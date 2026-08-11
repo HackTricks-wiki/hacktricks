@@ -1,82 +1,87 @@
-# Επιθέσεις Side Channel Analysis
+# Επιθέσεις Side-Channel Analysis
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Οι επιθέσεις side-channel ανακτούν μυστικά παρατηρώντας φυσικό ή μικροαρχιτεκτονικό «leakage» που *συσχετίζεται* με την εσωτερική κατάσταση, αλλά *δεν* αποτελεί μέρος της λογικής διεπαφής της συσκευής.  Τα παραδείγματα κυμαίνονται από τη μέτρηση του στιγμιαίου ρεύματος που καταναλώνει μια smart-card έως την εκμετάλλευση επιδράσεων διαχείρισης ισχύος της CPU μέσω δικτύου.
+Οι επιθέσεις side-channel ανακτούν μυστικά παρατηρώντας φυσική ή μικρο-αρχιτεκτονική «διαρροή» που *συσχετίζεται* με την εσωτερική κατάσταση, αλλά *δεν* αποτελεί μέρος της λογικής διεπαφής της συσκευής. Τα παραδείγματα κυμαίνονται από τη μέτρηση του στιγμιαίου ρεύματος που καταναλώνει μια smart-card έως την εκμετάλλευση επιδράσεων power-management των CPU μέσω δικτύου.
 
 ---
 
-## Κύρια Κανάλια Leakage
+## Κύρια Κανάλια Διαρροής
 
-| Κανάλι | Τυπικός Στόχος | Εργαλεία Μέτρησης |
+| Κανάλι | Τυπικός Στόχος | Όργανα Μέτρησης |
 |---------|---------------|-----------------|
-| Κατανάλωση ισχύος | Smart-cards, IoT MCUs, FPGAs | Παλμογράφος + shunt resistor/HS probe (π.χ. CW503)
-| Ηλεκτρομαγνητικό πεδίο (EM) | CPUs, RFID, AES accelerators | H-field probe + LNA, ChipWhisperer/RTL-SDR
-| Χρόνος εκτέλεσης / caches | Desktop και cloud CPUs | Timers υψηλής ακρίβειας (rdtsc/rdtscp), remote time-of-flight
-| Ακουστικό / μηχανικό | Πληκτρολόγια, 3-D printers, relays | MEMS microphone, laser vibrometer
-| Οπτικό και θερμικό | LEDs, laser printers, DRAM | Photodiode / high-speed camera, IR camera
-| Προκαλούμενα faults | ASIC/MCU cryptos | Clock/voltage glitch, EMFI, laser injection
+| Κατανάλωση ισχύος | Smart cards, IoT MCUs, FPGAs | Παλμογράφος μαζί με shunt resistor ή differential probe· το CW503 είναι τροφοδοτικό για probes/LNAs και όχι probe το ίδιο<sup>[[11]](#references)</sup> |
+| Ηλεκτρομαγνητικό πεδίο (EM) | CPUs, RFID, AES accelerators | H-field/near-field probe μαζί με low-noise amplifier και παλμογράφο ή SDR receiver, όπως ένα RTL-SDR<sup>[[13]](#references)</sup> |
+| Χρόνος εκτέλεσης / caches | Desktop και cloud CPUs | Timers υψηλής ακρίβειας (`rdtsc`/`rdtscp`) ή απομακρυσμένη μέτρηση time-of-flight |
+| Ακουστική / μηχανική | Πληκτρολόγια, 3-D printers, printers, relays και voltage regulators CPU | MEMS microphone ή laser vibrometer<sup>[[6]](#references)[[9]](#references)[[14]](#references)[[15]](#references)</sup> |
+| Οπτική και θερμική | Status LEDs, displays, DRAM και θερμικά συνδεδεμένες συσκευές | Photodiode, high-speed camera ή IR camera<sup>[[7]](#references)[[16]](#references)</sup> |
+| Fault injection | Κρυπτογραφία ASIC/MCU | Clock/voltage glitch, EMFI ή laser injection |
 
 ---
 
 ## Ανάλυση Ισχύος
 
 ### Simple Power Analysis (SPA)
-Παρατηρήστε ένα *μεμονωμένο* trace και συσχετίστε άμεσα τις κορυφές/κοιλάδες με operations (π.χ. DES S-boxes).<sup>[[1]](#references)</sup>
+Παρατηρήστε ένα *μεμονωμένο* trace και συσχετίστε ορατά χαρακτηριστικά με λειτουργίες όπως branches, modular multiplication ή διαφορετικές instruction sequences.<sup>[[1]](#references)</sup>
+
+Η ακριβής εγκατάσταση εξαρτάται από τον στόχο. Το παρακάτω χρησιμοποιεί το current high-level ChipWhisperer capture API, αφού το scope και το target έχουν συνδεθεί και ρυθμιστεί:<sup>[[1]](#references)</sup>
 ```python
-# ChipWhisperer-husky example – capture one AES trace
-from chipwhisperer.capture.api.programmers import STMLink
-from chipwhisperer.capture import CWSession
-cw = CWSession(project='aes')
-trig = cw.scope.trig
-cw.connect(cw.capture.scopes[0])
-cw.capture.init()
-trace = cw.capture.capture_trace()
-print(trace.wave)  # numpy array of power samples
+import chipwhisperer as cw
+
+scope = cw.scope()
+scope.default_setup()
+target = cw.target(scope)
+ktp = cw.ktp.Basic()
+key, plaintext = ktp.next()
+trace = cw.capture_trace(scope, target, plaintext, key)
+if trace is not None:
+print(trace.wave)  # NumPy array of power samples
 ```
 ### Differential/Correlation Power Analysis (DPA/CPA)
-Συλλέξτε *N > 1 000* ίχνη, υποθέστε το byte κλειδιού `k`, υπολογίστε το μοντέλο HW/HD και συσχετίστε το με τη διαρροή.
+Αποκτήστε πολλαπλά traces, υποθέστε ένα byte κλειδιού `k`, υπολογίστε ένα μοντέλο leakage Hamming-weight (HW) ή Hamming-distance (HD) και συσχετίστε το με κάθε sample. Ο απαιτούμενος αριθμός traces καθορίζεται από τον στόχο, τον θόρυβο, το alignment, τα countermeasures και το μοντέλο leakage· δεν αποτελεί σταθερό όριο.
 ```python
 import numpy as np
 corr = np.corrcoef(leakage_model(k), traces[:,sample])
 ```
-Το CPA παραμένει state-of-the-art, αλλά οι παραλλαγές machine-learning (MLA, deep-learning SCA) κυριαρχούν πλέον σε διαγωνισμούς όπως το ASCAD-v2 (2023).
+CPA είναι ένα τυπικό baseline. Τα Template attacks, η mutual-information analysis και οι προσεγγίσεις machine learning μπορούν να φανούν χρήσιμες όταν το leakage είναι μη γραμμικό ή τα traces δεν είναι σωστά ευθυγραμμισμένα.
 
 ---
 
 ## Electromagnetic Analysis (EMA)
-Οι near-field EM probes (500 MHz–3 GHz) κάνουν leak identical information με το power analysis *χωρίς* την εισαγωγή shunts. Έρευνα του 2024 απέδειξε key recovery σε απόσταση **>10 cm** από ένα STM32, χρησιμοποιώντας spectrum correlation και low-cost RTL-SDR front-ends.
+Η near-field EM analysis μπορεί να παρατηρήσει δραστηριότητα που εξαρτάται από τα δεδομένα, χωρίς την εισαγωγή shunt στη διαδρομή τροφοδοσίας. Δεν εκθέτει απαραίτητα το ίδιο σήμα με ένα power trace: η θέση και ο προσανατολισμός του probe, το bandwidth, το front-end gain, η ποιότητα του trigger και η απόσταση παίζουν όλα ρόλο.
 
 ---
 
 ## Timing & Micro-architectural Attacks
 Οι σύγχρονοι CPUs κάνουν leak secrets μέσω shared resources:
-* **Hertzbleed (2022)** – το DVFS frequency scaling συσχετίζεται με το Hamming weight, επιτρέποντας *remote* extraction κλειδιών EdDSA.<sup>[[2]](#references)</sup>
-* **Downfall / Gather Data Sampling (Intel, 2023)** – transient-execution για ανάγνωση AVX-gather data μεταξύ SMT threads.<sup>[[3]](#references)</sup>
-* **Zenbleed (AMD, 2023) & Inception (AMD, 2023)** – speculative vector mis-prediction κάνει leak registers cross-domain.<sup>[[4]](#references)</sup><sup>[[5]](#references)</sup>
+* **Hertzbleed (2022)** – Το dynamic voltage and frequency scaling που εξαρτάται από τα δεδομένα δημιουργεί ένα remote timing channel. Η αρχική end-to-end επίδειξη key-recovery στόχευε το SIKE· μεταγενέστερες εργασίες συζητούν άλλα primitives.<sup>[[2]](#references)</sup>
+* **Downfall / Gather Data Sampling (Intel, 2023)** – Η transient execution μπορεί να εκθέσει δεδομένα που χρησιμοποιούνται από vector gather instructions πέρα από security boundaries.<sup>[[3]](#references)</sup>
+* **Zenbleed (AMD, 2023)** – Ο εσφαλμένος χειρισμός της speculative κατάστασης των vector registers μπορεί να αποκαλύψει δεδομένα από τον ίδιο physical core.<sup>[[4]](#references)</sup>
+* **Inception (AMD, 2023)** – Ένα transient-execution attack συνδυάζει phantom execution με training σε transient execution, ώστε να δημιουργήσει attacker-controlled misprediction gadgets.<sup>[[5]](#references)</sup>
 
 ---
 
 ## Acoustic & Optical Attacks
-* Το "iLeakKeys" του 2024 έδειξε ακρίβεια 95 % στην ανάκτηση laptop keystrokes από **smart-phone microphone μέσω Zoom**, χρησιμοποιώντας CNN classifier.
-* High-speed photodiodes καταγράφουν το activity LED του DDR4 και ανακατασκευάζουν AES round keys σε <1 λεπτό (BlackHat 2023).
+Το acoustic leakage έχει χρησιμοποιηθεί για την ανάκτηση RSA keys από τον θόρυβο laptop σε ελεγχόμενο πείραμα, μεταξύ άλλων με το μικρόφωνο ενός κοντινού mobile phone.<sup>[[6]](#references)</sup> Μια ξεχωριστή μελέτη keyboard του 2023 ταξινόμησε keystrokes με ακρίβεια 95% όταν εκπαιδεύτηκε σε recordings από κοντινό phone και 93% όταν εκπαιδεύτηκε σε Zoom audio· αυτά τα ποσοστά περιγράφουν το trained-device experiment της συγκεκριμένης μελέτης και όχι οποιοδήποτε keyboard ή victim.<sup>[[9]](#references)</sup> Τα optical emanations από status LEDs μπορούν επίσης να συσχετιστούν με τα δεδομένα που υποβάλλονται σε επεξεργασία. Αυτά τα αποτελέσματα εξαρτώνται από το target και το setup· μην γενικεύετε το range ή το success rate τους σε άσχετες συσκευές.<sup>[[7]](#references)</sup>
 
 ---
 
 ## Fault Injection & Differential Fault Analysis (DFA)
-Ο συνδυασμός faults με side-channel leakage συντομεύει το key search (π.χ. 1-trace AES DFA). Πρόσφατα tools σε τιμές hobbyist:
-* **ChipSHOUTER & PicoEMP** – electromagnetic pulse glitching κάτω του 1 ns.
-* **GlitchKit-R5 (2025)** – open-source clock/voltage glitch platform με υποστήριξη για RISC-V SoCs.
+Ο συνδυασμός controlled faults με side-channel observations μπορεί να μειώσει το key search για ορισμένους αλγορίθμους και implementations. Συνήθεις lab platforms περιλαμβάνουν τις δυνατότητες voltage/clock glitching του ChipWhisperer και dedicated EM fault-injection tools, όπως τα ChipSHOUTER ή PicoEMP. Η προηγούμενη διατύπωση του draft περί “sub-1 ns” δεν πρέπει να χρησιμοποιείται ως specification: το published manual του ChipSHOUTER αναφέρει typical inserted-pulse widths **15–80 ns** με το tip των 1 mm και **24–480 ns** με το tip των 4 mm (παρότι το trigger/pulse jitter καθορίζεται σε picoseconds). Η απαιτούμενη timing resolution, η τοποθέτηση του probe και ο αριθμός των faulty outputs εξαρτώνται από το target και το fault model.<sup>[[1]](#references)[[10]](#references)</sup>
+
+## Unverified Research Leads Retained from the Earlier Draft
+
+Το προηγούμενο draft ανέφερε επίσης: ένα **500 MHz–3 GHz** EM setup που ανακτά ένα STM32 key από απόσταση μεγαλύτερη των **10 cm** χρησιμοποιώντας RTL-SDR· ένα DDR4 activity LED που αποκαλύπτει ένα AES round key σε λιγότερο από ένα λεπτό στο “Black Hat 2023”· και μια open-source RISC-V glitching platform του 2025 με την ονομασία **GlitchKit-R5**. Κατά τη διάρκεια αυτού του audit δεν εντοπίστηκε matching primary paper, conference material ή project repository. Αυτές οι ακριβείς λεπτομέρειες διατηρούνται ως search/reproduction leads και όχι ως established results ή tooling recommendations.
 
 ---
 
 ## Typical Attack Workflow
-1. Εντοπισμός του leakage channel και του mount point (VCC pin, decoupling cap, near-field spot).
-2. Εισαγωγή trigger (GPIO ή pattern-based).
-3. Συλλογή >1 k traces με κατάλληλο sampling/filters.
-4. Pre-process (alignment, mean removal, LP/HP filter, wavelet, PCA).
+1. Εντοπίστε το leakage channel και το mount point (VCC pin, decoupling cap, near-field spot).
+2. Εισαγάγετε trigger (GPIO ή pattern-based).
+3. Συλλέξτε αρκετά traces για το επιλεγμένο statistical test, καταγράφοντας plaintext/ciphertext και άλλα metadata.
+4. Εκτελέστε pre-process (alignment, mean removal, LP/HP filter, wavelet, PCA).
 5. Statistical ή ML key recovery (CPA, MIA, DL-SCA).
-6. Validation και iteration στα outliers.
+6. Επικυρώστε και επαναλάβετε τη διαδικασία για τα outliers.
 
 ---
 
@@ -85,24 +90,34 @@ corr = np.corrcoef(leakage_model(k), traces[:,sample])
 * **Masking/shuffling** – διαχωρισμός των secrets σε random shares· first-order resistance πιστοποιημένη μέσω TVLA.
 * **Hiding** – on-chip voltage regulators, randomised clock, dual-rail logic, EM shields.
 * **Fault detection** – redundant computation, threshold signatures.
-* **Operational** – απενεργοποίηση DVFS/turbo σε crypto kernels, απομόνωση SMT, απαγόρευση co-location σε multi-tenant clouds.
+* **Operational** – απενεργοποίηση του DVFS/turbo σε crypto kernels, απομόνωση του SMT, απαγόρευση co-location σε multi-tenant clouds.
 
 ---
 
 ## Tools & Frameworks
 * **ChipWhisperer-Husky** (2024) – 500 MS/s scope + Cortex-M trigger· Python API όπως παραπάνω.<sup>[[1]](#references)</sup>
-* **Riscure Inspector & FI** – commercial, με υποστήριξη automated leakage assessment (TVLA-2.0).
-* **scaaml** – TensorFlow-based deep-learning SCA library (v1.2 – 2025).
-* **pyecsca** – ANSSI open-source ECC SCA framework.
+* **Riscure Inspector and fault-injection products** – commercial analysis και automated test tooling.
+* **scaaml** – TensorFlow-based deep-learning SCA tooling και datasets.<sup>[[12]](#references)</sup>
+* **pyecsca** – open-source toolkit για reverse-engineering black-box ECC implementations μέσω side channels.<sup>[[8]](#references)</sup>
 
 ---
 
 ## References
 
-- [1] [ChipWhisperer Documentation](https://chipwhisperer.readthedocs.io/en/latest/)
-- [2] [Hertzbleed Attack Paper](https://www.hertzbleed.com/)
-- [3] [Downfall: Exploiting Speculative Data Gathering](https://downfall.page/)
+- [1] [Τεκμηρίωση ChipWhisperer](https://chipwhisperer.readthedocs.io/en/latest/)
+- [2] [Paper του Hertzbleed Attack](https://www.hertzbleed.com/)
+- [3] [Downfall: Εκμετάλλευση Speculative Data Gathering](https://downfall.page/)
 - [4] [Zenbleed](https://lock.cmpxchg8b.com/zenbleed.html)
-- [5] [Inception: Exposing New Attack Surfaces with Training in Transient Execution](https://comsec.ethz.ch/research/microarch/inception/)
-
+- [5] [Inception: Αποκάλυψη νέων Attack Surfaces με Training σε Transient Execution](https://comsec.ethz.ch/research/microarch/inception/)
+- [6] [Εξαγωγή RSA Key μέσω Low-Bandwidth Acoustic Cryptanalysis](https://eprint.iacr.org/2013/857.pdf)
+- [7] [Information Leakage από Optical Emanations](https://ora.ox.ac.uk/objects/uuid%3A4fe94cf8-052a-4025-a312-4a62f58fffac)
+- [8] [Τεκμηρίωση artifact του pyecsca](https://artifacts.iacr.org/tches/2024/a26/readme.html)
+- [9] [Μια Practical Deep Learning-Based Acoustic Side Channel Attack σε Keyboards](https://arxiv.org/abs/2308.01074)
+- [10] [NewAE - Εγχειρίδιο χρήσης ChipSHOUTER](https://media.newae.com/manuals/ChipSHOUTER_PRESS_1.3.pdf)
+- [11] [Τεκμηρίωση ChipWhisperer — CW503 probe power supply](https://chipwhisperer.readthedocs.io/en/latest/Tools/CW503%20Probe%20Power%20Supply.html)
+- [12] [Τεκμηρίωση Google SCAAML](https://google.github.io/scaaml/)
+- [13] [FOSDEM — Εκτέλεση low-cost electromagnetic side-channel attacks με χρήση RTL-SDR](https://archive.fosdem.org/2019/schedule/event/sdr_em_sidechannel_attacks/attachments/slides/2931/export/events/attachments/sdr_em_sidechannel_attacks/slides/2931/robyns2019fosdem.pdf)
+- [14] [Αποκωδικοποίηση Intellectual Property: Acoustic and Magnetic Side-Channel Attack σε 3-D Printer](https://arxiv.org/abs/2411.10887)
+- [15] [USENIX Security — Acoustic Side-Channel Attacks σε Printers](https://www.usenix.org/conference/usenixsecurity10/acoustic-side-channel-attacks-printers)
+- [16] [Κατασκοπεία της Temperature με χρήση DRAM](https://bearhw.ece.vt.edu/content/dam/bearhw_ece_vt_edu/publications/caslab/xiong2019spying.pdf)
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,130 +2,157 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## [ProjectHoneypot](https://www.projecthoneypot.org/)
+Αυτές οι υπηρεσίες υποστηρίζουν workflows reconnaissance, reputation, breach ή enrichment. Τα API, τα quotas, η τιμολόγηση και οι επιτρεπόμενες χρήσεις τους αλλάζουν συχνά· επιβεβαιώστε την τρέχουσα τεκμηρίωση του vendor και την εξουσιοδότηση του engagement πριν στείλετε identifiers πελατών ή ευαίσθητα δεδομένα.
 
-Μπορείτε να ρωτήσετε αν μια IP σχετίζεται με ύποπτες/κακόβουλες δραστηριότητες. Εντελώς δωρεάν.
+## [Project Honey Pot](https://www.projecthoneypot.org/) <sup>[[1]](#references)</sup>
 
-## [**BotScout**](http://botscout.com/api.htm)
+Ελέγξτε αν μια διεύθυνση IP έχει συσχετιστεί με ύποπτη ή κακόβουλη δραστηριότητα. Η πρόσβαση ενδέχεται να απαιτεί account ή API key.
 
-Ελέγξτε αν η διεύθυνση IP σχετίζεται με bot που καταχωρίζει λογαριασμούς. Μπορεί επίσης να ελέγξει usernames και emails. Αρχικά δωρεάν.
+## [**BotScout**](https://botscout.com/api.htm) <sup>[[2]](#references)</sup>
 
-## [Hunter](https://hunter.io/)
+Ελέγξτε αν μια διεύθυνση IP, ένα username ή μια διεύθυνση email έχει συσχετιστεί με αυτοματοποιημένη εγγραφή account ή άλλη αναφερόμενη δραστηριότητα bot.
 
-Εύρεση και επαλήθευση emails.\
-Ορισμένα API requests είναι δωρεάν, για περισσότερα χρειάζεται πληρωμή.\
-Εμπορικό;
+## [Hunter](https://hunter.io/) <sup>[[3]](#references)</sup>
 
-## [AlientVault](https://otx.alienvault.com/api)
+Βρείτε και επαληθεύστε επαγγελματικές διευθύνσεις email και patterns επικοινωνίας που σχετίζονται με domains. Ελέγξτε το τρέχον plan για τα όρια requests και τις επιτρεπόμενες χρήσεις.
 
-Εύρεση κακόβουλων δραστηριοτήτων που σχετίζονται με IPs και Domains. Δωρεάν.
+## [AlienVault OTX](https://otx.alienvault.com/api) <sup>[[4]](#references)</sup>
 
-## [Clearbit](https://dashboard.clearbit.com/)
+Αναζητήστε indicators threat-intelligence και δραστηριότητα που σχετίζεται με διευθύνσεις IP και domains.
 
-Εύρεση σχετικών προσωπικών δεδομένων για ένα email (profiles σε άλλες πλατφόρμες), domain (βασικές πληροφορίες εταιρείας, emails και εργαζόμενοι) και εταιρείες (λήψη πληροφοριών εταιρείας από email).\
-Χρειάζεται πληρωμή για πρόσβαση σε όλες τις δυνατότητες.\
-Εμπορικό;
+## [Clearbit](https://dashboard.clearbit.com/) <sup>[[5]](#references)</sup>
 
-## [BuiltWith](https://builtwith.com/)
+Εμπλουτίστε μια διεύθυνση email, ένα domain ή μια εταιρεία με διαθέσιμα business/profile δεδομένα. Η κάλυψη, η πρόσβαση και οι περιορισμοί privacy εξαρτώνται από το τρέχον product και plan.
 
-Τεχνολογίες που χρησιμοποιούνται από websites. Ακριβό...\
-Εμπορικό;
+## [BuiltWith](https://builtwith.com/) <sup>[[6]](#references)</sup>
 
-## [Fraudguard](https://fraudguard.io/)
+Εντοπίστε technologies που παρατηρούνται σε websites και αποκτήστε historical ή relationship δεδομένα όπου το επιτρέπει το επιλεγμένο plan.
 
-Έλεγχος αν ένας host (domain ή IP) σχετίζεται με ύποπτες/κακόβουλες δραστηριότητες. Παρέχει κάποια δωρεάν πρόσβαση στο API.\
-Εμπορικό;
+## [FraudGuard](https://fraudguard.io/) <sup>[[7]](#references)</sup>
 
-## [FortiGuard](https://fortiguard.com/)
+Ελέγξτε αν μια διεύθυνση IP σχετίζεται με ύποπτη ή κακόβουλη δραστηριότητα. Επιβεβαιώστε τα τρέχοντα API plans και limits.
 
-Έλεγχος αν ένας host (domain ή IP) σχετίζεται με ύποπτες/κακόβουλες δραστηριότητες. Παρέχει κάποια δωρεάν πρόσβαση στο API.
+## [FortiGuard](https://fortiguard.com/) <sup>[[8]](#references)</sup>
 
-## [SpamCop](https://www.spamcop.net/)
+Αναζητήστε categorization και threat intelligence του FortiGuard για domains, URLs ή διευθύνσεις IP. Η διαθεσιμότητα διαφέρει ανά service.
 
-Υποδεικνύει αν ένας host σχετίζεται με δραστηριότητα spam. Παρέχει κάποια δωρεάν πρόσβαση στο API.
+## [SpamCop](https://www.spamcop.net/) <sup>[[9]](#references)</sup>
 
-## [mywot](https://www.mywot.com/)
+Ελέγξτε αν μια διεύθυνση IP είναι καταχωρισμένη για αναφερόμενη δραστηριότητα spam.
 
-Με βάση απόψεις και άλλες μετρήσεις, δείχνει αν ένα domain σχετίζεται με ύποπτες/κακόβουλες πληροφορίες.
+## [myWOT](https://www.mywot.com/) <sup>[[10]](#references)</sup>
 
-## [ipinfo](https://ipinfo.io/)
+Ανακτήστε τη reputation ενός domain με βάση την κοινότητα της υπηρεσίας και άλλα signals.
 
-Λαμβάνει βασικές πληροφορίες από μια διεύθυνση IP. Μπορείτε να δοκιμάσετε έως 100K queries/μήνα.
+## [IPinfo](https://ipinfo.io/) <sup>[[11]](#references)</sup>
 
-## [securitytrails](https://securitytrails.com/app/account)
+Αποκτήστε geolocation, ASN, organization και σχετικά metadata για μια διεύθυνση IP. Ελέγξτε το τρέχον plan για τα quotas.
 
-Αυτή η πλατφόρμα παρέχει πληροφορίες για domains και διευθύνσεις IP, όπως domains μέσα σε μια IP ή στον server ενός domain, domains που ανήκουν σε ένα email (εύρεση σχετικών domains), ιστορικό IPs των domains (εύρεση του host πίσω από το CloudFlare), όλα τα domains που χρησιμοποιούν έναν nameserver....\
-Παρέχεται κάποια δωρεάν πρόσβαση.
+## [SecurityTrails](https://securitytrails.com/app/account) <sup>[[12]](#references)</sup>
 
-## [fullcontact](https://www.fullcontact.com/)
+Αυτή η platform παρέχει DNS και infrastructure intelligence, όπως historical resolutions, domains που σχετίζονται με IPs ή name servers και σχετικά records. Το historical DNS ενδέχεται να αποκαλύψει μια προηγούμενη origin address, αλλά δεν παρακάμπτει αξιόπιστα ένα CDN και πρέπει να επικυρώνεται.
 
-Επιτρέπει αναζήτηση με email, domain ή όνομα εταιρείας και ανάκτηση σχετικών "προσωπικών" πληροφοριών. Μπορεί επίσης να επαληθεύσει emails. Παρέχεται κάποια δωρεάν πρόσβαση.
+## [FullContact](https://www.fullcontact.com/) <sup>[[13]](#references)</sup>
 
-## [RiskIQ](https://www.spiderfoot.net/documentation/)
+Εμπλουτίστε μια διεύθυνση email, ένα domain ή ένα company name με διαθέσιμα identity και business attributes. Χειριστείτε τα personal data σύμφωνα με τις απαιτήσεις authorization και privacy.
 
-Πολλές πληροφορίες από domains και IPs ακόμη και στη δωρεάν/community έκδοση.
+## RiskIQ / Microsoft Defender Threat Intelligence (legacy transition) <sup>[[14]](#references)</sup>
 
-## [\_IntelligenceX](https://intelx.io/)
+Οι δυνατότητες PassiveTotal του RiskIQ μεταφέρθηκαν στο Microsoft Defender Threat Intelligence. Η πρόσβαση στο product, τα APIs και η διατηρημένη λειτουργικότητα έχουν αλλάξει, επομένως χρησιμοποιήστε την τρέχουσα τεκμηρίωση της Microsoft αντί για υποθέσεις σχετικά με το legacy PassiveTotal.
 
-Αναζήτηση για Domains, IPs και emails και λήψη πληροφοριών από dumps. Παρέχεται κάποια δωρεάν πρόσβαση.
+## [Intelligence X](https://intelx.io/) <sup>[[15]](#references)</sup>
 
-## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
+Αναζητήστε domains, διευθύνσεις IP, διευθύνσεις email και indexed historical ή leaked data, με την επιφύλαξη των access controls της υπηρεσίας.
 
-Αναζήτηση με βάση IP και συλλογή πληροφοριών που σχετίζονται με ύποπτες δραστηριότητες. Παρέχεται κάποια δωρεάν πρόσβαση.
+## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/) <sup>[[16]](#references)</sup>
 
-## [Greynoise](https://viz.greynoise.io/)
+Αναζητήστε διευθύνσεις IP και άλλα indicators για δεδομένα threat-intelligence και reputation.
 
-Αναζήτηση με βάση IP ή εύρος IP και λήψη πληροφοριών για IPs που σαρώνουν το Internet. Δωρεάν πρόσβαση για 15 ημέρες.
+## [GreyNoise](https://viz.greynoise.io/) <sup>[[17]](#references)</sup>
 
-## [Shodan](https://www.shodan.io/)
+Αναζητήστε διευθύνσεις IP ή ranges για παρατηρήσεις internet scanning και δραστηριότητα κοινών services. Ελέγξτε τους τρέχοντες όρους trial και community access.
 
-Λήψη πληροφοριών σάρωσης μιας διεύθυνσης IP. Παρέχει κάποια δωρεάν πρόσβαση στο api.
+## [Shodan](https://www.shodan.io/) <sup>[[18]](#references)</sup>
 
-## [Censys](https://censys.io/)
+Ανακτήστε πληροφορίες internet-scan και services για μια διεύθυνση IP, έναν host ή ένα search query. Η πρόσβαση στο API εξαρτάται από το account plan.
 
-Πολύ παρόμοιο με το shodan
+## [Censys](https://censys.io/) <sup>[[19]](#references)</sup>
 
-## [buckets.grayhatwarfare.com](https://buckets.grayhatwarfare.com/)
+Αναζητήστε datasets hosts, certificates, domains και internet services· το data model και η κάλυψή του διαφέρουν από του Shodan.
 
-Εύρεση ανοιχτών S3 buckets με αναζήτηση βάσει keyword.
+## [GrayHatWarfare bucket search](https://buckets.grayhatwarfare.com/) <sup>[[20]](#references)</sup>
 
-## [Dehashed](https://www.dehashed.com/data)
+Αναζητήστε στο index του provider δημόσια παρατηρημένα cloud-storage objects και buckets με βάση keyword.
 
-Εύρεση leaked credentials emails και ακόμη και domains\
-Εμπορικό;
+## [DeHashed](https://www.dehashed.com/data) <sup>[[21]](#references)</sup>
 
-## [psbdmp](https://psbdmp.ws/)
+Αναζητήστε indexed breach data για διευθύνσεις email, usernames, domains και σχετικά records. Χρησιμοποιήστε το μόνο με authorization και αποφύγετε την περιττή έκθεση breach data.
 
-Αναζήτηση pastebins όπου εμφανίστηκε ένα email. Εμπορικό;
+## [psbdmp](https://psbdmp.ws/) <sup>[[22]](#references)</sup>
 
-## [emailrep.io](https://emailrep.io/key)
+Αναζητήστε indexed περιεχόμενο paste για εμφανίσεις μιας διεύθυνσης email ή άλλου όρου. Επαληθεύστε ότι η υπηρεσία είναι ακόμη διαθέσιμη πριν την ενσωματώσετε.
 
-Λήψη της reputation ενός email. Εμπορικό;
+## [EmailRep](https://emailrep.io/key) <sup>[[23]](#references)</sup>
 
-## [ghostproject](https://ghostproject.fr/)
+Ανακτήστε reputation και risk signals για μια διεύθυνση email.
 
-Λήψη passwords από leaked emails. Εμπορικό;
+## GhostProject (historical) <sup>[[24]](#references)</sup>
 
-## [Binaryedge](https://www.binaryedge.io/)
+Ιστορικά διαφήμιζε searches leaked δεδομένων email/password. Αντιμετωπίστε την υπηρεσία ως high-risk third-party handling και επαληθεύστε τη διαθεσιμότητα, τη νομιμότητα και το authorization της πριν από τη χρήση.
 
-Λήψη ενδιαφέρουσων πληροφοριών από IPs
+## [BinaryEdge](https://www.binaryedge.io/) <sup>[[25]](#references)</sup>
 
-## [haveibeenpwned](https://haveibeenpwned.com/)
+Αποκτήστε δεδομένα internet-scan, exposure και threat-intelligence για διευθύνσεις IP και σχετικά assets.
 
-Αναζήτηση με βάση domain και email και έλεγχος αν έχει γίνει pwned, καθώς και για passwords. Εμπορικό;
+## [Have I Been Pwned](https://haveibeenpwned.com/) <sup>[[26]](#references)</sup>
 
-### [IP2Location.io](https://www.ip2location.io/)
+Ελέγξτε αν μια διεύθυνση email ή ένα verified domain εμφανίζεται σε γνωστά breaches. Η ξεχωριστή υπηρεσία Pwned Passwords ελέγχει password hashes με βάση prefix· **δεν** αποκαλύπτει plaintext passwords.
 
-Εντοπίζει τη γεωτοποθεσία IP, το data center, το ASN και ακόμη και πληροφορίες VPN. Προσφέρει 30K δωρεάν queries τον μήνα.
+### [IP2Location.io](https://www.ip2location.io/) <sup>[[27]](#references)</sup>
 
-### [IPQuery.io](https://www.ipquery.io/)
-IP Geolocation και OISNT με στοχευμένα datapoints. Μη εμπορικό.
+Ανακτήστε IP geolocation, data-center, ASN, proxy/VPN και σχετικά enrichment fields. Τα quotas εξαρτώνται από το τρέχον plan.
+
+### [IPQuery.io](https://www.ipquery.io/) <sup>[[28]](#references)</sup>
+IP geolocation και OSINT-oriented enrichment με επιλεγμένα data points. Ελέγξτε τους τρέχοντες όρους για commercial use.
 
 
-[https://dnsdumpster.com/](https://dnsdumpster.com/)(σε εμπορικό εργαλείο;)
+Το [DNSDumpster](https://dnsdumpster.com/) παρέχει αποτελέσματα DNS-reconnaissance.<sup>[[29]](#references)</sup>
 
-[https://www.netcraft.com/](https://www.netcraft.com/) (σε εμπορικό εργαλείο;)
+Το [Netcraft](https://www.netcraft.com/) παρέχει site, hosting και internet-infrastructure intelligence.<sup>[[30]](#references)</sup>
 
-[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) (σε εμπορικό εργαλείο;)
+Το [NMMapper](https://www.nmmapper.com/sys/tools/subdomainfinder/) παρέχει online interface για subdomain discovery.<sup>[[31]](#references)</sup>
 
+## References
+
+- [1] [Project Honey Pot](https://www.projecthoneypot.org/)
+- [2] [BotScout API](https://botscout.com/api.htm)
+- [3] [Hunter API](https://hunter.io/api-documentation)
+- [4] [AlienVault OTX API](https://otx.alienvault.com/api)
+- [5] [Clearbit](https://dashboard.clearbit.com/)
+- [6] [BuiltWith](https://builtwith.com/)
+- [7] [FraudGuard](https://fraudguard.io/)
+- [8] [FortiGuard Labs](https://www.fortiguard.com/)
+- [9] [SpamCop](https://www.spamcop.net/)
+- [10] [Web of Trust](https://www.mywot.com/)
+- [11] [IPinfo](https://ipinfo.io/)
+- [12] [SecurityTrails](https://securitytrails.com/)
+- [13] [FullContact](https://www.fullcontact.com/)
+- [14] [Microsoft Defender Threat Intelligence](https://learn.microsoft.com/en-us/defender/threat-intelligence/what-is-microsoft-defender-threat-intelligence-defender-ti)
+- [15] [Intelligence X](https://intelx.io/)
+- [16] [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
+- [17] [GreyNoise](https://www.greynoise.io/)
+- [18] [Shodan](https://www.shodan.io/)
+- [19] [Censys](https://censys.com/)
+- [20] [GrayHatWarfare](https://buckets.grayhatwarfare.com/)
+- [21] [DeHashed](https://www.dehashed.com/)
+- [22] [psbdmp](https://psbdmp.ws/)
+- [23] [EmailRep](https://emailrep.io/)
+- [24] [Cornell research — Πρωτόκολλα για τον έλεγχο compromised credentials (περιλαμβάνει το GhostProject)](https://rist.tech.cornell.edu/papers/c3.pdf)
+- [25] [BinaryEdge](https://www.binaryedge.io/)
+- [26] [Have I Been Pwned API](https://haveibeenpwned.com/API/v3)
+- [27] [IP2Location.io](https://www.ip2location.io/)
+- [28] [IPQuery](https://www.ipquery.io/)
+- [29] [DNSDumpster](https://dnsdumpster.com/)
+- [30] [Netcraft](https://www.netcraft.com/)
+- [31] [NMMapper Subdomain Finder](https://www.nmmapper.com/sys/tools/subdomainfinder/)
 {{#include ../banners/hacktricks-training.md}}
