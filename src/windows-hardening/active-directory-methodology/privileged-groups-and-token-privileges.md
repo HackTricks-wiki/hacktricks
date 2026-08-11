@@ -293,7 +293,7 @@ The important nuance is that the **creator becomes owner of the new GPO** and us
 - edit a GPO you created that is already linked somewhere useful
 - abuse another delegated right that lets you link GPOs, while this group gives you the edit side
 
-Practical abuse normally means adding an **Immediate Task**, **startup script**, **local admin membership**, or **user rights assignment** change through SYSVOL-backed policy files.<sup>[[3]](#references)[[4]](#references)[[13]](#references)</sup>
+Practical abuse normally means adding an **Immediate Task**, **startup script**, **local admin membership**, or **user rights assignment** change through SYSVOL-backed policy files.<sup>[[3]](#references)[[4]](#references)[[13]](#references)[[16]](#references)</sup>
 
 ```bash
 # Example with SharpGPOAbuse: add an immediate task that executes as SYSTEM
@@ -318,7 +318,7 @@ To list the members of this group, the following PowerShell command is used:
 Get-NetGroupMember -Identity "Print Operators" -Recurse
 ```
 
-On Domain Controllers this group is dangerous because the default Domain Controller Policy grants **`SeLoadDriverPrivilege`** to `Print Operators`. If you reach an elevated token for a member of this group, you can enable the privilege and load a signed-but-vulnerable driver to jump to kernel/SYSTEM.<sup>[[2]](#references)[[5]](#references)[[6]](#references)[[7]](#references)[[8]](#references)[[10]](#references)</sup> For token handling details, check [Access Tokens](../windows-local-privilege-escalation/access-tokens.md).
+On Domain Controllers this group is dangerous because the default Domain Controller Policy grants **`SeLoadDriverPrivilege`** to `Print Operators`. If you reach an elevated token for a member of this group, you can enable the privilege and load a signed-but-vulnerable driver to jump to kernel/SYSTEM.<sup>[[2]](#references)[[5]](#references)[[6]](#references)[[7]](#references)[[8]](#references)[[10]](#references)[[17]](#references)</sup> For token handling details, check [Access Tokens](../windows-local-privilege-escalation/access-tokens.md).
 
 #### Remote Desktop Users
 
@@ -364,8 +364,8 @@ If a service ACL gives this group change/start rights, point the service at an a
 
 - [1] [ired.team – Privileged Accounts and Token Privileges](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)
 - [2] [Tarlogic – Abusing SeLoadDriverPrivilege for Privilege Escalation](https://www.tarlogic.com/en/blog/abusing-seloaddriverprivilege-for-privilege-escalation/)
-- [3] [SpecterOps – A Red Teamer's Guide to GPOs and OUs](https://specterops.io/blog/2018/02/26/a-red-teamers-guide-to-gpos-and-ous/)
-- [4] [BloodHound – GenericAll edge abuse information](https://bloodhound.specterops.io/resources/edges/generic-all)
+- [3] [harmj0y – Abusing GPO Permissions](https://blog.harmj0y.net/redteaming/abusing-gpo-permissions/)
+- [4] [rastamouse – GPO Abuse, Part 1 (Internet Archive)](https://web.archive.org/web/20190416075109/https://rastamouse.me/2019/01/gpo-abuse-part-1/)
 - [5] [killswitch-GUI – HotLoad-Driver (ntloaddriver.cpp)](https://github.com/killswitch-GUI/HotLoad-Driver/blob/master/NtLoadDriver/EXE/NtLoadDriver-C%2B%2B/ntloaddriver.cpp#L13)
 - [6] [tandasat – ExploitCapcom](https://github.com/tandasat/ExploitCapcom)
 - [7] [TarlogicSecurity – EoPLoadDriver (eoploaddriver.cpp)](https://github.com/TarlogicSecurity/EoPLoadDriver/blob/master/eoploaddriver.cpp)
@@ -377,5 +377,7 @@ If a service ACL gives this group change/start rights, point the service at an a
 - [13] [WithSecure Labs – SharpGPOAbuse](https://labs.withsecure.com/tools/sharpgpoabuse)
 - [14] [ired.team – How to Abuse and Backdoor AdminSDHolder to Obtain Domain Admin Persistence](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/how-to-abuse-and-backdoor-adminsdholder-to-obtain-domain-admin-persistence)
 - [15] [Lab of a Penetration Tester – Abusing DnsAdmins Privilege for Escalation in Active Directory](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html)
+- [16] [BloodHound – GenericAll edge abuse information](https://bloodhound.specterops.io/resources/edges/generic-all)
+- [17] [Undocumented NT Internals – NtLoadDriver function (Internet Archive)](https://web.archive.org/web/20200313000124/http://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html)
 
 {{#include ../../banners/hacktricks-training.md}}

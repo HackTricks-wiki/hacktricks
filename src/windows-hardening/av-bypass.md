@@ -398,7 +398,7 @@ To bypass PowerShell logging, you can use the following techniques:
 
 - **Disable PowerShell Transcription and Module Logging**: You can use a tool such as [https://github.com/leechristensen/Random/blob/master/CSharp/DisablePSLogging.cs](https://github.com/leechristensen/Random/blob/master/CSharp/DisablePSLogging.cs) for this purpose.
 - **Use Powershell version 2**: If you use PowerShell version 2, AMSI will not be loaded, so you can run your scripts without being scanned by AMSI. You can do this: `powershell.exe -version 2`
-- **Use an unmanaged PowerShell session**: Use [UnmanagedPowerShell](https://github.com/leechristensen/UnmanagedPowerShell) to host PowerShell without launching `powershell.exe` (this is the approach used by Cobalt Strike's `powerpick`).
+- **Use an unmanaged PowerShell session**: Use [UnmanagedPowerShell](https://github.com/leechristensen/UnmanagedPowerShell) to host PowerShell without launching `powershell.exe` (the approach used by Cobalt Strike's `powerpick`). This evades controls tied specifically to the `powershell.exe` process, but it does not inherently disable AMSI, Script Block Logging, or every other PowerShell defense; coverage depends on the runtime and host implementation.
 
 
 ## Obfuscation

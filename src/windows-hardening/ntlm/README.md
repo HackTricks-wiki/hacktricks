@@ -182,7 +182,7 @@ The **challenge length is 8 bytes** and **2 responses are sent**: One is **24 by
 
 The **second response** is created using **several values** (a new client challenge, a **timestamp** to avoid **replay attacks**...)
 
-If you have a **PCAP containing a successful authentication exchange**, extract the domain, username, server challenge, and NTLMv2 response, format the capture for Hashcat, and use mode `5600` to attempt password recovery.<sup>[[2]](#references)</sup>
+If you have a **PCAP containing a successful authentication exchange**, extract the domain, username, server challenge, and NTLMv2 response, format the capture for Hashcat, and use mode `5600` to attempt password recovery. The archived practical walkthrough retains the packet-field extraction procedure, while Hashcat's examples define the current accepted format.<sup>[[2]](#references)[[7]](#references)</sup>
 
 ## Pass-the-Hash
 
@@ -355,5 +355,6 @@ For the **March 2026** local reflection variant that abuses **SMB arbitrary port
 - [4] [Internal Monologue Attack: Retrieving NTLM Hashes without Touching LSASS](https://github.com/eladshamir/Internal-Monologue)
 - [5] [NTLM Reflection is Dead, Long Live NTLM Reflection!](https://www.synacktiv.com/en/publications/ntlm-reflection-is-dead-long-live-ntlm-reflection-an-in-depth-analysis-of-cve-2025)
 - [6] [MSRC – CVE-2025-33073](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-33073)
+- [7] [Cracking an NTLMv2 Hash – 801Labs (Internet Archive)](https://web.archive.org/web/20211206031936/http://www.801labs.org/research-portal/post/cracking-an-ntlmv2-hash/)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -16,7 +16,7 @@ Another important difference is that a principal with sufficient **write permiss
 The **`TrustedToAuthForDelegation`** flag in `userAccountControl` is often described as a prerequisite for **S4U2Self**, but that is incomplete.\
 A service principal with an SPN can request S4U2Self without the flag. With `TrustedToAuthForDelegation`, the returned service ticket is **forwardable**; without it, the ticket is normally **non-forwardable**.<sup>[[5]](#references)</sup>
 
-Traditional constrained delegation rejects a **non-forwardable TGS** in the S4U2Proxy step. RBCD can accept that S4U2Self ticket when the target's security descriptor authorizes the requesting service.<sup>[[1]](#references)[[2]](#references)</sup>
+Traditional constrained delegation rejects a **non-forwardable TGS** in the S4U2Proxy step. RBCD can accept that S4U2Self ticket when the target's security descriptor authorizes the requesting service.<sup>[[1]](#references)[[2]](#references)[[16]](#references)</sup>
 
 ### Attack structure
 
@@ -376,7 +376,7 @@ adws-enumeration.md
 ## References
 
 - [1] [Wagging the Dog: Abusing Resource-Based Constrained Delegation to Attack Active Directory](https://eladshamir.com/2019/01/28/Wagging-the-Dog.html)
-- [2] [Microsoft Open Specifications – S4U2Proxy details](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-sfu/bde93b0e-f3c9-4ddf-9cd5-e9c237331c90)
+- [2] [Another Word on Delegation – harmj0y](https://blog.harmj0y.net/redteaming/another-word-on-delegation/)
 - [3] [Kerberos Resource-based Constrained Delegation: Computer Object Takeover](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object)
 - [4] [Netwrix – Resource-Based Constrained Delegation Abuse](https://netwrix.com/en/resources/blog/resource-based-constrained-delegation-abuse/)
 - [5] [Kerberosity Killed the Domain: An Offensive Kerberos Overview](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
@@ -390,6 +390,7 @@ adws-enumeration.md
 - [13] [Microsoft Open Specifications - Cross-domain S4U2Self](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-sfu/f35b6902-6f5e-4cd0-be64-c50bbaaf54a5)
 - [14] [Microsoft Open Specifications - SamrChangePasswordUser](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-samr/9699d8ca-e1a4-433c-a8c3-d7bebeb01476)
 - [15] [Microsoft Learn - Detect and remediate RC4 usage in Kerberos](https://learn.microsoft.com/en-us/windows-server/security/kerberos/detect-remediate-rc4-kerberos)
+- [16] [Microsoft Open Specifications – S4U2Proxy details](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-sfu/bde93b0e-f3c9-4ddf-9cd5-e9c237331c90)
 
 
 {{#include ../../banners/hacktricks-training.md}}
