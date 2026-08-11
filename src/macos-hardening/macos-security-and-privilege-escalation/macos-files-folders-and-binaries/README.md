@@ -15,7 +15,7 @@ Apple documents the macOS filesystem as a hierarchy of system, local, network, a
 - **/private**: Undocumented but a lot of the mentioned folders are symbolic links to the private directory.
 - **/sbin**: Essential system binaries (related to administration)
 - **/System**: Files required by macOS; this tree primarily contains Apple-provided components.
-- **/tmp**: Temporary files (a symbolic link to `/private/tmp`); cleanup timing is system-dependent.
+- **/tmp**: Temporary files (a symbolic link to `/private/tmp`). Historical installations commonly cleaned old temporary files on a periodic schedule, sometimes described as three days, but current cleanup timing is system- and policy-dependent; do not rely on data persisting there.
 - **/Users**: Home directory for users.
 - **/usr**: Config and system binaries
 - **/var**: Log files
@@ -80,7 +80,7 @@ macos-bundles.md
 
 ## Dyld Shared Library Cache (SLC)
 
-On macOS and iOS, commonly used system libraries and frameworks are prelinked into the **dyld shared cache**, which improves application startup performance. Its format and location are implementation details that change across OS releases. <sup>[[3]](#references)</sup>
+On macOS and iOS, commonly used system libraries and frameworks are prelinked into the **dyld shared cache**, which improves application startup performance. Although it is treated as one logical cache, current releases may store it as a main cache plus multiple subcache files rather than literally one file. Its format and location are implementation details that change across OS releases. <sup>[[3]](#references)</sup>
 
 This is located in macOS in `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/` and in older versions you might be able to find the **shared cache** in **`/System/Library/dyld/`**.\
 In iOS you can find them in **`/System/Library/Caches/com.apple.dyld/`**.
@@ -234,7 +234,13 @@ The extended attribute `com.apple.decmpfs` stores metadata for transparent compr
 
 The `UF_COMPRESSED` flag appears as `compressed` in `ls -lO`. Do not clear it manually: doing so can make the system interpret the compressed representation incorrectly.
 
-The `afsctool` utility can inspect or decompress files that use Apple filesystem compression.
+The command that clears the flag is shown here because it is useful during forensic review, but running it against a compressed file can make that file appear empty or inaccessible until its metadata is repaired:
+
+```bash
+chflags nocompressed /path/to/file
+```
+
+The built-in `/usr/bin/afscexpand` utility can force expansion of transparently compressed files. The separate third-party `afsctool` utility can also inspect or decompress Apple filesystem compression, but it should not be confused with the built-in command. <sup>[[8]](#references)</sup>
 
 
 ### Interesting configuration locations (macOS)
@@ -296,7 +302,7 @@ These are implementation details, not a stable public policy API; confirm the ac
 
 - **`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**: Contains information about downloaded files, like the URL from where they were downloaded.
 - **Unified log**: On current macOS versions, query system and application events with `log show` and `log stream`. <sup>[[6]](#references)</sup>
-- **`/var/log/system.log`** and **`/private/var/log/asl/*.asl`**: Legacy logging artifacts that may still be relevant on older systems.
+- **`/var/log/system.log`** and **`/private/var/log/asl/*.asl`**: Legacy logging artifacts that may still be relevant on older systems. On those releases, `/System/Library/LaunchDaemons/com.apple.syslogd.plist` configures `syslogd`; `launchctl list | grep com.apple.syslogd` can help determine whether the service is loaded.
 - **`$HOME/Library/Preferences/com.apple.recentitems.plist`**: Stores recently accessed files and applications through "Finder".
 - **`$HOME/Library/Preferences/com.apple.loginitems.plist`**: Legacy preference path associated with login items; modern macOS versions use additional mechanisms.
 - **`$HOME/Library/Logs/DiskUtility.log`**: Legacy Disk Utility log that may contain information about drives, including USB devices.
@@ -312,5 +318,6 @@ These are implementation details, not a stable public policy API; confirm the ac
 - [5] [`xattr(1)` - macOS manual page](https://manp.gs/mac/1/xattr)
 - [6] [`log(1)` - macOS manual page](https://manp.gs/mac/1/log)
 - [7] [Apple Developer - Launch Services](https://developer.apple.com/documentation/coreservices/launch_services)
+- [8] [`afscexpand(1)` - macOS manual page](https://manp.gs/mac/1/afscexpand)
 
 {{#include ../../../banners/hacktricks-training.md}}

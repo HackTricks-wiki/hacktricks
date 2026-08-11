@@ -41,7 +41,7 @@ Results from these tools should be interpreted carefully. A vulnerability in an 
 
 ## Build-Time Secrets
 
-One of the oldest mistakes in container build pipelines is embedding secrets directly into the image or passing them through build arguments or environment variables that persist in image metadata or layers. Build-time secrets should be mounted ephemerally during the build rather than copied into the image filesystem. <sup>[[4]](#references)</sup>
+One of the oldest mistakes in container build pipelines is embedding secrets directly into the image or passing them through build arguments or environment variables. Depending on the mechanism, those values may persist in image metadata or recoverable layers, appear in build logs, or become visible through inspection commands such as `docker inspect`. Build-time secrets should be mounted ephemerally during the build rather than copied into the image filesystem. <sup>[[4]](#references)</sup>
 
 BuildKit improved this model by allowing dedicated build-time secret handling. Instead of writing a secret into a layer, the build step can consume it transiently:
 

@@ -246,7 +246,7 @@ Its plist is located in `/System/Library/LaunchDaemons/com.apple.sysdiagnose.pli
 
 macOS generates extensive logs that are useful when analyzing an application's behavior.
 
-Some log fields contain the tag `<private>` to hide user- or device-identifying information. In controlled debugging environments, an appropriate logging profile may reveal this data; see the discussion [here](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log).
+Some log fields contain the tag `<private>` to hide user- or device-identifying information. Older instructions sometimes describe installing a certificate to reveal these fields; current debugging guidance instead uses an explicitly scoped configuration profile with `Enable-Private-Data`, or per-application `OSLogPreferences`, and behavior can vary by subsystem and macOS release. The older certificate/profile discussion is retained in the references. <sup>[[8]](#references)</sup><sup>[[9]](#references)</sup>
 
 ### Hopper
 
@@ -688,5 +688,7 @@ litefuzz -s -a tcp://localhost:5900 -i input/screenshared-session --reportcrash 
 - [5] [knight.sc - information stored in these section in this blog post](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html)
 - [6] [knight.sc - Debugging Apple Binaries That Use Pt Deny Attach](https://knight.sc/debugging/2019/06/03/debugging-apple-binaries-that-use-pt-deny-attach.html)
 - [7] [alexomara.com - Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants)
+- [8] [Apple Developer Forums - Xcode structured logs and `Enable-Private-Data`](https://developer.apple.com/forums/thread/738648)
+- [9] [Super User - Showing private data in the macOS unified log](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log)
 
 {{#include ../../../banners/hacktricks-training.md}}

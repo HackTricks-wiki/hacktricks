@@ -29,11 +29,11 @@ The XNU **kernel** also **incorporates** a significant amount of code derived fr
 
 Understanding the interaction between BSD and Mach can be complex, due to their different conceptual frameworks. For instance, BSD uses processes as its fundamental executing unit, while Mach operates based on threads. This discrepancy is reconciled in XNU by **associating each BSD process with a Mach task** that contains exactly one Mach thread. When BSD's fork() system call is used, the BSD code within the kernel uses Mach functions to create a task and a thread structure.
 
-Moreover, **Mach and BSD maintain different security models**: Mach's security model is based on port rights, whereas BSD's model includes process credentials and ownership. User space interacts with these layers through Mach traps and BSD system calls. These elements form the hybrid architecture of the macOS kernel.<sup>[[1]](#references)</sup>
+Moreover, **Mach and BSD maintain different security models**: Mach's security model is based on port rights, whereas BSD's model includes process credentials and ownership. Disparities at the boundary between these models have historically produced local privilege-escalation opportunities. User space interacts with these layers through Mach traps and BSD system calls. These elements form the hybrid architecture of the macOS kernel.<sup>[[1]](#references)</sup><sup>[[5]](#references)</sup>
 
 ### I/O Kit - Drivers
 
-I/O Kit provides XNU's object-oriented driver model and user-client interfaces. The dedicated page covers its registry, matching model, user clients, and attack surface:
+I/O Kit is XNU's open-source, object-oriented device-driver framework. Historically, kernel extensions used it to load modular driver code dynamically into the kernel; modern macOS increasingly moves supported drivers to DriverKit user-space extensions instead. I/O Kit also exposes user-client interfaces through which user processes communicate with drivers. The dedicated page covers its registry, matching model, user clients, and attack surface:<sup>[[1]](#references)</sup><sup>[[3]](#references)</sup>
 
 
 {{#ref}}
@@ -42,7 +42,7 @@ macos-iokit.md
 
 ### Coprocessors And Dedicated Security Hardware
 
-Apple silicon and Macs with a T2 chip include a **Secure Enclave**, with its own Boot ROM and AES engine, that supports secure key generation and storage, biometric processing, and the key hierarchy used by data-protection features. Apple platforms also use other dedicated hardware engines and controllers, but their responsibilities and interfaces vary by model and OS release. Treat low-level firmware and mailbox details as implementation-specific unless they are confirmed for the exact target. <sup>[[2]](#references)</sup>
+Apple silicon and Macs with a T2 chip include a **Secure Enclave**, with its own Boot ROM and AES engine, that supports secure key generation and storage, biometric processing, and the key hierarchy used by data-protection features. Apple platforms also use other coprocessors to move latency-sensitive work away from the main CPU cores and to isolate security-critical functions. Their responsibilities and interfaces vary by model and OS release, so treat low-level firmware and mailbox details as implementation-specific unless they are confirmed for the exact target. <sup>[[2]](#references)</sup>
 
 From a security-review perspective, the durable lesson is that the macOS attack surface extends beyond ordinary user processes and the XNU kernel. Drivers, firmware parsers, shared-memory interfaces, and I/O Kit or DriverKit user clients can mediate access to dedicated hardware. Validate the component, hardware generation, and trust boundary before drawing conclusions about exploit impact.
 
@@ -59,6 +59,8 @@ The following checklist preserves useful low-level leads while avoiding the assu
 | **Apple Video Encoder / media engines** | Reverse-engineered descriptions place media firmware in an isolated, EL1-like execution environment. Codec bitstreams, parameter sets, user-controlled buffers, VideoToolbox, and driver families such as `AppleAVE2` are high-value parser surfaces. | Disclosure of uncompressed frames, DRM bypass, or code execution with access to DMA engines. |
 | **Image Signal Processor (ISP)** | Secure camera-processing firmware is associated with the media-engine cluster while macOS camera drivers run on the application processor. Camera HALs, raw-frame descriptors, ISP configuration queues, I/O Kit interfaces, and firmware updates form the review surface. | Silent raw-camera capture, privacy-indicator bypass, fabricated imagery, or driver/firmware compromise. |
 | **AMX matrix units** | Coprocessor-style matrix units are exposed through architecture-specific instructions usable by generated user and kernel code. Review kernel virtualization of AMX state, context switches, `thread_set_state`, and user-space code generation. | Cross-process tile-register leakage, workload fingerprinting, or escalation through kernel state-management corruption. |
+
+These coprocessors participate in the platform's chain of trust. Apple documents separate secure-boot processes for the T2 chip and Secure Enclave, Apple-signed software-update authorization, and integrity protection for coprocessor firmware. Reverse-engineered components may additionally use authenticated mailbox or driver protocols; verify any claimed challenge-response handshake on the exact hardware and firmware rather than assuming one generic mechanism applies everywhere. <sup>[[2]](#references)</sup><sup>[[10]](#references)</sup><sup>[[11]](#references)</sup>
 
 ### IPC - Inter Process Communication
 
@@ -94,6 +96,7 @@ Important implementation details documented for RSR-capable Apple operating syst
 - Frameworks, shared libraries, and applications eligible for Rapid Security Response were moved into optimized, cryptographically sealed cryptex disk images on the Preboot volume.
 - An RSR can patch the cryptex backing image without resealing the entire system volume.
 - Cryptex content is bootstrapped after the kernel; its filesystem seals, measurements, and trust caches are represented in a separate Image4 ticket.
+- At runtime, validated cryptex content is mounted or grafted into the operating-system namespace so applications resolve the cryptex-provided versions. Technical descriptions of the boot process also track manifest and root-hash validation before full system services are available.
 - During RSR installation, the device requests a device-bound Cryptex1 Image4 manifest from Apple's signing service; the existing application-processor boot ticket is not replaced.
 - On macOS, some patched application content, such as Safari components, can become active after relaunching the application rather than after a full reboot.
 - Apple can remove a problematic response, and a user can remove and later reapply an RSR on supported versions.
@@ -112,5 +115,7 @@ Important implementation details documented for RSR-capable Apple operating syst
 - [7] [Asahi Linux - Apple-silicon platform documentation](https://asahilinux.org/docs/)
 - [8] [Asahi Linux - `m1n1` Apple-silicon experimentation tools](https://github.com/AsahiLinux/m1n1)
 - [9] [Apple Platform Security - Rapid Security Responses in Apple operating systems](https://support.apple.com/guide/security/sec87fc038c2/web)
+- [10] [Apple Platform Security - Secure software updates](https://support.apple.com/guide/security/secure-software-updates-secf683e0b36/web)
+- [11] [Apple Platform Security - Operating system integrity](https://support.apple.com/guide/security/sec8b776536b/web)
 
 {{#include ../../../banners/hacktricks-training.md}}

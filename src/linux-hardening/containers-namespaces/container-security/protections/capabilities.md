@@ -61,7 +61,7 @@ Although many capabilities can matter depending on the target, a few are repeate
 
 ## Runtime Usage
 
-Docker, Podman, containerd-based stacks, and CRI-O all use capability controls, but the defaults and management interfaces differ. Docker exposes them directly through flags such as `--cap-drop` and `--cap-add`. Kubernetes surfaces capability additions and drops through the Pod or container `securityContext`; lower-level runtimes express the resulting sets in the OCI runtime configuration. <sup>[[2]](#references)</sup> <sup>[[3]](#references)</sup> <sup>[[4]](#references)</sup>
+Docker, Podman, containerd-based stacks, and CRI-O all use capability controls, but the defaults and management interfaces differ. Docker exposes them directly through flags such as `--cap-drop` and `--cap-add`. Podman exposes similar controls and commonly combines them with rootless execution as an additional safety layer. Kubernetes surfaces capability additions and drops through the Pod or container `securityContext`; lower-level runtimes express the resulting sets in the OCI runtime configuration. System-container environments such as LXC and Incus also rely on capability control, but their broader host integration can tempt operators to relax defaults more aggressively than they would for an application container. <sup>[[2]](#references)</sup> <sup>[[3]](#references)</sup> <sup>[[4]](#references)</sup> <sup>[[5]](#references)</sup> <sup>[[6]](#references)</sup>
 
 The same principle holds across all of them: a capability that is technically possible to grant is not necessarily one that should be granted. Many real-world incidents begin when an operator adds a capability simply because a workload failed under a stricter configuration and the team needed a quick fix.
 
@@ -195,5 +195,7 @@ For Kubernetes, the important point is that the API does not define one universa
 - [2] [Open Container Initiative - Linux container configuration](https://github.com/opencontainers/runtime-spec/blob/main/config-linux.md#process)
 - [3] [Docker Docs - Runtime privilege and Linux capabilities](https://docs.docker.com/engine/containers/run/#runtime-privilege-and-linux-capabilities)
 - [4] [Kubernetes Documentation - Set capabilities for a container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container)
+- [5] [Podman documentation - `--cap-add` and `--cap-drop`](https://docs.podman.io/en/latest/markdown/podman-run.1.html#cap-add-capability)
+- [6] [Incus documentation - Security](https://linuxcontainers.org/incus/docs/main/explanation/security/)
 
 {{#include ../../../../banners/hacktricks-training.md}}

@@ -44,7 +44,7 @@ cat /proc/<pid>/gid_map
 
 ## Runtime Usage
 
-Rootless Podman is one of the clearest examples of user namespaces being treated as a first-class security mechanism. Rootless Docker also depends on them. Docker's `userns-remap` support improves safety in rootful daemon deployments too, although many deployments leave it disabled for compatibility reasons. Kubernetes can create a user namespace for a Pod when `hostUsers: false` is supported and enabled. <sup>[[2]](#references)</sup> <sup>[[3]](#references)</sup>
+Rootless Podman is one of the clearest examples of user namespaces being treated as a first-class security mechanism. Rootless Docker also depends on them. Docker's `userns-remap` support improves safety in rootful daemon deployments too, although many deployments leave it disabled for compatibility reasons. Kubernetes can create a user namespace for a Pod when `hostUsers: false` is supported and enabled, but adoption and defaults still vary by runtime, distribution, and cluster policy. Incus and LXC systems also rely heavily on UID/GID shifting and id-mapping concepts. <sup>[[2]](#references)</sup> <sup>[[3]](#references)</sup> <sup>[[4]](#references)</sup>
 
 The general trend is clear: environments that use user namespaces seriously usually provide a better answer to "what does container root actually mean?" than environments that do not.
 
@@ -138,5 +138,6 @@ If the workload runs as UID 0 and the mapping shows that this corresponds closel
 - [1] [`user_namespaces(7)` - Linux manual page](https://man7.org/linux/man-pages/man7/user_namespaces.7.html)
 - [2] [Docker Docs - Isolate containers with a user namespace](https://docs.docker.com/engine/security/userns-remap/)
 - [3] [Kubernetes Documentation - User namespaces](https://kubernetes.io/docs/concepts/workloads/pods/user-namespaces/)
+- [4] [Incus documentation - Security and unprivileged containers](https://linuxcontainers.org/incus/docs/main/explanation/security/)
 
 {{#include ../../../../../banners/hacktricks-training.md}}

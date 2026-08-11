@@ -31,7 +31,7 @@ However, at compiler level blocks doesn't exist, they are `os_object`s. Each of 
   - It has some reserved bytes
   - The size of it
   - It'll usually have a pointer to an Objective-C style signature to know how much space is needed for the params (flag `BLOCK_HAS_SIGNATURE`)
-  - If variables are referenced, the block may also contain pointers to copy and dispose helpers that manage captured values.
+  - If variables are referenced, the block may also contain pointers to copy and dispose helpers. The copy helper transfers retained or otherwise managed captures when the block is copied, and the dispose helper releases that state when the copied block is destroyed.
 
 ### Queues
 
@@ -65,7 +65,7 @@ When creating a queue with **`dispatch_queue_create`** the third argument is a `
 
 ### Dispatch objects
 
-There are several objects that libdispatch uses, and queues and blocks are only two of them. Dispatch sources are documented in the public API and implemented in libdispatch's source tree.<sup>[[1]](#references)</sup><sup>[[2]](#references)</sup>
+There are several objects that libdispatch uses, and queues and blocks are only two of them. Older reverse-engineering notes may describe a generic creation path as `dispatch_object_create`; that name is useful when recognizing decompiler output or historical notes, but it is not a public generic constructor in current libdispatch headers. Public code creates each object with its type-specific API, such as `dispatch_queue_create`, `dispatch_group_create`, `dispatch_semaphore_create`, or a `dispatch_source_create` variant. Dispatch sources are documented in the public API and implemented in libdispatch's source tree.<sup>[[1]](#references)</sup><sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
 
 - `block`
 - `data`: Data blocks

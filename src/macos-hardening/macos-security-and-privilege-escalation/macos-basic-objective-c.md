@@ -5,7 +5,7 @@
 ## Objective-C
 
 > [!CAUTION]
-> Programs written in Objective-C retain runtime metadata when compiled into [Mach-O binaries](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). This metadata includes class, method, and instance-variable information that supports Objective-C's dynamic runtime. <sup>[[1]](#references)</sup>
+> Programs written in Objective-C retain runtime metadata when compiled into [Mach-O binaries](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). This metadata includes class names, method names and type encodings, and instance-variable names and types that support Objective-C's dynamic runtime. <sup>[[1]](#references)</sup>
 
 You can inspect this information using [**class-dump**](https://github.com/nygard/class-dump):
 
@@ -337,7 +337,7 @@ if ([fileManager removeItemAtPath:@"/path/to/file1.txt" error:nil]) {
 }
 ```
 
-Files can also be managed with `NSURL` objects instead of `NSString` paths. Apple recommends URLs for filesystem locations because they provide a more efficient internal representation. <sup>[[3]](#references)</sup>
+Files can also be managed with `NSURL` objects instead of `NSString` paths. Many Foundation APIs expose corresponding method names using `URL` instead of `Path`, such as `copyItemAtURL:toURL:error:`. Apple recommends URLs for filesystem locations because they provide a more efficient internal representation. <sup>[[3]](#references)</sup>
 
 ```objectivec
 NSURL *sourceURL = [NSURL fileURLWithPath:@"/path/to/file1.txt"];

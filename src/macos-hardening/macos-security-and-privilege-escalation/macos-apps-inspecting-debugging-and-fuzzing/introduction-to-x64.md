@@ -4,7 +4,7 @@
 
 ## **Introduction to x64**
 
-x64, also known as x86-64 or AMD64, is the 64-bit extension of the x86 instruction-set architecture. Intel's architecture manuals define the registers, instruction set, and operating modes summarized below. <sup>[[1]](#references)</sup>
+x64, also known as x86-64 or AMD64, is the 64-bit extension of the x86 instruction-set architecture. It remains prevalent in desktop and server computing and is the architecture used by Intel-based Macs; Apple-silicon Macs use arm64 instead. Intel's architecture manuals define the registers, instruction set, and operating modes summarized below. <sup>[[1]](#references)</sup>
 
 ### **Registers**
 
@@ -179,6 +179,8 @@ int main(int argc, char **argv) {
 #### Shell
 
 The following minimal examples invoke `execve` using the macOS x86-64 syscall convention:
+
+For the corresponding ARM64 implementation and its original shellcode source, see the [ARM64 basic assembly page](arm64-basic-assembly.md#shell).
 
 {{#tabs}}
 {{#tab name="with adr"}}
