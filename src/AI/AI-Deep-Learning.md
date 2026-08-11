@@ -1,127 +1,128 @@
-# Deep Learning
+# डीप Learning
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Deep Learning
+## डीप Learning <sup>[[1]](#references)</sup>
 
-डीप लर्निंग मशीन लर्निंग का एक उपसमुच्चय है जो डेटा में जटिल पैटर्न को मॉडल करने के लिए कई परतों (डीप न्यूरल नेटवर्क) के साथ न्यूरल नेटवर्क का उपयोग करता है। इसने कंप्यूटर विज़न, प्राकृतिक भाषा प्रसंस्करण और भाषण पहचान सहित विभिन्न क्षेत्रों मेंRemarkable सफलता प्राप्त की है।
+डीप Learning, machine learning का एक subset है, जो data में complex patterns को model करने के लिए multiple layers वाले neural networks (deep neural networks) का उपयोग करता है। इसने computer vision, natural language processing और speech recognition सहित विभिन्न domains में उल्लेखनीय सफलता प्राप्त की है।
 
 ### Neural Networks
 
-न्यूरल नेटवर्क डीप लर्निंग के निर्माण खंड हैं। वे परतों में व्यवस्थित इंटरकनेक्टेड नोड्स (न्यूरॉन्स) से बने होते हैं। प्रत्येक न्यूरॉन इनपुट प्राप्त करता है, एक वेटेड सम लागू करता है, और एक आउटपुट उत्पन्न करने के लिए परिणाम को एक सक्रियण फ़ंक्शन के माध्यम से पास करता है। परतों को निम्नलिखित के रूप में वर्गीकृत किया जा सकता है:
-- **Input Layer**: पहली परत जो इनपुट डेटा प्राप्त करती है।
-- **Hidden Layers**: मध्यवर्ती परतें जो इनपुट डेटा पर परिवर्तन करती हैं। छिपी हुई परतों की संख्या और प्रत्येक परत में न्यूरॉन्स भिन्न हो सकते हैं, जिससे विभिन्न आर्किटेक्चर बनते हैं।
-- **Output Layer**: अंतिम परत जो नेटवर्क का आउटपुट उत्पन्न करती है, जैसे वर्गीकरण कार्यों में वर्ग संभावनाएँ।
+Neural networks, deep learning के building blocks हैं। इनमें layers में व्यवस्थित interconnected nodes (neurons) होते हैं। प्रत्येक neuron inputs प्राप्त करता है, weighted sum लागू करता है और output उत्पन्न करने के लिए परिणाम को activation function के माध्यम से भेजता है। Layers को इस प्रकार वर्गीकृत किया जा सकता है:
+- **Input Layer**: पहली layer, जो input data प्राप्त करती है।
+- **Hidden Layers**: Intermediate layers, जो input data पर transformations करती हैं। Hidden layers की संख्या और प्रत्येक layer में neurons की संख्या अलग-अलग हो सकती है, जिससे विभिन्न architectures बनते हैं।
+- **Output Layer**: अंतिम layer, जो network का output उत्पन्न करती है, जैसे classification tasks में class probabilities।
+
 
 ### Activation Functions
 
-जब न्यूरॉन्स की एक परत इनपुट डेटा को संसाधित करती है, तो प्रत्येक न्यूरॉन इनपुट पर एक वेट और एक बायस लागू करता है (`z = w * x + b`), जहाँ `w` वेट है, `x` इनपुट है, और `b` बायस है। फिर न्यूरॉन का आउटपुट एक **सक्रियण फ़ंक्शन के माध्यम से पास किया जाता है ताकि मॉडल में गैर-रेखीयता पेश की जा सके**। यह सक्रियण फ़ंक्शन मूल रूप से यह संकेत करता है कि अगला न्यूरॉन "सक्रिय होना चाहिए और कितना"। यह नेटवर्क को डेटा में जटिल पैटर्न और संबंधों को सीखने की अनुमति देता है, जिससे यह किसी भी निरंतर फ़ंक्शन का अनुमान लगाने में सक्षम होता है।
+जब neurons की कोई layer input data को process करती है, तो प्रत्येक neuron input पर एक weight और bias लागू करता है (`z = w * x + b`), जहाँ `w` weight है, `x` input है और `b` bias है। इसके बाद neuron का output model में **non-linearity शामिल करने के लिए activation function के माध्यम से भेजा जाता है**। यह activation function मूल रूप से बताता है कि अगला neuron "activate होना चाहिए या नहीं और कितना"। इससे network data में complex patterns और relationships सीख सकता है तथा किसी भी continuous function का approximation कर सकता है।
 
-इसलिए, सक्रियण फ़ंक्शन न्यूरल नेटवर्क में गैर-रेखीयता पेश करते हैं, जिससे यह डेटा में जटिल संबंधों को सीखने की अनुमति मिलती है। सामान्य सक्रियण फ़ंक्शन में शामिल हैं:
-- **Sigmoid**: इनपुट मानों को 0 और 1 के बीच के रेंज में मैप करता है, अक्सर बाइनरी वर्गीकरण में उपयोग किया जाता है।
-- **ReLU (Rectified Linear Unit)**: यदि इनपुट सकारात्मक है तो इसे सीधे आउटपुट करता है; अन्यथा, यह शून्य आउटपुट करता है। इसे इसकी सरलता और गहरे नेटवर्क को प्रशिक्षित करने में प्रभावशीलता के कारण व्यापक रूप से उपयोग किया जाता है।
-- **Tanh**: इनपुट मानों को -1 और 1 के बीच के रेंज में मैप करता है, अक्सर छिपी हुई परतों में उपयोग किया जाता है।
-- **Softmax**: कच्चे स्कोर को संभावनाओं में परिवर्तित करता है, अक्सर बहु-वर्ग वर्गीकरण के लिए आउटपुट परत में उपयोग किया जाता है।
+इसलिए, activation functions neural network में non-linearity शामिल करते हैं, जिससे वह data में complex relationships सीख सकता है। सामान्य activation functions में शामिल हैं:
+- **Sigmoid**: Input values को 0 और 1 के बीच की range में map करता है; आमतौर पर binary classification में उपयोग किया जाता है।
+- **ReLU (Rectified Linear Unit)**: यदि input positive हो तो उसे सीधे output करता है; अन्यथा zero output करता है। Deep networks की training में इसकी simplicity और effectiveness के कारण इसका व्यापक रूप से उपयोग किया जाता है।
+- **Tanh**: Input values को -1 और 1 के बीच की range में map करता है; आमतौर पर hidden layers में उपयोग किया जाता है।
+- **Softmax**: Raw scores को probabilities में convert करता है; आमतौर पर multi-class classification के लिए output layer में उपयोग किया जाता है।
 
 ### Backpropagation
 
-बैकप्रोपगेशन वह एल्गोरिदम है जिसका उपयोग न्यूरल नेटवर्क को न्यूरॉन्स के बीच कनेक्शनों के वेट को समायोजित करके प्रशिक्षित करने के लिए किया जाता है। यह हानि फ़ंक्शन के ग्रेडिएंट की गणना करके काम करता है और वेट को ग्रेडिएंट के विपरीत दिशा में अपडेट करता है ताकि हानि को न्यूनतम किया जा सके। बैकप्रोपगेशन में शामिल चरण हैं:
+Backpropagation, neural networks को train करने के लिए उपयोग किया जाने वाला algorithm है, जो neurons के बीच connections के weights को adjust करता है। यह प्रत्येक weight के संबंध में loss function के gradient की गणना करके और loss को minimize करने के लिए weights को gradient की विपरीत दिशा में update करके काम करता है। Backpropagation में शामिल steps हैं:
 
-1. **Forward Pass**: इनपुट को परतों के माध्यम से पास करके और सक्रियण फ़ंक्शन लागू करके नेटवर्क का आउटपुट गणना करें।
-2. **Loss Calculation**: एक हानि फ़ंक्शन (जैसे, रिग्रेशन के लिए औसत वर्ग त्रुटि, वर्गीकरण के लिए क्रॉस-एंट्रॉपी) का उपयोग करके पूर्वानुमानित आउटपुट और सच्चे लक्ष्य के बीच हानि (त्रुटि) की गणना करें।
-3. **Backward Pass**: कलन के श्रृंखला नियम का उपयोग करके प्रत्येक वेट के सापेक्ष हानि के ग्रेडिएंट की गणना करें।
-4. **Weight Update**: हानि को न्यूनतम करने के लिए एक ऑप्टिमाइजेशन एल्गोरिदम (जैसे, स्टोकास्टिक ग्रेडिएंट डिसेंट, एडम) का उपयोग करके वेट को अपडेट करें।
+1. **Forward Pass**: Input को layers के माध्यम से पास करके और activation functions लागू करके network का output compute करें।
+2. **Loss Calculation**: Loss function का उपयोग करके predicted output और true target के बीच loss (error) calculate करें (जैसे regression के लिए mean squared error और classification के लिए cross-entropy)।
+3. **Backward Pass**: Calculus के chain rule का उपयोग करके प्रत्येक weight के संबंध में loss के gradients compute करें।
+4. **Weight Update**: Loss को minimize करने के लिए optimization algorithm (जैसे stochastic gradient descent और Adam) का उपयोग करके weights update करें।
 
-## Convolutional Neural Networks (CNNs)
+## Convolutional Neural Networks (CNNs) <sup>[[2]](#references)</sup>
 
-कन्वोल्यूशनल न्यूरल नेटवर्क (CNNs) एक विशेष प्रकार का न्यूरल नेटवर्क है जिसे ग्रिड-जैसे डेटा, जैसे छवियों को संसाधित करने के लिए डिज़ाइन किया गया है। वे अपने स्पैटियल हायरार्की के फीचर्स को स्वचालित रूप से सीखने की क्षमता के कारण कंप्यूटर विज़न कार्यों में विशेष रूप से प्रभावी हैं।
+Convolutional Neural Networks (CNNs), grid-like data, जैसे images, को process करने के लिए designed neural network का एक specialized प्रकार हैं। Spatial hierarchies of features को automatically learn करने की क्षमता के कारण ये computer vision tasks में विशेष रूप से effective हैं।
 
-CNNs के मुख्य घटक शामिल हैं:
-- **Convolutional Layers**: स्थानीय विशेषताओं को निकालने के लिए इनपुट डेटा पर सीखने योग्य फ़िल्टर (कर्नेल) का उपयोग करके कन्वोल्यूशन ऑपरेशंस लागू करते हैं। प्रत्येक फ़िल्टर इनपुट पर स्लाइड करता है और एक डॉट प्रोडक्ट की गणना करता है, जिससे एक फीचर मैप उत्पन्न होता है।
-- **Pooling Layers**: महत्वपूर्ण विशेषताओं को बनाए रखते हुए उनके स्थानिक आयामों को कम करने के लिए फीचर मैप्स को डाउनसैंपल करते हैं। सामान्य पूलिंग ऑपरेशंस में मैक्स पूलिंग और एवरेज पूलिंग शामिल हैं।
-- **Fully Connected Layers**: एक परत में प्रत्येक न्यूरॉन को अगली परत में प्रत्येक न्यूरॉन से जोड़ते हैं, पारंपरिक न्यूरल नेटवर्क के समान। इन परतों का उपयोग आमतौर पर वर्गीकरण कार्यों के लिए नेटवर्क के अंत में किया जाता है।
+CNNs के मुख्य components में शामिल हैं:
+- **Convolutional Layers**: Local features extract करने के लिए learnable filters (kernels) का उपयोग करके input data पर convolution operations लागू करती हैं। प्रत्येक filter input पर slide करता है और dot product compute करता है, जिससे एक feature map उत्पन्न होता है।
+- **Pooling Layers**: Important features को बनाए रखते हुए उनके spatial dimensions को कम करने के लिए feature maps को downsample करती हैं। सामान्य pooling operations में max pooling और average pooling शामिल हैं।
+- **Fully Connected Layers**: एक layer के प्रत्येक neuron को अगली layer के प्रत्येक neuron से connect करती हैं, जैसा कि traditional neural networks में होता है। Classification tasks के लिए इन layers का उपयोग आमतौर पर network के अंत में किया जाता है।
 
-एक CNN के अंदर **`Convolutional Layers`**, हम निम्नलिखित के बीच भी अंतर कर सकते हैं:
-- **Initial Convolutional Layer**: पहली कन्वोल्यूशनल परत जो कच्चे इनपुट डेटा (जैसे, एक छवि) को संसाधित करती है और बुनियादी विशेषताओं जैसे किनारों और बनावटों की पहचान करने के लिए उपयोगी होती है।
-- **Intermediate Convolutional Layers**: अगली कन्वोल्यूशनल परतें जो प्रारंभिक परत द्वारा सीखी गई विशेषताओं पर निर्माण करती हैं, जिससे नेटवर्क को अधिक जटिल पैटर्न और प्रतिनिधित्व सीखने की अनुमति मिलती है।
-- **Final Convolutional Layer**: पूरी तरह से जुड़े परतों से पहले की अंतिम कन्वोल्यूशनल परतें, जो उच्च-स्तरीय विशेषताओं को कैप्चर करती हैं और वर्गीकरण के लिए डेटा को तैयार करती हैं।
+एक CNN की **`Convolutional Layers`** के अंदर, हम इनके बीच भी अंतर कर सकते हैं:
+- **Initial Convolutional Layer**: पहली convolutional layer, जो raw input data (जैसे image) को process करती है और edges तथा textures जैसे basic features की पहचान करने में उपयोगी होती है।
+- **Intermediate Convolutional Layers**: Subsequent convolutional layers, जो initial layer द्वारा सीखे गए features पर build करती हैं और network को अधिक complex patterns तथा representations सीखने देती हैं।
+- **Final Convolutional Layer**: Fully connected layers से पहले की अंतिम convolutional layers, जो high-level features capture करती हैं और data को classification के लिए तैयार करती हैं।
 
 > [!TIP]
-> CNNs छवि वर्गीकरण, वस्तु पहचान, और छवि विभाजन कार्यों के लिए विशेष रूप से प्रभावी होते हैं क्योंकि वे ग्रिड-जैसे डेटा में विशेषताओं की स्थानिक हायरार्की को सीखने की क्षमता रखते हैं और वेट शेयरिंग के माध्यम से पैरामीटर की संख्या को कम करते हैं।
-> इसके अलावा, वे डेटा के साथ बेहतर काम करते हैं जो फीचर लोकैलिटी प्रिंसिपल का समर्थन करते हैं जहाँ पड़ोसी डेटा (पिक्सेल) अधिक संभावना है कि वे संबंधित हों बनिस्बत दूर के पिक्सेल के, जो अन्य प्रकार के डेटा जैसे पाठ के लिए नहीं हो सकता।
-> इसके अलावा, ध्यान दें कि CNNs जटिल विशेषताओं की पहचान करने में सक्षम होंगे लेकिन किसी भी स्थानिक संदर्भ को लागू नहीं कर पाएंगे, जिसका अर्थ है कि छवि के विभिन्न भागों में पाए जाने वाले समान विशेषता समान होगी।
+> Grid-like data में features की spatial hierarchies सीखने और weight sharing के माध्यम से parameters की संख्या कम करने की क्षमता के कारण CNNs image classification, object detection और image segmentation tasks के लिए विशेष रूप से effective हैं।
+> इसके अलावा, वे feature locality principle को support करने वाले data के साथ बेहतर काम करते हैं, जहाँ neighboring data (pixels) के distant pixels की तुलना में related होने की अधिक संभावना होती है। Text जैसे अन्य प्रकार के data के लिए ऐसा आवश्यक नहीं है।
+> यह भी ध्यान दें कि CNNs complex features की पहचान करने में सक्षम होंगे, लेकिन किसी spatial context को लागू नहीं कर पाएँगे। इसका अर्थ है कि image के अलग-अलग हिस्सों में पाया जाने वाला समान feature एक जैसा ही होगा।
 
-### Example defining a CNN
+### CNN define करने का Example
 
-*यहाँ आपको PyTorch में एक कन्वोल्यूशनल न्यूरल नेटवर्क (CNN) को परिभाषित करने का विवरण मिलेगा जो 48x48 आकार के RGB छवियों के बैच के साथ शुरू होता है और विशेषताओं को निकालने के लिए कन्वोल्यूशनल परतों और मैक्सपूल का उपयोग करता है, इसके बाद वर्गीकरण के लिए पूरी तरह से जुड़े परतें होती हैं।*
+*यहाँ आपको PyTorch में Convolutional Neural Network (CNN) define करने का विवरण मिलेगा, जो dataset के रूप में 48x48 आकार वाली RGB images के batch से शुरू होता है और features extract करने के लिए convolutional layers तथा maxpool का उपयोग करता है, जिसके बाद classification के लिए fully connected layers होती हैं।*
 
-यहाँ आप PyTorch में 1 कन्वोल्यूशनल परत को परिभाषित कर सकते हैं: `self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)`।
+PyTorch में 1 convolutional layer को इस प्रकार define किया जा सकता है: `self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)`।
 
-- `in_channels`: इनपुट चैनलों की संख्या। RGB छवियों के मामले में, यह 3 है (प्रत्येक रंग चैनल के लिए एक)। यदि आप ग्रेस्केल छवियों के साथ काम कर रहे हैं, तो यह 1 होगा।
+- `in_channels`: Input channels की संख्या। RGB images के मामले में यह 3 होती है (प्रत्येक color channel के लिए एक)। यदि आप grayscale images के साथ काम कर रहे हैं, तो यह 1 होगी।
 
-- `out_channels`: आउटपुट चैनलों (फ़िल्टर) की संख्या जो कन्वोल्यूशनल परत सीखेगी। यह एक हाइपरपैरामीटर है जिसे आप अपने मॉडल आर्किटेक्चर के आधार पर समायोजित कर सकते हैं।
+- `out_channels`: Output channels (filters) की संख्या, जिन्हें convolutional layer learn करेगी। यह एक hyperparameter है, जिसे आप अपने model architecture के आधार पर adjust कर सकते हैं।
 
-- `kernel_size`: कन्वोल्यूशनल फ़िल्टर का आकार। एक सामान्य विकल्प 3x3 है, जिसका अर्थ है कि फ़िल्टर इनपुट छवि के 3x3 क्षेत्र को कवर करेगा। यह एक 3×3×3 रंग स्टाम्प की तरह है जिसका उपयोग in_channels से out_channels उत्पन्न करने के लिए किया जाता है:
-1. उस 3×3×3 स्टाम्प को छवि क्यूब के शीर्ष-बाएँ कोने पर रखें।
-2. प्रत्येक वेट को उसके नीचे के पिक्सेल से गुणा करें, सभी को जोड़ें, बायस जोड़ें → आपको एक संख्या मिलती है।
-3. उस संख्या को एक खाली मैप में स्थिति (0, 0) पर लिखें।
-4. स्टाम्प को एक पिक्सेल दाईं ओर स्लाइड करें (stride = 1) और तब तक दोहराएँ जब तक आप पूरे 48×48 ग्रिड को भर न दें।
+- `kernel_size`: Convolutional filter का आकार। सामान्य विकल्प 3x3 है, जिसका अर्थ है कि filter input image के 3x3 क्षेत्र को cover करेगा। यह एक 3×3×3 colour stamp की तरह है, जिसका उपयोग `out_channels` को `in_channels` से generate करने के लिए किया जाता है:
+1. उस 3×3×3 stamp को image cube के top-left corner पर रखें।
+2. प्रत्येक weight को उसके नीचे मौजूद pixel से multiply करें, सभी को जोड़ें, bias जोड़ें → आपको एक number प्राप्त होगा।
+3. उस number को position (0, 0) पर मौजूद blank map में लिखें।
+4. Stamp को एक pixel दाईं ओर slide करें (stride = 1) और तब तक दोहराएँ, जब तक पूरा 48×48 grid fill न हो जाए।
 
-- `padding`: इनपुट के प्रत्येक पक्ष में जोड़े गए पिक्सेल की संख्या। पैडिंग इनपुट के स्थानिक आयामों को बनाए रखने में मदद करती है, जिससे आउटपुट आकार पर अधिक नियंत्रण मिलता है। उदाहरण के लिए, 3x3 कर्नेल के साथ 48x48 पिक्सेल इनपुट, 1 का पैडिंग कन्वोल्यूशन ऑपरेशन के बाद आउटपुट आकार को समान (48x48) बनाए रखेगा। इसका कारण यह है कि पैडिंग इनपुट छवि के चारों ओर 1 पिक्सेल की सीमा जोड़ती है, जिससे कर्नेल को किनारों पर स्लाइड करने की अनुमति मिलती है बिना स्थानिक आयामों को कम किए।
+- `padding`: Input की प्रत्येक side पर जोड़े गए pixels की संख्या। Padding input के spatial dimensions को preserve करने में सहायता करता है और output size पर अधिक control देता है। उदाहरण के लिए, 3x3 kernel और 48x48 pixel input के साथ, padding का मान 1 होने पर convolution operation के बाद output size समान (48x48) रहेगा। ऐसा इसलिए है क्योंकि padding input image के चारों ओर 1 pixel का border जोड़ता है, जिससे kernel spatial dimensions को कम किए बिना edges पर slide कर सकता है।
 
-फिर, इस परत में प्रशिक्षित करने योग्य पैरामीटर की संख्या है:
-- (3x3x3 (कर्नेल आकार) + 1 (बायस)) x 32 (out_channels) = 896 प्रशिक्षित करने योग्य पैरामीटर।
+इस layer में trainable parameters की संख्या है:
+- (3x3x3 (kernel size) + 1 (bias)) x 32 (out_channels) = 896 trainable parameters।
 
-ध्यान दें कि प्रत्येक कर्नेल के लिए एक बायस (+1) जोड़ा गया है क्योंकि प्रत्येक कन्वोल्यूशनल परत का कार्य इनपुट का एक रैखिक परिवर्तन सीखना है, जिसे समीकरण द्वारा दर्शाया गया है:
+ध्यान दें कि उपयोग किए गए प्रत्येक kernel के लिए एक Bias (+1) जोड़ा जाता है, क्योंकि प्रत्येक convolutional layer का function input का linear transformation सीखना है, जिसे निम्न equation द्वारा दर्शाया जाता है:
 ```plaintext
 Y = f(W * X + b)
 ```
-जहाँ `W` वेट मैट्रिक्स है (सीखे गए फ़िल्टर, 3x3x3 = 27 पैरामीटर), `b` बायस वेक्टर है जो प्रत्येक आउटपुट चैनल के लिए +1 है।
+जहाँ `W` weight matrix (सीखे गए filters, 3x3x3 = 27 params) है, `b` bias vector है, जो प्रत्येक output channel के लिए +1 होता है।
 
-ध्यान दें कि `self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)` का आउटपुट `(batch_size, 32, 48, 48)` आकार का टेन्सर होगा, क्योंकि 32 नए उत्पन्न चैनलों की संख्या है जो 48x48 पिक्सल के आकार के हैं।
+ध्यान दें कि `self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)` का output `(batch_size, 32, 48, 48)` shape वाला tensor होगा, क्योंकि 32, 48x48 pixels के आकार वाले नए generated channels की संख्या है।
 
-फिर, हम इस कन्वोल्यूशनल लेयर को दूसरे कन्वोल्यूशनल लेयर से जोड़ सकते हैं जैसे: `self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1)`।
+इसके बाद, हम इस convolutional layer को किसी अन्य convolutional layer से इस प्रकार connect कर सकते हैं: `self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1)`।
 
-जो जोड़ेगा: (32x3x3 (कर्नेल आकार) + 1 (बायस)) x 64 (out_channels) = 18,496 ट्रेन करने योग्य पैरामीटर और आउटपुट का आकार `(batch_size, 64, 48, 48)` होगा।
+यह जोड़ेगा: (32x3x3 (kernel size) + 1 (bias)) x 64 (out_channels) = 18,496 trainable parameters और `(batch_size, 64, 48, 48)` shape का output देगा।
 
-जैसा कि आप देख सकते हैं, **पैरामीटर की संख्या प्रत्येक अतिरिक्त कन्वोल्यूशनल लेयर के साथ तेजी से बढ़ती है**, विशेष रूप से जब आउटपुट चैनलों की संख्या बढ़ती है।
+जैसा कि आप देख सकते हैं, **प्रत्येक अतिरिक्त convolutional layer के साथ parameters की संख्या तेज़ी से बढ़ती है**, विशेष रूप से तब, जब output channels की संख्या बढ़ती है।
 
-डेटा की मात्रा को नियंत्रित करने का एक विकल्प है कि प्रत्येक कन्वोल्यूशनल लेयर के बाद **मैक्स पूलिंग** का उपयोग किया जाए। मैक्स पूलिंग फीचर मैप्स के स्थानिक आयामों को कम करता है, जो पैरामीटर की संख्या और गणनात्मक जटिलता को कम करने में मदद करता है जबकि महत्वपूर्ण विशेषताओं को बनाए रखता है।
+उपयोग किए जाने वाले data की मात्रा को नियंत्रित करने का एक विकल्प प्रत्येक convolutional layer के बाद **max pooling** का उपयोग करना है। Max pooling feature maps के spatial dimensions को कम करता है, जिससे महत्वपूर्ण features को बनाए रखते हुए parameters की संख्या और computational complexity कम करने में सहायता मिलती है।
 
-इसे इस प्रकार घोषित किया जा सकता है: `self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)`। यह मूल रूप से 2x2 पिक्सल के ग्रिड का उपयोग करने और प्रत्येक ग्रिड से अधिकतम मान लेने का संकेत देता है ताकि फीचर मैप के आकार को आधा किया जा सके। इसके अलावा, `stride=2` का मतलब है कि पूलिंग ऑपरेशन एक बार में 2 पिक्सल आगे बढ़ेगा, इस मामले में, पूलिंग क्षेत्रों के बीच किसी भी ओवरलैप को रोकता है।
+इसे इस प्रकार declare किया जा सकता है: `self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)`। इसका मूल अर्थ 2x2 pixels के grid का उपयोग करना और feature map का आकार आधा करने के लिए प्रत्येक grid से maximum value लेना है। इसके अलावा, `stride=2` का अर्थ है कि pooling operation एक बार में 2 pixels आगे बढ़ेगा; इस मामले में, pooling regions के बीच किसी भी overlap को रोका जाता है।
 
-इस पूलिंग लेयर के साथ, पहले कन्वोल्यूशनल लेयर के बाद आउटपुट आकार `(batch_size, 64, 24, 24)` होगा जब `self.pool1` को `self.conv2` के आउटपुट पर लागू किया जाएगा, जिससे आकार को पिछले लेयर के 1/4 तक कम किया जाएगा।
+इस pooling layer के साथ, पहले convolutional layer के बाद output shape `(batch_size, 64, 24, 24)` होगा, जब `self.pool1` को `self.conv2` के output पर लागू किया जाएगा और आकार को पिछली layer के 1/4 तक कम किया जाएगा।
 
 > [!TIP]
-> यह महत्वपूर्ण है कि कन्वोल्यूशनल लेयर्स के बाद पूलिंग की जाए ताकि फीचर मैप्स के स्थानिक आयामों को कम किया जा सके, जो पैरामीटर की संख्या और गणनात्मक जटिलता को नियंत्रित करने में मदद करता है जबकि प्रारंभिक पैरामीटर महत्वपूर्ण विशेषताओं को सीखता है।
-> आप पूलिंग लेयर से पहले के कन्वोल्यूशन्स को इनपुट डेटा से विशेषताएँ निकालने के तरीके के रूप में देख सकते हैं (जैसे कि रेखाएँ, किनारे), यह जानकारी पूल किए गए आउटपुट में अभी भी मौजूद होगी, लेकिन अगली कन्वोल्यूशनल लेयर मूल इनपुट डेटा को नहीं देख पाएगी, केवल पूल किया गया आउटपुट, जो पिछले लेयर का एक कम किया गया संस्करण है जिसमें वह जानकारी है।
-> सामान्य क्रम में: `Conv → ReLU → Pool` प्रत्येक 2×2 पूलिंग विंडो अब फीचर सक्रियणों (“किनारा मौजूद / नहीं”) के साथ मुकाबला करती है, कच्चे पिक्सल तीव्रताओं के साथ नहीं। सबसे मजबूत सक्रियण को बनाए रखना वास्तव में सबसे महत्वपूर्ण सबूत को बनाए रखता है।
+> Feature maps के spatial dimensions को कम करने के लिए convolutional layers के बाद pooling करना महत्वपूर्ण है। इससे parameters की संख्या और computational complexity को नियंत्रित करने में सहायता मिलती है, साथ ही initial parameter को महत्वपूर्ण features सीखने में सक्षम बनाया जाता है।
+>आप convolutional layers को pooling layer से पहले input data (जैसे lines, edges) से features extract करने के तरीके के रूप में देख सकते हैं। यह information pooled output में अभी भी मौजूद रहेगी, लेकिन अगली convolutional layer original input data को नहीं देख पाएगी; वह केवल pooled output देखेगी, जो उस information के साथ पिछली layer का reduced version है।
+>सामान्य क्रम में: `Conv → ReLU → Pool`, प्रत्येक 2×2 pooling window अब raw pixel intensities के बजाय feature activations (“edge present / not”) के साथ काम करती है। सबसे strong activation को बनाए रखना वास्तव में सबसे salient evidence को बनाए रखता है।
 
-फिर, आवश्यकतानुसार जितनी भी कन्वोल्यूशनल और पूलिंग लेयर्स जोड़ने के बाद, हम आउटपुट को फ्लैट कर सकते हैं ताकि इसे पूरी तरह से जुड़े लेयर्स में फीड किया जा सके। यह बैच में प्रत्येक नमूने के लिए टेन्सर को 1D वेक्टर में फिर से आकार देकर किया जाता है:
+इसके बाद, आवश्यकतानुसार जितनी convolutional और pooling layers जोड़नी हों, जोड़कर हम output को flatten कर सकते हैं ताकि उसे fully connected layers में feed किया जा सके। यह batch में प्रत्येक sample के लिए tensor को 1D vector में reshape करके किया जाता है:
 ```python
 x = x.view(-1, 64*24*24)
 ```
-और इस 1D वेक्टर के साथ जिसमें पिछले कन्वोल्यूशनल और पूलिंग लेयर्स द्वारा उत्पन्न सभी प्रशिक्षण पैरामीटर हैं, हम एक पूरी तरह से जुड़े लेयर को इस तरह परिभाषित कर सकते हैं:
+और पिछले convolutional और pooling layers द्वारा generated सभी training parameters वाले इस 1D vector के साथ, हम एक fully connected layer को इस प्रकार define कर सकते हैं:
 ```python
 self.fc1 = nn.Linear(64 * 24 * 24, 512)
 ```
-जो पिछले लेयर के फ्लैट आउटपुट को लेगा और इसे 512 हिडन यूनिट्स पर मैप करेगा।
+जो पिछली layer के flattened output को लेगी और उसे 512 hidden units में map करेगी।
 
-ध्यान दें कि इस लेयर ने `(64 * 24 * 24 + 1 (bias)) * 512 = 3,221,504` ट्रेन करने योग्य पैरामीटर जोड़े हैं, जो संकुचन लेयर की तुलना में एक महत्वपूर्ण वृद्धि है। इसका कारण यह है कि पूरी तरह से जुड़े लेयर एक लेयर में हर न्यूरॉन को अगले लेयर के हर न्यूरॉन से जोड़ते हैं, जिससे पैरामीटर की संख्या बहुत अधिक हो जाती है।
+ध्यान दें कि इस layer ने `(64 * 24 * 24 + 1 (bias)) * 512 = 3,221,504` trainable parameters जोड़े, जो convolutional layers की तुलना में एक महत्वपूर्ण वृद्धि है। ऐसा इसलिए है क्योंकि fully connected layers एक layer के प्रत्येक neuron को अगली layer के प्रत्येक neuron से connect करती हैं, जिससे parameters की संख्या बहुत अधिक हो जाती है।
 
-अंत में, हम अंतिम वर्ग लॉजिट्स उत्पन्न करने के लिए एक आउटपुट लेयर जोड़ सकते हैं:
+अंत में, अंतिम class logits उत्पन्न करने के लिए हम एक output layer जोड़ सकते हैं:
 ```python
 self.fc2 = nn.Linear(512, num_classes)
 ```
-यह `(512 + 1 (bias)) * num_classes` ट्रेन करने योग्य पैरामीटर जोड़ेगा, जहाँ `num_classes` वर्गीकरण कार्य में वर्गों की संख्या है (जैसे, GTSRB डेटासेट के लिए 43)।
+यह `(512 + 1 (bias)) * num_classes` trainable parameters जोड़ेगा, जहाँ `num_classes` classification task में classes की संख्या है (जैसे, GTSRB dataset के लिए 43)।
 
-एक और सामान्य प्रथा यह है कि पूरी तरह से जुड़े परतों से पहले एक ड्रॉपआउट परत जोड़ी जाए ताकि ओवरफिटिंग को रोका जा सके। इसे इस तरह किया जा सकता है:
+एक और सामान्य practice है कि overfitting को रोकने के लिए fully connected layers से पहले dropout layer जोड़ी जाए। यह इस प्रकार किया जा सकता है:
 ```python
 self.dropout = nn.Dropout(0.5)
 ```
-इस परत में प्रशिक्षण के दौरान इनपुट यूनिट्स के एक अंश को यादृच्छिक रूप से शून्य पर सेट किया जाता है, जो विशिष्ट न्यूरॉन्स पर निर्भरता को कम करके ओवरफिटिंग को रोकने में मदद करता है।
+यह layer training के दौरान input units के एक अंश को random रूप से zero पर सेट करती है, जिससे specific neurons पर निर्भरता कम करके overfitting को रोकने में मदद मिलती है।
 
-### CNN कोड उदाहरण
+### CNN Code example
 ```python
 import torch
 import torch.nn as nn
@@ -222,23 +223,23 @@ x = self.fc2(x)
 # Note that the output is not passed through a softmax activation here, as it is typically done in the loss function (e.g., CrossEntropyLoss)
 return x
 ```
-### CNN कोड प्रशिक्षण उदाहरण
+### CNN Code training example
 
-निम्नलिखित कोड कुछ प्रशिक्षण डेटा बनाएगा और ऊपर परिभाषित `MY_NET` मॉडल को प्रशिक्षित करेगा। कुछ दिलचस्प मान नोट करने के लिए:
+निम्नलिखित code कुछ training data तैयार करेगा और ऊपर परिभाषित `MY_NET` model को train करेगा। ध्यान देने योग्य कुछ interesting values:
 
-- `EPOCHS` वह संख्या है जब मॉडल प्रशिक्षण के दौरान पूरे डेटासेट को देखेगा। यदि EPOCH बहुत छोटा है, तो मॉडल पर्याप्त नहीं सीख सकता है; यदि बहुत बड़ा है, तो यह ओवरफिट हो सकता है।
-- `LEARNING_RATE` ऑप्टिमाइज़र के लिए कदम का आकार है। एक छोटा लर्निंग रेट धीमी संकुचन की ओर ले जा सकता है, जबकि एक बड़ा इसे इष्टतम समाधान से अधिक कर सकता है और संकुचन को रोक सकता है।
-- `WEIGHT_DECAY` एक नियमितीकरण शब्द है जो बड़े वज़नों को दंडित करके ओवरफिटिंग को रोकने में मदद करता है।
+- `EPOCHS` वह संख्या है जितनी बार training के दौरान model पूरे dataset को देखेगा। यदि EPOCH बहुत छोटा है, तो model पर्याप्त रूप से सीख नहीं पाएगा; यदि बहुत बड़ा है, तो वह overfit कर सकता है।
+- `LEARNING_RATE` optimizer का step size है। छोटा learning rate धीमी convergence का कारण बन सकता है, जबकि बड़ा learning rate optimal solution से आगे निकल सकता है और convergence को रोक सकता है।
+- `WEIGHT_DECAY` एक regularization term है, जो बड़े weights को penalize करके overfitting को रोकने में मदद करता है।
 
-प्रशिक्षण लूप के संबंध में, यह कुछ दिलचस्प जानकारी है जो जानना आवश्यक है:
-- `criterion = nn.CrossEntropyLoss()` बहु-श्रेणी वर्गीकरण कार्यों के लिए उपयोग की जाने वाली हानि फ़ंक्शन है। यह एकल फ़ंक्शन में सॉफ्टमैक्स सक्रियण और क्रॉस-एंट्रॉपी हानि को संयोजित करता है, जिससे यह उन मॉडलों को प्रशिक्षित करने के लिए उपयुक्त बनाता है जो वर्ग लॉजिट्स आउटपुट करते हैं।
-- यदि मॉडल से अन्य प्रकार के आउटपुट की अपेक्षा की जाती, जैसे बाइनरी वर्गीकरण या रिग्रेशन, तो हम बाइनरी वर्गीकरण के लिए `nn.BCEWithLogitsLoss()` या रिग्रेशन के लिए `nn.MSELoss()` जैसी विभिन्न हानि फ़ंक्शंस का उपयोग करते।
-- `optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)` एडे़म ऑप्टिमाइज़र को प्रारंभ करता है, जो गहरे शिक्षण मॉडलों को प्रशिक्षित करने के लिए एक लोकप्रिय विकल्प है। यह ग्रेडिएंट्स के पहले और दूसरे क्षणों के आधार पर प्रत्येक पैरामीटर के लिए लर्निंग रेट को अनुकूलित करता है।
-- अन्य ऑप्टिमाइज़र जैसे `optim.SGD` (स्टोकास्टिक ग्रेडिएंट डिसेंट) या `optim.RMSprop` का भी उपयोग किया जा सकता है, प्रशिक्षण कार्य की विशिष्ट आवश्यकताओं के आधार पर।
-- `model.train()` विधि मॉडल को प्रशिक्षण मोड में सेट करती है, जिससे ड्रॉपआउट और बैच सामान्यीकरण जैसी परतें प्रशिक्षण के दौरान मूल्यांकन की तुलना में अलग तरीके से व्यवहार करती हैं।
-- `optimizer.zero_grad()` बैकवर्ड पास से पहले सभी ऑप्टिमाइज़ किए गए टेन्सर्स के ग्रेडिएंट्स को साफ करता है, जो आवश्यक है क्योंकि PyTorch में डिफ़ॉल्ट रूप से ग्रेडिएंट्स जमा होते हैं। यदि साफ नहीं किया गया, तो पिछले पुनरावृत्तियों के ग्रेडिएंट्स वर्तमान ग्रेडिएंट्स में जोड़े जाएंगे, जिससे गलत अपडेट होंगे।
-- `loss.backward()` हानि के ग्रेडिएंट्स को मॉडल के पैरामीटर के संबंध में गणना करता है, जिन्हें फिर ऑप्टिमाइज़र द्वारा वज़नों को अपडेट करने के लिए उपयोग किया जाता है।
-- `optimizer.step()` गणना किए गए ग्रेडिएंट्स और लर्निंग रेट के आधार पर मॉडल के पैरामीटर को अपडेट करता है।
+Training loop के संबंध में जानने योग्य कुछ interesting information:
+- `criterion = nn.CrossEntropyLoss()` multi-class classification tasks के लिए उपयोग किया जाने वाला loss function है। यह softmax activation और cross-entropy loss को एक ही function में जोड़ता है, जिससे यह class logits output करने वाले models की training के लिए उपयुक्त बनता है।
+- यदि model से binary classification या regression जैसे अन्य प्रकार के outputs की अपेक्षा होती, तो हम अलग loss functions का उपयोग करते, जैसे binary classification के लिए `nn.BCEWithLogitsLoss()` या regression के लिए `nn.MSELoss()`।
+- `optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)` Adam optimizer को initialize करता है, जो deep learning models की training के लिए एक popular choice है। यह gradients के first और second moments के आधार पर प्रत्येक parameter के लिए learning rate को adapt करता है।
+- Training task की specific requirements के आधार पर `optim.SGD` (Stochastic Gradient Descent) या `optim.RMSprop` जैसे अन्य optimizers का भी उपयोग किया जा सकता है।
+- `model.train()` method model को training mode में सेट करता है, जिससे dropout और batch normalization जैसी layers evaluation की तुलना में training के दौरान अलग तरह से व्यवहार करती हैं।
+- `optimizer.zero_grad()` backward pass से पहले सभी optimized tensors के gradients को clear करता है, जो आवश्यक है क्योंकि PyTorch में gradients default रूप से accumulate होते हैं। यदि उन्हें clear नहीं किया गया, तो पिछली iterations के gradients वर्तमान gradients में जुड़ जाएंगे, जिससे incorrect updates होंगे।
+- `loss.backward()` model parameters के संबंध में loss के gradients compute करता है, जिनका उपयोग optimizer weights को update करने के लिए करता है।
+- `optimizer.step()` computed gradients और learning rate के आधार पर model parameters को update करता है।
 ```python
 import torch, torch.nn.functional as F
 from torch import nn, optim
@@ -375,46 +376,53 @@ print(classification_report(labels_all, preds_all, zero_division=0))
 print("Confusion matrix (rows = true, cols = pred):")
 print(confusion_matrix(labels_all, preds_all))
 ```
-## पुनरावर्ती न्यूरल नेटवर्क (RNNs)
+## Recurrent Neural Networks (RNNs) <sup>[[3]](#references)</sup>
 
-पुनरावर्ती न्यूरल नेटवर्क (RNNs) एक प्रकार के न्यूरल नेटवर्क हैं जो अनुक्रमिक डेटा, जैसे समय श्रृंखला या प्राकृतिक भाषा, को संसाधित करने के लिए डिज़ाइन किए गए हैं। पारंपरिक फीडफॉरवर्ड न्यूरल नेटवर्क के विपरीत, RNNs में ऐसे कनेक्शन होते हैं जो स्वयं पर वापस लूप करते हैं, जिससे उन्हें एक छिपी हुई स्थिति बनाए रखने की अनुमति मिलती है जो अनुक्रम में पिछले इनपुट के बारे में जानकारी कैप्चर करती है।
+Recurrent Neural Networks (RNNs) neural networks का एक वर्ग हैं, जिन्हें time series या natural language जैसे sequential data को process करने के लिए design किया गया है। Traditional feedforward neural networks के विपरीत, RNNs में ऐसे connections होते हैं जो स्वयं पर loop back करते हैं, जिससे वे एक hidden state बनाए रख सकते हैं। यह hidden state sequence में पिछले inputs की information को capture करती है।
 
-RNNs के मुख्य घटक शामिल हैं:
-- **पुनरावर्ती परतें**: ये परतें इनपुट अनुक्रमों को एक समय चरण में संसाधित करती हैं, वर्तमान इनपुट और पिछले छिपे हुए स्थिति के आधार पर अपनी छिपी हुई स्थिति को अपडेट करती हैं। यह RNNs को डेटा में समय संबंधी निर्भरताओं को सीखने की अनुमति देता है।
-- **छिपी हुई स्थिति**: छिपी हुई स्थिति एक वेक्टर है जो पिछले समय चरणों से जानकारी का सारांश प्रस्तुत करता है। इसे प्रत्येक समय चरण में अपडेट किया जाता है और वर्तमान इनपुट के लिए भविष्यवाणियाँ करने के लिए उपयोग किया जाता है।
-- **आउटपुट परत**: आउटपुट परत छिपी हुई स्थिति के आधार पर अंतिम भविष्यवाणियाँ उत्पन्न करती है। कई मामलों में, RNNs का उपयोग भाषा मॉडलिंग जैसे कार्यों के लिए किया जाता है, जहाँ आउटपुट अनुक्रम में अगले शब्द के लिए एक संभाव्यता वितरण होता है।
+RNNs के मुख्य components में शामिल हैं:
+- **Recurrent Layers**: ये layers input sequences को एक समय में एक time step process करती हैं और current input तथा previous hidden state के आधार पर अपनी hidden state को update करती हैं। इससे RNNs data में temporal dependencies सीख सकती हैं।
+- **Hidden State**: hidden state एक vector है जो पिछले time steps की information को summarize करता है। इसे प्रत्येक time step पर update किया जाता है और current input के लिए predictions बनाने में उपयोग किया जाता है।
+- **Output Layer**: output layer hidden state के आधार पर final predictions उत्पन्न करती है। कई मामलों में, RNNs का उपयोग language modeling जैसे tasks के लिए किया जाता है, जहाँ output sequence में अगले word पर probability distribution होता है।
 
-उदाहरण के लिए, एक भाषा मॉडल में, RNN एक शब्दों के अनुक्रम को संसाधित करता है, जैसे "बिल्ली ने पर" और पिछले शब्दों द्वारा प्रदान किए गए संदर्भ के आधार पर अगले शब्द की भविष्यवाणी करता है, इस मामले में, "चटाई"।
+उदाहरण के लिए, एक language model में RNN words के sequence, जैसे "The cat sat on the", को process करता है और पिछले words द्वारा दिए गए context के आधार पर अगला word predict करता है, इस मामले में "mat"।
 
-### लंबी शॉर्ट-टर्म मेमोरी (LSTM) और गेटेड पुनरावर्ती यूनिट (GRU)
+### Long Short-Term Memory (LSTM) and Gated Recurrent Unit (GRU) <sup>[[3]](#references)</sup>
 
-RNNs अनुक्रमिक डेटा, जैसे भाषा मॉडलिंग, मशीन अनुवाद, और भाषण पहचान जैसे कार्यों के लिए विशेष रूप से प्रभावी होते हैं। हालाँकि, वे **लंबी दूरी की निर्भरताओं के साथ संघर्ष कर सकते हैं, जैसे कि गायब ग्रेडिएंट्स** के मुद्दों के कारण।
+RNNs sequential data से जुड़े tasks, जैसे language modeling, machine translation और speech recognition, के लिए विशेष रूप से प्रभावी हैं। हालांकि, **vanishing gradients जैसी समस्याओं के कारण उन्हें long-range dependencies के साथ कठिनाई हो सकती है**।
 
-इसका समाधान करने के लिए, लंबी शॉर्ट-टर्म मेमोरी (LSTM) और गेटेड पुनरावर्ती यूनिट (GRU) जैसी विशेष आर्किटेक्चर विकसित की गईं। ये आर्किटेक्चर सूचना के प्रवाह को नियंत्रित करने के लिए गेटिंग तंत्र पेश करते हैं, जिससे उन्हें लंबी दूरी की निर्भरताओं को अधिक प्रभावी ढंग से कैप्चर करने की अनुमति मिलती है।
+इसे संबोधित करने के लिए Long Short-Term Memory (LSTM) और Gated Recurrent Unit (GRU) जैसी specialized architectures विकसित की गईं। ये architectures ऐसे gating mechanisms प्रस्तुत करती हैं जो information के flow को control करते हैं, जिससे वे long-range dependencies को अधिक प्रभावी ढंग से capture कर पाती हैं।
 
-- **LSTM**: LSTM नेटवर्क तीन गेट (इनपुट गेट, फॉरगेट गेट, और आउटपुट गेट) का उपयोग करते हैं ताकि सेल स्थिति में सूचना के प्रवाह को नियंत्रित किया जा सके, जिससे उन्हें लंबे अनुक्रमों में जानकारी को याद रखने या भूलने की अनुमति मिलती है। इनपुट गेट यह नियंत्रित करता है कि नए इनपुट और पिछले छिपे हुए स्थिति के आधार पर कितनी नई जानकारी जोड़ी जाए, फॉरगेट गेट यह नियंत्रित करता है कि कितनी जानकारी को त्यागना है। इनपुट गेट और फॉरगेट गेट को मिलाकर हमें नई स्थिति मिलती है। अंततः, नई सेल स्थिति को इनपुट और पिछले छिपे हुए स्थिति के साथ मिलाकर हमें नई छिपी हुई स्थिति भी मिलती है।
-- **GRU**: GRU नेटवर्क LSTM आर्किटेक्चर को सरल बनाते हैं, इनपुट और फॉरगेट गेट को एकल अपडेट गेट में मिलाकर, जिससे वे गणनात्मक रूप से अधिक कुशल हो जाते हैं जबकि फिर भी लंबी दूरी की निर्भरताओं को कैप्चर करते हैं।
+- **LSTM**: LSTM networks cell state के अंदर और बाहर information के flow को regulate करने के लिए three gates (input gate, forget gate और output gate) का उपयोग करते हैं। इससे वे लंबे sequences में information को remember या forget कर सकते हैं। input gate यह control करता है कि input और previous hidden state के आधार पर कितनी नई information जोड़ी जाए, जबकि forget gate यह control करता है कि कितनी information discard की जाए। input gate और forget gate को combine करने पर हमें new state मिलती है। अंत में, new cell state को input और previous hidden state के साथ combine करने पर हमें new hidden state भी मिलती है।
+- **GRU**: GRU networks input और forget gates को एक single update gate में combine करके LSTM architecture को simplify करते हैं। इससे वे long-range dependencies को capture करते हुए computational रूप से अधिक efficient बनते हैं।
 
-## LLMs (बड़े भाषा मॉडल)
+## LLMs (Large Language Models)
 
-बड़े भाषा मॉडल (LLMs) एक प्रकार के गहरे शिक्षण मॉडल हैं जो विशेष रूप से प्राकृतिक भाषा प्रसंस्करण कार्यों के लिए डिज़ाइन किए गए हैं। इन्हें विशाल मात्रा में पाठ डेटा पर प्रशिक्षित किया जाता है और ये मानव-समान पाठ उत्पन्न कर सकते हैं, प्रश्नों का उत्तर दे सकते हैं, भाषाओं का अनुवाद कर सकते हैं, और विभिन्न अन्य भाषा-संबंधित कार्य कर सकते हैं।
-LLMs आमतौर पर ट्रांसफार्मर आर्किटेक्चर पर आधारित होते हैं, जो अनुक्रम में शब्दों के बीच संबंधों को कैप्चर करने के लिए आत्म-ध्यान तंत्र का उपयोग करते हैं, जिससे उन्हें संदर्भ को समझने और सुसंगत पाठ उत्पन्न करने की अनुमति मिलती है।
+Large Language Models (LLMs) deep learning models का एक प्रकार हैं, जिन्हें विशेष रूप से natural language processing tasks के लिए design किया गया है। इन्हें बहुत बड़ी मात्रा में text data पर train किया जाता है और ये human-like text generate कर सकते हैं, questions का answer दे सकते हैं, languages translate कर सकते हैं और language से संबंधित कई अन्य tasks perform कर सकते हैं।
+LLMs आमतौर पर transformer architectures पर आधारित होते हैं, जो sequence में words के बीच relationships को capture करने के लिए self-attention mechanisms का उपयोग करते हैं। इससे वे context को समझ सकते हैं और coherent text generate कर सकते हैं।
 
-### ट्रांसफार्मर आर्किटेक्चर
-ट्रांसफार्मर आर्किटेक्चर कई LLMs की नींव है। इसमें एक एन्कोडर-डिकोडर संरचना होती है, जहाँ एन्कोडर इनपुट अनुक्रम को संसाधित करता है और डिकोडर आउटपुट अनुक्रम उत्पन्न करता है। ट्रांसफार्मर आर्किटेक्चर के मुख्य घटक शामिल हैं:
-- **आत्म-ध्यान तंत्र**: यह तंत्र मॉडल को अनुक्रम में विभिन्न शब्दों के महत्व को तौलने की अनुमति देता है जब वह प्रतिनिधित्व उत्पन्न करता है। यह शब्दों के बीच संबंधों के आधार पर ध्यान स्कोर की गणना करता है, जिससे मॉडल प्रासंगिक संदर्भ पर ध्यान केंद्रित कर सकता है।
-- **मल्टी-हेड ध्यान**: यह घटक मॉडल को शब्दों के बीच कई संबंधों को कैप्चर करने की अनुमति देता है, जिसमें कई ध्यान सिर होते हैं, प्रत्येक इनपुट के विभिन्न पहलुओं पर ध्यान केंद्रित करता है।
-- **पोजिशनल एनकोडिंग**: चूंकि ट्रांसफार्मर में शब्द क्रम का कोई अंतर्निहित विचार नहीं होता है, पोजिशनल एनकोडिंग को इनपुट एम्बेडिंग में जोड़ा जाता है ताकि अनुक्रम में शब्दों की स्थिति के बारे में जानकारी प्रदान की जा सके।
+### Transformer Architecture <sup>[[4]](#references)</sup>
+Transformer architecture कई LLMs का foundation है। इसमें encoder-decoder structure होता है, जहाँ encoder input sequence को process करता है और decoder output sequence generate करता है। Transformer architecture के मुख्य components में शामिल हैं:
+- **Self-Attention Mechanism**: यह mechanism representations generate करते समय model को sequence में अलग-अलग words के महत्व को weigh करने देता है। यह words के बीच relationships के आधार पर attention scores compute करता है, जिससे model relevant context पर focus कर सकता है।
+- **Multi-Head Attention**: यह component model को multiple attention heads का उपयोग करके words के बीच multiple relationships capture करने देता है। प्रत्येक head input के अलग-अलग aspects पर focus करता है।
+- **Positional Encoding**: चूँकि transformers में word order की built-in notion नहीं होती, इसलिए sequence में words की position के बारे में information देने के लिए input embeddings में positional encoding जोड़ी जाती है।
 
-## डिफ्यूजन मॉडल
-डिफ्यूजन मॉडल एक प्रकार के जनरेटिव मॉडल हैं जो डेटा उत्पन्न करना सीखते हैं एक डिफ्यूजन प्रक्रिया का अनुकरण करके। ये विशेष रूप से छवि उत्पन्न करने जैसे कार्यों के लिए प्रभावी होते हैं और हाल के वर्षों में लोकप्रियता प्राप्त की है।
-डिफ्यूजन मॉडल धीरे-धीरे एक सरल शोर वितरण को एक जटिल डेटा वितरण में बदलते हैं एक श्रृंखला के माध्यम से डिफ्यूजन चरणों। डिफ्यूजन मॉडल के मुख्य घटक शामिल हैं:
-- **फॉरवर्ड डिफ्यूजन प्रक्रिया**: यह प्रक्रिया धीरे-धीरे डेटा में शोर जोड़ती है, इसे एक सरल शोर वितरण में बदलती है। फॉरवर्ड डिफ्यूजन प्रक्रिया आमतौर पर शोर स्तरों की एक श्रृंखला द्वारा परिभाषित की जाती है, जहाँ प्रत्येक स्तर डेटा में जोड़े गए शोर की एक विशिष्ट मात्रा के लिए होता है।
-- **रिवर्स डिफ्यूजन प्रक्रिया**: यह प्रक्रिया फॉरवर्ड डिफ्यूजन प्रक्रिया को उलटने के लिए सीखती है, डेटा को धीरे-धीरे डिनॉइज़ करते हुए लक्ष्य वितरण से नमूने उत्पन्न करती है। रिवर्स डिफ्यूजन प्रक्रिया को एक हानि फ़ंक्शन का उपयोग करके प्रशिक्षित किया जाता है जो मॉडल को शोर नमूनों से मूल डेटा को पुनर्निर्माण करने के लिए प्रोत्साहित करता है।
+## Diffusion Models <sup>[[5]](#references)</sup>
+Diffusion models generative models का एक वर्ग हैं, जो diffusion process को simulate करके data generate करना सीखते हैं। ये image generation जैसे tasks के लिए विशेष रूप से प्रभावी हैं और हाल के वर्षों में लोकप्रिय हुए हैं।
+Diffusion models diffusion steps की एक series के माध्यम से simple noise distribution को complex data distribution में धीरे-धीरे transform करके काम करते हैं। Diffusion models के मुख्य components में शामिल हैं:
+- **Forward Diffusion Process**: यह process data में धीरे-धीरे noise जोड़ता है और उसे simple noise distribution में transform करता है। Forward diffusion process आमतौर पर noise levels की एक series द्वारा define किया जाता है, जहाँ प्रत्येक level data में जोड़ी गई noise की एक specific amount के अनुरूप होता है।
+- **Reverse Diffusion Process**: यह process forward diffusion process को reverse करना सीखता है और target distribution से samples generate करने के लिए data को धीरे-धीरे denoise करता है। Reverse diffusion process को एक loss function का उपयोग करके train किया जाता है, जो model को noisy samples से original data reconstruct करने के लिए प्रोत्साहित करता है।
 
-इसके अलावा, एक पाठ संकेत से छवि उत्पन्न करने के लिए, डिफ्यूजन मॉडल आमतौर पर इन चरणों का पालन करते हैं:
-1. **पाठ एनकोडिंग**: पाठ संकेत को एक टेक्स्ट एनकोडर (जैसे, एक ट्रांसफार्मर-आधारित मॉडल) का उपयोग करके एक लेटेंट प्रतिनिधित्व में एनकोड किया जाता है। यह प्रतिनिधित्व पाठ के अर्थ को कैप्चर करता है।
-2. **शोर नमूना लेना**: एक यादृच्छिक शोर वेक्टर को गॉसियन वितरण से नमूना लिया जाता है।
-3. **डिफ्यूजन चरण**: मॉडल एक श्रृंखला के डिफ्यूजन चरणों को लागू करता है, धीरे-धीरे शोर वेक्टर को एक छवि में बदलता है जो पाठ संकेत के अनुरूप होती है। प्रत्येक चरण में छवि को डिनॉइज़ करने के लिए सीखे गए रूपांतरणों को लागू करना शामिल होता है।
+इसके अलावा, text prompt से image generate करने के लिए diffusion models आमतौर पर इन steps का पालन करते हैं:
+1. **Text Encoding**: text prompt को text encoder (जैसे, transformer-based model) का उपयोग करके latent representation में encode किया जाता है। यह representation text के semantic meaning को capture करती है।
+2. **Noise Sampling**: Gaussian distribution से एक random noise vector sample किया जाता है।
+3. **Diffusion Steps**: model diffusion steps की एक series apply करता है और noise vector को धीरे-धीरे ऐसी image में transform करता है जो text prompt से correspond करती है। प्रत्येक step में image को denoise करने के लिए learned transformations apply करना शामिल होता है।
 
+## References
+
+- [1] [PyTorch - Neural Networks ट्यूटोरियल](https://docs.pytorch.org/tutorials/beginner/blitz/neural_networks_tutorial.html)
+- [2] [PyTorch - Conv2d](https://docs.pytorch.org/docs/stable/generated/torch.nn.Conv2d.html)
+- [3] [PyTorch - LSTM](https://docs.pytorch.org/docs/stable/generated/torch.nn.LSTM.html)
+- [4] [PyTorch - Transformer](https://docs.pytorch.org/docs/stable/generated/torch.nn.Transformer.html)
+- [5] [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239)
 {{#include ../banners/hacktricks-training.md}}

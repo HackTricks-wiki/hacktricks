@@ -2,57 +2,62 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-मॉडल डेटा तैयारी मशीन लर्निंग पाइपलाइन में एक महत्वपूर्ण कदम है, क्योंकि इसमें कच्चे डेटा को मशीन लर्निंग मॉडल के प्रशिक्षण के लिए उपयुक्त प्रारूप में बदलना शामिल है। इस प्रक्रिया में कई प्रमुख चरण शामिल हैं:
+Model data preparation machine learning pipeline का एक महत्वपूर्ण चरण है, क्योंकि इसमें raw data को ऐसे format में बदला जाता है जो machine learning models की training के लिए उपयुक्त हो। इस प्रक्रिया में कई प्रमुख चरण शामिल हैं:
 
-1. **डेटा संग्रह**: विभिन्न स्रोतों से डेटा एकत्र करना, जैसे डेटाबेस, APIs, या फ़ाइलें। डेटा संरचित (जैसे, तालिकाएँ) या असंरचित (जैसे, पाठ, छवियाँ) हो सकता है।
-2. **डेटा सफाई**: गलत, अधूरा, या अप्रासंगिक डेटा बिंदुओं को हटाना या सुधारना। इस चरण में गायब मानों को संभालना, डुप्लिकेट हटाना, और आउटलेयर को फ़िल्टर करना शामिल हो सकता है।
-3. **डेटा रूपांतरण**: डेटा को मॉडलिंग के लिए उपयुक्त प्रारूप में परिवर्तित करना। इसमें सामान्यीकरण, स्केलिंग, श्रेणीबद्ध चर को एन्कोड करना, और फीचर इंजीनियरिंग जैसी तकनीकों के माध्यम से नए फीचर्स बनाना शामिल हो सकता है।
-4. **डेटा विभाजन**: डेटासेट को प्रशिक्षण, मान्यता, और परीक्षण सेट में विभाजित करना ताकि यह सुनिश्चित हो सके कि मॉडल अदृश्य डेटा पर अच्छी तरह से सामान्यीकृत कर सके।
+1. **Data Collection**: विभिन्न sources, जैसे databases, APIs या files से data एकत्र करना। Data structured (जैसे tables) या unstructured (जैसे text, images) हो सकता है।
+2. **Data Cleaning**: गलत, अधूरे या अप्रासंगिक data points को हटाना या ठीक करना। इस चरण में missing values को संभालना, duplicates हटाना और outliers को filter करना शामिल हो सकता है।
+3. **Data Transformation**: Data को modeling के लिए उपयुक्त format में बदलना। इसमें normalization, scaling, categorical variables की encoding और feature engineering जैसी techniques के माध्यम से नए features बनाना शामिल हो सकता है।
+4. **Data Splitting**: Dataset को training, validation और test sets में विभाजित करना, ताकि यह सुनिश्चित किया जा सके कि model unseen data पर अच्छी तरह generalize कर सके।
 
 ## Data Collection
 
-डेटा संग्रह विभिन्न स्रोतों से डेटा एकत्र करने की प्रक्रिया है, जिसमें शामिल हो सकते हैं:
-- **Databases**: संबंधपरक डेटाबेस (जैसे, SQL डेटाबेस) या NoSQL डेटाबेस (जैसे, MongoDB) से डेटा निकालना।
-- **APIs**: वेब APIs से डेटा लाना, जो वास्तविक समय या ऐतिहासिक डेटा प्रदान कर सकते हैं।
-- **Files**: CSV, JSON, या XML जैसे प्रारूपों में फ़ाइलों से डेटा पढ़ना।
-- **Web Scraping**: वेब स्क्रैपिंग तकनीकों का उपयोग करके वेबसाइटों से डेटा एकत्र करना।
+Data collection में विभिन्न sources से data एकत्र करना शामिल है, जिनमें ये शामिल हो सकते हैं:
+- **Databases**: Relational databases (जैसे SQL databases) या NoSQL databases (जैसे MongoDB) से data extract करना।
+- **APIs**: Web APIs से data fetch करना, जो real-time या historical data प्रदान कर सकते हैं।
+- **Files**: CSV, JSON या XML जैसे formats वाली files से data पढ़ना।
+- **Web Scraping**: Web scraping techniques का उपयोग करके websites से data एकत्र करना।
 
-मशीन लर्निंग प्रोजेक्ट के लक्ष्य के आधार पर, डेटा को प्रासंगिक स्रोतों से निकाला और एकत्र किया जाएगा ताकि यह समस्या क्षेत्र का प्रतिनिधित्व कर सके।
+Machine learning project के goal के आधार पर, problem domain का प्रतिनिधित्व सुनिश्चित करने के लिए data को relevant sources से extract और collect किया जाएगा।
 
-## Data Cleaning
+## Data Cleaning <sup>[[1]](#references)</sup><sup>[[2]](#references)</sup>
 
-डेटा सफाई डेटा सेट में त्रुटियों या असंगतियों की पहचान और सुधारने की प्रक्रिया है। यह चरण मशीन लर्निंग मॉडल के प्रशिक्षण के लिए उपयोग किए जाने वाले डेटा की गुणवत्ता सुनिश्चित करने के लिए आवश्यक है। डेटा सफाई में प्रमुख कार्य शामिल हैं:
-- **Handling Missing Values**: गायब डेटा बिंदुओं की पहचान और समाधान। सामान्य रणनीतियाँ शामिल हैं:
-- गायब मानों के साथ पंक्तियों या कॉलम को हटाना।
-- औसत, माध्यिका, या मोड इम्प्यूटेशन जैसी तकनीकों का उपयोग करके गायब मानों को भरना।
-- K-nearest neighbors (KNN) इम्प्यूटेशन या रिग्रेशन इम्प्यूटेशन जैसी उन्नत विधियों का उपयोग करना।
-- **Removing Duplicates**: यह सुनिश्चित करने के लिए डुप्लिकेट रिकॉर्ड की पहचान और हटाना कि प्रत्येक डेटा बिंदु अद्वितीय है।
-- **Filtering Outliers**: ऐसे आउटलेयर की पहचान और हटाना जो मॉडल के प्रदर्शन को प्रभावित कर सकते हैं। आउटलेयर की पहचान के लिए Z-score, IQR (Interquartile Range), या विज़ुअलाइज़ेशन (जैसे, बॉक्स प्लॉट) जैसी तकनीकों का उपयोग किया जा सकता है।
+Data cleaning dataset में errors या inconsistencies की पहचान करने और उन्हें ठीक करने की प्रक्रिया है। Machine learning models की training के लिए उपयोग किए जाने वाले data की quality सुनिश्चित करने हेतु यह चरण आवश्यक है। Data cleaning के प्रमुख tasks में शामिल हैं:
+- **Handling Missing Values**: Missing data points की पहचान करना और उनका समाधान करना। सामान्य strategies में शामिल हैं:
+- Missing values वाली rows या columns को हटाना।
+- Mean, median या mode imputation जैसी techniques का उपयोग करके missing values को impute करना।
+- K-nearest neighbors (KNN) imputation या regression imputation जैसी advanced methods का उपयोग करना।
+- **Removing Duplicates**: यह सुनिश्चित करने के लिए duplicate records की पहचान करना और उन्हें हटाना कि प्रत्येक data point unique हो।
+- **Filtering Outliers**: ऐसे outliers का पता लगाना और उन्हें हटाना जो model के performance को प्रभावित कर सकते हैं। Outliers की पहचान के लिए Z-score, IQR (Interquartile Range) या visualizations (जैसे box plots) जैसी techniques का उपयोग किया जा सकता है।
 
 ### Example of data cleaning
 ```python
+import re
+
+import numpy as np
 import pandas as pd
+from sklearn.impute import KNNImputer, SimpleImputer
+
 # Load the dataset
-data = pd.read_csv('data.csv')
+df = pd.read_csv('data.csv')
 
 # Finding invalid values based on a specific function
-def is_valid_possitive_int(num):
+def is_valid_positive_int(num):
 try:
 num = int(num)
 return 1 <= num <= 31
 except ValueError:
 return False
 
-invalid_days = data[~data['days'].astype(str).apply(is_valid_positive_int)]
+invalid_days = df[~df['days'].astype(str).apply(is_valid_positive_int)]
 
 ## Dropping rows with invalid days
-data = data.drop(invalid_days.index, errors='ignore')
+df = df.drop(invalid_days.index, errors='ignore')
 
 
 
 # Set "NaN" values to a specific value
 ## For example, setting NaN values in the 'days' column to 0
-data['days'] = pd.to_numeric(data['days'], errors='coerce')
+df['days'] = pd.to_numeric(df['days'], errors='coerce')
 
 ## For example, set "NaN" to not ips
 def is_valid_ip(ip):
@@ -81,153 +86,159 @@ df[numeric_cols] = knn_imputer.fit_transform(df[numeric_cols])
 
 
 # Filling missing values
-data.fillna(data.mean(), inplace=True)
+df.fillna(df.mean(numeric_only=True), inplace=True)
 
 # Removing duplicates
-data.drop_duplicates(inplace=True)
+df.drop_duplicates(inplace=True)
 # Filtering outliers using Z-score
 from scipy import stats
-z_scores = stats.zscore(data.select_dtypes(include=['float64', 'int64']))
-data = data[(z_scores < 3).all(axis=1)]
+z_scores = np.abs(stats.zscore(df.select_dtypes(include=['float64', 'int64']), nan_policy='omit'))
+df = df[(z_scores < 3).all(axis=1)]
 ```
-## Data Transformation
+## Data Transformation <sup>[[1]](#references)</sup>
 
-Data transformation में डेटा को मॉडलिंग के लिए उपयुक्त प्रारूप में परिवर्तित करना शामिल है। इस चरण में शामिल हो सकते हैं:
-- **Normalization & Standarization**: संख्यात्मक विशेषताओं को एक सामान्य सीमा में स्केल करना, आमतौर पर [0, 1] या [-1, 1]। यह ऑप्टिमाइजेशन एल्गोरिदम के समागम में सुधार करने में मदद करता है।
-- **Min-Max Scaling**: विशेषताओं को एक निश्चित सीमा में फिर से स्केल करना, आमतौर पर [0, 1]। यह सूत्र का उपयोग करके किया जाता है: `X' = (X - X_{min}) / (X_{max} - X_{min})`
-- **Z-Score Normalization**: विशेषताओं को मान को घटाकर और मानक विचलन से विभाजित करके मानकीकरण करना, जिसके परिणामस्वरूप 0 का मान और 1 का मानक विचलन होता है। यह सूत्र का उपयोग करके किया जाता है: `X' = (X - μ) / σ`, जहाँ μ मान है और σ मानक विचलन है।
-- **Skeyewness and Kurtosis**: विशेषताओं के वितरण को समायोजित करना ताकि skewness (असमानता) और kurtosis (चोटीपन) को कम किया जा सके। यह लॉगरिदमिक, वर्गमूल, या Box-Cox ट्रांसफॉर्मेशन जैसे ट्रांसफॉर्मेशन का उपयोग करके किया जा सकता है। उदाहरण के लिए, यदि किसी विशेषता का skewed वितरण है, तो लॉगरिदमिक ट्रांसफॉर्मेशन लागू करने से इसे सामान्यीकृत करने में मदद मिल सकती है।
-- **String Normalization**: स्ट्रिंग्स को एक सुसंगत प्रारूप में परिवर्तित करना, जैसे:
-- लोअरकेस करना
-- विशेष वर्णों को हटाना (संबंधित को बनाए रखते हुए)
-- स्टॉप शब्दों को हटाना (सामान्य शब्द जो अर्थ में योगदान नहीं करते, जैसे "the", "is", "and")
-- बहुत अधिक बार और बहुत कम बार आने वाले शब्दों को हटाना (जैसे, शब्द जो 90% से अधिक दस्तावेजों में या कॉर्पस में 5 बार से कम आते हैं)
-- व्हाइटस्पेस को ट्रिम करना
-- Stemming/Lemmatization: शब्दों को उनके मूल या जड़ रूप में कम करना (जैसे, "running" को "run" में)।
+Data transformation में data को modeling के लिए उपयुक्त format में बदलना शामिल है। इस चरण में निम्न शामिल हो सकते हैं:
+- **Normalization और standardization**: Numerical features को एक common range, आमतौर पर [0, 1] या [-1, 1], में scale करना। इससे optimization algorithms का convergence बेहतर हो सकता है।
+- **Min-Max Scaling**: Features को एक fixed range, आमतौर पर [0, 1], में rescale करना। यह formula का उपयोग करके किया जाता है: `X' = (X - X_{min}) / (X_{max} - X_{min})`
+- **Z-Score Normalization**: Mean को घटाकर और standard deviation से विभाजित करके features को standardize करना, जिससे mean 0 और standard deviation 1 वाला distribution प्राप्त होता है। यह formula का उपयोग करके किया जाता है: `X' = (X - μ) / σ`, जहाँ μ mean और σ standard deviation है।
+- **Skewness और kurtosis**: Logarithm, square root या Box-Cox जैसे transformations के साथ feature distributions को adjust करना। उदाहरण के लिए, logarithmic transformation positive skew को कम कर सकता है।
+- **String Normalization**: Strings को एक consistent format में बदलना, जैसे:
+- Lowercasing
+- Special characters हटाना (relevant characters को बनाए रखते हुए)
+- Stop words हटाना (ऐसे common words जो meaning में योगदान नहीं देते, जैसे "the", "is", और "and")
+- बहुत frequent और बहुत rare words हटाना (जैसे, वे words जो 90% से अधिक documents में दिखाई देते हैं या corpus में 5 बार से कम दिखाई देते हैं)
+- Whitespace trim करना
+- Stemming/Lemmatization: Words को उनके base या root form में बदलना (जैसे, "running" को "run" में)।
 
-- **Encoding Categorical Variables**: श्रेणीबद्ध चर को संख्यात्मक प्रतिनिधित्व में परिवर्तित करना। सामान्य तकनीकों में शामिल हैं:
-- **One-Hot Encoding**: प्रत्येक श्रेणी के लिए बाइनरी कॉलम बनाना।
-- उदाहरण के लिए, यदि किसी विशेषता में श्रेणियाँ "red", "green", और "blue" हैं, तो इसे तीन बाइनरी कॉलम में परिवर्तित किया जाएगा: `is_red`(100), `is_green`(010), और `is_blue`(001)।
-- **Label Encoding**: प्रत्येक श्रेणी को एक अद्वितीय पूर्णांक असाइन करना।
+- **Categorical Variables की Encoding**: Categorical variables को numerical representations में बदलना। Common techniques में शामिल हैं:
+- **One-Hot Encoding**: प्रत्येक category के लिए binary columns बनाना।
+- उदाहरण के लिए, यदि किसी feature में "red", "green", और "blue" categories हैं, तो इसे तीन binary columns में बदला जाएगा: `is_red`(100), `is_green`(010), और `is_blue`(001)।
+- **Label Encoding**: प्रत्येक category को एक unique integer देना।
 - उदाहरण के लिए, "red" = 0, "green" = 1, "blue" = 2।
-- **Ordinal Encoding**: श्रेणियों के क्रम के आधार पर पूर्णांक असाइन करना।
-- उदाहरण के लिए, यदि श्रेणियाँ "low", "medium", और "high" हैं, तो इन्हें क्रमशः 0, 1, और 2 के रूप में कोडित किया जा सकता है।
-- **Hashing Encoding**: श्रेणियों को निश्चित आकार के वेक्टर में परिवर्तित करने के लिए हैश फ़ंक्शन का उपयोग करना, जो उच्च-कार्डिनलिटी श्रेणीबद्ध चर के लिए उपयोगी हो सकता है।
-- उदाहरण के लिए, यदि किसी विशेषता में कई अद्वितीय श्रेणियाँ हैं, तो हैशिंग आयाम को कम कर सकता है जबकि श्रेणियों के बारे में कुछ जानकारी को बनाए रखता है।
-- **Bag of Words (BoW)**: पाठ डेटा को शब्दों की गिनती या आवृत्तियों के मैट्रिक्स के रूप में प्रस्तुत करना, जहाँ प्रत्येक पंक्ति एक दस्तावेज़ के लिए और प्रत्येक कॉलम कॉर्पस में एक अद्वितीय शब्द के लिए होता है।
-- उदाहरण के लिए, यदि कॉर्पस में "cat", "dog", और "fish" शब्द हैं, तो "cat" और "dog" वाले दस्तावेज़ को [1, 1, 0] के रूप में प्रस्तुत किया जाएगा। यह विशिष्ट प्रतिनिधित्व "unigram" कहा जाता है और यह शब्दों के क्रम को कैप्चर नहीं करता है, इसलिए यह अर्थ संबंधी जानकारी खो देता है।
-- **Bigram/Trigram**: BoW को शब्दों के अनुक्रम (bigrams या trigrams) को कैप्चर करने के लिए बढ़ाना ताकि कुछ संदर्भ बनाए रखा जा सके। उदाहरण के लिए, "cat and dog" को "cat and" के लिए एक bigram [1, 1] और "and dog" के लिए [1, 1] के रूप में प्रस्तुत किया जाएगा। इन मामलों में अधिक अर्थ संबंधी जानकारी एकत्र की जाती है (प्रतिनिधित्व के आयाम को बढ़ाना) लेकिन केवल 2 या 3 शब्दों के लिए एक समय में।
-- **TF-IDF (Term Frequency-Inverse Document Frequency)**: एक सांख्यिकीय माप जो एक दस्तावेज़ में एक शब्द के महत्व का मूल्यांकन करता है जो दस्तावेज़ों के संग्रह (कॉर्पस) के सापेक्ष होता है। यह शब्द आवृत्ति (कितनी बार एक शब्द एक दस्तावेज़ में प्रकट होता है) और विपरीत दस्तावेज़ आवृत्ति (कितना दुर्लभ एक शब्द सभी दस्तावेज़ों में है) को जोड़ता है।
-- उदाहरण के लिए, यदि शब्द "cat" एक दस्तावेज़ में बार-बार प्रकट होता है लेकिन पूरे कॉर्पस में दुर्लभ है, तो इसका उच्च TF-IDF स्कोर होगा, जो उस दस्तावेज़ में इसके महत्व को दर्शाता है।
+- **Ordinal Encoding**: Categories के order के आधार पर integers देना।
+- उदाहरण के लिए, यदि categories "low", "medium", और "high" हैं, तो इन्हें क्रमशः 0, 1, और 2 के रूप में encode किया जा सकता है।
+- **Hashing Encoding**: Categories को fixed-size vectors में बदलने के लिए hash function का उपयोग करना, जो high-cardinality categorical variables के लिए उपयोगी हो सकता है।
+- उदाहरण के लिए, यदि किसी feature में कई unique categories हैं, तो hashing categories के बारे में कुछ information बनाए रखते हुए dimensionality को कम कर सकता है।
+- **Bag of Words (BoW)**: Text data को word counts या frequencies के matrix के रूप में represent करना, जहाँ प्रत्येक row एक document और प्रत्येक column corpus में मौजूद एक unique word को दर्शाता है।
+- उदाहरण के लिए, यदि corpus में "cat", "dog", और "fish" words हैं, तो "cat" और "dog" वाले document को [1, 1, 0] के रूप में represent किया जाएगा। इस specific representation को "unigram" कहा जाता है और यह words के order को capture नहीं करता, इसलिए semantic information खो जाती है।
+- **Bigram/Trigram**: कुछ context बनाए रखने के लिए words के sequences (bigrams या trigrams) को capture करने हेतु BoW का विस्तार करना। उदाहरण के लिए, "cat and dog" को "cat and" के लिए bigram [1, 1] और "and dog" के लिए [1, 1] के रूप में represent किया जाएगा। इस case में अधिक semantic information एकत्र की जाती है (representation की dimensionality बढ़ाकर), लेकिन एक समय में केवल 2 या 3 words के लिए।
+- **TF-IDF (Term Frequency-Inverse Document Frequency)**: एक statistical measure जो किसी document में किसी word की importance का मूल्यांकन documents के collection (corpus) के सापेक्ष करता है। यह term frequency (किसी document में कोई word कितनी बार दिखाई देता है) और inverse document frequency (सभी documents में कोई word कितना rare है) को combine करता है।
+- उदाहरण के लिए, यदि "cat" word किसी document में frequently दिखाई देता है, लेकिन पूरे corpus में rare है, तो उसका TF-IDF score high होगा, जो उस document में उसकी importance दर्शाता है।
 
-- **Feature Engineering**: मौजूदा विशेषताओं से नई विशेषताएँ बनाना ताकि मॉडल की भविष्यवाणी शक्ति को बढ़ाया जा सके। इसमें विशेषताओं को संयोजित करना, दिनांक/समय के घटक निकालना, या डोमेन-विशिष्ट ट्रांसफॉर्मेशन लागू करना शामिल हो सकता है।
+- **Feature Engineering**: Model की predictive power बढ़ाने के लिए existing features से नए features बनाना। इसमें features को combine करना, date/time components निकालना, या domain-specific transformations लागू करना शामिल हो सकता है।
 
-## Data Splitting
+## Data Splitting <sup>[[3]](#references)</sup>
 
-Data splitting में डेटासेट को प्रशिक्षण, मान्यता, और परीक्षण के लिए अलग-अलग उपसमुच्चयों में विभाजित करना शामिल है। यह अप्रयुक्त डेटा पर मॉडल के प्रदर्शन का मूल्यांकन करने और ओवरफिटिंग को रोकने के लिए आवश्यक है। सामान्य रणनीतियों में शामिल हैं:
-- **Train-Test Split**: डेटासेट को एक प्रशिक्षण सेट (आमतौर पर डेटा का 60-80%) में विभाजित करना, एक मान्यता सेट (डेटा का 10-15%) हाइपरपैरामीटर को ट्यून करने के लिए, और एक परीक्षण सेट (डेटा का 10-15%)। मॉडल को प्रशिक्षण सेट पर प्रशिक्षित किया जाता है और परीक्षण सेट पर मूल्यांकन किया जाता है।
-- उदाहरण के लिए, यदि आपके पास 1000 नमूनों का डेटासेट है, तो आप 700 नमूनों का उपयोग प्रशिक्षण के लिए, 150 मान्यता के लिए, और 150 परीक्षण के लिए कर सकते हैं।
-- **Stratified Sampling**: यह सुनिश्चित करना कि प्रशिक्षण और परीक्षण सेट में वर्गों का वितरण समग्र डेटासेट के समान है। यह असंतुलित डेटासेट के लिए विशेष रूप से महत्वपूर्ण है, जहाँ कुछ वर्गों में अन्य की तुलना में काफी कम नमूने हो सकते हैं।
-- **Time Series Split**: समय श्रृंखला डेटा के लिए, डेटासेट को समय के आधार पर विभाजित किया जाता है, यह सुनिश्चित करते हुए कि प्रशिक्षण सेट में पहले के समय अवधि का डेटा होता है और परीक्षण सेट में बाद की अवधि का डेटा होता है। यह भविष्य के डेटा पर मॉडल के प्रदर्शन का मूल्यांकन करने में मदद करता है।
-- **K-Fold Cross-Validation**: डेटासेट को K उपसमुच्चयों (फोल्ड) में विभाजित करना और मॉडल को K बार प्रशिक्षित करना, प्रत्येक बार एक अलग फोल्ड को परीक्षण सेट के रूप में और शेष फोल्ड को प्रशिक्षण सेट के रूप में उपयोग करना। यह सुनिश्चित करने में मदद करता है कि मॉडल को डेटा के विभिन्न उपसमुच्चयों पर मूल्यांकन किया जाता है, जो इसके प्रदर्शन का अधिक मजबूत अनुमान प्रदान करता है।
+Data splitting में dataset को training, validation, और testing के लिए अलग-अलग subsets में विभाजित करना शामिल है। यह unseen data पर model के performance का मूल्यांकन करने और overfitting को रोकने के लिए आवश्यक है। Common strategies में शामिल हैं:
+- **Train-Test Split**: Dataset को training set (आमतौर पर data का 60-80%), validation set (hyperparameters tune करने के लिए data का 10-15%), और test set (data का 10-15%) में विभाजित करना। Model को training set पर train किया जाता है और test set पर evaluate किया जाता है।
+- उदाहरण के लिए, यदि आपके पास 1000 samples का dataset है, तो आप training के लिए 700 samples, validation के लिए 150, और testing के लिए 150 samples का उपयोग कर सकते हैं।
+- **Stratified Sampling**: यह सुनिश्चित करना कि training और test sets में classes का distribution overall dataset के समान हो। यह imbalanced datasets के लिए विशेष रूप से महत्वपूर्ण है, जहाँ कुछ classes में अन्य की तुलना में काफी कम samples हो सकते हैं।
+- **Time Series Split**: Time series data के लिए dataset को time के आधार पर विभाजित करना, जिससे यह सुनिश्चित हो कि training set में पहले के time periods का data और test set में बाद के periods का data हो। इससे future data पर model के performance का मूल्यांकन करने में मदद मिलती है।
+- **K-Fold Cross-Validation**: Dataset को K subsets (folds) में विभाजित करना और model को K बार train करना; प्रत्येक बार एक अलग fold को test set और बाकी folds को training set के रूप में उपयोग करना। इससे यह सुनिश्चित करने में मदद मिलती है कि model का मूल्यांकन data के अलग-अलग subsets पर हो, जिससे उसके performance का अधिक robust estimate मिलता है।
 
-## Model Evaluation
+## Model Evaluation <sup>[[4]](#references)</sup>
 
-Model evaluation अप्रयुक्त डेटा पर मशीन लर्निंग मॉडल के प्रदर्शन का आकलन करने की प्रक्रिया है। इसमें यह मापने के लिए विभिन्न मैट्रिक्स का उपयोग करना शामिल है कि मॉडल नए डेटा पर कितना अच्छा सामान्यीकृत होता है। सामान्य मूल्यांकन मैट्रिक्स में शामिल हैं:
+Model evaluation unseen data पर machine learning model के performance का आकलन करने की process है। इसमें यह मापने के लिए विभिन्न metrics का उपयोग किया जाता है कि model नए data पर कितनी अच्छी तरह generalize करता है। Common evaluation metrics में शामिल हैं:
 
 ### Accuracy
 
-Accuracy सही भविष्यवाणी की गई घटनाओं का कुल घटनाओं में अनुपात है। इसे इस प्रकार गणना की जाती है:
+Accuracy, total instances में से correctly predicted instances का proportion है। इसकी गणना इस प्रकार की जाती है:
 ```plaintext
 Accuracy = (Number of Correct Predictions) / (Total Number of Predictions)
 ```
 > [!TIP]
-> सटीकता एक सरल और सहज मेट्रिक है, लेकिन यह असंतुलित डेटा सेट के लिए उपयुक्त नहीं हो सकती है जहाँ एक वर्ग अन्य वर्गों पर हावी होता है, क्योंकि यह मॉडल के प्रदर्शन का भ्रामक प्रभाव दे सकती है। उदाहरण के लिए, यदि 90% डेटा वर्ग A से संबंधित है और मॉडल सभी उदाहरणों को वर्ग A के रूप में भविष्यवाणी करता है, तो यह 90% सटीकता प्राप्त करेगा, लेकिन यह वर्ग B की भविष्यवाणी के लिए उपयोगी नहीं होगा।
+> सटीकता एक सरल और सहज metric है, लेकिन यह imbalanced datasets के लिए उपयुक्त नहीं हो सकती, जहाँ एक class अन्य classes पर हावी होती है, क्योंकि यह model performance का भ्रामक प्रभाव दे सकती है। उदाहरण के लिए, यदि 90% data class A से संबंधित है और model सभी instances को class A के रूप में predict करता है, तो यह 90% accuracy प्राप्त करेगा, लेकिन class B की prediction के लिए उपयोगी नहीं होगा।
 
 ### Precision
 
-Precision वह अनुपात है जो मॉडल द्वारा किए गए सभी सकारात्मक भविष्यवाणियों में से सही सकारात्मक भविष्यवाणियों का होता है। इसे इस प्रकार गणना की जाती है:
+Precision, model द्वारा की गई सभी positive predictions में से true positive predictions का अनुपात है। इसकी गणना इस प्रकार की जाती है:
 ```plaintext
 Precision = (True Positives) / (True Positives + False Positives)
 ```
 > [!TIP]
-> सटीकता विशेष रूप से उन परिदृश्यों में महत्वपूर्ण है जहाँ झूठे सकारात्मक महंगे या अवांछनीय होते हैं, जैसे कि चिकित्सा निदान या धोखाधड़ी पहचान में। उदाहरण के लिए, यदि एक मॉडल 100 उदाहरणों को सकारात्मक के रूप में भविष्यवाणी करता है, लेकिन उनमें से केवल 80 वास्तव में सकारात्मक हैं, तो सटीकता 0.8 (80%) होगी।
+> Precision उन scenarios में विशेष रूप से महत्वपूर्ण है जहाँ false positives महंगे या अवांछित होते हैं, जैसे medical diagnoses या fraud detection में। उदाहरण के लिए, यदि कोई model 100 instances को positive के रूप में predict करता है, लेकिन उनमें से केवल 80 वास्तव में positive हैं, तो precision 0.8 (80%) होगी।
 
-### Recall (संवेदनशीलता)
+### Recall (Sensitivity)
 
-Recall, जिसे संवेदनशीलता या सही सकारात्मक दर के रूप में भी जाना जाता है, सभी वास्तविक सकारात्मक उदाहरणों में से सही सकारात्मक भविष्यवाणियों का अनुपात है। इसे इस प्रकार गणना किया जाता है:
+Recall, जिसे sensitivity या true positive rate के रूप में भी जाना जाता है, सभी वास्तविक positive instances में से true positive predictions का अनुपात है। इसकी गणना इस प्रकार की जाती है:
 ```plaintext
 Recall = (True Positives) / (True Positives + False Negatives)
 ```
 > [!TIP]
-> पुनः कॉल उन परिदृश्यों में महत्वपूर्ण है जहाँ झूठे नकारात्मक महंगे या अवांछनीय होते हैं, जैसे कि रोग पहचान या स्पैम फ़िल्टरिंग में। उदाहरण के लिए, यदि एक मॉडल 100 वास्तविक सकारात्मक उदाहरणों में से 80 की पहचान करता है, तो पुनः कॉल 0.8 (80%) होगा।
+> Recall उन परिस्थितियों में महत्वपूर्ण होता है जहाँ false negatives महंगे या अवांछनीय होते हैं, जैसे disease detection या spam filtering में। उदाहरण के लिए, यदि कोई model वास्तविक रूप से positive 100 instances में से 80 की पहचान करता है, तो recall 0.8 (80%) होगा।
 
-### F1 स्कोर
+### F1 Score
 
-F1 स्कोर सटीकता और पुनः कॉल का हार्मोनिक माध्य है, जो दोनों मैट्रिक्स के बीच संतुलन प्रदान करता है। इसे इस प्रकार गणना की जाती है:
+F1 score, precision और recall का harmonic mean होता है, जो दोनों metrics के बीच संतुलन प्रदान करता है। इसकी गणना इस प्रकार की जाती है:
 ```plaintext
 F1 Score = 2 * (Precision * Recall) / (Precision + Recall)
 ```
 > [!TIP]
-> F1 स्कोर असंतुलित डेटा सेट के साथ काम करते समय विशेष रूप से उपयोगी होता है, क्योंकि यह दोनों झूठे सकारात्मक और झूठे नकारात्मक को ध्यान में रखता है। यह एकल मैट्रिक प्रदान करता है जो सटीकता और पुनः प्राप्ति के बीच के व्यापार-ऑफ को कैप्चर करता है। उदाहरण के लिए, यदि एक मॉडल की सटीकता 0.8 और पुनः प्राप्ति 0.6 है, तो F1 स्कोर लगभग 0.69 होगा।
+> F1 score imbalanced datasets के साथ काम करते समय विशेष रूप से उपयोगी होता है, क्योंकि यह false positives और false negatives दोनों पर विचार करता है। यह एक ऐसा single metric प्रदान करता है, जो precision और recall के बीच trade-off को दर्शाता है। उदाहरण के लिए, यदि किसी model की precision 0.8 और recall 0.6 है, तो F1 score लगभग 0.69 होगा।
 
-### ROC-AUC (रिसीवर ऑपरेटिंग विशेषता - कर्व के नीचे का क्षेत्र)
+### ROC-AUC (Receiver Operating Characteristic - Area Under the Curve)
 
-ROC-AUC मैट्रिक मॉडल की वर्गों के बीच भेद करने की क्षमता का मूल्यांकन करता है, सही सकारात्मक दर (संवेदनशीलता) को विभिन्न थ्रेशोल्ड सेटिंग्स पर झूठे सकारात्मक दर के खिलाफ प्लॉट करके। ROC कर्व के नीचे का क्षेत्र (AUC) मॉडल के प्रदर्शन को मात्रात्मक रूप से व्यक्त करता है, जिसमें 1 का मान पूर्ण वर्गीकरण और 0.5 का मान यादृच्छिक अनुमान को दर्शाता है।
+ROC-AUC metric विभिन्न threshold settings पर true positive rate (sensitivity) को false positive rate के विरुद्ध plot करके classes के बीच अंतर करने की model की क्षमता का मूल्यांकन करता है। ROC curve के नीचे का क्षेत्रफल (AUC) model के performance को मापता है। 1 का मान perfect classification और 0.5 का मान random guessing को दर्शाता है।
 
 > [!TIP]
-> ROC-AUC द्विआधारी वर्गीकरण समस्याओं के लिए विशेष रूप से उपयोगी है और विभिन्न थ्रेशोल्ड के बीच मॉडल के प्रदर्शन का एक व्यापक दृश्य प्रदान करता है। यह सटीकता की तुलना में वर्ग असंतुलन के प्रति कम संवेदनशील है। उदाहरण के लिए, 0.9 का AUC वाला एक मॉडल यह दर्शाता है कि इसमें सकारात्मक और नकारात्मक उदाहरणों के बीच भेद करने की उच्च क्षमता है।
+> ROC-AUC binary classification problems के लिए विशेष रूप से उपयोगी है और विभिन्न thresholds पर model के performance का एक व्यापक दृष्टिकोण प्रदान करता है। यह accuracy की तुलना में class imbalance के प्रति कम sensitive होता है। उदाहरण के लिए, 0.9 AUC वाला model positive और negative instances के बीच अंतर करने की उच्च क्षमता दर्शाता है।
 
-### विशिष्टता
+### Specificity
 
-विशिष्टता, जिसे सही नकारात्मक दर के रूप में भी जाना जाता है, सभी वास्तविक नकारात्मक उदाहरणों में से सही नकारात्मक भविष्यवाणियों का अनुपात है। इसे इस प्रकार गणना की जाती है:
+Specificity, जिसे true negative rate भी कहा जाता है, सभी वास्तविक negative instances में से true negative predictions का अनुपात है। इसकी गणना इस प्रकार की जाती है:
 ```plaintext
 Specificity = (True Negatives) / (True Negatives + False Positives)
 ```
 > [!TIP]
-> विशिष्टता उन परिदृश्यों में महत्वपूर्ण है जहाँ झूठे सकारात्मक महंगे या अवांछनीय होते हैं, जैसे कि चिकित्सा परीक्षण या धोखाधड़ी पहचान में। यह मूल्यांकन करने में मदद करता है कि मॉडल नकारात्मक उदाहरणों की पहचान कितनी अच्छी तरह करता है। उदाहरण के लिए, यदि एक मॉडल 100 वास्तविक नकारात्मक उदाहरणों में से 90 को सही ढंग से पहचानता है, तो विशिष्टता 0.9 (90%) होगी।
+> Specificity उन परिस्थितियों में महत्वपूर्ण होती है जहाँ false positives महंगे या अवांछनीय होते हैं, जैसे medical testing या fraud detection में। यह आकलन करने में मदद करती है कि model negative instances की पहचान कितनी अच्छी तरह करता है। उदाहरण के लिए, यदि कोई model 100 वास्तविक negative instances में से 90 की सही पहचान करता है, तो specificity 0.9 (90%) होगी।
 
 ### Matthews Correlation Coefficient (MCC)
-Matthews Correlation Coefficient (MCC) द्विआधारी वर्गीकरण की गुणवत्ता का एक माप है। यह सही और गलत सकारात्मक और नकारात्मक को ध्यान में रखता है, मॉडल के प्रदर्शन का संतुलित दृश्य प्रदान करता है। MCC की गणना इस प्रकार की जाती है:
+Matthews Correlation Coefficient (MCC) binary classifications की गुणवत्ता का एक माप है। यह true और false positives तथा negatives को ध्यान में रखता है और model के performance का संतुलित दृष्टिकोण प्रदान करता है। MCC की गणना इस प्रकार की जाती है:
 ```plaintext
 MCC = (TP * TN - FP * FN) / sqrt((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN))
 ```
 जहाँ:
-- **TP**: सही सकारात्मक
-- **TN**: सही नकारात्मक
-- **FP**: गलत सकारात्मक
-- **FN**: गलत नकारात्मक
+- **TP**: True Positives
+- **TN**: True Negatives
+- **FP**: False Positives
+- **FN**: False Negatives
 
 > [!TIP]
-> MCC -1 से 1 के बीच होता है, जहाँ 1 पूर्ण वर्गीकरण को दर्शाता है, 0 यादृच्छिक अनुमान को दर्शाता है, और -1 भविष्यवाणी और अवलोकन के बीच कुल असहमति को दर्शाता है। यह असंतुलित डेटा सेट के लिए विशेष रूप से उपयोगी है, क्योंकि यह चारों भ्रम मैट्रिक्स घटकों पर विचार करता है।
+> MCC -1 से 1 तक होता है, जहाँ 1 perfect classification को दर्शाता है, 0 random guessing को दर्शाता है, और -1 prediction तथा observation के बीच total disagreement को दर्शाता है। यह imbalanced datasets के लिए विशेष रूप से उपयोगी है, क्योंकि इसमें confusion matrix के सभी चार components को ध्यान में रखा जाता है।
 
-### औसत निरपेक्ष त्रुटि (MAE)
-औसत निरपेक्ष त्रुटि (MAE) एक प्रतिगमन मीट्रिक है जो पूर्वानुमानित और वास्तविक मानों के बीच औसत निरपेक्ष अंतर को मापता है। इसे इस प्रकार गणना की जाती है:
+### Mean Absolute Error (MAE)
+Mean Absolute Error (MAE) एक regression metric है, जो predicted और actual values के बीच average absolute difference को मापता है। इसकी गणना इस प्रकार की जाती है:
 ```plaintext
 MAE = (1/n) * Σ|y_i - ŷ_i|
 ```
 जहाँ:
-- **n**: उदाहरणों की संख्या
-- **y_i**: उदाहरण i के लिए वास्तविक मान
-- **ŷ_i**: उदाहरण i के लिए पूर्वानुमानित मान
+- **n**: instances की संख्या
+- **y_i**: instance i का वास्तविक मान
+- **ŷ_i**: instance i के लिए predicted मान
 
 > [!TIP]
-> MAE पूर्वानुमानों में औसत त्रुटि की सीधी व्याख्या प्रदान करता है, जिससे इसे समझना आसान होता है। यह Mean Squared Error (MSE) जैसे अन्य मेट्रिक्स की तुलना में आउटलेयर के प्रति कम संवेदनशील है। उदाहरण के लिए, यदि किसी मॉडल का MAE 5 है, तो इसका मतलब है कि, औसतन, मॉडल के पूर्वानुमान वास्तविक मानों से 5 इकाइयों का विचलन करते हैं।
+> MAE predictions में औसत error की सीधी व्याख्या प्रदान करता है, जिससे इसे समझना आसान होता है। यह Mean Squared Error (MSE) जैसे अन्य metrics की तुलना में outliers के प्रति कम sensitive होता है। उदाहरण के लिए, यदि किसी model का MAE 5 है, तो इसका अर्थ है कि model की predictions, औसतन, वास्तविक values से 5 units तक अलग होती हैं।
 
-### भ्रम मैट्रिक्स
+### Confusion Matrix
 
-भ्रम मैट्रिक्स एक तालिका है जो वर्गीकरण मॉडल के प्रदर्शन का सारांश प्रस्तुत करती है, जिसमें सही सकारात्मक, सही नकारात्मक, गलत सकारात्मक, और गलत नकारात्मक पूर्वानुमानों की गणना दिखाई जाती है। यह प्रत्येक वर्ग पर मॉडल के प्रदर्शन का विस्तृत दृश्य प्रदान करती है।
+Confusion matrix एक table है जो true positive, true negative, false positive और false negative predictions की counts दिखाकर classification model के performance का सारांश प्रस्तुत करती है। यह प्रत्येक class पर model के performance का विस्तृत view प्रदान करती है।
 
-|               | पूर्वानुमानित सकारात्मक | पूर्वानुमानित नकारात्मक |
+|               | Predicted Positive | Predicted Negative |
 |---------------|---------------------|---------------------|
-| वास्तविक सकारात्मक| सही सकारात्मक (TP)  | गलत नकारात्मक (FN)  |
-| वास्तविक नकारात्मक| गलत सकारात्मक (FP) | सही नकारात्मक (TN)   |
+| Actual Positive| True Positive (TP)  | False Negative (FN)  |
+| Actual Negative| False Positive (FP) | True Negative (TN)   |
 
-- **सही सकारात्मक (TP)**: मॉडल ने सकारात्मक वर्ग का सही पूर्वानुमान किया।
-- **सही नकारात्मक (TN)**: मॉडल ने नकारात्मक वर्ग का सही पूर्वानुमान किया।
-- **गलत सकारात्मक (FP)**: मॉडल ने सकारात्मक वर्ग का गलत पूर्वानुमान किया (प्रकार I त्रुटि)।
-- **गलत नकारात्मक (FN)**: मॉडल ने नकारात्मक वर्ग का गलत पूर्वानुमान किया (प्रकार II त्रुटि)।
+- **True Positive (TP)**: Model ने positive class की सही prediction की।
+- **True Negative (TN)**: Model ने negative class की सही prediction की।
+- **False Positive (FP)**: Model ने positive class की गलत prediction की (Type I error)।
+- **False Negative (FN)**: Model ने negative class की गलत prediction की (Type II error)।
 
-भ्रम मैट्रिक्स का उपयोग विभिन्न मूल्यांकन मेट्रिक्स, जैसे सटीकता, सटीकता, पुनः प्राप्ति, और F1 स्कोर की गणना के लिए किया जा सकता है।
+Confusion matrix का उपयोग accuracy, precision, recall और F1 score जैसे evaluation metrics की गणना करने के लिए किया जा सकता है।
 
+## References
+
+- [1] [scikit-learn - Data का preprocessing](https://scikit-learn.org/stable/modules/preprocessing.html)
+- [2] [scikit-learn - Missing values का imputation](https://scikit-learn.org/stable/modules/impute.html)
+- [3] [scikit-learn - Cross-validation: estimator performance का evaluation](https://scikit-learn.org/stable/modules/cross_validation.html)
+- [4] [scikit-learn - Metrics और scoring](https://scikit-learn.org/stable/modules/model_evaluation.html)
 {{#include ../banners/hacktricks-training.md}}

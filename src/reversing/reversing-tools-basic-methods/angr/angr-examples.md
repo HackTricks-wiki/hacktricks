@@ -3,11 +3,11 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> यदि program **stdin से एक साथ कई values प्राप्त करने** के लिए `scanf` का उपयोग कर रहा है, तो आपको ऐसी state generate करनी होगी जो **`scanf`** के बाद से शुरू हो।
+> यदि program stdin से **एक साथ कई values प्राप्त करने के लिए** `scanf` का उपयोग कर रहा है, तो आपको ऐसा state generate करना होगा जो **`scanf`** के बाद शुरू हो।
 
 Codes [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup> से लिए गए हैं।
 
-### address तक पहुँचने के लिए Input (address दर्शाते हुए)
+### address तक पहुँचने के लिए input (address दर्शाते हुए)
 ```python
 import angr
 import sys
@@ -40,7 +40,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### address तक पहुंचने के लिए Input (prints को दर्शाते हुए)
+### पते तक पहुंचने के लिए इनपुट (प्रिंट दर्शाते हुए)
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -75,7 +75,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Registry values
+### Registry मान
 ```python
 # Angr doesn't currently support reading multiple things with scanf (Ex:
 # scanf("%u %u).) You will have to tell the simulation engine to begin the
@@ -104,7 +104,7 @@ password1 = claripy.BVS('password1', password1_size_in_bits)
 password2_size_in_bits = 32  # :integer
 password2 = claripy.BVS('password2', password2_size_in_bits)
 
-# Relate it Vectors with the registriy values you are interested in to reach an address
+# Relate its vectors to the register values needed to reach an address
 initial_state.regs.eax = password0
 initial_state.regs.ebx = password1
 initial_state.regs.edx = password2
@@ -201,9 +201,9 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-इस scenario में input `scanf("%u %u")` के साथ लिया गया था और `"1 1"` value दी गई थी, इसलिए stack की **`0x00000001`** values **user input** से आती हैं। आप देख सकते हैं कि ये values `$ebp - 8` से शुरू होती हैं। इसलिए, code में हमने **`$esp` से 8 bytes घटाए हैं (क्योंकि उस समय `$ebp` और `$esp` की value समान थी)** और फिर हमने BVS को push किया है।
+इस scenario में, input `scanf("%u %u")` के साथ लिया गया था और `"1 1"` value दी गई थी, इसलिए stack के **`0x00000001`** values **user input** से आते हैं। आप देख सकते हैं कि ये values `$ebp - 8` से शुरू होती हैं। इसलिए, code में हमने `$esp` से **8 bytes घटाए** (क्योंकि उस moment पर `$ebp` और `$esp` का value समान था) और फिर हमने BVS को push किया।
 
-![Stack में bit vectors रखें, ताकि पता चल सके कि program flow तक पहुँचने के लिए उस stack position की value क्या होनी चाहिए: इस scenario में, input scanf("%u %u") के साथ लिया गया था और value "1...](<../../../images/image (136).png>)
+![Stack में bit vectors डालकर यह पता लगाएँ कि किस stack position को - करना है ताकि program flow तक पहुँचा जा सके: इस scenario में, input scanf("%u %u") के साथ लिया गया था और value "1...](<../../../images/image (136).png>)
 
 ### Static Memory values (Global variables)
 ```python
@@ -215,7 +215,7 @@ def main(argv):
 path_to_binary = argv[1]
 project = angr.Project(path_to_binary)
 
-#Get an address after the scanf. Once the input has already being saved in the memory positions
+# Get an address after scanf, once the input has been saved in memory
 start_address = 0x8048606
 initial_state = project.factory.blank_state(addr=start_address)
 
@@ -337,7 +337,7 @@ def main(argv):
 path_to_binary = argv[1]
 project = angr.Project(path_to_binary)
 
-# Get an address just before opening the file with th simbolic content
+# Get an address just before opening the file with the symbolic content
 # Or at least when the file is not going to suffer more changes before being read
 start_address = 0x80488db
 initial_state = project.factory.blank_state(addr=start_address)
@@ -347,10 +347,10 @@ initial_state = project.factory.blank_state(addr=start_address)
 filename = 'WCEXPXBW.txt'
 symbolic_file_size_bytes = 64
 
-# Create a BV which is going to be the content of the simbolic file
+# Create a bit-vector that will hold the symbolic file content
 password = claripy.BVS('password', symbolic_file_size_bytes * 8)
 
-# Create the file simulation with the simbolic content
+# Create the simulated file with symbolic content
 password_file = angr.storage.SimFile(filename, content=password)
 
 # Add the symbolic file we created to the symbolic filesystem.
@@ -407,8 +407,8 @@ main(sys.argv)
 ### Constraints लागू करना
 
 > [!TIP]
-> कभी-कभी 16 characters की लंबाई वाले 2 words को **char by char** (loop) compare करने जैसे सरल human operations **angr** के लिए बहुत **costly** होते हैं, क्योंकि उसे branches को **exponentially** generate करना पड़ता है; हर if के लिए 1 branch generate होती है: `2^16`\
-> इसलिए, **angr से किसी पिछले point पर पहुँचने के लिए कहना** (जहाँ वास्तविक difficult part पहले ही पूरा हो चुका हो) और उन **constraints को manually set करना** अधिक आसान होता है।
+> कभी-कभी 16 अक्षरों वाले 2 words को **char by char** (loop) compare करने जैसे सरल human operations **angr** के लिए बहुत **costly** हो जाते हैं, क्योंकि उसे branches को **exponentially** generate करना पड़ता है। ऐसा इसलिए होता है क्योंकि प्रत्येक `if` के लिए 1 branch generate होती है: `2^16`\
+> इसलिए, **angr से पिछले point पर वापस जाने के लिए कहना** (जहाँ वास्तविक कठिन हिस्सा पहले ही पूरा हो चुका था) और उन **constraints को manually set करना** अधिक आसान होता है।
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -480,14 +480,14 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!CAUTION]
-> कुछ scenarios में आप **veritesting** activate कर सकते हैं, जो similar status को merge करेगा, ताकि बेकार branches को बचाया जा सके और solution खोजा जा सके: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> कुछ scenarios में आप **veritesting** activate कर सकते हैं, जो similar status को merge कर देगा, ताकि बेकार branches को बचाया जा सके और solution खोजा जा सके: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!TIP]
-> इन scenarios में आप एक और काम यह कर सकते हैं कि **function को hook करें और angr को ऐसा कुछ दें जिसे वह** आसानी से समझ सके।
+> इन scenarios में आप एक और काम यह कर सकते हैं कि **function को hook करें और angr को ऐसी जानकारी दें जिसे वह** आसानी से समझ सके।
 
 ### Simulation Managers
 
-कुछ simulation managers दूसरों की तुलना में अधिक उपयोगी हो सकते हैं। पिछले example में समस्या यह थी कि बहुत-सी useful branches create हो गई थीं। यहाँ, **veritesting** technique उन branches को merge करेगी और एक solution खोजेगी।\
+कुछ simulation managers दूसरों की तुलना में अधिक उपयोगी हो सकते हैं। पिछले example में समस्या यह थी कि बहुत सारी उपयोगी branches create हो गई थीं। यहाँ, **veritesting** technique उन branches को merge करेगी और solution खोजेगी।\
 इस simulation manager को इस तरह भी activate किया जा सकता है: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
@@ -526,7 +526,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### किसी function के एक call को Hooking/Bypassing
+### एक function call को Hooking/Bypassing करना
 ```python
 # This level performs the following computations:
 #
@@ -562,7 +562,7 @@ user_input_buffer_address,
 user_input_buffer_length
 )
 
-# Create a simbolic IF that if the loaded string frommemory is the expected
+# Create a symbolic If expression that checks the string loaded from memory
 # return True (1) if not returns False (0) in eax
 check_against_string = 'XKSPZSJKJYQCQXZV'.encode() # :string
 
@@ -807,8 +807,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-## संदर्भ
+## References
 
-- [1] [jakespringer/angr_ctf - GitHub repository](https://github.com/jakespringer/angr_ctf)
-
+- [1] [jakespringer/angr_ctf - GitHub रिपॉज़िटरी](https://github.com/jakespringer/angr_ctf)
 {{#include ../../../banners/hacktricks-training.md}}
