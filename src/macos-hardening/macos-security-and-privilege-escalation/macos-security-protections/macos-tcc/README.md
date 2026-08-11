@@ -4,17 +4,17 @@
 
 ## **Temel Bilgiler**
 
-**TCC (Transparency, Consent, and Control)**, uygulama izinlerini düzenlemeye odaklanan bir güvenlik protokolüdür. Temel görevi **konum servisleri, kişiler, fotoğraflar, mikrofon, kamera, erişilebilirlik ve tam disk erişimi** gibi hassas özellikleri korumaktır. Uygulamalara bu öğelere erişim izni verilmeden önce açık kullanıcı onayı talep ederek TCC, gizliliği ve kullanıcıların verileri üzerindeki kontrolünü artırır.
+**TCC (Transparency, Consent, and Control)**, uygulama izinlerini düzenlemeye odaklanan bir güvenlik protokolüdür. Temel amacı **konum servisleri, kişiler, fotoğraflar, mikrofon, kamera, erişilebilirlik ve tam disk erişimi** gibi hassas özellikleri korumaktır. Uygulama erişimine izin vermeden önce açık kullanıcı onayı gerektirerek TCC, gizliliği ve kullanıcıların verileri üzerindeki kontrolünü artırır.
 
-Kullanıcılar, uygulamalar korunan özelliklere erişim istediğinde TCC ile karşılaşır. Bu durum, kullanıcıların **erişime izin vermesine veya erişimi reddetmesine** olanak tanıyan bir istem aracılığıyla görünür. Ayrıca TCC, kullanıcıların **dosyaları bir uygulamaya sürükleyip bırakması** gibi doğrudan kullanıcı eylemlerini de destekleyerek belirli dosyalara erişim izni verilmesini sağlar ve uygulamaların yalnızca açıkça izin verilen öğelere erişebilmesini garanti eder.
+Uygulamalar korunan özelliklere erişim istediğinde kullanıcılar TCC ile karşılaşır. Bu durum, kullanıcıların **erişimi onaylamasına veya reddetmesine** olanak tanıyan bir istem aracılığıyla görünür. Ayrıca TCC, belirli dosyalara erişim izni vermek için dosyaları **bir uygulamaya sürükleyip bırakma** gibi doğrudan kullanıcı eylemlerini de destekler. Böylece uygulamaların yalnızca açıkça izin verilen verilere erişmesi sağlanır.
 
 ![TCC istemi örneği](https://rainforest.engineering/images/posts/macos-tcc/tcc-prompt.png?1620047855)
 
-**TCC**, `/System/Library/PrivateFrameworks/TCC.framework/Support/tccd` konumunda bulunan **daemon** tarafından yönetilir ve `com.apple.tccd.system` mach servisini kaydeden `/System/Library/LaunchDaemons/com.apple.tccd.system.plist` dosyasında yapılandırılır.
+**TCC**, `/System/Library/PrivateFrameworks/TCC.framework/Support/tccd` konumunda bulunan **daemon** tarafından yönetilir ve `com.apple.tccd.system` mach service'ini kaydeden `/System/Library/LaunchDaemons/com.apple.tccd.system.plist` dosyasında yapılandırılır.
 
-Her oturum açmış kullanıcı için, `/System/Library/LaunchAgents/com.apple.tccd.plist` dosyasında tanımlanan ve `com.apple.tccd` ile `com.apple.usernotifications.delegate.com.apple.tccd` mach servislerini kaydeden bir **kullanıcı kipinde tccd** çalışır.
+Oturum açmış her kullanıcı için `/System/Library/LaunchAgents/com.apple.tccd.plist` tarafından tanımlanan bir **user-mode tccd** çalışır ve `com.apple.tccd` ile `com.apple.usernotifications.delegate.com.apple.tccd` mach service'lerini kaydeder.
 
-Burada system ve kullanıcı olarak çalışan tccd'yi görebilirsiniz:
+Burada system ve user olarak çalışan tccd'yi görebilirsiniz:
 ```bash
 ps -ef | grep tcc
 0   374     1   0 Thu07PM ??         2:01.66 /System/Library/PrivateFrameworks/TCC.framework/Support/tccd system
@@ -24,22 +24,22 @@ ps -ef | grep tcc
 
 ### TCC Veritabanları
 
-İzinler/retler daha sonra bazı TCC veritabanlarında saklanır:
+İzin verme/reddetme bilgileri daha sonra bazı TCC veritabanlarında saklanır:
 
 - Sistem genelindeki veritabanı: **`/Library/Application Support/com.apple.TCC/TCC.db`** .
-- Bu veritabanı **SIP tarafından korunur**, bu nedenle yalnızca bir SIP bypass işlemi buraya yazabilir.
-- Kullanıcı başına tercihler için kullanıcı TCC veritabanı: **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**.
-- Bu veritabanı, yalnızca Full Disk Access gibi yüksek TCC ayrıcalıklarına sahip process'lerin buraya yazabilmesi için korunur (ancak SIP tarafından korunmaz).
+- Bu veritabanı **SIP tarafından korunur**, bu nedenle yalnızca bir SIP bypass işlemi bu veritabanına yazabilir.
+- Kullanıcı başına tercihler için kullanıcı TCC veritabanı: **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** .
+- Bu veritabanı korunur; bu nedenle yalnızca Full Disk Access gibi yüksek TCC ayrıcalıklarına sahip işlemler bu veritabanına yazabilir (ancak SIP tarafından korunmaz).
 
 > [!WARNING]
-> Önceki veritabanları **okuma erişimi açısından da TCC tarafından korunur**. Bu nedenle, bir TCC ayrıcalıklı process'ten erişmediğiniz sürece normal kullanıcı TCC veritabanınızı **okuyamazsınız**.
+> Önceki veritabanları okuma erişimi açısından da **TCC tarafından korunur**. Bu nedenle TCC ayrıcalıklarına sahip bir işlemden erişmediğiniz sürece normal kullanıcı TCC veritabanınızı **okuyamazsınız**.
 >
-> Ancak, bu yüksek ayrıcalıklara sahip bir process'in (**FDA** veya **`kTCCServiceEndpointSecurityClient`** gibi) kullanıcıların TCC veritabanına yazabileceğini unutmayın.
+> Ancak **FDA** veya **`kTCCServiceEndpointSecurityClient`** gibi yüksek ayrıcalıklara sahip bir işlemin kullanıcı TCC veritabanına yazabileceğini unutmayın.
 
-- **Konum servislerine erişmesine** izin verilen client'ları belirtmek için **`/var/db/locationd/clients.plist`** konumunda **üçüncü** bir TCC veritabanı bulunur.
-- SIP tarafından korunan **`/Users/carlospolop/Downloads/REG.db`** dosyası (TCC tarafından okuma erişimine karşı da korunur), tüm **geçerli TCC veritabanlarının** **konumunu** içerir.
-- SIP tarafından korunan **`/Users/carlospolop/Downloads/MDMOverrides.plist`** dosyası (TCC tarafından okuma erişimine karşı da korunur), TCC tarafından verilen daha fazla izin içerir.
-- SIP tarafından korunan **`/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist`** dosyası (herkes tarafından okunabilir), TCC istisnası gerektiren uygulamaların allow list'idir.
+- **Konum servislerine erişmesine** izin verilen istemcileri belirtmek için **`/var/db/locationd/clients.plist`** konumunda **üçüncü** bir TCC veritabanı bulunur.
+- SIP tarafından korunan **`/Users/carlospolop/Downloads/REG.db`** dosyası (okuma erişimi açısından da TCC tarafından korunur), tüm **geçerli TCC veritabanlarının** **konumunu** içerir.
+- SIP tarafından korunan **`/Users/carlospolop/Downloads/MDMOverrides.plist`** dosyası (okuma erişimi açısından da TCC tarafından korunur), daha fazla TCC tarafından verilen izin içerir.
+- SIP tarafından korunan **`/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist`** dosyası (ancak herkes tarafından okunabilir), TCC istisnası gerektiren uygulamaların allow list'idir.
 
 > [!TIP]
 > **iOS** üzerindeki TCC veritabanı **`/private/var/mobile/Library/TCC/TCC.db`** konumundadır.
@@ -54,7 +54,7 @@ ps -ef | grep tcc
 > com.apple.rootless.storage.TCC
 > ```
 >
-> Ancak kullanıcılar, **`tccutil`** command line utility'sini kullanarak kuralları **silebilir veya sorgulayabilir**.
+> Ancak kullanıcılar **kuralları silebilir veya sorgulayabilir**; bunun için **`tccutil`** command line utility'si kullanılabilir.
 
 #### Veritabanlarını sorgulama
 
@@ -102,17 +102,17 @@ sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 {{#endtabs}}
 
 > [!TIP]
-> Her iki veritabanını kontrol ederek bir uygulamanın izin verdiği, reddettiği veya sahip olmadığı izinleri kontrol edebilirsiniz (uygulama bunları isteyecektir).
+> Her iki veritabanını da kontrol ederek bir uygulamanın izin verdiği, engellediği veya sahip olmadığı izinleri görebilirsiniz (uygulama bu izinleri isteyecektir).
 
 - **`service`**, TCC **permission** dizesinin gösterimidir
-- **`client`**, izinlere sahip **bundle ID** veya **binary** yoludur
-- **`client_type`**, bunun bir Bundle Identifier(0) mı yoksa mutlak bir yol(1) mu olduğunu belirtir
+- **`client`**, izinlere sahip **bundle ID** veya **binary yolu**dur
+- **`client_type`**, bunun bir Bundle Identifier(0) mı yoksa mutlak yol(1) mu olduğunu belirtir
 
 <details>
 
-<summary>Mutlak bir yol ise nasıl çalıştırılır</summary>
+<summary>Mutlak yol ise nasıl çalıştırılır</summary>
 
-Şu komutu çalıştırmanız yeterlidir: **`launctl load you_bin.plist`**; örneğin aşağıdaki gibi bir plist ile:
+Plist dosyası şu şekilde olacak biçimde **`launctl load you_bin.plist`** komutunu çalıştırmanız yeterlidir:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -149,9 +149,7 @@ sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 </dict>
 </plist>
 ```
-</details>
-
-- **`auth_value`** farklı değerler alabilir: denied(0), unknown(1), allowed(2) veya limited(3).
+- **`auth_value`** farklı değerlere sahip olabilir: denied(0), unknown(1), allowed(2) veya limited(3).
 - **`auth_reason`** şu değerleri alabilir: Error(1), User Consent(2), User Set(3), System Set(4), Service Policy(5), MDM Policy(6), Override Policy(7), Missing usage string(8), Prompt Timeout(9), Preflight Unknown(10), Entitled(11), App Type Policy(12)
 - **csreq** alanı, çalıştırılacak binary'nin nasıl doğrulanacağını ve TCC izinlerinin nasıl verileceğini belirtir:
 ```bash
@@ -169,9 +167,9 @@ echo "$REQ_STR" | csreq -r- -b /tmp/csreq.bin
 REQ_HEX=$(xxd -p /tmp/csreq.bin  | tr -d '\n')
 echo "X'$REQ_HEX'"
 ```
-- **tablonun diğer alanları** hakkında daha fazla bilgi için [**bu blog gönderisine göz atın**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive).<sup>[[1]](#references)</sup>
+- Tablonun **diğer alanları** hakkında daha fazla bilgi için [**bu blog gönderisine göz atın**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive).<sup>[[1]](#references)</sup>
 
-Ayrıca `System Preferences --> Security & Privacy --> Privacy --> Files and Folders` bölümünde uygulamalara **önceden verilmiş izinleri** kontrol edebilirsiniz.
+Ayrıca `System Preferences --> Security & Privacy --> Privacy --> Files and Folders` bölümünden uygulamalara **zaten verilmiş izinleri** kontrol edebilirsiniz.
 
 > [!TIP]
 > Kullanıcılar **`tccutil`** kullanarak **kuralları silebilir veya sorgulayabilir**.
@@ -186,7 +184,7 @@ tccutil reset All
 ```
 ### TCC İmza Kontrolleri
 
-TCC **veritabanı** uygulamanın **Bundle ID**'sini depolar, ancak izni kullanmayı isteyen **App**'in doğru uygulama olduğundan **emin olmak** için **imza** hakkında da **bilgi** **depolar**.
+TCC **database**, uygulamanın **Bundle ID** bilgisini depolar; ancak izni kullanmak isteyen App'in doğru uygulama olduğundan **emin olmak** için **signature** hakkında **bilgi** de **depolar**.
 ```bash
 # From sqlite
 sqlite> select service, client, hex(csreq) from access where auth_value=2;
@@ -201,18 +199,18 @@ csreq -t -r /tmp/telegram_csreq.bin
 > [!WARNING]
 > Bu nedenle, aynı adı ve bundle ID'yi kullanan diğer uygulamalar, diğer uygulamalara verilen izinlere erişemeyecektir.
 
-### Entitlements & TCC Permissions
+### Entitlements & TCC İzinleri
 
-Uygulamaların bazı kaynaklar için yalnızca **request** göndermesi ve **granted access** alması yeterli değildir; aynı zamanda **ilgili entitlements** değerlerine de **sahip olmaları** gerekir.\
-Örneğin **Telegram**, **kameraya erişim** istemek için `com.apple.security.device.camera` entitlement değerine sahiptir. Bu **entitlement** değerine **sahip olmayan** bir **app**, kameraya erişemez (kullanıcıdan izin istenmesi de mümkün olmaz).
+Uygulamaların bazı kaynaklar için yalnızca **request** göndermesi ve **access** izni almış olması yeterli değildir; aynı zamanda ilgili **entitlements** değerlerine de **sahip olmaları** gerekir.\
+Örneğin **Telegram**, **kameraya erişim** istemek için `com.apple.security.device.camera` entitlement'ına sahiptir. Bu **entitlement** değerine **sahip olmayan** bir **app**, kameraya erişemez (kullanıcıdan izin istenmesi bile söz konusu olmaz).
 
-Entitlements değerlerinin plist dosyaları olduğunu ve code sig'in parçası olarak yer aldığını, ayrıca özel slot'lar aracılığıyla code sig içinde hash'lendiğini unutmayın. Bu değerler kernel'de kernel code tarafından veya user model code tarafından `csops(#169)` ya da `csops_audittoken(#170)` kullanılarak sorgulanabilir.
+Entitlements değerlerinin plist dosyaları olduğunu ve code sig'in parçası olarak özel slot'lar aracılığıyla code sig içinde ayrıca hash'lendiğini unutmayın; bu değerler kernel tarafından kernel code kullanılarak veya user model code tarafından `csops(#169)` ya da `csops_audittoken(#170)` kullanılarak sorgulanabilir.
 
-Bununla birlikte, uygulamaların `~/Desktop`, `~/Downloads` ve `~/Documents` gibi **belirli kullanıcı klasörlerine erişmesi** için herhangi bir özel **entitlements** değerine sahip olması gerekmez. Sistem, erişimi şeffaf bir şekilde yönetir ve gerektiğinde **kullanıcıdan izin ister**.
+Ancak uygulamaların `~/Desktop`, `~/Downloads` ve `~/Documents` gibi **belirli kullanıcı klasörlerine erişmek** için herhangi bir özel **entitlement** değerine sahip olması gerekmez. Sistem, erişimi şeffaf bir şekilde yönetir ve gerektiğinde **kullanıcıdan izin ister**.
 
 - [https://newosxbook.com/ent.php](https://newosxbook.com/ent.php)
 
-Apple'ın uygulamaları **prompt oluşturmaz**. **Entitlements** listelerinde **önceden verilmiş haklar** bulunur; bu nedenle **hiçbir zaman popup oluşturmazlar** ve **TCC databases** içinde de görünmezler. Örneğin:
+Apple'ın uygulamaları **prompt oluşturmaz**. **Entitlements** listelerinde **önceden verilmiş haklar** bulunur; bu nedenle **hiçbir zaman popup oluşturmazlar** ve **TCC veritabanlarının hiçbirinde görünmezler**. Örneğin:
 ```bash
 codesign -dv --entitlements :- /System/Applications/Calendar.app
 [...]
@@ -223,22 +221,22 @@ codesign -dv --entitlements :- /System/Applications/Calendar.app
 <string>kTCCServiceAddressBook</string>
 </array>
 ```
-Bu, Calendar'ın kullanıcıdan reminders, calendar ve address book'a erişim istemesini önler.
+Bu, Calendar'ın kullanıcıdan reminders, calendar ve address book erişimi istemesini önleyecektir.
 
 > [!TIP]
-> Entitlements hakkında bazı resmi dokümanların yanı sıra, [**https://newosxbook.com/ent.jl**](https://newosxbook.com/ent.jl) adresinde entitlements hakkında resmi olmayan **ilginç bilgiler** de bulmak mümkündür.
+> Entitlements hakkında bazı resmi dokümantasyonların yanı sıra, [**https://newosxbook.com/ent.jl**](https://newosxbook.com/ent.jl) adresinde **entitlements hakkında resmi olmayan ilginç bilgiler** bulmak da mümkündür.
 
-Bazı TCC izinleri şunlardır: kTCCServiceAppleEvents, kTCCServiceCalendar, kTCCServicePhotos... Bunların tümünü tanımlayan herkese açık bir liste yoktur; ancak [**bilinenlerin listesine**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive#service) bakabilirsiniz.<sup>[[1]](#references)</sup>
+Bazı TCC izinleri şunlardır: kTCCServiceAppleEvents, kTCCServiceCalendar, kTCCServicePhotos... Bunların tamamını tanımlayan herkese açık bir liste yoktur, ancak [**bilinenlerin listesini**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive#service) kontrol edebilirsiniz.<sup>[[1]](#references)</sup>
 
 ### Hassas, korunmayan konumlar
 
 - $HOME (kendisi)
-- $HOME/.ssh, $HOME/.aws vb.
+- $HOME/.ssh, $HOME/.aws, vb.
 - /tmp
 
 ### User Intent / com.apple.macl
 
-Daha önce belirtildiği gibi, bir dosyayı **sürükleyip\&bırakarak bir App'e dosyaya erişim izni vermek** mümkündür. Bu erişim herhangi bir TCC veritabanında belirtilmez; bunun yerine dosyanın **extended** **attribute**'u olarak saklanır. Bu attribute, izin verilen App'in **UUID'sini** depolar:<sup>[[2]](#references)</sup>
+Daha önce belirtildiği gibi, bir dosyayı bir App'e **sürükleyip bırakarak** App'e **erişim izni vermek** mümkündür. Bu erişim herhangi bir TCC veritabanında belirtilmez; bunun yerine dosyanın **extended** **attribute**'u olarak tutulur. Bu attribute, izin verilen App'in **UUID'sini depolar**:<sup>[[2]](#references)</sup>
 ```bash
 xattr Desktop/private.txt
 com.apple.macl
@@ -256,27 +254,27 @@ uuid 769FD8F1-90E0-3206-808C-A8947BEBD6C3
 > [!TIP]
 > **`com.apple.macl`** özniteliğinin tccd tarafından değil, **Sandbox** tarafından yönetilmesi ilginçtir.
 >
-> Ayrıca, bir bilgisayardaki bir uygulamanın UUID'sine izin veren bir dosyayı başka bir bilgisayara taşırsanız, aynı uygulamanın farklı UID'leri olacağı için bu dosyanın o uygulamaya erişim izni vermeyeceğini unutmayın.
+> Ayrıca, bilgisayarınızdaki bir uygulamanın UUID'sine izin veren bir dosyayı farklı bir bilgisayara taşırsanız, aynı uygulamanın farklı UID'leri olacağından bu dosyanın söz konusu uygulamaya erişim izni vermeyeceğini unutmayın.
 
-`com.apple.macl` genişletilmiş özniteliği, **SIP tarafından korunduğu** için diğer genişletilmiş öznitelikler gibi **temizlenemez**. Ancak [**bu gönderide açıklandığı üzere**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/), dosyayı **zip'leyip**, **silip** ve ardından **unzip'leyerek** devre dışı bırakmak mümkündür.<sup>[[3]](#references)</sup>
-
-
+`com.apple.macl` genişletilmiş özniteliği, **SIP tarafından korunduğu** için diğer genişletilmiş öznitelikler gibi **temizlenemez**. Ancak [**bu gönderide açıklandığı gibi**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/), dosyayı **zipping** ile sıkıştırıp, **silip** ardından **unzipping** ile açarak devre dışı bırakmak mümkündür.<sup>[[3]](#references)</sup>
 
 
 
 
-## XNU Sorumlu Process Mekanizması
 
-macOS/iOS'ta **sorumlu process** mekanizması, **TCC (Transparency, Consent, and Control)** framework'ü ve diğer güvenlik sistemleri tarafından, process alt process zincirleri üzerinden ilerlese bile bir eylemden nihai olarak hangi process'in sorumlu olduğunu takip etmek için kullanılan kritik bir güvenlik özelliğidir.
 
-TCC izinleri kontrol ederken (ör. kamera, mikrofon, konum), isteği yapan doğrudan process'i her zaman kontrol etmez. Bunun yerine **sorumlu process**'i kontrol eder; bu genellikle gerçek istek bir helper process veya daemon'dan gelse bile eylemi başlatan GUI uygulamasıdır.
+## XNU Responsible Process Mechanism
+
+macOS/iOS'ta **responsible process** mekanizması, **TCC (Transparency, Consent, and Control)** framework'ü ve diğer security sistemleri tarafından, child process zincirleri boyunca bile bir eylemden nihai olarak hangi process'in sorumlu olduğunu takip etmek için kullanılan kritik bir security özelliğidir.
+
+TCC izinleri kontrol ederken (ör. camera, microphone, location), isteği yapan immediate process'i her zaman kontrol etmez. Bunun yerine **responsible process**'i kontrol eder; bu genellikle gerçek istek bir helper process veya daemon'dan gelse bile eylemi başlatan GUI application'dır.
 
 <details>
-<summary>Sorumlu Process Nasıl Ayarlanır</summary>
+<summary>Responsible Process Nasıl Ayarlanır</summary>
 
-### Process Yapısı Alanları
+### Process Structure Fields
 
-XNU'daki her process iki önemli UUID tanımlayıcısını korur:
+XNU'daki her process, iki temel UUID identifier'ını korur:
 ```c
 // From bsd/sys/proc_internal.h
 struct proc {
@@ -287,15 +285,15 @@ uint8_t p_responsible_uuid[16];     // UUID of pid responsible for this process
 // ...
 };
 ```
-- **`p_uuid`**: Sürecin kendi UUID'si (Mach-O binary'sindeki `LC_UUID` load command'ından)
-- **`p_responsible_pid`**: Sorumlu sürecin PID'si
-- **`p_responsible_uuid`**: Sorumlu sürecin UUID'si (söz konusu süreç sonlandırıldıktan sonra bile korunur)
+- **`p_uuid`**: Process'in kendi UUID'si (Mach-O binary dosyasının `LC_UUID` load command'ından)
+- **`p_responsible_pid`**: Sorumlu process'in PID'si
+- **`p_responsible_uuid`**: Sorumlu process'in UUID'si (bu process sonlandırıldıktan sonra bile korunur)
 
-### Sorumlu Süreç Nasıl Ayarlanır?
+### Sorumlu Process Nasıl Belirlenir?
 
-1. **Süreç Oluşturma Sırasında (Fork)**
+1. **Process Oluşturma Sırasında (Fork)**
 
-`fork()` veya `posix_spawn()` aracılığıyla yeni bir süreç oluşturulduğunda, sorumlu süreç üst süreçten devralınır (`exec()` syscall'ı mevcut `proc` yapısını yeniden kullandığından bu adım burada tekrarlanmaz):
+`fork()` veya `posix_spawn()` aracılığıyla yeni bir process oluşturulduğunda, sorumlu process parent process'ten devralınır (`exec()` syscall mevcut `proc` yapısını yeniden kullandığından bu adım burada tekrarlanmaz):
 
 **Konum**: `bsd/kern/kern_fork.c:1053`
 ```c
@@ -303,9 +301,9 @@ uint8_t p_responsible_uuid[16];     // UUID of pid responsible for this process
 proc_set_responsible_pid(child_proc, parent_proc->p_responsible_pid);
 ```
 **Temel Noktalar:**
-- Alt süreçler, üst sürecin `p_responsible_pid` değerini **devralır**
+- Alt süreçler, ebeveynin `p_responsible_pid` değerini **devralır**
 - Bu, süreç hiyerarşisi boyunca bir **sorumluluk zinciri** oluşturur
-- Sorumlu süreç genellikle ilk GUI uygulamasını gösterir
+- Sorumlu süreç genellikle orijinal GUI uygulamasını gösterir
 
 2. **Temel İşlev: `proc_set_responsible_pid()`**
 
@@ -330,25 +328,25 @@ return;
 }
 ```
 **Bu işlevin yaptığı:**
-1. Hedef süreçte **sorumlu PID'yi ayarlar**
-2. `proc_find()` kullanarak **sorumlu süreci arar** (referans sayısını artırır)
-3. Sorumlu sürecin `p_uuid` değerindeki **UUID'yi**, hedef sürecin `p_responsible_uuid` alanına kopyalar
-4. `proc_rele()` ile **referansı serbest bırakır** (referans sayısını azaltır)
+1. Hedef process'te **sorumlu PID'yi ayarlar**
+2. `proc_find()` kullanarak **sorumlu process'i arar** (reference count'u artırır)
+3. Sorumlu process'in `p_uuid` değerini hedef process'in `p_responsible_uuid` değerine **kopyalar**
+4. `proc_rele()` ile **reference'ı serbest bırakır** (reference count'u azaltır)
 
 3. **Neden Hem PID hem de UUID Saklanıyor?**
 
-Çift depolama yaklaşımı kritik bir sorunu çözer:
+Çift saklama yaklaşımı kritik bir sorunu çözer:
 
 | Alan | Amaç | Sorun | Çözüm |
 |-------|---------|---------|----------|
-| `p_responsible_pid` | Mevcut sürecin hızlı aranması | Süreç sonlandıktan sonra PID yeniden kullanılabilir | Etkin süreç araması için kullanılır |
-| `p_responsible_uuid` | Kalıcı tanımlama | Süreç sonlandıktan sonra da varlığını sürdürür | Security kontrolleri ve auditing için kullanılır |
+| `p_responsible_pid` | Mevcut process'in hızlı şekilde aranması | Process sonlandıktan sonra PID yeniden kullanılabilir | Aktif process araması için kullanılır |
+| `p_responsible_uuid` | Kalıcı tanımlama | Process sonlandıktan sonra da geçerliliğini korur | Security kontrolleri ve auditing için kullanılır |
 
-**Sorun**: Sorumlu süreç child süreçten önce sonlanırsa PID geri dönüştürülebilir ve tamamen farklı bir sürece atanabilir.
+**Sorun**: Sorumlu process child process'ten önce sonlanırsa PID geri dönüştürülebilir ve tamamen farklı bir process'e atanabilir.
 
-**Çözüm**: UUID değişmezdir ve sorumlu olan belirli binary'yi, süreç sonlandıktan sonra bile benzersiz şekilde tanımlar.
+**Çözüm**: UUID değişmezdir ve sorumlu olan belirli binary'yi, process sonlandıktan sonra bile benzersiz şekilde tanımlar.
 
-### Süreç Oluşturma Akışı
+### Process Creation Flow
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ Parent Process (e.g., Safari)                               │
@@ -389,7 +387,7 @@ return;
 ```
 ### UUID Kaynağı: LC_UUID Load Command
 
-`p_uuid` içinde depolanan UUID, **Mach-O yürütülebilir dosyasının `LC_UUID` load command'ından** gelir:
+`p_uuid` içinde depolanan UUID, **Mach-O executable'ın `LC_UUID` load command'ından** gelir:
 
 1. **Derleme Zamanı**
 ```bash
@@ -414,14 +412,14 @@ memcpy(&result->uuid[0], &uulp->uuid[0], sizeof(result->uuid));
 return LOAD_SUCCESS;
 }
 ```
-3. **Process Structure İçinde Saklanır**
+3. **Process Structure İçinde Depolanır**
 
 **Konum**: `bsd/kern/kern_exec.c:2281`
 ```c
 // After loading the Mach-O binary during exec()
 proc_setexecutableuuid(p, &load_result.uuid[0]);
 ```
-**Konum**: `bsd/kern/kern_proc.c:1912-1915`
+**Location**: `bsd/kern/kern_proc.c:1912-1915`
 ```c
 void
 proc_setexecutableuuid(proc_t p, const unsigned char *uuid)
@@ -432,11 +430,11 @@ memcpy(p->p_uuid, uuid, sizeof(p->p_uuid));
 </details>
 
 
-## TCC Privesc ve Bypass'ler
+## TCC Privesc & Bypasses
 
 ### TCC'ye Ekleme
 
-Bir noktada bir TCC veritabanı üzerinde yazma erişimi elde etmeyi başarırsanız, bir giriş eklemek için aşağıdakine benzer bir şey kullanabilirsiniz (yorumları kaldırın):
+Herhangi bir noktada bir TCC veritabanı üzerinde yazma erişimi elde ederseniz, bir kayıt eklemek için aşağıdaki gibi bir şey kullanabilirsiniz (yorumları kaldırın):
 
 <details>
 
@@ -484,7 +482,7 @@ strftime('%s', 'now') -- last_reminded with default current timestamp
 
 ### TCC Payloads
 
-Bir uygulamanın içine bazı TCC izinleriyle girmeyi başardıysanız, bunları abuse etmek için TCC payloads içeren aşağıdaki sayfaya bakın:
+Bir uygulamanın içine bazı TCC izinleriyle girmeyi başardıysanız, bunları abuse etmek için TCC payload'larını içeren aşağıdaki sayfayı inceleyin:
 
 
 {{#ref}}
@@ -493,7 +491,7 @@ macos-tcc-payloads.md
 
 ### Apple Events
 
-Apple Events hakkında şunlardan bilgi edinin:
+Apple Events hakkında şunları öğrenin:
 
 
 {{#ref}}
@@ -503,9 +501,9 @@ macos-apple-events.md
 ### Automation (Finder) to FDA\*
 
 Automation izninin TCC adı: **`kTCCServiceAppleEvents`**\
-Bu özel TCC izni, TCC veritabanında **yönetilebilecek uygulamayı** da belirtir (bu nedenle izin, her şeyi yönetmeye izin vermez).
+Bu özel TCC izni, TCC veritabanı içinde **yönetilebilecek uygulamayı** da belirtir (dolayısıyla izin yalnızca her şeyi yönetmeye izin vermez).
 
-**Finder**, **her zaman FDA'ya sahip** bir uygulamadır (UI'da görünmese bile); bu nedenle üzerinde **Automation** ayrıcalıklarına sahipseniz, ayrıcalıklarını abuse ederek **bazı işlemleri gerçekleştirmesini sağlayabilirsiniz**.\
+**Finder**, **her zaman FDA'ya sahip olan** bir uygulamadır (UI'da görünmese bile); bu nedenle üzerinde **Automation** ayrıcalıklarına sahipseniz, ayrıcalıklarını abuse ederek **bazı işlemleri gerçekleştirmesini sağlayabilirsiniz**.\
 Bu durumda uygulamanızın **`com.apple.Finder`** üzerinde **`kTCCServiceAppleEvents`** iznine sahip olması gerekir.<sup>[[4]](#references)</sup>
 
 {{#tabs}}
@@ -536,23 +534,23 @@ EOD
 {{#endtab}}
 {{#endtabs}}
 
-Bunu kötüye kullanarak **kendi kullanıcı TCC veritabanınızı yazabilirsiniz**.
+Bunu **kendi kullanıcı TCC veritabanınızı yazmak** için kötüye kullanabilirsiniz.
 
 > [!WARNING]
-> Bu izinle **Finder'dan TCC tarafından kısıtlanmış klasörlere erişmesini istemeniz** ve dosyaları size vermesini sağlamanız mümkün olur; ancak afaik, **Finder'ın FDA erişimini tamamen kötüye kullanmak için keyfi kod çalıştırmasını sağlayamazsınız**.
+> Bu izinle **Finder'dan TCC tarafından kısıtlanan klasörlere erişmesini istemeniz** ve dosyaları size vermesini sağlamanız mümkün olur; ancak bildiğim kadarıyla, **FDA erişimini tamamen kötüye kullanmak için Finder'a rastgele kod çalıştırma işlemi yaptıramazsınız**.
 >
-> Bu nedenle, tam FDA yeteneklerini kötüye kullanamazsınız.
+> Bu nedenle, tüm FDA yeteneklerini kötüye kullanamazsınız.
 
-Bu, Finder üzerinde Automation ayrıcalıkları elde etmek için kullanılan TCC istemidir:
+Finder üzerinde Automation ayrıcalıkları elde etmek için kullanılan TCC istemi:
 
 <figure><img src="../../../../images/image (27).png" alt="" width="244"><figcaption></figcaption></figure>
 
 > [!CAUTION]
-> **Automator** uygulamasında **`kTCCServiceAppleEvents`** TCC izni bulunduğundan, Finder gibi **herhangi bir uygulamayı kontrol edebilir**. Dolayısıyla Automator'ı kontrol etme iznine sahip olarak aşağıdaki gibi bir kodla **Finder'ı** da kontrol edebilirsiniz:
+> **Automator** uygulamasının **`kTCCServiceAppleEvents`** TCC iznine sahip olması nedeniyle Finder gibi **herhangi bir uygulamayı kontrol edebildiğini** unutmayın. Bu nedenle Automator'u kontrol etme iznine sahip olarak aşağıdaki gibi bir kodla **Finder'ı da kontrol edebilirsiniz**:
 
 <details>
 
-<summary>Automator içinde bir shell elde etme</summary>
+<summary>Automator içinde bir shell açma</summary>
 ```applescript
 osascript<<EOD
 set theScript to "touch /tmp/something"
@@ -574,11 +572,11 @@ EOD
 ```
 </details>
 
-Aynı durum **Script Editor uygulaması** için de geçerlidir; Finder'ı kontrol edebilir, ancak bir AppleScript kullanarak bir scripti çalıştırmaya zorlayamazsınız.
+Aynı durum **Script Editor app** için de geçerlidir; Finder'ı kontrol edebilir, ancak bir AppleScript kullanarak onu bir script yürütmeye zorlayamazsınız.
 
-### Bazı TCC'lere Automation (SE)
+### Automation (SE) to some TCC
 
-**System Events, Folder Actions oluşturabilir ve Folder Actions bazı TCC klasörlerine (Desktop, Documents ve Downloads) erişebilir;** bu nedenle aşağıdaki gibi bir script bu davranışı kötüye kullanmak için kullanılabilir:
+**System Events Folder Actions oluşturabilir ve Folder Actions bazı TCC klasörlerine erişebilir** (Desktop, Documents & Downloads); bu nedenle aşağıdaki gibi bir script bu davranışı abuse etmek için kullanılabilir:
 ```bash
 # Create script to execute with the action
 cat > "/tmp/script.js" <<EOD
@@ -622,9 +620,9 @@ rm "$HOME/Desktop/file"
 ```
 ### Automation (SE) + Accessibility (**`kTCCServicePostEvent`|**`kTCCServiceAccessibility`**)** to FDA\*
 
-Automation on **`System Events`** + Accessibility (**`kTCCServicePostEvent`**) işlemleri **process**'lere tuş vuruşları göndermeye olanak tanır. Bu şekilde Finder'ı kötüye kullanarak kullanıcının TCC.db dosyasını değiştirebilir veya rastgele bir app'e FDA verebilirsiniz (ancak bunun için parola istenebilir).
+**`System Events`** üzerindeki Automation + Accessibility (**`kTCCServicePostEvent`**), **process'lere keystroke** gönderilmesine olanak tanır. Bu şekilde Finder'ı kötüye kullanarak kullanıcının TCC.db dosyasını değiştirebilir veya rastgele bir uygulamaya FDA verebilirsiniz (ancak bunun için parola istenebilir).
 
-Finder'ın kullanıcının TCC.db dosyasının üzerine yazması örneği:
+Finder'ın kullanıcı TCC.db dosyasının üzerine yazmasına örnek:
 ```applescript
 -- store the TCC.db file to copy in /tmp
 osascript <<EOF
@@ -670,41 +668,41 @@ keystroke "v" using {command down}
 end tell
 EOF
 ```
-### `kTCCServiceAccessibility` to FDA\*
+### `kTCCServiceAccessibility`'den FDA\*
 
-Bazı [**Accessibility permissions** izinlerini kötüye kullanarak](macos-tcc-payloads.md#accessibility) privesc ile FDA\* elde etmek veya örneğin keylogger çalıştırmak için [**payloads**](macos-tcc-payloads.md#accessibility) içeren bu sayfaya bakın.
+Accessibility permissions'ı abuse ederek FDA\*'ye privesc yapmak veya örneğin bir keylogger çalıştırmak için bazı [**payloads**](macos-tcc-payloads.md#accessibility) görmek üzere bu sayfayı kontrol edin.
 
-### **Endpoint Security Client to FDA**
+### **Endpoint Security Client'tan FDA'ya**
 
-**`kTCCServiceEndpointSecurityClient`** değerine sahipseniz FDA'ya sahipsiniz. Bitti.
+**`kTCCServiceEndpointSecurityClient`** sahibiyseniz, FDA'ya sahipsiniz. Bitti.
 
-### System Policy SysAdmin File to FDA
+### System Policy SysAdmin File'dan FDA'ya
 
-**`kTCCServiceSystemPolicySysAdminFiles`**, bir kullanıcının **`NFSHomeDirectory`** niteliğini **değiştirmenize** olanak tanır; bu da kullanıcının home folder'ını değiştirir ve dolayısıyla **TCC'yi bypass etmenizi** sağlar.<sup>[[5]](#references)</sup>
+**`kTCCServiceSystemPolicySysAdminFiles`**, bir kullanıcının **`NFSHomeDirectory`** attribute'unu **değiştirmenize** olanak tanır; bu da kullanıcının home folder'ını değiştirir ve dolayısıyla **TCC'yi bypass etmenizi** sağlar.<sup>[[5]](#references)</sup>
 
-### User TCC DB to FDA
+### User TCC DB'den FDA'ya
 
-**user TCC** database'i üzerinde **write permissions** elde ettiğinizde kendinize **`FDA`** permissions veremezsiniz; bunu yalnızca system database'de bulunan veritabanı verebilir.
+**user TCC** database'i üzerinde **write permissions** elde etmeniz, kendinize **`FDA`** permissions vermenizi sağlamaz; bunu yalnızca system database'de bulunan database verebilir.
 
-Ancak kendinize **`Automation rights to Finder`** verebilir ve FDA\*'ya yükselmek için önceki tekniği kötüye kullanabilirsiniz.
+Ancak kendinize **`Automation rights to Finder`** verebilir ve FDA\*'ya escalate olmak için önceki technique'i abuse edebilirsiniz.
 
-### **FDA to TCC permissions**
+### **FDA'dan TCC permissions'a**
 
-**Full Disk Access**'in TCC name'i **`kTCCServiceSystemPolicyAllFiles`** değeridir.
+**Full Disk Access**'in TCC'deki adı **`kTCCServiceSystemPolicyAllFiles`**'dır.
 
-Bunun gerçek bir privesc olduğunu düşünmüyorum, ancak yararlı bulmanız ihtimaline karşı: FDA'ya sahip bir programı kontrol ediyorsanız **users TCC database'ini değiştirebilir ve kendinize herhangi bir access verebilirsiniz**. Bu, FDA permissions'ınızı kaybetmeniz ihtimaline karşı persistence technique olarak yararlı olabilir.
+Bunun gerçek bir privesc olduğunu düşünmüyorum, ancak yararlı bulmanız ihtimaline karşı: FDA'ya sahip bir programı kontrol ediyorsanız, **users TCC database'ini modify edebilir ve kendinize herhangi bir access verebilirsiniz**. Bu, FDA permissions'ınızı kaybetmeniz ihtimaline karşı bir persistence technique olarak yararlı olabilir.
 
-### **SIP Bypass to TCC Bypass**
+### **SIP Bypass'tan TCC Bypass'a**
 
-system **TCC database**'i **SIP** tarafından korunur; bu nedenle yalnızca **belirtilen entitlements değerlerine sahip process'ler** bunu değiştirebilir. Dolayısıyla bir attacker bir **file** üzerinde **SIP bypass** bulursa (SIP tarafından kısıtlanan bir file'ı değiştirebilirse), şunları yapabilir:
+System **TCC database'i**, **SIP** tarafından korunur; bu nedenle yalnızca **belirtilen entitlements'a sahip process'ler** onu modify edebilir. Bu yüzden bir attacker bir **file** üzerinde **SIP bypass** bulursa (SIP tarafından kısıtlanan bir file'ı modify edebilirse), şunları yapabilir:
 
-- Bir TCC database'in **protection'ını kaldırabilir** ve kendisine tüm TCC permissions'larını verebilir. Örneğin şu file'ların herhangi birini kötüye kullanabilir:
-- TCC systems database
+- **Bir TCC database'inin protection'ını kaldırabilir** ve kendisine tüm TCC permissions'larını verebilir. Örneğin şu file'lardan herhangi birini abuse edebilir:
+- TCC systems database'i
 - REG.db
 - MDMOverrides.plist
 
-Ancak bu **SIP bypass'ı TCC'yi bypass etmek için** kötüye kullanmanın başka bir yolu daha vardır: `/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist` file'ı, TCC exception gerektiren uygulamaların allow list'idir. Bu nedenle bir attacker bu file üzerindeki **SIP protection'ı kaldırabilir** ve **kendi application'ını** ekleyebilirse, application TCC'yi bypass edebilir.\
-Örneğin terminal eklemek için:
+Ancak bu **SIP bypass'ı TCC'yi bypass etmek için** abuse etmenin başka bir seçeneği daha vardır: `/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist` file'ı, TCC exception gerektiren application'ların allow list'idir. Bu nedenle bir attacker bu file üzerindeki **SIP protection'ı kaldırabilir** ve **kendi application'ını** ekleyebilirse, application TCC'yi bypass edebilir.\
+Örneğin terminal'i eklemek için:
 ```bash
 # Get needed info
 codesign -d -r- /System/Applications/Utilities/Terminal.app
@@ -739,12 +737,11 @@ AllowApplicationsList.plist:
 macos-tcc-bypasses/
 {{#endref}}
 
-## Kaynaklar
+## References
 
 - [1] [macOS TCC.db'ye derinlemesine bakış - Rainforest QA Blog](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive)
-- [2] [maclTrack.command - com.apple.macl'ı izlemek için script (brunerd tarafından Gist)](https://gist.githubusercontent.com/brunerd/8bbf9ba66b2a7787e1a6658816f3ad3b/raw/34cabe2751fb487dc7c3de544d1eb4be04701ac5/maclTrack.command)
-- [3] [com.apple.macl'ı izleme ve ele alma](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/)
-- [4] [macOS TCC Kullanıcı Gizliliği Korumalarını Kazara ve Tasarım Yoluyla Bypass Etme](https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/)
+- [2] [maclTrack.command - com.apple.macl'i izlemek için script (brunerd tarafından Gist)](https://gist.githubusercontent.com/brunerd/8bbf9ba66b2a7787e1a6658816f3ad3b/raw/34cabe2751fb487dc7c3de544d1eb4be04701ac5/maclTrack.command)
+- [3] [com.apple.macl'i izleme ve ele alma](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/)
+- [4] [macOS TCC User Privacy Protections'ı kazara ve tasarım gereği bypass etme](https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/)
 - [5] [Ana dizini değiştirme ve TCC'yi bypass etme, diğer adıyla CVE-2020-27937](https://wojciechregula.blog/post/change-home-directory-and-bypass-tcc-aka-cve-2020-27937/)
-
 {{#include ../../../../banners/hacktricks-training.md}}

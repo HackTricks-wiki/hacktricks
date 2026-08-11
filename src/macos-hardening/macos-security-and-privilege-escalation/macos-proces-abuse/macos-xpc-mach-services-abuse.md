@@ -4,12 +4,12 @@
 
 ## Temel Bilgiler
 
-**XPC** (Cross-Process Communication), macOS'taki birincil IPC mekanizmasıdır. Sistem daemon'ları, `launchd` tarafından kaydedilen adlandırılmış portlar olan **Mach services**'leri expose eder; diğer process'ler bu servislere `NSXPCConnection` üzerinden bağlanabilir.<sup>[[1]](#references)</sup>
+**XPC** (Cross-Process Communication), macOS'taki birincil IPC mekanizmasıdır. Sistem daemon'ları, `launchd` tarafından kaydedilen adlandırılmış portlar olan **Mach services**'leri dışa açar; diğer process'ler bunlara `NSXPCConnection` üzerinden bağlanabilir.<sup>[[1]](#references)</sup>
 
-`MachServices` anahtarına sahip her **LaunchDaemon** ve **LaunchAgent** plist'i bir veya daha fazla adlandırılmış Mach portu kaydeder. Bunlar, herhangi bir process'in bağlanmayı deneyebileceği system-wide XPC endpoint'leridir.<sup>[[2]](#references)</sup>
+`MachServices` anahtarına sahip her **LaunchDaemon** ve **LaunchAgent** plist'i, bir veya daha fazla adlandırılmış Mach portu kaydeder. Bunlar, herhangi bir process'in bağlanmayı deneyebileceği sistem genelindeki XPC endpoint'leridir.<sup>[[2]](#references)</sup>
 
 > [!WARNING]
-> XPC Mach services, macOS'taki **en büyük local privilege escalation attack surface**'idir. Son yıllardaki çoğu local root exploit, LaunchDaemon'larda bulunan vulnerable XPC services üzerinden gerçekleşti. Bir root daemon'ında expose edilen her method, potansiyel bir escalation vector'ıdır.
+> XPC Mach services, macOS'taki **en büyük yerel privilege escalation attack surface'idir**. Son yıllardaki çoğu local root exploit'i, LaunchDaemon'larda bulunan güvenlik açığı içeren XPC service'leri üzerinden gerçekleşti. Bir root daemon'unda dışa açılan her method, potansiyel bir escalation vector'üdür.
 
 ### Mimari
 ```
@@ -47,7 +47,7 @@ WHERE e.isDaemon = 1
 ORDER BY e.privileged DESC
 LIMIT 50;"
 ```
-### XPC Arayüzlerini Listeleme
+### XPC Arayüzlerini Numaralandırma
 
 Bir daemon belirledikten sonra XPC arayüzünü reverse-engineer edin:
 ```bash
@@ -60,15 +60,15 @@ class-dump /path/to/daemon | grep -A20 "@protocol"
 # Check for XPC service bundles inside app bundles
 find /Applications -path "*/XPCServices/*.xpc" 2>/dev/null
 ```
-## XPC İstemci Doğrulama Zafiyetleri
+## XPC İstemci Doğrulama Güvenlik Açıkları
 
-XPC services içindeki en yaygın zafiyet sınıfı **yetersiz istemci doğrulaması**dır. Daemon şunları doğrulamalıdır:
+XPC services içindeki en yaygın güvenlik açığı sınıfı **yetersiz istemci doğrulamasıdır**. Daemon şunları doğrulamalıdır:
 
-1. Bağlanan process'in **Code signature**'ı
-2. Bağlanan process'in **Entitlements**'ları
-3. **Audit token** (yeniden kullanılabileceği için PID değil)
+1. Bağlanan process'in **code signature** bilgisi
+2. Bağlanan process'in **entitlements** bilgileri
+3. **Audit token** (yeniden kullanılabildiği için PID değil)
 
-### Vulnerable Pattern: No Verification
+### Güvenlik Açığı İçeren Örüntü: Doğrulama Yok
 ```objc
 // VULNERABLE — daemon accepts any connection
 - (BOOL)listener:(NSXPCListener *)listener
@@ -79,7 +79,7 @@ newConnection.exportedObject = self;
 return YES; // No verification!
 }
 ```
-### Zafiyetli Pattern: PID-Based Verification (Race Condition)
+### Güvenlik Açığı İçeren Örüntü: PID-Based Verification (Race Condition)
 ```objc
 // VULNERABLE — PID can be reused between check and use
 - (BOOL)listener:(NSXPCListener *)listener
@@ -121,7 +121,7 @@ return YES;
 return NO;
 }
 ```
-## Saldırı: Korumasız XPC Services'a Bağlanma
+## Saldırı: Korumasız XPC Services'e Bağlanma
 ```objc
 // Minimal XPC client — connect to a LaunchDaemon's Mach service
 #import <Foundation/Foundation.h>
@@ -157,7 +157,7 @@ NSLog(@"Result: %@", result);
 ```
 ## Attack: XPC Object Deserialization
 
-Karmaşık nesneleri (`NSSecureCoding` uyumlu) kabul eden XPC servisleri **deserialization attacks** karşısında savunmasız olabilir:
+Complex objects (`NSSecureCoding` conformant) kabul eden XPC services, **deserialization attacks**'e karşı vulnerable olabilir:
 ```objc
 // If the daemon accepts NSObject subclasses via XPC:
 // An attacker can send a crafted object that triggers:
@@ -170,7 +170,7 @@ Karmaşık nesneleri (`NSSecureCoding` uyumlu) kabul eden XPC servisleri **deser
 
 ### İstisnalar Sandbox Escape'i Nasıl Etkinleştirir?
 
-Sandboxed uygulamalar normalde yalnızca kendi XPC services'larıyla iletişim kurabilir. Ancak **mach-lookup exceptions**, system-wide services'lara erişilmesini sağlar:
+Sandbox içindeki uygulamalar normalde yalnızca kendi XPC servisleriyle iletişim kurabilir. Ancak **mach-lookup exceptions**, sistem genelindeki servislere erişilmesine olanak tanır:
 ```xml
 <!-- Entitlement granting mach-lookup exception -->
 <key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
@@ -203,11 +203,11 @@ echo "$ents" | grep -B1 -A10 "mach-lookup"
 5. Exploit a daemon bug → code execution outside the sandbox
 6. Escalate from daemon's privilege level (often root)
 ```
-## Privileged Helper Tools (SMJobBless)
+## Ayrıcalıklı Helper Tools (SMJobBless)
 
 ### Nasıl Çalışırlar
 
-`SMJobBless`, launchd aracılığıyla root olarak çalışan ayrıcalıklı bir helper yükler. Helper, XPC üzerinden parent app ile iletişim kurar:
+`SMJobBless`, launchd aracılığıyla root olarak çalışan ayrıcalıklı bir helper yükler. Helper, üst uygulamasıyla XPC üzerinden iletişim kurar:
 ```
 App (user context) ←→ XPC ←→ Helper (root via launchd)
 ```
@@ -273,15 +273,15 @@ class-dump /path/to/daemon
 # 3. Monitor for crashes
 log stream --predicate 'process == "daemon-name" AND (eventMessage CONTAINS "crash" OR eventMessage CONTAINS "fault")'
 ```
-## Gerçek Dünyadaki CVE'ler
+## Gerçek Dünya CVE'leri
 
 | CVE | Açıklama |
 |---|---|
-| CVE-2023-41993 | XPC service deserialization güvenlik açığı |
+| CVE-2023-41993 | XPC service serileştirme açığı |
 | CVE-2022-22616 | XPC service abuse üzerinden Gatekeeper bypass |
 | CVE-2021-30657 | Sysmond XPC privilege escalation |
-| CVE-2020-9839 | system daemon içindeki XPC race condition |
-| CVE-2019-8802 | client verification eksik privileged helper tool |
+| CVE-2020-9839 | System daemon içinde XPC race condition |
+| CVE-2019-8802 | İstemci doğrulaması eksik olan privileged helper tool<sup>[[5]](#references)</sup> |
 | CVE-2023-32369 | Migraine — `systemmigrationd` XPC üzerinden SIP bypass<sup>[[3]](#references)</sup> |
 | CVE-2022-26712 | PackageKit XPC root escalation<sup>[[4]](#references)</sup> |
 
@@ -313,13 +313,11 @@ plutil -p "$plist" | grep -A5 "MachServices" | sed 's/^/    /'
 }
 done
 ```
-## Referanslar
+## References
 
 - [1] [Apple Developer — XPC Services](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingXPCServices.html)
-- [2] [Apple Developer — Daemons and Services Programming Guide](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/Introduction.html)
-- [3] [Yeni macOS güvenlik açığı Migraine, System Integrity Protection'ı atlatabilir — Microsoft Security Blog](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
-- [4] [CVE-2022-26712: SIP-Bypass POC'si Tweet'lenebilir Bile](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/)
-- [5] [Objective-See — XPC Exploitation](https://objective-see.org/blog.html)
-- [6] [OBTS — XPC Attack Surface konuşmaları](https://objectivebythesea.org/)
-
+- [2] [Apple Developer — Daemon'lar ve Services Programming Guide](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/Introduction.html)
+- [3] [Yeni macOS açığı Migraine, System Integrity Protection'ı bypass edebilir — Microsoft Security Blog](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
+- [4] [CVE-2022-26712: SIP-Bypass için POC, Tweet'lenebilir bile](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/)
+- [5] [Objective-See — XPC client validation ve Rootpipe](https://objective-see.org/blog/blog_0x3E.html)
 {{#include ../../../banners/hacktricks-training.md}}

@@ -6,21 +6,21 @@
 
 Bir XPC service'e bağlantı kurulduğunda, server bağlantıya izin verilip verilmediğini kontrol eder. Genellikle gerçekleştireceği kontroller şunlardır:
 
-1. Bağlanan **process'in Apple-signed** bir sertifikayla imzalanıp imzalanmadığını kontrol eder (yalnızca Apple tarafından verilen sertifikalar).
+1. Bağlanan **process'in Apple-signed** bir certificate ile imzalanıp imzalanmadığını kontrol eder (yalnızca Apple tarafından verilir).
 - Bu **doğrulanmazsa**, bir attacker diğer kontrollerle eşleşen **fake certificate** oluşturabilir.
 2. Bağlanan process'in **organization’s certificate** ile imzalanıp imzalanmadığını kontrol eder (team ID verification).
-- Bu **doğrulanmazsa**, Apple tarafından verilen **herhangi bir developer certificate** signing için kullanılabilir ve service'e bağlanılabilir.
-3. Bağlanan process'in **uygun bir bundle ID** içerip içermediğini kontrol eder.
-- Bu **doğrulanmazsa**, **aynı organization tarafından imzalanmış** herhangi bir tool XPC service ile etkileşime geçmek için kullanılabilir.
-4. (4 veya 5) Bağlanan process'in **uygun bir software version number** içerip içermediğini kontrol eder.
-- Bu **doğrulanmazsa,** process injection'a karşı vulnerable olan eski ve insecure client'lar, diğer kontroller mevcut olsa bile XPC service'e bağlanmak için kullanılabilir.
-5. (4 veya 5) Bağlanan process'in dangerous entitlements olmadan hardened runtime kullanıp kullanmadığını kontrol eder (arbitrary library yüklemeye veya DYLD env vars kullanmaya izin verenler gibi).
-1. Bu **doğrulanmazsa,** client **code injection'a karşı vulnerable** olabilir.
+- Bu **doğrulanmazsa**, Apple tarafından verilen **herhangi bir developer certificate** signing için kullanılabilir ve service'e bağlantı kurulabilir.
+3. Bağlanan process'in **proper bundle ID** içerip içermediğini kontrol eder.
+- Bu **doğrulanmazsa**, **aynı org tarafından imzalanmış** herhangi bir tool XPC service ile etkileşim kurmak için kullanılabilir.
+4. (4 veya 5) Bağlanan process'in **proper software version number** değerine sahip olup olmadığını kontrol eder.
+- Bu **doğrulanmazsa**, process injection'a karşı vulnerable olan eski ve insecure bir client, diğer kontroller mevcut olsa bile XPC service'e bağlanmak için kullanılabilir.
+5. (4 veya 5) Bağlanan process'in dangerous entitlements olmadan hardened runtime kullanıp kullanmadığını kontrol eder (arbitrary libraries yüklemeye veya DYLD env vars kullanmaya izin verenler gibi).
+1. Bu **doğrulanmazsa**, client **code injection'a karşı vulnerable** olabilir.
 6. Bağlanan process'in service'e bağlanmasına izin veren bir **entitlement** içerip içermediğini kontrol eder. Bu, Apple binaries için geçerlidir.
-7. **Verification**, process ID'si (**PID**) yerine bağlanan **client’ın audit token'ı** temel alınarak yapılmalıdır; çünkü ilki **PID reuse attacks**'ı önler.
-- Developer'lar **audit token** API call'unu **nadiren kullanır**, çünkü bu API **private**'tır ve Apple bunu herhangi bir zamanda **değiştirebilir**. Ayrıca private API kullanımı Mac App Store uygulamalarında yasaktır.
+7. **verification**, process ID'sine (**PID**) dayanmak **yerine**, bağlanan **client’ın audit token'ı** temel alınarak yapılmalıdır; çünkü ilki **PID reuse attacks**'i önler.
+- Developer'lar **audit token** API call'unu, **private** olduğu için **nadiren kullanır**; dolayısıyla Apple bunu herhangi bir zamanda **değiştirebilir**. Ayrıca private API kullanımı Mac App Store apps için izinli değildir.
 - **`processIdentifier`** method'u kullanılırsa vulnerable olabilir.
-- **`xpc_connection_get_audit_token`** yerine **`xpc_dictionary_get_audit_token`** kullanılmalıdır; çünkü ilki [belirli durumlarda vulnerable olabilir](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/).<sup>[[5]](#references)</sup>
+- **`xpc_connection_get_audit_token`** yerine **`xpc_dictionary_get_audit_token`** kullanılmalıdır; çünkü ikincisi bazı durumlarda [vulnerable olabilir](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/).<sup>[[5]](#references)</sup>
 
 ### Communication Attacks
 
@@ -31,7 +31,7 @@ PID reuse attack hakkında daha fazla bilgi için:
 macos-pid-reuse.md
 {{#endref}}
 
-**`xpc_connection_get_audit_token`** attack hakkında daha fazla bilgi için:
+**`xpc_connection_get_audit_token`** attack check hakkında daha fazla bilgi için:
 
 
 {{#ref}}
@@ -40,20 +40,20 @@ macos-xpc_connection_get_audit_token-attack.md
 
 ### Trustcache - Downgrade Attacks Prevention
 
-Trustcache, Apple Silicon makinelerinde kullanılan ve Apple binaries'lerinin CDHSAH veritabanını depolayan bir defensive method'dur; böylece yalnızca izin verilen, değiştirilmemiş binaries çalıştırılabilir. Bu, downgrade edilmiş version'ların çalıştırılmasını önler.
+Trustcache, Apple Silicon makinelerinde tanıtılan ve Apple binaries'lerinin CDHSAH veritabanını depolayan bir defensive method'dur; böylece yalnızca izin verilen ve modify edilmemiş binaries execute edilebilir. Bu, downgrade edilmiş version'ların execute edilmesini önler.
 
 ### Code Examples
 
-Server, bu **verification** işlemini **`shouldAcceptNewConnection`** adlı bir function içinde gerçekleştirecektir.
+Server bu **verification** işlemini **`shouldAcceptNewConnection`** adlı bir function içinde gerçekleştirir.
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection {
 //Check connection
 return YES;
 }
 ```
-NSXPCConnection nesnesi, **private** bir **`auditToken`** özelliğine (kullanılması gereken ancak değişebilecek olan) ve **public** bir **`processIdentifier`** özelliğine (kullanılmaması gereken) sahiptir.
+`NSXPCConnection` nesnesi, **private** bir **`auditToken`** özelliğine (kullanılması gereken özellik budur, ancak private API değişebilir) ve authentication için kullanılmaması gereken **public** bir **`processIdentifier`** özelliğine sahiptir.
 
-Bağlantı kuran süreç şu şekilde doğrulanabilir:<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+Bağlantı kuran process aşağıdakine benzer bir yöntemle doğrulanabilir:<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 ```objectivec
 [...]
 SecRequirementRef requirementRef = NULL;
@@ -73,7 +73,7 @@ SecCodeCheckValidity(code, kSecCSDefaultFlags, requirementRef);
 SecTaskRef taskRef = SecTaskCreateWithAuditToken(NULL, ((ExtendedNSXPCConnection*)newConnection).auditToken);
 SecTaskValidateForRequirement(taskRef, (__bridge CFStringRef)(requirementString))
 ```
-Bir geliştirici istemcinin sürümünü kontrol etmek istemiyorsa, en azından istemcinin process injection’a karşı savunmasız olmadığını kontrol edebilir:
+Bir developer, client'ın sürümünü kontrol etmek istemiyorsa en azından client'ın process injection'a karşı savunmasız olmadığını kontrol edebilir:
 ```objectivec
 [...]
 CFDictionaryRef csInfo = NULL;
@@ -88,7 +88,7 @@ if ((csFlags & (cs_hard | cs_require_lv)) {
 return Yes; // Accept connection
 }
 ```
-Yukarıdaki `cs_*` sabitleri, XNU'nun `osfmk/kern/cs_blobs.h` dosyasında tanımlanan kod imzalama bayraklarıdır; bu nedenle tahmin edilmek yerine kaynak kodla karşılaştırılarak kontrol edilebilirler:<sup>[[4]](#references)</sup>
+Yukarıdaki `cs_*` sabitleri, XNU'nun `osfmk/kern/cs_blobs.h` dosyasında tanımlanan kod imzalama bayraklarıdır; bu nedenle tahmin edilmek yerine kaynakla karşılaştırılarak kontrol edilebilir:<sup>[[4]](#references)</sup>
 ```c
 #define CS_HARD                     0x00000100  /* don't load invalid pages */
 #define CS_KILL                     0x00000200  /* kill process if it becomes invalid */
@@ -96,12 +96,11 @@ Yukarıdaki `cs_*` sabitleri, XNU'nun `osfmk/kern/cs_blobs.h` dosyasında tanım
 #define CS_REQUIRE_LV               0x00002000  /* require library validation */
 #define CS_RUNTIME                  0x00010000  /* Apply hardened runtime policies */
 ```
-## Referanslar
+## References
 
-- [1] [Apple Developer — Code Signing Requirement Language](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/RequirementLang/RequirementLang.html)
+- [1] [Apple Developer — Kod İmzalama Gereksinimi Dili](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/RequirementLang/RequirementLang.html)
 - [2] [Apple Developer — `SecCodeCheckValidity`](https://developer.apple.com/documentation/security/seccodecheckvalidity(_:_:_:))
 - [3] [Apple Developer — `SecTaskCreateWithAuditToken`](https://developer.apple.com/documentation/security/sectaskcreatewithaudittoken(_:_:))
-- [4] [XNU — `osfmk/kern/cs_blobs.h` (`CS_*` code-signing flags)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
+- [4] [XNU — `osfmk/kern/cs_blobs.h` (`CS_*` kod imzalama bayrakları)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
 - [5] [Sector 7 — XPC audit token spoofing](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
-
 {{#include ../../../../../../banners/hacktricks-training.md}}

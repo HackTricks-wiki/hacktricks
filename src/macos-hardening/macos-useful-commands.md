@@ -2,13 +2,13 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### MacOS Automatic Enumeration Tools
+### macOS Automatic Enumeration Tools
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### Specific MacOS Commands
+### Specific macOS Commands
 ```bash
 #System info
 date
@@ -32,7 +32,7 @@ nettop #Monitor network usage of processes in top style
 system_profiler SPSoftwareDataType #System info
 system_profiler SPPrintersDataType #Printer
 system_profiler SPApplicationsDataType #Installed Apps
-system_profiler SPFrameworksDataType #Instaled framework
+system_profiler SPFrameworksDataType #Installed framework
 system_profiler SPDeveloperToolsDataType #Developer tools info
 system_profiler SPStartupItemDataType #Startup Items
 system_profiler SPNetworkDataType #Network Capabilities
@@ -117,7 +117,7 @@ sudo killall -HUP mDNSResponder
 ```
 ### Hızlı anti-analysis / virtualization kontrolü
 
-Bazı macOS stealers, VM'leri tespit etmek ve sandbox detonation'dan kaçınmak için `system_profiler` çağırarak **belirgin bir exit code (ör. 100)** ile sonlanır<sup>[[1]](#references)</sup>:
+Bazı macOS stealers, VM'leri tespit etmek için `system_profiler` çağırır ve sandbox detonation'ı önlemek amacıyla **belirli bir çıkış koduyla (ör. 100) sonlanır**<sup>[[1]](#references)</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
@@ -125,10 +125,10 @@ fi
 ```
 ### Yüklü Yazılımlar ve Servisler
 
-Yüklü **şüpheli** uygulamaları ve yüklü kaynaklar üzerindeki **yetkileri** kontrol edin:
+Yüklü **şüpheli** uygulamaları ve yüklü kaynaklar üzerindeki **ayrıcalıkları** kontrol edin:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
-system_profiler SPFrameworksDataType #Instaled framework
+system_profiler SPFrameworksDataType #Installed framework
 lsappinfo list #Installed Apps
 launchctl list #Services
 ```
@@ -149,8 +149,7 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
 
-## Referanslar
+## References
 
-- [1] [2025, Infostealer yılı](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
-
+- [1] [2025, Infostealer'ın yılı](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 {{#include ../banners/hacktricks-training.md}}
