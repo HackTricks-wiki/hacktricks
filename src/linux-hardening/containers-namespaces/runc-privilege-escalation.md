@@ -1,5 +1,7 @@
 # RunC Privilege Escalation
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Temel bilgiler
 
 **runc** hakkında daha fazla bilgi edinmek istiyorsanız aşağıdaki sayfaya göz atın:
@@ -10,7 +12,7 @@
 
 ## PE
 
-Host üzerindeki rootful bir process için `runc` mevcutsa, host'un `/` dizinini container içindeki `/` konumuna recursive olarak bind-mount eden bir mount configuration'a sahip bir OCI bundle kullanarak host filesystem'ını bu mount namespace içinde açığa çıkarabilirsiniz.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+Host üzerinde rootful bir process için `runc` kullanılabiliyorsa, container içindeki mount namespace içinde host filesystem'ını açığa çıkaran ve host'un `/` dizinini container içindeki `/` dizinine recursive olarak bind-mount eden bir OCI bundle kullanabilirsiniz.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 ```bash
 runc -help #Get help and see if runc is intalled
 runc spec #This will create the config.json file in your current folder
@@ -35,11 +37,11 @@ mkdir rootfs
 runc run demo
 ```
 > [!CAUTION]
-> Belgelenen `runc run` workflow'u rootful'dur: runc'in kendi örneklerinde bu işlem "run as root" olarak etiketlenir. Ayrıcalıksız bir kullanıcının `runc spec --rootless` gibi rootless bir yapılandırmaya ihtiyacı vardır ve runc, bu mod için user namespaces'in etkinleştirilmesi gerektiğini belirtir.<sup>[[1]](#references)</sup>
+> Belgelenen `runc run` workflow'u rootful'dur: runc'ın kendi örnekleri bunu "root olarak çalıştır" şeklinde belirtir. Yetkisiz bir kullanıcının `runc spec --rootless` gibi rootless bir yapılandırmaya ihtiyacı vardır ve runc, bu mod için user namespaces'in etkinleştirilmesi gerektiğini belirtir.<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [runc: Container'ları başlatmak ve çalıştırmak için CLI tool'u](https://github.com/opencontainers/runc#using-runc)
+- [1] [runc: Container'ları başlatmak ve çalıştırmak için CLI aracı](https://github.com/opencontainers/runc#using-runc)
 - [2] [OCI Runtime Specification: Mounts](https://github.com/opencontainers/runtime-spec/blob/main/config.md#mounts)
 - [3] [Shared Subtrees](https://docs.kernel.org/filesystems/sharedsubtree.html)
 {{#include ../../banners/hacktricks-training.md}}

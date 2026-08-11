@@ -1,16 +1,18 @@
 # DDexec / EverythingExec
 
+{{#include ../../../../banners/hacktricks-training.md}}
+
 ## Bağlam
 
-Linux'ta bir programı çalıştırmak için programın bir dosya olarak mevcut olması ve dosya sistemi hiyerarşisi üzerinden bir şekilde erişilebilir olması gerekir (bu, `execve()` işlevinin çalışma şeklidir). Bu dosya diskte veya RAM'de (tmpfs, memfd) bulunabilir, ancak bir dosya yoluna ihtiyacınız vardır. Bu durum, bir Linux sisteminde neyin çalıştırıldığını kontrol etmeyi, tehditleri ve saldırganın araçlarını tespit etmeyi veya bunların herhangi bir şeyi çalıştırmaya çalışmasını tamamen engellemeyi (_ör._ ayrıcalıksız kullanıcıların herhangi bir yere executable dosyalar yerleştirmesine izin vermemek) oldukça kolaylaştırır.
+Linux'ta bir programı çalıştırmak için programın bir dosya olarak mevcut olması ve dosya sistemi hiyerarşisi üzerinden bir şekilde erişilebilir olması gerekir (bu, `execve()`'nin çalışma şeklidir). Bu dosya diskte veya RAM'de (tmpfs, memfd) bulunabilir, ancak bir dosya yoluna ihtiyacınız vardır. Bu durum, bir Linux sisteminde neyin çalıştırıldığını kontrol etmeyi çok kolaylaştırır; tehditleri ve saldırganların araçlarını tespit etmeyi veya bunların kendilerine ait herhangi bir şeyi çalıştırmaya çalışmasını tamamen engellemeyi kolaylaştırır (_ör._ ayrıcalıksız kullanıcıların herhangi bir yere çalıştırılabilir dosyalar yerleştirmesine izin vermemek).
 
-Ancak bu teknik tüm bunları değiştirmek için burada. İstediğiniz process'i başlatamıyorsanız... **o hâlde zaten mevcut olan bir process'i hijack edersiniz**.
+Ancak bu teknik tüm bunları değiştirmek için burada. İstediğiniz process'i başlatamıyorsanız... **o zaman zaten mevcut olan bir process'i hijack edersiniz**.
 
-Bu teknik, **read-only, noexec, file-name whitelisting ve hash whitelisting gibi yaygın protection technique'lerini bypass etmenizi sağlar**.<sup>[[1]](#references)</sup>
+Bu teknik, **read-only, noexec, dosya adı whitelisting ve hash whitelisting gibi yaygın koruma tekniklerini bypass etmenizi** sağlar.<sup>[[1]](#references)</sup>
 
-## Dependencies
+## Bağımlılıklar
 
-Final script'in çalışması için aşağıdaki tools'a bağlıdır; bu tools'ların saldırdığınız sistemde erişilebilir olması gerekir (varsayılan olarak hepsini her yerde bulabilirsiniz):
+Son script'in çalışması için aşağıdaki araçlara bağlıdır; saldırdığınız sistemde bunlara erişilebilir olması gerekir (varsayılan olarak hepsini her yerde bulabilirsiniz):
 ```
 dd
 bash | zsh | ash (busybox)
@@ -26,42 +28,42 @@ base64
 ```
 ## Teknik
 
-Bir process'in belleğini keyfi olarak değiştirebiliyorsanız onu ele geçirebilirsiniz. Bu, zaten mevcut olan bir process'i hijack etmek ve onu başka bir programla değiştirmek için kullanılabilir. Bunu ya `ptrace()` syscall'ını kullanarak (syscall'ları çalıştırabilme yeteneğine sahip olmanız veya sistemde gdb bulunması gerekir) ya da daha ilginç bir şekilde `/proc/$pid/mem` dosyasına yazarak gerçekleştirebiliriz.<sup>[[1]](#references)</sup>
+Bir process'in belleğini keyfi olarak değiştirebiliyorsanız, onu ele geçirebilirsiniz. Bu, zaten mevcut olan bir process'i hijack etmek ve onu başka bir programla değiştirmek için kullanılabilir. Bunu ya `ptrace()` syscall'ını kullanarak (syscall'ları execute etme yeteneğine sahip olmanız veya sistemde gdb bulunması gerekir) ya da daha ilginç bir şekilde `/proc/$pid/mem` dosyasına yazarak gerçekleştirebiliriz.<sup>[[1]](#references)</sup>
 
-`/proc/$pid/mem` dosyası, bir process'in tüm adres alanının bire bir eşlemesidir (_ör._ x86-64'te `0x0000000000000000` ile `0x7ffffffffffff000` arası). Bu, bu dosyadan `x` offset'inden okuma yapmanın veya bu dosyaya `x` offset'inden yazmanın, sanal adres `x`'teki içeriği okumak veya değiştirmekle aynı olduğu anlamına gelir.
+`/proc/$pid/mem` dosyası, bir process'in tüm address space'inin bire bir eşlemesidir (_örn._ x86-64'te `0x0000000000000000` ile `0x7ffffffffffff000` arası). Bu, bu dosyadan `x` offset'inden okuma veya bu dosyaya `x` offset'ine yazma işleminin, sanal adres `x`'teki içeriği okumak veya değiştirmekle aynı olduğu anlamına gelir.
 
-Şimdi, karşılaşmamız gereken dört temel sorun var:
+Şimdi, karşılaşmamız gereken dört temel problem var:
 
-- Genel olarak yalnızca root ve dosyanın sahibi olan program onu değiştirebilir.
+- Genel olarak yalnızca root ve dosyanın program sahibi onu değiştirebilir.
 - ASLR.
-- Programın adres alanında map edilmemiş bir adresten okumaya veya bu adrese yazmaya çalışırsak bir I/O error alırız.
+- Programın address space'inde map edilmemiş bir adresten okumaya veya bu adrese yazmaya çalışırsak bir I/O hatası alırız.
 
-Bu sorunların, kusursuz olmasalar da işe yarayan çözümleri vardır:
+Bu problemlerin, mükemmel olmasalar da iyi olan çözümleri vardır:
 
-- Çoğu shell interpreter, daha sonra child process'ler tarafından inherit edilecek file descriptor'ların oluşturulmasına izin verir. Write permissions ile shell'in `mem` dosyasını gösteren bir fd oluşturabiliriz... böylece bu fd'yi kullanan child process'ler shell'in belleğini değiştirebilir.
-- ASLR aslında bir sorun bile değildir; process'in adres alanı hakkında bilgi edinmek için shell'in `maps` dosyasını veya procfs içindeki herhangi başka bir dosyayı inceleyebiliriz.
-- Bu nedenle dosya üzerinde `lseek()` yapmamız gerekir. Shell üzerinden bu, infamous `dd` kullanılmadığı sürece yapılamaz.
+- Çoğu shell interpreter, daha sonra child process'ler tarafından inherit edilecek file descriptor'ların oluşturulmasına izin verir. Yazma izinleriyle shell'in `mem` dosyasını gösteren bir fd oluşturabiliriz... böylece bu fd'yi kullanan child process'ler shell'in belleğini değiştirebilir.
+- ASLR aslında bir problem bile değildir; process'in address space'i hakkında bilgi edinmek için shell'in `maps` dosyasını veya procfs içindeki başka herhangi bir dosyayı kontrol edebiliriz.
+- Bu nedenle dosya üzerinde `lseek()` gerçekleştirmemiz gerekir. Shell'den bu, kötü şöhretli `dd` kullanılmadığı sürece yapılamaz.
 
-### Daha ayrıntılı olarak
+### Daha detaylı
 
-Adımlar görece kolaydır ve bunları anlamak için herhangi bir uzmanlık gerektirmez:<sup>[[1]](#references)</sup>
+Adımlar nispeten kolaydır ve bunları anlamak için herhangi bir uzmanlık gerektirmez:<sup>[[1]](#references)</sup>
 
-- Çalıştırmak istediğimiz binary'yi ve loader'ı parse ederek ihtiyaç duydukları mapping'leri belirleyin. Ardından, genel olarak kernel'in her `execve()` çağrısında gerçekleştirdiği adımların aynısını yapacak bir "shell"code hazırlayın:
+- Çalıştırmak istediğimiz binary'yi ve loader'ı parse ederek ihtiyaç duydukları mapping'leri öğrenin. Ardından, genel olarak kernel'in her `execve()` çağrısında gerçekleştirdiği adımların aynısını yapacak bir "shell"code hazırlayın:
 - Söz konusu mapping'leri oluşturun.
 - Binary'leri bunların içine okuyun.
-- Permissions'ları ayarlayın.
-- Son olarak stack'i programın argümanlarıyla initialize edin ve auxiliary vector'ü yerleştirin (loader tarafından gereklidir).
-- Loader'a jump edin ve geri kalanını onun yapmasına izin verin (programın ihtiyaç duyduğu library'leri load eder).
-- `syscall` dosyasından, process'in gerçekleştirdiği syscall sonrasında geri döneceği adresi elde edin.
+- İzinleri ayarlayın.
+- Son olarak stack'i programın argümanlarıyla initialize edin ve auxiliary vector'ü (loader tarafından gerekir) yerleştirin.
+- Loader'a jump edin ve geri kalanını onun yapmasına izin verin (program tarafından ihtiyaç duyulan library'leri load eder).
+- `syscall` dosyasından, process'in gerçekleştirdiği syscall'dan sonra döneceği adresi elde edin.
 - Executable olacak bu konumu shellcode'umuzla overwrite edin (`mem` üzerinden unwritable page'leri değiştirebiliriz).
-- Çalıştırmak istediğimiz programı process'in stdin'ine gönderin (söz konusu "shell"code tarafından `read()` edilecektir).
-- Bu noktada programımız için gerekli library'leri load etmek ve programın içine jump etmek loader'ın sorumluluğundadır.
+- Çalıştırmak istediğimiz programı process'in stdin'ine aktarın (söz konusu "shell"code tarafından `read()` edilecektir).
+- Bu noktada gerekli library'leri programımız için load etmek ve programa jump etmek loader'a kalır.
 
-**Araca göz atın:** [**https://github.com/arget13/DDexec**](https://github.com/arget13/DDexec).<sup>[[1]](#references)</sup>
+**Tool'a şu adresten göz atın:** [**https://github.com/arget13/DDexec**](https://github.com/arget13/DDexec).<sup>[[1]](#references)</sup>
 
 ## EverythingExec
 
-`dd` için, bunlardan biri olan `tail` dahil olmak üzere çeşitli alternatifler vardır. `tail`, şu anda `mem` dosyası üzerinde `lseek()` yapmak için kullanılan varsayılan programdır (`dd` kullanmanın tek amacı buydu). Söz konusu alternatifler şunlardır:<sup>[[1]](#references)</sup>
+`dd` için çeşitli alternatifler vardır; bunlardan biri olan `tail`, şu anda `mem` dosyası üzerinde `lseek()` gerçekleştirmek için kullanılan varsayılan programdır (`dd` kullanmanın tek amacı buydu). Söz konusu alternatifler şunlardır:<sup>[[1]](#references)</sup>
 ```bash
 tail
 hexdump

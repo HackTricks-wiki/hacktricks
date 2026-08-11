@@ -1,6 +1,8 @@
-# Yararlı Linux Komutları
+# Kullanışlı Linux Komutları
 
-## Yaygın Bash Komutları
+{{#include ../../banners/hacktricks-training.md}}
+
+## Yaygın Bash
 ```bash
 #Exfiltration using Base64
 base64 -w 0 file
@@ -299,9 +301,9 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
-## eBPF Telemetry ve Rootkit Hunting
+## eBPF Telemetry ve Rootkit Avcılığı
 
-Rootkit araştırmaları, TripleCross gibi hem eBPF tabanlı implantları hem de BPFDoor varyantları gibi BPF tabanlı backdoor'ları ortaya koymuştur. Beklenmeyen BPF programlarını, attachment'larını veya map'lerini ele geçirilmenin kanıtı olarak değil, araştırma ipuçları olarak değerlendirin.<sup>[[3]](#references)[[4]](#references)</sup> Yetkilendirilmiş sistemlerin baseline'ını `bpftool` veya `eBPFmon` ile oluşturun: `bpftool`, programları ve map'leri listeleyebilir, program talimatlarını dökebilir ve desteklenen özellikleri sorgulayabilir; eBPFmon ise bu bilgileri bir TUI'da sunar.<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
+Rootkit araştırmaları, TripleCross gibi eBPF tabanlı implantları ve BPFDoor varyantları gibi BPF tabanlı backdoor'ları ortaya koymuştur. Beklenmeyen BPF programlarını, attachment'larını veya map'lerini, compromise kanıtı olarak değil, araştırma ipuçları olarak değerlendirin.<sup>[[3]](#references)[[4]](#references)</sup> Yetkilendirilmiş sistemlerin baseline'ını `bpftool` veya `eBPFmon` ile oluşturun: `bpftool`, programları ve map'leri listeleyebilir, program talimatlarını dump edebilir ve desteklenen özellikleri sorgulayabilir; eBPFmon ise bu bilgileri bir TUI'da sunar.<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -319,11 +321,11 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-`bpftool` çıktısını beklenen NIC/cgroup attachment'larıyla ilişkilendirin; onaylanmamış bir PID'ye ait ani bir `xdp` veya `kprobe` programı, enjekte edilmiş bir payload için kesin kanıt değil, bir inceleme ipucudur.<sup>[[5]](#references)[[6]](#references)</sup>
+`bpftool` çıktısını beklenen NIC/cgroup eklemeleriyle ilişkilendirin; onaylanmamış bir PID'ye ait ani bir `xdp` veya `kprobe` programı, enjekte edilmiş bir payload için kesin kanıt değil, bir inceleme ipucudur.<sup>[[5]](#references)[[6]](#references)</sup>
 
 ## Journald Olay İncelemesi
 
-`journalctl`, `systemd-journald`'dan yapılandırılmış girdileri okur ve boot, öncelik, unit, UID ve göreli zamana göre filtrelemeyi destekler. Kanıtları korumanız veya karşılaştırmanız gerektiğinde bu filtreleri JSON çıktısıyla birleştirin; yalnızca filtreleme yapılması logların kurcalanmadığını kanıtlamaz.<sup>[[2]](#references)[[7]](#references)</sup>
+`journalctl`, `systemd-journald`'dan yapılandırılmış girdileri okur ve önyükleme, öncelik, birim, UID ve göreli zamana göre filtrelemeyi destekler. Kanıtları korumanız veya karşılaştırmanız gerektiğinde bu filtreleri JSON çıktısıyla birleştirin; yalnızca filtreleme, logların değiştirilmediğini kanıtlamaz.<sup>[[2]](#references)[[7]](#references)</sup>
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -334,7 +336,7 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-`--grep 'Invalid user' --case-sensitive` veya `-k` (yalnızca kernel mesajları) seçeneklerini daha sıkı filtrelere ihtiyaç duyduğunuzda ekleyin ve hedefli aramalar için `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` ve `_TRANSPORT` selector'larının birleştirilebileceğini unutmayın.<sup>[[7]](#references)</sup>
+`--grep 'Invalid user' --case-sensitive` veya `-k` (yalnızca kernel mesajları) seçeneklerini daha sıkı filtrelere ihtiyaç duyduğunuzda ekleyin ve hedefli aramalar için `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` ve `_TRANSPORT` seçicilerinin birleştirilebileceğini unutmayın.<sup>[[7]](#references)</sup>
 
 ## References
 
@@ -342,7 +344,7 @@ journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_20
 - [2] [Linux loglarını görüntülemek için journalctl komutu nasıl kullanılır](https://www.hostinger.com/tutorials/journalctl-command)
 - [3] [h3xduck/TripleCross](https://github.com/h3xduck/TripleCross)
 - [4] [Rapid7 Labs: Telekomünikasyon ağlarında BPFdoor](https://www.rapid7.com/blog/post/tr-bpfdoor-telecom-networks-sleeper-cells-threat-research-report/)
-- [5] [BPF Documentation — Linux Kernel documentation](https://docs.kernel.org/bpf/)
+- [5] [BPF Belgeleri — Linux Kernel belgeleri](https://docs.kernel.org/bpf/)
 - [6] [libbpf/bpftool](https://github.com/libbpf/bpftool)
 - [7] [journalctl(1) — Linux manual page](https://man7.org/linux/man-pages/man1/journalctl.1.html)
 {{#include ../../banners/hacktricks-training.md}}

