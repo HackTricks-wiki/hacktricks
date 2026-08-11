@@ -3,7 +3,7 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Якщо програма використовує `scanf`, щоб отримати **кілька значень одночасно зі stdin**, потрібно згенерувати стан, який починається після **`scanf`**.
+> Якщо програма використовує `scanf`, щоб отримати **кілька значень одночасно зі stdin**, потрібно створити стан, який починається після **`scanf`**.
 
 Коди взято з [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
 
@@ -40,7 +40,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Вхідні дані для досягнення адреси (із зазначенням виведених даних)
+### Вхідні дані для досягнення адреси (із зазначенням print-ів)
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -104,7 +104,7 @@ password1 = claripy.BVS('password1', password1_size_in_bits)
 password2_size_in_bits = 32  # :integer
 password2 = claripy.BVS('password2', password2_size_in_bits)
 
-# Relate it Vectors with the registriy values you are interested in to reach an address
+# Relate its vectors to the register values needed to reach an address
 initial_state.regs.eax = password0
 initial_state.regs.ebx = password1
 initial_state.regs.edx = password2
@@ -201,11 +201,11 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-У цьому сценарії вхідні дані було отримано за допомогою `scanf("%u %u")`, і було передано значення `"1 1"`, тому значення **`0x00000001`** у stack походять від **введених користувачем даних**. Ви можете побачити, що ці значення починаються з `$ebp - 8`. Отже, у коді ми **відняли 8 байтів від `$esp` (оскільки в той момент `$ebp` і `$esp` мали однакове значення)**, а потім виконали push BVS.
+У цьому сценарії введення було отримано за допомогою `scanf("%u %u")`, і було передано значення `"1 1"`, тому значення **`0x00000001`** у стеку походять із **введення користувача**. Ви можете побачити, що ці значення починаються з `$ebp - 8`. Отже, у коді ми **відняли 8 байтів від `$esp` (оскільки в цей момент `$ebp` і `$esp` мали однакове значення)**, а потім помістили BVS.
 
-![Розміщення bit vectors у stack, щоб визначити значення, якого має досягти позиція stack для переходу до потрібного потоку виконання: У цьому сценарії вхідні дані було отримано за допомогою scanf("%u %u"), і було передано значення "1...](<../../../images/image (136).png>)
+![Поміщення бітових векторів у стек, щоб визначити значення, якого має досягти позиція стека, аби спрямувати виконання програми: у цьому сценарії введення було отримано за допомогою scanf("%u %u"), і було передано значення "1...](<../../../images/image (136).png>)
 
-### Статичні значення пам'яті (глобальні змінні)
+### Статичні значення пам’яті (глобальні змінні)
 ```python
 import angr
 import claripy
@@ -215,7 +215,7 @@ def main(argv):
 path_to_binary = argv[1]
 project = angr.Project(path_to_binary)
 
-#Get an address after the scanf. Once the input has already being saved in the memory positions
+# Get an address after scanf, once the input has been saved in memory
 start_address = 0x8048606
 initial_state = project.factory.blank_state(addr=start_address)
 
@@ -325,7 +325,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Імітація файлу
+### Симуляція файлу
 ```python
 #In this challenge a password is read from a file and we want to simulate its content
 
@@ -337,7 +337,7 @@ def main(argv):
 path_to_binary = argv[1]
 project = angr.Project(path_to_binary)
 
-# Get an address just before opening the file with th simbolic content
+# Get an address just before opening the file with the symbolic content
 # Or at least when the file is not going to suffer more changes before being read
 start_address = 0x80488db
 initial_state = project.factory.blank_state(addr=start_address)
@@ -347,10 +347,10 @@ initial_state = project.factory.blank_state(addr=start_address)
 filename = 'WCEXPXBW.txt'
 symbolic_file_size_bytes = 64
 
-# Create a BV which is going to be the content of the simbolic file
+# Create a bit-vector that will hold the symbolic file content
 password = claripy.BVS('password', symbolic_file_size_bytes * 8)
 
-# Create the file simulation with the simbolic content
+# Create the simulated file with symbolic content
 password_file = angr.storage.SimFile(filename, content=password)
 
 # Add the symbolic file we created to the symbolic filesystem.
@@ -381,7 +381,7 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!TIP]
-> Зверніть увагу, що символічний файл також може містити константні дані, об'єднані із символічними даними:
+> Зверніть увагу, що symbolic file також може містити constant data, об'єднані із symbolic data:
 >
 > ```python
 >  # Hello world, my name is John.
@@ -407,8 +407,8 @@ main(sys.argv)
 ### Застосування обмежень
 
 > [!TIP]
-> Іноді прості операції, які виконує людина, як-от порівняння 2 слів довжиною 16 **char by char** (loop), можуть **cost** для **angr** багато ресурсів, оскільки йому потрібно генерувати **branches** експоненційно, адже він створює 1 branch на кожен if: `2^16`\
-> Тому простіше **ask angr get to a previous point** (де справді складну частину вже виконано) і **set those constrains manually**.
+> Іноді прості операції, як-от порівняння 2 слів довжиною 16 **char by char** (цикл), **cost** для **angr** дуже багато, оскільки йому потрібно генерувати гілки **експоненційно**, адже він генерує 1 гілку на кожен if: `2^16`\
+> Тому простіше **попросити angr перейти до попередньої точки** (де справді складну частину вже було виконано) і **встановити ці обмеження вручну**.
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -480,14 +480,14 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!CAUTION]
-> У деяких сценаріях можна активувати **veritesting**, що об'єднає схожі стани, щоб уникнути непотрібних гілок і знайти рішення: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> У деяких сценаріях можна активувати **veritesting**, який об’єднає подібні стани, щоб уникнути непотрібних гілок і знайти розв’язок: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!TIP]
 > Ще одна річ, яку можна зробити в таких сценаріях, — **hook the function giving angr something it can understand** простіше.
 
 ### Менеджери симуляції
 
-Деякі менеджери симуляції можуть бути кориснішими за інші. У попередньому прикладі виникла проблема, оскільки було створено багато корисних гілок. Тут техніка **veritesting** об'єднає їх і знайде рішення.\
+Деякі менеджери симуляції можуть бути кориснішими за інші. У попередньому прикладі виникла проблема, оскільки було створено багато корисних гілок. Тут техніка **veritesting** об’єднає їх і знайде розв’язок.\
 Цей менеджер симуляції також можна активувати за допомогою: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
@@ -526,7 +526,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Hooking/Bypassing одного виклику функції
+### Hooking/Обхід одного виклику функції
 ```python
 # This level performs the following computations:
 #
@@ -562,7 +562,7 @@ user_input_buffer_address,
 user_input_buffer_length
 )
 
-# Create a simbolic IF that if the loaded string frommemory is the expected
+# Create a symbolic If expression that checks the string loaded from memory
 # return True (1) if not returns False (0) in eax
 check_against_string = 'XKSPZSJKJYQCQXZV'.encode() # :string
 
@@ -594,7 +594,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Хук функції / Simprocedure
+### Hooking a function / Simprocedure
 ```python
 # Hook to the function called check_equals_WQNDNKKWAWOLXBAC
 
@@ -807,8 +807,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-## Посилання
+## References
 
-- [1] [jakespringer/angr_ctf - GitHub repository](https://github.com/jakespringer/angr_ctf)
-
+- [1] [jakespringer/angr_ctf - репозиторій GitHub](https://github.com/jakespringer/angr_ctf)
 {{#include ../../../banners/hacktricks-training.md}}
