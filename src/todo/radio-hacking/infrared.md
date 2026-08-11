@@ -4,67 +4,67 @@
 
 ## Kızılötesi Nasıl Çalışır <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
 
-**Kızılötesi ışık insanlar tarafından görülemez**. IR dalga boyu **0,7 ile 1000 mikron** arasındadır. Ev tipi uzaktan kumandalar veri iletimi için IR sinyali kullanır ve 0,75..1,4 mikron dalga boyu aralığında çalışır. Uzaktan kumandadaki bir microcontroller, infrared LED'in belirli bir frekansta yanıp sönmesini sağlayarak dijital sinyali IR sinyaline dönüştürür.
+**Kızılötesi ışık insanlar tarafından görülemez**. IR dalga boyu **0,7 ile 1000 mikron** arasındadır. Ev tipi kumandalar veri iletimi için IR sinyali kullanır ve 0,75..1,4 mikron dalga boyu aralığında çalışır. Kumandadaki bir microcontroller, infrared LED'i belirli bir frekansta yanıp sönecek şekilde çalıştırarak dijital sinyali IR sinyaline dönüştürür.
 
-IR sinyallerini almak için bir **photoreceiver** kullanılır. Bu bileşen **IR ışığını voltage pulse'larına dönüştürür**; bunlar zaten **digital signal'lerdir**. Genellikle receiver'ın içinde, **yalnızca istenen dalga boyunun geçmesine izin veren** ve paraziti kesen bir **dark light filter** bulunur.<sup>[[1]](#references)</sup>
+IR sinyallerini almak için bir **photoreceiver** kullanılır. Bu bileşen **IR ışığını, zaten **digital signals** olan gerilim darbelerine dönüştürür**. Genellikle alıcının içinde, **yalnızca istenen dalga boyunun geçmesine izin veren** ve gürültüyü kesen bir **dark light filter** bulunur.<sup>[[1]](#references)</sup>
 
-### IR Protocol'lerinin Çeşitliliği <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
+### IR Protocols Çeşitliliği <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
 
-IR protocol'leri 3 faktöre göre farklılık gösterir:<sup>[[1]](#references)</sup>
+IR protocols 3 faktörde farklılık gösterir:<sup>[[1]](#references)</sup>
 
 - bit encoding
 - data structure
 - carrier frequency — genellikle 36..38 kHz aralığında
 
-#### Bit Encoding Yöntemleri <a href="#bit-encoding-ways" id="bit-encoding-ways"></a>
+#### Bit encoding yöntemleri <a href="#bit-encoding-ways" id="bit-encoding-ways"></a>
 
 **1. Pulse Distance Encoding**
 
-Bit'ler, pulse'lar arasındaki space süresinin modüle edilmesiyle encode edilir. Pulse'ın kendisinin genişliği sabittir.
+Bitler, darbeler arasındaki boşluğun süresi modüle edilerek kodlanır. Darbenin genişliği sabittir.
 
 <figure><img src="../../images/image (295).png" alt=""><figcaption></figcaption></figure>
 
 **2. Pulse Width Encoding**
 
-Bit'ler pulse genişliğinin modüle edilmesiyle encode edilir. Pulse burst sonrasındaki space'in genişliği sabittir.
+Bitler, darbe genişliği modüle edilerek kodlanır. Darbe kümesinden sonraki boşluğun genişliği sabittir.
 
 <figure><img src="../../images/image (282).png" alt=""><figcaption></figcaption></figure>
 
 **3. Phase Encoding**
 
-Bu yöntem Manchester encoding olarak da bilinir. Logical value, pulse burst ile space arasındaki geçişin polarity'si tarafından belirlenir. "Space to pulse burst" logic "0" değerini, "pulse burst to space" ise logic "1" değerini belirtir.
+Bu yöntem Manchester encoding olarak da bilinir. Mantıksal değer, darbe kümesi ile boşluk arasındaki geçişin polaritesiyle belirlenir. "Space to pulse burst" logic "0", "pulse burst to space" ise logic "1" anlamına gelir.
 
 <figure><img src="../../images/image (634).png" alt=""><figcaption></figcaption></figure>
 
 **4. Öncekilerin ve diğer egzotik yöntemlerin kombinasyonu**
 
 > [!TIP]
-> Birkaç cihaz türü için **universal olmaya çalışan** IR protocol'leri vardır. En ünlüleri RC5 ve NEC'tir. Ne yazık ki, en ünlü olmak **en yaygın olmak anlamına gelmez**. Benim çevremde yalnızca iki NEC uzaktan kumandasıyla karşılaştım ve hiç RC5 uzaktan kumandası görmedim.
+> Birden fazla cihaz türü için **universal olmaya çalışan** IR protocols vardır. En ünlüleri RC5 ve NEC'tir. Ne yazık ki, en ünlü olanın **en yaygın olduğu anlamına gelmez**. Benim çevremde yalnızca iki NEC kumandasıyla karşılaştım ve hiç RC5 kumandası görmedim.
 >
-> Üreticiler, aynı cihaz aralığı içinde bile (örneğin TV-box'lar) kendilerine özgü IR protocol'lerini kullanmayı sever. Bu nedenle farklı şirketlerin uzaktan kumandaları ve bazen aynı şirketin farklı modellerine ait uzaktan kumandalar, aynı türdeki diğer cihazlarla çalışamaz.
+> Üreticiler, aynı cihaz aralığı içinde bile (örneğin TV-boxes) kendi benzersiz IR protocols'larını kullanmayı sever. Bu nedenle farklı şirketlerin kumandaları ve bazen aynı şirketin farklı modellerine ait kumandalar, aynı türdeki diğer cihazlarla çalışamaz.
 
-### Bir IR Sinyalini İncelemek
+### Bir IR sinyalini inceleme
 
-Uzaktan kumandanın IR sinyalinin nasıl göründüğünü anlamanın en güvenilir yolu oscilloscope kullanmaktır. Oscilloscope, alınan sinyali demodulate veya invert etmez; sinyal olduğu gibi görüntülenir. Bu, testing ve debugging için kullanışlıdır. NEC IR protocol'ü örneğinde beklenen sinyali göstereceğim.<sup>[[1]](#references)</sup>
+Kumandanın IR sinyalinin nasıl göründüğünü anlamanın en güvenilir yolu oscilloscope kullanmaktır. Alınan sinyali demodüle veya tersine çevirmez; yalnızca sinyali "olduğu gibi" görüntüler. Bu, test ve debugging için kullanışlıdır. NEC IR protocol örneği üzerinden beklenen sinyali göstereceğim.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../images/image (235).png" alt=""><figcaption></figcaption></figure>
 
-Genellikle encoded packet'ın başında bir preamble bulunur. Bu, receiver'ın gain seviyesini ve arka planı belirlemesini sağlar. Örneğin Sharp gibi preamble içermeyen protocol'ler de vardır.
+Genellikle kodlanmış bir paketin başlangıcında bir preamble bulunur. Bu, alıcının gain seviyesini ve arka planı belirlemesini sağlar. Örneğin Sharp gibi preamble içermeyen protocols da vardır.
 
-Daha sonra data iletilir. Structure, preamble ve bit encoding yöntemi belirli protocol tarafından belirlenir.
+Ardından data iletilir. Yapı, preamble ve bit encoding yöntemi belirli protocol tarafından belirlenir.
 
-**NEC IR protocol'ü**, kısa bir command ve düğmeye basılı tutulduğu sırada gönderilen bir repeat code içerir. Hem command hem de repeat code, başlangıçta aynı preamble'a sahiptir.
+**NEC IR protocol**, kısa bir command ve düğmeye basılı tutulduğu sürece gönderilen bir repeat code içerir. Hem command hem de repeat code başlangıçta aynı preamble'a sahiptir.
 
-NEC **command'ı**, preamble'a ek olarak, cihazın ne yapılması gerektiğini anlamasını sağlayan bir address byte ve command-number byte içerir. Transmission integrity'sini kontrol etmek için address ve command-number byte'ları inverse değerleriyle duplicate edilir. Command'ın sonunda ek bir stop bit bulunur.
+NEC **command**, preamble'a ek olarak, cihazın ne yapılması gerektiğini anlamasını sağlayan bir address byte ve command-number byte içerir. İletimin bütünlüğünü kontrol etmek için address ve command-number byte'ları ters değerleriyle birlikte yinelenir. Command'ın sonunda ek bir stop bit bulunur.
 
 **Repeat code**, preamble'dan sonra stop bit olan bir "1" içerir.
 
-NEC, **logic "0" ve "1"** için Pulse Distance Encoding kullanır: önce bir pulse burst iletilir, ardından uzunluğu bit'in değerini belirleyen bir pause gelir.
+**Logic "0" ve "1"** için NEC, Pulse Distance Encoding kullanır: önce bir pulse burst gönderilir, ardından uzunluğu bitin değerini belirleyen bir duraklama gelir.
 
-### Klimalar
+### Air Conditioners
 
-Diğer uzaktan kumandaların aksine, **klimalar yalnızca basılan düğmenin code'unu iletmez**. Ayrıca bir düğmeye basıldığında **tüm bilgileri de iletir**; bunun amacı **klima cihazı ile uzaktan kumandanın senkronize olmasını sağlamaktır**.\
-Bu sayede 20ºC'ye ayarlanmış bir cihaz bir uzaktan kumandayla 21ºC'ye yükseltildikten sonra, sıcaklığı hâlâ 20ºC olarak tutan başka bir uzaktan kumandayla tekrar yükseltildiğinde, cihazın sıcaklığı 21ºC'ye "yükseltmesi" (21ºC'de olduğunu düşünerek 22ºC'ye değil) önlenmiş olur.<sup>[[1]](#references)</sup>
+Diğer kumandalardan farklı olarak **air conditioners yalnızca basılan düğmenin code'unu göndermez**. Ayrıca **tüm bilgileri de gönderir**; böylece **air conditioned machine ile kumandanın senkronize olması** sağlanır.\
+Bu, 20ºC'ye ayarlanmış bir machine'in bir kumandayla 21ºC'ye çıkarılmasını ve ardından sıcaklığı hâlâ 20ºC olarak tutan başka bir kumanda kullanıldığında, bu kumandanın sıcaklığı 21ºC'ye "çıkarmasını" (21ºC'de olduğunu düşünerek 22ºC'ye değil) önler.<sup>[[1]](#references)</sup>
 
 ---
 
@@ -79,21 +79,21 @@ flipper-zero/fz-infrared.md
 
 ### Smart-TV / Set-top Box Takeover (EvilScreen)
 
-Yakın tarihli academic work (EvilScreen, 2022), **Infrared'ı Bluetooth veya Wi-Fi ile birleştiren multi-channel uzaktan kumandaların modern smart-TV'leri tamamen hijack etmek için abuse edilebileceğini** gösterdi. Bu attack, yüksek ayrıcalıklı IR service code'larını authenticated Bluetooth packet'larıyla zincirleyerek channel-isolation'ı bypass eder ve physical access olmadan arbitrary app launch, microphone activation veya factory-reset yapılmasına olanak tanır. ISO/IEC 27001 uyumluluğu iddiasındaki bir Samsung modeli de dahil olmak üzere farklı vendor'lara ait sekiz mainstream TV'nin vulnerable olduğu doğrulandı. Mitigation için vendor firmware fix'leri veya kullanılmayan IR receiver'ların tamamen devre dışı bırakılması gerekir.<sup>[[2]](#references)</sup>
+Yakın tarihli academic work (EvilScreen, 2022), **Infrared'ı Bluetooth veya Wi-Fi ile birleştiren multi-channel remotes cihazlarının modern smart-TV'leri tamamen ele geçirmek için kötüye kullanılabileceğini** gösterdi. Saldırı, yüksek ayrıcalıklı IR service code'larını authenticated Bluetooth packets ile birlikte kullanarak channel-isolation'ı atlar ve fiziksel erişim olmadan arbitrary app launch'larına, microphone activation'a veya factory-reset işlemine izin verir. Farklı vendor'lara ait, ISO/IEC 27001 uyumluluğu iddiasındaki bir Samsung modeli de dahil olmak üzere sekiz mainstream TV'nin vulnerable olduğu doğrulandı. Mitigation için vendor firmware fixes uygulanması veya kullanılmayan IR receivers'ların tamamen devre dışı bırakılması gerekir.<sup>[[2]](#references)</sup>
 
-### IR LED'ler Üzerinden Air-Gapped Data Exfiltration (aIR-Jumper family)
+### Air-Gapped Data Exfiltration via IR LEDs (aIR-Jumper family)
 
-Security camera'lar, router'lar ve hatta malicious USB stick'ler sıklıkla **night-vision IR LED'leri** içerir. Research, malware'in bu LED'leri modüle ederek (basit OOK ile <10–20 kbit/s) **duvarlar ve pencereler üzerinden, onlarca metre uzaklığa yerleştirilmiş harici bir camera'ya secret'ları exfiltrate edebileceğini** gösteriyor.<sup>[[3]](#references)</sup> Işık visible spectrum'un dışında olduğundan operator'ler bunu nadiren fark eder. Counter-measure'lar:
+Security cameras genellikle **night-vision IR LEDs** içerir. aIR-Jumper prototype, bu LED'leri kontrol eden malware'in pencereler üzerinden, onlarca metre mesafedeki harici bir camera'ya, **surveillance camera başına saniyede 20 bit'e kadar** secret exfiltration yapabildiğini gösterdi. Ters yönde researchers, yüzlerce metre ile kilometre arasındaki mesafelerde **saniyede 100 bit'ten daha yüksek** hızlarda infiltration gerçekleştirdi.<sup>[[3]](#references)</sup> Işık görünür spectrum dışında olduğundan operators bunu fark etmeyebilir. Countermeasures şunları içerir:
 
-* Hassas alanlardaki IR LED'leri fiziksel olarak shield edin veya çıkarın
-* Camera LED duty-cycle'ını ve firmware integrity'sini monitor edin
-* Pencerelere ve surveillance camera'lara IR-cut filter'lar yerleştirin
+* Hassas alanlardaki IR LEDs'leri fiziksel olarak shield edin veya çıkarın
+* Camera LED duty-cycle ve firmware integrity'yi monitor edin
+* Pencerelere ve surveillance cameras'a IR-cut filters yerleştirin
 
-Bir attacker, insecure camera'lara data flashing yaparak command'ları network'e **infiltrate etmek** için güçlü IR projector'lar da kullanabilir.
+Bir attacker, insecure cameras'a data flashing yoluyla network'e commands **infiltrate** etmek için güçlü IR projectors da kullanabilir.
 
-### Flipper Zero 1.0 ile Long-Range Brute-Force ve Extended Protocol'ler
+### Long-Range Brute-Force ve Flipper Zero 1.0 ile Extended Protocols
 
-Firmware 1.0 (September 2024), **düzinelerce ek IR protocol'ü ve isteğe bağlı harici amplifier module'lerini** ekledi. Universal-remote brute-force mode ile birlikte kullanıldığında Flipper, yüksek güçlü bir diode kullanarak 30 m'ye kadar mesafeden çoğu public TV/AC cihazını disable veya reconfigure edebilir.
+Firmware 1.0 (September 2024), universal-remotes library'yi genişletti ve infrared asset files'ın microSD'den dynamic loading özelliğini ekledi.<sup>[[4]](#references)</sup> Learning ve universal-remote işlevleri, yakındaki TVs ve air conditioners'a bilinen commands'ları replay edebilir veya deneyebilir. Menzil; emitter, optics, ambient light ve receiver'a büyük ölçüde bağlıdır; external IR hardware menzili artırabilir, ancak sabit bir mesafe varsayılmamalıdır.
 
 ---
 
@@ -101,25 +101,24 @@ Firmware 1.0 (September 2024), **düzinelerce ek IR protocol'ü ve isteğe bağl
 
 ### Hardware
 
-* **Flipper Zero** – learning, replay ve dictionary-bruteforce mode'larına sahip portable transceiver (yukarıya bakın).
-* **Arduino / ESP32** + IR LED / TSOP38xx receiver – düşük maliyetli DIY analyser/transmitter. `Arduino-IRremote` library'siyle birleştirin (v4.x >40 protocol'ü destekler).
-* **Logic analyser'lar** (Saleae/FX2) – protocol bilinmediğinde raw timing'leri capture eder.
-* **IR-blaster'lı smartphone'lar** (ör. Xiaomi) – hızlı field test için kullanışlıdır ancak range'i sınırlıdır.
+* **Flipper Zero** – learning, replay ve dictionary-bruteforce modes özelliklerine sahip portable transceiver (yukarıya bakın).
+* **Arduino / ESP32** + IR LED / TSOP38xx receiver – ucuz DIY analyser/transmitter. `Arduino-IRremote` library ile birleştirin (v4.x, 40'tan fazla protocol destekler).
+* **Logic analysers** (Saleae/FX2) – protocol bilinmediğinde raw timings yakalar.
+* **IR-blaster içeren smartphones** (ör. Xiaomi) – hızlı field test için uygundur, ancak menzili sınırlıdır.
 
 ### Software
 
-* **`Arduino-IRremote`** – aktif olarak maintain edilen C++ library:
+* **`Arduino-IRremote`** – aktif olarak sürdürülen C++ library:<sup>[[5]](#references)</sup>
 ```cpp
 #include <IRremote.hpp>
-IRsend sender;
-void setup(){ sender.begin(); }
+void setup(){ IrSender.begin(3); }
 void loop(){
-sender.sendNEC(0x20DF10EF, 32); // Samsung TV Power
+IrSender.sendNEC(0x00, 0x10, 0); // address, command, repeats
 delay(5000);
 }
 ```
-* **IRscrutinizer / AnalysIR** – raw capture'ları import eden, protocol'ü otomatik olarak identify eden ve Pronto/Arduino code'u oluşturan GUI decoder'lar.
-* **LIRC / ir-keytable (Linux)** – command line üzerinden IR receive ve inject etmek için:
+* **IRscrutinizer / AnalysIR** – raw captures içe aktaran, protocol'ü otomatik olarak belirleyen ve Pronto/Arduino code üreten GUI decoders.
+* **LIRC / ir-keytable (Linux)** – command line üzerinden IR alır ve inject eder:
 ```bash
 sudo ir-keytable -p nec,rc5 -t   # live-dump decoded scancodes
 irsend SEND_ONCE samsung KEY_POWER
@@ -129,15 +128,16 @@ irsend SEND_ONCE samsung KEY_POWER
 
 ## Defensive Measures <a href="#defense" id="defense"></a>
 
-* Gerekli olmadığında public space'lerde kullanılan cihazların IR receiver'larını disable edin veya üzerlerini kapatın.
-* Smart-TV'ler ile uzaktan kumandalar arasında *pairing* veya cryptographic check'ler enforce edin; privileged "service" code'larını isolate edin.
-* Classified area'ların çevresine IR-cut filter'lar veya continuous-wave detector'lar yerleştirerek optical covert channel'ları engelleyin.
-* Controllable IR LED'lere sahip camera/IoT appliance'ların firmware integrity'sini monitor edin.
+* Gerekmiyorsa public spaces'a yerleştirilen devices üzerindeki IR receivers'ları devre dışı bırakın veya kapatın.
+* Smart-TVs ve remotes arasında *pairing* veya cryptographic checks zorunlu kılın; ayrıcalıklı "service" codes'ları izole edin.
+* Optical covert channels'ı kesmek için classified areas çevresine IR-cut filters veya continuous-wave detectors yerleştirin.
+* Controllable IR LEDs sunan cameras/IoT appliances'ın firmware integrity'sini monitor edin.
 
 ## References
 
-- [1] [Flipper Zero Infrared blog post](https://blog.flipperzero.one/infrared/)
-- [2] [EvilScreen Attack: Smart TV Hijacking via Multi-channel Remote Control Mimicry (arXiv:2210.03014)](https://arxiv.org/abs/2210.03014)
-- [3] [aIR-Jumper: Covert Air-Gap Exfiltration/Infiltration via Security Cameras & Infrared (IR) (arXiv:1709.05742)](https://arxiv.org/abs/1709.05742)
-
+- [1] [Flipper Zero Infrared blog yazısı](https://blog.flipperzero.one/infrared/)
+- [2] [EvilScreen Attack: Multi-channel Remote Control Mimicry üzerinden Smart TV Hijacking](https://arxiv.org/abs/2210.03014)
+- [3] [aIR-Jumper: Security Cameras ve Infrared (IR) üzerinden Covert Air-Gap Exfiltration/Infiltration](https://arxiv.org/abs/1709.05742)
+- [4] [Flipper Zero Blog - Firmware 1.0 Released](https://blog.flipper.net/released-firmware-1/)
+- [5] [Arduino-IRremote - kullanım ve protocol documentation](https://github.com/Arduino-IRremote/Arduino-IRremote)
 {{#include ../../banners/hacktricks-training.md}}

