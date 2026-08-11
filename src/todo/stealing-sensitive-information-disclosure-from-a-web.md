@@ -1,17 +1,15 @@
-# Robando la divulgación de información sensible desde una Web
+# Robar información sensible de una página web
 
 {{#include ../banners/hacktricks-training.md}}
 
-Si en algún momento encuentras una **página web que muestra información sensible basándose en tu sesión**: quizá refleja cookies, muestra datos de tarjetas de crédito o cualquier otro tipo de información sensible, puedes intentar robarla.\
-Aquí presento las principales formas en las que puedes intentar conseguirlo:
+Si una **página web muestra información sensible basándose en la sesión actual**—como cookies, datos de la cuenta o detalles de tarjetas de crédito—un atacante puede intentar exfiltrarla. Las principales técnicas incluyen:
 
-- [**CORS bypass**](../pentesting-web/cors-bypass.md): Si puedes evadir los headers de CORS, podrás robar la información realizando una petición Ajax desde una página maliciosa.
-- [**XSS**](../pentesting-web/xss-cross-site-scripting/index.html): Si encuentras una vulnerabilidad XSS en la página, es posible que puedas aprovecharla para robar la información.
-- [**Danging Markup**](../pentesting-web/dangling-markup-html-scriptless-injection/index.html): Si no puedes inyectar tags XSS, quizá aún puedas robar la información utilizando otros tags HTML normales.
-- [**Clickjaking**](../pentesting-web/clickjacking.md): Si no existe protección contra este ataque, es posible que puedas engañar al usuario para que te envíe los datos sensibles (un ejemplo [aquí](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)).<sup>[[1]](#references)</sup>
+- [**CORS bypass**](../pentesting-web/cors-bypass.md): Una configuración incorrecta de CORS puede permitir que un origen malicioso lea respuestas sensibles mediante solicitudes cross-origin.
+- [**XSS**](../pentesting-web/xss-cross-site-scripting/index.html): Una vulnerabilidad XSS en el origen objetivo puede permitir que JavaScript inyectado lea y exfiltre la información.
+- [**Dangling markup**](../pentesting-web/dangling-markup-html-scriptless-injection/index.html): Cuando la inyección de scripts no está disponible, los elementos HTML inyectados aún pueden capturar contenido sensible.
+- [**Clickjacking**](../pentesting-web/clickjacking.md): Si faltan protecciones contra el framing, un atacante puede engañar a un usuario para que interactúe con la página sensible. El caso práctico enlazado demuestra esta técnica.<sup>[[1]](#references)</sup>
 
-## Referencias
+## References
 
-- [1] [Apache example servlet leads to Information Disclosure](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)
-
+- [1] [El servlet de ejemplo de Apache provoca una divulgación de información](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)
 {{#include ../banners/hacktricks-training.md}}

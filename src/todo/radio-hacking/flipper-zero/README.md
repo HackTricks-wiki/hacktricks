@@ -2,17 +2,21 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Con [**Flipper Zero**](https://flipperzero.one/) puedes:
+Flipper Zero es una herramienta multitarea de hardware portátil que admite las siguientes capacidades:<sup>[[1]](#references)</sup>
 
-- **Escuchar/Capturar/Reproducir frecuencias de radio:** [**Sub-GHz**](fz-sub-ghz.md)
-- **Leer/Capturar/Emular tarjetas NFC:** [**NFC**](fz-nfc.md)
-- **Leer/Capturar/Emular tags de 125 kHz:** [**125kHz RFID**](fz-125khz-rfid.md)
-- **Leer/Capturar/Enviar señales infrarrojas:** [**Infrarrojos**](fz-infrared.md)
-- **Leer/Capturar/Emular iButtons:** [**iButton**](../ibutton.md)
-- **Usarlo como Bad USB**
-- **Usarlo como clave de seguridad (U2F)**
-- **Jugar a Snake**
+- **Recibir, capturar y reproducir señales de radio compatibles:** [**Sub-GHz**](fz-sub-ghz.md)
+- **Leer, capturar y emular tarjetas NFC compatibles:** [**NFC**](fz-nfc.md)
+- **Leer, capturar y emular tags compatibles de 125 kHz:** [**RFID de 125 kHz**](fz-125khz-rfid.md)
+- **Leer, capturar y transmitir señales infrarrojas:** [**Infrarrojos**](fz-infrared.md)
+- **Leer, capturar y emular iButtons compatibles:** [**iButton**](../ibutton.md)
+- **Actuar como un dispositivo BadUSB**
+- **Actuar como una llave de seguridad U2F**
+- **Ejecutar aplicaciones y juegos como Snake**
 
-**Otros recursos de Flipper Zero en** [**https://github.com/djsime1/awesome-flipperzer**](https://github.com/djsime1/awesome-flipperzero)
+Para consultar firmware, aplicaciones, bases de datos y otros recursos mantenidos por la comunidad, consulta la colección Awesome Flipper Zero.<sup>[[2]](#references)</sup>
 
+## References
+
+- [1] [Flipper Zero - Descripción oficial del producto](https://flipper.net/)
+- [2] [GitHub - Awesome Flipper Zero](https://github.com/djsime1/awesome-flipperzero)
 {{#include ../../../banners/hacktricks-training.md}}

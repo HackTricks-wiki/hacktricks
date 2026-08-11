@@ -2,17 +2,19 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Código basura
+## Código basura
 
-Es muy común encontrar **código basura que nunca se utiliza** para dificultar el reversing de la macro.\
-Por ejemplo, en la siguiente imagen puedes ver que se utiliza un `If` que nunca va a ser verdadero para ejecutar código basura e inútil.
+Las macros pueden contener **código inalcanzable o irrelevante** cuyo objetivo es ralentizar el análisis. Identifica las condiciones constantes y rastrea el comportamiento alcanzable antes de dedicar tiempo a revertir una rama. El ejemplo siguiente usa una condición `If` que nunca puede ser verdadera para ocultar código basura.
 
-![Macros de Word - Código basura: Por ejemplo, en la siguiente imagen puedes ver que se utiliza un If que nunca va a ser verdadero para ejecutar código basura e inútil](<../images/image (369).png>)
+![Una macro de Word que contiene una rama condicional inalcanzable con código basura](<../images/image (369).png>)
 
-### Formularios de macros
+## Formularios de Macro
 
-Mediante la función **GetObject** es posible obtener datos de los formularios de la macro. Esto puede utilizarse para dificultar el análisis. La siguiente es una imagen de un formulario de macro utilizado para **ocultar datos dentro de cuadros de texto** (un cuadro de texto puede estar ocultando otros cuadros de texto):
+Los UserForms de VBA pueden almacenar datos en controles como cuadros de texto. Dado que los formularios, marcos y páginas pueden exponer cada uno una colección `Controls`, los analistas deben enumerar toda la jerarquía de controles en lugar de basarse únicamente en lo que muestra el formulario. El ejemplo siguiente almacena datos ocultos en cuadros de texto superpuestos.<sup>[[1]](#references)</sup>
 
-![Código basura - Formularios de macros: Mediante la función GetObject es posible obtener datos de los formularios de la macro. Esto puede utilizarse para dificultar el análisis. La siguiente es una imagen de un...](<../images/image (344).png>)
+![Un UserForm de macro con datos ocultos en cuadros de texto superpuestos](<../images/image (344).png>)
 
+## References
+
+- [1] [Microsoft Learn - Colecciones, controles y objetos (Microsoft Forms)](https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/objects-microsoft-forms)
 {{#include ../banners/hacktricks-training.md}}
