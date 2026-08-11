@@ -3,11 +3,11 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Wenn das Programm `scanf` verwendet, um **mehrere Werte auf einmal aus stdin** zu lesen, musst du einen Zustand erzeugen, der nach dem **`scanf`** beginnt.
+> Wenn das Programm `scanf` verwendet, um **mehrere Werte gleichzeitig aus stdin** einzulesen, musst du einen Zustand generieren, der nach dem **`scanf`** beginnt.
 
-Codes entnommen aus [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
+Codes entnommen von [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
 
-### Eingabe, um eine Adresse zu erreichen (unter Angabe der Adresse)
+### Eingabe zum Erreichen einer Adresse (Angabe der Adresse)
 ```python
 import angr
 import sys
@@ -40,7 +40,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Eingabe zum Erreichen der Adresse (zeigt Prints an)
+### Input zum Erreichen der Adresse (mit hinweisenden Prints)
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -75,7 +75,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Registrierungswerte
+### Registry-Werte
 ```python
 # Angr doesn't currently support reading multiple things with scanf (Ex:
 # scanf("%u %u).) You will have to tell the simulation engine to begin the
@@ -104,7 +104,7 @@ password1 = claripy.BVS('password1', password1_size_in_bits)
 password2_size_in_bits = 32  # :integer
 password2 = claripy.BVS('password2', password2_size_in_bits)
 
-# Relate it Vectors with the registriy values you are interested in to reach an address
+# Relate its vectors to the register values needed to reach an address
 initial_state.regs.eax = password0
 initial_state.regs.ebx = password1
 initial_state.regs.edx = password2
@@ -139,7 +139,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Stackwerte
+### Stack-Werte
 ```python
 # Put bit vectors in th stack to find out the vallue that stack position need to
 # have to reach a rogram flow
@@ -201,11 +201,11 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-In diesem Szenario wurde die Eingabe mit `scanf("%u %u")` eingelesen und der Wert `"1 1"` angegeben, sodass die Werte **`0x00000001`** auf dem Stack aus der **Benutzereingabe** stammen. Man kann sehen, wie diese Werte bei `$ebp - 8` beginnen. Daher haben wir im Code **8 Bytes von `$esp` subtrahiert (da `$ebp` und `$esp` in diesem Moment denselben Wert hatten)** und anschließend den BVS gepusht.
+In diesem Szenario wurde die Eingabe mit `scanf("%u %u")` eingelesen und der Wert `"1 1"` angegeben, daher stammen die Werte **`0x00000001`** auf dem Stack von der **Benutzereingabe**. Du kannst sehen, wie diese Werte bei `$ebp - 8` beginnen. Daher haben wir im Code **8 Byte von `$esp` subtrahiert (da `$ebp` und `$esp` zu diesem Zeitpunkt denselben Wert hatten)** und anschließend den BVS gepusht.
 
-![Bit-Vektoren auf dem Stack platzieren, um den Wert zu ermitteln, den diese Stack-Position erreichen muss, damit ein Programmfluss entsteht: In diesem Szenario wurde die Eingabe mit scanf("%u %u") eingelesen und der Wert "1...](<../../../images/image (136).png>)
+![Bit-Vektoren auf den Stack legen, um herauszufinden, welchen Wert diese Stack-Position benötigt, damit ein Programmfluss erreicht wird: In diesem Szenario wurde die Eingabe mit scanf("%u %u") eingelesen und der Wert "1...](<../../../images/image (136).png>)
 
-### Statische Speicherwerte (Globale Variablen)
+### Statische Speicherwerte (globale Variablen)
 ```python
 import angr
 import claripy
@@ -215,7 +215,7 @@ def main(argv):
 path_to_binary = argv[1]
 project = angr.Project(path_to_binary)
 
-#Get an address after the scanf. Once the input has already being saved in the memory positions
+# Get an address after scanf, once the input has been saved in memory
 start_address = 0x8048606
 initial_state = project.factory.blank_state(addr=start_address)
 
@@ -337,7 +337,7 @@ def main(argv):
 path_to_binary = argv[1]
 project = angr.Project(path_to_binary)
 
-# Get an address just before opening the file with th simbolic content
+# Get an address just before opening the file with the symbolic content
 # Or at least when the file is not going to suffer more changes before being read
 start_address = 0x80488db
 initial_state = project.factory.blank_state(addr=start_address)
@@ -347,10 +347,10 @@ initial_state = project.factory.blank_state(addr=start_address)
 filename = 'WCEXPXBW.txt'
 symbolic_file_size_bytes = 64
 
-# Create a BV which is going to be the content of the simbolic file
+# Create a bit-vector that will hold the symbolic file content
 password = claripy.BVS('password', symbolic_file_size_bytes * 8)
 
-# Create the file simulation with the simbolic content
+# Create the simulated file with symbolic content
 password_file = angr.storage.SimFile(filename, content=password)
 
 # Add the symbolic file we created to the symbolic filesystem.
@@ -404,11 +404,11 @@ main(sys.argv)
 >  # (!)
 > ```
 
-### Constraints anwenden
+### Anwenden von Constraints
 
 > [!TIP]
-> Manchmal kosten einfache Operationen für Menschen, wie das Vergleichen von 2 Wörtern mit einer Länge von 16 **char by char** (Schleife), **angr** sehr viel, weil es **exponentiell** viele Branches erzeugen muss, da es pro if 1 Branch erzeugt: `2^16`\
-> Daher ist es einfacher, **angr zu bitten, einen vorherigen Punkt zu erreichen** (an dem der wirklich schwierige Teil bereits erledigt wurde) und **diese Constraints manuell zu setzen**.
+> Manchmal kosten einfache menschliche Operationen, wie der Vergleich zweier Wörter mit einer Länge von 16 **Zeichen für Zeichen** (Schleife), **angr** viel Rechenaufwand, da **angr** exponentiell viele Verzweigungen erzeugen muss, weil es pro if eine Verzweigung erstellt: `2^16`\
+> Daher ist es einfacher, **angr zu einem vorherigen Punkt zurückkehren zu lassen** (an dem der tatsächlich schwierige Teil bereits erledigt wurde) und **diese Constraints manuell festzulegen**.
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -480,7 +480,7 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!CAUTION]
-> In einigen Szenarien kannst du **veritesting** aktivieren. Dabei werden ähnliche Zustände zusammengeführt, um unnötige Branches einzusparen und die Lösung zu finden: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> In einigen Szenarien kannst du **veritesting** aktivieren, wodurch ähnliche Status zusammengeführt werden, um unnötige Branches zu vermeiden und die Lösung zu finden: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!TIP]
 > Eine weitere Möglichkeit in diesen Szenarien besteht darin, die **Funktion zu hooken und angr etwas zu geben, das es** leichter verstehen kann.
@@ -488,7 +488,7 @@ main(sys.argv)
 ### Simulation Managers
 
 Einige Simulation Managers können nützlicher sein als andere. Im vorherigen Beispiel gab es ein Problem, da viele nützliche Branches erstellt wurden. Hier wird die **veritesting**-Technik diese zusammenführen und eine Lösung finden.\
-Dieser Simulation Manager kann ebenfalls aktiviert werden mit: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+Dieser Simulation Manager kann auch mit folgendem aktiviert werden: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
 import claripy
@@ -526,7 +526,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Hooking/Umgehen eines einzelnen Aufrufs einer Funktion
+### Hooking/Bypassing eines Funktionsaufrufs
 ```python
 # This level performs the following computations:
 #
@@ -562,7 +562,7 @@ user_input_buffer_address,
 user_input_buffer_length
 )
 
-# Create a simbolic IF that if the loaded string frommemory is the expected
+# Create a symbolic If expression that checks the string loaded from memory
 # return True (1) if not returns False (0) in eax
 check_against_string = 'XKSPZSJKJYQCQXZV'.encode() # :string
 
@@ -807,8 +807,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-## Referenzen
+## References
 
-- [1] [jakespringer/angr_ctf - GitHub repository](https://github.com/jakespringer/angr_ctf)
-
+- [1] [jakespringer/angr_ctf - GitHub-Repository](https://github.com/jakespringer/angr_ctf)
 {{#include ../../../banners/hacktricks-training.md}}
