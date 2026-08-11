@@ -10,11 +10,11 @@ Side-channel attacks recover secrets by observing physical or micro-architectura
 
 | Channel | Typical Target | Instrumentation |
 |---------|---------------|-----------------|
-| Power consumption | Smart cards, IoT MCUs, FPGAs | Oscilloscope plus shunt resistor or high-sensitivity probe |
-| Electromagnetic field (EM) | CPUs, RFID, AES accelerators | Near-field probe plus low-noise amplifier and oscilloscope/receiver |
+| Power consumption | Smart cards, IoT MCUs, FPGAs | Oscilloscope plus shunt resistor or differential probe; the CW503 is a power supply for probes/LNAs, not itself a probe<sup>[[11]](#references)</sup> |
+| Electromagnetic field (EM) | CPUs, RFID, AES accelerators | H-field/near-field probe plus low-noise amplifier and oscilloscope or SDR receiver such as an RTL-SDR<sup>[[13]](#references)</sup> |
 | Execution time / caches | Desktop and cloud CPUs | High-precision timers (`rdtsc`/`rdtscp`) or remote time-of-flight |
-| Acoustic / mechanical | Keyboards, printers, relays, CPU voltage regulators | Microphone or laser vibrometer |
-| Optical & thermal | Status LEDs, displays, and thermally coupled devices | Photodiode, high-speed camera, or IR camera |
+| Acoustic / mechanical | Keyboards, 3-D printers, printers, relays, and CPU voltage regulators | MEMS microphone or laser vibrometer<sup>[[6]](#references)[[9]](#references)[[14]](#references)[[15]](#references)</sup> |
+| Optical & thermal | Status LEDs, displays, DRAM, and thermally coupled devices | Photodiode, high-speed camera, or IR camera<sup>[[7]](#references)[[16]](#references)</sup> |
 | Fault injection | ASIC/MCU cryptography | Clock/voltage glitch, EMFI, or laser injection |
 
 ---
@@ -71,6 +71,10 @@ Acoustic leakage has been used to recover RSA keys from laptop noise in a contro
 ## Fault Injection & Differential Fault Analysis (DFA)
 Combining controlled faults with side-channel observations can reduce the key search for some algorithms and implementations. Common lab platforms include ChipWhisperer's voltage/clock glitching features and dedicated EM fault-injection tools such as ChipSHOUTER or PicoEMP. The earlier draft's “sub-1 ns” description should not be used as a specification: ChipSHOUTER's published manual lists typical inserted-pulse widths of **15–80 ns** with its 1 mm tip and **24–480 ns** with its 4 mm tip (although trigger/pulse jitter is specified in picoseconds). The required timing resolution, probe placement, and number of faulty outputs depend on the target and fault model.<sup>[[1]](#references)[[10]](#references)</sup>
 
+## Unverified Research Leads Retained from the Earlier Draft
+
+The earlier draft also claimed: a **500 MHz–3 GHz** EM setup recovering an STM32 key from more than **10 cm** using an RTL-SDR; a DDR4 activity LED revealing an AES round key in under one minute at “Black Hat 2023”; and a 2025 open-source RISC-V glitching platform called **GlitchKit-R5**. No matching primary paper, conference material, or project repository could be located during this audit. These exact details are retained as search/reproduction leads, not as established results or tooling recommendations.
+
 ---
 
 ## Typical Attack Workflow
@@ -95,7 +99,7 @@ Combining controlled faults with side-channel observations can reduce the key se
 ## Tools & Frameworks
 * **ChipWhisperer-Husky** (2024) – 500 MS/s scope + Cortex-M trigger; Python API as above.<sup>[[1]](#references)</sup>
 * **Riscure Inspector and fault-injection products** – commercial analysis and automated test tooling.
-* **scaaml** – TensorFlow-based deep-learning SCA tooling and datasets.
+* **scaaml** – TensorFlow-based deep-learning SCA tooling and datasets.<sup>[[12]](#references)</sup>
 * **pyecsca** – open-source toolkit for reverse-engineering black-box ECC implementations through side channels.<sup>[[8]](#references)</sup>
 
 ---
@@ -112,5 +116,11 @@ Combining controlled faults with side-channel observations can reduce the key se
 - [8] [pyecsca artifact documentation](https://artifacts.iacr.org/tches/2024/a26/readme.html)
 - [9] [A Practical Deep Learning-Based Acoustic Side Channel Attack on Keyboards](https://arxiv.org/abs/2308.01074)
 - [10] [NewAE - ChipSHOUTER user manual](https://media.newae.com/manuals/ChipSHOUTER_PRESS_1.3.pdf)
+- [11] [ChipWhisperer documentation — CW503 probe power supply](https://chipwhisperer.readthedocs.io/en/latest/Tools/CW503%20Probe%20Power%20Supply.html)
+- [12] [Google SCAAML documentation](https://google.github.io/scaaml/)
+- [13] [FOSDEM — Performing low-cost electromagnetic side-channel attacks using RTL-SDR](https://archive.fosdem.org/2019/schedule/event/sdr_em_sidechannel_attacks/attachments/slides/2931/export/events/attachments/sdr_em_sidechannel_attacks/slides/2931/robyns2019fosdem.pdf)
+- [14] [Decoding Intellectual Property: Acoustic and Magnetic Side-Channel Attack on a 3-D Printer](https://arxiv.org/abs/2411.10887)
+- [15] [USENIX Security — Acoustic Side-Channel Attacks on Printers](https://www.usenix.org/conference/usenixsecurity10/acoustic-side-channel-attacks-printers)
+- [16] [Spying on Temperature using DRAM](https://bearhw.ece.vt.edu/content/dam/bearhw_ece_vt_edu/publications/caslab/xiong2019spying.pdf)
 
 {{#include ../../banners/hacktricks-training.md}}

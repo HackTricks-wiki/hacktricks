@@ -58,7 +58,7 @@ minimodem -f noise.wav 1200
 minimodem -f noise.wav 2400
 ```
 
-`minimodem` supports Bell and other FSK modes plus custom mark/space frequencies; consult its options rather than assuming every recording can be autodetected. Try `--rx-invert`, an explicit baud mode, or a suitable sample rate when output is garbled.<sup>[[4]](#references)</sup>
+`minimodem` supports Bell and other FSK modes plus custom mark/space frequencies; consult its options rather than assuming every recording can be autodetected. Try `--rx-invert`, an explicit baud mode, or `--samplerate <Hz>` when output is garbled.<sup>[[4]](#references)</sup>
 
 ## WAV LSB
 
