@@ -1,13 +1,13 @@
-# Angr - Przykłady
+# Angr - Examples
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Jeśli program używa `scanf` do pobrania **kilku wartości naraz ze standardowego wejścia**, musisz wygenerować stan rozpoczynający się po **`scanf`**.
+> Jeśli program używa `scanf` do pobrania **kilku wartości jednocześnie ze stdin**, musisz wygenerować stan, który rozpoczyna się po **`scanf`**.
 
-Kod pochodzi z [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
+Kody pochodzą z [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
 
-### Dane wejściowe umożliwiające dotarcie do adresu (z podaniem adresu)
+### Dane wejściowe umożliwiające dotarcie do adresu (wskazującego adres)
 ```python
 import angr
 import sys
@@ -40,7 +40,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Dane wejściowe prowadzące do adresu (wskazujące instrukcje `print`)
+### Dane wejściowe umożliwiające dotarcie do adresu (wskazujące wydruki)
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -104,7 +104,7 @@ password1 = claripy.BVS('password1', password1_size_in_bits)
 password2_size_in_bits = 32  # :integer
 password2 = claripy.BVS('password2', password2_size_in_bits)
 
-# Relate it Vectors with the registriy values you are interested in to reach an address
+# Relate its vectors to the register values needed to reach an address
 initial_state.regs.eax = password0
 initial_state.regs.ebx = password1
 initial_state.regs.edx = password2
@@ -201,11 +201,11 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-W tym scenariuszu dane wejściowe zostały pobrane za pomocą `scanf("%u %u")` i podano wartość `"1 1"`, dlatego wartości **`0x00000001`** na stacku pochodzą z **danych wejściowych użytkownika**. Możesz zobaczyć, że te wartości zaczynają się od `$ebp - 8`. Dlatego w kodzie **odjęliśmy 8 bajtów od `$esp` (ponieważ w tym momencie `$ebp` i `$esp` miały tę samą wartość)**, a następnie wykonaliśmy push BVS.
+W tym scenariuszu dane wejściowe zostały pobrane za pomocą `scanf("%u %u")` i podano wartość `"1 1"`, dlatego wartości **`0x00000001`** na stosie pochodzą z **danych wejściowych użytkownika**. Możesz zobaczyć, że te wartości zaczynają się pod adresem `$ebp - 8`. Dlatego w kodzie **odjęliśmy 8 bajtów od `$esp` (ponieważ w tym momencie `$ebp` i `$esp` miały tę samą wartość)**, a następnie umieściliśmy BVS na stosie.
 
-![Umieść wektory bitowe na stacku, aby ustalić wartość, do której dana pozycja stacka musi dotrzeć, żeby osiągnąć określony przepływ programu: W tym scenariuszu dane wejściowe zostały pobrane za pomocą scanf("%u %u") i podano wartość "1...](<../../../images/image (136).png>)
+![Umieść wektory bitowe na stosie, aby ustalić wartość, jaką musi mieć dana pozycja stosu, aby osiągnąć określony przepływ programu: W tym scenariuszu dane wejściowe zostały pobrane za pomocą scanf("%u %u") i podano wartość "1...](<../../../images/image (136).png>)
 
-### Statyczne wartości pamięci (zmienne globalne)
+### Wartości pamięci statycznej (zmienne globalne)
 ```python
 import angr
 import claripy
@@ -215,7 +215,7 @@ def main(argv):
 path_to_binary = argv[1]
 project = angr.Project(path_to_binary)
 
-#Get an address after the scanf. Once the input has already being saved in the memory positions
+# Get an address after scanf, once the input has been saved in memory
 start_address = 0x8048606
 initial_state = project.factory.blank_state(addr=start_address)
 
@@ -337,7 +337,7 @@ def main(argv):
 path_to_binary = argv[1]
 project = angr.Project(path_to_binary)
 
-# Get an address just before opening the file with th simbolic content
+# Get an address just before opening the file with the symbolic content
 # Or at least when the file is not going to suffer more changes before being read
 start_address = 0x80488db
 initial_state = project.factory.blank_state(addr=start_address)
@@ -347,10 +347,10 @@ initial_state = project.factory.blank_state(addr=start_address)
 filename = 'WCEXPXBW.txt'
 symbolic_file_size_bytes = 64
 
-# Create a BV which is going to be the content of the simbolic file
+# Create a bit-vector that will hold the symbolic file content
 password = claripy.BVS('password', symbolic_file_size_bytes * 8)
 
-# Create the file simulation with the simbolic content
+# Create the simulated file with symbolic content
 password_file = angr.storage.SimFile(filename, content=password)
 
 # Add the symbolic file we created to the symbolic filesystem.
@@ -404,11 +404,11 @@ main(sys.argv)
 >  # (!)
 > ```
 
-### Stosowanie ograniczeń
+### Nakładanie ograniczeń
 
 > [!TIP]
-> Czasami proste operacje wykonywane przez człowieka, takie jak porównanie 2 słów o długości 16 **znak po znaku** (pętla), są dla **angr** bardzo **kosztowne**, ponieważ musi on generować rozgałęzienia **wykładniczo** — generuje 1 rozgałęzienie na każde `if`: `2^16`\
-> Dlatego łatwiej jest **poprosić angr o przejście do wcześniejszego punktu** (w którym trudna część została już wykonana) i **ustawić te ograniczenia ręcznie**.
+> Czasami proste operacje wykonywane przez człowieka, takie jak porównywanie 2 słów o długości 16 **znak po znaku** (w pętli), mogą być dla **angr** bardzo **kosztowne**, ponieważ musi on generować rozgałęzienia **wykładniczo**, gdyż tworzy 1 rozgałęzienie dla każdego if: `2^16`\
+> Dlatego łatwiej jest **poprosić angr o powrót do wcześniejszego punktu** (w którym wykonano już naprawdę trudną część) i **ręcznie ustawić te ograniczenia**.
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -480,15 +480,15 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!CAUTION]
-> W niektórych scenariuszach możesz aktywować **veritesting**, który połączy podobne statusy, aby pominąć niepotrzebne gałęzie i znaleźć rozwiązanie: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> W niektórych scenariuszach możesz aktywować **veritesting**, który połączy podobne stany, aby pominąć niepotrzebne gałęzie i znaleźć rozwiązanie: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!TIP]
-> Inną rzeczą, którą możesz zrobić w tych scenariuszach, jest **hook funkcji, dostarczając angr coś, co może łatwiej zrozumieć**.
+> Inną rzeczą, którą możesz zrobić w tych scenariuszach, jest **hook funkcji, aby przekazać angr coś, co łatwiej zrozumie**.
 
-### Simulation Managers
+### Menedżery symulacji
 
-Niektóre simulation managers mogą być bardziej przydatne niż inne. W poprzednim przykładzie pojawił się problem, ponieważ utworzono wiele użytecznych gałęzi. Tutaj technika **veritesting** połączy je i znajdzie rozwiązanie.\
-Ten simulation manager można również aktywować za pomocą: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+Niektóre menedżery symulacji mogą być bardziej przydatne niż inne. W poprzednim przykładzie występował problem, ponieważ tworzono wiele użytecznych gałęzi. Tutaj technika **veritesting** połączy je i znajdzie rozwiązanie.\
+Ten menedżer symulacji można również aktywować za pomocą: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
 import claripy
@@ -526,7 +526,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Hooking/omijanie jednego wywołania funkcji
+### Hooking/Bypassing jedno wywołanie funkcji
 ```python
 # This level performs the following computations:
 #
@@ -562,7 +562,7 @@ user_input_buffer_address,
 user_input_buffer_length
 )
 
-# Create a simbolic IF that if the loaded string frommemory is the expected
+# Create a symbolic If expression that checks the string loaded from memory
 # return True (1) if not returns False (0) in eax
 check_against_string = 'XKSPZSJKJYQCQXZV'.encode() # :string
 
@@ -809,6 +809,5 @@ main(sys.argv)
 ```
 ## References
 
-- [1] [jakespringer/angr_ctf - GitHub repository](https://github.com/jakespringer/angr_ctf)
-
+- [1] [jakespringer/angr_ctf - repozytorium GitHub](https://github.com/jakespringer/angr_ctf)
 {{#include ../../../banners/hacktricks-training.md}}

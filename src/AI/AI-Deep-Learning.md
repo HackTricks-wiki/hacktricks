@@ -1,125 +1,126 @@
-# Deep Learning
+# Głębokie uczenie
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Deep Learning
+## Głębokie uczenie <sup>[[1]](#references)</sup>
 
-Uczenie głębokie to podzbiór uczenia maszynowego, który wykorzystuje sieci neuronowe z wieloma warstwami (głębokie sieci neuronowe) do modelowania złożonych wzorców w danych. Osiągnęło ono niezwykły sukces w różnych dziedzinach, w tym w wizji komputerowej, przetwarzaniu języka naturalnego i rozpoznawaniu mowy.
+Głębokie uczenie jest podzbiorem machine learning, który wykorzystuje sieci neuronowe z wieloma warstwami (głębokie sieci neuronowe) do modelowania złożonych wzorców w danych. Osiągnęło ono znaczące sukcesy w różnych dziedzinach, w tym w computer vision, przetwarzaniu języka naturalnego i rozpoznawaniu mowy.
 
-### Neural Networks
+### Sieci neuronowe
 
-Sieci neuronowe są podstawowymi elementami uczenia głębokiego. Składają się z połączonych węzłów (neuronów) zorganizowanych w warstwy. Każdy neuron otrzymuje dane wejściowe, stosuje ważoną sumę i przekazuje wynik przez funkcję aktywacji, aby uzyskać wyjście. Warstwy można sklasyfikować w następujący sposób:
-- **Input Layer**: Pierwsza warstwa, która otrzymuje dane wejściowe.
-- **Hidden Layers**: Warstwy pośrednie, które wykonują transformacje na danych wejściowych. Liczba warstw ukrytych i neuronów w każdej warstwie może się różnić, co prowadzi do różnych architektur.
-- **Output Layer**: Ostatnia warstwa, która produkuje wyjście sieci, takie jak prawdopodobieństwa klas w zadaniach klasyfikacyjnych.
+Sieci neuronowe są podstawowymi elementami deep learning. Składają się z połączonych ze sobą węzłów (neuronów) zorganizowanych w warstwy. Każdy neuron otrzymuje dane wejściowe, oblicza sumę ważoną i przekazuje wynik przez funkcję aktywacji, aby wygenerować dane wyjściowe. Warstwy można podzielić w następujący sposób:
+- **Warstwa wejściowa**: Pierwsza warstwa, która otrzymuje dane wejściowe.
+- **Warstwy ukryte**: Warstwy pośrednie, które wykonują transformacje danych wejściowych. Liczba warstw ukrytych i neuronów w każdej warstwie może się różnić, prowadząc do powstania różnych architektur.
+- **Warstwa wyjściowa**: Ostatnia warstwa, która generuje dane wyjściowe sieci, takie jak prawdopodobieństwa klas w zadaniach klasyfikacji.
 
-### Activation Functions
 
-Gdy warstwa neuronów przetwarza dane wejściowe, każdy neuron stosuje wagę i bias do wejścia (`z = w * x + b`), gdzie `w` to waga, `x` to wejście, a `b` to bias. Wyjście neuronu jest następnie przekazywane przez **funkcję aktywacji, aby wprowadzić nieliniowość** do modelu. Ta funkcja aktywacji zasadniczo wskazuje, czy następny neuron "powinien być aktywowany i w jakim stopniu". Umożliwia to sieci uczenie się złożonych wzorców i relacji w danych, co pozwala jej przybliżać dowolną funkcję ciągłą.
+### Funkcje aktywacji
 
-Dlatego funkcje aktywacji wprowadzają nieliniowość do sieci neuronowej, umożliwiając jej uczenie się złożonych relacji w danych. Powszechne funkcje aktywacji to:
-- **Sigmoid**: Mapuje wartości wejściowe na zakres między 0 a 1, często używane w klasyfikacji binarnej.
-- **ReLU (Rectified Linear Unit)**: Zwraca bezpośrednio wejście, jeśli jest dodatnie; w przeciwnym razie zwraca zero. Jest szeroko stosowane ze względu na swoją prostotę i skuteczność w trenowaniu głębokich sieci.
-- **Tanh**: Mapuje wartości wejściowe na zakres między -1 a 1, często używane w warstwach ukrytych.
-- **Softmax**: Przekształca surowe wyniki w prawdopodobieństwa, często używane w warstwie wyjściowej do klasyfikacji wieloklasowej.
+Gdy warstwa neuronów przetwarza dane wejściowe, każdy neuron stosuje wagę i bias do danych wejściowych (`z = w * x + b`), gdzie `w` jest wagą, `x` jest danymi wejściowymi, a `b` jest biasem. Dane wyjściowe neuronu są następnie przekazywane przez **funkcję aktywacji w celu wprowadzenia nieliniowości** do modelu. Ta funkcja aktywacji zasadniczo wskazuje, czy następny neuron „powinien zostać aktywowany i w jakim stopniu”. Dzięki temu sieć może uczyć się złożonych wzorców i zależności w danych, co umożliwia jej aproksymowanie dowolnej funkcji ciągłej.
+
+Funkcje aktywacji wprowadzają zatem nieliniowość do sieci neuronowej, umożliwiając jej uczenie się złożonych zależności w danych. Typowe funkcje aktywacji obejmują:
+- **Sigmoid**: Odwzorowuje wartości wejściowe na zakres od 0 do 1; często używana w klasyfikacji binarnej.
+- **ReLU (Rectified Linear Unit)**: Zwraca dane wejściowe bezpośrednio, jeśli są dodatnie; w przeciwnym razie zwraca zero. Jest szeroko stosowana ze względu na prostotę i skuteczność w trenowaniu głębokich sieci.
+- **Tanh**: Odwzorowuje wartości wejściowe na zakres od -1 do 1; często używana w warstwach ukrytych.
+- **Softmax**: Konwertuje surowe wyniki na prawdopodobieństwa; często używana w warstwie wyjściowej do klasyfikacji wieloklasowej.
 
 ### Backpropagation
 
-Backpropagation to algorytm używany do trenowania sieci neuronowych poprzez dostosowywanie wag połączeń między neuronami. Działa poprzez obliczanie gradientu funkcji straty względem każdej wagi i aktualizowanie wag w przeciwnym kierunku gradientu, aby zminimalizować stratę. Kroki zaangażowane w backpropagation to:
+Backpropagation to algorytm używany do trenowania sieci neuronowych poprzez dostosowywanie wag połączeń między neuronami. Działa poprzez obliczanie gradientu funkcji straty względem każdej wagi i aktualizowanie wag w kierunku przeciwnym do gradientu w celu zminimalizowania straty. Kroki wykonywane podczas backpropagation to:
 
-1. **Forward Pass**: Oblicz wyjście sieci, przekazując dane wejściowe przez warstwy i stosując funkcje aktywacji.
-2. **Loss Calculation**: Oblicz stratę (błąd) między przewidywanym wyjściem a prawdziwym celem za pomocą funkcji straty (np. średni błąd kwadratowy dla regresji, entropia krzyżowa dla klasyfikacji).
-3. **Backward Pass**: Oblicz gradienty straty względem każdej wagi, korzystając z reguły łańcuchowej rachunku różniczkowego.
-4. **Weight Update**: Zaktualizuj wagi, korzystając z algorytmu optymalizacji (np. stochastyczny spadek gradientu, Adam), aby zminimalizować stratę.
+1. **Forward Pass**: Obliczenie danych wyjściowych sieci poprzez przekazanie danych wejściowych przez warstwy i zastosowanie funkcji aktywacji.
+2. **Loss Calculation**: Obliczenie straty (błędu) między przewidywanymi danymi wyjściowymi a prawdziwą wartością docelową za pomocą funkcji straty (np. średni błąd kwadratowy dla regresji, cross-entropy dla klasyfikacji).
+3. **Backward Pass**: Obliczenie gradientów straty względem każdej wagi przy użyciu reguły łańcuchowej rachunku różniczkowego.
+4. **Weight Update**: Aktualizacja wag za pomocą algorytmu optymalizacji (np. stochastic gradient descent, Adam) w celu zminimalizowania straty.
 
-## Convolutional Neural Networks (CNNs)
+## Convolutional Neural Networks (CNNs) <sup>[[2]](#references)</sup>
 
-Konwolucyjne sieci neuronowe (CNN) to specjalizowany typ sieci neuronowej zaprojektowany do przetwarzania danych w formie siatki, takich jak obrazy. Są szczególnie skuteczne w zadaniach związanych z wizją komputerową dzięki swojej zdolności do automatycznego uczenia się przestrzennych hierarchii cech.
+Convolutional Neural Networks (CNNs) to wyspecjalizowany typ sieci neuronowej przeznaczony do przetwarzania danych o strukturze siatki, takich jak obrazy. Są szczególnie skuteczne w zadaniach computer vision ze względu na zdolność do automatycznego uczenia się przestrzennych hierarchii cech.
 
-Główne komponenty CNN to:
-- **Convolutional Layers**: Stosują operacje konwolucji do danych wejściowych, używając uczących się filtrów (jąder) do wydobywania lokalnych cech. Każdy filtr przesuwa się po wejściu i oblicza iloczyn skalarny, produkując mapę cech.
-- **Pooling Layers**: Zmniejszają rozmiary map cech, zachowując ważne cechy. Powszechne operacje poolingowe to max pooling i average pooling.
-- **Fully Connected Layers**: Łączą każdy neuron w jednej warstwie z każdym neuronem w następnej warstwie, podobnie jak w tradycyjnych sieciach neuronowych. Te warstwy są zazwyczaj używane na końcu sieci do zadań klasyfikacyjnych.
+Główne komponenty CNN obejmują:
+- **Convolutional Layers**: Stosują operacje splotu na danych wejściowych za pomocą uczonych filtrów (jąder) w celu wyodrębnienia cech lokalnych. Każdy filtr przesuwa się po danych wejściowych i oblicza iloczyn skalarny, tworząc mapę cech.
+- **Pooling Layers**: Zmniejszają mapy cech, aby ograniczyć ich wymiary przestrzenne przy jednoczesnym zachowaniu istotnych cech. Typowe operacje pooling obejmują max pooling i average pooling.
+- **Fully Connected Layers**: Łączą każdy neuron jednej warstwy z każdym neuronem następnej warstwy, podobnie jak w tradycyjnych sieciach neuronowych. Warstwy te są zwykle używane na końcu sieci do zadań klasyfikacyjnych.
 
-Wewnątrz CNN **`Convolutional Layers`**, możemy również wyróżnić:
-- **Initial Convolutional Layer**: Pierwsza warstwa konwolucyjna, która przetwarza surowe dane wejściowe (np. obraz) i jest przydatna do identyfikacji podstawowych cech, takich jak krawędzie i tekstury.
-- **Intermediate Convolutional Layers**: Kolejne warstwy konwolucyjne, które budują na cechach wyuczonych przez warstwę początkową, pozwalając sieci na uczenie się bardziej złożonych wzorców i reprezentacji.
-- **Final Convolutional Layer**: Ostatnie warstwy konwolucyjne przed warstwami w pełni połączonymi, które uchwycają cechy na wysokim poziomie i przygotowują dane do klasyfikacji.
+Wewnątrz CNN, w **`Convolutional Layers`**, możemy również wyróżnić:
+- **Initial Convolutional Layer**: Pierwsza warstwa splotowa, która przetwarza surowe dane wejściowe (np. obraz) i jest przydatna do identyfikowania podstawowych cech, takich jak krawędzie i tekstury.
+- **Intermediate Convolutional Layers**: Kolejne warstwy splotowe, które bazują na cechach wyuczonych przez warstwę początkową, umożliwiając sieci uczenie się bardziej złożonych wzorców i reprezentacji.
+- **Final Convolutional Layer**: Ostatnie warstwy splotowe przed warstwami w pełni połączonymi, które przechwytują cechy wysokiego poziomu i przygotowują dane do klasyfikacji.
 
 > [!TIP]
-> CNN są szczególnie skuteczne w klasyfikacji obrazów, detekcji obiektów i zadaniach segmentacji obrazów dzięki ich zdolności do uczenia się przestrzennych hierarchii cech w danych w formie siatki oraz redukcji liczby parametrów poprzez dzielenie wag.
-> Co więcej, działają lepiej z danymi wspierającymi zasadę lokalności cech, gdzie sąsiednie dane (piksele) są bardziej prawdopodobne, że są ze sobą powiązane niż odległe piksele, co może nie mieć miejsca w przypadku innych typów danych, takich jak tekst.
-> Ponadto, zauważ, jak CNN będą w stanie identyfikować nawet złożone cechy, ale nie będą w stanie zastosować żadnego kontekstu przestrzennego, co oznacza, że ta sama cecha znaleziona w różnych częściach obrazu będzie taka sama.
+> CNN są szczególnie skuteczne w zadaniach klasyfikacji obrazów, wykrywania obiektów i segmentacji obrazów ze względu na zdolność do uczenia się przestrzennych hierarchii cech w danych o strukturze siatki oraz zmniejszania liczby parametrów dzięki współdzieleniu wag.
+> Ponadto lepiej działają z danymi, które spełniają zasadę lokalności cech, zgodnie z którą sąsiednie dane (piksele) są bardziej prawdopodobnie powiązane niż odległe piksele, co może nie mieć miejsca w przypadku innych typów danych, takich jak tekst.
+> Co więcej, należy zauważyć, że CNN będą w stanie identyfikować nawet złożone cechy, ale nie będą w stanie stosować żadnego kontekstu przestrzennego, co oznacza, że ta sama cecha znaleziona w różnych częściach obrazu będzie traktowana tak samo.
 
-### Example defining a CNN
+### Przykład definiowania CNN
 
-*Tutaj znajdziesz opis, jak zdefiniować konwolucyjną sieć neuronową (CNN) w PyTorch, która zaczyna się od partii obrazów RGB jako zbioru danych o rozmiarze 48x48 i wykorzystuje warstwy konwolucyjne oraz maxpool do wydobywania cech, a następnie warstwy w pełni połączone do klasyfikacji.*
+*Tutaj znajdziesz opis sposobu definiowania Convolutional Neural Network (CNN) w PyTorch, która rozpoczyna pracę z batch’em obrazów RGB jako datasetem o rozmiarze 48x48 i wykorzystuje warstwy splotowe oraz maxpool do wyodrębniania cech, a następnie warstwy w pełni połączone do klasyfikacji.*
 
-Tak można zdefiniować 1 warstwę konwolucyjną w PyTorch: `self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)`.
+Tak można zdefiniować 1 warstwę splotową w PyTorch: `self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)`.
 
-- `in_channels`: Liczba kanałów wejściowych. W przypadku obrazów RGB jest to 3 (jeden dla każdego kanału kolorystycznego). Jeśli pracujesz z obrazami w odcieniach szarości, będzie to 1.
+- `in_channels`: Liczba kanałów wejściowych. W przypadku obrazów RGB wynosi ona 3 (po jednym dla każdego kanału koloru). Jeśli pracujesz z obrazami w skali szarości, będzie wynosić 1.
 
-- `out_channels`: Liczba kanałów wyjściowych (filtrów), które warstwa konwolucyjna będzie uczyć. To jest hiperparametr, który możesz dostosować w zależności od architektury swojego modelu.
+- `out_channels`: Liczba kanałów wyjściowych (filtrów), których nauczy się warstwa splotowa. Jest to hyperparameter, który można dostosować w zależności od architektury modelu.
 
-- `kernel_size`: Rozmiar filtra konwolucyjnego. Powszechnym wyborem jest 3x3, co oznacza, że filtr pokryje obszar 3x3 obrazu wejściowego. To jak stempel kolorowy 3×3×3, który jest używany do generowania out_channels z in_channels:
+- `kernel_size`: Rozmiar filtra splotowego. Typowym wyborem jest 3x3, co oznacza, że filtr obejmie obszar 3x3 obrazu wejściowego. Jest to rodzaj kolorowego stempla 3×3×3 używanego do wygenerowania `out_channels` z `in_channels`:
 1. Umieść ten stempel 3×3×3 w lewym górnym rogu sześcianu obrazu.
-2. Pomnóż każdą wagę przez piksel pod nim, dodaj je wszystkie, dodaj bias → otrzymujesz jedną liczbę.
+2. Pomnóż każdą wagę przez znajdujący się pod nią piksel, dodaj wszystkie wyniki, a następnie dodaj bias → otrzymasz jedną liczbę.
 3. Zapisz tę liczbę na pustej mapie w pozycji (0, 0).
-4. Przesuń stempel o jeden piksel w prawo (stride = 1) i powtórz, aż wypełnisz całą siatkę 48×48.
+4. Przesuń stempel o jeden piksel w prawo (stride = 1) i powtarzaj, aż wypełnisz całą siatkę 48×48.
 
-- `padding`: Liczba pikseli dodawanych do każdej strony wejścia. Padding pomaga zachować wymiary przestrzenne wejścia, co pozwala na większą kontrolę nad rozmiarem wyjścia. Na przykład, przy jądrze 3x3 i wejściu o rozmiarze 48x48, padding równy 1 zachowa ten sam rozmiar wyjścia (48x48) po operacji konwolucji. Dzieje się tak, ponieważ padding dodaje obramowanie o 1 pikselu wokół obrazu wejściowego, co pozwala jądrowi przesuwać się po krawędziach bez zmniejszania wymiarów przestrzennych.
+- `padding`: Liczba pikseli dodawanych do każdego boku danych wejściowych. Padding pomaga zachować wymiary przestrzenne danych wejściowych, zapewniając większą kontrolę nad rozmiarem danych wyjściowych. Na przykład przy jądrze 3x3 i obrazie wejściowym o rozmiarze 48x48 pikseli padding o wartości 1 zachowa ten sam rozmiar danych wyjściowych (48x48) po operacji splotu. Dzieje się tak, ponieważ padding dodaje obramowanie o szerokości 1 piksela wokół obrazu wejściowego, umożliwiając przesuwanie jądra po krawędziach bez zmniejszania wymiarów przestrzennych.
 
-Wówczas liczba parametrów do wytrenowania w tej warstwie wynosi:
-- (3x3x3 (rozmiar jądra) + 1 (bias)) x 32 (out_channels) = 896 parametrów do wytrenowania.
+Liczba trenowalnych parametrów w tej warstwie wynosi zatem:
+- (3x3x3 (rozmiar jądra) + 1 (bias)) x 32 (`out_channels`) = 896 trenowalnych parametrów.
 
-Zauważ, że do każdego używanego jądra dodawany jest bias (+1), ponieważ funkcją każdej warstwy konwolucyjnej jest nauczenie się liniowej transformacji wejścia, co jest reprezentowane przez równanie:
+Należy zauważyć, że dla każdego użytego jądra dodawany jest bias (+1), ponieważ funkcją każdej warstwy splotowej jest nauczenie się liniowej transformacji danych wejściowych, reprezentowanej równaniem:
 ```plaintext
 Y = f(W * X + b)
 ```
-gdzie `W` to macierz wag (nauczone filtry, 3x3x3 = 27 parametrów), `b` to wektor biasu, który wynosi +1 dla każdego kanału wyjściowego.
+gdzie `W` jest macierzą wag (wyuczonymi filtrami, 3x3x3 = 27 parametrów), a `b` jest wektorem biasu, którego wartość dla każdego kanału wyjściowego wynosi +1.
 
-Zauważ, że wyjście `self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)` będzie tensor o kształcie `(batch_size, 32, 48, 48)`, ponieważ 32 to nowa liczba generowanych kanałów o rozmiarze 48x48 pikseli.
+Zauważ, że wynikiem `self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)` będzie tensor o kształcie `(batch_size, 32, 48, 48)`, ponieważ 32 to nowa liczba wygenerowanych kanałów o rozmiarze 48x48 pikseli.
 
-Następnie możemy połączyć tę warstwę konwolucyjną z inną warstwą konwolucyjną, jak: `self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1)`.
+Następnie możemy połączyć tę warstwę konwolucyjną z kolejną warstwą konwolucyjną w następujący sposób: `self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1)`.
 
-Co doda: (32x3x3 (rozmiar jądra) + 1 (bias)) x 64 (out_channels) = 18,496 parametrów do wytrenowania i wyjście o kształcie `(batch_size, 64, 48, 48)`.
+Doda to: (32x3x3 (rozmiar kernela) + 1 (bias)) x 64 (out_channels) = 18,496 trenowalnych parametrów oraz wynik o kształcie `(batch_size, 64, 48, 48)`.
 
-Jak widać, **liczba parametrów szybko rośnie z każdą dodatkową warstwą konwolucyjną**, szczególnie w miarę zwiększania liczby kanałów wyjściowych.
+Jak widać, **liczba parametrów szybko rośnie wraz z każdą dodatkową warstwą konwolucyjną**, szczególnie gdy zwiększa się liczba kanałów wyjściowych.
 
-Jedną z opcji kontrolowania ilości używanych danych jest zastosowanie **max pooling** po każdej warstwie konwolucyjnej. Max pooling redukuje wymiary przestrzenne map cech, co pomaga zmniejszyć liczbę parametrów i złożoność obliczeniową, jednocześnie zachowując ważne cechy.
+Jedną z możliwości kontrolowania ilości wykorzystywanych danych jest użycie **max pooling** po każdej warstwie konwolucyjnej. Max pooling zmniejsza przestrzenne wymiary map cech, co pomaga ograniczyć liczbę parametrów i złożoność obliczeniową, zachowując jednocześnie istotne cechy.
 
-Można to zadeklarować jako: `self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)`. To zasadniczo wskazuje na użycie siatki 2x2 pikseli i pobranie maksymalnej wartości z każdej siatki, aby zmniejszyć rozmiar mapy cech o połowę. Ponadto `stride=2` oznacza, że operacja poolingowa będzie przesuwać się o 2 piksele na raz, w tym przypadku zapobiegając jakimkolwiek nakładkom między obszarami poolingowymi.
+Można go zadeklarować jako: `self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)`. Oznacza to zasadniczo użycie siatki pikseli 2x2 i wybranie maksymalnej wartości z każdej siatki w celu zmniejszenia rozmiaru mapy cech o połowę. Ponadto `stride=2` oznacza, że operacja pooling będzie przesuwać się za każdym razem o 2 piksele, co w tym przypadku zapobiega nakładaniu się obszarów poolingu.
 
-Z tą warstwą poolingową, kształt wyjścia po pierwszej warstwie konwolucyjnej wynosiłby `(batch_size, 64, 24, 24)` po zastosowaniu `self.pool1` do wyjścia `self.conv2`, zmniejszając rozmiar do 1/4 poprzedniej warstwy.
+Po użyciu tej warstwy poolingu kształt wyniku po pierwszej warstwie konwolucyjnej będzie wynosić `(batch_size, 64, 24, 24)` po zastosowaniu `self.pool1` do wyniku `self.conv2`, zmniejszając rozmiar do 1/4 rozmiaru poprzedniej warstwy.
 
 > [!TIP]
-> Ważne jest, aby stosować pooling po warstwach konwolucyjnych, aby zmniejszyć wymiary przestrzenne map cech, co pomaga kontrolować liczbę parametrów i złożoność obliczeniową, jednocześnie sprawiając, że początkowy parametr uczy się ważnych cech.
-> Możesz postrzegać konwolucje przed warstwą poolingową jako sposób na wydobycie cech z danych wejściowych (jak linie, krawędzie), ta informacja nadal będzie obecna w wyjściu po pooling, ale następna warstwa konwolucyjna nie będzie mogła zobaczyć oryginalnych danych wejściowych, tylko wyjście po pooling, które jest zredukowaną wersją poprzedniej warstwy z tą informacją.
-> W zwykłej kolejności: `Conv → ReLU → Pool` każde okno poolingowe 2×2 teraz konkurowało z aktywacjami cech (“krawędź obecna / nie”), a nie surowymi intensywnościami pikseli. Utrzymanie najsilniejszej aktywacji naprawdę zachowuje najbardziej istotne dowody.
+> Ważne jest stosowanie poolingu po warstwach konwolucyjnych w celu zmniejszenia przestrzennych wymiarów map cech, co pomaga kontrolować liczbę parametrów i złożoność obliczeniową, a jednocześnie pozwala początkowym parametrom nauczyć się istotnych cech.
+>Możesz postrzegać konwolucje przed warstwą poolingu jako sposób na wyodrębnianie cech z danych wejściowych (takich jak linie i krawędzie). Informacje te nadal będą obecne w wyniku poolingu, ale następna warstwa konwolucyjna nie będzie już mogła zobaczyć oryginalnych danych wejściowych, a jedynie wynik poolingu, który jest pomniejszoną wersją poprzedniej warstwy zawierającą te informacje.
+>W typowej kolejności: `Conv → ReLU → Pool` każde okno poolingu 2×2 przetwarza teraz aktywacje cech („krawędź obecna / nieobecna”), a nie surowe wartości pikseli. Zachowanie najsilniejszej aktywacji rzeczywiście zachowuje najbardziej istotne informacje.
 
-Następnie, po dodaniu tylu warstw konwolucyjnych i poolingowych, ile to konieczne, możemy spłaszczyć wyjście, aby wprowadzić je do w pełni połączonych warstw. Robi się to przez przekształcenie tensora w wektor 1D dla każdej próbki w partii:
+Następnie, po dodaniu tylu warstw konwolucyjnych i poolingowych, ile potrzeba, możemy spłaszczyć wynik, aby przekazać go do warstw w pełni połączonych. Robi się to przez przekształcenie tensora w wektor 1D dla każdej próbki w batchu:
 ```python
 x = x.view(-1, 64*24*24)
 ```
-A z tym wektorem 1D zawierającym wszystkie parametry treningowe wygenerowane przez poprzednie warstwy konwolucyjne i poolingowe, możemy zdefiniować warstwę w pełni połączoną w następujący sposób:
+A wraz z tym jednowymiarowym wektorem zawierającym wszystkie parametry treningowe wygenerowane przez poprzednie warstwy konwolucyjne i poolingowe możemy zdefiniować warstwę w pełni połączoną w następujący sposób:
 ```python
 self.fc1 = nn.Linear(64 * 24 * 24, 512)
 ```
-Który weźmie spłaszczone wyjście z poprzedniej warstwy i odwzoruje je na 512 ukrytych jednostek.
+Która pobierze spłaszczone wyjście poprzedniej warstwy i zmapuje je na 512 hidden units.
 
-Zauważ, że ta warstwa dodała `(64 * 24 * 24 + 1 (bias)) * 512 = 3,221,504` trenowalnych parametrów, co stanowi znaczący wzrost w porównaniu do warstw konwolucyjnych. Dzieje się tak, ponieważ warstwy w pełni połączone łączą każdy neuron w jednej warstwie z każdym neuronem w następnej warstwie, co prowadzi do dużej liczby parametrów.
+Zwróć uwagę, że ta warstwa dodała `(64 * 24 * 24 + 1 (bias)) * 512 = 3,221,504` trainable parameters, co stanowi znaczący wzrost w porównaniu z warstwami konwolucyjnymi. Dzieje się tak, ponieważ fully connected layers łączą każdy neuron w jednej warstwie z każdym neuronem w następnej warstwie, co prowadzi do dużej liczby parametrów.
 
-Na koniec możemy dodać warstwę wyjściową, aby wygenerować ostateczne logity klas:
+Na koniec możemy dodać warstwę wyjściową, aby wygenerować końcowe class logits:
 ```python
 self.fc2 = nn.Linear(512, num_classes)
 ```
-To doda `(512 + 1 (bias)) * num_classes` parametry do uczenia, gdzie `num_classes` to liczba klas w zadaniu klasyfikacji (np. 43 dla zestawu danych GTSRB).
+Doda to `(512 + 1 (bias)) * num_classes` trenowalnych parametrów, gdzie `num_classes` oznacza liczbę klas w zadaniu klasyfikacji (np. 43 dla zbioru danych GTSRB).
 
-Jedną z ostatnich powszechnych praktyk jest dodanie warstwy dropout przed w pełni połączonymi warstwami, aby zapobiec przeuczeniu. Można to zrobić za pomocą:
+Inną powszechną praktyką jest dodanie warstwy dropout przed warstwami fully connected, aby zapobiec overfittingowi. Można to zrobić za pomocą:
 ```python
 self.dropout = nn.Dropout(0.5)
 ```
-Ta warstwa losowo ustawia ułamek jednostek wejściowych na zero podczas treningu, co pomaga zapobiegać przeuczeniu, zmniejszając zależność od konkretnych neuronów.
+Ta warstwa losowo ustawia ułamek jednostek wejściowych na zero podczas treningu, co pomaga zapobiegać przeuczeniu poprzez zmniejszenie zależności od określonych neuronów.
 
 ### Przykład kodu CNN
 ```python
@@ -222,22 +223,22 @@ x = self.fc2(x)
 # Note that the output is not passed through a softmax activation here, as it is typically done in the loss function (e.g., CrossEntropyLoss)
 return x
 ```
-### Przykład kodu treningowego CNN
+### Przykład treningu CNN Code
 
-Poniższy kod stworzy dane treningowe i wytrenuje model `MY_NET` zdefiniowany powyżej. Oto kilka interesujących wartości do zauważenia:
+Poniższy kod utworzy dane treningowe i wytrenuje model `MY_NET` zdefiniowany powyżej. Warto zwrócić uwagę na kilka interesujących wartości:
 
-- `EPOCHS` to liczba razy, kiedy model zobaczy cały zbiór danych podczas treningu. Jeśli EPOCH jest zbyt mały, model może nie nauczyć się wystarczająco; jeśli zbyt duży, może przeuczyć się.
-- `LEARNING_RATE` to rozmiar kroku dla optymalizatora. Mała wartość learning rate może prowadzić do wolnej konwergencji, podczas gdy duża może przekroczyć optymalne rozwiązanie i uniemożliwić konwergencję.
-- `WEIGHT_DECAY` to termin regularizacji, który pomaga zapobiegać przeuczeniu poprzez karanie dużych wag.
+- `EPOCHS` to liczba razy, ile model zobaczy cały zbiór danych podczas treningu. Jeśli EPOCH jest zbyt mały, model może nauczyć się zbyt mało; jeśli jest zbyt duży, może dojść do overfittingu.
+- `LEARNING_RATE` to rozmiar kroku optymalizatora. Mały learning rate może prowadzić do powolnej zbieżności, podczas gdy duży może spowodować przekroczenie optymalnego rozwiązania i uniemożliwić zbieżność.
+- `WEIGHT_DECAY` to termin regularyzacyjny, który pomaga zapobiegać overfittingowi poprzez nakładanie kary za duże wagi.
 
-Jeśli chodzi o pętlę treningową, oto kilka interesujących informacji do poznania:
-- `criterion = nn.CrossEntropyLoss()` to funkcja straty używana do zadań klasyfikacji wieloklasowej. Łączy aktywację softmax i stratę krzyżową w jednej funkcji, co czyni ją odpowiednią do trenowania modeli, które zwracają logity klas.
-- Jeśli model miałby zwracać inne typy wyjść, takie jak klasyfikacja binarna lub regresja, używalibyśmy różnych funkcji straty, takich jak `nn.BCEWithLogitsLoss()` dla klasyfikacji binarnej lub `nn.MSELoss()` dla regresji.
-- `optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)` inicjalizuje optymalizator Adam, który jest popularnym wyborem do trenowania modeli głębokiego uczenia. Dostosowuje on learning rate dla każdego parametru na podstawie pierwszych i drugich momentów gradientów.
-- Inne optymalizatory, takie jak `optim.SGD` (Stochastic Gradient Descent) lub `optim.RMSprop`, mogą być również używane, w zależności od specyficznych wymagań zadania treningowego.
-- Metoda `model.train()` ustawia model w tryb treningowy, umożliwiając warstwom takim jak dropout i normalizacja wsadowa zachowanie się inaczej podczas treningu w porównaniu do ewaluacji.
-- `optimizer.zero_grad()` czyści gradienty wszystkich optymalizowanych tensorów przed przejściem wstecznym, co jest konieczne, ponieważ gradienty domyślnie kumulują się w PyTorch. Jeśli nie zostaną wyczyszczone, gradienty z poprzednich iteracji byłyby dodawane do bieżących gradientów, co prowadziłoby do niepoprawnych aktualizacji.
-- `loss.backward()` oblicza gradienty straty względem parametrów modelu, które są następnie używane przez optymalizator do aktualizacji wag.
+Jeśli chodzi o pętlę treningową, warto znać następujące informacje:
+- `criterion = nn.CrossEntropyLoss()` to funkcja straty używana w zadaniach klasyfikacji wieloklasowej. Łączy aktywację softmax i stratę entropii krzyżowej w jednej funkcji, dzięki czemu nadaje się do trenowania modeli zwracających logity klas.
+- Jeśli model miałby zwracać inne typy wyników, takie jak klasyfikacja binarna lub regresja, używalibyśmy innych funkcji straty, takich jak `nn.BCEWithLogitsLoss()` dla klasyfikacji binarnej lub `nn.MSELoss()` dla regresji.
+- `optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)` inicjalizuje optymalizator Adam, który jest popularnym wyborem do trenowania modeli deep learning. Dostosowuje learning rate dla każdego parametru na podstawie pierwszego i drugiego momentu gradientów.
+- Można również użyć innych optymalizatorów, takich jak `optim.SGD` (Stochastic Gradient Descent) lub `optim.RMSprop`, zależnie od konkretnych wymagań zadania treningowego.
+- Metoda `model.train()` ustawia model w trybie treningowym, dzięki czemu warstwy takie jak dropout i batch normalization zachowują się inaczej podczas treningu niż podczas ewaluacji.
+- `optimizer.zero_grad()` usuwa gradienty wszystkich optymalizowanych tensorów przed przejściem wstecznym, co jest konieczne, ponieważ w PyTorch gradienty są domyślnie kumulowane. Jeśli nie zostaną usunięte, gradienty z poprzednich iteracji zostaną dodane do bieżących gradientów, prowadząc do nieprawidłowych aktualizacji.
+- `loss.backward()` oblicza gradienty straty względem parametrów modelu, które następnie są używane przez optymalizator do aktualizacji wag.
 - `optimizer.step()` aktualizuje parametry modelu na podstawie obliczonych gradientów i learning rate.
 ```python
 import torch, torch.nn.functional as F
@@ -375,46 +376,53 @@ print(classification_report(labels_all, preds_all, zero_division=0))
 print("Confusion matrix (rows = true, cols = pred):")
 print(confusion_matrix(labels_all, preds_all))
 ```
-## Sieci Neuronowe Rekurencyjne (RNN)
+## Rekurencyjne sieci neuronowe (RNN) <sup>[[3]](#references)</sup>
 
-Sieci Neuronowe Rekurencyjne (RNN) to klasa sieci neuronowych zaprojektowanych do przetwarzania danych sekwencyjnych, takich jak szereg czasowy lub język naturalny. W przeciwieństwie do tradycyjnych sieci neuronowych typu feedforward, RNN mają połączenia, które wracają do siebie, co pozwala im utrzymywać ukryty stan, który przechwycuje informacje o poprzednich wejściach w sekwencji.
+Rekurencyjne sieci neuronowe (RNN) to klasa sieci neuronowych zaprojektowanych do przetwarzania danych sekwencyjnych, takich jak szeregi czasowe lub język naturalny. W przeciwieństwie do tradycyjnych feedforward neural networks, RNN mają połączenia, które tworzą pętle zwrotne, dzięki czemu mogą utrzymywać hidden state przechowujący informacje o wcześniejszych danych wejściowych w sekwencji.
 
-Główne składniki RNN obejmują:
-- **Warstwy Rekurencyjne**: Te warstwy przetwarzają sekwencje wejściowe krok po kroku, aktualizując swój ukryty stan na podstawie bieżącego wejścia i poprzedniego ukrytego stanu. To pozwala RNN uczyć się zależności czasowych w danych.
-- **Ukryty Stan**: Ukryty stan to wektor, który podsumowuje informacje z poprzednich kroków czasowych. Jest aktualizowany w każdym kroku czasowym i jest używany do dokonywania prognoz dla bieżącego wejścia.
-- **Warstwa Wyjściowa**: Warstwa wyjściowa produkuje ostateczne prognozy na podstawie ukrytego stanu. W wielu przypadkach RNN są używane do zadań takich jak modelowanie języka, gdzie wyjście jest rozkładem prawdopodobieństwa dla następnego słowa w sekwencji.
+Główne komponenty RNN obejmują:
+- **Warstwy rekurencyjne**: Warstwy te przetwarzają sekwencje wejściowe krok po kroku, aktualizując swój hidden state na podstawie bieżącego wejścia i poprzedniego hidden state. Dzięki temu RNN mogą uczyć się zależności czasowych w danych.
+- **Hidden state**: Hidden state to wektor podsumowujący informacje z poprzednich kroków czasowych. Jest aktualizowany przy każdym kroku czasowym i używany do tworzenia predykcji dla bieżącego wejścia.
+- **Warstwa wyjściowa**: Warstwa wyjściowa generuje końcowe predykcje na podstawie hidden state. W wielu przypadkach RNN są używane do zadań takich jak modelowanie języka, gdzie wyjściem jest rozkład prawdopodobieństwa dla następnego słowa w sekwencji.
 
-Na przykład, w modelu językowym, RNN przetwarza sekwencję słów, na przykład "Kot usiadł na" i przewiduje następne słowo na podstawie kontekstu dostarczonego przez poprzednie słowa, w tym przypadku "macie".
+Na przykład w modelu językowym RNN przetwarza sekwencję słów, na przykład „The cat sat on the”, i przewiduje następne słowo na podstawie kontekstu dostarczonego przez poprzednie słowa, w tym przypadku „mat”.
 
-### Długoterminowa Pamięć Krótkoterminowa (LSTM) i Gated Recurrent Unit (GRU)
+### Long Short-Term Memory (LSTM) i Gated Recurrent Unit (GRU) <sup>[[3]](#references)</sup>
 
-RNN są szczególnie skuteczne w zadaniach związanych z danymi sekwencyjnymi, takimi jak modelowanie języka, tłumaczenie maszynowe i rozpoznawanie mowy. Jednak mogą mieć trudności z **długozasięgowymi zależnościami z powodu problemów takich jak znikające gradienty**.
+RNN są szczególnie skuteczne w zadaniach obejmujących dane sekwencyjne, takich jak modelowanie języka, machine translation i speech recognition. Mogą jednak mieć trudności z **zależnościami dalekiego zasięgu z powodu problemów takich jak zanikające gradienty**.
 
-Aby to rozwiązać, opracowano specjalistyczne architektury, takie jak Długoterminowa Pamięć Krótkoterminowa (LSTM) i Gated Recurrent Unit (GRU). Te architektury wprowadzają mechanizmy bramkowe, które kontrolują przepływ informacji, co pozwala im skuteczniej uchwycić długozasięgowe zależności.
+Aby rozwiązać ten problem, opracowano wyspecjalizowane architektury, takie jak Long Short-Term Memory (LSTM) i Gated Recurrent Unit (GRU). Architektury te wprowadzają mechanizmy bramkujące, które kontrolują przepływ informacji, umożliwiając skuteczniejsze wychwytywanie zależności dalekiego zasięgu.
 
-- **LSTM**: Sieci LSTM używają trzech bramek (bramka wejściowa, bramka zapomnienia i bramka wyjściowa) do regulacji przepływu informacji do i z stanu komórki, co umożliwia im zapamiętywanie lub zapominanie informacji w długich sekwencjach. Bramka wejściowa kontroluje, ile nowych informacji dodać na podstawie wejścia i poprzedniego ukrytego stanu, bramka zapomnienia kontroluje, ile informacji odrzucić. Łącząc bramkę wejściową i bramkę zapomnienia, uzyskujemy nowy stan. Na koniec, łącząc nowy stan komórki z wejściem i poprzednim ukrytym stanem, uzyskujemy również nowy ukryty stan.
-- **GRU**: Sieci GRU upraszczają architekturę LSTM, łącząc bramki wejściowe i zapomnienia w jedną bramkę aktualizacji, co czyni je obliczeniowo bardziej wydajnymi, jednocześnie uchwytując długozasięgowe zależności.
+- **LSTM**: Sieci LSTM używają trzech bramek (bramki wejściowej, bramki zapominania i bramki wyjściowej) do regulowania przepływu informacji do stanu komórki i z niego, dzięki czemu mogą zapamiętywać lub zapominać informacje w długich sekwencjach. Bramka wejściowa kontroluje, ile nowych informacji należy dodać na podstawie wejścia i poprzedniego hidden state, a bramka zapominania kontroluje, ile informacji odrzucić. Łącząc bramkę wejściową i bramkę zapominania, otrzymujemy nowy stan. Następnie, łącząc nowy stan komórki z wejściem i poprzednim hidden state, otrzymujemy również nowy hidden state.
+- **GRU**: Sieci GRU upraszczają architekturę LSTM, łącząc bramki wejściową i zapominania w jedną bramkę aktualizacji, dzięki czemu są bardziej efektywne obliczeniowo, a jednocześnie nadal wychwytują zależności dalekiego zasięgu.
 
-## LLMs (Duże Modele Językowe)
+## LLM (Large Language Models)
 
-Duże Modele Językowe (LLMs) to rodzaj modelu głębokiego uczenia, zaprojektowanego specjalnie do zadań przetwarzania języka naturalnego. Są trenowane na ogromnych ilościach danych tekstowych i mogą generować tekst przypominający ludzki, odpowiadać na pytania, tłumaczyć języki i wykonywać różne inne zadania związane z językiem.
-LLMs są zazwyczaj oparte na architekturach transformatorowych, które wykorzystują mechanizmy samouważności do uchwycenia relacji między słowami w sekwencji, co pozwala im zrozumieć kontekst i generować spójny tekst.
+Large Language Models (LLM) to rodzaj modeli deep learningu zaprojektowanych specjalnie do zadań związanych z przetwarzaniem języka naturalnego. Są trenowane na ogromnych ilościach danych tekstowych i mogą generować tekst przypominający tekst tworzony przez człowieka, odpowiadać na pytania, tłumaczyć języki oraz wykonywać różne inne zadania związane z językiem.
+LLM są zwykle oparte na architekturach transformer, które wykorzystują mechanizmy self-attention do wychwytywania relacji między słowami w sekwencji, co pozwala im rozumieć kontekst i generować spójny tekst.
 
-### Architektura Transformatora
-Architektura transformatora jest podstawą wielu LLMs. Składa się z struktury kodera-dekodera, gdzie koder przetwarza sekwencję wejściową, a dekoder generuje sekwencję wyjściową. Kluczowe składniki architektury transformatora obejmują:
-- **Mechanizm Samouważności**: Ten mechanizm pozwala modelowi ocenić znaczenie różnych słów w sekwencji podczas generowania reprezentacji. Oblicza wyniki uwagi na podstawie relacji między słowami, co umożliwia modelowi skupienie się na odpowiednim kontekście.
-- **Uwaga Wielogłowa**: Ten komponent pozwala modelowi uchwycić wiele relacji między słowami, używając wielu głów uwagi, z których każda koncentruje się na różnych aspektach wejścia.
-- **Kodowanie Pozycyjne**: Ponieważ transformatory nie mają wbudowanego pojęcia kolejności słów, kodowanie pozycyjne jest dodawane do osadzeń wejściowych, aby dostarczyć informacji o pozycji słów w sekwencji.
+### Architektura transformera <sup>[[4]](#references)</sup>
+Architektura transformera stanowi podstawę wielu LLM. Składa się ze struktury encoder-decoder, w której encoder przetwarza sekwencję wejściową, a decoder generuje sekwencję wyjściową. Główne komponenty architektury transformera obejmują:
+- **Mechanizm self-attention**: Mechanizm ten pozwala modelowi oceniać znaczenie różnych słów w sekwencji podczas generowania reprezentacji. Oblicza on scores uwagi na podstawie relacji między słowami, umożliwiając modelowi skupienie się na istotnym kontekście.
+- **Multi-Head Attention**: Komponent ten pozwala modelowi wychwytywać wiele relacji między słowami za pomocą wielu głów uwagi, z których każda skupia się na innych aspektach wejścia.
+- **Kodowanie pozycyjne**: Ponieważ transformery nie mają wbudowanego pojęcia kolejności słów, do embeddings wejściowych dodaje się kodowanie pozycyjne, aby dostarczyć informacji o pozycji słów w sekwencji.
 
-## Modele Dyfuzji
-Modele dyfuzji to klasa modeli generatywnych, które uczą się generować dane, symulując proces dyfuzji. Są szczególnie skuteczne w zadaniach takich jak generowanie obrazów i zyskały popularność w ostatnich latach.
-Modele dyfuzji działają poprzez stopniowe przekształcanie prostej rozkładu szumów w złożony rozkład danych poprzez szereg kroków dyfuzji. Kluczowe składniki modeli dyfuzji obejmują:
-- **Proces Dyfuzji Naprzód**: Ten proces stopniowo dodaje szum do danych, przekształcając je w prosty rozkład szumów. Proces dyfuzji naprzód jest zazwyczaj definiowany przez szereg poziomów szumów, gdzie każdy poziom odpowiada określonej ilości szumu dodanego do danych.
-- **Proces Dyfuzji Wstecz**: Ten proces uczy się odwracać proces dyfuzji naprzód, stopniowo usuwając szum z danych, aby generować próbki z docelowego rozkładu. Proces dyfuzji wstecz jest trenowany przy użyciu funkcji straty, która zachęca model do rekonstrukcji oryginalnych danych z zaszumionych próbek.
+## Modele dyfuzyjne <sup>[[5]](#references)</sup>
+Modele dyfuzyjne to klasa modeli generatywnych, które uczą się generować dane poprzez symulowanie procesu dyfuzji. Są szczególnie skuteczne w zadaniach takich jak generowanie obrazów i zyskały popularność w ostatnich latach.
+Modele dyfuzyjne działają poprzez stopniowe przekształcanie prostego rozkładu szumu w złożony rozkład danych za pomocą serii kroków dyfuzji. Główne komponenty modeli dyfuzyjnych obejmują:
+- **Proces dyfuzji w przód**: Proces ten stopniowo dodaje szum do danych, przekształcając je w prosty rozkład szumu. Proces dyfuzji w przód jest zwykle definiowany za pomocą serii poziomów szumu, gdzie każdy poziom odpowiada określonej ilości szumu dodanego do danych.
+- **Proces dyfuzji wstecznej**: Proces ten uczy się odwracać proces dyfuzji w przód, stopniowo odszumiając dane w celu generowania próbek z docelowego rozkładu. Proces dyfuzji wstecznej jest trenowany za pomocą funkcji straty, która zachęca model do odtworzenia oryginalnych danych z zaszumionych próbek.
 
-Ponadto, aby wygenerować obraz z tekstowego podpowiedzi, modele dyfuzji zazwyczaj wykonują następujące kroki:
-1. **Kodowanie Tekstu**: Tekstowa podpowiedź jest kodowana w latentną reprezentację za pomocą kodera tekstu (np. modelu opartego na transformatorze). Ta reprezentacja uchwyca semantyczne znaczenie tekstu.
-2. **Próbkowanie Szumu**: Losowy wektor szumu jest próbkowany z rozkładu Gaussa.
-3. **Kroki Dyfuzji**: Model stosuje szereg kroków dyfuzji, stopniowo przekształcając wektor szumu w obraz, który odpowiada tekstowej podpowiedzi. Każdy krok polega na zastosowaniu wyuczonych transformacji w celu usunięcia szumu z obrazu.
+Ponadto, aby wygenerować obraz na podstawie promptu tekstowego, modele dyfuzyjne zwykle wykonują następujące kroki:
+1. **Kodowanie tekstu**: Prompt tekstowy jest kodowany do reprezentacji latentnej za pomocą encodera tekstu (np. modelu opartego na transformerze). Reprezentacja ta odwzorowuje znaczenie semantyczne tekstu.
+2. **Próbkowanie szumu**: Losowy wektor szumu jest próbkowany z rozkładu Gaussa.
+3. **Kroki dyfuzji**: Model stosuje serię kroków dyfuzji, stopniowo przekształcając wektor szumu w obraz odpowiadający promptowi tekstowemu. Każdy krok obejmuje zastosowanie wyuczonych transformacji w celu odszumienia obrazu.
 
+## References
+
+- [1] [PyTorch - samouczek dotyczący sieci neuronowych](https://docs.pytorch.org/tutorials/beginner/blitz/neural_networks_tutorial.html)
+- [2] [PyTorch - Conv2d](https://docs.pytorch.org/docs/stable/generated/torch.nn.Conv2d.html)
+- [3] [PyTorch - LSTM](https://docs.pytorch.org/docs/stable/generated/torch.nn.LSTM.html)
+- [4] [PyTorch - Transformer](https://docs.pytorch.org/docs/stable/generated/torch.nn.Transformer.html)
+- [5] [Od-Noise'owane probabilistyczne modele dyfuzyjne](https://arxiv.org/abs/2006.11239)
 {{#include ../banners/hacktricks-training.md}}

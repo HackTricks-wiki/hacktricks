@@ -1,58 +1,63 @@
-# Przygotowanie danych modelu i ocena
+# Przygotowanie i ocena danych modelu
 
 {{#include ../banners/hacktricks-training.md}}
 
-Przygotowanie danych modelu jest kluczowym krokiem w procesie uczenia maszynowego, ponieważ polega na przekształceniu surowych danych w format odpowiedni do trenowania modeli uczenia maszynowego. Proces ten obejmuje kilka kluczowych kroków:
+Przygotowanie danych modelu to kluczowy etap w pipeline machine learning, ponieważ obejmuje przekształcanie surowych danych do formatu odpowiedniego do trenowania modeli machine learning. Proces ten obejmuje kilka kluczowych etapów:
 
-1. **Zbieranie danych**: Gromadzenie danych z różnych źródeł, takich jak bazy danych, API lub pliki. Dane mogą być strukturalne (np. tabele) lub niestrukturalne (np. tekst, obrazy).
-2. **Czyszczenie danych**: Usuwanie lub korygowanie błędnych, niekompletnych lub nieistotnych punktów danych. Ten krok może obejmować radzenie sobie z brakującymi wartościami, usuwanie duplikatów i filtrowanie wartości odstających.
-3. **Przekształcanie danych**: Konwertowanie danych w odpowiedni format do modelowania. Może to obejmować normalizację, skalowanie, kodowanie zmiennych kategorycznych oraz tworzenie nowych cech za pomocą technik takich jak inżynieria cech.
-4. **Podział danych**: Dzielnie zbioru danych na zestawy treningowe, walidacyjne i testowe, aby zapewnić, że model będzie dobrze generalizował na nieznanych danych.
+1. **Zbieranie danych**: Gromadzenie danych z różnych źródeł, takich jak bazy danych, API lub pliki. Dane mogą być ustrukturyzowane (np. tabele) lub nieustrukturyzowane (np. tekst, obrazy).
+2. **Czyszczenie danych**: Usuwanie lub poprawianie błędnych, niekompletnych lub nieistotnych punktów danych. Ten etap może obejmować obsługę brakujących wartości, usuwanie duplikatów i filtrowanie wartości odstających.
+3. **Transformacja danych**: Konwertowanie danych do formatu odpowiedniego do modelowania. Może to obejmować normalizację, skalowanie, kodowanie zmiennych kategorycznych oraz tworzenie nowych cech za pomocą technik takich jak feature engineering.
+4. **Podział danych**: Dzielenie datasetu na zbiory treningowy, walidacyjny i testowy, aby zapewnić, że model będzie dobrze generalizować na nieznane dane.
 
 ## Zbieranie danych
 
-Zbieranie danych polega na gromadzeniu danych z różnych źródeł, które mogą obejmować:
-- **Bazy danych**: Ekstrakcja danych z relacyjnych baz danych (np. bazy danych SQL) lub baz danych NoSQL (np. MongoDB).
-- **API**: Pobieranie danych z interfejsów API, które mogą dostarczać dane w czasie rzeczywistym lub historyczne.
+Zbieranie danych obejmuje gromadzenie danych z różnych źródeł, w tym:
+- **Bazy danych**: Wyodrębnianie danych z relacyjnych baz danych (np. baz danych SQL) lub baz danych NoSQL (np. MongoDB).
+- **API**: Pobieranie danych z webowych API, które mogą dostarczać dane w czasie rzeczywistym lub dane historyczne.
 - **Pliki**: Odczytywanie danych z plików w formatach takich jak CSV, JSON lub XML.
-- **Web Scraping**: Gromadzenie danych z witryn internetowych za pomocą technik web scrapingu.
+- **Web Scraping**: Zbieranie danych ze stron internetowych przy użyciu technik web scraping.
 
-W zależności od celu projektu uczenia maszynowego, dane będą ekstraktowane i zbierane z odpowiednich źródeł, aby zapewnić, że są reprezentatywne dla obszaru problemowego.
+W zależności od celu projektu machine learning dane zostaną wyodrębnione i zebrane z odpowiednich źródeł, aby zapewnić ich reprezentatywność dla domeny problemu.
 
-## Czyszczenie danych
+## Czyszczenie danych <sup>[[1]](#references)</sup><sup>[[2]](#references)</sup>
 
-Czyszczenie danych to proces identyfikacji i korygowania błędów lub niespójności w zbiorze danych. Krok ten jest niezbędny, aby zapewnić jakość danych używanych do trenowania modeli uczenia maszynowego. Kluczowe zadania w czyszczeniu danych obejmują:
-- **Radzenie sobie z brakującymi wartościami**: Identyfikacja i rozwiązywanie problemów z brakującymi punktami danych. Powszechne strategie obejmują:
-- Usuwanie wierszy lub kolumn z brakującymi wartościami.
-- Uzupełnianie brakujących wartości za pomocą technik takich jak imputacja średniej, mediany lub trybu.
-- Używanie zaawansowanych metod, takich jak imputacja K-najbliższych sąsiadów (KNN) lub imputacja regresyjna.
-- **Usuwanie duplikatów**: Identyfikacja i usuwanie zduplikowanych rekordów, aby zapewnić, że każdy punkt danych jest unikalny.
-- **Filtrowanie wartości odstających**: Wykrywanie i usuwanie wartości odstających, które mogą zniekształcać wydajność modelu. Techniki takie jak Z-score, IQR (zakres międzykwartylowy) lub wizualizacje (np. wykresy pudełkowe) mogą być używane do identyfikacji wartości odstających.
+Czyszczenie danych to proces identyfikowania i korygowania błędów lub niespójności w datasecie. Ten etap jest niezbędny do zapewnienia jakości danych używanych do trenowania modeli machine learning. Kluczowe zadania związane z czyszczeniem danych obejmują:
+- **Obsługa brakujących wartości**: Identyfikowanie i rozwiązywanie problemu brakujących punktów danych. Typowe strategie obejmują:
+- Usuwanie wierszy lub kolumn zawierających brakujące wartości.
+- Uzupełnianie brakujących wartości za pomocą technik takich jak imputacja średnią, medianą lub dominantą.
+- Używanie zaawansowanych metod, takich jak imputacja K-nearest neighbors (KNN) lub imputacja regresyjna.
+- **Usuwanie duplikatów**: Identyfikowanie i usuwanie zduplikowanych rekordów w celu zapewnienia unikalności każdego punktu danych.
+- **Filtrowanie wartości odstających**: Wykrywanie i usuwanie wartości odstających, które mogą zniekształcać wydajność modelu. Do identyfikowania wartości odstających można używać technik takich jak Z-score, IQR (Interquartile Range) lub wizualizacji (np. wykresów pudełkowych).
 
 ### Przykład czyszczenia danych
 ```python
+import re
+
+import numpy as np
 import pandas as pd
+from sklearn.impute import KNNImputer, SimpleImputer
+
 # Load the dataset
-data = pd.read_csv('data.csv')
+df = pd.read_csv('data.csv')
 
 # Finding invalid values based on a specific function
-def is_valid_possitive_int(num):
+def is_valid_positive_int(num):
 try:
 num = int(num)
 return 1 <= num <= 31
 except ValueError:
 return False
 
-invalid_days = data[~data['days'].astype(str).apply(is_valid_positive_int)]
+invalid_days = df[~df['days'].astype(str).apply(is_valid_positive_int)]
 
 ## Dropping rows with invalid days
-data = data.drop(invalid_days.index, errors='ignore')
+df = df.drop(invalid_days.index, errors='ignore')
 
 
 
 # Set "NaN" values to a specific value
 ## For example, setting NaN values in the 'days' column to 0
-data['days'] = pd.to_numeric(data['days'], errors='coerce')
+df['days'] = pd.to_numeric(df['days'], errors='coerce')
 
 ## For example, set "NaN" to not ips
 def is_valid_ip(ip):
@@ -81,128 +86,128 @@ df[numeric_cols] = knn_imputer.fit_transform(df[numeric_cols])
 
 
 # Filling missing values
-data.fillna(data.mean(), inplace=True)
+df.fillna(df.mean(numeric_only=True), inplace=True)
 
 # Removing duplicates
-data.drop_duplicates(inplace=True)
+df.drop_duplicates(inplace=True)
 # Filtering outliers using Z-score
 from scipy import stats
-z_scores = stats.zscore(data.select_dtypes(include=['float64', 'int64']))
-data = data[(z_scores < 3).all(axis=1)]
+z_scores = np.abs(stats.zscore(df.select_dtypes(include=['float64', 'int64']), nan_policy='omit'))
+df = df[(z_scores < 3).all(axis=1)]
 ```
-## Transformacja Danych
+## Transformacja danych <sup>[[1]](#references)</sup>
 
-Transformacja danych polega na konwersji danych do formatu odpowiedniego do modelowania. Ten krok może obejmować:
-- **Normalizacja i Standaryzacja**: Skalowanie cech numerycznych do wspólnego zakresu, zazwyczaj [0, 1] lub [-1, 1]. Pomaga to poprawić zbieżność algorytmów optymalizacji.
-- **Skalowanie Min-Max**: Przeskalowanie cech do ustalonego zakresu, zazwyczaj [0, 1]. Robi się to za pomocą wzoru: `X' = (X - X_{min}) / (X_{max} - X_{min})`
-- **Normalizacja Z-Score**: Standaryzacja cech poprzez odjęcie średniej i podzielenie przez odchylenie standardowe, co skutkuje rozkładem o średniej 0 i odchyleniu standardowym 1. Robi się to za pomocą wzoru: `X' = (X - μ) / σ`, gdzie μ to średnia, a σ to odchylenie standardowe.
-- **Skrzywienie i Kurtoza**: Dostosowanie rozkładu cech w celu zmniejszenia skrzywienia (asymetrii) i kurtozy (spiczastości). Można to zrobić za pomocą transformacji takich jak logarytmiczne, pierwiastek kwadratowy lub transformacje Box-Cox. Na przykład, jeśli cecha ma skrzywiony rozkład, zastosowanie transformacji logarytmicznej może pomóc w jej normalizacji.
-- **Normalizacja Łańcuchów**: Konwersja łańcuchów do spójnego formatu, takiego jak:
-- Zmiana na małe litery
-- Usuwanie znaków specjalnych (zachowując te istotne)
-- Usuwanie słów stop (powszechnych słów, które nie przyczyniają się do znaczenia, takich jak "the", "is", "and")
-- Usuwanie zbyt częstych i zbyt rzadkich słów (np. słów, które pojawiają się w więcej niż 90% dokumentów lub mniej niż 5 razy w korpusie)
-- Przycinanie białych znaków
-- Stemming/Lematyzacja: Redukcja słów do ich podstawowej lub rdzennej formy (np. "running" do "run").
+Transformacja danych polega na konwersji danych do formatu odpowiedniego do modelowania. Ten etap może obejmować:
+- **Normalizacja i standaryzacja**: Skalowanie cech numerycznych do wspólnego zakresu, zazwyczaj [0, 1] lub [-1, 1]. Może to poprawić zbieżność algorytmów optymalizacji.
+- **Min-Max Scaling**: Przeskalowanie cech do ustalonego zakresu, zwykle [0, 1]. Wykorzystuje się do tego wzór: `X' = (X - X_{min}) / (X_{max} - X_{min})`
+- **Z-Score Normalization**: Standaryzacja cech przez odjęcie średniej i podzielenie przez odchylenie standardowe, co daje rozkład ze średnią równą 0 i odchyleniem standardowym równym 1. Wykorzystuje się do tego wzór: `X' = (X - μ) / σ`, gdzie μ to średnia, a σ to odchylenie standardowe.
+- **Skośność i kurtoza**: Dostosowywanie rozkładów cech za pomocą transformacji, takich jak logarytm, pierwiastek kwadratowy lub Box-Cox. Na przykład transformacja logarytmiczna może zmniejszyć dodatnią skośność.
+- **String Normalization**: Konwersja ciągów znaków do spójnego formatu, na przykład:
+- Zamiana na małe litery
+- Usuwanie znaków specjalnych (z zachowaniem istotnych znaków)
+- Usuwanie stop words (częstych słów, które nie wpływają na znaczenie, takich jak "the", "is", "and")
+- Usuwanie zbyt częstych i zbyt rzadkich słów (np. słów występujących w ponad 90% dokumentów lub mniej niż 5 razy w korpusie)
+- Usuwanie początkowych i końcowych białych znaków
+- Stemming/Lemmatization: Redukowanie słów do ich podstawowej lub źródłowej formy (np. "running" do "run").
 
-- **Kodowanie Zmiennych Kategorycznych**: Konwersja zmiennych kategorycznych na reprezentacje numeryczne. Powszechne techniki obejmują:
-- **Kodowanie One-Hot**: Tworzenie binarnych kolumn dla każdej kategorii.
-- Na przykład, jeśli cecha ma kategorie "czerwony", "zielony" i "niebieski", zostanie przekształcona w trzy binarne kolumny: `is_red`(100), `is_green`(010) i `is_blue`(001).
-- **Kodowanie Etykiet**: Przypisywanie unikalnej liczby całkowitej każdej kategorii.
-- Na przykład, "czerwony" = 0, "zielony" = 1, "niebieski" = 2.
-- **Kodowanie Ordynalne**: Przypisywanie liczb całkowitych na podstawie kolejności kategorii.
-- Na przykład, jeśli kategorie to "niski", "średni" i "wysoki", mogą być zakodowane jako 0, 1 i 2, odpowiednio.
-- **Kodowanie Hashingowe**: Użycie funkcji haszującej do konwersji kategorii na wektory o stałej wielkości, co może być przydatne dla zmiennych kategorycznych o wysokiej kardynalności.
-- Na przykład, jeśli cecha ma wiele unikalnych kategorii, haszowanie może zmniejszyć wymiarowość, zachowując jednocześnie pewne informacje o kategoriach.
-- **Bag of Words (BoW)**: Reprezentowanie danych tekstowych jako macierzy zliczeń słów lub częstotliwości, gdzie każdy wiersz odpowiada dokumentowi, a każda kolumna odpowiada unikalnemu słowu w korpusie.
-- Na przykład, jeśli korpus zawiera słowa "kot", "pies" i "ryba", dokument zawierający "kot" i "pies" byłby reprezentowany jako [1, 1, 0]. Ta konkretna reprezentacja nazywa się "unigram" i nie uchwyca kolejności słów, więc traci informacje semantyczne.
-- **Bigram/Trigram**: Rozszerzenie BoW w celu uchwycenia sekwencji słów (bigramów lub trigramów), aby zachować pewien kontekst. Na przykład, "kot i pies" byłoby reprezentowane jako bigram [1, 1] dla "kot i" i [1, 1] dla "i pies". W tych przypadkach zbierane są dodatkowe informacje semantyczne (zwiększając wymiarowość reprezentacji), ale tylko dla 2 lub 3 słów na raz.
-- **TF-IDF (Term Frequency-Inverse Document Frequency)**: Statystyczna miara, która ocenia znaczenie słowa w dokumencie w odniesieniu do zbioru dokumentów (korpusu). Łączy częstotliwość terminu (jak często słowo pojawia się w dokumencie) i odwrotną częstotliwość dokumentu (jak rzadkie jest słowo w całym zbiorze dokumentów).
-- Na przykład, jeśli słowo "kot" pojawia się często w dokumencie, ale jest rzadkie w całym korpusie, będzie miało wysoką wartość TF-IDF, co wskazuje na jego znaczenie w tym dokumencie.
+- **Encoding Categorical Variables**: Konwersja zmiennych kategorycznych na reprezentacje numeryczne. Typowe techniki obejmują:
+- **One-Hot Encoding**: Tworzenie kolumn binarnych dla każdej kategorii.
+- Na przykład, jeśli cecha ma kategorie "red", "green" i "blue", zostanie przekształcona w trzy kolumny binarne: `is_red`(100), `is_green`(010) i `is_blue`(001).
+- **Label Encoding**: Przypisywanie unikalnej liczby całkowitej do każdej kategorii.
+- Na przykład: "red" = 0, "green" = 1, "blue" = 2.
+- **Ordinal Encoding**: Przypisywanie liczb całkowitych na podstawie kolejności kategorii.
+- Na przykład, jeśli kategorie to "low", "medium" i "high", można je zakodować odpowiednio jako 0, 1 i 2.
+- **Hashing Encoding**: Używanie funkcji hashującej do konwersji kategorii na wektory o stałym rozmiarze, co może być przydatne w przypadku zmiennych kategorycznych o dużej liczbie unikalnych wartości.
+- Na przykład, jeśli cecha ma wiele unikalnych kategorii, hashing może zmniejszyć wymiarowość, zachowując część informacji o kategoriach.
+- **Bag of Words (BoW)**: Reprezentowanie danych tekstowych jako macierzy liczby lub częstotliwości wystąpień słów, gdzie każdy wiersz odpowiada dokumentowi, a każda kolumna — unikalnemu słowu w korpusie.
+- Na przykład, jeśli korpus zawiera słowa "cat", "dog" i "fish", dokument zawierający "cat" i "dog" zostanie przedstawiony jako [1, 1, 0]. Ta konkretna reprezentacja nazywa się "unigram" i nie uwzględnia kolejności słów, przez co traci informacje semantyczne.
+- **Bigram/Trigram**: Rozszerzenie BoW o uwzględnianie sekwencji słów (bigramów lub trigramów) w celu zachowania części kontekstu. Na przykład "cat and dog" zostanie przedstawione jako bigram [1, 1] dla "cat and" oraz [1, 1] dla "and dog". W tym przypadku gromadzona jest większa ilość informacji semantycznych (zwiększa się wymiarowość reprezentacji), ale tylko dla 2 lub 3 słów jednocześnie.
+- **TF-IDF (Term Frequency-Inverse Document Frequency)**: Miara statystyczna oceniająca znaczenie słowa w dokumencie względem zbioru dokumentów (korpusu). Łączy częstotliwość terminu (jak często słowo występuje w dokumencie) oraz odwrotną częstotliwość dokumentową (jak rzadkie jest słowo we wszystkich dokumentach).
+- Na przykład, jeśli słowo "cat" często występuje w dokumencie, ale jest rzadkie w całym korpusie, uzyska wysoki wynik TF-IDF, wskazujący na jego znaczenie w tym dokumencie.
 
-- **Inżynieria Cech**: Tworzenie nowych cech z istniejących, aby zwiększyć moc predykcyjną modelu. Może to obejmować łączenie cech, wydobywanie komponentów daty/czasu lub stosowanie transformacji specyficznych dla danej dziedziny.
+- **Feature Engineering**: Tworzenie nowych cech na podstawie istniejących w celu zwiększenia mocy predykcyjnej modelu. Może to obejmować łączenie cech, wyodrębnianie składników daty/czasu lub stosowanie transformacji specyficznych dla danej dziedziny.
 
-## Podział Danych
+## Podział danych <sup>[[3]](#references)</sup>
 
-Podział danych polega na podzieleniu zbioru danych na oddzielne podzbiory do treningu, walidacji i testowania. Jest to niezbędne do oceny wydajności modelu na nieznanych danych i zapobiegania przeuczeniu. Powszechne strategie obejmują:
-- **Podział na Zbiór Treningowy i Testowy**: Podział zbioru danych na zbiór treningowy (zazwyczaj 60-80% danych), zbiór walidacyjny (10-15% danych) do dostrajania hiperparametrów oraz zbiór testowy (10-15% danych). Model jest trenowany na zbiorze treningowym i oceniany na zbiorze testowym.
-- Na przykład, jeśli masz zbiór danych z 1000 próbek, możesz użyć 700 próbek do treningu, 150 do walidacji i 150 do testowania.
-- **Próbkowanie Stratifikowane**: Zapewnienie, że rozkład klas w zbiorach treningowych i testowych jest podobny do ogólnego zbioru danych. Jest to szczególnie ważne dla niezrównoważonych zbiorów danych, gdzie niektóre klasy mogą mieć znacznie mniej próbek niż inne.
-- **Podział na Szereg Czasowy**: Dla danych szeregów czasowych zbiór danych jest dzielony na podstawie czasu, zapewniając, że zbiór treningowy zawiera dane z wcześniejszych okresów, a zbiór testowy zawiera dane z późniejszych okresów. Pomaga to ocenić wydajność modelu na przyszłych danych.
-- **K-Fold Cross-Validation**: Podział zbioru danych na K podzbiorów (foldów) i trenowanie modelu K razy, za każdym razem używając innego folda jako zbioru testowego, a pozostałych foldów jako zbioru treningowego. Pomaga to zapewnić, że model jest oceniany na różnych podzbiorach danych, co daje bardziej solidny oszacowanie jego wydajności.
+Podział danych polega na podzieleniu zbioru danych na oddzielne podzbiory do trenowania, walidacji i testowania. Jest to niezbędne do oceny wydajności modelu na nieznanych danych i zapobiegania przeuczeniu. Typowe strategie obejmują:
+- **Train-Test Split**: Podział zbioru danych na zbiór treningowy (zazwyczaj 60–80% danych), zbiór walidacyjny (10–15% danych) do dostrajania hiperparametrów oraz zbiór testowy (10–15% danych). Model jest trenowany na zbiorze treningowym i oceniany na zbiorze testowym.
+- Na przykład, jeśli masz zbiór danych zawierający 1000 próbek, możesz użyć 700 próbek do trenowania, 150 do walidacji i 150 do testowania.
+- **Stratified Sampling**: Zapewnienie, że rozkład klas w zbiorach treningowym i testowym jest podobny do rozkładu w całym zbiorze danych. Jest to szczególnie ważne w przypadku niezbalansowanych zbiorów danych, w których niektóre klasy mogą mieć znacznie mniej próbek niż inne.
+- **Time Series Split**: W przypadku danych szeregów czasowych zbiór danych jest dzielony według czasu, tak aby zbiór treningowy zawierał dane z wcześniejszych okresów, a zbiór testowy dane z późniejszych okresów. Pomaga to ocenić wydajność modelu na przyszłych danych.
+- **K-Fold Cross-Validation**: Podział zbioru danych na K podzbiorów (foldów) i trenowanie modelu K razy, za każdym razem z użyciem innego foldu jako zbioru testowego, a pozostałych foldów jako zbioru treningowego. Pomaga to zapewnić ocenę modelu na różnych podzbiorach danych, dostarczając bardziej wiarygodnego oszacowania jego wydajności.
 
-## Ocena Modelu
+## Ocena modelu <sup>[[4]](#references)</sup>
 
-Ocena modelu to proces oceny wydajności modelu uczenia maszynowego na nieznanych danych. Obejmuje użycie różnych metryk do ilościowego określenia, jak dobrze model generalizuje na nowe dane. Powszechne metryki oceny obejmują:
+Ocena modelu to proces analizowania wydajności modelu machine learning na nieznanych danych. Obejmuje użycie różnych metryk do określenia, jak dobrze model uogólnia się na nowe dane. Typowe metryki oceny obejmują:
 
-### Dokładność
+### Accuracy
 
-Dokładność to proporcja poprawnie przewidzianych przypadków do całkowitej liczby przypadków. Oblicza się ją jako:
+Accuracy to odsetek poprawnie przewidzianych przypadków w stosunku do wszystkich przypadków. Oblicza się ją według wzoru:
 ```plaintext
 Accuracy = (Number of Correct Predictions) / (Total Number of Predictions)
 ```
 > [!TIP]
-> Dokładność jest prostą i intuicyjną miarą, ale może nie być odpowiednia dla niezrównoważonych zbiorów danych, w których jedna klasa dominuje nad innymi, ponieważ może dawać mylące wrażenie wydajności modelu. Na przykład, jeśli 90% danych należy do klasy A, a model przewiduje wszystkie przypadki jako klasę A, osiągnie 90% dokładności, ale nie będzie przydatny do przewidywania klasy B.
+> Accuracy to prosta i intuicyjna metryka, ale może nie być odpowiednia dla niezrównoważonych zbiorów danych, w których jedna klasa dominuje nad pozostałymi, ponieważ może dawać mylące wyobrażenie o skuteczności modelu. Na przykład jeśli 90% danych należy do klasy A, a model przewiduje klasę A dla wszystkich przypadków, osiągnie 90% accuracy, ale nie będzie przydatny do przewidywania klasy B.
 
-### Precyzja
+### Precision
 
-Precyzja to proporcja prawdziwych pozytywnych przewidywań w stosunku do wszystkich pozytywnych przewidywań dokonanych przez model. Oblicza się ją jako:
+Precision to odsetek prawdziwie pozytywnych predykcji spośród wszystkich pozytywnych predykcji dokonanych przez model. Oblicza się ją następująco:
 ```plaintext
 Precision = (True Positives) / (True Positives + False Positives)
 ```
 > [!TIP]
-> Precyzja jest szczególnie ważna w scenariuszach, w których fałszywe pozytywy są kosztowne lub niepożądane, takich jak diagnozy medyczne czy wykrywanie oszustw. Na przykład, jeśli model przewiduje 100 przypadków jako pozytywne, ale tylko 80 z nich jest rzeczywiście pozytywnych, precyzja wynosiłaby 0,8 (80%).
+> Precyzja jest szczególnie ważna w sytuacjach, w których wyniki fałszywie dodatnie są kosztowne lub niepożądane, takich jak diagnozy medyczne lub wykrywanie oszustw. Na przykład jeśli model przewiduje 100 przypadków jako pozytywne, ale tylko 80 z nich jest faktycznie pozytywnych, precyzja wynosiłaby 0,8 (80%).
 
-### Recall (Czułość)
+### Czułość (Recall)
 
-Recall, znany również jako czułość lub wskaźnik prawdziwych pozytywów, to proporcja prawdziwych pozytywnych prognoz w stosunku do wszystkich rzeczywistych pozytywnych przypadków. Oblicza się go jako:
+Czułość, znana również jako odsetek prawdziwie pozytywnych, to stosunek prawdziwie pozytywnych predykcji do wszystkich faktycznie pozytywnych przypadków. Oblicza się ją następująco:
 ```plaintext
 Recall = (True Positives) / (True Positives + False Negatives)
 ```
 > [!TIP]
-> Przypomnienie jest kluczowe w scenariuszach, w których fałszywe negatywy są kosztowne lub niepożądane, takich jak wykrywanie chorób czy filtrowanie spamu. Na przykład, jeśli model identyfikuje 80 z 100 rzeczywistych pozytywnych przypadków, przypomnienie wynosi 0,8 (80%).
+> Recall ma kluczowe znaczenie w scenariuszach, w których wyniki fałszywie ujemne są kosztowne lub niepożądane, takich jak wykrywanie chorób lub filtrowanie spamu. Na przykład, jeśli model identyfikuje 80 ze 100 rzeczywistych przypadków pozytywnych, recall wynosiłby 0,8 (80%).
 
 ### F1 Score
 
-Wynik F1 to średnia harmoniczna precyzji i przypomnienia, zapewniająca równowagę między tymi dwoma metrykami. Oblicza się go jako:
+F1 score to średnia harmoniczna precision i recall, zapewniająca równowagę między tymi dwiema metrykami. Oblicza się go następująco:
 ```plaintext
 F1 Score = 2 * (Precision * Recall) / (Precision + Recall)
 ```
 > [!TIP]
-> Wskaźnik F1 jest szczególnie przydatny w przypadku niezrównoważonych zbiorów danych, ponieważ uwzględnia zarówno fałszywe pozytywy, jak i fałszywe negatywy. Zapewnia pojedynczy wskaźnik, który uchwyca kompromis między precyzją a czułością. Na przykład, jeśli model ma precyzję 0.8 i czułość 0.6, wskaźnik F1 wynosiłby około 0.69.
+> Wynik F1 jest szczególnie przydatny w przypadku niezrównoważonych zbiorów danych, ponieważ uwzględnia zarówno false positives, jak i false negatives. Zapewnia pojedynczą metrykę odzwierciedlającą kompromis między precision a recall. Na przykład, jeśli model ma precision na poziomie 0.8 i recall na poziomie 0.6, wynik F1 wyniesie około 0.69.
 
 ### ROC-AUC (Receiver Operating Characteristic - Area Under the Curve)
 
-Wskaźnik ROC-AUC ocenia zdolność modelu do rozróżniania klas, rysując krzywą rzeczywistej stopy pozytywnej (czułość) w stosunku do stopy fałszywych pozytywów przy różnych ustawieniach progowych. Powierzchnia pod krzywą ROC (AUC) kwantyfikuje wydajność modelu, przy czym wartość 1 oznacza doskonałą klasyfikację, a wartość 0.5 oznacza losowe zgadywanie.
+Metryka ROC-AUC ocenia zdolność modelu do rozróżniania klas, przedstawiając true positive rate (czułość) względem false positive rate przy różnych ustawieniach progu. Pole pod krzywą ROC (AUC) określa wydajność modelu, przy czym wartość 1 oznacza idealną klasyfikację, a wartość 0.5 oznacza losowe zgadywanie.
 
 > [!TIP]
-> ROC-AUC jest szczególnie przydatny w problemach klasyfikacji binarnej i zapewnia kompleksowy widok wydajności modelu w różnych progach. Jest mniej wrażliwy na niezrównoważenie klas w porównaniu do dokładności. Na przykład model z AUC równym 0.9 wskazuje, że ma wysoką zdolność do rozróżniania między pozytywnymi a negatywnymi przypadkami.
+> ROC-AUC jest szczególnie przydatne w problemach klasyfikacji binarnej i zapewnia kompleksowy obraz wydajności modelu przy różnych progach. Jest mniej wrażliwe na niezrównoważenie klas w porównaniu z accuracy. Na przykład model z AUC wynoszącym 0.9 ma wysoką zdolność do rozróżniania instancji pozytywnych i negatywnych.
 
-### Specyficzność
+### Specificity
 
-Specyficzność, znana również jako rzeczywista stopa negatywna, to proporcja rzeczywistych negatywnych prognoz w stosunku do wszystkich rzeczywistych negatywnych przypadków. Oblicza się ją jako:
+Specificity, znane również jako true negative rate, to odsetek poprawnych przewidywań negatywnych spośród wszystkich rzeczywistych instancji negatywnych. Oblicza się je jako:
 ```plaintext
 Specificity = (True Negatives) / (True Negatives + False Positives)
 ```
 > [!TIP]
-> Specyficzność jest ważna w scenariuszach, w których fałszywe pozytywy są kosztowne lub niepożądane, takich jak testy medyczne czy wykrywanie oszustw. Pomaga ocenić, jak dobrze model identyfikuje negatywne przypadki. Na przykład, jeśli model poprawnie identyfikuje 90 z 100 rzeczywistych negatywnych przypadków, specyficzność wynosi 0,9 (90%).
+> Specyficzność jest ważna w scenariuszach, w których wyniki fałszywie dodatnie są kosztowne lub niepożądane, takich jak badania medyczne lub wykrywanie oszustw. Pomaga ocenić, jak dobrze model identyfikuje przypadki negatywne. Na przykład jeśli model prawidłowo identyfikuje 90 ze 100 rzeczywistych przypadków negatywnych, specyficzność wynosiłaby 0,9 (90%).
 
 ### Współczynnik korelacji Matthewsa (MCC)
-Współczynnik korelacji Matthewsa (MCC) jest miarą jakości klasyfikacji binarnych. Uwzględnia prawdziwe i fałszywe pozytywy oraz negatywy, zapewniając zrównoważony obraz wydajności modelu. MCC oblicza się jako:
+Współczynnik korelacji Matthewsa (MCC) jest miarą jakości klasyfikacji binarnej. Uwzględnia prawdziwie i fałszywie dodatnie oraz prawdziwie i fałszywie ujemne wyniki, zapewniając zrównoważony obraz skuteczności modelu. MCC oblicza się następująco:
 ```plaintext
 MCC = (TP * TN - FP * FN) / sqrt((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN))
 ```
 gdzie:
-- **TP**: Prawdziwe Pozytywy
-- **TN**: Prawdziwe Negatywy
-- **FP**: Fałszywe Pozytywy
-- **FN**: Fałszywe Negatywy
+- **TP**: True Positives
+- **TN**: True Negatives
+- **FP**: False Positives
+- **FN**: False Negatives
 
 > [!TIP]
-> MCC waha się od -1 do 1, gdzie 1 oznacza doskonałą klasyfikację, 0 oznacza losowe zgadywanie, a -1 oznacza całkowitą niezgodność między prognozą a obserwacją. Jest szczególnie przydatny w przypadku niezrównoważonych zbiorów danych, ponieważ uwzględnia wszystkie cztery komponenty macierzy pomyłek.
+> MCC mieści się w zakresie od -1 do 1, gdzie 1 oznacza idealną klasyfikację, 0 oznacza losowe zgadywanie, a -1 oznacza całkowitą niezgodność między predykcją a obserwacją. Jest szczególnie przydatny w przypadku niezrównoważonych zbiorów danych, ponieważ uwzględnia wszystkie cztery elementy macierzy pomyłek.
 
-### Średni Błąd Bezwzględny (MAE)
-Średni Błąd Bezwzględny (MAE) to miara regresji, która mierzy średnią bezwzględną różnicę między wartościami prognozowanymi a rzeczywistymi. Oblicza się go jako:
+### Mean Absolute Error (MAE)
+Mean Absolute Error (MAE) to metryka regresji mierząca średnią bezwzględną różnicę między wartościami przewidywanymi a rzeczywistymi. Oblicza się ją następująco:
 ```plaintext
 MAE = (1/n) * Σ|y_i - ŷ_i|
 ```
@@ -212,23 +217,28 @@ gdzie:
 - **ŷ_i**: Przewidywana wartość dla instancji i
 
 > [!TIP]
-> MAE zapewnia proste zrozumienie średniego błędu w prognozach, co ułatwia jego interpretację. Jest mniej wrażliwy na wartości odstające w porównaniu do innych metryk, takich jak Mean Squared Error (MSE). Na przykład, jeśli model ma MAE równą 5, oznacza to, że średnio prognozy modelu odbiegają od rzeczywistych wartości o 5 jednostek.
+> MAE zapewnia prostą interpretację średniego błędu predykcji, dzięki czemu jest łatwy do zrozumienia. Jest mniej wrażliwy na wartości odstające w porównaniu z innymi metrykami, takimi jak Mean Squared Error (MSE). Na przykład jeśli model ma MAE równe 5, oznacza to, że średnio predykcje modelu różnią się od rzeczywistych wartości o 5 jednostek.
 
 ### Macierz pomyłek
 
-Macierz pomyłek to tabela, która podsumowuje wydajność modelu klasyfikacyjnego, pokazując liczby prawdziwych pozytywnych, prawdziwych negatywnych, fałszywych pozytywnych i fałszywych negatywnych prognoz. Zapewnia szczegółowy widok na to, jak dobrze model radzi sobie w każdej klasie.
+Macierz pomyłek to tabela podsumowująca wydajność modelu klasyfikacyjnego poprzez przedstawienie liczby predykcji: true positive, true negative, false positive i false negative. Zapewnia szczegółowy obraz tego, jak dobrze model działa dla każdej klasy.
 
-|               | Przewidywana pozytywna | Przewidywana negatywna |
-|---------------|-------------------------|-------------------------|
-| Rzeczywista pozytywna| Prawdziwy pozytywny (TP)  | Fałszywy negatywny (FN)  |
-| Rzeczywista negatywna| Fałszywy pozytywny (FP) | Prawdziwy negatywny (TN)   |
+|               | Przewidziana klasa pozytywna | Przewidziana klasa negatywna |
+|---------------|---------------------|---------------------|
+| Rzeczywista klasa pozytywna| True Positive (TP)  | False Negative (FN)  |
+| Rzeczywista klasa negatywna| False Positive (FP) | True Negative (TN)   |
 
-- **Prawdziwy pozytywny (TP)**: Model poprawnie przewidział klasę pozytywną.
-- **Prawdziwy negatywny (TN)**: Model poprawnie przewidział klasę negatywną.
-- **Fałszywy pozytywny (FP)**: Model błędnie przewidział klasę pozytywną (błąd typu I).
-- **Fałszywy negatywny (FN)**: Model błędnie przewidział klasę negatywną (błąd typu II).
+- **True Positive (TP)**: Model poprawnie przewidział klasę pozytywną.
+- **True Negative (TN)**: Model poprawnie przewidział klasę negatywną.
+- **False Positive (FP)**: Model niepoprawnie przewidział klasę pozytywną (błąd typu I).
+- **False Negative (FN)**: Model niepoprawnie przewidział klasę negatywną (błąd typu II).
 
-Macierz pomyłek może być używana do obliczania różnych metryk oceny, takich jak dokładność, precyzja, czułość i wynik F1.
+Macierz pomyłek może służyć do obliczania metryk ewaluacyjnych, takich jak accuracy, precision, recall i F1 score.
 
+## References
 
+- [1] [scikit-learn - Wstępne przetwarzanie danych](https://scikit-learn.org/stable/modules/preprocessing.html)
+- [2] [scikit-learn - Uzupełnianie brakujących wartości](https://scikit-learn.org/stable/modules/impute.html)
+- [3] [scikit-learn - Walidacja krzyżowa: ocena wydajności estymatora](https://scikit-learn.org/stable/modules/cross_validation.html)
+- [4] [scikit-learn - Metryki i scoring](https://scikit-learn.org/stable/modules/model_evaluation.html)
 {{#include ../banners/hacktricks-training.md}}
