@@ -2,34 +2,39 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Inleiding tot die Modbus-protokol
+## Inleiding tot Modbus
 
-Die Modbus-protokol is 'n wyd gebruikte protokol in Industrial Automation and Control Systems. Modbus maak kommunikasie tussen verskeie toestelle moontlik, soos programmable logic controllers (PLCs), sensors, aktueerders en ander industriële toestelle. Dit is noodsaaklik om die Modbus-protokol te verstaan, aangesien dit die mees gebruikte kommunikasieprotokol in die ICS is en baie potensiële attack surface bied vir sniffing en selfs die injection van opdragte in PLCs.
+Modbus is 'n oop application-layer-protokol wat wyd deur PLC's, sensors, aktuators en ander industriële toestelle geïmplementeer word. Sy versoek/antwoord-model stel coils en registers deur middel van function codes bloot. Security testing fokus daarom op ongemagtigde lees- en skryfbewerkings, verkeerswaarneming, replay en onveilige toestelgedrag — nie bloot op die vind van TCP-poort 502 nie.<sup>[[1]](#references)</sup>
 
-Hier word konsepte puntsgewys uiteengesit om konteks oor die protokol en die aard van die werking daarvan te verskaf. Die grootste uitdaging in ICS-sekuriteit is die koste van implementering en opgradering. Hierdie protokolle en standaarde is in die vroeë 80's en 90's ontwerp en word steeds wyd gebruik. Aangesien 'n industrie baie toestelle en verbindings het, is die opgradering van toestelle baie moeilik, wat hackers 'n voordeel bied wanneer hulle met verouderde protokolle werk. Attacks op Modbus is feitlik onvermydelik, aangesien dit sonder opgradering gebruik sal word indien die werking daarvan krities vir die industrie is.
+Baie implementerings behou legacy-serietoerusting omdat opgraderings stilstand, hersertifisering of die vervanging van veldtoestelle vereis. Tradisionele Modbus bied nóg vertroulikheid nóg peer-authentication; Modbus Security is 'n afsonderlike TLS-gebaseerde profiel wat X.509-sertifikate en TCP-poort 802 gebruik. Omdat die spesifikasie publiek en onafhanklik implementeerbaar is, verskil vendor-gedrag en ondersteuning vir opsionele function codes, en moet dit gefingerprint word eerder as om dit te aanvaar.<sup>[[1]](#references)[[2]](#references)</sup>
 
-## Die Client-Server-argitektuur
+## Die client-server-argitektuur
 
-Die Modbus-protokol word tipies in 'n Client Server Architecture gebruik, waar 'n master-toestel (client) kommunikasie met een of meer slave-toestelle (servers) begin. Daar word ook hierna verwys as Master-Slave-argitektuur, wat wyd in elektronika en IoT met SPI, I2C, ensovoorts gebruik word.
+In huidige terminologie begin 'n **client** 'n transaksie en stuur 'n **server** 'n antwoord terug. Ouer dokumentasie gebruik **master/slave**. Moenie hierdie application-verhouding met SPI of I2C verwar nie: dit is verskillende bus-protokolle.<sup>[[1]](#references)</sup>
 
-## Serial- en Etherent-weergawes
+## Serial- en Ethernet-transporte
 
-Die Modbus-protokol is ontwerp vir beide Serial Communication sowel as Ethernet Communications. Serial Communication word wyd in legacy-stelsels gebruik, terwyl moderne toestelle Ethernet ondersteun, wat hoë datatempo's bied en meer geskik is vir moderne industriële netwerke.
+Dieselfde Modbus-application-data kan deur serial-variante (RTU- of ASCII-framing) en deur Modbus TCP gedra word. Modbus TCP voeg 'n MBAP-header by en gebruik normaalweg TCP-poort 502; serial RTU gebruik kompakte binêre framing en 'n CRC, terwyl serial ASCII grepe as heksadesimale karakters voorstel en 'n LRC gebruik.<sup>[[1]](#references)[[3]](#references)</sup>
 
 ## Datarepresentasie
 
-Data word in die Modbus-protokol as ASCII of Binary oorgedra, hoewel die binêre formaat gebruik word weens die kompaktheid daarvan met ouer toestelle.
+Die datamodel bestaan uit enkelbis-coils/diskrete inputs en 16-bis-input/holding registers. Waardes wat oor verskeie registers strek, byte order, scaling en semantiese betekenis is toestelspesifiek en moet teen die vendor se register map bevestig word.<sup>[[1]](#references)</sup>
 
-## Funksiekodes
+## Function codes
 
-Die ModBus-protokol werk met die oordrag van spesifieke funksiekodes wat gebruik word om PLCs en verskeie beheertoestelle te bedryf. Hierdie gedeelte is belangrik om te verstaan, aangesien replay attacks uitgevoer kan word deur funksiekodes weer oor te dra. Legacy-toestelle ondersteun geen encryption vir data-oordrag nie en het gewoonlik lang drade wat hulle verbind, wat tot tampering met hierdie drade en die vaslegging/injection van data lei.
+Function codes kies bewerkings soos die lees van coils (`0x01`), die lees van holding registers (`0x03`), die skryf van 'n enkele coil/register (`0x05`/`0x06`) en die skryf van veelvuldige coils/registers (`0x0F`/`0x10`). 'n Vasgelegde skryfversoek kan replaybaar wees wanneer die implementering geen kompenserende authentication- of process-state-kontroles het nie. Met gemagtigde fisiese toegang tot lang serial-kabels kan 'n assessor ook frames direk op die bedrading vaslê of injecteer nadat die elektriese interface, terminering en veilige verbindingsmetode geïdentifiseer is. Enige van hierdie handelinge kan die fisiese proses beïnvloed; gebruik dus 'n laboratorium of uitdruklike operasionele magtiging.<sup>[[1]](#references)[[3]](#references)</sup>
 
-## Adressering van Modbus
+## Adressering
 
-Elke toestel in die netwerk het 'n unieke adres wat noodsaaklik is vir kommunikasie tussen toestelle. Protokolle soos Modbus RTU, Modbus TCP, ensovoorts word gebruik om adressering te implementeer en dien as 'n transport layer vir die data-oordrag. Die data wat oorgedra word, is in die Modbus-protokolformaat en bevat die boodskap.
+Serial-toestelle gebruik 'n unit address. Modbus TCP gebruik IP-adressering plus 'n Unit Identifier in die MBAP-header, wat veral relevant is wanneer 'n TCP-to-serial gateway versoeke na downstream units roeteer. Registerverwysings wat deur produkdokumentasie getoon word, kan eengebaseerd (`40001`) wees, terwyl protocol addresses nulgebaseerd is — 'n algemene bron van off-by-one-foute.<sup>[[1]](#references)[[3]](#references)</sup>
 
-Verder implementeer Modbus ook foutkontroles om die integriteit van die oorgedraagde data te verseker. Maar die belangrikste is dat Modbus 'n Open Standard is en enigiemand dit in hul toestelle kan implementeer. Dit het daartoe gelei dat hierdie protokol 'n wêreldwye standaard geword het en wyd in die industriële outomatiseringsbedryf gebruik word.
+Serial framing sluit transmissiefoutkontroles in (CRC vir RTU en LRC vir ASCII), en TCP verskaf sy normale transport checksum. Dit bespeur toevallige korrupsie; dit is nie kriptografiese integriteit of origin authentication nie.<sup>[[3]](#references)</sup>
 
-Weens die grootskaalse gebruik daarvan en die gebrek aan opgraderings, bied attacking van Modbus 'n beduidende voordeel met sy attack surface. ICS is sterk afhanklik van kommunikasie tussen toestelle, en enige attacks daarop kan gevaarlik wees vir die werking van industriële stelsels. Attacks soos replay, data injection, data sniffing en leaking, Denial of Service, data forgery, ensovoorts, kan uitgevoer word indien die transmissiemedium deur die aanvaller geïdentifiseer word.
+Tydens 'n gemagtigde assessering moet blootstelling, toegelate function codes, skryfbare address ranges, exception handling, rate limits en die vraag of network segmentation of 'n Modbus-aware firewall clients beperk, getoets word. Relevante threats sluit passiewe openbaarmaking, ongemagtigde command injection, replay, data forgery en denial of service in. Koördineer alle aktiewe toetse met proses-eienaars, omdat klaarblyklik klein registerveranderinge 'n fisiese proses kan verander.
 
+## References
+
+- [1] [Modbus Organization — Modbus Application Protocol-spesifikasie V1.1b3](https://www.modbus.org/file/secure/modbusprotocolspecification.pdf)
+- [2] [Modbus Organization — Modbus Security Protocol en implementeringsgidse](https://www.modbus.org/modbus-specifications)
+- [3] [Modbus Organization — Modbus over Serial Line-spesifikasie en implementeringsgids V1.02](https://www.modbus.org/file/secure/modbusoverserial.pdf)
 {{#include ../../banners/hacktricks-training.md}}

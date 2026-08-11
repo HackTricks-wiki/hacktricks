@@ -4,31 +4,31 @@
 
 ## Inleiding
 
-iButton is 'n generiese naam vir 'n elektroniese identifikasiesleutel wat in 'n **muntvormige metaalhouer** verpak is. Dit word ook Dallas Touch-geheue of kontakgeheue genoem. Alhoewel daar dikwels verkeerdelik na dit as 'n “magnetiese” sleutel verwys word, is daar **niks magneties** daaraan nie. Trouens, 'n volwaardige **mikroskyfie** wat op 'n digitale protokol werk, is binne-in versteek.<sup>[[1]](#references)</sup>
+iButton is 'n generiese naam vir 'n elektroniese identifikasiesleutel wat in 'n **muntvormige metaalhouer** verpak is. Dit word ook Dallas Touch Memory of contact memory genoem. Alhoewel daar dikwels verkeerdelik daarna verwys word as 'n “magnetiese” sleutel, is daar **niks magneties** daarin nie. Trouens, 'n volledige **mikroskyfie** wat op 'n digitale protokol werk, is daarin versteek.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../images/image (915).png" alt=""><figcaption></figcaption></figure>
 
 ### Wat is iButton? <a href="#what-is-ibutton" id="what-is-ibutton"></a>
 
-Gewoonlik verwys iButton na die fisiese vorm van die sleutel en leser - 'n ronde muntstuk met twee kontakte. Wat die raamwerk rondom dit betref, is daar baie variasies, van die algemeenste plastiekhouer met 'n gat tot ringe, hangertjies, ens.
+Die naam iButton beskryf die duursame muntvormige verpakking en kontakrangskikking. Houers sluit plastiekfobs, ringe en hangertjies in.
 
 <figure><img src="../../images/image (1078).png" alt=""><figcaption></figcaption></figure>
 
-Wanneer die sleutel die leser bereik, **raak die kontakte aan mekaar** en word die sleutel aangeskakel om sy ID te **versend**. Soms word die sleutel **nie onmiddellik gelees nie** omdat die **kontak-PSD van 'n interkom groter** as wat dit behoort te wees, is. Daarom kon die buitenste kontoere van die sleutel en leser nie aan mekaar raak nie. As dit die geval is, sal jy die sleutel teen een van die mure van die leser moet druk.<sup>[[1]](#references)</sup>
+Wanneer albei kontakte die leser raak, ontvang die toestel krag en verruil dit data. As die ingesakte kontakgeometrie verhoed dat die buitenste grondkontakte mekaar raak, kan die sleutel teen die leser se wand gekantel word om kontak te herstel.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../images/image (290).png" alt=""><figcaption></figcaption></figure>
 
 ### **1-Wire-protokol** <a href="#id-1-wire-protocol" id="id-1-wire-protocol"></a>
 
-Dallas-sleutels ruil data uit deur die 1-wire-protokol te gebruik. Met slegs een kontak vir data-oordrag (!!) in albei rigtings, van master na slave en omgekeerd. Die 1-wire-protokol werk volgens die Master-Slave-model. In hierdie topologie begin die Master altyd die kommunikasie, en die Slave volg sy instruksies.
+Dallas/Maxim-sleutels gebruik die 1-Wire-protokol: een datakontak dra tweerigtingverkeer en kan ook parasitiese krag voorsien, terwyl die metaalhouer die terugvoerkontak is. Die beheerder begin transaksies en die toestel reageer daarop.<sup>[[2]](#references)</sup>
 
-Wanneer die sleutel (Slave) met die interkom (Master) kontak maak, skakel die skyfie binne die sleutel aan, aangedryf deur die interkom, en die sleutel word geïnisialiseer. Daarna versoek die interkom die sleutel se ID. Vervolgens sal ons hierdie proses in meer besonderhede ondersoek.
+Wanneer die sleutel (Slave) kontak maak met die interkom (Master), skakel die skyfie binne die sleutel aan, aangedryf deur die interkom, en die sleutel word geïnisialiseer. Daarna versoek die interkom die sleutel-ID. Vervolgens sal ons hierdie proses in meer besonderhede ondersoek.
 
-Flipper kan in beide Master- en Slave-modusse werk. In die sleutel-leesmodus tree Flipper as 'n leser op, dit wil sê dit werk as 'n Master. In die sleutel-emulasiemodus gee die Flipper voor om 'n sleutel te wees; dit is in die Slave-modus.<sup>[[1]](#references)</sup>
+Flipper kan as die beheerder optree wanneer 'n sleutel gelees word, en as die geëmuleerde toestel optree wanneer 'n gestoorde identifiseerder aan 'n leser voorgelê word.<sup>[[1]](#references)</sup>
 
 ### Dallas-, Cyfral- & Metakom-sleutels
 
-Vir inligting oor hoe hierdie sleutels werk, kyk na die bladsy [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)<sup>[[1]](#references)</sup>
+Vir inligting oor hoe hierdie sleutels werk, besoek die bladsy [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)<sup>[[1]](#references)</sup>
 
 ### Aanvalle
 
@@ -39,8 +39,8 @@ iButtons kan met Flipper Zero aangeval word:
 flipper-zero/fz-ibutton.md
 {{#endref}}
 
-## Verwysings
+## References
 
-- [1] [Tem iButton met Flipper Zero](https://blog.flipperzero.one/taming-ibutton/)
-
+- [1] [Taming iButton with Flipper Zero](https://blog.flipperzero.one/taming-ibutton/)
+- [2] [Analog Devices — 1-Wire communication through software](https://www.analog.com/en/resources/technical-articles/1wire-communication-through-software.html)
 {{#include ../../banners/hacktricks-training.md}}

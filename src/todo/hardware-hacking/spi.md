@@ -4,60 +4,67 @@
 
 ## Basiese Inligting
 
-SPI (Serial Peripheral Interface) is 'n Sinchrone Serial Communication Protocol wat in embedded systems gebruik word vir kortafstandkommunikasie tussen ICs (Integrated Circuits). SPI Communication Protocol maak gebruik van die master-slave-argitektuur, wat deur die Clock- en Chip Select Signal georkestreer word. 'n Master-slave-argitektuur bestaan uit 'n master (gewoonlik 'n mikroverwerker) wat eksterne peripherals soos EEPROM, sensors, beheertoestelle, ens. bestuur, wat as die slaves beskou word.
+SPI (Serial Peripheral Interface) is 'n sinchrone seriële bus wat algemeen vir kortafstandkommunikasie tussen geïntegreerde stroombane gebruik word. 'n Beheerder verskaf die klok en kies 'n randtoestel, soos 'n EEPROM, sensor of beheertoestel, deur 'n chip-select-sein te gebruik.<sup>[[1]](#references)</sup>
 
-Veelvuldige slaves kan aan 'n master gekoppel word, maar slaves kan nie met mekaar kommunikeer nie. Slaves word deur twee pins, clock en chip select, geadministreer. Omdat SPI 'n sinchrone kommunikasieprotokol is, volg die input- en output-pins die clock-seine. Die chip select word deur die master gebruik om 'n slave te kies en daarmee te kommunikeer. Wanneer die chip select hoog is, word die slave device nie gekies nie, terwyl die chip gekies is wanneer dit laag is en die master met die slave kommunikeer.
+Veelvuldige randtoestelle kan die klok- en datalyne deel, gewoonlik met 'n aparte chip-select per randtoestel. Die beheerder koördineer oordragte; randtoestelle kommunikeer normaalweg nie direk met mekaar oor die SPI-bus nie. Chip-select-polariteit en -tydsberekening is toestelspesifiek; aktief-laag-seleksie is algemeen, maar nie universeel nie. SPI definieer nie discovery, adressering, commands of 'n enkele maksimum oordraglengte nie, dus moet jy altyd die teiken se datasheet raadpleeg.<sup>[[1]](#references)</sup>
 
-Die MOSI (Master Out, Slave In) en MISO (Master In, Slave Out) is verantwoordelik vir die stuur en ontvangs van data. Data word deur die MOSI-pin na die slave device gestuur terwyl die chip select laag gehou word. Die input-data bevat instruksies, memory addresses of data volgens die datasheet van die slave device se vendor. Na geldige input is die MISO-pin verantwoordelik vir die oordrag van data na die master. Die output-data word presies in die volgende clock cycle gestuur nadat die input geëindig het. Die MISO-pins stuur data totdat die data volledig oorgedra is of totdat die master die chip select-pin hoog stel (in daardie geval sal die slave ophou stuur en die master sal ná daardie clock cycle nie meer luister nie).
+MOSI/COPI dra data van die beheerder na die randtoestel, en MISO/CIPO dra data van die randtoestel na die beheerder. Albei rigtings kan gelyktydig geskuif word. Die verhouding tussen 'n command, adres, dummy cycles en teruggestuurde data word deur die randtoestel gedefinieer—nie deur SPI nie—en hang af van klokpolariteit en -fase (modusse 0–3). Moenie aanvaar dat output presies een klok ná die einde van input begin nie.<sup>[[1]](#references)</sup>
 
 ## Firmware vanaf EEPROMs Dump
 
-Die dumping van firmware kan nuttig wees om die firmware te ontleed en vulnerabilities daarin te vind. Dikwels is die firmware nie op die internet beskikbaar nie of is dit irrelevant weens variasies in faktore soos modelnommer, weergawe, ens. Daarom kan die direkte ekstraksie van die firmware vanaf die fisiese device nuttig wees om spesifiek na threats te soek.
+Firmware dump kan nuttig wees om dit te analiseer en kwesbaarhede te vind. Die korrekte image is moontlik nie aanlyn beskikbaar nie, of kan volgens model, hardwarerevisie of weergawe verskil. Deur dit direk vanaf die fisiese toestel te onttrek, kry jy dus 'n presiese assesseringsteiken.
 
-Om 'n Serial Console te kry kan nuttig wees, maar dikwels gebeur dit dat die files read-only is. Dit beperk die analise om verskeie redes. Byvoorbeeld, tools wat nodig is om packages te stuur en te ontvang, sal nie in die firmware beskikbaar wees nie. Die ekstraksie van die binaries om hulle te reverse engineer is dus nie haalbaar nie. Daarom kan dit baie nuttig wees om die volledige firmware op die system te dump en die binaries vir analise te onttrek.
+'n Seriële konsole kan help, maar sy filesystem kan read-only wees, en die teiken het moontlik nie analysis tools nie, insluitend utilities wat nodig is om toetsverkeer te stuur/ontvang of binaries gerieflik te onttrek. 'n Offline image bewaar die volledige flash-uitleg en maak filesystem-onttrekking en reverse engineering moontlik sonder om die lopende teiken te wysig.
 
-Ook tydens red teaming en wanneer fisiese toegang tot devices verkry word, kan die dumping van firmware help om die files te wysig of malicious files in te spuit en hulle dan terug in die memory te flash, wat nuttig kan wees om 'n backdoor in die device te plant. Daar is dus talle moontlikhede wat met firmware dumping ontsluit kan word.
+Tydens 'n gemagtigde fisiese assessering kan 'n geverifieerde dump ook beheerde wysigings- en reflashing-toetse ondersteun. Dit sluit in die wysiging van files of die inspuiting van 'n test payload/backdoor om firmware-vlak-persistentie te demonstreer. Bewaar verskeie ooreenstemmende reads en die oorspronklike image voordat enige write gedoen word: 'n verkeerde voltage, chip selection, uitleg of image kan die toestel brick.
 
 ### CH341A EEPROM Programmer and Reader
 
-Hierdie device is 'n goedkoop tool vir die dumping van firmware vanaf EEPROMs en om dit ook weer met firmware files te flash. Dit was 'n gewilde keuse vir werk met computer BIOS chips (wat bloot EEPROMs is). Hierdie device verbind oor USB en benodig minimale tools om te begin. Dit voltooi gewoonlik ook die taak vinnig, en kan dus nuttig wees vir fisiese toegang tot devices.
+Hierdie goedkoop USB-tool kan versoenbare seriële EEPROM- en SPI-flashtoestelle dump en reflash. Dit word algemeen gebruik met die SPI NOR-flashchips wat PC BIOS/UEFI-firmware stoor en is gerieflik tydens fisiese toegang wat deur tyd beperk word.
 
-![tekening](../../images/board_image_ch341a.jpg)
+![drawing](../../images/board_image_ch341a.jpg)
 
-Koppel die EEPROM memory aan die CH341a Programmer en prop die device by die computer in. Indien die device nie opgespoor word nie, probeer om drivers op die computer te installeer. Maak ook seker dat die EEPROM in die korrekte oriëntasie gekoppel is (plaas gewoonlik die VCC Pin in die teenoorgestelde oriëntasie as die USB connector); anders sal die software nie die chip kan opspoor nie. Verwys na die diagram indien nodig:
+Koppel die flash memory aan die CH341A en koppel dan die programmer aan die rekenaar. As die programmer self nie bespeur word nie, kontroleer die USB-kabel, OS-permissies en die toepaslike CH341A-driver voordat jy die teiken-chip begin foutsoek. Bevestig die chip se voltage, pin 1, adapterbedrading en programmer-output met die datasheets of 'n meter—moet **nie** op 'n reël soos die plasing van VCC teenoor die USB-connector staatmaak nie. Verkeerde oriëntasie of 5 V wat op 'n 3.3/1.8 V-komponent toegepas word, kan dit vernietig. In-circuit reads kan ook misluk omdat die res van die board die bus laai of van krag voorsien.<sup>[[2]](#references)</sup>
 
-![tekening](../../images/connect_wires_ch341a.jpg) ![tekening](../../images/eeprom_plugged_ch341a.jpg)
+![drawing](../../images/connect_wires_ch341a.jpg) ![drawing](../../images/eeprom_plugged_ch341a.jpg)
 
-Gebruik laastens softwares soos flashrom, G-Flash (GUI), ens. om die firmware te dump. G-Flash is 'n minimale GUI tool wat vinnig is en die EEPROM outomaties opspoor. Dit kan nuttig wees wanneer die firmware vinnig onttrek moet word sonder om veel met die documentation te eksperimenteer.
+Gebruik software soos `flashrom` of G-Flash om die chip te lees. G-Flash is 'n minimale GUI en kan versoenbare toestelle outomaties bespeur, wat gerieflik kan wees tydens vinnige acquisition, maar bevestig self die bespeurde model en voltage. Spesifiseer die presiese programmer en, wanneer nodig, die presiese chip-model; doen minstens twee reads en vergelyk hul hashes voordat jy 'n dump as betroubaar beskou.<sup>[[2]](#references)</sup>
 
-![tekening](../../images/connected_status_ch341a.jpg)
+![drawing](../../images/connected_status_ch341a.jpg)
 
-Nadat die firmware gedump is, kan die analise op die binary files gedoen word. Tools soos strings, hexdump, xxd, binwalk, ens. kan gebruik word om baie inligting oor die firmware sowel as die hele file system te onttrek.
+Nadat die firmware gedump is, kan die analysis op die binary files gedoen word. Tools soos strings, hexdump, xxd, binwalk, ens. kan gebruik word om baie inligting oor die firmware sowel as die hele filesystem te onttrek.
 
-Om die contents vanaf die firmware te onttrek, kan binwalk gebruik word. Binwalk analiseer hex signatures, identifiseer die files in die binary file en is in staat om hulle te onttrek.
+Vir aanvanklike triage kan Binwalk vir bekende signatures skandeer en ondersteunde ingebedde inhoud onttrek:
 ```
 binwalk -e <filename>
 ```
-Dit kan .bin of .rom wees, volgens die tools en konfigurasies wat gebruik word.
+Die uitvoerlêer kan `.bin`, `.rom` of ’n ander uitbreiding gebruik; die uitbreiding bepaal nie die formaat nie.
 
 > [!CAUTION]
-> Let daarop dat firmware-ekstraksie 'n delikate proses is en baie geduld vereis. Enige verkeerde hantering kan die firmware moontlik korrupteer of dit selfs heeltemal uitvee, wat die toestel onbruikbaar kan maak. Dit word aanbeveel om die spesifieke toestel te bestudeer voordat jy probeer om die firmware te onttrek.
+> Let daarop dat firmware-ekstraksie ’n delikate proses is en baie geduld vereis. Enige verkeerde hantering kan die firmware moontlik korrupteer of dit selfs heeltemal uitvee, wat die toestel onbruikbaar kan maak. Dit word aanbeveel om die spesifieke toestel te bestudeer voordat jy probeer om die firmware te onttrek.
 
 ### Bus Pirate + flashrom
 
-![CH341A EEPROM Programmer and Reader - Bus Pirate + flashrom: Bus Pirate + flashrom](<../../images/image (910).png>)
+![CH341A EEPROM-programmeerder en -leser - Bus Pirate + flashrom: Bus Pirate + flashrom](<../../images/image (910).png>)
 
-Let daarop dat selfs al dui die PINOUT van die Pirate Bus penne vir **MOSI** en **MISO** aan om aan SPI te koppel, sommige SPIs penne as DI en DO kan aandui. **MOSI -> DI, MISO -> DO**
+Sommige datasheets benoem die teikenpenne as `DI` en `DO`: vir ’n konvensionele flash-verbinding met ’n enkele datalyn, verbind die beheerder se **MOSI/COPI met DI** en die beheerder se **MISO/CIPO met DO**. Verifieer die teikendatasheet, omdat dual/quad I/O-onderdele penne in ander modusse hergebruik.
 
-![CH341A EEPROM Programmer and Reader - Bus Pirate + flashrom: Note that even if the PINOUT of the Pirate Bus indicates pins for MOSI and MISO to connect to SPI however some SPIs may...](<../../images/image (360).png>)
+![CH341A EEPROM-programmeerder en -leser - Bus Pirate + flashrom: Let daarop dat, selfs al dui die PINOUT van die Pirate Bus penne aan vir MOSI en MISO om aan SPI te verbind, sommige SPIs moontlik...](<../../images/image (360).png>)
 
-In Windows of Linux kan jy die program [**`flashrom`**](https://www.flashrom.org/Flashrom) gebruik om die inhoud van die flash memory te dump deur iets soos die volgende uit te voer:
+In Windows of Linux kan jy die program [**`flashrom`**](https://www.flashrom.org/Flashrom) gebruik om die inhoud van die flash-geheue te dump deur iets soos die volgende uit te voer:
 ```bash
 # In this command we are indicating:
 # -VV Verbose
-# -c <chip> The chip (if you know it better, if not, don'tindicate it and the program might be able to find it)
-# -p <programmer> In this case how to contact th chip via the Bus Pirate
+# -c <chip> Exact chip model (omit it to let flashrom probe candidates)
+# -p <programmer> Programmer configuration; here, the Bus Pirate connection
 # -r <file> Image to save in the filesystem
 flashrom -VV -c "W25Q64.V" -p buspirate_spi:dev=COM3 -r flash_content.img
 ```
+Onlangse Bus Pirate-dokumentasie toon ook opsionele `serialspeed`- en `spispeed`-parameters. Begin versigtig as lang drade of belasting in die stroombaan lesings onstabiel maak.<sup>[[3]](#references)</sup>
+
+## References
+
+- [1] [Analog Devices — Inleiding tot SPI-koppelvlak](https://www.analog.com/en/resources/analog-dialogue/articles/introduction-to-spi-interface.html)
+- [2] [flashrom-handleiding — CH341A SPI-programmeerder en lees-/skryfopsies](https://flashrom.org/classic_cli_manpage.html)
+- [3] [Bus Pirate-dokumentasie — flashrom](https://docs.buspirate.com/docs/software/flashrom/)
 {{#include ../../banners/hacktricks-training.md}}

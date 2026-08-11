@@ -2,42 +2,41 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Host header
+## Host header
 
-Die back-end vertrou verskeie kere op die **Host header** om sekere aksies uit te voer. Dit kan byvoorbeeld die waarde daarvan gebruik as die **domein waarheen 'n wagwoordterugstelling gestuur moet word**. Wanneer jy 'n e-pos met 'n skakel ontvang om jou wagwoord terug te stel, is die domein wat gebruik word die een wat jy in die Host header geplaas het. Dan kan jy die wagwoordterstelling van ander gebruikers versoek en die domein verander na een wat deur jou beheer word om hul wagwoordterstellingkodes te steel. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).<sup>[[1]](#references)</sup>
+Back ends vertrou soms op die HTTP `Host`-veld wanneer absolute skakels saamgestel word. As ’n wagwoordterugstel-e-pos ’n deur ’n aanvaller verskafde host gebruik, kan ’n aanvaller wat ’n terugstelling vir ’n slagoffer aanvra, ’n skakel wat ’n token bevat deur ’n aanvaller-beheerde domein stuur. Toets ook forwarded-host-velde, hantering van duplikaat-Host-velde en versoekteikens in absolute formaat by elke proxy-hop.<sup>[[1]](#references)</sup>
 
 > [!WARNING]
-> Let daarop dat jy moontlik nie eers hoef te wag totdat die gebruiker op die wagwoordterstelling-skakel klik om die token te kry nie, aangesien **spam filters of ander tussenganger-toestelle/bots moontlik daarop sal klik om dit te ontleed**.
+> ’n Gebruikerklik is moontlik nie nodig nie: **e-possekuriteitskandeerders, voorskoudienste of ander tussengangers kan die aanvaller-beheerde skakel outomaties aanvra**, waardeur die reset-token bekend gemaak word.
 
-### Sessie-booleans
+## Session-booleans
 
-Soms, wanneer jy 'n verifikasie korrek voltooi, sal die back-end **net 'n boolean met die waarde "True" by 'n sekuriteitskenmerk van jou sessie voeg**. Daarna sal 'n ander endpoint weet of jy daardie kontrole suksesvol geslaag het.\
-As jy egter **die kontrole slaag** en jou sessie daardie "True"-waarde in die sekuriteitskenmerk kry, kan jy probeer om **toegang tot ander hulpbronne te verkry** wat **van dieselfde kenmerk afhang**, maar waartoe jy **nie toestemming behoort te hê nie**. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).<sup>[[2]](#references)</sup>
+Sommige toepassings teken ’n voltooide verifikasie as ’n boolean in die session aan en laat dan ’n ander endpoint op daardie vlag staatmaak. Nadat jy die kontrole vir een hulpbron wettig geslaag het, toets of dieselfde vlag ’n ander gebruiker, objek of workflow verkeerdelik magtig. Dit is ’n second-order authorization/state-reuse-fout, nie bloot ’n IDOR nie.<sup>[[2]](#references)</sup>
 
-### Registrasie-funksionaliteit
+## Registration functionality
 
-Probeer om as 'n reeds bestaande gebruiker te registreer. Probeer ook ekwivalente karakters gebruik (punte, baie spasies en Unicode).
+Probeer om as ’n reeds bestaande gebruiker te registreer. Probeer ook ekwivalente karakters gebruik (punte, baie spasies en Unicode).
 
-### Oornamings-e-posse
+## Email-change state confusion
 
-Registreer 'n e-posadres, en verander die e-posadres voordat jy dit bevestig. As die nuwe bevestigingse-pos dan na die eerste geregistreerde e-posadres gestuur word, kan jy enige e-posadres oorneem. Of, as jy die tweede e-posadres kan aktiveer deur die eerste een te bevestig, kan jy ook enige rekening oorneem.
+Registreer ’n e-posadres en verander dit voordat jy dit bevestig. Kontroleer of die bevestiging vir die nuwe adres na die ou adres gestuur word, of of die bevestiging van die ou token die nuwe adres aktiveer. Confirmation-tokens moet aan die presiese account, pending address, doel en huidige state gekoppel wees.
 
-### Toegang tot interne servicedesk van maatskappye wat atlassian gebruik
+## Exposed Atlassian service desks
 
 
 {{#ref}}
 https://yourcompanyname.atlassian.net/servicedesk/customer/user/login
 {{#endref}}
 
-### TRACE method
+## TRACE method
 
-Ontwikkelaars kan vergeet om verskeie debugging-opsies in die produksie-omgewing te deaktiveer. Die HTTP `TRACE`-metode is byvoorbeeld vir diagnostiese doeleindes ontwerp. Indien dit geaktiveer is, sal die webbediener op versoeke wat die `TRACE`-metode gebruik reageer deur die presiese versoek wat ontvang is in die respons te eggo. Hierdie gedrag is dikwels onskadelik, maar lei soms tot inligtingblootstelling, soos die naam van interne authentication headers wat deur reverse proxies by versoeke gevoeg kan word.![Prent vir plasing](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
+Die HTTP `TRACE`-metode versoek ’n loop-back van die ontvangde versoek vir diagnostiese doeleindes. RFC 9110 vereis dat ontvangers sensitiewe velde, soos credentials en cookies, uit die weerspieëlde inhoud weglaat, maar onveilige implementerings of deur tussengangers bygevoegde headers kan steeds interne versoektransformasies bekend maak. Browsers verhoed script-gegenereerde TRACE-versoeke, dus hang die historiese cross-site tracing-aanval ook af van ’n aparte manier om beskermde velde in te spuit.<sup>[[3]](#references)</sup>![Image wat ’n TRACE-antwoord wys](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
 
-![Prent vir plasing](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
+![Beeld vir plasing](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
 
-## Verwysings
+## References
 
-- [1] [How I was able to take over any user's account with Host Header Injection](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2)
-- [2] [A less known attack vector: Second Order IDOR attacks](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a)
-
+- [1] [Hoe ek enige gebruiker se account met Host Header Injection kon oorneem](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2)
+- [2] [’n Minder bekende aanvalsvector: Second Order IDOR attacks](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a)
+- [3] [RFC 9110, afdeling 9.3.8 — TRACE](https://www.rfc-editor.org/rfc/rfc9110.html#name-trace)
 {{#include ../banners/hacktricks-training.md}}
