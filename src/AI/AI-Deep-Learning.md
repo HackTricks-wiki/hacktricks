@@ -1,127 +1,128 @@
-# Derin Öğrenme
+# Deep Learning
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Derin Öğrenme
+## Deep Learning <sup>[[1]](#references)</sup>
 
-Derin öğrenme, verilerdeki karmaşık kalıpları modellemek için birden fazla katmana (derin sinir ağları) sahip sinir ağları kullanan makine öğreniminin bir alt kümesidir. Bilgisayarla görme, doğal dil işleme ve konuşma tanıma gibi çeşitli alanlarda dikkate değer başarılar elde etmiştir.
+Deep learning, verilerdeki karmaşık örüntüleri modellemek için birden fazla katmana sahip neural network'leri (deep neural network'ler) kullanan machine learning alt kümesidir. Computer vision, natural language processing ve speech recognition dahil olmak üzere çeşitli alanlarda dikkate değer başarı elde etmiştir.
 
-### Sinir Ağları
+### Neural Network'ler
 
-Sinir ağları, derin öğrenmenin yapı taşlarıdır. Katmanlar halinde düzenlenmiş birbirine bağlı düğümlerden (nöronlar) oluşurlar. Her nöron, girdileri alır, ağırlıklı toplam uygular ve bir çıkış üretmek için sonucu bir aktivasyon fonksiyonundan geçirir. Katmanlar şu şekilde kategorize edilebilir:
-- **Girdi Katmanı**: Girdi verilerini alan ilk katman.
-- **Gizli Katmanlar**: Girdi verileri üzerinde dönüşümler gerçekleştiren ara katmanlar. Gizli katmanların ve her katmandaki nöron sayısının değişkenlik göstermesi, farklı mimarilere yol açabilir.
-- **Çıkış Katmanı**: Ağın çıktısını üreten son katman, örneğin sınıflandırma görevlerinde sınıf olasılıkları.
+Neural network'ler, deep learning'in yapı taşlarıdır. Katmanlar halinde düzenlenmiş birbirine bağlı düğümlerden (nöronlardan) oluşurlar. Her nöron girdileri alır, ağırlıklı bir toplam uygular ve bir çıktı üretmek için sonucu bir activation function'dan geçirir. Katmanlar şu şekilde kategorilere ayrılabilir:
+- **Input Layer**: Girdi verilerini alan ilk katmandır.
+- **Hidden Layers**: Girdi verileri üzerinde dönüşümler gerçekleştiren ara katmanlardır. Hidden layer'ların sayısı ve her katmandaki nöron sayısı değişebilir; bu da farklı mimarilerin ortaya çıkmasını sağlar.
+- **Output Layer**: Classification görevlerindeki sınıf olasılıkları gibi network'ün çıktısını üreten son katmandır.
 
-### Aktivasyon Fonksiyonları
 
-Bir nöron katmanı girdi verilerini işlerken, her nöron girdiye bir ağırlık ve bir bias uygular (`z = w * x + b`), burada `w` ağırlık, `x` girdi ve `b` bias'tır. Nöronun çıktısı daha sonra modele doğrusal olmayanlık eklemek için bir **aktivasyon fonksiyonundan geçirilir**. Bu aktivasyon fonksiyonu, bir sonraki nöronun "aktif hale gelip gelmeyeceğini ve ne kadar aktif olacağını" belirtir. Bu, ağın verilerdeki karmaşık kalıpları ve ilişkileri öğrenmesini sağlar, böylece herhangi bir sürekli fonksiyonu yaklaşık olarak modelleyebilir.
+### Activation Function'lar
 
-Bu nedenle, aktivasyon fonksiyonları sinir ağına doğrusal olmayanlık katarak verilerdeki karmaşık ilişkileri öğrenmesine olanak tanır. Yaygın aktivasyon fonksiyonları şunlardır:
-- **Sigmoid**: Girdi değerlerini 0 ile 1 arasında bir aralığa haritalar, genellikle ikili sınıflandırmada kullanılır.
-- **ReLU (Düzeltilmiş Doğrusal Birim)**: Girdi pozitifse doğrudan çıktıyı verir; aksi takdirde sıfır verir. Derin ağların eğitiminde basitliği ve etkinliği nedeniyle yaygın olarak kullanılır.
-- **Tanh**: Girdi değerlerini -1 ile 1 arasında bir aralığa haritalar, genellikle gizli katmanlarda kullanılır.
-- **Softmax**: Ham puanları olasılıklara dönüştürür, genellikle çok sınıflı sınıflandırma için çıkış katmanında kullanılır.
+Bir nöron katmanı girdi verilerini işlediğinde, her nöron girdiye bir ağırlık ve bias uygular (`z = w * x + b`); burada `w` ağırlık, `x` girdi ve `b` bias'tır. Nöronun çıktısı daha sonra modele **doğrusal olmayanlık kazandırmak için bir activation function'dan geçirilir**. Bu activation function temel olarak bir sonraki nöronun "etkinleştirilip etkinleştirilmeyeceğini ve ne ölçüde etkinleştirileceğini" belirtir. Bu, network'ün verilerdeki karmaşık örüntüleri ve ilişkileri öğrenmesini ve böylece herhangi bir sürekli fonksiyona yaklaşabilmesini sağlar.
 
-### Geri Yayılım
+Bu nedenle activation function'lar neural network'e doğrusal olmayanlık kazandırarak verilerdeki karmaşık ilişkileri öğrenmesini sağlar. Yaygın activation function'lar şunlardır:
+- **Sigmoid**: Girdi değerlerini 0 ile 1 arasındaki bir aralığa eşler; genellikle binary classification'da kullanılır.
+- **ReLU (Rectified Linear Unit)**: Girdi pozitifse doğrudan girdiyi, aksi durumda sıfırı verir. Basitliği ve deep network'lerin training sürecindeki etkinliği nedeniyle yaygın olarak kullanılır.
+- **Tanh**: Girdi değerlerini -1 ile 1 arasındaki bir aralığa eşler; genellikle hidden layer'larda kullanılır.
+- **Softmax**: Ham skorları olasılıklara dönüştürür; genellikle multi-class classification için output layer'da kullanılır.
 
-Geri yayılım, sinir ağlarını nöronlar arasındaki bağlantıların ağırlıklarını ayarlayarak eğitmek için kullanılan algoritmadır. Kayıp fonksiyonunun her bir ağırlıkla ilgili gradyanını hesaplayarak ve ağırlıkları gradyanın ters yönünde güncelleyerek kaybı minimize eder. Geri yayılımda yer alan adımlar şunlardır:
+### Backpropagation
 
-1. **İleri Geçiş**: Girdiyi katmanlardan geçirerek ve aktivasyon fonksiyonlarını uygulayarak ağın çıktısını hesaplayın.
-2. **Kayıp Hesaplama**: Tahmin edilen çıktı ile gerçek hedef arasındaki kaybı (hata) bir kayıp fonksiyonu kullanarak hesaplayın (örneğin, regresyon için ortalama kare hatası, sınıflandırma için çapraz entropi).
-3. **Geri Geçiş**: Kayıp ile her bir ağırlık arasındaki gradyanları hesaplayın, kalkülüsün zincir kuralını kullanarak.
-4. **Ağırlık Güncelleme**: Kayıbı minimize etmek için bir optimizasyon algoritması (örneğin, stokastik gradyan inişi, Adam) kullanarak ağırlıkları güncelleyin.
+Backpropagation, nöronlar arasındaki bağlantıların ağırlıklarını ayarlayarak neural network'leri train etmek için kullanılan algoritmadır. Her ağırlığa göre loss function'ın gradient'ini hesaplayarak ve loss'u en aza indirmek için ağırlıkları gradient'in tersi yönde güncelleyerek çalışır. Backpropagation sürecindeki adımlar şunlardır:
 
-## Konvolüsyonel Sinir Ağları (CNN'ler)
+1. **Forward Pass**: Girdiyi katmanlardan geçirip activation function'ları uygulayarak network'ün çıktısını hesaplayın.
+2. **Loss Calculation**: Bir loss function kullanarak tahmin edilen çıktı ile gerçek hedef arasındaki loss'u (hatayı) hesaplayın (ör. regression için mean squared error, classification için cross-entropy).
+3. **Backward Pass**: Calculus'un chain rule'unu kullanarak loss'un her ağırlığa göre gradient'lerini hesaplayın.
+4. **Weight Update**: Loss'u en aza indirmek için bir optimization algorithm (ör. stochastic gradient descent, Adam) kullanarak ağırlıkları güncelleyin.
 
-Konvolüsyonel Sinir Ağları (CNN'ler), ızgara benzeri verileri, örneğin görüntüleri işlemek için tasarlanmış özel bir sinir ağı türüdür. Özellikle, özelliklerin mekansal hiyerarşilerini otomatik olarak öğrenme yetenekleri nedeniyle bilgisayarla görme görevlerinde oldukça etkilidirler.
+## Convolutional Neural Networks (CNNs) <sup>[[2]](#references)</sup>
+
+Convolutional Neural Networks (CNNs), görüntüler gibi grid benzeri verileri işlemek için tasarlanmış özel bir neural network türüdür. Özelliklerin uzamsal hiyerarşilerini otomatik olarak öğrenebilme yetenekleri sayesinde computer vision görevlerinde özellikle etkilidirler.
 
 CNN'lerin ana bileşenleri şunlardır:
-- **Konvolüsyonel Katmanlar**: Girdi verilerine öğrenilebilir filtreler (çekirdekler) kullanarak konvolüsyon işlemleri uygular ve yerel özellikleri çıkarır. Her filtre, girdinin üzerinde kayar ve bir nokta çarpımı hesaplayarak bir özellik haritası üretir.
-- **Havuzlama Katmanları**: Önemli özellikleri korurken özellik haritalarının mekansal boyutlarını azaltmak için örnekleme yapar. Yaygın havuzlama işlemleri arasında maksimum havuzlama ve ortalama havuzlama bulunur.
-- **Tam Bağlantılı Katmanlar**: Bir katmandaki her nöronu bir sonraki katmandaki her nörona bağlar, geleneksel sinir ağlarına benzer. Bu katmanlar genellikle sınıflandırma görevleri için ağın sonunda kullanılır.
+- **Convolutional Layers**: Yerel özellikleri çıkarmak için learnable filter'lar (kernel'ler) kullanarak girdi verilerine convolution işlemleri uygular. Her filter girdi üzerinde kayar ve bir dot product hesaplayarak bir feature map üretir.
+- **Pooling Layers**: Önemli özellikleri korurken uzamsal boyutlarını azaltmak için feature map'leri downsample eder. Yaygın pooling işlemleri arasında max pooling ve average pooling bulunur.
+- **Fully Connected Layers**: Bir katmandaki her nöronu sonraki katmandaki her nörona bağlar; bu yönüyle geleneksel neural network'lere benzer. Bu katmanlar genellikle network'ün sonunda classification görevleri için kullanılır.
 
-Bir CNN içindeki **`Konvolüsyonel Katmanlar`** arasında ayrıca şunları ayırt edebiliriz:
-- **İlk Konvolüsyonel Katman**: Ham girdi verilerini (örneğin, bir görüntü) işleyen ilk konvolüsyonel katman ve kenarlar ve dokular gibi temel özellikleri tanımlamak için faydalıdır.
-- **Ara Konvolüsyonel Katmanlar**: İlk katmanın öğrendiği özellikler üzerine inşa eden sonraki konvolüsyonel katmanlar, ağın daha karmaşık kalıpları ve temsilleri öğrenmesine olanak tanır.
-- **Son Konvolüsyonel Katman**: Tam bağlantılı katmanlardan önceki son konvolüsyonel katmanlar, yüksek seviyeli özellikleri yakalar ve verileri sınıflandırma için hazırlar.
+Bir CNN içindeki **`Convolutional Layers`** arasında ayrıca şunları ayırt edebiliriz:
+- **Initial Convolutional Layer**: Ham girdi verilerini (ör. bir görüntü) işleyen ilk convolutional layer'dır ve kenarlar ile dokular gibi temel özellikleri tanımlamak için kullanışlıdır.
+- **Intermediate Convolutional Layers**: Initial layer tarafından öğrenilen özellikler üzerine inşa edilen sonraki convolutional layer'lardır; network'ün daha karmaşık örüntüleri ve temsilleri öğrenmesini sağlar.
+- **Final Convolutional Layer**: Fully connected layer'lardan önceki son convolutional layer'lardır; üst düzey özellikleri yakalar ve verileri classification için hazırlar.
 
 > [!TIP]
-> CNN'ler, ızgara benzeri verilerdeki özelliklerin mekansal hiyerarşilerini öğrenme yetenekleri ve ağırlık paylaşımı yoluyla parametre sayısını azaltma özellikleri nedeniyle görüntü sınıflandırma, nesne tespiti ve görüntü segmentasyonu görevlerinde özellikle etkilidir.
-> Ayrıca, komşu verilerin (piksel) uzak pikselere göre daha fazla ilişkili olma olasılığının yüksek olduğu özellik yerelliği ilkesini destekleyen verilerle daha iyi çalıştıklarını unutmayın; bu, metin gibi diğer veri türleri için geçerli olmayabilir.
-> Dahası, CNN'lerin karmaşık özellikleri tanımlayabileceğini ancak herhangi bir mekansal bağlam uygulayamayacağını, yani görüntünün farklı bölgelerinde bulunan aynı özelliğin aynı olacağını unutmayın.
+> CNN'ler, grid benzeri verilerde özelliklerin uzamsal hiyerarşilerini öğrenebilme ve weight sharing yoluyla parametre sayısını azaltabilme yetenekleri sayesinde image classification, object detection ve image segmentation görevlerinde özellikle etkilidir.
+> Ayrıca, feature locality principle'ı destekleyen verilerle daha iyi çalışırlar; bu prensibe göre komşu verilerin (pikselerin) uzak piksellere kıyasla birbiriyle ilişkili olma olasılığı daha yüksektir. Bu durum text gibi diğer veri türleri için geçerli olmayabilir.
+> Dahası, CNN'lerin karmaşık özellikleri bile tanımlayabildiğini ancak herhangi bir uzamsal context uygulayamadığını unutmayın; yani görüntünün farklı bölümlerinde bulunan aynı özellik aynı olacaktır.
 
-### CNN Tanımlama Örneği
+### CNN tanımlama örneği
 
-*Burada, 48x48 boyutunda bir RGB görüntü kümesi ile başlayan bir Konvolüsyonel Sinir Ağı (CNN) tanımlamanın nasıl yapılacağına dair bir açıklama bulacaksınız ve özellikleri çıkarmak için konvolüsyonel katmanlar ve maksimum havuzlama kullanılır, ardından sınıflandırma için tam bağlantılı katmanlar gelir.*
+*Burada, dataset olarak 48x48 boyutunda RGB görüntü batch'i ile başlayan ve özellikleri çıkarmak için convolutional layer'lar ile maxpool kullanan, ardından classification için fully connected layer'lar kullanan bir Convolutional Neural Network'ün (CNN) PyTorch'ta nasıl tanımlanacağı açıklanmaktadır.*
 
-PyTorch'ta 1 konvolüsyonel katmanı şu şekilde tanımlayabilirsiniz: `self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)`.
+PyTorch'ta 1 convolutional layer'ı şu şekilde tanımlayabilirsiniz: `self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)`.
 
-- `in_channels`: Girdi kanallarının sayısı. RGB görüntüleri durumunda bu 3'tür (her renk kanalı için bir tane). Eğer gri tonlamalı görüntülerle çalışıyorsanız, bu 1 olacaktır.
+- `in_channels`: Girdi kanallarının sayısıdır. RGB görüntülerde bu değer 3'tür (her renk kanalı için bir tane). Grayscale görüntülerle çalışıyorsanız bu değer 1 olur.
 
-- `out_channels`: Konvolüsyonel katmanın öğreneceği çıktı kanallarının (filtrelerin) sayısıdır. Bu, model mimarinize göre ayarlayabileceğiniz bir hiperparametredir.
+- `out_channels`: Convolutional layer'ın öğreneceği çıktı kanallarının (filter'ların) sayısıdır. Bu, model mimarinize göre ayarlayabileceğiniz bir hyperparameter'dır.
 
-- `kernel_size`: Konvolüsyonel filtrenin boyutu. Yaygın bir seçim 3x3'tür, bu da filtrenin girdi görüntüsünün 3x3 alanını kapsayacağı anlamına gelir. Bu, in_channels'tan out_channels'ı üretmek için kullanılan 3×3×3 renk damgası gibidir:
-1. O 3×3×3 damgayı görüntü küpünün sol üst köşesine yerleştirin.
-2. Her ağırlığı altındaki piksel ile çarpın, hepsini toplayın, bias ekleyin → bir sayı elde edersiniz.
-3. O sayıyı boş bir haritada (0, 0) konumuna yazın.
-4. Damgayı bir piksel sağa kaydırın (stride = 1) ve 48×48 ızgarayı doldurana kadar tekrarlayın.
+- `kernel_size`: Convolutional filter'ın boyutudur. Yaygın bir seçim 3x3'tür; bu, filter'ın girdi görüntüsünün 3x3'lük bir alanını kaplayacağı anlamına gelir. Bu, `in_channels`'tan `out_channels`'ı üretmek için kullanılan 3×3×3 renk damgası gibidir:
+1. Bu 3×3×3 damgayı görüntü küpünün sol üst köşesine yerleştirin.
+2. Her ağırlığı altındaki piksel ile çarpın, hepsini toplayın ve bias'ı ekleyin → bir sayı elde edersiniz.
+3. Bu sayıyı boş bir haritada (0, 0) konumuna yazın.
+4. Damgayı bir piksel sağa kaydırın (stride = 1) ve 48×48'lik grid'in tamamını doldurana kadar tekrarlayın.
 
-- `padding`: Girdiğin her tarafına eklenen piksel sayısı. Padding, çıktının boyutunu daha iyi kontrol edebilmek için girdiğin mekansal boyutlarını korumaya yardımcı olur. Örneğin, 3x3 çekirdek ile 48x48 piksel girdi için, 1'lik bir padding, konvolüsyon işlemi sonrasında çıktı boyutunu aynı (48x48) tutar. Bunun nedeni, padding'in girdi görüntüsünün etrafına 1 piksel genişliğinde bir kenar eklemesi ve çekirdeğin kenarların üzerinden kaymasına olanak tanımasıdır.
+- `padding`: Girdinin her tarafına eklenen piksel sayısıdır. Padding, girdinin uzamsal boyutlarının korunmasına yardımcı olarak çıktı boyutu üzerinde daha fazla kontrol sağlar. Örneğin, 3x3 kernel ve 48x48 piksellik bir girdide padding değerinin 1 olması, convolution işleminden sonra çıktı boyutunu aynı (48x48) tutar. Bunun nedeni, padding'in girdi görüntüsünün çevresine 1 piksel genişliğinde bir kenarlık ekleyerek kernel'in uzamsal boyutları azaltmadan kenarlar üzerinde kayabilmesini sağlamasıdır.
 
-Bu katmandaki eğitilebilir parametrelerin sayısı:
-- (3x3x3 (çekirdek boyutu) + 1 (bias)) x 32 (out_channels) = 896 eğitilebilir parametre.
+Daha sonra, bu katmandaki trainable parameter'ların sayısı:
+- (3x3x3 (kernel size) + 1 (bias)) x 32 (out_channels) = 896 trainable parameter.
 
-Her çekirdek için bir Bias (+1) eklenir çünkü her konvolüsyonel katmanın işlevi, girdinin doğrusal bir dönüşümünü öğrenmektir ve bu, şu denklemi temsil eder:
+Her kullanılan kernel için bir Bias (+1) eklendiğini unutmayın; çünkü her convolutional layer'ın işlevi, şu denklemle gösterilen girdi üzerinde doğrusal bir dönüşüm öğrenmektir:
 ```plaintext
 Y = f(W * X + b)
 ```
-`W` ağırlık matrisidir (öğrenilen filtreler, 3x3x3 = 27 parametre), `b` ise her çıkış kanalı için +1 olan bias vektörüdür.
+burada `W`, ağırlık matrisi (öğrenilen filtreler, 3x3x3 = 27 parametre), `b` ise her output channel için +1 olan bias vektörüdür.
 
-`self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)` ifadesinin çıktısının `(batch_size, 32, 48, 48)` şeklinde bir tensör olacağını unutmayın, çünkü 32, 48x48 piksel boyutunda üretilen yeni kanal sayısıdır.
+`self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)` çıktısının `(batch_size, 32, 48, 48)` şeklinde bir tensor olacağını unutmayın; çünkü 32, 48x48 piksel boyutunda oluşturulan yeni channel sayısıdır.
 
-Sonra, bu konvolüsyon katmanını başka bir konvolüsyon katmanına bağlayabiliriz: `self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1)`.
+Daha sonra bu convolutional layer'ı başka bir convolutional layer'a şu şekilde bağlayabiliriz: `self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1)`.
 
-Bu, şunları ekleyecektir: (32x3x3 (kernel boyutu) + 1 (bias)) x 64 (out_channels) = 18,496 eğitilebilir parametre ve `(batch_size, 64, 48, 48)` şeklinde bir çıktı.
+Bu işlem şunları ekler: (32x3x3 (kernel size) + 1 (bias)) x 64 (out_channels) = 18,496 trainable parameter ve `(batch_size, 64, 48, 48)` şeklinde bir output.
 
-Gördüğünüz gibi, **parametre sayısı her ek konvolüsyon katmanıyla hızla artar**, özellikle çıkış kanallarının sayısı arttıkça.
+Gördüğünüz gibi, özellikle output channel sayısı arttıkça, **her ek convolutional layer ile parameter sayısı hızla artar**.
 
-Kullanılan veri miktarını kontrol etmenin bir yolu, her konvolüsyon katmanından sonra **max pooling** kullanmaktır. Max pooling, özellik haritalarının mekansal boyutlarını azaltır, bu da parametre sayısını ve hesaplama karmaşıklığını azaltmaya yardımcı olurken önemli özelliklerin korunmasına yardımcı olur.
+Kullanılan data miktarını kontrol etmek için bir seçenek, her convolutional layer'dan sonra **max pooling** kullanmaktır. Max pooling, feature map'lerin spatial dimension'larını azaltır; bu da önemli feature'ları korurken parameter sayısını ve computational complexity'yi düşürmeye yardımcı olur.
 
-Şu şekilde tanımlanabilir: `self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)`. Bu, temel olarak 2x2 piksel ızgarası kullanmayı ve her ızgaradan maksimum değeri alarak özellik haritasının boyutunu yarıya indirmeyi belirtir. Ayrıca, `stride=2` demek, pooling işleminin her seferinde 2 piksel hareket edeceği anlamına gelir; bu durumda, pooling bölgeleri arasında herhangi bir örtüşmeyi önler.
+Şu şekilde tanımlanabilir: `self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)`. Bu, temelde 2x2 piksellik bir grid kullanıp feature map'in boyutunu yarıya indirmek için her grid'deki maksimum değeri almayı belirtir. Ayrıca, `stride=2`, pooling işleminin her seferinde 2 piksel ilerleyeceği anlamına gelir; bu durumda pooling bölgeleri arasında overlap oluşmasını önler.
 
-Bu pooling katmanıyla, ilk konvolüsyon katmanından sonra çıktı şekli, `self.conv2` çıktısına `self.pool1` uygulandıktan sonra `(batch_size, 64, 24, 24)` olacaktır ve boyutu önceki katmanın 1/4'üne düşecektir.
+Bu pooling layer ile ilk convolutional layer'dan sonraki output shape, `self.pool1` öğesinin `self.conv2` output'una uygulanmasından sonra `(batch_size, 64, 24, 24)` olur ve boyut önceki layer'ın 1/4'üne düşer.
 
 > [!TIP]
-> Konvolüsyon katmanlarından sonra pooling yapmak, özellik haritalarının mekansal boyutlarını azaltmak için önemlidir; bu, parametre sayısını ve hesaplama karmaşıklığını kontrol etmeye yardımcı olurken, başlangıç parametrelerinin önemli özellikleri öğrenmesini sağlar.
-> Pooling katmanından önceki konvolüsyonları, giriş verilerinden özellikleri çıkarmanın bir yolu olarak görebilirsiniz (çizgiler, kenarlar gibi), bu bilgi hala havuzlanmış çıktıda mevcut olacaktır, ancak bir sonraki konvolüsyon katmanı orijinal giriş verilerini göremeyecek, yalnızca bu bilginin azaltılmış versiyonu olan havuzlanmış çıktıyı görecektir.
-> Genellikle şu sırayla: `Conv → ReLU → Pool`, her 2×2 havuzlama penceresi artık özellik aktivasyonlarıyla (“kenar mevcut / yok”) rekabet eder, ham piksel yoğunluklarıyla değil. En güçlü aktivasyonu korumak, gerçekten de en belirgin kanıtı korur.
+> Feature map'lerin spatial dimension'larını azaltmak için convolutional layer'ların ardından pooling uygulamak önemlidir. Bu, parameter sayısını ve computational complexity'yi kontrol etmeye yardımcı olurken başlangıçtaki parameter'ların önemli feature'ları öğrenmesini sağlar.
+>Pooling layer'dan önceki convolution işlemlerini input data'dan (örneğin çizgiler ve kenarlar) feature çıkarma yöntemi olarak görebilirsiniz. Bu bilgiler pooled output içinde hâlâ bulunur; ancak sonraki convolutional layer artık original input data'yı göremez, yalnızca bu bilgileri içeren ve önceki layer'ın azaltılmış bir sürümü olan pooled output'u görür.
+>Genellikle kullanılan sırada: `Conv → ReLU → Pool`, her 2×2 pooling window artık ham piksel yoğunluklarıyla değil, feature activation'larıyla (“kenar var / yok”) karşılaşır. En güçlü activation'ı korumak, gerçekten de en önemli kanıtı korur.
 
-Sonra, ihtiyaç duyulan kadar konvolüsyon ve pooling katmanı ekledikten sonra, çıktıyı tamamen bağlı katmanlara beslemek için düzleştirebiliriz. Bu, tensörü her örnek için 1D vektör haline getirerek yapılır:
+Daha sonra, ihtiyacımız olan sayıda convolutional ve pooling layer ekledikten sonra output'u fully connected layer'lara aktarmak için flatten edebiliriz. Bu işlem, tensor'ü batch içindeki her sample için 1D bir vector olacak şekilde yeniden şekillendirerek yapılır:
 ```python
 x = x.view(-1, 64*24*24)
 ```
-Ve önceki konvolüsyonel ve havuzlama katmanları tarafından üretilen tüm eğitim parametreleriyle bu 1D vektörle, tam bağlantılı bir katmanı şu şekilde tanımlayabiliriz:
+Ve önceki convolutional ve pooling katmanları tarafından oluşturulan tüm training parametrelerini içeren bu 1D vektör ile şu şekilde bir fully connected layer tanımlayabiliriz:
 ```python
 self.fc1 = nn.Linear(64 * 24 * 24, 512)
 ```
-Önceki katmanın düzleştirilmiş çıktısını alacak ve bunu 512 gizli birime haritalayacaktır.
+Önceki katmanın düzleştirilmiş çıktısını alıp 512 gizli birime eşleyecektir.
 
-Bu katmanın `(64 * 24 * 24 + 1 (bias)) * 512 = 3,221,504` eğitilebilir parametre eklediğine dikkat edin; bu, konvolüsyonel katmanlara kıyasla önemli bir artıştır. Bunun nedeni, tam bağlantılı katmanların bir katmandaki her nöronu bir sonraki katmandaki her nörona bağlamasıdır, bu da büyük bir parametre sayısına yol açar.
+Bu katmanın `(64 * 24 * 24 + 1 (bias)) * 512 = 3,221,504` eğitilebilir parametre eklediğine dikkat edin; bu, convolutional katmanlara kıyasla önemli bir artıştır. Bunun nedeni, fully connected katmanların bir katmandaki her nöronu sonraki katmandaki her nörona bağlaması ve bunun da çok sayıda parametreye yol açmasıdır.
 
-Son olarak, nihai sınıf logitlerini üretmek için bir çıkış katmanı ekleyebiliriz:
+Son olarak, nihai sınıf logits'lerini üretmek için bir output layer ekleyebiliriz:
 ```python
 self.fc2 = nn.Linear(512, num_classes)
 ```
-Bu, `(512 + 1 (bias)) * num_classes` eğitilebilir parametre ekleyecektir; burada `num_classes`, sınıflandırma görevindeki sınıf sayısını ifade eder (örneğin, GTSRB veri seti için 43).
+Bu, `num_classes` sınıflandırma görevindeki sınıf sayısı olduğunda (örneğin, GTSRB veri kümesi için 43), `(512 + 1 (bias)) * num_classes` eğitilebilir parametre ekler.
 
-Son yaygın uygulamalardan biri, aşırı uyumu önlemek için tam bağlantılı katmanlardan önce bir dropout katmanı eklemektir. Bu, şu şekilde yapılabilir:
+Bir diğer yaygın uygulama, overfitting'i önlemek için fully connected katmanlardan önce bir dropout katmanı eklemektir. Bu işlem şu şekilde yapılabilir:
 ```python
 self.dropout = nn.Dropout(0.5)
 ```
-Bu katman, eğitim sırasında giriş birimlerinin bir kısmını rastgele sıfıra ayarlar; bu, belirli nöronlara olan bağımlılığı azaltarak aşırı uyumu önlemeye yardımcı olur.
+Bu katman, eğitim sırasında giriş birimlerinin bir kısmını rastgele sıfıra ayarlar; bu, belirli nöronlara olan bağımlılığı azaltarak overfitting'i önlemeye yardımcı olur.
 
-### CNN Kod örneği
+### CNN Code örneği
 ```python
 import torch
 import torch.nn as nn
@@ -222,23 +223,23 @@ x = self.fc2(x)
 # Note that the output is not passed through a softmax activation here, as it is typically done in the loss function (e.g., CrossEntropyLoss)
 return x
 ```
-### CNN Kod eğitim örneği
+### CNN Code eğitim örneği
 
-Aşağıdaki kod, bazı eğitim verileri oluşturacak ve yukarıda tanımlanan `MY_NET` modelini eğitecektir. Dikkate değer bazı ilginç değerler:
+Aşağıdaki kod, bazı training data oluşturacak ve yukarıda tanımlanan `MY_NET` modelini train edecektir. Dikkat edilmesi gereken bazı ilginç değerler:
 
-- `EPOCHS`, modelin eğitim sırasında tüm veri kümesini göreceği kezdir. EPOCH çok küçükse, model yeterince öğrenemeyebilir; çok büyükse, aşırı uyum sağlayabilir.
-- `LEARNING_RATE`, optimizasyon için adım boyutudur. Küçük bir öğrenme oranı yavaş yakınsama ile sonuçlanabilirken, büyük bir oran optimal çözümü aşabilir ve yakınsamayı engelleyebilir.
-- `WEIGHT_DECAY`, büyük ağırlıkları cezalandırarak aşırı uyumu önlemeye yardımcı olan bir düzenleme terimidir.
+- `EPOCHS`, modelin training sırasında tüm dataset'i kaç kez göreceğini belirtir. EPOCH çok küçükse model yeterince öğrenemeyebilir; çok büyükse overfit olabilir.
+- `LEARNING_RATE`, optimizer için step size'dır. Küçük bir learning rate yavaş convergence'a yol açabilirken, büyük bir learning rate optimal çözümü aşabilir ve convergence'ı engelleyebilir.
+- `WEIGHT_DECAY`, büyük weight'leri cezalandırarak overfitting'i önlemeye yardımcı olan bir regularization terimidir.
 
-Eğitim döngüsü ile ilgili bilmeniz gereken bazı ilginç bilgiler:
-- `criterion = nn.CrossEntropyLoss()` çok sınıflı sınıflandırma görevleri için kullanılan kayıp fonksiyonudur. Softmax aktivasyonu ve çapraz entropi kaybını tek bir fonksiyonda birleştirerek, sınıf logitleri üreten modellerin eğitimi için uygun hale getirir.
-- Modelin ikili sınıflandırma veya regresyon gibi diğer türde çıktılar üretmesi bekleniyorsa, ikili sınıflandırma için `nn.BCEWithLogitsLoss()` veya regresyon için `nn.MSELoss()` gibi farklı kayıp fonksiyonları kullanırdık.
-- `optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)` Adam optimizasyonunu başlatır; bu, derin öğrenme modellerini eğitmek için popüler bir tercihtir. Öğrenme oranını, gradyanların birinci ve ikinci momentlerine göre her parametre için uyarlamaktadır.
-- `optim.SGD` (Stokastik Gradyan İnişi) veya `optim.RMSprop` gibi diğer optimizatörler de, eğitim görevlerinin özel gereksinimlerine bağlı olarak kullanılabilir.
-- `model.train()` metodu, modeli eğitim moduna ayarlar ve dropout ve batch normalization gibi katmanların eğitim sırasında değerlendirmeden farklı davranmasını sağlar.
-- `optimizer.zero_grad()` geri yayılmadan önce tüm optimize edilen tensörlerin gradyanlarını temizler; bu, PyTorch'ta gradyanların varsayılan olarak biriktiği için gereklidir. Temizlenmezse, önceki iterasyonlardan gelen gradyanlar mevcut gradyanlara eklenir ve yanlış güncellemelerle sonuçlanır.
-- `loss.backward()` kaybın model parametrelerine göre gradyanlarını hesaplar; bu gradyanlar daha sonra optimizatör tarafından ağırlıkları güncellemek için kullanılır.
-- `optimizer.step()` hesaplanan gradyanlar ve öğrenme oranına dayanarak model parametrelerini günceller.
+Training loop hakkında bilinmesi gereken bazı ilginç bilgiler:
+- `criterion = nn.CrossEntropyLoss()`, multi-class classification görevlerinde kullanılan loss function'dır. Softmax activation ile cross-entropy loss'u tek bir function'da birleştirerek class logits üreten modelleri train etmek için uygun hale getirir.
+- Modelin binary classification veya regression gibi farklı output türleri üretmesi bekleniyorsa, binary classification için `nn.BCEWithLogitsLoss()` veya regression için `nn.MSELoss()` gibi farklı loss function'lar kullanırdık.
+- `optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)`, deep learning modellerini train etmek için popüler bir tercih olan Adam optimizer'ını başlatır. Gradient'lerin first ve second moment'larına göre her parameter için learning rate'i uyarlar.
+- Training task'ın özel gereksinimlerine bağlı olarak `optim.SGD` (Stochastic Gradient Descent) veya `optim.RMSprop` gibi diğer optimizer'lar da kullanılabilir.
+- `model.train()` method'u modeli training mode'a geçirir ve dropout ile batch normalization gibi layer'ların training sırasında evaluation'a kıyasla farklı davranmasını sağlar.
+- `optimizer.zero_grad()`, backward pass öncesinde optimize edilen tüm tensor'ların gradient'lerini temizler. Bu gereklidir, çünkü PyTorch'ta gradient'ler varsayılan olarak birikir. Temizlenmezse önceki iteration'lardaki gradient'ler mevcut gradient'lere eklenir ve hatalı update'lere yol açar.
+- `loss.backward()`, loss'un model parameter'larına göre gradient'lerini hesaplar. Bu gradient'ler daha sonra optimizer tarafından weight'leri güncellemek için kullanılır.
+- `optimizer.step()`, hesaplanan gradient'lere ve learning rate'e göre model parameter'larını günceller.
 ```python
 import torch, torch.nn.functional as F
 from torch import nn, optim
@@ -375,44 +376,53 @@ print(classification_report(labels_all, preds_all, zero_division=0))
 print("Confusion matrix (rows = true, cols = pred):")
 print(confusion_matrix(labels_all, preds_all))
 ```
-## Tekrarlayan Sinir Ağları (RNN'ler)
+## Recurrent Neural Networks (RNNs) <sup>[[3]](#references)</sup>
 
-Tekrarlayan Sinir Ağları (RNN'ler), zaman serileri veya doğal dil gibi sıralı verileri işlemek için tasarlanmış bir sinir ağı sınıfıdır. Geleneksel ileri beslemeli sinir ağlarının aksine, RNN'ler kendilerine geri dönen bağlantılara sahiptir, bu da onlara dizideki önceki girdiler hakkında bilgi tutan gizli bir durum sürdürme imkanı tanır.
+Recurrent Neural Networks (RNNs), zaman serileri veya doğal dil gibi sıralı verileri işlemek için tasarlanmış bir neural network sınıfıdır. Geleneksel feedforward neural network'lerin aksine RNN'ler, kendilerine geri dönen bağlantılara sahiptir. Bu, dizideki önceki girdiler hakkındaki bilgileri yakalayan bir hidden state'i korumalarını sağlar.
 
 RNN'lerin ana bileşenleri şunlardır:
-- **Tekrarlayan Katmanlar**: Bu katmanlar, giriş dizilerini bir zaman adımında bir kez işleyerek, mevcut girdi ve önceki gizli duruma dayanarak gizli durumlarını günceller. Bu, RNN'lerin verideki zamansal bağımlılıkları öğrenmesine olanak tanır.
-- **Gizli Durum**: Gizli durum, önceki zaman adımlarından gelen bilgileri özetleyen bir vektördür. Her zaman adımında güncellenir ve mevcut girdi için tahminler yapmakta kullanılır.
-- **Çıktı Katmanı**: Çıktı katmanı, gizli duruma dayanarak nihai tahminleri üretir. Birçok durumda, RNN'ler çıktının bir dizideki bir sonraki kelime üzerindeki olasılık dağılımı olduğu dil modelleme gibi görevler için kullanılır.
+- **Recurrent Layers**: Bu katmanlar input sequence'lerini her seferinde bir time step işleyerek hidden state'lerini mevcut input'a ve önceki hidden state'e göre günceller. Bu, RNN'lerin verilerdeki temporal dependencies'leri öğrenmesini sağlar.
+- **Hidden State**: Hidden state, önceki time step'lerden gelen bilgileri özetleyen bir vektördür. Her time step'te güncellenir ve mevcut input için tahminler yapmak üzere kullanılır.
+- **Output Layer**: Output layer, hidden state'e göre nihai tahminleri üretir. Birçok durumda RNN'ler, output'un bir dizideki sonraki kelime üzerinde bir probability distribution olduğu language modeling gibi görevlerde kullanılır.
 
-Örneğin, bir dil modelinde, RNN bir kelime dizisini işler, örneğin, "Kedi" ve önceki kelimelerin sağladığı bağlama dayanarak bir sonraki kelimeyi tahmin eder, bu durumda "halı".
+Örneğin bir language model'de RNN, "The cat sat on the" gibi bir kelime dizisini işler ve önceki kelimelerin sağladığı bağlama göre sonraki kelimeyi, bu durumda "mat" kelimesini tahmin eder.
 
-### Uzun Kısa Süreli Bellek (LSTM) ve Kapılı Tekrarlayan Birim (GRU)
+### Long Short-Term Memory (LSTM) and Gated Recurrent Unit (GRU) <sup>[[3]](#references)</sup>
 
-RNN'ler, dil modelleme, makine çevirisi ve konuşma tanıma gibi sıralı verilerle ilgili görevler için özellikle etkilidir. Ancak, **uzun menzilli bağımlılıklar ile ilgili sorunlar nedeniyle zayıflayabilmektedirler**.
+RNN'ler language modeling, machine translation ve speech recognition gibi sıralı veriler içeren görevlerde özellikle etkilidir. Ancak **vanishing gradients gibi sorunlar nedeniyle long-range dependencies'leri işleme konusunda zorlanabilirler**.
 
-Bunu ele almak için, Uzun Kısa Süreli Bellek (LSTM) ve Kapılı Tekrarlayan Birim (GRU) gibi özel mimariler geliştirilmiştir. Bu mimariler, bilgiyi kontrol eden kapama mekanizmaları tanıtarak uzun menzilli bağımlılıkları daha etkili bir şekilde yakalamalarına olanak tanır.
+Bunu ele almak için Long Short-Term Memory (LSTM) ve Gated Recurrent Unit (GRU) gibi özel architecture'lar geliştirildi. Bu architecture'lar, bilgi akışını kontrol eden gating mechanisms'ler sunarak long-range dependencies'leri daha etkili şekilde yakalamalarını sağlar.
 
-- **LSTM**: LSTM ağları, hücre durumuna bilgi akışını düzenlemek için üç kapı (giriş kapısı, unutma kapısı ve çıkış kapısı) kullanır ve uzun diziler boyunca bilgiyi hatırlama veya unutma yeteneği sağlar. Giriş kapısı, mevcut girdi ve önceki gizli duruma dayanarak ne kadar yeni bilgi ekleyeceğini kontrol eder, unutma kapısı ise ne kadar bilgiyi atacağını kontrol eder. Giriş kapısı ve unutma kapısını birleştirerek yeni durumu elde ederiz. Son olarak, yeni hücre durumunu, giriş ve önceki gizli durum ile birleştirerek yeni gizli durumu elde ederiz.
-- **GRU**: GRU ağları, LSTM mimarisini giriş ve unutma kapılarını tek bir güncelleme kapısında birleştirerek basitleştirir, bu da onları hesaplama açısından daha verimli hale getirirken uzun menzilli bağımlılıkları yakalamaya devam eder.
+- **LSTM**: LSTM network'leri, cell state'e giren ve çıkan bilgi akışını düzenlemek için üç gate (input gate, forget gate ve output gate) kullanır. Böylece bilgiyi uzun diziler boyunca hatırlayabilir veya unutabilirler. Input gate, input'a ve önceki hidden state'e göre ne kadar yeni bilgi ekleneceğini kontrol eder; forget gate ise ne kadar bilginin atılacağını kontrol eder. Input gate ile forget gate'i birleştirdiğimizde yeni state'i elde ederiz. Son olarak yeni cell state'i input ve önceki hidden state ile birleştirerek yeni hidden state'i de elde ederiz.
+- **GRU**: GRU network'leri, input gate ve forget gate'i tek bir update gate'te birleştirerek LSTM architecture'ını basitleştirir. Böylece long-range dependencies'leri yakalamaya devam ederken hesaplama açısından daha verimli olurlar.
 
-## LLM'ler (Büyük Dil Modelleri)
+## LLMs (Large Language Models)
 
-Büyük Dil Modelleri (LLM'ler), doğal dil işleme görevleri için özel olarak tasarlanmış bir derin öğrenme modeli türüdür. Büyük miktarda metin verisi üzerinde eğitilirler ve insan benzeri metinler üretebilir, soruları yanıtlayabilir, dilleri çevirebilir ve çeşitli diğer dil ile ilgili görevleri yerine getirebilirler. LLM'ler genellikle, bir dizideki kelimeler arasındaki ilişkileri yakalamak için kendine dikkat mekanizmaları kullanan dönüştürücü mimarilere dayanır, bu da bağlamı anlamalarına ve tutarlı metinler üretmelerine olanak tanır.
+Large Language Models (LLMs), özellikle natural language processing görevleri için tasarlanmış bir deep learning model türüdür. Büyük miktarlarda text data üzerinde eğitilirler ve insan benzeri metinler üretebilir, soruları yanıtlayabilir, dilleri çevirebilir ve dil ile ilgili çeşitli görevleri gerçekleştirebilirler.
+LLM'ler genellikle bir dizideki kelimeler arasındaki ilişkileri yakalamak için self-attention mechanisms kullanan transformer architecture'larına dayanır. Bu, bağlamı anlamalarını ve tutarlı metin üretmelerini sağlar.
 
-### Dönüştürücü Mimarisi
-Dönüştürücü mimarisi, birçok LLM'nin temelini oluşturur. Giriş dizisini işleyen bir kodlayıcı-çözücü yapısından oluşur ve çözücü çıktı dizisini üretir. Dönüştürücü mimarisinin ana bileşenleri şunlardır:
-- **Kendine Dikkat Mekanizması**: Bu mekanizma, modelin temsil oluştururken bir dizideki farklı kelimelerin önemini tartmasına olanak tanır. Kelimeler arasındaki ilişkilere dayanarak dikkat puanları hesaplar, bu da modelin ilgili bağlama odaklanmasını sağlar.
-- **Çoklu Başlı Dikkat**: Bu bileşen, modelin birden fazla dikkat başlığı kullanarak kelimeler arasındaki birden fazla ilişkiyi yakalamasına olanak tanır; her başlık, girişin farklı yönlerine odaklanır.
-- **Pozisyonel Kodlama**: Dönüştürücüler, kelime sırası hakkında yerleşik bir kavrama sahip olmadığından, dizideki kelimelerin konumuna dair bilgi sağlamak için giriş gömme katmanlarına pozisyonel kodlama eklenir.
+### Transformer Architecture <sup>[[4]](#references)</sup>
+Transformer architecture, birçok LLM'in temelini oluşturur. Encoder'ın input sequence'i işlediği ve decoder'ın output sequence'i ürettiği bir encoder-decoder yapısından oluşur. Transformer architecture'ın temel bileşenleri şunlardır:
+- **Self-Attention Mechanism**: Bu mechanism, modelin representation'lar üretirken bir dizideki farklı kelimelerin önemini ağırlıklandırmasını sağlar. Kelimeler arasındaki ilişkilere göre attention scores hesaplayarak modelin ilgili bağlama odaklanmasını sağlar.
+- **Multi-Head Attention**: Bu bileşen, her biri input'un farklı yönlerine odaklanan birden fazla attention head kullanarak modelin kelimeler arasındaki birden fazla ilişkiyi yakalamasını sağlar.
+- **Positional Encoding**: Transformer'ların yerleşik bir kelime sırası kavramı olmadığından, dizideki kelimelerin konumu hakkında bilgi sağlamak için input embeddings'lere positional encoding eklenir.
 
-## Difüzyon Modelleri
-Difüzyon modelleri, bir difüzyon sürecini simüle ederek veri üretmeyi öğrenen bir üretken model sınıfıdır. Görüntü üretimi gibi görevler için özellikle etkilidirler ve son yıllarda popülerlik kazanmışlardır. Difüzyon modelleri, basit bir gürültü dağılımını karmaşık bir veri dağılımına dönüştürmek için bir dizi difüzyon adımı aracılığıyla çalışır. Difüzyon modellerinin ana bileşenleri şunlardır:
-- **İleri Difüzyon Süreci**: Bu süreç, veriye gürültü ekleyerek onu basit bir gürültü dağılımına dönüştürür. İleri difüzyon süreci genellikle, her seviye belirli bir miktarda gürültü eklenmesini temsil eden bir dizi gürültü seviyesi ile tanımlanır.
-- **Ters Difüzyon Süreci**: Bu süreç, ileri difüzyon sürecini tersine çevirmeyi öğrenir, veriyi yavaş yavaş gürültüden arındırarak hedef dağılımdan örnekler üretir. Ters difüzyon süreci, modelin gürültülü örneklerden orijinal veriyi yeniden oluşturmasını teşvik eden bir kayıp fonksiyonu kullanılarak eğitilir.
+## Diffusion Models <sup>[[5]](#references)</sup>
+Diffusion models, bir diffusion process'i simüle ederek veri üretmeyi öğrenen generative model sınıfıdır. Image generation gibi görevlerde özellikle etkilidirler ve son yıllarda popülerlik kazanmışlardır.
+Diffusion models, bir dizi diffusion step aracılığıyla basit bir noise distribution'ı karmaşık bir data distribution'a kademeli olarak dönüştürerek çalışır. Diffusion models'in temel bileşenleri şunlardır:
+- **Forward Diffusion Process**: Bu process, veriye kademeli olarak noise ekleyerek veriyi basit bir noise distribution'a dönüştürür. Forward diffusion process genellikle, her bir seviyenin veriye eklenen belirli bir noise miktarına karşılık geldiği bir dizi noise level ile tanımlanır.
+- **Reverse Diffusion Process**: Bu process, forward diffusion process'i tersine çevirmeyi öğrenir ve target distribution'dan örnekler üretmek için verinin noise'unu kademeli olarak giderir. Reverse diffusion process, modelin noisy samples'lardan orijinal veriyi yeniden oluşturmasını teşvik eden bir loss function kullanılarak eğitilir.
 
-Ayrıca, bir metin isteminden bir görüntü üretmek için, difüzyon modelleri genellikle şu adımları izler:
-1. **Metin Kodlama**: Metin istemi, bir metin kodlayıcı (örneğin, bir dönüştürücü tabanlı model) kullanılarak gizli bir temsile kodlanır. Bu temsil, metnin anlamsal anlamını yakalar.
-2. **Gürültü Örnekleme**: Bir Gauss dağılımından rastgele bir gürültü vektörü örneklenir.
-3. **Difüzyon Adımları**: Model, gürültü vektörünü metin istemine karşılık gelen bir görüntüye dönüştürmek için bir dizi difüzyon adımı uygular. Her adım, görüntüyü gürültüden arındırmak için öğrenilen dönüşümleri uygulamayı içerir.
+Ayrıca diffusion models, bir text prompt'tan image üretmek için genellikle şu adımları izler:
+1. **Text Encoding**: Text prompt, bir text encoder (ör. transformer tabanlı bir model) kullanılarak latent representation'a kodlanır. Bu representation, text'in semantic anlamını yakalar.
+2. **Noise Sampling**: Gaussian distribution'dan rastgele bir noise vector örneklenir.
+3. **Diffusion Steps**: Model, noise vector'ü text prompt'a karşılık gelen bir image'a kademeli olarak dönüştürmek için bir dizi diffusion step uygular. Her step, image'ın noise'unu gidermek için öğrenilmiş transformations'ların uygulanmasını içerir.
 
+## References
+
+- [1] [PyTorch - Neural Networks öğreticisi](https://docs.pytorch.org/tutorials/beginner/blitz/neural_networks_tutorial.html)
+- [2] [PyTorch - Conv2d](https://docs.pytorch.org/docs/stable/generated/torch.nn.Conv2d.html)
+- [3] [PyTorch - LSTM](https://docs.pytorch.org/docs/stable/generated/torch.nn.LSTM.html)
+- [4] [PyTorch - Transformer](https://docs.pytorch.org/docs/stable/generated/torch.nn.Transformer.html)
+- [5] [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239)
 {{#include ../banners/hacktricks-training.md}}

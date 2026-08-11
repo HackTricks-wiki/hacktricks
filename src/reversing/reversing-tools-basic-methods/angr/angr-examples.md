@@ -3,9 +3,9 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Program **stdin'den aynı anda birkaç değer** almak için `scanf` kullanıyorsa, **`scanf` sonrasında** başlayan bir state oluşturmanız gerekir.
+> Program stdin'den **aynı anda birden fazla değer** almak için `scanf` kullanıyorsa **`scanf`** sonrasında başlayan bir state oluşturmanız gerekir.
 
-Codes taken from [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
+Kodlar [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup> adresinden alınmıştır.
 
 ### Adrese ulaşmak için girdi (adresi belirterek)
 ```python
@@ -75,7 +75,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Kayıt defteri değerleri
+### Kayıt Defteri değerleri
 ```python
 # Angr doesn't currently support reading multiple things with scanf (Ex:
 # scanf("%u %u).) You will have to tell the simulation engine to begin the
@@ -104,7 +104,7 @@ password1 = claripy.BVS('password1', password1_size_in_bits)
 password2_size_in_bits = 32  # :integer
 password2 = claripy.BVS('password2', password2_size_in_bits)
 
-# Relate it Vectors with the registriy values you are interested in to reach an address
+# Relate its vectors to the register values needed to reach an address
 initial_state.regs.eax = password0
 initial_state.regs.ebx = password1
 initial_state.regs.edx = password2
@@ -201,9 +201,9 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-Bu senaryoda input, `scanf("%u %u")` kullanılarak alındı ve `"1 1"` değeri verildi; bu nedenle stack'teki **`0x00000001`** değerleri **user input**'tan gelir. Bu değerlerin `$ebp - 8` konumunda başladığını görebilirsiniz. Bu nedenle kodda `$esp` değerinden **8 byte çıkardık** (**o anda `$ebp` ve `$esp` aynı değere sahipti**) ve ardından BVS'yi push ettik.
+Bu senaryoda girdi `scanf("%u %u")` kullanılarak alındı ve `"1 1"` değeri verildi; bu nedenle stack'teki **`0x00000001`** değerleri **user input** kaynağından gelir. Bu değerlerin `$ebp - 8` konumunda nasıl başladığını görebilirsiniz. Dolayısıyla kodda **`$esp` değerinden 8 byte çıkardık (o anda `$ebp` ve `$esp` aynı değere sahipti)** ve ardından BVS'yi push ettik.
 
-![Bir program akışına ulaşmak için stack'teki bit vektörlerini, stack konumunun sahip olması gereken değeri bulmak üzere yerleştirme: Bu senaryoda input, scanf("%u %u") kullanılarak alındı ve "1...](<../../../images/image (136).png>)
+![Bir program akışına ulaşmak için stack konumunun sahip olması gereken değeri bulmak üzere bit vektörlerini stack'e yerleştirme: Bu senaryoda girdi scanf("%u %u") kullanılarak alındı ve "1...](<../../../images/image (136).png>)
 
 ### Static Memory values (Global variables)
 ```python
@@ -215,7 +215,7 @@ def main(argv):
 path_to_binary = argv[1]
 project = angr.Project(path_to_binary)
 
-#Get an address after the scanf. Once the input has already being saved in the memory positions
+# Get an address after scanf, once the input has been saved in memory
 start_address = 0x8048606
 initial_state = project.factory.blank_state(addr=start_address)
 
@@ -337,7 +337,7 @@ def main(argv):
 path_to_binary = argv[1]
 project = angr.Project(path_to_binary)
 
-# Get an address just before opening the file with th simbolic content
+# Get an address just before opening the file with the symbolic content
 # Or at least when the file is not going to suffer more changes before being read
 start_address = 0x80488db
 initial_state = project.factory.blank_state(addr=start_address)
@@ -347,10 +347,10 @@ initial_state = project.factory.blank_state(addr=start_address)
 filename = 'WCEXPXBW.txt'
 symbolic_file_size_bytes = 64
 
-# Create a BV which is going to be the content of the simbolic file
+# Create a bit-vector that will hold the symbolic file content
 password = claripy.BVS('password', symbolic_file_size_bytes * 8)
 
-# Create the file simulation with the simbolic content
+# Create the simulated file with symbolic content
 password_file = angr.storage.SimFile(filename, content=password)
 
 # Add the symbolic file we created to the symbolic filesystem.
@@ -402,13 +402,13 @@ main(sys.argv)
 >  # the string from the file, except four symbolic bytes where the name would be
 >  # stored.
 >  # (!)
->  ```
+> ```
 
 ### Kısıtlamaları Uygulama
 
 > [!TIP]
-> Bazen 16 karakter uzunluğundaki 2 kelimeyi **karakter karakter** (döngüyle) karşılaştırmak gibi basit insan işlemleri **angr** için çok fazla **maliyete** neden olur; çünkü her `if` için 1 branch oluşturduğundan **üstel** olarak branch'ler üretmesi gerekir: `2^16`\
-> Bu nedenle, **angr'dan daha önceki bir noktaya gitmesini istemek** (gerçekten zor kısım zaten tamamlanmış olur) ve bu **kısıtlamaları manuel olarak ayarlamak** daha kolaydır.
+> Bazen 16 karakter uzunluğundaki 2 kelimeyi **karakter karakter** (döngüyle) karşılaştırmak gibi basit insan işlemleri, **angr** için çok fazla **maliyete** neden olur; çünkü dalları **üstel olarak** oluşturması gerekir. Her `if` için 1 dal oluşturduğundan: `2^16`\
+> Bu nedenle, **angr**'den **önceki bir noktaya geri dönmesini istemek** (gerçekten zor kısım zaten tamamlanmışken) ve bu **kısıtlamaları manuel olarak ayarlamak** daha kolaydır.
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -480,14 +480,14 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!CAUTION]
-> Bazı senaryolarda **veritesting** özelliğini etkinleştirebilirsiniz; bu özellik, gereksiz branch'leri kaydetmek ve çözümü bulmak için benzer durumları birleştirir: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> Bazı senaryolarda, gereksiz dallanmaları önlemek ve çözümü bulmak için benzer durumları birleştiren **veritesting** özelliğini etkinleştirebilirsiniz: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!TIP]
-> Bu senaryolarda yapabileceğiniz başka bir şey de **angr'a daha kolay anlayabileceği bir şey sağlayan function'ı hook etmektir**.
+> Bu senaryolarda yapabileceğiniz başka bir şey de, **angr'a daha kolay anlayabileceği bir şey vermek için işlevi hook'lamaktır**.
 
 ### Simulation Managers
 
-Bazı simulation manager'lar diğerlerinden daha kullanışlı olabilir. Önceki örnekte, çok sayıda kullanışlı branch oluşturulduğu için bir sorun vardı. Burada **veritesting** tekniği bunları birleştirerek bir çözüm bulacaktır.\
+Bazı simulation manager'lar diğerlerinden daha kullanışlı olabilir. Önceki örnekte, çok sayıda yararlı dal oluşturulduğu için bir sorun vardı. Burada **veritesting** tekniği bu dalları birleştirerek çözümü bulacaktır.\
 Bu simulation manager şu şekilde de etkinleştirilebilir: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
@@ -562,7 +562,7 @@ user_input_buffer_address,
 user_input_buffer_length
 )
 
-# Create a simbolic IF that if the loaded string frommemory is the expected
+# Create a symbolic If expression that checks the string loaded from memory
 # return True (1) if not returns False (0) in eax
 check_against_string = 'XKSPZSJKJYQCQXZV'.encode() # :string
 
@@ -594,7 +594,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Bir function'ı hook'lamak / Simprocedure
+### Bir function'ı hook'lama / Simprocedure
 ```python
 # Hook to the function called check_equals_WQNDNKKWAWOLXBAC
 
@@ -678,7 +678,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Birden fazla parametreyle scanf simülasyonu
+### Birden fazla parametreyle scanf'i simüle et
 ```python
 # This time, the solution involves simply replacing scanf with our own version,
 # since Angr does not support requesting multiple parameters with scanf.
@@ -807,8 +807,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-## Referanslar
+## References
 
-- [1] [jakespringer/angr_ctf - GitHub repository](https://github.com/jakespringer/angr_ctf)
-
+- [1] [jakespringer/angr_ctf - GitHub deposu](https://github.com/jakespringer/angr_ctf)
 {{#include ../../../banners/hacktricks-training.md}}
