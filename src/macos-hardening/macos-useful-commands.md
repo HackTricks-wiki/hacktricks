@@ -32,7 +32,7 @@ nettop #Monitor network usage of processes in top style
 system_profiler SPSoftwareDataType #System info
 system_profiler SPPrintersDataType #Printer
 system_profiler SPApplicationsDataType #Installed Apps
-system_profiler SPFrameworksDataType #Instaled framework
+system_profiler SPFrameworksDataType #Installed framework
 system_profiler SPDeveloperToolsDataType #Developer tools info
 system_profiler SPStartupItemDataType #Startup Items
 system_profiler SPNetworkDataType #Network Capabilities
@@ -115,9 +115,9 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### Verificação rápida de anti-análise / virtualização
+### Verificação rápida contra análise / virtualização
 
-Alguns stealers de macOS chamam `system_profiler` para detectar VMs e **abortam com um código de saída distinto (por exemplo, 100)** para evitar a detonação em sandbox<sup>[[1]](#references)</sup>:
+Alguns stealers para macOS chamam `system_profiler` para detectar VMs e **abortam com um código de saída distinto (por exemplo, 100)** para evitar a detonação em sandbox<sup>[[1]](#references)</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
@@ -125,14 +125,14 @@ fi
 ```
 ### Software e Serviços Instalados
 
-Verifique se há aplicativos **suspeitos** instalados e **privilégios** sobre os recursos instalados:
+Verifique se há aplicações **suspeitas** instaladas e **privilégios** sobre os recursos.instalados:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
-system_profiler SPFrameworksDataType #Instaled framework
+system_profiler SPFrameworksDataType #Installed framework
 lsappinfo list #Installed Apps
 launchctl list #Services
 ```
-### Processos do usuário
+### Processos do Usuário
 ```bash
 # will print all the running services under that particular user domain.
 launchctl print gui/<users UID>
@@ -149,8 +149,7 @@ Sem prompts
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
 
-## Referências
+## References
 
-- [1] [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
-
+- [1] [2025, o ano do Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 {{#include ../banners/hacktricks-training.md}}
