@@ -4,15 +4,15 @@
 
 ## Objašnjenje načina rada
 
-Procesi mogu biti pokrenuti na hostovima za koje su poznati korisničko ime i lozinka ili hash, korišćenjem WMI-ja. Komande se izvršavaju pomoću WMI-ja preko Wmiexec-a, čime se obezbeđuje iskustvo polu-interaktivnog shell-a.
+Procesi se mogu otvoriti na hostovima za koje su poznati korisničko ime i lozinka ili hash, korišćenjem WMI-ja. Wmiexec izvršava komande pomoću WMI-ja, pružajući polu-interaktivno iskustvo shell-a.
 
-**dcomexec.py:** Korišćenjem različitih DCOM endpoint-a, ova skripta pruža polu-interaktivni shell sličan onom u wmiexec.py, konkretno koristeći ShellBrowserWindow DCOM objekat. Trenutno podržava MMC20. Application, Shell Windows i Shell Browser Window objekte. (source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))<sup>[[2]](#references)</sup>
+**dcomexec.py:** Korišćenjem različitih DCOM endpoint-a, ova skripta pruža polu-interaktivni shell sličan onom koji pruža `wmiexec.py`. Izabrana vrednost `-object` određuje endpoint; podržani objekti uključuju `MMC20.Application`, `ShellWindows` i `ShellBrowserWindow`, pri čemu poslednji pruža tehniku Shell Browser Window istaknutu u originalnom vodiču.<sup>[[2]](#references)[[3]](#references)</sup>
 
 ## Osnove WMI-ja
 
 ### Namespace
 
-WMI-jev kontejner najvišeg nivoa organizovan je u hijerarhiji nalik strukturi direktorijuma i predstavlja \root, ispod kog su organizovani dodatni direktorijumi, poznati kao namespace-ovi.<sup>[[1]](#references)</sup>
+Organizovan u hijerarhiji nalik strukturi direktorijuma, WMI-jev kontejner najvišeg nivoa je \root, ispod kojeg su organizovani dodatni direktorijumi, odnosno namespace-ovi.<sup>[[1]](#references)</sup>
 Komande za izlistavanje namespace-ova:
 ```bash
 # Retrieval of Root namespaces
@@ -31,7 +31,7 @@ gwmi -Namespace "root/microsoft" -List -Recurse
 ```
 ### **Klase**
 
-Poznavanje naziva WMI klase, kao što je win32_process, i namespace-a u kojem se nalazi ključno je za svaku WMI operaciju.  
+Poznavanje naziva WMI klase, kao što je win32_process, i prostora imena u kojem se nalazi ključno je za svaku WMI operaciju.  
 Komande za izlistavanje klasa koje počinju sa `win32`:
 ```bash
 Get-WmiObject -Recurse -List -class win32* | more # Defaults to "root\cimv2"
@@ -45,7 +45,7 @@ Get-WmiObject -Namespace "root/microsoft/windows/defender" -Class MSFT_MpCompute
 ```
 ### Metode
 
-Metode, koje predstavljaju jednu ili više izvršivih funkcija WMI klasa, mogu se izvršiti.
+Metode, koje su jedna ili više izvršivih funkcija WMI klasa, mogu se izvršiti.
 ```bash
 # Class loading, method listing, and execution
 $c = [wmiclass]"win32_share"
@@ -71,12 +71,12 @@ net start | findstr "Instrumentation"
 ```
 ### Informacije o sistemu i procesima
 
-Prikupljanje informacija o sistemu i procesima putem WMI-ja:
+Prikupljanje informacija o sistemu i procesima pomoću WMI-ja:
 ```bash
 Get-WmiObject -ClassName win32_operatingsystem | select * | more
 Get-WmiObject win32_process | Select Name, Processid
 ```
-Za napadače, WMI je moćan alat za enumeraciju osetljivih podataka o sistemima ili domenima.<sup>[[1]](#references)</sup>
+Za napadače, WMI je moćan alat za prikupljanje osetljivih podataka o sistemima ili domenima.<sup>[[1]](#references)</sup>
 ```bash
 wmic computerystem list full /format:list
 wmic process list /format:list
@@ -85,17 +85,17 @@ wmic useraccount list /format:list
 wmic group list /format:list
 wmic sysaccount list /format:list
 ```
-Daljinsko upitavanje WMI-ja za dobijanje specifičnih informacija, kao što su lokalni administratori ili prijavljeni korisnici, moguće je uz pažljivo sastavljanje komandi.
+Daljinsko upitovanje WMI-ja za određene informacije, kao što su lokalni administratori ili prijavljeni korisnici, moguće je uz pažljivo formiranje komandi.
 
-### **Ručno daljinsko WMI upitavanje**
+### **Ručno izvršavanje udaljenih WMI upita**
 
-Diskretna identifikacija lokalnih administratora na udaljenoj mašini i prijavljenih korisnika može se postići korišćenjem specifičnih WMI upita. `wmic` takođe podržava čitanje iz tekstualne datoteke radi istovremenog izvršavanja komandi na više čvorova.<sup>[[1]](#references)</sup>
+Neupadljiva identifikacija lokalnih administratora na udaljenom računaru i prijavljenih korisnika može se postići pomoću specifičnih WMI upita. `wmic` takođe podržava čitanje iz tekstualne datoteke radi istovremenog izvršavanja komandi na više čvorova.<sup>[[1]](#references)</sup>
 
 Za daljinsko izvršavanje procesa putem WMI-ja, kao što je postavljanje Empire agenta, koristi se sledeća struktura komande, pri čemu je uspešno izvršavanje označeno povratnom vrednošću „0“:<sup>[[1]](#references)</sup>
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
-Ovaj proces prikazuje WMI-jevu mogućnost udaljenog izvršavanja i enumeracije sistema, naglašavajući njegovu korisnost za administraciju sistema i penetration testing.
+Ovaj proces ilustruje WMI mogućnost udaljenog izvršavanja i enumeracije sistema, ističući njegovu korisnost kako za administraciju sistema tako i za penetration testing.
 
 ## Automatski alati
 
@@ -120,8 +120,7 @@ SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug a
 
 ## References
 
-- [1] [Using Credentials to Own Windows Boxes - Part 3 (WMI and WinRM)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/)
-- [2] [Beginner's Guide to Impacket Tool Kit - Part 1](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)
-
-
+- [1] [Korišćenje akreditiva za preuzimanje kontrole nad Windows računarima - 3. deo (WMI i WinRM)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/)
+- [2] [Fortra Impacket – dcomexec.py](https://github.com/fortra/impacket/blob/master/examples/dcomexec.py)
+- [3] [Vodič za početnike kroz Impacket Tool Kit, 1. deo – Hacking Articles (Internet Archive)](https://web.archive.org/web/20190822180831/https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)
 {{#include ../../banners/hacktricks-training.md}}
