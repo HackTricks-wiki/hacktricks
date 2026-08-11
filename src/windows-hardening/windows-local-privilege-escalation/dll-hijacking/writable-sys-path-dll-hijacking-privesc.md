@@ -2,26 +2,26 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Introduction
+## Einführung
 
-Wenn du festgestellt hast, dass du **in einen System Path-Ordner schreiben** kannst (beachte, dass dies nicht funktioniert, wenn du in einen User Path-Ordner schreiben kannst), ist es möglicherweise möglich, **die Berechtigungen im System zu erweitern**.
+Wenn du **in ein Verzeichnis im systemweiten `PATH` schreiben** kannst (nicht nur in deinen Benutzer-`PATH`), kannst du möglicherweise **deine Berechtigungen auf dem System erweitern**.
 
-Dazu kannst du einen **Dll Hijacking** ausnutzen, bei dem du eine **von einem Service oder Prozess geladene Bibliothek hijackst**, der über **mehr Berechtigungen** verfügt als du. Da dieser Service eine Dll lädt, die wahrscheinlich im gesamten System nicht einmal existiert, wird er versuchen, sie aus dem System Path zu laden, in den du schreiben kannst.
+Dies kann durch **DLL hijacking** ausgenutzt werden, wenn ein privilegierterer Dienst oder Prozess versucht, eine DLL zu laden, die an den vorherigen Suchorten nicht vorhanden ist, und schließlich das beschreibbare systemweite `PATH`-Verzeichnis durchsucht.
 
-Weitere Informationen darüber, **was ein Dll Hijack ist**, findest du hier:
+Weitere Informationen zu **DLL hijacking** findest du unter:
 
 
 {{#ref}}
 ./
 {{#endref}}
 
-## Privesc with Dll Hijacking
+## Privesc mit Dll Hijacking
 
-### Finding a missing Dll
+### Eine fehlende DLL finden
 
-Als Erstes musst du einen **Prozess identifizieren**, der mit **mehr Berechtigungen** als du ausgeführt wird und versucht, eine **Dll aus dem System Path zu laden**, in den du schreiben kannst.
+Identifiziere zunächst **einen Prozess**, der mit **höheren Berechtigungen** ausgeführt wird und versucht, **eine DLL aus einem beschreibbaren systemweiten `PATH`-Verzeichnis zu laden**.
 
-Denke daran, dass diese Technik von einem **Machine/System PATH**-Eintrag abhängt, nicht nur von deinem **User PATH**. Daher lohnt es sich, vor dem Einsatz von Procmon die **Machine PATH**-Einträge zu enumerieren und zu prüfen, welche davon beschreibbar sind:<sup>[[1]](#references)</sup>
+Beachte, dass diese Technik von einem **Machine/System PATH**-Eintrag abhängt, nicht nur von deinem **User PATH**. Daher lohnt es sich, vor dem Einsatz von Procmon die **Machine PATH**-Einträge aufzulisten und zu überprüfen, welche davon beschreibbar sind:<sup>[[1]](#references)</sup>
 ```powershell
 $machinePath = [Environment]::GetEnvironmentVariable("Path", "Machine") -split ';' | Where-Object { $_ }
 $machinePath | ForEach-Object {
@@ -32,9 +32,9 @@ icacls $path 2>$null
 }
 }
 ```
-Das Problem in diesen Fällen ist, dass diese Prozesse wahrscheinlich bereits laufen. Um herauszufinden, welche DLLs den Services fehlen, musst du Procmon so schnell wie möglich starten (bevor die Prozesse geladen werden). Um die fehlenden `.dlls` zu finden, gehe wie folgt vor:
+Das Problem in diesen Fällen ist, dass diese Prozesse wahrscheinlich bereits ausgeführt werden. Um DLLs zu identifizieren, die Dienste zu laden versuchen, dies jedoch nicht schaffen, starten Sie Procmon so früh wie möglich (bevor die Prozesse gestartet werden) und gehen Sie dann wie folgt vor:
 
-- **Erstelle** den Ordner `C:\privesc_hijacking` und füge den Pfad `C:\privesc_hijacking` zur **System Path env variable** hinzu. Du kannst dies **manuell** oder mit **PS** tun:
+- **Erstellen** Sie den Ordner `C:\privesc_hijacking` und fügen Sie den Pfad `C:\privesc_hijacking` zur **System Path env variable** hinzu. Dies können Sie **manuell** oder mit **PS** tun:
 ```bash
 # Set the folder path to create and check events for
 $folderPath = "C:\privesc_hijacking"
@@ -51,65 +51,64 @@ $newPath = "$envPath;$folderPath"
 [Environment]::SetEnvironmentVariable("PATH", $newPath, "Machine")
 }
 ```
-- Starte **`procmon`** und gehe zu **`Options`** --> **`Enable boot logging`**, anschließend drücke **`OK`** in der Eingabeaufforderung.
-- Danach **reboot**. Wenn der Computer neu gestartet wird, beginnt **`procmon`** schnellstmöglich mit der **Aufzeichnung** von Ereignissen.
-- Sobald **Windows** **gestartet** ist, führe **`procmon`** erneut aus. Es teilt dir mit, dass es bereits ausgeführt wurde, und **fragt dich, ob du die Ereignisse** in einer Datei **speichern möchtest**. Wähle **yes** und **speichere die Ereignisse in einer Datei**.
-- **Nachdem** die **Datei** **generiert** wurde, schließe das geöffnete **`procmon`**-Fenster und **öffne die Ereignisdatei**.
-- Füge diese **Filter** hinzu. Dadurch findest du alle DLLs, die ein **Prozess** aus dem beschreibbaren System-PATH-Ordner zu laden versucht hat:
+- Starte **`procmon`** und gehe zu **`Options`** --> **`Enable boot logging`** und drücke **`OK`** in der Eingabeaufforderung.
+- Führe anschließend einen **Neustart** durch. Wenn der Computer neu gestartet wurde, beginnt **`procmon`** so schnell wie möglich mit der **Aufzeichnung** von Ereignissen.
+- Sobald **Windows** **gestartet** ist, führe **`procmon`** erneut aus. Das Programm teilt dir mit, dass es bereits ausgeführt wurde, und **fragt dich, ob du** die Ereignisse in einer Datei **speichern möchtest**. Antworte mit **Ja** und **speichere die Ereignisse in einer Datei**.
+- **Nachdem** die **Datei** **erstellt** wurde, schließe das geöffnete **`procmon`**-Fenster und **öffne die Ereignisdatei**.
+- Füge diese **Filter** hinzu, um alle DLLs zu finden, die ein **Prozess aus dem beschreibbaren System-Pfad-Ordner zu laden versucht hat**:
 
 <figure><img src="../../../images/image (945).png" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> **Boot logging** ist nur für Services erforderlich, die **zu früh starten**, um sie anderweitig beobachten zu können. Wenn du den Ziel-Service/das Zielprogramm **bei Bedarf auslösen kannst** (beispielsweise durch Interaktion mit seiner COM-Schnittstelle, einen Neustart des Services oder das erneute Starten einer geplanten Aufgabe), ist es normalerweise schneller, eine normale Procmon-Aufzeichnung mit Filtern wie **`Path contains .dll`**, **`Result is NAME NOT FOUND`** und **`Path begins with <writable_machine_path>`** zu verwenden.
+> **Boot logging ist nur für Dienste erforderlich, die zu früh starten**, um sie anderweitig beobachten zu können. Wenn du den Zieldienst bzw. das Zielprogramm **bei Bedarf auslösen kannst** (beispielsweise durch Interaktion mit seiner COM-Schnittstelle, einen Neustart des Dienstes oder das erneute Starten einer geplanten Aufgabe), ist es normalerweise schneller, eine normale Procmon-Aufzeichnung mit Filtern wie **`Path contains .dll`**, **`Result is NAME NOT FOUND`** und **`Path begins with <writable_machine_path>`** zu verwenden.
 
-### Übersehene DLLs
+### Übersehene Dlls
 
-Bei der Ausführung in einer kostenlosen **virtuellen (VMware-)Windows-11-Maschine** erhielt ich diese Ergebnisse:
+Bei der Ausführung auf einer kostenlosen **virtuellen (VMware-)Windows-11-Maschine** erhielt ich folgende Ergebnisse:
 
 <figure><img src="../../../images/image (607).png" alt=""><figcaption></figcaption></figure>
 
-In diesem Fall sind die EXE-Dateien nutzlos, also ignoriere sie. Die übersehenen DLLs stammten aus:
+Ignoriere in diesem Fall die `.exe`-Ergebnisse. Die fehlenden DLL-Suchen stammten von:
 
-| Service                         | DLL                | CMD line                                                             |
+| Dienst                         | Dll                | CMD-Zeile                                                             |
 | ------------------------------- | ------------------ | -------------------------------------------------------------------- |
 | Task Scheduler (Schedule)       | WptsExtensions.dll | `C:\Windows\system32\svchost.exe -k netsvcs -p -s Schedule`          |
 | Diagnostic Policy Service (DPS) | Unknown.DLL        | `C:\Windows\System32\svchost.exe -k LocalServiceNoNetwork -p -s DPS` |
 | ???                             | SharedRes.dll      | `C:\Windows\system32\svchost.exe -k UnistackSvcGroup`                |
 
-Nachdem ich dies gefunden hatte, stieß ich auf diesen interessanten Blogbeitrag, der ebenfalls erklärt, wie man [**WptsExtensions.dll für privesc missbraucht**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll). Genau das **werden wir jetzt tun**.<sup>[[3]](#references)</sup>
+Das folgende Beispiel verwendet die in diesem Artikel beschriebene Technik zum [**Abusing von `WptsExtensions.dll` zur Privilege Escalation**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll).<sup>[[3]](#references)</sup>
 
-### Weitere Kandidaten, die eine Analyse wert sind
+### Weitere Kandidaten, die eine Triage wert sind
 
-`WptsExtensions.dll` ist ein gutes Beispiel, aber nicht die einzige wiederkehrende **phantom DLL**, die in privilegierten Services auftaucht. Moderne Hunting-Regeln und öffentliche Hijack-Kataloge führen weiterhin Namen wie diese auf:<sup>[[2]](#references)</sup>
+`WptsExtensions.dll` ist ein gutes Beispiel, aber nicht die einzige wiederkehrende **Phantom-DLL**, die in privilegierten Diensten auftaucht. Moderne Hunting-Regeln und öffentliche Hijacking-Kataloge führen weiterhin Namen wie die folgenden auf:<sup>[[2]](#references)</sup>
 
-| Service / Szenario | Fehlende DLL | Hinweise |
+| Dienst / Szenario | Fehlende DLL | Hinweise |
 | --- | --- | --- |
-| Task Scheduler (`Schedule`) | `WptsExtensions.dll` | Klassischer **SYSTEM**-Kandidat auf Client-Systemen. Geeignet, wenn sich das beschreibbare Verzeichnis im **Machine PATH** befindet und der Service die DLL während des Starts abfragt. |
-| NetMan unter Windows Server | `wlanhlp.dll` / `wlanapi.dll` | Interessant bei **Server-Editionen**, da der Service als **SYSTEM** ausgeführt wird und in einigen Builds **bei Bedarf von einem normalen Benutzer ausgelöst werden kann**. Dadurch ist dieser Fall besser als Szenarien, die nur nach einem Reboot funktionieren. |
-| Connected Devices Platform Service (`CDPSvc`) | `cdpsgshims.dll` | Liefert normalerweise zunächst **`NT AUTHORITY\LOCAL SERVICE`**. Das reicht häufig trotzdem aus, da das Token über **`SeImpersonatePrivilege`** verfügt und du es daher mit [RoguePotato / PrintSpoofer](../roguepotato-and-printspoofer.md) verketten kannst. |
+| Task Scheduler (`Schedule`) | `WptsExtensions.dll` | Klassischer **SYSTEM**-Kandidat auf Client-Systemen. Gut geeignet, wenn sich das beschreibbare Verzeichnis im **Machine PATH** befindet und der Dienst beim Start nach der DLL sucht. |
+| NetMan unter Windows Server | `wlanhlp.dll` / `wlanapi.dll` | Auf **Server-Editionen** interessant, da der Dienst als **SYSTEM** ausgeführt wird und von einem normalen Benutzer bei einigen Builds **bei Bedarf ausgelöst werden kann**. Dadurch ist dieser Fall besser als Szenarien, die nur nach einem Neustart funktionieren. |
+| Connected Devices Platform Service (`CDPSvc`) | `cdpsgshims.dll` | Liefert normalerweise zunächst **`NT AUTHORITY\LOCAL SERVICE`**. Das reicht häufig dennoch aus, da das Token über **`SeImpersonatePrivilege`** verfügt und du es daher mit [RoguePotato / PrintSpoofer](../roguepotato-and-printspoofer.md) verknüpfen kannst. |
 
-Betrachte diese Namen als **Hinweise für die Triage**, nicht als garantierte Erfolge: Sie sind **von SKU und Build abhängig**, und Microsoft kann das Verhalten zwischen Releases ändern. Die wichtigste Erkenntnis ist, nach **fehlenden DLLs in privilegierten Services zu suchen, die den Machine PATH durchsuchen**, insbesondere wenn der Service **ohne Reboot erneut ausgelöst werden kann**.
+Betrachte diese Namen als **Hinweise für die Triage**, nicht als garantierte Treffer: Sie sind **von SKU und Build abhängig**, und Microsoft kann das Verhalten zwischen Releases ändern. Die wichtigste Erkenntnis ist, nach **fehlenden DLLs in privilegierten Diensten zu suchen, die den Machine PATH durchlaufen**, insbesondere wenn der Dienst **ohne Neustart erneut ausgelöst werden kann**.
 
 ### Exploitation
 
-Um also **Privilegien zu eskalieren**, werden wir die Bibliothek **WptsExtensions.dll** hijacken. Da wir den **Pfad** und den **Namen** kennen, müssen wir nur noch die **malicious DLL erstellen**.
+Um **Privileges zu eskalieren**, hijacke **`WptsExtensions.dll`**. Sobald **Pfad** und **Name** bekannt sind, generiere die schädliche DLL.
 
-Du kannst [**versuchen, eines dieser Beispiele zu verwenden**](#creating-and-compiling-dlls). Du könntest Payloads wie die folgenden ausführen: eine Rev-Shell erhalten, einen Benutzer hinzufügen, einen Beacon ausführen ...
+Du kannst [**versuchen, eines dieser Beispiele zu verwenden**](#creating-and-compiling-dlls). Du könntest Payloads wie die folgenden ausführen: eine Rev Shell erhalten, einen Benutzer hinzufügen, einen Beacon ausführen ...
 
 > [!WARNING]
-> Beachte, dass **nicht alle Services** mit **`NT AUTHORITY\SYSTEM`** ausgeführt werden. Einige laufen auch mit **`NT AUTHORITY\LOCAL SERVICE`**, das über **weniger Privilegien** verfügt. Daher **kannst du keinen neuen Benutzer erstellen**, um dessen Berechtigungen zu missbrauchen.\
-> Dieser Benutzer verfügt jedoch über das Privileg **`seImpersonate`**, sodass du die[ **Potato Suite zur Privilegieneskalation verwenden kannst**](../roguepotato-and-printspoofer.md). In diesem Fall ist eine Rev-Shell also eine bessere Option, als zu versuchen, einen Benutzer zu erstellen.
+> Beachte, dass **nicht alle Dienste** als **`NT AUTHORITY\SYSTEM`** ausgeführt werden. Einige laufen als **`NT AUTHORITY\LOCAL SERVICE`**, das **weniger Privileges** besitzt. Daher kannst du durch den Missbrauch eines dieser Dienste möglicherweise keinen neuen Benutzer erstellen.\
+> Dieses Konto verfügt jedoch über das Benutzerrecht **`SeImpersonatePrivilege`**, sodass du die [**Potato-Suite zur Privilege Escalation verwenden kannst**](../roguepotato-and-printspoofer.md). In diesem Fall ist eine Reverse Shell die bessere Option, als zu versuchen, einen Benutzer zu erstellen.
 
-Zum Zeitpunkt der Erstellung dieses Textes wird der **Task Scheduler**-Service mit **Nt AUTHORITY\SYSTEM** ausgeführt.
+Zum Zeitpunkt der Erstellung dieses Textes wird der **Task-Scheduler**-Dienst mit **Nt AUTHORITY\SYSTEM** ausgeführt.
 
-Nachdem du die **malicious DLL erstellt** hast (_in meinem Fall habe ich eine x64-Rev-Shell verwendet und eine Shell zurückerhalten, aber Defender hat sie beendet, weil sie aus msfvenom stammte_), speichere sie mit dem Namen **WptsExtensions.dll** im beschreibbaren System-PATH und **starte** den Computer **neu** (oder starte den Service neu beziehungsweise tue alles Notwendige, um den betroffenen Service/das betroffene Programm erneut auszuführen).
+Nachdem du die schädliche **DLL generiert** hast (_in meinem Fall habe ich eine x64-Rev-Shell verwendet und eine Shell zurückerhalten, aber Defender hat sie beendet, weil sie von msfvenom stammte_), speichere sie unter dem Namen **WptsExtensions.dll** im beschreibbaren System-Pfad und **starte** den Computer neu (oder starte den Dienst neu bzw. führe die erforderliche Aktion aus, damit der betroffene Dienst bzw. das Programm erneut ausgeführt wird).
 
-Wenn der Service neu gestartet wird, sollte die **DLL geladen und ausgeführt werden** (du kannst den **procmon**-Trick wiederverwenden, um zu prüfen, ob die **Bibliothek wie erwartet geladen wurde**).
+Wenn der Dienst neu gestartet wird, sollte die **DLL geladen und ausgeführt werden** (du kannst den **`procmon`**-Trick **wiederverwenden**, um zu überprüfen, ob die **Bibliothek wie erwartet geladen wurde**).
 
 ## References
 
-- [1] [Windows DLL Hijacking (Hopefully) Clarified](https://itm4n.github.io/windows-dll-hijacking-clarified/)
+- [1] [Windows DLL Hijacking (hoffentlich) geklärt](https://itm4n.github.io/windows-dll-hijacking-clarified/)
 - [2] [Suspicious DLL Loaded for Persistence or Privilege Escalation](https://www.elastic.co/guide/en/security/current/suspicious-dll-loaded-for-persistence-or-privilege-escalation.html)
 - [3] [DLL Hijacking – Windows Privilege Escalation](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll)
-
 {{#include ../../../banners/hacktricks-training.md}}
