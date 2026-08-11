@@ -1,4 +1,4 @@
-# FZ - Infrarrojo
+# FZ - Infrarrojos
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -11,31 +11,29 @@ Para obtener más información sobre cómo funciona el infrarrojo, consulta:
 ../infrared.md
 {{#endref}}
 
-## Receptor de señal IR en Flipper Zero <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
+## Receptor de señales IR en Flipper Zero <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
-Flipper utiliza un receptor de señal IR digital TSOP, que **permite interceptar señales de mandos a distancia IR**. Hay algunos **smartphones**, como Xiaomi, que también tienen un puerto IR, pero ten en cuenta que **la mayoría solo pueden transmitir** señales y **no pueden recibirlas**.<sup>[[1]](#references)</sup>
+Flipper Zero utiliza un receptor IR demodulador para capturar señales de mandos a distancia IR comunes. Algunos teléfonos, incluidos ciertos modelos Xiaomi, incorporan un transmisor IR, pero la mayoría no puede recibir ni decodificar señales de mandos a distancia.<sup>[[1]](#references)</sup>
 
-El **receptor** infrarrojo de Flipper es **bastante sensible**. Incluso puedes **capturar la señal** mientras permaneces **en algún punto entre** el mando y la TV. No es necesario apuntar directamente el mando al puerto IR de Flipper. Esto resulta útil cuando alguien cambia de canal mientras está cerca de la TV y tanto tú como Flipper estáis a cierta distancia.
+El **receptor infrarrojo de Flipper es bastante sensible**. Incluso puedes **captar la señal** mientras te encuentras **en algún punto entre** el mando y el televisor. No es necesario apuntar directamente el mando al puerto IR de Flipper. Esto resulta útil cuando alguien cambia de canal mientras está cerca del televisor y tanto tú como Flipper os encontráis a cierta distancia.
 
-Como la **decodificación de la señal infrarroja** ocurre en el lado del **software**, Flipper Zero potencialmente admite la **recepción y transmisión de cualquier código de mando IR**. En el caso de protocolos **desconocidos** que no se puedan reconocer, **graba y reproduce** la señal raw exactamente como se recibió.<sup>[[1]](#references)</sup>
+La decodificación del protocolo se realiza mediante software. Los protocolos reconocidos pueden almacenarse como comandos decodificados; los protocolos no compatibles pueden capturarse y reproducirse como datos de temporización sin procesar, dentro de los límites de frecuencia de portadora y temporización del hardware.<sup>[[1]](#references)</sup>
 
 ## Acciones
 
 ### Mandos universales
 
-Flipper Zero puede utilizarse como un **mando universal para controlar cualquier TV, aire acondicionado o centro multimedia**. En este modo, Flipper **hace bruteforce** de todos los **códigos conocidos** de todos los fabricantes compatibles **según el diccionario de la tarjeta SD**. No necesitas elegir un mando específico para apagar la TV de un restaurante.<sup>[[1]](#references)</sup>
+El modo de mando universal de Flipper Zero recorre comandos conocidos de su base de datos infrarroja para televisores, equipos de audio, proyectores y aires acondicionados compatibles. No se garantiza que controle todos los dispositivos y solo debe utilizarse con equipos que poseas o para los que tengas autorización para realizar pruebas.<sup>[[1]](#references)</sup>
 
-Basta con pulsar el botón de encendido en el modo Universal Remote y Flipper enviará **secuencialmente los comandos "Power Off"** de todas las TV que conoce: Sony, Samsung, Panasonic... y así sucesivamente. Cuando la TV recibe su señal, reaccionará y se apagará.
+Basta con pulsar el botón de encendido en el modo de mando universal para que Flipper **envíe secuencialmente comandos de "Apagar"** de todos los televisores que conoce: Sony, Samsung, Panasonic... y así sucesivamente. Cuando el televisor recibe su señal, reaccionará y se apagará.
 
-Este brute-force lleva tiempo. Cuanto mayor sea el diccionario, más tardará en terminar. Es imposible saber qué señal reconoció exactamente la TV, ya que no hay feedback de la TV.
+Este brute-force requiere tiempo. Cuanto mayor sea el diccionario, más tardará en finalizar. Es imposible saber qué señal reconoció exactamente el televisor, ya que no proporciona ningún feedback.
 
-### Aprender un nuevo mando
+### Aprender un mando nuevo
 
-Es posible **capturar una señal infrarroja** con Flipper Zero. Si **encuentra la señal en la base de datos**, Flipper **sabrá automáticamente qué dispositivo es** y te permitirá interactuar con él.\
-Si no la encuentra, Flipper puede **almacenar** la **señal** y permitirá **reproducirla**.<sup>[[1]](#references)</sup>
+Flipper Zero puede **capturar una señal infrarroja**. Si reconoce el protocolo y el comando, almacena una representación decodificada; de lo contrario, puede almacenar los datos de temporización sin procesar para reproducirlos posteriormente.<sup>[[1]](#references)</sup>
 
-## Referencias
+## References
 
-- [1] [Taking over TVs with Flipper Zero Infrared Port](https://blog.flipperzero.one/infrared/)
-
+- [1] [Tomar el control de televisores con el puerto infrarrojo de Flipper Zero](https://blog.flipperzero.one/infrared/)
 {{#include ../../../banners/hacktricks-training.md}}

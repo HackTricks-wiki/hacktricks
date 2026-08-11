@@ -4,43 +4,43 @@
 
 ## Introducción
 
-iButton es un nombre genérico para una llave de identificación electrónica integrada en un **contenedor metálico con forma de moneda**. También se denomina memoria **Dallas Touch** o memoria de contacto. Aunque a menudo se la llama erróneamente llave “magnética”, no hay **nada magnético** en ella. De hecho, en su interior se encuentra oculto un **microchip** completo que funciona mediante un protocolo digital.<sup>[[1]](#references)</sup>
+iButton es un nombre genérico para una llave de identificación electrónica alojada en un **contenedor metálico con forma de moneda**. También se denomina memoria **Dallas Touch** o memoria de contacto. Aunque a menudo se la llama incorrectamente llave “magnética”, en su interior **no hay nada magnético**. De hecho, dentro se encuentra oculto un **microchip** completo que funciona mediante un protocolo digital.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../images/image (915).png" alt=""><figcaption></figcaption></figure>
 
 ### ¿Qué es iButton? <a href="#what-is-ibutton" id="what-is-ibutton"></a>
 
-Normalmente, iButton hace referencia a la forma física de la llave y del lector: una moneda redonda con dos contactos. En cuanto al marco que la rodea, existen muchas variaciones, desde el soporte de plástico con un orificio, que es el más común, hasta anillos, colgantes, etc.
+El nombre iButton describe el paquete resistente con forma de moneda y la disposición de los contactos. Entre sus soportes se incluyen llaveros de plástico, anillos y colgantes.
 
 <figure><img src="../../images/image (1078).png" alt=""><figcaption></figcaption></figure>
 
-Cuando la llave llega al lector, los **contactos entran en contacto** y la llave recibe alimentación para **transmitir** su ID. A veces la llave **no se lee** inmediatamente porque el **PSD de contacto del interfono es más grande** de lo debido. Por lo tanto, los contornos exteriores de la llave y del lector no podían tocarse. Si ese es el caso, tendrás que presionar la llave contra una de las paredes del lector.<sup>[[1]](#references)</sup>
+Cuando ambos contactos tocan el lector, el dispositivo recibe alimentación e intercambia datos. Si la geometría del contacto empotrado impide que los contactos de tierra exteriores hagan contacto, inclinar la llave contra la pared del lector puede restablecer la conexión.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../images/image (290).png" alt=""><figcaption></figcaption></figure>
 
 ### **Protocolo 1-Wire** <a href="#id-1-wire-protocol" id="id-1-wire-protocol"></a>
 
-Las llaves Dallas intercambian datos mediante el protocolo 1-Wire, utilizando un único contacto para la transferencia de datos (!!) en ambas direcciones: del Master al Slave y viceversa. El protocolo 1-Wire funciona según el modelo Master-Slave. En esta topología, el Master siempre inicia la comunicación y el Slave sigue sus instrucciones.
+Las llaves Dallas/Maxim utilizan el protocolo 1-Wire: un contacto de datos transporta tráfico bidireccional y también puede proporcionar alimentación parasitaria, mientras que la carcasa metálica es el contacto de retorno. El controlador inicia las transacciones y el dispositivo responde.<sup>[[2]](#references)</sup>
 
-Cuando la llave (Slave) entra en contacto con el interfono (Master), el chip que hay dentro de la llave se enciende, recibe alimentación del interfono y la llave se inicializa. A continuación, el interfono solicita el ID de la llave. Seguidamente, examinaremos este proceso con más detalle.
+Cuando la llave (Slave) entra en contacto con el interfono (Master), el chip situado dentro de la llave se enciende, alimentado por el interfono, y la llave se inicializa. A continuación, el interfono solicita el ID de la llave. Ahora veremos este proceso con más detalle.
 
-Flipper puede funcionar tanto en modo Master como en modo Slave. En el modo de lectura de llaves, Flipper actúa como lector; es decir, funciona como Master. En el modo de emulación de llaves, Flipper simula ser una llave y funciona en modo Slave.<sup>[[1]](#references)</sup>
+Flipper puede actuar como controlador al leer una llave y como dispositivo emulado al presentar un identificador almacenado a un lector.<sup>[[1]](#references)</sup>
 
 ### Llaves Dallas, Cyfral y Metakom
 
 Para obtener información sobre cómo funcionan estas llaves, consulta la página [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)<sup>[[1]](#references)</sup>
 
-### Attacks
+### Ataques
 
-Los iButtons pueden ser atacados con Flipper Zero:
+Los iButton pueden atacarse con Flipper Zero:
 
 
 {{#ref}}
 flipper-zero/fz-ibutton.md
 {{#endref}}
 
-## Referencias
+## References
 
-- [1] [Taming iButton with Flipper Zero](https://blog.flipperzero.one/taming-ibutton/)
-
+- [1] [Dominar iButton con Flipper Zero](https://blog.flipperzero.one/taming-ibutton/)
+- [2] [Analog Devices — Comunicación 1-Wire mediante software](https://www.analog.com/en/resources/technical-articles/1wire-communication-through-software.html)
 {{#include ../../banners/hacktricks-training.md}}
