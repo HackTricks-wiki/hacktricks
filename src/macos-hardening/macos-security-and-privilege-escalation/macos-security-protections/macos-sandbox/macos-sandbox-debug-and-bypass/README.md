@@ -6,36 +6,36 @@
 
 <figure><img src="../../../../../images/image (901).png" alt=""><figcaption><p>Picha kutoka <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
 
-Katika picha iliyotangulia inawezekana kuona **jinsi sandbox itakavyopakiwa** wakati application yenye entitlement **`com.apple.security.app-sandbox`** inapotekelezwa.
+Katika picha iliyotangulia inawezekana kuona **jinsi sandbox itakavyopakiwa** wakati application yenye entitlement **`com.apple.security.app-sandbox`** inapoendeshwa.
 
 Compiler ita-link `/usr/lib/libSystem.B.dylib` kwenye binary.
 
-Kisha, **`libSystem.B`** itaita functions nyingine kadhaa hadi **`xpc_pipe_routine`** itume entitlements za app kwa **`securityd`**. Securityd hukagua ikiwa process inapaswa kuwekwa quarantine ndani ya Sandbox, na ikiwa ndivyo, itawekwa quarantine.\
-Hatimaye, sandbox ita-activate kupitia call ya **`__sandbox_ms`**, ambayo itaita **`__mac_syscall`**.<sup>[[1]](#references)[[3]](#references)</sup>
+Kisha, **`libSystem.B`** inaita functions kadhaa hadi **`xpc_pipe_routine`** itume entitlements za application kwa **`securityd`**. Securityd hukagua ikiwa process inapaswa kuwekwa quarantine ndani ya sandbox na, ikiwa ndivyo, huiweka quarantine.\
+Mwishowe, sandbox huwashwa kwa call ya **`__sandbox_ms`**, ambayo huiita **`__mac_syscall`**.<sup>[[1]](#references)[[3]](#references)</sup>
 
 ## Bypasses Zinazowezekana
 
 ### Kubypass quarantine attribute
 
-**Files zinazoundwa na sandboxed processes** huongezewa **quarantine attribute** ili kuzuia sandbox escapes: uki-drop application mpya na kujaribu kuizindua, quarantine flag huizuia. Kwa hiyo, **ikiwa unaweza ku-drop file au folder *bila* quarantine attribute, unaweza ku-escape App Sandbox** — drop tu `.app` bundle na uizindue kwa `open`, kwa sababu process mpya iliyoanzishwa itaendesha chini ya LaunchServices na si chini ya sandbox yako.
+**Files zinazoundwa na sandboxed processes** huongezewa **quarantine attribute** ili kuzuia sandbox escapes: uki-drop application mpya na kujaribu kui-launch, quarantine flag huizuia. Kwa hiyo, **ikiwa unaweza ku-drop file au folder *bila* quarantine attribute, unaweza ku-escape App Sandbox** — drop tu `.app` bundle na ui-launch kwa `open`, kwa sababu process mpya iliyo-launchiwa huendeshwa chini ya LaunchServices na si chini ya sandbox yako.
 
-Njia ya kuaminika ya kupata **unquarantined drop** ni kuomba **process nyingine ikuundie file**. Kama ilivyoandikwa katika [**A New Era of macOS Sandbox Escapes**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/) na Mickey Jin, **App Sandbox** huweka quarantine kwenye files zilizodropped, lakini XPC services zinazoendesha chini ya Service Sandbox hazifanyi hivyo. Kwa hiyo, XPC services kadhaa zisizohitaji authentication zingeweza kutumiwa kama primitive ya "quarantine laundering":<sup>[[4]](#references)</sup>
+Njia ya kuaminika ya kupata **unquarantined drop** ni kuomba **process nyingine ikuundie file**. Kama ilivyoandikwa katika [**A New Era of macOS Sandbox Escapes**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/) na Mickey Jin, **App Sandbox** huweka quarantine kwenye files zilizodropped, lakini **XPC services zinazoendeshwa chini ya Service Sandbox hazifanyi hivyo**. Kwa hiyo, XPC services kadhaa zisizohitaji authentication zingeweza kutumiwa kama primitive ya "quarantine laundering":<sup>[[4]](#references)</sup>
 
-- **CVE-2023-27944** (`TrialArchivingService`) na **CVE-2023-32414** (`ArchiveService`): hutoa archive iliyopitishwa na sandboxed app hadi location iliyochaguliwa **bila ku-propagate quarantine xattr** kwenda kwenye content iliyotolewa.
+- **CVE-2023-27944** (`TrialArchivingService`) na **CVE-2023-32414** (`ArchiveService`): hu-extract archive iliyopitishwa na sandboxed app kwenda kwenye location iliyochaguliwa **bila ku-propagate quarantine xattr** kwenda kwenye content iliyotolewa.
 - **CVE-2023-42977** (`PerfPowerServicesSignpostReader`): path traversal katika `submitSignpostDataWithConfig:` iliruhusu kuunda **arbitrary directories bila quarantine**, jambo linalotosha kujenga muundo mzima wa `.app` bundle nje ya container.
-- **CVE-2024-27864** (`diskimagescontroller.xpc`): hu-attach DMG yenye quarantine **bila kuweka quarantine kwenye device inayotokana nayo**, hivyo apps zilizo kwenye volume iliyomountiwa zinaweza kuzinduliwa.
+- **CVE-2024-27864** (`diskimagescontroller.xpc`): hu-attach DMG yenye quarantine **bila kuweka quarantine kwenye device inayotokana nayo**, hivyo applications zilizo kwenye mounted volume zinaweza ku-launchiwa.
 
 > [!TIP]
-> Extraction kwa kawaida **huondoa executable permission bit**. Workaround iliyotumiwa katika CVE-2023-27944 ilikuwa kuweka **symlink** inayoelekeza kwenye signed system binary iliyopo (kwa mfano `/System/Library/CoreServices/Automator Application Stub`) kama executable kuu ya bundle, jambo linaloiweka ikiwa launchable bila kuhitaji `+x` kwenye file iliyodropped.
+> Extraction kwa kawaida **huondoa executable permission bit**. Workaround iliyotumiwa katika CVE-2023-27944 ilikuwa kuweka **symlink** inayoelekeza kwenye signed system binary iliyopo (kwa mfano `/System/Library/CoreServices/Automator Application Stub`) kama executable kuu ya bundle, ambayo huiweka ikiwa inaweza ku-launchiwa bila kuhitaji `+x` kwenye file iliyodropped.
 
 > [!CAUTION]
-> Sababu ya hii kufanya kazi ni kwamba check inaendeshwa na **flag iliyo kwenye item inayozinduliwa**: *"When an app or other executable code is run from the Finder or GUI, macOS checks its quarantine flag before loading it"*, na ndipo *"it's handed over to Gatekeeper for full 'first run' security checks"* ([Explainer: Quarantine](https://eclecticlight.co/2021/12/11/explainer-quarantine/)). Kukosekana kwa flag kwenye bundle unayoizindua kunamaanisha hakuna Gatekeeper pass — na hiyo ndiyo hasa primitive inayotolewa na CVEs zilizo hapo juu.<sup>[[5]](#references)</sup>
+> Sababu inayofanya hii ifanye kazi ni kwamba check inaendeshwa na **flag iliyo kwenye item inayolaunchiwa**: *"When an app or other executable code is run from the Finder or GUI, macOS checks its quarantine flag before loading it"*, na ndipo tu *"it's handed over to Gatekeeper for full 'first run' security checks"* ([Explainer: Quarantine](https://eclecticlight.co/2021/12/11/explainer-quarantine/)). Kutokuwa na flag kwenye bundle unayolaunch kunamaanisha kutokuwa na Gatekeeper pass — na hiyo ndiyo primitive inayotolewa na CVEs zilizo hapo juu.<sup>[[5]](#references)</sup>
 >
-> Kumbuka kwamba ikiwa `.app` bundle tayari imeidhinishwa ku-run (ina quarantine xattr yenye flag ya "authorized to run"), unaweza pia kuitumia vibaya... isipokuwa sasa huwezi kuandika ndani ya **`.app`** bundles bila kuwa na baadhi ya privileged TCC perms (ambazo hutakuwa nazo ndani ya sandbox).
+> Kumbuka kwamba ikiwa `.app` bundle tayari imeidhinishwa ku-run (ina quarantine xattr yenye flag ya "authorized to run"), unaweza pia kuitumia vibaya... isipokuwa kwamba sasa huwezi kuandika ndani ya **`.app`** bundles isipokuwa uwe na baadhi ya privileged TCC perms (ambazo hutakuwa nazo ndani ya sandbox).
 
 ### Kutumia vibaya Open functionality
 
-Katika [**last examples of Word sandbox bypass**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv) inaweza kuonekana jinsi **`open`** cli functionality inavyoweza kutumiwa vibaya kubypass sandbox.
+Katika [**mifano ya mwisho ya Word sandbox bypass**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv) inaweza kuonekana jinsi **`open`** cli functionality inavyoweza kutumiwa vibaya kubypass sandbox.
 
 
 {{#ref}}
@@ -44,14 +44,14 @@ macos-office-sandbox-bypasses.md
 
 ### Launch Agents/Daemons
 
-Hata ikiwa application **imekusudiwa kuwa sandboxed** (`com.apple.security.app-sandbox`), inawezekana ku-bypass sandbox ikiwa **inatekelezwa kutoka kwa LaunchAgent** (`~/Library/LaunchAgents`) kwa mfano.\
-Kama ilivyoelezwa katika [**this post**](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818), ikiwa unataka kupata persistence kwa application ambayo ni sandboxed, unaweza kuifanya itekelezwe automatically kama LaunchAgent na labda ku-inject malicious code kupitia DyLib environment variables.<sup>[[6]](#references)</sup>
+Hata ikiwa application **imekusudiwa kuwa sandboxed** (`com.apple.security.app-sandbox`), inawezekana kubypass sandbox ikiwa **ime-executeiwa kutoka kwenye LaunchAgent** (`~/Library/LaunchAgents`) kwa mfano.\
+Kama ilivyoelezwa katika [**post hii**](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818), ikiwa unataka kupata persistence kwa application ambayo ni sandboxed unaweza kuifanya i-execute kiotomatiki kama LaunchAgent na labda ku-inject malicious code kupitia DyLib environment variables.<sup>[[6]](#references)</sup>
 
 ### Kutumia Vibaya Auto Start Locations
 
-Ikiwa sandboxed process inaweza **kuandika** mahali ambapo **baadaye unsandboxed application itaendesha binary**, itaweza **ku-escape kwa kuiweka tu** binary hiyo hapo. Mfano mzuri wa locations za aina hii ni `~/Library/LaunchAgents` au `/System/Library/LaunchDaemons`.
+Ikiwa sandboxed process inaweza **kuandika** mahali ambapo **baadaye unsandboxed application ita-run binary**, itaweza **ku-escape kwa kuweka tu** binary mahali hapo. Mfano mzuri wa locations za aina hii ni `~/Library/LaunchAgents` au `/System/Library/LaunchDaemons`.
 
-Kwa hili unaweza hata kuhitaji **hatua 2**: Kufanya process yenye **sandbox yenye ruhusa zaidi** (`file-read*`, `file-write*`) itekeleze code yako ambayo itaandika mahali ambapo **itatekelezwa bila sandbox**.
+Kwa hili unaweza hata kuhitaji **steps 2**: Kufanya process yenye **more permissive sandbox** (`file-read*`, `file-write*`) i-execute code yako ambayo kwa kweli itaandika mahali ambapo **ita-executeiwa bila sandbox**.
 
 Angalia ukurasa huu kuhusu **Auto Start locations**:
 
@@ -62,7 +62,7 @@ Angalia ukurasa huu kuhusu **Auto Start locations**:
 
 ### Kutumia Vibaya Processes Nyingine
 
-Ikiwa kutoka kwenye sandboxed process unaweza **ku-compromise processes nyingine** zinazoendesha kwenye sandboxes zenye vizuizi vichache (au zisizo na sandbox), utaweza ku-escape kwenda kwenye sandboxes zao:
+Ikiwa kutoka kwenye sandbox process unaweza **ku-compromise processes nyingine** zinazoendeshwa kwenye sandboxes zenye restrictions chache (au zisizo na sandbox), utaweza ku-escape kwenda kwenye sandboxes zao:
 
 
 {{#ref}}
@@ -71,9 +71,9 @@ Ikiwa kutoka kwenye sandboxed process unaweza **ku-compromise processes nyingine
 
 ### Mach services za System na User Zinazopatikana
 
-Sandbox pia huruhusu kuwasiliana na **Mach services** fulani kupitia XPC zilizofafanuliwa kwenye profile `application.sb`. Ikiwa unaweza **kutumia vibaya** mojawapo ya services hizi, unaweza kuweza **ku-escape sandbox**.
+Sandbox pia inaruhusu kuwasiliana na **Mach services** fulani kupitia XPC zilizo-defined katika profile `application.sb`. Ikiwa unaweza **kutumia vibaya** mojawapo ya services hizi unaweza **ku-escape sandbox**.
 
-Kama ilivyoonyeshwa katika [this writeup](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), taarifa kuhusu Mach services imehifadhiwa kwenye `/System/Library/xpc/launchd.plist`. Inawezekana kupata System na User Mach services zote kwa kutafuta ndani ya file hilo `<string>System</string>` na `<string>User</string>`.<sup>[[4]](#references)</sup>
+Kama ilivyoonyeshwa katika [writeup hii](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), maelezo kuhusu Mach services yamehifadhiwa katika `/System/Library/xpc/launchd.plist`. Inawezekana kupata System na User Mach services zote kwa kutafuta ndani ya file hiyo `<string>System</string>` na `<string>User</string>`.<sup>[[4]](#references)</sup>
 
 Zaidi ya hayo, inawezekana kukagua ikiwa Mach service inapatikana kwa sandboxed application kwa kuita `bootstrap_look_up`:
 ```objectivec
@@ -98,17 +98,17 @@ checkService(serviceName.UTF8String);
 }
 }
 ```
-### PID Mach services Zinazopatikana
+### Mach services za PID zinazopatikana
 
-Mach services hizi zilitumiwa vibaya kwa mara ya kwanza ili [escape kutoka kwenye sandbox katika writeup hii](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/). Wakati huo, **XPC services zote zilizohitajika** na application pamoja na framework yake zilionekana katika PID domain ya app (hizi ni Mach Services zenye `ServiceType` kama `Application`).<sup>[[4]](#references)</sup>
+Mach services hizi zilitumiwa vibaya kwa mara ya kwanza ili [escape kutoka kwenye sandbox katika writeup hii](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/). Wakati huo, **XPC services zote zinazohitajika** na application pamoja na framework yake zilionekana katika PID domain ya app (hizi ni Mach Services zenye `ServiceType` kama `Application`).<sup>[[4]](#references)</sup>
 
 Ili **kuwasiliana na PID Domain XPC service**, inahitajika tu kuisajili ndani ya app kwa mstari kama huu:
 ```objectivec
 [[NSBundle bundleWithPath:@“/System/Library/PrivateFrameworks/ShoveService.framework"]load];
 ```
-Zaidi ya hayo, inawezekana kupata Mach services zote za **Application** kwa kutafuta ndani ya `System/Library/xpc/launchd.plist` kwa `<string>Application</string>`.
+Zaidi ya hayo, inawezekana kupata services zote za **Application** Mach kwa kutafuta ndani ya `System/Library/xpc/launchd.plist` kwa ajili ya `<string>Application</string>`.
 
-Njia nyingine ya kupata xpc services halali ni kuangalia zile zilizo kwenye:
+Njia nyingine ya kupata services halali za xpc ni kuangalia zile zilizomo kwenye:
 ```bash
 find /System/Library/Frameworks -name "*.xpc"
 find /System/Library/PrivateFrameworks -name "*.xpc"
@@ -117,7 +117,7 @@ Mifano kadhaa ya kutumia technique hii vibaya inaweza kupatikana katika [**origi
 
 #### /System/Library/PrivateFrameworks/StorageKit.framework/XPCServices/storagekitfsrunner.xpc
 
-Service hii inaruhusu kila muunganisho wa XPC kwa kurudisha `YES` kila wakati, na method `runTask:arguments:withReply:` hutekeleza command yoyote yenye params zozote.
+Service hii inaruhusu kila XPC connection kwa kurudisha `YES` kila wakati, na method `runTask:arguments:withReply:` hutekeleza command yoyote kwa params zozote.
 
 Exploit ilikuwa "rahisi kama":
 ```objectivec
@@ -140,9 +140,9 @@ NSLog(@"run task result:%@, error:%@", bSucc, error);
 ```
 #### /System/Library/PrivateFrameworks/AudioAnalyticsInternal.framework/XPCServices/AudioAnalyticsHelperService.xpc
 
-Huduma hii ya XPC ilimruhusu kila client kwa kurudisha `YES` kila mara, na method ya `createZipAtPath:hourThreshold:withReply:` ilikubali path ya folder na kuibana kuwa faili la ZIP.
+Huduma hii ya XPC iliruhusu kila client kwa kurejesha `YES` kila wakati, na method ya `createZipAtPath:hourThreshold:withReply:` ilikubali path ya folder na kuibana kuwa faili la ZIP.
 
-Kwa hivyo, inawezekana kuunda muundo bandia wa folder la app, kulibana, kisha kulifungua na kulitekeleza ili kutoroka sandbox, kwa kuwa mafaili mapya hayatakuwa na attribute ya quarantine.
+Kwa hiyo, inawezekana kutengeneza muundo bandia wa folder la app, kuubana, kisha kuufungua na kuutekeleza ili kutoroka sandbox, kwa kuwa faili mpya hazitakuwa na attribute ya quarantine.
 
 Exploit ilikuwa:
 ```objectivec
@@ -183,7 +183,7 @@ break;
 ```
 #### /System/Library/PrivateFrameworks/WorkflowKit.framework/XPCServices/ShortcutsFileAccessHelper.xpc
 
-Huduma hii ya XPC inaruhusu kutoa ruhusa ya kusoma na kuandika kwenye URL yoyote kwa XPC client kupitia method `extendAccessToURL:completion:` ambayo ilikubali connection yoyote. Kwa kuwa huduma ya XPC ina FDA, inawezekana kutumia vibaya ruhusa hizi ili ku-bypass TCC kabisa.
+Huduma hii ya XPC inaruhusu kutoa ruhusa ya kusoma na kuandika kwa URL yoyote kwa mteja wa XPC kupitia methodi `extendAccessToURL:completion:` ambayo ilikubali connection yoyote. Kwa kuwa huduma ya XPC ina FDA, inawezekana kutumia vibaya ruhusa hizi kukwepa TCC kabisa.
 
 Exploit ilikuwa:
 ```objectivec
@@ -215,27 +215,27 @@ NSLog(@"Read the target content:%@", [NSData dataWithContentsOfURL:targetURL]);
 ```
 ### Static Compiling na Dynamically linking
 
-[**Utafiti huu**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) uligundua njia 2 za ku-bypass Sandbox. Kwa sababu sandbox hutekelezwa kutoka userland wakati **libSystem** library inapopakiwa. Ikiwa binary ingeweza kuepuka kuipakia, isingewahi kuwekewa sandbox:<sup>[[2]](#references)</sup>
+[**Utafiti huu**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) uligundua njia 2 za bypass Sandbox. Kwa kuwa sandbox hutekelezwa kutoka userland wakati **libSystem** library inapopakiwa. Ikiwa binary ingeweza kuepuka kuipakia, isingewekewa sandbox kamwe:<sup>[[2]](#references)</sup>
 
-- Ikiwa binary ilikuwa **ime-compilewa kabisa statically**, ingeweza kuepuka kupakia library hiyo.
-- Ikiwa **binary haikuhitaji kupakia libraries zozote** (kwa sababu linker pia iko kwenye libSystem), isingehitaji kupakia libSystem.
+- Ikiwa binary ilikuwa **ime-compilewa kabisa kwa static**, ingeweza kuepuka kupakia library hiyo.
+- Ikiwa **binary haingehitaji kupakia libraries zozote** (kwa sababu linker pia iko ndani ya libSystem), haingehitaji kupakia libSystem.
 
 ### Shellcodes
 
-Kumbuka kwamba **shellcodes** hata katika ARM64 zinahitaji ku-linkiwa kwenye `libSystem.dylib`:
+Kumbuka kwamba **hata shellcodes** katika ARM64 zinahitaji kuunganishwa na `libSystem.dylib`:
 ```bash
 ld -o shell shell.o -macosx_version_min 13.0
 ld: dynamic executables or dylibs must link with libSystem.dylib for architecture arm64
 ```
-### Vikwazo visivyorithiwa
+### Restrictions zisizorithiwa
 
-Kama ilivyoelezwa katika **[bonus ya writeup hii](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)**, kizuizi cha sandbox kama:<sup>[[4]](#references)</sup>
+Kama ilivyoelezwa katika **[sehemu ya ziada ya writeup hii](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)**, restriction ya sandbox kama vile:<sup>[[4]](#references)</sup>
 ```
 (version 1)
 (allow default)
 (deny file-write* (literal "/private/tmp/sbx"))
 ```
-inaweza kubypassiwa na process mpya inayotekeleza, kwa mfano:
+inaweza kuepukwa na mchakato mpya unaotekeleza, kwa mfano:
 ```bash
 mkdir -p /tmp/poc.app/Contents/MacOS
 echo '#!/bin/sh\n touch /tmp/sbx' > /tmp/poc.app/Contents/MacOS/poc
@@ -246,7 +246,7 @@ Hata hivyo, bila shaka, mchakato huu mpya hautarithi entitlements au privileges 
 
 ### Entitlements
 
-Kumbuka kwamba hata kama baadhi ya **actions** zinaweza **kuruhusiwa na sandbox** ikiwa application ina **entitlement** maalum, kama ilivyo kwenye:
+Kumbuka kwamba hata kama baadhi ya **actions** zinaweza **kuruhusiwa na sandbox** ikiwa application ina **entitlement** maalum, kama ilivyo katika:
 ```scheme
 (when (entitlement "com.apple.security.network.client")
 (allow network-outbound (remote ip))
@@ -333,9 +333,9 @@ __mac_syscall invoked. Policy: Quarantine, Call: 87
 __mac_syscall invoked. Policy: Sandbox, Call: 4
 Sandbox Bypassed!
 ```
-### Debug & bypass Sandbox kwa lldb
+### Debug & bypass Sandbox kwa kutumia lldb
 
-Hebu tukompile application ambayo inapaswa kuwa sandboxed:
+Let's compile an application that should be sandboxed:
 
 {{#tabs}}
 {{#tab name="sand.c"}}
@@ -372,7 +372,7 @@ system("cat ~/Desktop/del.txt");
 {{#endtab}}
 {{#endtabs}}
 
-Then compile the app:
+Kisha compile app:
 ```bash
 # Compile it
 gcc -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __info_plist -Xlinker Info.plist sand.c -o sand
@@ -384,7 +384,7 @@ codesign -s <cert-name> --entitlements entitlements.xml sand
 ```
 > [!CAUTION]
 > App itajaribu **kusoma** faili **`~/Desktop/del.txt`**, jambo ambalo **Sandbox haitaruhusu**.\
-> Unda faili humo kwa kuwa baada ya Sandbox kubypaswa, itaweza kulisoma:
+> Unda faili humo kwa sababu Sandbox ikishapitwa, itaweza kuisoma:
 >
 > ```bash
 > echo "Sandbox Bypassed" > ~/Desktop/del.txt
@@ -467,14 +467,14 @@ Process 2517 resuming
 Sandbox Bypassed!
 Process 2517 exited with status = 0 (0x00000000)
 ```
-> [!WARNING] > **Hata baada ya Sandbox kubypass TCC** itamuuliza mtumiaji ikiwa anataka kuruhusu mchakato kusoma files kutoka desktop
+> [!WARNING] > **Hata kama Sandbox ime-bypaswa, TCC** itamuuliza mtumiaji ikiwa anataka kuruhusu process kusoma files kutoka desktop
 
 ## References
 
-- [1] [Jonathan Levin - Apple Sandbox: Kuingia kwa Kina Zaidi katika Quagmire (slides za HITB GSEC 2016)](http://newosxbook.com/files/HITSB.pdf)
-- [2] [Saagar Jha - Mac App Store Sandbox Escape](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/)
-- [3] [Jonathan Levin - Apple Sandbox: Kuingia kwa Kina Zaidi katika Quagmire (HITB GSEC 2016)](https://www.youtube.com/watch?v=mG715HcDgO8)
+- [1] [Jonathan Levin - Apple Sandbox: Kuzama zaidi kwenye Quagmire (HITB GSEC 2016 slides)](http://newosxbook.com/files/HITSB.pdf)
+- [2] [Saagar Jha - Escape kutoka Mac App Store Sandbox](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/)
+- [3] [Jonathan Levin - Apple Sandbox: Kuzama zaidi kwenye Quagmire (HITB GSEC 2016)](https://www.youtube.com/watch?v=mG715HcDgO8)
 - [4] [Mickey Jin - Enzi Mpya ya macOS Sandbox Escapes](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/) (unquarantined drops via XPC services: CVE-2023-27944, CVE-2023-32414, CVE-2023-42977, CVE-2024-27864)
-- [5] [The Eclectic Light Company - Ufafanuzi: Quarantine](https://eclecticlight.co/2021/12/11/explainer-quarantine/)
+- [5] [The Eclectic Light Company - Maelezo: Quarantine](https://eclecticlight.co/2021/12/11/explainer-quarantine/)
 - [6] [Vicarius vSociety - CVE-2023-26818 (Sandbox): macOS TCC Bypass w/ Telegram using DyLib Injection (Part 2)](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818)
 {{#include ../../../../../banners/hacktricks-training.md}}

@@ -1,57 +1,57 @@
-# Mchakato wa macOS Dyld
+# mchakato wa Dyld wa macOS
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Taarifa za Msingi
+## Maelezo ya Msingi
 
-**entrypoint** halisi ya binary ya Mach-o ni dynamic linked, inayofafanuliwa katika `LC_LOAD_DYLINKER`, kwa kawaida ikiwa `/usr/lib/dyld`.<sup>[[3]](#references)</sup>
+**`entrypoint`** halisi ya binary ya Mach-o ni dynamic linked, iliyofafanuliwa katika `LC_LOAD_DYLINKER`, ambayo kwa kawaida huwa `/usr/lib/dyld`.<sup>[[3]](#references)</sup>
 
-Linker hii inahitaji kutafuta libraries zote za executable, kuzipanga kwenye memory na ku-link libraries zote zisizo lazy. Ni baada tu ya mchakato huu ndipo entry-point ya binary itatekelezwa.
+Linker hii inahitaji kutafuta libraries zote za executable, kuziweka kwenye memory na ku-link libraries zote zisizo lazy. Ni baada tu ya mchakato huu ndipo entry-point ya binary itatekelezwa.
 
-Bila shaka, **`dyld`** haina dependencies zozote (inatumia syscalls na vipande vya libSystem).
+Bila shaka, **`dyld`** haina dependencies zozote (inatumia syscalls na excerpts za libSystem).
 
 > [!CAUTION]
-> Ikiwa linker hii ina vulnerability yoyote, kwa kuwa inatekelezwa kabla ya binary yoyote kutekelezwa (hata zenye privileges za juu), ingewezekana **ku-escalate privileges**.
+> Ikiwa linker hii ina vulnerability yoyote, kwa kuwa inatekelezwa kabla ya binary yoyote kutekelezwa (hata zile zenye privileges za juu), itawezekana **ku-escalate privileges**.
 
 ### Mtiririko
 
-Dyld itapakiwa na **`dyldboostrap::start`**, ambayo pia itapakia vitu kama **stack canary**. Hii ni kwa sababu function hii itapokea kwenye vector yake ya argument ya **`apple`** hii na **values** nyingine **sensitive**.<sup>[[1]](#references)</sup>
+Dyld itapakiwa na **`dyldboostrap::start`**, ambayo pia itapakia vitu kama **stack canary**. Hii ni kwa sababu function hii itapokea katika vector yake ya **`apple`** argument hii pamoja na **values** nyingine **sensitive**.<sup>[[1]](#references)</sup>
 
-**`dyls::_main()`** ni entry point ya dyld na task yake ya kwanza ni kuendesha `configureProcessRestrictions()`, ambayo kwa kawaida huzuia environment variables za **`DYLD_*`** zilizoelezwa katika:<sup>[[2]](#references)</sup>
+**`dyls::_main()`** ni entry point ya dyld, na kazi yake ya kwanza ni kuendesha `configureProcessRestrictions()`, ambayo kwa kawaida huzuia environment variables za **`DYLD_*`** zilizoelezwa katika:<sup>[[2]](#references)</sup>
 
 
 {{#ref}}
 ./
 {{#endref}}
 
-Kisha, inapanga dyld shared cache ambayo hu-prelink system libraries zote muhimu, halafu inapanga libraries ambazo binary inategemea na inaendelea recursively hadi libraries zote zinazohitajika ziwe zimepakiwa. Kwa hiyo:
+Kisha, ina-map dyld shared cache ambayo hu-prelink system libraries zote muhimu, halafu ina-map libraries ambazo binary inategemea na kuendelea recursively hadi libraries zote zinazohitajika ziwe zimepakiwa. Kwa hiyo:
 
-1. inaanza kupakia libraries zilizoingizwa kwa `DYLD_INSERT_LIBRARIES` (ikiwa zimeruhusiwa)
-2. Kisha zilizopo kwenye shared cache
-3. Kisha zilizo-importiwa
+1. inaanza kupakia libraries zilizoingizwa kwa `DYLD_INSERT_LIBRARIES` (ikiwa inaruhusiwa)
+2. Kisha zile za shared cache
+3. Kisha zile zilizo-importiwa
 1. Kisha inaendelea ku-import libraries recursively
 
-Baada ya zote kupakiwa, **initialisers** za libraries hizi huendeshwa. Hizi huandikwa kwa kutumia **`__attribute__((constructor))`**, inayofafanuliwa katika `LC_ROUTINES[_64]` (ambayo sasa imepitwa na wakati), au kwa pointer katika section iliyo na flag `S_MOD_INIT_FUNC_POINTERS` (kwa kawaida: **`__DATA.__MOD_INIT_FUNC`**).
+Baada ya zote kupakiwa, **initialisers** za libraries hizi huendeshwa. Hizi huandikwa kwa kutumia **`__attribute__((constructor))`**, iliyofafanuliwa katika `LC_ROUTINES[_64]` (ambayo sasa imepitwa na wakati), au kwa pointer katika section iliyo na flag `S_MOD_INIT_FUNC_POINTERS` (kwa kawaida: **`__DATA.__MOD_INIT_FUNC`**).
 
 Terminators huandikwa kwa **`__attribute__((destructor))`** na hupatikana katika section iliyo na flag `S_MOD_TERM_FUNC_POINTERS` (**`__DATA.__mod_term_func`**).
 
 ### Stubs
 
-Binaries zote za macOS zina dynamic linking. Kwa hiyo, zina sections za stubs zinazosaidia binary kuruka kwenye code sahihi katika machines na contexts tofauti. Ni dyld, binary inapotekelezwa, ndiyo inayohusika na kutatua addresses hizi (angalau zisizo lazy).
+Binaries zote za macOS zina dynamic linking. Kwa hiyo, zina sections za stubs zinazosaidia binary kuruka hadi kwenye code sahihi kwenye machines na contexts tofauti. Ni dyld, wakati binary inatekelezwa, ndiyo inayohusika na kutatua addresses hizi (angalau zile zisizo lazy).
 
-Baadhi ya sections za stubs kwenye binary:
+Baadhi ya sections za stubs katika binary:
 
 - **`__TEXT.__[auth_]stubs`**: Pointers kutoka kwenye sections za `__DATA`
-- **`__TEXT.__stub_helper`**: Code ndogo inayokiita dynamic linking pamoja na taarifa kuhusu function ya kuita
-- **`__DATA.__[auth_]got`**: Global Offset Table (addresses za imported functions, zinapotatuliwa, (bound wakati wa load time kwa kuwa imewekewa flag `S_NON_LAZY_SYMBOL_POINTERS`)
-- **`__DATA.__nl_symbol_ptr`**: Non-lazy symbol pointers (bound wakati wa load time kwa kuwa imewekewa flag `S_NON_LAZY_SYMBOL_POINTERS`)
-- **`__DATA.__la_symbol_ptr`**: Lazy symbols pointers (bound wakati wa access ya kwanza)
+- **`__TEXT.__stub_helper`**: Code ndogo inayotumia dynamic linking ikiwa na taarifa kuhusu function itakayoitwa
+- **`__DATA.__[auth_]got`**: Global Offset Table (addresses za functions zilizo-importiwa, zinapotatuliwa, (hufungwa wakati wa load time kwa kuwa zimewekewa flag `S_NON_LAZY_SYMBOL_POINTERS`)
+- **`__DATA.__nl_symbol_ptr`**: Non-lazy symbol pointers (hufungwa wakati wa load time kwa kuwa zimewekewa flag `S_NON_LAZY_SYMBOL_POINTERS`)
+- **`__DATA.__la_symbol_ptr`**: Lazy symbols pointers (hufungwa wakati wa access ya kwanza)
 
 > [!WARNING]
-> Kumbuka kwamba pointers zenye prefix "auth\_" zinatumia encryption key moja ya ndani ya process ili kuzilinda (PAC). Zaidi ya hayo, inawezekana kutumia instruction ya arm64 `BLRA[A/B]` kuthibitisha pointer kabla ya kuifuata. Na RETA\[A/B] inaweza kutumika badala ya RET address.\
-> Kwa hakika, code iliyo katika **`__TEXT.__auth_stubs`** itatumia **`braa`** badala ya **`bl`** kuita function iliyoombwa ili ku-authenticate pointer.
+> Kumbuka kwamba pointers zilizo na prefix "auth_" zinatumia encryption key moja ya in-process kuzilinda (PAC). Zaidi ya hayo, inawezekana kutumia instruction ya arm64 `BLRA[A/B]` ili ku-verify pointer kabla ya kuifuata. Na RETA\[A/B] inaweza kutumika badala ya RET address.\
+> Kwa kweli, code iliyo katika **`__TEXT.__auth_stubs`** itatumia **`braa`** badala ya **`bl`** kuita function iliyoombwa na ku-authenticate pointer.
 >
-> Pia kumbuka kwamba matoleo ya sasa ya dyld hupakia kila kitu kama non-lazy.
+> Pia kumbuka kwamba versions za sasa za dyld hupakia kila kitu kama non-lazy.
 
 ### Kutafuta lazy symbols
 ```c
@@ -62,14 +62,14 @@ int main (int argc, char **argv, char **envp, char **apple)
 printf("Hi\n");
 }
 ```
-Sehemu ya disassembly inayovutia:
+Sehemu ya kuvutia ya disassembly:
 ```armasm
 ; objdump -d ./load
 100003f7c: 90000000    	adrp	x0, 0x100003000 <_main+0x1c>
 100003f80: 913e9000    	add	x0, x0, #4004
 100003f84: 94000005    	bl	0x100003f98 <_printf+0x100003f98>
 ```
-Inawezekana kuona kwamba jump ya kuita printf itaelekea kwenye **`__TEXT.__stubs`**:
+Inawezekana kuona kwamba jump ya kuita printf inaelekea kwenye **`__TEXT.__stubs`**:
 ```bash
 objdump --section-headers ./load
 
@@ -83,7 +83,7 @@ Idx Name          Size     VMA              Type
 3 __unwind_info 00000058 0000000100003fa8 DATA
 4 __got         00000008 0000000100004000 DATA
 ```
-Katika disassembly ya sehemu ya **`__stubs`**:
+Katika disassemble ya sehemu ya **`__stubs`**:
 ```bash
 objdump -d --section=__stubs ./load
 
@@ -96,21 +96,21 @@ Disassembly of section __TEXT,__stubs:
 100003f9c: f9400210    	ldr	x16, [x16]
 100003fa0: d61f0200    	br	x16
 ```
-unaweza kuona kwamba **tunaruka kwenda kwenye anwani ya GOT**, ambayo katika hali hii imetatuliwa non-lazy na itakuwa na anwani ya function ya printf.
+unaweza kuona kwamba **tunarukia anwani ya GOT**, ambayo katika hali hii imetatuliwa bila kucheleweshwa na itakuwa na anwani ya function ya printf.
 
-Katika hali nyingine, badala ya kuruka moja kwa moja kwenda kwenye GOT, inaweza kuruka kwenda **`__DATA.__la_symbol_ptr`**, ambayo itapakia thamani inayowakilisha function inayojaribu kupakiwa, kisha iruke kwenda **`__TEXT.__stub_helper`**, ambayo inaruka kwenda **`__DATA.__nl_symbol_ptr`**, iliyo na anwani ya **`dyld_stub_binder`** inayopokea kama parameters nambari ya function na anwani.\
-Function hii ya mwisho, baada ya kupata anwani ya function iliyotafutwa, huiandika katika eneo linalolingana ndani ya **`__TEXT.__stub_helper`** ili kuepuka kufanya utafutaji huo tena baadaye.
+Katika hali nyingine, badala ya kurukia moja kwa moja GOT, inaweza kurukia **`__DATA.__la_symbol_ptr`**, ambayo itapakia value inayowakilisha function inayojaribu kupakia, kisha irukie **`__TEXT.__stub_helper`**, ambayo hurukia **`__DATA.__nl_symbol_ptr`** yenye anwani ya **`dyld_stub_binder`**, inayopokea kama parameters nambari ya function na anwani.\
+Function hii ya mwisho, baada ya kupata anwani ya function iliyotafutwa, huiandika katika eneo linalolingana ndani ya **`__TEXT.__stub_helper`** ili kuepuka kufanya lookups siku zijazo.
 
 > [!TIP]
-> Hata hivyo, tambua kwamba matoleo ya sasa ya dyld hupakia kila kitu kama non-lazy.
+> Hata hivyo, tambua kwamba matoleo ya sasa ya dyld hupakia kila kitu bila kucheleweshwa.
 
 #### Dyld opcodes
 
-Hatimaye, **`dyld_stub_binder`** inahitaji kupata function iliyoonyeshwa na kuiandika katika anwani sahihi ili isiitafute tena. Ili kufanya hivyo, hutumia opcodes (mashine ya hali yenye idadi finiti ya hali) ndani ya dyld.
+Mwishowe, **`dyld_stub_binder`** inahitaji kupata function iliyoonyeshwa na kuiandika katika anwani sahihi ili isaitafute tena. Ili kufanya hivyo, hutumia opcodes (finite state machine) ndani ya dyld.
 
-## apple\[] vekta ya arguments
+## apple\[] argument vector
 
-Katika macOS, function kuu hupokea arguments 4 badala ya 3. Ya nne inaitwa apple, na kila ingizo huwa katika muundo wa `key=value`. Kwa mfano:
+Katika macOS, function kuu hupokea arguments 4 badala ya 3. Ya nne huitwa apple, na kila entry iko katika muundo wa `key=value`. Kwa mfano:
 ```c
 // gcc apple.c -o apple
 #include <stdio.h>
@@ -120,7 +120,7 @@ for (int i=0; apple[i]; i++)
 printf("%d: %s\n", i, apple[i])
 }
 ```
-Please provide the English text to translate.
+Tafadhali tuma maandishi ya Kiingereza unayotaka yatafsiriwe.
 ```
 0: executable_path=./a
 1:
@@ -136,7 +136,7 @@ Please provide the English text to translate.
 11: th_port=
 ```
 > [!TIP]
-> Kufikia wakati thamani hizi zinafika kwenye function kuu, taarifa nyeti huwa tayari zimeondolewa humo au vinginevyo ingekuwa data leak.
+> Kufikia wakati thamani hizi zinafikia function kuu, taarifa nyeti huwa tayari zimeondolewa ndani yake au vingekuwa data leak.
 
 inawezekana kuona thamani hizi zote za kuvutia kwa kutumia debugging kabla ya kuingia kwenye main kwa:
 
@@ -181,13 +181,13 @@ inawezekana kuona thamani hizi zote za kuvutia kwa kutumia debugging kabla ya ku
 
 ## dyld_all_image_infos
 
-Hii ni structure inayotolewa na dyld yenye taarifa kuhusu hali ya dyld, inayoweza kupatikana kwenye [**source code**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html), ikiwa na taarifa kama vile version, pointer inayoelekeza kwenye array ya dyld_image_info, kwenda kwenye dyld_image_notifier, ikiwa proc imetenganishwa na shared cache, ikiwa libSystem initializer iliitwa, pointer inayoelekeza kwenye Mach header ya dyld yenyewe, pointer inayoelekeza kwenye dyld version string...<sup>[[4]](#references)</sup>
+Hii ni structure inayotolewa na dyld yenye taarifa kuhusu hali ya dyld, ambayo inaweza kupatikana kwenye [**source code**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html), ikiwa na taarifa kama vile version, pointer ya dyld_image_info array, ya dyld_image_notifier, ikiwa proc imetenganishwa na shared cache, ikiwa libSystem initializer iliitwa, pointer ya Mach header ya dyld yenyewe, pointer ya dyld version string...<sup>[[4]](#references)</sup>
 
-## Vigezo vya mazingira vya dyld
+## dyld env variables
 
 ### debug dyld
 
-environment variables za kuvutia zinazosaidia kuelewa dyld inafanya nini:
+env variables zinazovutia zinazosaidia kuelewa dyld inafanya nini:
 
 - **DYLD_PRINT_LIBRARIES**
 
@@ -212,7 +212,7 @@ dyld[19948]: <1A7038EC-EE49-35AE-8A3C-C311083795FB> /usr/lib/system/libmacho.dyl
 Angalia jinsi kila library inavyopakiwa:
 ```
 DYLD_PRINT_SEGMENTS=1 ./apple
-dyld[21147]: reusing existing shared cache (/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e):
+dyld[21147]: re-using existing shared cache (/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e):
 dyld[21147]:         0x181944000->0x1D5D4BFFF init=5, max=5 __TEXT
 dyld[21147]:         0x1D5D4C000->0x1D5EC3FFF init=1, max=3 __DATA_CONST
 dyld[21147]:         0x1D7EC4000->0x1D8E23FFF init=3, max=3 __DATA
@@ -246,52 +246,52 @@ dyld[21147]:     __LINKEDIT (r..) 0x000239574000->0x000270BE4000
 ```
 - **DYLD_PRINT_INITIALIZERS**
 
-Print wakati kila library initializer inaendeshwa:
+Chapisha wakati kila library initializer inaendeshwa:
 ```
 DYLD_PRINT_INITIALIZERS=1 ./apple
 dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 [...]
 ```
-### Nyingine
+### Zingine
 
 - `DYLD_BIND_AT_LAUNCH`: Lazy bindings hutatuliwa pamoja na non lazy bindings
-- `DYLD_DISABLE_PREFETCH`: Zima pre-fetching ya maudhui ya \_\_DATA na \_\_LINKEDIT
-- `DYLD_FORCE_FLAT_NAMESPACE`: Single-level bindings
-- `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: Njia za resolution
-- `DYLD_INSERT_LIBRARIES`: Load library maalum
-- `DYLD_PRINT_TO_FILE`: Andika debug ya dyld kwenye file
-- `DYLD_PRINT_APIS`: Chapisha calls za libdyld API
-- `DYLD_PRINT_APIS_APP`: Chapisha calls za libdyld API zilizofanywa na main
+- `DYLD_DISABLE_PREFETCH`: Lemaza pre-fetching ya maudhui ya \_\_DATA na \_\_LINKEDIT
+- `DYLD_FORCE_FLAT_NAMESPACE`: Bindings za kiwango kimoja
+- `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: Njia za utatuzi
+- `DYLD_INSERT_LIBRARIES`: Pakia library maalum
+- `DYLD_PRINT_TO_FILE`: Andika debug ya dyld kwenye faili
+- `DYLD_PRINT_APIS`: Chapisha miito ya libdyld API
+- `DYLD_PRINT_APIS_APP`: Chapisha miito ya libdyld API iliyofanywa na main
 - `DYLD_PRINT_BINDINGS`: Chapisha symbols zinapofungwa
 - `DYLD_WEAK_BINDINGS`: Chapisha tu weak symbols zinapofungwa
-- `DYLD_PRINT_CODE_SIGNATURES`: Chapisha operations za usajili wa code signature
-- `DYLD_PRINT_DOFS`: Chapisha sections za D-Trace object format zinapoload
+- `DYLD_PRINT_CODE_SIGNATURES`: Chapisha utendaji wa usajili wa code signature
+- `DYLD_PRINT_DOFS`: Chapisha sehemu za D-Trace object format zinapopakiwa
 - `DYLD_PRINT_ENV`: Chapisha env inayoonekana na dyld
-- `DYLD_PRINT_INTERPOSTING`: Chapisha operations za interposting
-- `DYLD_PRINT_LIBRARIES`: Chapisha libraries zilizoload
-- `DYLD_PRINT_OPTS`: Chapisha load options
-- `DYLD_REBASING`: Chapisha operations za symbol rebasing
-- `DYLD_RPATHS`: Chapisha expansions za @rpath
+- `DYLD_PRINT_INTERPOSTING`: Chapisha utendaji wa interposting
+- `DYLD_PRINT_LIBRARIES`: Chapisha libraries zilizopakiwa
+- `DYLD_PRINT_OPTS`: Chapisha chaguo za upakiaji
+- `DYLD_REBASING`: Chapisha utendaji wa symbol rebasing
+- `DYLD_RPATHS`: Chapisha upanuzi wa @rpath
 - `DYLD_PRINT_SEGMENTS`: Chapisha mappings za Mach-O segments
-- `DYLD_PRINT_STATISTICS`: Chapisha timing statistics
-- `DYLD_PRINT_STATISTICS_DETAILS`: Chapisha timing statistics za kina
-- `DYLD_PRINT_WARNINGS`: Chapisha warning messages
-- `DYLD_SHARED_CACHE_DIR`: Path itakayotumika kwa shared library cache
+- `DYLD_PRINT_STATISTICS`: Chapisha takwimu za muda
+- `DYLD_PRINT_STATISTICS_DETAILS`: Chapisha takwimu za kina za muda
+- `DYLD_PRINT_WARNINGS`: Chapisha ujumbe wa maonyo
+- `DYLD_SHARED_CACHE_DIR`: Njia ya kutumia kwa shared library cache
 - `DYLD_SHARED_REGION`: "use", "private", "avoid"
-- `DYLD_USE_CLOSURES`: Enable closures
+- `DYLD_USE_CLOSURES`: Wezesha closures
 
 Inawezekana kupata zaidi kwa kitu kama:
 ```bash
 strings /usr/lib/dyld | grep "^DYLD_" | sort -u
 ```
-Au kupakua project ya dyld kutoka [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) na kuendesha ndani ya folder:
+Au kupakua mradi wa dyld kutoka [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) na kuendesha ndani ya folda:
 ```bash
 find . -type f | xargs grep strcmp| grep key,\ \" | cut -d'"' -f2 | sort -u
 ```
 ## References
 
-- [1] [dyld — `dyld/dyldMain.cpp` (njia ya kuanzisha mchakato)](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/dyldMain.cpp)
-- [2] [dyld — `dyld/DyldProcessConfig.cpp` (usanidi wa mchakato/usalama)](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/DyldProcessConfig.cpp)
-- [3] [XNU — `bsd/kern/kern_exec.c` (upande wa kernel wa `execve`, upakiaji wa dyld)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_exec.c)
+- [1] [dyld — `dyld/dyldMain.cpp` (njia ya kuanzisha process)](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/dyldMain.cpp)
+- [2] [dyld — `dyld/DyldProcessConfig.cpp` (usanidi wa process/security)](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/DyldProcessConfig.cpp)
+- [3] [XNU — `bsd/kern/kern_exec.c` (upande wa kernel wa `execve`, kupakia dyld)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_exec.c)
 - [4] [dyld — `include/mach-o/dyld_images.h` (muundo wa `dyld_all_image_infos`)](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html)
 {{#include ../../../../banners/hacktricks-training.md}}
