@@ -4,29 +4,29 @@
 
 ## Niveaux d’intégrité
 
-Dans Windows Vista et les versions ultérieures, les objets sécurisables peuvent porter une étiquette de **niveau d’intégrité**. La plupart des objets sont traités comme ayant une intégrité moyenne, tandis que certains emplacements destinés aux applications à faible intégrité peuvent être étiquetés comme faibles. Les processus démarrés par des utilisateurs standard s’exécutent normalement avec une intégrité moyenne, les applications élevées s’exécutent avec une intégrité élevée, et de nombreux services s’exécutent avec une intégrité système.<sup>[[1]](#references)</sup>
+Dans Windows Vista et les versions ultérieures, les objets sécurisables peuvent porter une étiquette de **niveau d’intégrité**. La plupart des objets sont considérés comme ayant une intégrité moyenne, tandis que certains emplacements destinés aux applications à faible intégrité peuvent être étiquetés comme tels. Les processus démarrés par des utilisateurs standard s’exécutent normalement avec une intégrité moyenne, les applications élevées avec une intégrité élevée, et de nombreux services avec une intégrité système.<sup>[[1]](#references)</sup>
 
-Une règle essentielle est que les objets ne peuvent pas être modifiés par des processus dont le niveau d’intégrité est inférieur à celui de l’objet. Windows applique cette vérification de Mandatory Integrity Control (MIC) avant d’évaluer la liste de contrôle d’accès discrétionnaire (DACL) de l’objet. Les niveaux couramment rencontrés sont les suivants :<sup>[[1]](#references)[[2]](#references)</sup>
+Une règle essentielle est que les objets ne peuvent pas être modifiés par des processus dont le niveau d’intégrité est inférieur à celui de l’objet. Windows applique cette vérification Mandatory Integrity Control (MIC) avant d’évaluer la liste de contrôle d’accès discrétionnaire (DACL) de l’objet. Les niveaux couramment rencontrés sont les suivants :<sup>[[1]](#references)[[2]](#references)</sup>
 
-- **Untrusted** : Le niveau le plus bas, représenté par `SECURITY_MANDATORY_UNTRUSTED_RID`.
-- **Low** : Principalement utilisé pour les interactions avec Internet, notamment dans le Protected Mode d’Internet Explorer, affectant les fichiers et processus associés, ainsi que certains dossiers comme le **Temporary Internet Folder**. Les processus à faible intégrité sont soumis à des restrictions importantes, notamment l’absence d’accès en écriture au registre et un accès en écriture limité au profil utilisateur.
-- **Medium** : Le niveau par défaut pour la plupart des activités, attribué aux utilisateurs standard et aux objets ne possédant pas de niveau d’intégrité spécifique. Même les membres du groupe Administrators fonctionnent par défaut à ce niveau.
-- **High** : Réservé aux administrateurs, leur permettant de modifier les objets dont le niveau d’intégrité est inférieur, y compris ceux possédant eux-mêmes un niveau élevé.
-- **System** : Le niveau opérationnel le plus élevé pour le kernel Windows et les services principaux, inaccessible même aux administrateurs, afin d’assurer la protection des fonctions système essentielles.
+- **Untrusted** : Le niveau le plus bas, représenté par `SECURITY_MANDATORY_UNTRUSTED_RID`. Par exemple, le sandbox Windows de Chromium attribue initialement une intégrité Low aux cibles sandboxées, puis abaisse les cibles renderer au niveau d’intégrité Untrusted après le démarrage.<sup>[[5]](#references)</sup>
+- **Low** : Principalement utilisé pour les interactions avec Internet, notamment dans le Protected Mode d’Internet Explorer, affectant les fichiers et processus associés, ainsi que certains dossiers comme **Temporary Internet Folder**. Les processus à faible intégrité sont soumis à d’importantes restrictions, notamment l’absence d’accès en écriture au registre et un accès en écriture limité au profil utilisateur.
+- **Medium** : Le niveau par défaut pour la plupart des activités, attribué aux utilisateurs standard et aux objets ne possédant pas de niveau d’intégrité spécifique. Même les membres du groupe Administrators s’exécutent par défaut à ce niveau.
+- **High** : Réservé aux administrateurs, leur permettant de modifier les objets ayant un niveau d’intégrité inférieur, y compris ceux qui se trouvent eux-mêmes au niveau High.
+- **System** : Le niveau opérationnel le plus élevé pour le kernel Windows et les services essentiels, inaccessible même aux administrateurs, afin d’assurer la protection des fonctions vitales du système.
 
-Windows définit également une valeur d’intégrité pour les protected processes, supérieure à System. **TrustedInstaller** est toutefois une identité de service Windows plutôt qu’un niveau MIC distinct ; sa capacité à modifier les ressources protégées du système d’exploitation provient des permissions accordées à cette identité.
+Windows définit également une valeur d’intégrité protected-process supérieure à System. **TrustedInstaller** est toutefois une identité de service Windows, et non un niveau MIC distinct ; sa capacité à modifier les ressources protégées du système d’exploitation provient des permissions accordées à cette identité.
 
-Vous pouvez obtenir le niveau d’intégrité d’un processus à l’aide de **Process Explorer** de **Sysinternals**, en ouvrant les propriétés du processus et en consultant l’onglet **Security** :<sup>[[3]](#references)</sup>
+Vous pouvez obtenir le niveau d’intégrité d’un processus avec **Process Explorer** de **Sysinternals**, en ouvrant les propriétés du processus et en consultant l’onglet **Security** :<sup>[[3]](#references)</sup>
 
-![Niveaux d’intégrité - Niveaux d’intégrité : vous pouvez obtenir le niveau d’intégrité d’un processus à l’aide de Process Explorer de Sysinternals, en accédant aux propriétés du processus et en consultant l’onglet "...](<../../images/image (824).png>)
+![Niveaux d’intégrité - Niveaux d’intégrité : vous pouvez obtenir le niveau d’intégrité d’un processus avec Process Explorer de Sysinternals, en accédant aux propriétés du processus et en consultant l’onglet "...](<../../images/image (824).png>)
 
-Vous pouvez également obtenir votre **niveau d’intégrité actuel** à l’aide de `whoami /groups` :
+Vous pouvez également obtenir votre **niveau d’intégrité actuel** avec `whoami /groups` :
 
-![Niveaux d’intégrité - Niveaux d’intégrité : vous pouvez également obtenir votre niveau d’intégrité actuel à l’aide de whoami /groups](<../../images/image (325).png>)
+![Niveaux d’intégrité - Niveaux d’intégrité : vous pouvez également obtenir votre niveau d’intégrité actuel avec whoami /groups](<../../images/image (325).png>)
 
 ### Niveaux d’intégrité dans le système de fichiers
 
-Un objet du système de fichiers peut avoir une **exigence de niveau d’intégrité minimal**. Un processus situé en dessous de ce niveau est soumis à la stratégie obligatoire de l’objet, même si sa DACL lui accorderait normalement l’accès. Par exemple, créez un fichier ordinaire depuis une console d’utilisateur standard et examinez ses permissions :<sup>[[1]](#references)[[4]](#references)</sup>
+Un objet du système de fichiers peut avoir une **exigence de niveau d’intégrité minimal**. Un processus dont le niveau est inférieur est soumis à la stratégie obligatoire de l’objet, même si sa DACL lui accorderait autrement l’accès. Par exemple, créez un fichier standard depuis une console d’utilisateur standard et examinez ses permissions :<sup>[[1]](#references)[[4]](#references)</sup>
 ```
 echo asd >asd.txt
 icacls asd.txt
@@ -37,7 +37,7 @@ NT AUTHORITY\INTERACTIVE:(I)(M,DC)
 NT AUTHORITY\SERVICE:(I)(M,DC)
 NT AUTHORITY\BATCH:(I)(M,DC)
 ```
-Maintenant, attribuez un niveau d’intégrité minimal **High** au fichier. Cela **doit être effectué depuis une console** exécutée en tant qu’**administrateur**, car une console ordinaire s’exécute avec un niveau d’intégrité Medium et **ne sera pas autorisée** à attribuer le niveau d’intégrité High à un objet :
+Maintenant, attribuez un niveau d’intégrité minimal **High** au fichier. Cela **doit être effectué depuis une console** exécutée en tant qu’**administrateur**, car une console classique s’exécute avec un niveau d’intégrité Medium et **ne sera pas autorisée** à attribuer le niveau d’intégrité High à un objet :
 ```
 icacls asd.txt /setintegritylevel(oi)(ci) High
 processed file: asd.txt
@@ -52,7 +52,7 @@ NT AUTHORITY\SERVICE:(I)(M,DC)
 NT AUTHORITY\BATCH:(I)(M,DC)
 Mandatory Label\High Mandatory Level:(NW)
 ```
-L’utilisateur `DESKTOP-IDJHTKP\user` dispose de **privilèges FULL** sur le fichier, car c’est lui qui l’a créé. Cependant, l’étiquette obligatoire empêche l’utilisateur de modifier le fichier, sauf si le processus s’exécute avec un niveau d’intégrité High. L’utilisateur peut tout de même le lire, car la mandatory policy affichée est `(NW)`, ou no-write-up :
+L’utilisateur `DESKTOP-IDJHTKP\user` dispose de **FULL privileges** sur le fichier, car il l’a créé. Cependant, l’étiquette obligatoire empêche l’utilisateur de modifier le fichier, sauf si le processus s’exécute avec un niveau d’intégrité High. L’utilisateur peut toujours le lire, car la mandatory policy affichée est `(NW)`, ou no-write-up :
 ```
 echo 1234 > asd.txt
 Access is denied.
@@ -62,11 +62,11 @@ C:\Users\Public\asd.txt
 Access is denied.
 ```
 > [!TIP]
-> **Par conséquent, lorsqu’un fichier possède un niveau d’intégrité minimal, vous devez exécuter votre processus au moins à ce niveau d’intégrité pour pouvoir le modifier.**
+> **Par conséquent, lorsqu’un fichier possède un niveau d’intégrité minimal, vous devez exécuter le processus au moins à ce niveau d’intégrité pour pouvoir le modifier.**
 
 ### Niveaux d’intégrité dans les binaires
 
-L’exemple suivant utilise une copie de `cmd.exe` située à `C:\Windows\System32\cmd-low.exe` et lui attribue un **niveau d’intégrité faible depuis une console administrateur** :
+L’exemple suivant utilise une copie de `cmd.exe` située à `C:\Windows\System32\cmd-low.exe` et lui attribue un **niveau d’intégrité Low depuis une console administrateur** :
 ```
 icacls C:\Windows\System32\cmd-low.exe
 C:\Windows\System32\cmd-low.exe NT AUTHORITY\SYSTEM:(I)(F)
@@ -80,18 +80,19 @@ Maintenant, lorsque j’exécute `cmd-low.exe`, il s’exécute **avec un niveau
 
 ![Niveaux d’intégrité dans le système de fichiers - Niveaux d’intégrité dans les binaires : Maintenant, lorsque j’exécute cmd-low.exe, il s’exécute avec un niveau d’intégrité faible au lieu d’un niveau moyen](<../../images/image (313).png>)
 
-Attribuer une étiquette d’intégrité élevée à un binaire (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`) ne le fait pas s’exécuter automatiquement avec une intégrité élevée. S’il est lancé depuis un processus avec une intégrité moyenne, il s’exécute avec une intégrité moyenne, car un nouveau processus reçoit le niveau d’intégrité le plus bas entre celui du fichier exécutable et celui de l’appelant.<sup>[[1]](#references)</sup>
+Attribuer une étiquette d’intégrité élevée à un binaire (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`) ne le fait pas s’exécuter automatiquement avec une intégrité élevée. S’il est lancé depuis un processus à intégrité moyenne, il s’exécute avec une intégrité moyenne, car un nouveau processus reçoit le niveau d’intégrité le plus faible entre celui du fichier exécutable et celui de l’appelant.<sup>[[1]](#references)</sup>
 
 ### Niveaux d’intégrité des processus
 
-Tous les fichiers et dossiers ne possèdent pas une étiquette d’intégrité minimale explicite, **mais chaque processus s’exécute avec un niveau d’intégrité**. Comme pour les objets du système de fichiers, **un processus qui souhaite obtenir un accès en écriture à un autre processus doit avoir au moins le même niveau d’intégrité**. Par conséquent, un processus avec une faible intégrité ne peut pas ouvrir un processus avec une intégrité moyenne avec un accès complet.<sup>[[1]](#references)</sup>
+Tous les fichiers et dossiers ne disposent pas d’une étiquette d’intégrité minimale explicite, **mais chaque processus s’exécute avec un niveau d’intégrité**. Comme pour les objets du système de fichiers, **un processus qui souhaite obtenir un accès en écriture à un autre processus doit avoir au moins le même niveau d’intégrité**. Par conséquent, un processus à faible intégrité ne peut pas ouvrir un processus à intégrité moyenne avec un accès complet.<sup>[[1]](#references)</sup>
 
-En raison de ces restrictions, l’approche la plus sûre consiste à **exécuter chaque processus avec le niveau d’intégrité le plus bas qui lui permet encore d’effectuer sa tâche prévue**.
+En raison de ces restrictions, l’approche la plus sûre consiste à **exécuter chaque processus avec le niveau d’intégrité le plus faible qui lui permet néanmoins d’effectuer le travail prévu**.
 
 ## References
 
-- [1] [Microsoft Learn – Contrôle d’intégrité obligatoire](https://learn.microsoft.com/en-us/windows/win32/secauthz/mandatory-integrity-control)
-- [2] [Microsoft Learn – Énumération MANDATORY_LEVEL](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ne-winnt-mandatory_level)
+- [1] [Microsoft Learn – Mandatory Integrity Control](https://learn.microsoft.com/en-us/windows/win32/secauthz/mandatory-integrity-control)
+- [2] [Microsoft Learn – MANDATORY_LEVEL enumeration](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ne-winnt-mandatory_level)
 - [3] [Microsoft Sysinternals – Process Explorer](https://learn.microsoft.com/en-us/sysinternals/downloads/process-explorer)
 - [4] [Microsoft Learn – icacls](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/icacls)
+- [5] [Chromium source – Default Windows sandbox integrity policy](https://github.com/chromium/chromium/blob/main/sandbox/policy/win/sandbox_win.cc#L212-L216)
 {{#include ../../banners/hacktricks-training.md}}
