@@ -126,7 +126,7 @@ A kernel extension could configure a `mac_policy_conf` struct and then register 
   This structure specifies the configuration information for a
   MAC policy module.  A policy module developer must supply
   a short unique policy name, a more descriptive full name, a list of label
-  namespaces and count, a pointer to the registered enty point operations,
+  namespaces and count, a pointer to the registered entry-point operations,
   any load time flags, and optionally, a pointer to a label slot identifier.
 
   The Framework will update the runtime flags (mpc_runtime_flags) to
@@ -139,7 +139,7 @@ A kernel extension could configure a `mac_policy_conf` struct and then register 
   The mpc_list field is used by the Framework and should not be
   modified by policies.
 */
-/* XXX - reorder these for better aligment on 64bit platforms */
+/* XXX - reorder these for better alignment on 64bit platforms */
 struct mac_policy_conf {
 	const char		*mpc_name;		/** policy name */
 	const char		*mpc_fullname;		/** full name */
@@ -158,7 +158,7 @@ It's easy to identify the kernel extensions configuring these policies by checki
 
 Note that MACF policies can be registered and unregistered also **dynamically**.
 
-One of the main fields of the `mac_policy_conf` is the **`mpc_ops`**. This fied specifies which opreations the policy is interested in. Note that there are hundres of them, so it's possible to zero all of them and then select just the ones the policy is interested on. From [here](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html):<sup>[[1]](#references)</sup>
+One of the main fields of `mac_policy_conf` is **`mpc_ops`**. This field specifies which operations interest the policy. There are hundreds of them, so it is possible to zero all entries and then select only those the policy needs. From [here](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html):<sup>[[1]](#references)</sup>
 
 ```c
 struct mac_policy_ops {

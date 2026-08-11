@@ -116,7 +116,7 @@ This information is being stored in **`/private/var/db/com.apple.backgroundtaskm
 
 When a new persistence is found an event of type **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`**. So, any way to **prevent** this **event** from being sent or the **agent from alerting** the user will help an attacker to _**bypass**_ BTM.<sup>[[1]](#references)</sup>
 
-- **Reseting the database**: Running the following command will reset the database (should rebuild it from the ground), however, for some reason, after running this, **no new persistence will be alerted until the system is rebooted**.<sup>[[1]](#references)</sup>
+- **Resetting the database**: Running the following command resets the database (which should rebuild it from scratch). However, after doing this, **no new persistence alerts appear until the system is rebooted**.<sup>[[1]](#references)</sup>
   - **root** is required.
 
 ```bash
@@ -139,7 +139,7 @@ ps -o state 1011
 T
 ```
 
-- **Bug**: If the **process that created the persistence exists fast right after it**, the daemon will try to **get information** about it, **fail**, and **won't be able to send the event** indicating that a new thing is persisting.<sup>[[1]](#references)</sup>
+- **Bug**: If the **process that created the persistence exits immediately afterward**, the daemon tries to **get information** about it, **fails**, and **cannot send the event** indicating that a new item is persisting.<sup>[[1]](#references)</sup>
 
 ## References
 
@@ -148,4 +148,3 @@ T
 - [3] [Manage login items and background tasks on Mac - Apple Platform Deployment](https://support.apple.com/en-gb/guide/deployment/depdca572563/web)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

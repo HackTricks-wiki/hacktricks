@@ -4,7 +4,7 @@
 
 ## XPC Authorization
 
-Apple also proposes another way to authenticate if the connecting process has **permissions to call the an exposed XPC method**.<sup>[[2]](#references)</sup>
+Apple also provides another way to authenticate whether the connecting process has **permission to call an exposed XPC method**.<sup>[[2]](#references)</sup>
 
 When an application needs to **execute actions as a privileged user**, instead of running the app as a privileged user it usually installs as root a HelperTool as an XPC service that could be called from the app to perform those actions. However, the app calling the service should have enough authorization.
 
@@ -181,7 +181,7 @@ static NSString * kCommandKeyAuthRightDesc    = @"authRightDescription";
 }
 ```
 
-This means that at the end of this process, the permissions declared inside `commandInfo` will be stored in `/var/db/auth.db`. Note how there you can find for **each method** that will r**equire authentication**, **permission name** and the **`kCommandKeyAuthRightDefault`**. The later one **indicates who can get this right**.<sup>[[1]](#references)</sup>
+This means that at the end of this process, the permissions declared inside `commandInfo` will be stored in `/var/db/auth.db`. For **each method** that will **require authentication**, the database contains the **permission name** and **`kCommandKeyAuthRightDefault`**. The latter **indicates who can get this right**.<sup>[[1]](#references)</sup>
 
 There are different scopes to indicate who can access a right. Some of them are defined in [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) (you can find [all of them in here](https://www.dssw.co.uk/reference/authorization-rights/)), but as summary:<sup>[[9]](#references)[[10]](#references)</sup>
 
@@ -239,7 +239,7 @@ In `HelperTool/HelperTool.m` the function **`readLicenseKeyAuthorization`** chec
 }
 ```
 
-Note that to **check the requirements to get the right** to call that method the function `authorizationRightForCommand` will just check the previously comment object **`commandInfo`**. Then, it will call **`AuthorizationCopyRights`** to check **if it has the rights** to call the function (note that the flags allow interaction with the user).<sup>[[1]](#references)[[3]](#references)</sup>
+To **check the requirements for obtaining the right** to call that method, `authorizationRightForCommand` checks the previously mentioned **`commandInfo`** object. It then calls **`AuthorizationCopyRights`** to check **whether the caller has the rights** to invoke the function (note that the flags allow interaction with the user).<sup>[[1]](#references)[[3]](#references)</sup>
 
 In this case, to call the function `readLicenseKeyAuthorization` the `kCommandKeyAuthRightDefault` is defined to `@kAuthorizationRuleClassAllow`. So **anyone can call it**.
 
@@ -317,7 +317,7 @@ If you find the function: **`[HelperTool checkAuthorization:command:]`** it's pr
 
 <figure><img src="../../../../../images/image (42).png" alt=""><figcaption></figcaption></figure>
 
-Thisn, if this function is calling functions such as `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree`, it's using [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154).
+If this function calls APIs such as `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, and `AuthorizationFree`, it is using the [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154) pattern.
 
 Check the **`/var/db/auth.db`** to see if it's possible to get permissions to call some privileged action without user interaction.
 

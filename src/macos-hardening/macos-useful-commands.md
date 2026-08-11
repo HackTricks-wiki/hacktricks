@@ -33,7 +33,7 @@ nettop #Monitor network usage of processes in top style
 system_profiler SPSoftwareDataType #System info
 system_profiler SPPrintersDataType #Printer
 system_profiler SPApplicationsDataType #Installed Apps
-system_profiler SPFrameworksDataType #Instaled framework
+system_profiler SPFrameworksDataType #Installed framework
 system_profiler SPDeveloperToolsDataType #Developer tools info
 system_profiler SPStartupItemDataType #Startup Items
 system_profiler SPNetworkDataType #Network Capabilities
@@ -133,7 +133,7 @@ Check for **suspicious** applications installed and **privileges** over the.inst
 
 ```
 system_profiler SPApplicationsDataType #Installed Apps
-system_profiler SPFrameworksDataType #Instaled framework
+system_profiler SPFrameworksDataType #Installed framework
 lsappinfo list #Installed Apps
 launchctl list #Services
 ```

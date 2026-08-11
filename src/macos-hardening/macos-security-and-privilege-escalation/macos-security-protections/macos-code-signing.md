@@ -210,6 +210,8 @@ Actually, it's possible to see in the Code Directory structs a parameter called 
 
 Every process has related a bitmask known as the `status` which is started by the kernel and some of them can be overridden by the **code signature**. These flags that can be included in the code signing are [defined in the code](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L36):<sup>[[1]](#references)</sup>
 
+User space can query or update permitted parts of this state through the `csops` and `csops_audittoken` operations defined by XNU.<sup>[[5]](#references)</sup>
+
 ```c
 /* code signing attributes of a process */
 #define CS_VALID                    0x00000001  /* dynamically valid */
