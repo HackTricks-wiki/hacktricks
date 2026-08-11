@@ -1,22 +1,20 @@
-# Expose local to the internet
+# Έκθεση του local στο διαδίκτυο
 
-{{#include ../../banners/hacktricks-training.md}}
-
-**Στόχος αυτής της σελίδας είναι να προτείνει εναλλακτικές που επιτρέπουν τουλάχιστον την έκθεση τοπικών raw TCP ports και τοπικών webs (HTTP) στο internet ΧΩΡΙΣ να χρειάζεται να εγκατασταθεί οτιδήποτε στον άλλο server (μόνο τοπικά, αν χρειάζεται).**
+**Ο στόχος αυτής της σελίδας είναι να προτείνει εναλλακτικές που επιτρέπουν τουλάχιστον την έκθεση local raw TCP ports και local web (HTTP) στο διαδίκτυο ΧΩΡΙΣ να χρειάζεται η εγκατάσταση οτιδήποτε στον άλλο server (μόνο στο local, αν χρειάζεται).**
 
 ## **Serveo**
 
-Από το [https://serveo.net/](https://serveo.net/), παρέχονται δωρεάν αρκετές δυνατότητες http και port forwarding.
+Η τεκμηρίωση του Serveo περιγράφει SSH forwarding για HTTP endpoints και private/public TCP forwarding· για την αίτηση ενός public TCP port διαφορετικού από 80/443 (συμπεριλαμβανομένου του port 0 για τυχαίο port) απαιτείται registered user.<sup>[[1]](#references)</sup>
 ```bash
 # Get a random port from serveo.net to expose local port 4444
 ssh -R 0:localhost:4444 serveo.net
 
-# Expose a web listening in localhost:300 in a random https URL
+# Expose a web listening in localhost:3000 in a random https URL
 ssh -R 80:localhost:3000 serveo.net
 ```
 ## SocketXP
 
-Από το [https://www.socketxp.com/download](https://www.socketxp.com/download), επιτρέπει την έκθεση των tcp και http:
+Ο οδηγός getting-started του SocketXP τεκμηριώνει τις εντολές `socketxp connect tcp://localhost:22` και `socketxp connect http://localhost:8080` για TCP και HTTP tunnels· ο agent πραγματοποιεί πρώτα authentication με ένα portal token.<sup>[[2]](#references)</sup>
 ```bash
 # Expose tcp port 22
 socketxp connect tcp://localhost:22
@@ -26,17 +24,17 @@ socketxp connect http://localhost:8080
 ```
 ## Ngrok
 
-Από το [https://ngrok.com/](https://ngrok.com/), επιτρέπει την έκθεση των θυρών http και tcp:
+Το CLI του ngrok τεκμηριώνει HTTP και TCP tunnels· το FAQ του αναφέρει ότι τα TCP endpoints του free tier απαιτούν έγκυρο τρόπο πληρωμής και ότι η κάρτα δεν χρεώνεται.<sup>[[3]](#references)[[4]](#references)</sup>
 ```bash
-# Expose web in 3000
+# Expose a local web service on port 8000
 ngrok http 8000
 
-# Expose port in 9000 (it requires a credit card, but you won't be charged)
+# Expose a local TCP service on port 9000
 ngrok tcp 9000
 ```
 ## Telebit
 
-Από το [https://telebit.cloud/](https://telebit.cloud/) μπορείτε να εκθέσετε θύρες http και tcp:
+Η legacy Telebit.js CLI τεκμηρίωση βοήθειας αναφέρει `telebit http <port>` για προώθηση HTTPS και `telebit tcp <local> [remote]` για raw TCP· η διαθεσιμότητα εξαρτάται από το deployment και το relay.<sup>[[5]](#references)</sup>
 ```bash
 # Expose web in 3000
 /Users/username/Applications/telebit/bin/telebit http 3000
@@ -46,49 +44,51 @@ ngrok tcp 9000
 ```
 ## LocalXpose
 
-Από το [https://localxpose.io/](https://localxpose.io/), είναι διαθέσιμες several δυνατότητες http και port forwarding **δωρεάν**.
+Η τρέχουσα ιστοσελίδα του LocalXpose τεκμηριώνει την εντολή `loclx tunnel http --to 3000`, αναφέρει υποστήριξη για HTTP/TLS/TCP/UDP και δηλώνει ότι το δωρεάν πρόγραμμα καλύπτει προσωπική/ελαφριά εμπορική χρήση, ενώ το TCP tunneling είναι δυνατότητα επί πληρωμή.<sup>[[6]](#references)[[7]](#references)</sup>
 ```bash
-# Expose web in port 8989
-loclx tunnel http -t 8989
+# Expose a local web service on port 8989
+loclx tunnel http --to 8989
 
-# Expose tcp port in 4545 (requires pro)
-loclx tunnel tcp --port 4545
+# Expose a local TCP service on port 4545 (paid plan)
+loclx tunnel tcp --to 4545
 ```
 ## Expose
 
-Από το [https://expose.dev/](https://expose.dev/) μπορείς να εκθέσεις θύρες http και tcp:
+Το Expose τεκμηριώνει τις εντολές `expose share` για τοπικά URLs HTTP/HTTPS και μια εντολή `expose share-port` μόνο για PRO για θύρες TCP.<sup>[[8]](#references)[[9]](#references)</sup>
 ```bash
-# Expose web in 3000
+# Expose a local HTTP service on port 3000
 ./expose share http://localhost:3000
 
-# Expose tcp port in port 4444 (REQUIRES PREMIUM)
+# Expose a local TCP service on port 4444 (PRO)
 ./expose share-port 4444
 ```
 ## Localtunnel
 
-Από το [https://github.com/localtunnel/localtunnel](https://github.com/localtunnel/localtunnel) μπορείτε να εκθέσετε http δωρεάν:
+Το επίσημο repository του localtunnel περιγράφει την έκθεση του localhost για testing και τεκμηριώνει την παρακάτω εντολή NPX.<sup>[[10]](#references)</sup>
 ```bash
 # Expose web in port 8000
 npx localtunnel --port 8000
 ```
 ## Cloudflare Tunnel (cloudflared)
 
-Το CLI `cloudflared` της Cloudflare μπορεί να δημιουργήσει μη αυθεντικοποιημένα "Quick" tunnels για γρήγορα demos ή named tunnels συνδεδεμένα με το δικό σας domain/hostnames. Υποστηρίζει reverse proxies HTTP(S), καθώς και raw TCP mappings που δρομολογούνται μέσω του edge της Cloudflare.<sup>[[1]](#references)</sup>
+Η τρέχουσα τεκμηρίωση του Cloudflare παρουσιάζει unauthenticated "Quick" tunnels για local development, ενώ η επισκόπηση του προϊόντος αναφέρει τα HTTP, HTTPS, TCP, SSH και RDP μεταξύ των υποστηριζόμενων δημοσιευμένων πρωτοκόλλων.<sup>[[11]](#references)[[12]](#references)</sup>
+
+Για ένα locally managed named tunnel, το Cloudflare τεκμηριώνει τη ροή εργασίας `tunnel login`, `create`, `route dns` και `--config ... run ...`.<sup>[[13]](#references)[[14]](#references)[[17]](#references)</sup>
 ```bash
 # Quick Tunnel exposing localhost:8080 (random trycloudflare subdomain)
 cloudflared tunnel --url http://localhost:8080
 
 # Named tunnel bound to a DNS record
-cloudflared tunnel login                       # one-time device auth
+cloudflared tunnel login                       # authenticate with Cloudflare
 cloudflared tunnel create my-tunnel
 cloudflared tunnel route dns my-tunnel app.example.com
-cloudflared tunnel run my-tunnel --config tunnel.yml
+cloudflared tunnel --config tunnel.yml run my-tunnel
 ```
-Named tunnels σάς επιτρέπουν να ορίσετε πολλαπλούς κανόνες ingress (HTTP, SSH, RDP κ.λπ.) μέσα στο `tunnel.yml`, υποστηρίζουν πολιτικές πρόσβασης ανά υπηρεσία μέσω του Cloudflare Access και μπορούν να εκτελούνται ως systemd containers για persistence. Τα Quick Tunnels είναι anonymous και ephemeral — ιδανικά για phishing payload staging ή δοκιμές webhook, αλλά το Cloudflare δεν εγγυάται uptime.<sup>[[1]](#references)</sup>
+Τα Named tunnels μπορούν να ορίσουν πολλαπλούς ingress rules σε YAML· οι Cloudflare Access policies μπορούν να ελέγχουν την πρόσβαση σε published applications, ενώ η Cloudflare τεκμηριώνει τις διαδρομές ανάπτυξης service και Docker για την εκτέλεση connectors. Τα Quick Tunnels είναι ανώνυμα, προσωρινά testing tunnels με όριο 200 ταυτόχρονων requests και χωρίς υποστήριξη για Server-Sent Events (SSE).<sup>[[11]](#references)[[15]](#references)[[16]](#references)[[17]](#references)</sup>
 
 ## Tailscale Funnel / Serve
 
-Το Tailscale v1.52+ παρέχει τις ενοποιημένες ροές εργασίας `tailscale serve` (κοινή χρήση μέσα στο tailnet) και `tailscale funnel` (δημοσίευση στο ευρύτερο internet). Και οι δύο εντολές μπορούν να λειτουργήσουν ως reverse proxy για HTTP(S) ή να προωθήσουν raw TCP, με automatic TLS και σύντομα hostnames `*.ts.net`.<sup>[[3]](#references)</sup>
+Το τρέχον CLI του Tailscale χρησιμοποιεί το Serve για sharing μόνο εντός του tailnet και το Funnel για public sharing. Οι εντολές υποστηρίζουν HTTP/HTTPS reverse-proxy targets και TCP forwarding· το raw TCP mode του Funnel περιορίζεται στις θύρες 443, 8443 και 10000.<sup>[[18]](#references)[[19]](#references)</sup>
 ```bash
 # Share localhost:3000 within the tailnet
 sudo tailscale serve 3000
@@ -99,20 +99,20 @@ sudo tailscale funnel --https=443 localhost:3000
 # Forward raw TCP (expose local SSH)
 sudo tailscale funnel --tcp=10000 tcp://localhost:22
 ```
-Χρησιμοποιήστε το `--bg` για να αποθηκεύσετε τη διαμόρφωση χωρίς να διατηρείτε μια διεργασία στο προσκήνιο και το `tailscale funnel status` για να ελέγχετε ποιες υπηρεσίες είναι προσβάσιμες από το δημόσιο internet. Επειδή το Funnel τερματίζει το TLS στον τοπικό κόμβο, τυχόν prompts για credentials, headers ή επιβολή mTLS μπορούν να παραμείνουν υπό τον έλεγχό σας.
+Χρησιμοποίησε το `--bg` για να διατηρήσεις τη διαμόρφωση χωρίς να κρατάς μια foreground διεργασία και χρησιμοποίησε το `tailscale funnel status` για να ελέγχεις ποιες υπηρεσίες είναι προσβάσιμες από το public internet. Για targets HTTPS Funnel, το Tailscale τεκμηριώνει τον τερματισμό TLS στον local node πριν από την προώθηση του request στην local service.<sup>[[18]](#references)[[19]](#references)</sup>
 
 ## Fast Reverse Proxy (frp)
 
-Το `frp` είναι μια self-hosted επιλογή, όπου ελέγχετε τον server rendezvous (`frps`) και τον client (`frpc`). Είναι ιδανικό για red teams που διαθέτουν ήδη ένα VPS και θέλουν deterministic domains/ports.
+Το `frp` είναι μια self-hosted επιλογή όπου ελέγχεις τον rendezvous server (`frps`) και τον client (`frpc`)· η τεκμηρίωσή του καλύπτει την προώθηση local services που βρίσκονται πίσω από NAT ή firewall, με deterministic remote ports/domains.<sup>[[20]](#references)</sup>
 
 <details>
-<summary>Δείγμα διαμόρφωσης frps/frpc</summary>
+<summary>Παράδειγμα διαμόρφωσης frps/frpc</summary>
 ```bash
-# Server: bind TCP/HTTP entry points and enable dashboard
+# Server: start frps with its server configuration
 ./frps -c frps.toml
 
-# Client: forward local 22 to remote port 6000 and a web app to vhost
-./frpc -c <<'EOF'
+# Client: save this as frpc.toml, then start it
+cat > frpc.toml <<'EOF'
 serverAddr = "c2.example.com"
 serverPort = 7000
 
@@ -129,30 +129,48 @@ type = "http"
 localPort = 8080
 customDomains = ["panel.example.com"]
 EOF
+./frpc -c frpc.toml
 ```
 </details>
 
-Οι πρόσφατες εκδόσεις προσθέτουν QUIC transport, token/OIDC auth, όρια bandwidth, health checks και αντιστοιχίσεις range βασισμένες σε Go templates—χρήσιμα για τη γρήγορη δημιουργία πολλαπλών listeners που αντιστοιχούν σε implants σε διαφορετικούς hosts.<sup>[[4]](#references)</sup>
+Η τρέχουσα τεκμηρίωση του project περιλαμβάνει QUIC transport, token/OIDC authentication, bandwidth limits, health checks και Go-template range mappings—συμβουλευτείτε την έκδοση που αντιστοιχεί στο deployment σας πριν χρησιμοποιήσετε οποιαδήποτε από αυτές τις επιλογές.<sup>[[20]](#references)</sup>
 
-## Pinggy (βασισμένο σε SSH)
+## Pinggy (SSH-based)
 
-Το Pinggy παρέχει SSH-accessible tunnels μέσω TCP/443, επομένως λειτουργεί ακόμη και πίσω από captive proxies που επιτρέπουν μόνο HTTPS. Οι συνεδρίες διαρκούν 60 λεπτά στο free tier και μπορούν να γίνουν script για γρήγορα demos ή webhook relays.<sup>[[5]](#references)</sup>
+Το Pinggy τεκμηριώνει SSH reverse forwarding μέσω της port 443, επομένως μπορεί να λειτουργήσει σε networks όπου το outbound SSH στην port 22 είναι blocked. Το free plan λήγει μετά από 60 λεπτά και χρησιμοποιεί νέο URL μετά την επανασύνδεση, ενώ το Pro προσθέτει persistent tunnels και custom domains.<sup>[[21]](#references)[[22]](#references)</sup>
 ```bash
 # Random subdomain exposing localhost:3000 via SSH reverse tunnel
-ssh -p 443 -R0:localhost:3000 a.pinggy.io
+ssh -p 443 -R0:localhost:3000 qr@free.pinggy.io
 ```
-Μπορείτε να ζητήσετε custom domains και tunnels μεγαλύτερης διάρκειας στο paid tier ή να ανακυκλώνετε αυτόματα τα tunnels, περικλείοντας την εντολή σε έναν βρόχο.
+Μπορείτε να ζητήσετε custom domains και persistent tunnels στο Pro.<sup>[[22]](#references)</sup> Μπορείτε να ανακυκλώνετε αυτόματα τα προσωρινά tunnels, περικλείοντας την εντολή σε έναν βρόχο.
 
-## Σημειώσεις Threat intel & OPSEC
+## Threat intel & OPSEC notes
 
-Οι adversaries κάνουν όλο και μεγαλύτερη κατάχρηση του ephemeral tunneling (ιδιαίτερα των unauthenticated endpoints `trycloudflare.com` του Cloudflare) για να κάνουν staging σε payloads Remote Access Trojan και να αποκρύπτουν την υποδομή C2. Η Proofpoint παρακολουθεί campaigns από τον Φεβρουάριο του 2024, οι οποίες διέθεταν AsyncRAT, Xworm, VenomRAT, GuLoader και Remcos, κατευθύνοντας τα download stages σε βραχύβια TryCloudflare URLs, καθιστώντας τις παραδοσιακές static blocklists πολύ λιγότερο αποτελεσματικές. Εξετάστε το ενδεχόμενο να κάνετε proactive rotation των tunnels και των domains, αλλά επίσης να παρακολουθείτε για ενδεικτικά external DNS lookups προς τον tunneler που χρησιμοποιείτε, ώστε να εντοπίζετε έγκαιρα detection από blue-team ή απόπειρες αποκλεισμού της υποδομής.<sup>[[2]](#references)</sup>
+Οι adversaries έχουν καταχραστεί τα ephemeral tunneling, συμπεριλαμβανομένων των unauthenticated endpoints `trycloudflare.com` του Cloudflare, για να παραδίδουν Remote Access Trojans μέσω προσωρινής υποδομής. Η Proofpoint ανέφερε δραστηριότητα που παρατηρήθηκε για πρώτη φορά τον Φεβρουάριο του 2024 και αφορούσε τα Xworm, AsyncRAT, VenomRAT, GuLoader και Remcos, επισημαίνοντας ότι τα προσωρινά tunnels δυσκολεύουν τις άμυνες που βασίζονται σε static blocklists.<sup>[[23]](#references)</sup> Εξετάστε το ενδεχόμενο προληπτικής εναλλαγής tunnels και domains και παρακολουθείτε για ενδεικτικά external DNS lookups προς το tunneler που χρησιμοποιείτε, ώστε να εντοπίζετε έγκαιρα πιθανή blue-team detection ή προσπάθειες αποκλεισμού της υποδομής.
 
 ## References
 
-- [1] [Cloudflare Docs - Δημιουργία locally-managed tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/local-management/create-local-tunnel/)
-- [2] [Proofpoint - Threat Actor κάνει κατάχρηση των Cloudflare Tunnels για τη διανομή RATs](https://www.proofpoint.com/us/blog/threat-insight/threat-actor-abuses-cloudflare-tunnels-deliver-rats)
-- [3] [Tailscale - Επαναφορά των Serve και Funnel](https://tailscale.com/blog/reintroducing-serve-funnel)
-- [4] [fatedier/frp - Repository του Fast Reverse Proxy](https://github.com/fatedier/frp)
-- [5] [Pinggy Documentation - Χρήση](https://pinggy.io/docs/usages/)
-
+- [1] [Τεκμηρίωση Serveo](https://serveo.net/docs/)
+- [2] [Τεκμηρίωση SocketXP - Ξεκινώντας](https://docs.socketxp.com/guide/getting-started/getting-started/)
+- [3] [ngrok Agent Command Line Interface](https://ngrok.com/docs/agent/cli)
+- [4] [Συχνές ερωτήσεις ngrok](https://ngrok.com/docs/faq)
+- [5] [Βοήθεια legacy CLI του Telebit.js](https://git.rootprojects.org/root/telebit.js/src/commit/4aaa87fd6ca5a8b149ce4a5f9d7b22ee5052f5d7/lib/en-us.toml)
+- [6] [LocalXpose](https://localxpose.io/)
+- [7] [Τεκμηρίωση LocalXpose](https://localxpose.gitbook.io/docs)
+- [8] [Expose - Κοινή χρήση sites](https://expose.dev/docs/client/sharing)
+- [9] [Expose - Κοινή χρήση TCP ports](https://github.com/exposedev/expose/blob/master/docs/client/sharing-tcp-ports.md)
+- [10] [repository localtunnel/localtunnel](https://github.com/localtunnel/localtunnel)
+- [11] [Cloudflare Docs - Ρύθμιση Cloudflare Tunnel](https://developers.cloudflare.com/tunnel/setup/)
+- [12] [Επισκόπηση Cloudflare Tunnel](https://developers.cloudflare.com/tunnel/)
+- [13] [Cloudflare Docs - Χρήσιμες εντολές tunnel](https://developers.cloudflare.com/tunnel/advanced/local-management/tunnel-useful-commands/)
+- [14] [Cloudflare Docs - Routing](https://developers.cloudflare.com/tunnel/routing/)
+- [15] [Cloudflare Docs - Αρχείο configuration](https://developers.cloudflare.com/tunnel/advanced/local-management/configuration-file/)
+- [16] [Πολιτικές Cloudflare Access](https://developers.cloudflare.com/cloudflare-one/access-controls/policies/)
+- [17] [Cloudflare Docs - Παράμετροι run](https://developers.cloudflare.com/tunnel/advanced/run-parameters/)
+- [18] [Εντολή Tailscale Serve](https://tailscale.com/docs/reference/tailscale-cli/serve)
+- [19] [Εντολή Tailscale Funnel](https://tailscale.com/docs/reference/tailscale-cli/funnel)
+- [20] [repository fatedier/frp - Fast Reverse Proxy](https://github.com/fatedier/frp)
+- [21] [Τεκμηρίωση Pinggy - Χρήση](https://pinggy.io/docs/usages/)
+- [22] [Pinggy - Απλά Localhost Tunnels](https://pinggy.io/)
+- [23] [Proofpoint - Threat Actor καταχράται Cloudflare Tunnels για την παράδοση RATs](https://www.proofpoint.com/uk/blog/threat-insight/threat-actor-abuses-cloudflare-tunnels-deliver-rats)
 {{#include ../../banners/hacktricks-training.md}}

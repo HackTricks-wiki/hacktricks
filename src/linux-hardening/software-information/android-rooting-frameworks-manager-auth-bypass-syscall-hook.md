@@ -1,85 +1,83 @@
 # Android Rooting Frameworks (KernelSU/Magisk) Manager Auth Bypass & Syscall Hook Abuse
 
-{{#include ../../banners/hacktricks-training.md}}
+Rooting frameworks όπως τα KernelSU, APatch και SKRoot κάνουν patch ή hook στον Android/Linux kernel και εκθέτουν privileged λειτουργικότητα σε unprivileged userspace manager app. Το Magisk συζητείται ξεχωριστά παρακάτω, επειδή το CVE-2024-48336 αφορούσε code loading στην πλευρά του manager και όχι αυτό το KernelSU syscall path.<sup>[[1]](#references)[[5]](#references)[[13]](#references)</sup>
 
-Rooting frameworks όπως τα KernelSU, APatch, SKRoot και Magisk συχνά τροποποιούν τον Linux/Android kernel και εκθέτουν privileged λειτουργικότητα σε ένα unprivileged userspace "manager" app μέσω ενός hooked syscall. Αν το βήμα manager-authentication έχει flaws, οποιοδήποτε local app μπορεί να φτάσει σε αυτό το channel και να κάνει privilege escalation σε ήδη-rooted συσκευές.
-
-Αυτή η σελίδα συνοψίζει τις τεχνικές και τις παγίδες που αποκαλύφθηκαν σε public research (κυρίως την ανάλυση της Zimperium για το KernelSU v0.5.7), ώστε τόσο οι red όσο και οι blue teams να κατανοήσουν τα attack surfaces, τα exploitation primitives και τα robust mitigations.<sup>[[1]](#references)</sup>
+Αυτή η σελίδα συνοψίζει τις τεχνικές και τις παγίδες που αποκαλύφθηκαν σε δημόσια έρευνα (κυρίως στην ανάλυση της Zimperium για το KernelSU v0.5.7), ώστε οι red και blue teams να κατανοήσουν τα attack surfaces, τα exploitation primitives και τα robust mitigations.<sup>[[1]](#references)</sup>
 
 ---
-## Architecture pattern: syscall-hooked manager channel
+## Αρχιτεκτονικό μοτίβο: syscall-hooked manager channel
 
-- Kernel module/patch hooks ένα syscall (συνήθως το prctl) για να λαμβάνει "commands" από το userspace.
-- Το protocol συνήθως είναι: magic_value, command_id, arg_ptr/len ...
-- Ένα userspace manager app κάνει πρώτα authentication (π.χ. CMD_BECOME_MANAGER). Μόλις ο kernel χαρακτηρίσει τον caller ως trusted manager, γίνονται αποδεκτά privileged commands:
-- Grant root στον caller (π.χ. CMD_GRANT_ROOT)
-- Διαχείριση allowlists/deny-lists για su
-- Ρύθμιση SELinux policy (π.χ. CMD_SET_SEPOLICY)
-- Query version/configuration
-- Επειδή οποιοδήποτε app μπορεί να κάνει invoke syscalls, η ορθότητα του manager authentication είναι κρίσιμη.
+- Στο KernelSU v0.5.7, ένα kernel hook στο `prctl` λαμβάνει μια magic value, ένα command ID και command-specific arguments από το userspace.<sup>[[1]](#references)[[2]](#references)[[11]](#references)</sup>
+- Ο caller ζητά πρώτα manager status με `CMD_BECOME_MANAGER`. Η authorization είναι command-specific: το `CMD_GRANT_ROOT` ελέγχει την κατάσταση manager/allowlist, το `CMD_ALLOW_SU` είναι manager-only και το `CMD_SET_SEPOLICY` είναι root-only σε αυτή την έκδοση.<sup>[[2]](#references)[[11]](#references)</sup>
+- Άλλες εντολές ανακτούν version/configuration ή αναφέρουν framework events.<sup>[[2]](#references)</sup>
+- Επειδή οποιοδήποτε app μπορεί να καλέσει αυτό το syscall interface, η ορθότητα του manager authentication είναι κρίσιμη.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Example (KernelSU design):
+Παράδειγμα (KernelSU design):
 - Hooked syscall: prctl
 - Magic value για redirect στο KernelSU handler: 0xDEADBEEF
-- Τα commands περιλαμβάνουν: CMD_BECOME_MANAGER, CMD_GET_VERSION, CMD_ALLOW_SU, CMD_SET_SEPOLICY, CMD_GRANT_ROOT, κ.λπ.
+- Οι εντολές περιλαμβάνουν: CMD_BECOME_MANAGER, CMD_GET_VERSION, CMD_ALLOW_SU, CMD_SET_SEPOLICY, CMD_GRANT_ROOT κ.λπ.<sup>[[1]](#references)[[2]](#references)[[11]](#references)</sup>
 
 ---
-## KernelSU v0.5.7 authentication flow (as implemented)
+## Authentication flow του KernelSU v0.5.7 (όπως έχει υλοποιηθεί)
 
-Όταν το userspace καλεί prctl(0xDEADBEEF, CMD_BECOME_MANAGER, data_dir_path, ...), το KernelSU επαληθεύει:
+Όταν το userspace καλεί `prctl(0xDEADBEEF, CMD_BECOME_MANAGER, data_dir_path, ...)`, το KernelSU επαληθεύει:<sup>[[1]](#references)[[2]](#references)[[11]](#references)</sup>
 
-1) Path prefix check
-- Το path πρέπει να ξεκινά με το αναμενόμενο prefix για το caller UID, π.χ. /data/data/<pkg> ή /data/user/<id>/<pkg>.
-- Reference: core_hook.c (v0.5.7) path prefix logic.<sup>[[2]](#references)</sup>
+1) Έλεγχος path prefix
+- Το path που παρέχεται πρέπει να ξεκινά με το αναμενόμενο prefix για το caller UID, π.χ. `/data/data/<pkg>` ή `/data/user/<id>/<pkg>`.
+- Reference: λογική path prefix του core_hook.c (v0.5.7).<sup>[[2]](#references)</sup>
 
-2) Ownership check
+2) Έλεγχος ownership
 - Το path πρέπει να ανήκει στο caller UID.
-- Reference: core_hook.c (v0.5.7) ownership logic.<sup>[[2]](#references)</sup>
+- Reference: λογική ownership του core_hook.c (v0.5.7).<sup>[[2]](#references)</sup>
 
-3) APK signature check μέσω FD table scan
-- Γίνεται iterate στα open file descriptors (FDs) του calling process.
-- Επιλέγεται το πρώτο file του οποίου το path ταιριάζει με /data/app/*/base.apk.
-- Γίνεται parse της APK v2 signature και verify έναντι του official manager certificate.
+3) Έλεγχος APK signature μέσω σάρωσης του FD table
+- Επανάληψη στα open file descriptors του calling process με αύξουσα σειρά descriptor.
+- Για κάθε regular file του οποίου το path ξεκινά με `/data/app/` και τελειώνει σε `/base.apk`, απαιτείται το path να περιέχει το package substring που προκύπτει από το παρεχόμενο data-directory path.
+- Επαλήθευση του signature του πρώτου candidate που περνά αυτούς τους path checks.
+- Parse του APK v2 signature και επαλήθευσή του έναντι του official manager certificate.
 - References: manager.c (iterating FDs), apk_sign.c (APK v2 verification).<sup>[[3]](#references)[[4]](#references)</sup>
 
-Αν όλοι οι έλεγχοι περάσουν, ο kernel αποθηκεύει προσωρινά το UID του manager και αποδέχεται privileged commands από αυτό το UID μέχρι να γίνει reset.
+Αν όλοι οι έλεγχοι περάσουν, ο kernel αποθηκεύει προσωρινά το UID του manager· οι manager-only εντολές αποδέχονται τότε αυτό το UID, ενώ οι υπόλοιπες εντολές διατηρούν τα δικά τους UID ή allowlist checks.<sup>[[2]](#references)[[3]](#references)</sup>
 
 ---
-## Vulnerability class: trusting “the first matching APK” from FD iteration
+## Κατηγορία ευπάθειας: εμπιστοσύνη σε APK selection που βασίζεται σε path
 
-Αν το signature check συνδέεται με το "first matching /data/app/*/base.apk" που εντοπίζεται στο process FD table, τότε στην πραγματικότητα δεν επαληθεύει το package του caller. Ένας attacker μπορεί να τοποθετήσει εκ των προτέρων ένα legitimately signed APK (του πραγματικού manager), ώστε να εμφανίζεται νωρίτερα στη FD list από το δικό του base.apk.
+Το KernelSU v0.5.7 δεν συνδέει το αποτέλεσμα του signature με την εγκατεστημένη package identity του PackageManager. Στο `manager.c`, το package test είναι μόνο ένας path substring check (`strstr(cwd, pkg)`), και στη συνέχεια γίνεται signature check στο πρώτο candidate που περνά αυτόν τον έλεγχο. Ένας attacker μπορεί επομένως να τοποθετήσει ένα genuine manager APK κάτω από ένα `/data/app/` path που περιέχει επίσης το package name του attacker και να φροντίσει να επιλεγεί πρώτο.<sup>[[1]](#references)[[3]](#references)[[4]](#references)</sup>
 
-Αυτό το trust-by-indirection επιτρέπει σε ένα unprivileged app να impersonate τον manager χωρίς να κατέχει το signing key του manager.<sup>[[1]](#references)</sup>
+Αυτή η trust-by-indirection επιτρέπει σε ένα unprivileged app να impersonate τον manager χωρίς να κατέχει το signing key του manager.<sup>[[1]](#references)</sup>
 
-Key properties exploited:<sup>[[1]](#references)</sup>
-- Το FD scan δεν συνδέεται με την package identity του caller· κάνει μόνο pattern-match σε path strings.
-- Το open() επιστρέφει το χαμηλότερο διαθέσιμο FD. Κλείνοντας πρώτα τα FDs με χαμηλότερο αριθμό, ένας attacker μπορεί να ελέγξει το ordering.
-- Το filter ελέγχει μόνο ότι το path ταιριάζει με /data/app/*/base.apk – όχι ότι αντιστοιχεί στο installed package του caller.
+Βασικές ιδιότητες που αξιοποιούνται:<sup>[[1]](#references)[[3]](#references)</sup>
+- Το FD scan είναι ταξινομημένο με βάση το descriptor index και το package check είναι path substring test, όχι verified package-to-APK identity binding.
+- Η open() επιστρέφει το χαμηλότερο διαθέσιμο FD. Κλείνοντας πρώτα τα χαμηλότερα-numbered FDs, ένας attacker μπορεί να ελέγξει τη σειρά.
+- Ένα bundled manager APK μπορεί να τοποθετηθεί κάτω από `/data/app/` σε path που περιέχει το package string του attacker, διατηρώντας παράλληλα το official manager signature.
 
 ---
-## Attack preconditions
+## Προϋποθέσεις attack
+
+Η συγκεκριμένη περίπτωση του KernelSU v0.5.7 απαιτεί:<sup>[[1]](#references)[[3]](#references)</sup>
 
 - Η συσκευή είναι ήδη rooted με vulnerable rooting framework (π.χ. KernelSU v0.5.7).
 - Ο attacker μπορεί να εκτελέσει arbitrary unprivileged code τοπικά (Android app process).
-- Ο πραγματικός manager δεν έχει ακόμη κάνει authentication (π.χ. αμέσως μετά από reboot). Ορισμένα frameworks κάνουν cache το manager UID μετά την επιτυχία· πρέπει να κερδίσετε το race.<sup>[[1]](#references)</sup>
+- Για την υλοποίηση v0.5.7, το `current->real_parent` πρέπει να έχει UID 0 (το source comment το περιγράφει ως zygote direct-child requirement)· το `manager.c` απορρίπτει άλλους parents.<sup>[[3]](#references)</sup>
+- Ο πραγματικός manager δεν έχει ακόμη authenticated (π.χ. αμέσως μετά από reboot). Ορισμένα frameworks κάνουν cache το manager UID μετά την επιτυχία· πρέπει να κερδίσετε το race.<sup>[[1]](#references)</sup>
 
 ---
 ## Exploitation outline (KernelSU v0.5.7)
 
-High-level steps:<sup>[[1]](#references)[[9]](#references)</sup>
-1) Δημιουργήστε ένα valid path προς το δικό σας app data directory, ώστε να ικανοποιούνται οι prefix και ownership checks.
-2) Βεβαιωθείτε ότι ένα genuine KernelSU Manager base.apk είναι ανοιχτό σε FD με μικρότερο αριθμό από το δικό σας base.apk.
-3) Κάντε invoke το prctl(0xDEADBEEF, CMD_BECOME_MANAGER, <your_data_dir>, ...) για να περάσετε τους checks.
-4) Εκδώστε privileged commands όπως CMD_GRANT_ROOT, CMD_ALLOW_SU, CMD_SET_SEPOLICY για να διατηρήσετε το elevation.
+Βήματα υψηλού επιπέδου (το αναφερόμενο demo video δείχνει το public proof of concept σε λειτουργία):<sup>[[1]](#references)[[2]](#references)[[10]](#references)</sup>
+1) Δημιουργήστε ένα valid path προς το δικό σας app data directory, ώστε να ικανοποιήσετε τα prefix και ownership checks.
+2) Τοποθετήστε ένα genuine KernelSU Manager base.apk κάτω από `/data/app/` σε path που περιέχει το package string σας και ανοίξτε το σε lower-numbered FD από το δικό σας base.apk.
+3) Καλέστε `prctl(0xDEADBEEF, CMD_BECOME_MANAGER, <your_data_dir>, ...)` για να περάσετε τους ελέγχους.
+4) Χρησιμοποιήστε το `CMD_GRANT_ROOT` και στη συνέχεια το `CMD_ALLOW_SU` για persistent su· καλέστε το root-only `CMD_SET_SEPOLICY` μόνο αφού αποκτήσετε root και μόνο όπου υποστηρίζεται.
 
-Practical notes on step 2 (FD ordering):<sup>[[1]](#references)</sup>
-- Εντοπίστε το FD του process σας για το δικό σας /data/app/*/base.apk, διατρέχοντας τα symlinks του /proc/self/fd.
-- Κλείστε ένα low FD (π.χ. stdin, fd 0) και ανοίξτε πρώτα το legitimate manager APK, ώστε να καταλάβει το fd 0 (ή οποιοδήποτε index είναι μικρότερο από το FD του δικού σας base.apk).
-- Κάντε bundle το legitimate manager APK με το app σας, ώστε το path του να ικανοποιεί το naive filter του kernel. Για παράδειγμα, τοποθετήστε το σε ένα subpath που ταιριάζει με /data/app/*/base.apk.
+Πρακτικές σημειώσεις για το βήμα 2 (FD ordering):<sup>[[1]](#references)</sup>
+- Εντοπίστε το FD του process σας για το δικό σας `/data/app/*/base.apk`, διατρέχοντας τα `/proc/self/fd` symlinks.
+- Κλείστε ένα low FD (π.χ. stdin, fd 0) και ανοίξτε πρώτα το legitimate manager APK, ώστε να καταλάβει το fd 0 (ή οποιοδήποτε index είναι χαμηλότερο από το FD του δικού σας base.apk).
+- Κάντε bundle το legitimate manager APK με το app σας, ώστε το path του να ξεκινά με `/data/app/`, να τελειώνει σε `/base.apk` και να περιέχει το package string σας. Για παράδειγμα, ένα path κάτω από το `lib` directory του app σας μπορεί να ικανοποιεί αυτούς τους ελέγχους.<sup>[[1]](#references)[[3]](#references)</sup>
 
-Example code snippets (Android/Linux, illustrative only):
+Παραδείγματα code snippets (Android/Linux, μόνο για illustration):
 
-Enumerate open FDs to locate base.apk entries:
+Απαρίθμηση των open FDs για τον εντοπισμό entries του base.apk:
 ```c
 #include <dirent.h>
 #include <stdio.h>
@@ -107,7 +105,7 @@ closedir(d);
 return best_fd; // First (lowest) matching fd
 }
 ```
-Εξανάγκασε ένα FD με χαμηλότερο αριθμό να δείχνει στο legitimate manager APK:
+Εξανάγκασε ένα FD με μικρότερο αριθμό να δείχνει στο νόμιμο manager APK:
 ```c
 #include <fcntl.h>
 #include <unistd.h>
@@ -119,72 +117,72 @@ int fd = open(legit_apk_path, O_RDONLY);
 (void)fd; // fd should now be 0 if available
 }
 ```
-Αυθεντικοποίηση του Manager μέσω prctl hook:
+Έλεγχος ταυτοποίησης του Manager μέσω του hook `prctl` του KernelSU v0.5.7:<sup>[[1]](#references)[[2]](#references)[[11]](#references)</sup>
 ```c
 #include <sys/prctl.h>
 #include <stdint.h>
 
 #define KSU_MAGIC          0xDEADBEEF
-#define CMD_BECOME_MANAGER 0x100  // Placeholder; command IDs are framework-specific
-
-static inline long ksu_call(unsigned long cmd, unsigned long arg2,
-unsigned long arg3, unsigned long arg4) {
-return prctl(KSU_MAGIC, cmd, arg2, arg3, arg4);
-}
+#define CMD_BECOME_MANAGER 1  // KernelSU v0.5.7; other frameworks differ
 
 int become_manager(const char *my_data_dir) {
-long result = -1;
-// arg2: command, arg3: pointer to data path (userspace->kernel copy), arg4: optional result ptr
-result = ksu_call(CMD_BECOME_MANAGER, (unsigned long)my_data_dir, 0, 0);
-return (int)result;
+uint32_t reply = 0;
+// arg3: data path; arg4: unused; arg5: userspace result pointer
+(void)prctl(KSU_MAGIC, CMD_BECOME_MANAGER,
+(unsigned long)my_data_dir, 0UL,
+(unsigned long)&reply);
+return reply == KSU_MAGIC ? 0 : -1;
 }
 ```
-Μετά την επιτυχία, privileged commands (παραδείγματα):
-- CMD_GRANT_ROOT: προώθηση της τρέχουσας διεργασίας σε root
-- CMD_ALLOW_SU: προσθήκη του package/UID σας στο allowlist για persistent su
-- CMD_SET_SEPOLICY: προσαρμογή της SELinux policy όπως υποστηρίζεται από το framework
+Μετά την επιτυχία, privileged commands (παραδείγματα):<sup>[[2]](#references)[[11]](#references)</sup>
+- CMD_GRANT_ROOT: προαγωγή της τρέχουσας διεργασίας σε root
+- CMD_ALLOW_SU: προσθήκη του package/UID σας στη allowlist για persistent su
+- CMD_SET_SEPOLICY: προσαρμογή της πολιτικής SELinux μετά την απόκτηση root· το KernelSU v0.5.7 ελέγχει για UID 0 για αυτήν την εντολή.<sup>[[2]](#references)</sup>
 
 Συμβουλή για race/persistence:
-- Καταχωρίστε έναν BOOT_COMPLETED receiver στο AndroidManifest (RECEIVE_BOOT_COMPLETED), ώστε να ξεκινά νωρίς μετά το reboot και να επιχειρεί authentication πριν από τον πραγματικό manager.<sup>[[1]](#references)</sup>
+- Καταχωρίστε έναν BOOT_COMPLETED receiver στο AndroidManifest (`RECEIVE_BOOT_COMPLETED`) ώστε να ξεκινά μετά από reboot και να επιχειρεί authentication πριν από τον πραγματικό manager· το permission εξουσιοδοτεί τη λήψη του `ACTION_BOOT_COMPLETED`, αλλά δεν εγγυάται από μόνο του priority στον προγραμματισμό.<sup>[[1]](#references)[[12]](#references)</sup>
 
 ---
-## Οδηγίες detection και mitigation
+## Οδηγίες ανίχνευσης και mitigation
 
 Για developers framework:
 - Συνδέστε το authentication με το package/UID του caller και όχι με αυθαίρετα FDs:
 - Επιλύστε το package του caller από το UID του και επαληθεύστε το σε σχέση με το signature του εγκατεστημένου package (μέσω PackageManager), αντί να κάνετε scanning των FDs.
-- Αν είναι kernel-only, χρησιμοποιήστε stable caller identity (task creds) και επικυρώστε την από stable source of truth που διαχειρίζεται από init/userspace helper, όχι από process FDs.
-- Αποφύγετε τους ελέγχους path-prefix ως identity· ικανοποιούνται trivially από τον caller.
-- Χρησιμοποιήστε nonce-based challenge–response μέσω του channel και εκκαθαρίστε οποιοδήποτε cached manager identity κατά το boot ή σε βασικά events.
-- Εξετάστε authenticated IPC βασισμένο σε binder, αντί για υπερφόρτωση generic syscalls, όπου αυτό είναι εφικτό.
+- Αν χρησιμοποιείται μόνο ο kernel, χρησιμοποιήστε σταθερή ταυτότητα caller (task creds) και επικυρώστε την μέσω μιας σταθερής πηγής αλήθειας που διαχειρίζεται το init/userspace helper, όχι μέσω process FDs.
+- Αποφύγετε τους ελέγχους path-prefix ως ταυτότητα· μπορούν να ικανοποιηθούν εύκολα από τον caller.
+- Χρησιμοποιήστε challenge–response βασισμένο σε nonce μέσω του channel και εκκαθαρίστε οποιαδήποτε cached ταυτότητα manager κατά το boot ή σε βασικά events.
+- Εξετάστε authenticated IPC βασισμένο σε binder αντί για υπερφόρτωση generic syscalls, όπου αυτό είναι εφικτό.
 
 Για defenders/blue team:
-- Εντοπίζετε την παρουσία rooting frameworks και manager processes· παρακολουθείτε prctl calls με ύποπτες magic constants (π.χ. 0xDEADBEEF), εφόσον διαθέτετε kernel telemetry.
+- Εντοπίζετε την παρουσία rooting frameworks και manager processes· παρακολουθείτε κλήσεις prctl με ύποπτες magic constants (π.χ. 0xDEADBEEF), εφόσον διαθέτετε kernel telemetry.<sup>[[1]](#references)[[11]](#references)</sup>
 - Σε managed fleets, αποκλείστε ή δημιουργήστε alert για boot receivers από untrusted packages που επιχειρούν γρήγορα privileged manager commands μετά το boot.
-- Βεβαιωθείτε ότι οι συσκευές είναι ενημερωμένες σε patched framework versions· ακυρώστε τα cached manager IDs κατά το update.
+- Βεβαιωθείτε ότι οι συσκευές έχουν ενημερωθεί σε patched εκδόσεις framework· ακυρώστε τα cached manager IDs μετά από update.
 
-Περιορισμοί του attack:
+Περιορισμοί της επίθεσης:<sup>[[1]](#references)[[2]](#references)</sup>
 - Επηρεάζει μόνο συσκευές που είναι ήδη rooted με vulnerable framework.
-- Συνήθως απαιτεί reboot/race window πριν από το authentication του legitimate manager (ορισμένα frameworks αποθηκεύουν προσωρινά το manager UID μέχρι το reset).
+- Συνήθως απαιτεί reboot/race window πριν από το authentication του νόμιμου manager (ορισμένα frameworks κάνουν cache το manager UID μέχρι το reset).
 
 ---
 ## Σχετικές σημειώσεις μεταξύ frameworks
 
-- Το password-based auth (π.χ. ιστορικά APatch/SKRoot builds) μπορεί να είναι αδύναμο αν τα passwords μπορούν να προβλεφθούν ή να υποβληθούν σε bruteforce ή αν οι validations περιέχουν bugs.<sup>[[1]](#references)[[6]](#references)[[7]](#references)</sup>
-- Το package/signature-based auth (π.χ. KernelSU) είναι ισχυρότερο κατ’ αρχήν, αλλά πρέπει να συνδέεται με τον πραγματικό caller και όχι με έμμεσα artefacts, όπως FD scans.<sup>[[1]](#references)[[5]](#references)</sup>
-- Magisk: Το CVE-2024-48336 (MagiskEoP) έδειξε ότι ακόμη και ώριμα ecosystems μπορεί να είναι ευάλωτα σε identity spoofing, το οποίο οδηγεί σε code execution με root μέσα στο manager context.<sup>[[1]](#references)[[8]](#references)</sup>
+- Το password-based auth (π.χ. ιστορικά builds των APatch/SKRoot) μπορεί να είναι αδύναμο αν τα passwords είναι προβλέψιμα ή μπορούν να υποστούν bruteforce, ή αν οι validations έχουν bugs.<sup>[[1]](#references)[[6]](#references)[[7]](#references)</sup>
+- Το package/signature-based auth (π.χ. KernelSU) είναι θεωρητικά ισχυρότερο, αλλά πρέπει να συνδέεται με τον πραγματικό caller και όχι με artefacts που προκύπτουν από path και επιλέγονται μέσω FD scans.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+- Magisk: Το CVE-2024-48336 επηρέαζε builds πριν από το Canary 27007, τα οποία φόρτωναν code από μη επαληθευμένο GMS package, επιτρέποντας σε ένα local app να εκτελέσει code στο Magisk app και να κάνει escalation σε root χωρίς user interaction.<sup>[[8]](#references)[[9]](#references)[[13]](#references)</sup>
 
 ---
 ## References
 
-- [1] [Zimperium – Το Rooting όλων των κακών: Security Holes που θα μπορούσαν να θέσουν σε κίνδυνο τη mobile συσκευή σας](https://zimperium.com/blog/the-rooting-of-all-evil-security-holes-that-could-compromise-your-mobile-device)
-- [2] [KernelSU v0.5.7 – Έλεγχοι path στο core_hook.c (L193, L201)](https://github.com/tiann/KernelSU/blob/v0.5.7/kernel/core_hook.c#L193)
-- [3] [KernelSU v0.5.7 – FD iteration/signature check στο manager.c (L43+)](https://github.com/tiann/KernelSU/blob/v0.5.7/kernel/manager.c#L43)
-- [4] [KernelSU – APK v2 verification στο apk_sign.c (main)](https://github.com/tiann/KernelSU/blob/main/kernel/apk_sign.c#L319)
-- [5] [KernelSU project](https://kernelsu.org/)
+- [1] [Zimperium – Το Rooting Όλων των Κακών: Κενά Ασφαλείας που Θα Μπορούσαν να Θέσουν σε Κίνδυνο την Κινητή Συσκευή σας](https://zimperium.com/blog/the-rooting-of-all-evil-security-holes-that-could-compromise-your-mobile-device)
+- [2] [KernelSU v0.5.7 – έλεγχοι authentication στο core_hook.c](https://github.com/tiann/KernelSU/blob/v0.5.7/kernel/core_hook.c#L149-L205)
+- [3] [KernelSU v0.5.7 – επανάληψη FD, έλεγχος package και κλήση signature στο manager.c](https://github.com/tiann/KernelSU/blob/v0.5.7/kernel/manager.c#L16-L67)
+- [4] [KernelSU v0.5.7 – επαλήθευση APK v2 στο apk_sign.c](https://github.com/tiann/KernelSU/blob/v0.5.7/kernel/apk_sign.c#L6-L119)
+- [5] [Project KernelSU](https://kernelsu.org/)
 - [6] [APatch](https://github.com/bmax121/APatch)
 - [7] [SKRoot](https://github.com/abcz316/SKRoot-linuxKernelRoot)
-- [8] [MagiskEoP – CVE-2024-48336](https://github.com/canyie/MagiskEoP)
-- [9] [KSU PoC demo video (Wistia)](https://zimperium-1.wistia.com/medias/ep1dg4t2qg?videoFoam=true)
-
+- [8] [Magisk issue #8279 – Επαλήθευση ότι το GMS είναι system app](https://github.com/topjohnwu/Magisk/issues/8279)
+- [9] [MagiskEoP – CVE-2024-48336](https://github.com/canyie/MagiskEoP)
+- [10] [Βίντεο επίδειξης KSU PoC (Wistia)](https://zimperium-1.wistia.com/medias/ep1dg4t2qg?videoFoam=true)
+- [11] [KernelSU v0.5.7 – identifiers εντολών ksu.h](https://github.com/tiann/KernelSU/blob/v0.5.7/kernel/ksu.h#L12-L24)
+- [12] [Android Manifest.permission.RECEIVE_BOOT_COMPLETED](https://developer.android.com/reference/android/Manifest.permission#RECEIVE_BOOT_COMPLETED)
+- [13] [NVD – CVE-2024-48336](https://nvd.nist.gov/vuln/detail/CVE-2024-48336)
 {{#include ../../banners/hacktricks-training.md}}

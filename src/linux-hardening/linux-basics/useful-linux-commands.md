@@ -1,8 +1,6 @@
 # Χρήσιμες εντολές Linux
 
-{{#include ../../banners/hacktricks-training.md}}
-
-## Συνηθισμένα Bash
+## Συνηθισμένες εντολές Bash
 ```bash
 #Exfiltration using Base64
 base64 -w 0 file
@@ -229,7 +227,7 @@ grep -Po 'd{3}[s-_]?d{3}[s-_]?d{4}' *.txt > us-phones.txt
 #Extract ISBN Numbers
 egrep -a -o "\bISBN(?:-1[03])?:? (?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]\b" *.txt > isbn.txt
 ```
-## Εντολή find
+## Find
 ```bash
 # Find SUID set files.
 find / -perm /u=s -ls 2>/dev/null
@@ -301,9 +299,9 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
-## Τηλεμετρία eBPF και Ανίχνευση Rootkit
+## Τηλεμετρία eBPF και Hunting για Rootkits
 
-Τα σύγχρονα rootkit (TripleCross, παραλλαγές του BPFDoor κ.λπ.) εγκαθίστανται όλο και συχνότερα ως κρυφά προγράμματα eBPF. Δημιουργήστε baseline για το περιβάλλον σας με τα `bpftool`/`eBPFmon`, ώστε να εντοπίζετε unsigned προγράμματα, μη αναμενόμενα cgroup hooks ή κακόβουλα περιεχόμενα map πριν τα αποσυνδέσετε.<sup>[[1]](#references)</sup>
+Η έρευνα σχετικά με Rootkits έχει τεκμηριώσει τόσο implants που βασίζονται σε eBPF, όπως το TripleCross, όσο και backdoors που βασίζονται σε BPF, όπως οι παραλλαγές του BPFDoor. Αντιμετωπίστε μη αναμενόμενα BPF programs, attachments ή maps ως ενδείξεις για έρευνα και όχι ως απόδειξη παραβίασης.<sup>[[3]](#references)[[4]](#references)</sup> Δημιουργήστε baseline για εξουσιοδοτημένα συστήματα με τα `bpftool` ή `eBPFmon`: το `bpftool` μπορεί να απαριθμήσει programs και maps, να κάνει dump των program instructions και να ελέγξει τα υποστηριζόμενα features, ενώ το eBPFmon παρουσιάζει αυτές τις πληροφορίες σε TUI.<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -321,11 +319,11 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-Συσχετίστε το output του bpftool με τα αναμενόμενα NIC/cgroup attachments· ένα ξαφνικό πρόγραμμα `xdp` ή `kprobe` που ανήκει σε μη εγκεκριμένο PID αποτελεί ισχυρή ένδειξη για injected eBPF payload.
+Συσχετίστε την έξοδο του `bpftool` με τις αναμενόμενες συνδέσεις NIC/cgroup· ένα ξαφνικό πρόγραμμα `xdp` ή `kprobe` που ανήκει σε μη εγκεκριμένο PID αποτελεί ένδειξη για διερεύνηση και όχι αδιάσειστη απόδειξη injected payload.<sup>[[5]](#references)[[6]](#references)</sup>
 
-## Διαλογή Συμβάντων Journald
+## Διαλογή περιστατικών Journald
 
-Το systemd-journald διατηρεί structured metadata, επομένως μπορείτε να κάνετε pivot ανά boot, severity, unit ή UID χωρίς να αγγίξετε το `/var/log/*`. Συνδυάστε φίλτρα με relative timestamps για να απομονώσετε γρήγορα τα attack windows ή να αποδείξετε παραποίηση logs.<sup>[[2]](#references)</sup>
+Το `journalctl` διαβάζει δομημένες καταχωρίσεις από το `systemd-journald` και υποστηρίζει φιλτράρισμα κατά boot, priority, unit, UID και σχετικό χρόνο. Συνδυάστε αυτά τα φίλτρα με έξοδο JSON όταν χρειάζεται να διατηρήσετε ή να συγκρίνετε στοιχεία· το φιλτράρισμα από μόνο του δεν αποδεικνύει ότι τα logs δεν έχουν παραποιηθεί.<sup>[[2]](#references)[[7]](#references)</sup>
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -336,11 +334,15 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-Προσθέστε `--grep 'Invalid user' --case-sensitive` ή `-k` (μόνο για το kernel ring buffer) όταν χρειάζεστε πιο αυστηρά φίλτρα και θυμηθείτε ότι οι selectors `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` και `_TRANSPORT` συνδυάζονται για αναζητήσεις σε περιβάλλοντα multi-tenant.
+Προσθέστε `--grep 'Invalid user' --case-sensitive` ή `-k` (μόνο μηνύματα kernel) όταν χρειάζεστε αυστηρότερα φίλτρα και θυμηθείτε ότι οι selectors `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` και `_TRANSPORT` μπορούν να συνδυαστούν για στοχευμένες αναζητήσεις.<sup>[[7]](#references)</sup>
 
-## Αναφορές
+## References
 
 - [1] [eBPFmon: Ένα νέο εργαλείο για την εξερεύνηση και την αλληλεπίδραση με εφαρμογές eBPF](https://redcanary.com/blog/linux-security/ebpfmon/)
 - [2] [Πώς να χρησιμοποιήσετε την εντολή journalctl για την προβολή Linux logs](https://www.hostinger.com/tutorials/journalctl-command)
-
+- [3] [h3xduck/TripleCross](https://github.com/h3xduck/TripleCross)
+- [4] [Rapid7 Labs: BPFdoor σε τηλεπικοινωνιακά δίκτυα](https://www.rapid7.com/blog/post/tr-bpfdoor-telecom-networks-sleeper-cells-threat-research-report/)
+- [5] [Τεκμηρίωση BPF — Η τεκμηρίωση του Linux Kernel](https://docs.kernel.org/bpf/)
+- [6] [libbpf/bpftool](https://github.com/libbpf/bpftool)
+- [7] [journalctl(1) — Σελίδα εγχειριδίου του Linux](https://man7.org/linux/man-pages/man1/journalctl.1.html)
 {{#include ../../banners/hacktricks-training.md}}
