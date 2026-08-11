@@ -2,49 +2,50 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Generative models zinaweza kutumika **kubypass KYC inayotegemea browser, uthibitishaji wa umri, na workflows za biometric liveness**. Sehemu dhaifu mara nyingi **si transport au cloud liveness provider, bali camera trust boundary**: browser ya desktop kwa kawaida huamini kifaa chochote ambacho `getUserMedia()` huonyesha kama webcam.<sup>[[1]](#references)</sup>
+Generative models zinaweza kutumika **kupita workflows za KYC za browser, uthibitishaji wa umri, na biometric liveness**. Sehemu dhaifu mara nyingi **si transport au cloud liveness provider**, bali ni **camera trust boundary**: browser ya desktop kwa kawaida huamini kifaa chochote ambacho `getUserMedia()` hufichua kama webcam.<sup>[[1]](#references)</sup>
 
-## Mlolongo wa Mashambulizi wa Kivitendo
+## Mlolongo wa Shambulio kwa Vitendo
 
-1. **Tengeneza media inayokidhi challenge** kwa video-to-video model kutoka kwa source actor na victim reference image.<sup>[[1]](#references)</sup>
-2. **Inject forged stream kabla ya signing au upload**, kwa mfano kupitia Linux virtual camera iliyoundwa na `v4l2loopback` na kulishwa na OBS au FFmpeg.<sup>[[3]](#references)</sup>
-3. Ruhusu browser na vendor SDK (WebRTC, AWS, n.k.) **zikamate, zisaini, na zipakie attacker-controlled frames kana kwamba zimetoka kwenye webcam halisi**.<sup>[[2]](#references)</sup>
+1. **Tengeneza media inayotii challenge** kwa kutumia video-to-video model kutoka kwa source actor na victim reference image.<sup>[[1]](#references)</sup>
+2. **Ingiza stream iliyoghushiwa kabla ya signing au upload**, kwa mfano kupitia Linux virtual camera iliyoundwa kwa `v4l2loopback` na kupewa data na OBS au FFmpeg.<sup>[[3]](#references)</sup>
+3. Ruhusu browser na vendor SDK (WebRTC, AWS, n.k.) **zikamate, zisaini, na zipakie frames zinazodhibitiwa na attacker kana kwamba zimetoka kwenye webcam halisi**.<sup>[[2]](#references)</sup>
 
-Hili ni muhimu wakati wa assessments kwa sababu signed WebSocket chunks au proprietary SDK framing zinaweza kufanya **network-layer tampering** isiwe ya kivitendo, ilhali **camera-layer injection** bado inafanya kazi.<sup>[[1]](#references)</sup>
+Hili ni muhimu wakati wa assessments kwa sababu signed WebSocket chunks au proprietary SDK framing zinaweza kufanya **network-layer tampering** isiwe ya vitendo, ilhali **camera-layer injection** bado inafanya kazi.<sup>[[1]](#references)</sup>
 
-## Njia Muhimu za Testing
+## Maeneo ya Upimaji yenye Thamani Kubwa
 
-- **Virtual webcam acceptance**: ikiwa flow inafanya kazi kutoka kwenye browser ya desktop, test kama OBS, `v4l2loopback`, au vendor virtual cameras zinakubaliwa kama peripherals za kawaida.<sup>[[1]](#references)</sup>
-- **Camera API redirection kwenye mobile**: mobile flows za native bado zinaweza kuwa vulnerable wakati Frida inafanya hooks kwenye camera APIs na kubadilisha sensor buffers kwa frames kutoka kwenye MP4 au virtual camera inayotegemea emulator.
-- **Constraint weakening**: pages zinazohitaji `deviceId`, `frameRate`, `width`, `height`, au `facingMode` halisi wakati mwingine zinaweza kubypass kwa kufanya monkeypatching ya `navigator.mediaDevices.getUserMedia` na kubadilisha strict constraints kwa broader ranges.<sup>[[4]](#references)</sup>
-- **Low-quality generation pamoja na post-processing**: generate video ya bei nafuu zaidi ambayo model inaweza ku-render kwa uaminifu, kisha tumia FFmpeg upscaling au frame interpolation kutimiza capture requirements.
-- **Predictable active challenges**: sequences zinazorudiwa za kugeuza kichwa au kuwasha flash zinafaa kurekodiwa na kureplayed kupitia generative workflow.
-- **Weak replay detection**: scene perturbations rahisi, kama crop au position shifts, mabadiliko ya overlay, au motion kidogo, zinaweza kutosha wakati anti-replay logic inakagua tu superficial frame similarity.<sup>[[1]](#references)</sup>
+- **Kukubaliwa kwa virtual webcam**: ikiwa flow inafanya kazi kutoka kwenye desktop browser, pima kama OBS, `v4l2loopback`, au vendor virtual cameras zinakubaliwa kama peripherals za kawaida.<sup>[[1]](#references)</sup>
+- **Camera API redirection kwenye mobile**: native flows bado zinaweza kuwa vulnerable wakati runtime instrumentation kama Frida inahook camera APIs na kubadilisha sensor buffers kwa frames kutoka kwenye MP4 file au emulator-backed virtual camera. Hili linahitaji udhibiti wa client execution environment na linapaswa kutathminiwa pamoja na root/jailbreak na application-integrity signals.<sup>[[1]](#references)</sup>
+- **Kupunguza ukali wa constraints**: pages zinazohitaji `deviceId`, `frameRate`, `width`, `height`, au `facingMode` maalum zinaweza wakati mwingine kupitwa kwa monkeypatching `navigator.mediaDevices.getUserMedia` na kubadilisha strict constraints kwa broader ranges.<sup>[[4]](#references)</sup>
+- **Generation yenye quality ya chini pamoja na post-processing**: pima kama video generated ya gharama ndogo inaweza kuupscaled au kufanyiwa frame interpolation kwa FFmpeg kwa kiwango cha kutosha kutimiza capture constraints.<sup>[[1]](#references)</sup>
+- **Active challenges zinazotabirika**: sequences za kurudia za kusogeza kichwa au kuwasha mwanga zinafaa kurekodiwa na kurudiwa kupitia generative workflow.
+- **Replay detection dhaifu**: scene perturbations rahisi, kama crop au position shifts, mabadiliko ya overlay, au motion ndogo, zinaweza kutosha wakati anti-replay logic inakagua tu superficial frame similarity.<sup>[[1]](#references)</sup>
 
 ## Tofauti za Trust Kati ya Mobile na Desktop
 
 Native mobile apps zinaweza kuongeza gharama ya attacker kupitia:<sup>[[1]](#references)</sup>
 
-- **sensor au Secure Element attestation** kwa camera buffers;
-- **execution-integrity** signals kama **Play Integrity** au **App Attest**;
-- **motion correlation** kati ya video na accelerometer au gyroscope telemetry.
+- **hardware-backed provenance au attestation signals**, ikiwa ni pamoja na evidence inayoungwa mkono na Secure Element pale ambapo platform na capture stack huifichua;
+- **execution-integrity** signals kama **Play Integrity** au **App Attest**;<sup>[[5]](#references)[[6]](#references)</sup>
+- **motion correlation** kati ya video na telemetry ya accelerometer au gyroscope.
 
-Desktop web flows kwa kawaida hazina camera chain of trust inayolingana, hivyo kwa ujumla huwa njia yenye upinzani mdogo zaidi.<sup>[[1]](#references)</sup>
+Desktop web flows kwa kawaida hazina camera chain of trust inayolingana, kwa hiyo kwa ujumla ndiyo njia yenye upinzani mdogo zaidi.<sup>[[1]](#references)</sup>
 
-## Maelezo ya Defensive Review
+## Vidokezo vya Defensive Review
 
-Unapokagua KYC au liveness integration, thibitisha kama:<sup>[[1]](#references)</sup>
+Wakati wa kukagua KYC au liveness integration, thibitisha kama:<sup>[[1]](#references)</sup>
 
 - inaruhusu **desktop-browser fallback** kwa workflow iliyofanyiwa threat modeling kwa mobile capture pekee;
-- inategemea zaidi **algorithmic liveness** bila human escalation thabiti kwa sessions zenye mashaka;
+- inategemea zaidi **algorithmic liveness** bila human escalation imara kwa suspicious sessions;
 - inatumia **challenges thabiti au zinazotabirika** ambazo zinaweza kurekodiwa mapema na kuingizwa kwenye generation pipeline;
-- inagundua **`getUserMedia` monkeypatching**, virtual cameras, browser hardware telemetry isiyolingana, au device attestation inayokosekana.<sup>[[1]](#references)</sup>
+- inatambua **`getUserMedia` monkeypatching**, virtual cameras, browser hardware telemetry isiyolingana, au device attestation inayokosekana.<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [Synacktiv - KYC: Bypass age verification using generative video models](https://www.synacktiv.com/en/publications/kyc-bypass-age-verification-using-generative-video-models.html)
+- [1] [Synacktiv - KYC: Kupita uthibitishaji wa umri kwa kutumia generative video models](https://www.synacktiv.com/en/publications/kyc-bypass-age-verification-using-generative-video-models.html)
 - [2] [Amazon Rekognition Face Liveness](https://docs.aws.amazon.com/rekognition/latest/dg/face-liveness.html)
 - [3] [v4l2loopback](https://github.com/v4l2loopback/v4l2loopback)
 - [4] [MDN - MediaDevices.getUserMedia()](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia)
-
+- [5] [Android Developers — Play Integrity API](https://developer.android.com/google/play/integrity)
+- [6] [Apple Developer — App Attest](https://developer.apple.com/documentation/devicecheck/establishing-your-app-s-integrity)
 {{#include ../banners/hacktricks-training.md}}

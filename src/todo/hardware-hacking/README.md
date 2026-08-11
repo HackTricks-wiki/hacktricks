@@ -1,52 +1,59 @@
-# Hardware Hacking
+# Udukuzi wa Vifaa
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## JTAG
 
-JTAG huruhusu kufanya boundary scan. Boundary scan huchanganua circuitry fulani, ikiwemo boundary-scan cells na registers zilizopachikwa kwa kila pin.
+JTAG (IEEE 1149.1) huwezesha upimaji wa boundary-scan kupitia seli zilizowekwa kuzunguka pini za I/O za kifaa. Vichakataji vingi pia hufichua kazi za utatuzi maalum za mtengenezaji kupitia Test Access Port (TAP) hiyo hiyo; boundary scan na utatuzi wa CPU ni matumizi yanayohusiana ya JTAG, si visawe.<sup>[[1]](#references)</sup>
 
-JTAG standard hufafanua **specific commands za kufanya boundary scans**, zikiwemo:
+Kiwango cha JTAG hufafanua **amri mahususi za kufanya boundary scans**, zikiwemo zifuatazo:
 
-- **BYPASS** hukuruhusu ku-test chip maalum bila gharama ya ziada ya kupitia chips nyingine.
-- **SAMPLE/PRELOAD** huchukua sample ya data inayoingia na kutoka kwenye device ikiwa katika hali yake ya kawaida ya kufanya kazi.
-- **EXTEST** huweka na kusoma hali za pins.
+- **BYPASS** huchagua rejista ya bypass yenye biti moja ili vifaa vingine katika scan chain vifikiwe kwa overhead ndogo.
+- **SAMPLE/PRELOAD** hunasa thamani za pini wakati wa utendaji wa kawaida na inaweza kupakia rejista ya boundary-scan kabla ya instruksheni nyingine.
+- **EXTEST** huweka na kusoma hali za pini.
 
-Pia inaweza ku-support commands nyingine kama:
+Pia inaweza kusaidia amri nyingine kama:
 
-- **IDCODE** kwa ajili ya kutambua device
-- **INTEST** kwa ajili ya internal testing ya device
+- **IDCODE** ya kutambua kifaa
+- **INTEST** ya kufanya majaribio ya ndani ya kifaa
 
-Unaweza kukutana na instructions hizi unapotumia tool kama JTAGulator.
+Huenda ukakutana na instruksheni hizi unapotumia tool kama JTAGulator.
 
-### The Test Access Port
+### Test Access Port
 
-Boundary scans hujumuisha tests za **Test Access Port (TAP)** yenye waya nne, port ya matumizi ya jumla inayotoa **access kwa JTAG test support** functions zilizojengwa ndani ya component. TAP hutumia signals tano zifuatazo:
+**Test Access Port (TAP)** hutoa ufikiaji wa mantiki ya majaribio ya JTAG ya sehemu. Ishara nne zinahitajika, na `TRST` ni ya hiari:<sup>[[1]](#references)</sup>
 
-- Test clock input (**TCK**) TCK ni **clock** inayobainisha mara ngapi TAP controller itachukua action moja (kwa maneno mengine, kuruka kwenda state inayofuata kwenye state machine).
-- Test mode select (**TMS**) input TMS hudhibiti **finite state machine**. Kwa kila beat ya clock, JTAG TAP controller ya device hukagua voltage kwenye TMS pin. Ikiwa voltage iko chini ya threshold fulani, signal huchukuliwa kuwa low na kutafsiriwa kama 0, ilhali ikiwa voltage iko juu ya threshold fulani, signal huchukuliwa kuwa high na kutafsiriwa kama 1.
-- Test data input (**TDI**) TDI ni pin inayotuma **data ndani ya chip kupitia scan cells**. Kila vendor anawajibika kufafanua communication protocol kupitia pin hii, kwa sababu JTAG haifafanui hilo.
-- Test data output (**TDO**) TDO ni pin inayotuma **data kutoka kwenye chip**.
-- Test reset (**TRST**) input TRST ya hiari hu-reset finite state machine **kwenda kwenye known good state**. Vinginevyo, TMS ikishikiliwa kwenye 1 kwa clock cycles tano mfululizo, huanzisha reset, kwa njia ileile ambayo TRST pin ingefanya, ndiyo maana TRST ni ya hiari.
+- Ingizo la saa ya majaribio (**TCK**) TCK ni **saa** inayobainisha mara ngapi kidhibiti cha TAP kitafanya kitendo kimoja (kwa maneno mengine, kurukia hali inayofuata katika state machine).
+- Ingizo la kuchagua hali ya majaribio (**TMS**) TMS hudhibiti **finite state machine**. Katika kila mpigo wa saa, kidhibiti cha JTAG TAP cha kifaa hukagua voltage kwenye pini ya TMS. Ikiwa voltage iko chini ya kiwango fulani, ishara huchukuliwa kuwa ya chini na kutafsiriwa kama 0; ikiwa voltage iko juu ya kiwango fulani, ishara huchukuliwa kuwa ya juu na kutafsiriwa kama 1.
+- Ingizo la data ya majaribio (**TDI**) husogeza instruksheni ya mfululizo au data ya majaribio ndani ya rejista iliyochaguliwa ya TAP. IEEE 1149.1 hufafanua tabia ya uhamishaji wa TAP, huku watengenezaji wakifafanua instruksheni za hiari na rejista za utatuzi.
+- Tokeo la data ya majaribio (**TDO**) TDO ni pini inayotuma **data nje ya chip**.
+- Ingizo la reset ya majaribio (**TRST**) TRST ya hiari huweka upya finite state machine **kwenye hali salama inayojulikana**. Vinginevyo, TMS ikishikiliwa kwenye 1 kwa mizunguko mitano ya saa mfululizo, huanzisha reset, kwa njia ileile ambayo pini ya TRST ingefanya; ndiyo sababu TRST ni ya hiari.
 
-Wakati mwingine utaweza kupata pins hizo zikiwa zimewekewa alama kwenye PCB. Katika hali nyingine unaweza kuhitaji **kuzipata**.
+Wakati mwingine utaweza kupata pini hizo zikiwa zimewekwa alama kwenye PCB. Katika hali nyingine huenda ukahitaji **kuzitafuta**.
 
-### Identifying JTAG pins
+### Kutambua pini za JTAG
 
-Njia ya haraka zaidi lakini yenye gharama kubwa zaidi ya kutambua JTAG ports ni kutumia **JTAGulator**, device iliyoundwa mahsusi kwa madhumuni haya (ingawa inaweza **pia kutambua UART pinouts**).
+Chaguo la haraka, lililoundwa mahsusi—lakini ghali kwa kulinganisha—la kutambua port za JTAG ni **JTAGulator**, ambayo pia inaweza kutambua mpangilio wa pini za UART.<sup>[[2]](#references)</sup>
 
-Ina **channels 24** unazoweza kuunganisha kwenye pins za board. Kisha hufanya **BF attack** ya combinations zote zinazowezekana kwa kutuma **IDCODE** na **BYPASS** boundary scan commands. Ikiwa inapokea response, huonyesha channel inayolingana na kila JTAG signal
+Ina **channels 24** zinazoweza kuunganishwa kwenye test points za board. Huhesabu michanganyiko ya pini zinazowezekana kwa kutumia scans za **IDCODE** na **BYPASS**, kisha huripoti channels zinazolingana na ishara za JTAG zilizotambuliwa.
 
-Njia ya bei nafuu lakini ya polepole zaidi ya kutambua JTAG pinouts ni kutumia [**JTAGenum**](https://github.com/cyphunk/JTAGenum/) iliyopakiwa kwenye Arduino-compatible microcontroller.
+Njia ya bei nafuu lakini ya polepole zaidi ya kutambua mpangilio wa pini za JTAG ni kutumia [**JTAGenum**](https://github.com/cyphunk/JTAGenum/) iliyopakiwa kwenye microcontroller inayooana na Arduino.
 
-Kwa kutumia **JTAGenum**, kwanza uta-**define pins za probing** device utakayotumia kwa enumeration.Utalazimika kurejelea pinout diagram ya device, kisha uunganishe pins hizo na test points kwenye target device yako.
+Ukitumia **JTAGenum**, kwanza fafanua pini za microcontroller ya uchunguzi zitakazotumika kwa enumeration. Angalia pinout yake, kisha unganisha pini hizo kwenye test points zinazowezekana kwenye board lengwa.<sup>[[3]](#references)</sup>
 
-**Njia ya tatu** ya kutambua JTAG pins ni **kukagua PCB** ili kutafuta mojawapo ya pinouts. Katika baadhi ya hali, PCBs zinaweza kutoa kwa urahisi **Tag-Connect interface**, ambayo ni ishara wazi kwamba board pia ina JTAG connector. Unaweza kuona jinsi interface hiyo inavyoonekana kwenye [https://www.tag-connect.com/info/](https://www.tag-connect.com/info/). Zaidi ya hayo, kukagua **datasheets za chipsets zilizo kwenye PCB** kunaweza kufichua pinout diagrams zinazoelekeza kwenye JTAG interfaces.
+**Njia ya tatu** ya kutambua pini za JTAG ni **kukagua PCB** ili kupata footprint inayojulikana. Baadhi ya boards hufichua **Tag-Connect** footprint, ingawa Tag-Connect ni mfumo wa connector unaoweza kubeba JTAG, SWD, UART au interface nyingine—si uthibitisho wa pekee kwamba pini hizo ni za JTAG. Datasheet za components na vipimo vya continuity vinaweza kisha kutambua ishara halisi.<sup>[[5]](#references)</sup>
 
 ## SDW
 
-SWD ni protocol maalum ya ARM iliyoundwa kwa ajili ya debugging.
+SWD ni interface ya utatuzi ya Arm yenye pini mbili na inayotumia packets.<sup>[[4]](#references)</sup>
 
-SWD interface inahitaji **pins mbili**: signal ya bidirectional **SWDIO**, ambayo ni sawa na **TDI na TDO pins za JTAG pamoja na clock**, na **SWCLK**, ambayo ni sawa na **TCK** katika JTAG. Devices nyingi hu-support **Serial Wire or JTAG Debug Port (SWJ-DP)**, interface iliyounganisha JTAG na SWD inayokuwezesha kuunganisha SWD au JTAG probe kwenye target.
+Interface hii hutumia **SWDIO** ya mwelekeo-mbili kwa data na **SWCLK** kwa saa. Vifaa vingi hutekeleza **Serial Wire/JTAG Debug Port (SWJ-DP)** inayoruhusu kuchagua kati ya SWD na JTAG kwenye pini zinazoshirikiwa.<sup>[[4]](#references)</sup>
 
+## References
+
+- [1] [Kikundi kazi cha IEEE 1149.1 — JTAG na boundary scan](https://sagroups.ieee.org/1149/1/)
+- [2] [Nyaraka za JTAGulator](https://github.com/grandideastudio/jtagulator/wiki)
+- [3] [JTAGenum — Enumeration ya pini za Arduino JTAG](https://github.com/cyphunk/JTAGenum/)
+- [4] [Arm — Interfaces za utatuzi zenye pini chache kwa mifumo yenye vifaa vingi](https://developer.arm.com/-/media/Arm%20Developer%20Community/PDF/Low_Pin-Count_Debug_Interfaces_for_Multi-device_Systems.pdf)
+- [5] [Tag-Connect — Footprints za nyaya za utatuzi na programming](https://www.tag-connect.com/info/)
 {{#include ../../banners/hacktricks-training.md}}

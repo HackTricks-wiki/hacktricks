@@ -6,49 +6,60 @@
 
 ### [**Hugging Face Transformers**](https://github.com/huggingface/transformers)
 
-Hugging Face Transformers ni mojawapo ya libraries maarufu za open-source za kutumia, ku-train, na ku-deploy LLMs kama GPT, BERT, na nyingine nyingi. Inatoa ecosystem pana inayojumuisha models zilizo-trainiwa awali, datasets, pamoja na integration rahisi na Hugging Face Hub kwa fine-tuning na deployment.
+Hugging Face Transformers ni library ya open-source ya kupakia, ku-train, na ku-serve models zilizofunzwa awali katika kazi za text, vision, audio, video, na multimodal. Uhostishaji wa models na datasets hutolewa kando na Hugging Face Hub.<sup>[[1]](#references)</sup>
 
 ### [**LangChain**](https://github.com/langchain-ai/langchain)
 
-LangChain ni framework iliyoundwa kwa ajili ya kujenga applications zinazotumia LLMs. Inawawezesha developers kuunganisha language models na external data sources, APIs, na databases. LangChain hutoa tools za advanced prompt engineering, kusimamia historia ya mazungumzo, na kuunganisha LLMs katika workflows changamano.
+LangChain ni framework ya kuunda applications na agents zinazoendeshwa na models, ikiwa na ujenzi wa prompts, usimamizi wa conversation-history/state, tools, retrieval, model, API, na database integrations.<sup>[[2]](#references)</sup>
 
 ### [**LitGPT**](https://github.com/Lightning-AI/litgpt)
 
-LitGPT ni project iliyotengenezwa na Lightning AI inayotumia Lightning framework kuwezesha training, fine-tuning, na deployment ya models zinazotegemea GPT. Inaunganishwa kwa urahisi na tools nyingine za Lightning AI, ikitoa workflows zilizoboreshwa za kushughulikia language models kubwa zenye performance na scalability iliyoboreshwa.
+LitGPT hutoa implementations zinazosomika na workflows za command-line kwa ajili ya pretraining, fine-tuning, evaluation, na deployment ya language models zinazotumika.<sup>[[3]](#references)</sup>
 
 ### [**LitServe**](https://github.com/Lightning-AI/LitServe)
 
 **Maelezo:**\
-LitServe ni deployment tool kutoka Lightning AI iliyoundwa kwa ajili ya ku-deploy AI models kwa haraka na kwa ufanisi. Inarahisisha kuunganisha LLMs katika applications za real-time kwa kutoa serving capabilities zenye scalability na optimization.
+LitServe ni framework ya model-serving kutoka Lightning AI kwa ajili ya kufichua inference APIs ikiwa na batching, streaming, acceleration, na scaling hooks.<sup>[[4]](#references)</sup>
 
 ### [**Axolotl**](https://github.com/axolotl-ai-cloud/axolotl)
 
-Axolotl ni platform ya cloud iliyoundwa kurahisisha deployment, scaling, na management ya AI models, ikiwa ni pamoja na LLMs. Inatoa features kama automated scaling, monitoring, na integration na cloud services mbalimbali, hivyo kurahisisha ku-deploy models katika production environments bila kusimamia infrastructure kwa kiwango kikubwa.
+Axolotl ni framework ya open-source ya post-training na fine-tuning inayoendeshwa na YAML configuration. Inatumia techniques kama full fine-tuning, LoRA/QLoRA, preference optimization, na multi-GPU training; yenyewe si cloud deployment platform.<sup>[[5]](#references)</sup>
 
 ## Jaribu models online
 
 ### [**Hugging Face**](https://huggingface.co/)
 
-**Hugging Face** ni platform na community inayoongoza kwa machine learning, inayojulikana hasa kwa kazi yake katika natural language processing (NLP). Inatoa tools, libraries, na resources zinazorahisisha ku-develop, kushiriki, na ku-deploy machine learning models.\
-Inatoa sections kadhaa kama:
+**Hugging Face** ni platform na community inayoongoza katika machine learning, inayojulikana hasa kwa kazi yake katika natural language processing (NLP). Inatoa tools, libraries, na resources zinazorahisisha kuendeleza, kushiriki, na ku-deploy machine learning models.\
+Hub inatoa sehemu kadhaa muhimu:<sup>[[6]](#references)</sup>
 
-* **Models**: Repository kubwa ya **machine learning models zilizo-trainiwa awali**, ambapo users wanaweza ku-browse, ku-download, na ku-integrate models kwa tasks mbalimbali kama text generation, translation, image recognition, na mengine.
-* **Datasets:** **Mkusanyiko mpana wa datasets** unaotumika kwa training na evaluation ya models. Unarahisisha access ya data sources mbalimbali, ukiwawezesha users kutafuta na kutumia data kwa machine learning projects zao maalum.
-* **Spaces:** Platform ya kuhifadhi na kushiriki **interactive machine learning applications** na demos. Inawawezesha developers **kuonyesha** models zao zikifanya kazi, kuunda interfaces zinazotumiwa kwa urahisi, na kushirikiana na wengine kwa kushiriki live demos.
+* **Models**: Repository kubwa ya **machine learning models zilizofunzwa awali**, ambapo watumiaji wanaweza kuvinjari, kupakua, na kuunganisha models kwa kazi mbalimbali kama text generation, translation, image recognition, na nyingine.
+* **Datasets:** **Mkusanyiko mpana wa datasets** unaotumika kwa training na evaluation ya models. Unawezesha ufikiaji rahisi wa vyanzo mbalimbali vya data, na kuwawezesha watumiaji kupata na kutumia data kwa machine learning projects zao mahususi.
+* **Spaces:** Platform ya kuhost na kushiriki **interactive machine learning applications** na demos. Inawawezesha developers **kuonyesha** models zao zikifanya kazi, kuunda interfaces zinazotumiwa kwa urahisi, na kushirikiana na wengine kwa kushiriki live demos.
 
 ## [**TensorFlow Hub**](https://www.tensorflow.org/hub) **&** [**Kaggle**](https://www.kaggle.com/)
 
-**TensorFlow Hub** ni repository pana ya reusable machine learning modules iliyotengenezwa na Google. Inalenga kurahisisha sharing na deployment ya machine learning models, hasa zile zilizojengwa kwa TensorFlow.
+**TensorFlow Hub** ni repository na library ya reusable trained model components, hasa modules zinazotumiwa kupitia TensorFlow/Keras. **Kaggle** kwa upande wake hutoa notebooks, datasets, competitions, na models.<sup>[[7]](#references)[[9]](#references)</sup>
 
-* **Modules:** Mkusanyiko mkubwa wa models zilizo-trainiwa awali na model components ambapo users wanaweza ku-browse, ku-download, na ku-integrate modules kwa tasks kama image classification, text embedding, na mengine.
-* **Tutorials:** Miongozo ya hatua kwa hatua na mifano inayowasaidia users kuelewa jinsi ya ku-implement na ku-fine-tune models kwa kutumia TensorFlow Hub.
-* **Documentation:** Miongozo ya kina na API references zinazowasaidia developers kutumia resources za repository kwa ufanisi.
+* **Modules:** Mkusanyiko mkubwa wa pre-trained models na model components, ambapo watumiaji wanaweza kuvinjari, kupakua, na kuunganisha modules kwa kazi kama image classification, text embedding, na nyingine.
+* **Tutorials:** Miongozo na mifano ya hatua kwa hatua inayowasaidia watumiaji kuimplement na kufanya fine-tune ya models kwa kutumia TensorFlow Hub.
+* **Documentation:** Miongozo kamili na marejeo ya API yanayowasaidia developers kutumia resources za repository kwa ufanisi.
 
 ## [**Replicate**](https://replicate.com/home)
 
-**Replicate** ni platform inayowawezesha developers kuendesha machine learning models kwenye cloud kupitia API rahisi. Inalenga kufanya ML models zipatikane na ziweze ku-deploy kwa urahisi bila kuhitaji setup kubwa ya infrastructure.
+**Replicate** ni platform iliyohostiwa kwa kuendesha packaged machine-learning models kupitia web interface au API.<sup>[[8]](#references)</sup>
 
-* **Models:** Repository ya machine learning models zilizochangiwa na community, ambapo users wanaweza ku-browse, kujaribu, na ku-integrate models katika applications zao kwa juhudi ndogo.
-* **API Access:** APIs rahisi za kuendesha models zinazowawezesha developers ku-deploy na ku-scale models kwa urahisi ndani ya applications zao.
+* **Models:** Repository ya machine learning models zilizochangiwa na community, ambapo watumiaji wanaweza kuvinjari, kujaribu, na kuunganisha models katika applications zao kwa juhudi ndogo.
+* **API access:** APIs za kuita models kutoka kwenye applications bila kuendesha underlying inference infrastructure.
 
+## References
+
+- [1] [Hugging Face Transformers](https://github.com/huggingface/transformers)
+- [2] [LangChain](https://github.com/langchain-ai/langchain)
+- [3] [LitGPT](https://github.com/Lightning-AI/litgpt)
+- [4] [LitServe](https://github.com/Lightning-AI/LitServe)
+- [5] [Axolotl](https://github.com/axolotl-ai-cloud/axolotl)
+- [6] [Hugging Face Hub documentation](https://huggingface.co/docs/hub/index)
+- [7] [TensorFlow Hub](https://www.tensorflow.org/hub)
+- [8] [Replicate documentation](https://replicate.com/docs)
+- [9] [Kaggle documentation](https://www.kaggle.com/docs)
 {{#include ../banners/hacktricks-training.md}}

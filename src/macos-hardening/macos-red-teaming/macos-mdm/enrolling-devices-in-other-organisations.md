@@ -1,57 +1,56 @@
-# Kusajili Devices katika Organisations Nyingine
+# Kusajili Vifaa katika Mashirika Mengine
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Utangulizi
 
-Kama [**ilivyotajwa awali**](#what-is-mdm-mobile-device-management)**,** ili kujaribu kusajili device katika organisation, **Serial Number ya organisation hiyo pekee ndiyo inahitajika**. Baada ya device kusajiliwa, organisations kadhaa zitasakinisha data nyeti kwenye device mpya: certificates, applications, WiFi passwords, VPN configurations [na kadhalika](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
-Kwa hivyo, hii inaweza kuwa entrypoint hatari kwa attackers ikiwa mchakato wa usajili haujalindwa ipasavyo.
+Apple Automated Device Enrollment (zamani ikiitwa DEP) huanza kwa kutambua kifaa kilichokabidhiwa shirika. Utafiti wa mwaka 2018 uliofupishwa hapa ulionyesha kwamba kujua serial number ya kifaa kilichokabidhiwa kulitosha kupata baadhi ya enrollment profiles za mashirika, kwa sababu mashirika hayo hayakuhitaji authentication ya ziada ya kutosha. Hili ni jambo la kihistoria, si madai kwamba kila MDM ya sasa inaweza kujiunga kwa kutumia serial number pekee. Profiles zinaweza kuwa na certificates, applications, siri za Wi-Fi, mipangilio ya VPN, na configuration nyingine nyeti.<sup>[[1]](#references)[[2]](#references)</sup>
 
-**Yafuatayo ni muhtasari wa utafiti [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe). Isome kwa maelezo zaidi ya kiufundi!**<sup>[[1]](#references)</sup>
+**Yafuatayo ni muhtasari wa utafiti [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe). Iangalie kwa maelezo zaidi ya kiufundi!**<sup>[[1]](#references)</sup>
 
-## Muhtasari wa DEP na MDM Binary Analysis
+## Muhtasari wa DEP na Binary Analysis ya MDM
 
-Utafiti huu unachunguza binaries zinazohusishwa na Device Enrollment Program (DEP) na Mobile Device Management (MDM) kwenye macOS. Vipengele muhimu ni:
+Utafiti ulichanganua binaries zinazohusiana na DEP na MDM katika matoleo ya macOS yaliyokuwa ya sasa wakati huo. Majina na majukumu ya components yanaweza kubadilika kati ya releases:
 
-- **`mdmclient`**: Huwasiliana na MDM servers na kuanzisha DEP check-ins kwenye matoleo ya macOS kabla ya 10.13.4.
-- **`profiles`**: Husimamia Configuration Profiles, na kuanzisha DEP check-ins kwenye matoleo ya macOS ya 10.13.4 na baadaye.
-- **`cloudconfigurationd`**: Husimamia mawasiliano ya DEP API na kupata Device Enrollment profiles.
+- **`mdmclient`**: Huwasiliana na MDM servers na kuanzisha DEP check-ins katika matoleo ya macOS ya kabla ya 10.13.4.
+- **`profiles`**: Hudhibiti Configuration Profiles, na huanzisha DEP check-ins katika matoleo ya macOS ya 10.13.4 na baadaye.
+- **`cloudconfigurationd`**: Hudhibiti mawasiliano ya DEP API na hupata Device Enrollment profiles.
 
 DEP check-ins hutumia functions za `CPFetchActivationRecord` na `CPGetActivationRecord` kutoka private Configuration Profiles framework ili kupata Activation Record, huku `CPFetchActivationRecord` ikiratibu mawasiliano na `cloudconfigurationd` kupitia XPC.<sup>[[1]](#references)</sup>
 
-## Tesla Protocol na Absinthe Scheme Reverse Engineering
+## Reverse Engineering ya Tesla Protocol na Absinthe Scheme
 
-DEP check-in inahusisha `cloudconfigurationd` kutuma JSON payload iliyosimbwa na kusainiwa kwenda _iprofiles.apple.com/macProfile_. Payload hiyo inajumuisha serial number ya device na action ya "RequestProfileConfiguration". Encryption scheme inayotumika huitwa "Absinthe" internally. Kuichanganua scheme hii ni mchakato changamano unaohusisha hatua nyingi, hali iliyosababisha kuchunguza mbinu mbadala za kuingiza serial numbers kiholela katika ombi la Activation Record.<sup>[[1]](#references)</sup>
+DEP check-in huhusisha `cloudconfigurationd` kutuma JSON payload iliyosimbwa kwa encryption na kusainiwa kwenye _iprofiles.apple.com/macProfile_. Payload hiyo inajumuisha serial number ya kifaa na action ya "RequestProfileConfiguration". Encryption scheme inayotumika huitwa "Absinthe" internally. Kutengua scheme hii ni jambo gumu na linahusisha hatua nyingi, jambo lililopelekea kuchunguza mbinu mbadala za kuingiza serial numbers za kiholela katika ombi la Activation Record.<sup>[[1]](#references)</sup>
 
 ## Proxying DEP Requests
 
-Majaribio ya kuingilia na kurekebisha DEP requests kwenda _iprofiles.apple.com_ kwa kutumia tools kama Charles Proxy yalizuiwa na payload encryption pamoja na hatua za usalama za SSL/TLS. Hata hivyo, kuwezesha configuration ya `MCCloudConfigAcceptAnyHTTPSCertificate` huruhusu kupita server certificate validation, ingawa hali ya payload iliyosimbwa bado inazuia kurekebisha serial number bila decryption key.<sup>[[1]](#references)</sup>
+Majaribio ya kuzuia na kurekebisha DEP requests zinazoelekezwa _iprofiles.apple.com_ kwa kutumia tools kama Charles Proxy yalikwamishwa na payload encryption pamoja na hatua za usalama za SSL/TLS. Hata hivyo, kuwezesha configuration ya `MCCloudConfigAcceptAnyHTTPSCertificate` huruhusu kupita server certificate validation, ingawa hali ya payload kuwa encrypted bado huzuia kurekebisha serial number bila decryption key.<sup>[[1]](#references)</sup>
 
 ## Instrumenting System Binaries Zinazoingiliana na DEP
 
-Instrumenting system binaries kama `cloudconfigurationd` kunahitaji kuzima System Integrity Protection (SIP) kwenye macOS. SIP ikiwa imezimwa, tools kama LLDB zinaweza kutumika kujiunga na system processes na huenda kurekebisha serial number inayotumika katika DEP API interactions. Mbinu hii inapendelewa kwa sababu huepuka ugumu wa entitlements na code signing.<sup>[[1]](#references)</sup>
+Kuinstrument system binaries kama `cloudconfigurationd` kunahitaji kuzima System Integrity Protection (SIP) kwenye macOS. SIP ikiwa imezimwa, tools kama LLDB zinaweza kutumika kuambatanishwa na system processes na huenda zikarekebisha serial number inayotumika katika DEP API interactions. Mbinu hii inapendelewa kwa sababu huepuka ugumu wa entitlements na code signing.<sup>[[1]](#references)</sup>
 
-**Kudhulumu Binary Instrumentation:**
-Kurekebisha DEP request payload kabla ya JSON serialization katika `cloudconfigurationd` kulithibitisha kuwa na ufanisi. Mchakato ulihusisha:
+**Exploiting Binary Instrumentation:**
+Kurekebisha DEP request payload kabla ya JSON serialization katika `cloudconfigurationd` kulionekana kuwa na ufanisi. Mchakato ulihusisha:
 
-1. Ku-attach LLDB kwenye `cloudconfigurationd`.
-2. Kupata sehemu ambayo system serial number inachukuliwa.
-3. Kuingiza serial number kiholela kwenye memory kabla payload haijasimbwa na kutumwa.
+1. Kuambatanisha LLDB kwenye `cloudconfigurationd`.
+2. Kubaini sehemu ambayo system serial number inapatikana.
+3. Kuingiza serial number ya kiholela kwenye memory kabla payload haija-encryptiwa na kutumwa.
 
-Mbinu hii iliruhusu kupata DEP profiles kamili kwa serial numbers kiholela, ikionyesha uwezekano wa vulnerability.<sup>[[1]](#references)</sup>
+Mbinu hii iliwawezesha watafiti kupata DEP profiles za serial numbers zilizotolewa na kukabidhiwa. Haikufanya serial number ya kiholela ambayo haijakabidhiwa iwe halali.<sup>[[1]](#references)</sup>
 
 ### Ku-automate Instrumentation kwa Python
 
-Mchakato wa exploitation uli-automate kwa kutumia Python pamoja na LLDB API, na kufanya iwezekane kuingiza serial numbers kiholela programmatically na kupata DEP profiles zinazohusiana.<sup>[[1]](#references)</sup>
+Mchakato wa exploitation uli-automatekwa kwa kutumia Python pamoja na LLDB API, na kufanya iwezekane kuingiza serial numbers za kiholela programmatically na kupata DEP profiles zinazolingana.<sup>[[1]](#references)</sup>
 
-### Potential Impacts za DEP na MDM Vulnerabilities
+### Athari Zinazowezekana za DEP na MDM Vulnerabilities
 
 Utafiti ulionyesha masuala makubwa ya usalama:
 
-1. **Information Disclosure**: Kwa kutoa serial number iliyosajiliwa kwenye DEP, taarifa nyeti za organisation zilizomo kwenye DEP profile zinaweza kupatikana.<sup>[[1]](#references)</sup>
+1. **Information Disclosure**: Kwa kutoa serial number iliyosajiliwa katika DEP, taarifa nyeti za shirika zilizomo kwenye DEP profile zinaweza kupatikana.<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [Duo Labs — MDM Me Maybe: Device Enrollment Program Security](https://duo.com/labs/research/mdm-me-maybe)
-
+- [1] [Duo Labs — Usalama wa MDM Me Maybe: Device Enrollment Program](https://duo.com/labs/research/mdm-me-maybe)
+- [2] [Apple Platform Deployment — Automated Device Enrollment](https://support.apple.com/guide/deployment/automated-device-enrollment-and-mdm-dep73069dd57/web)
 {{#include ../../../banners/hacktricks-training.md}}
