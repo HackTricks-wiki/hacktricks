@@ -1,8 +1,10 @@
-# Disk İmajı Edinme ve Bağlama
+# Image Edinme ve Bağlama
+
+{{#include ../../banners/hacktricks-training.md}}
 
 ## Edinme
 
-> Her zaman **salt okunur** olarak edinin ve **kopyalama sırasında hash hesaplayın**. Orijinal cihazı **yazmaya karşı engelli** tutun ve yalnızca doğrulanmış kopyalar üzerinde çalışın.
+> Her zaman **salt okunur** olarak edinin ve **kopyalarken hash hesaplayın**. Orijinal cihazı **yazmaya karşı kilitli** tutun ve yalnızca doğrulanmış kopyalar üzerinde çalışın.
 
 ### DD
 ```bash
@@ -19,7 +21,7 @@ sha256sum disk.img > disk.img.sha256
 sudo dc3dd if=/dev/sdc of=/forensics/pc.img hash=sha256,sha1 hashlog=/forensics/pc.hashes log=/forensics/pc.log bs=1M
 ```
 ### Guymager
-**raw (dd)**, **EWF (E01/EWFX)** ve **AFF4** çıktısını paralel doğrulamayla destekleyen grafiksel, çok iş parçacıklı imaj alma aracı. Çoğu Linux deposunda kullanılabilir (`apt install guymager`).
+**raw (dd)**, **EWF (E01/EWFX)** ve paralel doğrulamayla **AFF4** çıktısını destekleyen grafiksel, çok iş parçacıklı imager. Çoğu Linux reposunda kullanılabilir (`apt install guymager`).
 ```bash
 # Start in GUI mode
 sudo guymager
@@ -28,7 +30,7 @@ sudo guymager --simulate --input /dev/sdb --format EWF --hash sha256 --output /e
 ```
 ### AFF4 (Advanced Forensics Format 4)
 
-Bradley L. Schatz ve Michael I. Cohen tarafından kaleme alınan AFF4 v1.0 specification, sanallaştırılmış depolama, rastgele metadata, genişletilebilir compression ve hashing ile yüksek throughput sağlayan bir forensic container tanımlar.<sup>[[1]](#references)</sup>
+Bradley L. Schatz ve Michael I. Cohen tarafından hazırlanan AFF4 v1.0 specification, sanallaştırılmış depolama, rastgele metadata, genişletilebilir compression ve hashing ile yüksek throughput sağlayan bir forensic container tanımlar.<sup>[[1]](#references)</sup>
 ```bash
 # Acquire to AFF4 using the reference tool
 pipx install aff4imager
@@ -48,23 +50,23 @@ ftkimager /dev/sdb evidence --e01 --case-number 1 --evidence-number 1 \
 ```bash
 sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examiner --format encase6 --compression best
 ```
-### Cloud Disk Görüntüleme
+### Cloud Disklerinin İmajını Alma
 
 *AWS* – instance'ı kapatmadan bir **forensic snapshot** oluşturun:
 ```bash
 aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web-server 2025-07-22"
 # Copy the snapshot to S3 and download with aws cli / aws snowball
 ```
-*Azure* – `az snapshot create` kullanın ve bir SAS URL'ye aktarın.
+*Azure* – `az snapshot create` kullanın ve bir SAS URL'sine export edin.
 
 
-## Bağlama
+## Mount
 
 ### Doğru yaklaşımı seçme
 
-1. Orijinal bölümleme tablosunu (MBR/GPT) istediğinizde **tüm diski** bağlayın.
-2. Yalnızca bir volume gerektiğinde **tek bir bölüm dosyasını** bağlayın.
-3. Image eklerini salt okunur tutun (örneğin, qemu-nbd'nin `--read-only` seçeneğiyle).<sup>[[2]](#references)</sup> Filesystem'leri salt okunur olarak bağlayın (`-o ro`).<sup>[[3]](#references)</sup> **Kopyalar** üzerinde çalışın.
+1. Orijinal partition table'ı (MBR/GPT) istediğinizde **whole disk**'i mount edin.
+2. Yalnızca bir volume'a ihtiyacınız olduğunda **single partition file**'ı mount edin.
+3. Image attachment'larını read-only tutun (örneğin, qemu-nbd'nin `--read-only` seçeneğiyle).<sup>[[2]](#references)</sup> Filesystem'leri read-only olarak (`-o ro`) mount edin.<sup>[[3]](#references)</sup> **Copies** üzerinde çalışın.
 
 ### Raw images (dd, AFF4-extracted)
 ```bash
@@ -81,7 +83,7 @@ lsblk /dev/nbd0 -o NAME,SIZE,TYPE,FSTYPE,LABEL,UUID
 # Mount a partition (e.g. /dev/nbd0p2)
 sudo mount -o ro,uid=$(id -u) /dev/nbd0p2 /mnt
 ```
-Çevrilecek metni paylaşın.
+Tamamlandığında ayır:
 ```bash
 sudo umount /mnt && sudo qemu-nbd --disconnect /dev/nbd0
 ```
@@ -97,7 +99,7 @@ sudo qemu-nbd --connect=/dev/nbd1 --read-only /mnt/ewf/ewf1
 # 3. Mount the desired partition (XFS example; use the filesystem-specific option)
 sudo mount -o ro,norecovery /dev/nbd1p1 /mnt/evidence
 ```
-Dosya sistemi özel no-replay mount'ları için ext3/ext4 `noload` kullanırken XFS `norecovery` kullanır ve salt okunur mod gerektirir.<sup>[[3]](#references)[[4]](#references)</sup>
+Dosya sistemine özgü no-replay mount'ları için ext3/ext4 `noload` kullanırken XFS `norecovery` kullanır ve salt okunur mod gerektirir.<sup>[[3]](#references)[[4]](#references)</sup>
 
 Alternatif olarak **xmount** ile anında dönüştürün:
 ```bash
@@ -106,7 +108,7 @@ mount -o ro /tmp/raw_mount/image.dd /mnt
 ```
 ### LVM / BitLocker / VeraCrypt birimleri
 
-Block device'i (loop veya nbd) bağladıktan sonra:
+Blok aygıtını (loop veya nbd) bağladıktan sonra:
 ```bash
 # LVM
 sudo vgchange -ay               # activate logical volumes
@@ -123,19 +125,19 @@ sudo mount -o ro /mnt/bitlocker/dislocker-file /mnt/evidence
 sudo kpartx -av disk.img  # creates /dev/mapper/loop0p1, loop0p2 …
 mount -o ro /dev/mapper/loop0p2 /mnt
 ```
-### Yaygın mount hataları ve düzeltmeleri
+### Yaygın mount hataları ve çözümleri
 
-Dirty bir ext3/ext4 filesystem için journal replay işleminin engellenmesi gerektiğinde `ro,noload` kullanın.<sup>[[3]](#references)</sup>
+Dirty ext3/ext4 filesystem için journal replay işleminin engellenmesi gerektiğinde `ro,noload` kullanın.<sup>[[3]](#references)</sup>
 
-| Hata | Yaygın Neden | Düzeltme |
+| Hata | Tipik Neden | Çözüm |
 |-------|---------------|-----|
 | `cannot mount /dev/loop0 read-only` | Journal kullanan FS (ext4) düzgün şekilde unmount edilmemiş | `-o ro,noload` kullanın |
-| `bad superblock …` | Yanlış offset veya hasarlı FS | offset'i hesaplayın (`sector*size`) veya bir kopya üzerinde `fsck -n` çalıştırın |
-| `mount: unknown filesystem type 'LVM2_member'` | LVM container | `vgchange -ay` ile volume group'u etkinleştirin |
+| `bad superblock …` | Yanlış offset veya hasarlı FS | offset'i (`sector*size`) hesaplayın veya bir kopya üzerinde `fsck -n` çalıştırın |
+| `mount: unknown filesystem type 'LVM2_member'` | LVM container'ı | `vgchange -ay` ile volume group'u etkinleştirin |
 
 ### Temizleme
 
-Daha sonraki çalışmaları bozabilecek dangling mapping'ler bırakmamak için **umount** işlemini gerçekleştirmeyi ve loop/nbd device'larını **disconnect** etmeyi unutmayın:
+Daha sonraki çalışmaları bozabilecek dangling mapping'ler bırakmamak için loop/nbd cihazlarına **umount** uygulamayı ve bunların bağlantısını kesmeyi unutmayın:
 ```bash
 umount -Rl /mnt/evidence
 kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0

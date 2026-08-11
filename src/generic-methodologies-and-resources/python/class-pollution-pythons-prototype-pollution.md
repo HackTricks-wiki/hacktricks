@@ -1,8 +1,10 @@
 # Class Pollution (Python's Prototype Pollution)
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Temel Örnek
 
-Bir instance'ın class reference'ı üzerinden `__qualname__` değerinin değiştirilmesi, class'ı ve onun değiştirilebilir base class'larını günceller.<sup>[[1]](#references)</sup>
+Bir instance'ın class referansı üzerinden `__qualname__` değerinin değiştirilmesi, class'ı ve onun mutable base class'larını günceller.<sup>[[1]](#references)</sup>
 ```python
 class Company: pass
 class Developer(Company): pass
@@ -28,7 +30,7 @@ print(c) #<__main__.Polluted_Company object at 0x1043a72b0>
 ```
 ## Temel Zafiyet Örneği
 
-Özyinelemeli birleştirme, saldırgan tarafından kontrol edilen mapping anahtarlarını kabul edebilir ve item veya attribute erişimi üzerinden iç içe değerler yazabilir.<sup>[[1]](#references)</sup>
+Özyinelemeli bir merge, saldırgan tarafından kontrol edilen eşleme anahtarlarını kabul edebilir ve iç içe değerleri öğe veya öznitelik erişimi aracılığıyla yazabilir.<sup>[[1]](#references)</sup>
 ```python
 # Initial state
 class Employee: pass
@@ -65,9 +67,9 @@ print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 
 <details>
 
-<summary>RCE (subprocess) için sınıf özelliği varsayılan değeri oluşturma</summary>
+<summary>RCE için class property varsayılan değeri oluşturma (subprocess)</summary>
 
-Paylaşılan bir base class, kardeş sınıftaki bir command gadget tarafından kullanılan varsayılan bir attribute sağlayabilir.<sup>[[1]](#references)</sup>
+Paylaşılan bir base class, sibling-class command gadget tarafından kullanılan varsayılan bir attribute sağlayabilir.<sup>[[1]](#references)</sup>
 ```python
 from os import popen
 class Employee: pass # Creating an empty class
@@ -120,7 +122,7 @@ print(system_admin_emp.execute_command())
 
 <summary><code>globals</code> aracılığıyla diğer sınıfları ve global değişkenleri kirletme</summary>
 
-Bir fonksiyonun `__globals__` eşlemesi, o modülde tanımlanan bir yöntemden erişilebilen modül ad alanını açığa çıkarır.<sup>[[1]](#references)[[4]](#references)</sup>
+Bir fonksiyonun `__globals__` mapping'i, o modülde tanımlanan bir method'dan erişilebilen modül namespace'ini açığa çıkarır.<sup>[[1]](#references)[[4]](#references)</sup>
 ```python
 def merge(src, dst):
 # Recursive merge function
@@ -152,9 +154,9 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <details>
 
-<summary>Arbitrary subprocess execution</summary>
+<summary>Rastgele subprocess çalıştırma</summary>
 
-Windows'ta `Popen(..., shell=True)`, varsayılan shell olarak `COMSPEC` environment variable'ını kullanır; bu nedenle bu gadget, environment destekli command redirection'ı gösterir.<sup>[[1]](#references)[[5]](#references)</sup>
+Windows'ta `Popen(..., shell=True)`, varsayılan shell olarak `COMSPEC` environment variable'ını kullanır; bu nedenle bu gadget, environment destekli komut yönlendirmesini gösterir.<sup>[[1]](#references)[[5]](#references)</sup>
 ```python
 import subprocess, json
 
@@ -188,7 +190,7 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <summary><strong><code>__kwdefaults__</code></strong> Üzerine Yazma</summary>
 
-Python, `__kwdefaults__` değerini, bir işlev tanımında `*` veya `*args` sonrasında yer alan yalnızca anahtar sözcük parametrelerinin varsayılan değerlerinin eşlemesi olarak belgeler.<sup>[[4]](#references)</sup> Aşağıdaki gadget, kirletilmiş bir işlev yolu üzerinden bu eşlemeyi üzerine yazar.<sup>[[1]](#references)</sup>
+Python, `__kwdefaults__` değerini, bir function tanımında `*` veya `*args` sonrasında yer alan yalnızca keyword parametrelerinin varsayılan değerlerinin mapping'i olarak belgeler.<sup>[[4]](#references)</sup> Aşağıdaki gadget, polluted bir function path üzerinden bu mapping'i üzerine yazar.<sup>[[1]](#references)</sup>
 ```python
 from os import system
 import json
@@ -229,24 +231,24 @@ execute() #> Executing echo Polluted
 
 <details>
 
-<summary>Dosyalar arasında Flask secret'ını geçersiz kılma</summary>
+<summary>Dosyalar arasında Flask secret değerinin üzerine yazma</summary>
 
-Polluted object'ın class'ı uygulamanın entry-point module'ünden farklı bir module'de bulunuyorsa, method'larının `__globals__` değeri başlangıçta class module'ünün namespace'ini açığa çıkarır. Loader ve `sys.modules.__main__` üzerinden yapılan bir traversal, daha sonra entry-point module'üne ve Flask `app` object'ine ulaşabilir.<sup>[[1]](#references)[[2]](#references)</sup>
+Kirletilen nesnenin sınıfı, uygulamanın entry-point modülünden farklı bir modülde bulunuyorsa yöntemlerinin `__globals__` alanı başlangıçta sınıf modülünün namespace'ini açığa çıkarır. Ardından loader ve `sys.modules.__main__` üzerinden yapılan bir traversal, entry-point modülüne ve Flask `app` nesnesine ulaşabilir.<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-Flask, session cookie'yi imzalamak için `app.secret_key` kullanır; bu anahtarı bilmek, saldırganın geçerli session verileri oluşturmasına olanak tanır.<sup>[[6]](#references)</sup>
+Flask, session cookie'yi imzalamak için `app.secret_key` kullanır; bu key'i bilmek, bir saldırganın geçerli session verileri oluşturmasına olanak tanır.<sup>[[6]](#references)</sup>
 
 Orijinal writeup, `app.secret_key` değerine ulaşmak için aşağıdaki yolu gösterir; CTFtime da writeup'ın bir kopyasını barındırır.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-Anahtarın değiştirilmesi, yerine geçen session cookie'lerin imzalanmasına olanak tanıyabilir ve privilege escalation sağlayabilir; bkz. [Flask session tooling page](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).<sup>[[6]](#references)</sup>
+Changing the key, replacement session cookies imzalamaya olanak sağlayabilir ve privilege escalation sağlayabilir; bkz. [Flask session tooling sayfası](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).<sup>[[6]](#references)</sup>
 
 </details>
 
-Daha fazla read-only gadget için aşağıdaki sayfaya da bakın:
+Salt okunur gadget'lar hakkında daha fazla bilgi için aşağıdaki sayfaya da bakın:
 
 
 {{#ref}}
@@ -256,9 +258,9 @@ python-internal-read-gadgets.md
 ## References
 
 - [1] [Python'da Prototype Pollution](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
-- [2] [idekCTF 2022 task manager writeup (original)](https://kdxcxs.github.io/posts/wp/idekctf-2022-task-manager-wp/)
-- [3] [CTFtime - idekCTF 2022: task manager writeup](https://ctftime.org/writeup/36082)
+- [2] [idekCTF 2022 görev yöneticisi writeup (orijinal)](https://kdxcxs.github.io/posts/wp/idekctf-2022-task-manager-wp/)
+- [3] [CTFtime - idekCTF 2022: görev yöneticisi writeup](https://ctftime.org/writeup/36082)
 - [4] [inspect — Canlı nesneleri inceleme](https://docs.python.org/3/library/inspect.html)
-- [5] [subprocess — Subprocess yönetimi](https://docs.python.org/3/library/subprocess.html)
-- [6] [Quickstart — Flask Documentation](https://flask.palletsprojects.com/en/stable/quickstart/)
+- [5] [subprocess — Alt süreç yönetimi](https://docs.python.org/3/library/subprocess.html)
+- [6] [Hızlı başlangıç — Flask Belgeleri](https://flask.palletsprojects.com/en/stable/quickstart/)
 {{#include ../../banners/hacktricks-training.md}}

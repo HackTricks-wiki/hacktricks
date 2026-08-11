@@ -1,8 +1,10 @@
 # Web Requests
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Python Requests
 
-Bu örneklerde Requests'in belgelenmiş request argümanları, response özellikleri, multipart file tuple'ları ve session'ları kullanılır.<sup>[[1]](#references)</sup> `verify=False` örnekleri TLS sertifikası doğrulamasını devre dışı bırakır ve kontrollü testlerle sınırlı tutulmalıdır.<sup>[[1]](#references)</sup>
+Bu örneklerde Requests'in belgelenmiş request argümanları, response özellikleri, multipart file tuple'ları ve session'ları kullanılır.<sup>[[1]](#references)</sup> `verify=False` örnekleri TLS sertifika doğrulamasını devre dışı bırakır ve kontrollü testlerle sınırlandırılmalıdır.<sup>[[1]](#references)</sup>
 ```python
 import random
 import re
@@ -74,9 +76,9 @@ return resp.json()
 def get_random_string(guid, path):
 return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
-## RCE'yi exploit etmek için Python cmd
+## RCE exploit etmek için Python cmd
 
-Komut döngüsü Python'un `Cmd` sınıfını alt sınıflandırır; `default` metodu tanınmayan komut öneklerini işler, `cmdloop` girdi satırlarını yönlendirir ve `re.DOTALL`, çıkarma deseninin yeni satırlara yayılmasını sağlar.<sup>[[2]](#references)[[3]](#references)</sup>
+Komut döngüsü Python'un `Cmd` sınıfından türetilir; `default` metodu tanınmayan komut öneklerini işler, `cmdloop` girdi satırlarını dağıtır ve `re.DOTALL` çıkarma deseninin satır sonlarını kapsamasını sağlar.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 import requests
 import re
@@ -106,6 +108,6 @@ term.cmdloop()
 ## References
 
 - [1] [Requests Geliştirici Arayüzü](https://requests.readthedocs.io/en/stable/api/)
-- [2] [Python `cmd` — Satır yönelimli komut yorumlayıcıları için destek](https://docs.python.org/3/library/cmd.html)
+- [2] [Python `cmd` — Satır odaklı komut yorumlayıcıları için destek](https://docs.python.org/3/library/cmd.html)
 - [3] [Python `re` — Düzenli ifade işlemleri](https://docs.python.org/3/library/re.html)
 {{#include ../../banners/hacktricks-training.md}}

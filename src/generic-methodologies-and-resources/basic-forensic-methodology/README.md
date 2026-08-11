@@ -1,5 +1,7 @@
 # Temel Adli Bilişim Metodolojisi
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## İmaj Oluşturma ve Bağlama
 
 
@@ -9,7 +11,7 @@
 
 ## Malware Analizi
 
-Bu, **imaja sahip olduktan sonra gerçekleştirilecek ilk adım olmak zorunda değildir**. Ancak bir dosyanız, file-system imajınız, memory imajınız, pcap'iniz varsa bu malware analysis tekniklerini bağımsız olarak kullanabilirsiniz... Bu nedenle **bu işlemleri aklınızda tutmanız** faydalı olacaktır:
+**İmajı aldıktan** sonra gerçekleştirilecek ilk adımın bu olması **gerekmez**. Ancak bir dosyanız, dosya sistemi imajınız, bellek imajınız, pcap'iniz varsa bu malware analizi tekniklerini bağımsız olarak kullanabilirsiniz. Bu nedenle **bu işlemleri aklınızda bulundurmanız** faydalıdır:
 
 
 {{#ref}}
@@ -18,14 +20,14 @@ malware-analysis.md
 
 ## İmaj İnceleme
 
-Size bir cihazın **forensic imajı** verildiyse **partition'ları ve kullanılan file-system'ı analiz etmeye** ve potansiyel olarak **ilginç dosyaları** (silinmiş olanlar dahil) **kurtarmaya** başlayabilirsiniz. Nasıl yapılacağını burada öğrenin:
+Bir cihazın **adli imajı** size verildiyse, **bölümleri ve kullanılan dosya sistemini analiz etmeye** ve potansiyel olarak **ilginç dosyaları** (silinmiş olanlar dahil) **kurtarmaya** başlayabilirsiniz. Nasıl yapılacağını burada öğrenin:
 
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-Kullanılan OS'lere ve hatta platforma bağlı olarak farklı ilginç artifact'ler aranmalıdır:
+Kullanılan işletim sistemlerine ve hatta platforma bağlı olarak farklı ilginç artifact'ler aranmalıdır:
 
 
 {{#ref}}
@@ -47,31 +49,31 @@ docker-forensics.md
 ios-backup-forensics.md
 {{#endref}}
 
-## Belirli dosya türleri ve Software'lerin derinlemesine incelenmesi
+## Belirli Dosya Türleri ve Yazılımların Derinlemesine İncelenmesi
 
-Çok **şüpheli** bir **dosyanız** varsa, **dosya türüne ve onu oluşturan software'e** bağlı olarak bazı **trick'ler** faydalı olabilir.\
-Bazı ilginç trick'leri öğrenmek için aşağıdaki sayfayı okuyun:
+Elinizde çok **şüpheli** bir **dosya** varsa, onu oluşturan **dosya türüne ve yazılıma bağlı olarak** çeşitli **hileler** faydalı olabilir.\
+Bazı ilginç hileleri öğrenmek için aşağıdaki sayfayı okuyun:
 
 
 {{#ref}}
 specific-software-file-type-tricks/
 {{#endref}}
 
-Özellikle şu sayfadan bahsetmek istiyorum:
+Şu sayfaya özellikle değinmek istiyorum:
 
 
 {{#ref}}
 specific-software-file-type-tricks/browser-artifacts.md
 {{#endref}}
 
-## Memory Dump İncelemesi
+## Bellek Dökümü İncelemesi
 
 
 {{#ref}}
 memory-dump-analysis/
 {{#endref}}
 
-Pcap İncelemesi
+## Pcap İncelemesi
 
 
 {{#ref}}

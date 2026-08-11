@@ -1,34 +1,36 @@
-# Memory dump analizi
+# Bellek dökümü analizi
 
-## Start
+{{#include ../../../banners/hacktricks-training.md}}
 
-pcap içinde **malware** **aramaya** başlayın. [**Malware Analysis**](../malware-analysis.md) bölümünde bahsedilen **tools** araçlarını kullanın.
+## Başlangıç
+
+pcap içinde **malware** aramaya başlayın. [**Malware Analizi**](../malware-analysis.md) bölümünde belirtilen **tools** araçlarını kullanın.
 
 ## [Volatility](volatility-cheatsheet.md)
 
-**Volatility, memory dump analizi için açık kaynaklı bir framework'tür**. Bu Python aracı, harici kaynaklardan veya VMware VM'lerinden alınan dump'ları analiz eder ve dump'ın işletim sistemi profiline göre process'ler ve password'ler gibi verileri belirler. Plugin'lerle genişletilebilir olması, arşiv incelemeleri için onu oldukça çok yönlü hale getirir.<sup>[[1]](#references)[[2]](#references)</sup>
+**Volatility, bellek dökümlerini analiz etmek için kullanılan açık kaynaklı bir framework'tür**. Bu Python aracı, harici kaynaklardan veya VMware VM'lerinden alınan dökümleri analiz eder ve dökümün işletim sistemi profiline göre işlemler ve parolalar gibi verileri tanımlar. Plugin'lerle genişletilebilmesi, onu forensic araştırmalar için son derece çok yönlü hâle getirir.<sup>[[1]](#references)[[2]](#references)</sup>
 
-[**Burada bir cheatsheet bulun**](volatility-cheatsheet.md)
+[**Burada bir cheatsheet bulabilirsiniz**](volatility-cheatsheet.md)
 
-## Mini dump crash report
+## Mini dump crash raporu
 
-Dump küçük olduğunda (yalnızca birkaç KB, belki birkaç MB), tam bir memory dump yerine mini dump crash report olabilir.<sup>[[3]](#references)</sup>
+Döküm küçük olduğunda (yalnızca birkaç KB, belki birkaç MB), tam bir bellek dökümü yerine mini dump crash raporu olabilir.<sup>[[3]](#references)</sup>
 
-![Volatility - Mini dump crash report: Mini DuMP crash report olarak tanımlanan küçük bir dump dosyası](<../../../images/image (532).png>)
+![Volatility - Mini dump crash raporu: Mini DuMP crash raporu olarak tanımlanan küçük bir döküm dosyası](<../../../images/image (532).png>)
 
-Visual Studio kuruluysa bu dosyayı açarak process adı, architecture, exception ayrıntıları ve yüklenen module'ler gibi temel bilgileri görüntüleyebilirsiniz:<sup>[[4]](#references)</sup>
+Visual Studio yüklüyse bu dosyayı açarak işlem adı, mimari, exception ayrıntıları ve yüklenen modüller gibi temel bilgileri görüntüleyebilirsiniz:<sup>[[4]](#references)</sup>
 
-![Volatility - Mini dump crash report: Visual Studio kuruluysa bu dosyayı açabilir ve process adı, architecture, exception bilgileri ve... gibi bazı temel bilgileri alabilirsiniz](<../../../images/image (263).png>)
+![Volatility - Mini dump crash raporu: Visual Studio yüklüyse dosyayı açabilir ve işlem adı, mimari, exception bilgileri gibi bazı temel bilgileri görüntüleyebilirsiniz](<../../../images/image (263).png>)
 
-Ayrıca exception'ı inceleyebilir ve module'ün disassembly'sini görüntüleyebilirsiniz.<sup>[[4]](#references)</sup>
+Ayrıca exception'ı inceleyebilir ve modülün disassembly görünümünü görüntüleyebilirsiniz.<sup>[[4]](#references)</sup>
 
 ![Visual Studio minidump Actions panel with options to debug natively and set symbol paths](<../../../images/image (142).png>)
 
 ![Visual Studio disassembly of instructions from the minidump exception](<../../../images/image (610).png>)
 
-Her neyse, Visual Studio dump'ın derinlemesine analizini gerçekleştirmek için en iyi araç değildir.
+Her hâlükârda Visual Studio, dökümü derinlemesine analiz etmek için en iyi araç değildir.
 
-**IDA** veya **Radare** kullanarak onu **açmalı** ve **derinlemesine** incelemelisiniz.
+Dökümü derinlemesine incelemek için **IDA** veya **Radare** kullanarak **açmalısınız**.
 
 ## References
 
