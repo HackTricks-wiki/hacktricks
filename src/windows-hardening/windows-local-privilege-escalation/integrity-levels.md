@@ -8,7 +8,7 @@ In Windows Vista and later versions, securable objects can carry an **integrity 
 
 A key rule is that objects cannot be modified by processes with a lower integrity level than the object's level. Windows applies this Mandatory Integrity Control (MIC) check before evaluating the object's discretionary access control list (DACL). The commonly encountered levels are:<sup>[[1]](#references)[[2]](#references)</sup>
 
-- **Untrusted**: The lowest level, represented by `SECURITY_MANDATORY_UNTRUSTED_RID`.
+- **Untrusted**: The lowest level, represented by `SECURITY_MANDATORY_UNTRUSTED_RID`. As a real-world example, Chromium's Windows sandbox initially assigns sandboxed targets Low integrity and then lowers renderer targets to Untrusted integrity after startup.<sup>[[5]](#references)</sup>
 - **Low**: Mainly for internet interactions, especially in Internet Explorer's Protected Mode, affecting associated files and processes, and certain folders like the **Temporary Internet Folder**. Low integrity processes face significant restrictions, including no registry write access and limited user profile write access.
 - **Medium**: The default level for most activities, assigned to standard users and objects without specific integrity levels. Even members of the Administrators group operate at this level by default.
 - **High**: Reserved for administrators, allowing them to modify objects at lower integrity levels, including those at the high level itself.
@@ -102,5 +102,6 @@ Because of these restrictions, the safest approach is to **run each process at t
 - [2] [Microsoft Learn – MANDATORY_LEVEL enumeration](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ne-winnt-mandatory_level)
 - [3] [Microsoft Sysinternals – Process Explorer](https://learn.microsoft.com/en-us/sysinternals/downloads/process-explorer)
 - [4] [Microsoft Learn – icacls](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/icacls)
+- [5] [Chromium source – Default Windows sandbox integrity policy](https://github.com/chromium/chromium/blob/main/sandbox/policy/win/sandbox_win.cc#L212-L216)
 
 {{#include ../../banners/hacktricks-training.md}}
