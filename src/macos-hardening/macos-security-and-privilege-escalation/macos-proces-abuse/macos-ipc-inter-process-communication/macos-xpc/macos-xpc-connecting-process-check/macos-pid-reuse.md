@@ -1,27 +1,27 @@
-# macOS PID Reuse
+# Wiederverwendung von macOS-PIDs
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
 
-## PID Reuse
+## Wiederverwendung von PIDs
 
-Wenn ein macOS-**XPC service** den aufrufenden Prozess anhand der **PID** und nicht anhand des **audit token** überprüft, ist er für einen PID reuse attack anfällig. Dieser Angriff basiert auf einer **race condition**, bei der ein **exploit** **messages to the XPC** service **abusing** die Funktionalität **sendet** und **direkt danach** **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** mit der **allowed** binary ausführt.<sup>[[1]](#references)[[2]](#references)</sup>
+Wenn ein macOS-**XPC service** den aufrufenden Prozess anhand der **PID** und nicht anhand des **audit token** überprüft, ist er anfällig für einen PID-reuse-Angriff. Dieser Angriff basiert auf einer **race condition**, bei der ein **exploit** zunächst **Nachrichten an den XPC** service sendet und dabei dessen Funktionalität **missbraucht** und **direkt danach** **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** mit der **erlaubten** Binary ausführt.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Diese Funktion sorgt dafür, dass die **allowed binary Eigentümer der PID wird**, aber die **malicious XPC message** bereits **unmittelbar zuvor gesendet wurde**. Wenn der **XPC** service also die **PID** verwendet, um den Absender zu **authentifizieren**, und dies **NACH** der Ausführung von **`posix_spawn`** überprüft, wird er annehmen, dass die Anfrage von einem **authorized** process stammt.<sup>[[1]](#references)[[2]](#references)</sup>
+Diese Funktion sorgt dafür, dass die **erlaubte Binary die PID besitzt**, während die **bösartige XPC-Nachricht bereits** unmittelbar zuvor **gesendet wurde**. Wenn der **XPC** service also die **PID** verwendet, um den Absender zu **authentifizieren**, und dies **NACH** der Ausführung von **`posix_spawn`** überprüft, wird er annehmen, dass die Nachricht von einem **autorisierten** Prozess stammt.<sup>[[1]](#references)[[2]](#references)</sup>
 
-### Exploit example
+### Exploit-Beispiel
 
-Wenn du die Funktion **`shouldAcceptNewConnection`** oder eine von ihr aufgerufene Funktion findest, die **`processIdentifier`** aufruft, aber nicht **`auditToken`**, bedeutet das sehr wahrscheinlich, dass sie die Prozess-PID und nicht das audit token **überprüft**.\
+Wenn du die Funktion **`shouldAcceptNewConnection`** oder eine von ihr aufgerufene Funktion findest, die **`processIdentifier`** aufruft und nicht **`auditToken`**, bedeutet dies höchstwahrscheinlich, dass sie die **Prozess-PID** und nicht das audit token überprüft.\
 Zum Beispiel in diesem Bild (aus der Referenz):<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../../../../images/image (306).png" alt="https://wojciechregula.blog/images/2020/04/pid.png"><figcaption></figcaption></figure>
 
-Sieh dir dieses Beispiel für einen exploit an (ebenfalls aus der Referenz), um die beiden Teile des exploits zu sehen:<sup>[[1]](#references)</sup>
+Sieh dir dieses Beispiel für einen exploit an (ebenfalls aus der Referenz), um die 2 Teile des exploits zu sehen:<sup>[[1]](#references)</sup>
 
-- Einer, der mehrere forks **erzeugt**
-- **Jeder fork** wird das **payload** an den XPC service **senden** und direkt nach dem Senden der Nachricht **`posix_spawn`** ausführen.
+- Einer, der mehrere Forks erzeugt
+- **Jeder Fork** sendet den **Payload** an den XPC service und führt direkt nach dem Senden der Nachricht **`posix_spawn`** aus.
 
 > [!CAUTION]
-> Damit der exploit funktioniert, ist es wichtig, ` export`` `` `**`OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`** zu **setzen** oder Folgendes in den exploit einzufügen:
+> Damit der exploit funktioniert, ist es wichtig, ` export`` `` `**`OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`** zu setzen oder Folgendes in den exploit einzufügen:
 >
 > ```objectivec
 > asm(".section __DATA,__objc_fork_ok\n"
@@ -31,7 +31,7 @@ Sieh dir dieses Beispiel für einen exploit an (ebenfalls aus der Referenz), um 
 
 {{#tabs}}
 {{#tab name="NSTasks"}}
-Erste Option mit **`NSTasks`** und einem Argument, um die Child-Prozesse zu starten und die RC auszunutzen.
+Erste Option mit **`NSTasks`** und einem Argument zum Starten der Child-Prozesse, um die RC zu exploiten
 ```objectivec
 // Code from https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/
 // gcc -framework Foundation expl.m -o expl
@@ -140,7 +140,7 @@ return 0;
 {{#endtab}}
 
 {{#tab name="fork"}}
-Dieses Beispiel verwendet ein rohes **`fork`**, um **Kinderprozesse zu starten, die die PID race condition ausnutzen**, und anschließend **eine weitere race condition über einen Hard link auszunutzen**:
+Dieses Beispiel verwendet einen rohen **`fork`**, um **Kindprozesse zu starten, die die PID race condition ausnutzen**, und anschließend über einen Hard link eine **weitere race condition** auszunutzen:
 ```objectivec
 // export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 // gcc -framework Foundation expl.m -o expl
@@ -198,7 +198,7 @@ NSLog(@"obj: %@", obj);
 NSLog(@"conn: %@", connection);
 
 // Call vulenrable XPC function
-// TODO: CHANEG NAME OF FUNCTION TO CALL
+// TODO: CHANGE NAME OF FUNCTION TO CALL
 [obj DoSomething:^(_Bool b){
 NSLog(@"Response, %hdd", b);
 }];
@@ -264,7 +264,7 @@ system("ln hard_link download/legit_bin");
 xpc_pid_rc_abuse();
 usleep(10000);
 
-// The payload will generate this file if exploitation is successfull
+// The payload will generate this file if exploitation is successful
 if (access("/tmp/pwned", F_OK ) == 0) {
 pwned = true;
 }
@@ -278,16 +278,15 @@ return 0;
 
 ## Weitere Beispiele
 
-- [**Intego X9: Warum dein macOS-Antivirus PIDs nicht vertrauen sollte**](https://blog.quarkslab.com/intego_lpe_macos_2.html) - LPE gegen den privilegierten Helper eines Antivirusprogramms, der Clients anhand ihrer PID authentifizierte.<sup>[[3]](#references)</sup>
-- [**Ausnutzen des GOG-Galaxy-XPC-Service zur privilege escalation in macOS**](https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos)<sup>[[4]](#references)</sup>
+- [**Intego X9: Warum Ihr macOS-Antivirus PIDs nicht vertrauen sollte**](https://blog.quarkslab.com/intego_lpe_macos_2.html) - LPE gegen den privilegierten Helper eines AV, der Clients anhand der PID authentifizierte.<sup>[[3]](#references)</sup>
+- [**Ausnutzen des GOG Galaxy XPC service zur Privilege Escalation in macOS**](https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos)<sup>[[4]](#references)</sup>
 - [**Rootpipe Reborn (Teil II)**](https://objective-see.org/blog/blog_0x41.html)<sup>[[5]](#references)</sup>
 
-## Referenzen
+## References
 
-- [1] [XPC exploitation lernen - Teil 2: Sag Nein zur PID!](https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/)
-- [2] [Vertraue der PID nicht! Geschichten über einen einfachen Logikfehler und wo man ihn findet - Samuel Groß (WarCon 2018)](https://saelo.github.io/presentations/warcon18_dont_trust_the_pid.pdf)
-- [3] [Intego X9: Warum dein macOS-Antivirus PIDs nicht vertrauen sollte](https://blog.quarkslab.com/intego_lpe_macos_2.html)
-- [4] [Ausnutzen des GOG-Galaxy-XPC-Service zur privilege escalation in macOS](https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos)
+- [1] [XPC exploitation lernen – Teil 2: Sag Nein zur PID!](https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/)
+- [2] [Vertraue der PID nicht! Geschichten über einen einfachen Logikfehler und wo man ihn findet – Samuel Groß (WarCon 2018)](https://saelo.github.io/presentations/warcon18_dont_trust_the_pid.pdf)
+- [3] [Intego X9: Warum Ihr macOS-Antivirus PIDs nicht vertrauen sollte](https://blog.quarkslab.com/intego_lpe_macos_2.html)
+- [4] [Ausnutzen des GOG Galaxy XPC service zur Privilege Escalation in macOS](https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos)
 - [5] [Rootpipe Reborn (Teil II)](https://objective-see.org/blog/blog_0x41.html)
-
 {{#include ../../../../../../banners/hacktricks-training.md}}

