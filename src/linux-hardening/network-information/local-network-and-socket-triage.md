@@ -1,14 +1,12 @@
-# Triage lokaler Netzwerke und Sockets
+# Lokales Netzwerk und Socket-Triage
 
-{{#include ../../banners/hacktricks-training.md}}
+Nach dem Erhalt einer Shell auf einem Linux-Host sind die nützlichsten Netzwerkziele häufig nicht extern exponiert. Nur an Loopback gebundene Services, veth-Netzwerke, Unix-Sockets, temporäre Listener, Packet Captures und lokale Firewall-Regeln können Credentials oder ausschließlich lokal erreichbare Angriffsflächen offenlegen.
 
-Nachdem eine Shell auf einem Linux-Host erlangt wurde, sind die nützlichsten Netzwerkziele oft nicht extern exponiert. Nur an Loopback gebundene Services, veth-Netzwerke, Unix-Sockets, temporäre Listener, Packet Captures und lokale Firewall-Regeln können Credentials oder nur lokal vorhandene Angriffsflächen offenlegen.
+Diese Seite konzentriert sich auf praktische lokale post-exploitation techniques und nicht auf allgemeines Remote-Network-Pentesting.
 
-Diese Seite konzentriert sich auf praktische lokale Post-Exploitation-Techniken, nicht auf allgemeines Remote-Network-Pentesting.
+## Aufzählung von Loopback- und lokalen Services
 
-## Enumeration von Loopback- und lokalen Services
-
-Beginne damit, auflistbare Services, ihre Bind-Adressen und, sofern die Berechtigungen dies erlauben, den Prozess zu identifizieren, dem sie gehören:
+Beginne damit, lauschende Services, ihre Bind-Adressen und, sofern die Berechtigungen dies erlauben, den Prozess zu identifizieren, dem sie gehören.<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 ss -lntup
 ss -lnx
@@ -17,158 +15,158 @@ ip route
 ```
 Wichtige Muster:
 
-- `127.0.0.1:<port>` oder `[::1]:<port>`: standardmäßig nur vom Host aus erreichbar.
-- `0.0.0.0:<port>`: über alle IPv4-Schnittstellen erreichbar, sofern nicht gefiltert.
-- `172.x`, `10.x` oder `192.168.x` auf `veth*`, `docker*`, `br-*`, `cni*`: wahrscheinlich Container- oder lokale Labornetzwerke.
-- Unix-Sockets unter `/run`, `/var/run`, `/tmp` oder in Anwendungsverzeichnissen: lokale IPC-Angriffsflächen.
+- `127.0.0.1:<port>` oder `[::1]:<port>`: standardmäßig nur vom Host aus erreichbar.<sup>[[3]](#references)[[4]](#references)</sup>
+- `0.0.0.0:<port>`: auf allen IPv4-Schnittstellen erreichbar, sofern nicht gefiltert.<sup>[[3]](#references)</sup>
+- `10.0.0.0/8`, `172.16.0.0/12` oder `192.168.0.0/16` auf `veth*`, `docker*`, `br-*`, `cni*`: wahrscheinlich Container- oder lokale Labornetzwerke.<sup>[[23]](#references)[[24]](#references)</sup>
+- Unix-Sockets unter `/run`, `/var/run`, `/tmp` oder Anwendungsverzeichnissen: lokale IPC-Angriffsflächen.<sup>[[5]](#references)</sup>
 
-Lokale Ports mit leichtgewichtigen Probes erfassen:
+Ordne lokale Ports mit Lightweight-Probes zu.<sup>[[6]](#references)[[7]](#references)</sup>
 ```bash
 for p in 80 443 8000 8080 8081 9000 5000; do
 timeout 1 bash -c "echo >/dev/tcp/127.0.0.1/$p" 2>/dev/null && echo "open: $p"
 done
 ```
-Verwende `nmap` lokal, sofern verfügbar:
+Verwende `nmap` lokal, sofern verfügbar.<sup>[[8]](#references)[[9]](#references)[[10]](#references)</sup>
 ```bash
 nmap -sT -Pn -p- 127.0.0.1
 nmap -sT -Pn --open 127.0.0.1
 ```
 ## Verborgene veth- und Container-Subnetze
 
-Container- oder Laborumgebungen stellen Services häufig nur über ein Bridge- oder veth-Subnetz bereit. Zähle Interfaces und Routen auf, bevor du annimmst, dass ein Service nicht erreichbar ist:
+Containerisierte Umgebungen oder Laborumgebungen stellen Services häufig nur über ein Bridge- oder veth-Subnetz bereit. Enumeriere Schnittstellen und Routen, bevor du annimmst, dass ein Service nicht erreichbar ist.<sup>[[2]](#references)</sup>
 ```bash
 ip -br addr
 ip route
 ip neigh
 ```
-Wahrscheinliche lokale Subnetze finden:
+Wahrscheinliche lokale Subnetze ermitteln.<sup>[[2]](#references)</sup>
 ```bash
 ip -o -4 addr show | awk '{print $2, $4}'
 ```
-Untersuche ein entdecktes Subnetz sorgfältig:
+Untersuche ein entdecktes Subnetz vorsichtig.<sup>[[8]](#references)[[9]](#references)[[10]](#references)</sup>
 ```bash
 nmap -sT -Pn --open 172.17.0.0/24
 nmap -sT -Pn -p 80,443,8000,8080,9000 172.17.0.0/24
 ```
-Die Technik ist nützlich, wenn ein Web panel, Debug endpoint oder Helper service vor externen Scans verborgen ist, aber vom kompromittierten Host oder Container-Netzwerk aus erreichbar bleibt.
+Die Technik ist nützlich, wenn ein Webpanel, ein Debug-Endpunkt oder ein Hilfsdienst vor externen Scans verborgen, aber vom kompromittierten Host oder aus dem Container-Netzwerk erreichbar ist.
 
 ## Lokaler Pivot mit socat oder SSH
 
-Wenn ein Service an loopback gebunden ist, exponiere ihn über einen erlaubten Kanal, anstatt den Service selbst zu ändern.
+Wenn ein Dienst an Loopback gebunden ist, leite ihn über einen erlaubten Kanal weiter, anstatt den Dienst selbst zu ändern.
 
-Leite einen lokalen HTTP-Service mit SSH weiter:
+Leite einen nur lokal erreichbaren HTTP-Dienst mit SSH weiter.<sup>[[11]](#references)</sup>
 ```bash
 ssh -L 8080:127.0.0.1:8080 user@target
 ```
-Einen lokalen Port mit `socat` überbrücken, wenn du bereits Shell-Zugriff hast:
+Einen lokalen Port mit `socat` überbrücken, wenn Sie bereits Shell-Zugriff haben.<sup>[[12]](#references)</sup>
 ```bash
 socat TCP-LISTEN:18080,fork,reuseaddr TCP:127.0.0.1:8080
 ```
-Einen Unix-Socket für lokale Tests an TCP weiterleiten:
+Einen Unix-Socket für lokale Tests an TCP weiterleiten.<sup>[[5]](#references)[[12]](#references)</sup>
 ```bash
 socat TCP-LISTEN:18081,fork,reuseaddr UNIX-CONNECT:/run/app/app.sock
 ```
-Dies allein exploit't nichts. Es macht eine nur lokal erreichbare Oberfläche von deinen Tools aus erreichbar, sodass du mit ihr wie mit einem normalen Service interagieren kannst.
+Dies nutzt selbst nichts aus. Es macht eine nur lokal erreichbare Angriffsfläche aus Ihren Tools erreichbar, sodass Sie wie mit einem normalen Dienst damit interagieren können.
 
 ## Banner Grabbing und einfache Protokolle
 
-Nicht jeder Service ist HTTP. Viele lokale Services leaken über ein Banner oder ein einzeiliges Protokoll genügend Informationen.
+Nicht jeder Dienst ist HTTP. Viele lokale Dienste leaken über ein Banner oder ein einzeiliges Protokoll ausreichend Informationen.
 
-Einfache Probes:
+Grundlegende Probes.<sup>[[13]](#references)</sup>
 ```bash
 nc -nv 127.0.0.1 9000
 printf 'help\n' | nc -nv 127.0.0.1 9000
 printf 'version\n' | nc -nv 127.0.0.1 9000
 ```
-HTTP-Check ohne Browser:
+HTTP-Prüfung ohne Browser.<sup>[[13]](#references)[[14]](#references)</sup>
 ```bash
 printf 'GET / HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n' | nc -nv 127.0.0.1 8080
 curl -i http://127.0.0.1:8080/
 ```
-Für TLS:
+Für TLS.<sup>[[14]](#references)[[15]](#references)</sup>
 ```bash
 openssl s_client -connect 127.0.0.1:8443 -servername localhost
 curl -k -i https://127.0.0.1:8443/
 ```
 Das Ziel besteht darin, das Protokoll, das Authentifizierungsschema, die Version und die Frage zu identifizieren, ob der Dienst lokalen Clients vertraut.
 
-## Loopback-Traffic erfassen
+## Erfassen von Loopback-Datenverkehr
 
-Lokaler Traffic kann Header, Bearer-Tokens, Basic-Auth-Zugangsdaten oder anwendungsspezifische Secrets offenlegen. Erfasse Daten nur in autorisierten Umgebungen.
+Lokaler Datenverkehr kann Header, Bearer-Tokens, Basic-Auth-Zugangsdaten oder anwendungsspezifische Secrets offenlegen.<sup>[[17]](#references)[[25]](#references)</sup> Nur in autorisierten Umgebungen erfassen.
 
-Loopback-HTTP-Traffic erfassen:
+Loopback-HTTP-Datenverkehr erfassen.<sup>[[16]](#references)</sup>
 ```bash
 sudo tcpdump -i lo -A -s0 'tcp port 80 or tcp port 8080'
 ```
-Einen bestimmten lokalen Dienst mitschneiden:
+Einen bestimmten lokalen Dienst mitschneiden.<sup>[[16]](#references)</sup>
 ```bash
 sudo tcpdump -i lo -w /tmp/loopback.pcap 'tcp port 8080'
 ```
-Basic Auth aus einem abgefangenen oder protokollierten Header decodieren:
+Basic Auth aus einem abgefangenen oder protokollierten Header decodieren.<sup>[[17]](#references)[[18]](#references)</sup>
 ```bash
 printf '%s' 'dXNlcjpwYXNz' | base64 -d
 ```
-Nützliche Zeichenfolgen, nach denen in Textaufzeichnungen gesucht werden sollte:
+Nützliche Zeichenfolgen, nach denen in Texterfassungen gesucht werden sollte:
 ```bash
 grep -Ei 'Authorization:|Cookie:|Bearer|Basic|token|api[_-]?key|password' /tmp/capture.txt
 ```
-## TLS-Key-Logging
+## TLS Key Logging
 
-Wenn du die Prozessumgebung des Clients in einem Lab kontrollieren kannst, kann `SSLKEYLOGFILE` TLS-Sitzungen in Wireshark oder kompatiblen Tools entschlüsselbar machen. Dies ist nützlich, um lokalen HTTPS-Datenverkehr zu verstehen, ohne TLS selbst anzugreifen.
+Wenn du in einer Laborumgebung die Umgebung des Client-Prozesses kontrollieren kannst, kann `SSLKEYLOGFILE` TLS-Sitzungen in Wireshark oder kompatiblen Tools entschlüsselbar machen.<sup>[[19]](#references)[[20]](#references)</sup> Dies ist nützlich, um lokalen HTTPS-Traffic zu untersuchen, ohne TLS selbst anzugreifen.
 
-Führe einen Client mit aktiviertem Key-Logging aus:
+Führe einen Client mit aktiviertem Key Logging aus.<sup>[[19]](#references)[[20]](#references)</sup>
 ```bash
 export SSLKEYLOGFILE=/tmp/sslkeys.log
 curl -k https://127.0.0.1:8443/
 ls -l /tmp/sslkeys.log
 ```
-Zeichne den Datenverkehr gleichzeitig auf:
+Erfasse den Datenverkehr gleichzeitig.<sup>[[16]](#references)</sup>
 ```bash
 sudo tcpdump -i lo -w /tmp/tls.pcap 'tcp port 8443'
 ```
-Lade anschließend `/tmp/tls.pcap` und `/tmp/sslkeys.log` in Wireshark. Dies funktioniert nur, wenn die Client-Bibliothek NSS-style key logging unterstützt und du die Umgebung festlegen kannst, bevor die Verbindung hergestellt wird.
+Lade anschließend `/tmp/tls.pcap` und `/tmp/sslkeys.log` in Wireshark. Dies funktioniert nur, wenn die Client-Bibliothek NSS-style key logging unterstützt und du die Umgebung festlegen kannst, bevor die Verbindung hergestellt wird.<sup>[[20]](#references)[[21]](#references)</sup>
 
 ## Interaktion mit Unix-Sockets und Command Injection
 
-Unix-Sockets sind lokale IPC-Endpunkte. Sie können HTTP-APIs, benutzerdefinierte Protokolle oder unsichere Command-Handler bereitstellen.
+Unix-Sockets sind lokale IPC-Endpunkte.<sup>[[5]](#references)</sup> Sie können HTTP-APIs, benutzerdefinierte Protokolle oder unsichere Command-Handler bereitstellen.<sup>[[12]](#references)[[14]](#references)</sup>
 
-Sockets finden:
+Finde Sockets.<sup>[[1]](#references)[[5]](#references)</sup>
 ```bash
 ss -lnx
 find /run /var/run /tmp -type s -ls 2>/dev/null
 ```
-Mit HTTP über einen Unix-Socket interagieren:
+Mit HTTP über einen Unix-Socket interagieren.<sup>[[14]](#references)</sup>
 ```bash
 curl --unix-socket /run/app/app.sock http://localhost/
 curl --unix-socket /run/app/app.sock -i http://localhost/admin
 ```
-Mit einem Raw-Socket interagieren:
+Mit einem Raw-Socket interagieren.<sup>[[12]](#references)[[13]](#references)</sup>
 ```bash
 printf 'status\n' | socat - UNIX-CONNECT:/run/app/app.sock
 printf 'help\n' | nc -U /run/app/app.sock
 ```
-Wenn vom Benutzer kontrollierte Socket-Eingaben an eine Shell oder einen privilegierten Helper übergeben werden, kann daraus Command Injection entstehen. Ein gezieltes Beispiel finden Sie unter [Socket Command Injection](socket-command-injection.md).
+Wenn vom Benutzer kontrollierte Socket-Eingaben an eine Shell oder einen privilegierten Helper übergeben werden, kann dies zu Command Injection führen.<sup>[[26]](#references)</sup> Ein fokussiertes Beispiel findest du unter [Socket Command Injection](socket-command-injection.md).
 
 ## Überprüfung von nftables und autorisierte Regeländerungen
 
-Lokale Firewall-Regeln können erklären, warum ein Service lokal sichtbar, aber remote blockiert ist, oder warum ein hoher Port über eine Schnittstelle nicht erreichbar erscheint.
+Lokale Firewall-Regeln können erklären, warum ein Service lokal sichtbar, remote jedoch blockiert ist, oder warum ein hoher Port von einer Schnittstelle aus nicht erreichbar erscheint.<sup>[[22]](#references)</sup>
 
-Regeln überprüfen:
+Regeln überprüfen.<sup>[[22]](#references)</sup>
 ```bash
 sudo nft list ruleset
 sudo nft list tables
 sudo nft list chains
 ```
-Suche nach Drops, die einen Zielport betreffen:
+Suchen Sie nach Drops, die einen Zielport betreffen.<sup>[[22]](#references)</sup>
 ```bash
 sudo nft list ruleset | grep -Ei 'drop|reject|dport|tcp|udp'
 ```
-Entferne in einem autorisierten Lab eine bestimmte Blockierungsregel anhand ihres Handles:
+Entferne in einem autorisierten Labor eine bestimmte blockierende Regel anhand ihres Handles.<sup>[[22]](#references)</sup>
 ```bash
 sudo nft -a list chain inet filter input
 sudo nft delete rule inet filter input handle <handle>
 ```
-Bevorzuge das Löschen des exakten Handles gegenüber dem Leeren vollständiger Tabellen. Die Technik besteht darin, den genauen Filter zu identifizieren, der das Verhalten verursacht, und nur diese Regel zu ändern.
+Lösche vorzugsweise den exakten Handle, anstatt vollständige Tabellen zu leeren. Die Technik besteht darin, den genauen Filter zu identifizieren, der das Verhalten verursacht, und nur diese Regel zu ändern.<sup>[[22]](#references)</sup>
 
 ## Schneller Ablauf
 ```bash
@@ -180,6 +178,34 @@ nmap -sT -Pn --open 127.0.0.1
 find /run /var/run /tmp -type s -ls 2>/dev/null
 sudo nft list ruleset 2>/dev/null | head -n 80
 ```
-Priorisiere Dienste, die nur lokal erreichbar sind, als Benutzer mit höheren Berechtigungen ausgeführt werden, Admin-/Debug-Funktionen bereitstellen oder Clients aus dem Loopback-/Container-Netzwerk vertrauen.
+Priorisieren Sie Dienste, die nur lokal verfügbar sind, unter einem privilegierteren Benutzer ausgeführt werden, Admin-/Debug-Funktionen bereitstellen oder Clients aus dem Loopback-/Container-Netzwerk vertrauen.
 
+## References
+
+- [1] [ss(8) — Linux-Handbuchseite](https://man7.org/linux/man-pages/man8/ss.8.html)
+- [2] [ip(8) — Linux-Handbuchseite](https://man7.org/linux/man-pages/man8/ip.8.html)
+- [3] [ip(7) — Linux-Handbuchseite](https://man7.org/linux/man-pages/man7/ip.7.html)
+- [4] [RFC 4291: Adressierungsarchitektur für IP Version 6](https://www.rfc-editor.org/info/rfc4291/)
+- [5] [unix(7) — Linux-Handbuchseite](https://man7.org/linux/man-pages/man7/unix.7.html)
+- [6] [Umleitungen (Bash-Referenzhandbuch)](https://www.gnu.org/s/bash/manual/html_node/Redirections.html)
+- [7] [timeout-Aufruf (GNU Coreutils)](https://www.gnu.org/s/coreutils/timeout)
+- [8] [Port-Scanning-Techniken (Nmap-Referenzhandbuch)](https://nmap.org/book/man-port-scanning-techniques.html)
+- [9] [Host-Erkennung (Nmap-Referenzhandbuch)](https://nmap.org/book/man-host-discovery.html)
+- [10] [Port-Spezifikation und Scan-Reihenfolge (Nmap-Referenzhandbuch)](https://nmap.org/book/man-port-specification.html)
+- [11] [ssh(1) — Linux-Handbuchseite](https://man7.org/linux/man-pages/man1/ssh.1.html)
+- [12] [socat(1) — Linux-Handbuchseite](https://www.man7.org/linux/man-pages/man1/socat.1.html)
+- [13] [nc(1) — OpenBSD-Handbuchseite](https://man.openbsd.org/nc.1)
+- [14] [Handbuch des curl-Befehlszeilentools](https://curl.se/docs/manpage.html?category=23)
+- [15] [openssl-s_client — OpenSSL-Dokumentation](https://docs.openssl.org/3.0/man1/openssl-s_client/)
+- [16] [tcpdump(8) — Linux-Handbuchseite](https://man7.org/linux/man-pages/man8/tcpdump.8.html)
+- [17] [RFC 7617: Das „Basic“-HTTP-Authentifizierungsschema](https://www.rfc-editor.org/rfc/rfc7617.html)
+- [18] [base64-Aufruf (GNU Coreutils)](https://www.gnu.org/software/coreutils/manual/html_node/base64-invocation.html)
+- [19] [openssl-env — OpenSSL-Dokumentation](https://docs.openssl.org/master/man7/openssl-env/)
+- [20] [TLS — Wireshark-Wiki](https://wiki.wireshark.org/tls)
+- [21] [Wireshark-Benutzerhandbuch](https://www.wireshark.org/docs/wsug_html/)
+- [22] [nftables-Handbuch](https://netfilter.org/projects/nftables/manpage.html)
+- [23] [Adresszuweisung für private Internets (RFC 1918)](https://www.rfc-editor.org/rfc/rfc1918.html)
+- [24] [ip-link(8) — Linux-Handbuchseite](https://man7.org/linux/man-pages/man8/ip-link.8.html)
+- [25] [Das OAuth-2.0-Autorisierungsframework: Verwendung von Bearer-Token (RFC 6750)](https://www.rfc-editor.org/rfc/rfc6750.html)
+- [26] [CWE-78: Unzureichende Neutralisierung spezieller Elemente in einem OS-Befehl](https://cwe.mitre.org/data/definitions/78.html)
 {{#include ../../banners/hacktricks-training.md}}

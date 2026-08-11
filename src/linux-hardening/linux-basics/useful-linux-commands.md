@@ -1,8 +1,6 @@
 # Nützliche Linux-Befehle
 
-{{#include ../../banners/hacktricks-training.md}}
-
-## Allgemeine Bash-Befehle
+## Häufige Bash-Befehle
 ```bash
 #Exfiltration using Base64
 base64 -w 0 file
@@ -229,7 +227,7 @@ grep -Po 'd{3}[s-_]?d{3}[s-_]?d{4}' *.txt > us-phones.txt
 #Extract ISBN Numbers
 egrep -a -o "\bISBN(?:-1[03])?:? (?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]\b" *.txt > isbn.txt
 ```
-## Find
+## Finden
 ```bash
 # Find SUID set files.
 find / -perm /u=s -ls 2>/dev/null
@@ -301,9 +299,9 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
-## eBPF-Telemetrie & Rootkit-Jagd
+## eBPF-Telemetrie und Rootkit-Suche
 
-Moderne Rootkits (TripleCross, BPFDoor-Varianten usw.) persistieren zunehmend als versteckte eBPF-Programme. Erstelle mit `bpftool`/`eBPFmon` eine Baseline deiner Flotte, damit du nicht signierte Programme, unerwartete cgroup-Hooks oder bösartige Map-Inhalte erkennen kannst, bevor du sie abtrennst.<sup>[[1]](#references)</sup>
+Rootkit-Forschung hat sowohl eBPF-basierte Implants wie TripleCross als auch BPF-basierte Backdoors wie BPFDoor-Varianten nachgewiesen. Behandle unerwartete BPF-Programme, Attachments oder Maps als Ansatzpunkte für Untersuchungen und nicht als Beweis für eine Kompromittierung.<sup>[[3]](#references)[[4]](#references)</sup> Erstelle mit `bpftool` oder `eBPFmon` eine Baseline für autorisierte Systeme: `bpftool` kann Programme und Maps auflisten, Programminstruktionen ausgeben und unterstützte Funktionen abfragen, während eBPFmon diese Informationen in einer TUI darstellt.<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -321,11 +319,11 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-Korrelieren Sie die `bpftool`-Ausgabe mit den erwarteten NIC-/cgroup-Anbindungen; ein plötzlich auftretendes `xdp`- oder `kprobe`-Programm, das einem nicht genehmigten PID gehört, ist ein starkes Indiz für einen injizierten eBPF-Payload.
+Korrelieren Sie die Ausgabe von `bpftool` mit den erwarteten NIC-/cgroup-Anbindungen; ein plötzlich auftretendes `xdp`- oder `kprobe`-Programm, das einer nicht genehmigten PID gehört, ist ein Untersuchungsansatz, aber kein schlüssiger Beweis für ein injiziertes Payload.<sup>[[5]](#references)[[6]](#references)</sup>
 
-## Journald-Untersuchung bei Sicherheitsvorfällen
+## Journald-Triage bei Vorfällen
 
-systemd-journald speichert strukturierte Metadaten, sodass Sie nach Boot, Schweregrad, Unit oder UID suchen können, ohne `/var/log/*` anzufassen. Kombinieren Sie Filter mit relativen Zeitstempeln, um Angriffszeiträume einzugrenzen oder eine Manipulation der Logs schnell nachzuweisen.<sup>[[2]](#references)</sup>
+`journalctl` liest strukturierte Einträge aus `systemd-journald` und unterstützt die Filterung nach Bootvorgang, Priorität, Unit, UID und relativer Zeit. Kombinieren Sie diese Filter mit der JSON-Ausgabe, wenn Sie Beweise bewahren oder vergleichen müssen; die Filterung allein beweist nicht, dass Logs nicht manipuliert wurden.<sup>[[2]](#references)[[7]](#references)</sup>
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -336,11 +334,15 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-Füge `--grep 'Invalid user' --case-sensitive` oder `-k` (nur Kernel-Ringpuffer) hinzu, wenn du präzisere Filter benötigst, und denke daran, dass sich die Selektoren `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` und `_TRANSPORT` für Multi-Tenant-Hunts kombinieren lassen.
+Füge `--grep 'Invalid user' --case-sensitive` oder `-k` (nur Kernel-Meldungen) hinzu, wenn du präzisere Filter benötigst. Denke daran, dass die Selektoren `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` und `_TRANSPORT` für gezielte Suchen kombiniert werden können.<sup>[[7]](#references)</sup>
 
-## Referenzen
+## References
 
 - [1] [eBPFmon: Ein neues Tool zum Erkunden und Interagieren mit eBPF-Anwendungen](https://redcanary.com/blog/linux-security/ebpfmon/)
 - [2] [So verwendest du den journalctl-Befehl zum Anzeigen von Linux-Logs](https://www.hostinger.com/tutorials/journalctl-command)
-
+- [3] [h3xduck/TripleCross](https://github.com/h3xduck/TripleCross)
+- [4] [Rapid7 Labs: BPFdoor in Telekommunikationsnetzwerken](https://www.rapid7.com/blog/post/tr-bpfdoor-telecom-networks-sleeper-cells-threat-research-report/)
+- [5] [BPF-Dokumentation — Die Linux-Kernel-Dokumentation](https://docs.kernel.org/bpf/)
+- [6] [libbpf/bpftool](https://github.com/libbpf/bpftool)
+- [7] [journalctl(1) — Linux-Handbuchseite](https://man7.org/linux/man-pages/man1/journalctl.1.html)
 {{#include ../../banners/hacktricks-training.md}}

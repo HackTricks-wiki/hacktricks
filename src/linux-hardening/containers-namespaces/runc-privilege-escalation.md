@@ -1,10 +1,8 @@
 # RunC Privilege Escalation
 
-{{#include ../../banners/hacktricks-training.md}}
-
 ## Grundlegende Informationen
 
-Wenn du mehr über **runc** erfahren möchtest, siehe die folgende Seite:
+Wenn du mehr über **runc** erfahren möchtest, sieh dir die folgende Seite an:
 
 {{#ref}}
 ../../network-services-pentesting/2375-pentesting-docker.md
@@ -12,7 +10,7 @@ Wenn du mehr über **runc** erfahren möchtest, siehe die folgende Seite:
 
 ## PE
 
-Wenn du feststellst, dass `runc` auf dem Host installiert ist, kannst du möglicherweise **einen Container starten, der den root-/Ordner des Hosts mountet**.
+Wenn `runc` für einen rootful-Prozess auf dem Host verfügbar ist, kannst du ein OCI bundle verwenden, dessen mount configuration das `/` des Hosts rekursiv nach `/` innerhalb des Containers bind-mountet und dadurch das Host-Dateisystem in diesem mount namespace offenlegt.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 ```bash
 runc -help #Get help and see if runc is intalled
 runc spec #This will create the config.json file in your current folder
@@ -37,6 +35,11 @@ mkdir rootfs
 runc run demo
 ```
 > [!CAUTION]
-> Dies wird nicht immer funktionieren, da die Standardoperation von runc darin besteht, als root ausgeführt zu werden. Daher kann die Ausführung als unprivilegierter Benutzer einfach nicht funktionieren (es sei denn, es ist eine rootless-Konfiguration vorhanden). Eine rootless-Konfiguration zum Standard zu machen, ist generell keine gute Idee, da es innerhalb rootless-Container einige Einschränkungen gibt, die außerhalb rootless-Container nicht gelten.
+> Der dokumentierte `runc run`-Workflow ist rootful: Die eigenen Beispiele von runc bezeichnen ihn als „run as root“. Ein nicht privilegierter Benutzer benötigt eine rootless-Konfiguration wie `runc spec --rootless`, und runc dokumentiert, dass User Namespaces für diesen Modus aktiviert sein müssen.<sup>[[1]](#references)</sup>
 
+## References
+
+- [1] [runc: CLI-Tool zum Starten und Ausführen von Containern](https://github.com/opencontainers/runc#using-runc)
+- [2] [OCI Runtime Specification: Mounts](https://github.com/opencontainers/runtime-spec/blob/main/config.md#mounts)
+- [3] [Shared Subtrees](https://docs.kernel.org/filesystems/sharedsubtree.html)
 {{#include ../../banners/hacktricks-training.md}}
