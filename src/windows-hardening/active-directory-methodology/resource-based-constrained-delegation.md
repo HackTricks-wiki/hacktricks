@@ -11,6 +11,8 @@ The target object's _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ attribute con
 
 Another important difference is that a principal with sufficient **write permissions over a machine account** (`GenericAll`, `GenericWrite`, `WriteDacl`, `WriteProperty`, and similar rights) may be able to set _**msDS-AllowedToActOnBehalfOfOtherIdentity**_. Configuring traditional constrained delegation normally requires more privileged administrative access.<sup>[[1]](#references)</sup>
 
+More precisely, changing classic constrained-delegation settings is normally gated by `SeEnableDelegationPrivilege` on a domain controller, a right typically held by highly privileged administrators. RBCD shifts the decision to the target object's security descriptor, so write access to the relevant computer-object property can be sufficient without that user right.<sup>[[1]](#references)[[2]](#references)</sup>
+
 ### New Concepts
 
 The **`TrustedToAuthForDelegation`** flag in `userAccountControl` is often described as a prerequisite for **S4U2Self**, but that is incomplete.\
