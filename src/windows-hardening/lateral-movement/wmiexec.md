@@ -2,18 +2,18 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Cómo funciona
+## Explicación de cómo funciona
 
-Los procesos pueden abrirse en hosts donde se conozcan el nombre de usuario y la contraseña o el hash mediante WMI. Wmiexec ejecuta comandos usando WMI, proporcionando una experiencia de shell seminteractiva.
+Se pueden abrir procesos en hosts donde se conozcan el nombre de usuario y la contraseña o el hash mediante WMI. Wmiexec ejecuta comandos mediante WMI, proporcionando una experiencia de shell semiinteractiva.
 
-**dcomexec.py:** Mediante distintos endpoints DCOM, este script ofrece una shell seminteractiva similar a wmiexec.py, utilizando específicamente el objeto DCOM ShellBrowserWindow. Actualmente admite los objetos MMC20. Application, Shell Windows y Shell Browser Window. (source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))<sup>[[2]](#references)</sup>
+**dcomexec.py:** Mediante distintos endpoints DCOM, este script ofrece un shell semiinteractivo similar a `wmiexec.py`. El valor de `-object` seleccionado elige el endpoint; los objetos compatibles incluyen `MMC20.Application`, `ShellWindows` y `ShellBrowserWindow`, siendo este último el que proporciona la técnica Shell Browser Window destacada en el walkthrough original.<sup>[[2]](#references)[[3]](#references)</sup>
 
 ## Fundamentos de WMI
 
-### Namespace
+### Espacio de nombres
 
-Estructurado en una jerarquía con estilo de directorios, el contenedor de nivel superior de WMI es \root, bajo el cual se organizan directorios adicionales, denominados namespaces.<sup>[[1]](#references)</sup>
-Comandos para enumerar namespaces:
+Estructurado en una jerarquía con estilo de directorios, el contenedor de nivel superior de WMI es \root, bajo el cual se organizan directorios adicionales, denominados espacios de nombres.<sup>[[1]](#references)</sup>
+Comandos para listar espacios de nombres:
 ```bash
 # Retrieval of Root namespaces
 gwmi -namespace "root" -Class "__Namespace" | Select Name
@@ -24,15 +24,15 @@ Get-WmiObject -Class "__Namespace" -Namespace "Root" -List -Recurse 2> $null | s
 # Listing of namespaces within "root\cimv2"
 Get-WmiObject -Class "__Namespace" -Namespace "root\cimv2" -List -Recurse 2> $null | select __Namespace | sort __Namespace
 ```
-Las clases dentro de un namespace se pueden enumerar mediante:
+Las clases dentro de un namespace se pueden enumerar usando:
 ```bash
 gwmwi -List -Recurse # Defaults to "root\cimv2" if no namespace specified
 gwmi -Namespace "root/microsoft" -List -Recurse
 ```
 ### **Clases**
 
-Conocer el nombre de una clase WMI, como win32_process, y el namespace en el que reside es crucial para cualquier operación WMI.
-Comandos para listar las clases que comienzan con `win32`:
+Conocer el nombre de una clase de WMI, como win32_process, y el espacio de nombres en el que se encuentra es crucial para cualquier operación de WMI.
+Comandos para enumerar las clases que comienzan con `win32`:
 ```bash
 Get-WmiObject -Recurse -List -class win32* | more # Defaults to "root\cimv2"
 gwmi -Namespace "root/microsoft" -List -Recurse -Class "MSFT_MpComput*"
@@ -45,7 +45,7 @@ Get-WmiObject -Namespace "root/microsoft/windows/defender" -Class MSFT_MpCompute
 ```
 ### Métodos
 
-Se pueden ejecutar métodos, que son una o más funciones ejecutables de las clases WMI.
+Los métodos, que son una o más funciones ejecutables de las clases WMI, pueden ejecutarse.
 ```bash
 # Class loading, method listing, and execution
 $c = [wmiclass]"win32_share"
@@ -71,7 +71,7 @@ net start | findstr "Instrumentation"
 ```
 ### Información del sistema y los procesos
 
-Recopilación de información del sistema y de los procesos mediante WMI:
+Recopilación de información del sistema y los procesos mediante WMI:
 ```bash
 Get-WmiObject -ClassName win32_operatingsystem | select * | more
 Get-WmiObject win32_process | Select Name, Processid
@@ -85,19 +85,19 @@ wmic useraccount list /format:list
 wmic group list /format:list
 wmic sysaccount list /format:list
 ```
-La consulta remota de WMI para obtener información específica, como los administradores locales o los usuarios conectados, es posible mediante una construcción cuidadosa de los comandos.
+La consulta remota de WMI para obtener información específica, como administradores locales o usuarios conectados, es posible mediante una construcción cuidadosa de los comandos.
 
-### **Consulta manual remota de WMI**
+### **Consulta manual de WMI remota**
 
-La identificación sigilosa de administradores locales en una máquina remota y de los usuarios conectados puede lograrse mediante consultas WMI específicas. `wmic` también permite leer desde un archivo de texto para ejecutar comandos en varios nodos simultáneamente.<sup>[[1]](#references)</sup>
+La identificación sigilosa de administradores locales en una máquina remota y de los usuarios conectados puede lograrse mediante consultas WMI específicas. `wmic` también permite leer un archivo de texto para ejecutar comandos en varios nodos simultáneamente.<sup>[[1]](#references)</sup>
 
-Para ejecutar un proceso de forma remota mediante WMI, como implementar un agente de Empire, se utiliza la siguiente estructura de comando; una ejecución correcta se indica mediante un valor de retorno de "0":<sup>[[1]](#references)</sup>
+Para ejecutar un proceso de forma remota mediante WMI, como desplegar un agente de Empire, se utiliza la siguiente estructura de comando; una ejecución correcta se indica mediante un valor de retorno de "0":<sup>[[1]](#references)</sup>
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
 Este proceso ilustra la capacidad de WMI para la ejecución remota y la enumeración de sistemas, destacando su utilidad tanto para la administración de sistemas como para el pentesting.
 
-## Herramientas automáticas
+## Automatic Tools
 
 - [**SharpLateral**](https://github.com/mertdas/SharpLateral):
 ```bash
@@ -115,13 +115,12 @@ SharpMove.exe action=query computername=remote.host.local query="select * from w
 SharpMove.exe action=create computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true username=domain\user password=password
 SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug amsi=true username=domain\\user password=password
 ```
-- También puedes usar **Impacket's `wmiexec`**.
+- También podrías usar **`wmiexec` de Impacket**.
 
 
-## Referencias
+## References
 
-- [1] [Using Credentials to Own Windows Boxes - Part 3 (WMI and WinRM)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/)
-- [2] [Beginner's Guide to Impacket Tool Kit - Part 1](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)
-
-
+- [1] [Usar credenciales para apoderarse de equipos Windows - Parte 3 (WMI y WinRM)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/)
+- [2] [Fortra Impacket - dcomexec.py](https://github.com/fortra/impacket/blob/master/examples/dcomexec.py)
+- [3] [Guía para principiantes del kit de herramientas Impacket, parte 1 - Hacking Articles (Internet Archive)](https://web.archive.org/web/20190822180831/https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)
 {{#include ../../banners/hacktricks-training.md}}
