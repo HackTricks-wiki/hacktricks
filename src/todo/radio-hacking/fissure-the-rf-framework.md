@@ -53,10 +53,11 @@ Certain third-party tools do not work on every OS. Check the current [Known Conf
 git clone https://github.com/ainfosec/FISSURE.git
 cd FISSURE
 git checkout Python3  # optional; use Python2_maint-3.7 only for legacy requirements
+git submodule update --init
 ./install
 ```
 
-This will install PyQt software dependencies required to launch the installation GUIs if they are not found.
+The submodule step downloads the GNU Radio out-of-tree modules used by FISSURE and is required when installing those modules. The installer will also install missing PyQt dependencies needed to launch its installation GUIs.<sup>[[3]](#references)</sup>
 
 Next, select the option that best matches your operating system (should be detected automatically if your OS matches an option).
 
