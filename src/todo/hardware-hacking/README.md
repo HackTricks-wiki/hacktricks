@@ -1,52 +1,59 @@
-# Hardware Hacking
+# Donanım Hacking'i
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## JTAG
 
-JTAG, boundary scan gerçekleştirmeye olanak tanır. Boundary scan, her pin için gömülü boundary-scan hücreleri ve register'lar dahil olmak üzere belirli devreleri analiz eder.
+JTAG (IEEE 1149.1), bir cihazın I/O pinlerinin çevresine yerleştirilen hücreler aracılığıyla boundary-scan testini destekler. Birçok işlemci, aynı Test Access Port (TAP) üzerinden üreticiye özgü debug işlevleri de sunar; boundary scan ve CPU debugging, JTAG'in birbiriyle ilişkili kullanımlarıdır ancak eş anlamlı değildir.<sup>[[1]](#references)</sup>
 
-JTAG standardı, **boundary scan gerçekleştirmek için belirli komutlar** tanımlar. Bunlar arasında şunlar bulunur:
+JTAG standardı, **boundary scan gerçekleştirmek için özel komutlar** tanımlar. Bunlar şunları içerir:
 
-- **BYPASS**, diğer chip'lerden geçme yükü olmadan belirli bir chip'i test etmenize olanak tanır.
-- **SAMPLE/PRELOAD**, cihaz normal çalışma modundayken cihaza giren ve çıkan verilerin bir örneğini alır.
+- **BYPASS**, bir scan chain içindeki diğer cihazlara minimum ek yükle erişilebilmesi için tek bitlik bir bypass register seçer.
+- **SAMPLE/PRELOAD**, normal çalışma sırasında pin değerlerini yakalar ve başka bir instruction'dan önce boundary-scan register'ını önceden yükleyebilir.
 - **EXTEST**, pin durumlarını ayarlar ve okur.
 
-Ayrıca şu komutlar gibi diğer komutları da destekleyebilir:
+Ayrıca şu komutları da destekleyebilir:
 
 - Bir cihazı tanımlamak için **IDCODE**
 - Cihazın dahili testi için **INTEST**
 
-JTAGulator gibi bir araç kullandığınızda bu talimatlarla karşılaşabilirsiniz.
+JTAGulator gibi bir araç kullandığınızda bu instruction'larla karşılaşabilirsiniz.
 
 ### Test Access Port
 
-Boundary scan, genel amaçlı bir port olan dört telli **Test Access Port (TAP)** testlerini içerir. Bu port, bir bileşene yerleşik **JTAG test desteği** işlevlerine erişim sağlar. TAP aşağıdaki beş sinyali kullanır:
+**Test Access Port (TAP)**, bir bileşenin JTAG test logic'ine erişim sağlar. Dört sinyal gereklidir ve `TRST` isteğe bağlıdır:<sup>[[1]](#references)</sup>
 
-- Test clock input (**TCK**) TCK, TAP controller'ın tek bir eylemi ne sıklıkla gerçekleştireceğini, yani state machine'de bir sonraki duruma ne zaman geçeceğini tanımlayan **clock** sinyalidir.
-- Test mode select (**TMS**) input TMS, **finite state machine**'i kontrol eder. Her clock vuruşunda cihazın JTAG TAP controller'ı TMS pinindeki voltajı kontrol eder. Voltaj belirli bir eşik değerinin altındaysa sinyal low kabul edilir ve 0 olarak yorumlanır; voltaj belirli bir eşik değerinin üzerindeyse sinyal high kabul edilir ve 1 olarak yorumlanır.
-- Test data input (**TDI**) TDI, **scan cells üzerinden chip'e veri gönderen** pindir. JTAG bunu tanımlamadığından her vendor bu pin üzerinden iletişim protokolünü tanımlamaktan sorumludur.
-- Test data output (**TDO**) TDO, **chip'ten veri gönderen** pindir.
-- Test reset (**TRST**) input İsteğe bağlı TRST, finite state machine'i **bilinen ve düzgün bir duruma** sıfırlar. Alternatif olarak TMS beş ardışık clock cycle boyunca 1 seviyesinde tutulursa, TRST pininin yapacağı şekilde reset işlemini başlatır; TRST'nin isteğe bağlı olmasının nedeni budur.
+- Test clock input (**TCK**) TCK, TAP controller'ın tek bir action'ı ne sıklıkta gerçekleştireceğini, başka bir deyişle state machine'de bir sonraki state'e ne zaman geçeceğini belirleyen **clock** sinyalidir.
+- Test mode select (**TMS**) input TMS, **finite state machine**'i kontrol eder. Her clock çevriminde cihazın JTAG TAP controller'ı, TMS pinindeki gerilimi kontrol eder. Gerilim belirli bir eşikten düşükse sinyal low kabul edilir ve 0 olarak yorumlanır; belirli bir eşikten yüksekse sinyal high kabul edilir ve 1 olarak yorumlanır.
+- Test data input (**TDI**), seri instruction'ı veya test verisini seçili TAP register'ına kaydırır. IEEE 1149.1, TAP transfer davranışını tanımlar; vendor'lar ise optional instruction'ları ve debug register'larını tanımlar.
+- Test data output (**TDO**) TDO, **chip'ten dışarı data gönderen** pindir.
+- Test reset (**TRST**) input İsteğe bağlı TRST, finite state machine'i **bilinen ve güvenli bir state'e** sıfırlar. Alternatif olarak TMS beş ardışık clock çevrimi boyunca 1 seviyesinde tutulursa reset tetiklenir; bu işlem TRST pininin yaptığıyla aynıdır. Bu nedenle TRST isteğe bağlıdır.
 
-Bazen bu pinleri PCB üzerinde işaretlenmiş olarak bulabilirsiniz. Diğer durumlarda ise bunları **bulmanız** gerekebilir.
+Bazen bu pinleri PCB üzerinde işaretlenmiş olarak bulabilirsiniz. Diğer durumlarda ise onları **bulmanız** gerekebilir.
 
-### Identifying JTAG pins
+### JTAG pinlerini tanımlama
 
-JTAG portlarını tespit etmenin en hızlı, ancak en pahalı yolu, özellikle bu amaç için oluşturulmuş bir cihaz olan **JTAGulator** kullanmaktır (ancak **UART pinout'larını da tespit edebilir**).
+JTAG portlarını tespit etmek için hızlı, amaca özel ancak nispeten pahalı bir seçenek, UART pinout'larını da tanımlayabilen **JTAGulator**'dır.<sup>[[2]](#references)</sup>
 
-Cihazda, board pinlerine bağlayabileceğiniz **24 kanal** bulunur. Ardından **IDCODE** ve **BYPASS** boundary scan komutlarını göndererek tüm olası kombinasyonlar üzerinde bir **BF attack** gerçekleştirir. Bir yanıt alırsa her JTAG sinyaline karşılık gelen kanalı görüntüler.
+Cihazda, board üzerindeki test noktalarına bağlanabilen **24 kanal** bulunur. **IDCODE** ve **BYPASS** scan'lerini kullanarak aday pin kombinasyonlarını sıralar ve tespit edilen JTAG sinyallerine karşılık gelen kanalları bildirir.
 
-JTAG pinout'larını belirlemenin daha ucuz ancak çok daha yavaş bir yolu, Arduino uyumlu bir microcontroller üzerine yüklenen [**JTAGenum**](https://github.com/cyphunk/JTAGenum/) kullanmaktır.
+JTAG pinout'larını tanımlamanın daha ucuz ancak çok daha yavaş bir yolu, Arduino uyumlu bir microcontroller'a yüklenen [**JTAGenum**](https://github.com/cyphunk/JTAGenum/) aracını kullanmaktır.
 
-**JTAGenum** kullanırken öncelikle enumeration için kullanacağınız **probing** cihazının pinlerini tanımlamanız gerekir. Cihazın pinout şemasına başvurmanız ve ardından bu pinleri hedef cihazınızdaki test noktalarına bağlamanız gerekir.
+**JTAGenum** ile önce enumeration için kullanılacak probing microcontroller pinlerini tanımlayın. Pinout'una bakın, ardından bu pinleri hedef board üzerindeki aday test noktalarına bağlayın.<sup>[[3]](#references)</sup>
 
-JTAG pinlerini belirlemenin **üçüncü yolu**, pinout'lardan birini bulmak için **PCB'yi incelemektir**. Bazı durumlarda PCB'ler, board'un bir JTAG connector'ına da sahip olduğunun açık bir göstergesi olan **Tag-Connect interface**'ini uygun şekilde sunabilir. Bu interface'in nasıl göründüğünü [https://www.tag-connect.com/info/](https://www.tag-connect.com/info/) adresinde görebilirsiniz. Ayrıca, **PCB üzerindeki chipset'lerin datasheet'lerini incelemek**, JTAG interface'lerine işaret eden pinout şemalarını ortaya çıkarabilir.
+JTAG pinlerini tanımlamanın **üçüncü yolu**, bilinen bir footprint için **PCB'yi incelemektir**. Bazı board'lar **Tag-Connect** footprint'i sunar. Ancak Tag-Connect, JTAG, SWD, UART veya başka bir interface taşıyabilen bir connector system'dir; tek başına pinlerin JTAG olduğunu kanıtlamaz. Component datasheet'leri ve continuity ölçümleri, gerçek sinyallerin tanımlanmasını sağlar.<sup>[[5]](#references)</sup>
 
 ## SDW
 
-SWD, debugging için tasarlanmış ARM'e özgü bir protokoldür.
+SWD, Arm'ın iki pinli, packet tabanlı debug interface'idir.<sup>[[4]](#references)</sup>
 
-SWD interface'i **iki pin** gerektirir: JTAG'in **TDI ve TDO pinleri ile bir clock** sinyaline eşdeğer olan çift yönlü **SWDIO** sinyali ve JTAG'deki **TCK**'ye eşdeğer olan **SWCLK**. Birçok cihaz, hedefe SWD veya JTAG probe'larından birini bağlamanızı sağlayan, JTAG ve SWD'yi birleştiren **Serial Wire or JTAG Debug Port (SWJ-DP)**'yi destekler.
+Interface, data için çift yönlü **SWDIO** ve clock için **SWCLK** kullanır. Birçok cihaz, ortak pinler üzerinden SWD ve JTAG arasında seçim yapılmasına olanak tanıyan bir **Serial Wire/JTAG Debug Port (SWJ-DP)** uygular.<sup>[[4]](#references)</sup>
 
+## References
+
+- [1] [IEEE 1149.1 çalışma grubu — JTAG ve boundary scan](https://sagroups.ieee.org/1149/1/)
+- [2] [JTAGulator dokümantasyonu](https://github.com/grandideastudio/jtagulator/wiki)
+- [3] [JTAGenum — Arduino JTAG pin enumeration](https://github.com/cyphunk/JTAGenum/)
+- [4] [Arm — Çok cihazlı sistemler için düşük pin sayılı debug interface'leri](https://developer.arm.com/-/media/Arm%20Developer%20Community/PDF/Low_Pin-Count_Debug_Interfaces_for_Multi-device_Systems.pdf)
+- [5] [Tag-Connect — Debug ve programming cable footprint'leri](https://www.tag-connect.com/info/)
 {{#include ../../banners/hacktricks-training.md}}

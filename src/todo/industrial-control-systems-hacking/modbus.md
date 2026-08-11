@@ -1,35 +1,40 @@
-# Modbus Protokolü
+# Modbus Protocol
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Modbus Protokolüne Giriş
+## Modbus'a Giriş
 
-Modbus protokolü, Endüstriyel Otomasyon ve Kontrol Sistemlerinde yaygın olarak kullanılan bir protokoldür. Modbus; programlanabilir mantık denetleyicileri (PLC'ler), sensörler, aktüatörler ve diğer endüstriyel cihazlar gibi çeşitli cihazlar arasında iletişim kurulmasını sağlar. Modbus Protokolünü anlamak önemlidir; çünkü ICS'de en çok kullanılan iletişim protokolüdür ve PLC'leri sniffing, hatta komut enjekte etme açısından geniş bir attack surface barındırır.
+Modbus, PLC'ler, sensörler, aktüatörler ve diğer endüstriyel cihazlar tarafından yaygın olarak uygulanan açık bir application-layer protokolüdür. İstek/yanıt modeli, function code'lar aracılığıyla coil'leri ve register'ları dışa açar. Bu nedenle security testing yalnızca TCP portu 502'yi bulmaya değil; yetkisiz okuma/yazmalara, trafik gözlemine, replay'e ve güvenli olmayan cihaz davranışlarına odaklanır.<sup>[[1]](#references)</sup>
 
-Burada kavramlar, protokolün bağlamını ve çalışma yapısını açıklayacak şekilde maddeler hâlinde sunulmuştur. ICS system security açısından en büyük zorluk, uygulama ve yükseltme maliyetidir. Bu protokoller ve standartlar 80'li ve 90'lı yılların başında tasarlanmış olup hâlâ yaygın olarak kullanılmaktadır. Bir endüstride çok sayıda cihaz ve bağlantı bulunduğundan, cihazları yükseltmek oldukça zordur. Bu durum, hacker'lara eski protokollerle uğraşma konusunda avantaj sağlar. Modbus'a yönelik saldırılar pratikte neredeyse kaçınılmazdır; çünkü işletimi endüstri açısından kritik olduğu sürece yükseltme yapılmadan kullanılmaya devam edecektir.
+Birçok deployment, yükseltmeler downtime, yeniden sertifikalandırma veya field device'ların değiştirilmesini gerektirdiği için legacy serial ekipmanları kullanmaya devam eder. Geleneksel Modbus, confidentiality veya peer authentication sağlamaz; Modbus Security, X.509 certificate'ları ve TCP portu 802'yi kullanan, TLS tabanlı ayrı bir profildir. Specification herkese açık ve bağımsız olarak uygulanabilir olduğundan vendor davranışı ve optional-function desteği değişiklik gösterir; varsayılmamalı, bunun yerine fingerprinting yapılmalıdır.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## Client-Server Mimarisi
 
-Modbus Protokolü genellikle bir master cihazın (client), bir veya daha fazla slave cihazla (server) iletişimi başlattığı Client-Server Architecture yapısında kullanılır. Bu yapı, SPI, I2C vb. teknolojilerle electronics ve IoT alanlarında yaygın olarak kullanılan Master-Slave architecture olarak da adlandırılır.
+Güncel terminolojide bir **client** transaction'ı başlatır ve bir **server** yanıt döndürür. Eski documentation **master/slave** ifadelerini kullanır. Bu application ilişkisini SPI veya I2C ile karıştırmayın: bunlar farklı bus protocol'leridir.<sup>[[1]](#references)</sup>
 
-## Serial ve Etherent Sürümleri
+## Serial ve Ethernet transport'ları
 
-Modbus Protokolü hem Serial Communication hem de Ethernet Communications için tasarlanmıştır. Serial Communication legacy systems sistemlerinde yaygın olarak kullanılırken, modern cihazlar yüksek data rates sunan ve modern industrial networks için daha uygun olan Ethernet'i destekler.
+Aynı Modbus application data'sı serial varyantlar (RTU veya ASCII framing) ve Modbus TCP üzerinden taşınabilir. Modbus TCP bir MBAP header ekler ve normalde TCP portu 502'yi kullanır; serial RTU compact binary framing ve CRC kullanırken, serial ASCII byte'ları hexadecimal karakterler olarak temsil eder ve LRC kullanır.<sup>[[1]](#references)[[3]](#references)</sup>
 
-## Veri Gösterimi
+## Data representation
 
-Veriler Modbus protokolünde ASCII veya Binary olarak iletilir; ancak eski cihazlarla uyumluluğu ve compactibility nedeniyle Binary format kullanılır.
+Data model, single-bit coil/discrete input'lar ile 16-bit input/holding register'lardan oluşur. Multi-register değerleri, byte order, scaling ve semantic anlam cihaza özeldir ve vendor'ın register map'iyle doğrulanmalıdır.<sup>[[1]](#references)</sup>
 
-## Fonksiyon Kodları
+## Function code'lar
 
-ModBus Protokolü, PLC'leri ve çeşitli control devices cihazlarını çalıştırmak için kullanılan belirli function codes iletimini temel alır. Bu bölümün anlaşılması önemlidir; çünkü replay attacks, function codes yeniden iletilerek gerçekleştirilebilir. Legacy devices, data transmission için herhangi bir encryption desteklemez ve genellikle kendilerini birbirine bağlayan uzun kablolara sahiptir. Bu durum, bu kabloların kurcalanmasına ve verilerin yakalanıp enjekte edilmesine yol açar.
+Function code'lar coil'leri (`0x01`) okuma, holding register'ları (`0x03`) okuma, tek bir coil/register yazma (`0x05`/`0x06`) ve birden fazla coil/register yazma (`0x0F`/`0x10`) gibi işlemleri seçer. Yakalanan bir write request, deployment herhangi bir compensating authentication veya process-state check içermediğinde replay edilebilir. Uzun serial hatlara yetkili fiziksel erişimi olan bir assessor, electrical interface'i, termination'ı ve güvenli bağlantı yöntemini belirledikten sonra doğrudan kablolama üzerinden frame'leri de yakalayabilir veya inject edebilir. Her iki işlem de fiziksel process'i etkileyebilir; bu nedenle bir lab veya açık operational authorization kullanın.<sup>[[1]](#references)[[3]](#references)</sup>
 
-## Modbus Adresleme
+## Addressing
 
-Ağdaki her cihaz, cihazlar arasındaki iletişim için gerekli olan benzersiz bir adrese sahiptir. Modbus RTU, Modbus TCP vb. protokoller adreslemeyi uygulamak için kullanılır ve data transmission için bir transport layer görevi görür. Aktarılan veriler, mesajı içeren Modbus protokolü formatındadır.
+Serial cihazlar bir unit address kullanır. Modbus TCP, IP addressing'e ek olarak MBAP header içinde bir Unit Identifier kullanır; bu, istekleri downstream unit'lere yönlendiren TCP-to-serial gateway'lerinde özellikle önemlidir. Product documentation tarafından gösterilen register reference'ları one-based (`40001`), protocol address'leri ise zero-based olabilir; bu durum off-by-one hatalarının yaygın bir kaynağıdır.<sup>[[1]](#references)[[3]](#references)</sup>
 
-Ayrıca Modbus, iletilen verilerin bütünlüğünü sağlamak için error checks de uygular. Ancak her şeyden önce Modbus bir Open Standard'dır ve herkes bunu kendi cihazlarında uygulayabilir. Bu durum, protokolün global standard hâline gelmesini ve industrial automation industry genelinde yaygınlaşmasını sağlamıştır.
+Serial framing transmission-error check'leri (RTU için CRC ve ASCII için LRC) içerir ve TCP normal transport checksum'ını sağlar. Bunlar accidental corruption'ı tespit eder; cryptographic integrity veya origin authentication sağlamaz.<sup>[[3]](#references)</sup>
 
-Yaygın kullanımı ve yükseltmelerin eksikliği nedeniyle Modbus'a saldırmak, attack surface açısından önemli bir avantaj sağlar. ICS, cihazlar arasındaki iletişime büyük ölçüde bağımlıdır ve bu cihazlara yönelik herhangi bir saldırı, industrial systems işletimi açısından tehlikeli olabilir. İletim ortamı attacker tarafından tespit edilirse replay, data injection, data sniffing ve leak, Denial of Service, data forgery vb. saldırılar gerçekleştirilebilir.
+Yetkili bir assessment sırasında exposure'ı, izin verilen function code'ları, yazılabilir address range'lerini, exception handling'i, rate limit'lerini ve network segmentation veya Modbus-aware firewall'ın client'ları kısıtlayıp kısıtlamadığını test edin. İlgili tehditler arasında passive disclosure, unauthorized command injection, replay, data forgery ve denial of service bulunur. Görünüşte küçük register değişiklikleri fiziksel bir process'i değiştirebileceğinden, tüm active test'leri process owner'larıyla koordine edin.
 
+## References
+
+- [1] [Modbus Organization — Modbus Application Protocol Specification V1.1b3](https://www.modbus.org/file/secure/modbusprotocolspecification.pdf)
+- [2] [Modbus Organization — Modbus Security Protocol ve implementation guides](https://www.modbus.org/modbus-specifications)
+- [3] [Modbus Organization — Modbus over Serial Line Specification ve Implementation Guide V1.02](https://www.modbus.org/file/secure/modbusoverserial.pdf)
 {{#include ../../banners/hacktricks-training.md}}

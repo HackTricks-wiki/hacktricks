@@ -2,62 +2,69 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Temel Bilgiler
+## Basic Information
 
-SPI (Serial Peripheral Interface), embedded systems içinde IC'ler (Integrated Circuits) arasındaki kısa mesafeli iletişim için kullanılan Synchronous Serial Communication Protocol'dür. SPI Communication Protocol, Clock ve Chip Select Signal tarafından yönetilen master-slave mimarisini kullanır. Master-slave mimarisi, EEPROM, sensörler, kontrol cihazları vb. harici peripheral'ları yöneten bir master'dan (genellikle bir microprocessor) oluşur; bu harici peripheral'lar slave olarak kabul edilir.
+SPI (Serial Peripheral Interface), entegre devreler arasındaki kısa mesafeli iletişimde yaygın olarak kullanılan senkron bir serial bus'tır. Bir controller clock sinyalini sağlar ve chip-select sinyali kullanarak EEPROM, sensor veya control device gibi bir peripheral'ı seçer.<sup>[[1]](#references)</sup>
 
-Bir master'a birden fazla slave bağlanabilir, ancak slave'ler birbirleriyle iletişim kuramaz. Slave'ler clock ve chip select olmak üzere iki pin tarafından yönetilir. SPI bir synchronous communication protocol olduğundan, input ve output pin'leri clock signal'larını takip eder. Chip select, master tarafından bir slave'i seçmek ve onunla etkileşim kurmak için kullanılır. Chip select high olduğunda slave device seçilmemiştir; low olduğunda ise chip seçilmiştir ve master slave ile etkileşim kurar.
+Birden fazla peripheral, clock ve data hatlarını paylaşabilir; normalde her peripheral için ayrı bir chip-select bulunur. Transferleri controller yönetir; peripheral'lar SPI bus üzerinden genellikle birbirleriyle doğrudan iletişim kurmaz. Chip-select polarity ve timing cihaza özeldir; active-low selection yaygındır ancak evrensel değildir. SPI; discovery, addressing, commands veya tek bir maximum transfer length tanımlamaz, bu nedenle her zaman hedef datasheet'ine başvurun.<sup>[[1]](#references)</sup>
 
-MOSI (Master Out, Slave In) ve MISO (Master In, Slave Out), veri gönderme ve alma işlemlerinden sorumludur. Veri, chip select low tutulurken MOSI pini üzerinden slave device'a gönderilir. Input data, slave device vendor'ının datasheet'ine göre instruction'lar, memory address'ler veya data içerir. Geçerli bir input alındığında MISO pini, master'a data iletmekten sorumludur. Output data, input sona erdikten sonraki clock cycle'da gönderilir. MISO pin'leri, data tamamen iletilene veya master chip select pin'ini high yapana kadar data iletir (bu durumda slave iletimi durdurur ve master bu clock cycle'dan sonra dinlemez).
+MOSI/COPI, controller-to-peripheral data taşır; MISO/CIPO ise peripheral-to-controller data taşır. Her iki yön de aynı anda shift edilebilir. Bir command, address, dummy cycles ve döndürülen data arasındaki ilişki peripheral tarafından tanımlanır; SPI tarafından değil. Bu ilişki clock polarity ve phase'e (modes 0–3) bağlıdır. Output'un input sona erdikten tam olarak bir clock sonra başladığını varsaymayın.<sup>[[1]](#references)</sup>
 
-## EEPROM'lardan Firmware Dumping
+## Dumping Firmware from EEPROMs
 
-Firmware dumping, firmware'i analiz etmek ve içindeki vulnerability'leri bulmak için faydalı olabilir. Çoğu zaman firmware internet üzerinde mevcut değildir veya model number, version vb. faktörlerdeki farklılıklar nedeniyle geçersizdir. Bu nedenle firmware'i doğrudan physical device'dan çıkarmak, threat hunting sırasında spesifik sonuçlar elde etmek için faydalı olabilir.
+Firmware dumping, firmware'i analiz etmek ve vulnerabilities bulmak için yararlı olabilir. Doğru image çevrimiçi olarak bulunamayabilir veya model, hardware revision ya da version'a göre farklılık gösterebilir; bu nedenle firmware'i doğrudan physical device'dan çıkarmak, tam bir assessment target sağlar.
 
-Serial Console edinmek faydalı olabilir, ancak çoğu zaman dosyaların read-only olduğu görülür. Bu durum, çeşitli nedenlerden dolayı analizi kısıtlar. Örneğin package göndermek ve almak için gerekli tool'lar firmware'de bulunmayabilir. Bu nedenle binary'leri reverse engineer etmek üzere çıkarmak uygulanabilir değildir. Dolayısıyla tüm firmware'in system'e dump edilmesi ve analiz için binary'lerin çıkarılması çok faydalı olabilir.
+Bir serial console yardımcı olabilir, ancak filesystem'i read-only olabilir ve target'ta test traffic göndermek/almak veya binaries'leri uygun şekilde extract etmek için gereken utilities dahil olmak üzere analysis tools bulunmayabilir. Offline image, complete flash layout'u korur ve running target'ı değiştirmeden filesystem extraction ile reverse engineering yapılmasına olanak tanır.
 
-Ayrıca red teaming sırasında ve device'lara physical access elde edildiğinde firmware dumping, dosyaların değiştirilmesine veya malicious file'ların inject edilmesine ve ardından memory'ye yeniden flash'lanmasına yardımcı olabilir. Bu da device'a backdoor implant etmek için faydalı olabilir. Bu nedenle firmware dumping ile çok sayıda olasılığın önü açılabilir.
+Yetkili bir physical assessment sırasında verified dump, controlled modification ve reflashing tests için de kullanılabilir. Buna, firmware-level persistence'ı göstermek amacıyla dosyaları değiştirmek veya bir test payload/backdoor inject etmek dahildir. Herhangi bir write işleminden önce birbiriyle eşleşen birden fazla read'i ve original image'ı koruyun: yanlış voltage, chip selection, layout veya image cihazı brick edebilir.
 
-### CH341A EEPROM Programmer ve Reader
+### CH341A EEPROM Programmer and Reader
 
-Bu device, EEPROM'lardan firmware dump etmek ve firmware file'larıyla yeniden flash'lamak için kullanılan ucuz bir tool'dur. Computer BIOS chip'leriyle (bunlar yalnızca EEPROM'dur) çalışmak için popüler bir tercihtir. Bu device USB üzerinden bağlanır ve çalışmaya başlamak için minimum tool gerektirir. Ayrıca genellikle işlemi hızlıca tamamlar; bu nedenle physical device access sırasında da faydalı olabilir.
+Bu düşük maliyetli USB tool, uyumlu serial EEPROM ve SPI flash device'larını dump ve reflash edebilir. PC BIOS/UEFI firmware'ini depolayan SPI NOR flash chip'leriyle yaygın olarak kullanılır ve süreyle sınırlı physical access sırasında kullanışlıdır.
 
-![drawing](../../images/board_image_ch341a.jpg)
+![çizim](../../images/board_image_ch341a.jpg)
 
-EEPROM memory'yi CH341a Programmer'a bağlayın ve device'ı computer'a takın. Device algılanmıyorsa computer'a driver yüklemeyi deneyin. Ayrıca EEPROM'un doğru yönde bağlandığından emin olun (genellikle VCC Pin'ini USB connector'a göre ters yönde yerleştirin); aksi takdirde software chip'i algılayamaz. Gerekirse diyagrama bakın:
+Flash memory'yi CH341A'ya bağlayın ve ardından programmer'ı computer'a bağlayın. Programmer'ın kendisi detect edilmezse target chip'i troubleshoot etmeden önce USB cable'ı, OS permissions'ı ve uygun CH341A driver'ını kontrol edin. Datasheet'ler veya bir meter kullanarak chip'in voltage'ını, pin 1'i, adapter wiring'ini ve programmer output'unu doğrulayın—**VCC'yi USB connector'ın karşısına yerleştirmek** gibi bir kurala güvenmeyin. Yanlış orientation veya 3.3/1.8 V'luk bir parçaya 5 V uygulanması parçayı bozabilir. In-circuit read işlemleri, board'un geri kalanının bus'ı yüklemesi veya beslemesi nedeniyle başarısız olabilir.<sup>[[2]](#references)</sup>
 
-![drawing](../../images/connect_wires_ch341a.jpg) ![drawing](../../images/eeprom_plugged_ch341a.jpg)
+![çizim](../../images/connect_wires_ch341a.jpg) ![çizim](../../images/eeprom_plugged_ch341a.jpg)
 
-Son olarak firmware'i dump etmek için flashrom, G-Flash (GUI) vb. software'leri kullanın. G-Flash, hızlı çalışan ve EEPROM'u otomatik olarak algılayan minimal bir GUI tool'udur. Firmware'in çok fazla documentation ile uğraşmadan hızlıca çıkarılması gerektiğinde faydalı olabilir.
+Chip'i okumak için `flashrom` veya G-Flash gibi software'ler kullanın. G-Flash minimal bir GUI'dir ve uyumlu device'ları otomatik olarak detect edebilir; bu, hızlı acquisition sırasında kullanışlı olabilir, ancak detect edilen model ve voltage'ı kendiniz doğrulayın. Exact programmer'ı ve gerektiğinde exact chip model'ini belirtin; bir dump'ı reliable kabul etmeden önce en az iki read gerçekleştirin ve hash'lerini karşılaştırın.<sup>[[2]](#references)</sup>
 
-![drawing](../../images/connected_status_ch341a.jpg)
+![çizim](../../images/connected_status_ch341a.jpg)
 
-Firmware dump edildikten sonra analiz binary file'lar üzerinde yapılabilir. strings, hexdump, xxd, binwalk vb. tool'lar firmware ve hatta tüm file system hakkında çok miktarda information çıkarmak için kullanılabilir.
+Firmware dump edildikten sonra analysis binary files üzerinde yapılabilir. Firmware ve tüm filesystem hakkında çok miktarda information extract etmek için strings, hexdump, xxd, binwalk vb. tools kullanılabilir.
 
-Firmware içeriğini çıkarmak için binwalk kullanılabilir. Binwalk hex signature'larını analiz eder, binary file içindeki file'ları tespit eder ve bunları çıkarabilir.
+Initial triage için Binwalk, known signatures'ları tarayabilir ve supported embedded content'i extract edebilir:
 ```
 binwalk -e <filename>
 ```
-Bu, kullanılan araçlara ve yapılandırmalara bağlı olarak `.bin` veya `.rom` olabilir.
+Çıktı dosyası `.bin`, `.rom` veya başka bir uzantı kullanabilir; uzantı formatı belirlemez.
 
 > [!CAUTION]
-> Firmware extraction işleminin hassas bir süreç olduğunu ve büyük ölçüde sabır gerektirdiğini unutmayın. Yanlış bir işlem firmware'i bozabilir, hatta tamamen silebilir ve cihazı kullanılamaz hâle getirebilir. Firmware extraction işlemine başlamadan önce belirli cihazı incelemeniz önerilir.
+> Firmware çıkarma işleminin hassas bir süreç olduğunu ve büyük ölçüde sabır gerektirdiğini unutmayın. Herhangi bir yanlış işlem firmware'i bozabilir, hatta tamamen silebilir ve cihazı kullanılamaz hâle getirebilir. Firmware'i çıkarmayı denemeden önce ilgili cihazı incelemeniz önerilir.
 
 ### Bus Pirate + flashrom
 
 ![CH341A EEPROM Programmer and Reader - Bus Pirate + flashrom: Bus Pirate + flashrom](<../../images/image (910).png>)
 
-Pirate Bus'un PINOUT'unda SPI'ye bağlanmak için **MOSI** ve **MISO** pinleri gösterilse bile bazı SPI'larda pinler DI ve DO olarak gösterilebilir. **MOSI -> DI, MISO -> DO**
+Bazı datasheet'lerde hedef pinleri `DI` ve `DO` olarak adlandırılır: geleneksel tek veri hatlı flash bağlantısında kontrolcü **MOSI/COPI, DI'ye bağlanır** ve kontrolcü **MISO/CIPO, DO'ya bağlanır**. Dual/quad I/O parçaları diğer modlarda pinleri yeniden kullandığından hedef datasheet'ini doğrulayın.
 
-![CH341A EEPROM Programmer and Reader - Bus Pirate + flashrom: Pirate Bus'un PINOUT'unda SPI'ye bağlanmak için MOSI ve MISO pinleri gösterilse bile bazı SPI'larda pinler...](<../../images/image (360).png>)
+![CH341A EEPROM Programmer and Reader - Bus Pirate + flashrom: Note that even if the PINOUT of the Pirate Bus indicates pins for MOSI and MISO to connect to SPI however some SPIs may...](<../../images/image (360).png>)
 
-Windows veya Linux'ta, aşağıdakine benzer bir komut çalıştırarak flash memory içeriğini dump etmek için [**`flashrom`**](https://www.flashrom.org/Flashrom) programını kullanabilirsiniz:
+Windows veya Linux'ta, flash belleğin içeriğini aşağıdakine benzer bir komut çalıştırarak almak için [**`flashrom`**](https://www.flashrom.org/Flashrom) programını kullanabilirsiniz:
 ```bash
 # In this command we are indicating:
 # -VV Verbose
-# -c <chip> The chip (if you know it better, if not, don'tindicate it and the program might be able to find it)
-# -p <programmer> In this case how to contact th chip via the Bus Pirate
+# -c <chip> Exact chip model (omit it to let flashrom probe candidates)
+# -p <programmer> Programmer configuration; here, the Bus Pirate connection
 # -r <file> Image to save in the filesystem
 flashrom -VV -c "W25Q64.V" -p buspirate_spi:dev=COM3 -r flash_content.img
 ```
+Recent Bus Pirate dokümantasyonu isteğe bağlı `serialspeed` ve `spispeed` parametrelerini de gösterir. Uzun kablolar veya devre içi yükleme okumaların kararsız olmasına neden oluyorsa temkinli bir hızla başlayın.<sup>[[3]](#references)</sup>
+
+## References
+
+- [1] [Analog Devices — SPI Arayüzüne Giriş](https://www.analog.com/en/resources/analog-dialogue/articles/introduction-to-spi-interface.html)
+- [2] [flashrom kılavuzu — CH341A SPI programlayıcısı ve okuma/yazma seçenekleri](https://flashrom.org/classic_cli_manpage.html)
+- [3] [Bus Pirate dokümantasyonu — flashrom](https://docs.buspirate.com/docs/software/flashrom/)
 {{#include ../../banners/hacktricks-training.md}}

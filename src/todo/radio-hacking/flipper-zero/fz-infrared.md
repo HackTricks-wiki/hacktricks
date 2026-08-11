@@ -13,29 +13,27 @@ Kızılötesinin nasıl çalıştığı hakkında daha fazla bilgi için:
 
 ## Flipper Zero'da IR Sinyal Alıcısı <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
-Flipper, **IR uzaktan kumandalarından gelen sinyallerin yakalanmasına olanak tanıyan** TSOP adlı dijital bir IR sinyal alıcısı kullanır. Xiaomi gibi IR bağlantı noktasına sahip bazı **akıllı telefonlar** da vardır, ancak **çoğunun yalnızca sinyal gönderebildiğini** ve **sinyal alamadığını** unutmayın.<sup>[[1]](#references)</sup>
+Flipper Zero, yaygın IR kumandalarından sinyalleri yakalamak için demodülasyon yapan bir IR alıcısı kullanır. Bazı telefonlarda, belirli Xiaomi modelleri de dahil olmak üzere, IR vericisi bulunur; ancak çoğu telefon uzaktan kumanda sinyallerini alamaz ve decode edemez.<sup>[[1]](#references)</sup>
 
-Flipper'ın kızılötesi **alıcısı oldukça hassastır**. Hatta kumanda ile TV'nin **arasında bir yerde** dururken bile **sinyali yakalayabilirsiniz**. Kumandayı doğrudan Flipper'ın IR bağlantı noktasına doğrultmak gerekli değildir. Bu, biri TV'nin yanında durarak kanalları değiştirirken sizin ve Flipper'ın biraz uzakta olduğunuz durumlarda işe yarar.
+Flipper'ın infrared **alıcısı oldukça hassastır**. Kumanda ile TV'nin **arasında bir yerde** dururken bile **sinyali yakalayabilirsiniz**. Kumandayı doğrudan Flipper'ın IR portuna doğrultmak gerekli değildir. Bu, biri TV'nin yanında durarak kanal değiştirirken ve siz ile Flipper TV'den biraz uzaktayken işe yarar.
 
-Kızılötesi sinyalin **kod çözme işlemi** yazılım tarafında gerçekleştiği için Flipper Zero, potansiyel olarak **her türlü IR uzaktan kumanda kodunu almayı ve iletmeyi** destekler. Tanınamayan ve **bilinmeyen** protokoller söz konusu olduğunda sinyali alınan haliyle **kaydeder ve oynatır**.<sup>[[1]](#references)</sup>
+Protocol decoding software'de gerçekleşir. Tanınan protokoller decode edilmiş komutlar olarak saklanabilir; desteklenmeyen protokoller ise donanımın taşıyıcı frekansı ve zamanlama sınırlarına tabi olarak ham zamanlama verileri şeklinde yakalanıp yeniden oynatılabilir.<sup>[[1]](#references)</sup>
 
-## Eylemler
+## İşlemler
 
 ### Evrensel Kumandalar
 
-Flipper Zero, **herhangi bir TV'yi, klimayı veya medya merkezini kontrol etmek için evrensel kumanda** olarak kullanılabilir. Bu modda Flipper, **SD karttaki sözlüğe göre** desteklenen tüm üreticilerin **bilinen tüm kodlarına bruteforce uygular**. Bir restoranın TV'sini kapatmak için belirli bir kumanda seçmenize gerek yoktur.<sup>[[1]](#references)</sup>
+Flipper Zero'nun evrensel kumanda modu, desteklenen TV'ler, ses ekipmanları, projektörler ve klimalar için infrared veritabanındaki bilinen komutlar arasında sırayla geçiş yapar. Her cihazı kontrol edeceği garanti edilmez ve yalnızca sahibi olduğunuz veya test etme yetkiniz bulunan ekipmanlarda kullanılmalıdır.<sup>[[1]](#references)</sup>
 
-Evrensel Kumanda modunda güç düğmesine basmak yeterlidir; Flipper bildiği tüm TV'lerin **"Power Off"** komutlarını sırayla gönderir: Sony, Samsung, Panasonic... ve diğerleri. TV kendi sinyalini aldığında tepki verir ve kapanır.
+Universal Remote modunda güç düğmesine basmak yeterlidir; Flipper bildiği tüm TV'lerin **"Power Off"** komutlarını **sırayla gönderir**: Sony, Samsung, Panasonic... ve diğerleri. TV sinyali aldığında tepki verir ve kapanır.
 
-Bu tür bir bruteforce zaman alır. Sözlük ne kadar büyükse işlemin tamamlanması da o kadar uzun sürer. TV'den herhangi bir geri bildirim gelmediği için TV'nin tam olarak hangi sinyali tanıdığını öğrenmek mümkün değildir.
+Bu tür brute-force işlemi zaman alır. Dictionary ne kadar büyükse tamamlanması da o kadar uzun sürer. TV'den herhangi bir geri bildirim gelmediği için TV'nin tam olarak hangi sinyali tanıdığını öğrenmek mümkün değildir.
 
-### Yeni Kumanda Öğren
+### Yeni Kumanda Öğrenme
 
-Flipper Zero ile **bir kızılötesi sinyali yakalamak** mümkündür. Sinyali **veritabanında bulursa** Flipper bunun **hangi cihaza ait olduğunu otomatik olarak bilir** ve cihazla etkileşim kurmanıza olanak tanır.\
-Bulamazsa Flipper **sinyali depolayabilir** ve **yeniden oynatmanıza** izin verir.<sup>[[1]](#references)</sup>
+Flipper Zero **bir infrared sinyalini yakalayabilir**. Protocol ve komutu tanırsa decode edilmiş bir gösterim saklar; aksi takdirde daha sonra yeniden oynatmak üzere ham zamanlama verilerini saklayabilir.<sup>[[1]](#references)</sup>
 
-## Kaynaklar
+## References
 
-- [1] [Flipper Zero'nun Kızılötesi Bağlantı Noktasıyla TV'leri Ele Geçirmek](https://blog.flipperzero.one/infrared/)
-
+- [1] [Flipper Zero Infrared Port ile TV'leri Ele Geçirme](https://blog.flipperzero.one/infrared/)
 {{#include ../../../banners/hacktricks-training.md}}

@@ -4,31 +4,31 @@
 
 ## Giriş
 
-iButton, **bozuk para şeklindeki metal bir kapsül** içine yerleştirilmiş elektronik bir identification key için kullanılan genel bir addır. Ayrıca Dallas Touch Memory veya contact memory olarak da adlandırılır. Sıklıkla yanlış şekilde “manyetik” key olarak anılsa da içinde **manyetik hiçbir şey yoktur**. Aslında içerisinde dijital bir protokol üzerinden çalışan tam teşekküllü bir **microchip** gizlidir.<sup>[[1]](#references)</sup>
+iButton, **madeni para şeklindeki metal bir muhafazaya** yerleştirilmiş elektronik bir kimlik anahtarı için kullanılan genel bir addır. Ayrıca Dallas Touch Memory veya contact memory olarak da adlandırılır. Sıklıkla yanlışlıkla “manyetik” bir anahtar olarak anılsa da içinde **hiçbir manyetik unsur** bulunmaz. Aslında içinde dijital bir protokol üzerinden çalışan tam teşekküllü bir **microchip** gizlidir.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../images/image (915).png" alt=""><figcaption></figcaption></figure>
 
 ### iButton nedir? <a href="#what-is-ibutton" id="what-is-ibutton"></a>
 
-Genellikle iButton, key'in ve okuyucunun fiziksel biçimini ifade eder: iki kontağı olan yuvarlak bir bozuk para. Key'i çevreleyen çerçeve için, delikli en yaygın plastik tutucudan halkalara, kolyelere ve benzerlerine kadar çok sayıda varyasyon bulunur.
+iButton adı, dayanıklı madeni para şeklindeki muhafazayı ve kontak düzenini ifade eder. Taşıyıcılar arasında plastik anahtarlıklar, yüzükler ve kolyeler bulunur.
 
 <figure><img src="../../images/image (1078).png" alt=""><figcaption></figcaption></figure>
 
-Key okuyucuya ulaştığında, **kontaklar birbirine dokunur** ve key, ID'sini **iletmek** için güç alır. Bazen bir intercom'un **contact PSD'si olması gerekenden daha büyük** olduğu için key hemen **okunmaz**. Bu nedenle key'in ve okuyucunun dış hatları birbirine dokunamayabilir. Böyle bir durumda key'i okuyucunun duvarlarından birine bastırmanız gerekir.<sup>[[1]](#references)</sup>
+Her iki kontak okuyucuya temas ettiğinde cihaz güç alır ve veri alışverişi yapar. Girintili kontak geometrisi dış toprak kontaklarının birbirine temas etmesini engelliyorsa anahtarı okuyucunun duvarına doğru eğmek teması yeniden sağlayabilir.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../images/image (290).png" alt=""><figcaption></figcaption></figure>
 
-### **1-Wire protokolü** <a href="#id-1-wire-protocol" id="id-1-wire-protocol"></a>
+### **1-Wire protocol** <a href="#id-1-wire-protocol" id="id-1-wire-protocol"></a>
 
-Dallas key'leri, 1-wire protokolünü kullanarak veri alışverişi yapar. Her iki yöndeki veri aktarımı için yalnızca tek bir data kontağı (!!) kullanılır; Master'dan Slave'e ve tersi yönde. 1-wire protokolü Master-Slave modeline göre çalışır. Bu topolojide iletişimi her zaman Master başlatır ve Slave, Master'ın talimatlarını izler.
+Dallas/Maxim anahtarları 1-Wire protocol kullanır: bir veri kontağı çift yönlü trafiği taşır ve parazitik güç de sağlayabilir; metal muhafaza ise dönüş kontağıdır. Controller işlemleri başlatır ve cihaz yanıt verir.<sup>[[2]](#references)</sup>
 
-Key (Slave) intercom'a (Master) temas ettiğinde, key'in içindeki chip intercom tarafından beslenerek açılır ve key initialize edilir. Bunun ardından intercom key'in ID'sini ister. Şimdi bu sürece daha ayrıntılı olarak bakacağız.
+Anahtar (Slave) intercom'a (Master) temas ettiğinde anahtarın içindeki chip intercom tarafından beslenerek açılır ve anahtar başlatılır. Ardından intercom anahtar ID'sini ister. Şimdi bu sürece daha ayrıntılı olarak bakacağız.
 
-Flipper hem Master hem de Slave modlarında çalışabilir. Key okuma modunda Flipper, okuyucu gibi davranır; yani Master olarak çalışır. Key emulation modunda ise Flipper bir key gibi davranır ve Slave modundadır.<sup>[[1]](#references)</sup>
+Flipper, bir anahtarı okurken controller olarak ve kayıtlı bir identifier'ı okuyucuya sunarken emulated device olarak çalışabilir.<sup>[[1]](#references)</sup>
 
-### Dallas, Cyfral & Metakom key'leri
+### Dallas, Cyfral & Metakom keys
 
-Bu key'lerin nasıl çalıştığı hakkında bilgi için [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/) sayfasına bakın.<sup>[[1]](#references)</sup>
+Bu anahtarların nasıl çalıştığı hakkında bilgi için [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/) sayfasına bakın.<sup>[[1]](#references)</sup>
 
 ### Saldırılar
 
@@ -39,8 +39,8 @@ iButton'lara Flipper Zero ile saldırılabilir:
 flipper-zero/fz-ibutton.md
 {{#endref}}
 
-## Referanslar
+## References
 
-- [1] [Taming iButton with Flipper Zero](https://blog.flipperzero.one/taming-ibutton/)
-
+- [1] [Flipper Zero ile iButton'ı evcilleştirme](https://blog.flipperzero.one/taming-ibutton/)
+- [2] [Analog Devices — yazılım üzerinden 1-Wire iletişimi](https://www.analog.com/en/resources/technical-articles/1wire-communication-through-software.html)
 {{#include ../../banners/hacktricks-training.md}}

