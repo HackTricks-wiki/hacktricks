@@ -161,8 +161,11 @@ Binary-to-image helper:
 
 - [https://www.branah.com/braille-translator](https://www.branah.com/braille-translator)
 
+For broader collections of steganography utilities and technique-specific resources, see the bundled stego-toolkit and 0xRick's curated list.<sup>[[1]](#references)[[2]](#references)</sup>
+
 ## References
 
 - [1] [DominicBreuker/stego-toolkit - Docker image with the most popular steganography tools bundled together](https://github.com/DominicBreuker/stego-toolkit)
+- [2] [0xRick - Steganography Resources](https://0xrick.github.io/lists/stego/)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -106,6 +106,8 @@ sftp -P 8888 127.0.0.1
 
 [Penelope](https://github.com/brightio/penelope) automatically upgrades Unix-like reverse shells to PTY, resizes Unix-like terminals, and logs shell interactions; for Windows shells it provides readline but not real-time terminal resizing.<sup>[[2]](#references)</sup>
 
+![Penelope reverse-shell handler interface](https://github.com/user-attachments/assets/27ab4b3a-780c-4c07-a855-fd80a194c01e)
+
 Run `penelope` to listen on `0.0.0.0:4444` by default; incoming Unix-like shells can then be auto-upgraded and logged.<sup>[[2]](#references)</sup>
 
 ## No TTY

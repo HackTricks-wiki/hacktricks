@@ -127,7 +127,11 @@ Certificate Transparency (CT) logs expose certificate identities, so searching S
 
 Patrik Hudak's original [phishing-domain hunting write-up](https://0xpatrik.com/phishing-domains/) demonstrates this workflow in Censys, including filters for certificate date and issuer such as Let's Encrypt.<sup>[[13]](#references)</sup>
 
+![Censys certificate results filtered for suspicious identities](<../../images/image (1115).png>)
+
 You can also use the free [**crt.sh**](https://crt.sh) service to search for a keyword and filter results by date and CA.<sup>[[13]](#references)</sup>
+
+![crt.sh certificate-transparency results and matching identities](<../../images/image (519).png>)
 
 Its Matching Identities field can help compare identities from the real domain with suspicious domains, but treat matches as leads rather than proof.<sup>[[13]](#references)</sup>
 

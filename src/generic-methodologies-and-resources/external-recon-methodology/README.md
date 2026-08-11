@@ -134,6 +134,8 @@ cat my_targets.txt | xargs -I %% bash -c 'echo "http://%%/favicon.ico"' > target
 python3 favihash.py -f https://target/favicon.ico -t targets.txt -s
 ```
 
+![Favihash results used to discover domains sharing a favicon hash](https://www.infosecmatter.com/wp-content/uploads/2020/07/favihash.jpg)
+
 Simply said, favihash will allow us to discover domains that have the same favicon icon hash as our target.
 
 Use a known favicon hash as a Shodan or FOFA pivot to find other exposed instances of the same technology.<sup>[[5]](#references)</sup>
