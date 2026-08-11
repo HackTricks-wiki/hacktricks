@@ -2,34 +2,39 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Εισαγωγή στο πρωτόκολλο Modbus
+## Εισαγωγή στο Modbus
 
-Το πρωτόκολλο Modbus είναι ένα ευρέως χρησιμοποιούμενο πρωτόκολλο στα Συστήματα Βιομηχανικού Αυτοματισμού και Ελέγχου. Το Modbus επιτρέπει την επικοινωνία μεταξύ διαφόρων συσκευών, όπως programmable logic controllers (PLCs), αισθητήρων, ενεργοποιητών και άλλων βιομηχανικών συσκευών. Η κατανόηση του πρωτοκόλλου Modbus είναι απαραίτητη, καθώς είναι το πιο χρησιμοποιούμενο πρωτόκολλο επικοινωνίας στα ICS και διαθέτει μεγάλη attack surface για sniffing, ακόμη και για injecting εντολών σε PLCs.
+Το Modbus είναι ένα ανοικτό πρωτόκολλο επιπέδου εφαρμογής, το οποίο υλοποιείται ευρέως από PLCs, αισθητήρες, actuators και άλλες βιομηχανικές συσκευές. Το μοντέλο request/response εκθέτει coils και registers μέσω function codes. Επομένως, το security testing επικεντρώνεται σε μη εξουσιοδοτημένες αναγνώσεις/εγγραφές, παρατήρηση traffic, replay και μη ασφαλή συμπεριφορά συσκευών — όχι απλώς στον εντοπισμό της TCP port 502.<sup>[[1]](#references)</sup>
 
-Εδώ, οι έννοιες παρουσιάζονται σημειακά, παρέχοντας το πλαίσιο του πρωτοκόλλου και της φύσης λειτουργίας του. Η μεγαλύτερη πρόκληση στην ασφάλεια των συστημάτων ICS είναι το κόστος υλοποίησης και αναβάθμισης. Αυτά τα πρωτόκολλα και πρότυπα σχεδιάστηκαν στις αρχές των δεκαετιών του '80 και του '90 και εξακολουθούν να χρησιμοποιούνται ευρέως. Καθώς μια βιομηχανία διαθέτει πολλές συσκευές και συνδέσεις, η αναβάθμιση των συσκευών είναι πολύ δύσκολη, γεγονός που παρέχει στους hackers το πλεονέκτημα να αντιμετωπίζουν παρωχημένα πρωτόκολλα. Οι επιθέσεις στο Modbus είναι πρακτικά αναπόφευκτες, καθώς θα χρησιμοποιείται χωρίς αναβάθμιση, εφόσον η λειτουργία του είναι κρίσιμη για τη βιομηχανία.
+Πολλές εγκαταστάσεις διατηρούν legacy serial εξοπλισμό, επειδή οι αναβαθμίσεις απαιτούν downtime, επαναπιστοποίηση ή αντικατάσταση field devices. Το παραδοσιακό Modbus δεν παρέχει ούτε confidentiality ούτε peer authentication. Το Modbus Security είναι ένα ξεχωριστό TLS-based profile που χρησιμοποιεί X.509 certificates και την TCP port 802. Επειδή η specification είναι δημόσια και μπορεί να υλοποιηθεί ανεξάρτητα, η συμπεριφορά των vendors και η υποστήριξη optional functions διαφέρουν και θα πρέπει να γίνεται fingerprinting αντί να θεωρούνται δεδομένες.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## Η αρχιτεκτονική Client-Server
 
-Το πρωτόκολλο Modbus χρησιμοποιείται συνήθως σε αρχιτεκτονική Client-Server, όπου μια master συσκευή (client) ξεκινά την επικοινωνία με μία ή περισσότερες slave συσκευές (servers). Αυτό αναφέρεται επίσης ως αρχιτεκτονική Master-Slave, η οποία χρησιμοποιείται ευρέως στα ηλεκτρονικά και στο IoT με SPI, I2C κ.λπ.
+Στη σύγχρονη ορολογία, ένας **client** ξεκινά μια transaction και ένας **server** επιστρέφει response. Η παλαιότερη τεκμηρίωση χρησιμοποιεί τους όρους **master/slave**. Μην συγχέετε αυτή τη σχέση σε επίπεδο εφαρμογής με τα SPI ή I2C: πρόκειται για διαφορετικά bus protocols.<sup>[[1]](#references)</sup>
 
-## Serial και Etherent εκδόσεις
+## Serial και Ethernet transports
 
-Το πρωτόκολλο Modbus έχει σχεδιαστεί τόσο για Serial Communication όσο και για Ethernet Communications. Η Serial Communication χρησιμοποιείται ευρέως σε legacy συστήματα, ενώ οι σύγχρονες συσκευές υποστηρίζουν Ethernet, το οποίο προσφέρει υψηλότερους ρυθμούς μετάδοσης δεδομένων και είναι καταλληλότερο για σύγχρονα βιομηχανικά δίκτυα.
+Τα ίδια Modbus application data μπορούν να μεταφερθούν μέσω serial variants (RTU ή ASCII framing) και μέσω Modbus TCP. Το Modbus TCP προσθέτει ένα MBAP header και συνήθως χρησιμοποιεί την TCP port 502. Το serial RTU χρησιμοποιεί compact binary framing και CRC, ενώ το serial ASCII αναπαριστά τα bytes ως hexadecimal characters και χρησιμοποιεί LRC.<sup>[[1]](#references)[[3]](#references)</sup>
 
 ## Αναπαράσταση δεδομένων
 
-Τα δεδομένα μεταδίδονται στο πρωτόκολλο Modbus ως ASCII ή Binary, αν και χρησιμοποιείται η binary μορφή λόγω της compactibility της με παλαιότερες συσκευές.
+Το data model αποτελείται από single-bit coils/discrete inputs και 16-bit input/holding registers. Οι τιμές πολλαπλών registers, η σειρά των bytes, η κλιμάκωση και η σημασιολογική τους σημασία εξαρτώνται από τη συσκευή και πρέπει να επιβεβαιώνονται με βάση το register map του vendor.<sup>[[1]](#references)</sup>
 
-## Function Codes
+## Function codes
 
-Το πρωτόκολλο ModBus λειτουργεί με τη μετάδοση συγκεκριμένων function codes, οι οποίοι χρησιμοποιούνται για τον χειρισμό των PLCs και διαφόρων συσκευών ελέγχου. Αυτό το τμήμα είναι σημαντικό να γίνει κατανοητό, καθώς μπορούν να πραγματοποιηθούν replay attacks με την επαναμετάδοση function codes. Οι legacy συσκευές δεν υποστηρίζουν κρυπτογράφηση κατά τη μετάδοση δεδομένων και συνήθως διαθέτουν μακριά καλώδια που τις συνδέουν, γεγονός που επιτρέπει την παραβίαση αυτών των καλωδίων και την capturing/injecting δεδομένων.
+Τα function codes επιλέγουν operations όπως η ανάγνωση coils (`0x01`), η ανάγνωση holding registers (`0x03`), η εγγραφή ενός coil/register (`0x05`/`0x06`) και η εγγραφή πολλαπλών coils/registers (`0x0F`/`0x10`). Ένα captured write request μπορεί να είναι replayable όταν η εγκατάσταση δεν διαθέτει compensating authentication ή ελέγχους process-state. Με εξουσιοδοτημένη φυσική πρόσβαση σε μεγάλες serial διαδρομές, ένας assessor μπορεί επίσης να καταγράψει ή να inject frames απευθείας στην καλωδίωση, αφού αναγνωρίσει το electrical interface, το termination και την ασφαλή μέθοδο σύνδεσης. Κάθε ενέργεια μπορεί να επηρεάσει τη φυσική διαδικασία, επομένως χρησιμοποιήστε lab ή explicit operational authorization.<sup>[[1]](#references)[[3]](#references)</sup>
 
-## Διευθυνσιοδότηση του Modbus
+## Addressing
 
-Κάθε συσκευή στο δίκτυο διαθέτει κάποια μοναδική διεύθυνση, η οποία είναι απαραίτητη για την επικοινωνία μεταξύ των συσκευών. Πρωτόκολλα όπως τα Modbus RTU, Modbus TCP κ.λπ. χρησιμοποιούνται για την υλοποίηση της διευθυνσιοδότησης και λειτουργούν ως transport layer για τη μετάδοση δεδομένων. Τα δεδομένα που μεταφέρονται βρίσκονται σε μορφή πρωτοκόλλου Modbus και περιέχουν το μήνυμα.
+Οι serial devices χρησιμοποιούν unit address. Το Modbus TCP χρησιμοποιεί IP addressing καθώς και ένα Unit Identifier στο MBAP header, κάτι ιδιαίτερα σημαντικό όταν ένα TCP-to-serial gateway δρομολογεί requests σε downstream units. Οι register references που εμφανίζονται στην τεκμηρίωση προϊόντων μπορεί να είναι one-based (`40001`), ενώ οι protocol addresses είναι zero-based, γεγονός που αποτελεί συχνή πηγή off-by-one errors.<sup>[[1]](#references)[[3]](#references)</sup>
 
-Επιπλέον, το Modbus υλοποιεί ελέγχους σφαλμάτων για να διασφαλίσει την ακεραιότητα των μεταδιδόμενων δεδομένων. Αλλά πάνω απ' όλα, το Modbus είναι ένα Open Standard και οποιοσδήποτε μπορεί να το υλοποιήσει στις συσκευές του. Αυτό έκανε το πρωτόκολλο να εξελιχθεί σε παγκόσμιο πρότυπο και να διαδοθεί ευρέως στη βιομηχανία βιομηχανικού αυτοματισμού.
+Το serial framing περιλαμβάνει ελέγχους transmission errors (CRC για RTU και LRC για ASCII), ενώ το TCP παρέχει το κανονικό transport checksum. Αυτά εντοπίζουν τυχαία corruption· δεν αποτελούν cryptographic integrity ή origin authentication.<sup>[[3]](#references)</sup>
 
-Λόγω της μεγάλης κλίμακας χρήσης του και της έλλειψης αναβαθμίσεων, η επίθεση στο Modbus παρέχει σημαντικό πλεονέκτημα λόγω της attack surface του. Τα ICS εξαρτώνται σε μεγάλο βαθμό από την επικοινωνία μεταξύ συσκευών και οποιεσδήποτε επιθέσεις εναντίον τους μπορεί να είναι επικίνδυνες για τη λειτουργία των βιομηχανικών συστημάτων. Επιθέσεις όπως replay, data injection, data sniffing και leaking, Denial of Service, data forgery κ.λπ. μπορούν να πραγματοποιηθούν, εάν το μέσο μετάδοσης εντοπιστεί από τον attacker.
+Κατά τη διάρκεια ενός authorized assessment, ελέγξτε το exposure, τα επιτρεπόμενα function codes, τα writable address ranges, το exception handling, τα rate limits και το κατά πόσο το network segmentation ή ένα Modbus-aware firewall περιορίζει τους clients. Οι σχετικές απειλές περιλαμβάνουν passive disclosure, unauthorized command injection, replay, data forgery και denial of service. Συντονίστε όλα τα active tests με τους process owners, επειδή φαινομενικά μικρές αλλαγές σε registers μπορούν να μεταβάλουν μια φυσική διαδικασία.
 
+## References
+
+- [1] [Οργανισμός Modbus — Προδιαγραφή πρωτοκόλλου εφαρμογής Modbus V1.1b3](https://www.modbus.org/file/secure/modbusprotocolspecification.pdf)
+- [2] [Οργανισμός Modbus — Πρωτόκολλο Modbus Security και οδηγοί υλοποίησης](https://www.modbus.org/modbus-specifications)
+- [3] [Οργανισμός Modbus — Προδιαγραφή και οδηγός υλοποίησης Modbus μέσω Serial Line V1.02](https://www.modbus.org/file/secure/modbusoverserial.pdf)
 {{#include ../../banners/hacktricks-training.md}}
