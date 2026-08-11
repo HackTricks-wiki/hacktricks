@@ -26,17 +26,17 @@ ffmpeg -v info -i stego.mp3 -f null -
 
 ### Technique
 
-Spectrogram stego hides data by shaping energy over time/frequency so it becomes visible only in a time-frequency plot (often inaudible or perceived as noise).
+Spectrogram stego hides data by shaping energy over time/frequency so it becomes visible in a time-frequency plot, while the audio may sound like tones or noise.<sup>[[3]](#references)</sup>
 
 ### Sonic Visualiser
 
 Primary tool for spectrogram inspection:
 
-- [https://www.sonicvisualiser.org/](https://www.sonicvisualiser.org/)
+- [Sonic Visualiser](https://www.sonicvisualiser.org/)<sup>[[3]](#references)</sup>
 
 ### Alternatives
 
-- Audacity (spectrogram view, filters): https://www.audacityteam.org/
+- Audacity (spectrogram view and filters).<sup>[[6]](#references)</sup>
 - `sox` can generate spectrograms from the CLI:
 
 ```bash
@@ -58,7 +58,7 @@ minimodem -f noise.wav 1200
 minimodem -f noise.wav 2400
 ```
 
-`minimodem` autogains and autodetects mark/space tones; adjust `--rx-invert` or `--samplerate` if the output is garbled.
+`minimodem` supports Bell and other FSK modes plus custom mark/space frequencies; consult its options rather than assuming every recording can be autodetected. Try `--rx-invert`, an explicit baud mode, or a suitable sample rate when output is garbled.<sup>[[4]](#references)</sup>
 
 ## WAV LSB
 
@@ -79,7 +79,7 @@ Other audio-hiding families you may encounter:
 
 ### WavSteg
 
-From: https://github.com/ragibson/Steganography#WavSteg<sup>[[2]](#references)</sup>
+The following commands use WavSteg from the `ragibson/Steganography` toolkit.<sup>[[2]](#references)</sup>
 
 ```bash
 python3 WavSteg.py -r -b 1 -s sound.wav -o out.bin
@@ -88,22 +88,29 @@ python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
 
 ### DeepSound
 
-- [http://jpinsoft.net/deepsound/download.aspx](http://jpinsoft.net/deepsound/download.aspx)
+- DeepSound's official repository and releases.<sup>[[7]](#references)</sup>
 
 ## DTMF / dial tones
 
 ### Technique
 
-DTMF encodes characters as pairs of fixed frequencies (telephone keypad). If the audio resembles keypad tones or regular dual-frequency beeps, test DTMF decoding early.
+DTMF represents each keypad signal using one frequency from a low group and one from a high group. If the audio resembles keypad tones or regular dual-frequency beeps, test DTMF decoding early.<sup>[[5]](#references)</sup>
 
 Online decoders:
 
-- [https://unframework.github.io/dtmf-detect/](https://unframework.github.io/dtmf-detect/)
-- [http://dialabc.com/sound/detect/index.html](http://dialabc.com/sound/detect/index.html)
+- `dtmf-detect` browser tool.<sup>[[8]](#references)</sup>
+- `ribt/dtmf-decoder`, an offline audio-file decoder.<sup>[[9]](#references)</sup>
 
 ## References
 
 - [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
 - [2] [ragibson/Steganography](https://github.com/ragibson/Steganography#WavSteg)
+- [3] [Sonic Visualiser — documentation](https://www.sonicvisualiser.org/documentation.html)
+- [4] [kamalmostafa/minimodem — command-line FSK modem](https://github.com/kamalmostafa/minimodem)
+- [5] [ITU-T Recommendation Q.23 — technical features of push-button telephone sets](https://www.itu.int/rec/T-REC-Q.23/en)
+- [6] [Audacity](https://www.audacityteam.org/)
+- [7] [Jpinsoft/DeepSound — official repository and releases](https://github.com/Jpinsoft/DeepSound)
+- [8] [`dtmf-detect`](https://unframework.github.io/dtmf-detect/)
+- [9] [ribt/dtmf-decoder](https://github.com/ribt/dtmf-decoder)
 
 {{#include ../../banners/hacktricks-training.md}}

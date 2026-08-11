@@ -1,4 +1,4 @@
-# Side Channel Analysis Attacks 
+# Side-Channel Analysis Attacks
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -10,71 +10,73 @@ Side-channel attacks recover secrets by observing physical or micro-architectura
 
 | Channel | Typical Target | Instrumentation |
 |---------|---------------|-----------------|
-| Power consumption | Smart-cards, IoT MCUs, FPGAs | Oscilloscope + shunt resistor/HS probe (e.g. CW503)
-| Electromagnetic field (EM) | CPUs, RFID, AES accelerators | H-field probe + LNA, ChipWhisperer/RTL-SDR
-| Execution time / caches | Desktop & cloud CPUs | High-precision timers (rdtsc/rdtscp), remote time-of-flight
-| Acoustic / mechanical | Keyboards, 3-D printers, relays | MEMS microphone, laser vibrometer
-| Optical & thermal | LEDs, laser printers, DRAM | Photodiode / high-speed camera, IR camera
-| Fault-induced | ASIC/MCU cryptos | Clock/voltage glitch, EMFI, laser injection
+| Power consumption | Smart cards, IoT MCUs, FPGAs | Oscilloscope plus shunt resistor or high-sensitivity probe |
+| Electromagnetic field (EM) | CPUs, RFID, AES accelerators | Near-field probe plus low-noise amplifier and oscilloscope/receiver |
+| Execution time / caches | Desktop and cloud CPUs | High-precision timers (`rdtsc`/`rdtscp`) or remote time-of-flight |
+| Acoustic / mechanical | Keyboards, printers, relays, CPU voltage regulators | Microphone or laser vibrometer |
+| Optical & thermal | Status LEDs, displays, and thermally coupled devices | Photodiode, high-speed camera, or IR camera |
+| Fault injection | ASIC/MCU cryptography | Clock/voltage glitch, EMFI, or laser injection |
 
 ---
 
 ## Power Analysis
 
 ### Simple Power Analysis (SPA)
-Observe a *single* trace and directly associate peaks/valleys with operations (e.g. DES S-boxes).<sup>[[1]](#references)</sup>  
+Observe a *single* trace and associate visible features with operations such as branches, modular multiplication, or different instruction sequences.<sup>[[1]](#references)</sup>
+
+The exact setup is target-specific. The following uses the current high-level ChipWhisperer capture API after the scope and target have been connected and configured:<sup>[[1]](#references)</sup>
+
 ```python
-# ChipWhisperer-husky example – capture one AES trace
-from chipwhisperer.capture.api.programmers import STMLink
-from chipwhisperer.capture import CWSession
-cw = CWSession(project='aes')
-trig = cw.scope.trig
-cw.connect(cw.capture.scopes[0])
-cw.capture.init()
-trace = cw.capture.capture_trace()
-print(trace.wave)  # numpy array of power samples
+import chipwhisperer as cw
+
+scope = cw.scope()
+scope.default_setup()
+target = cw.target(scope)
+ktp = cw.ktp.Basic()
+key, plaintext = ktp.next()
+trace = cw.capture_trace(scope, target, plaintext, key)
+if trace is not None:
+    print(trace.wave)  # NumPy array of power samples
 ```
 
 ### Differential/Correlation Power Analysis (DPA/CPA)
-Acquire *N > 1 000* traces, hypothesise key byte `k`, compute HW/HD model and correlate with leakage.
+Acquire multiple traces, hypothesize a key byte `k`, compute a Hamming-weight (HW) or Hamming-distance (HD) leakage model, and correlate it with each sample. The required trace count is determined by the target, noise, alignment, countermeasures, and leakage model; it is not a fixed threshold.
 ```python
 import numpy as np
 corr = np.corrcoef(leakage_model(k), traces[:,sample])
 ```
-CPA remains state-of-the-art but machine-learning variants (MLA, deep-learning SCA) now dominate competitions such as ASCAD-v2 (2023).
+CPA is a standard baseline. Template attacks, mutual-information analysis, and machine-learning approaches can be useful when leakage is nonlinear or traces are poorly aligned.
 
 ---
 
 ## Electromagnetic Analysis (EMA)
-Near-field EM probes (500 MHz–3 GHz) leak identical information to power analysis *without* inserting shunts. 2024 research demonstrated key recovery at **>10 cm** from an STM32 using spectrum correlation and low-cost RTL-SDR front-ends.
+Near-field EM analysis can observe data-dependent activity without inserting a shunt in the supply path. It does not necessarily expose the same signal as a power trace: probe position, orientation, bandwidth, front-end gain, trigger quality, and distance all matter.
 
 ---
 
 ## Timing & Micro-architectural Attacks
 Modern CPUs leak secrets through shared resources:
-* **Hertzbleed (2022)** – DVFS frequency scaling correlates with Hamming weight, allowing *remote* extraction of EdDSA keys.<sup>[[2]](#references)</sup>
-* **Downfall / Gather Data Sampling (Intel, 2023)** – transient-execution to read AVX-gather data across SMT threads.<sup>[[3]](#references)</sup>
-* **Zenbleed (AMD, 2023) & Inception (AMD, 2023)** – speculative vector mis-prediction leaks registers cross-domain.<sup>[[4]](#references)</sup><sup>[[5]](#references)</sup>
+* **Hertzbleed (2022)** – Data-dependent dynamic voltage and frequency scaling creates a remote timing channel. The original end-to-end key-recovery demonstration targeted SIKE; follow-up work discusses other primitives.<sup>[[2]](#references)</sup>
+* **Downfall / Gather Data Sampling (Intel, 2023)** – Transient execution can expose data used by vector gather instructions across security boundaries.<sup>[[3]](#references)</sup>
+* **Zenbleed (AMD, 2023)** – Incorrect handling of speculative vector-register state can disclose data from the same physical core.<sup>[[4]](#references)</sup>
+* **Inception (AMD, 2023)** – A transient-execution attack combines phantom execution with training in transient execution to create attacker-controlled misprediction gadgets.<sup>[[5]](#references)</sup>
 
 ---
 
 ## Acoustic & Optical Attacks
-* 2024 "​iLeakKeys" showed 95 % accuracy recovering laptop keystrokes from a **smart-phone microphone over Zoom** using a CNN classifier.
-* High-speed photodiodes capture DDR4 activity LED and reconstruct AES round keys within <1 minute (BlackHat 2023).
+Acoustic leakage has been used to recover RSA keys from laptop noise in a controlled experiment, including with a nearby mobile phone microphone.<sup>[[6]](#references)</sup> A separate 2023 keyboard study classified keystrokes with 95% accuracy when trained on recordings from a nearby phone and 93% when trained on Zoom audio; these figures describe that paper's trained-device experiment, not an arbitrary keyboard or victim.<sup>[[9]](#references)</sup> Optical emanations from status LEDs can also be correlated with processed data. These results are target- and setup-specific; do not generalize their range or success rate to unrelated devices.<sup>[[7]](#references)</sup>
 
 ---
 
 ## Fault Injection & Differential Fault Analysis (DFA)
-Combining faults with side-channel leakage shortcuts key search (e.g. 1-trace AES DFA).  Recent hobbyist-priced tools:
-* **ChipSHOUTER & PicoEMP** – sub-1 ns electromagnetic pulse glitching.
-* **GlitchKit-R5 (2025)** – open-source clock/voltage glitch platform supporting RISC-V SoCs.
+Combining controlled faults with side-channel observations can reduce the key search for some algorithms and implementations. Common lab platforms include ChipWhisperer's voltage/clock glitching features and dedicated EM fault-injection tools such as ChipSHOUTER or PicoEMP. The required timing resolution, probe placement, and number of faulty outputs depend on the target and fault model.<sup>[[1]](#references)</sup>
 
 ---
 
 ## Typical Attack Workflow
 1. Identify leakage channel & mount point (VCC pin, decoupling cap, near-field spot).
 2. Insert trigger (GPIO or pattern-based).  
-3. Collect >1 k traces with proper sampling/filters.
+3. Collect enough traces for the chosen statistical test, recording plaintext/ciphertext and other metadata.
 4. Pre-process (alignment, mean removal, LP/HP filter, wavelet, PCA).
 5. Statistical or ML key recovery (CPA, MIA, DL-SCA).
 6. Validate and iterate on outliers.
@@ -92,9 +94,9 @@ Combining faults with side-channel leakage shortcuts key search (e.g. 1-trace AE
 
 ## Tools & Frameworks
 * **ChipWhisperer-Husky** (2024) – 500 MS/s scope + Cortex-M trigger; Python API as above.<sup>[[1]](#references)</sup>
-* **Riscure Inspector & FI** – commercial, supports automated leakage assessment (TVLA-2.0).
-* **scaaml** – TensorFlow-based deep-learning SCA library (v1.2 – 2025).
-* **pyecsca** – ANSSI open-source ECC SCA framework.
+* **Riscure Inspector and fault-injection products** – commercial analysis and automated test tooling.
+* **scaaml** – TensorFlow-based deep-learning SCA tooling and datasets.
+* **pyecsca** – open-source toolkit for reverse-engineering black-box ECC implementations through side channels.<sup>[[8]](#references)</sup>
 
 ---
 
@@ -105,5 +107,9 @@ Combining faults with side-channel leakage shortcuts key search (e.g. 1-trace AE
 - [3] [Downfall: Exploiting Speculative Data Gathering](https://downfall.page/)
 - [4] [Zenbleed](https://lock.cmpxchg8b.com/zenbleed.html)
 - [5] [Inception: Exposing New Attack Surfaces with Training in Transient Execution](https://comsec.ethz.ch/research/microarch/inception/)
+- [6] [RSA Key Extraction via Low-Bandwidth Acoustic Cryptanalysis](https://eprint.iacr.org/2013/857.pdf)
+- [7] [Information Leakage from Optical Emanations](https://ora.ox.ac.uk/objects/uuid%3A4fe94cf8-052a-4025-a312-4a62f58fffac)
+- [8] [pyecsca artifact documentation](https://artifacts.iacr.org/tches/2024/a26/readme.html)
+- [9] [A Practical Deep Learning-Based Acoustic Side Channel Attack on Keyboards](https://arxiv.org/abs/2308.01074)
 
 {{#include ../../banners/hacktricks-training.md}}
