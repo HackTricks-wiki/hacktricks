@@ -1,58 +1,63 @@
-# Preparazione e Valutazione dei Dati del Modello
+# Preparazione e valutazione dei dati del modello
 
 {{#include ../banners/hacktricks-training.md}}
 
-La preparazione dei dati del modello è un passaggio cruciale nel pipeline di machine learning, poiché comporta la trasformazione dei dati grezzi in un formato adatto per l'addestramento dei modelli di machine learning. Questo processo include diversi passaggi chiave:
+La preparazione dei dati del modello è un passaggio cruciale nella pipeline di machine learning, poiché consiste nel trasformare i dati grezzi in un formato adatto all'addestramento dei modelli di machine learning. Questo processo include diversi passaggi fondamentali:
 
-1. **Raccolta dei Dati**: Raccolta di dati da varie fonti, come database, API o file. I dati possono essere strutturati (ad es., tabelle) o non strutturati (ad es., testo, immagini).
-2. **Pulizia dei Dati**: Rimozione o correzione di punti dati errati, incompleti o irrilevanti. Questo passaggio può comportare la gestione dei valori mancanti, la rimozione dei duplicati e il filtraggio degli outlier.
-3. **Trasformazione dei Dati**: Conversione dei dati in un formato adatto per la modellazione. Questo può includere normalizzazione, scaling, codifica delle variabili categoriche e creazione di nuove caratteristiche attraverso tecniche come l'ingegneria delle caratteristiche.
-4. **Divisione dei Dati**: Suddivisione del dataset in set di addestramento, validazione e test per garantire che il modello possa generalizzare bene su dati non visti.
+1. **Raccolta dei dati**: raccolta di dati da diverse fonti, come database, API o file. I dati possono essere strutturati (ad esempio, tabelle) o non strutturati (ad esempio, testo, immagini).
+2. **Pulizia dei dati**: rimozione o correzione di dati errati, incompleti o irrilevanti. Questo passaggio può includere la gestione dei valori mancanti, la rimozione dei duplicati e il filtraggio degli outlier.
+3. **Trasformazione dei dati**: conversione dei dati in un formato adatto alla modellazione. Ciò può includere la normalizzazione, il ridimensionamento, la codifica delle variabili categoriche e la creazione di nuove feature attraverso tecniche come il feature engineering.
+4. **Suddivisione dei dati**: divisione del dataset in set di training, validation e test per garantire che il modello possa generalizzare correttamente a dati non osservati.
 
-## Raccolta dei Dati
+## Raccolta dei dati
 
-La raccolta dei dati comporta la raccolta di dati da varie fonti, che possono includere:
-- **Database**: Estrazione di dati da database relazionali (ad es., database SQL) o database NoSQL (ad es., MongoDB).
-- **API**: Recupero di dati da API web, che possono fornire dati in tempo reale o storici.
-- **File**: Lettura di dati da file in formati come CSV, JSON o XML.
-- **Web Scraping**: Raccolta di dati da siti web utilizzando tecniche di web scraping.
+La raccolta dei dati consiste nell'acquisire dati da diverse fonti, tra cui:
+- **Database**: estrazione di dati da database relazionali (ad esempio, database SQL) o database NoSQL (ad esempio, MongoDB).
+- **API**: recupero di dati da web API, che possono fornire dati in tempo reale o storici.
+- **File**: lettura di dati da file in formati come CSV, JSON o XML.
+- **Web Scraping**: raccolta di dati da siti web utilizzando tecniche di web scraping.
 
-A seconda dell'obiettivo del progetto di machine learning, i dati saranno estratti e raccolti da fonti rilevanti per garantire che siano rappresentativi del dominio del problema.
+In base all'obiettivo del progetto di machine learning, i dati verranno estratti e raccolti da fonti pertinenti per garantire che siano rappresentativi del dominio del problema.
 
-## Pulizia dei Dati
+## Pulizia dei dati <sup>[[1]](#references)</sup><sup>[[2]](#references)</sup>
 
-La pulizia dei dati è il processo di identificazione e correzione di errori o incoerenze nel dataset. Questo passaggio è essenziale per garantire la qualità dei dati utilizzati per l'addestramento dei modelli di machine learning. Le attività chiave nella pulizia dei dati includono:
-- **Gestione dei Valori Mancanti**: Identificazione e gestione dei punti dati mancanti. Le strategie comuni includono:
-- Rimozione di righe o colonne con valori mancanti.
+La pulizia dei dati è il processo di identificazione e correzione degli errori o delle incoerenze presenti nel dataset. Questo passaggio è essenziale per garantire la qualità dei dati utilizzati per l'addestramento dei modelli di machine learning. Le attività principali della pulizia dei dati includono:
+- **Gestione dei valori mancanti**: identificazione e gestione dei punti dati mancanti. Le strategie comuni includono:
+- Rimozione delle righe o delle colonne contenenti valori mancanti.
 - Imputazione dei valori mancanti utilizzando tecniche come l'imputazione della media, della mediana o della moda.
-- Utilizzo di metodi avanzati come l'imputazione K-nearest neighbors (KNN) o l'imputazione per regressione.
-- **Rimozione dei Duplicati**: Identificazione e rimozione di record duplicati per garantire che ogni punto dati sia unico.
-- **Filtraggio degli Outlier**: Rilevamento e rimozione di outlier che possono distorcere le prestazioni del modello. Tecniche come Z-score, IQR (Interquartile Range) o visualizzazioni (ad es., box plots) possono essere utilizzate per identificare outlier.
+- Utilizzo di metodi avanzati come l'imputazione con K-nearest neighbors (KNN) o l'imputazione mediante regressione.
+- **Rimozione dei duplicati**: identificazione e rimozione dei record duplicati per garantire che ogni punto dati sia univoco.
+- **Filtraggio degli outlier**: rilevamento e rimozione degli outlier che potrebbero alterare le prestazioni del modello. Per identificare gli outlier è possibile utilizzare tecniche come Z-score, IQR (Interquartile Range) o visualizzazioni (ad esempio, box plot).
 
 ### Esempio di pulizia dei dati
 ```python
+import re
+
+import numpy as np
 import pandas as pd
+from sklearn.impute import KNNImputer, SimpleImputer
+
 # Load the dataset
-data = pd.read_csv('data.csv')
+df = pd.read_csv('data.csv')
 
 # Finding invalid values based on a specific function
-def is_valid_possitive_int(num):
+def is_valid_positive_int(num):
 try:
 num = int(num)
 return 1 <= num <= 31
 except ValueError:
 return False
 
-invalid_days = data[~data['days'].astype(str).apply(is_valid_positive_int)]
+invalid_days = df[~df['days'].astype(str).apply(is_valid_positive_int)]
 
 ## Dropping rows with invalid days
-data = data.drop(invalid_days.index, errors='ignore')
+df = df.drop(invalid_days.index, errors='ignore')
 
 
 
 # Set "NaN" values to a specific value
 ## For example, setting NaN values in the 'days' column to 0
-data['days'] = pd.to_numeric(data['days'], errors='coerce')
+df['days'] = pd.to_numeric(df['days'], errors='coerce')
 
 ## For example, set "NaN" to not ips
 def is_valid_ip(ip):
@@ -81,114 +86,114 @@ df[numeric_cols] = knn_imputer.fit_transform(df[numeric_cols])
 
 
 # Filling missing values
-data.fillna(data.mean(), inplace=True)
+df.fillna(df.mean(numeric_only=True), inplace=True)
 
 # Removing duplicates
-data.drop_duplicates(inplace=True)
+df.drop_duplicates(inplace=True)
 # Filtering outliers using Z-score
 from scipy import stats
-z_scores = stats.zscore(data.select_dtypes(include=['float64', 'int64']))
-data = data[(z_scores < 3).all(axis=1)]
+z_scores = np.abs(stats.zscore(df.select_dtypes(include=['float64', 'int64']), nan_policy='omit'))
+df = df[(z_scores < 3).all(axis=1)]
 ```
-## Trasformazione dei Dati
+## Trasformazione dei dati <sup>[[1]](#references)</sup>
 
-La trasformazione dei dati implica la conversione dei dati in un formato adatto per la modellazione. Questo passaggio può includere:
-- **Normalizzazione e Standardizzazione**: Scalare le caratteristiche numeriche a un intervallo comune, tipicamente [0, 1] o [-1, 1]. Questo aiuta a migliorare la convergenza degli algoritmi di ottimizzazione.
-- **Min-Max Scaling**: Riscalare le caratteristiche a un intervallo fisso, di solito [0, 1]. Questo viene fatto utilizzando la formula: `X' = (X - X_{min}) / (X_{max} - X_{min})`
-- **Normalizzazione Z-Score**: Standardizzare le caratteristiche sottraendo la media e dividendo per la deviazione standard, risultando in una distribuzione con una media di 0 e una deviazione standard di 1. Questo viene fatto utilizzando la formula: `X' = (X - μ) / σ`, dove μ è la media e σ è la deviazione standard.
-- **Skeyewness e Kurtosi**: Regolare la distribuzione delle caratteristiche per ridurre la skewness (asimmetria) e la kurtosi (picco). Questo può essere fatto utilizzando trasformazioni come logaritmica, radice quadrata o trasformazioni di Box-Cox. Ad esempio, se una caratteristica ha una distribuzione distorta, applicare una trasformazione logaritmica può aiutare a normalizzarla.
-- **Normalizzazione delle Stringhe**: Convertire le stringhe in un formato coerente, come:
-- Minuscole
-- Rimozione di caratteri speciali (mantenendo quelli rilevanti)
-- Rimozione di stop words (parole comuni che non contribuiscono al significato, come "il", "è", "e")
-- Rimozione di parole troppo frequenti e troppo rare (ad es., parole che appaiono in più del 90% dei documenti o meno di 5 volte nel corpus)
-- Rimozione di spazi bianchi
-- Stemming/Lemmatizzazione: Ridurre le parole alla loro forma base o radice (ad es., "correndo" a "correre").
+La trasformazione dei dati consiste nel convertire i dati in un formato adatto alla modellazione. Questo passaggio può includere:
+- **Normalizzazione e standardizzazione**: ridimensionamento delle feature numeriche a un intervallo comune, in genere [0, 1] o [-1, 1]. Ciò può migliorare la convergenza degli algoritmi di ottimizzazione.
+- **Ridimensionamento Min-Max**: ridimensionamento delle feature a un intervallo fisso, solitamente [0, 1]. Viene eseguito utilizzando la formula: `X' = (X - X_{min}) / (X_{max} - X_{min})`
+- **Normalizzazione Z-Score**: standardizzazione delle feature sottraendo la media e dividendo per la deviazione standard, ottenendo una distribuzione con media pari a 0 e deviazione standard pari a 1. Viene eseguita utilizzando la formula: `X' = (X - μ) / σ`, dove μ è la media e σ è la deviazione standard.
+- **Asimmetria e curtosi**: regolazione delle distribuzioni delle feature con trasformazioni come logaritmo, radice quadrata o Box-Cox. Ad esempio, una trasformazione logaritmica può ridurre l'asimmetria positiva.
+- **Normalizzazione delle stringhe**: conversione delle stringhe in un formato coerente, ad esempio:
+- Conversione in minuscolo
+- Rimozione dei caratteri speciali (mantenendo quelli rilevanti)
+- Rimozione delle stop word (parole comuni che non contribuiscono al significato, come "the", "is", "and")
+- Rimozione delle parole troppo frequenti e troppo rare (ad esempio, parole che compaiono in più del 90% dei documenti o meno di 5 volte nel corpus)
+- Rimozione degli spazi bianchi iniziali e finali
+- Stemming/Lemmatizzazione: riduzione delle parole alla loro forma base o radice (ad esempio, "running" a "run").
 
-- **Codifica delle Variabili Categoriali**: Convertire le variabili categoriali in rappresentazioni numeriche. Le tecniche comuni includono:
-- **One-Hot Encoding**: Creare colonne binarie per ogni categoria.
-- Ad esempio, se una caratteristica ha categorie "rosso", "verde" e "blu", verrà trasformata in tre colonne binarie: `is_red`(100), `is_green`(010) e `is_blue`(001).
-- **Label Encoding**: Assegnare un intero unico a ciascuna categoria.
-- Ad esempio, "rosso" = 0, "verde" = 1, "blu" = 2.
-- **Ordinal Encoding**: Assegnare interi in base all'ordine delle categorie.
-- Ad esempio, se le categorie sono "basso", "medio" e "alto", possono essere codificate come 0, 1 e 2, rispettivamente.
-- **Hashing Encoding**: Utilizzare una funzione hash per convertire le categorie in vettori di dimensione fissa, che possono essere utili per variabili categoriali ad alta cardinalità.
-- Ad esempio, se una caratteristica ha molte categorie uniche, l'hashing può ridurre la dimensionalità mantenendo alcune informazioni sulle categorie.
-- **Bag of Words (BoW)**: Rappresentare i dati testuali come una matrice di conteggi o frequenze di parole, dove ogni riga corrisponde a un documento e ogni colonna corrisponde a una parola unica nel corpus.
-- Ad esempio, se il corpus contiene le parole "gatto", "cane" e "pesce", un documento contenente "gatto" e "cane" sarebbe rappresentato come [1, 1, 0]. Questa rappresentazione specifica è chiamata "unigram" e non cattura l'ordine delle parole, quindi perde informazioni semantiche.
-- **Bigram/Trigram**: Estendere BoW per catturare sequenze di parole (bigrammi o trigrammi) per mantenere un certo contesto. Ad esempio, "gatto e cane" sarebbe rappresentato come un bigram [1, 1] per "gatto e" e [1, 1] per "e cane". In questi casi vengono raccolte più informazioni semantiche (aumentando la dimensionalità della rappresentazione) ma solo per 2 o 3 parole alla volta.
-- **TF-IDF (Term Frequency-Inverse Document Frequency)**: Una misura statistica che valuta l'importanza di una parola in un documento rispetto a una collezione di documenti (corpus). Combina la frequenza del termine (quanto spesso appare una parola in un documento) e la frequenza inversa del documento (quanto è rara una parola in tutti i documenti).
-- Ad esempio, se la parola "gatto" appare frequentemente in un documento ma è rara nell'intero corpus, avrà un punteggio TF-IDF elevato, indicando la sua importanza in quel documento.
+- **Codifica delle variabili categoriche**: conversione delle variabili categoriche in rappresentazioni numeriche. Le tecniche comuni includono:
+- **One-Hot Encoding**: creazione di colonne binarie per ogni categoria.
+- Ad esempio, se una feature ha le categorie "red", "green" e "blue", verrà trasformata in tre colonne binarie: `is_red`(100), `is_green`(010) e `is_blue`(001).
+- **Label Encoding**: assegnazione di un intero univoco a ogni categoria.
+- Ad esempio, "red" = 0, "green" = 1, "blue" = 2.
+- **Ordinal Encoding**: assegnazione di interi in base all'ordine delle categorie.
+- Ad esempio, se le categorie sono "low", "medium" e "high", possono essere codificate rispettivamente come 0, 1 e 2.
+- **Hashing Encoding**: utilizzo di una funzione hash per convertire le categorie in vettori di dimensione fissa, utile per le variabili categoriche con cardinalità elevata.
+- Ad esempio, se una feature ha molte categorie univoche, l'hashing può ridurre la dimensionalità preservando alcune informazioni sulle categorie.
+- **Bag of Words (BoW)**: rappresentazione dei dati testuali come una matrice di conteggi o frequenze delle parole, in cui ogni riga corrisponde a un documento e ogni colonna corrisponde a una parola univoca nel corpus.
+- Ad esempio, se il corpus contiene le parole "cat", "dog" e "fish", un documento contenente "cat" e "dog" sarebbe rappresentato come [1, 1, 0]. Questa rappresentazione specifica è chiamata "unigram" e non cattura l'ordine delle parole, quindi perde informazioni semantiche.
+- **Bigram/Trigram**: estensione di BoW per catturare sequenze di parole (bigrammi o trigrammi) e conservare parte del contesto. Ad esempio, "cat and dog" sarebbe rappresentato come un bigramma [1, 1] per "cat and" e [1, 1] per "and dog". In questo caso viene raccolta una maggiore quantità di informazioni semantiche (aumentando la dimensionalità della rappresentazione), ma solo per 2 o 3 parole alla volta.
+- **TF-IDF (Term Frequency-Inverse Document Frequency)**: misura statistica che valuta l'importanza di una parola in un documento rispetto a una raccolta di documenti (corpus). Combina la frequenza del termine (quanto spesso una parola compare in un documento) e la frequenza inversa del documento (quanto è rara una parola nell'insieme dei documenti).
+- Ad esempio, se la parola "cat" compare frequentemente in un documento ma è rara nell'intero corpus, avrà un punteggio TF-IDF elevato, indicando la sua importanza in quel documento.
 
-- **Feature Engineering**: Creare nuove caratteristiche da quelle esistenti per migliorare il potere predittivo del modello. Questo può comportare la combinazione di caratteristiche, l'estrazione di componenti data/ora o l'applicazione di trasformazioni specifiche del dominio.
+- **Feature Engineering**: creazione di nuove feature a partire da quelle esistenti per migliorare la capacità predittiva del modello. Ciò può includere la combinazione di feature, l'estrazione di componenti di data/ora o l'applicazione di trasformazioni specifiche del dominio.
 
-## Suddivisione dei Dati
+## Suddivisione dei dati <sup>[[3]](#references)</sup>
 
-La suddivisione dei dati implica dividere il dataset in sottoinsiemi separati per l'addestramento, la validazione e il test. Questo è essenziale per valutare le prestazioni del modello su dati non visti e prevenire l'overfitting. Le strategie comuni includono:
-- **Train-Test Split**: Dividere il dataset in un set di addestramento (tipicamente 60-80% dei dati), un set di validazione (10-15% dei dati) per ottimizzare gli iperparametri, e un set di test (10-15% dei dati). Il modello viene addestrato sul set di addestramento e valutato sul set di test.
-- Ad esempio, se hai un dataset di 1000 campioni, potresti utilizzare 700 campioni per l'addestramento, 150 per la validazione e 150 per il test.
-- **Stratified Sampling**: Assicurarsi che la distribuzione delle classi nei set di addestramento e test sia simile a quella dell'intero dataset. Questo è particolarmente importante per dataset sbilanciati, dove alcune classi possono avere significativamente meno campioni di altre.
-- **Time Series Split**: Per i dati delle serie temporali, il dataset viene suddiviso in base al tempo, assicurando che il set di addestramento contenga dati da periodi temporali precedenti e il set di test contenga dati da periodi successivi. Questo aiuta a valutare le prestazioni del modello su dati futuri.
-- **K-Fold Cross-Validation**: Suddividere il dataset in K sottoinsiemi (fold) e addestrare il modello K volte, ogni volta utilizzando un fold diverso come set di test e i fold rimanenti come set di addestramento. Questo aiuta a garantire che il modello venga valutato su diversi sottoinsiemi di dati, fornendo una stima più robusta delle sue prestazioni.
+La suddivisione dei dati consiste nel dividere il dataset in sottoinsiemi separati per l'addestramento, la validazione e il testing. Ciò è essenziale per valutare le prestazioni del modello su dati non osservati e prevenire l'overfitting. Le strategie comuni includono:
+- **Suddivisione Train-Test**: divisione del dataset in un set di addestramento (in genere il 60-80% dei dati), un set di validazione (10-15% dei dati) per ottimizzare gli iperparametri e un set di test (10-15% dei dati). Il modello viene addestrato sul set di addestramento e valutato sul set di test.
+- Ad esempio, se si dispone di un dataset di 1000 campioni, si potrebbero utilizzare 700 campioni per l'addestramento, 150 per la validazione e 150 per il testing.
+- **Campionamento stratificato**: garanzia che la distribuzione delle classi nei set di addestramento e di test sia simile a quella dell'intero dataset. Ciò è particolarmente importante per i dataset sbilanciati, in cui alcune classi possono avere un numero di campioni significativamente inferiore rispetto ad altre.
+- **Suddivisione di serie temporali**: per i dati delle serie temporali, il dataset viene suddiviso in base al tempo, assicurando che il set di addestramento contenga dati relativi a periodi precedenti e il set di test contenga dati relativi a periodi successivi. Ciò aiuta a valutare le prestazioni del modello su dati futuri.
+- **Cross-Validation K-Fold**: suddivisione del dataset in K sottoinsiemi (fold) e addestramento del modello K volte, utilizzando ogni volta un fold diverso come set di test e i fold rimanenti come set di addestramento. Ciò contribuisce a garantire che il modello venga valutato su diversi sottoinsiemi di dati, fornendo una stima più robusta delle sue prestazioni.
 
-## Valutazione del Modello
+## Valutazione del modello <sup>[[4]](#references)</sup>
 
-La valutazione del modello è il processo di valutazione delle prestazioni di un modello di machine learning su dati non visti. Comporta l'uso di varie metriche per quantificare quanto bene il modello si generalizza a nuovi dati. Le metriche di valutazione comuni includono:
+La valutazione del modello è il processo di analisi delle prestazioni di un modello di machine learning su dati non osservati. Consiste nell'utilizzo di diverse metriche per quantificare quanto bene il modello si generalizzi a nuovi dati. Le metriche di valutazione comuni includono:
 
 ### Accuratezza
 
-L'accuratezza è la proporzione di istanze correttamente previste rispetto al totale delle istanze. Viene calcolata come:
+L'accuratezza è la proporzione di istanze predette correttamente rispetto al numero totale di istanze. Viene calcolata come:
 ```plaintext
 Accuracy = (Number of Correct Predictions) / (Total Number of Predictions)
 ```
 > [!TIP]
-> L'accuratezza è una metrica semplice e intuitiva, ma potrebbe non essere adatta per dataset sbilanciati in cui una classe domina le altre, poiché può dare un'impressione fuorviante delle prestazioni del modello. Ad esempio, se il 90% dei dati appartiene alla classe A e il modello prevede tutte le istanze come classe A, raggiungerà un'accuratezza del 90%, ma non sarà utile per prevedere la classe B.
+> L'accuratezza è una metrica semplice e intuitiva, ma potrebbe non essere adatta per dataset sbilanciati in cui una classe prevale sulle altre, poiché può dare un'impressione fuorviante delle prestazioni del modello. Ad esempio, se il 90% dei dati appartiene alla classe A e il modello predice tutte le istanze come appartenenti alla classe A, raggiungerà un'accuratezza del 90%, ma non sarà utile per predire la classe B.
 
 ### Precisione
 
-La precisione è la proporzione di previsioni positive vere rispetto a tutte le previsioni positive effettuate dal modello. Si calcola come:
+La precisione è la proporzione di predizioni positive corrette rispetto a tutte le predizioni positive effettuate dal modello. Si calcola come:
 ```plaintext
 Precision = (True Positives) / (True Positives + False Positives)
 ```
 > [!TIP]
-> La precisione è particolarmente importante in scenari in cui i falsi positivi sono costosi o indesiderati, come nelle diagnosi mediche o nella rilevazione delle frodi. Ad esempio, se un modello prevede 100 istanze come positive, ma solo 80 di esse sono effettivamente positive, la precisione sarebbe 0.8 (80%).
+> La precisione è particolarmente importante negli scenari in cui i falsi positivi sono costosi o indesiderati, come nelle diagnosi mediche o nel rilevamento delle frodi. Ad esempio, se un modello prevede 100 istanze come positive, ma solo 80 di esse sono effettivamente positive, la precisione sarebbe pari a 0,8 (80%).
 
 ### Recall (Sensibilità)
 
-Il recall, noto anche come sensibilità o tasso di veri positivi, è la proporzione di previsioni vere positive su tutte le istanze positive reali. Si calcola come:
+Il Recall, noto anche come sensibilità o tasso di veri positivi, è la proporzione delle previsioni di veri positivi rispetto a tutte le istanze effettivamente positive. Si calcola come:
 ```plaintext
 Recall = (True Positives) / (True Positives + False Negatives)
 ```
 > [!TIP]
-> Il richiamo è cruciale in scenari in cui i falsi negativi sono costosi o indesiderati, come nella rilevazione di malattie o nel filtraggio dello spam. Ad esempio, se un modello identifica 80 su 100 istanze positive reali, il richiamo sarebbe 0.8 (80%).
+> Il recall è fondamentale negli scenari in cui i falsi negativi sono costosi o indesiderati, come nel rilevamento delle malattie o nel filtraggio dello spam. Ad esempio, se un modello identifica 80 dei 100 casi positivi effettivi, il recall sarebbe pari a 0,8 (80%).
 
 ### F1 Score
 
-Il punteggio F1 è la media armonica di precisione e richiamo, fornendo un equilibrio tra le due metriche. Viene calcolato come:
+L'F1 score è la media armonica di precision e recall e fornisce un equilibrio tra le due metriche. Si calcola come:
 ```plaintext
 F1 Score = 2 * (Precision * Recall) / (Precision + Recall)
 ```
 > [!TIP]
-> Il punteggio F1 è particolarmente utile quando si lavora con set di dati sbilanciati, poiché considera sia i falsi positivi che i falsi negativi. Fornisce una metrica unica che cattura il compromesso tra precisione e richiamo. Ad esempio, se un modello ha una precisione di 0.8 e un richiamo di 0.6, il punteggio F1 sarebbe approssimativamente 0.69.
+> Il punteggio F1 è particolarmente utile quando si lavora con dataset sbilanciati, poiché considera sia i falsi positivi sia i falsi negativi. Fornisce una singola metrica che rappresenta il compromesso tra precisione e recall. Ad esempio, se un modello ha una precisione di 0.8 e un recall di 0.6, il punteggio F1 sarebbe approssimativamente 0.69.
 
 ### ROC-AUC (Receiver Operating Characteristic - Area Under the Curve)
 
-La metrica ROC-AUC valuta la capacità del modello di distinguere tra classi tracciando il tasso di veri positivi (sensibilità) rispetto al tasso di falsi positivi a vari livelli di soglia. L'area sotto la curva ROC (AUC) quantifica le prestazioni del modello, con un valore di 1 che indica una classificazione perfetta e un valore di 0.5 che indica una previsione casuale.
+La metrica ROC-AUC valuta la capacità del modello di distinguere tra le classi tracciando il tasso di veri positivi (sensibilità) rispetto al tasso di falsi positivi a diverse impostazioni di soglia. L'area sotto la curva ROC (AUC) quantifica le prestazioni del modello: un valore pari a 1 indica una classificazione perfetta, mentre un valore pari a 0.5 indica una previsione casuale.
 
 > [!TIP]
-> ROC-AUC è particolarmente utile per problemi di classificazione binaria e fornisce una visione completa delle prestazioni del modello attraverso diverse soglie. È meno sensibile allo sbilanciamento delle classi rispetto all'accuratezza. Ad esempio, un modello con un AUC di 0.9 indica che ha un'alta capacità di distinguere tra istanze positive e negative.
+> ROC-AUC è particolarmente utile per i problemi di classificazione binaria e fornisce una visione completa delle prestazioni del modello a diverse soglie. È meno sensibile allo sbilanciamento delle classi rispetto all'accuracy. Ad esempio, un modello con un AUC pari a 0.9 indica un'elevata capacità di distinguere tra istanze positive e negative.
 
 ### Specificità
 
-La specificità, nota anche come tasso di veri negativi, è la proporzione di previsioni vere negative su tutte le istanze negative reali. È calcolata come:
+La specificità, nota anche come tasso di veri negativi, è la proporzione di previsioni di veri negativi rispetto a tutte le istanze effettivamente negative. Viene calcolata come:
 ```plaintext
 Specificity = (True Negatives) / (True Negatives + False Positives)
 ```
 > [!TIP]
-> La specificità è importante in scenari in cui i falsi positivi sono costosi o indesiderati, come nei test medici o nella rilevazione delle frodi. Aiuta a valutare quanto bene il modello identifica le istanze negative. Ad esempio, se un modello identifica correttamente 90 su 100 istanze negative reali, la specificità sarebbe 0,9 (90%).
+> La specificità è importante negli scenari in cui i falsi positivi sono costosi o indesiderati, come nei test medici o nel rilevamento delle frodi. Aiuta a valutare quanto bene il modello identifichi le istanze negative. Ad esempio, se un modello identifica correttamente 90 su 100 istanze effettivamente negative, la specificità sarebbe pari a 0,9 (90%).
 
-### Matthews Correlation Coefficient (MCC)
-Il Matthews Correlation Coefficient (MCC) è una misura della qualità delle classificazioni binarie. Tiene conto dei veri e falsi positivi e negativi, fornendo una visione equilibrata delle prestazioni del modello. L'MCC è calcolato come:
+### Coefficiente di correlazione di Matthews (MCC)
+Il coefficiente di correlazione di Matthews (MCC) è una misura della qualità delle classificazioni binarie. Tiene conto dei veri e falsi positivi e negativi, fornendo una valutazione equilibrata delle prestazioni del modello. L'MCC si calcola come:
 ```plaintext
 MCC = (TP * TN - FP * FN) / sqrt((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN))
 ```
@@ -199,35 +204,41 @@ dove:
 - **FN**: Falsi Negativi
 
 > [!TIP]
-> Il MCC varia da -1 a 1, dove 1 indica una classificazione perfetta, 0 indica un'ipotesi casuale e -1 indica totale disaccordo tra previsione e osservazione. È particolarmente utile per dataset sbilanciati, poiché considera tutti e quattro i componenti della matrice di confusione.
+> L'MCC varia da -1 a 1, dove 1 indica una classificazione perfetta, 0 indica una previsione casuale e -1 indica un disaccordo totale tra previsione e osservazione. È particolarmente utile per i dataset sbilanciati, poiché considera tutti e quattro i componenti della matrice di confusione.
 
-### Errore Assoluto Medio (MAE)
-L'Errore Assoluto Medio (MAE) è una metrica di regressione che misura la differenza assoluta media tra i valori previsti e quelli reali. Viene calcolato come:
+### Mean Absolute Error (MAE)
+Mean Absolute Error (MAE) è una metrica di regressione che misura la differenza assoluta media tra i valori previsti e quelli effettivi. Si calcola come:
 ```plaintext
 MAE = (1/n) * Σ|y_i - ŷ_i|
 ```
 dove:
 - **n**: Numero di istanze
-- **y_i**: Valore reale per l'istanza i
+- **y_i**: Valore effettivo per l'istanza i
 - **ŷ_i**: Valore previsto per l'istanza i
 
 > [!TIP]
-> MAE fornisce un'interpretazione chiara dell'errore medio nelle previsioni, rendendolo facile da comprendere. È meno sensibile agli outlier rispetto ad altre metriche come l'Errore Quadratico Medio (MSE). Ad esempio, se un modello ha un MAE di 5, significa che, in media, le previsioni del modello si discostano dai valori reali di 5 unità.
+> MAE fornisce un'interpretazione immediata dell'errore medio nelle previsioni, rendendolo facile da comprendere. È meno sensibile agli outlier rispetto ad altre metriche come Mean Squared Error (MSE). Ad esempio, se un modello ha un MAE pari a 5, significa che, in media, le previsioni del modello si discostano dai valori effettivi di 5 unità.
 
-### Matrice di Confusione
+### Matrice di confusione
 
-La matrice di confusione è una tabella che riassume le prestazioni di un modello di classificazione mostrando i conteggi di previsioni vere positive, vere negative, false positive e false negative. Fornisce una visione dettagliata di quanto bene il modello si comporta su ciascuna classe.
+La matrice di confusione è una tabella che riassume le prestazioni di un modello di classificazione mostrando il numero di previsioni true positive, true negative, false positive e false negative. Fornisce una panoramica dettagliata delle prestazioni del modello per ciascuna classe.
 
-|               | Predetto Positivo | Predetto Negativo |
+|               | Predicted Positive | Predicted Negative |
 |---------------|---------------------|---------------------|
-| Reale Positivo| Vero Positivo (TP)  | Falso Negativo (FN)  |
-| Reale Negativo| Falso Positivo (FP) | Vero Negativo (TN)   |
+| Actual Positive| True Positive (TP)  | False Negative (FN)  |
+| Actual Negative| False Positive (FP) | True Negative (TN)   |
 
-- **Vero Positivo (TP)**: Il modello ha previsto correttamente la classe positiva.
-- **Vero Negativo (TN)**: Il modello ha previsto correttamente la classe negativa.
-- **Falso Positivo (FP)**: Il modello ha previsto erroneamente la classe positiva (errore di Tipo I).
-- **Falso Negativo (FN)**: Il modello ha previsto erroneamente la classe negativa (errore di Tipo II).
+- **True Positive (TP)**: Il modello ha previsto correttamente la classe positiva.
+- **True Negative (TN)**: Il modello ha previsto correttamente la classe negativa.
+- **False Positive (FP)**: Il modello ha previsto erroneamente la classe positiva (errore di Tipo I).
+- **False Negative (FN)**: Il modello ha previsto erroneamente la classe negativa (errore di Tipo II).
 
-La matrice di confusione può essere utilizzata per calcolare varie metriche di valutazione, come accuratezza, precisione, richiamo e punteggio F1.
+La matrice di confusione può essere utilizzata per calcolare metriche di valutazione come accuracy, precision, recall e F1 score.
 
+## References
+
+- [1] [scikit-learn - Preprocessing dei dati](https://scikit-learn.org/stable/modules/preprocessing.html)
+- [2] [scikit-learn - Imputazione dei valori mancanti](https://scikit-learn.org/stable/modules/impute.html)
+- [3] [scikit-learn - Cross-validation: valutazione delle prestazioni dell'estimatore](https://scikit-learn.org/stable/modules/cross_validation.html)
+- [4] [scikit-learn - Metriche e scoring](https://scikit-learn.org/stable/modules/model_evaluation.html)
 {{#include ../banners/hacktricks-training.md}}

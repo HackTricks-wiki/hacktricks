@@ -3,7 +3,7 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Se il programma utilizza `scanf` per ottenere **diversi valori contemporaneamente da stdin**, è necessario generare uno state che inizi dopo la **`scanf`**.
+> Se il programma usa `scanf` per ottenere **più valori contemporaneamente da stdin**, devi generare uno state che inizi dopo **`scanf`**.
 
 Codici tratti da [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
 
@@ -40,7 +40,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Input per raggiungere l'indirizzo (indicando le istruzioni di stampa)
+### Input per raggiungere l'indirizzo (indicando le stampe)
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -75,7 +75,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Valori del registro
+### Valori del Registro
 ```python
 # Angr doesn't currently support reading multiple things with scanf (Ex:
 # scanf("%u %u).) You will have to tell the simulation engine to begin the
@@ -104,7 +104,7 @@ password1 = claripy.BVS('password1', password1_size_in_bits)
 password2_size_in_bits = 32  # :integer
 password2 = claripy.BVS('password2', password2_size_in_bits)
 
-# Relate it Vectors with the registriy values you are interested in to reach an address
+# Relate its vectors to the register values needed to reach an address
 initial_state.regs.eax = password0
 initial_state.regs.ebx = password1
 initial_state.regs.edx = password2
@@ -201,11 +201,11 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-In questo scenario, l'input è stato acquisito con `scanf("%u %u")` ed è stato fornito il valore `"1 1"`, quindi i valori **`0x00000001`** dello stack provengono dall'**input dell'utente**. Puoi vedere come questi valori iniziano in `$ebp - 8`. Pertanto, nel codice abbiamo **sottratto 8 byte a `$esp` (poiché in quel momento `$ebp` e `$esp` avevano lo stesso valore)** e quindi abbiamo eseguito il push del BVS.
+In questo scenario, l'input è stato acquisito con `scanf("%u %u")` ed è stato fornito il valore `"1 1"`, quindi i valori **`0x00000001`** dello stack provengono dall'**input dell'utente**. Puoi vedere come questi valori iniziano in `$ebp - 8`. Pertanto, nel codice abbiamo **sottratto 8 byte a `$esp` (poiché in quel momento `$ebp` e `$esp` avevano lo stesso valore)** e poi abbiamo inserito il BVS.
 
-![Inserimento dei bit vector nello stack per determinare il valore che una posizione dello stack deve avere per raggiungere un determinato flusso di programma: In questo scenario, l'input è stato acquisito con scanf("%u %u") e il valore "1...](<../../../images/image (136).png>)
+![Inserimento di bit vector nello stack per scoprire il valore che quella posizione dello stack deve avere per raggiungere un flusso di programma: In questo scenario, l'input è stato acquisito con scanf("%u %u") ed è stato fornito il valore "1...](<../../../images/image (136).png>)
 
-### Valori statici della memoria (variabili globali)
+### Valori di memoria statici (variabili globali)
 ```python
 import angr
 import claripy
@@ -215,7 +215,7 @@ def main(argv):
 path_to_binary = argv[1]
 project = angr.Project(path_to_binary)
 
-#Get an address after the scanf. Once the input has already being saved in the memory positions
+# Get an address after scanf, once the input has been saved in memory
 start_address = 0x8048606
 initial_state = project.factory.blank_state(addr=start_address)
 
@@ -337,7 +337,7 @@ def main(argv):
 path_to_binary = argv[1]
 project = angr.Project(path_to_binary)
 
-# Get an address just before opening the file with th simbolic content
+# Get an address just before opening the file with the symbolic content
 # Or at least when the file is not going to suffer more changes before being read
 start_address = 0x80488db
 initial_state = project.factory.blank_state(addr=start_address)
@@ -347,10 +347,10 @@ initial_state = project.factory.blank_state(addr=start_address)
 filename = 'WCEXPXBW.txt'
 symbolic_file_size_bytes = 64
 
-# Create a BV which is going to be the content of the simbolic file
+# Create a bit-vector that will hold the symbolic file content
 password = claripy.BVS('password', symbolic_file_size_bytes * 8)
 
-# Create the file simulation with the simbolic content
+# Create the simulated file with symbolic content
 password_file = angr.storage.SimFile(filename, content=password)
 
 # Add the symbolic file we created to the symbolic filesystem.
@@ -381,34 +381,34 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!TIP]
-> Nota che il file simbolico potrebbe contenere anche dati costanti combinati con dati simbolici:
+> Nota che il file simbolico potrebbe anche contenere dati costanti uniti a dati simbolici:
 >
 > ```python
 >  # Hello world, my name is John.
 >  # ^                       ^
->  # ^ address 0             ^ address 24 (conta il numero di caratteri)
->  # Per rappresentare questo in memoria, vorremmo scrivere la stringa
->  # all'inizio del file:
+>  # ^ address 0             ^ address 24 (count the number of characters)
+>  # In order to represent this in memory, we would want to write the string to
+>  # the beginning of the file:
 >  #
 >  # hello_txt_contents = claripy.BVV('Hello world, my name is John.', 30*8)
 >  #
->  # Potremmo quindi voler sostituire John con una
->  # variabile simbolica. Chiameremmo:
+>  # Perhaps, then, we would want to replace John with a
+>  # symbolic variable. We would call:
 >  #
 >  # name_bitvector = claripy.BVS('symbolic_name', 4*8)
 >  #
->  # Poi, dopo che il programma chiama fopen('hello.txt', 'r') e quindi
->  # fread(buffer, sizeof(char), 30, hello_txt_file), il buffer conterrebbe
->  # la stringa del file, ad eccezione di quattro byte simbolici dove sarebbe
->  # memorizzato il nome.
+>  # Then, after the program calls fopen('hello.txt', 'r') and then
+>  # fread(buffer, sizeof(char), 30, hello_txt_file), the buffer would contain
+>  # the string from the file, except four symbolic bytes where the name would be
+>  # stored.
 >  # (!)
 > ```
 
 ### Applicazione dei vincoli
 
 > [!TIP]
-> A volte semplici operazioni umane, come confrontare 2 parole di lunghezza 16 **char by char** (loop), **costano** molto ad **angr** perché deve generare branch **esponenzialmente**, dato che genera 1 branch per ogni if: `2^16`\
-> Pertanto, è più semplice **chiedere ad angr di raggiungere un punto precedente** (dove la parte realmente difficile è già stata completata) e **impostare manualmente quei vincoli**.
+> A volte semplici operazioni eseguite da una persona, come confrontare 2 parole di lunghezza 16 **char by char** (loop), **costano** molto ad **angr** perché deve generare rami **esponenzialmente**, dato che genera 1 ramo per ogni if: `2^16`\
+> Pertanto, è più semplice **chiedere ad angr di raggiungere un punto precedente** (in cui la parte realmente difficile è già stata eseguita) e **impostare manualmente questi vincoli**.
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -480,15 +480,15 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!CAUTION]
-> In alcuni scenari puoi attivare **veritesting**, che unirà gli stati simili, così da evitare rami inutili e trovare la soluzione: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> In alcuni scenari puoi attivare **veritesting**, che unirà gli stati simili, al fine di evitare rami inutili e trovare la soluzione: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!TIP]
 > Un'altra cosa che puoi fare in questi scenari è **hookare la funzione fornendo ad angr qualcosa che possa comprendere** più facilmente.
 
-### Gestori di simulazione
+### Gestori delle simulazioni
 
-Alcuni gestori di simulazione possono essere più utili di altri. Nell'esempio precedente c'era un problema, poiché venivano creati molti rami utili. Qui, la tecnica **veritesting** li unirà e troverà una soluzione.\
-Questo gestore di simulazione può essere attivato anche con: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+Alcuni gestori delle simulazioni possono essere più utili di altri. Nell'esempio precedente c'era un problema, poiché venivano creati molti rami utili. Qui, la tecnica **veritesting** li unirà e troverà una soluzione.\
+Questo gestore delle simulazioni può essere attivato anche con: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
 import claripy
@@ -562,7 +562,7 @@ user_input_buffer_address,
 user_input_buffer_length
 )
 
-# Create a simbolic IF that if the loaded string frommemory is the expected
+# Create a symbolic If expression that checks the string loaded from memory
 # return True (1) if not returns False (0) in eax
 check_against_string = 'XKSPZSJKJYQCQXZV'.encode() # :string
 
@@ -678,7 +678,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Simulare scanf con diversi parametri
+### Simulare `scanf` con diversi parametri
 ```python
 # This time, the solution involves simply replacing scanf with our own version,
 # since Angr does not support requesting multiple parameters with scanf.
@@ -807,8 +807,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-## Riferimenti
+## References
 
-- [1] [jakespringer/angr_ctf - Repository GitHub](https://github.com/jakespringer/angr_ctf)
-
+- [1] [jakespringer/angr_ctf - repository GitHub](https://github.com/jakespringer/angr_ctf)
 {{#include ../../../banners/hacktricks-training.md}}
