@@ -15,12 +15,12 @@ Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
 
 ## Scheduled Tasks
 
-**Tasks** can be schedules to run with **certain frequency**. See which binaries are scheduled to run with:
+**Tasks** can be scheduled to run at a **specific frequency**. Use the following commands to see which binaries are scheduled to run:
 
 ```bash
 schtasks /query /fo TABLE /nh | findstr /v /i "disable deshab"
 schtasks /query /fo LIST 2>nul | findstr TaskName
-schtasks /query /fo LIST /v > schtasks.txt; cat schtask.txt | grep "SYSTEM\|Task To Run" | grep -B 1 SYSTEM
+schtasks /query /fo LIST /v > schtasks.txt; cat schtasks.txt | grep "SYSTEM\|Task To Run" | grep -B 1 SYSTEM
 Get-ScheduledTask | where {$_.TaskPath -notlike "\Microsoft*"} | ft TaskName,TaskPath,State
 
 #Schtask to give admin access

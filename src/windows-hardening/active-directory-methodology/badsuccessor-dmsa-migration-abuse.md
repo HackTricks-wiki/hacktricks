@@ -11,7 +11,7 @@ Delegated Managed Service Accounts (**dMSA**) are the next-generation successor 
 
 If an attacker can create **any** dMSA inside an OU and directly manipulate those 2 attributes, LSASS & the KDC will treat the dMSA as a *successor* of the linked account.  When the attacker subsequently authenticates as the dMSA **they inherit all the privileges of the linked account** – up to **Domain Admin** if the Administrator account is linked.<sup>[[1]](#references)</sup>
 
-This technique was coined **BadSuccessor** by Unit 42 in 2025.  At the time of writing **no security patch** is available; only hardening of OU permissions mitigates the issue.<sup>[[1]](#references)[[2]](#references)</sup>
+This technique was coined **BadSuccessor** by Unit 42 in 2025. Microsoft later assigned it **CVE-2025-53779** and released a security update in **August 2025**. The technique remains relevant to unpatched Windows Server 2025 environments and to reviews of dangerous OU delegation.<sup>[[1]](#references)[[2]](#references)[[6]](#references)</sup>
 
 ### Attack prerequisites
 
@@ -87,6 +87,7 @@ Correlating `4662` (attribute modification), `4741` (creation of a computer/serv
 
 ## Mitigation
 
+* Apply Microsoft's security update for **CVE-2025-53779** and verify the patch level of every Windows Server 2025 domain controller.<sup>[[6]](#references)</sup>
 * Apply the principle of **least privilege** – only delegate *Service Account* management to trusted roles.
 * Remove `Create Child` / `msDS-DelegatedManagedServiceAccount` from OUs that do not explicitly require it.
 * Monitor for the event IDs listed above and alert on *non-Tier-0* identities creating or editing dMSAs.
@@ -105,5 +106,6 @@ golden-dmsa-gmsa.md
 - [3] [SharpSuccessor PoC](https://github.com/logangoins/SharpSuccessor)
 - [4] [BadSuccessor.ps1 – Pentest-Tools-Collection](https://github.com/LuemmelSec/Pentest-Tools-Collection/blob/main/tools/ActiveDirectory/BadSuccessor.ps1)
 - [5] [NetExec BadSuccessor module](https://github.com/Pennyw0rth/NetExec/blob/main/nxc/modules/badsuccessor.py)
+- [6] [Microsoft Security Response Center – CVE-2025-53779](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-53779)
 
 {{#include ../../banners/hacktricks-training.md}}

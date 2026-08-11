@@ -27,13 +27,15 @@ Many services still run under user accounts with hand-managed passwords. The KDC
 | AES + PBKDF2 | PBKDF2-HMAC-SHA1 with 4,096 iterations and a per-principal salt generated from the domain + SPN | etype 17/18 (`$krb5tgs$17$`, `$krb5tgs$18$`) | ~6.8 million guesses/s | Salt blocks rainbow tables but still allows fast cracking of short passwords. |
 | RC4 + NT hash | Single MD4 of the password (unsalted NT hash); Kerberos only mixes in an 8-byte confounder per ticket | etype 23 (`$krb5tgs$23$`) | ~4.18 **billion** guesses/s | ~1000× faster than AES; attackers force RC4 whenever `msDS-SupportedEncryptionTypes` permits it. |
 
-*Benchmarks from Chick3nman as d in [Matthew Green's Kerberoasting analysis](https://blog.cryptographyengineering.com/2025/09/10/kerberoasting/).<sup>[[3]](#references)</sup>
+*Benchmarks from Chick3nman as cited in [Matthew Green's Kerberoasting analysis](https://blog.cryptographyengineering.com/2025/09/10/kerberoasting/).<sup>[[3]](#references)</sup>
 
 RC4’s confounder only randomizes the keystream; it does not add work per guess. Unless service accounts rely on random secrets (gMSA/dMSA, machine accounts, or vault-managed strings), compromise speed is purely GPU budget. Enforcing AES-only etypes removes the billion-guesses-per-second downgrade, but weak human passwords still fall to PBKDF2.<sup>[[3]](#references)</sup>
 
 ### Attack
 
 #### Linux
+
+A practical end-to-end example using NetExec to request roastable tickets and Hashcat to crack them is available in reference [1].<sup>[[1]](#references)</sup>
 
 ```bash
 # Metasploit Framework

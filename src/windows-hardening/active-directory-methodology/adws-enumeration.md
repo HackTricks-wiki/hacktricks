@@ -27,7 +27,7 @@ ADWS interactions are implemented over WS-Enumeration: every query starts with a
 * Supports **proxying through SOCKS** (useful from C2 implants).
 * Fine-grained search filters identical to LDAP `-q '(objectClass=user)'`.
 * Optional **write** operations ( `--set` / `--delete` ).
-* **BOFHound output mode** for direct ingestion into BloodHound.
+* **BOFHound output mode** for direct ingestion into BloodHound.<sup>[[3]](#references)</sup>
 * `--parse` flag to prettify timestamps / `userAccountControl` when human readability is required.<sup>[[2]](#references)</sup>
 
 ### Targeted collection flags & write operations
@@ -148,7 +148,7 @@ For arbitrary object classes, the `create custom` command consumes a YAML templa
 
 ## SOAPHound – High-Volume ADWS Collection (Windows)
 
-[FalconForce SOAPHound](https://github.com/FalconForceTeam/SOAPHound) is a .NET collector that keeps all LDAP interactions inside ADWS and emits BloodHound v4-compatible JSON. It builds a complete cache of `objectSid`, `objectGUID`, `distinguishedName` and `objectClass` once (`--buildcache`), then re-uses it for high-volume `--bhdump`, `--certdump` (ADCS), or `--dnsdump` (AD-integrated DNS) passes so only ~35 critical attributes ever leave the DC. AutoSplit (`--autosplit --threshold <N>`) automatically shards queries by CN prefix to stay under the 30-minute EnumerationContext timeout in large forests.<sup>[[8]](#references)</sup>
+[FalconForce SOAPHound](https://github.com/FalconForceTeam/SOAPHound) is a .NET collector that keeps all LDAP interactions inside ADWS and emits BloodHound v4-compatible JSON. It builds a complete cache of `objectSid`, `objectGUID`, `distinguishedName` and `objectClass` once (`--buildcache`), then reuses it for high-volume `--bhdump`, `--certdump` (ADCS), or `--dnsdump` (AD-integrated DNS) passes so only ~35 critical attributes ever leave the DC. AutoSplit (`--autosplit --threshold <N>`) automatically shards queries by CN prefix to stay under the 30-minute EnumerationContext timeout in large forests.<sup>[[8]](#references)</sup>
 
 Typical workflow on a domain-joined operator VM:
 
