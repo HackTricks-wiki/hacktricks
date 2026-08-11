@@ -1,4 +1,6 @@
-# 有用的 Linux 命令
+# 实用 Linux 命令
+
+{{#include ../../banners/hacktricks-training.md}}
 
 ## 常用 Bash
 ```bash
@@ -299,9 +301,9 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
-## eBPF Telemetry & Rootkit Hunting
+## eBPF 遥测与 Rootkit Hunting
 
-Rootkit 研究已经展示了基于 eBPF 的 implants（例如 TripleCross）以及基于 BPF 的 backdoors（例如 BPFDoor variants）。应将意外的 BPF programs、attachments 或 maps 视为调查线索，而不是 compromise 的证明。<sup>[[3]](#references)[[4]](#references)</sup> 使用 `bpftool` 或 `eBPFmon` 对 authorized systems 建立 baseline：`bpftool` 可以枚举 programs 和 maps、转储 program instructions，并查询受支持的 features；而 eBPFmon 则在 TUI 中呈现这些信息。<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
+Rootkit 研究已经证明存在基于 eBPF 的 implants（如 TripleCross）以及基于 BPF 的 backdoors（如 BPFDoor variants）。应将意外出现的 BPF programs、attachments 或 maps 视为调查线索，而不是被入侵的证据。<sup>[[3]](#references)[[4]](#references)</sup> 使用 `bpftool` 或 `eBPFmon` 为已授权系统建立基线：`bpftool` 可以枚举 programs 和 maps、转储 program instructions，并查询支持的 features；而 eBPFmon 则通过 TUI 展示这些信息。<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -319,11 +321,11 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-将 `bpftool` 输出与预期的 NIC/cgroup attachments 进行关联；由未批准 PID 所拥有的突发 `xdp` 或 `kprobe` 程序是调查线索，但不能确凿证明存在被注入的 payload。<sup>[[5]](#references)[[6]](#references)</sup>
+将 `bpftool` 输出与预期的 NIC/cgroup 附加情况进行关联；由未经批准的 PID 所拥有的突然出现的 `xdp` 或 `kprobe` 程序是调查线索，而不是已注入 payload 的确凿证据。<sup>[[5]](#references)[[6]](#references)</sup>
 
 ## Journald 事件分诊
 
-`journalctl` 从 `systemd-journald` 读取结构化条目，并支持按 boot、priority、unit、UID 和相对时间进行过滤。当需要保留或比较证据时，请将这些过滤条件与 JSON 输出结合使用；仅进行过滤并不能证明日志未被篡改。<sup>[[2]](#references)[[7]](#references)</sup>
+`journalctl` 从 `systemd-journald` 读取结构化条目，并支持按 boot、优先级、unit、UID 和相对时间进行筛选。当需要保留或比较证据时，请将这些筛选条件与 JSON 输出结合使用；仅进行筛选并不能证明日志未被篡改。<sup>[[2]](#references)[[7]](#references)</sup>
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -334,15 +336,15 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-添加 `--grep 'Invalid user' --case-sensitive` 或 `-k`（仅显示 kernel messages）以获得更精确的过滤结果，并记住可以组合 `_PID`、`_SYSTEMD_UNIT`、`_HOSTNAME` 和 `_TRANSPORT` selectors 来进行定向排查。<sup>[[7]](#references)</sup>
+添加 `--grep 'Invalid user' --case-sensitive` 或 `-k`（仅 kernel 消息），以便需要更严格的过滤时使用；请记住，`_PID`、`_SYSTEMD_UNIT`、`_HOSTNAME` 和 `_TRANSPORT` selectors 可以组合使用，以进行有针对性的搜索。<sup>[[7]](#references)</sup>
 
 ## References
 
-- [1] [eBPFmon：用于探索和交互 eBPF applications 的新工具](https://redcanary.com/blog/linux-security/ebpfmon/)
-- [2] [如何使用 journalctl command 查看 Linux logs](https://www.hostinger.com/tutorials/journalctl-command)
+- [1] [eBPFmon：用于探索和交互 eBPF 应用的新工具](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [2] [如何使用 journalctl 命令查看 Linux 日志](https://www.hostinger.com/tutorials/journalctl-command)
 - [3] [h3xduck/TripleCross](https://github.com/h3xduck/TripleCross)
 - [4] [Rapid7 Labs：电信网络中的 BPFdoor](https://www.rapid7.com/blog/post/tr-bpfdoor-telecom-networks-sleeper-cells-threat-research-report/)
-- [5] [BPF Documentation — Linux Kernel documentation](https://docs.kernel.org/bpf/)
+- [5] [BPF 文档——Linux Kernel 文档](https://docs.kernel.org/bpf/)
 - [6] [libbpf/bpftool](https://github.com/libbpf/bpftool)
-- [7] [journalctl(1) — Linux manual page](https://man7.org/linux/man-pages/man1/journalctl.1.html)
+- [7] [journalctl(1)——Linux 手册页](https://man7.org/linux/man-pages/man1/journalctl.1.html)
 {{#include ../../banners/hacktricks-training.md}}

