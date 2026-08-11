@@ -5,31 +5,31 @@
 
 ## Basics of Resource-based Constrained Delegation
 
-This is similar to the basic [Constrained Delegation](constrained-delegation.md) but **instead** of giving permissions to an **object** to **impersonate any user against a machine**. Resource-based Constrain Delegation **sets** in **the object who is able to impersonate any user against it**.<sup>[[12]](#references)</sup>
+Resource-based constrained delegation (RBCD) is similar to [constrained delegation](constrained-delegation.md), but the trust direction is reversed. Traditional constrained delegation records which services a principal may delegate to; RBCD records on the **target resource** which principals may impersonate users to it.<sup>[[12]](#references)</sup>
 
-In this case, the constrained object will have an attribute called _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ with the name of the user that can impersonate any other user against it.
+The target object's _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ attribute contains a security descriptor identifying the principals allowed to act on behalf of other identities to that resource.
 
-Another important difference from this Constrained Delegation to the other delegations is that any user with **write permissions over a machine account** (_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_) can set the **_msDS-AllowedToActOnBehalfOfOtherIdentity_** (In the other forms of Delegation you needed domain admin privs).<sup>[[1]](#references)</sup>
+Another important difference is that a principal with sufficient **write permissions over a machine account** (`GenericAll`, `GenericWrite`, `WriteDacl`, `WriteProperty`, and similar rights) may be able to set _**msDS-AllowedToActOnBehalfOfOtherIdentity**_. Configuring traditional constrained delegation normally requires more privileged administrative access.<sup>[[1]](#references)</sup>
 
 ### New Concepts
 
-Back in Constrained Delegation it was told that the **`TrustedToAuthForDelegation`** flag inside the _userAccountControl_ value of the user is needed to perform a **S4U2Self.** But that's not completely truth.\
-The reality is that even without that value, you can perform a **S4U2Self** against any user if you are a **service** (have a SPN) but, if you **have `TrustedToAuthForDelegation`** the returned TGS will be **Forwardable** and if you **don't have** that flag the returned TGS **won't** be **Forwardable**.<sup>[[5]](#references)</sup>
+The **`TrustedToAuthForDelegation`** flag in `userAccountControl` is often described as a prerequisite for **S4U2Self**, but that is incomplete.\
+A service principal with an SPN can request S4U2Self without the flag. With `TrustedToAuthForDelegation`, the returned service ticket is **forwardable**; without it, the ticket is normally **non-forwardable**.<sup>[[5]](#references)</sup>
 
-However, if the **TGS** used in **S4U2Proxy** is **NOT Forwardable** trying to abuse a **basic Constrain Delegation** it **won't work**. But if you are trying to exploit a **Resource-Based constrain delegation, it will work**.<sup>[[1]](#references)[[2]](#references)</sup>
+Traditional constrained delegation rejects a **non-forwardable TGS** in the S4U2Proxy step. RBCD can accept that S4U2Self ticket when the target's security descriptor authorizes the requesting service.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### Attack structure
 
-> If you have **write equivalent privileges** over a **Computer** account you can obtain **privileged access** in that machine.
+> If you have **write-equivalent privileges** over a **computer account**, you may be able to obtain privileged access to that machine.
 
-Suppose that the attacker has already **write equivalent privileges over the victim computer**.
+Assume the attacker already has **write-equivalent privileges over the victim computer object**.
 
-1. The attacker **compromises** an account that has a **SPN** or **creates one** (“Service A”). Note that **any** _Admin User_ without any other special privilege can **create** up until 10 Computer objects (**_MachineAccountQuota_**) and set them a **SPN**. So the attacker can just create a Computer object and set a SPN.
+1. The attacker **compromises** an account with an **SPN** or **creates one** ("Service A"). By default, an authenticated domain user can create up to 10 computer objects, as controlled by **_MachineAccountQuota_**; a computer object automatically supplies usable SPNs.
 2. The attacker **abuses its WRITE privilege** over the victim computer (ServiceB) to configure **resource-based constrained delegation to allow ServiceA to impersonate any user** against that victim computer (ServiceB).
 3. The attacker uses Rubeus to perform a **full S4U attack** (S4U2Self and S4U2Proxy) from Service A to Service B for a user **with privileged access to Service B**.
-   1. S4U2Self (from the SPN compromised/created account): Ask for a **TGS of Administrator to me** (Not Forwardable).
-   2. S4U2Proxy: Use the **not Forwardable TGS** of the step before to ask for a **TGS** from **Administrator** to the **victim host**.
-   3. Even if you are using a not Forwardable TGS, as you are exploiting Resource-based constrained delegation, it will work.
+   1. S4U2Self (from the compromised or created SPN account): request a **TGS representing Administrator to Service A** (non-forwardable).
+   2. S4U2Proxy: use that **non-forwardable TGS** to request a service ticket representing **Administrator** to the **victim host**.
+   3. The non-forwardable ticket can still work in this RBCD flow because Service A is authorized in the target resource's security descriptor.
 4. The attacker can **pass-the-ticket** and **impersonate** the user to gain **access to the victim ServiceB**.<sup>[[1]](#references)</sup>
 
 To check the _**MachineAccountQuota**_ of the domain you can use:
@@ -54,10 +54,10 @@ Get-DomainComputer SERVICEA
 
 ### Configuring Resource-based Constrained Delegation
 
-**Using activedirectory PowerShell module**<sup>[[4]](#references)</sup>
+**Using the Active Directory PowerShell module**<sup>[[4]](#references)</sup>
 
 ```bash
-Set-ADComputer $targetComputer -PrincipalsAllowedToDelegateToAccount SERVICEA$ #Assing delegation privileges
+Set-ADComputer $targetComputer -PrincipalsAllowedToDelegateToAccount SERVICEA$ #Assign delegation privileges
 Get-ADComputer $targetComputer -Properties PrincipalsAllowedToDelegateToAccount #Check that it worked
 ```
 
@@ -100,7 +100,7 @@ rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:admin
 ```
 
 > [!CAUTION]
-> Note that users have an attribute called "**Cannot be delegated**". If a user has this attribute to True, you won't be able to impersonate him. This property can be seen inside bloodhound.
+> Users can be marked **"Account is sensitive and cannot be delegated."** If that flag is enabled, the account cannot be impersonated through this delegation flow. BloodHound exposes this property during analysis.
 
 ### Linux tooling: end-to-end RBCD with Impacket (2024+)
 
@@ -375,10 +375,10 @@ adws-enumeration.md
 
 ## References
 
-- [1] [Wagging the Dog: Abusing Resource-Based Constrained Delegation to Attack Active Directory](https://shenaniganslabs.io/2019/01/28/Wagging-the-Dog.html)
-- [2] [Another Word on Delegation](https://www.harmj0y.net/blog/redteaming/another-word-on-delegation/)
+- [1] [Wagging the Dog: Abusing Resource-Based Constrained Delegation to Attack Active Directory](https://eladshamir.com/2019/01/28/Wagging-the-Dog.html)
+- [2] [Microsoft Open Specifications – S4U2Proxy details](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-sfu/bde93b0e-f3c9-4ddf-9cd5-e9c237331c90)
 - [3] [Kerberos Resource-based Constrained Delegation: Computer Object Takeover](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object)
-- [4] [Resource-Based Constrained Delegation Abuse](https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/)
+- [4] [Netwrix – Resource-Based Constrained Delegation Abuse](https://netwrix.com/en/resources/blog/resource-based-constrained-delegation-abuse/)
 - [5] [Kerberosity Killed the Domain: An Offensive Kerberos Overview](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
 - [6] [Impacket rbcd.py (official)](https://github.com/fortra/impacket/blob/master/examples/rbcd.py)
 - [7] [Quick Linux cheatsheet with recent syntax](https://tldrbins.github.io/rbcd/)
