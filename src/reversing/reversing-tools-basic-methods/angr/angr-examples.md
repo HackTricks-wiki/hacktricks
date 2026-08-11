@@ -3,9 +3,9 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Ako program koristi `scanf` za dobijanje **nekoliko vrednosti odjednom sa stdin-a**, potrebno je da generišete stanje koje počinje nakon **`scanf`**.
+> Ako program koristi `scanf` za preuzimanje **nekoliko vrednosti odjednom sa stdin-a**, potrebno je da generišete stanje koje počinje nakon funkcije **`scanf`**.
 
-Kodovi preuzeti sa [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
+Kod preuzet sa [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
 
 ### Ulaz za dostizanje adrese (navođenjem adrese)
 ```python
@@ -40,7 +40,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Ulaz za dostizanje adrese (uz indikaciju ispisa)
+### Ulaz za dostizanje adrese (što je naznačeno ispisima)
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -104,7 +104,7 @@ password1 = claripy.BVS('password1', password1_size_in_bits)
 password2_size_in_bits = 32  # :integer
 password2 = claripy.BVS('password2', password2_size_in_bits)
 
-# Relate it Vectors with the registriy values you are interested in to reach an address
+# Relate its vectors to the register values needed to reach an address
 initial_state.regs.eax = password0
 initial_state.regs.ebx = password1
 initial_state.regs.edx = password2
@@ -201,9 +201,9 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-U ovom scenariju, unos je uzet pomoću `scanf("%u %u")` i zadata je vrednost `"1 1"`, tako da vrednosti **`0x00000001`** na steku potiču od **korisničkog unosa**. Možete videti kako ove vrednosti počinju na `$ebp - 8`. Zbog toga smo u kodu **oduzeli 8 bajtova od `$esp` (pošto su u tom trenutku `$ebp` i `$esp` imali istu vrednost)**, a zatim smo postavili BVS na stek.
+U ovom scenariju, unos je preuzet pomoću `scanf("%u %u")`, a uneta je vrednost `"1 1"`, tako da vrednosti **`0x00000001`** na steku potiču od **korisničkog unosa**. Možete videti kako ove vrednosti počinju na `$ebp - 8`. Zbog toga smo u kodu **oduzeli 8 bajtova od `$esp` (pošto su u tom trenutku `$ebp` i `$esp` imali istu vrednost)**, a zatim smo ubacili BVS.
 
-![Postavite bit vektore na stek da biste saznali vrednost koju ta pozicija na steku mora da ima kako bi se dostigao tok programa: U ovom scenariju, unos je uzet pomoću scanf("%u %u") i zadata je vrednost "1...](<../../../images/image (136).png>)
+![Postavljanje bit vektora na stek kako bi se utvrdila vrednost koju ta pozicija na steku mora da ima da bi se došlo do određenog toka programa: U ovom scenariju, unos je preuzet pomoću scanf("%u %u"), a uneta je vrednost "1...](<../../../images/image (136).png>)
 
 ### Statičke vrednosti memorije (globalne promenljive)
 ```python
@@ -215,7 +215,7 @@ def main(argv):
 path_to_binary = argv[1]
 project = angr.Project(path_to_binary)
 
-#Get an address after the scanf. Once the input has already being saved in the memory positions
+# Get an address after scanf, once the input has been saved in memory
 start_address = 0x8048606
 initial_state = project.factory.blank_state(addr=start_address)
 
@@ -337,7 +337,7 @@ def main(argv):
 path_to_binary = argv[1]
 project = angr.Project(path_to_binary)
 
-# Get an address just before opening the file with th simbolic content
+# Get an address just before opening the file with the symbolic content
 # Or at least when the file is not going to suffer more changes before being read
 start_address = 0x80488db
 initial_state = project.factory.blank_state(addr=start_address)
@@ -347,10 +347,10 @@ initial_state = project.factory.blank_state(addr=start_address)
 filename = 'WCEXPXBW.txt'
 symbolic_file_size_bytes = 64
 
-# Create a BV which is going to be the content of the simbolic file
+# Create a bit-vector that will hold the symbolic file content
 password = claripy.BVS('password', symbolic_file_size_bytes * 8)
 
-# Create the file simulation with the simbolic content
+# Create the simulated file with symbolic content
 password_file = angr.storage.SimFile(filename, content=password)
 
 # Add the symbolic file we created to the symbolic filesystem.
@@ -381,7 +381,7 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!TIP]
-> Imajte na umu da simbolička datoteka takođe može da sadrži konstantne podatke spojene sa simboličkim podacima:
+> Imajte na umu da simbolička datoteka takođe može sadržati konstantne podatke spojene sa simboličkim podacima:
 >
 > ```python
 >  # Hello world, my name is John.
@@ -402,13 +402,13 @@ main(sys.argv)
 >  # the string from the file, except four symbolic bytes where the name would be
 >  # stored.
 >  # (!)
->  ```
+> ```
 
-### Primena Constrains
+### Primena ograničenja
 
 > [!TIP]
-> Ponekad jednostavne ljudske operacije, kao što je poređenje 2 reči dužine 16 **char by char** (petlja), **cost** mnogo **angr**-u jer mora da generiše grane **eksponencijalno**, pošto generiše 1 granu za svaki if: `2^16`\
-> Zato je jednostavnije **zatražiti od angr-a da se vrati na prethodnu tačku** (gde je stvarno težak deo već obavljen) i **ručno postaviti ta ograničenja**.
+> Ponekad jednostavne radnje koje čovek obavlja, kao što je poređenje 2 reči dužine 16 **karakter po karakter** (petlja), mogu **angr**-u oduzeti mnogo vremena, jer mora da generiše grane **eksponencijalno**, pošto generiše 1 granu za svaki if: `2^16`\
+> Zato je lakše **zatražiti od angr-a da se vrati na prethodnu tačku** (gde je stvarno složeni deo već obrađen) i **ručno postaviti ta ograničenja**.
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -480,15 +480,15 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!CAUTION]
-> U nekim scenarijima možete aktivirati **veritesting**, koji će spojiti slična stanja kako bi izbegao nepotrebne grane i pronašao rešenje: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> U nekim scenarijima možete aktivirati **veritesting**, koji će spojiti slična stanja, kako bi se izbegle nepotrebne grane i pronašlo rešenje: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!TIP]
-> Još nešto što možete uraditi u ovim scenarijima jeste da **hook-ujete funkciju tako da angr-u prosledite nešto što može lakše da razume**.
+> Još jedna stvar koju možete uraditi u ovim scenarijima jeste da **hook-ujete funkciju i date angr-u nešto što može lakše da razume**.
 
-### Simulation Managers
+### Menadžeri simulacije
 
-Neki simulation managers mogu biti korisniji od drugih. U prethodnom primeru postojao je problem, jer je kreirano mnogo korisnih grana. Ovde će tehnika **veritesting** spojiti te grane i pronaći rešenje.\
-Ovaj simulation manager takođe možete aktivirati pomoću: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+Neki menadžeri simulacije mogu biti korisniji od drugih. U prethodnom primeru postojao je problem zato što je kreiran veliki broj korisnih grana. Ovde će tehnika **veritesting** spojiti te grane i pronaći rešenje.\
+Ovaj menadžer simulacije takođe se može aktivirati pomoću: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
 import claripy
@@ -526,7 +526,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Hooking/Bypassing jednog poziva funkcije
+### Hooking/Zaobilaženje jednog poziva funkcije
 ```python
 # This level performs the following computations:
 #
@@ -562,7 +562,7 @@ user_input_buffer_address,
 user_input_buffer_length
 )
 
-# Create a simbolic IF that if the loaded string frommemory is the expected
+# Create a symbolic If expression that checks the string loaded from memory
 # return True (1) if not returns False (0) in eax
 check_against_string = 'XKSPZSJKJYQCQXZV'.encode() # :string
 
@@ -678,7 +678,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Simulacija scanf funkcije sa nekoliko parametara
+### Simulacija scanf-a sa nekoliko parametara
 ```python
 # This time, the solution involves simply replacing scanf with our own version,
 # since Angr does not support requesting multiple parameters with scanf.
@@ -740,7 +740,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Statički binarni fajlovi
+### Statičke binarne datoteke
 ```python
 # This challenge is the exact same as the first challenge, except that it was
 # compiled as a static binary. Normally, Angr automatically replaces standard
@@ -807,8 +807,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-## Reference
+## References
 
-- [1] [jakespringer/angr_ctf - GitHub repository](https://github.com/jakespringer/angr_ctf)
-
+- [1] [jakespringer/angr_ctf - GitHub repozitorijum](https://github.com/jakespringer/angr_ctf)
 {{#include ../../../banners/hacktricks-training.md}}

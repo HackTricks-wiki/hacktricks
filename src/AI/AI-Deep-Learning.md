@@ -1,127 +1,128 @@
-# Duboko Učenje
+# Duboko učenje
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Duboko Učenje
+## Duboko učenje <sup>[[1]](#references)</sup>
 
-Duboko učenje je podskup mašinskog učenja koji koristi neuronske mreže sa više slojeva (duboke neuronske mreže) za modelovanje složenih obrazaca u podacima. Postiglo je izvanredan uspeh u raznim domenima, uključujući računarsku viziju, obradu prirodnog jezika i prepoznavanje govora.
+Duboko učenje je podskup machine learning-a koji koristi neuronske mreže sa više slojeva (duboke neuronske mreže) za modelovanje složenih obrazaca u podacima. Postiglo je izuzetan uspeh u različitim oblastima, uključujući computer vision, natural language processing i prepoznavanje govora.
 
-### Neuronske Mreže
+### Neuronske mreže
 
-Neuronske mreže su osnovni gradivni blokovi dubokog učenja. Sastoje se od međusobno povezanih čvorova (neurona) organizovanih u slojeve. Svaki neuron prima ulaze, primenjuje ponderisani zbir i prosleđuje rezultat kroz aktivacionu funkciju da bi proizveo izlaz. Slojevi se mogu kategorizovati na sledeći način:
-- **Ulazni Sloj**: Prvi sloj koji prima ulazne podatke.
-- **Skriveni Slojevi**: Srednji slojevi koji vrše transformacije na ulaznim podacima. Broj skrivenih slojeva i neurona u svakom sloju može varirati, što dovodi do različitih arhitektura.
-- **Izlazni Sloj**: Poslednji sloj koji proizvodi izlaz mreže, kao što su verovatnoće klasa u zadacima klasifikacije.
+Neuronske mreže su osnovni gradivni elementi dubokog učenja. Sastoje se od međusobno povezanih čvorova (neurona) organizovanih u slojeve. Svaki neuron prima ulaze, primenjuje ponderisanu sumu i prosleđuje rezultat kroz activation function kako bi proizveo izlaz. Slojevi se mogu kategorizovati na sledeći način:
+- **Input Layer**: Prvi sloj koji prima ulazne podatke.
+- **Hidden Layers**: Međuslojevi koji vrše transformacije nad ulaznim podacima. Broj skrivenih slojeva i neurona u svakom sloju može da varira, što dovodi do različitih arhitektura.
+- **Output Layer**: Završni sloj koji proizvodi izlaz mreže, kao što su verovatnoće klasa u zadacima klasifikacije.
 
-### Aktivacione Funkcije
 
-Kada sloj neurona obrađuje ulazne podatke, svaki neuron primenjuje težinu i pristrasnost na ulaz (`z = w * x + b`), gde je `w` težina, `x` ulaz, a `b` pristrasnost. Izlaz neurona se zatim prosleđuje kroz **aktivacionu funkciju da bi se u model uvela nelinearnost**. Ova aktivaciona funkcija u suštini označava da li sledeći neuron "treba da bude aktiviran i koliko". Ovo omogućava mreži da uči složene obrasce i odnose u podacima, omogućavajući joj da aproksimira bilo koju kontinuiranu funkciju.
+### Activation Functions
 
-Stoga, aktivacione funkcije uvode nelinearnost u neuronsku mrežu, omogućavajući joj da uči složene odnose u podacima. Uobičajene aktivacione funkcije uključuju:
-- **Sigmoid**: Mapira ulazne vrednosti na opseg između 0 i 1, često korišćen u binarnoj klasifikaciji.
-- **ReLU (Rectified Linear Unit)**: Izlaz daje direktno ako je pozitivan; u suprotnom, izlaz je nula. Široko se koristi zbog svoje jednostavnosti i efikasnosti u obuci dubokih mreža.
-- **Tanh**: Mapira ulazne vrednosti na opseg između -1 i 1, često korišćen u skrivenim slojevima.
-- **Softmax**: Konvertuje sirove rezultate u verovatnoće, često korišćen u izlaznom sloju za višeklasnu klasifikaciju.
+Kada sloj neurona obrađuje ulazne podatke, svaki neuron primenjuje težinu i bias na ulaz (`z = w * x + b`), gde je `w` težina, `x` ulaz, a `b` bias. Izlaz neurona se zatim prosleđuje kroz **activation function kako bi se u model uvela nelinearnost**. Ova activation function u osnovi pokazuje da li sledeći neuron "treba da se aktivira i u kojoj meri". To omogućava mreži da uči složene obrasce i odnose u podacima, čime može da aproksimira bilo koju neprekidnu funkciju.
 
-### Povratna Propagacija
+Dakle, activation functions uvode nelinearnost u neuronsku mrežu, omogućavajući joj da uči složene odnose u podacima. Uobičajene activation functions uključuju:
+- **Sigmoid**: Preslikava ulazne vrednosti u opseg između 0 i 1 i često se koristi u binarnoj klasifikaciji.
+- **ReLU (Rectified Linear Unit)**: Direktno prosleđuje ulaz ako je pozitivan; u suprotnom prosleđuje nulu. Široko se koristi zbog jednostavnosti i efikasnosti pri obučavanju dubokih mreža.
+- **Tanh**: Preslikava ulazne vrednosti u opseg između -1 i 1 i često se koristi u skrivenim slojevima.
+- **Softmax**: Pretvara sirove rezultate u verovatnoće i često se koristi u izlaznom sloju za klasifikaciju sa više klasa.
 
-Povratna propagacija je algoritam koji se koristi za obuku neuronskih mreža prilagođavanjem težina veza između neurona. Funkcioniše tako što izračunava gradijent funkcije gubitka u odnosu na svaku težinu i ažurira težine u suprotnom pravcu od gradijenta kako bi minimizovao gubitak. Koraci uključeni u povratnu propagaciju su:
+### Backpropagation
 
-1. **Napredna Prolaz**: Izračunajte izlaz mreže prolazeći ulaz kroz slojeve i primenjujući aktivacione funkcije.
-2. **Izračunavanje Gubitka**: Izračunajte gubitak (grešku) između predviđenog izlaza i pravog cilja koristeći funkciju gubitka (npr. srednja kvadratna greška za regresiju, unakrsna entropija za klasifikaciju).
-3. **Povratni Prolaz**: Izračunajte gradijente gubitka u odnosu na svaku težinu koristeći pravilo lanca kalkulusa.
-4. **Ažuriranje Težina**: Ažurirajte težine koristeći algoritam optimizacije (npr. stohastički gradijentni spust, Adam) kako biste minimizovali gubitak.
+Backpropagation je algoritam koji se koristi za obučavanje neuronskih mreža podešavanjem težina veza između neurona. Funkcioniše tako što izračunava gradijent loss function u odnosu na svaku težinu i ažurira težine u suprotnom smeru od gradijenta kako bi se loss smanjio. Koraci uključeni u backpropagation su:
 
-## Konvolucione Neuronske Mreže (CNN)
+1. **Forward Pass**: Izračunavanje izlaza mreže prosleđivanjem ulaza kroz slojeve i primenom activation functions.
+2. **Loss Calculation**: Izračunavanje loss-a (greške) između predviđenog izlaza i stvarne ciljne vrednosti pomoću loss function (npr. srednja kvadratna greška za regresiju, cross-entropy za klasifikaciju).
+3. **Backward Pass**: Izračunavanje gradijenata loss-a u odnosu na svaku težinu pomoću chain rule-a iz diferencijalnog računa.
+4. **Weight Update**: Ažuriranje težina pomoću optimization algorithm-a (npr. stochastic gradient descent, Adam) kako bi se loss smanjio.
 
-Konvolucione Neuronske Mreže (CNN) su specijalizovana vrsta neuronske mreže dizajnirana za obradu podataka u obliku mreže, kao što su slike. Posebno su efikasne u zadacima računarske vizije zbog svoje sposobnosti da automatski uče prostorne hijerarhije karakteristika.
+## Convolutional Neural Networks (CNNs) <sup>[[2]](#references)</sup>
 
-Glavne komponente CNN uključuju:
-- **Konvolucioni Slojevi**: Primena konvolucionih operacija na ulazne podatke koristeći učljive filtre (jezgre) za ekstrakciju lokalnih karakteristika. Svaki filter se pomera preko ulaza i izračunava skalarni proizvod, proizvodeći mapu karakteristika.
-- **Slojevi Smanjenja**: Smanjuju mape karakteristika kako bi smanjili njihove prostorne dimenzije dok zadržavaju važne karakteristike. Uobičajene operacije smanjenja uključuju maksimalno smanjenje i prosečno smanjenje.
-- **Potpuno Povezani Slojevi**: Povezuju svaki neuron u jednom sloju sa svakim neuronom u sledećem sloju, slično tradicionalnim neuronskim mrežama. Ovi slojevi se obično koriste na kraju mreže za zadatke klasifikacije.
+Convolutional Neural Networks (CNNs) su specijalizovana vrsta neuronskih mreža namenjena obradi podataka organizovanih u obliku mreže, kao što su slike. Posebno su efikasne u zadacima computer vision-a zbog sposobnosti da automatski uče prostorne hijerarhije osobina.
 
-Unutar CNN **`Konvolucioni Slojevi`**, takođe možemo razlikovati između:
-- **Početni Konvolucioni Sloj**: Prvi konvolucioni sloj koji obrađuje sirove ulazne podatke (npr. sliku) i koristan je za identifikaciju osnovnih karakteristika kao što su ivice i teksture.
-- **Srednji Konvolucioni Slojevi**: Sledeći konvolucioni slojevi koji se oslanjaju na karakteristike naučene od strane početnog sloja, omogućavajući mreži da uči složenije obrasce i reprezentacije.
-- **Zadnji Konvolucioni Sloj**: Poslednji konvolucioni slojevi pre potpuno povezanih slojeva, koji hvataju visoko nivoe karakteristika i pripremaju podatke za klasifikaciju.
+Glavne komponente CNNs uključuju:
+- **Convolutional Layers**: Primenjuju convolution operacije nad ulaznim podacima pomoću filtera koji se mogu naučiti (kernels) kako bi izdvojili lokalne osobine. Svaki filter klizi preko ulaza i izračunava dot product, proizvodeći feature map.
+- **Pooling Layers**: Smanjuju uzorkovanje feature maps kako bi se smanjile njihove prostorne dimenzije, uz zadržavanje važnih osobina. Uobičajene pooling operacije uključuju max pooling i average pooling.
+- **Fully Connected Layers**: Povezuju svaki neuron u jednom sloju sa svakim neuronom u sledećem sloju, slično tradicionalnim neuronskim mrežama. Ovi slojevi se obično koriste na kraju mreže za zadatke klasifikacije.
+
+Unutar CNN **`Convolutional Layers`**, možemo takođe razlikovati:
+- **Initial Convolutional Layer**: Prvi convolutional layer koji obrađuje sirove ulazne podatke (npr. sliku) i koristan je za identifikovanje osnovnih osobina kao što su ivice i teksture.
+- **Intermediate Convolutional Layers**: Naredni convolutional layers koji nadograđuju osobine naučene u početnom sloju, omogućavajući mreži da uči složenije obrasce i reprezentacije.
+- **Final Convolutional Layer**: Poslednji convolutional layers pre fully connected layers, koji beleži osobine visokog nivoa i priprema podatke za klasifikaciju.
 
 > [!TIP]
-> CNN su posebno efikasni za klasifikaciju slika, prepoznavanje objekata i zadatke segmentacije slika zbog svoje sposobnosti da uče prostorne hijerarhije karakteristika u podacima u obliku mreže i smanje broj parametara kroz deljenje težina.
-> Pored toga, bolje funkcionišu sa podacima koji podržavaju princip lokalnosti karakteristika gde su susedni podaci (pikseli) verovatnije povezani nego udaljeni pikseli, što možda nije slučaj za druge vrste podataka kao što je tekst.
-> Takođe, imajte na umu kako će CNN moći da identifikuju čak i složene karakteristike, ali neće moći da primene bilo kakav prostorni kontekst, što znači da će ista karakteristika pronađena u različitim delovima slike biti ista.
+> CNNs su posebno efikasne za klasifikaciju slika, detekciju objekata i segmentaciju slika zbog sposobnosti da uče prostorne hijerarhije osobina u podacima organizovanim u obliku mreže i smanje broj parametara deljenjem težina.
+> Osim toga, bolje rade sa podacima koji podržavaju princip lokalnosti osobina, prema kojem je veća verovatnoća da su susedni podaci (pikseli) povezani nego udaljeni pikseli, što možda nije slučaj kod drugih vrsta podataka, kao što je tekst.
+> Takođe, imajte na umu da CNNs mogu da identifikuju čak i složene osobine, ali ne mogu da primene prostorni kontekst, što znači da će ista osobina pronađena u različitim delovima slike biti ista.
 
-### Primer definisanja CNN
+### Primer definisanja CNN-a
 
-*Ovde ćete pronaći opis kako definisati Konvolucionu Neuronsku Mrežu (CNN) u PyTorch-u koja počinje sa serijom RGB slika kao skupom podataka veličine 48x48 i koristi konvolucione slojeve i maksimalno smanjenje za ekstrakciju karakteristika, nakon čega slede potpuno povezani slojevi za klasifikaciju.*
+*Ovde ćete pronaći opis načina definisanja Convolutional Neural Network (CNN) u PyTorch-u, koja počinje sa batch-om RGB slika kao dataset-om veličine 48x48 i koristi convolutional layers i maxpool za izdvajanje osobina, nakon čega slede fully connected layers za klasifikaciju.*
 
-Ovako možete definisati 1 konvolucioni sloj u PyTorch-u: `self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)`.
+Ovako možete definisati 1 convolutional layer u PyTorch-u: `self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)`.
 
-- `in_channels`: Broj ulaznih kanala. U slučaju RGB slika, to je 3 (jedan za svaki kanal boje). Ako radite sa slikama u nijansama sive, to bi bilo 1.
+- `in_channels`: Broj ulaznih kanala. Kod RGB slika to je 3 (po jedan za svaki kanal boje). Ako radite sa grayscale slikama, vrednost bi bila 1.
 
-- `out_channels`: Broj izlaznih kanala (filtri) koje će konvolucioni sloj naučiti. Ovo je hiperparametar koji možete prilagoditi na osnovu arhitekture vašeg modela.
+- `out_channels`: Broj izlaznih kanala (filtera) koje će convolutional layer naučiti. Ovo je hyperparameter koji možete podesiti na osnovu arhitekture svog modela.
 
-- `kernel_size`: Veličina konvolucionog filtera. Uobičajen izbor je 3x3, što znači da će filter pokriti područje 3x3 ulazne slike. Ovo je poput 3×3×3 pečata boje koji se koristi za generisanje izlaznih kanala iz ulaznih kanala:
+- `kernel_size`: Veličina convolutional filtera. Uobičajen izbor je 3x3, što znači da će filter pokrivati oblast veličine 3x3 na ulaznoj slici. Ovo je poput 3×3×3 pečata u boji koji se koristi za generisanje out_channels iz in_channels:
 1. Postavite taj 3×3×3 pečat u gornji levi ugao kocke slike.
-2. Pomnožite svaku težinu sa pikselom ispod njega, saberite ih sve, dodajte pristrasnost → dobijate jedan broj.
-3. Zapišite taj broj u praznu mapu na poziciji (0, 0).
-4. Pomaknite pečat jedan piksel udesno (korak = 1) i ponovite dok ne popunite celu mrežu 48×48.
+2. Pomnožite svaku težinu pikselom ispod nje, saberite ih sve i dodajte bias → dobijate jedan broj.
+3. Upišite taj broj u praznu mapu na poziciji (0, 0).
+4. Pomerite pečat za jedan piksel udesno (stride = 1) i ponavljajte postupak dok ne popunite celu mrežu veličine 48×48.
 
-- `padding`: Broj piksela dodatih sa svake strane ulaza. Padding pomaže u očuvanju prostornih dimenzija ulaza, omogućavajući veću kontrolu nad veličinom izlaza. Na primer, sa 3x3 jezgrom i ulazom od 48x48 piksela, padding od 1 će zadržati istu veličinu izlaza (48x48) nakon konvolucione operacije. To je zato što padding dodaje granicu od 1 piksela oko ulazne slike, omogućavajući jezgru da se pomera preko ivica bez smanjenja prostornih dimenzija.
+- `padding`: Broj piksela dodatih svakoj strani ulaza. Padding pomaže u očuvanju prostornih dimenzija ulaza i omogućava bolju kontrolu veličine izlaza. Na primer, kod 3x3 kernela i ulaza veličine 48x48 piksela, padding vrednosti 1 zadržaće istu veličinu izlaza (48x48) nakon convolution operacije. To je zato što padding dodaje ivicu širine 1 piksel oko ulazne slike, omogućavajući kernelu da klizi preko ivica bez smanjenja prostornih dimenzija.
 
-Tada je broj parametara koji se mogu obučavati u ovom sloju:
-- (3x3x3 (veličina jezgra) + 1 (pristrasnost)) x 32 (izlazni kanali) = 896 parametara koji se mogu obučavati.
+Zatim je broj parametara koji se mogu trenirati u ovom sloju:
+- (3x3x3 (kernel size) + 1 (bias)) x 32 (out_channels) = 896 trainable parameters.
 
-Napomena: Pristrasnost (+1) se dodaje po jezgru koje se koristi jer je funkcija svakog konvolucionog sloja da nauči linearne transformacije ulaza, što je predstavljeno jednačinom:
+Imajte na umu da se Bias (+1) dodaje za svaki korišćeni kernel, jer je funkcija svakog convolutional layer-a učenje linearne transformacije ulaza, koja je predstavljena jednačinom:
 ```plaintext
 Y = f(W * X + b)
 ```
-gde je `W` matrica težina (naučeni filteri, 3x3x3 = 27 parametara), `b` je vektor pristrasnosti koji je +1 za svaki izlazni kanal.
+gde je `W` matrica težina (naučeni filteri, 3x3x3 = 27 parametara), `b` vektor bias vrednosti, koji iznosi +1 za svaki izlazni kanal.
 
-Napomena da će izlaz `self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)` biti tenzor oblika `(batch_size, 32, 48, 48)`, jer je 32 novi broj generisanih kanala veličine 48x48 piksela.
+Imajte na umu da će izlaz funkcije `self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)` biti tenzor oblika `(batch_size, 32, 48, 48)`, zato što je 32 novi broj generisanih kanala veličine 48x48 piksela.
 
-Zatim, mogli bismo povezati ovaj konvolucioni sloj sa još jednim konvolucionim slojem kao: `self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1)`.
+Zatim možemo povezati ovaj convolutional layer sa drugim convolutional layer-om, na primer: `self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1)`.
 
-Što će dodati: (32x3x3 (veličina kernela) + 1 (pristrasnost)) x 64 (izlazni kanali) = 18,496 parametara koji se mogu učiti i izlaz oblika `(batch_size, 64, 48, 48)`.
+Ovo će dodati: (32x3x3 (kernel size) + 1 (bias)) x 64 (out_channels) = 18,496 trainable parametara i izlaz oblika `(batch_size, 64, 48, 48)`.
 
-Kao što možete videti, **broj parametara brzo raste sa svakim dodatnim konvolucionim slojem**, posebno kako se povećava broj izlaznih kanala.
+Kao što možete videti, **broj parametara brzo raste sa svakim dodatnim convolutional layer-om**, naročito kada se povećava broj izlaznih kanala.
 
-Jedna opcija za kontrolu količine korišćenih podataka je korišćenje **max pooling** nakon svakog konvolucionog sloja. Max pooling smanjuje prostorne dimenzije mapa karakteristika, što pomaže u smanjenju broja parametara i računarske složenosti dok zadržava važne karakteristike.
+Jedna od opcija za kontrolu količine korišćenih podataka jeste upotreba **max pooling** sloja nakon svakog convolutional layer-a. Max pooling smanjuje prostorne dimenzije feature mapa, čime se smanjuju broj parametara i computational complexity, uz zadržavanje važnih feature-a.
 
-Može se deklarisati kao: `self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)`. Ovo u suštini označava korišćenje mreže od 2x2 piksela i uzimanje maksimalne vrednosti iz svake mreže kako bi se smanjila veličina mape karakteristika na polovinu. Štaviše, `stride=2` znači da će operacija pooling-a pomerati 2 piksela u isto vreme, u ovom slučaju, sprečavajući bilo kakvo preklapanje između područja pooling-a.
+Može se deklarisati kao: `self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)`. Ovo u osnovi označava korišćenje mreže od 2x2 piksela i uzimanje maksimalne vrednosti iz svake mreže, čime se veličina feature mape smanjuje upola. Štaviše, `stride=2` znači da će se pooling operation pomerati za 2 piksela odjednom, čime se u ovom slučaju sprečava preklapanje pooling regiona.
 
-Sa ovim pooling slojem, izlazni oblik nakon prvog konvolucionog sloja biće `(batch_size, 64, 24, 24)` nakon primene `self.pool1` na izlaz `self.conv2`, smanjujući veličinu na 1/4 prethodnog sloja.
+Sa ovim pooling layer-om, izlazni oblik nakon prvog convolutional layer-a bio bi `(batch_size, 64, 24, 24)` nakon primene `self.pool1` na izlaz funkcije `self.conv2`, čime se veličina smanjuje na 1/4 prethodnog layer-a.
 
 > [!TIP]
-> Važno je raditi pooling nakon konvolucionih slojeva kako bi se smanjile prostorne dimenzije mapa karakteristika, što pomaže u kontroli broja parametara i računarske složenosti dok inicijalni parametar uči važne karakteristike.
-> Možete videti konvolucije pre pooling sloja kao način ekstrakcije karakteristika iz ulaznih podataka (poput linija, ivica), ove informacije će i dalje biti prisutne u pooled izlazu, ali sledeći konvolucioni sloj neće moći da vidi originalne ulazne podatke, samo pooled izlaz, koji je smanjena verzija prethodnog sloja sa tom informacijom.
-> U uobičajenom redosledu: `Conv → ReLU → Pool` svaka 2×2 pooling prozorska sada se takmiči sa aktivacijama karakteristika (“ivica prisutna / ne”), a ne sirovim intenzitetima piksela. Održavanje najjače aktivacije zaista čuva najistaknutije dokaze.
+> Važno je primeniti pooling nakon convolutional layer-a kako bi se smanjile prostorne dimenzije feature mapa, što pomaže u kontroli broja parametara i computational complexity, istovremeno omogućavajući početnim parametrima da nauče važne feature-e.
+>Convolutions pre pooling layer-a možete posmatrati kao način za izdvajanje feature-a iz ulaznih podataka (kao što su linije i ivice). Ove informacije će i dalje biti prisutne u pooled output-u, ali sledeći convolutional layer neće moći da vidi originalne ulazne podatke, već samo pooled output, koji predstavlja smanjenu verziju prethodnog layer-a sa tim informacijama.
+>U uobičajenom redosledu: `Conv → ReLU → Pool`, svaki 2×2 pooling window sada obrađuje feature activations („ivica je prisutna / nije prisutna“), a ne sirove intenzitete piksela. Zadržavanje najsnažnije activation zaista zadržava najistaknutiji dokaz.
 
-Zatim, nakon dodavanja onoliko konvolucionih i pooling slojeva koliko je potrebno, možemo izravnati izlaz kako bismo ga uneli u potpuno povezane slojeve. To se radi preoblikovanjem tenzora u 1D vektor za svaki uzorak u seriji:
+Zatim, nakon dodavanja onoliko convolutional i pooling layer-a koliko je potrebno, možemo flatten-ovati izlaz kako bismo ga prosledili fully connected layer-ima. To se radi preoblikovanjem tenzora u 1D vektor za svaki uzorak u batch-u:
 ```python
 x = x.view(-1, 64*24*24)
 ```
-I sa ovim 1D vektorom sa svim parametrima obuke generisanim od prethodnih konvolucijskih i pooling slojeva, možemo definisati potpuno povezani sloj kao:
+I pomoću ovog 1D vektora sa svim parametrima za treniranje generisanim prethodnim convolutional i pooling slojevima možemo definisati fully connected sloj kao:
 ```python
 self.fc1 = nn.Linear(64 * 24 * 24, 512)
 ```
-Koji će uzeti spljošteni izlaz prethodnog sloja i mapirati ga na 512 skrivenih jedinica.
+Koji će uzeti flattenovani izlaz prethodnog sloja i mapirati ga na 512 hidden units.
 
-Obratite pažnju na to kako je ovaj sloj dodao `(64 * 24 * 24 + 1 (bias)) * 512 = 3,221,504` parametara koji se mogu trenirati, što je značajan porast u poređenju sa konvolucionim slojevima. To je zato što potpuno povezani slojevi povezuju svaku neuronu u jednom sloju sa svakom neuronom u sledećem sloju, što dovodi do velikog broja parametara.
+Primetite kako je ovaj sloj dodao `(64 * 24 * 24 + 1 (bias)) * 512 = 3,221,504` trainable parameters, što predstavlja značajno povećanje u poređenju sa convolutional layers. To je zato što fully connected layers povezuju svaki neuron u jednom sloju sa svakim neuronom u sledećem sloju, što dovodi do velikog broja parameters.
 
-Na kraju, možemo dodati izlazni sloj da proizvedemo konačne logite klase:
+Na kraju možemo dodati output layer za generisanje konačnih class logits:
 ```python
 self.fc2 = nn.Linear(512, num_classes)
 ```
-Ovo će dodati `(512 + 1 (bias)) * num_classes` parametara koji se mogu trenirati, gde je `num_classes` broj klasa u zadatku klasifikacije (npr., 43 za GTSRB dataset).
+Ovo će dodati `(512 + 1 (bias)) * num_classes` parametara koji se mogu trenirati, gde je `num_classes` broj klasa u zadatku klasifikacije (npr. 43 za GTSRB skup podataka).
 
-Jedna uobičajena praksa je dodavanje dropout sloja pre potpuno povezanih slojeva kako bi se sprečilo prekomerno prilagođavanje. Ovo se može uraditi sa:
+Još jedna uobičajena praksa je dodavanje dropout sloja pre potpuno povezanih slojeva kako bi se sprečio overfitting. To se može uraditi pomoću:
 ```python
 self.dropout = nn.Dropout(0.5)
 ```
-Ova sloj nasumično postavlja deo ulaznih jedinica na nulu tokom obuke, što pomaže u sprečavanju prekomernog prilagođavanja smanjenjem oslanjanja na specifične neurone.
+Ovaj sloj nasumično postavlja deo ulaznih jedinica na nulu tokom obučavanja, što pomaže u sprečavanju overfitting-a smanjenjem oslanjanja na određene neurone.
 
-### CNN Code example
+### Primer koda za CNN
 ```python
 import torch
 import torch.nn as nn
@@ -222,23 +223,23 @@ x = self.fc2(x)
 # Note that the output is not passed through a softmax activation here, as it is typically done in the loss function (e.g., CrossEntropyLoss)
 return x
 ```
-### CNN Code training example
+### Primer obuke CNN koda
 
-Sledeći kod će napraviti neke podatke za obuku i obučiti model `MY_NET` definisan iznad. Neki zanimljivi podaci koje treba napomenuti:
+Sledeći kod će kreirati podatke za obuku i obučiti model `MY_NET` definisan iznad. Neke zanimljive vrednosti koje treba imati na umu:
 
-- `EPOCHS` je broj puta kada će model videti ceo skup podataka tokom obuke. Ako je EPOCH previše mali, model možda neće naučiti dovoljno; ako je prevelik, može doći do prekomernog prilagođavanja.
-- `LEARNING_RATE` je veličina koraka za optimizator. Mala stopa učenja može dovesti do sporog konvergiranja, dok velika može preći optimalno rešenje i sprečiti konvergenciju.
-- `WEIGHT_DECAY` je regularizacioni termin koji pomaže u sprečavanju prekomernog prilagođavanja kažnjavajući velike težine.
+- `EPOCHS` predstavlja broj puta koliko će model videti čitav skup podataka tokom obuke. Ako je EPOCH premali, model možda neće dovoljno naučiti; ako je prevelik, može doći do overfitting-a.
+- `LEARNING_RATE` predstavlja veličinu koraka za optimizer. Mala stopa učenja može dovesti do spore konvergencije, dok velika može preskočiti optimalno rešenje i sprečiti konvergenciju.
+- `WEIGHT_DECAY` je termin regularizacije koji pomaže u sprečavanju overfitting-a kažnjavanjem velikih težina.
 
-Što se tiče petlje obuke, ovo su neke zanimljive informacije koje treba znati:
-- `criterion = nn.CrossEntropyLoss()` je funkcija gubitka koja se koristi za zadatke višeklasne klasifikacije. Kombinuje softmax aktivaciju i gubitak unakrsne entropije u jednoj funkciji, što je čini pogodnom za obuku modela koji izlaze sa klasnim logitima.
-- Ako se očekivalo da model izlazi sa drugim tipovima izlaza, kao što su binarna klasifikacija ili regresija, koristili bismo različite funkcije gubitka kao što su `nn.BCEWithLogitsLoss()` za binarnu klasifikaciju ili `nn.MSELoss()` za regresiju.
-- `optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)` inicijalizuje Adam optimizator, koji je popularan izbor za obuku modela dubokog učenja. Prilagođava stopu učenja za svaki parametar na osnovu prvih i drugih momenata gradijenata.
-- Drugi optimizatori kao što su `optim.SGD` (Stohastički gradijentni spust) ili `optim.RMSprop` takođe se mogu koristiti, u zavisnosti od specifičnih zahteva zadatka obuke.
-- `model.train()` metoda postavlja model u režim obuke, omogućavajući slojevima kao što su dropout i batch normalizacija da se ponašaju drugačije tokom obuke u poređenju sa evaluacijom.
-- `optimizer.zero_grad()` briše gradijente svih optimizovanih tenzora pre unazadnog prolaza, što je neophodno jer se gradijenti po defaultu akumuliraju u PyTorch-u. Ako se ne obrišu, gradijenti iz prethodnih iteracija biće dodati trenutnim gradijentima, što dovodi do netačnih ažuriranja.
-- `loss.backward()` izračunava gradijente gubitka u odnosu na parametre modela, koji se zatim koriste od strane optimizatora za ažuriranje težina.
-- `optimizer.step()` ažurira parametre modela na osnovu izračunatih gradijenata i stope učenja.
+Što se tiče training loop-a, evo nekoliko zanimljivih informacija:
+- `criterion = nn.CrossEntropyLoss()` je loss funkcija koja se koristi za multi-class classification zadatke. Ona kombinuje softmax aktivaciju i cross-entropy loss u jednoj funkciji, što je čini pogodnom za obuku modela koji daju class logits.
+- Ako se očekivalo da model daje druge vrste izlaza, kao što su binary classification ili regression, koristili bismo različite loss funkcije, kao što je `nn.BCEWithLogitsLoss()` za binary classification ili `nn.MSELoss()` za regression.
+- `optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)` inicijalizuje Adam optimizer, koji je popularan izbor za obuku deep learning modela. On prilagođava stopu učenja za svaki parametar na osnovu prvog i drugog momenta gradients-a.
+- Mogli bi se koristiti i drugi optimizatori, kao što su `optim.SGD` (Stochastic Gradient Descent) ili `optim.RMSprop`, u zavisnosti od konkretnih zahteva training zadatka.
+- Metoda `model.train()` postavlja model u training mode, omogućavajući da se slojevi poput dropout-a i batch normalization-a ponašaju drugačije tokom obuke u odnosu na evaluaciju.
+- `optimizer.zero_grad()` briše gradients svih optimizovanih tensor-a pre backward pass-a, što je neophodno zato što se gradients podrazumevano akumuliraju u PyTorch-u. Ako se ne obrišu, gradients iz prethodnih iteracija bi se dodali trenutnim gradients-ima, što bi dovelo do netačnih ažuriranja.
+- `loss.backward()` izračunava gradients loss-a u odnosu na parametre modela, koji se zatim koriste za ažuriranje težina pomoću optimizer-a.
+- `optimizer.step()` ažurira parametre modela na osnovu izračunatih gradients-a i stope učenja.
 ```python
 import torch, torch.nn.functional as F
 from torch import nn, optim
@@ -375,46 +376,53 @@ print(classification_report(labels_all, preds_all, zero_division=0))
 print("Confusion matrix (rows = true, cols = pred):")
 print(confusion_matrix(labels_all, preds_all))
 ```
-## Rekurentne neuronske mreže (RNN)
+## Rekurentne neuronske mreže (RNN) <sup>[[3]](#references)</sup>
 
-Rekurentne neuronske mreže (RNN) su klasa neuronskih mreža dizajniranih za obradu sekvencijalnih podataka, kao što su vremenske serije ili prirodni jezik. Za razliku od tradicionalnih feedforward neuronskih mreža, RNN imaju veze koje se vraćaju na sebe, što im omogućava da održavaju skriveno stanje koje hvata informacije o prethodnim ulazima u sekvenci.
+Rekurentne neuronske mreže (RNN) su klasa neuronskih mreža osmišljena za obradu sekvencijalnih podataka, kao što su vremenske serije ili prirodni jezik. Za razliku od tradicionalnih neuronskih mreža sa propagacijom unapred, RNN imaju veze koje se vraćaju same na sebe, što im omogućava da održavaju skriveno stanje koje obuhvata informacije o prethodnim ulazima u sekvenci.
 
-Glavne komponente RNN uključuju:
-- **Rekurentni slojevi**: Ovi slojevi obrađuju ulazne sekvence jedan vremenski korak u isto vreme, ažurirajući svoje skriveno stanje na osnovu trenutnog ulaza i prethodnog skrivenog stanja. Ovo omogućava RNN da uče vremenske zavisnosti u podacima.
-- **Skriveno stanje**: Skriveno stanje je vektor koji sumira informacije iz prethodnih vremenskih koraka. Ažurira se na svakom vremenskom koraku i koristi se za pravljenje predikcija za trenutni ulaz.
-- **Izlazni sloj**: Izlazni sloj proizvodi konačne predikcije na osnovu skrivenog stanja. U mnogim slučajevima, RNN se koriste za zadatke poput modelovanja jezika, gde je izlaz verovatnosna distribucija za sledeću reč u sekvenci.
+Glavne komponente RNN mreža uključuju:
+- **Rekurentni slojevi**: Ovi slojevi obrađuju ulazne sekvence korak po korak, ažurirajući svoje skriveno stanje na osnovu trenutnog ulaza i prethodnog skrivenog stanja. To omogućava RNN mrežama da uče vremenske zavisnosti u podacima.
+- **Skriveno stanje**: Skriveno stanje je vektor koji sažima informacije iz prethodnih vremenskih koraka. Ažurira se pri svakom vremenskom koraku i koristi se za predviđanja na osnovu trenutnog ulaza.
+- **Izlazni sloj**: Izlazni sloj proizvodi konačna predviđanja na osnovu skrivenog stanja. U mnogim slučajevima, RNN se koriste za zadatke kao što je jezičko modelovanje, gde je izlaz distribucija verovatnoće nad sledećom rečju u sekvenci.
 
-Na primer, u modelu jezika, RNN obrađuje sekvencu reči, na primer, "Mačka je sedela na" i predviđa sledeću reč na osnovu konteksta koji pružaju prethodne reči, u ovom slučaju, "prostirci".
+Na primer, u jezičkom modelu, RNN obrađuje sekvencu reči, na primer, „The cat sat on the“ i predviđa sledeću reč na osnovu konteksta koji pružaju prethodne reči, u ovom slučaju „mat“.
 
-### Duga kratkoročna memorija (LSTM) i Gated Recurrent Unit (GRU)
+### Long Short-Term Memory (LSTM) i Gated Recurrent Unit (GRU) <sup>[[3]](#references)</sup>
 
-RNN su posebno efikasne za zadatke koji uključuju sekvencijalne podatke, kao što su modelovanje jezika, mašinsko prevođenje i prepoznavanje govora. Međutim, mogu imati problema sa **dugoročnim zavisnostima zbog problema poput nestajanja gradijenata**.
+RNN su naročito efikasne za zadatke koji uključuju sekvencijalne podatke, kao što su jezičko modelovanje, mašinsko prevođenje i prepoznavanje govora. Međutim, mogu imati poteškoća sa **zavisnostima velikog dometa zbog problema kao što su nestajući gradijenti**.
 
-Da bi se to rešilo, razvijene su specijalizovane arhitekture poput Duga kratkoročna memorija (LSTM) i Gated Recurrent Unit (GRU). Ove arhitekture uvode mehanizme za kontrolu protoka informacija, omogućavajući im da efikasnije hvataju dugoročne zavisnosti.
+Da bi se rešio ovaj problem, razvijene su specijalizovane arhitekture kao što su Long Short-Term Memory (LSTM) i Gated Recurrent Unit (GRU). Ove arhitekture uvode mehanizme gejtovanja koji kontrolišu protok informacija, što im omogućava da efikasnije obuhvate zavisnosti velikog dometa.
 
-- **LSTM**: LSTM mreže koriste tri vrata (ulazna vrata, zaboravna vrata i izlazna vrata) za regulisanje protoka informacija unutar i van stanja ćelije, omogućavajući im da pamte ili zaborave informacije tokom dugih sekvenci. Ulazna vrata kontrolišu koliko nove informacije treba dodati na osnovu ulaza i prethodnog skrivenog stanja, zaboravna vrata kontrolišu koliko informacija treba odbaciti. Kombinovanjem ulaznih i zaboravnih vrata dobijamo novo stanje. Na kraju, kombinovanjem novog stanja ćelije sa ulazom i prethodnim skrivenim stanjem dobijamo novo skriveno stanje.
-- **GRU**: GRU mreže pojednostavljuju LSTM arhitekturu kombinovanjem ulaznih i zaboravnih vrata u jedna ažurirajuća vrata, čineći ih računski efikasnijim dok i dalje hvataju dugoročne zavisnosti.
+- **LSTM**: LSTM mreže koriste tri gejta (ulazni gejt, gejt zaboravljanja i izlazni gejt) za regulisanje protoka informacija u stanje ćelije i iz njega, što im omogućava da pamte ili zaboravljaju informacije tokom dugih sekvenci. Ulazni gejt kontroliše koliko novih informacija treba dodati na osnovu ulaza i prethodnog skrivenog stanja, dok gejt zaboravljanja kontroliše koliko informacija treba odbaciti. Kombinovanjem ulaznog gejta i gejta zaboravljanja dobijamo novo stanje. Konačno, kombinovanjem novog stanja ćelije sa ulazom i prethodnim skrivenim stanjem dobijamo i novo skriveno stanje.
+- **GRU**: GRU mreže pojednostavljuju LSTM arhitekturu kombinovanjem ulaznog gejta i gejta zaboravljanja u jedan gejt ažuriranja, čime postaju računski efikasnije, a i dalje obuhvataju zavisnosti velikog dometa.
 
-## LLMs (Veliki jezički modeli)
+## LLM (Large Language Models)
 
-Veliki jezički modeli (LLMs) su tip dubokog učenja posebno dizajniran za zadatke obrade prirodnog jezika. Obučeni su na ogromnim količinama tekstualnih podataka i mogu generisati tekst sličan ljudskom, odgovarati na pitanja, prevoditi jezike i obavljati razne druge zadatke vezane za jezik. 
-LLMs se obično zasnivaju na transformator arhitekturama, koje koriste mehanizme samopaznje za hvatanje odnosa između reči u sekvenci, omogućavajući im da razumeju kontekst i generišu koherentan tekst.
+Veliki jezički modeli (LLM) su vrsta modela dubokog učenja posebno osmišljena za zadatke obrade prirodnog jezika. Obučavaju se na ogromnim količinama tekstualnih podataka i mogu da generišu tekst nalik ljudskom, odgovaraju na pitanja, prevode jezike i obavljaju različite druge zadatke povezane sa jezikom.
+LLM se obično zasnivaju na transformer arhitekturama, koje koriste mehanizme samopažnje za obuhvatanje odnosa između reči u sekvenci, što im omogućava da razumeju kontekst i generišu koherentan tekst.
 
-### Arhitektura transformatora
-Arhitektura transformatora je osnova mnogih LLMs. Sastoji se od strukture enkoder-dekoder, gde enkoder obrađuje ulaznu sekvencu, a dekoder generiše izlaznu sekvencu. Ključne komponente arhitekture transformatora uključuju:
-- **Mehanizam samopaznje**: Ovaj mehanizam omogućava modelu da proceni važnost različitih reči u sekvenci prilikom generisanja reprezentacija. Izračunava ocene pažnje na osnovu odnosa između reči, omogućavajući modelu da se fokusira na relevantan kontekst.
-- **Višekratna pažnja**: Ova komponenta omogućava modelu da hvata više odnosa između reči koristeći više glava pažnje, pri čemu svaka fokusira na različite aspekte ulaza.
-- **Poziciono kodiranje**: Pošto transformatori nemaju ugrađenu predstavu o redosledu reči, poziciono kodiranje se dodaje ulaznim ugradnjama kako bi se pružile informacije o poziciji reči u sekvenci.
+### Transformer arhitektura <sup>[[4]](#references)</sup>
+Transformer arhitektura predstavlja osnovu mnogih LLM modela. Sastoji se od strukture enkodera i dekodera, gde enkoder obrađuje ulaznu sekvencu, a dekoder generiše izlaznu sekvencu. Ključne komponente transformer arhitekture uključuju:
+- **Mehanizam samopažnje**: Ovaj mehanizam omogućava modelu da odredi važnost različitih reči u sekvenci prilikom generisanja reprezentacija. Izračunava skorove pažnje na osnovu odnosa između reči, omogućavajući modelu da se usredsredi na relevantan kontekst.
+- **Pažnja sa više glava**: Ova komponenta omogućava modelu da obuhvati više odnosa između reči koristeći više glava pažnje, pri čemu se svaka usredsređuje na različite aspekte ulaza.
+- **Poziciono kodiranje**: Pošto transformeri nemaju ugrađenu predstavu o redosledu reči, poziciono kodiranje se dodaje ulaznim embedding-ima kako bi se obezbedile informacije o položaju reči u sekvenci.
 
-## Diffusion modeli
-Diffusion modeli su klasa generativnih modela koji uče da generišu podatke simulirajući proces difuzije. Posebno su efikasni za zadatke poput generisanja slika i stekli su popularnost u poslednjim godinama. 
-Diffusion modeli funkcionišu tako što postepeno transformišu jednostavnu distribuciju šuma u složenu distribuciju podataka kroz niz koraka difuzije. Ključne komponente diffusion modela uključuju:
-- **Proces napredne difuzije**: Ovaj proces postepeno dodaje šum podacima, transformišući ih u jednostavnu distribuciju šuma. Proces napredne difuzije se obično definiše nizom nivoa šuma, pri čemu svaki nivo odgovara specifičnoj količini šuma dodatog podacima.
-- **Proces obrnute difuzije**: Ovaj proces uči da obrne proces napredne difuzije, postepeno uklanjajući šum iz podataka kako bi generisao uzorke iz ciljne distribucije. Proces obrnute difuzije se obučava koristeći funkciju gubitka koja podstiče model da rekonstruiše originalne podatke iz bučnih uzoraka.
+## Diffusion modeli <sup>[[5]](#references)</sup>
+Diffusion modeli su klasa generativnih modela koji uče da generišu podatke simuliranjem diffusion procesa. Posebno su efikasni za zadatke kao što je generisanje slika i stekli su popularnost poslednjih godina.
+Diffusion modeli rade tako što postepeno transformišu jednostavnu distribuciju šuma u složenu distribuciju podataka kroz niz diffusion koraka. Ključne komponente diffusion modela uključuju:
+- **Proces forward diffusion**: Ovaj proces postepeno dodaje šum podacima, transformišući ih u jednostavnu distribuciju šuma. Proces forward diffusion obično se definiše nizom nivoa šuma, gde svaki nivo odgovara određenoj količini šuma dodatog podacima.
+- **Proces reverse diffusion**: Ovaj proces uči da obrne proces forward diffusion, postepeno uklanjajući šum iz podataka kako bi generisao uzorke iz ciljne distribucije. Proces reverse diffusion obučava se pomoću funkcije gubitka koja podstiče model da rekonstruiše originalne podatke iz zašumljenih uzoraka.
 
-Pored toga, da bi generisali sliku iz tekstualnog upita, diffusion modeli obično prate ove korake:
-1. **Kodiranje teksta**: Tekstualni upit se kodira u latentnu reprezentaciju koristeći enkoder teksta (npr. model zasnovan na transformatoru). Ova reprezentacija hvata semantičko značenje teksta.
-2. **Uzimanje uzorka šuma**: Nasumični vektor šuma se uzima iz Gaussove distribucije.
-3. **Koraci difuzije**: Model primenjuje niz koraka difuzije, postepeno transformišući vektor šuma u sliku koja odgovara tekstualnom upitu. Svaki korak uključuje primenu naučenih transformacija za uklanjanje šuma iz slike.
+Pored toga, za generisanje slike iz tekstualnog prompta, diffusion modeli obično prate sledeće korake:
+1. **Kodiranje teksta**: Tekstualni prompt se kodira u latentnu reprezentaciju pomoću enkodera teksta (npr. modela zasnovanog na transformer arhitekturi). Ova reprezentacija obuhvata semantičko značenje teksta.
+2. **Uzorkovanje šuma**: Nasumični vektor šuma uzorkuje se iz Gausove distribucije.
+3. **Diffusion koraci**: Model primenjuje niz diffusion koraka, postepeno transformišući vektor šuma u sliku koja odgovara tekstualnom promptu. Svaki korak uključuje primenu naučenih transformacija za uklanjanje šuma sa slike.
 
+## References
+
+- [1] [PyTorch - Tutorijal za neuronske mreže](https://docs.pytorch.org/tutorials/beginner/blitz/neural_networks_tutorial.html)
+- [2] [PyTorch - Conv2d](https://docs.pytorch.org/docs/stable/generated/torch.nn.Conv2d.html)
+- [3] [PyTorch - LSTM](https://docs.pytorch.org/docs/stable/generated/torch.nn.LSTM.html)
+- [4] [PyTorch - Transformer](https://docs.pytorch.org/docs/stable/generated/torch.nn.Transformer.html)
+- [5] [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239)
 {{#include ../banners/hacktricks-training.md}}
