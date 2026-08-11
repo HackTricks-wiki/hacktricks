@@ -1,25 +1,30 @@
-# macOS Ruby Applications Injection
+# Injection σε Ruby Applications του macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## RUBYOPT
 
-Χρησιμοποιώντας αυτή τη μεταβλητή περιβάλλοντος, είναι δυνατό να **προστεθούν νέες παράμετροι** στο **ruby** κάθε φορά που εκτελείται. Παρόλο που η παράμετρος **`-e`** δεν μπορεί να χρησιμοποιηθεί για τον καθορισμό κώδικα ruby προς εκτέλεση, είναι δυνατό να χρησιμοποιηθούν οι παράμετροι **`-I`** και **`-r`** για την προσθήκη ενός νέου φακέλου στη διαδρομή φόρτωσης των libraries και, στη συνέχεια, να **καθοριστεί ένα library προς φόρτωση**.
+Το Ruby αναλύει τα υποστηριζόμενα command-line switches από τη μεταβλητή περιβάλλοντος `RUBYOPT` πριν εκτελέσει ένα script. Παρόλο που το Ruby απορρίπτει ορισμένα switches εκεί, το `-I` μπορεί να προσθέσει έναν κατάλογο αναζήτησης libraries και το `-r` μπορεί να κάνει require μια library. Επομένως, μια διεργασία που εκκινεί το Ruby με environment variables που ελέγχει ο attacker μπορεί να εξαναγκαστεί να φορτώσει Ruby code που ελέγχει ο attacker.<sup>[[1]](#references)</sup>
 
-Δημιουργήστε το library **`inject.rb`** στο **`/tmp`**:
+Δημιουργήστε το `/tmp/inject.rb`:
 ```ruby:inject.rb
 puts `whoami`
 ```
-Δημιουργήστε οπουδήποτε ένα Ruby script όπως:
+Δημιουργήστε ένα benign Ruby script, όπως το `hello.rb`:
 ```ruby:hello.rb
 puts 'Hello, World!'
 ```
-Στη συνέχεια, κάντε ένα αυθαίρετο ruby script να το φορτώσει με:
+Εκτελέστε το με μια ελεγχόμενη τιμή `RUBYOPT`:
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby hello.rb
 ```
-Ενδιαφέρον γεγονός, λειτουργεί ακόμη και με την παράμετρο **`--disable-rubyopt`**:
+Για να απενεργοποιήσετε αυτήν τη συμπεριφορά, περάστε το `--disable=rubyopt` (ή `--disable-rubyopt`) **πριν** από το όνομα του script:<sup>[[1]](#references)</sup>
 ```bash
-RUBYOPT="-I/tmp -rinject" ruby hello.rb --disable-rubyopt
+RUBYOPT="-I/tmp -rinject" ruby --disable=rubyopt hello.rb
 ```
+Μια επιλογή που γράφεται μετά το `hello.rb` μεταβιβάζεται στο script μέσω του `ARGV`· δεν απενεργοποιεί την προγενέστερη επεξεργασία του `RUBYOPT`.<sup>[[1]](#references)</sup>
+
+## References
+
+- [1] [Τεκμηρίωση Ruby - Επιλογές γραμμής εντολών Ruby](https://ruby-doc.org/3.4/ruby/options_md.html)
 {{#include ../../../banners/hacktricks-training.md}}

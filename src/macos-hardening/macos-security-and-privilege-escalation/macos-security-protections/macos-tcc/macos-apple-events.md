@@ -2,21 +2,24 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Βασικές Πληροφορίες
+## Βασικές πληροφορίες
 
-Τα **Apple Events** είναι μια δυνατότητα του macOS της Apple που επιτρέπει στις εφαρμογές να επικοινωνούν μεταξύ τους. Αποτελούν μέρος του **Apple Event Manager**, ενός στοιχείου του λειτουργικού συστήματος macOS που είναι υπεύθυνο για τη διαχείριση της interprocess communication. Αυτό το σύστημα επιτρέπει σε μια εφαρμογή να στείλει ένα μήνυμα σε μια άλλη εφαρμογή, ζητώντας της να εκτελέσει μια συγκεκριμένη λειτουργία, όπως το άνοιγμα ενός αρχείου, την ανάκτηση δεδομένων ή την εκτέλεση μιας εντολής.
+Τα **Apple events** είναι δομημένα μηνύματα μεταξύ διεργασιών, τα οποία οι εφαρμογές χρησιμοποιούν για να ζητούν λειτουργίες ή δεδομένα από άλλες εφαρμογές. Το **Apple Event Manager** παρέχει τα APIs για τη δημιουργία, την αποστολή, τη λήψη και την απόκριση σε αυτά τα μηνύματα.<sup>[[1]](#references)</sup>
 
-Ο κύριος daemon είναι το `/System/Library/CoreServices/appleeventsd`, ο οποίος καταχωρίζει την υπηρεσία `com.apple.coreservices.appleevents`.
+Στο macOS, ο κύριος broker είναι το `/System/Library/CoreServices/appleeventsd`, ο οποίος καταχωρίζει την υπηρεσία Mach `com.apple.coreservices.appleevents`. Οι εφαρμογές που λαμβάνουν events καταχωρίζουν μια θύρα Mach για Apple events σε αυτή την υπηρεσία· οι αποστολείς λαμβάνουν μέσω αυτής τη θύρα προορισμού.<sup>[[3]](#references)</sup>
 
-Κάθε εφαρμογή που μπορεί να λαμβάνει events επικοινωνεί με αυτόν τον daemon, παρέχοντας το Apple Event Mach Port της. Όταν μια εφαρμογή θέλει να στείλει ένα event σε αυτήν, ζητά αυτή τη θύρα από τον daemon.
-
-Οι Sandboxed εφαρμογές απαιτούν privileges όπως `allow appleevent-send` και `(allow mach-lookup (global-name "com.apple.coreservices.appleevents"))`, ώστε να μπορούν να στέλνουν events. Ωστόσο, entitlements όπως το `com.apple.security.temporary-exception.apple-events` μπορούν να περιορίσουν ποιοι έχουν πρόσβαση στην αποστολή events, κάτι που μπορεί να απαιτεί entitlements όπως το `com.apple.private.appleevents`.
+Οι κανόνες sandbox και τα entitlements περιορίζουν αυτή την επικοινωνία. Ένα sandbox profile χρειάζεται άδεια για την αποστολή Apple events και την αναζήτηση της υπηρεσίας Mach του broker. Το entitlement `com.apple.security.temporary-exception.apple-events` μπορεί να περιορίσει περαιτέρω μια εφαρμογή σε sandbox, ώστε να επικοινωνεί μόνο με προορισμούς που αντιστοιχούν σε συγκεκριμένα bundle identifiers.<sup>[[2]](#references)</sup>
 
 > [!TIP]
-> Είναι δυνατή η χρήση της env variable **`AEDebugSends`** για την καταγραφή πληροφοριών σχετικά με το μήνυμα που αποστέλλεται:
+> Ορίστε τη μεταβλητή περιβάλλοντος **`AEDebugSends`** για να καταγράφετε πληροφορίες σχετικά με τα Apple events που αποστέλλονται από μια διεργασία:<sup>[[3]](#references)</sup>
 >
 > ```bash
 > AEDebugSends=1 osascript -e 'tell application "iTerm" to activate'
 > ```
 
+## References
+
+- [1] [Τεκμηρίωση Apple για developers - Apple Event Manager](https://developer.apple.com/documentation/applicationservices/apple_event_manager)
+- [2] [Τεκμηρίωση Apple για developers - Προσωρινά Exception Entitlements του App Sandbox](https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/EntitlementKeyReference/Chapters/AppSandboxTemporaryExceptionEntitlements.html)
+- [3] [Εσωτερική λειτουργία των Mac OS X και iOS - Μεταβλητές περιβάλλοντος για debugging Apple events](https://www.newosxbook.com/MOXiI.pdf)
 {{#include ../../../../banners/hacktricks-training.md}}
