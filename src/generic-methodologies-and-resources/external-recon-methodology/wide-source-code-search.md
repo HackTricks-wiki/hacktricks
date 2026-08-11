@@ -1,5 +1,7 @@
 # Wide Source Code Search
 
+{{#include ../../banners/hacktricks-training.md}}
+
 The goal of this page is to enumerate **platforms that allow you to search code** (literal, regex, symbol-aware, or path-scoped) across **thousands/millions of repos**.
 
 This is useful to:

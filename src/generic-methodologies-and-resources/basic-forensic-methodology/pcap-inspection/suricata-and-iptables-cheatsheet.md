@@ -1,5 +1,7 @@
 # Suricata & Iptables cheatsheet
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 ## Iptables
 
 ### Chains

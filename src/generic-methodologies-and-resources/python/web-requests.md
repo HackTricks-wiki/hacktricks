@@ -1,5 +1,7 @@
 # Web Requests
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Python Requests
 
 These examples use Requests' documented request arguments, response properties, multipart file tuples, and sessions.<sup>[[1]](#references)</sup> The `verify=False` examples disable TLS certificate verification and should be limited to controlled testing.<sup>[[1]](#references)</sup>

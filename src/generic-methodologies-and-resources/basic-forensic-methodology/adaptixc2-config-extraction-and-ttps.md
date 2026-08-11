@@ -1,5 +1,7 @@
 # AdaptixC2 Configuration Extraction and TTPs
 
+{{#include ../../banners/hacktricks-training.md}}
+
 AdaptixC2 is a modular, open‑source post‑exploitation/C2 framework with Windows x86/x64 beacons (EXE/DLL/service EXE/raw shellcode) and BOF support.<sup>[[1]](#references)</sup> This page documents:
 - How its RC4‑packed configuration is embedded and how to extract it from beacons
 - Network/profile indicators for HTTP/SMB/TCP listeners

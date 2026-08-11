@@ -1,5 +1,7 @@
 # venv
 
+{{#include ../../banners/hacktricks-training.md}}
+
 Python's standard `venv` module creates virtual environments, whose POSIX activation script is `<venv>/bin/activate`; type `deactivate` to leave the active environment.<sup>[[1]](#references)</sup> On Ubuntu, the `python3-venv` package supplies the module when it is not installed with the base Python package.<sup>[[2]](#references)</sup>
 
 

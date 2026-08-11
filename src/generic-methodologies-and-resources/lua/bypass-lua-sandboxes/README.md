@@ -1,5 +1,7 @@
 # Bypass Lua sandboxes (embedded VMs, game clients)
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 This page collects practical techniques to enumerate and break out of Lua "sandboxes" embedded in applications (notably game clients, plugins, or in-app scripting engines). Many engines expose a restricted Lua environment, but leave powerful globals reachable that enable arbitrary command execution or even native memory corruption when bytecode loaders are exposed.
 
 Key ideas:

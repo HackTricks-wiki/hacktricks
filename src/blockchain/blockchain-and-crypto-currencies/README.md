@@ -1,5 +1,7 @@
 # Blockchain and Crypto-Currencies
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Basic Concepts
 
 - **Smart Contracts** are defined as programs that execute on a blockchain when certain conditions are met, automating agreement executions without intermediaries.

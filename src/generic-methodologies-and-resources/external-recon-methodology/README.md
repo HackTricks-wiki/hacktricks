@@ -1,5 +1,7 @@
 # External Recon Methodology
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Assets discoveries
 
 > So you were said that everything belonging to some company is inside the scope, and you want to figure out what this company actually owns.

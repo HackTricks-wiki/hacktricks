@@ -1,5 +1,7 @@
 # Web3 Signing Workflow Compromise & Safe Delegatecall Proxy Takeover
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Overview
 
 A cold-wallet theft chain combined a **supply-chain compromise of the Safe{Wallet} web UI** with an **on-chain delegatecall primitive that overwrote a proxy’s implementation pointer (slot 0)**. The key takeaways are:

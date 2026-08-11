@@ -1,5 +1,7 @@
 # About the author
 
+{{#include ../banners/hacktricks-training.md}}
+
 ### Hello!!
 
 Techniques contributed by other researchers remain credited to their original authors. Kudos to everyone who shares knowledge to improve internet security.

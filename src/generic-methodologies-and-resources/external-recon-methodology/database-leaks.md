@@ -1,5 +1,7 @@
 # Database leaks
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Data Breach Search Engines
 
 - [GreyNoise Visualizer](https://viz.greynoise.io/) - Look up IPs and CIDRs, and query scanner activity by tags, CVEs, and metadata.<sup>[[1]](#references)</sup>

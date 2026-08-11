@@ -1,5 +1,7 @@
 # SVG/Font Glyph Analysis & Web DRM Deobfuscation (Raster Hashing + SSIM)
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 This page documents practical techniques to recover text from web readers that ship positioned glyph runs plus per-request vector glyph definitions (SVG paths), and that randomize glyph IDs per request to prevent scraping. The core idea is to ignore request-scoped numeric glyph IDs and fingerprint the visual shapes via raster hashing, then map shapes to characters with SSIM against a reference font atlas. The same approach may generalize to viewers with similar protections.<sup>[[1]](#references)</sup>
 
 Warning: Only use these techniques to back up content you legitimately own and in compliance with applicable laws and terms.
@@ -243,7 +245,7 @@ The source report used run geometry, style fields, and link metadata to preserve
 
 - In practice, books converge to a few hundred unique glyphs (e.g., ~361 including ligatures). Cache SSIM results by perceptual hash.<sup>[[1]](#references)</sup>
 - After initial discovery, future batches predominantly re-use known hashes; decoding becomes I/O-bound.
-- The cited report observed an average SSIM of about 0.95; flag low-scoring matches for manual review.<sup>[[1]](#references)</sup>
+- The d report observed an average SSIM of about 0.95; flag low-scoring matches for manual review.<sup>[[1]](#references)</sup>
 
 ## Generalization to other viewers
 
@@ -277,7 +279,7 @@ Adjust parameterization (book ASIN, page window, viewport) to match the readerâ€
 ## Results achievable
 
 - Collapse 100+ randomized alphabets to a single glyph space via perceptual hashing.<sup>[[1]](#references)</sup>
-- In the cited 920-page test, 361 unique glyphs were matched (100%) with an average SSIM of 0.9527.<sup>[[1]](#references)</sup>
+- In the d 920-page test, 361 unique glyphs were matched (100%) with an average SSIM of 0.9527.<sup>[[1]](#references)</sup>
 - The source report describes the reconstructed EPUB as near-indistinguishable from the original.<sup>[[1]](#references)</sup>
 
 ## References

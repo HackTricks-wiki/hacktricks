@@ -1,5 +1,7 @@
 # AI Agent Mode Phishing: Abusing Hosted Agent Browsers (AI‑in‑the‑Middle)
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Overview
 
 Many commercial AI assistants now offer an "agent mode" that can autonomously browse the web in a cloud-hosted, isolated browser. When a login is required, built-in guardrails typically prevent the agent from entering credentials and instead prompt the human to Take over Browser and authenticate inside the agent’s hosted session.<sup>[[2]](#references)</sup>

@@ -1,5 +1,7 @@
 # Python Sandbox Escape & Pyscript
 
+{{#include ../../banners/hacktricks-training.md}}
+
 **Interesting pages to check:**
 
 - [**Pyscript hacking tricks**](pyscript.md)

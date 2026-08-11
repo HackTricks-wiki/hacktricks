@@ -1,5 +1,7 @@
 # Keras Model Deserialization RCE and Gadget Hunting
 
+{{#include ../../banners/hacktricks-training.md}}
+
 This page summarizes practical exploitation techniques against the Keras model deserialization pipeline, explains the native .keras format internals and attack surface, and provides a researcher toolkit for finding Model File Vulnerabilities (MFVs) and post-fix gadgets.
 
 ## .keras model format internals

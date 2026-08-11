@@ -1,5 +1,7 @@
 # PNG Tricks
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 **PNG files** are very common in **CTFs**, **incident response**, and **malware staging** because they are **lossless**, **chunk-based**, and many tools will happily render them even when they contain **extra metadata**, **appended payloads**, or **partially corrupted chunks**.
 
 Treat a PNG as a **container**, not just as an image.

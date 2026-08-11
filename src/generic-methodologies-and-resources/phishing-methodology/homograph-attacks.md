@@ -1,5 +1,7 @@
 # Homograph / Homoglyph Attacks in Phishing
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Overview
 
 A homograph (aka homoglyph) attack abuses the fact that many **Unicode code points from non-Latin scripts are visually identical or extremely similar to ASCII characters**. By replacing one or more Latin characters with their look-alike counterparts, an attacker can craft:

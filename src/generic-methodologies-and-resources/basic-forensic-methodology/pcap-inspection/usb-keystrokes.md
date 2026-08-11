@@ -1,5 +1,7 @@
 # USB Keystrokes
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 If you have a pcap containing the communication via USB of a keyboard like the following one:
 
 ![USB Keystrokes: If you have a pcap containing the communication via USB of a keyboard like the following one](<../../../images/image (962).png>)

@@ -1,5 +1,7 @@
 # Basic Forensic Methodology
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Creating and Mounting an Image
 
 
