@@ -4,29 +4,45 @@
 
 ## Locked Device
 
-To start extracting data from an Android device it has to be unlocked. If it's locked you can:
+Prefer acquisition methods that preserve the device's state and document every action. If the device is locked, available options depend on the model, Android version, patch level, and whether access was configured before seizure. NIST recommends choosing a method according to the device and the authority for the examination.<sup>[[1]](#references)</sup>
 
-- Check if the device has debugging via USB activated.
-- Check for a possible [smudge attack](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf)<sup>[[1]](#references)</sup>
-- Try with [Brute-force](https://www.cultofmac.com/316532/this-brute-force-device-can-crack-any-iphones-pin-code/)<sup>[[2]](#references)</sup>
+- Check whether USB debugging was enabled and whether the acquisition workstation is already authorized. ADB access normally requires the user to unlock the device and confirm the workstation's RSA key.<sup>[[3]](#references)</sup>
+- Consider whether biometric access remains available under the applicable legal and procedural rules.
+- A **smudge attack** may reveal a graphical unlock pattern from residue on the screen, although later touches and cleaning reduce its reliability.<sup>[[2]](#references)</sup>
+- Use commercial or research lock-bypass tooling only when it explicitly supports the exact device and software build.
 
-## Data Adquisition
+## Data acquisition
 
-Create an [android backup using adb](../mobile-pentesting/android-app-pentesting/adb-commands.md#backup) and extract it using [Android Backup Extractor](https://sourceforge.net/projects/adbextractor/): `java -jar abe.jar unpack file.backup file.tar`
+On older devices, a legacy [ADB backup](../mobile-pentesting/android-app-pentesting/adb-commands.md#backup) may produce a `.backup` file that Android Backup Extractor can unpack:
 
-### If root access or physical connection to JTAG interface
+```bash
+java -jar abe.jar unpack file.backup file.tar
+```
 
-- `cat /proc/partitions` (search the path to the flash memory, generally the first entry is _mmcblk0_ and corresponds to the whole flash memory).
-- `df /data` (Discover the block size of the system).
-- dd if=/dev/block/mmcblk0 of=/sdcard/blk0.img bs=4096 (execute it with the information gathered from the block size).
+Do not assume this captures every application. ADB labels the command deprecated, and Android 12 excludes data from apps targeting API level 31 or later unless the app is debuggable.<sup>[[4]](#references)</sup>
+
+### Root or physical debug access
+
+The correct block device is hardware-dependent; do not assume it is always `mmcblk0`. First inventory the partitions and mounts, then image the verified source to separate storage:
+
+```bash
+cat /proc/partitions
+df /data
+dd if=/dev/block/<verified-device> of=/sdcard/device.img bs=4096
+```
+
+Hash the result and record the exact command, device identifiers, time, and any changes made during acquisition.<sup>[[1]](#references)</sup>
 
 ### Memory
 
-Use Linux Memory Extractor (LiME) to extract the RAM information. It's a kernel extension that should be loaded via adb.
+LiME can acquire physical memory from Linux and some Android devices, but its kernel module must be built for the target kernel and loaded with sufficient privileges. Module signing, kernel lockdown, and modern Android hardening may prevent it from loading.<sup>[[5]](#references)</sup>
 
 ## References
 
-- [1] [Smudge Attacks on Smartphone Touch Screens](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf)
-- [2] [This brute force device can crack any iPhone's PIN code](https://www.cultofmac.com/316532/this-brute-force-device-can-crack-any-iphones-pin-code/)
+- [1] [NIST SP 800-101 Rev. 1 - Guidelines on Mobile Device Forensics](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-101r1.pdf)
+- [2] [USENIX WOOT 2010 - Smudge Attacks on Smartphone Touch Screens](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf)
+- [3] [Android Developers - Android Debug Bridge](https://developer.android.com/tools/adb)
+- [4] [Android Developers - Android 12 ADB backup restriction](https://developer.android.com/about/versions/12/behavior-changes-12#adb-backup-restrictions)
+- [5] [504ensicsLabs - Linux Memory Extractor (LiME)](https://github.com/504ensicsLabs/LiME)
 
 {{#include ../banners/hacktricks-training.md}}
