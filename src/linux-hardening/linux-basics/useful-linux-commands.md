@@ -1,8 +1,6 @@
-# Kullanışlı Linux Komutları
+# Yararlı Linux Komutları
 
-{{#include ../../banners/hacktricks-training.md}}
-
-## Yaygın Bash
+## Yaygın Bash Komutları
 ```bash
 #Exfiltration using Base64
 base64 -w 0 file
@@ -149,7 +147,7 @@ python pyinstaller.py --onefile exploit.py
 #sudo apt-get install gcc-mingw-w64-i686
 i686-mingw32msvc-gcc -o executable useradd.c
 ```
-## Grep'ler
+## Greps
 ```bash
 #Extract emails from file
 grep -E -o "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}\b" file.txt
@@ -229,7 +227,7 @@ grep -Po 'd{3}[s-_]?d{3}[s-_]?d{4}' *.txt > us-phones.txt
 #Extract ISBN Numbers
 egrep -a -o "\bISBN(?:-1[03])?:? (?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]\b" *.txt > isbn.txt
 ```
-## Bul
+## Find
 ```bash
 # Find SUID set files.
 find / -perm /u=s -ls 2>/dev/null
@@ -301,9 +299,9 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
-## eBPF Telemetrisi ve Rootkit Avcılığı
+## eBPF Telemetry ve Rootkit Hunting
 
-Modern rootkit'ler (TripleCross, BPFDoor varyantları vb.) giderek daha fazla gizli eBPF programları olarak kalıcılık sağlıyor. İmzalanmamış programları, beklenmeyen cgroup hook'larını veya kötü amaçlı map içeriklerini detach etmeden önce tespit edebilmek için `bpftool`/`eBPFmon` ile filonuzun baseline'ını oluşturun.<sup>[[1]](#references)</sup>
+Rootkit araştırmaları, TripleCross gibi hem eBPF tabanlı implantları hem de BPFDoor varyantları gibi BPF tabanlı backdoor'ları ortaya koymuştur. Beklenmeyen BPF programlarını, attachment'larını veya map'lerini ele geçirilmenin kanıtı olarak değil, araştırma ipuçları olarak değerlendirin.<sup>[[3]](#references)[[4]](#references)</sup> Yetkilendirilmiş sistemlerin baseline'ını `bpftool` veya `eBPFmon` ile oluşturun: `bpftool`, programları ve map'leri listeleyebilir, program talimatlarını dökebilir ve desteklenen özellikleri sorgulayabilir; eBPFmon ise bu bilgileri bir TUI'da sunar.<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -321,11 +319,11 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-bpftool çıktısını beklenen NIC/cgroup eklemeleriyle ilişkilendirin; onaylanmamış bir PID tarafından sahiplenilen ani bir `xdp` veya `kprobe` programı, enjekte edilmiş bir eBPF payload'ının güçlü bir göstergesidir.
+`bpftool` çıktısını beklenen NIC/cgroup attachment'larıyla ilişkilendirin; onaylanmamış bir PID'ye ait ani bir `xdp` veya `kprobe` programı, enjekte edilmiş bir payload için kesin kanıt değil, bir inceleme ipucudur.<sup>[[5]](#references)[[6]](#references)</sup>
 
-## Journald Incident Triage
+## Journald Olay İncelemesi
 
-systemd-journald yapılandırılmış metadata tuttuğundan, `/var/log/*` konumuna dokunmadan boot, severity, unit veya UID üzerinden pivot edebilirsiniz. Saldırı zaman aralıklarını izole etmek veya log tampering'i hızlıca kanıtlamak için filtreleri göreli zaman damgalarıyla birleştirin.<sup>[[2]](#references)</sup>
+`journalctl`, `systemd-journald`'dan yapılandırılmış girdileri okur ve boot, öncelik, unit, UID ve göreli zamana göre filtrelemeyi destekler. Kanıtları korumanız veya karşılaştırmanız gerektiğinde bu filtreleri JSON çıktısıyla birleştirin; yalnızca filtreleme yapılması logların kurcalanmadığını kanıtlamaz.<sup>[[2]](#references)[[7]](#references)</sup>
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -336,11 +334,15 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-Daha sıkı filtreler gerektiğinde `--grep 'Invalid user' --case-sensitive` veya `-k` (yalnızca kernel ring buffer) ekleyin ve çok kiracılı araştırmalar için `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` ve `_TRANSPORT` seçicilerinin birlikte kullanılabildiğini unutmayın.
+`--grep 'Invalid user' --case-sensitive` veya `-k` (yalnızca kernel mesajları) seçeneklerini daha sıkı filtrelere ihtiyaç duyduğunuzda ekleyin ve hedefli aramalar için `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` ve `_TRANSPORT` selector'larının birleştirilebileceğini unutmayın.<sup>[[7]](#references)</sup>
 
 ## References
 
-- [1] [eBPFmon: A new tool for exploring and interacting with eBPF applications](https://redcanary.com/blog/linux-security/ebpfmon/)
-- [2] [How to use the journalctl command to view Linux logs](https://www.hostinger.com/tutorials/journalctl-command)
-
+- [1] [eBPFmon: eBPF uygulamalarını keşfetmek ve bunlarla etkileşim kurmak için yeni bir araç](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [2] [Linux loglarını görüntülemek için journalctl komutu nasıl kullanılır](https://www.hostinger.com/tutorials/journalctl-command)
+- [3] [h3xduck/TripleCross](https://github.com/h3xduck/TripleCross)
+- [4] [Rapid7 Labs: Telekomünikasyon ağlarında BPFdoor](https://www.rapid7.com/blog/post/tr-bpfdoor-telecom-networks-sleeper-cells-threat-research-report/)
+- [5] [BPF Documentation — Linux Kernel documentation](https://docs.kernel.org/bpf/)
+- [6] [libbpf/bpftool](https://github.com/libbpf/bpftool)
+- [7] [journalctl(1) — Linux manual page](https://man7.org/linux/man-pages/man1/journalctl.1.html)
 {{#include ../../banners/hacktricks-training.md}}

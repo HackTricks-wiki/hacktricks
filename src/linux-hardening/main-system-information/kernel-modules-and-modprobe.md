@@ -1,23 +1,22 @@
-# Kernel Modules ve modprobe Abuse
+# Kernel Modülleri ve modprobe Kötüye Kullanımı
 
-{{#include ../../banners/hacktricks-training.md}}
+## Kernel modülü ve modül yükleme yanlış yapılandırmaları
 
-## Kernel module ve module-loading misconfiguration'ları
+Kernel modülü desteği, Linux privilege escalation incelemesi sırasında yüksek etkili bir alandır. Her unsigned-module mesajını tek başına exploitable olarak değerlendirmeyin; bunun yerine pratik soruları yanıtlamak için kullanın.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[8]](#references)[[9]](#references)[[10]](#references)</sup>
 
-Kernel module desteği, Linux privilege escalation incelemesi sırasında yüksek etkili bir alandır. Her unsigned-module mesajını tek başına exploitable olarak değerlendirmeyin; bunun yerine şu pratik sorulara yanıt bulmak için kullanın:
+- Mevcut kullanıcı `sudo`, capabilities veya yazılabilir bir helper path üzerinden modül yükleyebilir mi?
+- Modül yükleme hâlâ etkin mi?
+- Modül signature enforcement devre dışı mı?
+- Modül dizinleri veya modül dosyaları yazılabilir mi?
+- Ne olduğunu doğrulamak için kernel logları okunabilir mi?
 
-- Mevcut kullanıcı `sudo`, capabilities veya writable bir helper path üzerinden module yükleyebilir mi?
-- Module loading hâlâ etkin mi?
-- Module signature enforcement devre dışı mı?
-- Module dizinleri veya module dosyaları writable mı?
-- Ne olduğunu doğrulamak için kernel log'ları okunabilir mi?
-
-Hızlı triage:
+Hızlı triage, aşağıdaki modül durumu, signature, logging ve modül ağacı kontrolleriyle başlar.<sup>[[1]](#references)[[2]](#references)[[6]](#references)[[8]](#references)</sup>
 ```bash
 uname -a
 uname -r
 cat /proc/sys/kernel/modules_disabled 2>/dev/null
-cat /proc/sys/kernel/module_sig_enforce 2>/dev/null
+grep -Eo '(^| )module\.sig_enforce(=[^ ]*)?' /proc/cmdline 2>/dev/null
+grep -E '^(CONFIG_MODULE_SIG|CONFIG_MODULE_SIG_FORCE)=' "/boot/config-$(uname -r)" 2>/dev/null
 cat /proc/sys/kernel/dmesg_restrict 2>/dev/null
 dmesg 2>/dev/null | grep -Ei 'module|signature|taint|verification'
 find /lib/modules/$(uname -r) -type d -writable -ls 2>/dev/null
@@ -25,16 +24,16 @@ find /lib/modules/$(uname -r) -type f -name '*.ko*' -writable -ls 2>/dev/null
 ```
 Yorum:
 
-- `modules_disabled=1`, yeniden başlatılana kadar yeni modüllerin yüklenemeyeceği anlamına gelir.
-- `module_sig_enforce=1`, genellikle imzasız modülleri engeller.
-- `dmesg_restrict=0`, birçok sistemde ayrıcalıksız kullanıcıların kernel günlüklerini okumasına izin verir.
-- `/lib/modules/$(uname -r)/` altındaki yazılabilir yollar tehlikelidir; çünkü modül keşfi ve otomatik yükleme bu ağaçta yer alan dosyalara güvenebilir.
+- `modules_disabled=1`, modüllerin ne yüklenebileceği ne de kaldırılabileceği ve yeniden başlatılana kadar değerin `0` olarak sıfırlanamayacağı anlamına gelir.<sup>[[1]](#references)</sup>
+- Kernel command line üzerindeki `module.sig_enforce=1` veya `CONFIG_MODULE_SIG_FORCE=y`, geçerli şekilde imzalanmış modülleri zorunlu kılar; aksi hâlde imzasız modüller yüklenebilir ve kernel tainted durumuna geçebilir.<sup>[[2]](#references)</sup>
+- `dmesg_restrict=0`, `dmesg` üzerinde herhangi bir kısıtlama uygulanmadığı anlamına gelir; değer `1` olduğunda erişim için `CAP_SYSLOG` gerekir.<sup>[[1]](#references)</sup>
+- `/lib/modules/$(uname -r)/` altındaki yazılabilir path'ler tehlikelidir; çünkü `modprobe`, modülleri yüklerken bu ağacı ve bağımlılık verilerini arar.<sup>[[8]](#references)</sup>
 
-### Modül yükleme ve kernel çıktısını okuma
+### Bir modülü yükleme ve kernel çıktısını okuma
 
-Yerel bir modülü yüklemek için meşru izniniz varsa `insmod`, sağladığınız tam `.ko` dosyasını ekler. Modülün init function'ı hemen çalışır ve `printk()` ile yazılan mesajlar kernel günlüklerinde görünür.
+Yerel bir modülü yüklemek için meşru izniniz varsa `insmod`, sağladığınız tam `.ko` dosyasını ekler. Modülün init function'ı yükleme işleminin bir parçası olarak çalışır ve `printk()` ile yazılan mesajlar, normalde `dmesg` ile okunan kernel log buffer'ına gider.<sup>[[3]](#references)[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 
-İnceleme veya lab ortamları için minimal iş akışı:
+Minimum bir review workflow'unda metadata'yı incelemek için `modinfo`, bir modülü yüklemek ve kaldırmak için `insmod` ve `rmmod`, yüklenme durumunu doğrulamak için `lsmod` ve kernel log'larını incelemek için `dmesg` kullanılır.<sup>[[4]](#references)[[6]](#references)[[12]](#references)[[13]](#references)[[14]](#references)</sup>
 ```bash
 ls -l ./example.ko
 modinfo ./example.ko 2>/dev/null
@@ -44,16 +43,16 @@ dmesg | tail -n 30
 sudo rmmod example
 dmesg | tail -n 30
 ```
-`sudo -l` `insmod`, `modprobe` veya bunların etrafındaki bir wrapper'a izin veriyorsa bunu kritik olarak değerlendirin:
+`sudo -l` `insmod`, `modprobe` veya bunların etrafındaki bir wrapper'a izin veriyorsa bunu kritik olarak değerlendirin: `sudo -l`, komutu çalıştıran kullanıcının ayrıcalıklarını listeler ve bir kernel module yüklemek `CAP_SYS_MODULE` gerektirir.<sup>[[3]](#references)[[9]](#references)[[10]](#references)</sup>
 ```bash
 sudo -l
 sudo /sbin/insmod ./example.ko
 ```
 ### Sudo ile izin verilen `insmod`
 
-Bir kullanıcının `insmod` çalıştırmasına izin veren bir sudo kuralı, normal bir yönetim yardımcısına izin verilmesiyle karşılaştırılamaz. Modülün başlatma kodu `.ko` eklenir eklenmez kernel context içinde çalışır; bu nedenle pratik inceleme sorusu şudur: "Bu kullanıcı yüklenen modülü seçebilir veya değiştirebilir mi?"
+Bir kullanıcının `insmod` çalıştırmasına izin veren bir sudo kuralı, normal bir yönetim yardımcısının çalıştırılmasına izin vermekle karşılaştırılamaz. Modülün başlatma kodu ekleme işleminin bir parçası olarak çalışır; bu nedenle pratik inceleme sorusu, bu kullanıcının yüklenen modülü seçip seçemediği veya değiştirebilip değiştiremediğidir.<sup>[[3]](#references)</sup>
 
-Genel inceleme akışı:
+Aşağıdaki generic inceleme akışı, aday bir modül için bu denetleme, yükleme, durum, günlük ve kaldırma kontrollerini tekrarlar.<sup>[[4]](#references)[[6]](#references)[[12]](#references)[[13]](#references)[[14]](#references)</sup>
 ```bash
 sudo -l
 ls -l ./candidate.ko
@@ -63,9 +62,9 @@ lsmod | grep -i candidate
 dmesg | tail -n 30
 sudo /sbin/rmmod candidate
 ```
-Kullanıcı rastgele bir `.ko` sağlayabiliyorsa, yetkilendirilmiş bir değerlendirmede bu kural tam sistem compromise olarak değerlendirilmelidir. Daha güvenli bir operasyonel yaklaşım, module loading işlemini sudo üzerinden devretmekten kaçınmaktır; kaçınılmazsa tam yolu, sahipliği, izinleri, imzalama politikasını ve kaldırma iş akışını kısıtlayın.
+Kullanıcı rastgele bir `.ko` sağlayabiliyorsa, yetki verilmiş bir değerlendirmede bu kural tam sistem ele geçirilmesi olarak değerlendirilmelidir. Daha güvenli bir operasyonel yaklaşım, module loading işlemini sudo üzerinden devretmekten kaçınmaktır; kaçınılmazsa tam yolu, sahipliği, izinleri, imzalama politikasını ve kaldırma iş akışını kısıtlayın.<sup>[[3]](#references)[[10]](#references)</sup>
 
-Kontrollü bir lab ortamında zararsız bir module-building pattern için minimal source ve Makefile şu şekilde görünür:
+Kontrollü bir lab ortamında zararsız bir module-building pattern için aşağıda minimal bir kaynak kodu ve Makefile gösterilmiştir; `make -C /lib/modules/$(uname -r)/build M=$PWD` biçimi, kernel'in external modules için belgelenmiş kbuild workflow'unu izler.<sup>[[5]](#references)[[7]](#references)</sup>
 ```c
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -93,7 +92,7 @@ make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
 clean:
 make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
 ```
-Yalnızca yetkili bir laboratuvarda derleyin ve yükleyin:
+Yalnızca yetkili bir laboratuvarda derleyip yükleyin; kbuild harici modülü derler ve yükleme/kaldırma komutları kernel module arayüzlerini çağırır.<sup>[[3]](#references)[[4]](#references)[[5]](#references)[[7]](#references)</sup>
 ```bash
 make
 sudo insmod demo.ko
@@ -102,47 +101,47 @@ sudo rmmod demo
 ```
 ### `kernel.modprobe` / `modprobe_path` kötüye kullanım kontrolleri
 
-`kernel.modprobe`, kernel'in module-loading işlemi için yardıma ihtiyaç duyduğunda çağırdığı userspace helper'ı kontrol eder. Bir attacker bunu writable bir executable path ile değiştirebilir ve unknown binary format veya başka bir module request path tetikleyebilirse, bu durum root code execution'a dönüşebilir.
+`kernel.modprobe`, kernel'in module autoload istekleri için çalıştırdığı userspace helper'ı belirtir; bu sysctl, açık module insertion işlemini değil autoloading'i etkiler. Bir attacker bunu yazılabilir bir executable path ile değiştirebilir ve bir module request tetikleyebilirse, bu helper ayrıcalıklı code-execution için bir yol haline gelir.<sup>[[1]](#references)</sup>
 
-Mevcut helper'ı kontrol edin:
+Mevcut helper path'ini kernel sysctl interface üzerinden kontrol edin ve hedefin ownership ve mode bilgilerini inceleyin.<sup>[[1]](#references)</sup>
 ```bash
 cat /proc/sys/kernel/modprobe 2>/dev/null
 sysctl kernel.modprobe 2>/dev/null
 ls -l "$(cat /proc/sys/kernel/modprobe 2>/dev/null)" 2>/dev/null
 ```
-Etkileyip etkileyemeyeceğinizi kontrol edin:
+sysctl, yetki devredilmiş sudo kurallarının veya dosya capabilities'lerinin etkilenip etkilenemeyeceğini kontrol edin.<sup>[[1]](#references)[[9]](#references)[[10]](#references)[[15]](#references)</sup>
 ```bash
 ls -l /proc/sys/kernel/modprobe
 sudo -l | grep -E 'sysctl|tee|bash|sh|modprobe'
 getcap -r / 2>/dev/null | grep -E 'cap_sys_admin|cap_sys_module'
 ```
-Genel, yalnızca laboratuvar ortamına özgü kalıp:
+Aşağıdaki yalnızca lab ortamına yönelik pattern, helper path'i değiştirir ve belgelenmiş bir module-autoload request'i tetikler; bunu yalnızca izole ve yetkilendirilmiş bir sistemde kullanın.<sup>[[1]](#references)</sup>
+
+Güncel Linux kernel'larında genel amaçlı bir trigger olarak bilinmeyen bir executable kullanmayın: legacy custom binary-format module autoloading Linux 6.14'te kaldırılmıştır; kernel documentation ise bilinmeyen bir filesystem type'ı module-autoload request path'i olarak tanımlar.<sup>[[1]](#references)[[11]](#references)</sup>
 ```bash
 # Example only: requires permission to write kernel.modprobe
 printf '#!/bin/sh\nid > /tmp/modprobe-helper-ran\n' > /tmp/helper
 chmod +x /tmp/helper
 echo /tmp/helper | sudo tee /proc/sys/kernel/modprobe
 
-# Trigger an unknown executable format so the kernel attempts helper logic
-printf '\\xff\\xff\\xff\\xff' > /tmp/unknown
-chmod +x /tmp/unknown
-/tmp/unknown 2>/dev/null || true
+# Trigger a documented module-autoload request (requires mount privilege)
+sudo mount -t definitely-not-a-filesystem none /mnt 2>/dev/null || true
 cat /tmp/modprobe-helper-ran 2>/dev/null
 ```
-Güçlendirilmiş sistemlerde bu işlem başarısız olmalıdır; çünkü ayrıcalıksız kullanıcılar `kernel.modprobe` değerine yazamaz, yardımcı program yolu yazılabilir değildir veya module-loading yolları engellenmiştir.
+Sıkılaştırılmış sistemlerde, izinler ayrıcalıksız yazmaları `kernel.modprobe` için engellediğinde, yardımcı program yolu yazılabilir olmadığında veya modül otomatik yüklemesi devre dışı bırakıldığında bu işlem başarısız olmalıdır.<sup>[[1]](#references)</sup>
 
 ### Yazılabilir `/lib/modules` incelemesi
 
-Yazılabilir module dizinleri, `modprobe` daha sonra nasıl çağrıldığına bağlı olarak module değiştirmeye, kötü amaçlı module yerleştirmeye veya auto-load kötüye kullanımına olanak sağlayabilir.
+Yazılabilir modül dizinleri; `modprobe`'un daha sonra nasıl çağrıldığına bağlı olarak modül değiştirmeye, kötü amaçlı modül yerleştirmeye veya otomatik yükleme kötüye kullanımına olanak sağlayabilir; `modprobe`, modülleri çözümlerken `/lib/modules/$(uname -r)` yolunda arama yapar ve bağımlılık verilerini kullanır.<sup>[[8]](#references)</sup>
 
-Yazılabilir konumları inceleyin:
+Etkin kernel sürümünün modül ağacı altındaki yazılabilir modül dosyalarını ve bağımlılık/takma ad metadata'sını inceleyin.<sup>[[8]](#references)</sup>
 ```bash
 KREL="$(uname -r)"
 find "/lib/modules/$KREL" -type d -writable -ls 2>/dev/null
 find "/lib/modules/$KREL" -type f -name '*.ko*' -writable -ls 2>/dev/null
 find "/lib/modules/$KREL" -type f \( -name 'modules.dep' -o -name 'modules.alias' -o -name 'modules.order' \) -writable -ls 2>/dev/null
 ```
-Yazılabilir modül içeriği bulursanız, modüllerin nasıl keşfedildiğini kontrol edin:
+Yazılabilir modül içeriği bulursanız, `modprobe`'un bağımlılıkları nasıl çözdüğünü ve `modinfo`'nun modül meta verilerini nasıl raporladığını inceleyin.<sup>[[8]](#references)[[12]](#references)</sup>
 ```bash
 modprobe --show-depends <module_name> 2>/dev/null
 modinfo <module_name> 2>/dev/null
@@ -150,9 +149,26 @@ grep -R "<module_name>" /lib/modules/$(uname -r)/modules.* 2>/dev/null
 ```
 Savunma notları:
 
-- `/lib/modules` dizininin sahipliğini `root:root` olarak koruyun ve kullanıcılar tarafından yazılabilir olmamasını sağlayın.
-- Operasyonel olarak mümkün olduğunda, önyükleme sonrasında `kernel.modules_disabled=1` ayarını yapın.
-- Yüklenebilir modüllere ihtiyaç duyan sistemlerde modül imzalamayı zorunlu kılın.
-- `/proc/sys/kernel/modprobe` ve `/lib/modules` üzerine yapılan yazma işlemlerini ve beklenmeyen `insmod`/`modprobe` çalıştırmalarını izleyin.
+- `/lib/modules` dizininin sahipliğini `root:root` olarak koruyun ve kullanıcılar tarafından yazılabilir olmamasını sağlayın.<sup>[[8]](#references)</sup>
+- Operasyonel olarak mümkün olan sistemlerde, önyükleme sonrasında `kernel.modules_disabled=1` değerini ayarlayın.<sup>[[1]](#references)</sup>
+- Yüklenebilir modüllere ihtiyaç duyan sistemlerde module signing uygulamasını zorunlu kılın.<sup>[[2]](#references)</sup>
+- `/proc/sys/kernel/modprobe`, `/lib/modules` üzerine yapılan yazma işlemlerini ve beklenmeyen `insmod`/`modprobe` çalıştırmalarını izleyin.<sup>[[1]](#references)[[8]](#references)</sup>
 
+## References
+
+- [1] [/proc/sys/kernel/ için documentation — Linux Kernel documentation](https://docs.kernel.org/admin-guide/sysctl/kernel.html)
+- [2] [Kernel module signing facility — Linux Kernel documentation](https://www.kernel.org/doc/html/latest/admin-guide/module-signing.html)
+- [3] [init_module(2) — Linux manual page](https://man7.org/linux/man-pages/man2/init_module.2.html)
+- [4] [insmod(8) — Linux manual page](https://man7.org/linux/man-pages/man8/insmod.8.html)
+- [5] [Driver Basics — Linux Kernel documentation](https://docs.kernel.org/driver-api/basics.html)
+- [6] [printk ile message logging — Linux Kernel documentation](https://docs.kernel.org/core-api/printk-basics.html)
+- [7] [External Modules oluşturma — Linux Kernel documentation](https://docs.kernel.org/kbuild/modules.html)
+- [8] [modprobe(8) — Linux manual page](https://man7.org/linux/man-pages/man8/modprobe.8.html)
+- [9] [sudo(8) — Linux manual page](https://man7.org/linux/man-pages/man8/sudo.8.html)
+- [10] [capabilities(7) — Linux manual page](https://man7.org/linux/man-pages/man7/capabilities.7.html)
+- [11] [‘execve-v6.14-rc1’ tag'inin birleştirilmesi — torvalds/linux](https://github.com/torvalds/linux/commit/fadc3ed9ce1cd9ecc5c8be8875f7ec11ab3a7ebe)
+- [12] [modinfo(8) — Linux manual page](https://man7.org/linux/man-pages/man8/modinfo.8.html)
+- [13] [lsmod(8) — Linux manual page](https://man7.org/linux/man-pages/man8/lsmod.8.html)
+- [14] [rmmod(8) — Linux manual page](https://man7.org/linux/man-pages/man8/rmmod.8.html)
+- [15] [getcap(8) — Linux manual page](https://man7.org/linux/man-pages/man8/getcap.8.html)
 {{#include ../../banners/hacktricks-training.md}}
