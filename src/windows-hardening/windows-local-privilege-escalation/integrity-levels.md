@@ -4,29 +4,29 @@
 
 ## Poziomy integralności
 
-W systemie Windows Vista i nowszych wszystkie chronione elementy mają znacznik **poziomu integralności**. Ta konfiguracja przypisuje głównie plikom i kluczom rejestru poziom integralności „medium”, z wyjątkiem niektórych folderów i plików, które Internet Explorer 7 może zapisywać przy niskim poziomie integralności. Domyślnie procesy uruchamiane przez standardowych użytkowników mają średni poziom integralności, podczas gdy usługi zazwyczaj działają na poziomie integralności systemu. Etykieta wysokiego poziomu integralności chroni katalog główny.
+W systemie Windows Vista i nowszych wersjach obiekty podlegające zabezpieczeniom mogą mieć etykietę **poziomu integralności**. Większość obiektów jest traktowana jako obiekty o średnim poziomie integralności, natomiast określone lokalizacje przeznaczone dla aplikacji o niskim poziomie integralności mogą być oznaczone jako obiekty o niskim poziomie. Procesy uruchamiane przez standardowych użytkowników zwykle działają na średnim poziomie integralności, podwyższone aplikacje działają na wysokim poziomie integralności, a wiele usług działa na poziomie integralności systemu.<sup>[[1]](#references)</sup>
 
-Kluczowa zasada mówi, że obiekty nie mogą być modyfikowane przez procesy o poziomie integralności niższym niż poziom tego obiektu. Dostępne poziomy integralności to:
+Kluczowa zasada mówi, że obiekty nie mogą być modyfikowane przez procesy o niższym poziomie integralności niż poziom obiektu. Windows stosuje to sprawdzenie Mandatory Integrity Control (MIC) przed oceną listy dyskretnej kontroli dostępu (DACL) obiektu. Najczęściej spotykane poziomy to:<sup>[[1]](#references)[[2]](#references)</sup>
 
-- **Untrusted**: Ten poziom jest przeznaczony dla procesów z anonimowymi logowaniami. Przykład: Chrome
-- **Low**: Używany głównie do interakcji z Internetem, szczególnie w trybie chronionym Internet Explorer, wpływając na powiązane pliki i procesy oraz określone foldery, takie jak **Temporary Internet Folder**. Procesy o niskim poziomie integralności podlegają znacznym ograniczeniom, w tym nie mają dostępu do zapisu w rejestrze i mają ograniczony dostęp do zapisu w profilu użytkownika.
-- **Medium**: Domyślny poziom dla większości działań, przypisywany standardowym użytkownikom i obiektom bez określonego poziomu integralności. Nawet członkowie grupy Administrators domyślnie działają na tym poziomie.
-- **High**: Zarezerwowany dla administratorów, umożliwiający im modyfikowanie obiektów o niższych poziomach integralności, w tym obiektów znajdujących się na poziomie wysokim.
-- **System**: Najwyższy poziom operacyjny dla jądra Windows i podstawowych usług, niedostępny nawet dla administratorów, zapewniający ochronę kluczowych funkcji systemu.
-- **Installer**: Unikalny poziom przewyższający wszystkie pozostałe, umożliwiający obiektom na tym poziomie odinstalowanie dowolnego innego obiektu.
+- **Untrusted**: Najniższy poziom, reprezentowany przez `SECURITY_MANDATORY_UNTRUSTED_RID`.
+- **Low**: Używany głównie do interakcji z internetem, szczególnie w trybie chronionym Internet Explorer, wpływając na powiązane pliki i procesy oraz określone foldery, takie jak **Temporary Internet Folder**. Procesy o niskim poziomie integralności podlegają znacznym ograniczeniom, w tym nie mają dostępu do zapisu w rejestrze i mają ograniczony dostęp do zapisu w profilu użytkownika.
+- **Medium**: Domyślny poziom dla większości działań, przypisywany standardowym użytkownikom i obiektom bez określonych poziomów integralności. Nawet członkowie grupy Administrators domyślnie działają na tym poziomie.
+- **High**: Zarezerwowany dla administratorów, umożliwiający im modyfikowanie obiektów o niższych poziomach integralności, w tym obiektów znajdujących się na samym wysokim poziomie.
+- **System**: Najwyższy poziom operacyjny dla jądra Windows i podstawowych usług, niedostępny nawet dla administratorów, co zapewnia ochronę kluczowych funkcji systemu.
 
-Poziom integralności procesu można sprawdzić za pomocą **Process Explorer** z pakietu **Sysinternals**, otwierając **properties** procesu i przechodząc do karty "**Security**":
+Windows definiuje również wartość integralności chronionego procesu znajdującą się powyżej poziomu System. **TrustedInstaller** jest jednak tożsamością usługi Windows, a nie odrębnym poziomem MIC; jego zdolność do modyfikowania chronionych zasobów systemu operacyjnego wynika z uprawnień przyznanych tej tożsamości.
 
-![Poziomy integralności - Poziomy integralności: Poziom integralności procesu można sprawdzić za pomocą Process Explorer z pakietu Sysinternals, otwierając properties procesu i przechodząc do karty "...](<../../images/image (824).png>)
+Poziom integralności procesu można uzyskać za pomocą **Process Explorer** z pakietu **Sysinternals**, otwierając właściwości procesu i wyświetlając kartę **Security**:<sup>[[3]](#references)</sup>
 
-Możesz także sprawdzić swój **bieżący poziom integralności** za pomocą `whoami /groups`
+![Poziomy integralności - Poziomy integralności: Poziom integralności procesu można uzyskać za pomocą Process Explorer z pakietu Sysinternals, otwierając właściwości procesu i wyświetlając kartę "...](<../../images/image (824).png>)
 
-![Poziomy integralności - Poziomy integralności: Możesz także sprawdzić swój bieżący poziom integralności za pomocą whoami /groups](<../../images/image (325).png>)
+Możesz również uzyskać **bieżący poziom integralności**, używając `whoami /groups`:
+
+![Poziomy integralności - Poziomy integralności: Bieżący poziom integralności można również uzyskać za pomocą whoami /groups](<../../images/image (325).png>)
 
 ### Poziomy integralności w systemie plików
 
-Obiekt w systemie plików może wymagać **minimalnego poziomu integralności**, a jeśli proces nie ma wymaganego poziomu integralności, nie będzie mógł z nim wchodzić w interakcję.\
-Na przykład **utwórzmy zwykły plik z konsoli zwykłego użytkownika i sprawdźmy uprawnienia**:
+Obiekt w systemie plików może mieć **wymagany minimalny poziom integralności**. Proces znajdujący się poniżej tego poziomu podlega obowiązkowej polityce obiektu, nawet jeśli jego DACL w innych okolicznościach przyznawałaby dostęp. Na przykład utwórz zwykły plik z konsoli standardowego użytkownika i sprawdź jego uprawnienia:<sup>[[1]](#references)[[4]](#references)</sup>
 ```
 echo asd >asd.txt
 icacls asd.txt
@@ -37,7 +37,7 @@ NT AUTHORITY\INTERACTIVE:(I)(M,DC)
 NT AUTHORITY\SERVICE:(I)(M,DC)
 NT AUTHORITY\BATCH:(I)(M,DC)
 ```
-Teraz przypiszmy plikowi minimalny poziom integralności **High**. Należy to zrobić z poziomu **konsoli** uruchomionej jako **administrator**, ponieważ **zwykła konsola** będzie działać na poziomie Medium Integrity i **nie będzie mogła** przypisać obiektowi poziomu High Integrity:
+Teraz przypisz plikowi minimalny poziom integralności **High**. Należy to zrobić z poziomu konsoli uruchomionej jako **administrator**, ponieważ zwykła konsola działa z poziomem integralności Medium i **nie będzie mogła** przypisać poziomu integralności High obiektowi:
 ```
 icacls asd.txt /setintegritylevel(oi)(ci) High
 processed file: asd.txt
@@ -52,7 +52,7 @@ NT AUTHORITY\SERVICE:(I)(M,DC)
 NT AUTHORITY\BATCH:(I)(M,DC)
 Mandatory Label\High Mandatory Level:(NW)
 ```
-W tym miejscu robi się ciekawie. Widać, że użytkownik `DESKTOP-IDJHTKP\user` ma **FULL privileges** względem pliku (faktycznie to właśnie ten użytkownik utworzył plik), jednak ze względu na zaimplementowany minimalny poziom integralności nie będzie już mógł modyfikować pliku, chyba że działa w ramach High Integrity Level (należy pamiętać, że będzie mógł go odczytać):
+Użytkownik `DESKTOP-IDJHTKP\user` ma **PEŁNE uprawnienia** do pliku, ponieważ go utworzył. Jednak etykieta mandatory uniemożliwia użytkownikowi modyfikowanie pliku, chyba że proces działa z poziomem High integrity. Użytkownik nadal może go odczytać, ponieważ wyświetlana polityka mandatory to `(NW)`, czyli no-write-up:
 ```
 echo 1234 > asd.txt
 Access is denied.
@@ -62,11 +62,11 @@ C:\Users\Public\asd.txt
 Access is denied.
 ```
 > [!TIP]
-> **Dlatego gdy plik ma określony minimalny poziom integralności, aby go zmodyfikować, musisz działać co najmniej na tym poziomie integralności.**
+> **Dlatego gdy plik ma minimalny poziom integralności, aby go zmodyfikować, musisz działać co najmniej na tym poziomie integralności.**
 
 ### Poziomy integralności w plikach binarnych
 
-Utworzyłem kopię `cmd.exe` w `C:\Windows\System32\cmd-low.exe` i ustawiłem dla niej **niski poziom integralności z konsoli administratora:**
+Poniższy przykład wykorzystuje kopię `cmd.exe` w lokalizacji `C:\Windows\System32\cmd-low.exe` i przypisuje jej **niski poziom integralności z konsoli administratora**:
 ```
 icacls C:\Windows\System32\cmd-low.exe
 C:\Windows\System32\cmd-low.exe NT AUTHORITY\SYSTEM:(I)(F)
@@ -76,16 +76,22 @@ APPLICATION PACKAGE AUTHORITY\ALL APPLICATION PACKAGES:(I)(RX)
 APPLICATION PACKAGE AUTHORITY\ALL RESTRICTED APP PACKAGES:(I)(RX)
 Mandatory Label\Low Mandatory Level:(NW)
 ```
-Teraz, gdy uruchomię `cmd-low.exe`, zostanie on **uruchomiony z niskim poziomem integralności** zamiast ze średnim:
+Teraz, gdy uruchomię `cmd-low.exe`, będzie on **działać na poziomie niskiej integralności** zamiast średniej:
 
-![Poziomy integralności w systemie plików - Poziomy integralności w plikach binarnych: Teraz, gdy uruchomię cmd-low.exe, zostanie on uruchomiony z niskim poziomem integralności zamiast ze średnim](<../../images/image (313).png>)
+![Poziomy integralności w systemie plików - Poziomy integralności w plikach binarnych: Teraz, gdy uruchomię cmd-low.exe, będzie on działać na poziomie niskiej integralności zamiast średniej](<../../images/image (313).png>)
 
-Jeśli jesteś ciekaw, przypisanie wysokiego poziomu integralności do pliku binarnego (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`) nie spowoduje automatycznego uruchomienia go z wysokim poziomem integralności (jeśli wywołasz go ze średniego poziomu integralności — domyślnie — zostanie uruchomiony ze średnim poziomem integralności).
+Przypisanie plikowi binarnemu etykiety wysokiej integralności (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`) nie powoduje automatycznego uruchomienia go z wysokim poziomem integralności. Jeśli zostanie wywołany z procesu o średnim poziomie integralności, działa ze średnim poziomem integralności, ponieważ nowy proces otrzymuje niższy z poziomów integralności: pliku wykonywalnego lub procesu wywołującego.<sup>[[1]](#references)</sup>
 
 ### Poziomy integralności w procesach
 
-Nie wszystkie pliki i foldery mają minimalny poziom integralności, **ale wszystkie procesy są uruchomione z określonym poziomem integralności**. Podobnie jak w przypadku systemu plików, **jeśli proces chce zapisywać dane w innym procesie, musi mieć co najmniej taki sam poziom integralności**. Oznacza to, że proces z niskim poziomem integralności nie może otworzyć uchwytu z pełnym dostępem do procesu ze średnim poziomem integralności.
+Nie wszystkie pliki i foldery mają jawną minimalną etykietę integralności, **ale każdy proces działa na określonym poziomie integralności**. Podobnie jak w przypadku obiektów systemu plików, **proces, który chce uzyskać dostęp do zapisu w innym procesie, musi mieć co najmniej taki sam poziom integralności**. Dlatego proces o niskim poziomie integralności nie może otworzyć procesu o średnim poziomie integralności z pełnym dostępem.<sup>[[1]](#references)</sup>
 
-Ze względu na ograniczenia opisane w tej i poprzedniej sekcji, z punktu widzenia bezpieczeństwa zawsze **zaleca się uruchamianie procesu z możliwie najniższym poziomem integralności**.
+Ze względu na te ograniczenia najbezpieczniejszym podejściem jest **uruchamianie każdego procesu na najniższym poziomie integralności, który nadal pozwala mu wykonywać zamierzone zadania**.
 
+## References
+
+- [1] [Microsoft Learn – Mandatory Integrity Control](https://learn.microsoft.com/en-us/windows/win32/secauthz/mandatory-integrity-control)
+- [2] [Microsoft Learn – MANDATORY_LEVEL enumeration](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ne-winnt-mandatory_level)
+- [3] [Microsoft Sysinternals – Process Explorer](https://learn.microsoft.com/en-us/sysinternals/downloads/process-explorer)
+- [4] [Microsoft Learn – icacls](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/icacls)
 {{#include ../../banners/hacktricks-training.md}}
