@@ -1,10 +1,10 @@
-# FZ - Infrared
+# FZ - Podczerwień
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Wprowadzenie <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
-Więcej informacji o działaniu Infrared znajdziesz tutaj:
+Więcej informacji o działaniu podczerwieni znajdziesz tutaj:
 
 
 {{#ref}}
@@ -13,29 +13,27 @@ Więcej informacji o działaniu Infrared znajdziesz tutaj:
 
 ## Odbiornik sygnału IR w Flipper Zero <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
-Flipper korzysta z cyfrowego odbiornika sygnału IR TSOP, który **umożliwia przechwytywanie sygnałów z pilotów IR**. Istnieją **smartfony**, takie jak Xiaomi, które również mają port IR, ale należy pamiętać, że **większość z nich może tylko transmitować** sygnały i **nie potrafi ich odbierać**.<sup>[[1]](#references)</sup>
+Flipper Zero korzysta z demodulującego odbiornika IR do przechwytywania sygnałów ze standardowych pilotów na podczerwień. Niektóre telefony, w tym wybrane modele Xiaomi, mają nadajnik IR, ale większość z nich nie potrafi odbierać ani dekodować sygnałów zdalnego sterowania.<sup>[[1]](#references)</sup>
 
-Odbiornik podczerwieni Flippera jest **bardzo czuły**. Możesz nawet **przechwycić sygnał**, pozostając **gdzieś pomiędzy** pilotem a telewizorem. Nie ma potrzeby kierowania pilota bezpośrednio na port IR Flippera. Jest to przydatne, gdy ktoś zmienia kanały, stojąc obok telewizora, a Ty i Flipper znajdujecie się w pewnej odległości.
+**Odbiornik podczerwieni Flippera jest bardzo czuły**. Możesz nawet **przechwycić sygnał**, pozostając **gdzieś pomiędzy** pilotem a telewizorem. Nie ma potrzeby kierowania pilota bezpośrednio na port IR Flippera. Przydaje się to, gdy ktoś przełącza kanały, stojąc blisko telewizora, a zarówno Ty, jak i Flipper znajdujecie się w pewnej odległości.
 
-Ponieważ **dekodowanie** sygnału podczerwieni odbywa się po stronie **software**, Flipper Zero potencjalnie obsługuje **odbieranie i transmitowanie dowolnych kodów pilotów IR**. W przypadku **nieznanych** protokołów, których nie udało się rozpoznać, **zapisuje i odtwarza** surowy sygnał dokładnie w takiej postaci, w jakiej został odebrany.<sup>[[1]](#references)</sup>
+Dekodowanie protokołu odbywa się programowo. Rozpoznane protokoły mogą być przechowywane jako zdekodowane komendy; nieobsługiwane protokoły można przechwytywać i odtwarzać jako surowe dane czasowe, z uwzględnieniem ograniczeń sprzętowych dotyczących częstotliwości nośnej i taktowania.<sup>[[1]](#references)</sup>
 
 ## Działania
 
 ### Uniwersalne piloty
 
-Flipper Zero może służyć jako **uniwersalny pilot do sterowania dowolnym telewizorem, klimatyzatorem lub centrum multimedialnym**. W tym trybie Flipper wykonuje **bruteforces** wszystkich **znanych kodów** wszystkich obsługiwanych producentów **zgodnie ze słownikiem zapisanym na karcie SD**. Nie musisz wybierać konkretnego pilota, aby wyłączyć telewizor w restauracji.<sup>[[1]](#references)</sup>
+Tryb uniwersalnego pilota Flipper Zero przechodzi przez znane komendy z bazy danych podczerwieni dla obsługiwanych telewizorów, urządzeń audio, projektorów i klimatyzatorów. Nie ma gwarancji, że będzie sterować każdym urządzeniem, dlatego należy go używać wyłącznie ze sprzętem będącym Twoją własnością lub takim, do którego testowania masz upoważnienie.<sup>[[1]](#references)</sup>
 
-Wystarczy nacisnąć przycisk zasilania w trybie Universal Remote, a Flipper będzie **sekwencyjnie wysyłać** polecenia „Power Off” do wszystkich znanych mu telewizorów: Sony, Samsung, Panasonic... i tak dalej. Gdy telewizor odbierze swój sygnał, zareaguje i wyłączy się.
+W trybie Universal Remote wystarczy nacisnąć przycisk zasilania, a Flipper będzie **sekwencyjnie wysyłać komendy „Power Off”** dla wszystkich znanych mu telewizorów: Sony, Samsung, Panasonic... i tak dalej. Gdy telewizor odbierze właściwy sygnał, zareaguje i wyłączy się.
 
-Takie brute-force zajmuje czas. Im większy słownik, tym dłużej potrwa zakończenie procesu. Nie da się dowiedzieć, który dokładnie sygnał został rozpoznany przez telewizor, ponieważ telewizor nie przekazuje żadnej informacji zwrotnej.
+Taki brute-force zajmuje czas. Im większy słownik, tym dłużej potrwa jego przeszukanie. Nie da się dowiedzieć, który dokładnie sygnał został rozpoznany przez telewizor, ponieważ telewizor nie przekazuje żadnej informacji zwrotnej.
 
 ### Nauka nowego pilota
 
-Za pomocą Flipper Zero można **przechwycić sygnał podczerwieni**. Jeśli **znajdzie sygnał w bazie danych**, Flipper automatycznie **rozpozna, jakie to urządzenie**, i pozwoli Ci z nim wchodzić w interakcję.\
-Jeśli go nie znajdzie, Flipper może **zapisać** **sygnał** i umożliwić jego **odtworzenie**.<sup>[[1]](#references)</sup>
+Flipper Zero może **przechwycić sygnał podczerwieni**. Jeśli rozpozna protokół i komendę, zapisuje zdekodowaną reprezentację; w przeciwnym razie może zapisać surowe dane czasowe do późniejszego odtworzenia.<sup>[[1]](#references)</sup>
 
-## Źródła
+## References
 
-- [1] [Taking over TVs with Flipper Zero Infrared Port](https://blog.flipperzero.one/infrared/)
-
+- [1] [Przejmowanie kontroli nad telewizorami za pomocą portu podczerwieni Flipper Zero](https://blog.flipperzero.one/infrared/)
 {{#include ../../../banners/hacktricks-training.md}}

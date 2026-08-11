@@ -1,4 +1,4 @@
-# Testowanie LLM
+# Testowanie LLM-ów
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -6,49 +6,60 @@
 
 ### [**Hugging Face Transformers**](https://github.com/huggingface/transformers)
 
-Hugging Face Transformers to jedna z najpopularniejszych bibliotek open source służących do używania, trenowania i wdrażania LLM, takich jak GPT, BERT i wiele innych. Oferuje kompleksowy ekosystem obejmujący pre-trained models, datasety oraz bezproblemową integrację z Hugging Face Hub na potrzeby fine-tuningu i wdrażania.
+Hugging Face Transformers to open-source'owa biblioteka służąca do ładowania, trenowania i udostępniania wstępnie wytrenowanych modeli do zadań związanych z tekstem, obrazem, dźwiękiem, wideo i multimodalnością. Hosting modeli i datasetów jest udostępniany osobno przez Hugging Face Hub.<sup>[[1]](#references)</sup>
 
 ### [**LangChain**](https://github.com/langchain-ai/langchain)
 
-LangChain to framework przeznaczony do tworzenia aplikacji z wykorzystaniem LLM. Umożliwia developerom łączenie modeli językowych z zewnętrznymi źródłami danych, API i bazami danych. LangChain udostępnia narzędzia do zaawansowanego prompt engineering, zarządzania historią konwersacji oraz integrowania LLM ze złożonymi workflow.
+LangChain to framework do tworzenia aplikacji i agentów opartych na modelach, obejmujący konstruowanie promptów, zarządzanie historią/stanem konwersacji, tools, retrieval oraz integracje z modelami, API i bazami danych.<sup>[[2]](#references)</sup>
 
 ### [**LitGPT**](https://github.com/Lightning-AI/litgpt)
 
-LitGPT to projekt opracowany przez Lightning AI, który wykorzystuje framework Lightning do ułatwiania trenowania, fine-tuningu i wdrażania modeli bazujących na GPT. Bezproblemowo integruje się z innymi narzędziami Lightning AI, zapewniając zoptymalizowane workflow do obsługi wielkoskalowych modeli językowych o zwiększonej wydajności i skalowalności.
+LitGPT udostępnia czytelne implementacje i workflows wiersza poleceń do pretrainingu, fine-tuningu, ewaluacji i wdrażania obsługiwanych modeli językowych.<sup>[[3]](#references)</sup>
 
 ### [**LitServe**](https://github.com/Lightning-AI/LitServe)
 
-**Opis:**\
-LitServe to narzędzie do wdrażania od Lightning AI, zaprojektowane z myślą o szybkim i wydajnym wdrażaniu modeli AI. Upraszcza integrację LLM z aplikacjami działającymi w czasie rzeczywistym, zapewniając skalowalne i zoptymalizowane możliwości servingowe.
+**Description:**\
+LitServe to framework model-serving od Lightning AI, służący do udostępniania API inference z obsługą batchingu, streamingu, akceleracji i hooków skalowania.<sup>[[4]](#references)</sup>
 
 ### [**Axolotl**](https://github.com/axolotl-ai-cloud/axolotl)
 
-Axolotl to platforma chmurowa zaprojektowana w celu usprawnienia wdrażania, skalowania i zarządzania modelami AI, w tym LLM. Oferuje funkcje takie jak automatyczne skalowanie, monitoring i integrację z różnymi usługami chmurowymi, ułatwiając wdrażanie modeli w środowiskach produkcyjnych bez konieczności rozbudowanego zarządzania infrastrukturą.
+Axolotl to open-source'owy framework post-trainingu i fine-tuningu oparty na konfiguracji YAML. Obsługuje techniki takie jak pełny fine-tuning, LoRA/QLoRA, optymalizację preferencji i trenowanie na wielu GPU; sam w sobie nie jest platformą cloud deploymentu.<sup>[[5]](#references)</sup>
 
-## Testowanie modeli online
+## Wypróbuj modele online
 
 ### [**Hugging Face**](https://huggingface.co/)
 
-**Hugging Face** to wiodąca platforma i społeczność związana z machine learningiem, szczególnie znana z działalności w obszarze przetwarzania języka naturalnego (NLP). Udostępnia narzędzia, biblioteki i zasoby ułatwiające tworzenie, udostępnianie i wdrażanie modeli machine learning.\
-Oferuje kilka sekcji, takich jak:
+**Hugging Face** to wiodąca platforma i społeczność związana z machine learningiem, znana przede wszystkim z prac nad przetwarzaniem języka naturalnego (NLP). Udostępnia tools, biblioteki i zasoby ułatwiające tworzenie, udostępnianie i wdrażanie modeli machine learning.\
+Hub oferuje kilka istotnych sekcji:<sup>[[6]](#references)</sup>
 
-* **Models**: Obszerne repozytorium **pre-trained modeli machine learning**, w którym użytkownicy mogą przeglądać, pobierać i integrować modele do różnych zadań, takich jak generowanie tekstu, tłumaczenie, rozpoznawanie obrazów i wiele innych.
-* **Datasets:** Kompleksowy **zbiór datasetów** używanych do trenowania i ewaluacji modeli. Ułatwia dostęp do różnorodnych źródeł danych, umożliwiając użytkownikom znajdowanie i wykorzystywanie danych w konkretnych projektach machine learning.
-* **Spaces:** Platforma do hostowania i udostępniania **interaktywnych aplikacji machine learning** oraz dem. Umożliwia developerom **prezentowanie** działania ich modeli, tworzenie przyjaznych dla użytkownika interfejsów i współpracę z innymi poprzez udostępnianie działających dem.
+* **Models**: Obszerne repozytorium **wstępnie wytrenowanych modeli machine learning**, w którym użytkownicy mogą przeglądać, pobierać i integrować modele do różnych zadań, takich jak generowanie tekstu, tłumaczenie, rozpoznawanie obrazów i inne.
+* **Datasets:** Obszerna **kolekcja datasetów** używanych do trenowania i ewaluacji modeli. Ułatwia dostęp do różnorodnych źródeł danych, umożliwiając użytkownikom znalezienie i wykorzystanie danych w konkretnych projektach machine learning.
+* **Spaces:** Platforma do hostowania i udostępniania **interaktywnych aplikacji machine learning** oraz demonstracji. Pozwala developerom **prezentować** działanie modeli, tworzyć przyjazne interfejsy i współpracować z innymi poprzez udostępnianie działających demonstracji.
 
 ## [**TensorFlow Hub**](https://www.tensorflow.org/hub) **&** [**Kaggle**](https://www.kaggle.com/)
 
-**TensorFlow Hub** to kompleksowe repozytorium wielokrotnego użytku modułów machine learning opracowanych przez Google. Koncentruje się na ułatwianiu udostępniania i wdrażania modeli machine learning, szczególnie tych zbudowanych przy użyciu TensorFlow.
+**TensorFlow Hub** to repozytorium i biblioteka wielokrotnego użytku dla wytrenowanych komponentów modeli, zwłaszcza modułów wykorzystywanych przez TensorFlow/Keras. **Kaggle** osobno udostępnia notebooki, datasety, competitions i modele.<sup>[[7]](#references)[[9]](#references)</sup>
 
-* **Modules:** Obszerna kolekcja pre-trained modeli i komponentów modeli, w której użytkownicy mogą przeglądać, pobierać i integrować moduły do zadań takich jak klasyfikacja obrazów, text embedding i wiele innych.
-* **Tutorials:** Instrukcje i przykłady krok po kroku pomagające użytkownikom zrozumieć, jak implementować i dostrajać modele przy użyciu TensorFlow Hub.
-* **Documentation:** Kompleksowe instrukcje i referencje API pomagające developerom skutecznie korzystać z zasobów repozytorium.
+* **Modules:** Obszerna kolekcja wstępnie wytrenowanych modeli i komponentów modeli, w której użytkownicy mogą przeglądać, pobierać i integrować moduły do zadań takich jak klasyfikacja obrazów, embedding tekstu i inne.
+* **Tutorials:** Przewodniki i przykłady krok po kroku pomagające użytkownikom implementować i dostrajać modele z wykorzystaniem TensorFlow Hub.
+* **Documentation:** Kompleksowe przewodniki i referencje API pomagające developerom skutecznie korzystać z zasobów repozytorium.
 
 ## [**Replicate**](https://replicate.com/home)
 
-**Replicate** to platforma umożliwiająca developerom uruchamianie modeli machine learning w chmurze za pośrednictwem prostego API. Koncentruje się na zapewnieniu łatwego dostępu do modeli ML i możliwości ich wdrażania bez konieczności rozbudowanej konfiguracji infrastruktury.
+**Replicate** to hostowana platforma do uruchamiania spakowanych modeli machine learning za pośrednictwem interfejsu webowego lub API.<sup>[[8]](#references)</sup>
 
-* **Models:** Repozytorium modeli machine learning współtworzonych przez społeczność, które użytkownicy mogą przeglądać, testować i integrować ze swoimi aplikacjami przy minimalnym nakładzie pracy.
-* **API Access:** Proste API do uruchamiania modeli, umożliwiające developerom łatwe wdrażanie i skalowanie modeli we własnych aplikacjach.
+* **Models:** Repozytorium modeli machine learning udostępnionych przez społeczność, które użytkownicy mogą przeglądać, wypróbowywać i integrować ze swoimi aplikacjami przy minimalnym wysiłku.
+* **API access:** API umożliwiające wywoływanie modeli z aplikacji bez obsługi znajdującej się pod spodem infrastruktury inference.
 
+## References
+
+- [1] [Hugging Face Transformers](https://github.com/huggingface/transformers)
+- [2] [LangChain](https://github.com/langchain-ai/langchain)
+- [3] [LitGPT](https://github.com/Lightning-AI/litgpt)
+- [4] [LitServe](https://github.com/Lightning-AI/LitServe)
+- [5] [Axolotl](https://github.com/axolotl-ai-cloud/axolotl)
+- [6] [Dokumentacja Hugging Face Hub](https://huggingface.co/docs/hub/index)
+- [7] [TensorFlow Hub](https://www.tensorflow.org/hub)
+- [8] [Dokumentacja Replicate](https://replicate.com/docs)
+- [9] [Dokumentacja Kaggle](https://www.kaggle.com/docs)
 {{#include ../banners/hacktricks-training.md}}
