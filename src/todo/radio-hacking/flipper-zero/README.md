@@ -2,17 +2,21 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Uz [**Flipper Zero**](https://flipperzero.one/) možete:
+Flipper Zero je prenosivi hardverski multitool koji podržava sledeće mogućnosti:<sup>[[1]](#references)</sup>
 
-- **Slušati/snimati/ponavljati radio-frekvencije:** [**Sub-GHz**](fz-sub-ghz.md)
-- **Čitati/snimati/emulirati NFC kartice:** [**NFC**](fz-nfc.md)
-- **Čitati/snimati/emulirati tagove od 125 kHz:** [**125kHz RFID**](fz-125khz-rfid.md)
-- **Čitati/snimati/slati infracrvene signale:** [**Infrared**](fz-infrared.md)
-- **Čitati/snimati/emulirati iButtons:** [**iButton**](../ibutton.md)
-- **Koristiti ga kao Bad USB**
-- **Koristiti ga kao security key (U2F)**
-- **Igrati Snake**
+- **Prijem, snimanje i reprodukcija podržanih radio-signala:** [**Sub-GHz**](fz-sub-ghz.md)
+- **Čitanje, snimanje i emulacija podržanih NFC kartica:** [**NFC**](fz-nfc.md)
+- **Čitanje, snimanje i emulacija podržanih tagova od 125 kHz:** [**125 kHz RFID**](fz-125khz-rfid.md)
+- **Čitanje, snimanje i emitovanje infracrvenih signala:** [**Infracrveno**](fz-infrared.md)
+- **Čitanje, snimanje i emulacija podržanih iButton uređaja:** [**iButton**](../ibutton.md)
+- **Delovanje kao BadUSB uređaj**
+- **Delovanje kao U2F security key**
+- **Pokretanje aplikacija i igara kao što je Snake**
 
-**Ostali Flipper Zero resursi nalaze se na** [**https://github.com/djsime1/awesome-flipperzer**](https://github.com/djsime1/awesome-flipperzero)
+Za firmware, aplikacije, baze podataka i druge resurse koje održava zajednica pogledajte kolekciju Awesome Flipper Zero.<sup>[[2]](#references)</sup>
 
+## References
+
+- [1] [Flipper Zero - Zvanični pregled proizvoda](https://flipper.net/)
+- [2] [GitHub - Awesome Flipper Zero](https://github.com/djsime1/awesome-flipperzero)
 {{#include ../../../banners/hacktricks-training.md}}

@@ -2,20 +2,24 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Osnovni Payloads
+## Intruder payload types
 
-- **Simple List:** Samo lista koja sadrži jednu stavku u svakom redu
-- **Runtime File:** Lista koja se čita tokom izvršavanja (ne učitava se u memoriju). Za podršku velikim listama.
-- **Case Modification:** Primena izmena na listu stringova (bez izmena, mala slova, VELIKA SLOVA, Proper name - prvo slovo veliko, a ostatak mala slova-, Proper Name -prvo slovo veliko, a ostatak ostaje isti-.
-- **Numbers:** Generisanje brojeva od X do Y koristeći korak Z ili nasumično.
-- **Brute Forcer:** Skup karaktera, min. i maks. dužina.
+- **Jednostavna lista:** Koristi konfigurisanu listu stringova kao payloads.
+- **Runtime file:** Čita jedan payload po liniji tokom runtime-a. Ovo je korisno za velike liste jer Burp ne učitava celu datoteku u memoriju.
+- **Case modification:** Menja velika i mala slova ulaznog stringa, na primer u mala slova, velika slova, oblik rečenice ili oblik naslova.
+- **Numbers:** Generiše sekvencijalne ili nasumične brojeve unutar konfigurisanog opsega.
+- **Brute forcer:** Generiše svaku permutaciju za izabrani skup karaktera i minimalnu/maksimalnu dužinu.<sup>[[1]](#references)</sup>
 
-[https://github.com/0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator) : Payload za izvršavanje komandi i preuzimanje izlaza putem DNS zahteva ka burpcollab.
+## Extensions and companion tools
 
-{{#ref}}
-https://medium.com/@ArtsSEC/burp-suite-exporter-462531be24e
-{{#endref}}
+- **Collabfiltrator** generiše payloads koji izvršavaju komande i exfiltriraju njihov izlaz kroz DNS upite ka Burp Collaborator-u.<sup>[[2]](#references)</sup>
+- **Burp Suite Exporter** izvozi Burp nalaze za upotrebu u drugim reporting workflow-ima.<sup>[[3]](#references)</sup>
+- **HTTP Script Generator** pretvara HTTP zahteve u skripte na nekoliko jezika.<sup>[[4]](#references)</sup>
 
-[https://github.com/h3xstream/http-script-generator](https://github.com/h3xstream/http-script-generator)
+## References
 
+- [1] [PortSwigger dokumentacija - Burp Intruder tipovi payload-a](https://portswigger.net/burp/documentation/desktop/tools/intruder/configure-attack/payload-types)
+- [2] [GitHub - 0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator)
+- [3] [ArtsSEC - Burp Suite Exporter](https://medium.com/@ArtsSEC/burp-suite-exporter-462531be24e)
+- [4] [GitHub - h3xstream/http-script-generator](https://github.com/h3xstream/http-script-generator)
 {{#include ../banners/hacktricks-training.md}}

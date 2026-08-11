@@ -4,19 +4,22 @@
 
 ## Osnovne informacije
 
-**Apple Events** su funkcija u Apple-ovom macOS-u koja aplikacijama omogućava međusobnu komunikaciju. Deo su **Apple Event Manager-a**, komponente macOS operativnog sistema odgovorne za upravljanje međuprocesnom komunikacijom. Ovaj sistem omogućava jednoj aplikaciji da pošalje poruku drugoj aplikaciji i zatraži od nje da izvrši određenu operaciju, kao što je otvaranje datoteke, preuzimanje podataka ili izvršavanje komande.
+**Apple events** su strukturirane međuprocesne poruke koje aplikacije koriste za zahtevanje operacija ili podataka od drugih aplikacija. **Apple Event Manager** obezbeđuje API-je za kreiranje, slanje, primanje i odgovaranje na ove poruke.<sup>[[1]](#references)</sup>
 
-Glavni daemon je `/System/Library/CoreServices/appleeventsd`, koji registruje servis `com.apple.coreservices.appleevents`.
+Na macOS-u je glavni broker `/System/Library/CoreServices/appleeventsd`, koji registruje `com.apple.coreservices.appleevents` Mach servis. Aplikacije koje primaju događaje registruju Apple-event Mach port kod ovog servisa; pošiljaoci preko njega dobijaju odredišni port.<sup>[[3]](#references)</sup>
 
-Svaka aplikacija koja može da prima events proverava se kod ovog daemon-a i prosleđuje svoj Apple Event Mach Port. Kada aplikacija želi da joj pošalje event, zatražiće ovaj port od daemon-a.
-
-Sandboxed aplikacijama su potrebne privilegije kao što su `allow appleevent-send` i `(allow mach-lookup (global-name "com.apple.coreservices.appleevents))` kako bi mogle da šalju events. Imajte na umu da entitlements kao što je `com.apple.security.temporary-exception.apple-events` mogu ograničiti ko ima pristup slanju events, za šta će biti potrebni entitlements kao što je `com.apple.private.appleevents`.
+Sandbox pravila i entitlements ograničavaju ovu komunikaciju. sandbox profil zahteva dozvolu za slanje Apple events i pronalaženje brokerovog Mach servisa. `com.apple.security.temporary-exception.apple-events` entitlement može dodatno ograničiti sandboxed aplikaciju na imenovane destination bundle identifiers.<sup>[[2]](#references)</sup>
 
 > [!TIP]
-> Moguće je koristiti env promenljivu **`AEDebugSends`** za beleženje informacija o poslatoj poruci:
+> Postavite promenljivu okruženja **`AEDebugSends`** da biste beležili informacije o Apple events koje proces šalje:<sup>[[3]](#references)</sup>
 >
 > ```bash
 > AEDebugSends=1 osascript -e 'tell application "iTerm" to activate'
 > ```
 
+## References
+
+- [1] [Apple Developer Documentation - Apple Event Manager](https://developer.apple.com/documentation/applicationservices/apple_event_manager)
+- [2] [Apple Developer Documentation - App Sandbox Temporary Exception Entitlements](https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/EntitlementKeyReference/Chapters/AppSandboxTemporaryExceptionEntitlements.html)
+- [3] [Mac OS X and iOS Internals - Apple-event debug environment variables](https://www.newosxbook.com/MOXiI.pdf)
 {{#include ../../../../banners/hacktricks-training.md}}

@@ -1,25 +1,30 @@
-# Injekcija u Ruby aplikacije na macOS-u
+# Injekcija Ruby aplikacija
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## RUBYOPT
 
-Korišćenjem ove env promenljive moguće je **dodati nove parametre** komandi **ruby** svaki put kada se izvrši. Iako parametar **`-e`** ne može da se koristi za navođenje Ruby koda koji treba izvršiti, moguće je koristiti parametre **`-I`** i **`-r`** za dodavanje nove fascikle putanji biblioteka koje treba učitati, a zatim **navesti biblioteku za učitavanje**.
+Ruby parsira podržane prekidače komandne linije iz promenljive okruženja `RUBYOPT` pre pokretanja skripte. Iako Ruby tamo odbacuje neke prekidače, `-I` može dodati direktorijum za pretragu biblioteka, a `-r` može zahtevati biblioteku. Proces koji pokreće Ruby sa promenljivama okruženja pod kontrolom napadača zato može biti primoran da učita Ruby kod pod kontrolom napadača.<sup>[[1]](#references)</sup>
 
-Kreirajte biblioteku **`inject.rb`** u fascikli **`/tmp`**:
+Kreirajte `/tmp/inject.rb`:
 ```ruby:inject.rb
 puts `whoami`
 ```
-Kreirajte bilo gde Ruby skriptu kao što je:
+Kreirajte bezopasnu Ruby skriptu kao što je `hello.rb`:
 ```ruby:hello.rb
 puts 'Hello, World!'
 ```
-Zatim navedite proizvoljnu ruby skriptu da ga učita pomoću:
+Pokrenite ga sa kontrolisanom vrednošću `RUBYOPT`:
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby hello.rb
 ```
-Zanimljiva činjenica, radi čak i sa parametrom **`--disable-rubyopt`**:
+Da biste onemogućili ovo ponašanje, prosledite `--disable=rubyopt` (ili `--disable-rubyopt`) **pre** imena skripte:<sup>[[1]](#references)</sup>
 ```bash
-RUBYOPT="-I/tmp -rinject" ruby hello.rb --disable-rubyopt
+RUBYOPT="-I/tmp -rinject" ruby --disable=rubyopt hello.rb
 ```
+Opcija napisana nakon `hello.rb` prosleđuje se skripti u `ARGV`; ona ne onemogućava prethodnu Ruby obradu promenljive `RUBYOPT`.<sup>[[1]](#references)</sup>
+
+## References
+
+- [1] [Ruby dokumentacija - Ruby opcije komandne linije](https://ruby-doc.org/3.4/ruby/options_md.html)
 {{#include ../../../banners/hacktricks-training.md}}

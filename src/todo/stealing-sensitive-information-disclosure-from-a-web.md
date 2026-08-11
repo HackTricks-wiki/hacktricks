@@ -1,17 +1,15 @@
-# Krađa osetljivih informacija iz Disclosure-a na Webu
+# Krađa osetljivih informacija sa web stranice
 
 {{#include ../banners/hacktricks-training.md}}
 
-Ako u nekom trenutku pronađete **web stranicu koja prikazuje osetljive informacije na osnovu vaše sesije**: Možda odražava cookies, ili ispisuje podatke o karticama ili neke druge osetljive informacije, možete pokušati da ih ukradete.\
-Ovde su predstavljeni glavni načini na koje to možete pokušati:
+Ako **web stranica prikazuje osetljive informacije na osnovu trenutne sesije**—kao što su cookies, podaci o nalogu ili podaci kreditne kartice—napadač može pokušati da ih eksfiltrira. Glavne tehnike uključuju:
 
-- [**CORS bypass**](../pentesting-web/cors-bypass.md): Ako možete zaobići CORS headers, moći ćete da ukradete informacije izvršavanjem Ajax zahteva za malicious stranicu.
-- [**XSS**](../pentesting-web/xss-cross-site-scripting/index.html): Ako pronađete XSS vulnerability na stranici, možda ćete moći da je iskoristite za krađu informacija.
-- [**Danging Markup**](../pentesting-web/dangling-markup-html-scriptless-injection/index.html): Ako ne možete da ubacite XSS tags, možda ćete i dalje moći da ukradete informacije koristeći druge uobičajene HTML tags.
-- [**Clickjaking**](../pentesting-web/clickjacking.md): Ako ne postoji zaštita od ovog attack-a, možda ćete moći da prevarite korisnika da vam pošalje osetljive podatke (primer je dostupan [ovde](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)).<sup>[[1]](#references)</sup>
+- [**CORS bypass**](../pentesting-web/cors-bypass.md): CORS misconfiguration može omogućiti zlonamernom originu da čita osetljive odgovore putem cross-origin zahteva.
+- [**XSS**](../pentesting-web/xss-cross-site-scripting/index.html): XSS ranjivost u ciljnom originu može omogućiti ubačenom JavaScript-u da pročita i eksfiltrira informacije.
+- [**Dangling markup**](../pentesting-web/dangling-markup-html-scriptless-injection/index.html): Kada injection skripte nije dostupan, ubačeni HTML elementi i dalje mogu uhvatiti osetljiv sadržaj.
+- [**Clickjacking**](../pentesting-web/clickjacking.md): Ako zaštite od framing-a nisu prisutne, napadač može prevariti korisnika da stupi u interakciju sa osetljivom stranicom. Povezana studija slučaja pokazuje ovu tehniku.<sup>[[1]](#references)</sup>
 
-## Reference
+## References
 
-- [1] [Apache example servlet leads to Information Disclosure](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)
-
+- [1] [Apache primer servlet-a dovodi do otkrivanja informacija](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)
 {{#include ../banners/hacktricks-training.md}}

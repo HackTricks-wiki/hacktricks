@@ -1,18 +1,20 @@
-# Word Macros
+# Word makroi
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Neupotrebljivi kod
+## Junk Code
 
-Veoma je uobičajeno pronaći **neupotrebljivi kod koji se nikada ne koristi** kako bi se otežala analiza makroa.\
-Na primer, na sledećoj slici možete videti da se koristi `If` za izvršavanje neupotrebljivog i beskorisnog koda, iako taj uslov nikada neće biti ispunjen.
+Makroi mogu sadržati **nedostižan ili nerelevantan kod** čija je svrha da uspori analizu. Identifikujte konstantne uslove i pratite dostižno ponašanje pre nego što utrošite vreme na reverse engineering grane. Primer u nastavku koristi `If` uslov koji nikada ne može biti ispunjen kako bi sakrio junk code.
 
-![Word Macros - Neupotrebljivi kod: Na primer, na sledećoj slici možete videti da se koristi If za izvršavanje neupotrebljivog i beskorisnog koda, iako taj uslov nikada neće biti ispunjen](<../images/image (369).png>)
+![Word makro koji sadrži nedostižnu uslovnu granu sa junk code-om](<../images/image (369).png>)
 
-### Forme makroa
+## Macro Forms
 
-Korišćenjem funkcije **GetObject** moguće je dobiti podatke iz formi makroa. Ovo može otežati analizu. U nastavku je prikazana forma makroa koja se koristi za **skrivanje podataka unutar tekstualnih polja** (tekstualno polje može skrivati druga tekstualna polja):
+VBA UserForms mogu čuvati podatke u kontrolama, kao što su tekstualna polja. Pošto forme, okviri i stranice mogu izlagati kolekciju `Controls`, analitičari bi trebalo da nabroje celu hijerarhiju kontrola, umesto da se oslanjaju samo na ono što forma prikazuje. Primer u nastavku čuva skrivene podatke u preklapajućim tekstualnim poljima.<sup>[[1]](#references)</sup>
 
-![Neupotrebljivi kod - Forme makroa: Korišćenjem funkcije GetObject moguće je dobiti podatke iz formi makroa. Ovo može otežati analizu. U nastavku je prikazana fotografija...](<../images/image (344).png>)
+![Macro UserForm sa podacima skrivenim u preklapajućim tekstualnim poljima](<../images/image (344).png>)
 
+## References
+
+- [1] [Microsoft Learn - Kolekcije, kontrole i objekti (Microsoft Forms)](https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/objects-microsoft-forms)
 {{#include ../banners/hacktricks-training.md}}

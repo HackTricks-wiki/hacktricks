@@ -2,28 +2,23 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Stranice sa raznim sadržajem koje se često pojavljuju u crypto izazovima, ali se ne uklapaju uredno na druga mesta.
+Ovaj odeljak prikuplja tehnike koje se pojavljuju u kriptografskim izazovima, ali se ne uklapaju uredno ni u jednu drugu kategoriju.
 
 ## Ezoterični jezici
 
 ### Tehnika
 
-Koristite ovo kada je crypto zadatak zapravo: pokrenite esolang program, a zatim dekodirajte njegov izlaz.
+Koristite ovaj postupak kada izazov zahteva pokretanje programa napisanog na ezoteričnom jeziku i dekodiranje njegovog izlaza.
 
-Ako vam izazov daje kod koji ne izgleda kao kod standardnog jezika:
+Ako izazov sadrži kod koji ne izgleda kao kod standardnog jezika:
 
-- Identifikujte esolang (pretražite Google koristeći karakterističan token).
+- Identifikujte jezik pretragom karakterističnog tokena ili niza instrukcija.
 - Koristite online interpreter ili Docker image.
-- Ako je izlaz neobičan, nakon izvršavanja potražite višeslojno encoding/compression.
+- Ako je izlaz neobičan, nakon izvršavanja potražite višeslojno kodiranje/kompresiju.
 
-Dobra početna lista:<sup>[[1]](#references)</sup>
+Korisni indeks jezika je Esolang wiki.<sup>[[1]](#references)</sup>
 
-{{#ref}}
-https://esolangs.org/wiki/Main_Page
-{{#endref}}
+## References
 
-## Reference
-
-- [1] [Esolang, wiki o ezoteričnim programskim jezicima](https://esolangs.org/wiki/Main_Page)
-
+- [1] [Esolang, wiki ezoteričnih programskih jezika](https://esolangs.org/wiki/Main_Page)
 {{#include ../../banners/hacktricks-training.md}}

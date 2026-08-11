@@ -2,21 +2,27 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Preuzmite besplatnu verziju aplikacije sa [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/), pokrenite je i wrap-ujte „malicious“ binary u njoj.\
-Imajte na umu da možete wrap-ovati "**.bat**" ako **samo** želite da **izvršite** **command lines** (umesto cmd.exe izaberite .bat fajl)
+MSI Wrapper može da upakuje izvršni fajl ili skriptu kao Windows Installer (`.msi`) fajl. Preuzmite i pokrenite besplatno izdanje, a zatim izaberite izvršni fajl koji treba upakovati. Da biste pokrenuli niz komandi, izaberite `.bat` fajl kao ulaz, umesto da pakujete `cmd.exe`.<sup>[[1]](#references)</sup>
 
-![MSI Wrapper: Imajte na umu da možete wrap-ovati " .bat " ako samo želite da izvršite command lines (umesto cmd.exe izaberite .bat fajl)](<../../images/image (417).png>)
+![Izbor izvornog izvršnog fajla ili batch skripte u MSI Wrapper-u](<../../images/image (417).png>)
 
-A ovo je najvažniji deo konfiguracije:
+Pažljivo konfigurišite kontekst izvršavanja i ostala svojstva installer-a:
 
-![MSI Wrapper: A ovo je najvažniji deo konfiguracije](<../../images/image (312).png>)
+![Konfigurisanje ID-ja aplikacije i bezbednosnog konteksta u MSI Wrapper-u](<../../images/image (312).png>)
 
-![MSI Wrapper: A ovo je najvažniji deo konfiguracije](<../../images/image (346).png>)
+![Konfigurisanje svojstava installer-a u MSI Wrapper-u](<../../images/image (346).png>)
 
-![MSI Wrapper: A ovo je najvažniji deo konfiguracije](<../../images/image (1072).png>)
+![Pregled postavki izgradnje u MSI Wrapper-u](<../../images/image (1072).png>)
 
-(Imajte na umu da ćete, ako pokušate da upakujete sopstveni binary, moći da izmenite ove vrednosti)
+Ove vrednosti mogu da se promene prilikom pakovanja prilagođenog binarnog fajla.
 
-Odavde samo klikćite na **next dugmad**, a zatim na poslednje **build dugme** i vaš installer/wrapper će biti generisan.
+Nastavite kroz preostale stranice čarobnjaka i izaberite **Build** da biste generisali installer.<sup>[[1]](#references)</sup>
 
+> [!WARNING]
+> Kreiranje MSI-ja samo po sebi ne dodeljuje povišene privilegije. Da li će instalacija biti pokrenuta sa povišenim privilegijama zavisi od Windows Installer politike, konteksta paketa i autorizacije korisnika. Microsoft upozorava da omogućavanje opcije `AlwaysInstallElevated` i za korisnika i za računar omogućava korisnicima koji nisu administratori da instaliraju pakete sa sistemskim privilegijama.<sup>[[2]](#references)</sup>
+
+## References
+
+- [1] [MSI Wrapper documentation - Getting started](https://www.exemsi.com/documentation/getting-started/)
+- [2] [Microsoft Learn - Installing a package with elevated privileges for a non-admin](https://learn.microsoft.com/en-us/windows/win32/msi/installing-a-package-with-elevated-privileges-for-a-non-admin)
 {{#include ../../banners/hacktricks-training.md}}
