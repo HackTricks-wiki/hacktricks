@@ -1,7 +1,5 @@
 # Nuttige Linux-opdragte
 
-{{#include ../../banners/hacktricks-training.md}}
-
 ## Algemene Bash
 ```bash
 #Exfiltration using Base64
@@ -303,7 +301,7 @@ iptables -P OUTPUT ACCEPT
 ```
 ## eBPF Telemetrie & Rootkit-jag
 
-Moderne rootkits (TripleCross, BPFDoor-variante, ens.) bly toenemend as versteekte eBPF-programme voortbestaan. Stel ’n baseline vir jou vloot op met `bpftool`/`eBPFmon` sodat jy ongetekende programme, onverwagte cgroup-hooks of kwaadwillige map-inhoud kan identifiseer voordat jy hulle losmaak.<sup>[[1]](#references)</sup>
+Rootkit-navorsing het beide eBPF-gebaseerde implants soos TripleCross en BPF-gebaseerde backdoors soos BPFDoor-variante gedemonstreer. Behandel onverwagte BPF-programme, attachments of maps as ondersoekleidrade eerder as bewys van compromise.<sup>[[3]](#references)[[4]](#references)</sup> Stel ’n basislyn vir gemagtigde stelsels met `bpftool` of `eBPFmon` op: `bpftool` kan programme en maps opsom, programinstruksies dump en ondersteunde features navraag doen, terwyl eBPFmon daardie inligting in ’n TUI vertoon.<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -321,11 +319,11 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-Vergelyk die bpftool-uitset met verwagte NIC/cgroup-aanhegsels; ’n skielike `xdp`- of `kprobe`-program wat deur ’n ongekeurde PID besit word, is ’n sterk aanduiding van ’n ingespuitte eBPF-payload.
+Korrelleer die `bpftool`-uitset met verwagte NIC/cgroup-koppelings; ’n skielike `xdp`- of `kprobe`-program wat deur ’n niegoedgekeurde PID besit word, is ’n ondersoekleidraad, nie afdoende bewys van ’n geïnjekteerde payload nie.<sup>[[5]](#references)[[6]](#references)</sup>
 
-## Journald-voorvalondersoek
+## Journald-insidenttriage
 
-systemd-journald hou gestruktureerde metadata, sodat jy volgens boot, erns, eenheid of UID kan pivot sonder om aan `/var/log/*` te raak. Kombineer filters met relatiewe tydstempels om aanvalvensters te isoleer of logmanipulasie vinnig te bewys.<sup>[[2]](#references)</sup>
+`journalctl` lees gestruktureerde inskrywings vanaf `systemd-journald` en ondersteun filtering volgens boot, prioriteit, eenheid, UID en relatiewe tyd. Kombineer daardie filters met JSON-uitset wanneer jy bewyse moet bewaar of vergelyk; filtering alleen bewys nie dat logs nie gemanipuleer is nie.<sup>[[2]](#references)[[7]](#references)</sup>
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -336,11 +334,15 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-Voeg `--grep 'Invalid user' --case-sensitive` of `-k` (slegs kernel ring buffer) by wanneer jy strenger filters nodig het, en onthou dat `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` en `_TRANSPORT`-selektors saamgestapel word vir multi-tenant-ondersoeke.
+Voeg `--grep 'Invalid user' --case-sensitive` of `-k` (slegs kernel-boodskappe) by wanneer jy strenger filters nodig het, en onthou dat `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` en `_TRANSPORT`-selectors gekombineer kan word vir geteikende soektogte.<sup>[[7]](#references)</sup>
 
-## Verwysings
+## References
 
-- [1] [eBPFmon: ’n Nuwe hulpmiddel om eBPF-toepassings te verken en daarmee te interaksieer](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [1] [eBPFmon: ’n Nuwe tool vir die verkenning van en interaksie met eBPF-toepassings](https://redcanary.com/blog/linux-security/ebpfmon/)
 - [2] [Hoe om die journalctl-opdrag te gebruik om Linux-logs te bekyk](https://www.hostinger.com/tutorials/journalctl-command)
-
+- [3] [h3xduck/TripleCross](https://github.com/h3xduck/TripleCross)
+- [4] [Rapid7 Labs: BPFdoor in telekommunikasienetwerke](https://www.rapid7.com/blog/post/tr-bpfdoor-telecom-networks-sleeper-cells-threat-research-report/)
+- [5] [BPF-dokumentasie — Die Linux Kernel-dokumentasie](https://docs.kernel.org/bpf/)
+- [6] [libbpf/bpftool](https://github.com/libbpf/bpftool)
+- [7] [journalctl(1) — Linux-manualblad](https://man7.org/linux/man-pages/man1/journalctl.1.html)
 {{#include ../../banners/hacktricks-training.md}}

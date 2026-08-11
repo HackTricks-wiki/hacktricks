@@ -1,42 +1,40 @@
-# Linux ptrace exit-race `pidfd_getfd()` FD-diefstal
+# Linux ptrace exit-race `pidfd_getfd()` FD theft
 
-{{#include ../../../banners/hacktricks-training.md}}
+'n Nuttige **Linux kernel privesc-patroon** is om 'n **ptrace authorization bug** in **file descriptor theft** uit 'n geprivilegeerde proses te omskep.
 
-'n Nuttige **Linux kernel privesc-patroon** is om 'n **ptrace authorization bug** in **file descriptor theft** vanaf 'n bevoorregte proses te omskep.
+In die Qualys `__ptrace_may_access()`-gevallestudie (CVE-2026-46333) jaag die aanvaller 'n **geprivilegeerde proses wat besig is om te beëindig of credentials te laat vaar** en gebruik `pidfd_getfd()` om 'n FD na die aanvallerproses te dupliseer.<sup>[[1]](#references)[[2]](#references)</sup>
 
-In die Qualys `__ptrace_may_access()`-gevallestudie (CVE-2026-46333) jaag die aanvaller 'n **bevoorregte proses wat besig is om te termineer of credentials te laat vaar** en gebruik `pidfd_getfd()` om 'n FD na die aanvaller se proses te dupliseer.<sup>[[1]](#references)[[2]](#references)</sup>
+## Core idea
 
-## Kernidee
+`pidfd_getfd()` dupliseer 'n file descriptor uit 'n ander proses, maar kontroleer eers ptrace-styl-permissies teenoor die teiken.<sup>[[3]](#references)</sup> As daardie authorization verkeerdelik tydens 'n **teardown window** toegestaan word, kan 'n onbevoorregte aanvaller die volgende kopieer:
 
-`pidfd_getfd()` dupliseer 'n file descriptor vanaf 'n ander proses, maar kontroleer eers ptrace-styl toestemmings teenoor die teiken. As daardie authorization verkeerdelik gedurende 'n **teardown window** toegestaan word, kan 'n unprivileged aanvaller die volgende kopieer:
+- FDs vir **sensitiewe lêers** wat reeds deur 'n geprivilegeerde helper oopgemaak is
+- FDs vir **geauthentiseerde IPC-kanale** wat reeds as root geautoriseer is
 
-- FDs vir **sensitive files** wat reeds deur 'n bevoorregte helper oopgemaak is
-- FDs vir **authenticated IPC channels** wat reeds as root geauthorizeer is
+Dit omskep 'n kernel-kant-authorization-bug in 'n baie praktiese userspace-primitive.<sup>[[1]](#references)</sup>
 
-Dit omskep 'n kernel-side authorization bug in 'n baie praktiese userspace primitive.<sup>[[1]](#references)</sup>
+## Why the primitive is dangerous
 
-## Waarom die primitive gevaarlik is
-
-Die aanval benodig **nie** 'n bug in die bevoorregte helper self nie. Die helper hoef slegs tydelik iets waardevols te hou:
+Die aanval benodig **nie 'n bug in die geprivilegeerde helper self nie**. Die helper hoef slegs tydelik iets waardevols te hou:
 
 - `/etc/shadow`
 - `/etc/ssh/*_key`
-- 'n bevoorregte D-Bus / systemd-verbinding
-- enige ander reeds-oopgemaakte secret of authorized channel
+- 'n geprivilegeerde D-Bus / systemd-verbinding
+- enige ander reeds-oop geheim of geautoriseerde kanaal
 
-Sodra dit in die aanvaller se proses gedupliseer is, pas die kernel operasies op die **stolen FD** toe, nie op die oorspronklike pathname of op 'n nuwe authentication flow nie.<sup>[[1]](#references)</sup>
+Sodra dit na die aanvallerproses gedupliseer is, verwys die duplikaat na dieselfde oop lêerbeskrywing, sodat daaropvolgende leesaksies of IPC-versoeke die reeds-oop FD gebruik eerder as om die oorspronklike pathname weer oop te maak of 'n nuwe authentication flow te begin.<sup>[[2]](#references)[[3]](#references)</sup>
 
-## Exploitation-patroon
+## Exploitation pattern
 
-1. Identifiseer 'n **setuid / setgid / file-capability binary** of **root daemon** wat sensitive files oopmaak of nuttige IPC-connections behou.
-2. Verkry 'n verhouding wat aan die relevante ptrace policy checks vir die teikenpad voldoen (byvoorbeeld om die **parent** van 'n spawned privileged child onder permissive YAMA-settings te wees).
-3. Jaag die proses terwyl dit **exiting** is, **credentials laat vaar**, of andersins 'n toestand binnegaan waar ptrace access nie meer beskikbaar behoort te wees nie.
-4. Gebruik `pidfd_open()` + `pidfd_getfd()` om die target FD gedurende die nou authorization window te dupliseer.
-5. Hergebruik die stolen FD vanuit die unprivileged context:
-- `read()` secrets vanaf 'n bevoorregte file descriptor
-- stuur requests oor 'n stolen authenticated IPC channel om **root-side actions** te verkry<sup>[[1]](#references)</sup>
+1. Identifiseer 'n **setuid / setgid / file-capability binary** of **root daemon** wat sensitiewe lêers oopmaak of nuttige IPC-verbindings behou.<sup>[[2]](#references)</sup>
+2. Verkry 'n verhouding wat aan die relevante ptrace-beleidskontroles vir die teikenpad voldoen (byvoorbeeld om die **ouer** van 'n voortgebragte geprivilegeerde child te wees onder permissiewe YAMA-instellings).<sup>[[2]](#references)[[4]](#references)</sup>
+3. Jaag die proses terwyl dit **beëindig**, **credentials laat vaar**, of andersins 'n toestand betree waarin ptrace-toegang nie meer beskikbaar behoort te wees nie.<sup>[[2]](#references)</sup>
+4. Gebruik `pidfd_open()` + `pidfd_getfd()` om die teiken-FD gedurende die beperkte authorization window te dupliseer.<sup>[[2]](#references)[[3]](#references)[[5]](#references)</sup>
+5. Hergebruik die gesteelde FD vanuit die onbevoorregte konteks.<sup>[[2]](#references)</sup>
+- `read()` geheime vanaf 'n geprivilegeerde file descriptor
+- stuur versoeke oor 'n gesteelde geauthentiseerde IPC-kanaal om **root-side aksies** te verkry
 
-Minimal primitive-vorm:<sup>[[1]](#references)[[3]](#references)</sup>
+Minimale primitive-vorm.<sup>[[1]](#references)[[3]](#references)[[5]](#references)</sup>
 ```c
 int p = pidfd_open(victim_pid, 0);
 int stolen = pidfd_getfd(p, victim_fd, 0);
@@ -44,48 +42,48 @@ int stolen = pidfd_getfd(p, victim_fd, 0);
 ```
 ## Praktiese teikens om te oudit
 
-Prioritiseer binaries en daemons wat, selfs kortliks, een van die volgende doen:<sup>[[1]](#references)</sup>
+Prioritiseer binaries en daemons wat, selfs net kortliks, een van hierdie dinge doen:<sup>[[1]](#references)[[2]](#references)</sup>
 
-- root-only-lêers oopmaak voordat privilege transitions voltooi is
-- aan die **system bus** koppel en ’n reeds-geauthoriseerde kanaal behou
-- gepriviligeerde FDs oor helper boundaries stuur
-- security-sensitive werk tydens `do_exit()`-aangrensende teardown uitvoer
+- root-only lêers oopmaak voordat privilege-oorgange voltooi is
+- aan die **system bus** koppel en ’n reeds-gemagtigde kanaal behou
+- privileged FDs oor helper-grense heen deurgee
+- sekuriteitsensitiewe werk tydens `do_exit()`-aangrensende afbreek uitvoer
 
-Goeie kandidate om te ondersoek:<sup>[[1]](#references)</sup>
+Goeie teikens om te ondersoek:<sup>[[1]](#references)</sup>
 
-- password- / account management helpers
-- SSH helpers
-- PolicyKit- / D-Bus-gemedieerde helpers
-- root desktop daemons wat D-Bus-metodes blootstel
+- wagwoord- / rekeningbestuurhelpers
+- SSH-helpers
+- PolicyKit / D-Bus-gemedieerde helpers
+- root-desktop-daemons wat D-Bus-metodes beskikbaar stel
 
-## YAMA as ’n exploit-gate
+## YAMA as ’n exploit-poort
 
-`kernel.yama.ptrace_scope` is ’n belangrike praktiese gate vir ptrace-family abuse:<sup>[[4]](#references)</sup>
+`kernel.yama.ptrace_scope` is ’n belangrike praktiese poort vir ptrace-familie-misbruik:<sup>[[3]](#references)[[4]](#references)</sup>
 
 - `0`: klassieke same-UID ptrace-gedrag
-- `1`: laat tipies parent -> child tracing toe, wat sommige publieke exploit-paaie bereikbaar kan hou
-- `2`: vereis `CAP_SYS_PTRACE` vir attach-style access en blokkeer onbevoegde `pidfd_getfd()` abuse in hierdie pad
-- `3`: deaktiveer ptrace attach heeltemal totdat daar herlaai word
+- `1`: laat gewoonlik ouer -> kind-tracing toe, wat sommige publieke exploit-roetes bereikbaar kan hou
+- `2`: vereis `CAP_SYS_PTRACE` vir attach-styl-toegang en blokkeer onbevoorregte `pidfd_getfd()`-misbruik in hierdie roete
+- `3`: deaktiveer ptrace attach heeltemal totdat die stelsel herlaai word
 
-Vir hierdie tegniek is `ptrace_scope=2` ’n sterk **tydelike mitigation**, omdat dit die publieke `pidfd_getfd()` exploitation path met `-EPERM` vir onbevoegde gebruikers breek.<sup>[[1]](#references)</sup>
+Vir hierdie tegniek is `ptrace_scope=2` ’n sterk **tydelike mitigering**, omdat dit die publieke `pidfd_getfd()`-exploitation-roete met `-EPERM` vir onbevoorregte gebruikers breek.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 
-## Detection / review-idees
+## Opsporings- / hersieningsidees
 
-Wanneer gepriviligeerde Linux-sagteware geoudit word, let op hierdie kombinasies:
+Wanneer bevoorregte Linux-sagteware geoudit word, soek na hierdie kombinasies:
 
-- **gepriviligeerde child process** + **attacker-controlled parent**
+- **bevoorregte child process** + **attacker-controlled parent**.<sup>[[2]](#references)[[4]](#references)</sup>
 - tydelike toegang tot **waardevolle oop lêers**
-- tydelike toegang tot **geauthentiseerde D-Bus/systemd-kanale**
-- security decisions wat **ptrace-style authorization** buite klassieke `ptrace(2)` hergebruik
-- kernel-API’s wat bestaande gepriviligeerde FDs kan **dupliseer, erf of heruitvoer**
+- tydelike toegang tot **geauthentiseerde D-Bus/systemd-kanale**.<sup>[[2]](#references)</sup>
+- sekuriteitsbesluite wat **ptrace-styl-magtiging** buite klassieke `ptrace(2)` hergebruik
+- kernel-API’s wat bestaande bevoorregte FDs kan **dupliseer, erf of weer uitvoer**
 
-Wanneer die kernel geoudit word, beskou enige pad wat **ptrace-equivalent authorization** tydens **task teardown** uitvoer as hoë risiko, veral indien sukses direkte toegang tot `task->files` of ander reeds-geauthoriseerde process resources bied.
+Wanneer die kernel geoudit word, behandel enige roete wat **ptrace-ekwivalente magtiging** tydens **task teardown** uitvoer as ’n hoë risiko, veral indien sukses direkte toegang tot `task->files` of ander reeds-gemagtigde prosesbronne bied.<sup>[[2]](#references)</sup>
 
-## Verwysings
+## References
 
-- [1] [CVE-2026-46333: Local Root Privilege Escalation and Credential Disclosure in the Linux Kernel ptrace Path (Qualys)](https://blog.qualys.com/vulnerabilities-threat-research/2026/05/20/cve-2026-46333-local-root-privilege-escalation-and-credential-disclosure-in-the-linux-kernel-ptrace-path)
+- [1] [CVE-2026-46333: Plaaslike root privilege escalation en credential disclosure in die Linux Kernel ptrace Path (Qualys)](https://blog.qualys.com/vulnerabilities-threat-research/2026/05/20/cve-2026-46333-local-root-privilege-escalation-and-credential-disclosure-in-the-linux-kernel-ptrace-path)
 - [2] [Qualys advisory TXT](https://cdn2.qualys.com/advisory/2026/05/20/cve-2026-46333-ptrace.txt)
-- [3] [pidfd_getfd(2) manual page](https://man7.org/linux/man-pages/man2/pidfd_getfd.2.html)
-- [4] [Linux kernel Yama documentation](https://www.kernel.org/doc/html/latest/admin-guide/LSM/Yama.html)
-
+- [3] [pidfd_getfd(2)-handleidingbladsy](https://man7.org/linux/man-pages/man2/pidfd_getfd.2.html)
+- [4] [Linux-kernel Yama-dokumentasie](https://www.kernel.org/doc/html/latest/admin-guide/LSM/Yama.html)
+- [5] [pidfd_open(2)-handleidingbladsy](https://man7.org/linux/man-pages/man2/pidfd_open.2.html)
 {{#include ../../../banners/hacktricks-training.md}}

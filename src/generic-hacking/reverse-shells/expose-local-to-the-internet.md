@@ -1,22 +1,20 @@
 # Stel plaaslike dienste aan die internet bloot
 
-{{#include ../../banners/hacktricks-training.md}}
-
-**Die doel van hierdie bladsy is om alternatiewe voor te stel waarmee plaaslike raw TCP-poorte en plaaslike webdienste (HTTP) TEN MINSTE aan die internet blootgestel kan word SONDER dat enigiets op die ander bediener geïnstalleer hoef te word (slegs plaaslik, indien nodig).**
+**Die doel van hierdie bladsy is om alternatiewe voor te stel wat dit ten minste moontlik maak om plaaslike rou TCP-poorte en plaaslike webwerwe (HTTP) aan die internet bloot te stel SONDER dat enigiets op die ander bediener geïnstalleer hoef te word (slegs plaaslik indien nodig).**
 
 ## **Serveo**
 
-Vanaf [https://serveo.net/](https://serveo.net/) bied dit verskeie HTTP- en port forwarding-kenmerke **gratis**.
+Serveo se dokumentasie beskryf SSH-forwarding vir HTTP-endpoints en private/openbare TCP-forwarding; om ’n nie-80/443-openbare TCP-poort aan te vra (insluitend poort 0 vir ’n ewekansige poort), vereis ’n geregistreerde gebruiker.<sup>[[1]](#references)</sup>
 ```bash
 # Get a random port from serveo.net to expose local port 4444
 ssh -R 0:localhost:4444 serveo.net
 
-# Expose a web listening in localhost:300 in a random https URL
+# Expose a web listening in localhost:3000 in a random https URL
 ssh -R 80:localhost:3000 serveo.net
 ```
 ## SocketXP
 
-Vanaf [https://www.socketxp.com/download](https://www.socketxp.com/download), maak dit moontlik om tcp en http bloot te stel:
+SocketXP se aan-die-slag-gids dokumenteer `socketxp connect tcp://localhost:22` en `socketxp connect http://localhost:8080` vir TCP- en HTTP-tunnels; die agent word eers met ’n portal token geauthentiseer.<sup>[[2]](#references)</sup>
 ```bash
 # Expose tcp port 22
 socketxp connect tcp://localhost:22
@@ -26,17 +24,17 @@ socketxp connect http://localhost:8080
 ```
 ## Ngrok
 
-Vanaf [https://ngrok.com/](https://ngrok.com/) kan jy http- en tcp-poorte blootstel:
+ngrok se CLI dokumenteer HTTP- en TCP-tunnels; sy FAQ sê dat TCP-endpunte op die gratis vlak ’n geldige betaalmetode vereis en dat die kaart nie gehef word nie.<sup>[[3]](#references)[[4]](#references)</sup>
 ```bash
-# Expose web in 3000
+# Expose a local web service on port 8000
 ngrok http 8000
 
-# Expose port in 9000 (it requires a credit card, but you won't be charged)
+# Expose a local TCP service on port 9000
 ngrok tcp 9000
 ```
 ## Telebit
 
-Vanaf [https://telebit.cloud/](https://telebit.cloud/) kan jy http- en tcp-poorte blootstel:
+Die legacy Telebit.js CLI-hulpdokumentasie dokumenteer `telebit http <port>` vir HTTPS-aanstuur en `telebit tcp <local> [remote]` vir raw TCP; beskikbaarheid hang van die implementering en relay af.<sup>[[5]](#references)</sup>
 ```bash
 # Expose web in 3000
 /Users/username/Applications/telebit/bin/telebit http 3000
@@ -46,49 +44,51 @@ Vanaf [https://telebit.cloud/](https://telebit.cloud/) kan jy http- en tcp-poort
 ```
 ## LocalXpose
 
-Vanaf [https://localxpose.io/](https://localxpose.io/) bied dit verskeie http- en port forwarding-funksies **gratis**.
+LocalXpose se huidige webwerf dokumenteer `loclx tunnel http --to 3000`, lys ondersteuning vir HTTP/TLS/TCP/UDP, en meld dat die gratis plan persoonlike/ligte kommersiële gebruik dek, terwyl TCP tunneling ’n vermoë van betaalde planne is.<sup>[[6]](#references)[[7]](#references)</sup>
 ```bash
-# Expose web in port 8989
-loclx tunnel http -t 8989
+# Expose a local web service on port 8989
+loclx tunnel http --to 8989
 
-# Expose tcp port in 4545 (requires pro)
-loclx tunnel tcp --port 4545
+# Expose a local TCP service on port 4545 (paid plan)
+loclx tunnel tcp --to 4545
 ```
 ## Expose
 
-Vanaf [https://expose.dev/](https://expose.dev/) kan jy http- en tcp-poorte blootstel:
+Expose documents `expose share` vir HTTP/HTTPS plaaslike URL's en 'n slegs-PRO `expose share-port`-opdrag vir TCP-poorte.<sup>[[8]](#references)[[9]](#references)</sup>
 ```bash
-# Expose web in 3000
+# Expose a local HTTP service on port 3000
 ./expose share http://localhost:3000
 
-# Expose tcp port in port 4444 (REQUIRES PREMIUM)
+# Expose a local TCP service on port 4444 (PRO)
 ./expose share-port 4444
 ```
 ## Localtunnel
 
-Vanaf [https://github.com/localtunnel/localtunnel](https://github.com/localtunnel/localtunnel) laat dit jou toe om http gratis bloot te stel:
+Die amptelike localtunnel-bewaarplek beskryf hoe localhost vir testing blootgestel word en dokumenteer die NPX-opdrag hieronder.<sup>[[10]](#references)</sup>
 ```bash
 # Expose web in port 8000
 npx localtunnel --port 8000
 ```
 ## Cloudflare Tunnel (cloudflared)
 
-Cloudflare se `cloudflared` CLI kan ongeauthentiseerde "Quick"-tunnels skep vir vinnige demos, of benoemde tunnels wat aan jou eie domein/gasheername gekoppel is. Dit ondersteun HTTP(S)-omgekeerde proxy's sowel as rou TCP-mappings wat deur Cloudflare se edge gerouteer word.<sup>[[1]](#references)</sup>
+Cloudflare se huidige dokumentasie wys ongeverifieerde "Quick"-tunnels vir plaaslike ontwikkeling, en die produkoorsig lys HTTP, HTTPS, TCP, SSH en RDP onder die ondersteunde gepubliseerde protokolle.<sup>[[11]](#references)[[12]](#references)</sup>
+
+Vir 'n plaaslik bestuurde benoemde tunnel dokumenteer Cloudflare die `tunnel login`, `create`, `route dns` en `--config ... run ...`-werkvloei.<sup>[[13]](#references)[[14]](#references)[[17]](#references)</sup>
 ```bash
 # Quick Tunnel exposing localhost:8080 (random trycloudflare subdomain)
 cloudflared tunnel --url http://localhost:8080
 
 # Named tunnel bound to a DNS record
-cloudflared tunnel login                       # one-time device auth
+cloudflared tunnel login                       # authenticate with Cloudflare
 cloudflared tunnel create my-tunnel
 cloudflared tunnel route dns my-tunnel app.example.com
-cloudflared tunnel run my-tunnel --config tunnel.yml
+cloudflared tunnel --config tunnel.yml run my-tunnel
 ```
-Named tunnels laat jou toe om verskeie ingress-reëls (HTTP, SSH, RDP, ens.) binne `tunnel.yml` te definieer, per-diens-toegangsbeleide via Cloudflare Access te ondersteun, en as systemd-containers te loop vir persistence. Quick Tunnels is anoniem en ephemeral—ideaal vir phishing payload staging of webhook-toetse, maar Cloudflare waarborg nie uptime nie.<sup>[[1]](#references)</sup>
+Named tunnels kan veelvuldige ingress rules in YAML definieer; Cloudflare Access policies kan toegang tot gepubliseerde toepassings beheer, en Cloudflare dokumenteer service- en Docker-deploymentpaaie vir die uitvoer van connectors. Quick Tunnels is anonieme, tydelike testing-tunnels met ’n limiet van 200 gelyktydige versoeke en geen ondersteuning vir Server-Sent Events (SSE) nie.<sup>[[11]](#references)[[15]](#references)[[16]](#references)[[17]](#references)</sup>
 
 ## Tailscale Funnel / Serve
 
-Tailscale v1.52+ verskaf unified `tailscale serve` (deel binne die tailnet) en `tailscale funnel` (publiseer na die breër internet)-workflows. Albei commands kan HTTP(S) reverse proxy of raw TCP forward, met automatic TLS en kort `*.ts.net`-hostnames.<sup>[[3]](#references)</sup>
+Tailscale se huidige CLI gebruik Serve vir tailnet-only sharing en Funnel vir publieke sharing. Die commands ondersteun HTTP/HTTPS reverse-proxy-teikens en TCP-forwarding; Funnel se raw TCP-mode is beperk tot poorte 443, 8443 en 10000.<sup>[[18]](#references)[[19]](#references)</sup>
 ```bash
 # Share localhost:3000 within the tailnet
 sudo tailscale serve 3000
@@ -99,20 +99,20 @@ sudo tailscale funnel --https=443 localhost:3000
 # Forward raw TCP (expose local SSH)
 sudo tailscale funnel --tcp=10000 tcp://localhost:22
 ```
-Gebruik `--bg` om die konfigurasie te behou sonder om ’n foreground process aan die gang te hou, en `tailscale funnel status` om te oudit watter dienste vanaf die publieke internet bereikbaar is. Omdat Funnel TLS op die plaaslike node beëindig, kan enige credential prompts, headers of mTLS enforcement onder jou beheer bly.
+Gebruik `--bg` om die konfigurasie te behou sonder om ’n voorgrondproses te laat loop, en gebruik `tailscale funnel status` om te oudit watter dienste vanaf die openbare internet bereikbaar is. Vir HTTPS Funnel-teikens dokumenteer Tailscale TLS-beëindiging op die plaaslike node voordat die versoek na die plaaslike diens aangestuur word.<sup>[[18]](#references)[[19]](#references)</sup>
 
 ## Fast Reverse Proxy (frp)
 
-`frp` is ’n self-hosted opsie waar jy die rendezvous-bediener (`frps`) en die kliënt (`frpc`) beheer. Dit is ideaal vir red teams wat reeds ’n VPS besit en deterministiese domeine/poorte wil hê.
+`frp` is ’n selfgehuisveste opsie waar jy die rendezvous-bediener (`frps`) en die kliënt (`frpc`) beheer; die dokumentasie daarvan dek die aanstuur van plaaslike dienste agter NAT of ’n firewall, met deterministiese afgeleë poorte/domeine.<sup>[[20]](#references)</sup>
 
 <details>
 <summary>Voorbeeld van frps/frpc-konfigurasie</summary>
 ```bash
-# Server: bind TCP/HTTP entry points and enable dashboard
+# Server: start frps with its server configuration
 ./frps -c frps.toml
 
-# Client: forward local 22 to remote port 6000 and a web app to vhost
-./frpc -c <<'EOF'
+# Client: save this as frpc.toml, then start it
+cat > frpc.toml <<'EOF'
 serverAddr = "c2.example.com"
 serverPort = 7000
 
@@ -129,30 +129,48 @@ type = "http"
 localPort = 8080
 customDomains = ["panel.example.com"]
 EOF
+./frpc -c frpc.toml
 ```
 </details>
 
-Onlangse vrystellings voeg QUIC-transport, token/OIDC-auth, bandwidth caps, health checks en Go-template-based range mappings by—nuttig om vinnig veelvuldige listeners op te stel wat terugkarteer na implants op verskillende hosts.<sup>[[4]](#references)</sup>
+Die huidige projekdokumentasie sluit QUIC transport, token/OIDC authentication, bandwidth limits, health checks en Go-template range mappings in—raadpleeg die release wat met jou deployment ooreenstem voordat jy enige van daardie opsies gebruik.<sup>[[20]](#references)</sup>
 
 ## Pinggy (SSH-based)
 
-Pinggy verskaf SSH-accessible tunnels oor TCP/443, dus werk dit selfs agter captive proxies wat slegs HTTPS toelaat. Sessies duur 60 minute op die free tier en kan gescript word vir vinnige demos of webhook relays.<sup>[[5]](#references)</sup>
+Pinggy dokumenteer SSH reverse forwarding oor poort 443, sodat dit kan werk in netwerke waar outbound SSH op poort 22 geblokkeer word. Die gratis plan verval ná 60 minute en gebruik ’n nuwe URL nadat daar weer verbind word, terwyl Pro persistente tunnels en pasgemaakte domeine byvoeg.<sup>[[21]](#references)[[22]](#references)</sup>
 ```bash
 # Random subdomain exposing localhost:3000 via SSH reverse tunnel
-ssh -p 443 -R0:localhost:3000 a.pinggy.io
+ssh -p 443 -R0:localhost:3000 qr@free.pinggy.io
 ```
-Jy kan custom domains en tunnels met ’n langer leeftyd op die betaalde vlak aanvra, of tunnels outomaties herwin deur die command in ’n loop te plaas.
+Jy kan pasgemaakte domains en persistente tunnels op Pro aanvra.<sup>[[22]](#references)</sup> Jy kan tydelike tunnels outomaties hergebruik deur die command in ’n loop te plaas.
 
-## Bedreigingsintelligensie- en OPSEC-notas
+## Threat intel & OPSEC-notas
 
-Adversaries het ephemeral tunneling toenemend misbruik, veral Cloudflare se unauthenticated `trycloudflare.com` endpoints, om Remote Access Trojan payloads te stageer en C2 infrastructure te versteek. Proofpoint het sedert Februarie 2024 campaigns opgespoor wat AsyncRAT, Xworm, VenomRAT, GuLoader en Remcos versprei het deur download stages na kortlewende TryCloudflare URLs te wys, wat tradisionele static blocklists veel minder effektief maak. Oorweeg dit om tunnels en domains proaktief te roteer, maar monitor ook vir kenmerkende external DNS lookups na die tunneler wat jy gebruik, sodat jy blue-team detection of pogings om infrastructure te blokkeer vroeg kan raaksien.<sup>[[2]](#references)</sup>
+Teenstanders het ephemeral tunneling misbruik, insluitend Cloudflare se ongeauthentiseerde `trycloudflare.com`-endpoints, om Remote Access Trojans deur tydelike infrastruktuur te lewer. Proofpoint het aktiwiteit gerapporteer wat die eerste keer in Februarie 2024 waargeneem is, met Xworm, AsyncRAT, VenomRAT, GuLoader en Remcos, en het opgemerk dat tydelike tunnels verdediging bemoeilik wat op statiese blocklists staatmaak.<sup>[[23]](#references)</sup> Oorweeg dit om tunnels en domains proaktief te roteer, en monitor vir kenmerkende eksterne DNS-opsoeke na die tunneler wat jy gebruik sodat jy blue-team detection of pogings om infrastruktuur te blokkeer vroeg kan opmerk.
 
-## Verwysings
+## References
 
-- [1] [Cloudflare Docs - Skep ’n lokaal bestuurde tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/local-management/create-local-tunnel/)
-- [2] [Proofpoint - Threat Actor Abuse Cloudflare Tunnels om RATs te lewer](https://www.proofpoint.com/us/blog/threat-insight/threat-actor-abuses-cloudflare-tunnels-deliver-rats)
-- [3] [Tailscale - Serve en Funnel word heringestel](https://tailscale.com/blog/reintroducing-serve-funnel)
-- [4] [fatedier/frp - Fast Reverse Proxy repository](https://github.com/fatedier/frp)
-- [5] [Pinggy Documentation - Gebruik](https://pinggy.io/docs/usages/)
-
+- [1] [Serveo-dokumentasie](https://serveo.net/docs/)
+- [2] [SocketXP-dokumentasie - Aan die gang](https://docs.socketxp.com/guide/getting-started/getting-started/)
+- [3] [ngrok Agent Command Line Interface](https://ngrok.com/docs/agent/cli)
+- [4] [ngrok FAQ](https://ngrok.com/docs/faq)
+- [5] [Telebit.js legacy CLI-hulp](https://git.rootprojects.org/root/telebit.js/src/commit/4aaa87fd6ca5a8b149ce4a5f9d7b22ee5052f5d7/lib/en-us.toml)
+- [6] [LocalXpose](https://localxpose.io/)
+- [7] [LocalXpose-dokumentasie](https://localxpose.gitbook.io/docs)
+- [8] [Expose - Deel sites](https://expose.dev/docs/client/sharing)
+- [9] [Expose - Deel TCP-poorte](https://github.com/exposedev/expose/blob/master/docs/client/sharing-tcp-ports.md)
+- [10] [localtunnel/localtunnel repository](https://github.com/localtunnel/localtunnel)
+- [11] [Cloudflare Docs - Stel Cloudflare Tunnel op](https://developers.cloudflare.com/tunnel/setup/)
+- [12] [Cloudflare Tunnel-oorsig](https://developers.cloudflare.com/tunnel/)
+- [13] [Cloudflare Docs - Nuttige tunnel commands](https://developers.cloudflare.com/tunnel/advanced/local-management/tunnel-useful-commands/)
+- [14] [Cloudflare Docs - Routing](https://developers.cloudflare.com/tunnel/routing/)
+- [15] [Cloudflare Docs - Konfigurasielêer](https://developers.cloudflare.com/tunnel/advanced/local-management/configuration-file/)
+- [16] [Cloudflare Access-beleide](https://developers.cloudflare.com/cloudflare-one/access-controls/policies/)
+- [17] [Cloudflare Docs - Run parameters](https://developers.cloudflare.com/tunnel/advanced/run-parameters/)
+- [18] [Tailscale Serve command](https://tailscale.com/docs/reference/tailscale-cli/serve)
+- [19] [Tailscale Funnel command](https://tailscale.com/docs/reference/tailscale-cli/funnel)
+- [20] [fatedier/frp - Fast Reverse Proxy repository](https://github.com/fatedier/frp)
+- [21] [Pinggy-dokumentasie - Gebruik](https://pinggy.io/docs/usages/)
+- [22] [Pinggy - Eenvoudige Localhost-tunnels](https://pinggy.io/)
+- [23] [Proofpoint - Bedreigingsakteur misbruik Cloudflare Tunnels om RATs te lewer](https://www.proofpoint.com/uk/blog/threat-insight/threat-actor-abuses-cloudflare-tunnels-deliver-rats)
 {{#include ../../banners/hacktricks-training.md}}
