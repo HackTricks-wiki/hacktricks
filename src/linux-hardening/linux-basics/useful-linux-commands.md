@@ -1,5 +1,7 @@
 # Commandes Linux utiles
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Bash courant
 ```bash
 #Exfiltration using Base64
@@ -256,7 +258,7 @@ find / -maxdepth 5 -type f -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /p
 # Found Newer directory only and sort by time. (depth = 5)
 find / -maxdepth 5 -type d -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /proc" | grep -v "| /dev" | grep -v "| /run" | grep -v "| /var/log" | grep -v "| /boot"  | grep -v "| /sys/" | sort -n -r | less
 ```
-## Rechercher de l'aide sur Nmap
+## Aide à la recherche avec Nmap
 ```bash
 #Nmap scripts ((default or version) and smb))
 nmap --script-help "(default or version) and *smb*"
@@ -299,9 +301,9 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
-## Télémétrie eBPF et chasse aux Rootkits
+## Télémétrie eBPF et recherche de rootkits
 
-Les recherches sur les Rootkits ont mis en évidence des implants basés sur eBPF, tels que TripleCross, ainsi que des backdoors basées sur BPF, comme certaines variantes de BPFDoor. Considérez les programmes, attachments ou maps BPF inattendus comme des pistes d’investigation plutôt que comme une preuve de compromission.<sup>[[3]](#references)[[4]](#references)</sup> Établissez une baseline des systèmes autorisés avec `bpftool` ou `eBPFmon` : `bpftool` peut énumérer les programmes et les maps, extraire les instructions des programmes et interroger les fonctionnalités prises en charge, tandis qu’eBPFmon présente ces informations dans une TUI.<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
+Les recherches sur les rootkits ont démontré l’existence d’implants basés sur eBPF, tels que TripleCross, ainsi que de backdoors basées sur BPF, comme certaines variantes de BPFDoor. Considérez les programmes, attachments ou maps BPF inattendus comme des pistes d’investigation, et non comme une preuve de compromission.<sup>[[3]](#references)[[4]](#references)</sup> Établissez une baseline des systèmes autorisés avec `bpftool` ou `eBPFmon` : `bpftool` peut énumérer les programmes et les maps, afficher les instructions des programmes et interroger les fonctionnalités prises en charge, tandis qu’eBPFmon présente ces informations dans une TUI.<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -319,11 +321,11 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-Mettez en corrélation la sortie de `bpftool` avec les attachments attendus au niveau du NIC/cgroup ; un programme `xdp` ou `kprobe` soudainement détenu par un PID non approuvé constitue une piste d'investigation, et non une preuve concluante de la présence d'un payload injecté.<sup>[[5]](#references)[[6]](#references)</sup>
+Corrélez la sortie de `bpftool` avec les attachments attendus du NIC/cgroup ; un programme `xdp` ou `kprobe` soudainement associé à un PID non approuvé constitue une piste d’investigation, et non une preuve concluante de la présence d’un payload injecté.<sup>[[5]](#references)[[6]](#references)</sup>
 
 ## Triage des incidents Journald
 
-`journalctl` lit les entrées structurées de `systemd-journald` et permet de filtrer par boot, priorité, unité, UID et temps relatif. Combinez ces filtres avec une sortie JSON lorsque vous devez préserver ou comparer des éléments de preuve ; le filtrage seul ne prouve pas que les logs n'ont pas été falsifiés.<sup>[[2]](#references)[[7]](#references)</sup>
+`journalctl` lit les entrées structurées de `systemd-journald` et permet de filtrer par boot, priorité, unité, UID et temps relatif. Combinez ces filtres avec une sortie JSON lorsque vous devez préserver ou comparer les éléments de preuve ; le filtrage seul ne prouve pas que les logs n’ont pas été altérés.<sup>[[2]](#references)[[7]](#references)</sup>
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -334,15 +336,15 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-Ajoutez `--grep 'Invalid user' --case-sensitive` ou `-k` (messages du kernel uniquement) lorsque vous avez besoin de filtres plus précis, et n’oubliez pas que les sélecteurs `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` et `_TRANSPORT` peuvent être combinés pour des recherches ciblées.<sup>[[7]](#references)</sup>
+Ajoutez `--grep 'Invalid user' --case-sensitive` ou `-k` (messages du kernel uniquement) lorsque vous avez besoin de filtres plus précis, et rappelez-vous que les sélecteurs `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` et `_TRANSPORT` peuvent être combinés pour des recherches ciblées.<sup>[[7]](#references)</sup>
 
 ## References
 
 - [1] [eBPFmon : un nouvel outil pour explorer et interagir avec les applications eBPF](https://redcanary.com/blog/linux-security/ebpfmon/)
 - [2] [Comment utiliser la commande journalctl pour afficher les logs Linux](https://www.hostinger.com/tutorials/journalctl-command)
 - [3] [h3xduck/TripleCross](https://github.com/h3xduck/TripleCross)
-- [4] [Rapid7 Labs : BPFdoor dans les réseaux télécoms](https://www.rapid7.com/blog/post/tr-bpfdoor-telecom-networks-sleeper-cells-threat-research-report/)
+- [4] [Rapid7 Labs : BPFdoor dans les réseaux de télécommunications](https://www.rapid7.com/blog/post/tr-bpfdoor-telecom-networks-sleeper-cells-threat-research-report/)
 - [5] [Documentation BPF — documentation du kernel Linux](https://docs.kernel.org/bpf/)
 - [6] [libbpf/bpftool](https://github.com/libbpf/bpftool)
-- [7] [journalctl(1) — page du manuel Linux](https://man7.org/linux/man-pages/man1/journalctl.1.html)
+- [7] [journalctl(1) — page de manuel Linux](https://man7.org/linux/man-pages/man1/journalctl.1.html)
 {{#include ../../banners/hacktricks-training.md}}

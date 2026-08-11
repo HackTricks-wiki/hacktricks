@@ -1,4 +1,6 @@
-# Élévation de privilèges RunC
+# RunC Privilege Escalation
+
+{{#include ../../banners/hacktricks-training.md}}
 
 ## Informations de base
 
@@ -10,7 +12,7 @@ Si vous souhaitez en savoir plus sur **runc**, consultez la page suivante :
 
 ## PE
 
-Si `runc` est disponible pour un processus rootful sur l’hôte, vous pouvez utiliser un OCI bundle dont la configuration de montage effectue un bind mount récursif du `/` de l’hôte vers `/` à l’intérieur du container, exposant ainsi le système de fichiers de l’hôte dans cet espace de noms de montage.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+Si `runc` est disponible pour un processus rootful sur l’hôte, vous pouvez utiliser un bundle OCI dont la configuration de montage effectue un bind mount récursif du `/` de l’hôte vers `/` à l’intérieur du container, exposant ainsi le système de fichiers de l’hôte dans ce mount namespace.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 ```bash
 runc -help #Get help and see if runc is intalled
 runc spec #This will create the config.json file in your current folder
@@ -35,11 +37,11 @@ mkdir rootfs
 runc run demo
 ```
 > [!CAUTION]
-> Le workflow documenté de `runc run` est rootful : les propres exemples de runc le qualifient de « run as root ». Un utilisateur non privilégié a besoin d'une configuration rootless telle que `runc spec --rootless`, et runc précise que les user namespaces doivent être activés pour ce mode.<sup>[[1]](#references)</sup>
+> Le workflow `runc run` documenté est rootful : les propres exemples de runc le décrivent comme « run as root ». Un utilisateur non privilégié a besoin d'une configuration rootless telle que `runc spec --rootless`, et runc précise que les user namespaces doivent être activés pour ce mode.<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [runc : outil CLI pour le lancement et l'exécution de containers](https://github.com/opencontainers/runc#using-runc)
-- [2] [Spécification du runtime OCI : Mounts](https://github.com/opencontainers/runtime-spec/blob/main/config.md#mounts)
-- [3] [Sous-arbres partagés](https://docs.kernel.org/filesystems/sharedsubtree.html)
+- [1] [runc : outil CLI pour créer et exécuter des containers](https://github.com/opencontainers/runc#using-runc)
+- [2] [Spécification OCI du runtime : mounts](https://github.com/opencontainers/runtime-spec/blob/main/config.md#mounts)
+- [3] [Shared Subtrees](https://docs.kernel.org/filesystems/sharedsubtree.html)
 {{#include ../../banners/hacktricks-training.md}}

