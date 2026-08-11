@@ -2,21 +2,21 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro <a href="#kfpn7" id="kfpn7"></a>
+## Introdução <a href="#introduction" id="introduction"></a>
 
-O Flipper Zero pode **receber e transmitir frequências de rádio na faixa de 300-928 MHz** com seu módulo integrado, que pode ler, salvar e emular controles remotos. Esses controles são usados para interagir com portões, barreiras, fechaduras de rádio, interruptores de controle remoto, campainhas sem fio, luzes inteligentes e muito mais. O Flipper Zero pode ajudar você a descobrir se sua segurança foi comprometida.
+O Flipper Zero pode **receber e transmitir frequências de rádio na faixa de 300-928 MHz** com seu módulo integrado, sujeito às restrições de frequência da região configurada. Ele pode ler, salvar e emular controles remotos compatíveis usados em portões, barreiras, fechaduras de rádio, interruptores, campainhas sem fio, luzes inteligentes e outros dispositivos.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../images/image (714).png" alt=""><figcaption></figcaption></figure>
 
-## Sub-GHz hardware <a href="#kfpn7" id="kfpn7"></a>
+## Hardware Sub-GHz <a href="#sub-ghz-hardware" id="sub-ghz-hardware"></a>
 
-O Flipper Zero possui um módulo integrado sub-1 GHz baseado em um [﻿](https://www.st.com/en/nfc/st25r3916.html#overview)﻿[chip CC1101](https://www.ti.com/lit/ds/symlink/cc1101.pdf) e uma antena de rádio (o alcance máximo é de 50 metros). Tanto o chip CC1101 quanto a antena foram projetados para operar nas bandas de 300-348 MHz, 387-464 MHz e 779-928 MHz.
+O Flipper Zero possui um módulo integrado abaixo de 1 GHz baseado em um transceptor CC1101 e uma antena de rádio. O alcance real depende da frequência, da antena, do ambiente e do transmissor; a Flipper documenta até aproximadamente 50 metros em condições favoráveis. O hardware cobre 300-348 MHz, 387-464 MHz e 779-928 MHz, enquanto o firmware e as regras regionais restringem ainda mais a transmissão.<sup>[[1]](#references)[[2]](#references)</sup>
 
 <figure><img src="../../../images/image (923).png" alt=""><figcaption></figcaption></figure>
 
-## Actions
+## Ações
 
-### Frequency Analyser
+### Analisador de frequência
 
 > [!TIP]
 > Como descobrir qual frequência o controle remoto está usando
@@ -25,80 +25,86 @@ Durante a análise, o Flipper Zero verifica a intensidade dos sinais (RSSI) em t
 
 Para determinar a frequência do controle remoto, faça o seguinte:
 
-1. Posicione o controle remoto bem próximo ao lado esquerdo do Flipper Zero.
+1. Coloque o controle remoto bem próximo ao lado esquerdo do Flipper Zero.
 2. Acesse **Main Menu** **→ Sub-GHz**.
-3. Selecione **Frequency Analyzer** e mantenha pressionado o botão do controle remoto que você deseja analisar.
+3. Selecione **Frequency Analyzer** e mantenha pressionado o botão do controle remoto que deseja analisar.
 4. Verifique o valor da frequência na tela.
 
 ### Read
 
 > [!TIP]
-> Encontrar informações sobre a frequência usada (também outra forma de descobrir qual frequência é usada)
+> Encontrar informações sobre a frequência usada (também é uma forma de descobrir qual frequência é usada)
 
-A opção **Read** **escuta na frequência configurada** na modulação indicada: 433.92 AM por padrão. Se **algo for encontrado** durante a leitura, **as informações serão exibidas** na tela. Essas informações podem ser usadas para replicar o sinal no futuro.<sup>[[1]](#references)</sup>
+A opção **Read** escuta na frequência e na modulação configuradas (433.92 MHz AM por padrão). Quando reconhece um sinal compatível, a tela exibe informações que podem ser salvas e reproduzidas posteriormente.<sup>[[1]](#references)</sup>
 
-Enquanto o Read estiver em uso, é possível pressionar o **botão esquerdo** e **configurá-lo**.\
+Enquanto o Read está em uso, é possível pressionar o **botão esquerdo** e **configurá-lo**.\
 No momento, ele possui **4 modulações** (AM270, AM650, FM328 e FM476) e **várias frequências relevantes** armazenadas:
 
 <figure><img src="../../../images/image (947).png" alt=""><figcaption></figcaption></figure>
 
-Você pode definir **qualquer uma que seja do seu interesse**. No entanto, se **não tiver certeza de qual frequência** pode ser usada pelo seu controle remoto, **defina Hopping como ON** (desativado por padrão) e pressione o botão várias vezes até que o Flipper capture o sinal e forneça as informações necessárias para configurar a frequência.
+Você pode selecionar qualquer frequência permitida. Se não tiver certeza de qual frequência o controle remoto usa, defina **Hopping como ON** (desativado por padrão) e pressione o botão do controle remoto várias vezes até que o Flipper capture o sinal e informe a frequência.
 
 > [!CAUTION]
-> Alternar entre frequências leva algum tempo; portanto, sinais transmitidos durante a alternância podem ser perdidos. Para obter uma melhor recepção do sinal, defina uma frequência fixa determinada pelo Frequency Analyzer.
+> Alternar entre frequências leva algum tempo; portanto, sinais transmitidos no momento da alternância podem ser perdidos. Para obter uma recepção de sinal melhor, defina uma frequência fixa determinada pelo Frequency Analyzer.
 
 ### **Read Raw**
 
 > [!TIP]
-> Roubar (e reproduzir) um sinal na frequência configurada
+> Capturar (e reproduzir) um sinal na frequência configurada
 
-A opção **Read Raw** **grava sinais** enviados na frequência de escuta. Isso pode ser usado para **roubar** um sinal e **repeti-lo**.<sup>[[1]](#references)</sup>
+A opção **Read Raw** grava os sinais enviados na frequência selecionada. Isso pode ser usado para capturar e reproduzir um sinal durante testes autorizados.<sup>[[1]](#references)</sup>
 
-Por padrão, o **Read Raw** também está em 433.92 em AM650, mas, se com a opção Read você descobriu que o sinal de seu interesse está em uma **frequência/modulação diferente, também pode modificá-la** pressionando o botão esquerdo (enquanto estiver dentro da opção Read Raw).
+Por padrão, o **Read Raw também usa 433.92 MHz com AM650**. Se a opção Read encontrar um sinal em uma frequência ou modulação diferente, pressione Left dentro do Read Raw para alterar essas configurações.
 
 ### Brute-Force
 
-Se você conhece o protocolo usado, por exemplo, pelo portão da garagem, é possível g**erar todos os códigos e enviá-los com o Flipper Zero.** Este é um exemplo compatível com tipos comuns de portões de garagem: [**https://github.com/tobiabocchi/flipperzero-bruteforce**](https://github.com/tobiabocchi/flipperzero-bruteforce)
+Se você souber qual protocolo um dispositivo, como uma porta de garagem, utiliza, pode ser possível **gerar códigos candidatos e transmiti-los com o Flipper Zero**. O projeto `flipperzero-bruteforce` oferece suporte a vários protocolos comuns de códigos estáticos.<sup>[[3]](#references)</sup>
 
-### Add Manually
+### Adicionar manualmente
 
 > [!TIP]
 > Adicionar sinais a partir de uma lista configurada de protocolos
 
-#### Lista de [protocolos compatíveis](https://docs.flipperzero.one/sub-ghz/add-new-remote) <a href="#id-3iglu" id="id-3iglu"></a>
+#### Lista de protocolos compatíveis <a href="#id-3iglu" id="id-3iglu"></a>
 
-| Princeton_433 (funciona com a maioria dos sistemas de código estático) | 433.92 | Estático |
-| ----------------------------------------------------------------------- | ------ | -------- |
-| Nice Flo 12bit_433                                                     | 433.92 | Estático |
-| Nice Flo 24bit_433                                                     | 433.92 | Estático |
-| CAME 12bit_433                                                         | 433.92 | Estático |
-| CAME 24bit_433                                                         | 433.92 | Estático |
-| Linear_300                                                             | 300.00 | Estático |
-| CAME TWEE                                                              | 433.92 | Estático |
-| Gate TX_433                                                             | 433.92 | Estático |
-| DoorHan_315                                                             | 315.00 | Dinâmico |
-| DoorHan_433                                                             | 433.92 | Dinâmico |
-| LiftMaster_315                                                          | 315.00 | Dinâmico |
-| LiftMaster_390                                                          | 390.00 | Dinâmico |
-| Security+2.0_310                                                        | 310.00 | Dinâmico |
-| Security+2.0_315                                                        | 315.00 | Dinâmico |
-| Security+2.0_390                                                        | 390.00 | Dinâmico |
+O menu Add Manually disponibiliza as predefinições de protocolos documentadas pelo Flipper Zero.<sup>[[4]](#references)</sup>
 
-### Supported Sub-GHz vendors
+| Princeton_433 (works with the majority of static code systems) | 433.92 | Static  |
+| -------------------------------------------------------------- | ------ | ------- |
+| Nice Flo 12bit_433                                             | 433.92 | Static  |
+| Nice Flo 24bit_433                                             | 433.92 | Static  |
+| CAME 12bit_433                                                 | 433.92 | Static  |
+| CAME 24bit_433                                                 | 433.92 | Static  |
+| Linear_300                                                     | 300.00 | Static  |
+| CAME TWEE                                                      | 433.92 | Static  |
+| Gate TX_433                                                    | 433.92 | Static  |
+| DoorHan_315                                                    | 315.00 | Dynamic |
+| DoorHan_433                                                    | 433.92 | Dynamic |
+| LiftMaster_315                                                 | 315.00 | Dynamic |
+| LiftMaster_390                                                 | 390.00 | Dynamic |
+| Security+2.0_310                                               | 310.00 | Dynamic |
+| Security+2.0_315                                               | 315.00 | Dynamic |
+| Security+2.0_390                                               | 390.00 | Dynamic |
 
-Consulte a lista em [https://docs.flipperzero.one/sub-ghz/supported-vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors)
+### Vendors Sub-GHz compatíveis
 
-### Supported Frequencies by region
+Consulte a lista de vendors compatíveis do Flipper Zero.<sup>[[5]](#references)</sup>
 
-Consulte a lista em [https://docs.flipperzero.one/sub-ghz/frequencies](https://docs.flipperzero.one/sub-ghz/frequencies)
+### Frequências compatíveis por região
 
-### Test
+Consulte a lista oficial de frequências regionais antes de transmitir.<sup>[[6]](#references)</sup>
+
+### Teste
 
 > [!TIP]
 > Obter os dBms das frequências salvas
 
 ## References
 
-- [1] [Sub-GHz - Flipper Zero User Documentation](https://docs.flipperzero.one/sub-ghz)
-
+- [1] [Sub-GHz - Documentação do usuário do Flipper Zero](https://docs.flipperzero.one/sub-ghz)
+- [2] [Folha de dados do Texas Instruments CC1101](https://www.ti.com/lit/ds/symlink/cc1101.pdf)
+- [3] [tobiabocchi/flipperzero-bruteforce](https://github.com/tobiabocchi/flipperzero-bruteforce)
+- [4] [Flipper Zero - Adicionar um controle remoto criado manualmente](https://docs.flipperzero.one/sub-ghz/add-new-remote)
+- [5] [Flipper Zero - Vendors Sub-GHz compatíveis](https://docs.flipperzero.one/sub-ghz/supported-vendors)
+- [6] [Flipper Zero - Frequências Sub-GHz regionais](https://docs.flipperzero.one/sub-ghz/frequencies)
 {{#include ../../../banners/hacktricks-training.md}}
