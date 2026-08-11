@@ -1,6 +1,8 @@
-# Przydatne polecenia systemu Linux
+# Przydatne polecenia Linuxa
 
-## Typowe polecenia Bash
+{{#include ../../banners/hacktricks-training.md}}
+
+## Typowy Bash
 ```bash
 #Exfiltration using Base64
 base64 -w 0 file
@@ -147,7 +149,7 @@ python pyinstaller.py --onefile exploit.py
 #sudo apt-get install gcc-mingw-w64-i686
 i686-mingw32msvc-gcc -o executable useradd.c
 ```
-## Greps
+## Grep
 ```bash
 #Extract emails from file
 grep -E -o "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}\b" file.txt
@@ -227,7 +229,7 @@ grep -Po 'd{3}[s-_]?d{3}[s-_]?d{4}' *.txt > us-phones.txt
 #Extract ISBN Numbers
 egrep -a -o "\bISBN(?:-1[03])?:? (?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]\b" *.txt > isbn.txt
 ```
-## Znajdź
+## Find
 ```bash
 # Find SUID set files.
 find / -perm /u=s -ls 2>/dev/null
@@ -256,7 +258,7 @@ find / -maxdepth 5 -type f -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /p
 # Found Newer directory only and sort by time. (depth = 5)
 find / -maxdepth 5 -type d -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /proc" | grep -v "| /dev" | grep -v "| /run" | grep -v "| /var/log" | grep -v "| /boot"  | grep -v "| /sys/" | sort -n -r | less
 ```
-## Pomoc dotycząca wyszukiwania w Nmap
+## Pomoc wyszukiwania w Nmap
 ```bash
 #Nmap scripts ((default or version) and smb))
 nmap --script-help "(default or version) and *smb*"
@@ -299,9 +301,9 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
-## Telemetria eBPF i wyszukiwanie rootkitów
+## Telemetria eBPF i Hunting Rootkitów
 
-Badania nad rootkitami wykazały zarówno implanty oparte na eBPF, takie jak TripleCross, jak i backdoory oparte na BPF, takie jak warianty BPFDoor. Nieoczekiwane programy BPF, attachmenty lub mapy należy traktować jako wskazówki do dalszego dochodzenia, a nie jako dowód kompromitacji.<sup>[[3]](#references)[[4]](#references)</sup> Ustal punkt odniesienia dla autoryzowanych systemów za pomocą `bpftool` lub `eBPFmon`: `bpftool` może wyliczać programy i mapy, zrzucać instrukcje programów oraz sprawdzać obsługiwane funkcje, podczas gdy eBPFmon prezentuje te informacje w TUI.<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
+Badania nad rootkitami wykazały zarówno implanty oparte na eBPF, takie jak TripleCross, jak i backdoory oparte na BPF, takie jak warianty BPFDoor. Nieoczekiwane programy BPF, attachmenty lub mapy traktuj jako wskazówki do analizy, a nie jako dowód na przejęcie systemu.<sup>[[3]](#references)[[4]](#references)</sup> Twórz baseline autoryzowanych systemów za pomocą `bpftool` lub `eBPFmon`: `bpftool` może wyliczać programy i mapy, zrzucać instrukcje programów oraz sprawdzać obsługiwane funkcje, podczas gdy eBPFmon prezentuje te informacje w interfejsie TUI.<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -319,9 +321,9 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-Skoreluj dane wyjściowe `bpftool` z oczekiwanymi podpięciami NIC/cgroup; nagle pojawiający się program `xdp` lub `kprobe`, którego właścicielem jest niezatwierdzony PID, jest wskazówką do dalszego dochodzenia, a nie rozstrzygającym dowodem wstrzykniętego payloadu.<sup>[[5]](#references)[[6]](#references)</sup>
+Skoreluj dane wyjściowe `bpftool` z oczekiwanymi podłączeniami NIC/cgroup; nagle pojawiający się program `xdp` lub `kprobe`, którego właścicielem jest niezatwierdzony PID, stanowi wskazówkę do dalszego dochodzenia, a nie rozstrzygający dowód na wstrzyknięty payload.<sup>[[5]](#references)[[6]](#references)</sup>
 
-## Wstępna analiza incydentu Journald
+## Triage incydentów Journald
 
 `journalctl` odczytuje ustrukturyzowane wpisy z `systemd-journald` i obsługuje filtrowanie według uruchomienia systemu, priorytetu, jednostki, UID oraz czasu względnego. Połącz te filtry z wyjściem JSON, gdy musisz zachować lub porównać dowody; samo filtrowanie nie dowodzi, że logi nie zostały zmodyfikowane.<sup>[[2]](#references)[[7]](#references)</sup>
 ```bash
@@ -334,15 +336,15 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-Dodaj `--grep 'Invalid user' --case-sensitive` lub `-k` (tylko komunikaty jądra), gdy potrzebujesz dokładniejszych filtrów, i pamiętaj, że selektory `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` oraz `_TRANSPORT` można łączyć w celu ukierunkowanych poszukiwań.<sup>[[7]](#references)</sup>
+Dodaj `--grep 'Invalid user' --case-sensitive` lub `-k` (tylko komunikaty kernela), gdy potrzebujesz dokładniejszych filtrów, i pamiętaj, że selektory `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` oraz `_TRANSPORT` można łączyć w celu przeprowadzania ukierunkowanych wyszukiwań.<sup>[[7]](#references)</sup>
 
 ## References
 
-- [1] [eBPFmon: Nowe narzędzie do badania aplikacji eBPF i interakcji z nimi](https://redcanary.com/blog/linux-security/ebpfmon/)
-- [2] [Jak używać polecenia journalctl do wyświetlania logów Linux](https://www.hostinger.com/tutorials/journalctl-command)
+- [1] [eBPFmon: nowe narzędzie do eksplorowania aplikacji eBPF i interakcji z nimi](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [2] [Jak używać polecenia journalctl do przeglądania logów systemu Linux](https://www.hostinger.com/tutorials/journalctl-command)
 - [3] [h3xduck/TripleCross](https://github.com/h3xduck/TripleCross)
 - [4] [Rapid7 Labs: BPFdoor w sieciach telekomunikacyjnych](https://www.rapid7.com/blog/post/tr-bpfdoor-telecom-networks-sleeper-cells-threat-research-report/)
-- [5] [Dokumentacja BPF — dokumentacja jądra Linux](https://docs.kernel.org/bpf/)
+- [5] [Dokumentacja BPF — dokumentacja Linux Kernel](https://docs.kernel.org/bpf/)
 - [6] [libbpf/bpftool](https://github.com/libbpf/bpftool)
 - [7] [journalctl(1) — strona podręcznika Linux](https://man7.org/linux/man-pages/man1/journalctl.1.html)
 {{#include ../../banners/hacktricks-training.md}}

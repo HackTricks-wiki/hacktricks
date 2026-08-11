@@ -1,16 +1,18 @@
 # DDexec / EverythingExec
 
+{{#include ../../../../banners/hacktricks-training.md}}
+
 ## Kontekst
 
-W systemie Linux, aby uruchomić program, musi on istnieć jako plik i musi być w jakiś sposób dostępny w hierarchii systemu plików (tak właśnie działa `execve()`). Plik ten może znajdować się na dysku lub w pamięci RAM (tmpfs, memfd), ale potrzebujesz ścieżki do pliku. Dzięki temu bardzo łatwo kontrolować, co jest uruchamiane w systemie Linux, wykrywać zagrożenia i narzędzia atakującego lub całkowicie uniemożliwić mu próbę wykonania czegokolwiek własnego (_np._ nie zezwalając użytkownikom bez uprawnień na umieszczanie plików wykonywalnych w dowolnym miejscu).
+W systemie Linux, aby uruchomić program, musi on istnieć jako plik i być w pewien sposób dostępny poprzez hierarchię systemu plików (tak właśnie działa `execve()`). Plik ten może znajdować się na dysku lub w pamięci RAM (tmpfs, memfd), ale potrzebujesz ścieżki do pliku. Dzięki temu bardzo łatwo kontrolować to, co jest uruchamiane w systemie Linux, wykrywać zagrożenia i narzędzia atakującego oraz uniemożliwiać im podejmowanie prób uruchomienia czegokolwiek własnego (_np._ nie zezwalając nieuprzywilejowanym użytkownikom na umieszczanie plików wykonywalnych w dowolnym miejscu).
 
-Ta technika ma jednak to wszystko zmienić. Jeśli nie możesz uruchomić wybranego procesu... **w takim razie przejmujesz już istniejący**.
+Ta technika ma jednak całkowicie to zmienić. Jeśli nie możesz uruchomić wybranego procesu... **przejmujesz już istniejący**.
 
-Ta technika pozwala **ominąć typowe mechanizmy ochrony, takie jak read-only, noexec, file-name whitelisting i hash whitelisting**.<sup>[[1]](#references)</sup>
+Ta technika pozwala **ominąć typowe mechanizmy ochrony, takie jak read-only, noexec, whitelistowanie nazw plików i whitelistowanie hashy**.<sup>[[1]](#references)</sup>
 
 ## Zależności
 
-Końcowy skrypt zależy od następujących narzędzi, aby działać. Muszą one być dostępne w atakowanym systemie (domyślnie znajdziesz je wszędzie):
+Końcowy skrypt zależy od poniższych narzędzi, aby działać; muszą one być dostępne w atakowanym systemie (domyślnie znajdziesz je wszędzie):
 ```
 dd
 bash | zsh | ash (busybox)
@@ -26,53 +28,53 @@ base64
 ```
 ## Technika
 
-Jeśli możesz dowolnie modyfikować pamięć procesu, możesz przejąć nad nim kontrolę. Można to wykorzystać do przejęcia już istniejącego procesu i zastąpienia go innym programem. Możemy to osiągnąć, korzystając z syscalla `ptrace()` (co wymaga możliwości wykonywania syscalli lub dostępności `gdb` w systemie) albo, co ciekawsze, zapisując do `/proc/$pid/mem`.<sup>[[1]](#references)</sup>
+Jeśli możesz dowolnie modyfikować pamięć procesu, możesz przejąć nad nim kontrolę. Można to wykorzystać do przejęcia już istniejącego procesu i zastąpienia go innym programem. Możemy to osiągnąć za pomocą syscalla `ptrace()` (co wymaga możliwości wykonywania syscalli lub dostępności gdb w systemie) albo, co ciekawsze, zapisując do `/proc/$pid/mem`.<sup>[[1]](#references)</sup>
 
-Plik `/proc/$pid/mem` jest mapowaniem jeden do jednego całej przestrzeni adresowej procesu (_np._ od `0x0000000000000000` do `0x7ffffffffffff000` w x86-64). Oznacza to, że odczyt z tego pliku lub zapis do niego pod offsetem `x` jest tym samym co odczyt lub modyfikacja zawartości pod adresem wirtualnym `x`.
+Plik `/proc/$pid/mem` jest odwzorowaniem jeden do jednego całej przestrzeni adresowej procesu (_np._ od `0x0000000000000000` do `0x7ffffffffffff000` w x86-64). Oznacza to, że odczyt z tego pliku lub zapis do niego pod offsetem `x` jest równoznaczny z odczytem lub modyfikacją zawartości pod adresem wirtualnym `x`.
 
 Teraz musimy zmierzyć się z czterema podstawowymi problemami:
 
-- Ogólnie rzecz biorąc, tylko root i właściciel pliku mogą go modyfikować.
+- Ogólnie tylko root i właściciel programu mogą go modyfikować.
 - ASLR.
-- Jeśli spróbujemy odczytać lub zapisać adres, który nie jest zmapowany w przestrzeni adresowej programu, otrzymamy błąd I/O.
+- Jeśli spróbujemy odczytać lub zapisać adres, który nie jest odwzorowany w przestrzeni adresowej programu, otrzymamy błąd I/O.
 
-Problemy te mają rozwiązania, które nie są idealne, ale są skuteczne:
+Problemy te mają rozwiązania, które — choć nie są idealne — dobrze spełniają swoje zadanie:
 
-- Większość interpreterów shell umożliwia tworzenie deskryptorów plików, które będą następnie dziedziczone przez procesy potomne. Możemy utworzyć fd wskazujący na plik `mem` shell z uprawnieniami do zapisu... dzięki temu procesy potomne korzystające z tego fd będą mogły modyfikować pamięć shell.
-- ASLR nie stanowi nawet problemu — możemy sprawdzić plik `maps` shell lub dowolny inny plik z procfs, aby uzyskać informacje o przestrzeni adresowej procesu.
-- Musimy więc wykonać `lseek()` na pliku. Z poziomu shell nie można tego zrobić bez użycia osławionego `dd`.
+- Większość interpreterów shell pozwala na tworzenie deskryptorów plików, które następnie będą dziedziczone przez procesy potomne. Możemy utworzyć fd wskazujący na plik `mem` shella z uprawnieniami do zapisu... dzięki temu procesy potomne korzystające z tego fd będą mogły modyfikować pamięć shella.
+- ASLR nie stanowi nawet problemu — możemy sprawdzić plik `maps` shella lub dowolny inny plik z procfs, aby uzyskać informacje o przestrzeni adresowej procesu.
+- Musimy więc wykonać `lseek()` na pliku. Z poziomu shella nie można tego zrobić bez użycia niesławnego `dd`.
 
-### Szczegóły
+### Bardziej szczegółowo
 
 Kroki są stosunkowo proste i nie wymagają żadnej specjalistycznej wiedzy, aby je zrozumieć:<sup>[[1]](#references)</sup>
 
-- Przeanalizuj binary, który chcemy uruchomić, oraz loader, aby ustalić, jakich mappingów wymagają. Następnie przygotuj "shell"code, który, ogólnie rzecz biorąc, wykona te same kroki, co kernel przy każdym wywołaniu `execve()`:
-- Utwórz wspomniane mappingi.
-- Wczytaj do nich binary.
+- Przeanalizuj plik binarny, który chcemy uruchomić, oraz loader, aby ustalić, jakich mapowań potrzebują. Następnie przygotuj "shell"code, który w ogólnym zarysie wykona te same kroki, co kernel przy każdym wywołaniu `execve()`:
+- Utwórz wspomniane mapowania.
+- Wczytaj do nich pliki binarne.
 - Skonfiguruj uprawnienia.
-- Na koniec zainicjalizuj stack argumentami programu i umieść auxiliary vector (wymagany przez loader).
+- Na koniec zainicjalizuj stos argumentami programu i umieść na nim wektor pomocniczy (wymagany przez loader).
 - Przeskocz do loadera i pozwól mu wykonać resztę (załadować biblioteki wymagane przez program).
-- Z pliku `syscall` uzyskaj adres, pod który proces powróci po syscallu, który wykonuje.
-- Nadpisz to miejsce, które będzie executable, naszym shellcode (przez `mem` możemy modyfikować strony bez uprawnień do zapisu).
+- Uzyskaj z pliku `syscall` adres, pod który proces powróci po zakończeniu wykonywanego syscalla.
+- Nadpisz to miejsce, które będzie wykonywalne, naszym shellcode'em (za pośrednictwem `mem` możemy modyfikować strony bez uprawnień do zapisu).
 - Przekaż program, który chcemy uruchomić, na stdin procesu (zostanie `read()` przez wspomniany "shell"code).
-- W tym momencie loader musi załadować niezbędne biblioteki naszego programu i przeskoczyć do niego.
+- W tym momencie loader zajmie się załadowaniem niezbędnych bibliotek naszego programu i przeskoczy do niego.
 
-**Sprawdź tool w** [**https://github.com/arget13/DDexec**](https://github.com/arget13/DDexec).<sup>[[1]](#references)</sup>
+**Sprawdź narzędzie na stronie** [**https://github.com/arget13/DDexec**](https://github.com/arget13/DDexec).<sup>[[1]](#references)</sup>
 
 ## EverythingExec
 
-Istnieje kilka alternatyw dla `dd`, z których jedną, `tail`, jest obecnie domyślny program używany do wykonywania `lseek()` w pliku `mem` (co było jedynym powodem używania `dd`). Wspomniane alternatywy to:<sup>[[1]](#references)</sup>
+Istnieje kilka alternatyw dla `dd`, z których jedna — `tail` — jest obecnie domyślnym programem używanym do wykonywania `lseek()` w pliku `mem` (co było jedynym powodem używania `dd`). Wspomniane alternatywy to:<sup>[[1]](#references)</sup>
 ```bash
 tail
 hexdump
 cmp
 xxd
 ```
-Ustawiając zmienną `SEEKER`, możesz zmienić używany seeker, _np._:
+Ustawiając zmienną `SEEKER`, możesz zmienić używany mechanizm wyszukiwania, _np._:
 ```bash
 SEEKER=cmp bash ddexec.sh ls -l <<< $(base64 -w0 /bin/ls)
 ```
-Jeśli znajdziesz inny poprawny seeker, który nie został zaimplementowany w skrypcie, nadal możesz go użyć, ustawiając zmienną `SEEKER_ARGS`:
+Jeśli znajdziesz inny prawidłowy seeker, który nie został zaimplementowany w skrypcie, nadal możesz go użyć, ustawiając zmienną `SEEKER_ARGS`:
 ```bash
 SEEKER=xxd SEEKER_ARGS='-s $offset' zsh ddexec.sh ls -l <<< $(base64 -w0 /bin/ls)
 ```
