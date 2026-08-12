@@ -2,7 +2,7 @@
   var CAMPAIGN_ID = "summer-" + new Date().getFullYear()
   var DISMISS_KEY = "htDiscountDismissedUntil:" + CAMPAIGN_ID
   var DISMISS_MS = 10 * 24 * 60 * 60 * 1000
-  var IMAGE_PATH = "images/hacktricks-summer-discount-2026.png"
+  var IMAGE_PATH = "images/hacktricks-summer-discount-2026-v1.webp"
   var TARGET_URL = "https://hacktricks-training.com"
   var TITLE = "HackTricks Training Summer Discount"
 

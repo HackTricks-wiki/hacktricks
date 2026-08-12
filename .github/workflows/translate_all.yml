@@ -76,7 +76,11 @@ jobs:
           wget -O compare_and_fix_refs.py https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/master/scripts/compare_and_fix_refs.py
           wget -O translator.py https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/master/scripts/translator.py
           cp mark_unchanged_s3_files.py /tmp/mark_unchanged_s3_files.py
+          cp upload_immutable_images.sh /tmp/upload_immutable_images.sh
           cd ..
+          mkdir -p /tmp/immutable-images
+          cp src/images/{hacktricks-summer-discount-2026-v1.webp,arte-badge-v1.webp,grte-badge-v1.webp,azrte-badge-v1.webp} /tmp/immutable-images/
+          cp theme/discount.js /tmp/discount.js
           wget -O /tmp/seo_postprocess.py https://raw.githubusercontent.com/HackTricks-wiki/hacktricks/master/scripts/seo_postprocess.py
 
       - name: Run get_and_save_refs.py
@@ -128,6 +132,8 @@ jobs:
           git checkout "$BRANCH"
           git pull
           MDBOOK_BOOK__LANGUAGE=$BRANCH mdbook build || (echo "Error logs" && cat hacktricks-preprocessor-error.log && echo "" && echo "" && echo "Debug logs" && (cat hacktricks-preprocessor.log | tail -n 20) && exit 1)
+          cp /tmp/immutable-images/* ./book/images/
+          cp /tmp/discount.js ./book/discount.js
       
       - name: Push search index to hacktricks-searchindex repo
         shell: bash
@@ -275,6 +281,7 @@ jobs:
             --manifest /tmp/s3-branch-manifest.json \
             --remote-prefix "$BRANCH/"
           aws s3 sync ./book s3://hacktricks-wiki/$BRANCH --delete
+          bash /tmp/upload_immutable_images.sh hacktricks-wiki "$BRANCH"
           echo "Sync completed"
           echo "Cat 3 files from the book"
           find . -type f -name 'index.html' -print | head -n 3 | xargs -r cat
