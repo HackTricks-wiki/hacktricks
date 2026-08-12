@@ -2,27 +2,28 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-MSI Wrapper inaweza kufunga executable au script kama faili la Windows Installer (`.msi`). Pakua na uanzishe toleo lisilolipishwa, kisha uchague executable ya kufungwa. Ili kutekeleza mfululizo wa amri, chagua faili la `.bat` kama ingizo badala ya kufunga `cmd.exe`.<sup>[[1]](#references)</sup>
+MSI Wrapper inaweza ku- package executable au script kama faili la Windows Installer (`.msi`). Pakua na uanzishe toleo lisilolipishwa, kisha uchague executable ya ku-package.<sup>[[3]](#references)</sup> Ili kuendesha mfululizo wa commands, chagua faili la `.bat` kama input badala ya ku-package `cmd.exe`.<sup>[[1]](#references)</sup>
 
 ![Kuchagua executable ya chanzo au batch script katika MSI Wrapper](<../../images/image (417).png>)
 
-Sanidi kwa uangalifu muktadha wa utekelezaji na sifa nyingine za installer:
+Sanidi execution context na sifa nyingine za installer kwa uangalifu:
 
-![Kusanidi kitambulisho cha programu na muktadha wa usalama katika MSI Wrapper](<../../images/image (312).png>)
+![Kusanidi application ID na security context katika MSI Wrapper](<../../images/image (312).png>)
 
 ![Kusanidi sifa za installer katika MSI Wrapper](<../../images/image (346).png>)
 
-![Kukagua mipangilio ya build ya MSI Wrapper](<../../images/image (1072).png>)
+![Kukagua build settings za MSI Wrapper](<../../images/image (1072).png>)
 
-Thamani hizi zinaweza kubadilishwa unapofunga binary maalum.
+Thamani hizi zinaweza kubadilishwa wakati wa ku-package binary maalum.
 
-Endelea kupitia kurasa zilizobaki za wizard na uchague **Build** ili kutengeneza installer.<sup>[[1]](#references)</sup>
+Endelea kupitia kurasa zilizosalia za wizard na uchague **Build** ili kutengeneza installer.<sup>[[1]](#references)</sup>
 
 > [!WARNING]
-> Kuunda MSI pekee hakutoi privileges zilizoinuliwa. Ikiwa installation itaendeshwa kwa privileges zilizoinuliwa hutegemea sera ya Windows Installer, muktadha wa package, na authorization ya mtumiaji. Microsoft inaonya kwamba kuwezesha `AlwaysInstallElevated` kwa mtumiaji na kompyuta huruhusu watumiaji wasio administrators kusakinisha packages kwa system privileges.<sup>[[2]](#references)</sup>
+> Kuunda MSI hakutoi elevated privileges moja kwa moja. Ikiwa installation itakuwa elevated hutegemea Windows Installer policy, package context na user authorization. Microsoft inaonya kwamba kuwezesha `AlwaysInstallElevated` kwa user na computer kunawawezesha non-administrators ku-install packages kwa system privileges.<sup>[[2]](#references)</sup>
 
 ## References
 
-- [1] [MSI Wrapper documentation - Kuanza](https://www.exemsi.com/documentation/getting-started/)
-- [2] [Microsoft Learn - Kusakinisha package kwa privileges zilizoinuliwa kwa mtumiaji asiye admin](https://learn.microsoft.com/en-us/windows/win32/msi/installing-a-package-with-elevated-privileges-for-a-non-admin)
+- [1] [Nyaraka za MSI Wrapper - Kuanza](https://www.exemsi.com/documentation/getting-started/)
+- [2] [Microsoft Learn - Ku-install package yenye elevated privileges kwa non-admin](https://learn.microsoft.com/en-us/windows/win32/msi/installing-a-package-with-elevated-privileges-for-a-non-admin)
+- [3] [MSI Wrapper - Kupakua](https://www.exemsi.com/download/)
 {{#include ../../banners/hacktricks-training.md}}

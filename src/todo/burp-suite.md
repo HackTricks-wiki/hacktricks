@@ -4,17 +4,19 @@
 
 ## Aina za payload za Intruder
 
+Burp Intruder inajumuisha payload generators na transformations zilizojengwa ndani zifuatazo:<sup>[[1]](#references)</sup>
+
 - **Simple list:** Tumia orodha iliyosanidiwa ya strings kama payloads.
-- **Runtime file:** Soma payload moja kwa kila mstari wakati wa runtime. Hii ni muhimu kwa orodha kubwa kwa sababu Burp haipakii faili lote kwenye memory.
-- **Case modification:** Badilisha herufi kubwa na ndogo za input string, kwa mfano kuwa lowercase, uppercase, sentence case, au title case.
-- **Numbers:** Zalisha nambari zinazofuatana au za random ndani ya range iliyosanidiwa.
-- **Brute forcer:** Zalisha kila permutation kwa character set iliyochaguliwa na urefu wa chini/wa juu.<sup>[[1]](#references)</sup>
+- **Runtime file:** Soma payload moja kwa kila mstari wakati wa runtime. Hii ni muhimu kwa orodha kubwa kwa sababu Burp haipakii file nzima kwenye memory.
+- **Case modification:** Tengeneza value isiyobadilishwa, katika herufi ndogo na herufi kubwa, `Propername` (herufi ya kwanza ikiwa kubwa na zilizobaki zikiwa ndogo), au `ProperName` (herufi ya kwanza ikiwa kubwa huku herufi zinazobaki zikibaki bila kubadilishwa). Burp huondoa matokeo yanayojirudia.
+- **Numbers:** Tengeneza nambari zinazofuatana au za random ndani ya range iliyosanidiwa.
+- **Brute forcer:** Tengeneza kila permutation kwa character set iliyochaguliwa na urefu wa chini/wa juu.
 
-## Extensions na zana shirikishi
+## Extensions na zana za ziada
 
-- **Collabfiltrator** huzalisha payloads zinazotekeleza commands na ku-exfiltrate output yake kupitia DNS queries kwenda Burp Collaborator.<sup>[[2]](#references)</sup>
-- **Burp Suite Exporter** hu-export findings za Burp kwa matumizi katika workflows nyingine za reporting.<sup>[[3]](#references)</sup>
-- **HTTP Script Generator** hubadilisha HTTP requests kuwa scripts katika lugha kadhaa.<sup>[[4]](#references)</sup>
+- **Collabfiltrator** hutengeneza payloads zinazotekeleza commands na ku-exfiltrate output yake kupitia DNS queries kwenda Burp Collaborator.<sup>[[2]](#references)</sup>
+- **Burp Suite Exporter** hu-export findings za Burp ili zitumike katika workflows nyingine za reporting.<sup>[[3]](#references)</sup>
+- **HTTP Script Generator** hubadilisha HTTP requests kuwa scripts katika languages kadhaa.<sup>[[4]](#references)</sup>
 
 ## References
 
