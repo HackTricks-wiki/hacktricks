@@ -2,32 +2,26 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Recherchez :
+## Parcours pratique
 
-- Homoglyphes Unicode
-- Caractères de largeur nulle
-- Motifs d'espaces (espaces contre tabulations)
-
-## Approche pratique
-
-Si du texte brut se comporte de manière inattendue, inspectez les points de code et normalisez avec précaution (ne détruisez pas les preuves).
+Si du texte brut se comporte de manière inattendue, conservez les éléments originaux, inspectez leurs points de code et ne normalisez qu'une copie.
 
 ### Technique
 
-La stéganographie textuelle repose fréquemment sur des caractères qui s'affichent de manière identique (ou qui sont invisibles) :
+La stéganographie textuelle repose fréquemment sur des caractères qui s'affichent de manière identique ou invisible :
 
-- Homoglyphes : différents points de code Unicode qui se ressemblent (le `a` latin contre le `а` cyrillique)
-- Caractères de largeur nulle : jointures, non-jointures et espaces de largeur nulle
-- Encodages par espaces blancs : espaces contre tabulations, espaces en fin de ligne, motifs de longueur de ligne<sup>[[1]](#references)</sup>
+- Homoglyphes : différents points de code Unicode qui se ressemblent (par exemple, `a` latin et `а` cyrillique)<sup>[[1]](#references)</sup>
+- Caractères de largeur nulle : joiners, non-joiners et espaces de largeur nulle<sup>[[2]](#references)</sup>
+- Encodages par espaces blancs : espaces par opposition aux tabulations, motifs d'espaces en fin de ligne et longueurs de ligne délibérées<sup>[[3]](#references)[[4]](#references)</sup>
 
-Autres cas à haut signal :
+Cas supplémentaires à fort signal :
 
-- Caractères de contrôle/de remplacement bidirectionnels (peuvent réordonner visuellement le texte)
-- Sélecteurs de variation et caractères combinatoires utilisés comme covert channel
+- Contrôles bidirectionnels, qui peuvent réordonner visuellement le texte<sup>[[1]](#references)</sup>
+- Sélecteurs de variation et caractères combinants, qui peuvent transporter un état caché tout en laissant le texte visible presque inchangé<sup>[[1]](#references)</sup>
 
-### Outils de décodage
+### Assistants de décodage
 
-- Terrain d'expérimentation pour les homoglyphes Unicode et les caractères de largeur nulle : https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder
+- [Encodeur/décodeur Unicode d'homoglyphes et de caractères de largeur nulle](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)<sup>[[2]](#references)</sup>
 
 ### Inspecter les points de code
 ```bash
@@ -41,14 +35,16 @@ PY
 ```
 ## Canaux CSS `unicode-range`
 
-Les règles `@font-face` peuvent encoder des octets dans les entrées `unicode-range: U+..`. Extrayez les codepoints, concaténez les valeurs hexadécimales, puis décodez-les :
+Les règles `@font-face` peuvent être détournées pour encoder des octets dans les entrées `unicode-range: U+..`. Extrayez les codepoints, concaténez les valeurs hexadécimales, puis décodez-les :<sup>[[3]](#references)</sup>
 ```bash
 grep -o "U+[0-9A-Fa-f]\+" styles.css | tr -d 'U+\n' | xxd -r -p
 ```
-Si les plages contiennent plusieurs octets par déclaration, séparez-les d’abord sur les virgules et normalisez-les (`tr ',+' '\n'`). Python facilite l’analyse et l’émission des octets lorsque le formatage est incohérent.<sup>[[1]](#references)</sup>
+Si les plages contiennent plusieurs valeurs par déclaration, séparez-les d'abord sur les virgules et normalisez (`tr ',+' '\n'`). Python peut analyser et produire les octets lorsque le formatage est incohérent.<sup>[[3]](#references)</sup>
 
-## Références
+## References
 
-- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
-
+- [1] [Rapport technique Unicode #36 : Considérations de sécurité Unicode](https://www.unicode.org/reports/tr36/)
+- [2] [Irongeek : Steganography Unicode avec des caractères de largeur nulle et des homoglyphes](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)
+- [3] [0xdf : Flagvent 2025 (Medium) — Liste de souhaits du père Noël](https://0xdf.gitlab.io/flagvent2025/medium)
+- [4] [Manuel Debian : steganography d'espaces blancs avec `stegsnow`](https://manpages.debian.org/trixie/stegsnow/stegsnow.1.en.html)
 {{#include ../../banners/hacktricks-training.md}}

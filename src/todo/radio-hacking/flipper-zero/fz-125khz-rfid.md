@@ -2,55 +2,50 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-
 ## Introduction
 
-Pour plus d'informations sur le fonctionnement des tags 125 kHz, consultez :
-
+Pour comprendre le fonctionnement des tags 125 kHz, consultez :
 
 {{#ref}}
 ../pentesting-rfid.md
 {{#endref}}
 
-## Actions
+L'[introduction aux tags RFID basse fréquence](../pentesting-rfid.md#low-frequency-rfid-tags-125khz) présente les familles de tags courantes et leurs formats de données.
 
-Pour plus d'informations sur ces types de tags, [**lisez cette introduction**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz).
+## Actions
 
 ### Lire
 
-Tente de **lire** les informations de la carte. Il est ensuite possible de les **émuler**.<sup>[[1]](#references)</sup>
+Utilisez **Lire** pour capturer les données du tag. Après une lecture réussie, Flipper Zero peut émuler le tag enregistré.<sup>[[1]](#references)</sup>
 
 > [!WARNING]
-> Notez que certains interphones tentent de se protéger contre la duplication des clés en envoyant une commande d'écriture avant la lecture. Si l'écriture réussit, le tag est considéré comme faux. Lorsque Flipper émule un RFID, il n'existe aucun moyen pour le lecteur de le distinguer de l'original, ce qui évite donc ce type de problème.
+> Certains lecteurs d'interphone tentent de détecter les tags duplicata inscriptibles en envoyant une commande d'écriture avant la lecture. Une émulation Flipper Zero n'expose pas la mémoire inscriptible du tag de la même manière.<sup>[[1]](#references)</sup>
 
 ### Ajouter manuellement
 
-Vous pouvez créer de **fausses cartes dans Flipper Zero en indiquant les données** manuellement, puis les émuler.
+Vous pouvez saisir manuellement les données du tag dans Flipper Zero, les enregistrer, puis les émuler.<sup>[[1]](#references)</sup>
 
-#### Identifiants sur les cartes
+#### IDs sur les cartes
 
-Parfois, lorsque vous obtenez une carte, vous trouverez son identifiant (ou une partie de celui-ci) inscrit et visible sur la carte.
+Parfois, une carte comporte tout ou partie de son ID imprimé sur sa face extérieure.
 
 - **EM Marin**
 
-Par exemple, sur cette carte EM-Marin, il est possible de **lire clairement les 3 derniers octets sur les 5** présents sur la carte physique.\
-Les 2 autres peuvent être **brute-forced** si vous ne pouvez pas les lire sur la carte.<sup>[[1]](#references)</sup>
+Par exemple, la carte EM-Marin illustrée expose les trois derniers de ses cinq octets d'ID. Si le tag ne peut pas être lu, les deux octets manquants peuvent être brute-forcés.
 
 <figure><img src="../../../images/image (104).png" alt=""><figcaption></figcaption></figure>
 
 - **HID**
 
-Il en va de même pour cette carte HID, où seuls 2 des 3 octets peuvent être trouvés imprimés sur la carte.
+De même, la carte HID illustrée n'imprime que deux de ses trois octets d'ID.
 
 <figure><img src="../../../images/image (1014).png" alt=""><figcaption></figcaption></figure>
 
-### Émuler/écrire
+### Émuler/Écrire
 
-Après avoir **copié** une carte ou **saisi** son identifiant **manuellement**, il est possible de l'**émuler** avec Flipper Zero ou de l'**écrire** sur une carte réelle.<sup>[[1]](#references)</sup>
+Après avoir lu un tag ou saisi manuellement son ID, Flipper Zero peut émuler l'identifiant enregistré. Pour les tags inscriptibles pris en charge, il peut également écrire les données enregistrées sur une carte compatible.<sup>[[1]](#references)</sup>
 
-## Références
+## References
 
-- [1] [Diving into RFID Protocols with Flipper Zero](https://blog.flipperzero.one/rfid/)
-
-
+- [1] [Flipper Zero : Plongée dans les protocoles RFID](https://blog.flipperzero.one/rfid/)
 {{#include ../../../banners/hacktricks-training.md}}

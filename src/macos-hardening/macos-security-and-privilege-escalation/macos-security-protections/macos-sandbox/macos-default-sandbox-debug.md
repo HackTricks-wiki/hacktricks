@@ -1,16 +1,19 @@
-# Débogage de la Sandbox par défaut de macOS
+# Débogage du sandbox par défaut de macOS
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Sur cette page, vous trouverez comment créer une application pour lancer des commandes arbitraires depuis la Sandbox par défaut de macOS :
+Cette page crée un petit exécuteur de commandes et le signe avec l’entitlement macOS App Sandbox. Les commandes lancées avec `system()` héritent des restrictions du sandbox de l’application. Cela est donc utile pour tester le comportement dans un sandbox ; il ne s’agit pas d’un sandbox escape.<sup>[[1]](#references)</sup>
 
 1. Compiler l’application :
 ```objectivec:main.m
 #include <Foundation/Foundation.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 int main(int argc, const char * argv[]) {
 @autoreleasepool {
-while (true) {
+while (1) {
 char input[512];
 
 printf("Enter command to run (or 'exit' to quit): ");
@@ -18,7 +21,7 @@ if (fgets(input, sizeof(input), stdin) == NULL) {
 break;
 }
 
-// Remove newline character
+// Remove the trailing newline.
 size_t len = strlen(input);
 if (len > 0 && input[len - 1] == '\n') {
 input[len - 1] = '\0';
@@ -34,9 +37,11 @@ system(input);
 return 0;
 }
 ```
-Compilez-le en exécutant : `clang -framework Foundation -o SandboxedShellApp main.m`
-
-2. Créez le bundle `.app`
+Compilez-le avec :
+```bash
+clang -framework Foundation -o SandboxedShellApp main.m
+```
+2. Construire le bundle `.app` :
 ```bash
 mkdir -p SandboxedShellApp.app/Contents/MacOS
 mv SandboxedShellApp SandboxedShellApp.app/Contents/MacOS/
@@ -58,7 +63,7 @@ cat << EOF > SandboxedShellApp.app/Contents/Info.plist
 </plist>
 EOF
 ```
-3. Définir les entitlements
+3. Définissez les entitlements. Le deuxième variant accorde également un accès en lecture/écriture au dossier Downloads de l'utilisateur.<sup>[[2]](#references)</sup>
 
 {{#tabs}}
 {{#tab name="sandbox"}}
@@ -94,12 +99,16 @@ EOF
 {{#endtab}}
 {{#endtabs}}
 
-4. Signez l’application (vous devez créer un certificat dans le trousseau)
+4. Signez l’application avec une identité de signature disponible dans le trousseau, puis exécutez-la. Lors d’une signature manuelle, `codesign --entitlements` intègre la liste de propriétés des entitlements dans la signature de l’application.<sup>[[1]](#references)</sup>
 ```bash
 codesign --entitlements entitlements.plist -s "YourIdentity" SandboxedShellApp.app
 ./SandboxedShellApp.app/Contents/MacOS/SandboxedShellApp
 
-# An d in case you need this in the future
+# Remove the signature if it is no longer needed.
 codesign --remove-signature SandboxedShellApp.app
 ```
+## References
+
+- [1] [Apple Code Signing Guide: Ajouter manuellement des entitlements pour le Sandboxing](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/Procedures/Procedures.html#//apple_ref/doc/uid/TP40005929-CH4-SW31)
+- [2] [Apple: entitlement `com.apple.security.files.downloads.read-write`](https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.files.downloads.read-write)
 {{#include ../../../../banners/hacktricks-training.md}}
