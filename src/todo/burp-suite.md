@@ -4,17 +4,19 @@
 
 ## Intruder payload türleri
 
-- **Simple list:** Payload olarak yapılandırılmış bir string listesi kullanır.
-- **Runtime file:** Çalışma zamanında satır başına bir payload okur. Burp tüm dosyayı belleğe yüklemediği için bu, büyük listeler açısından kullanışlıdır.
-- **Case modification:** Bir input string'inin büyük/küçük harf kullanımını değiştirir; örneğin lowercase, uppercase, sentence case veya title case yapar.
+Burp Intruder aşağıdaki yerleşik payload oluşturucularını ve dönüşümlerini içerir:<sup>[[1]](#references)</sup>
+
+- **Simple list:** Yapılandırılmış bir string listesini payload olarak kullanır.
+- **Runtime file:** Çalışma zamanında satır başına bir payload okur. Burp dosyanın tamamını belleğe yüklemediği için büyük listelerde kullanışlıdır.
+- **Case modification:** Değiştirilmemiş değeri, küçük harfli ve büyük harfli biçimleri, `Propername` (ilk harf büyük, geri kalanı küçük) veya `ProperName` (ilk harf büyük, kalan karakterler değiştirilmemiş) biçimini oluşturur. Burp yinelenen sonuçları atar.
 - **Numbers:** Yapılandırılmış bir aralık içinde sıralı veya rastgele sayılar oluşturur.
-- **Brute forcer:** Seçilen bir karakter kümesi ve minimum/maksimum uzunluk için tüm permütasyonları oluşturur.<sup>[[1]](#references)</sup>
+- **Brute forcer:** Seçilen bir karakter kümesi ile minimum/maksimum uzunluk için her permütasyonu oluşturur.
 
-## Extensions ve yardımcı araçlar
+## Eklentiler ve yardımcı araçlar
 
-- **Collabfiltrator**, komutları çalıştıran ve çıktıları Burp Collaborator'a DNS sorguları üzerinden exfiltrate eden payload'lar oluşturur.<sup>[[2]](#references)</sup>
+- **Collabfiltrator**, komutları çalıştıran ve çıktılarını Burp Collaborator'a DNS sorguları üzerinden exfiltrate eden payloadlar oluşturur.<sup>[[2]](#references)</sup>
 - **Burp Suite Exporter**, Burp bulgularını diğer raporlama iş akışlarında kullanılmak üzere dışa aktarır.<sup>[[3]](#references)</sup>
-- **HTTP Script Generator**, HTTP isteklerini çeşitli dillerdeki script'lere dönüştürür.<sup>[[4]](#references)</sup>
+- **HTTP Script Generator**, HTTP isteklerini çeşitli dillerdeki scriptlere dönüştürür.<sup>[[4]](#references)</sup>
 
 ## References
 

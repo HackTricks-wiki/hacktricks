@@ -4,19 +4,23 @@
 
 ## Bu Bölüm Hakkında
 
-Bu bölümde industrial control system (ICS) bileşenleri, mimarileri, protokolleri ve security assessment yöntemleri tanıtılmaktadır. ICS, fiziksel süreçleri izleyen veya bu süreçlerde değişikliklere neden olan programlanabilir sistemleri ve cihazları kapsayan daha geniş operational technology (OT) alanının bir parçasıdır. Yaygın örnekler arasında supervisory control and data acquisition (SCADA) sistemleri, distributed control systems (DCSs) ve programmable logic controllers (PLCs) bulunur.<sup>[[1]](#references)</sup>
+Bu bölüm, endüstriyel kontrol sistemi (ICS) bileşenlerini, mimarilerini, protokollerini ve güvenlik değerlendirme yöntemlerini tanıtır. ICS, fiziksel süreçleri izleyen veya bu süreçlerde değişikliklere neden olan programlanabilir sistem ve cihazlardan oluşan daha geniş operasyonel teknoloji (OT) alanının bir parçasıdır. Yaygın örnekler arasında denetleyici kontrol ve veri toplama (SCADA) sistemleri, dağıtık kontrol sistemleri (DCS'ler) ve programlanabilir mantık denetleyicileri (PLC'ler) bulunur.<sup>[[1]](#references)</sup>
 
-Bu ortamlardaki security çalışmaları; süreç güvenliği, güvenilirlik, kullanılabilirlik, deterministik çalışma ve ekipman yaşam döngüleri gibi geleneksel IT'den farklı gereksinimleri dikkate almalıdır. Teknik olarak geçerli bir security control, fiziksel süreci aksatıyorsa yine de uygun olmayabilir; bu nedenle test ve remediation işlemleri sistem sahibi ve operasyon personeliyle koordineli şekilde yürütülmelidir.<sup>[[1]](#references)</sup>
+Bu ortamlardaki güvenlik çalışmaları; süreç güvenliği, güvenilirlik, kullanılabilirlik, deterministik çalışma ve ekipman yaşam döngüleri gibi geleneksel IT'den farklı gereksinimleri dikkate almalıdır. Teknik olarak geçerli bir güvenlik kontrolü, fiziksel süreci kesintiye uğratıyorsa yine de uygun olmayabilir; bu nedenle test ve iyileştirme çalışmaları sistem sahibi ve operasyon personeliyle koordineli şekilde yürütülmelidir.<sup>[[1]](#references)</sup>
 
-## Assessment Öncelikleri
+Sistemin ele geçirilmesi veya kazara kesintiye uğraması üretimi durdurabilir, ekipmana zarar verebilir, tehlikeli maddelerin açığa çıkmasına, çevrenin zarar görmesine veya yaralanma ve can kaybına neden olabilir. Bu potansiyel fiziksel etki nedeniyle, aktif testlerden önce kontrol edilen sürecin ve güvenli çalışma sınırlarının anlaşılması gerekir.<sup>[[1]](#references)</sup>
 
-Kontrol edilen süreci, sistem sınırlarını, network topology'sini, varlıkları, data flow'larını, trust relationship'lerini ve harici bağlantıları anlayarak başlayın. Benzer cihaz türleri farklı tesislerde farklı işlevler üstlenebilir; bu nedenle bir deployment'ın mimarisinin veya impact model'inin başka bir deployment için geçerli olduğunu varsaymaktan kaçının.<sup>[[1]](#references)</sup>
+Birçok OT kurulumu, ekipmanların uzun hizmet ömrüne sahip olması ve değişikliklerin operasyonel ve güvenlik testleri gerektirmesi nedeniyle eski işletim sistemlerini, uygulamaları ve protokolleri kullanmaya devam eder. Bazı protokoller modern kimlik doğrulama veya şifreleme olmadan tasarlanmıştır ve patching, vendor desteği veya bakım aralıkları nedeniyle kısıtlanabilir; doğrudan yükseltmelerin uygulanabilir olmadığı durumlarda segmentation, access control ve monitoring ile telafi sağlayın.<sup>[[1]](#references)</sup>
 
-Mümkün olduğunda passive discovery'yi ve mevcut engineering dokümantasyonunu tercih edin. Her türlü active scanning veya exploitation işlemi; güvenlik kısıtlarını, maintenance window'larını, recovery prosedürlerini ve durdurma koşullarını tanımlayan onaylı bir test planını izlemelidir. Bulgular hem cybersecurity impact hem de fiziksel süreç üzerindeki olası etkiler açısından değerlendirilmelidir.<sup>[[1]](#references)</sup>
+## Değerlendirme Öncelikleri
 
-Aynı mimari bilgisi; asset inventory, network segmentation, monitoring, incident response ve risk-based vulnerability management gibi defensive faaliyetleri de destekler.<sup>[[1]](#references)</sup>
+Kontrol edilen süreci, sistem sınırlarını, network topolojisini, varlıkları, veri akışlarını, trust ilişkilerini ve harici bağlantıları anlayarak başlayın. Benzer cihaz türleri farklı tesislerde farklı işlevlere hizmet edebilir; bu nedenle bir kurulumun mimarisinin veya etki modelinin başka bir kurulum için geçerli olduğunu varsaymaktan kaçının.<sup>[[1]](#references)</sup>
+
+Mümkün olduğunda passive discovery ve mevcut mühendislik dokümantasyonunu tercih edin. Her türlü active scanning veya exploitation, güvenlik kısıtlarını, bakım aralıklarını, kurtarma prosedürlerini ve durdurma koşullarını tanımlayan onaylı bir test planını izlemelidir. Bulgular hem cybersecurity etkisi hem de fiziksel süreç üzerindeki potansiyel etkiler açısından değerlendirilmelidir.<sup>[[1]](#references)</sup>
+
+Aynı mimari bilgisi asset inventory, network segmentation, monitoring, incident response ve risk tabanlı vulnerability management gibi savunma faaliyetlerini de destekler.<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [NIST SP 800-82 Rev. 3 - Operational Technology (OT) Security Rehberi](https://csrc.nist.gov/pubs/sp/800/82/r3/final)
+- [1] [NIST SP 800-82 Rev. 3 - Operasyonel Teknoloji (OT) Güvenliği Kılavuzu](https://csrc.nist.gov/pubs/sp/800/82/r3/final)
 {{#include ../../banners/hacktricks-training.md}}
