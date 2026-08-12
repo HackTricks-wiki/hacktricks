@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Bu tarihsel Hack The Box zincirinde, daha önce yerleştirilmiş bir `.lnk` dosyasını çalıştıran bir MSI oluşturmak için WiX Toolset v3 kullanılmıştır. **Bir MSI otomatik olarak privileged değildir**: Çalıştırma, Windows Installer policy, custom-action attributes ve kurulumu gerçekleştiren kişinin seçtiği bağlamda gerçekleşir. Belirtilen senaryoda attacker ayrıca trusted signing CA'yı çalmış ve signed MSI'ı başka bir user tarafından izlenen bir klasöre yerleştirmiştir.<sup>[[1]](#references)[[3]](#references)</sup>
+Bu tarihsel Hack The Box zincirinde, daha önce yerleştirilmiş bir `.lnk` dosyasını çalıştıran bir MSI oluşturmak için WiX Toolset v3 kullanılmıştır. **Bir MSI otomatik olarak ayrıcalıklı değildir**: çalıştırma, Windows Installer policy, custom-action attributes ve kurulumu gerçekleştiren kişiye göre belirlenen context içinde gerçekleşir. d senaryosunda saldırgan ayrıca güvenilir bir signing CA ele geçirmiş ve imzalanmış MSI'ı başka bir user tarafından izlenen bir folder'a yerleştirmiştir.<sup>[[1]](#references)[[3]](#references)</sup>
 
-WiX MSI kullanım örneklerini kapsamlı şekilde anlamak için [bu sayfaya](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) başvurmanız önerilir. Burada WiX MSI kullanımını gösteren çeşitli örnekler bulabilirsiniz.<sup>[[2]](#references)</sup>
+WiX MSI kullanım örneklerini kapsamlı şekilde anlamak için [bu sayfaya](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) başvurulması önerilir. Burada WiX MSI kullanımını gösteren çeşitli örnekler bulabilirsiniz.<sup>[[2]](#references)</sup>
 
 MSI, `C:\Users\Public\Desktop\Shortcuts\rick.lnk` dosyasını çalıştırır. Orijinal WiX v3 XML'i aşağıda korunmuştur:<sup>[[1]](#references)</sup>
 ```html
@@ -38,19 +38,19 @@ fail_here
 </Product>
 </Wix>
 ```
-`InstallerVersion`, minimum Windows Installer sürümünü belirtir ve `Compressed="yes"` paketin sıkıştırılmış olarak işaretlenmesini sağlar. `Stage1` ertelenmiştir ancak `Impersonate="yes"` değerine sahiptir; bu nedenle yüklemeyi gerçekleştiren kullanıcının taklit edilmiş token'ı ile çalışır. Bu senaryodaki yetki değişikliği, bu özniteliğin sihirli bir şekilde SYSTEM yetkisi vermesinden değil, daha sonra MSI'ı açan ayrıcalıklı kullanıcıdan kaynaklanmıştır.<sup>[[3]](#references)</sup>
+`InstallerVersion`, minimum Windows Installer sürümünü belirtir ve `Compressed="yes"`, paketin sıkıştırılmış olarak işaretlenmesini sağlar. `Stage1` deferred durumdadır ancak `Impersonate="yes"` özelliğine sahiptir; bu nedenle yüklemeyi gerçekleştiren kullanıcının impersonated token'ı ile çalışır. Bu senaryodaki privilege değişikliği, bu özelliğin sihirli bir şekilde SYSTEM yetkisi vermesinden değil, MSI'ı daha sonra açan privileged user'dan kaynaklanmıştır.<sup>[[3]](#references)</sup>
 
-Kaynağı `candle.exe` ile bir WiX nesnesine derleyin:<sup>[[1]](#references)</sup>
+Kaynağı `candle.exe` ile bir WiX object'ine derleyin:<sup>[[1]](#references)</sup>
 ```
 candle.exe -out C:\tmp\wix.wixobj C:\tmp\Ethereal\msi.xml
 ```
-Bu nesneyi `light.exe` ile bir MSI'ye bağlayın:<sup>[[1]](#references)</sup>
+Bu nesneyi `light.exe` ile bir MSI'a bağlayın:<sup>[[1]](#references)</sup>
 ```
 light.exe -out C:\tmp\Ethereal\rick.msi C:\tmp\wix.wixobj
 ```
 ### Orijinal zincirde kullanılan imzalama adımı
 
-Hedef workflow, ele geçirilmiş bir internal CA tarafından imzalanan paketleri kabul ediyordu. Teknik anlatımda, kurtarılan `MyCA.cer`/`MyCA.pvk` dosyalarından bir signing certificate türetildi, bir PFX oluşturuldu ve MSI imzalandı:<sup>[[1]](#references)</sup>
+Hedef workflow, ele geçirilmiş bir internal CA tarafından imzalanan paketleri kabul ediyordu. Write-up, kurtarılan `MyCA.cer`/`MyCA.pvk` dosyalarından bir signing certificate türetti, bir PFX oluşturdu ve MSI'yi imzaladı:<sup>[[1]](#references)</sup>
 ```powershell
 makecert.exe -n "CN=Ethereal" -pe -cy end `
 -ic C:\tmp\MyCA.cer -iv C:\tmp\MyCA.pvk -sky signature `
@@ -58,11 +58,11 @@ makecert.exe -n "CN=Ethereal" -pe -cy end `
 pvk2pfx.exe -pvk C:\tmp\rick.pvk -spc C:\tmp\rick.cer -pfx C:\tmp\rick.pfx
 signtool.exe sign /f C:\tmp\rick.pfx C:\tmp\Ethereal\rick.msi
 ```
-Saldırgan daha sonra imzalı paketi `D:\DEV\MSIs` konumuna yerleştirdi ve ayrıcalıklı workflow/kullanıcının paketi çalıştırmasını bekledi. Tekniği uyarlarken bu ön koşulu koruyun: yükseltilmiş bir installation path, `AlwaysInstallElevated` gibi güvenli olmayan bir policy veya ayrıcalıklı bir victim olmadan bu paket yalnızca mevcut kullanıcının haklarıyla çalışır.
+Saldırgan daha sonra imzalı paketi `D:\DEV\MSIs` konumuna yerleştirdi ve yetkili workflow/kullanıcının paketi çalıştırmasını bekledi. Tekniği uyarlarken bu ön koşulu koruyun: yükseltilmiş yetkili bir kurulum yolu, `AlwaysInstallElevated` gibi güvenli olmayan bir policy veya yetkili bir victim olmadan bu paket yalnızca mevcut kullanıcının yetkileriyle çalışır.
 
 ## References
 
-- [1] [Hack The Box - Ethereal: Kötü Amaçlı msi Oluşturma ve root Alma - 0xRick's Blog](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)
+- [1] [Hack The Box - Ethereal: Kötü amaçlı msi oluşturma ve root erişimi elde etme - 0xRick's Blog](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)
 - [2] [Kısa bir giriş: WiX ile MSI installer oluşturma - CodeProject](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) (see also [wixtools](http://wixtoolset.org))
 - [3] [Microsoft Learn — Ertelenmiş yürütme custom actions (`Impersonate`)](https://learn.microsoft.com/en-us/windows/win32/msi/custom-action-in-script-execution-options)
 {{#include ../../banners/hacktricks-training.md}}
