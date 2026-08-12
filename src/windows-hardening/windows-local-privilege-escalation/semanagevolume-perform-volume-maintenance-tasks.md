@@ -1,31 +1,34 @@
-# SeManageVolumePrivilege: Raw pristup volumenu za proizvoljno čitanje datoteka
+# SeManageVolumePrivilege: zloupotreba održavanja volumena i validacija raw pristupa
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Pregled
 
-Korisničko pravo u Windowsu: Obavljanje zadataka održavanja volumena (konstanta: SeManageVolumePrivilege).
+Windows korisničko pravo: Obavljanje zadataka održavanja volumena (konstanta: SeManageVolumePrivilege).
 
-Nosioci ovog prava mogu da obavljaju operacije niskog nivoa nad volumenima, kao što su defragmentacija, kreiranje/uklanjanje volumena i maintenance IO. Za napadače je od ključne važnosti to što ovo pravo omogućava otvaranje raw handles uređaja volumena (npr. \\.\C:) i izdavanje direktnih disk I/O operacija koje zaobilaze NTFS ACL-ove datoteka. Uz raw pristup možete kopirati bajtove bilo koje datoteke na volumenu čak i ako je pristup zabranjen putem DACL-a, analiziranjem struktura filesystema offline ili korišćenjem alata koji čitaju podatke na nivou blokova/klastera.
+Ovo pravo odobrava operacije održavanja volumena, kao što su defragmentacija i kreiranje ili uklanjanje volumena. Microsoft upozorava da nosilac ovog prava može biti u mogućnosti da proširi datoteke u prostor za skladištenje koji sadrži druge podatke, a zatim da pročita ili izmeni pribavljene bajtove.<sup>[[1]](#references)</sup>
 
-Podrazumevano: Administratori na serverima i domain controllerima.<sup>[[1]](#references)</sup>
+Nemojte izjednačavati posedovanje `SeManageVolumePrivilege` sa garantovanim raw-disk pristupom. Microsoft navodi da otvaranje fizičkog diska ili volumena preko `CreateFile` za direktan pristup zahteva administratorske privilegije, a uobičajene provere pristupa objektima/uređajima i dalje važe. Na konkretnoj verziji sistema ili proizvodu proverite da li token, ACL uređaja, zatraženi pristup, oznake deljenja i stanje volumena dozvoljavaju raw handle pre nego što tvrdite da je moguće proizvoljno čitanje datoteka.<sup>[[3]](#references)</sup>
 
-## Scenariji zloupotrebe
+Podrazumevano: Administrators na serverima i kontrolerima domena.<sup>[[1]](#references)</sup>
 
-- Proizvoljno čitanje datoteka zaobilaženjem ACL-ova čitanjem disk uređaja (npr. eksfiltracija osetljivog materijala zaštićenog sistemom, kao što su privatni ključevi računara u %ProgramData%\Microsoft\Crypto\RSA\MachineKeys i %ProgramData%\Microsoft\Crypto\Keys, registry hive-ovi, DPAPI masterkeys, SAM, ntds.dit putem VSS-a itd.).
-- Zaobilaženje zaključanih/privilegovanih putanja (C:\Windows\System32\…) direktnim kopiranjem bajtova sa raw uređaja.
-- U AD CS okruženjima, eksfiltracija materijala ključa CA-a (machine key store) radi kreiranja “Golden Certificates” i impersonacije bilo kog domain principal-a putem PKINIT-a. Pogledajte link ispod.<sup>[[2]](#references)</sup>
+## Scenario zloupotrebe
 
-Napomena: I dalje vam je potreban parser za NTFS strukture, osim ako se oslanjate na pomoćne alate. Mnogi gotovi alati apstrahuju raw pristup.
+- Ako nalog zaista može da dobije raw-volume handle sa pravom čitanja, parser koji razume NTFS može zaobići ACL-ove po datotekama i oporaviti zaštićene ili zaključane datoteke iz dodeljenih klastera.
+- Moguće mete obuhvataju zaključan ili ACL-om zaštićen sadržaj u okviru `C:\Windows\System32`, registry hive-ove, DPAPI master keys, SAM i — kada je zasebno dostupan putem snapshot-a ili offline volumena — `ntds.dit`.
+- Na hostovima sa certificate services, korisne lokacije software-key datoteka obuhvataju `%ProgramData%\Microsoft\Crypto\RSA\MachineKeys` i `%ProgramData%\Microsoft\Crypto\Keys`; oporavak datoteke je koristan samo kada je njen ključni materijal exportable i kada se takođe može dešifrovati.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
+- Na AD CS hostu, uspešno oporavljen **exportable/software-backed** CA private key može omogućiti Golden Certificate abuse. Dizajni sa hardware-backed ili non-exportable ključevima menjaju ovaj put.<sup>[[2]](#references)</sup>
+
+Napomena: I dalje vam je potreban parser za NTFS strukture, osim ako se oslanjate na helper tools. Mnogi gotovi alati apstrahuju raw pristup.
 
 ## Praktične tehnike
 
-- Otvorite raw handle volumena i čitajte klastere:
+- Otvorite raw volume handle i čitajte klastere:
 
 <details>
-<summary>Kliknite za proširivanje</summary>
+<summary>Kliknite da proširite</summary>
 ```powershell
-# PowerShell – read first MB from C: raw device (requires SeManageVolumePrivilege)
+# Validation attempt: current Windows versions normally require an administrative token
 $fs = [System.IO.File]::Open("\\.\\C:",[System.IO.FileMode]::Open,[System.IO.FileAccess]::Read,[System.IO.FileShare]::ReadWrite)
 $buf = New-Object byte[] (1MB)
 $null = $fs.Read($buf,0,$buf.Length)
@@ -49,21 +52,21 @@ File.WriteAllBytes("C:\\temp\\blk.bin", buf);
 ```
 </details>
 
-- Koristite alat sa podrškom za NTFS da biste oporavili određene datoteke iz raw volumena:
-- RawCopy/RawCopy64 (kopiranje datoteka koje su u upotrebi na nivou sektora)
-- FTK Imager ili The Sleuth Kit (imaging samo za čitanje, a zatim carving datoteka)
-- vssadmin/diskshadow + shadow copy, a zatim kopirajte ciljnu datoteku iz snapshot-a (ako možete da kreirate VSS; često zahteva admin privilegije, ali je obično dostupno istim operatorima koji imaju SeManageVolumePrivilege)
+- Koristite NTFS-aware alat za oporavak određenih datoteka iz raw volumena:
+- RawCopy/RawCopy64 (kopiranje datoteka koje se koriste na nivou sektora)
+- FTK Imager ili The Sleuth Kit (read-only imaging, a zatim carving datoteka)
+- vssadmin/diskshadow + shadow copy, a zatim kopirajte ciljnu datoteku iz snapshot-a (ako možete da kreirate VSS; često je potreban admin, ali je to obično dostupno istim operatorima koji imaju SeManageVolumePrivilege)
 
 Tipične osetljive putanje koje treba ciljati:
 - %ProgramData%\Microsoft\Crypto\RSA\MachineKeys\
 - %ProgramData%\Microsoft\Crypto\Keys\
 - C:\Windows\System32\config\SAM, SYSTEM, SECURITY (lokalne tajne)
-- C:\Windows\NTDS\ntds.dit (domain controllers – putem shadow copy-ja)
-- C:\Windows\System32\CertSrv\CertEnroll\ (CA sertifikati/CRL-ovi; privatni ključevi se nalaze u prethodno navedenom machine key store-u)
+- C:\Windows\NTDS\ntds.dit (domain controllers – putem shadow copy)
+- C:\Windows\System32\CertSrv\CertEnroll\ (CA certifikati/CRL-ovi; privatni ključevi se nalaze u gore navedenom machine key store-u)
 
 ## AD CS veza: Forging a Golden Certificate
 
-Ako možete da pročitate privatni ključ Enterprise CA iz machine key store-a, možete da kreirate client-auth sertifikate za proizvoljne principals i da se autentifikujete putem PKINIT/Schannel. Ovo se često naziva Golden Certificate.<sup>[[2]](#references)</sup> Pogledajte:
+Ako možete da pročitate privatni ključ Enterprise CA iz machine key store-a, možete da forge-ujete client-auth certificates za proizvoljne principals i da se autentifikujete putem PKINIT/Schannel. Ovo se često naziva Golden Certificate.<sup>[[2]](#references)</sup> Pogledajte:
 
 {{#ref}}
 ../active-directory-methodology/ad-certificates/domain-persistence.md
@@ -73,14 +76,16 @@ Ako možete da pročitate privatni ključ Enterprise CA iz machine key store-a, 
 
 ## Detekcija i hardening
 
-- Strogo ograničite dodelu SeManageVolumePrivilege (Perform volume maintenance tasks) samo pouzdanim administratorima.
+- Strogo ograničite dodeljivanje SeManageVolumePrivilege (Perform volume maintenance tasks) samo pouzdanim administratorima.
 - Nadgledajte Sensitive Privilege Use i otvaranje process handle-ova prema device objektima kao što su \\.\C:, \\.\PhysicalDrive0.
-- Dajte prednost CA ključevima zaštićenim pomoću HSM/TPM-a ili DPAPI-NG-u, kako raw čitanje datoteka ne bi moglo da povrati materijal ključa u upotrebljivom obliku.
-- Održavajte upload, temp i extraction putanje kao neizvršne i međusobno odvojene (web context defense koji se često kombinuje sa ovim chain-om nakon eksploatacije).
+- Dajte prednost pravilno konfigurisanim HSM- ili TPM-backed, non-exportable CA ključevima, tako da kopirana key-container datoteka nije dovoljna za oporavak upotrebljivog materijala privatnog ključa.
+- Za application secrets izvan putanje CA ključa, DPAPI ili DPAPI-NG mogu učiniti kopiranu data datoteku nedovoljnom tako što je štite za korisnika, mašinu, grupu ili drugog ovlašćenog principala. Ovo ne štiti plaintext koji je već dostupan kompromitovanom principalu.<sup>[[4]](#references)</sup>
+- Održavajte upload, temp i extraction putanje non-executable i odvojene (web context defense koji se često kombinuje sa ovim chain-om tokom post‑exploitation faze).
 
-## Reference
+## References
 
-- [1] [Microsoft – Perform volume maintenance tasks (SeManageVolumePrivilege)](https://learn.microsoft.com/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/perform-volume-maintenance-tasks)
-- [2] [0xdf – HTB: Certificate (SeManageVolumePrivilege used to read CA key → Golden Certificate)](https://0xdf.gitlab.io/2025/10/04/htb-certificate.html)
-
+- [1] [Microsoft – Obavljanje zadataka održavanja volumena (SeManageVolumePrivilege)](https://learn.microsoft.com/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/perform-volume-maintenance-tasks)
+- [2] [0xdf – HTB: Certificate (SeManageVolumePrivilege korišćen za čitanje CA ključa → Golden Certificate)](https://0xdf.gitlab.io/2025/10/04/htb-certificate.html)
+- [3] [Microsoft - `CreateFile` fizički diskovi i volumeni](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea#physical-disks-and-volumes)
+- [4] [Microsoft - Cryptography API: Next Generation i DPAPI-NG](https://learn.microsoft.com/en-us/windows/win32/seccng/cng-portal)
 {{#include ../../banners/hacktricks-training.md}}

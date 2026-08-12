@@ -4,69 +4,69 @@
 
 ## Spot
 
-Ovo je najosnovniji način trgovanja. Možete **navesti količinu sredstva i cenu** po kojoj želite da kupite ili prodate, a kada se ta cena dostigne, transakcija se izvršava.
+Spot trgovanje podrazumeva razmenu imovine uz trenutnu isporuku. Limit nalog navodi količinu i ograničavajuću cenu; izvršava se samo kada tržište može da ispuni tu cenu ili povoljniju cenu. Market nalog, s druge strane, nastoji da se izvrši odmah po najboljim trenutno dostupnim cenama i može biti izložen klizanju cene.<sup>[[4]](#references)</sup>
 
-Obično možete koristiti i **trenutnu tržišnu cenu** kako bi se transakcija izvršila što je brže moguće po trenutnoj ceni.
+Stop-limit nalog ima stop cenu koja aktivira limit nalog. Može ograničiti cenu izvršenja, ali ne garantuje izvršenje ako se tržište kreće kroz limit cenu.<sup>[[4]](#references)</sup>
 
-**Stop Loss - Limit**: Takođe možete navesti količinu i cenu sredstava za kupovinu ili prodaju, uz istovremeno navođenje niže cene po kojoj će se kupovina ili prodaja izvršiti ako se ta cena dostigne (kako bi se zaustavili gubici).
+## Fjučersi
 
-## Futures
+Futures ugovor je standardizovani sporazum o kupovini ili prodaji određene robe ili finansijskog instrumenta na budući datum. Na primer, dve strane mogu da se dogovore o ceni od 70.000 USD za jedan bitcoin, uz poravnanje za šest meseci.<sup>[[1]](#references)</sup>
 
-Futures je ugovor kojim se dve strane dogovaraju da **nešto kupe u budućnosti po fiksnoj ceni**. Na primer, prodaja 1 bitcoina za 6 meseci po ceni od 70.000$.
+Ako je cena poravnanja 80.000 USD, long strana ostvaruje dobit, a short strana gubitak u odnosu na ugovorenu cenu od 70.000 USD. Ako je cena 60.000 USD, odnos je obrnut. Fjučersi kojima se stvarno trguje na berzi obračunavaju se po tržišnoj vrednosti i obično se zatvaraju ili prebacuju pre isteka, tako da je ovo pojednostavljena ilustracija.<sup>[[2]](#references)</sup>
 
-Očigledno, ako nakon 6 meseci vrednost bitcoina bude 80.000$, prodavac gubi novac, a kupac ga dobija. Ako nakon 6 meseci vrednost bitcoina bude 60.000$, dešava se suprotno.
+Proizvođači i potrošači koriste fjučerse za zaštitu od cenovnog rizika; drugi učesnici ih koriste u potrazi za profitom ili za obezbeđivanje likvidnosti.<sup>[[1]](#references)</sup>
 
-Međutim, ovo je zanimljivo, na primer, za preduzeća koja proizvode određeni proizvod i moraju da budu sigurna da će moći da ga prodaju po ceni koja pokriva troškove. Takođe je korisno za preduzeća koja žele da obezbede fiksne cene u budućnosti, čak i ako su one više.
+- **Long pozicija** generalno ostvaruje dobit kada cena ugovora raste.
+- **Short pozicija** generalno ostvaruje dobit kada cena ugovora pada.<sup>[[2]](#references)</sup>
 
-Ipak, na berzama se ovo obično koristi za pokušaj ostvarivanja profita.
+### Hedging pomoću fjučersa
 
-* Imajte na umu da "Long position" znači da neko ulaže uz očekivanje da će cena porasti
-* Dok "short position" znači da neko ulaže uz očekivanje da će cena pasti
+Ako portfolio menadžer očekuje pad portfolija, može otvoriti short poziciju u dovoljno korelisanom futures ugovoru na berzanski indeks. Dobici na short hedging poziciji mogu nadoknaditi deo gubitaka portfolija; bazni rizik znači da nadoknada retko bude potpuno precizna. Bitcoin future bi zaštitio izloženost bitcoinu, ali ne i automatski portfolio akcija.
 
-### Hedging With Futures <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
+Ako zaštićeno tržište pada, short futures pozicija može ostvariti dobit dok holdings gube vrednost. Ako tržište raste, holdings mogu ostvariti dobit dok hedging pozicija gubi. Hedging smanjuje odabrani rizik, umesto da stvara garantovani profit.<sup>[[1]](#references)</sup>
 
-Ako se menadžer fonda plaši da će neke akcije pasti, može zauzeti kratku poziciju na sredstvima kao što su bitcoini ili futures ugovori za S\&P 500. Ovo bi bilo slično kupovini ili posedovanju određenih sredstava i sklapanju ugovora o njihovoj prodaji u budućnosti po višoj ceni.
+### Perpetual fjučersi
 
-U slučaju pada cene, menadžer fonda će ostvariti dobit jer će sredstva prodati po višoj ceni. Ako cena sredstava poraste, menadžer neće ostvariti tu dobit, ali će i dalje zadržati svoja sredstva.
+Perpetual ugovori su derivati bez fiksnog datuma isteka. Crypto platforme za trgovanje obično koriste periodična funding plaćanja kako bi pomogle da njihova cena ostane blizu osnovne spot cene; uslovi se razlikuju u zavisnosti od platforme.<sup>[[3]](#references)</sup>
 
-### Perpetual Futures
+Dobit i gubitak se menjaju kako se menja mark cena. Promena cene od 1% proizvodi približno promenu od 1% nominalne vrednosti pozicije pre naknada i funding-a, ali leverage može učiniti da to bude mnogo veći procenat uplaćenog kolaterala.
 
-**Ovo su "futures" ugovori koji traju neograničeno** (bez datuma isteka ugovora). Veoma ih je često naći, na primer, na crypto berzama, gde možete ulaziti u futures pozicije i izlaziti iz njih na osnovu cene crypto valuta.
+### Fjučersi sa Leverage-om
 
-Imajte na umu da u ovim slučajevima dobici i gubici mogu nastajati u realnom vremenu: ako cena poraste za 1%, dobijate 1%; ako cena padne za 1%, gubite 1%.
+**Leverage** omogućava traderu da kontroliše veću nominalnu poziciju uz manji depozit margine. Gubici nisu uvek ograničeni na početnu marginu: likvidacija, cenovni gap-ovi, naknade i pravila platforme mogu proizvesti dodatne gubitke.<sup>[[3]](#references)</sup>
 
-### Futures with Leverage
+Na primer, margina od 100 USD uz leverage od 50x kontroliše poziciju od 5.000 USD. Ako zanemarimo naknade, funding i mehanizme likvidacije, povoljno kretanje od 1% proizvodi dobit od 50 USD (50% početne margine), dok nepovoljno kretanje od 1% proizvodi gubitak od 50 USD. Nepovoljno kretanje od 2% odgovara iznosu od 100 USD, iako će platforma obično likvidirati poziciju pre nego što se cela margina iscrpi.
 
-**Leverage** vam omogućava da kontrolišete veću poziciju na tržištu sa manjom količinom novca. U osnovi vam omogućava da "uložite" mnogo više novca nego što imate, rizikujući samo novac koji zaista posedujete.
+Leverage uvećava i dobitke i gubitke i omogućava likvidaciju nakon relativno malog nepovoljnog kretanja.
 
-Na primer, ako otvorite futures poziciju na BTC/USDT sa 100$ i leverage-om od 50x, to znači da biste, ako cena poraste za 1%, ostvarili dobit od 1x50 = 50% početnog uloga (50$). Prema tome, imali biste 150$.\
-Međutim, ako cena padne za 1%, izgubićete 50% svojih sredstava (u ovom slučaju 59$). Ako cena padne za 2%, izgubićete ceo ulog (2x50 = 100%).
+## Razlike između fjučersa i opcija
 
-Dakle, leverage omogućava kontrolu količine novca koji ulažete, uz istovremeno povećanje dobitaka i gubitaka.
-
-## Razlike između Futures i Options
-
-Glavna razlika između futures ugovora i opcija jeste u tome što je ugovor za kupca opcionalan: on može odlučiti da li će ga izvršiti ili ne (obično će to učiniti samo ako će od toga imati koristi). Prodavac mora da proda ako kupac želi da iskoristi opciju.\
-Međutim, kupac će prodavcu platiti određenu naknadu za otvaranje opcije (tako prodavac, koji očigledno preuzima veći rizik, počinje da zarađuje).
+Kupac opcije dobija pravo, a ne obavezu, da izvrši opciju u skladu sa uslovima ugovora. Prodavac opcije ima odgovarajuću obavezu ako kupac izvrši opciju. Kupac plaća prodavcu premiju za to pravo.<sup>[[4]](#references)</sup>
 
 ### 1. **Obaveza naspram prava:**
 
-* **Futures:** Kada kupite ili prodate futures ugovor, sklapate **obavezujući sporazum** o kupovini ili prodaji sredstva po određenoj ceni na određeni budući datum. I kupac i prodavac imaju **obavezu** da ispune ugovor po isteku (osim ako se ugovor ne zatvori pre toga).
-* **Options:** Kod opcija imate **pravo, ali ne i obavezu**, da kupite (u slučaju **call opcije**) ili prodate (u slučaju **put opcije**) sredstvo po određenoj ceni pre određenog datuma isteka ili na taj datum. **Kupac** ima mogućnost da izvrši opciju, dok je **prodavac** obavezan da izvrši transakciju ako kupac odluči da iskoristi opciju.
+* **Fjučersi:** Kada kupite ili prodate futures ugovor, sklapate **obavezujući sporazum** o kupovini ili prodaji imovine po određenoj ceni na budući datum. I kupac i prodavac su **obavezni** da ispune ugovor po isteku (osim ako se ugovor zatvori pre toga).
+* **Opcije:** Kod opcija imate **pravo, ali ne i obavezu**, da kupite (u slučaju **call opcije**) ili prodate (u slučaju **put opcije**) imovinu po određenoj ceni pre određenog datuma isteka ili na taj datum. **Kupac** ima mogućnost da izvrši opciju, dok je **prodavac** obavezan da realizuje trgovinu ako kupac odluči da izvrši opciju.
 
 ### 2. **Rizik:**
 
-* **Futures:** I kupac i prodavac preuzimaju **neograničen rizik** jer imaju obavezu da izvrše ugovor. Rizik predstavlja razliku između dogovorene cene i tržišne cene na datum isteka.
-* **Options:** Rizik kupca ograničen je na **premiju** plaćenu za kupovinu opcije. Ako se tržište ne kreće u korist imaoca opcije, on jednostavno može pustiti da opcija istekne. Međutim, **prodavac** (izdavalac) opcije ima neograničen rizik ako se tržište značajno kreće protiv njega.
+* **Fjučersi:** Obe strane mogu pretrpeti značajne gubitke. Da li je gubitak matematički neograničen zavisi od pozicije i osnovne imovine: short pozicija može imati teoretski neograničen gubitak, dok long pozicija ne može izgubiti više od nominalne vrednosti ako osnovna imovina ne može pasti ispod nule.
+* **Opcije:** Kupac koji ne prodaje drugu opciju obično rizikuje plaćenu premiju. Prodavac naked call opcije može se suočiti sa teoretski neograničenim gubitkom; druge strategije prodaje opcija imaju različite ograničene ili neograničene profile rizika.
 
 ### 3. **Trošak:**
 
-* **Futures:** Ne postoji početni trošak osim margine potrebne za držanje pozicije, jer i kupac i prodavac imaju obavezu da završe transakciju.
-* **Options:** Kupac mora unapred da plati **premiju opcije** za pravo da izvrši opciju. Ova premija predstavlja trošak opcije.
+* **Fjučersi:** Ne postoji početni trošak osim margine potrebne za držanje pozicije, pošto su i kupac i prodavac obavezni da završe trgovinu.
+* **Opcije:** Kupac mora unapred da plati **premiju opcije** za pravo izvršenja opcije. Ova premija je u suštini trošak opcije.
 
-### 4. **Potencijalni profit:**
+### 4. **Potencijal profita:**
 
-* **Futures:** Profit ili gubitak zasniva se na razlici između tržišne cene po isteku i dogovorene cene iz ugovora.
-* **Options:** Kupac ostvaruje profit kada se tržište povoljno pomeri iznad izvršne cene za iznos veći od plaćene premije. Prodavac ostvaruje profit zadržavanjem premije ako se opcija ne iskoristi.
+* **Fjučersi:** Profit ili gubitak zasniva se na razlici između tržišne cene po isteku i dogovorene cene u ugovoru.
+* **Opcije:** Kupac ostvaruje profit kada se tržište povoljno pomeri iznad strike cene za više od plaćene premije. Prodavac ostvaruje profit zadržavanjem premije ako opcija nije izvršena.
 
+## References
+
+- [1] [CFTC - Ekonomska svrha futures tržišta](https://www.cftc.gov/LearnAndProtect/EducationCenter/economicpurpose)
+- [2] [CFTC - Osnove futures tržišta](https://www.cftc.gov/LearnAndProtect/EducationCenter/FuturesMarketBasics/index2.htm)
+- [3] [CFTC - Razumevanje rizika trgovanja virtuelnim valutama](https://www.cftc.gov/LearnAndProtect/AdvisoriesAndArticles/understand_risks_of_virtual_currency.html)
+- [4] [CFTC rečnik - Opcija, premija i izvršenje](https://www.cftc.gov/LearnAndProtect/AdvisoriesAndArticles/CFTCGlossary/index.htm)
 {{#include ../banners/hacktricks-training.md}}

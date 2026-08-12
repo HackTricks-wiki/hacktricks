@@ -2,49 +2,49 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Overview
+## Pregled
 
-Windows Accessibility funkcije čuvaju korisničku konfiguraciju u HKCU i propagiraju je na per-session HKLM lokacije. Tokom prelaska na **Secure Desktop** (lock screen ili UAC prompt), **SYSTEM** komponente ponovo kopiraju ove vrednosti. Ako je **per-session HKLM ključ** upisiv korisniku, on postaje privilegovana tačka za upis, koja se može preusmeriti pomoću **registry symbolic links**, čime se dobija **arbitrary SYSTEM registry write**.<sup>[[1]](#references)</sup>
+Windows Accessibility funkcije čuvaju korisničku konfiguraciju u HKCU i propagiraju je na HKLM lokacije po sesijama. Tokom prelaska na **Secure Desktop** (zaključani ekran ili UAC prompt), **SYSTEM** komponente ponovo kopiraju ove vrednosti. Ako korisnik može da upisuje u **per-session HKLM ključ**, on postaje privilegovana tačka za upis koja može biti preusmerena pomoću **registry symbolic links**, što omogućava **arbitrary SYSTEM registry write**.<sup>[[1]](#references)</sup>
 
-RegPwn tehnika zloupotrebljava ovaj lanac propagacije pomoću malog race window-a stabilizovanog preko **opportunistic lock (oplock)** mehanizma na fajlu koji koristi `osk.exe`.<sup>[[1]](#references)</sup>
+RegPwn tehnika zloupotrebljava ovaj lanac propagacije pomoću malog race prozora koji se stabilizuje putem **opportunistic lock (oplock)** mehanizma nad datotekom koju koristi `osk.exe`.<sup>[[1]](#references)</sup>
 
-## Registry Propagation Chain (Accessibility -> Secure Desktop)
+## Lanac propagacije registra (Accessibility -> Secure Desktop)
 
 Primer funkcije: **On-Screen Keyboard** (`osk`). Relevantne lokacije su:
 
-- **System-wide feature list**:
+- **Lista funkcija na nivou sistema**:
 - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\ATs`
-- **Per-user configuration (user-writable)**:
+- **Konfiguracija po korisniku (user-writable)**:
 - `HKCU\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\ATConfig\osk`
-- **Per-session HKLM config (created by `winlogon.exe`, user-writable)**:
+- **HKLM konfiguracija po sesiji (kreira je `winlogon.exe`, user-writable)**:
 - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\Session<session id>\ATConfig\osk`
 - **Secure desktop/default user hive (SYSTEM context)**:
 - `HKU\.DEFAULT\Software\Microsoft\Windows NT\CurrentVersion\Accessibility\ATConfig\osk`
 
 Propagacija tokom prelaska na secure desktop (pojednostavljeno):
 
-1. **User `atbroker.exe`** kopira `HKCU\...\ATConfig\osk` u `HKLM\...\Session<session id>\ATConfig\osk`.
+1. **Korisnički `atbroker.exe`** kopira `HKCU\...\ATConfig\osk` u `HKLM\...\Session<session id>\ATConfig\osk`.
 2. **SYSTEM `atbroker.exe`** kopira `HKLM\...\Session<session id>\ATConfig\osk` u `HKU\.DEFAULT\...\ATConfig\osk`.
 3. **SYSTEM `osk.exe`** kopira `HKU\.DEFAULT\...\ATConfig\osk` nazad u `HKLM\...\Session<session id>\ATConfig\osk`.
 
-Ako je HKLM podstablo sesije upisivo korisniku, koraci 2/3 omogućavaju SYSTEM upis preko lokacije koju korisnik može da zameni.<sup>[[1]](#references)</sup>
+Ako korisnik može da upisuje u HKLM podstablo sesije, koraci 2/3 omogućavaju SYSTEM upis preko lokacije koju korisnik može da zameni.<sup>[[1]](#references)</sup>
 
-## Primitive: Arbitrary SYSTEM Registry Write via Registry Links
+## Primitive: Arbitrary SYSTEM Registry Write putem Registry Links
 
-Zamenite user-writable per-session ključ **registry symbolic link**-om koji pokazuje na odredište izabrano od strane napadača. Kada se izvrši SYSTEM kopiranje, ono prati link i upisuje vrednosti pod kontrolom napadača u proizvoljni ciljni ključ.
+Zamenite per-session ključ u koji korisnik može da upisuje pomoću **registry symbolic link**-a koji pokazuje na odredište koje odabere attacker. Kada se izvrši SYSTEM kopiranje, ono prati link i upisuje vrednosti pod kontrolom attackera u proizvoljni ciljni ključ.
 
 Ključna ideja:
 
-- Cilj victim write-a (user-writable):
+- Cilj upisa žrtve (user-writable):
 - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\Session<session id>\ATConfig\osk`
-- Napadač zamenjuje taj ključ **registry link**-om ka bilo kom drugom ključu.
-- SYSTEM izvršava kopiranje i upisuje u ključ koji je izabrao napadač, sa SYSTEM privilegijama.
+- Attacker zamenjuje taj ključ pomoću **registry link**-a koji pokazuje na bilo koji drugi ključ.
+- SYSTEM izvršava kopiranje i upisuje u ključ koji je odabrao attacker, sa SYSTEM permissions.
 
-Ovim se dobija **arbitrary SYSTEM registry write** primitive.<sup>[[1]](#references)</sup>
+Ovo omogućava **arbitrary SYSTEM registry write** primitive.<sup>[[1]](#references)</sup>
 
-## Winning the Race Window with Oplocks
+## Dobijanje race prozora pomoću Oplocks
 
-Postoji kratak timing window između pokretanja **SYSTEM `osk.exe`** procesa i njegovog upisa u per-session ključ. Da bi exploit bio pouzdan, na sledeću lokaciju se postavlja **oplock**:
+Postoji kratak timing prozor između pokretanja **SYSTEM `osk.exe`** i upisa u per-session ključ. Da bi exploit bio pouzdan, postavlja **oplock** nad:
 ```
 C:\Program Files\Common Files\microsoft shared\ink\fsdefinitions\oskmenu.xml
 ```
@@ -52,7 +52,7 @@ Kada se oplock aktivira, napadač zamenjuje HKLM ključ po sesiji registry linko
 
 ## Primer toka eksploatacije (visok nivo)
 
-1. Preuzmite trenutni **session ID** iz access tokena.
+1. Preuzmite trenutni **ID sesije** iz access tokena.
 2. Pokrenite skrivenu instancu `osk.exe` i kratko sačekajte (kako biste osigurali da se oplock aktivira).
 3. Upišite vrednosti pod kontrolom napadača u:
 - `HKCU\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\ATConfig\osk`
@@ -63,19 +63,18 @@ Kada se oplock aktivira, napadač zamenjuje HKLM ključ po sesiji registry linko
 
 ## Pretvaranje primitive u SYSTEM izvršavanje
 
-Jedan jednostavan lanac sastoji se od prepisivanja vrednosti **service configuration** (npr. `ImagePath`), a zatim pokretanja servisa. RegPwn PoC prepisuje `ImagePath` servisa **`msiserver`** i pokreće ga instanciranjem **MSI COM objekta**, što dovodi do izvršavanja koda u kontekstu **SYSTEM**.<sup>[[1]](#references)[[2]](#references)</sup>
+Jedan jednostavan lanac je prepisivanje vrednosti **service configuration** (npr. `ImagePath`), a zatim pokretanje servisa. RegPwn PoC prepisuje `ImagePath` servisa **`msiserver`** i aktivira ga instanciranjem **MSI COM object**-a, što dovodi do izvršavanja koda kao **SYSTEM**.<sup>[[1]](#references)</sup><sup>[[2]](#references)</sup>
 
 ## Povezano
 
-Za druga Secure Desktop / UIAccess ponašanja pogledajte:
+Za druga ponašanja Secure Desktop / UIAccess pogledajte:
 
 {{#ref}}
 uiaccess-admin-protection-bypass.md
 {{#endref}}
 
-## Reference
+## References
 
 - [1] [RIP RegPwn](https://www.mdsec.co.uk/2026/03/rip-regpwn/)
 - [2] [RegPwn PoC](https://github.com/mdsecactivebreach/RegPwn)
-
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,32 +1,32 @@
-# macOS Authorizations DB i Authd
+# macOS Authorizations DB & Authd
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## **Baza Authorizations**
+## Authorization Database
 
-Baza podataka koja se nalazi u `/var/db/auth.db` koristi se za čuvanje dozvola za izvršavanje osetljivih operacija. Ove operacije se u potpunosti izvršavaju u **user space** i obično ih koriste **XPC services** koje moraju da provere **da li je klijent koji poziva ovlašćen** da izvrši određenu radnju, proveravajući ovu bazu podataka.
+Security framework-ov Authorization Services omogućava privilegovanim helper-ima i drugim komponentama da procenjuju imenovana authorization prava. Na aktuelnim verzijama macOS-a, mnoga od tih pravila se čuvaju u `/var/db/auth.db` i procenjuju pomoću `authd`; ovaj fajl i njegova SQLite schema predstavljaju implementation details i mogu se menjati između izdanja.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
 
-Ova baza podataka se prvobitno kreira na osnovu sadržaja datoteke `/System/Library/Security/authorization.plist`. Zatim neke services mogu dodati ili izmeniti ove podatke kako bi im dodale druge dozvole.
+Sistemski podrazumevani podaci su se istorijski inicijalizovali iz `/System/Library/Security/authorization.plist`, a installers ili privilegovani servisi mogu dodavati imenovana prava. Prednost treba dati podržanom interfejsu `security authorizationdb read|write|remove` u odnosu na direktno menjanje baze podataka.<sup>[[3]](#references)</sup>
 
-Pravila se čuvaju u tabeli `rules` unutar baze podataka i sadrže sledeće kolone:
+Tabela `rules` u dokumentovanoj build verziji sadrži sledeće kolone. Ovo treba posmatrati kao forenzičku mapu, a ne kao stabilnu javnu schemu:
 
-- **id**: Jedinstveni identifikator za svako pravilo, koji se automatski uvećava i služi kao primarni ključ.
-- **name**: Jedinstveni naziv pravila koji se koristi za njegovu identifikaciju i referenciranje unutar authorization sistema.
-- **type**: Navodi tip pravila, ograničen na vrednosti 1 ili 2, kojima se definiše njegova authorization logika.
-- **class**: Kategorizuje pravilo u određenu klasu, pri čemu mora biti pozitivan ceo broj.
-- "allow" za dozvolu, "deny" za zabranu, "user" ako svojstvo group navodi grupu čije članstvo omogućava pristup, "rule" označava niz pravila koja moraju biti ispunjena, "evaluate-mechanisms" praćen nizom `mechanisms`, čiji elementi mogu biti builtins ili naziv bundle-a unutar `/System/Library/CoreServices/SecurityAgentPlugins/` ili `/Library/Security//SecurityAgentPlugins`
-- **group**: Navodi korisničku grupu povezanu sa pravilom za authorization zasnovan na grupama.
-- **kofn**: Predstavlja parametar „k-of-n“, koji određuje koliko podpravila mora biti ispunjeno od ukupnog broja pravila.
+- **id**: Jedinstveni identifier za svako pravilo, automatski se povećava i služi kao primary key.
+- **name**: Jedinstveno ime pravila koje se koristi za njegovu identifikaciju i referenciranje unutar authorization sistema.
+- **type**: Određuje tip pravila, ograničen na vrednosti 1 ili 2 kojima se definiše njegova authorization logika.
+- **class**: Kategorizuje pravilo u određenu klasu, pri čemu mora biti pozitivan integer.
+- Uobičajene klase pravila uključuju `allow`, `deny`, `user`, `rule` i `evaluate-mechanisms`. Mechanisms mogu biti ugrađeni ili Security Agent plug-ins u `/System/Library/CoreServices/SecurityAgentPlugins/` ili `/Library/Security/SecurityAgentPlugins/`.<sup>[[2]](#references)</sup>
+- **group**: Označava user grupu povezanu sa pravilom za group-based authorization.
+- **kofn**: Predstavlja parametar "k-of-n", koji određuje koliko podpravila mora biti ispunjeno od ukupnog broja.
 - **timeout**: Definiše trajanje u sekundama pre nego što authorization odobren pravilom istekne.
-- **flags**: Sadrži različite zastavice koje menjaju ponašanje i karakteristike pravila.
-- **tries**: Ograničava broj dozvoljenih pokušaja authorization-a radi povećanja bezbednosti.
-- **version**: Prati verziju pravila radi kontrole verzija i ažuriranja.
+- **flags**: Sadrži različite flags koji menjaju ponašanje i karakteristike pravila.
+- **tries**: Ograničava broj dozvoljenih authorization pokušaja radi povećanja bezbednosti.
+- **version**: Prati verziju pravila radi version control-a i ažuriranja.
 - **created**: Beleži timestamp kreiranja pravila u svrhu audita.
 - **modified**: Čuva timestamp poslednje izmene pravila.
-- **hash**: Sadrži hash vrednost pravila radi provere njegovog integriteta i otkrivanja neovlašćenih izmena.
-- **identifier**: Obezbeđuje jedinstveni string identifikator, kao što je UUID, za spoljne reference na pravilo.
-- **requirement**: Sadrži serijalizovane podatke koji definišu specifične authorization zahteve i mehanizme pravila.
-- **comment**: Nudi čitljiv opis ili komentar o pravilu radi dokumentacije i jasnoće.
+- **hash**: Sadrži hash vrednost pravila radi provere njegovog integriteta i otkrivanja tamperinga.
+- **identifier**: Obezbeđuje jedinstveni string identifier, kao što je UUID, za spoljne reference na pravilo.
+- **requirement**: Sadrži serialized podatke koji definišu specifične authorization zahteve i mechanisms pravila.
+- **comment**: Nudi ljudima čitljiv opis ili komentar o pravilu radi dokumentacije i jasnoće.
 
 ### Primer
 ```bash
@@ -56,7 +56,7 @@ security authorizationdb read com.apple.tcc.util.admin
 </dict>
 </plist>
 ```
-Štaviše, na stranici [https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/) moguće je videti značenje `authenticate-admin-nonshared`:<sup>[[1]](#references)</sup>
+Sledeće dekodirano pravilo ilustruje `authenticate-admin-nonshared` na dokumentovanoj verziji macOS-a:<sup>[[1]](#references)</sup>
 ```json
 {
 "allow-root": "false",
@@ -73,17 +73,19 @@ security authorizationdb read com.apple.tcc.util.admin
 ```
 ## Authd
 
-To je daemon koji prima zahteve za autorizaciju klijenata za izvršavanje osetljivih radnji. Radi kao XPC service definisan unutar foldera `XPCServices/` i koristi se za upisivanje svojih logova u `/var/log/authd.log`.
+`authd` je XPC servis koji procenjuje zahteve Authorization Services. U aktuelnim macOS buildovima njegov bundle može da se pregleda na adresi `/System/Library/Frameworks/Security.framework/XPCServices/authd.xpc`; ova putanja je detalj implementacije i može se razlikovati između izdanja. Starija izdanja su upisivala podatke u `/var/log/authd.log`; aktuelna izdanja prvenstveno koriste unified logging system, koji se može upititi pomoću `log show`/`log stream` uz predicate za proces `authd`.<sup>[[2]](#references)</sup><sup>[[5]](#references)</sup>
 
-Pored toga, pomoću security tool-a moguće je testirati mnoge API-je iz `Security.framework`-a. Na primer, pokretanje `AuthorizationExecuteWithPrivileges`: `security execute-with-privileges /bin/ls`
+Alat `security` izlaže nekoliko operacija Authorization Services. Istorijski primer poziva `AuthorizationExecuteWithPrivileges` pomoću `security execute-with-privileges /bin/ls`. Apple je deprecated-ovao ovaj API u macOS 10.7; moderni privileged helpers treba da koriste launchd-managed helper i XPC authorization.<sup>[[2]](#references)</sup><sup>[[4]](#references)</sup>
 
-To će fork-ovati i izvršiti `/usr/libexec/security_authtrampoline /bin/ls` kao root, koji će zatražiti dozvole u prompt-u za izvršavanje komande ls kao root:
+Na izdanjima koja ga i dalje podržavaju, ovo koristi `/usr/libexec/security_authtrampoline` i prikazuje authorization prompt pre pokretanja komande kao root:
 
 <figure><img src="../../../images/image (10).png" alt=""><figcaption></figcaption></figure>
 
-## Reference
+## References
 
-- [1] [authenticate-admin-nonshared - Pregled macOS Authorization Right](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/)
-
-
+- [1] [authenticate-admin-nonshared - Pregled macOS Authorization Right-a](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/)
+- [2] [Apple Authorization Services Programming Guide (arhiva)](https://developer.apple.com/library/archive/documentation/Security/Conceptual/authorization_concepts/)
+- [3] [`security(1)` macOS stranica priručnika](https://keith.github.io/xcode-man-pages/security.1.html)
+- [4] [Apple - Daemons and Services Programming Guide: Kreiranje launchd poslova](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html)
+- [5] [Apple open-source Security projekat - `authd`](https://github.com/apple-oss-distributions/Security/tree/main/OSX/authd)
 {{#include ../../../banners/hacktricks-training.md}}
