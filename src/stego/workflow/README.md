@@ -1,26 +1,26 @@
-# Stego Workflow
+# Przepływ pracy Stego
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Większość zadań stego można rozwiązać szybciej dzięki systematycznemu triage niż przez losowe wypróbowywanie narzędzi.
+Większość problemów ze Stego można rozwiązać szybciej dzięki systematycznemu triage niż przez losowe wypróbowywanie narzędzi.
 
 ## Główny przebieg
 
-### Szybka checklista triage
+### Lista kontrolna szybkiego triage
 
 Celem jest sprawne uzyskanie odpowiedzi na dwa pytania:
 
 1. Jaki jest rzeczywisty kontener/format?
-2. Czy payload znajduje się w metadanych, dołączonych bajtach, osadzonych plikach czy w stego na poziomie zawartości?
+2. Czy payload znajduje się w metadanych, dołączonych bajtach, osadzonych plikach czy w stego na poziomie treści?
 
 #### 1) Zidentyfikuj kontener
 ```bash
 file target
 ls -lah target
 ```
-Jeśli `file` i rozszerzenie są niezgodne, sprawdź sygnaturę zamiast ufać rozszerzeniu. `file` również działa heurystycznie i może zostać zmy­lony przez uszkodzone dane lub dane polyglot. W razie potrzeby traktuj popularne formaty jako kontenery (na przykład dokumenty OOXML są pakietami ZIP).<sup>[[2]](#references)</sup>
+Jeśli `file` i rozszerzenie są ze sobą niezgodne, sprawdź sygnaturę zamiast ufać przyrostkowi. `file` również opiera się na heurystyce i może zostać zmyślone przez niepoprawne lub poliglotyczne dane wejściowe. W razie potrzeby traktuj popularne formaty jako kontenery (na przykład dokumenty OOXML są pakietami ZIP).<sup>[[2]](#references)</sup>
 
-#### 2) Szukaj metadanych i oczywistych ciągów znaków
+#### 2) Sprawdź metadane i oczywiste ciągi znaków
 ```bash
 exiftool target
 strings -n 6 target | head
@@ -36,24 +36,24 @@ strings -e b -n 6 target | head
 binwalk target
 binwalk -e target
 ```
-Jeśli ekstrakcja zakończy się niepowodzeniem, ale zostaną zgłoszone sygnatury, ręcznie wytnij offsety za pomocą `dd`, a następnie ponownie uruchom `file` na wyciętym regionie.
+Jeśli ekstrakcja się nie powiedzie, ale zostaną zgłoszone sygnatury, ręcznie wytnij offsety za pomocą `dd`, a następnie ponownie uruchom `file` dla wyciętego regionu.
 
 #### 4) Jeśli obraz
 
 - Sprawdź anomalie: `magick identify -verbose file`
-- Jeśli to PNG/BMP, wylicz bit-plane/LSB: `zsteg -a file.png`
+- Jeśli PNG/BMP, wylicz bit-planes/LSB: `zsteg -a file.png`
 - Zweryfikuj strukturę PNG: `pngcheck -v file.png`
-- Użyj filtrów wizualnych (Stegsolve / StegoVeritas), gdy zawartość może zostać ujawniona przez transformacje kanałów/plane
+- Użyj filtrów wizualnych (Stegsolve / StegoVeritas), gdy zawartość może zostać ujawniona przez transformacje kanałów/bit-planes
 
 #### 5) Jeśli audio
 
-- Najpierw wykonaj spektrogram (Sonic Visualiser)
+- Najpierw spektrogram (Sonic Visualiser)
 - Dekoduj/sprawdź strumienie: `ffmpeg -v info -i file -f null -`
 - Jeśli audio przypomina ustrukturyzowane tony, przetestuj dekodowanie DTMF
 
 ### Podstawowe narzędzia
 
-Wykrywają one często spotykane przypadki na poziomie kontenera: payloady w metadanych, dołączone bajty oraz osadzone pliki ukryte przez rozszerzenie.<sup>[[1]](#references)[[3]](#references)</sup>
+Wykrywają one częste przypadki na poziomie kontenera: payloady w metadanych, dołączone bajty oraz osadzone pliki ukryte za pomocą rozszerzenia.<sup>[[1]](#references)[[3]](#references)</sup>
 
 #### Binwalk
 ```bash
@@ -61,7 +61,7 @@ binwalk file
 binwalk -e file
 binwalk --dd '.*' file
 ```
-Repozytorium: https://github.com/ReFirmLabs/binwalk
+Repo: https://github.com/ReFirmLabs/binwalk
 
 #### Foremost
 ```bash
@@ -83,62 +83,65 @@ strings -n 6 file
 ```bash
 cmp original.jpg stego.jpg -b -l
 ```
-### Kontenery, dołączone dane i sztuczki polyglot
+### Kontenery, dołączone dane i techniki polyglot
 
-Wiele wyzwań ze steganografii polega na dodatkowych bajtach znajdujących się za poprawnym plikiem lub na osadzonych archiwach ukrytych za pomocą rozszerzenia.
+Wiele wyzwań ze steganografii polega na dodatkowych bajtach znajdujących się za prawidłowym plikiem lub na osadzonych archiwach ukrytych pod innym rozszerzeniem.
 
 #### Dołączone payloady
 
-Wiele formatów ignoruje końcowe bajty. Do kontenera obrazu/audio można dołączyć plik ZIP/PDF/skrypt.
+Wiele formatów ignoruje końcowe bajty. Do kontenera obrazu/audio można dołączyć ZIP/PDF/skrypt.
 
 Szybkie sprawdzenia:
 ```bash
 binwalk file
 tail -c 200 file | xxd
 ```
-Jeśli znasz przesunięcie, wykonaj carving za pomocą `dd`:
+Jeśli znasz offset, użyj `dd` do carvingu:
 ```bash
 dd if=file of=carved.bin bs=1 skip=<offset>
 file carved.bin
 ```
-#### Bajty magiczne
+#### Magic bytes
 
-Gdy `file` nie potrafi rozpoznać pliku, poszukaj bajtów magicznych za pomocą `xxd` i porównaj je ze znanymi sygnaturami:
+Gdy `file` nie może rozpoznać pliku, wyszukaj magic bytes za pomocą `xxd` i porównaj je ze znanymi sygnaturami:
 ```bash
 xxd -g 1 -l 32 file
 ```
 #### Zip-in-disguise
 
-Try `7z` and `unzip`, even if the extension doesn’t say zip:
+Wypróbuj `7z` i `unzip`, nawet jeśli rozszerzenie nie wskazuje na format zip:
 ```bash
 7z l file
 unzip -l file
 ```
 ### Osobliwości związane ze stego
 
-Szybkie odnośniki do wzorców, które regularnie pojawiają się obok stego (QR-from-binary, braille itp.).
+Szybkie odnośniki do wzorców, które regularnie pojawiają się obok stego (QR z danych binarnych, brajl itp.).
 
 #### Kody QR z danych binarnych
 
-Jeśli długość bloba jest idealnym kwadratem, może on zawierać surowe piksele obrazu/kodu QR.
+Jeśli długość blobu jest pełnym kwadratem, może on zawierać surowe piksele obrazu/QR.
 ```python
 import math
 math.isqrt(2500)  # 50
 ```
-Pomocnik konwertowania danych binarnych na obraz:
+Pomocnik binary-to-image:
 
-- Pomocnik dCode do konwersji danych binarnych na obraz.<sup>[[5]](#references)</sup>
+- Pomocnik dCode binary-image.<sup>[[5]](#references)</sup>
 
 #### Braille
 
-- Tłumacz alfabetu Braille'a Branah.<sup>[[6]](#references)</sup>
+- Tłumacz Braille firmy Branah.<sup>[[6]](#references)</sup>
+
+Szersze zestawy narzędzi steganograficznych i zasoby dotyczące konkretnych technik znajdziesz w dołączonym stego-toolkit oraz na wyselekcjonowanej liście 0xRick.<sup>[[1]](#references)[[7]](#references)</sup>
 
 ## References
 
-- [1] [DominicBreuker/stego-toolkit - Obraz Docker zawierający najpopularniejsze narzędzia do steganografii](https://github.com/DominicBreuker/stego-toolkit)
+- [1] [DominicBreuker/stego-toolkit - Obraz Docker z najpopularniejszymi narzędziami steganograficznymi](https://github.com/DominicBreuker/stego-toolkit)
 - [2] [Daston et al. — Konwencje ECMA-376 dotyczące pakowania Open Packaging](https://ecma-international.org/publications-and-standards/standards/ecma-376/)
 - [3] [ReFirmLabs/binwalk](https://github.com/ReFirmLabs/binwalk)
 - [4] [korczis/foremost](https://github.com/korczis/foremost)
 - [5] [dCode — Obraz binarny](https://www.dcode.fr/binary-image)
-- [6] [Branah — Tłumacz alfabetu Braille'a](https://www.branah.com/braille-translator)
+- [6] [Branah — Tłumacz Braille'a](https://www.branah.com/braille-translator)
+- [7] [0xRick - Zasoby dotyczące steganografii](https://0xrick.github.io/lists/stego/)
 {{#include ../../banners/hacktricks-training.md}}
