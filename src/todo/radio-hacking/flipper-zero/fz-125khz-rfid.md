@@ -2,55 +2,50 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-
 ## Uvod
 
-Za više informacija o tome kako 125kHz tagovi funkcionišu, pogledajte:
-
+Za osnovne informacije o načinu rada tagova od 125 kHz, pogledajte:
 
 {{#ref}}
 ../pentesting-rfid.md
 {{#endref}}
 
-## Radnje
+[Uvod u RFID niske frekvencije](../pentesting-rfid.md#low-frequency-rfid-tags-125khz) objašnjava uobičajene porodice tagova i njihove formate podataka.
 
-Za više informacija o ovim tipovima tagova [**pročitajte ovaj uvod**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz).
+## Radnje
 
 ### Čitanje
 
-Pokušava da **pročita** informacije sa kartice. Zatim ih može **emulirati**.<sup>[[1]](#references)</sup>
+Koristite **Read** da biste snimili podatke taga. Nakon uspešnog čitanja, Flipper Zero može da emulira sačuvani tag.<sup>[[1]](#references)</sup>
 
 > [!WARNING]
-> Imajte na umu da neki interfoni pokušavaju da se zaštite od dupliciranja ključeva slanjem write komande pre čitanja. Ako upis uspe, taj tag se smatra lažnim. Kada Flipper emulira RFID, čitač nema način da ga razlikuje od originala, tako da se takvi problemi ne javljaju.
+> Neki interfonski čitači pokušavaju da otkriju upisive duplikate tagova tako što izdaju komandu za upis pre čitanja. Flipper Zero emulacija ne izlaže memoriju upisivog taga na isti način.<sup>[[1]](#references)</sup>
 
 ### Ručno dodavanje
 
-Možete kreirati **lažne kartice u uređaju Flipper Zero navođenjem podataka** ručno, a zatim ih emulirati.
+Možete ručno uneti podatke taga u Flipper Zero, sačuvati ih, a zatim emulirati tag.<sup>[[1]](#references)</sup>
 
 #### ID-jevi na karticama
 
-Ponekad ćete, kada dobijete karticu, pronaći ID (ili njegov deo) vidljivo ispisan na kartici.
+Ponekad je ceo ID kartice ili njegov deo odštampan na njenoj spoljašnjoj strani.
 
 - **EM Marin**
 
-Na primer, na ovoj EM-Marin kartici moguće je **pročitati poslednja 3 od 5 bajtova u otvorenom obliku**.\
-Preostala 2 bajta mogu se brute-force-ovati ako ih ne možete pročitati sa kartice.<sup>[[1]](#references)</sup>
+Na primer, prikazana EM-Marin kartica otkriva poslednja tri od svojih pet bajtova ID-ja. Ako tag ne može da se pročita, dva bajta koja nedostaju mogu se brute-force-ovati.
 
 <figure><img src="../../../images/image (104).png" alt=""><figcaption></figcaption></figure>
 
 - **HID**
 
-Isto se dešava i kod ove HID kartice, gde se na kartici mogu pronaći odštampana samo 2 od 3 bajta
+Slično tome, na prikazanoj HID kartici odštampana su samo dva od tri bajta ID-ja.
 
 <figure><img src="../../../images/image (1014).png" alt=""><figcaption></figcaption></figure>
 
-### Emulacija/upisivanje
+### Emulate/Write
 
-Nakon **kopiranja** kartice ili **ručnog unošenja** ID-ja, moguće je **emulirati** je pomoću uređaja Flipper Zero ili ga **upisati** na pravu karticu.<sup>[[1]](#references)</sup>
+Nakon čitanja taga ili ručnog unosa njegovog ID-ja, Flipper Zero može da emulira sačuvani credential. Za podržane upisive tagove, takođe može da upiše sačuvane podatke na kompatibilnu karticu.<sup>[[1]](#references)</sup>
 
-## Reference
+## References
 
-- [1] [Diving into RFID Protocols with Flipper Zero](https://blog.flipperzero.one/rfid/)
-
-
+- [1] [Flipper Zero: Istraživanje RFID protokola](https://blog.flipperzero.one/rfid/)
 {{#include ../../../banners/hacktricks-training.md}}

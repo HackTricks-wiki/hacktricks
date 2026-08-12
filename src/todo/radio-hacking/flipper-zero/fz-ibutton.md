@@ -4,8 +4,7 @@
 
 ## Uvod
 
-Za više informacija o tome šta je iButton pogledajte:
-
+Za osnovne informacije o iButton tehnologiji pogledajte:
 
 {{#ref}}
 ../ibutton.md
@@ -13,7 +12,7 @@ Za više informacija o tome šta je iButton pogledajte:
 
 ## Dizajn
 
-**Plavi** deo sledeće slike pokazuje kako treba da **postavite pravi iButton** da bi Flipper mogao da ga **očita.** **Zeleni** deo pokazuje kako treba da **dodirnete čitač** uređajem Flipper Zero da biste **ispravno emulirali iButton**.<sup>[[1]](#references)</sup>
+Na sledećoj slici, **plava** oblast prikazuje kako postaviti fizički iButton uz kontakte Flipper Zero uređaja radi očitavanja. **Zelena** oblast prikazuje koji kontakti treba da dodiruju čitač tokom emulacije.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../images/image (565).png" alt=""><figcaption></figcaption></figure>
 
@@ -21,23 +20,23 @@ Za više informacija o tome šta je iButton pogledajte:
 
 ### Čitanje
 
-U režimu čitanja, Flipper čeka da iButton ključem dodirnete čitač i može da obradi bilo koji od tri tipa ključeva: **Dallas, Cyfral i Metakom**. Flipper će **sam prepoznati tip ključa**. Naziv protokola ključa biće prikazan na ekranu iznad ID broja.<sup>[[1]](#references)</sup>
+U režimu čitanja, Flipper Zero čeka da ključ dodirne njegove kontakte, detektuje protokol i prikazuje protokol iznad ID-ja ključa. Ugrađena aplikacija podržava Dallas, Cyfral i Metakom ključeve za kontrolu pristupa.<sup>[[2]](#references)</sup>
 
 ### Ručno dodavanje
 
-Moguće je **ručno dodati** iButton tipa: **Dallas, Cyfral i Metakom**
+Možete ručno uneti podatke ključa za Dallas, Cyfral i Metakom protokole.<sup>[[2]](#references)</sup>
 
-### **Emulacija**
+### Emulacija
 
-Moguće je **emulirati** sačuvane iButton uređaje (pročitane ili ručno dodate).
+Možete emulirati sačuvani ključ, bez obzira na to da li je očitan sa fizičkog ključa ili ručno unet.<sup>[[2]](#references)</sup>
 
 > [!TIP]
-> Ako ne možete da ostvarite očekivani kontakt između uređaja Flipper Zero i čitača, možete da **koristite eksterni GPIO:**
+> Ako ugrađeni kontakti ne mogu da dosegnu čitač, povežite kontakte za podatke i uzemljenje preko GPIO pinova.<sup>[[2]](#references)</sup>
 
 <figure><img src="../../../images/image (138).png" alt=""><figcaption></figcaption></figure>
 
-## Reference
+## References
 
-- [1] [Taming iButton Keys with Flipper Zero](https://blog.flipperzero.one/taming-ibutton/)
-
+- [1] [Ukroćavanje iButton ključeva pomoću Flipper Zero uređaja](https://blog.flipperzero.one/taming-ibutton/)
+- [2] [Dokumentacija za Flipper Zero - Očitavanje iButton ključeva](https://docs.flipper.net/zero/ibutton/read)
 {{#include ../../../banners/hacktricks-training.md}}
