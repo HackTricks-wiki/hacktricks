@@ -4,11 +4,11 @@
 
 ## Attacking RFID Systems with Proxmark3
 
-The first thing you need to do is to have a [**Proxmark3**](https://proxmark.com) and [**install the software and it's dependencie**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**s**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux).
+Install the actively maintained RRG/Iceman Proxmark3 client and matching firmware, then confirm command syntax with that build because older commands shown below may have changed.<sup>[[1]](#references)[[5]](#references)</sup>
 
 ### Attacking MIFARE Classic 1KB
 
-It has **16 sectors**, each of them has **4 blocks** and each block contains **16B**. The UID is in sector 0 block 0 (and can't be altered).\
+MIFARE Classic 1K has **16 sectors**, each with **4 blocks** of **16 bytes**. Manufacturer block 0 contains the UID/manufacturer data and is read-only on genuine NXP cards; special clone or “magic” cards may permit rewriting it.<sup>[[1]](#references)[[2]](#references)</sup>\
 To access each sector you need **2 keys** (**A** and **B**) which are stored in **block 3 of each sector** (sector trailer). The sector trailer also stores the **access bits** that give the **read and write** permissions on **each block** using the 2 keys.\
 2 keys are useful to give permissions to read if you know the first one and write if you know the second one (for example).
 
@@ -76,7 +76,7 @@ TYPE : NXP MIFARE CLASSIC 1k | Plus 2k SL1
   proprietary non iso14443-4 card found, RATS not supported
   No chinese magic backdoor command detected
   Prng detection: WEAK
-  Valid ISO14443A Tag Found - Quiting Search
+  Valid ISO14443A Tag Found - Quitting Search
 ```
 
 With this information you could try to search information about the card and about the way to communicate with it. Proxmark3 allows to send raw commands like: `hf 14a raw -p -b 7 26`
@@ -97,5 +97,6 @@ You can create a script to **fuzz tag readers**, so copying the data of a **vali
 - [2] [Proxmark3 wiki: HF Magic cards](https://github.com/RfidResearchGroup/proxmark3/wiki/HF-Magic-cards)
 - [3] [NXP statement on MIFARE Classic Crypto1](https://www.mifare.net/en/products/chip-card-ics/mifare-classic/security-statement-on-crypto1-implementations/)
 - [4] [NFC card vulnerability exploitation in KioSoft Stored Value (SEC Consult)](https://sec-consult.com/vulnerability-lab/advisory/nfc-card-vulnerability-exploitation-leading-to-free-top-up-kiosoft-payment-solution/)
+- [5] [RRG/Iceman Proxmark3 — Linux installation](https://github.com/RfidResearchGroup/proxmark3/blob/master/doc/md/Installation_Instructions/Linux-Installation-Instructions.md)
 
 {{#include ../../banners/hacktricks-training.md}}

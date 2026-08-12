@@ -18,6 +18,10 @@ Several methods are employed for DLL hijacking, each with its effectiveness depe
 5. **WinSxS DLL Replacement**: Substituting the legitimate DLL with a malicious counterpart in the WinSxS directory, a method often associated with DLL side-loading.
 6. **Relative Path DLL Hijacking**: Placing the malicious DLL in a user-controlled directory with the copied application, resembling Binary Proxy Execution techniques.
 
+{{#ref}}
+windows-cpython-build-landmark-sys-path-hijacking.md
+{{#endref}}
+
 
 ### AppDomainManager hijacking (`<exe>.config` + attacker assembly)
 

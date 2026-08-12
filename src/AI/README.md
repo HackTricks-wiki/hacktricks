@@ -39,7 +39,7 @@ AI-llm-architecture/README.md
 
 ### AI Risk Frameworks
 
-At this moment, the main 2 frameworks to assess the risks of AI systems are the OWASP ML Top 10 and the Google SAIF:
+Two useful starting frameworks for assessing AI-system risk are the OWASP Machine Learning Security Top 10 and Google's Secure AI Framework (SAIF). They are complementary rather than an exhaustive list of AI risk frameworks.<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 {{#ref}}
@@ -75,7 +75,7 @@ KYC-Bypass-Using-AI.md
 
 ### AI Model Context Protocol
 
-MCP (Model Context Protocol) is a protocol that allows AI agent clients to connect with external tools and data sources in a plug-and-play fashion. This enables complex workflows and interactions between AI models and external systems:
+MCP (Model Context Protocol) is an open protocol for connecting AI applications to tools and data sources. Because MCP servers can expose data and actions, assessments must include authorization, consent, tool-input validation, and trust-boundary review.<sup>[[3]](#references)</sup>
 
 
 {{#ref}}
@@ -97,5 +97,11 @@ LLM-powered agents can automate long-running black-box web pentesting workflows 
 {{#ref}}
 Web-Black-Box-AI-Pentester-Bots.md
 {{#endref}}
+
+## References
+
+- [1] [OWASP Machine Learning Security Top 10](https://owasp.org/www-project-machine-learning-security-top-10/)
+- [2] [Google — Secure AI Framework (SAIF)](https://saif.google/)
+- [3] [Model Context Protocol — Introduction](https://modelcontextprotocol.io/docs/getting-started/intro)
 
 {{#include ../banners/hacktricks-training.md}}

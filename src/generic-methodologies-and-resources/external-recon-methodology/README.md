@@ -6,7 +6,7 @@
 
 > So you were said that everything belonging to some company is inside the scope, and you want to figure out what this company actually owns.
 
-The goal of this phase is to obtain all the **companies owned by the main company** and then all the **assets** of these companies. To do so, we are going to:
+The goal of this phase is to obtain all the **companies owned by the main company** and then all the **assets** of these companies. To do so, we are going to:<sup>[[1]](#references)</sup>
 
 1. Find the acquisitions of the main company, this will give us the companies inside the scope.
 2. Find the ASN (if any) of each company, this will give us the IP ranges owned by each company
@@ -138,6 +138,8 @@ python3 favihash.py -f https://target/favicon.ico -t targets.txt -s
 
 Simply said, favihash will allow us to discover domains that have the same favicon icon hash as our target.
 
+![favihash output used to discover domains with the same favicon hash](https://www.infosecmatter.com/wp-content/uploads/2020/07/favihash.jpg)<sup>[[11]](#references)</sup>
+
 Use a known favicon hash as a Shodan or FOFA pivot to find other exposed instances of the same technology.<sup>[[5]](#references)</sup>
 
 ```bash
@@ -207,6 +209,8 @@ Other useful tools are [**spoofcheck**](https://github.com/BishopFox/spoofcheck)
 An abandoned A record can become reachable when a cloud provider reassigns an IP. The referenced research demonstrates an opportunistic workflow that provisions an instance and correlates its address with passive DNS data; test takeover scenarios only within the authorized scope.<sup>[[7]](#references)</sup>
 
 ### **Other ways**
+
+Repeat the applicable discovery pivots whenever you find a new domain: each result can expose additional certificate names, passive-DNS relationships, favicon matches, and organization identifiers that were not visible from the original seed.<sup>[[9]](#references)[[10]](#references)</sup>
 
 **Shodan**
 
@@ -750,5 +754,6 @@ There are several tools out there that will perform part of the proposed actions
 - [8] [cramppet – Regulator: A Unique Method of Subdomain Enumeration](https://cramppet.github.io/regulator/index.html)
 - [9] [Carlos Polop – Full Subdomain Discovery Workflow, Part 1](https://trickest.com/blog/full-subdomain-discovery-using-workflow/)
 - [10] [Carlos Polop – Full Subdomain Brute Force Discovery Using Automated Trickest Workflow, Part 2](https://trickest.com/blog/full-subdomain-brute-force-discovery-using-workflow/)
+- [11] [InfoSecMatter – favihash output screenshot](https://www.infosecmatter.com/wp-content/uploads/2020/07/favihash.jpg)
 
 {{#include ../../banners/hacktricks-training.md}}

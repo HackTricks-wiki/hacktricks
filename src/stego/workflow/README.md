@@ -20,7 +20,7 @@ file target
 ls -lah target
 ```
 
-If `file` and the extension disagree, trust `file`. Treat common formats as containers when appropriate (e.g., OOXML documents are ZIP files).
+If `file` and the extension disagree, investigate the signature instead of trusting the suffix. `file` is also heuristic and can be confused by malformed or polyglot input. Treat common formats as containers when appropriate (for example, OOXML documents are ZIP packages).<sup>[[2]](#references)</sup>
 
 #### 2) Look for metadata and obvious strings
 
@@ -61,7 +61,7 @@ If extraction fails but signatures are reported, manually carve offsets with `dd
 
 ### Bread-and-butter tools
 
-These catch the high-frequency container-level cases: metadata payloads, appended bytes, and embedded files disguised by extension.<sup>[[1]](#references)</sup>
+These catch high-frequency container-level cases: metadata payloads, appended bytes, and embedded files disguised by extension.<sup>[[1]](#references)[[3]](#references)</sup>
 
 #### Binwalk
 
@@ -79,7 +79,7 @@ Repo: https://github.com/ReFirmLabs/binwalk
 foremost -i file
 ```
 
-Repo: https://github.com/korczis/foremost
+Project repository: `korczis/foremost`.<sup>[[4]](#references)</sup>
 
 #### Exiftool / Exiv2
 
@@ -155,17 +155,22 @@ math.isqrt(2500)  # 50
 
 Binary-to-image helper:
 
-- [https://www.dcode.fr/binary-image](https://www.dcode.fr/binary-image)
+- dCode binary-image helper.<sup>[[5]](#references)</sup>
 
 #### Braille
 
-- [https://www.branah.com/braille-translator](https://www.branah.com/braille-translator)
+- Branah Braille translator.<sup>[[6]](#references)</sup>
 
-For broader collections of steganography utilities and technique-specific resources, see the bundled stego-toolkit and 0xRick's curated list.<sup>[[1]](#references)[[2]](#references)</sup>
+For broader collections of steganography utilities and technique-specific resources, see the bundled stego-toolkit and 0xRick's curated list.<sup>[[1]](#references)[[7]](#references)</sup>
 
 ## References
 
 - [1] [DominicBreuker/stego-toolkit - Docker image with the most popular steganography tools bundled together](https://github.com/DominicBreuker/stego-toolkit)
-- [2] [0xRick - Steganography Resources](https://0xrick.github.io/lists/stego/)
+- [2] [Daston et al. — ECMA-376 Open Packaging Conventions](https://ecma-international.org/publications-and-standards/standards/ecma-376/)
+- [3] [ReFirmLabs/binwalk](https://github.com/ReFirmLabs/binwalk)
+- [4] [korczis/foremost](https://github.com/korczis/foremost)
+- [5] [dCode — Binary Image](https://www.dcode.fr/binary-image)
+- [6] [Branah — Braille Translator](https://www.branah.com/braille-translator)
+- [7] [0xRick - Steganography Resources](https://0xrick.github.io/lists/stego/)
 
 {{#include ../../banners/hacktricks-training.md}}

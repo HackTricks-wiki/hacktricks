@@ -4,28 +4,27 @@
 
 ## Garage Doors
 
-Garage door openers typically operate at frequencies in the 300-190 MHz range, with the most common frequencies being 300 MHz, 310 MHz, 315 MHz, and 390 MHz. This frequency range is commonly used for garage door openers because it is less crowded than other frequency bands and is less likely to experience interference from other devices.
+Garage-door remotes use several region- and product-specific sub-GHz allocations. Frequencies such as 300, 310, 315, 390, and 433.92 MHz are encountered, but there is no universal “300–190 MHz” garage-door band. Identify the target's label, regulatory region, and observed signal before transmitting.<sup>[[1]](#references)</sup>
 
 ## Car Doors
 
-Most car key fobs operate on either **315 MHz or 433 MHz**. These are both radio frequencies, and they are used in a variety of different applications. The main difference between the two frequencies is that 433 MHz has a longer range than 315 MHz. This means that 433 MHz is better for applications that require a longer range, such as remote keyless entry.\
-In Europe 433.92MHz is commonly used and in U.S. and Japan it's the 315MHz.<sup>[[1]](#references)</sup>
+Many car key fobs use **315 MHz or 433.92 MHz**, with regional rules and vehicle design influencing the choice. Frequency alone does not make 433 MHz longer-range than 315 MHz: transmit power, antenna efficiency, modulation, receiver sensitivity, propagation, and local regulations all matter. Europe commonly uses 433.92 MHz, while 315 MHz is common in North America and Japan.<sup>[[1]](#references)</sup>
 
 ## **Brute-force Attack**
 
 <figure><img src="../../images/image (1084).png" alt=""><figcaption></figcaption></figure>
 
-If instead of sending each code 5 times (sent like this to make sure the receiver gets it) so just send it once, the time is reduced to 6mins:
+In the demonstrated fixed-code system, sending each code once instead of five times reduces the estimated time to six minutes:
 
 <figure><img src="../../images/image (622).png" alt=""><figcaption></figcaption></figure>
 
-and if you **remove the 2 ms waiting** period between signals you can **reduce the time to 3minutes.**
+Removing the 2 ms wait between signals reduces that demonstration to approximately three minutes.
 
-Moreover, by using the De Bruijn Sequence (a way to reduce the number of bits needed to send all the potential binary numbers to burteforce) this **time is reduced just to 8 seconds**:<sup>[[3]](#references)</sup>
+Using a De Bruijn sequence to overlap candidate bit strings reduces the demonstrated attack to approximately eight seconds when the receiver accepts the continuous sequence without a required preamble or frame reset.<sup>[[3]](#references)</sup>
 
 <figure><img src="../../images/image (583).png" alt=""><figcaption></figcaption></figure>
 
-Example of this attack was implemented in [https://github.com/samyk/opensesame](https://github.com/samyk/opensesame)
+OpenSesame implements this attack against compatible fixed-code systems.<sup>[[5]](#references)</sup>
 
 Requiring **a preamble will avoid the De Bruijn Sequence** optimization and **rolling codes will prevent this attack** (supposing the code is long enough to not be bruteforceable).
 
@@ -54,7 +53,10 @@ Basically, you listen for the button and **capture the signal whilst the remote 
 
 ### Full Link Jamming Attack
 
-An attacker could **jam the signal near the vehicle or receive**r so the **receiver cannot actually ‘hear’ the code**, and once that is happening you can simply **capture and replay** the code when you have stopped jamming.<sup>[[2]](#references)</sup>
+> [!CAUTION]
+> Intentional RF interference is illegal in many jurisdictions and can disrupt safety-relevant systems. Perform jamming tests only in a shielded, authorized laboratory and under the applicable radio regulations.<sup>[[6]](#references)</sup>
+
+An attacker could **jam the signal near the vehicle or receiver** so the receiver cannot decode the code, capture the blocked transmission separately, stop jamming, and then replay the captured code.<sup>[[2]](#references)</sup>
 
 The victim at some point will use the **keys to lock the car**, but then the attack will have **recorded enough "close door" codes** that hopefully could be resent to open the door (a **change of frequency might be needed** as there are cars that use the same codes to open and close but listens for both commands in different frequencies).
 
@@ -63,10 +65,10 @@ The victim at some point will use the **keys to lock the car**, but then the att
 
 ### **Code Grabbing Attack ( aka ‘RollJam’ )**
 
-This is a more **stealth Jamming technique**. The attacker will jam the signal, so when the victim tries to lock the door it won't work, but the attacker will **record this code**. Then, the victim will **try to lock the car again** pressing the button and the car will **record this second code**.<sup>[[2]](#references)[[4]](#references)</sup>\
+This is a more **stealth Jamming technique**. The attacker will jam the signal, so when the victim tries to lock the door it won't work, but the attacker will **record this code**. Then, the victim will **try to lock the car again** pressing the button and the car will **record this second code**.<sup>[[2]](#references)</sup><sup>[[4]](#references)</sup>\
 Instantly after this the **attacker can send the first code** and the **car will lock** (victim will think the second press closed it). Then, the attacker will be able to **send the second stolen code to open** the car (supposing that a **"close car" code can also be used to open it**). A change of frequency might be needed (as there are cars that use the same codes to open and close but listens for both commands in different frequencies).
 
-The attacker can **jam the car receiver and not his receiver** because if the car receiver is listening in for example a 1MHz broadband, the attacker won't **jam** the exact frequency used by the remote but **a close one in that spectrum** while the **attackers receiver will be listening in a smaller range** where he can listen the remote signal **without the jam signal**.
+One RollJam implementation exploits receiver bandwidth: the jammer transmits near enough to the remote's carrier to desensitize the vehicle's wider receiver, while the attacker's narrower receiver remains centered on the remote and can still record it. The exact offset and bandwidth depend on the target hardware.<sup>[[2]](#references)</sup>
 
 > [!WARNING]
 > Other implementations seen in specifications show that the **rolling code is a portion** of the total code sent. Ie the code sent is a **24 bit key** where the first **12 are the rolling code**, the **second 8 are the command** (such as lock or unlock) and the last 4 is the **checksum**. Vehicles implementing this type are also naturally susceptible as the attacker merely needs to replace the rolling code segment to be able to **use any rolling code on both frequencies**.
@@ -80,9 +82,11 @@ Testing against an aftermarket rolling code system installed on a car, **sending
 
 ## References
 
-- [1] [What Radio Frequency Does Car Key Fobs Run On?](https://www.americanradioarchives.com/what-radio-frequency-does-car-key-fobs-run-on/)
+- [1] [Flipper Zero documentation - regional Sub-GHz frequencies](https://docs.flipper.net/zero/sub-ghz/frequencies)
 - [2] [Bypassing Rolling Code Systems - Andrew Mohawk](https://www.andrewmohawk.com/2016/02/05/bypassing-rolling-code-systems/)
 - [3] [Samy Kamkar - DEF CON 23: Drive It Like You Hacked It (OpenSesame)](https://samy.pl/defcon2015/)
 - [4] [How To Hack A Car - RollJam recreation with YARD Stick One / RTL-SDR](https://hackaday.io/project/164566-how-to-hack-a-car/details)
+- [5] [OpenSesame source code](https://github.com/samyk/opensesame)
+- [6] [FCC Enforcement Advisory - Jammer Enforcement](https://www.fcc.gov/document/jammer-enforcement)
 
 {{#include ../../banners/hacktricks-training.md}}
