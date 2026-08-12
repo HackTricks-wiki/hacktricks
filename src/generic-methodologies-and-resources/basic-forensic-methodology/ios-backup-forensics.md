@@ -7,12 +7,12 @@ This page describes practical steps to reconstruct and analyze iOS backups for s
 Goals:
 - Rebuild readable paths from Manifest.db
 - Enumerate messaging databases (iMessage, WhatsApp, Signal, Telegram, Viber)
-- Resolve attachment paths, extract embedded objects (PDF/Images/Fonts), and feed them to structural detectors
+- Resolve attachment paths, extract embedded objects where supported (PDF/Images/Fonts), and feed them to structural detectors
 
 
 ## Reconstructing an iOS backup
 
-Backups stored under MobileSync use hashed filenames that are not human‑readable. The Manifest.db SQLite database maps each stored object to its logical path.
+Backups stored under MobileSync use hashed filenames that are not human‑readable. The Manifest.db SQLite database maps each stored object to its logical path.<sup>[[1]](#references)[[2]](#references)</sup>
 
 High‑level procedure:
 1) Open Manifest.db and read the file records (domain, relativePath, flags, fileID/hash)
@@ -29,43 +29,47 @@ $ elegant-bouncer --ios-extract /path/to/backup --output /tmp/reconstructed
 ```
 
 Notes:
-- Handle encrypted backups by supplying the backup password to your extractor
+- Decrypt encrypted backups before passing them to a reconstruction tool; ElegantBouncer expects a decrypted backup.<sup>[[2]](#references)[[3]](#references)</sup>
 - Preserve original timestamps/ACLs when possible for evidentiary value
 
 ### Acquiring & decrypting the backup (USB / Finder / libimobiledevice)
 
-- On macOS/Finder set "Encrypt local backup" and create a *fresh* encrypted backup so keychain items are present.
-- Cross‑platform: `idevicebackup2` (libimobiledevice ≥1.4.0) understands iOS 17/18 backup protocol changes and fixes earlier restore/backup handshake errors.<sup>[[4]](#references)</sup>
+- In Finder/Apple Devices/iTunes, enable "Encrypt local backup" and create a new backup; encrypted backups can include saved passwords and Health data that unencrypted backups omit.<sup>[[8]](#references)</sup>
+- Cross‑platform: libimobiledevice 1.4.0 includes fixes for `idevicebackup2`.<sup>[[4]](#references)</sup> Enable encryption interactively, then force a full backup using the documented command ordering, with the target directory last.<sup>[[6]](#references)</sup>
 
 ```bash
-# Pair then create a full encrypted backup over USB
+# Pair, then enable encrypted backups (prompts for the password); keep the target directory last
 $ idevicepair pair
-$ idevicebackup2 backup --full --encrypt --password '<pwd>' ~/backups/iphone17
+$ idevicebackup2 -i encryption on ~/backups/iphone17
+
+# Create a full encrypted backup over USB
+$ idevicebackup2 backup --full ~/backups/iphone17
 ```
 
 ### IOC‑driven triage with MVT
 
-Amnesty’s Mobile Verification Toolkit (mvt-ios) now works directly on encrypted iTunes/Finder backups, automating decryption and IOC matching for mercenary spyware cases.<sup>[[3]](#references)</sup>
+Amnesty’s Mobile Verification Toolkit can extract a key from and decrypt encrypted iTunes/Finder backups, then scan the decrypted backup with a STIX2 IOC file.<sup>[[3]](#references)</sup>
 
 ```bash
 # Optionally extract a reusable key file
 $ mvt-ios extract-key -k /tmp/keyfile ~/backups/iphone17
 
-# Decrypt in-place copy of the backup
+# Decrypt to a separate destination
 $ mvt-ios decrypt-backup -p '<pwd>' -d /tmp/dec-backup ~/backups/iphone17
 
-# Run IOC scanning on the decrypted tree
-$ mvt-ios check-backup -i indicators.csv /tmp/dec-backup
+# Run IOC scanning on the decrypted tree with a STIX2 indicator file
+$ mvt-ios check-backup -i indicators.stix2.json -o /tmp/mvt-results /tmp/dec-backup
 ```
 
-Outputs land under `mvt-results/` (e.g., analytics_detected.json, safari_history_detected.json) and can be correlated with the attachment paths recovered below.
+With `-o`, JSON results are written under `/tmp/mvt-results/`; IOC matches use a `_detected` suffix and can be correlated with the attachment paths recovered below.<sup>[[3]](#references)</sup>
 
 ### General artifact parsing (iLEAPP)
 
-For timeline/metadata beyond messaging, run iLEAPP directly on the backup folder (supports iOS 11‑17 schemas):
+For timeline/metadata beyond messaging, run iLEAPP against the raw backup folder; its `itunes` input type accepts iTunes/Finder backups and current releases support iOS/iPadOS 11 through current versions.<sup>[[7]](#references)</sup>
 
 ```bash
-$ python3 ileapp.py -b /tmp/dec-backup -o /tmp/ileapp-report
+$ mkdir -p /tmp/ileapp-report
+$ python3 ileapp.py -t itunes -i /tmp/dec-backup -o /tmp/ileapp-report
 ```
 
 
@@ -74,7 +78,7 @@ $ python3 ileapp.py -b /tmp/dec-backup -o /tmp/ileapp-report
 After reconstruction, enumerate attachments for popular apps. The exact schema varies by app/version, but the approach is similar: query the messaging database, join messages to attachments, and resolve paths on disk.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### iMessage (sms.db)
-Key tables: message, attachment, message_attachment_join (MAJ), chat, chat_message_join (CMJ)
+Key tables: message, attachment, message_attachment_join (MAJ), chat, chat_message_join (CMJ).<sup>[[2]](#references)</sup>
 
 Example queries:
 
@@ -105,10 +109,10 @@ JOIN attachment a ON a.ROWID = maj.attachment_id
 ORDER BY m.date DESC;
 ```
 
-Attachment paths may be absolute or relative to the reconstructed tree under Library/SMS/Attachments/.
+Attachment paths may be absolute or relative to the reconstructed tree under Library/SMS/Attachments.<sup>[[2]](#references)</sup>
 
 ### WhatsApp (ChatStorage.sqlite)
-Common linkage: message table ↔ media/attachment table (naming varies by version). Query media rows to obtain on‑disk paths. Recent iOS builds still expose `ZMEDIALOCALPATH` in `ZWAMEDIAITEM`.
+Common linkage: message table ↔ media/attachment table (naming varies by version). Query media rows to obtain on‑disk paths. Belkasoft identifies `ZMEDIALOCALPATH` in `ZWAMEDIAITEM` as the media-file location; ElegantBouncer’s current implementation joins `ZWAMEDIAITEM.ZMESSAGE` to `ZWAMESSAGE.Z_PK` and prepends `Message/` when resolving a path that begins with `Media/`.<sup>[[9]](#references)[[10]](#references)</sup>
 
 ```sql
 SELECT
@@ -116,20 +120,20 @@ SELECT
   mi.ZMEDIALOCALPATH     AS media_path,
   datetime(m.ZMESSAGEDATE + 978307200, 'unixepoch') AS message_date,
   CASE m.ZISFROMME WHEN 1 THEN 'outgoing' ELSE 'incoming' END AS direction
-FROM ZWAMESSAGE m
-LEFT JOIN ZWAMEDIAITEM mi ON mi.Z_PK = m.ZMEDIAITEM
+FROM ZWAMEDIAITEM mi
+JOIN ZWAMESSAGE m ON mi.ZMESSAGE = m.Z_PK
 WHERE mi.ZMEDIALOCALPATH IS NOT NULL
 ORDER BY m.ZMESSAGEDATE DESC;
 ```
 
-Paths usually resolve under `AppDomainGroup-group.net.whatsapp.WhatsApp.shared/Message/Media/` inside the reconstructed backup.
+For that ElegantBouncer reconstruction path, a media path beginning with `Media/` resolves under `AppDomainGroup-group.net.whatsapp.WhatsApp.shared/Message/Media/`; Belkasoft’s guide instead documents a `Messages/Media/` path, so inspect the backup before assuming either spelling.<sup>[[9]](#references)[[10]](#references)</sup>
 
 ### Signal / Telegram / Viber
-- Signal: the message DB is encrypted; however, attachments cached on disk (and thumbnails) are usually scan‑able
-- Telegram: cache remains under `Library/Caches/` inside the sandbox; iOS 18 builds exhibit cache‑clearing bugs, so large residual media caches are common evidence sources<sup>[[5]](#references)</sup>
-- Viber: Viber.sqlite contains message/attachment tables with on‑disk references
+- Signal: the message DB is encrypted; however, attachments cached on disk (and thumbnails) are usually scan‑able.<sup>[[2]](#references)</sup>
+- Telegram: inspect the app's media/cache directories; Telegram documented a cache-cleanup bug in iOS app 11.2 on iOS 18.0.1, marked fixed in 11.3, so check for residual files.<sup>[[2]](#references)[[5]](#references)</sup>
+- Viber: Viber.sqlite contains message/attachment tables with on‑disk references.<sup>[[2]](#references)</sup>
 
-Tip: even when metadata is encrypted, scanning the media/cache directories still surfaces malicious objects.
+Tip: even when metadata is encrypted, scanning the media/cache directories still surfaces malicious objects.<sup>[[2]](#references)</sup>
 
 
 ## Scanning attachments for structural exploits
@@ -153,10 +157,10 @@ Detections covered by structural rules include:<sup>[[1]](#references)[[2]](#ref
 
 ## Validation, caveats, and false positives
 
-- Time conversions: iMessage stores dates in Apple epochs/units on some versions; convert appropriately during reporting
+- Time conversions: iMessage stores dates in Apple epochs/units on some versions; convert appropriately during reporting.<sup>[[2]](#references)</sup>
 - Schema drift: app SQLite schemas change over time; confirm table/column names per device build
-- Recursive extraction: PDFs may embed JBIG2 streams and fonts; extract and scan inner objects
-- False positives: structural heuristics are conservative but can flag rare malformed yet benign media<sup>[[1]](#references)[[2]](#references)</sup>
+- Recursive extraction: PDFs may embed JBIG2 streams and fonts; use a parser that can extract and scan inner objects
+- False positives: structural heuristics are conservative but can flag rare malformed yet benign media.<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 ## References
@@ -166,5 +170,10 @@ Detections covered by structural rules include:<sup>[[1]](#references)[[2]](#ref
 - [3] [MVT iOS backup workflow](https://docs.mvt.re/en/latest/ios/backup/check/)
 - [4] [libimobiledevice 1.4.0 release notes](https://libimobiledevice.org/news/2025/10/10/libimobiledevice-1.4.0-release/)
 - [5] [Update 11.2 has broken cache cleanup on iOS 18.0.1 (Telegram Bug Tracker)](https://bugs.telegram.org/c/44361)
+- [6] [idevicebackup2 manual](https://github.com/libimobiledevice/libimobiledevice/blob/master/docs/idevicebackup2.1)
+- [7] [iLEAPP project (GitHub)](https://github.com/abrignoni/iLEAPP)
+- [8] [About encrypted backups on your iPhone, iPad or iPod touch (Apple Support)](https://support.apple.com/en-ie/108353)
+- [9] [iOS WhatsApp Forensics with Belkasoft X](https://belkasoft.com/ios-whatsapp-forensics-with-belkasoft-x)
+- [10] [ElegantBouncer WhatsApp scanner and path resolver](https://github.com/msuiche/elegant-bouncer/blob/main/src/messaging.rs)
 
 {{#include ../../banners/hacktricks-training.md}}

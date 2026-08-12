@@ -4,7 +4,7 @@
 
 ## Basic Information
 
-XPC, which stands for XNU (the kernel used by macOS) inter-Process Communication, is a framework for **communication between processes** on macOS and iOS. XPC provides a mechanism for making **safe, asynchronous method calls between different processes** on the system. It's a part of Apple's security paradigm, allowing for the **creation of privilege-separated applications** where each **component** runs with **only the permissions it needs** to do its job, thereby limiting the potential damage from a compromised process.
+XPC is a framework for **communication between processes** on macOS and iOS. It provides mechanisms for making **safe, asynchronous calls between processes**. XPC supports **privilege-separated applications**, where each **component** runs with **only the permissions it needs**, thereby limiting the potential damage from a compromised process.<sup>[[1]](#references)</sup>
 
 XPC uses a form of Inter-Process Communication (IPC), which is a set of methods for different programs running on the same system to send data back and forth.
 
@@ -14,21 +14,21 @@ The primary benefits of XPC include:
 2. **Stability**: XPC helps isolate crashes to the component where they occur. If a process crashes, it can be restarted without affecting the rest of the system.
 3. **Performance**: XPC allows for easy concurrency, as different tasks can be run simultaneously in different processes.
 
-The only **drawback** is that **separating an application in several processes** making them communicate via XPC is **less efficient**. But in todays systems this isn't almost noticeable and the benefits are better.
+The main **drawback** is that **separating an application into several processes** and making them communicate through XPC adds overhead. On modern systems this overhead is usually small compared with the security and stability benefits.<sup>[[1]](#references)</sup>
 
-## Application Specific XPC services
+## Application-Specific XPC Services
 
-The XPC components of an application are **inside the application itself.** For example, in Safari you can find them in **`/Applications/Safari.app/Contents/XPCServices`**. They have extension **`.xpc`** (like **`com.apple.Safari.SandboxBroker.xpc`**) and are **also bundles** with the main binary inside of it: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker` and an `Info.plist: /Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`
+The XPC components of an application are **inside the application itself**. For example, in Safari you can find them in **`/Applications/Safari.app/Contents/XPCServices`**. They have the extension **`.xpc`** (like **`com.apple.Safari.SandboxBroker.xpc`**) and are **also bundles**, with the main binary and an `Info.plist` inside them. For example: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker` and `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`.<sup>[[2]](#references)</sup>
 
-As you might be thinking a **XPC component will have different entitlements and privileges** than the other XPC components or the main app binary. EXCEPT if a XPC service is configured with [**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information_property_list/xpcservice/joinexistingsession) set to “True” in its **Info.plist** file. In this case, the XPC service will run in the **same security session as the application** that called it.
+An **XPC component can have different entitlements and privileges** from other XPC components or the main application binary. One exception is an XPC service configured with **`JoinExistingSession`** set to `true` in its **Info.plist** file. In this case, the XPC service joins the **same security session as the application** that called it.<sup>[[4]](#references)</sup>
 
-XPC services are **started** by **launchd** when required and **shut down** once all tasks are **complete** to free system resources. **Application-specific XPC components can only be utilized by the application**, thereby reducing the risk associated with potential vulnerabilities.
+XPC services are **started** by **launchd** when required and can be **shut down** once their tasks are **complete** to free system resources. **Application-specific XPC components can only be used by their containing application**, thereby reducing the exposure of potential vulnerabilities.<sup>[[2]](#references)</sup>
 
-## System Wide XPC services
+## System-Wide XPC Services
 
-System-wide XPC services are accessible to all users. These services, either launchd or Mach-type, need to be **defined in plist** files located in specified directories such as **`/System/Library/LaunchDaemons`**, **`/Library/LaunchDaemons`**, **`/System/Library/LaunchAgents`**, or **`/Library/LaunchAgents`**.
+Unlike application-specific services, system-wide XPC services are not restricted to their containing application. They may be reachable by clients from multiple users, depending on the launchd domain and the service's own authorization checks. These launchd-managed Mach services need to be **defined in plist** files located in directories such as **`/System/Library/LaunchDaemons`**, **`/Library/LaunchDaemons`**, **`/System/Library/LaunchAgents`**, or **`/Library/LaunchAgents`**.<sup>[[2]](#references)[[3]](#references)</sup>
 
-These plists files will have a key called **`MachServices`** with the name of the service, and a key called **`Program`** with the path to the binary:
+These plist files have a **`MachServices`** key containing the service name and a **`Program`** key containing the path to the binary:
 
 ```xml
 cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
@@ -64,17 +64,17 @@ cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
 </plist>
 ```
 
-The ones in **`LaunchDameons`** are run by root. So if an unprivileged process can talk with one of these it could be able to escalate privileges.
+Services in **`LaunchDaemons`** commonly run as root. Therefore, if an unprivileged process can reach a vulnerable method exposed by one of these services, it may be able to escalate privileges.
 
 ## XPC Objects
 
 - **`xpc_object_t`**
 
-Every XPC message is a dictionary object that simplifies the serialization and deserialization. Moreover, `libxpc.dylib` declares most of the data types so it's possible to make that the received data is of the expected type. In the C API every object is a `xpc_object_t` (and it's type can be checked using `xpc_get_type(object)`).\
+XPC request and reply payloads are commonly dictionary objects, which simplify serialization and deserialization. `libxpc.dylib` also declares the data types needed to verify that received data has the expected type. In the C API every object is an `xpc_object_t` (and its type can be checked using `xpc_get_type(object)`).<sup>[[2]](#references)</sup>\
 Moreover, the function `xpc_copy_description(object)` can be used to get a string representation of the object that can be useful for debugging purposes.\
 These objects also have some methods to call like `xpc_<object>_copy`, `xpc_<object>_equal`, `xpc_<object>_hash`, `xpc_<object>_serialize`, `xpc_<object>_deserialize`...
 
-The `xpc_object_t` are created calling `xpc_<objetType>_create` function, which internally calls `_xpc_base_create(Class, Size)` where it's indicated the type of the class of the object (one of `XPC_TYPE_*`) and the size of it (some extra 40B will be added to the size for metadata). Which means that the data of the object will start at the offset 40B.\
+The `xpc_object_t` objects are created by calling an `xpc_<objectType>_create` function, which internally calls `_xpc_base_create(Class, Size)`, indicating the object's class (one of `XPC_TYPE_*`) and size. An extra 40 bytes are added for metadata, so the object data starts at offset 40 bytes.\
 Therefore, the `xpc_<objectType>_t` is kind of a subclass of the `xpc_object_t` which would be a subclass of `os_object_t*`.
 
 > [!WARNING]
@@ -87,11 +87,11 @@ It's possible to create a XPC server calling `xpc_pipe_create()` or `xpc_pipe_cr
 
 Note that the **`xpc_pipe`** object is a **`xpc_object_t`** with information in its struct about the two Mach ports used and the name (if any). The name, for example, the daemon `secinitd` in its plist `/System/Library/LaunchDaemons/com.apple.secinitd.plist` configures the pipe called `com.apple.secinitd`.
 
-An example of a **`xpc_pipe`** is the **bootstrap pip**e created by **`launchd`** making possible sharing Mach ports.
+An example of an **`xpc_pipe`** is the **bootstrap pipe** created by **`launchd`**, which makes it possible to share Mach ports.
 
 - **`NSXPC*`**
 
-These are Objective-C high level objects which allows the abstraction of XPC connections.\
+These are high-level Objective-C objects that abstract XPC connections.\
 Moreover, it's easier to debug these objects with DTrace than the previous ones.
 
 - **`GCD Queues`**
@@ -101,11 +101,11 @@ XPC uses GCD to pass messages, moreover it generates certain dispatch queues lik
 ## XPC Services
 
 These are **bundles with `.xpc`** extension located inside the **`XPCServices`** folder of other projects and in the `Info.plist` they have the `CFBundlePackageType` set to **`XPC!`**.\
-This file have other configuration keys like `ServiceType` which can be Application, User, System or `_SandboxProfile` which can define a sandbox or `_AllowedClients` which might indicate entitlements or ID required to contact the ser. these and other configuration options will be useful to configure the service when being launched.
+This file has other configuration keys, such as `ServiceType`, which can be Application, User, or System; `_SandboxProfile`, which can define a sandbox; and `_AllowedClients`, which may indicate the entitlements or identity required to contact the service. These and other options configure the service when it is launched.<sup>[[2]](#references)</sup>
 
 ### Starting a Service
 
-The app attempts to **connect** to a XPC service using `xpc_connection_create_mach_service`, then launchd locates the daemon and starts **`xpcproxy`**. **`xpcproxy`** enforce configured restrictions and. spawns the service with the provided FDs and Mach ports.
+The app attempts to **connect** to an XPC service using `xpc_connection_create_mach_service`; launchd then locates the daemon and starts **`xpcproxy`**. **`xpcproxy`** enforces the configured restrictions and spawns the service with the provided file descriptors and Mach ports.<sup>[[3]](#references)</sup>
 
 In order to improve the speed of the search of the XPC service, a cache is used.
 
@@ -115,7 +115,7 @@ It's possible to trace the actions of `xpcproxy` using:
 supraudit S -C -o /tmp/output /dev/auditpipe
 ```
 
-The XPC library use `kdebug` to log actions calling `xpc_ktrace_pid0` and `xpc_ktrace_pid1`. The codes it uses are undocumented so it's needed to add the into `/usr/share/misc/trace.codes`. They have the prefix `0x29` and for example one is `0x29000004`: `XPC_serializer_pack`.\
+The XPC library uses `kdebug` to log actions by calling `xpc_ktrace_pid0` and `xpc_ktrace_pid1`. The codes it uses are undocumented, so they need to be added to `/usr/share/misc/trace.codes`. They have the prefix `0x29`; for example, `0x29000004` is `XPC_serializer_pack`.\
 The utility `xpcproxy` uses the prefix `0x22`, for example: `0x2200001c: xpcproxy:will_do_preexec`.
 
 ## XPC Event Messages
@@ -124,7 +124,7 @@ Applications can **subscribe** to different event **messages**, enabling them to
 
 ### XPC Connecting Process Check
 
-When a process tries to call a method from via an XPC connection, the **XPC service should check if that process is allowed to connect**. Here are the common ways to check that and the common pitfalls:
+When a process tries to call a method through an XPC connection, the **XPC service should check whether that process is allowed to connect**. Here are common verification methods and their pitfalls:
 
 
 {{#ref}}
@@ -133,7 +133,7 @@ macos-xpc-connecting-process-check/
 
 ## XPC Authorization
 
-Apple also allows apps to **configure some rights and how to get them** so if the calling process have them it would be **allowed to call a method** from the XPC service:
+Apple also allows apps to **configure authorization rights and how callers obtain them**, so a process with the required rights is **allowed to call a method** exposed by the XPC service:
 
 
 {{#ref}}
@@ -142,7 +142,7 @@ macos-xpc-authorization.md
 
 ## XPC Sniffer
 
-To sniff the XPC messages you could use [**xpcspy**](https://github.com/hot3eed/xpcspy) which uses **Frida**.
+To sniff XPC messages, you can use **xpcspy**, which uses **Frida**.<sup>[[5]](#references)</sup>
 
 ```bash
 # Install
@@ -155,7 +155,7 @@ xpcspy -U -r -W <bundle-id>
 xpcspy -U <prog-name> -t 'i:com.apple.*' -t 'o:com.apple.*' -r
 ```
 
-Another possible tool to use is [**XPoCe2**](https://newosxbook.com/tools/XPoCe2.html).
+Another possible tool is **XPoCe2**.<sup>[[6]](#references)</sup>
 
 ## XPC Communication C Code Example
 
@@ -282,7 +282,7 @@ int main(int argc, const char *argv[]) {
 gcc xpc_server.c -o xpc_server
 gcc xpc_client.c -o xpc_client
 
-# Save server on it's location
+# Save the server in its configured location
 cp xpc_server /tmp
 
 # Load daemon
@@ -427,7 +427,7 @@ sudo launchctl unload /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist
 sudo rm /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist /tmp/oc_xpc_server
 ```
 
-## Client inside a Dylb code
+## Client Inside a Dylib
 
 ```objectivec
 // gcc -dynamiclib -framework Foundation oc_xpc_client.m -o oc_xpc_client.dylib
@@ -465,26 +465,33 @@ static void customConstructor(int argc, const char **argv)
 
 ## Remote XPC
 
-This functionality provided by `RemoteXPC.framework` (from `libxpc`) allows to communicate via XPC through different hosts.\
-The services that supports remote XPC will have in their plist the key UsesRemoteXPC like it's the case of `/System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist`. However, although the service will be registered with `launchd`, it's `UserEventAgent` with the plugins `com.apple.remoted.plugin` and `com.apple.remoteservicediscovery.events.plugin` which provides the functionality.
+The functionality provided by `RemoteXPC.framework` (from `libxpc`) allows XPC communication between different hosts.\
+Services that support remote XPC have the `UsesRemoteXPC` key in their plist, as is the case for `/System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist`. Although the service is registered with `launchd`, `UserEventAgent` and its `com.apple.remoted.plugin` and `com.apple.remoteservicediscovery.events.plugin` plugins provide the functionality.
 
-Moreover, the `RemoteServiceDiscovery.framework` allows to get info from the `com.apple.remoted.plugin` exposing functions such as `get_device`, `get_unique_device`, `connect`...
+Moreover, `RemoteServiceDiscovery.framework` obtains information from `com.apple.remoted.plugin`, exposing functions such as `get_device`, `get_unique_device`, and `connect`.
 
-Once connect is used and the socket `fd` of the service is gathered, it's possible to use `remote_xpc_connection_*` class.
+Once `connect` has returned the service's socket file descriptor, it is possible to use the `remote_xpc_connection_*` class.
 
-It's possible to get information about remote services using the cli tool `/usr/libexec/remotectl` using parameters as:
+It is possible to get information about remote services with the `/usr/libexec/remotectl` CLI using commands such as:
 
 ```bash
 /usr/libexec/remotectl list # Get bridge devices
 /usr/libexec/remotectl show ...# Get device properties and services
-/usr/libexec/remotectl dumpstate # Like dump withuot indicateing a servie
+/usr/libexec/remotectl dumpstate # Like dump without indicating a service
 /usr/libexec/remotectl [netcat|relay] ... # Expose a service in a port
 ...
 ```
 
-The communication between BridgeOS and the host occurs through a dedicated IPv6 interface. The `MultiverseSupport.framework` allows to establish sockets whose `fd` will be used for communicating.\
-It's possible to find thee communications using `netstat`, `nettop` or the open source option, `netbottom`.
+Communication between bridgeOS and the host occurs through a dedicated IPv6 interface. `MultiverseSupport.framework` establishes sockets whose file descriptors are used for communication.\
+It is possible to find these communications using `netstat`, `nettop`, or the open-source alternative `netbottom`.
+
+## References
+
+- [1] [Apple Developer — XPC](https://developer.apple.com/documentation/xpc)
+- [2] [Apple Developer Archive — Creating XPC Services](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingXPCServices.html)
+- [3] [Apple Developer — `xpc_connection_create_mach_service`](https://developer.apple.com/documentation/xpc/xpc_connection_create_mach_service(_:_:_:))
+- [4] [Apple Developer — `JoinExistingSession`](https://developer.apple.com/documentation/bundleresources/information_property_list/xpcservice/joinexistingsession)
+- [5] [hot3eed/xpcspy](https://github.com/hot3eed/xpcspy)
+- [6] [NewOSXBook — XPoCe2](https://newosxbook.com/tools/XPoCe2.html)
 
 {{#include ../../../../../banners/hacktricks-training.md}}
-
-

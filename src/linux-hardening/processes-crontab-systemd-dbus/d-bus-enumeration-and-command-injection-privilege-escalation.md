@@ -75,7 +75,7 @@ That quickly tells you which `Exec=` path will start for an activatable name and
 
 #### Connections
 
-[From wikipedia:](https://en.wikipedia.org/wiki/D-Bus) When a process sets up a connection to a bus, the bus assigns to the connection a special bus name called _unique connection name_. Bus names of this type are immutable—it's guaranteed they won't change as long as the connection exists—and, more importantly, they can't be reused during the bus lifetime. This means that no other connection to that bus will ever have assigned such unique connection name, even if the same process closes down the connection to the bus and creates a new one. Unique connection names are easily recognizable because they start with the—otherwise forbidden—colon character.
+[From wikipedia:](https://en.wikipedia.org/wiki/D-Bus) When a process sets up a connection to a bus, the bus assigns to the connection a special bus name called _unique connection name_. Bus names of this type are immutable—it's guaranteed they won't change as long as the connection exists—and, more importantly, they can't be reused during the bus lifetime. This means that no other connection to that bus will ever have assigned such unique connection name, even if the same process closes down the connection to the bus and creates a new one. Unique connection names are easily recognizable because they start with the—otherwise forbidden—colon character.<sup>[[4]](#references)</sup>
 
 ### Service Object Info
 
@@ -282,7 +282,7 @@ dbus-monitor "type=error" "sender=org.freedesktop.SystemToolsBackends"
 dbus-monitor "type=method_call" "type=method_return" "type=error"
 ```
 
-See the [D-Bus documentation](http://dbus.freedesktop.org/doc/dbus-specification.html) for more information on match rule syntax.
+See the [D-Bus documentation](http://dbus.freedesktop.org/doc/dbus-specification.html) for more information on match rule syntax.<sup>[[7]](#references)</sup>
 
 ### More
 
@@ -531,8 +531,8 @@ finish:
 Enumeration of a large D-Bus attack surface manually with `busctl`/`gdbus` quickly becomes painful. Two small FOSS utilities released in the last few years can speed things up during red-team or CTF engagements:
 
 ### dbusmap ("Nmap for D-Bus")
-* Author: @taviso – [https://github.com/taviso/dbusmap](https://github.com/taviso/dbusmap)
-* Written in C; single static binary (<50 kB) that walks every object path, pulls the `Introspect` XML and maps it to the owning PID/UID.
+* Author: @taviso – [https://github.com/taviso/dbusmap](https://github.com/taviso/dbusmap)<sup>[[5]](#references)</sup>
+* Written in C; single static binary (<50 kB) that walks every object path, pulls the `Introspect` XML and maps it to the owning PID/UID.<sup>[[5]](#references)</sup>
 * Useful flags:
   ```bash
   # List every service on the *system* bus and dump all callable methods
@@ -544,8 +544,8 @@ Enumeration of a large D-Bus attack surface manually with `busctl`/`gdbus` quick
 * The tool marks unprotected well-known names with `!`, instantly revealing services you can *own* (take over) or method calls that are reachable from an unprivileged shell.
 
 ### uptux.py
-* Author: @initstring – [https://github.com/initstring/uptux](https://github.com/initstring/uptux)
-* Python-only script that looks for *writable* paths in systemd units **and** overly-permissive D-Bus policy files (e.g. `send_destination="*"`).
+* Author: @initstring – [https://github.com/initstring/uptux](https://github.com/initstring/uptux)<sup>[[6]](#references)</sup>
+* Python-only script that looks for *writable* paths in systemd units **and** overly-permissive D-Bus policy files (e.g. `send_destination="*"`).<sup>[[6]](#references)</sup>
 * Quick usage:
   ```bash
   python3 uptux.py -n          # run all checks but don’t write a log file
@@ -593,5 +593,9 @@ Use `dbusmap --enable-probes` or manual `busctl call` to confirm whether a metho
 - [1] [USBCreator D-Bus Privilege Escalation in Ubuntu Desktop](https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/)
 - [2] [CVE-2024-45752: D-Bus service allows configuration by any unprivileged user](https://github.com/PixlOne/logiops/issues/473)
 - [3] [dde-api-proxy: Authentication Bypass in Deepin D-Bus Proxy Service (CVE-2025-23222)](https://security.opensuse.org/2025/01/24/dde-api-proxy-privilege-escalation.html)
+- [4] [D-Bus - Wikipedia](https://en.wikipedia.org/wiki/D-Bus)
+- [5] [taviso/dbusmap - "Nmap for D-Bus"](https://github.com/taviso/dbusmap)
+- [6] [initstring/uptux](https://github.com/initstring/uptux)
+- [7] [dbus.freedesktop.org - D-Bus documentation](http://dbus.freedesktop.org/doc/dbus-specification.html)
 
 {{#include ../../banners/hacktricks-training.md}}

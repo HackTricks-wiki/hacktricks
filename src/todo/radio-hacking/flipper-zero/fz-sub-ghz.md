@@ -2,15 +2,15 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro <a href="#kfpn7" id="kfpn7"></a>
+## Introduction <a href="#introduction" id="introduction"></a>
 
-Flipper Zero can **receive and transmit radio frequencies in the range of 300-928 MHz** with its built-in module, which can read, save, and emulate remote controls. These controls are used for interaction with gates, barriers, radio locks, remote control switches, wireless doorbells, smart lights, and more. Flipper Zero can help you to learn if your security is compromised.<sup>[[1]](#references)</sup>
+Flipper Zero can **receive and transmit radio frequencies in the range of 300-928 MHz** with its built-in module, subject to the frequency restrictions for the configured region. It can read, save, and emulate compatible remote controls used with gates, barriers, radio locks, switches, wireless doorbells, smart lights, and other devices.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../images/image (714).png" alt=""><figcaption></figcaption></figure>
 
-## Sub-GHz hardware <a href="#kfpn7" id="kfpn7"></a>
+## Sub-GHz Hardware <a href="#sub-ghz-hardware" id="sub-ghz-hardware"></a>
 
-Flipper Zero has a built-in sub-1 GHz module based on a [﻿](https://www.st.com/en/nfc/st25r3916.html#overview)﻿[CC1101 chip](https://www.ti.com/lit/ds/symlink/cc1101.pdf) and a radio antenna (the maximum range is 50 meters). Both the CC1101 chip and the antenna are designed to operate at frequencies in the 300-348 MHz, 387-464 MHz, and 779-928 MHz bands.<sup>[[1]](#references)</sup>
+Flipper Zero has a built-in sub-1 GHz module based on a CC1101 transceiver and a radio antenna. Actual range depends on the frequency, antenna, environment, and transmitter; Flipper documents up to approximately 50 meters under favorable conditions. The hardware covers 300-348 MHz, 387-464 MHz, and 779-928 MHz, while firmware and regional rules further restrict transmission.<sup>[[1]](#references)[[2]](#references)</sup>
 
 <figure><img src="../../../images/image (923).png" alt=""><figcaption></figcaption></figure>
 
@@ -35,14 +35,14 @@ To determine the remote's frequency, do the following:
 > [!TIP]
 > Find info about the frequency used (also another way to find which frequency is used)
 
-The **Read** option **listens on the configured frequency** on the indicated modulation: 433.92 AM by default. If **something is found** when reading, **info is given** in the screen. This info could be use to replicate the signal in the future.<sup>[[1]](#references)</sup>
+The **Read** option listens on the configured frequency and modulation (433.92 MHz AM by default). When it recognizes a supported signal, the screen displays information that can be saved and replayed later.<sup>[[1]](#references)</sup>
 
 While Read is in use, it's possible to press the **left button** and **configure it**.\
 At this moment it has **4 modulations** (AM270, AM650, FM328 and FM476), and **several relevant frequencies** stored:
 
 <figure><img src="../../../images/image (947).png" alt=""><figcaption></figcaption></figure>
 
-You can set **any that interests you**, however, if you are **not sure which frequency** could be the one used by the remote you have, **set Hopping to ON** (Off by default), and press the button several times until Flipper captures it and give you the info you need to set the frequency.
+You can select any permitted frequency. If you are unsure which frequency the remote uses, set **Hopping to ON** (off by default), then press the remote button several times until Flipper captures the signal and reports the frequency.
 
 > [!CAUTION]
 > Switching between frequencies takes some time, therefore signals transmitted at the time of switching can be missed. For better signal reception, set a fixed frequency determined by Frequency Analyzer.
@@ -52,20 +52,22 @@ You can set **any that interests you**, however, if you are **not sure which fre
 > [!TIP]
 > Steal (and replay) a signal in the configured frequency
 
-The **Read Raw** option **records signals** send in the listening frequency. This can be used to **steal** a signal and **repeat** it.
+The **Read Raw** option records signals sent on the selected frequency. This can be used to capture and replay a signal during authorized testing.<sup>[[1]](#references)</sup>
 
-By default **Read Raw is also in 433.92 in AM650**, but if with the Read option you found that the signal that interest you is in a **different frequency/modulation, you can also modify that** pressing left (while inside the Read Raw option).
+By default, **Read Raw also uses 433.92 MHz with AM650**. If the Read option found a signal on a different frequency or modulation, press Left inside Read Raw to change those settings.
 
 ### Brute-Force
 
-If you know the protocol used for example by the garage door it's possible to g**enerate all the codes and send them with the Flipper Zero.** This is an example that support general common types of garages: [**https://github.com/tobiabocchi/flipperzero-bruteforce**](https://github.com/tobiabocchi/flipperzero-bruteforce)
+If you know the protocol used by a device such as a garage door, it may be possible to **generate candidate codes and transmit them with Flipper Zero**. The `flipperzero-bruteforce` project supports several common static-code protocols.<sup>[[3]](#references)</sup>
 
 ### Add Manually
 
 > [!TIP]
 > Add signals from a configured list of protocols
 
-#### List of [supported protocols](https://docs.flipperzero.one/sub-ghz/add-new-remote) <a href="#id-3iglu" id="id-3iglu"></a>
+#### List of supported protocols <a href="#id-3iglu" id="id-3iglu"></a>
+
+The Add Manually menu exposes the protocol presets documented by Flipper Zero.<sup>[[4]](#references)</sup>
 
 | Princeton_433 (works with the majority of static code systems) | 433.92 | Static  |
 | -------------------------------------------------------------- | ------ | ------- |
@@ -86,11 +88,11 @@ If you know the protocol used for example by the garage door it's possible to g*
 
 ### Supported Sub-GHz vendors
 
-Check the list in [https://docs.flipperzero.one/sub-ghz/supported-vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors)
+Check Flipper Zero's supported-vendors list.<sup>[[5]](#references)</sup>
 
 ### Supported Frequencies by region
 
-Check the list in [https://docs.flipperzero.one/sub-ghz/frequencies](https://docs.flipperzero.one/sub-ghz/frequencies)
+Check the official regional-frequency list before transmitting.<sup>[[6]](#references)</sup>
 
 ### Test
 
@@ -99,9 +101,11 @@ Check the list in [https://docs.flipperzero.one/sub-ghz/frequencies](https://doc
 
 ## References
 
-- [1] [Flipper Zero Sub-GHz documentation](https://docs.flipperzero.one/sub-ghz)
+- [1] [Sub-GHz - Flipper Zero User Documentation](https://docs.flipperzero.one/sub-ghz)
+- [2] [Texas Instruments CC1101 data sheet](https://www.ti.com/lit/ds/symlink/cc1101.pdf)
+- [3] [tobiabocchi/flipperzero-bruteforce](https://github.com/tobiabocchi/flipperzero-bruteforce)
+- [4] [Flipper Zero - Add a manually created remote](https://docs.flipperzero.one/sub-ghz/add-new-remote)
+- [5] [Flipper Zero - Supported Sub-GHz vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors)
+- [6] [Flipper Zero - Regional Sub-GHz frequencies](https://docs.flipperzero.one/sub-ghz/frequencies)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

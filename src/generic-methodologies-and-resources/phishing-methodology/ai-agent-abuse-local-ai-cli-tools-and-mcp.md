@@ -4,7 +4,7 @@
 
 ## Overview
 
-Local AI command-line interfaces (AI CLIs) such as Claude Code, Gemini CLI, Codex CLI, Warp and similar tools often ship with powerful built‑ins: filesystem read/write, shell execution and outbound network access. Many act as MCP clients (Model Context Protocol), letting the model call external tools over STDIO or HTTP.<sup>[[2]](#references)</sup> Because the LLM plans tool-chains non‑deterministically, identical prompts can lead to different process, file and network behaviours across runs and hosts.
+Local AI command-line interfaces (AI CLIs) such as Claude Code, Gemini CLI, Codex CLI, Warp and similar tools often ship with powerful built‑ins: filesystem read/write, shell execution and outbound network access. Many act as MCP clients (Model Context Protocol), letting the model call external tools over STDIO or HTTP.<sup>[[2]](#references)[[7]](#references)</sup> Because the LLM plans tool-chains non‑deterministically, identical prompts can lead to different process, file and network behaviours across runs and hosts.
 
 Key mechanics seen in common AI CLIs:
 - Typically implemented in Node/TypeScript with a thin wrapper launching the model and exposing tools.
@@ -63,7 +63,7 @@ High-signal paths to review:
 - `.mcp.json`
 - `.vscode/` tasks, settings, extensions recommendations, or other editor files that steer AI helpers
 
-This pattern was highlighted in the Miasma npm supply-chain campaign: after package compromise, the attacker can use stolen maintainer access to push repository-local assistant configuration, shifting the trigger from `npm install` to **repository open / assistant load**.<sup>[[12]](#references)</sup> During reviews, treat new assistant-policy files with the same suspicion level as new workflow files, shell scripts, package hooks, or build-system metadata.
+This pattern was highlighted in the Miasma npm supply-chain campaign: after package compromise, the attacker can use stolen maintainer access to push repository-local assistant configuration, shifting the trigger from `npm install` to **repository open / assistant load**.<sup>[[13]](#references)</sup> During reviews, treat new assistant-policy files with the same suspicion level as new workflow files, shell scripts, package hooks, or build-system metadata.
 
 Defensive checks:
 
@@ -94,7 +94,7 @@ This makes repo-local env files and dot-directories part of the trust boundary f
 
 ## Adversary Playbook – Prompt‑Driven Secrets Inventory
 
-Task the agent to quickly triage and stage credentials/secrets for exfiltration while staying quiet:<sup>[[1]](#references)</sup>
+Task the agent to quickly triage and stage credentials/secrets for exfiltration while staying quiet.<sup>[[1]](#references)</sup>
 
 - Scope: recursively enumerate under $HOME and application/wallet dirs; avoid noisy/pseudo paths (`/proc`, `/sys`, `/dev`).
 - Performance/stealth: cap recursion depth; avoid `sudo`/priv‑escalation; summarise results.
@@ -131,10 +131,10 @@ Notes:
 
 ## Local Artifacts and Logs (Forensics)
 
-- Gemini CLI session logs: `~/.gemini/tmp/<uuid>/logs.json`<sup>[[1]](#references)</sup>
+- Gemini CLI session logs: `~/.gemini/tmp/<uuid>/logs.json`.<sup>[[1]](#references)</sup>
   - Fields commonly seen: `sessionId`, `type`, `message`, `timestamp`.
   - Example `message`: "@.bashrc what is in this file?" (user/agent intent captured).
-- Claude Code history: `~/.claude/history.jsonl`
+- Claude Code history: `~/.claude/history.jsonl`.<sup>[[1]](#references)</sup>
   - JSONL entries with fields like `display`, `timestamp`, `project`.
 
 ---
@@ -149,12 +149,12 @@ Key actors
 - Server: the MCP server (local or remote) exposing Prompts/Resources/Tools.
 
 AuthN/AuthZ
-- OAuth2 is common: an IdP authenticates, the MCP server acts as resource server.
-- After OAuth, the server issues an authentication token used on subsequent MCP requests. This is distinct from `Mcp-Session-Id` which identifies a connection/session after `initialize`.<sup>[[6]](#references)</sup>
+- OAuth2 is common: an IdP authenticates, the MCP server acts as resource server.<sup>[[3]](#references)</sup>
+- After OAuth, the authorization server issues an access token that the client presents to the MCP server, which acts as the protected resource/resource server. The access token is distinct from `Mcp-Session-Id`, which carries transport session state after `initialize` rather than authentication.<sup>[[6]](#references)[[7]](#references)</sup>
 
 ### Pre-Session Abuse: OAuth Discovery to Local Code Execution
 
-When a desktop client reaches a remote MCP server through a helper such as `mcp-remote`, the dangerous surface may appear **before** `initialize`, `tools/list`, or any ordinary JSON-RPC traffic. In 2025, researchers showed that `mcp-remote` versions `0.0.5` to `0.1.15` could accept attacker-controlled OAuth discovery metadata and forward a crafted `authorization_endpoint` string into the operating system URL handler (`open`, `xdg-open`, `start`, etc.), yielding local code execution on the connecting workstation.<sup>[[11]](#references)</sup>
+When a desktop client reaches a remote MCP server through a helper such as `mcp-remote`, the dangerous surface may appear **before** `initialize`, `tools/list`, or any ordinary JSON-RPC traffic. In 2025, researchers showed that `mcp-remote` versions `0.0.5` to `0.1.15` could accept attacker-controlled OAuth discovery metadata and forward a crafted `authorization_endpoint` string into the operating system URL handler (`open`, `xdg-open`, `start`, etc.), yielding local code execution on the connecting workstation.<sup>[[11]](#references)[[12]](#references)</sup>
 
 Offensive implications:
 - A malicious remote MCP server can weaponize the very first auth challenge, so compromise happens during server onboarding rather than during a later tool call.
@@ -165,7 +165,7 @@ When assessing remote MCP deployments, inspect the OAuth bootstrap path as caref
 
 Transports
 - Local: JSON‑RPC over STDIN/STDOUT.
-- Remote: Server‑Sent Events (SSE, still widely deployed) and streamable HTTP.<sup>[[7]](#references)</sup>
+- Remote: Server‑Sent Events (SSE, still widely deployed) and streamable HTTP.<sup>[[3]](#references)[[7]](#references)</sup>
 
 A) Session initialization
 - Obtain OAuth token if required (Authorization: Bearer ...).
@@ -175,7 +175,7 @@ A) Session initialization
 {"jsonrpc":"2.0","id":0,"method":"initialize","params":{"capabilities":{}}}
 ```
 
-- Persist the returned `Mcp-Session-Id` and include it on subsequent requests per transport rules.
+- Persist the returned `Mcp-Session-Id` and include it on subsequent requests per transport rules.<sup>[[7]](#references)</sup>
 
 B) Enumerate capabilities
 - Tools
@@ -251,7 +251,8 @@ Impact highlights
 - [8] [Equixly: MCP server security issues in the wild](https://equixly.com/blog/2025/03/29/mcp-server-new-security-nightmare/)
 - [9] [Caught in the Hook: RCE and API Token Exfiltration Through Claude Code Project Files](https://research.checkpoint.com/2026/rce-and-api-token-exfiltration-through-claude-code-project-files-cve-2025-59536/)
 - [10] [OpenAI Codex CLI Vulnerability: Command Injection](https://research.checkpoint.com/2025/openai-codex-cli-command-injection-vulnerability/)
-- [11] [When OAuth Becomes a Weapon: Lessons from CVE-2025-6514](https://amlalabs.com/blog/oauth-cve-2025-6514/)
-- [12] [What the Miasma campaign reveals about the new supply chain threat model and the underground market for developer credentials](https://www.tenable.com/blog/what-the-miasma-campaign-reveals-about-the-new-supply-chain-threat-model-and-the-underground)
+- [11] [OS command injection in mcp-remote when connecting to untrusted MCP servers (JFrog Security Research, JFSA-2025-001290844)](https://research.jfrog.com/vulnerabilities/mcp-remote-command-injection-rce-jfsa-2025-001290844/)
+- [12] [When OAuth Becomes a Weapon: Lessons from CVE-2025-6514](https://amlalabs.com/blog/oauth-cve-2025-6514/)
+- [13] [What the Miasma campaign reveals about the new supply chain threat model and the underground market for developer credentials](https://www.tenable.com/blog/what-the-miasma-campaign-reveals-about-the-new-supply-chain-threat-model-and-the-underground)
 
 {{#include ../../banners/hacktricks-training.md}}

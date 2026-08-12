@@ -60,7 +60,7 @@ Under _**Statistics --> I/O Graph**_ you can find a **graph of the communication
 ### Filters
 
 Here you can find wireshark filter depending on the protocol: [https://www.wireshark.org/docs/dfref/](https://www.wireshark.org/docs/dfref/)\
-In current Wireshark use `tls.*` instead of the old `ssl.*` filter names.\
+In current Wireshark use `tls.*` instead of the old `ssl.*` filter names.<sup>[[1]](#references)</sup>\
 Other interesting filters:
 
 - `(http.request or tls.handshake.type == 1) and !(udp.port eq 1900)`
@@ -82,7 +82,7 @@ If you want to **search** for **content** inside the **packets** of the sessions
 
 ### Following multiplexed streams
 
-Recent Wireshark versions can follow `TLS`, `HTTP/2` and `QUIC` streams directly. On noisy captures this is usually faster than only using `Follow TCP Stream`, especially when several requests share the same connection.
+Wireshark can follow `TLS`, `HTTP/2`, and `QUIC` streams directly. Its HTTP/2 and QUIC dialogs expose connection and substream selectors, which helps isolate multiplexed streams that share the same lower-level connection.<sup>[[4]](#references)</sup>
 
 ### Free pcap labs
 
@@ -105,7 +105,7 @@ If the capture is mostly encrypted, adding these fields as columns will speed up
 - `tls.handshake.ja3`
 - `tls.handshake.ja4` (Wireshark 4.2+)
 
-This lets you cluster sessions by hostname, ALPN (`http/1.1`, `h2`, `h3`, etc.) and client fingerprint even when the payload itself stays encrypted. For decrypted HTTP/2 and HTTP/3 captures, it is also useful to add `http2.header.value` or `http3.headers.header.value` as columns and pivot on paths, authorities and other interesting metadata.<sup>[[2]](#references)</sup>
+This lets you cluster sessions by hostname, ALPN (`http/1.1`, `h2`, `h3`, etc.) and client fingerprint even when the payload itself stays encrypted. For decrypted HTTP/2 and HTTP/3 captures, it is also useful to add `http2.header.value` or `http3.headers.header.value` as columns and pivot on paths, authorities and other interesting metadata.<sup>[[2]](#references)[[5]](#references)[[6]](#references)[[7]](#references)</sup>
 
 ```bash
 tshark -r capture.pcapng -Y "tls.handshake.type == 1" -T fields \
@@ -195,5 +195,9 @@ f.close()
 - [1] [Wireshark TLS wiki](https://wiki.wireshark.org/TLS)
 - [2] [Decrypting and parsing HTTP/3 traffic in Wireshark](https://blog.elmo.sg/posts/parsing-decrypted-quic-traffic-in-wireshark/)
 - [3] [Decrypting TLS Browser Traffic With Wireshark – The Easy Way!](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/)
+- [4] [Following Protocol Streams](https://www.wireshark.org/docs/wsug_html_chunked/ChAdvFollowStreamSection.html)
+- [5] [Display Filter Reference: Transport Layer Security](https://www.wireshark.org/docs/dfref/t/tls.html)
+- [6] [Display Filter Reference: HyperText Transfer Protocol 2](https://www.wireshark.org/docs/dfref/h/http2.html)
+- [7] [Display Filter Reference: Hypertext Transfer Protocol Version 3](https://www.wireshark.org/docs/dfref/h/http3.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

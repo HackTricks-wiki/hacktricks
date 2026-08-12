@@ -4,11 +4,11 @@
 
 ## Introduction
 
-If you found that you can **write in a System Path folder** (note that this won't work if you can write in a User Path folder) it's possible that you could **escalate privileges** in the system.
+If you can **write to a directory in the system-wide `PATH`** (not merely your user `PATH`), you may be able to **escalate privileges** on the system.
 
-In order to do that you can abuse a **Dll Hijacking** where you are going to **hijack a library being loaded** by a service or process with **more privileges** than yours, and because that service is loading a Dll that probably doesn't even exist in the entire system, it's going to try to load it from the System Path where you can write.
+This can be abused through **DLL hijacking** when a more-privileged service or process tries to load a DLL that does not exist in its earlier search locations and eventually searches the writable system `PATH` directory.
 
-For more info about **what is Dll Hijackig** check:
+For more information about **DLL hijacking**, see:
 
 
 {{#ref}}
@@ -17,9 +17,9 @@ For more info about **what is Dll Hijackig** check:
 
 ## Privesc with Dll Hijacking
 
-### Finding a missing Dll
+### Finding a Missing DLL
 
-The first thing you need is to **identify a process** running with **more privileges** than you that is trying to **load a Dll from the System Path** you can write in.
+First, **identify a process** running with **more privileges** that tries to **load a DLL from a writable system `PATH` directory**.
 
 Remember that this technique depends on a **Machine/System PATH** entry, not only on your **User PATH**. Therefore, before spending time on Procmon, it's worth enumerating the **Machine PATH** entries and checking which ones are writable:<sup>[[1]](#references)</sup>
 
@@ -34,7 +34,7 @@ $machinePath | ForEach-Object {
 }
 ```
 
-The problem in this cases is that probably thoses processes are already running. To find which Dlls are lacking the services you need to launch procmon as soon as possible (before processes are loaded). So, to find lacking .dlls do:
+The problem in these cases is that those processes are probably already running. To identify DLLs that services try and fail to load, launch Procmon as early as possible (before the processes start), then:
 
 - **Create** the folder `C:\privesc_hijacking` and add the path `C:\privesc_hijacking` to **System Path env variable**. You can do this **manually** or with **PS**:
 
@@ -59,7 +59,7 @@ if ($envPath -notlike "*$folderPath*") {
 - Then, **reboot**. When the computer is restarted **`procmon`** will start **recording** events asap.
 - Once **Windows** is **started execute `procmon`** again, it'll tell you that it has been running and will **ask you if you want to store** the events in a file. Say **yes** and **store the events in a file**.
 - **After** the **file** is **generated**, **close** the opened **`procmon`** window and **open the events file**.
-- Add these **filters** and you will find all the Dlls that some **proccess tried to load** from the writable System Path folder:
+- Add these **filters** to find all DLLs that a **process tried to load** from the writable System Path folder:
 
 <figure><img src="../../../images/image (945).png" alt=""><figcaption></figcaption></figure>
 
@@ -72,7 +72,7 @@ Running this in a free **virtual (vmware) Windows 11 machine** I got these resul
 
 <figure><img src="../../../images/image (607).png" alt=""><figcaption></figcaption></figure>
 
-In this case the .exe are useless so ignore them, the missed DLLs where from:
+In this case, ignore the `.exe` results. The missing-DLL probes came from:
 
 | Service                         | Dll                | CMD line                                                             |
 | ------------------------------- | ------------------ | -------------------------------------------------------------------- |
@@ -80,7 +80,7 @@ In this case the .exe are useless so ignore them, the missed DLLs where from:
 | Diagnostic Policy Service (DPS) | Unknown.DLL        | `C:\Windows\System32\svchost.exe -k LocalServiceNoNetwork -p -s DPS` |
 | ???                             | SharedRes.dll      | `C:\Windows\system32\svchost.exe -k UnistackSvcGroup`                |
 
-After finding this, I found this interesting blog post that also explains how to [**abuse WptsExtensions.dll for privesc**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll). Which is what we **are going to do now**.<sup>[[3]](#references)</sup>
+The following example uses the technique described in this article about [**abusing `WptsExtensions.dll` for privilege escalation**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll).<sup>[[3]](#references)</sup>
 
 ### Other candidates worth triaging
 
@@ -96,13 +96,13 @@ Treat these names as **triage hints**, not guaranteed wins: they are **SKU/build
 
 ### Exploitation
 
-So, to **escalate privileges** we are going to hijack the library **WptsExtensions.dll**. Having the **path** and the **name** we just need to **generate the malicious dll**.
+To **escalate privileges**, hijack **`WptsExtensions.dll`**. Once the **path** and **name** are known, generate the malicious DLL.
 
 You can [**try to use any of these examples**](#creating-and-compiling-dlls). You could run payloads such as: get a rev shell, add a user, execute a beacon...
 
 > [!WARNING]
-> Note that **not all the service are run** with **`NT AUTHORITY\SYSTEM`** some are also run with **`NT AUTHORITY\LOCAL SERVICE`** which has **less privileges** and you **won't be able to create a new user** abuse its permissions.\
-> However, that user has the **`seImpersonate`** privilege, so you can use the[ **potato suite to escalate privileges**](../roguepotato-and-printspoofer.md). So, in this case a rev shell is a better option that trying to create a user.
+> Note that **not all services run** as **`NT AUTHORITY\SYSTEM`**. Some run as **`NT AUTHORITY\LOCAL SERVICE`**, which has **fewer privileges**, so abusing one of these services may not let you create a new user.\
+> However, that account has the **`SeImpersonatePrivilege`** user right, so you can use the [**Potato suite to escalate privileges**](../roguepotato-and-printspoofer.md). In this case, a reverse shell is a better option than trying to create a user.
 
 At the moment of writing the **Task Scheduler** service is run with **Nt AUTHORITY\SYSTEM**.
 

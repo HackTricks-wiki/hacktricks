@@ -188,8 +188,6 @@ Microsoft introduced a three-phase rollout (Compatibility → Audit → Enforcem
 
 ---
 
-
-
 ## References
 
 - [1] [EKUwu: Not just another AD CS ESC](https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc)

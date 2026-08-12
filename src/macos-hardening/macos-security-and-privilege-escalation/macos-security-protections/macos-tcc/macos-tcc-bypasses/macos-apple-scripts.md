@@ -4,8 +4,7 @@
 
 ## Apple Scripts
 
-It's a scripting language used for task automation **interacting with remote processes**. It makes pretty easy to **ask other processes to perform some actions**. **Malware** may abuse these features to abuse functions exported by other processes.\
-For example, a malware could **inject arbitrary JS code in browser opened pages**. Or **auto click** some allow permissions requested to the user;<sup>[[3]](#references)</sup>
+AppleScript is an automation language that can send Apple Events to scriptable applications. With the relevant grants, malware can inject JavaScript into a scriptable browser tab or use System Events/Accessibility to click a permission dialog. Apple Events and Accessibility are distinct TCC services and generally require their respective user approvals.<sup>[[3]](#references)</sup>
 
 ```applescript
 tell window 1 of process "SecurityAgent"
@@ -13,8 +12,8 @@ tell window 1 of process "SecurityAgent"
 end tell
 ```
 
-Here you have some examples: [https://github.com/abbeycode/AppleScripts](https://github.com/abbeycode/AppleScripts)\
-Find more info about malware using applescripts [**here**](https://www.sentinelone.com/blog/how-offensive-actors-use-applescript-for-attacking-macos/).
+The `abbeycode/AppleScripts` repository contains automation examples.<sup>[[7]](#references)</sup>\
+Find more info about malware using applescripts [**here**](https://www.sentinelone.com/blog/how-offensive-actors-use-applescript-for-attacking-macos/).<sup>[[3]](#references)</sup>
 
 ### Automation / TCC quirks
 
@@ -41,7 +40,7 @@ EOF
 
 If you build a custom helper that sends Apple Events directly, giving it a **real app identity** makes testing and operations much more reliable. In practice this means embedding an `Info.plist` with `CFBundleIdentifier` and `NSAppleEventsUsageDescription`, signing the binary, and granting the `com.apple.security.automation.apple-events` entitlement. Otherwise the Apple Events prompt is frequently attributed to the **parent host** (for example `Terminal`) or the `NSAppleScript` execution just fails with confusing `-1750` / `errOSASystemError` errors.<sup>[[2]](#references)</sup>
 
-Apple scripts may be easily "**compiled**". These versions can be easily "**decompiled**" with `osadecompile`
+AppleScripts can be saved in compiled form and ordinarily decompiled with `osadecompile`.
 
 However, these scripts can also be **exported as "Read only"** (via the "Export..." option):
 
@@ -52,9 +51,9 @@ file mal.scpt
 mal.scpt: AppleScript compiled
 ```
 
-and in this case the content cannot be decompiled even with `osadecompile`
+In that case `osadecompile` refuses to recover normal source, but the bytecode and Apple Event terminology can still be analyzed.
 
-However, there are still some tools that can be used to understand this kind of executables, [**read this research for more info**](https://labs.sentinelone.com/fade-dead-adventures-in-reversing-malicious-run-only-applescripts/)).<sup>[[4]](#references)</sup> The tool [**applescript-disassembler**](https://github.com/Jinmo/applescript-disassembler) with [**aevt_decompile**](https://github.com/SentineLabs/aevt_decompile) will be very useful to understand how the script works.
+SentinelOne's run-only research describes how to recover structure despite that restriction. `applescript-disassembler` and `aevt_decompile` help inspect the compiled script and Apple Event data.<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 
 ## References
 
@@ -62,7 +61,8 @@ However, there are still some tools that can be used to understand this kind of 
 - [2] [Making AppleScript Work in macOS CLI Tools: The Undocumented Parts](https://steipete.me/posts/2025/applescript-cli-macos-complete-guide)
 - [3] [How Offensive Actors Use AppleScript For Attacking macOS](https://www.sentinelone.com/blog/how-offensive-actors-use-applescript-for-attacking-macos/)
 - [4] [FADE DEAD | Adventures in Reversing Malicious Run-Only AppleScripts](https://labs.sentinelone.com/fade-dead-adventures-in-reversing-malicious-run-only-applescripts/)
+- [5] [Jinmo/applescript-disassembler](https://github.com/Jinmo/applescript-disassembler)
+- [6] [SentineLabs/aevt_decompile](https://github.com/SentineLabs/aevt_decompile)
+- [7] [abbeycode/AppleScripts examples](https://github.com/abbeycode/AppleScripts)
 
 {{#include ../../../../../banners/hacktricks-training.md}}
-
-

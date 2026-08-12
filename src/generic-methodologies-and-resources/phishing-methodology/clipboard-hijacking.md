@@ -168,7 +168,6 @@ Threat hunting
 - Daily‑rotating C2 hostnames and URLs with `.../Y/?t=<epoch>&v=5&p=<encoded_user_pc_firstinfection>` pattern.
 - Correlate clipboard write events followed by Win+R paste then immediate `powershell.exe` execution.
 
-
 Blue-teams can combine clipboard, process-creation and registry telemetry to pinpoint pastejacking abuse:
 
 * Windows Registry: `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU` keeps a history of **Win + R** commands – look for unusual Base64 / obfuscated entries.

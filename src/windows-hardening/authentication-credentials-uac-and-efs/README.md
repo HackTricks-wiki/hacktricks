@@ -138,12 +138,9 @@ You can also use `cipher /e` and `cipher /d` inside a folder to **encrypt** and 
 
 This way requires the **victim user** to be **running** a **process** inside the host. If that is the case, using a `meterpreter` sessions you can impersonate the token of the process of the user (`impersonate_token` from `incognito`). Or you could just `migrate` to process of the user.
 
-#### Knowing the users password
+#### Knowing the user's password
 
-
-{{#ref}}
-https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
-{{#endref}}
+Mimikatz documents how to import the user's certificate/private key material and decrypt EFS-protected files when the password is known.<sup>[[6]](#references)</sup>
 
 ## Group Managed Service Accounts (gMSA)
 
@@ -157,7 +154,7 @@ Microsoft developed **Group Managed Service Accounts (gMSA)** to simplify the ma
 
 The passwords for gMSAs are stored in the LDAP property _**msDS-ManagedPassword**_ and are automatically reset every 30 days by Domain Controllers (DCs). This password, an encrypted data blob known as [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), can only be retrieved by authorized administrators and the servers on which the gMSAs are installed, ensuring a secure environment. To access this information, a secured connection such as LDAPS is required, or the connection must be authenticated with 'Sealing & Secure'.
 
-![https://cube0x0.github.io/Relaying-for-gMSA/](../../images/asd1.png)
+![Relaying NTLM authentication to retrieve a gMSA password](../../images/asd1.png)<sup>[[1]](#references)</sup>
 
 You can read this password with [**GMSAPasswordReader**](https://github.com/rvazarkar/GMSAPasswordReader)**:**<sup>[[2]](#references)</sup>
 
@@ -165,9 +162,9 @@ You can read this password with [**GMSAPasswordReader**](https://github.com/rvaz
 /GMSAPasswordReader --AccountName jkohler
 ```
 
-[**Find more info in this post**](https://cube0x0.github.io/Relaying-for-gMSA/)
+[**Find more information in the archived original research**](https://web.archive.org/web/20200724233424/https://cube0x0.github.io/Relaying-for-gMSA/).<sup>[[1]](#references)</sup>
 
-Also, check this [web page](https://cube0x0.github.io/Relaying-for-gMSA/) about how to perform a **NTLM relay attack** to **read** the **password** of **gMSA**.<sup>[[1]](#references)</sup>
+The same research explains how an **NTLM relay attack** can obtain a **gMSA password** when the relayed principal is authorized to read `msDS-ManagedPassword`.<sup>[[1]](#references)</sup>
 
 ### Abusing ACL chaining to read gMSA managed password (GenericAll -> ReadGMSAPassword)
 
@@ -237,7 +234,7 @@ $ExecutionContext.SessionState.LanguageMode
 Powershell -version 2
 ```
 
-In current Windows that Bypass won't work but you can use[ **PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
+On current Windows versions that bypass no longer works, but you can use [**PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
 **To compile it you may need** **to** _**Add a Reference**_ -> _Browse_ ->_Browse_ -> add `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` and **change the project to .Net4.5**.
 
 #### Direct bypass:
@@ -284,7 +281,7 @@ More can be found [here](https://blog.netspi.com/15-ways-to-bypass-the-powershel
 
 Is the API that can be use to authenticate users.
 
-The SSPI will be in charge of finding the adequate protocol for two machines that want to communicate. The preferred method for this is Kerberos. Then the SSPI will negotiate which authentication protocol will be used, these authentication protocols are called Security Support Provider (SSP), are located inside each Windows machine in the form of a DLL and both machines must support the same to be able to communicate.
+SSPI selects an appropriate authentication protocol for two communicating machines, preferring Kerberos when available. These protocols are implemented by Security Support Providers (SSPs), which are installed as DLLs on Windows; both peers must support the negotiated provider.
 
 ### Main SSPs
 
@@ -312,7 +309,7 @@ uac-user-account-control.md
 
 ## References
 
-- [1] [Relaying for gMSA – cube0x0](https://cube0x0.github.io/Relaying-for-gMSA/)
+- [1] [Relaying for gMSA – cube0x0 (Internet Archive)](https://web.archive.org/web/20200724233424/https://cube0x0.github.io/Relaying-for-gMSA/)
 - [2] [GMSAPasswordReader](https://github.com/rvazarkar/GMSAPasswordReader)
 - [3] [HTB Sendai – 0xdf: gMSA via rights chaining to WinRM](https://0xdf.gitlab.io/2025/08/28/htb-sendai.html)
 - [4] [darthsidious – Bypassing AppLocker and PowerShell Constrained Language Mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode)

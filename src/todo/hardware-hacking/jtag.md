@@ -9,7 +9,7 @@ README.md
 
 ## JTAGenum
 
-[**JTAGenum**](https://github.com/cyphunk/JTAGenum) is a tool you can load on an Arduino-compatible MCU or (experimentally) a Raspberry Pi to brute‑force unknown JTAG pinouts and even enumerate instruction registers.
+**JTAGenum** is a tool you can load on an Arduino-compatible MCU or, experimentally, a Raspberry Pi to brute-force unknown JTAG pinouts and enumerate instruction registers.<sup>[[3]](#references)</sup>
 
 - Arduino: connect digital pins D2–D11 to up to 10 suspected JTAG pads/testpoints, and Arduino GND to target GND. Power the target separately unless you know the rail is safe. Prefer 3.3 V logic (e.g., Arduino Due) or use a level shifter/series resistors when probing 1.8–3.3 V targets.
 - Raspberry Pi: the Pi build exposes fewer usable GPIOs (so scans are slower); check the repo for the current pin map and constraints.
@@ -32,7 +32,8 @@ Once flashed, open the serial monitor at 115200 baud and send `h` for help. Typi
 
 If a valid TAP is found you will see lines starting with `FOUND!` indicating discovered pins.
 
-Tips
+### JTAGenum Safety Tips
+
 - Always share ground, and never drive unknown pins above target Vtref. If in doubt, add 100–470 Ω series resistors on candidate pins.
 - If the device uses SWD/SWJ instead of 4‑wire JTAG, JTAGenum may not detect it; try SWD tools or an adapter that supports SWJ‑DP.
 
@@ -44,24 +45,25 @@ Tips
 
 ## First contact with OpenOCD (scan and IDCODE)
 
-OpenOCD is the de‑facto OSS for JTAG/SWD. With a supported adapter you can scan the chain and read IDCODEs:
+OpenOCD is the de‑facto OSS for JTAG/SWD. With a supported adapter you can scan the chain and read IDCODEs:<sup>[[1]](#references)</sup>
 
 - Generic example with a J‑Link:
 ```
 openocd -f interface/jlink.cfg -c "transport select jtag; adapter speed 1000" \
   -c "init; scan_chain; shutdown"
 ```
-- ESP32‑S3 built‑in USB‑JTAG (no external probe required):
+- ESP32‑S3 built‑in USB‑JTAG (no external probe required):<sup>[[2]](#references)</sup>
 ```
 openocd -f board/esp32s3-builtin.cfg -c "init; scan_chain; shutdown"
 ```
-Notes
+### Notes
+
 - If you get "all ones/zeros" IDCODE, check wiring, power, Vtref, and that the port isn’t locked by fuses/option bytes.
 - See OpenOCD low‑level `irscan`/`drscan` for manual TAP interaction when bringing up unknown chains.<sup>[[1]](#references)</sup>
 
 ## Halting the CPU and dumping memory/flash
 
-Once the TAP is recognized and a target script is chosen, you can halt the core and dump memory regions or internal flash. Examples (adjust target, base addresses and sizes):
+Once the TAP is recognized and a target script is chosen, you can halt the core and dump memory regions or internal flash. Examples (adjust target, base addresses and sizes):<sup>[[1]](#references)</sup>
 
 - Generic target after init:
 ```
@@ -73,19 +75,20 @@ openocd -f interface/jlink.cfg -f target/stm32f1x.cfg \
 openocd -f interface/ftdi/ft232h.cfg -f target/riscv.cfg \
   -c "init; riscv set_prefer_sba on; halt; dump_image sram.bin 0x80000000 0x20000; shutdown"
 ```
-- ESP32‑S3, program or read via OpenOCD helper:
+- ESP32‑S3, program or read via OpenOCD helper:<sup>[[2]](#references)</sup>
 ```
 openocd -f board/esp32s3-builtin.cfg \
   -c "program_esp app.bin 0x10000 verify exit"
 ```
 
-Tips
+### Memory-Dumping Tips
+
 - Use `mdw/mdh/mdb` to sanity‑check memory before long dumps.
 - For multi‑device chains, set BYPASS on non‑targets or use a board file that defines all TAPs.
 
 ## Boundary‑scan tricks (EXTEST/SAMPLE)
 
-Even when the CPU debug access is locked, boundary‑scan may still be exposed. With UrJTAG/OpenOCD you can:
+Even when the CPU debug access is locked, boundary‑scan may still be exposed. With UrJTAG/OpenOCD you can:<sup>[[1]](#references)</sup>
 - SAMPLE to snapshot pin states while the system runs (find bus activity, confirm pin mapping).
 - EXTEST to drive pins (e.g., bit‑bang external SPI flash lines via the MCU to read it offline if board wiring allows).
 
@@ -118,5 +121,6 @@ You need the device BSDL to know boundary register bit ordering. Beware that som
 
 - [1] [OpenOCD User’s Guide – JTAG Commands and configuration](https://openocd.org/doc-release/html/JTAG-Commands.html)
 - [2] [Espressif ESP32‑S3 JTAG debugging (USB‑JTAG, OpenOCD usage)](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/api-guides/jtag-debugging/)
+- [3] [JTAGenum – Arduino-based JTAG pinout scanner](https://github.com/cyphunk/JTAGenum)
 
 {{#include ../../banners/hacktricks-training.md}}

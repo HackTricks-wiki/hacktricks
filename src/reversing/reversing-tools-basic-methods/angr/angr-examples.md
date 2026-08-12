@@ -109,7 +109,7 @@ def main(argv):
   password2_size_in_bits = 32  # :integer
   password2 = claripy.BVS('password2', password2_size_in_bits)
 
-  # Relate it Vectors with the registriy values you are interested in to reach an address
+  # Relate its vectors to the register values needed to reach an address
   initial_state.regs.eax = password0
   initial_state.regs.ebx = password1
   initial_state.regs.edx = password2
@@ -224,7 +224,7 @@ def main(argv):
   path_to_binary = argv[1]
   project = angr.Project(path_to_binary)
 
-  #Get an address after the scanf. Once the input has already being saved in the memory positions
+  # Get an address after scanf, once the input has been saved in memory
   start_address = 0x8048606
   initial_state = project.factory.blank_state(addr=start_address)
 
@@ -350,7 +350,7 @@ def main(argv):
   path_to_binary = argv[1]
   project = angr.Project(path_to_binary)
 
-  # Get an address just before opening the file with th simbolic content
+  # Get an address just before opening the file with the symbolic content
   # Or at least when the file is not going to suffer more changes before being read
   start_address = 0x80488db
   initial_state = project.factory.blank_state(addr=start_address)
@@ -360,10 +360,10 @@ def main(argv):
   filename = 'WCEXPXBW.txt'
   symbolic_file_size_bytes = 64
 
-  # Create a BV which is going to be the content of the simbolic file
+  # Create a bit-vector that will hold the symbolic file content
   password = claripy.BVS('password', symbolic_file_size_bytes * 8)
 
-  # Create the file simulation with the simbolic content
+  # Create the simulated file with symbolic content
   password_file = angr.storage.SimFile(filename, content=password)
 
   # Add the symbolic file we created to the symbolic filesystem.
@@ -581,7 +581,7 @@ def main(argv):
       user_input_buffer_length
     )
 
-    # Create a simbolic IF that if the loaded string frommemory is the expected
+    # Create a symbolic If expression that checks the string loaded from memory
     # return True (1) if not returns False (0) in eax
     check_against_string = 'XKSPZSJKJYQCQXZV'.encode() # :string
 
@@ -835,9 +835,6 @@ if __name__ == '__main__':
 
 ## References
 
-- [1] [jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
+- [1] [jakespringer/angr_ctf - GitHub repository](https://github.com/jakespringer/angr_ctf)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

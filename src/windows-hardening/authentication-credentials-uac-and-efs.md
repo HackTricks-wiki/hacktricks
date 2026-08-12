@@ -136,9 +136,11 @@ You can also use `cipher /e` and `cipher /d` inside a folder to **encrypt** and 
 
 #### Being Authority System
 
-This way requires the **victim user** to be **running** a **process** inside the host. If that is the case, using a `meterpreter` sessions you can impersonate the token of the process of the user (`impersonate_token` from `incognito`). Or you could just `migrate` to process of the user.
+This approach requires the **victim user** to be **running** a **process** on the host. If so, from a `meterpreter` session you can impersonate the user's process token (`impersonate_token` from `incognito`). Alternatively, you can `migrate` into the user's process.
 
-#### Knowing the users password
+#### Knowing the User's Password
+
+Mimikatz can import the user's certificate and private key, then use them to decrypt EFS-protected files.<sup>[[2]](#references)</sup>
 
 {{#ref}}
 https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
@@ -156,7 +158,7 @@ Microsoft developed **Group Managed Service Accounts (gMSA)** to simplify the ma
 
 The passwords for gMSAs are stored in the LDAP property _**msDS-ManagedPassword**_ and are automatically reset every 30 days by Domain Controllers (DCs). This password, an encrypted data blob known as [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), can only be retrieved by authorized administrators and the servers on which the gMSAs are installed, ensuring a secure environment. To access this information, a secured connection such as LDAPS is required, or the connection must be authenticated with 'Sealing & Secure'.
 
-![https://cube0x0.github.io/Relaying-for-gMSA/](../images/asd1.png)
+![https://cube0x0.github.io/Relaying-for-gMSA/](../images/asd1.png)<sup>[[3]](#references)</sup>
 
 You can read this password with [**GMSAPasswordReader**](https://github.com/rvazarkar/GMSAPasswordReader)**:**
 
@@ -164,7 +166,7 @@ You can read this password with [**GMSAPasswordReader**](https://github.com/rvaz
 /GMSAPasswordReader --AccountName jkohler
 ```
 
-[**Find more info in this post**](https://cube0x0.github.io/Relaying-for-gMSA/)
+[**Find more info in this post**](https://cube0x0.github.io/Relaying-for-gMSA/)<sup>[[3]](#references)</sup>
 
 Also, check this [web page](https://cube0x0.github.io/Relaying-for-gMSA/) about how to perform a **NTLM relay attack** to **read** the **password** of **gMSA**.<sup>[[3]](#references)</sup>
 
@@ -235,7 +237,7 @@ Powershell -command "Write-Host 'My voice is my passport, verify me.'"
 $command = "Write-Host 'My voice is my passport, verify me.'" $bytes = [System.Text.Encoding]::Unicode.GetBytes($command) $encodedCommand = [Convert]::ToBase64String($bytes) powershell.exe -EncodedCommand $encodedCommand
 ```
 
-More can be found [here](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)
+More can be found [here](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)<sup>[[4]](#references)</sup>
 
 ## Security Support Provider Interface (SSPI)
 
@@ -268,7 +270,7 @@ authentication-credentials-uac-and-efs/uac-user-account-control.md
 
 ## References
 
-- [1] [Bypassing Applocker and Powershell contstrained language mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode)
+- [1] [Bypassing AppLocker and PowerShell constrained language mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode)
 - [2] [howto ~ decrypt EFS files](https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files)
 - [3] [Relaying for gMSA](https://cube0x0.github.io/Relaying-for-gMSA/)
 - [4] [15 Ways to Bypass the PowerShell Execution Policy](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)

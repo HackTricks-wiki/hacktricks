@@ -8,7 +8,6 @@ Dirty NIB refers to abusing Interface Builder files (.xib/.nib) inside a signed 
 > • Before macOS 13 Ventura: replacing a bundle’s MainMenu.nib (or another nib loaded at startup) could reliably achieve process injection and often privilege escalation.  
 > • Since macOS 13 (Ventura) and improved in macOS 14 (Sonoma): first‑launch deep verification, bundle protection, Launch Constraints, and the new TCC “App Management” permission largely prevent post‑launch nib tampering by unrelated apps. Attacks may still be feasible in niche cases (e.g., same‑developer tooling modifying own apps, or terminals granted App Management/Full Disk Access by the user).
 
-
 ## What are NIB/XIB files
 
 Nib (short for NeXT Interface Builder) files are serialized UI object graphs used by AppKit apps. Modern Xcode stores editable XML .xib files which are compiled into .nib at build time. A typical app loads its main UI via `NSApplicationMain()` which reads the `NSMainNibFile` key from the app’s Info.plist and instantiates the object graph at runtime.

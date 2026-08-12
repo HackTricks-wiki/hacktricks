@@ -6,7 +6,7 @@
 
 **Check the original post for [all the information about this technique](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab).**<sup>[[1]](#references)</sup>
 
-As **summary**: if you can write to the **msDS-KeyCredentialLink** property of a user/computer, you can retrieve the **NT hash of that object**.<sup>[[1]](#references)</sup>
+In summary, control of a user's or computer's **`msDS-KeyCredentialLink`** can let an attacker add a key credential, authenticate as that object with PKINIT, and—when the KDC and account support the necessary flows—use the resulting ticket with `S4U2Self`/user-to-user to recover the object's NT hash.<sup>[[1]](#references)</sup>
 
 In the post, a method is outlined for setting up **public-private key authentication credentials** to acquire a unique **Service Ticket** that includes the target's NTLM hash. This process involves the encrypted NTLM_SUPPLEMENTAL_CREDENTIAL within the Privilege Attribute Certificate (PAC), which can be decrypted.<sup>[[1]](#references)</sup>
 
@@ -16,7 +16,7 @@ To apply this technique, certain conditions must be met:<sup>[[1]](#references)<
 
 - A minimum of one Windows Server 2016 Domain Controller is needed.
 - The Domain Controller must have a server authentication digital certificate installed.
-- The Active Directory must be at the Windows Server 2016 Functional Level.
+- The directory schema must contain `msDS-KeyCredentialLink`; a Windows Server 2016 or newer DC and a PKINIT-capable certificate on the KDC are the practical platform requirements described by the research. Verify the domain's schema/DC mix rather than assuming the domain functional-level label alone decides exploitability.
 - An account with delegated rights to modify the msDS-KeyCredentialLink attribute of the target object is required.
 
 ## Abuse
@@ -32,7 +32,7 @@ A significant advantage of Key Trust abuse is its limitation to the attacker-gen
 
 ### [**Whisker**](https://github.com/eladshamir/Whisker)
 
-It's based on DSInternals providing a C# interface for this attack. Whisker and its Python counterpart, **pyWhisker**, enable manipulation of the `msDS-KeyCredentialLink` attribute to gain control over Active Directory accounts. These tools support various operations like adding, listing, removing, and clearing key credentials from the target object.
+Whisker uses DSInternals to manipulate `msDS-KeyCredentialLink` from C#. Whisker and its Python counterpart **pyWhisker** support adding, listing, removing, and clearing key credentials.<sup>[[2]](#references)[[4]](#references)</sup>
 
 **Whisker** functions include:
 
@@ -47,7 +47,7 @@ Whisker.exe add /target:computername$ /domain:constoso.local /dc:dc1.contoso.loc
 
 ### [pyWhisker](https://github.com/ShutdownRepo/pywhisker)
 
-It extends Whisker functionality to **UNIX-based systems**, leveraging Impacket and PyDSInternals for comprehensive exploitation capabilities, including listing, adding, and removing KeyCredentials, as well as importing and exporting them in JSON format.
+pyWhisker brings the workflow to **UNIX-like systems** with Impacket and PyDSInternals, including list/add/remove and JSON import/export operations.<sup>[[4]](#references)</sup>
 
 ```shell
 python3 pywhisker.py -d "domain.local" -u "user1" -p "complexpassword" --target "user2" --action "list"
@@ -55,7 +55,7 @@ python3 pywhisker.py -d "domain.local" -u "user1" -p "complexpassword" --target 
 
 ### [ShadowSpray](https://github.com/Dec0ne/ShadowSpray/)
 
-ShadowSpray aims to **exploit GenericWrite/GenericAll permissions that wide user groups may have over domain objects** to apply ShadowCredentials broadly. It entails logging into the domain, verifying the domain's functional level, enumerating domain objects, and attempting to add KeyCredentials for TGT acquisition and NT hash revelation. Cleanup options and recursive exploitation tactics enhance its utility.
+ShadowSpray enumerates domain objects over which the operator has rights such as `GenericWrite`/`GenericAll`, attempts to add key credentials broadly, and includes cleanup/recursive modes. Broad spraying is disruptive and conspicuous; use explicit targets and retain each added DeviceID for precise removal.<sup>[[3]](#references)</sup>
 
 ## References
 
@@ -65,6 +65,3 @@ ShadowSpray aims to **exploit GenericWrite/GenericAll permissions that wide user
 - [4] [pywhisker - Python version of the Shadow Credentials tool](https://github.com/ShutdownRepo/pywhisker)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

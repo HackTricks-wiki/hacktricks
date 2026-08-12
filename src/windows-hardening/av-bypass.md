@@ -24,7 +24,7 @@ if (-not (net session 2>$null)) {
 }
 ```
 
-Victims already believe they are installing “cracked” software, so the prompt is usually accepted, giving the malware the rights it needs to change Defender’s policy.
+Victims already believe they are installing “cracked” software, so the prompt is usually accepted, giving the malware the rights it needs to change Defender’s policy.<sup>[[26]](#references)</sup>
 
 ### Blanket `MpPreference` exclusions for every drive letter
 
@@ -43,7 +43,7 @@ Key observations:
 - The `.sys` extension exclusion is forward-looking—attackers reserve the option to load unsigned drivers later without touching Defender again.
 - All changes land under `HKLM\SOFTWARE\Microsoft\Windows Defender\Exclusions`, letting later stages confirm the exclusions persist or expand them without re-triggering UAC.
 
-Because no Defender service is stopped, naïve health checks keep reporting “antivirus active” even though real-time inspection never touches those paths.
+Because no Defender service is stopped, naïve health checks keep reporting “antivirus active” even though real-time inspection never touches those paths.<sup>[[26]](#references)</sup>
 
 ## **AV Evasion Methodology**
 
@@ -164,10 +164,10 @@ Windows PE modules can export functions that are actually "forwarders": instead 
 - Resolve `TargetFunc` from it
 
 Key behaviors to understand:
-- If `TargetDll` is a KnownDLL, it is supplied from the protected KnownDLLs namespace (e.g., ntdll, kernelbase, ole32).
+- If `TargetDll` is a KnownDLL, it is supplied from the protected KnownDLLs namespace (e.g., ntdll, kernelbase, ole32).<sup>[[15]](#references)</sup>
 - If `TargetDll` is not a KnownDLL, the normal DLL search order is used, which includes the directory of the module that is doing the forward resolution.
 
-This enables an indirect sideloading primitive: find a signed DLL that exports a function forwarded to a non-KnownDLL module name, then co-locate that signed DLL with an attacker-controlled DLL named exactly as the forwarded target module. When the forwarded export is invoked, the loader resolves the forward and loads your DLL from the same directory, executing your DllMain.
+This enables an indirect sideloading primitive: find a signed DLL that exports a function forwarded to a non-KnownDLL module name, then co-locate that signed DLL with an attacker-controlled DLL named exactly as the forwarded target module. When the forwarded export is invoked, the loader resolves the forward and loads your DLL from the same directory, executing your DllMain.<sup>[[13]](#references)</sup>
 
 Example observed on Windows 11:
 
@@ -212,7 +212,7 @@ Hunting tips:
 dumpbin /exports C:\Windows\System32\keyiso.dll
 # forwarders appear with a forwarder string e.g., NCRYPTPROV.SetAuditingInterface
 ```
-- See the Windows 11 forwarder inventory to search for candidates: https://hexacorn.com/d/apis_fwd.txt
+- See the Windows 11 forwarder inventory to search for candidates: https://hexacorn.com/d/apis_fwd.txt<sup>[[14]](#references)</sup>
 
 Detection/defense ideas:
 - Monitor LOLBins (e.g., rundll32.exe) loading signed DLLs from non-system paths, followed by loading non-KnownDLLs with the same base name from that directory
@@ -239,7 +239,7 @@ Git clone the Freeze repo and build it (git clone https://github.com/optiv/Freez
 
 ## Direct/Indirect Syscalls & SSN Resolution (SysWhispers4)
 
-EDRs often place **user-mode inline hooks** on `ntdll.dll` syscall stubs. To bypass those hooks, you can generate **direct** or **indirect** syscall stubs that load the correct **SSN** (System Service Number) and transition to kernel mode without executing the hooked export entrypoint.
+EDRs often place **user-mode inline hooks** on `ntdll.dll` syscall stubs. To bypass those hooks, you can generate **direct** or **indirect** syscall stubs that load the correct **SSN** (System Service Number) and transition to kernel mode without executing the hooked export entrypoint.<sup>[[32]](#references)</sup>
 
 **Invocation options:**
 - **Direct (embedded)**: emit a `syscall`/`sysenter`/`SVC #0` instruction in the generated stub (no `ntdll` export hit).
@@ -339,7 +339,7 @@ There are also many other techniques used to bypass AMSI with powershell, check 
 
 ### Blocking AMSI by preventing amsi.dll load (LdrLoadDll hook)
 
-AMSI is initialised only after `amsi.dll` is loaded into the current process. A robust, language‑agnostic bypass is to place a user‑mode hook on `ntdll!LdrLoadDll` that returns an error when the requested module is `amsi.dll`. As a result, AMSI never loads and no scans occur for that process.
+AMSI is initialised only after `amsi.dll` is loaded into the current process. A robust, language‑agnostic bypass is to place a user‑mode hook on `ntdll!LdrLoadDll` that returns an error when the requested module is `amsi.dll`. As a result, AMSI never loads and no scans occur for that process.<sup>[[23]](#references)</sup>
 
 Implementation outline (x64 C/C++ pseudocode):
 ```c
@@ -398,7 +398,7 @@ To bypass PowerShell logging, you can use the following techniques:
 
 - **Disable PowerShell Transcription and Module Logging**: You can use a tool such as [https://github.com/leechristensen/Random/blob/master/CSharp/DisablePSLogging.cs](https://github.com/leechristensen/Random/blob/master/CSharp/DisablePSLogging.cs) for this purpose.
 - **Use Powershell version 2**: If you use PowerShell version 2, AMSI will not be loaded, so you can run your scripts without being scanned by AMSI. You can do this: `powershell.exe -version 2`
-- **Use an Unmanaged Powershell Session**: Use [https://github.com/leechristensen/UnmanagedPowerShell](https://github.com/leechristensen/UnmanagedPowerShell) to spawn a powershell withuot defenses (this is what `powerpick` from Cobal Strike uses).
+- **Use an unmanaged PowerShell session**: Use [UnmanagedPowerShell](https://github.com/leechristensen/UnmanagedPowerShell) to host PowerShell without launching `powershell.exe` (the approach used by Cobalt Strike's `powerpick`). This evades controls tied specifically to the `powershell.exe` process, but it does not inherently disable AMSI, Script Block Logging, or every other PowerShell defense; coverage depends on the runtime and host implementation.
 
 
 ## Obfuscation
@@ -408,7 +408,7 @@ To bypass PowerShell logging, you can use the following techniques:
 
 ### Deobfuscating ConfuserEx-Protected .NET Binaries
 
-When analysing malware that uses ConfuserEx 2 (or commercial forks) it is common to face several layers of protection that will block decompilers and sandboxes.  The workflow below reliably **restores a near–original IL** that can afterwards be decompiled to C# in tools such as dnSpy or ILSpy.
+When analysing malware that uses ConfuserEx 2 (or commercial forks) it is common to face several layers of protection that will block decompilers and sandboxes.  The workflow below reliably **restores a near–original IL** that can afterwards be decompiled to C# in tools such as dnSpy or ILSpy.<sup>[[10]](#references)</sup>
 
 1.  Anti-tampering removal – ConfuserEx encrypts every *method body* and decrypts it inside the *module* static constructor (`<Module>.cctor`).  This also patches the PE checksum so any modification will crash the binary.  Use **AntiTamperKiller** to locate the encrypted metadata tables, recover the XOR keys and rewrite a clean assembly:
    ```bash
@@ -511,7 +511,7 @@ Event Tracing for Windows (ETW) is a powerful logging mechanism in Windows that 
 
 Similar to how AMSI is disabled (bypassed) it's also possible to make the **`EtwEventWrite`** function of the user space process return immediately without logging any events. This is done by patching the function in memory to return immediately, effectively disabling ETW logging for that process.
 
-You can find more info in **[https://blog.xpnsec.com/hiding-your-dotnet-etw/](https://blog.xpnsec.com/hiding-your-dotnet-etw/) and [https://github.com/repnz/etw-providers-docs/](https://github.com/repnz/etw-providers-docs/)**.
+You can find more info in **[https://blog.xpnsec.com/hiding-your-dotnet-etw/](https://blog.xpnsec.com/hiding-your-dotnet-etw/) and [https://github.com/repnz/etw-providers-docs/](https://github.com/repnz/etw-providers-docs/)**.<sup>[[33]](#references)[[34]](#references)</sup>
 
 
 ## C# Assembly Reflection
@@ -549,7 +549,7 @@ The repo indicates: Defender still scans the scripts but by utilising Go, Java, 
 
 ## TokenStomping
 
-Token stomping is a technique that allows an attacker to **manipulate the access token or a security prouct like an EDR or AV**, allowing them to reduce it privileges so the process won't die but it won't have permissions to check for malicious activities.
+Token stomping manipulates the access token of a security product such as an EDR or AV. Reducing the token's privileges can leave the process running while preventing it from performing privileged inspection or remediation actions.
 
 To prevent this Windows could **prevent external processes** from getting handles over the tokens of security processes.
 
@@ -561,11 +561,11 @@ To prevent this Windows could **prevent external processes** from getting handle
 
 ### Chrome Remote Desktop
 
-As described in [**this blog post**](https://trustedsec.com/blog/abusing-chrome-remote-desktop-on-red-team-operations-a-practical-guide), it's easy to just deploy the Chrome Remote Desktop in a victims PC and then use it to takeover it and maintain persistence:
+As described in [**this blog post**](https://trustedsec.com/blog/abusing-chrome-remote-desktop-on-red-team-operations-a-practical-guide), it's easy to just deploy the Chrome Remote Desktop in a victims PC and then use it to takeover it and maintain persistence:<sup>[[35]](#references)</sup>
 1. Download from https://remotedesktop.google.com/, click on "Set up via SSH", and then click on the MSI file for Windows to download the MSI file.
 2. Run the installer silently in the victim (admin required): `msiexec /i chromeremotedesktophost.msi /qn`
 3. Go back to the Chrome Remote Desktop page and click next. The wizard will then ask you to authorize; click the Authorize button to continue.
-4. Execute the given parameter with some adjustments: `"%PROGRAMFILES(X86)%\Google\Chrome Remote Desktop\CurrentVersion\remoting_start_host.exe" --code="YOUR_UNIQUE_CODE" --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=%COMPUTERNAME% --pin=111111` (Note the pin param which allows to set the pin withuot using the GUI).
+4. Execute the supplied command with the required adjustments: `"%PROGRAMFILES(X86)%\Google\Chrome Remote Desktop\CurrentVersion\remoting_start_host.exe" --code="YOUR_UNIQUE_CODE" --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=%COMPUTERNAME% --pin=111111` (the `--pin` parameter sets the PIN without using the GUI).
  
 
 ## Advanced Evasion
@@ -799,7 +799,7 @@ i686-w64-mingw32-g++ prometheus.cpp -o prometheus.exe -lws2_32 -s -ffunction-sec
 - [https://github.com/paranoidninja/ScriptDotSh-MalwareDevelopment/blob/master/prometheus.cpp](https://github.com/paranoidninja/ScriptDotSh-MalwareDevelopment/blob/master/prometheus.cpp)
 - [https://astr0baby.wordpress.com/2013/10/17/customizing-custom-meterpreter-loader/](https://astr0baby.wordpress.com/2013/10/17/customizing-custom-meterpreter-loader/)
 - [https://www.blackhat.com/docs/us-16/materials/us-16-Mittal-AMSI-How-Windows-10-Plans-To-Stop-Script-Based-Attacks-And-How-Well-It-Does-It.pdf](https://www.blackhat.com/docs/us-16/materials/us-16-Mittal-AMSI-How-Windows-10-Plans-To-Stop-Script-Based-Attacks-And-How-Well-It-Does-It.pdf)
-- [https://github.com/l0ss/Grouper2](ps://github.com/l0ss/Group)
+- [https://github.com/l0ss/Grouper2](https://github.com/l0ss/Grouper2)
 - [http://www.labofapenetrationtester.com/2016/05/practical-use-of-javascript-and-com-for-pentesting.html](http://www.labofapenetrationtester.com/2016/05/practical-use-of-javascript-and-com-for-pentesting.html)
 - [http://niiconsulting.com/checkmate/2018/06/bypassing-detection-for-a-reverse-meterpreter-shell/](http://niiconsulting.com/checkmate/2018/06/bypassing-detection-for-a-reverse-meterpreter-shell/)
 
@@ -840,7 +840,7 @@ https://github.com/praetorian-code/vulcan
 
 ## Bring Your Own Vulnerable Driver (BYOVD) – Killing AV/EDR From Kernel Space
 
-Storm-2603 leveraged a tiny console utility known as **Antivirus Terminator** to disable endpoint protections before dropping ransomware. The tool brings its **own vulnerable but *signed* driver** and abuses it to issue privileged kernel operations that even Protected-Process-Light (PPL) AV services cannot block.
+Storm-2603 leveraged a tiny console utility known as **Antivirus Terminator** to disable endpoint protections before dropping ransomware. The tool brings its **own vulnerable but *signed* driver** and abuses it to issue privileged kernel operations that even Protected-Process-Light (PPL) AV services cannot block.<sup>[[12]](#references)</sup>
 
 Key take-aways
 1. **Signed driver**: The file delivered to disk is `ServiceMouse.sys`, but the binary is the legitimately signed driver `AToolsKrnl64.sys` from Antiy Labs’ “System In-Depth Analysis Toolkit”. Because the driver bears a valid Microsoft signature it loads even when Driver-Signature-Enforcement (DSE) is enabled.
@@ -881,7 +881,7 @@ Detection / Mitigation
 Zscaler’s **Client Connector** applies device-posture rules locally and relies on Windows RPC to communicate the results to other components. Two weak design choices make a full bypass possible:
 
 1. Posture evaluation happens **entirely client-side** (a boolean is sent to the server).
-2. Internal RPC endpoints only validate that the connecting executable is **signed by Zscaler** (via `WinVerifyTrust`).
+2. Internal RPC endpoints only validate that the connecting executable is **signed by Zscaler** (via `WinVerifyTrust`).<sup>[[11]](#references)</sup>
 
 By **patching four signed binaries on disk** both mechanisms can be neutralised:
 
@@ -918,7 +918,7 @@ This case study demonstrates how purely client-side trust decisions and simple s
 
 ## Abusing Protected Process Light (PPL) To Tamper AV/EDR With LOLBINs
 
-Protected Process Light (PPL) enforces a signer/level hierarchy so that only equal-or-higher protected processes can tamper with each other. Offensively, if you can legitimately launch a PPL-enabled binary and control its arguments, you can convert benign functionality (e.g., logging) into a constrained, PPL-backed write primitive against protected directories used by AV/EDR.
+Protected Process Light (PPL) enforces a signer/level hierarchy so that only equal-or-higher protected processes can tamper with each other. Offensively, if you can legitimately launch a PPL-enabled binary and control its arguments, you can convert benign functionality (e.g., logging) into a constrained, PPL-backed write primitive against protected directories used by AV/EDR.<sup>[[16]](#references)[[17]](#references)[[18]](#references)[[19]](#references)[[20]](#references)</sup>
 
 What makes a process run as PPL
 - The target EXE (and any loaded DLLs) must be signed with a PPL-capable EKU.
@@ -933,7 +933,7 @@ stealing-credentials/credentials-protections.md
 
 Launcher tooling
 - Open-source helper: CreateProcessAsPPL (selects protection level and forwards arguments to the target EXE):
-  - [https://github.com/2x7EQ13/CreateProcessAsPPL](https://github.com/2x7EQ13/CreateProcessAsPPL)
+  - [https://github.com/2x7EQ13/CreateProcessAsPPL](https://github.com/2x7EQ13/CreateProcessAsPPL)<sup>[[19]](#references)</sup>
 - Usage pattern:
 
 ```text
@@ -983,19 +983,12 @@ Mitigations
 - Ensure Defender tamper protection and early-launch protections are enabled; investigate startup errors indicating binary corruption.
 - Consider disabling 8.3 short-name generation on volumes hosting security tooling if compatible with your environment (test thoroughly).
 
-References for PPL and tooling
-- Microsoft Protected Processes overview: https://learn.microsoft.com/windows/win32/procthread/protected-processes
-- EKU reference: https://learn.microsoft.com/openspecs/windows_protocols/ms-ppsec/651a90f3-e1f5-4087-8503-40d804429a88
-- Procmon boot logging (ordering validation): https://learn.microsoft.com/sysinternals/downloads/procmon
-- CreateProcessAsPPL launcher: https://github.com/2x7EQ13/CreateProcessAsPPL
-- Technique writeup (ClipUp + PPL + boot-order tamper): https://www.zerosalarium.com/2025/08/countering-edrs-with-backing-of-ppl-protection.html
-
 ## Tampering Microsoft Defender via Platform Version Folder Symlink Hijack
 
 Windows Defender chooses the platform it runs from by enumerating subfolders under:
 - `C:\ProgramData\Microsoft\Windows Defender\Platform\`
 
-It selects the subfolder with the highest lexicographic version string (e.g., `4.18.25070.5-0`), then starts the Defender service processes from there (updating service/registry paths accordingly). This selection trusts directory entries including directory reparse points (symlinks). An administrator can leverage this to redirect Defender to an attacker-writable path and achieve DLL sideloading or service disruption.
+It selects the subfolder with the highest lexicographic version string (e.g., `4.18.25070.5-0`), then starts the Defender service processes from there (updating service/registry paths accordingly). This selection trusts directory entries including directory reparse points (symlinks). An administrator can leverage this to redirect Defender to an attacker-writable path and achieve DLL sideloading or service disruption.<sup>[[21]](#references)[[22]](#references)</sup>
 
 Preconditions
 - Local Administrator (needed to create directories/symlinks under the Platform folder)
@@ -1040,14 +1033,14 @@ rmdir "C:\ProgramData\Microsoft\Windows Defender\Platform\5.18.25070.5-0"
 
 ## API/IAT Hooking + Call-Stack Spoofing with PIC (Crystal Kit-style)
 
-Red teams can move runtime evasion out of the C2 implant and into the target module itself by hooking its Import Address Table (IAT) and routing selected APIs through attacker-controlled, position‑independent code (PIC). This generalises evasion beyond the small API surface many kits expose (e.g., CreateProcessA), and extends the same protections to BOFs and post‑exploitation DLLs.
+Red teams can move runtime evasion out of the C2 implant and into the target module itself by hooking its Import Address Table (IAT) and routing selected APIs through attacker-controlled, position‑independent code (PIC). This generalises evasion beyond the small API surface many kits expose (e.g., CreateProcessA), and extends the same protections to BOFs and post‑exploitation DLLs.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
 
 High-level approach
 - Stage a PIC blob alongside the target module using a reflective loader (prepended or companion). The PIC must be self‑contained and position‑independent.
 - As the host DLL loads, walk its IMAGE_IMPORT_DESCRIPTOR and patch the IAT entries for targeted imports (e.g., CreateProcessA/W, CreateThread, LoadLibraryA/W, VirtualAlloc) to point at thin PIC wrappers.
 - Each PIC wrapper executes evasions before tail‑calling the real API address. Typical evasions include:
   - Memory mask/unmask around the call (e.g., encrypt beacon regions, RWX→RX, change page names/permissions) then restore post‑call.
-  - Call‑stack spoofing: construct a benign stack and transition into the target API so call‑stack analysis resolves to expected frames.
+  - Call‑stack spoofing: construct a benign stack and transition into the target API so call‑stack analysis resolves to expected frames.<sup>[[9]](#references)</sup>
 - For compatibility, export an interface so an Aggressor script (or equivalent) can register which APIs to hook for Beacon, BOFs and post‑ex DLLs.
 
 Why IAT hooking here
@@ -1093,7 +1086,7 @@ Related building blocks and examples
 
 ### Import-time IAT hooks via a resident PICO
 
-If you control a reflective loader, you can hook imports **during** `ProcessImports()` by replacing the loader's `GetProcAddress` pointer with a custom resolver that checks hooks first:
+If you control a reflective loader, you can hook imports **during** `ProcessImports()` by replacing the loader's `GetProcAddress` pointer with a custom resolver that checks hooks first:<sup>[[6]](#references)[[7]](#references)[[8]](#references)</sup>
 
 - Build a **resident PICO** (persistent PIC object) that survives after the transient loader PIC frees itself.
 - Export a `setup_hooks()` function that overwrites the loader's import resolver (e.g., `funcs.GetProcAddress = _GetProcAddress`).
@@ -1111,7 +1104,7 @@ Import-time hooks only trigger if the function is actually in the target's IAT. 
 
 ### Ekko-style sleep/idle obfuscation without patching `Sleep()`
 
-Instead of patching `Sleep`, hook the **actual wait/IPC primitives** the implant uses (`WaitForSingleObject(Ex)`, `WaitForMultipleObjects`, `ConnectNamedPipe`). For long waits, wrap the call in an Ekko-style obfuscation chain that encrypts the in-memory image during idle:
+Instead of patching `Sleep`, hook the **actual wait/IPC primitives** the implant uses (`WaitForSingleObject(Ex)`, `WaitForMultipleObjects`, `ConnectNamedPipe`). For long waits, wrap the call in an Ekko-style obfuscation chain that encrypts the in-memory image during idle:<sup>[[31]](#references)[[27]](#references)</sup>
 
 - Use `CreateTimerQueueTimer` to schedule a sequence of callbacks that call `NtContinue` with crafted `CONTEXT` frames.
 - Typical chain (x64): set image to `PAGE_READWRITE` → RC4 encrypt via `advapi32!SystemFunction032` over the full mapped image → perform the blocking wait → RC4 decrypt → **restore per-section permissions** by walking PE sections → signal completion.
@@ -1126,7 +1119,7 @@ Detection ideas (telemetry-based)
 
 ### Runtime CFG registration for sleep-obfuscation gadgets
 
-On CFG-enabled targets, the first indirect jump into a mid-function gadget such as `jmp [rbx]` or `jmp rdi` will usually crash the process with `STATUS_STACK_BUFFER_OVERRUN` because the gadget is not present in the module's CFG metadata. To keep Ekko/Kraken-style chains alive inside hardened processes:
+On CFG-enabled targets, the first indirect jump into a mid-function gadget such as `jmp [rbx]` or `jmp rdi` will usually crash the process with `STATUS_STACK_BUFFER_OVERRUN` because the gadget is not present in the module's CFG metadata. To keep Ekko/Kraken-style chains alive inside hardened processes:<sup>[[30]](#references)</sup>
 
 - Register every indirect destination used by the chain with `NtSetInformationVirtualMemory(..., VmCfgCallTargetInformation, ...)` and `CFG_CALL_TARGET_VALID` entries.
 - For addresses inside loaded images (`ntdll`, `kernel32`, `advapi32`), the `MEMORY_RANGE_ENTRY` must start at the **image base** and cover the **full image size**.
@@ -1137,7 +1130,7 @@ This turns ROP/JOP-style sleep chains from "works only in non-CFG processes" int
 
 ### CET-safe stack spoofing for sleeping threads
 
-Full `CONTEXT` replacement is noisy and can break on CET Shadow Stack systems because a spoofed `Rip` must still agree with the hardware shadow stack. A safer sleep-masking pattern is:
+Full `CONTEXT` replacement is noisy and can break on CET Shadow Stack systems because a spoofed `Rip` must still agree with the hardware shadow stack. A safer sleep-masking pattern is:<sup>[[30]](#references)</sup>
 
 - Pick another thread in the same process and read its `NT_TIB` / TEB stack bounds (`StackBase`, `StackLimit`) via `NtQueryInformationThread`.
 - Backup the current thread's real TEB/TIB.
@@ -1150,7 +1143,7 @@ This preserves a CET-consistent instruction pointer while misleading EDR stack w
 
 ### APC-based alternative: Kraken Mask
 
-If timer-queue dispatch is too signatured, the same sleep-encrypt-spoof-restore sequence can be executed from a suspended helper thread using queued APCs:
+If timer-queue dispatch is too signatured, the same sleep-encrypt-spoof-restore sequence can be executed from a suspended helper thread using queued APCs:<sup>[[27]](#references)</sup>
 
 - Create a helper thread with `NtTestAlert` as entrypoint.
 - Queue prepared `CONTEXT` frames/APCs with `NtQueueApcThread` and drain them with `NtAlertResumeThread`.
@@ -1170,7 +1163,7 @@ Additional detection ideas
 
 ## Precision Module Stomping
 
-Module stomping executes payloads from the **`.text` section of a DLL already mapped inside the target process** instead of allocating obvious private executable memory or loading a fresh sacrificial DLL. The overwrite target should be a **loaded, disk-backed image** whose code space can absorb the payload without corrupting code paths the process still needs.
+Module stomping executes payloads from the **`.text` section of a DLL already mapped inside the target process** instead of allocating obvious private executable memory or loading a fresh sacrificial DLL. The overwrite target should be a **loaded, disk-backed image** whose code space can absorb the payload without corrupting code paths the process still needs.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### Reliable target selection
 
@@ -1204,7 +1197,7 @@ Detection ideas
 
 ## Process Parameter Poisoning (P3)
 
-Process Parameter Poisoning (P3) is a **process-injection / EDR-evasion** technique that avoids the classic remote write path (`VirtualAllocEx` + `WriteProcessMemory`). Instead of copying bytes into an already running target, it abuses the fact that Windows **copies selected `CreateProcessW` startup parameters into the child process** and stores them inside `PEB->ProcessParameters` (`RTL_USER_PROCESS_PARAMETERS`).
+Process Parameter Poisoning (P3) is a **process-injection / EDR-evasion** technique that avoids the classic remote write path (`VirtualAllocEx` + `WriteProcessMemory`). Instead of copying bytes into an already running target, it abuses the fact that Windows **copies selected `CreateProcessW` startup parameters into the child process** and stores them inside `PEB->ProcessParameters` (`RTL_USER_PROCESS_PARAMETERS`).<sup>[[28]](#references)[[29]](#references)</sup>
 
 ### Poisonable carriers copied by `CreateProcessW`
 
@@ -1303,7 +1296,7 @@ Good hunting opportunities mentioned by the authors:
 
 ## SantaStealer Tradecraft for Fileless Evasion and Credential Theft
 
-SantaStealer (aka BluelineStealer) illustrates how modern info-stealers blend AV bypass, anti-analysis and credential access in a single workflow.
+SantaStealer (aka BluelineStealer) illustrates how modern info-stealers blend AV bypass, anti-analysis and credential access in a single workflow.<sup>[[24]](#references)</sup>
 
 ### Keyboard layout gating & sandbox delay
 
@@ -1330,7 +1323,7 @@ Sleep(exec_delay_seconds * 1000); // config-controlled delay to outlive sandboxe
 ### Fileless helper + double ChaCha20 reflective loading
 
 - The primary DLL/EXE embeds a Chromium credential helper that is either dropped to disk or manually mapped in-memory; fileless mode resolves imports/relocations itself so no helper artifacts are written.
-- That helper stores a second-stage DLL encrypted twice with ChaCha20 (two 32-byte keys + 12-byte nonces). After both passes, it reflectively loads the blob (no `LoadLibrary`) and calls exports `ChromeElevator_Initialize/ProcessAllBrowsers/Cleanup` derived from [ChromElevator](https://github.com/xaitax/Chrome-App-Bound-Encryption-Decryption).
+- That helper stores a second-stage DLL encrypted twice with ChaCha20 (two 32-byte keys + 12-byte nonces). After both passes, it reflectively loads the blob (no `LoadLibrary`) and calls exports `ChromeElevator_Initialize/ProcessAllBrowsers/Cleanup` derived from [ChromElevator](https://github.com/xaitax/Chrome-App-Bound-Encryption-Decryption).<sup>[[25]](#references)</sup>
 - The ChromElevator routines use direct-syscall reflective process hollowing to inject into a live Chromium browser, inherit AppBound Encryption keys, and decrypt passwords/cookies/credit cards straight from SQLite databases despite ABE hardening.
 
 
@@ -1341,37 +1334,40 @@ Sleep(exec_delay_seconds * 1000); // config-controlled delay to outlive sandboxe
 
 ## References
 
-- [Advanced Evasion Tradecraft: Precision Module Stomping](https://medium.com/@toneillcodes/advanced-evasion-tradecraft-precision-module-stomping-b51feb0978fe)
-- [toneillcodes/windows-process-injection](https://github.com/toneillcodes/windows-process-injection)
-- [Crystal Kit – blog](https://rastamouse.me/crystal-kit/)
-- [Crystal-Kit – GitHub](https://github.com/rasta-mouse/Crystal-Kit)
-- [Elastic – Call stacks, no more free passes for malware](https://www.elastic.co/security-labs/call-stacks-no-more-free-passes-for-malware)
-- [Crystal Palace – docs](https://tradecraftgarden.org/docs.html)
-- [simplehook – sample](https://tradecraftgarden.org/simplehook.html)
-- [stackcutting – sample](https://tradecraftgarden.org/stackcutting.html)
-- [Draugr – call-stack spoofing PIC](https://github.com/NtDallas/Draugr)
-- [Unit42 – New Infection Chain and ConfuserEx-Based Obfuscation for DarkCloud Stealer](https://unit42.paloaltonetworks.com/new-darkcloud-stealer-infection-chain/)
-- [Synacktiv – Should you trust your zero trust? Bypassing Zscaler posture checks](https://www.synacktiv.com/en/publications/should-you-trust-your-zero-trust-bypassing-zscaler-posture-checks.html)
-- [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
-- [Hexacorn – DLL ForwardSideLoading: Abusing Forwarded Exports](https://www.hexacorn.com/blog/2025/08/19/dll-forwardsideloading/)
-- [Windows 11 Forwarded Exports Inventory (apis_fwd.txt)](https://hexacorn.com/d/apis_fwd.txt)
-- [Microsoft Docs – Known DLLs](https://learn.microsoft.com/windows/win32/dlls/known-dlls)
-- [Microsoft – Protected Processes](https://learn.microsoft.com/windows/win32/procthread/protected-processes)
-- [Microsoft – EKU reference (MS-PPSEC)](https://learn.microsoft.com/openspecs/windows_protocols/ms-ppsec/651a90f3-e1f5-4087-8503-40d804429a88)
-- [Sysinternals – Process Monitor](https://learn.microsoft.com/sysinternals/downloads/procmon)
-- [CreateProcessAsPPL launcher](https://github.com/2x7EQ13/CreateProcessAsPPL)
-- [Zero Salarium – Countering EDRs With The Backing Of Protected Process Light (PPL)](https://www.zerosalarium.com/2025/08/countering-edrs-with-backing-of-ppl-protection.html)
-- [Zero Salarium – Break The Protective Shell Of Windows Defender With The Folder Redirect Technique](https://www.zerosalarium.com/2025/09/Break-Protective-Shell-Windows-Defender-Folder-Redirect-Technique-Symlink.html)
-- [Microsoft – mklink command reference](https://learn.microsoft.com/windows-server/administration/windows-commands/mklink)
-- [Check Point Research – Under the Pure Curtain: From RAT to Builder to Coder](https://research.checkpoint.com/2025/under-the-pure-curtain-from-rat-to-builder-to-coder/)
-- [Rapid7 – SantaStealer is Coming to Town: A New, Ambitious Infostealer](https://www.rapid7.com/blog/post/tr-santastealer-is-coming-to-town-a-new-ambitious-infostealer-advertised-on-underground-forums)
-- [ChromElevator – Chrome App Bound Encryption Decryption](https://github.com/xaitax/Chrome-App-Bound-Encryption-Decryption)
-- [Check Point Research – GachiLoader: Defeating Node.js Malware with API Tracing](https://research.checkpoint.com/2025/gachiloader-node-js-malware-with-api-tracing/)
-- [Sleeping Beauty: Putting Adaptix to Bed with Crystal Palace](https://maorsabag.github.io/posts/adaptix-stealthpalace/sleeping-beauty/)
-- [SensePost – Process Parameter Poisoning](https://sensepost.com/blog/2026/process-parameter-poisoning/)
-- [Orange Cyberdefense – p3-loader](https://github.com/Orange-Cyberdefense/p3-loader)
-- [Sleeping Beauty II: CFG, CET, and Stack Spoofing](https://maorsabag.github.io/posts/adaptix-stealthpalace/sleeping-beauty-ii)
-- [Ekko sleep obfuscation](https://github.com/Cracked5pider/Ekko)
-- [SysWhispers4 – GitHub](https://github.com/JoasASantos/SysWhispers4)
+- [1] [Advanced Evasion Tradecraft: Precision Module Stomping](https://medium.com/@toneillcodes/advanced-evasion-tradecraft-precision-module-stomping-b51feb0978fe)
+- [2] [toneillcodes/windows-process-injection](https://github.com/toneillcodes/windows-process-injection)
+- [3] [Crystal Kit – blog](https://rastamouse.me/crystal-kit/)
+- [4] [Crystal-Kit – GitHub](https://github.com/rasta-mouse/Crystal-Kit)
+- [5] [Elastic – Call stacks, no more free passes for malware](https://www.elastic.co/security-labs/call-stacks-no-more-free-passes-for-malware)
+- [6] [Crystal Palace – docs](https://tradecraftgarden.org/docs.html)
+- [7] [simplehook – sample](https://tradecraftgarden.org/simplehook.html)
+- [8] [stackcutting – sample](https://tradecraftgarden.org/stackcutting.html)
+- [9] [Draugr – call-stack spoofing PIC](https://github.com/NtDallas/Draugr)
+- [10] [Unit42 – New Infection Chain and ConfuserEx-Based Obfuscation for DarkCloud Stealer](https://unit42.paloaltonetworks.com/new-darkcloud-stealer-infection-chain/)
+- [11] [Synacktiv – Should you trust your zero trust? Bypassing Zscaler posture checks](https://www.synacktiv.com/en/publications/should-you-trust-your-zero-trust-bypassing-zscaler-posture-checks.html)
+- [12] [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
+- [13] [Hexacorn – DLL ForwardSideLoading: Abusing Forwarded Exports](https://www.hexacorn.com/blog/2025/08/19/dll-forwardsideloading/)
+- [14] [Windows 11 Forwarded Exports Inventory (apis_fwd.txt)](https://hexacorn.com/d/apis_fwd.txt)
+- [15] [Microsoft Learn – Dynamic-link library search order](https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order)
+- [16] [Microsoft Learn – Process security and access rights](https://learn.microsoft.com/en-us/windows/win32/procthread/process-security-and-access-rights)
+- [17] [Microsoft – EKU reference (MS-PPSEC)](https://learn.microsoft.com/openspecs/windows_protocols/ms-ppsec/651a90f3-e1f5-4087-8503-40d804429a88)
+- [18] [Sysinternals – Process Monitor](https://learn.microsoft.com/sysinternals/downloads/procmon)
+- [19] [CreateProcessAsPPL launcher](https://github.com/2x7EQ13/CreateProcessAsPPL)
+- [20] [Zero Salarium – Countering EDRs With The Backing Of Protected Process Light (PPL)](https://www.zerosalarium.com/2025/08/countering-edrs-with-backing-of-ppl-protection.html)
+- [21] [Zero Salarium – Break The Protective Shell Of Windows Defender With The Folder Redirect Technique](https://www.zerosalarium.com/2025/09/Break-Protective-Shell-Windows-Defender-Folder-Redirect-Technique-Symlink.html)
+- [22] [Microsoft – mklink command reference](https://learn.microsoft.com/windows-server/administration/windows-commands/mklink)
+- [23] [Check Point Research – Under the Pure Curtain: From RAT to Builder to Coder](https://research.checkpoint.com/2025/under-the-pure-curtain-from-rat-to-builder-to-coder/)
+- [24] [Rapid7 – SantaStealer is Coming to Town: A New, Ambitious Infostealer](https://www.rapid7.com/blog/post/tr-santastealer-is-coming-to-town-a-new-ambitious-infostealer-advertised-on-underground-forums)
+- [25] [ChromElevator – Chrome App Bound Encryption Decryption](https://github.com/xaitax/Chrome-App-Bound-Encryption-Decryption)
+- [26] [Check Point Research – GachiLoader: Defeating Node.js Malware with API Tracing](https://research.checkpoint.com/2025/gachiloader-node-js-malware-with-api-tracing/)
+- [27] [Sleeping Beauty: Putting Adaptix to Bed with Crystal Palace](https://maorsabag.github.io/posts/adaptix-stealthpalace/sleeping-beauty/)
+- [28] [SensePost – Process Parameter Poisoning](https://sensepost.com/blog/2026/process-parameter-poisoning/)
+- [29] [Orange Cyberdefense – p3-loader](https://github.com/Orange-Cyberdefense/p3-loader)
+- [30] [Sleeping Beauty II: CFG, CET, and Stack Spoofing](https://maorsabag.github.io/posts/adaptix-stealthpalace/sleeping-beauty-ii)
+- [31] [Ekko sleep obfuscation](https://github.com/Cracked5pider/Ekko)
+- [32] [SysWhispers4 – GitHub](https://github.com/JoasASantos/SysWhispers4)
+- [33] [blog.xpnsec.com - Hiding Your Dotnet Etw](https://blog.xpnsec.com/hiding-your-dotnet-etw)
+- [34] [repnz/etw-providers-docs](https://github.com/repnz/etw-providers-docs)
+- [35] [trustedsec.com - Abusing Chrome Remote Desktop On Red Team Operations A Practical Guide](https://trustedsec.com/blog/abusing-chrome-remote-desktop-on-red-team-operations-a-practical-guide)
 
 {{#include ../banners/hacktricks-training.md}}

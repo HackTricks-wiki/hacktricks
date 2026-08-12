@@ -10,21 +10,21 @@ iButton is a generic name for an electronic identification key packed in a **coi
 
 ### What is iButton? <a href="#what-is-ibutton" id="what-is-ibutton"></a>
 
-Usually, iButton implies the physical form of the key and reader - a round coin with two contacts. For the frame surrounding it, there are lots of variations from the most common plastic holder with a hole to rings, pendants, etc.
+The name iButton describes the durable coin-shaped package and contact arrangement. Holders include plastic fobs, rings, and pendants.
 
 <figure><img src="../../images/image (1078).png" alt=""><figcaption></figcaption></figure>
 
-When the key reaches the reader, the **contacts come to touch** and the key is powered to **transmit** its ID. Sometimes the key is **not read** immediately because the **contact PSD of an intercom is larger** than it should be. So the outer contours of the key and the reader couldn't touch. If that's the case, you'll have to press the key over one of the walls of the reader.
+When both contacts meet the reader, the device receives power and exchanges data. If the recessed contact geometry prevents the outer ground contacts from meeting, tilting the key against the reader wall can restore contact.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../images/image (290).png" alt=""><figcaption></figcaption></figure>
 
 ### **1-Wire protocol** <a href="#id-1-wire-protocol" id="id-1-wire-protocol"></a>
 
-Dallas keys exchange data using the 1-wire protocol. With only one contact for data transfer (!!) in both directions, from master to slave and vice versa. The 1-wire protocol works according to the Master-Slave model. In this topology, the Master always initiates communication and the Slave follows its instructions.
+Dallas/Maxim keys use the 1-Wire protocol: one data contact carries bidirectional traffic and may also provide parasitic power, while the metal can is the return contact. The controller initiates transactions and the device responds.<sup>[[2]](#references)</sup>
 
 When the key (Slave) contacts the intercom (Master), the chip inside the key turns on, powered by the intercom, and the key is initialized. Following that the intercom requests the key ID. Next, we will look up this process in more detail.
 
-Flipper can work both in Master and Slave modes. In the key reading mode, Flipper acts as a reader this is to say it works as a Master. And in the key emulation mode, the flipper pretends to be a key, it is in the Slave mode.
+Flipper can act as the controller while reading a key and as the emulated device while presenting a stored identifier to a reader.<sup>[[1]](#references)</sup>
 
 ### Dallas, Cyfral & Metakom keys
 
@@ -41,8 +41,7 @@ flipper-zero/fz-ibutton.md
 
 ## References
 
-- [1] [Taming iButton](https://blog.flipperzero.one/taming-ibutton/)
+- [1] [Taming iButton with Flipper Zero](https://blog.flipperzero.one/taming-ibutton/)
+- [2] [Analog Devices — 1-Wire communication through software](https://www.analog.com/en/resources/technical-articles/1wire-communication-through-software.html)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-

@@ -4,7 +4,7 @@
 
 ## Overview
 
-Container security starts before the workload is launched. The image determines which binaries, interpreters, libraries, startup scripts, and embedded configuration reach production. If the image is backdoored, stale, or built with secrets baked into it, the runtime hardening that follows is already operating on a compromised artifact.
+Container security starts before the workload is launched. The image determines which binaries, interpreters, libraries, startup scripts, and embedded configuration reach production. If the image is backdoored, stale, or built with secrets baked into it, the runtime hardening that follows is already operating on a compromised artifact. <sup>[[1]](#references)</sup>
 
 This is why image provenance, vulnerability scanning, signature verification, and secret handling belong in the same conversation as namespaces and seccomp. They protect a different phase of the lifecycle, but failures here often define the attack surface the runtime later has to contain.
 
@@ -12,7 +12,7 @@ This is why image provenance, vulnerability scanning, signature verification, an
 
 Images may come from public registries such as Docker Hub or from private registries operated by an organization. The security question is not simply where the image lives, but whether the team can establish provenance and integrity. Pulling unsigned or poorly tracked images from public sources increases the risk of malicious or tampered content entering production. Even internally hosted registries need clear ownership, review, and trust policy.
 
-Docker Content Trust historically used Notary and TUF concepts to require signed images. The exact ecosystem has evolved, but the enduring lesson remains useful: image identity and integrity should be verifiable rather than assumed.
+Docker Content Trust historically used Notary and TUF concepts to require signed images. Docker is retiring that implementation, so new deployments should use a current signing and verification workflow instead of starting a new DCT deployment. The enduring lesson remains useful: image identity and integrity should be verifiable rather than assumed. <sup>[[2]](#references)</sup>
 
 Example historical Docker Content Trust workflow:
 
@@ -26,7 +26,7 @@ The point of the example is not that every team must still use the same tooling,
 
 ## Vulnerability Scanning
 
-Image scanning helps answer two different questions. First, does the image contain known vulnerable packages or libraries? Second, does the image carry unnecessary software that expands the attack surface? An image full of debugging tools, shells, interpreters, and stale packages is both easier to exploit and harder to reason about.
+Image scanning helps answer two different questions. First, does the image contain known vulnerable packages or libraries? Second, does the image carry unnecessary software that expands the attack surface? An image full of debugging tools, shells, interpreters, and stale packages is both easier to exploit and harder to reason about. <sup>[[3]](#references)</sup>
 
 Examples of commonly used scanners include:
 
@@ -41,7 +41,7 @@ Results from these tools should be interpreted carefully. A vulnerability in an 
 
 ## Build-Time Secrets
 
-One of the oldest mistakes in container build pipelines is embedding secrets directly into the image or passing them through environment variables that later become visible through `docker inspect`, build logs, or recovered layers. Build-time secrets should be mounted ephemerally during the build rather than copied into the image filesystem.
+One of the oldest mistakes in container build pipelines is embedding secrets directly into the image or passing them through build arguments or environment variables. Depending on the mechanism, those values may persist in image metadata or recoverable layers, appear in build logs, or become visible through inspection commands such as `docker inspect`. Build-time secrets should be mounted ephemerally during the build rather than copied into the image filesystem. <sup>[[4]](#references)</sup>
 
 BuildKit improved this model by allowing dedicated build-time secret handling. Instead of writing a secret into a layer, the build step can consume it transiently:
 
@@ -54,7 +54,7 @@ This matters because image layers are durable artifacts. Once a secret enters a 
 
 ## Runtime Secrets
 
-Secrets needed by a running workload should also avoid ad hoc patterns such as plain environment variables whenever possible. Volumes, dedicated secret-management integrations, Docker secrets, and Kubernetes Secrets are common mechanisms. None of these removes all risk, especially if the attacker already has code execution in the workload, but they are still preferable to storing credentials permanently in the image or exposing them casually through inspection tooling.
+Secrets needed by a running workload should also avoid ad hoc patterns such as plain environment variables whenever possible. Volumes, dedicated secret-management integrations, Docker secrets, and Kubernetes Secrets are common mechanisms. None of these removes all risk, especially if the attacker already has code execution in the workload, but they are still preferable to storing credentials permanently in the image or exposing them casually through inspection tooling. <sup>[[5]](#references)</sup>
 
 A simple Docker Compose style secret declaration looks like:
 
@@ -134,4 +134,13 @@ What is interesting here:
 | Podman / Buildah | Supports OCI-native builds and secret-aware workflows | Strong build workflows are available, but operators must still choose them intentionally | embedding secrets in Containerfiles, broad build contexts, permissive bind mounts during builds |
 | Kubernetes | Native Secret objects and projected volumes | Runtime secret delivery is first-class, but exposure depends on RBAC, pod design, and host mounts | overbroad Secret mounts, service-account token misuse, `hostPath` access to kubelet-managed volumes |
 | Registries | Integrity is optional unless enforced | Public and private registries both depend on policy, signing, and admission decisions | pulling unsigned images freely, weak admission control, poor key management |
+
+## References
+
+- [1] [Open Container Initiative Image Format Specification](https://github.com/opencontainers/image-spec/blob/main/spec.md)
+- [2] [Docker Docs - Content trust in Docker](https://docs.docker.com/engine/security/trust/)
+- [3] [Docker Docs - Docker Scout](https://docs.docker.com/scout/)
+- [4] [Docker Docs - Build secrets](https://docs.docker.com/build/building/secrets/)
+- [5] [Kubernetes Documentation - Secrets](https://kubernetes.io/docs/concepts/configuration/secret/)
+
 {{#include ../../../banners/hacktricks-training.md}}

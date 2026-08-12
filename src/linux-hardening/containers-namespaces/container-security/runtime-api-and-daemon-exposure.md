@@ -199,7 +199,6 @@ If the kubelet or API-server proxy path authorizes `exec`, a WebSocket-capable c
 The goal of these checks is to answer whether the container can reach any management plane that should have remained outside the trust boundary.
 
 ```bash
-find / -maxdepth 3 \( -name docker.sock -o -name containerd.sock -o -name crio.sock -o -name podman.sock -o -name kubelet.sock \) 2>/dev/null
 mount | grep -E '/var/run|/run|docker.sock|containerd.sock|crio.sock|podman.sock|kubelet.sock'
 ss -lntp 2>/dev/null | grep -E ':2375|:2376'
 env | grep -E 'DOCKER_HOST|CONTAINERD_ADDRESS|CRI_CONFIG_FILE|BUILDKIT_HOST|XDG_RUNTIME_DIR'
@@ -226,4 +225,5 @@ What is interesting here:
 
 - [1] [containerd socket exploitation part 1](https://thegreycorner.com/2025/02/12/containerd-socket-exploitation-part-1.html)
 - [2] [Kubernetes API Server Bypass Risks](https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/)
+
 {{#include ../../../banners/hacktricks-training.md}}

@@ -86,7 +86,7 @@ This process is done automatically with [SprayKatz](https://github.com/aas-n/spr
 A DLL named **comsvcs.dll** found in `C:\Windows\System32` is responsible for **dumping process memory** in the event of a crash. This DLL includes a **function** named **`MiniDumpW`**, designed to be invoked using `rundll32.exe`.\
 It is irrelevant to use the first two arguments, but the third one is divided into three components. The process ID to be dumped constitutes the first component, the dump file location represents the second, and the third component is strictly the word **full**. No alternative options exist.\
 Upon parsing these three components, the DLL is engaged in creating the dump file and transferring the specified process's memory into this file.\
-Utilization of the **comsvcs.dll** is feasible for dumping the lsass process, thereby eliminating the need to upload and execute procdump. This method is described in detail at [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords).
+Utilization of the **comsvcs.dll** is feasible for dumping the lsass process, thereby eliminating the need to upload and execute procdump. This method is described in detail at [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords).<sup>[[9]](#references)</sup>
 
 The following command is employed for execution:
 
@@ -250,19 +250,19 @@ Within this database, three primary tables are maintained:
 - **Link Table**: It keeps track of relationships, such as group memberships.
 - **SD Table**: **Security descriptors** for each object are held here, ensuring the security and access control for the stored objects.
 
-More information about this: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)<sup>[[8]](#references)</sup>
+Christoffer Andersson's database-layer research documents these tables and their version-specific behavior in more detail.<sup>[[8]](#references)</sup>
 
 Windows uses _Ntdsa.dll_ to interact with that file and its used by _lsass.exe_. Then, **part** of the **NTDS.dit** file could be located **inside the `lsass`** memory (you can find the latest accessed data probably because of the performance improve by using a **cache**).
 
 #### Decrypting the hashes inside NTDS.dit
 
-The hash is cyphered 3 times:
+The hash is encrypted three times:
 
 1. Decrypt Password Encryption Key (**PEK**) using the **BOOTKEY** and **RC4**.
 2. Decrypt tha **hash** using **PEK** and **RC4**.
 3. Decrypt the **hash** using **DES**.
 
-**PEK** have the **same value** in **every domain controller**, but it is **cyphered** inside the **NTDS.dit** file using the **BOOTKEY** of the **SYSTEM file of the domain controller (is different between domain controllers)**. This is why to get the credentials from the NTDS.dit file **you need the files NTDS.dit and SYSTEM** (_C:\Windows\System32\config\SYSTEM_).
+The **PEK** has the **same value on every domain controller**, but it is **encrypted** inside **NTDS.dit** with the DC-specific **BOOTKEY** from that domain controller's **SYSTEM** hive. Therefore, extracting credentials requires both **NTDS.dit** and **SYSTEM** (`C:\Windows\System32\config\SYSTEM`).
 
 ### Copying NTDS.dit using Ntdsutil
 
@@ -505,6 +505,7 @@ This means **hardware binding prevents off-device export but not same-user use o
 - [5] [Chromium – `webauthn_credential_specifics.proto`](https://chromium.googlesource.com/chromium/src/+/main/components/sync/protocol/webauthn_credential_specifics.proto)
 - [6] [Microsoft – `NCryptCreatePersistedKey` / CNG key storage](https://learn.microsoft.com/en-us/windows/win32/api/ncrypt/nf-ncrypt-ncryptcreatepersistedkey)
 - [7] [0xWord – Hacking Windows: Ataques a Sistemas y Redes Microsoft](https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html)
-- [8] [How the Active Directory Data Store Really Works: Inside NTDS.dit (Part 1)](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
+- [8] [How the Active Directory Data Store Really Works: Inside NTDS.dit (Part 1)](https://blog.chrisse.se/?p=762)
+- [9] [en.hackndo.com - Remote Lsass Dump Passwords](https://en.hackndo.com/remote-lsass-dump-passwords)
 
 {{#include ../../banners/hacktricks-training.md}}

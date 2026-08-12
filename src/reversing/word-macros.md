@@ -2,20 +2,23 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Junk Code
+## Junk Code
 
-It's very common to find **junk code that is never used** to make the reversing of the macro more difficult.\
-For example, in the following image you can see that and If that is never going to be true is used to execute some junk and useless code.
+Macros may contain **unreachable or irrelevant code** intended to slow analysis. Identify constant conditions and trace reachable behavior before spending time reversing a branch. The example below uses an `If` condition that can never be true to conceal junk code.
 
-![Word Macros - Junk Code: For example, in the following image you can see that and If that is never going to be true is used to execute some junk and useless code](<../images/image (369).png>)
+![A Word macro containing an unreachable conditional branch with junk code](<../images/image (369).png>)
 
-### Macro Forms
+## Macro Forms
 
-Using the **GetObject** function it's possible to obtain data from forms of the macro. This can be used to difficult the analysis. The following is a photo of a macro form used to **hide data inside text boxes** (a text box can be hiding other text boxes):
+VBA UserForms can store data in controls such as text boxes. Because forms, frames, and pages can each expose a `Controls` collection, analysts should enumerate the entire control hierarchy rather than relying only on what the form displays. The example below stores concealed data in overlapping text boxes.<sup>[[1]](#references)</sup>
 
-![Junk Code - Macro Forms: Using the GetObject function it's possible to obtain data from forms of the macro. This can be used to difficult the analysis. The following is a photo of a...](<../images/image (344).png>)
+During dynamic analysis, VBA's `GetObject` function can retrieve an Automation object from a file or attach to an already-running Automation server. Macros may use that object access to reach data that is not obvious in the visible document; inspect both the returned object and the UserForm control tree.<sup>[[2]](#references)</sup>
+
+![A macro UserForm with data concealed in overlapping text boxes](<../images/image (344).png>)
+
+## References
+
+- [1] [Microsoft Learn - Collections, controls, and objects (Microsoft Forms)](https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/objects-microsoft-forms)
+- [2] [Microsoft Learn - `GetObject` function](https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/getobject-function)
 
 {{#include ../banners/hacktricks-training.md}}
-
-
-

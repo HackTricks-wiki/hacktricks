@@ -35,6 +35,8 @@ RC4’s confounder only randomizes the keystream; it does not add work per guess
 
 #### Linux
 
+A practical end-to-end example using NetExec to request roastable tickets and Hashcat to crack them is available in reference [1].<sup>[[1]](#references)</sup>
+
 ```bash
 # Metasploit Framework
 msf> use auxiliary/gather/get_user_spns

@@ -15,7 +15,7 @@ It's enough to **generate a list of the most probable phishing names** that an a
 
 ### Finding suspicious domains
 
-For this purpose, you can use any of the following tools. Note that these tools will also perform DNS requests automatically to check if the domain has any IP assigned to it:
+For this purpose, you can use any of the following tools. Both resolve candidate domains to check whether they are in use.<sup>[[3]](#references)[[4]](#references)</sup>
 
 - [**dnstwist**](https://github.com/elceef/dnstwist)
 - [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)
@@ -24,10 +24,10 @@ Tip: If you generate a candidate list, also feed it into your DNS resolver logs 
 
 ### Bitflipping
 
-**You can find a short the explanation of this technique in the parent page. Or read the original research in** [**https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/**](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
+**For a short explanation, see the parent page; for primary Windows.com bitsquatting research, see [Remy Hax's write-up](https://remyhax.xyz/posts/bitsquatting-windows/) and [BleepingComputer's report](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)**.<sup>[[1]](#references)[[2]](#references)</sup>
 
 For example, a 1 bit modification in the domain microsoft.com can transform it into _windnws.com._\
-**Attackers may register as many bit-flipping domains as possible related to the victim to redirect legitimate users to their infrastructure**.
+**Attackers may register as many bit-flipping domains as possible related to the victim to redirect legitimate users to their infrastructure**.<sup>[[1]](#references)[[2]](#references)</sup>
 
 **All possible bit-flipping domain names should be also monitored.**
 
@@ -52,9 +52,9 @@ If you have located the login forms of the suspicious domains, you can try to **
 
 ---
 
-### Hunting by favicon and web fingerprints (Shodan/ZoomEye/Censys)
+### Hunting by favicon and web fingerprints (Shodan/Censys)
 
-Many phishing kits reuse favicons from the brand they impersonate. Internet-wide scanners compute a MurmurHash3 of the base64-encoded favicon. You can generate the hash and pivot on it:
+Many phishing kits reuse favicons from the brand they impersonate. Shodan hashes its base64-encoded favicon data with MurmurHash3, while Censys exposes its own favicon hash fields.<sup>[[5]](#references)[[6]](#references)[[7]](#references)</sup> You can generate a Shodan-compatible hash and pivot on it:
 
 Python example (mmh3):
 
@@ -66,7 +66,7 @@ print(mmh3.hash(b64))  # e.g., 309020573
 ```
 
 - Query Shodan: `http.favicon.hash:309020573`
-- With tooling: look at community tools like favfreak to generate hashes and dorks for Shodan/ZoomEye/Censys.
+- With tooling: look at community tools like favfreak to calculate hashes and generate Shodan dorks.<sup>[[16]](#references)</sup>
 
 Notes
 - Favicons are reused; treat matches as leads and validate content and certs before acting.
@@ -74,7 +74,7 @@ Notes
 
 ### URL telemetry hunting (urlscan.io)
 
-`urlscan.io` stores historical screenshots, DOM, requests and TLS metadata of submitted URLs. You can hunt for brand abuse and clones:<sup>[[1]](#references)</sup>
+`urlscan.io` stores historical screenshots, DOM, requests and TLS metadata of submitted URLs. You can hunt for brand abuse and clones:<sup>[[8]](#references)</sup>
 
 Example queries (UI or API):
 - Find lookalikes excluding your legit domains: `page.domain:(/.*yourbrand.*/ AND NOT yourbrand.com AND NOT www.yourbrand.com)`
@@ -95,7 +95,7 @@ From the JSON, pivot on:
 
 ### Domain age via RDAP (scriptable)
 
-RDAP returns machine-readable creation events. Useful to flag **newly registered domains (NRDs)**.
+RDAP returns machine-readable registration events. Useful to flag **newly registered domains (NRDs)**.<sup>[[9]](#references)[[10]](#references)</sup>
 
 ```bash
 # .com/.net RDAP (Verisign)
@@ -110,9 +110,9 @@ Enrich your pipeline by tagging domains with registration age buckets (e.g., <7 
 
 ### TLS/JAx fingerprints to spot AiTM infrastructure
 
-Modern credential-phishing increasingly uses **Adversary-in-the-Middle (AiTM)** reverse proxies (e.g., Evilginx) to steal session tokens. You can add network-side detections:
+Credential-phishing can use **Adversary-in-the-Middle (AiTM)** reverse proxies (e.g., Evilginx) to steal session tokens.<sup>[[11]](#references)</sup> You can add network-side detections:
 
-- Log TLS/HTTP fingerprints (JA3/JA4/JA4S/JA4H) at egress. Some Evilginx builds have been observed with stable JA4 client/server values. Alert on known-bad fingerprints only as a weak signal and always confirm with content and domain intel.<sup>[[2]](#references)</sup>
+- Log TLS/HTTP fingerprints (JA3/JA4/JA4S/JA4H) at egress. Some Evilginx builds have been observed with stable JA4 client/server values. Alert on known-bad fingerprints only as a weak signal and always confirm with content and domain intel.<sup>[[12]](#references)</sup>
 - Proactively record TLS certificate metadata (issuer, SAN count, wildcard use, validity) for lookalike hosts discovered via CT or urlscan and correlate with DNS age and geolocation.
 
 > Note: Treat fingerprints as enrichment, not as sole blockers; frameworks evolve and may randomise or obfuscate.
@@ -123,31 +123,45 @@ The parent page also mentions a domain name variation technique that consists of
 
 #### Certificate Transparency
 
-It's not possible to take the previous "Brute-Force" approach but it's actually **possible to uncover such phishing attempts** also thanks to certificate transparency. Every time a certificate is emitted by a CA, the details are made public. This means that by reading the certificate transparency or even monitoring it, it's **possible to find domains that are using a keyword inside its name** For example, if an attacker generates a certificate of [https://paypal-financial.com](https://paypal-financial.com), seeing the certificate it's possible to find the keyword "paypal" and know that suspicious email is being used.
+Certificate Transparency (CT) logs expose certificate identities, so searching Subject or SAN names for brand keywords can reveal lookalike domains (for example, a certificate for `paypal-financial.com` exposes the `paypal` keyword). Filter results by issuance date and CA when useful, and validate candidates because keyword matches can be false positives.<sup>[[13]](#references)</sup>
 
-The post [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/) suggests that you can use Censys to search for certificates affecting a specific keyword and filter by date (only "new" certificates) and by the CA issuer "Let's Encrypt":
+Patrik Hudak's original [phishing-domain hunting write-up](https://0xpatrik.com/phishing-domains/) demonstrates this workflow in Censys, including filters for certificate date and issuer such as Let's Encrypt.<sup>[[13]](#references)</sup>
 
-![https://0xpatrik.com/content/images/2018/07/cert_listing.png](<../../images/image (1115).png>)
+![Censys certificate search results used to identify lookalike domains](<../../images/image (1115).png>)
 
-However, you can do "the same" using the free web [**crt.sh**](https://crt.sh). You can **search for the keyword** and the **filter** the results **by date and CA** if you wish.
+You can also use the free [**crt.sh**](https://crt.sh) service to search for a keyword and filter results by date and CA.<sup>[[13]](#references)</sup>
 
-![Domain names using keywords - Certificate Transparency: However, you can do "the same" using the free web crt.sh . You can search for the keyword and the filter the results by date and...](<../../images/image (519).png>)
+![crt.sh keyword search for suspicious certificate identities](<../../images/image (519).png>)
 
-Using this last option you can even use the field Matching Identities to see if any identity from the real domain matches any of the suspicious domains (note that a suspicious domain can be a false positive).
+Its Matching Identities field can help compare identities from the real domain with suspicious domains, but treat matches as leads rather than proof.<sup>[[13]](#references)</sup>
 
-**Another alternative** is the fantastic project called [**CertStream**](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067). CertStream provides a real-time stream of newly generated certificates which you can use to detect specified keywords in (near) real-time. In fact, there is a project called [**phishing_catcher**](https://github.com/x0rz/phishing_catcher) that does just that.
+[*CertStream*](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067) streams CT updates in near real time, and [*phishing_catcher*](https://github.com/x0rz/phishing_catcher) consumes that stream to score suspicious certificate names.<sup>[[14]](#references)[[15]](#references)</sup>
 
 Practical tip: when triaging CT hits, prioritise NRDs, untrusted/unknown registrars, privacy-proxy WHOIS, and certs with very recent `NotBefore` times. Maintain an allowlist of your owned domains/brands to reduce noise.
 
 #### **New domains**
 
-**One last alternative** is to gather a list of **newly registered domains** for some TLDs ([Whoxy](https://www.whoxy.com/newly-registered-domains/) provides such service) and **check the keywords in these domains**. However, long domains usually use one or more subdomains, therefore the keyword won't appear inside the FLD and you won't be able to find the phishing subdomain.
+A second option is to collect newly registered domains by TLD (for example, via [Whoxy](https://www.whoxy.com/newly-registered-domains/)) and filter for brand keywords. This misses phishing hosted on subdomains when the keyword is absent from the registered domain.<sup>[[13]](#references)</sup>
 
 Additional heuristic: treat certain **file-extension TLDs** (e.g., `.zip`, `.mov`) with extra suspicion in alerting. These are commonly confused for filenames in lures; combine the TLD signal with brand keywords and NRD age for better precision.
 
 ## References
 
-- [1] [urlscan.io – Search API Reference](https://urlscan.io/docs/search/)
-- [2] [APNIC Blog – JA4+ network fingerprinting](https://blog.apnic.net/2023/11/22/ja4-network-fingerprinting/)
+- [1] [Remy Hax – Bitsquatting Windows.com](https://remyhax.xyz/posts/bitsquatting-windows/)
+- [2] [Hijacking traffic to Microsoft's windows.com with bitflipping](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
+- [3] [dnstwist](https://github.com/elceef/dnstwist)
+- [4] [urlcrazy](https://github.com/urbanadventurer/urlcrazy)
+- [5] [Deep Dive: http.favicon](https://blog.shodan.io/deep-dive-http-favicon/)
+- [6] [mmh3 documentation](https://mmh3.readthedocs.io/en/stable/quickstart.html)
+- [7] [Platform Web Property Dataset](https://docs.censys.com/docs/platform-web-property-dataset)
+- [8] [urlscan.io – Search API Reference](https://urlscan.io/docs/search/)
+- [9] [Registration Data Access Protocol Help](https://www.verisign.com/news-insights/registration-data-access-protocol/help/)
+- [10] [RFC 9083: JSON Responses for the Registration Data Access Protocol](https://www.rfc-editor.org/rfc/rfc9083.html)
+- [11] [Token tactics: How to prevent, detect, and respond to cloud token theft](https://www.microsoft.com/en-us/security/blog/2022/11/16/token-tactics-how-to-prevent-detect-and-respond-to-cloud-token-theft/)
+- [12] [APNIC Blog – JA4+ network fingerprinting](https://blog.apnic.net/2023/11/22/ja4-network-fingerprinting/)
+- [13] [Patrik Hudak – Finding Phishing: Tools and Techniques](https://0xpatrik.com/phishing-domains/)
+- [14] [Ryan Sears – Introducing CertStream](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067)
+- [15] [x0rz – Phishing Catcher](https://github.com/x0rz/phishing_catcher)
+- [16] [Devansh Batham – FavFreak](https://github.com/devanshbatham/FavFreak)
 
 {{#include ../../banners/hacktricks-training.md}}

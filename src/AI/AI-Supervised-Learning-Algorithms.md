@@ -4,7 +4,7 @@
 
 ## Basic Information
 
-Supervised learning uses labeled data to train models that can make predictions on new, unseen inputs. In cybersecurity, supervised machine learning is widely applied to tasks such as intrusion detection (classifying network traffic as *normal* or *attack*), malware detection (distinguishing malicious software from benign), phishing detection (identifying fraudulent websites or emails), and spam filtering, among others. Each algorithm has its strengths and is suited to different types of problems (classification or regression). Below we review key supervised learning algorithms, explain how they work, and demonstrate their use on real cybersecurity datasets. We also discuss how combining models (ensemble learning) can often improve predictive performance.
+Supervised learning uses labeled data to train models that can make predictions on new, unseen inputs. In cybersecurity, supervised machine learning is widely applied to tasks such as intrusion detection (classifying network traffic as *normal* or *attack*), malware detection (distinguishing malicious software from benign), phishing detection (identifying fraudulent websites or emails), and spam filtering, among others.<sup>[[1]](#references)</sup> Each algorithm has its strengths and is suited to different types of problems (classification or regression). Below we review key supervised learning algorithms, explain how they work, and demonstrate their use on real cybersecurity datasets. We also discuss how combining models (ensemble learning) can often improve predictive performance.
 
 ## Algorithms
 
@@ -38,7 +38,7 @@ Let's dive into each algorithm:
 
 ### Linear Regression
 
-Linear regression is a **regression** algorithm used to predict continuous numeric values. It assumes a linear relationship between the input features (independent variables) and the output (dependent variable). The model attempts to fit a straight line (or hyperplane in higher dimensions) that best describes the relationship between features and the target. This is typically done by minimizing the sum of squared errors between predicted and actual values (Ordinary Least Squares method).<sup>[[8]](#references)</sup>
+Linear regression is a **regression** algorithm used to predict continuous numeric values. It assumes a linear relationship between the input features (independent variables) and the output (dependent variable). The model attempts to fit a straight line (or hyperplane in higher dimensions) that best describes the relationship between features and the target. This is typically done by minimizing the sum of squared errors between predicted and actual values (Ordinary Least Squares method).<sup>[[2]](#references)</sup>
 
 The simplest for to represent linear regression is with a line:
 
@@ -140,7 +140,7 @@ In this example, the linear regression model tries to predict connection `durati
 
 ### Logistic Regression
 
-Logistic regression is a **classification** algorithm that models the probability that an instance belongs to a particular class (typically the "positive" class). Despite its name, *logistic* regression is used for discrete outcomes (unlike linear regression which is for continuous outcomes). It is especially used for **binary classification** (two classes, e.g., malicious vs. benign), but it can be extended to multi-class problems (using softmax or one-vs-rest approaches).<sup>[[1]](#references)</sup>
+Logistic regression is a **classification** algorithm that models the probability that an instance belongs to a particular class (typically the "positive" class). Despite its name, *logistic* regression is used for discrete outcomes (unlike linear regression which is for continuous outcomes). It is especially used for **binary classification** (two classes, e.g., malicious vs. benign), but it can be extended to multi-class problems (using softmax or one-vs-rest approaches).<sup>[[3]](#references)</sup>
 
 The logistic regression uses the logistic function (also known as the sigmoid function) to map predicted values to probabilities. Note that the sigmoid function is a function with values between 0 and 1 that grows in a S-shaped curve according to the needs of the classification, which is useful for binary classification tasks. Therefore, each feature of each input is multiplied by its assigned weight, and the result is passed through the sigmoid function to produce a probability:
 
@@ -175,7 +175,7 @@ Logistic regression is designed for binary classification, but it can be extende
 <details>
 <summary>Example -- Phishing Website Detection with Logistic Regression:</summary>
 
-We'll use a **Phishing Websites Dataset** (from the UCI repository) which contains extracted features of websites (like whether the URL has an IP address, the age of the domain, presence of suspicious elements in HTML, etc.) and a label indicating if the site is phishing or legitimate. We train a logistic regression model to classify websites and then evaluate its accuracy, precision, recall, F1-score, and ROC AUC on a test split.
+We'll use a **Phishing Websites Dataset** (from the UCI repository) which contains extracted features of websites (like whether the URL has an IP address, the age of the domain, presence of suspicious elements in HTML, etc.) and a label indicating if the site is phishing or legitimate.<sup>[[4]](#references)</sup> We train a logistic regression model to classify websites and then evaluate its accuracy, precision, recall, F1-score, and ROC AUC on a test split.
 
 ```python
 import pandas as pd
@@ -238,7 +238,7 @@ In this phishing detection example, logistic regression produces a probability f
 
 ### Decision Trees
 
-A decision tree is a versatile **supervised learning algorithm** that can be used for both classification and regression tasks. It learns a hierarchical tree-like model of decisions based on the features of the data. Each internal node of the tree represents a test on a particular feature, each branch represents an outcome of that test, and each leaf node represents a predicted class (for classification) or value (for regression).<sup>[[2]](#references)</sup>
+A decision tree is a versatile **supervised learning algorithm** that can be used for both classification and regression tasks. It learns a hierarchical tree-like model of decisions based on the features of the data. Each internal node of the tree represents a test on a particular feature, each branch represents an outcome of that test, and each leaf node represents a predicted class (for classification) or value (for regression).<sup>[[5]](#references)</sup>
 
 To build a tree, algorithms like CART (Classification and Regression Tree) use measures such as **Gini impurity** or **information gain (entropy)** to choose the best feature and threshold to split the data at each step. The goal at each split is to partition the data to increase the homogeneity of the target variable in the resulting subsets (for classification, each node aims to be as pure as possible, containing predominantly a single class).
 
@@ -386,7 +386,7 @@ Random Forest is an **ensemble learning** method that builds upon decision trees
 
 By averaging the results of many trees, the random forest reduces the variance that a single decision tree might have. In simple terms, individual trees might overfit or be noisy, but a large number of diverse trees voting together smooths out those errors. The result is often a model with **higher accuracy** and better generalization than a single decision tree. In addition, random forests can provide an estimate of feature importance (by looking at how much each feature split reduces impurity on average).
 
-Random forests have become a **workhorse in cybersecurity** for tasks like intrusion detection, malware classification, and spam detection. They often perform well out-of-the-box with minimal tuning and can handle large feature sets. For example, in intrusion detection, a random forest may outperform an individual decision tree by catching more subtle patterns of attacks with fewer false positives. Research has shown random forests performing favorably compared to other algorithms in classifying attacks in datasets like NSL-KDD and UNSW-NB15.<sup>[[3]](#references)[[9]](#references)</sup>
+Random forests have become a **workhorse in cybersecurity** for tasks like intrusion detection, malware classification, and spam detection. They often perform well out-of-the-box with minimal tuning and can handle large feature sets. For example, in intrusion detection, a random forest may outperform an individual decision tree by catching more subtle patterns of attacks with fewer false positives. Research has shown random forests performing favorably compared to other algorithms in classifying attacks in datasets like NSL-KDD and UNSW-NB15.<sup>[[6]](#references)</sup><sup>[[7]](#references)</sup>
 
 #### **Key characteristics of Random Forests:**
 
@@ -500,13 +500,13 @@ ROC AUC:   0.962
 """
 ```
 
-The random forest typically achieves strong results on this intrusion detection task. We might observe an improvement in metrics like F1 or AUC compared to the single decision tree, especially in recall or precision, depending on the data. This aligns with the understanding that *"Random Forest (RF) is an ensemble classifier and performs well compared to other traditional classifiers for effective classification of attacks."*. In a security operations context, a random forest model might more reliably flag attacks while reducing false alarms, thanks to the averaging of many decision rules. Feature importance from the forest could tell us which network features are most indicative of attacks (e.g., certain network services or unusual counts of packets).
+The random forest typically achieves strong results on this intrusion detection task. We might observe an improvement in metrics like F1 or AUC compared to the single decision tree, especially in recall or precision, depending on the data. This aligns with the understanding that *"Random Forest (RF) is an ensemble classifier and performs well compared to other traditional classifiers for effective classification of attacks."*.<sup>[[6]](#references)</sup> In a security operations context, a random forest model might more reliably flag attacks while reducing false alarms, thanks to the averaging of many decision rules. Feature importance from the forest could tell us which network features are most indicative of attacks (e.g., certain network services or unusual counts of packets).
 
 </details>
 
 ### Support Vector Machines (SVM)
 
-Support Vector Machines are powerful supervised learning models used primarily for classification (and also regression as SVR). An SVM tries to find the **optimal separating hyperplane** that maximizes the margin between two classes. Only a subset of training points (the "support vectors" closest to the boundary) determines the position of this hyperplane. By maximizing the margin (distance between support vectors and the hyperplane), SVMs tend to achieve good generalization.<sup>[[4]](#references)</sup>
+Support Vector Machines are powerful supervised learning models used primarily for classification (and also regression as SVR). An SVM tries to find the **optimal separating hyperplane** that maximizes the margin between two classes. Only a subset of training points (the "support vectors" closest to the boundary) determines the position of this hyperplane. By maximizing the margin (distance between support vectors and the hyperplane), SVMs tend to achieve good generalization.<sup>[[8]](#references)</sup>
 
 Key to SVM's power is the ability to use **kernel functions** to handle non-linear relationships. The data can be implicitly transformed into a higher-dimensional feature space where a linear separator might exist. Common kernels include polynomial, radial basis function (RBF), and sigmoid. For example, if network traffic classes aren't linearly separable in the raw feature space, an RBF kernel can map them into a higher dimension where the SVM finds a linear split (which corresponds to a non-linear boundary in original space). The flexibility of choosing kernels allows SVMs to tackle a variety of problems.
 
@@ -602,7 +602,7 @@ The SVM model will output metrics that we can compare to logistic regression on 
 
 </details>
 
-#### Difference Logistic Rergessions & SVM
+#### Differences Between Logistic Regression and SVM
 
 | Aspect | **Logistic Regression** | **Support Vector Machines** |
 |---|---|---|
@@ -622,7 +622,7 @@ The SVM model will output metrics that we can compare to logistic regression on 
 
 ### Naive Bayes
 
-Naive Bayes is a family of **probabilistic classifiers** based on applying Bayes' Theorem with a strong independence assumption between features. Despite this "naive" assumption, Naive Bayes often works surprisingly well for certain applications, especially those involving text or categorical data, such as spam detection.<sup>[[5]](#references)</sup>
+Naive Bayes is a family of **probabilistic classifiers** based on applying Bayes' Theorem with a strong independence assumption between features. Despite this "naive" assumption, Naive Bayes often works surprisingly well for certain applications, especially those involving text or categorical data, such as spam detection.<sup>[[9]](#references)</sup>
 
 
 #### Bayes' Theorem
@@ -834,9 +834,9 @@ The k-NN model will classify a connection by looking at the 5 closest connection
 
 ### Gradient Boosting Machines (e.g., XGBoost)
 
-Gradient Boosting Machines are among the most powerful algorithms for structured data. **Gradient boosting** refers to the technique of building an ensemble of weak learners (often decision trees) in a sequential manner, where each new model corrects the errors of the previous ensemble. Unlike bagging (Random Forests) which build trees in parallel and average them, boosting builds trees *one by one*, each focusing more on the instances that previous trees mis-predicted.
+Gradient Boosting Machines are among the most powerful algorithms for structured data. **Gradient boosting** refers to the technique of building an ensemble of weak learners (often decision trees) in a sequential manner, where each new model corrects the errors of the previous ensemble. Unlike bagging (Random Forests) which build trees in parallel and average them, boosting builds trees *one by one*, each focusing more on the instances that previous trees mis-predicted.<sup>[[11]](#references)</sup>
 
-The most popular implementations in recent years are **XGBoost**, **LightGBM**, and **CatBoost**, all of which are gradient boosting decision tree (GBDT) libraries. They have been extremely successful in machine learning competitions and applications, often **achieving state-of-the-art performance on tabular datasets**. In cybersecurity, researchers and practitioners have used gradient boosted trees for tasks like **malware detection** (using features extracted from files or runtime behavior) and **network intrusion detection**. For example, a gradient boosting model can combine many weak rules (trees) such as "if many SYN packets and unusual port -> likely scan" into a strong composite detector that accounts for many subtle patterns.<sup>[[6]](#references)</sup>
+The most popular implementations in recent years are **XGBoost**, **LightGBM**, and **CatBoost**, all of which are gradient boosting decision tree (GBDT) libraries. They have been extremely successful in machine learning competitions and applications, often **achieving state-of-the-art performance on tabular datasets**. In cybersecurity, researchers and practitioners have used gradient boosted trees for tasks like **malware detection** (using features extracted from files or runtime behavior) and **network intrusion detection**. For example, a gradient boosting model can combine many weak rules (trees) such as "if many SYN packets and unusual port -> likely scan" into a strong composite detector that accounts for many subtle patterns.
 
 Why are boosted trees so effective? Each tree in the sequence is trained on the *residual errors* (gradients) of the current ensemble's predictions. This way, the model gradually **"boosts"** the areas where it's weak. The use of decision trees as base learners means the final model can capture complex interactions and non-linear relations. Also, boosting inherently has a form of built-in regularization: by adding many small trees (and using a learning rate to scale their contributions), it often generalizes well without huge overfitting, provided proper parameters are chosen.
 
@@ -905,13 +905,13 @@ ROC AUC:   0.990
 """
 ```
 
-The gradient boosting model will likely achieve very high accuracy and AUC on this phishing dataset (often these models can exceed 95% accuracy with proper tuning on such data, as seen in literature. This demonstrates why GBDTs are considered *"the state of the art model for tabular dataset"* -- they often outperform simpler algorithms by capturing complex patterns. In a cybersecurity context, this could mean catching more phishing sites or attacks with fewer misses. Of course, one must be cautious about overfitting -- we would typically use techniques like cross-validation and monitor performance on a validation set when developing such a model for deployment.
+The gradient boosting model will likely achieve very high accuracy and AUC on this phishing dataset (often these models can exceed 95% accuracy with proper tuning on such data, as seen in literature. This demonstrates why GBDTs are considered *"the state of the art model for tabular dataset"* -- they often outperform simpler algorithms by capturing complex patterns.<sup>[[11]](#references)</sup> In a cybersecurity context, this could mean catching more phishing sites or attacks with fewer misses. Of course, one must be cautious about overfitting -- we would typically use techniques like cross-validation and monitor performance on a validation set when developing such a model for deployment.
 
 </details>
 
 ### Combining Models: Ensemble Learning and Stacking
 
-Ensemble learning is a strategy of **combining multiple models** to improve overall performance. We already saw specific ensemble methods: Random Forest (an ensemble of trees via bagging) and Gradient Boosting (an ensemble of trees via sequential boosting). But ensembles can be created in other ways too, such as **voting ensembles** or **stacked generalization (stacking)**. The main idea is that different models may capture different patterns or have different weaknesses; by combining them, we can **compensate for each model's errors with another's strengths**.<sup>[[13]](#references)</sup>
+Ensemble learning is a strategy of **combining multiple models** to improve overall performance. We already saw specific ensemble methods: Random Forest (an ensemble of trees via bagging) and Gradient Boosting (an ensemble of trees via sequential boosting). But ensembles can be created in other ways too, such as **voting ensembles** or **stacked generalization (stacking)**. The main idea is that different models may capture different patterns or have different weaknesses; by combining them, we can **compensate for each model's errors with another's strengths**.<sup>[[12]](#references)</sup>
 
 -   **Voting Ensemble:** In a simple voting classifier, we train multiple diverse models (say, a logistic regression, a decision tree, and an SVM) and have them vote on the final prediction (majority vote for classification). If we weight the votes (e.g., higher weight to more accurate models), it's a weighted voting scheme. This typically improves performance when the individual models are reasonably good and independent -- the ensemble reduces the risk of an individual model's mistake since others may correct it. It's like having a panel of experts rather than a single opinion.
 
@@ -1003,27 +1003,26 @@ ROC AUC  : 0.992
 ```
 The stacked ensemble takes advantage of the complementary strengths of the base models. For instance, logistic regression might handle linear aspects of the data, the decision tree might capture specific rule-like interactions, and k-NN might excel in local neighborhoods of the feature space. The meta-model (a random forest here) can learn how to weigh these inputs. The resulting metrics often show an improvement (even if slight) over any single model's metrics. In our phishing example, if logistic alone had an F1 of say 0.95 and the tree 0.94, the stack might achieve 0.96 by picking up where each model errs.
 
-Ensemble methods like this demonstrate the principle that *"combining multiple models typically leads to better generalization"*. In cybersecurity, this can be implemented by having multiple detection engines (one might be rule-based, one machine learning, one anomaly-based) and then a layer that aggregates their alerts -- effectively a form of ensemble -- to make a final decision with higher confidence. When deploying such systems, one must consider the added complexity and ensure that the ensemble doesn't become too hard to manage or explain. But from an accuracy standpoint, ensembles and stacking are powerful tools for improving model performance.
+Ensemble methods like this demonstrate the principle that *"combining multiple models typically leads to better generalization"*.<sup>[[12]](#references)</sup> In cybersecurity, this can be implemented by having multiple detection engines (one might be rule-based, one machine learning, one anomaly-based) and then a layer that aggregates their alerts -- effectively a form of ensemble -- to make a final decision with higher confidence. When deploying such systems, one must consider the added complexity and ensure that the ensemble doesn't become too hard to manage or explain. But from an accuracy standpoint, ensembles and stacking are powerful tools for improving model performance.
 
 </details>
 
+The neural-network approaches described in the [deep-learning page](AI-Deep-Learning.md) can complement these classical models for intrusion detection when the dataset and compute budget justify the additional complexity.<sup>[[13]](#references)</sup>
 
 ## References
 
-- [1] [Logistic Regression](https://madhuramiah.medium.com/logistic-regression-6e55553cc003)
-- [2] [Decision Tree - Introduction with example](https://www.geeksforgeeks.org/decision-tree-introduction-example/)
-- [3] [Denial of Services Attack Detection using Random Forest Classifier with Information Gain](https://rjwave.org/ijedr/viewpaperforall.php?paper=IJEDR1703132)
-- [4] [What are Support Vector Machines (SVMs)? (IBM)](https://www.ibm.com/think/topics/support-vector-machine)
-- [5] [Naive Bayes spam filtering (Wikipedia)](https://en.m.wikipedia.org/wiki/Naive_Bayes_spam_filtering)
-- [6] [GBDT Demystified: How LightGBM, XGBoost, and CatBoost Work](https://medium.com/@rupalipatelkvc/gbdt-demystified-how-lightgbm-xgboost-and-catboost-work-9479b7262644)
-- [7] [AI and Machine Learning in Cybersecurity (zvelo)](https://zvelo.com/ai-and-machine-learning-in-cybersecurity/)
-- [8] [Linear Regression Explained](https://medium.com/@chaandram/linear-regression-explained-28d5bf1934ae)
-- [9] [Performance analysis of machine learning models for intrusion detection system using Gini Impurity-based Weighted Random Forest (GIWRF) feature selection technique](https://cybersecurity.springeropen.com/articles/10.1186/s42400-021-00103-8)
-- [10] [What is the k-nearest neighbors (KNN) algorithm? (IBM)](https://www.ibm.com/think/topics/knn)
-- [11] [Phishing Attacks and Websites Classification Using Machine Learning and Multiple Datasets (A Comparative Analysis)](https://arxiv.org/pdf/2101.02552)
-- [12] [How Deep Learning Enhances Intrusion Detection Systems](https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/)
-- [13] [Ensemble Learning: Boosting Model Performance by Combining Strengths](https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901)
+- [1] [AI and Machine Learning in Cybersecurity - zvelo](https://zvelo.com/ai-and-machine-learning-in-cybersecurity/)
+- [2] [Linear Regression, Explained - Medium](https://medium.com/@chaandram/linear-regression-explained-28d5bf1934ae)
+- [3] [Logistic Regression - Medium](https://madhuramiah.medium.com/logistic-regression-6e55553cc003)
+- [4] [Sohail Ahmed Khan, Wasiq Khan, Abir Hussain - "Phishing Attacks and Websites Classification Using Machine Learning and Multiple Datasets (A Comparative Analysis)"](https://arxiv.org/pdf/2101.02552)
+- [5] [Decision Tree - GeeksforGeeks](https://www.geeksforgeeks.org/decision-tree-introduction-example/)
+- [6] [Reena Singh Rajput, Sanjay Agrawal - "Denial of Services Attack Detection using Random Forest Classifier with Information Gain"](https://rjwave.org/ijedr/viewpaperforall.php?paper=IJEDR1703132)
+- [7] [Raisa Abedin Disha, Sajjad Waheed - "Performance analysis of machine learning models for intrusion detection system using Gini Impurity-based Weighted Random Forest (GIWRF) feature selection technique"](https://cybersecurity.springeropen.com/articles/10.1186/s42400-021-00103-8)
+- [8] [What is a Support Vector Machine? - IBM](https://www.ibm.com/think/topics/support-vector-machine)
+- [9] [Naive Bayes spam filtering - Wikipedia](https://en.m.wikipedia.org/wiki/Naive_Bayes_spam_filtering)
+- [10] [What is k-Nearest Neighbors (KNN)? - IBM](https://www.ibm.com/think/topics/knn)
+- [11] [GBDT Demystified: How LightGBM, XGBoost and CatBoost Work - Medium](https://medium.com/@rupalipatelkvc/gbdt-demystified-how-lightgbm-xgboost-and-catboost-work-9479b7262644)
+- [12] [Ensemble Learning: Boosting Model Performance by Combining Strengths - Medium](https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901)
+- [13] [How Deep Learning Enhances Intrusion Detection Systems](https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/)
 
 {{#include ../banners/hacktricks-training.md}}
-
-

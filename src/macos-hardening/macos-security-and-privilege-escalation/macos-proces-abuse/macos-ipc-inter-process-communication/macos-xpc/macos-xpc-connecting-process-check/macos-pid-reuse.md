@@ -4,9 +4,9 @@
 
 ## PID Reuse
 
-When a macOS **XPC service** is checking the called process based on the **PID** and not on the **audit token**, it's vulnerable to PID reuse attack. This attack is based on a **race condition** where an **exploit** is going to **send messages to the XPC** service **abusing** the functionality and just **after** that, executing **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** with the **allowed** binary.
+When a macOS **XPC service** is checking the called process based on the **PID** and not on the **audit token**, it's vulnerable to PID reuse attack. This attack is based on a **race condition** where an **exploit** is going to **send messages to the XPC** service **abusing** the functionality and just **after** that, executing **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** with the **allowed** binary.<sup>[[1]](#references)[[2]](#references)</sup>
 
-This function will make the **allowed binary own the PID** but the **malicious XPC message would have been sent** just before. So, if the **XPC** service **use** the **PID** to **authenticate** the sender and checks it **AFTER** the execution of **`posix_spawn`**, it will think it comes from an **authorized** process.
+This function will make the **allowed binary own the PID** but the **malicious XPC message would have been sent** just before. So, if the **XPC** service **use** the **PID** to **authenticate** the sender and checks it **AFTER** the execution of **`posix_spawn`**, it will think it comes from an **authorized** process.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### Exploit example
 
@@ -201,7 +201,7 @@ void child_xpc_pid_rc_abuse(){
     NSLog(@"conn: %@", connection);
 
     // Call vulenrable XPC function
-    // TODO: CHANEG NAME OF FUNCTION TO CALL
+    // TODO: CHANGE NAME OF FUNCTION TO CALL
     [obj DoSomething:^(_Bool b){
         NSLog(@"Response, %hdd", b);
     }];
@@ -267,7 +267,7 @@ int main(int argc, const char * argv[]) {
         xpc_pid_rc_abuse();
         usleep(10000);
 
-        // The payload will generate this file if exploitation is successfull
+        // The payload will generate this file if exploitation is successful
         if (access("/tmp/pwned", F_OK ) == 0) {
             pwned = true;
         }
@@ -295,6 +295,4 @@ int main(int argc, const char * argv[]) {
 - [5] [Rootpipe Reborn (Part II)](https://objective-see.org/blog/blog_0x41.html)
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
-
-
 

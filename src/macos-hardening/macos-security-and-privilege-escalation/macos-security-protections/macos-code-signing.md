@@ -210,6 +210,8 @@ Actually, it's possible to see in the Code Directory structs a parameter called 
 
 Every process has related a bitmask known as the `status` which is started by the kernel and some of them can be overridden by the **code signature**. These flags that can be included in the code signing are [defined in the code](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L36):<sup>[[1]](#references)</sup>
 
+User space can query or update permitted parts of this state through the `csops` and `csops_audittoken` operations defined by XNU.<sup>[[5]](#references)</sup>
+
 ```c
 /* code signing attributes of a process */
 #define CS_VALID                    0x00000001  /* dynamically valid */
@@ -261,7 +263,7 @@ Note that the function [**exec_mach_imgact**](https://github.com/apple-oss-distr
 
 Each application store some **requirements** that it must **satisfy** in order to be able to be executed. If the **application contains requirements aren't satisfied by the application**, it won't be executed (as it has probably been altered).
 
-The requirements of a binary use a **special grammar** which is a stream of **expressions** and are encoded as blobs using `0xfade0c00` as the magic whose **hash is stored in a special code slot**.
+The requirements of a binary use a **special grammar** which is a stream of **expressions** and are encoded as blobs using `0xfade0c00` as the magic whose **hash is stored in a special code slot**.<sup>[[4]](#references)</sup>
 
 The requirements of a binary can be seen running:
 
@@ -292,7 +294,7 @@ od -A x -t x1 /tmp/output.csreq
 [...]
 ```
 
-It's possible to access this information and create or modify requirements with some APIs from the `Security.framework` like:<sup>[[4]](#references)</sup>
+It's possible to access this information and create or modify requirements with some APIs from the `Security.framework` like:<sup>[[3]](#references)</sup>
 
 #### **Checking Validity**
 
@@ -342,7 +344,7 @@ The **kernel** is the one that **checks the code signature** before allowing the
 
 ## `cs_blobs` & `cs_blob`
 
-[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) struct contains the information about the entitlement of the running process on it. `csb_platform_binary` also informs if the application is a **platform binary** (which is checked in different moments by the OS to apply security mechanisms like to protect the SEND rights to the task ports of these processes).
+[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) struct contains the information about the entitlement of the running process on it. `csb_platform_binary` also informs if the application is a **platform binary** (which is checked in different moments by the OS to apply security mechanisms like to protect the SEND rights to the task ports of these processes).<sup>[[2]](#references)</sup>
 
 > [!WARNING]
 > Note that several security measures depend on the binary being a platform binary, so way to escalate privileges is to **make the binary a platform binary** (for example, by re-signing it with a certificate that allows it).
@@ -410,8 +412,8 @@ struct cs_blob {
 
 - [1] [XNU — `osfmk/kern/cs_blobs.h` (`CodeDirectory`, `CS_*` flags, blob magic values)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
 - [2] [XNU — `bsd/kern/ubc_subr.c` (`cs_blob` handling and signature validation)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/ubc_subr.c)
-- [3] [XNU — `bsd/sys/codesign.h` (`csops`/`csops_audittoken` operations)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
-- [4] [Apple Security framework source — `libsecurity_codesigning`](https://github.com/apple-oss-distributions/Security/tree/main/OSX/libsecurity_codesigning)
-- [5] [Apple Developer — Code Signing Guide](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/Introduction/Introduction.html)
+- [3] [Apple Security framework source — `libsecurity_codesigning`](https://github.com/apple-oss-distributions/Security/tree/main/OSX/libsecurity_codesigning)
+- [4] [Apple Developer — Code Signing Guide](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/Introduction/Introduction.html)
+- [5] [XNU — `bsd/sys/codesign.h` (`csops`/`csops_audittoken` operations)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
 
 {{#include ../../../banners/hacktricks-training.md}}

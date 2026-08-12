@@ -21,7 +21,7 @@ Then **`posix_spawn`** was introduced combining **`vfork`** and **`execve`** in 
 - `POSIX_SPAWN_CLOEXEC_DEFAULT`: Close all file descriptions on exec(2) by default
 - `_POSIX_SPAWN_HIGH_BITS_ASLR:` Randomize high bits of ASLR slide
 
-Moreover, `posix_spawn` allows to specify an array of **`posix_spawnattr`** that controls some aspects of the spawned process, and **`posix_spawn_file_actions`** to modify the state of the descriptors.
+Moreover, `posix_spawn` accepts **`posix_spawnattr`** settings that control aspects of the spawned process and **`posix_spawn_file_actions`** entries that modify file descriptors.
 
 When a process dies it send the **return code to the parent process** (if the parent died, the new parent is PID 1) with the signal `SIGCHLD`. The parent needs to get this value calling `wait4()` or `waitid()` and until that happen the child stays in a zombie state where it's still listed but doesn't consume resources.
 
@@ -143,9 +143,9 @@ Using QoS classes, developers do not need to manage the exact priority numbers b
 
 Moreover, there are different **thread scheduling policies** that flows to specify a set of scheduling parameters that the scheduler will take into consideration. This can be done using `thread_policy_[set/get]`. This might be useful in race condition attacks.
 
-## MacOS Process Abuse
+## macOS Process Abuse
 
-MacOS, like any other operating system, provides a variety of methods and mechanisms for **processes to interact, communicate, and share data**. While these techniques are essential for efficient system functioning, they can also be abused by threat actors to **perform malicious activities**.
+macOS provides many mechanisms for **processes to interact, communicate, and share data**. Although these mechanisms are essential to normal system operation, attackers can abuse them for injection, code execution, or data access.
 
 ### Library Injection
 
@@ -267,11 +267,11 @@ Note that executables compiled with **`pyinstaller`** won't use these environmen
 
 ### Shield
 
-[**Shield**](https://github.com/theevilbit/Shield) is an open source **EndpointSecurity**-based application that detects and blocks process injection. It is a good reference for which signals are actually observable from ES, since it alerts on:<sup>[[1]](#references)</sup>
+[**Shield**](https://github.com/theevilbit/Shield) is an open-source **EndpointSecurity**-based application that detects and blocks process injection. It is a good reference for which signals are observable through Endpoint Security, since it alerts on:<sup>[[1]](#references)</sup><sup>[[2]](#references)</sup>
 
 - **Injection environment variables** on process exec: `DYLD_INSERT_LIBRARIES`, `CFNETWORK_LIBRARY_PATH`, `RAWCAMERA_BUNDLE_PATH` and `ELECTRON_RUN_AS_NODE`.
 - **`task_for_pid`** calls — one process asking for another's task port, which is the prerequisite for injecting into it.
-- **Electron debugging arguments** — `--inspect`, `--inspect-brk` and `--remote-debugging-port`, which start an Electron app in debug mode and let anyone attach and run code in it.
+- **Electron debugging arguments** — `--inspect`, `--inspect-brk` and `--remote-debugging-port`, which start an Electron app in debug mode and let anyone attach and run code in it.<sup>[[3]](#references)</sup>
 - **Symlink/hardlink creation across privilege levels** — the classic "plant a link as a normal user, point it at a privileged location" primitive. Note that **symlinks can be alerted on but not blocked**: EndpointSecurity does not expose the link destination before creation.
 
 ### Calls made by other processes
@@ -288,4 +288,3 @@ Note that to call that function you need to be **the same uid** as the one runni
 - [4] [Scott Knight - Detecting task modifications](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

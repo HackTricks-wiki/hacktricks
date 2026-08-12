@@ -61,19 +61,14 @@ Access the official doc in [Volatility command reference](https://github.com/vol
 
 ### A note on “list” vs. “scan” plugins
 
-Volatility has two main approaches to plugins, which are sometimes reflected in their names. “list” plugins will try to navigate through Windows Kernel structures to retrieve information like processes (locate and walk the linked list of `_EPROCESS` structures in memory), OS handles (locating and listing the handle table, dereferencing any pointers found, etc). They more or less behave like the Windows API would if requested to, for example, list processes.
-
-That makes “list” plugins pretty fast, but just as vulnerable as the Windows API to manipulation by malware. For instance, if malware uses DKOM to unlink a process from the `_EPROCESS` linked list, it won’t show up in the Task Manager and neither will it in the pslist.
-
-“scan” plugins, on the other hand, will take an approach similar to carving the memory for things that might make sense when dereferenced as specific structures. `psscan` for instance will read the memory and try to make`_EPROCESS` objects out of it (it uses pool-tag scanning, which is searching for 4-byte strings that indicate the presence of a structure of interest). The advantage is that it can dig up processes that have exited, and even if malware tampers with the `_EPROCESS` linked list, the plugin will still find the structure lying around in memory (since it still needs to exist for the process to run). The downfall is that “scan” plugins are a bit slower than “list” plugins, and can sometimes yield false positives (a process that exited too long ago and had parts of its structure overwritten by other operations).
-
-From: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)<sup>[[6]](#references)</sup>
+`list` plugins walk kernel-maintained structures, so they are fast but may miss objects that malware unlinks. `scan` plugins such as `psscan` search memory for object signatures; they can recover terminated or unlinked processes, but are slower and can produce false positives when residual structures are damaged.<sup>[[8]](#references)</sup>
 
 ## OS Profiles
 
 ### Volatility3
 
-As explained inside the readme you need to put the **symbol table of the OS** you want to support inside _volatility3/volatility/symbols_.\
+Volatility 3 requires symbol tables for the target operating system. The project README lists Windows, Mac, and Linux packs; place them in `volatility3/symbols` or in a `symbols` directory beside the executable. Windows symbols that are missing may be fetched and generated automatically, while Mac and Linux tables may need to be produced separately.<sup>[[9]](#references)</sup>
+
 Symbol table packs for the various operating systems are available for **download** at:
 
 - [https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip)
@@ -121,9 +116,9 @@ volatility kdbgscan -f file.dmp
 
 #### **Differences between imageinfo and kdbgscan**
 
-[**From here**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): As opposed to imageinfo which simply provides profile suggestions, **kdbgscan** is designed to positively identify the correct profile and the correct KDBG address (if there happen to be multiple). This plugin scans for the KDBGHeader signatures linked to Volatility profiles and applies sanity checks to reduce false positives. The verbosity of the output and the number of sanity checks that can be performed depends on whether Volatility can find a DTB, so if you already know the correct profile (or if you have a profile suggestion from imageinfo), then make sure you use it from .<sup>[[1]](#references)</sup>
+[Andrea Fortuna's image-identification notes](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/) explain that `imageinfo` produces profile suggestions, while `kdbgscan` scans for KDBG signatures and applies sanity checks to identify candidate profiles and KDBG addresses. Its output depends in part on whether Volatility can locate a DTB, so pass a known or suggested profile when running it.<sup>[[1]](#references)</sup>
 
-Always take a look at the **number of processes that kdbgscan has found**. Sometimes imageinfo and kdbgscan can find **more than one** suitable **profile** but only the **valid one will have some process related** (This is because to extract processes the correct KDBG address is needed)<sup>[[1]](#references)</sup>
+When multiple candidates are returned, compare their process and module counts: a candidate with zero processes or modules is less credible than one with populated lists. Treat this as a sanity check rather than proof that a profile is correct.<sup>[[1]](#references)</sup>
 
 ```bash
 # GOOD
@@ -139,7 +134,7 @@ PsLoadedModuleList            : 0xfffff80001197ac0 (0 modules)
 
 #### KDBG
 
-The **kernel debugger block**, referred to as **KDBG** by Volatility, is crucial for forensic tasks performed by Volatility and various debuggers. Identified as `KdDebuggerDataBlock` and of the type `_KDDEBUGGER_DATA64`, it contains essential references like `PsActiveProcessHead`. This specific reference points to the head of the process list, enabling the listing of all processes, which is fundamental for thorough memory analysis.<sup>[[2]](#references)</sup>
+`KdDebuggerDataBlock`, known to Volatility as KDBG, is a `_KDDEBUGGER_DATA64` structure that includes `PsActiveProcessHead`, the head of the process list used for process enumeration.<sup>[[2]](#references)</sup>
 
 ## OS Information
 
@@ -431,7 +426,7 @@ volatility --profile=Win7SP1x86_23418 yarascan -Y "https://" -p 3692,3840,3976,3
 
 ### UserAssist
 
-**Windows** keeps track of programs you run using a feature in the registry called **UserAssist keys**. These keys record how many times each program is executed and when it was last run.<sup>[[3]](#references)</sup>
+`UserAssist` registry values record programs launched through Windows Explorer, including execution counts and last-run timestamps; command-line launches are not recorded in these keys.<sup>[[3]](#references)</sup>
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -632,7 +627,7 @@ volatility --profile=Win7SP1x86_23418 mftparser -f file.dmp
 {{#endtab}}
 {{#endtabs}}
 
-The **NTFS file system** uses a critical component known as the _master file table_ (MFT). This table includes at least one entry for every file on a volume, covering the MFT itself too. Vital details about each file, such as **size, timestamps, permissions, and actual data**, are encapsulated within the MFT entries or in areas external to the MFT but referenced by these entries. More details can be found in the [official documentation](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table).<sup>[[4]](#references)</sup>
+On NTFS, the MFT has at least one entry per file on the volume, including itself. File metadata and contents are stored in MFT entries or in locations those entries describe; see the [Microsoft documentation](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table).<sup>[[4]](#references)</sup>
 
 ### SSL Keys/Certs
 
@@ -900,7 +895,7 @@ volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
 volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 ```
 
-The **Master Boot Record (MBR)** plays a crucial role in managing the logical partitions of a storage medium, which are structured with different [file systems](https://en.wikipedia.org/wiki/File_system). It not only holds partition layout information but also contains executable code acting as a boot loader. This boot loader either directly initiates the OS's second-stage loading process (see [second-stage boot loader](https://en.wikipedia.org/wiki/Second-stage_boot_loader)) or works in harmony with the [volume boot record](https://en.wikipedia.org/wiki/Volume_boot_record) (VBR) of each partition. For in-depth knowledge, refer to the [MBR Wikipedia page](https://en.wikipedia.org/wiki/Master_boot_record).<sup>[[5]](#references)</sup>
+On BIOS-based systems, the MBR at sector 0 contains master boot code and the partition table. Microsoft documents that `bootsect /mbr` updates the code without changing that table.<sup>[[7]](#references)</sup>
 
 ## References
 
@@ -910,5 +905,8 @@ The **Master Boot Record (MBR)** plays a crucial role in managing the logical pa
 - [4] [Master File Table (Local File Systems) - Win32 apps](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table)
 - [5] [UEFI-based PC, protective MBR: what is it? - Microsoft Community](https://answers.microsoft.com/en-us/windows/forum/all/uefi-based-pc-protective-mbr-what-is-it/0fc7b558-d8d4-4a7d-bae2-395455bb19aa)
 - [6] [Tutorial: Volatility plugins for malware analysis](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
+- [7] [Bootsect Command-Line Options](https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/bootsect-command-line-options?view=windows-11)
+- [8] [Tutorial - Volatility plugins & malware analysis](https://tomchop.me/posts/volatility-plugin-malware-analysis/)
+- [9] [Volatility 3 README](https://github.com/volatilityfoundation/volatility3/blob/develop/README.md)
 
 {{#include ../../../banners/hacktricks-training.md}}

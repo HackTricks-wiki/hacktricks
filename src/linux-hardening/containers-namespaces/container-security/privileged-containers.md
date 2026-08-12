@@ -119,7 +119,7 @@ protections/selinux.md
 
 One of the big consequences of `--privileged` is that procfs and sysfs protections become much weaker. That can expose host-facing kernel interfaces that are normally masked or mounted read-only.
 
-A classic example is `core_pattern`:
+A classic example is `core_pattern`:<sup>[[1]](#references)</sup>
 
 ```bash
 [ -w /proc/sys/kernel/core_pattern ] || exit 1
@@ -338,4 +338,9 @@ protections/namespaces/pid-namespace.md
 {{#ref}}
 protections/namespaces/network-namespace.md
 {{#endref}}
+
+## References
+
+- [1] [Escaping privileged containers for fun](https://pwning.systems/posts/escaping-containers-for-fun/)
+
 {{#include ../../../banners/hacktricks-training.md}}

@@ -7,9 +7,9 @@
 A homograph (aka homoglyph) attack abuses the fact that many **Unicode code points from non-Latin scripts are visually identical or extremely similar to ASCII characters**. By replacing one or more Latin characters with their look-alike counterparts, an attacker can craft:
 
 * Display names, subjects or message bodies that look legitimate to the human eye but bypass keyword-based detections.
-* Domains, sub-domains or URL paths that fool victims into believing they are visiting a trusted site.
+* Domains, sub-domains or URL paths that fool victims into believing they are visiting a trusted site.<sup>[[1]](#references)</sup>
 
-Because every glyph is identified internally by its **Unicode code point**, a single substituted character is enough to defeat naïve string comparisons (e.g., `"Παypal.com"` vs. `"Paypal.com"`).
+Because every glyph is identified internally by its **Unicode code point**, a single substituted character is enough to defeat naïve string comparisons (e.g., `"Παypal.com"` vs. `"Paypal.com"`).<sup>[[1]](#references)[[3]](#references)</sup>
 
 ## Typical Phishing Workflow
 
@@ -19,9 +19,11 @@ Because every glyph is identified internally by its **Unicode code point**, a si
    * Sender display name (e.g., `Ηеlрdеѕk`)
    * Subject line (`Urgеnt Аctіon Rеquіrеd`)
    * Hyperlink text or fully qualified domain name
-4. **Redirect chain** – Victim is bounced through seemingly benign websites or URL shorteners before landing on the malicious host that harvests credentials / delivers malware.
+4. **Redirect chain** – Victim is bounced through seemingly benign websites or URL shorteners before landing on the malicious host that harvests credentials / delivers malware.<sup>[[1]](#references)</sup>
 
 ## Unicode Ranges Commonly Abused
+
+The following examples are Unicode blocks that contain characters commonly used to create cross-script look-alikes.<sup>[[2]](#references)[[3]](#references)</sup>
 
 | Script | Range | Example glyph | Looks like |
 |--------|-------|---------------|------------|
@@ -32,7 +34,7 @@ Because every glyph is identified internally by its **Unicode code point**, a si
 | Armenian | U+0530-058F | `օ` (U+0585) | Latin `o` |
 | Cherokee | U+13A0-13FF | `Ꭲ` (U+13A2) | Latin `T` |
 
-> Tip: Full Unicode charts are available at [unicode.org](https://home.unicode.org/).
+> Tip: Use the Unicode code charts to look up blocks and code points.
 
 ## Detection Techniques
 
@@ -41,8 +43,8 @@ Because every glyph is identified internally by its **Unicode code point**, a si
 Phishing emails aimed at an English-speaking organisation should rarely mix characters from multiple scripts.  A simple but effective heuristic is to:
 
 1. Iterate each character of the inspected string.
-2. Map the code point to its Unicode block.
-3. Raise an alert if more than one script is present **or** if non-Latin scripts appear where they are not expected (display name, domain, subject, URL, etc.).
+2. Map the code point to its script name or Unicode block.
+3. Raise an alert if more than one script is present **or** if non-Latin scripts appear where they are not expected (display name, domain, subject, URL, etc.).<sup>[[3]](#references)</sup>
 
 Python proof-of-concept:
 
@@ -71,18 +73,18 @@ for field, value in SUSPECT_FIELDS.items():
 
 ### 2. Punycode Normalisation (Domains)
 
-Internationalised Domain Names (IDNs) are encoded with **punycode** (`xn--`). Converting every hostname to punycode and then back to Unicode allows matching against a whitelist or performing similarity checks (e.g., Levenshtein distance) **after** the string has been normalised.
+Internationalised Domain Names (IDNs) have a Unicode form and an ASCII-compatible **Punycode** form prefixed with `xn--`. Convert hostnames to the IDNA/Punycode form before allow-listing or comparing them, while retaining the Unicode form for display.<sup>[[6]](#references)</sup>
 
 ```python
 import idna
-hostname = "Ρаypal.com"   # Greek Rho + Cyrillic a
+hostname = "ρаypal.com"   # Greek small rho + Cyrillic small a
 puny = idna.encode(hostname).decode()
-print(puny)  # xn--yl8hpyal.com
+print(puny)  # xn--ypal-9nd08d.com
 ```
 
 ### 3. Homoglyph Dictionaries / Algorithms
 
-Tools such as **dnstwist** (`--homoglyph`) or **urlcrazy** can enumerate visually-similar domain permutations and are useful for proactive takedown / monitoring.
+Tools such as **dnstwist** (`--fuzzers homoglyph`) or **urlcrazy** can enumerate visually-similar domain permutations and are useful for proactive takedown / monitoring.<sup>[[4]](#references)[[5]](#references)</sup>
 
 ## Prevention & Mitigation
 
@@ -102,7 +104,10 @@ These samples originate from Unit 42 research (July 2025) and illustrate how hom
 ## References
 
 - [1] [The Homograph Illusion: Not Everything Is As It Seems](https://unit42.paloaltonetworks.com/homograph-attacks/)
-- [2] [Unicode Character Database](https://home.unicode.org/)
-- [3] [dnstwist – domain permutation engine](https://github.com/elceef/dnstwist)
+- [2] [Unicode Character Code Charts](https://www.unicode.org/charts/)
+- [3] [Unicode Technical Standard #39: Unicode Security Mechanisms](https://unicode.org/reports/tr39/)
+- [4] [dnstwist – domain permutation engine](https://github.com/elceef/dnstwist)
+- [5] [URLCrazy – domain typo and variation generator](https://github.com/urbanadventurer/urlcrazy)
+- [6] [RFC 5890: Internationalized Domain Names for Applications (IDNA): Definitions and Document Framework](https://www.rfc-editor.org/rfc/rfc5890)
 
 {{#include ../../banners/hacktricks-training.md}}

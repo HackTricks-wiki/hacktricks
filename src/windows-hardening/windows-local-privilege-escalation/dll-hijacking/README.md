@@ -18,6 +18,10 @@ Several methods are employed for DLL hijacking, each with its effectiveness depe
 5. **WinSxS DLL Replacement**: Substituting the legitimate DLL with a malicious counterpart in the WinSxS directory, a method often associated with DLL side-loading.
 6. **Relative Path DLL Hijacking**: Placing the malicious DLL in a user-controlled directory with the copied application, resembling Binary Proxy Execution techniques.
 
+{{#ref}}
+windows-cpython-build-landmark-sys-path-hijacking.md
+{{#endref}}
+
 
 ### AppDomainManager hijacking (`<exe>.config` + attacker assembly)
 
@@ -132,11 +136,11 @@ and just show the **File System Activity**:
 ![Common Techniques - Finding missing Dlls: and just show the File System Activity](<../../../images/image (153).png>)
 
 If you are looking for **missing dlls in general** you **leave** this running for some **seconds**.\
-If you are looking for a **missing dll inside an specific executable** you should set **another filter like "Process Name" "contains" `<exec name>`, execute it, and stop capturing events**.<sup>[[9]](#references)</sup>
+If you are looking for a **missing DLL inside a specific executable**, set another filter such as **"Process Name" "contains" `<exec name>`**, execute it, and stop capturing events.<sup>[[9]](#references)</sup>
 
 ## Exploiting Missing Dlls
 
-In order to escalate privileges, the best chance we have is to be able to **write a dll that a privilege process will try to load** in some of **place where it is going to be searched**. Therefore, we will be able to **write** a dll in a **folder** where the **dll is searched before** the folder where the **original dll** is (weird case), or we will be able to **write on some folder where the dll is going to be searched** and the original **dll doesn't exist** on any folder.
+To escalate privileges, look for a **DLL that a privileged process tries to load** from a location you can write to. This can happen when you control a directory searched before the directory containing the legitimate DLL, or when the requested DLL does not exist and you can write to one of the searched directories.
 
 ### Dll Search Order
 
@@ -158,7 +162,7 @@ That is the **default** search order with **SafeDllSearchMode** enabled. When it
 
 If [**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa) function is called with **LOAD_WITH_ALTERED_SEARCH_PATH** the search begins in the directory of the executable module that **LoadLibraryEx** is loading.
 
-Finally, note that **a dll could be loaded indicating the absolute path instead just the name**. In that case that dll is **only going to be searched in that path** (if the dll has any dependencies, they are going to be searched as just loaded by name).
+Finally, a DLL can be loaded by absolute path rather than by name. In that case, Windows looks only at that path for the DLL itself; dependencies requested by name still follow the applicable search order.
 
 There are other ways to alter the ways to alter the search order but I'm not going to explain them here.
 
@@ -339,8 +343,8 @@ Certain exceptions to the standard DLL search order are noted in Windows documen
 - Identify a process that operates or will operate under **different privileges** (horizontal or lateral movement), which is **lacking a DLL**.
 - Ensure **write access** is available for any **directory** in which the **DLL** will be **searched for**. This location might be the directory of the executable or a directory within the system path.
 
-Yeah, the requisites are complicated to find as **by default it's kind of weird to find a privileged executable missing a dll** and it's even **more weird to have write permissions on a system path folder** (you can't by default). But, in misconfigured environments this is possible.\
-In the case you are lucky and you find yourself meeting the requirements, you could check the [UACME](https://github.com/hfiref0x/UACME) project. Even if the **main goal of the project is bypass UAC**, you may find there a **PoC** of a Dll hijaking for the Windows version that you can use (probably just changing the path of the folder where you have write permissions).
+These prerequisites are uncommon by default: privileged executables do not usually have missing DLL dependencies, and standard users normally cannot write to system search-path directories. Misconfigured environments can still expose both conditions.\
+If the requirements are met, check the [UACME](https://github.com/hfiref0x/UACME) project. Although its main goal is UAC bypass, it contains DLL-hijacking PoCs for specific Windows versions that can often be adapted to the writable directory you found.
 
 Note that you can **check your permissions in a folder** doing:<sup>[[5]](#references)</sup>
 
@@ -409,7 +413,7 @@ msfvenom -p windows/adduser USER=privesc PASS=Attacker@123 -f dll -o msf.dll
 
 ### Your own
 
-Note that in several cases the Dll that you compile must **export several functions** that are going to be loaded by the victim process, if these functions doesn't exist the **binary won't be able to load** them and the **exploit will fail**.
+In many cases, the DLL you compile must **export every function imported by the victim process**. If a required export is missing, the binary cannot resolve it and the exploit fails.
 
 <details>
 <summary>C DLL template (Win10)</summary>

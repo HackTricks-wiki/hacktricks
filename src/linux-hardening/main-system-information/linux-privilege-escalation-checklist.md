@@ -14,6 +14,7 @@
 - [ ] Check the [**PATH**](../linux-basics/linux-privilege-escalation/index.html#path), any **writable folder**?
 - [ ] Check [**env variables**](../linux-basics/linux-privilege-escalation/index.html#env-info), any sensitive detail?
 - [ ] Search for [**kernel exploits**](../linux-basics/linux-privilege-escalation/index.html#kernel-exploits) **using scripts** (DirtyCow?)
+- [ ] Before running a kernel PoC, verify its **actual prerequisites**, not only `uname -r`: architecture, required `CONFIG_*` options/modules, namespace creation and active mitigations. For example, test user/network namespace availability with `unshare -Urn true`; modern netfilter exploits may require `CONFIG_USER_NS`, unprivileged user namespaces and `CONFIG_NF_TABLES`.<sup>[[3]](#references)</sup>
 - [ ] **Check** if the [**sudo version** is vulnerable](../linux-basics/linux-privilege-escalation/index.html#sudo-version)
 - [ ] [**Dmesg** signature verification failed](../linux-basics/linux-privilege-escalation/index.html#dmesg-signature-verification-failed)
 - [ ] Review [**kernel module and module-loading misconfigurations**](kernel-modules-and-modprobe.md#kernel-module-and-module-loading-misconfigurations): `insmod`, `modinfo`, `lsmod`, `dmesg`, signature enforcement and `modules_disabled`.
@@ -32,6 +33,7 @@
 
 - [ ] **Check for**[ **useful software**](../linux-basics/linux-privilege-escalation/index.html#useful-software) **installed**
 - [ ] **Check for** [**vulnerable software**](../linux-basics/linux-privilege-escalation/index.html#vulnerable-software-installed) **installed**
+- [ ] On Debian/Ubuntu, check whether **needrestart interpreter scanning** is installed/enabled: `dpkg-query -W needrestart 2>/dev/null; grep -R interpscan /etc/needrestart 2>/dev/null`. Vulnerable builds crossed the privilege boundary by reusing attacker-controlled `PYTHONPATH`/`RUBYLIB`, racing `/proc/<pid>/exe`, or scanning attacker-controlled Perl paths when APT or `unattended-upgrades` invoked needrestart as root.<sup>[[4]](#references)</sup>
 
 ### [Processes](../linux-basics/linux-privilege-escalation/index.html#processes)
 
@@ -53,6 +55,7 @@
 
 - [ ] Any **writable .service** file?
 - [ ] Any **writable binary** executed by a **service**?
+- [ ] Any writable **helper, config or environment file referenced by a root unit** (`ExecStartPre=`, `ExecStartPost=`, `EnvironmentFile=`)? Inspect the merged unit with `systemctl cat <unit>` and review [service/socket file abuse](../interesting-files-permissions/write-to-root.md).
 - [ ] Any **writable folder in systemd PATH**?
 - [ ] Any **writable systemd unit drop-in** in `/etc/systemd/system/<unit>.d/*.conf` that can override `ExecStart`/`User`?<sup>[[2]](#references)</sup>
 
@@ -65,6 +68,7 @@
 - [ ] Any **writable .socket** file?
 - [ ] Can you **communicate with any socket**?
 - [ ] **HTTP sockets** with interesting info?
+- [ ] Can you access a [**container-runtime or node-agent API**](../containers-namespaces/container-security/runtime-api-and-daemon-exposure.md) such as `docker.sock`, `containerd.sock`, `crio.sock`, `podman.sock`, `buildkitd.sock` or a kubelet endpoint? Test the raw HTTP/gRPC API even when its usual CLI is absent.
 
 ### [D-Bus](../linux-basics/linux-privilege-escalation/index.html#d-bus)
 
@@ -92,7 +96,7 @@
 ### [SUDO and SUID commands](../linux-basics/linux-privilege-escalation/index.html#sudo-and-suid)
 
 - [ ] Can you execute **any command with sudo**? Can you use it to READ, WRITE or EXECUTE anything as root? ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] If `sudo -l` allows `sudoedit`, check for **sudoedit argument injection** (CVE-2023-22809) via `SUDO_EDITOR`/`VISUAL`/`EDITOR` to edit arbitrary files on vulnerable versions (`sudo -V` < 1.9.12p2). Example: `SUDO_EDITOR="vim -- /etc/sudoers" sudoedit /etc/hosts`<sup>[[1]](#references)</sup>
+- [ ] If `sudo -l` allows `sudoedit`, check for **sudoedit argument injection** (CVE-2023-22809) via `SUDO_EDITOR`/`VISUAL`/`EDITOR` to edit arbitrary files on vulnerable versions (`sudo -V` < 1.9.12p2). Example: `SUDO_EDITOR="vim -- /etc/sudoers" sudoedit /etc/hosts`.<sup>[[1]](#references)</sup>
 - [ ] Is any **exploitable SUID binary**? ([**GTFOBins**](https://gtfobins.github.io))
 - [ ] Are [**sudo** commands **limited** by **path**? can you **bypass** the restrictions](../linux-basics/linux-privilege-escalation/index.html#sudo-execution-bypassing-paths)?
 - [ ] [**Sudo/SUID binary without path indicated**](../linux-basics/linux-privilege-escalation/index.html#sudo-command-suid-binary-without-command-path)?
@@ -154,6 +158,8 @@
 
 ## References
 
-- [Sudo advisory: sudoedit arbitrary file edit](https://www.sudo.ws/security/advisories/sudoedit_any/)
-- [Oracle Linux docs: systemd drop-in configuration](https://docs.oracle.com/en/operating-systems/oracle-linux/8/systemd/ModifyingsystemdConfigurationFiles.html)
+- [1] [Sudo advisory: sudoedit arbitrary file edit](https://www.sudo.ws/security/advisories/sudoedit_any/)
+- [2] [Oracle Linux docs: systemd drop-in configuration](https://docs.oracle.com/en/operating-systems/oracle-linux/8/systemd/ModifyingsystemdConfigurationFiles.html)
+- [3] [Notselwyn: CVE-2024-1086 exploit requirements and research](https://github.com/Notselwyn/CVE-2024-1086)
+- [4] [Qualys Security Advisory: LPEs in needrestart](https://www.qualys.com/2024/11/19/needrestart/needrestart.txt)
 {{#include ../../banners/hacktricks-training.md}}

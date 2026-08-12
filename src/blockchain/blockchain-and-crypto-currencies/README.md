@@ -41,8 +41,6 @@ Privacy attacks, such as **Common Input Ownership** and **UTXO Change Address De
 
 Methods include cash trades, mining, and using mixers. **CoinJoin** mixes multiple transactions to complicate traceability, while **PayJoin** disguises CoinJoins as regular transactions for heightened privacy.
 
-# Bitcoin Privacy Atacks
-
 # Summary of Bitcoin Privacy Attacks
 
 In the world of Bitcoin, the privacy of transactions and the anonymity of users are often subjects of concern. Here's a simplified overview of several common methods through which attackers can compromise Bitcoin privacy.<sup>[[6]](#references)</sup>
@@ -122,7 +120,7 @@ By using a mixing service, a user can **send bitcoins** and receive **different 
 
 Example transactions that may have used CoinJoin include `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` and `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`.
 
-For more information, visit [CoinJoin](https://coinjoin.io/en). For a similar service on Ethereum, check out [Tornado Cash](https://tornado.cash), which anonymizes transactions with funds from miners.
+For more information, visit [CoinJoin](https://coinjoin.io/en). For an Ethereum smart-contract mixer that separates deposits from later withdrawals, see [Tornado Cash](https://tornado.cash).
 
 ## PayJoin
 
@@ -162,17 +160,17 @@ To safeguard privacy, it's vital to use a new address for every transaction. Reu
 
 # **Monero: A Beacon of Anonymity**
 
-Monero addresses the need for absolute anonymity in digital transactions, setting a high standard for privacy.
+Monero is designed to prioritize transaction privacy.
 
 # **Ethereum: Gas and Transactions**
 
 ## **Understanding Gas**
 
-Gas measures the computational effort needed to execute operations on Ethereum, priced in **gwei**. For example, a transaction costing 2,310,000 gwei (or 0.00231 ETH) involves a gas limit and a base fee, with a tip to incentivize miners. Users can set a max fee to ensure they don't overpay, with the excess refunded.<sup>[[5]](#references)</sup>
+Gas measures the computational effort needed to execute operations on Ethereum, priced in **gwei**. For example, a transaction costing 2,310,000 gwei (or 0.00231 ETH) involves a gas limit and a base fee, with a priority fee to incentivize validator inclusion. Users can set a max fee to ensure they don't overpay, with the excess refunded.<sup>[[5]](#references)</sup>
 
 ## **Executing Transactions**
 
-Transactions in Ethereum involve a sender and a recipient, which can be either user or smart contract addresses. They require a fee and must be mined. Essential information in a transaction includes the recipient, sender's signature, value, optional data, gas limit, and fees. Notably, the sender's address is deduced from the signature, eliminating the need for it in the transaction data.<sup>[[4]](#references)</sup>
+Transactions in Ethereum involve a sender and a recipient, which can be either user or smart contract addresses. They require a fee and must be included in a block. Essential information in a transaction includes the recipient, sender's signature, value, optional data, gas limit, and fees. Notably, the sender's address is deduced from the signature, eliminating the need for it in the transaction data.<sup>[[4]](#references)</sup>
 
 These practices and mechanisms are foundational for anyone looking to engage with cryptocurrencies while prioritizing privacy and security.
 
@@ -233,7 +231,7 @@ If a field such as `op.kind` is an enum and an attacker can inject an **out-of-r
 
 ### Jump-table / UB counter bypass
 
-If Rust lowers a large `match` into a **jump table**, an invalid enum discriminant may produce **undefined control flow**. A dangerous pattern is:
+If Rust lowers a large `match` into a **jump table**, an invalid enum discriminant may produce **undefined control flow**. A dangerous pattern is:<sup>[[7]](#references)[[9]](#references)</sup>
 
 1. One `match` updates **security-critical counters/constraints**.
 2. A second `match` performs the **real instruction semantics**.
@@ -252,7 +250,7 @@ Review checklist:
 
 Do not just validate memory safety; also validate the **semantic rules** that the proof is meant to enforce.
 
-For reversible/quantum-like instruction sets, ensure operands that must be distinct are actually constrained to be distinct. A Toffoli/CCX-like operation implemented as:
+For reversible/quantum-like instruction sets, ensure operands that must be distinct are actually constrained to be distinct. A Toffoli/CCX-like operation implemented as:<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```rust
 let v = cond & self.qubit(op.q_control1) & self.qubit(op.q_control2);
@@ -304,7 +302,7 @@ defi-amm-virtual-balance-cache-exploitation.md
 - [5] [Gas and fees | ethereum.org](https://ethereum.org/en/developers/docs/gas/)
 - [6] [Privacy - Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy#Forced_address_reuse)
 - [7] [Trail of Bits - We beat Google's zero-knowledge proof of quantum cryptanalysis](https://blog.trailofbits.com/2026/04/17/we-beat-googles-zero-knowledge-proof-of-quantum-cryptanalysis/)
-- [8] [Google patched paper version](https://arxiv.org/abs/2603.28846v2)
+- [8] [Securing Elliptic Curve Cryptocurrencies against Quantum Vulnerabilities: Resource Estimates and Mitigations (patched version)](https://arxiv.org/abs/2603.28846v2)
 - [9] [Trail of Bits proof-of-concept repository](https://github.com/trailofbits/quantum-zk-proof-poc)
 
 {{#include ../../banners/hacktricks-training.md}}

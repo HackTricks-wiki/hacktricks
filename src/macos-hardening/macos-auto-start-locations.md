@@ -80,7 +80,7 @@ There are cases where an **agent needs to be executed before the user logins**, 
 > New Daemons or Agents config files will be **loaded after next reboot or using** `launchctl load <target.plist>` It's **also possible to load .plist files without that extension** with `launchctl -F <file>` (however those plist files won't be automatically loaded after reboot).\
 > It's also possible to **unload** with `launchctl unload <target.plist>` (the process pointed by it will be terminated),
 >
-> To **ensure** that there isn't **anything** (like an override) **preventing** an **Agent** or **Daemon** **from** **running** run: `sudo launchctl load -w /System/Library/LaunchDaemos/com.apple.smdb.plist`
+> To **ensure** that there isn't **anything** (like an override) **preventing** an **Agent** or **Daemon** **from** **running**, run: `sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.smdb.plist`
 
 List all the agents and daemons loaded by the current user:
 
@@ -130,8 +130,8 @@ One of the first things `launchd` would do is to **start** all the **daemons** l
 
 ### shell startup files
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0001/](https://theevilbit.github.io/beyond/beyond_0001/)\
-Writeup (xterm): [https://theevilbit.github.io/beyond/beyond_0018/](https://theevilbit.github.io/beyond/beyond_0018/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0001/](https://theevilbit.github.io/beyond/beyond_0001/)<sup>[[2]](#references)</sup>\
+Writeup (xterm): [https://theevilbit.github.io/beyond/beyond_0018/](https://theevilbit.github.io/beyond/beyond_0018/)<sup>[[3]](#references)</sup>
 
 - Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
 - TCC Bypass: [✅](https://emojipedia.org/check-mark-button)
@@ -171,9 +171,9 @@ echo "touch /tmp/hacktricks" >> ~/.zshrc
 ### Re-opened Applications
 
 > [!CAUTION]
-> Configuring the indicated exploitation and loging-out and loging-in or even rebooting didn't work for me to execute the app. (The app wasn't being executed, maybe it needs to be running when these actions are performed)
+> Configuring the indicated exploitation and logging out and back in, or even rebooting, did not execute the app in testing. The app may need to be running when these actions are performed.
 
-**Writeup**: [https://theevilbit.github.io/beyond/beyond_0021/](https://theevilbit.github.io/beyond/beyond_0021/)
+**Writeup**: [https://theevilbit.github.io/beyond/beyond_0021/](https://theevilbit.github.io/beyond/beyond_0021/)<sup>[[4]](#references)</sup>
 
 - Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
@@ -213,7 +213,7 @@ To **add an application to this list** you can use:
 
 ### Terminal Preferences
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0020/](https://theevilbit.github.io/beyond/beyond_0020/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0020/](https://theevilbit.github.io/beyond/beyond_0020/)<sup>[[5]](#references)</sup>
 
 - Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
 - TCC bypass: [✅](https://emojipedia.org/check-mark-button)
@@ -315,8 +315,8 @@ You could also use the extensions **`.command`**, **`.tool`**, with regular shel
 
 ### Audio Plugins
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0013/](https://theevilbit.github.io/beyond/beyond_0013/)\
-Writeup: [https://posts.specterops.io/audio-unit-plug-ins-896d3434a882](https://posts.specterops.io/audio-unit-plug-ins-896d3434a882)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0013/](https://theevilbit.github.io/beyond/beyond_0013/)<sup>[[6]](#references)</sup>\
+Writeup: [https://posts.specterops.io/audio-unit-plug-ins-896d3434a882](https://posts.specterops.io/audio-unit-plug-ins-896d3434a882)<sup>[[7]](#references)</sup>
 
 - Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
 - TCC bypass: [🟠](https://emojipedia.org/large-orange-circle)
@@ -342,7 +342,7 @@ According to the previous writeups it's possible to **compile some audio plugins
 
 ### QuickLook Plugins
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0012/](https://theevilbit.github.io/beyond/beyond_0012/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0012/](https://theevilbit.github.io/beyond/beyond_0012/)<sup>[[8]](#references)</sup>
 
 - Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
 - TCC bypass: [🟠](https://emojipedia.org/large-orange-circle)
@@ -367,7 +367,7 @@ It's possible to compile your own QuickLook plugin, place it in one of the previ
 > [!CAUTION]
 > This didn't work for me, neither with the user LoginHook nor with the root LogoutHook
 
-**Writeup**: [https://theevilbit.github.io/beyond/beyond_0022/](https://theevilbit.github.io/beyond/beyond_0022/)
+**Writeup**: [https://theevilbit.github.io/beyond/beyond_0022/](https://theevilbit.github.io/beyond/beyond_0022/)<sup>[[9]](#references)</sup>
 
 - Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
@@ -419,7 +419,7 @@ The root user one is stored in **`/private/var/root/Library/Preferences/com.appl
 
 ### Cron
 
-**Writeup**: [https://theevilbit.github.io/beyond/beyond_0004/](https://theevilbit.github.io/beyond/beyond_0004/)
+**Writeup**: [https://theevilbit.github.io/beyond/beyond_0004/](https://theevilbit.github.io/beyond/beyond_0004/)<sup>[[10]](#references)</sup>
 
 - Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
   - However, you need to be able to execute `crontab` binary
@@ -451,7 +451,7 @@ ls -lR /usr/lib/cron/tabs/ /private/var/at/jobs /etc/periodic/
 
 There you can find the regular **cron** **jobs**, the **at** **jobs** (not very used) and the **periodic** **jobs** (mainly used for cleaning temporary files). The daily periodic jobs can be executed for example with: `periodic daily`.<sup>[[10]](#references)</sup>
 
-To add a **user cronjob programatically** it's possible to use:
+To add a **user cronjob programmatically** it's possible to use:
 
 ```bash
 echo '* * * * * /bin/bash -c "touch /tmp/cron3"' > /tmp/cron
@@ -460,7 +460,7 @@ crontab /tmp/cron
 
 ### iTerm2
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0002/](https://theevilbit.github.io/beyond/beyond_0002/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0002/](https://theevilbit.github.io/beyond/beyond_0002/)<sup>[[11]](#references)</sup>
 
 - Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
 - TCC bypass: [✅](https://emojipedia.org/check-mark-button)
@@ -549,7 +549,7 @@ open /Applications/iTerm.app/Contents/MacOS/iTerm2
 
 ### xbar
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0007/](https://theevilbit.github.io/beyond/beyond_0007/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0007/](https://theevilbit.github.io/beyond/beyond_0007/)<sup>[[12]](#references)</sup>
 
 - Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
   - But xbar must be installed
@@ -575,7 +575,7 @@ chmod +x "$HOME/Library/Application Support/xbar/plugins/a.sh"
 
 ### Hammerspoon
 
-**Writeup**: [https://theevilbit.github.io/beyond/beyond_0008/](https://theevilbit.github.io/beyond/beyond_0008/)
+**Writeup**: [https://theevilbit.github.io/beyond/beyond_0008/](https://theevilbit.github.io/beyond/beyond_0008/)<sup>[[13]](#references)</sup>
 
 - Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
   - But Hammerspoon must be installed
@@ -628,7 +628,7 @@ It allows to create workflows that can execute code when certain conditions are 
 
 ### SSHRC
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0006/](https://theevilbit.github.io/beyond/beyond_0006/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0006/](https://theevilbit.github.io/beyond/beyond_0006/)<sup>[[14]](#references)</sup>
 
 - Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
   - But ssh needs to be enabled and used
@@ -644,7 +644,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0006/](https://theevilbit.g
   - **Trigger**: Login via ssh
 
 > [!CAUTION]
-> To turn ssh on requres Full Disk Access:
+> To turn ssh on requires Full Disk Access:
 >
 > ```bash
 > sudo systemsetup -setremotelogin on
@@ -656,7 +656,7 @@ By default, unless `PermitUserRC no` in `/etc/ssh/sshd_config`, when a user **lo
 
 ### **Login Items**
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0003/](https://theevilbit.github.io/beyond/beyond_0003/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0003/](https://theevilbit.github.io/beyond/beyond_0003/)<sup>[[15]](#references)</sup>
 
 - Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
   - But you need to execute `osascript` with args
@@ -701,7 +701,7 @@ Another options would be to create the files **`.bash_profile`** and **`.zshenv`
 
 ### At
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0014/](https://theevilbit.github.io/beyond/beyond_0014/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0014/](https://theevilbit.github.io/beyond/beyond_0014/)<sup>[[16]](#references)</sup>
 
 - Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
   - But you need to **execute** **`at`** and it must be **enabled**
@@ -792,8 +792,8 @@ If we print the job file, we find that it contains the same information we got u
 
 ### Folder Actions
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0024/](https://theevilbit.github.io/beyond/beyond_0024/)\
-Writeup: [https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d](https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0024/](https://theevilbit.github.io/beyond/beyond_0024/)<sup>[[17]](#references)</sup>\
+Writeup: [https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d](https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d)<sup>[[18]](#references)</sup>
 
 - Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
   - But you need to be able to call `osascript` with arguments to contact **`System Events`** to be able to configure Folder Actions
@@ -903,7 +903,7 @@ Now that we have an empty environment
 
 ### Dock shortcuts
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0027/](https://theevilbit.github.io/beyond/beyond_0027/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0027/](https://theevilbit.github.io/beyond/beyond_0027/)<sup>[[19]](#references)</sup>
 
 - Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
   - But you need to have installed a malicious application inside the system
@@ -985,7 +985,7 @@ killall Dock
 
 ### Color Pickers
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0017](https://theevilbit.github.io/beyond/beyond_0017/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0017](https://theevilbit.github.io/beyond/beyond_0017/)<sup>[[20]](#references)</sup>
 
 - Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
   - A very specific action needs to happen
@@ -1004,7 +1004,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0017](https://theevilbit.gi
 
 **Compile a color picker** bundle with your code (you could use [**this one for example**](https://github.com/viktorstrate/color-picker-plus)) and add a constructor (like in the [Screen Saver section](macos-auto-start-locations.md#screen-saver)) and copy the bundle to `~/Library/ColorPickers`.<sup>[[20]](#references)</sup>
 
-Then, when the color picker is triggered your should should be aswell.
+Then, when the color picker is triggered, your bundle should execute as well.
 
 Note that the binary loading your library has a **very restrictive sandbox**: `/System/Library/Frameworks/AppKit.framework/Versions/C/XPCServices/LegacyExternalColorPickerService-x86_64.xpc/Contents/MacOS/LegacyExternalColorPickerService-x86_64`
 
@@ -1019,8 +1019,8 @@ Note that the binary loading your library has a **very restrictive sandbox**: `/
 
 ### Finder Sync Plugins
 
-**Writeup**: [https://theevilbit.github.io/beyond/beyond_0026/](https://theevilbit.github.io/beyond/beyond_0026/)\
-**Writeup**: [https://objective-see.org/blog/blog_0x11.html](https://objective-see.org/blog/blog_0x11.html)
+**Writeup**: [https://theevilbit.github.io/beyond/beyond_0026/](https://theevilbit.github.io/beyond/beyond_0026/)<sup>[[21]](#references)</sup>\
+**Writeup**: [https://objective-see.org/blog/blog_0x11.html](https://objective-see.org/blog/blog_0x11.html)<sup>[[22]](#references)</sup>
 
 - Useful to bypass sandbox: **No, because you need to execute your own app**
 - TCC bypass: ???
@@ -1042,8 +1042,8 @@ pluginkit -e use -i com.example.InSync.InSync
 
 ### Screen Saver
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0016/](https://theevilbit.github.io/beyond/beyond_0016/)\
-Writeup: [https://posts.specterops.io/saving-your-access-d562bf5bf90b](https://posts.specterops.io/saving-your-access-d562bf5bf90b)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0016/](https://theevilbit.github.io/beyond/beyond_0016/)<sup>[[23]](#references)</sup>\
+Writeup: [https://posts.specterops.io/saving-your-access-d562bf5bf90b](https://posts.specterops.io/saving-your-access-d562bf5bf90b)<sup>[[24]](#references)</sup>
 
 - Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
   - But you will end in a common application sandbox
@@ -1150,7 +1150,7 @@ void custom(int argc, const char **argv) {
 
 ### Spotlight Plugins
 
-writeup: [https://theevilbit.github.io/beyond/beyond_0011/](https://theevilbit.github.io/beyond/beyond_0011/)
+writeup: [https://theevilbit.github.io/beyond/beyond_0011/](https://theevilbit.github.io/beyond/beyond_0011/)<sup>[[25]](#references)</sup>
 
 - Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
   - But you will end in an application sandbox
@@ -1230,21 +1230,21 @@ plutil -p /Library/Spotlight/iBooksAuthor.mdimporter/Contents/Info.plist
 ```
 
 > [!CAUTION]
-> If you check the Plist of other `mdimporter` you might not find the entry **`UTTypeConformsTo`**. Thats because that is a built-in _Uniform Type Identifiers_ ([UTI](https://en.wikipedia.org/wiki/Uniform_Type_Identifier)) and it doesn't need to specify extensions.
+> If you check the Plist of other `mdimporter` you might not find the entry **`UTTypeConformsTo`**. That's because that is a built-in _Uniform Type Identifiers_ ([UTI](https://en.wikipedia.org/wiki/Uniform_Type_Identifier)) and it doesn't need to specify extensions.
 >
 > Moreover, System default plugins always take precedence, so an attacker can only access files that are not otherwise indexed by Apple's own `mdimporters`.
 
 To create your own importer you could start with this project: [https://github.com/megrimm/pd-spotlight-importer](https://github.com/megrimm/pd-spotlight-importer) and then change the name, the **`CFBundleDocumentTypes`** and add **`UTImportedTypeDeclarations`** so it supports the extension you would like to support and refelc them in **`schema.xml`**.\
 Then **change** the code of the function **`GetMetadataForFile`** to execute your payload when a file with the processed extension is created.
 
-Finally **build and copy your new `.mdimporter`** to one of thre previous locations and you can chech whenever it's loaded **monitoring the logs** or checking **`mdimport -L.`**
+Finally, **build and copy your new `.mdimporter`** to one of the three previous locations. You can check whether it is loaded by **monitoring the logs** or running **`mdimport -L`**.
 
 ### ~~Preference Pane~~
 
 > [!CAUTION]
 > It doesn't look like this is working anymore.
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0009/](https://theevilbit.github.io/beyond/beyond_0009/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0009/](https://theevilbit.github.io/beyond/beyond_0009/)<sup>[[26]](#references)</sup>
 
 - Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
   - It needs a specific user action
@@ -1267,7 +1267,7 @@ It doesn't look like this is working anymore.<sup>[[26]](#references)</sup>
 
 ### Periodic
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0019/](https://theevilbit.github.io/beyond/beyond_0019/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0019/](https://theevilbit.github.io/beyond/beyond_0019/)<sup>[[27]](#references)</sup>
 
 - Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
   - But you need to be root
@@ -1334,7 +1334,7 @@ If you manage to write any of the files `/etc/daily.local`, `/etc/weekly.local` 
 ### PAM
 
 Writeup: [Linux Hacktricks PAM](../linux-hardening/software-information/pam-pluggable-authentication-modules.md)\
-Writeup: [https://theevilbit.github.io/beyond/beyond_0005/](https://theevilbit.github.io/beyond/beyond_0005/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0005/](https://theevilbit.github.io/beyond/beyond_0005/)<sup>[[28]](#references)</sup>
 
 - Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
   - But you need to be root
@@ -1393,8 +1393,8 @@ session    required       pam_launchd.so
 
 ### Authorization Plugins
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0028/](https://theevilbit.github.io/beyond/beyond_0028/)\
-Writeup: [https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65](https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0028/](https://theevilbit.github.io/beyond/beyond_0028/)<sup>[[29]](#references)</sup>\
+Writeup: [https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65](https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65)<sup>[[30]](#references)</sup>
 
 - Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
   - But you need to be root and make extra configs
@@ -1464,7 +1464,7 @@ And then the **staff group should have sudo** access (read `/etc/sudoers` to con
 
 ### Man.conf
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0030/](https://theevilbit.github.io/beyond/beyond_0030/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0030/](https://theevilbit.github.io/beyond/beyond_0030/)<sup>[[31]](#references)</sup>
 
 - Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
   - But you need to be root and the user must use man
@@ -1498,7 +1498,7 @@ touch /tmp/manconf
 
 ### Apache2
 
-**Writeup**: [https://theevilbit.github.io/beyond/beyond_0025/](https://theevilbit.github.io/beyond/beyond_0025/)
+**Writeup**: [https://theevilbit.github.io/beyond/beyond_0025/](https://theevilbit.github.io/beyond/beyond_0025/)<sup>[[32]](#references)</sup>
 
 - Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
   - But you need to be root and apache needs to be running
@@ -1543,7 +1543,7 @@ static void myconstructor(int argc, const char **argv)
 
 ### BSM audit framework
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0031/](https://theevilbit.github.io/beyond/beyond_0031/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0031/](https://theevilbit.github.io/beyond/beyond_0031/)<sup>[[33]](#references)</sup>
 
 - Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
   - But you need to be root, auditd be running and cause a warning
@@ -1627,7 +1627,7 @@ RunService "$1"
 > [!CAUTION]
 > I cannot find this component in my macOS so for more info check the writeup
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0023/](https://theevilbit.github.io/beyond/beyond_0023/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0023/](https://theevilbit.github.io/beyond/beyond_0023/)<sup>[[34]](#references)</sup>
 
 Introduced by Apple, **emond** is a logging mechanism that seems to be underdeveloped or possibly abandoned, yet it remains accessible. While not particularly beneficial for a Mac administrator, this obscure service could serve as a subtle persistence method for threat actors, likely unnoticed by most macOS admins.<sup>[[34]](#references)</sup>
 
@@ -1639,7 +1639,7 @@ ls -l /private/var/db/emondClients
 
 ### ~~XQuartz~~
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0018/](https://theevilbit.github.io/beyond/beyond_0018/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0018/](https://theevilbit.github.io/beyond/beyond_0018/)<sup>[[3]](#references)</sup>
 
 #### Location
 
@@ -1654,7 +1654,7 @@ XQuartz is **no longer installed in macOS**, so if you want more info check the 
 ### ~~kext~~
 
 > [!CAUTION]
-> It's so complicated to install kext even as root taht I won't consider this to escape from sandboxes or even for persistence (unless you have an exploit)
+> Installing a kext is so complicated, even as root, that this is not considered a practical sandbox-escape or persistence technique unless you have an exploit.
 
 #### Location
 
@@ -1679,7 +1679,7 @@ For more information about [**kernel extensions check this section**](macos-secu
 
 ### ~~amstoold~~
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0029/](https://theevilbit.github.io/beyond/beyond_0029/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0029/](https://theevilbit.github.io/beyond/beyond_0029/)<sup>[[35]](#references)</sup>
 
 #### Location
 
@@ -1694,7 +1694,7 @@ I can no longer find this in my macOS.
 
 ### ~~xsanctl~~
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0015/](https://theevilbit.github.io/beyond/beyond_0015/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0015/](https://theevilbit.github.io/beyond/beyond_0015/)<sup>[[36]](#references)</sup>
 
 #### Location
 
@@ -1850,5 +1850,3 @@ RunService ()
 - [36] [Beyond the good ol' LaunchAgents - 15 - xsanctl](https://theevilbit.github.io/beyond/beyond_0015/)
 
 {{#include ../banners/hacktricks-training.md}}
-
-

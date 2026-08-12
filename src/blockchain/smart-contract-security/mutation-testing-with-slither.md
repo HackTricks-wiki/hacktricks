@@ -48,9 +48,9 @@ Older mutation engines relied on regex or line-oriented rewrites. That works, bu
 - Generating every possible variant on a weak line wastes large amounts of runtime
 
 AST- or Tree-sitter-based tooling improves this by targeting structured nodes instead of raw lines:<sup>[[1]](#references)</sup>
-- **slither-mutate** uses Slither's Solidity AST
-- **mewt** uses Tree-sitter as a language-agnostic core
-- **MuTON** builds on `mewt` and adds first-class support for TON languages such as FunC, Tolk, and Tact
+- **slither-mutate** uses Slither's Solidity AST.<sup>[[4]](#references)</sup>
+- **mewt** uses Tree-sitter as a language-agnostic core.<sup>[[6]](#references)</sup>
+- **MuTON** builds on `mewt` and adds first-class support for TON languages such as FunC, Tolk, and Tact.<sup>[[7]](#references)</sup>
 
 This makes multi-line constructs and expression-level mutations much more reliable than regex-only approaches.
 
@@ -98,7 +98,7 @@ Mutation campaigns can take hours or days. Tips to reduce cost:<sup>[[1]](#refer
 - Parallelize tests if your runner allows it; cache dependencies/builds.
 - Fail-fast: stop early when a change clearly demonstrates an assertion gap.
 
-The runtime math is brutal: `1000 mutants x 5-minute tests ~= 83 hours`, so campaign design matters as much as the mutator itself.
+The runtime math is brutal: `1000 mutants x 5-minute tests ~= 83 hours`, so campaign design matters as much as the mutator itself.<sup>[[1]](#references)</sup>
 
 ## Persistent campaigns and triage at scale
 

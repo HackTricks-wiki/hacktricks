@@ -91,7 +91,7 @@ mount -o bind /host /tmp/m 2>/dev/null && echo "bind mount works"
 
 ### Full Example: Two-Shell `mknod` Pivot
 
-A more specialized abuse path appears when the container root user can create block devices, the host and container share a user identity in a useful way, and the attacker already has a low-privilege foothold on the host. In that situation, the container can create a device node such as `/dev/sda`, and the low-privilege host user can later read it through `/proc/<pid>/root/` for the matching container process.
+A more specialized abuse path appears when the container root user can create block devices, the host and container share a user identity in a useful way, and the attacker already has a low-privilege foothold on the host. In that situation, the container can create a device node such as `/dev/sda`, and the low-privilege host user can later read it through `/proc/<pid>/root/` for the matching container process.<sup>[[1]](#references)</sup>
 
 Inside the container:
 
@@ -110,7 +110,7 @@ ps -auxf | grep /bin/sh
 grep -a 'HTB{' /proc/<pid>/root/sda
 ```
 
-The important lesson is not the exact CTF string search. It is that mount-namespace exposure through `/proc/<pid>/root/` can let a host user reuse container-created device nodes even when cgroup device policy prevented direct use inside the container itself.
+The important lesson is not the exact CTF string search. It is that mount-namespace exposure through `/proc/<pid>/root/` can let a host user reuse container-created device nodes even when cgroup device policy prevented direct use inside the container itself.<sup>[[1]](#references)</sup>
 
 ## Checks
 
@@ -129,4 +129,9 @@ What is interesting here:
 - `mountinfo` is often the best place to see whether a path is really host-derived or overlay-backed.
 
 These checks establish **which resources are visible in this namespace**, **which ones are host-derived**, and **which of them are writable or security-sensitive**.
+
+## References
+
+- [1] [When Containers Lie: Escaping Root and Breaking Docker Isolation](https://www.kayssel.com/post/docker-security-2/)
+
 {{#include ../../../../../banners/hacktricks-training.md}}

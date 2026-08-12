@@ -16,7 +16,7 @@ sudo find / -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
 
 ## \_JAVA_OPTIONS
 
-The env variable **`_JAVA_OPTIONS`** can be used to inject arbitrary java parameters in the execution of a java compiled app:
+The environment variable **`_JAVA_OPTIONS`** can be used to inject arbitrary Java VM parameters when a Java application starts.<sup>[[1]](#references)</sup>
 
 ```bash
 # Write your payload in a script called /tmp/payload.sh
@@ -79,7 +79,7 @@ int main(int argc, const char * argv[]) {
 }
 ```
 
-However, that will trigger an error on the executed app, another more stealth way is to create a java agent and use:
+However, that technique triggers an error in the executed application. A stealthier alternative is to create a Java agent and use `-javaagent`:<sup>[[2]](#references)</sup>
 
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
@@ -91,7 +91,7 @@ open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Profession
 ```
 
 > [!CAUTION]
-> Creating the agent with a **different Java version** from the application can crash the execution of both the agent and the application
+> Creating the agent with a **different Java version** from the application can crash both the agent and the application.
 
 Where the agent can be:
 
@@ -141,12 +141,12 @@ open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Profession
 
 ## vmoptions file
 
-This file support the specification of **Java params** when Java is executed. You could use some of the previous tricks to change the java params and **make the process execute arbitrary commands**.\
-Moreover, this file can also **include others** with the `include` directory, so you could also change an included file.
+This file supports the specification of **Java parameters** when Java is executed. You can use some of the previous techniques to change the Java parameters and **make the process execute arbitrary commands**.\
+Moreover, this file can also **include other files** with the `include` directive, so you can also change an included file.
 
 Even more, some Java apps will **load more than one `vmoptions`** file.
 
-Some applications like Android Studio indicates in their **output where are they looking** for these files, like:
+Some applications, such as Android Studio, indicate in their **output where they look** for these files:<sup>[[3]](#references)</sup>
 
 ```bash
 /Applications/Android\ Studio.app/Contents/MacOS/studio 2>&1 | grep vmoptions
@@ -159,7 +159,7 @@ Some applications like Android Studio indicates in their **output where are they
 2023-12-13 19:53:23.923 studio[74913:581359] parseVMOptions: platform=20 user=1 file=/Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 ```
 
-If they don't you can easily check for it with:
+If they do not, you can check for it with:
 
 ```bash
 # Monitor
@@ -169,9 +169,12 @@ sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
 /Applications/Android\ Studio.app/Contents/MacOS/studio
 ```
 
-Note how interesting is that Android Studio in this example is trying to load the file **`/Applications/Android Studio.app.vmoptions`**, a place where any user from the **`admin` group has write access.**
+Notice that Android Studio in this example tries to load **`/Applications/Android Studio.app.vmoptions`**, a location where any user in the **`admin` group has write access**.
+
+## References
+
+- [1] [OpenJDK — `_JAVA_OPTIONS` parsing in `arguments.cpp`](https://cr.openjdk.org/~never/bsd_headers/src/share/vm/runtime/arguments.cpp.html)
+- [2] [Oracle Java — `java.lang.instrument` package specification](https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html)
+- [3] [JetBrains — Configuring JVM options and platform properties](https://intellij-support.jetbrains.com/hc/en-us/articles/206544869-Configuring-JVM-options-and-platform-properties)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

@@ -2,53 +2,71 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-This section focuses on **practical cryptography for hacking/CTFs**: how to quickly recognize common patterns, pick the right tools, and apply known attacks.
+This section focuses on practical cryptography for security testing and CTFs: recognizing common patterns, selecting suitable tools, and applying known attacks.
 
-If you're here for hiding data inside files, go to the **Stego** section.
+For techniques that hide data inside files, see the **Stego** section.
 
 ## How to use this section
 
-Crypto challenges reward speed: classify the primitive, identify what you control (oracle/leak/nonce reuse), then apply a known attack template.
+Start by identifying the primitive and its parameters. Then determine what the attacker controls or observes, such as an oracle, a leaked value, or nonce reuse, before selecting an attack.
 
 ### CTF workflow
+
 {{#ref}}
 ctf-workflow/README.md
 {{#endref}}
 
-### Symmetric crypto
+### Symmetric cryptography
+
 {{#ref}}
 symmetric/README.md
 {{#endref}}
 
 ### Hashes, MACs, and KDFs
+
 {{#ref}}
 hashes/README.md
 {{#endref}}
 
-### Public-key crypto
+### Public-key cryptography
+
 {{#ref}}
 public-key/README.md
 {{#endref}}
 
 ### TLS and certificates
+
 {{#ref}}
 tls-and-certificates/README.md
 {{#endref}}
 
-### Crypto in malware
+### Cryptography in malware
+
 {{#ref}}
 crypto-in-malware/README.md
 {{#endref}}
 
-### Misc
+### Miscellaneous
+
 {{#ref}}
 ctf-misc/README.md
 {{#endref}}
 
 ## Quick setup
 
-- Python: `python3 -m venv .venv && source .venv/bin/activate`
-- Libraries: `pip install pycryptodome gmpy2 sympy pwntools`
-- SageMath (often essential for lattice/RSA/ECC): https://www.sagemath.org/
+Create an isolated Python environment and install commonly used packages. PyCryptodome's documentation recommends installing `pycryptodome` with `pip`; SageMath provides separate installation guidance for each supported platform.<sup>[[1]](#references)[[2]](#references)</sup>
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install pycryptodome gmpy2 sympy pwntools
+```
+
+SageMath is often useful for algebraic, lattice, RSA, and elliptic-curve calculations.<sup>[[2]](#references)</sup>
+
+## References
+
+- [1] [PyCryptodome documentation - Installation](https://www.pycryptodome.org/src/installation)
+- [2] [SageMath documentation - Installation guide](https://doc.sagemath.org/html/en/installation/)
 
 {{#include ../banners/hacktricks-training.md}}

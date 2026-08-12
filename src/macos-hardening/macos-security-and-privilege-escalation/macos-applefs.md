@@ -6,7 +6,7 @@
 
 **Apple File System (APFS)** is a modern file system designed to supersede the Hierarchical File System Plus (HFS+). Its development was driven by the need for **improved performance, security, and efficiency**.
 
-Some notable features of APFS include:
+Some notable features of APFS include:<sup>[[1]](#references)</sup>
 
 1. **Space Sharing**: APFS allows multiple volumes to **share the same underlying free storage** on a single physical device. This enables more efficient space utilization as the volumes can dynamically grow and shrink without the need for manual resizing or repartitioning.
    1. This means, compared with traditional partitions in file disks, **that in APFS different partitions (volumes) shares all the disk space**, while a regular partition usually had a fixed size.
@@ -31,7 +31,8 @@ The list of firmlinks can be found in the **`/usr/share/firmlinks`** file.
 
 ```
 
+## References
+
+- [1] [APFS Guide - Features - Apple Developer Documentation](https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/APFS_Guide/Features/Features.html)
+
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

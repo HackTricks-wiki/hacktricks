@@ -153,7 +153,7 @@ It's needed the **object**, the **method** and the **params**. And when a method
 
 The object is **`someObject`**, the method is **`@selector(method1p1:p2:)`** and the arguments are **value1**, **value2**.
 
-Following the object structures, it's possible to reach an **array of methods** where the **names** and **pointers** to the method code are **located**.
+Following the object structures, it's possible to reach an **array of methods** where the **names** and **pointers** to the method code are **located**.<sup>[[1]](#references)</sup>
 
 > [!CAUTION]
 > Note that because methods and classes are accessed based on their names, this information is stored in the binary, so it's possible to retrieve it with `otool -ov </path/bin>` or [`class-dump </path/bin>`](https://github.com/nygard/class-dump)

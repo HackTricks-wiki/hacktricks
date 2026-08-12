@@ -29,7 +29,7 @@ We decided to weaponize [RottenPotatoNG](https://github.com/breenmachine/RottenP
 
 > For the theory, see [Rotten Potato - Privilege Escalation from Service Accounts to SYSTEM](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/) and follow the chain of links and references.<sup>[[4]](#references)</sup>
 
-We discovered that, other than `BITS` there are a several COM servers we can abuse. They just need to:
+Besides `BITS`, several COM servers can be abused. They only need to:
 
 1. be instantiable by the current user, normally a “service user” which has impersonation privileges
 2. implement the `IMarshal` interface

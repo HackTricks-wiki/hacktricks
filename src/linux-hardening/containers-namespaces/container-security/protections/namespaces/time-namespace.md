@@ -168,6 +168,6 @@ For most container breakouts, the time namespace is not the first control you wi
 ## References
 
 - [1] [Linux `time_namespaces(7)` manual page](https://man7.org/linux/man-pages/man7/time_namespaces.7.html)
-- [2] [Time Namespaces - Linux Kernel Internals](https://kernel-internals.org/time/time-namespaces/)
+- [2] [Time Namespaces: Per-Container Clock Offsets for CLOCK_MONOTONIC / CLOCK_BOOTTIME - Linux Kernel Internals](https://kernel-internals.org/time/time-namespaces/)
 
 {{#include ../../../../../banners/hacktricks-training.md}}

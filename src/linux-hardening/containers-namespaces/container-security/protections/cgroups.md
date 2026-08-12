@@ -82,7 +82,7 @@ For the technique to work, the attacker generally needs:
 
 ### Classic PoC
 
-The historical one-liner PoC is:
+The historical one-liner PoC is:<sup>[[1]](#references)</sup>
 
 ```bash
 d=$(dirname $(ls -x /s*/fs/c*/*/r* | head -n1))
@@ -105,7 +105,7 @@ This PoC writes a payload path into `release_agent`, triggers cgroup release, an
 
 ### Readable Walk-Through
 
-The same idea is easier to understand when broken into steps.
+The same idea is easier to understand when broken into steps.<sup>[[1]](#references)</sup>
 
 1. Create and prepare a writable cgroup:
 
@@ -145,7 +145,7 @@ The effect is host-side execution of the payload with host root privileges. In a
 
 ### Relative Path Variant Using `/proc/<pid>/root`
 
-In some environments, the host path to the container filesystem is not obvious or is hidden by the storage driver. In that case the payload path can be expressed through `/proc/<pid>/root/...`, where `<pid>` is a host PID belonging to a process in the current container. That is the basis of the relative-path brute-force variant:
+In some environments, the host path to the container filesystem is not obvious or is hidden by the storage driver. In that case the payload path can be expressed through `/proc/<pid>/root/...`, where `<pid>` is a host PID belonging to a process in the current container. That is the basis of the relative-path brute-force variant:<sup>[[2]](#references)</sup>
 
 ```bash
 #!/bin/sh
@@ -199,7 +199,7 @@ The relevant trick here is not the brute force itself but the path form: `/proc/
 
 ### CVE-2022-0492 Variant
 
-In 2022, CVE-2022-0492 showed that writing to `release_agent` in cgroup v1 was not correctly checking for `CAP_SYS_ADMIN` in the **initial** user namespace. This made the technique far more reachable on vulnerable kernels because a container process that could mount a cgroup hierarchy could write `release_agent` without already being privileged in the host user namespace.
+In 2022, CVE-2022-0492 showed that writing to `release_agent` in cgroup v1 was not correctly checking for `CAP_SYS_ADMIN` in the **initial** user namespace. This made the technique far more reachable on vulnerable kernels because a container process that could mount a cgroup hierarchy could write `release_agent` without already being privileged in the host user namespace.<sup>[[3]](#references)</sup>
 
 Minimal exploit:
 
@@ -272,4 +272,11 @@ If you discover **cgroup v1**, writable controller mounts, and a container that 
 | containerd / CRI-O | Enabled by default | cgroups are part of normal lifecycle management | direct runtime configs that relax device controls or expose legacy writable cgroup v1 interfaces |
 
 The important distinction is that **cgroup existence** is usually default, while **useful resource constraints** are often optional unless explicitly configured.
+
+## References
+
+- [1] [Understanding Docker container escapes](https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/)
+- [2] [Privileged Container Escape - Control Groups release_agent](https://blog.ajxchapman.com/posts/2020/11/19/privileged-container-escape.html)
+- [3] [New Linux Vulnerability CVE-2022-0492 Affecting Cgroups: Can Containers Escape?](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)
+
 {{#include ../../../../banners/hacktricks-training.md}}

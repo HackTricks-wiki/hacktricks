@@ -8,7 +8,7 @@
 > For **Screen Recording**, **Input Monitoring**, and **synthetic input**, modern macOS also exposes explicit preflight / request APIs such as `CGPreflightScreenCaptureAccess`, `CGRequestScreenCaptureAccess`, `CGRequestListenEventAccess`, and `CGRequestPostEventAccess`.
 
 > [!WARNING]
-> This is still a very realistic attack path: recent permission-theft research against Microsoft macOS apps showed that **weak library validation / plugin loading** can let an attacker reuse the victim app's already-granted **camera**, **microphone**, and other TCC permissions without a second prompt.
+> This is still a very realistic attack path: recent permission-theft research against Microsoft macOS apps showed that **weak library validation / plugin loading** can let an attacker reuse the victim app's already-granted **camera**, **microphone**, and other TCC permissions without a second prompt.<sup>[[1]](#references)</sup>
 
 ## Quick triage before using a payload
 
@@ -174,7 +174,7 @@ void myconstructor(int argc, const char **argv)
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Copy `$HOME/Dowloads` to `/tmp/downloads`.
+Copy `$HOME/Downloads` to `/tmp/downloads`.
 
 ```bash
 cp -r "$HOME/Downloads" "/tmp/downloads"
@@ -465,7 +465,7 @@ static void telegram(int argc, const char **argv) {
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Prompt"}}
-Trigger the camera prompt if the current process is still `NotDetermined`.
+Trigger the camera prompt if the current process is still `NotDetermined`.<sup>[[3]](#references)</sup>
 
 ```objectivec
 #import <Foundation/Foundation.h>
@@ -637,7 +637,7 @@ static void telegram(int argc, const char **argv) {
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Prompt"}}
-Trigger the microphone prompt if the current process is still `NotDetermined`.
+Trigger the microphone prompt if the current process is still `NotDetermined`.<sup>[[3]](#references)</sup>
 
 ```objectivec
 #import <Foundation/Foundation.h>
@@ -849,7 +849,7 @@ screencapture -V 5 /tmp/screen.mov
 {{#endtabs}}
 
 > [!TIP]
-> On **macOS 12.3+**, `ScreenCaptureKit` is usually the better post-exploitation primitive than `AVCaptureScreenInput`: it can do high-performance streaming, single-frame grabs with `SCScreenshotManager`, and stream **system audio**. Recent `ScreenCaptureKit` updates also added `captureMicrophone` / `microphoneCaptureDeviceID` on `SCStreamConfiguration` plus `SCRecordingOutput` for straight-to-file recording, so one hijacked screen-capture client can save screen + system audio directly and add mic audio when the process also holds `kTCCServiceMicrophone`. For more desktop-session abuse primitives, see [this related page](../macos-input-monitoring-screen-capture-accessibility.md).
+> On **macOS 12.3+**, `ScreenCaptureKit` is usually the better post-exploitation primitive than `AVCaptureScreenInput`: it can do high-performance streaming, single-frame grabs with `SCScreenshotManager`, and stream **system audio**. Recent `ScreenCaptureKit` updates also added `captureMicrophone` / `microphoneCaptureDeviceID` on `SCStreamConfiguration` plus `SCRecordingOutput` for straight-to-file recording, so one hijacked screen-capture client can save screen + system audio directly and add mic audio when the process also holds `kTCCServiceMicrophone`.<sup>[[4]](#references)</sup> For more desktop-session abuse primitives, see [this related page](../macos-input-monitoring-screen-capture-accessibility.md).
 
 ### Accessibility
 
@@ -1045,8 +1045,6 @@ int main() {
 > [!TIP]
 > Newer macOS versions also split desktop-session abuse across **Input Monitoring** (`kTCCServiceListenEvent`) and **synthetic input** (`kTCCServicePostEvent`). If you need keylogging, screen grabs, or raw event injection instead of AXUIElement automation, check [macOS Input Monitoring, Screen Capture & Accessibility Abuse](../macos-input-monitoring-screen-capture-accessibility.md).
 
-
-
 ## References
 
 - [1] [Cisco Talos - How multiple vulnerabilities in Microsoft apps for macOS pave the way to stealing permissions](https://blog.talosintelligence.com/how-multiple-vulnerabilities-in-microsoft-apps-for-macos-pave-the-way-to-stealing-permissions/)
@@ -1055,6 +1053,5 @@ int main() {
 - [4] [Apple Developer - Capture HDR content with ScreenCaptureKit (WWDC24)](https://developer.apple.com/videos/play/wwdc2024/10088/)
 - [5] [vsociety - CVE-2023-26818: MacOS TCC Bypass with Telegram using DyLib Injection Part1](https://vsociety.medium.com/cve-2023-26818-macos-tcc-bypass-with-telegram-using-dylib-injection-part1-768b34efd8c4)
 - [6] [Vicarius vsociety - CVE-2023-26818: Exploit macOS TCC Bypass w/ Telegram (Part 1)](https://www.vicarius.io/vsociety/posts/cve-2023-26818-exploit-macos-tcc-bypass-w-telegram-part-1-2)
-
 
 {{#include ../../../../banners/hacktricks-training.md}}

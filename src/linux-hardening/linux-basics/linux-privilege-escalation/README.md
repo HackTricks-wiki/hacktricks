@@ -2,6 +2,8 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
+For broader background and historical enumeration workflows, compare the g0tmi1k, Payatu, SANS, LPE Workshop, Linux-Privilege-Escalation, and linux-private-i resources listed in the references.<sup>[[5]](#references)[[6]](#references)[[7]](#references)[[10]](#references)[[11]](#references)[[13]](#references)</sup>
+
 ## System Information
 
 ### OS info
@@ -94,15 +96,15 @@ sudo -V | grep "Sudo ver" | grep "1\.[01234567]\.[0-9]\+\|1\.8\.1[0-9]\*\|1\.8\.
 
 ### Sudo < 1.9.17p1
 
-Sudo versions before 1.9.17p1 (**1.9.14 - 1.9.17 < 1.9.17p1**) allows unprivileged local users to escalate their privileges to root via sudo `--chroot` option when `/etc/nsswitch.conf` file is used from a user controlled directory.<sup>[[28]](#references)</sup>  
+Sudo versions before 1.9.17p1 (**1.9.14 - 1.9.17 < 1.9.17p1**) allows unprivileged local users to escalate their privileges to root via sudo `--chroot` option when `/etc/nsswitch.conf` file is used from a user controlled directory.<sup>[[28]](#references)[[29]](#references)</sup>  
 
 Here is a [PoC](https://github.com/pr0v3rbs/CVE-2025-32463_chwoot) to exploit that [vulnerability](https://nvd.nist.gov/vuln/detail/CVE-2025-32463). Before running the exploit, make sure that your `sudo` version is vulnerable and that it supports the `chroot` feature.  
 
-For more information, refer to the original [vulnerability advisory](https://www.stratascale.com/resource/cve-2025-32463-sudo-chroot-elevation-of-privilege/)
+For more information, refer to the original [vulnerability advisory](https://www.stratascale.com/resource/cve-2025-32463-sudo-chroot-elevation-of-privilege/).<sup>[[28]](#references)</sup>
 
 ### Sudo host-based rules bypass (CVE-2025-32462)
 
-Sudo before 1.9.17p1 (reported affected range: **1.8.8–1.9.17**) can evaluate host-based sudoers rules using the **user-supplied hostname** from `sudo -h <host>` instead of the **real hostname**. If sudoers grants broader privileges on another host, you can **spoof** that host locally.<sup>[[28]](#references)</sup>
+Sudo before 1.9.17p1 (reported affected range: **1.8.8–1.9.17**) can evaluate host-based sudoers rules using the **user-supplied hostname** from `sudo -h <host>` instead of the **real hostname**. If sudoers grants broader privileges on another host, you can **spoof** that host locally.<sup>[[29]](#references)</sup>
 
 Requirements:
 - Vulnerable sudo version
@@ -495,8 +497,6 @@ Hardening
 - Bind to localhost and additionally restrict access via firewall/VPN; do not reuse passwords
 - Avoid embedding secrets in unit files; use secret stores or root-only EnvironmentFile
 - Enable audit/logging for on-demand job executions
-
-
 
 Check if any scheduled job is vulnerable. Maybe you can take advantage of a script being executed by root (wildcard vuln? can modify files that root uses? use symlinks? create specific files in the directory that root uses?).
 
@@ -1172,7 +1172,7 @@ gpg --list-keys 2>/dev/null
 
 ### Big UID
 
-Some Linux versions were affected by a bug that allows users with **UID > INT_MAX** to escalate privileges. More info: [here](https://gitlab.freedesktop.org/polkit/polkit/issues/74), [here](https://github.com/mirchr/security-research/blob/master/vulnerabilities/CVE-2018-19788.sh) and [here](https://twitter.com/paragonsec/status/1071152249529884674).\
+Some Linux versions were affected by a bug that allows users with **UID > INT_MAX** to escalate privileges. More info: [here](https://gitlab.freedesktop.org/polkit/polkit/issues/74), [here](https://github.com/mirchr/security-research/blob/master/vulnerabilities/CVE-2018-19788.sh) and [here](https://twitter.com/paragonsec/status/1071152249529884674).<sup>[[33]](#references)[[34]](#references)[[35]](#references)</sup>\
 **Exploit it** using: **`systemd-run -t /bin/bash`**
 
 ### Groups
@@ -1229,7 +1229,7 @@ sudo -l #Check commands you can execute with sudo
 find / -perm -4000 2>/dev/null #Find all SUID binaries
 ```
 
-Some **unexpected commands allow you to read and/or write files or even execute a command.**<sup>[[8]](#references)</sup> For example:
+Some **unexpected commands allow you to read and/or write files or even execute a command**.<sup>[[8]](#references)</sup> For example:
 
 ```bash
 sudo awk 'BEGIN {system("/bin/sh")}'
@@ -1274,10 +1274,10 @@ sudo PYTHONPATH=/dev/shm/ /opt/scripts/admin_tasks.sh
 
 ### Writable `__pycache__` / `.pyc` poisoning in sudo-allowed Python imports
 
-If a **sudo-allowed Python script** imports a module whose package directory contains a **writable `__pycache__`**, you may be able to replace the cached `.pyc` and get code execution as the privileged user on the next import.<sup>[[29]](#references)</sup>
+If a **sudo-allowed Python script** imports a module whose package directory contains a **writable `__pycache__`**, you may be able to replace the cached `.pyc` and get code execution as the privileged user on the next import.<sup>[[30]](#references)</sup>
 
 - Why it works:
-  - CPython stores bytecode caches in `__pycache__/module.cpython-<ver>.pyc`.<sup>[[30]](#references)</sup>
+  - CPython stores bytecode caches in `__pycache__/module.cpython-<ver>.pyc`.<sup>[[31]](#references)</sup>
   - The interpreter validates the **header** (magic + timestamp/hash metadata tied to the source), then executes the marshaled code object stored after that header.
   - If you can **delete and recreate** the cached file because the directory is writable, a root-owned but non-writable `.pyc` can still be replaced.
 - Typical path:
@@ -1293,7 +1293,7 @@ find / -type d -name __pycache__ -writable 2>/dev/null
 find / -type f -path '*/__pycache__/*.pyc' -ls 2>/dev/null
 ```
 
-If you can inspect the privileged script, identify imported modules and their cache path:<sup>[[31]](#references)</sup>
+If you can inspect the privileged script, identify imported modules and their cache path:<sup>[[32]](#references)</sup>
 
 ```bash
 grep -R "^import \\|^from " /opt/target/ 2>/dev/null
@@ -1585,7 +1585,7 @@ sudo LD_LIBRARY_PATH=/tmp <COMMAND>
 
 ### SUID Binary – .so injection
 
-When encountering a binary with **SUID** permissions that seems unusual, it's a good practice to verify if it's loading **.so** files properly. This can be checked by running the following command:
+When encountering a binary with **SUID** permissions that seems unusual, it's a good practice to verify if it's loading **.so** files properly. This can be checked by running the following command:<sup>[[17]](#references)</sup>
 
 ```bash
 strace <SUID-BINARY> 2>&1 | grep -i -E "open|access|no such file"
@@ -2171,7 +2171,7 @@ Read the code of [**linPEAS**](https://github.com/carlospolop/privilege-escalati
 ### Logs
 
 If you can read logs, you may be able to find **interesting/confidential information inside them**. The more strange the log is, the more interesting it will be (probably).\
-Also, some "**bad**" configured (backdoored?) **audit logs** may allow you to **record passwords** inside audit logs as explained in this post: [https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/](https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/).
+Also, some "**bad**" configured (backdoored?) **audit logs** may allow you to **record passwords** inside audit logs as explained in this post: [https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/](https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/).<sup>[[36]](#references)</sup>
 
 ```bash
 aureport --tty | grep -E "su |sudo " | sed -E "s,su|sudo,${C}[1;31m&${C}[0m,g"
@@ -2217,7 +2217,7 @@ A vulnerability in `logrotate` lets users with **write permissions** on a log fi
 > [!TIP]
 > This vulnerability affects `logrotate` version `3.18.0` and older
 
-More detailed information about the vulnerability can be found on this page: [https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition](https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition).
+More detailed information about the vulnerability can be found on this page: [https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition](https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition).<sup>[[37]](#references)</sup>
 
 You can exploit this vulnerability with [**logrotten**](https://github.com/whotwagner/logrotten).
 
@@ -2225,7 +2225,7 @@ This vulnerability is very similar to [**CVE-2016-1247**](https://www.cvedetails
 
 ### /etc/sysconfig/network-scripts/ (Centos/Redhat)
 
-**Vulnerability reference:** [**https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure\&qid=e026a0c5f83df4fd532442e1324ffa4f**](https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f)
+**Vulnerability reference:** [**https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure\&qid=e026a0c5f83df4fd532442e1324ffa4f**](https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f).<sup>[[20]](#references)</sup>
 
 If, for whatever reason, a user is able to **write** an `ifcf-<whatever>` script to _/etc/sysconfig/network-scripts_ **or** it can **adjust** an existing one, then your **system is pwned**.<sup>[[20]](#references)</sup>
 
@@ -2346,9 +2346,15 @@ Learn more and see a generalized pattern applicable to other discovery/monitorin
 - [25] [0xdf – HTB Previous (sudo terraform dev_overrides + TF_VAR symlink privesc)](https://0xdf.gitlab.io/2026/01/10/htb-previous.html)
 - [26] [0xdf – HTB Slonik (pg_basebackup cron copy → SUID bash)](https://0xdf.gitlab.io/2026/02/12/htb-slonik.html)
 - [27] [NVISO – You name it, VMware elevates it (CVE-2025-41244)](https://blog.nviso.eu/2025/09/29/you-name-it-vmware-elevates-it-cve-2025-41244/)
-- [28] [0xdf – HTB: Expressway](https://0xdf.gitlab.io/2026/03/07/htb-expressway.html)
-- [29] [0xdf – HTB: Browsed](https://0xdf.gitlab.io/2026/03/28/htb-browsed.html)
-- [30] [PEP 3147 – PYC Repository Directories](https://peps.python.org/pep-3147/)
-- [31] [Python importlib docs](https://docs.python.org/3/library/importlib.html)
+- [28] [Stratascale – CVE-2025-32463: Sudo Chroot Elevation of Privilege](https://www.stratascale.com/resource/cve-2025-32463-sudo-chroot-elevation-of-privilege/)
+- [29] [Rich Mirch – CVE-2025-32462 and CVE-2025-32463 Sudo elevation-of-privilege vulnerabilities](https://blog.mirch.io/sudo-elevation-of-privilege-vulnerabilities/)
+- [30] [0xdf – HTB: Browsed](https://0xdf.gitlab.io/2026/03/28/htb-browsed.html)
+- [31] [PEP 3147 – PYC Repository Directories](https://peps.python.org/pep-3147/)
+- [32] [Python importlib docs](https://docs.python.org/3/library/importlib.html)
+- [33] [polkit/polkit issue #74](https://gitlab.freedesktop.org/polkit/polkit/issues/74)
+- [34] [mirchr/security-research](https://github.com/mirchr/security-research/blob/master/vulnerabilities/CVE-2018-19788.sh)
+- [35] [Tweet by @paragonsec](https://twitter.com/paragonsec/status/1071152249529884674)
+- [36] [redsiege.com - Logging Passwords On Linux](https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux)
+- [37] [tech.feedyourhead.at - Details Of A Logrotate Race Condition](https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition)
 
 {{#include ../../../banners/hacktricks-training.md}}

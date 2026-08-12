@@ -292,4 +292,3 @@ mount
 - [10] [CVE-2022-26712: The POC for SIP-Bypass Is Even Tweetable](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

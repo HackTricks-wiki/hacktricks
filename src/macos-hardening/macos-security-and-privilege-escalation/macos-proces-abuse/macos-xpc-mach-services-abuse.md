@@ -4,9 +4,9 @@
 
 ## Basic Information
 
-**XPC** (Cross-Process Communication) is the primary IPC mechanism on macOS. System daemons expose **Mach services** — named ports registered with `launchd` — that other processes can connect to via `NSXPCConnection`.
+**XPC** (Cross-Process Communication) is the primary IPC mechanism on macOS. System daemons expose **Mach services** — named ports registered with `launchd` — that other processes can connect to via `NSXPCConnection`.<sup>[[1]](#references)</sup>
 
-Every **LaunchDaemon** and **LaunchAgent** plist with a `MachServices` key registers one or more named Mach ports. These are system-wide XPC endpoints that any process can attempt to connect to.
+Every **LaunchDaemon** and **LaunchAgent** plist with a `MachServices` key registers one or more named Mach ports. These are system-wide XPC endpoints that any process can attempt to connect to.<sup>[[2]](#references)</sup>
 
 > [!WARNING]
 > XPC Mach services are the **single largest local privilege escalation attack surface** on macOS. Most local root exploits in recent years went through vulnerable XPC services in LaunchDaemons. Every exposed method in a root daemon is a potential escalation vector.
@@ -311,9 +311,9 @@ log stream --predicate 'process == "daemon-name" AND (eventMessage CONTAINS "cra
 | CVE-2022-22616 | Gatekeeper bypass via XPC service abuse |
 | CVE-2021-30657 | Sysmond XPC privilege escalation |
 | CVE-2020-9839 | XPC race condition in system daemon |
-| CVE-2019-8802 | Privileged helper tool missing client verification |
-| CVE-2023-32369 | Migraine — SIP bypass through `systemmigrationd` XPC |
-| CVE-2022-26712 | PackageKit XPC root escalation |
+| CVE-2019-8802 | Privileged helper tool missing client verification<sup>[[5]](#references)</sup> |
+| CVE-2023-32369 | Migraine — SIP bypass through `systemmigrationd` XPC<sup>[[3]](#references)</sup> |
+| CVE-2022-26712 | PackageKit XPC root escalation<sup>[[4]](#references)</sup> |
 
 ## Enumeration Script
 
@@ -349,7 +349,8 @@ done
 
 - [1] [Apple Developer — XPC Services](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingXPCServices.html)
 - [2] [Apple Developer — Daemons and Services Programming Guide](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/Introduction.html)
-- [3] [Objective-See — XPC Exploitation](https://objective-see.org/blog.html)
-- [4] [OBTS — XPC Attack Surface talks](https://objectivebythesea.org/)
+- [3] [New macOS vulnerability, Migraine, could bypass System Integrity Protection — Microsoft Security Blog](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
+- [4] [CVE-2022-26712: The POC for SIP-Bypass Is Even Tweetable](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/)
+- [5] [Objective-See — XPC client validation and Rootpipe](https://objective-see.org/blog/blog_0x3E.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

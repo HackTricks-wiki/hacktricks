@@ -64,4 +64,6 @@ zips-tricks.md
 mach-o-entitlements-and-ipsw-indexing.md
 {{#endref}}
 
+## References
+
 {{#include ../../../banners/hacktricks-training.md}}

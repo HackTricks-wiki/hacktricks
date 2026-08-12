@@ -6,31 +6,31 @@
 
 ### [**Hugging Face Transformers**](https://github.com/huggingface/transformers)
 
-Hugging Face Transformers is one of the most popular open-source libraries for using, training, and deploying LLMs such as GPT, BERT, and many others. It offers a comprehensive ecosystem that includes pre-trained models, datasets, and seamless integration with the Hugging Face Hub for fine-tuning and deployment.
+Hugging Face Transformers is an open-source library for loading, training, and serving pretrained models across text, vision, audio, video, and multimodal tasks. Model and dataset hosting are provided separately by the Hugging Face Hub.<sup>[[1]](#references)</sup>
 
 ### [**LangChain**](https://github.com/langchain-ai/langchain)
 
-LangChain is a framework designed for building applications with LLMs. It allows developers to connect language models with external data sources, APIs, and databases. LangChain provides tools for advanced prompt engineering, managing conversation history, and integrating LLMs into complex workflows.
+LangChain is a framework for building model-driven applications and agents with prompt construction, conversation-history/state management, tools, retrieval, model, API, and database integrations.<sup>[[2]](#references)</sup>
 
 ### [**LitGPT**](https://github.com/Lightning-AI/litgpt)
 
-LitGPT is a project developed by Lightning AI that leverages the Lightning framework to facilitate the training, fine-tuning, and deployment of GPT-based models. It integrates seamlessly with other Lightning AI tools, providing optimized workflows for handling large-scale language models with enhanced performance and scalability.
+LitGPT provides readable implementations and command-line workflows for pretraining, fine-tuning, evaluating, and deploying supported language models.<sup>[[3]](#references)</sup>
 
 ### [**LitServe**](https://github.com/Lightning-AI/LitServe)
 
 **Description:**\
-LitServe is a deployment tool from Lightning AI designed for quickly and efficiently deploying AI models. It simplifies the integration of LLMs into real-time applications by providing scalable and optimized serving capabilities.
+LitServe is a model-serving framework from Lightning AI for exposing inference APIs with batching, streaming, acceleration, and scaling hooks.<sup>[[4]](#references)</sup>
 
 ### [**Axolotl**](https://github.com/axolotl-ai-cloud/axolotl)
 
-Axolotl is a cloud-based platform designed to streamline the deployment, scaling, and management of AI models, including LLMs. It offers features such as automated scaling, monitoring, and integration with various cloud services, making it easier to deploy models in production environments without extensive infrastructure management.
+Axolotl is an open-source post-training and fine-tuning framework driven by YAML configuration. It supports techniques such as full fine-tuning, LoRA/QLoRA, preference optimization, and multi-GPU training; it is not itself a cloud deployment platform.<sup>[[5]](#references)</sup>
 
 ## Try models online
 
 ### [**Hugging Face**](https://huggingface.co/)
 
 **Hugging Face** is a leading platform and community for machine learning, particularly known for its work in natural language processing (NLP). It provides tools, libraries, and resources that make it easier to develop, share, and deploy machine learning models.\
-It offers several sections like:
+The Hub offers several relevant sections:<sup>[[6]](#references)</sup>
 
 * **Models**: A vast repository of **pre-trained machine learning models** where users can browse, download, and integrate models for various tasks like text generation, translation, image recognition, and more.
 * **Datasets:** A comprehensive **collection of datasets** used for training and evaluating models. It facilitates easy access to diverse data sources, enabling users to find and utilize data for their specific machine learning projects.
@@ -38,18 +38,29 @@ It offers several sections like:
 
 ## [**TensorFlow Hub**](https://www.tensorflow.org/hub) **&** [**Kaggle**](https://www.kaggle.com/)
 
-**TensorFlow Hub** is a comprehensive repository of reusable machine learning modules developed by Google. It focuses on facilitating the sharing and deployment of machine learning models, especially those built with TensorFlow.
+**TensorFlow Hub** is a repository and library for reusable trained model components, especially modules consumed through TensorFlow/Keras. **Kaggle** separately provides notebooks, datasets, competitions, and models.<sup>[[7]](#references)[[9]](#references)</sup>
 
 * **Modules:** A vast collection of pre-trained models and model components where users can browse, download, and integrate modules for tasks such as image classification, text embedding, and more.
-* **Tutorials:** Step-by-step guides and examples which helps users understand how to implement and fine-tune models using TensorFlow Hub.
+* **Tutorials:** Step-by-step guides and examples that help users implement and fine-tune models using TensorFlow Hub.
 * **Documentation:** Comprehensive guides and API references that assist developers in effectively utilizing the repository’s resources.
 
 ## [**Replicate**](https://replicate.com/home)
 
-**Replicate** is a platform that allows developers to run machine learning models in the cloud via a simple API. It focuses on making ML models easily accessible and deployable without the need for extensive infrastructure setup.
+**Replicate** is a hosted platform for running packaged machine-learning models through a web interface or API.<sup>[[8]](#references)</sup>
 
 * **Models:** A repository of machine learning models contributed by the community which users can browse, try, and integrate models into their applications with minimal effort.
-* **API Access:** Simple APIs for running models the enable developers to deploy and scale models effortlessly within their own applications.
+* **API access:** APIs for invoking models from applications without operating the underlying inference infrastructure.
 
+## References
+
+- [1] [Hugging Face Transformers](https://github.com/huggingface/transformers)
+- [2] [LangChain](https://github.com/langchain-ai/langchain)
+- [3] [LitGPT](https://github.com/Lightning-AI/litgpt)
+- [4] [LitServe](https://github.com/Lightning-AI/LitServe)
+- [5] [Axolotl](https://github.com/axolotl-ai-cloud/axolotl)
+- [6] [Hugging Face Hub documentation](https://huggingface.co/docs/hub/index)
+- [7] [TensorFlow Hub](https://www.tensorflow.org/hub)
+- [8] [Replicate documentation](https://replicate.com/docs)
+- [9] [Kaggle documentation](https://www.kaggle.com/docs)
 
 {{#include ../banners/hacktricks-training.md}}

@@ -74,7 +74,7 @@ unzip -l suspect.png
 
 A very practical recent PNG forensic trick is checking whether a screenshot editor **overwrote** a PNG without **truncating** the old file first. In those cases, bytes from the **previous image** can remain after `IEND`, and sometimes extra `IDAT` data can be partially reconstructed.
 
-This became well known with **aCropalypse** (Google Pixel Markup) and the related **Windows Snipping Tool** issue. In practice, if a "cropped" or "redacted" PNG still contains old trailing data, you may be able to recover part of the original screenshot.<sup>[[1]](#references)</sup>
+This became well known with **aCropalypse** (Google Pixel Markup) and the related **Windows Snipping Tool** issue.<sup>[[3]](#references)</sup> In practice, if a "cropped" or "redacted" PNG still contains old trailing data, you may be able to recover part of the original screenshot.<sup>[[1]](#references)</sup>
 
 Practical workflow:
 
@@ -101,7 +101,7 @@ The most interesting PNG chunks for investigations are usually not the obvious i
 - `tEXt` / `zTXt` / `iTXt` – text metadata and compressed text
 - `eXIf` – EXIF data inside PNG
 - `iCCP` – embedded ICC profile
-- `PLTE` – palette data in indexed images, but also useful in payload-smuggling scenarios<sup>[[2]](#references)</sup>
+- `PLTE` – palette data in indexed images, but also useful in payload-smuggling scenarios.<sup>[[2]](#references)</sup>
 
 Dump them with:
 
@@ -110,7 +110,7 @@ pngcheck -vp suspect.png
 exiftool -a -u -g1 suspect.png
 ```
 
-For offensive payload persistence inside PNG chunks (for example **PLTE**, **IDAT**, or **tEXt** tricks that survive some PHP image transformations), check the more detailed upload-focused notes here<sup>[[2]](#references)</sup>:
+For offensive payload persistence inside PNG chunks (for example **PLTE**, **IDAT**, or **tEXt** tricks that survive some PHP image transformations), check the more detailed upload-focused notes here:<sup>[[2]](#references)</sup>
 
 {{#ref}}
 ../../../pentesting-web/file-upload/README.md
@@ -136,5 +136,6 @@ For sensitive evidence, always work on a **copy** and keep hashes of the origina
 
 - [1] [Exploiting aCropalypse: Recovering Truncated PNGs](https://www.da.vidbuchanan.co.uk/blog/exploiting-acropalypse.html)
 - [2] [Persistent PHP payloads in PNGs: How to inject PHP code in an image – and keep it there](https://www.synacktiv.com/en/publications/persistent-php-payloads-in-pngs-how-to-inject-php-code-in-an-image-and-keep-it-there)
+- [3] [NVD - CVE-2023-28303](https://nvd.nist.gov/vuln/detail/CVE-2023-28303)
 
 {{#include ../../../banners/hacktricks-training.md}}

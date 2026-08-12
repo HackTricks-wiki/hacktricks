@@ -256,7 +256,7 @@ Razer Synapse 4 added another useful pattern to this family: a low-privileged us
 Observed exploitation path:
 - Instantiate the COM object `RzUtility.Elevator`.
 - Call `LaunchProcessNoWait(<path>, "", 1)` to request an elevated launch.
-- In the public PoC, the PE-signature gate inside `simple_service.dll` is patched out before issuing the request, allowing an arbitrary attacker-chosen executable to be launched.<sup>[[6]](#references)</sup>
+- In the public PoC, the PE-signature gate inside `simple_service.dll` is patched out before issuing the request, allowing an arbitrary attacker-chosen executable to be launched.<sup>[[6]](#references)[[10]](#references)</sup>
 
 Minimal PowerShell invocation:
 

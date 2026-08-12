@@ -2,7 +2,7 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Masked paths are runtime protections that hide especially sensitive kernel-facing filesystem locations from the container by bind-mounting over them or otherwise making them inaccessible. The purpose is to prevent a workload from interacting directly with interfaces that ordinary applications do not need, especially inside procfs.
+Masked paths are runtime protections that hide especially sensitive kernel-facing filesystem locations from the container by bind-mounting over them or otherwise making them inaccessible. The OCI runtime specification defines `maskedPaths` as absolute paths that must not be readable inside the container. <sup>[[1]](#references)</sup>
 
 This matters because many container escapes and host-impacting tricks start by reading or writing special files under `/proc` or `/sys`. If those locations are masked, the attacker loses direct access to a useful part of the kernel control surface even after gaining code execution inside the container.
 
@@ -40,7 +40,7 @@ Masking does not create the main isolation boundary, but it removes several high
 
 ## Misconfigurations
 
-The main mistake is unmasking broad classes of paths for convenience or debugging. In Podman this may appear as `--security-opt unmask=ALL` or targeted unmasking. In Kubernetes, overly broad proc exposure may appear through `procMount: Unmasked`. Another serious problem is exposing host `/proc` or `/sys` through a bind mount, which bypasses the idea of a reduced container view entirely.
+The main mistake is unmasking broad classes of paths for convenience or debugging. In Podman this may appear as `--security-opt unmask=ALL` or targeted unmasking. In Kubernetes, overly broad proc exposure may appear through `procMount: Unmasked`. Another serious problem is exposing host `/proc` or `/sys` through a bind mount, which bypasses the idea of a reduced container view entirely. <sup>[[2]](#references)</sup> <sup>[[3]](#references)</sup>
 
 ## Abuse
 
@@ -97,4 +97,11 @@ What is interesting here:
 | containerd / CRI-O under Kubernetes | Runtime default | Usually applies OCI/runtime masked paths unless overridden | direct runtime config changes, same Kubernetes weakening paths |
 
 Masked paths are usually present by default. The main operational problem is not absence from the runtime, but deliberate unmasking or host bind mounts that negate the protection.
+
+## References
+
+- [1] [Open Container Initiative - Linux container configuration: Masked Paths](https://github.com/opencontainers/runtime-spec/blob/main/config-linux.md#masked-paths)
+- [2] [Podman documentation - `podman run` security options](https://docs.podman.io/en/latest/markdown/podman-run.1.html#security-opt-option)
+- [3] [Kubernetes Documentation - ProcMount](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-proc-mount-type-for-a-container)
+
 {{#include ../../../../banners/hacktricks-training.md}}

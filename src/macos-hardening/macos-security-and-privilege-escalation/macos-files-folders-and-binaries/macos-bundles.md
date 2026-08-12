@@ -42,7 +42,7 @@ Beyond the common directories, bundles may also include:
 
 This structure ensures that all necessary components are encapsulated within the bundle, facilitating a modular and secure application environment.
 
-For more detailed information on `Info.plist` keys and their meanings, the Apple developer documentation provides extensive resources: [Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html).
+For more detailed information on `Info.plist` keys and their meanings, the Apple developer documentation provides extensive resources: [Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html).<sup>[[3]](#references)</sup>
 
 ## Security Notes & Abuse Vectors
 
@@ -51,7 +51,7 @@ For more detailed information on `Info.plist` keys and their meanings, the Apple
 
 ## Resource Hijacking (Dirty NIB / NIB Injection)
 
-Before Ventura, swapping UI resources in a signed app could bypass shallow code signing and yield code execution with the app’s entitlements. Current research (2024) shows this still works on pre‑Ventura and on un-quarantined builds:<sup>[[1]](#references)[[2]](#references)</sup>
+Before Ventura, swapping UI resources in a signed app could bypass shallow code signing and yield code execution with the app’s entitlements. Current research (2024) shows this still works on pre-Ventura and on unquarantined builds:<sup>[[1]](#references)</sup><sup>[[2]](#references)</sup>
 
 1. Copy target app to a writable location (e.g., `/tmp/Victim.app`).
 2. Replace `Contents/Resources/MainMenu.nib` (or any nib declared in `NSMainNibFile`) with a malicious one that instantiates `NSAppleScript`, `NSTask`, etc.
@@ -102,11 +102,10 @@ otool -l /Applications/App.app/Contents/MacOS/App | grep -A2 RPATH
 otool -L /Applications/App.app/Contents/MacOS/App
 ```
 
-
-
 ## References
 
 - [1] [Bringing process injection into view(s): exploiting macOS apps using nib files (2024)](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)
 - [2] [Dirty NIB & bundle resource tampering write‑up (2024)](https://karol-mazurek.medium.com/snake-apple-app-bundle-ext-f5c43a3c84c4)
+- [3] [Apple Developer - Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

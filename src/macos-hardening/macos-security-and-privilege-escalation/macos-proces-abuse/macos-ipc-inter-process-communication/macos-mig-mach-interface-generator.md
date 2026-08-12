@@ -4,16 +4,16 @@
 
 ## Basic Information
 
-MIG was created to **simplify the process of Mach IPC** code creation. It basically **generates the needed code** for server and client to communicate with a given definition. Even if the generated code is ugly, a developer will just need to import it and his code will be much simpler than before.
+MIG was created to **simplify the process of Mach IPC** code creation. It basically **generates the needed code** for server and client to communicate with a given definition. Even if the generated code is ugly, a developer will just need to import it and his code will be much simpler than before.<sup>[[1]](#references)</sup>
 
 The definition is specified in Interface Definition Language (IDL) using the `.defs` extension.
 
 These definitions have 5 sections:
 
-- **Subsystem declaration**: The keyword subsystem is used to indicate the **name** and the **id**. It's also possible to mark it as **`KernelServer`** if the server should run in the kernel.
+- **Subsystem declaration**: The keyword subsystem is used to indicate the **name** and the **id**. It's also possible to mark it as **`KernelServer`** if the server should run in the kernel.<sup>[[4]](#references)</sup>
 - **Inclusions and imports**: MIG uses the C-prepocessor, so it's able to use imports. Moreover, it's possible to use `uimport` and `simport` for user or server generated code.
 - **Type declarations**: It's possible to define data types although usually it will import `mach_types.defs` and `std_types.defs`. For custom ones some syntax can be used:
-  - \[i`n/out]tran`: Function that needs to be trasnlated from an incoming or to an outgoing message
+  - \[i`n/out]tran`: Function that needs to be translated from an incoming or to an outgoing message
   - `c[user/server]type`: Mapping to another C type.
   - `destructor`: Call this function when the type is released.
 - **Operations**: These are the definitions of the RPC methods. There are 5 different types:
@@ -54,7 +54,7 @@ Several new files will be created in the current directory.
 
 > [!TIP]
 > You can find a more complex example in your system with: `mdfind mach_port.defs`\
-> And you can compile it from the same folder as the file with: `mig -DLIBSYSCALL_INTERFACE mach_ports.defs`
+> And you can compile it from the same folder as the file with: `mig -DLIBSYSCALL_INTERFACE mach_ports.defs`<sup>[[2]](#references)</sup>
 
 In the files **`myipcServer.c`** and **`myipcServer.h`** you can find the declaration and definition of the struct **`SERVERPREFmyipc_subsystem`**, which basically defines the function to call based on the received message ID (we indicated a starting number of 500):
 
@@ -127,7 +127,7 @@ Actually it's possible to identify this relation in the struct **`subsystem_to_n
 #endif
 ```
 
-Finally, another important function to make the server work will be **`myipc_server`**, which is the one that will actually **call the function** related to the received id:
+Finally, another important function to make the server work will be **`myipc_server`**, which is the one that will actually **call the function** related to the received id:<sup>[[3]](#references)</sup>
 
 <pre class="language-c"><code class="lang-c">mig_external boolean_t myipc_server
 	(mach_msg_header_t *InHeadP, mach_msg_header_t *OutHeadP)
@@ -253,7 +253,7 @@ As many binaries now use MIG to expose mach ports, it's interesting to know how 
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
 
-Moreover, MIG functions are just wrappers of the actual function that gets called, which means taht getting its dissasembly and grepping for BL you might be able to find the acatual function being called:
+Moreover, MIG functions are wrappers around the actual function that gets called. Therefore, by obtaining the disassembly and searching for `BL`, you may be able to find the actual function being called:
 
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep BL
@@ -281,7 +281,7 @@ It was previously mentioned that the function that will take care of **calling t
             // Call to sign_extend_64 that can help to identifyf this function
             // This stores in rax the pointer to the call that needs to be called
             // Check the used of the address 0x100004040 (functions addresses array)
-            // 0x1f4 = 500 (the strating ID)
+            // 0x1f4 = 500 (the starting ID)
 <strong>            rax = *(sign_extend_64(rax - 0x1f4) * 0x28 + 0x100004040);
 </strong>            var_20 = rax;
             // If - else, the if returns false, while the else call the correct function and returns true
@@ -341,7 +341,7 @@ This is the same function decompiled in a difefrent Hopper free version:
             }
             if ((r8 & 0x1) == 0x0) {
                     r8 = *(int32_t *)(var_10 + 0x14);
-                    // 0x1f4 = 500 (the strating ID)
+                    // 0x1f4 = 500 (the starting ID)
 <strong>                    r8 = r8 - 0x1f4;
 </strong>                    asm { smaddl     x8, w8, w9, x10 };
                     r8 = *(r8 + 0x8);
@@ -395,16 +395,14 @@ This data can be extracted [**using this Hopper script**](https://github.com/kni
 
 ### Debug
 
-The code generated by MIG also calles `kernel_debug` to generate logs about operations on entry and exit. It's possible to check them using **`trace`** or **`kdv`**: `kdv all | grep MIG`
+The code generated by MIG also calls `kernel_debug` to generate logs about operations on entry and exit. It is possible to inspect them using **`trace`** or **`kdv`**: `kdv all | grep MIG`
 
 ## References
 
 - [1] [bootstrap_cmds — `migcom.tproj` (the MIG compiler itself)](https://github.com/apple-oss-distributions/bootstrap_cmds/tree/main/migcom.tproj)
 - [2] [XNU — `osfmk/mach/mach_port.defs` (example MIG subsystem definition)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/mach_port.defs)
-- [3] [XNU — `osfmk/mach/task.defs` (task subsystem MIG definition)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/task.defs)
-- [4] [XNU — `osfmk/mach/message.h` (Mach message header layout)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/message.h)
+- [3] [XNU — `osfmk/mach/message.h` (Mach message header layout)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/message.h)
+- [4] [XNU — `osfmk/mach/task.defs` (task subsystem MIG definition)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/task.defs)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
-
 

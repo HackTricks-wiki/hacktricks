@@ -4,8 +4,8 @@
 
 ## Remote Access Services
 
-These are the common macOS services to access them remotely.\
-You can enable/disable these services in `System Settings` --> `Sharing`
+These are common services for remote access to macOS systems.<sup>[[11]](#references)</sup>\
+You can enable/disable these services in `System Settings` --> `Sharing`<sup>[[1]](#references)</sup>
 
 - **VNC**, known as “Screen Sharing” (tcp:5900)
 - **SSH**, called “Remote Login” (tcp:22)
@@ -38,7 +38,7 @@ sudo launchctl print-disabled system | egrep 'com.apple.screensharing|com.apple.
 
 ### Pentesting ARD
 
-Apple Remote Desktop (ARD) is an enhanced version of [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing) tailored for macOS, offering additional features. A notable vulnerability in ARD is its authentication method for the control screen password, which only uses the first 8 characters of the password, making it prone to [brute force attacks](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) with tools like Hydra or [GoRedShell](https://github.com/ahhh/GoRedShell/), as there are no default rate limits.<sup>[[3]](#references)</sup>
+Apple Remote Desktop (ARD) is an enhanced version of [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing) tailored for macOS, offering additional features. A notable vulnerability in ARD is its authentication method for the control screen password, which only uses the first 8 characters of the password, making it prone to [brute force attacks](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) with tools like Hydra or [GoRedShell](https://github.com/ahhh/GoRedShell/), as there are no default rate limits.<sup>[[2]](#references)</sup>
 
 Vulnerable instances can be identified using **nmap**'s `vnc-info` script. Services supporting `VNC Authentication (2)` are especially susceptible to brute force attacks due to the 8-character password truncation.
 
@@ -54,7 +54,7 @@ From an operator perspective, **Monterey 12.1+ changed remote-enablement workflo
 
 #### Apple Screen Sharing (RFB 003.889 / security type 36) pre-auth file-copy abuse
 
-Recent `screensharingd` research showed that Apple Screen Sharing is not always just classic VNC auth: newer builds speak **RFB `003.889`** and advertise **security type `36`**, where **SRP** authenticates first and **ChaCha20-Poly1305** is only installed after `ccsrp_server_verify_session` succeeds. The public write-up reports the bug as fixed in **macOS Tahoe 26.6** (**July 27, 2026**).<sup>[[8]](#references)[[9]](#references)</sup>
+Recent `screensharingd` research showed that Apple Screen Sharing is not always just classic VNC auth: newer builds speak **RFB `003.889`** and advertise **security type `36`**, where **SRP** authenticates first and **ChaCha20-Poly1305** is only installed after `ccsrp_server_verify_session` succeeds. The public write-up reports the bug as fixed in **macOS Tahoe 26.6** (**July 27, 2026**).<sup>[[8]](#references)</sup><sup>[[9]](#references)</sup>
 
 A useful pattern to remember is the **stale-status parser bypass**: after a successful 4-byte length read, every oversized/error branch must return a fresh error. On affected builds, a big-endian SRP frame length **`>= 32768`** makes the rejection path reuse the previous `NetBufferRead` success (`0`), so the caller sets the session as authenticated even though no password proof ran and no transport crypto was installed. Because unread bytes stay in the shared socket buffer, an attacker can **pipeline malformed SRP data and post-auth RFB messages in the same TCP burst** and get them parsed as **cleartext authenticated traffic**.<sup>[[8]](#references)</sup>
 
@@ -73,7 +73,7 @@ After the bypass, Apple's proprietary **file-copy** message **`0x22`** becomes a
 
 Interesting post-write pivots on writable paths include **`/etc/sudoers.d/`**, **`/etc/zshenv`**, **`/Library/LaunchDaemons/`**, and **`/var/root/.ssh/authorized_keys`**. **SIP does not stop the auth bypass or root file read**, but it does block some write targets such as **`/var/at`**, so cron-based execution only works with SIP disabled. On default SIP-enabled hosts, think in terms of **"root file write into privileged auto-consumed files"** rather than immediate code execution.<sup>[[8]](#references)</sup>
 
-Another SRP pitfall from the same research: servers must validate **`A mod N != 0`** (per RFC 5054), not just `A > 0`. Accepting **`A = N`** can force the shared secret to zero and undermine password verification.<sup>[[8]](#references)[[10]](#references)</sup>
+Another SRP pitfall from the same research: servers must validate **`A mod N != 0`** (per RFC 5054), not just `A > 0`. Accepting **`A = N`** can force the shared secret to zero and undermine password verification.<sup>[[8]](#references)</sup><sup>[[10]](#references)</sup>
 
 **Detection ideas**
 
@@ -112,8 +112,8 @@ In practice, the abuse case is not limited to Finder. Any **scriptable applicati
 
 | Year | CVE | Component | Impact | Fixed in |
 |------|-----|-----------|--------|----------|
-|2023|CVE-2023-42940|Screen Sharing|Incorrect session rendering could cause the *wrong* desktop or window to be transmitted, resulting in leakage of sensitive information|macOS Sonoma 14.2.1 (Dec 2023) |
-|2024|CVE-2024-44248|Screen Sharing Server|A user with screen sharing access may be able to view **another user's screen** because of a state-management issue|macOS Ventura 13.7.2 / Sonoma 14.7.2 / Sequoia 15.1 (Oct-Dec 2024) |
+|2023|CVE-2023-42940|Screen Sharing|Incorrect session rendering could cause the *wrong* desktop or window to be transmitted, resulting in leakage of sensitive information|macOS Sonoma 14.2.1 (Dec 2023) <sup>[[3]](#references)</sup>|
+|2024|CVE-2024-44248|Screen Sharing Server|A user with screen sharing access may be able to view **another user's screen** because of a state-management issue|macOS Ventura 13.7.2 / Sonoma 14.7.2 / Sequoia 15.1 (Oct-Dec 2024) <sup>[[7]](#references)</sup>|
 
 **Hardening tips**
 
@@ -250,8 +250,8 @@ For broader **mDNS spoofing, impersonation, and cross-subnet discovery** techniq
 
 | Year | CVE | Severity | Issue | Patched in |
 |------|-----|----------|-------|------------|
-|2024|CVE-2024-44183|Medium|A logic error in *mDNSResponder* allowed a crafted packet to trigger a **denial-of-service**|macOS Ventura 13.7 / Sonoma 14.7 / Sequoia 15.0 (Sep 2024) |
-|2025|CVE-2025-31222|High|A correctness issue in *mDNSResponder* could be abused for **local privilege escalation**|macOS Ventura 13.7.6 / Sonoma 14.7.6 / Sequoia 15.5 (May 2025) |
+|2024|CVE-2024-44183|Medium|A logic error in *mDNSResponder* allowed a crafted packet to trigger a **denial-of-service**|macOS Ventura 13.7 / Sonoma 14.7 / Sequoia 15.0 (Sep 2024) <sup>[[4]](#references)</sup>|
+|2025|CVE-2025-31222|High|A correctness issue in *mDNSResponder* could be abused for **local privilege escalation**|macOS Ventura 13.7.6 / Sonoma 14.7.6 / Sequoia 15.5 (May 2025) <sup>[[5]](#references)</sup>|
 
 **Mitigation guidance**
 
@@ -275,14 +275,15 @@ sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSResponder.p
 ## References
 
 - [1] [The Mac Hacker's Handbook](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)
-- [2] [The Art of Mac Malware, Volume I: Analysis - Patrick Wardle](https://taomm.org/vol1/analysis.html)
-- [3] [LockBoxx - macOS Red Teaming 206: ARD (Apple Remote Desktop Protocol)](https://lockboxx.blogspot.com/2019/07/macos-red-teaming-206-ard-apple-remote.html)
-- [4] [NVD – CVE-2023-42940](https://nvd.nist.gov/vuln/detail/CVE-2023-42940)
-- [5] [NVD – CVE-2024-44183](https://nvd.nist.gov/vuln/detail/CVE-2024-44183)
+- [2] [LockBoxx - macOS Red Teaming 206: ARD (Apple Remote Desktop Protocol)](https://lockboxx.blogspot.com/2019/07/macos-red-teaming-206-ard-apple-remote.html)
+- [3] [NVD – CVE-2023-42940](https://nvd.nist.gov/vuln/detail/CVE-2023-42940)
+- [4] [NVD – CVE-2024-44183](https://nvd.nist.gov/vuln/detail/CVE-2024-44183)
+- [5] [NVD – CVE-2025-31222](https://nvd.nist.gov/vuln/detail/CVE-2025-31222)
 - [6] [Palo Alto Unit 42 - Lateral Movement on macOS: Unique and Popular Techniques and In-the-Wild Examples](https://unit42.paloaltonetworks.com/unique-popular-techniques-lateral-movement-macos/)
 - [7] [Apple Support - About the security content of macOS Sonoma 14.7.2](https://support.apple.com/en-us/121840)
 - [8] [Apple Screen Sharing Pre-Auth RCE](https://warez.sl0p.foo/apple-screensharing-rce/)
 - [9] [Apple Support - About the security content of macOS Tahoe 26.6](https://support.apple.com/en-us/128067)
 - [10] [RFC 5054 - Using the Secure Remote Password (SRP) Protocol for TLS Authentication](https://www.rfc-editor.org/rfc/rfc5054)
+- [11] [The Art of Mac Malware, Volume I: Analysis - Patrick Wardle](https://taomm.org/)
 
 {{#include ../../banners/hacktricks-training.md}}

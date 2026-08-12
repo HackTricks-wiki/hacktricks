@@ -56,7 +56,7 @@ You can inspect candidate processes and their token/ACLs with **Process Explorer
 
 ### Code
 
-The following code from [here](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). It allows to **indicate a Process ID as argument** and a CMD **running as the user** of the indicated process will be run.\
+The following code comes from [this access-token article](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). It accepts a **process ID as an argument** and starts a command shell **as the user** of that process.<sup>[[3]](#references)</sup>\
 Running in a High Integrity process you can **indicate the PID of a process running as System** (like `winlogon`, `wininit`) and execute a `cmd.exe` as SYSTEM.<sup>[[3]](#references)</sup>
 
 ```cpp

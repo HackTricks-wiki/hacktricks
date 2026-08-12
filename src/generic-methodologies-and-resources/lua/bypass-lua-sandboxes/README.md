@@ -59,6 +59,7 @@ io.popen("/bin/sh -c 'id'")
 ```
 
 Notes:
+
 - Execution happens inside the client process; many anti-cheat/antidebug layers that block external debuggers won’t prevent in-VM process creation.
 - Also check: package.loadlib (arbitrary DLL/.so loading), require with native modules, LuaJIT's ffi (if present), and the debug library (can raise privileges inside the VM).
 
@@ -85,12 +86,14 @@ During _G enumeration, specifically look for:
 
 Minimal usage examples (if reachable):
 
+Lua's loader API changed across versions: in Lua 5.1, `load` reads from a reader function and `loadstring` reads from a string; Lua 5.2's `load` accepts either a string or a reader function, and `loadstring` is deprecated as its equivalent.<sup>[[5]](#references)[[6]](#references)</sup>
+
 ```lua
--- Execute source/bytecode
+-- Lua 5.2+ source loader; Lua 5.1 use loadstring("return 1+1")
 local f = load("return 1+1")
 print(f()) -- 2
 
--- loadstring is alias of load for strings in 5.1
+-- Lua 5.1 string/bytecode loader
 local bc = string.dump(function() return 0x1337 end)
 local g = loadstring(bc) -- in 5.1 may run precompiled bytecode
 print(g())
@@ -121,5 +124,7 @@ This path is engine/version-specific and requires RE. See references for deep di
 - [2] [Bytecode Breakdown: Unraveling Factorio's Lua Security Flaws](https://memorycorruption.net/posts/rce-lua-factorio/)
 - [3] [lua-l (2009): Discussion on dropping the bytecode verifier](https://web.archive.org/web/20230308193701/https://lua-users.org/lists/lua-l/2009-03/msg00039.html)
 - [4] [Exploiting Lua 5.1 bytecode (gist with verifier bypasses/notes)](https://gist.github.com/ulidtko/51b8671260db79da64d193e41d7e7d16)
+- [5] [Lua 5.1 Reference Manual](https://www.lua.org/manual/5.1/manual.html#pdf-loadstring)
+- [6] [Lua 5.2 Reference Manual](https://www.lua.org/manual/5.2/manual.html#pdf-load)
 
 {{#include ../../../banners/hacktricks-training.md}}

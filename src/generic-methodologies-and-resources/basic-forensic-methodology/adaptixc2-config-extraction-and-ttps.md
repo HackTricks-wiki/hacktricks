@@ -7,7 +7,7 @@ AdaptixC2 is a modular, open‑source post‑exploitation/C2 framework with Wind
 - Network/profile indicators for HTTP/SMB/TCP listeners
 - Common loader and persistence TTPs observed in the wild, with links to relevant Windows technique pages
 
-Recent upstream releases also ship DNS/DoH beacon listeners and the separate Gopher agent/listener family, so modern Adaptix infrastructure may expose more than the original HTTP/SMB/TCP surfaces even when a specific sample still uses the classic beacon agent.<sup>[[2]](#references)[[3]](#references)</sup>
+Recent upstream releases also ship DNS/DoH beacon listeners and the separate Gopher agent/listener family, so modern Adaptix infrastructure may expose more than the original HTTP/SMB/TCP surfaces even when a specific sample still uses the classic beacon agent.<sup>[[2]](#references)</sup>
 
 ## Beacon profiles and fields
 
@@ -189,7 +189,7 @@ Tips:
 
 The outer packing format (`u32 size | RC4 ciphertext | 16-byte key`) is reusable, so actor-customized listeners can keep the same extraction workflow while changing the decrypted field layout completely.
 
-A good recent example is the April 2026 Tropic Trooper campaign, where the extracted Adaptix beacon did not contain a standard HTTP/TCP profile. Instead, the decrypted blob stored GitHub transport parameters such as:<sup>[[5]](#references)</sup>
+A good recent example is the March 2026 Tropic Trooper campaign, where the extracted Adaptix beacon did not contain a standard HTTP/TCP profile. Instead, the decrypted blob stored GitHub transport parameters such as:<sup>[[5]](#references)</sup>
 - `repo_owner`
 - `repo_name`
 - `api_host` (for example `api.github.com`)
@@ -207,24 +207,24 @@ In that campaign the custom listener used GitHub issues as the C2 transport, and
 
 ## Network fingerprinting and hunting
 
-HTTP<sup>[[1]](#references)</sup>
+HTTP:<sup>[[1]](#references)</sup>
 - Common: POST to operator‑selected URIs (e.g., /uri.php, /endpoint/api)
 - Custom header parameter used for beacon ID (e.g., X‑Beacon‑Id, X‑App‑Id)
 - User‑agents mimicking Firefox 20 or contemporary Chrome builds
 - Polling cadence visible via sleep_delay/jitter_delay
-- Newer builds can rotate URIs, user-agents, Host headers, and servers across callbacks, so cluster on uncommon header names, response-size patterns, TLS reuse, and timing instead of assuming a single path/UA pair<sup>[[2]](#references)</sup>
+- Newer builds can rotate URIs, user-agents, Host headers, and servers across callbacks, so cluster on uncommon header names, response-size patterns, TLS reuse, and timing instead of assuming a single path/UA pair.<sup>[[2]](#references)</sup>
 
-SMB/TCP<sup>[[1]](#references)</sup>
+SMB/TCP:<sup>[[1]](#references)</sup>
 - SMB named‑pipe listeners for intranet C2 where web egress is constrained
 - TCP beacons may prepend a few bytes before traffic to obfuscate protocol start
 
 Current upstream teamserver defaults
-- `profile.yaml` currently ships with teamserver `0.0.0.0:4321`, endpoint `/endpoint`, certificate/key filenames `server.rsa.crt` and `server.rsa.key`, and extenders for HTTP, SMB, TCP, DNS, Beacon agent, and Gopher<sup>[[2]](#references)</sup>
-- On unmatched routes, the default error handler returns `Server: AdaptixC2` and `Adaptix-Version: v1.2`<sup>[[4]](#references)</sup>
-- The stock 404 body contains `AdaptixC2 404` and `You need to enter the correct connection details.`<sup>[[4]](#references)</sup>
-- Internet-wide scans in 2026 found many exposed teamservers on `4321` and many beacon listeners on `43211`, so both ports are useful seed pivots but should not be treated as exhaustive<sup>[[4]](#references)</sup>
+- `profile.yaml` currently ships with teamserver `0.0.0.0:4321`, endpoint `/endpoint`, certificate/key filenames `server.rsa.crt` and `server.rsa.key`, and extenders for HTTP, SMB, TCP, DNS, Beacon agent, and Gopher.<sup>[[2]](#references)</sup>
+- On unmatched routes, the default error handler returns `Server: AdaptixC2` and `Adaptix-Version: v1.2`.<sup>[[4]](#references)</sup>
+- The stock 404 body contains `AdaptixC2 404` and `You need to enter the correct connection details`.<sup>[[4]](#references)</sup>
+- Internet-wide scans in 2026 found many exposed teamservers on `4321` and many beacon listeners on `43211`, so both ports are useful seed pivots but should not be treated as exhaustive.<sup>[[4]](#references)</sup>
 
-DNS/DoH listener fingerprints<sup>[[4]](#references)</sup>
+DNS/DoH listener fingerprints:<sup>[[4]](#references)</sup>
 - The current BeaconDNS extender answers authoritatively (`AA=true`)
 - Queries that do not match the beacon protocol shape — notably names with fewer than 5 labels before the configured domain — are commonly answered with `TXT "OK"`
 - If the configured base TTL is left at zero, the listener uses a 10-second base and adds up to 59 seconds of jitter
@@ -232,12 +232,12 @@ DNS/DoH listener fingerprints<sup>[[4]](#references)</sup>
 
 ## Loader and persistence TTPs seen in incidents
 
-In‑memory PowerShell loaders<sup>[[1]](#references)</sup>
-- Download Base64/XOR payloads (Invoke‑RestMethod / WebClient)
-- Allocate unmanaged memory, copy shellcode, switch protection to 0x40 (PAGE_EXECUTE_READWRITE) via VirtualProtect
-- Execute via .NET dynamic invocation: Marshal.GetDelegateForFunctionPointer + delegate.Invoke()
+In‑memory PowerShell loaders:<sup>[[1]](#references)</sup>
+- Download Base64/XOR payloads (Invoke‑RestMethod / WebClient).<sup>[[9]](#references)</sup>
+- Allocate unmanaged memory, copy shellcode, switch protection to 0x40 (PAGE_EXECUTE_READWRITE) via VirtualProtect.<sup>[[7]](#references)</sup>
+- Execute via .NET dynamic invocation: Marshal.GetDelegateForFunctionPointer + delegate.Invoke().<sup>[[6]](#references)</sup>
 
-Trojanized signed software / staged shellcode loaders<sup>[[5]](#references)</sup>
+Trojanized signed software / staged shellcode loaders:<sup>[[5]](#references)</sup>
 - A 2026 Tropic Trooper chain used a trojanized SumatraPDF executable (TOSHIS loader) that redirected `_security_init_cookie` into malicious code instead of patching the PE entry point
 - The loader resolved APIs via Adler-32 hashing, downloaded a decoy PDF, fetched second-stage shellcode, decrypted it with AES-128-CBC through WinCrypt (`CryptDeriveKey` from a hardcoded seed), and reflectively executed an Adaptix beacon in memory
 - Persistence later moved to scheduled tasks with benign-looking names such as `\MSDNSvc` or `\MicrosoftUDN`, configured to re-launch the agent roughly every two hours
@@ -248,9 +248,9 @@ Check these pages for in‑memory execution and AMSI/ETW considerations:
 ../../windows-hardening/av-bypass.md
 {{#endref}}
 
-Persistence mechanisms observed<sup>[[1]](#references)</sup>
+Persistence mechanisms observed:<sup>[[1]](#references)</sup>
 - Startup folder shortcut (.lnk) to re‑launch a loader at logon
-- Registry Run keys (HKCU/HKLM ...\CurrentVersion\Run), often with benign‑sounding names like "Updater" to start loader.ps1
+- Registry Run keys (HKCU/HKLM ...\CurrentVersion\Run), often with benign‑sounding names like "Updater" to start loader.ps1.<sup>[[10]](#references)</sup>
 - DLL search‑order hijack by dropping msimg32.dll under %APPDATA%\Microsoft\Windows\Templates for susceptible processes
 
 Technique deep‑dives and checks:
@@ -264,20 +264,20 @@ Technique deep‑dives and checks:
 {{#endref}}
 
 Hunting ideas
-- PowerShell spawning RW→RX transitions: VirtualProtect to PAGE_EXECUTE_READWRITE inside powershell.exe
+- PowerShell spawning RW→RX transitions: VirtualProtect to PAGE_EXECUTE_READWRITE inside powershell.exe.<sup>[[8]](#references)</sup>
 - Dynamic invocation patterns (GetDelegateForFunctionPointer)
-- Unmatched HTTPS 404s with `Server: AdaptixC2`, `Adaptix-Version`, `AdaptixC2 404`, or `You need to enter the correct connection details.`<sup>[[4]](#references)</sup>
-- DNS responses with `AA=true` and `TXT "OK"` for short queries under suspect domains<sup>[[4]](#references)</sup>
-- GitHub API traffic to `/repos/<owner>/<repo>/issues` followed by `ipinfo.io` lookups from the same loader/beacon chain<sup>[[5]](#references)</sup>
-- Startup .lnk under user or common Startup folders<sup>[[1]](#references)</sup>
-- Suspicious Run keys (e.g., "Updater"), and loader names like update.ps1/loader.ps1<sup>[[1]](#references)</sup>
-- Trojanized PE samples that redirect `_security_init_cookie` into downloader code before showing a decoy document<sup>[[5]](#references)</sup>
-- User‑writable DLL paths under %APPDATA%\Microsoft\Windows\Templates containing msimg32.dll<sup>[[1]](#references)</sup>
+- Unmatched HTTPS 404s with `Server: AdaptixC2`, `Adaptix-Version`, `AdaptixC2 404`, or `You need to enter the correct connection details`.<sup>[[4]](#references)</sup>
+- DNS responses with `AA=true` and `TXT "OK"` for short queries under suspect domains.<sup>[[4]](#references)</sup>
+- GitHub API traffic to `/repos/<owner>/<repo>/issues` followed by `ipinfo.io` lookups from the same loader/beacon chain.<sup>[[5]](#references)</sup>
+- Startup .lnk under user or common Startup folders.<sup>[[1]](#references)</sup>
+- Suspicious Run keys (e.g., "Updater"), and loader names like update.ps1/loader.ps1.<sup>[[1]](#references)</sup>
+- Trojanized PE samples that redirect `_security_init_cookie` into downloader code before showing a decoy document.<sup>[[5]](#references)</sup>
+- User‑writable DLL paths under %APPDATA%\Microsoft\Windows\Templates containing msimg32.dll.<sup>[[1]](#references)</sup>
 
 ## Notes on OpSec fields
 
-- KillDate: timestamp after which the agent self‑expires<sup>[[1]](#references)</sup>
-- WorkingTime: hours when the agent should be active to blend with business activity<sup>[[1]](#references)</sup>
+- KillDate: timestamp after which the agent self‑expires.<sup>[[1]](#references)</sup>
+- WorkingTime: hours when the agent should be active to blend with business activity.<sup>[[1]](#references)</sup>
 
 These fields can be used for clustering and to explain observed quiet periods.
 

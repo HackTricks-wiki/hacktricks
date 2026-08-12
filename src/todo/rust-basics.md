@@ -436,6 +436,6 @@ Add the fuzz target to your repo and run it in your pipeline.
 ## References
 
 - [1] [RustSec Advisory Database](https://rustsec.org)
-- [2] [Cargo-vet: Auditing your Rust Dependencies](https://mozilla.github.io/cargo-vet/)
+- [2] [Cargo-vet: "Auditing your Rust Dependencies"](https://mozilla.github.io/cargo-vet/)
 
 {{#include ../banners/hacktricks-training.md}}

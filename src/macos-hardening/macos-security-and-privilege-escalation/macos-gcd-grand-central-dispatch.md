@@ -4,9 +4,9 @@
 
 ## Basic Information
 
-**Grand Central Dispatch (GCD),** also known as **libdispatch** (`libdispatch.dyld`), is available in both macOS and iOS. It's a technology developed by Apple to optimize application support for concurrent (multithreaded) execution on multicore hardware.
+**Grand Central Dispatch (GCD),** also known as **libdispatch** (`libdispatch.dyld`), is available in both macOS and iOS. It's a technology developed by Apple to optimize application support for concurrent (multithreaded) execution on multicore hardware.<sup>[[4]](#references)</sup>
 
-**GCD** provides and manages **FIFO queues** to which your application can **submit tasks** in the form of **block objects**. Blocks submitted to dispatch queues are **executed on a pool of threads** fully managed by the system. GCD automatically creates threads for executing the tasks in the dispatch queues and schedules those tasks to run on the available cores.
+**GCD** provides and manages **FIFO queues** to which your application can **submit tasks** in the form of **block objects**. Blocks submitted to dispatch queues are **executed on a pool of threads** fully managed by the system. GCD automatically creates threads for executing the tasks in the dispatch queues and schedules those tasks to run on the available cores.<sup>[[1]](#references)</sup>
 
 > [!TIP]
 > In summary, to execute code in **parallel**, processes can send **blocks of code to GCD**, which will take care of their execution. Therefore, processes don't create new threads; **GCD executes the given code with its own pool of threads** (which might increase or decrease as necessary).
@@ -31,11 +31,11 @@ However, at compiler level blocks doesn't exist, they are `os_object`s. Each of 
   - It has some reserved bytes
   - The size of it
   - It'll usually have a pointer to an Objective-C style signature to know how much space is needed for the params (flag `BLOCK_HAS_SIGNATURE`)
-  - If variables are referenced, this block will also have pointers to a copy helper (copying the value at the begining) and dispose helper (freeing it).
+  - If variables are referenced, the block may also contain pointers to copy and dispose helpers. The copy helper transfers retained or otherwise managed captures when the block is copied, and the dispose helper releases that state when the copied block is destroyed.
 
 ### Queues
 
-A dispatch queue is a named object providing FIFO ordering of blocks for executions.
+A dispatch queue is a named object providing FIFO ordering of blocks for executions.<sup>[[3]](#references)</sup>
 
 Blocks a set in queues to be executed, and these support 2 modes: `DISPATCH_QUEUE_SERIAL` and `DISPATCH_QUEUE_CONCURRENT`. Of course the **serial** one **won't have race condition** problems as a block won't be executed until the previous one has finished. But **the other type of queue might have it**.
 
@@ -65,7 +65,7 @@ When creating a queue with **`dispatch_queue_create`** the third argument is a `
 
 ### Dispatch objects
 
-There are several objects that libdispatch uses and queues and blocks are just 2 of them. It's possible to create these objects with `dispatch_object_create`:
+There are several objects that libdispatch uses, and queues and blocks are only two of them. Older reverse-engineering notes may describe a generic creation path as `dispatch_object_create`; that name is useful when recognizing decompiler output or historical notes, but it is not a public generic constructor in current libdispatch headers. Public code creates each object with its type-specific API, such as `dispatch_queue_create`, `dispatch_group_create`, `dispatch_semaphore_create`, or a `dispatch_source_create` variant. Dispatch sources are documented in the public API and implemented in libdispatch's source tree.<sup>[[1]](#references)</sup><sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
 
 - `block`
 - `data`: Data blocks
@@ -80,7 +80,7 @@ There are several objects that libdispatch uses and queues and blocks are just 2
 
 ## Objective-C
 
-In Objetive-C there are different functions to send a block to be executed in parallel:
+Objective-C provides several functions for submitting a block for concurrent execution:
 
 - [**dispatch_async**](https://developer.apple.com/documentation/dispatch/1453057-dispatch_async): Submits a block for asynchronous execution on a dispatch queue and returns immediately.
 - [**dispatch_sync**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync): Submits a block object for execution and returns after that block finishes executing.
@@ -226,6 +226,3 @@ Ghidra will automatically rewrite everything:
 - [4] [Apple Developer — Dispatch](https://developer.apple.com/documentation/dispatch)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

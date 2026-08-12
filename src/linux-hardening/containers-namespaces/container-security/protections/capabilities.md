@@ -4,7 +4,7 @@
 
 ## Overview
 
-Linux capabilities are one of the most important pieces of container security because they answer a subtle but fundamental question: **what does "root" really mean inside a container?** On a normal Linux system, UID 0 historically implied a very broad privilege set. In modern kernels, that privilege is decomposed into smaller units called capabilities. A process may run as root and still lack many powerful operations if the relevant capabilities have been removed.
+Linux capabilities are one of the most important pieces of container security because they answer a subtle but fundamental question: **what does "root" really mean inside a container?** On a normal Linux system, UID 0 historically implied a very broad privilege set. In modern kernels, that privilege is decomposed into smaller units called capabilities. A process may run as root and still lack many powerful operations if the relevant capabilities have been removed. <sup>[[1]](#references)</sup>
 
 Containers depend on this distinction heavily. Many workloads are still launched as UID 0 inside the container for compatibility or simplicity reasons. Without capability dropping, that would be far too dangerous. With capability dropping, a containerized root process can still perform many ordinary in-container tasks while being denied more sensitive kernel operations. That is why a container shell that says `uid=0(root)` does not automatically mean "host root" or even "broad kernel privilege". The capability sets decide how much that root identity is actually worth.
 
@@ -16,7 +16,7 @@ For the full Linux capability reference and many abuse examples, see:
 
 ## Operation
 
-Capabilities are tracked in several sets, including permitted, effective, inheritable, ambient, and bounding sets. For many container assessments, the exact kernel semantics of each set are less immediately important than the final practical question: **which privileged operations can this process successfully perform right now, and which future privilege gains are still possible?**
+Capabilities are tracked in several sets, including permitted, effective, inheritable, ambient, and bounding sets. For many container assessments, the exact kernel semantics of each set are less immediately important than the final practical question: **which privileged operations can this process successfully perform right now, and which future privilege gains are still possible?** <sup>[[1]](#references)</sup>
 
 The reason this matters is that many breakout techniques are really capability problems disguised as container problems. A workload with `CAP_SYS_ADMIN` can reach a huge amount of kernel functionality that a normal container root process should not touch. A workload with `CAP_NET_ADMIN` becomes much more dangerous if it also shares the host network namespace. A workload with `CAP_SYS_PTRACE` becomes much more interesting if it can see host processes through host PID sharing. In Docker or Podman that may appear as `--pid=host`; in Kubernetes it usually appears as `hostPID: true`.
 
@@ -61,7 +61,7 @@ Although many capabilities can matter depending on the target, a few are repeate
 
 ## Runtime Usage
 
-Docker, Podman, containerd-based stacks, and CRI-O all use capability controls, but the defaults and management interfaces differ. Docker exposes them very directly through flags such as `--cap-drop` and `--cap-add`. Podman exposes similar controls and frequently benefits from rootless execution as an additional safety layer. Kubernetes surfaces capability additions and drops through the Pod or container `securityContext`. System-container environments such as LXC/Incus also rely on capability control, but the broader host integration of those systems often tempts operators into relaxing defaults more aggressively than they would in an app-container environment.
+Docker, Podman, containerd-based stacks, and CRI-O all use capability controls, but the defaults and management interfaces differ. Docker exposes them directly through flags such as `--cap-drop` and `--cap-add`. Podman exposes similar controls and commonly combines them with rootless execution as an additional safety layer. Kubernetes surfaces capability additions and drops through the Pod or container `securityContext`; lower-level runtimes express the resulting sets in the OCI runtime configuration. System-container environments such as LXC and Incus also rely on capability control, but their broader host integration can tempt operators to relax defaults more aggressively than they would for an application container. <sup>[[2]](#references)</sup> <sup>[[3]](#references)</sup> <sup>[[4]](#references)</sup> <sup>[[5]](#references)</sup> <sup>[[6]](#references)</sup>
 
 The same principle holds across all of them: a capability that is technically possible to grant is not necessarily one that should be granted. Many real-world incidents begin when an operator adds a capability simply because a workload failed under a stricter configuration and the team needed a quick fix.
 
@@ -188,4 +188,14 @@ After collecting the raw capability information, the next step is interpretation
 | containerd / CRI-O under Kubernetes | Usually runtime default | The effective set depends on the runtime plus the Pod spec | same as Kubernetes row; direct OCI/CRI configuration can also add capabilities explicitly |
 
 For Kubernetes, the important point is that the API does not define one universal default capability set. If the Pod does not add or drop capabilities, the workload inherits the runtime default for that node.
+
+## References
+
+- [1] [capabilities(7) - Linux manual page](https://man7.org/linux/man-pages/man7/capabilities.7.html)
+- [2] [Open Container Initiative - Linux container configuration](https://github.com/opencontainers/runtime-spec/blob/main/config-linux.md#process)
+- [3] [Docker Docs - Runtime privilege and Linux capabilities](https://docs.docker.com/engine/containers/run/#runtime-privilege-and-linux-capabilities)
+- [4] [Kubernetes Documentation - Set capabilities for a container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container)
+- [5] [Podman documentation - `--cap-add` and `--cap-drop`](https://docs.podman.io/en/latest/markdown/podman-run.1.html#cap-add-capability)
+- [6] [Incus documentation - Security](https://linuxcontainers.org/incus/docs/main/explanation/security/)
+
 {{#include ../../../../banners/hacktricks-training.md}}

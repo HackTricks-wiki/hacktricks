@@ -2,19 +2,19 @@
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
-Namespaces are the kernel feature that makes a container feel like "its own machine" even though it is really just a host process tree. They do not create a new kernel and they do not virtualize everything, but they do let the kernel present different views of selected resources to different groups of processes. That is the core of the container illusion: the workload sees a filesystem, process table, network stack, hostname, IPC resources, and user/group identity model that appear local, even though the underlying system is shared.
+Namespaces are the kernel feature that makes a container feel like "its own machine" even though it is really just a host process tree. They do not create a new kernel and they do not virtualize everything, but they do let the kernel present different views of selected resources to different groups of processes. That is the core of the container illusion: the workload sees a filesystem, process table, network stack, hostname, IPC resources, and user/group identity model that appear local, even though the underlying system is shared. <sup>[[1]](#references)</sup>
 
 This is why namespaces are the first concept most people encounter when they learn how containers work. At the same time, they are one of the most commonly misunderstood concepts because readers often assume that "has namespaces" means "is safely isolated". In reality, a namespace only isolates the specific class of resources it was designed for. A process can have a private PID namespace and still be dangerous because it has a writable host bind mount. It can have a private network namespace and still be dangerous because it retains `CAP_SYS_ADMIN` and runs without seccomp. Namespaces are foundational, but they are only one layer in the final boundary.
 
 ## Namespace Types
 
-Linux containers commonly rely on several namespace types at the same time. The **mount namespace** gives the process a separate mount table and therefore a controlled filesystem view. The **PID namespace** changes process visibility and numbering so the workload sees its own process tree. The **network namespace** isolates interfaces, routes, sockets, and firewall state. The **IPC namespace** isolates SysV IPC and POSIX message queues. The **UTS namespace** isolates hostname and NIS domain name. The **user namespace** remaps user and group IDs so that root inside the container does not necessarily mean root on the host. The **cgroup namespace** virtualizes the visible cgroup hierarchy, and the **time namespace** virtualizes selected clocks in newer kernels.
+Linux containers commonly rely on several namespace types at the same time. The **mount namespace** gives the process a separate mount table and therefore a controlled filesystem view. The **PID namespace** changes process visibility and numbering so the workload sees its own process tree. The **network namespace** isolates interfaces, routes, sockets, and firewall state. The **IPC namespace** isolates SysV IPC and POSIX message queues. The **UTS namespace** isolates hostname and NIS domain name. The **user namespace** remaps user and group IDs so that root inside the container does not necessarily mean root on the host. The **cgroup namespace** virtualizes the visible cgroup hierarchy, and the **time namespace** virtualizes selected clocks in newer kernels. <sup>[[1]](#references)</sup> <sup>[[2]](#references)</sup>
 
 Each of these namespaces solves a different problem. This is why practical container security analysis often comes down to checking **which namespaces are isolated** and **which ones have been deliberately shared with the host**.
 
 ## Host Namespace Sharing
 
-Many container breakouts do not begin with a kernel vulnerability. They begin with an operator deliberately weakening the isolation model. The examples `--pid=host`, `--network=host`, and `--userns=host` are **Docker/Podman-style CLI flags** used here as concrete examples of host namespace sharing. Other runtimes express the same idea differently. In Kubernetes the equivalents usually appear as Pod settings such as `hostPID: true`, `hostNetwork: true`, or `hostIPC: true`. In lower-level runtime stacks such as containerd or CRI-O, the same behavior is often reached through the generated OCI runtime configuration rather than through a user-facing flag with the same name. In all of these cases, the result is similar: the workload no longer receives the default isolated namespace view.
+Many container breakouts do not begin with a kernel vulnerability. They begin with an operator deliberately weakening the isolation model. The examples `--pid=host`, `--network=host`, and `--userns=host` are **Docker/Podman-style CLI flags** used here as concrete examples of host namespace sharing. Other runtimes express the same idea differently. In Kubernetes the equivalents usually appear as Pod settings such as `hostPID: true`, `hostNetwork: true`, or `hostIPC: true`. In lower-level runtime stacks such as containerd or CRI-O, the same behavior is often reached through the generated OCI runtime configuration rather than through a user-facing flag with the same name. In all of these cases, the result is similar: the workload no longer receives the default isolated namespace view. <sup>[[2]](#references)</sup> <sup>[[3]](#references)</sup>
 
 This is why namespace reviews should never stop at "the process is in some namespace". The important question is whether the namespace is private to the container, shared with sibling containers, or joined directly to the host. In Kubernetes the same idea appears with flags such as `hostPID`, `hostNetwork`, and `hostIPC`. The names change between platforms, but the risk pattern is the same: a shared host namespace makes the container's remaining privileges and reachable host state much more meaningful.
 
@@ -127,4 +127,11 @@ As you read them, keep two ideas in mind. First, each namespace isolates only on
 | containerd / CRI-O under Kubernetes | Usually follow Kubernetes Pod defaults | same as Kubernetes row; direct CRI/OCI specs can also request host namespace joins |
 
 The main portability rule is simple: the **concept** of host namespace sharing is common across runtimes, but the **syntax** is runtime-specific.
+
+## References
+
+- [1] [namespaces(7) - Linux manual page](https://man7.org/linux/man-pages/man7/namespaces.7.html)
+- [2] [Open Container Initiative - Linux container namespaces](https://github.com/opencontainers/runtime-spec/blob/main/config-linux.md#namespaces)
+- [3] [Kubernetes API Reference - PodSpec host namespaces](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#PodSpec)
+
 {{#include ../../../../../banners/hacktricks-training.md}}

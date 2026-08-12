@@ -5,19 +5,15 @@
 ## Objective-C
 
 > [!CAUTION]
-> Note that programs written in Objective-C **retain** their class declarations **when** **compiled** into [Mach-O binaries](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). Such class declarations **include** the name and type of:
+> Programs written in Objective-C retain runtime metadata when compiled into [Mach-O binaries](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). This metadata includes class names, method names and type encodings, and instance-variable names and types that support Objective-C's dynamic runtime. <sup>[[1]](#references)</sup>
 
-- The class
-- The class methods
-- The class instance variables
-
-You can get this information using [**class-dump**](https://github.com/nygard/class-dump):
+You can inspect this information using [**class-dump**](https://github.com/nygard/class-dump):
 
 ```bash
 class-dump Kindle.app
 ```
 
-Note that this names could be obfuscated to make the reversing of the binary more difficult.
+These names may be obfuscated to make reverse engineering more difficult.
 
 ## Classes, Methods & Objects
 
@@ -28,7 +24,7 @@ Note that this names could be obfuscated to make the reversing of the binary mor
 @interface MyVehicle : NSObject
 
 // Declare the properties
-@property NSString *vehicleType;
+@property (copy) NSString *vehicleType;
 @property int numberOfWheels;
 
 // Declare the methods
@@ -41,7 +37,7 @@ Note that this names could be obfuscated to make the reversing of the binary mor
 ### **Class**
 
 ```objectivec
-@implementation MyVehicle : NSObject
+@implementation MyVehicle
 
 // No need to indicate the properties, only define methods
 
@@ -58,7 +54,7 @@ Note that this names could be obfuscated to make the reversing of the binary mor
 
 ### **Object & Call Method**
 
-To create an instance of a class the **`alloc`** method is called which **allocate memory** for each **property** and **zero** those allocations. Then **`init`** is called, which **initilize the properties** to the **required values**.
+To create an instance, **`alloc`** allocates and zero-initializes the object's storage. An **`init`** method then establishes the object's initial state. <sup>[[2]](#references)</sup>
 
 ```objectivec
 // Something like this:
@@ -82,7 +78,7 @@ Class methods are defined with the **plus sign** (+) not the hyphen (-) that is 
 
 ### Setter & Getter
 
-To **set** & **get** properties, you could do it with a **dot notation** or like if you were **calling a method**:
+Properties can be **set** and **read** with dot notation or by calling their accessor methods directly:
 
 ```objectivec
 // Set
@@ -96,20 +92,20 @@ NSLog(@"Number of wheels: %i", [newVehicle numberOfWheels]);
 
 ### **Instance Variables**
 
-Alternatively to setter & getter methods you can use instance variables. These variables have the same name as the properties but starting with a "\_":
+As an alternative to accessor methods, code inside a class can use the instance variable synthesized for a property. By default, its name is the property name prefixed with an underscore:
 
 ```objectivec
 - (void)makeLongTruck {
     _numberOfWheels = +10000;
-    NSLog(@"Number of wheels: %i", self.numberOfLeaves);
+    NSLog(@"Number of wheels: %i", self.numberOfWheels);
 }
 ```
 
 ### Protocols
 
-Protocols are set of method declarations (without properties). A class that implements a protocol implement the declared methods.
+Protocols declare methods that are independent of a particular class hierarchy. A class that adopts a protocol must implement its required methods. <sup>[[2]](#references)</sup>
 
-There are 2 types of methods: **mandatory** and **optional**. By **default** a method is **mandatory** (but you can also indicate it with a **`@required`** tag). To indicate that a method is optional use **`@optional`**.
+Protocol methods are **required** by default; `@required` makes that state explicit, while `@optional` marks the following declarations as optional.
 
 ```objectivec
 @protocol myNewProtocol
@@ -162,14 +158,17 @@ There are 2 types of methods: **mandatory** and **optional**. By **default** a m
 
 @end
 
-int main() {
-    MyVehicle* mySuperCar = [MyVehicle new];
-    [mySuperCar startEngine];
-    mySuperCar.numberOfWheels = 4;
-    NSLog(@"Number of wheels: %i", mySuperCar.numberOfWheels);
-    [mySuperCar setNumberOfWheels:3];
-    NSLog(@"Number of wheels: %i", mySuperCar.numberOfWheels);
-    [mySuperCar makeLongTruck];
+int main(void) {
+    @autoreleasepool {
+        MyVehicle *mySuperCar = [MyVehicle new];
+        [mySuperCar startEngine];
+        mySuperCar.numberOfWheels = 4;
+        NSLog(@"Number of wheels: %i", mySuperCar.numberOfWheels);
+        [mySuperCar setNumberOfWheels:3];
+        NSLog(@"Number of wheels: %i", mySuperCar.numberOfWheels);
+        [mySuperCar makeLongTruck];
+    }
+    return 0;
 }
 ```
 
@@ -184,7 +183,7 @@ NSString *bookAuthor = [[NSString alloc] initWithCString:"J.D. Salinger" encodin
 NSString *bookPublicationYear = [NSString stringWithCString:"1951" encoding:NSUTF8StringEncoding];
 ```
 
-Basic classes are **immutable**, so to append a string to an existing one a **new NSString needs to be created**.
+`NSString` instances are **immutable**, so appending content produces a new string.
 
 ```objectivec
 NSString *bookDescription = [NSString stringWithFormat:@"%@ by %@ was published in %@", bookTitle, bookAuthor, bookPublicationYear];
@@ -225,7 +224,7 @@ NSNumber *noNumber = @NO; // equivalent to [NSNumber numberWithBool:NO]
 #### Array, Sets & Dictionary
 
 ```objectivec
-// Inmutable arrays
+// Immutable arrays
 NSArray *colorsArray1 = [NSArray arrayWithObjects:@"red", @"green", @"blue", nil];
 NSArray *colorsArray2 = @[@"yellow", @"cyan", @"magenta"];
 NSArray *colorsArray3 = @[firstColor, secondColor, thirdColor];
@@ -238,7 +237,7 @@ NSMutableArray *mutColorsArray = [NSMutableArray array];
 [mutColorsArray addObject:@"yellow"];
 [mutColorsArray replaceObjectAtIndex:0 withObject:@"purple"];
 
-// Inmutable Sets
+// Immutable sets
 NSSet *fruitsSet1 = [NSSet setWithObjects:@"apple", @"banana", @"orange", nil];
 NSSet *fruitsSet2 = [NSSet setWithArray:@[@"apple", @"banana", @"orange"]];
 
@@ -272,7 +271,7 @@ NSMutableDictionary *mutFruitColorsDictionary = [NSMutableDictionary dictionaryW
 
 ### Blocks
 
-Blocks are **functions that behaves as objects** so they can be passed to functions or **stored** in **arrays** or **dictionaries**. Also, they can **represent a value if they are given values** so it's similar to lambdas.
+Blocks are closures that package executable code together with captured state. They can be passed as arguments and stored in collections, making them similar to lambdas in other languages. <sup>[[2]](#references)</sup>
 
 ```objectivec
 returnType (^blockName)(argumentType1, argumentType2, ...) = ^(argumentType1 param1, argumentType2 param2, ...){
@@ -293,7 +292,7 @@ It's also possible to **define a block type to be used as a parameter** in funct
 // Define the block type
 typedef void (^callbackLogger)(void);
 
-// Create a bloack with the block type
+// Create a block with the block type
 callbackLogger myLogger = ^{
     NSLog(@"%@", @"This is my block");
 };
@@ -338,14 +337,21 @@ if ([fileManager removeItemAtPath:@"/path/to/file1.txt" error:nil]) {
 }
 ```
 
-It's also possible to manage files **using `NSURL` objects instead of `NSString`** objects. The method names are similar, but **with `URL` instead of `Path`**.
+Files can also be managed with `NSURL` objects instead of `NSString` paths. Many Foundation APIs expose corresponding method names using `URL` instead of `Path`, such as `copyItemAtURL:toURL:error:`. Apple recommends URLs for filesystem locations because they provide a more efficient internal representation. <sup>[[3]](#references)</sup>
 
 ```objectivec
+NSURL *sourceURL = [NSURL fileURLWithPath:@"/path/to/file1.txt"];
+NSURL *destinationURL = [NSURL fileURLWithPath:@"/path/to/file2.txt"];
 
-
+if ([fileManager copyItemAtURL:sourceURL toURL:destinationURL error:nil]) {
+    NSLog(@"Copy successful");
+}
 ```
 
+## References
+
+- [1] [Apple Developer - Objective-C runtime](https://developer.apple.com/documentation/objectivec/objective-c_runtime)
+- [2] [Apple - Programming with Objective-C](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ProgrammingWithObjectiveC/)
+- [3] [Apple Developer - FileManager](https://developer.apple.com/documentation/foundation/filemanager)
+
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

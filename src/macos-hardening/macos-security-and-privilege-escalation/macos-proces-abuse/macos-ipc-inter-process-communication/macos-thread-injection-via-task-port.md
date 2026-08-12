@@ -118,7 +118,7 @@ Once arbitrary execution and a shared-memory back-channel are available you effe
 * **Mach port transfer** — pass rights in Mach messages via the established ports.  
 * **File-descriptor transfer** — leverage fileports (see *triple_fetch*).
 
-All of this is wrapped in the [`threadexec`](https://github.com/bazad/threadexec) library for easy re-use.
+All of this is wrapped in the [`threadexec`](https://github.com/bazad/threadexec) library for easy reuse.
 
 ---
 
@@ -177,7 +177,7 @@ Distributing your application **without** the `com.apple.security.get-task-allow
 
 | Tool | Year | Remarks |
 |------|------|---------|
-| [`task_vaccine`](https://github.com/rodionovd/task_vaccine) | 2023 | Compact PoC that demonstrates PAC-aware thread hijacking on Ventura/Sonoma |
+| [`task_vaccine`](https://github.com/rodionovd/task_vaccine) | 2023 | Compact PoC that demonstrates PAC-aware thread hijacking on Ventura/Sonoma<sup>[[2]](#references)</sup> |
 | `remote_thread_es` | 2024 | EndpointSecurity helper used by several EDR vendors to surface `REMOTE_THREAD_CREATE` events |
 
 > Reading these projects’ source code is useful to understand API changes introduced in macOS 13/14 and to stay compatible across Intel ↔ Apple Silicon.

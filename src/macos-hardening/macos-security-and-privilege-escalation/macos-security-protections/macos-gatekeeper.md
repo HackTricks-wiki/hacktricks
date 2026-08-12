@@ -256,7 +256,7 @@ com.apple.macl:
 00000040  00 00 00 00 00 00 00 00                          |........|
 00000048
 com.apple.quarantine: 00C1;607842eb;Brave;F643CD5F-6071-46AB-83AB-390BA944DEC5
-# 00c1 -- It has been allowed to eexcute this file (QTN_FLAG_USER_APPROVED = 0x0040)
+# 00c1 -- The user has been allowed to execute this file (QTN_FLAG_USER_APPROVED = 0x0040)
 # 607842eb -- Timestamp
 # Brave -- App
 # F643CD5F-6071-46AB-83AB-390BA944DEC5 -- UID assigned to the file downloaded
@@ -429,7 +429,7 @@ Any way to bypass Gatekeeper (manage to make the user download something and exe
 
 It was observed that if the **Archive Utility** is used for extraction, files with **paths exceeding 886 characters** do not receive the com.apple.quarantine extended attribute. This situation inadvertently allows those files to **circumvent Gatekeeper's** security checks.<sup>[[5]](#references)</sup>
 
-Check the [**original report**](https://labs.withsecure.com/publications/the-discovery-of-cve-2021-1810) for more information.
+Check the [**original report**](https://labs.withsecure.com/publications/the-discovery-of-cve-2021-1810) for more information.<sup>[[5]](#references)</sup>
 
 ### [CVE-2021-30990](https://ronmasas.com/posts/bypass-macos-gatekeeper)
 
@@ -439,7 +439,7 @@ Therefore, you could make `application.app/Contents/MacOS/Automator\ Application
 
 Example os expected location: `/System/Library/CoreServices/Automator\ Application\ Stub.app/Contents/MacOS/Automator\ Application\ Stub`
 
-Check the [**original report**](https://ronmasas.com/posts/bypass-macos-gatekeeper) for more information.
+Check the [**original report**](https://ronmasas.com/posts/bypass-macos-gatekeeper) for more information.<sup>[[6]](#references)</sup>
 
 ### [CVE-2022-22616](https://www.jamf.com/blog/jamf-threat-labs-safari-vuln-gatekeeper-bypass/)
 
@@ -449,7 +449,7 @@ In this bypass a zip file was created with an application starting to compress f
 zip -r test.app/Contents test.zip
 ```
 
-Check the [**original report**](https://www.jamf.com/blog/jamf-threat-labs-safari-vuln-gatekeeper-bypass/) for more information.
+Check the [**original report**](https://www.jamf.com/blog/jamf-threat-labs-safari-vuln-gatekeeper-bypass/) for more information.<sup>[[7]](#references)</sup>
 
 ### [CVE-2022-32910](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-32910)
 
@@ -459,7 +459,7 @@ Even if the components are different the exploitation of this vulnerability is v
 aa archive -d test.app/Contents -o test.app.aar
 ```
 
-Check the [**original report**](https://www.jamf.com/blog/jamf-threat-labs-macos-archive-utility-vulnerability/) for more information.
+Check the [**original report**](https://www.jamf.com/blog/jamf-threat-labs-macos-archive-utility-vulnerability/) for more information.<sup>[[8]](#references)</sup>
 
 ### [CVE-2022-42821](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
 
@@ -483,7 +483,7 @@ python3 -m http.server
 # Download the zip from the browser and decompress it, the file should be without a quarantine xattr
 ```
 
-Check the [**original report**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) for more information.
+Check the [**original report**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) for more information.<sup>[[9]](#references)</sup>
 
 Note that this could also be be exploited with AppleArchives:
 
@@ -500,7 +500,7 @@ It was discovered that **Google Chrome wasn't setting the quarantine attribute**
 
 ### [CVE-2023-27951](https://redcanary.com/blog/gatekeeper-bypass-vulnerabilities/)
 
-AppleDouble file formats store the attributes of a file in a separate file starting by `._`, this helps to copy dile attributes **across macOS machines**. However, it was noticed that after decompressing an AppleDouble file, the file starting with `._` **wasn't given the quarantine attribute**.<sup>[[11]](#references)</sup>
+AppleDouble stores a file's attributes in a separate file whose name starts with `._`; this helps copy file attributes **across macOS machines**. However, after decompressing an AppleDouble file, the file starting with `._` **wasn't given the quarantine attribute**.<sup>[[11]](#references)</sup>
 
 ```bash
 mkdir test
@@ -509,7 +509,7 @@ echo b > test/b
 echo ._a > test/._a
 aa archive -d test/ -o test.aar
 
-# If you downloaded the resulting test.aar and decompress it, the file test/._a won't have a quarantitne attribute
+# If you download and decompress the resulting test.aar, test/._a won't have a quarantine attribute
 ```
 
 Being able to create a file that won't have the quarantine attribute set, it was **possible to bypass Gatekeeper.** The trick was to **create a DMG file application** using the AppleDouble name convention (start it with `._`) and create a **visible file as a sym link to this hidden** file without the quarantine attribute.\
@@ -533,7 +533,7 @@ aa archive -d s/ -o app.aar
 
 ### [CVE-2023-41067]
 
-A Gatekeeper bypass fixed in macOS Sonoma 14.0 allowed crafted apps to run without prompting. Details were disclosed publicly after patching and the issue was actively exploited in the wild before fix. Ensure Sonoma 14.0 or later is installed.
+A Gatekeeper bypass fixed in macOS Sonoma 14.0 allowed crafted apps to run without prompting. Details were disclosed publicly after patching and the issue was actively exploited in the wild before fix. Ensure Sonoma 14.0 or later is installed.<sup>[[13]](#references)</sup>
 
 ### [CVE-2024-27853]
 
@@ -560,7 +560,6 @@ Several vulnerabilities in popular extraction tools (e.g., The Unarchiver) cause
 
 In an ".app" bundle if the quarantine xattr is not added to it, when executing it **Gatekeeper won't be triggered**.
 
-
 ## References
 
 - [1] [Apple Platform Security: About the security content of macOS Sonoma 14.4 (includes CVE-2024-27853)](https://support.apple.com/en-us/HT214084)
@@ -575,5 +574,6 @@ In an ".app" bundle if the quarantine xattr is not added to it, when executing i
 - [10] [F-Secure: Discovery of a Gatekeeper Bypass (CVE-2023-27943)](https://blog.f-secure.com/discovery-of-gatekeeper-bypass-cve-2023-27943/)
 - [11] [Finding and reporting a Gatekeeper bypass exploit with help from Mac Monitor](https://redcanary.com/blog/gatekeeper-bypass-vulnerabilities/)
 - [12] [CODE BLUE 2023: Bypassing macOS Security and Privacy Mechanisms — From Gatekeeper to System Integrity Protection (Koh Nakagawa)](https://codeblue.jp/2023/result/pdf/cb23-bypassing-macos-security-and-privacy-mechanisms-from-gatekeeper-to-system-integrity-protection-by-koh-nakagawa.pdf)
+- [13] [Apple: About the security content of macOS Sonoma 14 (CVE-2023-41067)](https://support.apple.com/en-us/HT213940)
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -41,7 +41,7 @@ The allowances/denies then stored in some TCC databases:
 - There is a **third** TCC database in **`/var/db/locationd/clients.plist`** to indicate clients allowed to **access location services**.
 - The SIP protected file **`/Users/carlospolop/Downloads/REG.db`** (also protected from read access with TCC), contains the **location** of all the **valid TCC databases**.
 - The SIP protected file **`/Users/carlospolop/Downloads/MDMOverrides.plist`** (also protected from read access with TCC), contains more TCC granted permissions.
-- The SIP protected file **`/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist`** (bu readable by anyone) is an allow list of applications that require a TCC exception.
+- The SIP-protected file **`/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist`** (but readable by anyone) is an allow list of applications that require a TCC exception.
 
 > [!TIP]
 > The TCC database in **iOS** is in **`/private/var/mobile/Library/TCC/TCC.db`**
@@ -580,7 +580,7 @@ You could abuse this to **write your own user TCC database**.
 > [!WARNING]
 > With this permission you will be able to **ask finder to access TCC restricted folders** and give you the files, but afaik you **won't be able to make Finder execute arbitrary code** to fully abuse his FDA access.
 >
-> Therefore, you won't be able to abuse the full FDA habilities.
+> Therefore, you won't be able to abuse the full FDA abilities.
 
 This is the TCC prompt to get Automation privileges over Finder:
 
@@ -725,7 +725,7 @@ If you have **`kTCCServiceEndpointSecurityClient`**, you have FDA. End.
 
 ### System Policy SysAdmin File to FDA
 
-**`kTCCServiceSystemPolicySysAdminFiles`** allows to **change** the **`NFSHomeDirectory`** attribute of a user that changes his home folder and therefore allows to **bypass TCC**.
+**`kTCCServiceSystemPolicySysAdminFiles`** allows to **change** the **`NFSHomeDirectory`** attribute of a user that changes his home folder and therefore allows to **bypass TCC**.<sup>[[5]](#references)</sup>
 
 ### User TCC DB to FDA
 
@@ -794,7 +794,7 @@ macos-tcc-bypasses/
 - [2] [maclTrack.command - script to track com.apple.macl (Gist by brunerd)](https://gist.githubusercontent.com/brunerd/8bbf9ba66b2a7787e1a6658816f3ad3b/raw/34cabe2751fb487dc7c3de544d1eb4be04701ac5/maclTrack.command)
 - [3] [Track and Tackle com.apple.macl](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/)
 - [4] [Bypassing macOS TCC User Privacy Protections By Accident And Design](https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/)
+- [5] [Change home directory and bypass TCC aka CVE-2020-27937](https://wojciechregula.blog/post/change-home-directory-and-bypass-tcc-aka-cve-2020-27937/)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
 

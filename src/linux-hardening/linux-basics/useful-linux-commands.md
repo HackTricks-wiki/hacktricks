@@ -317,7 +317,7 @@ iptables -P OUTPUT ACCEPT
 
 ## eBPF Telemetry & Rootkit Hunting
 
-Modern rootkits (TripleCross, BPFDoor variants, etc.) increasingly persist as hidden eBPF programs. Baseline your fleet with `bpftool`/`eBPFmon` so you can spot unsigned programs, unexpected cgroup hooks, or malicious map contents before detaching them.<sup>[[1]](#references)</sup>
+Rootkit research has demonstrated both eBPF-based implants such as TripleCross and BPF-based backdoors such as BPFDoor variants. Treat unexpected BPF programs, attachments, or maps as investigation leads rather than proof of compromise.<sup>[[3]](#references)[[4]](#references)</sup> Baseline authorized systems with `bpftool` or `eBPFmon`: `bpftool` can enumerate programs and maps, dump program instructions, and query supported features, while eBPFmon presents that information in a TUI.<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
 
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
@@ -337,11 +337,11 @@ sudo bpftool feature probe | less
 sudo ebpfmon
 ```
 
-Correlate the bpftool output with expected NIC/cgroup attachments; a sudden `xdp` or `kprobe` program owned by an unapproved PID is a strong indicator of an injected eBPF payload.
+Correlate the `bpftool` output with expected NIC/cgroup attachments; a sudden `xdp` or `kprobe` program owned by an unapproved PID is an investigation lead, not conclusive proof of an injected payload.<sup>[[5]](#references)[[6]](#references)</sup>
 
 ## Journald Incident Triage
 
-systemd-journald keeps structured metadata, so you can pivot by boot, severity, unit, or UID without touching `/var/log/*`. Combine filters with relative timestamps to isolate attack windows or prove log tampering quickly.<sup>[[2]](#references)</sup>
+`journalctl` reads structured entries from `systemd-journald` and supports filtering by boot, priority, unit, UID, and relative time. Combine those filters with JSON output when you need to preserve or compare evidence; filtering alone does not prove that logs were not tampered with.<sup>[[2]](#references)[[7]](#references)</sup>
 
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
@@ -354,12 +354,16 @@ sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking e
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
 
-Add `--grep 'Invalid user' --case-sensitive` or `-k` (kernel ring buffer only) when you need tighter filters, and remember `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME`, and `_TRANSPORT` selectors stack together for multi-tenant hunts.
+Add `--grep 'Invalid user' --case-sensitive` or `-k` (kernel messages only) when you need tighter filters, and remember `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME`, and `_TRANSPORT` selectors can be combined for targeted hunts.<sup>[[7]](#references)</sup>
 
 ## References
 
 - [1] [eBPFmon: A new tool for exploring and interacting with eBPF applications](https://redcanary.com/blog/linux-security/ebpfmon/)
 - [2] [How to use the journalctl command to view Linux logs](https://www.hostinger.com/tutorials/journalctl-command)
+- [3] [h3xduck/TripleCross](https://github.com/h3xduck/TripleCross)
+- [4] [Rapid7 Labs: BPFdoor in Telecom Networks](https://www.rapid7.com/blog/post/tr-bpfdoor-telecom-networks-sleeper-cells-threat-research-report/)
+- [5] [BPF Documentation — The Linux Kernel documentation](https://docs.kernel.org/bpf/)
+- [6] [libbpf/bpftool](https://github.com/libbpf/bpftool)
+- [7] [journalctl(1) — Linux manual page](https://man7.org/linux/man-pages/man1/journalctl.1.html)
 
 {{#include ../../banners/hacktricks-training.md}}
-

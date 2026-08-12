@@ -2,7 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-
 ## Acquisition
 
 > Always acquire **read-only** and **hash while you copy**. Keep the original device **write-blocked** and work only on verified copies.
@@ -37,7 +36,7 @@ sudo guymager --simulate --input /dev/sdb --format EWF --hash sha256 --output /e
 
 ### AFF4 (Advanced Forensics Format 4)
 
-AFF4 is Google’s modern imaging format designed for *very* large evidence (sparse, resumable, cloud-native).<sup>[[1]](#references)</sup>
+The AFF4 v1.0 specification, authored by Bradley L. Schatz and Michael I. Cohen, defines a forensic container with virtualized storage, arbitrary metadata, extensible compression and hashing, and high-throughput operation.<sup>[[1]](#references)</sup>
 
 ```bash
 # Acquire to AFF4 using the reference tool
@@ -81,7 +80,7 @@ aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web
 
 1. Mount the **whole disk** when you want the original partition table (MBR/GPT).
 2. Mount a **single partition file** when you only need one volume.
-3. Always mount **read-only** (`-o ro,norecovery`) and work on **copies**.<sup>[[2]](#references)</sup>
+3. Keep image attachments read-only (for example, qemu-nbd's `--read-only`).<sup>[[2]](#references)</sup> Mount filesystems read-only (`-o ro`).<sup>[[3]](#references)</sup> Work on **copies**.
 
 ### Raw images (dd, AFF4-extracted)
 
@@ -115,9 +114,11 @@ ewfmount evidence.E01 /mnt/ewf
 # 2. Attach the exposed raw file via qemu-nbd (safer than loop)
 sudo qemu-nbd --connect=/dev/nbd1 --read-only /mnt/ewf/ewf1
 
-# 3. Mount the desired partition
+# 3. Mount the desired partition (XFS example; use the filesystem-specific option)
 sudo mount -o ro,norecovery /dev/nbd1p1 /mnt/evidence
 ```
+
+For filesystem-specific no-replay mounts, ext3/ext4 use `noload`, while XFS uses `norecovery` and requires read-only mode.<sup>[[3]](#references)[[4]](#references)</sup>
 
 Alternatively convert on the fly with **xmount**:
 
@@ -151,9 +152,11 @@ mount -o ro /dev/mapper/loop0p2 /mnt
 
 ### Common mount errors & fixes
 
+For a dirty ext3/ext4 filesystem, use `ro,noload` when journal replay must be prevented.<sup>[[3]](#references)</sup>
+
 | Error | Typical Cause | Fix |
 |-------|---------------|-----|
-| `cannot mount /dev/loop0 read-only` | Journaled FS (ext4) not cleanly unmounted | use `-o ro,norecovery` |
+| `cannot mount /dev/loop0 read-only` | Journaled FS (ext4) not cleanly unmounted | use `-o ro,noload` |
 | `bad superblock …` | Wrong offset or damaged FS | calculate offset (`sector*size`) or run `fsck -n` on a copy |
 | `mount: unknown filesystem type 'LVM2_member'` | LVM container | activate volume group with `vgchange -ay` |
 
@@ -170,6 +173,8 @@ kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0
 ## References
 
 - [1] [AFF4 Standard Specification (Advanced Forensic Format v4)](https://github.com/aff4/Standard)
-- [2] [qemu-nbd manual page (mounting disk images safely)](https://manpages.debian.org/qemu-system-common/qemu-nbd.1.en.html)
+- [2] [QEMU qemu-nbd documentation](https://www.qemu.org/docs/master/tools/qemu-nbd.html)
+- [3] [mount(8) Linux manual page](https://man7.org/linux/man-pages/man8/mount.8.html)
+- [4] [The SGI XFS filesystem (Linux kernel documentation)](https://kernel.org/doc/html/v5.9/admin-guide/xfs.html)
 
 {{#include ../../banners/hacktricks-training.md}}

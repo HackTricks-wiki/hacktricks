@@ -35,7 +35,7 @@ Port rights, which define what operations a task can perform, are key to this co
 
 ### File Ports
 
-File ports allows to encapsulate file descriptors in Mac ports (using Mach port rights). It's possible to create a `fileport` from a given FD using `fileport_makeport` and create a FD froma. fileport using `fileport_makefd`.
+File ports allow file descriptors to be encapsulated in Mach ports (using Mach port rights). It is possible to create a `fileport` from a given file descriptor with `fileport_makeport` and create a file descriptor from a `fileport` with `fileport_makefd`.
 
 ### Establishing a communication
 
@@ -68,7 +68,7 @@ For these predefined services, the **lookup process differs slightly**. When a s
 However, this process only applies to predefined system tasks. Non-system tasks still operate as described originally, which could potentially allow for impersonation.
 
 > [!CAUTION]
-> Therefore, launchd should never crash or the whole sysem will crash.
+> Therefore, launchd should never crash or the whole system will crash.
 
 ### A Mach Message
 
@@ -87,7 +87,7 @@ typedef struct {
 } mach_msg_header_t;
 ```
 
-Processes possessing a _**receive right**_ can receive messages on a Mach port. Conversely, the **senders** are granted a _**send**_ or a _**send-once right**_. The send-once right is exclusively for sending a single message, after which it becomes invalid.
+Processes possessing a _**receive right**_ can receive messages on a Mach port. Conversely, the **senders** are granted a _**send**_ or a _**send-once right**_. The send-once right is exclusively for sending a single message, after which it becomes invalid.<sup>[[11]](#references)</sup>
 
 The initial field **`msgh_bits`** is a bitmap:
 
@@ -97,7 +97,7 @@ The initial field **`msgh_bits`** is a bitmap:
 - The **5 least significant bits of the 3rd byte** from can be used for **local port**
 - The **5 least significant bits of the 4th byte** from can be used for **remote port**
 
-The types that can be specified in the voucher, local and remote ports are (from [**mach/message.h**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)):
+The types that can be specified in the voucher, local and remote ports are (from [**mach/message.h**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)):<sup>[[5]](#references)</sup>
 
 ```c
 #define MACH_MSG_TYPE_MOVE_RECEIVE      16      /* Must hold receive right */
@@ -137,7 +137,7 @@ A **trailer** is **information added to the message by the kernel** (cannot be s
 
 However, there are other more **complex** messages, like the ones passing additional port rights or sharing memory, where the kernel also needs to send these objects to the recipient. In this cases the most significant bit of the header `msgh_bits` is set.
 
-The possible descriptors to pass are defined in [**`mach/message.h`**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html):
+The possible descriptors to pass are defined in [**`mach/message.h`**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html):<sup>[[5]](#references)</sup>
 
 ```c
 #define MACH_MSG_PORT_DESCRIPTOR                0
@@ -165,7 +165,7 @@ In 32bits, all the descriptors are 12B and the descriptor type is in the 11th on
 
 ### Mac Ports APIs
 
-Note that ports are associated to the task namespace, so to create or search for a port, the task namespace is also queried (more in `mach/mach_port.h`):
+Note that ports are associated to the task namespace, so to create or search for a port, the task namespace is also queried (more in `mach/mach_port.h`):<sup>[[6]](#references)</sup>
 
 - **`mach_port_allocate` | `mach_port_construct`**: **Create** a port.
   - `mach_port_allocate` can also create a **port set**: receive right over a group of ports. Whenever a message is received it's indicated the port from where it was.
@@ -427,7 +427,7 @@ int main() {
 
 ## Privileged Ports
 
-There are some special ports that allows to **perform certain sensitive actions or access certain sensitive data** in case a tasks have the **SEND** permissions over them. This makes these ports very interesting from an attackers perspective not only because of the capabilities but because it's possible to **share SEND permissions across tasks**.
+Some special ports allow a task to **perform certain sensitive actions or access certain sensitive data** when it has **SEND** rights over them. These ports are interesting from an attacker's perspective because of both their capabilities and the ability to **share SEND rights across tasks**.
 
 ### Host Special Ports
 
@@ -475,7 +475,7 @@ typedef	int	task_special_port_t;
 #define TASK_PAGED_LEDGER_PORT	6	/* Paged resource ledger for task. */
 ```
 
-From [here](https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_special_port.html):<sup>[[9]](#references)</sup>
+From [here](https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_special_port.html):<sup>[[8]](#references)</sup>
 
 - **TASK_KERNEL_PORT**\[task-self send right]: The port used to control this task. Used to send messages that affect the task. This is the port returned by **mach_task_self (see Task Ports below)**.
 - **TASK_BOOTSTRAP_PORT**\[bootstrap send right]: The task's bootstrap port. Used to send messages requesting return of other system service ports.
@@ -487,7 +487,7 @@ From [here](https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_specia
 
 Originally Mach didn't have "processes" it had "tasks" which was considered more like a container of threads. When Mach was merged with BSD **each task was correlated with a BSD process**. Therefore every BSD process has the details it needs to be a process and every Mach task also have its inner workings (except for the inexistent pid 0 which is the `kernel_task`).
 
-There are two very interesting functions related to this:
+There are two very interesting functions related to this:<sup>[[7]](#references)</sup>
 
 - `task_for_pid(target_task_port, pid, &task_port_of_pid)`: Get a SEND right for the task por of the task related to the specified by the `pid` and give it to the indicated `target_task_port` (which is usually the caller task which has used `mach_task_self()`, but could be a SEND port over a different task.)
 - `pid_for_task(task, &pid)`: Given a SEND right to a task, find to which PID this task is related to.
@@ -505,7 +505,7 @@ In order to perform actions within the task, the task needed a `SEND` right to i
 > [!CAUTION]
 > Notice that with a SEND right over a task port of a **different task**, it's possible to perform such actions over a different task.
 
-Moreover, the task_port is also the **`vm_map`** port which allows to **read an manipulate memory** inside a task with functions such as `vm_read()` and `vm_write()`. This basically means that a task with SEND rights over the task_port of a different task is going to be able to **inject code into that task**.
+Moreover, the task port is also the **`vm_map`** port, which allows a caller to **read and manipulate memory** inside a task with functions such as `vm_read()` and `vm_write()`. This means that a task with SEND rights over another task's task port can **inject code into that task**.
 
 Remember that because the **kernel is also a task**, if someone manages to get a **SEND permissions** over the **`kernel_task`**, it'll be able to make the kernel execute anything (jailbreaks).
 
@@ -1132,7 +1132,7 @@ In order to modify values the `clock_priv` subsystem can be sued with functions 
 
 ### Processors and Processor Set
 
-The processor apis allows to control a single logical processor calling functions like `processor_start`, `processor_exit`, `processor_info`, `processor_get_assignment`...
+The processor APIs allow control of a single logical processor through functions such as `processor_start`, `processor_exit`, `processor_info`, and `processor_get_assignment`.
 
 Moreover, the **processor set** apis provides a way to group multiple processors into a group. It's possible to retrieve the default processor set calling **`processor_set_default`**.\
 These are some interesting APIs to interact with the processor set:
@@ -1143,8 +1143,8 @@ These are some interesting APIs to interact with the processor set:
 - `processor_set_stack_usage`
 - `processor_set_info`
 
-As mentioned in [**this post**](https://reverse.put.as/2014/05/05/about-the-processor_set_tasks-access-to-kernel-memory-vulnerability/), in the past this allowed to bypass the previously mentioned protection to get task ports in other processes to control them by calling **`processor_set_tasks`** and getting a host port on every process.\
-Nowadays you need root to use that function and this is protected so you will only be able to get these ports on unprotected processes.<sup>[[11]](#references)</sup>
+As mentioned in [**this post**](https://reverse.put.as/2014/05/05/about-the-processor_set_tasks-access-to-kernel-memory-vulnerability/), in the past this allowed to bypass the previously mentioned protection to get task ports in other processes to control them by calling **`processor_set_tasks`** and getting a host port on every process.<sup>[[10]](#references)</sup>\
+Nowadays you need root to use that function and this is protected so you will only be able to get these ports on unprotected processes.<sup>[[10]](#references)</sup>
 
 You can try it with:
 
@@ -1153,7 +1153,7 @@ You can try it with:
 <summary><strong>processor_set_tasks code</strong></summary>
 
 ````c
-// Maincpart fo the code from https://newosxbook.com/articles/PST2.html
+// Main part of the code from https://newosxbook.com/articles/PST2.html
 //gcc ./port_pid.c -o port_pid
 
 #include <stdio.h>
@@ -1281,7 +1281,7 @@ macos-mig-mach-interface-generator.md
 
 ## MIG handler type confusion -> fake vtable pointer-chain hijack
 
-If a MIG handler **retrieves a C++ object by Mach message-supplied ID** (e.g., from an internal Object Map) and then **assumes a specific concrete type without validating the real dynamic type**, later virtual calls can dispatch through attacker-controlled pointers. In `coreaudiod`’s `com.apple.audio.audiohald` service (CVE-2024-54529), `_XIOContext_Fetch_Workgroup_Port` used the looked-up `HALS_Object` as an `ioct` and executed a vtable call via:<sup>[[10]](#references)</sup>
+If a MIG handler **retrieves a C++ object by Mach message-supplied ID** (e.g., from an internal Object Map) and then **assumes a specific concrete type without validating the real dynamic type**, later virtual calls can dispatch through attacker-controlled pointers. In `coreaudiod`’s `com.apple.audio.audiohald` service (CVE-2024-54529), `_XIOContext_Fetch_Workgroup_Port` used the looked-up `HALS_Object` as an `ioct` and executed a vtable call via:<sup>[[9]](#references)</sup>
 
 ```asm
 mov rax, qword ptr [rdi]
@@ -1316,13 +1316,11 @@ HALS_Object + 0x68  -> controlled_object
 - [3] [knightsc/inject.c – dlopen dylib injection into a remote Mach task (Gist)](https://gist.github.com/knightsc/45edfc4903a9d2fa9f5905f60b02ce5a)
 - [4] [Don't talk all at once: Elevating privileges on macOS by audit token spoofing – Sector 7](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
 - [5] [XNU — `osfmk/mach/message.h` (Mach message structures and flags)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/message.h)
-- [6] [XNU — `osfmk/ipc/ipc_port.h` (port rights and internals)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/ipc/ipc_port.h)
-- [7] [XNU — `osfmk/mach/mach_port.defs` (port manipulation MIG interface)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/mach_port.defs)
-- [8] [XNU — `osfmk/mach/task.defs` (`task_for_pid`, thread/task port operations)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/task.defs)
-- [9] [task_get_special_port – MIT Darwin XNU manual](https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_special_port.html)
-- [10] [Project Zero – Sound Barrier 2](https://projectzero.google/2026/01/sound-barrier-2.html)
-- [11] [About the processor_set_tasks() access to kernel memory vulnerability – reverse.put.as](https://reverse.put.as/2014/05/05/about-the-processor_set_tasks-access-to-kernel-memory-vulnerability/)
+- [6] [XNU — `osfmk/mach/mach_port.defs` (port manipulation MIG interface)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/mach_port.defs)
+- [7] [XNU — `osfmk/mach/task.defs` (`task_for_pid`, thread/task port operations)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/task.defs)
+- [8] [task_get_special_port – MIT Darwin XNU manual](https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_special_port.html)
+- [9] [Project Zero – Sound Barrier 2](https://projectzero.google/2026/01/sound-barrier-2.html)
+- [10] [About the processor_set_tasks() access to kernel memory vulnerability – reverse.put.as](https://reverse.put.as/2014/05/05/about-the-processor_set_tasks-access-to-kernel-memory-vulnerability/)
+- [11] [XNU — `osfmk/ipc/ipc_port.h` (port rights and internals)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/ipc/ipc_port.h)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
-

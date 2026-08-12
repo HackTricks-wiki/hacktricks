@@ -66,7 +66,7 @@ for d in m.decls():
 
 # Machine Arithmetic
 
-Modern CPUs and main-stream programming languages use arithmetic over fixed-size bit-vectors. Machine arithmetic is available in Z3Py as Bit-Vectors.<sup>[[1]](#references)</sup>
+Modern CPUs and main-stream programming languages use arithmetic over fixed-size bit-vectors. Machine arithmetic is available in Z3Py as Bit-Vectors.
 
 ```python
 from z3 import *
@@ -136,7 +136,7 @@ If you need full symbolic execution over a binary instead of manually lifting on
 
 ## Model user-controlled data as bytes first
 
-For reversing, it is usually better to start with `BitVec(..., 8)` for each input byte and then rebuild words exactly as the target does. This preserves wrap-around, signedness bugs, shifts, rotates, and byte-order issues.
+For reversing, it is usually better to start with `BitVec(..., 8)` for each input byte and then rebuild words exactly as the target does. This preserves wrap-around, signedness bugs, shifts, rotates, and byte-order issues.<sup>[[2]](#references)</sup>
 
 ```python
 from z3 import *
@@ -162,7 +162,7 @@ Useful helpers when translating assembly or decompiler code:
 
 ## Model memory/register tables with arrays
 
-When a check depends on `buf[i]`, lookup tables, or emulated memory, `Array` can be cleaner than creating dozens of separate variables.
+When a check depends on `buf[i]`, lookup tables, or emulated memory, `Array` can be cleaner than creating dozens of separate variables.<sup>[[3]](#references)</sup>
 
 ```python
 from z3 import *
@@ -185,7 +185,7 @@ This is especially handy when the binary copies values around memory before vali
 
 ## Incremental solving is great for branch triage
 
-When you already extracted the base constraints, use `push()` / `pop()` (or assumptions) to test alternative branches without rebuilding the solver every time:
+When you already extracted the base constraints, use `push()` / `pop()` (or assumptions) to test alternative branches without rebuilding the solver every time:<sup>[[3]](#references)</sup>
 
 ```python
 from z3 import *
@@ -209,7 +209,7 @@ This is useful when replaying path conditions recovered from a decompiler, or wh
 
 ## Optimize for nicer payloads
 
-Once a model is satisfiable, `Optimize()` can help you get a more usable solution: for example, prefer printable bytes, minimize a checksum component, or maximize some structure that makes the recovered password easier to type or copy.
+Once a model is satisfiable, `Optimize()` can help you get a more usable solution: for example, prefer printable bytes, minimize a checksum component, or maximize some structure that makes the recovered password easier to type or copy.<sup>[[3]](#references)</sup>
 
 ```python
 from z3 import *
@@ -226,7 +226,7 @@ print(bytes(o.model()[c].as_long() for c in key))
 
 ## Strings/sequences for format-heavy serials
 
-If the target mainly checks prefixes, suffixes, substrings, or regex-like structure, `String`/`Seq` constraints can be easier than byte-by-byte bit-vectors:
+If the target mainly checks prefixes, suffixes, substrings, or regex-like structure, `String`/`Seq` constraints can be easier than byte-by-byte bit-vectors:<sup>[[3]](#references)</sup>
 
 ```python
 from z3 import *
@@ -295,8 +295,8 @@ else:
 
 ## References
 
-- [1] [Z3Py Guide - Examples (ericpony)](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
-- [2] [Z3 Guide (Microsoft)](https://microsoft.github.io/z3guide/)
-- [3] [Programming Z3 (Stanford)](https://theory.stanford.edu/~nikolaj/programmingz3.html)
+- [1] [Z3Py Guide with Examples (ericpony z3py-tutorial)](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
+- [2] [Z3 Guide - Bit-Vectors theory (Microsoft z3guide)](https://microsoft.github.io/z3guide/)
+- [3] [Programming Z3 (Nikolaj Bjørner, Leonardo de Moura, Lev Nachmanson, Christoph Wintersteiger)](https://theory.stanford.edu/~nikolaj/programmingz3.html)
 
 {{#include ../../banners/hacktricks-training.md}}

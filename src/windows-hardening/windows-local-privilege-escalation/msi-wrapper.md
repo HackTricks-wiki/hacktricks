@@ -2,21 +2,29 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Download the free version app from [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/), execute it and wrap the "malicious" binary on it.\
-Note that you can wrap a "**.bat**" if you **just** want to **execute** **command lines (instead of cmd.exe select the .bat file)**
+MSI Wrapper can package an executable or script as a Windows Installer (`.msi`) file. Download and start the free edition, then select the executable to package.<sup>[[3]](#references)</sup> To run a sequence of commands, select a `.bat` file as the input rather than packaging `cmd.exe`.<sup>[[1]](#references)</sup>
 
-![MSI Wrapper: Note that you can wrap a " .bat " if you just want to execute command lines (instead of cmd.exe select the .bat file)](<../../images/image (417).png>)
+![Selecting the source executable or batch script in MSI Wrapper](<../../images/image (417).png>)
 
-And this is the most important part of the configuration:
+Configure the execution context and other installer properties carefully:
 
-![MSI Wrapper: And this is the most important part of the configuration](<../../images/image (312).png>)
+![Configuring the application ID and security context in MSI Wrapper](<../../images/image (312).png>)
 
-![MSI Wrapper: And this is the most important part of the configuration](<../../images/image (346).png>)
+![Configuring installer properties in MSI Wrapper](<../../images/image (346).png>)
 
-![MSI Wrapper: And this is the most important part of the configuration](<../../images/image (1072).png>)
+![Reviewing the MSI Wrapper build settings](<../../images/image (1072).png>)
 
-(Please, note that if you try to pack your own binary you will be able to modify these values)
+These values can be changed when packaging a custom binary.
 
-From here just click on **next buttons** and the last **build button and your installer/wrapper will be generated.**
+Continue through the remaining wizard pages and select **Build** to generate the installer.<sup>[[1]](#references)</sup>
+
+> [!WARNING]
+> Creating an MSI does not by itself grant elevated privileges. Whether installation is elevated depends on Windows Installer policy, package context, and user authorization. Microsoft warns that enabling `AlwaysInstallElevated` for both the user and computer lets non-administrators install packages with system privileges.<sup>[[2]](#references)</sup>
+
+## References
+
+- [1] [MSI Wrapper documentation - Getting started](https://www.exemsi.com/documentation/getting-started/)
+- [2] [Microsoft Learn - Installing a package with elevated privileges for a non-admin](https://learn.microsoft.com/en-us/windows/win32/msi/installing-a-package-with-elevated-privileges-for-a-non-admin)
+- [3] [MSI Wrapper - Download](https://www.exemsi.com/download/)
 
 {{#include ../../banners/hacktricks-training.md}}

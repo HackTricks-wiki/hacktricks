@@ -75,6 +75,7 @@ This is useful both for defenders and for red teamers doing self-assessment: if 
 
 ## References
 
+
 - [1] [Objective-See - TCCing is Believing! Apple finally adds TCC events to Endpoint Security!](https://objective-see.org/blog/blog_0x7F.html)
 - [2] [Red Canary - Introducing: Mac Monitor](https://redcanary.com/blog/threat-detection/mac-monitor/)
 

@@ -37,14 +37,14 @@ To learn how to **attack an AD** you need to **understand** really good the **Ke
 You can take a lot to [https://wadcoms.github.io/](https://wadcoms.github.io) to have a quick view of which commands you can run to enumerate/exploit an AD.
 
 > [!WARNING]
-> Kerberos communication **requires a full qualifid name (FQDN)** for performing actions. If you try to access a machine by the IP address, **it'll use NTLM and not kerberos**.
+> Kerberos communication normally **requires a fully qualified domain name (FQDN)** so that the client can obtain a ticket for the correct SPN. Accessing a machine by IP address commonly falls back to NTLM instead of Kerberos.
 
 ## Recon Active Directory (No creds/sessions)
 
 If you just have access to an AD environment but you don't have any credentials/sessions you could:
 
 - **Pentest the network:**
-  - Scan the network, find machines and open ports and try to **exploit vulnerabilities** or **extract credentials** from them (for example, [printers could be very interesting targets](ad-information-in-printers.md).
+  - Scan the network, find machines and open ports, and try to **exploit vulnerabilities** or **extract credentials** from them (for example, [printers can be very interesting targets](ad-information-in-printers.md)).
   - Enumerating DNS could give information about key servers in the domain as web, printers, shares, vpn, media, etc.
     - `gobuster dns -d domain.local -t 25 -w /opt/Seclist/Discovery/DNS/subdomain-top2000.txt`
   - Take a look to the General [**Pentesting Methodology**](../../generic-methodologies-and-resources/pentesting-methodology.md) to find more information about how to do this.
@@ -182,7 +182,7 @@ You might be able to **obtain** some challenge **hashes** to crack **poisoning**
 
 ### NTLM Relay
 
-If you have managed to enumerate the active directory you will have **more emails and a better understanding of the network**. You might be able to to force NTLM [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)  to get access to the AD env.
+Active Directory enumeration provides usernames, email identifiers and naming patterns, candidate hosts, and services that may be coerced into authenticating. Use that context to identify viable NTLM [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) and potential paths into the AD environment.
 
 ### NetExec workspace-driven recon & relay posture checks
 
@@ -264,7 +264,7 @@ Notes:
 
 - NT-candidate inputs **must remain raw 32-hex NT hashes**. Disable rule engines (no `-r`, no hybrid modes) because mangling corrupts the candidate key material.
 - These modes are not inherently faster, but the NTLM keyspace (~30,000 MH/s on an M3 Max) is ~100× quicker than Kerberos RC4 (~300 MH/s). Testing a curated NT list is far cheaper than exploring the entire password space in the slow format.
-- Always run the **latest Hashcat build** (`git clone https://github.com/hashcat/hashcat && make install`) because modes 31500/31600/35300/35400 shipped recently.
+- Always run the **latest Hashcat build** (`git clone https://github.com/hashcat/hashcat && make install`) because modes 31500/31600/35300/35400 shipped recently.<sup>[[7]](#references)</sup>
 - There is currently no NT mode for AS-REQ Pre-Auth, and AES etypes (19600/19700) require the plaintext password because their keys are derived via PBKDF2 from UTF-16LE passwords, not raw NT hashes.
 
 #### Example – Kerberoast RC4 (mode 35300)
@@ -319,7 +319,7 @@ The exact same workflow applies to NetNTLM challenge-responses (`-m 27000/27100`
 
 For this phase you need to have **compromised the credentials or a session of a valid domain account.** If you have some valid credentials or a shell as a domain user, **you should remember that the options given before are still options to compromise other users**.
 
-Before start the authenticated enumeration you should know what is the **Kerberos double hop problem.**
+Before starting authenticated enumeration, understand the **Kerberos double-hop problem**.
 
 
 {{#ref}}
@@ -328,7 +328,7 @@ kerberos-double-hop-problem.md
 
 ### Enumeration
 
-Having compromised an account is a **big step to start compromising the whole domain**, because you are going to be able to start the **Active Directory Enumeration:**
+Compromising an account is a **major step toward assessing the domain**, because it enables authenticated **Active Directory enumeration**:
 
 Regarding [**ASREPRoast**](asreproast.md) you can now find every possible vulnerable user, and regarding [**Password Spraying**](password-spraying.md) you can get a **list of all the usernames** and try the password of the compromised account, empty passwords and new promising passwords.
 
@@ -361,13 +361,13 @@ More about this in:
 kerberoast.md
 {{#endref}}
 
-### Remote connexion (RDP, SSH, FTP, Win-RM, etc)
+### Remote connection (RDP, SSH, FTP, Win-RM, etc.)
 
 Once you have obtained some credentials you could check if you have access to any **machine**. For that matter, you could use **CrackMapExec** to attempt connecting on several servers with different protocols, accordingly to your ports scans.
 
 ### Local Privilege Escalation
 
-If you have compromised credentials or a session as a regular domain user and you have **access** with this user to **any machine in the domain** you should try to find your way to **escalate privileges locally and looting for credentials**. This is because only with local administrator privileges you will be able to **dump hashes of other users** in memory (LSASS) and locally (SAM).
+If you have compromised credentials or a session as a regular domain user and can access **any machine in the domain**, look for a path to **escalate privileges locally and collect credentials**. Local administrator privileges may allow you to **dump other users' hashes** from memory (LSASS) and local storage (SAM).
 
 There is a complete page in this book about [**local privilege escalation in Windows**](../windows-local-privilege-escalation/index.html) and a [**checklist**](../checklist-windows-privilege-escalation.md). Also, don't forget to use [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite).
 
@@ -385,7 +385,7 @@ It's very **unlikely** that you will find **tickets** in the current user **givi
 
 ### NTLM Relay
 
-If you have managed to enumerate the active directory you will have **more emails and a better understanding of the network**. You might be able to to force NTLM [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)**.**
+With domain credentials or a user session, revisit NTLM [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack): authenticated enumeration and coercion techniques can expose relay paths that were unavailable during unauthenticated reconnaissance.
 
 ### Looks for Creds in Computer Shares | SMB Shares
 
@@ -461,7 +461,7 @@ crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9c
 ### MSSQL Abuse & Trusted Links
 
 If a user has privileges to **access MSSQL instances**, he could be able to use it to **execute commands** in the MSSQL host (if running as SA), **steal** the NetNTLM **hash** or even perform a **relay** **attack**.\
-Also, if a MSSQL instance is trusted (database link) by a different MSSQL instance. If the user has privileges over the trusted database, he is going to be able to **use the trust relationship to execute queries also in the other instance**. These trusts can be chained and at some point the user might be able to find a misconfigured database where he can execute commands.\
+If an MSSQL instance is trusted through a database link by another instance, a user with privileges over the linked database may be able to **use the trust relationship to execute queries on the other instance**. These trusts can be chained and may eventually reach a misconfigured database where the user can execute commands.\
 **The links between databases work even across forest trusts.**
 
 
@@ -796,7 +796,7 @@ Get-DomainForeignGroupMember
 ### Child-to-Parent forest privilege escalation
 
 ```bash
-# Fro powerview
+# From PowerView
 Get-DomainTrust
 
 SourceName      : sub.domain.local    --> current domain

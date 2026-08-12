@@ -16,7 +16,7 @@ You should start by reading this post for some basic concepts you should know ab
 ## 1. Tokenization
 
 > [!TIP]
-> The goal of this initial phase is very simple: **Divide the input in tokens (ids) in some way that makes sense**.
+> The goal of this phase is to **divide the input into tokens and map them to token IDs**.
 
 
 {{#ref}}
@@ -26,7 +26,7 @@ You should start by reading this post for some basic concepts you should know ab
 ## 2. Data Sampling
 
 > [!TIP]
-> The goal of this second phase is very simple: **Sample the input data and prepare it for the training phase usually by separating the dataset into sentences of a specific length and generating also the expected response.**
+> The goal of this phase is to prepare training sequences of a chosen context length together with their shifted prediction targets.
 
 
 {{#ref}}
@@ -39,7 +39,7 @@ You should start by reading this post for some basic concepts you should know ab
 > The goal of this third phase is very simple: **Assign each of the previous tokens in the vocabulary a vector of the desired dimensions to train the model.** Each word in the vocabulary will a point in a space of X dimensions.\
 > Note that initially the position of each word in the space is just initialised "randomly" and these positions are trainable parameters (will be improved during the training).
 >
-> Moreover, during the token embedding **another layer of embeddings is created** which represents (in this case) the **absolute possition of the word in the training sentence**. This way a word in different positions in the sentence will have a different representation (meaning).
+> Moreover, during token embedding, **another embedding layer is created** that represents (in this case) the **absolute position of the word in the training sentence**. This way, a word in different positions in the sentence has a different representation.
 
 
 {{#ref}}
@@ -82,7 +82,7 @@ You should start by reading this post for some basic concepts you should know ab
 ## 7.0. LoRA Improvements in fine-tuning
 
 > [!TIP]
-> The use of **LoRA reduce a lot the computation** needed to **fine tune** already trained models.
+> LoRA substantially reduces the number of trainable parameters and optimizer state needed to fine-tune a pretrained model.
 
 
 {{#ref}}
@@ -111,6 +111,6 @@ You should start by reading this post for some basic concepts you should know ab
 
 ## References
 
-- [1] [Build a Large Language Model (From Scratch)](https://www.manning.com/books/build-a-large-language-model-from-scratch)
+- [1] [Build a Large Language Model (From Scratch) - Manning](https://www.manning.com/books/build-a-large-language-model-from-scratch)
 
 {{#include ../../banners/hacktricks-training.md}}

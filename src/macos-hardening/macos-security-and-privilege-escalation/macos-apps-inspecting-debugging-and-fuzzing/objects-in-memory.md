@@ -109,7 +109,7 @@ Objective‑C uses mangling to encode selector and variable types of simple and 
 
 The selector would be `processString:withOptions:andError:`
 
-#### Type Encoding
+#### Encoded Signature
 
 - `id` is encoded as `@`
 - `char *` is encoded as `*`
@@ -275,7 +275,8 @@ if (ObjC.available) {
 
 ## References
 
+
 - [1] [Clang/LLVM: Pointer Authentication and the ptrauth.h intrinsics (arm64e ABI)](https://clang.llvm.org/docs/PointerAuthentication.html)
-- [2] [Apple objc runtime headers - objc-object.h (tagged pointers, non‑pointer isa, etc.)](https://opensource.apple.com/source/objc4/objc4-818.2/runtime/objc-object.h.auto.html)
+- [2] [Apple Open Source - Objective-C runtime `objc-object.h`](https://github.com/apple-oss-distributions/objc4/blob/main/runtime/objc-object.h)
 
 {{#include ../../../banners/hacktricks-training.md}}

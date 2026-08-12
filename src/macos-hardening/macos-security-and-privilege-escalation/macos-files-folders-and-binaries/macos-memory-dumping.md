@@ -12,17 +12,17 @@ Swap files, such as `/private/var/vm/swapfile0`, serve as **caches when the phys
 
 The file located at `/private/var/vm/sleepimage` is crucial during **hibernation mode**. **Data from memory is stored in this file when OS X hibernates**. Upon waking the computer, the system retrieves memory data from this file, allowing the user to continue where they left off.
 
-It's worth noting that on modern MacOS systems, this file is typically encrypted for security reasons, making recovery difficult.
+On modern macOS systems, this file is typically encrypted, making recovery difficult.
 
 - To check if encryption is enabled for the sleepimage, the command `sysctl vm.swapusage` can be run. This will show if the file is encrypted.
 
 ### Memory Pressure Logs
 
-Another important memory-related file in MacOS systems is the **memory pressure log**. These logs are located in `/var/log` and contain detailed information about the system's memory usage and pressure events. They can be particularly useful for diagnosing memory-related issues or understanding how the system manages memory over time.
+Another memory-related artifact on macOS is the **memory pressure log**. These logs contain information about memory usage and pressure events and can help explain how the system managed memory over time. Legacy releases may store relevant files under `/var/log`; current releases also expose memory-pressure information through the unified log and diagnostic reports.
 
 ## Dumping memory with osxpmem
 
-In order to dump the memory in a MacOS machine you can use [**osxpmem**](https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip).
+To dump physical memory on supported legacy macOS versions, you can use [**osxpmem**](https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip).
 
 **Note**: This is mostly a **legacy workflow** now. `osxpmem` depends on loading a kernel extension, the [Rekall](https://github.com/google/rekall) project is archived, the latest release is from **2017**, and the published binary targets **Intel Macs**. On current macOS releases, especially on **Apple Silicon**, kext-based full-RAM acquisition is usually blocked by modern kernel-extension restrictions, SIP, and platform-signing requirements. In practice, on modern systems you will more often end up doing a **process-scoped dump** instead of a whole-RAM image.
 
@@ -172,7 +172,7 @@ Older userland tools such as [`readmem`](https://github.com/gdbinit/readmem) als
 
 ## Heap / VM snapshots with `.memgraph`
 
-If you mainly care about **heap objects**, **allocation provenance**, or a snapshot that can be moved to another machine, a `.memgraph` is often more practical than a giant Mach-O core. The `leaks` tooling can generate one from a live process:
+If you mainly care about **heap objects**, **allocation provenance**, or a snapshot that can be moved to another machine, a `.memgraph` is often more practical than a giant Mach-O core. The `leaks` tooling can generate one from a live process:<sup>[[2]](#references)</sup>
 
 ```bash
 # Capture a memory graph from a live process
@@ -261,5 +261,3 @@ For more object-level runtime triage once you can already inspect the process, c
 - [2] [leaks(1) man page](https://keith.github.io/xcode-man-pages/leaks.1.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-

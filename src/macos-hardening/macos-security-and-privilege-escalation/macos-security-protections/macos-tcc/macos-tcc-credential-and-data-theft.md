@@ -4,10 +4,10 @@
 
 ## Overview
 
-macOS TCC (Transparency, Consent, and Control) protects access to sensitive user data. When an attacker **compromises a binary that already has TCC grants**, they inherit those permissions. This page documents the exploitation potential of each data-theft-related TCC permission.
+macOS TCC (Transparency, Consent, and Control) protects access to sensitive user data. When an attacker **compromises a binary that already has TCC grants**, they inherit those permissions. This page documents the exploitation potential of each data-theft-related TCC permission.<sup>[[2]](#references)</sup>
 
 > [!WARNING]
-> Code injection into a TCC-granted binary (via DYLD injection, dylib hijacking, or task port) **silently inherits all its TCC permissions**. There is no additional prompt or verification when the same process reads protected data.
+> Code injection into a TCC-granted binary (via DYLD injection, dylib hijacking, or task port) **silently inherits all its TCC permissions**. There is no additional prompt or verification when the same process reads protected data.<sup>[[4]](#references)</sup>
 
 ---
 
@@ -24,7 +24,7 @@ The macOS Keychain stores:
 
 ### Entitlement: `keychain-access-groups`
 
-Keychain items are organized into **access groups**. An application's `keychain-access-groups` entitlement lists which groups it can access:
+Keychain items are organized into **access groups**. An application's `keychain-access-groups` entitlement lists which groups it can access:<sup>[[1]](#references)</sup>
 
 ```xml
 <key>keychain-access-groups</key>
@@ -266,7 +266,7 @@ This entitlement allows communicating with `com.apple.iCloudHelper` XPC service,
 - **iCloud tokens** — authentication tokens for the user's Apple ID
 - **iCloud Drive** — synced documents from all devices
 - **iCloud Keychain** — passwords synced across all Apple devices
-- **Find My** — location of all the user's Apple devices<sup>[[4]](#references)</sup>
+- **Find My** — location of all the user's Apple devices<sup>[[3]](#references)</sup>
 
 ```bash
 # Find iCloud-entitled binaries
@@ -354,7 +354,7 @@ SELECT path FROM executables WHERE iCloudAccs = 1;" 2>/dev/null
 
 - [1] [Apple Developer — Keychain Services](https://developer.apple.com/documentation/security/keychain_services)
 - [2] [Apple Developer — TCC](https://developer.apple.com/documentation/security/protecting-the-user-s-privacy)
-- [3] [Objective-See — TCC Exploitation](https://objective-see.org/blog/blog_0x4C.html)
-- [4] [OBTS v5.0 — "What Happens on your Mac, Stays on Apple's iCloud?!" (Wojciech Regula)](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+- [3] [OBTS v5.0 — "What Happens on your Mac, Stays on Apple's iCloud?!" (Wojciech Regula)](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+- [4] [Objective-See — TCC Exploitation](https://objective-see.org/blog/blog_0x4C.html)
 
 {{#include ../../../../banners/hacktricks-training.md}}

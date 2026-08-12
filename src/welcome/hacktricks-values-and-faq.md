@@ -25,20 +25,18 @@
 >
 > - **Thank you so much for these resources, how can I thank you?**
 
-You can publicly thanks HackTricks teams for putting together all these resources publicly in a tweet mentioning [**@hacktricks_live**](https://twitter.com/hacktricks_live).\
-If you are specially grateful you can also [**sponsor the project here**](https://github.com/sponsors/carlospolop).\
-And don't forget to **give a star in the Github projects!** (Find the links below).
+You can publicly thank the HackTricks team for putting together these resources in a tweet mentioning [**@hacktricks_live**](https://twitter.com/hacktricks_live).\
+If you're especially grateful, you can sponsor the project through GitHub Sponsors.<sup>[[3]](#references)</sup>\
+And don't forget to **star the GitHub projects**.<sup>[[1]](#references)[[2]](#references)</sup>
 
 > [!TIP]
 >
 > - **How can I contribute to the project?**
 
-You can **share new tips and tricks with the community or fix bugs** you find in the books sending a **Pull Request** to the respective Github pages:
+You can **share new tips and tricks with the community or fix bugs** you find in the books by sending a **pull request** to the respective GitHub repositories.<sup>[[1]](#references)[[2]](#references)</sup>
 
-- [https://github.com/carlospolop/hacktricks](https://github.com/carlospolop/hacktricks)
-- [https://github.com/carlospolop/hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)
-
-Don't forget to **give a star in the Github projects!**
+- [HackTricks repository](https://github.com/HackTricks-wiki/hacktricks)
+- [HackTricks Cloud repository](https://github.com/HackTricks-wiki/hacktricks-cloud)
 
 > [!TIP]
 >
@@ -78,7 +76,7 @@ The first **HackTricks** **value** is to offer **FREE** hacking educational reso
 
 If you think HackTricks books are made for **commercial purposes** you are **COMPLETELY WRONG**.
 
-We have sponsors because, even if all the content is FREE, we want to **offer the community the possibility of appreciating our work** if they want to. Therefore, we offer people the option to donate to HackTricks via [**Github sponsors**](https://github.com/sponsors/carlospolop), and **relevant cybersecurity companies** to sponsor HackTricks and to **have some ads** in the book being the **ads** always placed in places where make them **visible** but **doesn't disturb the learning** process if someone focus in the content.
+We have sponsors because, even if all the content is FREE, we want to **offer the community the possibility of appreciating our work** if they want to. People can donate to HackTricks via **GitHub Sponsors**.<sup>[[3]](#references)</sup> **Relevant cybersecurity companies** can also sponsor HackTricks and place ads in the book, always positioned to be visible without disturbing the learning process.
 
 You won't find HackTricks filled with annoying ads like other blogs with much less content than HackTricks, because HackTricks is not made for commercial purposes.
 
@@ -142,5 +140,10 @@ This license does not grant any trademark or branding rights in relation to the 
 >
 > By using this book, the user agrees to release the authors and publishers from any and all liability and responsibility for any damages, losses, or harm that may result from the use of this book or any of the information contained within it.
 
-{{#include ../banners/hacktricks-training.md}}
+## References
 
+- [1] [HackTricks-wiki/hacktricks — GitHub repository](https://github.com/HackTricks-wiki/hacktricks)
+- [2] [HackTricks-wiki/hacktricks-cloud — GitHub repository](https://github.com/HackTricks-wiki/hacktricks-cloud)
+- [3] [GitHub Sponsors — Carlos Polop](https://github.com/sponsors/carlospolop)
+
+{{#include ../banners/hacktricks-training.md}}

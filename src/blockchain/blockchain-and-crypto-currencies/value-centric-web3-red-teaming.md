@@ -2,10 +2,10 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-The MITRE Adversarial Actions in Digital Asset Payment Techniques (AADAPT) matrix captures attacker behaviors that manipulate digital value rather than just infrastructure. Treat it as a **threat-modeling backbone**: enumerate every component that can mint, price, authorize, or route assets, map those touchpoints to AADAPT techniques, and then drive red-team scenarios that measure whether the environment can resist irreversible economic loss.
+The MITRE Adversarial Actions in Digital Asset Payment Techniques (AADAPT) framework categorizes adversarial actions and techniques targeting digital asset systems.<sup>[[1]](#references)</sup> Treat it as a **threat-modeling backbone**: enumerate every component that can mint, price, authorize, or route assets, map those touchpoints to AADAPT techniques, and then drive red-team scenarios that measure whether the environment can resist irreversible economic loss.
 
 ## 1. Inventory value-bearing components
-Build a map of everything that can influence value state, even if it is off-chain.<sup>[[1]](#references)</sup>
+Build a map of everything that can influence value state, even if it is off-chain.<sup>[[2]](#references)</sup>
 
 - **Custodial signing services** (HSM/KMS clusters, Vault/KMaaS, signing APIs used by bots or back-office jobs). Capture key IDs, policies, automation identities, and approval workflows.
 - **Admin & upgrade paths** for contracts (proxy admins, governance timelocks, emergency pause keys, parameter registries). Include who/what can call them, and under which quorum or delay.
@@ -17,7 +17,7 @@ Build a map of everything that can influence value state, even if it is off-chai
 Deliverable: a value-flow diagram showing how assets move, who authorizes movement, and which external signals influence business logic.
 
 ## 2. Map components to AADAPT behaviors
-Translate the AADAPT taxonomy into concrete attack candidates per component.<sup>[[1]](#references)</sup>
+Translate the AADAPT taxonomy into concrete attack candidates per component.<sup>[[2]](#references)</sup>
 
 | Component | Primary AADAPT focus |
 | --- | --- |
@@ -34,16 +34,16 @@ This mapping ensures you test not just the contracts, but every identity/automat
 1. **Operational weaknesses**: exposed CI credentials, over-privileged IAM roles, misconfigured KMS policies, automation accounts that can request arbitrary signatures, public buckets with bridge configs, etc.
 2. **Value-specific weaknesses**: fragile oracle parameters, upgradable contracts without multi-party approvals, flash-loan sensitive liquidity, governance actions that bypass timelocks.
 
-Work the queue like an adversary: start with the operational footholds that could succeed today, then progress into deep protocol/economic manipulation paths.<sup>[[1]](#references)</sup>
+Work the queue like an adversary: start with the operational footholds that could succeed today, then progress into deep protocol/economic manipulation paths.<sup>[[2]](#references)</sup>
 
 ## 4. Execute in controlled, production-realistic environments
-- **Forked mainnets / isolated testnets**: replicate bytecode, storage, and liquidity so flash-loan paths, oracle drifts, and bridge flows run end-to-end without touching real funds.<sup>[[1]](#references)</sup>
+- **Forked mainnets / isolated testnets**: replicate bytecode, storage, and liquidity so flash-loan paths, oracle drifts, and bridge flows run end-to-end without touching real funds.<sup>[[2]](#references)</sup>
 - **Blast-radius planning**: define circuit breakers, pausable modules, rollback runbooks, and test-only admin keys before detonating a scenario.
 - **Stakeholder coordination**: notify custodians, oracle operators, bridge partners, and compliance so their monitoring teams expect the traffic.
 - **Legal sign-off**: document scope, authorization, and stop conditions when simulations could cross regulated rails.
 
 ## 5. Telemetry aligned with AADAPT techniques
-Instrument telemetry streams so every scenario produces actionable detection data.<sup>[[1]](#references)</sup>
+Instrument telemetry streams so every scenario produces actionable detection data.<sup>[[2]](#references)</sup>
 
 - **Chain-level traces**: full call graphs, gas usage, transaction nonces, block timestamps—to reconstruct flash-loan bundles, reentrancy-like structures, and cross-contract hops.
 - **Application/API logs**: tie each on-chain tx back to a human or automation identity (session ID, OAuth client, API key, CI job ID) with IPs and auth methods.
@@ -55,20 +55,20 @@ Instrument telemetry streams so every scenario produces actionable detection dat
 Tag everything with scenario IDs or synthetic user IDs so analysts can align observables with the AADAPT technique being exercised.
 
 ## 6. Purple-team loop & maturity metrics
-1. Run the scenario in the controlled environment and capture detections (alerts, dashboards, responders paged).<sup>[[1]](#references)</sup>
+1. Run the scenario in the controlled environment and capture detections (alerts, dashboards, responders paged).<sup>[[2]](#references)</sup>
 2. Map each step to the specific AADAPT techniques plus the observables produced in chain/app/KMS/oracle/bridge planes.
 3. Formulate and deploy detection hypotheses (threshold rules, correlation searches, invariant checks).
 4. Re-run until mean time to detect (MTTD) and mean time to contain (MTTC) meet business tolerances and playbooks reliably halt the value loss.
 
-Track program maturity on three axes:<sup>[[1]](#references)</sup>
+Track program maturity on three axes:<sup>[[2]](#references)</sup>
 - **Visibility**: every critical value path has telemetry in each plane.
 - **Coverage**: proportion of prioritized AADAPT techniques exercised end-to-end.
 - **Response**: ability to pause contracts, revoke keys, or freeze flows before irreversible loss.
 
-Typical milestones: (1) completed value inventory + AADAPT mapping, (2) first end-to-end scenario with detections implemented, (3) quarterly purple-team cycles expanding coverage and driving down MTTD/MTTC.<sup>[[1]](#references)</sup>
+Typical milestones: (1) completed value inventory + AADAPT mapping, (2) first end-to-end scenario with detections implemented, (3) quarterly purple-team cycles expanding coverage and driving down MTTD/MTTC.<sup>[[2]](#references)</sup>
 
 ## 7. Scenario templates
-Use these repeatable blueprints to design simulations that map directly to AADAPT behaviors.<sup>[[1]](#references)</sup>
+Use these repeatable blueprints to design simulations that map directly to AADAPT behaviors.<sup>[[2]](#references)</sup>
 
 ### Scenario A – Flash-loan economic manipulation
 - **Objective**: borrow transient capital inside one transaction to distort AMM prices/liquidity and trigger mispriced borrows, liquidations, or mints before repaying.
@@ -103,6 +103,7 @@ Use these repeatable blueprints to design simulations that map directly to AADAP
 
 ## References
 
-- [1] [MITRE AADAPT Framework as a Red Team Roadmap (Bishop Fox)](https://bishopfox.com/blog/mitre-aadapt-framework-as-a-red-team-roadmap)
+- [1] [AADAPT(TM) Cyber Threat Framework for Digital Assets (MITRE)](https://www.mitre.org/sites/default/files/2025-05/PR-25-1118-aadpt-cyber-threat-framework-for-digital-assets.pdf)
+- [2] [MITRE AADAPT Framework as a Red Team Roadmap (Bishop Fox)](https://bishopfox.com/blog/mitre-aadapt-framework-as-a-red-team-roadmap)
 
 {{#include ../../banners/hacktricks-training.md}}
