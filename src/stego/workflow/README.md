@@ -2,23 +2,23 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Більшість завдань зі stego розв’язуються швидше завдяки систематичному triage, ніж шляхом випадкового використання інструментів.
+Більшість stego-задач розв'язуються швидше завдяки систематичному triage, ніж спробам використовувати випадкові інструменти.
 
 ## Основний процес
 
-### Контрольний список швидкого triage
+### Чекліст швидкого triage
 
 Мета — ефективно відповісти на два запитання:
 
-1. Який справжній контейнер/формат?
-2. Чи міститься payload у metadata, дописаних байтах, вбудованих файлах або на рівні вмісту stego?
+1. Який справжній container/format?
+2. Чи міститься payload у metadata, дописаних байтах, embedded files або content-level stego?
 
-#### 1) Визначте контейнер
+#### 1) Визначте container
 ```bash
 file target
 ls -lah target
 ```
-Якщо `file` і розширення не збігаються, перевірте сигнатуру замість того, щоб довіряти суфіксу. `file` також працює за евристичними правилами, і його можна ввести в оману пошкодженими або polyglot-вхідними даними. За потреби розглядайте поширені формати як контейнери (наприклад, документи OOXML є ZIP-пакетами).<sup>[[2]](#references)</sup>
+Якщо `file` і розширення не збігаються, перевірте сигнатуру замість того, щоб довіряти суфіксу. `file` також використовує евристичний аналіз, і його можна ввести в оману пошкодженими або поліглотними вхідними даними. За потреби розглядайте поширені формати як контейнери (наприклад, документи OOXML є ZIP-пакетами).<sup>[[2]](#references)</sup>
 
 #### 2) Шукайте метадані та очевидні рядки
 ```bash
@@ -31,29 +31,29 @@ strings -n 6 target | tail
 strings -e l -n 6 target | head
 strings -e b -n 6 target | head
 ```
-#### 3) Перевірка на додані дані / вбудовані файли
+#### 3) Перевірка доданих даних / вбудованих файлів
 ```bash
 binwalk target
 binwalk -e target
 ```
-Якщо extraction не вдається, але сигнатури повідомляються, вручну витягніть offsets за допомогою `dd` і повторно запустіть `file` для витягнутої області.
+Якщо видобування не вдається, але сигнатури виявлено, вручну виріжте offsets за допомогою `dd` і повторно запустіть `file` для вирізаної області.
 
 #### 4) Якщо це зображення
 
 - Перевірте аномалії: `magick identify -verbose file`
 - Якщо це PNG/BMP, перелічіть bit-planes/LSB: `zsteg -a file.png`
 - Перевірте структуру PNG: `pngcheck -v file.png`
-- Використовуйте візуальні фільтри (Stegsolve / StegoVeritas), якщо вміст може розкриватися завдяки перетворенням каналів/площин
+- Використовуйте візуальні фільтри (Stegsolve / StegoVeritas), якщо вміст може розкриватися після перетворень каналів/площин
 
 #### 5) Якщо це аудіо
 
 - Спочатку побудуйте spectrogram (Sonic Visualiser)
-- Декодуйте/перевірте streams: `ffmpeg -v info -i file -f null -`
+- Декодуйте/перевірте потоки: `ffmpeg -v info -i file -f null -`
 - Якщо аудіо нагадує структуровані тони, перевірте DTMF decoding
 
 ### Основні інструменти
 
-Вони виявляють поширені випадки на рівні контейнера: payloads у metadata, додані bytes і embedded files, замасковані розширенням.<sup>[[1]](#references)[[3]](#references)</sup>
+Вони виявляють поширені випадки на рівні контейнера: payload у метаданих, дописані байти та embedded files, замасковані розширенням.<sup>[[1]](#references)[[3]](#references)</sup>
 
 #### Binwalk
 ```bash
@@ -61,7 +61,7 @@ binwalk file
 binwalk -e file
 binwalk --dd '.*' file
 ```
-Репозиторій: https://github.com/ReFirmLabs/binwalk
+Repo: https://github.com/ReFirmLabs/binwalk
 
 #### Foremost
 ```bash
@@ -83,11 +83,11 @@ strings -n 6 file
 ```bash
 cmp original.jpg stego.jpg -b -l
 ```
-### Контейнери, додані дані та поліглотні прийоми
+### Контейнери, додані дані та polyglot tricks
 
-Багато задач зі стеганографії містять додаткові байти після коректного файлу або вбудовані архіви, замасковані розширенням.
+Багато завдань зі стеганографії містять додаткові байти після коректного файлу або вбудовані архіви, замасковані розширенням.
 
-#### Додані payload
+#### Додані payloads
 
 Багато форматів ігнорують кінцеві байти. ZIP/PDF/script можна додати до контейнера зображення/аудіо.
 
@@ -103,42 +103,45 @@ file carved.bin
 ```
 #### Магічні байти
 
-Коли `file` не може визначити тип, шукайте магічні байти за допомогою `xxd` і порівнюйте їх із відомими сигнатурами:
+Коли `file` не може визначити тип файлу, шукайте магічні байти за допомогою `xxd` і порівнюйте їх із відомими сигнатурами:
 ```bash
 xxd -g 1 -l 32 file
 ```
 #### Zip-in-disguise
 
-Спробуйте `7z` і `unzip`, навіть якщо розширення не вказує на zip:
+Спробуйте `7z` і `unzip`, навіть якщо розширення не вказує на формат zip:
 ```bash
 7z l file
 unzip -l file
 ```
-### Дивні випадки, пов’язані зі stego
+### Дивності поруч зі stego
 
-Швидкі посилання на шаблони, які регулярно трапляються поруч зі stego (QR-from-binary, шрифт Брайля тощо).
+Швидкі посилання на шаблони, які регулярно трапляються поруч зі stego (QR із binary, braille тощо).
 
-#### QR codes from binary
+#### QR-коди з binary
 
-Якщо довжина blob є повним квадратом, це можуть бути необроблені пікселі для зображення/QR.
+Якщо довжина blob є повним квадратом, це можуть бути raw pixels для зображення/QR.
 ```python
 import math
 math.isqrt(2500)  # 50
 ```
 Помічник для перетворення двійкового коду на зображення:
 
-- dCode binary-image helper.<sup>[[5]](#references)</sup>
+- Помічник dCode для перетворення двійкового коду на зображення.<sup>[[5]](#references)</sup>
 
 #### Брайль
 
-- Branah Braille translator.<sup>[[6]](#references)</sup>
+- Перекладач Брайля Branah.<sup>[[6]](#references)</sup>
+
+Для ширших добірок утиліт для стеганографії та ресурсів, присвячених окремим технікам, див. bundled stego-toolkit і curated list від 0xRick.<sup>[[1]](#references)[[7]](#references)</sup>
 
 ## References
 
-- [1] [DominicBreuker/stego-toolkit - Docker image with the most popular steganography tools bundled together](https://github.com/DominicBreuker/stego-toolkit)
-- [2] [Daston et al. — ECMA-376 Open Packaging Conventions](https://ecma-international.org/publications-and-standards/standards/ecma-376/)
+- [1] [DominicBreuker/stego-toolkit - Docker-образ із найпопулярнішими інструментами стеганографії в одному комплекті](https://github.com/DominicBreuker/stego-toolkit)
+- [2] [Daston та ін. — ECMA-376 Open Packaging Conventions](https://ecma-international.org/publications-and-standards/standards/ecma-376/)
 - [3] [ReFirmLabs/binwalk](https://github.com/ReFirmLabs/binwalk)
 - [4] [korczis/foremost](https://github.com/korczis/foremost)
 - [5] [dCode — Двійкове зображення](https://www.dcode.fr/binary-image)
 - [6] [Branah — Перекладач Брайля](https://www.branah.com/braille-translator)
+- [7] [0xRick — Ресурси зі стеганографії](https://0xrick.github.io/lists/stego/)
 {{#include ../../banners/hacktricks-training.md}}
