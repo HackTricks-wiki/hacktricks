@@ -1,31 +1,31 @@
-# Hashes, MACs & KDFs
+# Hash、MAC、KDF
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## CTFでよくあるパターン
+## Common CTFパターン
 
 - 「Signature」が実際には `hash(secret || message)` → length extension。
-- Saltなしの password hash → trivial cracking / lookup。
-- hash と MAC の混同（hash != authentication）。
+- Saltなしのpassword hash → より高速な繰り返しcrackingとprecomputed lookup attack。
+- hashとMACの混同（hash != authentication）。
 
 ## Hash length extension attack
 
 ### Technique
 
-サーバーが次のような「signature」を計算している場合、これを悪用できることがあります。
+length-extension attackは、サーバーが次のような「signature」を計算する場合に可能です。
 
 `sig = HASH(secret || message)`
 
-また、Merkle–Damgård hash（classic examples: MD5, SHA-1, SHA-256）が使用されている必要があります。
+また、MD5、SHA-1、SHA-256などのMerkle-Damgård hashを使用している場合です。
 
-次の情報が分かっている場合：
+以下が分かっている場合：
 
 - `message`
 - `sig`
 - hash function
-- （または brute-force できる）`len(secret)`
+- （またはbrute-forceできる）`len(secret)`
 
-secret を知らなくても、次のデータに対する有効な signature を計算できます。
+secretを知らなくても、次の値に対する有効なsignatureを計算できます。
 
 `message || padding || appended_data`
 
@@ -33,51 +33,48 @@ secret を知らなくても、次のデータに対する有効な signature �
 
 ### Important limitation: HMAC is not affected
 
-Length extension attacks は、Merkle–Damgård hashes に対する `HASH(secret || message)` のような構成に適用されます。これらは、この種類の問題を回避するよう特別に設計された **HMAC**（例：HMAC-SHA256）には適用されません。<sup>[[1]](#references)</sup>
+length-extension attackは、`HASH(secret || message)`のような脆弱なprefix constructionに適用されます。keyとinnerおよびouterのhash処理を別々に組み合わせるHMAC construction（例：HMAC-SHA256）を露出させるものではありません。<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### Tools
 
-- hash_extender:
-{{#ref}}
-https://github.com/iagox86/hash_extender
-{{#endref}}
-- hashpump:
-{{#ref}}
-https://github.com/bwall/HashPump
-{{#endref}}
+- [`hash_extender`](https://github.com/iagox86/hash_extender)<sup>[[3]](#references)</sup>
+- [`hashpumpy`](https://pypi.org/project/hashpumpy/)、HashPump length-extension toolのPython bindings<sup>[[7]](#references)</sup>
 
-### Good explanation
+### 詳細な解説
 
-{{#ref}}
-https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks
-{{#endref}}
+[hash length extension attackについて知っておくべきこと](https://www.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)<sup>[[1]](#references)</sup>
 
 ## Password hashing and cracking
 
-### First questions
+### 最初に確認すること<sup>[[4]](#references)</sup>
 
-- **salted** か？（`salt$hash` 形式を探す）
+- **salt**付きか？（`salt$hash`形式を探す）
 - **fast hash**（MD5/SHA1/SHA256）か、**slow KDF**（bcrypt/scrypt/argon2/PBKDF2）か？
-- **format hint**（hashcat mode / John format）はあるか？
+- **format hint**（hashcat mode / John format）があるか？
 
-### Practical workflow
+### 実践的なworkflow<sup>[[5]](#references)[[6]](#references)</sup>
 
-1. hash を特定する：
+1. hashを特定する：
 - `hashid <hash>`
 - `hashcat --example-hashes | rg -n "<pattern>"`
-2. Saltなしで common な場合：crypto workflow section の online DB と identification tooling を試す。
-3. それ以外は crack する：
+2. Saltなしで一般的なhashの場合：crypto workflow sectionのonline DBとidentification toolingを試す。
+3. それ以外の場合はcrackする：
 - `hashcat -m <mode> -a 0 hashes.txt wordlist.txt`
 - `john --wordlist=wordlist.txt --format=<fmt> hashes.txt`
 
-### Common mistakes you can exploit
+### Exploit可能なよくあるミス
 
-- 複数の user 間で同じ password を再利用 → 1つを crack して pivot。
-- Truncated hashes / custom transforms → normalize して再試行。
-- Weak KDF parameters（例：少ない PBKDF2 iterations）→ それでも crack 可能。
+- 同じpasswordを複数のuserで再利用 → 1つをcrackしてpivot。
+- Truncated hash / custom transform → normalizeして再試行。
+- Weak KDF parameters（例：PBKDF2のiteration数が少ない）→ それでもcrack可能。
 
 ## References
 
-- [1] [Everything you need to know about hash length extension attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
-
+- [1] [SkullSecurity - hash length-extension attackについて知っておくべきこと](https://www.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
+- [2] [NIST FIPS 198-1 - Keyed-Hash Message Authentication Code](https://csrc.nist.gov/pubs/fips/198-1/final)
+- [3] [hash_extender](https://github.com/iagox86/hash_extender)
+- [4] [OWASP Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html)
+- [5] [Hashcat example hashes](https://hashcat.net/wiki/doku.php?id=example_hashes)
+- [6] [John the Ripper command-line options](https://www.openwall.com/john/doc/OPTIONS.shtml)
+- [7] [PyPI: `hashpumpy` HashPump用Python bindings](https://pypi.org/project/hashpumpy/)
 {{#include ../../banners/hacktricks-training.md}}

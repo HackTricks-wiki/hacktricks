@@ -2,15 +2,18 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-このページでは、macOS の default sandbox 内から任意のコマンドを起動するアプリを作成する方法を説明します。
+このページでは、小さな command runner を作成し、macOS App Sandbox entitlement を付与して署名します。`system()` で起動されたコマンドはアプリの sandbox 制限を継承するため、sandbox 内での動作をテストするのに役立ちます。ただし、これは sandbox escape ではありません。<sup>[[1]](#references)</sup>
 
 1. アプリケーションをコンパイルします。
 ```objectivec:main.m
 #include <Foundation/Foundation.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 int main(int argc, const char * argv[]) {
 @autoreleasepool {
-while (true) {
+while (1) {
 char input[512];
 
 printf("Enter command to run (or 'exit' to quit): ");
@@ -18,7 +21,7 @@ if (fgets(input, sizeof(input), stdin) == NULL) {
 break;
 }
 
-// Remove newline character
+// Remove the trailing newline.
 size_t len = strlen(input);
 if (len > 0 && input[len - 1] == '\n') {
 input[len - 1] = '\0';
@@ -34,9 +37,11 @@ system(input);
 return 0;
 }
 ```
-次のコマンドを実行してコンパイルします: `clang -framework Foundation -o SandboxedShellApp main.m`
-
-2. `.app` bundleをビルドします
+次のコマンドでコンパイルします:
+```bash
+clang -framework Foundation -o SandboxedShellApp main.m
+```
+2. `.app` bundleをビルドします：
 ```bash
 mkdir -p SandboxedShellApp.app/Contents/MacOS
 mv SandboxedShellApp SandboxedShellApp.app/Contents/MacOS/
@@ -58,7 +63,7 @@ cat << EOF > SandboxedShellApp.app/Contents/Info.plist
 </plist>
 EOF
 ```
-3. Entitlementsを定義する
+3. entitlements を定義します。2つ目の variant では、ユーザーの Downloads フォルダへの読み取り/書き込みアクセスも許可されます。<sup>[[2]](#references)</sup>
 
 {{#tabs}}
 {{#tab name="sandbox"}}
@@ -94,12 +99,16 @@ EOF
 {{#endtab}}
 {{#endtabs}}
 
-4. Appに署名する（Keychainで証明書を作成する必要があります）
+4. keychain で利用可能な signing identity を使用して app に署名し、その後実行します。手動で署名する場合、`codesign --entitlements` は entitlement property list を app の署名に埋め込みます。<sup>[[1]](#references)</sup>
 ```bash
 codesign --entitlements entitlements.plist -s "YourIdentity" SandboxedShellApp.app
 ./SandboxedShellApp.app/Contents/MacOS/SandboxedShellApp
 
-# An d in case you need this in the future
+# Remove the signature if it is no longer needed.
 codesign --remove-signature SandboxedShellApp.app
 ```
+## References
+
+- [1] [Apple Code Signing Guide: Sandboxing のための Entitlements の手動追加](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/Procedures/Procedures.html#//apple_ref/doc/uid/TP40005929-CH4-SW31)
+- [2] [Apple: `com.apple.security.files.downloads.read-write` entitlement](https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.files.downloads.read-write)
 {{#include ../../../../banners/hacktricks-training.md}}

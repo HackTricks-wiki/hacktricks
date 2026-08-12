@@ -2,60 +2,63 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-このセクションでは、ファイル（画像/音声/動画/ドキュメント/アーカイブ）およびテキストベースのsteganographyから**hidden dataを見つけて抽出する**方法に焦点を当てます。
+このセクションでは、画像、音声、動画、ドキュメント、アーカイブ、テキストから**隠されたデータを発見・抽出する方法**に焦点を当てます。Steganography は、あるデータの中に別のデータを埋め込むことで、通信の存在そのものを隠します。<sup>[[1]](#references)</sup>
 
-cryptographic attacksを探している場合は、**Crypto**セクションに移動してください。
+暗号攻撃を探している場合は、**Crypto**セクションに移動してください。
 
-## Entry Point
+## エントリーポイント
 
-steganographyにはforensicsの問題として取り組みます。実際のcontainerを特定し、signalの強い場所（metadata、追加データ、embedded files）を列挙してから、content-level extraction techniquesを適用します。
+Steganography はフォレンジックの問題としてアプローチします。実際のコンテナを特定し、シグナルの強い場所（メタデータ、追加データ、埋め込みファイル）を列挙してから、コンテンツレベルの抽出技法を適用します。
 
-### Workflow & triage
+### ワークフローとトリアージ
 
-container identification、metadata/string inspection、carving、format-specific branchingを優先する、構造化されたworkflowです。
+コンテナの特定、メタデータや文字列の検査、carving、フォーマット固有の分岐を優先する、体系的なワークフローです。
 
 {{#ref}}
 workflow/README.md
 {{#endref}}
 
-### Images
+### 画像
 
-CTF stegoの大部分が存在する場所です。LSB/bit-planes（PNG/BMP）、chunk/file-formatの奇妙な挙動、JPEG tooling、multi-frame GIF tricksなどを扱います。
+CTF stego の多くが存在する分野です。LSB/bit-planes（PNG/BMP）、chunk/file-format の奇妙な挙動、JPEG tooling、multi-frame GIF のトリックなどを扱います。
 
 {{#ref}}
 images/README.md
 {{#endref}}
 
-### Audio
+### 音声
 
-Spectrogram messages、sample LSB embedding、telephone keypad tones（DTMF）は、繰り返し登場するパターンです。
+Spectrogram メッセージ、sample LSB embedding、telephone keypad tones（DTMF）は、繰り返し登場するパターンです。
 
 {{#ref}}
 audio/README.md
 {{#endref}}
 
-### Text
+### テキスト
 
-テキストが通常どおり表示されるにもかかわらず予期しない挙動をする場合は、Unicode homoglyphs、zero-width characters、またはwhitespace-based encodingを検討してください。
+テキストが通常どおり表示されるにもかかわらず予期しない挙動を示す場合は、Unicode homoglyphs、zero-width characters、または whitespace-based encoding を検討します。
 
 {{#ref}}
 text/README.md
 {{#endref}}
 
-### Documents
+### ドキュメント
 
-PDFsとOffice filesはまずcontainerです。attacksは通常、embedded files/streams、object/relationship graphs、ZIP extractionを中心に行われます。
+PDF と Office ファイルは、まずコンテナとして捉えます。攻撃は通常、埋め込みファイル/stream、object/relationship graph、ZIP extraction を中心に展開されます。
 
 {{#ref}}
 documents/README.md
 {{#endref}}
 
-### Malware and delivery-style steganography
+### Malware と delivery-style steganography
 
-Payload deliveryでは、pixel-level hidingではなく、marker-delimited text payloadsを含む、一見有効なファイル（例：GIF/PNG）が頻繁に使用されます。
+Payload delivery では、GIF や PNG 画像などの一見有効なファイルを使用し、ピクセル内にデータを隠すのではなく、marker で区切られたテキスト payload を保持させることがあります。
 
 {{#ref}}
 malware-and-network/README.md
 {{#endref}}
 
+## References
+
+- [1] [NIST CSRC 用語集 - Steganography](https://csrc.nist.gov/glossary/term/steganography)
 {{#include ../banners/hacktricks-training.md}}

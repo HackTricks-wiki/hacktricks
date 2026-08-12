@@ -2,10 +2,9 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## 概要
+## はじめに
 
-iButton の詳細については、以下を確認してください:
-
+iButton technologyの背景については、以下を参照してください。
 
 {{#ref}}
 ../ibutton.md
@@ -13,31 +12,31 @@ iButton の詳細については、以下を確認してください:
 
 ## 設計
 
-以下の画像の**青色**の部分は、Flipper が**読み取れるように、実際の iButton を配置する**位置です。**緑色**の部分は、Flipper zero で**正しく iButton をエミュレートするために**リーダーに接触させる位置です。<sup>[[1]](#references)</sup>
+次の画像では、**青色**の領域が、読み取りのために物理的なiButtonをFlipper Zeroの接点に当てる位置を示しています。**緑色**の領域は、emulation中にreaderに接触させるべき接点を示しています。<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../images/image (565).png" alt=""><figcaption></figcaption></figure>
 
-## 操作
+## Actions
 
 ### 読み取り
 
-Read Mode では、Flipper は iButton キーが接触するのを待機し、3 種類のキー、**Dallas、Cyfral、Metakom** を読み取れます。Flipper は**キーの種類を自動的に判別します**。キーのプロトコル名は、ID 番号の上に画面表示されます。<sup>[[1]](#references)</sup>
+Read modeでは、Flipper Zeroはkeyが接点に触れるのを待ち、protocolを検出し、key IDの上にprotocolを表示します。組み込みapplicationは、Dallas、Cyfral、Metakomのaccess-control keyをサポートしています。<sup>[[2]](#references)</sup>
 
 ### 手動で追加
 
-**Dallas、Cyfral、Metakom** タイプの iButton を**手動で追加できます**。
+Dallas、Cyfral、Metakom protocolのkey dataを手動で入力できます。<sup>[[2]](#references)</sup>
 
-### **エミュレート**
+### Emulate
 
-保存した iButton（読み取ったもの、または手動で追加したもの）を**エミュレートできます**。
+物理keyから読み取ったものでも、手動で入力したものでも、保存済みのkeyをemulateできます。<sup>[[2]](#references)</sup>
 
 > [!TIP]
-> Flipper Zero をリーダーに接触させて、想定どおりの接点を作れない場合は、**外部 GPIO を使用できます:**
+> 組み込み接点がreaderに届かない場合は、GPIO pinsを介してdata接点とground接点を接続してください。<sup>[[2]](#references)</sup>
 
 <figure><img src="../../../images/image (138).png" alt=""><figcaption></figcaption></figure>
 
-## 参考資料
+## References
 
-- [1] [Taming iButton Keys with Flipper Zero](https://blog.flipperzero.one/taming-ibutton/)
-
+- [1] [Flipper ZeroでiButton Keysを使いこなす](https://blog.flipperzero.one/taming-ibutton/)
+- [2] [Flipper Zero documentation - iButton keysの読み取り](https://docs.flipper.net/zero/ibutton/read)
 {{#include ../../../banners/hacktricks-training.md}}

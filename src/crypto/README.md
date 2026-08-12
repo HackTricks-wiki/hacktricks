@@ -1,54 +1,69 @@
-# 暗号
+# Crypto
 
 {{#include ../banners/hacktricks-training.md}}
 
-このセクションでは、**hacking/CTF向けの実践的な暗号技術**について扱います。一般的なパターンを素早く見分け、適切なツールを選び、既知の攻撃手法を適用する方法を学びます。
+このセクションでは、security testing と CTFs のための実践的な暗号技術を扱います。一般的なパターンの認識、適切なツールの選択、既知の攻撃の適用について説明します。
 
-ファイル内にデータを隠す方法を探している場合は、**Stego**セクションに進んでください。
+ファイル内にデータを隠す技術については、**Stego** セクションを参照してください。
 
 ## このセクションの使い方
 
-Crypto challengeでは速度が重要です。暗号プリミティブを分類し、自分が制御できるもの（oracle/leak/nonce reuse）を特定してから、既知の攻撃テンプレートを適用します。
+まず、primitive とそのパラメータを特定します。次に、攻撃を選択する前に、attacker が何を制御または観測できるかを判断します。たとえば、oracle、leaked value、nonce reuse などです。
 
-### CTFワークフロー
+### CTF workflow
+
 {{#ref}}
 ctf-workflow/README.md
 {{#endref}}
 
-### 対称暗号
+### Symmetric cryptography
+
 {{#ref}}
 symmetric/README.md
 {{#endref}}
 
-### ハッシュ、MAC、KDF
+### Hashes, MACs, and KDFs
+
 {{#ref}}
 hashes/README.md
 {{#endref}}
 
-### 公開鍵暗号
+### Public-key cryptography
+
 {{#ref}}
 public-key/README.md
 {{#endref}}
 
-### TLSと証明書
+### TLS and certificates
+
 {{#ref}}
 tls-and-certificates/README.md
 {{#endref}}
 
-### マルウェアにおける暗号
+### Cryptography in malware
+
 {{#ref}}
 crypto-in-malware/README.md
 {{#endref}}
 
-### その他
+### Miscellaneous
+
 {{#ref}}
 ctf-misc/README.md
 {{#endref}}
 
-## クイックセットアップ
+## Quick setup
 
-- Python: `python3 -m venv .venv && source .venv/bin/activate`
-- ライブラリ: `pip install pycryptodome gmpy2 sympy pwntools`
-- SageMath（lattice/RSA/ECCでは必須になることが多い）: <https://www.sagemath.org/>
+隔離された Python 環境を作成し、一般的に使用されるパッケージをインストールします。PyCryptodome のドキュメントでは、`pip` を使用して `pycryptodome` をインストールすることを推奨しています。SageMath では、サポート対象の各プラットフォーム向けに個別のインストール手順が提供されています。<sup>[[1]](#references)[[2]](#references)</sup>
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install pycryptodome gmpy2 sympy pwntools
+```
+SageMathは、algebra、lattice、RSA、elliptic-curveの計算に役立つことがよくあります。<sup>[[2]](#references)</sup>
 
+## References
+
+- [1] [PyCryptodome documentation - インストール](https://www.pycryptodome.org/src/installation)
+- [2] [SageMath documentation - インストールガイド](https://doc.sagemath.org/html/en/installation/)
 {{#include ../banners/hacktricks-training.md}}

@@ -2,55 +2,50 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
+## 導入
 
-## 概要
-
-125kHzタグの仕組みについて詳しくは、以下を確認してください:
-
+125 kHzタグの動作の背景については、以下を参照してください。
 
 {{#ref}}
 ../pentesting-rfid.md
 {{#endref}}
 
-## 操作
+[低周波RFIDの概要](../pentesting-rfid.md#low-frequency-rfid-tags-125khz)では、一般的なタグの種類とデータ形式について説明しています。
 
-これらのタイプのタグについて詳しくは、[**この概要を読んでください**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz)。
+## 操作
 
 ### 読み取り
 
-カード情報の**読み取り**を試みます。その後、それらを**emulate**できます。<sup>[[1]](#references)</sup>
+**Read**を使用してタグデータをキャプチャします。読み取りに成功すると、Flipper Zeroは保存したタグをエミュレートできます。<sup>[[1]](#references)</sup>
 
 > [!WARNING]
-> 一部のインターホンは、読み取り前にwrite commandを送信することで、キーの複製から自身を保護しようとします。writeが成功した場合、そのタグは偽物とみなされます。FlipperがRFIDをemulateする場合、readerがそれをオリジナルと区別する方法はないため、このような問題は発生しません。
+> 一部のインターホンリーダーは、読み取り前に書き込みコマンドを発行して、書き込み可能な複製タグを検出しようとします。Flipper Zeroのエミュレーションでは、書き込み可能なタグメモリを同じ方法で公開しません。<sup>[[1]](#references)</sup>
 
 ### 手動で追加
 
-手動で入力したデータを示す**偽のカードをFlipper Zeroで作成**し、それをemulateできます。
+Flipper Zeroにタグデータを手動で入力して保存し、その後エミュレートできます。<sup>[[1]](#references)</sup>
 
 #### カード上のID
 
-カードを入手した際、ID（またはその一部）がカードの表面に見える形で書かれていることがあります。
+カードによっては、IDの全部または一部が外装に印刷されています。
 
 - **EM Marin**
 
-たとえば、このEM-Marinカードでは、物理カード上で5バイトのうち最後の3バイトを**平文で読み取る**ことができます。\
-カードから読み取れない場合は、残りの2バイトをbrute-forceできます。<sup>[[1]](#references)</sup>
+たとえば、画像のEM-Marinカードには、5バイトあるIDのうち最後の3バイトが表示されています。タグを読み取れない場合は、不足している2バイトをbrute-forceできる可能性があります。
 
 <figure><img src="../../../images/image (104).png" alt=""><figcaption></figcaption></figure>
 
 - **HID**
 
-このHIDカードでも同様に、3バイトのうち2バイトだけがカードに印刷されています。
+同様に、画像のHIDカードには、3バイトあるIDのうち2バイトだけが印刷されています。
 
 <figure><img src="../../../images/image (1014).png" alt=""><figcaption></figcaption></figure>
 
-### Emulate/Write
+### エミュレート/書き込み
 
-カードを**コピー**するか、IDを**手動で入力**した後、Flipper Zeroでそれを**emulate**するか、実際のカードに**write**できます。<sup>[[1]](#references)</sup>
+タグを読み取るか、IDを手動で入力した後、Flipper Zeroは保存した認証情報をエミュレートできます。対応している書き込み可能なタグでは、保存したデータを互換性のあるカードに書き込むこともできます。<sup>[[1]](#references)</sup>
 
-## 参考資料
+## References
 
-- [1] [Diving into RFID Protocols with Flipper Zero](https://blog.flipperzero.one/rfid/)
-
-
+- [1] [Flipper Zero: RFIDプロトコルを深掘り](https://blog.flipperzero.one/rfid/)
 {{#include ../../../banners/hacktricks-training.md}}

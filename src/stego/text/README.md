@@ -1,35 +1,29 @@
-# テキスト Steganography
+# Text Steganography
 
 {{#include ../../banners/hacktricks-training.md}}
 
-確認する項目:
-
-- Unicode homoglyphs
-- Zero-width characters
-- Whitespace patterns (spaces と tabs)
-
 ## 実践的な手順
 
-プレーンテキストが予期せぬ動作をする場合は、codepointsを調査し、慎重にnormalizeする（証拠を破壊しないこと）。
+プレーンテキストが予期せず動作する場合は、元の証拠を保持し、その codepoints を調べ、コピーに対してのみ正規化を行います。
 
 ### Technique
 
-Text stegoでは、同じように表示される（または見えない）文字が頻繁に利用されます:
+Text Steganography は、同じように表示される、または表示されない文字に依存することがよくあります。
 
-- Homoglyphs: 同じに見える異なるUnicode codepoints（Latinの `a` とCyrillicの `а`）
-- Zero-width characters: joiners、non-joiners、zero-width spaces
-- Whitespace encodings: spaces と tabs、末尾のspaces、行長のパターン<sup>[[1]](#references)</sup>
+- Homoglyphs: 似て見える異なる Unicode codepoints（例: Latin の `a` と Cyrillic の `а`）<sup>[[1]](#references)</sup>
+- Zero-width characters: joiners、non-joiners、zero-width spaces<sup>[[2]](#references)</sup>
+- Whitespace encodings: spaces と tabs の違い、末尾の空白パターン、意図的な行長パターン<sup>[[3]](#references)[[4]](#references)</sup>
 
-その他のhigh-signalなケース:
+その他の signal が強いケース:
 
-- Bidirectional override/control characters（テキストを視覚的に並べ替えられる）
-- Variation selectors と combining characters をcovert channelとして使用する
+- Bidirectional controls: テキストの見た目上の順序を変更できます<sup>[[1]](#references)</sup>
+- Variation selectors と combining characters: 表示されるテキストをほぼ変更せずに、hidden state を保持できます<sup>[[1]](#references)</sup>
 
 ### Decode helpers
 
-- Unicode homoglyph/zero-width playground: https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder
+- [Unicode homoglyph and zero-width-character encoder/decoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)<sup>[[2]](#references)</sup>
 
-### codepointsを調査する
+### codepoints を調べる
 ```bash
 python3 - <<'PY'
 import sys
@@ -39,16 +33,18 @@ if ord(ch) > 127 or ch.isspace():
 print(i, hex(ord(ch)), repr(ch))
 PY
 ```
-## CSS `unicode-range` チャネル
+## CSS `unicode-range` channels
 
-`@font-face` ルールでは、`unicode-range: U+..` エントリにバイトをエンコードできます。コードポイントを抽出し、16進数を連結してデコードします：
+`@font-face` ルールを悪用して、`unicode-range: U+..` エントリにバイトをエンコードできます。コードポイントを抽出し、16進数値を連結してデコードします。<sup>[[3]](#references)</sup>
 ```bash
 grep -o "U+[0-9A-Fa-f]\+" styles.css | tr -d 'U+\n' | xxd -r -p
 ```
-複数の bytes が 1 つの declaration に含まれている場合は、まずカンマで分割し、正規化します（`tr ',+' '\n'`）。Python を使うと、formatting に一貫性がない場合でも bytes の parse と emit を簡単に行えます。<sup>[[1]](#references)</sup>
+宣言ごとに複数の値が含まれている場合は、まずカンマで分割して正規化します（`tr ',+' '\n'`）。フォーマットに一貫性がない場合でも、Pythonでバイト列を解析して出力できます。<sup>[[3]](#references)</sup>
 
 ## References
 
-- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
-
+- [1] [Unicode Technical Report #36: Unicodeのセキュリティに関する考慮事項](https://www.unicode.org/reports/tr36/)
+- [2] [Irongeek: Zero-Width CharactersとHomoglyphsによるUnicode Steganography](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)
+- [3] [0xdf: Flagvent 2025 (Medium) — Santa's Wishlist](https://0xdf.gitlab.io/flagvent2025/medium)
+- [4] [Debian manual: `stegsnow` whitespace steganography](https://manpages.debian.org/trixie/stegsnow/stegsnow.1.en.html)
 {{#include ../../banners/hacktricks-training.md}}
