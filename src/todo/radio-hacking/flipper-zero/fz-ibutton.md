@@ -4,8 +4,7 @@
 
 ## Giriş
 
-iButton hakkında daha fazla bilgi için bkz.:
-
+iButton teknolojisi hakkında arka plan bilgisi için bkz.:
 
 {{#ref}}
 ../ibutton.md
@@ -13,31 +12,31 @@ iButton hakkında daha fazla bilgi için bkz.:
 
 ## Tasarım
 
-Aşağıdaki görseldeki **mavi** bölüm, Flipper'ın **okuyabilmesi** için **gerçek iButton'ı** yerleştirmeniz gereken yerdir. **Yeşil** bölüm ise bir iButton'ı **doğru şekilde emüle etmek** için Flipper Zero ile okuyucuya **dokunmanız** gereken yerdir.<sup>[[1]](#references)</sup>
+Aşağıdaki görselde **mavi** alan, okuma amacıyla fiziksel bir iButton'ın Flipper Zero'nun kontaklarına nasıl yerleştirileceğini gösterir. **Yeşil** alan, emülasyon sırasında hangi kontakların bir okuyucuya temas etmesi gerektiğini gösterir.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../images/image (565).png" alt=""><figcaption></figcaption></figure>
 
-## Eylemler
+## İşlemler
 
 ### Oku
 
-Read Mode'da Flipper, iButton anahtarının dokundurulmasını bekler ve üç tür anahtardan herhangi birini okuyabilir: **Dallas, Cyfral ve Metakom**. Flipper, anahtarın türünü **kendisi belirler**. Anahtar protokolünün adı, ID numarasının üzerinde ekranda görüntülenir.<sup>[[1]](#references)</sup>
+Okuma modunda Flipper Zero, kontaklarına bir anahtarın dokunmasını bekler, protokolü algılar ve protokolü anahtar kimliğinin üzerinde görüntüler. Yerleşik uygulama Dallas, Cyfral ve Metakom erişim kontrolü anahtarlarını destekler.<sup>[[2]](#references)</sup>
 
 ### Manuel olarak ekle
 
-Şu türlerde bir iButton'ı **manuel olarak eklemek** mümkündür: **Dallas, Cyfral ve Metakom**
+Dallas, Cyfral ve Metakom protokolleri için anahtar verilerini manuel olarak girebilirsiniz.<sup>[[2]](#references)</sup>
 
-### **Emüle et**
+### Emüle et
 
-Kaydedilmiş iButton'ları (okunmuş veya manuel olarak eklenmiş) **emüle etmek** mümkündür.
+Fiziksel bir anahtardan okunmuş veya manuel olarak girilmiş fark etmeksizin, kaydedilmiş bir anahtarı emüle edebilirsiniz.<sup>[[2]](#references)</sup>
 
 > [!TIP]
-> Flipper Zero'nun beklenen temas noktalarını okuyucuya dokunduramıyorsanız **harici GPIO'yu kullanabilirsiniz:**
+> Yerleşik kontaklar okuyucuya ulaşamıyorsa veri ve toprak kontaklarını GPIO pinleri üzerinden bağlayın.<sup>[[2]](#references)</sup>
 
 <figure><img src="../../../images/image (138).png" alt=""><figcaption></figcaption></figure>
 
-## Referanslar
+## References
 
 - [1] [Taming iButton Keys with Flipper Zero](https://blog.flipperzero.one/taming-ibutton/)
-
+- [2] [Flipper Zero documentation - Reading iButton keys](https://docs.flipper.net/zero/ibutton/read)
 {{#include ../../../banners/hacktricks-training.md}}

@@ -2,25 +2,25 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Bu bölüm, dosyalardan (görüntüler/ses/video/belgeler/arşivler) ve metin tabanlı steganografiden **gizli verileri bulmaya ve çıkarmaya** odaklanır.
+Bu bölüm; görsellerden, seslerden, videolardan, belgelerden, arşivlerden ve metinlerden **gizli verileri bulmaya ve çıkarmaya** odaklanır. Steganography, verileri başka verilerin içine yerleştirerek bir iletişimin varlığını gizler.<sup>[[1]](#references)</sup>
 
-Kriptografik saldırılarla ilgileniyorsanız **Crypto** bölümüne gidin.
+Kriptografik saldırılar için buradaysanız **Crypto** bölümüne gidin.
 
-## Başlangıç Noktası
+## Entry Point
 
-Steganografiye bir adli bilişim problemi olarak yaklaşın: gerçek container'ı belirleyin, yüksek sinyalli konumları (metadata, eklenmiş veriler, gömülü dosyalar) tarayın ve ancak bundan sonra içerik düzeyinde extraction tekniklerini uygulayın.
+Steganography'yi bir adli bilişim problemi olarak ele alın: gerçek kapsayıcıyı belirleyin, yüksek sinyalli konumları (metadata, eklenmiş veriler, gömülü dosyalar) listeleyin ve ancak bundan sonra içerik düzeyinde extraction tekniklerini uygulayın.
 
-### Workflow ve triage
+### İş akışı ve triage
 
-Container identification, metadata/string inspection, carving ve formata özgü dallanmayı önceliklendiren yapılandırılmış bir workflow.
+Kapsayıcı tanımlamayı, metadata/string incelemesini, carving işlemini ve formata özel dallanmayı önceliklendiren yapılandırılmış bir iş akışı.
 
 {{#ref}}
 workflow/README.md
 {{#endref}}
 
-### Görüntüler
+### Görseller
 
-CTF stego çalışmalarının çoğu burada yer alır: LSB/bit-planes (PNG/BMP), chunk/file-format anormallikleri, JPEG araçları ve çok kareli GIF hileleri.
+CTF stego işlemlerinin çoğunun bulunduğu alan: LSB/bit düzlemleri (PNG/BMP), chunk/dosya formatı anormallikleri, JPEG araçları ve çok kareli GIF hileleri.
 
 {{#ref}}
 images/README.md
@@ -28,7 +28,7 @@ images/README.md
 
 ### Ses
 
-Spectrogram mesajları, sample LSB embedding ve telefon tuş takımı tonları (DTMF) tekrarlanan kalıplardır.
+Spektrogram mesajları, sample LSB embedding ve telefon tuş takımı tonları (DTMF) tekrarlanan kalıplardır.
 
 {{#ref}}
 audio/README.md
@@ -44,18 +44,21 @@ text/README.md
 
 ### Belgeler
 
-PDF'ler ve Office dosyaları öncelikle container'lardır; saldırılar genellikle gömülü dosyalar/stream'ler, object/relationship graph'ları ve ZIP extraction etrafında şekillenir.
+PDF'ler ve Office dosyaları öncelikle kapsayıcılardır; saldırılar genellikle gömülü dosyalar/stream'ler, object/relationship grafikleri ve ZIP extraction etrafında şekillenir.
 
 {{#ref}}
 documents/README.md
 {{#endref}}
 
-### Malware ve delivery tarzı steganografi
+### Malware ve delivery tarzı steganography
 
-Payload delivery sıklıkla pixel-level hiding yerine marker-delimited text payload'ları taşıyan, geçerli görünen dosyaları (ör. GIF/PNG) kullanır.
+Payload delivery, verileri piksellerde gizlemek yerine marker ile ayrılmış text payload'ları taşıyan GIF veya PNG görselleri gibi geçerli görünen dosyaları kullanabilir.
 
 {{#ref}}
 malware-and-network/README.md
 {{#endref}}
 
+## References
+
+- [1] [NIST CSRC Sözlüğü - Steganography](https://csrc.nist.gov/glossary/term/steganography)
 {{#include ../banners/hacktricks-training.md}}

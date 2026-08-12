@@ -2,53 +2,68 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Bu bölüm **hacking/CTF'ler için pratik kriptografiye** odaklanır: yaygın pattern'leri hızlıca tanımak, doğru tools'ları seçmek ve bilinen attack'leri uygulamak.
+Bu bölüm, security testing ve CTF'ler için pratik kriptografiye odaklanır: yaygın kalıpları tanıma, uygun araçları seçme ve bilinen attack'leri uygulama.
 
-Verileri dosyaların içine gizlemek için buradaysanız **Stego** bölümüne gidin.
+Verileri dosyaların içine gizleyen teknikler için **Stego** bölümüne bakın.
 
 ## Bu bölüm nasıl kullanılır
 
-Crypto challenge'ları hızı ödüllendirir: primitive'i sınıflandırın, neyi kontrol ettiğinizi (oracle/leak/nonce reuse) belirleyin, ardından bilinen bir attack template'i uygulayın.
+Primitive'i ve parametrelerini belirleyerek başlayın. Ardından bir oracle, leak edilmiş bir değer veya nonce reuse gibi saldırganın kontrol ettiği ya da gözlemlediği unsurları belirleyin ve sonra bir attack seçin.
 
 ### CTF workflow
+
 {{#ref}}
 ctf-workflow/README.md
 {{#endref}}
 
-### Symmetric crypto
+### Symmetric cryptography
+
 {{#ref}}
 symmetric/README.md
 {{#endref}}
 
-### Hash'ler, MAC'ler ve KDF'ler
+### Hashes, MACs, and KDFs
+
 {{#ref}}
 hashes/README.md
 {{#endref}}
 
-### Public-key crypto
+### Public-key cryptography
+
 {{#ref}}
 public-key/README.md
 {{#endref}}
 
-### TLS ve sertifikalar
+### TLS and certificates
+
 {{#ref}}
 tls-and-certificates/README.md
 {{#endref}}
 
-### Malware'da crypto
+### Cryptography in malware
+
 {{#ref}}
 crypto-in-malware/README.md
 {{#endref}}
 
-### Misc
+### Miscellaneous
+
 {{#ref}}
 ctf-misc/README.md
 {{#endref}}
 
 ## Hızlı kurulum
 
-- Python: `python3 -m venv .venv && source .venv/bin/activate`
-- Libraries: `pip install pycryptodome gmpy2 sympy pwntools`
-- SageMath (lattice/RSA/ECC için çoğu zaman gerekli): <https://www.sagemath.org/>
+İzole bir Python ortamı oluşturun ve yaygın olarak kullanılan paketleri yükleyin. PyCryptodome belgeleri `pycryptodome` paketinin `pip` ile yüklenmesini önerir; SageMath ise desteklenen her platform için ayrı kurulum yönergeleri sunar.<sup>[[1]](#references)[[2]](#references)</sup>
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install pycryptodome gmpy2 sympy pwntools
+```
+SageMath, algebra, lattice, RSA ve elliptic-curve hesaplamaları için genellikle kullanışlıdır.<sup>[[2]](#references)</sup>
 
+## References
+
+- [1] [PyCryptodome documentation - Kurulum](https://www.pycryptodome.org/src/installation)
+- [2] [SageMath documentation - Kurulum rehberi](https://doc.sagemath.org/html/en/installation/)
 {{#include ../banners/hacktricks-training.md}}

