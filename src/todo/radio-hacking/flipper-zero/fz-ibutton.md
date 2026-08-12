@@ -4,8 +4,7 @@
 
 ## Εισαγωγή
 
-Για περισσότερες πληροφορίες σχετικά με το iButton, δείτε:
-
+Για βασικές πληροφορίες σχετικά με την τεχνολογία iButton, δείτε:
 
 {{#ref}}
 ../ibutton.md
@@ -13,7 +12,7 @@
 
 ## Σχεδιασμός
 
-Το **μπλε** τμήμα της παρακάτω εικόνας δείχνει πώς πρέπει να **τοποθετήσετε το πραγματικό iButton**, ώστε το Flipper να μπορεί να **το διαβάσει.** Το **πράσινο** τμήμα δείχνει πώς πρέπει να **αγγίξετε τον reader** με το Flipper Zero, ώστε να **προσομοιώσετε σωστά ένα iButton**.<sup>[[1]](#references)</sup>
+Στην παρακάτω εικόνα, η **μπλε** περιοχή δείχνει πώς να τοποθετήσετε ένα φυσικό iButton επάνω στις επαφές του Flipper Zero για ανάγνωση. Η **πράσινη** περιοχή δείχνει ποιες επαφές πρέπει να αγγίζουν έναν reader κατά την emulation.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../images/image (565).png" alt=""><figcaption></figcaption></figure>
 
@@ -21,23 +20,23 @@
 
 ### Ανάγνωση
 
-Στη λειτουργία ανάγνωσης, το Flipper περιμένει να αγγίξει το iButton key και μπορεί να επεξεργαστεί οποιονδήποτε από τους τρεις τύπους keys: **Dallas, Cyfral και Metakom**. Το Flipper θα **εντοπίσει μόνο του τον τύπο του key**. Το όνομα του πρωτοκόλλου του key θα εμφανιστεί στην οθόνη, πάνω από τον αριθμό ID.<sup>[[1]](#references)</sup>
+Στη λειτουργία ανάγνωσης, το Flipper Zero περιμένει να αγγίξει μια επαφή ένα κλειδί, ανιχνεύει το protocol και εμφανίζει το protocol πάνω από το ID του κλειδιού. Η ενσωματωμένη εφαρμογή υποστηρίζει access-control keys των Dallas, Cyfral και Metakom.<sup>[[2]](#references)</sup>
 
-### Μη αυτόματη προσθήκη
+### Χειροκίνητη προσθήκη
 
-Είναι δυνατή η **μη αυτόματη προσθήκη** ενός iButton τύπου: **Dallas, Cyfral και Metakom**
+Μπορείτε να εισαγάγετε χειροκίνητα τα δεδομένα κλειδιού για τα protocols Dallas, Cyfral και Metakom.<sup>[[2]](#references)</sup>
 
-### **Προσομοίωση**
+### Emulate
 
-Είναι δυνατή η **προσομοίωση** αποθηκευμένων iButtons (που διαβάστηκαν ή προστέθηκαν μη αυτόματα).
+Μπορείτε να κάνετε emulate ένα αποθηκευμένο κλειδί, είτε αυτό διαβάστηκε από ένα φυσικό κλειδί είτε εισήχθη χειροκίνητα.<sup>[[2]](#references)</sup>
 
 > [!TIP]
-> Αν δεν μπορείτε να επιτύχετε τις αναμενόμενες επαφές του Flipper Zero με τον reader, μπορείτε να **χρησιμοποιήσετε το εξωτερικό GPIO:**
+> Αν οι ενσωματωμένες επαφές δεν μπορούν να φτάσουν τον reader, συνδέστε τις επαφές data και ground μέσω των ακροδεκτών GPIO.<sup>[[2]](#references)</sup>
 
 <figure><img src="../../../images/image (138).png" alt=""><figcaption></figcaption></figure>
 
-## Αναφορές
+## References
 
-- [1] [Taming iButton Keys with Flipper Zero](https://blog.flipperzero.one/taming-ibutton/)
-
+- [1] [Εξοικείωση με τα iButton Keys μέσω του Flipper Zero](https://blog.flipperzero.one/taming-ibutton/)
+- [2] [Τεκμηρίωση Flipper Zero - Ανάγνωση iButton Keys](https://docs.flipper.net/zero/ibutton/read)
 {{#include ../../../banners/hacktricks-training.md}}

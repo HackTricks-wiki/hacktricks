@@ -2,18 +2,18 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+Πολλές προηγμένες προκλήσεις κρυπτογραφίας σε CTF περιλαμβάνουν RSA, κρυπτογραφία ελλειπτικών καμπυλών (ECC), ECDSA, lattices ή weak randomness.
 
-Οι περισσότερες δύσκολες ασκήσεις crypto σε CTF καταλήγουν εδώ: RSA, ECC/ECDSA, lattices και κακή τυχαιότητα.
+## Συνιστώμενα εργαλεία
 
-## Προτεινόμενα εργαλεία
-
-- SageMath (LLL/lattices, modular arithmetic): https://www.sagemath.org/
-- RsaCtfTool (Swiss-army knife): https://github.com/Ganapati/RsaCtfTool
-- factordb (γρήγοροι έλεγχοι παραγοντοποίησης): http://factordb.com/
+- [SageMath](https://www.sagemath.org/) για modular arithmetic, elliptic curves και lattice reduction<sup>[[1]](#references)</sup>
+- [RsaCtfTool](https://github.com/RsaCtfTool/RsaCtfTool) για τον έλεγχο συνηθισμένων αδυναμιών του RSA<sup>[[2]](#references)</sup>
+- [FactorDB](https://factordb.com/) για τον έλεγχο του αν ένας ακέραιος έχει γνωστούς παράγοντες<sup>[[3]](#references)</sup>
+- Η Python [`ecdsa` library](https://ecdsa.readthedocs.io/) για key parsing, signing και verification<sup>[[7]](#references)</sup>
 
 ## RSA
 
-Ξεκινήστε εδώ όταν έχετε `n,e,c` και κάποιο επιπλέον hint (shared modulus, low exponent, partial bits, related messages).
+Ξεκινήστε από εδώ όταν μια πρόκληση παρέχει τα `n`, `e` και `c`, μαζί με ένα hint όπως shared modulus, low exponent, partial key bits ή related messages.
 
 {{#ref}}
 rsa/README.md
@@ -21,38 +21,42 @@ rsa/README.md
 
 ## ECC / ECDSA
 
-Αν εμπλέκονται signatures, ελέγξτε πρώτα για nonce problems (reuse/bias/leaks), πριν θεωρήσετε ότι απαιτούνται δύσκολα μαθηματικά.
+Αν εμπλέκονται υπογραφές, ελέγξτε για nonce reuse, bias ή leak πριν υποθέσετε ότι πρέπει να λυθεί το underlying discrete-logarithm problem.
 
 ### ECDSA nonce reuse / bias
 
-Αν δύο signatures χρησιμοποιούν ξανά το ίδιο nonce `k`, το private key μπορεί να ανακτηθεί.
+Το ECDSA απαιτεί έναν νέο secret αριθμό `k` για κάθε μήνυμα. Αν το ίδιο `k` υπογράψει δύο διαφορετικά message hashes, το private key μπορεί να ανακτηθεί από τις public signature values.<sup>[[4]](#references)</sup>
 
-Ακόμη κι αν το `k` δεν είναι πανομοιότυπο, το **bias/leakage** των bits του nonce μεταξύ signatures μπορεί να είναι αρκετό για lattice recovery (συνηθισμένο θέμα σε CTF).
+Ακόμη και όταν το `k` δεν είναι ίδιο, bias ή leak των nonce bits σε πολλές υπογραφές μπορεί να επιτρέψει lattice-based recovery.<sup>[[5]](#references)</sup>
 
-Τεχνική ανάκτηση όταν το `k` χρησιμοποιείται ξανά:
+Τεχνική ανάκτηση όταν το `k` επαναχρησιμοποιείται:<sup>[[4]](#references)</sup>
 
-Εξισώσεις signature του ECDSA (τάξη ομάδας `n`):
+Εξισώσεις υπογραφής ECDSA (group order `n`):
 
 - `r = (kG)_x mod n`
 - `s = k^{-1}(h(m) + r*d) mod n`
 
-Αν το ίδιο `k` χρησιμοποιείται για δύο messages `m1, m2`, παράγοντας signatures `(r, s1)` και `(r, s2)`:
+Αν το ίδιο `k` επαναχρησιμοποιηθεί για δύο messages `m1, m2`, παράγοντας signatures `(r, s1)` και `(r, s2)`:
 
 - `k = (h(m1) - h(m2)) * (s1 - s2)^{-1} mod n`
 - `d = (s1*k - h(m1)) * r^{-1} mod n`
 
 ### Invalid-curve attacks
 
-Αν ένα protocol δεν επαληθεύει ότι τα points ανήκουν στην αναμενόμενη curve (ή subgroup), ένας attacker μπορεί να εξαναγκάσει operations σε μια weak group και να ανακτήσει secrets.
+Αν ένα protocol δεν επικυρώνει ότι ένα input point ανήκει στην αναμενόμενη curve και στο σωστό subgroup, ένας attacker μπορεί να εξαναγκάσει operations σε weaker group και να ανακτήσει πληροφορίες για ένα secret scalar. Το SEC 1 καθορίζει public-key validation checks που αποσκοπούν στην αποτροπή τέτοιων inputs.<sup>[[6]](#references)</sup>
 
 Τεχνική σημείωση:
 
-- Validate ότι τα points ανήκουν στην curve και στο σωστό subgroup.
-- Πολλά CTF tasks το μοντελοποιούν ως εξής: ο "server multiplies attacker-chosen point by secret scalar and returns something."
+- Επικυρώστε ότι τα points δεν είναι το point at infinity, έχουν valid coordinates, ικανοποιούν την curve equation και ανήκουν στο απαιτούμενο subgroup.<sup>[[6]](#references)</sup>
+- Σε CTF challenges, αυτό συχνά μοντελοποιείται ως ένας server που πολλαπλασιάζει ένα point επιλεγμένο από τον attacker με ένα secret scalar και επιστρέφει μια derived value.
 
-### Tooling
+## References
 
-- SageMath για curve arithmetic / lattices
-- `ecdsa` Python library για parsing/verification
-
+- [1] [SageMath](https://www.sagemath.org/)
+- [2] [RsaCtfTool](https://github.com/RsaCtfTool/RsaCtfTool)
+- [3] [FactorDB](https://factordb.com/)
+- [4] [NIST FIPS 186-5: Πρότυπο Ψηφιακής Υπογραφής](https://csrc.nist.gov/pubs/fips/186-5/final)
+- [5] [Breitner and Heninger: Biased Nonce Sense — Lattice Attacks against Weak ECDSA Signatures](https://eprint.iacr.org/2019/023)
+- [6] [SEC 1 v2.0: Κρυπτογραφία Ελλειπτικών Καμπυλών](https://www.secg.org/sec1-v2.pdf)
+- [7] [Τεκμηρίωση της Python `ecdsa`](https://ecdsa.readthedocs.io/)
 {{#include ../../banners/hacktricks-training.md}}
