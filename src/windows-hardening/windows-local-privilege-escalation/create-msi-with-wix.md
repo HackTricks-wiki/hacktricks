@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-This historical Hack The Box chain used WiX Toolset v3 to build an MSI that launched a previously planted `.lnk` file. **An MSI is not automatically privileged**: execution occurs in the context selected by Windows Installer policy, the custom-action attributes, and whoever installs it. In the cited scenario, the attacker also stole a trusted signing CA and placed the signed MSI in a folder watched by another user.<sup>[[1]](#references)[[3]](#references)</sup>
+This historical Hack The Box chain used WiX Toolset v3 to build an MSI that launched a previously planted `.lnk` file. **An MSI is not automatically privileged**: execution occurs in the context selected by Windows Installer policy, the custom-action attributes, and whoever installs it. In the d scenario, the attacker also stole a trusted signing CA and placed the signed MSI in a folder watched by another user.<sup>[[1]](#references)[[3]](#references)</sup>
 
 For a comprehensive understanding of wix MSI usage examples, it is advisable to consult [this page](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Here, you can find various examples that demonstrate the usage of wix MSI.<sup>[[2]](#references)</sup>
 
