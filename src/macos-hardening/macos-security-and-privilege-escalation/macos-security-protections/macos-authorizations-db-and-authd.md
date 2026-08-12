@@ -1,32 +1,32 @@
-# БД авторизацій macOS та Authd
+# macOS Authorizations DB і Authd
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## **БД авторизацій**
+## База даних авторизації
 
-База даних, розташована в `/var/db/auth.db`, використовується для зберігання дозволів на виконання чутливих операцій. Ці операції повністю виконуються в **user space** і зазвичай використовуються **XPC services**, яким потрібно перевірити, **чи авторизований клієнт, що викликає сервіс**, на виконання певної дії, перевіряючи цю базу даних.
+Security framework's Authorization Services дають змогу privileged helpers та іншим компонентам оцінювати іменовані права авторизації. У поточних версіях macOS багато таких правил зберігаються в `/var/db/auth.db` і оцінюються `authd`; цей файл і його SQLite schema є деталями реалізації та можуть змінюватися між випусками.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
 
-Спочатку ця база даних створюється на основі вмісту `/System/Library/Security/authorization.plist`. Потім деякі сервіси можуть додавати або змінювати цю базу даних, додаючи до неї інші дозволи.
+Системні default-налаштування історично завантажувалися з `/System/Library/Security/authorization.plist`, а installers або privileged services можуть додавати іменовані права. Надавайте перевагу підтримуваному інтерфейсу `security authorizationdb read|write|remove`, а не прямому редагуванню бази даних.<sup>[[3]](#references)</sup>
 
-Правила зберігаються в таблиці `rules` усередині бази даних і містять такі стовпці:
+Таблиця `rules`, яку спостерігали в документованій збірці, містить такі колонки. Розглядайте це як forensic map, а не стабільну public schema:
 
-- **id**: Унікальний ідентифікатор кожного правила, який автоматично збільшується та використовується як первинний ключ.
-- **name**: Унікальне ім’я правила, що використовується для його ідентифікації та посилання на нього в системі авторизації.
-- **type**: Визначає тип правила; допустимими є значення 1 або 2, які визначають його логіку авторизації.
-- **class**: Відносить правило до певного класу, який має бути додатним цілим числом.
-- "allow" для дозволу, "deny" для заборони, "user", якщо властивість group вказує на групу, членство в якій дозволяє доступ, "rule" вказує на масив із правилом, яке потрібно виконати, "evaluate-mechanisms" супроводжується масивом `mechanisms`, елементами якого є або вбудовані механізми, або назва bundle всередині `/System/Library/CoreServices/SecurityAgentPlugins/` чи `/Library/Security//SecurityAgentPlugins`
-- **group**: Вказує групу користувачів, пов’язану з правилом для авторизації на основі групи.
-- **kofn**: Представляє параметр "k-of-n", який визначає, скільки підправил із загальної кількості має бути виконано.
-- **timeout**: Визначає тривалість у секундах, після якої авторизація, надана правилом, втрачає чинність.
-- **flags**: Містить різні прапорці, що змінюють поведінку та характеристики правила.
-- **tries**: Обмежує кількість дозволених спроб авторизації для підвищення безпеки.
-- **version**: Відстежує версію правила для контролю версій і оновлень.
-- **created**: Зберігає часову мітку створення правила для цілей аудиту.
-- **modified**: Зберігає часову мітку останньої зміни правила.
-- **hash**: Містить хеш-значення правила для забезпечення його цілісності та виявлення підробки.
-- **identifier**: Надає унікальний рядковий ідентифікатор, наприклад UUID, для зовнішніх посилань на правило.
-- **requirement**: Містить серіалізовані дані, що визначають конкретні вимоги та механізми авторизації правила.
-- **comment**: Містить зрозумілий для людини опис або коментар до правила для документування та ясності.
+- **id**: Унікальний ідентифікатор для кожного правила, який автоматично збільшується та використовується як primary key.
+- **name**: Унікальне ім'я правила, що використовується для його ідентифікації та посилання на нього в authorization system.
+- **type**: Визначає тип правила; обмежений значеннями 1 або 2 для визначення його authorization logic.
+- **class**: Відносить правило до певного класу; має бути додатним integer.
+- До поширених класів правил належать `allow`, `deny`, `user`, `rule` та `evaluate-mechanisms`. Mechanisms можуть бути вбудованими або plug-ins Security Agent у `/System/Library/CoreServices/SecurityAgentPlugins/` чи `/Library/Security/SecurityAgentPlugins/`.<sup>[[2]](#references)</sup>
+- **group**: Вказує user group, пов'язану з правилом для group-based authorization.
+- **kofn**: Представляє параметр "k-of-n", який визначає, скільки subrules із загальної кількості мають бути виконані.
+- **timeout**: Визначає тривалість у секундах, після якої authorization, надана правилом, спливає.
+- **flags**: Містить різні flags, що змінюють поведінку та характеристики правила.
+- **tries**: Обмежує кількість дозволених authorization attempts для підвищення security.
+- **version**: Відстежує версію правила для контролю версій та оновлень.
+- **created**: Записує timestamp створення правила для auditing.
+- **modified**: Зберігає timestamp останньої зміни правила.
+- **hash**: Містить hash-значення правила для забезпечення його цілісності та виявлення tampering.
+- **identifier**: Надає унікальний string identifier, наприклад UUID, для зовнішніх посилань на правило.
+- **requirement**: Містить serialized data, що визначає конкретні authorization requirements і mechanisms правила.
+- **comment**: Надає зрозумілий людині опис або comment про правило для документації та ясності.
 
 ### Приклад
 ```bash
@@ -56,7 +56,7 @@ security authorizationdb read com.apple.tcc.util.admin
 </dict>
 </plist>
 ```
-Крім того, у [https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/) можна побачити значення `authenticate-admin-nonshared`:<sup>[[1]](#references)</sup>
+Наведене нижче декодоване правило ілюструє `authenticate-admin-nonshared` у задокументованій версії macOS:<sup>[[1]](#references)</sup>
 ```json
 {
 "allow-root": "false",
@@ -73,17 +73,19 @@ security authorizationdb read com.apple.tcc.util.admin
 ```
 ## Authd
 
-Це daemon, який отримує запити на авторизацію клієнтів для виконання чутливих дій. Він працює як XPC service, визначений у теці `XPCServices/`, і записує свої логи до `/var/log/authd.log`.
+`authd` — це XPC-сервіс, який обробляє запити Authorization Services. У поточних збірках macOS його bundle можна перевірити за шляхом `/System/Library/Frameworks/Security.framework/XPCServices/authd.xpc`; цей шлях є деталлю реалізації та може відрізнятися в різних релізах. У старіших релізах записи велися у `/var/log/authd.log`; поточні релізи переважно використовують unified logging system, яку можна запитувати за допомогою `log show`/`log stream`, використовуючи предикат процесу `authd`.<sup>[[2]](#references)</sup><sup>[[5]](#references)</sup>
 
-Крім того, за допомогою security tool можна тестувати багато API з `Security.framework`. Наприклад, запуск `AuthorizationExecuteWithPrivileges`: `security execute-with-privileges /bin/ls`
+Інструмент `security` надає кілька операцій Authorization Services. Історичний приклад викликає `AuthorizationExecuteWithPrivileges` за допомогою `security execute-with-privileges /bin/ls`. Apple оголосила цей API застарілим у macOS 10.7; сучасні privileged helpers мають використовувати helper, керований launchd, і XPC authorization.<sup>[[2]](#references)</sup><sup>[[4]](#references)</sup>
 
-Це виконає fork і exec `/usr/libexec/security_authtrampoline /bin/ls` від імені root, після чого буде запитано дозвіл у prompt для виконання ls від імені root:
+У релізах, які все ще це підтримують, використовується `/usr/libexec/security_authtrampoline`, і перед запуском команди від імені root відображається запит авторизації:
 
 <figure><img src="../../../images/image (10).png" alt=""><figcaption></figcaption></figure>
 
 ## References
 
-- [1] [authenticate-admin-nonshared - Overview of the macOS Authorization Right](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/)
-
-
+- [1] [authenticate-admin-nonshared - Огляд права авторизації macOS](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/)
+- [2] [Посібник Apple з програмування Authorization Services (архів)](https://developer.apple.com/library/archive/documentation/Security/Conceptual/authorization_concepts/)
+- [3] [Сторінка посібника macOS для `security(1)`](https://keith.github.io/xcode-man-pages/security.1.html)
+- [4] [Apple - Посібник з програмування Daemons and Services: створення завдань launchd](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html)
+- [5] [Проєкт Security з відкритим кодом Apple - `authd`](https://github.com/apple-oss-distributions/Security/tree/main/OSX/authd)
 {{#include ../../../banners/hacktricks-training.md}}
