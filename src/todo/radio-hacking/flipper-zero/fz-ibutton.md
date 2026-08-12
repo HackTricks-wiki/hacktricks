@@ -2,42 +2,41 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## 简介
+## Introduction
 
-有关 iButton 的更多信息，请查看：
-
+有关 iButton 技术的背景信息，请参阅：
 
 {{#ref}}
 ../ibutton.md
 {{#endref}}
 
-## 设计
+## Design
 
-下图中的**蓝色**部分表示你需要如何**放置真实的 iButton**，以便 Flipper 能够**读取它**。**绿色**部分表示你需要如何用 Flipper Zero **接触读卡器**，以便**正确模拟 iButton**。<sup>[[1]](#references)</sup>
+在下图中，**蓝色**区域显示了如何将实体 iButton 放置在 Flipper Zero 的触点上以进行读取。**绿色**区域显示了模拟时应与 reader 接触的触点。<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../images/image (565).png" alt=""><figcaption></figcaption></figure>
 
-## 操作
+## Actions
 
-### 读取
+### Read
 
-在 Read Mode 中，Flipper 会等待 iButton key 接触，并能够识别以下三种类型的 key：**Dallas、Cyfral 和 Metakom**。Flipper 会**自动识别 key 的类型**。key protocol 的名称会显示在屏幕上、ID number 的上方。<sup>[[1]](#references)</sup>
+在 Read 模式下，Flipper Zero 等待钥匙接触其触点，检测协议，并在钥匙 ID 上方显示协议。内置应用支持 Dallas、Cyfral 和 Metakom 门禁钥匙。<sup>[[2]](#references)</sup>
 
-### 手动添加
+### Add manually
 
-可以**手动添加**以下类型的 iButton：**Dallas、Cyfral 和 Metakom**
+你可以手动输入 Dallas、Cyfral 和 Metakom 协议的钥匙数据。<sup>[[2]](#references)</sup>
 
-### **Emulate**
+### Emulate
 
-可以**模拟**已保存的 iButton（读取的或手动添加的）。
+你可以模拟已保存的钥匙，无论该钥匙是从实体钥匙读取的，还是手动输入的。<sup>[[2]](#references)</sup>
 
 > [!TIP]
-> 如果无法让 Flipper Zero 的触点与读卡器正确接触，可以**使用 external GPIO：**
+> 如果内置触点无法接触 reader，可以通过 GPIO 引脚连接数据触点和接地触点。<sup>[[2]](#references)</sup>
 
 <figure><img src="../../../images/image (138).png" alt=""><figcaption></figcaption></figure>
 
-## 参考资料
+## References
 
-- [1] [Taming iButton Keys with Flipper Zero](https://blog.flipperzero.one/taming-ibutton/)
-
+- [1] [使用 Flipper Zero 驯服 iButton 钥匙](https://blog.flipperzero.one/taming-ibutton/)
+- [2] [Flipper Zero 文档 - 读取 iButton 钥匙](https://docs.flipper.net/zero/ibutton/read)
 {{#include ../../../banners/hacktricks-training.md}}

