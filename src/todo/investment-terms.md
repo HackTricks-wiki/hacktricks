@@ -2,71 +2,71 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Spot
+## À vista
 
-Esta é a forma mais básica de fazer trading. Você pode **indicar a quantidade do ativo e o preço** pelo qual deseja comprar ou vender e, sempre que esse preço for atingido, a operação será realizada.
+A negociação à vista troca um ativo por entrega imediata. Uma ordem limitada especifica a quantidade e o preço-limite; ela é executada somente quando o mercado pode atender a esse preço ou a um preço melhor. Já uma ordem a mercado busca execução imediata aos melhores preços disponíveis e pode sofrer slippage.<sup>[[4]](#references)</sup>
 
-Normalmente, você também pode usar o **preço atual de mercado** para realizar a transação o mais rapidamente possível pelo preço atual.
-
-**Stop Loss - Limit**: Você também pode indicar a quantidade e o preço dos ativos a comprar ou vender, além de indicar um preço inferior para comprar ou vender caso ele seja atingido (para interromper perdas).
+Uma ordem stop-limit tem um preço de stop que ativa uma ordem limitada. Ela pode restringir o preço de execução, mas não garante a execução se o mercado ultrapassar o limite.<sup>[[4]](#references)</sup>
 
 ## Futuros
 
-Um futuro é um contrato no qual 2 partes concordam em **adquirir algo no futuro a um preço fixo**. Por exemplo, vender 1 bitcoin em 6 meses por 70.000$.
+Um contrato futuro é um acordo padronizado para comprar ou vender uma commodity ou instrumento financeiro especificado em uma data futura. Por exemplo, duas partes poderiam concordar com um preço de US$ 70.000 por um bitcoin, com liquidação em seis meses.<sup>[[1]](#references)</sup>
 
-Obviamente, se após 6 meses o valor do bitcoin for 80.000$, o vendedor perderá dinheiro e o comprador ganhará. Se, em 6 meses, o valor do bitcoin for 60.000$, o oposto acontecerá.
+Se o preço de liquidação for US$ 80.000, a posição comprada ganha e a posição vendida perde em relação ao preço contratual de US$ 70.000. Se for US$ 60.000, a direção se inverte. Os contratos futuros efetivamente negociados em exchanges são ajustados ao mercado e geralmente encerrados ou rolados antes do vencimento, portanto, esta é uma ilustração simplificada.<sup>[[2]](#references)</sup>
 
-No entanto, isso é interessante, por exemplo, para empresas que estão gerando um produto e precisam ter a segurança de que conseguirão vendê-lo por um preço que cubra os custos. Também é útil para empresas que desejam garantir preços fixos no futuro para algo, mesmo que sejam mais altos.
+Produtores e consumidores usam futuros para proteger-se contra o risco de preço; outros participantes os usam para buscar lucro ou fornecer liquidez.<sup>[[1]](#references)</sup>
 
-Embora, nas exchanges, isso geralmente seja usado para tentar obter lucro.
+- Uma **posição comprada** geralmente lucra quando o preço do contrato sobe.
+- Uma **posição vendida** geralmente lucra quando o preço do contrato cai.<sup>[[2]](#references)</sup>
 
-* Observe que uma "posição comprada" significa que alguém está apostando que o preço vai aumentar
-* Enquanto uma "posição vendida" significa que alguém está apostando que o preço vai cair
+### Hedge com Futuros
 
-### Hedging com Futuros <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
+Se um gestor de fundo espera que uma carteira caia, ele pode assumir uma posição vendida em um contrato futuro de índice de ações suficientemente correlacionado. Os ganhos do hedge vendido podem compensar parte das perdas da carteira; o risco de base significa que essa compensação raramente é exata. Um futuro de bitcoin protegeria uma exposição a bitcoin, não automaticamente uma carteira de ações.
 
-Se um gestor de fundo teme que algumas ações vão cair, ele pode assumir uma posição vendida em alguns ativos, como bitcoins ou contratos futuros do S\&P 500. Isso seria semelhante a comprar ou possuir alguns ativos e criar um contrato para vendê-los em um momento futuro por um preço maior.
-
-Caso o preço caia, o gestor do fundo obterá lucro porque venderá os ativos por um preço maior. Se o preço dos ativos subir, o gestor não obterá esse lucro, mas ainda manterá seus ativos.
+Se o mercado protegido cair, a posição vendida em futuros poderá ganhar enquanto os ativos mantidos perderão valor. Se ele subir, os ativos mantidos poderão ganhar enquanto o hedge perderá. O hedge reduz um risco específico, em vez de criar um lucro garantido.<sup>[[1]](#references)</sup>
 
 ### Futuros Perpétuos
 
-**Estes são "futuros" que durarão indefinidamente** (sem uma data de término do contrato). É muito comum encontrá-los, por exemplo, em exchanges de criptomoedas, onde você pode entrar e sair de futuros com base no preço das criptomoedas.
+Contratos perpétuos são derivativos sem uma data de vencimento fixa. Plataformas de criptoativos normalmente usam pagamentos periódicos de funding para ajudar a manter seu preço próximo do preço à vista do ativo subjacente; os termos variam conforme a plataforma.<sup>[[3]](#references)</sup>
 
-Observe que, nesses casos, os ganhos e as perdas podem ocorrer em tempo real: se o preço aumentar 1%, você ganha 1%; se o preço diminuir 1%, você perderá esse valor.
+O lucro e a perda mudam conforme o preço de marcação se movimenta. Uma variação de preço de 1% produz aproximadamente uma variação de 1% no valor nocional da posição antes de taxas e funding, mas a alavancagem pode transformar isso em uma porcentagem muito maior da garantia depositada.
 
 ### Futuros com Alavancagem
 
-A **alavancagem** permite controlar uma posição maior no mercado com uma quantia menor de dinheiro. Basicamente, ela permite que você "aposte" muito mais dinheiro do que possui, arriscando apenas o dinheiro que realmente tem.
+**Alavancagem** permite que um trader controle uma posição nocional maior com um depósito de margem menor. As perdas nem sempre se limitam à margem inicial: liquidação, gaps, taxas e regras da plataforma podem produzir perdas adicionais.<sup>[[3]](#references)</sup>
 
-Por exemplo, se você abrir uma posição futura em BTC/USDT com 100$ e uma alavancagem de 50x, isso significa que, se o preço aumentar 1%, você ganhará 1x50 = 50% do seu investimento inicial (50$). E, portanto, terá 150$.\
-No entanto, se o preço diminuir 1%, você perderá 50% dos seus fundos (59$ neste caso). E, se o preço diminuir 2%, perderá toda a sua aposta (2x50 = 100%).
+Por exemplo, uma margem de US$ 100 com alavancagem de 50x controla uma posição de US$ 5.000. Ignorando taxas, funding e mecanismos de liquidação, uma variação favorável de 1% produz um ganho de US$ 50 (50% da margem inicial), enquanto uma variação adversa de 1% produz uma perda de US$ 50. Uma variação adversa de 2% corresponde a US$ 100, embora uma plataforma normalmente liquide a posição antes que toda a margem seja consumida.
 
-Portanto, a alavancagem permite controlar a quantia de dinheiro apostada, aumentando os ganhos e as perdas.
+A alavancagem amplia tanto os ganhos quanto as perdas e possibilita a liquidação após uma variação adversa relativamente pequena.
 
 ## Diferenças entre Futuros e Opções
 
-A principal diferença entre futuros e opções é que o contrato é opcional para o comprador: ele pode decidir executá-lo ou não (normalmente, só o fará se obtiver algum benefício). O vendedor deve vender se o comprador quiser usar a opção.\
-No entanto, o comprador pagará alguma taxa ao vendedor pela abertura da opção (assim, o vendedor, que aparentemente está assumindo mais riscos, começa a ganhar algum dinheiro).
+O comprador de uma opção recebe um direito, não uma obrigação, de exercer nos termos do contrato. O lançador da opção tem a obrigação correspondente caso o comprador exerça a opção. O comprador paga ao lançador um prêmio por esse direito.<sup>[[4]](#references)</sup>
 
 ### 1. **Obrigação vs. Direito:**
 
-* **Futuros:** Quando você compra ou vende um contrato futuro, está entrando em um **acordo vinculativo** para comprar ou vender um ativo a um preço específico em uma data futura. Tanto o comprador quanto o vendedor são **obrigados** a cumprir o contrato no vencimento (a menos que o contrato seja encerrado antes disso).
-* **Opções:** Com opções, você tem o **direito, mas não a obrigação**, de comprar (no caso de uma **opção de compra**) ou vender (no caso de uma **opção de venda**) um ativo a um preço específico antes ou em uma determinada data de vencimento. O **comprador** tem a opção de executar, enquanto o **vendedor** é obrigado a cumprir a negociação se o comprador decidir exercer a opção.
+* **Futuros:** Quando você compra ou vende um contrato futuro, está firmando um **acordo vinculante** para comprar ou vender um ativo a um preço específico em uma data futura. Tanto o comprador quanto o vendedor são **obrigados** a cumprir o contrato no vencimento (a menos que o contrato seja encerrado antes disso).
+* **Opções:** Com opções, você tem o **direito, mas não a obrigação**, de comprar (no caso de uma **opção de compra**) ou vender (no caso de uma **opção de venda**) um ativo a um preço específico antes ou em determinada data de vencimento. O **comprador** tem a opção de executar, enquanto o **vendedor** é obrigado a cumprir a negociação se o comprador decidir exercer a opção.
 
 ### 2. **Risco:**
 
-* **Futuros:** Tanto o comprador quanto o vendedor assumem **risco ilimitado**, pois são obrigados a concluir o contrato. O risco é a diferença entre o preço acordado e o preço de mercado na data de vencimento.
-* **Opções:** O risco do comprador é limitado ao **prêmio** pago pela compra da opção. Se o mercado não se mover a favor do titular da opção, ele pode simplesmente deixar a opção expirar. No entanto, o **vendedor** (lançador) da opção tem risco ilimitado se o mercado se mover significativamente contra ele.
+* **Futuros:** Ambos os lados podem sofrer perdas substanciais. O fato de a perda ser matematicamente ilimitada depende da posição e do ativo subjacente: uma posição vendida pode ter uma perda teórica ilimitada, enquanto uma posição comprada não pode perder mais do que o valor nocional se o ativo subjacente não puder cair abaixo de zero.
+* **Opções:** Um comprador que não lança outra opção geralmente arrisca o prêmio pago. Um lançador de uma opção de compra descoberta pode enfrentar uma perda teoricamente ilimitada; outras estratégias de lançamento de opções têm diferentes perfis de risco limitado ou ilimitado.
 
 ### 3. **Custo:**
 
-* **Futuros:** Não há custo inicial além da margem necessária para manter a posição, pois tanto o comprador quanto o vendedor são obrigados a concluir a negociação.
+* **Futuros:** Não há custo inicial além da margem exigida para manter a posição, pois o comprador e o vendedor são obrigados a concluir a negociação.
 * **Opções:** O comprador deve pagar antecipadamente um **prêmio da opção** pelo direito de exercer a opção. Esse prêmio é essencialmente o custo da opção.
 
 ### 4. **Potencial de Lucro:**
 
 * **Futuros:** O lucro ou a perda baseia-se na diferença entre o preço de mercado no vencimento e o preço acordado no contrato.
-* **Opções:** O comprador lucra quando o mercado se move favoravelmente além do preço de exercício por uma quantia superior ao prêmio pago. O vendedor lucra ao ficar com o prêmio se a opção não for exercida.
+* **Opções:** O comprador lucra quando o mercado se movimenta favoravelmente para além do preço de exercício em um valor superior ao prêmio pago. O vendedor lucra mantendo o prêmio se a opção não for exercida.
 
+## References
+
+- [1] [CFTC - A finalidade econômica dos mercados futuros](https://www.cftc.gov/LearnAndProtect/EducationCenter/economicpurpose)
+- [2] [CFTC - Noções básicas do mercado futuro](https://www.cftc.gov/LearnAndProtect/EducationCenter/FuturesMarketBasics/index2.htm)
+- [3] [CFTC - Entenda os riscos da negociação de moedas virtuais](https://www.cftc.gov/LearnAndProtect/AdvisoriesAndArticles/understand_risks_of_virtual_currency.html)
+- [4] [Glossário da CFTC - Opção, prêmio e exercício](https://www.cftc.gov/LearnAndProtect/AdvisoriesAndArticles/CFTCGlossary/index.htm)
 {{#include ../banners/hacktricks-training.md}}
