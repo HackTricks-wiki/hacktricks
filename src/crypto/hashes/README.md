@@ -1,66 +1,58 @@
-# Hashes, MACs & KDFs
+# Hashes, MACs और KDFs
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## सामान्य CTF पैटर्न
 
 - "Signature" वास्तव में `hash(secret || message)` है → length extension।
-- Unsalted password hashes → trivial cracking / lookup।
-- Hash को MAC समझना (hash != authentication)।
+- बिना salt वाले password hashes → तेज़ repeated cracking और precomputed lookup attacks।
+- hash को MAC समझ लेना (hash != authentication)।
 
 ## Hash length extension attack
 
 ### Technique
 
-यदि कोई server इस तरह की "signature" compute करता है, तो आप अक्सर इसका exploit कर सकते हैं:
+Length-extension attack संभव हो सकता है जब कोई server इस तरह का "signature" compute करता है:
 
 `sig = HASH(secret || message)`
 
-और Merkle–Damgård hash का उपयोग करता है (classic examples: MD5, SHA-1, SHA-256)।
+और MD5, SHA-1 या SHA-256 जैसे Merkle-Damgård hash का उपयोग करता है।
 
-यदि आपको पता हो:
+यदि आपको पता है:
 
 - `message`
 - `sig`
 - hash function
-- (या आप brute-force कर सकते हों) `len(secret)`
+- (या आप brute-force कर सकते हैं) `len(secret)`
 
-तो आप बिना secret जाने, इसके लिए valid signature compute कर सकते हैं:
+तो आप इसके लिए valid signature compute कर सकते हैं:
 
 `message || padding || appended_data`
 
-<sup>[[1]](#references)</sup>
+secret जाने बिना।<sup>[[1]](#references)</sup>
 
-### Important limitation: HMAC is not affected
+### महत्वपूर्ण सीमा: HMAC प्रभावित नहीं होता
 
-Length extension attacks, Merkle–Damgård hashes के लिए `HASH(secret || message)` जैसी constructions पर लागू होते हैं। ये **HMAC** (जैसे HMAC-SHA256) पर लागू नहीं होते, जिसे विशेष रूप से इस प्रकार की समस्या से बचने के लिए design किया गया है।<sup>[[1]](#references)</sup>
+Length-extension attacks, `HASH(secret || message)` जैसे vulnerable prefix constructions पर लागू होते हैं। वे HMAC construction (उदाहरण के लिए, HMAC-SHA256) को expose नहीं करते, जो अलग-अलग inner और outer hash applications के साथ key को combine करता है।<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### Tools
 
-- hash_extender:
-{{#ref}}
-https://github.com/iagox86/hash_extender
-{{#endref}}
-- hashpump:
-{{#ref}}
-https://github.com/bwall/HashPump
-{{#endref}}
+- [`hash_extender`](https://github.com/iagox86/hash_extender)<sup>[[3]](#references)</sup>
+- [`hashpumpy`](https://pypi.org/project/hashpumpy/), HashPump length-extension tool के लिए Python bindings<sup>[[7]](#references)</sup>
 
-### Good explanation
+### अच्छा explanation
 
-{{#ref}}
-https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks
-{{#endref}}
+[Hash length extension attacks के बारे में जानने योग्य सब कुछ](https://www.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)<sup>[[1]](#references)</sup>
 
-## Password hashing and cracking
+## Password hashing और cracking
 
-### First questions
+### पहले प्रश्न<sup>[[4]](#references)</sup>
 
 - क्या यह **salted** है? (`salt$hash` formats देखें)
 - क्या यह **fast hash** (MD5/SHA1/SHA256) है या **slow KDF** (bcrypt/scrypt/argon2/PBKDF2)?
 - क्या आपके पास **format hint** (hashcat mode / John format) है?
 
-### Practical workflow
+### Practical workflow<sup>[[5]](#references)[[6]](#references)</sup>
 
 1. Hash की पहचान करें:
 - `hashid <hash>`
@@ -70,14 +62,19 @@ https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-lengt
 - `hashcat -m <mode> -a 0 hashes.txt wordlist.txt`
 - `john --wordlist=wordlist.txt --format=<fmt> hashes.txt`
 
-### Common mistakes you can exploit
+### सामान्य गलतियाँ जिनका आप exploit कर सकते हैं
 
-- Users के बीच same password reuse → एक को crack करें, फिर pivot करें।
+- Users के बीच same password reuse → एक को crack करें, pivot करें।
 - Truncated hashes / custom transforms → normalize करके फिर प्रयास करें।
-- Weak KDF parameters (जैसे, low PBKDF2 iterations) → अभी भी crackable।
+- Weak KDF parameters (जैसे, low PBKDF2 iterations) → फिर भी crackable।
 
 ## References
 
-- [1] [Everything you need to know about hash length extension attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
-
+- [1] [SkullSecurity - Hash length-extension attacks के बारे में जानने योग्य सब कुछ](https://www.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
+- [2] [NIST FIPS 198-1 - Keyed-Hash Message Authentication Code](https://csrc.nist.gov/pubs/fips/198-1/final)
+- [3] [hash_extender](https://github.com/iagox86/hash_extender)
+- [4] [OWASP Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html)
+- [5] [Hashcat example hashes](https://hashcat.net/wiki/doku.php?id=example_hashes)
+- [6] [John the Ripper command-line options](https://www.openwall.com/john/doc/OPTIONS.shtml)
+- [7] [PyPI: `hashpumpy` Python bindings for HashPump](https://pypi.org/project/hashpumpy/)
 {{#include ../../banners/hacktricks-training.md}}

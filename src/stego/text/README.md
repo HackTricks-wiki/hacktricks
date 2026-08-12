@@ -2,32 +2,26 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-इन चीज़ों को देखें:
-
-- Unicode homoglyphs
-- Zero-width characters
-- Whitespace patterns (spaces vs tabs)
-
 ## Practical path
 
-यदि plain text अप्रत्याशित रूप से व्यवहार करता है, तो codepoints का निरीक्षण करें और सावधानी से normalize करें (evidence को नष्ट न करें)।
+यदि plain text अप्रत्याशित रूप से व्यवहार करे, तो मूल evidence को सुरक्षित रखें, उसके codepoints का निरीक्षण करें, और केवल एक copy को normalize करें।
 
 ### Technique
 
-Text stego अक्सर ऐसे characters पर निर्भर करता है जो एक जैसे (या अदृश्य) दिखाई देते हैं:
+Text steganography अक्सर ऐसे characters पर निर्भर करती है जो एक जैसे या अदृश्य दिखाई देते हैं:
 
-- Homoglyphs: अलग-अलग Unicode codepoints जो एक जैसे दिखाई देते हैं (Latin `a` और Cyrillic `а`)
-- Zero-width characters: joiners, non-joiners, zero-width spaces
-- Whitespace encodings: spaces और tabs, trailing spaces, line-length patterns<sup>[[1]](#references)</sup>
+- Homoglyphs: अलग-अलग Unicode codepoints जो एक जैसे दिखते हैं (उदाहरण के लिए, Latin `a` और Cyrillic `а`)<sup>[[1]](#references)</sup>
+- Zero-width characters: joiners, non-joiners और zero-width spaces<sup>[[2]](#references)</sup>
+- Whitespace encodings: spaces बनाम tabs, trailing-space patterns और जानबूझकर बनाए गए line-length patterns<sup>[[3]](#references)[[4]](#references)</sup>
 
 अतिरिक्त high-signal cases:
 
-- Bidirectional override/control characters (जो text को दृश्य रूप से पुनर्व्यवस्थित कर सकते हैं)
-- Variation selectors और combining characters का covert channel के रूप में उपयोग
+- Bidirectional controls, जो text को दृश्य रूप से पुनः क्रमित कर सकते हैं<sup>[[1]](#references)</sup>
+- Variation selectors और combining characters, जो visible text को लगभग अपरिवर्तित रखते हुए hidden state वहन कर सकते हैं<sup>[[1]](#references)</sup>
 
 ### Decode helpers
 
-- Unicode homoglyph/zero-width playground: https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder
+- [Unicode homoglyph and zero-width-character encoder/decoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)<sup>[[2]](#references)</sup>
 
 ### Inspect codepoints
 ```bash
@@ -41,14 +35,16 @@ PY
 ```
 ## CSS `unicode-range` चैनल
 
-`@font-face` rules `unicode-range: U+..` प्रविष्टियों में bytes encode कर सकते हैं। codepoints निकालें, hex को concatenate करें और decode करें:
+`@font-face` rules का उपयोग `unicode-range: U+..` entries में bytes encode करने के लिए किया जा सकता है। codepoints निकालें, hexadecimal values को concatenate करें, और उन्हें decode करें:<sup>[[3]](#references)</sup>
 ```bash
 grep -o "U+[0-9A-Fa-f]\+" styles.css | tr -d 'U+\n' | xxd -r -p
 ```
-यदि ranges में प्रत्येक declaration में multiple bytes हों, तो पहले commas पर split करें और normalize करें (`tr ',+' '\n'`)। Formatting inconsistent होने पर Python bytes को parse और emit करना आसान बनाता है।<sup>[[1]](#references)</sup>
+यदि declarations में ranges के अंदर कई values हों, तो पहले commas पर split करें और normalize करें (`tr ',+' '\n'`)। Formatting असंगत होने पर Python bytes को parse और emit कर सकता है।<sup>[[3]](#references)</sup>
 
-## संदर्भ
+## References
 
-- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
-
+- [1] [Unicode Technical Report #36: Unicode Security Considerations](https://www.unicode.org/reports/tr36/)
+- [2] [Irongeek: Zero-Width Characters और Homoglyphs के साथ Unicode Steganography](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)
+- [3] [0xdf: Flagvent 2025 (Medium) — Santa's Wishlist](https://0xdf.gitlab.io/flagvent2025/medium)
+- [4] [Debian manual: `stegsnow` whitespace steganography](https://manpages.debian.org/trixie/stegsnow/stegsnow.1.en.html)
 {{#include ../../banners/hacktricks-training.md}}
