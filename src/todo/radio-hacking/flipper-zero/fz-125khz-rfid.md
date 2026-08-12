@@ -2,55 +2,50 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-
 ## Utangulizi
 
-Kwa maelezo zaidi kuhusu jinsi tags za 125kHz zinavyofanya kazi, angalia:
-
+Kwa maelezo ya msingi kuhusu jinsi tags za 125 kHz zinavyofanya kazi, tazama:
 
 {{#ref}}
 ../pentesting-rfid.md
 {{#endref}}
 
-## Vitendo
+[Utangulizi wa RFID ya masafa ya chini](../pentesting-rfid.md#low-frequency-rfid-tags-125khz) unaeleza familia za kawaida za tags na miundo yake ya data.
 
-Kwa maelezo zaidi kuhusu aina hizi za tags [**soma utangulizi huu**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz).
+## Vitendo
 
 ### Soma
 
-Hujaribu **kusoma** maelezo ya kadi. Kisha inaweza **ku-emulate** kadi hizo.<sup>[[1]](#references)</sup>
+Tumia **Read** kunasa data ya tag. Baada ya kusoma kwa mafanikio, Flipper Zero inaweza kuiga tag iliyohifadhiwa.<sup>[[1]](#references)</sup>
 
 > [!WARNING]
-> Kumbuka kwamba baadhi ya intercom hujaribu kujilinda dhidi ya duplication ya funguo kwa kutuma write command kabla ya kusoma. Ikiwa write inafanikiwa, tag hiyo huchukuliwa kuwa fake. Flipper inapo-emulate RFID, hakuna njia kwa reader kuitofautisha na ile ya awali, hivyo matatizo kama hayo hayatokei.
+> Baadhi ya wasomaji wa intercom hujaribu kugundua tags duplicate zinazoweza kuandikwa kwa kutuma amri ya write kabla ya kusoma. Emulation ya Flipper Zero haionyeshi memory ya tag inayoweza kuandikwa kwa njia hiyo hiyo.<sup>[[1]](#references)</sup>
 
-### Add Manually
+### Ongeza kwa mikono
 
-Unaweza kuunda **fake cards katika Flipper Zero kwa kuingiza data** wewe mwenyewe, kisha kuzi-emulate.
+Unaweza kuingiza data ya tag kwa mikono kwenye Flipper Zero, kuihifadhi, kisha kuiiga.<sup>[[1]](#references)</sup>
 
 #### IDs kwenye kadi
 
-Wakati mwingine, unapopata kadi, utapata ID yake (au sehemu yake) ikiwa imeandikwa na kuonekana kwenye kadi.
+Wakati mwingine kadi huwa na ID yake yote au sehemu yake iliyochapishwa nje.
 
 - **EM Marin**
 
-Kwa mfano, kwenye kadi hii ya EM-Marin, inawezekana **kusoma bytes 3 za mwisho kati ya bytes 5 kwa uwazi** kwenye kadi halisi.\
-Bytes 2 zilizobaki zinaweza kuwa brute-forced ikiwa huwezi kuzisoma kutoka kwenye kadi.<sup>[[1]](#references)</sup>
+Kwa mfano, kadi ya EM-Marin iliyoonyeshwa inaonyesha baiti tatu za mwisho kati ya baiti zake tano za ID. Ikiwa tag haiwezi kusomwa, baiti mbili zilizokosekana zinaweza kufanyiwa brute-force.
 
 <figure><img src="../../../images/image (104).png" alt=""><figcaption></figcaption></figure>
 
 - **HID**
 
-Hali hiyo hiyo hutokea kwenye kadi hii ya HID, ambapo ni bytes 2 tu kati ya 3 zinazoweza kupatikana zikiwa zimechapishwa kwenye kadi.
+Vivyo hivyo, kadi ya HID iliyoonyeshwa huchapisha baiti mbili tu kati ya baiti zake tatu za ID.
 
 <figure><img src="../../../images/image (1014).png" alt=""><figcaption></figcaption></figure>
 
 ### Emulate/Write
 
-Baada ya **kunakili** kadi au **kuingiza** ID **wewe mwenyewe**, inawezekana kui-emulate kwa Flipper Zero au **kuiandika** kwenye kadi halisi.<sup>[[1]](#references)</sup>
+Baada ya kusoma tag au kuingiza ID yake kwa mikono, Flipper Zero inaweza kuiga credential iliyohifadhiwa. Kwa tags zinazoweza kuandikwa na zinazoungwa mkono, inaweza pia kuandika data iliyohifadhiwa kwenye kadi inayooana.<sup>[[1]](#references)</sup>
 
-## Marejeo
+## References
 
-- [1] [Diving into RFID Protocols with Flipper Zero](https://blog.flipperzero.one/rfid/)
-
-
+- [1] [Flipper Zero: Diving into RFID Protocols](https://blog.flipperzero.one/rfid/)
 {{#include ../../../banners/hacktricks-training.md}}

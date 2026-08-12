@@ -2,39 +2,39 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Maelezo ya Msingi
+## Taarifa za Msingi
 
-Vifaa vya Apple vilivyotengenezwa baada ya 2010 vina nambari za seriali zenye **herufi na tarakimu 12**, ambapo kila sehemu hutoa taarifa maalum:
+Usidhani kwamba kila Mac ina nambari ya seriali yenye herufi 12 inayoweza kufasiriwa. Muundo wa zamani wa Apple uliweka ndani yake taarifa za utengenezaji na usanidi, lakini Apple ilianza kutumia nambari za seriali zilizobadilishwa bila mpangilio katika bidhaa mpya mwaka 2021. Muundo huu wa kubadilishwa bila mpangilio hauonyeshi maelezo ya utengenezaji au usanidi.<sup>[[1]](#references)</sup>
 
-- **Herufi 3 za Kwanza**: Huonyesha **eneo la utengenezaji**.
-- **Herufi ya 4 na ya 5**: Huonyesha **mwaka na wiki ya utengenezaji**.
-- **Herufi ya 6 hadi ya 8**: Hutumika kama **kitambulisho cha kipekee** cha kila kifaa.
-- **Herufi 4 za Mwisho**: Hubainisha **nambari ya modeli**.
+### Muundo wa zamani wenye herufi 12
 
-Kwa mfano, nambari ya seriali **C02L13ECF8J2** hufuata muundo huu.
+Kwa vifaa vingi vilivyotengenezwa kuanzia 2010 hadi kabla ya mabadiliko kwenda kwenye muundo wa kubadilishwa bila mpangilio, muundo wenye herufi 12 bado unaweza kutoa vidokezo muhimu vya inventory:<sup>[[3]](#references)</sup>
 
-### **Maeneo ya Utengenezaji (Herufi 3 za Kwanza)**
+- Herufi 1–3 hubainisha eneo la utengenezaji.
+- Herufi 4–5 huonyesha nusu ya mwaka na wiki ya uzalishaji.
+- Herufi 6–8 hutofautisha vifaa vilivyotengenezwa katika eneo na wakati uleule.
+- Herufi 9–12 hubainisha model au msimbo wa usanidi.
 
-Misimbo fulani huwakilisha viwanda maalum:
+Kwa mfano, `C02L13ECF8J2` unafuata muundo huu wa zamani. Ramani za viwanda zinazodumishwa na jamii zinajumuisha viambishi kama `FC`, `F`, `XA`, `XB`, `QP`, na `G8` kwa maeneo ya Marekani; `RN` kwa Mexico; `CK` kwa Cork; `VM` kwa eneo la Foxconn nchini Jamhuri ya Czech; `SG` au `E` kwa Singapore; `MB` kwa Malaysia; `PT` au `CY` kwa Korea; na `EE`, `QT`, au `UV` kwa Taiwan. Viambishi vingi—ikiwemo `FK`, `F1`, `F2`, `W8`, `DL`, `DM`, `DN`, `YM`, `7J`, `1C`, `4H`, `WQ`, `F7`, `C0`, `C3`, na `C7`—vimehusishwa na vituo vya China; `RM` imehusishwa na vifaa vilivyorekebishwa.<sup>[[3]](#references)</sup>
 
-- **FC, F, XA/XB/QP/G8**: Maeneo mbalimbali nchini Marekani.
-- **RN**: Mexico.
-- **CK**: Cork, Ireland.
-- **VM**: Foxconn, Jamhuri ya Czech.
-- **SG/E**: Singapore.
-- **MB**: Malaysia.
-- **PT/CY**: Korea.
-- **EE/QT/UV**: Taiwan.
-- **FK/F1/F2, W8, DL/DM, DN, YM/7J, 1C/4H/WQ/F7**: Maeneo mbalimbali nchini China.
-- **C0, C3, C7**: Miji maalum nchini China.
-- **RM**: Vifaa vilivyorekebishwa.
+Misimbo ya tarehe ya herufi ya nne huanzia `C` (nusu ya kwanza ya 2010) hadi `Z` (nusu ya pili ya 2019), kisha mfuatano huo hutumika tena. Kwa herufi ya tano, tarakimu `1`–`9` huwakilisha wiki 1–9, huku herufi `C`–`Y`, isipokuwa vokali na `S`, zikiwakilisha wiki 10–27; ongeza 26 wakati herufi ya nne inapoonyesha nusu ya pili ya mwaka.<sup>[[3]](#references)</sup>
 
-### **Mwaka wa Utengenezaji (Herufi ya 4)**
+Ramani hizi ni muhimu kwa triage ya vifaa vya muundo wa zamani, lakini si uthibitisho wa mamlaka wa asili, umri, au uhalisi. Thibitisha matokeo kupitia data ya inventory ya Apple.
 
-Herufi hii hubadilika kutoka 'C' (inayowakilisha nusu ya kwanza ya 2010) hadi 'Z' (nusu ya pili ya 2019), huku herufi tofauti zikionyesha vipindi tofauti vya nusu mwaka.
+Kwa utambuzi wa kuaminika, pata nambari ya seriali kutoka kwenye kifaa na utumie lookup ya Apple ya coverage au specifications za kiufundi badala ya kujaribu kubaini model kutokana na nafasi za herufi.<sup>[[2]](#references)</sup>
 
-### **Wiki ya Utengenezaji (Herufi ya 5)**
+### Pata nambari ya seriali
 
-Tarakimu 1-9 huwakilisha wiki ya 1-9. Herufi C-Y (bila kujumuisha vokali na 'S') huwakilisha wiki ya 10-27. Kwa nusu ya pili ya mwaka, 26 huongezwa kwenye nambari hii.
+Kiolesura cha picha huionyesha chini ya **Apple menu > About This Mac**.<sup>[[2]](#references)</sup> Kutoka kwenye shell, amri yoyote kati ya zifuatazo husoma nambari ya seriali ya platform:
+```bash
+system_profiler SPHardwareDataType | awk -F ': ' '/Serial Number/ {print $2}'
+ioreg -rd1 -c IOPlatformExpertDevice | awk -F '"' '/IOPlatformSerialNumber/ {print $4}'
+```
+Chukulia nambari ya seriali kama kitambulishi, si authenticator: thibitisha kifaa kupitia mchakato husika wa Apple au MDM wa inventory kabla ya kufanya maamuzi kuhusu enrollment au umiliki.
 
+## References
+
+- [1] [MacRumors - Apple inaanza mabadiliko kuelekea nambari za seriali zilizobahatishwa](https://www.macrumors.com/2021/05/05/purple-iphone-12-randomized-serial-number/)
+- [2] [Apple Support - Tafuta jina la modeli na nambari ya seriali ya Mac yako](https://support.apple.com/en-us/102767)
+- [3] [Beetstech - Fafanua maana iliyo nyuma ya nambari ya seriali ya Apple](https://beetstech.com/blog/decode-meaning-behind-apple-serial-number)
 {{#include ../../../banners/hacktricks-training.md}}

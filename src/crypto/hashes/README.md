@@ -2,21 +2,21 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Mifumo ya kawaida ya CTF
+## Miundo ya kawaida ya CTF
 
-- "Signature" kwa hakika ni `hash(secret || message)` → length extension.
-- Password hashes zisizo na salt → cracking / lookup rahisi.
+- "Signature" kwa kweli ni `hash(secret || message)` → length extension.
+- Password hashes zisizo na salt → cracking ya haraka zaidi na mashambulizi ya precomputed lookup.
 - Kuchanganya hash na MAC (hash != authentication).
 
 ## Hash length extension attack
 
 ### Technique
 
-Mara nyingi unaweza kutumia hili ikiwa server inakokotoa "signature" kama:
+Length-extension attack inaweza kuwezekana wakati server inakokotoa "signature" kama:
 
 `sig = HASH(secret || message)`
 
-na inatumia Merkle–Damgård hash (mifano ya kawaida: MD5, SHA-1, SHA-256).
+na inatumia Merkle-Damgård hash kama MD5, SHA-1, au SHA-256.
 
 Ikiwa unajua:
 
@@ -25,42 +25,34 @@ Ikiwa unajua:
 - hash function
 - (au unaweza kubrute-force) `len(secret)`
 
-Basi unaweza kukokotoa signature halali kwa:
+Basi unaweza kukokotoa signature halali ya:
 
 `message || padding || appended_data`
 
 bila kujua secret.<sup>[[1]](#references)</sup>
 
-### Limitation muhimu: HMAC haiathiriki
+### Kizuizi muhimu: HMAC haiathiriwi
 
-Length extension attacks hutumika kwa constructions kama `HASH(secret || message)` za Merkle–Damgård hashes. Hazitumiki kwa **HMAC** (kwa mfano, HMAC-SHA256), ambayo iliundwa mahsusi kuzuia aina hii ya tatizo.<sup>[[1]](#references)</sup>
+Length-extension attacks hutumika kwa vulnerable prefix constructions kama `HASH(secret || message)`. Hazifichui HMAC construction (kwa mfano, HMAC-SHA256), ambayo huunganisha key na matumizi tofauti ya inner na outer hash.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### Tools
 
-- hash_extender:
-{{#ref}}
-https://github.com/iagox86/hash_extender
-{{#endref}}
-- hashpump:
-{{#ref}}
-https://github.com/bwall/HashPump
-{{#endref}}
+- [`hash_extender`](https://github.com/iagox86/hash_extender)<sup>[[3]](#references)</sup>
+- [`hashpumpy`](https://pypi.org/project/hashpumpy/), Python bindings za HashPump length-extension tool<sup>[[7]](#references)</sup>
 
 ### Maelezo mazuri
 
-{{#ref}}
-https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks
-{{#endref}}
+[Everything you need to know about hash length extension attacks](https://www.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)<sup>[[1]](#references)</sup>
 
-## Password hashing na cracking
+## Password hashing and cracking
 
-### Maswali ya kwanza
+### Maswali ya kwanza<sup>[[4]](#references)</sup>
 
 - Je, ina **salt**? (tafuta formats za `salt$hash`)
 - Je, ni **fast hash** (MD5/SHA1/SHA256) au **slow KDF** (bcrypt/scrypt/argon2/PBKDF2)?
 - Je, una **format hint** (hashcat mode / John format)?
 
-### Practical workflow
+### Practical workflow<sup>[[5]](#references)[[6]](#references)</sup>
 
 1. Tambua hash:
 - `hashid <hash>`
@@ -72,12 +64,17 @@ https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-lengt
 
 ### Makosa ya kawaida unayoweza kutumia
 
-- Password ileile inatumiwa tena na users → crack moja, pivot.
-- Hashes zilizokatwa / custom transforms → normalize na ujaribu tena.
+- Password ileile imetumika tena na users → crack moja, pivot.
+- Truncated hashes / custom transforms → normalize na ujaribu tena.
 - Weak KDF parameters (kwa mfano, PBKDF2 iterations chache) → bado zinaweza ku-crackiwa.
 
 ## References
 
-- [1] [Everything you need to know about hash length extension attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
-
+- [1] [SkullSecurity - Kila kitu unachohitaji kujua kuhusu hash length-extension attacks](https://www.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
+- [2] [NIST FIPS 198-1 - Keyed-Hash Message Authentication Code](https://csrc.nist.gov/pubs/fips/198-1/final)
+- [3] [hash_extender](https://github.com/iagox86/hash_extender)
+- [4] [OWASP Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html)
+- [5] [Hashcat example hashes](https://hashcat.net/wiki/doku.php?id=example_hashes)
+- [6] [John the Ripper command-line options](https://www.openwall.com/john/doc/OPTIONS.shtml)
+- [7] [PyPI: `hashpumpy` Python bindings za HashPump](https://pypi.org/project/hashpumpy/)
 {{#include ../../banners/hacktricks-training.md}}

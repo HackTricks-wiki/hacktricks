@@ -1,16 +1,19 @@
-# Utatuzi wa Default Sandbox ya macOS
+# Utatuzi wa macOS Default Sandbox
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Katika ukurasa huu unaweza kupata jinsi ya kuunda app ya kuzindua amri arbitrary kutoka ndani ya Default Sandbox ya macOS:
+Ukurasa huu huunda command runner ndogo na kuitia saini kwa entitlement ya macOS App Sandbox. Commands zinazoanzishwa kwa `system()` hurithi vikwazo vya sandbox vya app, kwa hiyo hii ni muhimu kwa kujaribu tabia ndani ya sandbox; si sandbox escape.<sup>[[1]](#references)</sup>
 
 1. Compile application:
 ```objectivec:main.m
 #include <Foundation/Foundation.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 int main(int argc, const char * argv[]) {
 @autoreleasepool {
-while (true) {
+while (1) {
 char input[512];
 
 printf("Enter command to run (or 'exit' to quit): ");
@@ -18,7 +21,7 @@ if (fgets(input, sizeof(input), stdin) == NULL) {
 break;
 }
 
-// Remove newline character
+// Remove the trailing newline.
 size_t len = strlen(input);
 if (len > 0 && input[len - 1] == '\n') {
 input[len - 1] = '\0';
@@ -34,9 +37,11 @@ system(input);
 return 0;
 }
 ```
-Iunde kwa kuiendesha: `clang -framework Foundation -o SandboxedShellApp main.m`
-
-2. Unda bundle ya `.app`
+Icompile kwa kutumia:
+```bash
+clang -framework Foundation -o SandboxedShellApp main.m
+```
+2. Jenga bundle ya `.app`:
 ```bash
 mkdir -p SandboxedShellApp.app/Contents/MacOS
 mv SandboxedShellApp SandboxedShellApp.app/Contents/MacOS/
@@ -58,7 +63,7 @@ cat << EOF > SandboxedShellApp.app/Contents/Info.plist
 </plist>
 EOF
 ```
-3. Bainisha entitlements
+3. Bainisha entitlements. Toleo la pili pia linatoa access ya kusoma/kuandika kwenye folda ya Downloads ya mtumiaji.<sup>[[2]](#references)</sup>
 
 {{#tabs}}
 {{#tab name="sandbox"}}
@@ -94,12 +99,16 @@ EOF
 {{#endtab}}
 {{#endtabs}}
 
-4. Saini app (unahitaji kuunda certificate katika keychain)
+4. Saini app kwa kutumia signing identity inayopatikana kwenye keychain, kisha iendeshe. Unaposaini manually, `codesign --entitlements` huweka entitlement property list kwenye signature ya app.<sup>[[1]](#references)</sup>
 ```bash
 codesign --entitlements entitlements.plist -s "YourIdentity" SandboxedShellApp.app
 ./SandboxedShellApp.app/Contents/MacOS/SandboxedShellApp
 
-# An d in case you need this in the future
+# Remove the signature if it is no longer needed.
 codesign --remove-signature SandboxedShellApp.app
 ```
+## References
+
+- [1] [Mwongozo wa Apple wa Code Signing: Kuongeza Entitlements kwa Sandboxing Kibinafsi](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/Procedures/Procedures.html#//apple_ref/doc/uid/TP40005929-CH4-SW31)
+- [2] [Apple: `com.apple.security.files.downloads.read-write` entitlement](https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.files.downloads.read-write)
 {{#include ../../../../banners/hacktricks-training.md}}
