@@ -4,69 +4,69 @@
 
 ## Spot
 
-Dit is die mees basiese manier om handel te dryf. Jy kan **die hoeveelheid van die bate en die prys aandui** waarteen jy wil koop of verkoop, en wanneer daardie prys bereik word, word die transaksie uitgevoer.
+Spot-handel ruil 'n bate vir onmiddellike lewering. 'n Limietorder spesifiseer die hoeveelheid en limietprys; dit word slegs uitgevoer wanneer die mark daardie prys of 'n beter prys kan bied. 'n Markorder poog daarenteen om vinnig uitgevoer te word teen die beste pryse wat dan beskikbaar is, en kan prysglyding ervaar.<sup>[[4]](#references)</sup>
 
-Gewoonlik kan jy ook die **huidige markprys** gebruik om die transaksie so vinnig moontlik teen die huidige prys uit te voer.
+'n Stop-limietorder het 'n stopprys wat 'n limietorder aktiveer. Dit kan die uitvoeringsprys beperk, maar waarborg nie uitvoering as die mark deur die limietprys beweeg nie.<sup>[[4]](#references)</sup>
 
-**Stop Loss - Limit**: Jy kan ook die hoeveelheid en die prys van die bates wat gekoop of verkoop moet word aandui, terwyl jy ook ’n laer prys aandui waarteen gekoop of verkoop moet word indien dit bereik word (om verliese te stop).
+## Termynkontrakte
 
-## Futures
+'n Termynkontrak is 'n gestandaardiseerde ooreenkoms om 'n bepaalde kommoditeit of finansiële instrument op 'n toekomstige datum te koop of te verkoop. Twee partye kan byvoorbeeld op 'n prys van $70,000 vir een bitcoin ooreenkom, met vereffening oor ses maande.<sup>[[1]](#references)</sup>
 
-’n Future is ’n kontrak waarin 2 partye ooreenkom om **iets in die toekoms teen ’n vaste prys te bekom**. Byvoorbeeld, om 1 bitcoin oor 6 maande teen $70.000 te verkoop.
+As die vereffeningsprys $80,000 is, maak die lang kant wins en ly die kort kant 'n verlies relatief tot die kontrakprys van $70,000. As dit $60,000 is, word die rigting omgekeer. Werklike beursverhandelde termynkontrakte word teen markwaarde gewaardeer en gewoonlik voor verstryking gesluit of omgerol, dus is dit 'n vereenvoudigde illustrasie.<sup>[[2]](#references)</sup>
 
-As die waarde van bitcoin na 6 maande natuurlik $80.000 is, verloor die verkoper geld en verdien die koper dit. As die waarde van bitcoin oor 6 maande $60.000 is, gebeur die teenoorgestelde.
+Produsente en verbruikers gebruik termynkontrakte om prysrisiko te verskans; ander deelnemers gebruik dit om wins te probeer maak of likiditeit te verskaf.<sup>[[1]](#references)</sup>
 
-Dit is egter byvoorbeeld interessant vir besighede wat ’n produk vervaardig en die sekerheid nodig het dat hulle dit teen ’n prys sal kan verkoop wat die koste dek. Dit is ook nuttig vir besighede wat vaste pryse in die toekoms vir iets wil verseker, selfs al is dit hoër.
+- 'n **Lang posisie** maak oor die algemeen wins wanneer die kontrakprys styg.
+- 'n **Kort posisie** maak oor die algemeen wins wanneer die kontrakprys daal.<sup>[[2]](#references)</sup>
 
-Op exchanges word dit egter gewoonlik gebruik om wins te probeer maak.
+### Verskansing Met Termynkontrakte
 
-* Let daarop dat ’n "Long position" beteken dat iemand daarop wed dat ’n prys gaan styg
-* Terwyl ’n "short position" beteken dat iemand daarop wed dat ’n prys gaan daal
+As 'n fondsbestuurder verwag dat 'n portefeulje sal daal, kan hulle 'n voldoende gekorreleerde aandele-indeks-termynkontrak kort verkoop. Winste op die kort verskansing kan sommige portefeuljeverliese verreken; basisrisiko beteken dat die verrekening selde presies is. 'n Bitcoin-termynkontrak sal blootstelling aan bitcoin verskans, nie outomaties 'n aandeleportefeulje nie.
 
-### Hedging With Futures <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
+As die verskanste mark daal, kan die kort termynposisie wins maak terwyl die besittings waarde verloor. As dit styg, kan die besittings wins maak terwyl die verskansing verloor. Verskansing verminder 'n gekose risiko eerder as om 'n gewaarborgde wins te skep.<sup>[[1]](#references)</sup>
 
-As ’n fondsbestuurder bang is dat sekere aandele gaan daal, kan hy ’n short position op sommige bates, soos bitcoin- of S\&P 500-futureskontrakte, inneem. Dit sal soortgelyk wees aan die aankoop of besit van sekere bates en die skep van ’n kontrak om dit op ’n toekomstige tyd teen ’n hoër prys te verkoop.
+### Ewigdurende Termynkontrakte
 
-Indien die prys daal, sal die fondsbestuurder wins maak omdat hy die bates teen ’n hoër prys sal verkoop. As die prys van die bates styg, sal die bestuurder nie daardie voordeel verdien nie, maar hy sal steeds sy bates behou.
+Ewigdurende kontrakte is afgeleide instrumente sonder 'n vaste vervaldatum. Crypto-platforms gebruik algemeen periodieke befondsingsbetalings om hul prys naby die onderliggende spotprys te hou; terme verskil volgens platform.<sup>[[3]](#references)</sup>
 
-### Perpetual Futures
+Wins en verlies verander namate die merkprys beweeg. 'n Prysbeweging van 1% lewer ongeveer 'n beweging van 1% op die posisie se nominale waarde voor fooie en befondsing, maar hefboomwerking kan dit 'n veel groter persentasie van die gestorte kollateraal maak.
 
-**Dit is "futures" wat onbepaald sal voortduur** (sonder ’n einddatum vir die kontrak). Dit is baie algemeen om dit byvoorbeeld op crypto-exchanges te vind, waar jy futures kan betree en verlaat op grond van die prys van crypto.
+### Termynkontrakte met Hefboomwerking
 
-Let daarop dat die wins en verlies in hierdie gevalle intyds kan plaasvind: as die prys met 1% styg, wen jy 1%; as die prys met 1% daal, verloor jy dit.
+**Hefboomwerking** stel 'n handelaar in staat om 'n groter nominale posisie met 'n kleiner margeverpligting te beheer. Verliese is nie altyd tot die aanvanklike marge beperk nie: likwidasie, gapings, fooie en platformreëls kan bykomende verliese veroorsaak.<sup>[[3]](#references)</sup>
 
-### Futures with Leverage
+Byvoorbeeld, $100 se marge teen 50x hefboomwerking beheer 'n posisie van $5,000. As fooie, befondsing en likwidas meganismes geïgnoreer word, lewer 'n gunstige beweging van 1% 'n wins van $50 (50% van die aanvanklike marge), terwyl 'n ongunstige beweging van 1% 'n verlies van $50 lewer. 'n Ongunstige beweging van 2% stem ooreen met $100, hoewel 'n platform die posisie normaalweg sal likwideer voordat die hele marge opgebruik is.
 
-**Leverage** stel jou in staat om ’n groter posisie in die mark met ’n kleiner hoeveelheid geld te beheer. Dit stel jou basies in staat om met veel meer geld te "wed" as wat jy het, terwyl jy slegs die geld wat jy werklik het, waag.
+Hefboomwerking vergroot sowel winste as verliese en maak likwidasie ná 'n betreklik klein ongunstige beweging moontlik.
 
-Byvoorbeeld, as jy ’n future-posisie in BTC/USDT met $100 en 50x leverage open, beteken dit dat as die prys met 1% styg, jy 1x50 = 50% van jou aanvanklike belegging ($50) sou wen. Jy sal dus $150 hê.\
-As die prys egter met 1% daal, sal jy 50% van jou fondse verloor ($59 in hierdie geval). En as die prys met 2% daal, sal jy jou hele weddenskap verloor (2x50 = 100%).
+## Verskille Tussen Termynkontrakte en Opsies
 
-Leverage stel jou dus in staat om die hoeveelheid geld waarop jy wed, te beheer terwyl dit die winste en verliese verhoog.
-
-## Verskille tussen Futures en Options
-
-Die belangrikste verskil tussen futures en options is dat die kontrak vir die koper opsioneel is: Hy kan besluit om dit uit te oefen of nie (gewoonlik sal hy dit slegs doen indien hy daarby sal baat). Die verkoper moet verkoop indien die koper die option wil gebruik.\
-Die koper sal egter ’n fooi aan die verkoper betaal om die option te open (dus begin die verkoper, wat blykbaar meer risiko neem, reeds geld verdien).
+'n Opsiekoper ontvang 'n reg, nie 'n verpligting nie, om ingevolge die kontrakvoorwaardes uit te oefen. Die opsieskrywer het die ooreenstemmende verpligting indien die koper uitoefen. Die koper betaal die skrywer 'n premie vir daardie reg.<sup>[[4]](#references)</sup>
 
 ### 1. **Verpligting teenoor Reg:**
 
-* **Futures:** Wanneer jy ’n futures-kontrak koop of verkoop, tree jy ’n **bindende ooreenkoms** aan om ’n bate teen ’n spesifieke prys op ’n toekomstige datum te koop of verkoop. Beide die koper en verkoper is **verplig** om die kontrak by verstryking na te kom (tensy die kontrak voor daardie tyd gesluit word).
-* **Options:** Met options het jy die **reg, maar nie die verpligting nie**, om ’n bate teen ’n spesifieke prys voor of op ’n sekere vervaldatum te koop (in die geval van ’n **call option**) of te verkoop (in die geval van ’n **put option**). Die **koper** het die opsie om dit uit te oefen, terwyl die **verkoper** verplig is om die transaksie uit te voer indien die koper besluit om die option uit te oefen.
+* **Termynkontrakte:** Wanneer jy 'n termynkontrak koop of verkoop, tree jy 'n **bindende ooreenkoms** aan om 'n bate teen 'n spesifieke prys op 'n toekomstige datum te koop of te verkoop. Sowel die koper as die verkoper is **verplig** om die kontrak by verstryking na te kom (tensy die kontrak voor dan gesluit word).
+* **Opsies:** Met opsies het jy die **reg, maar nie die verpligting nie**, om 'n bate teen 'n spesifieke prys voor of op 'n bepaalde vervaldatum te koop (in die geval van 'n **call-opsie**) of te verkoop (in die geval van 'n **put-opsie**). Die **koper** het die opsie om uit te oefen, terwyl die **verkoper** verplig is om die transaksie uit te voer indien die koper besluit om die opsie uit te oefen.
 
 ### 2. **Risiko:**
 
-* **Futures:** Beide die koper en verkoper neem **onbeperkte risiko** aan omdat hulle verplig is om die kontrak te voltooi. Die risiko is die verskil tussen die ooreengekome prys en die markprys op die vervaldatum.
-* **Options:** Die koper se risiko is beperk tot die **premie** wat betaal is om die option te koop. As die mark nie in die optionhouer se guns beweeg nie, kan hy eenvoudig die option laat verval. Die **verkoper** (skrywer) van die option het egter onbeperkte risiko indien die mark beduidend teen hom beweeg.
+* **Termynkontrakte:** Albei kante kan aansienlike verliese ly. Of die verlies wiskundig onbeperk is, hang van die posisie en onderliggende bate af: 'n kort posisie kan 'n onbeperkte teoretiese verlies hê, terwyl 'n lang posisie nie meer as die nominale waarde kan verloor indien die onderliggende bate nie onder nul kan daal nie.
+* **Opsies:** 'n Koper wat nie 'n ander opsie skryf nie, loop oor die algemeen die risiko van die betaalde premie. 'n Onbedekte call-skrywer kan 'n teoreties onbeperkte verlies ly; ander opsieskryfstrategieë het verskillende begrensde of onbeperkte risikoprofiele.
 
 ### 3. **Koste:**
 
-* **Futures:** Daar is geen voorafkoste buiten die margin wat benodig word om die posisie te hou nie, aangesien die koper en verkoper albei verplig is om die transaksie te voltooi.
-* **Options:** Die koper moet vooraf ’n **option-premie** betaal vir die reg om die option uit te oefen. Hierdie premie is basies die koste van die option.
+* **Termynkontrakte:** Daar is geen voorafkoste buiten die marge wat vereis word om die posisie te hou nie, aangesien die koper en verkoper albei verplig is om die transaksie te voltooi.
+* **Opsies:** Die koper moet vooraf 'n **opsiepremie** betaal vir die reg om die opsie uit te oefen. Hierdie premie is in wese die koste van die opsie.
 
 ### 4. **Winsmoontlikheid:**
 
-* **Futures:** Die wins of verlies is gebaseer op die verskil tussen die markprys by verstryking en die ooreengekome prys in die kontrak.
-* **Options:** Die koper maak wins wanneer die mark gunstig beweeg tot bo die strike price met meer as die betaalde premie. Die verkoper maak wins deur die premie te behou indien die option nie uitgeoefen word nie.
+* **Termynkontrakte:** Die wins of verlies is gebaseer op die verskil tussen die markprys by verstryking en die ooreengekome prys in die kontrak.
+* **Opsies:** Die koper maak wins wanneer die mark gunstig verby die uitoefeningsprys beweeg met meer as die betaalde premie. Die verkoper maak wins deur die premie te behou indien die opsie nie uitgeoefen word nie.
 
+## References
+
+- [1] [CFTC - Die ekonomiese doel van termynmarkte](https://www.cftc.gov/LearnAndProtect/EducationCenter/economicpurpose)
+- [2] [CFTC - Basiese beginsels van termynmarkte](https://www.cftc.gov/LearnAndProtect/EducationCenter/FuturesMarketBasics/index2.htm)
+- [3] [CFTC - Verstaan die risiko's van virtuele-geldeenheidshandel](https://www.cftc.gov/LearnAndProtect/AdvisoriesAndArticles/understand_risks_of_virtual_currency.html)
+- [4] [CFTC-woordelys - Opsie, premie en uitoefening](https://www.cftc.gov/LearnAndProtect/AdvisoriesAndArticles/CFTCGlossary/index.htm)
 {{#include ../banners/hacktricks-training.md}}
