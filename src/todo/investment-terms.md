@@ -2,71 +2,71 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Spot
+## स्पॉट
 
-यह trading करने का सबसे बुनियादी तरीका है। आप **asset की मात्रा और वह price बता सकते हैं** जिस पर आप उसे खरीदना या बेचना चाहते हैं, और जब भी वह price पहुंच जाती है, transaction पूरा हो जाता है।
+स्पॉट ट्रेडिंग में किसी asset का तत्काल delivery के लिए आदान-प्रदान किया जाता है। Limit order में quantity और limit price निर्दिष्ट की जाती है; यह तभी execute होता है जब market उस price या उससे बेहतर price को पूरा कर सके। इसके बजाय market order उपलब्ध सर्वोत्तम prices पर शीघ्र execution का प्रयास करता है और इसमें slippage हो सकती है।<sup>[[4]](#references)</sup>
 
-आमतौर पर आप transaction को वर्तमान price पर जितनी जल्दी हो सके पूरा करने के लिए **current market price** का भी उपयोग कर सकते हैं।
+Stop-limit order में एक stop price होती है, जो limit order को सक्रिय करती है। यह execution price को सीमित कर सकती है, लेकिन यदि market limit से आगे निकल जाए तो execution की गारंटी नहीं देती।<sup>[[4]](#references)</sup>
 
-**Stop Loss - Limit**: आप खरीदने या बेचने के लिए assets की मात्रा और price बता सकते हैं, साथ ही नुकसान रोकने के लिए एक दूसरी price भी निर्धारित कर सकते हैं, जिस पर पहुंचने पर खरीद या बिक्री हो जाएगी।
+## फ्यूचर्स
 
-## Futures
+Futures contract किसी निर्दिष्ट commodity या financial instrument को भविष्य की तारीख में खरीदने या बेचने का standardized agreement होता है। उदाहरण के लिए, दो पक्ष छह महीने बाद settlement के लिए एक bitcoin की कीमत $70,000 तय कर सकते हैं।<sup>[[1]](#references)</sup>
 
-Future एक contract होता है जिसमें 2 पक्ष **भविष्य में किसी चीज़ को निश्चित price पर प्राप्त करने** के लिए सहमत होते हैं। उदाहरण के लिए, 6 महीनों में 1 bitcoin को 70.000$ पर बेचना।
+यदि settlement price $80,000 है, तो $70,000 की contract price की तुलना में long side को लाभ और short side को हानि होती है। यदि यह $60,000 है, तो दिशा उलट जाती है। वास्तविक exchange-traded futures को market के अनुसार mark किया जाता है और expiration से पहले सामान्यतः बंद या roll कर दिया जाता है, इसलिए यह एक सरल उदाहरण है।<sup>[[2]](#references)</sup>
 
-यदि 6 महीनों बाद bitcoin की value 80.000$ हो जाती है, तो बेचने वाले पक्ष को नुकसान और खरीदने वाले पक्ष को लाभ होता है। यदि 6 महीनों बाद bitcoin की value 60.000$ हो जाती है, तो इसके विपरीत होता है।
+Producers और consumers price risk को hedge करने के लिए futures का उपयोग करते हैं; अन्य participants profit कमाने या liquidity प्रदान करने के लिए इनका उपयोग करते हैं।<sup>[[1]](#references)</sup>
 
-हालांकि, यह उन businesses के लिए उपयोगी है जो कोई product बना रहे हैं और यह सुनिश्चित करना चाहते हैं कि वे उसे ऐसी price पर बेच पाएंगे जिससे उनकी लागत पूरी हो सके। यह उन businesses के लिए भी उपयोगी है जो भविष्य में किसी चीज़ के लिए fixed prices सुनिश्चित करना चाहते हैं, भले ही वह price अधिक हो।
+- **Long position** में सामान्यतः contract price बढ़ने पर लाभ होता है।
+- **Short position** में सामान्यतः contract price घटने पर लाभ होता है।<sup>[[2]](#references)</sup>
 
-हालांकि, exchanges में इसका उपयोग आमतौर पर profit कमाने की कोशिश के लिए किया जाता है।
+### Futures के साथ Hedging
 
-* ध्यान दें कि "Long position" का अर्थ है कि कोई व्यक्ति यह अनुमान लगा रहा है कि price बढ़ने वाली है।
-* जबकि "short position" का अर्थ है कि कोई व्यक्ति यह अनुमान लगा रहा है कि price घटने वाली है।
+यदि कोई fund manager किसी portfolio के गिरने की अपेक्षा करता है, तो वह पर्याप्त रूप से correlated stock-index futures contract को short कर सकता है। Short hedge से होने वाला लाभ portfolio के कुछ losses की भरपाई कर सकता है; basis risk का अर्थ है कि यह offset शायद ही कभी सटीक होता है। Bitcoin future, bitcoin exposure को hedge करेगा, किसी stock portfolio को स्वतः नहीं।
 
-### Futures के साथ Hedging <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
-
-यदि कोई fund manager इस बात से चिंतित है कि कुछ stocks की price घटने वाली है, तो वह bitcoins या S\&P 500 futures contracts जैसे कुछ assets पर short position ले सकता है। यह कुछ assets को खरीदने या अपने पास रखने और उन्हें भविष्य में अधिक price पर बेचने का contract बनाने के समान होगा।
-
-यदि price घटती है, तो fund manager को लाभ होगा क्योंकि वह assets को अधिक price पर बेच पाएगा। यदि assets की price बढ़ती है, तो manager को वह लाभ नहीं मिलेगा, लेकिन उसके assets उसके पास बने रहेंगे।
+यदि hedged market गिरता है, तो short futures position को लाभ हो सकता है, जबकि holdings का value घट सकता है। यदि market बढ़ता है, तो holdings को लाभ हो सकता है, जबकि hedge में loss हो सकता है। Hedging selected risk को कम करता है, guaranteed profit नहीं बनाता।<sup>[[1]](#references)</sup>
 
 ### Perpetual Futures
 
-**ये ऐसे "futures" हैं जो अनिश्चितकाल तक चलते हैं** (इनकी कोई समाप्ति तिथि नहीं होती)। इन्हें crypto exchanges में देखना बहुत सामान्य है, जहां आप cryptos की price के आधार पर futures में प्रवेश या उससे बाहर निकल सकते हैं।
+Perpetual contracts ऐसे derivatives होते हैं जिनकी कोई निश्चित expiration date नहीं होती। Crypto venues सामान्यतः periodic funding payments का उपयोग करके उनकी price को underlying spot price के करीब रखने में सहायता करते हैं; terms venue के अनुसार अलग-अलग होते हैं।<sup>[[3]](#references)</sup>
 
-ध्यान दें कि इन मामलों में लाभ और नुकसान real time में हो सकते हैं। यदि price 1% बढ़ती है, तो आपको 1% का लाभ होगा; यदि price 1% घटती है, तो आपको 1% का नुकसान होगा।
+Mark price बदलने पर profit और loss भी बदलते हैं। Fees और funding से पहले, price में 1% का बदलाव position के notional value में लगभग 1% का बदलाव लाता है, लेकिन leverage के कारण यह posted collateral के प्रतिशत के रूप में बहुत बड़ा हो सकता है।
 
 ### Leverage वाले Futures
 
-**Leverage** आपको कम amount of money के साथ market में बड़ी position नियंत्रित करने की सुविधा देता है। मूल रूप से, यह आपको अपनी वास्तविक राशि से कहीं अधिक money "bet" करने की अनुमति देता है, जबकि risk केवल उस money का होता है जो वास्तव में आपके पास है।
+**Leverage** किसी trader को कम margin deposit के साथ बड़ी notional position नियंत्रित करने की अनुमति देता है। Losses हमेशा initial margin तक सीमित नहीं होते: liquidation, gaps, fees और venue rules अतिरिक्त losses पैदा कर सकते हैं।<sup>[[3]](#references)</sup>
 
-उदाहरण के लिए, यदि आप BTC/USDT में 100$ के साथ 50x leverage वाली future position खोलते हैं, तो इसका अर्थ है कि यदि price 1% बढ़ती है, तो आपको अपने initial investment का 1x50 = 50% (50$) लाभ होगा। इसलिए आपके पास 150$ होंगे।\
-हालांकि, यदि price 1% घटती है, तो आपके funds का 50% (इस मामले में 59$) कम हो जाएगा। और यदि price 2% घटती है, तो आपका पूरा bet समाप्त हो जाएगा (2x50 = 100%)।
+उदाहरण के लिए, 50x leverage पर $100 का margin $5,000 की position को नियंत्रित करता है। Fees, funding और liquidation mechanics को नज़रअंदाज़ करने पर, favorable 1% move से $50 का लाभ होता है (initial margin का 50%), जबकि adverse 1% move से $50 का loss होता है। Adverse 2% move $100 के बराबर होता है, हालांकि कोई venue सामान्यतः पूरा margin समाप्त होने से पहले position को liquidate कर देगा।
 
-इसलिए, leverage आपको bet की जाने वाली money की amount को नियंत्रित करने की सुविधा देता है, जबकि winnings और losses को बढ़ाता है।
+Leverage लाभ और हानि दोनों को बढ़ाता है और तुलनात्मक रूप से छोटे adverse move के बाद liquidation को संभव बनाता है।
 
 ## Futures और Options के बीच अंतर
 
-Futures और options के बीच मुख्य अंतर यह है कि buyer के लिए contract optional होता है: वह इसे execute करने या न करने का निर्णय ले सकता है (आमतौर पर वह तभी execute करेगा जब उसे इससे लाभ होगा)। यदि buyer option का उपयोग करना चाहता है, तो seller को बेचना अनिवार्य होता है।\
-हालांकि, buyer option खोलने के लिए seller को कुछ fee देता है (इसलिए seller, जो aparentemente अधिक risk ले रहा है, शुरुआत से ही कुछ money कमाना शुरू कर देता है)।
+Option buyer को contract terms के अंतर्गत exercise करने का अधिकार मिलता है, obligation नहीं। यदि buyer exercise करता है, तो option writer पर corresponding obligation होती है। Buyer उस अधिकार के लिए writer को premium देता है।<sup>[[4]](#references)</sup>
 
 ### 1. **Obligation बनाम Right:**
 
-* **Futures:** जब आप futures contract खरीदते या बेचते हैं, तो आप किसी asset को भविष्य की किसी तारीख पर निश्चित price पर खरीदने या बेचने के लिए **binding agreement** में प्रवेश करते हैं। Buyer और seller दोनों **expiration पर contract पूरा करने के लिए बाध्य** होते हैं (जब तक कि contract को उससे पहले बंद न कर दिया जाए)।
-* **Options:** Options में आपके पास किसी asset को निश्चित price पर, किसी निश्चित expiration date से पहले या उस date पर खरीदने (इसे **call option** कहा जाता है) या बेचने (इसे **put option** कहा जाता है) का **अधिकार होता है, लेकिन obligation नहीं**। **Buyer** के पास execute करने का option होता है, जबकि **seller** को trade पूरा करना अनिवार्य होता है यदि buyer option का उपयोग करने का निर्णय लेता है।
+* **Futures:** जब आप futures contract खरीदते या बेचते हैं, तो आप किसी specific price पर future date में asset खरीदने या बेचने के लिए **binding agreement** में प्रवेश करते हैं। Buyer और seller दोनों expiration पर contract पूरा करने के लिए **obligated** होते हैं (जब तक contract को उससे पहले बंद न कर दिया जाए)।
+* **Options:** Options में आपको किसी asset को specific price पर किसी निश्चित expiration date से पहले या उस date पर खरीदने ( **call option** के मामले में) या बेचने ( **put option** के मामले में) का **right, but not the obligation** मिलता है। **Buyer** के पास execute करने का option होता है, जबकि यदि buyer option exercise करने का निर्णय लेता है, तो **seller** trade पूरा करने के लिए obligated होता है।
 
 ### 2. **Risk:**
 
-* **Futures:** Buyer और seller दोनों **unlimited risk** लेते हैं क्योंकि contract पूरा करना उनके लिए अनिवार्य होता है। Risk, agreed-upon price और expiration date पर market price के बीच का अंतर होता है।
-* **Options:** Buyer का risk option खरीदने के लिए दिए गए **premium** तक सीमित होता है। यदि market option holder के पक्ष में नहीं बढ़ता, तो वह option को expire होने दे सकता है। हालांकि, option के **seller** (writer) के लिए risk unlimited होता है यदि market उसके विरुद्ध काफी अधिक बढ़ता है।
+* **Futures:** दोनों पक्षों को substantial losses हो सकते हैं। Loss mathematically unlimited है या नहीं, यह position और underlying asset पर निर्भर करता है: short position में theoretical loss unbounded हो सकता है, जबकि यदि underlying zero से नीचे नहीं गिर सकता, तो long position notional value से अधिक नहीं खो सकती।
+* **Options:** ऐसा buyer जो कोई अन्य option write नहीं करता, सामान्यतः paid premium को risk में रखता है। Naked call writer को theoretically unlimited loss हो सकता है; अन्य option-writing strategies में bounded या unbounded risk profiles अलग-अलग होते हैं।
 
 ### 3. **Cost:**
 
-* **Futures:** Position बनाए रखने के लिए आवश्यक margin के अलावा कोई upfront cost नहीं होती, क्योंकि buyer और seller दोनों trade पूरा करने के लिए बाध्य होते हैं।
-* **Options:** Buyer को option exercise करने के अधिकार के लिए upfront **option premium** देना पड़ता है। यह premium मूल रूप से option की cost होती है।
+* **Futures:** Position रखने के लिए आवश्यक margin के अतिरिक्त कोई upfront cost नहीं होती, क्योंकि buyer और seller दोनों trade पूरा करने के लिए obligated होते हैं।
+* **Options:** Option exercise करने के अधिकार के लिए buyer को upfront **option premium** देना पड़ता है। यह premium मूलतः option की cost होती है।
 
 ### 4. **Profit Potential:**
 
-* **Futures:** Profit या loss expiration पर market price और contract में तय agreed-upon price के बीच के अंतर पर आधारित होता है।
-* **Options:** Buyer को तब profit होता है जब market, strike price से आगे और paid premium से अधिक अनुकूल दिशा में बढ़ता है। यदि option exercise नहीं किया जाता, तो seller premium अपने पास रखकर profit कमाता है।
+* **Futures:** Profit या loss expiration पर market price और contract में agreed-upon price के बीच के difference पर आधारित होता है।
+* **Options:** Buyer को तब लाभ होता है जब market premium paid से अधिक मात्रा में strike price के आगे favorable दिशा में move करता है। यदि option exercise नहीं किया जाता, तो seller premium रखकर लाभ कमाता है।
 
+## References
+
+- [1] [CFTC - Futures markets का economic purpose](https://www.cftc.gov/LearnAndProtect/EducationCenter/economicpurpose)
+- [2] [CFTC - Futures Market की मूल बातें](https://www.cftc.gov/LearnAndProtect/EducationCenter/FuturesMarketBasics/index2.htm)
+- [3] [CFTC - Virtual-currency trading के risks को समझें](https://www.cftc.gov/LearnAndProtect/AdvisoriesAndArticles/understand_risks_of_virtual_currency.html)
+- [4] [CFTC Glossary - Option, premium और exercise](https://www.cftc.gov/LearnAndProtect/AdvisoriesAndArticles/CFTCGlossary/index.htm)
 {{#include ../banners/hacktricks-training.md}}
