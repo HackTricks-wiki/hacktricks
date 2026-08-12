@@ -2,6 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
+
 ## Passwords
 
 ### Shadow Passwords
@@ -65,7 +66,7 @@ sudo ./keychaindump
 
 ### chainbreaker
 
-[**Chainbreaker**](https://github.com/n0fate/chainbreaker) can be used to extract the following types of information from an OSX keychain in a forensically sound manner:
+[**Chainbreaker**](https://github.com/n0fate/chainbreaker) can extract the following types of information from a macOS keychain in a forensically sound manner:
 
 - Hashed Keychain password, suitable for cracking with [hashcat](https://hashcat.net/hashcat/) or [John the Ripper](https://www.openwall.com/john/)
 - Internet Passwords
@@ -114,7 +115,7 @@ python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d1
 
 ```bash
 #Use volafox (https://github.com/n0fate/volafox) to extract possible keychain passwords
-# Unformtunately volafox isn't working with the latest versions of MacOS
+# Unfortunately, Volafox does not support recent macOS versions
 python vol.py -i ~/Desktop/show/macosxml.mem -o keychaindump
 
 #Try to extract the passwords using the extracted keychain passwords
@@ -318,7 +319,7 @@ These are notifications that the user should see in the screen:
 
 - **`CFUserNotification`**: These API provides a way to show in the screen a pop-up with a message.
 - **The Bulletin Board**: This shows in iOS a banner that disappears and will be stored in the Notification Center.
-- **`NSUserNotificationCenter`**: This is the iOS bulletin board in MacOS. On older macOS releases the database usually lives in `/var/folders/<user temp>/0/com.apple.notificationcenter/db2/db`; on Sequoia+ it was moved to `~/Library/Group Containers/group.com.apple.usernoted/db2/db`.
+- **`NSUserNotificationCenter`**: The legacy notification-center service on macOS. On older releases, the database usually lives in `/var/folders/<user temp>/0/com.apple.notificationcenter/db2/db`; on Sequoia and later, it moved to `~/Library/Group Containers/group.com.apple.usernoted/db2/db`.
 
 ## References
 
@@ -328,4 +329,3 @@ These are notifications that the user should see in the screen:
 - [4] [9to5Mac – Apple addresses privacy concerns around Notification Center database in macOS Sequoia](https://9to5mac.com/2024/09/01/security-bite-apple-addresses-privacy-concerns-around-notification-center-database-in-macos-sequoia/)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

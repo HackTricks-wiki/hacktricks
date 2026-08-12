@@ -1,5 +1,7 @@
 # Full TTYs
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Full TTY
 
 `/etc/shells` lists valid login-shell pathnames and is consulted by some programs; it is not a universal prerequisite for allocating a PTY.<sup>[[3]](#references)[[4]](#references)</sup> If a program such as `pkexec` rejects `SHELL` with `The value for the SHELL variable was not found in the /etc/shells file`, ensure the exact shell path (for example, `/bin/bash`) appears in `/etc/shells`.<sup>[[10]](#references)</sup> The `CTRL+Z`/`fg` recovery sequence below uses Bash job control; if the current shell is not Bash, start Bash before using that sequence.<sup>[[7]](#references)</sup>
@@ -105,6 +107,8 @@ sftp -P 8888 127.0.0.1
 [Penelope](https://github.com/brightio/penelope) automatically upgrades Unix-like reverse shells to PTY, resizes Unix-like terminals, and logs shell interactions; for Windows shells it provides readline but not real-time terminal resizing.<sup>[[2]](#references)</sup>
 
 Run `penelope` to listen on `0.0.0.0:4444` by default; incoming Unix-like shells can then be auto-upgraded and logged.<sup>[[2]](#references)</sup>
+
+![Penelope handling and upgrading an incoming shell](https://github.com/user-attachments/assets/27ab4b3a-780c-4c07-a855-fd80a194c01e)
 
 ## No TTY
 

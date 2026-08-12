@@ -75,7 +75,7 @@ otool -l "/Applications/VulnDyld.app/Contents/Resources/lib/binary" | grep LC_RP
 {{#tab name="@rpath"}}
 
 ```bash
-# Check librareis loaded using @rapth and the used versions
+# Check libraries loaded using @rpath and the versions used
 otool -l "/Applications/VulnDyld.app/Contents/Resources/lib/binary" | grep "@rpath" -A 3
          name @rpath/lib.dylib (offset 24)
    time stamp 2 Thu Jan  1 01:00:02 1970

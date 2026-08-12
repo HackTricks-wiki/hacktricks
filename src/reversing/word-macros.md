@@ -12,9 +12,9 @@ Macros may contain **unreachable or irrelevant code** intended to slow analysis.
 
 VBA UserForms can store data in controls such as text boxes. Because forms, frames, and pages can each expose a `Controls` collection, analysts should enumerate the entire control hierarchy rather than relying only on what the form displays. The example below stores concealed data in overlapping text boxes.<sup>[[1]](#references)</sup>
 
-![A macro UserForm with data concealed in overlapping text boxes](<../images/image (344).png>)
+During dynamic analysis, VBA's `GetObject` function can retrieve an Automation object from a file or attach to an already-running Automation server. Macros may use that object access to reach data that is not obvious in the visible document; inspect both the returned object and the UserForm control tree.<sup>[[2]](#references)</sup>
 
-Macros may also use VBA's `GetObject` function to open a file-backed ActiveX object or attach to an existing Office automation object. During analysis, trace the function's path and class arguments, then follow every property and method invoked on the returned object. `GetObject` does not itself enumerate UserForm controls; it is a separate object-access mechanism.<sup>[[2]](#references)</sup>
+![A macro UserForm with data concealed in overlapping text boxes](<../images/image (344).png>)
 
 ## References
 

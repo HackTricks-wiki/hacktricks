@@ -1,5 +1,7 @@
 # Containerd (ctr) Privilege Escalation
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Basic information
 
 Go to the following link to learn **where `containerd` and `ctr` fit in the container stack**:

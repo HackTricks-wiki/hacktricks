@@ -1,5 +1,7 @@
 # NFS No Root Squash Misconfiguration Privilege Escalation
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Squashing Basic Info
 
 With NFS AUTH_SYS/AUTH_UNIX, the server bases file-permission checks on the `uid` and `gid` supplied in each RPC request. Other security flavors, such as Kerberos, use different credentials, and the server can map numeric credentials before checking permissions.<sup>[[4]](#references)[[5]](#references)</sup>

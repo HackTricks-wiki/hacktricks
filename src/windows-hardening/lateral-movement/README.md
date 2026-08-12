@@ -12,8 +12,14 @@ Windows supports several mechanisms that can be used to execute commands on remo
 - [**DCOM Exec**](dcomexec.md)
 - [**RDPexec**](rdpexec.md)
 - [**SCMexec**](scmexec.md)
-- [**Pass the cookie**](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/az-pass-the-cookie.html) (cloud)
-- [**Pass the PRT**](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/pass-the-prt.html) (cloud)
-- [**Pass the AzureAD Certificate**](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/az-pass-the-certificate.html) (cloud)
+- **Pass the cookie** (cloud)<sup>[[1]](#references)</sup>
+- **Pass the PRT** (cloud)<sup>[[2]](#references)</sup>
+- **Pass the Microsoft Entra ID certificate** (cloud)<sup>[[3]](#references)</sup>
+
+## References
+
+- [1] [HackTricks Cloud - Pass the cookie](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/az-pass-the-cookie.html)
+- [2] [HackTricks Cloud - Pass the PRT](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/pass-the-prt.html)
+- [3] [HackTricks Cloud - Pass the certificate](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/az-pass-the-certificate.html)
 
 {{#include ../../banners/hacktricks-training.md}}

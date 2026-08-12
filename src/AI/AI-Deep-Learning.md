@@ -2,7 +2,7 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Deep Learning
+## Deep Learning <sup>[[1]](#references)</sup>
 
 Deep learning is a subset of machine learning that uses neural networks with multiple layers (deep neural networks) to model complex patterns in data. It has achieved remarkable success in various domains, including computer vision, natural language processing, and speech recognition.
 
@@ -33,7 +33,7 @@ Backpropagation is the algorithm used to train neural networks by adjusting the 
 3. **Backward Pass**: Compute the gradients of the loss with respect to each weight using the chain rule of calculus.
 4. **Weight Update**: Update the weights using an optimization algorithm (e.g., stochastic gradient descent, Adam) to minimize the loss.
 
-## Convolutional Neural Networks (CNNs)
+## Convolutional Neural Networks (CNNs) <sup>[[2]](#references)</sup>
 
 Convolutional Neural Networks (CNNs) are a specialized type of neural network designed for processing grid-like data, such as images. They are particularly effective in computer vision tasks due to their ability to automatically learn spatial hierarchies of features.
 
@@ -389,7 +389,7 @@ print("Confusion matrix (rows = true, cols = pred):")
 print(confusion_matrix(labels_all, preds_all))
 ```
 
-## Recurrent Neural Networks (RNNs)
+## Recurrent Neural Networks (RNNs) <sup>[[3]](#references)</sup>
 
 Recurrent Neural Networks (RNNs) are a class of neural networks designed for processing sequential data, such as time series or natural language. Unlike traditional feedforward neural networks, RNNs have connections that loop back on themselves, allowing them to maintain a hidden state that captures information about previous inputs in the sequence.
 
@@ -400,7 +400,7 @@ The main components of RNNs include:
 
 For example, in a language model, the RNN processes a sequence of words, for example, "The cat sat on the" and predicts the next word based on the context provided by the previous words, in this case, "mat".
 
-### Long Short-Term Memory (LSTM) and Gated Recurrent Unit (GRU)
+### Long Short-Term Memory (LSTM) and Gated Recurrent Unit (GRU) <sup>[[3]](#references)</sup>
 
 RNNs are particularly effective for tasks involving sequential data, such as language modeling, machine translation, and speech recognition. However, they can struggle with **long-range dependencies due to issues like vanishing gradients**.
 
@@ -414,13 +414,13 @@ To address this, specialized architectures like Long Short-Term Memory (LSTM) an
 Large Language Models (LLMs) are a type of deep learning model specifically designed for natural language processing tasks. They are trained on vast amounts of text data and can generate human-like text, answer questions, translate languages, and perform various other language-related tasks.
 LLMs are typically based on transformer architectures, which use self-attention mechanisms to capture relationships between words in a sequence, allowing them to understand context and generate coherent text.
 
-### Transformer Architecture
+### Transformer Architecture <sup>[[4]](#references)</sup>
 The transformer architecture is the foundation of many LLMs. It consists of an encoder-decoder structure, where the encoder processes the input sequence and the decoder generates the output sequence. The key components of the transformer architecture include:
 - **Self-Attention Mechanism**: This mechanism allows the model to weigh the importance of different words in a sequence when generating representations. It computes attention scores based on the relationships between words, enabling the model to focus on relevant context.
 - **Multi-Head Attention**: This component allows the model to capture multiple relationships between words by using multiple attention heads, each focusing on different aspects of the input.
 - **Positional Encoding**: Since transformers do not have a built-in notion of word order, positional encoding is added to the input embeddings to provide information about the position of words in the sequence.
 
-## Diffusion Models
+## Diffusion Models <sup>[[5]](#references)</sup>
 Diffusion models are a class of generative models that learn to generate data by simulating a diffusion process. They are particularly effective for tasks like image generation and have gained popularity in recent years.
 Diffusion models work by gradually transforming a simple noise distribution into a complex data distribution through a series of diffusion steps. The key components of diffusion models include:
 - **Forward Diffusion Process**: This process gradually adds noise to the data, transforming it into a simple noise distribution. The forward diffusion process is typically defined by a series of noise levels, where each level corresponds to a specific amount of noise added to the data.
@@ -431,6 +431,12 @@ Moreover, to generate an image from a text prompt, diffusion models typically fo
 2. **Noise Sampling**: A random noise vector is sampled from a Gaussian distribution.
 3. **Diffusion Steps**: The model applies a series of diffusion steps, gradually transforming the noise vector into an image that corresponds to the text prompt. Each step involves applying learned transformations to denoise the image.
 
+## References
+
+- [1] [PyTorch - Neural Networks tutorial](https://docs.pytorch.org/tutorials/beginner/blitz/neural_networks_tutorial.html)
+- [2] [PyTorch - Conv2d](https://docs.pytorch.org/docs/stable/generated/torch.nn.Conv2d.html)
+- [3] [PyTorch - LSTM](https://docs.pytorch.org/docs/stable/generated/torch.nn.LSTM.html)
+- [4] [PyTorch - Transformer](https://docs.pytorch.org/docs/stable/generated/torch.nn.Transformer.html)
+- [5] [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239)
 
 {{#include ../banners/hacktricks-training.md}}
-

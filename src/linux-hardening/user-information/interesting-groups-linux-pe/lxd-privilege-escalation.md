@@ -1,5 +1,7 @@
 # lxd/lxc Group - Privilege escalation
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 Membership in the host's LXD management group (normally _**lxd**_) can provide a path to root by allowing full control of the daemon.<sup>[[1]](#references)</sup>
 
 ## Exploiting without internet

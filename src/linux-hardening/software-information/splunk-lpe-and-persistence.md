@@ -1,5 +1,7 @@
 # Splunk LPE and Persistence
 
+{{#include ../../banners/hacktricks-training.md}}
+
 If **enumerating** a machine **internally** or **externally** you find **Splunk running** (usually **8000** for the web UI and **8089** for the management API), valid credentials can often be turned into **code execution** through app installation, scripted inputs, or management actions.<sup>[[1]](#references)[[5]](#references)[[6]](#references)[[10]](#references)</sup> If Splunk is running as **root**, that frequently becomes an immediate **privilege escalation**.<sup>[[1]](#references)</sup>
 
 If you only need the generic remote attack surface, enumeration, or app-upload RCE path, check:

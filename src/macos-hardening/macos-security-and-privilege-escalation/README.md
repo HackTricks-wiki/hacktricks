@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic MacOS
+## Basic macOS
 
-If you are not familiar with macOS, you should start learning the basics of macOS:
+If you are not familiar with macOS, start with the basics and the incident-response, malware-analysis, and command references listed below.<sup>[[1]](#references)</sup><sup>[[2]](#references)</sup><sup>[[3]](#references)</sup><sup>[[4]](#references)</sup>
 
 - Special macOS **files & permissions:**
 
@@ -27,14 +27,14 @@ macos-users.md
 macos-applefs.md
 {{#endref}}
 
-- The **architecture** of the k**ernel**
+- The **architecture** of the **kernel**
 
 
 {{#ref}}
 mac-os-architecture/
 {{#endref}}
 
-- Common macOS n**etwork services & protocols**
+- Common macOS **network services and protocols**
 
 
 {{#ref}}
@@ -44,23 +44,23 @@ macos-protocols.md
 - **Opensource** macOS: [https://opensource.apple.com/](https://opensource.apple.com/)
   - To download a `tar.gz` change a URL such as [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) to [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
 
-### MacOS MDM
+### macOS MDM
 
-In companies **macOS** systems are highly probably going to be **managed with a MDM**. Therefore, from the perspective of an attacker is interesting to know **how that works**:
+In corporate environments, macOS systems are often managed with mobile device management (MDM). From an attacker's perspective, it is therefore useful to understand how MDM works:
 
 
 {{#ref}}
 ../macos-red-teaming/macos-mdm/
 {{#endref}}
 
-### MacOS - Inspecting, Debugging and Fuzzing
+### macOS - Inspecting, Debugging And Fuzzing
 
 
 {{#ref}}
 macos-apps-inspecting-debugging-and-fuzzing/
 {{#endref}}
 
-## MacOS Security Protections
+## macOS Security Protections
 
 
 {{#ref}}
@@ -90,7 +90,7 @@ macos-files-folders-and-binaries/macos-installers-abuse.md
 
 ### File Extension & URL scheme app handlers
 
-Weird apps registered by file extensions could be abused and different applications can be register to open specific protocols
+Unexpected applications registered for file extensions or URL schemes may expose useful attack surfaces or handler-hijacking opportunities.
 
 
 {{#ref}}
@@ -103,13 +103,13 @@ In macOS **applications and binaries can have permissions** to access folders or
 
 Therefore, an attacker that wants to successfully compromise a macOS machine will need to **escalate its TCC privileges** (or even **bypass SIP**, depending on his needs).
 
-These privileges are usually given in the form of **entitlements** the application is signed with, or the application might requested some accesses and after the **user approving them** they can be found in the **TCC databases**. Another way a process can obtain these privileges is by being a **child of a process** with those **privileges** as they are usually **inherited**.<sup>[[5]](#references)</sup>
+These privileges are usually granted through code-signing **entitlements** or through user-approved access recorded in the **TCC databases**. Some privileges may also be inherited from a parent process, depending on the protection and execution chain.<sup>[[5]](#references)</sup>
 
-Follow these links to find different was to [**escalate privileges in TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), to [**bypass TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) and how in the past [**SIP has been bypassed**](macos-security-protections/macos-sip.md#sip-bypasses).
+Follow these links for ways to [**escalate TCC privileges**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), [**bypass TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html), and understand how [**SIP has been bypassed**](macos-security-protections/macos-sip.md#sip-bypasses) in the past.
 
 ## macOS Traditional Privilege Escalation
 
-Of course from a red teams perspective you should be also interested in escalating to root. Check the following post for some hints:
+From a red-team perspective, escalation to root is another important objective. The following page covers common approaches:
 
 
 {{#ref}}
@@ -123,9 +123,9 @@ macos-privilege-escalation.md
 ## References
 
 - [1] [OS X Incident Response: Scripting and Analysis](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
-- [2] [The Art of Mac Malware, Vol. 1 — Analysis (Patrick Wardle)](https://taomm.org/vol1/analysis.html)
-- [3] [NicolasGrimonpont/Cheatsheet — macOS/Linux/Windows commands & security tools cheatsheet](https://github.com/NicolasGrimonpont/Cheatsheet)
-- [4] [SentinelOne — macOS Security Resource](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)
+- [2] [The Art of Mac Malware, Vol. 1 - Analysis](https://taomm.org/)
+- [3] [NicolasGrimonpont/Cheatsheet - macOS/Linux/Windows commands and security tools](https://github.com/NicolasGrimonpont/Cheatsheet)
+- [4] [SentinelOne - macOS Security Resource](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)
 - [5] [2022 - macOS local security: escaping the sandbox and bypassing TCC (YouTube)](https://www.youtube.com/watch?v=vMGiplQtjTY)
 
 {{#include ../../banners/hacktricks-training.md}}

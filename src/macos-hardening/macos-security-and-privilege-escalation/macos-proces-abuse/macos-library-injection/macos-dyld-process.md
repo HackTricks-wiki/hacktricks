@@ -39,7 +39,7 @@ Terminators are coded with **`__attribute__((destructor))`** and are located in 
 
 All binaries sin macOS are dynamically linked. Therefore, they contain some stubs sections that helps the binary to jump to the correct code in different machines and context. It's dyld when the binary is executed the brain that needs to resolve these addresses (at least the non-lazy ones).
 
-Som stub sections in the binary:
+Some stub sections in the binary:
 
 - **`__TEXT.__[auth_]stubs`**: Pointers from `__DATA` sections
 - **`__TEXT.__stub_helper`**: Small code invoking dynamic linking with info on the function to call
@@ -110,7 +110,7 @@ In other situations instead of directly jumping to the GOT, it could jump to **`
 This last function, after finding the address of the searched function writes it in the corresponding location in **`__TEXT.__stub_helper`** to avoid doing lookups in the future.
 
 > [!TIP]
-> However notice taht current dyld versions load everything as non-lazy.
+> However, notice that current dyld versions load everything as non-lazy.
 
 #### Dyld opcodes
 
@@ -273,10 +273,10 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 ### Others
 
 - `DYLD_BIND_AT_LAUNCH`: Lazy bindings are resolved with non lazy ones
-- `DYLD_DISABLE_PREFETCH`: DIsable pre-fetching of \_\_DATA and \_\_LINKEDIT content
+- `DYLD_DISABLE_PREFETCH`: Disable pre-fetching of \_\_DATA and \_\_LINKEDIT content
 - `DYLD_FORCE_FLAT_NAMESPACE`: Single-level bindings
 - `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: Resolution paths
-- `DYLD_INSERT_LIBRARIES`: Load an specifc library
+- `DYLD_INSERT_LIBRARIES`: Load a specific library
 - `DYLD_PRINT_TO_FILE`: Write dyld debug in a file
 - `DYLD_PRINT_APIS`: Print libdyld API calls
 - `DYLD_PRINT_APIS_APP`: Print libdyld API calls made by main
@@ -298,7 +298,7 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 - `DYLD_SHARED_REGION`: "use", "private", "avoid"
 - `DYLD_USE_CLOSURES`: Enable closures
 
-It's possible to find more with someting like:
+It's possible to find more with something like:
 
 ```bash
 strings /usr/lib/dyld | grep "^DYLD_" | sort -u
@@ -318,4 +318,3 @@ find . -type f | xargs grep strcmp| grep key,\ \" | cut -d'"' -f2 | sort -u
 - [4] [dyld — `include/mach-o/dyld_images.h` (`dyld_all_image_infos` structure)](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-

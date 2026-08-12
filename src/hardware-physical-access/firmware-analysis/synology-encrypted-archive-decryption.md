@@ -6,7 +6,7 @@
 
 Several Synology devices (DSM/BSM NAS, BeeStation, …) distribute their firmware and application packages in **encrypted PAT / SPK archives**.  Those archives can be decrypted *offline* with nothing but the public download files thanks to hard-coded keys embedded inside the official extraction libraries.
 
-This page documents, step-by-step, how the encrypted format works and how to fully recover the clear-text **TAR** that sits inside each package.  The procedure is based on Synacktiv research performed during Pwn2Own Ireland 2024 and implemented in the open-source tool [`synodecrypt`](https://github.com/synacktiv/synodecrypt).<sup>[[1]](#references)[[2]](#references)</sup>
+This page documents, step-by-step, how the encrypted format works and how to fully recover the clear-text **TAR** that sits inside each package.  The procedure is based on Synacktiv research performed during Pwn2Own Ireland 2024 and implemented in the open-source tool [`synodecrypt`](https://github.com/synacktiv/synodecrypt).<sup>[[1]](#references)</sup><sup>[[2]](#references)</sup>
 
 > ⚠️  The format is exactly the same for both `*.pat` (system update) and `*.spk` (application) archives – they only differ in the pair of hard-coded keys that are selected.
 

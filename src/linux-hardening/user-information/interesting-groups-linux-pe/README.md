@@ -1,5 +1,7 @@
 # Interesting Groups - Linux Privesc
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 ## Sudo/Admin Groups
 
 ### **PE - Method 1**

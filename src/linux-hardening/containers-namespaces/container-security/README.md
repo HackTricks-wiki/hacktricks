@@ -1,5 +1,7 @@
 # Container Security
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 ## What A Container Actually Is
 
 A practical way to define a container is this: a container is a **regular Linux process tree** that has been started under a specific OCI-style configuration so that it sees a controlled filesystem, a controlled set of kernel resources, and a restricted privilege model. The process may believe it is PID 1, may believe it has its own network stack, may believe it owns its own hostname and IPC resources, and may even run as root inside its own user namespace. But under the hood it is still a host process that the kernel schedules like any other.

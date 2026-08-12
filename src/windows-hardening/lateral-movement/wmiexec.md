@@ -6,7 +6,7 @@
 
 Processes can be opened on hosts where the username and either password or hash are known through the use of WMI. Commands are executed using WMI by Wmiexec, providing a semi-interactive shell experience.
 
-**dcomexec.py:** Utilizing different DCOM endpoints, this script offers a semi-interactive shell akin to wmiexec.py, specifically leveraging the ShellBrowserWindow DCOM object. It currently supports MMC20. Application, Shell Windows, and Shell Browser Window objects. (source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))<sup>[[2]](#references)</sup>
+**dcomexec.py:** Using different DCOM endpoints, this script offers a semi-interactive shell similar to `wmiexec.py`. The selected `-object` value chooses the endpoint; supported objects include `MMC20.Application`, `ShellWindows`, and `ShellBrowserWindow`, with the latter providing the Shell Browser Window technique highlighted in the original walkthrough.<sup>[[2]](#references)[[3]](#references)</sup>
 
 ## WMI Fundamentals
 
@@ -145,7 +145,8 @@ SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug a
 ## References
 
 - [1] [Using Credentials to Own Windows Boxes - Part 3 (WMI and WinRM)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/)
-- [2] [Beginner's Guide to Impacket Tool Kit - Part 1](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)
+- [2] [Fortra Impacket – dcomexec.py](https://github.com/fortra/impacket/blob/master/examples/dcomexec.py)
+- [3] [Beginner's Guide to Impacket Tool Kit, Part 1 – Hacking Articles (Internet Archive)](https://web.archive.org/web/20190822180831/https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)
 
 
 {{#include ../../banners/hacktricks-training.md}}

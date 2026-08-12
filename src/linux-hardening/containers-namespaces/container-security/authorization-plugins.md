@@ -1,5 +1,7 @@
 # Runtime Authorization Plugins
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 ## Overview
 
 Runtime authorization plugins are an extra policy layer that decides whether a caller may perform a given daemon action. Docker is the classic example. By default, anyone who can talk to the Docker daemon effectively has broad control over it. Authorization plugins try to narrow that model by examining the authenticated user and the requested API operation, then allowing or denying the request according to policy.

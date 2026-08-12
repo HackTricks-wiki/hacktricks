@@ -1,5 +1,7 @@
 # Linux Environment Variables
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Global variables
 
 The global variables **will be** inherited by **child processes**.

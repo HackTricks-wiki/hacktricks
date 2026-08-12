@@ -4,12 +4,12 @@
 
 ## Why it matters
 
-LDAP relay/MITM lets attackers forward binds to Domain Controllers to obtain authenticated contexts. Two server-side controls blunt these paths:
+LDAP relay/MITM attacks forward authentication to a domain controller to obtain an authenticated LDAP context. Two related controls reduce these paths:
 
-- **LDAP Channel Binding (CBT)** ties an LDAPS bind to the specific TLS tunnel, breaking relays/replays across different channels.
-- **LDAP Signing** forces integrity-protected LDAP messages, preventing tampering and most unsigned relays.
+- **LDAP channel binding (CBT)** binds applicable authentication to the TLS server certificate/channel used by LDAPS, frustrating cross-channel relay.
+- **LDAP signing** requires integrity protection for SASL LDAP binds. It does not add confidentiality; use TLS when LDAP contents also need encryption.<sup>[[2]](#references)</sup>
 
-**Quick offensive check**: tools like `netexec ldap <dc> -u user -p pass` print the server posture. If you see `(signing:None)` and `(channel binding:Never)`, Kerberos/NTLM **relays to LDAP** are viable (e.g., using KrbRelayUp to write `msDS-AllowedToActOnBehalfOfOtherIdentity` for RBCD and impersonate administrators).<sup>[[4]](#references)</sup>
+**Quick posture check**: tools such as `netexec ldap <dc> -u user -p pass` report observed signing and channel-binding policy. `(signing:None)` and `(channel binding:Never)` indicate missing controls, but a successful relay still depends on the captured authentication type, EPA behavior, account privileges, target protocol, and relay protections. When the relayed principal has the necessary rights, tooling such as KrbRelayUp can write `msDS-AllowedToActOnBehalfOfOtherIdentity`, configure resource-based constrained delegation (RBCD), and use the resulting delegation path to impersonate a privileged principal.<sup>[[4]](#references)</sup>
 
 **Server 2025 DCs** introduce a new GPO (**LDAP server signing requirements Enforcement**) that defaults to **Require Signing** when left **Not Configured**. To avoid enforcement you must explicitly set that policy to **Disabled**.<sup>[[1]](#references)</sup>
 
@@ -35,7 +35,7 @@ LDAP relay/MITM lets attackers forward binds to Domain Controllers to obtain aut
 - **DC GPO**:
   - Legacy: `Domain controller: LDAP server signing requirements` = `Require signing` (default is `None`).<sup>[[2]](#references)</sup>
   - **Server 2025**: leave legacy policy at `None` and set `LDAP server signing requirements Enforcement` = `Enabled` (Not Configured = enforced by default; set `Disabled` to avoid it).<sup>[[1]](#references)</sup>
-- **Compatibility**: only Windows **XP SP3+** supports LDAP signing; older systems will break when enforcement is enabled.
+- **Compatibility**: Inventory non-Windows appliances and applications using simple binds or unsigned SASL binds. Microsoft documents support on maintained Windows versions; legacy-client compatibility statements should be verified against the actual client stack rather than reduced to an XP version threshold.<sup>[[2]](#references)</sup>
 
 ## Audit-first rollout (recommended ~30 days)
 

@@ -4,11 +4,11 @@
 
 ## Reinforcement Learning
 
-Reinforcement learning (RL) is a type of machine learning where an agent learns to make decisions by interacting with an environment. The agent receives feedback in the form of rewards or penalties based on its actions, allowing it to learn optimal behaviors over time. RL is particularly useful for problems where the solution involves sequential decision-making, such as robotics, game playing, and autonomous systems.
+Reinforcement learning (RL) is a type of machine learning where an agent learns to make decisions by interacting with an environment. The agent receives feedback in the form of rewards or penalties based on its actions, allowing it to learn optimal behaviors over time. RL is particularly useful for problems where the solution involves sequential decision-making, such as robotics, game playing, and autonomous systems.<sup>[[5]](#references)</sup>
 
 ### Q-Learning
 
-Q-Learning is a model-free reinforcement learning algorithm that learns the value of actions in a given state. It uses a Q-table to store the expected utility of taking a specific action in a specific state. The algorithm updates the Q-values based on the rewards received and the maximum expected future rewards.
+Q-Learning is a model-free reinforcement learning algorithm that learns the value of actions in a given state. It uses a Q-table to store the expected utility of taking a specific action in a specific state. The algorithm updates the Q-values based on the rewards received and the maximum expected future rewards.<sup>[[5]](#references)</sup><sup>[[6]](#references)</sup>
 1. **Initialization**: Initialize the Q-table with arbitrary values (often zeros).
 2. **Action Selection**: Choose an action using an exploration strategy (e.g., ε-greedy, where with probability ε a random action is chosen, and with probability 1-ε the action with the highest Q-value is selected).
   - Note that the algorithm could always chose the known best action given a state, but this would not allow the agent to explore new actions that might yield better rewards. That's why the ε-greedy variable is used to balance exploration and exploitation.
@@ -42,7 +42,7 @@ SARSA is another model-free reinforcement learning algorithm that is similar to 
 2. **Action Selection**: Choose an action using an exploration strategy (e.g., ε-greedy).
 3. **Environment Interaction**: Execute the chosen action in the environment, observe the next state and reward.
   - Note that depending in this case on the ε-greedy probability, the next step might be a random action (for exploration) or the best known action (for exploitation).
-4. **Q-Value Update**: Update the Q-value for the state-action pair using the SARSA update rule. Note that the update rule is similar to Q-Learning, but it uses the action taht will be taken in the next state `s'` rather than the maximum Q-value for that state:
+4. **Q-Value Update**: Update the Q-value for the state-action pair using the SARSA update rule. Note that the update rule is similar to Q-Learning, but it uses the action that will be taken in the next state `s'` rather than the maximum Q-value for that state:<sup>[[5]](#references)</sup>
   ```plaintext
   Q(s, a) = Q(s, a) + α * (r + γ * Q(s', a') - Q(s, a))
   ```
@@ -57,7 +57,7 @@ SARSA is another model-free reinforcement learning algorithm that is similar to 
 
 #### Softmax vs ε-Greedy Action Selection
 
-In addition to ε-greedy action selection, SARSA can also use a softmax action selection strategy. In softmax action selection, the probability of selecting an action is **proportional to its Q-value**, allowing for a more nuanced exploration of the action space. The probability of selecting action `a` in state `s` is given by:
+In addition to ε-greedy action selection, SARSA can also use a softmax action-selection strategy. The probability of an action is proportional to `exp(Q(s,a) / τ)`, not directly to its raw Q-value. This provides a more nuanced exploration of the action space. The probability of selecting action `a` in state `s` is:<sup>[[5]](#references)</sup>
 
 ```plaintext
 P(a|s) = exp(Q(s, a) / τ) / Σ(exp(Q(s, a') / τ))
@@ -120,6 +120,7 @@ Instead of static image patches, recent MADRL work uses *behavioral sequences* (
 - [2] [PNAct: Crafting Backdoor Attacks in Safe Reinforcement Learning](https://arxiv.org/abs/2507.00485)
 - [3] [Spatiotemporal Backdoor Attack in Multi-Agent Reinforcement Learning](https://arxiv.org/abs/2402.03210)
 - [4] [RLHFPoison: Reward Poisoning Attack for RLHF](https://aclanthology.org/2024.acl-long.140/)
+- [5] [Sutton and Barto – Reinforcement Learning: An Introduction, second edition](http://incompleteideas.net/book/the-book-2nd.html)
+- [6] [Watkins and Dayan – Q-learning](https://link.springer.com/article/10.1007/BF00992698)
 
 {{#include ../banners/hacktricks-training.md}}
-

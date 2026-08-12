@@ -4,13 +4,13 @@
 
 ## Overview
 
-The user namespace changes the meaning of user and group IDs by letting the kernel map IDs seen inside the namespace to different IDs outside it. This is one of the most important modern container protections because it directly addresses the biggest historical problem in classic containers: **root inside the container used to be uncomfortably close to root on the host**.
+The user namespace changes the meaning of user and group IDs by letting the kernel map IDs seen inside the namespace to different IDs outside it. This is one of the most important modern container protections because it directly addresses the biggest historical problem in classic containers: **root inside the container used to be uncomfortably close to root on the host**. <sup>[[1]](#references)</sup>
 
 With user namespaces, a process may run as UID 0 inside the container and still correspond to an unprivileged UID range on the host. That means the process can behave like root for many in-container tasks while being much less powerful from the host's point of view. This does not solve every container security problem, but it changes the consequences of a container compromise significantly.
 
 ## Operation
 
-A user namespace has mapping files such as `/proc/self/uid_map` and `/proc/self/gid_map` that describe how namespace IDs translate to parent IDs. If root inside the namespace maps to an unprivileged host UID, then operations that would require real host root simply do not carry the same weight. This is why user namespaces are central to **rootless containers** and why they are one of the biggest differences between older rootful container defaults and more modern least-privilege designs.
+A user namespace has mapping files such as `/proc/self/uid_map` and `/proc/self/gid_map` that describe how namespace IDs translate to parent IDs. If root inside the namespace maps to an unprivileged host UID, then operations that would require real host root simply do not carry the same weight. This is why user namespaces are central to **rootless containers** and why they are one of the biggest differences between older rootful container defaults and more modern least-privilege designs. <sup>[[1]](#references)</sup>
 
 The point is subtle but crucial: root inside the container is not eliminated, it is **translated**. The process still experiences a root-like environment locally, but the host should not be treating it as full root.
 
@@ -44,7 +44,7 @@ cat /proc/<pid>/gid_map
 
 ## Runtime Usage
 
-Rootless Podman is one of the clearest examples of user namespaces being treated as a first-class security mechanism. Rootless Docker also depends on them. Docker's userns-remap support improves safety in rootful daemon deployments too, although historically many deployments left it disabled for compatibility reasons. Kubernetes support for user namespaces has improved, but adoption and defaults vary by runtime, distro, and cluster policy. Incus/LXC systems also rely heavily on UID/GID shifting and idmapping ideas.
+Rootless Podman is one of the clearest examples of user namespaces being treated as a first-class security mechanism. Rootless Docker also depends on them. Docker's `userns-remap` support improves safety in rootful daemon deployments too, although many deployments leave it disabled for compatibility reasons. Kubernetes can create a user namespace for a Pod when `hostUsers: false` is supported and enabled, but adoption and defaults still vary by runtime, distribution, and cluster policy. Incus and LXC systems also rely heavily on UID/GID shifting and id-mapping concepts. <sup>[[2]](#references)</sup> <sup>[[3]](#references)</sup> <sup>[[4]](#references)</sup>
 
 The general trend is clear: environments that use user namespaces seriously usually provide a better answer to "what does container root actually mean?" than environments that do not.
 
@@ -132,5 +132,12 @@ What is interesting here:
 - The mapping files are more valuable than `id` alone, because `id` only shows the namespace-local identity.
 
 If the workload runs as UID 0 and the mapping shows that this corresponds closely to host root, you should interpret the rest of the container's privileges much more strictly.
+
+## References
+
+- [1] [`user_namespaces(7)` - Linux manual page](https://man7.org/linux/man-pages/man7/user_namespaces.7.html)
+- [2] [Docker Docs - Isolate containers with a user namespace](https://docs.docker.com/engine/security/userns-remap/)
+- [3] [Kubernetes Documentation - User namespaces](https://kubernetes.io/docs/concepts/workloads/pods/user-namespaces/)
+- [4] [Incus documentation - Security and unprivileged containers](https://linuxcontainers.org/incus/docs/main/explanation/security/)
 
 {{#include ../../../../../banners/hacktricks-training.md}}

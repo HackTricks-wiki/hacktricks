@@ -2,10 +2,9 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro
+## Introduction
 
-For more info about what is an iButton check:
-
+For background on iButton technology, see:
 
 {{#ref}}
 ../ibutton.md
@@ -13,7 +12,7 @@ For more info about what is an iButton check:
 
 ## Design
 
-The **blue** part of the following imageis how you would need to **put the real iButton** so the Flipper can **read it.** The **green** part is how you need to **touch the reader** with the Flipper zero to **correctly emulate an iButton**.<sup>[[1]](#references)</sup>
+In the following image, the **blue** area shows how to place a physical iButton against the Flipper Zero's contacts for reading. The **green** area shows which contacts should touch a reader during emulation.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../images/image (565).png" alt=""><figcaption></figcaption></figure>
 
@@ -21,25 +20,25 @@ The **blue** part of the following imageis how you would need to **put the real 
 
 ### Read
 
-In Read Mode Flipper is waiting for the iButton key to touch and is able to digest any of three types of keys: **Dallas, Cyfral, and Metakom**. Flipper will **figure out the type of the key itself**. The name of the key protocol will be displayed on the screen above the ID number.<sup>[[1]](#references)</sup>
+In Read mode, the Flipper Zero waits for a key to touch its contacts, detects the protocol, and displays the protocol above the key ID. The built-in application supports Dallas, Cyfral, and Metakom access-control keys.<sup>[[2]](#references)</sup>
 
 ### Add manually
 
-It's possible to **add manually** an iButton of type: **Dallas, Cyfral, and Metakom**
+You can manually enter key data for the Dallas, Cyfral, and Metakom protocols.<sup>[[2]](#references)</sup>
 
-### **Emulate**
+### Emulate
 
-It's possible to **emulate** saved iButtons (read or manually added).
+You can emulate a saved key, whether it was read from a physical key or entered manually.<sup>[[2]](#references)</sup>
 
 > [!TIP]
-> If you cannot make the expected contacts of the Flipper Zero touch the reader you can **use the external GPIO:**
+> If the built-in contacts cannot reach the reader, connect the data and ground contacts through the GPIO pins.<sup>[[2]](#references)</sup>
 
 <figure><img src="../../../images/image (138).png" alt=""><figcaption></figcaption></figure>
 
 ## References
 
 - [1] [Taming iButton Keys with Flipper Zero](https://blog.flipperzero.one/taming-ibutton/)
+- [2] [Flipper Zero documentation - Reading iButton keys](https://docs.flipper.net/zero/ibutton/read)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 

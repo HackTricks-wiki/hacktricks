@@ -155,7 +155,7 @@ $> ls ~/Documents
 
 ### CVE-2021-30761 - Notes
 
-Notes had access to TCC protected locations but when a note is created this is **created in a non-protected location**. So, you could ask notes to copy a protected file in a noe (so in a non-protected location) and then access the file:
+Notes had access to TCC-protected locations, but a newly created note was **stored in a non-protected location**. Therefore, an attacker could ask Notes to copy a protected file into a note and then access the resulting data from the non-protected location:
 
 <figure><img src="../../../../../images/image (476).png" alt=""><figcaption></figcaption></figure>
 
@@ -263,7 +263,7 @@ Plugins are extra code usually in the form of libraries or plist, that will be *
 
 The application `/System/Library/CoreServices/Applications/Directory Utility.app` had the entitlement **`kTCCServiceSystemPolicySysAdminFiles`**, loaded plugins with **`.daplug`** extension and **didn't have the hardened** runtime.
 
-In order to weaponize this CVE, the **`NFSHomeDirectory`** is **changed** (abusing the previous entitlement) in order to be able to **take over the users TCC databas**e to bypass TCC.
+To weaponize this CVE, the **`NFSHomeDirectory`** is **changed** (abusing the previous entitlement) to **take over the user's TCC database** and bypass TCC.
 
 For more info check the [**original report**](https://wojciechregula.blog/post/change-home-directory-and-bypass-tcc-aka-cve-2020-27937/).<sup>[[12]](#references)</sup>
 

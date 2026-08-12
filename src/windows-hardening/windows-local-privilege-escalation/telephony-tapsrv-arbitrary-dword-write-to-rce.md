@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-When the Windows Telephony service (TapiSrv, `tapisrv.dll`) is configured as a **TAPI server**, it exposes the **`tapsrv` MSRPC interface over the `\pipe\tapsrv` named pipe** to authenticated SMB clients. A design bug in the asynchronous event delivery for remote clients lets an attacker turn a mailslot handle into a **controlled 4-byte write to any pre-existing file writable by `NETWORK SERVICE`**. That primitive can be chained to overwrite the Telephony admin list and abuse an **admin-only arbitrary DLL load** to execute code as `NETWORK SERVICE`.<sup>[[1]](#references)</sup>
+When the Windows Telephony service (TapiSrv, `tapisrv.dll`) is configured as a **TAPI server**, it exposes the **`tapsrv` MSRPC interface over the `\pipe\tapsrv` named pipe** to authenticated SMB clients. CVE-2026-20931 in asynchronous event delivery lets an attacker turn a purported mailslot handle into a **controlled 4-byte write to a pre-existing file writable by `NETWORK SERVICE`**. The published chain overwrites the Telephony administrator list, then reaches an administrator-only DLL load and executes as `NETWORK SERVICE`.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## Attack Surface
 
@@ -38,12 +38,13 @@ When the Windows Telephony service (TapiSrv, `tapisrv.dll`) is configured as a *
 3. **Payload**: the export executes under `NETWORK SERVICE`. A minimal DLL can run `cmd.exe /c whoami /all > C:\Windows\Temp\poc.txt` and return a non-zero value (e.g., `0x1337`) so the service unloads the DLL, confirming execution.<sup>[[1]](#references)</sup>
 
 ## Hardening / Detection Notes
-- Disable TAPI server mode unless required; block remote access to `\pipe\tapsrv`.
+- Install the Microsoft security update for CVE-2026-20931. Independently disable TAPI server mode unless required and block remote access to `\pipe\tapsrv`.
 - Enforce mailslot namespace validation (`\\*\MAILSLOT\`) before opening client-supplied paths.
 - Lock down `C:\Windows\TAPI\tsec.ini` ACLs and monitor changes; alert on `GetUIDllName` calls loading non-default paths.<sup>[[1]](#references)</sup>
 
 ## References
 
 - [1] [Who’s on the line? Exploiting RCE in Windows Telephony Service (CVE-2026-20931)](https://swarm.ptsecurity.com/whos-on-the-line-exploiting-rce-in-windows-telephony-service/)
+- [2] [Microsoft Security Response Center — CVE-2026-20931](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-20931)
 
 {{#include ../../banners/hacktricks-training.md}}

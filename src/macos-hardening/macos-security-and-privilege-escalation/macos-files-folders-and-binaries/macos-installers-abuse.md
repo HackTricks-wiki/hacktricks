@@ -8,7 +8,7 @@ A macOS **installer package** (also known as a `.pkg` file) is a file format use
 
 The package file itself is an archive that holds a **hierarchy of files and directories that will be installed on the target** computer. It can also include **scripts** to perform tasks before and after the installation, like setting up configuration files or cleaning up old versions of the software.
 
-### Hierarchy
+### Package Structure
 
 <figure><img src="../../../images/Pasted Graphic.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption></figcaption></figure>
 
@@ -65,7 +65,7 @@ DMG files, or Apple Disk Images, are a file format used by Apple's macOS for dis
 > [!CAUTION]
 > Note that **`.dmg`** installers support **so many formats** that in the past some of them containing vulnerabilities were abused to obtain **kernel code execution**.
 
-### Hierarchy
+### Disk Image Structure
 
 <figure><img src="../../../images/image (225).png" alt=""><figcaption></figcaption></figure>
 
@@ -79,7 +79,7 @@ The hierarchy of a DMG file can be different based on the content. However, for 
 
 ### Execution from public directories
 
-If a pre or post installation script is for example executing from **`/var/tmp/Installerutil`**, and an attacker can control that script, they can escalate privileges whenever it's executed. Or another similar example:<sup>[[1]](#references)[[3]](#references)</sup>
+If a pre- or post-installation script executes a file such as **`/var/tmp/Installerutil`** and an attacker can replace that file, the attacker can escalate privileges when the installer invokes it. The d talks and walkthrough show variants of this insecure external-script pattern.<sup>[[1]](#references)</sup><sup>[[3]](#references)</sup><sup>[[4]](#references)</sup>
 
 <figure><img src="../../../images/Pasted Graphic 5.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption><p><a href="https://www.youtube.com/watch?v=kCXhIYtODBg">https://www.youtube.com/watch?v=kCXhIYtODBg</a></p></figcaption></figure>
 
@@ -109,7 +109,7 @@ find /tmp/target-pkg -type f \( -name preinstall -o -name postinstall \) -exec s
 rg -n '^#!/bin/(zsh|bash)|sudo -u |launchctl asuser|\$USER|\$HOME|PATH=|/usr/bin/env ' /tmp/target-pkg
 ```
 
-For the 2024 PackageKit root-environment bug (`~/.zshenv` / `~/.bash*` inheritance during user-initiated installs), check [the generic macOS privesc page](../macos-privilege-escalation.md). If the package is **Apple-signed**, the same script bug can become **SIP/TCC-relevant** because `system_installd` may carry `com.apple.rootless.install.heritable`; see [the SIP page](../macos-security-protections/macos-sip.md).<sup>[[5]](#references)[[6]](#references)</sup>
+For the 2024 PackageKit root-environment bug (`~/.zshenv` / `~/.bash*` inheritance during user-initiated installs), check [the generic macOS privesc page](../macos-privilege-escalation.md). If the package is **Apple-signed**, the same script bug can become **SIP/TCC-relevant** because `system_installd` may carry `com.apple.rootless.install.heritable`; see [the SIP page](../macos-security-protections/macos-sip.md).<sup>[[5]](#references)</sup><sup>[[6]](#references)</sup>
 
 ### Execution by mounting
 

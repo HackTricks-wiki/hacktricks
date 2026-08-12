@@ -505,7 +505,7 @@ int main() {
 
 This feature is particularly useful for preventing certain classes of security vulnerabilities such as **unauthorized file access** or **race conditions**. These vulnerabilities occurs when for example a thread is accessing a file description giving **another vulnerable thread access over it** or when a file descriptor is **inherited** by a vulnerable child process. Some functions related to this functionality are:
 
-- `guarded_open_np`: Opend a FD with a guard
+- `guarded_open_np`: Opens a file descriptor with a guard
 - `guarded_close_np`: Close it
 - `change_fdguard_np`: Change guard flags on a descriptor (even removing the guard protection)
 

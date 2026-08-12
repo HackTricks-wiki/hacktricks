@@ -1,5 +1,7 @@
 # Android Rooting Frameworks (KernelSU/Magisk) Manager Auth Bypass & Syscall Hook Abuse
 
+{{#include ../../banners/hacktricks-training.md}}
+
 Rooting frameworks such as KernelSU, APatch and SKRoot patch or hook the Android/Linux kernel and expose privileged functionality to an unprivileged userspace manager app. Magisk is discussed separately below because CVE-2024-48336 involved manager-side code loading rather than this KernelSU syscall path.<sup>[[1]](#references)[[5]](#references)[[13]](#references)</sup>
 
 This page abstracts the techniques and pitfalls uncovered in public research (notably Zimperium’s analysis of KernelSU v0.5.7) to help both red and blue teams understand attack surfaces, exploitation primitives, and robust mitigations.<sup>[[1]](#references)</sup>
@@ -64,7 +66,7 @@ The concrete KernelSU v0.5.7 case requires:<sup>[[1]](#references)[[3]](#referen
 ---
 ## Exploitation outline (KernelSU v0.5.7)
 
-High-level steps (the cited demo video shows the public proof of concept in operation):<sup>[[1]](#references)[[2]](#references)[[10]](#references)</sup>
+High-level steps (the d demo video shows the public proof of concept in operation):<sup>[[1]](#references)[[2]](#references)[[10]](#references)</sup>
 1) Build a valid path to your own app data directory to satisfy prefix and ownership checks.
 2) Place a genuine KernelSU Manager base.apk under `/data/app/` at a path containing your package string, then open it on a lower-numbered FD than your own base.apk.
 3) Invoke prctl(0xDEADBEEF, CMD_BECOME_MANAGER, <your_data_dir>, ...) to pass the checks.

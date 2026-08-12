@@ -11,6 +11,8 @@
 
 ## AES modes and misuse
 
+NIST specifies the ECB, CBC, and CTR confidentiality modes in SP 800-38A and GCM authenticated encryption in SP 800-38D.<sup>[[2]](#references)[[3]](#references)</sup>
+
 ### ECB: Electronic Codebook
 
 ECB leaks patterns: equal plaintext blocks → equal ciphertext blocks. That enables:
@@ -22,7 +24,7 @@ If you can control plaintext and observe ciphertext (or cookies), try making rep
 
 ### CBC: Cipher Block Chaining
 
-- CBC is **malleable**: flipping bits in `C[i-1]` flips predictable bits in `P[i]`.
+- CBC is **malleable**: flipping bits in `C[i-1]` flips predictable bits in `P[i]`, while also garbling `P[i-1]`. Modifying the IV targets the first plaintext block without garbling an earlier plaintext block.
 - If the system exposes valid padding vs invalid padding, you may have a **padding oracle**.
 
 ### CTR
@@ -62,13 +64,13 @@ GCM also breaks badly under nonce reuse. If the same key+nonce is used more than
 Operational guidance:
 
 - Treat "nonce reuse" in AEAD as a critical vulnerability.
-- Misuse-resistant AEADs (e.g., GCM-SIV) reduce nonce-misuse fallout but still require unique nonces/IVs.
+- Misuse-resistant AEADs such as AES-GCM-SIV reduce nonce-reuse fallout. Callers should still provide unique nonces as required by the construction's interface; accidental reuse has bounded consequences compared with ordinary GCM.<sup>[[3]](#references)[[4]](#references)</sup>
 - If you have multiple ciphertexts under the same nonce, start by checking `C1 XOR C2 = P1 XOR P2` style relations.
 
 ### Tools
 
-- CyberChef for quick experiments: https://gchq.github.io/CyberChef/
-- Python: `pycryptodome` for scripting
+- [CyberChef](https://gchq.github.io/CyberChef/) for quick experiments.<sup>[[8]](#references)</sup>
+- Python's [PyCryptodome](https://www.pycryptodome.org/) package for scripting.<sup>[[9]](#references)</sup>
 
 ## ECB exploitation patterns
 
@@ -102,10 +104,10 @@ If the backend tolerates padding/extra spaces (`admin` vs `admin    `), you can:
 
 ### What it is
 
-In CBC mode, if the server reveals (directly or indirectly) whether decrypted plaintext has **valid PKCS#7 padding**, you can often:
+In CBC mode, if the server reveals (directly or indirectly) whether decrypted plaintext has **valid PKCS#7 padding**, you can often:<sup>[[7]](#references)</sup>
 
 - Decrypt ciphertext without the key
-- Encrypt chosen plaintext (forge ciphertext)
+- Construct a ciphertext that decrypts to chosen plaintext when you can submit crafted preceding blocks or IVs and the application accepts the resulting validly padded message
 
 The oracle can be:
 
@@ -152,7 +154,7 @@ This is not a break of confidentiality by itself, but it is a common privilege-e
 
 ## CBC-MAC
 
-CBC-MAC is secure only under specific conditions (notably **fixed-length messages** and correct domain separation).
+CBC-MAC is secure only under specific conditions (notably **fixed-length messages** and correct domain separation). AES-CMAC is a standardized construction that safely handles variable-length inputs.<sup>[[5]](#references)</sup>
 
 ### Classic variable-length forgery pattern
 
@@ -194,7 +196,7 @@ Autosolvers:
 
 ### RC4
 
-RC4 is a stream cipher; encrypt/decrypt are the same operation.
+RC4 is a legacy stream cipher; encrypt/decrypt are the same XOR operation. Its known biases make it unsuitable for new systems, and TLS explicitly prohibits its cipher suites.<sup>[[6]](#references)</sup>
 
 If you can get RC4 encryption of known plaintext under the same key, you can recover the keystream and decrypt other messages of the same length/offset.
 
@@ -207,6 +209,13 @@ https://0xrick.github.io/hack-the-box/kryptos/
 ## References
 
 - [1] [Trail of Bits – Carelessness versus craftsmanship in cryptography](https://blog.trailofbits.com/2026/02/18/carelessness-versus-craftsmanship-in-cryptography/)
+- [2] [NIST SP 800-38A - Recommendation for Block Cipher Modes of Operation](https://csrc.nist.gov/pubs/sp/800/38/a/final)
+- [3] [NIST SP 800-38D - Recommendation for Galois/Counter Mode (GCM) and GMAC](https://csrc.nist.gov/pubs/sp/800/38/d/final)
+- [4] [RFC 8452 - AES-GCM-SIV: Nonce Misuse-Resistant Authenticated Encryption](https://www.rfc-editor.org/rfc/rfc8452)
+- [5] [RFC 4493 - The AES-CMAC Algorithm](https://www.rfc-editor.org/rfc/rfc4493)
+- [6] [RFC 7465 - Prohibiting RC4 Cipher Suites](https://www.rfc-editor.org/rfc/rfc7465)
+- [7] [OWASP Web Security Testing Guide - Testing for Padding Oracle](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/09-Testing_for_Weak_Cryptography/02-Testing_for_Padding_Oracle)
+- [8] [GCHQ CyberChef](https://gchq.github.io/CyberChef/)
+- [9] [PyCryptodome documentation](https://www.pycryptodome.org/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

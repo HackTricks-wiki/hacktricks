@@ -175,9 +175,9 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 In [**this blogpost**](https://hackerone.com/reports/1274695), this debugging is abused to make a headless chrome **download arbitrary files in arbitrary locations**.<sup>[[8]](#references)</sup>
 
 > [!TIP]
-> If an app has its custom way to check if env variables or params such as `--inspect` are set, you could try to **bypass** it in runtime using the arg `--inspect-brk` which will **stop the execution** at the beggining the app and execute a bypass (overwritting the args or the env variables of the current process for example).
+> If an app has its custom way to check if env variables or params such as `--inspect` are set, you could try to **bypass** it in runtime using the arg `--inspect-brk` which will **stop the execution** at the beginning the app and execute a bypass (overwriting the args or the env variables of the current process for example).
 
-The folllowing was an exploit that monitoring and executing the app with the param `--inspect-brk` it was possible to bypass the custom protection it had (overwritting the params of the process to remove `--inspect-brk`) and then injecting a JS payload to dump cookies and credentials from the app:
+The following was an exploit that monitoring and executing the app with the param `--inspect-brk` it was possible to bypass the custom protection it had (overwriting the params of the process to remove `--inspect-brk`) and then injecting a JS payload to dump cookies and credentials from the app:
 
 ```python
 import asyncio

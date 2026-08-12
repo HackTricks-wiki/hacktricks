@@ -1,5 +1,7 @@
 # Kernel Modules and modprobe Abuse
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Kernel module and module-loading misconfigurations
 
 Kernel module support is a high-impact area during Linux privilege escalation review. Do not treat every unsigned-module message as exploitable by itself, but use it to answer practical questions.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[8]](#references)[[9]](#references)[[10]](#references)</sup>
