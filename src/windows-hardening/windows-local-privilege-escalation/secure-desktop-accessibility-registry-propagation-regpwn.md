@@ -4,34 +4,34 @@
 
 ## Muhtasari
 
-Windows Accessibility features huhifadhi configuration ya mtumiaji chini ya HKCU na kuieneza kwenye maeneo ya HKLM ya kila session. Wakati wa mabadiliko ya **Secure Desktop** (lock screen au UAC prompt), vipengele vya **SYSTEM** hu-copy tena values hizi. Ikiwa **per-session HKLM key** inaweza kuandikwa na mtumiaji, huwa sehemu ya privileged write inayoweza kuelekezwa upya kwa kutumia **registry symbolic links**, na hivyo kutoa **arbitrary SYSTEM registry write**.<sup>[[1]](#references)</sup>
+Vipengele vya Windows Accessibility huhifadhi usanidi wa mtumiaji chini ya HKCU na kuunakili kwenye maeneo ya HKLM ya kila session. Wakati wa mabadiliko ya **Secure Desktop** (lock screen au UAC prompt), vipengele vya **SYSTEM** hunakili tena thamani hizi. Ikiwa **per-session HKLM key inaandikika na mtumiaji**, huwa sehemu ya privileged write inayoweza kuelekezwa upya kwa kutumia **registry symbolic links**, na hivyo kutoa **arbitrary SYSTEM registry write**.<sup>[[1]](#references)</sup>
 
-Mbinu ya RegPwn hutumia vibaya propagation chain hiyo kwa kutumia race window ndogo inayodhibitiwa kupitia **opportunistic lock (oplock)** kwenye file inayotumiwa na `osk.exe`.<sup>[[1]](#references)</sup>
+Mbinu ya RegPwn hutumia vibaya mnyororo huo wa propagation kwa kutumia race window ndogo inayodhibitiwa kupitia **opportunistic lock (oplock)** kwenye faili inayotumiwa na `osk.exe`.<sup>[[1]](#references)</sup>
 
 ## Registry Propagation Chain (Accessibility -> Secure Desktop)
 
 Mfano wa feature: **On-Screen Keyboard** (`osk`). Maeneo husika ni:
 
-- **Orodha ya feature ya mfumo mzima**:
+- **System-wide feature list**:
 - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\ATs`
-- **Configuration ya kila mtumiaji (user-writable)**:
+- **Per-user configuration (user-writable)**:
 - `HKCU\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\ATConfig\osk`
-- **Per-session HKLM config (inayoundwa na `winlogon.exe`, user-writable)**:
+- **Per-session HKLM config (created by `winlogon.exe`, user-writable)**:
 - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\Session<session id>\ATConfig\osk`
 - **Secure desktop/default user hive (SYSTEM context)**:
 - `HKU\.DEFAULT\Software\Microsoft\Windows NT\CurrentVersion\Accessibility\ATConfig\osk`
 
 Propagation wakati wa mabadiliko ya secure desktop (kwa muhtasari):
 
-1. **User `atbroker.exe`** hu-copy `HKCU\...\ATConfig\osk` kwenda `HKLM\...\Session<session id>\ATConfig\osk`.
-2. **SYSTEM `atbroker.exe`** hu-copy `HKLM\...\Session<session id>\ATConfig\osk` kwenda `HKU\.DEFAULT\...\ATConfig\osk`.
-3. **SYSTEM `osk.exe`** hu-copy `HKU\.DEFAULT\...\ATConfig\osk` kurudi `HKLM\...\Session<session id>\ATConfig\osk`.
+1. **User `atbroker.exe`** hunakili `HKCU\...\ATConfig\osk` kwenda `HKLM\...\Session<session id>\ATConfig\osk`.
+2. **SYSTEM `atbroker.exe`** hunakili `HKLM\...\Session<session id>\ATConfig\osk` kwenda `HKU\.DEFAULT\...\ATConfig\osk`.
+3. **SYSTEM `osk.exe`** hunakili `HKU\.DEFAULT\...\ATConfig\osk` kurudi `HKLM\...\Session<session id>\ATConfig\osk`.
 
-Ikiwa HKLM subtree ya session inaweza kuandikwa na mtumiaji, hatua ya 2/3 hutoa SYSTEM write kupitia location ambayo mtumiaji anaweza kuibadilisha.<sup>[[1]](#references)</sup>
+Ikiwa subtree ya session HKLM inaweza kuandikwa na mtumiaji, hatua ya 2/3 hutoa SYSTEM write kupitia eneo ambalo mtumiaji anaweza kulibadilisha.<sup>[[1]](#references)</sup>
 
 ## Primitive: Arbitrary SYSTEM Registry Write via Registry Links
 
-Badilisha per-session key inayoweza kuandikwa na mtumiaji iwe **registry symbolic link** inayoelekeza kwenye destination iliyochaguliwa na attacker. SYSTEM copy inapotokea, hufuata link hiyo na kuandika values zinazodhibitiwa na attacker ndani ya target key yoyote.
+Badilisha per-session key inayoweza kuandikwa na mtumiaji iwe **registry symbolic link** inayoelekeza kwenye destination iliyochaguliwa na attacker. SYSTEM copy inapotokea, hufuata link hiyo na kuandika values zinazodhibitiwa na attacker kwenye target key yoyote.
 
 Wazo kuu:
 
@@ -44,16 +44,16 @@ Hii hutoa **arbitrary SYSTEM registry write** primitive.<sup>[[1]](#references)<
 
 ## Winning the Race Window with Oplocks
 
-Kuna timing window fupi kati ya kuanza kwa **SYSTEM `osk.exe`** na kuandika per-session key. Ili kuifanya iwe reliable, exploit huweka **oplock** kwenye:
+Kuna timing window fupi kati ya **SYSTEM `osk.exe`** kuanza na kuandika per-session key. Ili kuifanya iwe ya kuaminika, exploit huweka **oplock** kwenye:
 ```
 C:\Program Files\Common Files\microsoft shared\ink\fsdefinitions\oskmenu.xml
 ```
-Wakati oplock inapo-trigger, mshambuliaji hubadilisha per-session HKLM key kuwa registry link, huruhusu uandishi wa SYSTEM kufanyika, kisha huondoa link.<sup>[[1]](#references)</sup>
+Wakati oplock inapo-trigger, mshambuliaji hubadilisha key ya HKLM ya kila session kuwa registry link, huruhusu uandishi wa SYSTEM kukamilika, kisha huondoa link.<sup>[[1]](#references)</sup>
 
-## Mtiririko wa Mfano wa Exploitation (Kiwango cha Juu)
+## Mfano wa Mtiririko wa Exploitation (Kwa Kiwango cha Juu)
 
 1. Pata **session ID** ya sasa kutoka kwenye access token.
-2. Anzisha instance iliyofichwa ya `osk.exe` na ulale kwa muda mfupi (hakikisha oplock ita-trigger).
+2. Anzisha instance iliyofichwa ya `osk.exe` na usubiri kwa muda mfupi (ili kuhakikisha oplock itatokea).
 3. Andika values zinazodhibitiwa na mshambuliaji kwenye:
 - `HKCU\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\ATConfig\osk`
 4. Weka **oplock** kwenye `C:\Program Files\Common Files\microsoft shared\ink\fsdefinitions\oskmenu.xml`.
@@ -63,7 +63,7 @@ Wakati oplock inapo-trigger, mshambuliaji hubadilisha per-session HKLM key kuwa 
 
 ## Kubadilisha Primitive Kuwa SYSTEM Execution
 
-Chain moja ya moja kwa moja ni ku-overwrite value ya **service configuration** (kwa mfano, `ImagePath`) kisha kuanzisha service. RegPwn PoC hu-overwrite `ImagePath` ya **`msiserver`** na ku-trigger service hiyo kwa ku-instantiate **MSI COM object**, hivyo kusababisha **SYSTEM** code execution.<sup>[[1]](#references)[[2]](#references)</sup>
+Chain moja ya moja kwa moja ni kubadilisha value ya **service configuration** (kwa mfano, `ImagePath`) kisha kuanzisha service. RegPwn PoC hubadilisha `ImagePath` ya **`msiserver`** na kui-trigger kwa kuunda **MSI COM object**, hivyo kusababisha **SYSTEM** code execution.<sup>[[1]](#references)</sup><sup>[[2]](#references)</sup>
 
 ## Zinazohusiana
 
@@ -77,5 +77,4 @@ uiaccess-admin-protection-bypass.md
 
 - [1] [RIP RegPwn](https://www.mdsec.co.uk/2026/03/rip-regpwn/)
 - [2] [RegPwn PoC](https://github.com/mdsecactivebreach/RegPwn)
-
 {{#include ../../banners/hacktricks-training.md}}

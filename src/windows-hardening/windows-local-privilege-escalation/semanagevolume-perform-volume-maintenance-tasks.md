@@ -1,31 +1,34 @@
-# SeManageVolumePrivilege: Ufikiaji wa raw volume kwa kusoma faili kiholela
+# SeManageVolumePrivilege: Matumizi mabaya ya maintenance ya volume na uthibitishaji wa raw-access
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Muhtasari
 
-Haki ya mtumiaji ya Windows: Perform volume maintenance tasks (constant: SeManageVolumePrivilege).
+Haki ya mtumiaji wa Windows: Perform volume maintenance tasks (constant: SeManageVolumePrivilege).
 
-Wenye haki hii wanaweza kufanya shughuli za kiwango cha chini kwenye volume, kama vile defragmentation, kuunda/kuondoa volumes, na maintenance IO. Muhimu kwa attackers, haki hii inaruhusu kufungua raw volume device handles (kwa mfano, \\.\C:) na kutoa direct disk I/O inayopita NTFS file ACLs. Kwa raw access, unaweza kunakili bytes za faili lolote kwenye volume hata kama DACL inakuzuia, kwa kuchanganua miundo ya filesystem offline au kutumia tools zinazosoma katika kiwango cha block/cluster.
+Haki hii inaruhusu shughuli za maintenance ya volume kama vile defragmentation na kuunda au kuondoa volumes. Microsoft inaonya kwamba mwenye haki hii anaweza kuweza kuendeleza files hadi kwenye storage iliyo na data nyingine, kisha kusoma au kurekebisha bytes zilizopatikana.<sup>[[1]](#references)</sup>
+
+Usilinganishe moja kwa moja kuwa na `SeManageVolumePrivilege` na uhakika wa kupata raw-disk access. Microsoft inaeleza kwamba kufungua physical disk au volume kupitia `CreateFile` kwa direct access kunahitaji administrative privileges, na ukaguzi wa kawaida wa object/device access bado hutumika. Kwenye build au product fulani, jaribu kama token, device ACL, requested access, share flags, na volume state zinaruhusu raw handle kabla ya kudai uwezo wa kusoma file lolote.<sup>[[3]](#references)</sup>
 
 Default: Administrators kwenye servers na domain controllers.<sup>[[1]](#references)</sup>
 
-## Matukio ya abuse
+## Abuse scenarios
 
-- Kusoma faili kiholela kwa kupita ACLs kwa kusoma disk device (kwa mfano, ku-exfiltrate taarifa nyeti zinazolindwa na mfumo kama machine private keys zilizo chini ya %ProgramData%\Microsoft\Crypto\RSA\MachineKeys na %ProgramData%\Microsoft\Crypto\Keys, registry hives, DPAPI masterkeys, SAM, ntds.dit kupitia VSS, n.k.).
-- Kupita locked/privileged paths (C:\Windows\System32\…) kwa kunakili bytes moja kwa moja kutoka kwenye raw device.
-- Katika mazingira ya AD CS, ku-exfiltrate CA’s key material (machine key store) ili kutengeneza “Golden Certificates” na kujifanya domain principal yoyote kupitia PKINIT. Tazama link hapa chini.<sup>[[2]](#references)</sup>
+- Ikiwa account inaweza kweli kupata readable raw-volume handle, parser inayojua NTFS inaweza kupita per-file ACLs na kurejesha files zilizolindwa au zilizofungwa kutoka kwenye allocated clusters.
+- Malengo yanayowezekana yanajumuisha content iliyofungwa au kulindwa na ACL chini ya `C:\Windows\System32`, registry hives, DPAPI master keys, SAM, na—pale inapoweza kufikiwa kando kupitia snapshot au offline volume—`ntds.dit`.
+- Kwenye certificate services hosts, maeneo muhimu ya software keys yanajumuisha `%ProgramData%\Microsoft\Crypto\RSA\MachineKeys` na `%ProgramData%\Microsoft\Crypto\Keys`; kurejesha file kuna manufaa tu wakati key material yake inaweza ku-exportiwa na pia inaweza ku-decryptiwa.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
+- Kwenye AD CS host, CA private key iliyorejeshwa kwa mafanikio na ambayo ni **exportable/software-backed** inaweza kuwezesha Golden Certificate abuse. Miundo ya keys inayotumia hardware au isiyoweza ku-exportiwa hubadilisha njia hii.<sup>[[2]](#references)</sup>
 
-Kumbuka: Bado unahitaji parser ya miundo ya NTFS isipokuwa utegemee helper tools. Tools nyingi zinazopatikana tayari huficha raw access.
+Kumbuka: Bado unahitaji parser ya NTFS structures isipokuwa utegemee helper tools. Zana nyingi zinazopatikana tayari huficha maelezo ya raw access.
 
-## Mbinu za vitendo
+## Practical techniques
 
 - Fungua raw volume handle na usome clusters:
 
 <details>
 <summary>Bofya ili kupanua</summary>
 ```powershell
-# PowerShell – read first MB from C: raw device (requires SeManageVolumePrivilege)
+# Validation attempt: current Windows versions normally require an administrative token
 $fs = [System.IO.File]::Open("\\.\\C:",[System.IO.FileMode]::Open,[System.IO.FileAccess]::Read,[System.IO.FileShare]::ReadWrite)
 $buf = New-Object byte[] (1MB)
 $null = $fs.Read($buf,0,$buf.Length)
@@ -49,10 +52,10 @@ File.WriteAllBytes("C:\\temp\\blk.bin", buf);
 ```
 </details>
 
-- Tumia tool inayotambua NTFS kurejesha faili mahususi kutoka kwenye raw volume:
-- RawCopy/RawCopy64 (sector-level copy ya faili zinazotumika)
-- FTK Imager au The Sleuth Kit (read-only imaging, kisha carve files)
-- vssadmin/diskshadow + shadow copy, kisha nakili faili lengwa kutoka kwenye snapshot (ikiwa unaweza kuunda VSS; mara nyingi huhitaji admin, lakini kwa kawaida hupatikana kwa operators wale wale walio na SeManageVolumePrivilege)
+- Tumia zana inayofahamu NTFS kurejesha faili mahususi kutoka kwenye volume ghafi:
+- RawCopy/RawCopy64 (kunakili faili zinazotumika kwa kiwango cha sectors)
+- FTK Imager au The Sleuth Kit (imaging ya kusoma tu, kisha kuchonga faili)
+- vssadmin/diskshadow + shadow copy, kisha nakili faili lengwa kutoka kwenye snapshot (ikiwa unaweza kuunda VSS; mara nyingi huhitaji admin, lakini kwa kawaida hupatikana kwa operators wale wale wenye SeManageVolumePrivilege)
 
 Njia nyeti za kawaida za kulenga:
 - %ProgramData%\Microsoft\Crypto\RSA\MachineKeys\
@@ -61,9 +64,9 @@ Njia nyeti za kawaida za kulenga:
 - C:\Windows\NTDS\ntds.dit (domain controllers – kupitia shadow copy)
 - C:\Windows\System32\CertSrv\CertEnroll\ (CA certs/CRLs; private keys huhifadhiwa kwenye machine key store iliyo hapo juu)
 
-## Muunganiko wa AD CS: Forging a Golden Certificate
+## Muunganisho wa AD CS: Forging a Golden Certificate
 
-Ikiwa unaweza kusoma private key ya Enterprise CA kutoka kwenye machine key store, unaweza kutengeneza client-auth certificates za principals wowote na ku-authenticate kupitia PKINIT/Schannel. Hii mara nyingi huitwa Golden Certificate.<sup>[[2]](#references)</sup> Tazama:
+Ikiwa unaweza kusoma private key ya Enterprise CA kutoka kwenye machine key store, unaweza kuunda client-auth certificates za principals yoyote na kufanya authentication kupitia PKINIT/Schannel. Hii mara nyingi huitwa Golden Certificate.<sup>[[2]](#references)</sup> Tazama:
 
 {{#ref}}
 ../active-directory-methodology/ad-certificates/domain-persistence.md
@@ -71,16 +74,18 @@ Ikiwa unaweza kusoma private key ya Enterprise CA kutoka kwenye machine key stor
 
 (Sehemu: “Forging Certificates with Stolen CA Certificates (Golden Certificate) – DPERSIST1”).
 
-## Utambuzi na hardening
+## Ugunduzi na hardening
 
-- Punguza kwa ukali ugawaji wa SeManageVolumePrivilege (Perform volume maintenance tasks) kwa admins wanaoaminika pekee.
+- Punguza kwa kiasi kikubwa assignment ya SeManageVolumePrivilege (Perform volume maintenance tasks) na uwape trusted admins pekee.
 - Fuatilia Sensitive Privilege Use na process handle opens kwa device objects kama \\.\C:, \\.\PhysicalDrive0.
-- Pendelea CA keys zinazoungwa mkono na HSM/TPM au DPAPI-NG ili raw file reads zisiweze kurejesha key material katika mfumo unaoweza kutumika.
-- Weka uploads, temp, na extraction paths zikiwa non-executable na zimetenganishwa (web context defense ambayo mara nyingi huambatana na chain hii ya post-exploitation).
+- Pendelea CA keys zilizosanidiwa ipasavyo, zinazoungwa mkono na HSM au TPM na zisizoweza ku-exportiwa, ili faili iliyonakiliwa ya key-container isitoshe kurejesha private-key material inayoweza kutumika.
+- Kwa application secrets zilizo nje ya CA-key path, DPAPI au DPAPI-NG inaweza kufanya faili ya data iliyonakiliwa isiwe ya kutosha kwa kuilinda kwa user, machine, group, au principal mwingine aliyeidhinishwa. Hii hailindi plaintext ambayo tayari inaweza kufikiwa na principal aliyecompromised.<sup>[[4]](#references)</sup>
+- Weka uploads, temp, na extraction paths zikiwa non-executable na zimetenganishwa (web context defense ambayo mara nyingi huambatana na chain hii baada ya pentesting).
 
-## Marejeo
+## References
 
-- [1] [Microsoft – Perform volume maintenance tasks (SeManageVolumePrivilege)](https://learn.microsoft.com/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/perform-volume-maintenance-tasks)
-- [2] [0xdf – HTB: Certificate (SeManageVolumePrivilege used to read CA key → Golden Certificate)](https://0xdf.gitlab.io/2025/10/04/htb-certificate.html)
-
+- [1] [Microsoft – Tekeleza majukumu ya maintenance ya volume (SeManageVolumePrivilege)](https://learn.microsoft.com/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/perform-volume-maintenance-tasks)
+- [2] [0xdf – HTB: Certificate (SeManageVolumePrivilege iliyotumika kusoma CA key → Golden Certificate)](https://0xdf.gitlab.io/2025/10/04/htb-certificate.html)
+- [3] [Microsoft - `CreateFile` disks na volumes za physical](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea#physical-disks-and-volumes)
+- [4] [Microsoft - Cryptography API: Next Generation na DPAPI-NG](https://learn.microsoft.com/en-us/windows/win32/seccng/cng-portal)
 {{#include ../../banners/hacktricks-training.md}}

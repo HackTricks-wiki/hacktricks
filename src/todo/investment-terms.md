@@ -4,69 +4,69 @@
 
 ## Spot
 
-Hii ndiyo njia ya msingi zaidi ya kufanya trading. Unaweza **kuonyesha kiasi cha asset na bei** unayotaka kununua au kuuza, na bei hiyo inapofikiwa, operesheni inatekelezwa.
+Spot trading hubadilisha asset kwa uwasilishaji wa papo hapo. Limit order hubainisha kiasi na bei ya juu au ya chini inayokubalika; hutekelezwa tu wakati market inaweza kukidhi bei hiyo au bei bora zaidi. Market order badala yake hulenga utekelezaji wa haraka kwa bei bora zinazopatikana wakati huo na inaweza kukumbwa na slippage.<sup>[[4]](#references)</sup>
 
-Kwa kawaida unaweza pia kutumia **bei ya sasa ya soko** ili kufanya muamala haraka iwezekanavyo kwa bei ya sasa.
-
-**Stop Loss - Limit**: Unaweza pia kuonyesha kiasi na bei za assets za kununua au kuuza, huku pia ukionyesha bei ya chini ya kununua au kuuza endapo itafikiwa (ili kusitisha hasara).
+Stop-limit order ina stop price inayowasha limit order. Inaweza kudhibiti bei ya utekelezaji, lakini haihakikishi utekelezaji ikiwa market itapita kiwango cha limit.<sup>[[4]](#references)</sup>
 
 ## Futures
 
-Future ni mkataba ambapo pande 2 hukubaliana **kupata kitu hapo baadaye kwa bei iliyowekwa**. Kwa mfano, kuuza bitcoin 1 baada ya miezi 6 kwa bei ya $70,000.
+Futures contract ni makubaliano yaliyosanifishwa ya kununua au kuuza commodity au financial instrument maalum katika tarehe ya baadaye. Kwa mfano, wahusika wawili wanaweza kukubaliana bei ya $70,000 kwa bitcoin moja, kwa settlement baada ya miezi sita.<sup>[[1]](#references)</sup>
 
-Ni wazi kwamba ikiwa baada ya miezi 6 thamani ya bitcoin ni $80,000, upande wa muuzaji hupoteza pesa na upande wa mnunuzi hupata pesa. Ikiwa baada ya miezi 6 thamani ya bitcoin ni $60,000, kinyume chake hutokea.
+Ikiwa settlement price ni $80,000, long side hupata faida na short side hupata hasara ikilinganishwa na bei ya contract ya $70,000. Ikiwa ni $60,000, mwelekeo hubadilika. Futures zinazouzwa kwenye exchanges halisi huwekwa kwenye mark to market na kwa kawaida hufungwa au ku-roll kabla ya expiration, kwa hiyo huu ni mfano uliorahisishwa.<sup>[[2]](#references)</sup>
 
-Hata hivyo, hii inafaa kwa mfano kwa biashara zinazozalisha bidhaa na zinahitaji uhakika kwamba zitaweza kuiuza kwa bei itakayolipia gharama. Au biashara zinazotaka kuhakikisha bei zilizowekwa hapo baadaye za kitu fulani, hata kama bei hizo ni za juu.
+Wazalishaji na watumiaji hutumia futures kuzuia price risk; washiriki wengine huzitumia kutafuta faida au kutoa liquidity.<sup>[[1]](#references)</sup>
 
-Ingawa kwenye exchanges hii kwa kawaida hutumiwa kujaribu kupata faida.
+- **Long position** kwa kawaida hupata faida wakati bei ya contract inapanda.
+- **Short position** kwa kawaida hupata faida wakati bei ya contract inashuka.<sup>[[2]](#references)</sup>
 
-* Kumbuka kwamba "Long position" inamaanisha mtu anaweka dau kwamba bei itaongezeka
-* Wakati "short position" inamaanisha mtu anaweka dau kwamba bei itashuka
+### Hedging With Futures
 
-### Hedging With Futures <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
+Ikiwa fund manager anatarajia portfolio kushuka, anaweza kufanya short kwenye stock-index futures contract yenye correlation ya kutosha. Faida kutoka kwenye short hedge inaweza kufidia baadhi ya hasara za portfolio; basis risk humaanisha kuwa ulinganifu huo mara chache huwa kamili. Bitcoin future ingezuia bitcoin exposure, si portfolio ya stocks moja kwa moja.
 
-Ikiwa msimamizi wa fund anaogopa kwamba baadhi ya stocks zitashuka, anaweza kuchukua short position kwenye assets kama bitcoins au mikataba ya futures ya S\&P 500. Hii itafanana na kununua au kuwa na baadhi ya assets na kuunda mkataba wa kuziuza wakati fulani hapo baadaye kwa bei kubwa zaidi.
-
-Ikiwa bei itashuka, msimamizi wa fund atapata faida kwa sababu atauza assets kwa bei kubwa zaidi. Ikiwa bei ya assets itaongezeka, msimamizi hatapata faida hiyo, lakini bado atazihifadhi assets zake.
+Ikiwa market iliyofanyiwa hedge inashuka, short futures position inaweza kupata faida huku holdings zikishuka thamani. Ikiwa inapanda, holdings zinaweza kupata faida huku hedge ikipata hasara. Hedging hupunguza risk iliyochaguliwa badala ya kuunda faida iliyohakikishwa.<sup>[[1]](#references)</sup>
 
 ### Perpetual Futures
 
-**Hizi ni "futures" zitakazodumu bila kikomo** (bila tarehe ya mwisho ya mkataba). Ni jambo la kawaida kuzipata, kwa mfano, kwenye crypto exchanges ambapo unaweza kuingia na kutoka kwenye futures kulingana na bei ya cryptos.
+Perpetual contracts ni derivatives zisizo na tarehe maalum ya expiration. Crypto venues kwa kawaida hutumia malipo ya funding ya vipindi ili kusaidia kuweka bei yao karibu na spot price ya underlying asset; masharti hutofautiana kulingana na venue.<sup>[[3]](#references)</sup>
 
-Kumbuka kwamba katika hali hizi faida na hasara vinaweza kutokea kwa wakati halisi; bei ikiongezeka kwa 1%, utapata faida ya 1%, na bei ikishuka kwa 1%, utapoteza 1%.
+Faida na hasara hubadilika mark price inaposogea. Mabadiliko ya bei ya 1% huzalisha takriban mabadiliko ya 1% kwenye notional value ya position kabla ya fees na funding, lakini leverage inaweza kufanya hayo yawe asilimia kubwa zaidi ya collateral iliyowekwa.
 
 ### Futures with Leverage
 
-**Leverage** hukuwezesha kudhibiti position kubwa zaidi kwenye soko kwa kutumia kiasi kidogo cha pesa. Kimsingi hukuwezesha "kuweka dau" la pesa nyingi zaidi kuliko ulizo nazo, huku ukihatarisha pesa ulizo nazo tu.
+**Leverage** humwezesha trader kudhibiti position yenye notional value kubwa kwa margin deposit ndogo. Hasara si lazima ziishie kwenye initial margin: liquidation, gaps, fees na kanuni za venue zinaweza kusababisha hasara za ziada.<sup>[[3]](#references)</sup>
 
-Kwa mfano, ukifungua future position kwenye BTC/USDT kwa $100 na leverage ya 50x, hii inamaanisha kwamba ikiwa bei itaongezeka kwa 1%, utapata 1x50 = 50% ya uwekezaji wako wa awali ($50). Kwa hiyo utakuwa na $150.\
-Hata hivyo, ikiwa bei itashuka kwa 1%, utapoteza 50% ya fedha zako ($59 katika hali hii). Na ikiwa bei itashuka kwa 2%, utapoteza dau lako lote (2x50 = 100%).
+Kwa mfano, margin ya $100 yenye leverage ya 50x hudhibiti position ya $5,000. Tukipuuza fees, funding na liquidation mechanics, mabadiliko mazuri ya 1% huzalisha faida ya $50 (50% ya initial margin), huku mabadiliko yasiyofaa ya 1% yakizalisha hasara ya $50. Mabadiliko yasiyofaa ya 2% yanalingana na $100, ingawa venue kwa kawaida italiquidate position kabla margin yote kuisha.
 
-Kwa hiyo, kutumia leverage hukuwezesha kudhibiti kiasi cha pesa unachoweka kwenye dau huku ukiongeza faida na hasara.
+Leverage huongeza ukubwa wa faida na hasara na hufanya liquidation iwezekane baada ya mabadiliko madogo kwa kulinganisha lakini yasiyofaa.
 
-## Tofauti Kati ya Futures na Options
+## Differences Between Futures and Options
 
-Tofauti kuu kati ya futures na options ni kwamba mkataba huo ni wa hiari kwa mnunuzi: Anaweza kuamua kuutekeleza au la (kwa kawaida ataukutekeleza tu ikiwa atanufaika). Muuzaji lazima auze ikiwa mnunuzi anataka kutumia option.\
-Hata hivyo, mnunuzi atamlipa muuzaji ada fulani kwa kufungua option (kwa hiyo muuzaji, ambaye inaonekana anachukua hatari kubwa zaidi, huanza kupata pesa).
+Option buyer hupokea haki, si wajibu, wa ku-exercise kulingana na masharti ya contract. Option writer ana wajibu unaolingana ikiwa buyer ata-exercise. Buyer humlipa writer premium kwa ajili ya haki hiyo.<sup>[[4]](#references)</sup>
 
 ### 1. **Wajibu dhidi ya Haki:**
 
-* **Futures:** Unaponunua au kuuza mkataba wa futures, unaingia kwenye **makubaliano ya lazima** ya kununua au kuuza asset kwa bei maalum katika tarehe fulani ya baadaye. Mnunuzi na muuzaji wote **wanalazimika** kutimiza mkataba wakati wa kuisha kwake (isipokuwa mkataba umefungwa kabla ya hapo).
-* **Options:** Kwenye options, una **haki, lakini si wajibu**, ya kununua (katika kesi ya **call option**) au kuuza (katika kesi ya **put option**) asset kwa bei maalum kabla ya au katika tarehe fulani ya mwisho. **Mnunuzi** ana option ya kuitekeleza, huku **muuzaji** akiwa na wajibu wa kutimiza trade ikiwa mnunuzi ataamua kutumia option hiyo.
+* **Futures:** Unaponunua au kuuza futures contract, unaingia kwenye **binding agreement** ya kununua au kuuza asset kwa bei maalum katika tarehe ya baadaye. Buyer na seller wote **wanalazimika** kutimiza contract wakati wa expiration (isipokuwa contract ifungwe kabla ya hapo).
+* **Options:** Ukiwa na options, una **haki, lakini si wajibu**, wa kununua (katika **call option**) au kuuza (katika **put option**) asset kwa bei maalum kabla au katika tarehe fulani ya expiration. **Buyer** ana chaguo la kutekeleza, huku **seller** akiwa na wajibu wa kukamilisha trade ikiwa buyer ataamua ku-exercise option.
 
-### 2. **Hatari:**
+### 2. **Risk:**
 
-* **Futures:** Mnunuzi na muuzaji wote huchukua **hatari isiyo na kikomo** kwa sababu wanalazimika kukamilisha mkataba. Hatari ni tofauti kati ya bei iliyokubaliwa na bei ya soko katika tarehe ya mwisho.
-* **Options:** Hatari ya mnunuzi imewekewa kikomo na **premium** iliyolipwa kununua option. Ikiwa soko halisogei kwa faida ya mwenye option, anaweza kuiacha option iishe tu. Hata hivyo, **muuzaji** (writer) wa option ana hatari isiyo na kikomo ikiwa soko litasogea kwa kiasi kikubwa dhidi yake.
+* **Futures:** Pande zote zinaweza kupata hasara kubwa. Ikiwa hasara ni theoretically unlimited hutegemea position na underlying asset: short position inaweza kuwa na hasara ya kinadharia isiyo na kikomo, huku long position isiweze kupoteza zaidi ya notional value ikiwa underlying haiwezi kushuka chini ya sifuri.
+* **Options:** Buyer ambaye haandiki option nyingine kwa kawaida yuko kwenye risk ya premium aliyolipa. Naked call writer anaweza kukabiliwa na hasara ya kinadharia isiyo na kikomo; mikakati mingine ya kuandika options ina viwango tofauti vya risk vilivyo na au visivyo na kikomo.
 
 ### 3. **Gharama:**
 
-* **Futures:** Hakuna gharama ya awali zaidi ya margin inayohitajika kushikilia position, kwa sababu mnunuzi na muuzaji wote wanalazimika kukamilisha trade.
-* **Options:** Mnunuzi lazima alipe **option premium** mapema kwa ajili ya haki ya kutumia option. Premium hii kimsingi ndiyo gharama ya option.
+* **Futures:** Hakuna gharama ya awali zaidi ya margin inayohitajika kushikilia position, kwa kuwa buyer na seller wote wana wajibu wa kukamilisha trade.
+* **Options:** Buyer lazima alipe **option premium** mapema kwa ajili ya haki ya ku-exercise option. Premium hii kimsingi ndiyo gharama ya option.
 
 ### 4. **Uwezekano wa Faida:**
 
-* **Futures:** Faida au hasara inategemea tofauti kati ya bei ya soko wakati wa kuisha kwa mkataba na bei iliyokubaliwa kwenye mkataba.
-* **Options:** Mnunuzi hupata faida soko linaposogea kwa manufaa yake na kuvuka strike price kwa kiasi kinachozidi premium iliyolipwa. Muuzaji hupata faida kwa kuhifadhi premium ikiwa option haitatumika.
+* **Futures:** Faida au hasara hutegemea tofauti kati ya market price wakati wa expiration na bei iliyokubaliwa kwenye contract.
+* **Options:** Buyer hupata faida market inapokwenda kwa mwelekeo unaofaa na kuvuka strike price kwa kiasi kinachozidi premium iliyolipwa. Seller hupata faida kwa kuhifadhi premium ikiwa option haija-exercise.
 
+## References
+
+- [1] [CFTC - Madhumuni ya kiuchumi ya futures markets](https://www.cftc.gov/LearnAndProtect/EducationCenter/economicpurpose)
+- [2] [CFTC - Misingi ya Futures Market](https://www.cftc.gov/LearnAndProtect/EducationCenter/FuturesMarketBasics/index2.htm)
+- [3] [CFTC - Elewa risks za virtual-currency trading](https://www.cftc.gov/LearnAndProtect/AdvisoriesAndArticles/understand_risks_of_virtual_currency.html)
+- [4] [CFTC Glossary - Option, premium na exercise](https://www.cftc.gov/LearnAndProtect/AdvisoriesAndArticles/CFTCGlossary/index.htm)
 {{#include ../banners/hacktricks-training.md}}

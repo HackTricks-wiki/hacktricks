@@ -2,31 +2,31 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## **Database ya Authorizations**
+## Database ya Authorization
 
-Database iliyoko kwenye `/var/db/auth.db` hutumika kuhifadhi permissions za kutekeleza operations nyeti. Operations hizi hutekelezwa kabisa katika **user space** na kwa kawaida hutumiwa na **XPC services** zinazohitaji kuangalia **ikiwa client anayepiga simu ameidhinishwa** kutekeleza action fulani kwa kuangalia database hii.
+Security framework ya Authorization Services huruhusu privileged helpers na vipengele vingine kutathmini authorization rights zenye majina. Katika matoleo ya sasa ya macOS, sheria nyingi hizo huhifadhiwa kwenye `/var/db/auth.db` na kutathminiwa na `authd`; faili hili pamoja na schema yake ya SQLite ni implementation details na zinaweza kubadilika kati ya matoleo.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
 
-Mwanzoni database hii huundwa kutokana na maudhui ya `/System/Library/Security/authorization.plist`. Kisha, baadhi ya services zinaweza kuongeza au kurekebisha database hii ili kuongeza permissions nyingine.
+System defaults kwa kihistoria zimeanzishwa kutoka `/System/Library/Security/authorization.plist`, na installers au privileged services zinaweza kuongeza named rights. Tumia interface inayoungwa mkono ya `security authorizationdb read|write|remove` badala ya kuhariri database moja kwa moja.<sup>[[3]](#references)</sup>
 
-Rules huhifadhiwa kwenye table ya `rules` ndani ya database na ina columns zifuatazo:
+Jedwali la `rules` lililoonekana kwenye build iliyoandikwa lina columns zifuatazo. Ichukulie hii kama forensic map, si public schema thabiti:
 
-- **id**: Kitambulisho cha kipekee kwa kila rule, huongezwa automatically na hutumika kama primary key.
+- **id**: Kitambulisho cha kipekee cha kila rule, huongezwa automatically na hutumika kama primary key.
 - **name**: Jina la kipekee la rule linalotumika kuitambua na kuirejelea ndani ya authorization system.
-- **type**: Hubainisha aina ya rule, ikiwa imewekewa mipaka ya values 1 au 2 za kufafanua authorization logic yake.
-- **class**: Huainisha rule katika class maalum, kuhakikisha kuwa ni positive integer.
-- "allow" kwa kuruhusu, "deny" kwa kukataa, "user" ikiwa property ya group inaonyesha group ambayo uanachama wake unaruhusu access, "rule" huonyesha kwenye array rule inayopaswa kutimizwa, "evaluate-mechanisms" ikifuatiwa na `mechanisms` array ambayo huwa builtins au jina la bundle ndani ya `/System/Library/CoreServices/SecurityAgentPlugins/` au `/Library/Security//SecurityAgentPlugins`
+- **type**: Hubainisha aina ya rule, ikiwa na kikomo cha values 1 au 2 ili kufafanua authorization logic yake.
+- **class**: Huainisha rule katika class maalum, na lazima iwe positive integer.
+- Rule classes za kawaida ni `allow`, `deny`, `user`, `rule`, na `evaluate-mechanisms`. Mechanisms zinaweza kuwa built-ins au Security Agent plug-ins zilizo chini ya `/System/Library/CoreServices/SecurityAgentPlugins/` au `/Library/Security/SecurityAgentPlugins/`.<sup>[[2]](#references)</sup>
 - **group**: Huonyesha user group inayohusishwa na rule kwa ajili ya group-based authorization.
 - **kofn**: Inawakilisha parameter ya "k-of-n", inayoamua ni subrules ngapi lazima zitimizwe kati ya jumla fulani.
-- **timeout**: Hufafanua muda kwa sekunde kabla ya authorization iliyotolewa na rule kuisha.
-- **flags**: Ina flags mbalimbali zinazorekebisha tabia na sifa za rule.
+- **timeout**: Hufafanua muda kwa sekunde kabla ya authorization iliyotolewa na rule ku-expire.
+- **flags**: Ina flags mbalimbali zinazobadilisha tabia na sifa za rule.
 - **tries**: Huweka kikomo cha idadi ya authorization attempts zinazoruhusiwa ili kuimarisha security.
 - **version**: Hufuatilia version ya rule kwa ajili ya version control na updates.
-- **created**: Huhifadhi timestamp ya wakati rule iliundwa kwa madhumuni ya auditing.
+- **created**: Hurekodi timestamp wakati rule iliundwa kwa madhumuni ya auditing.
 - **modified**: Huhifadhi timestamp ya modification ya mwisho iliyofanywa kwenye rule.
 - **hash**: Huhifadhi hash value ya rule ili kuhakikisha integrity yake na kugundua tampering.
-- **identifier**: Hutoa string identifier ya kipekee, kama UUID, kwa ajili ya external references za rule.
+- **identifier**: Hutoa string identifier ya kipekee, kama UUID, kwa external references za rule.
 - **requirement**: Ina serialized data inayofafanua authorization requirements na mechanisms maalum za rule.
-- **comment**: Hutoa maelezo au comment inayoweza kusomwa na binadamu kuhusu rule kwa ajili ya documentation na uwazi.
+- **comment**: Hutoa maelezo au comment inayoeleweka na binadamu kuhusu rule kwa ajili ya documentation na uwazi.
 
 ### Mfano
 ```bash
@@ -56,7 +56,7 @@ security authorizationdb read com.apple.tcc.util.admin
 </dict>
 </plist>
 ```
-Zaidi ya hayo, katika [https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/) inawezekana kuona maana ya `authenticate-admin-nonshared`:<sup>[[1]](#references)</sup>
+Kanuni iliyodekodishwa ifuatayo inaonyesha `authenticate-admin-nonshared` kwenye toleo la macOS lililoandikwa:<sup>[[1]](#references)</sup>
 ```json
 {
 "allow-root": "false",
@@ -73,17 +73,19 @@ Zaidi ya hayo, katika [https://www.dssw.co.uk/reference/authorization-rights/aut
 ```
 ## Authd
 
-Ni daemon ambayo itapokea maombi ya kuidhinisha clients kutekeleza vitendo nyeti. Inafanya kazi kama huduma ya XPC iliyofafanuliwa ndani ya folda ya `XPCServices/` na hutumia kuandika logs zake kwenye `/var/log/authd.log`.
+`authd` ni huduma ya XPC inayotathmini maombi ya Authorization Services. Kwenye matoleo ya sasa ya macOS, bundle yake inaweza kuchunguzwa kwenye `/System/Library/Frameworks/Security.framework/XPCServices/authd.xpc`; path hii ni maelezo ya utekelezaji na inaweza kutofautiana kati ya matoleo. Matoleo ya zamani yaliandika kwenye `/var/log/authd.log`; matoleo ya sasa hutumia hasa unified logging system, ambayo inaweza kuulizwa kwa `log show`/`log stream` kwa kutumia process predicate ya `authd`.<sup>[[2]](#references)</sup><sup>[[5]](#references)</sup>
 
-Zaidi ya hayo, kwa kutumia security tool inawezekana kujaribu API nyingi za `Security.framework`. Kwa mfano, kuendesha `AuthorizationExecuteWithPrivileges`: `security execute-with-privileges /bin/ls`
+Tool ya `security` hufichua operations kadhaa za Authorization Services. Mfano wa kihistoria hutumia `AuthorizationExecuteWithPrivileges` pamoja na `security execute-with-privileges /bin/ls`. Apple ilitangaza API hiyo kuwa deprecated katika macOS 10.7; privileged helpers za kisasa zinapaswa kutumia helper inayosimamiwa na launchd pamoja na XPC authorization.<sup>[[2]](#references)</sup><sup>[[4]](#references)</sup>
 
-Hii itafanya fork na exec ya `/usr/libexec/security_authtrampoline /bin/ls` ikiwa root, ambayo itaomba ruhusa kupitia prompt ili kutekeleza ls kama root:
+Kwenye matoleo ambayo bado yana support hiyo, hii hutumia `/usr/libexec/security_authtrampoline` na kuonyesha authorization prompt kabla ya kuendesha command kama root:
 
 <figure><img src="../../../images/image (10).png" alt=""><figcaption></figcaption></figure>
 
 ## References
 
-- [1] [authenticate-admin-nonshared - Overview of the macOS Authorization Right](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/)
-
-
+- [1] [authenticate-admin-nonshared - Muhtasari wa macOS Authorization Right](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/)
+- [2] [Mwongozo wa Apple wa Programming wa Authorization Services (archive)](https://developer.apple.com/library/archive/documentation/Security/Conceptual/authorization_concepts/)
+- [3] [Ukurasa wa manual wa `security(1)` wa macOS](https://keith.github.io/xcode-man-pages/security.1.html)
+- [4] [Apple - Mwongozo wa Programming wa Daemons and Services: Kuunda launchd jobs](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html)
+- [5] [Mradi wa Apple wa Security wenye source code wazi - `authd`](https://github.com/apple-oss-distributions/Security/tree/main/OSX/authd)
 {{#include ../../../banners/hacktricks-training.md}}
