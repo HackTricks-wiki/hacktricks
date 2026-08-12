@@ -2,31 +2,31 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## **Baza danych autoryzacji**
+## Baza danych autoryzacji
 
-Baza danych znajdująca się w `/var/db/auth.db` służy do przechowywania uprawnień do wykonywania wrażliwych operacji. Operacje te są wykonywane całkowicie w **user space** i zwykle używają ich usługi **XPC**, które muszą sprawdzić, **czy wywołujący je klient jest uprawniony** do wykonania określonej czynności, sprawdzając tę bazę danych.
+Usługi autoryzacji frameworka Security umożliwiają uprzywilejowanym helperom i innym komponentom ocenianie nazwanych uprawnień autoryzacji. W obecnych wersjach macOS wiele z tych reguł jest przechowywanych w `/var/db/auth.db` i ocenianych przez `authd`; ten plik oraz jego schemat SQLite są szczegółami implementacji i mogą się zmieniać między wydaniami.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
 
-Początkowo ta baza danych jest tworzona na podstawie zawartości `/System/Library/Security/authorization.plist`. Następnie niektóre usługi mogą dodawać do tej bazy danych inne uprawnienia lub modyfikować jej zawartość.
+Domyślne ustawienia systemu były historycznie inicjalizowane na podstawie `/System/Library/Security/authorization.plist`, a instalatory lub uprzywilejowane usługi mogą dodawać nazwane uprawnienia. Zamiast bezpośredniej edycji bazy danych należy używać obsługiwanego interfejsu `security authorizationdb read|write|remove`.<sup>[[3]](#references)</sup>
 
-Reguły są przechowywane w tabeli `rules` wewnątrz bazy danych i zawierają następujące kolumny:
+Tabela `rules` zaobserwowana w udokumentowanej kompilacji zawiera następujące kolumny. Należy traktować to jako mapę kryminalistyczną, a nie stabilny publiczny schemat:
 
-- **id**: Unikalny identyfikator każdej reguły, automatycznie zwiększany i służący jako klucz główny.
+- **id**: Unikalny identyfikator każdej reguły, automatycznie zwiększany i pełniący funkcję klucza głównego.
 - **name**: Unikalna nazwa reguły używana do jej identyfikowania i odwoływania się do niej w systemie autoryzacji.
-- **type**: Określa typ reguły, ograniczony do wartości 1 lub 2, definiujących jej logikę autoryzacji.
-- **class**: Kategoryzuje regułę do określonej klasy, która musi być dodatnią liczbą całkowitą.
-- "allow" oznacza zezwolenie, "deny" oznacza odmowę, "user" jest używane, gdy właściwość group wskazuje grupę, której członkostwo umożliwia dostęp, "rule" wskazuje w tablicy regułę, która musi zostać spełniona, a "evaluate-mechanisms" jest następujące po tablicy `mechanisms`, zawierającej elementy będące wbudowanymi mechanizmami lub nazwą bundle wewnątrz `/System/Library/CoreServices/SecurityAgentPlugins/` lub `/Library/Security//SecurityAgentPlugins`
-- **group**: Wskazuje grupę użytkowników powiązaną z regułą na potrzeby autoryzacji opartej na grupach.
-- **kofn**: Reprezentuje parametr „k z n”, określający, ile podreguł musi zostać spełnionych z określonej łącznej liczby.
-- **timeout**: Określa czas w sekundach, po którym wygasa autoryzacja przyznana przez regułę.
+- **type**: Określa typ reguły; do definiowania jej logiki autoryzacji dozwolone są wartości 1 lub 2.
+- **class**: Kategoryzuje regułę według określonej klasy; wartość musi być dodatnią liczbą całkowitą.
+- Typowe klasy reguł obejmują `allow`, `deny`, `user`, `rule` i `evaluate-mechanisms`. Mechanizmy mogą być wbudowane lub dostarczane jako plug-iny Security Agent w `/System/Library/CoreServices/SecurityAgentPlugins/` lub `/Library/Security/SecurityAgentPlugins/`.<sup>[[2]](#references)</sup>
+- **group**: Wskazuje grupę użytkownika powiązaną z regułą na potrzeby autoryzacji opartej na grupach.
+- **kofn**: Reprezentuje parametr „k-of-n”, określający, ile podreguł spośród łącznej liczby musi zostać spełnionych.
+- **timeout**: Określa czas w sekundach, po którym autoryzacja przyznana przez regułę wygasa.
 - **flags**: Zawiera różne flagi modyfikujące zachowanie i właściwości reguły.
 - **tries**: Ogranicza liczbę dozwolonych prób autoryzacji w celu zwiększenia bezpieczeństwa.
 - **version**: Śledzi wersję reguły na potrzeby kontroli wersji i aktualizacji.
 - **created**: Zapisuje znacznik czasu utworzenia reguły na potrzeby audytu.
 - **modified**: Przechowuje znacznik czasu ostatniej modyfikacji reguły.
-- **hash**: Zawiera wartość hash reguły, aby zapewnić jej integralność i wykrywać manipulacje.
-- **identifier**: Udostępnia unikalny identyfikator tekstowy, taki jak UUID, do zewnętrznych odwołań do reguły.
-- **requirement**: Zawiera serializowane dane definiujące konkretne wymagania autoryzacji i mechanizmy reguły.
-- **comment**: Zawiera czytelny dla człowieka opis lub komentarz dotyczący reguły, ułatwiający dokumentację i zrozumienie.
+- **hash**: Zawiera wartość hash reguły w celu zapewnienia jej integralności i wykrywania manipulacji.
+- **identifier**: Udostępnia unikalny identyfikator tekstowy, taki jak UUID, na potrzeby zewnętrznych odwołań do reguły.
+- **requirement**: Zawiera zserializowane dane definiujące określone wymagania autoryzacji i mechanizmy reguły.
+- **comment**: Zawiera czytelny dla człowieka opis lub komentarz dotyczący reguły, ułatwiający jej dokumentowanie i zrozumienie.
 
 ### Przykład
 ```bash
@@ -56,7 +56,7 @@ security authorizationdb read com.apple.tcc.util.admin
 </dict>
 </plist>
 ```
-Ponadto na stronie [https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/) można zobaczyć znaczenie `authenticate-admin-nonshared`:<sup>[[1]](#references)</sup>
+Poniższa zdekodowana reguła ilustruje `authenticate-admin-nonshared` w udokumentowanej wersji macOS:<sup>[[1]](#references)</sup>
 ```json
 {
 "allow-root": "false",
@@ -73,17 +73,19 @@ Ponadto na stronie [https://www.dssw.co.uk/reference/authorization-rights/authen
 ```
 ## Authd
 
-To daemon, który odbiera żądania klientów dotyczące wykonywania wrażliwych działań. Działa jako usługa XPC zdefiniowana w folderze `XPCServices/` i zapisuje swoje logi w `/var/log/authd.log`.
+`authd` to usługa XPC, która ocenia żądania Authorization Services. W obecnych kompilacjach macOS jej pakiet można sprawdzić pod adresem `/System/Library/Frameworks/Security.framework/XPCServices/authd.xpc`; ścieżka ta jest szczegółem implementacyjnym i może różnić się w zależności od wersji. Starsze wersje zapisywały logi w `/var/log/authd.log`; obecne wersje korzystają głównie z systemu unified logging, który można przeszukiwać za pomocą `log show`/`log stream`, używając predykatu procesu `authd`.<sup>[[2]](#references)</sup><sup>[[5]](#references)</sup>
 
-Ponadto za pomocą narzędzia security można testować wiele API `Security.framework`. Na przykład uruchomienie `AuthorizationExecuteWithPrivileges`: `security execute-with-privileges /bin/ls`
+Narzędzie `security` udostępnia kilka operacji Authorization Services. Historyczny przykład wywołuje `AuthorizationExecuteWithPrivileges` za pomocą `security execute-with-privileges /bin/ls`. Apple oznaczyło to API jako deprecated w macOS 10.7; współczesne uprzywilejowane helpery powinny korzystać z helpera zarządzanego przez launchd oraz autoryzacji XPC.<sup>[[2]](#references)</sup><sup>[[4]](#references)</sup>
 
-Spowoduje to wykonanie fork i exec `/usr/libexec/security_authtrampoline /bin/ls` jako root. Następnie zostanie wyświetlony monit o uprawnienia w celu uruchomienia ls jako root:
+W wersjach, które nadal to obsługują, używany jest `/usr/libexec/security_authtrampoline`, a przed uruchomieniem polecenia jako root wyświetlany jest monit autoryzacyjny:
 
 <figure><img src="../../../images/image (10).png" alt=""><figcaption></figcaption></figure>
 
 ## References
 
-- [1] [authenticate-admin-nonshared - Overview of the macOS Authorization Right](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/)
-
-
+- [1] [authenticate-admin-nonshared - Omówienie uprawnienia autoryzacyjnego macOS](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/)
+- [2] [Przewodnik programowania Apple Authorization Services (archiwum)](https://developer.apple.com/library/archive/documentation/Security/Conceptual/authorization_concepts/)
+- [3] [Strona podręcznika macOS `security(1)`](https://keith.github.io/xcode-man-pages/security.1.html)
+- [4] [Apple - Przewodnik programowania daemonów i usług: tworzenie zadań launchd](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html)
+- [5] [Projekt Security firmy Apple o otwartym kodzie źródłowym - `authd`](https://github.com/apple-oss-distributions/Security/tree/main/OSX/authd)
 {{#include ../../../banners/hacktricks-training.md}}

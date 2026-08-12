@@ -4,69 +4,69 @@
 
 ## Spot
 
-To najbardziej podstawowy sposób prowadzenia tradingu. Możesz **wskazać ilość aktywa i cenę**, po której chcesz kupić lub sprzedać, a gdy tylko cena ta zostanie osiągnięta, operacja zostanie wykonana.
+Trading spot polega na wymianie aktywa z natychmiastową dostawą. Zlecenie z limitem określa ilość i cenę limitu; jest realizowane tylko wtedy, gdy rynek może spełnić tę cenę lub zaoferować lepszą. Zlecenie rynkowe dąży natomiast do szybkiej realizacji po najlepszych dostępnych cenach i może wiązać się z poślizgiem cenowym.<sup>[[4]](#references)</sup>
 
-Zwykle możesz również użyć **bieżącej ceny rynkowej**, aby wykonać transakcję tak szybko, jak to możliwe, po aktualnej cenie.
-
-**Stop Loss - Limit**: Możesz również wskazać ilość i cenę aktywów do kupna lub sprzedaży, a także niższą cenę kupna lub sprzedaży na wypadek jej osiągnięcia (aby ograniczyć straty).
+Zlecenie stop-limit ma cenę stop, która aktywuje zlecenie z limitem. Może ograniczać cenę realizacji, ale nie gwarantuje realizacji, jeśli rynek przekroczy ustalony limit.<sup>[[4]](#references)</sup>
 
 ## Futures
 
-Futures to kontrakt, w którym 2 strony uzgadniają **nabycie czegoś w przyszłości po ustalonej cenie**. Na przykład sprzedaż 1 bitcoina za 6 miesięcy po cenie 70 000 USD.
+Kontrakt futures to ustandaryzowana umowa kupna lub sprzedaży określonego towaru albo instrumentu finansowego w przyszłym terminie. Przykładowo dwie strony mogą uzgodnić cenę 70 000 USD za jednego bitcoina z rozliczeniem za sześć miesięcy.<sup>[[1]](#references)</sup>
 
-Oczywiście, jeśli po 6 miesiącach wartość bitcoina wyniesie 80 000 USD, strona sprzedająca straci pieniądze, a strona kupująca je zarobi. Jeśli po 6 miesiącach wartość bitcoina wyniesie 60 000 USD, sytuacja będzie odwrotna.
+Jeśli cena rozliczeniowa wynosi 80 000 USD, strona długa zyskuje, a strona krótka traci w porównaniu z kontraktową ceną 70 000 USD. Jeśli wynosi 60 000 USD, sytuacja jest odwrotna. Rzeczywiste futures notowane na giełdzie są wyceniane rynkowo i zwykle zamykane lub rolowane przed wygaśnięciem, więc jest to uproszczona ilustracja.<sup>[[2]](#references)</sup>
 
-Jest to jednak interesujące na przykład dla firm, które wytwarzają produkt i muszą mieć pewność, że będą mogły sprzedać go po cenie pozwalającej pokryć koszty. Dotyczy to również firm, które chcą zagwarantować sobie stałe ceny w przyszłości, nawet jeśli będą one wyższe.
+Producenci i konsumenci używają futures do zabezpieczania ryzyka cenowego; inni uczestnicy wykorzystują je w celu osiągania zysku lub zapewniania płynności.<sup>[[1]](#references)</sup>
 
-Chociaż na giełdach rozwiązanie to jest zwykle wykorzystywane do próby osiągnięcia zysku.
+- **Pozycja długa** zasadniczo przynosi zysk, gdy cena kontraktu rośnie.
+- **Pozycja krótka** zasadniczo przynosi zysk, gdy cena kontraktu spada.<sup>[[2]](#references)</sup>
 
-* Zauważ, że „Long position” oznacza, że ktoś obstawia wzrost ceny
-* Natomiast „short position” oznacza, że ktoś obstawia spadek ceny
+### Zabezpieczanie za pomocą futures
 
-### Hedging With Futures <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
+Jeśli zarządzający funduszem spodziewa się spadku wartości portfela, może otworzyć krótką pozycję w wystarczająco skorelowanym kontrakcie futures na indeks akcji. Zyski z krótkiego zabezpieczenia mogą zrekompensować część strat portfela; ryzyko bazy oznacza, że kompensacja rzadko jest dokładna. Futures na bitcoina zabezpiecza ekspozycję na bitcoina, a nie automatycznie portfel akcji.
 
-Jeśli zarządzający funduszem obawia się, że niektóre akcje spadną, może zająć krótką pozycję na aktywach takich jak bitcoin lub kontrakty futures na S\&P 500. Byłoby to podobne do kupienia lub posiadania aktywów i zawarcia kontraktu na ich sprzedaż w przyszłości po wyższej cenie.
-
-Jeśli cena spadnie, zarządzający funduszem osiągnie zysk, ponieważ sprzeda aktywa po wyższej cenie. Jeśli cena aktywów wzrośnie, zarządzający nie osiągnie tego zysku, ale nadal zachowa swoje aktywa.
+Jeśli zabezpieczany rynek spada, krótka pozycja futures może zyskiwać, podczas gdy posiadane aktywa tracą na wartości. Jeśli rynek rośnie, posiadane aktywa mogą zyskiwać, podczas gdy zabezpieczenie przynosi straty. Zabezpieczanie zmniejsza wybrane ryzyko, zamiast zapewniać gwarantowany zysk.<sup>[[1]](#references)</sup>
 
 ### Perpetual Futures
 
-**Są to „futures”, które będą trwać bezterminowo** (bez daty zakończenia kontraktu). Bardzo często można je znaleźć na przykład na giełdach kryptowalut, gdzie można wchodzić i wychodzić z futures w zależności od ceny kryptowalut.
+Kontrakty perpetual to instrumenty pochodne bez ustalonej daty wygaśnięcia. Platformy kryptowalutowe powszechnie stosują okresowe płatności fundingowe, aby utrzymywać ich cenę blisko bazowej ceny spot; warunki różnią się w zależności od platformy.<sup>[[3]](#references)</sup>
 
-Zauważ, że w takich przypadkach zyski i straty mogą być naliczane w czasie rzeczywistym: jeśli cena wzrośnie o 1%, zyskasz 1%; jeśli cena spadnie o 1%, stracisz 1%.
+Zysk i strata zmieniają się wraz ze zmianą ceny mark. Zmiana ceny o 1% powoduje w przybliżeniu zmianę o 1% wartości nominalnej pozycji przed uwzględnieniem opłat i funding, ale dźwignia może sprawić, że będzie to znacznie większy procent wniesionego zabezpieczenia.
 
-### Futures with Leverage
+### Futures z dźwignią
 
-**Dźwignia finansowa** pozwala kontrolować większą pozycję na rynku za pomocą mniejszej kwoty pieniędzy. Zasadniczo pozwala „obstawiać” znacznie większą kwotę, niż posiadasz, ryzykując tylko pieniędzmi, które faktycznie masz.
+**Dźwignia** pozwala traderowi kontrolować większą pozycję nominalną przy mniejszym depozycie zabezpieczającym. Straty nie zawsze ograniczają się do początkowego depozytu: likwidacja, luki cenowe, opłaty i zasady platformy mogą prowadzić do dodatkowych strat.<sup>[[3]](#references)</sup>
 
-Na przykład, jeśli otworzysz pozycję futures na BTC/USDT za 100 USD z dźwignią 50x, oznacza to, że jeśli cena wzrośnie o 1%, zarobisz 1x50 = 50% swojej początkowej inwestycji (50 USD). W rezultacie będziesz mieć 150 USD.\
-Jeśli jednak cena spadnie o 1%, stracisz 50% swoich środków (w tym przypadku 50 USD). Jeśli cena spadnie o 2%, stracisz całą obstawioną kwotę (2x50 = 100%).
+Przykładowo depozyt zabezpieczający w wysokości 100 USD przy dźwigni 50x kontroluje pozycję o wartości 5000 USD. Pomijając opłaty, funding i mechanizmy likwidacji, korzystna zmiana o 1% przynosi zysk 50 USD (50% początkowego depozytu), natomiast niekorzystna zmiana o 1% powoduje stratę 50 USD. Niekorzystna zmiana o 2% odpowiada kwocie 100 USD, jednak platforma zazwyczaj zlikwiduje pozycję, zanim cały depozyt zostanie wykorzystany.
 
-Dźwignia pozwala więc kontrolować kwotę, którą obstawiasz, jednocześnie zwiększając potencjalne zyski i straty.
+Dźwignia zwiększa zarówno zyski, jak i straty oraz umożliwia likwidację po relatywnie niewielkiej niekorzystnej zmianie ceny.
 
-## Różnice między Futures a Options
+## Różnice między futures a opcjami
 
-Główna różnica między futures a options polega na tym, że wykonanie kontraktu jest opcjonalne dla kupującego: może on zdecydować, czy go wykonać, czy nie (zwykle zrobi to tylko wtedy, gdy będzie to dla niego korzystne). Sprzedający musi sprzedać, jeśli kupujący chce skorzystać z opcji.\
-Kupujący zapłaci jednak sprzedającemu opłatę za otwarcie opcji (dzięki czemu sprzedający, który pozornie podejmuje większe ryzyko, zaczyna zarabiać pewne pieniądze).
+Nabywca opcji otrzymuje prawo, a nie obowiązek, do wykonania jej na warunkach określonych w kontrakcie. Wystawca opcji ma odpowiadający temu obowiązek, jeśli nabywca wykona opcję. Nabywca płaci wystawcy premię za to prawo.<sup>[[4]](#references)</sup>
 
 ### 1. **Obowiązek a prawo:**
 
-* **Futures:** Kupując lub sprzedając kontrakt futures, zawierasz **wiążącą umowę** kupna lub sprzedaży aktywa po określonej cenie i w określonym terminie w przyszłości. Zarówno kupujący, jak i sprzedający są **zobowiązani** do realizacji kontraktu w dniu wygaśnięcia (chyba że kontrakt zostanie wcześniej zamknięty).
-* **Options:** W przypadku options masz **prawo, ale nie obowiązek**, kupić (w przypadku **call option**) lub sprzedać (w przypadku **put option**) aktywo po określonej cenie przed określonym terminem wygaśnięcia lub w tym terminie. **Kupujący** ma możliwość wykonania opcji, natomiast **sprzedający** jest zobowiązany do realizacji transakcji, jeśli kupujący zdecyduje się wykonać opcję.
+* **Futures:** Kupując lub sprzedając kontrakt futures, zawierasz **wiążącą umowę** kupna lub sprzedaży aktywa po określonej cenie w przyszłym terminie. Zarówno kupujący, jak i sprzedający są **zobowiązani** do wykonania kontraktu w dniu wygaśnięcia, chyba że kontrakt zostanie wcześniej zamknięty.
+* **Opcje:** W przypadku opcji masz **prawo, ale nie obowiązek**, kupna (w przypadku **opcji call**) lub sprzedaży (w przypadku **opcji put**) aktywa po określonej cenie przed określonym terminem wygaśnięcia lub w tym terminie. **Nabywca** ma możliwość wykonania opcji, natomiast **sprzedający** jest zobowiązany do realizacji transakcji, jeśli nabywca zdecyduje się wykonać opcję.
 
 ### 2. **Ryzyko:**
 
-* **Futures:** Zarówno kupujący, jak i sprzedający ponoszą **nieograniczone ryzyko**, ponieważ są zobowiązani do realizacji kontraktu. Ryzyko stanowi różnica między uzgodnioną ceną a ceną rynkową w dniu wygaśnięcia.
-* **Options:** Ryzyko kupującego jest ograniczone do **premii** zapłaconej za zakup opcji. Jeśli rynek nie zmieni się na korzyść posiadacza opcji, może on po prostu pozwolić na jej wygaśnięcie. Jednak **sprzedający** (wystawca) opcji ponosi nieograniczone ryzyko, jeśli rynek znacząco zmieni się na jego niekorzyść.
+* **Futures:** Obie strony mogą ponieść znaczne straty. To, czy strata jest matematycznie nieograniczona, zależy od pozycji i aktywa bazowego: pozycja krótka może wiązać się z teoretycznie nieograniczoną stratą, natomiast pozycja długa nie może przynieść straty większej niż wartość nominalna, jeśli aktywo bazowe nie może spaść poniżej zera.
+* **Opcje:** Nabywca, który nie wystawia innej opcji, zasadniczo ryzykuje zapłaconą premię. Wystawca nagiej opcji call może ponieść teoretycznie nieograniczoną stratę; inne strategie wystawiania opcji mają różne profile ryzyka — ograniczone lub nieograniczone.
 
 ### 3. **Koszt:**
 
-* **Futures:** Nie ma kosztu początkowego wykraczającego poza depozyt zabezpieczający wymagany do utrzymania pozycji, ponieważ zarówno kupujący, jak i sprzedający są zobowiązani do realizacji transakcji.
-* **Options:** Kupujący musi z góry zapłacić **premię opcyjną** za prawo do wykonania opcji. Premia ta stanowi zasadniczo koszt opcji.
+* **Futures:** Nie ma kosztu początkowego poza depozytem zabezpieczającym wymaganym do utrzymania pozycji, ponieważ kupujący i sprzedający są zobowiązani do sfinalizowania transakcji.
+* **Opcje:** Nabywca musi z góry zapłacić **premię opcyjną** za prawo wykonania opcji. Premia ta jest zasadniczo kosztem opcji.
 
 ### 4. **Potencjał zysku:**
 
-* **Futures:** Zysk lub strata zależy od różnicy między ceną rynkową w dniu wygaśnięcia a uzgodnioną ceną określoną w kontrakcie.
-* **Options:** Kupujący osiąga zysk, gdy rynek przesunie się korzystnie poza cenę wykonania o więcej niż zapłacona premia. Sprzedający osiąga zysk, zatrzymując premię, jeśli opcja nie zostanie wykonana.
+* **Futures:** Zysk lub strata zależy od różnicy między ceną rynkową w dniu wygaśnięcia a uzgodnioną ceną kontraktu.
+* **Opcje:** Nabywca osiąga zysk, gdy rynek porusza się korzystnie poza cenę wykonania o wartość większą niż zapłacona premia. Sprzedający osiąga zysk, zatrzymując premię, jeśli opcja nie zostanie wykonana.
 
+## References
+
+- [1] [CFTC - Ekonomiczny cel rynków futures](https://www.cftc.gov/LearnAndProtect/EducationCenter/economicpurpose)
+- [2] [CFTC - Podstawy rynku futures](https://www.cftc.gov/LearnAndProtect/EducationCenter/FuturesMarketBasics/index2.htm)
+- [3] [CFTC - Zrozumienie ryzyka handlu wirtualnymi walutami](https://www.cftc.gov/LearnAndProtect/AdvisoriesAndArticles/understand_risks_of_virtual_currency.html)
+- [4] [CFTC Glossary - Opcja, premia i wykonanie](https://www.cftc.gov/LearnAndProtect/AdvisoriesAndArticles/CFTCGlossary/index.htm)
 {{#include ../banners/hacktricks-training.md}}
