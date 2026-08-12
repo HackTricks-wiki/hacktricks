@@ -1,35 +1,29 @@
-# Text Steganography
+# Tekssteganografie
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Soek na:
-
-- Unicode-homogliewe
-- Zero-width characters
-- Whitespace-patrone (spasies teenoor tabs)
-
 ## Praktiese pad
 
-As plain text onverwags optree, inspekteer codepoints en normaliseer versigtig (moenie bewyse vernietig nie).
+As gewone teks onverwags optree, bewaar die oorspronklike bewys, inspekteer die codepoints daarvan, en normaliseer slegs 'n kopie.
 
 ### Tegniek
 
-Text stego maak dikwels staat op karakters wat identies (of onsigbaar) vertoon:
+Tekssteganografie maak dikwels staat op karakters wat identies of onsigbaar vertoon:
 
-- Homogliewe: verskillende Unicode-codepoints wat dieselfde lyk (Latynse `a` teenoor Cyrilliese `а`)
-- Zero-width characters: joiners, non-joiners, zero-width spaces
-- Whitespace-enkoderings: spasies teenoor tabs, spasies aan die einde, patrone in reëllengtes<sup>[[1]](#references)</sup>
+- Homoglyphs: verskillende Unicode-codepoints wat eenders lyk (byvoorbeeld Latynse `a` en Cyrilliese `а`)<sup>[[1]](#references)</sup>
+- Zero-width characters: joiners, non-joiners en zero-width spaces<sup>[[2]](#references)</sup>
+- Whitespace encodings: spasies teenoor tabs, patrone van spasies aan die einde, en doelbewuste lynlengtepatrone<sup>[[3]](#references)[[4]](#references)</sup>
 
 Bykomende hoë-sein-gevalle:
 
-- Bidirectional override/control characters (kan teks visueel herrangskik)
-- Variation selectors en combining characters wat as 'n covert channel gebruik word
+- Bidirectional controls, wat teks visueel kan herrangskik<sup>[[1]](#references)</sup>
+- Variation selectors en combining characters, wat verborge toestand kan dra terwyl die sigbare teks byna onveranderd bly<sup>[[1]](#references)</sup>
 
-### Dekoderingshulpmiddels
+### Decode helpers
 
-- Unicode-homoglyph/zero-width-speelplek: https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder
+- [Unicode homoglyph and zero-width-character encoder/decoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)<sup>[[2]](#references)</sup>
 
-### Inspekteer codepoints
+### Inspect codepoints
 ```bash
 python3 - <<'PY'
 import sys
@@ -39,16 +33,18 @@ if ord(ch) > 127 or ch.isspace():
 print(i, hex(ord(ch)), repr(ch))
 PY
 ```
-## CSS `unicode-range` channels
+## CSS `unicode-range`-kanale
 
-`@font-face`-reëls kan grepe in `unicode-range: U+..`-inskrywings enkodeer. Onttrek die codepoints, voeg die heksadesimale waardes saam en dekodeer:
+`@font-face`-reëls kan misbruik word om grepe in `unicode-range: U+..`-inskrywings te enkodeer. Onttrek die codepoints, voeg die heksadesimale waardes saam en dekodeer hulle:<sup>[[3]](#references)</sup>
 ```bash
 grep -o "U+[0-9A-Fa-f]\+" styles.css | tr -d 'U+\n' | xxd -r -p
 ```
-Indien reekse veelvuldige grepe per deklarasie bevat, verdeel dit eers op kommas en normaliseer (`tr ',+' '\n'`). Python maak dit maklik om grepe te ontleed en uit te voer wanneer formatering inkonsekwent is.<sup>[[1]](#references)</sup>
+As reekse veelvuldige waardes per deklarasie bevat, verdeel dit eers op kommas en normaliseer dit (`tr ',+' '\n'`). Python kan die grepe ontleed en uitvoer wanneer die formatering inkonsekwent is.<sup>[[3]](#references)</sup>
 
-## Verwysings
+## References
 
-- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
-
+- [1] [Unicode Technical Report #36: Unicode-sekuriteitsoorwegings](https://www.unicode.org/reports/tr36/)
+- [2] [Irongeek: Unicode-steganografie met nulwydtekarakters en homogliewe](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)
+- [3] [0xdf: Flagvent 2025 (Medium) — Kersvader se wenslys](https://0xdf.gitlab.io/flagvent2025/medium)
+- [4] [Debian-handleiding: `stegsnow`-witruimte-steganografie](https://manpages.debian.org/trixie/stegsnow/stegsnow.1.en.html)
 {{#include ../../banners/hacktricks-training.md}}

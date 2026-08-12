@@ -1,16 +1,19 @@
-# macOS Default Sandbox Ontfouting
+# macOS Default Sandbox-ontfouting
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Op hierdie bladsy kan jy leer hoe om 'n app te skep wat arbitrêre commands vanuit die standaard macOS sandbox kan launch:
+Hierdie bladsy bou 'n klein command runner en sign dit met die macOS App Sandbox entitlement. Commands wat met `system()` geloods word, erf die app se sandbox-beperkings, dus is dit nuttig om gedrag binne 'n sandbox te toets; dit is nie 'n sandbox escape nie.<sup>[[1]](#references)</sup>
 
-1. Compile die toepassing:
+1. Compile die application:
 ```objectivec:main.m
 #include <Foundation/Foundation.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 int main(int argc, const char * argv[]) {
 @autoreleasepool {
-while (true) {
+while (1) {
 char input[512];
 
 printf("Enter command to run (or 'exit' to quit): ");
@@ -18,7 +21,7 @@ if (fgets(input, sizeof(input), stdin) == NULL) {
 break;
 }
 
-// Remove newline character
+// Remove the trailing newline.
 size_t len = strlen(input);
 if (len > 0 && input[len - 1] == '\n') {
 input[len - 1] = '\0';
@@ -34,9 +37,11 @@ system(input);
 return 0;
 }
 ```
-Kompileer dit deur die volgende uit te voer: `clang -framework Foundation -o SandboxedShellApp main.m`
-
-2. Bou die `.app`-bundel
+Kompileer dit met:
+```bash
+clang -framework Foundation -o SandboxedShellApp main.m
+```
+2. Bou die `.app`-bundle:
 ```bash
 mkdir -p SandboxedShellApp.app/Contents/MacOS
 mv SandboxedShellApp SandboxedShellApp.app/Contents/MacOS/
@@ -58,7 +63,7 @@ cat << EOF > SandboxedShellApp.app/Contents/Info.plist
 </plist>
 EOF
 ```
-3. Definieer die entitlements
+3. Definieer die entitlements. Die tweede variant verleen ook lees-/skryftoegang tot die gebruiker se Downloads-lêergids.<sup>[[2]](#references)</sup>
 
 {{#tabs}}
 {{#tab name="sandbox"}}
@@ -94,12 +99,16 @@ EOF
 {{#endtab}}
 {{#endtabs}}
 
-4. Onderteken die app (jy moet 'n sertifikaat in die keychain skep)
+4. Teken die app met ’n signing identity wat in die keychain beskikbaar is, en voer dit dan uit. Wanneer dit handmatig geteken word, sluit `codesign --entitlements` die entitlement-eienskaplys by die app se handtekening in.<sup>[[1]](#references)</sup>
 ```bash
 codesign --entitlements entitlements.plist -s "YourIdentity" SandboxedShellApp.app
 ./SandboxedShellApp.app/Contents/MacOS/SandboxedShellApp
 
-# An d in case you need this in the future
+# Remove the signature if it is no longer needed.
 codesign --remove-signature SandboxedShellApp.app
 ```
+## References
+
+- [1] [Apple Code Signing Guide: Entitlements handmatig byvoeg vir Sandboxing](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/Procedures/Procedures.html#//apple_ref/doc/uid/TP40005929-CH4-SW31)
+- [2] [Apple: `com.apple.security.files.downloads.read-write` entitlement](https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.files.downloads.read-write)
 {{#include ../../../../banners/hacktricks-training.md}}

