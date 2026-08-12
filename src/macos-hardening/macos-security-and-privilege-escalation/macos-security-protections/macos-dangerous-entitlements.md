@@ -2,6 +2,8 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
+Entitlements declare capabilities and security exceptions that the operating system grants to signed code. The entries below focus on those that are especially useful during offensive review.<sup>[[13]](#references)</sup>
+
 > [!WARNING]
 > Note that entitlements starting with **`com.apple`** are not available to third-parties, only Apple can grant them... Or if you are using an enterprise certificate you could create your own entitlements starting with **`com.apple`** actually and bypass protections based on this.
 
@@ -9,15 +11,15 @@
 
 ### `com.apple.rootless.install.heritable`
 
-The entitlement **`com.apple.rootless.install.heritable`** allows to **bypass SIP**. Check [this for more info](macos-sip.md#com.apple.rootless.install.heritable).
+The entitlement **`com.apple.rootless.install.heritable`** allows a process to **bypass SIP**. Check [this for more info](macos-sip.md#com.apple.rootless.install.heritable).
 
 ### **`com.apple.rootless.install`**
 
-The entitlement **`com.apple.rootless.install`** allows to **bypass SIP**. Check[ this for more info](macos-sip.md#com.apple.rootless.install).
+The entitlement **`com.apple.rootless.install`** allows a process to **bypass SIP**. Check [this for more info](macos-sip.md#com.apple.rootless.install).
 
 ### **`com.apple.system-task-ports` (previously called `task_for_pid-allow`)**
 
-This entitlement allows to get the **task port for any** process, except the kernel. Check [**this for more info**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
+This entitlement allows a process to get the **task port for any** process except the kernel. Check [**this for more info**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
 
 ### `com.apple.security.get-task-allow`
 
@@ -29,7 +31,7 @@ Apps with the Debugging Tool Entitlement can call `task_for_pid()` to retrieve a
 
 ### `com.apple.security.cs.disable-library-validation`
 
-This entitlement allows to **load frameworks, plug-ins, or libraries without being either signed by Apple or signed with the same Team ID** as the main executable, so an attacker could abuse some arbitrary library load to inject code. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).<sup>[[4]](#references)</sup>
+This entitlement allows an application to **load frameworks, plug-ins, or libraries without requiring them to be signed by Apple or with the same Team ID** as the main executable, so an attacker could abuse an arbitrary library load to inject code. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).<sup>[[4]](#references)</sup>
 
 ### `com.apple.private.security.clear-library-validation`
 
@@ -78,11 +80,11 @@ This entitlement allows to **use DYLD environment variables** that could be used
 
 ### `com.apple.private.tcc.manager` or `com.apple.rootless.storage`.`TCC`
 
-[**According to this blog**](https://objective-see.org/blog/blog_0x4C.html) **and** [**this blog**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/), these entitlements allows to **modify** the **TCC** database.<sup>[[6]](#references)[[7]](#references)</sup>
+[**According to this blog**](https://objective-see.org/blog/blog_0x4C.html) **and** [**this blog**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/), these entitlements allow a process to **modify** the **TCC** database.<sup>[[6]](#references)[[7]](#references)</sup>
 
-### **`system.install.apple-software`** and **`system.install.apple-software.standar-user`**
+### Authorization rights **`system.install.apple-software`** and **`system.install.apple-software.standard-user`**
 
-These entitlements allows to **install software without asking for permissions** to the user, which can be helpful for a **privilege escalation**.
+These Authorization Services rights govern the installation of Apple-provided software. A process entitled to obtain them may bypass the usual authorization flow, which can be helpful for **privilege escalation**.<sup>[[14]](#references)</sup>
 
 ### `com.apple.private.security.kext-management`
 
@@ -90,7 +92,7 @@ Entitlement needed to ask the **kernel to load a kernel extension**.
 
 ### **`com.apple.private.icloud-account-access`**
 
-The entitlement **`com.apple.private.icloud-account-access`** it's possible to communicate with **`com.apple.iCloudHelper`** XPC service which will **provide iCloud tokens**.
+The entitlement **`com.apple.private.icloud-account-access`** makes it possible to communicate with the **`com.apple.iCloudHelper`** XPC service, which will **provide iCloud tokens**.
 
 **iMovie** and **Garageband** had this entitlement.
 
@@ -102,11 +104,11 @@ TODO: I don't know what this allows to do
 
 ### `com.apple.private.apfs.revert-to-snapshot`
 
-TODO: In [**this report**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **is mentioned that this could be used to** update the SSV-protected contents after a reboot. If you know how it send a PR please!<sup>[[9]](#references)</sup>
+TODO: [**This report**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) mentions that this entitlement could be used to update SSV-protected contents after a reboot. If you know how, please send a PR!<sup>[[9]](#references)</sup>
 
 ### `com.apple.private.apfs.create-sealed-snapshot`
 
-TODO: In [**this report**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **is mentioned that this could be used to** update the SSV-protected contents after a reboot. If you know how it send a PR please!<sup>[[9]](#references)</sup>
+TODO: [**The same report**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) mentions that creating a sealed snapshot could be used to update SSV-protected contents after a reboot. If you know how, please send a PR!<sup>[[9]](#references)</sup>
 
 ### `keychain-access-groups`
 
@@ -167,7 +169,7 @@ There are some entitlements that could be used to bypass Trustcache/CDhash prote
 
 ### `com.apple.security.cs.allow-jit`
 
-This entitlement allows to **create memory that is writable and executable** by passing the `MAP_JIT` flag to the `mmap()` system function. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit).<sup>[[10]](#references)</sup>
+This entitlement allows a process to **create memory that is writable and executable** by passing the `MAP_JIT` flag to the `mmap()` system function. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit).<sup>[[10]](#references)</sup>
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
@@ -311,5 +313,6 @@ For detailed IOKit/DriverKit exploitation, see:
 - [11] [Apple Developer — Allow Unsigned Executable Memory Entitlement](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory)
 - [12] [Apple Developer — Disable Executable Memory Protection Entitlement](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection)
 - [13] [Apple Developer — Entitlements](https://developer.apple.com/documentation/bundleresources/entitlements)
+- [14] [Apple Developer Archive — Authorization Services Programming Guide](https://developer.apple.com/library/archive/documentation/Security/Conceptual/authorization_concepts/01introduction/introduction.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

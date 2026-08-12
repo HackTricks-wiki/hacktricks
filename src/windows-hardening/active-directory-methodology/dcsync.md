@@ -93,7 +93,7 @@ Operational notes:
 `-just-dc` generates 3 files:
 
 - one with the **NTLM hashes**
-- one with the the **Kerberos keys**
+- one with the **Kerberos keys**
 - one with cleartext passwords from the NTDS for any accounts set with [**reversible encryption**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption) enabled. You can get users with reversible encryption with
 
   ```bash
@@ -102,7 +102,7 @@ Operational notes:
 
 ### Persistence
 
-If you are a domain admin, you can grant this permissions to any user with the help of `powerview`:<sup>[[3]](#references)</sup>
+If you are a domain admin, you can grant these permissions to any user with the help of PowerView:<sup>[[3]](#references)</sup>
 
 ```bash
 Add-ObjectAcl -TargetDistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -PrincipalSamAccountName username -Rights DCSync -Verbose

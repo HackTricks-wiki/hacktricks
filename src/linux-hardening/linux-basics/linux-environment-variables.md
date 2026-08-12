@@ -52,7 +52,7 @@ If you are looking for **credentials** or **interesting service configuration** 
 
 ## Common variables
 
-From: [https://geek-university.com/linux/common-environment-variables/](https://geek-university.com/linux/common-environment-variables/)<sup>[[5]](#references)</sup>
+From: [https://geek-university.com/linux/common-environment-variables/](https://geek-university.com/linux/common-environment-variables/).<sup>[[5]](#references)</sup>
 
 - **DISPLAY** – the display used by **X**. This variable is usually set to **:0.0**, which means the first display on the current computer.
 - **EDITOR** – the user’s preferred text editor.
@@ -209,7 +209,7 @@ EOF
 BASH_ENV=/tmp/pre.sh bash -c 'echo target'
 ```
 
-Bash itself disables these startup files when the **real/effective IDs differ** unless `-p` is used, so the exact behavior depends on how the wrapper invokes the shell. Be careful with privileged wrappers that call `setuid()`/`setgid()` **before** launching Bash: once the IDs match again, Bash may trust `BASH_ENV`, `ENV`, and related shell state that would otherwise be ignored.<sup>[[1]](#references)</sup>
+Bash ignores these startup files when the **real/effective IDs differ**; `-p` preserves the effective ID but does not enable those startup files, so the exact behavior depends on how the wrapper invokes the shell. Be careful with privileged wrappers that call `setuid()`/`setgid()` **before** launching Bash: once the IDs match again, Bash may trust `BASH_ENV`, `ENV`, and related shell state that would otherwise be ignored.<sup>[[1]](#references)</sup>
 
 ### **PYTHONPATH, PYTHONHOME, PYTHONSTARTUP & PYTHONINSPECT**
 

@@ -2,17 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-This page documents a class of DeFi/AMM exploitation techniques against Uniswap v4–style DEXes that extend core math with custom hooks. A recent incident in Bunni V2 leveraged a rounding/precision flaw in a Liquidity Distribution Function (LDF) executed on each swap, enabling the attacker to accrue positive credits and drain liquidity.<sup>[[1]](#references)[[2]](#references)[[7]](#references)</sup>
+This page documents a class of DeFi/AMM exploitation techniques against Uniswap v4–style DEXes that extend core math with custom hooks. A Bunni V2 incident illustrates a related failure: a rounding-direction bug in withdrawal accounting understated active liquidity, and a later swap exposed that underestimation in a profitable sandwich.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 
 Key idea: if a hook implements additional accounting that depends on fixed‑point math, tick rounding, and threshold logic, an attacker can craft exact‑input swaps that cross specific thresholds so that rounding discrepancies accumulate in their favor. Repeating the pattern and then withdrawing the inflated balance realizes profit, often financed with a flash loan.
 
 ## Background: Uniswap v4 hooks and swap flow
 
-- Hooks are contracts that the PoolManager calls at specific lifecycle points (e.g., beforeSwap/afterSwap, beforeAddLiquidity/afterAddLiquidity, beforeRemoveLiquidity/afterRemoveLiquidity, beforeInitialize/afterInitialize, beforeDonate/afterDonate).<sup>[[3]](#references)[[6]](#references)</sup>
-- Pools are initialized with a PoolKey including hooks address. If non‑zero, PoolManager performs callbacks on every relevant operation.<sup>[[6]](#references)</sup>
-- Hooks can return **custom deltas** that modify the final balance changes of a swap or liquidity action (custom accounting). Those deltas are settled as net balances at the end of the call, so any rounding error inside hook math accumulates before settlement.<sup>[[5]](#references)</sup>
-- Core math uses fixed‑point formats such as Q64.96 for sqrtPriceX96 and tick arithmetic with 1.0001^tick. Any custom math layered on top must carefully match rounding semantics to avoid invariant drift.<sup>[[4]](#references)[[8]](#references)</sup>
-- Swaps can be exactInput or exactOutput. In v3/v4, price moves along ticks; crossing a tick boundary may activate/deactivate range liquidity. Hooks may implement extra logic on threshold/tick crossings.<sup>[[5]](#references)</sup>
+- Hooks are contracts that the PoolManager calls at specific lifecycle points (e.g., beforeSwap/afterSwap, beforeAddLiquidity/afterAddLiquidity, beforeRemoveLiquidity/afterRemoveLiquidity, beforeInitialize/afterInitialize, beforeDonate/afterDonate).<sup>[[4]](#references)</sup>
+- Pools are initialized with a PoolKey including the hook contract. A non-zero hook address enables the callbacks selected for that pool.<sup>[[4]](#references)[[14]](#references)</sup>
+- Hooks can return **custom deltas** that modify the final balance changes of a swap or liquidity action (custom accounting). Those deltas are settled as net balances at the end of the call, so any rounding error inside hook math accumulates before settlement.<sup>[[4]](#references)</sup>
+- Core math uses fixed-point formats such as Q64.96 for sqrtPriceX96 and tick arithmetic with 1.0001^tick. Any custom math layered on top must carefully match rounding semantics to avoid invariant drift.<sup>[[12]](#references)[[13]](#references)</sup>
+- Swaps can be exactInput or exactOutput. In v3/v4, price moves along ticks; crossing a tick boundary may activate/deactivate range liquidity. Hooks may implement extra logic on threshold/tick crossings.<sup>[[9]](#references)[[11]](#references)</sup>
 
 ## Vulnerability archetype: threshold‑crossing precision/rounding drift
 
@@ -45,6 +45,8 @@ Attack preconditions
 - Verify that afterSwap settlement credits the caller more than the cost, leaving a positive BalanceDelta or credit in the hook’s accounting.
 - Repeat swaps to accumulate credit; then call the hook’s withdrawal/settlement path.
 
+In v4, the swap loop must run from a PoolManager unlock callback; negative `amountSpecified` denotes exact input, and `sqrtPriceLimitX96` must be strictly inside the valid range. A zero price limit reverts, so the pseudocode below uses the lower bound for a zero-for-one swap.<sup>[[9]](#references)[[10]](#references)[[11]](#references)</sup>
+
 Example Foundry‑style test harness (pseudocode)
 ```solidity
 function test_precision_rounding_abuse() public {
@@ -54,7 +56,7 @@ function test_precision_rounding_abuse() public {
         currency1: USDT,
         fee: 500, // 0.05%
         tickSpacing: 10,
-        hooks: address(bunniHook)
+        hooks: IHooks(address(bunniHook))
     });
     pm.initialize(key, initialSqrtPriceX96);
 
@@ -62,13 +64,14 @@ function test_precision_rounding_abuse() public {
     uint256 exactIn = calibrateToCrossThreshold(key, targetTickBoundary);
 
     // 3) Loop swaps to accrue rounding credit
+    // This loop runs inside the PoolManager unlockCallback.
     for (uint i; i < N; ++i) {
         pm.swap(
             key,
-            IPoolManager.SwapParams({
+            SwapParams({
                 zeroForOne: true,
-                amountSpecified: int256(exactIn), // exactInput
-                sqrtPriceLimitX96: 0 // allow tick crossing
+                amountSpecified: -int256(exactIn), // exactInput
+                sqrtPriceLimitX96: TickMath.MIN_SQRT_PRICE + 1 // allow movement to the lower bound
             }),
             ""
         );
@@ -80,12 +83,12 @@ function test_precision_rounding_abuse() public {
 ```
 
 Calibrating the exactInput
-- Compute ΔsqrtP for a tick step: sqrtP_next = sqrtP_current × 1.0001^(Δtick).
-- Approximate Δin using v3/v4 formulas: Δx ≈ L × (ΔsqrtP / (sqrtP_next × sqrtP_current)). Ensure rounding direction matches core math.
+- Compute the target with core TickMath: sqrtP_next = sqrtP_current × 1.0001^(Δtick) in real-value terms; the Q64.96 result is rounded by TickMath.<sup>[[13]](#references)</sup>
+- Approximate a token0 (zero-for-one) input using the Q64.96-aware formula: Δx ≈ L × |ΔsqrtP| × 2^96 / (sqrtP_next × sqrtP_current). Match the core routine’s direction-specific rounding.<sup>[[12]](#references)</sup>
 - Adjust Δin by ±1 wei around the boundary to find the branch where the hook rounds in your favor.
 
 4) Amplify with flash loans
-- Borrow a large notional (e.g., 3M USDT or 2000 WETH) to run many iterations atomically.<sup>[[1]](#references)[[2]](#references)[[7]](#references)</sup>
+- Borrow a large notional (e.g., 3M USDT or 2000 WETH) to run many iterations atomically.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 - Execute the calibrated swap loop, then withdraw and repay within the flash loan callback.
 
 Aave V3 flash loan skeleton
@@ -113,7 +116,7 @@ function executeOperation(
 
 5) Exit and cross‑chain replication
 - If hooks are deployed on multiple chains, repeat the same calibration per chain.
-- Bridge proceeds back to the target chain and optionally cycle via lending protocols to obfuscate flows.<sup>[[2]](#references)</sup>
+- In the Bunni incident, flash-loan liquidity and bridge routes differed by chain, so account for those chain-specific constraints when reproducing the analysis.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## Common root causes in hook math
 
@@ -125,8 +128,8 @@ function executeOperation(
 
 ## Custom accounting & delta amplification
 
-- Uniswap v4 custom accounting lets hooks return deltas that directly adjust what the caller owes/receives. If the hook tracks credits internally, rounding residue can accumulate across many small operations **before** the final settlement happens.<sup>[[5]](#references)</sup>
-- This makes boundary/threshold abuse stronger: the attacker can alternate `swap → withdraw → swap` in the same tx, forcing the hook to recompute deltas on slightly different state while all balances are still pending.
+- Uniswap v4 custom accounting lets hooks return deltas that directly adjust what the caller owes/receives. If the hook tracks credits internally, rounding residue can accumulate across many small operations **before** the final settlement happens.<sup>[[4]](#references)</sup>
+- If the hook exposes a compatible withdrawal path, an attacker can alternate `swap → withdraw → swap` within the same PoolManager unlock callback, forcing the hook to recompute deltas on slightly different state while balances remain pending until the unlock settles.<sup>[[4]](#references)[[10]](#references)</sup>
 - When reviewing hooks, always trace how BalanceDelta/HookDelta is produced and settled. A single biased rounding in one branch can become a compounding credit when deltas are repeatedly re‑computed.
 
 ## Defensive guidance
@@ -143,14 +146,14 @@ function executeOperation(
 
 ## Case study: Bunni V2 (2025‑09‑02)
 
-- Protocol: Bunni V2 (Uniswap v4 hook) with an LDF applied per swap to rebalance.<sup>[[7]](#references)</sup>
-- Affected pools: USDC/USDT on Ethereum and weETH/ETH on Unichain, totaling about $8.4M.<sup>[[1]](#references)[[2]](#references)</sup>
-- Step 1 (price push): the attacker flash‑borrowed ~3M USDT and swapped to push the tick to ~5000, shrinking the **active** USDC balance down to ~28 wei.<sup>[[7]](#references)</sup>
-- Step 2 (rounding drain): 44 tiny withdrawals exploited floor rounding in `BunniHubLogic::withdraw()` to reduce the active USDC balance from 28 wei to 4 wei (‑85.7%) while only a tiny fraction of LP shares was burned. Total liquidity was underestimated by ~84.4%.<sup>[[2]](#references)[[7]](#references)</sup>
-- Step 3 (liquidity rebound sandwich): a large swap moved the tick to ~839,189 (1 USDC ≈ 2.77e36 USDT). Liquidity estimates flipped and increased by ~16.8%, enabling a sandwich where the attacker swapped back at the inflated price and exited with profit.<sup>[[7]](#references)</sup>
-- Fix identified in the post‑mortem: change the idle‑balance update to round **up** so repeated micro‑withdrawals can’t ratchet the pool’s active balance downward.<sup>[[7]](#references)</sup>
+- Protocol: Bunni V2, a Uniswap v4 hook using a Liquidity Density Function (LDF) to compute token density and total-liquidity estimates.<sup>[[1]](#references)[[2]](#references)</sup>
+- Affected pools: USDC/USDT on Ethereum and weETH/ETH on Unichain, totaling about $8.4M.<sup>[[1]](#references)</sup>
+- Step 1 (price push): the attacker flash-borrowed ~3M USDT and swapped to push the tick to ~5000, shrinking the **active** USDC balance down to ~28 wei.<sup>[[1]](#references)</sup>
+- Step 2 (rounding drain): 44 tiny withdrawals exploited floor rounding in `BunniHubLogic::withdraw()` to reduce the active USDC balance from 28 wei to 4 wei (-85.7%) while only a tiny fraction of LP shares was burned. Total liquidity decreased by ~84.4%.<sup>[[1]](#references)[[2]](#references)</sup>
+- Step 3 (liquidity rebound sandwich): a large swap moved the tick to ~839,189 (1 USDC ≈ 2.77e36 USDT). Liquidity estimates flipped and increased by ~16.8%, enabling a sandwich where the attacker swapped back at the inflated price and exited with profit.<sup>[[1]](#references)</sup>
+- Fix identified in the post-mortem: change the idle-balance update to round **up** so repeated micro-withdrawals no longer ratchet the pool’s active balance downward.<sup>[[1]](#references)</sup>
 
-Simplified vulnerable line (and post‑mortem fix)<sup>[[7]](#references)</sup>
+Simplified vulnerable line (and post‑mortem fix).<sup>[[1]](#references)</sup>
 ```solidity
 // BunniHubLogic::withdraw() idle balance update (simplified)
 uint256 newBalance = balance - balance.mulDiv(shares, currentTotalSupply);
@@ -168,14 +171,19 @@ uint256 newBalance = balance - balance.mulDivUp(shares, currentTotalSupply);
 
 ## References
 
-- [1] [Bunni V2 Exploit: $8.3M Drained via Liquidity Flaw (summary)](https://quillaudits.medium.com/bunni-v2-exploit-8-3m-drained-50acbdcd9e7b)
+- [1] [Bunni Exploit Post Mortem (Sep 2025)](https://blog.bunni.xyz/posts/exploit-post-mortem/)
 - [2] [Bunni V2 Exploit: Full Hack Analysis](https://www.quillaudits.com/blog/hack-analysis/bunni-v2-exploit)
-- [3] [Uniswap v4 background (QuillAudits research)](https://www.quillaudits.com/research/uniswap-development)
-- [4] [Liquidity mechanics in Uniswap v4 core](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/liquidity-mechanics-in-uniswap-v4-core)
-- [5] [Swap mechanics in Uniswap v4 core](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/swap-mechanics-in-uniswap-v4-core)
-- [6] [Uniswap v4 Hooks and Security Considerations](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/uniswap-v4-hooks-and-security)
-- [7] [Bunni Exploit Post Mortem (Sep 2025)](https://blog.bunni.xyz/posts/exploit-post-mortem/)
-- [8] [Uniswap v4 Core Whitepaper](https://app.uniswap.org/whitepaper-v4.pdf)
+- [3] [Bunni V2 Exploit: $8.3M Drained via Liquidity Flaw (summary)](https://quillaudits.medium.com/bunni-v2-exploit-8-3m-drained-50acbdcd9e7b)
+- [4] [Uniswap v4 Core Whitepaper](https://app.uniswap.org/whitepaper-v4.pdf)
+- [5] [Uniswap v4 background (QuillAudits research)](https://www.quillaudits.com/research/uniswap-development)
+- [6] [Liquidity mechanics in Uniswap v4 core](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/liquidity-mechanics-in-uniswap-v4-core)
+- [7] [Swap mechanics in Uniswap v4 core](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/swap-mechanics-in-uniswap-v4-core)
+- [8] [Uniswap v4 Hooks and Security Considerations](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/uniswap-v4-hooks-and-security)
+- [9] [Uniswap v4 core Pool.sol](https://github.com/Uniswap/v4-core/blob/main/src/libraries/Pool.sol)
+- [10] [Uniswap v4 core PoolManager.sol](https://github.com/Uniswap/v4-core/blob/main/src/PoolManager.sol)
+- [11] [Uniswap v4 SwapParams](https://github.com/Uniswap/v4-core/blob/main/src/types/PoolOperation.sol)
+- [12] [Uniswap v4 core SqrtPriceMath.sol](https://github.com/Uniswap/v4-core/blob/main/src/libraries/SqrtPriceMath.sol)
+- [13] [Uniswap v4 core TickMath.sol](https://github.com/Uniswap/v4-core/blob/main/src/libraries/TickMath.sol)
+- [14] [Uniswap v4 PoolKey](https://github.com/Uniswap/v4-core/blob/main/src/types/PoolKey.sol)
 
 {{#include ../../banners/hacktricks-training.md}}
-

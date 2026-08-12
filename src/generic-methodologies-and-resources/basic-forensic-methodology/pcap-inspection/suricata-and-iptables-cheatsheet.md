@@ -6,13 +6,15 @@
 
 ### Chains
 
-In iptables, lists of rules known as chains are processed sequentially. Among these, three primary chains are universally present, with additional ones like NAT being potentially supported depending on the system's capabilities.
+In iptables, each chain is a sequential list of packet-matching rules. The default `filter` table has the built-in `INPUT`, `FORWARD`, and `OUTPUT` chains; other tables, such as `nat`, may be available depending on kernel configuration and loaded modules.<sup>[[1]](#references)</sup>
 
 - **Input Chain**: Utilized for managing the behavior of incoming connections.
 - **Forward Chain**: Employed for handling incoming connections that are not destined for the local system. This is typical for devices acting as routers, where the data received is meant to be forwarded to another destination. This chain is relevant primarily when the system is involved in routing, NATing, or similar activities.
 - **Output Chain**: Dedicated to the regulation of outgoing connections.
 
 These chains ensure the orderly processing of network traffic, allowing for the specification of detailed rules governing the flow of data into, through, and out of a system.
+
+The string-match examples use the standard `string` match; matching is case-sensitive unless `--icase` is supplied, and `--algo` selects the BM or KMP search strategy.<sup>[[2]](#references)</sup>
 
 ```bash
 # Delete all rules
@@ -55,8 +57,10 @@ iptables-restore < /etc/sysconfig/iptables
 
 ### Install & Config
 
+Package commands below are distribution- and release-specific; the official installation guide documents the Ubuntu PPA, Debian backports, RPM packages, and systemd service management.<sup>[[3]](#references)</sup>
+
 ```bash
-# Install details from: https://suricata.readthedocs.io/en/suricata-6.0.0/install.html#install-binary-packages
+# Package installation details vary by distribution and release; see References.
 # Ubuntu
 add-apt-repository ppa:oisf/suricata-stable
 apt-get update
@@ -73,7 +77,7 @@ yum install epel-release
 yum install suricata
 
 # Get rules
-suricata-update
+suricata-update update-sources
 suricata-update list-sources #List sources of the rules
 suricata-update enable-source et/open #Add et/open rulesets
 suricata-update
@@ -84,20 +88,17 @@ rule-files:
 
 # Run
 ## Add rules in /etc/suricata/rules/suricata.rules
-systemctl suricata start
+systemctl start suricata
 suricata -c /etc/suricata/suricata.yaml -i eth0
 
 
 # Reload rules
 suricatasc -c ruleset-reload-nonblocking
-## or set the follogin in /etc/suricata/suricata.yaml
-detect-engine:
-  - rule-reload: true
 
 # Validate suricata config
 suricata -T -c /etc/suricata/suricata.yaml -v
 
-# Configure suricata as IPs
+# Configure Suricata as an IPS
 ## Config drop to generate alerts
 ## Search for the following lines in /etc/suricata/suricata.yaml and remove comments:
 - drop:
@@ -121,13 +122,15 @@ Type=simple
 systemctl daemon-reload
 ```
 
+The `suricata-update` sequence follows Suricata's documented workflow for fetching, listing, enabling, and loading rule sources.<sup>[[4]](#references)</sup> The `suricatasc` command above is a documented non-blocking Unix-socket rule-reload method.<sup>[[8]](#references)</sup> The NFQUEUE rules send local input/output traffic to Suricata, while `-q 0` selects queue 0 for inline processing.<sup>[[7]](#references)</sup>
+
 ### Rules Definitions
 
-[From the docs:](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) A rule/signature consists of the following:
+A Suricata rule/signature has three parts.<sup>[[5]](#references)</sup>
 
-- The **action**, determines what happens when the signature matches.
-- The **header**, defines the protocol, IP addresses, ports and direction of the rule.
-- The **rule options**, define the specifics of the rule.
+- The **action** specifies what happens when the signature matches.
+- The **header** selects the protocol, IP addresses, ports, and direction.
+- The **rule options** define the match-specific details.
 
 ```bash
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
@@ -149,11 +152,11 @@ alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing 
 - udp
 - icmp
 - ip (ip stands for ‘all’ or ‘any’)
-- _layer7 protocols_: http, ftp, tls, smb, dns, ssh... (more in the [**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html))
+- _layer7 protocols_: http, ftp, tls, smb, dns, ssh, and others.<sup>[[5]](#references)</sup>
 
 #### Source and Destination Addresses
 
-It supports IP ranges, negations and a list of addresses:
+Suricata supports IP ranges, negation, and grouped address lists.<sup>[[5]](#references)</sup>
 
 | Example                       | Meaning                                  |
 | ----------------------------- | ---------------------------------------- |
@@ -165,7 +168,7 @@ It supports IP ranges, negations and a list of addresses:
 
 #### Source and Destination Ports
 
-It supports port ranges, negations and lists of ports
+Suricata supports port ranges, negation, and lists of ports.<sup>[[5]](#references)</sup>
 
 | Example         | Meaning                                |
 | --------------- | -------------------------------------- |
@@ -179,7 +182,7 @@ It supports port ranges, negations and lists of ports
 
 #### Direction
 
-It's possible to indicate the direction of the communication rule being applied:
+Suricata rules can specify the communication direction being evaluated.<sup>[[5]](#references)</sup>
 
 ```
 source -> destination
@@ -188,7 +191,7 @@ source <> destination  (both directions)
 
 #### Keywords
 
-There are **hundreds of options** available in Suricata to search for the **specific packet** you are looking for, here it will be mentioned if something interesting is found. Check the [**documentation** ](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html)for more!
+The examples below use Suricata's rule keywords, including metadata, IP, ICMP, payload, and application-layer options; the official rule documentation catalogs these families and their syntax.<sup>[[6]](#references)[[9]](#references)</sup>
 
 ```bash
 # Meta Keywords
@@ -216,6 +219,7 @@ reject tcp any any -> any any (msg: "php-rce"; content: "eval"; nocase; metadata
 
 # Replaces string
 ## Content and replace string must have the same length
+## The replace modifier is IPS-only and operates on individual packets
 content:"abc"; replace: "def"
 alert tcp any any -> any any (msg: "flag replace"; content: "CTF{a6st"; replace: "CTF{u798"; nocase; sid:100; rev: 1;)
 ## The replace works in both input and output packets
@@ -230,5 +234,17 @@ drop tcp any any -> any any (msg:"regex"; pcre:"/CTF\{[\w]{3}/i"; sid:10001;)
 ## Drop by port
 drop tcp any any -> any 8000 (msg:"8000 port"; sid:1000;)
 ```
+
+## References
+
+- [1] [iptables(8) — Linux manual page](https://man7.org/linux/man-pages/man8/iptables.8.html)
+- [2] [iptables-extensions(8) — Linux manual page](https://man7.org/linux/man-pages/man8/iptables-extensions.8.html)
+- [3] [3. Installation — Suricata 7.0.14 documentation](https://docs.suricata.io/en/suricata-7.0.14/install.html)
+- [4] [9.1. Rule Management with Suricata-Update — Suricata 8.0.1 documentation](https://docs.suricata.io/en/suricata-8.0.1/rule-management/suricata-update.html)
+- [5] [8.1. Rules Format — Suricata 8.0.3 documentation](https://docs.suricata.io/en/suricata-8.0.3/rules/intro.html)
+- [6] [8.7. Payload Keywords — Suricata 8.0.3 documentation](https://docs.suricata.io/en/suricata-8.0.3/rules/payload-keywords.html)
+- [7] [15. Setting up IPS/inline for Linux — Suricata 7.0.15 documentation](https://docs.suricata.io/en/suricata-7.0.15/setting-up-ipsinline-for-linux.html)
+- [8] [9.3. Rule Reloads — Suricata 7.0.14 documentation](https://docs.suricata.io/en/suricata-7.0.14/rule-management/rule-reload.html)
+- [9] [8. Suricata Rules — Suricata 8.0.3 documentation](https://docs.suricata.io/en/suricata-8.0.3/rules/index.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

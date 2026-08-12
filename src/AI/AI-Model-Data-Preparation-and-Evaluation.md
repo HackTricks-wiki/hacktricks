@@ -19,7 +19,7 @@ Data collection involves gathering data from various sources, which can include:
 
 Depending on the goal of the machine learning project, the data will be extracted and collected from relevant sources to ensure it is representative of the problem domain.
 
-## Data Cleaning
+## Data Cleaning <sup>[[1]](#references)</sup><sup>[[2]](#references)</sup>
 
 Data cleaning is the process of identifying and correcting errors or inconsistencies in the dataset. This step is essential to ensure the quality of the data used for training machine learning models. Key tasks in data cleaning include:
 - **Handling Missing Values**: Identifying and addressing missing data points. Common strategies include:
@@ -32,28 +32,33 @@ Data cleaning is the process of identifying and correcting errors or inconsisten
 ### Example of data cleaning
 
 ```python
+import re
+
+import numpy as np
 import pandas as pd
+from sklearn.impute import KNNImputer, SimpleImputer
+
 # Load the dataset
-data = pd.read_csv('data.csv')
+df = pd.read_csv('data.csv')
 
 # Finding invalid values based on a specific function
-def is_valid_possitive_int(num):
+def is_valid_positive_int(num):
     try:
         num = int(num)
         return 1 <= num <= 31
     except ValueError:
         return False
 
-invalid_days = data[~data['days'].astype(str).apply(is_valid_positive_int)]
+invalid_days = df[~df['days'].astype(str).apply(is_valid_positive_int)]
 
 ## Dropping rows with invalid days
-data = data.drop(invalid_days.index, errors='ignore')
+df = df.drop(invalid_days.index, errors='ignore')
 
 
 
 # Set "NaN" values to a specific value
 ## For example, setting NaN values in the 'days' column to 0
-data['days'] = pd.to_numeric(data['days'], errors='coerce')
+df['days'] = pd.to_numeric(df['days'], errors='coerce')
 
 ## For example, set "NaN" to not ips
 def is_valid_ip(ip):
@@ -82,23 +87,23 @@ df[numeric_cols] = knn_imputer.fit_transform(df[numeric_cols])
 
 
 # Filling missing values
-data.fillna(data.mean(), inplace=True)
+df.fillna(df.mean(numeric_only=True), inplace=True)
 
 # Removing duplicates
-data.drop_duplicates(inplace=True)
+df.drop_duplicates(inplace=True)
 # Filtering outliers using Z-score
 from scipy import stats
-z_scores = stats.zscore(data.select_dtypes(include=['float64', 'int64']))
-data = data[(z_scores < 3).all(axis=1)]
+z_scores = np.abs(stats.zscore(df.select_dtypes(include=['float64', 'int64']), nan_policy='omit'))
+df = df[(z_scores < 3).all(axis=1)]
 ```
 
-## Data Transformation
+## Data Transformation <sup>[[1]](#references)</sup>
 
 Data transformation involves converting the data into a format suitable for modeling. This step may include:
-- **Normalization & Standarization**: Scaling numerical features to a common range, typically [0, 1] or [-1, 1]. This helps improve the convergence of optimization algorithms.
+- **Normalization and standardization**: Scaling numerical features to a common range, typically [0, 1] or [-1, 1]. This can improve the convergence of optimization algorithms.
     - **Min-Max Scaling**: Rescaling features to a fixed range, usually [0, 1]. This is done using the formula: `X' = (X - X_{min}) / (X_{max} - X_{min})`
     - **Z-Score Normalization**: Standardizing features by subtracting the mean and dividing by the standard deviation, resulting in a distribution with a mean of 0 and a standard deviation of 1. This is done using the formula: `X' = (X - μ) / σ`, where μ is the mean and σ is the standard deviation.
-    - **Skeyewness and Kurtosis**: Adjusting the distribution of features to reduce skewness (asymmetry) and kurtosis (peakedness). This can be done using transformations like logarithmic, square root, or Box-Cox transformations. For example, if a feature has a skewed distribution, applying a logarithmic transformation can help normalize it.
+    - **Skewness and kurtosis**: Adjusting feature distributions with transformations such as logarithm, square root, or Box-Cox. For example, a logarithmic transformation can reduce positive skew.
     - **String Normalization**: Converting strings to a consistent format, such as:
       - Lowercasing
       - Removing special characters (keeping the relevant ones)
@@ -124,7 +129,7 @@ Data transformation involves converting the data into a format suitable for mode
 
 - **Feature Engineering**: Creating new features from existing ones to enhance the model's predictive power. This can involve combining features, extracting date/time components, or applying domain-specific transformations.
 
-## Data Splitting
+## Data Splitting <sup>[[3]](#references)</sup>
 
 Data splitting involves dividing the dataset into separate subsets for training, validation, and testing. This is essential to evaluate the model's performance on unseen data and prevent overfitting. Common strategies include:
 - **Train-Test Split**: Dividing the dataset into a training set (typically 60-80% of the data), a validation set (10-15% of the data) to tune hyperparameters, and a test set (10-15% of the data). The model is trained on the training set and evaluated on the test set.
@@ -133,7 +138,7 @@ Data splitting involves dividing the dataset into separate subsets for training,
 - **Time Series Split**: For time series data, the dataset is split based on time, ensuring that the training set contains data from earlier time periods and the test set contains data from later periods. This helps evaluate the model's performance on future data.
 - **K-Fold Cross-Validation**: Splitting the dataset into K subsets (folds) and training the model K times, each time using a different fold as the test set and the remaining folds as the training set. This helps ensure that the model is evaluated on different subsets of data, providing a more robust estimate of its performance.
 
-## Model Evaluation
+## Model Evaluation <sup>[[4]](#references)</sup>
 
 Model evaluation is the process of assessing the performance of a machine learning model on unseen data. It involves using various metrics to quantify how well the model generalizes to new data. Common evaluation metrics include:
 
@@ -235,7 +240,13 @@ The confusion matrix is a table that summarizes the performance of a classificat
 - **False Positive (FP)**: The model incorrectly predicted the positive class (Type I error).
 - **False Negative (FN)**: The model incorrectly predicted the negative class (Type II error).
 
-The confusion matrix can be used to calculate various evaluation metrics, such as accuracy, precision, recall, and F1 score.
+The confusion matrix can be used to calculate evaluation metrics such as accuracy, precision, recall, and F1 score.
+
+## References
+
+- [1] [scikit-learn - Preprocessing data](https://scikit-learn.org/stable/modules/preprocessing.html)
+- [2] [scikit-learn - Imputation of missing values](https://scikit-learn.org/stable/modules/impute.html)
+- [3] [scikit-learn - Cross-validation: evaluating estimator performance](https://scikit-learn.org/stable/modules/cross_validation.html)
+- [4] [scikit-learn - Metrics and scoring](https://scikit-learn.org/stable/modules/model_evaluation.html)
 
 {{#include ../banners/hacktricks-training.md}}
-

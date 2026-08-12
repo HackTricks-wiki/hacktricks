@@ -174,7 +174,7 @@ void myconstructor(int argc, const char **argv)
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Copy `$HOME/Dowloads` to `/tmp/downloads`.
+Copy `$HOME/Downloads` to `/tmp/downloads`.
 
 ```bash
 cp -r "$HOME/Downloads" "/tmp/downloads"

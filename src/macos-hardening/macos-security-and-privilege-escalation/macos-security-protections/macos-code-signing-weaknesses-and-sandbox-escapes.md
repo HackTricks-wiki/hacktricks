@@ -113,6 +113,10 @@ if (kr == KERN_SUCCESS) {
 
 ## No Library Validation + DYLD Environment
 
+### Runtime Library-Validation Clearing
+
+The private entitlement **`com.apple.private.security.clear-library-validation`** does not disable library validation at process launch. Instead, it permits the process to call `csops(..., CS_OPS_CLEAR_LV, ...)` on itself at runtime. XNU then clears `CS_REQUIRE_LV | CS_FORCED_LV`, provided the caller has the entitlement and satisfies the handler's additional checks. Consequently, a process may become a viable library-injection target only after it reaches the code path that clears library validation.<sup>[[4]](#references)[[5]](#references)</sup>
+
 ### The Deadly Combination
 
 When a binary has **both**:<sup>[[3]](#references)</sup>

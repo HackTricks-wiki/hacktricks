@@ -256,7 +256,7 @@ com.apple.macl:
 00000040  00 00 00 00 00 00 00 00                          |........|
 00000048
 com.apple.quarantine: 00C1;607842eb;Brave;F643CD5F-6071-46AB-83AB-390BA944DEC5
-# 00c1 -- It has been allowed to eexcute this file (QTN_FLAG_USER_APPROVED = 0x0040)
+# 00c1 -- The user has been allowed to execute this file (QTN_FLAG_USER_APPROVED = 0x0040)
 # 607842eb -- Timestamp
 # Brave -- App
 # F643CD5F-6071-46AB-83AB-390BA944DEC5 -- UID assigned to the file downloaded
@@ -500,7 +500,7 @@ It was discovered that **Google Chrome wasn't setting the quarantine attribute**
 
 ### [CVE-2023-27951](https://redcanary.com/blog/gatekeeper-bypass-vulnerabilities/)
 
-AppleDouble file formats store the attributes of a file in a separate file starting by `._`, this helps to copy dile attributes **across macOS machines**. However, it was noticed that after decompressing an AppleDouble file, the file starting with `._` **wasn't given the quarantine attribute**.<sup>[[11]](#references)</sup>
+AppleDouble stores a file's attributes in a separate file whose name starts with `._`; this helps copy file attributes **across macOS machines**. However, after decompressing an AppleDouble file, the file starting with `._` **wasn't given the quarantine attribute**.<sup>[[11]](#references)</sup>
 
 ```bash
 mkdir test
@@ -509,7 +509,7 @@ echo b > test/b
 echo ._a > test/._a
 aa archive -d test/ -o test.aar
 
-# If you downloaded the resulting test.aar and decompress it, the file test/._a won't have a quarantitne attribute
+# If you download and decompress the resulting test.aar, test/._a won't have a quarantine attribute
 ```
 
 Being able to create a file that won't have the quarantine attribute set, it was **possible to bypass Gatekeeper.** The trick was to **create a DMG file application** using the AppleDouble name convention (start it with `._`) and create a **visible file as a sym link to this hidden** file without the quarantine attribute.\

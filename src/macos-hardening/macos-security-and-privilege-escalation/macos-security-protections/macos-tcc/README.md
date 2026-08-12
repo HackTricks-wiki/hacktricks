@@ -41,7 +41,7 @@ The allowances/denies then stored in some TCC databases:
 - There is a **third** TCC database in **`/var/db/locationd/clients.plist`** to indicate clients allowed to **access location services**.
 - The SIP protected file **`/Users/carlospolop/Downloads/REG.db`** (also protected from read access with TCC), contains the **location** of all the **valid TCC databases**.
 - The SIP protected file **`/Users/carlospolop/Downloads/MDMOverrides.plist`** (also protected from read access with TCC), contains more TCC granted permissions.
-- The SIP protected file **`/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist`** (bu readable by anyone) is an allow list of applications that require a TCC exception.
+- The SIP-protected file **`/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist`** (but readable by anyone) is an allow list of applications that require a TCC exception.
 
 > [!TIP]
 > The TCC database in **iOS** is in **`/private/var/mobile/Library/TCC/TCC.db`**
@@ -580,7 +580,7 @@ You could abuse this to **write your own user TCC database**.
 > [!WARNING]
 > With this permission you will be able to **ask finder to access TCC restricted folders** and give you the files, but afaik you **won't be able to make Finder execute arbitrary code** to fully abuse his FDA access.
 >
-> Therefore, you won't be able to abuse the full FDA habilities.
+> Therefore, you won't be able to abuse the full FDA abilities.
 
 This is the TCC prompt to get Automation privileges over Finder:
 
@@ -797,5 +797,4 @@ macos-tcc-bypasses/
 - [5] [Change home directory and bypass TCC aka CVE-2020-27937](https://wojciechregula.blog/post/change-home-directory-and-bypass-tcc-aka-cve-2020-27937/)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
 

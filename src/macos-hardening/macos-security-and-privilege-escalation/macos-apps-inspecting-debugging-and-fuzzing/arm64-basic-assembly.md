@@ -5,7 +5,7 @@
 
 ## **Exception Levels - EL (ARM64v8)**
 
-In ARMv8 architecture, execution levels, known as Exception Levels (ELs), define the privilege level and capabilities of the execution environment. There are four exception levels, ranging from EL0 to EL3, each serving a different purpose:
+In the Armv8 architecture, Exception Levels (ELs) define the privilege and execution environment. The architecture defines four levels, from EL0 to EL3, although a particular system need not use every level in the way described by a generic example. <sup>[[5]](#references)</sup>
 
 1. **EL0 - User Mode**:
    - This is the least-privileged level and is used for executing regular application code.
@@ -21,15 +21,14 @@ In ARMv8 architecture, execution levels, known as Exception Levels (ELs), define
 4. **EL3 - Secure Monitor Mode**:
    - This is the most privileged level and is often used for secure booting and trusted execution environments.
    - EL3 can manage and control accesses between secure and non-secure states (such as secure boot, trusted OS, etc.).
-   - It was use for KPP (Kernel Patch Protection) in macOS, but it's not used anymore.
-   - EL3 is not used anymore by Apple.
-    - The transition to EL3 is typically done using the `SMC` (Secure Monitor Call) instruction.
+   - Software requests a transition to the secure monitor with the `SMC` (Secure Monitor Call) instruction when that interface is implemented.
+   - Older Apple-security material often discussed **Kernel Patch Protection (KPP)** together with privileged monitor-level enforcement. That is useful historical context, but the blanket claims that Apple no longer uses EL3 or that every Apple platform implements KPP at EL3 are not portable across generations. Current Apple documentation instead describes protections such as Kernel Integrity Protection, System Coprocessor Integrity Protection, SPTM, and TXM; verify the SoC and OS version being analyzed. <sup>[[6]](#references)</sup>
 
 The use of these levels allows for a structured and secure way to manage different aspects of the system, from user applications to the most privileged system software. ARMv8's approach to privilege levels helps in effectively isolating different system components, thereby enhancing the security and robustness of the system.
 
 ## **Registers (ARM64v8)**
 
-ARM64 has **31 general-purpose registers**, labeled `x0` through `x30`. Each can store a **64-bit** (8-byte) value. For operations that require only 32-bit values, the same registers can be accessed in a 32-bit mode using the names w0 through w30.
+ARM64 has **31 general-purpose registers**, labeled `x0` through `x30`. Each can store a **64-bit** (8-byte) value. For 32-bit operations, the same registers are addressed as `w0` through `w30`. <sup>[[5]](#references)</sup>
 
 1. **`x0`** to **`x7`** - These are typically used as scratch registers and for passing parameters to subroutines.
    - **`x0`** also carries the return data of a function
@@ -71,7 +70,7 @@ They are often used to store the **base address of the thread-local storage** re
 
 ### **PSTATE**
 
-**PSTATE** contains several process components serialized into the operating-system-visible **`SPSR_ELx`** special register, being X the **permission** **level of the triggered** exception (this allows to recover the process state when the exception ends).\
+**PSTATE** contains processor-state fields. On an exception, relevant state is saved in **`SPSR_ELx`**, where `x` identifies the exception level handling the exception, so the state can be restored on return.\
 These are the accessible fields:
 
 <figure><img src="../../../images/image (1196).png" alt=""><figcaption></figcaption></figure>
@@ -365,7 +364,7 @@ For example the call `gettimeofdate` reads the value of `timeval` directly from 
 
 ### objc_msgSend
 
-It's super common to find this function used in Objective-C or Swift programs. This function allows to call a method of an objective-C object.
+This function is common in Objective-C and Swift binaries because it dispatches a message to an Objective-C object.
 
 Parameters ([more info in the docs](https://developer.apple.com/documentation/objectivec/1456712-objc_msgsend)):<sup>[[4]](#references)</sup>
 
@@ -578,7 +577,7 @@ sh_path: .asciz "/bin/sh"
 
 #### Read with cat
 
-The goal is to execute `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`, so the second argument (x1) is an array of params (which in memory these means a stack of the addresses).
+This example invokes `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`. Register `x1` points to the null-terminated argument vector containing pointers to the two strings.
 
 ```armasm
 .section __TEXT,__text     ; Begin a new section of type __TEXT and name __text
@@ -815,5 +814,7 @@ call_execve:
 - [2] [daem0nc0re/macOS_ARM64_Shellcode - bindshell.s](https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s)
 - [3] [daem0nc0re/macOS_ARM64_Shellcode - reverseshell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s)
 - [4] [Apple Developer - 712 Objc Msgsend](https://developer.apple.com/documentation/objectivec/1456712-objc_msgsend)
+- [5] [Arm - Arm Architecture Reference Manual for A-profile architecture](https://developer.arm.com/documentation/ddi0487/latest)
+- [6] [Apple Platform Security - Operating system integrity](https://support.apple.com/guide/security/sec8b776536b/web)
 
 {{#include ../../../banners/hacktricks-training.md}}

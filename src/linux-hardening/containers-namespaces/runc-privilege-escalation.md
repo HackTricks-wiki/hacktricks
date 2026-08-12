@@ -12,7 +12,7 @@ If you want to learn more about **runc** check the following page:
 
 ## PE
 
-If you find that `runc` is installed in the host you may be able to **run a container mounting the root / folder of the host**.
+If `runc` is available to a rootful process on the host, you can use an OCI bundle whose mount configuration recursively bind-mounts the host's `/` at `/` inside the container, exposing the host filesystem in that mount namespace.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 
 ```bash
 runc -help #Get help and see if runc is intalled
@@ -39,6 +39,12 @@ runc run demo
 ```
 
 > [!CAUTION]
-> This won't always work as the default operation of runc is to run as root, so running it as an unprivileged user simply cannot work (unless you have a rootless configuration). Making a rootless configuration the default isn't generally a good idea because there are quite a few restrictions inside rootless containers that don't apply outside rootless containers.
+> The documented `runc run` workflow is rootful: runc's own examples label it "run as root." An unprivileged user needs a rootless configuration such as `runc spec --rootless`, and runc documents that user namespaces must be enabled for that mode.<sup>[[1]](#references)</sup>
+
+## References
+
+- [1] [runc: CLI tool for spawning and running containers](https://github.com/opencontainers/runc#using-runc)
+- [2] [OCI Runtime Specification: Mounts](https://github.com/opencontainers/runtime-spec/blob/main/config.md#mounts)
+- [3] [Shared Subtrees](https://docs.kernel.org/filesystems/sharedsubtree.html)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -6,7 +6,7 @@
 
 > So you were said that everything belonging to some company is inside the scope, and you want to figure out what this company actually owns.
 
-The goal of this phase is to obtain all the **companies owned by the main company** and then all the **assets** of these companies. To do so, we are going to:
+The goal of this phase is to obtain all the **companies owned by the main company** and then all the **assets** of these companies. To do so, we are going to:<sup>[[1]](#references)</sup>
 
 1. Find the acquisitions of the main company, this will give us the companies inside the scope.
 2. Find the ASN (if any) of each company, this will give us the IP ranges owned by each company
@@ -134,11 +134,11 @@ cat my_targets.txt | xargs -I %% bash -c 'echo "http://%%/favicon.ico"' > target
 python3 favihash.py -f https://target/favicon.ico -t targets.txt -s
 ```
 
-![favihash - discover domains with the same favicon icon hash](https://www.infosecmatter.com/wp-content/uploads/2020/07/favihash.jpg)
-
 Simply said, favihash will allow us to discover domains that have the same favicon icon hash as our target.
 
-Moreover, you can also search technologies using the favicon hash as explained in [**this blog post**](https://medium.com/@Asm0d3us/weaponizing-favicon-ico-for-bugbounties-osint-and-what-not-ace3c214e139). That means that if you know the **hash of the favicon of a vulnerable version of a web tech** you can search if in shodan and **find more vulnerable places**:<sup>[[5]](#references)</sup>
+![favihash output used to discover domains with the same favicon hash](https://www.infosecmatter.com/wp-content/uploads/2020/07/favihash.jpg)<sup>[[11]](#references)</sup>
+
+Use a known favicon hash as a Shodan or FOFA pivot to find other exposed instances of the same technology.<sup>[[5]](#references)</sup>
 
 ```bash
 shodan search org:"Target" http.favicon.hash:116323821 --fields ip_str,port --separator " " | awk '{print $1":"$2}'
@@ -163,17 +163,17 @@ def fav_hash(url):
 
 You can also get favicon hashes at scale with [**httpx**](https://github.com/projectdiscovery/httpx) (`httpx -l targets.txt -favicon`) and then pivot in Shodan/Censys.
 
-Useful things to remember when using favicon fingerprints:<sup>[[3]](#references)[[4]](#references)</sup>
+Treat favicon fingerprints as leads and validate them with surrounding signals.<sup>[[3]](#references)[[4]](#references)</sup>
 
-- **Treat the hash as an indicator, not proof**: MMH3 is compact and collisions are possible; operators can also replace favicons or intentionally reuse a misleading icon.
-- **Probe more than** `/favicon.ico`: many products expose icons in framework/build paths or via `manifest.json`, `site.webmanifest`, `browserconfig.xml`, `apple-touch-icon*`, inline `data:` URLs, or HTML `<link rel="icon">` tags. The path itself can fingerprint a product family.
-- **Static files are often reachable when the app is not**: WAF/SSO/IdP controls may protect dynamic routes but still expose static icons. Always request the favicon directly and review `ETag`, `Last-Modified`, redirects and cache headers for weak version/build hints.
-- **Validate matches with surrounding signals**: compare title, HTML/body hash, headers, TLS certificate subjects/SANs, Shodan/Censys components, and exposed ports before concluding that a favicon identifies a product.
-- **Cluster by HTML/body hash when pivoting at scale**: if most hosts sharing a favicon collapse into one page template, the fingerprint is stronger; if the same hash splits into many unrelated templates, prefer "generic/shared/honeypot" over a product label.
-- **Honeypot heuristic**: if the same favicon hash appears across many unrelated HTML signatures, random ports, and conflicting products, treat it as a probable honeypot or generic placeholder rather than a real product fingerprint.
-- **Use a 404 probe on ambiguous targets**: fetch a real page and a nonexistent path such as `/_favicon_probe_<8-hex>` in a browser. Matching hosting-provider/parking responses often explain shared favicons better than true product overlap.
-- **Bootstrap mappings from detection rules**: Nuclei templates and public favicon datasets can provide known `favicon` ↔ `product` ↔ `CPE` mappings that are useful for rapid triage after CVE disclosures.
-- **Coverage caveat**: Shodan-style datasets are IP-centric. CDN-fronted, SNI-routed, anycast, and domain-only surfaces may be undercounted, so a low hit count does **not** mean low real-world deployment.
+- **Treat the hash as an indicator, not proof**: MMH3 is compact; collisions, reused icons, and deliberate spoofing are possible.
+- **Probe more than** `/favicon.ico`: inspect framework/build paths, manifest files, `browserconfig.xml`, `site.webmanifest`, `apple-touch-icon*`, inline data URLs, and HTML `<link rel="icon">` tags.
+- **Static assets may remain reachable behind WAF/SSO/IdP controls**: request the icon directly and review `ETag`, `Last-Modified`, redirects, and cache headers.
+- **Validate matches with surrounding signals**: compare the title, HTML/body hash, headers, TLS certificate subjects/SANs, product components, and exposed ports.
+- **Cluster by HTML/body hash**: a consistent template strengthens the fingerprint; mixed templates suggest a generic or shared icon.
+- **Treat a hash appearing across unrelated signatures, ports, and products as a potential honeypot or placeholder.**
+- **On ambiguous targets, compare a real page with a nonexistent path** such as `/_favicon_probe_<8-hex>`; matching hosting or parking responses may explain the shared icon.
+- **Bootstrap triage from Nuclei detection rules or public datasets** that map favicon hashes to products and CPEs.
+- **Remember the IP-centric coverage gap**: CDN-fronted, SNI-routed, anycast, and domain-only surfaces may be missing from Shodan-like datasets.
 
 ### **Copyright / Uniq string**
 
@@ -188,8 +188,7 @@ It's common to have a cron job such as
 37 13 */10 * * certbot renew --post-hook "systemctl reload nginx"
 ```
 
-to renew the all the domain certificates on the server. This means that even if the CA used for this doesn't set the time it was generated in the Validity time, it's possible to **find domains belonging to the same company in the certificate transparency logs**.\
-Check out this [**writeup for more information**](https://swarm.ptsecurity.com/discovering-domains-via-a-time-correlation-attack/).<sup>[[6]](#references)</sup>
+to renew all certificates on a server at the same time. Correlating certificate timestamps or certificate-transparency log positions can reveal related domains.<sup>[[6]](#references)</sup>
 
 Also use **certificate transparency** logs directly:
 
@@ -205,13 +204,11 @@ Other useful tools are [**spoofcheck**](https://github.com/BishopFox/spoofcheck)
 
 ### **Passive Takeover**
 
-Apparently is common for people to assign subdomains to IPs that belongs to cloud providers and at some point **lose that IP address but forget about removing the DNS record**. Therefore, just **spawning a VM** in a cloud (like Digital Ocean) you will be actually **taking over some subdomains(s)**.
-
-[**This post**](https://kmsec.uk/blog/passive-takeover/) explains a store about it and propose a script that **spawns a VM in DigitalOcean**, **gets** the **IPv4** of the new machine, and **searches in Virustotal for subdomain records** pointing to it.<sup>[[7]](#references)</sup>
+An abandoned A record can become reachable when a cloud provider reassigns an IP. The referenced research demonstrates an opportunistic workflow that provisions an instance and correlates its address with passive DNS data; test takeover scenarios only within the authorized scope.<sup>[[7]](#references)</sup>
 
 ### **Other ways**
 
-**Note that you can use this technique to discover more domain names every time you find a new domain.**
+Repeat the applicable discovery pivots whenever you find a new domain: each result can expose additional certificate names, passive-DNS relationships, favicon matches, and organization identifiers that were not visible from the original seed.<sup>[[9]](#references)[[10]](#references)</sup>
 
 **Shodan**
 
@@ -508,7 +505,7 @@ cat subdomains.txt | dmut -d /tmp/words-permutations.txt -w 100 \
 
 #### Smart permutations generation
 
-- [**regulator**](https://github.com/cramppet/regulator): For more info read this [**post**](https://cramppet.github.io/regulator/index.html) but it will basically get the **main parts** from the **discovered subdomains** and will mix them to find more subdomains.<sup>[[8]](#references)</sup>
+- [**regulator**](https://github.com/cramppet/regulator): Learns regex-like patterns from discovered subdomains and generates candidate names to resolve.<sup>[[8]](#references)</sup>
 
 ```bash
 python3 main.py adobe.com adobe adobe.rules
@@ -524,15 +521,7 @@ echo www | subzuf facebook.com
 
 ### **Subdomain Discovery Workflow**
 
-Check this blog post I wrote about how to **automate the subdomain discovery** from a domain using **Trickest workflows** so I don't need to launch manually a bunch of tools in my computer:
-
-{{#ref}}
-https://trickest.com/blog/full-subdomain-discovery-using-workflow/
-{{#endref}}
-
-{{#ref}}
-https://trickest.com/blog/full-subdomain-brute-force-discovery-using-workflow/
-{{#endref}}
+Trickest workflow examples combine OSINT, DNS brute force, and permutation stages for repeatable subdomain enumeration.<sup>[[9]](#references)[[10]](#references)</sup>
 
 ### **VHosts / Virtual Hosts**
 
@@ -546,7 +535,7 @@ You can find some **VHosts in IPs using** [**HostHunter**](https://github.com/Sp
 
 If you suspect that some subdomain can be hidden in a web server you could try to brute force it:
 
-When the **IP redirects to a hostname** (name-based vhosts), fuzz the `Host` header directly and let ffuf **auto-calibrate** to highlight responses that differ from the default vhost:<sup>[[2]](#references)</sup>
+For name-based vhosts, fuzz the `Host` header and use ffuf's auto-calibration to filter the default response.<sup>[[2]](#references)</sup>
 
 ```bash
 ffuf -u http://10.10.10.10 -H "Host: FUZZ.example.com" \
@@ -693,11 +682,7 @@ You can use the **tool** [**Leakos**](https://github.com/carlospolop/Leakos) to 
 
 #### Github Dorks
 
-Check also this **page** for potential **github dorks** you could also search for in the organization you are attacking:
-
-{{#ref}}
-github-leaked-secrets.md
-{{#endref}}
+Check the [GitHub dorks and leaks page](github-leaked-secrets.md) for potential **GitHub dorks** to search in the organization.
 
 ### Pastes Leaks
 
@@ -718,11 +703,7 @@ If you find **valid leaked** credentials or API tokens, this is a very easy win.
 
 If you found that the company has **open-source code** you can **analyse** it and search for **vulnerabilities** on it.
 
-**Depending on the language** there are different **tools** you can use:
-
-{{#ref}}
-../../network-services-pentesting/pentesting-web/code-review-tools.md
-{{#endref}}
+**Depending on the language** there are different **tools** you can use; see the [source-code review tools](../../network-services-pentesting/pentesting-web/code-review-tools.md) list.
 
 There are also free services that allow you to **scan public repositories**, such as:
 
@@ -761,13 +742,16 @@ There are several tools out there that will perform part of the proposed actions
 
 ## References
 
-- [1] All free courses of [**@Jhaddix**](https://twitter.com/Jhaddix) like [**The Bug Hunter's Methodology v4.0 - Recon Edition**](https://www.youtube.com/watch?v=p4JgIu1mceI)
+- [1] [Jason Haddix – The Bug Hunter's Methodology v4.0: Recon Edition](https://www.youtube.com/watch?v=p4JgIu1mceI)
 - [2] [0xdf – HTB: Guardian](https://0xdf.gitlab.io/2026/02/28/htb-guardian.html)
-- [3] [Bishop Fox – On Favicons: From Browser Icons to Attack Surface Intelligence](https://bishopfox.com/blog/on-favicons-from-browser-icons-to-attack-surface-intelligence)
+- [3] [Aaron Ringo (Bishop Fox) – On Favicons: From Browser Icons to Attack Surface Intelligence](https://bishopfox.com/blog/on-favicons-from-browser-icons-to-attack-surface-intelligence)
 - [4] [BishopFox/Favicons](https://github.com/BishopFox/Favicons)
-- [5] [@Asm0d3us - Weaponizing Favicon Ico For Bugbounties Osint And What Not](https://medium.com/@Asm0d3us/weaponizing-favicon-ico-for-bugbounties-osint-and-what-not-ace3c214e139)
-- [6] [swarm.ptsecurity.com - Discovering Domains Via A Time Correlation Attack](https://swarm.ptsecurity.com/discovering-domains-via-a-time-correlation-attack)
-- [7] [kmsec.uk - Passive Takeover](https://kmsec.uk/blog/passive-takeover)
-- [8] [cramppet.github.io - Regulator - Index](https://cramppet.github.io/regulator/index.html)
+- [5] [Devansh Batham (@Asm0d3us) – Weaponizing favicon.ico for BugBounties, OSINT and what not](https://medium.com/@Asm0d3us/weaponizing-favicon-ico-for-bugbounties-osint-and-what-not-ace3c214e139)
+- [6] [Arseniy Sharoglazov – Discovering Domains via a Time-Correlation Attack on Certificate Transparency](https://swarm.ptsecurity.com/discovering-domains-via-a-time-correlation-attack)
+- [7] [Kieran Miyamoto (kmsec.uk) – Passive Takeover: Uncovering (and Emulating) an Expensive Subdomain Takeover Campaign](https://kmsec.uk/blog/passive-takeover/)
+- [8] [cramppet – Regulator: A Unique Method of Subdomain Enumeration](https://cramppet.github.io/regulator/index.html)
+- [9] [Carlos Polop – Full Subdomain Discovery Workflow, Part 1](https://trickest.com/blog/full-subdomain-discovery-using-workflow/)
+- [10] [Carlos Polop – Full Subdomain Brute Force Discovery Using Automated Trickest Workflow, Part 2](https://trickest.com/blog/full-subdomain-brute-force-discovery-using-workflow/)
+- [11] [InfoSecMatter – favihash output screenshot](https://www.infosecmatter.com/wp-content/uploads/2020/07/favihash.jpg)
 
 {{#include ../../banners/hacktricks-training.md}}

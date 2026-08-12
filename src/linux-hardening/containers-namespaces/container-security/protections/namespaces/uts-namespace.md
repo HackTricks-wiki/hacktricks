@@ -4,7 +4,7 @@
 
 ## Overview
 
-The UTS namespace isolates the **hostname** and **NIS domain name** seen by the process. At first glance this may look trivial compared with mount, PID, or user namespaces, but it is part of what makes a container appear to be its own host. Inside the namespace, the workload can see and sometimes change a hostname that is local to that namespace rather than global to the machine.
+The UTS namespace isolates the **hostname** and **NIS domain name** seen by the process. At first glance this may look trivial compared with mount, PID, or user namespaces, but it is part of what makes a container appear to be its own host. Inside the namespace, the workload can see and sometimes change a hostname that is local to that namespace rather than global to the machine. <sup>[[1]](#references)</sup>
 
 On its own, this is usually not the centerpiece of a breakout story. However, once the host UTS namespace is shared, a sufficiently privileged process may influence host identity-related settings, which can matter operationally and occasionally security-wise.
 
@@ -23,7 +23,7 @@ The hostname change remains local to that namespace and does not alter the host'
 
 ## Runtime Usage
 
-Normal containers get an isolated UTS namespace. Docker and Podman can join the host UTS namespace through `--uts=host`, and similar host-sharing patterns can appear in other runtimes and orchestration systems. Most of the time, however, private UTS isolation is simply part of the normal container setup and requires little operator attention.
+Normal containers get an isolated UTS namespace. Docker and Podman can join the host UTS namespace through `--uts=host`, and lower-level runtimes can omit the UTS namespace from an OCI configuration to inherit the runtime namespace. Most of the time, however, private UTS isolation is simply part of the normal container setup and requires little operator attention. <sup>[[2]](#references)</sup>
 
 ## Security Impact
 
@@ -79,5 +79,10 @@ What is interesting here:
 - This is usually a lower-priority finding than PID, mount, or user namespace issues, but it still confirms how isolated the process really is.
 
 In most environments, the UTS namespace is best thought of as a supporting isolation layer. It is rarely the first thing you chase in a breakout, but it is still part of the overall consistency and safety of the container view.
+
+## References
+
+- [1] [`uts_namespaces(7)` - Linux manual page](https://man7.org/linux/man-pages/man7/uts_namespaces.7.html)
+- [2] [Open Container Initiative - Linux container namespaces](https://github.com/opencontainers/runtime-spec/blob/main/config-linux.md#namespaces)
 
 {{#include ../../../../../banners/hacktricks-training.md}}

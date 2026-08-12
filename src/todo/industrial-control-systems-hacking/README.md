@@ -1,19 +1,27 @@
-# Industrial Control Systems Hacking 
+# Industrial Control Systems Hacking
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## About this Section
+## About This Section
 
-This section contains all about Industrial Control Systems including concepts as well as methodologies to hack them with various security issues that persists in them. 
+This section introduces industrial control system (ICS) components, architectures, protocols, and security-assessment methods. ICS is part of the broader operational technology (OT) domain: programmable systems and devices that monitor or cause changes in physical processes. Common examples include supervisory control and data acquisition (SCADA) systems, distributed control systems (DCSs), and programmable logic controllers (PLCs).<sup>[[1]](#references)</sup>
 
-Industrial Control Systems are everywhere, since industries are vital for economic development of a nation. But these ICS are hard to update and lesser advancements are made in this field. Hence, finding security flaws is common here. Most of the protocols and standards used here where developed back in the 90's and have much lesser capabilities as compared to current attack scenarios. 
+Security work in these environments must account for requirements that differ from conventional IT, including process safety, reliability, availability, deterministic operation, and equipment lifecycles. A technically valid security control may still be unsuitable if it disrupts the physical process, so testing and remediation should be coordinated with the system owner and operations personnel.<sup>[[1]](#references)</sup>
 
-It has become important to secure these systems since damaging them can cost a lot and even lives at the worst case. To understand Industrial Contol Systems security, knowing the internals of them is necessary. 
+Compromise or accidental disruption can stop production, damage equipment, release hazardous material, harm the environment, or cause injury and loss of life. This potential physical impact is why understanding the controlled process and its safe operating limits must come before active testing.<sup>[[1]](#references)</sup>
 
-Since Industrial Control Systems are installed following set standards, knowing each components would help in interconnecting every other mechanisms in the control system. Installation of these devices like PLCs and SCADA systems is different is various industries, hence information gathering is critical. 
+Many OT deployments retain legacy operating systems, applications, and protocols because equipment has a long service life and changes require operational and safety testing. Some protocols were designed without modern authentication or encryption, and patching may be constrained by vendor support or maintenance windows; compensate with segmentation, access control, and monitoring where direct upgrades are not feasible.<sup>[[1]](#references)</sup>
 
-Industrial Control Systems can be complicated at times and hence require a lot of patience to do anything. It's all about probing and reconnaissance before planning attacks and developing any exploits. 
+## Assessment Priorities
 
-These techniques can also be used to protect against attacks and blue teaming for industrial control systems.
+Begin by understanding the controlled process, system boundaries, network topology, assets, data flows, trust relationships, and external connections. Similar device types can serve different functions across sites, so avoid assuming that one deployment's architecture or impact model applies to another.<sup>[[1]](#references)</sup>
+
+Prefer passive discovery and existing engineering documentation where possible. Any active scanning or exploitation should follow an approved test plan that defines safety constraints, maintenance windows, recovery procedures, and stop conditions. Findings should be evaluated for both cybersecurity impact and potential effects on the physical process.<sup>[[1]](#references)</sup>
+
+The same architectural knowledge supports defensive activities such as asset inventory, network segmentation, monitoring, incident response, and risk-based vulnerability management.<sup>[[1]](#references)</sup>
+
+## References
+
+- [1] [NIST SP 800-82 Rev. 3 - Guide to Operational Technology (OT) Security](https://csrc.nist.gov/pubs/sp/800/82/r3/final)
 
 {{#include ../../banners/hacktricks-training.md}}

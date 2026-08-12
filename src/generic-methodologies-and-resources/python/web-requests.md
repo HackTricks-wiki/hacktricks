@@ -2,10 +2,15 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-
 ## Python Requests
 
+These examples use Requests' documented request arguments, response properties, multipart file tuples, and sessions.<sup>[[1]](#references)</sup> The `verify=False` examples disable TLS certificate verification and should be limited to controlled testing.<sup>[[1]](#references)</sup>
+
 ```python
+import random
+import re
+import string
+
 import requests
 
 url = "http://example.com:80/some/path.php"
@@ -24,7 +29,7 @@ body_text = gr.text
 ret_cookies = gr.cookies
 is_redirect = gr.is_redirect
 is_permanent_redirect = gr.is_permanent_redirect
-float_seconds = gr.elapsed.total_seconds() 10.231
+float_seconds = gr.elapsed.total_seconds()
 
 #Regular Post requests sending parameters (data)
 pr = requests.post(url, data=params, headers=headers, cookies=cookies, verify=False, allow_redirects=True, proxies=proxies)
@@ -75,6 +80,8 @@ def get_random_string(guid, path):
 
 ## Python cmd to exploit an RCE
 
+The command loop subclasses Python's `Cmd`; its `default` method handles unrecognized command prefixes, `cmdloop` dispatches input lines, and `re.DOTALL` lets the extraction pattern span newlines.<sup>[[2]](#references)[[3]](#references)</sup>
+
 ```python
 import requests
 import re
@@ -102,5 +109,10 @@ term = Terminal()
 term.cmdloop()
 ```
 
-{{#include ../../banners/hacktricks-training.md}}
+## References
 
+- [1] [Requests Developer Interface](https://requests.readthedocs.io/en/stable/api/)
+- [2] [Python `cmd` — Support for line-oriented command interpreters](https://docs.python.org/3/library/cmd.html)
+- [3] [Python `re` — Regular expression operations](https://docs.python.org/3/library/re.html)
+
+{{#include ../../banners/hacktricks-training.md}}

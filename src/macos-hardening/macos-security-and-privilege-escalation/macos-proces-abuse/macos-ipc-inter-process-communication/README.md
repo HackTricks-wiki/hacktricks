@@ -35,7 +35,7 @@ Port rights, which define what operations a task can perform, are key to this co
 
 ### File Ports
 
-File ports allows to encapsulate file descriptors in Mac ports (using Mach port rights). It's possible to create a `fileport` from a given FD using `fileport_makeport` and create a FD froma. fileport using `fileport_makefd`.
+File ports allow file descriptors to be encapsulated in Mach ports (using Mach port rights). It is possible to create a `fileport` from a given file descriptor with `fileport_makeport` and create a file descriptor from a `fileport` with `fileport_makefd`.
 
 ### Establishing a communication
 
@@ -68,7 +68,7 @@ For these predefined services, the **lookup process differs slightly**. When a s
 However, this process only applies to predefined system tasks. Non-system tasks still operate as described originally, which could potentially allow for impersonation.
 
 > [!CAUTION]
-> Therefore, launchd should never crash or the whole sysem will crash.
+> Therefore, launchd should never crash or the whole system will crash.
 
 ### A Mach Message
 
@@ -427,7 +427,7 @@ int main() {
 
 ## Privileged Ports
 
-There are some special ports that allows to **perform certain sensitive actions or access certain sensitive data** in case a tasks have the **SEND** permissions over them. This makes these ports very interesting from an attackers perspective not only because of the capabilities but because it's possible to **share SEND permissions across tasks**.
+Some special ports allow a task to **perform certain sensitive actions or access certain sensitive data** when it has **SEND** rights over them. These ports are interesting from an attacker's perspective because of both their capabilities and the ability to **share SEND rights across tasks**.
 
 ### Host Special Ports
 
@@ -505,7 +505,7 @@ In order to perform actions within the task, the task needed a `SEND` right to i
 > [!CAUTION]
 > Notice that with a SEND right over a task port of a **different task**, it's possible to perform such actions over a different task.
 
-Moreover, the task_port is also the **`vm_map`** port which allows to **read an manipulate memory** inside a task with functions such as `vm_read()` and `vm_write()`. This basically means that a task with SEND rights over the task_port of a different task is going to be able to **inject code into that task**.
+Moreover, the task port is also the **`vm_map`** port, which allows a caller to **read and manipulate memory** inside a task with functions such as `vm_read()` and `vm_write()`. This means that a task with SEND rights over another task's task port can **inject code into that task**.
 
 Remember that because the **kernel is also a task**, if someone manages to get a **SEND permissions** over the **`kernel_task`**, it'll be able to make the kernel execute anything (jailbreaks).
 
@@ -1132,7 +1132,7 @@ In order to modify values the `clock_priv` subsystem can be sued with functions 
 
 ### Processors and Processor Set
 
-The processor apis allows to control a single logical processor calling functions like `processor_start`, `processor_exit`, `processor_info`, `processor_get_assignment`...
+The processor APIs allow control of a single logical processor through functions such as `processor_start`, `processor_exit`, `processor_info`, and `processor_get_assignment`.
 
 Moreover, the **processor set** apis provides a way to group multiple processors into a group. It's possible to retrieve the default processor set calling **`processor_set_default`**.\
 These are some interesting APIs to interact with the processor set:
@@ -1153,7 +1153,7 @@ You can try it with:
 <summary><strong>processor_set_tasks code</strong></summary>
 
 ````c
-// Maincpart fo the code from https://newosxbook.com/articles/PST2.html
+// Main part of the code from https://newosxbook.com/articles/PST2.html
 //gcc ./port_pid.c -o port_pid
 
 #include <stdio.h>

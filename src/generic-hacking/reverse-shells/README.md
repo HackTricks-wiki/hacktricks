@@ -32,4 +32,3 @@
 - [10] [rsg (ReverShellGenerator) - Tool to generate various ways to do a reverse shell](https://github.com/mthbernardes/rsg)
 
 {{#include ../../banners/hacktricks-training.md}}
-

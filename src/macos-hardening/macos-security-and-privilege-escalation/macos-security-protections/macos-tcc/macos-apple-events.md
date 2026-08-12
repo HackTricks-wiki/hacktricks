@@ -4,19 +4,30 @@
 
 ## Basic Information
 
-**Apple Events** are a feature in Apple's macOS that allows applications to communicate with each other. They are part of the **Apple Event Manager**, which is a component of the macOS operating system responsible for handling interprocess communication. This system enables one application to send a message to another application to request that it perform a particular operation, like opening a file, retrieving data, or executing a command.
+**Apple events** are structured interprocess messages that applications use to request operations or data from other applications. The **Apple Event Manager** provides the APIs for creating, sending, receiving, and responding to these messages.<sup>[[1]](#references)</sup>
 
-The mina daemon is `/System/Library/CoreServices/appleeventsd` which registers the service `com.apple.coreservices.appleevents`.
+On macOS, the principal broker is `/System/Library/CoreServices/appleeventsd`, which registers the `com.apple.coreservices.appleevents` Mach service. Applications that receive events register an Apple-event Mach port with this service; senders obtain the destination port through it.<sup>[[3]](#references)</sup>
 
-Every application that can receive events will checking with this daemon providing its Apple Event Mach Port. And when an app wants to send an event to to it, the app will request this port from the daemon.
+Sandbox rules and entitlements limit this communication. A sandbox profile commonly expresses the required operations as `allow appleevent-send` and a Mach lookup for `com.apple.coreservices.appleevents`:<sup>[[3]](#references)</sup>
 
-Sandboxed applications requires privileges like `allow appleevent-send` and `(allow mach-lookup (global-name "com.apple.coreservices.appleevents))` in order to be able to send events. Noten that entitlements like `com.apple.security.temporary-exception.apple-events` could restrict who have access to send events which will need entitlements like `com.apple.private.appleevents`.
+```scheme
+(allow appleevent-send)
+(allow mach-lookup (global-name "com.apple.coreservices.appleevents"))
+```
+
+The public `com.apple.security.temporary-exception.apple-events` entitlement can restrict a sandboxed application to named destination bundle identifiers. When analyzing Apple-signed components, also check for the private `com.apple.private.appleevents` entitlement; private Apple entitlements are not normally available to third-party applications.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
 
 > [!TIP]
-> It's possible to use the env variable **`AEDebugSends`** in order to log informtion about the message sent:
+> Set the **`AEDebugSends`** environment variable to log information about Apple events sent by a process:<sup>[[3]](#references)</sup>
 >
 > ```bash
 > AEDebugSends=1 osascript -e 'tell application "iTerm" to activate'
 > ```
+
+## References
+
+- [1] [Apple Developer Documentation - Apple Event Manager](https://developer.apple.com/documentation/applicationservices/apple_event_manager)
+- [2] [Apple Developer Documentation - App Sandbox Temporary Exception Entitlements](https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/EntitlementKeyReference/Chapters/AppSandboxTemporaryExceptionEntitlements.html)
+- [3] [Mac OS X and iOS Internals - Apple-event debug environment variables](https://www.newosxbook.com/MOXiI.pdf)
 
 {{#include ../../../../banners/hacktricks-training.md}}

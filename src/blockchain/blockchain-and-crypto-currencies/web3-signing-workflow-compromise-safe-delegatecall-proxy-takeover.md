@@ -6,8 +6,8 @@
 
 A cold-wallet theft chain combined a **supply-chain compromise of the Safe{Wallet} web UI** with an **on-chain delegatecall primitive that overwrote a proxy’s implementation pointer (slot 0)**. The key takeaways are:
 
-- If a dApp can inject code into the signing path, it can make a signer produce a valid **EIP-712 signature over attacker-chosen fields**<sup>[[4]](#references)</sup> while restoring the original UI data so other signers remain unaware.
-- Safe proxies store `masterCopy` (implementation) at **storage slot 0**. A delegatecall to a contract that writes to slot 0 effectively “upgrades” the Safe to attacker logic, yielding full control of the wallet.
+- If a dApp can inject code into the signing path, it can make a signer produce a valid **EIP-712 signature over attacker-chosen fields** while restoring the original UI data so other signers remain unaware.<sup>[[1]](#references)[[3]](#references)[[4]](#references)</sup>
+- Safe proxies store `masterCopy` (implementation) at **storage slot 0**. A delegatecall to a contract that writes to slot 0 effectively “upgrades” the Safe to attacker logic, yielding full control of the wallet.<sup>[[3]](#references)</sup>
 
 ## Off-chain: Targeted signing mutation in Safe{Wallet}
 
@@ -31,11 +31,11 @@ if (isVictimSafe && isVictimSigner && tx.data.operation === 0) {
 
 ### Attack properties
 - **Context-gated**: hard-coded allowlists for victim Safes/signers prevented noise and lowered detection.<sup>[[1]](#references)[[3]](#references)</sup>
-- **Last-moment mutation**: fields (`to`, `data`, `operation`, gas) were overwritten immediately before `signTransaction`, then reverted, so proposal payloads in the UI looked benign while signatures matched the attacker payload.
-- **EIP-712 opacity**: wallets showed structured data but did not decode nested calldata or highlight `operation = delegatecall`, making the mutated message effectively blind-signed.
+- **Last-moment mutation**: fields (`to`, `data`, `operation`, gas) were overwritten immediately before `signTransaction`, then reverted, so proposal payloads in the UI looked benign while signatures matched the attacker payload.<sup>[[3]](#references)</sup>
+- **EIP-712 opacity**: wallets showed structured data but did not decode nested calldata or highlight `operation = delegatecall`, making the mutated message effectively blind-signed.<sup>[[3]](#references)[[4]](#references)</sup>
 
 ### Gateway validation relevance
-Safe proposals are submitted to the **Safe Client Gateway**.<sup>[[5]](#references)</sup> Prior to hardened checks, the gateway could accept a proposal where `safeTxHash`/signature corresponded to different fields than the JSON body if the UI rewrote them post-signing. After the incident, the gateway now rejects proposals whose hash/signature do not match the submitted transaction. Similar server-side hash verification should be enforced on any signing-orchestration API.
+Safe proposals are submitted to the **Safe Client Gateway**.<sup>[[5]](#references)</sup> Prior to hardened checks, the gateway could accept a proposal where `safeTxHash`/signature corresponded to different fields than the JSON body if the UI rewrote them post-signing. After the incident, the gateway now rejects proposals whose hash/signature do not match the submitted transaction.<sup>[[3]](#references)</sup> Similar server-side hash verification should be enforced on any signing-orchestration API.
 
 ### 2025 Bybit/Safe incident highlights
 - The February 21, 2025 Bybit cold-wallet drain (~401k ETH) reused the same pattern: a compromised Safe S3 bundle only triggered for Bybit signers and swapped `operation=0` → `1`, pointing `to` at a pre-deployed attacker contract that writes slot 0.<sup>[[1]](#references)[[3]](#references)</sup>
@@ -63,15 +63,15 @@ Execution path:<sup>[[1]](#references)[[3]](#references)</sup>
 4. Slot 0 (`masterCopy`) now points to attacker-controlled logic → **full wallet takeover and fund drain**.
 
 ### Guard & version notes (post-incident hardening)
-- Safes >= v1.3.0 can install a **Guard** to veto `delegatecall` or enforce ACLs on `to`/selectors; Bybit ran v1.1.1, so no Guard hook existed. Upgrading contracts (and re-adding owners) is required to gain this control plane.
+- Transaction guards were introduced in Safe v1.3.0 and can inspect all `execTransaction` parameters before execution; a guard can reject `delegatecall` or enforce policy on the destination and calldata. Bybit ran v1.1.1, which predates this hook.<sup>[[2]](#references)[[6]](#references)</sup>
 
 ## Detection & hardening checklist
 
 - **UI integrity**: pin JS assets / SRI; monitor bundle diffs; treat signing UI as part of the trust boundary.
-- **Sign-time validation**: hardware wallets with **EIP-712 clear-signing**; explicitly render `operation` and decode nested calldata. Reject signing when `operation = 1` unless policy allows it.
-- **Server-side hash checks**: gateways/services that relay proposals must recompute `safeTxHash` and validate signatures match the submitted fields.
+- **Sign-time validation**: hardware wallets with **EIP-712 clear-signing**; explicitly render `operation` and decode nested calldata. Reject signing when `operation = 1` unless policy allows it.<sup>[[3]](#references)</sup>
+- **Server-side hash checks**: gateways/services that relay proposals must recompute `safeTxHash` and validate signatures match the submitted fields.<sup>[[3]](#references)</sup>
 - **Policy/allowlists**: preflight rules for `to`, selectors, asset types, and disallow delegatecall except for vetted flows. Require an internal policy service before broadcasting fully signed transactions.
-- **Contract design**: avoid exposing arbitrary delegatecall in multisig/treasury wallets unless strictly necessary. Place upgrade pointers away from slot 0 or guard with explicit upgrade logic and access control.
+- **Contract design**: avoid exposing arbitrary delegatecall in multisig/treasury wallets unless strictly necessary. Treat any implementation pointer as an upgrade primitive: protect it with explicit access control and guard delegatecall targets/selectors; moving the pointer to another slot alone is not a complete defense.<sup>[[3]](#references)[[6]](#references)</sup>
 - **Monitoring**: alert on delegatecall executions from wallets holding treasury funds, and on proposals that change `operation` from typical `call` patterns.
 
 ## References
@@ -81,6 +81,6 @@ Execution path:<sup>[[1]](#references)[[3]](#references)</sup>
 - [3] [In-depth technical analysis of the Bybit hack (NCC Group)](https://www.nccgroup.com/research-blog/in-depth-technical-analysis-of-the-bybit-hack/)
 - [4] [EIP-712](https://eips.ethereum.org/EIPS/eip-712)
 - [5] [safe-client-gateway (GitHub)](https://github.com/safe-global/safe-client-gateway)
+- [6] [Safe smart account v1.3.0 changelog (GitHub)](https://github.com/safe-fndn/safe-smart-account/blob/main/CHANGELOG.md)
 
 {{#include ../../banners/hacktricks-training.md}}
-

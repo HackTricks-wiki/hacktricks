@@ -80,7 +80,7 @@ There are cases where an **agent needs to be executed before the user logins**, 
 > New Daemons or Agents config files will be **loaded after next reboot or using** `launchctl load <target.plist>` It's **also possible to load .plist files without that extension** with `launchctl -F <file>` (however those plist files won't be automatically loaded after reboot).\
 > It's also possible to **unload** with `launchctl unload <target.plist>` (the process pointed by it will be terminated),
 >
-> To **ensure** that there isn't **anything** (like an override) **preventing** an **Agent** or **Daemon** **from** **running** run: `sudo launchctl load -w /System/Library/LaunchDaemos/com.apple.smdb.plist`
+> To **ensure** that there isn't **anything** (like an override) **preventing** an **Agent** or **Daemon** **from** **running**, run: `sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.smdb.plist`
 
 List all the agents and daemons loaded by the current user:
 
@@ -171,7 +171,7 @@ echo "touch /tmp/hacktricks" >> ~/.zshrc
 ### Re-opened Applications
 
 > [!CAUTION]
-> Configuring the indicated exploitation and loging-out and loging-in or even rebooting didn't work for me to execute the app. (The app wasn't being executed, maybe it needs to be running when these actions are performed)
+> Configuring the indicated exploitation and logging out and back in, or even rebooting, did not execute the app in testing. The app may need to be running when these actions are performed.
 
 **Writeup**: [https://theevilbit.github.io/beyond/beyond_0021/](https://theevilbit.github.io/beyond/beyond_0021/)<sup>[[4]](#references)</sup>
 
@@ -451,7 +451,7 @@ ls -lR /usr/lib/cron/tabs/ /private/var/at/jobs /etc/periodic/
 
 There you can find the regular **cron** **jobs**, the **at** **jobs** (not very used) and the **periodic** **jobs** (mainly used for cleaning temporary files). The daily periodic jobs can be executed for example with: `periodic daily`.<sup>[[10]](#references)</sup>
 
-To add a **user cronjob programatically** it's possible to use:
+To add a **user cronjob programmatically** it's possible to use:
 
 ```bash
 echo '* * * * * /bin/bash -c "touch /tmp/cron3"' > /tmp/cron
@@ -644,7 +644,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0006/](https://theevilbit.g
   - **Trigger**: Login via ssh
 
 > [!CAUTION]
-> To turn ssh on requres Full Disk Access:
+> To turn ssh on requires Full Disk Access:
 >
 > ```bash
 > sudo systemsetup -setremotelogin on
@@ -1004,7 +1004,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0017](https://theevilbit.gi
 
 **Compile a color picker** bundle with your code (you could use [**this one for example**](https://github.com/viktorstrate/color-picker-plus)) and add a constructor (like in the [Screen Saver section](macos-auto-start-locations.md#screen-saver)) and copy the bundle to `~/Library/ColorPickers`.<sup>[[20]](#references)</sup>
 
-Then, when the color picker is triggered your should should be aswell.
+Then, when the color picker is triggered, your bundle should execute as well.
 
 Note that the binary loading your library has a **very restrictive sandbox**: `/System/Library/Frameworks/AppKit.framework/Versions/C/XPCServices/LegacyExternalColorPickerService-x86_64.xpc/Contents/MacOS/LegacyExternalColorPickerService-x86_64`
 
@@ -1230,14 +1230,14 @@ plutil -p /Library/Spotlight/iBooksAuthor.mdimporter/Contents/Info.plist
 ```
 
 > [!CAUTION]
-> If you check the Plist of other `mdimporter` you might not find the entry **`UTTypeConformsTo`**. Thats because that is a built-in _Uniform Type Identifiers_ ([UTI](https://en.wikipedia.org/wiki/Uniform_Type_Identifier)) and it doesn't need to specify extensions.
+> If you check the Plist of other `mdimporter` you might not find the entry **`UTTypeConformsTo`**. That's because that is a built-in _Uniform Type Identifiers_ ([UTI](https://en.wikipedia.org/wiki/Uniform_Type_Identifier)) and it doesn't need to specify extensions.
 >
 > Moreover, System default plugins always take precedence, so an attacker can only access files that are not otherwise indexed by Apple's own `mdimporters`.
 
 To create your own importer you could start with this project: [https://github.com/megrimm/pd-spotlight-importer](https://github.com/megrimm/pd-spotlight-importer) and then change the name, the **`CFBundleDocumentTypes`** and add **`UTImportedTypeDeclarations`** so it supports the extension you would like to support and refelc them in **`schema.xml`**.\
 Then **change** the code of the function **`GetMetadataForFile`** to execute your payload when a file with the processed extension is created.
 
-Finally **build and copy your new `.mdimporter`** to one of thre previous locations and you can chech whenever it's loaded **monitoring the logs** or checking **`mdimport -L.`**
+Finally, **build and copy your new `.mdimporter`** to one of the three previous locations. You can check whether it is loaded by **monitoring the logs** or running **`mdimport -L`**.
 
 ### ~~Preference Pane~~
 
@@ -1654,7 +1654,7 @@ XQuartz is **no longer installed in macOS**, so if you want more info check the 
 ### ~~kext~~
 
 > [!CAUTION]
-> It's so complicated to install kext even as root taht I won't consider this to escape from sandboxes or even for persistence (unless you have an exploit)
+> Installing a kext is so complicated, even as root, that this is not considered a practical sandbox-escape or persistence technique unless you have an exploit.
 
 #### Location
 

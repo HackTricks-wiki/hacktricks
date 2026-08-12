@@ -113,7 +113,7 @@ If you want to dump LSASS despite PPL, you have 3 main options:
 reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
 ```
 
-When you running **`mimikatz privilege::debug sekurlsa::logonpasswords`** it'll probably fail with the error code `0x00000005` becasue of this.
+When running **`mimikatz privilege::debug sekurlsa::logonpasswords`**, it will probably fail with error code `0x00000005` because of this protection.
 
 - For more information about this check [https://itm4n.github.io/lsass-runasppl/](https://itm4n.github.io/lsass-runasppl/)<sup>[[5]](#references)</sup>
 

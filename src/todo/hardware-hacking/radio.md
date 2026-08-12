@@ -4,12 +4,12 @@
 
 ## SigDigger
 
-[**SigDigger** ](https://github.com/BatchDrake/SigDigger)is a free digital signal analyzer for GNU/Linux and macOS, designed to extract information of unknown radio signals. It supports a variety of SDR devices through SoapySDR, and allows adjustable demodulation of FSK, PSK and ASK signals, decode analog video, analyze bursty signals and listen to analog voice channels (all in real time).<sup>[[1]](#references)</sup>
+[**SigDigger**](https://github.com/BatchDrake/SigDigger) is a free digital-signal analyzer for GNU/Linux and macOS designed to extract information from unknown radio signals. It supports SDR devices through SoapySDR and provides real-time demodulation and analysis tools for FSK, PSK, ASK, analog video, bursty signals, and analog voice channels.<sup>[[1]](#references)</sup>
 
 ### Basic Config
 
 After installing there are a few things that you could consider configuring.\
-In settings (the second tab button) you can select the **SDR device** or **select a file** to read and which frequency to syntonise and the Sample rate (recommended to up to 2.56Msps if your PC support it)
+In settings (the second tab button), select an **SDR device** or an input file, the frequency to tune, and the sample rate. A rate up to 2.56 Msps may be practical if the host supports it.
 
 ![SigDigger settings showing SDR device, input file, frequency and sample rate options](<../../images/image (245).png>)
 
@@ -45,8 +45,8 @@ With [**SigDigger** ](https://github.com/BatchDrake/SigDigger)synchronize with t
 
 ![Synchronize with radio channel - Interesting tricks: In frames of information you usually should find different frames well aligned between them](<../../images/image (597).png>)
 
-- **After recovering the bits you might need to process them someway**. For example, in Manchester codification a up+down will be a 1 or 0 and a down+up will be the other one. So pairs of 1s and 0s (ups and downs) will be a real 1 or a real 0.
-- Even if a signal is using Manchester codification (it's impossible to find more than two 0s or 1s in a row), you might **find several 1s or 0s together in the preamble**!
+- **After recovering the level transitions, you may need to decode them.** For Manchester encoding, one transition direction represents `0` and the opposite direction represents `1`; the exact polarity depends on the convention in use.
+- A preamble may contain a run of the same sampled level even when the payload uses Manchester encoding, so identify the frame boundary before decoding.
 
 ### Uncovering modulation type with IQ
 
@@ -60,7 +60,7 @@ If you are checking a signal there are different ways to try to figure out what 
   - Note that if the information is hidden in the fact that a phase is changed and not in the phase itself, you won't see different phases clearly differentiated.
 - **Detecting FM**: IQ doesn't have a field to identify frequencies (distance to centre is amplitude and angle is phase).\
   Therefore, to identify FM, you should **only see basically a circle** in this graph.\
-  Moreover, a different frequency is "represented" by the IQ graph by a **speed acceleration across the circle** (so in SysDigger selecting the signal the IQ graph is populated, if you find an acceleration or change of direction in the created circle it could mean that this is FM):
+  Moreover, a frequency offset changes the rotation rate around the IQ circle. In SigDigger, a change in rotation speed or direction can therefore indicate FM.
 
 ## AM Example
 
@@ -72,7 +72,7 @@ sigdigger_20220308_165547Z_2560000_433500000_float32_iq.raw
 
 #### Checking the envelope
 
-Checking AM info with [**SigDigger** ](https://github.com/BatchDrake/SigDigger)and just looking at the **envelop** you can see different clear amplitude levels. The used signal is sending pulses with information in AM, this is how one pulse looks like:<sup>[[1]](#references)</sup>
+When inspecting AM data with [**SigDigger**](https://github.com/BatchDrake/SigDigger), the signal **envelope** can reveal distinct amplitude levels. The sample signal sends information as amplitude-modulated pulses; one pulse looks like this:<sup>[[1]](#references)</sup>
 
 ![SigDigger AM signal envelope with clear pulse amplitude levels](<../../images/image (590).png>)
 
@@ -102,9 +102,9 @@ In this example you can see how there is a **big circle** but also **a lot of po
 
 #### With one symbol
 
-Select the smallest symbol you can find (so you are sure it's just 1) and check the "Selection freq". I this case it would be 1.013kHz (so 1kHz).
+Select the smallest interval that clearly contains one symbol and check **Selection freq**. In this example it is 1.013 kHz, approximately 1 kHz.
 
-![Get Symbol Rate - With one symbol: Select the smallest symbol you can find (so you are sure it's just 1) and check the "Selection freq". I this case it would be 1.013kHz (so 1kHz)](<../../images/image (78).png>)
+![Get Symbol Rate - With one symbol: Select the smallest symbol you can find (so you are sure it is just one) and check the "Selection freq". In this case it would be 1.013 kHz (so 1 kHz).](<../../images/image (78).png>)
 
 #### With a group of symbols
 
@@ -114,14 +114,14 @@ You can also indicate the number of symbols you are going to select and SigDigge
 
 ### Get Bits
 
-Having found this is an **AM modulated** signal and the **symbol rate** (and knowing that in this case something up means 1 and something down means 0), it's very easy to **obtain the bits** encoded in the signal. So, select the signal with info and configure the sampling and decision and press sample (check that **Amplitude** is selected, the discovered **Symbol rate** is configured and the **Gadner clock recovery** is selected):
+After identifying AM and estimating the **symbol rate**, select the signal region, configure amplitude sampling and the decision levels, choose **Gardner clock recovery**, and press **Sample**:
 
 ![SigDigger Get Bits panel configured for AM sampling, symbol rate and Gardner clock recovery](<../../images/image (965).png>)
 
 - **Sync to selection intervals** means that if you previously selected intervals to find the symbol rate, that symbol rate will be used.
 - **Manual** means that the indicated symbol rate is going to be used
 - In **Fixed interval selection** you indicate the number of intervals that should be selected and it calculates the symbol rate from it
-- **Gadner clock recovery** is usually the best option, but you still need to indicate some approximate symbol rate.
+- **Gardner clock recovery** is a useful default, but it still needs an approximate symbol rate.
 
 Pressing sample this appears:
 
@@ -139,7 +139,7 @@ Finally **increasing** the **Zoom** and **changing the Row size** you can see th
 
 If the signal has more than 1 bit per symbol (for example 2), SigDigger has **no way to know which symbol is** 00, 01, 10, 11, so it will use different **grey scales** the represent each (and if you copy the bits it will use **numbers from 0 to 3**, you will need to treat them).
 
-Also, use **codifications** such as **Manchester**, and **up+down** can be **1 or 0** and an down+up can be a 1 or 0. In those cases you need to **treat the obtained ups (1) and downs (0)** to substitute the pairs of 01 or 10 as 0s or 1s.
+For line encodings such as **Manchester**, translate each valid transition pair (`01` or `10`) into a data bit according to the convention used by the protocol.
 
 ## FM Example
 
@@ -155,11 +155,11 @@ Signal example sending information modulated in FM:
 
 ![Uncovering FM - Checking the frequencies and waveform: Signal example sending information modulated in FM](<../../images/image (725).png>)
 
-In the previous image you can observe pretty good that **2 frequencies are used** but if you **observe** the **waveform** you might n**ot be able to identify correctly the 2 different frequencies**:
+The spectrum clearly shows **two frequencies**, although they may be difficult to distinguish in the time-domain waveform:
 
 ![SigDigger FM waveform where the two frequencies are difficult to distinguish directly](<../../images/image (717).png>)
 
-This is because I capture the signal in booth frequencies, therefore one is approximately the other in negative:
+This happens because the capture is centered between both frequencies, so their frequency offsets are approximately opposite:
 
 ![SigDigger FM capture showing the two frequencies as approximate negatives of each other](<../../images/image (942).png>)
 
@@ -187,7 +187,7 @@ And this is would be phase histogram (which makes very clear the signal is not m
 
 IQ doesn't have a field to identify frequencies (distance to centre is amplitude and angle is phase).\
 Therefore, to identify FM, you should **only see basically a circle** in this graph.\
-Moreover, a different frequency is "represented" by the IQ graph by a **speed acceleration across the circle** (so in SysDigger selecting the signal the IQ graph is populated, if you find an acceleration or change of direction in the created circle it could mean that this is FM):
+Moreover, a frequency offset changes the rotation rate around the IQ circle. In SigDigger, a change in rotation speed or direction can therefore indicate FM:
 
 ![SigDigger IQ graph where FM appears as acceleration changes around the circle](<../../images/image (81).png>)
 

@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-This page documents practical techniques to recover text from web readers that ship positioned glyph runs plus per-request vector glyph definitions (SVG paths), and that randomize glyph IDs per request to prevent scraping. The core idea is to ignore request-scoped numeric glyph IDs and fingerprint the visual shapes via raster hashing, then map shapes to characters with SSIM against a reference font atlas. The workflow generalizes beyond Kindle Cloud Reader to any viewer with similar protections.<sup>[[1]](#references)</sup>
+This page documents practical techniques to recover text from web readers that ship positioned glyph runs plus per-request vector glyph definitions (SVG paths), and that randomize glyph IDs per request to prevent scraping. The core idea is to ignore request-scoped numeric glyph IDs and fingerprint the visual shapes via raster hashing, then map shapes to characters with SSIM against a reference font atlas. The same approach may generalize to viewers with similar protections.<sup>[[1]](#references)</sup>
 
 Warning: Only use these techniques to back up content you legitimately own and in compliance with applicable laws and terms.
 
@@ -11,23 +11,23 @@ Warning: Only use these techniques to back up content you legitimately own and i
 Endpoint observed:<sup>[[1]](#references)</sup>
 - [https://read.amazon.com/renderer/render](https://read.amazon.com/renderer/render)
 
-Required materials per session:
+Required materials per session:<sup>[[1]](#references)</sup>
 - Browser session cookies (normal Amazon login)
 - Rendering token from a startReading API call
 - Additional ADP session token used by the renderer
 
-Behavior:
+Behavior:<sup>[[1]](#references)</sup>
 - Each request, when sent with browser-equivalent headers and cookies, returns a TAR archive limited to 5 pages.
 - For a long book you will need many batches; each batch uses a different randomized mapping of glyph IDs.
 
-Typical TAR contents:
+Typical TAR contents:<sup>[[1]](#references)</sup>
 - page_data_0_4.json — positioned text runs as sequences of glyph IDs (not Unicode)
 - glyphs.json — per-request SVG path definitions for each glyph and fontFamily
 - toc.json — table of contents
 - metadata.json — book metadata
 - location_map.json — logical→visual position mappings
 
-Example page run structure:
+Example page run structure:<sup>[[1]](#references)</sup>
 ```json
 {
   "type": "TextRun",
@@ -39,22 +39,22 @@ Example page run structure:
 }
 ```
 
-Example glyphs.json entry:
+Example glyphs.json entry:<sup>[[1]](#references)</sup>
 ```json
 {
   "24": {"path": "M 450 1480 L 820 1480 L 820 0 L 1050 0 L 1050 1480 ...", "fontFamily": "bookerly_normal"}
 }
 ```
 
-Notes on anti-scraping path tricks:
+Notes on anti-scraping path tricks:<sup>[[1]](#references)</sup>
 - Paths may include micro relative moves (e.g., `m3,1 m1,6 m-4,-7`) that confuse many vector parsers and naïve path sampling.
 - Always render filled complete paths with a robust SVG engine (e.g., CairoSVG) instead of doing command/coordinate differencing.
 
 ## Why naïve decoding fails
 
 - Per-request randomized glyph substitution: glyph ID→character mapping changes every batch; IDs are meaningless globally.<sup>[[1]](#references)</sup>
-- Direct SVG coordinate comparison is brittle: identical shapes may differ in numeric coordinates or command encoding per request.
-- OCR on isolated glyphs performs poorly (≈50%), confuses punctuation and look-alike glyphs, and ignores ligatures.
+- Direct SVG coordinate comparison is brittle: identical shapes may differ in numeric coordinates or command encoding per request.<sup>[[1]](#references)</sup>
+- OCR on isolated glyphs performs poorly (≈50%), confuses punctuation and look-alike glyphs, and ignores ligatures.<sup>[[1]](#references)</sup>
 
 ## Working pipeline: request-agnostic glyph normalization and mapping
 
@@ -67,19 +67,19 @@ Notes on anti-scraping path tricks:
 - Treat the hash as a stable ID: the same visual shape across requests collapses to the same perceptual hash, defeating randomized IDs.
 
 3) Reference font atlas generation
-- Download the target TTF/OTF fonts (e.g., Bookerly normal/italic/bold/bold-italic).
+- Download the target TTF/OTF fonts (e.g., Bookerly normal/italic/bold/bold-italic).<sup>[[1]](#references)</sup>
 - Render candidates for A–Z, a–z, 0–9, punctuation, special marks (em/en dashes, quotes), and explicit ligatures: `ff`, `fi`, `fl`, `ffi`, `ffl`.
 - Keep separate atlases per font variant (normal/italic/bold/bold-italic).
 - Use a proper text shaper (HarfBuzz) if you want glyph-level fidelity for ligatures; simple rasterization via Pillow ImageFont can be sufficient if you render the ligature strings directly and the shaping engine resolves them.
 
 4) Visual similarity matching with SSIM
 - For each unknown glyph image, compute SSIM (Structural Similarity Index) against all candidate images across all font variant atlases.<sup>[[4]](#references)</sup>
-- Assign the character string of the best-scoring match. SSIM absorbs small antialiasing, scale, and coordinate differences better than pixel-exact comparisons.
+- Assign the character string of the best-scoring match. SSIM absorbs small antialiasing, scale, and coordinate differences better than pixel-exact comparisons.<sup>[[1]](#references)[[4]](#references)</sup>
 
 5) Edge handling and reconstruction
-- When a glyph maps to a ligature (multi-char), expand it during decoding.
-- Use run rectangles (top/left/right/bottom) to infer paragraph breaks (Y deltas), alignment (X patterns), style, and sizes.
-- Serialize to HTML/EPUB preserving `fontStyle`, `fontWeight`, `fontSize`, and internal links.
+- When a glyph maps to a ligature (multi-char), expand it during decoding.<sup>[[1]](#references)</sup>
+- Use run rectangles (top/left/right/bottom) to infer paragraph breaks (Y deltas), alignment (X patterns), style, and sizes.<sup>[[1]](#references)</sup>
+- Serialize to HTML/EPUB preserving `fontStyle`, `fontWeight`, `fontSize`, and internal links.<sup>[[1]](#references)</sup>
 
 ### Implementation tips
 
@@ -228,6 +228,8 @@ def process_tar(tar_path: str, cache: dict, atlases) -> list[dict]:
 
 ## Layout/EPUB reconstruction heuristics
 
+The source report used run geometry, style fields, and link metadata to preserve the reconstructed document’s formatting.<sup>[[1]](#references)</sup>
+
 - Paragraph breaks: If the next run’s top Y exceeds the previous line’s baseline by a threshold (relative to font size), start a new paragraph.<sup>[[1]](#references)</sup>
 - Alignment: Group by similar left X for left-aligned paragraphs; detect centered lines by symmetric margins; detect right-aligned by right edges.
 - Styling: Preserve italic/bold via `fontStyle`/`fontWeight`; vary CSS classes by `fontSize` buckets to approximate headings vs body.
@@ -235,7 +237,7 @@ def process_tar(tar_path: str, cache: dict, atlases) -> list[dict]:
 
 ## Mitigating SVG anti-scraping path tricks
 
-- Use filled paths with `fill-rule: nonzero` and a proper renderer (CairoSVG, resvg). Do not rely on path token normalization.<sup>[[1]](#references)</sup>
+- Use filled paths with `fill-rule: nonzero` and a proper renderer (CairoSVG, resvg). Do not rely on path token normalization.<sup>[[1]](#references)[[2]](#references)[[5]](#references)[[6]](#references)</sup>
 - Avoid stroke rendering; focus on filled solids to sidestep hairline artifacts caused by micro relative moves.
 - Keep a stable viewBox per render so that identical shapes rasterize consistently across batches.
 
@@ -243,14 +245,14 @@ def process_tar(tar_path: str, cache: dict, atlases) -> list[dict]:
 
 - In practice, books converge to a few hundred unique glyphs (e.g., ~361 including ligatures). Cache SSIM results by perceptual hash.<sup>[[1]](#references)</sup>
 - After initial discovery, future batches predominantly re-use known hashes; decoding becomes I/O-bound.
-- Average SSIM ≈0.95 is a strong signal; consider flagging low-scoring matches for manual review.
+- The d report observed an average SSIM of about 0.95; flag low-scoring matches for manual review.<sup>[[1]](#references)</sup>
 
 ## Generalization to other viewers
 
-Any system that:<sup>[[1]](#references)</sup>
-- Returns positioned glyph runs with request-scoped numeric IDs
-- Ships per-request vector glyphs (SVG paths or subset fonts)
-- Caps pages per request to prevent bulk export
+The Kindle workflow suggests that similar viewers may be amenable to the same normalization when they:<sup>[[1]](#references)</sup>
+- return positioned glyph runs with request-scoped numeric IDs
+- ship per-request vector glyphs (SVG paths or subset fonts)
+- cap pages per request
 
 …can be handled with the same normalization:
 - Rasterize per-request shapes → perceptual hash → shape ID
@@ -272,19 +274,21 @@ curl 'https://read.amazon.com/renderer/render' \
   --compressed --output batch_000.tar
 ```
 
-Adjust parameterization (book ASIN, page window, viewport) to match the reader’s requests. Expect a 5-page-per-request cap.
+Adjust parameterization (book ASIN, page window, viewport) to match the reader’s requests. Expect a 5-page-per-request cap.<sup>[[1]](#references)</sup>
 
 ## Results achievable
 
-- Collapse 100+ randomized alphabets to a single glyph space via perceptual hashing<sup>[[1]](#references)</sup>
-- 100% mapping of unique glyphs with average SSIM ~0.95 when atlases include ligatures and variants
-- Reconstructed EPUB/HTML visually indistinguishable from the original
+- Collapse 100+ randomized alphabets to a single glyph space via perceptual hashing.<sup>[[1]](#references)</sup>
+- In the d 920-page test, 361 unique glyphs were matched (100%) with an average SSIM of 0.9527.<sup>[[1]](#references)</sup>
+- The source report describes the reconstructed EPUB as near-indistinguishable from the original.<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [Kindle Web DRM: Breaking Randomized SVG Glyph Obfuscation with Raster Hashing + SSIM (Pixelmelt blog)](https://blog.pixelmelt.dev/kindle-web-drm/)
+- [1] [How I Reversed Amazon's Kindle Web Obfuscation Because Their App Sucked (Pixelmelt)](https://blog.pixelmelt.dev/kindle-web-drm/)
 - [2] [CairoSVG – SVG to PNG renderer](https://cairosvg.org/)
 - [3] [imagehash – Perceptual image hashing (pHash)](https://pypi.org/project/ImageHash/)
 - [4] [scikit-image – Structural Similarity Index (SSIM)](https://scikit-image.org/docs/stable/api/skimage.metrics.html#skimage.metrics.structural_similarity)
+- [5] [SVG 1.1 – Fill properties](https://www.w3.org/TR/SVG11/painting.html#FillRuleProperty)
+- [6] [resvg – SVG rendering library](https://github.com/linebender/resvg)
 
 {{#include ../../../banners/hacktricks-training.md}}

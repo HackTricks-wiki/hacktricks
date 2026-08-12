@@ -4,7 +4,7 @@
 
 ## Remote Access Services
 
-These are the common macOS services to access them remotely.\
+These are common services for remote access to macOS systems.<sup>[[11]](#references)</sup>\
 You can enable/disable these services in `System Settings` --> `Sharing`<sup>[[1]](#references)</sup>
 
 - **VNC**, known as “Screen Sharing” (tcp:5900)
@@ -54,7 +54,7 @@ From an operator perspective, **Monterey 12.1+ changed remote-enablement workflo
 
 #### Apple Screen Sharing (RFB 003.889 / security type 36) pre-auth file-copy abuse
 
-Recent `screensharingd` research showed that Apple Screen Sharing is not always just classic VNC auth: newer builds speak **RFB `003.889`** and advertise **security type `36`**, where **SRP** authenticates first and **ChaCha20-Poly1305** is only installed after `ccsrp_server_verify_session` succeeds. The public write-up reports the bug as fixed in **macOS Tahoe 26.6** (**July 27, 2026**).<sup>[[8]](#references)[[9]](#references)</sup>
+Recent `screensharingd` research showed that Apple Screen Sharing is not always just classic VNC auth: newer builds speak **RFB `003.889`** and advertise **security type `36`**, where **SRP** authenticates first and **ChaCha20-Poly1305** is only installed after `ccsrp_server_verify_session` succeeds. The public write-up reports the bug as fixed in **macOS Tahoe 26.6** (**July 27, 2026**).<sup>[[8]](#references)</sup><sup>[[9]](#references)</sup>
 
 A useful pattern to remember is the **stale-status parser bypass**: after a successful 4-byte length read, every oversized/error branch must return a fresh error. On affected builds, a big-endian SRP frame length **`>= 32768`** makes the rejection path reuse the previous `NetBufferRead` success (`0`), so the caller sets the session as authenticated even though no password proof ran and no transport crypto was installed. Because unread bytes stay in the shared socket buffer, an attacker can **pipeline malformed SRP data and post-auth RFB messages in the same TCP burst** and get them parsed as **cleartext authenticated traffic**.<sup>[[8]](#references)</sup>
 
@@ -73,7 +73,7 @@ After the bypass, Apple's proprietary **file-copy** message **`0x22`** becomes a
 
 Interesting post-write pivots on writable paths include **`/etc/sudoers.d/`**, **`/etc/zshenv`**, **`/Library/LaunchDaemons/`**, and **`/var/root/.ssh/authorized_keys`**. **SIP does not stop the auth bypass or root file read**, but it does block some write targets such as **`/var/at`**, so cron-based execution only works with SIP disabled. On default SIP-enabled hosts, think in terms of **"root file write into privileged auto-consumed files"** rather than immediate code execution.<sup>[[8]](#references)</sup>
 
-Another SRP pitfall from the same research: servers must validate **`A mod N != 0`** (per RFC 5054), not just `A > 0`. Accepting **`A = N`** can force the shared secret to zero and undermine password verification.<sup>[[8]](#references)[[10]](#references)</sup>
+Another SRP pitfall from the same research: servers must validate **`A mod N != 0`** (per RFC 5054), not just `A > 0`. Accepting **`A = N`** can force the shared secret to zero and undermine password verification.<sup>[[8]](#references)</sup><sup>[[10]](#references)</sup>
 
 **Detection ideas**
 
@@ -284,6 +284,6 @@ sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSResponder.p
 - [8] [Apple Screen Sharing Pre-Auth RCE](https://warez.sl0p.foo/apple-screensharing-rce/)
 - [9] [Apple Support - About the security content of macOS Tahoe 26.6](https://support.apple.com/en-us/128067)
 - [10] [RFC 5054 - Using the Secure Remote Password (SRP) Protocol for TLS Authentication](https://www.rfc-editor.org/rfc/rfc5054)
-- [11] [The Art of Mac Malware, Volume I: Analysis - Patrick Wardle](https://taomm.org/vol1/analysis.html)
+- [11] [The Art of Mac Malware, Volume I: Analysis - Patrick Wardle](https://taomm.org/)
 
 {{#include ../../banners/hacktricks-training.md}}

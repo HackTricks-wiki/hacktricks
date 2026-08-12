@@ -10,8 +10,8 @@ In the previous image it's possible to observe **how the sandbox will be loaded*
 
 The compiler will link `/usr/lib/libSystem.B.dylib` to the binary.
 
-Then, **`libSystem.B`** will be calling other several functions until the **`xpc_pipe_routine`** sends the entitlements of the app to **`securityd`**. Securityd checks if the process should be quarantine inside the Sandbox, and if so, it will be quarentine.\
-Finally, the sandbox will be activated will a call to **`__sandbox_ms`** which will call **`__mac_syscall`**.<sup>[[1]](#references)[[3]](#references)</sup>
+Then, **`libSystem.B`** calls several functions until **`xpc_pipe_routine`** sends the application's entitlements to **`securityd`**. Securityd checks whether the process should be quarantined inside the sandbox and, if so, quarantines it.\
+Finally, the sandbox is activated with a call to **`__sandbox_ms`**, which calls **`__mac_syscall`**.<sup>[[1]](#references)[[3]](#references)</sup>
 
 ## Possible Bypasses
 
@@ -119,7 +119,7 @@ find /System/Library/Frameworks -name "*.xpc"
 find /System/Library/PrivateFrameworks -name "*.xpc"
 ```
 
-Several examples abusing this technique can be found in the [**original writeup**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), however, the following are some sumarized examples.<sup>[[4]](#references)</sup>
+Several examples abusing this technique can be found in the [**original writeup**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), however, the following are some summarized examples.<sup>[[4]](#references)</sup>
 
 #### /System/Library/PrivateFrameworks/StorageKit.framework/XPCServices/storagekitfsrunner.xpc
 
@@ -148,7 +148,7 @@ void exploit_storagekitfsrunner(void) {
 
 #### /System/Library/PrivateFrameworks/AudioAnalyticsInternal.framework/XPCServices/AudioAnalyticsHelperService.xpc
 
-This XPC service allowed every client bu always returning YES and the method `createZipAtPath:hourThreshold:withReply:` basically allowed to indicate the path to a folder to compress and it'll compress it in a ZIP file.
+This XPC service allowed every client by always returning `YES`, and the `createZipAtPath:hourThreshold:withReply:` method accepted the path to a folder and compressed it into a ZIP file.
 
 Therefore, it's possible to generate a fake app folder structure, compress it, then decompress and execute it to escape the sandbox as the new files won't have the quarantine attribute.
 
@@ -243,7 +243,7 @@ ld: dynamic executables or dylibs must link with libSystem.dylib for architectur
 
 ### Not inherited restrictions
 
-As explined in the **[bonus of this writeup](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)** a sandbox restriction like:<sup>[[4]](#references)</sup>
+As explained in the **[bonus of this writeup](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)** a sandbox restriction like:<sup>[[4]](#references)</sup>
 
 ```
 (version 1)
@@ -513,5 +513,3 @@ Process 2517 exited with status = 0 (0x00000000)
 - [6] [Vicarius vSociety - CVE-2023-26818 (Sandbox): macOS TCC Bypass w/ Telegram using DyLib Injection (Part 2)](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818)
 
 {{#include ../../../../../banners/hacktricks-training.md}}
-
-

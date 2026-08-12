@@ -231,7 +231,7 @@ and alert on kernel-service creation from user-writable paths.
 ### Self‑patching compromised services to reduce detection (Linux)
 Adversaries increasingly “self‑patch” a service right after exploiting it to both prevent re‑exploitation and suppress vulnerability‑based detections. The idea is to replace vulnerable components with the latest legitimate upstream binaries/JARs, so scanners report the host as patched while persistence and C2 remain.<sup>[[3]](#references)</sup>
 
-Example: Apache ActiveMQ OpenWire RCE (CVE‑2023‑46604)<sup>[[3]](#references)[[4]](#references)</sup>
+Example: Apache ActiveMQ OpenWire RCE (CVE‑2023‑46604).<sup>[[3]](#references)[[4]](#references)</sup>
 - Post‑exploitation, attackers fetched legitimate JARs from Maven Central (repo1.maven.org), deleted vulnerable JARs in the ActiveMQ install, and restarted the broker.
 - This closed the initial RCE while maintaining other footholds (cron, SSH config changes, separate C2 implants).
 

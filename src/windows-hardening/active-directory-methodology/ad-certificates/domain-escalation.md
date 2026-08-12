@@ -554,7 +554,7 @@ certipy account update -username John@corp.local -password Passw0rd! -user Jane 
 Attempting authentication with the issued certificate now yields the NT hash of `Administrator@corp.local`. The command must include `-domain <domain>` due to the certificate's lack of domain specification:
 
 ```bash
-certipy auth -pfx adminitrator.pfx -domain corp.local
+certipy auth -pfx administrator.pfx -domain corp.local
 ```
 
 ## Weak Certificate Mappings - ESC10
@@ -661,7 +661,7 @@ If CA Server Do not configured with `IF_ENFORCEENCRYPTICERTREQUEST`, it can be m
 You can use `certipy` to enumerate if `Enforce Encryption for Requests` is Disabled and certipy will show `ESC11` Vulnerabilities.
 
 ```bash
-$ certipy find -u mane@domain.local -p 'password' -dc-ip 192.168.100.100 -stdout
+$ certipy find -u <user>@domain.local -p 'password' -dc-ip 192.168.100.100 -stdout
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
 
 Certificate Authorities
@@ -868,7 +868,7 @@ Using built-in default version 1 certificate templates, an attacker can craft a 
 
 ### Abuse
 
-The following is referenced to [this link]((https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation#esc15-arbitrary-application-policy-injection-in-v1-templates-cve-2024-49019-ekuwu),Click to see more detailed usage methods.<sup>[[14]](#references)</sup>
+The [Certipy privilege-escalation documentation](https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation#esc15-arbitrary-application-policy-injection-in-v1-templates-cve-2024-49019-ekuwu) contains more detailed usage examples.<sup>[[14]](#references)</sup>
 
 
 Certipy's `find` command can help identify V1 templates that are potentially susceptible to ESC15 if the CA is unpatched.
@@ -1097,4 +1097,3 @@ Both scenarios lead to an **increase in the attack surface** from one forest to 
 - [16] [Furious5 – AD CS ESC16: Misconfiguration and Exploitation](https://medium.com/@muneebnawaz3849/ad-cs-esc16-misconfiguration-and-exploitation-9264e022a8c6)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

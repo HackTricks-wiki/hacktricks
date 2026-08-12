@@ -8,7 +8,7 @@ In Linux in order to run a program it must exist as a file, it must be accessibl
 
 But this technique is here to change all of this. If you can not start the process you want... **then you hijack one already existing**.
 
-This technique allows you to **bypass common protection techniques such as read-only, noexec, file-name whitelisting, hash whitelisting...**<sup>[[1]](#references)</sup>
+This technique allows you to **bypass common protection techniques such as read-only, noexec, file-name whitelisting, hash whitelisting**.<sup>[[1]](#references)</sup>
 
 ## Dependencies
 
@@ -61,7 +61,7 @@ The steps are relatively easy and do not require any kind of expertise to unders
 - Pass the program we want to run to the stdin of the process (will be `read()` by said "shell"code).
 - At this point it is up to the loader to load the necessary libraries for our program and jump into it.
 
-**Check out the tool in** [**https://github.com/arget13/DDexec**](https://github.com/arget13/DDexec)<sup>[[1]](#references)</sup>
+**Check out the tool in** [**https://github.com/arget13/DDexec**](https://github.com/arget13/DDexec).<sup>[[1]](#references)</sup>
 
 ## EverythingExec
 

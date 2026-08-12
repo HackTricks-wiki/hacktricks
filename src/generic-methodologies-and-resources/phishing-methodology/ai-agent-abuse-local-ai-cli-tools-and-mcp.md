@@ -4,7 +4,7 @@
 
 ## Overview
 
-Local AI command-line interfaces (AI CLIs) such as Claude Code, Gemini CLI, Codex CLI, Warp and similar tools often ship with powerful built‑ins: filesystem read/write, shell execution and outbound network access. Many act as MCP clients (Model Context Protocol), letting the model call external tools over STDIO or HTTP.<sup>[[2]](#references)</sup> Because the LLM plans tool-chains non‑deterministically, identical prompts can lead to different process, file and network behaviours across runs and hosts.
+Local AI command-line interfaces (AI CLIs) such as Claude Code, Gemini CLI, Codex CLI, Warp and similar tools often ship with powerful built‑ins: filesystem read/write, shell execution and outbound network access. Many act as MCP clients (Model Context Protocol), letting the model call external tools over STDIO or HTTP.<sup>[[2]](#references)[[7]](#references)</sup> Because the LLM plans tool-chains non‑deterministically, identical prompts can lead to different process, file and network behaviours across runs and hosts.
 
 Key mechanics seen in common AI CLIs:
 - Typically implemented in Node/TypeScript with a thin wrapper launching the model and exposing tools.
@@ -94,7 +94,7 @@ This makes repo-local env files and dot-directories part of the trust boundary f
 
 ## Adversary Playbook – Prompt‑Driven Secrets Inventory
 
-Task the agent to quickly triage and stage credentials/secrets for exfiltration while staying quiet:<sup>[[1]](#references)</sup>
+Task the agent to quickly triage and stage credentials/secrets for exfiltration while staying quiet.<sup>[[1]](#references)</sup>
 
 - Scope: recursively enumerate under $HOME and application/wallet dirs; avoid noisy/pseudo paths (`/proc`, `/sys`, `/dev`).
 - Performance/stealth: cap recursion depth; avoid `sudo`/priv‑escalation; summarise results.
@@ -131,10 +131,10 @@ Notes:
 
 ## Local Artifacts and Logs (Forensics)
 
-- Gemini CLI session logs: `~/.gemini/tmp/<uuid>/logs.json`<sup>[[1]](#references)</sup>
+- Gemini CLI session logs: `~/.gemini/tmp/<uuid>/logs.json`.<sup>[[1]](#references)</sup>
   - Fields commonly seen: `sessionId`, `type`, `message`, `timestamp`.
   - Example `message`: "@.bashrc what is in this file?" (user/agent intent captured).
-- Claude Code history: `~/.claude/history.jsonl`
+- Claude Code history: `~/.claude/history.jsonl`.<sup>[[1]](#references)</sup>
   - JSONL entries with fields like `display`, `timestamp`, `project`.
 
 ---
@@ -149,8 +149,8 @@ Key actors
 - Server: the MCP server (local or remote) exposing Prompts/Resources/Tools.
 
 AuthN/AuthZ
-- OAuth2 is common: an IdP authenticates, the MCP server acts as resource server.
-- After OAuth, the server issues an authentication token used on subsequent MCP requests. This is distinct from `Mcp-Session-Id` which identifies a connection/session after `initialize`.<sup>[[6]](#references)</sup>
+- OAuth2 is common: an IdP authenticates, the MCP server acts as resource server.<sup>[[3]](#references)</sup>
+- After OAuth, the authorization server issues an access token that the client presents to the MCP server, which acts as the protected resource/resource server. The access token is distinct from `Mcp-Session-Id`, which carries transport session state after `initialize` rather than authentication.<sup>[[6]](#references)[[7]](#references)</sup>
 
 ### Pre-Session Abuse: OAuth Discovery to Local Code Execution
 
@@ -165,7 +165,7 @@ When assessing remote MCP deployments, inspect the OAuth bootstrap path as caref
 
 Transports
 - Local: JSON‑RPC over STDIN/STDOUT.
-- Remote: Server‑Sent Events (SSE, still widely deployed) and streamable HTTP.<sup>[[7]](#references)</sup>
+- Remote: Server‑Sent Events (SSE, still widely deployed) and streamable HTTP.<sup>[[3]](#references)[[7]](#references)</sup>
 
 A) Session initialization
 - Obtain OAuth token if required (Authorization: Bearer ...).
@@ -175,7 +175,7 @@ A) Session initialization
 {"jsonrpc":"2.0","id":0,"method":"initialize","params":{"capabilities":{}}}
 ```
 
-- Persist the returned `Mcp-Session-Id` and include it on subsequent requests per transport rules.
+- Persist the returned `Mcp-Session-Id` and include it on subsequent requests per transport rules.<sup>[[7]](#references)</sup>
 
 B) Enumerate capabilities
 - Tools

@@ -2,6 +2,7 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
+This page is a collection of third-party tools and services rather than a recommended testing methodology. Validate each project's maintenance status and use tools only on systems you are authorized to assess; the OWASP Web Security Testing Guide provides a structured starting point for planning web tests.<sup>[[1]](#references)</sup>
 
 ## BlueTeam
 
@@ -55,7 +56,7 @@
 - [https://github.com/Naategh/dom-red](https://github.com/Naategh/dom-red) : Check a list of domain against Open Redirection
 - [https://github.com/prodigysml/Dr.-Watson](https://github.com/prodigysml/Dr.-Watson) : Burp plugin, offline analysis to discover domains, subdomains and IPs
 - [https://github.com/hahwul/WebHackersWeapons](https://github.com/hahwul/WebHackersWeapons): List of different tools
-- [https://github.com/gauravnarwani97/Trishul](https://github.com/gauravnarwani97/Trishul) : BurpSuite Plugingto find vulns (SQLi, XSS, SSTI)
+- [https://github.com/gauravnarwani97/Trishul](https://github.com/gauravnarwani97/Trishul) : Burp Suite plugin for finding vulnerabilities (SQLi, XSS, SSTI)
 - [https://github.com/fransr/postMessage-tracker](https://github.com/fransr/postMessage-tracker) : Chrome extension for tracking post-messages functions
 - [https://github.com/Quitten/Autorize](https://github.com/Quitten/Autorize) : Automatic authentication tests (remove cookies and try to send the request)
 - [https://github.com/pikpikcu/xrcross](https://github.com/pikpikcu/xrcross): XRCross is a Reconstruction, Scanner, and a tool for penetration / BugBounty testing. This tool was built to test (XSS|SSRF|CORS|SSTI|IDOR|RCE|LFI|SQLI) vulnerabilities
@@ -78,7 +79,7 @@
 
 ## Firmware
 
-Tools q veo q pueden molar para analizar firmares (automaticas):
+Tools that may help automate firmware analysis:
 
 - [https://github.com/craigz28/firmwalker](https://github.com/craigz28/firmwalker)
 - [https://github.com/fkie-cad/FACT_core](https://github.com/fkie-cad/FACT_core)
@@ -93,7 +94,7 @@ Como extraer firmware si no lo encontramos online: [https://www.youtube.com/watc
 
 Aqui un firware con vulnerabilidades para analizar: [https://github.com/scriptingxss/IoTGoat](https://github.com/scriptingxss/IoTGoat)
 
-y por aqui la metodologia owasp para analizar firmware: [https://github.com/scriptingxss/owasp-fstm](https://github.com/scriptingxss/owasp-fstm)
+OWASP firmware-testing methodology: [https://github.com/scriptingxss/owasp-fstm](https://github.com/scriptingxss/owasp-fstm)
 
 Firmware emulation: FIRMADYNE (https://github.com/firmadyne/firmadyne/) is a platform for automating the emulation and dynamic analysis of Linux-based firmware.
 
@@ -119,5 +120,8 @@ Firmware emulation: FIRMADYNE (https://github.com/firmadyne/firmadyne/) is a pla
 - [https://github.com/doyensec/awesome-electronjs-hacking](https://github.com/doyensec/awesome-electronjs-hacking) : This list aims to cover Electron.js security related topics.
 - [https://github.com/serain/bbrecon](https://github.com/serain/bbrecon) : Info about BB programs
 
+## References
+
+- [1] [OWASP Web Security Testing Guide](https://owasp.org/www-project-web-security-testing-guide/)
 
 {{#include ../banners/hacktricks-training.md}}

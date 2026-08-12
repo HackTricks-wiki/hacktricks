@@ -32,7 +32,7 @@ This technique may be also **used as an ASEP technique** as every application in
 
 ### Library Validation
 
-Even if the binary allows to use the **`DYLD_INSERT_LIBRARIES`** env variable, if the binary checks the signature of the library to load it won't load a custom what.
+Even if the binary allows the **`DYLD_INSERT_LIBRARIES`** environment variable, it will not load a custom library if it validates the library's signature.
 
 In order to load a custom library, the binary needs to have **one of the following entitlements**:
 
@@ -57,8 +57,8 @@ macos-dyld-hijacking-and-dyld_insert_libraries.md
 > [!CAUTION]
 > Remember that **previous Library Validation restrictions also apply** to perform Dylib hijacking attacks.
 
-As in Windows, in MacOS you can also **hijack dylibs** to make **applications** **execute** **arbitrary** **code** (well, actually froma regular user this coul not be possible as you might need a TCC permission towrite inside an `.app` bundle and hijack a library).\
-However, the way **MacOS** applications **load** libraries is **more restricted** than in Windows. This implies that **malware** developers can still use this technique for **stealth**, but the probably to be able to **abuse this to escalate privileges is much lower**.
+As on Windows, on macOS you can **hijack dylibs** to make **applications execute arbitrary code**. From a regular user account this may not be possible, because writing inside an `.app` bundle to hijack a library can require a TCC permission.\
+However, the way **macOS** applications **load** libraries is **more restricted** than on Windows. Malware developers can still use this technique for **stealth**, but abusing it to escalate privileges is much less likely.
 
 First of all, is **more common** to find that **MacOS binaries indicates the full path** to the libraries to load. And second, **MacOS never search** in the folders of the **$PATH** for libraries.
 
@@ -279,7 +279,7 @@ bool UnsafeHeader::isRestricted() const
 
 ```cpp
     // For security, setuid programs ignore DYLD_* environment variables.
-    // Additionally, the DYLD_* enviroment variables are removed
+    // Additionally, the DYLD_* environment variables are removed
     // from the environment, so that any child processes doesn't see them.
     for ( const char* const* s = proc.envp; *s != NULL; s++ ) {
         if ( strncmp(*s, "DYLD_", 5) != 0 ) {
@@ -328,7 +328,7 @@ DYLD_INSERT_LIBRARIES=inject.dylib ./hello-restrict
 Create a new certificate in the Keychain and use it to sign the binary:
 
 ```bash
-# Apply runtime proetction
+# Apply runtime protection
 codesign -s <cert-name> --option=runtime ./hello
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello #Library won't be injected
 

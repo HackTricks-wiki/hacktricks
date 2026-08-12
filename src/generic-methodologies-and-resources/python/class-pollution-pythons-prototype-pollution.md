@@ -4,7 +4,7 @@
 
 ## Basic Example
 
-Check how is possible to pollute classes of objects with strings:<sup>[[1]](#references)</sup>
+Changing `__qualname__` through an instance's class reference updates the class and its mutable base classes.<sup>[[1]](#references)</sup>
 
 ```python
 class Company: pass
@@ -31,6 +31,8 @@ print(c) #<__main__.Polluted_Company object at 0x1043a72b0>
 ```
 
 ## Basic Vulnerability Example
+
+A recursive merge can accept attacker-controlled mapping keys and write nested values through either item or attribute access.<sup>[[1]](#references)</sup>
 
 ```python
 # Initial state
@@ -69,7 +71,9 @@ print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 
 <details>
 
-<summary>Creating class property default value to RCE (subprocess)</summary><sup>[[1]](#references)</sup>
+<summary>Creating class property default value to RCE (subprocess)</summary>
+
+A shared base class can supply a default attribute consumed by a sibling-class command gadget.<sup>[[1]](#references)</sup>
 
 ```python
 from os import popen
@@ -122,7 +126,9 @@ print(system_admin_emp.execute_command())
 
 <details>
 
-<summary>Polluting other classes and global vars through <code>globals</code></summary><sup>[[1]](#references)</sup>
+<summary>Polluting other classes and global vars through <code>globals</code></summary>
+
+A function's `__globals__` mapping exposes the module namespace reachable from a method defined in that module.<sup>[[1]](#references)[[4]](#references)</sup>
 
 ```python
 def merge(src, dst):
@@ -156,7 +162,9 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <details>
 
-<summary>Arbitrary subprocess execution</summary><sup>[[1]](#references)</sup>
+<summary>Arbitrary subprocess execution</summary>
+
+On Windows, `Popen(..., shell=True)` uses the `COMSPEC` environment variable as the default shell, so this gadget demonstrates environment-backed command redirection.<sup>[[1]](#references)[[5]](#references)</sup>
 
 ```python
 import subprocess, json
@@ -192,7 +200,7 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <summary>Overwritting <strong><code>__kwdefaults__</code></strong></summary>
 
-**`__kwdefaults__`** is a special attribute of all functions, based on Python [documentation](https://docs.python.org/3/library/inspect.html), it is a “mapping of any default values for **keyword-only** parameters”. Polluting this attribute allows us to control the default values of keyword-only parameters of a function, these are the function’s parameters that come after \* or \*args.<sup>[[1]](#references)</sup>
+Python documents `__kwdefaults__` as the mapping of default values for keyword-only parameters, which follow `*` or `*args` in a function definition.<sup>[[4]](#references)</sup> The following gadget overwrites that mapping through a polluted function path.<sup>[[1]](#references)</sup>
 
 ```python
 from os import system
@@ -237,23 +245,22 @@ execute() #> Executing echo Polluted
 
 <summary>Overwriting Flask secret across files</summary>
 
-So, if you can do a class pollution over an object defined in the main python file of the web but **whose class is defined in a different file** than the main one. Because in order to access \_\_globals\_\_ in the previous payloads you need to access the class of the object or methods of the class, you will be able to **access the globals in that file, but not in the main one**. \
-Therefore, you **won't be able to access the Flask app global object** that defined the **secret key** in the main page:<sup>[[1]](#references)</sup>
+If the polluted object's class lives in a module different from the application's entry-point module, its methods' `__globals__` initially expose the class module's namespace. A traversal through the loader and `sys.modules.__main__` can then reach the entry-point module and its Flask `app` object.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
 
-In this scenario you need a gadget to traverse files to get to the main one to **access the global object `app.secret_key`** to change the Flask secret key and be able to [**escalate privileges** knowing this key](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
+Flask uses `app.secret_key` to sign the session cookie; knowing the key allows an attacker to create valid session data.<sup>[[6]](#references)</sup>
 
-A payload like this one [from this writeup](https://ctftime.org/writeup/36082):<sup>[[2]](#references)</sup>
+The original writeup demonstrates the following path to reach `app.secret_key`; CTFtime also hosts a copy of the writeup.<sup>[[2]](#references)[[3]](#references)</sup>
 
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
 
-Use this payload to **change `app.secret_key`** (the name in your app might be different) to be able to sign new and more privileges flask cookies.
+Changing the key can allow signing replacement session cookies and may enable privilege escalation; see [the Flask session tooling page](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).<sup>[[6]](#references)</sup>
 
 </details>
 
@@ -267,6 +274,10 @@ python-internal-read-gadgets.md
 ## References
 
 - [1] [Prototype Pollution in Python](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
-- [2] [CTFtime - idekCTF 2022: task manager writeup](https://ctftime.org/writeup/36082)
+- [2] [idekCTF 2022 task manager writeup (original)](https://kdxcxs.github.io/posts/wp/idekctf-2022-task-manager-wp/)
+- [3] [CTFtime - idekCTF 2022: task manager writeup](https://ctftime.org/writeup/36082)
+- [4] [inspect — Inspect live objects](https://docs.python.org/3/library/inspect.html)
+- [5] [subprocess — Subprocess management](https://docs.python.org/3/library/subprocess.html)
+- [6] [Quickstart — Flask Documentation](https://flask.palletsprojects.com/en/stable/quickstart/)
 
 {{#include ../../banners/hacktricks-training.md}}

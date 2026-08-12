@@ -96,4 +96,6 @@ anti-forensic-techniques.md
 file-integrity-monitoring.md
 {{#endref}}
 
+## References
+
 {{#include ../../banners/hacktricks-training.md}}

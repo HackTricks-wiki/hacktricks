@@ -6,88 +6,88 @@ If you have a pcap containing the communication via USB of a keyboard like the f
 
 ![USB Keystrokes: If you have a pcap containing the communication via USB of a keyboard like the following one](<../../../images/image (962).png>)
 
-USB keyboards usually speak the HID **boot protocol**, so every interrupt transfer towards the host is only 8 bytes long: one byte of modifier bits (Ctrl/Shift/Alt/Super), one reserved byte, and up to six keycodes per report. Decoding those bytes is enough to rebuild everything that was typed.
+For a keyboard using the HID **boot protocol**, each Interrupt IN report has a fixed 8-byte layout: one modifier byte, one reserved byte, and six keycode bytes. The host compares successive reports and maps keycodes to HID usages to reconstruct key events.<sup>[[8]](#references)</sup>
 
 ## USB HID report basics
 
-The typical IN report looks like:
+The standard boot keyboard input report is structured as follows.<sup>[[8]](#references)[[9]](#references)</sup>
 
 | Byte | Meaning |
 | --- | --- |
-| 0 | Modifier bitmap (`0x02` = Left Shift, `0x20` = Right Alt, etc.). Multiple bits can be set simultaneously. |
-| 1 | Reserved/padding but often reused by gaming keyboards for vendor data. |
+| 0 | Modifier bitmap (`0x02` = Left Shift, `0x20` = Right Shift, `0x40` = Right Alt, etc.). Multiple bits can be set simultaneously. |
+| 1 | Reserved byte; unused reports should normally set it to zero. OEM or system-specific use is not portable. |
 | 2-7 | Up to six concurrent keycodes in USB usage ID format (`0x04 = a`, `0x1E = 1`). `0x00` means "no key". | 
 
-Keyboards without NKRO usually send `0x01` in byte 2 when more than six keys are pressed to signal "rollover". Understanding this layout helps when you only have the raw `usb.capdata` bytes.
+In the boot layout, usage ID `0x01` (`Keyboard ErrorRollOver`) is reported in all key slots when more than six non-modifier keys are pressed; it can also signal an unrecognizable combination.<sup>[[8]](#references)[[9]](#references)</sup> Understanding this layout helps when you only have the raw `usb.capdata` bytes.
 
 ## Extracting HID data from a PCAP
 
 ### Identify the keyboard interface first
 
-On busy captures, identify the HID keyboard before dumping any reports. A reliable starting point is the interface descriptor response:<sup>[[2]](#references)</sup>
+On busy captures, identify the HID keyboard before dumping any reports. A reliable starting point is the interface descriptor response:<sup>[[3]](#references)[[8]](#references)</sup>
 
 ```text
 usb.transfer_type == 0x02 && usb.endpoint_address.direction == 1 && usb.bDescriptorType == 4 && usb.bInterfaceClass == 3
 ```
 
-Look at `usb.bInterfaceSubClass` and `usb.bInterfaceProtocol`:
+The HID class defines these interface values:<sup>[[8]](#references)</sup>
 
-- `subclass == 1` and `protocol == 1` usually means a boot keyboard
-- `protocol == 2` is typically a mouse
-- `protocol == 0` often means a vendor-defined or NKRO-style HID interface that still carries keyboard data, but not in the simple 8-byte boot layout
+- `subclass == 1` is the Boot Interface Subclass; with `protocol == 1` it identifies a boot keyboard
+- `protocol == 2` identifies a boot mouse
+- `protocol == 0` means no boot protocol; inspect the HID report descriptor instead of assuming an 8-byte layout
 
-Once the interface is known, pin your filters to `usb.bus_id`, `usb.device_address`, and if possible `usb.interface_number` before exporting anything.
+Once the interface is known, pin your filters to `usb.bus_id`, `usb.device_address`, and if possible `usb.bInterfaceNumber` before exporting anything.
 
 ### Wireshark workflow
 
-1. **Isolate the device**: filter on interrupt IN traffic from the keyboard, e.g. `usb.transfer_type == 0x01 && usb.endpoint_address.direction == "IN" && usb.device_address == 3`.
-2. **Add useful columns**: right-click the `Leftover Capture Data` field (`usb.capdata`) and your preferred `usbhid.*` fields (e.g. `usbhid.boot_report.keyboard.keycode_1`) to follow keystrokes without opening every frame.
+1. **Isolate the device**: filter on interrupt IN traffic from the keyboard, e.g. `usb.transfer_type == 0x01 && usb.endpoint_address.direction == 1 && usb.device_address == 3`.
+2. **Add useful columns**: right-click the `Leftover Capture Data` field (`usb.capdata`) and your preferred `usbhid.*` fields (e.g. `usbhid.boot_report.keyboard.keycode_1`) to follow keystrokes without opening every frame.<sup>[[11]](#references)</sup>
 3. **Hide empty reports**: apply `!(usb.capdata == 00:00:00:00:00:00:00:00)` to drop idle frames.
-4. **Export for post-processing**: `File -> Export Packet Dissections -> As CSV`, include `frame.number`, `usb.src`, `usb.capdata`, and `usbhid.modifiers` to script the reconstruction later.
+4. **Export for post-processing**: `File -> Export Packet Dissections -> As CSV`, include `frame.number`, `usb.src`, `usb.capdata`, and decoded modifier fields such as `usbhid.boot_report.keyboard.modifier.left_shift` and `usbhid.boot_report.keyboard.modifier.right_alt` to script the reconstruction later.<sup>[[10]](#references)[[11]](#references)</sup>
 
 ### Command-line workflow
 
-`ctf-usb-keyboard-parser` already automates the classic tshark + sed pipeline:
+The classic extraction pattern—dump `usb.capdata`, drop idle reports, and map usage IDs—appears in the original 2017 analysis and its walkthrough.<sup>[[1]](#references)[[2]](#references)</sup>
+
+The `ctf-usb-keyboard-parser` repository automates the classic tshark + sed pipeline:<sup>[[5]](#references)</sup>
 
 ```bash
 tshark -r ./usb.pcap -Y 'usb.capdata && usb.data_len == 8' -T fields -e usb.capdata | sed 's/../:&/g2' > keystrokes.txt
 python3 usbkeyboard.py ./keystrokes.txt
 ```
 
-On newer captures you can keep both `usb.capdata` and the richer `usbhid.data` field by batching per device:
+On newer captures, prefer Wireshark's decoded `usbhid.data` field and fall back to `usb.capdata`; write one payload per report to a per-device file:<sup>[[7]](#references)[[10]](#references)[[11]](#references)</sup>
 
 ```bash
-tshark -r usb.pcapng -Y "usb.capdata || usbhid.data" -T fields -e usb.src -e usb.capdata -e usbhid.data | \
-  sort -s -k1,1 | \
-  awk '{ printf "%s", (NR==1 ? $1 : pre!=$1 ? "\n" $1 : "") " " $2; pre=$1 }' | \
-  awk '{ for (i=2; i<=NF; i++) print $i > "usbdata-" $1 ".txt" }'
+tshark -r usb.pcapng -Y "usb.capdata || usbhid.data" -T fields -E separator=$'\t' -e usb.src -e usb.capdata -e usbhid.data | \
+  awk -F '\t' '{ payload = ($3 != "" ? $3 : $2); if (payload != "") print payload > "usbdata-" $1 ".txt" }'
 ```
 
-Those per-device files drop straight into any decoder. If the capture came from BLE keyboards tunneled over GATT, filter on `btatt.value && frame.len == 20` and dump the hex payloads before decoding.
+Those per-device files can be fed to a decoder after normalizing the hex format it expects. If the capture came from BLE keyboards tunneled over GATT, filter on `btatt.value && frame.len == 20` and dump the hex payloads before decoding.<sup>[[7]](#references)</sup>
 
 ### When the report is not the classic 8-byte boot report
 
-Recent gaming keyboards, split keyboards, and composite HID devices often expose a non-boot keyboard interface where the payload no longer matches `modifier,reserved,key1..key6`.
+A non-boot interface or a report ID can change the payload layout, so do not assume every keyboard report matches `modifier,reserved,key1..key6`.<sup>[[8]](#references)[[11]](#references)</sup>
 
 - Prefer `usbhid.data` over `usb.capdata` when Wireshark has already parsed the HID layer.
-- If every line starts with a constant prefix or report ID, strip it with an offset-aware decoder rather than assuming byte 0 is always the modifier.
-- Some USBPcap exports omit the reserved byte, so decoders that support `--no-reserved` or a custom offset save time.
+- If every line starts with a constant prefix or report ID, strip it with an offset-aware decoder rather than assuming byte 0 is always the modifier.<sup>[[7]](#references)</sup>
+- Some USBPcap exports omit the reserved byte, so decoders that support `--no-reserved` or a custom offset save time.<sup>[[7]](#references)</sup>
 - If the HID report descriptor or BLE HOGP report map is present in the capture, use it to recover the actual field layout before writing a parser.
 
 ## Automating the decoding
 
-- **ctf-usb-keyboard-parser** remains handy for quick CTF challenges and already ships in the repository.<sup>[[3]](#references)</sup>
-- **CTF-Usb_Keyboard_Parser** (`main.py`) parses both `pcap` and `pcapng` files natively, understands `LinkTypeUsbLinuxMmapped`/`LinkTypeUsbPcap`, and does not require tshark, so it works nicely inside isolated sandboxes.<sup>[[4]](#references)</sup>
-- **USB-HID-decoders** adds keyboard, mouse, and tablet visualizers. You can either run the `extract_hid_data.sh` helper (tshark backend) or `extract_hid_data.py` (scapy backend) and then feed the resulting text file to the decoder or replay modules to watch the keystrokes unfold.<sup>[[5]](#references)</sup>
+- **ctf-usb-keyboard-parser** remains handy for quick CTF challenges and already ships in the repository.<sup>[[5]](#references)</sup>
+- **CTF-Usb_Keyboard_Parser** (`main.py`) parses both `pcap` and `pcapng` files natively, understands `LinkTypeUsbLinuxMmapped`/`LinkTypeUsbPcap`, and does not require tshark or another external dependency, so it is suitable for isolated sandboxes.<sup>[[6]](#references)</sup>
+- **USB-HID-decoders** adds keyboard, mouse, and tablet visualizers. You can either run the `extract_hid_data.sh` helper (tshark backend) or `extract_hid_data.py` (scapy backend) and then feed the resulting text file to the decoder or replay modules to watch the keystrokes unfold.<sup>[[7]](#references)</sup>
 
 ### Stateful decoding matters
 
-USB interrupt captures usually contain both the key press and one or more repeated copies of the same report before the release event arrives. A practical decoder should:<sup>[[2]](#references)</sup>
+USB boot keyboards send reports at the idle rate even when there is no new key event, so captures may contain repeated reports before the release event. A practical decoder should:<sup>[[3]](#references)[[8]](#references)</sup>
 
 - emit only newly pressed keycodes compared to the previous report
-- keep modifier state (`Shift`, `Ctrl`, `AltGr`) from byte 0 or the parsed `usbhid.boot_report.keyboard.modifier` field
+- keep modifier state (`Shift`, `Ctrl`, `AltGr`) from byte 0 or parsed fields such as `usbhid.boot_report.keyboard.modifier.left_shift` and `usbhid.boot_report.keyboard.modifier.right_alt`
 - track toggle keys such as `Caps Lock`, because uppercase output is not controlled by Shift alone
-- remember that HID usage IDs are layout-agnostic: `0x1d` is the physical `z`/`y` key position depending on the host keyboard layout
+- remember that HID usage IDs are layout-agnostic: `0x1d` is the physical `z`/`y` key position depending on the host keyboard layout.<sup>[[9]](#references)</sup>
 
 ## Quick Python decoder
 
@@ -125,17 +125,23 @@ Feed it with the plain hex lines dumped earlier to get an instant rough reconstr
 ## Troubleshooting tips
 
 - If Wireshark does not populate `usbhid.*` fields, the HID report descriptor was probably not captured. Replug the keyboard while capturing or fall back to raw `usb.capdata`.
-- On Linux software captures, `usbmon` is the normal source; on Windows, Wireshark depends on the **USBPcap** extcap to see raw USB URBs at all.<sup>[[1]](#references)</sup>
+- On Linux software captures, `usbmon` is the normal source; on Windows, Wireshark depends on the **USBPcap** extcap to see raw USB URBs at all.<sup>[[4]](#references)</sup>
 - If the keyboard was attached through a hub or dock, confirm the interface descriptor first and then decode only that device/interface pair. Composite HID captures frequently mix keyboard and mouse reports.
-- Windows captures require the **USBPcap** extcap interface; make sure it survived Wireshark upgrades, as missing extcaps leave you with empty device lists.<sup>[[1]](#references)</sup>
-- Always correlate `usb.bus_id:device:interface` (e.g. `1.9.1`) before decoding anything — mixing multiple keyboards or storage devices leads to nonsense keystrokes.
+- Windows captures require the **USBPcap** extcap interface; make sure it survived Wireshark upgrades, as missing extcaps leave you with empty device lists.<sup>[[4]](#references)</sup>
+- Always correlate the bus, device, and interface tuple (`usb.bus_id`, `usb.device_address`, `usb.bInterfaceNumber`; e.g. `1.9.1`) before decoding anything — mixing multiple keyboards or storage devices leads to nonsense keystrokes.<sup>[[10]](#references)</sup>
 
 ## References
 
-- [1] [Wireshark USB capture setup](https://wiki.wireshark.org/CaptureSetup/USB)
-- [2] [ACSC Quals 2023 - pcap 1, 2 write-up](https://hackmd.io/@t510599/acsc-2023-quals-pcap)
-- [3] [ctf-usb-keyboard-parser](https://github.com/TeamRocketIst/ctf-usb-keyboard-parser)
-- [4] [CTF-Usb_Keyboard_Parser](https://github.com/5h4rrk/CTF-Usb_Keyboard_Parser)
-- [5] [USB-HID-decoders](https://github.com/Nissen96/USB-HID-decoders)
+- [1] [HackIT CTF 2017 Writeup: foren100](https://0xd13a.github.io/ctfs/hackit2017/foren100/)
+- [2] [USB Keyboard packet capture analysis](https://naykisec.github.io/USB-Keyboard-packet-capture-analysis/)
+- [3] [ACSC Quals 2023 - pcap 1, 2 write-up](https://hackmd.io/@t510599/acsc-2023-quals-pcap)
+- [4] [Wireshark USB capture setup](https://wiki.wireshark.org/CaptureSetup/USB)
+- [5] [ctf-usb-keyboard-parser](https://github.com/TeamRocketIst/ctf-usb-keyboard-parser)
+- [6] [CTF-Usb_Keyboard_Parser](https://github.com/5h4rrk/CTF-Usb_Keyboard_Parser)
+- [7] [USB-HID-decoders](https://github.com/Nissen96/USB-HID-decoders)
+- [8] [Device Class Definition for Human Interface Devices (HID) 1.11](https://www.usb.org/sites/default/files/documents/hid1_11.pdf)
+- [9] [HID Usage Tables 1.2](https://usb.org/sites/default/files/hut1_2.pdf)
+- [10] [Wireshark Display Filter Reference: USB](https://www.wireshark.org/docs/dfref/u/usb.html)
+- [11] [Wireshark Display Filter Reference: USB HID](https://www.wireshark.org/docs/dfref/u/usbhid.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

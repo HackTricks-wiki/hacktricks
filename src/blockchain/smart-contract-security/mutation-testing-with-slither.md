@@ -48,9 +48,9 @@ Older mutation engines relied on regex or line-oriented rewrites. That works, bu
 - Generating every possible variant on a weak line wastes large amounts of runtime
 
 AST- or Tree-sitter-based tooling improves this by targeting structured nodes instead of raw lines:<sup>[[1]](#references)</sup>
-- **slither-mutate** uses Slither's Solidity AST<sup>[[4]](#references)</sup>
-- **mewt** uses Tree-sitter as a language-agnostic core<sup>[[6]](#references)</sup>
-- **MuTON** builds on `mewt` and adds first-class support for TON languages such as FunC, Tolk, and Tact<sup>[[7]](#references)</sup>
+- **slither-mutate** uses Slither's Solidity AST.<sup>[[4]](#references)</sup>
+- **mewt** uses Tree-sitter as a language-agnostic core.<sup>[[6]](#references)</sup>
+- **MuTON** builds on `mewt` and adds first-class support for TON languages such as FunC, Tolk, and Tact.<sup>[[7]](#references)</sup>
 
 This makes multi-line constructs and expression-level mutations much more reliable than regex-only approaches.
 
@@ -179,4 +179,3 @@ Otherwise, you risk hard-coding implementation accidents into the test suite and
 - [7] [MuTON](https://github.com/trailofbits/muton)
 
 {{#include ../../banners/hacktricks-training.md}}
-

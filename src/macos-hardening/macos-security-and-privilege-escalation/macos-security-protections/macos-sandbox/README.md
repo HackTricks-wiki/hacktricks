@@ -112,7 +112,7 @@ AAAhAboBAAAAAAgAAABZAO4B5AHjBMkEQAUPBSsGPwsgASABHgEgASABHwEf...
 ```
 
 > [!WARNING]
-> Everything created/modified by a Sandboxed application will get the **quarantine attribut**e. This will prevent a sandbox space by triggering Gatekeeper if the sandbox app tries to execute something with **`open`**.
+> Everything created or modified by a sandboxed application gets the **quarantine attribute**. This can prevent a sandbox escape by triggering Gatekeeper if the sandboxed application tries to execute something with **`open`**.
 
 ## Sandbox Profiles
 
@@ -123,7 +123,7 @@ Here you can find an example:
 ```scheme
 (version 1) ; First you get the version
 
-(deny default) ; Then you shuold indicate the default action when no rule applies
+(deny default) ; Then you should indicate the default action when no rule applies
 
 (allow network*) ; You can use wildcards and allow everything
 
@@ -141,7 +141,7 @@ Here you can find an example:
 > [!TIP]
 > Check this [**research**](https://reverse.put.as/2011/09/14/apple-sandbox-guide-v1-0/) **to check more actions that could be allowed or denied.**<sup>[[5]](#references)</sup>
 >
-> Note that in the compiled version of a profile the name of the operations are substituded by their entries in an array known by the dylib and the kext, making the compiled version shorter and more difficult to read.
+> Note that in the compiled version of a profile the name of the operations are substituted by their entries in an array known by the dylib and the kext, making the compiled version shorter and more difficult to read.
 
 Important **system services** also run inside their own custom **sandbox** such as the `mdnsresponder` service. You can view these custom **sandbox profiles** inside:
 
@@ -152,7 +152,7 @@ Important **system services** also run inside their own custom **sandbox** such 
 
 **App Store** apps use the **profile** **`/System/Library/Sandbox/Profiles/application.sb`**. You can check in this profile how entitlements such as **`com.apple.security.network.server`** allows a process to use the network.
 
-Then, some **Apple daemon services** use different profiles located in `/System/Library/Sandbox/Profiles/*.sb` or `/usr/share/sandbox/*.sb`. These sandboxes are applied in the main funciton calling the API `sandbox_init_XXX`.<sup>[[3]](#references)</sup>
+Then, some **Apple daemon services** use different profiles located in `/System/Library/Sandbox/Profiles/*.sb` or `/usr/share/sandbox/*.sb`. These sandboxes are applied in the main function calling the API `sandbox_init_XXX`.<sup>[[3]](#references)</sup>
 
 **SIP** is a Sandbox profile called platform_profile in `/System/Library/Sandbox/rootless.conf`.
 
@@ -232,7 +232,7 @@ It's possible to trace all the checks sandbox performs every time an action is c
 (trace /tmp/trace.out)
 ```
 
-Ans then just execute something using that profile:
+And then just execute something using that profile:
 
 ```bash
 sandbox-exec -f /tmp/trace.sb /bin/ls
@@ -388,7 +388,7 @@ A good example of that is the function **`_mpo_file_check_mmap`** which hooked *
 Moreover, out of the hundred(s) hooks Sandbox uses, there are 3 in particular that are very interesting:
 
 - `mpo_proc_check_for`: It applies the profile if needed and if it wasn't previously applied
-- `mpo_vnode_check_exec`: Called when a process loads the associated binary, then a profile check is perfomed and also a check forbidding SUID/SGID executions.
+- `mpo_vnode_check_exec`: Called when a process loads the associated binary, then a profile check is performed and also a check forbidding SUID/SGID executions.
 - `mpo_cred_label_update_execve`: This is called when the label is assigned. This is the longest one as it's called when the binary is fully loaded but it hasn't been executed yet. It'll perform actions such as creating the sandbox object, attach sandbox struct to the kauth credentials, remove access to mach ports...
 
 Note that **`_cred_sb_evalutate`** is a wrapper over **`sb_evaluate_internal`** and this function gets the credentials passed and then performs the evaluation using the **`eval`** function which usually evaluates the **platform profile** which is by default applied to all processes and then the **specific process profile**. Note that the platform profile is one of the main components of **SIP** in macOS.

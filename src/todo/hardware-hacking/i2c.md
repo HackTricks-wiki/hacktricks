@@ -4,6 +4,9 @@
 
 ## Bus Pirate
 
+> [!CAUTION]
+> Verify the target voltage, pinout, pull-up arrangement, and common ground before connecting a Bus Pirate. Do not enable the Bus Pirate power supplies on a live, target-powered bus merely to sniff it; two supplies can contend and damage hardware. The transcript below is a device-specific Bus Pirate v3/community-firmware example, not a universal wiring recipe.<sup>[[1]](#references)[[2]](#references)</sup>
+
 To test a Bus Pirate is working, connect +5V with VPU and 3.3V with ADC and access the bus pirate (Using Tera Term for example) and use the command `~`:
 
 ```bash
@@ -51,7 +54,7 @@ To connect with the bus pirate you can follow the docs:
 
 ![Use command - Press space: To connect with the bus pirate you can follow the docs](<../../images/image (484).png>)
 
-In this case I'm going to connect to an EPROM: ATMEL901 24C256 PU27:
+In this case the target is a 24C256-family I²C EEPROM. Confirm the exact suffix/datasheet because supported supply voltage varies by part.<sup>[[3]](#references)</sup>
 
 ![Use command - Press space: In this case I'm going to connect to an EPROM: ATMEL901 24C256 PU27](<../../images/image (964).png>)
 
@@ -74,7 +77,7 @@ GND     3.3V    5.0V    ADC     VPU     AUX     SCL     SDA     -       -
 P       P       P       I       I       I       I       I       I       I
 GND     3.27V   4.96V   0.00V   4.96V   L       H       H       L       L
 
-#Notice how the VPU is in 5V becausethe EPROM needs 5V signals
+# This particular setup used 5 V pull-ups; do not generalize it to every 24C256 variant or board
 
 # Get mode options
 HiZ>m
@@ -105,7 +108,7 @@ Set speed:
  3. ~100kHz
  4. ~240kHz
 
-# Select communication spped
+# Select communication speed
 (1)> 2
 Clutch disengaged!!!
 To finish setup, start up the power supplies with command 'W'
@@ -127,8 +130,8 @@ I2C>(1)
 Searching I2C address space. Found devices at:
 0xA0(0x50 W) 0xA1(0x50 R)
 
-# Note that each slave will have a write address and a read address
-# 0xA0 ad 0xA1 in the previous case
+# Bus Pirate displays the 8-bit address bytes 0xA0 (write) and 0xA1 (read)
+# Both correspond to the same 7-bit I2C target address, 0x50
 
 # Write "BBB" in address 0x69
 I2C>[0xA0 0x00 0x69 0x42 0x42 0x42]
@@ -195,7 +198,7 @@ Clutch disengaged!!!
 To finish setup, start up the power supplies with command 'W'
 Ready
 
-# EVEN IF YOU ARE GOING TO SNIFF YOU NEED TO POWER ON!
+# Historical transcript powered this bench setup. On a live target-powered bus, leave Bus Pirate power OFF.
 
 I2C>W
 POWER SUPPLIES ON
@@ -208,5 +211,11 @@ Sniffer
 Any key to exit
 [0xA0+0x00+0x69+0x41+0x41+0x41+0x20+0x48+0x69+0x20+0x44+0x72+0x65+0x67+0x21+0x20+0x41+0x41+0x41+0x00+]
 ```
+
+## References
+
+- [1] [Bus Pirate documentation — I²C](https://docs.buspirate.com/docs/devices/i2c-eeprom/)
+- [2] [NXP — I²C-bus specification and user manual](https://www.nxp.com/docs/en/user-guide/UM10204.pdf)
+- [3] [Microchip — AT24C256C I²C serial EEPROM datasheet](https://ww1.microchip.com/downloads/en/DeviceDoc/AT24C256C-I2C-Compatible-Two-Wire-Serial-EEPROM-256-Kbit-32,768-x-8-20005915A.pdf)
 
 {{#include ../../banners/hacktricks-training.md}}

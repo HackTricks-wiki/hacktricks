@@ -53,5 +53,6 @@ def main():
 main()
 ```
 
-{{#include ../../banners/hacktricks-training.md}}
+## References
 
+{{#include ../../banners/hacktricks-training.md}}

@@ -51,7 +51,7 @@ For more detailed information on `Info.plist` keys and their meanings, the Apple
 
 ## Resource Hijacking (Dirty NIB / NIB Injection)
 
-Before Ventura, swapping UI resources in a signed app could bypass shallow code signing and yield code execution with the app’s entitlements. Current research (2024) shows this still works on pre‑Ventura and on un-quarantined builds:<sup>[[1]](#references)[[2]](#references)</sup>
+Before Ventura, swapping UI resources in a signed app could bypass shallow code signing and yield code execution with the app’s entitlements. Current research (2024) shows this still works on pre-Ventura and on unquarantined builds:<sup>[[1]](#references)</sup><sup>[[2]](#references)</sup>
 
 1. Copy target app to a writable location (e.g., `/tmp/Victim.app`).
 2. Replace `Contents/Resources/MainMenu.nib` (or any nib declared in `NSMainNibFile`) with a malicious one that instantiates `NSAppleScript`, `NSTask`, etc.

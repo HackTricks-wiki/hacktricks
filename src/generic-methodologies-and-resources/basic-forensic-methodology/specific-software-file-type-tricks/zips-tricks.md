@@ -12,7 +12,7 @@
 
 The [Zip file format specification](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) provides comprehensive details on the structure and standards of zip files.<sup>[[4]](#references)</sup>
 
-It's crucial to note that password-protected zip files **do not encrypt filenames or file sizes** within, a security flaw not shared with RAR or 7z files which encrypt this information. Furthermore, zip files encrypted with the older ZipCrypto method are vulnerable to a **plaintext attack** if an unencrypted copy of a compressed file is available.<sup>[[1]](#references)</sup> This attack leverages the known content to crack the zip's password, a vulnerability detailed in [HackThis's article](https://www.hackthis.co.uk/articles/known-plaintext-attack-cracking-zip-files) and further explained in [this academic paper](https://www.cs.auckland.ac.nz/~mike/zipattacks.pdf).<sup>[[11]](#references)[[12]](#references)</sup> However, zip files secured with **AES-256** encryption are immune to this plaintext attack, showcasing the importance of choosing secure encryption methods for sensitive data.<sup>[[1]](#references)</sup>
+It's crucial to note that traditional password-protected ZIP files generally leave filenames and file sizes visible, unlike header-encryption modes supported by RAR and 7z. Furthermore, ZIP files encrypted with the older ZipCrypto method are vulnerable to a **plaintext attack** if an unencrypted copy of a compressed file is available.<sup>[[1]](#references)</sup> This attack leverages the known content to crack the ZIP's password, as explained in [this academic paper](https://math.ucr.edu/~mike/zipattacks.pdf) and illustrated in [this Hack This Site walk-through](https://www.hackthissite.org/articles/read/793).<sup>[[11]](#references)[[12]](#references)</sup> However, the ZipCrypto known-plaintext attack does not apply to entries secured with **AES-256** encryption.<sup>[[1]](#references)</sup>
 
 ---
 
@@ -119,7 +119,7 @@ Inspection:
 zipdetails -v sample.apk | sed -n '/Extra ID/,+4p' | head -n 50
 ```
 
-Examples observed: unknown IDs like `0xCAFE` ("Java Executable") or `0x414A` ("JA:") carrying large payloads.
+Examples observed: unknown IDs like `0xCAFE` ("Java Executable") or `0x414A` ("JA:") carrying large payloads.<sup>[[2]](#references)</sup>
 
 DFIR heuristics:
 - Alert when Extra fields are unusually large on core entries (`classes*.dex`, `AndroidManifest.xml`, `resources.arsc`).
@@ -180,35 +180,36 @@ Blue-team detection ideas:
 
 ### Concatenated central directories (multi-EOCD evasion)
 
-Recent phishing campaigns ship a single blob that is actually **two ZIP files concatenated**. Each has its own End of Central Directory (EOCD) + central directory. Different extractors parse different directories (7zip reads the first, WinRAR the last), letting attackers hide payloads that only some tools show. This also bypasses basic mail gateway AV that inspects only the first directory.<sup>[[5]](#references)[[6]](#references)</sup>
+In a 2024 phishing campaign, attackers shipped a single blob that was actually **two ZIP files concatenated**. Each had its own End of Central Directory (EOCD) record and central directory. Different extractors parsed different directories (7-Zip read the first, while WinRAR read the last), letting attackers hide payloads that only some tools showed; scanners that inspect only one directory can miss the other archive.<sup>[[5]](#references)[[6]](#references)</sup>
 
 **Triage commands**
 
 ```bash
 # Count EOCD signatures
 binwalk -R "PK\x05\x06" suspect.zip
-# Dump central-directory offsets
-zipdetails -v suspect.zip | grep -n "End Central"
+# Show EOCD records and their central-directory offsets
+zipdetails --scan -v suspect.zip | grep -ni -A2 "end central"
 ```
 
-If more than one EOCD appears or there is "data after payload" warnings, split the blob and inspect each part:
+If more than one EOCD appears or there are "data after payload" warnings, split the blob and inspect each part:
 
 ```bash
-# recover the second archive (heuristic: start at second EOCD offset)
-# adjust OFF based on binwalk output
+# Recover the second archive from its first local-file-header offset.
+binwalk -R "PK\x03\x04" suspect.zip
+# Adjust OFF to the second archive's local-header offset from that output.
 OFF=123456
-dd if=suspect.zip bs=1 skip=$OFF of=tail.zip
+dd if=suspect.zip bs=1 skip="$OFF" of=tail.zip
 7z l tail.zip   # list hidden content
 ```
 
 ### Quoted-overlap / overlapping-entry bombs (non-recursive)
 
-Modern "better zip bomb" builds a tiny **kernel** (highly compressed DEFLATE block) and reuses it via overlapping local headers. Every central directory entry points to the same compressed data, achieving >28M:1 ratios without nesting archives. Libraries that trust central directory sizes (Python `zipfile`, Java `java.util.zip`, Info-ZIP prior to hardened builds) can be forced to allocate petabytes.<sup>[[7]](#references)[[8]](#references)</sup>
+Quoted-overlap ZIP bombs build a tiny **kernel** (a highly compressed DEFLATE block) and reuse it across overlapping entries. Full-overlap variants point multiple central-directory entries at one local header, while quoted-overlap variants quote local headers inside DEFLATE streams; the published construction achieves more than 28M:1 without nested archives.<sup>[[7]](#references)</sup>
 
 **Quick detection (duplicate LFH offsets)**
 
 ```python
-# detect overlapping entries by identical relative offsets
+# detect full-overlap variants by identical relative offsets
 import struct, sys
 buf=open(sys.argv[1],'rb').read()
 off=0; seen=set()
@@ -223,9 +224,9 @@ while True:
 ```
 
 **Handling**
-- Perform a dry-run walk: `zipdetails -v file.zip | grep -n "Rel Off"` and ensure offsets are strictly increasing and unique.
-- Cap accepted total uncompressed size and entry count before extraction (`zipdetails -t` or custom parser).
-- When you must extract, do it inside a cgroup/VM with CPU+disk limits (avoid unbounded inflation crashes).
+- Perform a dry-run walk: `zipdetails -v file.zip | grep -n "Local Header Offset"` and compare referenced local-header offsets and compressed-data ranges; duplicate offsets flag full-overlap variants.<sup>[[7]](#references)[[8]](#references)</sup>
+- Cap accepted total uncompressed size and entry count before extraction with a parser; `zipinfo -t file.zip` reports totals but does not enforce a safety limit.<sup>[[8]](#references)</sup>
+- When you must extract, do it inside a cgroup/VM with CPU and disk limits (avoid unbounded inflation crashes).<sup>[[8]](#references)</sup>
 
 ---
 
@@ -268,11 +269,11 @@ zipinfo -v suspect.zip | grep -E "file name|offset|comment"
 ```
 
 Heuristics:
-- Reject or isolate archives with mismatched LFH/CD names, duplicate filenames, multiple EOCD records, or trailing bytes after the final EOCD.<sup>[[10]](#references)</sup>
-- Treat ZIPs using unusual Unicode-path extra fields or inconsistent comments as suspicious if different tools disagree on the extracted tree.<sup>[[9]](#references)</sup>
+- For security-sensitive ingestion, reject or isolate archives with mismatched LFH/CD names, duplicate filenames, multiple EOCD records, or trailing bytes after the final EOCD.<sup>[[9]](#references)[[10]](#references)</sup>
+- Treat ZIPs using unusual Unicode-path extra fields or inconsistent comments as suspicious if different tools disagree on the extracted tree.<sup>[[4]](#references)[[9]](#references)</sup>
 - If analysis matters more than preserving the original bytes, repackage the archive with a strict parser after extraction in a sandbox and compare the resulting file list to the original metadata.
 
-This matters beyond package ecosystems: the same ambiguity class can hide payloads from mail gateways, static scanners, and custom ingestion pipelines that "peek" at ZIP contents before a different extractor handles the archive.
+This matters beyond package ecosystems: the same ambiguity class can hide payloads from mail gateways, static scanners, and custom ingestion pipelines that "peek" at ZIP contents before a different extractor handles the archive.<sup>[[9]](#references)</sup>
 
 ---
 
@@ -282,15 +283,15 @@ This matters beyond package ecosystems: the same ambiguity class can hide payloa
 
 - [1] [CTF Forensics Field Guide (Mike's Blog, CTF category)](https://michael-myers.github.io/blog/categories/ctf/)
 - [2] [GodFather – Part 1 – A multistage dropper (APK ZIP anti-reversing)](https://shindan.io/blog/godfather-part-1-a-multistage-dropper)
-- [3] [zipdetails (Archive::Zip script)](https://metacpan.org/pod/distribution/Archive-Zip/scripts/zipdetails)
+- [3] [zipdetails (IO::Compress script)](https://metacpan.org/dist/IO-Compress/view/bin/zipdetails)
 - [4] [ZIP File Format Specification (PKWARE APPNOTE.TXT)](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT)
 - [5] [Flexible Structure of Zip Archives Exploited to Hide Malware Undetected (Perception Point)](https://perception-point.io/news/flexible-structure-of-zip-archives-exploited-to-hide-malware-undetected/)
 - [6] [Hackers bury malware in new ZIP file attack — concatenated ZIP central directories](https://www.tomshardware.com/tech-industry/cyber-security/hackers-bury-malware-in-new-zip-file-attack-combining-multiple-zips-into-one-bypasses-antivirus-protections)
-- [7] [A better zip bomb (David Fifield, USENIX WOOT 2019)](https://www.bamsoftware.com/hacks/zipbomb/)
+- [7] [A better zip bomb (David Fifield, USENIX WOOT 2019)](https://www.usenix.org/system/files/woot19-paper_fifield_0.pdf)
 - [8] [Understanding Zip Bombs: overlapping/quoted-overlap kernel construction](https://ubos.tech/news/understanding-zip-bombs-construction-risks-and-mitigation-2/)
 - [9] [My ZIP isn't your ZIP: Identifying and Exploiting Semantic Gaps Between ZIP Parsers (USENIX Security 2025)](https://www.usenix.org/conference/usenixsecurity25/presentation/you)
 - [10] [Preventing ZIP parser confusion attacks on Python package installers](https://blog.pypi.org/posts/2025-08-07-wheel-archive-confusion-attacks/)
-- [11] [ZIP Attacks with Reduced Known Plaintext (Michael Stay, AccessData Corporation)](https://www.cs.auckland.ac.nz/~mike/zipattacks.pdf)
-- [12] [Known Plaintext Attack: Cracking ZIP Files](https://www.hackthis.co.uk/articles/known-plaintext-attack-cracking-zip-files)
+- [11] [ZIP Attacks with Reduced Known Plaintext (Michael Stay, AccessData Corporation)](https://math.ucr.edu/~mike/zipattacks.pdf)
+- [12] [Hack This Site: Realistic Web Mission, Level 15 (known-plaintext ZIP attack)](https://www.hackthissite.org/articles/read/793)
 
 {{#include ../../../banners/hacktricks-training.md}}

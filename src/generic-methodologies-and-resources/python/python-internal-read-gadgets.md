@@ -2,7 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-
 ## Basic Information
 
 Different vulnerabilities such as [**Python Format Strings**](bypass-python-sandboxes/index.html#python-format-string) or [**Class Pollution**](class-pollution-pythons-prototype-pollution.md) might allow you to **read python internal data but won't allow you to execute code**. Therefore, a pentester will need to make the most of these read permissions to **obtain sensitive privileges and escalate the vulnerability**.
@@ -114,7 +113,7 @@ Environment variables are frequently the only secrets needed to move from read t
 
 ### Django-Unicorn class pollution (CVE-2025-24370)
 
-`django-unicorn` ([**GHSA-g9wf-5777-gq43**](https://github.com/adamghill/django-unicorn/security/advisories/GHSA-g9wf-5777-gq43), `<0.62.0`) allowed **class pollution** via crafted component requests. Setting a property path such as `__init__.__globals__` let an attacker reach the component module globals and any imported modules (e.g. `settings`, `os`, `sys`). From there you can leak `SECRET_KEY`, `DATABASES` or service credentials without code execution. The exploit chain is purely read-based and uses the same dunder-gadget patterns as above.<sup>[[5]](#references)</sup>
+`django-unicorn` ([**GHSA-g9wf-5777-gq43**](https://github.com/adamghill/django-unicorn/security/advisories/GHSA-g9wf-5777-gq43), affected versions `<0.61.0`) allowed **class pollution** through crafted component requests. A property path such as `__init__.__globals__` could reach component-module globals and imported modules; the advisory demonstrates overwriting Django's `SECRET_KEY` and values in `os.environ`, rather than a read-only exploit.<sup>[[5]](#references)</sup> If a separate bug provides read access to the same object graph, those globals may expose configuration and credentials without requiring code execution.
 
 ### Gadget collections for chaining
 

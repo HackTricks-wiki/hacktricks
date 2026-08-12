@@ -276,7 +276,7 @@ IOConnectCallStructMethod(conn, X, buf, sizeof(buf), buf, &outSz);
 
 ## DriverKit — User-Space Drivers
 
-### Basic Information
+### DriverKit Basics
 
 **DriverKit** is Apple's user-space replacement for kernel extensions (kexts), introduced in macOS 10.15. DriverKit binaries (`.dext` bundles) run as user-space processes but communicate directly with the kernel through a privileged IOKit interface.<sup>[[4]](#references)</sup>
 
@@ -365,7 +365,7 @@ kern_return_t kr = IOConnectCallStructMethod(conn, X, buf, sizeof(buf), buf, &ou
 
 - [1] [Apple Security Updates – macOS Sequoia 15.1 / Sonoma 14.7.1 (IOGPUFamily)](https://support.apple.com/en-us/121564)
 - [2] [Rapid7 – IOHIDFamily CVE-2024-27799 summary](https://www.rapid7.com/db/vulnerabilities/apple-osx-iohidfamily-cve-2024-27799/)
-- [3] [Apple Security Updates – macOS 13.6.1 (CVE-2023-42891 IOHIDFamily)](https://support.apple.com/en-us/121551)
+- [3] [Apple Security Updates - macOS Sonoma 14.2 (CVE-2023-42891 IOKit)](https://support.apple.com/en-us/120879)
 - [4] [Apple Developer — DriverKit](https://developer.apple.com/documentation/driverkit)
 - [5] [Apple Developer — System Extensions](https://developer.apple.com/documentation/systemextensions)
 

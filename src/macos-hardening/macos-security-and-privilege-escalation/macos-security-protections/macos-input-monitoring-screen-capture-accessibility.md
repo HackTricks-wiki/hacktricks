@@ -219,7 +219,7 @@ AXUIElementCopyAttributeValue(textField, kAXValueAttribute, &value);
 
 ### Attack: Self-Granting TCC Permissions
 
-The most dangerous accessibility abuse is **navigating System Settings to grant your own malware additional permissions**:
+The most dangerous accessibility abuse is **navigating System Settings to grant your own malware additional permissions**.<sup>[[4]](#references)</sup>
 
 ```bash
 # Using osascript with accessibility access:
@@ -331,6 +331,6 @@ WHERE tccPermsStr LIKE '%kTCCServiceListenEvent%'
 - [1] [Apple Developer — Event Taps](https://developer.apple.com/documentation/coregraphics/quartz_event_services)
 - [2] [Apple Developer — Accessibility API](https://developer.apple.com/documentation/applicationservices/axuielement_h)
 - [3] [Apple Developer — ScreenCaptureKit](https://developer.apple.com/documentation/screencapturekit)
-- [4] [Objective-See — Accessibility Abuse as TCC Bypass](https://objective-see.org/blog.html)
+- [4] [Objective-See — Synthetic events and user-interface security on macOS](https://objective-see.org/blog/blog_0x36.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

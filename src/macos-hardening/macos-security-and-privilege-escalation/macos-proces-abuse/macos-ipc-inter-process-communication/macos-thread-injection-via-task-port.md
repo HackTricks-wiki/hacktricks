@@ -118,7 +118,7 @@ Once arbitrary execution and a shared-memory back-channel are available you effe
 * **Mach port transfer** — pass rights in Mach messages via the established ports.  
 * **File-descriptor transfer** — leverage fileports (see *triple_fetch*).
 
-All of this is wrapped in the [`threadexec`](https://github.com/bazad/threadexec) library for easy re-use.
+All of this is wrapped in the [`threadexec`](https://github.com/bazad/threadexec) library for easy reuse.
 
 ---
 

