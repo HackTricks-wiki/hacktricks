@@ -4,8 +4,7 @@
 
 ## Introducción
 
-Para obtener más información sobre qué es un iButton, consulta:
-
+Para obtener información general sobre la tecnología iButton, consulta:
 
 {{#ref}}
 ../ibutton.md
@@ -13,7 +12,7 @@ Para obtener más información sobre qué es un iButton, consulta:
 
 ## Diseño
 
-La parte **azul** de la siguiente imagen muestra cómo debes **colocar el iButton real** para que el Flipper pueda **leerlo**. La parte **verde** muestra cómo debes **tocar el lector** con el Flipper Zero para **emular correctamente un iButton**.<sup>[[1]](#references)</sup>
+En la siguiente imagen, el área **azul** muestra cómo colocar un iButton físico contra los contactos del Flipper Zero para leerlo. El área **verde** muestra qué contactos deben tocar un lector durante la emulación.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../images/image (565).png" alt=""><figcaption></figcaption></figure>
 
@@ -21,23 +20,23 @@ La parte **azul** de la siguiente imagen muestra cómo debes **colocar el iButto
 
 ### Leer
 
-En el modo de lectura, Flipper espera a que la llave iButton toque el dispositivo y puede procesar cualquiera de los tres tipos de llaves: **Dallas, Cyfral y Metakom**. Flipper **determinará por sí mismo el tipo de llave**. El nombre del protocolo de la llave se mostrará en la pantalla, encima del número de ID.<sup>[[1]](#references)</sup>
+En el modo de lectura, el Flipper Zero espera a que una llave toque sus contactos, detecta el protocolo y muestra el protocolo encima del ID de la llave. La aplicación integrada admite llaves de control de acceso Dallas, Cyfral y Metakom.<sup>[[2]](#references)</sup>
 
 ### Añadir manualmente
 
-Es posible **añadir manualmente** un iButton de tipo: **Dallas, Cyfral y Metakom**
+Puedes introducir manualmente los datos de una llave para los protocolos Dallas, Cyfral y Metakom.<sup>[[2]](#references)</sup>
 
-### **Emular**
+### Emular
 
-Es posible **emular** iButtons guardados (leídos o añadidos manualmente).
+Puedes emular una llave guardada, tanto si se leyó de una llave física como si se introdujo manualmente.<sup>[[2]](#references)</sup>
 
 > [!TIP]
-> Si no puedes conseguir que los contactos esperados del Flipper Zero toquen el lector, puedes **usar el GPIO externo:**
+> Si los contactos integrados no pueden llegar al lector, conecta los contactos de datos y tierra a través de los pines GPIO.<sup>[[2]](#references)</sup>
 
 <figure><img src="../../../images/image (138).png" alt=""><figcaption></figcaption></figure>
 
-## Referencias
+## References
 
-- [1] [Dominar las llaves iButton con Flipper Zero](https://blog.flipperzero.one/taming-ibutton/)
-
+- [1] [Domando las llaves iButton con Flipper Zero](https://blog.flipperzero.one/taming-ibutton/)
+- [2] [Documentación de Flipper Zero - Lectura de llaves iButton](https://docs.flipper.net/zero/ibutton/read)
 {{#include ../../../banners/hacktricks-training.md}}
