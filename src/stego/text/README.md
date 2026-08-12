@@ -2,32 +2,26 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Procure por:
+## Caminho prático
 
-- Homoglyphs Unicode
-- Caracteres de largura zero
-- Padrões de espaços em branco (espaços vs tabs)
-
-## Abordagem prática
-
-Se o texto simples se comportar de forma inesperada, inspecione os codepoints e normalize cuidadosamente (não destrua as evidências).
+Se o texto simples se comportar de forma inesperada, preserve a evidência original, inspecione seus codepoints e normalize apenas uma cópia.
 
 ### Técnica
 
-A esteganografia em texto frequentemente depende de caracteres que são renderizados de forma idêntica (ou invisível):
+A esteganografia de texto frequentemente depende de caracteres que são renderizados de forma idêntica ou invisível:
 
-- Homoglyphs: diferentes codepoints Unicode que parecem iguais (`a` latino vs `а` cirílico)
-- Caracteres de largura zero: joiners, non-joiners e espaços de largura zero
-- Codificações por espaços em branco: espaços vs tabs, espaços no final das linhas e padrões de comprimento de linha<sup>[[1]](#references)</sup>
+- Homoglyphs: diferentes codepoints Unicode que parecem iguais (por exemplo, o `a` latino e o `а` cirílico)<sup>[[1]](#references)</sup>
+- Caracteres de largura zero: joiners, non-joiners e espaços de largura zero<sup>[[2]](#references)</sup>
+- Codificações de whitespace: espaços versus tabulações, padrões de espaços à direita e padrões deliberados de comprimento de linha<sup>[[3]](#references)[[4]](#references)</sup>
 
 Casos adicionais de alto sinal:
 
-- Caracteres de controle/sobrescrita bidirecional (podem reordenar visualmente o texto)
-- Seletores de variação e caracteres combinantes usados como um canal secreto
+- Controles bidirecionais, que podem reordenar visualmente o texto<sup>[[1]](#references)</sup>
+- Seletores de variação e caracteres combinantes, que podem carregar um estado oculto enquanto deixam o texto visível praticamente inalterado<sup>[[1]](#references)</sup>
 
 ### Auxiliares de decodificação
 
-- Playground de homoglyphs Unicode/caracteres de largura zero: https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder
+- [Codificador/decodificador de homoglyphs Unicode e caracteres de largura zero](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)<sup>[[2]](#references)</sup>
 
 ### Inspecionar codepoints
 ```bash
@@ -41,14 +35,16 @@ PY
 ```
 ## Canais `unicode-range` de CSS
 
-As regras `@font-face` podem codificar bytes em entradas `unicode-range: U+..`. Extraia os codepoints, concatene os valores hexadecimais e decodifique:
+As regras `@font-face` podem ser abusadas para codificar bytes em entradas `unicode-range: U+..`. Extraia os codepoints, concatene os valores hexadecimais e decodifique-os:<sup>[[3]](#references)</sup>
 ```bash
 grep -o "U+[0-9A-Fa-f]\+" styles.css | tr -d 'U+\n' | xxd -r -p
 ```
-Se os ranges contiverem múltiplos bytes por declaração, divida primeiro nas vírgulas e normalize (`tr ',+' '\n'`). Python facilita a análise e a emissão de bytes quando a formatação é inconsistente.<sup>[[1]](#references)</sup>
+Se os intervalos contiverem vários valores por declaração, divida primeiro pelas vírgulas e normalize (`tr ',+' '\n'`). O Python pode analisar e emitir os bytes quando a formatação é inconsistente.<sup>[[3]](#references)</sup>
 
-## Referências
+## References
 
-- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
-
+- [1] [Relatório Técnico Unicode #36: Considerações de Segurança do Unicode](https://www.unicode.org/reports/tr36/)
+- [2] [Irongeek: Steganography Unicode com Caracteres de Largura Zero e Homoglyphs](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)
+- [3] [0xdf: Flagvent 2025 (Medium) — Lista de Desejos do Papai Noel](https://0xdf.gitlab.io/flagvent2025/medium)
+- [4] [Manual do Debian: stegsnow whitespace steganography](https://manpages.debian.org/trixie/stegsnow/stegsnow.1.en.html)
 {{#include ../../banners/hacktricks-training.md}}

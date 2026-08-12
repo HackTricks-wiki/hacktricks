@@ -4,37 +4,37 @@
 
 ## Informações básicas
 
-Os dispositivos Apple lançados após 2010 têm números de série compostos por **12 caracteres alfanuméricos**, e cada segmento transmite informações específicas:
+Não presuma que todo Mac tenha um número de série decodificável de 12 caracteres. O formato antigo da Apple codificava informações de fabricação e configuração, mas a Apple começou a introduzir números de série randomizados em novos produtos em 2021. O formato randomizado não expõe detalhes de fabricação ou configuração.<sup>[[1]](#references)</sup>
 
-- **Primeiros 3 caracteres**: Indicam o **local de fabricação**.
-- **Caracteres 4 e 5**: Indicam o **ano e a semana de fabricação**.
-- **Caracteres 6 a 8**: Servem como um **identificador único** para cada dispositivo.
-- **Últimos 4 caracteres**: Especificam o **número do modelo**.
+### Formato legado de 12 caracteres
 
-Por exemplo, o número de série **C02L13ECF8J2** segue essa estrutura.
+Para muitos dispositivos fabricados de 2010 até a transição para o formato randomizado, o formato de 12 caracteres ainda pode fornecer informações úteis para inventário:<sup>[[3]](#references)</sup>
 
-### **Locais de fabricação (primeiros 3 caracteres)**
+- Os caracteres 1–3 identificam o local de fabricação.
+- Os caracteres 4–5 codificam o semestre e a semana de produção.
+- Os caracteres 6–8 distinguem unidades produzidas no mesmo local e período.
+- Os caracteres 9–12 identificam o modelo ou código de configuração.
 
-Alguns códigos representam fábricas específicas:
+Por exemplo, `C02L13ECF8J2` segue essa estrutura legada. Os mapeamentos de fábricas mantidos pela comunidade incluem prefixos como `FC`, `F`, `XA`, `XB`, `QP` e `G8` para locais nos Estados Unidos; `RN` para o México; `CK` para Cork; `VM` para uma unidade da Foxconn na República Tcheca; `SG` ou `E` para Singapura; `MB` para a Malásia; `PT` ou `CY` para a Coreia; e `EE`, `QT` ou `UV` para Taiwan. Vários prefixos — incluindo `FK`, `F1`, `F2`, `W8`, `DL`, `DM`, `DN`, `YM`, `7J`, `1C`, `4H`, `WQ`, `F7`, `C0`, `C3` e `C7` — foram associados a instalações na China; `RM` foi associado a dispositivos recondicionados.<sup>[[3]](#references)</sup>
 
-- **FC, F, XA/XB/QP/G8**: Vários locais nos EUA.
-- **RN**: México.
-- **CK**: Cork, Irlanda.
-- **VM**: Foxconn, República Tcheca.
-- **SG/E**: Singapura.
-- **MB**: Malásia.
-- **PT/CY**: Coreia.
-- **EE/QT/UV**: Taiwan.
-- **FK/F1/F2, W8, DL/DM, DN, YM/7J, 1C/4H/WQ/F7**: Diferentes locais na China.
-- **C0, C3, C7**: Cidades específicas na China.
-- **RM**: Dispositivos recondicionados.
+Os códigos de data do quarto caractere vão de `C` (primeiro semestre de 2010) a `Z` (segundo semestre de 2019), com a sequência reutilizada posteriormente. Para o quinto caractere, os dígitos `1`–`9` representam as semanas 1–9, enquanto as letras `C`–`Y`, excluindo as vogais e `S`, representam as semanas 10–27; some 26 quando o quarto caractere indicar o segundo semestre de um ano.<sup>[[3]](#references)</sup>
 
-### **Ano de fabricação (4º caractere)**
+Esses mapeamentos são úteis para a triagem de dispositivos legados, mas não constituem uma prova definitiva de origem, idade ou autenticidade. Confirme o resultado por meio dos dados de inventário da Apple.
 
-Esse caractere varia de 'C' (representando a primeira metade de 2010) a 'Z' (segunda metade de 2019), com letras diferentes indicando diferentes períodos de seis meses.
+Para uma identificação confiável, obtenha o número de série do dispositivo e use a consulta de cobertura ou de especificações técnicas da Apple, em vez de tentar inferir o modelo a partir das posições dos caracteres.<sup>[[2]](#references)</sup>
 
-### **Semana de fabricação (5º caractere)**
+### Obter o número de série
 
-Os dígitos de 1 a 9 correspondem às semanas 1 a 9. As letras de C a Y (excluindo as vogais e o 'S') representam as semanas 10 a 27. Para a segunda metade do ano, 26 é adicionado a esse número.
+A interface gráfica o exibe em **menu Apple > Sobre Este Mac**.<sup>[[2]](#references)</sup> Em um shell, qualquer um dos comandos a seguir lê o número de série da plataforma:
+```bash
+system_profiler SPHardwareDataType | awk -F ': ' '/Serial Number/ {print $2}'
+ioreg -rd1 -c IOPlatformExpertDevice | awk -F '"' '/IOPlatformSerialNumber/ {print $4}'
+```
+Trate um número de série como um identificador, não como um autenticador: confirme o dispositivo por meio do fluxo de inventário relevante da Apple ou do MDM antes de tomar decisões de inscrição ou propriedade.
 
+## References
+
+- [1] [MacRumors - Apple inicia a transição para números de série aleatorizados](https://www.macrumors.com/2021/05/05/purple-iphone-12-randomized-serial-number/)
+- [2] [Apple Support - Encontre o nome do modelo e o número de série do seu Mac](https://support.apple.com/en-us/102767)
+- [3] [Beetstech - Decodifique o significado por trás de um número de série da Apple](https://beetstech.com/blog/decode-meaning-behind-apple-serial-number)
 {{#include ../../../banners/hacktricks-training.md}}
