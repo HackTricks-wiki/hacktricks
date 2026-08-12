@@ -4,17 +4,19 @@
 
 ## Intruder-Payload-Typen
 
-- **Simple list:** Verwende eine konfigurierte Liste von Zeichenfolgen als Payloads.
-- **Runtime file:** Lies zur Laufzeit einen Payload pro Zeile ein. Dies ist für große Listen nützlich, da Burp nicht die gesamte Datei in den Speicher lädt.
-- **Case modification:** Ändere die Groß- und Kleinschreibung einer Eingabezeichenfolge, beispielsweise in Kleinbuchstaben, Großbuchstaben, Satzschreibung oder Titelschreibung.
-- **Numbers:** Generiere fortlaufende oder zufällige Zahlen innerhalb eines konfigurierten Bereichs.
-- **Brute forcer:** Generiere jede Permutation für einen ausgewählten Zeichensatz sowie eine minimale und maximale Länge.<sup>[[1]](#references)</sup>
+Burp Intruder umfasst die folgenden integrierten Payload-Generatoren und Transformationen:<sup>[[1]](#references)</sup>
 
-## Extensions und Begleittools
+- **Einfache Liste:** Eine konfigurierte Liste von Strings als Payloads verwenden.
+- **Laufzeitdatei:** Zur Laufzeit einen Payload pro Zeile einlesen. Dies ist für große Listen nützlich, da Burp nicht die gesamte Datei in den Speicher lädt.
+- **Groß-/Kleinschreibung ändern:** Den unveränderten Wert, die Klein- und Großschreibung, `Propername` (erster Buchstabe groß und der Rest klein) oder `ProperName` (erster Buchstabe groß, die verbleibenden Zeichen unverändert) generieren. Burp verwirft doppelte Ergebnisse.
+- **Zahlen:** Sequenzielle oder zufällige Zahlen innerhalb eines konfigurierten Bereichs generieren.
+- **Brute forcer:** Jede Permutation für einen ausgewählten Zeichensatz sowie eine minimale und maximale Länge generieren.
+
+## Extensions und begleitende Tools
 
 - **Collabfiltrator** generiert Payloads, die Befehle ausführen und deren Ausgabe über DNS-Abfragen an Burp Collaborator exfiltrieren.<sup>[[2]](#references)</sup>
 - **Burp Suite Exporter** exportiert Burp-Ergebnisse zur Verwendung in anderen Reporting-Workflows.<sup>[[3]](#references)</sup>
-- **HTTP Script Generator** konvertiert HTTP-Anfragen in Scripts in mehreren Sprachen.<sup>[[4]](#references)</sup>
+- **HTTP Script Generator** konvertiert HTTP-Anfragen in Scripts für mehrere Sprachen.<sup>[[4]](#references)</sup>
 
 ## References
 
