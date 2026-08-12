@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Esta cadeia histórica do Hack The Box usou o WiX Toolset v3 para criar um MSI que executava um arquivo `.lnk` plantado anteriormente. **Um MSI não possui privilégios automaticamente**: a execução ocorre no contexto definido pela política do Windows Installer, pelos atributos da custom-action e por quem o instala. No cenário citado, o atacante também roubou uma CA de assinatura confiável e colocou o MSI assinado em uma pasta monitorada por outro usuário.<sup>[[1]](#references)[[3]](#references)</sup>
+Esta chain histórica do Hack The Box usou o WiX Toolset v3 para criar um MSI que executava um arquivo `.lnk` previamente plantado. **Um MSI não possui privilégios automaticamente**: a execução ocorre no contexto selecionado pela política do Windows Installer, pelos atributos da custom action e por quem o instala. No cenário d, o atacante também roubou uma CA de assinatura confiável e colocou o MSI assinado em uma pasta monitorada por outro usuário.<sup>[[1]](#references)[[3]](#references)</sup>
 
 Para compreender de forma abrangente os exemplos de uso de MSI com WiX, é recomendável consultar [esta página](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Nela, você encontrará vários exemplos que demonstram o uso de MSI com WiX.<sup>[[2]](#references)</sup>
 
@@ -38,9 +38,9 @@ fail_here
 </Product>
 </Wix>
 ```
-`InstallerVersion` declara a versão mínima do Windows Installer, e `Compressed="yes"` indica que o pacote está compactado. `Stage1` é adiada, mas possui `Impersonate="yes"`, portanto é executada com o token personificado do usuário que está instalando; a mudança de privilégio neste cenário veio do usuário privilegiado que posteriormente abriu o MSI, não desse atributo concedendo SYSTEM magicamente.<sup>[[3]](#references)</sup>
+`InstallerVersion` declara a versão mínima do Windows Installer e `Compressed="yes"` indica que o pacote está compactado. `Stage1` é deferred, mas tem `Impersonate="yes"`, portanto é executado com o token impersonado do usuário que está instalando; a mudança de privilégio nesse cenário ocorreu devido ao usuário privilegiado que posteriormente abriu o MSI, não porque esse atributo conceda SYSTEM magicamente.<sup>[[3]](#references)</sup>
 
-Compile o código-fonte em um objeto WiX com `candle.exe`:<sup>[[1]](#references)</sup>
+Compile o source em um objeto WiX com `candle.exe`:<sup>[[1]](#references)</sup>
 ```
 candle.exe -out C:\tmp\wix.wixobj C:\tmp\Ethereal\msi.xml
 ```
@@ -50,7 +50,7 @@ light.exe -out C:\tmp\Ethereal\rick.msi C:\tmp\wix.wixobj
 ```
 ### Etapa de assinatura usada na cadeia original
 
-O workflow de destino aceitava pacotes assinados por uma CA interna comprometida. O write-up derivou um certificado de assinatura a partir dos arquivos `MyCA.cer`/`MyCA.pvk` recuperados, criou um PFX e assinou o MSI:<sup>[[1]](#references)</sup>
+O fluxo de trabalho alvo aceitava pacotes assinados por uma CA interna comprometida. O artigo derivou um certificado de assinatura a partir de `MyCA.cer`/`MyCA.pvk`, criou um PFX e assinou o MSI:<sup>[[1]](#references)</sup>
 ```powershell
 makecert.exe -n "CN=Ethereal" -pe -cy end `
 -ic C:\tmp\MyCA.cer -iv C:\tmp\MyCA.pvk -sky signature `
@@ -63,6 +63,6 @@ O atacante então colocou o pacote assinado em `D:\DEV\MSIs` e aguardou que o wo
 ## References
 
 - [1] [Hack The Box - Ethereal: Criando um msi malicioso e obtendo root - 0xRick's Blog](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)
-- [2] [Uma introdução rápida: Criar um instalador MSI com WiX - CodeProject](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) (see also [wixtools](http://wixtoolset.org))
+- [2] [Uma introdução rápida: Criando um instalador MSI com WiX - CodeProject](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) (see also [wixtools](http://wixtoolset.org))
 - [3] [Microsoft Learn — Custom actions de execução adiada (`Impersonate`)](https://learn.microsoft.com/en-us/windows/win32/msi/custom-action-in-script-execution-options)
 {{#include ../../banners/hacktricks-training.md}}
