@@ -1,20 +1,23 @@
-# Word マクロ
+# Word Macros
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## ジャンクコード
 
-Macros may contain **解析を遅らせる目的の、到達不能または無関係なコード**。定数条件を特定し、branch の reverse に時間をかける前に、到達可能な挙動を追跡する。以下の例では、決して true にならない `If` condition を使用して、ジャンクコードを隠している。
+Macros には、解析を遅延させる目的で **到達不能なコードや無関係なコード** が含まれている場合があります。分岐の reverse に時間をかける前に、常に成立しない条件を特定し、到達可能な挙動を追跡してください。以下の例では、決して true にならない `If` 条件を使用してジャンクコードを隠しています。
 
-![到達不能な conditional branch とジャンクコードを含む Word マクロ](<../images/image (369).png>)
+![到達不能な条件分岐とジャンクコードを含む Word macro](<../images/image (369).png>)
 
 ## Macro Forms
 
-VBA UserForms は、text box などの control に data を保存できる。form、frame、page はそれぞれ `Controls` collection を公開できるため、analyst は form に表示される内容だけに依存せず、control hierarchy 全体を列挙する必要がある。以下の例では、重なった text box に concealed data を保存している。<sup>[[1]](#references)</sup>
+VBA UserForms は、テキストボックスなどのコントロールにデータを保存できます。フォーム、フレーム、ページはそれぞれ `Controls` コレクションを公開できるため、表示されているフォームの内容だけに頼らず、コントロール階層全体を列挙する必要があります。以下の例では、重なったテキストボックスに隠されたデータを保存しています。<sup>[[1]](#references)</sup>
 
-![重なった text box に data を隠した macro UserForm](<../images/image (344).png>)
+動的解析では、VBA の `GetObject` 関数を使用して、ファイルから Automation オブジェクトを取得したり、すでに実行中の Automation server に接続したりできます。Macros はこのオブジェクトアクセスを使用して、表示されているドキュメントからは明らかでないデータに到達する場合があります。返されたオブジェクトと UserForm のコントロールツリーの両方を調査してください。<sup>[[2]](#references)</sup>
+
+![重なったテキストボックスにデータを隠した macro UserForm](<../images/image (344).png>)
 
 ## References
 
-- [1] [Microsoft Learn - Collections、controls、objects（Microsoft Forms）](https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/objects-microsoft-forms)
+- [1] [Microsoft Learn - コレクション、コントロール、オブジェクト (Microsoft Forms)](https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/objects-microsoft-forms)
+- [2] [Microsoft Learn - `GetObject` 関数](https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/getobject-function)
 {{#include ../banners/hacktricks-training.md}}

@@ -4,27 +4,30 @@
 
 ## RUBYOPT
 
-Ruby は、script を実行する前に、`RUBYOPT` environment variable からサポートされている command-line switch を解析します。Ruby はそこで一部の switch を拒否しますが、`-I` で library-search directory を先頭に追加でき、`-r` で library を require できます。そのため、attacker-controlled environment variables を使って Ruby を起動する process は、attacker-controlled Ruby code を load するように仕向けられます。<sup>[[1]](#references)</sup>
+Rubyは、scriptを実行する前に、`RUBYOPT`環境変数からサポートされているコマンドラインスイッチを解析します。Rubyは`RUBYOPT`内で`-e`によるcode executionを拒否しますが、`-I`はlibrary-search directoryを先頭に追加でき、`-r`はlibraryをrequireできます。そのため、attacker-controlledなenvironment variablesを使用してRubyを起動するprocessは、attacker-controlledなRuby codeをloadするように仕向けられます。<sup>[[1]](#references)</sup>
 
-`/tmp/inject.rb` を作成します:
+`/tmp/inject.rb`を作成します。
 ```ruby:inject.rb
 puts `whoami`
 ```
-`hello.rb` のような benign な Ruby script を作成します：
+`hello.rb` のような無害な Ruby スクリプトを作成します：
 ```ruby:hello.rb
 puts 'Hello, World!'
 ```
-制御された `RUBYOPT` 値で実行します:
+制御された `RUBYOPT` 値で実行します：
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby hello.rb
 ```
-この挙動を無効にするには、スクリプト名の**前**に `--disable=rubyopt`（または `--disable-rubyopt`）を渡します:<sup>[[1]](#references)</sup>
+この動作を無効にするには、スクリプト名の**前に**`--disable=rubyopt`（または`--disable-rubyopt`）を渡します。<sup>[[1]](#references)</sup>
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby --disable=rubyopt hello.rb
 ```
-`hello.rb` の後に記述されたオプションはスクリプトに `ARGV` として渡されます。これは、Ruby による `RUBYOPT` の事前処理を無効化するものではありません。<sup>[[1]](#references)</sup>
-
+`hello.rb` の後に記述されたオプションはスクリプトに `ARGV` として渡され、Ruby による `RUBYOPT` の先行処理を無効にすることはありません。<sup>[[1]](#references)</sup>
+```bash
+# This still loads /tmp/inject.rb because --disable-rubyopt is an argument to hello.rb.
+RUBYOPT="-I/tmp -rinject" ruby hello.rb --disable-rubyopt
+```
 ## References
 
-- [1] [Ruby ドキュメント - Ruby コマンドラインオプション](https://ruby-doc.org/3.4/ruby/options_md.html)
+- [1] [Ruby documentation - Ruby command-line options](https://ruby-doc.org/3.4/ruby/options_md.html)
 {{#include ../../../banners/hacktricks-training.md}}
