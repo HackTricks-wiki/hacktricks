@@ -4,69 +4,69 @@
 
 ## Spot
 
-Questo è il modo più basilare per fare trading. Puoi **indicare la quantità dell'asset e il prezzo** al quale vuoi acquistare o vendere e, ogni volta che viene raggiunto quel prezzo, l'operazione viene eseguita.
+Il trading spot scambia un asset con consegna immediata. Un ordine limit specifica la quantità e il prezzo limite; viene eseguito solo quando il mercato può soddisfare quel prezzo o uno migliore. Un ordine market cerca invece un'esecuzione rapida ai migliori prezzi disponibili in quel momento e può subire slippage.<sup>[[4]](#references)</sup>
 
-Di solito puoi anche usare il **prezzo corrente di mercato** per eseguire la transazione il più rapidamente possibile al prezzo corrente.
-
-**Stop Loss - Limit**: puoi anche indicare la quantità e il prezzo degli asset da acquistare o vendere, specificando inoltre un prezzo più basso al quale acquistare o vendere nel caso venga raggiunto (per limitare le perdite).
+Un ordine stop-limit ha un prezzo stop che attiva un ordine limit. Può limitare il prezzo di esecuzione, ma non garantisce l'esecuzione se il mercato supera il limite.<sup>[[4]](#references)</sup>
 
 ## Futures
 
-Un future è un contratto in cui 2 parti concordano di **acquistare qualcosa in futuro a un prezzo fisso**. Per esempio, vendere 1 bitcoin tra 6 mesi a 70.000$.
+Un contratto futures è un accordo standardizzato per acquistare o vendere una determinata commodity o uno strumento finanziario a una data futura. Ad esempio, due parti potrebbero concordare un prezzo di 70.000 $ per un bitcoin, con regolamento tra sei mesi.<sup>[[1]](#references)</sup>
 
-Ovviamente, se dopo 6 mesi il valore del bitcoin è di 80.000$, il venditore perde denaro e l'acquirente lo guadagna. Se dopo 6 mesi il valore del bitcoin è di 60.000$, accade il contrario.
+Se il prezzo di regolamento è 80.000 $, la posizione long guadagna e la posizione short perde rispetto al prezzo contrattuale di 70.000 $. Se è 60.000 $, la direzione si inverte. I futures effettivamente negoziati sugli exchange sono regolati al valore di mercato e normalmente chiusi o rinnovati prima della scadenza, quindi si tratta di un esempio semplificato.<sup>[[2]](#references)</sup>
 
-Tuttavia, questo è interessante, per esempio, per le aziende che producono un prodotto e hanno bisogno della certezza di poterlo vendere a un prezzo sufficiente a coprire i costi. Oppure per le aziende che vogliono assicurarsi prezzi fissi in futuro per qualcosa, anche se più elevati.
+Produttori e consumatori usano i futures per coprire il rischio di prezzo; altri partecipanti li usano per cercare un profitto o fornire liquidità.<sup>[[1]](#references)</sup>
 
-Sebbene negli exchange venga solitamente utilizzato per cercare di ottenere un profitto.
+- Una **posizione long** generalmente produce profitti quando il prezzo del contratto aumenta.
+- Una **posizione short** generalmente produce profitti quando il prezzo del contratto diminuisce.<sup>[[2]](#references)</sup>
 
-* Nota che una "posizione Long" significa che qualcuno sta scommettendo sul fatto che il prezzo aumenterà
-* Mentre una "posizione short" significa che qualcuno sta scommettendo sul fatto che il prezzo diminuirà
+### Hedging con i Futures
 
-### Hedging With Futures <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
+Se un gestore di fondi prevede un calo del portafoglio, potrebbe assumere una posizione short su un contratto futures su un indice azionario sufficientemente correlato. I guadagni della copertura short possono compensare parte delle perdite del portafoglio; il basis risk fa sì che la compensazione sia raramente esatta. Un future su bitcoin coprirebbe l'esposizione al bitcoin, non automaticamente un portafoglio azionario.
 
-Se un gestore di fondi teme che alcune azioni scenderanno, potrebbe assumere una posizione short su alcuni asset, come bitcoin o contratti futures sull'S\&P 500. Questo sarebbe simile all'acquistare o possedere alcuni asset e creare un contratto per venderli in futuro a un prezzo più elevato.
+Se il mercato coperto diminuisce, la posizione short sui futures può guadagnare mentre le partecipazioni perdono valore. Se aumenta, le partecipazioni possono guadagnare mentre la copertura perde. L'hedging riduce un rischio specifico, invece di creare un profitto garantito.<sup>[[1]](#references)</sup>
 
-Nel caso in cui il prezzo scenda, il gestore del fondo otterrà un profitto perché venderà gli asset a un prezzo più elevato. Se il prezzo degli asset aumenta, il gestore non otterrà quel profitto, ma manterrà comunque i suoi asset.
+### Futures Perpetui
 
-### Perpetual Futures
+I contratti perpetui sono derivati senza una data di scadenza fissa. Le piattaforme crypto usano comunemente pagamenti periodici di funding per mantenere il loro prezzo vicino al prezzo spot sottostante; i termini variano in base alla piattaforma.<sup>[[3]](#references)</sup>
 
-**Questi sono "futures" che durano indefinitamente** (senza una data di scadenza del contratto). È molto comune trovarli, per esempio, negli exchange crypto, dove puoi entrare e uscire dai futures in base al prezzo delle crypto.
+Il profitto e la perdita cambiano con il movimento del mark price. Un movimento dell'1% nel prezzo produce approssimativamente un movimento dell'1% sul valore nozionale della posizione, prima di commissioni e funding, ma la leva può trasformarlo in una variazione percentuale molto maggiore del collaterale depositato.
 
-Nota che in questi casi il profitto e la perdita possono verificarsi in tempo reale: se il prezzo aumenta dell'1%, guadagni l'1%; se il prezzo diminuisce dell'1%, lo perdi.
+### Futures con Leverage
 
-### Futures with Leverage
+La **leva** consente a un trader di controllare una posizione nozionale più grande con un deposito di margine più piccolo. Le perdite non sono sempre limitate al margine iniziale: liquidazione, gap, commissioni e regole della piattaforma possono produrre perdite aggiuntive.<sup>[[3]](#references)</sup>
 
-La **Leverage** ti consente di controllare una posizione più grande sul mercato con una quantità di denaro minore. In pratica, ti permette di "scommettere" molto più denaro di quello che possiedi, rischiando solo il denaro che hai effettivamente.
+Ad esempio, 100 $ di margine con una leva 50x controllano una posizione da 5.000 $. Ignorando commissioni, funding e meccanismi di liquidazione, un movimento favorevole dell'1% produce un guadagno di 50 $ (il 50% del margine iniziale), mentre un movimento sfavorevole dell'1% produce una perdita di 50 $. Un movimento sfavorevole del 2% corrisponde a 100 $, sebbene una piattaforma normalmente liquidi la posizione prima che tutto il margine venga esaurito.
 
-Per esempio, se apri una posizione future su BTC/USDT con 100$ e una leva 50x, significa che, se il prezzo aumenta dell'1%, guadagnerai 1x50 = il 50% del tuo investimento iniziale (50$). E quindi avrai 150$.\
-Tuttavia, se il prezzo diminuisce dell'1%, perderai il 50% dei tuoi fondi (59$ in questo caso). E se il prezzo diminuisce del 2%, perderai tutta la tua scommessa (2x50 = 100%).
+La leva amplifica sia i guadagni sia le perdite e rende possibile la liquidazione dopo un movimento sfavorevole relativamente ridotto.
 
-Pertanto, la leva consente di controllare la quantità di denaro scommessa, aumentando al contempo i guadagni e le perdite.
+## Differenze tra Futures e Opzioni
 
-## Differenze tra Futures e Options
-
-La differenza principale tra futures e options è che il contratto è facoltativo per l'acquirente: può decidere se eseguirlo o meno (di solito lo farà solo se ne trarrà beneficio). Il venditore deve vendere se l'acquirente vuole utilizzare l'opzione.\
-Tuttavia, l'acquirente pagherà una commissione al venditore per l'apertura dell'opzione (quindi il venditore, che apparentemente si assume un rischio maggiore, inizia a guadagnare del denaro).
+L'acquirente di un'opzione riceve un diritto, non un obbligo, di esercitare l'opzione secondo i termini del contratto. Il writer dell'opzione ha l'obbligo corrispondente se l'acquirente esercita l'opzione. L'acquirente paga al writer un premio per tale diritto.<sup>[[4]](#references)</sup>
 
 ### 1. **Obbligo vs. Diritto:**
 
-* **Futures:** Quando acquisti o vendi un contratto futures, stai stipulando un **accordo vincolante** per acquistare o vendere un asset a un prezzo specifico in una data futura. Sia l'acquirente sia il venditore sono **obbligati** a rispettare il contratto alla scadenza (a meno che il contratto non venga chiuso prima).
-* **Options:** Con le options, hai il **diritto, ma non l'obbligo**, di acquistare (nel caso di una **call option**) o vendere (nel caso di una **put option**) un asset a un prezzo specifico prima o alla scadenza stabilita. L'**acquirente** ha la possibilità di eseguire l'operazione, mentre il **venditore** è obbligato a completarla se l'acquirente decide di esercitare l'opzione.
+* **Futures:** Quando acquisti o vendi un contratto futures, stipuli un **accordo vincolante** per acquistare o vendere un asset a un prezzo specifico in una data futura. Sia l'acquirente sia il venditore sono **obbligati** a rispettare il contratto alla scadenza, a meno che il contratto non venga chiuso prima.
+* **Opzioni:** Con le opzioni, hai il **diritto, ma non l'obbligo**, di acquistare (nel caso di una **call option**) o vendere (nel caso di una **put option**) un asset a un prezzo specifico prima o alla data di scadenza stabilita. L'**acquirente** ha la facoltà di eseguire l'operazione, mentre il **venditore** è obbligato a completarla se l'acquirente decide di esercitare l'opzione.
 
 ### 2. **Rischio:**
 
-* **Futures:** Sia l'acquirente sia il venditore assumono un **rischio illimitato**, perché sono obbligati a completare il contratto. Il rischio corrisponde alla differenza tra il prezzo concordato e il prezzo di mercato alla data di scadenza.
-* **Options:** Il rischio dell'acquirente è limitato al **premio** pagato per acquistare l'opzione. Se il mercato non si muove a favore del titolare dell'opzione, questi può semplicemente lasciarla scadere. Tuttavia, il **venditore** (writer) dell'opzione ha un rischio illimitato se il mercato si muove significativamente contro di lui.
+* **Futures:** Entrambe le parti possono subire perdite sostanziali. Il fatto che la perdita sia matematicamente illimitata dipende dalla posizione e dall'asset sottostante: una posizione short può avere una perdita teorica illimitata, mentre una posizione long non può perdere più del valore nozionale se il sottostante non può scendere sotto zero.
+* **Opzioni:** Un acquirente che non vende un'altra opzione generalmente rischia il premio pagato. Il writer di una call naked può subire una perdita teoricamente illimitata; altre strategie di vendita di opzioni presentano profili di rischio limitati o illimitati differenti.
 
 ### 3. **Costo:**
 
 * **Futures:** Non vi è alcun costo iniziale oltre al margine richiesto per mantenere la posizione, poiché sia l'acquirente sia il venditore sono obbligati a completare l'operazione.
-* **Options:** L'acquirente deve pagare in anticipo un **premio dell'opzione** per ottenere il diritto di esercitarla. Questo premio rappresenta essenzialmente il costo dell'opzione.
+* **Opzioni:** L'acquirente deve pagare anticipatamente un **premio dell'opzione** per ottenere il diritto di esercitarla. Questo premio è essenzialmente il costo dell'opzione.
 
 ### 4. **Potenziale di profitto:**
 
-* **Futures:** Il profitto o la perdita si basa sulla differenza tra il prezzo di mercato alla scadenza e il prezzo concordato nel contratto.
-* **Options:** L'acquirente ottiene un profitto quando il mercato si muove favorevolmente oltre lo strike price per un importo superiore al premio pagato. Il venditore ottiene un profitto trattenendo il premio se l'opzione non viene esercitata.
+* **Futures:** Il profitto o la perdita si basano sulla differenza tra il prezzo di mercato alla scadenza e il prezzo concordato nel contratto.
+* **Opzioni:** L'acquirente realizza un profitto quando il mercato si muove favorevolmente oltre lo strike price di un valore superiore al premio pagato. Il venditore realizza un profitto trattenendo il premio se l'opzione non viene esercitata.
 
+## References
+
+- [1] [CFTC - Lo scopo economico dei mercati futures](https://www.cftc.gov/LearnAndProtect/EducationCenter/economicpurpose)
+- [2] [CFTC - Nozioni di base sui mercati futures](https://www.cftc.gov/LearnAndProtect/EducationCenter/FuturesMarketBasics/index2.htm)
+- [3] [CFTC - Comprendere i rischi del trading di valute virtuali](https://www.cftc.gov/LearnAndProtect/AdvisoriesAndArticles/understand_risks_of_virtual_currency.html)
+- [4] [Glossario CFTC - Opzione, premio ed esercizio](https://www.cftc.gov/LearnAndProtect/AdvisoriesAndArticles/CFTCGlossary/index.htm)
 {{#include ../banners/hacktricks-training.md}}

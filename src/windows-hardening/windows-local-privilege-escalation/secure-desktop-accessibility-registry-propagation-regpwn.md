@@ -1,81 +1,80 @@
-# Secure Desktop Accessibility Registry Propagation LPE (RegPwn)
+# LPE tramite propagazione del Registro di sistema dell'accessibilità del Secure Desktop (RegPwn)
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Panoramica
 
-Le funzionalita di Accessibility di Windows mantengono la configurazione dell'utente in HKCU e la propagano nelle posizioni HKLM per-sessione. Durante una transizione al **Secure Desktop** (schermata di blocco o prompt UAC), i componenti **SYSTEM** ricopiano questi valori. Se la **per-session HKLM key** e scrivibile dall'utente, diventa un punto di scrittura privilegiato che puo essere reindirizzato con **registry symbolic links**, ottenendo una **arbitrary SYSTEM registry write**.<sup>[[1]](#references)</sup>
+Le funzionalità di accessibilità di Windows mantengono la configurazione dell'utente in HKCU e la propagano nelle posizioni HKLM specifiche della sessione. Durante una transizione al **Secure Desktop** (schermata di blocco o richiesta UAC), i componenti **SYSTEM** ricopiano questi valori. Se la **chiave HKLM specifica della sessione è scrivibile dall'utente**, diventa un punto privilegiato per la scrittura che può essere reindirizzato tramite **collegamenti simbolici del Registro di sistema**, ottenendo una **scrittura arbitraria nel Registro di sistema come SYSTEM**.<sup>[[1]](#references)</sup>
 
 La tecnica RegPwn sfrutta questa catena di propagazione con una piccola race window stabilizzata tramite un **opportunistic lock (oplock)** su un file utilizzato da `osk.exe`.<sup>[[1]](#references)</sup>
 
-## Catena di propagazione del Registry (Accessibility -> Secure Desktop)
+## Catena di propagazione del Registro di sistema (Accessibilità -> Secure Desktop)
 
-Feature di esempio: **On-Screen Keyboard** (`osk`). Le posizioni rilevanti sono:
+Esempio di funzionalità: **Tastiera su schermo** (`osk`). Le posizioni rilevanti sono:
 
-- **Elenco delle feature a livello di sistema**:
+- **Elenco delle funzionalità a livello di sistema**:
 - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\ATs`
-- **Configurazione per-utente (scrivibile dall'utente)**:
+- **Configurazione per utente (scrivibile dall'utente)**:
 - `HKCU\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\ATConfig\osk`
-- **Configurazione HKLM per-sessione (creata da `winlogon.exe`, scrivibile dall'utente)**:
+- **Configurazione HKLM specifica della sessione (creata da `winlogon.exe`, scrivibile dall'utente)**:
 - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\Session<session id>\ATConfig\osk`
-- **Secure desktop/default user hive (contesto SYSTEM)**:
+- **Hive dell'utente predefinito/Secure Desktop (contesto SYSTEM)**:
 - `HKU\.DEFAULT\Software\Microsoft\Windows NT\CurrentVersion\Accessibility\ATConfig\osk`
 
-Propagazione durante una transizione al secure desktop (semplificata):
+Propagazione durante una transizione al Secure Desktop (semplificata):
 
-1. L'`atbroker.exe` dell'**utente** copia `HKCU\...\ATConfig\osk` in `HKLM\...\Session<session id>\ATConfig\osk`.
-2. L'`atbroker.exe` **SYSTEM** copia `HKLM\...\Session<session id>\ATConfig\osk` in `HKU\.DEFAULT\...\ATConfig\osk`.
-3. L'`osk.exe` **SYSTEM** copia `HKU\.DEFAULT\...\ATConfig\osk` nuovamente in `HKLM\...\Session<session id>\ATConfig\osk`.
+1. **`atbroker.exe` dell'utente** copia `HKCU\...\ATConfig\osk` in `HKLM\...\Session<session id>\ATConfig\osk`.
+2. **`atbroker.exe` eseguito come SYSTEM** copia `HKLM\...\Session<session id>\ATConfig\osk` in `HKU\.DEFAULT\...\ATConfig\osk`.
+3. **`osk.exe` eseguito come SYSTEM** copia `HKU\.DEFAULT\...\ATConfig\osk` nuovamente in `HKLM\...\Session<session id>\ATConfig\osk`.
 
-Se il subtree HKLM della sessione e scrivibile dall'utente, i passaggi 2/3 forniscono una scrittura SYSTEM attraverso una posizione che l'utente puo sostituire.<sup>[[1]](#references)</sup>
+Se il sottoalbero HKLM della sessione è scrivibile dall'utente, il passaggio 2/3 fornisce una scrittura come SYSTEM tramite una posizione che l'utente può sostituire.<sup>[[1]](#references)</sup>
 
-## Primitive: Arbitrary SYSTEM Registry Write tramite Registry Links
+## Primitiva: scrittura arbitraria nel Registro di sistema come SYSTEM tramite collegamenti del Registro
 
-Sostituisci la key per-sessione scrivibile dall'utente con un **registry symbolic link** che punta a una destinazione scelta dall'attaccante. Quando avviene la copia SYSTEM, il link viene seguito e i valori controllati dall'attaccante vengono scritti nella key di destinazione arbitraria.
+Sostituisci la chiave specifica della sessione scrivibile dall'utente con un **collegamento simbolico del Registro di sistema** che punti a una destinazione scelta dall'attaccante. Quando avviene la copia come SYSTEM, il collegamento viene seguito e i valori controllati dall'attaccante vengono scritti nella chiave di destinazione arbitraria.
 
-Idea principale:
+Idea chiave:
 
-- Target della scrittura della vittima (scrivibile dall'utente):
+- Destinazione della scrittura della vittima (scrivibile dall'utente):
 - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\Session<session id>\ATConfig\osk`
-- L'attaccante sostituisce quella key con un **registry link** verso qualsiasi altra key.
-- SYSTEM esegue la copia e scrive nella key scelta dall'attaccante con permessi SYSTEM.
+- L'attaccante sostituisce quella chiave con un **collegamento del Registro di sistema** verso qualsiasi altra chiave.
+- SYSTEM esegue la copia e scrive nella chiave scelta dall'attaccante con autorizzazioni SYSTEM.
 
-Questo fornisce una primitive di **arbitrary SYSTEM registry write**.<sup>[[1]](#references)</sup>
+Questo produce una primitiva di **scrittura arbitraria nel Registro di sistema come SYSTEM**.<sup>[[1]](#references)</sup>
 
-## Vincere la Race Window con gli Oplock
+## Vincere la race window con gli oplock
 
-Esiste una breve finestra temporale tra l'avvio di **SYSTEM `osk.exe`** e la scrittura della per-session key. Per renderla affidabile, l'exploit imposta un **oplock** su:
+Esiste una breve finestra temporale tra l'avvio di **`osk.exe` come SYSTEM** e la scrittura della chiave specifica della sessione. Per renderla affidabile, l'exploit posiziona un **oplock** su:
 ```
 C:\Program Files\Common Files\microsoft shared\ink\fsdefinitions\oskmenu.xml
 ```
-Quando si attiva l'oplock, l'attaccante sostituisce la chiave HKLM per-sessione con un registry link, lascia che la scrittura da parte di SYSTEM venga completata, quindi rimuove il link.<sup>[[1]](#references)</sup>
+Quando si attiva l’oplock, l’attaccante sostituisce la chiave HKLM per-sessione con un registry link, lascia che la scrittura da parte di SYSTEM venga eseguita, quindi rimuove il link.<sup>[[1]](#references)</sup>
 
-## Flusso di sfruttamento di esempio (alto livello)
+## Flusso di Exploitation di esempio (alto livello)
 
-1. Ottenere l'**ID di sessione** corrente dal token di accesso.
-2. Avviare un'istanza nascosta di `osk.exe` e attendere brevemente (per assicurarsi che l'oplock si attivi).
-3. Scrivere valori controllati dall'attaccante in:
+1. Ottieni l’**ID della sessione** corrente dal token di accesso.
+2. Avvia un’istanza nascosta di `osk.exe` e attendi brevemente (per assicurarti che l’oplock si attivi).
+3. Scrivi valori controllati dall’attaccante in:
 - `HKCU\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\ATConfig\osk`
-4. Impostare un **oplock** su `C:\Program Files\Common Files\microsoft shared\ink\fsdefinitions\oskmenu.xml`.
-5. Attivare **Secure Desktop** (`LockWorkstation()`), causando l'avvio di `atbroker.exe` / `osk.exe` da parte di SYSTEM.
-6. Quando si attiva l'oplock, sostituire `HKLM\...\Session<session id>\ATConfig\osk` con un **registry link** verso un target arbitrario.
-7. Attendere brevemente il completamento della copia da parte di SYSTEM, quindi rimuovere il link.<sup>[[1]](#references)</sup>
+4. Imposta un **oplock** su `C:\Program Files\Common Files\microsoft shared\ink\fsdefinitions\oskmenu.xml`.
+5. Attiva il **Secure Desktop** (`LockWorkstation()`), causando l’avvio di `atbroker.exe` / `osk.exe` da parte di SYSTEM.
+6. Quando si attiva l’oplock, sostituisci `HKLM\...\Session<session id>\ATConfig\osk` con un **registry link** verso un target arbitrario.
+7. Attendi brevemente il completamento della copia da parte di SYSTEM, quindi rimuovi il link.<sup>[[1]](#references)</sup>
 
-## Conversione della primitive in esecuzione come SYSTEM
+## Conversione della Primitive in Esecuzione come SYSTEM
 
-Una catena semplice consiste nel sovrascrivere un valore di **configurazione del servizio** (ad esempio `ImagePath`) e quindi avviare il servizio. Il RegPwn PoC sovrascrive `ImagePath` di **`msiserver`** e lo attiva tramite l'istanza dell'**oggetto COM MSI**, ottenendo l'esecuzione di codice come **SYSTEM**.<sup>[[1]](#references)[[2]](#references)</sup>
+Una catena semplice consiste nel sovrascrivere un valore di **configurazione del servizio** (ad esempio `ImagePath`) e quindi avviare il servizio. Il PoC RegPwn sovrascrive `ImagePath` di **`msiserver`** e lo attiva istanziando l’**oggetto COM MSI**, ottenendo l’**esecuzione di codice** come **SYSTEM**.<sup>[[1]](#references)</sup><sup>[[2]](#references)</sup>
 
 ## Correlati
 
-Per altri comportamenti di Secure Desktop / UIAccess, vedere:
+Per altri comportamenti di Secure Desktop / UIAccess, consulta:
 
 {{#ref}}
 uiaccess-admin-protection-bypass.md
 {{#endref}}
 
-## Riferimenti
+## References
 
 - [1] [RIP RegPwn](https://www.mdsec.co.uk/2026/03/rip-regpwn/)
 - [2] [RegPwn PoC](https://github.com/mdsecactivebreach/RegPwn)
-
 {{#include ../../banners/hacktricks-training.md}}
