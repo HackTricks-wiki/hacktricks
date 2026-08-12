@@ -1,31 +1,34 @@
-# SeManageVolumePrivilege : accès au volume brut pour la lecture arbitraire de fichiers
+# SeManageVolumePrivilege : abus de la maintenance des volumes et validation de l’accès brut
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Vue d’ensemble
+## Présentation
 
 Droit utilisateur Windows : effectuer des tâches de maintenance des volumes (constante : SeManageVolumePrivilege).
 
-Les détenteurs de ce droit peuvent effectuer des opérations de bas niveau sur les volumes, comme la défragmentation, la création ou la suppression de volumes et les opérations d’E/S de maintenance. Pour les attackers, ce droit permet notamment d’ouvrir des handles de périphériques de volume brut (par exemple, \\.\C:) et d’émettre des opérations d’E/S directes sur le disque, en contournant les ACL de fichiers NTFS. Avec un accès brut, il est possible de copier les octets de n’importe quel fichier du volume, même si l’accès est refusé par la DACL, en analysant les structures du système de fichiers offline ou en utilisant des outils qui lisent les données au niveau des blocs ou des clusters.
+Ce droit autorise les opérations de maintenance des volumes, telles que la défragmentation et la création ou la suppression de volumes. Microsoft avertit qu’un détenteur peut être en mesure d’étendre des fichiers dans un espace de stockage contenant d’autres données, puis de lire ou de modifier les octets ainsi acquis.<sup>[[1]](#references)</sup>
 
-Par défaut : Administrators sur les serveurs et les domain controllers.<sup>[[1]](#references)</sup>
+Ne considérez pas la possession de `SeManageVolumePrivilege` comme un accès garanti au disque brut. Microsoft précise que l’ouverture d’un disque physique ou d’un volume via `CreateFile` pour un accès direct nécessite des privilèges administratifs, et que les contrôles d’accès normaux aux objets et aux périphériques s’appliquent toujours. Sur une version ou un produit donné, vérifiez si le token, l’ACL du périphérique, l’accès demandé, les indicateurs de partage et l’état du volume permettent d’obtenir un handle brut avant d’affirmer qu’une lecture arbitraire de fichiers est possible.<sup>[[3]](#references)</sup>
+
+Par défaut : Administrators sur les serveurs et les contrôleurs de domaine.<sup>[[1]](#references)</sup>
 
 ## Scénarios d’abus
 
-- Lecture arbitraire de fichiers contournant les ACL en lisant le périphérique disque (par exemple, exfiltrer des éléments sensibles protégés par le système, comme les clés privées de la machine dans %ProgramData%\Microsoft\Crypto\RSA\MachineKeys et %ProgramData%\Microsoft\Crypto\Keys, les registry hives, les DPAPI masterkeys, SAM, ntds.dit via VSS, etc.).
-- Contournement des chemins verrouillés ou privilégiés (C:\Windows\System32\…) en copiant directement les octets depuis le périphérique brut.
-- Dans les environnements AD CS, exfiltration du matériel de clé de la CA (machine key store) afin de créer des « Golden Certificates » et d’usurper l’identité de n’importe quel principal du domaine via PKINIT. Voir le lien ci-dessous.<sup>[[2]](#references)</sup>
+- Si le compte peut effectivement obtenir un handle lisible vers le volume brut, un parseur compatible avec NTFS peut contourner les ACL appliquées aux fichiers et récupérer des fichiers protégés ou verrouillés depuis les clusters alloués.
+- Les cibles possibles incluent le contenu verrouillé ou protégé par une ACL sous `C:\Windows\System32`, les ruches du registre, les clés principales DPAPI, la SAM et — lorsqu’il est accessible séparément via un snapshot ou un volume hors ligne — `ntds.dit`.
+- Sur les hôtes de services de certificats, les emplacements utiles des clés logicielles incluent `%ProgramData%\Microsoft\Crypto\RSA\MachineKeys` et `%ProgramData%\Microsoft\Crypto\Keys` ; la récupération d’un fichier n’est utile que si son matériel de clé est exportable et peut également être déchiffré.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
+- Sur un hôte AD CS, une clé privée d’AC **exportable et stockée dans un logiciel** récupérée avec succès peut permettre un abus de type Golden Certificate. Les conceptions utilisant des clés protégées par matériel ou non exportables modifient cette voie d’exploitation.<sup>[[2]](#references)</sup>
 
-Remarque : vous avez toujours besoin d’un parser pour les structures NTFS, sauf si vous utilisez des outils auxiliaires. De nombreux outils disponibles sur le marché abstraient l’accès brut.
+Remarque : vous avez toujours besoin d’un parseur pour les structures NTFS, sauf si vous utilisez des outils auxiliaires. De nombreux outils disponibles dans le commerce abstraient l’accès brut.
 
 ## Techniques pratiques
 
-- Ouvrir un handle de volume brut et lire les clusters :
+- Ouvrir un handle vers un volume brut et lire les clusters :
 
 <details>
 <summary>Cliquez pour développer</summary>
 ```powershell
-# PowerShell – read first MB from C: raw device (requires SeManageVolumePrivilege)
+# Validation attempt: current Windows versions normally require an administrative token
 $fs = [System.IO.File]::Open("\\.\\C:",[System.IO.FileMode]::Open,[System.IO.FileAccess]::Read,[System.IO.FileShare]::ReadWrite)
 $buf = New-Object byte[] (1MB)
 $null = $fs.Read($buf,0,$buf.Length)
@@ -49,21 +52,21 @@ File.WriteAllBytes("C:\\temp\\blk.bin", buf);
 ```
 </details>
 
-- Utilisez un outil compatible NTFS pour récupérer des fichiers spécifiques depuis le volume brut :
-- RawCopy/RawCopy64 (copie au niveau des secteurs de fichiers utilisés)
-- FTK Imager ou The Sleuth Kit (imagerie en lecture seule, puis carving des fichiers)
-- vssadmin/diskshadow + shadow copy, puis copiez le fichier cible depuis le snapshot (si vous pouvez créer un VSS ; cela nécessite souvent des privilèges d’administrateur, mais est généralement accessible aux mêmes opérateurs qui détiennent SeManageVolumePrivilege)
+- Utiliser un outil compatible avec NTFS pour récupérer des fichiers spécifiques depuis le volume brut :
+- RawCopy/RawCopy64 (copie au niveau des secteurs de fichiers en cours d’utilisation)
+- FTK Imager ou The Sleuth Kit (création d’une image en lecture seule, puis récupération des fichiers)
+- vssadmin/diskshadow + shadow copy, puis copier le fichier cible depuis le snapshot (si vous pouvez créer un VSS ; cela nécessite souvent des privilèges d’administrateur, mais ceux-ci sont généralement disponibles pour les mêmes opérateurs qui détiennent SeManageVolumePrivilege)
 
 Chemins sensibles typiques à cibler :
 - %ProgramData%\Microsoft\Crypto\RSA\MachineKeys\
 - %ProgramData%\Microsoft\Crypto\Keys\
 - C:\Windows\System32\config\SAM, SYSTEM, SECURITY (secrets locaux)
 - C:\Windows\NTDS\ntds.dit (contrôleurs de domaine – via shadow copy)
-- C:\Windows\System32\CertSrv\CertEnroll\ (certificats/CRL de l’AC ; les clés privées se trouvent dans le magasin de clés machine ci-dessus)
+- C:\Windows\System32\CertSrv\CertEnroll\ (certificats/CRL de l’AC ; les clés privées se trouvent dans le magasin de clés de l’ordinateur indiqué ci-dessus)
 
-## AD CS tie‑in : Forging a Golden Certificate
+## Intégration AD CS : Forging a Golden Certificate
 
-Si vous pouvez lire la clé privée de l’Enterprise CA depuis le magasin de clés machine, vous pouvez forger des certificats d’authentification client pour des principaux arbitraires et vous authentifier via PKINIT/Schannel. Cela est souvent appelé un Golden Certificate.<sup>[[2]](#references)</sup> Voir :
+Si vous pouvez lire la clé privée de l’Enterprise CA dans le magasin de clés de l’ordinateur, vous pouvez forger des certificats d’authentification client pour des principals arbitraires et vous authentifier via PKINIT/Schannel. Cette technique est souvent appelée Golden Certificate.<sup>[[2]](#references)</sup> Voir :
 
 {{#ref}}
 ../active-directory-methodology/ad-certificates/domain-persistence.md
@@ -71,16 +74,18 @@ Si vous pouvez lire la clé privée de l’Enterprise CA depuis le magasin de cl
 
 (Section : « Forging Certificates with Stolen CA Certificates (Golden Certificate) – DPERSIST1 »).
 
-## Detection and hardening
+## Détection et hardening
 
-- Limitez strictement l’attribution de SeManageVolumePrivilege (Perform volume maintenance tasks) aux seuls administrateurs de confiance.
-- Surveillez Sensitive Privilege Use et les ouvertures de handles de processus vers des objets de périphérique tels que \\.\C:, \\.\PhysicalDrive0.
-- Préférez des clés d’AC protégées par HSM/TPM ou DPAPI-NG afin que la lecture brute des fichiers ne permette pas de récupérer le matériel cryptographique sous une forme exploitable.
-- Conservez les chemins d’upload, temporaires et d’extraction comme non exécutables et séparés (défense du contexte web qui accompagne souvent cette chaîne post‑exploitation).
+- Limiter strictement l’attribution de SeManageVolumePrivilege (Perform volume maintenance tasks) aux administrateurs de confiance uniquement.
+- Surveiller l’utilisation des privilèges sensibles et les ouvertures de handles de processus vers des objets device tels que \\.\C:, \\.\PhysicalDrive0.
+- Privilégier des clés d’AC correctement configurées, protégées par HSM ou TPM et non exportables, afin que la copie d’un fichier de conteneur de clé ne suffise pas à récupérer du matériel de clé privée utilisable.
+- Pour les secrets applicatifs situés en dehors du chemin des clés d’AC, DPAPI ou DPAPI-NG peut rendre un fichier de données copié insuffisant en le protégeant pour un utilisateur, une machine, un groupe ou un autre principal autorisé. Cela ne protège pas le texte en clair déjà accessible au principal compromis.<sup>[[4]](#references)</sup>
+- Conserver les chemins d’upload, temporaires et d’extraction comme non exécutables et séparés (défense du contexte web qui accompagne souvent cette chaîne post‑exploitation).
 
 ## References
 
-- [1] [Microsoft – Perform volume maintenance tasks (SeManageVolumePrivilege)](https://learn.microsoft.com/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/perform-volume-maintenance-tasks)
-- [2] [0xdf – HTB: Certificate (SeManageVolumePrivilege used to read CA key → Golden Certificate)](https://0xdf.gitlab.io/2025/10/04/htb-certificate.html)
-
+- [1] [Microsoft – Effectuer les tâches de maintenance des volumes (SeManageVolumePrivilege)](https://learn.microsoft.com/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/perform-volume-maintenance-tasks)
+- [2] [0xdf – HTB: Certificate (SeManageVolumePrivilege utilisé pour lire la clé d’AC → Golden Certificate)](https://0xdf.gitlab.io/2025/10/04/htb-certificate.html)
+- [3] [Microsoft - `CreateFile` disques physiques et volumes](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea#physical-disks-and-volumes)
+- [4] [Microsoft - API de cryptographie : Next Generation et DPAPI-NG](https://learn.microsoft.com/en-us/windows/win32/seccng/cng-portal)
 {{#include ../../banners/hacktricks-training.md}}

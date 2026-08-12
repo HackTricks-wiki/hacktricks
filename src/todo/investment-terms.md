@@ -1,72 +1,72 @@
-# Termes d’investissement
+# Termes d'investissement
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## Spot
 
-C’est la manière la plus basique de faire du trading. Vous pouvez **indiquer le montant de l’actif et le prix** auxquels vous souhaitez acheter ou vendre, et dès que ce prix est atteint, l’opération est effectuée.
+Le trading Spot échange un actif contre une livraison immédiate. Un ordre à cours limité spécifie la quantité et le prix limite ; il ne s'exécute que lorsque le marché peut satisfaire ce prix ou proposer un meilleur prix. Un ordre au marché cherche au contraire une exécution rapide aux meilleurs prix alors disponibles et peut subir du slippage.<sup>[[4]](#references)</sup>
 
-Vous pouvez généralement aussi utiliser le **prix actuel du marché** afin d’effectuer la transaction aussi rapidement que possible au prix actuel.
+Un ordre stop-limit possède un prix stop qui active un ordre à cours limité. Il peut contraindre le prix d'exécution, mais ne garantit pas l'exécution si le marché traverse la limite.<sup>[[4]](#references)</sup>
 
-**Stop Loss - Limit** : Vous pouvez également indiquer le montant et le prix des actifs à acheter ou à vendre, tout en indiquant un prix inférieur auquel acheter ou vendre s’il est atteint (pour limiter les pertes).
+## Futures
 
-## Contrats à terme
+Un contrat futures est un accord standardisé visant à acheter ou vendre une matière première ou un instrument financier spécifié à une date ultérieure. Par exemple, deux parties pourraient convenir d'un prix de 70 000 $ pour un bitcoin, avec un règlement dans six mois.<sup>[[1]](#references)</sup>
 
-Un contrat à terme est un contrat dans lequel 2 parties se mettent d’accord pour **acquérir quelque chose dans le futur à un prix fixe**. Par exemple, vendre 1 bitcoin dans 6 mois pour 70 000 $.
+Si le prix de règlement est de 80 000 $, la position longue gagne et la position courte perd par rapport au prix contractuel de 70 000 $. S'il est de 60 000 $, le sens est inversé. Les futures réellement négociés en bourse sont évalués au prix du marché et généralement clôturés ou reconduits avant leur expiration ; il s'agit donc d'une illustration simplifiée.<sup>[[2]](#references)</sup>
 
-Évidemment, si dans 6 mois la valeur du bitcoin est de 80 000 $, le vendeur perd de l’argent et l’acheteur en gagne. Si dans 6 mois la valeur du bitcoin est de 60 000 $, c’est l’inverse qui se produit.
+Les producteurs et les consommateurs utilisent les futures pour couvrir le risque de prix ; d'autres participants les utilisent pour chercher à réaliser un profit ou fournir de la liquidité.<sup>[[1]](#references)</sup>
 
-Cependant, cela peut être intéressant, par exemple, pour les entreprises qui fabriquent un produit et doivent avoir la garantie de pouvoir le vendre à un prix leur permettant de couvrir leurs coûts. Cela peut également intéresser les entreprises qui souhaitent garantir des prix fixes à l’avenir pour un produit, même si ces prix sont plus élevés.
+- Une **position longue** est généralement bénéficiaire lorsque le prix du contrat augmente.
+- Une **position courte** est généralement bénéficiaire lorsque le prix du contrat baisse.<sup>[[2]](#references)</sup>
 
-Bien que, sur les exchanges, cette méthode soit généralement utilisée pour essayer de réaliser un bénéfice.
+### Couverture avec des futures
 
-* Notez qu’une « position longue » signifie que quelqu’un parie sur une hausse du prix
-* Tandis qu’une « position short » signifie que quelqu’un parie sur une baisse du prix
+Si un gestionnaire de fonds s'attend à une baisse d'un portefeuille, il peut vendre à découvert un contrat futures sur indice boursier suffisamment corrélé. Les gains de la couverture courte peuvent compenser une partie des pertes du portefeuille ; le risque de base signifie que la compensation est rarement exacte. Un future sur bitcoin couvrirait une exposition au bitcoin, mais pas automatiquement un portefeuille d'actions.
 
-### Couverture avec des contrats à terme <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
+Si le marché couvert baisse, la position courte sur futures peut gagner de la valeur tandis que les actifs détenus en perdent. S'il augmente, les actifs détenus peuvent prendre de la valeur tandis que la couverture en perd. La couverture réduit un risque donné plutôt qu'elle ne crée un profit garanti.<sup>[[1]](#references)</sup>
 
-Si un gestionnaire de fonds craint que certaines actions baissent, il peut prendre une position short sur certains actifs, comme des bitcoins ou des contrats à terme sur le S\&P 500. Cela revient à acheter ou à détenir certains actifs et à créer un contrat prévoyant de les vendre à une date ultérieure à un prix plus élevé.
+### Futures perpétuels
 
-Si le prix baisse, le gestionnaire de fonds réalisera un bénéfice, car il vendra les actifs à un prix plus élevé. Si le prix des actifs augmente, le gestionnaire ne réalisera pas ce bénéfice, mais conservera ses actifs.
+Les contrats perpétuels sont des dérivés sans date d'expiration fixe. Les plateformes crypto utilisent couramment des paiements périodiques de funding pour maintenir leur prix proche du prix Spot sous-jacent ; les conditions varient selon la plateforme.<sup>[[3]](#references)</sup>
 
-### Contrats à terme perpétuels
+Les profits et pertes évoluent avec le prix de référence. Un mouvement de prix de 1 % produit approximativement un mouvement de 1 % de la valeur notionnelle de la position avant les frais et le funding, mais l'effet de levier peut en faire un pourcentage beaucoup plus important de la garantie déposée.
 
-**Ce sont des « contrats à terme » qui durent indéfiniment** (sans date de fin de contrat). Il est très courant d’en trouver, par exemple, sur les exchanges crypto, où vous pouvez entrer et sortir de contrats à terme en fonction du prix des cryptomonnaies.
+### Futures avec effet de levier
 
-Notez que, dans ces cas, les bénéfices et les pertes peuvent être réalisés en temps réel : si le prix augmente de 1 %, vous gagnez 1 % ; si le prix baisse de 1 %, vous le perdez.
+L'**effet de levier** permet à un trader de contrôler une position notionnelle plus importante avec un dépôt de marge inférieur. Les pertes ne sont pas toujours limitées à la marge initiale : la liquidation, les gaps, les frais et les règles de la plateforme peuvent entraîner des pertes supplémentaires.<sup>[[3]](#references)</sup>
 
-### Contrats à terme avec effet de levier
+Par exemple, une marge de 100 $ avec un effet de levier de 50x contrôle une position de 5 000 $. En ignorant les frais, le funding et les mécanismes de liquidation, un mouvement favorable de 1 % produit un gain de 50 $ (50 % de la marge initiale), tandis qu'un mouvement défavorable de 1 % produit une perte de 50 $. Un mouvement défavorable de 2 % correspond à 100 $, bien qu'une plateforme liquide normalement la position avant que toute la marge soit épuisée.
 
-**L’effet de levier** vous permet de contrôler une position plus importante sur le marché avec une somme d’argent plus faible. Il vous permet essentiellement de « parier » beaucoup plus d’argent que vous n’en possédez, en ne risquant que l’argent dont vous disposez réellement.
+L'effet de levier amplifie à la fois les gains et les pertes et rend la liquidation possible après un mouvement défavorable relativement faible.
 
-Par exemple, si vous ouvrez une position future sur la paire BTC/USDT avec 100 $ et un effet de levier de 50x, cela signifie que si le prix augmente de 1 %, vous gagnerez 1x50 = 50 % de votre investissement initial (50 $). Vous disposerez donc de 150 $.\
-Cependant, si le prix baisse de 1 %, vous perdrez 50 % de vos fonds (59 $ dans ce cas). Et si le prix baisse de 2 %, vous perdrez la totalité de votre mise (2x50 = 100 %).
+## Différences entre les futures et les options
 
-Ainsi, l’effet de levier permet de contrôler le montant d’argent misé tout en augmentant les gains et les pertes.
-
-## Différences entre les contrats à terme et les options
-
-La principale différence entre les contrats à terme et les options est que le contrat est facultatif pour l’acheteur : il peut décider de l’exécuter ou non (généralement, il ne l’exécutera que si cela lui est favorable). Le vendeur doit vendre si l’acheteur souhaite utiliser l’option.\
-Cependant, l’acheteur paiera des frais au vendeur pour ouvrir l’option (le vendeur, qui prend apparemment davantage de risques, commence donc à gagner de l’argent).
+L'acheteur d'une option reçoit un droit, et non une obligation, d'exercer selon les conditions du contrat. Le vendeur de l'option a l'obligation correspondante si l'acheteur exerce son droit. L'acheteur paie au vendeur une prime pour ce droit.<sup>[[4]](#references)</sup>
 
 ### 1. **Obligation contre droit :**
 
-* **Contrats à terme :** Lorsque vous achetez ou vendez un contrat à terme, vous concluez un **accord contraignant** pour acheter ou vendre un actif à un prix donné à une date future. L’acheteur et le vendeur sont tous deux **obligés** d’exécuter le contrat à son expiration (sauf si le contrat est clôturé avant cette date).
-* **Options :** Avec les options, vous avez le **droit, mais pas l’obligation**, d’acheter (dans le cas d’une **option call**) ou de vendre (dans le cas d’une **option put**) un actif à un prix donné avant ou à une certaine date d’expiration. L’**acheteur** a la possibilité d’exécuter l’option, tandis que le **vendeur** est obligé d’effectuer la transaction si l’acheteur décide d’exercer l’option.
+* **Futures :** Lorsque vous achetez ou vendez un contrat futures, vous concluez un **accord contraignant** pour acheter ou vendre un actif à un prix spécifique à une date ultérieure. L'acheteur et le vendeur sont tous deux **obligés** d'exécuter le contrat à son expiration (sauf si le contrat est clôturé auparavant).
+* **Options :** Avec les options, vous avez le **droit, mais pas l'obligation**, d'acheter (dans le cas d'une **option call**) ou de vendre (dans le cas d'une **option put**) un actif à un prix spécifique avant ou à une certaine date d'expiration. L'**acheteur** peut choisir d'exécuter l'option, tandis que le **vendeur** est obligé d'exécuter la transaction si l'acheteur décide d'exercer l'option.
 
 ### 2. **Risque :**
 
-* **Contrats à terme :** L’acheteur et le vendeur prennent tous deux un **risque illimité**, car ils sont obligés d’exécuter le contrat. Le risque correspond à la différence entre le prix convenu et le prix du marché à la date d’expiration.
-* **Options :** Le risque de l’acheteur est limité à la **prime** payée pour acheter l’option. Si le marché n’évolue pas en faveur du détenteur de l’option, celui-ci peut simplement laisser l’option expirer. Cependant, le **vendeur** (émetteur) de l’option prend un risque illimité si le marché évolue fortement contre lui.
+* **Futures :** Les deux parties peuvent subir des pertes importantes. Le fait que la perte soit mathématiquement illimitée dépend de la position et de l'actif sous-jacent : une position courte peut avoir une perte théorique non bornée, tandis qu'une position longue ne peut pas perdre plus que la valeur notionnelle si le sous-jacent ne peut pas descendre en dessous de zéro.
+* **Options :** Un acheteur qui ne vend pas lui-même une autre option risque généralement la prime payée. Le vendeur d'une option call non couverte peut subir une perte théoriquement illimitée ; les autres stratégies de vente d'options présentent des profils de risque bornés ou non bornés différents.
 
 ### 3. **Coût :**
 
-* **Contrats à terme :** Il n’y a pas de coût initial au-delà de la marge requise pour conserver la position, puisque l’acheteur et le vendeur sont tous deux obligés d’effectuer la transaction.
-* **Options :** L’acheteur doit payer d’avance une **prime d’option** pour obtenir le droit d’exercer l’option. Cette prime constitue essentiellement le coût de l’option.
+* **Futures :** Il n'y a pas de coût initial au-delà de la marge requise pour conserver la position, puisque l'acheteur et le vendeur sont tous deux obligés de finaliser la transaction.
+* **Options :** L'acheteur doit payer d'avance une **prime d'option** pour obtenir le droit d'exercer l'option. Cette prime constitue essentiellement le coût de l'option.
 
 ### 4. **Potentiel de profit :**
 
-* **Contrats à terme :** Le bénéfice ou la perte dépend de la différence entre le prix du marché à l’expiration et le prix convenu dans le contrat.
-* **Options :** L’acheteur réalise un bénéfice lorsque le marché évolue favorablement au-delà du prix d’exercice, et ce mouvement dépasse le montant de la prime payée. Le vendeur réalise un bénéfice en conservant la prime si l’option n’est pas exercée.
+* **Futures :** Le profit ou la perte dépend de la différence entre le prix du marché à l'expiration et le prix convenu dans le contrat.
+* **Options :** L'acheteur réalise un profit lorsque le marché évolue favorablement au-delà du prix d'exercice d'un montant supérieur à la prime payée. Le vendeur réalise un profit en conservant la prime si l'option n'est pas exercée.
 
+## References
+
+- [1] [CFTC - L'objectif économique des marchés futures](https://www.cftc.gov/LearnAndProtect/EducationCenter/economicpurpose)
+- [2] [CFTC - Principes fondamentaux des marchés futures](https://www.cftc.gov/LearnAndProtect/EducationCenter/FuturesMarketBasics/index2.htm)
+- [3] [CFTC - Comprendre les risques du trading de devises virtuelles](https://www.cftc.gov/LearnAndProtect/AdvisoriesAndArticles/understand_risks_of_virtual_currency.html)
+- [4] [Glossaire de la CFTC - Option, prime et exercice](https://www.cftc.gov/LearnAndProtect/AdvisoriesAndArticles/CFTCGlossary/index.htm)
 {{#include ../banners/hacktricks-training.md}}
