@@ -1,10 +1,10 @@
-# Injection aplikacji Ruby w macOS
+# Injection do aplikacji Ruby w macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## RUBYOPT
 
-Ruby analizuje obsługiwane przełączniki wiersza poleceń ze zmiennej środowiskowej `RUBYOPT` przed uruchomieniem skryptu. Chociaż Ruby odrzuca niektóre przełączniki użyte w ten sposób, `-I` może dodać katalog wyszukiwania bibliotek, a `-r` może załadować bibliotekę. Proces uruchamiający Ruby ze zmiennymi środowiskowymi kontrolowanymi przez atakującego może więc zostać zmuszony do załadowania kodu Ruby kontrolowanego przez atakującego.<sup>[[1]](#references)</sup>
+Ruby analizuje obsługiwane przełączniki wiersza poleceń ze zmiennej środowiskowej `RUBYOPT` przed uruchomieniem skryptu. Ruby odrzuca wykonywanie kodu za pomocą `-e` w `RUBYOPT`, ale `-I` może dodać katalog wyszukiwania bibliotek, a `-r` może załadować bibliotekę. Proces uruchamiający Ruby ze zmiennymi środowiskowymi kontrolowanymi przez attackera może więc zostać zmuszony do załadowania kontrolowanego przez attackera kodu Ruby.<sup>[[1]](#references)</sup>
 
 Utwórz `/tmp/inject.rb`:
 ```ruby:inject.rb
@@ -22,8 +22,11 @@ Aby wyłączyć to zachowanie, przekaż `--disable=rubyopt` (lub `--disable-ruby
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby --disable=rubyopt hello.rb
 ```
-Opcja zapisana po `hello.rb` jest przekazywana do skryptu w `ARGV`; nie wyłącza wcześniejszego przetwarzania `RUBYOPT` przez Ruby.<sup>[[1]](#references)</sup>
-
+Opcja zapisana po `hello.rb` jest przekazywana do skryptu w `ARGV`; nie wyłącza wcześniejszego przetwarzania zmiennej `RUBYOPT` przez Ruby.<sup>[[1]](#references)</sup>
+```bash
+# This still loads /tmp/inject.rb because --disable-rubyopt is an argument to hello.rb.
+RUBYOPT="-I/tmp -rinject" ruby hello.rb --disable-rubyopt
+```
 ## References
 
 - [1] [Dokumentacja Ruby - opcje wiersza poleceń Ruby](https://ruby-doc.org/3.4/ruby/options_md.html)

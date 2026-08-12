@@ -1,10 +1,10 @@
-# Fault Injection Attacks
+# Ataki Fault Injection
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Fault injection celowo zakłóca działanie urządzenia podczas jego pracy, aby wykonało ono nieprawidłowe obliczenie. Użyteczna usterka może pominąć instrukcję, uszkodzić dane, ominąć kontrolę bezpieczeństwa lub wygenerować wadliwy wynik kryptograficzny, z którego można wyprowadzić poufne informacje.<sup>[[1]](#references)</sup>
+Fault injection — często nazywany w pracach nad bezpieczeństwem sprzętowym **glitchingiem** — polega na celowym zakłócaniu pracy urządzenia, aby wykonało ono nieprawidłowe obliczenie. Użyteczna usterka może pominąć instrukcję, uszkodzić dane, ominąć kontrolę bezpieczeństwa lub wygenerować wadliwy wynik kryptograficzny, z którego można wyprowadzić poufne informacje.<sup>[[1]](#references)</sup>
 
-Typowe techniki polegają na manipulowaniu napięciem zasilania lub zegarem, wstrzykiwaniu zakłóceń elektromagnetycznych albo stosowaniu stymulacji optycznej lub laserowej.<sup>[[1]](#references)</sup> Różnią się precyzją i inwazyjnością, ale skuteczne testowanie zazwyczaj wymaga powtarzalnego wyzwalania oraz systematycznego przeszukiwania zakresów czasu, szerokości impulsu i intensywności. Rozpocznij od stabilnego stanu bazowego, rejestruj osobno restarty i zniekształcone wyniki oraz zmieniaj jeden parametr naraz.<sup>[[2]](#references)</sup>
+Typowe techniki polegają na manipulowaniu napięciem zasilania lub zegarem, wstrzykiwaniu zakłóceń elektromagnetycznych albo stosowaniu stymulacji optycznej lub laserowej.<sup>[[1]](#references)</sup> Różnią się one precyzją i inwazyjnością, ale skuteczne testowanie zazwyczaj wymaga powtarzalnego wyzwalania oraz systematycznego przeszukiwania parametrów czasu, szerokości impulsu i intensywności. Zacznij od stabilnej wartości bazowej, rejestruj osobno resety i nieprawidłowe wyniki oraz zmieniaj tylko jeden parametr naraz.<sup>[[2]](#references)</sup>
 
 ## References
 
