@@ -2,10 +2,9 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Einleitung
+## Einführung
 
-Weitere Informationen darüber, was ein iButton ist:
-
+Hintergrundinformationen zur iButton-Technologie finden Sie hier:
 
 {{#ref}}
 ../ibutton.md
@@ -13,7 +12,7 @@ Weitere Informationen darüber, was ein iButton ist:
 
 ## Aufbau
 
-Der **blaue** Teil des folgenden Bildes zeigt, wie du den **echten iButton** platzieren musst, damit der Flipper ihn **lesen kann.** Der **grüne** Teil zeigt, wie du den Reader mit dem Flipper Zero **berühren musst, um einen iButton korrekt zu emulieren.**<sup>[[1]](#references)</sup>
+Im folgenden Bild zeigt der **blaue** Bereich, wie ein physischer iButton zum Lesen an den Kontakten des Flipper Zero positioniert wird. Der **grüne** Bereich zeigt, welche Kontakte bei der Emulation einen Leser berühren sollten.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../images/image (565).png" alt=""><figcaption></figcaption></figure>
 
@@ -21,23 +20,23 @@ Der **blaue** Teil des folgenden Bildes zeigt, wie du den **echten iButton** pla
 
 ### Lesen
 
-Im Lesemodus wartet der Flipper darauf, dass der iButton-Schlüssel den Reader berührt, und kann drei Arten von Schlüsseln verarbeiten: **Dallas, Cyfral und Metakom**. Der Flipper **ermittelt den Typ des Schlüssels selbst.** Der Name des Schlüsselprotokolls wird auf dem Bildschirm über der ID-Nummer angezeigt.<sup>[[1]](#references)</sup>
+Im Lesemodus wartet der Flipper Zero darauf, dass ein Schlüssel seine Kontakte berührt, erkennt das Protokoll und zeigt das Protokoll über der Schlüssel-ID an. Die integrierte Anwendung unterstützt Dallas-, Cyfral- und Metakom-Zugangskontrollschlüssel.<sup>[[2]](#references)</sup>
 
 ### Manuell hinzufügen
 
-Es ist möglich, einen iButton des Typs **Dallas, Cyfral oder Metakom manuell hinzuzufügen.**
+Sie können Schlüsseldaten für die Dallas-, Cyfral- und Metakom-Protokolle manuell eingeben.<sup>[[2]](#references)</sup>
 
-### **Emulieren**
+### Emulieren
 
-Es ist möglich, gespeicherte iButtons zu **emulieren** (gelesene oder manuell hinzugefügte).
+Sie können einen gespeicherten Schlüssel emulieren, unabhängig davon, ob er von einem physischen Schlüssel gelesen oder manuell eingegeben wurde.<sup>[[2]](#references)</sup>
 
 > [!TIP]
-> Wenn du die erwarteten Kontakte des Flipper Zero nicht mit dem Reader in Kontakt bringen kannst, kannst du den **externen GPIO verwenden:**
+> Wenn die integrierten Kontakte den Leser nicht erreichen können, verbinden Sie die Daten- und Massekontakte über die GPIO-Pins.<sup>[[2]](#references)</sup>
 
 <figure><img src="../../../images/image (138).png" alt=""><figcaption></figcaption></figure>
 
-## Referenzen
+## References
 
-- [1] [Taming iButton Keys with Flipper Zero](https://blog.flipperzero.one/taming-ibutton/)
-
+- [1] [iButton-Schlüssel mit Flipper Zero bändigen](https://blog.flipperzero.one/taming-ibutton/)
+- [2] [Flipper-Zero-Dokumentation - iButton-Schlüssel lesen](https://docs.flipper.net/zero/ibutton/read)
 {{#include ../../../banners/hacktricks-training.md}}

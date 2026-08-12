@@ -2,55 +2,50 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-
 ## Einführung
 
-Weitere Informationen zur Funktionsweise von 125-kHz-Tags findest du hier:
-
+Hintergrundinformationen zur Funktionsweise von 125-kHz-Tags findest du hier:
 
 {{#ref}}
 ../pentesting-rfid.md
 {{#endref}}
 
-## Aktionen
+Die [Einführung in RFID mit niedriger Frequenz](../pentesting-rfid.md#low-frequency-rfid-tags-125khz) erklärt die gängigen Tag-Familien und ihre Datenformate.
 
-Weitere Informationen zu diesen Tag-Typen findest du in [**dieser Einführung**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz).
+## Aktionen
 
 ### Lesen
 
-Versucht, die Karteninformationen zu **lesen**. Anschließend können sie **emuliert** werden.<sup>[[1]](#references)</sup>
+Verwende **Lesen**, um die Tag-Daten zu erfassen. Nach einem erfolgreichen Lesevorgang kann Flipper Zero den gespeicherten Tag emulieren.<sup>[[1]](#references)</sup>
 
 > [!WARNING]
-> Beachte, dass einige Gegensprechanlagen versuchen, sich durch das Senden eines Schreibbefehls vor dem Duplizieren von Schlüsseln zu schützen. Wenn der Schreibvorgang erfolgreich ist, wird der Tag als gefälscht betrachtet. Wenn Flipper RFID emuliert, gibt es für das Lesegerät keine Möglichkeit, ihn vom Original zu unterscheiden, sodass solche Probleme nicht auftreten.
+> Einige Lesegeräte von Gegensprechanlagen versuchen, beschreibbare Duplikat-Tags zu erkennen, indem sie vor dem Lesen einen Schreibbefehl ausführen. Eine Emulation durch Flipper Zero stellt den beschreibbaren Tag-Speicher nicht auf dieselbe Weise bereit.<sup>[[1]](#references)</sup>
 
 ### Manuell hinzufügen
 
-Du kannst **gefälschte Karten in Flipper Zero erstellen, indem du die Daten manuell angibst**, und sie anschließend emulieren.
+Du kannst Tag-Daten manuell in Flipper Zero eingeben, speichern und anschließend emulieren.<sup>[[1]](#references)</sup>
 
 #### IDs auf Karten
 
-Manchmal findest du beim Erhalten einer Karte die ID (oder einen Teil davon) sichtbar auf der Karte aufgedruckt.
+Manchmal ist die ID einer Karte ganz oder teilweise auf ihrer Außenseite aufgedruckt.
 
 - **EM Marin**
 
-Bei dieser EM-Marin-Karte ist es beispielsweise möglich, die **letzten 3 von 5 Bytes im Klartext zu lesen**.\
-Die anderen 2 können per Brute-Force ermittelt werden, wenn du sie nicht von der Karte ablesen kannst.<sup>[[1]](#references)</sup>
+Die abgebildete EM-Marin-Karte zeigt beispielsweise die letzten drei ihrer fünf ID-Bytes. Wenn der Tag nicht gelesen werden kann, können die beiden fehlenden Bytes per Brute-Force ermittelt werden.
 
 <figure><img src="../../../images/image (104).png" alt=""><figcaption></figcaption></figure>
 
 - **HID**
 
-Dasselbe gilt für diese HID-Karte, bei der nur 2 von 3 Bytes auf der Karte aufgedruckt sind.
+Auf der abgebildeten HID-Karte sind dagegen nur zwei der drei ID-Bytes aufgedruckt.
 
 <figure><img src="../../../images/image (1014).png" alt=""><figcaption></figcaption></figure>
 
 ### Emulieren/Schreiben
 
-Nach dem **Kopieren** einer Karte oder dem **manuellen Eingeben** der ID ist es möglich, sie mit Flipper Zero zu **emulieren** oder sie auf eine echte Karte zu **schreiben**.<sup>[[1]](#references)</sup>
+Nach dem Lesen eines Tags oder der manuellen Eingabe seiner ID kann Flipper Zero die gespeicherten Zugangsdaten emulieren. Bei unterstützten beschreibbaren Tags kann das Gerät die gespeicherten Daten außerdem auf eine kompatible Karte schreiben.<sup>[[1]](#references)</sup>
 
-## Referenzen
+## References
 
-- [1] [Diving into RFID Protocols with Flipper Zero](https://blog.flipperzero.one/rfid/)
-
-
+- [1] [Flipper Zero: Einblick in RFID-Protokolle](https://blog.flipperzero.one/rfid/)
 {{#include ../../../banners/hacktricks-training.md}}

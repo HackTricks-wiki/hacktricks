@@ -2,18 +2,18 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-
-Die meiste schwierige CTF-Kryptografie läuft darauf hinaus: RSA, ECC/ECDSA, Lattices und schlechte Zufallszahlen.
+Viele fortgeschrittene CTF-Kryptografie-Herausforderungen beinhalten RSA, elliptische-Kurven-Kryptografie (ECC), ECDSA, Gitter oder schwache Zufallswerte.
 
 ## Empfohlene Tools
 
-- SageMath (LLL/Lattices, modulare Arithmetik): https://www.sagemath.org/
-- RsaCtfTool (Schweizer Taschenmesser): https://github.com/Ganapati/RsaCtfTool
-- factordb (schnelle Faktorisierungsprüfungen): http://factordb.com/
+- [SageMath](https://www.sagemath.org/) für modulare Arithmetik, elliptische Kurven und Gitterreduktion<sup>[[1]](#references)</sup>
+- [RsaCtfTool](https://github.com/RsaCtfTool/RsaCtfTool) zum Testen häufiger RSA-Schwachstellen<sup>[[2]](#references)</sup>
+- [FactorDB](https://factordb.com/) zum Überprüfen, ob eine ganze Zahl bekannte Faktoren besitzt<sup>[[3]](#references)</sup>
+- Die Python-[`ecdsa`-Bibliothek](https://ecdsa.readthedocs.io/) zum Parsen von Schlüsseln sowie zum Signieren und Verifizieren<sup>[[7]](#references)</sup>
 
 ## RSA
 
-Beginne hier, wenn du `n,e,c` und einen zusätzlichen Hinweis hast (gemeinsamer Modulus, niedriger Exponent, partielle Bits, verwandte Nachrichten).
+Beginne hier, wenn eine Challenge `n`, `e` und `c` sowie einen Hinweis wie einen gemeinsamen Modulus, einen niedrigen Exponenten, teilweise bekannte Schlüsselbits oder verwandte Nachrichten bereitstellt.
 
 {{#ref}}
 rsa/README.md
@@ -21,15 +21,15 @@ rsa/README.md
 
 ## ECC / ECDSA
 
-Wenn Signaturen beteiligt sind, teste zuerst auf Nonce-Probleme (Wiederverwendung/Bias/leaks), bevor du von schwieriger Mathematik ausgehst.
+Wenn Signaturen beteiligt sind, teste auf Nonce-Wiederverwendung, Bias oder leaks, bevor du annimmst, dass das zugrunde liegende diskrete-Logarithmus-Problem gelöst werden muss.
 
-### Wiederverwendung / Bias der ECDSA-Nonce
+### ECDSA nonce reuse / bias
 
-Wenn zwei Signaturen dieselbe Nonce `k` wiederverwenden, kann der private Schlüssel wiederhergestellt werden.
+ECDSA benötigt eine frische geheime Zahl `k` für jede Nachricht. Wenn dasselbe `k` zwei verschiedene Nachrichten-Hashes signiert, kann der private Schlüssel aus den öffentlichen Signaturwerten wiederhergestellt werden.<sup>[[4]](#references)</sup>
 
-Auch wenn `k` nicht identisch ist, kann **Bias/Leakage** von Nonce-Bits über mehrere Signaturen hinweg für eine Wiederherstellung mithilfe von Lattices ausreichen (ein häufiges CTF-Thema).
+Auch wenn `k` nicht identisch ist, können Bias oder leaks von Nonce-Bits über viele Signaturen hinweg eine gitterbasierte Wiederherstellung ermöglichen.<sup>[[5]](#references)</sup>
 
-Technische Wiederherstellung bei wiederverwendetem `k`:
+Technische Wiederherstellung bei wiederverwendetem `k`:<sup>[[4]](#references)</sup>
 
 ECDSA-Signaturgleichungen (Gruppenordnung `n`):
 
@@ -41,18 +41,22 @@ Wenn dasselbe `k` für zwei Nachrichten `m1, m2` wiederverwendet wird und die Si
 - `k = (h(m1) - h(m2)) * (s1 - s2)^{-1} mod n`
 - `d = (s1*k - h(m1)) * r^{-1} mod n`
 
-### Invalid-Curve-Angriffe
+### Invalid-curve attacks
 
-Wenn ein Protokoll nicht überprüft, ob Punkte auf der erwarteten Kurve (oder in der erwarteten Untergruppe) liegen, kann ein Angreifer Operationen in einer schwachen Gruppe erzwingen und Geheimnisse wiederherstellen.
+Wenn ein Protokoll nicht validiert, dass ein Eingabepunkt auf der erwarteten Kurve und in der korrekten Untergruppe liegt, kann ein Angreifer Operationen in einer schwächeren Gruppe erzwingen und Informationen über einen geheimen Skalar wiederherstellen. SEC 1 spezifiziert Prüfungen zur Validierung öffentlicher Schlüssel, die solche Eingaben verhindern sollen.<sup>[[6]](#references)</sup>
 
 Technischer Hinweis:
 
-- Überprüfe, dass Punkte auf der Kurve liegen und sich in der korrekten Untergruppe befinden.
-- Viele CTF-Aufgaben modellieren dies als „Der Server multipliziert einen vom Angreifer gewählten Punkt mit einem geheimen Skalar und gibt etwas zurück.“
+- Validiere, dass Punkte nicht der Punkt im Unendlichen sind, gültige Koordinaten besitzen, die Kurvengleichung erfüllen und zur erforderlichen Untergruppe gehören.<sup>[[6]](#references)</sup>
+- In CTF-Challenges wird dies häufig als Server modelliert, der einen vom Angreifer gewählten Punkt mit einem geheimen Skalar multipliziert und einen abgeleiteten Wert zurückgibt.
 
-### Tools
+## References
 
-- SageMath für Kurvenarithmetik / Lattices
-- Python-Bibliothek `ecdsa` zum Parsen und Verifizieren
-
+- [1] [SageMath](https://www.sagemath.org/)
+- [2] [RsaCtfTool](https://github.com/RsaCtfTool/RsaCtfTool)
+- [3] [FactorDB](https://factordb.com/)
+- [4] [NIST FIPS 186-5: Standard für digitale Signaturen](https://csrc.nist.gov/pubs/fips/186-5/final)
+- [5] [Breitner und Heninger: Biased Nonce Sense — Gitterangriffe gegen schwache ECDSA-Signaturen](https://eprint.iacr.org/2019/023)
+- [6] [SEC 1 v2.0: Kryptografie mit elliptischen Kurven](https://www.secg.org/sec1-v2.pdf)
+- [7] [Python-`ecdsa`-Dokumentation](https://ecdsa.readthedocs.io/)
 {{#include ../../banners/hacktricks-training.md}}

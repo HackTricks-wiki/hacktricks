@@ -1,35 +1,29 @@
-# Text Steganography
+# Text-Steganografie
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Suche nach:
+## Praktischer Weg
 
-- Unicode-Homoglyphen
-- Zero-width characters
-- Whitespace-Mustern (Leerzeichen vs. Tabs)
+Wenn sich Klartext unerwartet verhält, bewahren Sie die ursprünglichen Beweise auf, untersuchen Sie seine Codepoints und normalisieren Sie nur eine Kopie.
 
-## Praktischer Ansatz
+### Technik
 
-Wenn sich Klartext unerwartet verhält, überprüfe die Codepoints und normalisiere vorsichtig (zerstöre keine Beweise).
+Text-Steganografie beruht häufig auf Zeichen, die identisch oder unsichtbar dargestellt werden:
 
-### Technique
-
-Text-Stego beruht häufig auf Zeichen, die identisch (oder unsichtbar) dargestellt werden:
-
-- Homoglyphen: unterschiedliche Unicode-Codepoints, die gleich aussehen (lateinisches `a` vs. kyrillisches `а`)
-- Zero-width characters: Joiner, Non-Joiner und Zero-width spaces
-- Whitespace encodings: Leerzeichen vs. Tabs, nachgestellte Leerzeichen, Muster der Zeilenlänge<sup>[[1]](#references)</sup>
+- Homoglyphen: unterschiedliche Unicode-Codepoints, die ähnlich aussehen (zum Beispiel das lateinische `a` und das kyrillische `а`)<sup>[[1]](#references)</sup>
+- Zero-Width-Zeichen: Joiner, Non-Joiner und Zero-Width-Spaces<sup>[[2]](#references)</sup>
+- Whitespace-Codierungen: Leerzeichen im Vergleich zu Tabulatoren, Muster aus nachgestellten Leerzeichen und absichtliche Muster bei der Zeilenlänge<sup>[[3]](#references)[[4]](#references)</sup>
 
 Weitere Fälle mit hoher Aussagekraft:
 
-- Bidirectional override/control characters (können Text visuell neu anordnen)
-- Variation selectors und combining characters, die als covert channel verwendet werden
+- Bidirektionale Steuerzeichen, die Text visuell neu anordnen können<sup>[[1]](#references)</sup>
+- Variation Selectors und Combining Characters, die einen verborgenen Zustand übertragen können, während der sichtbare Text nahezu unverändert bleibt<sup>[[1]](#references)</sup>
 
-### Decode helpers
+### Decode-Hilfsprogramme
 
-- Unicode-Homoglyphen/Zero-width-playground: https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder
+- [Unicode-Homoglyphen- und Zero-Width-Zeichen-Encoder/Decoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)<sup>[[2]](#references)</sup>
 
-### Codepoints überprüfen
+### Codepoints untersuchen
 ```bash
 python3 - <<'PY'
 import sys
@@ -41,14 +35,16 @@ PY
 ```
 ## CSS-`unicode-range`-Kanäle
 
-`@font-face`-Regeln können Bytes in `unicode-range: U+..`-Einträgen kodieren. Extrahiere die Codepoints, füge das Hex zusammen und dekodiere:
+`@font-face`-Regeln können missbraucht werden, um Bytes in `unicode-range: U+..`-Einträgen zu kodieren. Extrahiere die Codepoints, füge die Hexadezimalwerte zusammen und dekodiere sie:<sup>[[3]](#references)</sup>
 ```bash
 grep -o "U+[0-9A-Fa-f]\+" styles.css | tr -d 'U+\n' | xxd -r -p
 ```
-Wenn ranges mehrere Bytes pro Deklaration enthalten, teile sie zuerst an Kommas auf und normalisiere sie (`tr ',+' '\n'`). Python macht es einfach, Bytes zu parsen und auszugeben, wenn die Formatierung inkonsistent ist.<sup>[[1]](#references)</sup>
+Wenn Bereiche mehrere Werte pro Deklaration enthalten, teile sie zuerst an Kommas auf und normalisiere sie (`tr ',+' '\n'`). Python kann die Bytes auch dann parsen und ausgeben, wenn die Formatierung inkonsistent ist.<sup>[[3]](#references)</sup>
 
-## Referenzen
+## References
 
-- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
-
+- [1] [Unicode Technical Report #36: Unicode-Sicherheitsüberlegungen](https://www.unicode.org/reports/tr36/)
+- [2] [Irongeek: Unicode-Steganografie mit Zero-Width Characters und Homoglyphen](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)
+- [3] [0xdf: Flagvent 2025 (Medium) — Santas Wunschliste](https://0xdf.gitlab.io/flagvent2025/medium)
+- [4] [Debian-Handbuch: Whitespace-Steganografie mit `stegsnow`](https://manpages.debian.org/trixie/stegsnow/stegsnow.1.en.html)
 {{#include ../../banners/hacktricks-training.md}}
