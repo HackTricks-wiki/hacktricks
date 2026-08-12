@@ -1,161 +1,194 @@
-# NVRAM
+# macOS NVRAM
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Podstawowe informacje
 
-**NVRAM** (Non-Volatile Random-Access Memory) przechowuje **konfigurację na czas uruchamiania i konfigurację na poziomie firmware** na sprzęcie Mac. Najważniejsze z punktu widzenia bezpieczeństwa zmienne to:
+**NVRAM** (Non-Volatile Random-Access Memory) przechowuje stan firmware'u i wczesnego uruchamiania systemu poza standardowym systemem plików macOS. Wpływ na bezpieczeństwo zależy zarówno od zmiennej, jak i architektury uruchamiania:
 
-| Zmienna | Przeznaczenie |
+| Zmienna | Cel / znaczenie dla bezpieczeństwa |
 |---|---|
-| `boot-args` | Argumenty uruchamiania kernela (flagi debugowania, szczegółowe uruchamianie, obejście AMFI) |
-| `csr-active-config` | **Bitmask konfiguracji SIP** — kontroluje, które zabezpieczenia są aktywne |
-| `SystemAudioVolume` | Głośność dźwięku podczas uruchamiania |
-| `prev-lang:kbd` | Preferowany język / układ klawiatury |
-| `efi-boot-device-data` | Wybór urządzenia rozruchowego |
+| `boot-args` | Argumenty przekazywane do kernela. Argumenty debugowania lub zmniejszające poziom bezpieczeństwa są filtrowane, chyba że boot policy na nie zezwala. |
+| `csr-active-config` | Maska bitowa SIP na komputerach Mac z procesorem Intel. Na Apple silicon równoważna polityka jest przechowywana w `LocalPolicy` dla poszczególnych woluminów i nie jest bezpośrednio uznawana na podstawie tej zmiennej. |
+| `efi-boot-device` / `efi-boot-device-data` | Cel uruchamiania Intel EFI. |
+| `boot-volume` | Stan wyboru woluminu uruchamiania na Apple silicon. |
+| `SystemAudioVolume`, `prev-lang:kbd` | Przykłady zwykłych ustawień trwałych. |
 
-Na współczesnych Macach zmienne NVRAM są podzielone na zmienne **systemowe** (chronione przez Secure Boot) oraz **niesystemowe**. Maci z układami Apple Silicon używają **Secure Storage Component (SSC)** do kryptograficznego powiązania stanu NVRAM z łańcuchem rozruchowym.<sup>[[1]](#references)</sup>
+Istotne jest rozróżnienie między **danymi przechowywanymi w NVRAM** a **polityką bezpieczeństwa zaakceptowaną przez łańcuch uruchamiania**. Na Apple silicon Secure Enclave podpisuje `LocalPolicy` dla każdej grupy woluminów uruchamiania; nonce przechowywany w Secure Storage Component zapewnia ochronę przed replay. W związku z tym zmiana właściwości NVRAM o podobnej nazwie sama w sobie nie przepisuje zaakceptowanej boot policy.<sup>[[1]](#references)[[4]](#references)</sup>
 
 ## Dostęp do NVRAM z przestrzeni użytkownika
 
-### Odczytywanie NVRAM
+### Odczyt i zebranie wartości bazowych
 ```bash
-# List all NVRAM variables
+# List variables (values are separated from names by a tab)
 nvram -p
 
-# Read a specific variable
+# Read individual variables. Absence is normal on many configurations.
 nvram boot-args
-
-# Export all NVRAM as XML plist
-nvram -xp
-
-# Read SIP configuration
 nvram csr-active-config
+
+# Export typed values as an XML plist; useful for diffing two acquisitions
+nvram -xp > "nvram-$(date +%Y%m%d-%H%M%S).plist"
+
+# The same properties as exposed through the IODeviceTree plane
+ioreg -lw0 -p IODeviceTree -n options
+
+# Effective SIP status
 csrutil status
 ```
-### Zapisywanie NVRAM
+Nie klasyfikuj każdego nieznanego klucza jako złośliwego. Sprzęt, recoveryOS, aktualizacje, Find My i nieudane uruchomienia tworzą zmienne zależne od modelu i wersji. Porównaj przechwycone dane z wcześniejszym punktem odniesienia z **tego samego Maca** i traktuj nieoczekiwane binarne bloby, zmieniony wybór uruchamiania lub argumenty obniżające poziom bezpieczeństwa jako wskazówki, a nie dowód włamania.
 
-Zapisywanie zmiennych NVRAM wymaga **uprawnień root**, a w przypadku zmiennych krytycznych dla systemu (takich jak `csr-active-config`) proces musi mieć określone flagi podpisywania kodu lub entitlements:
+### Writing NVRAM
+
+Root może tworzyć lub zmieniać wiele zwykłych zmiennych, ale zmienne chronione zależą dodatkowo od przestrzeni nazw zmiennej, SIP, reguł jądra dotyczących poszczególnych zmiennych oraz ograniczonych uprawnień Apple. Dlatego pomyślne wykonanie `sudo` dla nieszkodliwego niestandardowego klucza **nie** dowodzi, że proces może modyfikować `boot-args`, SIP lub zmienne regionu systemowego.
 ```bash
-# Set boot-args (requires root)
-sudo nvram boot-args="debug=0x144 kcsuffix=development"
+# Harmless test variable (perform only on a disposable test host)
+sudo nvram HTTest='persistence-value'
+nvram HTTest
+sudo nvram -d HTTest
 
-# Clear boot-args
-sudo nvram -d boot-args
-
-# Set a custom variable
-sudo nvram MyCustomVar="persistence-value"
-```
-## Flaga CS_NVRAM_UNRESTRICTED
-
-Pliki binarne z flagą podpisywania kodu **`CS_NVRAM_UNRESTRICTED`** mogą modyfikować zmienne NVRAM, które są zwykle chronione nawet przed użytkownikiem root.
-
-### Znajdowanie plików binarnych z flagą NVRAM-Unrestricted
-```bash
-# Check code signing flags for a binary
-codesign -dvvv /usr/sbin/nvram 2>&1 | grep "flags="
-```
-## Implikacje bezpieczeństwa
-
-### Osłabianie SIP za pomocą NVRAM
-
-Jeśli atakujący może zapisywać dane w NVRAM (za pośrednictwem przejętego pliku binarnego bez ograniczeń NVRAM lub poprzez wykorzystanie podatności), może zmodyfikować `csr-active-config`, aby **wyłączyć zabezpieczenia SIP przy następnym uruchomieniu**:
-```bash
-# SIP configuration is a bitmask stored in NVRAM
-# Each bit controls a different SIP protection:
-#   Bit 0 (0x1):  Filesystem protection
-#   Bit 1 (0x2):  Kext signing
-#   Bit 2 (0x4):  Task-for-pid restriction
-#   Bit 3 (0x8):  Unrestricted filesystem
-#   Bit 4 (0x10): Apple Internal (debug)
-#   Bit 5 (0x20): Unrestricted DTrace
-#   Bit 6 (0x40): Unrestricted NVRAM
-#   Bit 7 (0x80): Device configuration
-
-# Current SIP configuration
-nvram csr-active-config | xxd
-
-# On older hardware, a compromised NVRAM-unrestricted binary could:
-# nvram csr-active-config=%7f%00%00%00   # Disable most SIP protections
-```
-> [!WARNING]
-> Na nowoczesnych komputerach Mac z układami Apple Silicon **łańcuch Secure Boot weryfikuje** zmiany w NVRAM i uniemożliwia modyfikację SIP w czasie działania systemu. Zmiany `csr-active-config` zaczynają obowiązywać wyłącznie za pośrednictwem recoveryOS. Jednak na komputerach Mac z procesorami **Intel** lub w systemach z **reduced security mode** manipulowanie NVRAM może nadal osłabiać SIP.
-
-### Włączanie debugowania jądra
-```bash
-# Enable kernel debug flags via boot-args
-sudo nvram boot-args="debug=0x144"
-
-# Common debug flags:
-#   0x01  DB_HALT      — Wait for debugger at boot
-#   0x04  DB_KPRT      — Send kernel printf to serial
-#   0x40  DB_KERN_DUMP — Dump kernel core on NMI
-#   0x100 DB_REBOOT_POST_PANIC — Reboot after panic
-
-# Use development kernel
-sudo nvram boot-args="kcsuffix=development"
-```
-### Utrwalanie w firmware
-
-Modyfikacje NVRAM **przetrwają ponowną instalację systemu operacyjnego** — utrzymują się na poziomie firmware. Atakujący może zapisać niestandardowe zmienne NVRAM, które mechanizm persistence odczyta podczas uruchamiania:
-```bash
-# Write a persistence marker
-nvram attacker-payload-config="base64_encoded_config_here"
-
-# A startup script or LaunchDaemon could read this:
-nvram attacker-payload-config 2>/dev/null && /path/to/payload
+# Delete one variable
+sudo nvram -d variable-name
 ```
 > [!CAUTION]
-> Persistence NVRAM przetrwa wymazanie dysku i ponowną instalację systemu operacyjnego. Do jej usunięcia wymagany jest **PRAM/NVRAM reset** (Command+Option+P+R na komputerach Mac z procesorem Intel) lub **DFU restore** (Apple Silicon).
+> Unikaj `nvram -c` podczas testów: żąda usunięcia wszystkich usuwalnych zmiennych i może zmienić zachowanie podczas uruchamiania lub odzyskiwania systemu. Niektóre zmienne są dostępne wyłącznie dla kernela, chronione przez entitlement, ukryte podczas odczytu lub możliwe do usunięcia tylko podczas resetowania NVRAM.
 
-### AMFI Bypass
+## Entitlements NVRAM i `CS_NVRAM_UNRESTRICTED`
 
-Argument rozruchowy `amfi_get_out_of_my_way=1` wyłącza **Apple Mobile File Integrity**, umożliwiając wykonywanie niepodpisanego kodu:
+W czasie exec XNU mapuje `com.apple.rootless.restricted-nvram-variables.heritable` na flagę procesu **`CS_NVRAM_UNRESTRICTED`** (`0x00008000`). Nie jest to równoważne zwykłemu sprawdzeniu efektywnego UID 0. Istnieją również węższe prywatne entitlements dotyczące określonych zmiennych lub operacji.
+
+Sprawdzaj entitlements zamiast polegać na ogólnym wierszu flag wyświetlanym przez `codesign`:
 ```bash
-# This requires NVRAM write access AND reduced security boot:
-sudo nvram boot-args="amfi_get_out_of_my_way=1"
+# Static entitlements embedded in a Mach-O signature
+codesign -d --entitlements :- /path/to/binary 2>&1
+
+# Quickly highlight NVRAM-related entitlements
+codesign -d --entitlements :- /path/to/binary 2>&1 |
+grep -Ei 'nvram|restricted-nvram'
+
+# The nvram CLI itself normally asks the IOKit service to enforce the caller's
+# privilege; possession of /usr/sbin/nvram is not an entitlement bypass.
+codesign -d --entitlements :- /usr/sbin/nvram 2>&1
 ```
-## CVE z rzeczywistych przypadków
+Podczas audytu uprzywilejowanego helpera prześledź **rzeczywistą tożsamość klienta i ścieżkę żądania**. Błąd confused-deputy w usłudze z entitlementem może być bardziej użyteczny niż bezpośrednie wywołanie `nvram`, ale dostępna zmienna/operacja może nadal podlegać ograniczeniom XNU.
 
-| CVE | Opis |
-|---|---|
-| CVE-2020-9839 | Manipulacja NVRAM umożliwiająca trwałe ominięcie SIP <sup>[[2]](#references)</sup> |
-| CVE-2019-8779 | Trwałość NVRAM na poziomie firmware na komputerach Mac z układem T2 <sup>[[3]](#references)</sup> |
-| CVE-2022-22583 | Eskalacja uprawnień związana z NVRAM w PackageKit |
-| CVE-2020-10004 | Problem logiczny w obsłudze NVRAM umożliwiający modyfikację systemu |
+## Stan SIP w systemie Intel a `LocalPolicy` w Apple Silicon
 
-## Skrypt Enumeration
+### Intel: `csr-active-config`
+
+W systemach Intel `csr-active-config` koduje wyjątki `CSR_ALLOW_*`. Powszechnie istotne pozycje bitów to:
+```text
+0x001  untrusted kexts                 0x002  unrestricted filesystem
+0x004  task_for_pid                    0x008  kernel debugger
+0x010  Apple-internal behavior         0x020  unrestricted DTrace
+0x040  unrestricted NVRAM              0x080  device configuration
+0x100  any recovery OS                 0x200  unapproved kexts
+0x400  executable-policy override      0x800  unauthenticated root (SSV)
+```
+Odczytaj obowiązujące ustawienie za pomocą `csrutil status`; surowe dane wyjściowe `nvram` mogą używać bajtów little-endian zakodowanych procentowo. Zobacz [macOS SIP](../macos-security-protections/macos-sip.md), aby poznać implikacje dotyczące ochrony i bypass.
+```bash
+nvram csr-active-config 2>/dev/null
+csrutil status
+```
+### Apple Silicon: sprawdzanie zaakceptowanej polityki uruchamiania
+
+Na urządzeniach Apple silicon `sip0` w podpisanej przez Secure Enclave `LocalPolicy` zawiera bity polityki SIP, które wcześniej były przechowywane w NVRAM. Pozostałe istotne pola polityki to `sip1` (zezwalanie na niepowodzenie weryfikacji root-hash SSV), `sip2` (nieblokowanie pamięci jądra za pomocą CTRR) oraz `sip3` (wyłączenie listy dozwolonych `boot-args` w iBoot). Te pola można modyfikować wyłącznie z powiązanego One True recoveryOS (1TR); włączenie `sip3` wymaga również przejścia na Permissive Security.<sup>[[4]](#references)</sup>
+
+Podczas enumeracji używaj wyłącznie operacji wyświetlania:
+```bash
+# Apple silicon: show the selected volume group's LocalPolicy
+sudo bputil -d
+
+# Machine-readable display, or display every bootable OS policy
+sudo bputil -d -j
+sudo bputil -e -j
+
+# Map policy output to APFS volume groups when multiple OSes are installed
+diskutil apfs listVolumeGroups
+```
+> [!WARNING]
+> Nie używaj opcji zmieniających politykę `bputil` podczas audytu. Zwykłe przejęcie systemu macOS nie powinno umożliwiać cichego włączenia powyższych pól: ścieżka downgrade celowo wymaga fizycznego dostępu do sparowanego 1TR oraz uwierzytelnienia właściciela.<sup>[[4]](#references)</sup>
+
+## Implikacje bezpieczeństwa
+
+### `boot-args` jako wzmacniacz po przejęciu
+
+Argumenty takie jak opcje debugowania kernela, `kcsuffix=development` lub `amfi_get_out_of_my_way=1` mogą osłabić późniejsze etapy bootowania, ale tylko wtedy, gdy platforma je zaakceptuje. Na Apple silicon w trybie Full lub Reduced Security iBoot filtruje argumenty zmniejszające bezpieczeństwo; nieograniczone argumenty wymagają opisanego wyżej downgrade polityki `sip3`. Na Intel ograniczenie NVRAM przez SIP podobnie uniemożliwia traktowanie powłoki root jako automatycznej kontroli nad `boot-args`.
+```bash
+# Enumerate, do not assume that a value shown here was accepted by iBoot
+nvram boot-args 2>/dev/null
+
+# Confirm what the running kernel reports it received
+sysctl kern.bootargs
+
+# Search for common security-reducing/debug strings
+{ nvram boot-args 2>/dev/null; sysctl -n kern.bootargs 2>/dev/null; } |
+grep -Ei 'amfi|cs_enforcement|debug|kcsuffix|keepsyms|ktrace|rc\.trampoline'
+```
+Zobacz [AMFI](../macos-security-protections/macos-amfi-applemobilefileintegrity.md) oraz [kernel debugging](macos-kernel-extensions.md), zamiast zakładać, że historyczny argument zachowuje się identycznie w każdej wersji macOS.
+
+### Wykonywanie `rc.trampoline` z użyciem NVRAM
+
+Niedawne badania udokumentowały konkretny komponent korzystający z danych NVRAM: binarny plik platformy Apple `/System/Library/CoreServices/rc.trampoline`. Gdy launchd wykryje argument rozruchowy `rc.trampoline=1`, to zadanie rozruchowe odczytuje właściwość `apple-trusted-trampoline` z `IODeviceTree:/options`, zapisuje ją do tymczasowego pliku wykonywalnego, uruchamia go w stanie wstrzymania, sprawdza jego stan code-signing, usuwa go za pomocą unlink, a następnie wznawia jego działanie. Zadanie rozruchowe blokuje launchd do momentu zakończenia procesu potomnego.<sup>[[5]](#references)</sup>
+
+Jest to **prymityw persistence po downgrade, a nie obejście SIP**. Zademonstrowana ścieżka wymagała wyłączenia SIP, aby zadanie rozruchowe zostało uruchomione i można było ustawić `boot-args`. Badania zaobserwowały również przybliżony limit rozmiaru wartości wynoszący 390 KB. Wartość tego rozwiązania polega na tym, że bajty pliku wykonywalnego mogą znajdować się poza zwykłym filesystemem i zostać zmaterializowane podczas bootowania, gdy atakujący uzyskał już wymagany security downgrade.<sup>[[5]](#references)</sup>
+
+Szukaj obu wymaganych artefaktów oraz zdarzenia launchd:
+```bash
+# Print names only so a large binary value is not dumped to the terminal
+nvram -p | cut -f1 | grep -E '^(apple-trusted-trampoline|boot-args)$'
+nvram boot-args 2>/dev/null | grep -F 'rc.trampoline='
+
+# The research-observed execution produces an rc.trampoline boot-task event
+log show --last 30d --style compact \
+--predicate 'eventMessage CONTAINS[c] "rc.trampoline"'
+```
+Niestandardowe zmienne NVRAM są w przeciwnym razie wyłącznie **magazynem danych**: nie wykonują żadnych działań, chyba że wykorzysta je firmware, komponent rozruchowy Apple lub oddzielny mechanizm persistence. To rozróżnienie zapobiega przecenianiu znaczenia znacznika takiego jak `nvram attacker-config=...` jako wykonania kodu firmware.
+
+## Skrypt enumeracji
+
+<details>
+<summary>Audyt NVRAM i boot-policy dla Apple silicon</summary>
 ```bash
 #!/bin/bash
-echo "=== NVRAM Security Audit ==="
+set -u
 
-# Current SIP status
-echo -e "\n[*] SIP Status:"
-csrutil status
+echo '=== NVRAM / boot-policy audit ==='
+echo '[*] Architecture:'
+uname -m
 
-# Current boot-args
-echo -e "\n[*] Boot Arguments:"
-nvram boot-args 2>/dev/null || echo "  (none set)"
+echo '[*] Effective SIP:'
+csrutil status 2>&1
 
-# All NVRAM variables
-echo -e "\n[*] All NVRAM Variables:"
-nvram -p | grep -v "^$" | wc -l
-echo "  variables total"
+echo '[*] Stored and effective boot arguments:'
+nvram boot-args 2>/dev/null || echo 'boot-args: <not set/readable>'
+sysctl kern.bootargs 2>/dev/null || true
 
-# Security-relevant variables
-echo -e "\n[*] Security-Relevant Variables:"
-for var in csr-active-config boot-args StartupMute SystemAudioVolume efi-boot-device; do
-echo "  $var: $(nvram "$var" 2>/dev/null || echo 'not set')"
-done
+echo '[*] Intel SIP variable (absence on Apple silicon is expected):'
+nvram csr-active-config 2>/dev/null || echo 'csr-active-config: <not set/readable>'
 
-# Check for custom (non-Apple) variables
-echo -e "\n[*] Non-Standard Variables (potential persistence):"
-nvram -p | grep -v "^$" | grep -vE "^(SystemAudioVolume|boot-args|csr-active-config|prev-lang|LocationServicesEnabled|fmm-mobileme-token|bluetoothInternalControllerAddress|bluetoothActiveControllerInfo|SystemAudioVolumeExtension|efi-)" | head -20
+echo '[*] High-signal NVRAM names:'
+nvram -p 2>/dev/null | cut -f1 |
+grep -E '^(apple-trusted-trampoline|boot-args|csr-active-config|efi-boot-device(-data)?|boot-volume)$' || true
+
+echo '[*] rc.trampoline log evidence:'
+log show --last 30d --style compact \
+--predicate 'eventMessage CONTAINS[c] "rc.trampoline"' 2>/dev/null | tail -20
+
+if [[ "$(uname -m)" == 'arm64' ]] && command -v bputil >/dev/null; then
+echo '[*] Apple silicon LocalPolicy (read-only display):'
+bputil -d -j 2>&1
+fi
 ```
-## Odnośniki
+</details>
+
+
+
+## References
 
 - [1] [Przewodnik Apple Platform Security — Proces uruchamiania](https://support.apple.com/guide/security/boot-process-secac71d5623/web)
 - [2] [Aktualizacje zabezpieczeń Apple — CVE związane z NVRAM](https://support.apple.com/en-us/HT201222)
-- [3] [Duo Labs — Zabezpieczenia Apple T2](https://duo.com/labs/research/apple-t2-xpc)
-
+- [3] [Duo Labs — Bezpieczeństwo Apple T2](https://duo.com/labs/research/apple-t2-xpc)
+- [4] [Apple Platform Security — Zawartość pliku LocalPolicy dla Maca z układem Apple silicon](https://support.apple.com/guide/security/contents-a-localpolicy-file-mac-apple-silicon-secc745a0845/web)
+- [5] [Poza dobrymi starymi LaunchAgents — Utrwalanie za pomocą NVRAM z apple-trusted-trampoline](https://theevilbit.github.io/beyond/beyond_0035/)
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,8 +1,8 @@
-# Tworzenie MSI z Custom-Action za pomocą WiX
+# Tworzenie MSI z Custom Action przy użyciu WiX
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Ten historyczny chain z Hack The Box wykorzystywał WiX Toolset v3 do zbudowania MSI, który uruchamiał wcześniej umieszczony plik `.lnk`. **MSI nie ma automatycznie podwyższonych uprawnień**: wykonanie odbywa się w kontekście określonym przez zasady Windows Installer, atrybuty custom-action oraz użytkownika, który je instaluje. W przytoczonym scenariuszu attacker ukradł również zaufany signing CA i umieścił podpisany MSI w folderze monitorowanym przez innego użytkownika.<sup>[[1]](#references)[[3]](#references)</sup>
+Ten historyczny chain z Hack The Box wykorzystywał WiX Toolset v3 do zbudowania MSI, który uruchamiał wcześniej umieszczony plik `.lnk`. **MSI nie ma automatycznie podwyższonych uprawnień**: wykonanie odbywa się w kontekście wybranym przez zasady Windows Installer, atrybuty custom action oraz osobę, która go instaluje. W scenariuszu d atakujący ukradł również zaufany CA podpisujący i umieścił podpisany MSI w folderze monitorowanym przez innego użytkownika.<sup>[[1]](#references)[[3]](#references)</sup>
 
 Aby kompleksowo zrozumieć przykłady użycia wix MSI, zaleca się zapoznanie z [tą stroną](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Znajdują się tam różne przykłady demonstrujące użycie wix MSI.<sup>[[2]](#references)</sup>
 
@@ -38,7 +38,7 @@ fail_here
 </Product>
 </Wix>
 ```
-`InstallerVersion` deklaruje minimalną wersję Windows Installer, a `Compressed="yes"` oznacza, że pakiet jest skompresowany. `Stage1` jest odroczony, ale ma `Impersonate="yes"`, więc uruchamia się z tokenem personifikacji użytkownika wykonującego instalację; zmiana uprawnień w tym scenariuszu nastąpiła dzięki uprzywilejowanemu użytkownikowi, który później otworzył plik MSI, a nie dlatego, że ten atrybut magicznie nadaje uprawnienia SYSTEM.<sup>[[3]](#references)</sup>
+`InstallerVersion` deklaruje minimalną wersję Windows Installer, a `Compressed="yes"` oznacza, że pakiet jest skompresowany. `Stage1` jest odroczone, ale ma `Impersonate="yes"`, więc działa z tokenem impersonacji użytkownika przeprowadzającego instalację; zmiana uprawnień w tym scenariuszu nastąpiła dzięki uprzywilejowanemu użytkownikowi, który później otworzył plik MSI, a nie dlatego, że ten atrybut magicznie nadaje uprawnienia SYSTEM.<sup>[[3]](#references)</sup>
 
 Skompiluj źródło do obiektu WiX za pomocą `candle.exe`:<sup>[[1]](#references)</sup>
 ```
@@ -48,9 +48,9 @@ Połącz ten obiekt z plikiem MSI za pomocą `light.exe`:<sup>[[1]](#references)
 ```
 light.exe -out C:\tmp\Ethereal\rick.msi C:\tmp\wix.wixobj
 ```
-### Etap podpisywania użyty w pierwotnym łańcuchu
+### Etap podpisywania użyty w oryginalnym łańcuchu
 
-Docelowy workflow akceptował pakiety podpisane przez zaatakowany wewnętrzny CA. W opisie wyprowadzono certyfikat podpisywania na podstawie odzyskanych plików `MyCA.cer`/`MyCA.pvk`, utworzono plik PFX i podpisano MSI:<sup>[[1]](#references)</sup>
+Docelowy workflow akceptował pakiety podpisane przez przejęty wewnętrzny CA. W opisie wyprowadzono certyfikat podpisujący z odzyskanych plików `MyCA.cer`/`MyCA.pvk`, utworzono PFX i podpisano MSI:<sup>[[1]](#references)</sup>
 ```powershell
 makecert.exe -n "CN=Ethereal" -pe -cy end `
 -ic C:\tmp\MyCA.cer -iv C:\tmp\MyCA.pvk -sky signature `
@@ -58,11 +58,11 @@ makecert.exe -n "CN=Ethereal" -pe -cy end `
 pvk2pfx.exe -pvk C:\tmp\rick.pvk -spc C:\tmp\rick.cer -pfx C:\tmp\rick.pfx
 signtool.exe sign /f C:\tmp\rick.pfx C:\tmp\Ethereal\rick.msi
 ```
-Następnie attacker umieścił podpisany package w `D:\DEV\MSIs` i czekał, aż uprzywilejowany workflow/użytkownik go wykona. Zachowaj ten warunek wstępny podczas adaptowania techniki: bez uprzywilejowanej ścieżki instalacji, niebezpiecznej policy, takiej jak `AlwaysInstallElevated`, lub uprzywilejowanej ofiary ten package zostanie wykonany wyłącznie z uprawnieniami bieżącego użytkownika.
+Następnie atakujący umieścił podpisany pakiet w `D:\DEV\MSIs` i czekał, aż uprzywilejowany workflow/użytkownik go wykona. Zachowaj ten warunek wstępny podczas dostosowywania tej techniki: bez ścieżki instalacji z podwyższonymi uprawnieniami, niebezpiecznej polityki, takiej jak `AlwaysInstallElevated`, lub uprzywilejowanej ofiary ten pakiet wykonuje się wyłącznie z uprawnieniami bieżącego użytkownika.
 
 ## References
 
-- [1] [Hack The Box - Ethereal: Tworzenie złośliwego msi i uzyskanie root - Blog 0xRick's](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)
+- [1] [Hack The Box - Ethereal: Tworzenie złośliwego msi i uzyskanie root - Blog 0xRick](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)
 - [2] [Krótkie wprowadzenie: Tworzenie instalatora MSI za pomocą WiX - CodeProject](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) (see also [wixtools](http://wixtoolset.org))
-- [3] [Microsoft Learn — Niestandardowe akcje z odroczonym wykonaniem (`Impersonate`)](https://learn.microsoft.com/en-us/windows/win32/msi/custom-action-in-script-execution-options)
+- [3] [Microsoft Learn — Custom actions z odroczonym wykonaniem (`Impersonate`)](https://learn.microsoft.com/en-us/windows/win32/msi/custom-action-in-script-execution-options)
 {{#include ../../banners/hacktricks-training.md}}
