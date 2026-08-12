@@ -4,69 +4,69 @@
 
 ## Spot
 
-Esta es la forma más básica de hacer trading. Puedes **indicar la cantidad del activo y el precio** al que quieres comprarlo o venderlo, y cuando se alcance ese precio, se realiza la operación.
+El trading Spot intercambia un activo para su entrega inmediata. Una orden limitada especifica la cantidad y el precio límite; solo se ejecuta cuando el mercado puede satisfacer ese precio o uno mejor. Una orden de mercado, en cambio, busca una ejecución rápida a los mejores precios disponibles en ese momento y puede experimentar slippage.<sup>[[4]](#references)</sup>
 
-Normalmente también puedes usar el **precio actual del mercado** para realizar la transacción lo más rápido posible al precio vigente.
-
-**Stop Loss - Limit**: También puedes indicar la cantidad y el precio de los activos que quieres comprar o vender, además de indicar un precio inferior para comprar o vender en caso de que se alcance (para detener las pérdidas).
+Una orden stop-limit tiene un precio stop que activa una orden limitada. Puede restringir el precio de ejecución, pero no garantiza la ejecución si el mercado atraviesa el límite.<sup>[[4]](#references)</sup>
 
 ## Futuros
 
-Un futuro es un contrato mediante el cual 2 partes llegan a un acuerdo para **adquirir algo en el futuro a un precio fijo**. Por ejemplo, vender 1 bitcoin dentro de 6 meses por 70.000$.
+Un contrato de futuros es un acuerdo estandarizado para comprar o vender una materia prima o instrumento financiero específico en una fecha futura. Por ejemplo, dos partes podrían acordar un precio de 70.000 $ por un bitcoin, con liquidación en seis meses.<sup>[[1]](#references)</sup>
 
-Obviamente, si después de 6 meses el valor del bitcoin es de 80.000$, la parte vendedora pierde dinero y la parte compradora lo gana. Si después de 6 meses el valor del bitcoin es de 60.000$, ocurre lo contrario.
+Si el precio de liquidación es de 80.000 $, la posición long obtiene ganancias y la posición short sufre pérdidas en relación con el precio contractual de 70.000 $. Si es de 60.000 $, la dirección se invierte. Los futuros negociados en exchanges reales se ajustan al mercado y normalmente se cierran o se renuevan antes del vencimiento, por lo que esta es una explicación simplificada.<sup>[[2]](#references)</sup>
 
-Sin embargo, esto resulta interesante, por ejemplo, para empresas que generan un producto y necesitan tener la seguridad de que podrán venderlo a un precio que les permita cubrir los costes. También para empresas que quieren garantizar precios fijos en el futuro para algo, aunque sean más altos.
+Los productores y consumidores utilizan futuros para cubrir el riesgo de precio; otros participantes los utilizan para buscar beneficios o proporcionar liquidez.<sup>[[1]](#references)</sup>
 
-Aunque en los exchanges normalmente se utiliza para intentar obtener beneficios.
+- Una **posición long** generalmente obtiene beneficios cuando sube el precio del contrato.
+- Una **posición short** generalmente obtiene beneficios cuando baja el precio del contrato.<sup>[[2]](#references)</sup>
 
-* Ten en cuenta que una "posición Long" significa que alguien está apostando a que el precio va a aumentar
-* Mientras que una "posición short" significa que alguien está apostando a que el precio va a bajar
+### Cobertura con futuros
 
-### Cobertura con futuros <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
+Si un gestor de fondos espera que una cartera baje, podría abrir una posición short en un contrato de futuros sobre un índice bursátil suficientemente correlacionado. Las ganancias de la cobertura short pueden compensar parte de las pérdidas de la cartera; el riesgo de base significa que la compensación rara vez es exacta. Un futuro de bitcoin cubriría la exposición a bitcoin, no automáticamente una cartera de acciones.
 
-Si un gestor de fondos teme que algunas acciones vayan a bajar, podría abrir una posición short sobre algunos activos, como bitcoins o contratos de futuros del S\&P 500. Esto sería similar a comprar o poseer algunos activos y crear un contrato para venderlos en el futuro a un precio mayor.
-
-En caso de que el precio baje, el gestor de fondos obtendrá beneficios porque venderá los activos a un precio mayor. Si el precio de los activos sube, el gestor no obtendrá ese beneficio, pero conservará sus activos.
+Si el mercado cubierto baja, la posición short en futuros puede ganar valor mientras las posiciones mantenidas lo pierden. Si sube, las posiciones mantenidas pueden ganar valor mientras la cobertura pierde. La cobertura reduce un riesgo específico en lugar de crear un beneficio garantizado.<sup>[[1]](#references)</sup>
 
 ### Futuros perpetuos
 
-**Estos son "futuros" que duran indefinidamente** (sin una fecha de finalización del contrato). Es muy común encontrarlos, por ejemplo, en exchanges de criptomonedas, donde puedes entrar y salir de futuros en función del precio de las criptomonedas.
+Los contratos perpetuos son derivados sin una fecha de vencimiento fija. Las plataformas de criptomonedas suelen utilizar pagos periódicos de funding para ayudar a mantener su precio cerca del precio Spot subyacente; las condiciones varían según la plataforma.<sup>[[3]](#references)</sup>
 
-Ten en cuenta que, en estos casos, las ganancias y las pérdidas pueden producirse en tiempo real: si el precio aumenta un 1%, ganas un 1%; si el precio disminuye un 1%, lo pierdes.
+Las ganancias y pérdidas cambian a medida que se mueve el precio de referencia. Un movimiento del precio del 1 % produce aproximadamente un movimiento del 1 % sobre el valor nocional de la posición antes de comisiones y funding, pero el apalancamiento puede convertirlo en un porcentaje mucho mayor del colateral depositado.
 
 ### Futuros con apalancamiento
 
-El **apalancamiento** te permite controlar una posición mayor en el mercado con una cantidad menor de dinero. Básicamente, te permite "apostar" mucho más dinero del que tienes, arriesgando únicamente el dinero que realmente posees.
+El **apalancamiento** permite a un trader controlar una posición nocional mayor con un depósito de margen menor. Las pérdidas no siempre se limitan al margen inicial: la liquidación, los gaps, las comisiones y las reglas de la plataforma pueden producir pérdidas adicionales.<sup>[[3]](#references)</sup>
 
-Por ejemplo, si abres una posición de futuros en BTC/USDT con 100$ y un apalancamiento de 50x, esto significa que, si el precio aumenta un 1%, ganarías 1x50 = el 50% de tu inversión inicial (50$). Y, por tanto, tendrías 150$.\
-Sin embargo, si el precio disminuye un 1%, perderías el 50% de tus fondos (59$ en este caso). Y si el precio disminuye un 2%, perderías toda tu apuesta (2x50 = 100%).
+Por ejemplo, un margen de 100 $ con un apalancamiento de 50x controla una posición de 5.000 $. Ignorando las comisiones, el funding y los mecanismos de liquidación, un movimiento favorable del 1 % produce una ganancia de 50 $ (el 50 % del margen inicial), mientras que un movimiento adverso del 1 % produce una pérdida de 50 $. Un movimiento adverso del 2 % equivale a 100 $, aunque normalmente una plataforma liquidará la posición antes de que se agote todo el margen.
 
-Por tanto, el apalancamiento permite controlar la cantidad de dinero que apuestas, al tiempo que aumenta las ganancias y las pérdidas.
+El apalancamiento amplifica tanto las ganancias como las pérdidas y hace posible la liquidación después de un movimiento adverso comparativamente pequeño.
 
 ## Diferencias entre futuros y opciones
 
-La principal diferencia entre futuros y opciones es que el contrato es opcional para el comprador: puede decidir ejecutarlo o no (normalmente solo lo hará si obtiene un beneficio). El vendedor debe vender si el comprador quiere utilizar la opción.\
-Sin embargo, el comprador pagará una comisión al vendedor por abrir la opción (por lo que el vendedor, que aparentemente asume más riesgo, empieza a obtener algo de dinero).
+El comprador de una opción recibe un derecho, no una obligación, de ejercerla según las condiciones del contrato. El vendedor de la opción tiene la obligación correspondiente si el comprador ejerce. El comprador paga al vendedor una prima por ese derecho.<sup>[[4]](#references)</sup>
 
 ### 1. **Obligación frente a derecho:**
 
-* **Futuros:** Cuando compras o vendes un contrato de futuros, estás entrando en un **acuerdo vinculante** para comprar o vender un activo a un precio específico en una fecha futura. Tanto el comprador como el vendedor están **obligados** a cumplir el contrato al vencimiento (a menos que el contrato se cierre antes).
-* **Opciones:** Con las opciones, tienes el **derecho, pero no la obligación**, de comprar (en el caso de una **opción call**) o vender (en el caso de una **opción put**) un activo a un precio específico antes de una fecha de vencimiento determinada o en ella. El **comprador** tiene la opción de ejecutar el contrato, mientras que el **vendedor** está obligado a realizar la operación si el comprador decide ejercer la opción.
+* **Futuros:** Cuando compras o vendes un contrato de futuros, estás entrando en un **acuerdo vinculante** para comprar o vender un activo a un precio específico en una fecha futura. Tanto el comprador como el vendedor están **obligados** a cumplir el contrato al vencimiento (salvo que el contrato se cierre antes).
+* **Opciones:** Con las opciones, tienes el **derecho, pero no la obligación**, de comprar (en el caso de una **opción call**) o vender (en el caso de una **opción put**) un activo a un precio específico antes de una fecha de vencimiento determinada o en ella. El **comprador** tiene la opción de ejecutar, mientras que el **vendedor** está obligado a cumplir la operación si el comprador decide ejercer la opción.
 
 ### 2. **Riesgo:**
 
-* **Futuros:** Tanto el comprador como el vendedor asumen un **riesgo ilimitado** porque están obligados a completar el contrato. El riesgo es la diferencia entre el precio acordado y el precio de mercado en la fecha de vencimiento.
-* **Opciones:** El riesgo del comprador está limitado a la **prima** pagada para adquirir la opción. Si el mercado no se mueve a favor del titular de la opción, este puede simplemente dejar que la opción expire. Sin embargo, el **vendedor** (emisor) de la opción tiene un riesgo ilimitado si el mercado se mueve significativamente en su contra.
+* **Futuros:** Ambas partes pueden sufrir pérdidas sustanciales. Que la pérdida sea matemáticamente ilimitada depende de la posición y del activo subyacente: una posición short puede tener una pérdida teórica ilimitada, mientras que una posición long no puede perder más que el valor nocional si el subyacente no puede caer por debajo de cero.
+* **Opciones:** Un comprador que no venda otra opción generalmente arriesga la prima pagada. El vendedor de una call naked puede enfrentarse a una pérdida teóricamente ilimitada; otras estrategias de venta de opciones tienen perfiles de riesgo limitados o ilimitados diferentes.
 
 ### 3. **Coste:**
 
-* **Futuros:** No hay ningún coste inicial aparte del margen necesario para mantener la posición, ya que tanto el comprador como el vendedor están obligados a completar la operación.
-* **Opciones:** El comprador debe pagar por adelantado una **prima de opción** por el derecho a ejercer la opción. Esta prima es, esencialmente, el coste de la opción.
+* **Futuros:** No hay un coste inicial aparte del margen necesario para mantener la posición, ya que tanto el comprador como el vendedor están obligados a completar la operación.
+* **Opciones:** El comprador debe pagar por adelantado una **prima de opción** por el derecho a ejercerla. Esta prima es esencialmente el coste de la opción.
 
 ### 4. **Potencial de beneficios:**
 
-* **Futuros:** El beneficio o la pérdida se basa en la diferencia entre el precio de mercado al vencimiento y el precio acordado en el contrato.
+* **Futuros:** La ganancia o pérdida se basa en la diferencia entre el precio de mercado al vencimiento y el precio acordado en el contrato.
 * **Opciones:** El comprador obtiene beneficios cuando el mercado se mueve favorablemente más allá del precio de ejercicio por un importe superior a la prima pagada. El vendedor obtiene beneficios al conservar la prima si la opción no se ejerce.
 
+## References
+
+- [1] [CFTC - El propósito económico de los mercados de futuros](https://www.cftc.gov/LearnAndProtect/EducationCenter/economicpurpose)
+- [2] [CFTC - Conceptos básicos del mercado de futuros](https://www.cftc.gov/LearnAndProtect/EducationCenter/FuturesMarketBasics/index2.htm)
+- [3] [CFTC - Comprender los riesgos del trading de monedas virtuales](https://www.cftc.gov/LearnAndProtect/AdvisoriesAndArticles/understand_risks_of_virtual_currency.html)
+- [4] [Glosario de la CFTC - Opción, prima y ejercicio](https://www.cftc.gov/LearnAndProtect/AdvisoriesAndArticles/CFTCGlossary/index.htm)
 {{#include ../banners/hacktricks-training.md}}
