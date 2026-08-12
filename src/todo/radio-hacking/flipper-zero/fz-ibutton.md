@@ -4,8 +4,7 @@
 
 ## 소개
 
-iButton에 대한 자세한 정보는 다음을 확인하세요:
-
+iButton 기술에 대한 배경 정보는 다음을 참조하세요.
 
 {{#ref}}
 ../ibutton.md
@@ -13,7 +12,7 @@ iButton에 대한 자세한 정보는 다음을 확인하세요:
 
 ## 설계
 
-다음 이미지의 **파란색** 부분은 Flipper가 **읽을 수 있도록 실제 iButton을 배치해야 하는** 위치입니다. **녹색** 부분은 iButton을 **올바르게 에뮬레이트하기 위해** Flipper Zero로 리더기에 **접촉해야 하는** 위치입니다.<sup>[[1]](#references)</sup>
+다음 이미지에서 **파란색** 영역은 물리적 iButton을 읽기 위해 Flipper Zero의 접점에 대는 방법을 보여줍니다. **초록색** 영역은 에뮬레이션 중 리더에 닿아야 하는 접점을 보여줍니다.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../images/image (565).png" alt=""><figcaption></figcaption></figure>
 
@@ -21,23 +20,23 @@ iButton에 대한 자세한 정보는 다음을 확인하세요:
 
 ### 읽기
 
-Read Mode에서 Flipper는 iButton 키가 접촉하기를 기다리며, **Dallas, Cyfral, Metakom** 세 가지 유형의 키를 모두 인식할 수 있습니다. Flipper가 **키 유형을 자동으로 판별합니다**. 키 프로토콜 이름은 ID 번호 위 화면에 표시됩니다.<sup>[[1]](#references)</sup>
+Read 모드에서 Flipper Zero는 키가 접점에 닿을 때까지 기다리고, protocol을 감지한 다음 키 ID 위에 protocol을 표시합니다. 기본 제공 application은 Dallas, Cyfral 및 Metakom access-control key를 지원합니다.<sup>[[2]](#references)</sup>
 
 ### 수동으로 추가
 
-**Dallas, Cyfral, Metakom** 유형의 iButton을 **수동으로 추가할 수 있습니다.**
+Dallas, Cyfral 및 Metakom protocol의 key data를 수동으로 입력할 수 있습니다.<sup>[[2]](#references)</sup>
 
-### **에뮬레이트**
+### 에뮬레이션
 
-저장된 iButton(읽었거나 수동으로 추가한 iButton)을 **에뮬레이트할 수 있습니다.**
+물리적 key에서 읽었든 수동으로 입력했든 저장된 key를 에뮬레이션할 수 있습니다.<sup>[[2]](#references)</sup>
 
 > [!TIP]
-> Flipper Zero의 접점을 리더기에 제대로 맞출 수 없다면 **외부 GPIO를 사용할 수 있습니다:**
+> 기본 제공 접점이 reader에 닿지 않는 경우 GPIO pin을 통해 data 및 ground 접점을 연결하세요.<sup>[[2]](#references)</sup>
 
 <figure><img src="../../../images/image (138).png" alt=""><figcaption></figcaption></figure>
 
-## 참고 자료
+## References
 
-- [1] [Taming iButton Keys with Flipper Zero](https://blog.flipperzero.one/taming-ibutton/)
-
+- [1] [Flipper Zero로 iButton Key 다루기](https://blog.flipperzero.one/taming-ibutton/)
+- [2] [Flipper Zero documentation - iButton Key 읽기](https://docs.flipper.net/zero/ibutton/read)
 {{#include ../../../banners/hacktricks-training.md}}

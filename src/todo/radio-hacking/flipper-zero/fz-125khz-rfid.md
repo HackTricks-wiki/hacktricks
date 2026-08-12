@@ -2,55 +2,50 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-
 ## 소개
 
-125kHz 태그의 작동 방식에 대한 자세한 내용은 다음을 확인하세요:
-
+125 kHz 태그의 작동 방식에 대한 배경 지식은 다음을 참조하세요.
 
 {{#ref}}
 ../pentesting-rfid.md
 {{#endref}}
 
-## 동작
+[저주파 RFID 소개](../pentesting-rfid.md#low-frequency-rfid-tags-125khz)에서는 일반적인 태그 제품군과 데이터 형식을 설명합니다.
 
-이러한 유형의 태그에 대한 자세한 내용은 [**이 소개 문서**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz)를 확인하세요.
+## 작업
 
 ### 읽기
 
-카드 정보를 **읽기** 위해 시도합니다. 그런 다음 카드를 **에뮬레이트**할 수 있습니다.<sup>[[1]](#references)</sup>
+**Read**를 사용하여 태그 데이터를 캡처합니다. 읽기에 성공하면 Flipper Zero가 저장된 태그를 에뮬레이트할 수 있습니다.<sup>[[1]](#references)</sup>
 
 > [!WARNING]
-> 일부 인터콤은 읽기 전에 write command를 전송하여 key duplication을 방지하려고 합니다. write가 성공하면 해당 태그는 가짜로 간주됩니다. Flipper가 RFID를 에뮬레이트할 때 리더는 이를 원본 태그와 구분할 방법이 없으므로 이러한 문제가 발생하지 않습니다.
+> 일부 인터컴 리더는 읽기 전에 쓰기 명령을 전송하여 쓰기 가능한 복제 태그를 탐지하려고 합니다. Flipper Zero 에뮬레이션은 동일한 방식으로 쓰기 가능한 태그 메모리를 노출하지 않습니다.<sup>[[1]](#references)</sup>
 
 ### 수동으로 추가
 
-수동으로 입력한 **데이터를 나타내는 가짜 카드**를 Flipper Zero에서 생성한 다음 에뮬레이트할 수 있습니다.
+Flipper Zero에 태그 데이터를 수동으로 입력하고 저장한 다음 에뮬레이트할 수 있습니다.<sup>[[1]](#references)</sup>
 
 #### 카드의 ID
 
-카드를 받았을 때 카드에 ID 또는 ID의 일부가 눈에 보이게 적혀 있는 경우가 있습니다.
+카드 외부에 ID의 전체 또는 일부가 인쇄되어 있는 경우가 있습니다.
 
 - **EM Marin**
 
-예를 들어 이 EM-Marin 카드에서는 실제 카드에 있는 5바이트 중 마지막 3바이트를 **평문으로 읽을 수 있습니다**.\
-카드에서 나머지 2바이트를 읽을 수 없다면 brute-force할 수 있습니다.<sup>[[1]](#references)</sup>
+예를 들어, 그림의 EM-Marin 카드는 5바이트 ID 중 마지막 3바이트를 노출합니다. 태그를 읽을 수 없는 경우 누락된 2바이트를 brute-force할 수 있습니다.
 
 <figure><img src="../../../images/image (104).png" alt=""><figcaption></figcaption></figure>
 
 - **HID**
 
-이 HID 카드도 마찬가지로 3바이트 중 2바이트만 카드에 인쇄되어 있습니다.
+마찬가지로 그림의 HID 카드는 3바이트 ID 중 2바이트만 인쇄되어 있습니다.
 
 <figure><img src="../../../images/image (1014).png" alt=""><figcaption></figcaption></figure>
 
 ### 에뮬레이트/쓰기
 
-카드를 **복사**하거나 ID를 **수동으로 입력**한 후 Flipper Zero로 카드를 **에뮬레이트**하거나 실제 카드에 **쓸** 수 있습니다.<sup>[[1]](#references)</sup>
+태그를 읽거나 ID를 수동으로 입력한 후 Flipper Zero는 저장된 자격 증명을 에뮬레이트할 수 있습니다. 지원되는 쓰기 가능한 태그의 경우 저장된 데이터를 호환되는 카드에 쓸 수도 있습니다.<sup>[[1]](#references)</sup>
 
-## 참고 자료
+## References
 
-- [1] [Diving into RFID Protocols with Flipper Zero](https://blog.flipperzero.one/rfid/)
-
-
+- [1] [Flipper Zero: Diving into RFID Protocols](https://blog.flipperzero.one/rfid/)
 {{#include ../../../banners/hacktricks-training.md}}

@@ -2,34 +2,28 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-다음을 확인하세요:
+## 실용적인 접근
 
-- Unicode homoglyphs
-- Zero-width characters
-- Whitespace patterns (spaces vs tabs)
+일반 텍스트가 예상과 다르게 동작하면 원본 증거를 보존하고, 해당 텍스트의 codepoint를 검사한 후 사본만 정규화하세요.
 
-## 실용적인 방법
+### 기법
 
-일반 텍스트가 예상과 다르게 동작한다면 codepoints를 검사하고 신중하게 normalize하세요 (evidence를 훼손하지 마세요).
+텍스트 Steganography는 렌더링 결과가 동일하거나 보이지 않는 문자를 자주 이용합니다:
 
-### Technique
+- Homoglyphs: 서로 다른 Unicode codepoint이지만 비슷하게 보이는 문자(예: Latin `a`와 Cyrillic `а`)<sup>[[1]](#references)</sup>
+- Zero-width 문자: joiner, non-joiner 및 zero-width space<sup>[[2]](#references)</sup>
+- Whitespace 인코딩: space와 tab의 차이, 줄 끝 공백 패턴 및 의도적인 줄 길이 패턴<sup>[[3]](#references)[[4]](#references)</sup>
 
-Text stego는 동일하게 렌더링되는 (또는 보이지 않는) characters에 의존하는 경우가 많습니다:
+추가적인 고신호 사례:
 
-- Homoglyphs: 동일하게 보이는 서로 다른 Unicode codepoints (Latin `a`와 Cyrillic `а`)
-- Zero-width characters: joiners, non-joiners, zero-width spaces
-- Whitespace encodings: spaces와 tabs, trailing spaces, line-length patterns<sup>[[1]](#references)</sup>
+- Bidirectional control은 텍스트를 시각적으로 재배열할 수 있습니다<sup>[[1]](#references)</sup>
+- Variation selector와 combining character는 표시되는 텍스트를 거의 변경하지 않고 숨겨진 상태를 전달할 수 있습니다<sup>[[1]](#references)</sup>
 
-추가적인 high-signal 사례:
+### Decode helper
 
-- Bidirectional override/control characters (텍스트를 시각적으로 재배열할 수 있음)
-- covert channel로 사용되는 Variation selectors 및 combining characters
+- [Unicode Homoglyph 및 zero-width-character encoder/decoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)<sup>[[2]](#references)</sup>
 
-### Decode helpers
-
-- Unicode homoglyph/zero-width playground: https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder
-
-### codepoints 검사
+### codepoint 검사
 ```bash
 python3 - <<'PY'
 import sys
@@ -41,14 +35,16 @@ PY
 ```
 ## CSS `unicode-range` 채널
 
-`@font-face` 규칙은 `unicode-range: U+..` 항목에 바이트를 인코딩할 수 있습니다. 코드 포인트를 추출하고 16진수를 연결한 다음 디코딩합니다:
+`@font-face` 규칙을 악용하여 `unicode-range: U+..` 항목에 바이트를 인코딩할 수 있습니다. 코드포인트를 추출하고 16진수 값을 연결한 다음 디코딩합니다:<sup>[[3]](#references)</sup>
 ```bash
 grep -o "U+[0-9A-Fa-f]\+" styles.css | tr -d 'U+\n' | xxd -r -p
 ```
-범위에 선언당 여러 바이트가 포함되어 있다면 먼저 쉼표를 기준으로 분할하고 normalize하세요 (`tr ',+' '\n'`). Python을 사용하면 형식이 일관되지 않아도 바이트를 쉽게 파싱하고 출력할 수 있습니다.<sup>[[1]](#references)</sup>
+범위에 선언당 여러 값이 포함되어 있으면 먼저 쉼표를 기준으로 분할한 다음 정규화하세요 (`tr ',+' '\n'`). 형식이 일관되지 않을 때는 Python으로 바이트를 파싱하고 출력할 수 있습니다.<sup>[[3]](#references)</sup>
 
-## 참고 문헌
+## References
 
-- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
-
+- [1] [Unicode 기술 보고서 #36: Unicode 보안 고려 사항](https://www.unicode.org/reports/tr36/)
+- [2] [Irongeek: Zero-Width Characters 및 Homoglyphs를 사용한 Unicode Steganography](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)
+- [3] [0xdf: Flagvent 2025 (Medium) — Santa's Wishlist](https://0xdf.gitlab.io/flagvent2025/medium)
+- [4] [Debian 매뉴얼: `stegsnow` 공백 Steganography](https://manpages.debian.org/trixie/stegsnow/stegsnow.1.en.html)
 {{#include ../../banners/hacktricks-training.md}}
