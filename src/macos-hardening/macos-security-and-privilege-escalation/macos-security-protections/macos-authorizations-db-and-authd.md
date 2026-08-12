@@ -2,33 +2,33 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## **Yetkilendirmeler DB**
+## Authorization Database
 
-`/var/db/auth.db` konumunda bulunan veritabanı, hassas işlemleri gerçekleştirme izinlerini depolamak için kullanılan veritabanıdır. Bu işlemler tamamen **user space** içinde gerçekleştirilir ve genellikle, bu veritabanını kontrol ederek **calling client**'ın belirli bir eylemi gerçekleştirme konusunda **authorized** olup olmadığını denetlemesi gereken **XPC services** tarafından kullanılır.
+Security framework'ünün Authorization Services bileşenleri, ayrıcalıklı yardımcıların ve diğer bileşenlerin adlandırılmış authorization rights değerlerini değerlendirmesine olanak tanır. Güncel macOS sürümlerinde bu kuralların çoğu `/var/db/auth.db` dosyasında kalıcı olarak tutulur ve `authd` tarafından değerlendirilir; bu dosya ve SQLite şeması uygulama ayrıntılarıdır ve sürümler arasında değişebilir.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
 
-Başlangıçta bu veritabanı, `/System/Library/Security/authorization.plist` içeriğinden oluşturulur. Ardından bazı servisler, başka izinler eklemek için bu veritabanındaki verileri ekleyebilir veya değiştirebilir.
+System varsayılanları geçmişte `/System/Library/Security/authorization.plist` dosyasından alınarak oluşturulmuştur; installer'lar veya ayrıcalıklı servisler adlandırılmış haklar ekleyebilir. Veritabanını doğrudan düzenlemek yerine desteklenen `security authorizationdb read|write|remove` arayüzünü kullanın.<sup>[[3]](#references)</sup>
 
-Kurallar, veritabanındaki `rules` tablosunda depolanır ve aşağıdaki sütunları içerir:
+Belgelendirilen build'de gözlemlenen `rules` tablosu aşağıdaki sütunları içerir. Bunu sabit bir public schema olarak değil, adli inceleme haritası olarak değerlendirin:
 
-- **id**: Her kural için otomatik olarak artırılan ve primary key olarak kullanılan benzersiz tanımlayıcı.
-- **name**: Authorization system içinde kuralı tanımlamak ve referans vermek için kullanılan benzersiz ad.
-- **type**: Authorization logic'i tanımlamak üzere 1 veya 2 değerleriyle sınırlı olan kural türünü belirtir.
-- **class**: Kuralı belirli bir sınıfa kategorize eder ve pozitif bir integer olmasını sağlar.
-- İzin verme için "allow", reddetme için "deny", `group` özelliği üyeliği erişime izin veren bir grubu belirtiyorsa "user", karşılanması gereken bir kuralı dizi içinde belirtiyorsa "rule", ardından `mechanisms` array'i gelen "evaluate-mechanisms"; bu array'deki değerler ya builtins ya da `/System/Library/CoreServices/SecurityAgentPlugins/` veya `/Library/Security//SecurityAgentPlugins` içindeki bir bundle adıdır.
-- **group**: Group-based authorization için kuralla ilişkili user group'u belirtir.
-- **kofn**: Toplam sayının kaç alt kuralından kaçının karşılanması gerektiğini belirleyen "k-of-n" parametresini temsil eder.
-- **timeout**: Kural tarafından verilen authorization'ın süresi dolmadan önce geçecek saniye cinsinden süreyi tanımlar.
-- **flags**: Kuralın davranışını ve özelliklerini değiştiren çeşitli flag'leri içerir.
-- **tries**: Security'yi artırmak için izin verilen authorization denemelerinin sayısını sınırlar.
-- **version**: Version control ve güncellemeler için kuralın sürümünü takip eder.
-- **created**: Auditing amacıyla kuralın oluşturulduğu timestamp'i kaydeder.
-- **modified**: Kuralda yapılan son değişikliğin timestamp'ini depolar.
-- **hash**: Kuralın bütünlüğünü sağlamak ve kurcalamayı tespit etmek için kuralın hash değerini içerir.
-- **identifier**: Kuralın external reference'ları için UUID gibi benzersiz bir string identifier sağlar.
-- **requirement**: Kuralın belirli authorization gereksinimlerini ve mekanizmalarını tanımlayan serialized data içerir.
-- **comment**: Documentation ve clarity amacıyla kural hakkında human-readable bir açıklama veya comment sunar.
+- **id**: Her rule için otomatik olarak artırılan ve primary key olarak kullanılan benzersiz tanımlayıcı.
+- **name**: Authorization system içinde rule'u tanımlamak ve referans vermek için kullanılan benzersiz ad.
+- **type**: Authorization logic'i tanımlamak üzere 1 veya 2 değerleriyle sınırlı olan rule türünü belirtir.
+- **class**: Rule'u belirli bir class içinde kategorize eder ve pozitif bir integer olmasını sağlar.
+- Yaygın rule class'ları arasında `allow`, `deny`, `user`, `rule` ve `evaluate-mechanisms` bulunur. Mechanism'ler built-in olabilir veya `/System/Library/CoreServices/SecurityAgentPlugins/` ya da `/Library/Security/SecurityAgentPlugins/` altındaki Security Agent plug-in'leri olabilir.<sup>[[2]](#references)</sup>
+- **group**: Group-based authorization için rule ile ilişkili user group'u belirtir.
+- **kofn**: Toplam sayı içindeki kaç subrule'un karşılanması gerektiğini belirleyen "k-of-n" parametresini temsil eder.
+- **timeout**: Rule tarafından verilen authorization'ın sona ermesinden önce geçecek saniye cinsinden süreyi tanımlar.
+- **flags**: Rule'un davranışını ve özelliklerini değiştiren çeşitli flag'leri içerir.
+- **tries**: Güvenliği artırmak amacıyla izin verilen authorization denemelerinin sayısını sınırlar.
+- **version**: Version control ve güncellemeler için rule'un sürümünü takip eder.
+- **created**: Auditing amacıyla rule'un oluşturulduğu timestamp'i kaydeder.
+- **modified**: Rule'da yapılan son değişikliğin timestamp'ini saklar.
+- **hash**: Bütünlüğünü doğrulamak ve tampering'i tespit etmek için rule'un hash değerini tutar.
+- **identifier**: Rule'a dış referanslar için UUID gibi benzersiz bir string identifier sağlar.
+- **requirement**: Rule'un belirli authorization gereksinimlerini ve mechanism'lerini tanımlayan serialize edilmiş verileri içerir.
+- **comment**: Documentation ve açıklık amacıyla rule hakkında human-readable bir açıklama veya comment sunar.
 
-### Örnek
+### Example
 ```bash
 # List by name and comments
 sudo sqlite3 /var/db/auth.db "select name, comment from rules"
@@ -56,7 +56,7 @@ security authorizationdb read com.apple.tcc.util.admin
 </dict>
 </plist>
 ```
-Ayrıca [https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/) adresinde `authenticate-admin-nonshared` ifadesinin anlamını görmek mümkündür:<sup>[[1]](#references)</sup>
+Aşağıdaki decode edilmiş kural, belgelenmiş bir macOS sürümünde `authenticate-admin-nonshared` özelliğini gösterir:<sup>[[1]](#references)</sup>
 ```json
 {
 "allow-root": "false",
@@ -73,17 +73,19 @@ Ayrıca [https://www.dssw.co.uk/reference/authorization-rights/authenticate-admi
 ```
 ## Authd
 
-Hassas eylemleri gerçekleştirmek üzere client'ları authorize etmek için gelen istekleri alan bir daemon'dur. `XPCServices/` klasörü içinde tanımlanan bir XPC service olarak çalışır ve log'larını `/var/log/authd.log` dosyasına yazar.
+`authd`, Authorization Services isteklerini değerlendiren XPC service'tir. Güncel macOS derlemelerinde bundle'ı `/System/Library/Frameworks/Security.framework/XPCServices/authd.xpc` konumunda incelenebilir; bu yol bir implementation detail'dir ve sürümlere göre farklılık gösterebilir. Eski sürümlerde `/var/log/authd.log` dosyasına yazılırdı; güncel sürümler ağırlıklı olarak unified logging system'i kullanır ve bu sistem `authd` process predicate'iyle `log show`/`log stream` kullanılarak sorgulanabilir.<sup>[[2]](#references)</sup><sup>[[5]](#references)</sup>
 
-Ayrıca security tool kullanılarak birçok `Security.framework` API'si test edilebilir. Örneğin `AuthorizationExecuteWithPrivileges` şu şekilde çalıştırılabilir: `security execute-with-privileges /bin/ls`
+`security` tool'u çeşitli Authorization Services işlemlerini kullanıma sunar. Tarihsel bir örnekte `security execute-with-privileges /bin/ls` ile `AuthorizationExecuteWithPrivileges` çağrılır. Apple bu API'yi macOS 10.7'de deprecated etti; modern privileged helper'lar bunun yerine launchd-managed helper ve XPC authorization kullanmalıdır.<sup>[[2]](#references)</sup><sup>[[4]](#references)</sup>
 
-Bu işlem, `/usr/libexec/security_authtrampoline /bin/ls` komutunu root olarak fork ve exec eder; ardından ls'yi root olarak çalıştırmak için bir prompt üzerinden izin ister:
+Bunu hâlâ destekleyen sürümlerde `/usr/libexec/security_authtrampoline` kullanılır ve komut root olarak çalıştırılmadan önce bir authorization prompt görüntülenir:
 
 <figure><img src="../../../images/image (10).png" alt=""><figcaption></figcaption></figure>
 
 ## References
 
-- [1] [authenticate-admin-nonshared - Overview of the macOS Authorization Right](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/)
-
-
+- [1] [authenticate-admin-nonshared - macOS Authorization Right'a Genel Bakış](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/)
+- [2] [Apple Authorization Services Programming Guide (archive)](https://developer.apple.com/library/archive/documentation/Security/Conceptual/authorization_concepts/)
+- [3] [`security(1)` macOS manual page](https://keith.github.io/xcode-man-pages/security.1.html)
+- [4] [Apple - Daemons and Services Programming Guide: launchd jobs oluşturma](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html)
+- [5] [Apple open-source Security projesi - `authd`](https://github.com/apple-oss-distributions/Security/tree/main/OSX/authd)
 {{#include ../../../banners/hacktricks-training.md}}

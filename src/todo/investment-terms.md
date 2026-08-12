@@ -4,69 +4,69 @@
 
 ## Spot
 
-Bu, trading yapmanın en temel yoludur. **Varlığın miktarını ve satın almak veya satmak istediğiniz fiyatı belirtebilir**, fiyat ulaşıldığında işlem gerçekleştirilir.
+Spot trading, bir varlığın anında teslim edilmek üzere takas edilmesidir. Limit emri, miktarı ve limit fiyatını belirtir; yalnızca piyasa bu fiyatı veya daha iyisini karşılayabildiğinde gerçekleşir. Buna karşılık piyasa emri, mevcut en iyi fiyatlardan hızlı bir şekilde gerçekleşmeyi hedefler ve slippage yaşayabilir.<sup>[[4]](#references)</sup>
 
-Genellikle işlemi mevcut fiyattan mümkün olduğunca hızlı gerçekleştirmek için **güncel piyasa fiyatını** da kullanabilirsiniz.
+Stop-limit emrinde, bir limit emrini etkinleştiren bir stop fiyatı bulunur. Gerçekleşme fiyatını sınırlayabilir; ancak piyasa limit fiyatını aştığında emrin gerçekleşmesini garanti etmez.<sup>[[4]](#references)</sup>
 
-**Stop Loss - Limit**: Ayrıca varlıkların miktarını ve satın alma veya satış fiyatını belirtebilir, bunun yanında ulaşıldığında satın almak veya satmak için daha düşük bir fiyat da belirtebilirsiniz (zarar durdurmak için).
+## Futures
 
-## Vadeli İşlemler
+Bir futures sözleşmesi, belirli bir emtia veya finansal aracı gelecekteki bir tarihte satın almak ya da satmak için yapılan standartlaştırılmış bir anlaşmadır. Örneğin iki taraf, bir bitcoin için altı ay sonraki takas işlemi üzere 70.000 $ fiyatında anlaşabilir.<sup>[[1]](#references)</sup>
 
-Vadeli işlem, 2 tarafın **gelecekte bir şeyi sabit bir fiyattan satın almak** üzere anlaşmaya vardığı bir sözleşmedir. Örneğin 1 bitcoin'i 6 ay sonra 70.000$'dan satmak.
+Takas fiyatı 80.000 $ ise long taraf, 70.000 $ olan sözleşme fiyatına göre kazanç sağlar ve short taraf zarar eder. Fiyat 60.000 $ ise yön tersine döner. Gerçekte borsada işlem gören futures sözleşmeleri piyasa değerine göre düzenli olarak yeniden değerlendirilir ve genellikle vade dolmadan önce kapatılır veya yenilenir; bu nedenle bu yalnızca basitleştirilmiş bir örnektir.<sup>[[2]](#references)</sup>
 
-Açıkça, 6 ay sonra bitcoin'in değeri 80.000$ olursa satan taraf para kaybeder ve alan taraf kazanır. 6 ay sonra bitcoin'in değeri 60.000$ olursa bunun tersi gerçekleşir.
+Üreticiler ve tüketiciler fiyat riskinden korunmak için futures kullanır; diğer katılımcılar bunları kâr elde etmek veya likidite sağlamak için kullanır.<sup>[[1]](#references)</sup>
 
-Ancak bu, örneğin bir ürün üreten ve maliyetlerini karşılayacak bir fiyattan ürünü satabileceğinden emin olmak isteyen işletmeler için ilgi çekicidir. Ya da gelecekte bir şey için, daha yüksek olsa bile, sabit fiyatları güvence altına almak isteyen işletmeler için.
+- **Long pozisyon**, sözleşme fiyatı yükseldiğinde genellikle kâr sağlar.
+- **Short pozisyon**, sözleşme fiyatı düştüğünde genellikle kâr sağlar.<sup>[[2]](#references)</sup>
 
-Borsalarda ise bu genellikle kâr elde etmeye çalışmak için kullanılır.
+### Futures ile Hedging
 
-* "Long position", bir kişinin fiyatın yükseleceğine bahis oynadığı anlamına gelir
-* "Short position" ise bir kişinin fiyatın düşeceğine bahis oynadığı anlamına gelir
+Bir fon yöneticisi portföyün düşmesini bekliyorsa, yeterli korelasyona sahip bir hisse senedi endeksi futures sözleşmesinde short pozisyon açabilir. Short hedge işleminden elde edilen kazançlar portföy zararlarının bir kısmını dengeleyebilir; basis risk nedeniyle bu dengeleme nadiren tam olur. Bitcoin future, bitcoin riskini hedge eder; otomatik olarak bir hisse senedi portföyünü hedge etmez.
 
-### Hedging With Futures <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
-
-Bir fon yöneticisi bazı hisselerin düşeceğinden korkuyorsa bitcoin veya S\&P 500 vadeli işlem sözleşmeleri gibi bazı varlıklar üzerinde short position alabilir. Bu, bazı varlıkları satın almaya veya elinde bulundurmaya ve bunları gelecekte daha yüksek bir fiyattan satmak üzere bir sözleşme oluşturmaya benzer.
-
-Fiyat düşerse fon yöneticisi, varlıkları daha yüksek bir fiyattan satacağı için kâr elde eder. Varlıkların fiyatı yükselirse yönetici bu kârı elde edemez, ancak varlıklarını elinde tutmaya devam eder.
+Hedge edilen piyasa düşerse short futures pozisyonu değer kazanırken varlıkların değeri düşebilir. Piyasa yükselirse varlıklar değer kazanırken hedge zarara uğrayabilir. Hedging, belirli bir riski azaltır; garantili kâr sağlamaz.<sup>[[1]](#references)</sup>
 
 ### Perpetual Futures
 
-**Bunlar süresiz olarak devam eden "futures" sözleşmeleridir** (sözleşmenin bitiş tarihi yoktur). Örneğin crypto borsalarında bunlara rastlamak oldukça yaygındır; crypto fiyatlarına göre futures işlemlerine girip çıkabilirsiniz.
+Perpetual sözleşmeler, sabit bir vade tarihi olmayan türev ürünlerdir. Crypto platformları, fiyatlarını temel alınan spot fiyatına yakın tutmaya yardımcı olmak için genellikle dönemsel funding ödemeleri kullanır; koşullar platforma göre değişir.<sup>[[3]](#references)</sup>
 
-Bu durumlarda kâr ve zararların gerçek zamanlı olabileceğini unutmayın: Fiyat %1 artarsa %1 kazanırsınız; fiyat %1 düşerse %1 kaybedersiniz.
+Kâr ve zarar, mark fiyatı hareket ettikçe değişir. Fiyatın %1 hareket etmesi, ücretler ve funding öncesinde pozisyonun nominal değerinde yaklaşık %1'lik bir harekete neden olur; ancak leverage, bunun yatırılan teminatın çok daha büyük bir yüzdesi olmasına yol açabilir.
 
-### Kaldıraçlı Futures
+### Leverage ile Futures
 
-**Kaldıraç**, daha az miktarda parayla piyasada daha büyük bir pozisyonu kontrol etmenizi sağlar. Temel olarak, sahip olduğunuzdan çok daha fazla parayla "bahis" yapmanıza ve yalnızca gerçekten sahip olduğunuz parayı riske atmanıza olanak tanır.
+**Leverage**, bir trader'ın daha küçük bir margin yatırımıyla daha büyük nominal değere sahip bir pozisyon kontrol etmesini sağlar. Zararlar her zaman başlangıç margin'iyle sınırlı değildir: liquidation, gap'ler, ücretler ve platform kuralları ek zararlara yol açabilir.<sup>[[3]](#references)</sup>
 
-Örneğin BTC/USDT üzerinde 100$ ile 50x kaldıraçlı bir futures pozisyonu açarsanız, fiyat %1 arttığında başlangıç yatırımınızın %1x50 = %50'sini (50$) kazanırsınız. Böylece 150$'ınız olur.\
-Ancak fiyat %1 düşerse paranızın %50'sini (bu durumda 59$) kaybedersiniz. Fiyat %2 düşerse tüm bahsinizi kaybedersiniz (%2x50 = %100).
+Örneğin, 50x leverage ile yatırılan 100 $ margin, 5.000 $ değerinde bir pozisyonu kontrol eder. Ücretler, funding ve liquidation mekanizmaları göz ardı edilirse, lehine gerçekleşen %1'lik bir hareket 50 $ kazanç (%50 başlangıç margin'i) sağlarken, aleyhe gerçekleşen %1'lik bir hareket 50 $ zarara yol açar. Aleyhe gerçekleşen %2'lik bir hareket 100 $'a karşılık gelir; ancak bir platform normalde tüm margin tükenmeden önce pozisyonu liquidate eder.
 
-Bu nedenle kaldıraç, kazançları ve kayıpları artırırken bahis yaptığınız para miktarını kontrol etmenizi sağlar.
+Leverage hem kazançları hem de zararları büyütür ve görece küçük bir aleyhe hareket sonrasında liquidation'ı mümkün kılar.
 
 ## Futures ve Options Arasındaki Farklar
 
-Futures ve options arasındaki temel fark, sözleşmenin alıcı için isteğe bağlı olmasıdır: Alıcı sözleşmeyi uygulayıp uygulamamaya karar verebilir (genellikle yalnızca bundan kâr elde edecekse uygular). Alıcı option'ı kullanmak isterse satıcı satış yapmak zorundadır.\
-Ancak alıcı, option'ı açtığı için satıcıya bir ücret öder (bu nedenle görünüşte daha fazla risk alan satıcı para kazanmaya başlar).
+Bir option alıcısı, sözleşme koşulları kapsamında kullanma hakkı elde eder; yükümlülük elde etmez. Option yazıcısı, alıcının option'ı kullanması durumunda buna karşılık gelen yükümlülüğe sahiptir. Alıcı bu hak karşılığında yazıcıya bir premium öder.<sup>[[4]](#references)</sup>
 
 ### 1. **Yükümlülük ve Hak:**
 
-* **Futures:** Bir futures sözleşmesi satın aldığınızda veya sattığınızda, belirli bir tarihte belirli bir fiyattan bir varlığı satın almak veya satmak için **bağlayıcı bir anlaşmaya** girmiş olursunuz. Hem alıcı hem de satıcı, sözleşme sona erdiğinde sözleşmeyi yerine getirmekle **yükümlüdür** (sözleşme bundan önce kapatılmadığı sürece).
-* **Options:** Options işlemlerinde, belirli bir fiyattan bir varlığı belirli bir son kullanma tarihinden önce veya o tarihte satın alma (**call option** durumunda) ya da satma (**put option** durumunda) **hakkına, ancak yükümlülüğüne sahip olmazsınız**. **Alıcı** işlemi gerçekleştirme seçeneğine sahiptir; **satıcı** ise alıcı option'ı kullanmaya karar verirse işlemi gerçekleştirmekle yükümlüdür.
+* **Futures:** Bir futures sözleşmesi aldığınızda veya sattığınızda, gelecekteki bir tarihte bir varlığı belirli bir fiyattan almak ya da satmak için **bağlayıcı bir anlaşmaya** girmiş olursunuz. Hem alıcı hem de satıcı, sözleşme vade tarihinden önce kapatılmadığı sürece, vade tarihinde sözleşmeyi yerine getirmekle **yükümlüdür**.
+* **Options:** Options işlemlerinde, belirli bir fiyattan bir varlığı belirli bir vade tarihinden önce veya o tarihte alma ( **call option** durumunda) ya da satma ( **put option** durumunda) **hakkına sahip olursunuz; ancak yükümlülüğünüz yoktur**. **Alıcı** işlemi gerçekleştirme seçeneğine sahiptir; **satıcı** ise alıcı option'ı kullanmaya karar verirse işlemi yerine getirmekle yükümlüdür.
 
 ### 2. **Risk:**
 
-* **Futures:** Hem alıcı hem de satıcı, sözleşmeyi tamamlamakla yükümlü oldukları için **sınırsız risk** üstlenir. Risk, anlaşılan fiyat ile son kullanma tarihindeki piyasa fiyatı arasındaki farktır.
-* **Options:** Alıcının riski, option'ı satın almak için ödenen **prim** ile sınırlıdır. Piyasa option sahibinin lehine hareket etmezse option'ın süresinin dolmasına izin verebilir. Ancak option'ın **satıcısı** (writer), piyasa kendisinin aleyhine önemli ölçüde hareket ederse sınırsız risk taşır.
+* **Futures:** Her iki taraf da önemli zararlarla karşılaşabilir. Zararın matematiksel olarak sınırsız olup olmadığı pozisyona ve temel alınan varlığa bağlıdır: short pozisyon teorik olarak sınırsız zarara yol açabilirken, temel alınan varlık sıfırın altına düşemiyorsa long pozisyon nominal değerden daha fazla zarar edemez.
+* **Options:** Başka bir option yazmayan bir alıcı genellikle ödediği premium'ı riske atar. Naked call yazıcısı teorik olarak sınırsız zararla karşılaşabilir; diğer option yazma stratejilerinin riskleri sınırlı veya sınırsız olabilir.
 
 ### 3. **Maliyet:**
 
-* **Futures:** Alıcı ve satıcı işlemi tamamlamakla yükümlü olduğundan, pozisyonu korumak için gereken teminat dışında önceden ödenen bir maliyet yoktur.
-* **Options:** Alıcı, option'ı kullanma hakkı için önceden bir **option primi** ödemelidir. Bu prim, temel olarak option'ın maliyetidir.
+* **Futures:** Pozisyonu korumak için gereken margin dışında peşin bir maliyet yoktur; çünkü alıcı ve satıcı işlemi tamamlamakla yükümlüdür.
+* **Options:** Alıcı, option'ı kullanma hakkı karşılığında peşin olarak bir **option premium'ı** ödemelidir. Bu premium, esas olarak option'ın maliyetidir.
 
 ### 4. **Kâr Potansiyeli:**
 
-* **Futures:** Kâr veya zarar, son kullanma tarihindeki piyasa fiyatı ile sözleşmede anlaşılan fiyat arasındaki farka dayanır.
-* **Options:** Alıcı, piyasa strike price'ın ötesinde ve ödenen primden daha fazla lehine hareket ettiğinde kâr eder. Satıcı ise option kullanılmazsa primi elinde tutarak kâr eder.
+* **Futures:** Kâr veya zarar, vade tarihindeki piyasa fiyatı ile sözleşmede anlaşılan fiyat arasındaki farka dayanır.
+* **Options:** Alıcı, piyasa strike fiyatının ötesine ve ödenen premium'dan daha fazla olacak şekilde lehine hareket ettiğinde kâr eder. Satıcı, option kullanılmazsa premium'ı elinde tutarak kâr eder.
 
+## References
+
+- [1] [CFTC - Futures piyasalarının ekonomik amacı](https://www.cftc.gov/LearnAndProtect/EducationCenter/economicpurpose)
+- [2] [CFTC - Futures piyasalarının temelleri](https://www.cftc.gov/LearnAndProtect/EducationCenter/FuturesMarketBasics/index2.htm)
+- [3] [CFTC - Sanal para işlemlerinin risklerini anlayın](https://www.cftc.gov/LearnAndProtect/AdvisoriesAndArticles/understand_risks_of_virtual_currency.html)
+- [4] [CFTC Glossary - Option, premium, and exercise](https://www.cftc.gov/LearnAndProtect/AdvisoriesAndArticles/CFTCGlossary/index.htm)
 {{#include ../banners/hacktricks-training.md}}

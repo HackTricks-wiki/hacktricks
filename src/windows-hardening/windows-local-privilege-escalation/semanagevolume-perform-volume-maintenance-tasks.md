@@ -1,31 +1,34 @@
-# SeManageVolumePrivilege: Keyfi dosya okuma için ham birim erişimi
+# SeManageVolumePrivilege: Volume-maintenance abuse and raw-access validation
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Genel Bakış
+## Overview
 
-Windows kullanıcı hakkı: Birim bakım görevlerini gerçekleştirme (sabit değer: SeManageVolumePrivilege).
+Windows kullanıcı hakkı: Perform volume maintenance tasks (sabit değer: SeManageVolumePrivilege).
 
-Bu hakka sahip kullanıcılar birleştirme, birim oluşturma/kaldırma ve bakım IO'su gibi düşük seviyeli birim işlemlerini gerçekleştirebilir. Saldırganlar açısından kritik nokta, bu hakkın ham birim aygıtı tanıtıcılarının (ör. \\.\C:) açılmasına ve NTFS dosya ACL'lerini atlayan doğrudan disk IO'su gerçekleştirilmesine izin vermesidir. Ham erişim ile, DACL tarafından erişim reddedilmiş olsa bile, dosya sistemi yapılarını çevrimdışı ayrıştırarak veya blok/küme seviyesinde okuma yapan araçlardan yararlanarak birimdeki herhangi bir dosyanın baytlarını kopyalayabilirsiniz.
+Bu hak, birimlerin birleştirilmesi ve birim oluşturma veya kaldırma gibi volume-maintenance işlemlerine izin verir. Microsoft, bu hakkın sahibinin dosyaları başka veriler içeren depolama alanına genişletebilmesinin ve ardından elde edilen baytları okuyup değiştirebilmesinin mümkün olabileceği konusunda uyarır.<sup>[[1]](#references)</sup>
+
+`SeManageVolumePrivilege` sahipliğini garantili raw-disk access ile eşdeğer görmeyin. Microsoft, doğrudan erişim için `CreateFile` aracılığıyla fiziksel bir disk veya volume açmanın administrative privileges gerektirdiğini ve normal object/device access kontrollerinin hâlâ geçerli olduğunu belirtir. Belirli bir build veya üründe, arbitrary file read iddiasında bulunmadan önce token, device ACL, istenen access, share flags ve volume state unsurlarının raw handle alınmasına izin verip vermediğini test edin.<sup>[[3]](#references)</sup>
 
 Varsayılan: Sunucularda ve domain controller'larda Administrators.<sup>[[1]](#references)</sup>
 
-## Kötüye kullanım senaryoları
+## Abuse scenarios
 
-- Disk aygıtını okuyarak ACL'leri atlayan keyfi dosya okuma (ör. %ProgramData%\Microsoft\Crypto\RSA\MachineKeys ve %ProgramData%\Microsoft\Crypto\Keys altındaki makine özel anahtarları, registry hive'ları, DPAPI masterkey'leri, SAM, VSS aracılığıyla ntds.dit gibi hassas ve sistem tarafından korunan materyalleri exfiltrate etme).
-- Baytları doğrudan ham aygıttan kopyalayarak kilitli/ayrıcalıklı yolları (C:\Windows\System32\…) atlama.
-- AD CS ortamlarında, “Golden Certificates” üretmek ve PKINIT aracılığıyla herhangi bir domain principal'ını taklit etmek için CA'in anahtar materyalini (makine key store) exfiltrate etme. Aşağıdaki linke bakın.<sup>[[2]](#references)</sup>
+- Hesap gerçekten okunabilir bir raw-volume handle elde edebiliyorsa, NTFS-aware bir parser per-file ACL'lerini bypass edebilir ve allocated cluster'lardan korunan veya locked file'ları kurtarabilir.
+- Olası hedefler arasında `C:\Windows\System32` altındaki locked veya ACL-protected content, registry hive'ları, DPAPI master key'leri, SAM ve ayrı olarak bir snapshot veya offline volume üzerinden erişilebildiğinde `ntds.dit` bulunur.
+- Certificate services host'larında kullanışlı software-key konumları arasında `%ProgramData%\Microsoft\Crypto\RSA\MachineKeys` ve `%ProgramData%\Microsoft\Crypto\Keys` bulunur; bir file'ı kurtarmak yalnızca key material exportable olduğunda ve ayrıca decrypt edilebildiğinde işe yarar.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
+- Bir AD CS host'unda başarıyla kurtarılan **exportable/software-backed** CA private key, Golden Certificate abuse işlemini mümkün kılabilir. Hardware-backed veya non-exportable key tasarımları bu yolu değiştirir.<sup>[[2]](#references)</sup>
 
-Not: Yardımcı araçlara güvenmiyorsanız NTFS yapılarını ayrıştırmak için yine de bir parser'a ihtiyacınız vardır. Piyasadaki birçok araç ham erişimi soyutlar.
+Not: Helper tools kullanmıyorsanız NTFS structures için yine de bir parser gerekir. Piyasada bulunan birçok tool raw access işlemini soyutlar.
 
-## Uygulamalı teknikler
+## Practical techniques
 
-- Ham birim tanıtıcısı açıp kümeleri okuyun:
+- Raw volume handle açın ve cluster'ları okuyun:
 
 <details>
 <summary>Genişletmek için tıklayın</summary>
 ```powershell
-# PowerShell – read first MB from C: raw device (requires SeManageVolumePrivilege)
+# Validation attempt: current Windows versions normally require an administrative token
 $fs = [System.IO.File]::Open("\\.\\C:",[System.IO.FileMode]::Open,[System.IO.FileAccess]::Read,[System.IO.FileShare]::ReadWrite)
 $buf = New-Object byte[] (1MB)
 $null = $fs.Read($buf,0,$buf.Length)
@@ -50,20 +53,20 @@ File.WriteAllBytes("C:\\temp\\blk.bin", buf);
 </details>
 
 - Raw volume'dan belirli dosyaları kurtarmak için NTFS-aware bir tool kullanın:
-- RawCopy/RawCopy64 (kullanımda olan dosyaların sektör seviyesinde kopyalanması)
+- RawCopy/RawCopy64 (kullanımda olan dosyaların sector-level kopyalanması)
 - FTK Imager veya The Sleuth Kit (salt okunur imaging, ardından dosyaları carve etme)
-- vssadmin/diskshadow + shadow copy, ardından hedef dosyayı snapshot'tan kopyalama (VSS oluşturabiliyorsanız; genellikle admin yetkisi gerektirir, ancak SeManageVolumePrivilege yetkisine sahip olan aynı operatörlerde çoğunlukla kullanılabilir)
+- vssadmin/diskshadow + shadow copy, ardından hedef dosyayı snapshot'tan kopyalama (VSS oluşturabiliyorsanız; genellikle admin yetkisi gerektirir, ancak SeManageVolumePrivilege sahibi aynı operatörler tarafından çoğunlukla kullanılabilir)
 
-Hedeflenecek tipik hassas yollar:
+Hedeflenebilecek tipik hassas yollar:
 - %ProgramData%\Microsoft\Crypto\RSA\MachineKeys\
 - %ProgramData%\Microsoft\Crypto\Keys\
-- C:\Windows\System32\config\SAM, SYSTEM, SECURITY (yerel secrets)
-- C:\Windows\NTDS\ntds.dit (domain controllers – shadow copy aracılığıyla)
-- C:\Windows\System32\CertSrv\CertEnroll\ (CA certs/CRLs; private keys yukarıdaki machine key store'da bulunur)
+- C:\Windows\System32\config\SAM, SYSTEM, SECURITY (yerel secret'lar)
+- C:\Windows\NTDS\ntds.dit (domain controller'lar – shadow copy üzerinden)
+- C:\Windows\System32\CertSrv\CertEnroll\ (CA certificate/CRL'leri; private key'ler yukarıdaki machine key store'da bulunur)
 
 ## AD CS bağlantısı: Golden Certificate Forging
 
-Enterprise CA'nın private key'ini machine key store'dan okuyabiliyorsanız, rastgele principals için client-auth certificates forge edebilir ve PKINIT/Schannel üzerinden authenticate olabilirsiniz. Bu genellikle Golden Certificate olarak adlandırılır.<sup>[[2]](#references)</sup> Bkz.:
+Enterprise CA'nın private key'ini machine key store'dan okuyabiliyorsanız, keyfi principal'lar için client-auth certificate'ları forge edebilir ve PKINIT/Schannel üzerinden authenticate olabilirsiniz. Bu genellikle Golden Certificate olarak adlandırılır.<sup>[[2]](#references)</sup> Bkz.:
 
 {{#ref}}
 ../active-directory-methodology/ad-certificates/domain-persistence.md
@@ -74,13 +77,15 @@ Enterprise CA'nın private key'ini machine key store'dan okuyabiliyorsanız, ras
 ## Detection ve hardening
 
 - SeManageVolumePrivilege (Perform volume maintenance tasks) atamasını yalnızca güvenilir admin'lerle sınırlayın.
-- Sensitive Privilege Use ve \\.\C:, \\.\PhysicalDrive0 gibi device object'lerine yönelik process handle açma işlemlerini izleyin.
-- HSM/TPM-backed CA keys veya DPAPI-NG kullanmayı tercih edin; böylece raw file read işlemleri key material'ı kullanılabilir biçimde kurtaramaz.
-- Upload, temp ve extraction path'lerini executable olmayan ve birbirinden ayrılmış şekilde tutun (bu chain post-exploitation ile sıklıkla birlikte kullanılan web context defense).
+- Sensitive Privilege Use'ı ve \\.\C:, \\.\PhysicalDrive0 gibi device object'lerine yönelik process handle açma işlemlerini monitor edin.
+- Kopyalanmış bir key-container dosyasının kullanılabilir private-key materyalini kurtarmak için yeterli olmaması amacıyla, düzgün yapılandırılmış HSM- veya TPM-backed, export edilemeyen CA key'lerini tercih edin.
+- CA-key path'i dışındaki application secret'ları için DPAPI veya DPAPI-NG, kopyalanmış bir data file'ını user, machine, group veya başka bir authorized principal'a koruyarak yetersiz hâle getirebilir. Bu, compromised principal tarafından hâlihazırda erişilebilen plaintext'i korumaz.<sup>[[4]](#references)</sup>
+- Upload, temp ve extraction path'lerini executable olmayan ve birbirinden ayrılmış şekilde tutun (bu chain post‑exploitation ile sıklıkla birlikte kullanılan web context defense).
 
 ## References
 
 - [1] [Microsoft – Perform volume maintenance tasks (SeManageVolumePrivilege)](https://learn.microsoft.com/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/perform-volume-maintenance-tasks)
 - [2] [0xdf – HTB: Certificate (SeManageVolumePrivilege used to read CA key → Golden Certificate)](https://0xdf.gitlab.io/2025/10/04/htb-certificate.html)
-
+- [3] [Microsoft - `CreateFile` physical disks and volumes](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea#physical-disks-and-volumes)
+- [4] [Microsoft - Cryptography API: Next Generation and DPAPI-NG](https://learn.microsoft.com/en-us/windows/win32/seccng/cng-portal)
 {{#include ../../banners/hacktricks-training.md}}
