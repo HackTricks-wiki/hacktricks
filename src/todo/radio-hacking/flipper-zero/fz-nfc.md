@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Einleitung <a href="#id-9wrzi" id="id-9wrzi"></a>
+## Einführung <a href="#id-9wrzi" id="id-9wrzi"></a>
 
 Informationen zu RFID und NFC findest du auf der folgenden Seite:
 
@@ -16,65 +16,64 @@ Informationen zu RFID und NFC findest du auf der folgenden Seite:
 > [!CAUTION]
 > Neben NFC-Karten unterstützt Flipper Zero **andere Arten von Hochfrequenzkarten**, darunter mehrere **Mifare** Classic und Ultralight sowie **NTAG**.
 
-Der Liste der unterstützten Karten werden neue NFC-Kartentypen hinzugefügt. Flipper Zero unterstützt die folgenden **NFC-Karten des Typs A** (ISO 14443A):
+Die folgende Liste der Fähigkeiten beschreibt die in dem ursprünglichen Artikel dokumentierte Firmware und sollte nicht als aktuelle, vollständige Support-Matrix betrachtet werden. Die Flipper-Firmware hat im Laufe der Zeit Protokolle hinzugefügt und das NFC-Verhalten geändert. Prüfe die aktuelle offizielle Dokumentation für die installierte Firmware.<sup>[[1]](#references)</sup><sup>[[2]](#references)</sup>
 
-- **Bankkarten (EMV)** — liest nur UID, SAK und ATQA ohne zu speichern.
-- **Unbekannte Karten** — liest (UID, SAK, ATQA) und emuliert eine UID.
+- **Bankkarten (EMV)** — nur UID, SAK und ATQA ohne Speicherung auslesen.
+- **Unbekannte Karten** — UID, SAK und ATQA auslesen und eine UID emulieren.
 
-Bei **NFC-Karten des Typs B, Typ F und Typ V** kann Flipper Zero eine UID lesen, ohne sie zu speichern.
+Bei **NFC-Kartentypen B, F und V** konnte die dokumentierte Firmware eine UID auslesen, ohne sie zu speichern.
 
 ### NFC-Karten des Typs A <a href="#uvusf" id="uvusf"></a>
 
 #### Bankkarte (EMV) <a href="#kzmrp" id="kzmrp"></a>
 
-Flipper Zero kann eine UID, SAK, ATQA und gespeicherte Daten auf Bankkarten **nur ohne Speicherung** lesen.
+Die dokumentierte Firmware konnte eine UID, SAK, ATQA und verfügbare Anwendungsdaten einer Bankkarte **ohne Speicherung auslesen**.
 
-Bildschirm zum Lesen von BankkartenBei Bankkarten kann Flipper Zero Daten nur **ohne sie zu speichern und zu emulieren** lesen.
+Bei diesen Bankkarten zeigte die Firmware die Daten an, ohne die Karte zu speichern oder zu emulieren.
 
 <figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-26-31.png?auto=format&ixlib=react-9.1.1&h=916&w=2662" alt=""><figcaption></figcaption></figure>
 
 #### Unbekannte Karten <a href="#id-37eo8" id="id-37eo8"></a>
 
-Wenn Flipper Zero den **Typ der NFC-Karte nicht bestimmen kann**, können nur **UID, SAK und ATQA** **gelesen und gespeichert** werden.
+Wenn Flipper Zero den **Typ der NFC-Karte nicht bestimmen kann**, können nur eine **UID, SAK und ATQA** **ausgelesen und gespeichert** werden.
 
-Bildschirm zum Lesen unbekannter KartenBei unbekannten NFC-Karten kann Flipper Zero nur eine UID emulieren.
+Bei einer unbekannten NFC-Karte kann dieser Modus nur ihre UID emulieren.
 
 <figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-27-53.png?auto=format&ixlib=react-9.1.1&h=932&w=2634" alt=""><figcaption></figcaption></figure>
 
-### NFC-Karten der Typen B, F und V <a href="#wyg51" id="wyg51"></a>
+### NFC-Kartentypen B, F und V <a href="#wyg51" id="wyg51"></a>
 
-Bei **NFC-Karten der Typen B, F und V** kann Flipper Zero eine UID nur **lesen und anzeigen**, ohne sie zu speichern.
+In der in dem ursprünglichen Artikel dokumentierten Firmware konnten bei NFC-Kartentypen B, F und V nur die Kennung ausgelesen und angezeigt werden, ohne sie zu speichern.<sup>[[1]](#references)</sup>
 
 <figure><img src="https://archbee.imgix.net/3StCFqarJkJQZV-7N79yY/zBU55Fyj50TFO4U7S-OXH_screenshot-2022-08-12-at-182540.png?auto=format&ixlib=react-9.1.1&h=1080&w=2704" alt=""><figcaption></figcaption></figure>
 
 ## Aktionen
 
-Eine Einführung zu NFC findest du auf [**dieser Seite**](../pentesting-rfid.md#high-frequency-rfid-tags-13.56-mhz).
+Eine Einführung in NFC findest du auf [**dieser Seite**](../pentesting-rfid.md#high-frequency-rfid-tags-13.56-mhz).
 
-### Lesen
+### Auslesen
 
-Flipper Zero kann **NFC-Karten lesen**, versteht jedoch **nicht alle Protokolle**, die auf ISO 14443 basieren. Da die **UID jedoch ein Low-Level-Attribut ist**, kann es vorkommen, dass die **UID bereits gelesen wurde, das High-Level-Datenübertragungsprotokoll aber noch unbekannt ist**. Du kannst die UID mit Flipper lesen, emulieren und manuell eingeben, um primitive Lesegeräte zu verwenden, die die UID zur Autorisierung nutzen.<sup>[[1]](#references)</sup>
+Flipper Zero kann NFC-Karten auslesen, implementiert jedoch nicht jedes auf ISO 14443 basierende Protokoll höherer Ebene. Daher kann das Gerät möglicherweise die UID, SAK und ATQA der unteren Ebene auslesen, während das Anwendungsprotokoll unbekannt bleibt. Bei einfachen Zugangssystemen, die nur anhand der UID autorisieren, kann das Tool diese Kennung auslesen, manuell eingeben und emulieren. Kryptografisch authentifizierte Systeme erfordern mehr als eine kopierte UID.<sup>[[1]](#references)</sup>
 
-#### Lesen der UID VS Lesen der darin enthaltenen Daten <a href="#reading-the-uid-vs-reading-the-data-inside" id="reading-the-uid-vs-reading-the-data-inside"></a>
+#### UID auslesen VS Daten im Inneren auslesen <a href="#reading-the-uid-vs-reading-the-data-inside" id="reading-the-uid-vs-reading-the-data-inside"></a>
 
 <figure><img src="../../../images/image (217).png" alt=""><figcaption></figcaption></figure>
 
-Das Lesen von 13,56-MHz-Tags mit Flipper lässt sich in zwei Teile unterteilen:<sup>[[1]](#references)</sup>
+Das Auslesen von 13,56-MHz-Tags in Flipper kann in zwei Teile unterteilt werden:<sup>[[1]](#references)</sup>
 
-- **Low-Level-Lesen** — liest nur UID, SAK und ATQA. Flipper versucht, anhand dieser von der Karte gelesenen Daten das High-Level-Protokoll zu erraten. Dabei kannst du dir nicht zu 100 % sicher sein, da es sich nur um eine auf bestimmten Faktoren basierende Annahme handelt.
-- **High-Level-Lesen** — liest die Daten aus dem Speicher der Karte mithilfe eines bestimmten High-Level-Protokolls. Das bedeutet, die Daten einer Mifare Ultralight zu lesen, die Sektoren einer Mifare Classic zu lesen oder die Kartenattribute von PayPass/Apple Pay zu lesen.
+- **Auslesen auf niedriger Ebene** — liest nur die UID, SAK und ATQA aus. Flipper versucht, anhand dieser von der Karte ausgelesenen Daten das Protokoll höherer Ebene zu erraten. Dabei kann man sich nicht zu 100 % sicher sein, da dies nur eine auf bestimmten Faktoren basierende Annahme ist.
+- **Auslesen auf hoher Ebene** — liest die Daten aus dem Speicher der Karte mithilfe eines bestimmten Protokolls höherer Ebene aus. Dabei werden beispielsweise die Daten einer Mifare Ultralight, die Sektoren einer Mifare Classic oder die Kartenattribute von PayPass/Apple Pay ausgelesen.
 
-### Bestimmten Typ lesen
+### Gezieltes Auslesen
 
-Falls Flipper Zero den Kartentyp anhand der Low-Level-Daten nicht ermitteln kann, kannst du unter `Extra Actions` die Option `Read Specific Card Type` auswählen und **manuell** **den Typ der Karte angeben, die du lesen möchtest**.
+Falls Flipper Zero den Kartentyp anhand der Daten der unteren Ebene nicht ermitteln kann, kannst du unter `Extra Actions` die Option `Read Specific Card Type` auswählen und **manuell** den **Typ der Karte angeben, die du auslesen möchtest**.
 
 #### EMV-Bankkarten (PayPass, payWave, Apple Pay, Google Pay) <a href="#emv-bank-cards-paypass-paywave-apple-pay-google-pay" id="emv-bank-cards-paypass-paywave-apple-pay-google-pay"></a>
 
-Neben dem einfachen Lesen der UID kannst du deutlich mehr Daten aus einer Bankkarte extrahieren. Es ist möglich, **die vollständige Kartennummer** (die 16 Ziffern auf der Vorderseite der Karte), das **Gültigkeitsdatum** und in einigen Fällen sogar den **Namen des Inhabers** zusammen mit einer Liste der **jüngsten Transaktionen** zu erhalten.\
-Auf diese Weise kannst du jedoch **nicht den CVV lesen** (die 3 Ziffern auf der Rückseite der Karte). Außerdem sind **Bankkarten vor Replay-Angriffen geschützt**, sodass das Kopieren mit Flipper und der anschließende Versuch, die Karte zum Bezahlen zu emulieren, nicht funktioniert.<sup>[[1]](#references)</sup>
+Ältere Flipper-Firmware und kompatible EMV-Karten konnten mehr als nur die UID offenlegen, darunter möglicherweise die PAN, das Ablaufdatum, den Namen des Karteninhabers oder das Transaktionsprotokoll, sofern diese Datensätze von der Karte bereitgestellt wurden. Die Verfügbarkeit variiert je nach Karte, Anwendung und Firmware. Der auf die Karte aufgedruckte CVV des Magnetstreifens wird auf diese Weise nicht offengelegt. Das Auslesen dieser Datensätze klont außerdem nicht die für eine kontaktlose Zahlung erforderlichen kryptografischen Transaktionsfunktionen.<sup>[[1]](#references)</sup>
 
-## Referenzen
+## References
 
-- [1] [Diving into RFID Protocols with Flipper Zero](https://blog.flipperzero.one/rfid/)
-
+- [1] [Eintauchen in RFID-Protokolle mit Flipper Zero](https://blog.flipperzero.one/rfid/)
+- [2] [Dokumentation zu Flipper Zero - NFC](https://docs.flipper.net/zero/nfc)
 {{#include ../../../banners/hacktricks-training.md}}
