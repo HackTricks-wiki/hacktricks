@@ -4,158 +4,191 @@
 
 ## 기본 정보
 
-**NVRAM**(Non-Volatile Random-Access Memory)은 Mac 하드웨어의 **부팅 시점 및 firmware 수준 구성**을 저장합니다. 보안상 가장 중요한 변수는 다음과 같습니다.
+**NVRAM** (Non-Volatile Random-Access Memory)은 일반적인 macOS 파일 시스템 외부에 펌웨어와 초기 부팅 상태를 저장합니다. 보안에 미치는 영향은 변수와 부팅 아키텍처 모두에 따라 달라집니다.
 
-| 변수 | 목적 |
+| 변수 | 용도 / 보안 관련성 |
 |---|---|
-| `boot-args` | Kernel 부팅 인수(debug flags, verbose boot, AMFI bypass) |
-| `csr-active-config` | **SIP 구성 bitmask** — 활성화된 보호 기능을 제어 |
-| `SystemAudioVolume` | 부팅 시 오디오 볼륨 |
-| `prev-lang:kbd` | 선호 언어 / 키보드 레이아웃 |
-| `efi-boot-device-data` | 부팅 장치 선택 |
+| `boot-args` | 커널에 전달되는 인수입니다. 디버그 또는 보안을 약화시키는 인수는 부팅 정책에서 허용하지 않는 한 필터링됩니다. |
+| `csr-active-config` | Intel Mac의 SIP bitmask입니다. Apple silicon에서는 해당 정책이 volume별 `LocalPolicy`에 저장되며, 이 변수에서 직접 신뢰하지 않습니다. |
+| `efi-boot-device` / `efi-boot-device-data` | Intel EFI 부팅 대상입니다. |
+| `boot-volume` | Apple silicon의 부팅 volume 선택 상태입니다. |
+| `SystemAudioVolume`, `prev-lang:kbd` | 일반적인 영구 설정의 예입니다. |
 
-최신 Mac에서는 NVRAM 변수가 **system** 변수(Secure Boot로 보호됨)와 **non-system** 변수로 나뉩니다. Apple Silicon Mac은 **Secure Storage Component (SSC)**를 사용하여 NVRAM 상태를 boot chain에 암호학적으로 바인딩합니다.<sup>[[1]](#references)</sup>
+중요한 차이점은 **NVRAM에 저장된 data**와 **부팅 chain에서 허용되는 보안 정책**의 차이입니다. Apple silicon에서는 Secure Enclave가 부팅 volume group별 `LocalPolicy`에 서명하며, Secure Storage Component에 저장된 nonce가 replay 방지를 제공합니다. 따라서 이름이 유사한 NVRAM property를 변경하는 것만으로는 허용된 부팅 정책이 다시 작성되지 않습니다.<sup>[[1]](#references)[[4]](#references)</sup>
 
-## User Space에서의 NVRAM Access
+## User Space에서 NVRAM 액세스
 
-### NVRAM 읽기
+### 읽기 및 기준 수집
 ```bash
-# List all NVRAM variables
+# List variables (values are separated from names by a tab)
 nvram -p
 
-# Read a specific variable
+# Read individual variables. Absence is normal on many configurations.
 nvram boot-args
-
-# Export all NVRAM as XML plist
-nvram -xp
-
-# Read SIP configuration
 nvram csr-active-config
+
+# Export typed values as an XML plist; useful for diffing two acquisitions
+nvram -xp > "nvram-$(date +%Y%m%d-%H%M%S).plist"
+
+# The same properties as exposed through the IODeviceTree plane
+ioreg -lw0 -p IODeviceTree -n options
+
+# Effective SIP status
 csrutil status
 ```
+익숙하지 않은 모든 키를 악성으로 분류하지 마세요. 하드웨어, recoveryOS, 업데이트, Find My 및 부팅 실패로 인해 모델과 버전에 따라 달라지는 변수가 생성됩니다. **동일한 Mac**에서 이전에 수집한 기준값과 비교하고, 예상치 못한 binary blob, 변경된 부팅 선택 또는 보안을 약화하는 인수는 침해의 증거가 아니라 조사 단서로 간주하세요.
+
 ### NVRAM 쓰기
 
-NVRAM 변수를 쓰려면 **root 권한**이 필요하며, 시스템 핵심 변수(예: `csr-active-config`)의 경우 프로세스에 특정 code-signing flags 또는 entitlements가 있어야 합니다:
+root는 일반 변수를 많이 생성하거나 변경할 수 있지만, 보호된 변수는 변수 namespace, SIP, 변수별 kernel 규칙 및 제한된 Apple entitlement에도 영향을 받습니다. 따라서 무해한 사용자 지정 키에 대해 `sudo`가 성공한다고 해서 해당 프로세스가 `boot-args`, SIP 또는 system-region 변수를 수정할 수 있다는 의미는 아닙니다.
 ```bash
-# Set boot-args (requires root)
-sudo nvram boot-args="debug=0x144 kcsuffix=development"
+# Harmless test variable (perform only on a disposable test host)
+sudo nvram HTTest='persistence-value'
+nvram HTTest
+sudo nvram -d HTTest
 
-# Clear boot-args
-sudo nvram -d boot-args
-
-# Set a custom variable
-sudo nvram MyCustomVar="persistence-value"
-```
-## CS_NVRAM_UNRESTRICTED 플래그
-
-**`CS_NVRAM_UNRESTRICTED`** code-signing 플래그가 있는 바이너리는 일반적으로 root로부터도 보호되는 NVRAM 변수를 수정할 수 있습니다.
-
-### NVRAM-Unrestricted 바이너리 찾기
-```bash
-# Check code signing flags for a binary
-codesign -dvvv /usr/sbin/nvram 2>&1 | grep "flags="
-```
-## 보안 영향
-
-### NVRAM을 통한 SIP 약화
-
-공격자가 NVRAM에 쓸 수 있다면(손상된 `NVRAM-unrestricted` binary를 통하거나 취약점을 악용하여), `csr-active-config`를 수정해 **다음 부팅 시 SIP protections를 비활성화**할 수 있습니다:
-```bash
-# SIP configuration is a bitmask stored in NVRAM
-# Each bit controls a different SIP protection:
-#   Bit 0 (0x1):  Filesystem protection
-#   Bit 1 (0x2):  Kext signing
-#   Bit 2 (0x4):  Task-for-pid restriction
-#   Bit 3 (0x8):  Unrestricted filesystem
-#   Bit 4 (0x10): Apple Internal (debug)
-#   Bit 5 (0x20): Unrestricted DTrace
-#   Bit 6 (0x40): Unrestricted NVRAM
-#   Bit 7 (0x80): Device configuration
-
-# Current SIP configuration
-nvram csr-active-config | xxd
-
-# On older hardware, a compromised NVRAM-unrestricted binary could:
-# nvram csr-active-config=%7f%00%00%00   # Disable most SIP protections
-```
-> [!WARNING]
-> 최신 Apple Silicon Mac에서는 **Secure Boot chain이 NVRAM** 변경 사항을 검증하고 runtime SIP 수정을 방지합니다. `csr-active-config` 변경 사항은 recoveryOS를 통해서만 적용됩니다. 그러나 **Intel Mac** 또는 **reduced security mode**가 적용된 시스템에서는 NVRAM 조작으로 여전히 SIP가 약화될 수 있습니다.
-
-### Kernel Debugging 활성화
-```bash
-# Enable kernel debug flags via boot-args
-sudo nvram boot-args="debug=0x144"
-
-# Common debug flags:
-#   0x01  DB_HALT      — Wait for debugger at boot
-#   0x04  DB_KPRT      — Send kernel printf to serial
-#   0x40  DB_KERN_DUMP — Dump kernel core on NMI
-#   0x100 DB_REBOOT_POST_PANIC — Reboot after panic
-
-# Use development kernel
-sudo nvram boot-args="kcsuffix=development"
-```
-### Firmware Persistence
-
-NVRAM 수정은 **OS 재설치 후에도 유지**되며, firmware 레벨에서 지속됩니다. 공격자는 persistence mechanism이 부팅 시 읽는 custom NVRAM 변수를 작성할 수 있습니다:
-```bash
-# Write a persistence marker
-nvram attacker-payload-config="base64_encoded_config_here"
-
-# A startup script or LaunchDaemon could read this:
-nvram attacker-payload-config 2>/dev/null && /path/to/payload
+# Delete one variable
+sudo nvram -d variable-name
 ```
 > [!CAUTION]
-> NVRAM persistence는 디스크 삭제 및 OS 재설치 후에도 유지됩니다. 이를 제거하려면 **PRAM/NVRAM reset**(Intel Mac에서는 Command+Option+P+R) 또는 **DFU restore**(Apple Silicon)가 필요합니다.
+> 테스트 중에는 `nvram -c`를 사용하지 마세요. 삭제 가능한 모든 변수를 삭제하도록 요청하며, 부팅/복구 동작을 변경할 수 있습니다. 일부 변수는 커널 전용이거나 entitlement로 보호되며, 읽을 때 숨겨지거나 NVRAM 재설정 중에만 삭제할 수 있습니다.
 
-### AMFI Bypass
+## NVRAM Entitlements 및 `CS_NVRAM_UNRESTRICTED`
 
-`amfi_get_out_of_my_way=1` boot argument는 **Apple Mobile File Integrity**를 비활성화하여 unsigned code가 실행되도록 합니다:
+exec 시점에 XNU는 `com.apple.rootless.restricted-nvram-variables.heritable`을 프로세스 플래그 **`CS_NVRAM_UNRESTRICTED`** (`0x00008000`)에 매핑합니다. 이는 일반적인 유효 UID 0 검사와 동일하지 않습니다. 특정 변수나 작업에만 적용되는 더 제한적인 private entitlements도 있습니다.
+
+`codesign`이 출력하는 일반적인 flags 줄에 의존하지 말고 entitlements를 검사하세요:
 ```bash
-# This requires NVRAM write access AND reduced security boot:
-sudo nvram boot-args="amfi_get_out_of_my_way=1"
-```
-## 실제 CVE
+# Static entitlements embedded in a Mach-O signature
+codesign -d --entitlements :- /path/to/binary 2>&1
 
-| CVE | 설명 |
-|---|---|
-| CVE-2020-9839 | 지속적인 SIP 우회를 가능하게 하는 NVRAM manipulation <sup>[[2]](#references)</sup> |
-| CVE-2019-8779 | T2 Mac에서 firmware-level NVRAM persistence <sup>[[3]](#references)</sup> |
-| CVE-2022-22583 | PackageKit NVRAM 관련 privilege escalation |
-| CVE-2020-10004 | system modification을 가능하게 하는 NVRAM handling의 logic issue |
+# Quickly highlight NVRAM-related entitlements
+codesign -d --entitlements :- /path/to/binary 2>&1 |
+grep -Ei 'nvram|restricted-nvram'
+
+# The nvram CLI itself normally asks the IOKit service to enforce the caller's
+# privilege; possession of /usr/sbin/nvram is not an entitlement bypass.
+codesign -d --entitlements :- /usr/sbin/nvram 2>&1
+```
+권한이 있는 helper를 감사할 때는 **실제 client identity와 request path**를 추적하세요. 권한이 부여된 service의 confused-deputy bug는 `nvram`을 직접 호출하는 것보다 더 유용할 수 있지만, 접근 가능한 variable/operation은 여전히 XNU에 의해 제한될 수 있습니다.
+
+## Intel SIP State와 Apple Silicon `LocalPolicy`
+
+### Intel: `csr-active-config`
+
+Intel에서 `csr-active-config`는 `CSR_ALLOW_*` 예외를 인코딩합니다. 일반적으로 관련 있는 bit position은 다음과 같습니다:
+```text
+0x001  untrusted kexts                 0x002  unrestricted filesystem
+0x004  task_for_pid                    0x008  kernel debugger
+0x010  Apple-internal behavior         0x020  unrestricted DTrace
+0x040  unrestricted NVRAM              0x080  device configuration
+0x100  any recovery OS                 0x200  unapproved kexts
+0x400  executable-policy override      0x800  unauthenticated root (SSV)
+```
+`csrutil status`로 적용된 설정을 확인할 수 있습니다. 원시 `nvram` 출력에서는 퍼센트로 인코딩된 little-endian 바이트가 사용될 수 있습니다. 보호 기능 및 bypass 관련 사항은 [macOS SIP](../macos-security-protections/macos-sip.md)를 참조하세요.
+```bash
+nvram csr-active-config 2>/dev/null
+csrutil status
+```
+### Apple Silicon: 허용된 boot policy 검사
+
+Apple silicon에서 Secure Enclave가 서명한 `LocalPolicy`의 `sip0`에는 이전에 NVRAM에 저장되었던 SIP policy 비트가 들어 있습니다. 그 외 관련 policy 필드는 `sip1`(SSV root-hash verification failure 허용), `sip2`(CTRR로 kernel memory를 lock하지 않음), `sip3`(iBoot의 `boot-args` allowlist 비활성화)입니다. 이러한 필드는 paired One True recoveryOS(1TR)에서만 변경할 수 있으며, `sip3`를 활성화하려면 Permissive Security로의 downgrade도 필요합니다.<sup>[[4]](#references)</sup>
+
+열거 중에는 display 작업만 사용합니다:
+```bash
+# Apple silicon: show the selected volume group's LocalPolicy
+sudo bputil -d
+
+# Machine-readable display, or display every bootable OS policy
+sudo bputil -d -j
+sudo bputil -e -j
+
+# Map policy output to APFS volume groups when multiple OSes are installed
+diskutil apfs listVolumeGroups
+```
+> [!WARNING]
+> 감사 중에는 `bputil` policy-changing options를 사용하지 마세요. 일반적인 macOS 침해만으로는 위 필드를 조용히 활성화할 수 없어야 합니다. downgrade 경로에는 의도적으로 paired 1TR에 대한 물리적 접근과 owner authentication이 필요합니다.<sup>[[4]](#references)</sup>
+
+## 보안 영향
+
+### Post-Compromise Amplifier로서의 `boot-args`
+
+kernel-debugging options, `kcsuffix=development` 또는 `amfi_get_out_of_my_way=1`과 같은 인자는 이후 boot stages를 약화할 수 있지만, platform이 이를 허용하는 경우에만 가능합니다. Apple silicon의 Full 또는 Reduced Security에서는 iBoot가 security-reducing arguments를 필터링합니다. unrestricted arguments를 사용하려면 앞서 설명한 `sip3` policy downgrade가 필요합니다. Intel에서는 SIP의 NVRAM restriction 역시 root shell을 자동으로 `boot-args` control 권한으로 간주하지 못하게 합니다.
+```bash
+# Enumerate, do not assume that a value shown here was accepted by iBoot
+nvram boot-args 2>/dev/null
+
+# Confirm what the running kernel reports it received
+sysctl kern.bootargs
+
+# Search for common security-reducing/debug strings
+{ nvram boot-args 2>/dev/null; sysctl -n kern.bootargs 2>/dev/null; } |
+grep -Ei 'amfi|cs_enforcement|debug|kcsuffix|keepsyms|ktrace|rc\.trampoline'
+```
+See [AMFI](../macos-security-protections/macos-amfi-applemobilefileintegrity.md) 및 [kernel debugging](macos-kernel-extensions.md)을 참고하여, 과거의 주장이 모든 macOS 릴리스에서 동일하게 동작한다고 가정하지 마세요.
+
+### NVRAM 기반 `rc.trampoline` 실행
+
+최근 연구에서는 NVRAM 데이터의 구체적인 사용 사례가 문서화되었습니다. Apple 플랫폼 바이너리인 `/System/Library/CoreServices/rc.trampoline`이 바로 그 사례입니다. launchd가 `rc.trampoline=1` boot argument를 확인하면, 이 boot task는 `IODeviceTree:/options`에서 `apple-trusted-trampoline` property를 읽어 임시 executable에 기록하고, 이를 suspended 상태로 시작한 뒤 code-signing 상태를 확인하고, 파일을 unlink한 다음 다시 resume합니다. 이 boot task는 child가 종료될 때까지 launchd를 차단합니다.<sup>[[5]](#references)</sup>
+
+이는 **SIP bypass가 아니라 downgrade 이후의 persistence primitive**입니다. 입증된 경로에서는 boot task가 실행되고 `boot-args`를 설정할 수 있도록 SIP가 비활성화되어 있어야 했습니다. 또한 연구에서는 약 390KB의 value-size ceiling이 관찰되었습니다. 이 기법의 가치는 executable bytes를 일반적인 filesystem 외부에 저장하고, attacker가 이미 필요한 security downgrade를 획득한 후 boot 중에 이를 materialize할 수 있다는 점입니다.<sup>[[5]](#references)</sup>
+
+필요한 두 artifact와 launchd event를 모두 탐색하세요:
+```bash
+# Print names only so a large binary value is not dumped to the terminal
+nvram -p | cut -f1 | grep -E '^(apple-trusted-trampoline|boot-args)$'
+nvram boot-args 2>/dev/null | grep -F 'rc.trampoline='
+
+# The research-observed execution produces an rc.trampoline boot-task event
+log show --last 30d --style compact \
+--predicate 'eventMessage CONTAINS[c] "rc.trampoline"'
+```
+임의의 custom NVRAM 변수는 그 외에는 **storage**일 뿐입니다. firmware, Apple boot component 또는 별도의 persistence mechanism이 이를 사용하지 않는 한 아무것도 실행하지 않습니다. 이러한 구분은 `nvram attacker-config=...`와 같은 marker를 firmware code execution으로 과장하는 것을 방지합니다.
 
 ## Enumeration Script
+
+<details>
+<summary>NVRAM 및 Apple silicon boot-policy 감사</summary>
 ```bash
 #!/bin/bash
-echo "=== NVRAM Security Audit ==="
+set -u
 
-# Current SIP status
-echo -e "\n[*] SIP Status:"
-csrutil status
+echo '=== NVRAM / boot-policy audit ==='
+echo '[*] Architecture:'
+uname -m
 
-# Current boot-args
-echo -e "\n[*] Boot Arguments:"
-nvram boot-args 2>/dev/null || echo "  (none set)"
+echo '[*] Effective SIP:'
+csrutil status 2>&1
 
-# All NVRAM variables
-echo -e "\n[*] All NVRAM Variables:"
-nvram -p | grep -v "^$" | wc -l
-echo "  variables total"
+echo '[*] Stored and effective boot arguments:'
+nvram boot-args 2>/dev/null || echo 'boot-args: <not set/readable>'
+sysctl kern.bootargs 2>/dev/null || true
 
-# Security-relevant variables
-echo -e "\n[*] Security-Relevant Variables:"
-for var in csr-active-config boot-args StartupMute SystemAudioVolume efi-boot-device; do
-echo "  $var: $(nvram "$var" 2>/dev/null || echo 'not set')"
-done
+echo '[*] Intel SIP variable (absence on Apple silicon is expected):'
+nvram csr-active-config 2>/dev/null || echo 'csr-active-config: <not set/readable>'
 
-# Check for custom (non-Apple) variables
-echo -e "\n[*] Non-Standard Variables (potential persistence):"
-nvram -p | grep -v "^$" | grep -vE "^(SystemAudioVolume|boot-args|csr-active-config|prev-lang|LocationServicesEnabled|fmm-mobileme-token|bluetoothInternalControllerAddress|bluetoothActiveControllerInfo|SystemAudioVolumeExtension|efi-)" | head -20
+echo '[*] High-signal NVRAM names:'
+nvram -p 2>/dev/null | cut -f1 |
+grep -E '^(apple-trusted-trampoline|boot-args|csr-active-config|efi-boot-device(-data)?|boot-volume)$' || true
+
+echo '[*] rc.trampoline log evidence:'
+log show --last 30d --style compact \
+--predicate 'eventMessage CONTAINS[c] "rc.trampoline"' 2>/dev/null | tail -20
+
+if [[ "$(uname -m)" == 'arm64' ]] && command -v bputil >/dev/null; then
+echo '[*] Apple silicon LocalPolicy (read-only display):'
+bputil -d -j 2>&1
+fi
 ```
-## 참고 자료
+</details>
+
+
+
+## References
 
 - [1] [Apple Platform Security Guide — 부팅 프로세스](https://support.apple.com/guide/security/boot-process-secac71d5623/web)
-- [2] [Apple Security Updates — NVRAM 관련 CVE](https://support.apple.com/en-us/HT201222)
-- [3] [Duo Labs — Apple T2 보안](https://duo.com/labs/research/apple-t2-xpc)
-
+- [2] [Apple Security Updates — NVRAM-related CVEs](https://support.apple.com/en-us/HT201222)
+- [3] [Duo Labs — Apple T2 Security](https://duo.com/labs/research/apple-t2-xpc)
+- [4] [Apple Platform Security — Apple silicon이 탑재된 Mac의 LocalPolicy 파일 내용](https://support.apple.com/guide/security/contents-a-localpolicy-file-mac-apple-silicon-secc745a0845/web)
+- [5] [Beyond the good ol' LaunchAgents — apple-trusted-trampoline을 사용한 NVRAM을 통한 Persist](https://theevilbit.github.io/beyond/beyond_0035/)
 {{#include ../../../banners/hacktricks-training.md}}
