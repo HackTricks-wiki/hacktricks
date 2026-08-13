@@ -69,6 +69,12 @@ mimikatz lsadump::secrets /system:C:\path\system.hiv /security:C:\path\security.
 # Look for the DPAPI_SYSTEM secret in the output
 ```
 
+Veeam-specific DPAPI example:
+
+{{#ref}}
+../../network-services-pentesting/pentesting-veeam-backup-and-replication.md
+{{#endref}}
+
 ### Protected Data by DPAPI
 
 Among the personal data protected by DPAPI are:

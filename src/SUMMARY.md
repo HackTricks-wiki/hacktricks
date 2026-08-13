@@ -467,6 +467,7 @@
 - [Pentesting JDWP - Java Debug Wire Protocol](network-services-pentesting/pentesting-jdwp-java-debug-wire-protocol.md)
 - [Pentesting Printers$$external:http://hacking-printers.net/wiki/index.php/Main_Page$$]()
 - [Pentesting SAP](network-services-pentesting/pentesting-sap.md)
+- [Pentesting Veeam Backup & Replication](network-services-pentesting/pentesting-veeam-backup-and-replication.md)
 - [Pentesting VoIP](network-services-pentesting/pentesting-voip/README.md)
   - [Basic VoIP Protocols](network-services-pentesting/pentesting-voip/basic-voip-protocols/README.md)
     - [SIP (Session Initiation Protocol)](network-services-pentesting/pentesting-voip/basic-voip-protocols/sip-session-initiation-protocol.md)
