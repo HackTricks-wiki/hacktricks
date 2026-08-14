@@ -79,7 +79,12 @@ jobs:
           cp upload_immutable_images.sh /tmp/upload_immutable_images.sh
           cd ..
           mkdir -p /tmp/immutable-images
-          cp src/images/{hacktricks-summer-discount-2026-v1.webp,arte-badge-v1.webp,grte-badge-v1.webp,azrte-badge-v1.webp} /tmp/immutable-images/
+          cp \
+            src/images/hacktricks-summer-discount-2026-v1.webp \
+            src/images/arte-badge-v1.webp \
+            src/images/grte-badge-v1.webp \
+            src/images/azrte-badge-v1.webp \
+            /tmp/immutable-images/
           cp theme/discount.js /tmp/discount.js
           wget -O /tmp/seo_postprocess.py https://raw.githubusercontent.com/HackTricks-wiki/hacktricks/master/scripts/seo_postprocess.py
 
