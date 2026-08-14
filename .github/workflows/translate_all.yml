@@ -8,6 +8,15 @@ on:
       - '.gitignore'
       - Dockerfile
   workflow_dispatch:
+    inputs:
+      translation_base_sha:
+        description: "Optional base commit for a catch-up translation range"
+        required: false
+        type: string
+      translation_head_sha:
+        description: "Optional head commit for a catch-up translation range"
+        required: false
+        type: string
 
 permissions:
   packages: write
@@ -106,10 +115,18 @@ jobs:
           git push || echo "No changes to push"
       
       - name: Run translation script on changed files
+        env:
+          TRANSLATION_BASE_SHA: ${{ inputs.translation_base_sha }}
+          TRANSLATION_HEAD_SHA: ${{ inputs.translation_head_sha }}
         run: |
           git checkout master
           export OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
-          git diff --name-only HEAD~1 | grep -v "SUMMARY.md" | while read -r file; do
+          HEAD_SHA="${TRANSLATION_HEAD_SHA:-$GITHUB_SHA}"
+          BASE_SHA="${TRANSLATION_BASE_SHA:-${HEAD_SHA}^}"
+          git rev-parse --verify "${BASE_SHA}^{commit}" >/dev/null
+          git rev-parse --verify "${HEAD_SHA}^{commit}" >/dev/null
+          echo "Collecting changed files from ${BASE_SHA} to ${HEAD_SHA}"
+          git diff --name-only "$BASE_SHA" "$HEAD_SHA" | grep -v "SUMMARY.md" | while read -r file; do
             if echo "$file" | grep -qE '\.md$'; then
               echo -n ",$file" >> /tmp/file_paths.txt
             fi
