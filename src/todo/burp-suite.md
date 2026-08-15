@@ -4,11 +4,13 @@
 
 ## Intruder payload types
 
+Burp Intruder includes the following built-in payload generators and transformations:<sup>[[1]](#references)</sup>
+
 - **Simple list:** Use a configured list of strings as payloads.
 - **Runtime file:** Read one payload per line at runtime. This is useful for large lists because Burp does not load the entire file into memory.
-- **Case modification:** Change the capitalization of an input string, for example to lowercase, uppercase, sentence case, or title case.
+- **Case modification:** Generate the unmodified value, lowercase and uppercase forms, `Propername` (first letter uppercase and the rest lowercase), or `ProperName` (first letter uppercase with the remaining characters unchanged). Burp discards duplicate results.
 - **Numbers:** Generate sequential or random numbers within a configured range.
-- **Brute forcer:** Generate every permutation for a chosen character set and minimum/maximum length.<sup>[[1]](#references)</sup>
+- **Brute forcer:** Generate every permutation for a chosen character set and minimum/maximum length.
 
 ## Extensions and companion tools
 
