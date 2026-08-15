@@ -1,14 +1,14 @@
-# Uchambuzi wa SVG/Font Glyph & Web DRM Deobfuscation (Raster Hashing + SSIM)
+# SVG/Font Glyph Analysis & Web DRM Deobfuscation (Raster Hashing + SSIM)
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Ukurasa huu unaandika mbinu za kiutendaji za kurejesha maandishi kutoka kwa web readers wanaotuma glyph runs zilizowekwa katika nafasi pamoja na vector glyph definitions za kila request (SVG paths), na wanaobadilisha glyph IDs kwa kila request ili kuzuia scraping. Wazo kuu ni kupuuza numeric glyph IDs zinazohusiana na request husika na kutambua alama za kuona kwa kutumia raster hashing, kisha kuhusisha alama hizo na characters kwa kutumia SSIM dhidi ya reference font atlas. Mbinu hiyo hiyo inaweza kutumika kwa viewers wenye ulinzi unaofanana.<sup>[[1]](#references)</sup>
+Ukurasa huu unaandika mbinu za vitendo za kurejesha maandishi kutoka kwa web readers wanaosafirisha glyph runs zilizowekwa pamoja na vector glyph definitions kwa kila request (SVG paths), na wanaobadilisha glyph IDs kwa kila request ili kuzuia scraping. Wazo kuu ni kupuuza numeric glyph IDs zinazohusishwa na request na kutambua maumbo ya kuona kupitia raster hashing, kisha kuhusisha maumbo hayo na herufi kwa kutumia SSIM dhidi ya reference font atlas. Mbinu hii inaweza pia kutumika kwa viewers wenye ulinzi unaofanana.<sup>[[1]](#references)</sup>
 
-Onyo: Tumia mbinu hizi pekee kuhifadhi nakala za maudhui unayomiliki kihalali na kwa kufuata sheria pamoja na masharti yanayotumika.
+Onyo: Tumia mbinu hizi pekee kuhifadhi nakala za maudhui unayomiliki kihalali na kwa kuzingatia sheria na masharti yanayotumika.
 
-## Upatikanaji (mfano: Kindle Cloud Reader)
+## Acquisition (example: Kindle Cloud Reader)
 
-Endpoint iliyobainishwa:<sup>[[1]](#references)</sup>
+Endpoint iliyozingatiwa:<sup>[[1]](#references)</sup>
 - [https://read.amazon.com/renderer/render](https://read.amazon.com/renderer/render)
 
 Vifaa vinavyohitajika kwa kila session:<sup>[[1]](#references)</sup>
@@ -17,17 +17,17 @@ Vifaa vinavyohitajika kwa kila session:<sup>[[1]](#references)</sup>
 - ADP session token ya ziada inayotumiwa na renderer
 
 Tabia:<sup>[[1]](#references)</sup>
-- Kila request, inapotumwa ikiwa na headers na cookies zinazolingana na browser, hurejesha TAR archive yenye kikomo cha pages 5.
-- Kwa kitabu kirefu utahitaji batches nyingi; kila batch hutumia mapping tofauti iliyobadilishwa kwa nasibu ya glyph IDs.
+- Kila request, inapotumwa ikiwa na headers na cookies zinazolingana na browser, hurudisha TAR archive yenye ukomo wa pages 5.
+- Kwa kitabu kirefu utahitaji batches nyingi; kila batch hutumia mapping tofauti iliyobadilishwa bila mpangilio ya glyph IDs.
 
-Yaliyomo kwa kawaida kwenye TAR:<sup>[[1]](#references)</sup>
+Maudhui ya kawaida ya TAR:<sup>[[1]](#references)</sup>
 - page_data_0_4.json — positioned text runs kama mfululizo wa glyph IDs (si Unicode)
-- glyphs.json — per-request SVG path definitions kwa kila glyph na fontFamily
+- glyphs.json — SVG path definitions kwa kila glyph na fontFamily kwa kila request
 - toc.json — table of contents
-- metadata.json — book metadata
+- metadata.json — metadata ya kitabu
 - location_map.json — mappings za logical→visual positions
 
-Muundo wa mfano wa page run:<sup>[[1]](#references)</sup>
+Mfumo wa mfano wa page run:<sup>[[1]](#references)</sup>
 ```json
 {
 "type": "TextRun",
@@ -44,50 +44,50 @@ Mfano wa ingizo la glyphs.json:<sup>[[1]](#references)</sup>
 "24": {"path": "M 450 1480 L 820 1480 L 820 0 L 1050 0 L 1050 1480 ...", "fontFamily": "bookerly_normal"}
 }
 ```
-Maelezo kuhusu mbinu za path za anti-scraping:<sup>[[1]](#references)</sup>
-- Paths zinaweza kujumuisha mikusanyo midogo ya relative moves (kwa mfano, `m3,1 m1,6 m-4,-7`) inayochanganya vector parsers nyingi na path sampling rahisi.
-- Daima render paths zilizojazwa na zilizokamilika kwa kutumia SVG engine imara (kwa mfano, CairoSVG) badala ya kufanya utofautishaji wa commands/coordinates.
+Vidokezo kuhusu mbinu za paths za anti-scraping:<sup>[[1]](#references)</sup>
+- Paths zinaweza kujumuisha miondoko midogo ya relative (kwa mfano, `m3,1 m1,6 m-4,-7`) inayochanganya vector parsers nyingi na path sampling rahisi.
+- Daima render filled complete paths kwa kutumia SVG engine imara (kwa mfano, CairoSVG) badala ya kufanya command/coordinate differencing.
 
 ## Kwa nini decoding rahisi hushindwa
 
 - Per-request randomized glyph substitution: mapping ya glyph ID→character hubadilika kila batch; IDs hazina maana kwa ujumla.<sup>[[1]](#references)</sup>
-- Ulinganishaji wa coordinates za SVG moja kwa moja hauna uthabiti: shapes zinazofanana zinaweza kutofautiana katika numeric coordinates au command encoding kwa kila request.<sup>[[1]](#references)</sup>
+- Ulinganishaji wa moja kwa moja wa SVG coordinates si thabiti: shapes zinazofanana zinaweza kutofautiana katika numeric coordinates au command encoding kwa kila request.<sup>[[1]](#references)</sup>
 - OCR kwenye glyphs zilizotengwa hufanya kazi vibaya (≈50%), huchanganya punctuation na glyphs zinazofanana, na hupuuza ligatures.<sup>[[1]](#references)</sup>
 
-## Pipeline inayofanya kazi: glyph normalization na mapping isiyofungamana na request
+## Working pipeline: request-agnostic glyph normalization and mapping
 
 1) Rasterize per-request SVG glyphs
-- Tengeneza SVG document ndogo kwa kila glyph kwa kutumia `path` iliyotolewa na render kwenye canvas yenye ukubwa usiobadilika (kwa mfano, 512×512) ukitumia CairoSVG au engine inayolingana inayoshughulikia path sequences tata.<sup>[[1]](#references)[[2]](#references)</sup>
-- Render ikiwa imejazwa kwa rangi nyeusi kwenye background nyeupe; epuka strokes ili kuondoa artifacts zinazotegemea renderer na AA.
+- Unda minimal SVG document kwa kila glyph ukitumia `path` iliyotolewa na u-render kwenye fixed canvas (kwa mfano, 512×512) ukitumia CairoSVG au engine inayolingana inayoshughulikia tricky path sequences.<sup>[[1]](#references)[[2]](#references)</sup>
+- Render filled black on white; epuka strokes ili kuondoa artifacts zinazotegemea renderer na AA.
 
-2) Perceptual hashing kwa utambulisho wa cross-request
-- Kadiria perceptual hash (kwa mfano, pHash kupitia `imagehash.phash`) ya kila glyph image.<sup>[[3]](#references)</sup>
-- Chukulia hash kama ID thabiti: shape ileile ya kuonekana katika requests mbalimbali itaunganishwa kuwa perceptual hash ileile, hivyo kushinda randomized IDs.
+2) Perceptual hashing for cross-request identity
+- Kokotoa perceptual hash (kwa mfano, pHash kupitia `imagehash.phash`) ya kila glyph image.<sup>[[3]](#references)</sup>
+- Chukulia hash kama stable ID: shape ileile ya kimaonekano katika requests mbalimbali itaunganishwa kuwa perceptual hash ileile, hivyo kushinda randomized IDs.
 
-3) Utengenezaji wa reference font atlas
-- Pakua fonts za TTF/OTF zinazolengwa (kwa mfano, Bookerly normal/italic/bold/bold-italic).<sup>[[1]](#references)</sup>
-- Render candidates za A–Z, a–z, 0–9, punctuation, special marks (em/en dashes, quotes), na ligatures zilizoainishwa wazi: `ff`, `fi`, `fl`, `ffi`, `ffl`.
+3) Reference font atlas generation
+- Pakua target TTF/OTF fonts (kwa mfano, Bookerly normal/italic/bold/bold-italic).<sup>[[1]](#references)</sup>
+- Render candidates za A–Z, a–z, 0–9, punctuation, special marks (em/en dashes, quotes), na explicit ligatures: `ff`, `fi`, `fl`, `ffi`, `ffl`.
 - Weka atlases tofauti kwa kila font variant (normal/italic/bold/bold-italic).
-- Tumia text shaper sahihi (HarfBuzz) ikiwa unataka glyph-level fidelity kwa ligatures; rasterization rahisi kupitia Pillow ImageFont inaweza kutosha ikiwa unarender strings za ligature moja kwa moja na shaping engine ikazitatua.
+- Tumia proper text shaper (HarfBuzz) ikiwa unataka glyph-level fidelity kwa ligatures; simple rasterization kupitia Pillow ImageFont inaweza kutosha ikiwa uta-render ligature strings moja kwa moja na shaping engine ikazitatua.
 
-4) Visual similarity matching kwa kutumia SSIM
-- Kwa kila unknown glyph image, kadiria SSIM (Structural Similarity Index) dhidi ya candidate images zote katika font variant atlases zote.<sup>[[4]](#references)</sup>
-- Weka character string ya match yenye score bora. SSIM inachukua vizuri tofauti ndogo za antialiasing, scale, na coordinates kuliko comparisons zinazohitaji pixels zifanane kabisa.<sup>[[1]](#references)[[4]](#references)</sup>
+4) Visual similarity matching with SSIM
+- Kwa kila unknown glyph image, kokotoa SSIM (Structural Similarity Index) dhidi ya candidate images zote katika font variant atlases zote.<sup>[[4]](#references)</sup>
+- Assign character string ya match yenye score bora zaidi. SSIM hufidia tofauti ndogo za antialiasing, scale, na coordinates vizuri zaidi kuliko pixel-exact comparisons.<sup>[[1]](#references)[[4]](#references)</sup>
 
-5) Kushughulikia edges na reconstruction
-- Glyph inapomappingiwa kuwa ligature (multi-char), expand wakati wa decoding.<sup>[[1]](#references)</sup>
+5) Edge handling and reconstruction
+- Glyph inapomapishwa kuwa ligature (multi-char), expand wakati wa decoding.<sup>[[1]](#references)</sup>
 - Tumia run rectangles (top/left/right/bottom) kukadiria paragraph breaks (Y deltas), alignment (X patterns), style, na sizes.<sup>[[1]](#references)</sup>
-- Serialize kuwa HTML/EPUB huku ukihifadhi `fontStyle`, `fontWeight`, `fontSize`, na internal links.<sup>[[1]](#references)</sup>
+- Serialize hadi HTML/EPUB ukihifadhi `fontStyle`, `fontWeight`, `fontSize`, na internal links.<sup>[[1]](#references)</sup>
 
-### Vidokezo vya utekelezaji
+### Implementation tips
 
 - Normalize images zote ziwe na size na grayscale sawa kabla ya hashing na SSIM.
-- Cache kwa kutumia perceptual hash ili kuepuka kukokotoa upya SSIM kwa glyphs zinazorudiwa katika batches mbalimbali.
-- Tumia raster size yenye quality ya juu (kwa mfano, 256–512 px) kwa discrimination bora; downscale inapohitajika kabla ya SSIM ili kuharakisha.
-- Ikiwa unatumia Pillow kurender TTF candidates, weka canvas size ileile na center glyph; ongeza padding ili kuepuka kukata ascenders/descenders.
+- Cache kwa perceptual hash ili kuepuka kukokotoa upya SSIM kwa repeated glyphs katika batches mbalimbali.
+- Tumia high-quality raster size (kwa mfano, 256–512 px) kwa discrimination bora; downscale inapohitajika kabla ya SSIM ili kuharakisha.
+- Ikiwa unatumia Pillow ku-render TTF candidates, weka canvas size sawa na u-center glyph; ongeza padding ili kuepuka kukata ascenders/descenders.
 
 <details>
-<summary>Python: glyph normalization na matching kutoka mwanzo hadi mwisho (raster hash + SSIM)</summary>
+<summary>Python: end-to-end glyph normalization and matching (raster hash + SSIM)</summary>
 ```python
 # pip install cairosvg pillow imagehash scikit-image uharfbuzz freetype-py
 import io, json, tarfile, base64, math
@@ -224,41 +224,41 @@ return out_runs
 
 ## Heuristics za uundaji upya wa Layout/EPUB
 
-Ripoti ya chanzo ilitumia jiometri ya runs, sehemu za style, na metadata ya links ili kuhifadhi formatting ya document iliyoundwa upya.<sup>[[1]](#references)</sup>
+Ripoti chanzo ilitumia jiometri ya runs, sehemu za style, na metadata ya links ili kuhifadhi formatting ya document iliyoundwa upya.<sup>[[1]](#references)</sup>
 
-- Mapumziko ya paragraph: Ikiwa Y ya juu ya run inayofuata inazidi baseline ya mstari uliotangulia kwa kiwango fulani (ikilinganishwa na ukubwa wa font), anza paragraph mpya.<sup>[[1]](#references)</sup>
-- Alignment: Panga kwa X ya kushoto inayofanana kwa paragraphs zilizo-left-aligned; tambua mistari iliyowekwa katikati kwa margins zenye usawa; tambua iliyo-right-aligned kwa edges za kulia.
-- Styling: Hifadhi italic/bold kupitia `fontStyle`/`fontWeight`; badilisha CSS classes kulingana na vikundi vya `fontSize` ili kukadiria headings dhidi ya body.
-- Links: Ikiwa runs zina metadata ya link (kwa mfano, `positionId`), toa anchors na hrefs za ndani.
+- Kuvunja paragraphs: Ikiwa Y ya juu ya run inayofuata inazidi baseline ya line iliyotangulia kwa threshold (ikilinganishwa na font size), anza paragraph mpya.<sup>[[1]](#references)</sup>
+- Alignment: Panga kwa left X inayofanana kwa paragraphs zilizo left-aligned; tambua lines zilizocentered kwa margins zenye ulinganifu; tambua zilizo right-aligned kwa edges za kulia.
+- Styling: Hifadhi italic/bold kupitia `fontStyle`/`fontWeight`; badilisha CSS classes kulingana na buckets za `fontSize` ili kukadiria headings dhidi ya body.
+- Links: Ikiwa runs zina metadata ya link (kwa mfano, `positionId`), toa anchors na internal hrefs.
 
-## Kupunguza mbinu za SVG za anti-scraping za path
+## Kupunguza mbinu za SVG anti-scraping za paths
 
-- Tumia paths zilizojazwa zenye `fill-rule: nonzero` na renderer inayofaa (CairoSVG, resvg). Usitumie path token normalization.<sup>[[1]](#references)[[2]](#references)[[5]](#references)[[6]](#references)</sup>
-- Epuka stroke rendering; lenga solids zilizojazwa ili kuepuka hairline artifacts zinazosababishwa na relative moves ndogo sana.
-- Dumisha viewBox thabiti kwa kila render ili shapes zinazofanana zirasterize kwa uthabiti katika batches mbalimbali.
+- Tumia paths zilizojaa zenye `fill-rule: nonzero` na renderer sahihi (CairoSVG, resvg). Usitumie path token normalization.<sup>[[1]](#references)[[2]](#references)[[5]](#references)[[6]](#references)</sup>
+- Epuka stroke rendering; lenga solids zilizojaa ili kuepuka hairline artifacts zinazosababishwa na micro relative moves.
+- Dumisha viewBox thabiti kwa kila render ili shapes zinazofanana zirasterize kwa uthabiti katika batches.
 
 ## Maelezo ya performance
 
-- Kwa vitendo, books hujikusanya kuwa glyphs chache za kipekee (kwa mfano, ~361 pamoja na ligatures). Cache matokeo ya SSIM kwa kutumia perceptual hash.<sup>[[1]](#references)</sup>
-- Baada ya discovery ya awali, batches zinazofuata hutumia tena hashes zinazojulikana kwa kiasi kikubwa; decoding huwa I/O-bound.
-- Ripoti ya d iliona SSIM ya wastani ya takriban 0.95; weka alama kwa matches zenye alama ndogo kwa ajili ya manual review.<sup>[[1]](#references)</sup>
+- Kwa vitendo, books hukusanyika kuwa glyphs za kipekee mia chache (kwa mfano, ~361 ikijumuisha ligatures). Cache matokeo ya SSIM kwa perceptual hash.<sup>[[1]](#references)</sup>
+- Baada ya discovery ya awali, batches zijazo hutumia tena hashes zinazojulikana kwa kiasi kikubwa; decoding huwa I/O-bound.
+- Ripoti iliyotajwa iliona SSIM ya wastani ya takriban 0.95; weka alama kwenye matches zenye score ya chini kwa manual review.<sup>[[1]](#references)</sup>
 
 ## Generalization kwa viewers wengine
 
-Workflow ya Kindle inaonyesha kuwa viewers wanaofanana wanaweza kufaa kwa normalization hiyo hiyo ikiwa:<sup>[[1]](#references)</sup>
-- wanarudisha positioned glyph runs zenye numeric IDs zinazohusishwa na request
+Kindle workflow inapendekeza kwamba viewers wanaofanana wanaweza kufaa kwa normalization hiyo hiyo wanapokuwa:<sup>[[1]](#references)</sup>
+- wanarudisha glyph runs zilizo na positions zenye numeric IDs zinazohusishwa na request
 - wanatuma vector glyphs za kila request (SVG paths au subset fonts)
-- wanaweka kikomo cha pages kwa kila request
+- wanapunguza idadi ya pages kwa request
 
 …zinaweza kushughulikiwa kwa normalization hiyo hiyo:
 - Rasterize shapes za kila request → perceptual hash → shape ID
 - Atlas ya candidate glyphs/ligatures kwa kila font variant
-- SSIM (au perceptual metric inayofanana) ya kugawa characters
-- Unda upya layout kutokana na rectangles/styles za runs
+- SSIM (au perceptual metric inayofanana) kwa ajili ya kugawa characters
+- Unda upya layout kutoka kwa rectangles/styles za runs
 
 ## Mfano mdogo wa acquisition (sketch)
 
-Tumia DevTools za browser yako kunasa headers, cookies na tokens halisi zinazotumiwa na reader wakati wa kuomba `/renderer/render`. Kisha zirudie kupitia script au curl.<sup>[[1]](#references)</sup> Muhtasari wa mfano:
+Tumia DevTools za browser yako kunasa headers, cookies na tokens halisi zinazotumiwa na reader wakati wa kuomba `/renderer/render`. Kisha zirudie kutoka kwenye script au curl.<sup>[[1]](#references)</sup> Muhtasari wa mfano:
 ```bash
 curl 'https://read.amazon.com/renderer/render' \
 -H 'Cookie: session-id=...; at-main=...; sess-at-main=...' \
@@ -268,20 +268,20 @@ curl 'https://read.amazon.com/renderer/render' \
 -H 'Accept: application/x-tar' \
 --compressed --output batch_000.tar
 ```
-Rekebisha uwekaji wa parameter (book ASIN, page window, viewport) ili ulingane na maombi ya msomaji. Tarajia kikomo cha kurasa 5 kwa kila ombi.<sup>[[1]](#references)</sup>
+Rekebisha parameterization (book ASIN, page window, viewport) ili ilingane na maombi ya msomaji. Tarajia kikomo cha kurasa 5 kwa kila request.<sup>[[1]](#references)</sup>
 
-## Matokeo yanayoweza kufikiwa
+## Matokeo yanayoweza kupatikana
 
-- Kunja alphabets 100+ zilizowekwa random kuwa glyph space moja kupitia perceptual hashing.<sup>[[1]](#references)</sup>
-- Katika jaribio la d lenye kurasa 920, glyphs 361 za kipekee zililinganishwa (100%) kwa wastani wa SSIM wa 0.9527.<sup>[[1]](#references)</sup>
-- Ripoti ya chanzo inaeleza kuwa EPUB iliyoundwa upya ilikuwa karibu kutotofautika na ya awali.<sup>[[1]](#references)</sup>
+- Punguza alphabets 100+ zilizowekwa randomized hadi glyph space moja kwa kutumia perceptual hashing.<sup>[[1]](#references)</sup>
+- Katika jaribio lililotajwa la kurasa 920, glyphs 361 za kipekee zililinganishwa (100%) kwa SSIM ya wastani ya 0.9527.<sup>[[1]](#references)</sup>
+- Ripoti ya chanzo inaeleza EPUB iliyojengwa upya kuwa karibu kutotofautiana na ya awali.<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [Jinsi Nilivyoreverse Amazon's Kindle Web Obfuscation Kwa Sababu App Yao Ilikuwa Mbaya (Pixelmelt)](https://blog.pixelmelt.dev/kindle-web-drm/)
-- [2] [CairoSVG – Renderer ya SVG hadi PNG](https://cairosvg.org/)
+- [1] [Jinsi Nilivyogeuza Amazon's Kindle Web Obfuscation Kwa Sababu App Yao Ilikuwa Mbaya (Pixelmelt)](https://blog.pixelmelt.dev/kindle-web-drm/)
+- [2] [CairoSVG – renderer ya SVG hadi PNG](https://cairosvg.org/)
 - [3] [imagehash – Perceptual image hashing (pHash)](https://pypi.org/project/ImageHash/)
 - [4] [scikit-image – Structural Similarity Index (SSIM)](https://scikit-image.org/docs/stable/api/skimage.metrics.html#skimage.metrics.structural_similarity)
 - [5] [SVG 1.1 – Sifa za fill](https://www.w3.org/TR/SVG11/painting.html#FillRuleProperty)
-- [6] [resvg – Maktaba ya SVG rendering](https://github.com/linebender/resvg)
+- [6] [resvg – library ya SVG rendering](https://github.com/linebender/resvg)
 {{#include ../../../banners/hacktricks-training.md}}

