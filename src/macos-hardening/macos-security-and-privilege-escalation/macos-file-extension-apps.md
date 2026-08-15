@@ -25,6 +25,8 @@ From an operator perspective, keep in mind there are usually **two useful views*
 
 This distinction matters: an application can be **registered** as able to handle a type or scheme, but the **current default** may still be another bundle ID.
 
+On recent macOS releases, registration discovery is not limited to `/Applications`: apps in other Spotlight-visible, accessible folders and mounted/shared volumes can enter the registry. Therefore, preserve the `path` and volume information from `lsregister -dump` during triage and do not assume that unregistering an app is durable while the bundle remains discoverable.<sup>[[4]](#references)</sup>
+
 ## File Extension & URL scheme app handlers
 
 The following line can be useful to find the applications that can open files depending on the extension:
@@ -122,6 +124,27 @@ dutix targets show ftp
 dutix apps show Safari
 ```
 
+### Per-file `Open With` overrides
+
+Handler resolution also has a **file-specific** layer. Before falling back to the file's UTI and the user's global default, LaunchServices checks the `com.apple.LaunchServices.OpenWith` extended attribute. Finder creates it when **Always Open With** is selected for one file; its value is a binary property list containing an application path, bundle identifier, and version selector.<sup>[[3]](#references)</sup>
+
+Inspect and decode it without trusting the filename extension:
+
+```bash
+xattr -px com.apple.LaunchServices.OpenWith ./suspicious.doc | xxd -r -p | plutil -p -
+```
+
+This is useful when a single lure opens with an unexpected application even though `duti`, `dutix`, or `LSHandlers` reports a benign global default. For a controlled lab, the exact opaque value can be copied from a file configured through Finder; deleting it restores normal type-based resolution:
+
+```bash
+# Clone an existing per-file association
+value="$(xattr -px com.apple.LaunchServices.OpenWith ./seed.doc | tr -d '[:space:]')"
+xattr -wx com.apple.LaunchServices.OpenWith "$value" ./test.doc
+
+# Remove the override
+xattr -d com.apple.LaunchServices.OpenWith ./test.doc
+```
+
 ## Interesting Info.plist keys
 
 When triaging an application bundle, these keys matter the most:
@@ -150,6 +173,7 @@ This is useful both for **persistence / hijacking research** and for **initial-a
 
 - A malicious app can claim a **rare extension** or a **custom UTI** and wait for the victim to open the lure file.
 - A malicious app can register a **custom URL scheme** reachable from a browser, Electron app, office document, chat client, or another helper app.<sup>[[1]](#references)</sup>
+- To separate normal default resolution from testing a particular candidate handler, invoke the scheme through LaunchServices with `open 'targetscheme://host/path?value=test'`, then target a specific registered bundle with `open -b com.vendor.Target 'targetscheme://host/path?value=test'`. This is useful for auditing how the receiving app validates and decodes attacker-controlled URL components.<sup>[[1]](#references)</sup>
 - If you edit an app bundle after building it, you can force LaunchServices to re-parse it with:
 
 ```bash
@@ -165,10 +189,12 @@ When testing suspicious bundles, pay special attention to:
 
 If your goal is passive code-execution from merely browsing to a folder or selecting a file, also check the dedicated page for [Quick Look generators](macos-proces-abuse/macos-quicklook-generators.md), as that is a different but closely related file-handler surface.
 
-## References
 
+
+## References
 
 - [1] [Objective-See - Remote Mac Exploitation Via Custom URL Schemes](https://objective-see.org/blog/blog_0x38.html)
 - [2] [Jamf Threat Labs - Bypassing the Gate: A closer look into Gatekeeper flaws on macOS](https://www.jamf.com/blog/gatekeeper-flaws-on-macos/)
-
+- [3] [The Eclectic Light Company - How macOS opens a file in the correct app](https://eclecticlight.co/2024/04/10/how-macos-opens-a-file-in-the-correct-app/)
+- [4] [The Eclectic Light Company - Controlling LaunchServices in macOS Sequoia](https://eclecticlight.co/2025/03/27/controlling-launchservices-in-macos-sequoia/)
 {{#include ../../banners/hacktricks-training.md}}

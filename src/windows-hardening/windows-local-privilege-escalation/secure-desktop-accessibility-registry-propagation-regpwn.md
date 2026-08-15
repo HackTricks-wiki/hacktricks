@@ -65,7 +65,7 @@ When the oplock triggers, the attacker swaps the per-session HKLM key for a regi
 
 ## Converting the Primitive to SYSTEM Execution
 
-One straightforward chain is to overwrite a **service configuration** value (e.g., `ImagePath`) and then start the service. The RegPwn PoC overwrites the `ImagePath` of **`msiserver`** and triggers it by instantiating the **MSI COM object**, resulting in **SYSTEM** code execution.<sup>[[1]](#references)[[2]](#references)</sup>
+One straightforward chain is to overwrite a **service configuration** value (e.g., `ImagePath`) and then start the service. The RegPwn PoC overwrites the `ImagePath` of **`msiserver`** and triggers it by instantiating the **MSI COM object**, resulting in **SYSTEM** code execution.<sup>[[1]](#references)</sup><sup>[[2]](#references)</sup>
 
 ## Related
 

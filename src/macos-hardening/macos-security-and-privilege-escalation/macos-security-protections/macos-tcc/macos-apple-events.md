@@ -8,7 +8,14 @@
 
 On macOS, the principal broker is `/System/Library/CoreServices/appleeventsd`, which registers the `com.apple.coreservices.appleevents` Mach service. Applications that receive events register an Apple-event Mach port with this service; senders obtain the destination port through it.<sup>[[3]](#references)</sup>
 
-Sandbox rules and entitlements limit this communication. A sandbox profile needs permission to send Apple events and look up the broker's Mach service. The `com.apple.security.temporary-exception.apple-events` entitlement can further restrict a sandboxed application to named destination bundle identifiers.<sup>[[2]](#references)</sup>
+Sandbox rules and entitlements limit this communication. A sandbox profile commonly expresses the required operations as `allow appleevent-send` and a Mach lookup for `com.apple.coreservices.appleevents`:<sup>[[3]](#references)</sup>
+
+```scheme
+(allow appleevent-send)
+(allow mach-lookup (global-name "com.apple.coreservices.appleevents"))
+```
+
+The public `com.apple.security.temporary-exception.apple-events` entitlement can restrict a sandboxed application to named destination bundle identifiers. When analyzing Apple-signed components, also check for the private `com.apple.private.appleevents` entitlement; private Apple entitlements are not normally available to third-party applications.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
 
 > [!TIP]
 > Set the **`AEDebugSends`** environment variable to log information about Apple events sent by a process:<sup>[[3]](#references)</sup>

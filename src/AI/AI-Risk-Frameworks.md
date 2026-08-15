@@ -79,11 +79,11 @@ The [MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS) provides a c
 
 ## LLMJacking (Token Theft & Resale of Cloud-hosted LLM Access)
 
-Attackers steal active session tokens or cloud API credentials and invoke paid, cloud-hosted LLMs without authorization. Access is often resold via reverse proxies that front the victim’s account, e.g. "oai-reverse-proxy" deployments. Consequences include financial loss, model misuse outside policy, and attribution to the victim tenant.<sup>[[5]](#references)[[6]](#references)[[7]](#references)</sup>
+Attackers steal active session tokens or cloud API credentials and invoke paid, cloud-hosted LLMs without authorization. Access is often resold via reverse proxies that front the victim’s account, e.g. "oai-reverse-proxy" deployments. Consequences include financial loss, model misuse outside policy, and attribution to the victim tenant.<sup>[[5]](#references)</sup><sup>[[6]](#references)</sup><sup>[[7]](#references)</sup>
 
 TTPs:
 - Harvest tokens from infected developer machines or browsers; steal CI/CD secrets; buy leaked cookies.<sup>[[5]](#references)</sup>
-- Stand up a reverse proxy that forwards requests to the genuine provider, hiding the upstream key and multiplexing many customers.<sup>[[5]](#references)[[7]](#references)</sup>
+- Stand up a reverse proxy that forwards requests to the genuine provider, hiding the upstream key and multiplexing many customers.<sup>[[5]](#references)</sup><sup>[[7]](#references)</sup>
 - Abuse direct base-model endpoints to bypass enterprise guardrails and rate limits.<sup>[[4]](#references)</sup>
 
 Mitigations:
@@ -153,6 +153,8 @@ Benefits:
 - `--userns=keep-id` and rootless Podman reduce the impact of a container breakout because container root is not host root.
 - Read-only model mounts reduce the chance of model tampering from inside the container.
 
+For persistent deployments, the same restrictions can be expressed as Podman Quadlet units. If GPU access is delegated through the Container Device Interface, keep the CDI device specification as narrow as possible instead of exposing every accelerator node.<sup>[[10]](#references)</sup><sup>[[11]](#references)</sup>
+
 ### GPU device-node minimization
 
 For GPU-backed inference, `/dev/nvidia*` files are high-value local attack surfaces because they expose large driver `ioctl()` handlers and potentially shared GPU memory-management paths.<sup>[[8]](#references)</sup>
@@ -198,7 +200,7 @@ owner /srv/llm/** rw,
 
 ## Phantom Squatting: LLM-Hallucinated Domains as an AI Supply-Chain Vector
 
-Phantom squatting is the **domain/URL equivalent of slopsquatting**. Instead of hallucinating a non-existent package name, the LLM hallucinates a plausible **portal, API, webhook, billing, SSO, download or support domain** for a real brand, and an attacker registers that namespace before a human or agent uses it.<sup>[[12]](#references)[[13]](#references)</sup>
+Phantom squatting is the **domain/URL equivalent of slopsquatting**. Instead of hallucinating a non-existent package name, the LLM hallucinates a plausible **portal, API, webhook, billing, SSO, download or support domain** for a real brand, and an attacker registers that namespace before a human or agent uses it.<sup>[[12]](#references)</sup><sup>[[13]](#references)</sup>
 
 This matters because in many AI-assisted workflows the model output is treated as a **trusted dependency**:
 - Developers paste the suggested endpoint into code or CI/CD integrations.
@@ -243,7 +245,7 @@ This fits several AI risk buckets at once: **AI supply-chain attack**, **insecur
 
 - [1] [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/)
 - [2] [Google SAIF (Secure AI Framework) – Risks](https://saif.google/secure-ai-framework/risks)
-- [3] [MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS)
+- [3] [MITRE ATLAS Threat Matrix](https://atlas.mitre.org/)
 - [4] [Unit 42 – The Risks of Code Assistant LLMs: Harmful Content, Misuse and Deception](https://unit42.paloaltonetworks.com/code-assistant-llms/)
 - [5] [Sysdig – LLMjacking: Stolen Cloud Credentials Used in New AI Attack](https://sysdig.com/blog/llmjacking-stolen-cloud-credentials-used-in-new-ai-attack/)
 - [6] [LLMJacking scheme overview – The Hacker News](https://thehackernews.com/2024/05/researchers-uncover-llmjacking-scheme.html)
@@ -256,4 +258,3 @@ This fits several AI risk buckets at once: **AI supply-chain attack**, **insecur
 - [13] [Socket – Slopsquatting: How AI Hallucinations Are Fueling a New Class of Supply Chain Attacks](https://socket.dev/blog/slopsquatting-how-ai-hallucinations-are-fueling-a-new-class-of-supply-chain-attacks)
 
 {{#include ../banners/hacktricks-training.md}}
-

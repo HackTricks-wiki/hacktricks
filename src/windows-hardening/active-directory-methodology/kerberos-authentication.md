@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Check the amazing post from:** [**https://www.tarlogic.com/en/blog/how-kerberos-works/**](https://www.tarlogic.com/en/blog/how-kerberos-works/)<sup>[[3]](#references)</sup>
+For a protocol-level walkthrough of the exchanges summarized below, see Tarlogic's Kerberos article.<sup>[[3]](#references)</sup>
 
 ## TL;DR for attackers
 - Kerberos is the default AD auth protocol; most lateral-movement chains will touch it.
@@ -19,12 +19,12 @@
 ## Fresh attack notes (2024-2026)
 - **RC4 hardening changed the defaults, not Kerberos itself** – modern DC hardening focuses on the **default assumed encryption types** for accounts that do **not** explicitly set `msDS-SupportedEncryptionTypes`. After the 2026 rollout, those accounts increasingly default to **AES-only** on patched DCs, so blind `/rc4` Kerberoast assumptions fail more often. However, **explicitly RC4-enabled service accounts remain excellent offline-crack targets**.<sup>[[1]](#references)</sup>
 - **PAC validation enforcement matters for forged tickets** – 2024 PAC-signature hardening means that **golden/diamond/sapphire/extraSID-style abuses** need more realistic PAC data and the correct signing context. Unpatched domains or domains left in compatibility/audit-style deployments stay softer targets.<sup>[[2]](#references)</sup>
-- **Certificate-based Kerberos changed twice**:<sup>[[2]](#references)</sup>
+- **Certificate-based Kerberos changed twice**:
   - **Strong certificate binding** (KB5014754 timeline) makes sloppy certificate-to-account mappings less reliable in fully enforced environments.
-  - **CVE-2025-26647** added another hardening layer around **altSecID / SKI certificate mappings**. If DCs are unpatched, still auditing, or explicitly bypassing NTAuth validation, pass-the-certificate / shadow-credential follow-on abuse stays more practical.
+  - **CVE-2025-26647** added another hardening layer around `altSecurityIdentities` mappings that use a certificate's Subject Key Identifier. Patch level, enforcement or audit state, and explicit mapping configuration therefore matter when evaluating pass-the-certificate and related certificate-based paths.<sup>[[5]](#references)</sup><sup>[[6]](#references)</sup> For PKINIT, the KDC also validates the certificate path and checks that the issuer is trusted through the NTAuth store.<sup>[[8]](#references)</sup>
 - **Cross-domain / cross-forest delegation abuse is still very alive** – Windows supports modern cross-realm **S4U2Self/S4U2Proxy** flows, so writable delegation attributes in another domain are still valuable. The blocker is usually tooling fidelity and trust/policy details, not protocol support.
 - **Recursive multi-domain RBCD matters operationally** – in 3+ domain forests, **S4U2Self/S4U2Proxy** can recurse through trust referrals, and **SPN-less** abuse may require a final **`S4U2Self+U2U`** hop plus RC4-dependent ticket handling. See [Resource-Based Constrained Delegation](resource-based-constrained-delegation.md).<sup>[[4]](#references)</sup>
-- **Windows Server 2025 introduced new Kerberos-adjacent attack surface** through **dMSA** migration logic. If you see delegated rights over OUs or service-account objects in a 2025 domain, check the dedicated [BadSuccessor page](acl-persistence-abuse/BadSuccessor.md) instead of treating it like “just another gMSA”.
+- **Windows Server 2025 introduced delegated Managed Service Accounts (dMSAs)** and their migration logic. If you see delegated rights over OUs or service-account objects in a 2025 domain, check the dedicated [BadSuccessor page](acl-persistence-abuse/BadSuccessor.md) instead of treating it like “just another gMSA”.<sup>[[7]](#references)</sup>
 
 ## Fast operator checks in modern domains
 
@@ -78,5 +78,9 @@ Practical interpretation:
 - [2] [Microsoft Support - Latest Windows hardening guidance and key dates](https://support.microsoft.com/en-us/topic/latest-windows-hardening-guidance-and-key-dates-eb1bd411-f68c-4d74-a4e1-456721a6551b)
 - [3] [Kerberos (I): How does Kerberos work? – Theory](https://www.tarlogic.com/en/blog/how-kerberos-works/)
 - [4] [Synacktiv - Exploiting RBCD in Cross-Domain & Cross-Forest Environments: Part 2](https://www.synacktiv.com/publications/exploiter-la-rbcd-en-environnements-cross-domain-cross-forest-partie-2)
+- [5] [Microsoft Support - KB5014754 certificate-based authentication changes](https://support.microsoft.com/help/5014754)
+- [6] [Microsoft - CVE-2025-26647 Kerberos certificate mapping vulnerability](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-26647)
+- [7] [Microsoft Learn - Delegated Managed Service Accounts overview](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/delegated-managed-service-accounts/delegated-managed-service-accounts-overview)
+- [8] [Microsoft Learn - Smart-card certificate requirements and KDC validation](https://learn.microsoft.com/en-us/windows/security/identity-protection/smart-cards/smart-card-certificate-requirements-and-enumeration)
 
 {{#include ../../banners/hacktricks-training.md}}
