@@ -1,12 +1,12 @@
-# macOS Installers Abuse
+# macOS Installers का Abuse
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Pkg Basic Information
+## Pkg की Basic Information
 
-एक macOS **installer package** (जिसे `.pkg` file भी कहा जाता है) macOS द्वारा **software वितरित करने** के लिए उपयोग किया जाने वाला file format है। ये files एक **box की तरह होती हैं जिसमें software को** सही ढंग से install और run करने के लिए आवश्यक **हर चीज़ होती है**।
+macOS का **installer package** (जिसे `.pkg` file भी कहा जाता है) macOS द्वारा **software distribute करने** के लिए उपयोग किया जाने वाला file format है। ये files एक **box की तरह होती हैं, जिसमें software को सही तरीके से install और run करने के लिए आवश्यक सभी चीजें** होती हैं।
 
-Package file स्वयं एक archive होती है, जिसमें **target** computer पर install की जाने वाली **files और directories की hierarchy** होती है। इसमें installation से पहले और बाद में tasks करने के लिए **scripts** भी शामिल हो सकती हैं, जैसे configuration files सेट करना या software के पुराने versions को साफ़ करना।
+Package file स्वयं एक archive होती है, जिसमें **target computer पर install की जाने वाली files और directories की hierarchy** होती है। इसमें installation से पहले और बाद में tasks करने के लिए **scripts** भी शामिल हो सकती हैं, जैसे configuration files सेट करना या software के पुराने versions को clean up करना।
 
 ### Package Structure
 
@@ -15,8 +15,8 @@ Package file स्वयं एक archive होती है, जिसमे
 - **Distribution (xml)**: Customizations (title, welcome text…) और script/installation checks
 - **PackageInfo (xml)**: Info, install requirements, install location, run की जाने वाली scripts के paths
 - **Bill of materials (bom)**: File permissions के साथ install, update या remove की जाने वाली files की list
-- **Payload (CPIO archive gzip compressed)**: PackageInfo में दिए गए `install-location` में install की जाने वाली files
-- **Scripts (CPIO archive gzip compressed)**: Pre और post install scripts तथा अन्य resources, जिन्हें execution के लिए temp directory में extract किया जाता है।
+- **Payload (CPIO archive gzip compressed)**: PackageInfo के `install-location` में install की जाने वाली files
+- **Scripts (CPIO archive gzip compressed)**: Pre और post install scripts तथा अन्य resources, जिन्हें execution के लिए एक temp directory में extract किया जाता है।
 
 ### Decompress
 ```bash
@@ -36,7 +36,7 @@ cpio -i < Scripts
 
 ### Static triage shortcuts
 
-यदि लक्ष्य analysis है, तो पहले package को `Installer.app` से खोलने से **बचने** का प्रयास करें। कुछ packages Installer द्वारा खुलते ही code execute कर सकते हैं (उदाहरण के लिए `system.run()` या installer plug-ins के माध्यम से), इसलिए offline extraction आमतौर पर अधिक सुरक्षित शुरुआती कदम होता है।
+यदि लक्ष्य analysis है, तो पहले package को `Installer.app` से खोलने से **बचने का प्रयास करें**। कुछ packages Installer द्वारा खोले जाते ही code execute कर सकते हैं (उदाहरण के लिए `system.run()` या installer plug-ins के माध्यम से), इसलिए offline extraction आमतौर पर अधिक सुरक्षित शुरुआती कदम होता है।
 ```bash
 PKG="Suspicious.pkg"
 OUT="/tmp/pkg-audit"
@@ -56,10 +56,10 @@ rg -n 'system\.(run|runOnce)|<script>|launchctl|osascript|curl|chmod 4[0-7]{3}|s
 ```
 ## DMG की मूल जानकारी
 
-DMG files, या Apple Disk Images, Apple के macOS द्वारा disk images के लिए उपयोग किया जाने वाला file format है। DMG file मूल रूप से एक **mountable disk image** होती है (इसमें अपना filesystem होता है), जिसमें आमतौर पर compressed और कभी-कभी encrypted raw block data होता है। जब आप कोई DMG file खोलते हैं, तो macOS उसे **ऐसे mount करता है जैसे वह कोई physical disk हो**, जिससे आप उसकी contents तक पहुँच सकते हैं।
+DMG files, या Apple Disk Images, Apple के macOS द्वारा disk images के लिए उपयोग किया जाने वाला file format है। DMG file मूल रूप से एक **mountable disk image** होती है (इसमें अपना filesystem होता है), जिसमें आमतौर पर compressed और कभी-कभी encrypted raw block data होता है। जब आप DMG file खोलते हैं, तो macOS उसे **ऐसे mount करता है जैसे वह कोई physical disk हो**, जिससे आप उसकी contents तक पहुंच सकते हैं।
 
 > [!CAUTION]
-> ध्यान दें कि **`.dmg`** installers **बहुत से formats** support करते हैं और अतीत में vulnerabilities वाली कुछ files का abuse करके **kernel code execution** प्राप्त किया गया है।
+> ध्यान दें कि **`.dmg`** installers **बहुत सारे formats** को support करते हैं और पहले इनमें से कुछ में मौजूद vulnerabilities का abuse करके **kernel code execution** प्राप्त किया गया था।
 
 ### Disk Image Structure
 
@@ -68,20 +68,20 @@ DMG files, या Apple Disk Images, Apple के macOS द्वारा disk 
 DMG file की hierarchy उसकी content के आधार पर अलग हो सकती है। हालांकि, application DMGs के लिए यह आमतौर पर इस structure का पालन करती है:
 
 - Top Level: यह disk image का root होता है। इसमें अक्सर application और संभवतः Applications folder का link होता है।
-- Application (.app): यह वास्तविक application होती है। macOS में application आमतौर पर एक package होती है, जिसमें application बनाने वाली कई individual files और folders शामिल होती हैं।
-- Applications Link: यह macOS में Applications folder का shortcut होता है। इसका उद्देश्य application को install करना आसान बनाना है। आप .app file को इस shortcut पर drag करके app install कर सकते हैं।
+- Application (.app): यह वास्तविक application होती है। macOS में application आमतौर पर एक package होती है, जिसमें application बनाने वाली कई individual files और folders शामिल होते हैं।
+- Applications Link: यह macOS में Applications folder का shortcut होता है। इसका उद्देश्य application को install करना आसान बनाना है। आप app install करने के लिए .app file को इस shortcut पर drag कर सकते हैं।
 
 ## pkg abuse के जरिए Privesc
 
-### Public directories से execution
+### public directories से Execution
 
-यदि कोई pre- या post-installation script **`/var/tmp/Installerutil`** जैसी file को execute करती है और attacker उस file को replace कर सकता है, तो installer द्वारा उसे invoke करने पर attacker privileges escalate कर सकता है। d talks और walkthrough इस insecure external-script pattern के variants दिखाते हैं।<sup>[[1]](#references)</sup><sup>[[3]](#references)</sup><sup>[[4]](#references)</sup>
+यदि कोई pre- या post-installation script **`/var/tmp/Installerutil`** जैसी file को execute करती है और attacker उस file को replace कर सकता है, तो installer द्वारा उसे invoke किए जाने पर attacker privileges escalate कर सकता है। उद्धृत talks और walkthrough इस insecure external-script pattern के variants दिखाते हैं।<sup>[[1]](#references)</sup><sup>[[3]](#references)</sup><sup>[[4]](#references)</sup>
 
 <figure><img src="../../../images/Pasted Graphic 5.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption><p><a href="https://www.youtube.com/watch?v=kCXhIYtODBg">https://www.youtube.com/watch?v=kCXhIYtODBg</a></p></figcaption></figure>
 
 ### AuthorizationExecuteWithPrivileges
 
-यह एक [public function](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg) है, जिसे कई installers और updaters **किसी चीज़ को root के रूप में execute करने** के लिए call करते हैं। यह function **execute** की जाने वाली **file** का **path** parameter के रूप में स्वीकार करता है। हालांकि, यदि कोई attacker इस file को **modify** कर सकता है, तो वह इसे root के साथ execute करवाकर **abuse** कर सकेगा और **privileges escalate** कर सकेगा।
+यह एक [public function](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg) है, जिसे कई installers और updaters **किसी चीज को root के रूप में execute करने** के लिए call करते हैं। यह function execute की जाने वाली **file** का **path** parameter के रूप में स्वीकार करता है, हालांकि, यदि कोई attacker इस file को **modify** कर सके, तो वह root के साथ इसके execution का **abuse** करके **privileges escalate** कर सकेगा।
 ```bash
 # Breakpoint in the function to check which file is loaded
 (lldb) b AuthorizationExecuteWithPrivileges
@@ -91,37 +91,37 @@ DMG file की hierarchy उसकी content के आधार पर अल
 
 ### Environment और shebang का दुरुपयोग
 
-Modern PackageKit bugs से पता चला कि installer scripts अक्सर **trusted root code** के रूप में execute होती हैं, जबकि attacker-controlled context पास में बना रहता है। Vendor packages का audit करते समय इन पर विशेष ध्यान दें:
+Modern PackageKit bugs से पता चला कि installer scripts अक्सर **trusted root code** के रूप में execute की जाती हैं, जबकि attacker-controlled context अब भी पास में बना रहता है। Vendor packages का audit करते समय इन पर विशेष ध्यान दें:
 
-- Shell interpreters जैसे `#!/bin/zsh` / `#!/bin/bash`
-- `sudo -u $USER`, `launchctl asuser` जैसे calls, या ऐसा कोई भी logic जो `$USER`, `$HOME`, `PATH`, `TMPDIR` या relative paths पर भरोसा करता हो
-- ऐसे non-shell interpreters जो user-controlled init files या libraries load कर सकते हैं
+- `#!/bin/zsh` / `#!/bin/bash` जैसे Shell interpreters
+- `sudo -u $USER`, `launchctl asuser` जैसी calls, या ऐसा कोई logic जो `$USER`, `$HOME`, `PATH`, `TMPDIR`, या relative paths पर भरोसा करता हो
+- ऐसे Non-shell interpreters जो user-controlled init files या libraries load कर सकते हैं
 ```bash
 pkgutil --expand-full Target.pkg /tmp/target-pkg
 find /tmp/target-pkg -type f \( -name preinstall -o -name postinstall \) -exec sh -c 'printf "\n### %s\n" "$1"; head -n 1 "$1"' sh {} \;
 rg -n '^#!/bin/(zsh|bash)|sudo -u |launchctl asuser|\$USER|\$HOME|PATH=|/usr/bin/env ' /tmp/target-pkg
 ```
-2024 के PackageKit root-environment bug (`~/.zshenv` / `~/.bash*` inheritance during user-initiated installs) के लिए [generic macOS privesc page](../macos-privilege-escalation.md) देखें। यदि package **Apple-signed** है, तो यही script bug **SIP/TCC-relevant** बन सकता है, क्योंकि `system_installd` के पास `com.apple.rootless.install.heritable` हो सकता है; [SIP page](../macos-security-protections/macos-sip.md) देखें।<sup>[[5]](#references)</sup><sup>[[6]](#references)</sup>
+2024 PackageKit root-environment bug (`~/.zshenv` / `~/.bash*` inheritance during user-initiated installs) के लिए [generic macOS privesc page](../macos-privilege-escalation.md) देखें। यदि package **Apple-signed** है, तो यही script bug **SIP/TCC-relevant** बन सकता है, क्योंकि `system_installd` के पास `com.apple.rootless.install.heritable` हो सकता है; [SIP page](../macos-security-protections/macos-sip.md) देखें।<sup>[[5]](#references)</sup><sup>[[6]](#references)</sup>
 
-### Mounting द्वारा Execution
+### Mount करके Execution
 
-यदि कोई installer `/tmp/fixedname/bla/bla` में लिखता है, तो `/tmp/fixedname` के ऊपर `noowners` के साथ **mount create** करना संभव है, जिससे आप **installation के दौरान किसी भी file को modify** करके installation process का abuse कर सकते हैं।
+यदि कोई installer `/tmp/fixedname/bla/bla` में लिखता है, तो `/tmp/fixedname` के ऊपर `noowners` के साथ **mount बनाना** संभव है, जिससे installation के दौरान **किसी भी file को modify** करके installation process का दुरुपयोग किया जा सकता है।
 
 इसका एक उदाहरण **CVE-2021-26089** है, जिसमें **periodic script को overwrite** करके root के रूप में execution प्राप्त किया गया। अधिक जानकारी के लिए यह talk देखें: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)<sup>[[7]](#references)</sup>
 
-## pkg as malware
+## malware के रूप में pkg
 
 ### Empty Payload
 
-सिर्फ **`.pkg`** file generate करना संभव है, जिसमें किसी वास्तविक payload के बजाय केवल scripts के अंदर malware मौजूद हो और **pre and post-install scripts** शामिल हों।<sup>[[2]](#references)</sup>
+सिर्फ **`.pkg`** file बनाना संभव है, जिसमें **pre और post-install scripts** हों और scripts के अंदर मौजूद malware के अलावा कोई वास्तविक payload न हो।<sup>[[2]](#references)</sup>
 
-### JS in Distribution xml
+### Distribution xml में JS
 
-Package की **distribution xml** file में **`<script>`** tags जोड़ना संभव है, और वह code execute हो जाएगा तथा **`system.run`** का उपयोग करके **commands execute** कर सकता है:
+Package की **distribution xml** file में **`<script>`** tags जोड़ना संभव है। यह code execute हो जाएगा और **`system.run`** का उपयोग करके **commands execute** कर सकता है:
 
 <figure><img src="../../../images/image (1043).png" alt=""><figcaption></figcaption></figure>
 
-Distribution packages में यह आमतौर पर इस बात पर निर्भर करता है कि top-level `Distribution` file external scripts को enable करती है या नहीं, उदाहरण के लिए `allow-external-scripts="true"` के साथ। इसलिए केवल `preinstall` / `postinstall` की समीक्षा पर्याप्त नहीं है: **Distribution XML** में स्वयं `installation-check` / `volume-check` hooks और direct `system.run()` / `system.runOnce()` execution paths हो सकते हैं।
+Distribution packages में यह आमतौर पर top-level `Distribution` file द्वारा external scripts enable करने पर निर्भर करता है, उदाहरण के लिए `allow-external-scripts="true"` के साथ। इसलिए केवल `preinstall` / `postinstall` की समीक्षा पर्याप्त नहीं है: **Distribution XML स्वयं** `installation-check` / `volume-check` hooks और direct `system.run()` / `system.runOnce()` execution paths रख सकता है।
 ```bash
 xmllint --format Distribution | sed -n '1,200p'
 rg -n 'allow-external-scripts|system\.(run|runOnce)|installation-check|volume-check|function ' Distribution
@@ -191,12 +191,12 @@ productbuild --distribution dist.xml --package-path myapp.pkg final-installer.pk
 ```
 ## References
 
-- [1] [DEF CON 27 - Pkgs को Unpack करना: Macos Installer Packages के अंदर एक नज़र और सामान्य Security Flaws](https://www.youtube.com/watch?v=iASSG0_zobQ)
-- [2] [OBTS v4.0: "macOS Installers की Wild World" - Tony Lambert](https://www.youtube.com/watch?v=Eow5uNHtmIg)
-- [3] [DEF CON 27 - Pkgs को Unpack करना: MacOS Installer Packages के अंदर एक नज़र](https://www.youtube.com/watch?v=kCXhIYtODBg)
+- [1] [DEF CON 27 - Pkgs को अनपैक करना: Macos Installer Packages के अंदर एक नज़र और सामान्य Security Flaws](https://www.youtube.com/watch?v=iASSG0_zobQ)
+- [2] [OBTS v4.0: "macOS Installers की जंगली दुनिया" - Tony Lambert](https://www.youtube.com/watch?v=Eow5uNHtmIg)
+- [3] [DEF CON 27 - Pkgs को अनपैक करना: MacOS Installer Packages के अंदर एक नज़र](https://www.youtube.com/watch?v=kCXhIYtODBg)
 - [4] [RedTeamRecipe – macOS Red Teaming: Installer Packages का Exploitation](https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages)
 - [5] [CVE-2024-27822: macOS PackageKit Privilege Escalation](https://khronokernel.com/macos/2024/06/03/CVE-2024-27822.html)
 - [6] [Apple-signed Packages के साथ SIP को तोड़ना](https://www.l3harris.com/newsroom/editorial/2024/03/breaking-sip-apple-signed-packages)
 - [7] [OBTS v4.0: "Bugs का Mount(ain)" - Csaba Fitzl](https://www.youtube.com/watch?v=jSYPazD4VcE)
-- [8] [DEF CON 25 - Patrick Wardle - macOS पर 1000 Installers से Death और सब कुछ broken है!](https://www.youtube.com/watch?v=lTOItyjTTkw)
+- [8] [DEF CON 25 - Patrick Wardle - macOS पर 1000 Installers से मृत्यु और सब कुछ खराब है!](https://www.youtube.com/watch?v=lTOItyjTTkw)
 {{#include ../../../banners/hacktricks-training.md}}
