@@ -2,9 +2,11 @@
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
-### Word Sandbox bypass via Launch Agents
+The following are **historical Microsoft Office for Mac sandbox escapes**. They document reusable trust-boundary mistakes, but patched Office/macOS combinations should not be assumed vulnerable without reproducing the exact version and policy.
 
-The application uses a **custom Sandbox** using the entitlement **`com.apple.security.temporary-exception.sbpl`** and this custom sandbox allows to write files anywhere as long as the filename started with `~$`: `(require-any (require-all (vnode-type REGULAR-FILE) (regex #"(^|/)~$[^/]+$")))`
+### Word sandbox bypass via LaunchAgents
+
+The affected application used a custom sandbox rule through `com.apple.security.temporary-exception.sbpl`. It allowed regular files whose basename started with `~$`: `(require-any (require-all (vnode-type REGULAR-FILE) (regex #"(^|/)~$[^/]+$")))`.<sup>[[1]](#references)</sup>
 
 Therefore, escaping was as easy as **writing a `plist`** LaunchAgent in `~/Library/LaunchAgents/~$escape.plist`.
 
@@ -14,7 +16,7 @@ Check the [**original report here**](https://www.mdsec.co.uk/2018/08/escaping-th
 
 Remember that from the first escape, Word can write arbitrary files whose name start with `~$` although after the patch of the previous vuln it wasn't possible to write in `/Library/Application Scripts` or in `/Library/LaunchAgents`.
 
-It was discovered that from within the sandbox it's possible to create a **Login Item** (apps that will be executed when the user logs in). However, these apps **won't execute unless** they are **notarized** and it's **not possible to add args** (so you cannot just run a reverse shell using **`bash`**).
+The affected sandbox allowed creation of a **Login Item**, which launches when the user logs in. The demonstrated path required an acceptable signed/notarized application and did not permit arbitrary arguments, so adding `bash` with a reverse-shell argument was insufficient.<sup>[[2]](#references)</sup>
 
 From the previous Sandbox bypass, Microsoft disabled the option to write files in `~/Library/LaunchAgents`. However, it was discovered that if you put a **zip file as a Login Item** the `Archive Utility` will just **unzip** it on its current location. So, because by default the folder `LaunchAgents` from `~/Library` is not created, it was possible to **zip a plist in `LaunchAgents/~$escape.plist`** and **place** the zip file in **`~/Library`** so when decompress it will reach the persistence destination.
 
@@ -26,17 +28,17 @@ Check the [**original report here**](https://objective-see.org/blog/blog_0x4B.ht
 
 However, the previous technique had a limitation, if the folder **`~/Library/LaunchAgents`** exists because some other software created it, it would fail. So a different Login Items chain was discovered for this.
 
-An attacker could create the the files **`.bash_profile`** and **`.zshenv`** with the payload to execute and then zip them and **write the zip in the victims** user folder: **`~/~$escape.zip`**.
+An attacker could create **`.bash_profile`** and **`.zshenv`** containing the payload, archive them, and write the ZIP to the **victim's** home directory as **`~/~$escape.zip`**.
 
-Then, add the zip file to the **Login Items** and then the **`Terminal`** app. When the user relogins, the zip file would be uncompressed in the users file, overwriting **`.bash_profile`** and **`.zshenv`** and therefore, the terminal will execute one of these files (depending if bash or zsh is used).
+Then add the ZIP and **Terminal** as Login Items. At the next login, Archive Utility extracts the dotfiles into the user's home directory and Terminal's shell evaluates the applicable startup file (`.bash_profile` for the demonstrated Bash path or `.zshenv` for Zsh).<sup>[[3]](#references)</sup>
 
 Check the [**original report here**](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c).<sup>[[3]](#references)</sup>
 
 ### Word Sandbox Bypass with Open and env variables
 
-From sandboxed processes it's still possible to invoke other processes using the **`open`** utility. Moreover, these processes will run **within their own sandbox**.
+Sandboxed processes could still request application launches through **`open`**. The launched application ran in its own security context rather than inheriting Word's exact sandbox profile.<sup>[[4]](#references)</sup>
 
-It was discovered that the open utility has the **`--env`** option to run an app with **specific env** variables. Therefore, it was possible to create the **`.zshenv` file** within a folder **inside** the **sandbox** and the use `open` with `--env` setting the **`HOME` variable** to that folder opening that `Terminal` app, which will execute the `.zshenv` file (for some reason it was also needed to set the variable `__OSINSTALL_ENVIROMENT`).
+The affected `open` utility had an **`--env`** option for supplying environment variables. The exploit created `.zshenv` inside the sandbox, set `HOME` to that directory, and launched Terminal so Zsh evaluated it. The reported chain also set the misspelled private variable `__OSINSTALL_ENVIROMENT`; preserve that exact spelling when reproducing the historical PoC.<sup>[[4]](#references)</sup>
 
 Check the [**original report here**](https://perception-point.io/blog/technical-analysis-of-cve-2021-30864/).<sup>[[4]](#references)</sup>
 
@@ -44,10 +46,10 @@ Check the [**original report here**](https://perception-point.io/blog/technical-
 
 The **`open`** utility also supported the **`--stdin`** param (and after the previous bypass it was no longer possible to use `--env`).
 
-The thing is that even if **`python`** was signed by Apple, it **won't execute** a script with the **`quarantine`** attribute. However, it was possible to pass it a script from stdin so it won't check if it was quarantined or not:
+Although Apple's Python application would reject a quarantined script file, the vulnerable workflow could feed the same script over standard input, avoiding the file-based quarantine check:<sup>[[5]](#references)</sup>
 
 1. Drop a **`~$exploit.py`** file with arbitrary Python commands.
-2. Run _open_ **`–stdin='~$exploit.py' -a Python`**, which runs the Python app with our dropped file serving as its standard input. Python happily runs our code, and since it’s a child process of _launchd_, it isn’t bound to Word’s sandbox rules.<sup>[[5]](#references)</sup>
+2. Run `open --stdin='~$exploit.py' -a Python`. The launched Python application receives the dropped code on standard input and, in the vulnerable versions, runs outside Word's sandbox because LaunchServices creates it under `launchd`.<sup>[[5]](#references)</sup>
 
 ## References
 
@@ -58,4 +60,3 @@ The thing is that even if **`python`** was signed by Apple, it **won't execute**
 - [5] [Uncovering a macOS App Sandbox escape vulnerability: A deep dive into CVE-2022-26706 - Microsoft Security Blog](https://www.microsoft.com/en-us/security/blog/2022/07/13/uncovering-a-macos-app-sandbox-escape-vulnerability-a-deep-dive-into-cve-2022-26706/)
 
 {{#include ../../../../../banners/hacktricks-training.md}}
-

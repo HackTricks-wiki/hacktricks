@@ -41,6 +41,29 @@ When you start a debugged browser something like this will appear:<sup>[[2]](#re
 DevTools listening on ws://127.0.0.1:9222/devtools/browser/7d7aa9d9-7c61-4114-b4c6-fcf5c35b4369
 ```
 
+### Enumerating and driving a CDP endpoint
+
+The HTTP discovery endpoints distinguish the **browser** WebSocket from individual **target** (tab, worker, extension, etc.) WebSockets. Query `/json/version` for the browser endpoint and `/json/list` for targets; the returned `webSocketDebuggerUrl` values can then be driven directly with CDP's JSON-RPC-like messages.<sup>[[5]](#references)</sup>
+
+```bash
+# Browser metadata and browser-level WebSocket
+curl -s http://127.0.0.1:9222/json/version | jq
+
+# Pages/workers and their target-level WebSockets
+curl -s http://127.0.0.1:9222/json/list |
+  jq '.[] | {id, type, title, url, webSocketDebuggerUrl}'
+
+BROWSER_WS=$(curl -s http://127.0.0.1:9222/json/version | jq -r .webSocketDebuggerUrl)
+PAGE_WS=$(curl -s http://127.0.0.1:9222/json/list | jq -r '[.[] | select(.type=="page")][0].webSocketDebuggerUrl')
+```
+
+For example, connect with `websocat "$BROWSER_WS"` and send `{"id":1,"method":"Target.getTargets"}` or `{"id":2,"method":"Storage.getCookies"}`. On a page target (`websocat "$PAGE_WS"`), `Runtime.evaluate` executes in that renderer and `Page.captureScreenshot` returns a base64-encoded screenshot. `document.cookie` cannot reveal `HttpOnly` cookies, whereas `Storage.getCookies` asks the browser for its cookie store.<sup>[[5]](#references)</sup>
+
+```json
+{"id":3,"method":"Runtime.evaluate","params":{"expression":"({url:location.href,title:document.title,cookie:document.cookie})","returnByValue":true}}
+{"id":4,"method":"Page.captureScreenshot","params":{"format":"png"}}
+```
+
 ### Browsers, WebSockets and same-origin policy <a href="#browsers-websockets-and-same-origin-policy" id="browsers-websockets-and-same-origin-policy"></a>
 
 Websites open in a web-browser can make WebSocket and HTTP requests under the browser security model. An **initial HTTP connection** is necessary to **obtain a unique debugger session id**. The **same-origin-policy** **prevents** websites from being able to make **this HTTP connection**. For additional security against [**DNS rebinding attacks**](https://en.wikipedia.org/wiki/DNS_rebinding)**,** Node.js verifies that the **'Host' headers** for the connection either specify an **IP address** or **`localhost`** precisely.<sup>[[4]](#references)</sup>
@@ -108,6 +131,17 @@ Browser.open(JSON.stringify({ url: "c:\\windows\\system32\\calc.exe" }))
 You can check the API here: [https://chromedevtools.github.io/devtools-protocol/](https://chromedevtools.github.io/devtools-protocol/).<sup>[[5]](#references)</sup>
 In this section I will just list interesting things I find people have used to exploit this protocol.
 
+### Chrome 136+ default-profile restriction
+
+Starting with **Chrome 136**, Chrome ignores `--remote-debugging-port` and `--remote-debugging-pipe` when they target the **default Chrome data directory**. The switch must be paired with a non-standard `--user-data-dir`, whose separate encryption key and isolated browser state prevent the simple flag-based technique from exposing the user's normal authenticated profile. This Chrome-specific restriction should not be assumed to cover older Chrome builds, Chrome for Testing, Electron/CEF applications, or other Chromium derivatives without verification.<sup>[[14]](#references)</sup>
+
+```bash
+# Valid current-Chrome debugging setup, but this is a new isolated profile
+google-chrome --remote-debugging-port=9222 --user-data-dir=/tmp/chrome-cdp-lab
+```
+
+Therefore, seeing a current Chrome process launched only with `--remote-debugging-port` does **not** prove that CDP became active. Confirm the listener and `/json/version`, and determine which profile actually backs it.<sup>[[14]](#references)</sup>
+
 ### Parameter Injection via Deep Links
 
 In the [**CVE-2021-38112**](https://rhinosecuritylabs.com/aws/cve-2021-38112-aws-workspaces-rce/) Rhino security discovered that an application based on CEF **registered a custom UR**I in the system (workspaces://index.html) that received the full URI and then **launched the CEF based applicatio**n with a configuration that was partially constructing from that URI.<sup>[[8]](#references)</sup>
@@ -146,15 +180,34 @@ STAR Labs showed that exposed WebDriver/CDP services can enable arbitrary file r
 
 For additional historical browser-automation and Chromium security cases, see the Counter WebDriver write-up and Project Zero issues 773, 1742, and 1944.<sup>[[10]](#references)[[11]](#references)[[12]](#references)[[13]](#references)</sup>
 
+### Enabling CDP inside a live Chromium process
+
+On Windows, [**CDP-Enabler**](https://github.com/deathflamingo/CDP-Enabler) demonstrated that the command-line restriction is not the only way to activate CDP: code already capable of injecting into an existing `msedge.exe` can invoke Chromium's non-exported `content::DevToolsAgentHost::StartRemoteDebuggingServer` and expose the authenticated live profile without restarting the browser.<sup>[[15]](#references)</sup>
+
+The demonstrated chain injects a DLL with `VirtualAllocEx`/`WriteProcessMemory`/`CreateRemoteThread`, resolves internal Edge symbols (first from PDBs and then with version-specific byte signatures), subclasses the browser window, and posts a message so the final server-start call executes on the browser **UI thread**. The socket is bound to loopback, after which normal CDP primitives can retrieve cookies, capture tabs, inspect network traffic, or evaluate JavaScript in authenticated pages.<sup>[[15]](#references)</sup>
+
+> [!WARNING]
+> This is a **post-compromise/process-injection** technique, not an unauthenticated network bypass. It is highly build-dependent because the relevant C++ symbols are not exported and signatures can change after browser updates.<sup>[[15]](#references)</sup>
+
+For detection, do not rely only on `--remote-debugging-*` command-line telemetry: also correlate unusual handles and memory operations against browser processes (`PROCESS_VM_OPERATION`, `PROCESS_VM_WRITE`, thread creation), DLL injection, and unexpected loopback listening sockets owned by Chrome/Edge.<sup>[[15]](#references)</sup>
+
 ### Post-Exploitation
 
-In a real environment and **after compromising** a user PC that uses Chrome/Chromium based browser you could launch a Chrome process with the **debugging activated and port-forward the debugging port** so you can access it. This way you will be able to **inspect everything the victim does with Chrome and steal sensitive information**.<sup>[[7]](#references)</sup>
+In a real environment and **after compromising** a user PC that uses a Chromium-based browser, a historical technique was to relaunch the browser with debugging enabled and forward the loopback port. This can expose the victim's browsing state on products/builds that still accept the selected profile, but Chrome 136+ will not honor this against its default data directory.<sup>[[7]](#references)[[14]](#references)</sup>
 
-The stealth way is to **terminate every Chrome process** and then call something like:<sup>[[7]](#references)</sup>
+The original relaunch command is preserved below for older/version-specific targets. The second command is the supported current-Chrome form, but it creates an isolated profile rather than reopening the victim's normal authenticated state.<sup>[[7]](#references)[[14]](#references)</sup>
 
-```bash
+```powershell
+# Historical: verify whether the target actually honors it
 Start-Process "Chrome" "--remote-debugging-port=9222 --restore-last-session"
+
+# Current Chrome: CDP works, but against a new profile
+Start-Process "Chrome" "--remote-debugging-port=9222 --user-data-dir=$env:TEMP\chrome-cdp"
 ```
+
+For macOS-specific Chromium relaunch, extension, and CDP tradecraft, see [macOS Chromium Injection](../../macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-chromium-injection.md).
+
+
 
 ## References
 
@@ -171,5 +224,6 @@ Start-Process "Chrome" "--remote-debugging-port=9222 --restore-last-session"
 - [11] [Google Project Zero Issue 773 (Chromium bug tracker)](https://bugs.chromium.org/p/project-zero/issues/detail?id=773)
 - [12] [Google Project Zero Issue 1742 (Chromium bug tracker)](https://bugs.chromium.org/p/project-zero/issues/detail?id=1742)
 - [13] [Google Project Zero Issue 1944 (Chromium bug tracker)](https://bugs.chromium.org/p/project-zero/issues/detail?id=1944)
-
+- [14] [Changes to remote debugging switches to improve security - Chrome for Developers](https://developer.chrome.com/blog/remote-debugging-port)
+- [15] [Injecting CDP into a Running Edge Browser: A Deep Dive into Runtime Browser Instrumentation](https://deathflamingo.com/blog/cdp_enabler/)
 {{#include ../../banners/hacktricks-training.md}}

