@@ -79,7 +79,7 @@ The hierarchy of a DMG file can be different based on the content. However, for 
 
 ### Execution from public directories
 
-If a pre- or post-installation script executes a file such as **`/var/tmp/Installerutil`** and an attacker can replace that file, the attacker can escalate privileges when the installer invokes it. The d talks and walkthrough show variants of this insecure external-script pattern.<sup>[[1]](#references)</sup><sup>[[3]](#references)</sup><sup>[[4]](#references)</sup>
+If a pre- or post-installation script executes a file such as **`/var/tmp/Installerutil`** and an attacker can replace that file, the attacker can escalate privileges when the installer invokes it. The cited talks and walkthrough show variants of this insecure external-script pattern.<sup>[[1]](#references)</sup><sup>[[3]](#references)</sup><sup>[[4]](#references)</sup>
 
 <figure><img src="../../../images/Pasted Graphic 5.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption><p><a href="https://www.youtube.com/watch?v=kCXhIYtODBg">https://www.youtube.com/watch?v=kCXhIYtODBg</a></p></figcaption></figure>
 
