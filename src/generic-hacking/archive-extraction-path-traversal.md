@@ -99,7 +99,7 @@ ESET reported RomCom (Storm-0978/UNC2596) spear-phishing campaigns that attached
 
 ## Mitigation & Hardening
 
-1. **Update the extractor** – WinRAR 7.13+ and 7-Zip 25.00+ contain fixes for the d path/symlink issues.<sup>[[1]](#references)[[5]](#references)</sup>
+1. **Update the extractor** – WinRAR 7.13+ and 7-Zip 25.00+ contain fixes for the cited path/symlink issues.<sup>[[1]](#references)[[5]](#references)</sup>
 2. Extract archives with “**Do not extract paths**” / “**Ignore paths**” when possible.
 3. On Unix, drop privileges & mount a **chroot/namespace** before extraction; on Windows, use **AppContainer** or a sandbox.
 4. If writing custom code, normalise with `realpath()`/`PathCanonicalize()` **before** create/write, and reject any entry that escapes the destination.
