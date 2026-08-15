@@ -1,10 +1,10 @@
-# Creare un MSI con Custom-Action utilizzando WiX
+# Creare un MSI con Custom-Action usando WiX
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Questa catena storica di Hack The Box utilizzava WiX Toolset v3 per creare un MSI che avviava un file `.lnk` precedentemente posizionato. **Un MSI non dispone automaticamente di privilegi**: l'esecuzione avviene nel contesto determinato dai criteri di Windows Installer, dagli attributi della custom action e dall'utente che lo installa. Nello scenario d, l'attacker aveva inoltre sottratto una trusted signing CA e collocato l'MSI firmato in una cartella monitorata da un altro utente.<sup>[[1]](#references)[[3]](#references)</sup>
+Questa catena storica di Hack The Box utilizzava WiX Toolset v3 per creare un MSI che avviava un file `.lnk` precedentemente posizionato. **Un MSI non dispone automaticamente di privilegi**: l'esecuzione avviene nel contesto determinato dai criteri di Windows Installer, dagli attributi della custom-action e dall'utente che lo installa. Nello scenario citato, l'attaccante aveva inoltre sottratto una CA di firma affidabile e posizionato l'MSI firmato in una cartella monitorata da un altro utente.<sup>[[1]](#references)[[3]](#references)</sup>
 
-Per una comprensione completa degli esempi di utilizzo di wix MSI, è consigliabile consultare [questa pagina](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Qui sono disponibili vari esempi che illustrano l'utilizzo di wix MSI.<sup>[[2]](#references)</sup>
+Per una comprensione completa degli esempi di utilizzo degli MSI di WiX, è consigliabile consultare [questa pagina](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Qui sono disponibili vari esempi che illustrano l'utilizzo degli MSI di WiX.<sup>[[2]](#references)</sup>
 
 L'MSI esegue `C:\Users\Public\Desktop\Shortcuts\rick.lnk`. L'XML originale di WiX v3 è riportato di seguito:<sup>[[1]](#references)</sup>
 ```html
@@ -38,9 +38,9 @@ fail_here
 </Product>
 </Wix>
 ```
-`InstallerVersion` dichiara la versione minima di Windows Installer e `Compressed="yes"` indica che il pacchetto è compresso. `Stage1` è posticipata, ma ha `Impersonate="yes"`, quindi viene eseguita con il token impersonato dell'utente che sta effettuando l'installazione; il cambio di privilegi in questo scenario è avvenuto perché l'utente privilegiato ha aperto successivamente l'MSI, non perché quell'attributo conceda magicamente SYSTEM.<sup>[[3]](#references)</sup>
+`InstallerVersion` dichiara la versione minima di Windows Installer e `Compressed="yes"` indica che il pacchetto è compresso. `Stage1` è deferred ma ha `Impersonate="yes"`, quindi viene eseguito con il token impersonato dell'utente che esegue l'installazione; in questo scenario, il cambio di privilegi è derivato dall'utente privilegiato che ha aperto successivamente l'MSI, non dal fatto che quell'attributo conceda magicamente i privilegi di SYSTEM.<sup>[[3]](#references)</sup>
 
-Compila il codice sorgente in un oggetto WiX con `candle.exe`:<sup>[[1]](#references)</sup>
+Compila il sorgente in un oggetto WiX con `candle.exe`:<sup>[[1]](#references)</sup>
 ```
 candle.exe -out C:\tmp\wix.wixobj C:\tmp\Ethereal\msi.xml
 ```
@@ -50,7 +50,7 @@ light.exe -out C:\tmp\Ethereal\rick.msi C:\tmp\wix.wixobj
 ```
 ### Passaggio di firma utilizzato nella catena originale
 
-Il workflow target accettava pacchetti firmati da una CA interna compromessa. Il write-up ricavava un certificato di firma dai file `MyCA.cer`/`MyCA.pvk`, creava un PFX e firmava l'MSI:<sup>[[1]](#references)</sup>
+Il workflow target accettava pacchetti firmati da una CA interna compromessa. Il write-up ricavava un certificato di firma dai file `MyCA.cer`/`MyCA.pvk` recuperati, creava un PFX e firmava l'MSI:<sup>[[1]](#references)</sup>
 ```powershell
 makecert.exe -n "CN=Ethereal" -pe -cy end `
 -ic C:\tmp\MyCA.cer -iv C:\tmp\MyCA.pvk -sky signature `
@@ -58,11 +58,11 @@ makecert.exe -n "CN=Ethereal" -pe -cy end `
 pvk2pfx.exe -pvk C:\tmp\rick.pvk -spc C:\tmp\rick.cer -pfx C:\tmp\rick.pfx
 signtool.exe sign /f C:\tmp\rick.pfx C:\tmp\Ethereal\rick.msi
 ```
-L'attaccante ha quindi posizionato il pacchetto firmato in `D:\DEV\MSIs` e ha atteso che il flusso di lavoro/l'utente con privilegi lo eseguisse. Mantieni questa precondizione quando adatti la tecnica: senza un percorso di installazione elevato, una policy non sicura come `AlwaysInstallElevated` o una vittima con privilegi, questo pacchetto viene eseguito solo con i diritti dell'utente corrente.
+L'attacker ha quindi posizionato il package firmato in `D:\DEV\MSIs` e ha atteso che il workflow/utente con privilegi lo eseguisse. Mantieni questa precondizione quando adatti la tecnica: senza un percorso di installazione elevato, una policy non sicura come `AlwaysInstallElevated` o una vittima con privilegi, questo package viene eseguito solo con i diritti dell'utente corrente.
 
 ## References
 
-- [1] [Hack The Box - Ethereal: Creazione di un msi malevolo e ottenimento dei privilegi di root - Blog di 0xRick](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)
+- [1] [Hack The Box - Ethereal: Creazione di un msi malevolo e ottenimento di root - Blog di 0xRick](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)
 - [2] [Una rapida introduzione: creare un installer MSI con WiX - CodeProject](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) (see also [wixtools](http://wixtoolset.org))
-- [3] [Microsoft Learn — Custom actions con esecuzione differita (`Impersonate`)](https://learn.microsoft.com/en-us/windows/win32/msi/custom-action-in-script-execution-options)
+- [3] [Microsoft Learn — Custom action con esecuzione posticipata (`Impersonate`)](https://learn.microsoft.com/en-us/windows/win32/msi/custom-action-in-script-execution-options)
 {{#include ../../banners/hacktricks-training.md}}
