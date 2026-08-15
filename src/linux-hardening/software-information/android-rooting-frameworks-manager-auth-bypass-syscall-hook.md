@@ -66,7 +66,7 @@ The concrete KernelSU v0.5.7 case requires:<sup>[[1]](#references)[[3]](#referen
 ---
 ## Exploitation outline (KernelSU v0.5.7)
 
-High-level steps (the d demo video shows the public proof of concept in operation):<sup>[[1]](#references)[[2]](#references)[[10]](#references)</sup>
+High-level steps (the cited demo video shows the public proof of concept in operation):<sup>[[1]](#references)[[2]](#references)[[10]](#references)</sup>
 1) Build a valid path to your own app data directory to satisfy prefix and ownership checks.
 2) Place a genuine KernelSU Manager base.apk under `/data/app/` at a path containing your package string, then open it on a lower-numbered FD than your own base.apk.
 3) Invoke prctl(0xDEADBEEF, CMD_BECOME_MANAGER, <your_data_dir>, ...) to pass the checks.
