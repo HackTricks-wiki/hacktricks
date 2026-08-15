@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-MSI Wrapper can package an executable or script as a Windows Installer (`.msi`) file. Download and start the free edition, then select the executable to package. To run a sequence of commands, select a `.bat` file as the input rather than packaging `cmd.exe`.<sup>[[1]](#references)</sup>
+MSI Wrapper can package an executable or script as a Windows Installer (`.msi`) file. Download and start the free edition, then select the executable to package.<sup>[[3]](#references)</sup> To run a sequence of commands, select a `.bat` file as the input rather than packaging `cmd.exe`.<sup>[[1]](#references)</sup>
 
 ![Selecting the source executable or batch script in MSI Wrapper](<../../images/image (417).png>)
 
@@ -25,5 +25,6 @@ Continue through the remaining wizard pages and select **Build** to generate the
 
 - [1] [MSI Wrapper documentation - Getting started](https://www.exemsi.com/documentation/getting-started/)
 - [2] [Microsoft Learn - Installing a package with elevated privileges for a non-admin](https://learn.microsoft.com/en-us/windows/win32/msi/installing-a-package-with-elevated-privileges-for-a-non-admin)
+- [3] [MSI Wrapper - Download](https://www.exemsi.com/download/)
 
 {{#include ../../banners/hacktricks-training.md}}
