@@ -1,33 +1,33 @@
-# SVG/Font Glyph Analysis & Web DRM Deobfuscation (Raster Hashing + SSIM)
+# SVG/Font Glyph-analise & Web DRM-deobfuskasie (Raster-hashing + SSIM)
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Hierdie bladsy dokumenteer praktiese tegnieke om teks te herwin uit weblesers wat geposisioneerde glyph-runs saam met per-versoek-vektorglyph-definisies (SVG paths) lewer, en wat glyph IDs per versoek randomiseer om scraping te voorkom. Die kernidee is om versoek-spesifieke numeriese glyph IDs te ignoreer en die visuele vorms via raster hashing te fingerprint, en dan vorms aan karakters te koppel met SSIM teenoor ’n verwysingsfontatlas. Dieselfde benadering kan veralgemeen word na viewers met soortgelyke beskerming.<sup>[[1]](#references)</sup>
+Hierdie bladsy dokumenteer praktiese tegnieke om teks te herwin uit weblesers wat geposisioneerde glyph-runs saam met per-versoek vektorglyph-definisies (SVG paths) lewer, en wat glyph-ID's per versoek randomiseer om scraping te voorkom. Die kernidee is om versoek-spesifieke numeriese glyph-ID's te ignoreer en eerder die visuele vorms deur middel van raster-hashing te fingerprint, en dan vorms aan karakters te koppel met SSIM teenoor 'n verwysingsfont-atlas. Dieselfde benadering kan moontlik veralgemeen word na viewers met soortgelyke beskerming.<sup>[[1]](#references)</sup>
 
 Waarskuwing: Gebruik hierdie tegnieke slegs om inhoud waarvan jy wettiglik die eienaar is, te rugsteun en in ooreenstemming met toepaslike wette en bepalings.
 
-## Acquisition (example: Kindle Cloud Reader)
+## Verkryging (voorbeeld: Kindle Cloud Reader)
 
 Endpoint waargeneem:<sup>[[1]](#references)</sup>
 - [https://read.amazon.com/renderer/render](https://read.amazon.com/renderer/render)
 
 Vereiste materiaal per sessie:<sup>[[1]](#references)</sup>
-- Browser-sessiekoekies (normale Amazon-aanmelding)
-- Rendering token van ’n startReading API-call
-- Bykomende ADP-sessie-token wat deur die renderer gebruik word
+- Browser-sessiecookies (normale Amazon-aanmelding)
+- Rendering token van 'n startReading API-call
+- Addisionele ADP-sessietoken wat deur die renderer gebruik word
 
 Gedrag:<sup>[[1]](#references)</sup>
-- Elke versoek, wanneer dit met browser-ekwivalente headers en koekies gestuur word, lewer ’n TAR-argief wat tot 5 bladsye bevat.
-- Vir ’n lang boek sal jy baie batches benodig; elke batch gebruik ’n ander gerandomiseerde kartering van glyph IDs.
+- Elke versoek, wanneer dit met browser-ekwivalente headers en cookies gestuur word, lewer 'n TAR-argief wat tot 5 bladsye beperk is.
+- Vir 'n lang boek sal jy baie bondels nodig hê; elke bondel gebruik 'n ander gerandomiseerde kartering van glyph-ID's.
 
 Tipiese TAR-inhoud:<sup>[[1]](#references)</sup>
-- page_data_0_4.json — geposisioneerde tekstruns as rye van glyph IDs (nie Unicode nie)
+- page_data_0_4.json — geposisioneerde teks-runs as rye glyph-ID's (nie Unicode nie)
 - glyphs.json — per-versoek SVG path-definisies vir elke glyph en fontFamily
 - toc.json — inhoudsopgawe
 - metadata.json — boekmetadata
 - location_map.json — logiese→visuele posisie-karterings
 
-Voorbeeld van ’n bladsylopiestruktuur:<sup>[[1]](#references)</sup>
+Voorbeeld van bladsy-run-struktuur:<sup>[[1]](#references)</sup>
 ```json
 {
 "type": "TextRun",
@@ -38,56 +38,56 @@ Voorbeeld van ’n bladsylopiestruktuur:<sup>[[1]](#references)</sup>
 "fontSize": 12.5
 }
 ```
-Voorbeeld van 'n glyphs.json-inskrywing:<sup>[[1]](#references)</sup>
+Voorbeeld van glyphs.json-inskrywing:<sup>[[1]](#references)</sup>
 ```json
 {
 "24": {"path": "M 450 1480 L 820 1480 L 820 0 L 1050 0 L 1050 1480 ...", "fontFamily": "bookerly_normal"}
 }
 ```
-Notas oor anti-scraping path tricks:<sup>[[1]](#references)</sup>
-- Paths kan mikro-relatiewe bewegings insluit (bv. `m3,1 m1,6 m-4,-7`) wat baie vector parsers en naïewe path sampling verwar.
-- Render altyd gevulde volledige paths met ’n robuuste SVG-enjin (bv. CairoSVG) in plaas daarvan om command/coordinate differencing te doen.
+Notas oor anti-scraping path-truuks:<sup>[[1]](#references)</sup>
+- Paths kan mikro-relatiewe bewegings insluit (byvoorbeeld `m3,1 m1,6 m-4,-7`) wat baie vektorparsers en naïewe path-sampling verwar.
+- Lewer altyd volledig ingevulde paths met ’n robuuste SVG-enjin (byvoorbeeld CairoSVG) in plaas daarvan om command/coordinate-differencing te doen.
 
 ## Waarom naïewe decoding misluk
 
-- Per-request randomized glyph substitution: glyph ID→character mapping verander met elke batch; IDs is globaal betekenisloos.<sup>[[1]](#references)</sup>
-- Direkte SVG-coordinate comparison is broos: identiese vorms kan per request in numeriese coordinates of command encoding verskil.<sup>[[1]](#references)</sup>
-- OCR op geïsoleerde glyphs presteer swak (≈50%), verwar leestekens en look-alike glyphs, en ignoreer ligatures.<sup>[[1]](#references)</sup>
+- Per-request gerandomiseerde glyph-substitution: glyph ID→character-mapping verander met elke batch; IDs is globaal betekenisloos.<sup>[[1]](#references)</sup>
+- Direkte SVG-coordinate-vergelyking is broos: identiese vorms kan per request in numeriese coordinates of command-encoding verskil.<sup>[[1]](#references)</sup>
+- OCR op geïsoleerde glyphs presteer swak (≈50%), verwar leestekens en soortgelyke glyphs, en ignoreer ligatures.<sup>[[1]](#references)</sup>
 
-## Werkende pipeline: request-agnostic glyph-normalisering en mapping
+## Werkende pipeline: request-agnostic glyph-normalisering en -mapping
 
-1) Rasterize per-request SVG-glyphs
-- Bou ’n minimale SVG-dokument per glyph met die verskafde `path` en render dit op ’n vaste canvas (bv. 512×512) met CairoSVG of ’n ekwivalente enjin wat moeilike path sequences hanteer.<sup>[[1]](#references)[[2]](#references)</sup>
-- Render gevulde swart op wit; vermy strokes om renderer- en AA-afhanklike artifacts uit te skakel.
+1) Rasterizeer glyphs per request se SVG
+- Bou ’n minimale SVG-dokument per glyph met die verskafde `path` en lewer dit op ’n vaste canvas (byvoorbeeld 512×512) met CairoSVG of ’n ekwivalente enjin wat moeilike path-sequences hanteer.<sup>[[1]](#references)[[2]](#references)</sup>
+- Lewer gevulde swart op wit; vermy strokes om renderer- en AA-afhanklike artefakte uit te skakel.
 
-2) Perceptual hashing vir cross-request identity
-- Bereken ’n perceptual hash (bv. pHash via `imagehash.phash`) van elke glyph image.<sup>[[3]](#references)</sup>
-- Behandel die hash as ’n stabiele ID: dieselfde visuele vorm oor requests heen word tot dieselfde perceptual hash gereduseer, wat randomized IDs neutraliseer.
+2) Perceptual hashing vir cross-request-identiteit
+- Bereken ’n perceptual hash (byvoorbeeld pHash via `imagehash.phash`) van elke glyph-image.<sup>[[3]](#references)</sup>
+- Behandel die hash as ’n stabiele ID: dieselfde visuele vorm oor requests heen word tot dieselfde perceptual hash saamgevoeg, wat gerandomiseerde IDs verydel.
 
-3) Reference font atlas generation
-- Download die teiken- TTF/OTF-fonts (bv. Bookerly normal/italic/bold/bold-italic).<sup>[[1]](#references)</sup>
-- Render candidates vir A–Z, a–z, 0–9, punctuation, special marks (em/en dashes, quotes), en explicit ligatures: `ff`, `fi`, `fl`, `ffi`, `ffl`.
-- Hou aparte atlasse per font variant (normal/italic/bold/bold-italic).
-- Gebruik ’n behoorlike text shaper (HarfBuzz) as jy glyph-level fidelity vir ligatures wil hê; eenvoudige rasterization via Pillow ImageFont kan voldoende wees as jy die ligature strings direk render en die shaping engine dit resolve.
+3) Generering van ’n reference font atlas
+- Laai die teiken- TTF/OTF-fonts af (byvoorbeeld Bookerly normal/italic/bold/bold-italic).<sup>[[1]](#references)</sup>
+- Lewer kandidate vir A–Z, a–z, 0–9, leestekens, spesiale marks (em/en-dashes, aanhalingstekens) en eksplisiete ligatures: `ff`, `fi`, `fl`, `ffi`, `ffl`.
+- Hou aparte atlasse per font-variant (normal/italic/bold/bold-italic).
+- Gebruik ’n behoorlike text shaper (HarfBuzz) as jy glyph-vlak-fideliteit vir ligatures wil hê; eenvoudige rasterization via Pillow ImageFont kan voldoende wees as jy die ligature-strings direk lewer en die shaping engine dit oplos.
 
-4) Visual similarity matching met SSIM
-- Bereken vir elke unknown glyph image SSIM (Structural Similarity Index) teenoor alle candidate images oor alle font variant-atlase.<sup>[[4]](#references)</sup>
-- Ken die character string van die match met die hoogste telling toe. SSIM absorbeer klein antialiasing-, scale- en coordinate-verskille beter as pixel-exact comparisons.<sup>[[1]](#references)[[4]](#references)</sup>
+4) Visuele similarity-matching met SSIM
+- Bereken vir elke onbekende glyph-image SSIM (Structural Similarity Index) teenoor alle kandidaatbeelde oor alle font-variant-atlasse heen.<sup>[[4]](#references)</sup>
+- Ken die character-string van die beste telling toe. SSIM absorbeer klein antialiasing-, skaal- en coordinate-verskille beter as pixel-eksakte vergelykings.<sup>[[1]](#references)[[4]](#references)</sup>
 
-5) Edge handling en reconstruction
+5) Edge-hantering en rekonstruksie
 - Wanneer ’n glyph na ’n ligature (multi-char) map, brei dit tydens decoding uit.<sup>[[1]](#references)</sup>
-- Gebruik run rectangles (top/left/right/bottom) om paragraph breaks (Y deltas), alignment (X patterns), style en sizes af te lei.<sup>[[1]](#references)</sup>
-- Serialize na HTML/EPUB terwyl `fontStyle`, `fontWeight`, `fontSize` en internal links behoue bly.<sup>[[1]](#references)</sup>
+- Gebruik run-rectangle (top/left/right/bottom) om paragraafbreuke (Y-deltas), belyning (X-patterns), styl en groottes af te lei.<sup>[[1]](#references)</sup>
+- Serialiseer na HTML/EPUB terwyl `fontStyle`, `fontWeight`, `fontSize` en interne links behoue bly.<sup>[[1]](#references)</sup>
 
 ### Implementeringswenke
 
-- Normalizeer alle images na dieselfde grootte en grayscale voordat hashing en SSIM toegepas word.
-- Cache volgens perceptual hash om te voorkom dat SSIM vir herhaalde glyphs oor batches heen herbereken word.
-- Gebruik ’n hoëgehalte-rastergrootte (bv. 256–512 px) vir beter onderskeiding; downscale soos nodig voordat SSIM toegepas word om dit te versnel.
-- As jy Pillow gebruik om TTF-candidates te render, stel dieselfde canvas-grootte in en sentreer die glyph; voeg padding by om clipping van ascenders/descenders te voorkom.
+- Normaliseer alle images na dieselfde grootte en grayscale voordat hashing en SSIM toegepas word.
+- Cache volgens perceptual hash om te voorkom dat SSIM herhaaldelik vir glyphs oor batches heen herbereken word.
+- Gebruik ’n hoëgehalte-rastergrootte (byvoorbeeld 256–512 px) vir beter diskriminasie; verklein soos nodig voordat SSIM toegepas word om dit te versnel.
+- As jy Pillow gebruik om TTF-kandidate te lewer, stel dieselfde canvas-grootte in en sentreer die glyph; voeg padding by om clipping van ascenders/descenders te voorkom.
 
 <details>
-<summary>Python: end-to-end glyph-normalisering en matching (raster hash + SSIM)</summary>
+<summary>Python: end-to-end glyph-normalisering en -matching (raster hash + SSIM)</summary>
 ```python
 # pip install cairosvg pillow imagehash scikit-image uharfbuzz freetype-py
 import io, json, tarfile, base64, math
@@ -222,43 +222,43 @@ return out_runs
 ```
 </details>
 
-## Heuristieke vir uitleg-/EPUB-rekonstruksie
+## Heuristieke vir uitleg/EPUB-rekonstruksie
 
-Die bronverslag het run-geometrie, stylvelde en skakelmetadata gebruik om die geformateerde dokument te rekonstrueer.<sup>[[1]](#references)</sup>
+Die bronverslag het run-geometrie, stylvelde en skakelmetadata gebruik om die herstelde dokument se formatering te behou.<sup>[[1]](#references)</sup>
 
-- Paragraafbreuke: As die volgende run se boonste Y die vorige reël se basislyn met ’n drempelwaarde oorskry (relatief tot die fontgrootte), begin ’n nuwe paragraaf.<sup>[[1]](#references)</sup>
-- Belyning: Groepeer volgens soortgelyke linker-X-waardes vir linksbelynde paragrawe; bespeur gesentreerde lyne deur simmetriese marges; bespeur regsbelyning volgens die regterkante.
-- Stilering: Behou kursief/vetdruk via `fontStyle`/`fontWeight`; wissel CSS-klasse volgens `fontSize`-groepe om opskrifte teenoor hoofteks te benader.
-- Skakels: As runs skakelmetadata insluit (bv. `positionId`), genereer ankers en interne hrefs.
+- Paragraafbreuke: As die volgende run se boonste Y die vorige reël se basislyn met ’n drempelwaarde (relatief tot lettergrootte) oorskry, begin ’n nuwe paragraaf.<sup>[[1]](#references)</sup>
+- Belyning: Groepeer volgens soortgelyke linker-X vir linksbelynde paragrawe; bespeur gesentreerde lyne deur simmetriese kantlyne; bespeur regs-belynde lyne volgens regterkante.
+- Stilering: Behou kursief/vet via `fontStyle`/`fontWeight`; wissel CSS-klasse volgens `fontSize`-groepe om opskrifte teenoor hoofteks te benader.
+- Skakels: As runs skakelmetadata bevat (bv. `positionId`), genereer ankers en interne hrefs.
 
-## Beperking van SVG anti-scraping-padtruuks
+## Versagting van SVG anti-scraping-padbepalings
 
-- Gebruik gevulde paaie met `fill-rule: nonzero` en ’n behoorlike renderer (CairoSVG, resvg). Moenie op padtoken-normalisering staatmaak nie.<sup>[[1]](#references)[[2]](#references)[[5]](#references)[[6]](#references)</sup>
-- Vermy streep-rendering; fokus op gevulde soliede vorms om haarlynartefakte wat deur klein relatiewe bewegings veroorsaak word, te vermy.
-- Handhaaf ’n stabiele viewBox per render sodat identiese vorms konsekwent oor bondels heen gerasteriseer word.
+- Gebruik gevulde paths met `fill-rule: nonzero` en ’n behoorlike renderer (CairoSVG, resvg). Moenie op path-token-normalisering staatmaak nie.<sup>[[1]](#references)[[2]](#references)[[5]](#references)[[6]](#references)</sup>
+- Vermy stroke-rendering; fokus op gevulde soliede vorms om haarlynartefakte, wat deur mikro-relatiewe verskuiwings veroorsaak word, te omseil.
+- Behou ’n stabiele viewBox per render sodat identiese vorms konsekwent oor bondels heen rasteriseer.
 
 ## Prestasie-aantekeninge
 
 - In die praktyk konvergeer boeke na ’n paar honderd unieke glyphs (bv. ~361, insluitend ligature). Kas SSIM-resultate volgens perceptuele hash.<sup>[[1]](#references)</sup>
 - Ná aanvanklike ontdekking hergebruik toekomstige bondels hoofsaaklik bekende hashes; dekodering word I/O-gebonde.
-- Die d-verslag het ’n gemiddelde SSIM van ongeveer 0.95 waargeneem; merk passings met lae tellings vir handmatige hersiening.<sup>[[1]](#references)</sup>
+- Die aangehaalde verslag het ’n gemiddelde SSIM van ongeveer 0.95 waargeneem; merk lae-telling-ooreenstemmings vir handmatige hersiening.<sup>[[1]](#references)</sup>
 
 ## Veralgemening na ander viewers
 
-Die Kindle-werkvloei dui daarop dat soortgelyke viewers moontlik vir dieselfde normalisering vatbaar is wanneer hulle:<sup>[[1]](#references)</sup>
-- geposisioneerde glyph-runs met numeriese ID’s wat aan versoeke gekoppel is, terugstuur
-- vektorglyphs per versoek verskaf (SVG-paaie of subset-fonts)
+Die Kindle-workflow dui daarop dat soortgelyke viewers moontlik vir dieselfde normalisering vatbaar is wanneer hulle:<sup>[[1]](#references)</sup>
+- geposisioneerde glyph-runs met versoekgebonden numeriese IDs terugstuur
+- per-versoek-vektorglyphs (SVG-paths of subset fonts) versend
 - die aantal bladsye per versoek beperk
 
 …kan met dieselfde normalisering hanteer word:
-- Rasteriseer vorms per versoek → perceptuele hash → vorm-ID
+- Rasteriseer per-versoek-vorms → perceptuele hash → vorm-ID
 - Atlas van kandidaat-glyphs/ligature per fontvariant
-- SSIM (of ’n soortgelyke perceptuele metriek) om karakters toe te ken
-- Rekonstrueer uitleg uit run-reghoeke/-style
+- SSIM (of soortgelyke perceptuele maatstaf) om karakters toe te ken
+- Rekonstrueer uitleg uit run-reghoeke/style
 
 ## Minimale verkrygingsvoorbeeld (skets)
 
-Gebruik jou blaaier se DevTools om die presiese headers, cookies en tokens vas te vang wat deur die reader gebruik word wanneer dit `/renderer/render` aanvra. Repliseer dit dan vanuit ’n script of curl.<sup>[[1]](#references)</sup> Voorbeeldskets:
+Gebruik jou blaaier se DevTools om die presiese headers, cookies en tokens vas te lê wat deur die reader gebruik word wanneer dit `/renderer/render` aanvra. Repliseer dit dan vanuit ’n script of curl.<sup>[[1]](#references)</sup> Voorbeeldskets:
 ```bash
 curl 'https://read.amazon.com/renderer/render' \
 -H 'Cookie: session-id=...; at-main=...; sess-at-main=...' \
@@ -268,20 +268,20 @@ curl 'https://read.amazon.com/renderer/render' \
 -H 'Accept: application/x-tar' \
 --compressed --output batch_000.tar
 ```
-Pas parameterisering (book ASIN, bladsyvenster, viewport) aan om by die leser se versoeke te pas. Verwag ’n limiet van 5 bladsye per versoek.<sup>[[1]](#references)</sup>
+Pas parameterisering (boek-ASIN, bladsyvenster, viewport) aan om by die leser se versoeke te pas. Verwag ’n limiet van 5 bladsye per versoek.<sup>[[1]](#references)</sup>
 
-## Bereikbare resultate
+## Results achievable
 
-- Vou meer as 100 gerandomiseerde alfabette saam tot ’n enkele glyph-ruimte via perceptuele hashing.<sup>[[1]](#references)</sup>
-- In die d 920-bladsy-toets is 361 unieke glyphs (100%) ooreenstemmend gevind, met ’n gemiddelde SSIM van 0.9527.<sup>[[1]](#references)</sup>
+- Vou meer as 100 gerandomiseerde alfabette saam tot ’n enkele glyph-ruimte deur perceptuele hashing te gebruik.<sup>[[1]](#references)</sup>
+- In die aangehaalde toets van 920 bladsye is 361 unieke glyphs ooreenstemmend gevind (100%), met ’n gemiddelde SSIM van 0.9527.<sup>[[1]](#references)</sup>
 - Die bronverslag beskryf die gerekonstrueerde EPUB as byna ononderskeibaar van die oorspronklike.<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [Hoe ek Amazon se Kindle Web Obfuscation omgekeer het omdat hul toepassing swak was (Pixelmelt)](https://blog.pixelmelt.dev/kindle-web-drm/)
-- [2] [CairoSVG – SVG-na-PNG-rendererder](https://cairosvg.org/)
-- [3] [imagehash – Perseptuele beeldhashing (pHash)](https://pypi.org/project/ImageHash/)
-- [4] [scikit-image – Strukturele-ooreenkomsindeks (SSIM)](https://scikit-image.org/docs/stable/api/skimage.metrics.html#skimage.metrics.structural_similarity)
+- [1] [Hoe ek Amazon se Kindle-webobfuskasie omgekeer het omdat hul toepassing swak was (Pixelmelt)](https://blog.pixelmelt.dev/kindle-web-drm/)
+- [2] [CairoSVG – SVG-na-PNG-renderder](https://cairosvg.org/)
+- [3] [imagehash – Perseptuele image hashing (pHash)](https://pypi.org/project/ImageHash/)
+- [4] [scikit-image – Strukturele ooreenkomsindeks (SSIM)](https://scikit-image.org/docs/stable/api/skimage.metrics.html#skimage.metrics.structural_similarity)
 - [5] [SVG 1.1 – Fill-eienskappe](https://www.w3.org/TR/SVG11/painting.html#FillRuleProperty)
 - [6] [resvg – SVG-renderingsbiblioteek](https://github.com/linebender/resvg)
 {{#include ../../../banners/hacktricks-training.md}}
