@@ -245,7 +245,7 @@ The source report used run geometry, style fields, and link metadata to preserve
 
 - In practice, books converge to a few hundred unique glyphs (e.g., ~361 including ligatures). Cache SSIM results by perceptual hash.<sup>[[1]](#references)</sup>
 - After initial discovery, future batches predominantly re-use known hashes; decoding becomes I/O-bound.
-- The d report observed an average SSIM of about 0.95; flag low-scoring matches for manual review.<sup>[[1]](#references)</sup>
+- The cited report observed an average SSIM of about 0.95; flag low-scoring matches for manual review.<sup>[[1]](#references)</sup>
 
 ## Generalization to other viewers
 
@@ -279,7 +279,7 @@ Adjust parameterization (book ASIN, page window, viewport) to match the readerâ€
 ## Results achievable
 
 - Collapse 100+ randomized alphabets to a single glyph space via perceptual hashing.<sup>[[1]](#references)</sup>
-- In the d 920-page test, 361 unique glyphs were matched (100%) with an average SSIM of 0.9527.<sup>[[1]](#references)</sup>
+- In the cited 920-page test, 361 unique glyphs were matched (100%) with an average SSIM of 0.9527.<sup>[[1]](#references)</sup>
 - The source report describes the reconstructed EPUB as near-indistinguishable from the original.<sup>[[1]](#references)</sup>
 
 ## References
