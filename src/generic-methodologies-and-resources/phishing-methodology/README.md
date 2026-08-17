@@ -500,6 +500,35 @@ Modern intrusion sets increasingly skip email lures entirely and **directly targ
 
 ---
 
+## Cross-channel vishing and launch-triggered desktop phishing
+
+A high-confidence campaign can turn an **account-existence endpoint** into a targeting oracle before contacting anyone: submit candidate email addresses or phone numbers to registration, recovery, or passkey endpoints and classify identifiers by status, body, length, or timing. Concurrency, retries, and proxy rotation increase throughput, while enriching only positive matches gives the caller enough personal context to avoid random cold calls.<sup>[[14]](#references)</sup>
+
+The lure can then synchronize channels. For example, a branded email creates a fake support case and verification code; a later caller repeats those exact values and the victim's known account details. The email makes the call expected, while the call appears to validate the email. The operator can use that trust to direct the victim to a counterfeit desktop application.<sup>[[14]](#references)</sup>
+
+### Launch-triggered legitimate-process replacement
+
+A counterfeit Electron application can stay invisible until the victim launches the software it impersonates. One observed design created a `1x1`, transparent, frameless `BrowserWindow`, converted close/quit events into hide operations, and polled the process list every five seconds. When the genuine application appeared under `/Applications/`, the malware killed it, exposed the cloned window, and activated the expected application name with AppleScript. Because the visible phishing UI follows the victim's own launch action, it looks like the program they intended to open.<sup>[[14]](#references)</sup>
+
+```javascript
+for (const { pid, command } of await listProcesses()) {
+  if (isTarget(command) && command.includes(".app/") &&
+      command.includes("/Applications/")) {
+    execSync(`kill -9 ${pid}`)
+    mainWindow.show()
+    exec(`osascript -e 'tell application "Target App" to activate'`)
+  }
+}
+```
+
+Recovery-secret forms can also implement **quality control**: enforce valid phrase lengths, split a pasted phrase into ordered fields, simulate verification, deliberately reject the first submission, and request it again. Comparing repeated submissions reduces missing or mistyped words before the secret is used.<sup>[[14]](#references)</sup>
+
+During analysis, do not stop at the renderer or assume that context isolation makes the application benign. Trace every API exposed by `preload.js` through `contextBridge`/`ipcRenderer.invoke()` to its `ipcMain` handler: a renderer with no direct network activity can pass stolen data to the main process, which performs IP discovery and HTTPS exfiltration. Also trace configuration selection and initialization before labeling a code path active; platform-specific persistence, monitoring, or downloader functions may be present but unreachable when the configuration object is missing.<sup>[[14]](#references)</sup>
+
+Useful hunting correlations include periodic wallet-process enumeration followed by `kill -9` and `osascript`, access to a public-IP service immediately before Telegram Bot API traffic, and a wallet-branded Electron process that remains alive with no visible window. Review [Electron application boundaries](../../network-services-pentesting/pentesting-web/electron-desktop-apps/README.md), [macOS auto-start locations](../../macos-hardening/macos-auto-start-locations.md), and [clipboard wallet-address replacement](clipboard-hijacking.md) separately when the lure adds IPC abuse, LaunchAgents, or transaction-address substitution.<sup>[[14]](#references)</sup>
+
+---
+
 ## At-Scale Deception – SEO Poisoning & “ClickFix” Campaigns
 Commodity crews offset the cost of high-touch ops with mass attacks that turn **search engines & ad networks into the delivery channel**.<sup>[[6]](#references)</sup>
 
@@ -711,5 +740,6 @@ Defence tips:
 - [11] [Hijacking traffic to Microsoft's windows.com with bitflipping (BleepingComputer)](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 - [12] [Love? Actually: Fake dating app used as lure in targeted spyware campaign in Pakistan](https://www.welivesecurity.com/en/eset-research/love-actually-fake-dating-app-used-lure-targeted-spyware-campaign-pakistan/)
 - [13] [ESET GhostChat IoCs and samples](https://github.com/eset/malware-ioc/tree/master/ghostchat)
+- [14] [Operation ASTERIX: Anatomy of a Crypto Fraud Pipeline](https://www.rapid7.com/blog/post/tr-operation-asterix-crypto-fraud-vishing-phishing/)
 
 {{#include ../../banners/hacktricks-training.md}}
