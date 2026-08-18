@@ -409,6 +409,7 @@
   - [ADB Commands](mobile-pentesting/android-app-pentesting/adb-commands.md)
   - [APK decompilers](mobile-pentesting/android-app-pentesting/apk-decompilers.md)
   - [AVD - Android Virtual Device](mobile-pentesting/android-app-pentesting/avd-android-virtual-device.md)
+  - [Baseband Modem And SoC Isolation Exploitation](mobile-pentesting/android-app-pentesting/baseband-and-soc-isolation-exploitation.md)
   - [Bypass Biometric Authentication (Android)](mobile-pentesting/android-app-pentesting/bypass-biometric-authentication-android.md)
   - [content:// protocol](mobile-pentesting/android-app-pentesting/content-protocol.md)
   - [Drozer Tutorial](mobile-pentesting/android-app-pentesting/drozer-tutorial/README.md)
