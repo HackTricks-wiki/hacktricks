@@ -281,7 +281,11 @@ Get-VHD -VMId <vm-guid>
 Mount-VHD -Path 'C:\HyperV\Virtual Hard Disks\DC01.vhdx' -ReadOnly
 ```
 
-From there, reuse the `Backup Operators` workflow to copy `Windows\NTDS\ntds.dit` and the registry hives offline.
+From there, reuse the `Backup Operators` workflow to copy `Windows\NTDS\ntds.dit` and the registry hives offline. Related backup-file workflow:
+
+{{#ref}}
+../../network-services-pentesting/pentesting-veeam-backup-and-replication.md
+{{#endref}}
 
 ## Group Policy Creators Owners	
 
