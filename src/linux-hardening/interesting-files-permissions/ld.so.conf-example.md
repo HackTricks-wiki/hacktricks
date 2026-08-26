@@ -256,11 +256,28 @@ ldd sharedvuln
 
 **As you can see, having sudo privileges over `ldconfig` you can exploit the same vulnerability.** The option details matter when assessing a constrained sudo rule: `-f` selects another configuration but still rebuilds `/etc/ld.so.cache`; `-C` redirects the cache elsewhere; `-N` prevents cache rebuilding; and `-X` prevents link updates but **still rebuilds the cache unless combined with `-N`**. `-n` implies `-N`, so it can update links in supplied directories but cannot poison the cache; `-r` operates below an alternate root and normally does not change the host cache.<sup>[[2]](#references)</sup>
 
+### glibc 2.44: installing a prebuilt cache
+
+Glibc 2.44 added `ldconfig --install SOURCE`, which atomically copies a prebuilt cache to the selected cache destination (the host `/etc/ld.so.cache` unless `-C` or `-r` changes it). This creates another dangerous argument for sudoers rules and privileged wrappers: an attacker can construct a valid cache **without privileges**, then use the permitted `--install` invocation to replace the system cache. The install path checks the cache magic but does not regenerate its entries from trusted configuration.<sup>[[9]](#references)[[10]](#references)</sup>
+
+```bash
+# Build a valid cache as the unprivileged user. -X avoids changing symlinks.
+/sbin/ldconfig -X -f /dev/null -t /dev/null \
+  -C /tmp/evil.ld.so.cache /tmp
+/sbin/ldconfig -p -C /tmp/evil.ld.so.cache | grep -F libcustom.so
+
+# Dangerous when sudo permits ldconfig with attacker-selected arguments.
+sudo /sbin/ldconfig --install /tmp/evil.ld.so.cache
+"$interp" --list ./sharedvuln | grep -F libcustom.so
+```
+
+The cache still contains **pathnames**, not library bytes, so `/tmp/libcustom.so` must remain present and compatible when the victim starts. Filters that merely reject `-f`, positional directories, or `-t` are therefore incomplete on glibc 2.44: reject `--install`/`-I` too, or preferably do not delegate `ldconfig` at all.<sup>[[9]](#references)[[10]](#references)</sup>
+
 ## glibc 2.44: cached system-wide tunables
 
-Starting with glibc 2.44, `ldconfig` also parses `/etc/tunables.conf` and stores its settings as an extension in `/etc/ld.so.cache`. The file accepts `include` directives and per-process filters. Prefixes control scope: `@` targets only `AT_SECURE` processes, `$` excludes them, and `*` covers both. This expands the audit boundary beyond library directories: writable tunables configuration or an included file can influence future program startups after a privileged cache rebuild.<sup>[[7]](#references)</sup>
+Starting with glibc 2.44, `ldconfig` also parses `/etc/tunables.conf` and stores its settings as an extension in `/etc/ld.so.cache`. The file accepts `include` directives and per-process filters. Prefixes control scope: `@`/`onlysecure` targets only `AT_SECURE` processes, `$`/`nonsecure` excludes them, and `*`/`anysecure` covers both. **An unprefixed entry defaults to non-secure processes**, so an attacker must explicitly use `@` or `*` to influence setuid, setgid, or capability-elevated programs. This expands the audit boundary beyond library directories: writable tunables configuration or an included file can influence future program startups after a privileged cache rebuild.<sup>[[7]](#references)[[9]](#references)</sup>
 
-The same release adds `ldconfig -t TUNCONF`, which selects an alternate tunables file while still writing the normal cache unless another option changes it. Therefore, wrappers and sudo rules that attempted to block only `-f` must also reject `-t`, arbitrary positional directories, and cache-output manipulation.<sup>[[7]](#references)[[8]](#references)</sup>
+The same release adds `ldconfig -t TUNCONF`, which selects an alternate tunables file while still writing the normal cache unless another option changes it. Therefore, wrappers and sudo rules that attempted to block only `-f` must also reject `-t`, arbitrary positional directories, `--install`, and cache-output manipulation.<sup>[[7]](#references)[[8]](#references)[[10]](#references)</sup>
 
 ```bash
 # Detection / lab-only proof of cache influence
@@ -273,7 +290,20 @@ sudo ldconfig -t /tmp/evil.tunconf
 sudo ldconfig                         # rebuild from the real configuration
 ```
 
-This is not automatically arbitrary code execution. It is a privileged **loader-behavior manipulation** primitive: glibc explicitly warns that system-wide values can apply security-sensitive tunables to setuid/setgid programs without per-tunable security screening. Enumerate the host's actual tunables with `--list-tunables` and look for target-specific allocator changes, CPU-hardening changes, or denial-of-service conditions rather than assuming a universal payload.<sup>[[7]](#references)</sup>
+### Target-selective tunables
+
+The `[proc:PATTERN]` filter applies the following entries only when the executable's full `/proc/self/exe` path (if `PATTERN` starts with `/`) or basename matches. A filter ends at the next filter, `[]`, the end of the file, or an include-file boundary. This makes a poisoned cache less noisy because the altered behavior can be restricted to one privileged victim.<sup>[[7]](#references)</sup>
+
+```ini
+# Affect only this AT_SECURE executable; "-" also forbids env overrides.
+[proc:/usr/bin/passwd]
+-@glibc.malloc.check=3
+[]
+```
+
+The `-`/`nonoverridable` prefix prevents `GLIBC_TUNABLES` from overriding a cached value; `+`/`overridable` restores the normal override behavior. For `AT_SECURE` processes the environment variable is ignored entirely anyway. Treat the file format as version-specific—the glibc project does not promise it as a stable interface—and enumerate supported names and values with `"$interp" --list-tunables` before attempting a targeted effect.<sup>[[7]](#references)[[9]](#references)</sup>
+
+This is not automatically arbitrary code execution. It is a privileged **loader-behavior manipulation** primitive: glibc explicitly warns that system-wide values can apply security-sensitive tunables to setuid/setgid programs without per-tunable security screening. Look for target-specific allocator changes, CPU-hardening changes, or denial-of-service conditions rather than assuming a universal payload.<sup>[[7]](#references)</sup>
 
 
 
@@ -287,4 +317,6 @@ This is not automatically arbitrary code execution. It is a privileged **loader-
 - [6] [Dynamic Linker Diagnostics (The GNU C Library)](https://sourceware.org/glibc/manual/latest/html_node/Dynamic-Linker-Diagnostics.html)
 - [7] [System-wide Tunables (The GNU C Library 2.44)](https://sourceware.org/glibc/manual/2.44/html_node/System_002dwide-Tunables.html)
 - [8] [Add system-wide tunables: ldconfig part (patch v6 1/4)](https://sourceware.org/pipermail/libc-alpha/2026-March/175984.html)
+- [9] [The GNU C Library version 2.44 is now available](https://sourceware.org/pipermail/libc-alpha/2026-July/179159.html)
+- [10] [glibc 2.44 ldconfig source](https://sourceware.org/git/?p=glibc.git;a=blob;f=elf/ldconfig.c;hb=glibc-2.44)
 {{#include ../../banners/hacktricks-training.md}}
