@@ -219,12 +219,68 @@ It's possible to inject code into .NET applications through **`DOTNET_STARTUP_HO
 macos-.net-applications-injection.md
 {{#endref}}
 
-### Bash Injection
+### Shell Injection
 
-Non-interactive Bash reads the file named by **`BASH_ENV`** before executing its requested script or command:
+Non-interactive Bash reads **`BASH_ENV`**; zsh reads **`$ZDOTDIR/.zshenv`**; and fish reads configuration below **`XDG_CONFIG_HOME`** or **`XDG_DATA_DIRS`**. Each can execute a controlled startup file before the intended command:
 
 {{#ref}}
 macos-bash-applications-injection.md
+{{#endref}}
+
+### PHP Injection
+
+**`PHPRC`** or **`PHP_INI_SCAN_DIR`** can load controlled PHP configuration whose **`auto_prepend_file`** executes before the target script.
+
+{{#ref}}
+macos-php-applications-injection.md
+{{#endref}}
+
+### Lua Injection
+
+The standalone Lua interpreter executes code or an `@file` from **`LUA_INIT`** (or its version-specific variant) before processing the target script.
+
+{{#ref}}
+macos-lua-applications-injection.md
+{{#endref}}
+
+### R Injection
+
+**`R_PROFILE_USER`** and **`R_PROFILE`** redirect startup profiles containing R code. **`R_DEFAULT_PACKAGES`** / **`R_SCRIPT_DEFAULT_PACKAGES`** plus an R library path can instead auto-load an installed package.
+
+{{#ref}}
+macos-r-applications-injection.md
+{{#endref}}
+
+### Julia Injection
+
+**`JULIA_DEPOT_PATH`** redirects the depot whose `config/startup.jl` is automatically executed.
+
+{{#ref}}
+macos-julia-applications-injection.md
+{{#endref}}
+
+### Erlang and Elixir Injection
+
+**`ERL_AFLAGS`**, **`ERL_FLAGS`**, or **`ERL_ZFLAGS`** can inject an Erlang VM **`-eval`** expression without requiring a payload file; Elixir workloads commonly start the same VM.
+
+{{#ref}}
+macos-erlang-elixir-applications-injection.md
+{{#endref}}
+
+### GNU Octave Injection
+
+**`OCTAVE_SITE_INITFILE`** and **`OCTAVE_VERSION_INITFILE`** redirect Octave startup scripts.
+
+{{#ref}}
+macos-octave-applications-injection.md
+{{#endref}}
+
+### PowerShell Injection
+
+On macOS and Linux, **`XDG_CONFIG_HOME`** can redirect PowerShell user profiles that execute when `pwsh` starts.
+
+{{#ref}}
+macos-powershell-applications-injection.md
 {{#endref}}
 
 ### Perl Injection
