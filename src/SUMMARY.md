@@ -226,6 +226,7 @@
   - [macOS Process Abuse](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/README.md)
     - [macOS Dirty NIB](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-dirty-nib.md)
     - [macOS Chromium Injection](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-chromium-injection.md)
+    - [macOS Bash Applications Injection](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-bash-applications-injection.md)
     - [macOS Electron Applications Injection](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-electron-applications-injection.md)
     - [macOS Function Hooking](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-function-hooking.md)
     - [macOS IPC - Inter Process Communication](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-ipc-inter-process-communication/README.md)

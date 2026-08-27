@@ -203,7 +203,7 @@ macos-dirty-nib.md
 
 ### Java Applications Injection
 
-It's possible to abuse certain java capabilities (like the **`_JAVA_OPTS`** env variable) to make a java application execute **arbitrary code/commands**.
+It's possible to inject JVM options through **`_JAVA_OPTIONS`**, **`JAVA_TOOL_OPTIONS`**, or **`JDK_JAVA_OPTIONS`** and load a Java or native agent before the application starts.
 
 
 {{#ref}}
@@ -212,11 +212,19 @@ macos-java-apps-injection.md
 
 ### .Net Applications Injection
 
-It's possible to inject code into .Net applications by **abusing the .Net debugging functionality** (not protected by macOS protections such as runtime hardening).
+It's possible to inject code into .NET applications through **`DOTNET_STARTUP_HOOKS`** before `Main`, or by abusing the .NET debugging functionality when its prerequisites are present.
 
 
 {{#ref}}
 macos-.net-applications-injection.md
+{{#endref}}
+
+### Bash Injection
+
+Non-interactive Bash reads the file named by **`BASH_ENV`** before executing its requested script or command:
+
+{{#ref}}
+macos-bash-applications-injection.md
 {{#endref}}
 
 ### Perl Injection
@@ -239,28 +247,15 @@ macos-ruby-applications-injection.md
 
 ### Python Injection
 
-If the environment variable **`PYTHONINSPECT`** is set, the python process will drop into a python cli once it's finished. It's also possible to use **`PYTHONSTARTUP`** to indicate a python script to execute at the beginning of an interactive session.\
-However, note that **`PYTHONSTARTUP`** script won't be executed when **`PYTHONINSPECT`** creates the interactive session.
-
-Other env variables such as **`PYTHONPATH`** and **`PYTHONHOME`** could also be useful to make a python command execute arbitrary code.
+The **`PYTHONWARNINGS`** and **`BROWSER`** standard-library chain can execute a command during warning-filter parsing. A file-backed alternative places `sitecustomize.py` on **`PYTHONPATH`** so normal `site` initialization imports it before the target script. Interactive-only variables such as **`PYTHONSTARTUP`** have narrower applicability.
 
 Note that executables compiled with **`pyinstaller`** won't use these environmental variables even if they are running using an embedded python.
 
-> [!CAUTION]
-> Overall I couldn't find a way to make python execute arbitrary code abusing environment variables.\
-> However, most of the people install pyhton using **Hombrew**, which will install pyhton in a **writable location** for the default admin user. You can hijack it with something like:
->
-> ```bash
-> mv /opt/homebrew/bin/python3 /opt/homebrew/bin/python3.old
-> cat > /opt/homebrew/bin/python3 <<EOF
-> #!/bin/bash
-> # Extra hijack code
-> /opt/homebrew/bin/python3.old "$@"
-> EOF
-> chmod +x /opt/homebrew/bin/python3
-> ```
->
-> Even **root** will run this code when running python.
+{{#ref}}
+macos-python-applications-injection.md
+{{#endref}}
+
+Separately, Homebrew commonly installs Python below `/opt/homebrew`, where members of the local `admin` group may be able to replace the launcher. That is a writable-binary hijack rather than environment-variable injection; verify ownership and ACLs before treating it as exploitable.
 
 
 ## Detection
