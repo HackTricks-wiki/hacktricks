@@ -16,6 +16,7 @@
   - [Github Dorks & Leaks](generic-methodologies-and-resources/external-recon-methodology/github-leaked-secrets.md)
 - [Pentesting Network](generic-methodologies-and-resources/pentesting-network/README.md)
   - [DHCPv6](generic-methodologies-and-resources/pentesting-network/dhcpv6.md)
+  - [DDS/RTPS Security and Service Impersonation](generic-methodologies-and-resources/pentesting-network/dds-rtps-security.md)
   - [EIGRP Attacks](generic-methodologies-and-resources/pentesting-network/eigrp-attacks.md)
   - [GLBP & HSRP Attacks](generic-methodologies-and-resources/pentesting-network/glbp-and-hsrp-attacks.md)
   - [IDS and IPS Evasion](generic-methodologies-and-resources/pentesting-network/ids-evasion.md)
