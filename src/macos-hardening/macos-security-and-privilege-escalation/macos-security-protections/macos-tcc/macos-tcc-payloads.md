@@ -3,16 +3,16 @@
 {{#include ../../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> TCC 决策与请求资源的 **进程身份** 绑定。在 post-exploitation 中，通常的目标是将这些 payload 注入已获批准的应用中（或在其 bundle / signature context 中执行），而不是运行一个会触发自身提示的新 helper。
+> TCC 决策与请求资源的**进程身份**绑定。在 post-exploitation 中，通常的目标是将这些 payload 注入到一个已获批准的应用中（或在其 bundle / signature 上下文中以其他方式执行），而不是运行一个会触发自身提示的新 helper。
 >
-> 对于 **Screen Recording**、**Input Monitoring** 和 **synthetic input**，现代 macOS 还提供了明确的 preflight / request API，例如 `CGPreflightScreenCaptureAccess`、`CGRequestScreenCaptureAccess`、`CGRequestListenEventAccess` 和 `CGRequestPostEventAccess`。
+> 对于 **Screen Recording**、**Input Monitoring** 和**合成输入**，现代 macOS 还提供了显式的 preflight / request API，例如 `CGPreflightScreenCaptureAccess`、`CGRequestScreenCaptureAccess`、`CGRequestListenEventAccess` 和 `CGRequestPostEventAccess`。
 
 > [!WARNING]
-> 这仍然是一条非常现实的攻击路径：近期针对 Microsoft macOS 应用的 permission-theft 研究表明，**weak library validation / plugin loading** 可能让攻击者复用受害应用已经获得的 **camera**、**microphone** 以及其他 TCC 权限，而无需再次触发提示。<sup>[[1]](#references)</sup>
+> 这仍然是一条非常现实的攻击路径：近期针对 Microsoft macOS 应用的权限窃取研究表明，**弱 library validation / plugin loading** 可能让攻击者复用受害应用已经获授的**摄像头**、**麦克风**及其他 TCC 权限，而无需再次触发提示。<sup>[[1]](#references)</sup>
 
-## 使用 payload 前的快速 triage
+## 使用 payload 前的快速初步检查
 
-近期的 permission-theft 研究不断强化同一工作流程：首先找到一个已经拥有所需 TCC 授权的应用，然后确认它是否是一个现实可行的 injection target。<sup>[[1]](#references)</sup>
+近期的权限窃取研究不断强化同一套工作流程：首先找到一个已经拥有所需 TCC 授权的应用，然后确认它是否是一个现实可行的注入目标。<sup>[[1]](#references)</sup>
 ```bash
 sqlite3 "$HOME/Library/Application Support/com.apple.TCC/TCC.db" \
 "select service, client from access where auth_value=2 and service in ('kTCCServiceCamera','kTCCServiceMicrophone','kTCCServiceScreenCapture','kTCCServiceAccessibility') order by service, client;"
@@ -20,12 +20,12 @@ sqlite3 "$HOME/Library/Application Support/com.apple.TCC/TCC.db" \
 codesign -d --entitlements :- /Applications/Target.app 2>/dev/null | \
 egrep 'disable-library-validation|allow-dyld-environment-variables'
 ```
-如果目标还会加载攻击者控制的 plug-ins / frameworks，这些 payload 会变得更加有趣。有关在进入一个已获得批准的进程后进行更广泛的 post-exploitation 思路，请查看[这个相关页面](macos-tcc-credential-and-data-theft.md)。
+如果目标还会加载攻击者控制的 plug-ins / frameworks，这些 payload 会变得更加有趣。有关在进入一个已获得批准的进程后进行 post-exploitation 的更多思路，请查看[这个相关页面](macos-tcc-credential-and-data-theft.md)。
 
 ### Desktop
 
-- **Entitlement**: None
-- **TCC**: kTCCServiceSystemPolicyDesktopFolder
+- **Entitlement**：无
+- **TCC**：kTCCServiceSystemPolicyDesktopFolder
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
@@ -73,7 +73,7 @@ cp -r "$HOME/Desktop" "/tmp/desktop"
 
 ### 文档
 
-- **Entitlement**：None
+- **Entitlement**：无
 - **TCC**：`kTCCServiceSystemPolicyDocumentsFolder`
 
 {{#tabs}}
@@ -323,7 +323,7 @@ cp -r "$HOME/Library/Calendars" "/tmp/calendars"
 
 {{#tabs}}
 {{#tab name="ObjetiveC - Record"}}
-录制一段 3 秒视频，并将其保存到 **`/tmp/recording.mov`**<sup>[[5]](#references)</sup>。
+Record a 3s video and save it in **`/tmp/recording.mov`**<sup>[[5]](#references)</sup>
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -435,7 +435,7 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Prompt"}}
-如果当前进程仍为 `NotDetermined`，则触发相机提示。<sup>[[3]](#references)</sup>
+如果当前进程仍处于 `NotDetermined` 状态，则触发摄像头提示。<sup>[[3]](#references)</sup>
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -454,7 +454,7 @@ dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
 {{#endtab}}
 
 {{#tab name="Shell"}}
-使用相机拍照
+使用摄像头拍照
 ```bash
 ffmpeg -framerate 30 -f avfoundation -i "0" -frames:v 1 /tmp/capture.jpg
 ```
@@ -568,7 +568,7 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Check"}}
-检查应用是否有权访问麦克风。<sup>[[5]](#references)</sup>
+检查应用是否具有访问麦克风的权限。<sup>[[5]](#references)</sup>
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -618,7 +618,7 @@ dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
 {{#endtab}}
 
 {{#tab name="Shell"}}
-录制 5 秒音频并将其存储在 `/tmp/recording.wav`
+录制一段 5 秒音频并将其存储在 `/tmp/recording.wav`
 ```bash
 # Check the microphones
 ffmpeg -f avfoundation -list_devices true -i ""
@@ -628,17 +628,37 @@ ffmpeg -f avfoundation -i ":1" -t 5 /tmp/recording.wav
 {{#endtab}}
 {{#endtabs}}
 
-### 位置
+### System Audio（Core Audio process taps）
+
+- **Entitlement**：对于未进行 sandbox 的客户端，没有专用的 system-audio-capture entitlement（仍适用常规 sandbox 限制）
+- **Usage description**：`NSAudioCaptureUsageDescription`
+- **TCC**：System Audio Recording（独立于 Microphone 授权）
+
+在 **macOS 14.2+** 上，Core Audio process taps 可以复制选定进程、进程组或全局混音的输出音频，而无需安装虚拟 loopback driver。底层链路为 `CATapDescription` -> `AudioHardwareCreateProcessTap` -> private aggregate device -> `AudioDeviceIOProc`；首次通过包含该 tap 的 aggregate 开始录音时，macOS 会请求 System Audio Recording 访问权限。bundle 必须包含 `NSAudioCaptureUsageDescription`，否则 consent 流程无法正常工作。<sup>[[7]](#references)</sup>
+
+对于快速 payload，[`catap`](https://github.com/sbetko/catap) 封装了 tap、aggregate-device、IO callback、WAV writer 和 cleanup lifecycle：<sup>[[8]](#references)</sup>
+```bash
+python3 -m venv /tmp/catap-env
+source /tmp/catap-env/bin/activate
+pip install catap
+catap list-apps
+catap record Safari -d 10 -o /tmp/safari.wav
+catap record --system -d 10 -o /tmp/system-mix.wav
+```
+> [!WARNING]
+> TCC 将 CLI capture 归因于**承载它的 terminal app**，而不仅仅是 Python process。如果没有 System Audio Recording grant，Core Audio graph 可能会启动并正常提供大小正确但**填充为零的 buffers**，这很容易被误认为是对安静目标进行的正常 capture。为承载它的 app 授予权限，重启该 app，然后使用已知的可听见 source 重复测试；`catap` 还会报告某次 recording 是否仅包含 silence。<sup>[[8]](#references)</sup>
+
+### Location
 
 > [!TIP]
-> 应用要获取位置，必须启用 **Location Services**（位于 Privacy & Security），否则将无法访问。
+> 要让 app 获取 location，必须启用（来自 Privacy & Security 的）**Location Services**；如果未启用，app 将无法访问它。
 
 - **Entitlement**: `com.apple.security.personal-information.location`
-- **TCC**: 已在 `/var/db/locationd/clients.plist` 中授予
+- **TCC**: Granted in `/var/db/locationd/clients.plist`
 
 {{#tabs}}
 {{#tab name="ObjectiveC"}}
-将位置写入 `/tmp/logs.txt`
+将 location 写入 `/tmp/logs.txt`
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -688,7 +708,7 @@ freopen("/tmp/logs.txt", "w", stderr); // Redirect stderr to /tmp/logs.txt
 {{#endtab}}
 
 {{#tab name="Shell"}}
-从 shell 获取当前位置。<sup>[[2]](#references)</sup>
+从 shell 获取当前目录。<sup>[[2]](#references)</sup>
 ```bash
 # Fast option: use a dedicated CoreLocation CLI helper
 brew install --cask corelocationcli
@@ -698,19 +718,19 @@ CoreLocationCLI --json
 CoreLocationCLI --watch --format '%latitude %longitude %speed %time'
 ```
 > [!TIP]
-> 这仍然依赖于已启用的 **Location Services**，以及工具 / terminal 已获得 TCC approval。在大多数 Mac 上，`CoreLocationCLI` 还依赖 Wi-Fi-assisted positioning，因此禁用 Wi-Fi 通常会导致 `kCLErrorDomain error 0`。
+> 这仍然依赖于已启用的 **Location Services**，并且工具或终端已获得 TCC 批准。在大多数 Mac 上，`CoreLocationCLI` 还依赖 Wi-Fi 辅助定位，因此禁用 Wi-Fi 通常会导致 `kCLErrorDomain error 0`。
 
 {{#endtab}}
 {{#endtabs}}
 
 ### Screen Recording
 
-- **Entitlement**: None
-- **TCC**: `kTCCServiceScreenCapture`
+- **Entitlement**：无
+- **TCC**：`kTCCServiceScreenCapture`
 
 {{#tabs}}
 {{#tab name="ObjectiveC"}}
-将主屏幕录制 5 秒，保存至 `/tmp/screen.mov`
+在 `/tmp/screen.mov` 中录制主屏幕 5 秒
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -768,7 +788,7 @@ freopen("/tmp/logs.txt", "w", stderr); // Redirect stderr to /tmp/logs.txt
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Check / Prompt"}}
-检查当前进程是否能够捕获屏幕，并在需要时触发 TCC 提示。
+检查当前进程是否可以捕获屏幕，并在需要时触发 TCC 提示。
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <CoreGraphics/CoreGraphics.h>
@@ -797,14 +817,14 @@ screencapture -V 5 /tmp/screen.mov
 {{#endtabs}}
 
 > [!TIP]
-> 在 **macOS 12.3+** 上，`ScreenCaptureKit` 通常是比 `AVCaptureScreenInput` 更好的 post-exploitation primitive：它支持高性能流式传输、使用 `SCScreenshotManager` 抓取单帧，以及传输 **system audio**。近期的 `ScreenCaptureKit` 更新还为 `SCStreamConfiguration` 添加了 `captureMicrophone` / `microphoneCaptureDeviceID`，并提供了可直接录制到文件的 `SCRecordingOutput`，因此，一个被劫持的 screen-capture 客户端可以直接保存屏幕和 system audio；如果进程同时持有 `kTCCServiceMicrophone`，还可以添加 mic audio。<sup>[[4]](#references)</sup> 如需了解更多 desktop-session abuse primitive，请参阅[此相关页面](../macos-input-monitoring-screen-capture-accessibility.md)。
+> 在 **macOS 12.3+** 上，`ScreenCaptureKit` 通常是比 `AVCaptureScreenInput` 更好的 post-exploitation primitive：它支持高性能 streaming、使用 `SCScreenshotManager` 抓取单帧，以及 streaming **system audio**。近期的 `ScreenCaptureKit` 更新还为 `SCStreamConfiguration` 添加了 `captureMicrophone` / `microphoneCaptureDeviceID`，并提供了可直接录制到文件的 `SCRecordingOutput`，因此，一个被劫持的 screen-capture client 可以直接保存屏幕和 system audio；当该进程同时持有 `kTCCServiceMicrophone` 时，还可以加入麦克风音频。<sup>[[4]](#references)</sup> 有关更多 desktop-session abuse primitives，请参阅[此相关页面](../macos-input-monitoring-screen-capture-accessibility.md)。
 
 ### Accessibility
 
 - **Entitlement**：无
 - **TCC**：`kTCCServiceAccessibility`
 
-利用 TCC privilege 接受 Finder 的控制并按下回车键，以此绕过 TCC
+利用 TCC privilege 接受 Finder 的控制并按下 Enter，以此绕过 TCC
 
 {{#tabs}}
 {{#tab name="Accept TCC"}}
@@ -861,7 +881,7 @@ return 0;
 {{#endtab}}
 
 {{#tab name="Check / Prompt"}}
-检查当前进程是否已获得 Accessibility 信任；如果未获得，请求 macOS 显示授权界面。
+检查当前进程是否已获得 Accessibility 信任；如果尚未获得，请求 macOS 显示授权界面。
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <ApplicationServices/ApplicationServices.h>
@@ -875,7 +895,7 @@ NSLog(@"Accessibility access: %@", trusted ? @"granted" : @"pending/denied");
 {{#endtab}}
 
 {{#tab name="Keylogger"}}
-将按下的按键存储在 **`/tmp/keystrokes.txt`**
+将按下的键存储在 **`/tmp/keystrokes.txt`**
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <ApplicationServices/ApplicationServices.h>
@@ -982,17 +1002,19 @@ return 0;
 {{#endtab}}
 {{#endtabs}}
 
-> [!CAUTION] > **Accessibility 是一种非常强大的权限**，你还可以以其他方式滥用它，例如仅通过该权限就能执行 **keystrokes attack**，而不需要调用 System Events。
+> [!CAUTION] > **Accessibility 是一种非常强大的权限**，你可以通过其他方式滥用它，例如仅利用它就能执行 **keystrokes attack**，而无需调用 System Events。
 
 > [!TIP]
-> 较新的 macOS 版本还将桌面会话滥用拆分到 **Input Monitoring** (`kTCCServiceListenEvent`) 和 **synthetic input** (`kTCCServicePostEvent)` 中。如果你需要 keylogging、screen grabs 或 raw event injection，而不是 AXUIElement automation，请查看 [macOS Input Monitoring、Screen Capture 与 Accessibility Abuse](../macos-input-monitoring-screen-capture-accessibility.md)。
+> 较新的 macOS 版本还将桌面会话滥用拆分到 **Input Monitoring** (`kTCCServiceListenEvent`) 和 **synthetic input** (`kTCCServicePostEvent)` 中。如果你需要进行 keylogging、screen grabs 或 raw event injection，而不是使用 AXUIElement automation，请查看 [macOS Input Monitoring, Screen Capture & Accessibility Abuse](../macos-input-monitoring-screen-capture-accessibility.md)。
 
 ## References
 
-- [1] [Cisco Talos - Microsoft apps for macOS 中的多个漏洞如何为窃取权限铺平道路](https://blog.talosintelligence.com/how-multiple-vulnerabilities-in-microsoft-apps-for-macos-pave-the-way-to-stealing-permissions/)
+- [1] [Cisco Talos - macOS 上 Microsoft 应用中的多个漏洞如何为窃取权限铺平道路](https://blog.talosintelligence.com/how-multiple-vulnerabilities-in-microsoft-apps-for-macos-pave-the-way-to-stealing-permissions/)
 - [2] [CoreLocationCLI](https://github.com/fulldecent/corelocationcli)
 - [3] [Apple Developer - 在 macOS 上请求 Media Capture 授权](https://developer.apple.com/documentation/bundleresources/requesting-authorization-for-media-capture-on-macos?language=objc)
-- [4] [Apple Developer - 使用 ScreenCaptureKit 捕获 HDR 内容 (WWDC24)](https://developer.apple.com/videos/play/wwdc2024/10088/)
-- [5] [vsociety - CVE-2023-26818：使用 DyLib Injection Part1 绕过 MacOS TCC](https://vsociety.medium.com/cve-2023-26818-macos-tcc-bypass-with-telegram-using-dylib-injection-part1-768b34efd8c4)
+- [4] [Apple Developer - 使用 ScreenCaptureKit Capture HDR content（WWDC24）](https://developer.apple.com/videos/play/wwdc2024/10088/)
+- [5] [vsociety - CVE-2023-26818：使用 DyLib Injection 绕过 MacOS TCC，Part1](https://vsociety.medium.com/cve-2023-26818-macos-tcc-bypass-with-telegram-using-dylib-injection-part1-768b34efd8c4)
 - [6] [Vicarius vsociety - CVE-2023-26818：使用 Telegram Exploit macOS TCC Bypass（Part 1）](https://www.vicarius.io/vsociety/posts/cve-2023-26818-exploit-macos-tcc-bypass-w-telegram-part-1-2)
+- [7] [Apple Developer - 使用 Core Audio taps Capturing system audio](https://developer.apple.com/documentation/coreaudio/capturing-system-audio-with-core-audio-taps)
+- [8] [catap - Core Audio process taps 的 Python bindings 和 recorder](https://github.com/sbetko/catap)
 {{#include ../../../../banners/hacktricks-training.md}}
