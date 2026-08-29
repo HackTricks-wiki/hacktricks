@@ -274,7 +274,7 @@ v=DMARC1; p=none
 
 ### DomainKeys Identified Mail (DKIM)
 
-You must **configure a DKIM for the new domain**. If you don't know what is a DMARC record [**read this page**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
+You must **configure a DKIM for the new domain**. If you don't know what is a DKIM record [**read this page**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
 
 This tutorial is based on: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy).<sup>[[5]](#references)</sup>
 
