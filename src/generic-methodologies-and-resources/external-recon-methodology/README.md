@@ -124,6 +124,16 @@ There are some pages and tools that let you search by these trackers and more:
 - [**Publicwww**](https://publicwww.com)
 - [**SpyOnWeb**](http://spyonweb.com)
 - [**Webscout**](https://github.com/straightblast/Sc0ut) (finds related sites by shared analytics/trackers)
+- [**StackScan**](https://www.stackscan.com) - **Free tier** (Web and API). Pivot on any served asset, not just tracker IDs: a script path, a self-hosted bundle name, or the host an asset loads from, returning every site carrying it
+
+The API returns the stack for a single domain, which is useful for confirming a candidate asset belongs to the same estate:
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" -H "X-Tenant-Id: $WORKSPACE" \
+  "https://api.stackscan.com/v1/tech-lookup/domains/lookup?domain=tesla.com"
+```
+
+Returns each detected technology with its category. Asset pivoting is currently web only, the API covers per-domain lookup.
 
 ### **Favicon**
 
