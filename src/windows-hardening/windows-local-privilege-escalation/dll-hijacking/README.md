@@ -1,4 +1,4 @@
-# Dll Hijacking
+# DLL Hijacking
 
 {{#include ../../../banners/hacktricks-training.md}}
 
