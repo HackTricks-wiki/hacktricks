@@ -557,6 +557,7 @@
     - [PHP SSRF](network-services-pentesting/pentesting-web/php-tricks-esp/php-ssrf.md)
   - [Perl Tricks](network-services-pentesting/pentesting-web/perl-tricks.md)
   - [PrestaShop](network-services-pentesting/pentesting-web/prestashop.md)
+  - [Proxmox VE](network-services-pentesting/pentesting-web/proxmox-ve.md)
   - [Python](network-services-pentesting/pentesting-web/python.md)
   - [Rocket Chat](network-services-pentesting/pentesting-web/rocket-chat.md)
   - [Ruby Tricks](network-services-pentesting/pentesting-web/ruby-tricks.md)
