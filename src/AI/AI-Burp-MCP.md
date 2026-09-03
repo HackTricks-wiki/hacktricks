@@ -4,11 +4,11 @@
 
 ## Overview
 
-Burp's **MCP Server** extension can expose intercepted HTTP(S) traffic to MCP-capable LLM clients so they can **reason over real requests/responses** for passive vulnerability discovery and report drafting. The intent is evidence-driven review (no fuzzing or blind scanning), keeping Burp as the source of truth.
+Burp's **MCP Server** extension can expose intercepted HTTP(S) traffic to MCP-capable LLM clients so they can **reason over real requests/responses** for vulnerability discovery and report drafting. Keep Burp as the source of truth: use passive analysis or deliberate one-variable replays rather than blind scanning.<sup>[[8]](#references)</sup>
 
 ## Architecture
 
-- **Burp MCP Server (BApp)** listens on `127.0.0.1:9876` and exposes intercepted traffic via MCP.<sup>[[1]](#references)[[2]](#references)</sup>
+- **Burp MCP Server (BApp)** listens on `127.0.0.1:9876` by default and exposes intercepted traffic via MCP.<sup>[[1]](#references)[[2]](#references)[[7]](#references)</sup>
 - **MCP proxy JAR** bridges stdio (client side) to Burp's MCP SSE endpoint.
 - **Optional local reverse proxy** (Caddy) normalizes headers for strict MCP handshake checks.
 - **Clients/backends**: Codex CLI (cloud), Gemini CLI (cloud), or Ollama (local).
@@ -21,17 +21,24 @@ Install **MCP Server** from the Burp BApp Store and verify it is listening on `1
 
 ### 2) Extract the proxy JAR
 
-In the MCP Server tab, click **Extract server proxy jar** and save `mcp-proxy.jar`.
+In the MCP Server tab, click **Extract server proxy jar** and save `mcp-proxy-all.jar`.<sup>[[7]](#references)</sup>
 
 ### 3) Configure an MCP client (Codex example)
 
-Point the client to the proxy JAR and Burp's SSE endpoint:
+Point the client to the proxy JAR and Burp's direct SSE endpoint. The packaged proxy is a stdio-to-SSE bridge; it does not replace the Burp listener.<sup>[[7]](#references)</sup>
 
 ```toml
 # ~/.codex/config.toml
 [mcp_servers.burp]
 command = "java"
-args = ["-jar", "/absolute/path/to/mcp-proxy.jar", "--sse-url", "http://127.0.0.1:19876"]
+args = ["-jar", "/absolute/path/to/mcp-proxy-all.jar", "--sse-url", "http://127.0.0.1:9876"]
+```
+
+The equivalent Codex command is:<sup>[[7]](#references)[[8]](#references)</sup>
+
+```bash
+codex mcp add burp -- /path/to/java -jar /path/to/mcp-proxy-all.jar \
+  --sse-url http://127.0.0.1:9876
 ```
 
 Then run Codex and list MCP tools:
@@ -65,12 +72,24 @@ reverse_proxy 127.0.0.1:9876 {
 EOF
 ```
 
-Start the proxy and the client:
+Start the proxy and the client, and change the configured `--sse-url` to `http://127.0.0.1:19876` only while using this Caddy listener:<sup>[[1]](#references)[[3]](#references)</sup>
 
 ```bash
 caddy run --config ~/burp-mcp/Caddyfile &
 codex
 ```
+
+### 5) Pair browser state with proxy evidence (Playwright MCP)
+
+Register Playwright MCP so its browser uses Burp's proxy. This lets the agent correlate rendered DOM/accessibility state with the exact HTTP history that produced it.<sup>[[6]](#references)[[8]](#references)</sup>
+
+```bash
+codex mcp add playwright -- npx -y @playwright/mcp@latest \
+  --proxy-server=http://127.0.0.1:8080 \
+  --ignore-https-errors
+```
+
+Adapt the listener address, restart Codex, and use `/mcp` to verify both integrations. The example disables browser certificate errors so HTTPS interception is not blocked by Burp's locally generated certificate.<sup>[[6]](#references)[[8]](#references)</sup>
 
 ## Using different clients
 
@@ -102,6 +121,30 @@ Example local models and approximate VRAM needs:
 - `deepseek-r1:14b` (~16GB VRAM)
 - `gpt-oss:20b` (~20GB VRAM)
 - `llama3.1:70b` (48GB+ VRAM)
+
+## Evidence-driven replay and validation
+
+Do not let the agent treat a plausible explanation or an intermediate response as proof. Use Burp requests/responses and independently observed browser state to make every test falsifiable.<sup>[[8]](#references)</sup>
+
+1. Save a baseline request/response pair and identify the exact attacker-controlled component.
+2. For authorization comparisons, capture the same workflow independently under both accounts before mutating identifiers, cookies, or tokens.
+3. Before replaying a mutation, record the hypothesis, evidence location, expected signal, and the result that would disprove it.
+4. Mutate one component at a time, preserve the resulting pair, and label direct observations separately from inference.
+5. Track each candidate as `open`, `blocked`, `rejected`, or `confirmed`; revisit it only when new evidence changes the mechanism or a prerequisite.
+6. Confirm attacker control, reachability, repeatability, constraint bypass, impact, and the final application state. A redirect or successful tool call is not proof if the claimed state change is downstream.
+
+Keep the exploitation details in the relevant technique page. For example, browser-message candidates belong in [PostMessage Vulnerabilities](../pentesting-web/postmessage-vulnerabilities/README.md), while token key-selection behavior belongs in [JWT Vulnerabilities](../pentesting-web/hacking-jwt-json-web-tokens.md).<sup>[[8]](#references)</sup>
+
+A compact hypothesis record keeps parallel agents from repeating the same attractive branch:<sup>[[8]](#references)</sup>
+
+```yaml
+status: open
+hypothesis: "cross-account object access ignores ownership"
+evidence: ["requests/user-a.txt", "requests/user-b.txt"]
+next_test: "change only the object ID in user A's request"
+expected_signal: "user B's object is returned"
+falsifier: "server rejects it or returns only user A's object"
+```
 
 ## Prompt pack for passive review
 
@@ -162,6 +205,9 @@ Operational cautions: cloud backends may exfiltrate session cookies/PII unless p
 - [3] [PortSwigger MCP server strict Origin/header validation issue](https://github.com/PortSwigger/mcp-server/issues/34)
 - [4] [Burp MCP Agents (workflows, launchers, prompt pack)](https://github.com/six2dez/burp-mcp-agents)
 - [5] [Burp AI Agent](https://github.com/six2dez/burp-ai-agent)
+- [6] [Microsoft Playwright MCP](https://github.com/microsoft/playwright-mcp)
+- [7] [PortSwigger Burp Suite MCP Server](https://github.com/PortSwigger/mcp-server)
+- [8] [How to use Codex for Bug Bounty research: explore broadly, validate rigorously](https://www.yeswehack.com/learn-bug-bounty/llm-series-codex)
 
 {{#include ../banners/hacktricks-training.md}}
 
