@@ -517,6 +517,7 @@
   - [Flask](network-services-pentesting/pentesting-web/flask.md)
   - [Fortinet Fortiweb](network-services-pentesting/pentesting-web/fortinet-fortiweb.md)
   - [Git](network-services-pentesting/pentesting-web/git.md)
+  - [GeoNetwork](network-services-pentesting/pentesting-web/geonetwork.md)
   - [Golang](network-services-pentesting/pentesting-web/golang.md)
   - [Grafana](network-services-pentesting/pentesting-web/grafana.md)
   - [GraphQL](network-services-pentesting/pentesting-web/graphql.md)
