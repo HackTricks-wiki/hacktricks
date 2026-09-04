@@ -111,6 +111,41 @@ rg -n '^#!/bin/(zsh|bash)|sudo -u |launchctl asuser|\$USER|\$HOME|PATH=|/usr/bin
 
 For the 2024 PackageKit root-environment bug (`~/.zshenv` / `~/.bash*` inheritance during user-initiated installs), check [the generic macOS privesc page](../macos-privilege-escalation.md). If the package is **Apple-signed**, the same script bug can become **SIP/TCC-relevant** because `system_installd` may carry `com.apple.rootless.install.heritable`; see [the SIP page](../macos-security-protections/macos-sip.md).<sup>[[5]](#references)</sup><sup>[[6]](#references)</sup>
 
+### Stateful inputs and implicit callbacks
+
+Do not restrict the review to obvious command injection. A root `preinstall`/`postinstall` can cross a trust boundary whenever it consumes **state that existed before installation**: predictable files in `/tmp` or `/var/tmp`, an existing user-writable installation tree, configuration files, repository metadata, or a username later passed to `chown`.<sup>[[9]](#references)[[10]](#references)</sup>
+
+Two recent Homebrew installer flaws illustrate reusable variants:
+
+- **Attacker-selected ownership:** a package-user override was read from the predictable `/var/tmp/.homebrew_pkg_user.plist` without validating its owner, mode, ACLs, symlink state, or provenance. A low-privileged user could select their own account and a later root `postinstall` would recursively transfer ownership of the Homebrew tree and cache to it. This was a privilege-assignment flaw, not shell injection.<sup>[[9]](#references)</sup>
+- **Tool callbacks from an existing tree:** a root `postinstall` ran `git checkout` inside an installation that was intentionally writable by its normal user. Planting an executable `.git/hooks/post-checkout` therefore converted a later GUI/MDM package upgrade into root code execution. On the Intel path, merging the packaged `.git` directory into the existing repository also preserved attacker-added hooks.<sup>[[10]](#references)</sup>
+
+The second primitive is easy to model during an authorized test; the trigger occurs only when the vulnerable privileged installer later runs a hook-capable Git operation.<sup>[[10]](#references)</sup>
+
+```bash
+repo=/path/to/user-writable/install
+mkdir -p "$repo/.git/hooks"
+cat > "$repo/.git/hooks/post-checkout" <<'EOF'
+#!/bin/sh
+id > /tmp/pkg-post-checkout-context
+EOF
+chmod +x "$repo/.git/hooks/post-checkout"
+# Wait for the privileged .pkg install/upgrade; do not invoke it as root just to test.
+```
+
+Expand nested packages and map every attacker-controlled source to a privileged sink. In addition to direct execution, search for parsers, ownership changes and tools with plug-in/hook mechanisms.<sup>[[9]](#references)[[10]](#references)</sup>
+
+```bash
+PKG=Target.pkg
+OUT=$(mktemp -d)
+pkgutil --expand-full "$PKG" "$OUT"
+grep -RniE '(/var/tmp|/tmp|defaults[[:space:]]+read|PlistBuddy|chown[[:space:]]+-R)' "$OUT"
+grep -RniE '(^|[;&|[:space:]])(git|svn|hg|npm|pip|ruby|python)[[:space:]]' "$OUT"
+grep -RniE '(checkout|reset|submodule|hooksPath|GIT_(DIR|CONFIG)|PYTHONPATH|RUBYOPT)' "$OUT"
+```
+
+For hardening, move privileged inputs into a root-owned staging directory and validate each path immediately before use (regular file, expected owner/mode, no unsafe ACL, and no symlink traversal). Avoid recursively changing ownership from an untrusted identity. When Git must run over a pre-existing tree, suppress callbacks explicitly (for example, `git -c core.hooksPath=/dev/null ...`) or replace repository metadata atomically before invoking Git.<sup>[[9]](#references)[[10]](#references)</sup>
+
 ### Execution by mounting
 
 If an installer writes to `/tmp/fixedname/bla/bla`, it's possible to **create a mount** over `/tmp/fixedname` with noowners so you could **modify any file during the installation** to abuse the installation process.
@@ -201,6 +236,8 @@ EOF
 productbuild --distribution dist.xml --package-path myapp.pkg final-installer.pkg
 ```
 
+
+
 ## References
 
 - [1] [DEF CON 27 - Unpacking Pkgs A Look Inside Macos Installer Packages And Common Security Flaws](https://www.youtube.com/watch?v=iASSG0_zobQ)
@@ -211,5 +248,6 @@ productbuild --distribution dist.xml --package-path myapp.pkg final-installer.pk
 - [6] [Breaking SIP with Apple-signed Packages](https://www.l3harris.com/newsroom/editorial/2024/03/breaking-sip-apple-signed-packages)
 - [7] [OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl](https://www.youtube.com/watch?v=jSYPazD4VcE)
 - [8] [DEF CON 25 - Patrick Wardle - Death By 1000 Installers on macOS and it's all broken!](https://www.youtube.com/watch?v=lTOItyjTTkw)
-
+- [9] [Homebrew macOS installer trusts a user-controlled package-user plist](https://github.com/Homebrew/brew/security/advisories/GHSA-59v8-x8q4-px5c)
+- [10] [Root code execution via Git hooks in a macOS PKG postinstall](https://github.com/Homebrew/brew/security/advisories/GHSA-6689-q779-c33m)
 {{#include ../../../banners/hacktricks-training.md}}
