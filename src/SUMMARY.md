@@ -995,6 +995,7 @@
 # 🔩 Reversing
 
 - [Reversing Tools & Basic Methods](reversing/reversing-tools-basic-methods/README.md)
+  - [Static Deobfuscation of Node.js/V8 Cached Bytecode](reversing/reversing-tools-basic-methods/nodejs-v8-cached-bytecode.md)
   - [Angr](reversing/reversing-tools-basic-methods/angr/README.md)
     - [Angr - Examples](reversing/reversing-tools-basic-methods/angr/angr-examples.md)
   - [Z3 - Satisfiability Modulo Theories (SMT)](reversing/reversing-tools-basic-methods/satisfiability-modulo-theories-smt-z3.md)
