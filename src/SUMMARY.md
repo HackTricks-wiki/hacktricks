@@ -570,6 +570,7 @@
   - [Tomcat](network-services-pentesting/pentesting-web/tomcat/README.md)
   - [Telerik Ui Aspnet Ajax Unsafe Reflection Webresource Axd](network-services-pentesting/pentesting-web/telerik-ui-aspnet-ajax-unsafe-reflection-webresource-axd.md)
   - [Uncovering CloudFlare](network-services-pentesting/pentesting-web/uncovering-cloudflare.md)
+  - [Veeam Service Provider Console](network-services-pentesting/pentesting-web/veeam-service-provider-console.md)
   - [Vuejs](network-services-pentesting/pentesting-web/vuejs.md)
   - [VMWare (ESX, VCenter...)](network-services-pentesting/pentesting-web/vmware-esx-vcenter....md)
   - [Web API Pentesting](network-services-pentesting/pentesting-web/web-api-pentesting.md)
