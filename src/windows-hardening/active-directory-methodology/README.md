@@ -350,6 +350,34 @@ Regarding [**ASREPRoast**](asreproast.md) you can now find every possible vulner
 
 > Even if this Enumeration section looks small this is the most important part of all. Access the links (mainly the one of cmd, powershell, powerview and BloodHound), learn how to enumerate a domain and practice until you feel comfortable. During an assessment, this will be the key moment to find your way to DA or to decide that nothing can be done.
 
+### Predictable pre-created computer accounts -> gMSA password access
+
+Computer accounts staged for legacy joins can retain a predictable initial password. NetExec's `pre2k` module identifies the characteristic `userAccountControl` value `4128` (`WORKSTATION_TRUST_ACCOUNT | PASSWD_NOTREQD`) and attempts a Kerberos TGT with the first 14 characters of the lowercase computer name, without the trailing `$`. Treat this UAC value as a candidate selector rather than assuming that membership in **Pre-Windows 2000 Compatible Access** alone proves the password is weak.<sup>[[18]](#references)[[20]](#references)</sup>
+
+Use authenticated LDAP enumeration to test the candidates and save successful TGTs. `ALL=True` expands testing beyond objects with the default `4128` filter.<sup>[[18]](#references)</sup>
+
+```bash
+netexec ldap dc.corp.local -u auditor -p 'Password!' -M pre2k
+netexec ldap dc.corp.local -u auditor -p 'Password!' -M pre2k -o ALL=True
+
+# Validate a candidate explicitly with Kerberos
+netexec ldap dc.corp.local -u 'APP01$' -p app01 -k
+```
+
+A failed default/NTLM bind does **not** invalidate this finding: test with `-k`, an FQDN that resolves to the DC, and a clock synchronized with the KDC. Successful module runs write candidate lists and acquired ccaches below `~/.nxc/modules/pre2k/`.<sup>[[18]](#references)[[20]](#references)</sup>
+
+After compromising the computer principal, graph its nested group memberships and outbound rights. In particular, principals named in a gMSA's `msDS-GroupMSAMembership` security descriptor can read `msDS-ManagedPassword`; NetExec's `--gmsa` output shows the allowed principals and returns the current NT hash when the authenticating computer is authorized.<sup>[[19]](#references)[[20]](#references)</sup>
+
+```bash
+# Enumerate gMSAs and their password readers with the initial user
+netexec ldap dc.corp.local -u auditor -p 'Password!' --gmsa
+
+# Re-query as the compromised computer through Kerberos
+netexec ldap dc.corp.local -u 'APP01$' -p app01 -k --gmsa
+```
+
+Then evaluate the recovered gMSA like any other credential: inspect local/domain group membership, logon rights, SPNs, delegation, and reachable services before trying pass-the-hash. This ACL-based retrieval path is distinct from [Golden gMSA/dMSA](golden-dmsa-gmsa.md), which derives managed passwords after KDS root-key compromise.<sup>[[20]](#references)</sup>
+
 ### Kerberoast
 
 Kerberoasting involves obtaining **TGS tickets** used by services tied to user accounts and cracking their encryption—which is based on user passwords—**offline**.
@@ -1066,5 +1094,8 @@ If you want to detect common AD tradecraft, **do not rely only on operator-contr
 - [15] [From DA to EA with ESC5](https://specterops.io/blog/2023/05/16/from-da-to-ea-with-esc5/)
 - [16] [Escalating from child domain's admins to enterprise admins in 5 minutes by abusing AD CS, a follow up](https://www.pkisolutions.com/escalating-from-child-domains-admins-to-enterprise-admins-in-5-minutes-by-abusing-ad-cs-a-follow-up/)
 - [17] [An ACE Up the Sleeve: Designing Active Directory DACL Backdoors](https://specterops.io/assets/resources/an_ace_up_the_sleeve.pdf)
+- [18] [NetExec pre2k module source](https://github.com/Pennyw0rth/NetExec/blob/main/nxc/modules/pre2k.py)
+- [19] [Microsoft ADSchema - msDS-GroupMSAMembership attribute](https://learn.microsoft.com/en-us/windows/win32/adschema/a-msds-groupmsamembership)
+- [20] [0xdf - HTB Pirate](https://0xdf.gitlab.io/2026/09/05/htb-pirate.html)
 
 {{#include ../../banners/hacktricks-training.md}}

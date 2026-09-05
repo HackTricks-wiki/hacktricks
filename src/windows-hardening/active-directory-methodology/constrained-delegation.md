@@ -82,6 +82,34 @@ export KRB5CCNAME=Administrator_HOST.ccache
 
 If you prefer forging the user ST first (e.g., offline hash only), pair **ticketer.py** with **getST.py** for S4U2Proxy. `tgssub.py` is also handy when you already have a working ccache and only need to swap the service class for the same host. See the open Impacket issue #1713 for current quirks (KRB_AP_ERR_MODIFIED when the forged ST doesn't match the SPN key).<sup>[[2]](#references)</sup>
 
+### SPN-jacking: redirecting a constrained-delegation target
+
+Classic constrained delegation authorizes an **SPN string** in `msDS-AllowedToDelegateTo`, not an immutable target SID. During S4U2Proxy, the KDC resolves the account that currently owns that SPN and encrypts the service ticket with that account's long-term key. Therefore, control of the delegating account plus `WriteSPN` over another service/computer account can redirect an unchanged delegation constraint without `SeEnableDelegationPrivilege`.<sup>[[5]](#references)[[6]](#references)</sup>
+
+Two variants exist:<sup>[[5]](#references)</sup>
+
+- **Ghost SPN-jacking:** the allowed SPN is orphaned because its former owner was deleted, renamed, or had the SPN removed. Add it directly to the desired target account.
+- **Live SPN-jacking:** the SPN still belongs to a source account. Duplicate-SPN validation normally blocks the destination write, so `WriteSPN` is needed on both objects: remove it from the source, add it to the target, obtain the ticket, and restore the original registration.
+
+The following abstracted Linux flow moves an allowed SPN, runs S4U as the compromised delegating principal, and rewrites the ticket's service name to a useful service on the new target.<sup>[[5]](#references)[[6]](#references)</sup>
+
+```bash
+# Omit this deletion for a ghost SPN
+bloodyAD --host "$DC" -d "$DOMAIN" -u "$WRITER" -p "$PASSWORD" \
+  msldap delspn "$SOURCE_DN" "$DELEGATED_SPN"
+
+bloodyAD --host "$DC" -d "$DOMAIN" -u "$WRITER" -p "$PASSWORD" \
+  msldap addspn "$TARGET_DN" "$DELEGATED_SPN"
+
+getST.py -dc-ip "$DC_IP" -spn "$DELEGATED_SPN" \
+  -impersonate Administrator -altservice "cifs/$TARGET_FQDN" \
+  "$DOMAIN/$DELEGATING_ACCOUNT:$DELEGATING_PASSWORD"
+```
+
+`-altservice` is the second, separate primitive. The S4U2Proxy ticket was encrypted for the account that now owns `$DELEGATED_SPN`; because the ticket service name (`sname`) is outside the encrypted ticket body, tooling can substitute another service class/hostname whose service uses that same account key. SPN-jacking first changes **which account key** protects the ticket, while service-class substitution changes **where that ticket is presented**.<sup>[[5]](#references)[[6]](#references)</sup>
+
+For live jacking, reverse the two LDAP writes immediately after ticket acquisition to avoid breaking the legitimate service. On DCs with computer-account auditing enabled, hunt for Security event **4742** where `servicePrincipalName` is removed from one computer and shortly added to another, especially when the SPN hostname differs from the destination's `dNSHostName`. Correlate with event **4769**: S4U2Self presents the same account as client/service, while S4U2Proxy populates **Transited Services**.<sup>[[5]](#references)</sup>
+
 ### Automating delegation setup from low-priv creds
 
 If you already hold **GenericAll/WriteDACL** over a computer or service account, you can push the required attributes remotely without RSAT using **bloodyAD** (2024+):
@@ -158,5 +186,7 @@ Invoke-Mimikatz -Command '"kerberos::ptt TGS_Administrator@dollarcorp.moneycorp.
 - [2] [Abusing Delegation with Impacket (Part 2): Constrained Delegation (Black Hills, 2025)](https://www.blackhillsinfosec.com/abusing-delegation-with-impacket-part-2/)
 - [3] [Kerberos Constrained Delegation (ired.team)](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-kerberos-constrained-delegation)
 - [4] [Kerberosity Killed the Domain: An Offensive Kerberos Overview (SpecterOps)](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
+- [5] [Elad Shamir - SPN-jacking: An Edge Case in WriteSPN Abuse](https://www.semperis.com/blog/spn-jacking-an-edge-case-in-writespn-abuse/)
+- [6] [0xdf - HTB Pirate](https://0xdf.gitlab.io/2026/09/05/htb-pirate.html)
 
 {{#include ../../banners/hacktricks-training.md}}
