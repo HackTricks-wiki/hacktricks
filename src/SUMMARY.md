@@ -949,6 +949,7 @@
 - [Adreno A7xx Sds Rb Priv Bypass Gpu Smmu Kernel Rw](binary-exploitation/linux-kernel-exploitation/adreno-a7xx-sds-rb-priv-bypass-gpu-smmu-kernel-rw.md)
 - [Af Unix Msg Oob Uaf Skb Primitives](binary-exploitation/linux-kernel-exploitation/af-unix-msg-oob-uaf-skb-primitives.md)
 - [Arm64 Static Linear Map Kaslr Bypass](binary-exploitation/linux-kernel-exploitation/arm64-static-linear-map-kaslr-bypass.md)
+- [Futex PI UAF to Pipe Physical R/W and Workqueue Execution](binary-exploitation/linux-kernel-exploitation/futex-pi-uaf-pipe-buffer-workqueue-usermodehelper.md)
 - [Ksmbd Streams Xattr Oob Write Cve 2025 37947](binary-exploitation/linux-kernel-exploitation/ksmbd-streams_xattr-oob-write-cve-2025-37947.md)
 - [Pixel Bigwave Bigo Job Timeout Uaf Kernel Write](binary-exploitation/linux-kernel-exploitation/pixel-bigwave-bigo-job-timeout-uaf-kernel-write.md)
 - [Linux kernel exploitation - toctou](binary-exploitation/linux-kernel-exploitation/posix-cpu-timers-toctou-cve-2025-38352.md)
