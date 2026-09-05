@@ -1063,6 +1063,50 @@ Useful runtime flags from the PoC:
 - Successful exploitation writes a **DC `.pfx`** and **Kerberos `.ccache`** locally.
 - Because the certificate maps to a **Domain Controller account**, follow-on actions can include **certificate-based Kerberos auth**, **DCSync**, and reuse of the recovered **machine NT hash**.<sup>[[2]](#references)</sup>
 
+## IIS AppPool machine enrollment to same-host Administrator
+
+An IIS pool running as `ApplicationPoolIdentity` uses its host's **computer account** for outbound access to network resources. Therefore, code execution as `IIS AppPool\<POOL>` stays low-privileged in the local token but can submit an AD CS request that the CA authenticates as `HOST$`; this is an outbound identity transition, not token impersonation or a Potato-style local elevation.<sup>[[19]](#references)[[20]](#references)</sup>
+
+This chain requires a domain-joined IIS host, an Enterprise CA reachable through RPC, a published machine-authentication template for which the computer has enrollment rights, PKINIT support, and KDC/SMB reachability. A custom pool identity changes the outbound principal, so confirm the pool really uses `ApplicationPoolIdentity` before assuming `HOST$`.<sup>[[19]](#references)[[20]](#references)</sup>
+
+### Attacker-controlled-key enrollment
+
+Generate the key pair and CSR away from the IIS server and retain the private key. Submit **only the CSR** from the compromised worker. The [Certi-Bhai ASPX PoC](https://github.com/incredibleindishell/Certi-Bhai/blob/main/IIS_Privilege_escalation/cert.aspx) instantiates `CertificateAuthority.Request`, sets `CertificateTemplate:Machine`, calls `ICertRequest::Submit`, and returns the issued certificate. Use the CA configuration string `CAHOST\CA-NAME`; a normal `Machine` template builds the subject from AD, so requester-supplied subject/SAN data is not required.<sup>[[18]](#references)[[19]](#references)[[21]](#references)</sup>
+
+Combine the returned certificate with the **matching retained key**. `certutil -MergePFX machine_cert.cer machine_cert.pfx` only works when Windows can already associate the certificate with an accessible private key; for separate PEM files, create PKCS#12 explicitly:<sup>[[19]](#references)[[23]](#references)</sup>
+
+```bash
+openssl pkcs12 -export -in machine_cert.cer -inkey machine_cert.key \
+  -out machine_cert.pfx -name 'HOST$'
+```
+
+Use the PFX for PKINIT and keep the returned computer TGT as base64 rather than injecting it immediately:<sup>[[5]](#references)[[19]](#references)</sup>
+
+```powershell
+Rubeus.exe asktgt /user:HOST$ /domain:DOMAIN /certificate:machine_cert.pfx `
+  /password:PFX_PASSWORD /nowrap
+```
+
+### S4U2Self plus same-host service substitution
+
+S4U2Self lets a service obtain a ticket **to itself** containing another user's authorization data. With the computer TGT, Rubeus can request that ticket for a privileged user, rewrite the service name in the returned KRB-CRED to CIFS, and inject it. This is the local “delegate to thyself” primitive: it does not require S4U2Proxy or an `msDS-AllowedToDelegateTo` entry.<sup>[[5]](#references)[[17]](#references)[[22]](#references)</sup>
+
+```powershell
+Rubeus.exe s4u /self /impersonateuser:Administrator `
+  /altservice:cifs/HOST.DOMAIN /ticket:BASE64_MACHINE_TGT /ptt /nowrap
+
+klist
+dir \\HOST.DOMAIN\C$
+```
+
+The substituted ticket is usable only by services on the **same computer account/key** (here, CIFS on `HOST`). It is not a reusable Administrator ticket for other domain machines. Also, the demonstrated result is privileged SMB/filesystem access as Administrator; obtaining a local `NT AUTHORITY\SYSTEM` process still requires a separate remote-execution step.<sup>[[5]](#references)[[17]](#references)[[19]](#references)</sup>
+
+### Detection and hardening
+
+- On the CA, correlate Certification Services events **4886** (request received) and **4887** (issued) for unexpected `Machine`-template requests by IIS server accounts.<sup>[[19]](#references)[[24]](#references)</sup>
+- On DCs, event **4768** includes certificate fields when certificate pre-authentication is used; alert on unusual PKINIT TGT requests for web-server accounts. Follow with **4769** requests involving a privileged impersonated identity and the same host. Because Rubeus `/altservice` rewrites the KRB-CRED service name client-side, do not require the DC-side 4769 service name to be `cifs`.<sup>[[5]](#references)[[25]](#references)[[26]](#references)</sup>
+- Hunt for `w3wp.exe` reaching CA RPC endpoints, unexpected ASPX creation, Kerberos-authenticated access to administrative shares, and secrets-dumping activity. Restrict app-tier access to CA RPC/KDC/SMB where possible and remove computer enrollment rights or machine-authentication templates that are not operationally required.<sup>[[19]](#references)</sup>
+
 ## Compromising Forests with Certificates Explained in Passive Voice
 
 ### Breaking of Forest Trusts by Compromised CAs
@@ -1095,5 +1139,15 @@ Both scenarios lead to an **increase in the attack surface** from one forest to 
 - [14] [Certipy Wiki – Privilege Escalation (ESC1-ESC17)](https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation)
 - [15] [TrustedSec – EKUwu: Not Just Another AD CS ESC](https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc)
 - [16] [Furious5 – AD CS ESC16: Misconfiguration and Exploitation](https://medium.com/@muneebnawaz3849/ad-cs-esc16-misconfiguration-and-exploitation-9264e022a8c6)
+- [17] [Charlie Clark – Revisiting “Delegate 2 Thyself”](https://exploit.ph/revisiting-delegate-2-thyself.html)
+- [18] [incredibleindishell/Certi-Bhai – IIS AD CS enrollment PoC](https://github.com/incredibleindishell/Certi-Bhai/blob/main/IIS_Privilege_escalation/cert.aspx)
+- [19] [Mannu Linux – Privilege Escalation from IIS AppPool via the AD CS RPC Endpoint](https://mannulinux.org/2026/08/Privilege-escalation-from-IIS-AppPool-to-NT-AuthoritySYSTEM-via-AD-CS-RPC-endpoint.html)
+- [20] [Microsoft – Application Pool Identities](https://learn.microsoft.com/en-us/iis/manage/configuring-security/application-pool-identities)
+- [21] [Microsoft – ICertRequest::Submit](https://learn.microsoft.com/en-us/windows/win32/api/certcli/nf-certcli-icertrequest-submit)
+- [22] [Microsoft Open Specifications – S4U2self](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-sfu/02636893-7a1f-4357-af9a-b672e3e3de13)
+- [23] [OpenSSL – pkcs12 command](https://docs.openssl.org/3.6/man1/openssl-pkcs12/)
+- [24] [Microsoft – Audit Certification Services](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/audit-certification-services)
+- [25] [Microsoft – Event 4768: A Kerberos authentication ticket was requested](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4768)
+- [26] [Microsoft – Event 4769: A Kerberos service ticket was requested](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4769)
 
 {{#include ../../../banners/hacktricks-training.md}}
