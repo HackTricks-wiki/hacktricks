@@ -17,6 +17,8 @@ sudo pip3 install -U oletools
 olevba -c /path/to/document #Extract macros
 ```
 
+For password-encrypted Office documents, see the [grammar-driven offline recovery workflow](../../../generic-hacking/brute-force.md#grammar-driven-combinator-attacks-encrypted-office-example).
+
 ---
 
 ## OLE Compound File exploitation: Autodesk Revit RFA – ECC recomputation and controlled gzip
