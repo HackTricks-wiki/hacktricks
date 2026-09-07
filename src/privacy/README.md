@@ -64,11 +64,27 @@ Then select the smallest sustainable controls. A complicated plan that is routin
 - [Network Privacy & Anonymous Connectivity](network-privacy-and-anonymous-connectivity.md)
 - [Advanced Network Privacy Architectures](advanced-network-privacy-architectures.md)
 - [Privacy Operating Systems](privacy-operating-systems.md)
+- [Privacy-Preserving Communications and Sharing](privacy-preserving-communications-and-sharing.md)
 - [Authorized Red-Team Infrastructure](authorized-red-team-infrastructure.md)
 - [Private Digital Payments](private-digital-payments.md)
 - [Cryptocurrency Privacy](cryptocurrency-privacy.md)
 - [Privacy-Preserving Payment Protocols](privacy-preserving-payment-protocols.md)
+- [Reproducible Privacy Testing](reproducible-privacy-testing.md)
 - [Operational Privacy Playbooks](operational-privacy-playbooks.md)
+
+## Guide and verification index
+
+| Technique | Deployment guide | Verification/failure test |
+|---|---|---|
+| Identity/browser compartment | [Threat Modeling & Identity Separation](threat-modeling-and-identity-separation.md) | [Browser and OS tests](reproducible-privacy-testing.md#browser-compartment-test) |
+| VPN, Tor, guest Wi-Fi, travel router, cellular | [Network Privacy & Anonymous Connectivity](network-privacy-and-anonymous-connectivity.md) | [Network-path test](reproducible-privacy-testing.md#network-path-test) |
+| Split relays, OHTTP, namespaces, bridges, onions, I2P | [Advanced Network Privacy Architectures](advanced-network-privacy-architectures.md) | [Tor/onion and route tests](reproducible-privacy-testing.md#tor-and-onion-service-test) |
+| Tails, Whonix and Qubes | [Privacy Operating Systems](privacy-operating-systems.md) | [OS isolation test](reproducible-privacy-testing.md#operating-system-isolation-test) |
+| Signal, SimpleX, Briar, OnionShare and encrypted files | [Privacy-Preserving Communications and Sharing](privacy-preserving-communications-and-sharing.md) | [Communications/file tests](reproducible-privacy-testing.md#communications-metadata-test) |
+| Authorized red-team egress/drop nodes | [Authorized Red-Team Infrastructure](authorized-red-team-infrastructure.md) | [Accountability drill](reproducible-privacy-testing.md#authorized-red-team-accountability-drill) |
+| Cash, prepaid and virtual cards | [Private Digital Payments](private-digital-payments.md) | [Payment privacy test](reproducible-privacy-testing.md#payment-privacy-test) |
+| Bitcoin, PayJoin/CoinJoin, Lightning and Monero | [Cryptocurrency Privacy](cryptocurrency-privacy.md) | [Payment privacy test](reproducible-privacy-testing.md#payment-privacy-test) |
+| Silent Payments, Zcash, Taler and federated e-cash | [Privacy-Preserving Payment Protocols](privacy-preserving-payment-protocols.md) | [Payment privacy test](reproducible-privacy-testing.md#payment-privacy-test) |
 
 ## References
 

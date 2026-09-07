@@ -108,6 +108,21 @@ If an authorized scenario requires guest access:
 - Give infrastructure a kill date and budget alert. Orphaned systems become risk to both client and Internet.
 - Preserve enough internal attribution to investigate accidents. “No logs” is usually incompatible with professional evidence and safety obligations.
 
+## Blind to defenders, attributable to the controller
+
+When the exercise objective is to measure detection rather than test an allowlist, the target SOC can remain blind without making the operation unaccountable:
+
+1. The exercise controller approves every public source, domain, certificate and on-site device but withholds the list from the SOC.
+2. The controller stores the source-to-engagement/operator map in a separate encrypted vault with two-person emergency access.
+3. Each operator job receives a signed manifest containing scope, time window, source compartment and irreversible job identifier. The target never needs to see the manifest during normal operation.
+4. Bastion audit events are chained or sent append-only to controller storage so an operator cannot silently rewrite attribution after an incident.
+5. A 24/7 provider-abuse contact holds a verification phrase/reference that confirms authorization without disclosing the client publicly.
+6. Every path implements an out-of-band stop channel that does not depend on the assessment C2, target network or one operator's account.
+7. Before live testing, send benign canaries from every source. Confirm the controller can resolve and stop them within the ROE response time.
+8. After the exercise, compare SOC telemetry with the controller ledger, disclose the source list, and explain missed/incorrect detections.
+
+Do not add anti-forensics, log destruction, compromised relays or false subscriber identities. Those defeat accountable testing rather than improve it.
+
 ## Teardown checklist
 
 - [ ] Exercise controller confirms stop.

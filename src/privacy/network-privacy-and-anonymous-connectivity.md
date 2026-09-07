@@ -108,9 +108,30 @@ Operationally:
 - **TLS Encrypted Client Hello (ECH)** can protect the inner server name in a TLS handshake when client, DNS, and server support it. Destination IP, timing, volume, and the endpoint remain visible.<sup>[[16]](#references)</sup>
 - With a correctly configured VPN or Tor environment, DNS should follow that environment's supported route. Adding a separate resolver can create a new observer or fingerprint.
 
+### Encrypted-DNS/ECH verification workflow
+
+1. Decide whether DNS is controlled by the VPN/Tor environment, the OS, or the application. Configure it in **one** intended layer instead of stacking unrelated resolvers.
+2. Select a resolver from its published privacy/retention policy and enable strict encrypted mode where the platform supports it. Opportunistic fallback may silently return to plaintext.
+3. Query a unique subdomain under an authoritative test zone you control; confirm the authoritative log sees the intended recursive resolver.
+4. Capture only the test device's traffic with authorization. Confirm the access network cannot read plaintext DNS, while recognizing it can see the encrypted resolver/tunnel endpoint.
+5. Test a blocked/unreachable encrypted resolver. The pass condition is the chosen fail-closed or documented fallback behavior—not an accidental clear query.
+6. For ECH, use a controlled ECH-enabled host and inspect client/server diagnostics to confirm the **inner** ClientHello was accepted. Merely offering an HTTPS record does not prove ECH succeeded.
+7. Repeat after network changes, captive portals, browser updates and VPN reconnects. Record which component owns DNS/ECH so later administrators do not create a bypass.
+
 ## Mixnets
 
 Mixnets such as Nym or Katzenpost add fixed-size packets, delay, reordering, and cover traffic to resist timing correlation. Those properties cost latency and bandwidth, and independent deployment-scale evidence is limited. Treat current consumer mixnets as **emerging/high-latency options**, not faster or guaranteed replacements for Tor/VPNs.<sup>[[17]](#references)</sup>
+
+### Evaluation workflow
+
+1. Identify a maintained client and the exact supported application; do not force arbitrary browser/system traffic through an undocumented proxy.
+2. Read the current threat model for entry, mix nodes, gateway, destination and collusion assumptions.
+3. Install from the official signed source in a separate test compartment and use only a benign owned endpoint.
+4. Measure delivery latency, message-size limits, reliability, retransmission and what happens when the gateway is unavailable.
+5. Inspect local traffic and the owned endpoint to confirm the intended path and source. Check whether replies use the same privacy design.
+6. Test shutdown/failure: the application must not silently fall back to direct Internet access.
+7. Do not disable cover traffic, reduce delays or choose unusual fixed routes merely for speed; these changes can invalidate the stated anonymity model.
+8. Keep it experimental until the specific deployment, independent analysis and operational reliability meet the consequence level.
 
 ## Network preflight checklist
 
