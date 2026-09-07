@@ -7,9 +7,13 @@ on:
     paths-ignore:
       - '.gitignore'
       - 'book/**'
+      - Dockerfile
+      - '.github/**'
   workflow_dispatch:
 
-concurrency: build_master
+concurrency:
+  group: build-master
+  cancel-in-progress: true
 
 permissions:
   packages: write
@@ -42,14 +46,6 @@ jobs:
             --default-lang en \
             --site-name "HackTricks"
       
-      - name: Install GitHub CLI
-        run: |
-          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
-          && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
-          && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
-          && sudo apt update \
-          && sudo apt install gh -y
-      
       - name: Push search index to hacktricks-searchindex repo
         shell: bash
         env:
@@ -73,7 +69,7 @@ jobs:
           fi
 
           # Clone the searchindex repo
-          git clone https://x-access-token:${TOKEN}@github.com/${TARGET_REPO}.git /tmp/searchindex-repo
+          git clone --depth 1 https://x-access-token:${TOKEN}@github.com/${TARGET_REPO}.git /tmp/searchindex-repo
           
           cd /tmp/searchindex-repo
           git config user.name "GitHub Actions"
@@ -143,13 +139,13 @@ jobs:
                       echo "Detected history rewrite, re-cloning repository..."
                       cd /tmp
                       rm -rf searchindex-repo
-                      git clone https://x-access-token:${TOKEN}@github.com/${TARGET_REPO}.git searchindex-repo
+                      git clone --depth 1 https://x-access-token:${TOKEN}@github.com/${TARGET_REPO}.git searchindex-repo
                       cd searchindex-repo
                       git config user.name "GitHub Actions"
                       git config user.email "github-actions@github.com"
                       
-                      # Re-copy the .gz version
-                      cp "${GITHUB_WORKSPACE}/${ASSET}.gz" "${FILENAME}.gz"
+                      # Re-copy the encrypted gzip payload expected by the site loader.
+                      cp "${GITHUB_WORKSPACE}/${ASSET}.gz.enc" "${FILENAME}.gz"
                       
                       git add "${FILENAME}.gz"
                       TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
@@ -174,7 +170,7 @@ jobs:
 
       # Login in AWs
       - name: Configure AWS credentials using OIDC
-        uses: aws-actions/configure-aws-credentials@v3
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: us-east-1
