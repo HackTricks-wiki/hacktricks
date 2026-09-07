@@ -368,7 +368,7 @@ Every entry uses the same fields. “Procedure” means a lawful deployment or a
 
 **Cons:** physical discovery/theft; serial/MAC/USB/DHCP/PoE/RF and camera evidence; loss may expose credentials.
 
-**Procedure:** (1) obtain exact written placement authority; (2) record serial, MAC, photo, location and retrieval time; (3) use signed minimal image and short-lived mutual credentials; (4) restrict outbound-only destinations/capabilities; (5) add remote kill/bandwidth limits; (6) test SOC visibility; (7) retrieve and attest wipe. Never hide one in an unconsenting venue.
+**Procedure:** follow [Capture-Resilient Authorized Field Nodes](capture-resilient-authorized-field-nodes.md): (1) obtain exact written placement authority; (2) record serial, MAC, photo, location and retrieval time; (3) use a signed minimal image and short-lived mutual credentials; (4) restrict outbound-only destinations/capabilities; (5) add server-side quarantine and bandwidth limits; (6) test SOC visibility and loss response; (7) retrieve, preserve required evidence, then sanitize under the agreed lifecycle policy. Never hide one in an unconsenting venue.
 
 **Detection:** NAC/802.1X, switchport/PoE/DHCP, USB inventory, RF survey, recurring tunnel, receiving/camera and physical inspection.
 
@@ -392,9 +392,124 @@ Every entry uses the same fields. “Procedure” means a lawful deployment or a
 
 **Cons:** high latency; small anonymity set; custody/physical metadata; malicious peers; data eventually reaches a gateway that observes it.
 
-**Procedure:** (1) build an isolated owned three-node mesh or file queue; (2) encrypt/authenticate content end to end; (3) remove direct Internet routes from origin; (4) relay a benign file after a controlled delay; (5) verify only gateway contacts owned destination; (6) compare custody/timestamps; (7) wipe temporary media/queues per policy.
+**Procedure:** (1) build an isolated owned three-node mesh or file queue; (2) encrypt/authenticate content end to end; (3) remove direct Internet routes from origin; (4) relay a benign file after a controlled delay; (5) verify only gateway contacts owned destination; (6) compare custody/timestamps; (7) preserve required evidence, then sanitize temporary media/queues at approved closeout.
 
 **Detection:** endpoint file/process activity, peer-radio links, removable-media audit, queue/gateway periodicity and content identifiers. Longer correlation windows replace interactive-flow analysis.
+
+## TURN relay and forced-relay WebRTC
+
+**Mechanics:** Traversal Using Relays around NAT (TURN) allocates a public relay address and carries UDP, TCP or TLS traffic between a client and peers. An ICE policy can force relay use instead of exposing a direct candidate. TURN solves reachability, not general anonymity: the server authenticates the client and observes allocations, peers, time and volume.<sup>[[19]](#references)</sup>
+
+**Pros:** widely implemented; handles restrictive NAT; supports mobile WebRTC; the peer does not receive the client's direct transport address when relay-only policy is correctly enforced.
+
+**Cons:** the TURN operator sees both adjacent sides; application identity, media fingerprint and signaling remain; relay-only costs bandwidth and latency; misconfiguration can still gather host or server-reflexive candidates.
+
+**Procedure:** (1) deploy an organization-owned TURN service with TLS and short-lived credentials; (2) restrict realms, peers, ports, quotas and expiration; (3) set the test application to relay-only ICE; (4) call an owned peer; (5) inspect `getStats()` and packet capture to confirm only relay candidates carried media; (6) fail the relay and confirm there is no direct fallback; (7) retain allocation logs for the engagement.
+
+**Detection:** signaling, browser process and TURN allocations join the session to the relay; networks observe sustained flows to TURN ports or TLS endpoints; the peer sees the allocated relay. **Captured node:** application state and ephemeral TURN credentials may reveal the realm and rendezvous service. Minimize exposure with per-device, short-lived credentials and keep operator authentication only at the controller.
+
+## Outbound-only rendezvous or reverse overlay
+
+**Mechanics:** a node behind NAT initiates an authenticated connection to an organization-controlled broker. The operator separately authenticates to the broker, which authorizes a narrow management channel; neither inbound port forwarding nor a direct operator-to-node route is required.
+
+**Pros:** stable behind NAT and captive last miles; central revocation and audit; field-node address changes do not require operator discovery; cleanly separates operator identity from the node credential.
+
+**Cons:** the broker becomes a high-value correlation point; periodic keepalives are recognizable; a broad tunnel can become an unsafe pivot; loss of the broker ends management.
+
+**Procedure:** follow [Capture-Resilient Authorized Field Nodes](capture-resilient-authorized-field-nodes.md#step-4-stable-outbound-rendezvous): issue one scoped device identity, permit only an owned broker and approved management service, use authenticated keepalive, enforce fail-closed routing, test address changes and reboot recovery, and revoke the identity during the loss drill. WireGuard documents a 25-second persistent keepalive as a broadly useful NAT interval when it is actually needed.<sup>[[20]](#references)</sup>
+
+**Detection:** broker and identity-provider logs map both sides; the access network sees a repeated encrypted destination/cadence; endpoint inventory shows the overlay agent. **Captured node:** assume its device key, broker name, tunnel addresses and cached task data are exposed. It must contain no operator private key, personal account or reusable controller token.
+
+## Pull mailbox, message queue or object-store rendezvous
+
+**Mechanics:** a field workload polls an authenticated mailbox for signed, pre-approved jobs and posts bounded results. The operator writes to the queue through a separate control plane; there is no interactive socket between them.
+
+**Pros:** tolerates intermittent links; decouples timing and addressing; quotas and schemas can constrain capability; easy centralized audit and revocation.
+
+**Cons:** polling cadence and stable object/queue names fingerprint the system; provider logs join producer and consumer; delayed control; captured queued data may expose the exercise.
+
+**Procedure:** (1) create one engagement queue and one device identity; (2) define a signed schema of benign, explicitly scoped jobs; (3) set message TTL, maximum result size and rate; (4) allow the node to pull only its queue and write only its result prefix; (5) test offline accumulation, duplicate delivery and revocation; (6) centralize immutable access logs; (7) delete the queue after retention requirements are met.
+
+**Detection:** hunt for periodic API calls by an unusual process, stable bucket/object/queue paths, identical user-agent or TLS behavior, and a fetch-then-new-connection sequence. **Captured node:** local cache can reveal pending jobs and object names; keep cache encrypted, bounded and disposable, while preserving authoritative controller logs.
+
+## Dual-uplink failover and connection migration
+
+**Mechanics:** an approved field node has two independent uplinks—such as venue Ethernet/Wi-Fi and organization cellular—and keeps its control session through an overlay or message broker as routes change. This is availability engineering, not anonymity.
+
+**Pros:** survives one provider, AP or captive-portal failure; supports planned maintenance; permits quick isolation of a suspect path.
+
+**Cons:** two providers create two location/account records; simultaneous use makes correlation easier; route and DNS leaks during failover; cellular co-location evidence remains.
+
+**Procedure:** (1) register both organization-owned interfaces and providers; (2) assign deterministic route priorities and health checks to owned endpoints; (3) bind DNS and management to the overlay; (4) prevent the secondary path from accepting inbound traffic; (5) unplug each path and verify session recovery, source policy and no direct destination access; (6) alert on unplanned path change; (7) document data use and roaming limits.
+
+**Detection:** correlate the same device certificate, request grammar and timing across ASNs; local inventory sees both radios; carriers/venues retain their own records. **Captured node:** both SIM/device identifiers and known SSIDs may be visible; use organization assets and never co-locate or pair the node with personal devices.
+
+## Organization private APN or managed cellular tunnel
+
+**Mechanics:** a carrier private APN places enrolled SIMs into a private routed domain or tunnels traffic to an enterprise gateway. It separates the device from the public mobile Internet but does not hide it from the carrier or contracting organization.
+
+**Pros:** stable private addressing; carrier-level enrollment and traffic policy; avoids public inbound exposure; useful for authorized remote appliances.
+
+**Cons:** subscriber, IMSI/IMEI, cell and billing attribution are strong; procurement lead time and cost; carrier/gateway outage; not anonymous to the operator.
+
+**Procedure:** (1) contract the APN in the assessment organization's name; (2) whitelist only registered SIMs and gateway prefixes; (3) add application-layer mutual authentication; (4) restrict the APN route to the rendezvous and update services; (5) test SIM removal, roaming, public-Internet breakout and revocation; (6) monitor carrier and gateway records; (7) cancel or quarantine every SIM at closeout.
+
+**Detection:** carrier inventory and cell telemetry, APN gateway flows, SIM/IMEI mismatch and enterprise asset records. **Captured node:** the SIM and modem identify the contract even when storage is encrypted; capture resilience therefore means rapid suspension and narrow authorization, not deniability.
+
+## Long-range point-to-point wireless bridge
+
+**Mechanics:** directional Wi-Fi or another licensed/unlicensed point-to-point radio connects two owner-approved sites, with Internet egress at the remote site. It can move the apparent IP location without using a commercial proxy.
+
+**Pros:** high throughput; independent of intermediate wired carriers; controllable RF and routing; useful for testing segmentation and remote-site monitoring.
+
+**Cons:** line-of-sight, spectrum, landlord and regulatory constraints; distinctive RF emissions and hardware; both endpoints are physical evidence; weather/power/alignment affect stability.
+
+**Procedure:** (1) obtain written permission for both sites and verify spectrum/power rules; (2) survey the path without transmitting outside approved parameters; (3) use authenticated encryption and a management VLAN; (4) restrict the bridge to an owned rendezvous or test subnet; (5) test failover, alignment, power recovery and RF containment; (6) label/inventory both radios; (7) remove them and verify configuration reset after the exercise.
+
+**Detection:** RF surveys, spectrum analysis, rooftop/site inspection, bridge MAC/OUI, management traffic and remote-site egress logs. **Captured node:** configuration reveals its peer and management domain; use unique exercise credentials, no personal management accounts and rapid peer-key revocation.
+
+## Consented cooperative or community exit
+
+**Mechanics:** volunteers or partner organizations knowingly run relays under a published policy. Traffic exits from a shared community pool while the coordination layer accounts for abuse and revocation.
+
+**Pros:** diverse non-cloud networks; explicit consent is safer than proxyware; shared governance can distribute trust; useful for research and censorship-resilience studies.
+
+**Cons:** small pools and membership records reduce anonymity; exit operators receive complaints and observe traffic metadata; malicious participants, variable uptime and jurisdiction differences.
+
+**Procedure:** (1) publish an acceptable-use and logging policy; (2) obtain informed opt-in from each operator; (3) issue a unique relay identity and restrict destinations/rates; (4) provide abuse handling and one-action revocation; (5) send only authorized traffic to owned endpoints during testing; (6) measure churn and correlation exposure; (7) remove the relay cleanly when consent ends.
+
+**Detection:** membership/control-plane records, relay certificates, common software fingerprint and exit behavior identify the pool. **Captured node:** relay configuration may identify the cooperative but should not contain client identities; store client-to-session accountability at the authorized controller under access control.
+
+## IPv6 temporary addresses and prefix rotation
+
+**Mechanics:** IPv6 privacy extensions create temporary interface identifiers so a stable address is not reused for every outbound connection. Provider prefix changes can add rotation, but the delegated prefix, subscriber record and upper-layer fingerprint remain.<sup>[[21]](#references)</sup>
+
+**Pros:** reduces passive long-term tracking by a stable interface identifier; built into common operating systems; no relay overhead.
+
+**Cons:** not source anonymity; ISP and local network still know the prefix/device; DNS, accounts and browser state link sessions; address churn complicates allowlists and logging.
+
+**Procedure:** (1) inspect current stable and temporary addresses on an owned client; (2) enable the OS-supported privacy-address default rather than third-party spoofing; (3) request an owned IPv6 endpoint repeatedly across address lifetimes; (4) confirm inbound services bind only intended stable addresses; (5) retain DHCPv6/RA/neighbor and precise endpoint logs; (6) test VPN/firewall behavior for every IPv6 address.
+
+**Detection:** correlate delegated prefix, layer-2 identity, neighbor discovery, account and endpoint telemetry instead of treating one address as one device. **Captured node:** network profiles and interface identifiers remain; temporary addressing prevents one passive identifier, not forensic attribution.
+
+## Capture/compromise exposure matrix
+
+This table applies a capture-resilience check to every family above. “Minimize” means reduce secrets and blast radius on authorized assets; it never means clearing evidence or hiding from an investigation.
+
+| Technique family | A captured endpoint/relay can reveal | Minimum authorized control |
+|---|---|---|
+| NAT/CGNAT, public Wi-Fi, travel router | known networks, DHCP/portal history, MACs, tunnel peer | separate organization device; private MAC where supported; no personal accounts; controller inventory |
+| VPN, VPS, HTTP/SOCKS/SSH, multi-hop | provider/hostnames, keys, routes, logs and adjacent hop | one identity per engagement; short TTL; narrow routes; broker-side revocation; no master keys |
+| OHTTP/ODoH, MASQUE, split-provider relay | relay/gateway configuration, application identifiers and cached requests | minimize payload identifiers; pin approved config; bounded cache; strict no-direct fallback |
+| Tor, bridge, onion service, I2P, mixnet, GNUnet | installed software, bridge/onion material, local state and peer history | standard client; separate service keys; encrypted minimal state; rotate compromised service identity |
+| Remote browser/VDI/jump host | workspace token, clipboard/files and remote tenant | phishing-resistant MFA at gateway; disabled transfer channels; rapid session revocation |
+| Cellular, satellite, private APN | SIM/eSIM, IMEI/terminal identity, provider and approximate location | organization contract; no personal co-location; narrow APN/overlay policy; provider suspension runbook |
+| Residential/cooperative proxy, ORB lab | agent identity, controller/next hop, cached traffic | only consented/owned nodes; signed agent; per-node credential; controller-held participant mapping |
+| CDN/fronting, fast flux, serverless | tenant/origin/config, API tokens, deployment and billing references | dedicated project; least-privilege role; short-lived deploy token; provider audit retained centrally |
+| Dead drop, pull mailbox, store-and-forward | object names, queue, cached jobs/results and custody data | signed bounded jobs; TTL; encrypted cache; separate producer identity; immutable server logs |
+| Drop, nearest-neighbor, long-range bridge | serial/radio/SSID/peer, device key, physical placement artifacts | written placement; unique device identity; no operator secret; tamper/state telemetry; revoke and recover |
+| TURN, reverse overlay, dual-uplink | realm/broker, device credential, peer/route and uplink profiles | outbound-only narrow service; short-lived device credential; independent operator login; fail-closed paths |
+| IPv6 temporary addressing | profiles, prefix history and endpoint/application state | treat as anti-tracking only; preserve network logs; pair with endpoint compartmentation |
 
 ## Choosing and testing a path
 
@@ -427,3 +542,6 @@ Every entry uses the same fields. “Procedure” means a lawful deployment or a
 - [16] [MITRE ATT&CK — Domain Fronting (T1090.004)](https://attack.mitre.org/techniques/T1090/004/)
 - [17] [MITRE ATT&CK — Fast Flux DNS (T1568.001)](https://attack.mitre.org/techniques/T1568/001/)
 - [18] [Volexity — The Nearest Neighbor Attack](https://www.volexity.com/blog/2024/11/22/the-nearest-neighbor-attack-how-a-russian-apt-weaponized-nearby-wi-fi-networks-for-covert-access/)
+- [19] [RFC 8656 — Traversal Using Relays around NAT (TURN)](https://www.rfc-editor.org/rfc/rfc8656.html)
+- [20] [WireGuard — Quick Start: NAT and Firewall Traversal Persistence](https://www.wireguard.com/quickstart/)
+- [21] [RFC 8981 — Temporary Address Extensions for Stateless Address Autoconfiguration in IPv6](https://www.rfc-editor.org/rfc/rfc8981.html)

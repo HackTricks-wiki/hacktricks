@@ -13,7 +13,7 @@ The material deliberately includes techniques reported in government and APT ope
 
 This is therefore both an offensive tradecraft reference and a defender's attribution manual. The aim is to make advanced behavior understandable and testable, not to pretend that one commercial service makes an operator invisible.
 
-**Research cutoff:** 7 September 2026. Provider availability, product behavior, sanctions, cash/prepaid thresholds, SIM-registration rules, and crypto regulation change frequently; verify them again before relying on them.
+**Research cutoff:** 8 September 2026. Provider availability, product behavior, sanctions, cash/prepaid thresholds, SIM-registration rules, and crypto regulation change frequently; verify them again before relying on them.
 
 {% hint style="danger" %}
 Understanding a technique is not authorization to perform it. The pages explain criminal abuse such as compromised routers, a neighbor's Wi-Fi, hidden devices, stolen identities and laundering at the mechanism-and-detection level. Reproduction steps use only owned lab systems, synthetic identities and test assets. Never access a third party, evade KYC or sanctions, or conceal criminal proceeds. Unauthorized access is criminalized in many jurisdictions, including under the US CFAA, the UK Computer Misuse Act, and EU member-state laws implementing Directive 2013/40/EU.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup><sup>[[4]](#references)</sup>
@@ -84,6 +84,7 @@ Then select the smallest sustainable controls. A complicated plan that is routin
 
 - [Anonymous Internet Access Technique Catalog](anonymous-internet-access-techniques.md) — canonical inventory with pros, cons, deployment/emulation steps and detection for each access-path family.
 - [Anonymous Payment Technique Catalog](anonymous-payment-techniques.md) — canonical inventory with pros, cons, lawful workflow and detection for each payment family.
+- [Capture-Resilient Authorized Field Nodes](capture-resilient-authorized-field-nodes.md) — stable outbound rendezvous, dual-uplink recovery, secret minimization, capture drills and discovery/compromise monitoring for owner-approved drops.
 - [Offensive Infrastructure and Attribution Evasion](offensive-infrastructure-and-attribution-evasion.md) — ORBs, multi-hop/residential relays, redirectors, fronting, fast flux, domain shadowing, web services and persona infrastructure.
 - [Covert Physical and Wireless Access](covert-physical-wireless-access.md) — nearest-neighbor attacks, public access, drop devices, cellular backhaul and satellite abuse.
 - [Government and APT Case Studies](government-and-apt-case-studies.md) — reconstructed public cases and the telemetry that exposed them.
@@ -111,6 +112,7 @@ Then select the smallest sustainable controls. A complicated plan that is routin
 |---|---|---|
 | All Internet-access technique families | [Anonymous Internet Access Technique Catalog](anonymous-internet-access-techniques.md) | Per-technique detection plus [reproducible labs](authorized-adversary-emulation-labs.md) |
 | All payment technique families | [Anonymous Payment Technique Catalog](anonymous-payment-techniques.md) | Per-technique detection plus [synthetic payment lab](authorized-adversary-emulation-labs.md#lab-6-synthetic-peel-chain-and-bridge-graph) |
+| Owner-approved physical field node | [Capture-Resilient Authorized Field Nodes](capture-resilient-authorized-field-nodes.md) | Capture drill, off-device state monitoring and suspected-discovery runbook |
 | ORBs, residential relays, fronting, fast flux and dead drops | [Offensive Infrastructure and Attribution Evasion](offensive-infrastructure-and-attribution-evasion.md) | [Owned emulation labs](authorized-adversary-emulation-labs.md#lab-1-owned-orb-and-redirector-chain) |
 | Nearest-neighbor Wi-Fi, drops, cellular and satellite paths | [Covert Physical and Wireless Access](covert-physical-wireless-access.md) | [Owned wireless-pivot lab](authorized-adversary-emulation-labs.md#lab-4-nearest-neighbor-wireless-pivot) |
 | Cross-layer infrastructure and operator attribution | [Attribution, Detection and Countermeasures](attribution-detection-and-countermeasures.md) | [Exercise report template](authorized-adversary-emulation-labs.md#exercise-report-template) |

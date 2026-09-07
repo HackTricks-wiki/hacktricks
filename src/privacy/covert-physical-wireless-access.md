@@ -1,5 +1,7 @@
 # Covert Physical and Wireless Access
 
+For a detailed, owner-approved implementation covering outbound rendezvous, power/uplink recovery, minimal device-held secrets, capture testing and monitoring for possible discovery, see [Capture-Resilient Authorized Field Nodes](capture-resilient-authorized-field-nodes.md).
+
 Changing the network path can also change apparent physical origin. A sophisticated actor may use a nearby compromised system, a hidden device, public access, cellular backhaul or a satellite receiver so that target logs point away from the operator. None of these removes physical, radio or provider evidence; it moves attribution into different datasets.
 
 ## Technique matrix

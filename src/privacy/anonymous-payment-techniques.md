@@ -395,6 +395,134 @@ The procedures below are for lawful funds, truthful accounts and authorized proc
 
 **Detection:** purchase/funding and eventual sweep/redemption, device serial/tamper evidence, delivery/meeting and endpoint records.
 
+## Merchant-scoped invoice or one-time payment request
+
+**Mechanics:** the merchant creates a single-use request containing amount, expiry and order reference. The payer settles it through a supported rail without exposing a reusable credential directly to the merchant; the issuer or payment processor may still identify both parties.
+
+**Pros:** limits credential reuse and accidental cross-merchant identifiers; exact amount/expiry reduce errors; compatible with ordinary accounting and refunds.
+
+**Cons:** invoice, delivery, browser, processor and issuer still link the order; a unique amount/time can strengthen correlation; malicious payment links are common.
+
+**Procedure:** (1) authenticate the merchant independently; (2) request a fresh invoice with exact amount, asset/network and expiry; (3) inspect the destination and refund rules; (4) pay from the approved engagement compartment; (5) verify the merchant acknowledges the same invoice; (6) preserve receipt and transaction reference; (7) expire rather than reuse the request.
+
+**Detection:** merchant and processor join invoice, session and settlement; unique amounts/timing and delivery identify the payer. **Captured wallet/device:** invoice history exposes counterparties and purpose; minimize unnecessary memo data, encrypt the device and keep authoritative accounting in the controlled finance system.
+
+## Prepaid service credit and capability token
+
+**Mechanics:** a service converts a conventional payment into bounded internal credits or a bearer capability. Subsequent API/resource use can avoid presenting the original card on every request, but the service can often map issuance to redemption.
+
+**Pros:** caps spend and compromise loss; separates day-to-day workers from the funding credential; supports per-project budgets and revocation.
+
+**Cons:** usually pseudonymous, not anonymous; service database, redemption IP and unique usage pattern link activity; bearer tokens can be stolen; refunds may require the original payer.
+
+**Procedure:** (1) purchase credits through an organization account; (2) create one project and budget; (3) issue a narrow token with service, amount and expiry constraints; (4) store it only in the approved secret manager or workload identity path; (5) test rejection outside scope and after expiry; (6) monitor consumption; (7) revoke and reconcile unused value.
+
+**Detection:** provider joins funding account, project, token issuance and usage; defenders alert on geographic/process changes and anomalous consumption. **Captured node:** assume its remaining capability can be spent; use short expiry, low balance, audience binding and immediate server-side revocation.
+
+## Privacy Pass or blinded authorization token
+
+**Mechanics:** an issuer produces a privacy-preserving authorization token that an origin can validate without linking redemption to issuance. It can represent paid entitlement or rate-limited access, but is not itself a general currency. The architecture separates client, attester, issuer and origin roles and warns that IP/timing or collusion can undo unlinkability.<sup>[[18]](#references)</sup>
+
+**Pros:** unlinkable redemption for supported services; no reusable account cookie at the origin; cached tokens can separate issuance and use in time.
+
+**Cons:** application-specific; issuer/attester trust and anonymity-set partitioning; IP and browser metadata remain; token theft or distinctive issuance timing can correlate use.
+
+**Procedure:** (1) use an implementation conforming to the relevant Privacy Pass token type; (2) define exactly what entitlement the token proves; (3) separate issuer and origin administration where the threat model requires it; (4) minimize challenge metadata; (5) issue several test tokens and redeem each once at owned origins; (6) compare logs for forbidden stable identifiers; (7) test replay, expiry and revocation/abuse controls.
+
+**Detection:** origins see redemption IP/time and token validity; issuers/attesters see issuance context; analysts test timing and metadata partitions without assuming a cryptographic break. **Captured client:** unspent bearer tokens may be usable; bound their value, lifetime and audience, and never cache the funding credential with them.
+
+## Delegated organization procurement or fiscal sponsor
+
+**Mechanics:** an authorized procurement team, reseller or fiscal sponsor contracts and pays while the operational team receives a bounded service. This is role separation with truthful records, not a nominee or false identity.
+
+**Pros:** vendors need not receive every operator's identity or personal payment details; central compliance, tax and refund handling; clear budget and offboarding.
+
+**Cons:** sponsor knows the beneficiary and purpose; contracts, approvals, delivery and accounts remain; added delay/fees; weak separation if the same individual administers every layer.
+
+**Procedure:** (1) document business purpose, beneficiary and approving authority; (2) select an organization-approved intermediary; (3) contract under truthful details; (4) provision a project-scoped subaccount with no personal billing credential; (5) separate finance administrators from operators; (6) reconcile invoices and access; (7) terminate both service and delegated access at closeout.
+
+**Detection:** procurement, identity-provider, vendor and delivery records join the chain. **Captured operational device:** it should reveal the service project but not finance credentials; keep invoices and payer identities in the finance system, not on field nodes.
+
+## Escrow or conditional settlement
+
+**Mechanics:** a trusted escrow agent or smart contract holds value until documented conditions are met. It can reduce direct disclosure between payer and payee, while escrow and underlying payment rails retain the relationship.
+
+**Pros:** dispute and delivery protection; payer and merchant can expose fewer reusable credentials to each other; auditable release conditions.
+
+**Cons:** escrow custody/contract risk, fees and identity obligations; on-chain contracts are public; order, shipping and dispute data remain; not anonymous to the intermediary.
+
+**Procedure:** (1) verify legal entity, custody, fees, dispute forum and supported assets; (2) create an exact written milestone and refund path; (3) fund from an approved organization account; (4) verify receipt and release authorization independently; (5) release only after evidence; (6) preserve the complete audit record; (7) close unused permissions or contract approvals.
+
+**Detection:** escrow account/contract events, funding and release time, beneficiary and dispute records reveal the transaction. **Captured device:** session tokens or contract approvals may permit release; require separate approver/MFA and revoke active sessions on loss.
+
+## Batched or pooled organization settlement
+
+**Mechanics:** many approved obligations are aggregated and settled in fewer bank or blockchain transactions, with a private internal ledger assigning each share. Batching can reduce public per-purchase detail but the coordinator retains complete attribution.
+
+**Pros:** lower fees; fewer public graph edges; hides individual line items from a public observer when amounts are aggregated; straightforward internal accounting.
+
+**Cons:** coordinator is a complete observer and high-value target; distinctive totals/timing can correlate; custody and reconciliation risk; can resemble structuring if abused.
+
+**Procedure:** (1) define participants and lawful obligations in the accounting system; (2) set a regular, business-justified batch window rather than thresholds designed to avoid controls; (3) require dual approval of the aggregate; (4) settle to authenticated recipients; (5) reconcile every internal line to the batch; (6) handle refunds as linked corrections; (7) protect ledger access and retain it per policy.
+
+**Detection:** coordinator ledger, approval and beneficiary records provide ground truth; public analysts use input/output/value/time clustering cautiously. **Captured payer device:** it should contain only its requisition, not the pool's signing key or participant ledger.
+
+## Account-abstraction paymaster or sponsored gas
+
+**Mechanics:** a relayer/bundler submits a smart-account operation and a paymaster pays transaction fees, avoiding a direct native-gas funding edge from the user wallet. It improves one graph property; the operation, contract and service telemetry remain public or observable.<sup>[[19]](#references)</sup>
+
+**Pros:** removes a common gas-funding link; supports scoped sponsorship and rate limits; better onboarding for legitimate privacy applications.
+
+**Cons:** paymaster/bundler/RPC/front end can correlate requests; contract events and public inputs remain; sponsorship policy fingerprints a cohort; malicious contracts or approvals can steal assets.
+
+**Procedure:** (1) use an audited maintained smart account and paymaster on the correct network; (2) inspect which fields are public and what the sponsor logs; (3) limit sponsorship by contract, function, amount, nonce and expiry; (4) test with low value; (5) submit through the application's intended privacy-aware path; (6) verify the operation and fee payer on chain; (7) revoke allowances/session keys and retain compliance records.
+
+**Detection:** join UserOperation, EntryPoint, paymaster, bundler/RPC and application logs; cluster identical sponsorship policy cautiously. **Captured wallet:** session keys and pending approvals may be usable even without gas; scope them tightly and revoke through the account's recovery policy.
+
+## Threshold or multisignature payment authorization
+
+**Mechanics:** spending requires a threshold of independent signers. It does not hide the transaction, but lets payment authority be separated from any captured laptop, field node or single operator.
+
+**Pros:** strong compromise and insider resistance; accountable approval; no single field device holds complete signing authority; supports recovery.
+
+**Cons:** coordination and availability; signer/device/account metadata can correlate participants; bad backup design causes loss; public multisig patterns can be identifiable.
+
+**Procedure:** (1) define signers, threshold, limits and recovery before funding; (2) initialize on separate supported hardware/accounts; (3) verify addresses and backups independently; (4) give field workloads only unsigned requisition capability; (5) require out-of-band review of recipient, amount and purpose; (6) test recovery and one-signer loss with small value; (7) rotate a signer after compromise.
+
+**Detection:** approval system, signer device and public script/contract provide evidence; defenders alert on policy or signer-set changes. **Captured node:** it should expose at most one low-authority session key or unsigned request; never cache quorum material together.
+
+## Closed-loop community or event currency
+
+**Mechanics:** a cooperative, conference or private test environment issues credits redeemable only among enrolled participants. Internal transfer may expose less to global payment networks, while the operator controls issuance and redemption.
+
+**Pros:** bounded economic domain; can test offline or privacy-preserving payment UX; limits external card exposure; clear experimental controls.
+
+**Cons:** small anonymity set; operator and merchants observe activity; limited acceptance and redemption; licensing, consumer-protection and tax rules may apply even to local value.
+
+**Procedure:** (1) obtain legal/compliance review and publish issuer terms; (2) enroll consenting test participants; (3) cap issuance and prohibit cash-like misuse; (4) use fresh payment requests and minimize public participant identifiers; (5) record aggregate reserves and private individual receipts; (6) test loss/refund/redemption; (7) close the ledger and return residual value as promised.
+
+**Detection:** issuer ledger, enrollment, merchant and redemption records reconstruct flows; unusual circular transfers or rapid cash-out warrant review. **Captured wallet:** local balance and counterparties may be exposed; cap value, encrypt state and support issuer-side freeze/reissue with an auditable record.
+
+## Capture/compromise exposure matrix
+
+This applies a seizure/loss test to every family. The objective is to limit spend authority and unrelated identity disclosure while retaining lawful accounting—not to erase transactions or defeat an investigation.
+
+| Technique family | A captured wallet/device/account can reveal | Minimum authorized control |
+|---|---|---|
+| Cash, money order, COD, physical bearer value | receipts, serials, notes, remaining bearer value and physical contacts | carry only approved amount; separate private accounting; prompt loss report; no false records |
+| Prepaid, gift, voucher, service credits | balance, issuer, activation, redemption and account/session tokens | low balance; one purpose; truthful registration; issuer freeze/revocation where available |
+| Virtual/tokenized card, wallet token, payment app | issuer account, device token, transactions, recovery and merchant history | device lock; transaction alerts; merchant scope; remote issuer suspension; no shared recovery account |
+| Bank compartment, delegated procurement, red-team procurement | organization, approvers, vendor, invoices and project | role separation; least-privilege subaccount; finance credentials never on operational/field nodes |
+| Invoice, escrow, batch settlement | counterparty, purpose, pending approval, coordinator or dispute trail | single-use request; separate approver; limited session; central authoritative ledger |
+| Bitcoin, Silent Payments, PayJoin/CoinJoin | seed/keys, labels, addresses, transaction graph and network configuration | hardware/offline signing; encrypted wallet; passphrase limits; watch-only field view; documented recovery |
+| Lightning/BOLT 12 | seed, channels, invoices, peers/LSP and payment database | minimal hot balance; encrypted backup; separate node identity; close/recover per documented plan |
+| Monero, Zcash, MWEB, ZK applications | spend/view keys, local wallet history, RPC and boundary transactions | separate spend/view roles; hardware support where available; no exchange session on field node |
+| Stablecoins, swaps, bridges and DEX | transparent graph, approvals, RPC/front-end state and destination assets | revoke allowances; verified contracts; low-value test; complete reconciliation |
+| Cashu, Fedimint, Taler, Privacy Pass | bearer tokens, mint/federation/exchange, issuance/redemption cache | small balance; encrypted backup as protocol supports; redeem/reissue; never colocate funding credential |
+| Paymaster, multisig/threshold | session key, one signer, pending operations and sponsor policy | narrow session key; independent quorum; signer rotation; field device cannot reach threshold |
+| Mixer/peel/structuring, nominees/fronts, refund/gambling abuse | incriminating provider, communications, graph and participant records | no operational use; emulate with synthetic/testnet evidence only |
+| Community/event currency | enrollment, local balance, counterparties and redemption | capped value; issuer freeze/reissue; consent and private auditable ledger |
+
 ## Selection and verification workflow
 
 1. Name which party must not learn which field.
@@ -424,3 +552,5 @@ The procedures below are for lawful funds, truthful accounts and authorized proc
 - [15] [FATF — Virtual Assets Red Flag Indicators](https://www.fatf-gafi.org/en/publications/Methodsandtrends/Virtual-assets-red-flag-indicators.html)
 - [16] [US FinCEN — Administrators, exchangers and users of virtual currency](https://www.fincen.gov/resources/statutes-regulations/guidance/application-fincens-regulations-persons-administering)
 - [17] [EU Regulation 2023/1113 — transfer information and crypto-assets](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32023R1113)
+- [18] [RFC 9576 — The Privacy Pass Architecture](https://www.rfc-editor.org/rfc/rfc9576.html) and [RFC 9577 — Privacy Pass HTTP Authentication](https://www.rfc-editor.org/rfc/rfc9577.html)
+- [19] [ERC-4337 — Account Abstraction Using an Alternative Mempool](https://eips.ethereum.org/EIPS/eip-4337) and [Ethereum.org — Privacy application architecture](https://ethereum.org/latest/privacy-apps-on-ethereum/)

@@ -105,6 +105,7 @@
 - [Offensive Privacy, Attribution Evasion and OPSEC](privacy/README.md)
   - [Anonymous Internet Access Technique Catalog](privacy/anonymous-internet-access-techniques.md)
   - [Anonymous Payment Technique Catalog](privacy/anonymous-payment-techniques.md)
+  - [Capture-Resilient Authorized Field Nodes](privacy/capture-resilient-authorized-field-nodes.md)
   - [Offensive Infrastructure and Attribution Evasion](privacy/offensive-infrastructure-and-attribution-evasion.md)
   - [Covert Physical and Wireless Access](privacy/covert-physical-wireless-access.md)
   - [Government and APT Case Studies](privacy/government-and-apt-case-studies.md)
