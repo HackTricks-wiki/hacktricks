@@ -100,6 +100,17 @@
   - [Web3 Signing Workflow Compromise Safe Delegatecall Proxy Takeover](blockchain/blockchain-and-crypto-currencies/web3-signing-workflow-compromise-safe-delegatecall-proxy-takeover.md)
 - [Lua Sandbox Escape](generic-methodologies-and-resources/lua/bypass-lua-sandboxes/README.md)
 
+# 🕵️ Privacy
+
+- [Privacy](privacy/README.md)
+  - [Threat Modeling and Identity Separation](privacy/threat-modeling-and-identity-separation.md)
+  - [Network Privacy and Anonymous Connectivity](privacy/network-privacy-and-anonymous-connectivity.md)
+  - [Privacy Operating Systems](privacy/privacy-operating-systems.md)
+  - [Authorized Red-Team Infrastructure](privacy/authorized-red-team-infrastructure.md)
+  - [Private Digital Payments](privacy/private-digital-payments.md)
+  - [Cryptocurrency Privacy](privacy/cryptocurrency-privacy.md)
+  - [Operational Privacy Playbooks](privacy/operational-privacy-playbooks.md)
+
 # 🧙‍♂️ Generic Hacking
 
 - [Archive Extraction Path Traversal](generic-hacking/archive-extraction-path-traversal.md)
