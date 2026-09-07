@@ -62,10 +62,12 @@ Then select the smallest sustainable controls. A complicated plan that is routin
 
 - [Threat Modeling & Identity Separation](threat-modeling-and-identity-separation.md)
 - [Network Privacy & Anonymous Connectivity](network-privacy-and-anonymous-connectivity.md)
+- [Advanced Network Privacy Architectures](advanced-network-privacy-architectures.md)
 - [Privacy Operating Systems](privacy-operating-systems.md)
 - [Authorized Red-Team Infrastructure](authorized-red-team-infrastructure.md)
 - [Private Digital Payments](private-digital-payments.md)
 - [Cryptocurrency Privacy](cryptocurrency-privacy.md)
+- [Privacy-Preserving Payment Protocols](privacy-preserving-payment-protocols.md)
 - [Operational Privacy Playbooks](operational-privacy-playbooks.md)
 
 ## References

@@ -123,6 +123,8 @@ Centralized stablecoins add issuer control. Current USDC and Tether terms reserv
 
 Before material value, cross-border activity, privacy-enhancing coordination or business-like exchange/transmission, obtain current professional advice for the relevant jurisdictions.
 
+For Bitcoin Silent Payments, fully shielded Zcash, GNU Taler, federated Chaumian e-cash, and BOLT 12, continue to [Privacy-Preserving Payment Protocols](privacy-preserving-payment-protocols.md).
+
 ## References
 
 - [1] [Bitcoin.org — Protect your privacy](https://bitcoin.org/en/protect-your-privacy) and [Bitcoin Developer Guide — Transactions](https://developer.bitcoin.org/devguide/transactions.html)

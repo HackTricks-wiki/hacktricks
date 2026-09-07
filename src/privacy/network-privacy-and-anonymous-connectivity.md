@@ -123,6 +123,8 @@ Mixnets such as Nym or Katzenpost add fixed-size packets, delay, reordering, and
 - [ ] The observer table and residual traffic-correlation risk are accepted.
 - [ ] Provider policy, retention, and emergency contact are current.
 
+For split-knowledge relays, route-enforced workloads, pluggable transports, onion services, I2P, and disposable remote browsers, continue to [Advanced Network Privacy Architectures](advanced-network-privacy-architectures.md).
+
 ## References
 
 - [1] [EFF — Choosing the VPN That's Right for You](https://ssd.eff.org/module/choosing-vpn-thats-right-you)

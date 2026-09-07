@@ -105,10 +105,12 @@
 - [Privacy](privacy/README.md)
   - [Threat Modeling and Identity Separation](privacy/threat-modeling-and-identity-separation.md)
   - [Network Privacy and Anonymous Connectivity](privacy/network-privacy-and-anonymous-connectivity.md)
+  - [Advanced Network Privacy Architectures](privacy/advanced-network-privacy-architectures.md)
   - [Privacy Operating Systems](privacy/privacy-operating-systems.md)
   - [Authorized Red-Team Infrastructure](privacy/authorized-red-team-infrastructure.md)
   - [Private Digital Payments](privacy/private-digital-payments.md)
   - [Cryptocurrency Privacy](privacy/cryptocurrency-privacy.md)
+  - [Privacy-Preserving Payment Protocols](privacy/privacy-preserving-payment-protocols.md)
   - [Operational Privacy Playbooks](privacy/operational-privacy-playbooks.md)
 
 # 🧙‍♂️ Generic Hacking
