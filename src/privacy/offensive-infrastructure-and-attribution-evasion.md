@@ -2,6 +2,8 @@
 
 An operator rarely obtains meaningful anonymity from a single proxy. Real campaigns build a **separation graph**: the operator reaches an access node, traversal nodes hide that node from the exit, redirectors protect the real C2, and disposable names point to the public edge.
 
+Use the [Anonymous Internet Access Technique Catalog](anonymous-internet-access-techniques.md) for a normalized pros/cons/deployment/detection view of every path. This page goes deeper into adversarial infrastructure composition.
+
 ```text
 operator -> access relay -> traversal mesh -> exit/redirector -> target
                 |                 |                |

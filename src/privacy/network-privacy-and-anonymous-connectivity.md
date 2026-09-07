@@ -2,6 +2,8 @@
 
 Network privacy is a routing decision, not a complete identity. Select a path by asking who should be unable to connect **source**, **destination**, **content**, and **timing**.
 
+For the normalized inventory—`Pros`, `Cons`, step-by-step `Procedure`, and `Detection` for every access-path family—start with the [Anonymous Internet Access Technique Catalog](anonymous-internet-access-techniques.md). This page expands the common deployable options.
+
 ## What each observer can usually see
 
 | Path | Local network / ISP | Intermediary | Destination | Main limitation | Relative speed |

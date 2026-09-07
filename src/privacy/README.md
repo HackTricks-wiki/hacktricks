@@ -82,6 +82,8 @@ Then select the smallest sustainable controls. A complicated plan that is routin
 
 ## Offensive-first section map
 
+- [Anonymous Internet Access Technique Catalog](anonymous-internet-access-techniques.md) — canonical inventory with pros, cons, deployment/emulation steps and detection for each access-path family.
+- [Anonymous Payment Technique Catalog](anonymous-payment-techniques.md) — canonical inventory with pros, cons, lawful workflow and detection for each payment family.
 - [Offensive Infrastructure and Attribution Evasion](offensive-infrastructure-and-attribution-evasion.md) — ORBs, multi-hop/residential relays, redirectors, fronting, fast flux, domain shadowing, web services and persona infrastructure.
 - [Covert Physical and Wireless Access](covert-physical-wireless-access.md) — nearest-neighbor attacks, public access, drop devices, cellular backhaul and satellite abuse.
 - [Government and APT Case Studies](government-and-apt-case-studies.md) — reconstructed public cases and the telemetry that exposed them.
@@ -107,6 +109,8 @@ Then select the smallest sustainable controls. A complicated plan that is routin
 
 | Technique | Deployment guide | Verification/failure test |
 |---|---|---|
+| All Internet-access technique families | [Anonymous Internet Access Technique Catalog](anonymous-internet-access-techniques.md) | Per-technique detection plus [reproducible labs](authorized-adversary-emulation-labs.md) |
+| All payment technique families | [Anonymous Payment Technique Catalog](anonymous-payment-techniques.md) | Per-technique detection plus [synthetic payment lab](authorized-adversary-emulation-labs.md#lab-6-synthetic-peel-chain-and-bridge-graph) |
 | ORBs, residential relays, fronting, fast flux and dead drops | [Offensive Infrastructure and Attribution Evasion](offensive-infrastructure-and-attribution-evasion.md) | [Owned emulation labs](authorized-adversary-emulation-labs.md#lab-1-owned-orb-and-redirector-chain) |
 | Nearest-neighbor Wi-Fi, drops, cellular and satellite paths | [Covert Physical and Wireless Access](covert-physical-wireless-access.md) | [Owned wireless-pivot lab](authorized-adversary-emulation-labs.md#lab-4-nearest-neighbor-wireless-pivot) |
 | Cross-layer infrastructure and operator attribution | [Attribution, Detection and Countermeasures](attribution-detection-and-countermeasures.md) | [Exercise report template](authorized-adversary-emulation-labs.md#exercise-report-template) |

@@ -2,6 +2,8 @@
 
 Advanced payment systems can hide a payer from the merchant, hide a recipient or amount from a public ledger, or prevent a mint from linking withdrawal to redemption. These are different properties. None erases acquisition, device, network, delivery, accounting, sanctions or endpoint records.
 
+The [Anonymous Payment Technique Catalog](anonymous-payment-techniques.md) provides a standardized `Pros`, `Cons`, step-by-step `Procedure`, and `Detection` entry for every payment family. This page expands the advanced protocols.
+
 {% hint style="danger" %}
 Use only lawful funds and counterparties. Do not use privacy protocols to defeat required identification, sanctions, tax, source-of-funds checks or transaction reporting. Do not operate an exchange, mint or transmission service without understanding licensing, custody, AML and consumer-protection duties.
 {% endhint %}

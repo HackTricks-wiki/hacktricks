@@ -2,6 +2,8 @@
 
 Cryptocurrency privacy is a protocol-and-operations question, not a synonym for secrecy or immunity. Public ledgers, exchanges, wallet servers, network peers, merchants and later transactions expose different parts of the graph.
 
+Start with the [Anonymous Payment Technique Catalog](anonymous-payment-techniques.md) for the per-technique pros/cons/procedure/detection format. This page expands cryptocurrency-specific mechanics and operational limits.
+
 {% hint style="danger" %}
 This chapter is for lawful self-custody and data minimization. Do not use it to launder proceeds, evade sanctions/tax/reporting, transact with prohibited parties, mislead a regulated provider, or operate an unlicensed transmission service. Privacy technology does not change the legal origin or ownership of funds.
 {% endhint %}

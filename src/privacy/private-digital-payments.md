@@ -2,6 +2,8 @@
 
 Payment privacy is the controlled disclosure of transaction data. It is not a way to make illegal funds legitimate, evade tax or sanctions, defeat KYC, use false identities, or hide an unauthorized engagement. A payment can be private from a merchant while remaining fully visible to an issuer, network, employer, tax authority, or investigator.
 
+The [Anonymous Payment Technique Catalog](anonymous-payment-techniques.md) is the normalized inventory with `Pros`, `Cons`, lawful step-by-step `Procedure`, and `Detection` for each family. This page expands conventional payment methods.
+
 {% hint style="danger" %}
 Never use stolen accounts, synthetic identities, money mules, fictitious residency or source-of-funds claims, transaction splitting (“structuring”), or opaque “no-KYC card” brokers. Check current law and provider terms in every relevant jurisdiction.
 {% endhint %}
