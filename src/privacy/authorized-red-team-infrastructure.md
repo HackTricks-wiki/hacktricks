@@ -2,6 +2,8 @@
 
 For a professional red team, the goal is **controlled attribution**, not immunity from accountability. The target should not trivially see an operator's home IP or personal accounts, while the engagement owner must be able to identify the source, stop the operation, handle abuse reports, preserve evidence, and prove authorization.
 
+This page is the deployment baseline for a lawful engagement. For the adversary tradecraft it is meant to emulate—including compromised ORBs, residential relays, fronting, dead drops and nearby wireless pivots—start with [Offensive Infrastructure and Attribution Evasion](offensive-infrastructure-and-attribution-evasion.md) and [Government and APT Case Studies](government-and-apt-case-studies.md), then reproduce the required telemetry in the [authorized labs](authorized-adversary-emulation-labs.md).
+
 NIST defines rules of engagement (ROE) as pre-established constraints that grant authority for defined testing activities.<sup>[[1]](#references)</sup> Privacy architecture cannot expand that authority.
 
 ## Choose an egress pattern

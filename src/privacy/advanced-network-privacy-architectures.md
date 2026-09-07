@@ -128,14 +128,16 @@ Use I2P only when both ends intentionally support it, isolate its long-lived rou
 - Keep clocks correct for protocol security, but remove unnecessary precise timestamps from published artifacts.
 - Minimize session duration and stale infrastructure without rapid “fast-flux” rotation, which is conspicuous and damages accountability.
 
-## Techniques to reject
+## Techniques that cannot use uninvolved third parties
 
-- Residential/mobile proxy markets with unclear consent or provenance.
-- Open proxies, compromised routers, botnets, stolen cloud accounts, borrowed identities or third-party Wi-Fi.
-- Domain fronting, protocol mimicry or CDN abuse contrary to provider/client terms.
-- Custom encrypted tunnels advertised as “undetectable.” Encryption does not hide flow shape, endpoints or implementation fingerprints.
-- Chaining many consumer VPNs paid through the same account/device and expecting independent trust.
-- Random MAC/hostname/IP rotation as a substitute for account and physical separation.
+These are genuine adversary techniques, not imaginary or unimportant ones. Their mechanics and detection are covered in [Offensive Infrastructure and Attribution Evasion](offensive-infrastructure-and-attribution-evasion.md), [Covert Physical and Wireless Access](covert-physical-wireless-access.md), and the [APT case studies](government-and-apt-case-studies.md). During an authorized exercise, reproduce their observable behavior with owned substitutes:
+
+- model residential/mobile exit churn with controlled relay pools, never markets of unclear consent;
+- model open proxies, compromised routers and botnets with owned VMs/routers;
+- model stolen cloud accounts with a designated exercise tenant and synthetic victim identity;
+- model domain fronting on an owned reverse proxy rather than an unwilling CDN;
+- model third-party Wi-Fi with two isolated APs owned by the lab;
+- treat custom encryption, multi-VPN chains and identifier rotation as test hypotheses whose flow, account and endpoint artifacts remain detectable.
 
 For an authorized red team, any attempt to make traffic less recognizable must be an explicit detection objective in the ROE, have a controller-held attribution map, and include a stop/deconfliction mechanism.
 

@@ -102,7 +102,13 @@
 
 # 🕵️ Privacy
 
-- [Privacy](privacy/README.md)
+- [Offensive Privacy, Attribution Evasion and OPSEC](privacy/README.md)
+  - [Offensive Infrastructure and Attribution Evasion](privacy/offensive-infrastructure-and-attribution-evasion.md)
+  - [Covert Physical and Wireless Access](privacy/covert-physical-wireless-access.md)
+  - [Government and APT Case Studies](privacy/government-and-apt-case-studies.md)
+  - [Financial Obfuscation Tradecraft](privacy/financial-obfuscation-tradecraft.md)
+  - [Attribution, Detection and Countermeasures](privacy/attribution-detection-and-countermeasures.md)
+  - [Authorized Adversary-Emulation Labs](privacy/authorized-adversary-emulation-labs.md)
   - [Threat Modeling and Identity Separation](privacy/threat-modeling-and-identity-separation.md)
   - [Network Privacy and Anonymous Connectivity](privacy/network-privacy-and-anonymous-connectivity.md)
   - [Advanced Network Privacy Architectures](privacy/advanced-network-privacy-architectures.md)
