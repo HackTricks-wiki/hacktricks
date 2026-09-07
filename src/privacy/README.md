@@ -82,8 +82,8 @@ Then select the smallest sustainable controls. A complicated plan that is routin
 
 ## Offensive-first section map
 
-- [Anonymous Internet Access Technique Catalog](anonymous-internet-access-techniques.md) — canonical inventory with pros, cons, deployment/emulation steps and detection for each access-path family.
-- [Anonymous Payment Technique Catalog](anonymous-payment-techniques.md) — canonical inventory with pros, cons, lawful workflow and detection for each payment family.
+- [Anonymous Internet Access Technique Catalog](anonymous-internet-access-techniques.md) — 48 access-path families with pros, cons, deployment/emulation steps, detection, capture exposure and controller-side discovery monitoring.
+- [Anonymous Payment Technique Catalog](anonymous-payment-techniques.md) — 48 payment families with pros, cons, lawful workflows, detection, capture exposure and compromise monitoring.
 - [Capture-Resilient Authorized Field Nodes](capture-resilient-authorized-field-nodes.md) — stable outbound rendezvous, dual-uplink recovery, secret minimization, capture drills and discovery/compromise monitoring for owner-approved drops.
 - [Offensive Infrastructure and Attribution Evasion](offensive-infrastructure-and-attribution-evasion.md) — ORBs, multi-hop/residential relays, redirectors, fronting, fast flux, domain shadowing, web services and persona infrastructure.
 - [Covert Physical and Wireless Access](covert-physical-wireless-access.md) — nearest-neighbor attacks, public access, drop devices, cellular backhaul and satellite abuse.

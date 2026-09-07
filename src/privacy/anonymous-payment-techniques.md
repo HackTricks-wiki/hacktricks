@@ -22,6 +22,10 @@ The procedures below are for lawful funds, truthful accounts and authorized proc
 | Swaps/bridges/DEX | moves value across asset/chain | both graphs, contracts and providers | forensic mechanics; ordinary lawful swaps only |
 | Mixers/peel/structuring | increases graph ambiguity/work | entry/exit graph and service records | synthetic detection exercise only |
 | Nominees/mules/OTC/fronts | inserts human/business intermediaries | facilitators, banks, communications | criminal-abuse analysis only |
+| Reusable/stealth payment addresses | fresh recipient address per payment | public announcement/notification and wallet boundaries | deployable where supported |
+| Confidential sidechain/state channel | hides amount/asset or intermediate updates | peers, bridge/federation and lifecycle settlement | protocol-specific |
+| Carrier/open-banking/platform billing | hides primary card from merchant | carrier, bank/PISP or platform identifies customer | ordinary identified payment |
+| Mutual credit/net settlement | fewer external settlement records | private ledger operator has full mapping | identified participants only |
 
 ## Cash
 
@@ -503,6 +507,102 @@ The procedures below are for lawful funds, truthful accounts and authorized proc
 
 **Detection:** issuer ledger, enrollment, merchant and redemption records reconstruct flows; unusual circular transfers or rapid cash-out warrant review. **Captured wallet:** local balance and counterparties may be exposed; cap value, encrypt state and support issuer-side freeze/reissue with an auditable record.
 
+## Bitcoin reusable payment codes and private payment instructions
+
+**Mechanics:** BIP 47 payment codes use a reusable public identifier plus ECDH-derived one-time deposit addresses; BIP 351 specifies a newer private-payment instruction design. They reduce public address reuse while allowing a recipient to publish stable payment instructions. Notification, wallet support, funding and subsequent coin selection still affect privacy.<sup>[[20]](#references)</sup>
+
+**Pros:** one public instruction can yield distinct addresses; recipient need not publish every invoice address; compatible wallets can monitor derived payments; useful for repeated lawful donors/customers.
+
+**Cons:** wallet interoperability varies; notification transactions or published payment code link a relationship context; sender, recipient and public graph still see transactions; careless consolidation or change handling defeats the benefit.
+
+**Procedure:** (1) confirm that both maintained wallets support the exact same specification/version; (2) back up and test recovery on a low-value wallet; (3) authenticate the recipient payment code out of band; (4) send a small lawful test; (5) verify that a fresh derived address was used; (6) label the relationship locally and apply coin control; (7) test recovery and refund behavior before relying on it.
+
+**Detection:** analysts examine notification patterns, funding/change, later consolidation and service boundaries; public-code publication identifies the recipient context even when deposit addresses differ. **Capture-resilient OPSEC:** keep spend keys off field devices and expose at most a watch-only relationship view. **Monitoring:** alert on unexpected notification transactions, reused derived addresses, wallet gap-limit/recovery errors and unplanned consolidation.
+
+## EVM stealth addresses (ERC-5564)
+
+**Mechanics:** a sender derives a one-time stealth account from a recipient's stealth meta-address and publishes an announcement containing an ephemeral public key and view tag. The recipient scans announcements with a viewing key and derives the corresponding spend key. Recipient linkage improves, but sender, amount/token, gas, announcement and later spending remain visible.<sup>[[21]](#references)</sup>
+
+**Pros:** non-interactive fresh receiver address; reusable meta-address; separate viewing and spending roles; works across supported EVM assets/applications.
+
+**Cons:** announcement scanning and spam; funding gas for the new address can relink it; sender knows recipient; public token/amount and eventual consolidation remain; implementation and wallet support vary.
+
+**Procedure:** (1) use an audited maintained implementation on a test network first; (2) generate separate viewing and spending material and back it up; (3) authenticate the meta-address; (4) send a low-value test and announcement; (5) scan and derive the stealth account; (6) test supported gas sponsorship without a personal funding edge; (7) record public fields and preserve lawful accounting.
+
+**Detection:** follow announcement caller, token/amount, timing, gas sponsor, spending and consolidation; a view key can prove receipt without granting spend. **Capture-resilient OPSEC:** a networked scanner should have only the viewing role where supported; keep spend and recovery keys elsewhere. **Monitoring:** alert on malformed/spam announcements, view-key access, unexpected spend derivation and stealth outputs moved without approval.
+
+## Liquid Confidential Transactions
+
+**Mechanics:** Liquid blinds output amounts and asset types by default using commitments and proofs while leaving the transaction graph, input/output count, fee and block time visible. Peg-in/peg-out and service boundaries remain linkable, and users can selectively disclose blinding data.<sup>[[22]](#references)</sup>
+
+**Pros:** confidential amount and asset type by default; fast sidechain settlement; selective audit through blinding keys/descriptors; hides commercially sensitive values from public observers.
+
+**Cons:** graph structure and timing remain; federation/bridge and exchange trust; peg boundaries and unconfidential outputs; wallet/node/network records; receiver and sender know their transaction.
+
+**Procedure:** (1) select a maintained Liquid wallet and verify its backup model; (2) use testnet or a small lawful amount; (3) receive to a confidential address and verify the wallet marks the output blinded; (4) send a test confidential transaction; (5) inspect which explorer fields remain public; (6) export only the scoped blinding proof needed for audit; (7) document peg/exchange boundaries and reconcile funds.
+
+**Detection:** analyze visible graph/fee/time, peg and exchange records, network metadata and later unblinding evidence; do not infer hidden amount or asset. **Capture-resilient OPSEC:** separate spend seed, blinding/view data and watch-only operations. **Monitoring:** alert on accidental unconfidential addresses, unknown peg requests, descriptor changes and unapproved unblinding-key export.
+
+## General payment or state channel
+
+**Mechanics:** participants lock funds, exchange signed off-chain state updates and publish only opening, closing or disputed state on chain. Intermediate payments are not globally broadcast, but peers and routing/intermediary services observe their portion and endpoints must retain the latest enforceable state.<sup>[[23]](#references)</sup>
+
+**Pros:** many fast low-fee private-to-public-ledger interactions; less global transaction detail; bounded channel balance; useful for metered services and repeated counterparties.
+
+**Cons:** channel peers know one another and can retain updates; opening/closing/value/timing correlate; online monitoring may be required during challenge windows; implementation and liquidity risk; not a large anonymity set by itself.
+
+**Procedure:** (1) choose a maintained audited implementation and understand its dispute window; (2) open a low-value test channel between owned parties; (3) exchange signed state updates with unique nonces; (4) back up the latest enforceable state; (5) close cooperatively; (6) rehearse stale-state rejection on testnet; (7) preserve accounting and channel-peer records.
+
+**Detection:** public chain exposes lifecycle/disputes; peers, watch services and application transport expose off-chain timing and parties. **Capture-resilient OPSEC:** cap hot balance and keep the latest signed state in an encrypted recoverable store separate from field nodes. **Monitoring:** watch continuously for stale-state publication, missed backup, peer-key change and an approaching challenge deadline.
+
+## Mobile carrier billing
+
+**Mechanics:** an online service charges a purchase to a mobile subscription or prepaid balance through the carrier billing system. The merchant may receive a carrier authorization instead of card/bank details, while the carrier knows the subscriber/line, device/network context, merchant, amount and time.<sup>[[24]](#references)</sup>
+
+**Pros:** no card number at the merchant; broad phone availability; usable for low-value digital goods; carrier can cap and reverse charges.
+
+**Cons:** strongly identified by SIM/account and often device; small limits and high fees; merchant category restrictions; account takeover/SIM-swap risk; carrier and aggregator create a complete transaction trail.
+
+**Procedure:** (1) confirm service availability, limit, fee and refund terms with the organization carrier account; (2) enable it only on a dedicated organization line if justified; (3) set the lowest useful spend cap; (4) purchase a benign test item; (5) verify merchant and carrier receipts; (6) disable recurring authorization; (7) reconcile and turn off the feature after the assessment.
+
+**Detection:** carrier, aggregator and merchant records join line, subscriber, IP/device and charge; enterprise telecom invoices expose it. **Capture-resilient OPSEC:** do not use a personal number and require carrier-account MFA outside the field device. **Monitoring:** enable instant charge/SIM-change alerts and stop on unexpected premium-service enrollment, forwarding or account recovery.
+
+## Open-banking payment initiation
+
+**Mechanics:** with explicit user consent, a regulated payment-initiation service provider (PISP) asks the account-servicing bank to initiate a transfer. The merchant may not receive card credentials, but the PISP and banks retain regulated payer, payee, consent, device and transaction records.<sup>[[25]](#references)</sup>
+
+**Pros:** no reusable card number at checkout; strong bank authentication; exact account-to-account settlement; consent and status APIs; clear reconciliation.
+
+**Cons:** not anonymous to banks/PISP; payee often sees legal account details or reference; phishing/redirect risk; jurisdiction and refund protections vary; consent metadata adds another observer.
+
+**Procedure:** (1) verify that the PISP is currently regulated and the merchant callback domain is authentic; (2) start from the merchant request; (3) review payee, amount, reference and requested consent at the bank; (4) authorize only the single payment; (5) verify final status independently; (6) revoke residual consent if any; (7) retain receipt and reconcile.
+
+**Detection:** bank/PISP/merchant logs and transfer references provide strong attribution. **Capture-resilient OPSEC:** keep banking authentication and recovery off operational/field devices; the device should hold only a paid-service entitlement. **Monitoring:** use bank transaction/consent alerts and investigate new PISP grants, changed payee or status callbacks outside the expected session.
+
+## Platform wallet, app-store balance or in-app credit
+
+**Mechanics:** a platform bills the user or redeems account credit, then issues a signed receipt or entitlement to an application. The app developer may not receive the original funding instrument, while the platform maps account, device, funding, product and redemption.<sup>[[26]](#references)</sup>
+
+**Pros:** merchant/developer gets no primary PAN; fraud/refund and family/business controls; small prepaid balance can cap exposure; signed receipts simplify entitlement verification.
+
+**Cons:** platform account is a strong identity and behavior hub; device and storefront geography; gift-balance purchase/redemption trail; limited cash-out; fraud controls can freeze funds; not cross-platform money.
+
+**Procedure:** (1) use an organization-managed platform account where policy permits; (2) review funding, region, refund and transferable-value rules; (3) add only the approved budget; (4) purchase a benign product through the official store; (5) verify the application receives only expected receipt fields; (6) disable recurring purchase; (7) reconcile and remove the account from operational hardware.
+
+**Detection:** platform receipts/server notifications, account/device login and funding records reconstruct the purchase. **Capture-resilient OPSEC:** never sign a field node into a personal store account; provide only a scoped app entitlement where possible. **Monitoring:** enable new-device/purchase alerts and investigate receipt replay, family/account changes or unexpected restore events.
+
+## Mutual credit, clearing or periodic net settlement
+
+**Mechanics:** participants record obligations in a private ledger and periodically settle only each net position. Individual service events need not create separate public payments, but the ledger operator and counterparties retain detailed attribution.
+
+**Pros:** fewer external transactions and fees; public observers see only net settlement; works for repeated organizations; explicit credit limits contain exposure.
+
+**Cons:** centralized ledger is complete evidence and a fraud target; counterparty/default risk; legal/accounting/tax duties; small membership set; unusual net transfers can still reveal relationships.
+
+**Procedure:** (1) use only identified consenting organizations with legal/accounting approval; (2) define unit, credit limit, settlement interval and dispute rules; (3) record every obligation with immutable approval; (4) let separate finance roles calculate and approve net positions; (5) settle through an ordinary lawful rail; (6) reconcile individual lines to the settlement; (7) close access and retain records under policy.
+
+**Detection:** ledger, invoices, approvals and final bank/chain settlement provide ground truth; analysts should not infer missing gross activity solely from the net transfer. **Capture-resilient OPSEC:** operational devices can submit bounded requisitions but cannot edit balances or authorize settlement. **Monitoring:** alert on credit-limit breach, backdated entries, administrator changes, reconciliation mismatch and settlement to a new beneficiary.
+
 ## Capture/compromise exposure matrix
 
 This applies a seizure/loss test to every family. The objective is to limit spend authority and unrelated identity disclosure while retaining lawful accounting—not to erase transactions or defeat an investigation.
@@ -522,6 +622,30 @@ This applies a seizure/loss test to every family. The objective is to limit spen
 | Paymaster, multisig/threshold | session key, one signer, pending operations and sponsor policy | narrow session key; independent quorum; signer rotation; field device cannot reach threshold |
 | Mixer/peel/structuring, nominees/fronts, refund/gambling abuse | incriminating provider, communications, graph and participant records | no operational use; emulate with synthetic/testnet evidence only |
 | Community/event currency | enrollment, local balance, counterparties and redemption | capped value; issuer freeze/reissue; consent and private auditable ledger |
+| Reusable Bitcoin/EVM stealth address | payment/view/spend keys, relationship metadata, announcements and derived outputs | watch/view-only network role; offline/hardware spend role; no personal funding session |
+| Liquid confidential/state channels | seed, blinding data/latest state, peers, boundaries and disputes | separate spend/view/state backup; low hot balance; independent dispute monitor |
+| Carrier/open-banking/platform billing | phone/bank/store account, consent, receipt, device and funding source | organization account; external MFA; low limit; no personal account on field hardware |
+| Mutual-credit clearing | members, obligations, limits, approvals and settlement ledger | operational requisition only; separate immutable ledger and dual finance approval |
+
+## Monitoring possible discovery or payment compromise
+
+Payment denial, a compliance review or a wallet going offline does not prove that an investigation exists. Monitor only accounts, ledgers and infrastructure the organization is entitled to observe; never probe providers or counterparties to test whether they are cooperating with investigators.
+
+| Covered techniques | Safe monitoring signals | Freeze/stop condition |
+|---|---|---|
+| Cash, money order/COD, prepaid/gift/voucher, physical bearer value | inventory/receipt mismatch, duplicate serial, unexpected redemption/refund or loss report | missing instrument, redemption outside approved order, altered receipt or custody break |
+| Virtual/tokenized card, payment app, bank/ACH/wire, open banking, carrier/platform billing | issuer/bank/platform alerts, new device/consent/payee, token reuse, SIM/account recovery | unknown authorization, payee change, new recovery factor, SIM swap or recurring charge |
+| Account/merchant compartment, controlled/delegated procurement, service credits | IdP/vendor project, role/token/budget change, invoice and consumption | cross-project token, unknown admin, limit breach, invoice mismatch or unsupported destination |
+| Invoice, escrow, pooled settlement, mutual credit | request expiry, approval/release, ledger integrity, reconciliation and beneficiary change | altered amount/payee, backdated ledger, unilateral release or unreconciled batch |
+| Bitcoin address/coin control, Silent Payments, BIP47/BIP351 | watch-only transactions, notification/scan state, address reuse, UTXO labels and consolidation | unknown spend, reused recipient output, wallet gap/recovery failure or unapproved merge |
+| PayJoin/CoinJoin | proposal inputs/outputs/fees, coordinator availability, final transaction equality | substituted output, excessive fee, unexpected input disclosure or coordinator policy change |
+| Lightning/BOLT12/general channels | channel backup, invoice/offer use, liquidity, peer/LSP and chain dispute | unknown invoice payment, peer-key change, stale close or approaching dispute deadline |
+| Monero/Zcash/MWEB/Liquid CT | view/watch events, pool/domain/address type, descriptor and boundary transaction | spend without approval, transparent/unconfidential downgrade, key export or unknown boundary |
+| Ethereum ZK, stealth addresses, paymaster, stablecoin | contract/announcement, RPC/bundler, gas sponsor, allowance/session key and issuer action | wrong contract/public field, unknown approval/spend, paymaster change or issuer freeze |
+| Cashu/Fedimint/Taler/Privacy Pass | mint/federation/exchange health, token double-spend/replay, gateway and bearer balance | unknown redemption, mint key/terms change, restore failure or balance inconsistency |
+| Swaps/bridges/DEX | verified contract, allowance, both-chain confirmations, rate and destination | contract/route mismatch, unlimited approval, missing destination or bridge incident |
+| Multisig/threshold | signer-set/policy change, pending proposal, quorum and recovery audit | unknown proposal/signer, threshold reduction, recovery activation or policy bypass |
+| Mixer/peel/structuring, nominees/fronts, NFT/gambling/refund abuse | synthetic lab ground truth and detection output only | any real account, person or value entering the emulation: stop immediately |
 
 ## Selection and verification workflow
 
@@ -554,3 +678,10 @@ This applies a seizure/loss test to every family. The objective is to limit spen
 - [17] [EU Regulation 2023/1113 — transfer information and crypto-assets](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32023R1113)
 - [18] [RFC 9576 — The Privacy Pass Architecture](https://www.rfc-editor.org/rfc/rfc9576.html) and [RFC 9577 — Privacy Pass HTTP Authentication](https://www.rfc-editor.org/rfc/rfc9577.html)
 - [19] [ERC-4337 — Account Abstraction Using an Alternative Mempool](https://eips.ethereum.org/EIPS/eip-4337) and [Ethereum.org — Privacy application architecture](https://ethereum.org/latest/privacy-apps-on-ethereum/)
+- [20] [BIP 47 — Reusable Payment Codes](https://bips.dev/47/) and [BIP 351 — Private Payments](https://bips.dev/351/)
+- [21] [ERC-5564 — Stealth Addresses](https://eips.ethereum.org/EIPS/eip-5564)
+- [22] [Liquid — Confidential Transactions](https://docs.liquid.net/docs/confidential-transactions)
+- [23] [Ethereum.org — State and payment channels](https://ethereum.org/developers/docs/scaling/state-channels/)
+- [24] [GSMA Open Gateway — Carrier Billing API](https://open-gateway.gsma.com/docs/carrier-billing/api-reference)
+- [25] [Open Banking Standards — Payment Initiation Services](https://standards.openbanking.org.uk/customer-experience-guidelines/payment-initiation-services/v4-0/)
+- [26] [Apple Developer — StoreKit](https://developer.apple.com/documentation/storekit/)

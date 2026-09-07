@@ -23,6 +23,11 @@ Every entry uses the same fields. “Procedure” means a lawful deployment or a
 | Fast flux/DGA/dead drop | rotating node/service | infrastructure discovery resistance | variable | owned-lab reproduction only |
 | Drop/nearest-neighbor | local target-adjacent address | crosses geographic/network boundary | high | owned-site lab only |
 | Store-and-forward/offline | gateway or physical receiver | reduces interactive timing linkage | low | application-specific |
+| Pluggable/refraction transport | Tor entry or cooperating diversion proxy | censorship-resistant reachability | variable | supported client or research lab |
+| IPFS gateway/PIR/remote fetcher | gateway or application service | publisher/query/request partitioning | variable | bounded application only |
+| Anycast/QUIC/MPTCP | stable broker or multiple subflows | rendezvous and session continuity | high | availability, not anonymity |
+| CI/CD automation runner | hosted runner address | disposable accountable egress | high | owned workflow only |
+| Non-IP local first hop | organization gateway | removes Internet stack from sensor | low | owner-approved deployment |
 
 ## Direct shared NAT and carrier-grade NAT
 
@@ -492,6 +497,114 @@ Every entry uses the same fields. “Procedure” means a lawful deployment or a
 
 **Detection:** correlate delegated prefix, layer-2 identity, neighbor discovery, account and endpoint telemetry instead of treating one address as one device. **Captured node:** network profiles and interface identifiers remain; temporary addressing prevents one passive identifier, not forensic attribution.
 
+## Tor pluggable transports: Snowflake, WebTunnel, obfs4 and meek
+
+**Mechanics:** a pluggable transport changes how the first Tor connection appears or how it reaches a bridge. Snowflake uses short-lived volunteer WebRTC proxies, WebTunnel resembles ordinary HTTPS, obfs4 resists simple protocol identification and active probing, and meek relays through supported web infrastructure. They are censorship-circumvention transports into Tor, not extra end-to-end anonymity layers.<sup>[[22]](#references)</sup>
+
+**Pros:** useful when direct Tor or known relays are blocked; Snowflake avoids a stable public bridge address; integrated into maintained Tor clients; destination still receives ordinary Tor properties.
+
+**Cons:** lower or variable performance; broker/front/bridge and local network observe different metadata; transport fingerprints and blocking remain possible; volunteer proxy does not replace Tor and should not be trusted with application plaintext.
+
+**Procedure:** (1) install and verify the official Tor Browser or supported Tor client; (2) select the built-in transport in Connection/Bridges; (3) connect only to an owned diagnostic page; (4) confirm the page sees a Tor exit, not the Snowflake/WebTunnel peer; (5) compare bootstrap and performance; (6) fail the transport and confirm the client does not silently connect directly; (7) return to the standard supported configuration after the test.
+
+**Detection:** a censor can combine destination allowlists, TLS/WebRTC behavior, broker discovery and flow analysis; endpoints expose Tor and transport configuration. **Capture-resilient OPSEC:** use the standard client, never copy personal browser state into it, and assume bridge/broker history is recoverable. **Monitoring:** watch Tor bootstrap logs, unexpected direct DNS/connection attempts and controller-side owned-page observations; transport failure is not proof of discovery.
+
+## Refraction networking or decoy routing
+
+**Mechanics:** a cooperating network operator detects a covert signal in traffic apparently addressed to an allowed decoy and diverts the flow to a circumvention proxy. Deployment requires infrastructure in the network path; it is not something a client can create merely by selecting an innocent website.<sup>[[23]](#references)</sup>
+
+**Pros:** the apparent destination may be difficult for a censor to block without collateral damage; no public bridge address must be distributed; useful research model for on-path-assisted circumvention.
+
+**Cons:** specialized ISP/transit participation; deployability and performance depend on routing; client-to-decoy flow and proxy-side activity remain; a global or cooperating observer can correlate timing.
+
+**Procedure:** do not signal through uninvolved networks. Reproduce the architecture in an isolated lab: (1) create owned client, router, decoy and proxy namespaces; (2) use a benign tagged test request; (3) let the owned router redirect only that tag to the proxy; (4) log pre/post-routing tuples and request IDs; (5) compare ordinary and signaled flows; (6) test false positives and removal; (7) destroy the lab routes.
+
+**Detection:** authorized network operators can inspect routing divergence, unusual client hello/tag behavior and decoy-versus-back-end flow discrepancies. **Capture-resilient OPSEC:** a research client should hold only test keys and documentation addresses. **Monitoring:** compare signed lab-router decisions with proxy arrivals; do not probe production transit providers to determine whether they detected signaling.
+
+## Content-addressed gateway or cached peer retrieval
+
+**Mechanics:** an HTTP gateway retrieves an IPFS content identifier (CID), possibly from its cache or peers, and returns the verifiable content to the client. The original publisher may see the gateway or other peers rather than the final reader; the gateway sees the reader IP and requested CID. Native peer-to-peer retrieval exposes the client to peers and DHT/routing participants.<sup>[[24]](#references)</sup>
+
+**Pros:** publisher and reader can be separated by caches; immutable content is hash-verifiable; replicated data survives one host; HTTP clients require no native peer stack.
+
+**Cons:** public CIDs and gateway logs reveal interests; first retrieval timing can correlate publisher and reader; malicious web content and path-style same-origin hazards; public gateways are best-effort and prohibit abuse.
+
+**Procedure:** (1) publish a harmless test file to an owned private IPFS swarm or owned gateway; (2) record its CID; (3) retrieve it through a separate owned HTTP gateway using subdomain isolation; (4) verify the bytes against the CID; (5) repeat after caching; (6) compare publisher, peer and gateway logs; (7) unpin and remove test content when retention ends.
+
+**Detection:** gateways log source/CID; DHT and peer connections reveal retrieval; endpoint history and file hashes identify content. **Capture-resilient OPSEC:** store no private publishing key on a read-only field client and encrypt sensitive content before content addressing. **Monitoring:** alert on unexpected pinning, peer-set change, CID requests outside the allowlist or gateway account notices.
+
+## Private information retrieval service
+
+**Mechanics:** Private Information Retrieval (PIR) lets a client retrieve one record from a database while cryptographically hiding the selected index from the server under a stated single- or multi-server threat model. It protects query selection for a bounded dataset; it is not general web access or IP anonymity.<sup>[[25]](#references)</sup>
+
+**Pros:** strong application-specific query privacy; measurable leakage model; useful for key directories, blocklists or small public databases; can reduce the need to reveal exact lookup terms.
+
+**Cons:** computation/bandwidth overhead; server learns connection time/IP unless combined with a relay; dataset version, response size and application state can partition users; implementation maturity varies.
+
+**Procedure:** (1) deploy an audited PIR implementation against a synthetic owned database; (2) publish dataset version and parameters; (3) retrieve several indices through identical request sizes; (4) verify correctness locally; (5) compare server logs and confirm the index is absent; (6) test malicious/truncated responses and version mismatch; (7) document the exact privacy assumption rather than calling it anonymous browsing.
+
+**Detection:** networks see service use and volume; endpoint telemetry exposes the client and final record use; a compromised server can manipulate datasets or timing. **Capture-resilient OPSEC:** keep only public database parameters and a bounded cache on the client. **Monitoring:** validate signed dataset roots, fixed request shapes, error-rate changes and server-key rotations.
+
+## Constrained server-side fetcher, preview or rendering service
+
+**Mechanics:** a remote service fetches or renders a URL and returns a screenshot, metadata or sanitized content. The destination sees the fetcher address; the service sees the requester, URL and result. Abusing link-preview bots, security scanners or third-party URL fetchers is not authorized proxy use.
+
+**Pros:** isolates active content from the workstation; destination receives a controlled fetcher fingerprint; can enforce file type, size, destination and rendering limits; disposable execution environment.
+
+**Cons:** service has complete request knowledge; account/API/billing records; SSRF and data-exfiltration risk; scripts, authentication and interactive sites may not work; unique URLs correlate requester and fetch.
+
+**Procedure:** (1) deploy an organization-owned fetcher with a strict allowlist of owned test domains; (2) block private, link-local, metadata and redirect-to-unapproved addresses; (3) cap methods, redirects, bytes and render time; (4) strip credentials/cookies; (5) submit an owned URL; (6) compare requester, fetcher and target logs; (7) destroy the render instance and retain central audit according to policy.
+
+**Detection:** target sees the service ASN/fingerprint; provider and controller logs map requester to URL; endpoint process/API calls show submission. **Capture-resilient OPSEC:** use one short-lived project token with no arbitrary destination authority. **Monitoring:** alert on allowlist denials, redirect violations, fetches without a controller job ID and provider abuse notices.
+
+## Anycast rendezvous pool
+
+**Mechanics:** multiple organization-controlled nodes advertise or front one stable service address, and routing selects a nearby instance. Anycast improves availability and hides an individual back-end from the client, but the operator still controls all instances and the service address is stable.<sup>[[26]](#references)</sup>
+
+**Pros:** resilient regional ingress; no field reconfiguration when one instance fails; DDoS/load distribution; central policy can move sessions among known nodes.
+
+**Cons:** BGP/CDN and provider records identify the organization; path changes can break stateful sessions; monitoring differs by client location; a single stable address is easily blocked or reputation-clustered.
+
+**Procedure:** use a provider-supported organization project or an isolated routing lab: (1) deploy two identical authenticated health endpoints; (2) expose one documented service address; (3) keep session state at the broker rather than an edge; (4) withdraw one node and verify reconnection; (5) test certificate, policy and log consistency; (6) alert on unauthorized origin/region; (7) remove advertisements and credentials at closeout.
+
+**Detection:** BGP/RPKI/history, provider tenancy, certificates and identical service behavior identify the pool. **Capture-resilient OPSEC:** an edge holds only regional service identity and no operator or fleet-enrollment key. **Monitoring:** probe every region from authorized monitors, compare route origin and configuration digest, and treat an unexpected origin as an incident.
+
+## QUIC migration and Multipath TCP continuity
+
+**Mechanics:** QUIC connection IDs can keep a client session alive across NAT rebinding or address changes; Multipath TCP can carry one reliable byte stream across multiple subflows. They improve continuity across Wi-Fi/cellular transitions but expose old and new paths to the common peer and can make cross-path correlation easier.<sup>[[27]](#references)</sup>
+
+**Pros:** faster recovery during uplink changes; application session need not restart; MPTCP can combine resilience and throughput; valuable for approved field nodes.
+
+**Cons:** not anonymity; peer sees migration/subflows; connection identifiers and simultaneous traffic link paths; middlebox/carrier support varies; duplicated provider records increase exposure.
+
+**Procedure:** (1) enable the supported transport only between an owned field client and rendezvous; (2) authenticate the application independently of IP; (3) begin a bounded transfer on approved Wi-Fi; (4) switch to organization cellular; (5) confirm path validation, data integrity and no clear/direct fallback; (6) test idle timeout and return; (7) retain broker records of every path transition.
+
+**Detection:** the peer directly observes address migration or MPTCP subflows; access providers see their part; connection IDs, TLS identity and timing join both. **Capture-resilient OPSEC:** store only device-scoped session material and expire resumable state quickly. **Monitoring:** alert on impossible path changes, simultaneous unapproved networks, migration storms and resumption after quarantine.
+
+## Managed CI/CD or ephemeral automation runner egress
+
+**Mechanics:** an organization-owned workflow executes a bounded network check on a hosted runner. The destination sees a cloud runner address while the platform retains repository, actor, workflow, token, log and billing attribution. This is remote execution with accountable egress, not anonymity from the provider.<sup>[[28]](#references)</sup>
+
+**Pros:** disposable clean environment; reproducible job definition; no inbound connection; useful for geographically distributed availability checks; strong controller audit.
+
+**Cons:** platform and organization identify the initiator; broad workflow tokens and untrusted pull requests are dangerous; shared IP reputation; logs/artifacts can retain secrets or target data.
+
+**Procedure:** (1) create a private organization repository and environment for the assessment; (2) permit only manually approved, fixed benign jobs against owned endpoints; (3) use minimal read-only workflow permissions and no production secrets; (4) run the check; (5) compare workflow, provider and target records; (6) verify artifacts contain no credentials; (7) delete the environment token and retain required audit.
+
+**Detection:** provider audit and workflow logs provide direct attribution; targets identify runner ASNs/ranges and stable request grammar. **Capture-resilient OPSEC:** never place field-device, signing, wallet or cloud-administrator secrets in runner variables. **Monitoring:** require branch/environment approval and alert on workflow edits, fork execution, secret reads and unexpected destinations.
+
+## Non-IP local first hop to an owned gateway
+
+**Mechanics:** Bluetooth mesh, Wi-Fi Aware/Direct, low-power radio or a serial/optical link carries bounded messages from a nearby sensor to an owner-approved Internet gateway. The field device itself has no Internet route; the gateway is the only egress. Radio range and protocol limits make this a telemetry/store-and-forward design, not interactive anonymous Internet.
+
+**Pros:** removes an Internet stack and credentials from the smallest field device; low power; gateway centralizes policy; can bridge temporary dead zones.
+
+**Cons:** RF/physical discovery, pairing and device identifiers; small bandwidth and range; gateway still links all messages; spectrum and encryption restrictions vary; capture can expose queued data.
+
+**Procedure:** (1) obtain site and spectrum approval; (2) pair one owned sensor with one owned gateway using unique keys; (3) define signed fixed-size message types, TTL and rate; (4) give the sensor no default IP route; (5) let the gateway forward only to an owned collector; (6) test replay, range loss and gateway outage; (7) inventory and retrieve both devices.
+
+**Detection:** RF survey, pairing database, physical inspection and gateway process/flow logs reveal the path. **Capture-resilient OPSEC:** the sensor holds only its pairwise key and bounded encrypted queue, never operator, Wi-Fi, cellular or controller credentials. **Monitoring:** alert on new peers, sequence rollback, key failure, unusual RF rate and messages arriving through an unregistered gateway.
+
 ## Capture/compromise exposure matrix
 
 This table applies a capture-resilience check to every family above. “Minimize” means reduce secrets and blast radius on authorized assets; it never means clearing evidence or hiding from an investigation.
@@ -510,6 +623,29 @@ This table applies a capture-resilience check to every family above. “Minimize
 | Drop, nearest-neighbor, long-range bridge | serial/radio/SSID/peer, device key, physical placement artifacts | written placement; unique device identity; no operator secret; tamper/state telemetry; revoke and recover |
 | TURN, reverse overlay, dual-uplink | realm/broker, device credential, peer/route and uplink profiles | outbound-only narrow service; short-lived device credential; independent operator login; fail-closed paths |
 | IPv6 temporary addressing | profiles, prefix history and endpoint/application state | treat as anti-tracking only; preserve network logs; pair with endpoint compartmentation |
+| Pluggable transport/refraction lab | bridge/broker/decoy settings, Tor state and research keys | standard client or isolated lab; no personal browser state; no production signaling |
+| IPFS/PIR/fetcher | requested CID/query client, cached content, gateway or service token | encrypted bounded cache; public-only parameters; short-lived allowlisted service token |
+| Anycast/QUIC/MPTCP | service nodes, connection IDs, resumable state and every known path | regional identity only; short resumption lifetime; central route/session revocation |
+| Managed CI/CD runner | repository, workflow, provider token, logs and artifacts | least-privilege workflow; no production/field/wallet secrets; environment approval |
+| Non-IP local hop | radio peer, pairwise key, queued messages and gateway identity | unique pairwise key; fixed message schema; no Wi-Fi/cellular/operator credential |
+
+## Monitoring possible discovery for every access family
+
+No client-side test proves that an investigator or defender is watching. Monitor changes in systems the engagement owns, corroborate them with the controller/client, and stop rather than probing observers. The rows below cover every technique above; combine them with the [field-node alert states and response runbook](capture-resilient-authorized-field-nodes.md#monitoring-for-discovery-loss-or-compromise).
+
+| Covered techniques | Safe controller-side signals | Quarantine/stop condition |
+|---|---|---|
+| NAT/CGNAT, public/guest Wi-Fi, travel router, cellular/eSIM, satellite, private APN | lease/portal/carrier session, public tuple, BSSID/cell/path change, provider notice | unapproved network/SIM/device, unexplained relocation or provider/SOC escalation |
+| VPN/VPS, HTTP/SOCKS/SSH, multi-hop, residential/cooperative proxy | peer authentication, tunnel state, route/DNS leaks, new admin/API event, complaint | duplicate/stolen credential, unknown administrator, direct fallback or out-of-scope egress |
+| OHTTP/ODoH/ECH, MASQUE, split-provider relay, TURN | relay/gateway allocation, key/config version, unsupported direct connection, error/replay rate | key mismatch, direct fallback, unknown realm/peer or provider abuse notice |
+| Tor Browser, bridges, Snowflake/WebTunnel/obfs4/meek, VPN±Tor, onion service | bootstrap state, circuit failure, onion descriptor/service health and owned canary page | personal-account crossover, unexpected non-Tor connection or compromised service key |
+| I2P, mixnet, GNUnet, mesh/store-forward, non-IP local hop | peer set, queue age/sequence, gateway arrival, radio association and content hash | unknown peer/gateway, sequence rollback, unauthorized content or missing custody record |
+| Remote browser/VDI/jump host, CI/CD runner, serverless | IdP session, workflow/image/config change, new token use, artifact/export and cloud audit | unknown login/workflow edit, secret read, unexpected destination or project-role escalation |
+| ORB lab, fast flux/DGA, CDN/fronting, dead drop/pull mailbox | owned node inventory, DNS/edge/object access, controller graph, job signature and TTL | unknown node/origin/object writer, unsigned/replayed job, topology escape from lab |
+| Drop/nearest-neighbor/long-range bridge/outbound overlay/dual uplink | signed heartbeat, boot/config hash, enclosure state, AP/switch context, duplicate identity | moved/opened node, unexpected boot/hash/path, sentinel use or site report |
+| IPv6 temporary addresses, QUIC migration, MPTCP | delegated prefix, connection ID/subflows, path-validation and broker session | impossible migration, simultaneous unapproved paths or session resumption after revoke |
+| IPFS/cache, PIR, constrained fetcher | CID/query-shape/root version, peer/gateway change, redirect/allowlist denial | unexpected pin/query/destination, unsigned dataset root or provider abuse notice |
+| Refraction/decoy-routing lab, anycast rendezvous | owned diversion decision, proxy arrival, BGP/RPKI origin, regional config digest | production-path signal, unknown route origin, region/config inconsistency |
 
 ## Choosing and testing a path
 
@@ -545,3 +681,10 @@ This table applies a capture-resilience check to every family above. “Minimize
 - [19] [RFC 8656 — Traversal Using Relays around NAT (TURN)](https://www.rfc-editor.org/rfc/rfc8656.html)
 - [20] [WireGuard — Quick Start: NAT and Firewall Traversal Persistence](https://www.wireguard.com/quickstart/)
 - [21] [RFC 8981 — Temporary Address Extensions for Stateless Address Autoconfiguration in IPv6](https://www.rfc-editor.org/rfc/rfc8981.html)
+- [22] [Tor Project — Pluggable transports and bridges](https://support.torproject.org/tor-browser/circumvention/unblocking-tor/) and [Using Snowflake](https://support.torproject.org/anti-censorship/how-can-i-use-snowflake/)
+- [23] [Refraction Networking — project and deployment research](https://refraction.network/) and [Running Refraction Networking for Real](https://refraction.network/papers/deployment-pets20.pdf)
+- [24] [IPFS — HTTP Gateway concepts and request lifecycle](https://docs.ipfs.tech/concepts/ipfs-gateway/)
+- [25] [IETF PEARG — Private Information Retrieval overview](https://datatracker.ietf.org/meeting/121/materials/slides-121-pearg-call-me-by-my-name-simple-practical-private-information-retrieval-for-keyword-queries-00)
+- [26] [RFC 4786 — Operation of Anycast Services](https://www.rfc-editor.org/rfc/rfc4786.html)
+- [27] [RFC 9000 — QUIC connection migration](https://www.rfc-editor.org/rfc/rfc9000.html) and [RFC 8684 — Multipath TCP](https://www.rfc-editor.org/rfc/rfc8684.html)
+- [28] [GitHub — GitHub-hosted runners reference](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)
