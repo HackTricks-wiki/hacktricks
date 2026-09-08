@@ -1,661 +1,663 @@
-# Catalogue des techniques de paiement anonymes
+# Anonymous Payment Technique Catalog
 
-Ce catalogue couvre les **familles** de paiement, de l'argent liquide ordinaire à l'e-cash à signature aveugle et à l'obfuscation sur les chaînes publiques. « Anonyme » signifie toujours anonyme vis-à-vis d'un observateur identifié. Un commerçant, un émetteur, une mint, un exchange, un analyste blockchain, un fournisseur réseau, un employeur et un observateur physique voient des faits différents.
+{{#include ../banners/hacktricks-training.md}}
 
-Les procédures ci-dessous concernent des fonds licites, des comptes véridiques et des achats autorisés. Les techniques dont le but était, dans les cas cités, le blanchiment, l'évasion de sanctions ou la fraude à l'identité sont expliquées et détectées, mais leur procédure constitue un exercice forensique synthétique, et non des instructions pour commettre ces infractions.
+This catalog covers payment **families** from ordinary cash through blind-signature e-cash and public-chain obfuscation. “Anonymous” always means anonymous from a named observer. A merchant, issuer, mint, exchange, blockchain analyst, network provider, employer and physical observer see different facts.
 
-## Matrice de couverture
+The procedures below are for lawful funds, truthful accounts and authorized procurement. Techniques whose purpose in the cited cases was laundering, sanctions evasion or identity fraud are explained and detected, but their procedure is a synthetic forensic exercise—not instructions for performing the crime.
 
-| Famille | Propriété principale de confidentialité | Observateur/confiance principal | Traitement |
+## Coverage matrix
+
+| Family | Main privacy property | Main observer/trust | Treatment |
 |---|---|---|---|
-| Espèces et équivalents | aucune trace distante du réseau de paiement | bénéficiaire et environnement physique | workflow licite |
-| Valeur prépayée/cadeau/bon | sépare le remboursement de la carte principale | vendeur, émetteur et service de remboursement | workflow licite, selon la juridiction |
-| Carte virtuelle/tokenisée | masque le PAN réutilisable ou sépare les commerçants | émetteur/réseau/wallet identifient toujours le payeur | workflow licite |
-| Payment app/intermédiaire | le commerçant peut ne voir qu'un alias/intermédiaire | l'app collecte identité, appareil et transaction | référence comparative |
-| Hygiène Bitcoin/Silent Payments | pseudonymes et impossibilité de relier le destinataire | graphe public et frontière wallet/réseau | déployable |
-| PayJoin/CoinJoin | affaiblit les heuristiques de propriété commune/lien | participants/coordinator/réseau/graphe public | déployable si pris en charge ; revue juridique |
-| Lightning/BOLT 12 | routage off-chain et réduction du chemin visible du destinataire | extrémités, hops, services et graphe des channels | déployable si pris en charge |
-| Monero/Zcash/MWEB | confidentialité on-chain au niveau du protocole | acquisition, extrémité, réseau et frontières | déployable si licite et pris en charge |
-| Application Ethereum ZK | masque une déclaration ou un lien d'action donné | entrées publiques, RPC, relayer et app | spécifique à l'application |
-| Cashu/Fedimint/Taler | confidentialité du payeur par signature aveugle | mint/federation/exchange, garde et frontières | émergent/spécifique au déploiement |
-| Stablecoins | règlement numérique pratique | chaîne transparente et contrôle/gel par l'émetteur | pas une base anonyme |
-| Swaps/bridges/DEX | déplace la valeur entre actifs/chaînes | deux graphes, contrats et fournisseurs | mécanique forensique ; swaps licites uniquement |
-| Mixers/peel/structuring | accroît l'ambiguïté et le travail du graphe | graphe entrée/sortie et journaux du service | exercice synthétique de détection uniquement |
-| Nominees/mules/fronts/OTC | insère des intermédiaires humains/commerciaux | facilitateurs, banques et communications | analyse des abus criminels uniquement |
-| Adresses de paiement réutilisables/stealth | nouvelle adresse du destinataire par paiement | annonce/notification publique et frontières du wallet | déployable si pris en charge |
-| Sidechain confidentielle/state channel | masque montant/actif ou mises à jour intermédiaires | pairs, bridge/federation et règlement final | spécifique au protocole |
-| Opérateur mobile/open banking/facturation plateforme | masque la carte principale au commerçant | opérateur, banque/PISP ou plateforme identifient le client | paiement ordinaire identifié |
-| Crédit mutuel/règlement net | moins de traces externes de règlement | l'opérateur du registre privé possède toute la correspondance | participants identifiés uniquement |
+| Cash and cash equivalents | no remote payment-network record | recipient and physical environment | lawful workflow |
+| Prepaid/gift/voucher value | separates redemption from primary card | seller, issuer and redemption service | lawful workflow, jurisdiction varies |
+| Virtual/tokenized card | hides reusable PAN or separates merchants | issuer/network/wallet still identifies payer | lawful workflow |
+| Payment app/intermediary | merchant may see alias/intermediary | app collects identity/device/transaction | comparison baseline |
+| Bitcoin hygiene/Silent Payments | pseudonyms and recipient unlinkability | public graph and wallet/network boundary | deployable |
+| PayJoin/CoinJoin | weakens common ownership/linkage heuristics | participants/coordinator/network/public graph | deployable where supported; legal review |
+| Lightning/BOLT 12 | off-chain routing and receiver-path reduction | endpoints, hops, services and channel graph | deployable where supported |
+| Monero/Zcash/MWEB | protocol-level on-chain confidentiality | acquisition, endpoint, network and boundary remain | deployable where lawful/supported |
+| Ethereum ZK application | hides a specified statement/action link | public inputs, RPC, relayer and app | application-specific |
+| Cashu/Fedimint/Taler | blind-signature payer privacy | mint/federation/exchange custody and boundaries | emerging/deployment-specific |
+| Stablecoins | convenient digital settlement | transparent chain plus issuer freeze/control | not anonymous baseline |
+| Swaps/bridges/DEX | moves value across asset/chain | both graphs, contracts and providers | forensic mechanics; ordinary lawful swaps only |
+| Mixers/peel/structuring | increases graph ambiguity/work | entry/exit graph and service records | synthetic detection exercise only |
+| Nominees/mules/OTC/fronts | inserts human/business intermediaries | facilitators, banks, communications | criminal-abuse analysis only |
+| Reusable/stealth payment addresses | fresh recipient address per payment | public announcement/notification and wallet boundaries | deployable where supported |
+| Confidential sidechain/state channel | hides amount/asset or intermediate updates | peers, bridge/federation and lifecycle settlement | protocol-specific |
+| Carrier/open-banking/platform billing | hides primary card from merchant | carrier, bank/PISP or platform identifies customer | ordinary identified payment |
+| Mutual credit/net settlement | fewer external settlement records | private ledger operator has full mapping | identified participants only |
 
-## Espèces
+## Cash
 
-**Mécanisme :** une valeur physique au porteur change de mains sans autorisation en ligne de l'émetteur ni registre public.
+**Mechanics:** physical bearer value changes hands without an online issuer authorization or public ledger.
 
-**Avantages :** le commerçant n'a pas besoin de connaître l'identité bancaire/de la carte ; aucun graphe de transaction distant ; méthode largement comprise et définitive.
+**Pros:** merchant need not learn bank/card identity; no remote transaction graph; broadly understandable and final.
 
-**Inconvénients :** uniquement en face à face ; vol/perte ; contrôles de monnaie rendue, reçus, numéros de série ou déclaration ; retrait, caméras, témoins et localisation peuvent toujours relier le payeur.
+**Cons:** face-to-face only; theft/loss; change/receipt/serial or reporting controls; withdrawal, cameras, witnesses and location still link the payer.
 
-**Procédure :** (1) confirmer que les espèces sont légales et acceptées, ainsi que les éventuelles règles de montant/déclaration ; (2) les retirer ou recevoir légalement et conserver une comptabilité privée ; (3) payer un commerçant ordinaire sans identifiants de fidélité ou de compte inutiles ; (4) demander uniquement le reçu requis ; (5) éviter les données d'expédition/de compte si l'achat ne les nécessite pas ; (6) consigner en interne le motif commercial légitime.
+**Procedure:** (1) confirm cash is legal/accepted and any amount/reporting rule; (2) withdraw or receive it lawfully and keep private accounting records; (3) pay an ordinary merchant without unnecessary loyalty/account identifiers; (4) request only the receipt required; (5) avoid shipping/account data if the purchase does not need it; (6) record legitimate business purpose internally.
 
-**Détection :** rapprocher caisse, reçus et inventaire avec les caméras et journaux d'accès selon la politique applicable ; examiner les remboursements inhabituels en espèces ou les montants répétés juste sous les seuils de contrôle, sans considérer l'usage ordinaire des espèces comme suspect en soi.
+**Detection:** reconcile till/receipt/inventory, cameras and access logs under applicable policy; investigate unusual cash refunding or repeated just-below-control amounts without treating ordinary cash use as suspicious by itself.
 
-## Mandat, mandat postal, chèque de caisse et paiement à la livraison
+## Money order, postal order, cashier instrument and cash on delivery
 
-**Mécanisme :** un émetteur réglementé convertit des espèces ou des fonds de compte en un instrument numéroté payable à un bénéficiaire nommé ; le COD reporte l'encaissement à la livraison.
+**Mechanics:** a regulated issuer converts cash/account funds into a numbered instrument payable to a named recipient; COD defers collection to delivery.
 
-**Avantages :** le bénéficiaire peut ne pas recevoir le numéro de banque/carte principal du payeur ; utilisable lorsque les espèces ne peuvent pas être envoyées à distance ; reçu clair.
+**Pros:** recipient may not receive the payer's primary bank/card number; usable where cash cannot travel remotely; clear receipt.
 
-**Inconvénients :** l'émetteur/le détaillant conserve les données d'achat/d'identité requises ; suivi du numéro de série ; adresse du bénéficiaire/livraison ; risques de perte/fraude et restrictions régionales ; généralement non anonyme.
+**Cons:** issuer/retailer retains purchase/identity data as required; serial tracking; recipient/delivery address; loss/fraud and regional restrictions; not generally anonymous.
 
-**Procédure :** (1) vérifier règles, limites, identification et acceptation par le bénéficiaire ; (2) acheter avec des informations véridiques et des fonds licites ; (3) remplir immédiatement le bénéficiaire et le montant ; (4) conserver numéro de série et reçu ; (5) utiliser une livraison suivie adaptée à la valeur ; (6) rapprocher encaissement et remboursement.
+**Procedure:** (1) check issuer rules, limits, identification and recipient acceptance; (2) buy with truthful information and lawful funds; (3) complete payee/amount immediately; (4) preserve serial/receipt; (5) use tracked delivery appropriate to value; (6) reconcile redemption/refund.
 
-**Détection :** registres d'achat/encaissement de l'émetteur, numéro de série, détaillant/caméra, expédition et compte du bénéficiaire ; signaler les altérations, doublons de numéros et encaissements rapides géographiquement incohérents.
+**Detection:** issuer purchase/redemption record, instrument serial, retailer/camera, shipping and recipient account; flag alteration, duplicate serials and rapid geographically inconsistent redemption.
 
-## Carte prépayée open-loop
+## Open-loop prepaid card
 
-**Mécanisme :** un moyen de paiement marqué par un réseau autorise les dépenses sur un solde prépayé plutôt que sur un compte de crédit principal.
+**Mechanics:** a network-branded stored-value credential authorizes against a prepaid balance rather than a primary credit account.
 
-**Avantages :** limite l'exposition du commerçant et les pertes ; sépare le commerçant du PAN principal ; utilisable en ligne lorsqu'elle est acceptée.
+**Pros:** limits merchant exposure and loss; separates merchant from main PAN; usable online where accepted.
 
-**Inconvénients :** traces d'achat, d'activation, de recharge et d'appareil ; KYC et limites variables ; échecs d'adresse de facturation ; restrictions de retrait/remboursement ; « sans nom » ne signifie pas sans registre de l'émetteur.
+**Cons:** purchase/activation/reload/registration and device records; KYC and limits vary; billing-address failures; cash-out/refund restrictions; “no name” does not mean no issuer record.
 
-**Procédure :** (1) vérifier l'émetteur actuel, les frais, le KYC, la zone géographique et la prise en charge du online/récurrent ; (2) acheter auprès d'un vendeur autorisé avec des fonds licites ; (3) enregistrer les données véridiques requises ; (4) l'utiliser pour un seul contexte ou objectif ; (5) ne pas structurer les recharges ni fabriquer une résidence ; (6) conserver les justificatifs d'achat/dépense et fermer ou éliminer la carte selon les conditions de l'émetteur.
+**Procedure:** (1) verify current issuer identity, fees, KYC, geography and online/recurring support; (2) acquire through an authorized seller with lawful funds; (3) register truthful required data; (4) use for one compartment/purpose; (5) do not structure loads or fabricate residency; (6) retain purchase/expense evidence and close/dispose per issuer terms.
 
-**Détection :** relier vendeur/activation, financement, appareil/IP, autorisation commerçant, vérification du solde et remboursement. Les schémas comptent davantage que l'étiquette prépayée.
+**Detection:** join seller/activation, funding, device/IP, merchant authorization, balance checks and redemption/refund. Patterns matter more than the prepaid label.
 
-## Carte cadeau closed-loop, bon et crédit de service transférable
+## Closed-loop gift card, voucher and transferable service credit
 
-**Mécanisme :** une valeur numérotée n'est échangeable qu'auprès d'un commerçant, service ou écosystème donné. Les crédits de téléphonie, de jeu et de boutique sont des variantes.
+**Mechanics:** numbered value is redeemable only with one merchant/service or ecosystem. Airtime/game/store credits are variants.
 
-**Avantages :** le commerçant bénéficiaire peut ne voir que le code/solde ; portée limitée ; don facile et séparation budgétaire.
+**Pros:** recipient merchant may see only code/balance; limited blast radius; easy gifting and budget separation.
 
-**Inconvénients :** le vendeur et le service enregistrent achat, activation et utilisation ; compte, appareil et livraison peuvent toujours relier les opérations ; escroqueries, remises de revente et limites d'expiration/région ; faibles droits de remboursement.
+**Cons:** seller and service log purchase/activation/redemption; account/device/delivery still link; scams, resale discounts and expiry/region limits; weak refund rights.
 
-**Procédure :** (1) acheter uniquement par des canaux autorisés ; (2) enregistrer la valeur du code sans exposer le secret ; (3) ne pas rattacher de compte de fidélité identifiant si cela n'est pas nécessaire ; (4) utiliser un compte/contexte commerçant distinct et légitime ; (5) conserver le reçu jusqu'à acceptation ; (6) ne jamais acheter de codes à la suite d'une demande non sollicitée de « taxes/support/ransomware ».
+**Procedure:** (1) buy only from authorized channels; (2) record code value without exposing the secret; (3) avoid attaching an identifying loyalty account if unnecessary; (4) redeem through a separate legitimate merchant account/context; (5) keep receipt until accepted; (6) never buy codes for an unsolicited “tax/support/ransom” demand.
 
-**Détection :** heure d'émission/utilisation, convergence appareil/compte, achats en volume ou selon des seuils, appareil vérifiant de nombreux soldes et utilisation rapide à distance.
+**Detection:** code issuance/redemption time, device/account convergence, bulk/threshold-pattern purchase, one device checking many balances, and distant rapid redemption.
 
-## Carte ou code cadeau financé par cryptocurrency
+## Cryptocurrency-funded card or gift-code broker
 
-**Mécanisme :** un intermédiaire accepte de la cryptocurrency et émet une carte, un bon ou un code commerçant. Il s'agit d'une conversion entre rails : le commerçant voit une valeur ordinaire, tandis que le broker relie le dépôt on-chain à l'émission et à la livraison.
+**Mechanics:** an intermediary accepts cryptocurrency and issues a card, voucher or merchant code. This is a cross-rail conversion: the merchant sees ordinary card/gift value, while the broker links the on-chain deposit to issuance and delivery.
 
-**Avantages :** le commerçant ne reçoit pas le wallet de financement ; utile pour les commerçants licites n'acceptant pas la crypto ; valeur stockée limitée.
+**Pros:** merchant does not receive the funding wallet; useful for legitimate merchants that do not accept crypto; bounded stored value.
 
-**Inconvénients :** pas anonyme vis-à-vis du broker/émetteur ; règles KYC, sanctions, exchange et programme de cartes ; graphe public du dépôt ; compte/appareil/email et utilisation du code reconnectent les deux côtés ; risques d'escroquerie/insolvabilité.
+**Cons:** not anonymous from broker/issuer; KYC, sanctions, exchange and card-program rules; public deposit graph; account/device/email and code redemption reconnect both sides; scam/insolvency risk.
 
-**Procédure :** (1) vérifier l'entité légale, l'émetteur de la carte, la juridiction, le KYC, les frais et la politique de remboursement ; (2) utiliser uniquement des fonds licites et documentés ; (3) tester la plus petite valeur ; (4) vérifier les restrictions de réseau/commerçant avant l'achat ; (5) conserver la transaction blockchain et le reçu du broker pour la comptabilité ; (6) ne jamais utiliser un broker promettant fraude à l'identité, contournement des sanctions ou retrait « intraçable ».
+**Procedure:** (1) verify the legal entity, card issuer, supported jurisdiction, KYC, fees and refund policy; (2) use only lawful documented funds; (3) test the smallest denomination; (4) verify network/merchant restrictions before purchase; (5) preserve both blockchain transaction and broker receipt for accounting; (6) never use a broker promising identity fraud, sanctions bypass or “untraceable” cash-out.
 
-**Détection :** corréler les adresses de dépôt du broker, montant/heure uniques, compte/appareil et autorisation de carte ou utilisation du code ; les registres de l'émetteur et du broker relient la chaîne publique au commerçant.
+**Detection:** correlate broker deposit addresses, unique amount/time, account/device and issued-card authorization or gift-code redemption; issuer and broker records bridge the public chain to the merchant.
 
-## Carte virtuelle ou limitée à un commerçant
+## Virtual or merchant-locked card
 
-**Mécanisme :** l'émetteur associe un PAN/token généré au compte réel, avec souvent des restrictions de commerçant, montant ou expiration.
+**Mechanics:** the issuer maps a generated PAN/token to the real account, often restricting merchant, amount or expiration.
 
-**Avantages :** empêche la divulgation du PAN réutilisable ; compartimentation par commerçant ; limites de dépense et révocation facile ; contrôle mature de la fraude.
+**Pros:** prevents reusable PAN disclosure; merchant compartmentation; spend limits and easy revocation; mature fraud control.
 
-**Inconvénients :** l'émetteur connaît toujours le payeur, le financement, le commerçant, l'appareil/IP et l'heure ; le commerçant voit le compte/livraison ; certains remboursements ou paiements récurrents échouent ; non anonyme.
+**Cons:** issuer still knows payer, funding, merchant, device/IP and time; merchant sees account/delivery; some refunds/recurring charges fail; not anonymous.
 
-**Procédure :** (1) utiliser la fonction officielle de l'émetteur réglementé ; (2) créer une carte pour un commerçant ou engagement unique ; (3) définir la plus petite limite utile et l'expiration ; (4) utiliser une facturation exacte lorsque nécessaire ; (5) vérifier le libellé du relevé et le comportement des remboursements ; (6) geler/supprimer après le règlement final tout en conservant les preuves d'audit.
+**Procedure:** (1) use the regulated issuer's official feature; (2) create a card for one merchant/engagement; (3) set the smallest useful limit and expiry; (4) use accurate billing where required; (5) verify statement descriptor/refund behavior; (6) freeze/delete after final settlement while retaining audit evidence.
 
-**Détection :** correspondance token-compte de l'émetteur, autorisation commerçant, appareil et livraison. Les défenseurs utilisent la réutilisation spécifique au commerçant, la vélocité et les signaux de prise de contrôle.
+**Detection:** issuer token-to-account mapping, merchant authorization, device and delivery. Defenders use merchant-specific reuse, velocity and account takeover signals.
 
-## Token de réseau de mobile wallet
+## Mobile-wallet network token
 
-**Mécanisme :** la tokenisation EMV remplace le PAN par un identifiant limité, souvent lié à un appareil, un commerçant ou un scénario de paiement.<sup>[[1]](#references)</sup>
+**Mechanics:** EMV payment tokenization substitutes a constrained credential for the PAN, often bound to a device, merchant or payment scenario.<sup>[[1]](#references)</sup>
 
-**Avantages :** le commerçant ne reçoit pas le PAN réutilisable ; cryptographie de l'appareil et données dynamiques réduisant le clonage ; révocation sans remplacement de la carte.
+**Pros:** merchant does not receive the reusable PAN; device cryptography/dynamic data reduce cloning; revocable without replacing card.
 
-**Inconvénients :** l'émetteur, le token service, la plateforme wallet et le réseau conservent les correspondances et transactions ; compte de plateforme/appareil et localisation peuvent identifier le payeur.
+**Cons:** issuer, token service, wallet platform and network retain mappings/transactions; device/platform account and location may identify payer.
 
-**Procédure :** (1) enregistrer une carte légitime dans le wallet officiel ; (2) protéger le compte de plateforme et l'appareil par une authentification forte ; (3) vérifier le token de l'appareil/les derniers chiffres à l'achat ; (4) désactiver la localisation/les analytics inutiles lorsque c'est possible ; (5) désactiver immédiatement les tokens des appareils perdus ; (6) examiner les registres de l'émetteur et du wallet.
+**Procedure:** (1) enroll a legitimate card in the official wallet; (2) protect platform account/device with strong authentication; (3) verify device token/last digits at purchase; (4) disable unnecessary location/analytics where supported; (5) remove lost devices/token immediately; (6) review issuer and wallet records.
 
-**Détection :** correspondance requestor de token/cryptogramme d'appareil-émetteur, télémétrie wallet/compte, terminal commerçant et éléments physiques.
+**Detection:** token requestor/device cryptogram and issuer mapping, wallet/account telemetry, merchant terminal and physical evidence.
 
-## Payment app, wallet de marketplace et intermédiaire centralisé
+## Payment app, marketplace wallet and centralized intermediary
 
-**Mécanisme :** le service gère les comptes et transfère les fonds en interne ou par des rails bancaires/de cartes ; le commerçant peut voir un alias tandis que le service voit les deux parties.
+**Mechanics:** the service maintains accounts and transfers internally or over bank/card rails; the merchant may see an alias while the service sees both parties.
 
-**Avantages :** commodité et mécanismes de litige/remboursement ; le bénéficiaire ne voit pas nécessairement les coordonnées bancaires/de carte.
+**Pros:** convenience, dispute/refund mechanisms, recipient does not necessarily see bank/card details.
 
-**Inconvénients :** graphe centralisé d'identité, de relations, de transactions et d'appareils ; gels et procédures légales ; les contreparties peuvent exposer le profil ; l'utilisation des données peut dépasser le nécessaire au paiement.<sup>[[2]](#references)</sup>
+**Cons:** centralized identity/social/transaction/device graph; freezes and legal process; counterparties can expose profile; data use may exceed payment necessity.<sup>[[2]](#references)</sup>
 
-**Procédure :** (1) lire les conditions d'identité, de confidentialité, de conservation et de protection de l'acheteur ; (2) limiter la synchronisation facultative du profil et des contacts ; (3) utiliser un compte distinct et véridique uniquement si les conditions l'autorisent ; (4) activer MFA et alertes ; (5) vérifier le bénéficiaire et la confidentialité du mémo/profil ; (6) exporter les registres et fermer les liens inutilisés.
+**Procedure:** (1) read identity, privacy, retention and buyer-protection terms; (2) minimize optional profile/contact synchronization; (3) use a separate truthful account only when terms allow; (4) enable MFA/alerts; (5) verify recipient and privacy of memo/profile; (6) export records and close unused links.
 
-**Détection :** compte du fournisseur, appareil/IP, graphe de contacts, financement/retrait, mémo et registres commerçants. Un alias est une pseudonymie vis-à-vis d'une contrepartie, pas un anonymat vis-à-vis de la plateforme.
+**Detection:** provider account, device/IP, contact graph, funding/withdrawal, memo and merchant records. An alias is pseudonymity from a counterparty, not anonymity from the platform.
 
-## Virement bancaire, ACH, wire et paiement instantané par compte
+## Bank transfer, ACH, wire and instant-account payment
 
-**Mécanisme :** des établissements réglementés déplacent la valeur entre des comptes identifiés et échangent les données de paiement requises.
+**Mechanics:** regulated institutions move value between identified accounts and exchange required payment data.
 
-**Avantages :** rapide, traçable, parfois réversible, avec des registres solides ; les numéros de compte virtuels peuvent réduire la divulgation au commerçant.
+**Pros:** fast, accountable, reversible in limited cases, strong records; virtual account numbers may reduce merchant disclosure.
 
-**Inconvénients :** les banques et processors connaissent les deux côtés ; relevés et références ; non anonyme ; données transfrontalières et Travel Rule/AML.
+**Cons:** banks/processors know both sides; statements and references; not anonymous; cross-border and Travel Rule/AML data.
 
-**Procédure :** utiliser uniquement lorsque la traçabilité est acceptable : vérifier indépendamment le bénéficiaire, limiter les données facultatives du mémo, utiliser si possible un compte/référence virtuel fourni par la banque, activer les alertes, conserver la facture et rapprocher les comptes.
+**Procedure:** use only when accountability is acceptable: verify beneficiary independently, minimize optional memo data, use a bank-provided virtual account/reference where available, enable alerts, retain invoice and reconcile.
 
-**Détection :** registres bancaires/de paiement déterministes, propriété du bénéficiaire/compte, session/appareil et contrôles de fraude. Il s'agit d'une référence, pas d'une technique d'anonymat.
+**Detection:** deterministic bank/payment records, beneficiary/account ownership, device/session and fraud controls. This is a baseline, not an anonymity technique.
 
-## Compartimentation des comptes et commerçants
+## Account and merchant compartmentation
 
-**Mécanisme :** des identités, comptes, alias email, cartes et contextes de livraison distincts empêchent des commerçants sans lien de regrouper trivialement l'activité, tandis qu'un émetteur/contrôleur conserve la correspondance.
+**Mechanics:** separate lawful identities/accounts, email aliases, cards and delivery contexts prevent unrelated merchants from trivially joining activity while an issuer/controller keeps the mapping.
 
-**Avantages :** réduit les fuites et le lien inter-commerçants ; facile à auditer ; compatible avec les paiements réglementés.
+**Pros:** reduces breach and cross-merchant linkage; easy to audit; compatible with regulated payments.
 
-**Inconvénients :** le fournisseur relie toujours les compartiments ; téléphone de récupération, appareil/IP et expédition peuvent les reconnecter ; certaines politiques interdisent plusieurs comptes.
+**Cons:** provider still maps compartments; recovery phone/device/IP and shipping can reconnect them; policy may forbid multiple accounts.
 
-**Procédure :** (1) définir un objectif unique ; (2) créer uniquement des alias/sous-comptes conformes aux conditions ; (3) utiliser un token ou une carte spécifique au commerçant ; (4) désactiver la personnalisation publicitaire/contact inter-comptes ; (5) conserver un registre de contrôle chiffré ; (6) retirer les identifiants après la fin des besoins de remboursement/conservation.
+**Procedure:** (1) define one purpose; (2) create only terms-compliant aliases/subaccounts; (3) use a merchant-specific token/card; (4) disable cross-account contact/ad personalization; (5) keep an encrypted controller ledger; (6) retire identifiers after refunds/retention needs end.
 
-**Détection :** les fournisseurs relient récupération, appareil, financement et IP ; les commerçants relient livraison, navigateur et comportement du compte. Les défenseurs doivent distinguer compartimentation légitime et fraude à l'identité synthétique.
+**Detection:** providers join recovery, device, funding and IP; merchants join delivery, browser and account behavior. Defenders should distinguish legitimate compartmentation from synthetic identity fraud.
 
-## Achat contrôlé de red team
+## Controlled red-team procurement
 
-**Mécanisme :** le SOC ignore l'achat tandis qu'un contrôleur d'exercice conserve la correspondance entre entité légale, opérateur et infrastructure.
+**Mechanics:** the SOC is blind to a purchase while an exercise controller retains legal entity, operator and infrastructure mapping.
 
-**Avantages :** exercice de détection réaliste ; aucune exposition personnelle ; déconfliction et audit immédiats.
+**Pros:** realistic detection exercise; no personal exposure; immediate deconfliction and audit.
 
-**Inconvénients :** non anonyme pour l'organisation/le fournisseur ; charge de gouvernance ; fuites si le registre d'attribution est mal géré.
+**Cons:** not anonymous to organization/provider; governance overhead; leaks if the controller ledger is mishandled.
 
-**Procédure :** (1) attribuer une carte/wallet/budget d'organisation spécifique à l'engagement ; (2) séparer les rôles d'acheteur et d'opérateur ; (3) consigner actif, montant, service, objectif et date d'arrêt ; (4) stocker la correspondance d'attribution avec un accès limité au contrôleur ; (5) ne jamais utiliser fausse identité, mule ou fonds volés ; (6) révéler et rapprocher les indicateurs et remboursements à la clôture.
+**Procedure:** (1) allocate an engagement-specific organization card/wallet/budget; (2) separate purchaser/operator roles; (3) record asset, amount, service, purpose and kill date; (4) store attribution mapping with limited controller access; (5) never use false identity/mule/stolen funds; (6) reveal/reconcile indicators and refunds at closeout.
 
-**Détection :** le contrôleur relie facture du fournisseur et actif ; le SOC teste la découverte indépendante via domaine, certificat, hébergement et trafic plutôt que par les données du porteur.
+**Detection:** controller maps provider invoice and asset; SOC tests independent discovery through domain, certificate, hosting and traffic rather than cardholder data.
 
-## Hygiène Bitcoin et coin control
+## Bitcoin address hygiene and coin control
 
-**Mécanisme :** des adresses de réception nouvelles, des libellés locaux et une dépense sélective des UTXO réduisent la réutilisation d'adresses et la fusion accidentelle de compartiments sur un registre public.
+**Mechanics:** fresh receive addresses, local labeling and selective UTXO spending reduce address reuse and accidental compartment merging on a public ledger.
 
-**Avantages :** largement pris en charge ; self-custodial ; évite les liens publics les plus simples.
+**Pros:** broadly supported; self-custodial; avoids the simplest public linkage.
 
-**Inconvénients :** toutes les transactions et tous les montants restent publics ; heuristiques common-input/change, timing et consolidations peuvent relier les activités ; les registres d'acquisition, RPC et réseau demeurent.
+**Cons:** all transactions/amounts remain public; common-input/change/timing and later consolidation link activity; acquisition/RPC/network records remain.
 
-**Procédure :** (1) installer/vérifier un wallet maintenu ; (2) sauvegarder et tester la récupération de la seed ; (3) utiliser une nouvelle adresse par facture ; (4) libeller localement source et objectif ; (5) utiliser coin control pour éviter de fusionner les contextes ; (6) préférer un nœud local ou une connexion respectueuse de la confidentialité ; (7) vérifier change et frais et conserver la comptabilité licite.<sup>[[3]](#references)</sup>
+**Procedure:** (1) install/verify a maintained wallet; (2) back up and test seed recovery; (3) use a new address per invoice; (4) label source/purpose locally; (5) use coin control to avoid merging contexts; (6) prefer a local node or privacy-aware connection; (7) preview change/fees and retain lawful accounting.<sup>[[3]](#references)</sup>
 
-**Détection :** graphe d'adresses, heuristiques common-input/change avec incertitude, montant/heure exacts, consolidation, dépôts auprès de services, moment de diffusion node/RPC et registres off-chain.
+**Detection:** address graph, common-input/change heuristics with uncertainty, exact amount/time, consolidation, service deposits, node/RPC broadcast timing and off-chain records.
 
 ## Bitcoin Silent Payments
 
-**Mécanisme :** BIP 352 permet au destinataire de publier un code statique tandis que les payeurs dérivent des sorties Taproot uniques par ECDH ; les observateurs externes ne peuvent pas relier directement les sorties au code.<sup>[[4]](#references)</sup>
+**Mechanics:** BIP 352 lets a receiver publish a static code while senders derive unique Taproot outputs via ECDH; outside observers cannot directly link outputs to the code.<sup>[[4]](#references)</sup>
 
-**Avantages :** identifiant public réutilisable sans réutilisation d'adresse ; aucune demande interactive d'adresse ni sortie de notification ; se fond dans les sorties Taproot.
+**Pros:** reusable public identifier without address reuse; no interactive address request or notification output; blends into Taproot outputs.
 
-**Inconvénients :** coût de scan du destinataire ; support wallet variable ; graphe montant/expéditeur et dépenses toujours publics ; le serveur d'indexation peut observer les scans.
+**Cons:** receiver scanning cost; wallet support varies; amount/sender graph and spending remain public; index server can observe scans.
 
-**Procédure :** (1) choisir un wallet BIP 352 récent ; (2) sauvegarder/tester le descriptor et la récupération du scan ; (3) générer un code libellé lorsque c'est pris en charge ; (4) authentifier le code publié ; (5) l'expéditeur vérifie les inputs et envoie un petit test ; (6) le destinataire scanne de préférence via son propre nœud ; (7) garder les UTXO reçus séparés.
+**Procedure:** (1) select a current BIP 352 wallet; (2) back up/test descriptor and scanning recovery; (3) generate labeled code where supported; (4) authenticate the published code; (5) sender reviews inputs and sends a small test; (6) receiver scans preferably through own node; (7) keep received UTXOs separated.
 
-**Détection :** non identifiable de manière fiable à partir de la seule sortie, par conception ; les analystes utilisent les inputs de l'expéditeur, montant/heure, dépenses ultérieures, wallet/réseau/index et registres de contreparties.
+**Detection:** not reliably identifiable from output alone by design; analysts use sender inputs, amount/time, later spending, wallet/network/index and counterparty records.
 
 ## PayJoin
 
-**Mécanisme :** le payeur et le bénéficiaire apportent des inputs à une même transaction, rompant l'hypothèse selon laquelle tous les inputs appartiennent au même propriétaire.<sup>[[5]](#references)</sup>
+**Mechanics:** payer and payee contribute inputs to one payment transaction, breaking the assumption that all inputs share one owner.<sup>[[5]](#references)</sup>
 
-**Avantages :** paiement ordinaire avec confidentialité améliorée ; bénéfice pour le graphe global en affaiblissant une heuristique commune ; aucun groupe de sorties égales nécessaire.
+**Pros:** ordinary payment with improved privacy; benefits the wider graph by weakening a common heuristic; no equal-output crowd required.
 
-**Inconvénients :** interaction et support nécessaires ; disponibilité de l'endpoint du bénéficiaire ; montant et transaction finale publics ; métadonnées d'implémentation et de repli.
+**Cons:** interactive/support requirement; receiver endpoint availability; amount and final transaction public; implementation and fallback metadata.
 
-**Procédure :** (1) confirmer que les deux wallets maintenus prennent en charge la même version PayJoin ; (2) authentifier la facture/l'endpoint ; (3) commencer via l'URI de paiement PayJoin du wallet ; (4) examiner montant/frais finaux et ne signer que les inputs attendus ; (5) éviter toute modification manuelle de transaction ; (6) vérifier diffusion et réception ; (7) documenter le repli si la négociation échoue.
+**Procedure:** (1) confirm both maintained wallets support the same PayJoin version; (2) authenticate invoice/endpoint; (3) start from the wallet's PayJoin-enabled payment URI; (4) inspect final amount/fee and sign only expected inputs; (5) avoid manual transaction surgery; (6) verify broadcast and receipt; (7) record fallback if negotiation fails.
 
-**Détection :** les analystes blockchain ne doivent pas forcer le clustering common-input ; l'endpoint/le fournisseur peut journaliser la négociation ; utiliser les preuves wallet/réseau et les dépenses ultérieures, pas uniquement la forme de la transaction.
+**Detection:** blockchain analysts must not force common-input clustering; endpoint/provider may log negotiation; use wallet/network and later-spend evidence rather than transaction shape alone.
 
 ## CoinJoin
 
-**Mécanisme :** plusieurs participants créent collaborativement une transaction comportant de nombreux inputs/outputs, souvent de dénominations égales, accroissant l'ambiguïté de correspondance inputs-outputs.
+**Mechanics:** multiple participants collaboratively create a transaction with many inputs/outputs, commonly equal denominations, increasing ambiguity about input-output correspondence.
 
-**Avantages :** ensemble d'ambiguïté on-chain plus large ; designs self-custodial existants ; structure de rounds mesurable.
+**Pros:** larger on-chain ambiguity set; self-custodial designs exist; measurable round structure.
 
-**Inconvénients :** métadonnées coordinator/peer/réseau ; frais et liquidité ; forme de transaction identifiable ; change toxique et consolidation ultérieure détruisent les gains ; disponibilité légale/fournisseur variable.
+**Cons:** coordinator/peer/network metadata; fees/liquidity; identifiable transaction shape; toxic change and later consolidation destroy gains; legal/provider availability varies.
 
-**Procédure :** (1) vérifier disponibilité et légalité actuelles du wallet/coordinator ; (2) installer le wallet officiel et le sauvegarder ; (3) n'utiliser que des UTXO licites ; (4) comprendre dénomination, frais et modèle du coordinator ; (5) garder le change et les outputs mixtes libellés et séparés ; (6) ne jamais les consolider ensemble ; (7) acheminer le trafic réseau comme officiellement pris en charge et conserver la comptabilité.
+**Procedure:** (1) verify current wallet/coordinator availability and legality; (2) install official wallet and back up; (3) use only lawful UTXOs; (4) understand denomination, fee and coordinator model; (5) keep change and mixed outputs labeled/separate; (6) never consolidate them together; (7) route network traffic as officially supported and preserve accounting.
 
-**Détection :** identifier la structure collaborative sans supposer un crime ; calculer les correspondances possibles et l'ensemble d'anonymat, puis surveiller change/consolidation, frontières des services et registres réseau/coordinator.
+**Detection:** identify collaborative structure without assuming crime; calculate possible mappings/anonymity set, then watch change/consolidation, service boundaries and network/coordinator records.
 
 ## Lightning Network
 
-**Mécanisme :** les paiements HTLC traversent des channels routés par onion ; la plupart des détails ne sont pas publiés on-chain, tandis que financement/clôture et informations publiques des channels le sont.
+**Mechanics:** HTLC payments traverse onion-routed channels; most payment details are not published on chain, while funding/closing and public channel information are.
 
-**Avantages :** rapide et peu coûteux ; les intermédiaires voient normalement les hops adjacents ; les détails ordinaires restent off-chain.
+**Pros:** fast, low fee; intermediaries normally see adjacent hops; routine payment details stay off chain.
 
-**Inconvénients :** expéditeur/destinataire et premier/dernier hop en savent davantage ; probing, timing, graphe des channels, liquidité, wallets et registres LSP ; les custodial wallets identifient les utilisateurs.
+**Cons:** sender/receiver and first/last hop know more; probing, timing, channel graph, liquidity/wallet/LSP records; custodial wallets identify users.
 
-**Procédure :** (1) choisir consciemment self-custodial ou custodial ; (2) vérifier wallet/seed/récupération des channels ; (3) utiliser une invoice correspondant exactement au paiement ; (4) préférer les channels privés/fonctions LSP seulement après étude des compromis ; (5) protéger l'IP du nœud via Tor pris en charge si nécessaire ; (6) éviter les invoices identifiantes réutilisées ; (7) conserver la comptabilité des channels et paiements.<sup>[[6]](#references)</sup>
+**Procedure:** (1) choose self-custodial versus custodial knowingly; (2) verify wallet/seed/channel recovery; (3) use an invoice for the exact payment; (4) prefer private channels/LSP features only after reading tradeoffs; (5) protect node IP with supported Tor where needed; (6) avoid reusing identifying invoices; (7) keep channel and payment accounting.<sup>[[6]](#references)</sup>
 
-**Détection :** journaux node/LSP/custodian, graphe/probes de channels, échecs et timing des paiements, financement/clôture on-chain ; aucune transaction publique ne signifie pas absence de registres.
+**Detection:** node/LSP/custodian logs, channel graph/probes, payment failure/timing and on-chain funding/closure; no public transaction does not mean no records.
 
-## Offres BOLT 12 et route blinding
+## BOLT 12 offers and route blinding
 
-**Mécanisme :** une offer réutilisable produit de nouvelles invoices et peut annoncer des chemins masqués afin que le payeur n'apprenne pas le node/chemin clair du destinataire.
+**Mechanics:** a reusable offer produces fresh invoices and may advertise blinded paths so the payer need not learn the receiver's clear node/path.
 
-**Avantages :** confidentialité du destinataire ; endpoint réutilisable pour dons/paiements sans invoice statique ; intégration au routage onion de Lightning.
+**Pros:** receiver privacy; reusable donation/payment endpoint without static invoice; integrates with Lightning onion routing.
 
-**Inconvénients :** support wallet variable ; endpoints, hops sélectionnés et financement restent visibles ; contact public ou endpoint réseau peut réidentifier le destinataire.
+**Cons:** wallet support varies; endpoints, selected hops and funding remain; public contact or network endpoint can reidentify receiver.
 
-**Procédure :** (1) confirmer le support BOLT 12 correspondant ; (2) authentifier l'offer ; (3) demander une nouvelle invoice ; (4) vérifier montant, émetteur et récurrence ; (5) payer via le wallet ; (6) vérifier réception/remboursement ; (7) limiter alias/contact du nœud et conserver la comptabilité.<sup>[[7]](#references)</sup>
+**Procedure:** (1) confirm matching BOLT 12 support; (2) authenticate offer; (3) request a fresh invoice; (4) review amount/issuer/recurrence; (5) pay through the wallet; (6) verify receipt/refund behavior; (7) minimize node alias/contact and preserve accounting.<sup>[[7]](#references)</sup>
 
-**Détection :** télémétrie wallet/LSP et premier/dernier hop, compte de diffusion de l'offer, timing/valeur et graphe du financement ; le route blinding limite volontairement la visibilité du payeur.
+**Detection:** wallet/LSP and first/last-hop telemetry, offer distribution account, timing/value and funding graph; route blinding intentionally limits payer visibility.
 
 ## Monero
 
-**Mécanisme :** les stealth addresses à usage unique masquent le lien avec le destinataire, RingCT masque les montants et les ring signatures fournissent l'ambiguïté de l'expéditeur.
+**Mechanics:** one-time stealth addresses hide recipient linkage, RingCT hides amounts and ring signatures provide sender ambiguity.
 
-**Avantages :** confidentialité activée par défaut on-chain ; confidentialité de l'expéditeur, du destinataire et du montant ; écosystème mature de wallets/nodes dédiés.
+**Pros:** privacy is default on chain; sender/receiver/amount confidentiality; mature dedicated wallet/node ecosystem.
 
-**Inconvénients :** acquisition/off-ramp et registres endpoint/réseau/contrepartie ; un remote node voit requêtes et IP ; support des exchanges et traitement juridique variables ; les erreurs opérationnelles peuvent toujours relier les contextes.
+**Cons:** acquisition/off-ramp and endpoint/network/counterparty records; remote node sees queries/IP; exchange support/legal treatment varies; small operational mistakes still link contexts.
 
-**Procédure :** (1) acquérir légalement et conserver le motif/la source ; (2) installer/vérifier un wallet officiel maintenu ; (3) sauvegarder/tester la seed ; (4) utiliser un nœud local ou un chemin remote node Tor/I2P documenté ; (5) utiliser une nouvelle subaddress par payeur/facture ; (6) libeller localement les contextes ; (7) ne divulguer une preuve de transaction ou un accès view qu'intentionnellement.<sup>[[8]](#references)</sup>
+**Procedure:** (1) acquire lawfully and retain basis/source; (2) install/verify official maintained wallet; (3) back up/test seed; (4) use a local node or documented Tor/I2P remote-node path; (5) use new subaddress per payer/invoice; (6) label contexts locally; (7) disclose transaction proof/view access only deliberately.<sup>[[8]](#references)</sup>
 
-**Détection :** se concentrer sur les preuves d'exchange, commerçant, appareil, réseau et wallet saisi ; l'utilisation du protocole seule n'est pas suspecte et la chaîne publique expose volontairement moins d'informations.
+**Detection:** focus on exchange/merchant/device/network and seized-wallet evidence; protocol use alone is not suspicious and the public chain deliberately exposes less.
 
-## Zcash Orchard entièrement shielded
+## Zcash fully shielded Orchard
 
-**Mécanisme :** les zero-knowledge proofs valident les transferts shielded tandis que l'expéditeur, le destinataire et le montant sont chiffrés ; les pools transparents et transitions de pool restent publics.
+**Mechanics:** zero-knowledge proofs validate shielded transfers while sender, receiver and amount are encrypted; transparent pools and pool transitions remain public.
 
-**Avantages :** forte confidentialité on-chain shielded ; viewing keys permettant un audit limité ; validité imposée par le protocole.
+**Pros:** strong shielded on-chain confidentiality; viewing keys can support scoped audit; protocol-enforced validity.
 
-**Inconvénients :** support wallet/exchange et choix réel du pool variables ; corrélation temps/valeur aux frontières transparentes ; réseau/RPC et endpoints persistants.
+**Cons:** wallet/exchange support and actual pool choice vary; transparent boundary timing/value correlation; network/RPC and endpoint remain.
 
-**Procédure :** (1) choisir un wallet Orchard maintenu et shielded par défaut ; (2) vérifier et sauvegarder ; (3) obtenir des ZEC légalement ; (4) recevoir vers une Unified Address prise en charge et confirmer le pool ; (5) préférer shielded-to-shielded ; (6) utiliser la confidentialité réseau prise en charge ; (7) tester la divulgation de viewing key avec une petite valeur avant l'audit.<sup>[[9]](#references)</sup>
+**Procedure:** (1) select a maintained Orchard shielded-by-default wallet; (2) verify/back up; (3) obtain ZEC lawfully; (4) receive to supported Unified Address and confirm pool; (5) prefer shielded-to-shielded; (6) use supported network privacy; (7) test viewing-key disclosure on a small wallet before audit.<sup>[[9]](#references)</sup>
 
-**Détection :** frontières transparentes et registres des services, métadonnées wallet/réseau et viewing keys lorsqu'elles sont fournies légalement ; ne pas supposer que tous les paiements Unified Address étaient shielded.
+**Detection:** transparent boundary and service records, wallet/network metadata and viewing keys where lawfully provided; do not assume all Unified Address payments were shielded.
 
-## Mimblewimble et Litecoin MWEB
+## Mimblewimble and Litecoin MWEB
 
-**Mécanisme :** les confidential transactions masquent les montants et l'agrégation de type Mimblewimble retire l'historique conventionnel riche en adresses ; Litecoin implémente une extension optionnelle parallèle à sa chaîne transparente.
+**Mechanics:** confidential transactions hide amounts and Mimblewimble-style aggregation removes conventional address-rich history; Litecoin implements an optional extension block alongside its transparent chain.
 
-**Avantages :** montants confidentiels et meilleure fongibilité dans le domaine privé ; pruning/agrégation efficaces.
+**Pros:** confidential amounts and improved fungibility in the private domain; efficient pruning/aggregation.
 
-**Inconvénients :** la frontière opt-in peg-in/out est publique et corrélable ; support wallet/exchange ; différences de modèle interactif/adresse ; registres réseau et d'acquisition.
+**Cons:** opt-in boundary peg-in/out is public and correlatable; wallet/exchange support; interactive/address model differences; network and acquisition records.
 
-**Procédure :** (1) choisir un wallet maintenu prenant explicitement MWEB en charge ; (2) vérifier/sauvegarder et tester un petit montant ; (3) acquérir légalement ; (4) faire le peg vers MWEB et vérifier le domaine du solde ; (5) transacter uniquement avec un destinataire compatible ; (6) éviter un peg-out immédiatement distinctif ; (7) conserver des registres d'audit privés.<sup>[[10]](#references)</sup>
+**Procedure:** (1) choose a maintained wallet with explicit MWEB support; (2) verify/back up and test small amount; (3) acquire lawfully; (4) peg into MWEB and verify balance domain; (5) transact only with a compatible receiver; (6) avoid immediate distinctive peg-out; (7) retain private audit records.<sup>[[10]](#references)</sup>
 
-**Détection :** timing/valeur des peg-in/out publics, données exchange/wallet/node et dépenses transparentes ultérieures ; les transferts confidentiels internes réduisent intentionnellement les détails disponibles.
+**Detection:** public peg-in/out timing/value, exchange/wallet/node data and later transparent spends; internal confidential transfer details are intentionally reduced.
 
-## Applications Ethereum de confidentialité zero-knowledge
+## Ethereum zero-knowledge privacy applications
 
-**Mécanisme :** un circuit prouve une déclaration — appartenance, propriété valide d'une note ou autorisation — sans révéler le secret ; un contrat verifier la contrôle. Dépôts, retraits, entrées publiques, événements et gas peuvent toujours exposer les liens.
+**Mechanics:** a circuit proves a statement—membership, valid note ownership or authorization—without revealing the secret; a verifier contract checks it. Deposits, withdrawals, public inputs, events and gas can still expose links.
 
-**Avantages :** divulgation sélective programmable ; applications à ensemble anonyme ; règles vérifiables sans révélation de toutes les données.
+**Pros:** programmable selective disclosure; anonymous-set applications; verifiable rules without revealing all data.
 
-**Inconvénients :** bugs de contrat/circuit ; petit ensemble d'anonymat ; frontières publiques ; RPC/IP/session/analytics/gas funding ; risques applicatifs, juridiques et de sanctions.
+**Cons:** contract/circuit bugs; small anonymity set; public boundaries; RPC/IP/session/analytics/gas funding; application and sanctions/legal risk.
 
-**Procédure :** (1) définir exactement ce que la preuve masque ; (2) utiliser légalement une application auditée et maintenue ; (3) examiner entrées publiques, événements et règles de dépôt/retrait ; (4) séparer wallet d'action et sponsorship du gas comme le prévoit le protocole ; (5) utiliser un chemin RPC/réseau respectueux de la confidentialité ; (6) tester avec une petite valeur ; (7) conserver les registres de conformité.<sup>[[11]](#references)</sup>
+**Procedure:** (1) define exactly what the proof hides; (2) use an audited maintained application where lawful; (3) inspect public inputs/events and deposit/withdraw rules; (4) separate action wallet and gas sponsorship as the protocol intends; (5) use a privacy-aware RPC/network path; (6) test with small value; (7) preserve compliance records.<sup>[[11]](#references)</sup>
 
-**Détection :** événements de contrats, timing/valeur dépôt-retrait, relayer/paymaster, RPC/session, stockage/analytics frontend et frontière exchange/commerçant finale. Ne pas prétendre que la preuve ZK masque les champs déclarés publics.
+**Detection:** contract events, deposit/withdraw timing/value, relayer/paymaster, RPC/session, frontend storage/analytics and eventual exchange/merchant boundary. Do not claim the ZK proof hides fields declared public.
 
 ## Stablecoins
 
-**Mécanisme :** les tokens sont transférés sur une chaîne publique ; les émetteurs centralisés peuvent geler, blacklister ou racheter auprès de comptes identifiés.
+**Mechanics:** tokens transfer on a public chain; centralized issuers may freeze/blacklist or redeem against identified accounts.
 
-**Avantages :** stabilité du prix, liquidité et support commerçant ; règlement rapide ; comptabilité simple.
+**Pros:** price stability, liquidity and merchant support; fast settlement; easy accounting.
 
-**Inconvénients :** graphe transparent des adresses, montants et contrats ; financement du gas ; identité/contrôle de l'émetteur et de l'exchange ; filtrage des sanctions ; anonymat généralement faible.
+**Cons:** transparent address/amount/contract graph; gas funding; issuer and exchange identity/control; sanctions screening; generally poor anonymity.
 
-**Procédure :** traiter comme un paiement identifié : utiliser une adresse commerciale nouvelle uniquement pour la compartimentation, vérifier contrat token/réseau, tester un petit montant, protéger le wallet, utiliser un RPC de confiance ou un nœud local, conserver source/motif et filtrer les parties requises.
+**Procedure:** treat as identified payment: use a fresh business address only for compartmentation, verify token contract/network, test small amount, protect wallet, use trusted RPC/local node, retain basis/source and screen required parties.
 
-**Détection :** graphe complet des événements token, listes/actions de gel de l'émetteur et relations exchange/RPC/appareil/financement du gas.
+**Detection:** complete token event graph, issuer freeze list/actions, exchange/RPC/device and gas-funding relationships.
 
 ## Cashu Chaumian e-cash
 
-**Mécanisme :** une mint signe aveuglément des secrets bearer générés par le client et garantis par des réserves Bitcoin/Lightning de la mint ; elle peut empêcher la double dépense sans relier directement l'émission au remboursement ultérieur.
+**Mechanics:** a mint blindly signs client-generated bearer secrets backed by the mint's Bitcoin/Lightning reserves; it can prevent double-spend without directly linking issuance to later redemption.
 
-**Avantages :** tokens bearer sans compte ; transferts peer instantanés ; la mint ne peut pas relier directement le retrait aveugle à la dépense ; tokens transmissibles comme données/QR.
+**Pros:** accountless bearer tokens; instant peer transfer; mint cannot directly link blinded withdrawal to spend; tokens can move as data/QR.
 
-**Inconvénients :** garde/solvabilité/censure de la mint ; perte/vol des données bearer ; frontières de dénomination/timing et Lightning ; métadonnées réseau ; écosystème logiciel précoce.<sup>[[12]](#references)</sup>
+**Cons:** mint custody/solvency/censorship; bearer data loss/theft; denomination/timing and Lightning boundaries; network metadata; early software ecosystem.<sup>[[12]](#references)</sup>
 
-**Procédure :** (1) utiliser d'abord une mint de test officielle ou une valeur minime jetable ; (2) installer un wallet maintenu et tester les limites de backup/restore ; (3) authentifier la mint et examiner garde/frais ; (4) minter une petite valeur ; (5) envoyer le token par canal privé/QR authentifié ; (6) le destinataire swap le token avant de le considérer définitif ; (7) rembourser et rapprocher. Ne jamais stocker une valeur significative dans une mint non fiable.
+**Procedure:** (1) use an official test mint or tiny disposable value first; (2) install a maintained wallet and test backup/restore limitations; (3) authenticate mint and review custody/fees; (4) mint a small amount; (5) send token over an authenticated private channel/QR; (6) receiver swaps token before treating it final; (7) redeem and reconcile. Never store meaningful value in an untrusted mint.
 
-**Détection :** la mint voit réseau, frontières émission/remboursement/Lightning et ensemble des tokens dépensés, mais le blinding retire le lien direct du token ; endpoints/messages et montant/timing distinctifs peuvent rétablir les liens.
+**Detection:** mint sees network, issue/redeem/Lightning boundaries and spent-token set but blinding removes direct token linkage; endpoints/messages and distinctive amount/timing can restore links.
 
 ## Fedimint federated e-cash
 
-**Mécanisme :** un quorum de guardians détient les réserves et signe aveuglément l'e-cash ; les transferts bearer internes sont privés vis-à-vis des guardians, tandis que les gateways Lightning relient les paiements externes.
+**Mechanics:** a threshold of guardians holds reserves and blind-signs e-cash; internal bearer transfers are private from guardians, while Lightning gateways bridge external payments.
 
-**Avantages :** garde distribuée ; transfert interne privé ; gouvernance communautaire ; aucun guardian seul ne contrôle la réserve sous le seuil.
+**Pros:** distributes custody; private internal transfer; community governance; no single guardian controls reserve below threshold.
 
-**Inconvénients :** risque de quorum/garde/logiciel ; gateway voyant invoices et timing ; frontières dépôt/retrait ; récupération complexe de l'état client.
+**Cons:** guardian quorum/custody/software risk; gateway observes invoices/timing; deposit/withdraw boundaries; client-state recovery complexity.
 
-**Procédure :** (1) vérifier invitation, guardians, quorum et juridiction de la federation ; (2) installer un client maintenu et tester la récupération ; (3) déposer une petite valeur licite ; (4) utiliser de nouvelles payment requests internes ; (5) considérer la gateway comme observateur des paiements Lightning ; (6) tester le remboursement ; (7) conserver les registres source/taxe hors des données de paiement publiques.<sup>[[13]](#references)</sup>
+**Procedure:** (1) verify federation invite/guardians/quorum/jurisdiction; (2) install maintained client and test recovery; (3) deposit a small lawful amount; (4) use fresh internal payment requests; (5) treat gateway as observer for Lightning; (6) test redemption; (7) retain source/tax records outside public payment data.<sup>[[13]](#references)</sup>
 
-**Détection :** la federation voit les émissions/remboursements agrégés, les gateways voient les invoices externes, Bitcoin/Lightning montrent les frontières et les preuves endpoint/communication peuvent relier les transferts internes.
+**Detection:** federation sees aggregate issuance/redemption, gateways see external invoices, Bitcoin/Lightning show boundaries, and endpoint/communication evidence can link internal transfers.
 
 ## GNU Taler
 
-**Mécanisme :** l'e-cash à signature aveugle intégré à une banque vise à garder le payeur anonyme vis-à-vis des commerçants, tout en rendant les commerçants et revenus responsables.
+**Mechanics:** bank-integrated blind-signature e-cash aims to keep the payer anonymous to merchants while merchants and income remain accountable.
 
-**Avantages :** confidentialité du payeur par conception ; monnaie ordinaire ; responsabilité/remboursement du commerçant ; aucun token spéculatif requis.
+**Pros:** payer privacy by design; ordinary currency; merchant accountability/refunds; no speculative token required.
 
-**Inconvénients :** déploiements limités ; exchange/banque voient le financement ; le commerçant voit commande/livraison ; risque bearer/récupération du wallet ; opérateurs réglementés.
+**Cons:** limited deployments; exchange/bank sees funding; merchant sees order/delivery; wallet bearer/recovery risk; regulated operators.
 
-**Procédure :** (1) trouver un exchange/commerçant actuel pour la juridiction et la devise ; (2) lire KYC, frais et confidentialité ; (3) installer le wallet officiel ; (4) retirer légalement auprès de la banque/exchange pris en charge ; (5) examiner le contrat commerçant ; (6) payer et conserver reçus/remboursements ; (7) éviter les identifiants de session commerçant inutiles.<sup>[[14]](#references)</sup>
+**Procedure:** (1) locate a current exchange/merchant for the jurisdiction/currency; (2) read KYC/fees/privacy; (3) install official wallet; (4) withdraw lawfully from supported bank/exchange; (5) review merchant contract; (6) pay and preserve receipt/refund data; (7) avoid unnecessary merchant session identifiers.<sup>[[14]](#references)</sup>
 
-**Détection :** le retrait banque/exchange et le dépôt commerçant sont des frontières responsables ; commande, appareil, livraison et timing peuvent corréler même lorsque les coins sont blindés.
+**Detection:** bank/exchange withdrawal and merchant deposit are accountable boundaries; merchant order/device/delivery and timing may correlate even when coins are blinded.
 
-## Bridge inter-chaînes, atomic swap et exchange décentralisé
+## Cross-chain bridge, atomic swap and decentralized exchange
 
-**Mécanisme :** un contrat/service verrouille ou brûle un actif et libère/minte un autre, ou des contreparties échangent atomiquement. Cela rompt une vue mono-registre, pas la continuité économique.
+**Mechanics:** a contract/service locks/burns one asset and releases/mints another, or counterparties atomically exchange. It breaks a single-ledger view, not economic continuity.
 
-**Avantages :** interopérabilité actif/réseau ; possibilité d'éviter un custodian centralisé ; usage ordinaire de portefeuille/liquidité.
+**Pros:** asset/network interoperability; can avoid one centralized custodian; ordinary portfolio/liquidity use.
 
-**Inconvénients :** les deux chaînes sont publiques ; temps, valeur, frais, liquidité et contrats sont corrélables ; registres bridge/relayer/frontend/RPC ; risques de contrat, contrepartie et réglementation.
+**Cons:** both chains are public; time/value/fees/liquidity and contracts correlate; bridge/relayer/frontend/RPC records; smart-contract/counterparty and regulatory risk.
 
-**Procédure pour les swaps licites :** (1) vérifier le contrat/service officiel et la disponibilité légale ; (2) examiner garde, audit, frais et slippage ; (3) effectuer un petit test ; (4) consigner les deux transaction IDs et le taux ; (5) protéger les approvals ; (6) rapprocher l'actif de destination et révoquer les approvals inutiles. Ne pas utiliser les swaps pour dissimuler la source des fonds.
+**Procedure for lawful swaps:** (1) verify official contract/service and legal availability; (2) inspect custody/audit/fees/slippage; (3) use a small test; (4) record both transaction IDs and rate; (5) protect approvals; (6) reconcile destination asset and revoke unnecessary approval. Do not use swaps to disguise source of funds.
 
-**Détection :** événements dépôt/retrait du bridge, montant unique moins frais, ordre temporel, liquidité, relayer/RPC/frontend et dépôts ultérieurs auprès de services.
+**Detection:** bridge deposit/withdraw events, unique amount minus fees, time order, liquidity, relayer/RPC/frontend and later service deposits.
 
-## Mixer centralisé ou tumbler
+## Centralized mixer or tumbler
 
-**Mécanisme :** un service reçoit des dépôts dans un pool et restitue ultérieurement d'autres unités, tentant d'obscurcir la correspondance directe entre entrées et sorties.
+**Mechanics:** a service receives deposits into a pool and returns different units later, attempting to obscure direct input-output mapping.
 
-**Avantages :** peut théoriquement agrandir l'ambiguïté transactionnelle.
+**Pros:** can enlarge transaction ambiguity in theory.
 
-**Inconvénients :** l'opérateur peut voler ou journaliser ; analyse des montants/timing d'entrée-sortie ; exposition aux sanctions, au money transmission et au crime ; une saisie peut révéler les correspondances ; risque de rejet/taint.
+**Cons:** operator can steal/log; entry/exit timing/value analysis; sanctions/money-transmission and criminal exposure; seizures expose mappings; taint/rejection risk.
 
-**Procédure :** aucun guide opérationnel de mixing n'est fourni. Reproduire le graphe en sécurité en étendant [Lab 6](authorized-adversary-emulation-labs.md#lab-6-synthetic-peel-chain-and-bridge-graph) : créer des dépôts synthétiques, sorties groupées, frais et délais ; fournir aux analystes des correspondances incomplètes ; mesurer les heuristiques efficaces ; puis révéler la vérité terrain.
+**Procedure:** no operational mixing guide is provided. Reproduce the graph safely by extending [Lab 6](authorized-adversary-emulation-labs.md#lab-6-synthetic-peel-chain-and-bridge-graph): create synthetic deposits, pooled outputs, fees and delays; give analysts incomplete mappings; measure which heuristics work; then reveal ground truth.
 
-**Détection :** identification du wallet/contrat du service, ensembles de candidats entrée-sortie, montant/frais/timing, réutilisation d'adresses de dépôt, journaux saisis/fournisseur et consolidations en aval. Étiqueter l'attribution probabiliste.
+**Detection:** service wallet/contract identification, entry/exit candidate sets, amount/fee/timing, deposit address reuse, seized/provider logs and downstream consolidation. Label probabilistic attribution.
 
-## Peel chains, fan-out/fan-in et structuring
+## Peel chains, fan-out/fan-in and structuring
 
-**Mécanisme :** des transactions répétées prélèvent de petits paiements sur le change, répartissent la valeur entre de nombreuses adresses, reconvergent vers des collecteurs ou divisent les montants pour éviter un examen.
+**Mechanics:** repeated transactions peel small payments from change, split value across many addresses, reconverge collectors, or divide amounts to avoid review.
 
-**Avantages :** accroît la charge de travail d'un analyste naïf et le nombre d'adresses.
+**Pros:** increases naive analyst workload and address count.
 
-**Inconvénients :** continuité de valeur/cadence/transaction reconnaissable ; consolidations et endpoints de services ; le structuring peut être illégal en lui-même ; frais et erreurs opérationnelles.
+**Cons:** recognizable value/cadence/transaction continuity; consolidation and service endpoints; structuring can itself be illegal; fees and operational errors.
 
-**Procédure :** utiliser uniquement des données CSV/testnet synthétiques : générer une source importante, des arêtes paiement/change répétées, des branches parallèles et un collecteur ; ajouter des exemples bénins ressemblant à des exchanges ; régler la détection et documenter les faux positifs.
+**Procedure:** use only synthetic CSV/testnet data: generate a large source, repeated payment/change edges, parallel branches and one collector; add benign exchange-like examples; tune detection and document false positives.
 
-**Détection :** continuité du graphe, schéma de change répété, cadence, montants juste sous les contrôles, endpoint de service commun et registres off-chain. Les hot wallets d'exchange peuvent ressembler à ces schémas : le contexte est obligatoire.<sup>[[15]](#references)</sup>
+**Detection:** graph continuity, repeated change pattern, cadence, just-below-control amounts, common service endpoint and off-chain records. Exchange hot wallets can resemble these patterns, so context is mandatory.<sup>[[15]](#references)</sup>
 
-## Nominee, money mule, broker OTC et société écran
+## Nominee, money mule, OTC broker and front company
 
-**Mécanisme :** une autre personne, un autre compte ou une autre société reçoit, convertit ou dépense les fonds, insérant des couches juridiques et opérationnelles entre le contrôleur et la transaction.
+**Mechanics:** another person/account/company receives, converts or spends funds, inserting legal and operational layers between controller and transaction.
 
-**Avantages pour un adversaire :** le compte nommé n'identifie pas immédiatement le contrôleur ; peut relier espèces, crypto, biens et juridictions.
+**Pros to an adversary:** named account does not immediately identify controller; can bridge cash, crypto, goods and jurisdictions.
 
-**Inconvénients :** exposition à la fraude d'identité et au blanchiment ; chaque participant ajoute communications, données bancaires/commerciales/fiscales/d'expédition, frais, incohérences et témoins ; la réutilisation d'un facilitateur crée des hubs.
+**Cons:** identity fraud/money-laundering exposure; every participant adds communications, bank/company/tax/shipping records, fees, inconsistency and witnesses; facilitator reuse creates hubs.
 
-**Procédure :** ne pas émuler avec de vraies personnes ou de vrais comptes. Construire un graphe synthétique avec contrôleur, recruteur, mule, OTC, commerçant écran et bénéficiaire ; ajouter les arêtes appareil/IP/message/banque ; demander aux enquêteurs de distinguer titulaire du compte et contrôleur et de consigner la confiance dans les preuves.
+**Procedure:** do not emulate with real people/accounts. Build a synthetic graph with controller, recruiter, mule, OTC, shell merchant and beneficiary; seed device/IP/message/bank edges; ask investigators to distinguish account holder from controller and record evidence confidence.
 
-**Détection :** appareil/IP/récupération partagés, bénéficiaire/vélocité inhabituels, nombreux expéditeurs sans lien, mouvement immédiat vers l'extérieur, incohérences société/directeur/facture, communications et livraison d'espèces/marchandises.
+**Detection:** shared device/IP/recovery, unusual beneficiary/velocity, many unrelated senders, immediate onward movement, company/director/invoice inconsistency, communications and cash/commodity delivery.
 
-## NFT, jeu d'argent, biens marchands et boucles de remboursement
+## NFTs, gambling, merchant goods and refund loops
 
-**Mécanisme :** la valeur est convertie en actif auto-évalué, solde de pari, biens revendables ou remboursements afin de créer un récit transactionnel différent.
+**Mechanics:** value is converted into a self-priced asset, wagering balance, resalable goods or refunds to create a different transaction narrative.
 
-**Avantages pour un adversaire :** changement de forme de l'actif et ajout d'intermédiaires marketplace/commerçant.
+**Pros to an adversary:** changes asset form and introduces marketplace/merchant intermediaries.
 
-**Inconvénients :** graphe marketplace/compte/appareil et wash trading ; registres de jeu et de remboursements ; livraison/revente ; frais/pertes ; responsabilité pour fraude/blanchiment.
+**Cons:** marketplace/account/device and wash-trade graph; odds/play and refund records; delivery/resale evidence; fees/losses; fraud/laundering liability.
 
-**Procédure :** aucun workflow de dissimulation. Utiliser des données marketplace synthétiques avec trades liés entre wallets, prix invraisemblables, jeu minimal, instrument de remboursement incohérent et expédition commune ; valider la détection sur des collectionneurs/clients légitimes.
+**Procedure:** no concealment workflow. Use synthetic marketplace data with related-wallet self-trades, implausible pricing, minimal play, mismatched refund instrument and common shipping; validate detection against legitimate collectors/customers.
 
-**Détection :** trades circulaires/auto-financés, propriété/financement communs, prix aberrants, revente/remboursement immédiat, activité économique minimale, appareil/livraison partagés et reconvergence des produits.
+**Detection:** circular/self-funded trades, common ownership/funding, price outliers, immediate resale/refund, minimal economic activity, shared device/delivery and proceeds reconvergence.
 
-## Wallet physique au porteur ou transfert de token offline
+## Physical bearer wallet or offline token transfer
 
-**Mécanisme :** un appareil, papier/QR, instrument hardware bearer ou token e-cash transfère le contrôle d'un secret au lieu de diffuser un paiement au moment de la remise.
+**Mechanics:** a device, paper/QR, hardware bearer instrument or e-cash token transfers control of a secret rather than broadcasting a payment at handover.
 
-**Avantages :** aucun événement réseau en direct durant l'échange ; utilisable offline ; garde physique comparable aux espèces.
+**Pros:** no live network event during exchange; useful offline; physical cash-like custody.
 
-**Inconvénients :** copie/vol/perte et exclusivité incertaine ; remboursement/diffusion ultérieurs créent des liens ; rencontre/expédition physiques ; contrefaçon/altération.
+**Cons:** copy/theft/loss and uncertain exclusivity; later redemption/broadcast links; physical meeting/shipping; counterfeit/tamper risk.
 
-**Procédure :** (1) utiliser uniquement un instrument/protocole examiné ; (2) initialiser et vérifier l'authenticité en privé ; (3) charger seulement une petite valeur licite ; (4) transférer dans un contexte autorisé et documenté ; (5) le destinataire vérifie ou sweep rapidement selon le protocole ; (6) ne jamais supposer que l'expéditeur n'a pas conservé de copie ; (7) consigner en privé les preuves de propriété et fiscales.
+**Procedure:** (1) use only a reviewed instrument/protocol; (2) initialize/verify authenticity privately; (3) load only small lawful value; (4) transfer in a documented authorized context; (5) receiver verifies or sweeps promptly as protocol requires; (6) never assume the sender retained no copy; (7) record ownership/tax evidence privately.
 
-**Détection :** achat/financement et sweep/remboursement final, numéro de série/altération de l'appareil, livraison/rencontre et registres des endpoints.
+**Detection:** purchase/funding and eventual sweep/redemption, device serial/tamper evidence, delivery/meeting and endpoint records.
 
-## Invoice limitée au commerçant ou demande de paiement unique
+## Merchant-scoped invoice or one-time payment request
 
-**Mécanisme :** le commerçant crée une demande à usage unique contenant montant, expiration et référence de commande. Le payeur la règle via un rail pris en charge sans exposer directement un identifiant réutilisable au commerçant ; l'émetteur ou processor peut néanmoins identifier les deux parties.
+**Mechanics:** the merchant creates a single-use request containing amount, expiry and order reference. The payer settles it through a supported rail without exposing a reusable credential directly to the merchant; the issuer or payment processor may still identify both parties.
 
-**Avantages :** limite la réutilisation des identifiants et les liens inter-commerçants accidentels ; montant/expiration exacts réduisent les erreurs ; compatible avec comptabilité et remboursements ordinaires.
+**Pros:** limits credential reuse and accidental cross-merchant identifiers; exact amount/expiry reduce errors; compatible with ordinary accounting and refunds.
 
-**Inconvénients :** invoice, livraison, navigateur, processor et émetteur relient encore la commande ; montant/heure uniques peuvent renforcer la corrélation ; les liens de paiement malveillants sont fréquents.
+**Cons:** invoice, delivery, browser, processor and issuer still link the order; a unique amount/time can strengthen correlation; malicious payment links are common.
 
-**Procédure :** (1) authentifier indépendamment le commerçant ; (2) demander une invoice fraîche avec montant, actif/réseau et expiration exacts ; (3) examiner destination et règles de remboursement ; (4) payer depuis le compartiment d'engagement approuvé ; (5) vérifier que le commerçant reconnaît la même invoice ; (6) conserver reçu et référence de transaction ; (7) laisser expirer plutôt que réutiliser la demande.
+**Procedure:** (1) authenticate the merchant independently; (2) request a fresh invoice with exact amount, asset/network and expiry; (3) inspect the destination and refund rules; (4) pay from the approved engagement compartment; (5) verify the merchant acknowledges the same invoice; (6) preserve receipt and transaction reference; (7) expire rather than reuse the request.
 
-**Détection :** commerçant et processor relient invoice, session et règlement ; montants/heures uniques et livraison identifient le payeur. **Wallet/appareil capturé :** l'historique des invoices expose contreparties et objectifs ; minimiser les mémos inutiles, chiffrer l'appareil et conserver la comptabilité de référence dans le système financier contrôlé.
+**Detection:** merchant and processor join invoice, session and settlement; unique amounts/timing and delivery identify the payer. **Captured wallet/device:** invoice history exposes counterparties and purpose; minimize unnecessary memo data, encrypt the device and keep authoritative accounting in the controlled finance system.
 
-## Crédit de service prépayé et capability token
+## Prepaid service credit and capability token
 
-**Mécanisme :** un service convertit un paiement classique en crédits internes limités ou en capability bearer. L'utilisation ultérieure d'API/ressources peut éviter de présenter la carte initiale à chaque requête, mais le service peut souvent relier émission et utilisation.
+**Mechanics:** a service converts a conventional payment into bounded internal credits or a bearer capability. Subsequent API/resource use can avoid presenting the original card on every request, but the service can often map issuance to redemption.
 
-**Avantages :** limite les dépenses et les pertes en cas de compromission ; sépare les opérateurs quotidiens de l'identifiant de financement ; permet budgets par projet et révocation.
+**Pros:** caps spend and compromise loss; separates day-to-day workers from the funding credential; supports per-project budgets and revocation.
 
-**Inconvénients :** généralement pseudonyme, non anonyme ; base du service, IP de remboursement et schéma d'utilisation unique relient l'activité ; vol des tokens bearer ; remboursement pouvant exiger le payeur initial.
+**Cons:** usually pseudonymous, not anonymous; service database, redemption IP and unique usage pattern link activity; bearer tokens can be stolen; refunds may require the original payer.
 
-**Procédure :** (1) acheter les crédits via un compte d'organisation ; (2) créer un projet et budget uniques ; (3) émettre un token limité par service, montant et expiration ; (4) le stocker uniquement dans le secret manager approuvé ou le chemin workload identity ; (5) tester le rejet hors périmètre et après expiration ; (6) surveiller la consommation ; (7) révoquer et rapprocher la valeur inutilisée.
+**Procedure:** (1) purchase credits through an organization account; (2) create one project and budget; (3) issue a narrow token with service, amount and expiry constraints; (4) store it only in the approved secret manager or workload identity path; (5) test rejection outside scope and after expiry; (6) monitor consumption; (7) revoke and reconcile unused value.
 
-**Détection :** le fournisseur relie compte de financement, projet, émission du token et utilisation ; alerter sur changements géographiques/processus et consommation anormale. **Node capturé :** supposer que sa capability restante peut être dépensée ; utiliser courte expiration, faible solde, audience binding et révocation serveur immédiate.
+**Detection:** provider joins funding account, project, token issuance and usage; defenders alert on geographic/process changes and anomalous consumption. **Captured node:** assume its remaining capability can be spent; use short expiry, low balance, audience binding and immediate server-side revocation.
 
-## Token d'autorisation Privacy Pass ou aveugle
+## Privacy Pass or blinded authorization token
 
-**Mécanisme :** un émetteur produit un token d'autorisation respectueux de la confidentialité qu'un origin peut valider sans relier le remboursement à l'émission. Il peut représenter un droit payé ou un accès limité, mais n'est pas une monnaie générale. L'architecture sépare les rôles client, attester, issuer et origin et avertit que IP/timing ou collusion peuvent annuler l'absence de lien.<sup>[[18]](#references)</sup>
+**Mechanics:** an issuer produces a privacy-preserving authorization token that an origin can validate without linking redemption to issuance. It can represent paid entitlement or rate-limited access, but is not itself a general currency. The architecture separates client, attester, issuer and origin roles and warns that IP/timing or collusion can undo unlinkability.<sup>[[18]](#references)</sup>
 
-**Avantages :** remboursement non lié pour les services pris en charge ; aucun cookie de compte réutilisable à l'origin ; les tokens mis en cache séparent émission et utilisation dans le temps.
+**Pros:** unlinkable redemption for supported services; no reusable account cookie at the origin; cached tokens can separate issuance and use in time.
 
-**Inconvénients :** spécifique à l'application ; confiance issuer/attester et partitionnement de l'ensemble d'anonymat ; IP et métadonnées du navigateur persistent ; vol ou timing distinctif de l'émission pouvant corréler l'utilisation.
+**Cons:** application-specific; issuer/attester trust and anonymity-set partitioning; IP and browser metadata remain; token theft or distinctive issuance timing can correlate use.
 
-**Procédure :** (1) utiliser une implémentation conforme au type de token Privacy Pass concerné ; (2) définir exactement le droit prouvé ; (3) séparer administration issuer et origin lorsque le modèle de menace l'exige ; (4) minimiser les métadonnées du challenge ; (5) émettre plusieurs tokens de test et les rembourser une seule fois sur des origins possédés ; (6) comparer les logs à la recherche d'identifiants stables interdits ; (7) tester rejeu, expiration, révocation et abus.
+**Procedure:** (1) use an implementation conforming to the relevant Privacy Pass token type; (2) define exactly what entitlement the token proves; (3) separate issuer and origin administration where the threat model requires it; (4) minimize challenge metadata; (5) issue several test tokens and redeem each once at owned origins; (6) compare logs for forbidden stable identifiers; (7) test replay, expiry and revocation/abuse controls.
 
-**Détection :** les origins voient IP/heure de remboursement et validité ; issuers/attesters voient le contexte d'émission ; les analystes testent timing et partitions de métadonnées sans supposer une rupture cryptographique. **Client capturé :** les tokens bearer non dépensés peuvent être utilisables ; limiter leur valeur, durée et audience, et ne jamais mettre la credential de financement en cache avec eux.
+**Detection:** origins see redemption IP/time and token validity; issuers/attesters see issuance context; analysts test timing and metadata partitions without assuming a cryptographic break. **Captured client:** unspent bearer tokens may be usable; bound their value, lifetime and audience, and never cache the funding credential with them.
 
-## Achat délégué d'organisation ou fiscal sponsor
+## Delegated organization procurement or fiscal sponsor
 
-**Mécanisme :** une équipe d'achat autorisée, un revendeur ou un fiscal sponsor contracte et paie tandis que l'équipe opérationnelle reçoit un service limité. Il s'agit d'une séparation des rôles avec des registres véridiques, non d'un nominee ou d'une fausse identité.
+**Mechanics:** an authorized procurement team, reseller or fiscal sponsor contracts and pays while the operational team receives a bounded service. This is role separation with truthful records, not a nominee or false identity.
 
-**Avantages :** les fournisseurs n'ont pas besoin de recevoir l'identité ou les données de paiement personnelles de chaque opérateur ; conformité, fiscalité et remboursements centralisés ; budget et retrait clairs.
+**Pros:** vendors need not receive every operator's identity or personal payment details; central compliance, tax and refund handling; clear budget and offboarding.
 
-**Inconvénients :** le sponsor connaît le bénéficiaire et l'objectif ; contrats, approbations, livraison et comptes restent ; délais/frais supplémentaires ; séparation faible si la même personne administre toutes les couches.
+**Cons:** sponsor knows the beneficiary and purpose; contracts, approvals, delivery and accounts remain; added delay/fees; weak separation if the same individual administers every layer.
 
-**Procédure :** (1) documenter motif commercial, bénéficiaire et autorité d'approbation ; (2) choisir un intermédiaire approuvé par l'organisation ; (3) contracter sous des informations véridiques ; (4) provisionner un sous-compte limité au projet sans credential personnelle de facturation ; (5) séparer administrateurs financiers et opérateurs ; (6) rapprocher factures et accès ; (7) terminer service et accès délégué à la clôture.
+**Procedure:** (1) document business purpose, beneficiary and approving authority; (2) select an organization-approved intermediary; (3) contract under truthful details; (4) provision a project-scoped subaccount with no personal billing credential; (5) separate finance administrators from operators; (6) reconcile invoices and access; (7) terminate both service and delegated access at closeout.
 
-**Détection :** registres d'achat, identity provider, fournisseur et livraison relient la chaîne. **Appareil opérationnel capturé :** il doit révéler le projet de service, mais pas les credentials financières ; conserver factures et identités des payeurs dans le système financier, pas sur les field nodes.
+**Detection:** procurement, identity-provider, vendor and delivery records join the chain. **Captured operational device:** it should reveal the service project but not finance credentials; keep invoices and payer identities in the finance system, not on field nodes.
 
-## Escrow ou règlement conditionnel
+## Escrow or conditional settlement
 
-**Mécanisme :** un agent escrow de confiance ou un smart contract conserve la valeur jusqu'à la satisfaction de conditions documentées. Il peut réduire la divulgation directe entre payeur et bénéficiaire, tandis que l'escrow et les rails sous-jacents conservent la relation.
+**Mechanics:** a trusted escrow agent or smart contract holds value until documented conditions are met. It can reduce direct disclosure between payer and payee, while escrow and underlying payment rails retain the relationship.
 
-**Avantages :** protection contre litiges et problèmes de livraison ; payeur et commerçant peuvent éviter de s'exposer mutuellement des credentials réutilisables ; conditions de libération auditables.
+**Pros:** dispute and delivery protection; payer and merchant can expose fewer reusable credentials to each other; auditable release conditions.
 
-**Inconvénients :** risques de garde/contrat, frais et obligations d'identité ; contrats on-chain publics ; commande, expédition et litiges demeurent ; non anonyme vis-à-vis de l'intermédiaire.
+**Cons:** escrow custody/contract risk, fees and identity obligations; on-chain contracts are public; order, shipping and dispute data remain; not anonymous to the intermediary.
 
-**Procédure :** (1) vérifier entité légale, garde, frais, forum de litige et actifs pris en charge ; (2) créer une étape écrite exacte et un chemin de remboursement ; (3) financer depuis un compte d'organisation approuvé ; (4) vérifier indépendamment réception et autorisation de libération ; (5) libérer uniquement après preuve ; (6) conserver l'audit complet ; (7) fermer permissions ou approvals inutilisés.
+**Procedure:** (1) verify legal entity, custody, fees, dispute forum and supported assets; (2) create an exact written milestone and refund path; (3) fund from an approved organization account; (4) verify receipt and release authorization independently; (5) release only after evidence; (6) preserve the complete audit record; (7) close unused permissions or contract approvals.
 
-**Détection :** événements compte/contrat escrow, financement et libération, bénéficiaire et litige révèlent la transaction. **Appareil capturé :** session tokens ou approvals de contrat peuvent permettre une libération ; exiger approbateur séparé/MFA et révoquer les sessions actives en cas de perte.
+**Detection:** escrow account/contract events, funding and release time, beneficiary and dispute records reveal the transaction. **Captured device:** session tokens or contract approvals may permit release; require separate approver/MFA and revoke active sessions on loss.
 
-## Règlement organisationnel groupé ou mutualisé
+## Batched or pooled organization settlement
 
-**Mécanisme :** plusieurs obligations approuvées sont agrégées et réglées par moins de transactions bancaires ou blockchain, avec un registre interne privé attribuant chaque part. Le batching peut réduire le détail public par achat, mais le coordinateur conserve l'attribution complète.
+**Mechanics:** many approved obligations are aggregated and settled in fewer bank or blockchain transactions, with a private internal ledger assigning each share. Batching can reduce public per-purchase detail but the coordinator retains complete attribution.
 
-**Avantages :** frais réduits ; moins d'arêtes publiques ; lignes individuelles masquées à un observateur public lorsque les montants sont agrégés ; comptabilité interne simple.
+**Pros:** lower fees; fewer public graph edges; hides individual line items from a public observer when amounts are aggregated; straightforward internal accounting.
 
-**Inconvénients :** le coordinateur est un observateur complet et une cible importante ; totaux/heures distinctifs corrélables ; risques de garde et de rapprochement ; peut ressembler à du structuring s'il est détourné.
+**Cons:** coordinator is a complete observer and high-value target; distinctive totals/timing can correlate; custody and reconciliation risk; can resemble structuring if abused.
 
-**Procédure :** (1) définir participants et obligations licites dans le système comptable ; (2) établir une fenêtre régulière justifiée commercialement plutôt que des seuils destinés à éviter les contrôles ; (3) exiger une double approbation de l'agrégat ; (4) régler vers des bénéficiaires authentifiés ; (5) rapprocher chaque ligne interne avec le batch ; (6) traiter les remboursements comme corrections liées ; (7) protéger l'accès au registre et le conserver selon la politique.
+**Procedure:** (1) define participants and lawful obligations in the accounting system; (2) set a regular, business-justified batch window rather than thresholds designed to avoid controls; (3) require dual approval of the aggregate; (4) settle to authenticated recipients; (5) reconcile every internal line to the batch; (6) handle refunds as linked corrections; (7) protect ledger access and retain it per policy.
 
-**Détection :** registre du coordinateur, approbations et bénéficiaires fournissent la vérité terrain ; les analystes publics utilisent prudemment les clusters d'inputs/outputs/valeur/temps. **Appareil du payeur capturé :** il ne doit contenir que sa demande, pas la clé de signature du pool ni le registre des participants.
+**Detection:** coordinator ledger, approval and beneficiary records provide ground truth; public analysts use input/output/value/time clustering cautiously. **Captured payer device:** it should contain only its requisition, not the pool's signing key or participant ledger.
 
-## Paymaster d'account abstraction ou gas sponsorisé
+## Account-abstraction paymaster or sponsored gas
 
-**Mécanisme :** un relayer/bundler soumet une opération de smart account et un paymaster paie les frais de transaction, évitant une arête directe de financement du gas natif depuis le wallet utilisateur. Cela améliore une propriété du graphe ; opération, contrat et télémétrie du service restent publics ou observables.<sup>[[19]](#references)</sup>
+**Mechanics:** a relayer/bundler submits a smart-account operation and a paymaster pays transaction fees, avoiding a direct native-gas funding edge from the user wallet. It improves one graph property; the operation, contract and service telemetry remain public or observable.<sup>[[19]](#references)</sup>
 
-**Avantages :** retire un lien courant de financement du gas ; permet sponsorship limité et rate limits ; facilite l'intégration d'applications licites de confidentialité.
+**Pros:** removes a common gas-funding link; supports scoped sponsorship and rate limits; better onboarding for legitimate privacy applications.
 
-**Inconvénients :** paymaster/bundler/RPC/frontend peuvent corréler les requêtes ; événements de contrat et entrées publiques persistent ; la politique de sponsorship caractérise une cohorte ; contrats ou approvals malveillants peuvent voler des actifs.
+**Cons:** paymaster/bundler/RPC/front end can correlate requests; contract events and public inputs remain; sponsorship policy fingerprints a cohort; malicious contracts or approvals can steal assets.
 
-**Procédure :** (1) utiliser un smart account et paymaster audités et maintenus sur le bon réseau ; (2) examiner les champs publics et les logs du sponsor ; (3) limiter le sponsorship par contrat, fonction, montant, nonce et expiration ; (4) tester avec une faible valeur ; (5) soumettre via le chemin de l'application prévu et respectueux de la confidentialité ; (6) vérifier on-chain l'opération et le payeur du gas ; (7) révoquer allowances/session keys et conserver les registres de conformité.
+**Procedure:** (1) use an audited maintained smart account and paymaster on the correct network; (2) inspect which fields are public and what the sponsor logs; (3) limit sponsorship by contract, function, amount, nonce and expiry; (4) test with low value; (5) submit through the application's intended privacy-aware path; (6) verify the operation and fee payer on chain; (7) revoke allowances/session keys and retain compliance records.
 
-**Détection :** relier UserOperation, EntryPoint, paymaster, bundler/RPC et logs applicatifs ; regrouper prudemment les politiques de sponsorship identiques. **Wallet capturé :** session keys et approvals en attente peuvent être utilisés même sans gas ; les limiter strictement et les révoquer via la politique de récupération du compte.
+**Detection:** join UserOperation, EntryPoint, paymaster, bundler/RPC and application logs; cluster identical sponsorship policy cautiously. **Captured wallet:** session keys and pending approvals may be usable even without gas; scope them tightly and revoke through the account's recovery policy.
 
-## Autorisation de paiement threshold ou multisignature
+## Threshold or multisignature payment authorization
 
-**Mécanisme :** une dépense exige un seuil de signataires indépendants. Cela ne masque pas la transaction, mais sépare l'autorité de paiement d'un laptop, field node ou opérateur compromis.
+**Mechanics:** spending requires a threshold of independent signers. It does not hide the transaction, but lets payment authority be separated from any captured laptop, field node or single operator.
 
-**Avantages :** forte résistance à la compromission et à l'insider ; approbation responsable ; aucun appareil terrain ne détient toute l'autorité ; récupération prise en charge.
+**Pros:** strong compromise and insider resistance; accountable approval; no single field device holds complete signing authority; supports recovery.
 
-**Inconvénients :** coordination et disponibilité ; métadonnées des signataires/appareils/comptes pouvant corréler les participants ; mauvaise sauvegarde entraînant une perte ; scripts/contrats multisig publics parfois identifiables.
+**Cons:** coordination and availability; signer/device/account metadata can correlate participants; bad backup design causes loss; public multisig patterns can be identifiable.
 
-**Procédure :** (1) définir signataires, seuil, limites et récupération avant financement ; (2) initialiser sur hardware/comptes séparés ; (3) vérifier indépendamment adresses et sauvegardes ; (4) donner aux workloads terrain uniquement la capacité de demande non signée ; (5) exiger une revue hors bande du bénéficiaire, montant et motif ; (6) tester récupération et perte d'un signataire avec une petite valeur ; (7) faire tourner un signataire après compromission.
+**Procedure:** (1) define signers, threshold, limits and recovery before funding; (2) initialize on separate supported hardware/accounts; (3) verify addresses and backups independently; (4) give field workloads only unsigned requisition capability; (5) require out-of-band review of recipient, amount and purpose; (6) test recovery and one-signer loss with small value; (7) rotate a signer after compromise.
 
-**Détection :** système d'approbation, appareils des signataires et script/contrat public fournissent les preuves ; alerter sur les changements de politique ou d'ensemble de signataires. **Node capturé :** il ne doit exposer au maximum qu'une session key de faible autorité ou une demande non signée ; ne jamais mettre le matériel du quorum en cache ensemble.
+**Detection:** approval system, signer device and public script/contract provide evidence; defenders alert on policy or signer-set changes. **Captured node:** it should expose at most one low-authority session key or unsigned request; never cache quorum material together.
 
-## Monnaie communautaire ou événementielle closed-loop
+## Closed-loop community or event currency
 
-**Mécanisme :** une coopérative, une conférence ou un environnement de test privé émet des crédits échangeables uniquement entre participants inscrits. Les transferts internes peuvent moins exposer les réseaux de paiement globaux, tandis que l'opérateur contrôle émission et remboursement.
+**Mechanics:** a cooperative, conference or private test environment issues credits redeemable only among enrolled participants. Internal transfer may expose less to global payment networks, while the operator controls issuance and redemption.
 
-**Avantages :** domaine économique limité ; test d'UX de paiement offline ou respectueuse de la confidentialité ; exposition moindre de la carte externe ; contrôles expérimentaux clairs.
+**Pros:** bounded economic domain; can test offline or privacy-preserving payment UX; limits external card exposure; clear experimental controls.
 
-**Inconvénients :** petit ensemble d'anonymat ; opérateur et commerçants voient l'activité ; acceptation/remboursement limités ; licences, protection du consommateur et règles fiscales peuvent s'appliquer.
+**Cons:** small anonymity set; operator and merchants observe activity; limited acceptance and redemption; licensing, consumer-protection and tax rules may apply even to local value.
 
-**Procédure :** (1) obtenir revue juridique/conformité et publier les conditions de l'émetteur ; (2) inscrire des participants consentants ; (3) limiter l'émission et interdire les abus assimilables aux espèces ; (4) utiliser de nouvelles demandes de paiement et limiter les identifiants publics ; (5) enregistrer réserves agrégées et reçus individuels privés ; (6) tester perte/remboursement/rachat ; (7) fermer le registre et restituer la valeur résiduelle comme promis.
+**Procedure:** (1) obtain legal/compliance review and publish issuer terms; (2) enroll consenting test participants; (3) cap issuance and prohibit cash-like misuse; (4) use fresh payment requests and minimize public participant identifiers; (5) record aggregate reserves and private individual receipts; (6) test loss/refund/redemption; (7) close the ledger and return residual value as promised.
 
-**Détection :** registre émetteur, inscription, commerçants et remboursements reconstruisent les flux ; transferts circulaires inhabituels ou cash-out rapides justifient un examen. **Wallet capturé :** solde local et contreparties peuvent être exposés ; plafonner la valeur, chiffrer l'état et permettre gel/réémission côté émetteur avec trace auditable.
+**Detection:** issuer ledger, enrollment, merchant and redemption records reconstruct flows; unusual circular transfers or rapid cash-out warrant review. **Captured wallet:** local balance and counterparties may be exposed; cap value, encrypt state and support issuer-side freeze/reissue with an auditable record.
 
-## Payment codes Bitcoin réutilisables et instructions privées
+## Bitcoin reusable payment codes and private payment instructions
 
-**Mécanisme :** les payment codes BIP 47 utilisent un identifiant public réutilisable et des adresses de dépôt à usage unique dérivées par ECDH ; BIP 351 spécifie un design plus récent d'instructions de paiement privées. Ils réduisent la réutilisation publique des adresses, mais notification, support wallet, financement et sélection ultérieure des coins influencent encore la confidentialité.<sup>[[20]](#references)</sup>
+**Mechanics:** BIP 47 payment codes use a reusable public identifier plus ECDH-derived one-time deposit addresses; BIP 351 specifies a newer private-payment instruction design. They reduce public address reuse while allowing a recipient to publish stable payment instructions. Notification, wallet support, funding and subsequent coin selection still affect privacy.<sup>[[20]](#references)</sup>
 
-**Avantages :** une instruction publique peut produire des adresses distinctes ; le destinataire n'a pas à publier chaque adresse de facture ; les wallets compatibles peuvent surveiller les paiements dérivés ; utile pour des donateurs/clients licites récurrents.
+**Pros:** one public instruction can yield distinct addresses; recipient need not publish every invoice address; compatible wallets can monitor derived payments; useful for repeated lawful donors/customers.
 
-**Inconvénients :** interopérabilité wallet variable ; transactions de notification ou publication du payment code lient un contexte relationnel ; expéditeur, destinataire et graphe public voient toujours les transactions ; consolidation ou gestion du change imprudentes annulent le bénéfice.
+**Cons:** wallet interoperability varies; notification transactions or published payment code link a relationship context; sender, recipient and public graph still see transactions; careless consolidation or change handling defeats the benefit.
 
-**Procédure :** (1) confirmer que les deux wallets maintenus prennent en charge exactement la même spécification/version ; (2) sauvegarder et tester la récupération avec un wallet de faible valeur ; (3) authentifier hors bande le payment code du destinataire ; (4) envoyer un petit test licite ; (5) vérifier qu'une nouvelle adresse dérivée a été utilisée ; (6) libeller localement la relation et appliquer coin control ; (7) tester récupération et remboursement avant de s'y fier.
+**Procedure:** (1) confirm that both maintained wallets support the exact same specification/version; (2) back up and test recovery on a low-value wallet; (3) authenticate the recipient payment code out of band; (4) send a small lawful test; (5) verify that a fresh derived address was used; (6) label the relationship locally and apply coin control; (7) test recovery and refund behavior before relying on it.
 
-**Détection :** examiner notifications, financement/change, consolidations ultérieures et frontières des services ; la publication du code public identifie le contexte du destinataire même si les adresses de dépôt diffèrent. **OPSEC résistante à la capture :** conserver les spend keys hors des appareils terrain et exposer au maximum une vue watch-only de la relation. **Surveillance :** alerter sur notifications inattendues, adresses dérivées réutilisées, erreurs gap-limit/récupération et consolidations non prévues.
+**Detection:** analysts examine notification patterns, funding/change, later consolidation and service boundaries; public-code publication identifies the recipient context even when deposit addresses differ. **Capture-resilient OPSEC:** keep spend keys off field devices and expose at most a watch-only relationship view. **Monitoring:** alert on unexpected notification transactions, reused derived addresses, wallet gap-limit/recovery errors and unplanned consolidation.
 
-## Stealth addresses EVM (ERC-5564)
+## EVM stealth addresses (ERC-5564)
 
-**Mécanisme :** un expéditeur dérive un compte stealth à usage unique depuis la stealth meta-address du destinataire et publie une annonce contenant une clé publique éphémère et un view tag. Le destinataire scanne les annonces avec une viewing key et dérive la spend key correspondante. Le lien avec le destinataire s'améliore, mais expéditeur, montant/token, gas, annonce et dépenses ultérieures restent visibles.<sup>[[21]](#references)</sup>
+**Mechanics:** a sender derives a one-time stealth account from a recipient's stealth meta-address and publishes an announcement containing an ephemeral public key and view tag. The recipient scans announcements with a viewing key and derives the corresponding spend key. Recipient linkage improves, but sender, amount/token, gas, announcement and later spending remain visible.<sup>[[21]](#references)</sup>
 
-**Avantages :** nouvelle adresse de réception non interactive ; meta-address réutilisable ; rôles viewing et spending séparés ; fonctionne avec les actifs/applications EVM pris en charge.
+**Pros:** non-interactive fresh receiver address; reusable meta-address; separate viewing and spending roles; works across supported EVM assets/applications.
 
-**Inconvénients :** scan et spam des annonces ; financement du gas de la nouvelle adresse pouvant la relier ; l'expéditeur connaît le destinataire ; token/montant publics et consolidation ultérieure ; support d'implémentation et de wallet variable.
+**Cons:** announcement scanning and spam; funding gas for the new address can relink it; sender knows recipient; public token/amount and eventual consolidation remain; implementation and wallet support vary.
 
-**Procédure :** (1) utiliser d'abord une implémentation auditée et maintenue sur un testnet ; (2) générer et sauvegarder séparément le matériel de viewing et de spending ; (3) authentifier la meta-address ; (4) envoyer un test de faible valeur avec annonce ; (5) scanner et dériver le compte stealth ; (6) tester un sponsorship du gas pris en charge sans arête personnelle de financement ; (7) consigner les champs publics et conserver une comptabilité licite.
+**Procedure:** (1) use an audited maintained implementation on a test network first; (2) generate separate viewing and spending material and back it up; (3) authenticate the meta-address; (4) send a low-value test and announcement; (5) scan and derive the stealth account; (6) test supported gas sponsorship without a personal funding edge; (7) record public fields and preserve lawful accounting.
 
-**Détection :** suivre appelant de l'annonce, token/montant, timing, sponsor du gas, dépenses et consolidations ; une view key peut prouver une réception sans permettre une dépense. **OPSEC résistante à la capture :** un scanner réseau ne doit avoir que le rôle viewing lorsque possible ; conserver ailleurs les clés de dépense et de récupération. **Surveillance :** alerter sur annonces malformées/spam, accès view-key, dérivation de dépense inattendue et sorties stealth déplacées sans approbation.
+**Detection:** follow announcement caller, token/amount, timing, gas sponsor, spending and consolidation; a view key can prove receipt without granting spend. **Capture-resilient OPSEC:** a networked scanner should have only the viewing role where supported; keep spend and recovery keys elsewhere. **Monitoring:** alert on malformed/spam announcements, view-key access, unexpected spend derivation and stealth outputs moved without approval.
 
 ## Liquid Confidential Transactions
 
-**Mécanisme :** Liquid masque par défaut montants et types d'actifs des outputs au moyen de commitments et proofs, tout en laissant visibles graphe, nombre d'inputs/outputs, frais et heure du bloc. Peg-in/peg-out et frontières de service restent liables, et les utilisateurs peuvent divulguer sélectivement les données de blinding.<sup>[[22]](#references)</sup>
+**Mechanics:** Liquid blinds output amounts and asset types by default using commitments and proofs while leaving the transaction graph, input/output count, fee and block time visible. Peg-in/peg-out and service boundaries remain linkable, and users can selectively disclose blinding data.<sup>[[22]](#references)</sup>
 
-**Avantages :** montant et type d'actif confidentiels par défaut ; règlement sidechain rapide ; audit sélectif via clés/descriptors de blinding ; valeurs commerciales masquées aux observateurs publics.
+**Pros:** confidential amount and asset type by default; fast sidechain settlement; selective audit through blinding keys/descriptors; hides commercially sensitive values from public observers.
 
-**Inconvénients :** structure du graphe et timing persistants ; confiance envers federation/bridge/exchange ; frontières peg et outputs non confidentiels ; registres wallet/node/réseau ; expéditeur et destinataire connaissent leur transaction.
+**Cons:** graph structure and timing remain; federation/bridge and exchange trust; peg boundaries and unconfidential outputs; wallet/node/network records; receiver and sender know their transaction.
 
-**Procédure :** (1) choisir un wallet Liquid maintenu et vérifier son modèle de sauvegarde ; (2) utiliser testnet ou une petite valeur licite ; (3) recevoir vers une adresse confidentielle et vérifier que le wallet marque l'output comme blindé ; (4) envoyer une transaction confidentielle de test ; (5) examiner les champs encore publics dans l'explorer ; (6) exporter uniquement la preuve de blinding nécessaire à l'audit ; (7) documenter frontières peg/exchange et rapprocher les fonds.
+**Procedure:** (1) select a maintained Liquid wallet and verify its backup model; (2) use testnet or a small lawful amount; (3) receive to a confidential address and verify the wallet marks the output blinded; (4) send a test confidential transaction; (5) inspect which explorer fields remain public; (6) export only the scoped blinding proof needed for audit; (7) document peg/exchange boundaries and reconcile funds.
 
-**Détection :** analyser graphe/frais/temps visibles, registres peg/exchange, métadonnées réseau et preuves ultérieures de déblindage ; ne pas déduire montant ou actif masqués. **OPSEC résistante à la capture :** séparer seed de dépense, données blinding/view et opérations watch-only. **Surveillance :** alerter sur adresses accidentellement non confidentielles, demandes peg inconnues, changements de descriptor et export non approuvé de clés de déblindage.
+**Detection:** analyze visible graph/fee/time, peg and exchange records, network metadata and later unblinding evidence; do not infer hidden amount or asset. **Capture-resilient OPSEC:** separate spend seed, blinding/view data and watch-only operations. **Monitoring:** alert on accidental unconfidential addresses, unknown peg requests, descriptor changes and unapproved unblinding-key export.
 
-## General payment ou state channel
+## General payment or state channel
 
-**Mécanisme :** les participants verrouillent des fonds, échangent des mises à jour d'état signées off-chain et ne publient on-chain que l'ouverture, la fermeture ou l'état contesté. Les paiements intermédiaires ne sont pas diffusés globalement, mais les pairs et services de routage/intermédiaires voient leur portion et les endpoints doivent conserver le dernier état exécutable.<sup>[[23]](#references)</sup>
+**Mechanics:** participants lock funds, exchange signed off-chain state updates and publish only opening, closing or disputed state on chain. Intermediate payments are not globally broadcast, but peers and routing/intermediary services observe their portion and endpoints must retain the latest enforceable state.<sup>[[23]](#references)</sup>
 
-**Avantages :** nombreuses interactions rapides et peu coûteuses, privées vis-à-vis du registre public ; moins de détails transactionnels globaux ; solde de channel limité ; utile pour services mesurés et contreparties récurrentes.
+**Pros:** many fast low-fee private-to-public-ledger interactions; less global transaction detail; bounded channel balance; useful for metered services and repeated counterparties.
 
-**Inconvénients :** les pairs se connaissent et peuvent conserver les mises à jour ; ouverture/fermeture/valeur/timing corrélables ; surveillance en ligne parfois nécessaire pendant les fenêtres de contestation ; risques d'implémentation/liquidité ; pas un grand ensemble d'anonymat en soi.
+**Cons:** channel peers know one another and can retain updates; opening/closing/value/timing correlate; online monitoring may be required during challenge windows; implementation and liquidity risk; not a large anonymity set by itself.
 
-**Procédure :** (1) choisir une implémentation auditée et maintenue et comprendre la fenêtre de litige ; (2) ouvrir un channel de test de faible valeur entre parties possédées ; (3) échanger des mises à jour signées avec des nonces uniques ; (4) sauvegarder le dernier état exécutable ; (5) fermer de manière coopérative ; (6) répéter sur testnet le rejet d'un état obsolète ; (7) conserver comptabilité et registres des pairs.
+**Procedure:** (1) choose a maintained audited implementation and understand its dispute window; (2) open a low-value test channel between owned parties; (3) exchange signed state updates with unique nonces; (4) back up the latest enforceable state; (5) close cooperatively; (6) rehearse stale-state rejection on testnet; (7) preserve accounting and channel-peer records.
 
-**Détection :** la chaîne publique expose cycle de vie/litiges ; pairs, services de veille et transport applicatif exposent timing et parties off-chain. **OPSEC résistante à la capture :** plafonner le solde hot et conserver le dernier état signé dans un stockage chiffré récupérable séparé des field nodes. **Surveillance :** surveiller publication d'état obsolète, sauvegarde manquée, changement de clé du pair et échéance de contestation proche.
+**Detection:** public chain exposes lifecycle/disputes; peers, watch services and application transport expose off-chain timing and parties. **Capture-resilient OPSEC:** cap hot balance and keep the latest signed state in an encrypted recoverable store separate from field nodes. **Monitoring:** watch continuously for stale-state publication, missed backup, peer-key change and an approaching challenge deadline.
 
-## Facturation par opérateur mobile
+## Mobile carrier billing
 
-**Mécanisme :** un service en ligne facture un achat sur un abonnement mobile ou un solde prépayé via le système de facturation opérateur. Le commerçant peut recevoir une autorisation opérateur plutôt que les données de carte/banque, tandis que l'opérateur connaît abonné/ligne, contexte appareil/réseau, commerçant, montant et heure.<sup>[[24]](#references)</sup>
+**Mechanics:** an online service charges a purchase to a mobile subscription or prepaid balance through the carrier billing system. The merchant may receive a carrier authorization instead of card/bank details, while the carrier knows the subscriber/line, device/network context, merchant, amount and time.<sup>[[24]](#references)</sup>
 
-**Avantages :** aucun numéro de carte chez le commerçant ; disponibilité téléphonique étendue ; utilisable pour biens numériques de faible valeur ; l'opérateur peut plafonner et annuler les frais.
+**Pros:** no card number at the merchant; broad phone availability; usable for low-value digital goods; carrier can cap and reverse charges.
 
-**Inconvénients :** fortement identifié par SIM/compte et souvent appareil ; limites basses et frais élevés ; restrictions de catégories ; risque de prise de compte/SIM swap ; opérateur et agrégateur créent une trace complète.
+**Cons:** strongly identified by SIM/account and often device; small limits and high fees; merchant category restrictions; account takeover/SIM-swap risk; carrier and aggregator create a complete transaction trail.
 
-**Procédure :** (1) confirmer disponibilité, limite, frais et conditions de remboursement avec le compte opérateur de l'organisation ; (2) l'activer uniquement sur une ligne d'organisation dédiée si justifié ; (3) fixer le plafond utile minimal ; (4) acheter un article de test bénin ; (5) vérifier les reçus commerçant/opérateur ; (6) désactiver l'autorisation récurrente ; (7) rapprocher et désactiver la fonction après l'évaluation.
+**Procedure:** (1) confirm service availability, limit, fee and refund terms with the organization carrier account; (2) enable it only on a dedicated organization line if justified; (3) set the lowest useful spend cap; (4) purchase a benign test item; (5) verify merchant and carrier receipts; (6) disable recurring authorization; (7) reconcile and turn off the feature after the assessment.
 
-**Détection :** registres opérateur, agrégateur et commerçant relient ligne, abonné, IP/appareil et frais ; les factures télécom d'entreprise l'exposent. **OPSEC résistante à la capture :** ne pas utiliser de numéro personnel et exiger la MFA du compte opérateur hors de l'appareil terrain. **Surveillance :** activer alertes instantanées de frais/changement SIM et arrêter en cas d'inscription inattendue à un service premium, transfert ou récupération de compte.
+**Detection:** carrier, aggregator and merchant records join line, subscriber, IP/device and charge; enterprise telecom invoices expose it. **Capture-resilient OPSEC:** do not use a personal number and require carrier-account MFA outside the field device. **Monitoring:** enable instant charge/SIM-change alerts and stop on unexpected premium-service enrollment, forwarding or account recovery.
 
-## Initiation de paiement open banking
+## Open-banking payment initiation
 
-**Mécanisme :** avec le consentement explicite de l'utilisateur, un PISP réglementé demande à la banque teneuse du compte d'initier un transfert. Le commerçant peut ne pas recevoir de credential de carte, mais PISP et banques conservent les registres réglementés du payeur, bénéficiaire, consentement, appareil et transaction.<sup>[[25]](#references)</sup>
+**Mechanics:** with explicit user consent, a regulated payment-initiation service provider (PISP) asks the account-servicing bank to initiate a transfer. The merchant may not receive card credentials, but the PISP and banks retain regulated payer, payee, consent, device and transaction records.<sup>[[25]](#references)</sup>
 
-**Avantages :** aucun numéro de carte réutilisable au checkout ; authentification bancaire forte ; règlement compte-à-compte exact ; APIs de consentement/statut ; rapprochement clair.
+**Pros:** no reusable card number at checkout; strong bank authentication; exact account-to-account settlement; consent and status APIs; clear reconciliation.
 
-**Inconvénients :** non anonyme pour banques/PISP ; le bénéficiaire voit souvent coordonnées ou référence du compte légal ; risques phishing/redirection ; protections variables selon juridiction ; les métadonnées de consentement ajoutent un observateur.
+**Cons:** not anonymous to banks/PISP; payee often sees legal account details or reference; phishing/redirect risk; jurisdiction and refund protections vary; consent metadata adds another observer.
 
-**Procédure :** (1) vérifier que le PISP est actuellement réglementé et que le domaine callback du commerçant est authentique ; (2) partir de la demande du commerçant ; (3) vérifier bénéficiaire, montant, référence et consentement demandé dans la banque ; (4) autoriser uniquement le paiement unique ; (5) vérifier indépendamment le statut final ; (6) révoquer tout consentement résiduel ; (7) conserver le reçu et rapprocher.
+**Procedure:** (1) verify that the PISP is currently regulated and the merchant callback domain is authentic; (2) start from the merchant request; (3) review payee, amount, reference and requested consent at the bank; (4) authorize only the single payment; (5) verify final status independently; (6) revoke residual consent if any; (7) retain receipt and reconcile.
 
-**Détection :** logs banque/PISP/commerçant et références du transfert fournissent une attribution solide. **OPSEC résistante à la capture :** garder authentification et récupération bancaires hors des appareils opérationnels/terrain ; l'appareil ne doit contenir qu'un droit au service payé. **Surveillance :** utiliser alertes de transaction/consentement et examiner nouveaux grants PISP, bénéficiaire modifié ou callbacks de statut hors de la session attendue.
+**Detection:** bank/PISP/merchant logs and transfer references provide strong attribution. **Capture-resilient OPSEC:** keep banking authentication and recovery off operational/field devices; the device should hold only a paid-service entitlement. **Monitoring:** use bank transaction/consent alerts and investigate new PISP grants, changed payee or status callbacks outside the expected session.
 
-## Wallet de plateforme, solde d'app store ou crédit in-app
+## Platform wallet, app-store balance or in-app credit
 
-**Mécanisme :** une plateforme facture l'utilisateur ou rachète le crédit du compte, puis fournit à une application un reçu signé ou une entitlement. Le développeur peut ne pas recevoir l'instrument de financement initial, tandis que la plateforme relie compte, appareil, financement, produit et utilisation.<sup>[[26]](#references)</sup>
+**Mechanics:** a platform bills the user or redeems account credit, then issues a signed receipt or entitlement to an application. The app developer may not receive the original funding instrument, while the platform maps account, device, funding, product and redemption.<sup>[[26]](#references)</sup>
 
-**Avantages :** le commerçant/développeur ne reçoit pas le PAN principal ; contrôles de fraude/remboursement et familiaux/commerciaux ; petit solde prépayé limitant l'exposition ; reçus signés simplifiant la vérification.
+**Pros:** merchant/developer gets no primary PAN; fraud/refund and family/business controls; small prepaid balance can cap exposure; signed receipts simplify entitlement verification.
 
-**Inconvénients :** le compte de plateforme est un hub fort d'identité et de comportement ; appareil et géographie du store ; traces d'achat/utilisation du solde cadeau ; retrait limité ; contrôles de fraude pouvant geler les fonds ; pas une monnaie interplateforme.
+**Cons:** platform account is a strong identity and behavior hub; device and storefront geography; gift-balance purchase/redemption trail; limited cash-out; fraud controls can freeze funds; not cross-platform money.
 
-**Procédure :** (1) utiliser un compte de plateforme géré par l'organisation lorsque la politique le permet ; (2) examiner financement, région, remboursement et règles de valeur transférable ; (3) n'ajouter que le budget approuvé ; (4) acheter un produit bénin via le store officiel ; (5) vérifier que l'application ne reçoit que les champs attendus du reçu ; (6) désactiver les achats récurrents ; (7) rapprocher et retirer le compte du hardware opérationnel.
+**Procedure:** (1) use an organization-managed platform account where policy permits; (2) review funding, region, refund and transferable-value rules; (3) add only the approved budget; (4) purchase a benign product through the official store; (5) verify the application receives only expected receipt fields; (6) disable recurring purchase; (7) reconcile and remove the account from operational hardware.
 
-**Détection :** reçus/notifications serveur de la plateforme, connexions compte/appareil et financement reconstruisent l'achat. **OPSEC résistante à la capture :** ne jamais connecter un field node à un compte store personnel ; fournir seulement une entitlement applicative limitée lorsque possible. **Surveillance :** activer alertes nouvel appareil/achat et examiner rejeu de reçu, changements familiaux/de compte ou restaurations inattendues.
+**Detection:** platform receipts/server notifications, account/device login and funding records reconstruct the purchase. **Capture-resilient OPSEC:** never sign a field node into a personal store account; provide only a scoped app entitlement where possible. **Monitoring:** enable new-device/purchase alerts and investigate receipt replay, family/account changes or unexpected restore events.
 
-## Crédit mutuel, clearing ou règlement net périodique
+## Mutual credit, clearing or periodic net settlement
 
-**Mécanisme :** les participants enregistrent leurs obligations dans un registre privé et ne règlent périodiquement que chaque position nette. Les événements de service individuels peuvent ne pas créer de paiements publics séparés, mais l'opérateur et les contreparties conservent une attribution détaillée.
+**Mechanics:** participants record obligations in a private ledger and periodically settle only each net position. Individual service events need not create separate public payments, but the ledger operator and counterparties retain detailed attribution.
 
-**Avantages :** moins de transactions et de frais externes ; les observateurs publics ne voient que le règlement net ; adapté aux organisations récurrentes ; limites de crédit explicites contenant l'exposition.
+**Pros:** fewer external transactions and fees; public observers see only net settlement; works for repeated organizations; explicit credit limits contain exposure.
 
-**Inconvénients :** le registre centralisé est une preuve complète et une cible de fraude ; risque de contrepartie/défaut ; obligations juridiques, comptables et fiscales ; petit groupe ; les transferts nets inhabituels peuvent révéler les relations.
+**Cons:** centralized ledger is complete evidence and a fraud target; counterparty/default risk; legal/accounting/tax duties; small membership set; unusual net transfers can still reveal relationships.
 
-**Procédure :** (1) utiliser uniquement des organisations identifiées et consentantes avec approbation juridique/comptable ; (2) définir unité, limite de crédit, intervalle de règlement et litiges ; (3) enregistrer chaque obligation avec approbation immuable ; (4) faire calculer et approuver les positions nettes par des rôles financiers séparés ; (5) régler via un rail licite ordinaire ; (6) rapprocher les lignes individuelles du règlement ; (7) fermer les accès et conserver les registres selon la politique.
+**Procedure:** (1) use only identified consenting organizations with legal/accounting approval; (2) define unit, credit limit, settlement interval and dispute rules; (3) record every obligation with immutable approval; (4) let separate finance roles calculate and approve net positions; (5) settle through an ordinary lawful rail; (6) reconcile individual lines to the settlement; (7) close access and retain records under policy.
 
-**Détection :** registre, factures, approbations et règlement bancaire/chaîne final fournissent la vérité terrain ; les analystes ne doivent pas déduire l'activité brute manquante du seul transfert net. **OPSEC résistante à la capture :** les appareils opérationnels peuvent soumettre des demandes limitées mais ne peuvent modifier les soldes ni autoriser le règlement. **Surveillance :** alerter sur dépassement de limite, écritures antidatées, changements d'administrateur, écart de rapprochement et règlement vers un nouveau bénéficiaire.
+**Detection:** ledger, invoices, approvals and final bank/chain settlement provide ground truth; analysts should not infer missing gross activity solely from the net transfer. **Capture-resilient OPSEC:** operational devices can submit bounded requisitions but cannot edit balances or authorize settlement. **Monitoring:** alert on credit-limit breach, backdated entries, administrator changes, reconciliation mismatch and settlement to a new beneficiary.
 
-## Matrice d'exposition à la capture/compromission
+## Capture/compromise exposure matrix
 
-Elle applique un test de saisie/perte à chaque famille. L'objectif est de limiter l'autorité de dépense et la divulgation d'identités sans lien tout en conservant une comptabilité licite — pas d'effacer les transactions ni de contrecarrer une enquête.
+This applies a seizure/loss test to every family. The objective is to limit spend authority and unrelated identity disclosure while retaining lawful accounting—not to erase transactions or defeat an investigation.
 
-| Famille de techniques | Ce qu'un wallet/appareil/compte capturé peut révéler | Contrôle autorisé minimal |
+| Technique family | A captured wallet/device/account can reveal | Minimum authorized control |
 |---|---|---|
-| Espèces, mandat/COD, valeur physique bearer | reçus, numéros, notes, valeur restante et contacts physiques | transporter uniquement le montant approuvé ; comptabilité privée séparée ; signaler rapidement la perte ; aucun faux registre |
-| Prépayé, cadeau, bon, crédits de service | solde, émetteur, activation, utilisation et tokens de session/compte | solde faible ; un objectif ; inscription véridique ; gel/révocation par l'émetteur si disponible |
-| Carte virtuelle/tokenisée, wallet token, payment app | compte émetteur, token appareil, transactions, récupération et historique commerçant | verrouillage appareil ; alertes ; portée commerçant ; suspension distante ; aucun compte de récupération partagé |
-| Banque compartimentée, achat délégué/red team | organisation, approbateurs, fournisseur, factures et projet | séparation des rôles ; sous-compte least privilege ; credentials financières jamais sur field nodes |
-| Invoice, escrow, règlement groupé | contrepartie, objectif, approbation en attente, coordinateur ou litige | demande unique ; approbateur séparé ; session limitée ; registre central de référence |
-| Bitcoin, Silent Payments, PayJoin/CoinJoin | seed/clés, libellés, adresses, graphe et configuration réseau | signature hardware/offline ; wallet chiffré ; limites passphrase ; vue watch-only terrain ; récupération documentée |
-| Lightning/BOLT 12 | seed, channels, invoices, pairs/LSP et base de paiements | solde hot minimal ; backup chiffré ; identité node séparée ; fermeture/récupération documentée |
-| Monero, Zcash, MWEB, applications ZK | spend/view keys, historique local, RPC et transactions frontières | rôles spend/view séparés ; hardware si disponible ; aucune session exchange sur le field node |
-| Stablecoins, swaps, bridges, DEX | graphe transparent, approvals, état RPC/frontend et actifs de destination | révoquer allowances ; contrats vérifiés ; petit test ; rapprochement complet |
-| Cashu, Fedimint, Taler, Privacy Pass | bearer tokens, mint/federation/exchange, cache émission/remboursement | petit solde ; backup chiffré selon protocole ; rembourser/réémettre ; jamais de credential de financement colocalisée |
-| Paymaster, multisig/threshold | session key, un signataire, opérations en attente et politique sponsor | session key étroite ; quorum indépendant ; rotation ; appareil terrain hors seuil |
-| Mixer/peel/structuring, nominees/fronts, abus remboursement/jeu | fournisseur incriminant, communications, graphe et participants | aucun usage opérationnel ; émulation synthétique/testnet uniquement |
-| Monnaie communautaire/événementielle | inscription, solde local, contreparties et remboursement | valeur plafonnée ; gel/réémission émetteur ; registre privé auditable et consentement |
-| Stealth address Bitcoin/EVM réutilisable | clés paiement/view/spend, métadonnées relationnelles, annonces et sorties dérivées | rôle réseau watch/view-only ; rôle spend offline/hardware ; aucune session de financement personnelle |
-| Liquid confidential/state channels | seed, données blinding/dernier état, pairs, frontières et litiges | sauvegardes spend/view/state séparées ; faible solde hot ; moniteur de litige indépendant |
-| Facturation opérateur/open banking/platform | compte téléphone/banque/store, consentement, reçu, appareil et source de financement | compte organisation ; MFA externe ; limite faible ; aucun compte personnel sur hardware terrain |
-| Clearing de crédit mutuel | membres, obligations, limites, approbations et registre de règlement | demandes opérationnelles uniquement ; registre immuable séparé et double approbation financière |
+| Cash, money order, COD, physical bearer value | receipts, serials, notes, remaining bearer value and physical contacts | carry only approved amount; separate private accounting; prompt loss report; no false records |
+| Prepaid, gift, voucher, service credits | balance, issuer, activation, redemption and account/session tokens | low balance; one purpose; truthful registration; issuer freeze/revocation where available |
+| Virtual/tokenized card, wallet token, payment app | issuer account, device token, transactions, recovery and merchant history | device lock; transaction alerts; merchant scope; remote issuer suspension; no shared recovery account |
+| Bank compartment, delegated procurement, red-team procurement | organization, approvers, vendor, invoices and project | role separation; least-privilege subaccount; finance credentials never on operational/field nodes |
+| Invoice, escrow, batch settlement | counterparty, purpose, pending approval, coordinator or dispute trail | single-use request; separate approver; limited session; central authoritative ledger |
+| Bitcoin, Silent Payments, PayJoin/CoinJoin | seed/keys, labels, addresses, transaction graph and network configuration | hardware/offline signing; encrypted wallet; passphrase limits; watch-only field view; documented recovery |
+| Lightning/BOLT 12 | seed, channels, invoices, peers/LSP and payment database | minimal hot balance; encrypted backup; separate node identity; close/recover per documented plan |
+| Monero, Zcash, MWEB, ZK applications | spend/view keys, local wallet history, RPC and boundary transactions | separate spend/view roles; hardware support where available; no exchange session on field node |
+| Stablecoins, swaps, bridges and DEX | transparent graph, approvals, RPC/front-end state and destination assets | revoke allowances; verified contracts; low-value test; complete reconciliation |
+| Cashu, Fedimint, Taler, Privacy Pass | bearer tokens, mint/federation/exchange, issuance/redemption cache | small balance; encrypted backup as protocol supports; redeem/reissue; never colocate funding credential |
+| Paymaster, multisig/threshold | session key, one signer, pending operations and sponsor policy | narrow session key; independent quorum; signer rotation; field device cannot reach threshold |
+| Mixer/peel/structuring, nominees/fronts, refund/gambling abuse | incriminating provider, communications, graph and participant records | no operational use; emulate with synthetic/testnet evidence only |
+| Community/event currency | enrollment, local balance, counterparties and redemption | capped value; issuer freeze/reissue; consent and private auditable ledger |
+| Reusable Bitcoin/EVM stealth address | payment/view/spend keys, relationship metadata, announcements and derived outputs | watch/view-only network role; offline/hardware spend role; no personal funding session |
+| Liquid confidential/state channels | seed, blinding data/latest state, peers, boundaries and disputes | separate spend/view/state backup; low hot balance; independent dispute monitor |
+| Carrier/open-banking/platform billing | phone/bank/store account, consent, receipt, device and funding source | organization account; external MFA; low limit; no personal account on field hardware |
+| Mutual-credit clearing | members, obligations, limits, approvals and settlement ledger | operational requisition only; separate immutable ledger and dual finance approval |
 
-## Surveillance d'une découverte ou compromission possible du paiement
+## Monitoring possible discovery or payment compromise
 
-Un refus de paiement, une revue de conformité ou la mise hors ligne d'un wallet ne prouvent pas l'existence d'une enquête. Surveiller uniquement les comptes, registres et infrastructures que l'organisation est autorisée à observer ; ne jamais sonder les fournisseurs ou contreparties pour vérifier s'ils coopèrent avec des enquêteurs.
+Payment denial, a compliance review or a wallet going offline does not prove that an investigation exists. Monitor only accounts, ledgers and infrastructure the organization is entitled to observe; never probe providers or counterparties to test whether they are cooperating with investigators.
 
-| Techniques couvertes | Signaux de surveillance sûrs | Condition de gel/arrêt |
+| Covered techniques | Safe monitoring signals | Freeze/stop condition |
 |---|---|---|
-| Espèces, mandat/COD, prépayé/cadeau/bon, valeur bearer physique | écart inventaire/reçu, numéro dupliqué, remboursement/utilisation inattendu ou signalement de perte | instrument manquant, utilisation hors commande approuvée, reçu altéré ou rupture de garde |
-| Carte virtuelle/tokenisée, payment app, banque/ACH/wire, open banking, facturation opérateur/plateforme | alertes émetteur/banque/plateforme, nouvel appareil/consentement/bénéficiaire, réutilisation token, récupération SIM/compte | autorisation inconnue, changement bénéficiaire, nouveau facteur de récupération, SIM swap ou frais récurrent |
-| Compartiment compte/commerçant, achat contrôlé/délégué, crédits service | changement IdP/fournisseur de projet, rôle/token/budget, facture et consommation | token interprojets, admin inconnu, dépassement, facture incohérente ou destination non prise en charge |
-| Invoice, escrow, règlement groupé, crédit mutuel | expiration demande, approbation/libération, intégrité registre, rapprochement et changement bénéficiaire | montant/payee modifié, registre antidaté, libération unilatérale ou batch non rapproché |
-| Adresse Bitcoin/coin control, Silent Payments, BIP47/BIP351 | transactions watch-only, état notification/scan, réutilisation d'adresse, labels UTXO et consolidation | dépense inconnue, output destinataire réutilisé, échec gap/recovery ou fusion non approuvée |
-| PayJoin/CoinJoin | inputs/outputs/frais de proposition, disponibilité coordinator, transaction finale | output substitué, frais excessifs, divulgation inattendue d'input ou changement de politique coordinator |
-| Lightning/BOLT12/channels généraux | backup channel, usage invoice/offer, liquidité, pair/LSP et litige de chaîne | paiement invoice inconnu, changement clé pair, close obsolète ou échéance de litige proche |
-| Monero/Zcash/MWEB/Liquid CT | événements view/watch, type pool/domaine/adresse, descriptor et transaction frontière | dépense non approuvée, downgrade transparent/non confidentiel, export de clé ou frontière inconnue |
-| Ethereum ZK, stealth addresses, paymaster, stablecoin | contrat/annonce, RPC/bundler, sponsor gas, allowance/session key et action émetteur | mauvais contrat/champ public, approval/dépense inconnue, changement paymaster ou gel émetteur |
-| Cashu/Fedimint/Taler/Privacy Pass | santé mint/federation/exchange, double dépense/rejeu, gateway et solde bearer | remboursement inconnu, changement clé/conditions mint, échec restore ou incohérence solde |
-| Swaps/bridges/DEX | contrat vérifié, allowance, confirmations des deux chaînes, taux et destination | contrat/route incohérent, approval illimité, destination absente ou incident bridge |
-| Multisig/threshold | changement ensemble/politique, proposition en attente, quorum et audit récupération | proposition/signataire inconnu, réduction seuil, activation récupération ou contournement |
-| Mixer/peel/structuring, nominees/fronts, NFT/jeu/remboursement | uniquement vérité terrain du lab synthétique et résultat de détection | tout compte, personne ou valeur réelle entrant dans l'émulation : arrêt immédiat |
+| Cash, money order/COD, prepaid/gift/voucher, physical bearer value | inventory/receipt mismatch, duplicate serial, unexpected redemption/refund or loss report | missing instrument, redemption outside approved order, altered receipt or custody break |
+| Virtual/tokenized card, payment app, bank/ACH/wire, open banking, carrier/platform billing | issuer/bank/platform alerts, new device/consent/payee, token reuse, SIM/account recovery | unknown authorization, payee change, new recovery factor, SIM swap or recurring charge |
+| Account/merchant compartment, controlled/delegated procurement, service credits | IdP/vendor project, role/token/budget change, invoice and consumption | cross-project token, unknown admin, limit breach, invoice mismatch or unsupported destination |
+| Invoice, escrow, pooled settlement, mutual credit | request expiry, approval/release, ledger integrity, reconciliation and beneficiary change | altered amount/payee, backdated ledger, unilateral release or unreconciled batch |
+| Bitcoin address/coin control, Silent Payments, BIP47/BIP351 | watch-only transactions, notification/scan state, address reuse, UTXO labels and consolidation | unknown spend, reused recipient output, wallet gap/recovery failure or unapproved merge |
+| PayJoin/CoinJoin | proposal inputs/outputs/fees, coordinator availability, final transaction equality | substituted output, excessive fee, unexpected input disclosure or coordinator policy change |
+| Lightning/BOLT12/general channels | channel backup, invoice/offer use, liquidity, peer/LSP and chain dispute | unknown invoice payment, peer-key change, stale close or approaching dispute deadline |
+| Monero/Zcash/MWEB/Liquid CT | view/watch events, pool/domain/address type, descriptor and boundary transaction | spend without approval, transparent/unconfidential downgrade, key export or unknown boundary |
+| Ethereum ZK, stealth addresses, paymaster, stablecoin | contract/announcement, RPC/bundler, gas sponsor, allowance/session key and issuer action | wrong contract/public field, unknown approval/spend, paymaster change or issuer freeze |
+| Cashu/Fedimint/Taler/Privacy Pass | mint/federation/exchange health, token double-spend/replay, gateway and bearer balance | unknown redemption, mint key/terms change, restore failure or balance inconsistency |
+| Swaps/bridges/DEX | verified contract, allowance, both-chain confirmations, rate and destination | contract/route mismatch, unlimited approval, missing destination or bridge incident |
+| Multisig/threshold | signer-set/policy change, pending proposal, quorum and recovery audit | unknown proposal/signer, threshold reduction, recovery activation or policy bypass |
+| Mixer/peel/structuring, nominees/fronts, NFT/gambling/refund abuse | synthetic lab ground truth and detection output only | any real account, person or value entering the emulation: stop immediately |
 
-## Workflow de sélection et de vérification
+## Selection and verification workflow
 
-1. Nommer la partie qui ne doit pas apprendre quel champ.
-2. Identifier émetteur/mint/custodian, registre public, réseau/RPC, commerçant et observateurs physiques.
-3. Vérifier support actuel, légalité, limites, garde, récupération et comportement de remboursement.
-4. Effectuer un petit test de bout en bout avec des fonds licites.
-5. Examiner reçu commerçant, relevé fournisseur, chaîne publique et logs wallet/node.
-6. Tester sauvegarde/récupération et divulgation d'audit volontaire.
-7. Conserver correctement, avec contrôle d'accès, les registres requis de source, propriété, fiscalité, sanctions et engagement.
+1. Name which party must not learn which field.
+2. Identify issuer/mint/custodian, public ledger, network/RPC, merchant and physical observers.
+3. Verify current support, legality, limits, custody, recovery and refund behavior.
+4. Use a small lawful end-to-end test.
+5. Inspect the merchant receipt, provider statement, public chain and wallet/node logs.
+6. Test backup/recovery and deliberate audit disclosure.
+7. Keep required source, ownership, tax, sanctions and engagement records accurate but access-controlled.
 
 ## References
 
@@ -685,3 +687,4 @@ Un refus de paiement, une revue de conformité ou la mise hors ligne d'un wallet
 - [24] [GSMA Open Gateway — Carrier Billing API](https://open-gateway.gsma.com/docs/carrier-billing/api-reference)
 - [25] [Open Banking Standards — Payment Initiation Services](https://standards.openbanking.org.uk/customer-experience-guidelines/payment-initiation-services/v4-0/)
 - [26] [Apple Developer — StoreKit](https://developer.apple.com/documentation/storekit/)
+{{#include ../banners/hacktricks-training.md}}
