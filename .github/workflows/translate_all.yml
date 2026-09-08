@@ -321,7 +321,6 @@ jobs:
           aws-region: us-east-1
 
       - name: Refresh root sitemap index
-        id: root_sitemap
         shell: bash
         run: |
           set -euo pipefail
@@ -335,26 +334,16 @@ jobs:
             --output ./sitemap.xml
           if aws s3 cp s3://hacktricks-wiki/sitemap.xml /tmp/current-root-sitemap.xml >/dev/null 2>&1 && cmp -s /tmp/current-root-sitemap.xml ./sitemap.xml; then
             echo "Root sitemap unchanged; skipping its upload."
-            echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             aws s3 cp ./sitemap.xml s3://hacktricks-wiki/sitemap.xml \
               --content-type application/xml \
               --cache-control max-age=300
-            echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Invalidate translated HTML and SEO assets once
         shell: bash
         run: |
           set -euo pipefail
-          paths=(
-            "/af/*" "/de/*" "/el/*" "/es/*" "/fr/*" "/hi/*"
-            "/it/*" "/ja/*" "/ko/*" "/pl/*" "/pt/*" "/sr/*"
-            "/sw/*" "/tr/*" "/uk/*" "/zh/*"
-          )
-          if [ "${{ steps.root_sitemap.outputs.changed }}" = "true" ]; then
-            paths+=("/sitemap.xml")
-          fi
           aws cloudfront create-invalidation \
             --distribution-id "${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}" \
-            --paths "${paths[@]}"
+            --paths "/*"
