@@ -1,14 +1,16 @@
-# Labs autorizados de emulación de adversarios
+# Laboratorios autorizados de emulación de adversarios
 
-Estos ejercicios reproducen **arquitectura observable**, no una intrusión no autorizada. Ejecútalos en un host Linux de laboratorio dedicado con Docker, sin credenciales sensibles y sin rutas hacia targets de terceros. Los nombres son fijos para que el desmontaje sea explícito.
+{{#include ../banners/hacktricks-training.md}}
+
+Estos ejercicios reproducen una **arquitectura observable**, no un compromiso no autorizado. Ejecútalos en un host Linux de laboratorio dedicado con Docker, sin credenciales confidenciales y sin rutas hacia objetivos de terceros. Los nombres son fijos para que el desmontaje sea explícito.
 
 {% hint style="danger" %}
-No reemplaces los contenedores, APs, routers, cuentas o transacciones sintéticas propios indicados a continuación por proxies públicos, la Wi-Fi de un vecino, un tenant de CDN de producción que no controles o fondos ilícitos reales. La autorización por escrito debe cubrir cada sistema y entorno de radio.
+No reemplaces los contenedores, APs, routers, cuentas ni transacciones sintéticas propios indicados abajo por proxies públicos, la Wi-Fi de un vecino, un tenant de CDN de producción que no controles o fondos ilícitos reales. La autorización escrita debe cubrir cada sistema y entorno de radio.
 {% endhint %}
 
-## Lab 1: cadena de ORB y redirector propios
+## Laboratorio 1: ORB y cadena de redirector propios
 
-**Objetivo:** demostrar que un target solo registra la salida, mientras cada relay ve los saltos adyacentes. Esto emula la estructura T1090.003/T1584 sin dispositivos comprometidos.
+**Objetivo:** demostrar que un objetivo registra únicamente la salida, mientras cada relay ve los saltos adyacentes. Esto emula la estructura T1090.003/T1584 sin dispositivos comprometidos.
 
 **Requisitos:** Docker Engine y nombres de contenedor sin usar que comiencen por `ht-orb-`.
 
@@ -31,7 +33,7 @@ docker network connect ht-orb-transit ht-orb-r1
 docker run --rm --network ht-orb-entry curlimages/curl:latest \
 -sS http://ht-orb-r1:8080/ >/dev/null
 ```
-### Verificar los límites de visibilidad
+### Verifica los límites de visibilidad
 ```bash
 docker logs ht-orb-target
 docker logs ht-orb-r1
@@ -39,25 +41,25 @@ docker logs ht-orb-r2
 docker inspect -f '{{range .NetworkSettings.Networks}}{{.NetworkID}} {{.IPAddress}}{{println}}{{end}}' \
 ht-orb-r1 ht-orb-r2 ht-orb-target
 ```
-Resultado esperado: Nginx registra la dirección de `ht-orb-r2` en `ht-orb-target`, no la del cliente de una sola ejecución. Los logs del Relay muestran conexiones únicamente desde su red adyacente. La inspección del plano de control de Docker aún reconstruye toda la ruta, de forma análoga a la evidencia del proveedor/controlador.
+Resultado esperado: Nginx registra la dirección `ht-orb-r2` en `ht-orb-target`, no la del cliente one-shot. Los logs del relay muestran conexiones únicamente desde su red adyacente. La inspección del control-plane de Docker aún reconstruye la ruta completa, de forma análoga a la evidencia del proveedor/controlador.
 
 ### Experimentos de detección
 
 1. Repite las solicitudes cada 60 segundos y representa gráficamente el tiempo entre llegadas y los bytes.
-2. Sustituye `ht-orb-r2` por un nuevo contenedor/dirección con nombre, pero conserva la misma cadencia y solicitud de aplicación; confirma que una regla basada únicamente en IP pierde la cadena, mientras que el comportamiento sigue vinculándola.
+2. Sustituye `ht-orb-r2` por un nuevo contenedor/dirección con nombre, pero conserva la misma cadencia y solicitud de aplicación; confirma que una regla basada únicamente en IP pierde la cadena, mientras que el comportamiento aún la vincula.
 3. Captura en los tres bridges de Docker con `tcpdump` en el host del lab y compara las marcas de tiempo.
-4. Detén `ht-orb-r2`; verifica que no haya un fallback directo desde la entrada hasta el destino.
+4. Detén `ht-orb-r2`; verifica que no exista un fallback directo desde la entrada al objetivo.
 
 ### Desmontaje
 ```bash
 docker rm -f ht-orb-r1 ht-orb-r2 ht-orb-target
 docker network rm ht-orb-entry ht-orb-transit ht-orb-target
 ```
-## Lab 2: discrepancia SNI/Host y logging del redirector
+## Lab 2: SNI/Host mismatch y logging del redirector
 
-**Objetivo:** reproducir la primitiva de enrutamiento detrás del domain fronting en un edge local privado y mostrar dónde es visible. No interviene ningún CDN público.
+**Objetivo:** reproducir la primitiva de routing detrás de domain fronting en un edge local privado y mostrar dónde es visible. No interviene ningún CDN público.
 
-### Construir un edge TLS local
+### Construye un edge TLS local
 ```bash
 ht_front_dir="$(mktemp -d)"
 openssl req -x509 -newkey rsa:2048 -nodes -days 1 \
@@ -91,15 +93,15 @@ curl -k --resolve front.lab:8443:127.0.0.1 \
 -H 'Host: origin.lab' https://front.lab:8443/
 docker logs ht-front-edge
 ```
-Los campos de log esperados incluyen `sni=front.lab host=origin.lab`. La captura de paquetes del cliente al edge expone el SNI, a menos que se use ECH; el HTTP Host está cifrado en ese enlace. El edge de terminación ve ambos.
+Los campos de log esperados incluyen `sni=front.lab host=origin.lab`. La captura de paquetes entre el cliente y el edge expone el SNI, salvo que se utilice ECH; el HTTP Host está cifrado en ese enlace. El edge que termina la conexión ve ambos.
 
 Ahora envía una solicitud normal y confirma que la policy la rechaza:
 ```bash
 curl -k --resolve front.lab:8443:127.0.0.1 https://front.lab:8443/
 ```
-### Afirmación de detección
+### Aserción de detección
 
-Alertar sobre `sni != host` solo después de normalizar los puertos y las mayúsculas/minúsculas, y comprobar las excepciones conocidas de reverse-proxy. Añadir el contexto del proceso y del tenant/origen antes de asignar la gravedad.
+Genera una alerta sobre `sni != host` solo después de normalizar los puertos y las mayúsculas/minúsculas, y comprobar las excepciones conocidas de reverse-proxy. Añade el contexto del proceso y del tenant/origen antes de asignar la gravedad.
 
 ### Desmontaje
 ```bash
@@ -107,11 +109,11 @@ docker rm -f ht-front-edge ht-front-target
 docker network rm ht-front-net
 rm -rf -- "$ht_front_dir"
 ```
-## Lab 3: telemetría DNS de fast-flux
+## Lab 3: fast-flux DNS telemetry
 
-**Objetivo:** generar un dataset seguro de DNS con TTL bajo y similar a multi-ASN, y validar un análisis. Las direcciones de documentación RFC 5737 devueltas no son enroutables para este propósito.
+**Objetivo:** generar un dataset seguro de DNS similar a low-TTL/multi-ASN y validar un analytic. Las direcciones de documentación RFC 5737 devueltas no son enrutables para este propósito.
 
-### Ejecutar un servidor autoritativo
+### Ejecuta un authoritative server
 ```bash
 ht_dns_dir="$(mktemp -d)"
 cat >"$ht_dns_dir/Corefile" <<'EOF'
@@ -142,52 +144,52 @@ dig @127.0.0.1 -p 1053 flux.lab A +noall +answer
 done
 docker logs ht-flux-dns
 ```
-Resultado esperado: cada respuesta incluye tres IPs de documentación y un TTL de 5 segundos. El fast flux real también rota subconjuntos con el tiempo; cambia el serial/las direcciones de la zona y reinicia este servidor desechable para crear múltiples épocas.
+Resultado esperado: cada respuesta contiene tres IPs de documentación y un TTL de 5 segundos. El fast flux real también rota subconjuntos con el tiempo; cambia el serial/las direcciones de la zona y reinicia este servidor desechable para crear múltiples épocas.
 
 ### Validación analítica
 
-Para una ventana de cinco minutos, calcula `median(TTL)`, las respuestas distintas, las etiquetas sintéticas de ASN/geografía distintas y la rotación de respuestas. Exige al menos dos dimensiones sospechosas, además de un evento de proceso/seguimiento. Ejecuta el mismo análisis con una muestra conocida de CDN para medir los falsos positivos.
+Para una ventana de cinco minutos, calcula `median(TTL)`, las respuestas distintas, las etiquetas de ASN/geografía sintéticas distintas y la rotación de respuestas. Exige al menos dos dimensiones sospechosas además de un evento de proceso/seguimiento. Ejecuta el mismo análisis sobre una muestra conocida de CDN para medir los falsos positivos.
 
-### Desmontaje
+### Desmantelamiento
 ```bash
 docker rm -f ht-flux-dns
 rm -rf -- "$ht_dns_dir"
 ```
-## Lab 4: nearest-neighbor wireless pivot
+## Laboratorio 4: pivot wireless de vecino más cercano
 
-**Objetivo:** reproducir el boundary mismatch de APT28 con dos “organizaciones” propias. Debido a que los comandos del hardware/drivers Wi-Fi varían, este lab especifica roles y evidencias verificables en lugar de fingir que un comando de `hostapd` sirve para cualquier radio.
+**Objetivo:** reproducir el desajuste de límites de APT28 con dos “organizaciones” propias. Como los comandos de hardware/driver Wi-Fi varían, este laboratorio especifica roles y evidencias verificables en lugar de pretender que un comando de `hostapd` sirve para cualquier radio.
 
-### Equipment
+### Equipamiento
 
-- dos APs propios, en canales/SSIDs de laboratorio aislados `HT-NEIGHBOR` y `HT-TARGET`;
-- un servicio target accesible únicamente desde `HT-TARGET`;
-- un pivot Linux propio con dos radios, capaz de asociarse a ambos APs;
+- dos AP propios, en canales/SSID de laboratorio aislados `HT-NEIGHBOR` y `HT-TARGET`;
+- un servicio objetivo accesible únicamente desde `HT-TARGET`;
+- un pivot Linux de doble radio propio, capaz de asociarse a ambos AP;
 - una workstation de remote-control detrás de `HT-NEIGHBOR`;
-- logs de RADIUS/NAC o de asociación de los APs, logs de DHCP y logs de auditoría/procesos del pivot.
+- logs de RADIUS/NAC o de asociación del AP, logs de DHCP y logs de auditoría/procesos del pivot.
 
-### Procedure
+### Procedimiento
 
-1. Aísla físicamente o atenúa la configuración para que ningún SSID salga del área autorizada. Confírmalo con un survey.
-2. Configura `HT-TARGET` con una identidad de ejercicio y omite deliberadamente la validación de device-certificate/posture en la primera ejecución. Registra esto como la condición bajo prueba.
-3. Conecta la primera interfaz del pivot a `HT-NEIGHBOR` y la segunda interfaz a `HT-TARGET`. **No** habilites un bridge general; permite únicamente el target service/port mediante un host firewall.
-4. Desde la workstation, abre un túnel autenticado hacia el pivot y solicita el target service a través de él.
-5. Registra la creación del proceso/interfaz del pivot, ambas asociaciones con los APs, el evento de RADIUS del target, el lease de DHCP y la dirección de origen del target.
+1. Aísla físicamente o atenúa la configuración para que ningún SSID salga del área autorizada. Confírmalo mediante un survey.
+2. Configura `HT-TARGET` con una identidad de ejercicio y omite deliberadamente la validación de certificado del dispositivo/posture en la primera ejecución. Registra esto como la condición bajo prueba.
+3. Conecta la primera interfaz del pivot a `HT-NEIGHBOR` y la segunda interfaz a `HT-TARGET`. **No** habilites un bridge general; permite únicamente el servicio/puerto objetivo mediante un firewall del host.
+4. Desde la workstation, abre un túnel autenticado hacia el pivot y solicita el servicio objetivo a través de él.
+5. Registra la creación del proceso/interfaz del pivot, ambas asociaciones con los AP, el evento RADIUS objetivo, el lease DHCP y la dirección de origen objetivo.
 6. Pide al equipo de detección que reconstruya la cadena sin el mapa del controller.
-7. Habilita EAP-TLS/posture de managed-device en `HT-TARGET`, elimina el target certificate aprobado del pivot y repite. El acceso debería fallar durante la admisión.
-8. Repite usando una MAC randomized vista por primera vez. Verifica que la decisión basada en certificate/device siga funcionando y que ninguna regla trate la MAC por sí sola como identidad.
+7. Habilita EAP-TLS/posture de managed-device en `HT-TARGET`, elimina el certificado objetivo aprobado del pivot y repite. El acceso debería fallar durante la admisión.
+8. Repite usando una MAC randomized vista por primera vez. Verifica que la decisión sobre el certificado/dispositivo siga funcionando y que ninguna regla trate la MAC por sí sola como identidad.
 
-### Success criteria
+### Criterios de éxito
 
-- Inicialmente, el target ve un cliente Wi-Fi local en lugar de la workstation.
-- La telemetría de las asociaciones identifica un pivot con rutas simultáneas hacia el control del neighbor y la radio del target.
-- La admisión respaldada por certificate/device bloquea la segunda ejecución.
-- Ningún paquete llega a una network fuera del lab aislado.
+- El objetivo ve inicialmente un cliente Wi-Fi local en lugar de la workstation.
+- La telemetría de las asociaciones identifica un pivot con rutas simultáneas hacia el control del vecino y la radio objetivo.
+- La admisión respaldada por certificado/dispositivo bloquea la segunda ejecución.
+- Ningún paquete llega a una red fuera del laboratorio aislado.
 
-## Lab 5: dead-drop resolver sequence
+## Laboratorio 5: secuencia de resolución dead-drop
 
 **Objetivo:** detectar un proceso que lee un objeto con apariencia legítima, decodifica un puntero y contacta inmediatamente con un segundo servicio.
 
-### Build
+### Compilación
 ```bash
 docker network create ht-ddr-net
 docker run -d --name ht-ddr-c2 --network ht-ddr-net nginx:alpine
@@ -201,16 +203,16 @@ python -c 'import base64,urllib.request; p=urllib.request.urlopen("http://ht-ddr
 docker logs ht-ddr-web
 docker logs ht-ddr-c2
 ```
-El contenido codificado es `http://ht-ddr-c2:80/`. Una detección funcional asocia el mismo proceso/contenedor de corta duración que lee `/profile.txt`, decodifica el contenido y contacta con `ht-ddr-c2` en cuestión de segundos. Calcula el hash y conserva la respuesta del objeto.
+El contenido codificado es `http://ht-ddr-c2:80/`. Una detección funcional vincula el mismo proceso/contenedor de corta duración que lee `/profile.txt`, decodifica el contenido y contacta con `ht-ddr-c2` en cuestión de segundos. Calcula el hash y conserva la respuesta del objeto.
 
-### Desmontaje
+### Desmantelamiento
 ```bash
 docker rm -f ht-ddr-web ht-ddr-c2
 docker network rm ht-ddr-net
 ```
 ## Laboratorio 6: synthetic peel-chain y bridge graph
 
-**Objetivo:** practicar el tracing de valores sin activos, cuentas ni servicios reales.
+**Objetivo:** practicar el rastreo de valor sin activos, cuentas o servicios reales.
 
 ### Crear y rastrear el dataset
 ```bash
@@ -241,15 +243,15 @@ print(f'{e["time"]} {e["chain"]}: {src} -> {e["destination"]} {e["amount"]} [{e[
 frontier.add(e["destination"])
 PY
 ```
-Los analistas deben identificar el patrón de peel/change, tratar el enlace del bridge como una inferencia respaldada por separado, calcular la diferencia de fee/valor y marcar el exchange como una solicitud de evidencia off-chain. Cambien un valor/tiempo y documenten cómo cambia la confianza.
+Los analistas deben identificar el patrón de peel/change, tratar el enlace puente como una inferencia respaldada por separado, calcular la diferencia de comisión/valor y marcar el exchange como una solicitud de evidencia off-chain. Cambien un valor/tiempo y documenten cómo cambia la confianza.
 
-### Desmontaje
+### Desglose
 ```bash
 rm -rf -- "$ht_graph_dir"
 ```
-## Lab 7: sensor pasivo de señalización de tráfico
+## Laboratorio 7: sensor pasivo de señalización de tráfico
 
-**Objetivo:** emular la firma de red de un implant pasivo activado mediante un valor mágico sin crear un shell, persistence ni remote access. El listener se enlaza únicamente a loopback y registra un evento benigno.
+**Objetivo:** emular la firma de red de un implant pasivo activado por un magic value sin crear un shell, persistence ni remote access. El listener se enlaza únicamente a loopback y registra un evento benigno.
 ```bash
 ht_signal_dir="$(mktemp -d)"
 cat >"$ht_signal_dir/listener.py" <<'PY'
@@ -279,7 +281,7 @@ wait "$ht_signal_pid"
 cat "$ht_signal_dir/events.log"
 rm -rf -- "$ht_signal_dir"
 ```
-Resultado esperado: el tráfico ordinario no produce ningún evento de aplicación; solo lo hace el token designado. Captura el tráfico de loopback durante la ejecución y verifica que un sensor de red aún pueda ver ambos datagramas. Después, evalúa los controles del host que detectan un packet listener de larga duración inesperado o un filtro de packet-capture. Los implants pasivos reales de RedPenguin inspeccionaban el tráfico en un router y ofrecían funcionalidad peligrosa; este lab deliberadamente no hace ninguna de las dos cosas.
+Resultado esperado: el tráfico normal no produce ningún evento de aplicación; solo lo produce el token designado. Captura el tráfico de loopback durante la ejecución y verifica que un sensor de red aún pueda ver ambos datagramas. Después, evalúa los controles del host que detectan un listener de paquetes inesperado de larga duración o un filtro de captura de paquetes. Los implants pasivos reales de RedPenguin inspeccionaban el tráfico en un router y ofrecían funcionalidad peligrosa; este lab deliberadamente no hace ninguna de las dos cosas.
 
 ## Plantilla del informe del ejercicio
 
@@ -293,8 +295,8 @@ Para cada lab, registra:
 - eventos observados realmente y lagunas de retención;
 - lógica analítica, umbral y muestra de falsos positivos;
 - si el equipo objetivo reconstruyó la ruta;
-- resultado de la repetición de la mitigación; y
-- evidencias de teardown/recuperación.
+- resultado de la repetición de prueba de mitigación; y
+- evidencias de desmontaje/recuperación.
 
 Un ejercicio está incompleto hasta que la detección se vuelve a ejecutar después de la mitigación y se elimina cada recurso del lab.
 
@@ -303,6 +305,7 @@ Un ejercicio está incompleto hasta que la detección se vuelve a ejecutar despu
 - [1] [MITRE ATT&CK — Multi-hop Proxy (T1090.003)](https://attack.mitre.org/techniques/T1090/003/)
 - [2] [MITRE ATT&CK — Domain Fronting (T1090.004)](https://attack.mitre.org/techniques/T1090/004/)
 - [3] [MITRE ATT&CK — Fast Flux DNS (T1568.001)](https://attack.mitre.org/techniques/T1568/001/)
-- [4] [Volexity — The Nearest Neighbor Attack](https://www.volexity.com/blog/2024/11/22/the-nearest-neighbor-attack-how-a-russian-apt-weaponized-nearby-wi-fi-networks-for-covert-access/)
+- [4] [Volexity — El ataque del vecino más cercano](https://www.volexity.com/blog/2024/11/22/the-nearest-neighbor-attack-how-a-russian-apt-weaponized-nearby-wi-fi-networks-for-covert-access/)
 - [5] [MITRE ATT&CK — Dead Drop Resolver (T1102.001)](https://attack.mitre.org/techniques/T1102/001/)
 - [6] [MITRE ATT&CK — Traffic Signaling (T1205)](https://attack.mitre.org/techniques/T1205/)
+{{#include ../banners/hacktricks-training.md}}
