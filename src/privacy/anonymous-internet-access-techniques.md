@@ -1,690 +1,693 @@
-# Catálogo de técnicas de acesso anônimo à Internet
+# Anonymous Internet Access Technique Catalog
 
-Este é o inventário canônico de caminhos de acesso. Ele abrange **famílias** de protocolos e operações, não todos os nomes de fornecedores. Nenhum caminho da Internet garante anonimato: evidências de conta, navegador, endpoint, temporização, pagamento, control plane da cloud e evidências físicas podem derrotar uma rota aparentemente perfeita.
+{{#include ../banners/hacktricks-training.md}}
 
-Cada entrada usa os mesmos campos. “Procedimento” significa uma implantação legal ou uma emulação em laboratório próprio. Quando a técnica real depende de comprometer um roteador, roubar acesso ou abusar de um intermediário que não consentiu, a reprodução substitui esses sistemas por sistemas pertencentes ao exercício.
+This is the canonical access-path inventory. It covers protocol and operational **families**, not every vendor name. No Internet path guarantees anonymity: account, browser, endpoint, timing, payment, cloud-control-plane and physical evidence can defeat a perfect-looking route.
 
-## Matriz de cobertura
+Every entry uses the same fields. “Procedure” means a lawful deployment or an owned-lab emulation. Where the real technique depends on compromising a router, stealing access or abusing an unwilling intermediary, the reproduction substitutes systems owned by the exercise.
 
-| Família | O destino vê | Propriedade mais forte | Velocidade | Tratamento |
+## Coverage matrix
+
+| Family | Destination sees | Strongest property | Speed | Treatment |
 |---|---|---|---|---|
-| Shared NAT/CGNAT | endereço público compartilhado | ambiguidade entre assinantes | alta | implantável |
-| VPN, VPS, SOCKS/HTTP/SSH proxy | endereço do relay | separação rápida do endereço de origem | alta | implantável |
-| Multi-hop/split relay, MASQUE | proxy final | divisão de conhecimento ou túnel IP completo | alta/moderada | implantável com relays confiáveis |
-| Tor, bridge, onion service | exit ou identidade onion | caminho multiparticipante e navegador comum | moderada | implantável |
-| I2P, GNUnet, mixnet | peer/gateway do overlay | resistência de overlay ou de temporização | baixa/variável | específica da aplicação |
-| OHTTP/ODoH, Private Relay | gateway/egress | particionamento de origem/requisição | alta | somente aplicações compatíveis |
-| Public Wi-Fi, travel router | endereço do local/túnel | alteração de localização/caminho de acesso | alta | requer permissão |
-| Cellular/eSIM, satellite | endereço da operadora/provedor | uplink físico independente | alta/variável | assinatura/provedor observam |
-| Remote browser/jump host | workspace remoto | separação de endpoint e egress | alta | implantável |
-| Residential/mobile proxy | endereço de rede residencial/operadora | aparência de rede de consumidor | alta | consentimento/proveniência críticos |
-| ORB/compromised relay | endereço de outra vítima | ocultação da origem e reputação emprestada | alta | reprodução somente em laboratório próprio |
-| CDN/fronting/redirector | endereço frontal da CDN | proteção da infraestrutura back-end | alta | requer aprovação do provedor/proprietário |
-| Fast flux/DGA/dead drop | nó/serviço rotativo | resistência à descoberta da infraestrutura | variável | reprodução somente em laboratório próprio |
-| Drop/nearest-neighbor | endereço adjacente ao alvo | atravessa fronteira geográfica/de rede | alta | somente laboratório no local próprio |
-| Store-and-forward/offline | gateway ou receptor físico | reduz vínculo de temporização interativa | baixa | específica da aplicação |
-| Pluggable/refraction transport | entrada Tor ou proxy de desvio cooperante | alcançabilidade resistente à censura | variável | cliente compatível ou laboratório de pesquisa |
-| IPFS gateway/PIR/remote fetcher | gateway ou serviço da aplicação | particionamento de publicador/consulta/requisição | variável | somente aplicação delimitada |
-| Anycast/QUIC/MPTCP | broker estável ou múltiplos subflows | rendezvous e continuidade da sessão | alta | disponibilidade, não anonimato |
-| CI/CD automation runner | endereço do runner hospedado | egress descartável e atribuível | alta | somente workflow próprio |
-| Non-IP local first hop | gateway da organização | remove a pilha de Internet do sensor | baixa | implantação aprovada pelo proprietário |
+| Shared NAT/CGNAT | shared public address | ambiguity among subscribers | high | deployable |
+| VPN, VPS, SOCKS/HTTP/SSH proxy | relay address | fast source-address separation | high | deployable |
+| Multi-hop/split relay, MASQUE | final proxy | knowledge split or full-IP tunnel | high/moderate | deployable with trusted relays |
+| Tor, bridge, onion service | exit or onion identity | multi-party path and common browser | moderate | deployable |
+| I2P, GNUnet, mixnet | overlay peer/gateway | overlay or timing resistance | low/variable | application-specific |
+| OHTTP/ODoH, Private Relay | gateway/egress | source/request partitioning | high | supported applications only |
+| Public Wi-Fi, travel router | venue/tunnel address | location/access-path change | high | permission required |
+| Cellular/eSIM, satellite | carrier/provider address | independent physical uplink | high/variable | subscription/provider observes |
+| Remote browser/jump host | remote workspace | endpoint and egress separation | high | deployable |
+| Residential/mobile proxy | consumer/carrier address | consumer-network appearance | high | consent/provenance critical |
+| ORB/compromised relay | another victim's address | origin concealment and borrowed reputation | high | owned-lab reproduction only |
+| CDN/fronting/redirector | CDN/front address | protects back-end infrastructure | high | provider/owner approval required |
+| Fast flux/DGA/dead drop | rotating node/service | infrastructure discovery resistance | variable | owned-lab reproduction only |
+| Drop/nearest-neighbor | local target-adjacent address | crosses geographic/network boundary | high | owned-site lab only |
+| Store-and-forward/offline | gateway or physical receiver | reduces interactive timing linkage | low | application-specific |
+| Pluggable/refraction transport | Tor entry or cooperating diversion proxy | censorship-resistant reachability | variable | supported client or research lab |
+| IPFS gateway/PIR/remote fetcher | gateway or application service | publisher/query/request partitioning | variable | bounded application only |
+| Anycast/QUIC/MPTCP | stable broker or multiple subflows | rendezvous and session continuity | high | availability, not anonymity |
+| CI/CD automation runner | hosted runner address | disposable accountable egress | high | owned workflow only |
+| Non-IP local first hop | organization gateway | removes Internet stack from sensor | low | owner-approved deployment |
 
-## NAT compartilhado direto e Carrier-Grade NAT
+## Direct shared NAT and carrier-grade NAT
 
-**Mecânica:** vários usuários compartilham um endereço público; o provedor de acesso mapeia endereços e portas do assinante para a tupla pública.
+**Mechanics:** several users share one public address; the access provider maps subscriber-side addresses and ports to the public tuple.
 
-**Prós:** rápido; nenhum cliente especial; somente o IP no destino pode identificar uma residência, local ou pool da operadora.
+**Pros:** fast; no special client; destination-side IP alone may identify only a household, venue or carrier pool.
 
-**Contras:** o provedor pode conservar os mapeamentos de assinante/porta/horário; contas e fingerprints permanecem; outros usuários podem prejudicar a reputação do endereço.
+**Cons:** the provider can retain subscriber/port/time mappings; accounts and fingerprints remain; other users can damage address reputation.
 
-**Procedimento:** (1) confirme se o acesso autorizado usa NAT/CGNAT; (2) registre o IP público e a porta de origem exatos em um endpoint próprio; (3) mantenha as identidades de aplicação separadas; (4) não trate o endereçamento compartilhado como controle de privacidade; (5) use um caminho mais forte se o ISP não puder conhecer os destinos.
+**Procedure:** (1) confirm whether the authorized access uses NAT/CGNAT; (2) record the exact public IP and source port at an owned endpoint; (3) keep application identities separated; (4) do not treat shared addressing as a privacy control; (5) use a stronger path if the ISP must not learn destinations.
 
-**Detecção:** os destinos devem conservar a porta de origem e o horário preciso, não apenas o IP. Os provedores correlacionam logs de alocação NAT; investigadores associam evidências de conta/dispositivo/navegador.
+**Detection:** destinations should retain source port and precise time, not IP alone. Providers correlate NAT allocation logs; investigators join account/device/browser evidence.
 
-## VPN comercial
+## Commercial VPN
 
-**Mecânica:** uma conexão full-tunnel criptografada termina na VPN; os destinos veem o egress dela. A VPN normalmente pode associar origem, temporização e destinos.
+**Mechanics:** an encrypted full-tunnel connection terminates at the VPN; destinations see its egress. The VPN can normally associate source, timing and destinations.
 
-**Prós:** rápida; simples; protege contra observação passiva local; exits estáveis ou compartilhados; adequada para egress controlado de red team.
+**Pros:** fast; simple; protects against local passive observation; stable or shared exits; good for controlled red-team egress.
 
-**Contras:** confiança concentrada; telemetria de cobrança/login; falhas de kill switch/DNS/IPv6; exits compartilhados frequentemente são bloqueados por reputação.
+**Cons:** concentrated trust; billing/login telemetry; kill-switch/DNS/IPv6 failures; shared exits are often reputation-blocked.
 
-**Procedimento:** (1) identifique provedor, proprietário, jurisdição, retenção e política de assessment; (2) instale o cliente oficial assinado; (3) habilite full tunnel, always-on e comportamento fail-closed; (4) encaminhe DNS e IPv6 deliberadamente; (5) verifique IPv4/IPv6/DNS observados em um endpoint próprio; (6) interrompa/reconecte o túnel e confirme que não há fallback em claro.<sup>[[1]](#references)</sup>
+**Procedure:** (1) identify provider, owner, jurisdiction, retention and assessment policy; (2) install the signed official client; (3) enable full tunnel, always-on and fail-closed behavior; (4) route DNS and IPv6 deliberately; (5) verify observed IPv4/IPv6/DNS at an owned endpoint; (6) stop/reconnect the tunnel and confirm no clear fallback.<sup>[[1]](#references)</sup>
 
-**Detecção:** redes locais veem um fluxo criptografado longo para a infraestrutura da VPN; provedores têm registros de autenticação/conexão; destinos usam ASN/reputação junto com correlação de conta, TLS/browser e comportamento.
+**Detection:** local networks see a long encrypted flow to VPN infrastructure; providers have authentication/connection records; destinations use ASN/reputation plus account, TLS/browser and behavior correlation.
 
-## Egress de VPN self-hosted ou VPS alugado
+## Self-hosted VPN or rented VPS egress
 
-**Mecânica:** o operador controla um gateway WireGuard/OpenVPN ou encaminha tráfego por um servidor alugado.
+**Mechanics:** the operator controls a WireGuard/OpenVPN gateway or forwards traffic through a rented server.
 
-**Prós:** alta velocidade previsível; endereço fixo que pode entrar em allowlist; logging/firewall personalizado; bom controle de incidentes.
+**Pros:** predictable high speed; fixed allowlistable address; custom logging/firewall; good incident control.
 
-**Contras:** conjunto de anonimato pequeno; tenant da cloud, pagamento, login de origem, API e histórico da imagem vinculam o operador; um servidor novo e distinto é fácil de agrupar.
+**Cons:** low anonymity set; cloud tenant, payment, source login, API and image history link the operator; a distinctive new server is easy to cluster.
 
-**Procedimento:** (1) crie um projeto de organização específico do engagement; (2) provisione uma imagem compatível e endereço fixo; (3) restrinja a administração a MFA/chaves; (4) configure egress full-tunnel e DNS; (5) permita somente destinos delimitados quando possível; (6) teste comportamento de leak/falha; (7) retenha registros de auditoria do controller; (8) destrua credenciais e recursos no teardown.
+**Procedure:** (1) create an engagement-specific organization project; (2) provision a supported image and fixed address; (3) restrict management to MFA/key-based administration; (4) configure full-tunnel egress and DNS; (5) allow only scoped destinations where practical; (6) test leak/failure behavior; (7) retain controller audit records; (8) destroy credentials and resources at teardown.
 
-**Detecção:** correlacione ASN de hosting, endereço visto pela primeira vez, fingerprint de certificado/serviço e comportamento de scanning; proprietários da cloud usam logs de control plane, console, billing e flow.
+**Detection:** correlate hosting ASN, first-seen address, certificate/service fingerprint and scanning behavior; cloud owners use control-plane, console, billing and flow logs.
 
-## HTTP CONNECT, SOCKS e encaminhamento SSH
+## HTTP CONNECT, SOCKS and SSH forwarding
 
-**Mecânica:** uma aplicação solicita que um proxy abra um fluxo TCP; SOCKS também pode transportar resolução de nomes e UDP, dependendo da versão; SSH encaminha fluxos dentro de uma sessão criptografada.
+**Mechanics:** an application asks a proxy to open a TCP stream; SOCKS can also convey name resolution and UDP depending on version; SSH forwards streams inside one encrypted session.
 
-**Prós:** leve; por aplicação; rápido; útil para chaining e acesso a redes segmentadas.
+**Pros:** lightweight; per-application; fast; useful for chaining and reaching segmented networks.
 
-**Contras:** aplicações podem ignorá-lo; DNS pode vazar; o proxy vê endpoints adjacentes; o estado do navegador permanece; open proxies podem ser armadilhas ou sistemas comprometidos.
+**Cons:** applications can bypass it; DNS may leak; proxy sees adjacent endpoints; browser state remains; open proxies may be traps or compromised systems.
 
-**Procedimento:** (1) implante o proxy em um host próprio; (2) exija autenticação e restrinja origem/destino; (3) configure um perfil de aplicação descartável; (4) garanta resolução DNS remota quando necessário; (5) verifique com um endpoint DNS/HTTP próprio; (6) bloqueie egress direto para o workload; (7) inspecione e altere as credenciais do proxy.
+**Procedure:** (1) deploy the proxy on an owned host; (2) require authentication and restrict source/destination; (3) configure one disposable application profile; (4) ensure remote DNS resolution when required; (5) verify with an owned DNS/HTTP endpoint; (6) block direct egress for the workload; (7) inspect and rotate proxy credentials.
 
-**Detecção:** identifique processos capazes de criar túneis, negociação CONNECT/SOCKS, sessões SSH longas e destinos incompatíveis com a aplicação; logs do proxy reconstroem os fluxos.
+**Detection:** identify tunnel-capable processes, CONNECT/SOCKS negotiation, long SSH sessions and destinations inconsistent with the application; proxy logs reconstruct streams.
 
-## Web proxy de reescrita de URL e extensão de proxy do navegador
+## URL-rewriting web proxy and browser proxy extension
 
-**Mecânica:** um site busca um destino e reescreve links/forms por sua própria origem, ou uma extensão direciona requisições do navegador para um proxy. O destino vê o serviço, enquanto o serviço pode ver plaintext após a terminação TLS e injetar ou conservar conteúdo.
+**Mechanics:** a website fetches a destination and rewrites links/forms through its own origin, or an extension directs browser requests to a proxy. The destination sees the service, while the service can see plaintext after TLS termination and inject or retain content.
 
-**Prós:** nenhum cliente sistêmico; rápido para navegação simples; funciona quando a instalação de VPN é impossível.
+**Pros:** no system-wide client; fast for simple browsing; works where VPN installation is impossible.
 
-**Contras:** o proxy pode ler credenciais/conteúdo, reescrever downloads e fingerprintar usuários; scripts/WebSockets/downloads podem escapar; a extensão tem privilégios amplos; conjunto de anonimato pequeno e bloqueios frequentes.
+**Cons:** proxy can read credentials/content, rewrite downloads and fingerprint users; scripts/WebSockets/downloads may bypass; browser extension has broad privileges; small anonymity set and frequent blocking.
 
-**Procedimento:** (1) use somente um proxy operado pela organização para testes autorizados; (2) isole-o em um navegador descartável sem contas pessoais; (3) proíba a inserção de senhas e downloads sensíveis; (4) verifique em uma página própria se todo subrecurso passa pelo proxy; (5) teste WebSocket, download e comportamento de forms; (6) remova a extensão/perfil após o uso.
+**Procedure:** (1) use only an organization-operated proxy for authorized testing; (2) isolate it in a disposable browser with no personal accounts; (3) prohibit password entry and sensitive downloads; (4) verify every subresource at an owned page resolves through the proxy; (5) test WebSocket, download and form behavior; (6) remove the extension/profile after use.
 
-**Detecção:** o destino registra o proxy; proxy/DNS corporativos e inventário de extensões identificam o serviço; content-security/reporting ou subrecursos canary próprios revelam bypass direto; logs do proxy mapeiam a sessão do usuário aos alvos.
+**Detection:** destination logs the proxy; enterprise proxy/DNS and extension inventory identify the service; content-security/reporting or owned canary subresources reveal direct bypass; proxy logs map user session to targets.
 
-## Proxy multi-hop ou VPN multi-hop do provedor
+## Multi-hop proxy or provider multi-hop VPN
 
-**Mecânica:** uma entrada vê a origem, enquanto um ou mais relays de trânsito a separam de um exit que vê o destino.
+**Mechanics:** an entry sees the source while one or more traversal relays separate it from an exit that sees the destination.
 
-**Prós:** nenhum relay comum precisa conhecer as duas pontas; falha/apreensão de um nó revela menos; geografia flexível.
+**Pros:** no ordinary relay needs both ends; failure/seizure of one node reveals less; flexible geography.
 
-**Contras:** administração/logs compartilhados anulam a separação; latência; correlação temporal; mais falhas e rotas DNS; a mesma conta/pagamento pode unir todos os hops.
+**Cons:** shared administration/logs defeat the split; latency; timing correlation; more failure and DNS routes; same account/payment can join every hop.
 
-**Procedimento:** (1) defina qual observador cada hop remove; (2) use relays próprios/aprovados e administrados independentemente quando a separação for importante; (3) imponha acesso somente de entrada a partir do workload; (4) garanta que cada relay alcance apenas o hop seguinte; (5) verifique logs em todas as camadas; (6) pare cada hop e confirme comportamento fail-closed. Reproduza com [Lab 1](authorized-adversary-emulation-labs.md#lab-1-owned-orb-and-redirector-chain).
+**Procedure:** (1) define which observer each hop removes; (2) use independently administered owned/approved relays when separation matters; (3) enforce entry-only access from the workload; (4) ensure each relay can reach only the next hop; (5) verify logs at every layer; (6) stop each hop and confirm fail-closed behavior. Reproduce with [Lab 1](authorized-adversary-emulation-labs.md#lab-1-owned-orb-and-redirector-chain).
 
-**Detecção:** correlacione temporização/volume de NetFlow adjacente, handshakes de proxy repetidos e infraestrutura de controller comum; não infira a geografia do operador a partir do exit.
+**Detection:** correlate adjacent NetFlow timing/volume, repeated proxy handshakes and common controller infrastructure; do not infer operator geography from the exit.
 
-## Relay de aplicação com conhecimento dividido e OHTTP
+## Split-knowledge application relay and OHTTP
 
-**Mecânica:** o cliente criptografa uma mensagem HTTP stateless para um gateway e a envia por um relay. O relay vê o IP do cliente, mas não a requisição; o gateway vê a requisição, mas normalmente apenas o IP do relay.
+**Mechanics:** the client encrypts a stateless HTTP message to a gateway and sends it through a relay. The relay sees client IP but not the request; the gateway sees the request but normally only the relay IP.
 
-**Prós:** particionamento de privacidade forte e auditável para requisições compatíveis; menor overhead que redes de anonimato gerais.
+**Pros:** strong, auditable privacy partition for supported requests; lower overhead than general anonymity networks.
 
-**Contras:** não permite navegação arbitrária; cookies/autenticação podem religar sessões; conluio relay/gateway e análise de tráfego permanecem; a aplicação precisa implementá-lo.
+**Cons:** not arbitrary browsing; cookies/authentication can relink; relay/gateway collusion and traffic analysis remain; application must implement it.
 
-**Procedimento:** (1) selecione uma aplicação que declare suporte à RFC 9458; (2) verifique as chaves do gateway pelo caminho oficial de configuração; (3) evite campos estáveis por usuário; (4) envie somente a requisição stateless compatível; (5) compare logs do relay, gateway e alvo; (6) teste rotação/falha de chaves sem fallback direto.<sup>[[2]](#references)</sup>
+**Procedure:** (1) select an application that explicitly supports RFC 9458; (2) verify gateway keys through the official configuration path; (3) avoid stable per-user fields; (4) send only the supported stateless request; (5) compare relay, gateway and target logs; (6) test key rotation/failure without direct fallback.<sup>[[2]](#references)</sup>
 
-**Detecção:** endpoints expõem o processo iniciador e o relay OHTTP; gateways detectam tráfego malformado/repetido; temporização e campos estáveis de payload/conta podem correlacionar requisições.
+**Detection:** enterprise endpoints expose the initiating process and OHTTP relay; gateways detect malformed/replayed traffic; timing and stable payload/account fields can correlate requests.
 
-## MASQUE CONNECT-UDP/CONNECT-IP e proxies HTTP de privacidade
+## MASQUE CONNECT-UDP/CONNECT-IP and HTTP privacy proxies
 
-**Mecânica:** HTTP Extended CONNECT sobre TLS/QUIC transporta pacotes UDP ou IP por um proxy. Pode implementar um túnel moderno semelhante a VPN e misturar o transporte com HTTP/3, mas o proxy continua sendo um observador.<sup>[[3]](#references)</sup>
+**Mechanics:** HTTP Extended CONNECT over TLS/QUIC carries UDP or IP packets through a proxy. It can implement a modern VPN-like tunnel and blend transport with HTTP/3, but the proxy remains an observer.<sup>[[3]](#references)</sup>
 
-**Prós:** multiplexação/roaming eficientes; suporta UDP ou IP completo; implantação pela infraestrutura HTTP moderna.
+**Pros:** efficient multiplexing/roaming; supports UDP or full IP; deploys through modern HTTP infrastructure.
 
-**Contras:** não é uma rede de anonimato; proxy/conta veem origem e destinos; fingerprints QUIC/HTTP e caminhos conhecidos são visíveis a endpoints/provedores.
+**Cons:** not an anonymity network; proxy/account sees source and destinations; QUIC/HTTP fingerprints and well-known paths are visible to endpoints/providers.
 
-**Procedimento:** (1) use um cliente/serviço que documente suporte às RFC 9298/9484; (2) autentique o certificado/configuração do proxy; (3) defina rotas de destino permitidas; (4) habilite DNS criptografado dentro do caminho; (5) verifique UDP, TCP, IPv6 e failover contra endpoints próprios; (6) inspecione logs de requisições e flows do proxy.
+**Procedure:** (1) use a client/service that documents RFC 9298/9484 support; (2) authenticate the proxy certificate/configuration; (3) define allowed target routes; (4) enable encrypted DNS inside the path; (5) verify UDP, TCP, IPv6 and failover against owned endpoints; (6) inspect proxy request and flow logs.
 
-**Detecção:** endpoints veem o processo do cliente e a interface virtual; redes podem classificar QUIC/TLS sustentado para um proxy; logs do proxy expõem destino/caminho CONNECT e rotas atribuídas.
+**Detection:** endpoints see the client process and virtual interface; networks can classify sustained QUIC/TLS to a proxy; proxy logs expose CONNECT target/path and assigned routes.
 
 ## Tor Browser
 
-**Mecânica:** Tor seleciona relays guard, middle e exit; a criptografia em camadas limita o que cada relay vê. Tor Browser adiciona um navegador padronizado destinado a resistir a fingerprinting.
+**Mechanics:** Tor selects guard, middle and exit relays; layered encryption limits each relay's view. Tor Browser adds a standardized browser intended to resist fingerprinting.
 
-**Prós:** grande conjunto público de anonimato; nenhum relay comum conhece ambas as pontas; unlinkability do destino sem operar servidores.
+**Pros:** large public anonymity set; no one ordinary relay knows both ends; destination unlinkability without operating servers.
 
-**Contras:** mais lento; focado em TCP; reputação/bloqueios de exits; logins e divulgações identificam o usuário; correlação temporal de baixa latência permanece.
+**Cons:** slower; TCP-focused; exit reputation/blocks; logins and disclosures identify the user; low-latency timing correlation remains.
 
-**Procedimento:** (1) baixe e verifique o Tor Browser do projeto; (2) mantenha os padrões e evite extensões; (3) escolha um nível de segurança apropriado; (4) crie uma identidade/sessão separada; (5) evite contas identificáveis e documentos externos ativos; (6) use HTTPS ou onion services autenticados; (7) verifique o exit somente com um endpoint próprio.<sup>[[4]](#references)</sup>
+**Procedure:** (1) download and verify Tor Browser from the project; (2) keep defaults and avoid extensions; (3) choose an appropriate security level; (4) create a separate identity/session; (5) avoid identifying accounts and external active documents; (6) use HTTPS or authenticated onion services; (7) verify the exit only with an owned endpoint.<sup>[[4]](#references)</sup>
 
-**Detecção:** redes locais podem identificar tráfego para guards conhecidos, a menos que uma bridge/transport seja usada; destinos veem exits e o comportamento do Tor Browser; observadores de ponta a ponta correlacionam temporização/volume.
+**Detection:** local networks can identify known guard traffic unless a bridge/transport is used; destinations see exits and Tor Browser behavior; end-to-end observers correlate timing/volume.
 
-## Tor bridges e pluggable transports
+## Tor bridges and pluggable transports
 
-**Mecânica:** uma bridge não pública substitui o guard público; obfs4, Snowflake ou WebTunnel alteram o transporte do primeiro hop para resistir a bloqueio/probing simples.
+**Mechanics:** a non-public bridge replaces the public guard; obfs4, Snowflake or WebTunnel changes the first-hop transport to resist simple blocking/probing.
 
-**Prós:** contorna censura e oculta destinos de relays públicos óbvios; mantém o circuito Tor após a entrada.
+**Pros:** circumvents censorship and hides obvious public-relay destinations; retains the Tor circuit after entry.
 
-**Contras:** padrões de transporte/descoberta de bridges continuam possíveis; desempenho variável; não acrescenta proteção contra contas ou temporização global.
+**Cons:** transport patterns/bridge discovery remain possible; variable performance; does not add protection against accounts or global timing.
 
-**Procedimento:** (1) tente Tor direto primeiro; (2) nas configurações de Connection do Tor Browser, selecione um transport compatível integrado ou solicite uma bridge oficial; (3) não use binários/listas aleatórios; (4) conecte e execute um teste benigno; (5) teste reconexão e relógio; (6) mantenha todas as demais configurações do navegador padrão.<sup>[[5]](#references)</sup>
+**Procedure:** (1) try direct Tor first; (2) in Tor Browser Connection settings select a built-in supported transport or request an official bridge; (3) do not use random binaries/lists; (4) connect and run a benign test; (5) test reconnect and clock; (6) keep all other browser settings standard.<sup>[[5]](#references)</sup>
 
-**Detecção:** censores usam descoberta de destino, classificação de protocolo/fluxo e probing ativo; defensores devem distinguir uso de circumvention de comprometimento e depender do processo/contexto do endpoint.
+**Detection:** censors use destination discovery, protocol/flow classification and active probing; defenders should distinguish circumvention use from compromise and rely on endpoint process/context.
 
-## VPN antes do Tor e Tor antes da VPN
+## VPN before Tor and Tor before VPN
 
-**Mecânica:** VPN-before-Tor oculta o uso direto de Tor do ISP de acesso, mas expõe a origem à VPN. Tor-before-VPN fornece à VPN tráfego pós-Tor e frequentemente uma identidade estável de cliente/túnel.
+**Mechanics:** VPN-before-Tor hides direct Tor use from the access ISP but exposes the source to the VPN. Tor-before-VPN gives the VPN post-Tor traffic and often a stable customer/tunnel identity.
 
-**Prós:** remove um observador específico quando projetado corretamente; pode alcançar redes que bloqueiam uma camada.
+**Pros:** removes a specific observer when designed correctly; can reach networks that block one layer.
 
-**Contras:** complexidade, fingerprint incomum, leaks, conjunto de anonimato reduzido e falsa confiança; o Tor Project trata combinações como avançadas.<sup>[[6]](#references)</sup>
+**Cons:** complexity, uncommon fingerprint, leaks, reduced anonymity set and false confidence; Tor Project treats combinations as advanced.<sup>[[6]](#references)</sup>
 
-**Procedimento:** (1) escreva qual observador é removido e qual novo observador é introduzido; (2) use um ambiente descartável; (3) estabeleça somente o caminho externo pretendido; (4) imponha rotas de firewall; (5) verifique DNS/IPv4/IPv6 e a ordem de cada falha; (6) compare a visibilidade de ambos os provedores; (7) abandone a pilha se não houver vantagem mensurável.
+**Procedure:** (1) write the observer removed and new observer introduced; (2) use a disposable environment; (3) establish only the intended outer path; (4) enforce firewall routes; (5) verify DNS/IPv4/IPv6 and each failure order; (6) compare both providers' visibility; (7) abandon the stack if it has no measurable advantage.
 
-**Detecção:** observadores local/VPN/Tor veem camadas adjacentes diferentes; a temporização permanece ponta a ponta; fingerprints incomuns de túneis aninhados e contas de provedores podem vincular sessões.
+**Detection:** local/VPN/Tor observers see different adjacent layers; timing remains end-to-end; unusual nested tunnel fingerprints and provider accounts can link sessions.
 
 ## Onion service
 
-**Mecânica:** cliente e serviço constroem circuitos Tor até um rendezvous, ocultando o IP do serviço e evitando um exit.
+**Mechanics:** both client and service build Tor circuits to a rendezvous, hiding the service IP and avoiding an exit.
 
-**Prós:** proteção da localização da origem e do serviço; autenticação onion ponta a ponta; nenhuma porta pública de entrada; autorização opcional do cliente.
+**Pros:** source and service location protection; end-to-end onion authentication; no public inbound port; optional client authorization.
 
-**Contras:** origem pode vazar por updates/analytics/erros; a chave onion é crítica; identidade da aplicação, temporização e comprometimento do host permanecem.
+**Cons:** origin leaks through updates/analytics/errors; onion key is critical; application identity/timing and host compromise remain.
 
-**Procedimento:** (1) isole a aplicação e faça bind somente a loopback/socket; (2) instale Tor compatível; (3) configure um onion service v3 usando instruções oficiais; (4) proteja/faça backup da chave somente se uma identidade estável for necessária; (5) adicione autorização de cliente para uso fechado; (6) remova fetches de terceiros; (7) verifique externamente que a origem não está acessível.<sup>[[7]](#references)</sup>
+**Procedure:** (1) isolate the application and bind it only to loopback/socket; (2) install supported Tor; (3) configure a v3 onion service using official instructions; (4) protect/back up its key only if stable identity is needed; (5) add client authorization for closed use; (6) remove third-party fetches; (7) externally verify the origin is not reachable.<sup>[[7]](#references)</sup>
 
-**Detecção:** defensores do host/rede encontram o processo/configuração Tor e circuitos de saída; erros de aplicação, DNS, certificados ou recursos de terceiros podem expor a origem.
+**Detection:** host/network defenders find Tor process/configuration and outbound circuits; application errors, DNS, certificates or third-party resources can expose origin.
 
-## Serviços internos I2P
+## I2P internal services
 
-**Mecânica:** I2P usa túneis unidirecionais separados de entrada/saída para destinos dentro do overlay; outproxies para a Internet pública adicionam um ponto de confiança.
+**Mechanics:** I2P uses separate unidirectional inbound/outbound tunnels for destinations inside the overlay; public-Internet outproxies add a trust point.
 
-**Prós:** publicação interna descentralizada; nenhuma dependência de exit oficial; caminhos de entrada/saída separados.
+**Pros:** decentralized internal publishing; no official exit dependency; separate inbound/outbound paths.
 
-**Contras:** não substitui a web geral; ecossistema menor; comportamento prolongado de peers; outproxy pode observar navegação pública.
+**Cons:** not a general web replacement; smaller ecosystem; long-running peer behavior; outproxy can observe public browsing.
 
-**Procedimento:** (1) instale da fonte oficial; (2) use um contexto dedicado; (3) permita estabilização de integração/bandwidth; (4) acesse um serviço próprio nativo de I2P; (5) evite outproxies salvo necessidade explícita; (6) verifique que o desligamento não cria fallback direto; (7) inspecione logs locais de peers e serviços.<sup>[[8]](#references)</sup>
+**Procedure:** (1) install from the official source; (2) use a dedicated context; (3) allow integration/bandwidth stabilization; (4) access an I2P-native owned service; (5) avoid outproxies unless explicitly required; (6) verify shutdown gives no direct fallback; (7) inspect local peer and service logs.<sup>[[8]](#references)</sup>
 
-**Detecção:** redes locais veem tráfego de peers de longa duração e comportamento de bootstrap; endpoints expõem processos de router/aplicação; outproxies registram exits.
+**Detection:** local networks see long-lived peer traffic and bootstrap behavior; endpoints expose router/application processes; outproxies log exits.
 
 ## Mixnets
 
-**Mecânica:** pacotes de tamanho fixo, batching, atraso, reordenação e cover traffic reduzem correlação temporal; gateways conectam aplicações.
+**Mechanics:** fixed-size packets, batching, delay, reordering and cover traffic reduce timing correlation; gateways bridge applications.
 
-**Prós:** maior resistência à análise temporal que proxies de baixa latência; úteis para mensagens/transações assíncronas.
+**Pros:** better resistance to timing analysis than low-latency proxies; useful for asynchronous messages/transactions.
 
-**Contras:** latência, overhead de bandwidth, implantação menor e limitações de aplicação; metadados de gateway/conta podem persistir.
+**Cons:** latency, bandwidth overhead, smaller deployment and application limits; gateway/account metadata can persist.
 
-**Procedimento:** (1) selecione um cliente mantido e uma aplicação compatível; (2) leia o threat model real; (3) instale em um compartimento separado; (4) envie dados benignos a um endpoint próprio; (5) meça latência/confiabilidade e caminho de resposta; (6) teste falha do gateway; (7) nunca desative atrasos/cover traffic apenas por velocidade.<sup>[[9]](#references)</sup>
+**Procedure:** (1) select a maintained client and supported application; (2) read the actual threat model; (3) install in a separate compartment; (4) send benign data to an owned endpoint; (5) measure latency/reliability and reply path; (6) test gateway failure; (7) never disable delays/cover traffic merely for speed.<sup>[[9]](#references)</sup>
 
-**Detecção:** endpoints identificam o cliente; redes de acesso podem classificar gateways/cadência de pacotes; gateways e exits observam funções adjacentes, enquanto correlação ampla exige janelas estatísticas mais longas.
+**Detection:** endpoints identify the client; access networks can classify gateways/packet cadence; gateways and exits observe adjacent roles, while broader correlation requires longer statistical windows.
 
 ## GNUnet anonymous file sharing
 
-**Mecânica:** GNUnet pode encaminhar requisições de publicação/busca/download por peers e adicionar cover traffic conforme um nível de anonimato. A documentação própria alerta que o nível padrão 1 não exige cover traffic e que análise poderosa de tráfego pode identificar a origem.<sup>[[10]](#references)</sup>
+**Mechanics:** GNUnet can route publish/search/download requests through peers and add cover traffic according to an anonymity level. Its own documentation warns that default level 1 does not require cover traffic and powerful traffic analysis may identify origin.<sup>[[10]](#references)</sup>
 
-**Prós:** compartilhamento anônimo descentralizado e nativo da aplicação; requisito de cover traffic ajustável.
+**Pros:** decentralized, application-native anonymous sharing; tunable cover-traffic requirement.
 
-**Contras:** não é acesso web anônimo comum; custo de desempenho/storage; limitações de peers e análise de tráfego; a documentação de GNUnet VPN diz que seu overlay IP não fornece bom anonimato.
+**Cons:** not ordinary anonymous web access; performance/storage cost; peer and traffic-analysis limitations; GNUnet VPN documentation says its IP overlay does not provide good anonymity.
 
-**Procedimento:** (1) instale um build oficial mantido; (2) isole um peer de teste; (3) limite bandwidth/storage; (4) publique um arquivo de teste inofensivo e único com um nível de anonimato escolhido; (5) recupere-o de outro peer próprio; (6) registre cover traffic e latência; (7) não alegue que o componente IP VPN fornece anonimato equivalente.
+**Procedure:** (1) install a maintained official build; (2) isolate a test peer; (3) cap bandwidth/storage; (4) publish a harmless unique test file with a chosen anonymity level; (5) retrieve from another owned peer; (6) record cover-traffic and latency; (7) avoid claiming the IP VPN component provides equivalent anonymity.
 
-**Detecção:** bootstrap de peers, tráfego do overlay, datastore/processo local e identificadores de arquivo; um observador amplo pode analisar volume contra o cover traffic.
+**Detection:** peer bootstrap, overlay traffic, local datastore/process and file identifiers; a broad observer can analyze traffic volume against cover traffic.
 
-## DNS criptografado, ODoH e ECH
+## Encrypted DNS, ODoH and ECH
 
-**Mecânica:** DoH/DoT/DoQ criptografam para um resolver; ODoH divide o endereço do cliente da consulta entre proxy e resolver; ECH criptografa o ClientHello/nome de servidor TLS interno.
+**Mechanics:** DoH/DoT/DoQ encrypt to a resolver; ODoH splits client address from query between proxy and resolver; ECH encrypts the inner TLS ClientHello/server name.
 
-**Prós:** remove DNS/SNI em plaintext de alguns observadores locais; ODoH particiona o conhecimento de origem/consulta.
+**Pros:** removes plaintext DNS/SNI from some local observers; ODoH partitions source/query knowledge.
 
-**Contras:** não é um caminho de anonimato IP; resolver/proxy/servidor mantêm suas funções; IP de destino, temporização, volume e endpoint permanecem; fallback pode vazar.
+**Cons:** not an IP-anonymity path; resolver/proxy/server retain roles; destination IP/timing/volume and endpoint remain; fallback can leak.
 
-**Procedimento:** (1) escolha se o DNS será controlado pelo OS, aplicação ou túnel; (2) habilite modo estrito criptografado ou ODoH compatível; (3) teste um domínio próprio único; (4) capture localmente para confirmar ausência de consulta em claro; (5) falhe o resolver e verifique o comportamento pretendido; (6) para ECH, confirme nos diagnósticos do servidor a aceitação do ClientHello interno.<sup>[[11]](#references)</sup>
+**Procedure:** (1) choose whether OS, application or tunnel owns DNS; (2) enable strict encrypted mode or supported ODoH; (3) test a unique owned domain; (4) capture locally to confirm no clear query; (5) fail the resolver and verify intended behavior; (6) for ECH, confirm server diagnostics show inner ClientHello acceptance.<sup>[[11]](#references)</sup>
 
-**Detecção:** logs do endpoint/resolver expõem consultas; redes identificam endpoints de resolvers criptografados e flows de destino; o estado de ECH é visível em endpoints/CDN mesmo quando oculto no caminho.
+**Detection:** endpoint/resolver logs expose queries; networks identify encrypted-resolver endpoints and destination flows; ECH state is visible at endpoints/CDN even when hidden on path.
 
-## Relay de privacidade com provedores divididos
+## Split-provider privacy relay
 
-**Mecânica:** produtos como iCloud Private Relay usam uma entrada que conhece o cliente e um egress operado independentemente que conhece o destino, com tratamento de região aproximada.
+**Mechanics:** products such as iCloud Private Relay use an ingress that knows the client and an independently operated egress that knows the destination, with coarse region handling.
 
-**Prós:** divisão de conhecimento com pouco atrito; rápido; proteção integrada de DNS/web para tráfego compatível.
+**Pros:** low-friction split knowledge; fast; integrated DNS/web protection for supported traffic.
 
-**Contras:** escopo limitado ao produto/aplicação; o provedor da conta/plataforma ainda identifica o cliente; não fornece anonimato sistêmico arbitrário; permanecem riscos de conluio/legalidade e temporização.
+**Cons:** product/application scope is limited; account/platform provider still identifies customer; not arbitrary system anonymity; collusion/legal and timing risks.
 
-**Procedimento:** (1) confirme as aplicações e tipos de tráfego exatos suportados; (2) habilite o recurso em um contexto de plataforma dedicado quando apropriado; (3) selecione o comportamento regional; (4) teste Safari/DNS e aplicações não compatíveis separadamente; (5) inspecione o endereço visto pelo destino; (6) teste troca/falha de rede.<sup>[[12]](#references)</sup>
+**Procedure:** (1) confirm exact applications and traffic types supported; (2) enable the feature under a dedicated platform context where appropriate; (3) select region behavior; (4) test Safari/DNS and unsupported applications separately; (5) inspect the destination address; (6) test network switching/failure.<sup>[[12]](#references)</sup>
 
-**Detecção:** o acesso vê a entrada; o destino vê o egress; logs de plataforma/relay e registros de conta abrangem suas respectivas camadas; aplicações incompatíveis expõem caminhos normais.
+**Detection:** access sees ingress; destination sees egress; platform/relay logs and account records span their respective layer; unsupported applications expose normal paths.
 
-## Remote browser, VDI, RDP ou jump host da organização
+## Remote browser, VDI, RDP or organization jump host
 
-**Mecânica:** navegação/execução de ferramentas ocorre em um sistema remoto; o destino vê o egress dele, enquanto o provedor do workspace vê a conexão do operador e o control plane.
+**Mechanics:** browsing/tool execution occurs on a remote system; the destination sees its egress while the workspace provider sees the operator connection and control plane.
 
-**Prós:** rápido; isola conteúdo arriscado; egress estável e controlado; estado descartável e auditoria organizacional forte.
+**Pros:** fast; isolates risky content; stable controlled egress; disposable state and strong organizational audit.
 
-**Contras:** provedor/admin pode observar sessão/conta; canais de tela/clipboard/arquivo vazam; fingerprint do navegador remoto pode ser único; não é anônimo para o proprietário do workspace.
+**Cons:** provider/admin can observe session/account; screen/clipboard/file channels leak; remote browser fingerprint may be unique; not anonymous to the workspace owner.
 
-**Procedimento:** (1) crie um workspace próprio da organização por engagement; (2) exija MFA e restrinja a administração; (3) desabilite ou limite clipboard/upload/download; (4) encaminhe por egress fixo aprovado; (5) não use IdP/sync pessoal; (6) exporte somente evidências revisadas; (7) destrua workspace e credenciais conforme o cronograma.
+**Procedure:** (1) create one organization-owned workspace per engagement; (2) require MFA and restrict administration; (3) disable or constrain clipboard/upload/download; (4) route through approved fixed egress; (5) use no personal IdP/sync; (6) export only reviewed evidence; (7) destroy workspace and credentials on schedule.
 
-**Detecção:** logs do provedor e IdP associam usuário à sessão; destinos agrupam egress/browser do workspace; defensores corporativos identificam protocolos de controle remoto e sessões anômalas na cloud.
+**Detection:** provider and IdP logs map user to session; destinations cluster workspace egress/browser; enterprise defenders identify remote-control protocols and anomalous cloud sessions.
 
-## Public ou guest Wi-Fi
+## Public or guest Wi-Fi
 
-**Mecânica:** o tráfego sai pelo NAT do local ou por um túnel iniciado nele.
+**Mechanics:** traffic exits through the venue NAT or a tunnel started there.
 
-**Prós:** alta velocidade e endereço compartilhado fora de casa; nenhuma infraestrutura dedicada.
+**Pros:** high speed and a shared non-home address; no dedicated infrastructure.
 
-**Contras:** associação ao local/DHCP/portal, câmeras, compra e evidências de localização; peers/APs hostis; termos de uso; risco físico.
+**Cons:** venue association/DHCP/portal, camera, purchase and location evidence; hostile peers/APs; terms; physical risk.
 
-**Procedimento:** (1) obtenha acesso oferecido a convidados e confirme o SSID com funcionários; (2) use um dispositivo de baixa confiança e atualizado; (3) desabilite compartilhamento/auto-join e habilite private MAC; (4) conclua o portal sem identidade reutilizada; (5) inicie um caminho VPN/Tor fail-closed; (6) verifique o tráfego tethered; (7) esqueça a rede.
+**Procedure:** (1) obtain access offered to guests and verify SSID with staff; (2) use a patched low-trust device; (3) disable sharing/auto-join and enable private MAC; (4) complete the portal without reused identity; (5) start a fail-closed VPN/Tor path; (6) verify tethered traffic; (7) forget the network.
 
-**Detecção:** o local correlaciona AP, MAC, DHCP, portal e horário; o destino vê o local/túnel; investigadores combinam evidências físicas e do dispositivo. Nunca contorne controles de acesso.
+**Detection:** venue correlates AP, MAC, DHCP, portal and time; destination sees venue/tunnel; investigators combine physical and device evidence. Never bypass access control.
 
 ## Travel router
 
-**Mecânica:** um roteador pertencente ao operador ingressa no Wi-Fi/Ethernet do local e fornece uma rede interna isolada com política de túnel imposta.
+**Mechanics:** an operator-owned router joins venue Wi-Fi/Ethernet and provides an isolated internal network with enforced tunnel policy.
 
-**Prós:** isola workstations; kill switch/DNS central; rede de cliente consistente; protege endpoints privilegiados de broadcasts locais.
+**Pros:** isolates workstations; central kill switch/DNS; consistent client network; shields privileged endpoints from local broadcasts.
 
-**Contras:** o roteador se torna um fingerprint estável de rádio/DHCP; adiciona attack surface; captive portals e tethering podem contornar o túnel.
+**Cons:** router becomes a stable radio/DHCP fingerprint; adds attack surface; captive portals and tethering can bypass tunnel.
 
-**Procedimento:** (1) atualize o firmware compatível; (2) defina credenciais únicas de administração e desabilite WAN admin/WPS/UPnP; (3) configure MAC upstream privado quando permitido; (4) crie um SSID interno separado; (5) imponha política de firewall full-tunnel DNS/IPv6; (6) teste portal, reconexão e falha do túnel.
+**Procedure:** (1) update supported firmware; (2) set unique management credentials and disable WAN admin/WPS/UPnP; (3) configure private upstream MAC where permitted; (4) create a separate internal SSID; (5) enforce full-tunnel DNS/IPv6 firewall policy; (6) test portal, reconnect and tunnel failure.
 
-**Detecção:** o local vê a associação do roteador e o formato do tráfego; fingerprinting local de RF/DHCP o identifica; o provedor VPN vê a origem do local.
+**Detection:** venue sees the router association and traffic shape; local RF/DHCP fingerprinting identifies it; VPN provider sees venue source.
 
-## Cellular, SIM pré-pago e eSIM
+## Cellular, prepaid SIM and eSIM
 
-**Mecânica:** um modem usa acesso rádio da operadora e geralmente NAT da operadora; uma camada VPN/Tor pode alterar o exit visível ao destino.
+**Mechanics:** a modem uses carrier radio access and usually carrier NAT; a VPN/Tor layer can change the destination-visible exit.
 
-**Prós:** independente da rede wired/Wi-Fi local; móvel; alta velocidade; backhaul útil para drops autorizados.
+**Pros:** independent from local wired/Wi-Fi network; mobile; high speed; useful backhaul for authorized drops.
 
-**Contras:** a operadora conhece assinante/eSIM, IMSI, IMEI, células, horário e portas atribuídas; leis de registro variam; co-localização com telefone pessoal vincula dispositivos.
+**Cons:** carrier knows subscriber/eSIM, IMSI, IMEI, cells, time and assigned ports; registration laws vary; co-location with personal phone links devices.
 
-**Procedimento:** (1) obtenha o serviço legalmente com os dados exigidos corretos; (2) use modem/dispositivo separado pertencente à organização; (3) registre-o com o controller do exercício; (4) desabilite rádios/contas não relacionados; (5) estabeleça o túnel aprovado; (6) teste se clientes tethered realmente o seguem; (7) verifique premissas de retenção do provedor antes de viajar.<sup>[[13]](#references)</sup>
+**Procedure:** (1) obtain service lawfully with accurate required details; (2) use an organization-owned separate modem/device; (3) record it with the exercise controller; (4) disable unrelated radios/accounts; (5) establish approved tunnel; (6) test whether tethered clients actually follow it; (7) verify provider and retention assumptions before travel.<sup>[[13]](#references)</sup>
 
-**Detecção:** registros da operadora e localização RF; inventário corporativo de USB/PCI/MDM e surveys de rogue hotspots; temporização do destino/túnel.
+**Detection:** carrier records and RF location; enterprise USB/PCI/MDM inventory and rogue-hotspot surveys; destination/tunnel timing.
 
-## Internet via satellite e abuso de downlink satelital
+## Satellite Internet and satellite downlink abuse
 
-**Mecânica:** o serviço normal usa terminal/provedor registrado. O abuso antigo de DVB-S one-way permitia que um receptor dentro de um beam observasse tráfego de downlink não criptografado destinado a um assinante legítimo enquanto usava outro caminho para requisições de saída.
+**Mechanics:** normal service uses a registered terminal/provider. Older one-way DVB-S abuse let a receiver inside a beam observe unencrypted downlink traffic addressed to a legitimate subscriber while using another path for outbound requests.
 
-**Prós:** ampla cobertura; último trecho independente; o abuso histórico one-way podia atribuir incorretamente C2 à geografia de um assinante.
+**Pros:** wide footprint; independent last mile; historical one-way abuse could misattribute C2 to a subscriber geography.
 
-**Contras:** registros de equipamento/RF/provedor; latência e cobertura; sistemas bidirecionais modernos são diferentes; caminho de saída e roteamento assimétrico continuam sendo evidências.
+**Cons:** equipment/RF/provider records; latency and coverage; modern bidirectional systems differ; outbound path and asymmetric routing remain evidence.
 
-**Procedimento:** para acesso legal, registre um terminal próprio e use túnel conforme necessário. Para emular o comportamento histórico da Turla, reproduza capturas sintéticas one-way em um laboratório sem RF e teste se analistas detectam uma resposta a um host que não fez requisição; não intercepte tráfego satelital ao vivo.<sup>[[14]](#references)</sup>
+**Procedure:** for lawful access, register an owned terminal and tunnel traffic as required. To emulate historical Turla behavior, replay synthetic one-way packet captures inside an RF-free lab and test whether analysts detect a reply to a host that made no request; do not intercept live satellite traffic.<sup>[[14]](#references)</sup>
 
-**Detecção:** telemetria de provedor/terminal, direction finding RF, flow impossível/assimétrico, inconsistência de RTT/roteamento e configuração do malware.
+**Detection:** provider/terminal telemetry, RF direction finding, impossible/asymmetric flow, RTT/routing inconsistency and malware configuration.
 
-## Residential/mobile proxy ou proxyware consentido
+## Residential/mobile proxy or consented proxyware
 
-**Mecânica:** um gateway backconnect atribui exits residenciais/móveis, fixos ou rotativos. A oferta pode ser consentida, incluída de forma enganosa ou maliciosa.
+**Mechanics:** a backconnect gateway assigns consumer broadband/mobile exits, either sticky or rotating. Supply may be consensual, deceptively bundled or malicious.
 
-**Prós:** alta velocidade; escolha geográfica; ASN de consumidor evita alguns bloqueios de hosting; pools grandes.
+**Pros:** high speed; geographic choice; consumer ASN avoids some hosting blocks; large pools.
 
-**Contras:** risco de proveniência/consentimento/legalidade; broker vê o cliente; exits infectados prejudicam vítimas; rotação cria anomalias; caro e pouco confiável.
+**Cons:** provenance/consent and legal risk; broker sees customer; infected exits harm victims; rotation creates anomalies; expensive and unreliable.
 
-**Procedimento:** use somente agents próprios, documentados e com consentimento informado para emulação: (1) registre endpoints de teste; (2) inventarie proprietários/IPs; (3) configure um gateway; (4) alterne modos sticky/per-request; (5) envie somente a um alvo próprio; (6) compare logs de gateway/exit/alvo; (7) remova todos os agents.
+**Procedure:** use only documented, informed-consent organization-owned agents for emulation: (1) enroll test endpoints; (2) inventory owners/IPs; (3) configure a gateway; (4) rotate sticky/per-request modes; (5) send only to an owned target; (6) compare gateway/exit/target logs; (7) remove every agent.
 
-**Detecção:** deslocamento impossível, browser/conta estáveis através de mudanças rápidas de IP/ASN, protocolos backconnect, artefatos de processo/rede proxyware e relações broker/controller.
+**Detection:** impossible travel, stable browser/account across rapid IP/ASN changes, backconnect protocols, proxyware process/network artifacts and broker/controller relations.
 
-## ORB, botnet e relays de edge devices comprometidos
+## ORB, botnet and compromised edge-device relays
 
-**Mecânica:** roteadores/IoT/servidores alugados ou comprometidos formam funções de acesso, trânsito e exit administradas como uma fleet. Vários clientes APT podem compartilhá-la.
+**Mechanics:** leased or compromised routers/IoT/servers form access, traversal and exit roles administered as a fleet. Multiple APT customers may share it.
 
-**Prós:** reputação/geografia emprestadas; exits de curta duração; mesh multi-hop resiliente; vínculo direto fraco entre ator e IP.
+**Pros:** borrowed reputation/geography; short-lived exits; resilient multi-hop mesh; weak direct actor-to-IP link.
 
-**Contras:** vitimização criminosa; padrões de implant/controller/fleet; apreensão do intermediário; desempenho inconsistente; registros de operador/cliente.
+**Cons:** criminal victimization; implant/controller and fleet patterns; intermediary seizure; inconsistent performance; operator/customer service records.
 
-**Procedimento:** nunca comprometa dispositivos reais. Use [Lab 1](authorized-adversary-emulation-labs.md#lab-1-owned-orb-and-redirector-chain): (1) crie redes isoladas de entrada/trânsito/alvo; (2) conecte containers relay próprios dual-homed; (3) encaminhe somente uma porta de teste; (4) envie uma requisição benigna; (5) verifique que o alvo vê somente o exit; (6) alterne o exit; (7) desmonte todos os assets nomeados.<sup>[[15]](#references)</sup>
+**Procedure:** never compromise real devices. Use [Lab 1](authorized-adversary-emulation-labs.md#lab-1-owned-orb-and-redirector-chain): (1) create isolated entry/transit/target networks; (2) attach owned dual-homed relay containers; (3) forward only one test port; (4) send a benign request; (5) verify target sees only exit; (6) rotate exit; (7) tear down all named assets.<sup>[[15]](#references)</sup>
 
-**Detecção:** rastreie topologia, portas/serviços, relações de controller, fingerprints de implant e ciclo de vida dos nós; centralize telemetria de configuração/flow/integridade de edge; não iguale IP de exit ao ator.
+**Detection:** track topology, ports/services, controller relations, implant fingerprints and node lifecycle; centralize edge configuration/flow/integrity telemetry; do not equate exit IP with actor.
 
-## CDN redirector, domain fronting e domainless fronting
+## CDN redirector, domain fronting and domainless fronting
 
-**Mecânica:** uma edge pública encaminha somente tráfego que corresponde a uma grammar; fronting usa um SNI externo benigno e uma authority HTTP interna diferente, ou SNI vazio, quando o intermediário permite.
+**Mechanics:** a public edge forwards only traffic matching a grammar; fronting places a benign outer SNI and different inner HTTP authority, or blank SNI, when the intermediary permits it.
 
-**Prós:** oculta/protege o back-end; edge global rápida; mistura o destino a um serviço compartilhado; cutover rápido.
+**Pros:** hides/protects back-end; fast global edge; blends destination with a shared service; rapid cutover.
 
-**Contras:** a CDN vê todo o routing e tenant; muitos provedores proíbem fronting cross-tenant; artefatos de SNI/Host/processo/flow e conta; reutilização de configuração agrupa campanhas.
+**Cons:** CDN sees all routing and tenant; many providers prohibit cross-tenant fronting; SNI/Host/process/flow and account artifacts; configuration reuse clusters campaigns.
 
-**Procedimento:** reproduza somente em um reverse proxy próprio com [Lab 2](authorized-adversary-emulation-labs.md#lab-2-snihost-mismatch-and-redirector-logging): crie certificado/edge local, encaminhe um Host incompatível a um alvo próprio, registre SNI e Host, envie requisições normais/incompatíveis e remova os containers.<sup>[[16]](#references)</sup>
+**Procedure:** reproduce only on an owned reverse proxy with [Lab 2](authorized-adversary-emulation-labs.md#lab-2-snihost-mismatch-and-redirector-logging): create a local certificate/edge, route one mismatched Host to an owned target, log SNI and Host, send normal/mismatched requests, then remove containers.<sup>[[16]](#references)</sup>
 
-**Detecção:** compare SNI/ECH/Host/`:authority` no endpoint ou edge terminadora; associe processo iniciador, tenant/origin, grammar de requisição e cadência do flow.
+**Detection:** compare SNI/ECH/Host/`:authority` at endpoint or terminating edge; join initiating process, tenant/origin, request grammar and flow cadence.
 
-## Dynamic DNS, DGA, fast flux e double flux
+## Dynamic DNS, DGA, fast flux and double flux
 
-**Mecânica:** DDNS atualiza um nome estável; DGA deriva nomes candidatos variáveis; fast flux alterna endereços de serviço com TTL baixo; double flux também alterna name servers.
+**Mechanics:** DDNS updates a stable name; DGA derives changing candidate names; fast flux rotates service addresses at low TTL; double flux also rotates name servers.
 
-**Prós:** descoberta resiliente; substituição rápida da infraestrutura; oculta o controller atrás de muitos nós.
+**Pros:** resilient discovery; rapid infrastructure replacement; shields controller behind many nodes.
 
-**Contras:** DNS cria telemetria centralizada; entropia/NXDOMAIN/churn; TTL baixo e padrões amplos de ASN; registro e infraestrutura autoritativa permanecem.
+**Cons:** DNS creates centralized telemetry; entropy/NXDOMAIN/churn; low TTL and broad ASN patterns; registration and authoritative infrastructure remain.
 
-**Procedimento:** use [Lab 3](authorized-adversary-emulation-labs.md#lab-3-fast-flux-dns-telemetry): sirva uma zona própria retornando endereços RFC 5737 com TTL de cinco segundos, consulte-a repetidamente, altere a epoch sintética e valide analytics. Nunca aponte registros de teste para terceiros.<sup>[[17]](#references)</sup>
+**Procedure:** use [Lab 3](authorized-adversary-emulation-labs.md#lab-3-fast-flux-dns-telemetry): serve an owned zone returning RFC 5737 addresses with five-second TTL, query it repeatedly, change the synthetic epoch, and validate analytics. Never point test records at third parties.<sup>[[17]](#references)</sup>
 
-**Detecção:** respostas/ASNs únicos em janela deslizante, TTL mediano, geografia, churn autoritativo, clusters DGA de NXDOMAIN/léxico/tempo e follow-on do processo; exclua CDNs legítimas com contexto.
+**Detection:** sliding-window unique answers/ASNs, median TTL, geography, authoritative churn, DGA NXDOMAIN/lexical/temporal clusters and process follow-on; exclude legitimate CDNs with context.
 
-## Serviço web legítimo, dead-drop resolver e tasking one-way
+## Legitimate web service, dead-drop resolver and one-way tasking
 
-**Mecânica:** um post público, repositório, documento, objeto ou feed contém um endpoint ou task atual codificado. O cliente pode devolver resultados por outro canal.
+**Mechanics:** a public post, repository, document, object or feed contains an encoded current endpoint or task. The client may return results over another channel.
 
-**Prós:** serviço de alta reputação permitido; TLS; rotação do endpoint sem alterar o binário; tasking assimétrico dificulta correlação simples de flows.
+**Pros:** allowed high-reputation service; TLS; endpoint rotation without changing binary; asymmetric tasking frustrates simple flow correlation.
 
-**Contras:** identificadores estáveis de objeto/conta/API; registros do provedor; sequência de decodificação/follow-on; conteúdo pode ser apreendido ou alterado.
+**Cons:** stable object/account/API identifiers; provider records; endpoint decode/follow-on sequence; content can be seized or changed.
 
-**Procedimento:** use [Lab 5](authorized-adversary-emulation-labs.md#lab-5-dead-drop-resolver-sequence): hospede um ponteiro codificado em um container próprio, faça fetch/decode a partir de um cliente de curta duração, contate um segundo serviço próprio, preserve ambos os logs e desmonte.
+**Procedure:** use [Lab 5](authorized-adversary-emulation-labs.md#lab-5-dead-drop-resolver-sequence): host an encoded pointer on one owned container, fetch/decode from a short-lived client, contact a second owned service, preserve both logs, then tear down.
 
-**Detecção:** correlacione processo incomum → leitura de objeto estável → decode → novo destino; faça hash/preserve o conteúdo e retenha caminhos completos dos objetos, não apenas o domínio.
+**Detection:** correlate unusual process → stable object read → decode → new destination; hash/preserve content and retain full object paths, not just domain.
 
-## Serverless, container efêmero e egress cloud-NAT
+## Serverless, ephemeral container and cloud-NAT egress
 
-**Mecânica:** functions/jobs curtos executam atrás de NAT de provedor ou front; o serviço lógico permanece estável enquanto instâncias e endereços rotacionam.
+**Mechanics:** functions/short-lived jobs run behind provider NAT or a front; logical service stays stable while instances and addresses rotate.
 
-**Prós:** implantação/destruição rápidas; egress compartilhado em escala do provedor; pouco disco local; routing regional elástico.
+**Pros:** rapid deployment/destruction; provider-scale shared egress; little local disk; elastic regional routing.
 
-**Contras:** tenant, role, API, imagem, secret, invocation, billing e logs front-to-origin são duráveis; fingerprints de cold-start/plataforma; política do provedor.
+**Cons:** tenant, role, API, image, secret, invocation, billing and front-to-origin logs are durable; cold-start and platform fingerprints; provider policy.
 
-**Procedimento:** (1) use um tenant de exercício pertencente à organização; (2) implante uma function benigna que solicite somente a um endpoint próprio; (3) registre projeto/role/imagem/configuração; (4) invoque em várias instâncias; (5) compare IPs do alvo com audit/request IDs; (6) teste retenção de logs; (7) remova function, roles e secrets.
+**Procedure:** (1) use an organization-owned exercise tenant; (2) deploy a benign function that requests only an owned endpoint; (3) record project/role/image/config; (4) invoke across several instances; (5) compare target IPs with audit/request IDs; (6) test log retention; (7) remove function, roles and secrets.
 
-**Detecção:** logs de auditoria/invocação da cloud, criação incomum de roles, egress compartilhado com grammar de requisição estável, reutilização de imagem/layer/secret e correlação front-origin.
+**Detection:** cloud audit/invocation logs, unusual role creation, shared egress plus stable request grammar, image/layer and secret reuse, and front-origin correlation.
 
-## Drop autorizado no local
+## Authorized on-site drop
 
-**Mecânica:** um computador pequeno inventariado usa wired/Wi-Fi local e rendezvous VPN/cellular de saída, apresentando uma origem local.
+**Mechanics:** an inventoried small computer uses local wired/Wi-Fi and outbound VPN/cellular rendezvous, presenting a local source.
 
-**Prós:** teste realista de origem interna; alta velocidade; permite testar NAC, inventário físico e controles de egress.
+**Pros:** realistic internal-origin testing; high speed; can test NAC, physical inventory and egress controls.
 
-**Contras:** descoberta/roubo físico; evidências de serial/MAC/USB/DHCP/PoE/RF e câmeras; perda pode expor credenciais.
+**Cons:** physical discovery/theft; serial/MAC/USB/DHCP/PoE/RF and camera evidence; loss may expose credentials.
 
-**Procedimento:** siga [Capture-Resilient Authorized Field Nodes](capture-resilient-authorized-field-nodes.md): (1) obtenha autorização escrita exata para a instalação; (2) registre serial, MAC, foto, localização e horário de recuperação; (3) use imagem mínima assinada e credenciais mútuas de curta duração; (4) restrinja destinos/capacidades somente de saída; (5) adicione quarantine no servidor e limites de bandwidth; (6) teste visibilidade do SOC e resposta à perda; (7) recupere, preserve as evidências exigidas e sanitize conforme a política de lifecycle acordada. Nunca esconda um dispositivo em local sem consentimento.
+**Procedure:** follow [Capture-Resilient Authorized Field Nodes](capture-resilient-authorized-field-nodes.md): (1) obtain exact written placement authority; (2) record serial, MAC, photo, location and retrieval time; (3) use a signed minimal image and short-lived mutual credentials; (4) restrict outbound-only destinations/capabilities; (5) add server-side quarantine and bandwidth limits; (6) test SOC visibility and loss response; (7) retrieve, preserve required evidence, then sanitize under the agreed lifecycle policy. Never hide one in an unconsenting venue.
 
-**Detecção:** NAC/802.1X, switchport/PoE/DHCP, inventário USB, survey RF, túnel recorrente, receiving/câmeras e inspeção física.
+**Detection:** NAC/802.1X, switchport/PoE/DHCP, USB inventory, RF survey, recurring tunnel, receiving/camera and physical inspection.
 
-## Pivot wireless nearest-neighbor
+## Nearest-neighbor wireless pivot
 
-**Mecânica:** um ator controla um host dentro do alcance de rádio do alvo e usa credenciais Wi-Fi do alvo para atravessar remotamente a fronteira. APT28 usou organizações comprometidas próximas dessa forma.<sup>[[18]](#references)</sup>
+**Mechanics:** an actor controls a host in radio range of the target, then uses target Wi-Fi credentials to cross the boundary remotely. APT28 used nearby compromised organizations this way.<sup>[[18]](#references)</sup>
 
-**Prós:** nenhum deslocamento do operador; o alvo vê uma origem de rádio local; contorna controles aplicados somente à entrada pela Internet.
+**Pros:** no operator travel; target sees a local radio source; bypasses controls applied only to Internet entry.
 
-**Contras:** requer host dual-radio próximo, comprometido/próprio, e acesso válido; evidências de RADIUS/NAC/AP e endpoint vizinho; anomalias de sinal/dispositivo.
+**Cons:** requires nearby compromised/owned dual-radio host and valid access; RADIUS/NAC/AP and neighbor endpoint evidence; signal/device anomalies.
 
-**Procedimento:** reproduza somente com o [two-owned-AP Lab 4](authorized-adversary-emulation-labs.md#lab-4-nearest-neighbor-wireless-pivot): conecte um pivot próprio aos SSIDs de laboratório vizinho e alvo, encaminhe somente um serviço, colete logs de ambos os APs/pivot, habilite EAP-TLS/device posture e confirme que a segunda tentativa falha.
+**Procedure:** reproduce only with the [two-owned-AP Lab 4](authorized-adversary-emulation-labs.md#lab-4-nearest-neighbor-wireless-pivot): join an owned pivot to neighbor and target lab SSIDs, forward only one service, collect both AP/pivot logs, then enable EAP-TLS/device posture and confirm the second attempt fails.
 
-**Detecção:** correlacione identidade RADIUS, certificado/posture gerenciado, dispositivo visto pela primeira vez, edge/sinal do AP, login concorrente e presença física; procure endpoints próximos com rádios simultâneos, forwarding e túneis.
+**Detection:** correlate RADIUS identity, managed certificate/posture, first-seen device, AP edge/signal, concurrent login and physical presence; hunt nearby endpoints for simultaneous radios, forwarding and tunnels.
 
-## Community mesh, delay-tolerant e store-and-forward offline
+## Community mesh, delay-tolerant and offline store-and-forward
 
-**Mecânica:** o tráfego atravessa peers locais, gateways assíncronos, mídia removível ou filas agendadas em vez de uma sessão interativa única com a Internet.
+**Mechanics:** traffic traverses local peers, asynchronous gateways, removable media or scheduled queues rather than one interactive Internet session.
 
-**Prós:** funciona durante interrupção/censura; entrega atrasada/em lote enfraquece temporização simples; nenhuma última milha central para comunicação local.
+**Pros:** works during disruption/censorship; delayed/batched delivery weakens simple timing; no central last mile for local communication.
 
-**Contras:** latência alta; conjunto de anonimato pequeno; metadados de custódia/físicos; peers maliciosos; os dados eventualmente chegam a um gateway que os observa.
+**Cons:** high latency; small anonymity set; custody/physical metadata; malicious peers; data eventually reaches a gateway that observes it.
 
-**Procedimento:** (1) construa uma mesh isolada própria de três nós ou fila de arquivos; (2) criptografe/autentique o conteúdo ponta a ponta; (3) remova rotas diretas de Internet da origem; (4) retransmita um arquivo benigno após atraso controlado; (5) verifique que somente o gateway contata o destino próprio; (6) compare custódia/timestamps; (7) preserve as evidências exigidas e sanitize mídia/filas temporárias no encerramento aprovado.
+**Procedure:** (1) build an isolated owned three-node mesh or file queue; (2) encrypt/authenticate content end to end; (3) remove direct Internet routes from origin; (4) relay a benign file after a controlled delay; (5) verify only gateway contacts owned destination; (6) compare custody/timestamps; (7) preserve required evidence, then sanitize temporary media/queues at approved closeout.
 
-**Detecção:** atividade de arquivo/processo no endpoint, links de rádio entre peers, auditoria de mídia removível, periodicidade de fila/gateway e identificadores de conteúdo. Janelas de correlação maiores substituem a análise de flow interativo.
+**Detection:** endpoint file/process activity, peer-radio links, removable-media audit, queue/gateway periodicity and content identifiers. Longer correlation windows replace interactive-flow analysis.
 
-## TURN relay e WebRTC forced-relay
+## TURN relay and forced-relay WebRTC
 
-**Mecânica:** Traversal Using Relays around NAT (TURN) aloca um endereço público de relay e transporta tráfego UDP, TCP ou TLS entre cliente e peers. Uma política ICE pode forçar o uso de relay em vez de expor um candidate direto. TURN resolve alcançabilidade, não anonimato geral: o servidor autentica o cliente e observa alocações, peers, horário e volume.<sup>[[19]](#references)</sup>
+**Mechanics:** Traversal Using Relays around NAT (TURN) allocates a public relay address and carries UDP, TCP or TLS traffic between a client and peers. An ICE policy can force relay use instead of exposing a direct candidate. TURN solves reachability, not general anonymity: the server authenticates the client and observes allocations, peers, time and volume.<sup>[[19]](#references)</sup>
 
-**Prós:** amplamente implementado; lida com NAT restritivo; suporta WebRTC móvel; o peer não recebe o endereço de transporte direto do cliente quando a política relay-only é imposta corretamente.
+**Pros:** widely implemented; handles restrictive NAT; supports mobile WebRTC; the peer does not receive the client's direct transport address when relay-only policy is correctly enforced.
 
-**Contras:** o operador TURN vê ambos os lados adjacentes; identidade da aplicação, fingerprint de mídia e signaling permanecem; relay-only custa bandwidth e latência; configuração incorreta ainda pode coletar candidates host ou server-reflexive.
+**Cons:** the TURN operator sees both adjacent sides; application identity, media fingerprint and signaling remain; relay-only costs bandwidth and latency; misconfiguration can still gather host or server-reflexive candidates.
 
-**Procedimento:** (1) implante um serviço TURN próprio da organização com TLS e credenciais de curta duração; (2) restrinja realms, peers, portas, quotas e expiração; (3) configure a aplicação de teste para ICE relay-only; (4) faça uma chamada para um peer próprio; (5) inspecione `getStats()` e capture pacotes para confirmar que somente candidates relay transportaram mídia; (6) falhe o relay e confirme ausência de fallback direto; (7) retenha logs de allocation do engagement.
+**Procedure:** (1) deploy an organization-owned TURN service with TLS and short-lived credentials; (2) restrict realms, peers, ports, quotas and expiration; (3) set the test application to relay-only ICE; (4) call an owned peer; (5) inspect `getStats()` and packet capture to confirm only relay candidates carried media; (6) fail the relay and confirm there is no direct fallback; (7) retain allocation logs for the engagement.
 
-**Detecção:** signaling, processo do navegador e allocations TURN associam a sessão ao relay; redes observam flows sustentados para portas TURN ou endpoints TLS; o peer vê o relay alocado. **Nó capturado:** estado da aplicação e credenciais TURN efêmeras podem revelar realm e serviço de rendezvous. Minimize a exposição com credenciais curtas por dispositivo e mantenha a autenticação do operador somente no controller.
+**Detection:** signaling, browser process and TURN allocations join the session to the relay; networks observe sustained flows to TURN ports or TLS endpoints; the peer sees the allocated relay. **Captured node:** application state and ephemeral TURN credentials may reveal the realm and rendezvous service. Minimize exposure with per-device, short-lived credentials and keep operator authentication only at the controller.
 
-## Rendezvous outbound-only ou reverse overlay
+## Outbound-only rendezvous or reverse overlay
 
-**Mecânica:** um nó atrás de NAT inicia uma conexão autenticada a um broker controlado pela organização. O operador autentica-se separadamente no broker, que autoriza um canal de gerenciamento estreito; não é necessário port forwarding de entrada nem rota direta operador-nó.
+**Mechanics:** a node behind NAT initiates an authenticated connection to an organization-controlled broker. The operator separately authenticates to the broker, which authorizes a narrow management channel; neither inbound port forwarding nor a direct operator-to-node route is required.
 
-**Prós:** estável atrás de NAT e últimas milhas cativas; revogação e auditoria centralizadas; mudanças de endereço do field node não exigem descoberta pelo operador; separa claramente identidade do operador da credencial do nó.
+**Pros:** stable behind NAT and captive last miles; central revocation and audit; field-node address changes do not require operator discovery; cleanly separates operator identity from the node credential.
 
-**Contras:** o broker torna-se um ponto de alta importância para correlação; keepalives periódicos são reconhecíveis; um túnel amplo pode virar pivot inseguro; perda do broker encerra o gerenciamento.
+**Cons:** the broker becomes a high-value correlation point; periodic keepalives are recognizable; a broad tunnel can become an unsafe pivot; loss of the broker ends management.
 
-**Procedimento:** siga [Capture-Resilient Authorized Field Nodes](capture-resilient-authorized-field-nodes.md#step-4-stable-outbound-rendezvous): emita uma identidade de dispositivo delimitada, permita somente um broker próprio e serviço de gerenciamento aprovado, use keepalive autenticado, imponha routing fail-closed, teste mudanças de endereço e recuperação após reboot e revogue a identidade no exercício de perda. WireGuard documenta keepalive persistente de 25 segundos como intervalo NAT amplamente útil quando realmente necessário.<sup>[[20]](#references)</sup>
+**Procedure:** follow [Capture-Resilient Authorized Field Nodes](capture-resilient-authorized-field-nodes.md#step-4-stable-outbound-rendezvous): issue one scoped device identity, permit only an owned broker and approved management service, use authenticated keepalive, enforce fail-closed routing, test address changes and reboot recovery, and revoke the identity during the loss drill. WireGuard documents a 25-second persistent keepalive as a broadly useful NAT interval when it is actually needed.<sup>[[20]](#references)</sup>
 
-**Detecção:** logs do broker e IdP associam ambos os lados; a rede de acesso vê um destino/cadência criptografados repetidos; inventário do endpoint mostra o agent do overlay. **Nó capturado:** presuma expostos sua chave de dispositivo, nome do broker, endereços do túnel e dados de tasks em cache. Ele não deve conter chave privada do operador, conta pessoal ou token reutilizável do controller.
+**Detection:** broker and identity-provider logs map both sides; the access network sees a repeated encrypted destination/cadence; endpoint inventory shows the overlay agent. **Captured node:** assume its device key, broker name, tunnel addresses and cached task data are exposed. It must contain no operator private key, personal account or reusable controller token.
 
-## Pull mailbox, message queue ou object-store rendezvous
+## Pull mailbox, message queue or object-store rendezvous
 
-**Mecânica:** um workload de campo consulta uma mailbox autenticada por jobs assinados e pré-aprovados e publica resultados limitados. O operador grava na queue por um control plane separado; não existe socket interativo entre eles.
+**Mechanics:** a field workload polls an authenticated mailbox for signed, pre-approved jobs and posts bounded results. The operator writes to the queue through a separate control plane; there is no interactive socket between them.
 
-**Prós:** tolera links intermitentes; desacopla temporização e endereçamento; quotas e schemas podem limitar capacidades; auditoria e revogação centralizadas fáceis.
+**Pros:** tolerates intermittent links; decouples timing and addressing; quotas and schemas can constrain capability; easy centralized audit and revocation.
 
-**Contras:** cadência de polling e nomes estáveis de objeto/queue fingerprintam o sistema; logs do provedor associam produtor e consumidor; controle atrasado; dados enfileirados capturados podem expor o exercício.
+**Cons:** polling cadence and stable object/queue names fingerprint the system; provider logs join producer and consumer; delayed control; captured queued data may expose the exercise.
 
-**Procedimento:** (1) crie uma queue de engagement e uma identidade de dispositivo; (2) defina um schema assinado de jobs benignos e explicitamente delimitados; (3) defina TTL de mensagens, tamanho máximo de resultado e rate; (4) permita que o nó leia somente sua queue e grave somente em seu prefixo de resultados; (5) teste acúmulo offline, entrega duplicada e revogação; (6) centralize logs de acesso imutáveis; (7) exclua a queue após cumprir os requisitos de retenção.
+**Procedure:** (1) create one engagement queue and one device identity; (2) define a signed schema of benign, explicitly scoped jobs; (3) set message TTL, maximum result size and rate; (4) allow the node to pull only its queue and write only its result prefix; (5) test offline accumulation, duplicate delivery and revocation; (6) centralize immutable access logs; (7) delete the queue after retention requirements are met.
 
-**Detecção:** procure chamadas periódicas de API por processo incomum, caminhos estáveis de bucket/object/queue, user-agent ou comportamento TLS idênticos e sequência fetch-then-new-connection. **Nó capturado:** cache local pode revelar jobs pendentes e nomes de objetos; mantenha o cache criptografado, limitado e descartável, preservando os logs autoritativos do controller.
+**Detection:** hunt for periodic API calls by an unusual process, stable bucket/object/queue paths, identical user-agent or TLS behavior, and a fetch-then-new-connection sequence. **Captured node:** local cache can reveal pending jobs and object names; keep cache encrypted, bounded and disposable, while preserving authoritative controller logs.
 
-## Failover de uplinks duplos e migração de conexão
+## Dual-uplink failover and connection migration
 
-**Mecânica:** um field node aprovado possui dois uplinks independentes — como Ethernet/Wi-Fi do local e cellular da organização — e mantém a sessão de controle por overlay ou message broker enquanto as rotas mudam. Isso é engenharia de disponibilidade, não anonimato.
+**Mechanics:** an approved field node has two independent uplinks—such as venue Ethernet/Wi-Fi and organization cellular—and keeps its control session through an overlay or message broker as routes change. This is availability engineering, not anonymity.
 
-**Prós:** sobrevive à falha de um provedor, AP ou captive portal; suporta manutenção planejada; permite isolar rapidamente um caminho suspeito.
+**Pros:** survives one provider, AP or captive-portal failure; supports planned maintenance; permits quick isolation of a suspect path.
 
-**Contras:** dois provedores criam dois registros de localização/conta; uso simultâneo facilita correlação; leaks de rota e DNS durante failover; evidências de co-localização cellular permanecem.
+**Cons:** two providers create two location/account records; simultaneous use makes correlation easier; route and DNS leaks during failover; cellular co-location evidence remains.
 
-**Procedimento:** (1) registre ambas as interfaces e provedores pertencentes à organização; (2) atribua prioridades de rota e health checks determinísticos a endpoints próprios; (3) vincule DNS e gerenciamento ao overlay; (4) impeça que o caminho secundário aceite tráfego de entrada; (5) desconecte cada caminho e verifique recuperação da sessão, política de origem e ausência de acesso direto ao destino; (6) alerte sobre alterações não planejadas; (7) documente uso de dados e limites de roaming.
+**Procedure:** (1) register both organization-owned interfaces and providers; (2) assign deterministic route priorities and health checks to owned endpoints; (3) bind DNS and management to the overlay; (4) prevent the secondary path from accepting inbound traffic; (5) unplug each path and verify session recovery, source policy and no direct destination access; (6) alert on unplanned path change; (7) document data use and roaming limits.
 
-**Detecção:** correlacione o mesmo certificado de dispositivo, grammar de requisição e temporização entre ASNs; inventário local vê ambos os rádios; carriers/locais conservam seus próprios registros. **Nó capturado:** ambos os identificadores SIM/dispositivo e SSIDs conhecidos podem estar visíveis; use assets da organização e nunca co-localize ou emparelhe o nó com dispositivos pessoais.
+**Detection:** correlate the same device certificate, request grammar and timing across ASNs; local inventory sees both radios; carriers/venues retain their own records. **Captured node:** both SIM/device identifiers and known SSIDs may be visible; use organization assets and never co-locate or pair the node with personal devices.
 
-## APN privado da organização ou túnel cellular gerenciado
+## Organization private APN or managed cellular tunnel
 
-**Mecânica:** um APN privado da operadora coloca SIMs registrados em um domínio roteado privado ou encaminha o tráfego a um gateway corporativo. Separa o dispositivo da Internet móvel pública, mas não o oculta da operadora ou da organização contratante.
+**Mechanics:** a carrier private APN places enrolled SIMs into a private routed domain or tunnels traffic to an enterprise gateway. It separates the device from the public mobile Internet but does not hide it from the carrier or contracting organization.
 
-**Prós:** endereçamento privado estável; enrollment e política de tráfego no nível da operadora; evita exposição pública de entrada; útil para appliances remotos autorizados.
+**Pros:** stable private addressing; carrier-level enrollment and traffic policy; avoids public inbound exposure; useful for authorized remote appliances.
 
-**Contras:** atribuição forte por assinante, IMSI/IMEI, célula e billing; prazo e custo de contratação; outage de carrier/gateway; não é anônimo para o operador.
+**Cons:** subscriber, IMSI/IMEI, cell and billing attribution are strong; procurement lead time and cost; carrier/gateway outage; not anonymous to the operator.
 
-**Procedimento:** (1) contrate o APN em nome da organização do assessment; (2) permita apenas SIMs registrados e prefixes do gateway; (3) adicione mutual authentication na camada da aplicação; (4) restrinja a rota do APN ao rendezvous e serviços de update; (5) teste remoção de SIM, roaming, saída para Internet pública e revogação; (6) monitore registros da operadora e gateway; (7) cancele ou coloque em quarantine cada SIM no encerramento.
+**Procedure:** (1) contract the APN in the assessment organization's name; (2) whitelist only registered SIMs and gateway prefixes; (3) add application-layer mutual authentication; (4) restrict the APN route to the rendezvous and update services; (5) test SIM removal, roaming, public-Internet breakout and revocation; (6) monitor carrier and gateway records; (7) cancel or quarantine every SIM at closeout.
 
-**Detecção:** inventário da operadora e telemetria celular, flows do gateway APN, incompatibilidade SIM/IMEI e registros de assets corporativos. **Nó capturado:** SIM e modem identificam o contrato mesmo com storage criptografado; capture resilience significa suspensão rápida e autorização estreita, não deniability.
+**Detection:** carrier inventory and cell telemetry, APN gateway flows, SIM/IMEI mismatch and enterprise asset records. **Captured node:** the SIM and modem identify the contract even when storage is encrypted; capture resilience therefore means rapid suspension and narrow authorization, not deniability.
 
 ## Long-range point-to-point wireless bridge
 
-**Mecânica:** Wi-Fi direcional ou outro rádio point-to-point licenciado/não licenciado conecta dois locais aprovados pelos proprietários, com egress de Internet no local remoto. Pode mover a localização aparente do IP sem proxy comercial.
+**Mechanics:** directional Wi-Fi or another licensed/unlicensed point-to-point radio connects two owner-approved sites, with Internet egress at the remote site. It can move the apparent IP location without using a commercial proxy.
 
-**Prós:** alto throughput; independente de carriers wired intermediários; RF e routing controláveis; útil para testar segmentação e monitoramento do local remoto.
+**Pros:** high throughput; independent of intermediate wired carriers; controllable RF and routing; useful for testing segmentation and remote-site monitoring.
 
-**Contras:** line-of-sight, spectrum, landlord e restrições regulatórias; emissões RF e hardware distintos; ambos os endpoints são evidências físicas; clima/energia/alinhamento afetam estabilidade.
+**Cons:** line-of-sight, spectrum, landlord and regulatory constraints; distinctive RF emissions and hardware; both endpoints are physical evidence; weather/power/alignment affect stability.
 
-**Procedimento:** (1) obtenha permissão escrita para ambos os locais e verifique regras de spectrum/potência; (2) faça survey sem transmitir fora dos parâmetros aprovados; (3) use criptografia autenticada e uma management VLAN; (4) restrinja a bridge a um rendezvous ou subnet de teste próprio; (5) teste failover, alinhamento, recuperação de energia e contenção RF; (6) etiquete/inventarie ambos os rádios; (7) remova-os e verifique reset da configuração após o exercício.
+**Procedure:** (1) obtain written permission for both sites and verify spectrum/power rules; (2) survey the path without transmitting outside approved parameters; (3) use authenticated encryption and a management VLAN; (4) restrict the bridge to an owned rendezvous or test subnet; (5) test failover, alignment, power recovery and RF containment; (6) label/inventory both radios; (7) remove them and verify configuration reset after the exercise.
 
-**Detecção:** surveys RF, análise de spectrum, inspeção de rooftop/local, MAC/OUI da bridge, tráfego de gerenciamento e logs de egress do local remoto. **Nó capturado:** configuração revela seu peer e domínio de gerenciamento; use credenciais exclusivas do exercício, nenhuma conta pessoal de gerenciamento e revogação rápida da peer key.
+**Detection:** RF surveys, spectrum analysis, rooftop/site inspection, bridge MAC/OUI, management traffic and remote-site egress logs. **Captured node:** configuration reveals its peer and management domain; use unique exercise credentials, no personal management accounts and rapid peer-key revocation.
 
-## Exit cooperativo ou comunitário consentido
+## Consented cooperative or community exit
 
-**Mecânica:** voluntários ou organizações parceiras operam relays conscientemente sob uma política publicada. O tráfego sai de um pool comunitário compartilhado enquanto a camada de coordenação registra abuso e revogação.
+**Mechanics:** volunteers or partner organizations knowingly run relays under a published policy. Traffic exits from a shared community pool while the coordination layer accounts for abuse and revocation.
 
-**Prós:** redes não-cloud diversas; consentimento explícito é mais seguro que proxyware; governança compartilhada pode distribuir confiança; útil para pesquisa e estudos de resistência à censura.
+**Pros:** diverse non-cloud networks; explicit consent is safer than proxyware; shared governance can distribute trust; useful for research and censorship-resilience studies.
 
-**Contras:** pools pequenos e registros de membros reduzem o anonimato; operadores de exit recebem reclamações e observam metadados; participantes maliciosos, uptime variável e jurisdições diferentes.
+**Cons:** small pools and membership records reduce anonymity; exit operators receive complaints and observe traffic metadata; malicious participants, variable uptime and jurisdiction differences.
 
-**Procedimento:** (1) publique política de uso aceitável e logging; (2) obtenha opt-in informado de cada operador; (3) emita identidade de relay única e restrinja destinos/rates; (4) forneça tratamento de abuso e revogação em uma ação; (5) envie somente tráfego autorizado a endpoints próprios durante os testes; (6) meça churn e exposição à correlação; (7) remova o relay corretamente quando o consentimento terminar.
+**Procedure:** (1) publish an acceptable-use and logging policy; (2) obtain informed opt-in from each operator; (3) issue a unique relay identity and restrict destinations/rates; (4) provide abuse handling and one-action revocation; (5) send only authorized traffic to owned endpoints during testing; (6) measure churn and correlation exposure; (7) remove the relay cleanly when consent ends.
 
-**Detecção:** registros de membership/control plane, certificados de relay, fingerprint de software comum e comportamento de exit identificam o pool. **Nó capturado:** configuração do relay pode identificar a cooperação, mas não deve conter identidades de clientes; armazene a responsabilidade cliente-sessão no controller autorizado sob controle de acesso.
+**Detection:** membership/control-plane records, relay certificates, common software fingerprint and exit behavior identify the pool. **Captured node:** relay configuration may identify the cooperative but should not contain client identities; store client-to-session accountability at the authorized controller under access control.
 
-## Endereços temporários IPv6 e rotação de prefix
+## IPv6 temporary addresses and prefix rotation
 
-**Mecânica:** extensões de privacidade IPv6 criam identificadores temporários de interface para que um endereço estável não seja reutilizado em toda conexão de saída. Mudanças de prefix delegado podem adicionar rotação, mas prefix, registro do assinante e fingerprint da camada superior permanecem.<sup>[[21]](#references)</sup>
+**Mechanics:** IPv6 privacy extensions create temporary interface identifiers so a stable address is not reused for every outbound connection. Provider prefix changes can add rotation, but the delegated prefix, subscriber record and upper-layer fingerprint remain.<sup>[[21]](#references)</sup>
 
-**Prós:** reduz tracking passivo de longo prazo por identificador de interface estável; integrado a sistemas operacionais comuns; nenhum overhead de relay.
+**Pros:** reduces passive long-term tracking by a stable interface identifier; built into common operating systems; no relay overhead.
 
-**Contras:** não fornece anonimato de origem; ISP e rede local ainda conhecem prefix/device; DNS, contas e estado do navegador vinculam sessões; churn de endereços complica allowlists e logging.
+**Cons:** not source anonymity; ISP and local network still know the prefix/device; DNS, accounts and browser state link sessions; address churn complicates allowlists and logging.
 
-**Procedimento:** (1) inspecione endereços estáveis e temporários atuais em um cliente próprio; (2) habilite o padrão de privacy address suportado pelo OS em vez de spoofing de terceiros; (3) solicite repetidamente a um endpoint IPv6 próprio durante diferentes lifetimes de endereço; (4) confirme que serviços de entrada fazem bind somente aos endereços estáveis pretendidos; (5) retenha logs precisos de DHCPv6/RA/neighbor e endpoint; (6) teste VPN/firewall para cada endereço IPv6.
+**Procedure:** (1) inspect current stable and temporary addresses on an owned client; (2) enable the OS-supported privacy-address default rather than third-party spoofing; (3) request an owned IPv6 endpoint repeatedly across address lifetimes; (4) confirm inbound services bind only intended stable addresses; (5) retain DHCPv6/RA/neighbor and precise endpoint logs; (6) test VPN/firewall behavior for every IPv6 address.
 
-**Detecção:** correlacione prefix delegado, identidade de camada 2, neighbor discovery, conta e telemetria do endpoint, em vez de tratar um endereço como um dispositivo. **Nó capturado:** perfis de rede e identificadores de interface permanecem; endereçamento temporário impede um identificador passivo único, não atribuição forense.
+**Detection:** correlate delegated prefix, layer-2 identity, neighbor discovery, account and endpoint telemetry instead of treating one address as one device. **Captured node:** network profiles and interface identifiers remain; temporary addressing prevents one passive identifier, not forensic attribution.
 
-## Tor pluggable transports: Snowflake, WebTunnel, obfs4 e meek
+## Tor pluggable transports: Snowflake, WebTunnel, obfs4 and meek
 
-**Mecânica:** um pluggable transport altera a aparência da primeira conexão Tor ou como ela alcança uma bridge. Snowflake usa proxies WebRTC voluntários de curta duração, WebTunnel se parece com HTTPS comum, obfs4 resiste a identificação simples de protocolo e probing ativo, e meek retransmite por infraestrutura web compatível. São transports de circumvention para entrar no Tor, não camadas extras de anonimato ponta a ponta.<sup>[[22]](#references)</sup>
+**Mechanics:** a pluggable transport changes how the first Tor connection appears or how it reaches a bridge. Snowflake uses short-lived volunteer WebRTC proxies, WebTunnel resembles ordinary HTTPS, obfs4 resists simple protocol identification and active probing, and meek relays through supported web infrastructure. They are censorship-circumvention transports into Tor, not extra end-to-end anonymity layers.<sup>[[22]](#references)</sup>
 
-**Prós:** úteis quando Tor direto ou relays conhecidos são bloqueados; Snowflake evita um endereço público de bridge estável; integrados a clientes Tor mantidos; o destino ainda recebe as propriedades normais do Tor.
+**Pros:** useful when direct Tor or known relays are blocked; Snowflake avoids a stable public bridge address; integrated into maintained Tor clients; destination still receives ordinary Tor properties.
 
-**Contras:** desempenho menor ou variável; broker/front/bridge e rede local observam metadados diferentes; fingerprints de transporte e bloqueio continuam possíveis; proxy voluntário não substitui Tor e não deve receber plaintext da aplicação.
+**Cons:** lower or variable performance; broker/front/bridge and local network observe different metadata; transport fingerprints and blocking remain possible; volunteer proxy does not replace Tor and should not be trusted with application plaintext.
 
-**Procedimento:** (1) instale e verifique o Tor Browser oficial ou cliente Tor compatível; (2) selecione o transport integrado em Connection/Bridges; (3) conecte somente a uma página de diagnóstico própria; (4) confirme que a página vê um exit Tor, não o peer Snowflake/WebTunnel; (5) compare bootstrap e desempenho; (6) falhe o transport e confirme que o cliente não se conecta diretamente em silêncio; (7) retorne à configuração padrão compatível após o teste.
+**Procedure:** (1) install and verify the official Tor Browser or supported Tor client; (2) select the built-in transport in Connection/Bridges; (3) connect only to an owned diagnostic page; (4) confirm the page sees a Tor exit, not the Snowflake/WebTunnel peer; (5) compare bootstrap and performance; (6) fail the transport and confirm the client does not silently connect directly; (7) return to the standard supported configuration after the test.
 
-**Detecção:** um censor pode combinar allowlists de destino, comportamento TLS/WebRTC, descoberta de broker e análise de flow; endpoints expõem Tor e configuração do transport. **OPSEC resiliente a captura:** use o cliente padrão, nunca copie estado pessoal de navegador para ele e presuma que histórico de bridge/broker pode ser recuperado. **Monitoramento:** observe logs de bootstrap Tor, tentativas diretas inesperadas de DNS/conexão e observações de páginas próprias no controller; falha do transport não prova descoberta.
+**Detection:** a censor can combine destination allowlists, TLS/WebRTC behavior, broker discovery and flow analysis; endpoints expose Tor and transport configuration. **Capture-resilient OPSEC:** use the standard client, never copy personal browser state into it, and assume bridge/broker history is recoverable. **Monitoring:** watch Tor bootstrap logs, unexpected direct DNS/connection attempts and controller-side owned-page observations; transport failure is not proof of discovery.
 
-## Refraction networking ou decoy routing
+## Refraction networking or decoy routing
 
-**Mecânica:** um operador de rede cooperante detecta um sinal encoberto em tráfego aparentemente endereçado a um decoy permitido e desvia o flow para um proxy de circumvention. A implantação exige infraestrutura no caminho da rede; não é algo que um cliente possa criar simplesmente selecionando um site inocente.<sup>[[23]](#references)</sup>
+**Mechanics:** a cooperating network operator detects a covert signal in traffic apparently addressed to an allowed decoy and diverts the flow to a circumvention proxy. Deployment requires infrastructure in the network path; it is not something a client can create merely by selecting an innocent website.<sup>[[23]](#references)</sup>
 
-**Prós:** o destino aparente pode ser difícil de bloquear sem dano colateral; nenhum endereço público de bridge precisa ser distribuído; modelo de pesquisa útil para circumvention assistido no caminho.
+**Pros:** the apparent destination may be difficult for a censor to block without collateral damage; no public bridge address must be distributed; useful research model for on-path-assisted circumvention.
 
-**Contras:** participação especializada de ISP/transit; deployability e desempenho dependem do routing; flow cliente-decoy e atividade do lado do proxy permanecem; observador global ou cooperante pode correlacionar a temporização.
+**Cons:** specialized ISP/transit participation; deployability and performance depend on routing; client-to-decoy flow and proxy-side activity remain; a global or cooperating observer can correlate timing.
 
-**Procedimento:** não sinalize por redes não envolvidas. Reproduza a arquitetura em laboratório isolado: (1) crie namespaces próprios de cliente, router, decoy e proxy; (2) use uma requisição de teste benigna com tag; (3) faça o router próprio redirecionar somente essa tag ao proxy; (4) registre tuples e request IDs antes/depois do routing; (5) compare flows normais e sinalizados; (6) teste falsos positivos e remoção; (7) destrua as rotas do laboratório.
+**Procedure:** do not signal through uninvolved networks. Reproduce the architecture in an isolated lab: (1) create owned client, router, decoy and proxy namespaces; (2) use a benign tagged test request; (3) let the owned router redirect only that tag to the proxy; (4) log pre/post-routing tuples and request IDs; (5) compare ordinary and signaled flows; (6) test false positives and removal; (7) destroy the lab routes.
 
-**Detecção:** operadores autorizados podem inspecionar divergência de routing, comportamento incomum de client hello/tag e discrepâncias entre flows decoy e back-end. **OPSEC resiliente a captura:** um cliente de pesquisa deve conter somente chaves de teste e endereços de documentação. **Monitoramento:** compare decisões assinadas do lab router com chegadas ao proxy; não faça probing em provedores de transit de produção para descobrir se detectaram signaling.
+**Detection:** authorized network operators can inspect routing divergence, unusual client hello/tag behavior and decoy-versus-back-end flow discrepancies. **Capture-resilient OPSEC:** a research client should hold only test keys and documentation addresses. **Monitoring:** compare signed lab-router decisions with proxy arrivals; do not probe production transit providers to determine whether they detected signaling.
 
-## Gateway content-addressed ou recuperação por peer em cache
+## Content-addressed gateway or cached peer retrieval
 
-**Mecânica:** um gateway HTTP recupera um content identifier (CID) IPFS, possivelmente de seu cache ou peers, e devolve o conteúdo verificável ao cliente. O publicador original pode ver o gateway ou outros peers, e não o leitor final; o gateway vê o IP do leitor e o CID solicitado. A recuperação peer-to-peer nativa expõe o cliente a peers e participantes de DHT/routing.<sup>[[24]](#references)</sup>
+**Mechanics:** an HTTP gateway retrieves an IPFS content identifier (CID), possibly from its cache or peers, and returns the verifiable content to the client. The original publisher may see the gateway or other peers rather than the final reader; the gateway sees the reader IP and requested CID. Native peer-to-peer retrieval exposes the client to peers and DHT/routing participants.<sup>[[24]](#references)</sup>
 
-**Prós:** publicador e leitor podem ser separados por caches; conteúdo imutável é verificável por hash; dados replicados sobrevivem a um host; clientes HTTP não exigem pilha peer nativa.
+**Pros:** publisher and reader can be separated by caches; immutable content is hash-verifiable; replicated data survives one host; HTTP clients require no native peer stack.
 
-**Contras:** CIDs públicos e logs do gateway revelam interesses; temporização da primeira recuperação pode correlacionar publicador e leitor; conteúdo web malicioso e riscos de same-origin em paths; gateways públicos são best-effort e proíbem abuso.
+**Cons:** public CIDs and gateway logs reveal interests; first retrieval timing can correlate publisher and reader; malicious web content and path-style same-origin hazards; public gateways are best-effort and prohibit abuse.
 
-**Procedimento:** (1) publique um arquivo de teste inofensivo em uma private IPFS swarm ou gateway próprio; (2) registre o CID; (3) recupere-o por um gateway HTTP próprio separado usando isolamento por subdomínio; (4) verifique os bytes contra o CID; (5) repita após caching; (6) compare logs de publicador, peer e gateway; (7) unpin e remova o conteúdo de teste quando terminar a retenção.
+**Procedure:** (1) publish a harmless test file to an owned private IPFS swarm or owned gateway; (2) record its CID; (3) retrieve it through a separate owned HTTP gateway using subdomain isolation; (4) verify the bytes against the CID; (5) repeat after caching; (6) compare publisher, peer and gateway logs; (7) unpin and remove test content when retention ends.
 
-**Detecção:** gateways registram origem/CID; conexões DHT e peer revelam recuperação; histórico do endpoint e hashes de arquivo identificam o conteúdo. **OPSEC resiliente a captura:** não armazene chave privada de publicação em um field client read-only e criptografe conteúdo sensível antes do content addressing. **Monitoramento:** alerte sobre pinning inesperado, alteração do conjunto de peers, requisições de CID fora da allowlist ou notificações de abuso do gateway.
+**Detection:** gateways log source/CID; DHT and peer connections reveal retrieval; endpoint history and file hashes identify content. **Capture-resilient OPSEC:** store no private publishing key on a read-only field client and encrypt sensitive content before content addressing. **Monitoring:** alert on unexpected pinning, peer-set change, CID requests outside the allowlist or gateway account notices.
 
-## Serviço de private information retrieval
+## Private information retrieval service
 
-**Mecânica:** Private Information Retrieval (PIR) permite que um cliente recupere um registro de um database enquanto oculta criptograficamente o índice selecionado do servidor, sob um threat model single-server ou multi-server declarado. Protege a seleção da consulta em um dataset delimitado; não é acesso web geral nem anonimato IP.<sup>[[25]](#references)</sup>
+**Mechanics:** Private Information Retrieval (PIR) lets a client retrieve one record from a database while cryptographically hiding the selected index from the server under a stated single- or multi-server threat model. It protects query selection for a bounded dataset; it is not general web access or IP anonymity.<sup>[[25]](#references)</sup>
 
-**Prós:** privacidade forte e específica da aplicação; modelo de leakage mensurável; útil para diretórios de chaves, blocklists ou databases públicos pequenos; pode reduzir a necessidade de revelar termos exatos de lookup.
+**Pros:** strong application-specific query privacy; measurable leakage model; useful for key directories, blocklists or small public databases; can reduce the need to reveal exact lookup terms.
 
-**Contras:** overhead de computação/bandwidth; servidor aprende IP/horário da conexão salvo combinação com relay; versão do dataset, tamanho da resposta e estado da aplicação podem particionar usuários; maturidade da implementação varia.
+**Cons:** computation/bandwidth overhead; server learns connection time/IP unless combined with a relay; dataset version, response size and application state can partition users; implementation maturity varies.
 
-**Procedimento:** (1) implante uma implementação PIR auditada contra um database sintético próprio; (2) publique versão e parâmetros do dataset; (3) recupere vários índices usando tamanhos de requisição idênticos; (4) verifique a correção localmente; (5) compare logs do servidor e confirme ausência do índice; (6) teste respostas maliciosas/truncadas e incompatibilidade de versão; (7) documente a premissa exata de privacidade em vez de chamá-la de navegação anônima.
+**Procedure:** (1) deploy an audited PIR implementation against a synthetic owned database; (2) publish dataset version and parameters; (3) retrieve several indices through identical request sizes; (4) verify correctness locally; (5) compare server logs and confirm the index is absent; (6) test malicious/truncated responses and version mismatch; (7) document the exact privacy assumption rather than calling it anonymous browsing.
 
-**Detecção:** redes veem uso e volume do serviço; telemetria do endpoint expõe cliente e uso do registro final; servidor comprometido pode manipular datasets ou temporização. **OPSEC resiliente a captura:** mantenha no cliente apenas parâmetros públicos do database e um cache limitado. **Monitoramento:** valide roots assinadas do dataset, formatos fixos de requisição, mudanças na taxa de erro e rotações de chave do servidor.
+**Detection:** networks see service use and volume; endpoint telemetry exposes the client and final record use; a compromised server can manipulate datasets or timing. **Capture-resilient OPSEC:** keep only public database parameters and a bounded cache on the client. **Monitoring:** validate signed dataset roots, fixed request shapes, error-rate changes and server-key rotations.
 
-## Fetcher, preview ou rendering server-side restrito
+## Constrained server-side fetcher, preview or rendering service
 
-**Mecânica:** um serviço remoto busca ou renderiza uma URL e retorna screenshot, metadados ou conteúdo sanitizado. O destino vê o endereço do fetcher; o serviço vê o solicitante, a URL e o resultado. Abusar de bots de link-preview, scanners de segurança ou URL fetchers de terceiros não é uso autorizado de proxy.
+**Mechanics:** a remote service fetches or renders a URL and returns a screenshot, metadata or sanitized content. The destination sees the fetcher address; the service sees the requester, URL and result. Abusing link-preview bots, security scanners or third-party URL fetchers is not authorized proxy use.
 
-**Prós:** isola conteúdo ativo da workstation; o destino recebe fingerprint controlado do fetcher; pode impor limites de tipo/tamanho/destino/renderização; ambiente de execução descartável.
+**Pros:** isolates active content from the workstation; destination receives a controlled fetcher fingerprint; can enforce file type, size, destination and rendering limits; disposable execution environment.
 
-**Contras:** o serviço tem conhecimento completo da requisição; registros de conta/API/billing; risco de SSRF e exfiltração; scripts, autenticação e sites interativos podem não funcionar; URLs únicas correlacionam solicitante e fetch.
+**Cons:** service has complete request knowledge; account/API/billing records; SSRF and data-exfiltration risk; scripts, authentication and interactive sites may not work; unique URLs correlate requester and fetch.
 
-**Procedimento:** (1) implante um fetcher próprio da organização com allowlist estrita de domínios de teste próprios; (2) bloqueie endereços privados, link-local, metadata e redirects para endereços não aprovados; (3) limite methods, redirects, bytes e tempo de renderização; (4) remova credenciais/cookies; (5) envie uma URL própria; (6) compare logs do solicitante, fetcher e alvo; (7) destrua a instância de renderização e retenha a auditoria central conforme a política.
+**Procedure:** (1) deploy an organization-owned fetcher with a strict allowlist of owned test domains; (2) block private, link-local, metadata and redirect-to-unapproved addresses; (3) cap methods, redirects, bytes and render time; (4) strip credentials/cookies; (5) submit an owned URL; (6) compare requester, fetcher and target logs; (7) destroy the render instance and retain central audit according to policy.
 
-**Detecção:** o alvo vê ASN/fingerprint do serviço; logs do provedor/controller associam solicitante à URL; processo/API do endpoint mostra o envio. **OPSEC resiliente a captura:** use um token de projeto curto, sem autoridade para destinos arbitrários. **Monitoramento:** alerte sobre negações de allowlist, violações de redirect, fetches sem controller job ID e notificações de abuso do provedor.
+**Detection:** target sees the service ASN/fingerprint; provider and controller logs map requester to URL; endpoint process/API calls show submission. **Capture-resilient OPSEC:** use one short-lived project token with no arbitrary destination authority. **Monitoring:** alert on allowlist denials, redirect violations, fetches without a controller job ID and provider abuse notices.
 
 ## Anycast rendezvous pool
 
-**Mecânica:** múltiplos nós controlados pela organização anunciam ou frontam um endereço de serviço estável, e o routing seleciona uma instância próxima. Anycast melhora disponibilidade e oculta um back-end individual do cliente, mas o operador controla todas as instâncias e o endereço do serviço é estável.<sup>[[26]](#references)</sup>
+**Mechanics:** multiple organization-controlled nodes advertise or front one stable service address, and routing selects a nearby instance. Anycast improves availability and hides an individual back-end from the client, but the operator still controls all instances and the service address is stable.<sup>[[26]](#references)</sup>
 
-**Prós:** ingresso regional resiliente; nenhuma reconfiguração de campo quando uma instância falha; distribuição de DDoS/load; política central pode mover sessões entre nós conhecidos.
+**Pros:** resilient regional ingress; no field reconfiguration when one instance fails; DDoS/load distribution; central policy can move sessions among known nodes.
 
-**Contras:** registros de BGP/CDN e provedor identificam a organização; mudanças de caminho podem quebrar sessões stateful; monitoramento varia conforme localização do cliente; um endereço estável é facilmente bloqueado ou agrupado por reputação.
+**Cons:** BGP/CDN and provider records identify the organization; path changes can break stateful sessions; monitoring differs by client location; a single stable address is easily blocked or reputation-clustered.
 
-**Procedimento:** use um projeto próprio compatível com o provedor ou um laboratório de routing isolado: (1) implante dois health endpoints autenticados idênticos; (2) exponha um endereço de serviço documentado; (3) mantenha o estado de sessão no broker, não na edge; (4) retire um nó e verifique a reconexão; (5) teste consistência de certificado, política e logs; (6) alerte sobre origin/região não autorizados; (7) remova anúncios e credenciais no encerramento.
+**Procedure:** use a provider-supported organization project or an isolated routing lab: (1) deploy two identical authenticated health endpoints; (2) expose one documented service address; (3) keep session state at the broker rather than an edge; (4) withdraw one node and verify reconnection; (5) test certificate, policy and log consistency; (6) alert on unauthorized origin/region; (7) remove advertisements and credentials at closeout.
 
-**Detecção:** BGP/RPKI/history, tenancy do provedor, certificados e comportamento idêntico do serviço identificam o pool. **OPSEC resiliente a captura:** uma edge contém somente a identidade de serviço regional e nenhuma chave de operador ou enrollment de fleet. **Monitoramento:** faça probes de cada região por monitors autorizados, compare origem de rota e digest de configuração e trate uma origem inesperada como incidente.
+**Detection:** BGP/RPKI/history, provider tenancy, certificates and identical service behavior identify the pool. **Capture-resilient OPSEC:** an edge holds only regional service identity and no operator or fleet-enrollment key. **Monitoring:** probe every region from authorized monitors, compare route origin and configuration digest, and treat an unexpected origin as an incident.
 
-## Migração QUIC e continuidade Multipath TCP
+## QUIC migration and Multipath TCP continuity
 
-**Mecânica:** connection IDs do QUIC podem manter uma sessão viva através de rebinding de NAT ou mudança de endereço; Multipath TCP pode transportar um único byte stream confiável por múltiplos subflows. Melhoram continuidade entre Wi-Fi/cellular, mas expõem caminhos antigos/novos ao peer comum e podem facilitar correlação entre caminhos.<sup>[[27]](#references)</sup>
+**Mechanics:** QUIC connection IDs can keep a client session alive across NAT rebinding or address changes; Multipath TCP can carry one reliable byte stream across multiple subflows. They improve continuity across Wi-Fi/cellular transitions but expose old and new paths to the common peer and can make cross-path correlation easier.<sup>[[27]](#references)</sup>
 
-**Prós:** recuperação rápida durante alterações de uplink; sessão da aplicação não precisa reiniciar; MPTCP pode combinar resiliência e throughput; valioso para field nodes aprovados.
+**Pros:** faster recovery during uplink changes; application session need not restart; MPTCP can combine resilience and throughput; valuable for approved field nodes.
 
-**Contras:** não é anonimato; peer vê migração/subflows; connection identifiers e tráfego simultâneo vinculam caminhos; suporte de middlebox/carrier varia; registros duplicados de provedores aumentam exposição.
+**Cons:** not anonymity; peer sees migration/subflows; connection identifiers and simultaneous traffic link paths; middlebox/carrier support varies; duplicated provider records increase exposure.
 
-**Procedimento:** (1) habilite o transport compatível somente entre um field client próprio e rendezvous; (2) autentique a aplicação independentemente do IP; (3) inicie uma transferência limitada em Wi-Fi aprovado; (4) alterne para cellular da organização; (5) confirme validação do caminho, integridade dos dados e ausência de fallback claro/direto; (6) teste idle timeout e retorno; (7) retenha no broker registros de toda transição de caminho.
+**Procedure:** (1) enable the supported transport only between an owned field client and rendezvous; (2) authenticate the application independently of IP; (3) begin a bounded transfer on approved Wi-Fi; (4) switch to organization cellular; (5) confirm path validation, data integrity and no clear/direct fallback; (6) test idle timeout and return; (7) retain broker records of every path transition.
 
-**Detecção:** o peer observa diretamente migração de endereço ou subflows MPTCP; provedores de acesso veem sua parte; connection IDs, identidade TLS e temporização unem ambos. **OPSEC resiliente a captura:** armazene somente material de sessão por dispositivo e expire rapidamente o estado resumível. **Monitoramento:** alerte sobre mudanças impossíveis de caminho, redes simultâneas não aprovadas, storms de migração e resumption após quarantine.
+**Detection:** the peer directly observes address migration or MPTCP subflows; access providers see their part; connection IDs, TLS identity and timing join both. **Capture-resilient OPSEC:** store only device-scoped session material and expire resumable state quickly. **Monitoring:** alert on impossible path changes, simultaneous unapproved networks, migration storms and resumption after quarantine.
 
-## Egress de managed CI/CD ou runner de automação efêmero
+## Managed CI/CD or ephemeral automation runner egress
 
-**Mecânica:** um workflow próprio da organização executa uma verificação de rede delimitada em um runner hospedado. O destino vê um endereço de runner da cloud, enquanto a plataforma conserva atribuição de repository, actor, workflow, token, logs e billing. É execução remota com egress atribuível, não anonimato perante o provedor.<sup>[[28]](#references)</sup>
+**Mechanics:** an organization-owned workflow executes a bounded network check on a hosted runner. The destination sees a cloud runner address while the platform retains repository, actor, workflow, token, log and billing attribution. This is remote execution with accountable egress, not anonymity from the provider.<sup>[[28]](#references)</sup>
 
-**Prós:** ambiente limpo descartável; definição de job reproduzível; nenhuma conexão de entrada; útil para verificações de disponibilidade distribuídas geograficamente; auditoria forte do controller.
+**Pros:** disposable clean environment; reproducible job definition; no inbound connection; useful for geographically distributed availability checks; strong controller audit.
 
-**Contras:** plataforma e organização identificam o iniciador; tokens amplos e pull requests não confiáveis são perigosos; reputação de IP compartilhada; logs/artifacts podem reter secrets ou dados do alvo.
+**Cons:** platform and organization identify the initiator; broad workflow tokens and untrusted pull requests are dangerous; shared IP reputation; logs/artifacts can retain secrets or target data.
 
-**Procedimento:** (1) crie um repository privado da organização e um environment para o assessment; (2) permita somente jobs benignos, fixos e aprovados manualmente contra endpoints próprios; (3) use permissões mínimas read-only no workflow e nenhum secret de produção; (4) execute a verificação; (5) compare registros do workflow, provedor e alvo; (6) confirme que artifacts não contêm credenciais; (7) exclua o token do environment e retenha a auditoria exigida.
+**Procedure:** (1) create a private organization repository and environment for the assessment; (2) permit only manually approved, fixed benign jobs against owned endpoints; (3) use minimal read-only workflow permissions and no production secrets; (4) run the check; (5) compare workflow, provider and target records; (6) verify artifacts contain no credentials; (7) delete the environment token and retain required audit.
 
-**Detecção:** auditoria do provedor e logs do workflow fornecem atribuição direta; alvos identificam ASNs/ranges de runners e grammar estável de requisição. **OPSEC resiliente a captura:** nunca coloque secrets de field devices, signing, wallet ou administrador da cloud em variáveis do runner. **Monitoramento:** exija aprovação de branch/environment e alerte sobre alterações de workflow, execução por fork, leitura de secrets e destinos inesperados.
+**Detection:** provider audit and workflow logs provide direct attribution; targets identify runner ASNs/ranges and stable request grammar. **Capture-resilient OPSEC:** never place field-device, signing, wallet or cloud-administrator secrets in runner variables. **Monitoring:** require branch/environment approval and alert on workflow edits, fork execution, secret reads and unexpected destinations.
 
-## Primeiro hop local não-IP para um gateway próprio
+## Non-IP local first hop to an owned gateway
 
-**Mecânica:** Bluetooth mesh, Wi-Fi Aware/Direct, rádio de baixa potência ou link serial/óptico transporta mensagens delimitadas de um sensor próximo a um gateway de Internet aprovado pelo proprietário. O dispositivo de campo não tem rota de Internet; o gateway é o único egress. Limites de alcance e protocolo tornam isso um design de telemetry/store-and-forward, não Internet anônima interativa.
+**Mechanics:** Bluetooth mesh, Wi-Fi Aware/Direct, low-power radio or a serial/optical link carries bounded messages from a nearby sensor to an owner-approved Internet gateway. The field device itself has no Internet route; the gateway is the only egress. Radio range and protocol limits make this a telemetry/store-and-forward design, not interactive anonymous Internet.
 
-**Prós:** remove pilha de Internet e credenciais do menor dispositivo de campo; baixo consumo; gateway centraliza a política; pode atravessar zonas temporariamente sem cobertura.
+**Pros:** removes an Internet stack and credentials from the smallest field device; low power; gateway centralizes policy; can bridge temporary dead zones.
 
-**Contras:** descoberta RF/física, pairing e identificadores de dispositivo; bandwidth e alcance pequenos; gateway ainda vincula todas as mensagens; restrições de spectrum e criptografia variam; captura pode expor dados enfileirados.
+**Cons:** RF/physical discovery, pairing and device identifiers; small bandwidth and range; gateway still links all messages; spectrum and encryption restrictions vary; capture can expose queued data.
 
-**Procedimento:** (1) obtenha aprovação do local e spectrum; (2) faça pairing de um sensor próprio com um gateway próprio usando chaves únicas; (3) defina tipos de mensagem assinados e de tamanho fixo, TTL e rate; (4) dê ao sensor nenhuma rota IP padrão; (5) permita que o gateway encaminhe somente a um collector próprio; (6) teste replay, perda de alcance e outage do gateway; (7) inventarie e recupere ambos os dispositivos.
+**Procedure:** (1) obtain site and spectrum approval; (2) pair one owned sensor with one owned gateway using unique keys; (3) define signed fixed-size message types, TTL and rate; (4) give the sensor no default IP route; (5) let the gateway forward only to an owned collector; (6) test replay, range loss and gateway outage; (7) inventory and retrieve both devices.
 
-**Detecção:** survey RF, database de pairing, inspeção física e logs de processo/flow do gateway revelam o caminho. **OPSEC resiliente a captura:** o sensor contém somente sua chave pairwise e queue criptografada limitada, nunca credenciais de operador, Wi-Fi, cellular ou controller. **Monitoramento:** alerte sobre novos peers, rollback de sequência, falha de chave, taxa RF incomum e mensagens que chegam por gateway não registrado.
+**Detection:** RF survey, pairing database, physical inspection and gateway process/flow logs reveal the path. **Capture-resilient OPSEC:** the sensor holds only its pairwise key and bounded encrypted queue, never operator, Wi-Fi, cellular or controller credentials. **Monitoring:** alert on new peers, sequence rollback, key failure, unusual RF rate and messages arriving through an unregistered gateway.
 
-## Matriz de exposição a captura/comprometimento
+## Capture/compromise exposure matrix
 
-Esta tabela aplica uma verificação de capture resilience a cada família acima. “Minimize” significa reduzir secrets e blast radius em assets autorizados; nunca significa apagar evidências ou ocultar-se de uma investigação.
+This table applies a capture-resilience check to every family above. “Minimize” means reduce secrets and blast radius on authorized assets; it never means clearing evidence or hiding from an investigation.
 
-| Família de técnica | Um endpoint/relay capturado pode revelar | Controle autorizado mínimo |
+| Technique family | A captured endpoint/relay can reveal | Minimum authorized control |
 |---|---|---|
-| NAT/CGNAT, public Wi-Fi, travel router | redes conhecidas, histórico DHCP/portal, MACs, peer do túnel | dispositivo separado da organização; private MAC quando compatível; nenhuma conta pessoal; inventário do controller |
-| VPN, VPS, HTTP/SOCKS/SSH, multi-hop | provedores/hostnames, chaves, rotas, logs e hop adjacente | uma identidade por engagement; TTL curto; rotas estreitas; revogação no broker; nenhuma master key |
-| OHTTP/ODoH, MASQUE, relay de provedor dividido | configuração relay/gateway, identificadores de aplicação e requests em cache | minimize identificadores do payload; fixe configuração aprovada; cache limitado; ausência estrita de fallback direto |
-| Tor, bridge, onion service, I2P, mixnet, GNUnet | software instalado, material bridge/onion, estado local e histórico de peers | cliente padrão; chaves de serviço separadas; estado mínimo criptografado; altere a identidade do serviço comprometido |
-| Remote browser/VDI/jump host | token do workspace, clipboard/arquivos e tenant remoto | MFA resistente a phishing no gateway; canais de transferência desabilitados; revogação rápida da sessão |
-| Cellular, satellite, APN privado | SIM/eSIM, identidade IMEI/terminal, provedor e localização aproximada | contrato da organização; nenhuma co-localização pessoal; política estreita de APN/overlay; runbook de suspensão |
-| Proxy residencial/cooperativo, ORB lab | identidade do agent, controller/próximo hop, tráfego em cache | somente nós consentidos/próprios; agent assinado; credencial por nó; mapeamento de participantes no controller |
-| CDN/fronting, fast flux, serverless | tenant/origin/configuração, tokens API, deployment e referências de billing | projeto dedicado; role least-privilege; token de deployment curto; auditoria do provedor retida centralmente |
-| Dead drop, pull mailbox, store-and-forward | nomes de objetos, queue, jobs/resultados em cache e dados de custódia | jobs assinados e delimitados; TTL; cache criptografado; identidade de produtor separada; logs de servidor imutáveis |
-| Drop, nearest-neighbor, bridge de longo alcance | serial/radio/SSID/peer, device key, artefatos de instalação física | instalação escrita; identidade de dispositivo única; nenhum secret de operador; telemetria de estado/tamper; revogar e recuperar |
-| TURN, reverse overlay, dual-uplink | realm/broker, credencial de dispositivo, peer/rota e perfis de uplink | serviço estreito somente de saída; credencial curta; login de operador independente; caminhos fail-closed |
-| Endereçamento temporário IPv6 | perfis, histórico de prefix e estado de endpoint/aplicação | tratar apenas como anti-tracking; preservar logs de rede; combinar com compartmentation do endpoint |
-| Pluggable transport/refraction lab | configurações bridge/broker/decoy, estado Tor e chaves de pesquisa | cliente padrão ou laboratório isolado; nenhum estado pessoal de navegador; nenhum signaling de produção |
-| IPFS/PIR/fetcher | CID/query solicitado, conteúdo em cache, token de gateway/serviço | cache criptografado e limitado; somente parâmetros públicos; token curto de serviço com allowlist |
-| Anycast/QUIC/MPTCP | nós de serviço, connection IDs, estado resumível e todos os caminhos conhecidos | somente identidade regional; resumption curta; revogação central de rota/sessão |
-| Managed CI/CD runner | repository, workflow, token do provedor, logs e artifacts | workflow least-privilege; nenhum secret de produção/field/wallet; aprovação do environment |
-| Non-IP local hop | peer de rádio, chave pairwise, mensagens enfileiradas e identidade do gateway | chave pairwise única; schema fixo de mensagens; nenhuma credencial de Wi-Fi/cellular/operador |
+| NAT/CGNAT, public Wi-Fi, travel router | known networks, DHCP/portal history, MACs, tunnel peer | separate organization device; private MAC where supported; no personal accounts; controller inventory |
+| VPN, VPS, HTTP/SOCKS/SSH, multi-hop | provider/hostnames, keys, routes, logs and adjacent hop | one identity per engagement; short TTL; narrow routes; broker-side revocation; no master keys |
+| OHTTP/ODoH, MASQUE, split-provider relay | relay/gateway configuration, application identifiers and cached requests | minimize payload identifiers; pin approved config; bounded cache; strict no-direct fallback |
+| Tor, bridge, onion service, I2P, mixnet, GNUnet | installed software, bridge/onion material, local state and peer history | standard client; separate service keys; encrypted minimal state; rotate compromised service identity |
+| Remote browser/VDI/jump host | workspace token, clipboard/files and remote tenant | phishing-resistant MFA at gateway; disabled transfer channels; rapid session revocation |
+| Cellular, satellite, private APN | SIM/eSIM, IMEI/terminal identity, provider and approximate location | organization contract; no personal co-location; narrow APN/overlay policy; provider suspension runbook |
+| Residential/cooperative proxy, ORB lab | agent identity, controller/next hop, cached traffic | only consented/owned nodes; signed agent; per-node credential; controller-held participant mapping |
+| CDN/fronting, fast flux, serverless | tenant/origin/config, API tokens, deployment and billing references | dedicated project; least-privilege role; short-lived deploy token; provider audit retained centrally |
+| Dead drop, pull mailbox, store-and-forward | object names, queue, cached jobs/results and custody data | signed bounded jobs; TTL; encrypted cache; separate producer identity; immutable server logs |
+| Drop, nearest-neighbor, long-range bridge | serial/radio/SSID/peer, device key, physical placement artifacts | written placement; unique device identity; no operator secret; tamper/state telemetry; revoke and recover |
+| TURN, reverse overlay, dual-uplink | realm/broker, device credential, peer/route and uplink profiles | outbound-only narrow service; short-lived device credential; independent operator login; fail-closed paths |
+| IPv6 temporary addressing | profiles, prefix history and endpoint/application state | treat as anti-tracking only; preserve network logs; pair with endpoint compartmentation |
+| Pluggable transport/refraction lab | bridge/broker/decoy settings, Tor state and research keys | standard client or isolated lab; no personal browser state; no production signaling |
+| IPFS/PIR/fetcher | requested CID/query client, cached content, gateway or service token | encrypted bounded cache; public-only parameters; short-lived allowlisted service token |
+| Anycast/QUIC/MPTCP | service nodes, connection IDs, resumable state and every known path | regional identity only; short resumption lifetime; central route/session revocation |
+| Managed CI/CD runner | repository, workflow, provider token, logs and artifacts | least-privilege workflow; no production/field/wallet secrets; environment approval |
+| Non-IP local hop | radio peer, pairwise key, queued messages and gateway identity | unique pairwise key; fixed message schema; no Wi-Fi/cellular/operator credential |
 
-## Monitoramento de possível descoberta para cada família de acesso
+## Monitoring possible discovery for every access family
 
-Nenhum teste no lado do cliente prova que um investigador ou defensor está observando. Monitore alterações em sistemas pertencentes ao engagement, corrobore-as com controller/cliente e pare em vez de sondar observadores. As linhas abaixo cobrem todas as técnicas acima; combine-as com os [estados de alerta e runbook de resposta do field node](capture-resilient-authorized-field-nodes.md#monitoring-for-discovery-loss-or-compromise).
+No client-side test proves that an investigator or defender is watching. Monitor changes in systems the engagement owns, corroborate them with the controller/client, and stop rather than probing observers. The rows below cover every technique above; combine them with the [field-node alert states and response runbook](capture-resilient-authorized-field-nodes.md#monitoring-for-discovery-loss-or-compromise).
 
-| Técnicas cobertas | Sinais seguros no controller | Condição de quarantine/stop |
+| Covered techniques | Safe controller-side signals | Quarantine/stop condition |
 |---|---|---|
-| NAT/CGNAT, public/guest Wi-Fi, travel router, cellular/eSIM, satellite, APN privado | sessão lease/portal/carrier, tupla pública, alteração de BSSID/célula/caminho, aviso do provedor | rede/SIM/dispositivo não aprovado, relocation inexplicada ou escalada de provedor/SOC |
-| VPN/VPS, HTTP/SOCKS/SSH, multi-hop, proxy residencial/cooperativo | autenticação do peer, estado do túnel, leaks de rota/DNS, novo evento admin/API, reclamação | credencial duplicada/roubada, administrador desconhecido, fallback direto ou egress fora do escopo |
-| OHTTP/ODoH/ECH, MASQUE, relay dividido, TURN | allocation relay/gateway, versão de chave/configuração, conexão direta não suportada, taxa de erro/replay | mismatch de chave, fallback direto, realm/peer desconhecido ou aviso de abuso |
-| Tor Browser, bridges, Snowflake/WebTunnel/obfs4/meek, VPN±Tor, onion service | estado de bootstrap, falha de circuito, descriptor onion/saúde do serviço e página canary própria | crossover com conta pessoal, conexão inesperada não-Tor ou chave de serviço comprometida |
-| I2P, mixnet, GNUnet, mesh/store-forward, non-IP local hop | conjunto de peers, idade/sequência da queue, chegada ao gateway, associação de rádio e hash de conteúdo | peer/gateway desconhecido, rollback de sequência, conteúdo não autorizado ou registro de custódia ausente |
-| Remote browser/VDI/jump host, CI/CD runner, serverless | sessão IdP, alteração de workflow/imagem/configuração, novo uso de token, artifact/export e auditoria cloud | login/alteração de workflow desconhecidos, leitura de secret, destino inesperado ou escalada de role/projeto |
-| ORB lab, fast flux/DGA, CDN/fronting, dead drop/pull mailbox | inventário de nós próprios, acesso DNS/edge/objeto, grafo do controller, assinatura do job e TTL | nó/origin/writer de objeto desconhecido, job não assinado/repetido, escape da topologia do laboratório |
-| Drop/nearest-neighbor/bridge de longo alcance/outbound overlay/dual uplink | heartbeat assinado, hash de boot/config, estado do enclosure, contexto AP/switch, identidade duplicada | nó movido/aberto, boot/hash/caminho inesperado, uso de sentinel ou relatório do local |
-| IPv6 temporário, migração QUIC, MPTCP | prefix delegado, connection ID/subflows, validação de caminho e sessão broker | migração impossível, caminhos simultâneos não aprovados ou resumption após revogação |
-| IPFS/cache, PIR, fetcher delimitado | CID/formato da query/root version, mudança de peer/gateway, redirect/negação de allowlist | pin/query/destino inesperado, root de dataset não assinado ou aviso de abuso |
-| Lab de refraction/decoy-routing, rendezvous anycast | decisão de desvio própria, chegada ao proxy, origem BGP/RPKI, digest regional de configuração | sinal em caminho de produção, origem de rota desconhecida, inconsistência de região/configuração |
+| NAT/CGNAT, public/guest Wi-Fi, travel router, cellular/eSIM, satellite, private APN | lease/portal/carrier session, public tuple, BSSID/cell/path change, provider notice | unapproved network/SIM/device, unexplained relocation or provider/SOC escalation |
+| VPN/VPS, HTTP/SOCKS/SSH, multi-hop, residential/cooperative proxy | peer authentication, tunnel state, route/DNS leaks, new admin/API event, complaint | duplicate/stolen credential, unknown administrator, direct fallback or out-of-scope egress |
+| OHTTP/ODoH/ECH, MASQUE, split-provider relay, TURN | relay/gateway allocation, key/config version, unsupported direct connection, error/replay rate | key mismatch, direct fallback, unknown realm/peer or provider abuse notice |
+| Tor Browser, bridges, Snowflake/WebTunnel/obfs4/meek, VPN±Tor, onion service | bootstrap state, circuit failure, onion descriptor/service health and owned canary page | personal-account crossover, unexpected non-Tor connection or compromised service key |
+| I2P, mixnet, GNUnet, mesh/store-forward, non-IP local hop | peer set, queue age/sequence, gateway arrival, radio association and content hash | unknown peer/gateway, sequence rollback, unauthorized content or missing custody record |
+| Remote browser/VDI/jump host, CI/CD runner, serverless | IdP session, workflow/image/config change, new token use, artifact/export and cloud audit | unknown login/workflow edit, secret read, unexpected destination or project-role escalation |
+| ORB lab, fast flux/DGA, CDN/fronting, dead drop/pull mailbox | owned node inventory, DNS/edge/object access, controller graph, job signature and TTL | unknown node/origin/object writer, unsigned/replayed job, topology escape from lab |
+| Drop/nearest-neighbor/long-range bridge/outbound overlay/dual uplink | signed heartbeat, boot/config hash, enclosure state, AP/switch context, duplicate identity | moved/opened node, unexpected boot/hash/path, sentinel use or site report |
+| IPv6 temporary addresses, QUIC migration, MPTCP | delegated prefix, connection ID/subflows, path-validation and broker session | impossible migration, simultaneous unapproved paths or session resumption after revoke |
+| IPFS/cache, PIR, constrained fetcher | CID/query-shape/root version, peer/gateway change, redirect/allowlist denial | unexpected pin/query/destination, unsigned dataset root or provider abuse notice |
+| Refraction/decoy-routing lab, anycast rendezvous | owned diversion decision, proxy arrival, BGP/RPKI origin, regional config digest | production-path signal, unknown route origin, region/config inconsistency |
 
-## Escolhendo e testando um caminho
+## Choosing and testing a path
 
-1. Nomeie o observador a remover e os dados a ocultar.
-2. Selecione a família menos complexa que o remova.
-3. Desenhe os observadores de origem, entrada, trânsito, saída, DNS, conta e pagamento.
-4. Use identidade separada de endpoint/aplicação.
-5. Verifique IPv4, IPv6, DNS, bypass de WebRTC/aplicação e visão do destino.
-6. Interrompa cada hop e confirme que a falha é fechada.
-7. Compare logs em cada componente sob seu controle.
-8. Registre vínculos residuais de temporização, provedor, endpoint e físicos.
+1. Name the observer to remove and data to hide.
+2. Select the least complex family that removes it.
+3. Draw source, entry, traversal, exit, DNS, account and payment observers.
+4. Use a separate endpoint/application identity.
+5. Verify IPv4, IPv6, DNS, WebRTC/application bypass and destination view.
+6. Break every hop and confirm failure is closed.
+7. Compare logs at every component you control.
+8. Record residual timing, provider, endpoint and physical links.
 
 ## References
 
-- [1] [EFF — Escolhendo a VPN certa para você](https://ssd.eff.org/module/choosing-vpn-thats-right-you)
-- [2] [RFC 9458 — HTTP Oblivious](https://www.rfc-editor.org/rfc/rfc9458.html)
+- [1] [EFF — Choosing the VPN that is right for you](https://ssd.eff.org/module/choosing-vpn-thats-right-you)
+- [2] [RFC 9458 — Oblivious HTTP](https://www.rfc-editor.org/rfc/rfc9458.html)
 - [3] [RFC 9298 — Proxying UDP in HTTP](https://www.rfc-editor.org/rfc/rfc9298.html) and [RFC 9484 — Proxying IP in HTTP](https://www.rfc-editor.org/rfc/rfc9484.html)
-- [4] [Tor Project — Proteções do Tor](https://support.torproject.org/about-tor/introduction/protections/) and [Tor specification introduction](https://spec.torproject.org/intro/)
-- [5] [Tor Project — Desbloqueando o Tor](https://support.torproject.org/tor-browser/circumvention/unblocking-tor/)
-- [6] [Tor Project — Usando Tor Browser com uma VPN](https://support.torproject.org/tor-browser/general/vpn-with-tor/)
-- [7] [Tor Project — Visão geral dos onion services](https://community.torproject.org/onion-services/overview/)
+- [4] [Tor Project — Tor protections](https://support.torproject.org/about-tor/introduction/protections/) and [Tor specification introduction](https://spec.torproject.org/intro/)
+- [5] [Tor Project — Unblocking Tor](https://support.torproject.org/tor-browser/circumvention/unblocking-tor/)
+- [6] [Tor Project — Using Tor Browser with a VPN](https://support.torproject.org/tor-browser/general/vpn-with-tor/)
+- [7] [Tor Project — Onion services overview](https://community.torproject.org/onion-services/overview/)
 - [8] [I2P — Threat model](https://www.i2p.net/en/docs/overview/threat-model/)
 - [9] [Katzenpost — Threat model](https://katzenpost.network/docs/threat_model/)
-- [10] [GNUnet — Compartilhamento anônimo de arquivos](https://docs.gnunet.org/master/users/fs.html) and [GNUnet VPN limitations](https://docs.gnunet.org/latest/users/vpn.html)
+- [10] [GNUnet — Anonymous file sharing](https://docs.gnunet.org/master/users/fs.html) and [GNUnet VPN limitations](https://docs.gnunet.org/latest/users/vpn.html)
 - [11] [RFC 9230 — Oblivious DoH](https://www.rfc-editor.org/rfc/rfc9230.html) and [RFC 9849 — Encrypted Client Hello](https://www.rfc-editor.org/rfc/rfc9849.html)
-- [12] [Apple Platform Security — Segurança do iCloud Private Relay](https://support.apple.com/guide/security/secad8ce3233/web)
-- [13] [GSMA — Registro obrigatório de SIM](https://www.gsma.com/solutions-and-impact/connectivity-for-good/mobile-for-development/programme/digital-identity/mandatory-sim-registration-policy-and-regulatory-perspectives-in-the-absence-of-data-protection-laws/)
+- [12] [Apple Platform Security — iCloud Private Relay security](https://support.apple.com/guide/security/secad8ce3233/web)
+- [13] [GSMA — Mandatory SIM registration](https://www.gsma.com/solutions-and-impact/connectivity-for-good/mobile-for-development/programme/digital-identity/mandatory-sim-registration-policy-and-regulatory-perspectives-in-the-absence-of-data-protection-laws/)
 - [14] [Kaspersky Securelist — Satellite Turla](https://securelist.com/satellite-turla-apt-command-and-control-in-the-sky/72081/)
-- [15] [Google Cloud/Mandiant — Atores de espionagem ligados à China usam redes ORB](https://cloud.google.com/blog/topics/threat-intelligence/china-nexus-espionage-orb-networks)
+- [15] [Google Cloud/Mandiant — China-nexus espionage actors use ORB networks](https://cloud.google.com/blog/topics/threat-intelligence/china-nexus-espionage-orb-networks)
 - [16] [MITRE ATT&CK — Domain Fronting (T1090.004)](https://attack.mitre.org/techniques/T1090/004/)
 - [17] [MITRE ATT&CK — Fast Flux DNS (T1568.001)](https://attack.mitre.org/techniques/T1568/001/)
 - [18] [Volexity — The Nearest Neighbor Attack](https://www.volexity.com/blog/2024/11/22/the-nearest-neighbor-attack-how-a-russian-apt-weaponized-nearby-wi-fi-networks-for-covert-access/)
 - [19] [RFC 8656 — Traversal Using Relays around NAT (TURN)](https://www.rfc-editor.org/rfc/rfc8656.html)
 - [20] [WireGuard — Quick Start: NAT and Firewall Traversal Persistence](https://www.wireguard.com/quickstart/)
 - [21] [RFC 8981 — Temporary Address Extensions for Stateless Address Autoconfiguration in IPv6](https://www.rfc-editor.org/rfc/rfc8981.html)
-- [22] [Tor Project — Pluggable transports e bridges](https://support.torproject.org/tor-browser/circumvention/unblocking-tor/) and [Using Snowflake](https://support.torproject.org/anti-censorship/how-can-i-use-snowflake/)
-- [23] [Refraction Networking — pesquisa de projeto e implantação](https://refraction.network/) and [Running Refraction Networking for Real](https://refraction.network/papers/deployment-pets20.pdf)
-- [24] [IPFS — Conceitos de HTTP Gateway e ciclo de vida da requisição](https://docs.ipfs.tech/concepts/ipfs-gateway/)
-- [25] [IETF PEARG — Visão geral de Private Information Retrieval](https://datatracker.ietf.org/meeting/121/materials/slides-121-pearg-call-me-by-my-name-simple-practical-private-information-retrieval-for-keyword-queries-00)
+- [22] [Tor Project — Pluggable transports and bridges](https://support.torproject.org/tor-browser/circumvention/unblocking-tor/) and [Using Snowflake](https://support.torproject.org/anti-censorship/how-can-i-use-snowflake/)
+- [23] [Refraction Networking — project and deployment research](https://refraction.network/) and [Running Refraction Networking for Real](https://refraction.network/papers/deployment-pets20.pdf)
+- [24] [IPFS — HTTP Gateway concepts and request lifecycle](https://docs.ipfs.tech/concepts/ipfs-gateway/)
+- [25] [IETF PEARG — Private Information Retrieval overview](https://datatracker.ietf.org/meeting/121/materials/slides-121-pearg-call-me-by-my-name-simple-practical-private-information-retrieval-for-keyword-queries-00)
 - [26] [RFC 4786 — Operation of Anycast Services](https://www.rfc-editor.org/rfc/rfc4786.html)
 - [27] [RFC 9000 — QUIC connection migration](https://www.rfc-editor.org/rfc/rfc9000.html) and [RFC 8684 — Multipath TCP](https://www.rfc-editor.org/rfc/rfc8684.html)
-- [28] [GitHub — Referência de runners hospedados pelo GitHub](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)
+- [28] [GitHub — GitHub-hosted runners reference](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)
+{{#include ../banners/hacktricks-training.md}}
