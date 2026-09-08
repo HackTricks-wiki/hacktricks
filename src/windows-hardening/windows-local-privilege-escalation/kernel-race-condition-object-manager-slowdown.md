@@ -1,20 +1,20 @@
-# Object Manager Slow Paths による Kernel Race Condition Exploitation
+# Object Manager Slow PathsによるKernel Race Condition Exploitation
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## レースウィンドウを広げることが重要な理由
+## Race windowを引き延ばすことが重要な理由
 
-多くの Windows kernel LPE は、`check_state(); NtOpenX("name"); privileged_action();` という古典的なパターンに従います。最新のハードウェアでは、コールド状態の `NtOpenEvent`/`NtOpenSection` が短い名前を解決するのに約 2 µs しかかからないため、secure action が実行される前にチェック済みの状態を反転させる時間はほとんどありません。意図的にステップ 2 の Object Manager Namespace (OMNS) lookup を数十マイクロ秒かかるようにすることで、attacker は何千回も試行しなくても、通常は不安定な race に一貫して勝てるだけの時間を確保できます。<sup>[[1]](#references)</sup>
+多くのWindows kernel LPEは、`check_state(); NtOpenX("name"); privileged_action();`という典型的なパターンに従います。最新のハードウェアでは、coldな`NtOpenEvent`/`NtOpenSection`による短い名前の解決は約2 µsで完了するため、secure actionが実行される前にchecked stateを変更する時間はほとんどありません。意図的にstep 2のObject Manager Namespace (OMNS) lookupに数十マイクロ秒かかるようにすることで、attackerは数千回の試行を必要とせず、本来は不安定なraceにも一貫して勝てるだけの時間を得られます。<sup>[[1]](#references)</sup>
 
-## Object Manager lookup の内部概要
+## Object Manager lookupの内部概要
 
-* **OMNS structure** – `\BaseNamedObjects\Foo` のような名前は、directory ごとに解決されます。各 component で、kernel は *Object Directory* を検索して開き、Unicode string を比較します。経路上で symbolic link（ドライブレターなど）が辿られる場合もあります。
-* **UNICODE_STRING limit** – OM path は `UNICODE_STRING` 内に格納され、その `Length` は 16 ビット値です。絶対的な上限は 65,535 bytes（32,767 UTF-16 codepoints）です。`\BaseNamedObjects\` のような prefix を使用しても、attacker は約 32,000 文字を制御できます。
-* **Attacker prerequisites** – どの user でも、`\BaseNamedObjects` のような writable directory の下に object を作成できます。vulnerable code がその内部の名前を使用する場合、またはそこに到達する symbolic link を辿る場合、attacker は special privileges なしで lookup performance を制御できます。<sup>[[1]](#references)</sup>
+* **OMNS structure** – `\BaseNamedObjects\Foo`のような名前は、directoryごとに解決されます。各componentで、kernelは*Object Directory*を検索・openし、Unicode stringを比較します。途中でsymbolic link（例：drive letter）が辿られる場合もあります。
+* **UNICODE_STRING limit** – OM pathsは`UNICODE_STRING`内に格納され、その`Length`は16-bit valueです。絶対的な上限は65 535 bytes（32 767 UTF-16 codepoints）です。`\BaseNamedObjects\`のようなprefixがあっても、attackerは約32 000文字を制御できます。
+* **Attacker prerequisites** – すべてのuserは、`\BaseNamedObjects`のようなwritable directoryの配下にobjectを作成できます。vulnerable codeがその配下のnameを使用する場合、またはそこに到達するsymbolic linkをfollowする場合、attackerはspecial privilegesなしでlookup performanceを制御できます。<sup>[[1]](#references)</sup>
 
 ## Slowdown primitive #1 – Single maximal component
 
-component の解決コストは、その長さに対しておおむね線形です。これは kernel が parent directory 内のすべての entry に対して Unicode comparison を実行する必要があるためです。32 kB の長さの名前を持つ event を作成すると、Windows 11 24H2（Snapdragon X Elite testbed）では `NtOpenEvent` latency が約 2 µs から約 35 µs に直ちに増加します。
+componentの解決コストは、その長さに対しておおむねlinearです。これはkernelがparent directory内のすべてのentryに対してUnicode comparisonを実行する必要があるためです。32 kBの長さのnameを持つeventを作成すると、Windows 11 24H2（Snapdragon X Elite testbed）では`NtOpenEvent` latencyが約2 µsから約35 µsへ即座に増加します。
 ```cpp
 std::wstring path;
 while (path.size() <= 32000) {
@@ -25,13 +25,13 @@ path += std::wstring(500, 'A');
 ```
 *実践的な注意点*
 
-- 名前付き kernel object（events、sections、semaphores など）であれば、いずれでも長さ制限に到達できます。
-- Symbolic links または reparse points によって、短い「victim」名をこの巨大な component に向けると、slowdown を透過的に適用できます。
-- すべてが user-writable namespace 内に存在するため、この payload は standard user integrity level から実行できます。<sup>[[1]](#references)</sup>
+- 任意の名前付き kernel object（events、sections、semaphores…）を使用して長さ制限に達させることができます。
+- Symbolic links または reparse points によって、短い「victim」名をこの巨大な component に向けることで、slowdown を透過的に適用できます。
+- すべてが user-writable namespaces 内に存在するため、この payload は standard user integrity level から動作します。<sup>[[1]](#references)</sup>
 
-## Slowdown primitive #2 – 深く再帰したディレクトリ
+## Slowdown primitive #2 – Deep recursive directories
 
-より攻撃的な variant では、数千個のディレクトリの chain（`\BaseNamedObjects\A\A\...\X`）を割り当てます。各 hop で directory resolution logic（ACL checks、hash lookups、reference counting）がトリガーされるため、1 回の string compare よりも level あたりの latency が高くなります。同じ `UNICODE_STRING` size による制限を受けますが、約 16,000 levels では、long single components で達成された 35 µs の barrier を empirical timings が上回ります。
+より攻撃的な variant では、数千個の directories の chain（`\BaseNamedObjects\A\A\...\X`）を割り当てます。各 hop で directory resolution logic（ACL checks、hash lookups、reference counting）が trigger されるため、per-level latency は単一の string compare より高くなります。同じ `UNICODE_STRING` size による制限である約 16,000 levels では、empirical timings が、長い単一 component で達成される 35 µs の barrier を超えます。
 ```cpp
 ScopedHandle base_dir = OpenDirectory(L"\\BaseNamedObjects");
 HANDLE last_dir = base_dir.get();
@@ -45,19 +45,19 @@ printf("%d,%f\n", i + 1, result);
 }
 }
 ```
-ヒント:
+Tips:
 
 * 親ディレクトリが重複を拒否し始めた場合は、レベルごとに文字（`A/B/C/...`）を切り替える。
-* exploit 後に chain をクリーンに削除して namespace を汚染しないよう、handle array を保持する。<sup>[[1]](#references)</sup>
+* exploitation 後に chain をクリーンに削除して namespace を汚染しないよう、handle array を保持する。<sup>[[1]](#references)</sup>
 
 ## Slowdown primitive #3 – Shadow directories、hash collisions、symlink reparses（マイクロ秒ではなく数分）
 
-Object directories は **shadow directories**（fallback lookups）と、entry 用の bucketed hash tables をサポートしている。これらと 64-component の symbolic-link reparse limit を組み合わせて悪用し、`UNICODE_STRING` の長さを超えずに slowdown を大幅に増幅する。
+Object directories は **shadow directories**（fallback lookups）と、entry 用の bucket 化された hash tables をサポートしている。これらに加えて、64-component の symbolic-link reparse limit を悪用し、`UNICODE_STRING` の長さを超過せずに slowdown を大幅に増幅する。
 
-1. `\BaseNamedObjects` 配下に、例として `A`（shadow）と `A\A`（target）の 2 つの directories を作成する。2 つ目は 1 つ目を shadow directory として使用して (`NtCreateDirectoryObjectEx`)、作成する。これにより、`A` での missing lookup は `A\A` に fall through する。
-2. 各 directory に、同じ hash bucket に入る **colliding names** を数千個追加する（例: `RtlHashUnicodeString` の値を同じに保ちながら、末尾の digits を変える）。これにより lookup は単一 directory 内で O(n) の linear scan に劣化する。
-3. 長い `A\A\…` suffix に繰り返し reparse する、約 63 個の **object manager symbolic links** の chain を構築し、reparse budget を消費する。各 reparse は parsing を先頭から再開するため、collision のコストが増幅される。
-4. 最終 component（`...\\0`）の lookup は、各 directory に 16,000 個の collisions が存在する場合、Windows 11 上で **数分**かかるようになり、one-shot kernel LPE において実質的に race win を確実に得られる。
+1. `\BaseNamedObjects` の下に、例として `A`（shadow）と `A\A`（target）の2つのディレクトリを作成する。2つ目のディレクトリは、1つ目を shadow directory として使用して作成する（`NtCreateDirectoryObjectEx`）。これにより、`A` 内で見つからない lookup は `A\A` にフォールスルーする。
+2. 各ディレクトリに、同じ hash bucket に入る **colliding names** を数千個投入する（例：同じ `RtlHashUnicodeString` value を維持しながら末尾の数字を変える）。これにより、lookup は単一ディレクトリ内で O(n) の linear scan まで低下する。
+3. 長い `A\A\…` suffix に繰り返し reparse する、約63個の **object manager symbolic links** の chain を構築し、reparse budget を消費する。各 reparse は parsing を先頭から再開するため、collision のコストが増幅される。
+4. 最終 component（`...\\0`）の lookup は、各ディレクトリに16,000個の collisions が存在する場合、Windows 11 上で **minutes** を要するようになり、one-shot kernel LPEs において race の勝利を実質的に保証できる。
 ```cpp
 ScopedHandle shadow = CreateDirectory(L"\\BaseNamedObjects\\A");
 ScopedHandle target = CreateDirectoryEx(L"A", shadow.get(), shadow.get());
@@ -66,16 +66,16 @@ CreateCollidingEntries(target, 16000, dirs);
 CreateSymlinkChain(shadow, LongSuffix(L"\\A", 16000), 63);
 printf("%f\n", RunTest(LongSuffix(L"\\A", 16000) + L"\\0", 1));
 ```
-*重要性*: 数分間の slowdown により、one-shot の race ベース LPE は deterministic exploit になります。<sup>[[1]](#references)</sup>
+*重要な理由*: 数分間の slowdown により、one-shot の race-based LPE が deterministic exploit になります。<sup>[[1]](#references)</sup>
 
-### 2025 retest notes & ready-made tooling
+### 2025年の再テストに関するメモとすぐに使える tooling
 
-- James Forshaw は、Windows 11 24H2 (ARM64) で更新された timing とともにこの technique を再公開しました。Baseline の open は引き続き約 2 µs です。32 kB の component により約 35 µs まで増加し、shadow-dir + collision + 63-reparse chain では依然として約 3 分に達します。これは、現在の build でも primitives が存続していることを確認しています。Source code と perf harness は、更新された Project Zero の post にあります。<sup>[[1]](#references)</sup>
-- 公開されている `symboliclink-testing-tools` bundle を使用して setup を script 化できます。`CreateObjectDirectory.exe` で shadow/target pair を作成し、`NativeSymlink.exe` を loop で実行して 63-hop chain を生成します。これにより、手書きの `NtCreate*` wrapper を用意する必要がなくなり、ACL も一貫して維持できます。<sup>[[2]](#references)</sup>
+- James Forshaw は、Windows 11 24H2（ARM64）で更新された timing とともにこの technique を再公開しました。baseline の open は引き続き約 2 µs で、32 kB の component によって約 35 µs まで増加します。また、shadow-dir + collision + 63-reparse chain では依然として約 3 分に達し、これらの primitive が現行の build でも有効であることが確認されています。source code と perf harness は更新版の Project Zero post にあります。<sup>[[1]](#references)</sup>
+- 公開されている `symboliclink-testing-tools` bundle を使用して setup を script 化できます。`CreateObjectDirectory.exe` で shadow/target pair を作成し、`NativeSymlink.exe` を loop で実行して 63-hop chain を生成します。これにより、手書きの `NtCreate*` wrapper を用意する必要がなくなり、ACL も一貫した状態に保てます。<sup>[[2]](#references)</sup>
 
-## Measuring your race window
+## Race window の測定
 
-exploit 内に簡単な harness を組み込み、victim hardware 上で window がどの程度大きくなるかを測定します。以下の snippet は、`QueryPerformanceCounter` を使用して target object を `iterations` 回 open し、1 回の open あたりの平均 cost を返します。<sup>[[1]](#references)</sup>
+exploit 内に簡単な harness を組み込み、victim hardware 上で window がどの程度大きくなるかを測定します。以下の snippet は、target object を `iterations` 回 open し、`QueryPerformanceCounter` を使用して 1 回の open にかかる平均コストを返します。<sup>[[1]](#references)</sup>
 ```cpp
 static double RunTest(const std::wstring name, int iterations,
 std::wstring create_name = L"", HANDLE root = nullptr) {
@@ -94,27 +94,27 @@ handles.emplace_back(open_handle);
 return timer.GetTime(iterations);
 }
 ```
-結果は、race orchestration strategy（必要な worker thread の数、sleep interval、shared state を切り替えるタイミングなど）に直接反映されます。
+結果は race orchestration strategy に直接反映されます（例：必要な worker threads の数、sleep intervals、共有状態を切り替える必要があるタイミング）。
 
 ## Exploitation workflow
 
-1. **脆弱な open を特定する** – symbols、ETW、hypervisor tracing、または reversing を使って kernel path を追跡し、attacker-controlled name または user-writable directory 内の symbolic link をたどる `NtOpen*`/`ObOpenObjectByName` 呼び出しを見つけます。
-2. **その name を slow path に置き換える**
+1. **脆弱な open を特定する** – symbols、ETW、hypervisor tracing、または reverse engineering を使って kernel path を追跡し、attacker が制御する名前や user-writable directory 内の symbolic link を走査する `NtOpen*`/`ObOpenObjectByName` 呼び出しを見つけます。
+2. **その名前を slow path に置き換える**
 - `\BaseNamedObjects`（または別の writable OM root）配下に、長い component または directory chain を作成します。
-- name the kernel expects が slow path に解決されるように symbolic link を作成します。元の target に触れずに、vulnerable driver の directory lookup を自分の構造へ向けられます。
-3. **race を trigger する**
-- Thread A（victim）は vulnerable code を実行し、slow lookup 内で block します。
-- Thread B（attacker）は、Thread A が処理中の間に guarded state（例：file handle の swap、symbolic link の書き換え、object security の切り替え）を変更します。
-- Thread A が再開して privileged action を実行すると、stale state を観測し、attacker-controlled operation を実行します。
-4. **clean up** – 疑わしい artifact を残したり、正規の IPC user を壊したりしないよう、directory chain と symbolic link を削除します。<sup>[[1]](#references)</sup>
+- kernel が想定する名前が slow path に解決されるよう、symbolic link を作成します。元の target に触れずに、vulnerable driver の directory lookup をこの構造へ向けることができます。
+3. **race を発生させる**
+- Thread A（victim）が vulnerable code を実行し、slow lookup 内で block します。
+- Thread B（attacker）が、Thread A が拘束されている間に guarded state を切り替えます（例：file handle の swap、symbolic link の書き換え、object security の切り替え）。
+- Thread A が再開して privileged action を実行すると、stale state を認識し、attacker が制御する operation を実行します。
+4. **後片付けをする** – 疑わしい artifacts を残したり、正規の IPC users を壊したりしないよう、directory chain と symbolic links を削除します。<sup>[[1]](#references)</sup>
 
 ## Applied chain: mutable Cloud Files placeholders + Object Manager path switching
 
-RoguePlanet（CVE-2026-50656）に対する bypass として公開された [ShieldBreak](https://github.com/MSNightmare/ShieldBreak) は、より広範な exploitation pattern を示しています。これは、privileged scanner に logical file のある representation を分類させた後、remediation がそれを使用する前に、その bytes と namespace resolution の両方を変更します。PoC は、Cloud Files hydration TOCTOU、Object Manager shadow-directory fallback、CLFS-generated-name capture、local administrative-share link を組み合わせ、Defender cleanup を protected DLL write に変換します。<sup>[[3]](#references)[[4]](#references)</sup>
+[RoguePlanet (CVE-2026-50656)](https://github.com/MSNightmare/ShieldBreak) の bypass として公開された [ShieldBreak](https://github.com/MSNightmare/ShieldBreak) は、より広範な exploitation pattern を示しています。これは、privileged scanner に logical file のある表現を分類させた後、remediation がそれを使用する前に、その bytes と namespace resolution の両方を変更します。PoC は Cloud Files hydration TOCTOU、Object Manager shadow-directory fallback、CLFS-generated-name capture、local administrative-share link を組み合わせ、Defender cleanup を protected DLL write に変換します。<sup>[[3]](#references)[[4]](#references)</sup>
 
 ### 1. Cloud Files hydration を通じて content を置き換える
 
-attacker-writable directory を Cloud Files sync root として登録し、`CF_CALLBACK_TYPE_FETCH_DATA` callback に接続します。そして、EICAR ZIP のような deterministic detection trigger と advertised size が一致する placeholder を作成します。最初の fetch は trigger を返して callback state を切り替え、後続の fetch は payload を返します。scanner が最初の representation を分類した後、transfer key を取得し、payload-sized metadata で hydration を再開してから、hydration を EOF まで強制します。<sup>[[4]](#references)</sup>
+attacker が書き込み可能な directory を Cloud Files sync root として登録し、`CF_CALLBACK_TYPE_FETCH_DATA` callback を接続します。次に、EICAR ZIP のような決定論的な detection trigger と advertised size が一致する placeholder を作成します。最初の fetch では trigger を返して callback state を切り替え、その後の fetch では payload を返します。scanner が最初の representation を分類した後、transfer key を取得し、payload-sized metadata で hydration を再開してから、hydration を EOF まで強制します。<sup>[[4]](#references)</sup>
 ```cpp
 CfRegisterSyncRoot(sync_root, &registration, &policies, flags);
 CfConnectSyncRoot(sync_root, callbacks, &state, connect_flags, &connection);
@@ -125,58 +125,84 @@ opInfo.Type = CF_OPERATION_TYPE_RESTART_HYDRATION;
 CfExecute(&opInfo, &restart_params);
 CfHydratePlaceholder(placeholder_handle, {0}, CF_EOF, 0, NULL);
 ```
-セキュリティ境界は、scan、verdict、remediation が pathname または placeholder identity のみに依存している場合に破綻します。どちらも、後続の hydration によって検査済みの bytes が返されることを保証しません。<sup>[[4]](#references)</sup>
+セキュリティ境界が pathname または placeholder identity のみに基づいて scan、verdict、remediation を行う場合、その境界は破綻します。どちらも、後の hydration で検査済みの bytes が返されることを保証しません。<sup>[[4]](#references)</sup>
 
 ### 2. shadow-directory fallback を通じて invariant path を切り替える
 
-`NtCreateDirectoryObjectEx` を使用し、target handle を shadow/fallback directory として渡して、target Object Manager directory と、2つ目の directory を作成します。両方の resolution layer に同名の `WD_SCAN` entry を配置します。visible entry は通常の working directory を指し、fallback entry は `\CLFS\??\<working-directory>` を指すようにします。以下の invariant path のみを Defender に提供します。operation の実行中に visible link を削除すると、同じ string が CLFS-backed entry にフォールスルーします。<sup>[[4]](#references)</sup>
+`NtCreateDirectoryObjectEx` を使用して、target Object Manager directory と、target handle を shadow/fallback directory として渡した 2 つ目の directory を作成します。両方の resolution layer に同名の `WD_SCAN` entry を配置します。visible entry は通常の working directory を指し、fallback entry は `\CLFS\??\<working-directory>` を指すようにします。Defender には以下の invariant path のみを提供します。operation の実行中に visible link を削除すると、同じ string が CLFS-backed entry に fall through します。<sup>[[4]](#references)</sup>
 ```text
 \\.\globalroot\BaseNamedObjects\Restricted\WD_SHADOW_<GUID>\WD_SCAN\BERLIN
 ```
-これは、lookup を遅延させるためだけに shadow directories を使用する方法とは異なります。攻撃者は、文字列を変更せずに、以前に受け入れられた path の**意味**を変更します。<sup>[[4]](#references)</sup>
+これは、lookup を遅延させる目的だけで shadow directories を使用する場合とは異なります。攻撃者は、文字列を変更せずに、以前に受け入れられたパスの**意味**を変更します。<sup>[[4]](#references)</sup>
 
-### 3. 生成された名前を取得し、ファイル名固有の link を設定する
+### 3. 生成された名前を取得し、ファイル名固有のリンクを作成する
 
-`ReadDirectoryChangesW` を使用して作業ディレクトリを監視します。最初の `FILE_ACTION_ADDED` で、表示されている `WD_SCAN` link を削除して fallback lookup を有効にします。2 番目に生成されたファイル名を取得し、その CLFS 関連ファイルを開いて、`LockFileEx` で範囲 `0..MAXLONGLONG` をロックします。privileged operation が停止している間に、表示ディレクトリ内の `WD_SCAN` を実際の Object Manager directory に置き換え、観測したファイル名から名前を付けた child symbolic link を作成します（PoC では末尾 4 文字を削除します）。これを local SMB 経由で protected destination に向けます。<sup>[[4]](#references)</sup>
+`ReadDirectoryChangesW` を使用して working directory を監視します。最初の `FILE_ACTION_ADDED` で、表示されている `WD_SCAN` link を削除して fallback lookup を有効にします。2 番目に生成されたファイル名を取得し、その CLFS 関連ファイルを開いて、`LockFileEx` で範囲 `0..MAXLONGLONG` をロックします。privileged operation が停止している間に、表示されている directory 内の `WD_SCAN` を実際の Object Manager directory に置き換え、確認したファイル名から名付けた child symbolic link を作成します（PoC では末尾の 4 文字を削除します）。local SMB を介して protected destination を指すように設定します。<sup>[[4]](#references)</sup>
 ```text
 \??\UNC\127.0.0.1\C$\Windows\System32\phoneinfo.dll
 ```
-権限のないプロセス自体はその宛先に書き込めませんが、Defender の SYSTEM コンテキストは loopback administrative share を経由できます。生成された名前の監視と、ファイル名固有の Object Manager link を組み合わせることで、事前に remediation artifact を予測する必要がなくなります。<sup>[[4]](#references)</sup>
+権限のないプロセス自身はその宛先に書き込めませんが、Defender の SYSTEM コンテキストは loopback administrative share をトラバースできます。生成された名前の観測と、ファイル名固有の Object Manager link を組み合わせることで、事前に remediation artifact を予測する必要がなくなります。<sup>[[4]](#references)</sup>
 
 ### 4. cleanup race を安定化し、privileged loader をトリガーする
 
-スキャン前に、PoC は有効な PE（`ntdll.dll`）を placeholder の `:stream` NTFS alternate data stream に保存します。redirection によって保護された base file が作成された後、`phoneinfo.dll:stream` を execute access で開き、`PAGE_EXECUTE_READ | SEC_IMAGE` mapping を維持したまま cleanup の再開を待ちます。この live file/section objects により、最終的な race 中の削除または置換が制限されます。再開された hydration は EICAR ではなく payload DLL を返すため、保護された base file に attacker-controlled code が含まれることになります。<sup>[[4]](#references)</sup>
+スキャン前に、PoC は有効な PE（`ntdll.dll`）を placeholder の `:stream` NTFS alternate data stream に保存します。redirection によって保護された base file が作成された後、`phoneinfo.dll:stream` を execute access 付きで開き、`PAGE_EXECUTE_READ | SEC_IMAGE` mapping を維持したまま cleanup の再開を待ちます。存続する file/section object により、最終的な race 中の削除または置換が制約されます。再開された hydration は EICAR ではなく payload DLL を返すため、保護された base file には attacker-controlled code が含まれます。<sup>[[4]](#references)</sup>
 
-次に、`C:\ProgramData\Microsoft\Windows\WER\ReportQueue\...` 配下に細工した `Report.wer` を配置し、Task Scheduler COM API を通じて `\Microsoft\Windows\Windows Error Reporting\QueueReporting` を呼び出すことで、保護された write を SYSTEM execution に変換します。この chain では、privileged WER processing が配置された `C:\Windows\System32\phoneinfo.dll` を load し、named-pipe connection を payload execution signal として使用します。<sup>[[4]](#references)</sup>
+その後、`C:\ProgramData\Microsoft\Windows\WER\ReportQueue\...` に細工した `Report.wer` を配置し、Task Scheduler COM API を介して `\Microsoft\Windows\Windows Error Reporting\QueueReporting` を呼び出すことで、protected write を SYSTEM execution に変換します。この chain では、privileged WER processing が配置された `C:\Windows\System32\phoneinfo.dll` をロードします。named-pipe connection は payload execution signal として使用されます。<sup>[[4]](#references)</sup>
 
 ### Detection pivots
 
-有用な相関関係は、単一の temporary filename よりも具体的であり、chain 内のすべての namespace transition を対象にします。<sup>[[4]](#references)</sup>
+有用な相関関係は、単一の一時ファイル名よりも具体的であり、chain 内のすべての namespace transition を対象にします。<sup>[[4]](#references)</sup>
 
-- 新たに登録された Cloud Files provider に続いて、同じ placeholder 上で EICAR detection と `CF_OPERATION_TYPE_RESTART_HYDRATION` が発生する。
+- 新たに登録された Cloud Files provider、その後の EICAR detection、および同じ placeholder に対する `CF_OPERATION_TYPE_RESTART_HYDRATION`。
 - `WD_TARGET_*`、`WD_SHADOW_*`、または `WD_SCAN` を含む Object Manager paths。特に、`\\.\globalroot\BaseNamedObjects\Restricted\` 配下の scan path。
-- CLFS file creation に続いて、exclusive whole-file lock と、privileged security process から `\\127.0.0.1\C$\Windows\System32\*.dll` への loopback access が発生する。
-- System32 DLL と NTFS ADS が同時に作成され、その後に stream の `SEC_IMAGE` mapping が行われる。
-- attacker-created WER queue entry に続いて、通常とは異なる手動の `\Microsoft\Windows\Windows Error Reporting\QueueReporting` 実行と、配置された DLL の image load が発生する。
+- CLFS file creation、その後の exclusive whole-file lock、および privileged security process から `\\127.0.0.1\C$\Windows\System32\*.dll` への loopback access。
+- NTFS ADS と同時に作成された System32 DLL、その後の stream に対する `SEC_IMAGE` mapping。
+- attacker-created WER queue entry、その後の `\Microsoft\Windows\Windows Error Reporting\QueueReporting` の通常とは異なる手動実行、および配置された DLL の image load。
+
+## Applied chain: privileged remediation に対する oplock-gated mount-point switch
+
+privileged scanner が attacker-controlled file を検査し、その後、validated handles を使い続けるのではなく **pathname** を再度開いて remediation を行う場合、再利用可能な LPE pattern が現れます。FalconFlank は CrowdStrike Falcon の Office macro-removal workflow を対象とする公開例です。repository は、関連する policy を有効にした Windows 11 25H2 および Windows Server 2025 での testing を主張していますが、CVE、affected-build range、vendor advisory、patch status は公開していません。そのため、product-specific claim は未検証かつ build-dependent として扱ってください。<sup>[[5]](#references)[[6]](#references)</sup>
+
+### Race layout
+
+1. 最終的な relative name が意図した宛先で有用になる writable tree を構築します。この例では `%TEMP%\\Flanker_{GUID}\\WindowsPowerShell\\v1.0\\bcrypt.dll` を使用しますが、最初に `bcrypt.dll` へ OLE macro document（PE DLL ではない）を書き込みます。content-based detection が remediation をトリガーし、attacker-controlled basename は後の side-load 用に保持されます。<sup>[[5]](#references)</sup>
+2. directories を broad sharing と `FILE_OPEN_REPARSE_POINT` 付きで開き、`FSCTL_REQUEST_OPLOCK`、`OPLOCK_LEVEL_CACHE_READ | OPLOCK_LEVEL_CACHE_HANDLE`、および `REQUEST_OPLOCK_INPUT_FLAG_REQUEST` を指定して、trigger に asynchronous RH oplock を要求します。overlapped event を待ち、その完了を path-switch cue として使用します。RH oplock-break notification は advisory であり、すべての conflicting operation がブロックされている証明ではないため、exploitability は依然として victim の正確な open/remediation sequence に依存します。<sup>[[5]](#references)[[7]](#references)</sup>
+3. break 後、delete と POSIX-semantics flags を使用し、`FileDispositionInformationEx`（information class 64）で leaf directory を削除してから、その handle を閉じます。次に、`FSCTL_SET_REPARSE_POINT_EX` で空になった parent に `IO_REPARSE_TAG_MOUNT_POINT` を適用します。mount point は変更されていない suffix を `\\SystemRoot\\System32\\WindowsPowerShell` のような protected tree へ redirect します。directory が空でない場合、reparse point の設定は失敗するため、先行する削除手順が必要になります。<sup>[[5]](#references)[[8]](#references)</sup>
+4. privileged workflow を再開します。directory chain と final object が以前に検査したものと同一であることを証明せずに string を再度 resolve した場合、同じ logical pathname が attacker-selected protected directory に到達します。この例では、元の process から `C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\bcrypt.dll` を read/write で再度開くことで成功を検証します。これにより、confused-deputy write primitive と後続の code-execution stage を区別できます。<sup>[[5]](#references)</sup>
+5. 結果の file を real DLL に置き換え、privileged loader を起動します。PoC は `CreateTransaction` + `CreateFileTransacted` を使用して file を truncate し、DLL サイズの replacement を mapping し、PE をコピーして commit します。TxF は file handle と後続の handle-based operations を transaction に bind しますが、これは post-race replacement mechanism であり、privilege boundary failure の原因ではありません。<sup>[[5]](#references)[[9]](#references)</sup>
+6. 最後に、実行ファイルが配置された隣接 filename を probe する既存の privileged scheduled task を実行します。FalconFlank は `\\Microsoft\\Windows\\Application Experience\\MareBackup` を呼び出し、DLL が `\\??\\pipe\\FALCONFLANK` に接続するのを待ってから、配置した file を削除します。task name だけから特定の resulting token を想定してはいけません。tested build 上で、起動された process、module path、integrity level、token を確認してください。<sup>[[5]](#references)</sup>
+
+したがって、中心となる audit question は「service が元の input path を validate するか」ではなく、「すべての privileged mutation が、validation 済みの、同じ opened file および directory objects に bind されたままか」です。check と use の間で handles を保持し、trusted directory handle を基準に child objects を開き、予期しない reparse tags を拒否し、mutation 前に file identity を再検証することで、この種の pathname-substitution bug を防止できます。<sup>[[1]](#references)[[8]](#references)</sup>
+
+### Detection and PoC triage
+
+High-signal detection では、namespace transition と privileged consumer を相関させます。GUID-named temporary tree 内の DLL basename に対応する OLE header、oplock break、leaf directory の POSIX-style removal、protected Windows directory を対象とする mount point の作成、およびその宛先配下での同じ basename の作成または変更を確認します。公開例では、より限定的な pivot として `C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\bcrypt.dll`、`MareBackup` の手動実行、および `FALCONFLANK` named pipe を追加します。ただし、いずれも単独では十分ではありません。<sup>[[5]](#references)</sup>
+
+PoC を再現する際は、公開 source にある次の3つの reliability defect を考慮してください。`FlushFileBuffers` に file handle ではなく埋め込み byte-array pointer を渡していること、`GetFolder`、`GetTask`、`Run` の後に stale `HRESULT` を検査していること、そして directory deletion、reparse creation、oplock event、pipe connection に対して上限のない retry/wait loop を使用していることです。<sup>[[5]](#references)</sup>
 
 ## Operational considerations
 
-- **Combine primitives** – `UNICODE_STRING` のサイズ上限に達するまで、directory chain の *per level* に long name を使用して、さらに高い latency を実現できます。
-- **One-shot bugs** – window が拡大することで（数十マイクロ秒から数分）、CPU affinity pinning または hypervisor-assisted preemption と組み合わせた「single trigger」bugs が現実的になります。
-- **Side effects** – slowdown は malicious path にのみ影響するため、システム全体の performance は影響を受けません。そのため、defender が namespace growth を監視していない限り、気付くことはほとんどありません。
-- **Cleanup** – 作成したすべての directory/object への handles を保持し、後で `NtMakeTemporaryObject`/`NtClose` を呼び出せるようにします。そうしないと、制限のない directory chain が reboot 後も残る可能性があります。
-- **File-system races** – 脆弱な path が最終的に NTFS を経由して解決される場合、OM slowdown の実行中に backing file 上へ Oplock（同じ toolkit の `SetOpLock.exe` など）を設定できます。これにより、OM graph を変更せずに consumer をさらに数ミリ秒間 freeze できます。<sup>[[2]](#references)</sup>
+- **Combine primitives** – `UNICODE_STRING` の size 上限に達するまで、directory chain の *各 level ごと* に長い name を使用して、さらに高い latency を実現できます。
+- **One-shot bugs** – expanded window（数十マイクロ秒から数分）により、CPU affinity pinning または hypervisor-assisted preemption と組み合わせれば、「single trigger」bugs が現実的になります。
+- **Side effects** – slowdown は malicious path にのみ影響するため、システム全体の performance は変化しません。defender が namespace growth を監視していない限り、気付くことはほとんどありません。
+- **Cleanup** – 作成したすべての directory/object への handles を保持し、後で `NtMakeTemporaryObject`/`NtClose` を呼び出せるようにします。そうしなければ、上限のない directory chain が reboot 後も残る可能性があります。
+- **File-system races** – 脆弱な path が最終的に NTFS を通じて resolve される場合、OM slowdown の実行中に backing file に Oplock（同じ toolkit の `SetOpLock.exe` など）を重ねて設定できます。これにより、OM graph を変更せずに consumer を追加の数ミリ秒間 freeze できます。<sup>[[2]](#references)</sup>
 
 ## Defensive notes
 
-- named objects に依存する kernel code は、open の *後* に security-sensitive state を再検証するか、check の前に reference を取得する必要があります（TOCTOU gap を解消します）。
-- user-controlled names を dereference する前に、OM path の depth/length に上限を適用します。過度に長い names を拒否することで、攻撃者を microsecond window に戻せます。
-- object manager namespace growth（ETW `Microsoft-Windows-Kernel-Object`）を instrument し、`\BaseNamedObjects` 配下にある疑わしい数千コンポーネントの chain を検出します。
+- named objects に依存する kernel code は、open の *後* に security-sensitive state を再検証するか、check 前に reference を取得して、TOCTOU gap を閉じるべきです。
+- user-controlled names を dereference する前に、OM path の depth/length に上限を適用します。過度に長い names を拒否すれば、攻撃者を microsecond window に戻せます。
+- object manager namespace growth（ETW `Microsoft-Windows-Kernel-Object`）を instrument し、`\BaseNamedObjects` 配下にある、数千の components からなる疑わしい chain を検出します。
 
 ## References
 
-- [1] [Project Zero – Windows Exploitation Techniques: Path Lookups で Race Conditions に勝つ](https://projectzero.google/2025/12/windows-exploitation-techniques.html)
+- [1] [Project Zero – Windows Exploitation Techniques: Path Lookups による Race Conditions の攻略](https://projectzero.google/2025/12/windows-exploitation-techniques.html)
 - [2] [googleprojectzero/symboliclink-testing-tools](https://github.com/googleprojectzero/symboliclink-testing-tools)
 - [3] [MSNightmare/ShieldBreak](https://github.com/MSNightmare/ShieldBreak)
 - [4] [ShieldBreak.cpp (commit be016d8)](https://github.com/MSNightmare/ShieldBreak/blob/be016d8c18c8355a12753286c1ce9d5a48a0dab4/ShieldBreak.cpp)
+- [5] [FalconFlank.cpp (commit 702b574)](https://github.com/MSNightmare/FalconFlank/blob/702b57477a9f0a99ddabef56e7ebe6c1e99c2435/FalconFlank.cpp)
+- [6] [MSNightmare/FalconFlank](https://github.com/MSNightmare/FalconFlank)
+- [7] [Microsoft Learn - FSCTL_REQUEST_OPLOCK](https://learn.microsoft.com/en-us/windows/win32/api/winioctl/ni-winioctl-fsctl_request_oplock)
+- [8] [Microsoft Learn - FSCTL_SET_REPARSE_POINT_EX](https://learn.microsoft.com/en-us/windows-hardware/drivers/ifs/fsctl-set-reparse-point-ex)
+- [9] [Microsoft Learn - Transactional NTFS の使用方法](https://learn.microsoft.com/en-us/windows/win32/fileio/how-to-use-transactional-ntfs)
 {{#include ../../banners/hacktricks-training.md}}
