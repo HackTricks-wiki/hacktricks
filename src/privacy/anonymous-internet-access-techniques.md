@@ -1,141 +1,143 @@
-# Katalog der Techniken für anonymen Internetzugang
+# Katalog für anonyme Internetzugriffstechniken
 
-Dies ist das maßgebliche Inventar der Zugriffspfade. Es umfasst protokoll- und betriebstechnische **Familien**, nicht jeden Anbieternamen. Kein Internetpfad garantiert Anonymität: Konto-, Browser-, Endpunkt-, Timing-, Zahlungs-, Cloud-Control-Plane- und physische Beweise können eine perfekt wirkende Route entkräften.
+{{#include ../banners/hacktricks-training.md}}
 
-Jeder Eintrag verwendet dieselben Felder. „Verfahren“ bedeutet eine rechtmäßige Bereitstellung oder eine Emulation in einem eigenen Labor. Wenn die reale Technik vom Kompromittieren eines Routers, dem Diebstahl von Zugangsdaten oder dem Missbrauch eines unwilligen Vermittlers abhängt, ersetzt die Reproduktion diese durch Systeme, die der Übung gehören.
+Dies ist das kanonische Inventar der Zugriffspfade. Es behandelt protokollbezogene und operative **Familien**, nicht jeden Anbieternamen. Kein Internetpfad garantiert Anonymität: Konto-, Browser-, Endpunkt-, Zeit-, Zahlungs-, Cloud-Control-Plane- und physische Beweise können selbst eine perfekt wirkende Route entkräften.
+
+Jeder Eintrag verwendet dieselben Felder. „Verfahren“ bedeutet eine rechtmäßige Bereitstellung oder eine Emulation in einem eigenen Labor. Wenn die echte Technik die Kompromittierung eines Routers, den Diebstahl eines Zugangs oder den Missbrauch eines unwilligen Vermittlers erfordert, ersetzt die Reproduktion diese Systeme durch Systeme, die dem Übungsteilnehmer gehören.
 
 ## Abdeckungsmatrix
 
-| Familie | Was das Ziel sieht | Stärkste Eigenschaft | Geschwindigkeit | Behandlung |
+| Familie | Ziel sieht | Stärkste Eigenschaft | Geschwindigkeit | Behandlung |
 |---|---|---|---|---|
-| Shared NAT/CGNAT | gemeinsame öffentliche Adresse | Mehrdeutigkeit zwischen Teilnehmern | hoch | einsetzbar |
-| VPN, VPS, SOCKS/HTTP/SSH proxy | Relay-Adresse | schnelle Trennung der Quelladresse | hoch | einsetzbar |
-| Multi-Hop/Split-Relay, MASQUE | letzter proxy | Wissensteilung oder vollständiger IP-Tunnel | hoch/moderat | mit vertrauenswürdigen Relays einsetzbar |
-| Tor, Bridge, Onion Service | Exit- oder Onion-Identität | Pfad über mehrere Parteien und gemeinsamer Browser | moderat | einsetzbar |
-| I2P, GNUnet, Mixnet | Overlay-Peer/Gateway | Overlay- oder Timing-Resistenz | niedrig/variabel | anwendungsspezifisch |
+| Shared NAT/CGNAT | gemeinsame öffentliche Adresse | Mehrdeutigkeit unter Teilnehmern | hoch | bereitstellbar |
+| VPN, VPS, SOCKS/HTTP/SSH proxy | Relay-Adresse | schnelle Trennung der Quelladresse | hoch | bereitstellbar |
+| Multi-Hop/Split-Relay, MASQUE | finalen Proxy | Wissensaufteilung oder vollständiger IP-Tunnel | hoch/mittel | mit vertrauenswürdigen Relays bereitstellbar |
+| Tor, Bridge, onion service | Exit oder Onion-Identität | Mehrparteienpfad und einheitlicher Browser | mittel | bereitstellbar |
+| I2P, GNUnet, mixnet | Overlay-Peer/Gateway | Overlay- oder Timing-Resistenz | niedrig/variabel | anwendungsspezifisch |
 | OHTTP/ODoH, Private Relay | Gateway/Egress | Aufteilung von Quelle und Anfrage | hoch | nur unterstützte Anwendungen |
-| Öffentliches WLAN, Travel Router | Venue-/Tunnel-Adresse | Änderung von Standort/Zugriffspfad | hoch | Zustimmung erforderlich |
-| Mobilfunk/eSIM, Satellit | Carrier-/Provider-Adresse | unabhängiger physischer Uplink | hoch/variabel | Subscription/Provider beobachtet |
-| Remote Browser/Jump Host | Remote Workspace | Trennung von Endpunkt und Egress | hoch | einsetzbar |
-| Residential/Mobile Proxy | Consumer-/Carrier-Adresse | Erscheinungsbild eines Consumer-Netzes | hoch | Zustimmung/Herkunft entscheidend |
-| ORB/kompromittiertes Relay | Adresse eines anderen Opfers | Verschleierung der Herkunft und geliehene Reputation | hoch | nur Reproduktion im eigenen Labor |
-| CDN/Fronting/Redirector | CDN-/Front-Adresse | Schutz der Back-End-Infrastruktur | hoch | Zustimmung von Provider/Eigentümer erforderlich |
-| Fast Flux/DGA/Dead Drop | rotierender Node/Service | Resistenz gegen Infrastrukturermittlung | variabel | nur Reproduktion im eigenen Labor |
-| Drop/Nearest Neighbor | lokale zielnahe Adresse | Überquerung geografischer/Netzwerkgrenzen | hoch | nur Labor am eigenen Standort |
-| Store-and-Forward/offline | Gateway oder physischer Empfänger | weniger interaktive Timing-Verknüpfung | niedrig | anwendungsspezifisch |
-| Pluggable/Refraction Transport | Tor-Einstieg oder kooperierender Diversion-Proxy | zensurresistenter Zugriff | variabel | unterstützter Client oder Forschungslabor |
-| IPFS Gateway/PIR/Remote Fetcher | Gateway oder Anwendungsservice | Trennung von Publisher, Query und Request | variabel | nur begrenzte Anwendung |
-| Anycast/QUIC/MPTCP | stabiler Broker oder mehrere Subflows | Rendezvous und Session-Kontinuität | hoch | Verfügbarkeit, nicht Anonymität |
-| CI/CD-Automation-Runner | Adresse des Hosted Runners | kurzlebiger, nachvollziehbarer Egress | hoch | nur eigener Workflow |
-| Nicht-IP-basierter lokaler erster Hop | Organisations-Gateway | Entfernen des Internet-Stacks vom Sensor | niedrig | vom Eigentümer genehmigte Bereitstellung |
+| Öffentliches Wi-Fi, travel router | Venue-/Tunnel-Adresse | Änderung von Standort/Zugriffspfad | hoch | Genehmigung erforderlich |
+| Mobilfunk/eSIM, Satellit | Carrier-/Provider-Adresse | unabhängiger physischer Uplink | hoch/variabel | Subscription-/Provider-Beobachtung |
+| Remote-Browser/jump host | Remote-Workspace | Trennung von Endpunkt und Egress | hoch | bereitstellbar |
+| Residential-/Mobile-Proxy | Consumer-/Carrier-Adresse | Erscheinungsbild eines Consumer-Netzes | hoch | Einwilligung/Herkunft entscheidend |
+| ORB/kompromittiertes Relay | Adresse eines anderen Opfers | Verbergen des Ursprungs und geliehene Reputation | hoch | nur eigene Laborreproduktion |
+| CDN/fronting/redirector | CDN-/Front-Adresse | Schutz der Back-End-Infrastruktur | hoch | Genehmigung von Provider/Eigentümer erforderlich |
+| Fast Flux/DGA/dead drop | rotierender Knoten/Dienst | Resistenz gegen Infrastrukturaufklärung | variabel | nur eigene Laborreproduktion |
+| Drop/Nearest Neighbor | lokale, zielnahe Adresse | Überquerung geografischer/Netzwerkgrenzen | hoch | nur Labor am eigenen Standort |
+| Store-and-forward/offline | Gateway oder physischer Empfänger | geringere interaktive Timing-Verknüpfung | niedrig | anwendungsspezifisch |
+| Pluggable/Refraction Transport | Tor-Einstieg oder kooperierender Diversionsproxy | zensurresistente Erreichbarkeit | variabel | unterstützter Client oder Forschungslabor |
+| IPFS gateway/PIR/remote fetcher | Gateway oder Anwendungsdienst | Trennung von Publisher, Query und Request | variabel | nur begrenzte Anwendung |
+| Anycast/QUIC/MPTCP | stabiler Broker oder mehrere Subflows | Rendezvous und Sessionkontinuität | hoch | Verfügbarkeit, keine Anonymität |
+| CI/CD-Automation-Runner | Adresse des gehosteten Runners | verworfener, nachvollziehbarer Egress | hoch | nur eigener Workflow |
+| Nicht-IP-lokaler erster Hop | Organisations-Gateway | entfernt den Internet-Stack vom Sensor | niedrig | vom Eigentümer genehmigte Bereitstellung |
 
 ## Direktes Shared NAT und Carrier-Grade NAT
 
-**Mechanik:** Mehrere Nutzer teilen sich eine öffentliche Adresse; der Access-Provider ordnet Teilnehmeradressen und Ports dem öffentlichen Tupel zu.
+**Mechanik:** Mehrere Nutzer teilen eine öffentliche Adresse; der Access-Provider ordnet Teilnehmeradressen und Ports dem öffentlichen Tupel zu.
 
-**Vorteile:** schnell; kein spezieller Client; die IP allein auf der Zielseite identifiziert möglicherweise nur einen Haushalt, Veranstaltungsort oder Carrier-Pool.
+**Vorteile:** schnell; kein spezieller Client; die IP am Ziel kann möglicherweise nur einen Haushalt, ein Venue oder einen Carrier-Pool identifizieren.
 
-**Nachteile:** Der Provider kann Teilnehmer-/Port-/Zeitzuordnungen speichern; Konten und Fingerprints bleiben bestehen; andere Nutzer können die Reputation der Adresse beschädigen.
+**Nachteile:** Der Provider kann Teilnehmer-/Port-/Zeit-Zuordnungen speichern; Konten und Fingerprints bleiben bestehen; andere Nutzer können die Reputation der Adresse schädigen.
 
-**Verfahren:** (1) Bestätigen, ob der autorisierte Zugriff NAT/CGNAT verwendet; (2) die exakte öffentliche IP und den Quellport an einem eigenen Endpunkt aufzeichnen; (3) Anwendungsidentitäten getrennt halten; (4) Shared Addressing nicht als Privacy-Control behandeln; (5) einen stärkeren Pfad verwenden, wenn der ISP Ziele nicht kennen darf.
+**Verfahren:** (1) Bestätigen, ob der autorisierte Zugang NAT/CGNAT verwendet; (2) die exakte öffentliche IP und den Quellport an einem eigenen Endpunkt erfassen; (3) Anwendungsidentitäten trennen; (4) Shared Addressing nicht als Datenschutzkontrolle behandeln; (5) einen stärkeren Pfad verwenden, wenn der ISP Ziele nicht erfahren darf.
 
-**Erkennung:** Ziele sollten Quellport und genaue Zeit, nicht nur die IP speichern. Provider korrelieren NAT-Zuweisungslogs; Ermittler verknüpfen Konto-, Geräte- und Browserbeweise.
+**Erkennung:** Ziele sollten Quellport und präzise Zeit, nicht nur die IP speichern. Provider korrelieren NAT-Zuweisungslogs; Ermittler verknüpfen Konto-, Geräte- und Browserbeweise.
 
 ## Kommerzielles VPN
 
-**Mechanik:** Eine verschlüsselte Full-Tunnel-Verbindung endet beim VPN; Ziele sehen dessen Egress. Das VPN kann Quelle, Timing und Ziele normalerweise einander zuordnen.
+**Mechanik:** Eine verschlüsselte Full-Tunnel-Verbindung endet beim VPN; Ziele sehen dessen Egress. Das VPN kann Quelle, Timing und Ziele normalerweise miteinander verknüpfen.
 
-**Vorteile:** schnell; einfach; schützt vor lokaler passiver Beobachtung; stabile oder gemeinsam genutzte Exits; gut für kontrollierten Red-Team-Egress.
+**Vorteile:** schnell; einfach; schützt vor lokaler passiver Beobachtung; stabile oder geteilte Exits; gut für kontrollierten Red-Team-Egress.
 
 **Nachteile:** konzentriertes Vertrauen; Billing-/Login-Telemetrie; Kill-Switch-/DNS-/IPv6-Fehler; Shared Exits werden häufig wegen ihrer Reputation blockiert.
 
-**Verfahren:** (1) Provider, Eigentümer, Gerichtsbarkeit, Aufbewahrung und Assessment-Policy bestimmen; (2) den signierten offiziellen Client installieren; (3) Full Tunnel, Always-on und Fail-closed-Verhalten aktivieren; (4) DNS und IPv6 bewusst routen; (5) beobachtete IPv4-/IPv6-/DNS-Werte an einem eigenen Endpunkt prüfen; (6) Tunnel stoppen/neu verbinden und bestätigen, dass kein unverschlüsselter Fallback möglich ist.<sup>[[1]](#references)</sup>
+**Verfahren:** (1) Provider, Eigentümer, Rechtsraum, Aufbewahrung und Assessment-Richtlinie bestimmen; (2) den signierten offiziellen Client installieren; (3) Full Tunnel, Always-on und Fail-closed aktivieren; (4) DNS und IPv6 bewusst routen; (5) beobachtete IPv4/IPv6/DNS-Werte an einem eigenen Endpunkt prüfen; (6) Tunnel stoppen/neu verbinden und bestätigen, dass kein Klartext-Fallback besteht.<sup>[[1]](#references)</sup>
 
-**Erkennung:** Lokale Netzwerke sehen einen langen verschlüsselten Datenstrom zur VPN-Infrastruktur; Provider besitzen Authentifizierungs-/Verbindungsdaten; Ziele verwenden ASN-/Reputation- sowie Konto-, TLS-/Browser- und Verhaltenskorrelation.
+**Erkennung:** Lokale Netzwerke sehen einen langen verschlüsselten Flow zur VPN-Infrastruktur; Provider besitzen Authentifizierungs-/Verbindungsdaten; Ziele verwenden ASN-/Reputation-Daten sowie Konto-, TLS-/Browser- und Verhaltenskorrelation.
 
 ## Selbst gehosteter VPN- oder gemieteter VPS-Egress
 
-**Mechanik:** Der Betreiber kontrolliert ein WireGuard-/OpenVPN-Gateway oder leitet Datenverkehr über einen gemieteten Server weiter.
+**Mechanik:** Der Betreiber kontrolliert ein WireGuard/OpenVPN-Gateway oder leitet Daten über einen gemieteten Server weiter.
 
-**Vorteile:** vorhersehbare hohe Geschwindigkeit; feste, in Allowlists aufnehmbare Adresse; individuelles Logging/Firewalling; gute Incident-Kontrolle.
+**Vorteile:** vorhersehbare hohe Geschwindigkeit; feste, allowlistbare Adresse; individuelle Logs/Firewall; gute Incident-Kontrolle.
 
-**Nachteile:** kleine Anonymitätsmenge; Cloud-Tenant, Zahlung, Quell-Login, API- und Image-Historie verknüpfen den Betreiber; ein neuer, charakteristischer Server lässt sich leicht clustern.
+**Nachteile:** kleine Anonymitätsmenge; Cloud-Tenant, Zahlung, Source-Login, API und Image-Historie verknüpfen den Betreiber; ein unverwechselbarer neuer Server lässt sich leicht clustern.
 
-**Verfahren:** (1) ein engagementbezogenes Organisationsprojekt erstellen; (2) ein unterstütztes Image und eine feste Adresse bereitstellen; (3) Management auf MFA-/schlüsselbasierte Administration beschränken; (4) Full-Tunnel-Egress und DNS konfigurieren; (5) Ziele nach Möglichkeit auf den vorgesehenen Umfang beschränken; (6) Leak-/Fehlerverhalten testen; (7) Controller-Auditdaten aufbewahren; (8) Credentials und Ressourcen beim Abbau löschen.
+**Verfahren:** (1) ein engagement-spezifisches Organisationsprojekt erstellen; (2) ein unterstütztes Image und eine feste Adresse bereitstellen; (3) Management auf MFA-/schlüsselbasierte Administration beschränken; (4) Full-Tunnel-Egress und DNS konfigurieren; (5) Ziele, soweit praktikabel, auf den Scope beschränken; (6) Leak-/Fehlerverhalten testen; (7) Controller-Audit-Logs aufbewahren; (8) Credentials und Ressourcen beim Abbau zerstören.
 
 **Erkennung:** Hosting-ASN, erstmals beobachtete Adresse, Zertifikats-/Service-Fingerprint und Scanverhalten korrelieren; Cloud-Eigentümer verwenden Control-Plane-, Console-, Billing- und Flow-Logs.
 
-## HTTP CONNECT, SOCKS und SSH Forwarding
+## HTTP CONNECT, SOCKS und SSH-Forwarding
 
-**Mechanik:** Eine Anwendung fordert einen Proxy auf, einen TCP-Datenstrom zu öffnen; SOCKS kann je nach Version auch Namensauflösung und UDP übertragen; SSH leitet Datenströme innerhalb einer verschlüsselten Sitzung weiter.
+**Mechanik:** Eine Anwendung bittet einen Proxy, einen TCP-Stream zu öffnen; SOCKS kann je nach Version auch Namensauflösung und UDP übertragen; SSH leitet Streams innerhalb einer verschlüsselten Session weiter.
 
-**Vorteile:** leichtgewichtig; pro Anwendung; schnell; nützlich für Chaining und segmentierte Netzwerke.
+**Vorteile:** leichtgewichtig; pro Anwendung; schnell; nützlich für Verkettungen und segmentierte Netzwerke.
 
-**Nachteile:** Anwendungen können ihn umgehen; DNS kann leaken; der Proxy sieht benachbarte Endpunkte; Browserstatus bleibt erhalten; offene Proxies können Fallen oder kompromittierte Systeme sein.
+**Nachteile:** Anwendungen können den Proxy umgehen; DNS kann leaken; der Proxy sieht benachbarte Endpunkte; Browserstatus bleibt bestehen; offene Proxies können Fallen oder kompromittierte Systeme sein.
 
-**Verfahren:** (1) den Proxy auf einem eigenen Host bereitstellen; (2) Authentifizierung verlangen und Quelle/Ziel beschränken; (3) ein verfügbares Anwendungsprofil konfigurieren; (4) bei Bedarf Remote-DNS-Auflösung sicherstellen; (5) mit einem eigenen DNS-/HTTP-Endpunkt prüfen; (6) direkten Egress für die Workload blockieren; (7) Proxy-Credentials prüfen und rotieren.
+**Verfahren:** (1) Proxy auf einem eigenen Host bereitstellen; (2) Authentifizierung verlangen und Quelle/Ziel beschränken; (3) ein einzelnes verworfenes Anwendungsprofil konfigurieren; (4) bei Bedarf entfernte DNS-Auflösung sicherstellen; (5) mit einem eigenen DNS-/HTTP-Endpunkt prüfen; (6) direkten Egress für die Workload blockieren; (7) Proxy-Credentials prüfen und rotieren.
 
-**Erkennung:** tunnel-fähige Prozesse, CONNECT-/SOCKS-Verhandlung, lange SSH-Sitzungen und mit der Anwendung unvereinbare Ziele identifizieren; Proxy-Logs rekonstruieren die Datenströme.
+**Erkennung:** tunnel-fähige Prozesse, CONNECT-/SOCKS-Verhandlung, lange SSH-Sessions und anwendungsinkonsistente Ziele identifizieren; Proxy-Logs rekonstruieren die Streams.
 
-## URL-umschreibender Web-Proxy und Browser-Proxy-Extension
+## URL-rewriting-Webproxy und Browser-Proxy-Extension
 
-**Mechanik:** Eine Website ruft ein Ziel ab und schreibt Links/Formulare über ihren eigenen Origin um, oder eine Extension leitet Browseranfragen an einen Proxy. Das Ziel sieht den Service, während der Service nach der TLS-Terminierung Klartext lesen sowie Inhalte einschleusen oder speichern kann.
+**Mechanik:** Eine Website ruft ein Ziel ab und schreibt Links/Formulare über ihren eigenen Origin um, oder eine Extension leitet Browseranfragen an einen Proxy. Das Ziel sieht den Dienst; der Dienst kann nach TLS-Terminierung Klartext lesen sowie Inhalte einschleusen oder speichern.
 
-**Vorteile:** kein systemweiter Client; schnell für einfaches Browsing; funktioniert, wenn VPN-Installation unmöglich ist.
+**Vorteile:** kein systemweiter Client; schnell für einfaches Browsing; funktioniert, wenn eine VPN-Installation unmöglich ist.
 
-**Nachteile:** Der Proxy kann Credentials/Inhalte lesen, Downloads umschreiben und Nutzer fingerprinten; Scripts/WebSockets/Downloads können ihn umgehen; die Browser-Extension besitzt weitreichende Rechte; kleine Anonymitätsmenge und häufige Blockierung.
+**Nachteile:** Der Proxy kann Credentials/Inhalte lesen, Downloads umschreiben und Nutzer fingerprinten; Scripts/WebSockets/Downloads können ihn umgehen; eine Browser-Extension besitzt weitreichende Rechte; kleine Anonymitätsmenge und häufige Blockierung.
 
-**Verfahren:** (1) nur einen organisationsbetriebenen Proxy für autorisierte Tests verwenden; (2) ihn in einem verfügbaren Browser ohne persönliche Konten isolieren; (3) Passworteingabe und sensible Downloads verbieten; (4) auf einer eigenen Seite prüfen, dass jede Subresource über den Proxy aufgelöst wird; (5) WebSocket-, Download- und Formularverhalten testen; (6) Extension/Profil danach entfernen.
+**Verfahren:** (1) nur einen organisationsbetriebenen Proxy für autorisierte Tests verwenden; (2) ihn in einem verworfenen Browser ohne persönliche Konten isolieren; (3) Passworteingabe und sensible Downloads verbieten; (4) auf einer eigenen Seite prüfen, dass jedes Subresource über den Proxy aufgelöst wird; (5) WebSocket-, Download- und Formularverhalten testen; (6) Extension/Profil nach der Nutzung entfernen.
 
-**Erkennung:** Das Ziel protokolliert den Proxy; Enterprise-Proxy/DNS und Extension-Inventar identifizieren den Service; Content-Security-/Reporting- oder eigene Canary-Subresources zeigen direkten Bypass; Proxy-Logs ordnen Benutzersitzungen den Zielen zu.
+**Erkennung:** Das Ziel protokolliert den Proxy; Enterprise-Proxy/DNS und Extension-Inventar identifizieren den Dienst; Content-Security-/Reporting- oder eigene Canary-Subresources zeigen direkte Umgehungen; Proxy-Logs ordnen Benutzersessions den Zielen zu.
 
 ## Multi-Hop-Proxy oder Multi-Hop-VPN eines Providers
 
-**Mechanik:** Ein Einstieg sieht die Quelle, während ein oder mehrere Traversal-Relays sie von einem Exit trennen, der das Ziel sieht.
+**Mechanik:** Ein Entry sieht die Quelle, während ein oder mehrere Traversal-Relays sie von einem Exit trennen, der das Ziel sieht.
 
-**Vorteile:** Kein gewöhnliches Relay benötigt beide Enden; Ausfall/Beschlagnahme eines Knotens offenbart weniger; flexible Geografie.
+**Vorteile:** Kein gewöhnliches Relay benötigt beide Enden; Ausfall/Beschlagnahmung eines Knotens enthüllt weniger; flexible Geografie.
 
-**Nachteile:** Gemeinsame Administration/Logs beseitigen die Trennung; Latenz; Timing-Korrelation; mehr Fehler- und DNS-Pfade; dasselbe Konto/dieselbe Zahlung kann alle Hops verbinden.
+**Nachteile:** Gemeinsame Administration/Logs zerstören die Trennung; Latenz; Timing-Korrelation; mehr Ausfälle und DNS-Routen; dasselbe Konto/dieselbe Zahlung kann alle Hops verbinden.
 
-**Verfahren:** (1) festlegen, welchen Beobachter jeder Hop entfernt; (2) bei erforderlicher Trennung unabhängig verwaltete eigene/genehmigte Relays verwenden; (3) nur Entry-Zugriff aus der Workload erzwingen; (4) sicherstellen, dass jedes Relay nur den nächsten Hop erreicht; (5) Logs auf jeder Ebene prüfen; (6) jeden Hop stoppen und Fail-closed-Verhalten bestätigen. Mit [Lab 1](authorized-adversary-emulation-labs.md#lab-1-owned-orb-and-redirector-chain) reproduzieren.
+**Verfahren:** (1) festlegen, welchen Beobachter jeder Hop entfernt; (2) bei notwendiger Trennung unabhängig verwaltete eigene/genehmigte Relays verwenden; (3) nur Entry-Zugriff von der Workload erzwingen; (4) jeden Relay auf den jeweils nächsten Hop beschränken; (5) Logs auf jeder Ebene prüfen; (6) jeden Hop stoppen und Fail-closed-Verhalten bestätigen. Mit [Lab 1](authorized-adversary-emulation-labs.md#lab-1-owned-orb-and-redirector-chain) reproduzieren.
 
-**Erkennung:** Benachbarte NetFlow-Zeitpunkte/-Volumina, wiederholte Proxy-Handshakes und gemeinsame Controller-Infrastruktur korrelieren; die Betreibergeografie nicht aus dem Exit ableiten.
+**Erkennung:** Benachbarte NetFlow-Zeit/Volumen, wiederholte Proxy-Handshakes und gemeinsame Controller-Infrastruktur korrelieren; aus dem Exit keine Geografie des Betreibers ableiten.
 
-## Anwendungssplit-Relay und OHTTP
+## Split-Knowledge-Application-Relay und OHTTP
 
 **Mechanik:** Der Client verschlüsselt eine zustandslose HTTP-Nachricht für ein Gateway und sendet sie über ein Relay. Das Relay sieht die Client-IP, aber nicht die Anfrage; das Gateway sieht die Anfrage, normalerweise jedoch nur die Relay-IP.
 
-**Vorteile:** starke, auditierbare Privacy-Trennung für unterstützte Requests; geringerer Overhead als allgemeine Anonymitätsnetzwerke.
+**Vorteile:** starke, auditierbare Datenschutztrennung für unterstützte Requests; geringerer Overhead als allgemeine Anonymitätsnetzwerke.
 
-**Nachteile:** kein beliebiges Browsing; Cookies/Authentifizierung können erneut verknüpfen; Kollusion von Relay/Gateway und Traffic-Analyse bleiben möglich; die Anwendung muss dies implementieren.
+**Nachteile:** kein beliebiges Browsing; Cookies/Authentifizierung können erneut verknüpfen; Kollusion und Traffic-Analyse zwischen Relay/Gateway bleiben möglich; die Anwendung muss dies implementieren.
 
-**Verfahren:** (1) eine Anwendung auswählen, die RFC 9458 ausdrücklich unterstützt; (2) Gateway-Schlüssel über den offiziellen Konfigurationspfad prüfen; (3) stabile benutzerbezogene Felder vermeiden; (4) nur den unterstützten zustandslosen Request senden; (5) Relay-, Gateway- und Ziellogs vergleichen; (6) Schlüsselrotation/-fehler ohne direkten Fallback testen.<sup>[[2]](#references)</sup>
+**Verfahren:** (1) eine Anwendung auswählen, die RFC 9458 ausdrücklich unterstützt; (2) Gateway-Schlüssel über den offiziellen Konfigurationsweg prüfen; (3) stabile benutzerspezifische Felder vermeiden; (4) nur den unterstützten zustandslosen Request senden; (5) Relay-, Gateway- und Ziel-Logs vergleichen; (6) Schlüsselrotation/-ausfall ohne direkten Fallback testen.<sup>[[2]](#references)</sup>
 
-**Erkennung:** Enterprise-Endpunkte zeigen den initiierenden Prozess und das OHTTP-Relay; Gateways erkennen fehlerhafte/wiederholte Daten; Timing sowie stabile Payload-/Kontofelder können Requests korrelieren.
+**Erkennung:** Enterprise-Endpunkte zeigen den auslösenden Prozess und das OHTTP-Relay; Gateways erkennen fehlerhafte/wiederholte Daten; Timing sowie stabile Payload-/Kontofelder können Requests korrelieren.
 
-## MASQUE CONNECT-UDP/CONNECT-IP und HTTP-Privacy-Proxies
+## MASQUE CONNECT-UDP/CONNECT-IP und HTTP-Datenschutz-Proxies
 
-**Mechanik:** HTTP Extended CONNECT über TLS/QUIC transportiert UDP- oder IP-Pakete durch einen Proxy. Dies kann einen modernen VPN-ähnlichen Tunnel implementieren und den Transport mit HTTP/3 vermischen, der Proxy bleibt jedoch Beobachter.<sup>[[3]](#references)</sup>
+**Mechanik:** HTTP Extended CONNECT über TLS/QUIC transportiert UDP- oder IP-Pakete durch einen Proxy. Dies kann einen modernen VPN-ähnlichen Tunnel implementieren und den Transport mit HTTP/3 vermischen; der Proxy bleibt jedoch Beobachter.<sup>[[3]](#references)</sup>
 
 **Vorteile:** effizientes Multiplexing/Roaming; unterstützt UDP oder vollständiges IP; Bereitstellung über moderne HTTP-Infrastruktur.
 
-**Nachteile:** kein Anonymitätsnetzwerk; Proxy/Konto sehen Quelle und Ziele; QUIC-/HTTP-Fingerprints und bekannte Pfade sind für Endpunkte/Provider sichtbar.
+**Nachteile:** kein Anonymitätsnetzwerk; Proxy/Konto sieht Quelle und Ziele; QUIC-/HTTP-Fingerprints und bekannte Pfade sind für Endpunkte/Provider sichtbar.
 
-**Verfahren:** (1) einen Client/Service mit dokumentierter RFC-9298-/9484-Unterstützung verwenden; (2) Proxy-Zertifikat/-Konfiguration authentifizieren; (3) erlaubte Zielrouten definieren; (4) verschlüsseltes DNS innerhalb des Pfads aktivieren; (5) UDP, TCP, IPv6 und Failover an eigenen Endpunkten prüfen; (6) Proxy-Request- und Flow-Logs untersuchen.
+**Verfahren:** (1) Client/Dienst mit dokumentierter RFC-9298/9484-Unterstützung verwenden; (2) Proxy-Zertifikat/-Konfiguration authentifizieren; (3) erlaubte Zielrouten definieren; (4) verschlüsseltes DNS innerhalb des Pfades aktivieren; (5) UDP, TCP, IPv6 und Failover an eigenen Endpunkten prüfen; (6) Proxy-Request- und Flow-Logs untersuchen.
 
-**Erkennung:** Endpunkte sehen den Clientprozess und das virtuelle Interface; Netzwerke können anhaltendes QUIC/TLS zu einem Proxy klassifizieren; Proxy-Logs legen CONNECT-Ziel/-Pfad und zugewiesene Routen offen.
+**Erkennung:** Endpunkte sehen Clientprozess und virtuelles Interface; Netzwerke können anhaltendes QUIC/TLS zu einem Proxy klassifizieren; Proxy-Logs zeigen CONNECT-Ziel/Pfad und zugewiesene Routen.
 
 ## Tor Browser
 
-**Mechanik:** Tor wählt Guard-, Middle- und Exit-Relays; mehrschichtige Verschlüsselung begrenzt die Sicht jedes Relays. Tor Browser fügt einen standardisierten Browser hinzu, der Fingerprinting erschweren soll.
+**Mechanik:** Tor wählt Guard-, Middle- und Exit-Relays; mehrschichtige Verschlüsselung begrenzt die Sicht jedes Relays. Tor Browser ergänzt einen standardisierten Browser, der Fingerprinting widerstehen soll.
 
 **Vorteile:** große öffentliche Anonymitätsmenge; kein gewöhnliches Relay kennt beide Enden; Ziel-Unlinkability ohne eigene Server.
 
-**Nachteile:** langsamer; TCP-orientiert; Exit-Reputation/-Blockierung; Logins und Offenlegungen identifizieren den Nutzer; Low-Latency-Timing-Korrelation bleibt möglich.
+**Nachteile:** langsamer; TCP-orientiert; Exit-Reputation/-Blockaden; Logins und Preisgaben identifizieren den Nutzer; Korrelation durch Low-Latency-Timing bleibt möglich.
 
-**Verfahren:** (1) Tor Browser vom Projekt herunterladen und prüfen; (2) Standardeinstellungen beibehalten und Extensions vermeiden; (3) geeignete Sicherheitsstufe auswählen; (4) separate Identität/Sitzung erstellen; (5) identifizierende Konten und externe aktive Dokumente vermeiden; (6) HTTPS oder authentifizierte Onion Services verwenden; (7) Exit nur mit einem eigenen Endpunkt prüfen.<sup>[[4]](#references)</sup>
+**Verfahren:** (1) Tor Browser aus dem Projekt herunterladen und verifizieren; (2) Standardeinstellungen beibehalten und Extensions vermeiden; (3) angemessenes Sicherheitsniveau wählen; (4) separate Identität/Session erstellen; (5) identifizierende Konten und externe aktive Dokumente vermeiden; (6) HTTPS oder authentifizierte Onion-Services verwenden; (7) Exit nur an einem eigenen Endpunkt prüfen.<sup>[[4]](#references)</sup>
 
-**Erkennung:** Lokale Netzwerke können bekannten Guard-Datenverkehr identifizieren, sofern keine Bridge/kein Transport verwendet wird; Ziele sehen Exits und Tor-Browser-Verhalten; Ende-zu-Ende-Beobachter korrelieren Timing/Volumen.
+**Erkennung:** Lokale Netzwerke können bekannten Guard-Traffic erkennen, sofern keine Bridge/kein Transport verwendet wird; Ziele sehen Exits und das Verhalten von Tor Browser; Ende-zu-Ende-Beobachter korrelieren Timing/Volumen.
 
 ## Tor Bridges und Pluggable Transports
 
@@ -143,536 +145,536 @@ Jeder Eintrag verwendet dieselben Felder. „Verfahren“ bedeutet eine rechtmä
 
 **Vorteile:** umgeht Zensur und verbirgt offensichtliche Ziele öffentlicher Relays; behält den Tor-Circuit nach dem Einstieg bei.
 
-**Nachteile:** Transportmuster/Bridge-Ermittlung bleiben möglich; variable Leistung; kein zusätzlicher Schutz vor Konten oder globalem Timing.
+**Nachteile:** Transportmuster/Bridge-Erkennung bleiben möglich; variable Performance; kein zusätzlicher Schutz vor Konten oder globalem Timing.
 
-**Verfahren:** (1) zuerst direktes Tor versuchen; (2) in den Tor-Browser-Connection-Einstellungen einen integrierten unterstützten Transport auswählen oder eine offizielle Bridge anfordern; (3) keine zufälligen Binärdateien/Listen verwenden; (4) verbinden und einen harmlosen Test durchführen; (5) Reconnect und Uhrzeit testen; (6) alle anderen Browsereinstellungen standardmäßig belassen.<sup>[[5]](#references)</sup>
+**Verfahren:** (1) zuerst direktes Tor versuchen; (2) in den Verbindungseinstellungen von Tor Browser einen integrierten unterstützten Transport auswählen oder eine offizielle Bridge anfordern; (3) keine zufälligen Binärdateien/Listen verwenden; (4) verbinden und einen harmlosen Test ausführen; (5) Reconnect und Uhr prüfen; (6) alle übrigen Browsereinstellungen standardmäßig belassen.<sup>[[5]](#references)</sup>
 
-**Erkennung:** Zensoren verwenden Zielermittlung, Protokoll-/Flow-Klassifizierung und aktives Probing; Verteidiger sollten Umgehungsnutzung von Kompromittierung unterscheiden und sich auf Endpunktprozess/-kontext stützen.
+**Erkennung:** Zensoren verwenden Zielerkennung, Protokoll-/Flow-Klassifizierung und aktives Probing; Verteidiger sollten Umgehungsnutzung von Kompromittierung unterscheiden und sich auf Endpunktprozess/-kontext stützen.
 
 ## VPN vor Tor und Tor vor VPN
 
-**Mechanik:** VPN-before-Tor verbirgt die direkte Tor-Nutzung vor dem Access-ISP, gibt die Quelle jedoch dem VPN preis. Tor-before-VPN gibt dem VPN Datenverkehr nach Tor und oft eine stabile Kunden-/Tunnelidentität.
+**Mechanik:** VPN-vor-Tor verbirgt direkte Tor-Nutzung vor dem Access-ISP, enthüllt die Quelle jedoch gegenüber dem VPN. Tor-vor-VPN gibt dem VPN Tor-Nachverkehr und häufig eine stabile Kunden-/Tunnelidentität.
 
-**Vorteile:** entfernt bei korrektem Design einen bestimmten Beobachter; kann Netze erreichen, die eine Ebene blockieren.
+**Vorteile:** entfernt bei korrekter Planung einen bestimmten Beobachter; kann Netze erreichen, die eine Ebene blockieren.
 
-**Nachteile:** Komplexität, ungewöhnlicher Fingerprint, Leaks, kleinere Anonymitätsmenge und falsches Vertrauen; das Tor Project betrachtet Kombinationen als fortgeschritten.<sup>[[6]](#references)</sup>
+**Nachteile:** Komplexität, ungewöhnlicher Fingerprint, Leaks, kleinere Anonymitätsmenge und falsches Vertrauen; Tor Project behandelt Kombinationen als fortgeschritten.<sup>[[6]](#references)</sup>
 
-**Verfahren:** (1) den entfernten und den neu eingeführten Beobachter dokumentieren; (2) eine verfügbare Umgebung verwenden; (3) nur den vorgesehenen äußeren Pfad aufbauen; (4) Firewall-Routen erzwingen; (5) DNS/IPv4/IPv6 und jede Fehlerreihenfolge prüfen; (6) Sichtbarkeit beider Provider vergleichen; (7) den Stack verwerfen, wenn kein messbarer Vorteil besteht.
+**Verfahren:** (1) den entfernten und den neu eingeführten Beobachter notieren; (2) verworfene Umgebung verwenden; (3) nur den beabsichtigten äußeren Pfad herstellen; (4) Firewall-Routen erzwingen; (5) DNS/IPv4/IPv6 und jede Fehlerreihenfolge prüfen; (6) Sichtbarkeit beider Provider vergleichen; (7) Stack verwerfen, wenn kein messbarer Vorteil besteht.
 
-**Erkennung:** Lokale/VPN-/Tor-Beobachter sehen unterschiedliche benachbarte Ebenen; Timing bleibt Ende-zu-Ende; ungewöhnliche verschachtelte Tunnel-Fingerprints und Providerkonten können Sitzungen verknüpfen.
+**Erkennung:** Lokale/VPN-/Tor-Beobachter sehen unterschiedliche benachbarte Ebenen; Timing bleibt Ende-zu-Ende; ungewöhnliche verschachtelte Tunnel-Fingerprints und Providerkonten können Sessions verbinden.
 
 ## Onion Service
 
-**Mechanik:** Client und Service bauen Tor-Circuits zu einem Rendezvous auf, wodurch die Service-IP verborgen und ein Exit vermieden wird.
+**Mechanik:** Client und Service erstellen Tor-Circuits zu einem Rendezvous, verbergen die Service-IP und vermeiden einen Exit.
 
 **Vorteile:** Schutz von Quelle und Service-Standort; Ende-zu-Ende-Onion-Authentifizierung; kein öffentlicher Inbound-Port; optionale Client-Autorisierung.
 
-**Nachteile:** Origin-Leaks durch Updates/Analytics/Fehler; der Onion-Schlüssel ist kritisch; Anwendungsidentität/Timing und Host-Kompromittierung bleiben bestehen.
+**Nachteile:** Origin-Leaks durch Updates/Analytics/Fehler; Onion-Schlüssel ist kritisch; Anwendungsidentität, Timing und Host-Kompromittierung bleiben bestehen.
 
-**Verfahren:** (1) Anwendung isolieren und nur an Loopback/Socket binden; (2) unterstütztes Tor installieren; (3) einen v3-Onion-Service nach offiziellen Anweisungen konfigurieren; (4) Schlüssel nur schützen/sichern, wenn eine stabile Identität erforderlich ist; (5) für geschlossene Nutzung Client-Autorisierung hinzufügen; (6) Drittanbieterabrufe entfernen; (7) extern prüfen, dass der Origin nicht erreichbar ist.<sup>[[7]](#references)</sup>
+**Verfahren:** (1) Anwendung isolieren und nur an Loopback/Socket binden; (2) unterstütztes Tor installieren; (3) v3-Onion-Service nach offiziellen Anweisungen konfigurieren; (4) Schlüssel nur sichern/backupen, wenn eine stabile Identität benötigt wird; (5) Client-Autorisierung für geschlossene Nutzung hinzufügen; (6) Third-Party-Fetches entfernen; (7) extern prüfen, dass der Origin nicht erreichbar ist.<sup>[[7]](#references)</sup>
 
-**Erkennung:** Host-/Netzwerkverteidiger finden Tor-Prozess/-Konfiguration und ausgehende Circuits; Anwendungsfehler, DNS, Zertifikate oder Drittanbieterressourcen können den Origin offenlegen.
+**Erkennung:** Host-/Netzwerkverteidiger finden Tor-Prozess/Konfiguration und ausgehende Circuits; Anwendungsfehler, DNS, Zertifikate oder Third-Party-Ressourcen können den Origin offenlegen.
 
 ## I2P-interne Services
 
-**Mechanik:** I2P verwendet getrennte unidirektionale Inbound-/Outbound-Tunnel für Ziele innerhalb des Overlays; Public-Internet-Outproxies bilden einen Vertrauenspunkt.
+**Mechanik:** I2P verwendet getrennte unidirektionale Inbound-/Outbound-Tunnel für Ziele innerhalb des Overlays; Outproxies zum öffentlichen Internet bilden einen Vertrauenspunkt.
 
-**Vorteile:** dezentrale interne Veröffentlichung; keine Abhängigkeit von einem offiziellen Exit; getrennte Ein- und Ausgangspfade.
+**Vorteile:** dezentrale interne Veröffentlichung; keine Abhängigkeit von einem offiziellen Exit; getrennte Inbound-/Outbound-Pfade.
 
-**Nachteile:** kein allgemeiner Webersatz; kleineres Ökosystem; lang laufendes Peer-Verhalten; Outproxy kann öffentliches Browsing beobachten.
+**Nachteile:** kein allgemeiner Webersatz; kleineres Ökosystem; langfristiges Peer-Verhalten; Outproxy kann öffentliches Browsing beobachten.
 
-**Verfahren:** (1) aus offizieller Quelle installieren; (2) einen dedizierten Kontext verwenden; (3) Integration/Bandbreitenstabilisierung erlauben; (4) einen eigenen I2P-nativen Service aufrufen; (5) Outproxies vermeiden, sofern nicht ausdrücklich erforderlich; (6) prüfen, dass das Beenden keinen direkten Fallback erzeugt; (7) lokale Peer- und Service-Logs untersuchen.<sup>[[8]](#references)</sup>
+**Verfahren:** (1) aus offizieller Quelle installieren; (2) dedizierten Kontext verwenden; (3) Integration/Bandbreitenstabilisierung zulassen; (4) eigenen I2P-Service aufrufen; (5) Outproxies vermeiden, sofern nicht ausdrücklich erforderlich; (6) prüfen, dass das Herunterfahren keinen direkten Fallback ermöglicht; (7) lokale Peer- und Service-Logs untersuchen.<sup>[[8]](#references)</sup>
 
-**Erkennung:** Lokale Netzwerke sehen langlebigen Peer-Datenverkehr und Bootstrap-Verhalten; Endpunkte legen Router-/Anwendungsprozesse offen; Outproxies protokollieren Exits.
+**Erkennung:** Lokale Netzwerke sehen langlebigen Peer-Traffic und Bootstrap-Verhalten; Endpunkte legen Router-/Anwendungsprozesse offen; Outproxies protokollieren Exits.
 
 ## Mixnets
 
-**Mechanik:** Pakete fester Größe, Batching, Verzögerung, Neuordnung und Cover Traffic reduzieren Timing-Korrelation; Gateways verbinden Anwendungen.
+**Mechanik:** Pakete fester Größe, Batching, Verzögerung, Umordnung und Cover Traffic reduzieren Timing-Korrelation; Gateways verbinden Anwendungen.
 
-**Vorteile:** besserer Schutz gegen Timing-Analyse als Low-Latency-Proxies; nützlich für asynchrone Nachrichten/Transaktionen.
+**Vorteile:** höhere Resistenz gegen Timing-Analyse als Low-Latency-Proxies; nützlich für asynchrone Nachrichten/Transaktionen.
 
 **Nachteile:** Latenz, Bandbreiten-Overhead, kleinere Bereitstellung und Anwendungsgrenzen; Gateway-/Kontometadaten können bestehen bleiben.
 
-**Verfahren:** (1) einen gepflegten Client und eine unterstützte Anwendung auswählen; (2) das tatsächliche Threat Model lesen; (3) in einem separaten Compartment installieren; (4) harmlose Daten an einen eigenen Endpunkt senden; (5) Latenz/Zuverlässigkeit und Antwortpfad messen; (6) Gateway-Ausfall testen; (7) Verzögerungen/Cover Traffic niemals nur für Geschwindigkeit deaktivieren.<sup>[[9]](#references)</sup>
+**Verfahren:** (1) gepflegten Client und unterstützte Anwendung auswählen; (2) tatsächliches Threat Model lesen; (3) in separater Umgebung installieren; (4) harmlose Daten an eigenen Endpunkt senden; (5) Latenz/Zuverlässigkeit und Antwortpfad messen; (6) Gateway-Ausfall testen; (7) Verzögerungen/Cover Traffic niemals nur aus Geschwindigkeitsgründen deaktivieren.<sup>[[9]](#references)</sup>
 
-**Erkennung:** Endpunkte identifizieren den Client; Zugangsnetze können Gateways/Paketkadenz klassifizieren; Gateways und Exits sehen benachbarte Rollen, während umfassendere Korrelation längere statistische Zeitfenster erfordert.
+**Erkennung:** Endpunkte identifizieren den Client; Access-Netzwerke können Gateways/Paketkadenz klassifizieren; Gateways und Exits sehen benachbarte Rollen, während umfassendere Korrelation längere statistische Zeitfenster erfordert.
 
 ## GNUnet Anonymous File Sharing
 
-**Mechanik:** GNUnet kann Publish-/Search-/Download-Requests über Peers routen und abhängig von einer Anonymitätsstufe Cover Traffic hinzufügen. Die eigene Dokumentation warnt, dass Standardstufe 1 keinen Cover Traffic verlangt und leistungsfähige Traffic-Analyse den Ursprung identifizieren kann.<sup>[[10]](#references)</sup>
+**Mechanik:** GNUnet kann Publish-/Search-/Download-Anfragen über Peers routen und entsprechend einem Anonymitätslevel Cover Traffic hinzufügen. Die eigene Dokumentation warnt, dass Level 1 standardmäßig keinen Cover Traffic verlangt und leistungsfähige Traffic-Analyse den Ursprung identifizieren kann.<sup>[[10]](#references)</sup>
 
-**Vorteile:** dezentrales, anwendungsnahes anonymes Sharing; einstellbare Anforderungen an Cover Traffic.
+**Vorteile:** dezentrales, anwendungsnahes anonymes Sharing; einstellbare Cover-Traffic-Anforderung.
 
-**Nachteile:** kein gewöhnlicher anonymer Webzugriff; Performance-/Speicherkosten; Peer- und Traffic-Analyse-Limits; die GNUnet-VPN-Dokumentation erklärt, dass das IP-Overlay keine gute Anonymität bietet.
+**Nachteile:** kein gewöhnlicher anonymer Webzugang; Performance-/Speicherkosten; Peer- und Traffic-Analyse-Grenzen; GNUnet-VPN-Dokumentation zufolge bietet sein IP-Overlay keine gute Anonymität.
 
-**Verfahren:** (1) einen gepflegten offiziellen Build installieren; (2) einen Test-Peer isolieren; (3) Bandbreite/Speicher begrenzen; (4) eine harmlose eindeutige Testdatei mit gewählter Anonymitätsstufe veröffentlichen; (5) sie von einem anderen eigenen Peer abrufen; (6) Cover Traffic und Latenz aufzeichnen; (7) nicht behaupten, die IP-VPN-Komponente biete gleichwertige Anonymität.
+**Verfahren:** (1) gepflegten offiziellen Build installieren; (2) Test-Peer isolieren; (3) Bandbreite/Speicher begrenzen; (4) harmlose eindeutige Testdatei mit gewähltem Anonymitätslevel veröffentlichen; (5) von einem anderen eigenen Peer abrufen; (6) Cover Traffic und Latenz erfassen; (7) nicht behaupten, dass die IP-VPN-Komponente gleichwertige Anonymität bietet.
 
-**Erkennung:** Peer-Bootstrap, Overlay-Datenverkehr, lokaler Datastore/Prozess und Datei-Identifier; ein umfassender Beobachter kann Datenvolumen gegen Cover Traffic analysieren.
+**Erkennung:** Peer-Bootstrap, Overlay-Traffic, lokaler Datastore/Prozess und Dateikennungen; ein umfassender Beobachter kann Traffic-Volumen gegen Cover Traffic analysieren.
 
 ## Verschlüsseltes DNS, ODoH und ECH
 
 **Mechanik:** DoH/DoT/DoQ verschlüsseln zum Resolver; ODoH teilt Clientadresse und Query zwischen Proxy und Resolver; ECH verschlüsselt den inneren TLS ClientHello/Servernamen.
 
-**Vorteile:** entfernt Plaintext-DNS/SNI von einigen lokalen Beobachtern; ODoH teilt die Kenntnis von Quelle und Query.
+**Vorteile:** entfernt für manche lokalen Beobachter Klartext-DNS/SNI; ODoH teilt die Kenntnis von Quelle und Query.
 
 **Nachteile:** kein IP-Anonymitätspfad; Resolver/Proxy/Server behalten ihre Rollen; Ziel-IP, Timing, Volumen und Endpunkt bleiben sichtbar; Fallback kann leaken.
 
-**Verfahren:** (1) festlegen, ob OS, Anwendung oder Tunnel DNS kontrolliert; (2) strikten verschlüsselten Modus oder unterstütztes ODoH aktivieren; (3) eine eigene eindeutige Domain testen; (4) lokal mitschneiden und fehlende Klartext-Queries bestätigen; (5) Resolverausfall herbeiführen und gewünschtes Verhalten prüfen; (6) bei ECH bestätigen, dass Serverdiagnosen die Annahme des inneren ClientHello anzeigen.<sup>[[11]](#references)</sup>
+**Verfahren:** (1) bestimmen, ob OS, Anwendung oder Tunnel DNS kontrolliert; (2) Strict Encrypted Mode oder unterstütztes ODoH aktivieren; (3) eigene eindeutige Domain testen; (4) lokal mitschneiden und fehlenden Klartext-Query bestätigen; (5) Resolver ausfallen lassen und erwartetes Verhalten prüfen; (6) bei ECH bestätigen, dass Serverdiagnosen die Annahme des inneren ClientHello zeigen.<sup>[[11]](#references)</sup>
 
-**Erkennung:** Endpunkt-/Resolver-Logs legen Queries offen; Netzwerke identifizieren verschlüsselte Resolver-Endpunkte und Ziel-Flows; ECH-Zustand ist an Endpunkten/CDN sichtbar, auch wenn er im Pfad verborgen ist.
+**Erkennung:** Endpunkt-/Resolver-Logs zeigen Queries; Netzwerke erkennen verschlüsselte Resolver-Endpunkte und Zielflows; ECH-Zustand ist an Endpunkten/CDN sichtbar, auch wenn er auf dem Pfad verborgen ist.
 
-## Split-Provider Privacy Relay
+## Split-Provider-Privacy-Relay
 
 **Mechanik:** Produkte wie iCloud Private Relay verwenden einen Ingress, der den Client kennt, und einen unabhängig betriebenen Egress, der das Ziel kennt, mit grober Regionsbehandlung.
 
-**Vorteile:** reibungsarme Wissensteilung; schnell; integrierter DNS-/Webschutz für unterstützten Datenverkehr.
+**Vorteile:** reibungsarme Wissensaufteilung; schnell; integrierter DNS-/Webschutz für unterstützten Traffic.
 
-**Nachteile:** Produkt-/Anwendungsumfang ist begrenzt; Konto-/Plattformprovider identifiziert weiterhin den Kunden; keine beliebige Systemanonymität; Kollusions-/Rechts- und Timing-Risiken.
+**Nachteile:** begrenzter Produkt-/Anwendungsumfang; Konto-/Plattformprovider identifiziert den Kunden weiterhin; keine beliebige Systemanonymität; Kollusions-, Rechts- und Timingrisiken.
 
-**Verfahren:** (1) exakt unterstützte Anwendungen und Datentypen bestätigen; (2) die Funktion gegebenenfalls in einem dedizierten Plattformkontext aktivieren; (3) Regionsverhalten auswählen; (4) Safari/DNS und nicht unterstützte Anwendungen getrennt testen; (5) Zieladresse untersuchen; (6) Netzwerkwechsel/-ausfall testen.<sup>[[12]](#references)</sup>
+**Verfahren:** (1) exakt unterstützte Anwendungen und Traffic-Typen bestätigen; (2) Funktion gegebenenfalls unter dediziertem Plattformkontext aktivieren; (3) Regionsverhalten wählen; (4) Safari/DNS und nicht unterstützte Anwendungen getrennt testen; (5) Zieladresse untersuchen; (6) Netzwerkwechsel/-ausfall testen.<sup>[[12]](#references)</sup>
 
-**Erkennung:** Der Zugriff sieht den Ingress; das Ziel sieht den Egress; Plattform-/Relay-Logs und Kontodaten umfassen jeweils ihre Ebene; nicht unterstützte Anwendungen legen normale Pfade offen.
+**Erkennung:** Access sieht den Ingress; Ziel sieht den Egress; Plattform-/Relay-Logs und Kontodaten decken jeweils ihre Ebene ab; nicht unterstützte Anwendungen legen normale Pfade offen.
 
-## Remote Browser, VDI, RDP oder organisatorischer Jump Host
+## Remote-Browser, VDI, RDP oder Organisations-Jump-Host
 
-**Mechanik:** Browsing/Tool-Ausführung findet auf einem Remote-System statt; das Ziel sieht dessen Egress, während der Workspace-Provider die Betreiberverbindung und Control Plane sieht.
+**Mechanik:** Browsing/Toolausführung erfolgt auf einem Remote-System; das Ziel sieht dessen Egress, während der Workspace-Provider die Operatorverbindung und Control Plane sieht.
 
-**Vorteile:** schnell; isoliert riskante Inhalte; stabiler kontrollierter Egress; verfügbarer Zustand und starke Organisationsprüfung.
+**Vorteile:** schnell; isoliert riskante Inhalte; stabiler kontrollierter Egress; verworfener Zustand und starke Organisationsprüfung.
 
-**Nachteile:** Provider/Admin kann Sitzung/Konto beobachten; Bildschirm-/Clipboard-/Dateikanäle leaken; Remote-Browser-Fingerprint kann eindeutig sein; gegenüber dem Workspace-Eigentümer nicht anonym.
+**Nachteile:** Provider/Admin kann Session/Konto beobachten; Bildschirm-/Clipboard-/Dateikanäle leaken; Remote-Browser-Fingerprint kann einzigartig sein; keine Anonymität gegenüber dem Workspace-Eigentümer.
 
-**Verfahren:** (1) pro Engagement einen organisations-eigenen Workspace erstellen; (2) MFA verlangen und Administration beschränken; (3) Clipboard/Upload/Download deaktivieren oder begrenzen; (4) über genehmigten festen Egress routen; (5) keine persönliche IdP-/Sync-Nutzung; (6) nur geprüfte Beweise exportieren; (7) Workspace und Credentials planmäßig vernichten.
+**Verfahren:** (1) pro Engagement einen organisations-eigenen Workspace erstellen; (2) MFA verlangen und Administration beschränken; (3) Clipboard/Upload/Download deaktivieren oder begrenzen; (4) über genehmigten festen Egress routen; (5) keine persönliche IdP-/Sync-Nutzung; (6) nur geprüfte Beweise exportieren; (7) Workspace und Credentials planmäßig zerstören.
 
-**Erkennung:** Provider- und IdP-Logs ordnen Nutzer Sitzungen zu; Ziele clustern Workspace-Egress/Browser; Enterprise-Verteidiger erkennen Remote-Control-Protokolle und ungewöhnliche Cloud-Sitzungen.
+**Erkennung:** Provider- und IdP-Logs ordnen Nutzer Sessions zu; Ziele clustern Workspace-Egress/Browser; Enterprise-Verteidiger erkennen Remote-Control-Protokolle und anomale Cloud-Sessions.
 
-## Öffentliches oder Gäste-WLAN
+## Öffentliches oder Gast-Wi-Fi
 
-**Mechanik:** Datenverkehr verlässt das Netzwerk über Venue-NAT oder einen dort gestarteten Tunnel.
+**Mechanik:** Traffic verlässt das Netzwerk über Venue-NAT oder einen dort gestarteten Tunnel.
 
-**Vorteile:** hohe Geschwindigkeit und gemeinsam genutzte Nicht-Heimadresse; keine eigene Infrastruktur.
+**Vorteile:** hohe Geschwindigkeit und gemeinsame Nicht-Heimadresse; keine dedizierte Infrastruktur.
 
-**Nachteile:** Venue-Zuordnung/DHCP/Portal, Kameras, Kauf- und Standortbeweise; feindliche Peers/APs; Nutzungsbedingungen; physisches Risiko.
+**Nachteile:** Venue-Zuordnung/DHCP/Portal, Kamera-, Kauf- und Standortbeweise; feindliche Peers/APs; Nutzungsbedingungen; physisches Risiko.
 
-**Verfahren:** (1) Gästen angebotenen Zugang verwenden und SSID beim Personal bestätigen; (2) ein gepatchtes Gerät mit geringem Vertrauensniveau verwenden; (3) Sharing/Auto-Join deaktivieren und private MAC aktivieren; (4) Portal ohne wiederverwendete Identität abschließen; (5) Fail-closed-VPN-/Tor-Pfad starten; (6) Tethering-Datenverkehr prüfen; (7) Netzwerk vergessen.
+**Verfahren:** (1) Gästen angebotenen Zugang verwenden und SSID mit Personal bestätigen; (2) gepatchtes Gerät mit geringem Vertrauen einsetzen; (3) Sharing/Auto-Join deaktivieren und private MAC aktivieren; (4) Portal ohne wiederverwendete Identität abschließen; (5) Fail-closed-VPN/Tor starten; (6) getetherte Verbindungen prüfen; (7) Netzwerk vergessen.
 
-**Erkennung:** Venue korreliert AP, MAC, DHCP, Portal und Zeit; Ziel sieht Venue/Tunnel; Ermittler kombinieren physische und Gerätebeweise. Zugriffskontrollen niemals umgehen.
+**Erkennung:** Venue korreliert AP, MAC, DHCP, Portal und Zeit; Ziel sieht Venue/Tunnel; Ermittler verbinden physische und Gerätebeweise. Zugriffskontrollen niemals umgehen.
 
 ## Travel Router
 
-**Mechanik:** Ein eigener Router verbindet sich mit Venue-WLAN/Ethernet und stellt ein isoliertes internes Netzwerk mit erzwungener Tunnel-Policy bereit.
+**Mechanik:** Ein eigener Router verbindet sich mit Venue-Wi-Fi/Ethernet und stellt ein isoliertes internes Netz mit erzwungener Tunnelrichtlinie bereit.
 
-**Vorteile:** isoliert Workstations; zentraler Kill Switch/DNS; konsistentes Client-Netzwerk; schützt privilegierte Endpunkte vor lokalen Broadcasts.
+**Vorteile:** isoliert Workstations; zentraler Kill Switch/DNS; konsistentes Client-Netz; schützt privilegierte Endpunkte vor lokalen Broadcasts.
 
-**Nachteile:** Router wird zu einem stabilen Funk-/DHCP-Fingerprint; zusätzliche Angriffsfläche; Captive Portals und Tethering können den Tunnel umgehen.
+**Nachteile:** Router wird zu einem stabilen Radio-/DHCP-Fingerprint; zusätzliche Angriffsfläche; Captive Portals und Tethering können den Tunnel umgehen.
 
-**Verfahren:** (1) unterstützte Firmware aktualisieren; (2) eindeutige Management-Credentials setzen und WAN-Admin/WPS/UPnP deaktivieren; (3) erlaubten privaten Upstream-MAC konfigurieren; (4) separate interne SSID erstellen; (5) Full-Tunnel-DNS-/IPv6-Firewall-Policy erzwingen; (6) Portal, Reconnect und Tunnelausfall testen.
+**Verfahren:** (1) unterstützte Firmware aktualisieren; (2) eindeutige Management-Credentials setzen und WAN-Admin/WPS/UPnP deaktivieren; (3) privaten Upstream-MAC verwenden, sofern zulässig; (4) separate interne SSID erstellen; (5) Full-Tunnel-DNS-/IPv6-Firewallrichtlinie erzwingen; (6) Portal, Reconnect und Tunnelausfall testen.
 
 **Erkennung:** Venue sieht Routerassoziation und Traffic-Form; lokale RF-/DHCP-Fingerprinting identifiziert ihn; VPN-Provider sieht die Venue-Quelle.
 
 ## Mobilfunk, Prepaid-SIM und eSIM
 
-**Mechanik:** Ein Modem verwendet Carrier-Funkzugang und üblicherweise Carrier-NAT; eine VPN-/Tor-Schicht kann den für das Ziel sichtbaren Exit ändern.
+**Mechanik:** Ein Modem verwendet Carrier-Funkzugang und normalerweise Carrier-NAT; eine VPN-/Tor-Schicht kann den am Ziel sichtbaren Exit ändern.
 
-**Vorteile:** unabhängig vom lokalen kabelgebundenen/WLAN-Netz; mobil; hohe Geschwindigkeit; nützlicher Backhaul für autorisierte Drops.
+**Vorteile:** unabhängig vom lokalen kabelgebundenen/Wi-Fi-Netz; mobil; hohe Geschwindigkeit; nützlich als Backhaul für autorisierte Drops.
 
-**Nachteile:** Carrier kennt Subscriber/eSIM, IMSI, IMEI, Zellen, Zeit und zugewiesene Ports; Registrierungsgesetze variieren; gemeinsame Nutzung mit dem persönlichen Telefon verbindet Geräte.
+**Nachteile:** Carrier kennt Teilnehmer/eSIM, IMSI, IMEI, Zellen, Zeit und zugewiesene Ports; Registrierungsgesetze variieren; gemeinsame Nutzung mit einem persönlichen Telefon verbindet Geräte.
 
-**Verfahren:** (1) Dienst rechtmäßig und mit den erforderlichen korrekten Angaben beziehen; (2) separates Organisationsmodem/-gerät verwenden; (3) beim Übungscontroller registrieren; (4) nicht zugehörige Funkmodule/Konten deaktivieren; (5) genehmigten Tunnel aufbauen; (6) prüfen, ob verbundene Clients ihm tatsächlich folgen; (7) Provider- und Aufbewahrungsannahmen vor Reisen prüfen.<sup>[[13]](#references)</sup>
+**Verfahren:** (1) Dienst rechtmäßig und mit erforderlichen korrekten Angaben beziehen; (2) separates organisations-eigenes Modem/Gerät verwenden; (3) beim Übungscontroller registrieren; (4) nicht relevante Funkgeräte/Konten deaktivieren; (5) genehmigten Tunnel herstellen; (6) prüfen, ob getetherte Clients tatsächlich darüber laufen; (7) Provider- und Aufbewahrungsannahmen vor Reisen prüfen.<sup>[[13]](#references)</sup>
 
-**Erkennung:** Carrierdaten und RF-Standort; Enterprise-USB-/PCI-/MDM-Inventar und Rogue-Hotspot-Prüfungen; Ziel-/Tunnel-Timing.
+**Erkennung:** Carrierdaten und RF-Standort; Enterprise-USB-/PCI-/MDM-Inventar und Rogue-Hotspot-Suchen; Ziel-/Tunnel-Timing.
 
-## Satelliteninternet und Missbrauch von Satelliten-Downlinks
+## Satelliteninternet und Missbrauch von Satellite Downlinks
 
-**Mechanik:** Normaler Dienst verwendet ein registriertes Terminal/einen Provider. Älterer einseitiger DVB-S-Missbrauch erlaubte es einem Empfänger innerhalb eines Beams, unverschlüsselten Downlink-Datenverkehr für einen legitimen Teilnehmer zu beobachten, während ein anderer Pfad für ausgehende Requests verwendet wurde.
+**Mechanik:** Normaler Dienst verwendet registriertes Terminal/Provider. Älterer einseitiger DVB-S-Missbrauch erlaubte einem Empfänger innerhalb eines Beams, unverschlüsselten Downlink-Traffic für einen legitimen Teilnehmer zu beobachten, während ein anderer Pfad für ausgehende Anfragen verwendet wurde.
 
-**Vorteile:** große Reichweite; unabhängige letzte Meile; historischer einseitiger Missbrauch konnte C2 fälschlich der Geografie eines Teilnehmers zuordnen.
+**Vorteile:** große Reichweite; unabhängige letzte Meile; historischer einseitiger Missbrauch konnte C2 fälschlich einer Teilnehmergeografie zuordnen.
 
 **Nachteile:** Geräte-/RF-/Providerdaten; Latenz und Abdeckung; moderne bidirektionale Systeme unterscheiden sich; Outbound-Pfad und asymmetrisches Routing bleiben Beweise.
 
-**Verfahren:** Für rechtmäßigen Zugriff ein eigenes Terminal registrieren und Datenverkehr nach Bedarf tunneln. Zur Emulation historischen Turla-Verhaltens synthetische One-Way-Packet-Captures in einem RF-freien Labor abspielen und prüfen, ob Analysten eine Antwort an einen Host erkennen, der keine Anfrage gestellt hat; keinen Live-Satellitendatenverkehr abfangen.<sup>[[14]](#references)</sup>
+**Verfahren:** Für rechtmäßigen Zugang ein eigenes Terminal registrieren und Traffic nach Bedarf tunneln. Zur Emulation historischen Turla-Verhaltens synthetische One-Way-Paketmitschnitte in einem RF-freien Labor wiedergeben und prüfen, ob Analysten eine Antwort an einen Host erkennen, der keine Anfrage gestellt hat; keinen Live-Satellitentraffic abfangen.<sup>[[14]](#references)</sup>
 
-**Erkennung:** Provider-/Terminaltelemetrie, RF-Richtungsermittlung, unmöglicher/asymmetrischer Flow, RTT-/Routing-Inkonsistenz und Malware-Konfiguration.
+**Erkennung:** Provider-/Terminal-Telemetrie, RF-Richtungsbestimmung, unmöglicher/asymmetrischer Flow, RTT-/Routing-Widerspruch und Malware-Konfiguration.
 
-## Residential-/Mobile-Proxy oder Proxyware mit Zustimmung
+## Residential-/Mobile-Proxy oder Proxyware mit Einwilligung
 
-**Mechanik:** Ein Backconnect-Gateway weist Consumer-Breitband-/Mobilfunk-Exits zu, entweder dauerhaft oder rotierend. Das Angebot kann einvernehmlich, täuschend gebündelt oder bösartig sein.
+**Mechanik:** Ein Backconnect-Gateway weist Consumer-Breitband-/Mobilfunk-Exits zu, dauerhaft oder rotierend. Die Bereitstellung kann einvernehmlich, täuschend gebündelt oder bösartig sein.
 
-**Vorteile:** hohe Geschwindigkeit; geografische Auswahl; Consumer-ASN umgeht einige Hosting-Blockierungen; große Pools.
+**Vorteile:** hohe Geschwindigkeit; geografische Auswahl; Consumer-ASN umgeht manche Hosting-Blockaden; große Pools.
 
-**Nachteile:** Herkunfts-/Zustimmungs- und Rechtsrisiko; Broker sieht Kunden; infizierte Exits schädigen Opfer; Rotation erzeugt Anomalien; teuer und unzuverlässig.
+**Nachteile:** Herkunfts-/Einwilligungs- und Rechtsrisiko; Broker sieht Kunden; infizierte Exits schädigen Opfer; Rotation erzeugt Anomalien; teuer und unzuverlässig.
 
-**Verfahren:** Für Emulation nur dokumentierte Agents mit informierter Zustimmung und Organisationsbesitz verwenden: (1) Testendpunkte registrieren; (2) Eigentümer/IPs inventarisieren; (3) Gateway konfigurieren; (4) Sticky-/Per-Request-Modi rotieren; (5) nur an ein eigenes Ziel senden; (6) Gateway-/Exit-/Ziellogs vergleichen; (7) jeden Agent entfernen.
+**Verfahren:** Nur dokumentierte, informierte, organisations-eigene Agents für Emulation verwenden: (1) Testendpunkte registrieren; (2) Eigentümer/IPs inventarisieren; (3) Gateway konfigurieren; (4) Sticky-/Per-Request-Modi rotieren; (5) nur an eigenes Ziel senden; (6) Gateway-/Exit-/Ziel-Logs vergleichen; (7) jeden Agent entfernen.
 
 **Erkennung:** Unmögliche Reisen, stabiler Browser/Account über schnelle IP-/ASN-Wechsel, Backconnect-Protokolle, Proxyware-Prozess-/Netzwerkartefakte und Broker-/Controller-Beziehungen.
 
 ## ORB-, Botnet- und kompromittierte Edge-Device-Relays
 
-**Mechanik:** Gemietete oder kompromittierte Router/IoT-Geräte/Server bilden von einer Flotte verwaltete Zugangs-, Traversal- und Exit-Rollen. Mehrere APT-Kunden können sie gemeinsam nutzen.
+**Mechanik:** Gemietete oder kompromittierte Router/IoT-Geräte/Server bilden von einer Flotte verwaltete Access-, Traversal- und Exit-Rollen. Mehrere APT-Kunden können sie gemeinsam nutzen.
 
-**Vorteile:** geliehene Reputation/Geografie; kurzlebige Exits; ausfallsicheres Multi-Hop-Mesh; schwache direkte Akteur-IP-Verknüpfung.
+**Vorteile:** geliehene Reputation/Geografie; kurzlebige Exits; widerstandsfähiges Multi-Hop-Mesh; schwache direkte Akteur-IP-Verknüpfung.
 
-**Nachteile:** Kriminalität gegen Opfer; Implant-/Controller- und Flottenmuster; Beschlagnahme von Vermittlern; inkonsistente Leistung; Betreiber-/Kundenunterlagen.
+**Nachteile:** Kriminalität gegen Opfer; Implantat-/Controller- und Flottenmuster; Beschlagnahmung von Vermittlern; inkonsistente Performance; Operator-/Kundenunterlagen.
 
-**Verfahren:** Niemals reale Geräte kompromittieren. [Lab 1](authorized-adversary-emulation-labs.md#lab-1-owned-orb-and-redirector-chain) verwenden: (1) isolierte Entry-/Transit-/Target-Netze erstellen; (2) eigene dual-homed Relay-Container anbinden; (3) nur einen Testport weiterleiten; (4) harmlose Anfrage senden; (5) prüfen, dass das Ziel nur den Exit sieht; (6) Exit rotieren; (7) alle benannten Assets abbauen.<sup>[[15]](#references)</sup>
+**Verfahren:** Niemals echte Geräte kompromittieren. [Lab 1](authorized-adversary-emulation-labs.md#lab-1-owned-orb-and-redirector-chain) verwenden: (1) isolierte Entry-/Transit-/Zielnetze erstellen; (2) eigene Dual-Homed-Relay-Container verbinden; (3) nur einen Testport weiterleiten; (4) harmlose Anfrage senden; (5) prüfen, dass das Ziel nur den Exit sieht; (6) Exit rotieren; (7) alle benannten Ressourcen abbauen.<sup>[[15]](#references)</sup>
 
-**Erkennung:** Topologie, Ports/Services, Controllerbeziehungen, Implant-Fingerprints und Node-Lebenszyklus verfolgen; Edge-Konfiguration/Flow-/Integritätstelemetrie zentralisieren; Exit-IP nicht mit dem Akteur gleichsetzen.
+**Erkennung:** Topologie, Ports/Services, Controller-Beziehungen, Implantat-Fingerprints und Knotenlebenszyklus verfolgen; Edge-Konfiguration/Flow/Integrität zentral telemetrieren; Exit-IP nicht mit dem Akteur gleichsetzen.
 
-## CDN-Redirector, Domain Fronting und domainless Fronting
+## CDN-Redirector, Domain Fronting und Domainless Fronting
 
-**Mechanik:** Ein öffentlicher Edge leitet nur Datenverkehr weiter, der einer Grammatik entspricht; Fronting verwendet ein harmloses äußeres SNI und eine andere innere HTTP-Authority oder leeres SNI, sofern der Vermittler dies erlaubt.
+**Mechanik:** Ein öffentlicher Edge leitet nur Traffic weiter, der einer Grammatik entspricht; Fronting verwendet einen harmlosen äußeren SNI und eine andere innere HTTP Authority oder leeres SNI, sofern der Vermittler dies zulässt.
 
-**Vorteile:** verbirgt/schützt das Back-End; schneller globaler Edge; vermischt das Ziel mit einem Shared Service; schnelles Umschalten.
+**Vorteile:** verbirgt/schützt Back-End; schneller globaler Edge; vermischt das Ziel mit einem Shared Service; schneller Wechsel.
 
-**Nachteile:** CDN sieht gesamtes Routing und Tenant; viele Provider verbieten Cross-Tenant-Fronting; SNI/Host/Prozess/Flow und Kontenartefakte; wiederverwendete Konfigurationen clustern Kampagnen.
+**Nachteile:** CDN sieht sämtliches Routing und den Tenant; viele Provider verbieten Cross-Tenant-Fronting; SNI/Host/Prozess/Flow und Kontenartefakte; wiederverwendete Konfiguration clustert Kampagnen.
 
-**Verfahren:** Nur auf einem eigenen Reverse Proxy mit [Lab 2](authorized-adversary-emulation-labs.md#lab-2-snihost-mismatch-and-redirector-logging) reproduzieren: lokalen Zertifikats-/Edge-Dienst erstellen, einen abweichenden Host an ein eigenes Ziel routen, SNI und Host protokollieren, normale/abweichende Requests senden und anschließend Container entfernen.<sup>[[16]](#references)</sup>
+**Verfahren:** Nur auf einem eigenen Reverse Proxy mit [Lab 2](authorized-adversary-emulation-labs.md#lab-2-snihost-mismatch-and-redirector-logging) reproduzieren: lokalen Certificate/Edge erstellen, einen abweichenden Host zu einem eigenen Ziel routen, SNI und Host loggen, normale/abweichende Requests senden und Container entfernen.<sup>[[16]](#references)</sup>
 
-**Erkennung:** SNI/ECH/Host/`:authority` am Endpunkt oder terminierenden Edge vergleichen; initiierenden Prozess, Tenant/Origin, Request-Grammatik und Flow-Kadenz verknüpfen.
+**Erkennung:** SNI/ECH/Host/`:authority` an Endpunkt oder terminierendem Edge vergleichen; auslösenden Prozess, Tenant/Origin, Request-Grammatik und Flow-Kadenz verbinden.
 
 ## Dynamic DNS, DGA, Fast Flux und Double Flux
 
 **Mechanik:** DDNS aktualisiert einen stabilen Namen; DGA erzeugt wechselnde Kandidatennamen; Fast Flux rotiert Serviceadressen mit niedriger TTL; Double Flux rotiert zusätzlich Nameserver.
 
-**Vorteile:** robuste Ermittlung; schneller Infrastrukturersatz; verbirgt Controller hinter vielen Nodes.
+**Vorteile:** widerstandsfähige Auffindbarkeit; schneller Infrastrukturwechsel; verbirgt Controller hinter vielen Knoten.
 
-**Nachteile:** DNS erzeugt zentrale Telemetrie; Entropie/NXDOMAIN/Churn; niedrige TTL und breite ASN-Muster; Registrierung und autoritative Infrastruktur bleiben.
+**Nachteile:** DNS erzeugt zentrale Telemetrie; Entropie/NXDOMAIN/Wechsel; niedrige TTL und breite ASN-Muster; Registrierung und autoritative Infrastruktur bleiben.
 
-**Verfahren:** [Lab 3](authorized-adversary-emulation-labs.md#lab-3-fast-flux-dns-telemetry) verwenden: eine eigene Zone bereitstellen, die RFC-5737-Adressen mit fünf Sekunden TTL zurückgibt, wiederholt abfragen, die synthetische Epoche ändern und Analytics validieren. Testrecords niemals auf Dritte verweisen.<sup>[[17]](#references)</sup>
+**Verfahren:** [Lab 3](authorized-adversary-emulation-labs.md#lab-3-fast-flux-dns-telemetry) verwenden: eigene Zone mit RFC-5737-Adressen und fünf Sekunden TTL bereitstellen, wiederholt abfragen, synthetische Epoche ändern und Analytics validieren. Testrecords niemals auf Dritte zeigen lassen.<sup>[[17]](#references)</sup>
 
-**Erkennung:** einzigartige Antworten/ASNs im Sliding Window, Median-TTL, Geografie, autoritativer Churn, DGA-NXDOMAIN-/lexikalische/zeitliche Cluster und nachfolgende Prozesse; legitime CDNs kontextbezogen ausschließen.
+**Erkennung:** Eindeutige Antworten/ASNs im Sliding Window, mediane TTL, Geografie, autoritativer Wechsel, DGA-NXDOMAIN-/lexikalische/zeitliche Cluster und nachfolgende Prozesse; legitime CDNs mit Kontext ausschließen.
 
-## Legitimer Webservice, Dead-Drop-Resolver und One-Way-Tasking
+## Legitime Webdienste, Dead-Drop-Resolver und One-Way-Tasking
 
-**Mechanik:** Ein öffentlicher Post, ein Repository, Dokument, Objekt oder Feed enthält einen codierten aktuellen Endpunkt oder Task. Der Client kann Ergebnisse über einen anderen Kanal zurückgeben.
+**Mechanik:** Ein öffentlicher Post, ein Repository, ein Dokument, Objekt oder Feed enthält einen codierten aktuellen Endpunkt oder Task. Der Client kann Ergebnisse über einen anderen Kanal zurückgeben.
 
-**Vorteile:** erlaubter Service mit hoher Reputation; TLS; Endpunktrotation ohne Binäränderung; asymmetrisches Tasking erschwert einfache Flow-Korrelation.
+**Vorteile:** erlaubter Dienst mit hoher Reputation; TLS; Endpunktrotation ohne Binäränderung; asymmetrisches Tasking erschwert einfache Flow-Korrelation.
 
-**Nachteile:** stabile Objekt-/Konto-/API-Identifier; Providerdaten; Endpunkt-Decoding/Folgezugriff; Inhalte können beschlagnahmt oder geändert werden.
+**Nachteile:** stabile Objekt-/Konto-/API-Kennungen; Providerdaten; Endpunkt-Decode-/Follow-on-Sequenz; Inhalt kann beschlagnahmt oder verändert werden.
 
-**Verfahren:** [Lab 5](authorized-adversary-emulation-labs.md#lab-5-dead-drop-resolver-sequence) verwenden: einen codierten Pointer in einem eigenen Container hosten, ihn von einem kurzlebigen Client abrufen/dekodieren, einen zweiten eigenen Service kontaktieren, beide Logs aufbewahren und anschließend abbauen.
+**Verfahren:** [Lab 5](authorized-adversary-emulation-labs.md#lab-5-dead-drop-resolver-sequence) verwenden: codierten Pointer auf einem eigenen Container hosten, von einem kurzlebigen Client abrufen/decodieren, zweiten eigenen Dienst kontaktieren, beide Logs aufbewahren und anschließend abbauen.
 
-**Erkennung:** ungewöhnlichen Prozess → Lesen eines stabilen Objekts → Decoding → neues Ziel korrelieren; Inhalte hashen/aufbewahren und vollständige Objektpfade, nicht nur Domains, speichern.
+**Erkennung:** ungewöhnlichen Prozess → stabiles Objektlesen → Decode → neues Ziel korrelieren; Inhalte hashen/aufbewahren und vollständige Objektpfade, nicht nur Domains, speichern.
 
 ## Serverless-, kurzlebiger Container- und Cloud-NAT-Egress
 
-**Mechanik:** Functions/kurzlebige Jobs laufen hinter Provider-NAT oder einem Front; der logische Service bleibt stabil, während Instanzen und Adressen rotieren.
+**Mechanik:** Functions/kurzlebige Jobs laufen hinter Provider-NAT oder einem Front; der logische Dienst bleibt stabil, während Instanzen/Adressen rotieren.
 
-**Vorteile:** schnelle Bereitstellung/Zerstörung; geteilter Egress im Providermaßstab; wenig lokaler Datenträger; elastisches regionales Routing.
+**Vorteile:** schnelle Bereitstellung/Zerstörung; geteilter Egress auf Providermaßstab; wenig lokale Festplatte; elastisches regionales Routing.
 
-**Nachteile:** Tenant, Rolle, API, Image, Secret, Invocation, Billing und Front-to-Origin-Logs sind dauerhaft; Cold-Start- und Plattform-Fingerprints; Provider-Policy.
+**Nachteile:** Tenant, Rolle, API, Image, Secret, Invocation, Billing und Front-to-Origin-Logs sind dauerhaft; Cold-Start-/Plattform-Fingerprints; Provider-Richtlinie.
 
-**Verfahren:** (1) eigenen Organisations-Übungstenant verwenden; (2) harmlose Function bereitstellen, die nur einen eigenen Endpunkt anfragt; (3) Projekt/Rolle/Image/Konfiguration aufzeichnen; (4) über mehrere Instanzen ausführen; (5) Ziel-IPs mit Audit-/Request-IDs vergleichen; (6) Logaufbewahrung testen; (7) Function, Rollen und Secrets entfernen.
+**Verfahren:** (1) eigenen Organisations-Tenant verwenden; (2) harmlose Function bereitstellen, die nur einen eigenen Endpunkt anfragt; (3) Projekt/Rolle/Image/Konfiguration erfassen; (4) über mehrere Instanzen aufrufen; (5) Ziel-IPs mit Audit-/Request-IDs vergleichen; (6) Log-Aufbewahrung testen; (7) Function, Rollen und Secrets entfernen.
 
-**Erkennung:** Cloud-Audit-/Invocation-Logs, ungewöhnliche Rollenerstellung, geteilter Egress mit stabiler Request-Grammatik, wiederverwendete Images/Layers/Secrets und Front-Origin-Korrelation.
+**Erkennung:** Cloud-Audit-/Invocation-Logs, ungewöhnliche Rollenerstellung, geteilter Egress mit stabiler Request-Grammatik, Image-/Layer-/Secret-Wiederverwendung und Front-Origin-Korrelation.
 
 ## Autorisierter On-Site-Drop
 
-**Mechanik:** Ein inventarisierter Kleincomputer verwendet lokales Wired/Wi-Fi und einen ausgehenden VPN-/Mobilfunk-Rendezvous und präsentiert eine lokale Quelle.
+**Mechanik:** Ein inventarisierter Kleincomputer verwendet lokales Kabel/Wi-Fi sowie ausgehendes VPN-/Mobilfunk-Rendezvous und präsentiert eine lokale Quelle.
 
-**Vorteile:** realistischer Test interner Herkunft; hohe Geschwindigkeit; testet NAC, physisches Inventar und Egress-Kontrollen.
+**Vorteile:** realistischer Test interner Herkunft; hohe Geschwindigkeit; kann NAC, physisches Inventar und Egress-Kontrollen prüfen.
 
-**Nachteile:** physische Entdeckung/Diebstahl; Serial/MAC/USB/DHCP/PoE/RF- und Kamera-Beweise; Verlust kann Credentials offenlegen.
+**Nachteile:** physische Entdeckung/Diebstahl; Seriennummer/MAC/USB/DHCP/PoE/RF- und Kamerabeweise; Verlust kann Credentials offenlegen.
 
-**Verfahren:** [Capture-Resilient Authorized Field Nodes](capture-resilient-authorized-field-nodes.md) befolgen: (1) exakt schriftliche Platzierungsgenehmigung einholen; (2) Seriennummer, MAC, Foto, Standort und Abholzeit erfassen; (3) signiertes Minimal-Image und kurzlebige gegenseitige Credentials verwenden; (4) ausgehende Ziele/Fähigkeiten beschränken; (5) serverseitige Quarantäne und Bandbreitenlimits hinzufügen; (6) SOC-Sichtbarkeit und Verlustreaktion testen; (7) abrufen, erforderliche Beweise sichern und anschließend gemäß vereinbarter Lifecycle-Policy bereinigen. Niemals an einem nicht zustimmenden Ort verstecken.
+**Verfahren:** [Capture-Resilient Authorized Field Nodes](capture-resilient-authorized-field-nodes.md) befolgen: (1) exakte schriftliche Platzierungsgenehmigung einholen; (2) Seriennummer, MAC, Foto, Standort und Abholzeit erfassen; (3) signiertes minimales Image und kurzlebige Mutual-Credentials verwenden; (4) ausgehende Ziele/Fähigkeiten beschränken; (5) serverseitige Quarantäne und Bandbreitenlimits hinzufügen; (6) SOC-Sichtbarkeit und Verlustreaktion testen; (7) abholen, erforderliche Beweise sichern und gemäß vereinbarter Lifecycle-Richtlinie bereinigen. Niemals in einem nicht einwilligenden Venue verstecken.
 
-**Erkennung:** NAC/802.1X, Switchport/PoE/DHCP, USB-Inventar, RF-Survey, wiederkehrender Tunnel, Empfang/Kamera und physische Inspektion.
+**Erkennung:** NAC/802.1X, Switchport/PoE/DHCP, USB-Inventar, RF-Survey, wiederkehrender Tunnel, Empfang/Kamera und physische Prüfung.
 
 ## Nearest-Neighbor-Wireless-Pivot
 
-**Mechanik:** Ein Akteur kontrolliert einen Host in Funkreichweite des Ziels und verwendet anschließend Ziel-WLAN-Credentials, um die Grenze remote zu überqueren. APT28 nutzte nahegelegene kompromittierte Organisationen auf diese Weise.<sup>[[18]](#references)</sup>
+**Mechanik:** Ein Akteur kontrolliert einen Host in Funkreichweite des Ziels und verwendet anschließend Ziel-Wi-Fi-Credentials, um die Grenze aus der Ferne zu überschreiten. APT28 nutzte dies über nahe kompromittierte Organisationen.<sup>[[18]](#references)</sup>
 
-**Vorteile:** keine Anreise des Betreibers; Ziel sieht eine lokale Funkquelle; Kontrollen, die nur den Internetzugang schützen, werden umgangen.
+**Vorteile:** keine Reise des Operators; Ziel sieht lokale Funkquelle; umgeht Kontrollen, die nur auf den Internetzugang angewendet werden.
 
-**Nachteile:** nahegelegener kompromittierter/eigener Dual-Radio-Host und gültiger Zugriff erforderlich; RADIUS/NAC/AP- und Nachbarendpunktbeweise; Signal-/Geräteanomalien.
+**Nachteile:** nahegelegener kompromittierter/eigener Dual-Radio-Host und gültiger Zugang erforderlich; RADIUS/NAC/AP- und Nachbarendpunktbeweise; Signal-/Geräteanomalien.
 
-**Verfahren:** Nur mit dem [two-owned-AP Lab 4](authorized-adversary-emulation-labs.md#lab-4-nearest-neighbor-wireless-pivot) reproduzieren: einen eigenen Pivot mit Nachbar- und Ziel-Labor-SSID verbinden, nur einen Service weiterleiten, beide AP-/Pivot-Logs erfassen, anschließend EAP-TLS/Gerätehaltung aktivieren und bestätigen, dass der zweite Versuch scheitert.
+**Verfahren:** Nur mit dem [two-owned-AP Lab 4](authorized-adversary-emulation-labs.md#lab-4-nearest-neighbor-wireless-pivot) reproduzieren: eigenen Pivot in benachbarte und Ziel-Lab-SSIDs einbinden, nur einen Dienst weiterleiten, beide AP-/Pivot-Logs erfassen, anschließend EAP-TLS/Gerätehaltung aktivieren und bestätigen, dass der zweite Versuch scheitert.
 
-**Erkennung:** RADIUS-Identität, verwaltetes Zertifikat/Device Posture, erstmals erkanntes Gerät, AP-Rand/Signal, parallelen Login und physische Präsenz korrelieren; nahe Endpunkte auf gleichzeitige Funkmodule, Forwarding und Tunnel untersuchen.
+**Erkennung:** RADIUS-Identität, verwaltetes Zertifikat/Haltung, erstmals beobachtetes Gerät, AP-Rand/Signal, gleichzeitiges Login und physische Präsenz korrelieren; nahe Endpunkte auf gleichzeitige Funkgeräte, Forwarding und Tunnel untersuchen.
 
-## Community Mesh, Delay-Tolerant und Offline Store-and-Forward
+## Community-Mesh, Delay-Tolerant und Offline Store-and-Forward
 
-**Mechanik:** Datenverkehr durchläuft lokale Peers, asynchrone Gateways, Wechselmedien oder geplante Queues statt einer interaktiven Internet-Sitzung.
+**Mechanik:** Traffic durchläuft lokale Peers, asynchrone Gateways, Wechselmedien oder geplante Queues statt einer interaktiven Internet-Session.
 
-**Vorteile:** funktioniert bei Störung/Zensur; verzögerte/gebündelte Zustellung schwächt einfache Timing-Analyse; kein zentraler letzter Hop für lokale Kommunikation.
+**Vorteile:** funktioniert bei Störungen/Zensur; verzögerte/gebündelte Zustellung schwächt einfache Timing-Analyse; kein zentraler Last Mile für lokale Kommunikation.
 
-**Nachteile:** hohe Latenz; kleine Anonymitätsmenge; Übergabe-/physische Metadaten; bösartige Peers; Daten erreichen schließlich ein Gateway, das sie beobachtet.
+**Nachteile:** hohe Latenz; kleine Anonymitätsmenge; Verwahrungs-/physische Metadaten; bösartige Peers; Daten erreichen letztlich ein Gateway, das sie beobachtet.
 
-**Verfahren:** (1) isoliertes eigenes Drei-Knoten-Mesh oder eine File-Queue aufbauen; (2) Inhalte Ende-zu-Ende verschlüsseln/authentifizieren; (3) direkte Internet-Routen vom Ursprung entfernen; (4) harmlose Datei nach kontrollierter Verzögerung weiterleiten; (5) prüfen, dass nur das Gateway das eigene Ziel kontaktiert; (6) Übergabe-/Zeitstempel vergleichen; (7) erforderliche Beweise sichern und temporäre Medien/Queues beim genehmigten Abschluss bereinigen.
+**Verfahren:** (1) isoliertes eigenes Drei-Knoten-Mesh oder eine File-Queue erstellen; (2) Inhalte Ende-zu-Ende verschlüsseln/authentifizieren; (3) direkte Internet-Routen vom Ursprung entfernen; (4) harmlose Datei nach kontrollierter Verzögerung weiterleiten; (5) prüfen, dass nur das Gateway das eigene Ziel kontaktiert; (6) Verwahrung/Zeitstempel vergleichen; (7) erforderliche Beweise sichern und temporäre Medien/Queues beim genehmigten Abschluss bereinigen.
 
-**Erkennung:** Endpunkt-Datei-/Prozessaktivität, Peer-Funkverbindungen, Wechselmedien-Audit, Queue-/Gateway-Periodizität und Content-Identifier. Längere Korrelationsfenster ersetzen die interaktive Flow-Analyse.
+**Erkennung:** Endpunkt-Datei-/Prozessaktivität, Peer-Funkverbindungen, Wechselmedien-Audit, Queue-/Gateway-Periodizität und Inhaltskennungen. Längere Korrelationsfenster ersetzen interaktive Flow-Analyse.
 
-## TURN Relay und erzwungenes Relay in WebRTC
+## TURN-Relay und erzwungenes WebRTC-Relay
 
-**Mechanik:** Traversal Using Relays around NAT (TURN) weist eine öffentliche Relay-Adresse zu und überträgt UDP-, TCP- oder TLS-Daten zwischen Client und Peers. Eine ICE-Policy kann Relay-Nutzung erzwingen, statt einen direkten Candidate offenzulegen. TURN löst Erreichbarkeit, nicht allgemeine Anonymität: Der Server authentifiziert den Client und beobachtet Allocations, Peers, Zeit und Volumen.<sup>[[19]](#references)</sup>
+**Mechanik:** Traversal Using Relays around NAT (TURN) weist eine öffentliche Relay-Adresse zu und transportiert UDP-, TCP- oder TLS-Traffic zwischen Client und Peers. Eine ICE-Richtlinie kann Relay-Nutzung erzwingen, statt einen direkten Kandidaten offenzulegen. TURN löst Erreichbarkeit, keine allgemeine Anonymität: Der Server authentifiziert den Client und sieht Allocations, Peers, Zeit und Volumen.<sup>[[19]](#references)</sup>
 
-**Vorteile:** weit verbreitet implementiert; bewältigt restriktives NAT; unterstützt mobiles WebRTC; der Peer erhält bei korrekt erzwungener Relay-only-Policy nicht die direkte Transportadresse des Clients.
+**Vorteile:** weit verbreitet; funktioniert bei restriktivem NAT; unterstützt mobiles WebRTC; der Peer erhält bei korrekter Relay-only-Richtlinie nicht die direkte Transportadresse des Clients.
 
-**Nachteile:** TURN-Betreiber sieht beide benachbarten Seiten; Anwendungsidentität, Medien-Fingerprint und Signaling bleiben; Relay-only kostet Bandbreite/Latenz; Fehlkonfiguration kann weiterhin Host- oder serverreflexive Candidates sammeln.
+**Nachteile:** TURN-Betreiber sieht beide benachbarten Seiten; Anwendungsidentität, Media-Fingerprint und Signaling bleiben; Relay-only kostet Bandbreite/Latenz; Fehlkonfiguration kann weiterhin Host- oder serverreflexive Kandidaten sammeln.
 
-**Verfahren:** (1) eigenen TURN-Service mit TLS und kurzlebigen Credentials bereitstellen; (2) Realms, Peers, Ports, Quotas und Ablauf beschränken; (3) Testanwendung auf Relay-only ICE setzen; (4) eigenen Peer anrufen; (5) `getStats()` und Packet Capture prüfen und bestätigen, dass nur Relay-Candidates Medien übertragen; (6) Relay ausfallen lassen und direkten Fallback ausschließen; (7) Allocation-Logs für das Engagement aufbewahren.
+**Verfahren:** (1) organisations-eigenen TURN-Dienst mit TLS und kurzlebigen Credentials bereitstellen; (2) Realms, Peers, Ports, Quoten und Ablauf beschränken; (3) Testanwendung auf Relay-only ICE setzen; (4) eigenen Peer anrufen; (5) `getStats()` und Paketmitschnitt prüfen, um zu bestätigen, dass nur Relay-Kandidaten Medien transportieren; (6) Relay ausfallen lassen und direkten Fallback ausschließen; (7) Allocation-Logs für das Engagement aufbewahren.
 
-**Erkennung:** Signaling, Browserprozess und TURN-Allocations verbinden Sitzung und Relay; Netzwerke beobachten anhaltende Flows zu TURN-Ports oder TLS-Endpunkten; der Peer sieht das zugewiesene Relay. **Erfasster Node:** Anwendungszustand und kurzlebige TURN-Credentials können Realm und Rendezvous-Service offenlegen. Exposition durch gerätebezogene, kurzlebige Credentials minimieren und Betreiber-Authentifizierung ausschließlich am Controller halten.
+**Erkennung:** Signaling, Browserprozess und TURN-Allocations verbinden Session und Relay; Netzwerke sehen dauerhafte Flows zu TURN-Ports oder TLS-Endpunkten; Peer sieht das zugewiesene Relay. **Erfasster Knoten:** Anwendungszustand und kurzlebige TURN-Credentials können Realm und Rendezvous-Dienst offenlegen. Exposition mit gerätebezogenen, kurzlebigen Credentials minimieren und Operatorauthentifizierung nur beim Controller aufbewahren.
 
-## Outbound-Only-Rendezvous oder Reverse Overlay
+## Nur ausgehendes Rendezvous oder Reverse Overlay
 
-**Mechanik:** Ein Node hinter NAT initiiert eine authentifizierte Verbindung zu einem organisationskontrollierten Broker. Der Betreiber authentifiziert sich separat am Broker, der einen engen Managementkanal autorisiert; weder Inbound-Port-Forwarding noch direkte Betreiber-zu-Node-Route ist erforderlich.
+**Mechanik:** Ein Knoten hinter NAT initiiert eine authentifizierte Verbindung zu einem organisationskontrollierten Broker. Der Operator authentifiziert sich separat beim Broker, der einen engen Managementkanal autorisiert; weder Inbound-Portforwarding noch direkte Operator-zu-Knoten-Route ist erforderlich.
 
-**Vorteile:** stabil hinter NAT und Captive Last Miles; zentrale Sperrung und Auditierung; wechselnde Field-Node-Adressen erfordern keine Betreiberermittlung; Betreiberidentität und Node-Credential werden sauber getrennt.
+**Vorteile:** stabil hinter NAT und Captive Last Miles; zentrale Sperrung und Auditierung; wechselnde Feldknotenadresse erfordert keine Operator-Suche; trennt Operatoridentität sauber vom Knotenschlüssel.
 
-**Nachteile:** Broker wird zu einem wertvollen Korrelationspunkt; regelmäßige Keepalives sind erkennbar; ein breiter Tunnel kann zu einem unsicheren Pivot werden; Verlust des Brokers beendet Management.
+**Nachteile:** Broker wird zu einem wertvollen Korrelationspunkt; periodische Keepalives sind erkennbar; ein breiter Tunnel kann zu einem unsicheren Pivot werden; Brokerverlust beendet Management.
 
-**Verfahren:** [Capture-Resilient Authorized Field Nodes](capture-resilient-authorized-field-nodes.md#step-4-stable-outbound-rendezvous) befolgen: eine begrenzte Geräteidentität ausstellen, nur eigenen Broker und genehmigten Management-Service erlauben, authentifizierte Keepalives verwenden, Fail-closed-Routing erzwingen, Adresswechsel und Neustartwiederherstellung testen und die Identität während der Verlustübung widerrufen. WireGuard dokumentiert ein persistentes Keepalive von 25 Sekunden als allgemein nützliches NAT-Intervall, wenn es tatsächlich benötigt wird.<sup>[[20]](#references)</sup>
+**Verfahren:** [Capture-Resilient Authorized Field Nodes](capture-resilient-authorized-field-nodes.md#step-4-stable-outbound-rendezvous) befolgen: eine begrenzte Geräteidentität ausgeben, nur eigenen Broker und genehmigten Managementdienst erlauben, authentifizierte Keepalives verwenden, Fail-closed-Routing erzwingen, Adresswechsel und Reboot-Recovery testen und die Identität während der Verlustübung widerrufen. WireGuard dokumentiert ein 25-sekündiges Persistent Keepalive als allgemein nützliches NAT-Intervall, wenn es tatsächlich benötigt wird.<sup>[[20]](#references)</sup>
 
-**Erkennung:** Broker- und IdP-Logs ordnen beide Seiten zu; das Zugangsnetz sieht ein wiederholtes verschlüsseltes Ziel/eine Kadenz; Endpunktinventar zeigt den Overlay-Agent. **Erfasster Node:** davon ausgehen, dass Geräteschlüssel, Brokername, Tunneladressen und gecachte Taskdaten offengelegt sind. Er darf keinen privaten Betreiberschlüssel, kein persönliches Konto und kein wiederverwendbares Controller-Token enthalten.
+**Erkennung:** Broker- und IdP-Logs verbinden beide Seiten; Access-Netz sieht wiederholtes verschlüsseltes Ziel/Kadenz; Endpunktinventar zeigt den Overlay-Agent. **Erfasster Knoten:** Annehmen, dass Geräteschlüssel, Brokername, Tunneladressen und gecachte Taskdaten offengelegt sind. Er darf keinen privaten Operatorschlüssel, kein persönliches Konto und kein wiederverwendbares Controller-Token enthalten.
 
 ## Pull-Mailbox, Message Queue oder Object-Store-Rendezvous
 
-**Mechanik:** Eine Field-Workload fragt eine authentifizierte Mailbox nach signierten, vorab genehmigten Jobs ab und sendet begrenzte Ergebnisse. Der Betreiber schreibt über eine separate Control Plane in die Queue; zwischen ihnen besteht kein interaktiver Socket.
+**Mechanik:** Eine Feld-Workload fragt eine authentifizierte Mailbox nach signierten, vorab genehmigten Jobs ab und veröffentlicht begrenzte Ergebnisse. Der Operator schreibt über eine separate Control Plane in die Queue; es gibt keinen interaktiven Socket zwischen beiden.
 
-**Vorteile:** toleriert unterbrochene Verbindungen; entkoppelt Timing und Adressierung; Quotas und Schemas begrenzen Fähigkeiten; einfache zentrale Auditierung und Sperrung.
+**Vorteile:** toleriert unterbrochene Verbindungen; entkoppelt Timing und Adressierung; Quoten und Schemas begrenzen Fähigkeiten; einfache zentrale Prüfung und Sperrung.
 
 **Nachteile:** Polling-Kadenz und stabile Objekt-/Queue-Namen fingerprinten das System; Provider-Logs verbinden Producer und Consumer; verzögerte Steuerung; erfasste Queue-Daten können die Übung offenlegen.
 
-**Verfahren:** (1) eine Engagement-Queue und eine Geräteidentität erstellen; (2) signiertes Schema harmloser, ausdrücklich begrenzter Jobs definieren; (3) Nachrichten-TTL, maximale Ergebnisgröße und Rate setzen; (4) Node nur seine Queue lesen und nur in sein Ergebnispräfix schreiben lassen; (5) Offline-Akkumulation, doppelte Zustellung und Widerruf testen; (6) unveränderliche Zugriffslogs zentralisieren; (7) Queue nach Erfüllung der Aufbewahrungspflichten löschen.
+**Verfahren:** (1) eine Engagement-Queue und Geräteidentität erstellen; (2) signiertes Schema harmloser, ausdrücklich begrenzter Jobs definieren; (3) Message-TTL, maximale Ergebnisgröße und Rate festlegen; (4) Node nur seine Queue lesen und nur in sein Ergebnispräfix schreiben lassen; (5) Offline-Aufstau, doppelte Zustellung und Sperrung testen; (6) unveränderliche Zugriffslogs zentralisieren; (7) Queue nach Ablauf der Aufbewahrung löschen.
 
-**Erkennung:** periodische API-Aufrufe eines ungewöhnlichen Prozesses, stabile Bucket-/Objekt-/Queue-Pfade, identisches User-Agent-/TLS-Verhalten und Fetch-then-new-connection-Sequenzen suchen. **Erfasster Node:** lokaler Cache kann ausstehende Jobs und Objektnamen offenlegen; Cache verschlüsselt, begrenzt und löschbar halten, autoritative Controller-Logs jedoch bewahren.
+**Erkennung:** periodische API-Aufrufe eines ungewöhnlichen Prozesses, stabile Bucket-/Objekt-/Queue-Pfade, identischer User-Agent oder TLS-Verhalten und Fetch-then-new-connection-Sequenzen suchen. **Erfasster Knoten:** lokaler Cache kann offene Jobs und Objektnamen offenlegen; Cache verschlüsselt, begrenzt und verwwerfbar halten, während autoritative Controller-Logs erhalten bleiben.
 
 ## Dual-Uplink-Failover und Connection Migration
 
-**Mechanik:** Ein genehmigter Field Node besitzt zwei unabhängige Uplinks, etwa Venue-Ethernet/Wi-Fi und Organisationsmobilfunk, und hält seine Control Session über ein Overlay oder einen Message Broker aufrecht, während sich Routen ändern. Dies ist Verfügbarkeits-, nicht Anonymitätsengineering.
+**Mechanik:** Ein genehmigter Feldknoten hat zwei unabhängige Uplinks, etwa Venue-Ethernet/Wi-Fi und Organisationsmobilfunk, und hält seine Control Session über ein Overlay oder einen Message Broker aufrecht, während sich Routen ändern. Dies ist Verfügbarkeits-Engineering, keine Anonymität.
 
-**Vorteile:** übersteht Ausfall eines Providers, APs oder Captive Portals; unterstützt geplante Wartung; ermöglicht schnelle Isolierung eines verdächtigen Pfads.
+**Vorteile:** übersteht Ausfall eines Providers, APs oder Captive Portals; unterstützt geplante Wartung; erlaubt schnelle Isolation eines verdächtigen Pfades.
 
-**Nachteile:** Zwei Provider erzeugen zwei Standort-/Kontodaten; gleichzeitige Nutzung erleichtert Korrelation; Routen-/DNS-Leaks beim Failover; Mobilfunk-Co-Location bleibt ein Beweis.
+**Nachteile:** zwei Provider erzeugen zwei Standort-/Kontodaten; gleichzeitige Nutzung erleichtert Korrelation; Routen-/DNS-Leaks beim Failover; Mobilfunk-Co-Location bleibt beweiskräftig.
 
-**Verfahren:** (1) beide organisations-eigenen Interfaces und Provider registrieren; (2) deterministische Routenprioritäten und Health Checks zu eigenen Endpunkten zuweisen; (3) DNS und Management an das Overlay binden; (4) verhindern, dass der sekundäre Pfad Inbound-Verkehr annimmt; (5) jeden Pfad trennen und Session-Wiederherstellung, Quellpolicy sowie fehlenden direkten Zielzugriff prüfen; (6) ungeplanten Pfadwechsel alarmieren; (7) Datennutzung und Roaming-Limits dokumentieren.
+**Verfahren:** (1) beide organisations-eigenen Interfaces/Provider registrieren; (2) deterministische Routenprioritäten und Health Checks zu eigenen Endpunkten festlegen; (3) DNS und Management an Overlay binden; (4) sekundären Pfad daran hindern, Inbound-Traffic anzunehmen; (5) jeden Pfad trennen und Session-Recovery, Source Policy und fehlenden direkten Zielzugriff prüfen; (6) ungeplanten Pfadwechsel alarmieren; (7) Datennutzung/Roaming-Grenzen dokumentieren.
 
-**Erkennung:** dasselbe Gerätezertifikat, dieselbe Request-Grammatik und dasselbe Timing über ASNs korrelieren; lokales Inventar sieht beide Funkmodule; Carrier/Venues behalten eigene Daten. **Erfasster Node:** beide SIM-/Geräte-Identifier und bekannte SSIDs können sichtbar sein; Organisationsressourcen verwenden und Node niemals mit persönlichen Geräten zusammenbringen.
+**Erkennung:** dasselbe Geräte-Zertifikat, Request-Grammatik und Timing über ASNs korrelieren; lokales Inventar sieht beide Funkgeräte; Carrier/Venues behalten eigene Daten. **Erfasster Knoten:** beide SIM-/Gerätekennungen und bekannte SSIDs können sichtbar sein; Organisationsressourcen verwenden und den Node niemals mit persönlichen Geräten koppeln.
 
-## Organisations-eigener APN oder verwalteter Mobilfunktunnel
+## Organisations-Private-APN oder verwalteter Mobilfunktunnel
 
-**Mechanik:** Ein privater Carrier-APN platziert eingeschriebene SIMs in einer privaten gerouteten Domain oder tunnelt Datenverkehr zu einem Enterprise-Gateway. Er trennt das Gerät vom öffentlichen Mobilinternet, verbirgt es jedoch nicht vor Carrier oder beauftragter Organisation.
+**Mechanik:** Ein privater Carrier-APN platziert registrierte SIMs in einer privaten gerouteten Domäne oder tunnelt Traffic zu einem Enterprise-Gateway. Er trennt das Gerät vom öffentlichen mobilen Internet, verbirgt es jedoch nicht vor Carrier oder beauftragter Organisation.
 
-**Vorteile:** stabile private Adressierung; Carrier-Enrollment und Traffic-Policy; kein öffentlicher Inbound; nützlich für autorisierte Remote-Appliances.
+**Vorteile:** stabile private Adressierung; Carrier-Enrollment und Traffic-Richtlinie; keine öffentliche Inbound-Exposition; nützlich für autorisierte Remote-Appliances.
 
-**Nachteile:** Subscriber-, IMSI-/IMEI-, Zell- und Billing-Zuordnung sind stark; Vorlaufzeit und Kosten; Carrier-/Gateway-Ausfall; gegenüber dem Betreiber nicht anonym.
+**Nachteile:** Teilnehmer, IMSI/IMEI, Zelle und Billing ermöglichen starke Zuordnung; Vorlaufzeit und Kosten; Carrier-/Gateway-Ausfall; keine Anonymität gegenüber dem Betreiber.
 
-**Verfahren:** (1) APN im Namen der Assessment-Organisation beauftragen; (2) nur registrierte SIMs und Gateway-Präfixe allowlisten; (3) gegenseitige Authentifizierung auf Anwendungsebene hinzufügen; (4) APN-Route auf Rendezvous- und Update-Services beschränken; (5) SIM-Entfernung, Roaming, Public-Internet-Breakout und Widerruf testen; (6) Carrier- und Gateway-Daten überwachen; (7) jede SIM beim Abschluss kündigen oder unter Quarantäne stellen.
+**Verfahren:** (1) APN im Namen der Assessment-Organisation beauftragen; (2) nur registrierte SIMs und Gateway-Präfixe allowlisten; (3) Mutual Authentication auf Anwendungsebene hinzufügen; (4) APN-Route auf Rendezvous-/Update-Dienste beschränken; (5) SIM-Entfernung, Roaming, Public-Internet-Breakout und Widerruf testen; (6) Carrier-/Gatewaydaten überwachen; (7) jede SIM beim Abschluss kündigen oder in Quarantäne setzen.
 
-**Erkennung:** Carrierinventar und Zelltelemetrie, APN-Gateway-Flows, SIM-/IMEI-Abweichung und Enterprise-Asset-Daten. **Erfasster Node:** SIM und Modem identifizieren den Vertrag auch bei verschlüsseltem Speicher; Capture-Resilience bedeutet daher schnelle Sperrung und enge Autorisierung, nicht Abstreitbarkeit.
+**Erkennung:** Carrierinventar und Zelltelemetrie, APN-Gateway-Flows, SIM-/IMEI-Abweichung und Enterprise-Assetdaten. **Erfasster Knoten:** SIM und Modem identifizieren den Vertrag, auch wenn der Speicher verschlüsselt ist; Capture-Resilience bedeutet daher schnelle Sperrung und enge Autorisierung, nicht Abstreitbarkeit.
 
-## Drahtlose Langstrecken-Punkt-zu-Punkt-Brücke
+## Langreichweiten-Punkt-zu-Punkt-Wireless-Bridge
 
-**Mechanik:** Richtfunk-Wi-Fi oder ein anderes lizenziertes/nicht lizenziertes Point-to-Point-Radio verbindet zwei genehmigte Standorte; der Internet-Egress liegt am entfernten Standort. Die scheinbare IP-Position kann ohne kommerziellen Proxy verlagert werden.
+**Mechanik:** Richtfunk-Wi-Fi oder ein anderes lizenzierter/nicht lizenzierter Point-to-Point-Funk verbindet zwei genehmigte Eigentümerstandorte, mit Internet-Egress am entfernten Standort. Die scheinbare IP-Position kann ohne kommerziellen Proxy verlagert werden.
 
-**Vorteile:** hoher Durchsatz; unabhängig von zwischengeschalteten Carriern; kontrollierbares RF und Routing; nützlich zum Testen von Segmentierung und Remote-Site-Monitoring.
+**Vorteile:** hoher Durchsatz; unabhängig von Zwischen-Carriern; kontrollierbare RF und Routing; nützlich zum Testen von Segmentierung und Remote-Site-Monitoring.
 
-**Nachteile:** Sichtlinie, Frequenz, Vermieter- und Regulierungsanforderungen; charakteristische RF-Emissionen und Hardware; beide Endpunkte sind physischer Beweis; Wetter/Strom/Ausrichtung beeinflussen Stabilität.
+**Nachteile:** Sichtverbindung, Frequenz-, Vermieter- und Regulierungsanforderungen; eindeutige RF-Emissionen und Hardware; beide Endpunkte sind physische Beweise; Wetter/Strom/Ausrichtung beeinflussen Stabilität.
 
-**Verfahren:** (1) schriftliche Genehmigung für beide Standorte einholen und Frequenz-/Leistungsregeln prüfen; (2) Pfad ohne Senden außerhalb genehmigter Parameter untersuchen; (3) authentifizierte Verschlüsselung und Management-VLAN verwenden; (4) Bridge auf eigenes Rendezvous oder Testsubnetz beschränken; (5) Failover, Ausrichtung, Stromwiederherstellung und RF-Eindämmung testen; (6) beide Funkgeräte kennzeichnen/inventarisieren; (7) entfernen und nach der Übung Konfigurationsreset prüfen.
+**Verfahren:** (1) schriftliche Genehmigung für beide Standorte und Frequenz-/Leistungsregeln einholen; (2) Pfad ohne Senden außerhalb genehmigter Parameter vermessen; (3) authentifizierte Verschlüsselung und Management-VLAN verwenden; (4) Bridge auf eigenes Rendezvous/Testsubnetz beschränken; (5) Failover, Ausrichtung, Stromwiederherstellung und RF-Eindämmung testen; (6) beide Funkgeräte markieren/inventarisieren; (7) entfernen und nach der Übung Konfigurationsreset prüfen.
 
-**Erkennung:** RF-Surveys, Spektrumanalyse, Dach-/Standortinspektion, Bridge-MAC/OUI, Managementdaten und Remote-Site-Egress-Logs. **Erfasster Node:** Konfiguration offenbart Peer und Managementdomain; eindeutige Übungs-Credentials, keine persönlichen Managementkonten und schnelle Peer-Key-Sperrung verwenden.
+**Erkennung:** RF-Surveys, Spektrumanalyse, Dach-/Standortprüfung, Bridge-MAC/OUI, Management-Traffic und Remote-Site-Egress-Logs. **Erfasster Knoten:** Konfiguration offenbart Peer und Managementdomäne; eindeutige Übungs-Credentials, keine persönlichen Managementkonten und schnellen Peer-Key-Widerruf verwenden.
 
 ## Einvernehmlicher kooperativer oder Community-Exit
 
-**Mechanik:** Freiwillige oder Partnerorganisationen betreiben wissentlich Relays nach veröffentlichter Policy. Datenverkehr verlässt das Netz aus einem gemeinsamen Community-Pool, während die Koordination Missbrauch und Sperrungen verwaltet.
+**Mechanik:** Freiwillige oder Partnerorganisationen betreiben wissentlich Relays unter veröffentlichter Richtlinie. Traffic verlässt das Netz aus einem gemeinsamen Community-Pool, während die Koordination Missbrauch und Widerruf verwaltet.
 
-**Vorteile:** vielfältige Nicht-Cloud-Netze; ausdrückliche Zustimmung ist sicherer als Proxyware; gemeinsame Governance kann Vertrauen verteilen; nützlich für Forschung und Zensurresilienz.
+**Vorteile:** vielfältige Nicht-Cloud-Netze; ausdrückliche Einwilligung ist sicherer als Proxyware; gemeinsame Governance kann Vertrauen verteilen; nützlich für Forschung und Zensurresilienz.
 
-**Nachteile:** kleine Pools und Mitgliederdaten reduzieren Anonymität; Exit-Betreiber erhalten Beschwerden und sehen Traffic-Metadaten; bösartige Teilnehmer, variable Verfügbarkeit und unterschiedliche Gerichtsbarkeiten.
+**Nachteile:** kleine Pools und Mitgliedsdaten reduzieren Anonymität; Exit-Betreiber erhalten Beschwerden und sehen Traffic-Metadaten; böswillige Teilnehmer, wechselnde Verfügbarkeit und unterschiedliche Rechtsräume.
 
-**Verfahren:** (1) Acceptable-Use- und Logging-Policy veröffentlichen; (2) informierte Opt-ins jedes Betreibers einholen; (3) eindeutige Relay-Identität ausstellen und Ziele/Raten beschränken; (4) Abuse-Handling und sofortige Sperrung bereitstellen; (5) während Tests nur autorisierten Datenverkehr zu eigenen Endpunkten senden; (6) Churn und Korrelationsexposition messen; (7) Relay sauber entfernen, wenn Zustimmung endet.
+**Verfahren:** (1) Acceptable-Use- und Logging-Richtlinie veröffentlichen; (2) informierte Einwilligung jedes Betreibers einholen; (3) eindeutige Relay-Identität ausstellen und Ziele/Raten beschränken; (4) Missbrauchsbehandlung und sofortigen Widerruf anbieten; (5) beim Test nur autorisierten Traffic an eigene Endpunkte senden; (6) Wechsel- und Korrelationsrisiko messen; (7) Relay bei Ende der Einwilligung sauber entfernen.
 
-**Erkennung:** Mitgliedschafts-/Control-Plane-Daten, Relay-Zertifikate, gemeinsamer Software-Fingerprint und Exit-Verhalten identifizieren den Pool. **Erfasster Node:** Relay-Konfiguration kann die Kooperation identifizieren, darf jedoch keine Clientidentitäten enthalten; Client-to-Session-Accountability am autorisierten Controller zugriffskontrolliert speichern.
+**Erkennung:** Mitglieds-/Control-Plane-Daten, Relay-Zertifikate, gemeinsamer Software-Fingerprint und Exit-Verhalten identifizieren den Pool. **Erfasster Knoten:** Relay-Konfiguration kann die Kooperation identifizieren, sollte aber keine Clientidentitäten enthalten; Client-zu-Session-Verantwortlichkeit beim autorisierten Controller mit Zugriffskontrolle speichern.
 
-## IPv6 Temporary Addresses und Präfixrotation
+## Temporäre IPv6-Adressen und Präfixrotation
 
-**Mechanik:** IPv6 Privacy Extensions erzeugen temporäre Interface-Identifier, sodass eine stabile Adresse nicht für jede ausgehende Verbindung wiederverwendet wird. Provider-Präfixwechsel können zusätzliche Rotation erzeugen, Präfix, Teilnehmerdaten und Fingerprint höherer Schichten bleiben jedoch.<sup>[[21]](#references)</sup>
+**Mechanik:** IPv6-Privacy-Extensions erzeugen temporäre Interface-Identifier, sodass eine stabile Adresse nicht für jede ausgehende Verbindung wiederverwendet wird. Providerpräfixwechsel können zusätzliche Rotation erzeugen, aber delegiertes Präfix, Teilnehmerdaten und Layer-übergreifender Fingerprint bleiben.<sup>[[21]](#references)</sup>
 
-**Vorteile:** reduziert passives langfristiges Tracking durch einen stabilen Interface-Identifier; in gängigen Betriebssystemen integriert; kein Relay-Overhead.
+**Vorteile:** reduziert langfristiges passives Tracking durch stabile Interface-ID; in üblichen Betriebssystemen integriert; kein Relay-Overhead.
 
-**Nachteile:** keine Quellenanonymität; ISP und lokales Netzwerk kennen Präfix/Gerät weiterhin; DNS, Konten und Browserstatus verknüpfen Sitzungen; Adresswechsel erschwert Allowlists und Logging.
+**Nachteile:** keine Quellenanonymität; ISP und lokales Netz kennen Präfix/Gerät; DNS, Konten und Browserstatus verbinden Sessions; Adresswechsel erschwert Allowlists und Logging.
 
-**Verfahren:** (1) aktuelle stabile und temporäre Adressen eines eigenen Clients prüfen; (2) vom OS unterstützten Privacy-Address-Standard statt Spoofing durch Drittanbieter aktivieren; (3) wiederholt einen eigenen IPv6-Endpunkt über die Lebensdauer der Adressen anfragen; (4) bestätigen, dass Inbound-Services nur an vorgesehene stabile Adressen gebunden sind; (5) DHCPv6-/RA-/Neighbor- und genaue Endpunktlogs aufbewahren; (6) VPN-/Firewall-Verhalten für jede IPv6-Adresse testen.
+**Verfahren:** (1) aktuelle stabile und temporäre Adressen eines eigenen Clients prüfen; (2) vom OS unterstützten Privacy-Address-Standard statt Spoofing durch Dritte aktivieren; (3) wiederholt einen eigenen IPv6-Endpunkt über Adresslebensdauern anfragen; (4) bestätigen, dass Inbound-Dienste nur an vorgesehene stabile Adressen gebunden sind; (5) DHCPv6-/RA-/Neighbor- und präzise Endpunktlogs aufbewahren; (6) VPN-/Firewallverhalten für jede IPv6-Adresse testen.
 
-**Erkennung:** delegiertes Präfix, Layer-2-Identität, Neighbor Discovery, Konto- und Endpunkttelemetrie korrelieren, statt eine Adresse als ein Gerät zu behandeln. **Erfasster Node:** Netzwerkprofile und Interface-Identifier bleiben; temporäre Adressen verhindern einen passiven Identifier, nicht forensische Zuordnung.
+**Erkennung:** delegiertes Präfix, Layer-2-Identität, Neighbor Discovery, Konto- und Endpunkttelemetrie korrelieren, statt eine Adresse als ein Gerät zu behandeln. **Erfasster Knoten:** Netzwerkprofile und Interface-Identifier bleiben; temporäre Adressierung verhindert eine passive Kennung, nicht forensische Zuordnung.
 
 ## Tor Pluggable Transports: Snowflake, WebTunnel, obfs4 und meek
 
-**Mechanik:** Ein Pluggable Transport verändert das Erscheinungsbild der ersten Tor-Verbindung oder deren Weg zu einer Bridge. Snowflake verwendet kurzlebige freiwillige WebRTC-Proxies, WebTunnel ähnelt gewöhnlichem HTTPS, obfs4 widersteht einfacher Protokollerkennung und aktivem Probing, und meek leitet über unterstützte Web-Infrastruktur. Dies sind Zensurumgehungstransporte in Tor, keine zusätzlichen Ende-zu-Ende-Anonymitätsschichten.<sup>[[22]](#references)</sup>
+**Mechanik:** Ein Pluggable Transport verändert das Erscheinungsbild der ersten Tor-Verbindung oder deren Weg zu einer Bridge. Snowflake verwendet kurzlebige freiwillige WebRTC-Proxies, WebTunnel ähnelt normalem HTTPS, obfs4 widersteht einfacher Protokollerkennung/aktivem Probing und meek leitet über unterstützte Webinfrastruktur. Dies sind Zensurumgehungstransporte in Tor, keine zusätzlichen Ende-zu-Ende-Anonymitätsschichten.<sup>[[22]](#references)</sup>
 
-**Vorteile:** nützlich, wenn direktes Tor oder bekannte Relays blockiert werden; Snowflake vermeidet eine stabile öffentliche Bridge-Adresse; in gepflegte Tor-Clients integriert; das Ziel erhält weiterhin gewöhnliche Tor-Eigenschaften.
+**Vorteile:** nützlich bei blockiertem direktem Tor oder bekannten Relays; Snowflake vermeidet eine stabile öffentliche Bridge-Adresse; in gepflegte Tor-Clients integriert; das Ziel erhält weiterhin normale Tor-Eigenschaften.
 
-**Nachteile:** geringere oder variable Leistung; Broker/Front/Bridge und lokales Netzwerk sehen unterschiedliche Metadaten; Transport-Fingerprints und Blockierung bleiben möglich; freiwillige Proxies ersetzen Tor nicht und sollten keinen Klartext der Anwendung erhalten.
+**Nachteile:** geringere/variable Performance; Broker/Front/Bridge und lokales Netz sehen unterschiedliche Metadaten; Transport-Fingerprints und Blockierung bleiben möglich; freiwilliger Proxy ersetzt Tor nicht und sollte keinen Klartext der Anwendung erhalten.
 
-**Verfahren:** (1) offiziellen Tor Browser oder unterstützten Tor Client installieren und prüfen; (2) integrierten Transport in Connection/Bridges auswählen; (3) nur eine eigene Diagnose-Seite aufrufen; (4) bestätigen, dass die Seite einen Tor-Exit, nicht den Snowflake-/WebTunnel-Peer sieht; (5) Bootstrap und Leistung vergleichen; (6) Transport ausfallen lassen und bestätigen, dass der Client nicht stillschweigend direkt verbindet; (7) nach dem Test zur standardmäßig unterstützten Konfiguration zurückkehren.
+**Verfahren:** (1) offiziellen Tor Browser oder unterstützten Tor-Client installieren/verifizieren; (2) integrierten Transport in Verbindung/Bridges wählen; (3) nur eigene Diagnoseseite kontaktieren; (4) bestätigen, dass die Seite einen Tor-Exit, nicht den Snowflake-/WebTunnel-Peer sieht; (5) Bootstrap und Performance vergleichen; (6) Transport ausfallen lassen und stillen direkten Connect ausschließen; (7) nach dem Test zur standardmäßig unterstützten Konfiguration zurückkehren.
 
-**Erkennung:** Ein Zensor kann Ziel-Allowlists, TLS-/WebRTC-Verhalten, Brokerermittlung und Flow-Analyse kombinieren; Endpunkte legen Tor- und Transportkonfiguration offen. **Capture-resilient OPSEC:** Standardclient verwenden, niemals persönlichen Browserstatus hineinkopieren und davon ausgehen, dass Bridge-/Broker-Historie wiederherstellbar ist. **Monitoring:** Tor-Bootstrap-Logs, unerwartete direkte DNS-/Verbindungsversuche und Beobachtungen eigener Seiten am Controller überwachen; Transportausfall ist kein Beweis für Entdeckung.
+**Erkennung:** Ein Zensor kann Allowlists, TLS-/WebRTC-Verhalten, Broker-Erkennung und Flow-Analyse verbinden; Endpunkte zeigen Tor- und Transportkonfiguration. **Capture-resiliente OPSEC:** Standardclient verwenden, niemals persönlichen Browserstatus kopieren und davon ausgehen, dass Bridge-/Broker-Historie wiederherstellbar ist. **Monitoring:** Tor-Bootstrap-Logs, unerwartete direkte DNS-/Verbindungsversuche und Beobachtungen eigener Controller-Seiten überwachen; Transportfehler sind kein Beweis für Entdeckung.
 
 ## Refraction Networking oder Decoy Routing
 
-**Mechanik:** Ein kooperierender Netzwerkbetreiber erkennt ein verdecktes Signal in Datenverkehr, der scheinbar an ein erlaubtes Decoy adressiert ist, und leitet den Flow an einen Circumvention-Proxy um. Die Bereitstellung erfordert Infrastruktur im Netzwerkpfad; ein Client kann dies nicht allein durch Auswahl einer harmlosen Website erzeugen.<sup>[[23]](#references)</sup>
+**Mechanik:** Ein kooperierender Netzwerkbetreiber erkennt ein verdecktes Signal in Traffic, der scheinbar an ein erlaubtes Decoy adressiert ist, und leitet den Flow zu einem Umgehungsproxy um. Die Bereitstellung erfordert Infrastruktur im Netzwerkpfad; ein Client kann dies nicht allein durch Auswahl einer harmlosen Website erzeugen.<sup>[[23]](#references)</sup>
 
-**Vorteile:** Das scheinbare Ziel kann für einen Zensor schwer blockierbar sein, ohne Kollateralschäden zu verursachen; keine öffentliche Bridge-Adresse muss verteilt werden; nützliches Forschungsmodell für pfadunterstützte Umgehung.
+**Vorteile:** das scheinbare Ziel kann für einen Zensor schwer zu blockieren sein, ohne Kollateralschäden zu verursachen; keine öffentliche Bridge-Adresse muss verteilt werden; nützliches Forschungsmodell für pfadunterstützte Umgehung.
 
-**Nachteile:** spezialisierte ISP-/Transitbeteiligung; Bereitstellbarkeit und Performance hängen vom Routing ab; Client-to-Decoy-Flow und Proxyaktivität bleiben; ein globaler oder kooperierender Beobachter kann Timing korrelieren.
+**Nachteile:** spezialisierte ISP-/Transitbeteiligung; Bereitstellung/Performance hängen vom Routing ab; Client-to-Decoy-Flow und Proxyaktivität bleiben; globaler/kooperierender Beobachter kann Timing korrelieren.
 
-**Verfahren:** Nicht über unbeteiligte Netzwerke signalisieren. Architektur nur in einem isolierten Labor reproduzieren: (1) eigene Client-, Router-, Decoy- und Proxy-Namespaces erstellen; (2) harmlose markierte Testanfrage verwenden; (3) eigenen Router nur dieses Tag an den Proxy umleiten lassen; (4) Pre-/Post-Routing-Tupel und Request-IDs protokollieren; (5) normale und signalisierte Flows vergleichen; (6) False Positives und Entfernung testen; (7) Laborrouten zerstören.
+**Verfahren:** Nicht über unbeteiligte Netze signalisieren. Architektur in isoliertem Labor reproduzieren: (1) eigene Client-, Router-, Decoy- und Proxy-Namespaces erstellen; (2) harmlose markierte Testanfrage verwenden; (3) eigenen Router nur dieses Tag zum Proxy umleiten lassen; (4) Pre-/Post-Routing-Tupel und Request-IDs loggen; (5) normale und signalisierte Flows vergleichen; (6) False Positives und Entfernung testen; (7) Laborrouten zerstören.
 
-**Erkennung:** Autorisierte Netzwerkbetreiber können Routingabweichung, ungewöhnliches ClientHello-/Tag-Verhalten und Diskrepanzen zwischen Decoy- und Back-End-Flows untersuchen. **Capture-resilient OPSEC:** Ein Forschungsclient sollte nur Testschlüssel und Dokumentationsadressen besitzen. **Monitoring:** signierte Entscheidungen des Laborrouters mit Proxyankünften vergleichen; keine Produktions-Transitprovider sondieren, um deren Erkennung zu bestimmen.
+**Erkennung:** Autorisierte Netzwerkbetreiber können Routingabweichung, ungewöhnliches ClientHello-/Tag-Verhalten und Diskrepanzen zwischen Decoy- und Back-End-Flow prüfen. **Capture-resiliente OPSEC:** Forschungsclient sollte nur Testschlüssel und Dokumentationsadressen enthalten. **Monitoring:** signierte Entscheidungen des Laborrouters mit Proxyankünften vergleichen; keine Produktions-Transitprovider sondieren, um Erkennung des Signaling festzustellen.
 
-## Content-Addressed Gateway oder Cached Peer Retrieval
+## Content-Addressed Gateway oder Cached-Peer-Retrieval
 
-**Mechanik:** Ein HTTP-Gateway ruft einen IPFS Content Identifier (CID) ab, gegebenenfalls aus Cache oder von Peers, und gibt den verifizierbaren Inhalt an den Client zurück. Der ursprüngliche Publisher kann das Gateway oder andere Peers statt des endgültigen Lesers sehen; das Gateway sieht Leser-IP und angeforderten CID. Native Peer-to-Peer-Abrufe setzen den Client Peers und DHT-/Routingteilnehmern aus.<sup>[[24]](#references)</sup>
+**Mechanik:** Ein HTTP-Gateway ruft einen IPFS Content Identifier (CID), eventuell aus Cache oder Peers, ab und gibt verifizierbaren Inhalt an den Client zurück. Der ursprüngliche Publisher sieht möglicherweise Gateway oder andere Peers statt des Lesers; das Gateway sieht Leser-IP und angeforderten CID. Native Peer-to-Peer-Abfrage exponiert den Client gegenüber Peers und DHT-/Routing-Teilnehmern.<sup>[[24]](#references)</sup>
 
-**Vorteile:** Publisher und Leser können durch Caches getrennt werden; unveränderliche Inhalte sind hash-verifizierbar; replizierte Daten überleben den Ausfall eines Hosts; HTTP-Clients benötigen keinen nativen Peer-Stack.
+**Vorteile:** Publisher und Leser können durch Caches getrennt werden; unveränderlicher Inhalt ist hash-verifizierbar; replizierte Daten überstehen den Ausfall eines Hosts; HTTP-Clients benötigen keinen nativen Peer-Stack.
 
-**Nachteile:** öffentliche CIDs und Gateway-Logs zeigen Interessen; Timing des ersten Abrufs kann Publisher und Leser korrelieren; bösartige Webinhalte und Path-Style-Same-Origin-Risiken; öffentliche Gateways sind Best Effort und verbieten Missbrauch.
+**Nachteile:** öffentliche CIDs und Gateway-Logs offenbaren Interessen; erstes Abruf-Timing kann Publisher und Leser korrelieren; bösartiger Webinhalt und Same-Origin-Gefahren bei Pfaden; öffentliche Gateways sind Best-Effort und verbieten Missbrauch.
 
-**Verfahren:** (1) harmlose Testdatei in einem eigenen privaten IPFS-Swarm oder eigenen Gateway veröffentlichen; (2) CID aufzeichnen; (3) über ein separates eigenes HTTP-Gateway mit Subdomain-Isolation abrufen; (4) Bytes gegen CID verifizieren; (5) nach dem Caching wiederholen; (6) Publisher-, Peer- und Gateway-Logs vergleichen; (7) Testinhalt nach Ende der Aufbewahrung entpinnen und entfernen.
+**Verfahren:** (1) harmlose Testdatei in eigenem privaten IPFS-Swarm oder Gateway veröffentlichen; (2) CID erfassen; (3) über separates eigenes HTTP-Gateway mit Subdomain-Isolation abrufen; (4) Bytes gegen CID prüfen; (5) nach Caching wiederholen; (6) Publisher-, Peer- und Gateway-Logs vergleichen; (7) Pins entfernen und Testinhalt nach Ablauf der Aufbewahrung löschen.
 
-**Erkennung:** Gateways protokollieren Quelle/CID; DHT- und Peer-Verbindungen zeigen Abruf; Endpunkthistorie und Dateihashes identifizieren Inhalt. **Capture-resilient OPSEC:** keinen privaten Publishing-Schlüssel auf einem schreibgeschützten Field Client speichern und sensible Inhalte vor der Content-Adressierung verschlüsseln. **Monitoring:** unerwartetes Pinning, Peer-Set-Änderung, CID-Anfragen außerhalb der Allowlist oder Gateway-Kontohinweise alarmieren.
+**Erkennung:** Gateways loggen Quelle/CID; DHT-/Peer-Verbindungen zeigen Abruf; Endpunkthistorie und Dateihashes identifizieren Inhalt. **Capture-resiliente OPSEC:** keinen privaten Publishing-Key auf einem Read-only-Feldclient speichern und sensible Inhalte vor Content-Addressing verschlüsseln. **Monitoring:** unerwartetes Pinning, Peer-Set-Änderung, nicht erlaubte CID-Anfragen oder Gateway-Kontobenachrichtigungen alarmieren.
 
-## Private Information Retrieval Service
+## Private-Information-Retrieval-Service
 
-**Mechanik:** Private Information Retrieval (PIR) ermöglicht es einem Client, einen Datensatz aus einer Datenbank abzurufen, während der ausgewählte Index gegenüber dem Server kryptografisch verborgen bleibt, gemäß einem festgelegten Single- oder Multi-Server-Threat-Model. Es schützt die Query-Auswahl für einen begrenzten Datensatz, ist jedoch kein allgemeiner Webzugriff oder IP-Anonymität.<sup>[[25]](#references)</sup>
+**Mechanik:** Private Information Retrieval (PIR) ermöglicht einem Client, einen Datensatz aus einer Datenbank abzurufen, während der ausgewählte Index gegenüber dem Server unter einem angegebenen Single-/Multi-Server-Threat-Model kryptografisch verborgen bleibt. Es schützt die Query-Auswahl eines begrenzten Datasets, ist aber kein allgemeiner Webzugang und keine IP-Anonymität.<sup>[[25]](#references)</sup>
 
-**Vorteile:** starke anwendungsspezifische Query-Privacy; messbares Leckagemodell; nützlich für Schlüsselverzeichnisse, Blocklists oder kleine öffentliche Datenbanken; kann die Offenlegung exakter Suchbegriffe vermeiden.
+**Vorteile:** starke anwendungsspezifische Query-Privatsphäre; messbares Leakage-Modell; nützlich für Schlüsselverzeichnisse, Blocklists oder kleine öffentliche Datenbanken; kann die Preisgabe genauer Suchbegriffe vermeiden.
 
-**Nachteile:** Rechen-/Bandbreiten-Overhead; Server erfährt Verbindungszeit/IP, sofern kein Relay verwendet wird; Dataset-Version, Antwortgröße und Anwendungszustand können Nutzer trennen; Reife der Implementierung variiert.
+**Nachteile:** Rechen-/Bandbreiten-Overhead; Server kennt Verbindungstime/IP, sofern kein Relay verwendet wird; Dataset-Version, Antwortgröße und Anwendungszustand können Nutzer trennen; unterschiedliche Reifegrade der Implementierungen.
 
-**Verfahren:** (1) auditierte PIR-Implementierung gegen synthetische eigene Datenbank bereitstellen; (2) Dataset-Version und Parameter veröffentlichen; (3) mehrere Indizes mit identischen Request-Größen abrufen; (4) Korrektheit lokal prüfen; (5) Server-Logs vergleichen und bestätigen, dass der Index fehlt; (6) bösartige/gekürzte Antworten und Versionsabweichung testen; (7) die genaue Privacy-Annahme dokumentieren, statt von anonymem Browsing zu sprechen.
+**Verfahren:** (1) auditierte PIR-Implementierung gegen eigene synthetische Datenbank bereitstellen; (2) Dataset-Version und Parameter veröffentlichen; (3) mehrere Indizes mit identischen Request-Größen abrufen; (4) lokal Korrektheit prüfen; (5) Server-Logs vergleichen und Abwesenheit des Index bestätigen; (6) bösartige/abgeschnittene Antworten und Versionskonflikte testen; (7) exakte Datenschutzannahme dokumentieren, statt anonymes Browsing zu behaupten.
 
-**Erkennung:** Netzwerke sehen Service-Nutzung und Volumen; Endpunkttelemetrie legt Client und endgültige Datensatznutzung offen; ein kompromittierter Server kann Datensätze oder Timing manipulieren. **Capture-resilient OPSEC:** nur öffentliche Datenbankparameter und einen begrenzten Cache auf dem Client speichern. **Monitoring:** signierte Dataset-Roots, feste Request-Formen, Änderungen der Fehlerrate und Server-Key-Rotationen validieren.
+**Erkennung:** Netzwerke sehen Dienstnutzung und Volumen; Endpunkttelemetrie zeigt Client und finale Datensatznutzung; kompromittierter Server kann Datenbanken oder Timing manipulieren. **Capture-resiliente OPSEC:** nur öffentliche Datenbankparameter und begrenzten Cache auf dem Client speichern. **Monitoring:** signierte Dataset-Roots, feste Request-Formen, Fehlerquotenänderungen und Server-Key-Rotationen validieren.
 
-## Begrenzter serverseitiger Fetcher, Preview- oder Rendering-Service
+## Eingeschränkter serverseitiger Fetcher, Preview- oder Rendering-Service
 
-**Mechanik:** Ein Remote-Service ruft eine URL ab oder rendert sie und gibt Screenshot, Metadaten oder bereinigten Inhalt zurück. Das Ziel sieht die Fetcher-Adresse; der Service sieht Requester, URL und Ergebnis. Der Missbrauch von Link-Preview-Bots, Security-Scannern oder URL-Fetchern Dritter ist keine autorisierte Proxy-Nutzung.
+**Mechanik:** Ein Remote-Dienst ruft eine URL ab oder rendert sie und gibt Screenshot, Metadaten oder bereinigten Inhalt zurück. Das Ziel sieht die Fetcher-Adresse; der Dienst sieht Anforderer, URL und Ergebnis. Der Missbrauch von Link-Preview-Bots, Security-Scannern oder URL-Fetchern Dritter ist keine autorisierte Proxy-Nutzung.
 
-**Vorteile:** isoliert aktive Inhalte von der Workstation; Ziel erhält einen kontrollierten Fetcher-Fingerprint; Dateiart, Größe, Ziel und Rendering-Limits können erzwungen werden; verfügbare Ausführungsumgebung.
+**Vorteile:** isoliert aktive Inhalte von der Workstation; Ziel erhält kontrollierten Fetcher-Fingerprint; Dateiart, Größe, Ziel und Renderinglimits können erzwungen werden; verworfene Ausführungsumgebung.
 
-**Nachteile:** Service besitzt vollständige Requestkenntnis; Konto-/API-/Billing-Daten; SSRF- und Datenexfiltrationsrisiko; Scripts, Authentifizierung und interaktive Websites können nicht funktionieren; eindeutige URLs korrelieren Requester und Fetch.
+**Nachteile:** Dienst kennt die vollständige Anfrage; Konto/API-/Billing-Daten; SSRF- und Datenexfiltrationsrisiko; Scripts, Authentifizierung und interaktive Sites funktionieren möglicherweise nicht; eindeutige URLs korrelieren Anforderer und Abruf.
 
-**Verfahren:** (1) eigenen Fetcher mit strikter Allowlist eigener Testdomains bereitstellen; (2) private, link-local, Metadaten- und Redirect-to-unapproved-Adressen blockieren; (3) Methoden, Redirects, Bytes und Renderzeit begrenzen; (4) Credentials/Cookies entfernen; (5) eigene URL übermitteln; (6) Requester-, Fetcher- und Ziellogs vergleichen; (7) Renderinstanz zerstören und zentrales Audit gemäß Policy aufbewahren.
+**Verfahren:** (1) eigenen Fetcher mit strikter Allowlist eigener Testdomains bereitstellen; (2) private, link-local, Metadata- und Redirect-to-unapproved-Adressen blockieren; (3) Methoden, Redirects, Bytes und Renderzeit begrenzen; (4) Credentials/Cookies entfernen; (5) eigene URL einreichen; (6) Anforderer-, Fetcher- und Ziel-Logs vergleichen; (7) Renderinstanz zerstören und zentrales Audit gemäß Richtlinie aufbewahren.
 
-**Erkennung:** Ziel sieht Service-ASN/Fingerprint; Provider- und Controller-Logs ordnen Requester der URL zu; Endpunktprozess/API-Aufrufe zeigen die Übermittlung. **Capture-resilient OPSEC:** ein kurzlebiges Projekttoken ohne beliebige Zielberechtigung verwenden. **Monitoring:** Allowlist-Ablehnungen, Redirect-Verstöße, Fetches ohne Controller-Job-ID und Provider-Abuse-Hinweise alarmieren.
+**Erkennung:** Ziel sieht Service-ASN/Fingerprint; Provider- und Controller-Logs verbinden Anforderer und URL; Endpunktprozess/API-Aufrufe zeigen Submission. **Capture-resiliente OPSEC:** ein kurzlebiges Projekt-Token ohne beliebige Zielberechtigung verwenden. **Monitoring:** Allowlist-Ablehnungen, Redirect-Verletzungen, Fetches ohne Controller-Job-ID und Provider-Missbrauchshinweise alarmieren.
 
 ## Anycast-Rendezvous-Pool
 
-**Mechanik:** Mehrere organisationskontrollierte Nodes announcen oder fronten eine stabile Serviceadresse; Routing wählt eine nahe Instanz. Anycast verbessert Verfügbarkeit und verbirgt ein einzelnes Back-End vor dem Client, der Betreiber kontrolliert jedoch alle Instanzen und die Serviceadresse bleibt stabil.<sup>[[26]](#references)</sup>
+**Mechanik:** Mehrere organisationskontrollierte Knoten bewerben oder fronten eine stabile Serviceadresse; Routing wählt eine nahe Instanz. Anycast verbessert Verfügbarkeit und verbirgt ein einzelnes Backend vor dem Client, aber der Betreiber kontrolliert weiterhin alle Instanzen und die Serviceadresse bleibt stabil.<sup>[[26]](#references)</sup>
 
-**Vorteile:** resiliente regionale Ingresses; keine Field-Node-Neukonfiguration bei Ausfall einer Instanz; DDoS-/Lastverteilung; zentrale Policy kann Sitzungen zwischen bekannten Nodes verschieben.
+**Vorteile:** widerstandsfähiger regionaler Ingress; keine Feldneukonfiguration bei Ausfall einer Instanz; DDoS-/Lastverteilung; zentrale Richtlinie kann Sessions zwischen bekannten Knoten verschieben.
 
-**Nachteile:** BGP-/CDN- und Providerdaten identifizieren die Organisation; Pfadwechsel können zustandsbehaftete Sitzungen abbrechen; Monitoring unterscheidet sich je nach Clientstandort; eine stabile Adresse ist leicht blockier- oder reputationsclusterbar.
+**Nachteile:** BGP/CDN- und Providerdaten identifizieren die Organisation; Pfadwechsel können zustandsbehaftete Sessions unterbrechen; Monitoring unterscheidet sich nach Clientstandort; eine stabile Adresse ist leicht zu blockieren oder zu clustern.
 
-**Verfahren:** Provider-gestütztes eigenes Organisationsprojekt oder isoliertes Routing-Labor verwenden: (1) zwei identische authentifizierte Health-Endpunkte bereitstellen; (2) eine dokumentierte Serviceadresse veröffentlichen; (3) Sitzungszustand am Broker statt am Edge halten; (4) einen Node zurückziehen und Reconnect prüfen; (5) Zertifikat, Policy und Logkonsistenz testen; (6) nicht autorisierten Origin/Region alarmieren; (7) Announcements und Credentials beim Abschluss entfernen.
+**Verfahren:** Provider-unterstütztes Organisationsprojekt oder isoliertes Routing-Labor verwenden: (1) zwei identische authentifizierte Health-Endpunkte bereitstellen; (2) dokumentierte Serviceadresse veröffentlichen; (3) Sessionzustand beim Broker statt am Edge halten; (4) einen Knoten zurückziehen und Reconnect prüfen; (5) Zertifikat, Richtlinie und Logkonsistenz testen; (6) unautorisierten Origin/Region alarmieren; (7) Advertisements und Credentials beim Abschluss entfernen.
 
-**Erkennung:** BGP/RPKI/Historie, Provider-Tenant, Zertifikate und identisches Serviceverhalten identifizieren den Pool. **Capture-resilient OPSEC:** Ein Edge hält nur regionale Serviceidentität und keinen Operator- oder Flotten-Enrollment-Key. **Monitoring:** jede Region von autorisierten Monitoren prüfen, Route Origin und Konfigurationsdigest vergleichen und unerwarteten Origin als Incident behandeln.
+**Erkennung:** BGP/RPKI/Historie, Provider-Tenancy, Zertifikate und identisches Serviceverhalten identifizieren den Pool. **Capture-resiliente OPSEC:** Edge enthält nur regionale Serviceidentität und keinen Operator-/Flottenregistrierungsschlüssel. **Monitoring:** jede Region von autorisierten Monitoren prüfen, Route-Origin und Konfigurationsdigest vergleichen und unerwarteten Origin als Incident behandeln.
 
 ## QUIC-Migration und Multipath-TCP-Kontinuität
 
-**Mechanik:** QUIC Connection IDs können eine Client-Sitzung über NAT-Rebinding oder Adresswechsel hinweg erhalten; Multipath TCP kann einen zuverlässigen Bytestrom über mehrere Subflows übertragen. Beide verbessern Kontinuität bei WLAN-/Mobilfunkwechseln, legen dem gemeinsamen Peer jedoch alte und neue Pfade offen und können Cross-Path-Korrelation erleichtern.<sup>[[27]](#references)</sup>
+**Mechanik:** QUIC Connection IDs können eine Client-Session über NAT-Rebinding oder Adresswechsel erhalten; Multipath TCP kann einen zuverlässigen Bytestream über mehrere Subflows transportieren. Beide verbessern Kontinuität bei Wi-Fi-/Mobilfunkwechseln, exponieren alte und neue Pfade jedoch gegenüber dem gemeinsamen Peer und können Cross-Path-Korrelation erleichtern.<sup>[[27]](#references)</sup>
 
-**Vorteile:** schnellere Wiederherstellung bei Uplink-Wechseln; Anwendungssitzung muss nicht neu starten; MPTCP kann Resilienz und Durchsatz kombinieren; wertvoll für genehmigte Field Nodes.
+**Vorteile:** schnellere Wiederherstellung bei Uplinkwechsel; Anwendungssession muss nicht neu starten; MPTCP kann Resilienz und Durchsatz verbinden; wertvoll für genehmigte Feldknoten.
 
-**Nachteile:** keine Anonymität; Peer sieht Migration/Subflows; Connection IDs und paralleler Datenverkehr verbinden Pfade; Unterstützung durch Middleboxes/Carrier variiert; zusätzliche Providerdaten erhöhen die Exposition.
+**Nachteile:** keine Anonymität; Peer sieht Migration/Subflows; Connection IDs und paralleler Traffic verbinden Pfade; Middlebox-/Carrier-Unterstützung variiert; doppelte Providerdaten erhöhen die Exposition.
 
-**Verfahren:** (1) unterstützten Transport nur zwischen eigenem Field Client und Rendezvous aktivieren; (2) Anwendung unabhängig von IP authentifizieren; (3) begrenzten Transfer über genehmigtes WLAN beginnen; (4) auf Organisationsmobilfunk wechseln; (5) Pfadvalidierung, Datenintegrität und fehlenden Klartext-/Direkt-Fallback bestätigen; (6) Idle Timeout und Rückkehr testen; (7) Brokerdaten jedes Pfadwechsels aufbewahren.
+**Verfahren:** (1) unterstützten Transport nur zwischen eigenem Feldclient und Rendezvous aktivieren; (2) Anwendung unabhängig von IP authentifizieren; (3) begrenzten Transfer über genehmigtes Wi-Fi starten; (4) auf Organisationsmobilfunk wechseln; (5) Path Validation, Datenintegrität und fehlenden Klartext/direkten Fallback bestätigen; (6) Idle Timeout und Rückkehr testen; (7) Brokerdaten jeder Pfadänderung aufbewahren.
 
-**Erkennung:** Peer beobachtet Adressmigration oder MPTCP-Subflows direkt; Access-Provider sehen ihren Anteil; Connection IDs, TLS-Identität und Timing verbinden beide. **Capture-resilient OPSEC:** nur gerätebezogenes Sitzungsmaterial speichern und wiederaufnehmbaren Zustand schnell ablaufen lassen. **Monitoring:** unmögliche Pfadwechsel, gleichzeitige nicht genehmigte Netze, Migrationsstürme und Resumption nach Quarantäne alarmieren.
+**Erkennung:** Peer beobachtet Adressmigration oder MPTCP-Subflows direkt; Access-Provider sehen ihren Teil; Connection IDs, TLS-Identität und Timing verbinden beide. **Capture-resiliente OPSEC:** nur gerätebezogenes Sessionmaterial speichern und resumierbaren Zustand schnell ablaufen lassen. **Monitoring:** unmögliche Pfadwechsel, gleichzeitige nicht genehmigte Netze, Migrationsstürme und Wiederaufnahme nach Quarantäne alarmieren.
 
 ## Verwalteter CI/CD- oder kurzlebiger Automation-Runner-Egress
 
-**Mechanik:** Ein organisations-eigener Workflow führt auf einem Hosted Runner eine begrenzte Netzwerkprüfung aus. Das Ziel sieht eine Cloud-Runner-Adresse, während die Plattform Repository, Akteur, Workflow, Token, Logs und Billing zuordnet. Dies ist Remote Execution mit nachvollziehbarem Egress, keine Anonymität gegenüber dem Provider.<sup>[[28]](#references)</sup>
+**Mechanik:** Ein organisations-eigener Workflow führt eine begrenzte Netzwerkprüfung auf einem gehosteten Runner aus. Das Ziel sieht eine Cloud-Runner-Adresse, während die Plattform Repository, Akteur, Workflow, Token, Logs und Billing zuordnet. Dies ist Remote Execution mit nachvollziehbarem Egress, keine Anonymität gegenüber dem Provider.<sup>[[28]](#references)</sup>
 
-**Vorteile:** verfügbare saubere Umgebung; reproduzierbare Jobdefinition; keine eingehende Verbindung; nützlich für geografisch verteilte Verfügbarkeitsprüfungen; starkes Controller-Audit.
+**Vorteile:** verworfene saubere Umgebung; reproduzierbare Jobdefinition; keine eingehende Verbindung; nützlich für geografisch verteilte Verfügbarkeitsprüfungen; starkes Controller-Audit.
 
-**Nachteile:** Plattform und Organisation identifizieren Initiator; breite Workflow-Tokens und nicht vertrauenswürdige Pull Requests sind gefährlich; gemeinsame IP-Reputation; Logs/Artefakte können Secrets oder Zieldaten speichern.
+**Nachteile:** Plattform und Organisation identifizieren Initiator; breite Workflow-Tokens und nicht vertrauenswürdige Pull Requests sind gefährlich; geteilte IP-Reputation; Logs/Artefakte können Secrets oder Zieldaten speichern.
 
-**Verfahren:** (1) privates Organisationsrepository und Assessment-Environment erstellen; (2) nur manuell genehmigte, feste harmlose Jobs gegen eigene Endpunkte erlauben; (3) minimale schreibgeschützte Workflow-Berechtigungen und keine Produktionssecrets verwenden; (4) Prüfung ausführen; (5) Workflow-, Provider- und Zielaufzeichnungen vergleichen; (6) Artefakte auf Credentials prüfen; (7) Environment-Token löschen und erforderliches Audit aufbewahren.
+**Verfahren:** (1) privates Organisations-Repository und Assessment-Environment erstellen; (2) nur manuell genehmigte, feste harmlose Jobs zu eigenen Endpunkten erlauben; (3) minimale Read-only-Workflowrechte und keine Produktions-Secrets verwenden; (4) Prüfung ausführen; (5) Workflow-, Provider- und Zielaufzeichnungen vergleichen; (6) Artefakte auf Credentials prüfen; (7) Environment-Token löschen und erforderliches Audit aufbewahren.
 
-**Erkennung:** Provider-Audit und Workflow-Logs liefern direkte Zuordnung; Ziele identifizieren Runner-ASNs/-Bereiche und stabile Request-Grammatik. **Capture-resilient OPSEC:** niemals Secrets von Field Devices, Signing, Wallets oder Cloud-Administratoren in Runner-Variablen speichern. **Monitoring:** Branch-/Environment-Genehmigung verlangen und Workflowänderungen, Fork-Ausführung, Secret-Lesen und unerwartete Ziele alarmieren.
+**Erkennung:** Provider-Audit und Workflow-Logs liefern direkte Zuordnung; Ziele identifizieren Runner-ASNs/-Ranges und stabile Request-Grammatik. **Capture-resiliente OPSEC:** niemals Feldgeräte-, Signing-, Wallet- oder Cloud-Administrator-Secrets in Runner-Variablen ablegen. **Monitoring:** Branch-/Environment-Genehmigung verlangen und Workflowänderungen, Fork-Ausführung, Secret-Lesevorgänge und unerwartete Ziele alarmieren.
 
-## Nicht-IP-basierter lokaler erster Hop zu einem eigenen Gateway
+## Nicht-IP-lokaler erster Hop zu einem eigenen Gateway
 
-**Mechanik:** Bluetooth-Mesh, Wi-Fi Aware/Direct, Low-Power-Funk oder serielle/optische Verbindung übertragen begrenzte Nachrichten von einem nahen Sensor zu einem genehmigten Internet-Gateway. Das Field Device selbst hat keine Internetroute; das Gateway ist der einzige Egress. Reichweite und Protokollgrenzen machen dies zu Telemetrie/Store-and-Forward, nicht zu interaktivem anonymem Internet.
+**Mechanik:** Bluetooth-Mesh, Wi-Fi Aware/Direct, Low-Power-Funk oder serielle/optische Verbindung transportiert begrenzte Nachrichten von einem nahen Sensor zu einem genehmigten Internet-Gateway. Das Feldgerät selbst besitzt keine Internetroute; das Gateway ist der einzige Egress. Funkreichweite und Protokollgrenzen machen dies zu Telemetrie/Store-and-forward, nicht zu interaktivem anonymem Internet.
 
-**Vorteile:** entfernt Internet-Stack und Credentials vom kleinsten Field Device; geringer Stromverbrauch; Gateway zentralisiert Policy; kann temporäre Funklöcher überbrücken.
+**Vorteile:** entfernt Internet-Stack und Credentials vom kleinsten Feldgerät; geringer Energieverbrauch; Gateway zentralisiert Richtlinie; kann temporäre Funklöcher überbrücken.
 
-**Nachteile:** RF-/physische Entdeckung, Pairing und Geräte-Identifier; geringe Bandbreite/Reichweite; Gateway verknüpft weiterhin alle Nachrichten; Frequenz- und Verschlüsselungsbeschränkungen variieren; Erfassung kann Warteschlangendaten offenlegen.
+**Nachteile:** RF-/physische Auffindbarkeit, Pairing und Gerätekennungen; geringe Bandbreite/Reichweite; Gateway verbindet alle Nachrichten; Frequenz- und Verschlüsselungsbeschränkungen variieren; Erfassung kann Queue-Daten offenlegen.
 
-**Verfahren:** (1) Standort- und Frequenzgenehmigung einholen; (2) einen eigenen Sensor mit einem eigenen Gateway über eindeutige Schlüssel koppeln; (3) signierte Nachrichtenarten fester Größe, TTL und Rate definieren; (4) dem Sensor keine Standard-IP-Route geben; (5) Gateway nur an einen eigenen Collector weiterleiten lassen; (6) Replay, Reichweitenverlust und Gatewayausfall testen; (7) beide Geräte inventarisieren und zurückholen.
+**Verfahren:** (1) Standort- und Frequenzgenehmigung einholen; (2) einen eigenen Sensor mit einem eigenen Gateway über eindeutige Schlüssel koppeln; (3) signierte Nachrichtenarten fester Größe, TTL und Rate definieren; (4) dem Sensor keine Standard-IP-Route geben; (5) Gateway nur zu eigenem Collector weiterleiten lassen; (6) Replay, Reichweitenverlust und Gateway-Ausfall testen; (7) beide Geräte inventarisieren und zurückholen.
 
-**Erkennung:** RF-Survey, Pairing-Datenbank, physische Inspektion sowie Gateway-Prozess-/Flow-Logs legen den Pfad offen. **Capture-resilient OPSEC:** Sensor hält nur seinen Pairwise-Key und eine begrenzte verschlüsselte Queue, niemals Operator-, WLAN-, Mobilfunk- oder Controller-Credentials. **Monitoring:** neue Peers, Sequenz-Rollback, Schlüsselfehler, ungewöhnliche RF-Rate und Nachrichten über nicht registrierte Gateways alarmieren.
+**Erkennung:** RF-Survey, Pairing-Datenbank, physische Prüfung und Gateway-Prozess-/Flow-Logs zeigen den Pfad. **Capture-resiliente OPSEC:** Sensor enthält nur Pairwise-Key und begrenzte verschlüsselte Queue, niemals Operator-, Wi-Fi-, Mobilfunk- oder Controller-Credentials. **Monitoring:** neue Peers, Sequenz-Rollback, Key-Fehler, ungewöhnliche RF-Rate und Nachrichten über nicht registriertes Gateway alarmieren.
 
-## Exposure-Matrix für Erfassung/Kompromittierung
+## Matrix zur Exposition bei Erfassung/Kompromittierung
 
-Diese Tabelle wendet auf jede oben genannte Familie eine Capture-Resilience-Prüfung an. „Minimieren“ bedeutet, Secrets und Blast Radius auf autorisierten Assets zu reduzieren; es bedeutet niemals, Beweise zu löschen oder sich einer Untersuchung zu entziehen.
+Diese Tabelle wendet eine Capture-Resilience-Prüfung auf jede oben genannte Familie an. „Minimieren“ bedeutet, Secrets und Blast Radius auf autorisierten Assets zu reduzieren; es bedeutet niemals, Beweise zu löschen oder sich vor einer Untersuchung zu verbergen.
 
-| Technologiefamilie | Ein erfasster Endpunkt/ein Relay kann offenlegen | Minimale autorisierte Kontrolle |
+| Technikenfamilie | Ein erfasster Endpunkt/Relay kann offenlegen | Minimale autorisierte Kontrolle |
 |---|---|---|
-| NAT/CGNAT, öffentliches WLAN, Travel Router | bekannte Netze, DHCP-/Portalhistorie, MACs, Tunnel-Peer | separates Organisationsgerät; private MAC, sofern unterstützt; keine persönlichen Konten; Controller-Inventar |
-| VPN, VPS, HTTP/SOCKS/SSH, Multi-Hop | Provider/Hostnamen, Schlüssel, Routen, Logs und benachbarter Hop | eine Identität pro Engagement; kurze TTL; enge Routen; Broker-seitiger Widerruf; keine Master Keys |
-| OHTTP/ODoH, MASQUE, Split-Provider-Relay | Relay-/Gateway-Konfiguration, Anwendungs-Identifier und gecachte Requests | Payload-Identifier minimieren; genehmigte Konfiguration pinnen; begrenzter Cache; strikter kein-direkter-Fallback |
-| Tor, Bridge, Onion Service, I2P, Mixnet, GNUnet | installierte Software, Bridge-/Onion-Material, lokalen Zustand und Peer-Historie | Standardclient; separate Service-Schlüssel; verschlüsselter Minimalzustand; kompromittierte Serviceidentität rotieren |
-| Remote Browser/VDI/Jump Host | Workspace-Token, Clipboard/Dateien und Remote-Tenant | phishing-resistentes MFA am Gateway; Transferkanäle deaktivieren; schnelle Sitzungswiderrufung |
-| Mobilfunk, Satellit, privater APN | SIM/eSIM, IMEI/Terminalidentität, Provider und ungefähren Standort | Organisationsvertrag; keine persönliche Co-Location; enge APN-/Overlay-Policy; Provider-Sperr-Runbook |
-| Residential-/kooperativer Proxy, ORB-Labor | Agentidentität, Controller/nächsten Hop, gecachten Datenverkehr | nur zugestimmte/eigene Nodes; signierter Agent; Credential pro Node; Teilnehmerzuordnung beim Controller |
-| CDN/Fronting, Fast Flux, Serverless | Tenant/Origin/Konfiguration, API-Tokens, Deployment- und Billingreferenzen | dediziertes Projekt; Least-Privilege-Rolle; kurzlebiges Deployment-Token; Provider-Audit zentral aufbewahren |
-| Dead Drop, Pull-Mailbox, Store-and-Forward | Objektnamen, Queue, gecachte Jobs/Ergebnisse und Übergabedaten | signierte begrenzte Jobs; TTL; verschlüsselter Cache; getrennte Producer-Identität; unveränderliche Server-Logs |
-| Drop, Nearest Neighbor, Long-Range Bridge | Serial/RF/SSID/Peer, Geräteschlüssel, physische Platzierungsartefakte | schriftliche Platzierung; eindeutige Geräteidentität; kein Operatorschlüssel; Manipulations-/Zustandstelemetrie; widerrufen und zurückholen |
-| TURN, Reverse Overlay, Dual-Uplink | Realm/Broker, Geräte-Credential, Peer/Route und Uplink-Profile | enger Outbound-only-Service; kurzlebiges Geräte-Credential; unabhängiger Operator-Login; Fail-closed-Pfade |
-| IPv6 Temporary Addresses | Profile, Präfixhistorie und Endpunkt-/Anwendungszustand | nur als Anti-Tracking behandeln; Netzwerklogs bewahren; mit Endpunkt-Compartmentation kombinieren |
-| Pluggable Transport/Refraction-Labor | Bridge-/Broker-/Decoy-Einstellungen, Tor-Zustand und Forschungsschlüssel | Standardclient oder isoliertes Labor; kein persönlicher Browserstatus; kein Production Signaling |
-| IPFS/PIR/Fetcher | angeforderten CID/Query-Client, gecachten Inhalt, Gateway- oder Service-Token | verschlüsselter begrenzter Cache; nur öffentliche Parameter; kurzlebiges allowlistiertes Service-Token |
-| Anycast/QUIC/MPTCP | Servicenodes, Connection IDs, wiederaufnehmbaren Zustand und bekannte Pfade | nur regionale Identität; kurze Resumption-Lebensdauer; zentrale Route-/Sitzungswiderrufung |
-| Verwalteter CI/CD-Runner | Repository, Workflow, Provider-Token, Logs und Artefakte | Least-Privilege-Workflow; keine Produktions-/Field-/Wallet-Secrets; Environment-Genehmigung |
-| Nicht-IP-lokaler Hop | Funkpeer, Pairwise-Key, Warteschlangennachrichten und Gatewayidentität | eindeutiger Pairwise-Key; festes Nachrichtenschema; keine WLAN-/Mobilfunk-/Operator-Credentials |
+| NAT/CGNAT, öffentliches Wi-Fi, travel router | bekannte Netze, DHCP-/Portalhistorie, MACs, Tunnel-Peer | separates Organisationsgerät; private MAC, sofern unterstützt; keine persönlichen Konten; Controller-Inventar |
+| VPN, VPS, HTTP/SOCKS/SSH, Multi-Hop | Provider/Hostnamen, Schlüssel, Routen, Logs und benachbarten Hop | eine Identität je Engagement; kurze TTL; enge Routen; Broker-seitiger Widerruf; keine Masterkeys |
+| OHTTP/ODoH, MASQUE, Split-Provider-Relay | Relay-/Gateway-Konfiguration, Anwendungskennungen und gecachte Requests | Payload-Kennungen minimieren; genehmigte Konfiguration pinnen; begrenzter Cache; strikter direkter Fallback-Ausschluss |
+| Tor, Bridge, Onion Service, I2P, Mixnet, GNUnet | installierte Software, Bridge-/Onion-Material, lokalen Zustand und Peer-Historie | Standardclient; separate Servicekeys; verschlüsselter Minimalzustand; kompromittierte Serviceidentität rotieren |
+| Remote-Browser/VDI/Jump-Host | Workspace-Token, Clipboard/Dateien und Remote-Tenant | phishing-resistente MFA am Gateway; Transferkanäle deaktiviert; schnelle Session-Sperrung |
+| Mobilfunk, Satellit, Private APN | SIM/eSIM, IMEI/Terminalidentität, Provider und ungefähren Standort | Organisationsvertrag; keine persönliche Co-Location; enge APN-/Overlay-Richtlinie; Provider-Sperrprozess |
+| Residential-/kooperativer Proxy, ORB-Labor | Agentidentität, Controller/nächster Hop, gecachten Traffic | nur einwilligende/eigene Nodes; signierter Agent; Node-Credential; Teilnehmerzuordnung beim Controller |
+| CDN/Fronting, Fast Flux, Serverless | Tenant/Origin/Konfiguration, API-Tokens, Deployment- und Billingdaten | dediziertes Projekt; Least-Privilege-Rolle; kurzlebiges Deploy-Token; Provider-Audit zentral aufbewahren |
+| Dead Drop, Pull-Mailbox, Store-and-forward | Objektnamen, Queue, gecachte Jobs/Ergebnisse und Verwahrungsdaten | signierte begrenzte Jobs; TTL; verschlüsselter Cache; getrennte Produceridentität; unveränderliche Serverlogs |
+| Drop, Nearest Neighbor, Long-Range Bridge | Serien-/Funk-/SSID-/Peer-Daten, Geräteschlüssel, physische Platzierungsartefakte | schriftliche Platzierung; eindeutige Geräteidentität; kein Operatorssecret; Manipulations-/Zustandstelemetrie; widerrufen und zurückholen |
+| TURN, Reverse Overlay, Dual-Uplink | Realm/Broker, Gerätecredential, Peer/Route und Uplinkprofile | nur ausgehender enger Dienst; kurzlebiges Gerätecredential; unabhängiger Operatorlogin; Fail-closed-Pfade |
+| Temporäre IPv6-Adressierung | Profile, Präfixhistorie und Endpunkt-/Anwendungszustand | nur als Anti-Tracking behandeln; Netzwerklogs bewahren; mit Endpunktkompartimentierung kombinieren |
+| Pluggable Transport/Refraction-Labor | Bridge-/Broker-/Decoy-Einstellungen, Tor-Zustand und Forschungsschlüssel | Standardclient oder isoliertes Labor; kein persönlicher Browserstatus; kein Production-Signaling |
+| IPFS/PIR/Fetcher | angeforderten CID/Query-Client, gecachten Inhalt, Gateway-/Service-Token | verschlüsselter begrenzter Cache; nur öffentliche Parameter; kurzlebiges allowlistiertes Service-Token |
+| Anycast/QUIC/MPTCP | Servicenodes, Connection IDs, resumierbaren Zustand und bekannte Pfade | nur regionale Identität; kurze Resume-Lebensdauer; zentrale Routen-/Session-Sperrung |
+| Verwalteter CI/CD-Runner | Repository, Workflow, Provider-Token, Logs und Artefakte | Least-Privilege-Workflow; keine Produktions-/Feld-/Wallet-Secrets; Environment-Genehmigung |
+| Nicht-IP-lokaler Hop | Funk-Peer, Pairwise-Key, Queued Messages und Gatewayidentität | eindeutiger Pairwise-Key; festes Nachrichtenschema; keine Wi-Fi-/Mobilfunk-/Operator-Credentials |
 
 ## Monitoring möglicher Entdeckung für jede Zugriffsfamilie
 
-Kein clientseitiger Test beweist, dass ein Ermittler oder Verteidiger zusieht. Änderungen in Systemen überwachen, die dem Engagement gehören, mit Controller/Client abgleichen und statt Beobachter zu sondieren stoppen. Die folgenden Zeilen decken alle oben genannten Techniken ab; mit den [Alert-Zuständen und dem Response-Runbook für Field Nodes](capture-resilient-authorized-field-nodes.md#monitoring-for-discovery-loss-or-compromise) kombinieren.
+Kein clientseitiger Test beweist, dass ein Ermittler oder Verteidiger zusieht. Änderungen in Systemen überwachen, die dem Engagement gehören, sie mit Controller/Client corroborieren und statt Beobachter zu sondieren stoppen. Die folgenden Zeilen decken jede oben genannte Technik ab; mit den [field-node alert states and response runbook](capture-resilient-authorized-field-nodes.md#monitoring-for-discovery-loss-or-compromise) kombinieren.
 
-| Abgedeckte Techniken | Sichere Signale auf Controllerseite | Quarantäne-/Stoppbedingung |
+| Abgedeckte Techniken | Sichere controllerseitige Signale | Quarantäne-/Stoppbedingung |
 |---|---|---|
-| NAT/CGNAT, öffentliches/Gäste-WLAN, Travel Router, Mobilfunk/eSIM, Satellit, privater APN | Lease/Portal/Carrier-Sitzung, öffentliches Tupel, BSSID-/Zell-/Pfadwechsel, Providerhinweis | nicht genehmigtes Netzwerk/SIM/Gerät, unerklärliche Verlagerung oder Provider-/SOC-Eskalation |
-| VPN/VPS, HTTP/SOCKS/SSH, Multi-Hop, Residential-/kooperativer Proxy | Peer-Authentifizierung, Tunnelstatus, Routen-/DNS-Leaks, neues Admin-/API-Ereignis, Beschwerde | doppeltes/gestohlenes Credential, unbekannter Administrator, direkter Fallback oder Egress außerhalb des Umfangs |
-| OHTTP/ODoH/ECH, MASQUE, Split-Provider-Relay, TURN | Relay-/Gateway-Allocation, Schlüssel-/Konfigurationsversion, nicht unterstützte Direktverbindung, Fehler-/Replay-Rate | Schlüsselabweichung, direkter Fallback, unbekannter Realm/Peer oder Provider-Abuse-Hinweis |
-| Tor Browser, Bridges, Snowflake/WebTunnel/obfs4/meek, VPN±Tor, Onion Service | Bootstrap-Zustand, Circuit-Ausfall, Onion-Descriptor-/Servicezustand und eigene Canary-Seite | Übernahme persönlicher Konten, unerwartete Nicht-Tor-Verbindung oder kompromittierter Serviceschlüssel |
-| I2P, Mixnet, GNUnet, Mesh/Store-and-Forward, Nicht-IP-lokaler Hop | Peer-Set, Queue-Alter/Sequenz, Gateway-Ankunft, Funkassoziation und Content-Hash | unbekannter Peer/Gateway, Sequenz-Rollback, nicht autorisierter Inhalt oder fehlender Übergabenachweis |
-| Remote Browser/VDI/Jump Host, CI/CD-Runner, Serverless | IdP-Sitzung, Workflow-/Image-/Konfigurationsänderung, neues Token, Artefakt/Export und Cloud-Audit | unbekannter Login/Workflow-Edit, Secret-Lesen, unerwartetes Ziel oder Projektrolleneskalation |
-| ORB-Labor, Fast Flux/DGA, CDN/Fronting, Dead Drop/Pull-Mailbox | eigene Node-Inventardaten, DNS-/Edge-/Objektzugriff, Controllergraph, Jobsignatur und TTL | unbekannter Node/Origin/Objekt-Writer, unsignierter/wiederholter Job, Topologieausbruch aus dem Labor |
-| Drop/Nearest Neighbor/Long-Range Bridge/Outbound Overlay/Dual Uplink | signierter Heartbeat, Boot-/Konfigurationshash, Gehäusezustand, AP-/Switchkontext, doppelte Identität | verschobener/geöffneter Node, unerwarteter Boot/Hash/Pfad, Sentinel-Nutzung oder Standortmeldung |
-| IPv6 Temporary Addresses, QUIC Migration, MPTCP | delegiertes Präfix, Connection ID/Subflows, Pfadvalidierung und Broker-Sitzung | unmögliche Migration, gleichzeitige nicht genehmigte Pfade oder Sitzungsfortsetzung nach Widerruf |
-| IPFS/Cache, PIR, begrenzter Fetcher | CID-/Query-Form, Root-Version, Peer-/Gatewaywechsel, Redirect-/Allowlist-Ablehnung | unerwartetes Pinning/Query/Ziel, unsignierte Dataset-Root oder Provider-Abuse-Hinweis |
-| Refraction-/Decoy-Routing-Labor, Anycast-Rendezvous | eigene Umleitungsentscheidung, Proxy-Ankunft, BGP/RPKI-Origin, regionaler Konfigurationsdigest | Signal im Produktionspfad, unbekannter Route Origin, Regions-/Konfigurationsabweichung |
+| NAT/CGNAT, öffentliches/Gast-Wi-Fi, travel router, Mobilfunk/eSIM, Satellit, private APN | Lease/Portal-/Carrier-Session, öffentliches Tupel, BSSID-/Zellen-/Pfadwechsel, Providerhinweis | nicht genehmigtes Netz/SIM/Gerät, ungeklärte Verlagerung oder Provider-/SOC-Eskalation |
+| VPN/VPS, HTTP/SOCKS/SSH, Multi-Hop, Residential-/kooperativer Proxy | Peer-Authentifizierung, Tunnelzustand, Routen-/DNS-Leaks, neues Admin-/API-Ereignis, Beschwerde | doppeltes/gestohlenes Credential, unbekannter Admin, direkter Fallback oder Egress außerhalb des Scopes |
+| OHTTP/ODoH/ECH, MASQUE, Split-Provider-Relay, TURN | Relay-/Gateway-Allocation, Schlüssel-/Konfigurationsversion, nicht unterstützte direkte Verbindung, Fehler-/Replay-Rate | Schlüsselabweichung, direkter Fallback, unbekannter Realm/Peer oder Provider-Missbrauchshinweis |
+| Tor Browser, Bridges, Snowflake/WebTunnel/obfs4/meek, VPN±Tor, Onion Service | Bootstrapzustand, Circuitausfall, Onion Descriptor/Servicezustand und eigene Canary-Seite | persönlicher Account-Crossover, unerwartete Nicht-Tor-Verbindung oder kompromittierter Servicekey |
+| I2P, Mixnet, GNUnet, Mesh/Store-forward, Nicht-IP-lokaler Hop | Peer-Set, Queue-Alter/-Sequenz, Gatewayankunft, Funkassoziation und Content-Hash | unbekannter Peer/Gateway, Sequenz-Rollback, nicht autorisierter Inhalt oder fehlender Verwahrungsnachweis |
+| Remote-Browser/VDI/Jump-Host, CI/CD-Runner, Serverless | IdP-Session, Workflow-/Image-/Konfigurationsänderung, neue Token-Nutzung, Artefakt/Export und Cloud-Audit | unbekannter Login/Workflowänderung, Secret-Lesevorgang, unerwartetes Ziel oder Projekt-/Rollenescalation |
+| ORB-Labor, Fast Flux/DGA, CDN/Fronting, Dead Drop/Pull-Mailbox | eigenes Node-Inventar, DNS-/Edge-/Objektzugriff, Controllergraph, Jobsignatur und TTL | unbekannter Node/Origin/Objektwriter, unsignierter/wiederholter Job, Topologie verlässt Labor |
+| Drop/Nearest Neighbor/Long-Range Bridge/Outbound Overlay/Dual Uplink | signierter Heartbeat, Boot-/Konfigurationshash, Gehäusestatus, AP-/Switchkontext, doppelte Identität | bewegter/geöffneter Node, unerwarteter Boot/Hash/Pfad, Sentinel-Nutzung oder Standortmeldung |
+| Temporäres IPv6, QUIC-Migration, MPTCP | delegiertes Präfix, Connection ID/Subflows, Path Validation und Broker-Session | unmögliche Migration, gleichzeitige nicht genehmigte Pfade oder Session-Resume nach Widerruf |
+| IPFS/Cache, PIR, eingeschränkter Fetcher | CID-/Query-Form/Root-Version, Peer-/Gatewayänderung, Redirect-/Allowlist-Ablehnung | unerwartetes Pinning/Query/Ziel, unsignierter Dataset-Root oder Provider-Missbrauchshinweis |
+| Refraction-/Decoy-Routing-Labor, Anycast-Rendezvous | eigene Diversionsentscheidung, Proxyankunft, BGP/RPKI-Origin, regionaler Konfigurationsdigest | Production-Path-Signal, unbekannter Route-Origin, regionale/Konfigurationsabweichung |
 
-## Auswahl und Test eines Pfads
+## Auswahl und Test eines Pfades
 
 1. Den zu entfernenden Beobachter und die zu verbergenden Daten benennen.
-2. Die am wenigsten komplexe Familie auswählen, die ihn entfernt.
-3. Beobachter für Quelle, Einstieg, Traversal, Exit, DNS, Konto und Zahlung einzeichnen.
-4. Eine separate Endpunkt-/Anwendungsidentität verwenden.
-5. IPv4, IPv6, DNS, WebRTC-/Anwendungs-Bypass und Zielansicht prüfen.
-6. Jeden Hop unterbrechen und bestätigen, dass der Ausfall geschlossen ist.
+2. Die am wenigsten komplexe Familie wählen, die ihn entfernt.
+3. Quellen-, Entry-, Traversal-, Exit-, DNS-, Konto- und Zahlungsbeobachter einzeichnen.
+4. Separate Endpunkt-/Anwendungsidentität verwenden.
+5. IPv4, IPv6, DNS, WebRTC-/Anwendungsumgehung und Zielsicht prüfen.
+6. Jeden Hop unterbrechen und geschlossenen Fehlerzustand bestätigen.
 7. Logs jeder kontrollierten Komponente vergleichen.
 8. Verbleibende Timing-, Provider-, Endpunkt- und physische Verknüpfungen dokumentieren.
 
 ## References
 
-- [1] [EFF — Das richtige VPN für Sie auswählen](https://ssd.eff.org/module/choosing-vpn-thats-right-you)
+- [1] [EFF — Choosing the VPN that is right for you](https://ssd.eff.org/module/choosing-vpn-thats-right-you)
 - [2] [RFC 9458 — Oblivious HTTP](https://www.rfc-editor.org/rfc/rfc9458.html)
 - [3] [RFC 9298 — Proxying UDP in HTTP](https://www.rfc-editor.org/rfc/rfc9298.html) and [RFC 9484 — Proxying IP in HTTP](https://www.rfc-editor.org/rfc/rfc9484.html)
 - [4] [Tor Project — Tor protections](https://support.torproject.org/about-tor/introduction/protections/) and [Tor specification introduction](https://spec.torproject.org/intro/)
-- [5] [Tor Project — Tor entsperren](https://support.torproject.org/tor-browser/circumvention/unblocking-tor/)
-- [6] [Tor Project — Tor Browser mit einem VPN verwenden](https://support.torproject.org/tor-browser/general/vpn-with-tor/)
-- [7] [Tor Project — Überblick über Onion Services](https://community.torproject.org/onion-services/overview/)
-- [8] [I2P — Threat Model](https://www.i2p.net/en/docs/overview/threat-model/)
-- [9] [Katzenpost — Threat Model](https://katzenpost.network/docs/threat_model/)
-- [10] [GNUnet — Anonymous File Sharing](https://docs.gnunet.org/master/users/fs.html) and [GNUnet VPN limitations](https://docs.gnunet.org/latest/users/vpn.html)
+- [5] [Tor Project — Unblocking Tor](https://support.torproject.org/tor-browser/circumvention/unblocking-tor/)
+- [6] [Tor Project — Using Tor Browser with a VPN](https://support.torproject.org/tor-browser/general/vpn-with-tor/)
+- [7] [Tor Project — Onion services overview](https://community.torproject.org/onion-services/overview/)
+- [8] [I2P — Threat model](https://www.i2p.net/en/docs/overview/threat-model/)
+- [9] [Katzenpost — Threat model](https://katzenpost.network/docs/threat_model/)
+- [10] [GNUnet — Anonymous file sharing](https://docs.gnunet.org/master/users/fs.html) and [GNUnet VPN limitations](https://docs.gnunet.org/latest/users/vpn.html)
 - [11] [RFC 9230 — Oblivious DoH](https://www.rfc-editor.org/rfc/rfc9230.html) and [RFC 9849 — Encrypted Client Hello](https://www.rfc-editor.org/rfc/rfc9849.html)
 - [12] [Apple Platform Security — iCloud Private Relay security](https://support.apple.com/guide/security/secad8ce3233/web)
-- [13] [GSMA — Obligatorische SIM-Registrierung](https://www.gsma.com/solutions-and-impact/connectivity-for-good/mobile-for-development/programme/digital-identity/mandatory-sim-registration-policy-and-regulatory-perspectives-in-the-absence-of-data-protection-laws/)
+- [13] [GSMA — Mandatory SIM registration](https://www.gsma.com/solutions-and-impact/connectivity-for-good/mobile-for-development/programme/digital-identity/mandatory-sim-registration-policy-and-regulatory-perspectives-in-the-absence-of-data-protection-laws/)
 - [14] [Kaspersky Securelist — Satellite Turla](https://securelist.com/satellite-turla-apt-command-and-control-in-the-sky/72081/)
 - [15] [Google Cloud/Mandiant — China-nexus espionage actors use ORB networks](https://cloud.google.com/blog/topics/threat-intelligence/china-nexus-espionage-orb-networks)
 - [16] [MITRE ATT&CK — Domain Fronting (T1090.004)](https://attack.mitre.org/techniques/T1090/004/)
@@ -688,3 +690,4 @@ Kein clientseitiger Test beweist, dass ein Ermittler oder Verteidiger zusieht. �
 - [26] [RFC 4786 — Operation of Anycast Services](https://www.rfc-editor.org/rfc/rfc4786.html)
 - [27] [RFC 9000 — QUIC connection migration](https://www.rfc-editor.org/rfc/rfc9000.html) and [RFC 8684 — Multipath TCP](https://www.rfc-editor.org/rfc/rfc8684.html)
 - [28] [GitHub — GitHub-hosted runners reference](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)
+{{#include ../banners/hacktricks-training.md}}
