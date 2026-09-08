@@ -1,127 +1,129 @@
-# Protocoli za Malipo Zinazolinda Faragha
+# Protocol za Malipo Zinazohifadhi Faragha
 
-Mifumo ya malipo ya hali ya juu inaweza kumficha mlipaji kutoka kwa merchant, kumficha mpokeaji au kiasi kutoka kwenye public ledger, au kuzuia mint kuunganisha withdrawal na redemption. Hizi ni sifa tofauti. Hakuna inayofuta rekodi za acquisition, kifaa, mtandao, delivery, accounting, sanctions au endpoint.
+{{#include ../banners/hacktricks-training.md}}
 
-[Anonymous Payment Technique Catalog](anonymous-payment-techniques.md) hutoa vipengele vilivyosanifishwa vya `Pros`, `Cons`, `Procedure` ya hatua kwa hatua, na `Detection` kwa kila familia ya malipo. Ukurasa huu unapanua maelezo ya protocol za hali ya juu.
+Mifumo ya hali ya juu ya malipo inaweza kumficha mlipaji kutoka kwa mfanyabiashara, kumficha mpokeaji au kiasi kwenye leja ya umma, au kuzuia mint kuhusisha withdrawal na redemption. Hizi ni sifa tofauti. Hakuna inayofuta rekodi za ununuzi, kifaa, mtandao, uwasilishaji, uhasibu, sanctions au endpoint.
+
+[Anonymous Payment Technique Catalog](anonymous-payment-techniques.md) hutoa maelezo sanifu ya `Pros`, `Cons`, `Procedure` ya hatua kwa hatua, na `Detection` kwa kila familia ya malipo. Ukurasa huu unapanua protocols za hali ya juu.
 
 {% hint style="danger" %}
-Tumia fedha na counterparties halali pekee. Usitumie privacy protocols kukwepa utambulisho unaohitajika, sanctions, kodi, ukaguzi wa source-of-funds au reporting ya miamala. Usiendeshe exchange, mint au huduma ya transmission bila kuelewa wajibu wa licensing, custody, AML na consumer-protection.
+Tumia fedha na counterparties halali pekee. Usitumie privacy protocols kukwepa identification inayohitajika, sanctions, kodi, ukaguzi wa chanzo cha fedha au kuripoti miamala. Usiendeshe exchange, mint au huduma ya transmission bila kuelewa majukumu ya licensing, custody, AML na ulinzi wa watumiaji.
 {% endhint %}
 
 ## Linganisha chaguo za hali ya juu
 
-| Protocol | Huficha nini kutoka kwa public/merchant | Trusted au observing party | Ukomaavu/upatikanaji |
+| Protocol | Huficha nini kutoka kwa umma/mfanyabiashara | Mhusika anayeaminika au anayeangalia | Ukomavu/upatikanaji |
 |---|---|---|---|
-| Bitcoin Silent Payments (BIP 352) | Watu wa nje hawawezi kuunganisha payment code inayotumika tena na outputs zake za mara moja | Public Bitcoin graph inabaki; wallet/index server inaweza kuona scans | Specification imekamilika; wallet support hutofautiana |
-| Zcash fully shielded Orchard | Sender, receiver na amount zimesimbwa kwenye on-chain | Wallet backend/network na acquisition/off-ramp bado zinabaki | Imetumika; shielded support hutofautiana kwa wallet/exchange |
-| GNU Taler | Merchant si lazima ajue utambulisho wa payer; mapato ya merchant yanabaki accountable | Taler exchange/bank huona funding; merchant huona order | Deployments zina mipaka ya kijiografia |
-| Federated Chaumian e-cash | Federation haipaswi kuunganisha notes zilizotolewa na internal transfers/redemption | Guardian quorum huhifadhi reserves; gateways huona boundary activity | Community deployments zinazoibuka |
-| Lightning BOLT 12/route blinding | Hupunguza kufichuliwa kwa receiver/node na route | Endpoints, hops zilizochaguliwa, funding chain na wallet services | Support inategemea wallet |
-| Virtual card/token | Merchant hupokea credential yenye mipaka, si PAN inayoweza kutumika tena | Issuer/network huhifadhi payer na transaction | Imepevuka na inapatikana kwa upana |
+| Bitcoin Silent Payments (BIP 352) | Watu wa nje hawawezi kuhusisha payment code inayoweza kutumika tena na outputs zake za mara moja | Graph ya umma ya Bitcoin hubaki; wallet/index server inaweza kuona scans | Specification imekamilika; support ya wallet hutofautiana |
+| Zcash fully shielded Orchard | Mtumaji, mpokeaji na kiasi husimbwa kwenye chain | Wallet backend/network na acquisition/off-ramp hubaki | Imetumwa; shielded support hutofautiana kwa wallet/exchange |
+| GNU Taler | Mfanyabiashara hahitaji kujua utambulisho wa mlipaji; mapato ya mfanyabiashara hubaki accountable | Taler exchange/bank huona funding; mfanyabiashara huona oda | Deployments zimewekewa mipaka kijiografia |
+| Federated Chaumian e-cash | Federation haipaswi kuhusisha notes zilizotolewa na transfers/redemption za ndani | Guardian quorum huhifadhi reserves; gateways huona shughuli za mipakani | Community deployments zinazoibukia |
+| Lightning BOLT 12/route blinding | Hupunguza ufichuzi wa receiver/node na route | Endpoints, hops zilizochaguliwa, funding chain na huduma za wallet | Support hutegemea wallet |
+| Virtual card/token | Mfanyabiashara hupokea credential yenye mipaka, si PAN inayoweza kutumika tena | Issuer/network huhifadhi mlipaji na transaction | Imepevuka na inapatikana kwa upana |
 
 ## Bitcoin Silent Payments (BIP 352)
 
-Silent Payments humruhusu receiver kuchapisha payment code moja tuli, huku kila sender akitengeneza Taproot output ya kipekee. Mchunguzi wa nje wa chain hawezi kuunganisha moja kwa moja outputs hizo na code iliyochapishwa, na hakuna ombi la anwani la mawasiliano au notification output ya on-chain linalohitajika. BIP 352 imewekwa kuwa **Complete**, lakini huongeza gharama ya scanning na haiendani na wallet ambazo hazijaiimplement.<sup>[[1]](#references)</sup>
+Silent Payments humruhusu mpokeaji kuchapisha payment code moja tuli huku kila mtumaji akitengeneza Taproot output ya kipekee. Mwangalizi wa chain aliye nje hawezi kuhusisha moja kwa moja outputs hizo na code iliyochapishwa, na hakuna ombi shirikishi la anwani au notification output ya on-chain linalohitajika. BIP 352 imewekwa kuwa **Complete**, lakini huongeza gharama ya scanning na haiendani na wallets ambazo hazijaiimplement.<sup>[[1]](#references)</sup>
 
-### Mtiririko wa receiver
+### Mtiririko wa kazi wa mpokeaji
 
-1. Chagua wallet inayodumishwa na inayounga mkono waziwazi upokeaji wa BIP 352; thibitisha kipengele hicho dhidi ya documentation ya sasa ya wallet, si dai la social media.
-2. Fanya backup ya wallet seed na Silent Payment descriptor/key material kwa kutumia recovery method iliyoandikwa na wallet. Jaribu discovery kwa kiasi kidogo cha testnet/mainnet kabla ya kuchapisha code.
-3. Tengeneza **labels** tofauti kwa campaigns, invoices au counterparties pale wallet inapounga mkono BIP 352 labels. Labels husaidia local accounting bila kuchapisha anwani zinazoweza kuunganishwa.
-4. Chapisha Silent Payment code tuli kupitia authenticated channel. Inaweza kutumika tena, lakini impostor anaweza kubadilisha na kuweka code yake mwenyewe.
-5. Fanya scanning kupitia local full node inapowezekana. Third-party index/scanning server inaweza kujifunza muda wa maombi au filter data hata kama haiwezi kutumia fedha.
-6. Weka UTXOs zilizogunduliwa zikiwa na labels na tumia coin-control rules zilezile kama za Bitcoin ya kawaida. Kuzitumia au kuziunganisha kunaweza kufichua uhusiano wa umiliki.
-7. Thibitisha kuwa recovery inagundua malipo bila kutegemea external index ambayo haijafanyiwa backup.
+1. Chagua wallet inayodumishwa na inayounga mkono waziwazi receiving ya BIP 352; thibitisha feature hiyo dhidi ya documentation ya sasa ya wallet, si dai la social media.
+2. Fanya backup ya wallet seed na Silent Payment descriptor/key material kwa kutumia njia ya recovery iliyoelezwa na wallet. Jaribu discovery kwa kiasi kidogo cha testnet/mainnet kabla ya kuchapisha code.
+3. Tengeneza **labels** tofauti za campaigns, invoices au counterparties pale wallet inapounga mkono BIP 352 labels. Labels husaidia uhasibu wa ndani bila kuchapisha anwani zinazoweza kuhusishwa.
+4. Chapisha Silent Payment code tuli kupitia channel iliyothibitishwa. Inaweza kutumika tena, lakini impostor anaweza kubadilisha na kuweka code yake mwenyewe.
+5. Fanya scan kupitia local full node inapowezekana. Third-party index/scanning server inaweza kujifunza muda wa maombi au filter data hata kama haiwezi kutumia fedha.
+6. Weka UTXOs zilizogunduliwa zikiwa na labels na tumia coin-control rules zilezile za Bitcoin ya kawaida. Kuzitumia au kuziunganisha kunaweza kufichua uhusiano wa umiliki.
+7. Thibitisha kuwa recovery inagundua malipo bila kutegemea external index ambayo haijawekewa backup.
 
-### Mtiririko wa sender
+### Mtiririko wa kazi wa mtumaji
 
-1. Thibitisha kuwa wallet inaunga mkono kutuma kwenda kwenye address version hiyo na authenticate receiver's long static code.
-2. Ruhusu wallet itengeneze output; usiwahi kubadilisha au kufupisha code mwenyewe.
-3. Kagua kwa makini inputs zilizochaguliwa. Silent Payments huboresha privacy ya recipient-address, lakini sender inputs bado ziko kwenye public graph.
-4. Tumia fee bumping/PSBT behavior inayoungwa mkono na wallet. BIP 352 inahitaji output re-derivation ikiwa inputs zitabadilika, na baadhi ya signing modes si salama.
-5. Hifadhi receipt au proof iliyosimbwa inayohitajika kwa disputes/accounting.
+1. Thibitisha kuwa wallet inaunga mkono kutuma kwenye address version hiyo na thibitisha static code ndefu ya mpokeaji.
+2. Ruhusu wallet itengeneze output; usiwahi kubadilisha au kufupisha code wewe mwenyewe.
+3. Kagua inputs zilizochaguliwa kwa makini. Silent Payments huboresha faragha ya anwani ya mpokeaji, lakini sender inputs bado ziko kwenye graph ya umma.
+4. Tumia fee bumping/PSBT behavior inayoungwa mkono na wallet. BIP 352 inahitaji output iundwe upya inputs zinapobadilika, na baadhi ya signing modes si salama.
+5. Hifadhi receipt au proof iliyosimbwa inayohitajika kwa disputes/uhasibu.
 
-Silent Payments hutatua uchapishaji unaorudiwa wa recipient address. Hazifichi amount, muda wa transaction, sender cluster, acquisition history au co-spending ya baadaye.
+Silent Payments hutatua uchapishaji unaorudiwa wa anwani ya mpokeaji. Hazifichi kiasi, muda wa transaction, sender cluster, historia ya acquisition au co-spending ya baadaye.
 
-## Zcash fully shielded payments
+## Malipo ya Zcash fully shielded
 
-Zcash inaunga mkono transparent na shielded value pools. Orchard shielded transactions hutumia zero-knowledge proofs ili nodes ziweze kuthibitisha validity huku maelezo ya transaction yakiwa yamesimbwa; Unified Addresses zinaweza kuwa na receiver types nyingi.<sup>[[2]](#references)</sup> Privacy inategemea path halisi iliyochaguliwa na wallet, si herufi ya kwanza ya address inayoonyeshwa.
+Zcash inaunga mkono transparent na shielded value pools. Orchard shielded transactions hutumia zero-knowledge proofs ili nodes ziweze kuthibitisha validity huku maelezo ya transaction yakisimbwa; Unified Addresses zinaweza kuwa na aina nyingi za receivers.<sup>[[2]](#references)</sup> Faragha hutegemea path halisi iliyochaguliwa na wallet, si herufi ya kwanza ya anwani inayoonyeshwa.
 
 ### Mtiririko wa shielded
 
-1. Chagua wallet inayodumishwa inayotambua wazi tabia ya **shielded-by-default** na Orchard support ya sasa. Thibitisha download na ufanye backup/test ya seed.
-2. Pata ZEC kwa njia halali na urekodi basis/source. Exchange bado inajua acquisition na withdrawal.
-3. Pokea kwenye Unified Address inayoungwa mkono na wallet, kisha kagua kama transaction iliingia kwenye shielded pool. Usidhani shielding ya kiotomatiki bila kuthibitisha tabia ya wallet.
-4. Pendelea transfers za **shielded-to-shielded**. Transparent-to-shielded na shielded-to-transparent boundary movements hufichua public values/timing na zinaweza kuwezesha amount correlation; Orchard specification inabainisha kuwa spending kwenda kwenye non-Orchard address hufichua transaction value.<sup>[[3]](#references)</sup>
-5. Epuka round trips za exact-amount zinazotambulika na boundary crossings za haraka. Hii ni privacy hygiene, si ruhusa ya kuficha umiliki au reporting.
+1. Chagua wallet inayodumishwa na inayotambulisha wazi tabia ya **shielded-by-default** pamoja na support ya sasa ya Orchard. Thibitisha download na ufanye backup/test ya seed.
+2. Pata ZEC kwa njia halali na urekodi msingi/chanzo. Exchange bado inajua acquisition na withdrawal.
+3. Pokea kwenye Unified Address inayoungwa mkono na wallet, kisha kagua ikiwa transaction iliingia kwenye shielded pool. Usidhani kuwa shielding ya kiotomatiki imetokea bila kuthibitisha tabia ya wallet.
+4. Pendelea transfers za **shielded-to-shielded**. Harakati za transparent-to-shielded na shielded-to-transparent mipakani hufichua public values/timing na zinaweza kuwezesha correlation ya kiasi; Orchard specification inasema kuwa kutumia kwenye non-Orchard address hufichua thamani ya transaction.<sup>[[3]](#references)</sup>
+5. Epuka round trips zenye exact amounts zinazotambulika na kuvuka mipaka mara moja. Hii ni usafi wa faragha, si ruhusa ya kuficha umiliki au reporting.
 6. Tumia network-privacy path inayoungwa mkono na wallet. Shielded cryptography haifichi IP/timing kutoka kwa wallet servers au peers.
-7. Weka internal compliance records na utumie viewing keys kwa audit/disclosure iliyokusudiwa pekee baada ya kuelewa scope yake.
-8. Thibitisha recipient wallet/exchange support kabla ya kutuma; transparent receiver anayelazimishwa hubadilisha privacy property.
+7. Hifadhi compliance records za ndani na tumia viewing keys kwa audit/disclosure iliyokusudiwa tu baada ya kuelewa scope yake.
+8. Thibitisha support ya wallet/exchange ya mpokeaji kabla ya kutuma; receiver wa transparent anayelazimishwa hubadilisha sifa ya faragha.
 
-## GNU Taler: anonymous payer, accountable merchant
+## GNU Taler: mlipaji asiyejulikana, mfanyabiashara accountable
 
-GNU Taler ni open electronic-payment protocol inayotumia traditional currencies, blind signatures na regulated exchange/bank integration. Muundo wake unalenga kuwafanya customers wabaki anonymous kwa merchants huku merchants wakiendelea kutambulika na kulipa kodi.<sup>[[4]](#references)</sup> Si cryptocurrency, na upatikanaji wake hutegemea exchange, bank, wallet na merchant ya eneo inayolingana.
+GNU Taler ni open electronic-payment protocol inayotumia currencies za jadi, blind signatures na integration inayodhibitiwa ya exchange/bank. Muundo wake unalenga kuwafanya wateja wasijulikane kwa wafanyabiashara huku wafanyabiashara wakibaki wanaotambulika na wanaolipa kodi.<sup>[[4]](#references)</sup> Si cryptocurrency, na upatikanaji wake hutegemea exchange ya kikanda, bank, wallet na merchant vinavyoendana.
 
-### Mtiririko wa user inapopatikana
+### Mtiririko wa kazi wa mtumiaji pale inapotekelezwa
 
-1. Tambua Taler exchange na merchant inayofanya kazi katika currency/jurisdiction husika; soma terms, fees, KYC na privacy notices zao za sasa.
-2. Install official wallet na thibitisha source yake. Linda wallet backup/recovery data kama cash kwa sababu wallet value inaweza kuwa bearer asset.
-3. Withdraw value kupitia supported bank/exchange flow ukitumia taarifa za kweli. Funding institution/exchange inaweza kujua withdrawal hata kama blind signatures zinavunja direct coin-to-withdrawal link.
-4. Kagua merchant contract ndani ya wallet: merchant identity, item/summary, amount, fees, refund na delivery terms.
-5. Lipa na uhifadhi receipt data inayohitajika kwa refund, warranty, accounting au tax.
+1. Tambua Taler exchange na merchant inayofanya kazi katika currency/jurisdiction husika; soma masharti yao ya sasa, fees, KYC na privacy notices.
+2. Sakinisha official wallet na thibitisha chanzo chake. Linda wallet backup/recovery data kama fedha taslimu kwa sababu wallet value inaweza kuwa bearer asset.
+3. Fanya withdrawal ya value kupitia bank/exchange flow inayoungwa mkono ukitumia taarifa za kweli. Funding institution/exchange inaweza kujua withdrawal ingawa blind signatures huvunja uhusiano wa moja kwa moja kati ya coin na withdrawal.
+4. Kagua merchant contract ndani ya wallet: utambulisho wa merchant, bidhaa/muhtasari, kiasi, fees, refund na masharti ya uwasilishaji.
+5. Lipa na uhifadhi receipt data inayohitajika kwa refund, warranty, uhasibu au kodi.
 6. Usitumie tena optional merchant session/account identifiers ikiwa merchant unlinkability inahitajika.
-7. Weka wallet, network na delivery metadata kwenye threat model; payment cryptography ya Taler haifichi shipping address au endpoint iliyoathiriwa.
+7. Weka wallet, network na delivery metadata ndani ya threat model; payment cryptography ya Taler haifichi shipping address au endpoint iliyoathirika.
 
-Merchant na exchange hubaki accountable, na kuendesha component yoyote kati yao kunaweza kuwa regulated payment-service activity.
+Mfanyabiashara na exchange hubaki accountable, na kuendesha component yoyote kati yao kunaweza kuwa shughuli ya regulated payment-service.
 
 ## Federated Chaumian e-cash
 
-Chaumian e-cash hutumia blind signatures ili mint itie saini token bila kuona token iliyofunuliwa baadaye na kutumika. Fedimint husambaza custody ya reserves na signing kati ya guardian federation; documentation yake inasema guardians huona aggregate reserves/outstanding notes lakini hawapaswi kuona individual balance au nani alimlipa nani ndani ya federation.<sup>[[5]](#references)</sup>
+Chaumian e-cash hutumia blind signatures ili mint isaini token bila kuona token hiyo ikiwa haijafichuliwa baadaye. Fedimint husambaza custody ya reserves na signing miongoni mwa guardian federation; documentation yake inasema guardians huona aggregate reserves/outstanding notes lakini hawapaswi kuona balance ya mtu binafsi au nani amemlipa nani ndani ya federation.<sup>[[5]](#references)</sup>
 
-Hii ni **custodial bearer value**. Guardian quorum ya kutosha hudhibiti reserves; federation failure, guardians wasio waaminifu, software bugs au client state iliyopotea vinaweza kusababisha hasara. Deposits, withdrawals na Lightning gateways ni boundary events zinazoonekana na zinaweza kuunganisha timing/amount.
+Hii ni **custodial bearer value**. Guardian quorum ya kutosha hudhibiti reserves; federation failure, guardians wasio waaminifu, software bugs au kupotea kwa client state kunaweza kusababisha hasara. Deposits, withdrawals na Lightning gateways ni boundary events zinazoonekana na zinaweza kuhusisha timing/amount.
 
-### Mtiririko wa limited-risk
+### Mtiririko wa kazi wenye risk ndogo
 
-1. Tumia kiasi kidogo tu ambacho unaweza kumudu kupoteza. Chukulia public/unknown federations kuwa hatari zaidi kuliko guardians wenye accountability ya ulimwengu halisi.
-2. Thibitisha federation invite kupitia authenticated channel na urekodi guardian identities, quorum, jurisdiction, fees, recovery na shutdown policy.
-3. Install compatible wallet inayodumishwa, ithibitishe, na uelewe backup scheme yake kabla ya kuweka deposit.
-4. Deposit Bitcoin iliyopatikana kihalali kupitia documented path. Rekodi peg-in kwa accounting na chukulia timing/amount yake kuwa ya umma au inajulikana kwenye boundary.
-5. Ndani ya federation, tumia fresh payment requests na epuka kuongeza account/chat/delivery identifiers zinazounda tena link ambayo blind signature iliiondoa.
-6. Kwa Lightning payments, chukulia gateway kuwa observer wa ziada wa invoices na boundary timing.
-7. Redeem/withdraw kulingana na policy, ukitarajia kuwa distinctive amount na immediate timing vinaweza kuhusishwa na deposit au external payment.
-8. Weka tax/source/authorization records kwa faragha; usiwaombe guardians au gateways kuwasilisha activity kwa taarifa zisizo za kweli.
+1. Tumia kiasi kidogo tu unachoweza kupoteza. Chukulia federations za umma/zinazojulikana kidogo kuwa na risk kubwa kuliko guardians wenye accountability ya ulimwengu halisi.
+2. Thibitisha federation invite kupitia authenticated channel na urekodi utambulisho wa guardians, quorum, jurisdiction, fees, recovery na shutdown policy.
+3. Sakinisha wallet inayodumishwa na inayoendana, ithibitishe, na uelewe backup scheme yake kabla ya kuweka deposit.
+4. Weka Bitcoin iliyopatikana kihalali kupitia documented path. Rekodi peg-in kwa uhasibu na chukulia timing/amount yake kuwa ya umma au inajulikana kwenye boundary.
+5. Ndani ya federation, tumia payment requests mpya na epuka kuongeza account/chat/delivery identifiers zinazounda tena uhusiano ulioondolewa na blind signature.
+6. Kwa malipo ya Lightning, ichukulie gateway kama mwangalizi wa ziada wa invoices na boundary timing.
+7. Fanya redeem/withdraw kulingana na policy, ukitarajia kuwa kiasi kinachotambulika na timing ya mara moja vinaweza kuhusishwa na deposit au payment ya nje.
+8. Hifadhi tax/source/authorization records kwa faragha; usiwaombe guardians au gateways wapotoshe taarifa za shughuli.
 
-Usieleze federated e-cash kuwa trustless, self-custodial au guaranteed anonymous.
+Usieleze federated e-cash kuwa trustless, self-custodial au anonymous iliyohakikishwa.
 
 ## BOLT 12 offers na route blinding
 
-BOLT 12 offers zinaweza kutumika tena bila kuchapisha stable on-chain address na zinaweza kutumia blinded paths ili payer asihitaji kujua clear node identity/path ya receiver. Hii inakamilisha, lakini haibadilishi, onion routing iliyopo ya Lightning.
+BOLT 12 offers zinaweza kutumika tena bila kuchapisha anwani thabiti ya on-chain na zinaweza kutumia blinded paths ili mlipaji asiwe na haja ya kujua utambulisho/path iliyo wazi ya node ya mpokeaji. Hii inakamilisha, lakini haibadilishi, onion routing iliyopo ya Lightning.
 
 Kabla ya kutumia:
 
-1. Thibitisha kuwa sender na receiver wallets zinaunga mkono BOLT 12 features zilezile za sasa; usikadirie support kutokana na branding ya jumla ya “Lightning”.
-2. Authenticate offer out of band na kagua amount, issuer/description na recurrence rules.
-3. Tumia fresh invoice/payment context iliyotengenezwa kutoka kwenye offer.
-4. Weka node aliases, public contact information na stable network endpoints kuwa chache iwezekanavyo.
+1. Thibitisha kuwa wallets za mtumaji na mpokeaji zinaunga mkono BOLT 12 features zilezile za sasa; usikadirie support kutokana na branding ya jumla ya “Lightning”.
+2. Thibitisha offer out of band na kagua kiasi, issuer/description na recurrence rules.
+3. Tumia invoice/payment context mpya iliyotengenezwa kutoka kwenye offer.
+4. Weka node aliases, taarifa za mawasiliano za umma na stable network endpoints kwa kiwango cha chini.
 5. Chukulia kuwa sender/receiver, first/last hop, wallet service, channel graph na on-chain funding/closure bado hufichua sehemu za uhusiano.
 
-## Auditability bila public disclosure
+## Auditability bila ufichuzi wa umma
 
-Privacy na audit zinaweza kuwepo pamoja:
+Faragha na audit vinaweza kuwepo pamoja:
 
-- Weka labels, invoices, authorization, cost basis na ownership mapping zikiwa zimesimbwa nje ya public protocol.
-- Tenganisha **view/audit key** na spending key pale protocol inapotoa moja; jaribu disclosure yake halisi kwenye sample wallet kwanza.
-- Mpe auditor scoped proof ya kiwango cha chini badala ya seed au unrestricted spending credential.
-- Rekodi software version, protocol/pool, transaction ID au proof, counterparty purpose na exchange-rate source wakati wa transaction.
-- Bainisha retention na deletion badala ya kukusanya permanent unencrypted identity graph.
+- Hifadhi labels, invoices, authorization, cost basis na ownership mapping zikiwa zimesimbwa nje ya public protocol.
+- Tenganisha **view/audit key** na spending key pale protocol inapotoa mojawapo; jaribu disclosure yake halisi kwenye sample wallet kwanza.
+- Mpe auditor proof yenye scope ndogo inayohitajika badala ya seed au spending credential isiyo na mipaka.
+- Rekodi software version, protocol/pool, transaction ID au proof, purpose ya counterparty na chanzo cha exchange-rate wakati wa transaction.
+- Bainisha retention na deletion badala ya kukusanya identity graph ya kudumu isiyosimbwa.
 
-## Orodha ya ukaguzi wa uteuzi
+## Checklist ya uchaguzi
 
-- [ ] Sehemu iliyofichwa na observer zimetajwa kwa usahihi.
-- [ ] Wallet/protocol support ilithibitishwa kufikia tarehe ya transaction.
-- [ ] Acquisition, network, node/RPC, counterparty, delivery na later-spend links zimeandikwa.
-- [ ] Hatari za custody, recovery, liquidity, issuer/federation solvency na refund zimekubaliwa.
-- [ ] Required identity, tax, sanctions, source na organizational records zinaendelea kuwa sahihi.
+- [ ] Field iliyofichwa na observer vimetajwa kwa usahihi.
+- [ ] Support ya wallet/protocol ilithibitishwa kufikia tarehe ya transaction.
+- [ ] Links za acquisition, network, node/RPC, counterparty, delivery na later-spend zimeandikwa.
+- [ ] Risk za custody, recovery, liquidity, issuer/federation solvency na refund zimekubaliwa.
+- [ ] Records zinazohitajika za identity, kodi, sanctions, source na shirika bado ni sahihi.
 - [ ] Jaribio dogo la end-to-end, likijumuisha recovery na audit proof, limefaulu.
 
 ## References
@@ -130,5 +132,6 @@ Privacy na audit zinaweza kuwepo pamoja:
 - [2] [Zcash — Unified Addresses](https://z.cash/learn/what-are-zcash-unified-addresses/) and [The Orchard Book — Keys and addresses](https://zcash.github.io/orchard/design/keys.html)
 - [3] [ZIP 224 — Orchard Shielded Protocol](https://zips.z.cash/zip-0224)
 - [4] [GNU Taler Documentation](https://docs.taler.net/) and [Merchant Manual — About GNU Taler](https://docs.taler.net/taler-merchant-manual.html)
-- [5] [Fedimint — How it works](https://fedimint.org/users/how-it-works), [How federations work](https://fedimint.org/guardians/how-federations-work), and [Threshold blind signatures](https://docs.fedimint.org/crypto/index.html)
+- [5] [Fedimint — Jinsi inavyofanya kazi](https://fedimint.org/users/how-it-works), [How federations work](https://fedimint.org/guardians/how-federations-work), and [Threshold blind signatures](https://docs.fedimint.org/crypto/index.html)
 - [6] [BOLT 12 — Offers](https://github.com/lightning/bolts/blob/master/12-offer-encoding.md)
+{{#include ../banners/hacktricks-training.md}}
