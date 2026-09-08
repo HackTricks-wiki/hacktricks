@@ -1,16 +1,18 @@
-# Εξουσιοδοτημένα Adversary-Emulation Labs
+# Εργαστήρια Authorized Adversary-Emulation
 
-Αυτές οι ασκήσεις αναπαράγουν **παρατηρήσιμη αρχιτεκτονική**, όχι μη εξουσιοδοτημένο compromise. Εκτελέστε τες σε έναν αποκλειστικό Linux lab host με Docker, χωρίς ευαίσθητα credentials και χωρίς διαδρομή προς targets τρίτων. Τα ονόματα είναι προκαθορισμένα, ώστε το teardown να είναι ρητό.
+{{#include ../banners/hacktricks-training.md}}
+
+Αυτές οι ασκήσεις αναπαράγουν **παρατηρήσιμη αρχιτεκτονική**, όχι μη εξουσιοδοτημένη παραβίαση. Εκτελέστε τις σε έναν αποκλειστικό Linux lab host με Docker, χωρίς ευαίσθητα διαπιστευτήρια και χωρίς διαδρομή προς στόχους τρίτων. Τα ονόματα είναι προκαθορισμένα, ώστε το teardown να είναι σαφές.
 
 {% hint style="danger" %}
-Μην αντικαταστήσετε τα containers, τα APs, τους routers, τους λογαριασμούς ή τις synthetic transactions που σας ανήκουν παρακάτω με public proxies, το Wi-Fi ενός γείτονα, έναν production CDN tenant που δεν ελέγχετε ή πραγματικά illicit funds. Η γραπτή authorization πρέπει να καλύπτει κάθε σύστημα και radio environment.
+Μην αντικαταστήσετε τα containers, τα APs, τους routers, τους λογαριασμούς ή τις συνθετικές συναλλαγές που ανήκουν σε εσάς παρακάτω με public proxies, το Wi-Fi ενός γείτονα, έναν production CDN tenant που δεν ελέγχετε ή πραγματικά παράνομα κεφάλαια. Η γραπτή εξουσιοδότηση πρέπει να καλύπτει κάθε σύστημα και περιβάλλον radio.
 {% endhint %}
 
-## Lab 1: owned ORB και αλυσίδα redirectors
+## Lab 1: owned ORB και αλυσίδα redirector
 
-**Objective:** δείξτε ότι ένα target καταγράφει μόνο το exit, ενώ κάθε relay βλέπει τα γειτονικά hops. Αυτό προσομοιώνει τη δομή T1090.003/T1584 χωρίς compromised devices.
+**Objective:** δείξτε ότι ένας στόχος καταγράφει μόνο την έξοδο, ενώ κάθε relay βλέπει τα γειτονικά hops. Αυτό προσομοιώνει τη δομή T1090.003/T1584 χωρίς compromised devices.
 
-**Requirements:** Docker Engine και αχρησιμοποίητα container names που αρχίζουν με `ht-orb-`.
+**Requirements:** Docker Engine και αχρησιμοποίητα ονόματα containers που αρχίζουν με `ht-orb-`.
 
 ### Build
 ```bash
@@ -31,7 +33,7 @@ docker network connect ht-orb-transit ht-orb-r1
 docker run --rm --network ht-orb-entry curlimages/curl:latest \
 -sS http://ht-orb-r1:8080/ >/dev/null
 ```
-### Επαλήθευση των ορίων ορατότητας
+### Επαληθεύστε τα όρια ορατότητας
 ```bash
 docker logs ht-orb-target
 docker logs ht-orb-r1
@@ -39,25 +41,25 @@ docker logs ht-orb-r2
 docker inspect -f '{{range .NetworkSettings.Networks}}{{.NetworkID}} {{.IPAddress}}{{println}}{{end}}' \
 ht-orb-r1 ht-orb-r2 ht-orb-target
 ```
-Αναμενόμενο αποτέλεσμα: Το Nginx καταγράφει τη διεύθυνση `ht-orb-r2` στο `ht-orb-target`, όχι τον one-shot client. Τα Relay logs εμφανίζουν συνδέσεις μόνο από το γειτονικό τους δίκτυο. Η επιθεώρηση του Docker control-plane εξακολουθεί να ανασυνθέτει ολόκληρη τη διαδρομή—ανάλογα με τα στοιχεία provider/controller.
+Αναμενόμενο αποτέλεσμα: Το Nginx καταγράφει τη διεύθυνση `ht-orb-r2` στο `ht-orb-target`, όχι αυτήν του one-shot client. Τα relay logs εμφανίζουν συνδέσεις μόνο από το γειτονικό τους δίκτυο. Η επιθεώρηση του Docker control-plane εξακολουθεί να ανακατασκευάζει ολόκληρη τη διαδρομή — ανάλογα με τα στοιχεία provider/controller.
 
 ### Πειράματα ανίχνευσης
 
-1. Επανάλαβε τα requests κάθε 60 δευτερόλεπτα και δημιούργησε γράφημα του χρόνου μεταξύ διαδοχικών συνδέσεων και των bytes.
-2. Αντικατάστησε το `ht-orb-r2` με ένα νέο named container/address, αλλά διατήρησε τον ίδιο ρυθμό και το ίδιο application request· επιβεβαίωσε ότι ένας κανόνας που βασίζεται μόνο σε IP χάνει την αλυσίδα, ενώ η συμπεριφορά εξακολουθεί να τη συνδέει.
-3. Κατέγραψε την κίνηση στα τρία Docker bridges με `tcpdump` στο lab host και σύγκρινε τα timestamps.
-4. Σταμάτησε το `ht-orb-r2`· επιβεβαίωσε ότι δεν υπάρχει άμεσο fallback από το entry στο target.
+1. Επανάλαβε τα requests κάθε 60 δευτερόλεπτα και δημιούργησε γράφημα με τον χρόνο μεταξύ αφίξεων και τα bytes.
+2. Αντικατάστησε το `ht-orb-r2` με ένα νέο named container/address, διατηρώντας τον ίδιο ρυθμό και το ίδιο application request· επιβεβαίωσε ότι ένας κανόνας που βασίζεται μόνο σε IP χάνει την αλυσίδα, ενώ η συμπεριφορά εξακολουθεί να τη συνδέει.
+3. Κατέγραψε κίνηση στα τρία Docker bridges με `tcpdump` στο lab host και σύγκρινε τα timestamps.
+4. Σταμάτησε το `ht-orb-r2`· επαλήθευσε ότι δεν υπάρχει άμεσο fallback από το entry προς το target.
 
 ### Κατάργηση
 ```bash
 docker rm -f ht-orb-r1 ht-orb-r2 ht-orb-target
 docker network rm ht-orb-entry ht-orb-transit ht-orb-target
 ```
-## Lab 2: SNI/Host mismatch and redirector logging
+## Lab 2: Ασυμφωνία SNI/Host και logging του redirector
 
-**Στόχος:** αναπαραγωγή του routing primitive πίσω από το domain fronting σε ένα ιδιωτικό τοπικό edge και ανάδειξη του σημείου όπου είναι ορατό. Δεν εμπλέκεται δημόσιο CDN.
+**Στόχος:** αναπαραγωγή του routing primitive πίσω από το domain fronting σε ένα ιδιωτικό local edge και επίδειξη του σημείου όπου είναι ορατό. Δεν εμπλέκεται public CDN.
 
-### Δημιουργία ενός τοπικού TLS edge
+### Δημιουργία ενός local TLS edge
 ```bash
 ht_front_dir="$(mktemp -d)"
 openssl req -x509 -newkey rsa:2048 -nodes -days 1 \
@@ -91,7 +93,7 @@ curl -k --resolve front.lab:8443:127.0.0.1 \
 -H 'Host: origin.lab' https://front.lab:8443/
 docker logs ht-front-edge
 ```
-Τα αναμενόμενα πεδία log περιλαμβάνουν `sni=front.lab host=origin.lab`. Η καταγραφή πακέτων client-to-edge εκθέτει το SNI, εκτός αν χρησιμοποιείται ECH· το HTTP Host είναι κρυπτογραφημένο σε αυτήν τη σύνδεση. Το terminating edge βλέπει και τα δύο.
+Τα αναμενόμενα πεδία log περιλαμβάνουν `sni=front.lab host=origin.lab`. Η καταγραφή πακέτων από τον client προς το edge εκθέτει το SNI, εκτός αν χρησιμοποιείται ECH· το HTTP Host είναι κρυπτογραφημένο σε αυτήν τη σύνδεση. Το edge που τερματίζει τη σύνδεση βλέπει και τα δύο.
 
 Τώρα στείλτε ένα κανονικό request και επιβεβαιώστε ότι η policy το απορρίπτει:
 ```bash
@@ -99,9 +101,9 @@ curl -k --resolve front.lab:8443:127.0.0.1 https://front.lab:8443/
 ```
 ### Assertion ανίχνευσης
 
-Ειδοποιήστε για `sni != host` μόνο αφού κανονικοποιήσετε τις θύρες/την πεζογράφηση και ελέγξετε τις γνωστές εξαιρέσεις reverse-proxy. Προσθέστε το context της διεργασίας και του tenant/origin πριν αντιστοιχίσετε severity.
+Σημάνετε συναγερμό για `sni != host` μόνο αφού κανονικοποιήσετε τις θύρες και τα πεζά/κεφαλαία και ελέγξετε τις γνωστές εξαιρέσεις reverse-proxy. Προσθέστε το πλαίσιο της διεργασίας και του tenant/origin πριν αντιστοιχίσετε severity.
 
-### Κατάργηση
+### Εκκαθάριση
 ```bash
 docker rm -f ht-front-edge ht-front-target
 docker network rm ht-front-net
@@ -109,9 +111,9 @@ rm -rf -- "$ht_front_dir"
 ```
 ## Lab 3: fast-flux DNS telemetry
 
-**Στόχος:** δημιουργία ενός ασφαλούς dataset DNS τύπου low-TTL/multi-ASN και επικύρωση ενός analytic. Οι διευθύνσεις τεκμηρίωσης RFC 5737 που επιστρέφονται είναι non-routable για αυτόν τον σκοπό.
+**Στόχος:** δημιουργία ενός ασφαλούς dataset DNS με low-TTL/όπως multi-ASN και επικύρωση ενός analytic. Οι RFC 5737 documentation διευθύνσεις που επιστρέφονται είναι non-routable για αυτόν τον σκοπό.
 
-### Εκτέλεση authoritative server
+### Εκτέλεση ενός authoritative server
 ```bash
 ht_dns_dir="$(mktemp -d)"
 cat >"$ht_dns_dir/Corefile" <<'EOF'
@@ -142,50 +144,50 @@ dig @127.0.0.1 -p 1053 flux.lab A +noall +answer
 done
 docker logs ht-flux-dns
 ```
-Αναμενόμενο αποτέλεσμα: κάθε απάντηση περιέχει τρεις documentation IPs και TTL 5 δευτερολέπτων. Το πραγματικό fast flux περιστρέφει επίσης υποσύνολα με την πάροδο του χρόνου· αλλάξτε το zone serial/τις διευθύνσεις και επανεκκινήστε αυτόν τον disposable server για να δημιουργήσετε πολλαπλές epochs.
+Αναμενόμενο αποτέλεσμα: κάθε απάντηση περιλαμβάνει τρεις documentation IPs και TTL 5 δευτερολέπτων. Το πραγματικό fast flux περιστρέφει επίσης υποσύνολα με την πάροδο του χρόνου· αλλάξτε το serial/τις διευθύνσεις του zone και επανεκκινήστε αυτόν τον disposable server για να δημιουργήσετε πολλαπλές epochs.
 
 ### Αναλυτική επικύρωση
 
 Για ένα παράθυρο πέντε λεπτών, υπολογίστε τα `median(TTL)`, distinct answers, distinct synthetic ASN/geography labels και answer churn. Απαιτήστε τουλάχιστον δύο ύποπτες διαστάσεις, καθώς και ένα process/follow-on event. Εκτελέστε την ίδια ανάλυση σε ένα γνωστό CDN sample για να μετρήσετε τα false positives.
 
-### Κατάργηση
+### Κατάργηση setup
 ```bash
 docker rm -f ht-flux-dns
 rm -rf -- "$ht_dns_dir"
 ```
-## Εργαστήριο 4: nearest-neighbor wireless pivot
+## Εργαστήριο 4: wireless pivot προς κοντινό γειτονικό δίκτυο
 
-**Στόχος:** αναπαραγωγή του boundary mismatch του APT28 με δύο ιδιόκτητες «οργανώσεις». Επειδή οι εντολές για Wi-Fi hardware/driver διαφέρουν, αυτό το lab καθορίζει επαληθεύσιμους ρόλους και τεκμήρια, αντί να προσποιείται ότι μία εντολή `hostapd` ταιριάζει σε κάθε radio.
+**Στόχος:** αναπαραγωγή της ασυμφωνίας ορίων του APT28 με δύο ιδιόκτητους «οργανισμούς». Επειδή οι εντολές hardware/driver του Wi-Fi διαφέρουν, αυτό το εργαστήριο καθορίζει επαληθεύσιμους ρόλους και στοιχεία τεκμηρίωσης, αντί να προσποιείται ότι μία εντολή `hostapd` ταιριάζει σε κάθε radio.
 
 ### Εξοπλισμός
 
-- δύο AP που σας ανήκουν, σε απομονωμένα lab κανάλια/SSID `HT-NEIGHBOR` και `HT-TARGET`;
-- μία target service προσβάσιμη μόνο από το `HT-TARGET`;
+- δύο AP που σας ανήκουν, σε απομονωμένα κανάλια/SSID εργαστηρίου `HT-NEIGHBOR` και `HT-TARGET`;
+- μία target υπηρεσία προσβάσιμη μόνο από το `HT-TARGET`;
 - ένα dual-radio Linux pivot που σας ανήκει και μπορεί να συνδεθεί και στα δύο AP;
-- ένα remote-control workstation πίσω από το `HT-NEIGHBOR`;
-- RADIUS/NAC ή AP association logs, DHCP logs και pivot audit/process logs.
+- ένας remote-control workstation πίσω από το `HT-NEIGHBOR`;
+- αρχεία καταγραφής RADIUS/NAC ή AP association, DHCP και pivot audit/process.
 
 ### Διαδικασία
 
-1. Απομονώστε φυσικά ή μειώστε την ισχύ του setup, ώστε κανένα SSID να μην διαφεύγει από την authorized περιοχή. Επιβεβαιώστε το με survey.
-2. Ρυθμίστε το `HT-TARGET` με exercise identity και παραλείψτε σκόπιμα το device-certificate/posture validation για την πρώτη εκτέλεση. Καταγράψτε το ως την condition under test.
-3. Συνδέστε το πρώτο interface του pivot στο `HT-NEIGHBOR` και το δεύτερο interface στο `HT-TARGET`. **Μην** ενεργοποιήσετε general bridge· επιτρέψτε μόνο τη target service/port μέσω host firewall.
-4. Από το workstation, ανοίξτε authenticated tunnel προς το pivot και ζητήστε την target service μέσω αυτού.
-5. Καταγράψτε τη δημιουργία process/interface στο pivot, και τις δύο AP associations, το target RADIUS event, το DHCP lease και το target source address.
-6. Ζητήστε από την detection team να ανακατασκευάσει την αλυσίδα χωρίς το controller map.
-7. Ενεργοποιήστε EAP-TLS/managed-device posture στο `HT-TARGET`, αφαιρέστε το approved target certificate του pivot και επαναλάβετε. Η πρόσβαση θα πρέπει να αποτύχει κατά την admission.
-8. Επαναλάβετε με first-seen randomized MAC. Επαληθεύστε ότι η certificate/device απόφαση εξακολουθεί να λειτουργεί και ότι κανένας κανόνας δεν αντιμετωπίζει το MAC από μόνο του ως identity.
+1. Απομονώστε φυσικά ή μειώστε την εμβέλεια της εγκατάστασης, ώστε κανένα SSID να μην ξεφεύγει από την εξουσιοδοτημένη περιοχή. Επιβεβαιώστε το με survey.
+2. Ρυθμίστε το `HT-TARGET` με μια identity για την άσκηση και παραλείψτε σκόπιμα την επικύρωση device-certificate/posture για την πρώτη εκτέλεση. Καταγράψτε το ως την υπό εξέταση συνθήκη.
+3. Συνδέστε το πρώτο interface του pivot στο `HT-NEIGHBOR` και το δεύτερο interface στο `HT-TARGET`. **Μην** ενεργοποιήσετε γενικό bridge· επιτρέψτε μόνο την target service/port μέσω host firewall.
+4. Από τον workstation, ανοίξτε authenticated tunnel προς το pivot και ζητήστε την target service μέσω αυτού.
+5. Καταγράψτε τη δημιουργία διεργασίας/interface του pivot, τις συνδέσεις και στα δύο AP, το target RADIUS event, το DHCP lease και την target source address.
+6. Ζητήστε από την detection team να ανασυνθέσει την αλυσίδα χωρίς το controller map.
+7. Ενεργοποιήστε EAP-TLS/managed-device posture στο `HT-TARGET`, αφαιρέστε το εγκεκριμένο target certificate του pivot και επαναλάβετε. Η πρόσβαση θα πρέπει να αποτύχει στο admission.
+8. Επαναλάβετε με randomized MAC που εμφανίζεται για πρώτη φορά. Επαληθεύστε ότι η απόφαση certificate/device εξακολουθεί να λειτουργεί και ότι κανένας κανόνας δεν αντιμετωπίζει το MAC από μόνο του ως identity.
 
 ### Κριτήρια επιτυχίας
 
-- Η target βλέπει αρχικά έναν local Wi-Fi client και όχι το workstation.
-- Τα joined telemetry δεδομένα αναγνωρίζουν ένα pivot με ταυτόχρονες neighbor-control και target-radio διαδρομές.
-- Η certificate/device-backed admission αποκλείει τη δεύτερη εκτέλεση.
-- Κανένα packet δεν φτάνει σε network εκτός του isolated lab.
+- Η target βλέπει αρχικά έναν τοπικό Wi-Fi client και όχι τον workstation.
+- Η joined telemetry αναγνωρίζει ένα pivot με ταυτόχρονες διαδρομές προς το neighbor-control και το target-radio.
+- Το certificate/device-backed admission αποκλείει τη δεύτερη εκτέλεση.
+- Κανένα packet δεν φτάνει σε δίκτυο εκτός του απομονωμένου εργαστηρίου.
 
 ## Εργαστήριο 5: dead-drop resolver sequence
 
-**Στόχος:** εντοπισμός process που διαβάζει ένα αντικείμενο που φαίνεται legitimate, αποκωδικοποιεί έναν pointer και επικοινωνεί αμέσως με δεύτερη service.
+**Στόχος:** ανίχνευση μιας διεργασίας που διαβάζει ένα αντικείμενο με νόμιμη εμφάνιση, αποκωδικοποιεί έναν pointer και επικοινωνεί αμέσως με μια δεύτερη υπηρεσία.
 
 ### Κατασκευή
 ```bash
@@ -201,18 +203,18 @@ python -c 'import base64,urllib.request; p=urllib.request.urlopen("http://ht-ddr
 docker logs ht-ddr-web
 docker logs ht-ddr-c2
 ```
-Το encoded περιεχόμενο είναι `http://ht-ddr-c2:80/`. Μια λειτουργική ανίχνευση συσχετίζει την ίδια βραχύβια διεργασία/container που διαβάζει το `/profile.txt`, αποκωδικοποιεί το περιεχόμενο και επικοινωνεί με το `ht-ddr-c2` μέσα σε λίγα δευτερόλεπτα. Υπολόγισε το hash και διατήρησε την απόκριση του object.
+Το κωδικοποιημένο περιεχόμενο είναι `http://ht-ddr-c2:80/`. Μια λειτουργική ανίχνευση συσχετίζει την ίδια βραχύβια διεργασία/container που διαβάζει το `/profile.txt`, αποκωδικοποιεί το περιεχόμενο και επικοινωνεί με το `ht-ddr-c2` μέσα σε λίγα δευτερόλεπτα. Υπολογίστε το hash και διατηρήστε την απόκριση του object.
 
-### Εκκαθάριση
+### Αποδόμηση
 ```bash
 docker rm -f ht-ddr-web ht-ddr-c2
 docker network rm ht-ddr-net
 ```
 ## Εργαστήριο 6: synthetic peel-chain και bridge graph
 
-**Στόχος:** εξάσκηση στην ιχνηλάτηση αξίας χωρίς πραγματικά assets, accounts ή services.
+**Στόχος:** εξάσκηση στο value tracing χωρίς πραγματικά assets, accounts ή services.
 
-### Δημιουργία και ιχνηλάτηση του dataset
+### Δημιουργία και tracing του dataset
 ```bash
 ht_graph_dir="$(mktemp -d)"
 cat >"$ht_graph_dir/edges.csv" <<'EOF'
@@ -241,15 +243,15 @@ print(f'{e["time"]} {e["chain"]}: {src} -> {e["destination"]} {e["amount"]} [{e[
 frontier.add(e["destination"])
 PY
 ```
-Οι αναλυτές πρέπει να εντοπίζουν το μοτίβο peel/change, να αντιμετωπίζουν το bridge link ως ξεχωριστά υποστηριζόμενο συμπέρασμα, να υπολογίζουν τη διαφορά fee/value και να επισημαίνουν το exchange ως αίτημα off-chain evidence. Αλλάξτε μία value/time και τεκμηριώστε πώς μεταβάλλεται η confidence.
+Οι Analysts θα πρέπει να εντοπίσουν το μοτίβο peel/change, να αντιμετωπίσουν το bridge link ως ξεχωριστά υποστηριζόμενο συμπέρασμα, να υπολογίσουν τη διαφορά fee/value και να επισημάνουν το exchange ως αίτημα για off-chain στοιχεία. Αλλάξτε μία value/ώρα και καταγράψτε πώς αλλάζει η confidence.
 
-### Αποδόμηση
+### Teardown
 ```bash
 rm -rf -- "$ht_graph_dir"
 ```
-## Εργαστήριο 7: passive traffic-signaling sensor
+## Lab 7: παθητικός αισθητήρας σηματοδότησης traffic
 
-**Στόχος:** προσομοίωση του network signature ενός passive, magic-value-activated implant χωρίς δημιουργία shell, persistence ή remote access. Ο listener κάνει bind μόνο στο loopback και καταγράφει ένα benign event.
+**Στόχος:** προσομοίωση του network signature ενός παθητικού implant που ενεργοποιείται μέσω magic value, χωρίς δημιουργία shell, persistence ή remote access. Ο listener συνδέεται μόνο στο loopback και καταγράφει ένα benign event.
 ```bash
 ht_signal_dir="$(mktemp -d)"
 cat >"$ht_signal_dir/listener.py" <<'PY'
@@ -279,30 +281,31 @@ wait "$ht_signal_pid"
 cat "$ht_signal_dir/events.log"
 rm -rf -- "$ht_signal_dir"
 ```
-Αναμενόμενο αποτέλεσμα: η συνηθισμένη κίνηση δεν παράγει κανένα application event· μόνο το καθορισμένο token το κάνει. Καταγράψτε την loopback κίνηση κατά την εκτέλεση και επαληθεύστε ότι ένας network sensor εξακολουθεί να βλέπει και τα δύο datagrams. Στη συνέχεια αξιολογήστε τα host controls που εντοπίζουν έναν απρόσμενο packet listener μακράς διάρκειας ή ένα packet-capture filter. Τα πραγματικά παθητικά implants του RedPenguin επιθεωρούσαν την κίνηση σε router και προσέφεραν επικίνδυνες λειτουργίες· αυτό το lab σκόπιμα δεν κάνει τίποτα από τα δύο.
+Αναμενόμενο αποτέλεσμα: η συνήθης κίνηση δεν παράγει κανένα application event· μόνο το καθορισμένο token παράγει event. Καταγράψτε την κίνηση loopback κατά την εκτέλεση και επαληθεύστε ότι ένα network sensor μπορεί να δει και τα δύο datagrams. Στη συνέχεια αξιολογήστε τα host controls που εντοπίζουν έναν απρόσμενο packet listener μακράς διάρκειας ή ένα packet-capture filter. Τα πραγματικά παθητικά implants του RedPenguin επιθεωρούσαν την κίνηση σε router και παρείχαν επικίνδυνη λειτουργικότητα· αυτό το lab σκόπιμα δεν κάνει τίποτα από τα δύο.
 
 ## Πρότυπο αναφοράς άσκησης
 
 Για κάθε lab καταγράψτε:
 
-- authorization και isolated scope·
-- υπόθεση και τεχνική ATT&CK·
-- topology και πίνακα observers·
-- ακριβή ώρα έναρξης/λήξης και configuration hashes·
-- αναμενόμενα events ανά sensor·
-- events που παρατηρήθηκαν στην πράξη και κενά retention·
-- analytic logic, threshold και δείγμα false positive·
-- αν η target team ανασύνθεσε τη διαδρομή·
-- αποτέλεσμα mitigation retest· και
-- evidence για teardown/recovery.
+- την authorization και το isolated scope·
+- την υπόθεση και την ATT&CK technique·
+- την topology και τον πίνακα observers·
+- την ακριβή ώρα έναρξης/λήξης και τα configuration hashes·
+- τα αναμενόμενα events ανά sensor·
+- τα events που παρατηρήθηκαν πραγματικά και τα retention gaps·
+- την analytic logic, το threshold και ένα false-positive sample·
+- αν η target team ανακατασκεύασε τη διαδρομή·
+- το αποτέλεσμα του mitigation retest· και
+- τα στοιχεία teardown/recovery.
 
-Μια άσκηση είναι incomplete έως ότου το detection εκτελεστεί ξανά μετά το mitigation και αφαιρεθεί κάθε lab resource.
+Μια άσκηση είναι incomplete μέχρι να εκτελεστεί ξανά το detection μετά το mitigation και να αφαιρεθεί κάθε lab resource.
 
 ## References
 
 - [1] [MITRE ATT&CK — Multi-hop Proxy (T1090.003)](https://attack.mitre.org/techniques/T1090/003/)
 - [2] [MITRE ATT&CK — Domain Fronting (T1090.004)](https://attack.mitre.org/techniques/T1090/004/)
 - [3] [MITRE ATT&CK — Fast Flux DNS (T1568.001)](https://attack.mitre.org/techniques/T1568/001/)
-- [4] [Volexity — Η επίθεση The Nearest Neighbor](https://www.volexity.com/blog/2024/11/22/the-nearest-neighbor-attack-how-a-russian-apt-weaponized-nearby-wi-fi-networks-for-covert-access/)
+- [4] [Volexity — Η επίθεση του πλησιέστερου γείτονα](https://www.volexity.com/blog/2024/11/22/the-nearest-neighbor-attack-how-a-russian-apt-weaponized-nearby-wi-fi-networks-for-covert-access/)
 - [5] [MITRE ATT&CK — Dead Drop Resolver (T1102.001)](https://attack.mitre.org/techniques/T1102/001/)
 - [6] [MITRE ATT&CK — Traffic Signaling (T1205)](https://attack.mitre.org/techniques/T1205/)
+{{#include ../banners/hacktricks-training.md}}
