@@ -1,16 +1,18 @@
 # Yetkili Adversary-Emulation Lab'ları
 
-Bu alıştırmalar, yetkisiz compromise yerine **gözlemlenebilir mimariyi** yeniden oluşturur. Bunları Docker yüklü, hassas kimlik bilgileri içermeyen ve üçüncü taraf hedeflere route'u olmayan özel bir Linux lab host'unda çalıştırın. İsimler sabittir; böylece teardown açıkça yapılabilir.
+{{#include ../banners/hacktricks-training.md}}
+
+Bu alıştırmalar, yetkisiz compromise yerine **gözlemlenebilir mimariyi** yeniden oluşturur. Bunları Docker içeren, hassas kimlik bilgileri barındırmayan ve üçüncü taraf hedeflere route'u olmayan özel bir Linux lab host üzerinde çalıştırın. Teardown işleminin açıkça yapılabilmesi için adlar sabit tutulmuştur.
 
 {% hint style="danger" %}
-Aşağıdaki sahip olunan container'ları, AP'leri, router'ları, hesapları veya sentetik işlemleri public proxy'lerle, bir komşunun Wi-Fi ağıyla, kontrol etmediğiniz production CDN tenant'ıyla ya da gerçek illicit funds ile değiştirmeyin. Yazılı yetkilendirme her sistem ve radio ortamını kapsamalıdır.
+Aşağıdaki sahip olunan container'ları, AP'leri, router'ları, hesapları veya synthetic transaction'ları public proxy'ler, bir komşunun Wi-Fi'ı, kontrol etmediğiniz production CDN tenant'ı ya da gerçek illicit funds ile değiştirmeyin. Yazılı authorization her sistemi ve radio ortamını kapsamalıdır.
 {% endhint %}
 
-## Lab 1: sahip olunan ORB ve redirector zinciri
+## Lab 1: sahip olunan ORB ve redirector chain
 
-**Objective:** bir target'ın yalnızca exit'i kaydettiğini, her relay'in ise bitişik hop'ları gördüğünü göstermek. Bu, compromise edilmiş cihazlar olmadan T1090.003/T1584 yapısını emüle eder.
+**Objective:** Bir target'ın yalnızca exit'i kaydettiğini, her relay'in ise kendisine bitişik hop'ları gördüğünü gösterin. Bu, compromised device'lar olmadan T1090.003/T1584 yapısını emüle eder.
 
-**Requirements:** Docker Engine ve `ht-orb-` ile başlayan kullanılmayan container isimleri.
+**Requirements:** Docker Engine ve `ht-orb-` ile başlayan kullanılmayan container adları.
 
 ### Build
 ```bash
@@ -39,25 +41,25 @@ docker logs ht-orb-r2
 docker inspect -f '{{range .NetworkSettings.Networks}}{{.NetworkID}} {{.IPAddress}}{{println}}{{end}}' \
 ht-orb-r1 ht-orb-r2 ht-orb-target
 ```
-Beklenen sonuç: Nginx, tek seferlik client yerine `ht-orb-target` üzerindeki `ht-orb-r2` adresini kaydeder. Relay logları yalnızca bitişik ağlarından gelen bağlantıları gösterir. Docker control-plane incelemesi, provider/controller kanıtına benzer şekilde tüm yolu yeniden oluşturur.
+Beklenen sonuç: Nginx, tek seferlik istemciyi değil, `ht-orb-target` üzerindeki `ht-orb-r2` adresini kaydeder. Relay log'ları yalnızca bitişik ağlarından gelen bağlantıları gösterir. Docker control-plane incelemesi, sağlayıcı/controller kanıtlarına benzer şekilde tüm yolu yeniden oluşturur.
 
-### Detection experiments
+### Tespit deneyleri
 
-1. İstekleri her 60 saniyede bir tekrarlayın ve varışlar arası süreyi ve byte miktarını grafik üzerinde gösterin.
-2. `ht-orb-r2` yerine yeni adlandırılmış bir container/adres kullanın; ancak aynı aralığı ve application request'i koruyun. IP-only bir kuralın chain'i kaybettiğini, davranışın ise bağlantıyı hâlâ kurduğunu doğrulayın.
-3. Lab host üzerinde `tcpdump` kullanarak üç Docker bridge üzerinde capture alın ve zaman damgalarını karşılaştırın.
+1. İstekleri her 60 saniyede bir tekrarlayın ve istekler arası süreyi ve baytları grafik üzerinde gösterin.
+2. `ht-orb-r2` yerine yeni adlandırılmış bir container/adres kullanın; ancak aynı ritmi ve uygulama isteğini koruyun. Yalnızca IP'ye dayalı bir kuralın zinciri kaybettiğini, davranışın ise hâlâ bağlantı kurduğunu doğrulayın.
+3. Lab ana bilgisayarında `tcpdump` ile üç Docker bridge üzerinde yakalama yapın ve zaman damgalarını karşılaştırın.
 4. `ht-orb-r2`'yi durdurun; entry'den target'a doğrudan bir fallback olmadığını doğrulayın.
 
-### Teardown
+### Temizleme
 ```bash
 docker rm -f ht-orb-r1 ht-orb-r2 ht-orb-target
 docker network rm ht-orb-entry ht-orb-transit ht-orb-target
 ```
 ## Lab 2: SNI/Host mismatch ve redirector logging
 
-**Objective:** private local edge üzerinde domain fronting'in arkasındaki routing primitive'i yeniden oluşturmak ve bunun nerede görünür olduğunu göstermek. Herhangi bir public CDN kullanılmaz.
+**Objective:** domain fronting'in arkasındaki routing primitive'i özel bir yerel edge üzerinde yeniden üretin ve bunun nerede görünür olduğunu gösterin. Herhangi bir public CDN kullanılmaz.
 
-### Yerel bir TLS edge oluşturma
+### Yerel bir TLS edge oluşturun
 ```bash
 ht_front_dir="$(mktemp -d)"
 openssl req -x509 -newkey rsa:2048 -nodes -days 1 \
@@ -85,23 +87,23 @@ docker run -d --name ht-front-edge --network ht-front-net -p 127.0.0.1:8443:443 
 -v "$ht_front_dir/default.conf:/etc/nginx/conf.d/default.conf:ro" \
 -v "$ht_front_dir:/etc/nginx/tls:ro" nginx:alpine
 ```
-### Uyumsuzluğu gönder ve gözlemle
+### Uyumsuzluğu gönderin ve gözlemleyin
 ```bash
 curl -k --resolve front.lab:8443:127.0.0.1 \
 -H 'Host: origin.lab' https://front.lab:8443/
 docker logs ht-front-edge
 ```
-Beklenen log alanları arasında `sni=front.lab host=origin.lab` bulunur. ECH kullanılmıyorsa client-to-edge packet capture SNI bilgisini açığa çıkarır; HTTP Host bu bağlantıda şifrelenir. Terminating edge her ikisini de görür.
+Beklenen log alanları arasında `sni=front.lab host=origin.lab` bulunur. ECH kullanılmıyorsa client-to-edge packet capture SNI'ı açığa çıkarır; HTTP Host bu bağlantı üzerinden şifrelenir. Terminating edge her ikisini de görür.
 
-Şimdi normal bir request gönderin ve policy'nin bunu reddettiğini doğrulayın:
+Şimdi normal bir istek gönderin ve policy'nin bunu reddettiğini doğrulayın:
 ```bash
 curl -k --resolve front.lab:8443:127.0.0.1 https://front.lab:8443/
 ```
-### Tespit doğrulaması
+### Detection assertion
 
-` sni != host` ifadesini yalnızca portları/büyük-küçük harf durumunu normalleştirdikten ve bilinen reverse-proxy istisnalarını kontrol ettikten sonra uyarı olarak işaretleyin. Severity atamadan önce süreç ve tenant/origin bağlamını ekleyin.
+` sni != host` için yalnızca portları/büyük-küçük harf kullanımını normalize ettikten ve bilinen reverse-proxy istisnalarını kontrol ettikten sonra uyarı oluşturun. Severity atamadan önce process ve tenant/origin bağlamını ekleyin.
 
-### Söküm
+### Teardown
 ```bash
 docker rm -f ht-front-edge ht-front-target
 docker network rm ht-front-net
@@ -109,9 +111,9 @@ rm -rf -- "$ht_front_dir"
 ```
 ## Lab 3: fast-flux DNS telemetry
 
-**Amaç:** güvenli bir low-TTL/multi-ASN-like DNS veri kümesi oluşturmak ve bir analitiği doğrulamak. Döndürülen RFC 5737 documentation adresleri bu amaçla routable değildir.
+**Amaç:** güvenli bir low-TTL/multi-ASN-like DNS dataset oluşturmak ve bir analytic'i doğrulamak. Döndürülen RFC 5737 documentation adresleri bu amaçla routable değildir.
 
-### Authoritative server çalıştırın
+### Bir authoritative server çalıştırın
 ```bash
 ht_dns_dir="$(mktemp -d)"
 cat >"$ht_dns_dir/Corefile" <<'EOF'
@@ -142,52 +144,52 @@ dig @127.0.0.1 -p 1053 flux.lab A +noall +answer
 done
 docker logs ht-flux-dns
 ```
-Beklenen sonuç: her yanıt üç documentation IP'si ve 5 saniyelik bir TTL taşır. Gerçek Fast Flux ayrıca zaman içinde alt kümeleri de döndürür; birden fazla epoch oluşturmak için zone serial/addresses değerlerini değiştirin ve bu disposable server'ı yeniden başlatın.
+Beklenen sonuç: her yanıt üç adet documentation IP ve 5 saniyelik bir TTL içerir. Gerçek fast flux ayrıca zaman içinde alt kümeleri de döndürür; birden fazla epoch oluşturmak için zone serial/addresses değerlerini değiştirin ve bu geçici sunucuyu yeniden başlatın.
 
 ### Analitik doğrulama
 
-Beş dakikalık bir pencere için `median(TTL)`, distinct answers, distinct synthetic ASN/geography labels ve answer churn değerlerini hesaplayın. En az iki şüpheli boyut ile birlikte bir process/follow-on event gerektirin. False positive oranını ölçmek için aynı analitiği bilinen bir CDN örneği üzerinde çalıştırın.
+Beş dakikalık bir pencere için `median(TTL)`, benzersiz yanıtları, benzersiz sentetik ASN/coğrafya etiketlerini ve yanıt değişimini hesaplayın. En az iki şüpheli boyutun yanı sıra bir process/follow-on event gerektirin. Yanlış pozitifleri ölçmek için aynı analitiği bilinen bir CDN örneği üzerinde çalıştırın.
 
-### Ortamın kaldırılması
+### Söküm
 ```bash
 docker rm -f ht-flux-dns
 rm -rf -- "$ht_dns_dir"
 ```
 ## Lab 4: nearest-neighbor wireless pivot
 
-**Amaç:** Sahip olduğunuz iki “organization” ile APT28 boundary mismatch durumunu yeniden üretmek. Wi-Fi donanımı/driver komutları değişiklik gösterdiğinden bu lab, her radio için tek bir `hostapd` komutunun geçerli olduğunu varsaymak yerine doğrulanabilir roller ve kanıtlar belirtir.
+**Amaç:** Sahip olduğunuz iki “organization” ile APT28 boundary mismatch durumunu yeniden üretmek. Wi-Fi hardware/driver commands değişiklik gösterdiğinden, bu lab her radio için tek bir `hostapd` komutunun geçerli olduğunu varsaymak yerine doğrulanabilir roller ve kanıtlar tanımlar.
 
-### Ekipman
+### Equipment
 
-- İzole lab kanalları/SSID'leri `HT-NEIGHBOR` ve `HT-TARGET` üzerinde bulunan, size ait iki AP;
-- Yalnızca `HT-TARGET` üzerinden erişilebilen bir target service;
-- Her iki AP'ye association yapabilen, size ait dual-radio Linux pivot;
+- İzole lab channels/SSIDs `HT-NEIGHBOR` ve `HT-TARGET` üzerinde size ait iki AP;
+- yalnızca `HT-TARGET` üzerinden erişilebilen bir target service;
+- her iki AP'ye association yapabilen, size ait dual-radio Linux pivot;
 - `HT-NEIGHBOR` arkasında bulunan bir remote-control workstation;
-- RADIUS/NAC veya AP association log'ları, DHCP log'ları ve pivot audit/process log'ları.
+- RADIUS/NAC veya AP association logs, DHCP logs ve pivot audit/process logs.
 
-### Prosedür
+### Procedure
 
 1. Kurulumu fiziksel olarak izole edin veya sinyali zayıflatın; böylece hiçbir SSID authorized area dışına çıkmasın. Bir survey ile doğrulayın.
-2. `HT-TARGET` üzerinde bir exercise identity yapılandırın ve ilk çalıştırmada device-certificate/posture validation işlemini kasıtlı olarak devre dışı bırakın. Test edilen koşul olarak bunu kaydedin.
-3. Pivot'un ilk interface'ini `HT-NEIGHBOR`'a, ikinci interface'ini `HT-TARGET`'a join edin. Genel bir bridge'i etkinleştirmeyin; yalnızca target service/port'un host firewall üzerinden geçmesine izin verin.
+2. `HT-TARGET` üzerinde bir exercise identity yapılandırın ve ilk çalıştırmada device-certificate/posture validation özelliğini bilerek devre dışı bırakın. Bunu test edilen koşul olarak kaydedin.
+3. Pivot'un first interface'ını `HT-NEIGHBOR`'a, second interface'ını `HT-TARGET`'a bağlayın. Genel bir bridge'i etkinleştirmeyin; yalnızca target service/port trafiğine host firewall üzerinden izin verin.
 4. Workstation'dan pivot'a authenticated tunnel açın ve target service'ı bu tunnel üzerinden isteyin.
-5. Pivot process/interface oluşturma işlemini, her iki AP association'ını, target RADIUS event'ini, DHCP lease'ini ve target source address'ini kaydedin.
+5. Pivot process/interface creation olayını, her iki AP association'ını, target RADIUS event'ini, DHCP lease'ini ve target source address'ini kaydedin.
 6. Detection team'den controller map olmadan chain'i yeniden oluşturmasını isteyin.
-7. `HT-TARGET` üzerinde EAP-TLS/managed-device posture özelliğini etkinleştirin, pivot'un approved target certificate'ını kaldırın ve tekrarlayın. Access, admission aşamasında başarısız olmalıdır.
-8. İlk kez görülen randomized MAC ile tekrarlayın. Certificate/device kararının hâlâ çalıştığını ve hiçbir kuralın yalnızca MAC'i identity olarak değerlendirmediğini doğrulayın.
+7. `HT-TARGET` üzerinde EAP-TLS/managed-device posture özelliğini etkinleştirin, pivot'un approved target certificate'ını kaldırın ve işlemi tekrarlayın. Access, admission aşamasında başarısız olmalıdır.
+8. İşlemi first-seen randomized MAC ile tekrarlayın. Certificate/device decision'ın hâlâ çalıştığını ve hiçbir rule'un yalnızca MAC'i identity olarak değerlendirmediğini doğrulayın.
 
-### Başarı kriterleri
+### Success criteria
 
 - Target başlangıçta workstation yerine local Wi-Fi client görür.
-- Joined telemetry, eşzamanlı neighbor-control ve target-radio path'lerine sahip tek bir pivot tanımlar.
+- Joined telemetry, eş zamanlı neighbor-control ve target-radio paths içeren tek bir pivot tanımlar.
 - Certificate/device-backed admission ikinci çalıştırmayı engeller.
 - İzole lab dışındaki hiçbir network'e packet ulaşmaz.
 
 ## Lab 5: dead-drop resolver sequence
 
-**Amaç:** Meşru görünen bir object'i okuyan, bir pointer'ı decode eden ve hemen ardından ikinci bir service'e bağlanan bir process'i tespit etmek.
+**Amaç:** Legitimate-looking bir object'i okuyan, bir pointer'ı decode eden ve hemen ardından ikinci bir service'a bağlanan bir process'i tespit etmek.
 
-### Kurulum
+### Build
 ```bash
 docker network create ht-ddr-net
 docker run -d --name ht-ddr-c2 --network ht-ddr-net nginx:alpine
@@ -201,18 +203,18 @@ python -c 'import base64,urllib.request; p=urllib.request.urlopen("http://ht-ddr
 docker logs ht-ddr-web
 docker logs ht-ddr-c2
 ```
-Kodlanmış içerik `http://ht-ddr-c2:80/` şeklindedir. Çalışan bir detection, `/profile.txt` dosyasını okuyan, içeriğin kodunu çözen ve saniyeler içinde `ht-ddr-c2` ile iletişim kuran aynı kısa ömürlü process/container'ı ilişkilendirir. Object response'u hash'leyin ve koruyun.
+Kodlanmış içerik `http://ht-ddr-c2:80/` şeklindedir. Çalışan bir detection, aynı kısa ömürlü process/container'ın `/profile.txt` dosyasını okumasını, içeriği decode etmesini ve saniyeler içinde `ht-ddr-c2` ile iletişime geçmesini birleştirir. Object response'un hash'ini alın ve koruyun.
 
-### Söküm
+### Temizleme
 ```bash
 docker rm -f ht-ddr-web ht-ddr-c2
 docker network rm ht-ddr-net
 ```
 ## Lab 6: sentetik peel-chain ve bridge graph
 
-**Amaç:** gerçek asset'ler, account'lar veya service'ler olmadan value tracing pratiği yapmak.
+**Amaç:** gerçek varlıklar, hesaplar veya servisler olmadan value tracing pratiği yapmak.
 
-### Dataset'i oluştur ve trace et
+### Veri kümesini oluşturun ve trace edin
 ```bash
 ht_graph_dir="$(mktemp -d)"
 cat >"$ht_graph_dir/edges.csv" <<'EOF'
@@ -241,7 +243,7 @@ print(f'{e["time"]} {e["chain"]}: {src} -> {e["destination"]} {e["amount"]} [{e[
 frontier.add(e["destination"])
 PY
 ```
-Analistler peel/change pattern'ını belirlemeli, bridge link'ini ayrı olarak desteklenen bir çıkarım şeklinde ele almalı, fee/value farkını hesaplamalı ve exchange'i off-chain evidence request olarak işaretlemelidir. Bir value/time değerini değiştirin ve confidence'ın nasıl değiştiğini belgeleyin.
+Analistler peel/change pattern'ını belirlemeli, bridge link'ini ayrı olarak desteklenmesi gereken bir çıkarım şeklinde ele almalı, fee/value farkını hesaplamalı ve exchange'i off-chain evidence request olarak işaretlemelidir. Bir value/time değerini değiştirin ve confidence'ın nasıl değiştiğini belgeleyin.
 
 ### Teardown
 ```bash
@@ -249,7 +251,7 @@ rm -rf -- "$ht_graph_dir"
 ```
 ## Lab 7: pasif trafik-sinyalleme sensörü
 
-**Objective:** shell, persistence veya remote access oluşturmadan pasif, magic-value-activated bir implantın network signature'ını emulate etmek. Listener yalnızca loopback'e bind olur ve benign bir event kaydeder.
+**Objective:** Bir shell, persistence veya remote access oluşturmadan pasif, magic-value-activated bir implant'ın network signature'ını taklit etmek. Listener yalnızca loopback'e bağlanır ve zararsız bir olayı kaydeder.
 ```bash
 ht_signal_dir="$(mktemp -d)"
 cat >"$ht_signal_dir/listener.py" <<'PY'
@@ -279,30 +281,31 @@ wait "$ht_signal_pid"
 cat "$ht_signal_dir/events.log"
 rm -rf -- "$ht_signal_dir"
 ```
-Beklenen sonuç: normal trafik hiçbir application event üretmemeli; yalnızca belirlenen token üretmelidir. Çalışma sırasında loopback trafiğini yakalayın ve bir network sensor'ünün her iki datagram'ı da hâlâ görebildiğini doğrulayın. Ardından, beklenmeyen şekilde uzun süre çalışan bir packet listener'ı veya packet-capture filter'ını algılayan host kontrollerini değerlendirin. Gerçek RedPenguin passive implant'ları bir router üzerindeki trafiği inceliyor ve tehlikeli işlevler sunuyordu; bu lab kasıtlı olarak bunların hiçbirini yapmaz.
+Beklenen sonuç: ordinary traffic hiçbir application event üretmez; yalnızca designated token üretir. Çalışma sırasında loopback traffic'i yakalayın ve bir network sensor'ünün her iki datagram'ı da hâlâ görebildiğini doğrulayın. Ardından beklenmeyen, uzun süre çalışan bir packet listener'ı veya packet-capture filter'ını tespit eden host controls'ü değerlendirin. Gerçek RedPenguin passive implants, bir router üzerindeki traffic'i incelemiş ve tehlikeli işlevler sunmuştur; bu lab kasıtlı olarak bunların hiçbirini yapmaz.
 
 ## Exercise report template
 
 Her lab için şunları kaydedin:
 
-- authorization ve izole kapsam;
+- authorization ve isolated scope;
 - hypothesis ve ATT&CK technique;
 - topology ve observer tablosu;
 - kesin başlangıç/bitiş zamanı ve configuration hash'leri;
-- her sensor için beklenen event'ler;
-- gerçekte gözlemlenen event'ler ve retention açıkları;
-- analytic logic, threshold ve false-positive örneği;
+- her sensor için beklenen events;
+- gerçekte gözlemlenen events ve retention gaps;
+- analytic logic, threshold ve false-positive sample;
 - target team'in path'i yeniden oluşturup oluşturmadığı;
 - mitigation retest sonucu; ve
 - teardown/recovery kanıtı.
 
-Detection mitigation sonrasında yeniden çalıştırılana ve her lab kaynağı kaldırılana kadar bir exercise tamamlanmış sayılmaz.
+Detection mitigation sonrasında yeniden çalıştırılmadıkça ve her lab resource kaldırılmadıkça exercise tamamlanmış sayılmaz.
 
 ## References
 
 - [1] [MITRE ATT&CK — Multi-hop Proxy (T1090.003)](https://attack.mitre.org/techniques/T1090/003/)
 - [2] [MITRE ATT&CK — Domain Fronting (T1090.004)](https://attack.mitre.org/techniques/T1090/004/)
 - [3] [MITRE ATT&CK — Fast Flux DNS (T1568.001)](https://attack.mitre.org/techniques/T1568/001/)
-- [4] [Volexity — En Yakın Komşu Saldırısı](https://www.volexity.com/blog/2024/11/22/the-nearest-neighbor-attack-how-a-russian-apt-weaponized-nearby-wi-fi-networks-for-covert-access/)
+- [4] [Volexity — The Nearest Neighbor Attack](https://www.volexity.com/blog/2024/11/22/the-nearest-neighbor-attack-how-a-russian-apt-weaponized-nearby-wi-fi-networks-for-covert-access/)
 - [5] [MITRE ATT&CK — Dead Drop Resolver (T1102.001)](https://attack.mitre.org/techniques/T1102/001/)
 - [6] [MITRE ATT&CK — Traffic Signaling (T1205)](https://attack.mitre.org/techniques/T1205/)
+{{#include ../banners/hacktricks-training.md}}
