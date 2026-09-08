@@ -1,6 +1,8 @@
-# Test di privacy riproducibili
+# Test della privacy riproducibili
 
-Una configurazione della privacy non è completata quando si connette. È completata quando il suo confine dichiarato è stato testato durante l’uso normale, i malfunzionamenti, il ripristino e lo smantellamento. Esegui i test su infrastrutture di tua proprietà o che sei autorizzato a ispezionare; i siti pubblici di “leak test” diventano un altro osservatore.
+{{#include ../banners/hacktricks-training.md}}
+
+Una configurazione privacy non è completa quando si connette. È completa quando il suo confine dichiarato è stato testato durante l’uso normale, in caso di errore, durante il ripristino e nella fase di teardown. Esegui i test su infrastrutture di tua proprietà o che sei autorizzato a ispezionare; i siti pubblici di “leak test” diventano un ulteriore osservatore.
 
 ## Crea un piccolo ambiente di test autorizzato
 
@@ -12,21 +14,21 @@ local packet/route view                 server-side logs
 |
 controller/provider dashboards and payment/account records
 ```
-Registrare prima di ogni test:
+Registra prima di ogni test:
 
 - ID del test, inizio/fine in UTC, operatore e autorizzazione;
 - versioni e configurazione di endpoint/OS/client, nonché l'hash della configurazione;
-- osservazioni previste su IPv4, IPv6, DNS, TLS, account, pagamenti e aspetti fisici;
-- quali log verranno esaminati e i relativi orologi/fusi orari;
-- criterio di superamento/fallimento e orario di teardown.
+- osservazioni attese su IPv4, IPv6, DNS, TLS, account, pagamenti e aspetti fisici;
+- quali log verranno analizzati e i relativi orologi/fusi orari;
+- regola di pass/fail e orario di teardown.
 
-Non testare mai per prima un'identità sensibile. Utilizzare un account sintetico e valori canary univoci e innocui di proprietà del tester.
+Non testare mai per prima un'identità sensibile. Usa un account sintetico e valori canary univoci e innocui di proprietà del tester.
 
 ## Test del percorso di rete
 
-### 1. Acquisire la baseline
+### 1. Acquisisci la baseline
 
-Prima di abilitare il percorso di privacy, registrare le route locali e i resolver:
+Prima di abilitare il percorso privacy, registra le route locali e i resolver:
 ```bash
 ip route
 ip -6 route
@@ -34,7 +36,7 @@ resolvectl status
 ```
 Su macOS usa `route -n get default`, `netstat -rn -f inet6` e `scutil --dns`. Salva l'output solo nell'archivio controllato delle evidenze; può contenere identificatori locali.
 
-### 2. Connettersi e ispezionare il routing
+### 2. Connettiti e ispeziona il routing
 
 Abilita il namespace VPN/Tor/workload, quindi verifica la route selezionata per gli indirizzi pubblici controllati:
 ```bash
@@ -45,58 +47,58 @@ Sostituisci gli indirizzi della documentazione con gli indirizzi del server di t
 
 ### 3. Osserva da entrambe le estremità
 
-Imposta l'URL dell'endpoint sotto il tuo controllo, quindi richiedi un percorso benigno univoco:
+Imposta l'URL dell'endpoint controllato, quindi richiedi un percorso benigno univoco:
 ```bash
 : "${PRIVACY_TEST_URL:?Set PRIVACY_TEST_URL to the owned HTTPS endpoint}"
 curl --fail --show-error --silent \
 "${PRIVACY_TEST_URL}/privacy-check/run-20260907-001"
 ```
-Usa un dominio reale controllato dal tester, TLS autenticato e un token non sensibile nel path. Controlla il log del server per verificare:
+Usa un dominio reale controllato dal tester, TLS autenticato e un token non sensibile nel path. Controlla il log del server per:
 
 - indirizzo sorgente/ASN ed egress previsto;
 - IPv4 rispetto a IPv6;
-- comportamento di Host/SNI visibile all'endpoint;
-- user agent e header dell'applicazione;
+- comportamento di Host/SNI visibile sull'endpoint;
+- user agent e application headers;
 - ora esatta e riutilizzo della richiesta.
 
-Non aggiungere `X-Forwarded-For`, header di debug univoci o cookie contenenti l'identità a una richiesta che dovrebbe essere separata.
+Non aggiungere `X-Forwarded-For`, debug headers univoci o cookie contenenti l'identità a una richiesta che dovrebbe essere separata.
 
 ### 4. Testa il DNS con un canary di proprietà
 
-Configura una zona di test autorevole di cui controlli i log delle query. Esegui una query per un'etichetta casuale univoca attraverso il compartimento:
+Configura una test zone authoritative i cui query log siano sotto il tuo controllo. Esegui una query per un'etichetta casuale univoca attraverso il compartment:
 ```bash
 dig run-20260907-001.privacy-test.example A
 dig run-20260907-001.privacy-test.example AAAA
 ```
-Ispeziona il log autorevole. Normalmente vede il recursive resolver, non necessariamente il client. Confronta quel resolver con il design DNS previsto per VPN/Tor/applicazione. Non è richiesto un random public DNS leak site.
+Ispeziona il log autorevole. Normalmente vede il resolver ricorsivo, non necessariamente il client. Confronta quel resolver con il design DNS previsto per VPN/Tor/applicazioni. Non è necessario utilizzare un sito pubblico casuale per verificare i DNS leak.
 
-### 5. Testare il comportamento fail-closed
+### 5. Testa il comportamento fail-closed
 
-Mantieni un loop di richieste benigno rivolto all'endpoint di proprietà, quindi interrompi il percorso privacy. Il workload deve fallire invece di passare a un'interfaccia fisica. Controlla entrambe le famiglie di indirizzi e il DNS:
+Mantieni un loop di richieste benigne diretto all'endpoint di proprietà, quindi interrompi il privacy path. Il workload deve fallire invece di passare a un'interfaccia fisica. Controlla entrambe le famiglie di indirizzi e il DNS:
 ```bash
 : "${PRIVACY_TEST_URL:?Set PRIVACY_TEST_URL to the owned HTTPS endpoint}"
 curl -4 --connect-timeout 5 "${PRIVACY_TEST_URL}/run-v4"
 curl -6 --connect-timeout 5 "${PRIVACY_TEST_URL}/run-v6"
 dig privacy-test.example
 ```
-Ripetere durante:
+Ripeti durante:
 
-- arresto anomalo del processo tunnel;
-- passaggio da Wi-Fi a Ethernet o all'hotspot;
+- crash del processo tunnel;
+- passaggio da Wi-Fi a Ethernet o a hotspot;
 - sospensione/riattivazione;
 - rinnovo DHCP;
 - stato del captive portal;
-- riconnessione del provider/scadenza della chiave.
+- riconnessione del provider/scadenza della key.
 
-Per un namespace/container Linux, arrestare il relativo tunnel e verificare che non disponga di altre route predefinite o resolver:
+Per un namespace/container Linux, arresta il relativo tunnel e verifica che non abbia altre route predefinite né altri resolver:
 ```bash
 ip netns exec privacy-workload ip route
 ip netns exec privacy-workload ip -6 route
 ip netns exec privacy-workload resolvectl status
 ```
-Nomi e comandi variano a seconda del deployment. Non incollarli in un host di produzione remoto senza possibilità di recupero tramite console.
+I nomi e i comandi variano in base al deployment. Non incollarli su un host production remoto senza un ripristino tramite console.
 
-### 6. Ispezionare socket e pacchetti locali
+### 6. Ispezionare i socket e i pacchetti locali
 
 Con autorizzazione, verifica quale processo/interfaccia comunica effettivamente:
 ```bash
@@ -104,19 +106,19 @@ ss -tpn
 ss -upn
 sudo tcpdump -ni any 'host TEST_SERVER_IP'
 ```
-Sostituisci `TEST_SERVER_IP` con l'indirizzo esplicito di tua proprietà; evita di acquisire indiscriminatamente dati di utenti non pertinenti. L'interfaccia fisica dovrebbe vedere il peer del tunnel/bridge, mentre il traffico con destinazione in chiaro dovrebbe esistere solo al livello previsto.
+Sostituisci `TEST_SERVER_IP` con l'indirizzo esplicitamente autorizzato; evita una cattura ampia di utenti non correlati. L'interfaccia fisica dovrebbe vedere il peer del tunnel/bridge, mentre il traffico con destinazione in chiaro dovrebbe esistere solo al layer previsto.
 
 ## Test di Tor e onion-service
 
-1. In Tor Browser, visita il controllo della connessione del Tor Project e conferma l'uso di Tor. Non considerarlo una prova dell'identità.<sup>[[1]](#references)</sup>
-2. Visita l'endpoint HTTPS di tua proprietà con un canary univoco e conferma che rilevi un'uscita Tor, nessun cookie identificativo e il contesto standard del browser.
-3. Seleziona **New Identity**, visita nuovamente l'endpoint con un canary diverso e verifica che lo stato locale sia stato cancellato come previsto. Il cambio dell'IP di uscita non è garantito né rappresenta lo scopo di New Identity.
-4. Per un onion service, accedervi esclusivamente tramite Tor Browser. Conferma che l'host del servizio non abbia listener pubblici con una scansione esterna autorizzata e che le risposte dell'applicazione non contengano hostname/IP pubblici.
-5. Ispeziona DNS/HTTP outbound dell'origine, template, pagine di errore, email/webhook e asset di terze parti. Qualsiasi fetch diretto può divulgare l'origine o l'account dell'operatore.
-6. Se è abilitata l'autorizzazione del client, conferma che un Tor Browser pulito e senza credenziali non possa connettersi e che uno con credenziali possa farlo.
+1. In Tor Browser, visita il controllo della connessione del Tor Project e conferma l'uso di Tor. Non considerarlo una prova d'identità.<sup>[[1]](#references)</sup>
+2. Visita l'endpoint HTTPS autorizzato con un canary univoco e conferma che rilevi un'uscita Tor, nessun cookie identificativo e il contesto standard del browser.
+3. Seleziona **New Identity**, visita nuovamente l'endpoint con un canary diverso e verifica che lo stato locale sia stato cancellato come previsto. Il cambio dell'IP di uscita non è garantito né costituisce lo scopo di New Identity.
+4. Per un onion service, accedervi solo tramite Tor Browser. Conferma che l'host del servizio non abbia listener pubblici tramite una scansione esterna autorizzata e che le risposte dell'applicazione non contengano hostname/IP pubblici.
+5. Ispeziona il DNS/HTTP in uscita dall'origine, i template, le pagine di errore, le email/webhook e gli asset di terze parti. Qualsiasi fetch diretto può rivelare l'origine o l'account dell'operatore.
+6. Se l'autorizzazione del client è abilitata, conferma che un Tor Browser pulito e senza credenziali non possa connettersi e che uno con credenziali possa farlo.
 7. Ruota una chiave di autorizzazione di test e conferma che il client revocato perda l'accesso senza modificare l'identità onion.
 
-## Test del compartimento del browser
+## Test di compartimentazione del browser
 
 Crea una pagina controllata che registri solo i campi necessari per il test, con un breve periodo di conservazione. Confronta i compartimenti personali e quelli dedicati alla privacy per:
 
@@ -127,9 +129,9 @@ Crea una pagina controllata che registri solo i campi necessari per il test, con
 - permessi e modifiche visibili alle estensioni;
 - dati user-agent TLS/HTTP lato server.
 
-Non cercare di rendere Tor Browser “più casuale”. La condizione di superamento è la somiglianza con il suo anonymity set standard e l'assenza di stato personale, non la massima differenza rispetto al browser personale.
+Non tentare di rendere Tor Browser “più casuale”. La condizione di superamento è la somiglianza con il suo anonymity set standard e l'assenza di stato personale, non la massima differenza rispetto al browser personale.
 
-Testa copia/incolla, trascinamento, apertura dei file scaricati, suggerimenti del password manager e pulsanti dell'identity provider. Questi sono frequenti ponti tra i compartimenti.
+Testa il copia/incolla, il drag/drop, l'apertura dei file scaricati, i suggerimenti del password manager e i pulsanti dell'identity provider. Questi sono ponti frequenti tra i compartimenti.
 
 ## Test di isolamento del sistema operativo
 
@@ -137,16 +139,16 @@ Testa copia/incolla, trascinamento, apertura dei file scaricati, suggerimenti de
 
 1. Inizia con un file/canary benigno in una sessione senza Persistent Storage.
 2. Arresta completamente il sistema, riavvia e conferma che sia scomparso.
-3. Abilita una sola categoria di persistenza necessaria, ripeti il test e conferma che lo stato non correlato del browser/dell'applicazione non venga conservato.
+3. Abilita una sola categoria di persistenza necessaria, ripeti il test e conferma che lo stato non correlato del browser/applicazione non venga conservato.
 4. Verifica che Unsafe Browser non possa essere utilizzato dopo il login al portale per attività sensibili e che le applicazioni Tor si riconnettano normalmente.
 
 ### Whonix/Qubes
 
 1. Arresta il qube Gateway/net e dimostra che il qube Workstation/app non possa raggiungere IPv4, IPv6 o DNS.
-2. Tenta esclusivamente il percorso clipboard/file inter-qube configurato esplicitamente e conferma che gli altri percorsi di cartelle/dispositivi condivisi siano assenti.
+2. Tenta solo il percorso clipboard/file inter-qube configurato esplicitamente e conferma che gli altri percorsi di cartelle/dispositivi condivisi siano assenti.
 3. Apri un documento di test benigno in un qube disposable, chiudilo e conferma che il suo stato scompaia.
 4. Verifica che il qube vault non abbia un NetVM e non possa acquisirne uno tramite una modifica del template/default.
-5. Esegui lo snapshot/restore di una VM di test e verifica se lo stato associato all'identità ritorna inaspettatamente.
+5. Crea/ripristina uno snapshot di una VM di test e verifica se lo stato contenente l'identità ritorna inaspettatamente.
 
 ## Test dei metadati delle comunicazioni
 
@@ -154,63 +156,63 @@ Per ogni messenger selezionato:
 
 1. Crea partecipanti esclusivamente di test su dispositivi controllati.
 2. Registra ciò che è richiesto per la registrazione: telefono, account dell'app store, IP, push service, username o invito.
-3. Invia un solo messaggio benigno mentre ispezioni anteprime delle notifiche, desktop collegati, dispositivi wearable e backup.
+3. Invia un messaggio benigno ispezionando le anteprime delle notifiche, i desktop collegati, i dispositivi indossabili e i backup.
 4. Verifica i codici di sicurezza tramite un percorso indipendente.
-5. Disabilita ricevute/push oppure abilita Tor/trasporti locali uno alla volta e osserva i cambiamenti in affidabilità/metadati.
+5. Disabilita le ricevute/push o abilita Tor/trasporti locali uno alla volta e osserva le variazioni di affidabilità/metadati.
 6. Esporta o ripristina un backup di test e documenta esattamente quali profilo, contatti e cronologia contiene.
-7. Perdi/revoca un dispositivo di test e conferma che i partecipanti rimanenti vedano il cambiamento previsto della chiave/del dispositivo.
+7. Perdi/revoca un dispositivo di test e conferma che i partecipanti rimanenti vedano il cambio previsto di chiave/dispositivo.
 
-Non eseguire il test contattando persone non coinvolte o generando traffico abusivo.
+Non eseguire test contattando persone non coinvolte o generando traffico abusivo.
 
 ## Test di sanitizzazione dei file
 
-1. Calcola l'hash e conserva l'originale in uno storage di evidenze cifrato:
+1. Calcola l'hash e conserva l'originale in uno storage cifrato per le evidenze:
 ```bash
 sha256sum ./original/file > ./original/file.sha256
 ```
-2. Crea una copia ripulita utilizzando il processo specifico per il formato descritto in [Comunicazioni e condivisione con tutela della privacy](privacy-preserving-communications-and-sharing.md).
+2. Crea una copia ripulita utilizzando il processo specifico per il formato descritto in [Comunicazioni e condivisione a tutela della privacy](privacy-preserving-communications-and-sharing.md).
 3. Confronta gli inventari dei metadati:
 ```bash
 exiftool -a -u -g1 ./original/file
 exiftool -a -u -g1 ./clean/file
 ```
-4. Esegui/apri la copia in un contesto usa e getta. Controlla contenuti nascosti, allegati, link, moduli, livelli, miniature e identificatori visivi.
-5. Cerca solo nella copia preparata stringhe note di canary relative ad autore/email/percorso.
-6. Calcola l'hash dell'output finale e fai verificare a una seconda persona il file esatto che verrà pubblicato.
+4. Esegui il rendering/apri la copia in un contesto disposable. Controlla contenuti nascosti, allegati, link, form, livelli, miniature e identificatori visivi.
+5. Cerca solo nella copia staged stringhe note di canary relative ad autore/email/path.
+6. Calcola l'hash dell'output finale e fai verificare da una seconda persona il file esatto da pubblicare.
 
-L'assenza nell'output di ExifTool non dimostra l'anonimato; gli interni del formato, i pixel, la prosa e i record di distribuzione rimangono.
+L'assenza nell'output di ExifTool non dimostra l'anonimato; gli elementi interni del formato, i pixel, la prosa e i record di distribuzione rimangono.
 
 ## Test della privacy dei pagamenti
 
-Usa l'importo minimo consentito o una rete di test/sandbox ufficiale:
+Usa l'importo minimo consentito o una test network/sandbox ufficiale:
 
-1. Scrivi la visualizzazione prevista per pagatore, beneficiario/esercente, emittente/exchange, rete/nodo, ledger pubblico e contabile/responsabile del controllo.
-2. Crea una fattura/contesto esercente di test univoco senza identità falsa.
-3. Paga una volta, quindi raccogli la tua ricevuta, estratto conto, dashboard dell'esercente, log del wallet/nodo e visualizzazione della blockchain pubblica, ove applicabile.
-4. Verifica se importo, timestamp, indirizzo/token, account, IP/dispositivo, consegna e percorso del rimborso corrispondono alla tabella degli osservatori.
-5. Per Bitcoin, controlla il riutilizzo degli indirizzi, gli input selezionati, il resto e i successivi consolidamenti nella visualizzazione coin-control del wallet.
-6. Per i protocolli shielded, verifica l'effettivo pool/percorso e ciò che rivela una viewing key; non dedurre la privacy dal branding del wallet.
-7. Per e-cash/Taler, testa backup/ripristino, rimborso e riscatto con un valore ridotto; documenta i record dei confini di mint/exchange/federation.
-8. Revoca una carta virtuale/credenziale di test e conferma che l'autorizzazione successiva fallisca, mantenendo al contempo chiara la gestione dei rimborsi legittimi.
-9. Riconcilia e conserva criptate le evidenze fiscali/di autorizzazione richieste.
+1. Scrivi la visualizzazione prevista per pagatore, beneficiario/esercente, issuer/exchange, network/node, ledger pubblico e accountant/controller.
+2. Crea una fattura/un contesto merchant di test univoco senza usare un'identità falsa.
+3. Effettua un solo pagamento, quindi raccogli la tua ricevuta, il tuo estratto conto, la dashboard del merchant, il log del wallet/node e la visualizzazione della chain pubblica, ove applicabile.
+4. Verifica se importo, timestamp, address/token, account, IP/device, consegna e percorso del rimborso corrispondono alla tabella degli osservatori.
+5. Per Bitcoin, esamina il riutilizzo degli address, gli input selezionati, il resto e i successivi consolidamenti nella vista coin-control del wallet.
+6. Per i protocolli shielded, verifica il pool/percorso effettivo e ciò che una viewing key rivela; non dedurre la privacy dal branding del wallet.
+7. Per e-cash/Taler, testa backup/recovery, rimborso e redemption con un piccolo importo; documenta i record dei confini mint/exchange/federation.
+8. Revoca una virtual card/credenziale di test e conferma che le autorizzazioni successive falliscano, mantenendo chiara la gestione dei rimborsi legittimi.
+9. Riconcilia e conserva crittografate le evidenze fiscali/di autorizzazione richieste.
 
 Non creare mai trasferimenti circolari, suddivisioni per soglia, acquisti falsi o rimborsi sospetti come “test della privacy”.
 
-## Esercitazione di responsabilizzazione autorizzata del red-team
+## Esercitazione autorizzata di accountability del red-team
 
-Prima dell'esercitazione, svolgi un tabletop e un drill tecnico:
+Prima dell'esercitazione, esegui un tabletop e un technical drill:
 
-1. Un operatore avvia un canary benigno da ciascun percorso sorgente approvato.
+1. Un operatore lancia un canary benigno da ogni source path approvato.
 2. Il SOC target registra ciò che rileva senza ricevere l'identità dell'operatore, se è previsto un blind testing.
-3. Il controller dell'esercitazione risolve la relazione sorgente → engagement → operatore dalla mappa depositata in escrow e dal job record firmato.
-4. Il controller invia lo stop di emergenza; l'operatore e il proprietario dell'infrastruttura dimostrano lo spegnimento entro il tempo previsto dalle ROE.
-5. Il provider abuse riceve il contatto corretto 24/7 e il riferimento all'autorizzazione.
-6. Le evidenze mostrano target, orario, strumento/job e operatore senza conservare contenuti di payload non necessari.
+3. Il controller dell'esercitazione risolve source → engagement → operator dalla mappa conservata in escrow e dal job record firmato.
+4. Il controller invia l'emergency stop; l'operatore e il proprietario dell'infrastruttura dimostrano lo shutdown entro il tempo previsto dal ROE.
+5. Il provider abuse riceve il contatto 24/7 corretto e il riferimento all'autorizzazione.
+6. Le evidenze mostrano target, ora, tool/job e operatore senza conservare contenuti del payload non necessari.
 7. Un secondo operatore verifica la revoca delle credenziali e il teardown delle risorse.
 
-Boccia la revisione della readiness se il SOC può vedere trivialmente infrastrutture personali/domestiche **oppure** se il controller non può attribuire e arrestare rapidamente la sorgente.
+Fallisci la readiness review se il SOC può vedere facilmente l'infrastruttura personale/domestica **oppure** se il controller non può attribuire e arrestare rapidamente la source.
 
-## Modello del record di test
+## Template del record di test
 ```text
 Test ID / date (UTC):
 Authorization / owner:
@@ -232,3 +234,4 @@ Evidence retention/deletion date:
 - [2] [WireGuard — Routing e Network Namespaces](https://www.wireguard.com/netns/)
 - [3] [ExifTool — FAQ e indicazioni sui metadati](https://exiftool.org/faq.html)
 - [4] [NIST SP 800-115 — Guida tecnica al testing e alla valutazione della sicurezza delle informazioni](https://csrc.nist.gov/pubs/sp/800/115/final)
+{{#include ../banners/hacktricks-training.md}}
