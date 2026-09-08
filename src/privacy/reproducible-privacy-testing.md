@@ -1,10 +1,12 @@
-# Reproducibilno testiranje privatnosti
+# Testiranje privatnosti koje se može ponoviti
 
-Postavka privatnosti nije završena kada se poveže. Završena je tek kada je njena deklarisana granica testirana tokom uobičajene upotrebe, otkaza, oporavka i uklanjanja. Testirajte u odnosu na infrastrukturu čiji ste vlasnik ili koju ste ovlašćeni da proveravate; javni sajtovi za „leak test“ postaju još jedan posmatrač.
+{{#include ../banners/hacktricks-training.md}}
 
-## Napravite malo ovlašćeno testno okruženje
+Podešavanje privatnosti nije završeno kada se poveže. Završeno je tek kada je njegova deklarisana granica testirana tokom uobičajene upotrebe, u slučaju otkaza, oporavka i uklanjanja. Testirajte infrastrukturu čiji ste vlasnik ili za čiju ste proveru ovlašćeni; javni sajtovi za „leak test“ postaju još jedan posmatrač.
 
-Koristite tri uloge, idealno na odvojenim providerima/mrežama:
+## Napravite malo autorizovano testno okruženje
+
+Koristite tri uloge, po mogućstvu na odvojenim provajderima/mrežama:
 ```text
 operator endpoint ---- privacy path ---- owned web/DNS endpoint
 |                                      |
@@ -12,21 +14,21 @@ local packet/route view                 server-side logs
 |
 controller/provider dashboards and payment/account records
 ```
-Zabeležite pre svakog testa:
+Pre svakog testa zabeležite:
 
-- ID testa, UTC vreme početka/završetka, operatora i autorizaciju;
-- endpoint/OS/client verzije i hash konfiguracije;
-- očekivana IPv4, IPv6, DNS, TLS, account, payment i fizička zapažanja;
-- koje logove ćete pregledati i njihove satove/vremenske zone;
-- pravilo za prolaz/neuspeh i vreme teardown-a.
+- ID testa, vreme početka/završetka u UTC-u, operatera i autorizaciju;
+- endpoint/OS/verzije klijenta i hash konfiguracije;
+- očekivana IPv4, IPv6, DNS, TLS, zapažanja o nalogu, plaćanju i fizičkom okruženju;
+- koji logovi će biti pregledani i njihove satove/vremenske zone;
+- pravilo prolaza/pada testa i vreme uklanjanja postavki.
 
-Nikada prvo ne testirajte osetljivi identitet. Koristite synthetic account i bezopasne, jedinstvene canary vrednosti u vlasništvu testera.
+Nikada nemojte prvo testirati osetljiv identitet. Koristite sintetički nalog i bezopasne, jedinstvene canary vrednosti u vlasništvu testera.
 
 ## Test mrežne putanje
 
-### 1. Snimite baseline
+### 1. Snimite početno stanje
 
-Pre omogućavanja privacy path-a, zabeležite lokalne rute i resolvere:
+Pre uključivanja privatne putanje zabeležite lokalne rute i resolver-e:
 ```bash
 ip route
 ip -6 route
@@ -36,22 +38,22 @@ Na macOS-u koristite `route -n get default`, `netstat -rn -f inet6` i `scutil --
 
 ### 2. Povežite se i proverite rutiranje
 
-Omogućite VPN/Tor/workload namespace, zatim proverite rutu izabranu za kontrolisane javne adrese:
+Omogućite VPN/Tor/workload namespace, zatim proverite rutu odabranu za kontrolisane javne adrese:
 ```bash
 ip route get 192.0.2.10
 ip -6 route get 2001:db8::10
 ```
-Zamenite dokumentacione adrese adresama testnog servera. Potvrdite da izabrani interfejs/tabela odgovara dizajnu.
+Zamenite adrese iz dokumentacije adresama test servera. Potvrdite da izabrani interface/tabela odgovara dizajnu.
 
-### 3. Posmatrajte sa oba kraja
+### 3. Posmatrajte sa obe strane
 
-Podesite URL endpointa u vašem vlasništvu, zatim zatražite jedinstvenu bezopasnu putanju:
+Postavite URL endpointa u vašem vlasništvu, a zatim zatražite jedinstvenu bezopasnu putanju:
 ```bash
 : "${PRIVACY_TEST_URL:?Set PRIVACY_TEST_URL to the owned HTTPS endpoint}"
 curl --fail --show-error --silent \
 "${PRIVACY_TEST_URL}/privacy-check/run-20260907-001"
 ```
-Koristite domain kojim upravlja tester, authenticated TLS i token putanje koji nije osetljiv. Pregledajte server log za:
+Koristite domen kojim upravlja tester, authenticated TLS i token putanje koji nije osetljiv. Pregledajte server log za:
 
 - izvornu adresu/ASN i očekivani egress;
 - IPv4 naspram IPv6;
@@ -61,18 +63,18 @@ Koristite domain kojim upravlja tester, authenticated TLS i token putanje koji n
 
 Nemojte dodavati `X-Forwarded-For`, jedinstvene debug headers ili cookies koji sadrže identitet u navodno odvojen request.
 
-### 4. Testirajte DNS pomoću canary-ja pod vašom kontrolom
+### 4. Testirajte DNS pomoću owned canary-ja
 
-Konfigurišite authoritative test zone čije query logove kontrolišete. Pošaljite upit za jedinstvenu nasumičnu labelu kroz compartment:
+Konfigurišite authoritative test zone čije query logove kontrolišete. Pošaljite upit za jedinstveni nasumični label kroz compartment:
 ```bash
 dig run-20260907-001.privacy-test.example A
 dig run-20260907-001.privacy-test.example AAAA
 ```
-Proverite merodavan log. On obično vidi rekurzivni resolver, a ne nužno klijenta. Uporedite taj resolver sa predviđenim VPN/Tor/application DNS dizajnom. Nasumični javni DNS leak sajt nije potreban.
+Proverite authoritative log. On obično vidi recursive resolver, a ne nužno client. Uporedite taj resolver sa predviđenim VPN/Tor/application DNS dizajnom. Nasumični javni DNS leak sajt nije potreban.
 
 ### 5. Testirajte fail-closed ponašanje
 
-Održavajte benignu petlju zahteva usmerenu ka endpointu u vašem vlasništvu, a zatim zaustavite privacy putanju. Workload mora da otkaže, umesto da se prebaci na fizički interfejs. Proverite obe familije adresa i DNS:
+Održavajte bezopasnu petlju zahteva usmerenu ka endpointu koji je u vašem vlasništvu, zatim zaustavite privacy putanju. Workload mora da otkaže, a ne da se prebaci na fizički interfejs. Proverite obe address families i DNS:
 ```bash
 : "${PRIVACY_TEST_URL:?Set PRIVACY_TEST_URL to the owned HTTPS endpoint}"
 curl -4 --connect-timeout 5 "${PRIVACY_TEST_URL}/run-v4"
@@ -81,53 +83,53 @@ dig privacy-test.example
 ```
 Ponovite tokom:
 
-- rušenja tunnel procesa;
+- pada tunnel procesa;
 - prebacivanja sa Wi-Fi-ja na Ethernet ili hotspot;
-- sleep/wake;
-- DHCP obnavljanja;
-- stanja captive-portal-a;
+- uspavljivanja/buđenja;
+- obnove DHCP-a;
+- stanja captive portala;
 - ponovnog povezivanja provajdera/isteka ključa.
 
-Za Linux namespace/container, zaustavite njegov tunnel i proverite da nema drugu default route ili resolver:
+Za Linux namespace/container, zaustavite njegov tunnel i proverite da nema drugu podrazumevanu rutu ili resolver:
 ```bash
 ip netns exec privacy-workload ip route
 ip netns exec privacy-workload ip -6 route
 ip netns exec privacy-workload resolvectl status
 ```
-Nazivi i komande razlikuju se u zavisnosti od deployment-a. Nemojte ih nalepiti na udaljeni production host bez mogućnosti oporavka putem konzole.
+Nazivi i komande se razlikuju u zavisnosti od implementacije. Nemojte ih nalepiti na udaljeni production host bez oporavka putem konzole.
 
-### 6. Proverite lokalne sokete i pakete
+### 6. Pregled lokalnih socket-a i paketa
 
-Uz odobrenje, proverite koji proces/interface zapravo komunicira:
+Uz odobrenje, proverite koji proces/interfejs zapravo komunicira:
 ```bash
 ss -tpn
 ss -upn
 sudo tcpdump -ni any 'host TEST_SERVER_IP'
 ```
-Zamenite `TEST_SERVER_IP` eksplicitnom adresom u vašem vlasništvu; izbegavajte široko prikupljanje podataka o nepovezanim korisnicima. Fizički interfejs treba da vidi peer tunela/bridge-a, dok jasan saobraćaj ka odredištu treba da postoji samo na predviđenom sloju.
+Zamenite `TEST_SERVER_IP` eksplicitno posedovanom adresom; izbegavajte široko hvatanje podataka o nepovezanim korisnicima. Fizički interfejs treba da vidi peer tunela/bridge-a, dok saobraćaj sa jasnom destinacijom treba da postoji samo na predviđenom sloju.
 
 ## Tor i test onion-service-a
 
 1. U Tor Browser-u posetite stranicu Tor Project-a za proveru konekcije i potvrdite korišćenje Tor-a. Nemojte to smatrati dokazom identiteta.<sup>[[1]](#references)</sup>
-2. Posetite HTTPS endpoint u vašem vlasništvu sa jedinstvenim canary-em i potvrdite da vidi Tor exit, da nema identifikujućih kolačića i da koristi standardni kontekst pregledača.
-3. Izaberite **New Identity**, ponovo posetite stranicu sa drugačijim canary-em i proverite da li je lokalno stanje očišćeno kako je očekivano. Promena izlazne IP adrese nije zagarantovana niti je svrha opcije New Identity.
-4. Za onion service pristupajte mu isključivo kroz Tor Browser. Potvrdite da host service-a nema javni listener pomoću autorizovanog eksternog skeniranja i da odgovori aplikacije ne sadrže javni hostname/IP.
-5. Pregledajte odlazni DNS/HTTP sa origin-a, template-e, stranice sa greškama, email/webhook-e i asset-e trećih strana. Svako direktno preuzimanje može otkriti origin ili nalog operatora.
-6. Ako je omogućena autorizacija klijenata, potvrdite da se neautorizovani čist Tor Browser ne može povezati, a da autorizovani može.
-7. Rotirajte testni authorization key i potvrdite da opozvani klijent gubi pristup bez promene onion identiteta.
+2. Posetite posedovani HTTPS endpoint sa jedinstvenim canary-jem i potvrdite da vidi Tor exit, da nema identifikujućih kolačića i da koristi standardni kontekst browser-a.
+3. Izaberite **New Identity**, ponovo posetite stranicu sa drugačijim canary-jem i proverite da li je lokalno stanje očišćeno kako se očekuje. Promena exit IP adrese nije garantovana niti predstavlja svrhu opcije New Identity.
+4. Za onion-service, pristupajte mu samo kroz Tor Browser. Potvrdite da host service-a nema javni listener pomoću autorizovanog eksternog skeniranja i da odgovori aplikacije ne sadrže javni hostname/IP.
+5. Pregledajte odlazni DNS/HTTP sa origin-a, template-e, error page-ove, email/webhook-e i assets-e trećih strana. Svako direktno preuzimanje može otkriti origin ili operatorski nalog.
+6. Ako je omogućena autorizacija klijenata, potvrdite da čist Tor Browser bez credential-a ne može da se poveže, a da onaj sa credential-om može.
+7. Rotirajte test authorization key i potvrdite da opozvani klijent gubi pristup bez promene onion identiteta.
 
 ## Test browser-compartment-a
 
-Kreirajte kontrolisanu stranicu koja beleži samo polja potrebna za test, uz kratak period zadržavanja podataka. Uporedite lični compartment i privacy compartment za:
+Kreirajte kontrolisanu stranicu koja beleži samo polja potrebna za test, uz kratak period zadržavanja. Uporedite personalni i privacy compartment za:
 
 - cookies/local storage/service workers i cache;
 - browser sync/login stanje;
 - jezik, vremensku zonu, dimenzije ekrana/prozora i fontove;
-- WebRTC/network candidates;
+- WebRTC/network kandidate;
 - dozvole i izmene vidljive ekstenzijama;
 - TLS/HTTP user-agent podatke na serveru.
 
-Ne pokušavajte da Tor Browser učinite „nasumičnijim“. Uslov prolaza je sličnost sa njegovim standardnim anonymity set-om i odsustvo ličnog stanja, a ne maksimalna različitost u odnosu na lični browser.
+Ne pokušavajte da Tor Browser učinite „nasumičnijim“. Uslov prolaska je sličnost sa njegovim standardnim anonymity set-om i odsustvo personalnog stanja, a ne maksimalna razlika u odnosu na personalni browser.
 
 Testirajte copy/paste, drag/drop, otvaranje preuzetih fajlova, predloge password manager-a i dugmad identity provider-a. To su česti mostovi između compartment-a.
 
@@ -135,82 +137,82 @@ Testirajte copy/paste, drag/drop, otvaranje preuzetih fajlova, predloge password
 
 ### Tails
 
-1. Počnite sa bezopasnim fajlom/canary-em u sesiji bez Persistent Storage-a.
-2. Potpuno ugasite sistem, ponovo ga pokrenite i potvrdite da je fajl nestao.
-3. Omogućite samo jednu potrebnu kategoriju persistence-a, ponovite test i potvrdite da nepovezano stanje browser-a/aplikacija nije zadržano.
-4. Proverite da se Unsafe Browser ne može koristiti nakon prijavljivanja na portal za osetljive aktivnosti i da se Tor aplikacije normalno ponovo povezuju.
+1. Započnite sa benignim fajlom/canary-jem u session-u bez Persistent Storage-a.
+2. Potpuno ugasite sistem, restartujte ga i potvrdite da je fajl nestao.
+3. Omogućite samo jednu potrebnu kategoriju persistence-a, ponovite postupak i potvrdite da nepovezano stanje browser-a/aplikacija nije zadržano.
+4. Proverite da se Unsafe Browser ne može koristiti nakon portal login-a za osetljive aktivnosti i da se Tor aplikacije normalno ponovo povezuju.
 
 ### Whonix/Qubes
 
 1. Zaustavite Gateway/net qube i dokažite da Workstation/app qube ne može da pristupi IPv4, IPv6 ili DNS-u.
-2. Pokušajte samo eksplicitno konfigurisani inter-qube clipboard/file path i potvrdite da drugi shared-folder/device path-ovi ne postoje.
-3. Otvorite bezopasan testni dokument u disposable qube-u, zatvorite ga i potvrdite da njegovo stanje nestaje.
-4. Proverite da vault qube nema NetVM i da ga ne može dobiti promenom template-a/default-a.
-5. Napravite snapshot/restore testnog VM-a i proverite da li se stanje koje nosi identitet neočekivano vraća.
+2. Pokušajte samo eksplicitno konfigurisan inter-qube clipboard/file path i potvrdite da drugi shared-folder/device path-ovi ne postoje.
+3. Otvorite benigni test dokument u disposable qube-u, zatvorite ga i potvrdite da njegovo stanje nestaje.
+4. Proverite da vault qube nema NetVM i da ne može da ga dobije kroz promenu template/default podešavanja.
+5. Napravite snapshot/restore test VM-a i proverite da li se stanje koje nosi identitet neočekivano vraća.
 
-## Test metapodataka komunikacije
+## Test komunikacionih metadata podataka
 
-Za svaki izabrani messenger:
+Za svaki odabrani messenger:
 
 1. Kreirajte učesnike namenjene samo testiranju na kontrolisanim uređajima.
-2. Zabeležite šta registracija zahteva: telefon, app-store nalog, IP, push service, username ili pozivnicu.
-3. Pošaljite jednu bezopasnu poruku uz pregled notification preview-a, povezanih desktop računara, nosivih uređaja i backup-a.
+2. Zabeležite šta je potrebno za registraciju: telefon, app-store nalog, IP, push service, username ili invitation.
+3. Pošaljite jednu benignu poruku i pritom pregledajte notification preview-e, povezane desktop računare, wearables i backup-e.
 4. Proverite safety/security kodove nezavisnim putem.
-5. Isključite receipts/push ili omogućite Tor/lokalne transport-e, jedan po jedan, i posmatrajte promene pouzdanosti/metapodataka.
-6. Izvezite ili vratite testni backup i tačno dokumentujte koje profile, kontakte i istoriju sadrži.
-7. Izgubite/opozovite testni uređaj i potvrdite da preostali učesnici vide očekivanu promenu ključa/uređaja.
+5. Isključite receipts/push ili omogućite Tor/lokalne transport-e jedan po jedan i posmatrajte promene pouzdanosti/metadata podataka.
+6. Izvezite ili vratite test backup i precizno dokumentujte koje profile, kontakte i istoriju sadrži.
+7. Izgubite/opozovite test uređaj i potvrdite da preostali učesnici vide očekivanu promenu key/device-a.
 
-Nemojte testirati kontaktiranjem nepovezanih ljudi ili generisanjem zloupotrebljavajućeg saobraćaja.
+Nemojte testirati kontaktiranjem nepovezanih osoba ili generisanjem abuse saobraćaja.
 
 ## Test sanitizacije fajlova
 
-1. Izračunajte hash i sačuvajte original u šifrovanom skladištu dokaza:
+1. Hash-ujte i sačuvajte original u encrypted evidence storage-u:
 ```bash
 sha256sum ./original/file > ./original/file.sha256
 ```
-2. Napravite očišćenu kopiju koristeći proces specifičan za format u dokumentu [Privacy-Preserving Communications and Sharing](privacy-preserving-communications-and-sharing.md).
+2. Napravite očišćenu kopiju koristeći proces specifičan za format u [Privacy-Preserving Communications and Sharing](privacy-preserving-communications-and-sharing.md).
 3. Uporedite inventare metapodataka:
 ```bash
 exiftool -a -u -g1 ./original/file
 exiftool -a -u -g1 ./clean/file
 ```
-4. Render/open kopiju u disposable kontekstu. Proverite skriveni sadržaj, priloge, links, forms, layers, thumbnails i vizuelne identifikatore.
-5. Pretražite samo staged kopiju za poznatim canary author/email/path stringovima.
-6. Hashujte konačni output i neka druga osoba proveri tačno file koji se objavljuje.
+4. Render/open the copy in a disposable context. Proverite skriveni sadržaj, priloge, linkove, obrasce, slojeve, sličice i vizuelne identifikatore.
+5. Pretražite samo pripremljenu kopiju za poznate canary stringove autora/e-pošte/putanje.
+6. Izračunajte hash konačnog izlaza i neka druga osoba proveri tačan fajl koji se objavljuje.
 
-Odsustvo iz ExifTool outputa nije dokaz anonimnosti; interni detalji formata, pixels, prozni tekst i zapisi o distribuciji i dalje ostaju.
+Odsustvo iz ExifTool izlaza nije dokaz anonimnosti; interne strukture formata, pikseli, tekst i evidencije distribucije ostaju.
 
 ## Test privatnosti plaćanja
 
 Koristite najmanji dozvoljeni iznos ili zvaničnu testnu mrežu/sandbox:
 
-1. Zapišite očekivani prikaz za payera, payee/merchant, issuer/exchange, network/node, javni ledger i accountant/controller.
-2. Kreirajte jedinstveni testni invoice/merchant kontekst bez lažnog identiteta.
-3. Platite jednom, zatim prikupite **sopstveni** receipt, statement, merchant dashboard, wallet/node log i prikaz javnog chaina gde je primenljivo.
-4. Proverite da li se amount, timestamp, address/token, account, IP/device, delivery i refund ruta podudaraju sa tabelom posmatrača.
-5. Za Bitcoin proverite ponovno korišćenje adrese, odabrane inputs, change i kasniju konsolidaciju u wallet coin-control prikazu.
-6. Za shielded protocols proverite stvarni pool/path i ono što viewing key otkriva; ne zaključujte o privatnosti na osnovu wallet brendiranja.
-7. Za e-cash/Taler testirajte backup/recovery, refund i redemption sa malom vrednošću; dokumentujte mint/exchange/federation boundary records.
-8. Opozovite virtual card/test credential i potvrdite da kasnija authorization ne uspeva, dok pravilno postupanje sa refundom ostaje razumljivo.
-9. Uskladite i zadržite potrebne tax/authorization dokaze šifrovane.
+1. Zapišite očekivani pregled za platioca, primaoca/trgovca, izdavaoca/menjačnicu, mrežu/čvor, javni ledger i računovođu/kontrolora.
+2. Kreirajte jedinstveni testni kontekst fakture/trgovca bez lažnog identiteta.
+3. Platite jednom, zatim prikupite **sopstvenu** potvrdu, izvod, kontrolnu tablu trgovca, wallet/node log i prikaz javnog lanca gde je primenljivo.
+4. Proverite da li se iznos, vremenska oznaka, adresa/token, nalog, IP/uređaj, isporuka i putanja refundacije podudaraju sa tabelom posmatrača.
+5. Za Bitcoin proverite ponovnu upotrebu adrese, izabrane ulaze, kusur i kasniju konsolidaciju u prikazu coin-control walleta.
+6. Za shielded protokole proverite stvarni pool/path i šta viewing key otkriva; ne zaključujte o privatnosti na osnovu brendiranja walleta.
+7. Za e-cash/Taler testirajte backup/recovery, refundaciju i redemption sa malom vrednošću; dokumentujte evidencije granica mint/exchange/federation.
+8. Opozovite virtuelnu karticu/testni credential i potvrdite da kasnija autorizacija ne uspeva, dok razumevanje legitimne obrade refundacije ostaje očuvano.
+9. Uskladite i čuvajte potrebne poreske/autorizacione dokaze u šifrovanom obliku.
 
-Nikada ne kreirajte circular transfers, threshold-splitting, fake purchases ili sumnjive refundove kao „test privatnosti“.
+Nikada ne kreirajte kružne transfere, deljenje iznosa radi izbegavanja pragova, lažne kupovine ili sumnjive refundacije kao „test privatnosti“.
 
-## Authorized red-team drill odgovornosti
+## Vežba odgovornosti ovlašćenog red-team-a
 
-Pre vežbe sprovedite tabletop i technical drill:
+Pre vežbe sprovedite tabletop i tehničku vežbu:
 
-1. Operator pokreće benigni canary sa svakog odobrenog source patha.
-2. Target SOC beleži šta detektuje, bez prijema identiteta operatora ako je predviđeno blind testing.
-3. Exercise controller razrešava source → engagement → operator iz escrowed mape i potpisanog job recorda.
-4. Controller šalje emergency stop; operator i infrastructure owner demonstriraju shutdown u roku definisanom ROE-om.
-5. Provider abuse dobija tačan 24/7 kontakt i authorization reference.
-6. Evidence pokazuje target, vreme, tool/job i operatora, bez zadržavanja nepotrebnog payload sadržaja.
-7. Drugi operator proverava credential revocation i resource teardown.
+1. Operator pokreće benigni canary iz svake odobrene izvorne putanje.
+2. Ciljni SOC beleži šta detektuje, bez primanja identiteta operatora ako je predviđeno slepo testiranje.
+3. Kontrolor vežbe razrešava source → engagement → operator iz escrowed mape i potpisanog job record-a.
+4. Kontrolor šalje emergency stop; operator i vlasnik infrastrukture demonstriraju gašenje u roku definisanom ROE-om.
+5. Provider abuse dobija tačan 24/7 kontakt i referencu autorizacije.
+6. Dokazi pokazuju cilj, vreme, alat/job i operatora, bez zadržavanja nepotrebnog sadržaja payload-a.
+7. Drugi operator proverava opoziv credentiala i uklanjanje resursa.
 
-Oborite readiness review ako SOC može trivijalno da vidi ličnu/kućnu infrastrukturu **ILI** ako controller ne može brzo da pripiše i zaustavi source.
+Oborite proveru spremnosti ako SOC može trivijalno da vidi ličnu/kućnu infrastrukturu **ILI** ako kontrolor ne može brzo da pripiše i zaustavi izvor.
 
-## Template zapisa testa
+## Šablon testnog zapisa
 ```text
 Test ID / date (UTC):
 Authorization / owner:
@@ -230,5 +232,6 @@ Evidence retention/deletion date:
 
 - [1] [Tor Project — Provera veze](https://check.torproject.org/)
 - [2] [WireGuard — Rutiranje i mrežni namespace-ovi](https://www.wireguard.com/netns/)
-- [3] [ExifTool — Česta pitanja i smernice za metapodatke](https://exiftool.org/faq.html)
-- [4] [NIST SP 800-115 — Tehnički vodič za testiranje i procenu informacione bezbednosti](https://csrc.nist.gov/pubs/sp/800/115/final)
+- [3] [ExifTool — FAQ i smernice za metapodatke](https://exiftool.org/faq.html)
+- [4] [NIST SP 800-115 — Tehnički vodič za testiranje i procenu bezbednosti informacija](https://csrc.nist.gov/pubs/sp/800/115/final)
+{{#include ../banners/hacktricks-training.md}}
