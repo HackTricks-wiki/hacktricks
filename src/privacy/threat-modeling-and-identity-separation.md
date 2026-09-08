@@ -1,91 +1,93 @@
 # Threat Modeling & Identity Separation
 
-最も一般的な anonymity の失敗は、暗号が破られることではありません。それは **linkage** です。つまり、1つの identifier、時間パターン、device、account、payment、file、または人間の習慣によって、本来分離されているはずの2つの context が結び付けられることです。
+{{#include ../banners/hacktricks-training.md}}
 
-## プライバシーの threat model を構築する
+最も一般的な匿名性の失敗は、暗号が破られることではありません。それは**linkage**です。つまり、1つの識別子、タイミングパターン、デバイス、アカウント、支払い、ファイル、または人間の習慣によって、本来分離されるべき2つのコンテキストが結び付けられることです。
 
-EFF の6つの質問による security plan は、強固な基盤になります。何を保護する必要があるのか、誰から保護するのか、失敗の影響と可能性、利用できる労力、そして助けになれる協力者を明確にします。<sup>[[1]](#references)</sup> 小さな表を使って、これを実際の運用に落とし込みます。
+## プライバシー脅威モデルを構築する
+
+EFFの6つの質問によるセキュリティ計画は、有力な基盤です。何を保護する必要があるか、誰から保護するか、失敗の影響と可能性、利用できる労力、そして支援してくれる仲間を明確にします。<sup>[[1]](#references)</sup> 小さな表を使って、これを実際に運用できる形にします。
 
 | Asset/action | Observer | Observable data | Correlation route | Control | Residual risk |
 |---|---|---|---|---|---|
-| クライアントの調査 | ISP | 宛先と timing metadata | 自宅の subscriber record | Tor Browser | Tor の利用が見える；end-to-end correlation |
-| Pseudonymous account | Platform | IP、browser、recovery data | 再利用した phone/email/photo | 専用の context と alias | 文章や social graph による correlation |
-| Online purchase | Merchant | Account、delivery、tokenized card | Address と account history | Guest checkout、最小限の fields、virtual card | Issuer と carrier に records が残る |
-| Red-team traffic | Target/client | Source IP と behavior | Provider/engagement records | 専用の authorized egress | escalation 時には意図的に attributable |
+| クライアントの調査 | ISP | 宛先およびタイミングのメタデータ | 自宅の加入者記録 | Tor Browser | Torの使用が可視化される。end-to-end correlation |
+| 仮名アカウント | Platform | IP、ブラウザ、recovery data | 再利用された電話番号/email/写真 | 専用コンテキストとalias | 文章およびsocial graphによる相関 |
+| オンライン購入 | Merchant | アカウント、配送、tokenized card | 住所およびアカウント履歴 | Guest checkout、最小限の入力項目、virtual card | Issuerおよびcarrierが記録を保持 |
+| Red-team traffic | Target/client | Source IPおよび挙動 | Provider/engagement records | 専用の承認済みegress | escalation時には意図的に帰属可能 |
 
-location、provider、device、counterpart、または consequences が変わるたびに、この表を見直します。
+場所、provider、デバイス、相手、または結果が変わるたびに表を見直します。
 
-## linkability graph を描く
+## linkability graphを描く
 
-各 identity を別々の node として扱います。共有されている attribute ごとに edge を追加します。
+各identityを別々のノードとして扱います。共有されている属性ごとにedgeを追加します。
 
-- email または recovery address；
-- phone number または contact-book upload；
-- username、avatar、photo、bio、または writing/code style；
-- password、passkey-sync account、または recovery question；
-- device、advertising ID、browser profile、cookies、fonts、または extensions；
-- IP address、time zone、language、schedule、または同時に online であること；
-- bank card、exchange account、wallet cluster、shipping address、または loyalty program；
-- document author fields、EXIF location、printer marks、または cloud-share owner；
-- colleague、group membership、social graph。
+- emailまたはrecovery address;
+- 電話番号またはcontact-book upload;
+- username、avatar、写真、bio、またはwriting/code style;
+- password、passkey-sync account、またはrecovery question;
+- デバイス、advertising ID、browser profile、cookies、fonts、またはextensions;
+- IP address、time zone、言語、スケジュール、または同時オンライン状態;
+- bank card、exchange account、wallet cluster、shipping address、またはloyalty program;
+- document author fields、EXIF location、printer marks、またはcloud-share owner;
+- 同僚、group membership、social graph。
 
-edge は自動的に致命的なものではありません。しかし、どの observer がその connection を作れるのかを示します。EFF は、phone numbers、email addresses、再利用した photographs が profiles を結び付ける可能性について、特に警告しています。<sup>[[2]](#references)</sup>
+edgeは必ずしも致命的ではありませんが、どのobserverが接続を成立させられるかを示します。EFFは、電話番号、email address、再利用された写真によってprofilesがリンクされる可能性を明確に警告しています。<sup>[[2]](#references)</sup>
 
-## compartment を段階的に作成する
+## compartmentを段階的に作成する
 
-1. **context と禁止する links に名前を付ける。** 例：`client-red-2026`。personal email、home browser profiles、personal payment methods、無関係な clients との link を禁止します。
-2. **isolation boundary を選択する。** 強度が低い順に、separate browser profile → separate OS account → separate VM/qube → dedicated device です。separate tab や private window は security boundary ではありません。
-3. **その boundary 内で新しい identifiers を作成する。** context 専用の email/alias、username、password-manager vault または collection、authentication keys を使用します。provider からの unlinkability が重要な場合は、personal recovery channel を追加しないでください。
-4. **1つの network policy を選択する。** context が常に client VPN、engagement VPS、trusted VPN、または Tor のどれを使うのか決定します。可能な場合は fail-closed routing を強制します。
-5. **payment policy を選択する。** payment method は observer model に合わせる必要があります。virtual card は merchant から PAN を隠せる場合がありますが、issuer には customer を識別されます。
-6. **data-transfer rules を設定する。** 範囲を限定した意図的な transfer を優先します。clipboard、shared folders、USB devices、cloud sync、printers、screenshots は、潜在的な bridges として扱います。
-7. **作成日と teardown 日を記録する。** contracts/tax/compliance のために保持すべき evidence と、期限切れにすべき transient data を定義します。
-8. **使用前に links をテストする。** account settings、recovery fields、public profile、IP/DNS、browser state、file metadata、provider dashboards を確認します。
+1. **コンテキストと禁止するリンクを定義する。** 例: `client-red-2026`。個人用email、home browser profiles、個人用payment methods、無関係なclientsから分離する。
+2. **isolation boundaryを選択する。** 強度の低い順に、separate browser profile → separate OS account → separate VM/qube → dedicated device。別のtabやprivate windowはsecurity boundaryではありません。
+3. **そのboundary内で新しい識別子を作成する。** コンテキスト専用のemail/alias、username、password-manager vaultまたはcollection、authentication keysを使用します。providerからのunlinkabilityが重要な場合、個人用recovery channelを追加しないでください。
+4. **1つのnetwork policyを選択する。** そのコンテキストで常にclient VPN、engagement VPS、trusted VPN、Torのどれを使用するか決定します。可能な場合はfail-closed routingを強制します。
+5. **payment policyを選択する。** payment methodはobserver modelに適合させる必要があります。virtual cardはmerchantからPANを隠せても、issuerにはcustomerを特定させます。
+6. **data-transfer rulesを設定する。** 範囲を限定した意図的なtransferを優先します。clipboard、shared folders、USB devices、cloud sync、printers、screenshotsは、ブリッジになる可能性があるものとして扱います。
+7. **作成日とteardown日を記録する。** 契約、税務、complianceのために保持すべき証拠と、期限切れにすべき一時データを定義します。
+8. **使用前にリンクをテストする。** account settings、recovery fields、public profile、IP/DNS、browser state、file metadata、provider dashboardsを確認します。
 
 {% hint style="warning" %}
-service または law によって正確な identification が要求されている場合は、identity information を捏造しないでください。privacy compartment は data minimization と separation のためのものであり、identity fraud や customer due diligence の bypass のためのものではありません。
+サービスまたは法律が正確な本人情報を要求する場合、そのidentity informationを捏造しないでください。privacy compartmentは、データの最小化と分離のためのものであり、identity fraudやcustomer due diligenceの回避のためのものではありません。
 {% endhint %}
 
-## Endpoint と account の baseline
+## Endpointとアカウントのbaseline
 
-- supported hardware を使用し、OS、browser、wallet、firmware の updates を速やかに install します。
-- device encryption を有効にし、強力な device passcode を使用します。Encryption at rest は、電源オフの device を紛失または押収された場合には有効ですが、malware や unlocked session が data を読み取れる状態では有効ではありません。<sup>[[3]](#references)</sup>
-- password manager で、unique かつ randomly generated な passwords を使用します。
-- threat model が recovery/sync model を許容する場合は、WebAuthn/passkeys や hardware security keys などの phishing-resistant authentication を優先します。NIST は、manually entered OTPs は phishing-resistant ではないと説明しています。impostor がそれらを relay できるためです。<sup>[[4]](#references)</sup>
-- recovery codes は offline に保管し、endpoint から分離します。synced passkey account が、本来分離すべき identities を結び付けていないか確認します。
-- 不要な location、contacts、microphone、camera、Bluetooth、advertising-ID、background permissions を無効にします。
-- personal cloud sync、browser sync、password-manager accounts、app stores を high-separation context に混在させないでください。
+- サポート対象のhardwareを使用し、OS、browser、wallet、firmwareのupdatesを速やかにインストールします。
+- device encryptionを有効にし、強力なdevice passcodeを使用します。Encryption at restは、電源オフのdeviceを紛失または押収された場合には役立ちますが、malwareやunlock済みのsessionがデータを読み取れる状態では役立ちません。<sup>[[3]](#references)</sup>
+- password managerで、固有のランダム生成passwordsを使用します。
+- threat modelでrecovery/sync modelが許容される場合は、WebAuthn/passkeysやhardware security keysなどのphishing-resistant authenticationを優先します。NISTは、手動入力のOTPsは、攻撃者がそれらをrelayできるためphishing-resistantではないと説明しています。<sup>[[4]](#references)</sup>
+- recovery codesをofflineで保管し、endpointから分離します。synced passkey accountによって、本来分離すべきidentityが結合されないか確認します。
+- 不要なlocation、contacts、microphone、camera、Bluetooth、advertising-ID、background permissionsを無効にします。
+- personal cloud sync、browser sync、password-manager accounts、app storesをhigh-separation contextに混在させないでください。
 
 ## Browser privacy
 
-Browser fingerprinting は、観測可能な configuration、device、environment、behavior を使って user を識別または correlate します。cookies を消去したり IP addresses を変更したりしても、これを確実に防ぐことはできません。また W3C は、広く配備された手段によってこれを完全に技術的排除することは困難だとしています。<sup>[[5]](#references)</sup>
+Browser fingerprintingは、観測可能なconfiguration、device、environment、behaviorを使ってuserを識別または相関させます。cookiesの削除やIP addressesの変更だけでは確実に防げず、W3Cは、広く展開された手段によって完全に技術的排除を行うことは現実的でないとしています。<sup>[[5]](#references)</sup>
 
-通常の privacy では、次のようにします。
+通常のprivacy対策:
 
-1. HTTPS-only mode と強力な tracking protection を備えた、maintained browser を使用します。
-2. third-party tracking を block し、対応している場合は state を partition します。
-3. 本当に分離すべき context には、separate browser profiles を使用します。
-4. 不要な permissions を無効にし、定めた schedule で site data を消去します。
-5. 無関係な sensitive research を行っている間は、identity-rich accounts に login しないでください。
+1. HTTPS-only modeと強力なtracking protectionを備えた、保守されているbrowserを使用します。
+2. third-party trackingをブロックし、対応している場合はstateをpartitionします。
+3. 本当に分離されたcontextsには、別々のbrowser profilesを使用します。
+4. 不要なpermissionsを無効にし、定めたスケジュールでsite dataを消去します。
+5. 無関係なsensitive researchを行っている間に、identity-rich accountsへloginすることを避けます。
 
-web anonymity には、**Tor Browser の standard configuration** を使用します。通常の browser を Tor 経由で proxy しないでください。Tor Project は、通常の browsers が DNS/WebRTC、persistent state、fonts、plugins、fingerprint の違いを通じて leak する可能性があると警告しています。<sup>[[6]](#references)</sup> 追加の extensions、珍しい window sizes、custom fonts、browser を目立たせる preferences は避けてください。<sup>[[7]](#references)</sup>
+Web anonymityには、**Tor Browserをstandard configurationで使用**します。通常のbrowserをTor経由でproxyしないでください。Tor Projectは、通常のbrowsersがDNS/WebRTC、persistent state、fonts、plugins、fingerprint differencesを通じてleakする可能性があると警告しています。<sup>[[6]](#references)</sup> 追加のextensions、 unusual window sizes、custom fonts、browserを目立たせるpreferencesは避けます。<sup>[[7]](#references)</sup>
 
-## Communications と metadata
+## Communicationsとmetadata
 
-Metadata には、message content が encrypted であっても、sender、recipient、time、location、その他の context が含まれます。<sup>[[8]](#references)</sup>
+Metadataには、message contentがencryptedであっても、sender、recipient、time、location、その他のcontextが含まれます。<sup>[[8]](#references)</sup>
 
-- 実用上可能な場合は、server-side metadata を最小化し、open protocols/clients を備えた end-to-end-encrypted tools を優先します。
-- sensitive contacts は、独立した channel または対面で確認します。Signal safety numbers は、この確認のために設計されています。<sup>[[9]](#references)</sup>
-- Signal usernames は phone number を共有せずに contact を開始できますが、register には phone number が依然として必要です。phone-number visibility/discoverability は意図的に設定してください。<sup>[[9]](#references)</sup>
-- Disappearing messages は保持される copies を減らしますが、recipients は content を撮影、copy、forward、archive できます。
-- Email は通常、routing metadata を露出します。privacy-focused providers であっても、相手側が ordinary email を使っている場合、両者が互換性のある E2EE method を使用しない限り、message を end-to-end encrypted にはできません。例えば Proton は、他の providers への ordinary mail は TLS を使用し、receiving provider から読み取り可能なままであると説明しています。<sup>[[10]](#references)</sup>
-- address books を分離し、pseudonymous account に personal contacts を upload しないでください。
+- 実用上可能な場合は、server-side metadataを最小化し、open protocols/clientsを使用するend-to-end-encrypted toolsを優先します。
+- 独立したchannelまたは対面でsensitive contactsを確認します。Signal safety numbersは、この確認のために設計されています。<sup>[[9]](#references)</sup>
+- Signal usernamesを使えばphone numberを共有せずにcontactを開始できますが、登録には依然としてphone numberが必要です。phone-number visibility/discoverabilityは意図的に設定してください。<sup>[[9]](#references)</sup>
+- Disappearing messagesは保持されるcopiesを減らしますが、recipientsはcontentを撮影、コピー、forward、archiveできます。
+- Emailは通常、routing metadataを公開します。privacy-focused providersであっても、相手側が通常のemailを使用している場合、双方が互換性のあるE2EE methodを使用しない限りmessageをend-to-end encryptedにはできません。例えばProtonは、他のprovidersへの通常のmailではTLSが使用され、受信側providerから読み取り可能なままであると説明しています。<sup>[[10]](#references)</sup>
+- address booksを分離し、pseudonymous accountに個人のcontactsをuploadしないでください。
 
-## Files、photos、authorship
+## Files、photos、authorshop
 
-Tails は、photographs に camera と location data が含まれる可能性があり、office documents に author と creation-time fields が含まれる可能性があると警告しています。<sup>[[11]](#references)</sup>
+Tailsは、photographsにcameraおよびlocation dataが含まれる可能性があり、office documentsにはauthorおよびcreation-time fieldsが含まれる可能性があると警告しています。<sup>[[11]](#references)</sup>
 
-共有する前に：
+共有する前に:
 ```bash
 # Inspect recursively; do not assume the extension tells the whole story
 exiftool -a -u -g1 path/to/file
@@ -93,47 +95,48 @@ exiftool -a -u -g1 path/to/file
 # Create a cleaned copy. Verify the copy before publishing.
 exiftool -all= -o cleaned-file path/to/file
 ```
-その後、クリーニング済みのコピーを隔離された viewer で再度開き、次を確認します。
+その後、クリーニング済みのコピーを隔離された viewer で再び開き、以下を確認します。
 
 - document properties、comments、tracked changes、hidden sheets/slides、thumbnails、attachments；
 - EXIF/XMP/IPTC、GPS、timestamps、device/software names、unique IDs；
-- 目に見える反射、landmarks、screen contents、voices、faces、background sounds；
+- 見える反射、landmarks、screen contents、voices、faces、background sounds；
 - filename、archive paths、cloud-share owner、signing certificate、revision history。
 
-Sanitization によって evidence や authenticity が損なわれることがあります。chain of custody または後日の verification が重要な場合は、encrypted original を保管してください。Stylometry や coding style によって authorship が特定されることもあります。metadata removal では human style は変わりません。
+Sanitization によって evidence や authenticity が損なわれる可能性があります。chain of custody または後日の verification が重要な場合は、encrypted original を保持してください。Stylometry や coding style によって authorship が結び付けられる場合もあります。metadata の除去によって human style が変わることはありません。
 
 ## Common failure patterns
 
 - “anonymous” connection を通じて personal account にログインする。
-- recovery phone、avatar、username、public key、wallet、donation address を再利用する。
-- 相関する状況から、2つの identity を同時に運用する。
-- personal cloud clipboard や shared folder を介して text/files をコピーする。
-- 特徴的な Tor Browser extensions をインストールしたり、多数の default settings を変更したりする。
-- 何が、どの期間、どの subcontractors によって logging されるのかを理解せず、“no logs” という主張を信用する。
-- secondary phone が personal phone と一緒に移動しているにもかかわらず、anonymous だと考える。EFF は、cellular location と co-travel によってデバイス間の相関が可能になると指摘しています。<sup>[[3]](#references)</sup>
+- recovery phone、avatar、username、public key、wallet、または donation address を再利用する。
+- 相関する contexts から、2つの identities を同時に運用する。
+- personal cloud clipboard または shared folder を通じて text/files をコピーする。
+- 特徴的な Tor Browser extensions をインストールしたり、多数の defaults を変更したりする。
+- “no logs” という主張を、何が、どのくらいの期間、どの subcontractors によって logging されるのかを理解せずに信用する。
+- secondary phone が personal phone と並行して移動しているにもかかわらず、anonymous だと考える。EFF は、cellular location と co-travel によって devices を相関付けられると指摘しています。<sup>[[3]](#references)</sup>
 - encryption を deletion とみなす。endpoints や recipients が plaintext を保持している可能性があります。
 
 ## Verification checklist
 
 - [ ] context に personal recovery address、phone、sync account、または意図的に受け入れたものを除く reused media が存在しない。
-- [ ] 意図した network path が有効で、fail closed する。
+- [ ] intended network path が有効で、fails closed する。
 - [ ] browser/device time zone、locale、extensions、permissions が plan と一致している。
 - [ ] compartment 内で personal accounts が開かれていない。
-- [ ] files が inspection と sanitization を受けており、originals は別に扱われている。
+- [ ] files が inspected および sanitized され、originals は別途扱われている。
 - [ ] contacts が second channel を通じて authenticated されている。
 - [ ] provider-visible metadata と retention period を理解している。
-- [ ] teardown、evidence retention、account-recovery procedures が文書化されている。
+- [ ] teardown、evidence retention、account-recovery procedures が document されている。
 
 ## References
 
-- [1] [EFF Surveillance Self-Defense — Security Plan](https://ssd.eff.org/module/your-security-plan)
-- [2] [EFF Surveillance Self-Defense — Social Networks での自己防衛](https://ssd.eff.org/module/protecting-yourself-social-networks)
+- [1] [EFF Surveillance Self-Defense — セキュリティ計画](https://ssd.eff.org/module/your-security-plan)
+- [2] [EFF Surveillance Self-Defense — Social Networks で自分を守る](https://ssd.eff.org/module/protecting-yourself-social-networks)
 - [3] [EFF Surveillance Self-Defense — Protest への参加](https://ssd.eff.org/module/attending-protest)
 - [4] [NIST SP 800-63B-4 — Authentication と Authenticator Management](https://pages.nist.gov/800-63-4/sp800-63b.html)
-- [5] [W3C — Web Specifications における Browser Fingerprinting の Mitigation](https://www.w3.org/TR/fingerprinting-guidance/)
-- [6] [Tor Project — 他の browsers で Tor を使用する](https://support.torproject.org/tor-browser/security/using-tor-with-other-browsers/)
+- [5] [W3C — Web Specifications における Browser Fingerprinting の Mitigating](https://www.w3.org/TR/fingerprinting-guidance/)
+- [6] [Tor Project — 他の browsers と Tor を使用する](https://support.torproject.org/tor-browser/security/using-tor-with-other-browsers/)
 - [7] [Tor Project — Tor Browser の Plugins と add-ons](https://support.torproject.org/tor-browser/features/plugins/)
 - [8] [EFF Surveillance Self-Defense — Communication Metadata が重要な理由](https://ssd.eff.org/module/why-metadata-matters)
-- [9] [Signal — Phone Number Privacy と Usernames：Deeper Dive](https://support.signal.org/hc/en-us/articles/6829998083994-Phone-Number-Privacy-and-Usernames-Deeper-Dive)
-- [10] [Proton — Proton Mail 内で暗号化されるもの](https://proton.me/support/what-is-encrypted-within-protonmail)
+- [9] [Signal — Phone Number Privacy と Usernames：さらに詳しく](https://support.signal.org/hc/en-us/articles/6829998083994-Phone-Number-Privacy-and-Usernames-Deeper-Dive)
+- [10] [Proton — Proton Mail 内で encrypted されるもの](https://proton.me/support/what-is-encrypted-within-protonmail)
 - [11] [Tails — Warnings：Tails は safe だが magic ではない](https://tails.net/doc/about/warnings/index.en.html)
+{{#include ../banners/hacktricks-training.md}}
