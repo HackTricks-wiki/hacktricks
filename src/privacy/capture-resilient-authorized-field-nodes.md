@@ -1,5 +1,7 @@
 # Capture-Resilient Authorized Field Nodes
 
+{{#include ../banners/hacktricks-training.md}}
+
 An on-site Raspberry Pi, mini-PC, travel router or cellular appliance can give an authorized red team a durable vantage point. It is also a likely point of discovery, theft and attribution. The right design objective is therefore **stable, controlled access with little authority on the field node**, not an untraceable implant.
 
 This guide applies only to equipment placed with the site owner's written authorization. A coffee shop, neighbor, hotel or shared building is not in scope merely because its network is reachable. Do not hide hardware in an unconsenting venue, bypass a captive portal, use another person's credentials, interfere with monitoring, or attempt to erase evidence after discovery.
@@ -249,3 +251,4 @@ Pass criteria: zero personal accounts/workstation keys; zero cross-engagement or
 - [4] [RFC 8656 — Traversal Using Relays around NAT (TURN)](https://www.rfc-editor.org/rfc/rfc8656.html)
 - [5] [CISA — Use Logging on Business Systems](https://www.cisa.gov/audiences/small-and-medium-businesses/secure-your-business/use-logging-on-business-systems)
 - [6] [NIST SP 800-61 Rev. 3 — Incident Response Recommendations and Considerations](https://csrc.nist.gov/pubs/sp/800/61/r3/final)
+{{#include ../banners/hacktricks-training.md}}

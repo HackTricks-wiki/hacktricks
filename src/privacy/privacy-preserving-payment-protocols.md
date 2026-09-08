@@ -1,5 +1,7 @@
 # Privacy-Preserving Payment Protocols
 
+{{#include ../banners/hacktricks-training.md}}
+
 Advanced payment systems can hide a payer from the merchant, hide a recipient or amount from a public ledger, or prevent a mint from linking withdrawal to redemption. These are different properties. None erases acquisition, device, network, delivery, accounting, sanctions or endpoint records.
 
 The [Anonymous Payment Technique Catalog](anonymous-payment-techniques.md) provides a standardized `Pros`, `Cons`, step-by-step `Procedure`, and `Detection` entry for every payment family. This page expands the advanced protocols.
@@ -132,3 +134,4 @@ Privacy and audit can coexist:
 - [4] [GNU Taler Documentation](https://docs.taler.net/) and [Merchant Manual — About GNU Taler](https://docs.taler.net/taler-merchant-manual.html)
 - [5] [Fedimint — How it works](https://fedimint.org/users/how-it-works), [How federations work](https://fedimint.org/guardians/how-federations-work), and [Threshold blind signatures](https://docs.fedimint.org/crypto/index.html)
 - [6] [BOLT 12 — Offers](https://github.com/lightning/bolts/blob/master/12-offer-encoding.md)
+{{#include ../banners/hacktricks-training.md}}

@@ -1,5 +1,7 @@
 # Financial Obfuscation Tradecraft
 
+{{#include ../banners/hacktricks-training.md}}
+
 Payment privacy is an attribution problem, not a payment-brand problem. An operation leaves evidence when value is acquired, moved, converted, spent and delivered. A public-chain address can be pseudonymous while an exchange, card issuer, merchant, mobile device or shipping camera identifies the person behind it.
 
 This page explains financial-obfuscation patterns used in cybercrime and state-linked operations so defenders can recognize them. It does **not** provide a laundering, sanctions-evasion, false-identity or KYC-bypass procedure.
@@ -159,3 +161,4 @@ This creates **blindness to the exercise participant**, not blindness to law, pr
 - [6] [US Treasury — Blender.io sanctions and Lazarus funds](https://home.treasury.gov/news/press-releases/jy0768)
 - [7] [FBI — North Korea responsible for the 2025 Bybit theft](https://www.fbi.gov/investigate/cyber/alerts/2025/north-korea-responsible-for-1-5-billion-bybit-hack)
 - [8] [FinCEN — Application of regulations to virtual-currency users, administrators and exchangers](https://www.fincen.gov/resources/statutes-regulations/guidance/application-fincens-regulations-persons-administering)
+{{#include ../banners/hacktricks-training.md}}

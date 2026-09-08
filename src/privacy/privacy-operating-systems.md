@@ -1,5 +1,7 @@
 # Privacy Operating Systems
 
+{{#include ../banners/hacktricks-training.md}}
+
 Privacy-focused operating systems reduce routing and persistence mistakes, but none can compensate for identifying behavior or compromised hardware.
 
 ## Choose the isolation model
@@ -82,3 +84,4 @@ Rules:
 - [3] [Whonix — Whonix and Tor limitations](https://www.whonix.org/wiki/Warning)
 - [4] [Qubes OS — Security design goals](https://doc.qubes-os.org/en/latest/developer/system/security-design-goals.html)
 - [5] [Qubes OS — How to use disposables](https://doc.qubes-os.org/en/latest/user/how-to-guides/how-to-use-disposables.html)
+{{#include ../banners/hacktricks-training.md}}

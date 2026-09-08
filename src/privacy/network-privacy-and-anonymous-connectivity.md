@@ -1,5 +1,7 @@
 # Network Privacy & Anonymous Connectivity
 
+{{#include ../banners/hacktricks-training.md}}
+
 Network privacy is a routing decision, not a complete identity. Select a path by asking who should be unable to connect **source**, **destination**, **content**, and **timing**.
 
 For the normalized inventory—`Pros`, `Cons`, step-by-step `Procedure`, and `Detection` for every access-path family—start with the [Anonymous Internet Access Technique Catalog](anonymous-internet-access-techniques.md). This page expands the common deployable options.
@@ -167,3 +169,4 @@ For split-knowledge relays, route-enforced workloads, pluggable transports, onio
 - [15] [RFC 9230 — Oblivious DNS over HTTPS](https://www.rfc-editor.org/rfc/rfc9230.html)
 - [16] [RFC 9849 — TLS Encrypted Client Hello](https://www.rfc-editor.org/rfc/rfc9849.html)
 - [17] [Katzenpost — Threat Model](https://katzenpost.network/docs/threat_model/)
+{{#include ../banners/hacktricks-training.md}}

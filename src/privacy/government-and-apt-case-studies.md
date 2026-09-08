@@ -1,5 +1,7 @@
 # Government and APT Case Studies
 
+{{#include ../banners/hacktricks-training.md}}
+
 These public cases show how separate privacy techniques are composed in real operations. Attribution labels are those used by the cited investigators or governments; an IP address, tool overlap or geopolitical fit alone is not conclusive attribution.
 
 ## APT28: remote nearest-neighbor Wi-Fi access
@@ -143,3 +145,4 @@ PRC operator -> encrypted KV path -> compromised SOHO exit -> edge service
 - [12] [US Treasury — Blender.io sanctions and Lazarus funds](https://home.treasury.gov/news/press-releases/jy0768)
 - [13] [CISA AA25-239A — Countering Chinese state-sponsored actors' compromise of networks worldwide](https://www.cisa.gov/news-events/cybersecurity-advisories/aa25-239a)
 - [14] [Google Cloud/Mandiant — Ghost in the Router: UNC3886 targets Juniper routers](https://cloud.google.com/blog/topics/threat-intelligence/china-nexus-espionage-targets-juniper-routers)
+{{#include ../banners/hacktricks-training.md}}

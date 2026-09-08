@@ -1,5 +1,7 @@
 # Authorized Red-Team Infrastructure
 
+{{#include ../banners/hacktricks-training.md}}
+
 For durable on-site devices, use the [Capture-Resilient Authorized Field Nodes](capture-resilient-authorized-field-nodes.md) design and suspected-discovery runbook.
 
 For a professional red team, the goal is **controlled attribution**, not immunity from accountability. The target should not trivially see an operator's home IP or personal accounts, while the engagement owner must be able to identify the source, stop the operation, handle abuse reports, preserve evidence, and prove authorization.
@@ -146,3 +148,4 @@ Do not add anti-forensics, log destruction, compromised relays or false subscrib
 - [3] [AWS — Customer Support Policy for Penetration Testing](https://aws.amazon.com/security/penetration-testing/)
 - [4] [AWS — Privacy Notice](https://aws.amazon.com/privacy/) and [CloudTrail Event History](https://docs.aws.amazon.com/awscloudtrail/latest/userguide/view-cloudtrail-events.html)
 - [5] [ICANN — Registration Data Policy](https://www.icann.org/en/contracted-parties/consensus-policies/registration-data-policy)
+{{#include ../banners/hacktricks-training.md}}

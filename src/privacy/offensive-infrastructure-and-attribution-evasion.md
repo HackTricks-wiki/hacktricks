@@ -1,5 +1,7 @@
 # Offensive Infrastructure and Attribution Evasion
 
+{{#include ../banners/hacktricks-training.md}}
+
 An operator rarely obtains meaningful anonymity from a single proxy. Real campaigns build a **separation graph**: the operator reaches an access node, traversal nodes hide that node from the exit, redirectors protect the real C2, and disposable names point to the public edge.
 
 Use the [Anonymous Internet Access Technique Catalog](anonymous-internet-access-techniques.md) for a normalized pros/cons/deployment/detection view of every path. This page goes deeper into adversarial infrastructure composition.
@@ -234,3 +236,4 @@ If one ordinary provider can fill every column, the architecture provides concea
 - [10] [MITRE ATT&CK — Multi-Stage Channels (T1104)](https://attack.mitre.org/techniques/T1104/)
 - [11] [MITRE ATT&CK — Protocol Tunneling (T1572)](https://attack.mitre.org/techniques/T1572/)
 - [12] [MITRE ATT&CK — Traffic Signaling (T1205)](https://attack.mitre.org/techniques/T1205/)
+{{#include ../banners/hacktricks-training.md}}

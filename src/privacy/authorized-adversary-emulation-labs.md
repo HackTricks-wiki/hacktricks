@@ -1,5 +1,7 @@
 # Authorized Adversary-Emulation Labs
 
+{{#include ../banners/hacktricks-training.md}}
+
 These exercises reproduce **observable architecture**, not unauthorized compromise. Run them on a dedicated Linux lab host with Docker, no sensitive credentials and no route to third-party targets. The names are fixed so teardown is explicit.
 
 {% hint style="danger" %}
@@ -334,3 +336,4 @@ An exercise is incomplete until the detection is rerun after mitigation and ever
 - [4] [Volexity — The Nearest Neighbor Attack](https://www.volexity.com/blog/2024/11/22/the-nearest-neighbor-attack-how-a-russian-apt-weaponized-nearby-wi-fi-networks-for-covert-access/)
 - [5] [MITRE ATT&CK — Dead Drop Resolver (T1102.001)](https://attack.mitre.org/techniques/T1102/001/)
 - [6] [MITRE ATT&CK — Traffic Signaling (T1205)](https://attack.mitre.org/techniques/T1205/)
+{{#include ../banners/hacktricks-training.md}}
