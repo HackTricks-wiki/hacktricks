@@ -1,20 +1,20 @@
-# Exploitation Kernel Race Condition μέσω Object Manager Slow Paths
+# Εκμετάλλευση Kernel Race Condition μέσω Slow Paths του Object Manager
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Γιατί έχει σημασία η επιμήκυνση του race window
+## Γιατί έχει σημασία η διεύρυνση του race window
 
-Πολλά Windows kernel LPEs ακολουθούν το κλασικό μοτίβο `check_state(); NtOpenX("name"); privileged_action();`. Σε σύγχρονο hardware, ένα cold `NtOpenEvent`/`NtOpenSection` επιλύει ένα σύντομο όνομα σε περίπου 2 µs, αφήνοντας σχεδόν καθόλου χρόνο για την αλλαγή της ελεγμένης κατάστασης πριν εκτελεστεί η secure action. Αναγκάζοντας σκόπιμα το Object Manager Namespace (OMNS) lookup στο βήμα 2 να διαρκεί δεκάδες microseconds, ο attacker αποκτά αρκετό χρόνο ώστε να κερδίζει με συνέπεια races που διαφορετικά θα ήταν ασταθή, χωρίς να χρειάζεται χιλιάδες προσπάθειες.<sup>[[1]](#references)</sup>
+Πολλά Windows kernel LPEs ακολουθούν το κλασικό μοτίβο `check_state(); NtOpenX("name"); privileged_action();`. Σε σύγχρονο hardware, ένα cold `NtOpenEvent`/`NtOpenSection` επιλύει ένα σύντομο όνομα σε ~2 µs, αφήνοντας σχεδόν μηδενικό χρόνο για την αλλαγή της ελεγμένης κατάστασης πριν εκτελεστεί η secure action. Αναγκάζοντας σκόπιμα το Object Manager Namespace (OMNS) lookup στο βήμα 2 να διαρκεί δεκάδες μικροδευτερόλεπτα, ο attacker αποκτά αρκετό χρόνο ώστε να κερδίζει με συνέπεια races που διαφορετικά θα ήταν flaky, χωρίς να χρειάζεται χιλιάδες προσπάθειες.<sup>[[1]](#references)</sup>
 
 ## Τα εσωτερικά του Object Manager lookup με λίγα λόγια
 
-* **Δομή OMNS** – Ονόματα όπως `\BaseNamedObjects\Foo` επιλύονται directory-by-directory. Κάθε component προκαλεί στον kernel την εύρεση/άνοιγμα ενός *Object Directory* και τη σύγκριση Unicode strings. Symbolic links (π.χ. drive letters) ενδέχεται να διασχίζονται κατά τη διαδρομή.
-* **Όριο UNICODE_STRING** – Οι διαδρομές OM μεταφέρονται μέσα σε ένα `UNICODE_STRING`, του οποίου το `Length` είναι τιμή 16 bit. Το απόλυτο όριο είναι 65 535 bytes (32 767 UTF-16 codepoints). Με prefixes όπως `\BaseNamedObjects\`, ο attacker εξακολουθεί να ελέγχει περίπου 32 000 χαρακτήρες.
-* **Προαπαιτούμενα attacker** – Οποιοσδήποτε user μπορεί να δημιουργήσει objects κάτω από writable directories όπως το `\BaseNamedObjects`. Όταν ο ευάλωτος κώδικας χρησιμοποιεί ένα όνομα μέσα σε αυτό ή ακολουθεί ένα symbolic link που καταλήγει εκεί, ο attacker ελέγχει την απόδοση του lookup χωρίς special privileges.<sup>[[1]](#references)</sup>
+* **Δομή OMNS** – Ονόματα όπως `\BaseNamedObjects\Foo` επιλύονται directory-by-directory. Κάθε component προκαλεί στον kernel την εύρεση/άνοιγμα ενός *Object Directory* και τη σύγκριση Unicode strings. Symbolic links (π.χ. drive letters) μπορεί να ακολουθηθούν κατά τη διαδρομή.
+* **Όριο UNICODE_STRING** – Τα OM paths μεταφέρονται μέσα σε ένα `UNICODE_STRING`, του οποίου το `Length` είναι τιμή 16 bit. Το απόλυτο όριο είναι 65 535 bytes (32 767 UTF-16 codepoints). Με prefixes όπως το `\BaseNamedObjects\`, ο attacker εξακολουθεί να ελέγχει περίπου 32 000 χαρακτήρες.
+* **Προαπαιτούμενα attacker** – Οποιοσδήποτε user μπορεί να δημιουργεί objects κάτω από writable directories, όπως το `\BaseNamedObjects`. Όταν ο ευάλωτος κώδικας χρησιμοποιεί ένα όνομα μέσα σε αυτό ή ακολουθεί ένα symbolic link που καταλήγει εκεί, ο attacker ελέγχει την απόδοση του lookup χωρίς special privileges.<sup>[[1]](#references)</sup>
 
-## Slowdown primitive #1 – Single maximal component
+## Slowdown primitive #1 – Ένα single maximal component
 
-Το κόστος επίλυσης ενός component είναι περίπου γραμμικό ως προς το μήκος του, επειδή ο kernel πρέπει να εκτελέσει Unicode comparison με κάθε entry στο parent directory. Η δημιουργία ενός event με όνομα μήκους 32 kB αυξάνει αμέσως το latency του `NtOpenEvent` από περίπου 2 µs σε περίπου 35 µs στα Windows 11 24H2 (Snapdragon X Elite testbed).
+Το κόστος επίλυσης ενός component είναι περίπου γραμμικό ως προς το μήκος του, επειδή ο kernel πρέπει να εκτελέσει Unicode comparison με κάθε entry στο parent directory. Η δημιουργία ενός event με όνομα μήκους 32 kB αυξάνει άμεσα το latency του `NtOpenEvent` από ~2 µs σε ~35 µs στα Windows 11 24H2 (Snapdragon X Elite testbed).
 ```cpp
 std::wstring path;
 while (path.size() <= 32000) {
@@ -26,12 +26,12 @@ path += std::wstring(500, 'A');
 *Πρακτικές σημειώσεις*
 
 - Μπορείτε να φτάσετε το όριο μήκους χρησιμοποιώντας οποιοδήποτε named kernel object (events, sections, semaphores…).
-- Τα symbolic links ή τα reparse points μπορούν να δείχνουν από ένα σύντομο όνομα “victim” σε αυτό το τεράστιο component, ώστε η επιβράδυνση να εφαρμόζεται διαφανώς.
-- Επειδή όλα βρίσκονται σε namespaces εγγράψιμα από τον χρήστη, το payload λειτουργεί από ένα standard user integrity level.<sup>[[1]](#references)</sup>
+- Τα symbolic links ή τα reparse points μπορούν να παραπέμπουν από ένα σύντομο όνομα «victim» σε αυτό το τεράστιο component, ώστε η επιβράδυνση να εφαρμόζεται διαφανώς.
+- Επειδή τα πάντα βρίσκονται σε namespaces εγγράψιμα από τον χρήστη, το payload λειτουργεί από ένα standard user integrity level.<sup>[[1]](#references)</sup>
 
-## Μηχανισμός επιβράδυνσης #2 – Βαθιά αναδρομικά directories
+## Primitive επιβράδυνσης #2 – Βαθιά recursive directories
 
-Μια πιο επιθετική παραλλαγή εκχωρεί μια αλυσίδα χιλιάδων directories (`\BaseNamedObjects\A\A\...\X`). Κάθε hop ενεργοποιεί τη λογική επίλυσης directories (ACL checks, hash lookups, reference counting), επομένως το latency ανά επίπεδο είναι υψηλότερο από αυτό ενός απλού string compare. Με περίπου 16 000 levels (περιορίζονται από το ίδιο μέγεθος `UNICODE_STRING`), οι εμπειρικοί χρόνοι ξεπερνούν το όριο των 35 µs που επιτυγχάνεται με μεγάλα single components.
+Μια πιο επιθετική παραλλαγή δεσμεύει μια αλυσίδα χιλιάδων directories (`\BaseNamedObjects\A\A\...\X`). Κάθε hop ενεργοποιεί τη λογική επίλυσης directories (έλεγχοι ACL, αναζητήσεις hash, καταμέτρηση references), επομένως το latency ανά επίπεδο είναι υψηλότερο από αυτό μιας απλής σύγκρισης string. Με περίπου 16.000 επίπεδα (περιορισμένα από το ίδιο μέγεθος `UNICODE_STRING`), οι empirical μετρήσεις ξεπερνούν το όριο των 35 µs που επιτυγχάνεται με μεγάλα single components.
 ```cpp
 ScopedHandle base_dir = OpenDirectory(L"\\BaseNamedObjects");
 HANDLE last_dir = base_dir.get();
@@ -48,16 +48,16 @@ printf("%d,%f\n", i + 1, result);
 Συμβουλές:
 
 * Εναλλάσσετε τον χαρακτήρα ανά επίπεδο (`A/B/C/...`) αν ο γονικός κατάλογος αρχίσει να απορρίπτει διπλότυπα.
-* Διατηρείτε έναν πίνακα handles, ώστε να μπορείτε να διαγράψετε καθαρά την αλυσίδα μετά το exploitation και να αποφύγετε τη ρύπανση του namespace.<sup>[[1]](#references)</sup>
+* Διατηρείτε έναν πίνακα handles, ώστε να μπορείτε να διαγράψετε καθαρά την αλυσίδα μετά την exploitation και να αποφύγετε τη ρύπανση του namespace.<sup>[[1]](#references)</sup>
 
 ## Slowdown primitive #3 – Shadow directories, hash collisions & symlink reparses (λεπτά αντί για microseconds)
 
-Οι κατάλογοι αντικειμένων υποστηρίζουν **shadow directories** (αναζητήσεις fallback) και hash tables με buckets για τις καταχωρίσεις. Καταχραστείτε και τα δύο, μαζί με το όριο των 64 reparses για symbolic links, ώστε να πολλαπλασιάσετε την επιβράδυνση χωρίς να υπερβείτε το μήκος του `UNICODE_STRING`:
+Οι κατάλογοι αντικειμένων υποστηρίζουν **shadow directories** (αναζητήσεις fallback) και hash tables με buckets για τα entries. Εκμεταλλευτείτε και τα δύο, μαζί με το όριο των 64 reparses για symbolic links, ώστε να πολλαπλασιάσετε την επιβράδυνση χωρίς να υπερβείτε το μήκος του `UNICODE_STRING`:
 
-1. Δημιουργήστε δύο directories κάτω από το `\BaseNamedObjects`, για παράδειγμα `A` (shadow) και `A\A` (target). Δημιουργήστε το δεύτερο χρησιμοποιώντας το πρώτο ως shadow directory (`NtCreateDirectoryObjectEx`), ώστε οι αναζητήσεις που αποτυγχάνουν στο `A` να συνεχίζονται στο `A\A`.
-2. Γεμίστε κάθε directory με χιλιάδες **colliding names** που καταλήγουν στο ίδιο hash bucket (για παράδειγμα, μεταβάλλοντας τα τελικά ψηφία και διατηρώντας την ίδια τιμή `RtlHashUnicodeString`). Οι αναζητήσεις υποβαθμίζονται πλέον σε γραμμικές σαρώσεις O(n) μέσα σε έναν μόνο directory.
-3. Δημιουργήστε μια αλυσίδα περίπου 63 **object manager symbolic links** που κάνουν επανειλημμένα reparse στο μεγάλο suffix `A\A\…`, καταναλώνοντας το reparse budget. Κάθε reparse επανεκκινεί το parsing από την αρχή, πολλαπλασιάζοντας το κόστος των collisions.
-4. Η αναζήτηση του τελικού component (`...\\0`) διαρκεί πλέον **λεπτά** στα Windows 11 όταν υπάρχουν 16 000 collisions ανά directory, παρέχοντας πρακτικά εγγυημένη νίκη σε race conditions για one-shot kernel LPEs.
+1. Δημιουργήστε δύο καταλόγους κάτω από το `\BaseNamedObjects`, για παράδειγμα τους `A` (shadow) και `A\A` (target). Δημιουργήστε τον δεύτερο χρησιμοποιώντας τον πρώτο ως shadow directory (`NtCreateDirectoryObjectEx`), ώστε οι αναζητήσεις που αποτυγχάνουν στο `A` να συνεχίζουν στο `A\A`.
+2. Γεμίστε κάθε κατάλογο με χιλιάδες **colliding names** που καταλήγουν στο ίδιο hash bucket (για παράδειγμα, μεταβάλλοντας τα τελικά ψηφία, ενώ διατηρείται η ίδια τιμή `RtlHashUnicodeString`). Οι αναζητήσεις υποβαθμίζονται πλέον σε γραμμικές σαρώσεις O(n) μέσα σε έναν μόνο κατάλογο.
+3. Δημιουργήστε μια αλυσίδα περίπου 63 **object manager symbolic links** που κάνουν επαναλαμβανόμενα reparse στο μεγάλο επίθημα `A\A\…`, καταναλώνοντας το reparse budget. Κάθε reparse επανεκκινεί το parsing από την αρχή, πολλαπλασιάζοντας το κόστος των collisions.
+4. Η αναζήτηση του τελικού component (`...\\0`) διαρκεί πλέον **λεπτά** στα Windows 11 όταν υπάρχουν 16 000 collisions ανά κατάλογο, παρέχοντας πρακτικά εγγυημένη νίκη στο race για one-shot kernel LPEs.
 ```cpp
 ScopedHandle shadow = CreateDirectory(L"\\BaseNamedObjects\\A");
 ScopedHandle target = CreateDirectoryEx(L"A", shadow.get(), shadow.get());
@@ -68,14 +68,14 @@ printf("%f\n", RunTest(LongSuffix(L"\\A", 16000) + L"\\0", 1));
 ```
 *Γιατί έχει σημασία*: Μια επιβράδυνση διάρκειας μερικών λεπτών μετατρέπει τα one-shot race-based LPEs σε deterministic exploits.<sup>[[1]](#references)</sup>
 
-### Σημειώσεις επανελέγχου 2025 και έτοιμα εργαλεία
+### Σημειώσεις επανελέγχου του 2025 και έτοιμα εργαλεία
 
-- Ο James Forshaw αναδημοσίευσε την τεχνική με ενημερωμένους χρονισμούς στα Windows 11 24H2 (ARM64). Τα baseline opens παραμένουν περίπου στα 2 µs· ένα component μεγέθους 32 kB το αυξάνει περίπου στα 35 µs, ενώ οι αλυσίδες shadow-dir + collision + 63-reparse εξακολουθούν να φτάνουν περίπου τα 3 λεπτά, επιβεβαιώνοντας ότι τα primitives εξακολουθούν να λειτουργούν στα τρέχοντα builds. Ο πηγαίος κώδικας και το perf harness βρίσκονται στη νεότερη ανάρτηση του Project Zero.<sup>[[1]](#references)</sup>
-- Μπορείτε να αυτοματοποιήσετε το setup χρησιμοποιώντας το public bundle `symboliclink-testing-tools`: το `CreateObjectDirectory.exe` δημιουργεί το ζεύγος shadow/target και το `NativeSymlink.exe`, μέσα σε loop, δημιουργεί την αλυσίδα των 63 hops. Έτσι αποφεύγονται τα χειρόγραφα `NtCreate*` wrappers και διατηρούνται συνεπή τα ACLs.<sup>[[2]](#references)</sup>
+- Ο James Forshaw αναδημοσίευσε την τεχνική με ενημερωμένους χρονισμούς στα Windows 11 24H2 (ARM64). Τα baseline opens παραμένουν περίπου στα 2 µs· ένα component 32 kB τα αυξάνει περίπου στα 35 µs, ενώ οι αλυσίδες shadow-dir + collision + 63-reparse εξακολουθούν να φτάνουν περίπου τα 3 minutes, επιβεβαιώνοντας ότι τα primitives επιβιώνουν στα τρέχοντα builds. Ο source code και το perf harness βρίσκονται στο ανανεωμένο post του Project Zero.<sup>[[1]](#references)</sup>
+- Μπορείτε να κάνετε script το setup χρησιμοποιώντας το public bundle `symboliclink-testing-tools`: το `CreateObjectDirectory.exe` δημιουργεί το ζεύγος shadow/target και το `NativeSymlink.exe`, μέσα σε loop, δημιουργεί την αλυσίδα των 63 hops. Έτσι αποφεύγετε wrappers `NtCreate*` γραμμένα χειροκίνητα και διατηρείτε συνεπή τα ACLs.<sup>[[2]](#references)</sup>
 
-## Measuring your race window
+## Μέτρηση του race window
 
-Ενσωματώστε ένα γρήγορο harness στο exploit σας, ώστε να μετρήσετε πόσο μεγάλο γίνεται το window στο hardware του victim. Το παρακάτω snippet ανοίγει το target object `iterations` φορές και επιστρέφει το μέσο κόστος ανά open χρησιμοποιώντας το `QueryPerformanceCounter`.<sup>[[1]](#references)</sup>
+Ενσωματώστε ένα σύντομο harness στο exploit σας, ώστε να μετρήσετε πόσο μεγάλο γίνεται το window στο hardware του victim. Το παρακάτω snippet ανοίγει το target object `iterations` φορές και επιστρέφει το μέσο κόστος ανά open χρησιμοποιώντας το `QueryPerformanceCounter`.<sup>[[1]](#references)</sup>
 ```cpp
 static double RunTest(const std::wstring name, int iterations,
 std::wstring create_name = L"", HANDLE root = nullptr) {
@@ -94,27 +94,27 @@ handles.emplace_back(open_handle);
 return timer.GetTime(iterations);
 }
 ```
-Τα αποτελέσματα τροφοδοτούν άμεσα τη στρατηγική orchestration του race (π.χ. τον αριθμό των worker threads που απαιτούνται, τα sleep intervals και το πόσο νωρίς χρειάζεται να αλλάξετε την κοινόχρηστη κατάσταση).
+Τα αποτελέσματα τροφοδοτούν άμεσα τη στρατηγική orchestration του race (π.χ. τον αριθμό των worker threads που απαιτούνται, τα sleep intervals και το πόσο νωρίς πρέπει να αλλάξετε την shared state).
 
 ## Ροή εργασίας exploitation
 
-1. **Εντοπίστε το ευάλωτο open** – Ανιχνεύστε τη διαδρομή του kernel (μέσω symbols, ETW, hypervisor tracing ή reversing) μέχρι να βρείτε μια κλήση `NtOpen*`/`ObOpenObjectByName` που διασχίζει ένα όνομα ελεγχόμενο από τον attacker ή ένα symbolic link σε κατάλογο εγγράψιμο από τον χρήστη.
+1. **Εντοπίστε το ευάλωτο open** – Παρακολουθήστε τη διαδρομή του kernel (μέσω symbols, ETW, hypervisor tracing ή reversing) μέχρι να βρείτε μια κλήση `NtOpen*`/`ObOpenObjectByName` που διασχίζει ένα όνομα ελεγχόμενο από τον attacker ή ένα symbolic link σε user-writable directory.
 2. **Αντικαταστήστε αυτό το όνομα με ένα slow path**
-- Δημιουργήστε το long component ή την αλυσίδα καταλόγων κάτω από το `\BaseNamedObjects` (ή κάποια άλλη εγγράψιμη OM root).
-- Δημιουργήστε ένα symbolic link, ώστε το όνομα που αναμένει ο kernel να επιλύεται πλέον στο slow path. Μπορείτε να κατευθύνετε το directory lookup του ευάλωτου driver στη δομή σας χωρίς να αγγίξετε τον αρχικό προορισμό.
+- Δημιουργήστε το long component ή την αλυσίδα directories κάτω από το `\BaseNamedObjects` (ή άλλο writable OM root).
+- Δημιουργήστε ένα symbolic link, ώστε το όνομα που περιμένει ο kernel να επιλύεται πλέον στο slow path. Μπορείτε να κατευθύνετε το directory lookup του vulnerable driver στη δομή σας χωρίς να αγγίξετε το αρχικό target.
 3. **Ενεργοποιήστε το race**
 - Το Thread A (victim) εκτελεί τον ευάλωτο κώδικα και μπλοκάρει μέσα στο slow lookup.
-- Το Thread B (attacker) αλλάζει τη guarded state (π.χ. αντικαθιστά ένα file handle, ξαναγράφει ένα symbolic link ή αλλάζει το object security) ενώ το Thread A είναι απασχολημένο.
+- Το Thread B (attacker) αλλάζει τη guarded state (π.χ. ανταλλάσσει ένα file handle, ξαναγράφει ένα symbolic link ή αλλάζει το object security) ενώ το Thread A είναι απασχολημένο.
 - Όταν το Thread A συνεχίσει και εκτελέσει την privileged action, παρατηρεί stale state και εκτελεί την operation που ελέγχεται από τον attacker.
-4. **Εκκαθάριση** – Διαγράψτε την αλυσίδα καταλόγων και τα symbolic links, ώστε να μην αφήσετε ύποπτα artifacts ή να διακόψετε legitimate IPC users.<sup>[[1]](#references)</sup>
+4. **Καθαρισμός** – Διαγράψτε την αλυσίδα directories και τα symbolic links, ώστε να μην αφήσετε ύποπτα artifacts ή να διακόψετε legitimate IPC users.<sup>[[1]](#references)</sup>
 
 ## Εφαρμοσμένη αλυσίδα: mutable Cloud Files placeholders + Object Manager path switching
 
-Το [ShieldBreak](https://github.com/MSNightmare/ShieldBreak), που δημοσιεύτηκε ως bypass για το RoguePlanet (CVE-2026-50656), επιδεικνύει ένα ευρύτερο exploitation pattern: κάνει έναν privileged scanner να ταξινομήσει μία αναπαράσταση ενός logical file και, στη συνέχεια, αλλάζει τόσο τα bytes του όσο και το namespace resolution πριν το remediation το χρησιμοποιήσει. Το PoC συνδυάζει ένα Cloud Files hydration TOCTOU, ένα Object Manager shadow-directory fallback, capture ονομάτων που δημιουργούνται από το CLFS και ένα local administrative-share link, ώστε να μετατρέψει το Defender cleanup σε protected DLL write.<sup>[[3]](#references)[[4]](#references)</sup>
+Το [ShieldBreak](https://github.com/MSNightmare/ShieldBreak), που δημοσιεύτηκε ως bypass για το RoguePlanet (CVE-2026-50656), επιδεικνύει ένα ευρύτερο exploitation pattern: κάνει έναν privileged scanner να ταξινομήσει μία αναπαράσταση ενός logical file και, στη συνέχεια, αλλάζει τόσο τα bytes του όσο και το namespace resolution πριν η remediation process το χρησιμοποιήσει. Το PoC συνδυάζει ένα Cloud Files hydration TOCTOU, ένα Object Manager shadow-directory fallback, capture ονομάτων που δημιουργούνται από το CLFS και ένα local administrative-share link, ώστε να μετατρέψει το Defender cleanup σε protected DLL write.<sup>[[3]](#references)[[4]](#references)</sup>
 
 ### 1. Αντικατάσταση περιεχομένου μέσω Cloud Files hydration
 
-Καταχωρίστε έναν κατάλογο εγγράψιμο από τον attacker ως Cloud Files sync root, συνδέστε ένα `CF_CALLBACK_TYPE_FETCH_DATA` callback και δημιουργήστε ένα placeholder του οποίου το advertised size αντιστοιχεί σε ένα deterministic detection trigger, όπως το EICAR ZIP. Το πρώτο fetch επιστρέφει το trigger και αλλάζει την callback state· τα επόμενα fetch επιστρέφουν το payload. Αφού ο scanner ταξινομήσει την πρώτη αναπαράσταση, λάβετε το transfer key και επανεκκινήστε το hydration με metadata μεγέθους ίσου με του payload, έπειτα εξαναγκάστε το hydration έως το EOF.<sup>[[4]](#references)</sup>
+Καταχωρίστε έναν attacker-writable directory ως Cloud Files sync root, συνδέστε ένα `CF_CALLBACK_TYPE_FETCH_DATA` callback και δημιουργήστε ένα placeholder του οποίου το advertised size αντιστοιχεί σε ένα deterministic detection trigger, όπως το EICAR ZIP. Το πρώτο fetch επιστρέφει το trigger και αλλάζει την callback state· τα επόμενα fetches επιστρέφουν το payload. Αφού ο scanner ταξινομήσει την πρώτη αναπαράσταση, αποκτήστε το transfer key και επανεκκινήστε το hydration με payload-sized metadata και, στη συνέχεια, εξαναγκάστε το hydration μέχρι το EOF.<sup>[[4]](#references)</sup>
 ```cpp
 CfRegisterSyncRoot(sync_root, &registration, &policies, flags);
 CfConnectSyncRoot(sync_root, callbacks, &state, connect_flags, &connection);
@@ -125,58 +125,84 @@ opInfo.Type = CF_OPERATION_TYPE_RESTART_HYDRATION;
 CfExecute(&opInfo, &restart_params);
 CfHydratePlaceholder(placeholder_handle, {0}, CF_EOF, 0, NULL);
 ```
-Το security boundary αποτυγχάνει αν τα scan, verdict και remediation αναφέρονται μόνο σε ένα pathname ή placeholder identity: κανένα από τα δύο δεν εγγυάται ότι ένα μεταγενέστερο hydration θα επιστρέψει τα bytes που εξετάστηκαν.<sup>[[4]](#references)</sup>
+Το security boundary αποτυγχάνει αν το scan, το verdict και το remediation αναφέρονται μόνο σε ένα pathname ή σε μια placeholder identity: κανένα από τα δύο δεν εγγυάται ότι ένα μεταγενέστερο hydration θα επιστρέψει τα bytes που επιθεωρήθηκαν.<sup>[[4]](#references)</sup>
 
-### 2. Μεταβολή ενός invariant path μέσω shadow-directory fallback
+### 2. Αλλαγή ενός invariant path μέσω shadow-directory fallback
 
-Δημιουργήστε έναν target Object Manager directory και έναν δεύτερο directory με `NtCreateDirectoryObjectEx`, περνώντας το target handle ως shadow/fallback directory. Τοποθετήστε ένα same-named `WD_SCAN` entry και στα δύο resolution layers: το visible entry δείχνει στο normal working directory, ενώ το fallback entry δείχνει στο `\CLFS\??\<working-directory>`. Παρέχετε στο Defender μόνο το invariant path παρακάτω· η διαγραφή του visible link όσο η λειτουργία είναι ενεργή κάνει το ίδιο string να καταλήξει στο CLFS-backed entry.<sup>[[4]](#references)</sup>
+Δημιουργήστε έναν target Object Manager directory και έναν δεύτερο directory με `NtCreateDirectoryObjectEx`, περνώντας το handle του target ως shadow/fallback directory. Τοποθετήστε μια entry με το ίδιο όνομα, `WD_SCAN`, και στα δύο resolution layers: η visible entry δείχνει στο κανονικό working directory, ενώ η fallback entry δείχνει στο `\CLFS\??\<working-directory>`. Δώστε στο Defender μόνο το παρακάτω invariant path· η διαγραφή του visible link ενώ η operation βρίσκεται σε εξέλιξη κάνει το ίδιο string να ακολουθήσει το fallback προς την CLFS-backed entry.<sup>[[4]](#references)</sup>
 ```text
 \\.\globalroot\BaseNamedObjects\Restricted\WD_SHADOW_<GUID>\WD_SCAN\BERLIN
 ```
-Αυτό διαφέρει από τη χρήση shadow directories μόνο για την επιβράδυνση της αναζήτησης: ο attacker αλλάζει το **meaning** μιας προηγουμένως αποδεκτής διαδρομής χωρίς να τροποποιήσει το string της.<sup>[[4]](#references)</sup>
+Αυτό διαφέρει από τη χρήση shadow directories μόνο για την επιβράδυνση της αναζήτησης: ο attacker αλλάζει το **νόημα** μιας διαδρομής που είχε προηγουμένως γίνει αποδεκτή, χωρίς να τροποποιήσει το string της.<sup>[[4]](#references)</sup>
 
-### 3. Καταγράψτε το generated name και εγκαταστήστε ένα filename-specific link
+### 3. Καταγραφή του παραγόμενου ονόματος και εγκατάσταση filename-specific link
 
-Παρακολουθήστε τον working directory με το `ReadDirectoryChangesW`. Στο πρώτο `FILE_ACTION_ADDED`, αφαιρέστε το ορατό `WD_SCAN` link για να ενεργοποιήσετε το fallback lookup. Καταγράψτε το δεύτερο generated filename, ανοίξτε το σχετικό με το CLFS αρχείο και κλειδώστε το range `0..MAXLONGLONG` με το `LockFileEx`. Ενώ η privileged operation έχει stalled, αντικαταστήστε το `WD_SCAN` στον ορατό directory με έναν πραγματικό Object Manager directory και δημιουργήστε ένα child symbolic link με όνομα βασισμένο στο observed filename (το PoC αφαιρεί τους τέσσερις τελευταίους χαρακτήρες του). Κατευθύνετέ το στον protected destination μέσω local SMB:<sup>[[4]](#references)</sup>
+Παρακολουθήστε τον working directory με το `ReadDirectoryChangesW`. Στο πρώτο `FILE_ACTION_ADDED`, αφαιρέστε το ορατό link `WD_SCAN` για να ενεργοποιήσετε το fallback lookup. Καταγράψτε το δεύτερο παραγόμενο filename, ανοίξτε το συγκεκριμένο CLFS-related αρχείο και κλειδώστε το range `0..MAXLONGLONG` με το `LockFileEx`. Όσο η privileged operation είναι σε αναμονή, αντικαταστήστε το `WD_SCAN` στον ορατό κατάλογο με έναν πραγματικό Object Manager directory και δημιουργήστε ένα child symbolic link με όνομα βασισμένο στο filename που παρατηρήθηκε (το PoC αφαιρεί τους τέσσερις τελευταίους χαρακτήρες του). Κατευθύνετέ το προς τον protected destination μέσω local SMB:<sup>[[4]](#references)</sup>
 ```text
 \??\UNC\127.0.0.1\C$\Windows\System32\phoneinfo.dll
 ```
-Η μη προνομιούχα διεργασία δεν μπορεί να γράψει η ίδια σε αυτόν τον προορισμό, όμως το context SYSTEM του Defender μπορεί να διασχίσει το loopback administrative share. Ο συνδυασμός παρατήρησης generated names με ένα filename-specific Object Manager link εξαλείφει την ανάγκη πρόβλεψης του remediation artifact εκ των προτέρων.<sup>[[4]](#references)</sup>
+Η μη προνομιούχα διεργασία δεν μπορεί να γράψει η ίδια σε αυτόν τον προορισμό, όμως το context SYSTEM του Defender μπορεί να διασχίσει το loopback administrative share. Ο συνδυασμός παρατήρησης των παραγόμενων ονομάτων με ένα filename-specific Object Manager link εξαλείφει την ανάγκη πρόβλεψης του remediation artifact εκ των προτέρων.<sup>[[4]](#references)</sup>
 
 ### 4. Σταθεροποίηση του cleanup race και ενεργοποίηση privileged loader
 
-Πριν από τη σάρωση, το PoC αποθηκεύει ένα έγκυρο PE (`ntdll.dll`) στο `:stream` NTFS alternate data stream του placeholder. Αφού η ανακατεύθυνση δημιουργήσει το protected base file, ανοίγει το `phoneinfo.dll:stream` με execute access και διατηρεί ενεργό ένα `PAGE_EXECUTE_READ | SEC_IMAGE` mapping, ενώ το cleanup συνεχίζεται· τα ενεργά file/section objects περιορίζουν τη διαγραφή ή την αντικατάσταση κατά το final race. Το restarted hydration επιστρέφει πλέον το payload DLL αντί για το EICAR, οπότε το protected base file περιέχει code που ελέγχεται από τον attacker.<sup>[[4]](#references)</sup>
+Πριν από τη σάρωση, το PoC αποθηκεύει ένα έγκυρο PE (`ntdll.dll`) στο `:stream` NTFS alternate data stream του placeholder. Αφού η ανακατεύθυνση δημιουργήσει το προστατευμένο base file, ανοίγει το `phoneinfo.dll:stream` με execute access και διατηρεί ενεργό ένα `PAGE_EXECUTE_READ | SEC_IMAGE` mapping ενώ συνεχίζεται το cleanup· τα ζωντανά file/section objects περιορίζουν τη διαγραφή ή την αντικατάσταση κατά το τελικό race. Η επανεκκινημένη hydration επιστρέφει πλέον το payload DLL αντί για το EICAR, με αποτέλεσμα το προστατευμένο base file να περιέχει code ελεγχόμενο από τον attacker.<sup>[[4]](#references)</sup>
 
-Στη συνέχεια, ένα protected write μετατρέπεται σε SYSTEM execution με την τοποθέτηση ενός crafted `Report.wer` κάτω από το `C:\ProgramData\Microsoft\Windows\WER\ReportQueue\...` και την invocation του `\Microsoft\Windows\Windows Error Reporting\QueueReporting` μέσω του Task Scheduler COM API. Σε αυτή την αλυσίδα, το privileged WER processing φορτώνει το planted `C:\Windows\System32\phoneinfo.dll`· μια named-pipe connection χρησιμοποιείται ως payload execution signal.<sup>[[4]](#references)</sup>
+Στη συνέχεια, ένα protected write μετατρέπεται σε SYSTEM execution με την τοποθέτηση ενός crafted `Report.wer` κάτω από το `C:\ProgramData\Microsoft\Windows\WER\ReportQueue\...` και την κλήση του `\Microsoft\Windows\Windows Error Reporting\QueueReporting` μέσω του Task Scheduler COM API. Σε αυτή την αλυσίδα, το privileged WER processing φορτώνει το planted `C:\Windows\System32\phoneinfo.dll`· μια named-pipe connection χρησιμοποιείται ως payload execution signal.<sup>[[4]](#references)</sup>
 
 ### Detection pivots
 
-Οι χρήσιμες συσχετίσεις είναι πιο συγκεκριμένες από οποιοδήποτε μεμονωμένο temporary filename και καλύπτουν όλες τις namespace transitions της αλυσίδας:<sup>[[4]](#references)</sup>
+Οι χρήσιμες συσχετίσεις είναι πιο συγκεκριμένες από οποιοδήποτε μεμονωμένο temporary filename και καλύπτουν όλες τις μεταβάσεις namespace στην αλυσίδα:<sup>[[4]](#references)</sup>
 
 - Ένας newly registered Cloud Files provider, ακολουθούμενος από EICAR detection και `CF_OPERATION_TYPE_RESTART_HYDRATION` στο ίδιο placeholder.
-- Object Manager paths που περιέχουν `WD_TARGET_*`, `WD_SHADOW_*` ή `WD_SCAN`, ειδικά ένα scan path κάτω από το `\\.\globalroot\BaseNamedObjects\Restricted\`.
-- CLFS file creation, ακολουθούμενο από exclusive whole-file lock και loopback access στο `\\127.0.0.1\C$\Windows\System32\*.dll` από ένα privileged security process.
-- Creation ενός System32 DLL μαζί με ένα NTFS ADS, ακολουθούμενο από `SEC_IMAGE` mapping του stream.
-- Ένα attacker-created WER queue entry, ακολουθούμενο από ένα unusual manual run του `\Microsoft\Windows\Windows Error Reporting\QueueReporting` και ένα image load του planted DLL.
+- Object Manager paths που περιέχουν `WD_TARGET_*`, `WD_SHADOW_*` ή `WD_SCAN`, ιδιαίτερα ένα scan path κάτω από το `\\.\globalroot\BaseNamedObjects\Restricted\`.
+- Δημιουργία CLFS file, ακολουθούμενη από exclusive whole-file lock και loopback access στο `\\127.0.0.1\C$\Windows\System32\*.dll` από privileged security process.
+- Δημιουργία System32 DLL μαζί με NTFS ADS, ακολουθούμενη από `SEC_IMAGE` mapping του stream.
+- Ένα attacker-created WER queue entry, ακολουθούμενο από ασυνήθιστο manual run του `\Microsoft\Windows\Windows Error Reporting\QueueReporting` και image load του planted DLL.
 
-## Επιχειρησιακές considerations
+## Applied chain: oplock-gated mount-point switch against privileged remediation
 
-- **Συνδυάστε primitives** – Μπορείτε να χρησιμοποιήσετε ένα long name *ανά level* σε μια directory chain για ακόμη υψηλότερο latency, μέχρι να εξαντλήσετε το μέγεθος του `UNICODE_STRING`.
-- **One-shot bugs** – Το διευρυμένο window (δεκάδες microseconds έως minutes) καθιστά ρεαλιστικά τα “single trigger” bugs όταν συνδυάζονται με CPU affinity pinning ή hypervisor-assisted preemption.
-- **Side effects** – Το slowdown επηρεάζει μόνο το malicious path, οπότε η συνολική απόδοση του συστήματος παραμένει ανεπηρέαστη· οι defenders σπάνια θα το παρατηρήσουν, εκτός αν παρακολουθούν την αύξηση του namespace.
-- **Cleanup** – Διατηρήστε handles σε κάθε directory/object που δημιουργείτε, ώστε να μπορείτε να καλέσετε `NtMakeTemporaryObject`/`NtClose` στη συνέχεια. Διαφορετικά, unbounded directory chains ενδέχεται να παραμείνουν μετά από reboot.
+Ένα επαναχρησιμοποιήσιμο LPE pattern εμφανίζεται όταν ένας privileged scanner ελέγχει ένα attacker-controlled file και αργότερα εκτελεί remediation ανοίγοντάς το ξανά μέσω του **pathname**, αντί να συνεχίσει μέσω validated handles. Το FalconFlank είναι ένα public example που στοχεύει το Office macro-removal workflow του CrowdStrike Falcon· το repository υποστηρίζει testing σε Windows 11 25H2 και Windows Server 2025 με ενεργοποιημένη τη σχετική policy, αλλά δεν δημοσιεύει CVE, affected-build range, vendor advisory ή patch status, επομένως ο product-specific ισχυρισμός πρέπει να θεωρείται μη επαληθευμένος και εξαρτώμενος από το build.<sup>[[5]](#references)[[6]](#references)</sup>
+
+### Race layout
+
+1. Δημιουργήστε ένα writable tree του οποίου το τελικό relative name είναι χρήσιμο στον intended destination. Το example χρησιμοποιεί `%TEMP%\\Flanker_{GUID}\\WindowsPowerShell\\v1.0\\bcrypt.dll`, αλλά αρχικά γράφει ένα OLE macro document — όχι ένα PE DLL — στο `bcrypt.dll`. Το content-based detection ενεργοποιεί το remediation, ενώ το attacker-controlled basename διατηρείται για το μεταγενέστερο side-load.<sup>[[5]](#references)</sup>
+2. Ανοίξτε τα directories με broad sharing και `FILE_OPEN_REPARSE_POINT`, έπειτα ζητήστε ένα asynchronous RH oplock στο trigger με `FSCTL_REQUEST_OPLOCK`, `OPLOCK_LEVEL_CACHE_READ | OPLOCK_LEVEL_CACHE_HANDLE` και `REQUEST_OPLOCK_INPUT_FLAG_REQUEST`. Περιμένετε το overlapped event και χρησιμοποιήστε την ολοκλήρωσή του ως path-switch cue. Μια RH oplock-break notification είναι advisory και όχι απόδειξη ότι κάθε conflicting operation έχει μπλοκαριστεί, επομένως η exploitability εξακολουθεί να εξαρτάται από την ακριβή open/remediation sequence του victim.<sup>[[5]](#references)[[7]](#references)</sup>
+3. Μετά το break, αφαιρέστε το leaf directory με `FileDispositionInformationEx` (information class 64), χρησιμοποιώντας delete μαζί με POSIX-semantics flags, κλείστε το handle του και εφαρμόστε ένα `IO_REPARSE_TAG_MOUNT_POINT` στο πλέον κενό parent με `FSCTL_SET_REPARSE_POINT_EX`. Το mount point ανακατευθύνει το unchanged suffix σε ένα protected tree όπως το `\\SystemRoot\\System32\\WindowsPowerShell`· η ρύθμιση ενός reparse point αποτυγχάνει αν το directory δεν είναι κενό, γεγονός που εξηγεί το προηγούμενο deletion step.<sup>[[5]](#references)[[8]](#references)</sup>
+4. Συνεχίστε το privileged workflow. Αν επιλύσει ξανά το string χωρίς να αποδείξει ότι το directory chain και το final object είναι εκείνα που ελέγχθηκαν προηγουμένως, το ίδιο logical pathname οδηγεί πλέον στο attacker-selected protected directory. Στο example, η επιτυχία ελέγχεται με το εκ νέου άνοιγμα του `C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\bcrypt.dll` για read/write από την original process· αυτό διαχωρίζει το confused-deputy write primitive από το μεταγενέστερο code-execution stage.<sup>[[5]](#references)</sup>
+5. Αντικαταστήστε το resulting file με το πραγματικό DLL και ενεργοποιήστε έναν privileged loader. Το PoC χρησιμοποιεί `CreateTransaction` + `CreateFileTransacted`, κάνει truncate στο file, κάνει map το DLL-sized replacement, αντιγράφει το PE και εκτελεί commit· το TxF συνδέει το file handle και τις επακόλουθες handle-based operations με το transaction, αλλά αποτελεί post-race replacement mechanism και όχι την πηγή της αποτυχίας του privilege boundary.<sup>[[5]](#references)[[9]](#references)</sup>
+6. Τέλος, εκτελέστε ένα υπάρχον privileged scheduled task του οποίου το executable κάνει probe στο planted adjacent filename. Το FalconFlank καλεί το `\\Microsoft\\Windows\\Application Experience\\MareBackup`, περιμένει το DLL να συνδεθεί στο `\\??\\pipe\\FALCONFLANK` και στη συνέχεια διαγράφει το planted file. Μην υποθέτετε συγκεκριμένο resulting token αποκλειστικά από το task name — επαληθεύστε τη launched process, το module path, το integrity level και το token στο tested build.<sup>[[5]](#references)</sup>
+
+Το βασικό audit question επομένως δεν είναι «επικυρώνει η service το original input path;» αλλά «παραμένει κάθε privileged mutation συνδεδεμένο με τα ίδια opened file και directory objects που επικυρώθηκαν;». Η διατήρηση handles μεταξύ check και use, το άνοιγμα child objects relative σε trusted directory handle, η απόρριψη μη αναμενόμενων reparse tags και η επανεπικύρωση της file identity πριν από το mutation κλείνουν αυτή την κατηγορία pathname-substitution bug.<sup>[[1]](#references)[[8]](#references)</sup>
+
+### Detection and PoC triage
+
+Το high-signal detection συσχετίζει τη namespace transition με τον privileged consumer: ένα OLE header κάτω από DLL basename σε GUID-named temporary tree, ένα oplock break, POSIX-style removal του leaf directory, δημιουργία mount point που στοχεύει protected Windows directory και δημιουργία ή τροποποίηση του ίδιου basename κάτω από αυτόν τον destination. Για το public example, προσθέστε τα `C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\bcrypt.dll`, manual execution του `MareBackup` και τη named pipe `FALCONFLANK` ως πιο στενά pivots· κανένα από αυτά δεν επαρκεί μόνο του.<sup>[[5]](#references)</sup>
+
+Κατά την αναπαραγωγή του PoC, λάβετε υπόψη τρία reliability defects στο published source: καλεί το `FlushFileBuffers` με pointer προς το embedded byte-array αντί για το file handle, ελέγχει ένα stale `HRESULT` μετά τα `GetFolder`, `GetTask` και `Run`, και χρησιμοποιεί unbounded retry/wait loops για directory deletion, reparse creation, το oplock event και το pipe connection.<sup>[[5]](#references)</sup>
+
+## Operational considerations
+
+- **Συνδυασμός primitives** – Μπορείτε να χρησιμοποιήσετε ένα long name *ανά level* σε ένα directory chain για ακόμη μεγαλύτερο latency, μέχρι να εξαντλήσετε το μέγεθος του `UNICODE_STRING`.
+- **One-shot bugs** – Το διευρυμένο window (από δεκάδες microseconds έως minutes) καθιστά ρεαλιστικά τα “single trigger” bugs όταν συνδυάζονται με CPU affinity pinning ή hypervisor-assisted preemption.
+- **Side effects** – Η slowdown επηρεάζει μόνο το malicious path, επομένως η συνολική system performance παραμένει ανεπηρέαστη· οι defenders σπάνια θα το παρατηρήσουν, εκτός αν παρακολουθούν την ανάπτυξη του namespace.
+- **Cleanup** – Διατηρήστε handles σε κάθε directory/object που δημιουργείτε, ώστε να μπορείτε να καλέσετε `NtMakeTemporaryObject`/`NtClose` αργότερα. Διαφορετικά, unbounded directory chains ενδέχεται να παραμείνουν μετά από reboot.
 - **File-system races** – Αν το vulnerable path τελικά επιλύεται μέσω NTFS, μπορείτε να τοποθετήσετε ένα Oplock (π.χ. το `SetOpLock.exe` από το ίδιο toolkit) στο backing file ενώ εκτελείται το OM slowdown, παγώνοντας τον consumer για επιπλέον milliseconds χωρίς να τροποποιήσετε το OM graph.<sup>[[2]](#references)</sup>
 
-## Αμυντικές σημειώσεις
+## Defensive notes
 
-- Ο kernel code που βασίζεται σε named objects θα πρέπει να επανεπικυρώνει το security-sensitive state *μετά* το open ή να λαμβάνει reference πριν από τον έλεγχο (κλείνοντας το TOCTOU gap).
-- Επιβάλετε upper bounds στο OM path depth/length πριν από το dereferencing user-controlled names. Η απόρριψη υπερβολικά long names αναγκάζει τους attackers να επιστρέψουν στο microsecond window.
-- Κάντε instrument την αύξηση του object manager namespace (ETW `Microsoft-Windows-Kernel-Object`) για τον εντοπισμό ύποπτων chains με χιλιάδες components κάτω από το `\BaseNamedObjects`.
+- Ο kernel code που βασίζεται σε named objects πρέπει να επανεπικυρώνει το security-sensitive state *μετά* το open ή να λαμβάνει reference πριν από το check, κλείνοντας το TOCTOU gap.
+- Επιβάλετε upper bounds στο OM path depth/length πριν από το dereferencing user-controlled names. Η απόρριψη υπερβολικά μεγάλων names αναγκάζει τους attackers να επιστρέψουν στο microsecond window.
+- Instrument το object manager namespace growth (ETW `Microsoft-Windows-Kernel-Object`) για τον εντοπισμό ύποπτων chains με χιλιάδες components κάτω από το `\BaseNamedObjects`.
 
 ## References
 
-- [1] [Project Zero – Τεχνικές Exploitation στα Windows: Κερδίζοντας Race Conditions με Path Lookups](https://projectzero.google/2025/12/windows-exploitation-techniques.html)
+- [1] [Project Zero – Τεχνικές Windows Exploitation: Κερδίζοντας Race Conditions με Path Lookups](https://projectzero.google/2025/12/windows-exploitation-techniques.html)
 - [2] [googleprojectzero/symboliclink-testing-tools](https://github.com/googleprojectzero/symboliclink-testing-tools)
 - [3] [MSNightmare/ShieldBreak](https://github.com/MSNightmare/ShieldBreak)
 - [4] [ShieldBreak.cpp (commit be016d8)](https://github.com/MSNightmare/ShieldBreak/blob/be016d8c18c8355a12753286c1ce9d5a48a0dab4/ShieldBreak.cpp)
+- [5] [FalconFlank.cpp (commit 702b574)](https://github.com/MSNightmare/FalconFlank/blob/702b57477a9f0a99ddabef56e7ebe6c1e99c2435/FalconFlank.cpp)
+- [6] [MSNightmare/FalconFlank](https://github.com/MSNightmare/FalconFlank)
+- [7] [Microsoft Learn - FSCTL_REQUEST_OPLOCK](https://learn.microsoft.com/en-us/windows/win32/api/winioctl/ni-winioctl-fsctl_request_oplock)
+- [8] [Microsoft Learn - FSCTL_SET_REPARSE_POINT_EX](https://learn.microsoft.com/en-us/windows-hardware/drivers/ifs/fsctl-set-reparse-point-ex)
+- [9] [Microsoft Learn - Πώς να χρησιμοποιήσετε το Transactional NTFS](https://learn.microsoft.com/en-us/windows/win32/fileio/how-to-use-transactional-ntfs)
 {{#include ../../banners/hacktricks-training.md}}
