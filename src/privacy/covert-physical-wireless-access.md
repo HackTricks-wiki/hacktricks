@@ -1,22 +1,24 @@
 # Ukryty dostęp fizyczny i bezprzewodowy
 
-Szczegółową, zatwierdzoną przez właściciela implementację obejmującą outbound rendezvous, odzyskiwanie zasilania/uplink, minimalną ilość sekretów przechowywanych na urządzeniu, testy przechwycenia oraz monitorowanie pod kątem możliwego wykrycia opisano w [Capture-Resilient Authorized Field Nodes](capture-resilient-authorized-field-nodes.md).
+{{#include ../banners/hacktricks-training.md}}
 
-Zmiana ścieżki sieciowej może również zmienić pozorne źródło fizyczne. Wyrafinowany aktor może użyć pobliskiego przejętego systemu, ukrytego urządzenia, publicznego dostępu, cellular backhaul lub odbiornika satelitarnego, aby logi celu wskazywały lokalizację inną niż operatora. Żadne z tych rozwiązań nie usuwa dowodów fizycznych, radiowych ani pochodzących od providera; przenosi atrybucję do innych zbiorów danych.
+Szczegółową, zatwierdzoną przez właściciela implementację obejmującą outbound rendezvous, odzyskiwanie zasilania/uplink, minimalną liczbę sekretów przechowywanych na urządzeniu, testy przechwytywania oraz monitoring pod kątem możliwego wykrycia opisano w [Capture-Resilient Authorized Field Nodes](capture-resilient-authorized-field-nodes.md).
+
+Zmiana ścieżki sieciowej może również zmienić pozorne źródło fizyczne. Zaawansowany aktor może użyć pobliskiego skompromitowanego systemu, ukrytego urządzenia, publicznego dostępu, cellular backhaul lub odbiornika satelitarnego, aby logi celu wskazywały miejsce oddalone od operatora. Żadne z tych rozwiązań nie usuwa dowodów fizycznych, radiowych ani pochodzących od providera; przenosi atrybucję do innych zbiorów danych.
 
 ## Macierz technik
 
 | Technika | Pozorne źródło | Niezbędny warunek | Dowody o wysokiej wartości |
 |---|---|---|---|
-| Pobliskie wireless pivot | firma/dom obok celu | przejęty host dual-homed i dostęp do docelowej sieci Wi-Fi | logi endpointu sąsiedniego hosta, skojarzenia RF oraz RADIUS/DHCP celu |
-| Sieć publiczna/gościnna | NAT obiektu lub wyjście tunelu | zgodny z prawem dostęp lub obejście kontroli dostępu | captive portal, DHCP, skojarzenie z AP, monitoring CCTV oraz dane płatności/lokalizacji |
-| Ukryte urządzenie drop | przewodowy, Wi-Fi lub cellular adres celu/pobliskiej lokalizacji | fizyczne umieszczenie lub dostarczenie | switchport/USB, RF, inwentaryzacja, zasilanie oraz telemetryka outbound tunnel |
-| Router cellular/eSIM | NAT operatora lub dedykowany APN | modem/SIM/subskrypcja | IMEI/IMSI/eSIM, sektor stacji bazowej, konto operatora oraz czasowa korelacja ruchu |
+| Pobliskie wireless pivot | firma/dom obok celu | skompromitowany host dual-homed i dostęp do Wi-Fi celu | logi endpointu sąsiedniego hosta, skojarzenie RF oraz RADIUS/DHCP celu |
+| Sieć publiczna/gościnna | NAT obiektu lub wyjście tunelu | zgodny z prawem dostęp lub obejście kontroli dostępu | captive portal, DHCP, skojarzenie z AP, CCTV oraz dane płatności/lokalizacji |
+| Ukryte urządzenie podrzucone | adres przewodowy, Wi-Fi lub komórkowy celu/pobliskiego obiektu | fizyczne umieszczenie lub dostarczenie | switchport/USB, RF, inwentaryzacja, zasilanie oraz telemetryka outbound tunnel |
+| Router komórkowy/eSIM | NAT operatora lub dedykowany APN | modem/SIM/subskrypcja | IMEI/IMSI/eSIM, sektor komórkowy, konto operatora oraz synchronizacja czasowa ruchu |
 | Nadużycie łącza satelitarnego | adres subskrybenta w zasięgu wiązki | słabość specyficzna dla protokołu i usługi | lokalizacja RF, przepływ uplink, niemożliwe RTT/routing oraz rejestry providera |
 
 ## Nearest-neighbor attack
 
-Volexity udokumentowało operację APT28/GRU z 2022 roku, w której aktor znajdował się zdalnie względem ostatecznego celu. Przeprowadził password spraying na publicznej usłudze celu, aby uzyskać prawidłowe dane uwierzytelniające, lecz MFA uniemożliwiło bezpośrednie logowanie z Internetu. Enterprise Wi-Fi celu akceptowała te dane bez MFA. Aktor przejął organizacje znajdujące się fizycznie blisko celu, znalazł system dual-homed z zasięgiem bezprzewodowym i użył go do uwierzytelnienia w docelowej sieci Wi-Fi. Volexity nazwało to **Nearest Neighbor Attack**.<sup>[[1]](#references)</sup>
+Volexity udokumentowało w 2022 roku operację APT28/GRU, w której aktor znajdował się zdalnie względem ostatecznego celu. Wykorzystał password spraying przeciwko publicznej usłudze celu, aby uzyskać prawidłowe dane uwierzytelniające, ale MFA uniemożliwiło bezpośrednie logowanie z Internetu. Korporacyjne Wi-Fi celu akceptowało te dane bez MFA. Aktor skompromitował organizacje znajdujące się fizycznie blisko celu, znalazł system dual-homed z zasięgiem bezprzewodowym i użył go do uwierzytelnienia się w Wi-Fi celu. Volexity nazwało tę technikę **Nearest Neighbor Attack**.<sup>[[1]](#references)</sup>
 ```text
 remote operator
 |
@@ -26,38 +28,38 @@ compromised organization B -- Wi-Fi radio --> target organization A
 |
 internal service
 ```
-Nowość polega na kompozycji. Żaden operator nie udaje się do celu, a MFA usługi dostępnej z Internetu nadal działa. Zaatakowany sąsiad zapewnia fizyczną bliskość; skradzione dane uwierzytelniające celu zapewniają dostęp logiczny; docelowa sieć Wi-Fi staje się ścieżką przekraczania granicy.
+Nowatorstwo polega na kompozycji. Żaden operator nie przemieszcza się do celu, a MFA usługi wystawionej do Internetu nadal działa. Przejęty system sąsiada zapewnia fizyczną bliskość; skradzione dane uwierzytelniające celu zapewniają dostęp logiczny; docelowa sieć Wi-Fi staje się ścieżką przekraczania granicy.
 
 ### Warunki wstępne i widoczność
 
-- Pobliskim systemem musi dać się zdalnie sterować, a system ten musi mieć kompatybilne radio lub dostęp do innego pobliskiego punktu pośredniczącego.
-- Docelowy SSID musi być osiągalny z tego systemu, a dopuszczenie do Wi-Fi musi akceptować wielokrotnie używalne dane uwierzytelniające, certyfikat lub stan urządzenia.
-- Punkt pośredniczący często potrzebuje dwóch jednoczesnych ścieżek: jednej z powrotem do operatora i jednej do docelowej sieci WLAN.
-- Cel może zobaczyć nowy adres MAC stacji i prawidłową nazwę użytkownika, ale bez odpowiadającego mu certyfikatu zarządzanego urządzenia, informacji o stanie, historii lub oczekiwanego wpisu do budynku.
-- Logi endpointu sąsiada mogą wskazywać skanowanie sieci bezprzewodowych, nowe profile, zmiany interfejsów, tunelowanie i aktywność związaną ze zdalnym sterowaniem.
+- Pobliskim systemem musi dać się zdalnie sterować, a także musi on mieć kompatybilne radio lub dostęp do innego pobliskiego pivota.
+- Docelowy SSID musi docierać do tego systemu, a dopuszczenie do Wi-Fi musi akceptować wielokrotnie używalne dane uwierzytelniające, certyfikat lub stan urządzenia.
+- Pivot często potrzebuje dwóch jednoczesnych ścieżek: jednej z powrotem do operatora i jednej do docelowej sieci WLAN.
+- Cel może zobaczyć nowy adres MAC stacji i prawidłową nazwę użytkownika, ale bez odpowiadającego certyfikatu zarządzanego urządzenia, informacji o posture, historii lub oczekiwanego wejścia do budynku.
+- Logi endpointu sąsiada mogą rejestrować skanowanie sieci bezprzewodowych, nowe profile, zmiany interfejsów, tunneling oraz aktywność związaną ze zdalnym sterowaniem.
 
 ### Wykrywanie i zapobieganie
 
-1. Wymagaj EAP-TLS opartego na certyfikatach oraz stanu zarządzanego urządzenia dla firmowej sieci Wi-Fi; nie uznawaj hasła, które nie przeszło MFA w Internecie, za wystarczające tylko dlatego, że dociera drogą radiową.
-2. Koreluj uwierzytelnianie RADIUS z tożsamością MDM/NAC, historycznym powiązaniem stacji z urządzeniem, lokalizacją AP, zdarzeniami dostępu fizycznego i równoczesnymi sesjami.
-3. Generuj alert, gdy konto łączy się po raz pierwszy, z nietypowego brzegu AP, bez zarządzanego certyfikatu lub gdy ta sama tożsamość jest aktywna w innym miejscu.
-4. Monitoruj endpointy zdolne do mostkowania interfejsów. W systemach Windows, Linux i urządzeniach sieciowych analizuj nieoczekiwane profile WLAN, konfiguracje przekazywania/NAT, wirtualne adaptery i trwałe tunele.
-5. Ograniczaj niepotrzebne rozchodzenie się sygnału dzięki rozsądnemu rozmieszczeniu AP i planowaniu mocy. Jest to środek pomocniczy, a nie uwierzytelnianie.
-6. Koordynuj reagowanie na incydenty z sąsiednimi najemcami: ostateczne źródło radiowe może samo być ofiarą.
+1. Wymagaj EAP-TLS opartego na certyfikatach oraz posture zarządzanego urządzenia dla firmowego Wi-Fi; nie uznawaj hasła, które nie przeszło MFA w Internecie, za wystarczające tylko dlatego, że dociera drogą radiową.
+2. Koreluj uwierzytelnianie RADIUS z tożsamością MDM/NAC, historycznym powiązaniem stacji z urządzeniem, lokalizacją AP, zdarzeniami dostępu fizycznego oraz równoczesnymi sesjami.
+3. Generuj alert, gdy konto łączy się po raz pierwszy, z nietypowej krawędzi AP, bez zarządzanego certyfikatu lub gdy ta sama tożsamość jest aktywna w innym miejscu.
+4. Monitoruj endpointy zdolne do łączenia interfejsów. W systemach Windows, Linux i appliance'ach sieciowych analizuj nieoczekiwane profile WLAN, konfigurację forwarding/NAT, wirtualne adaptery oraz trwałe tunele.
+5. Ograniczaj niepotrzebne rozprzestrzenianie sygnału poprzez rozsądne rozmieszczenie AP i planowanie mocy. Jest to kontrola wspierająca, a nie uwierzytelnianie.
+6. Koordynuj incident response z sąsiednimi najemcami: końcowe źródło radiowe może samo być ofiarą.
 
-[Posiadane laboratorium dwóch organizacji](authorized-adversary-emulation-labs.md#lab-4-nearest-neighbor-wireless-pivot) odtwarza te obserwowalne oznaki bez atakowania sąsiada.
+[Owned two-organization lab](authorized-adversary-emulation-labs.md#lab-4-nearest-neighbor-wireless-pivot) odtwarza te obserwowalne oznaki bez atakowania sąsiada.
 
-## Publiczne obiekty i sieci Wi-Fi podmiotów trzecich
+## Publiczne miejsca i Wi-Fi stron trzecich
 
-Korzystanie z sieci Wi-Fi w kawiarni, hotelu, na lotnisku lub udostępnianej przez gminę zmienia adres IP widoczny dla celu. Nie zapewnia jednak anonimowości. Obiekt lub jego dostawca może przechowywać informacje o połączeniu z AP, adres MAC urządzenia, dzierżawę DHCP, konto portalu captive portal, weryfikację SMS/e-mail oraz logi przepływów. Fizyczne wejście, monitoring CCTV, zakup, dane o lokalizacji telefonu komórkowego i rejestry podróży mogą połączyć zdarzenie cyfrowe z konkretną osobą.
+Korzystanie z Wi-Fi w kawiarni, hotelu, na lotnisku lub w sieci miejskiej zmienia adres IP widoczny dla celu. Nie zapewnia anonimowości. Miejsce lub jego dostawca może przechowywać informacje o powiązaniu z AP, adres MAC urządzenia, dzierżawę DHCP, konto captive portal, walidację SMS/email oraz logi przepływów. Dane o wejściu do obiektu, nagrania CCTV, zakup, lokalizacja telefonu komórkowego i rejestry podróży mogą połączyć zdarzenie cyfrowe z konkretną osobą.
 
-Aktor może próbować ograniczyć jeden ze śladów, używając losowych adresów MAC, oddzielnego urządzenia, gotówki lub tunelu. Korelacja między warstwami nadal jest możliwa dzięki czasowi przybycia, powtarzającym się schematom odwiedzania obiektu, odciskom radiowym, zachowaniu portalu, synchronizacji ruchu, nagraniom z kamer i dostawcy tunelu. VPN również przenosi miejsce, w którym cel może być śledzony, z logów obiektu do logów VPN; nie usuwa wiedzy obiektu o obecności urządzenia.
+Aktor może próbować ograniczyć jeden ze śladów, używając randomizowanych adresów MAC, oddzielnego urządzenia, gotówki lub tunelu. Korelacja między warstwami nadal jest możliwa na podstawie czasu przybycia, powtarzającego się schematu odwiedzania miejsca, fingerprintów radiowych, zachowania portalu, synchronizacji ruchu, nagrań z kamer i dostawcy tunelu. VPN przenosi również cel z logów miejsca do logów VPN; nie usuwa wiedzy miejsca o tym, że urządzenie było obecne.
 
-Administratorzy publicznego dostępu powinni izolować klientów, blokować ruch boczny, stosować WPA2/3-Enterprise lub klucze per-device tam, gdzie jest to możliwe, przechowywać proporcjonalne logi DHCP/RADIUS/security, chronić captive portals i publikować procedurę zgłaszania nadużyć. Red teams powinni korzystać z takiego obiektu wyłącznie wtedy, gdy jego warunki i zakres engagementu na to pozwalają; omijanie portalu, kradzież dostępu lub atakowanie innych gości nie jest autoryzowanym skrótem w testach.
+Obrońcy publicznego dostępu powinni izolować klientów, blokować ruch lateralny, stosować WPA2/3-Enterprise lub klucze per-device, gdy jest to możliwe, przechowywać proporcjonalne logi DHCP/RADIUS/security, chronić captive portals oraz publikować procedurę obsługi nadużyć. Red teams powinny korzystać z takiego miejsca wyłącznie wtedy, gdy pozwalają na to jego warunki i zakres engagementu; omijanie portalu, kradzież dostępu lub atakowanie innych gości nie jest autoryzowanym skrótem testowym.
 
-## Ukryte urządzenia drop i warshipping
+## Covert drop devices i warshipping
 
-Drop to niewielki system umieszczony w obiekcie lub dostarczony do niego, a następnie sterowany przez wychodzące połączenie Ethernet, Wi-Fi lub komórkowe. „Warshipping” polega na zapakowaniu urządzenia tak, aby zwykła dostawa przeniosła je do zasięgu radiowego. Możliwy sprzęt obejmuje zarówno komputer jednopłytkowy, jak i zmodyfikowaną ładowarkę, urządzenie peryferyjne USB, urządzenie sieciowe lub modem zasilany baterią.
+Drop to mały system umieszczony w obiekcie lub do niego dostarczony, a następnie kontrolowany za pośrednictwem wychodzącego Ethernetu, Wi-Fi lub sieci komórkowej. „Warshipping” pakuje urządzenie tak, aby zwykła dostawa przeniosła je do zasięgu radiowego. Możliwy sprzęt obejmuje zarówno komputer jednopłytkowy, jak i zmodyfikowaną ładowarkę, urządzenie peryferyjne USB, appliance sieciowy lub modem zasilany baterią.
 
 Architektura operacyjna:
 ```text
@@ -65,40 +67,40 @@ operator -> controlled rendezvous <- outbound encrypted tunnel <- drop
 |
 scoped local interface
 ```
-Urządzenie może zapewniać zdalny foothold, wykonywać pomiary bezprzewodowe, emulować autoryzowane urządzenie peryferyjne do ćwiczeń lub przekazywać ruch. Jego pozorne źródło znajduje się lokalnie, ale tworzy fizyczne artefakty: numery seryjne, opakowania, odciski palców, kamery, logi dostępu, pobór mocy, deskryptory USB, negocjację switchportu, fingerprinting DHCP, zachowanie OUI/randomizacji MAC, emisje RF i powtarzające się połączenia rendezvous.
+Urządzenie może zapewniać zdalny przyczółek, wykonywać pomiary bezprzewodowe, emulować autoryzowane urządzenie peryferyjne używane podczas ćwiczeń lub przekazywać ruch. Jego pozorne źródło znajduje się lokalnie, ale urządzenie pozostawia fizyczne artefakty: numery seryjne, opakowania, odciski palców, nagrania z kamer, logi dostępu, pobór energii, deskryptory USB, negocjację switchportu, fingerprinty DHCP, zachowanie OUI/randomizacji MAC, emisje RF i cykliczne połączenia rendezvous.
 
 ### Kontrole defensywne
 
-- Utrzymuj procedury odbioru przesyłek i ewidencji zasobów; sprawdzaj nieoczekiwaną elektronikę oraz paczki zaadresowane do nieistniejących pracowników.
-- Stosuj 802.1X/NAC w sieciach przewodowych i bezprzewodowych, wyłączaj nieużywane porty, a nieznane urządzenia umieszczaj w ograniczonej sieci VLAN do działań naprawczych.
-- Generuj alerty dotyczące nowych fingerprintów DHCP, trwale występujących lokalnie administrowanych adresów MAC, nowych urządzeń sieciowych USB/HID, nieautoryzowanego Wi-Fi Direct/Bluetooth oraz długotrwałych tuneli wychodzących.
-- Ustal bazowe zachowanie switchportu, Power over Ethernet, DNS i TLS. Mały host bez wpisu w ewidencji, który nawiązuje okresowe szyfrowane połączenia, jest silniejszym sygnałem niż sam „Raspberry Pi OUI”.
-- Podczas ćwiczeń zinwentaryzuj, oznacz, określ zakres, zaszyfruj, zapewnij zdalne wyłączenie, ustal termin odbioru i upewnij się, że utrata urządzenia nie umożliwi ujawnienia możliwych do ponownego użycia danych uwierzytelniających.
+- Utrzymuj procedury odbioru przesyłek i inwentaryzacji zasobów; sprawdzaj nieoczekiwaną elektronikę oraz paczki adresowane do nieistniejących pracowników.
+- Używaj 802.1X/NAC dla dostępu przewodowego i bezprzewodowego, wyłączaj nieużywane porty, a nieznane urządzenia umieszczaj w ograniczonym VLAN-ie remediation.
+- Generuj alerty dla nowych fingerprintów DHCP, lokalnie administrowanych adresów MAC, które pozostają aktywne, nowych urządzeń sieciowych/HID USB, nieautoryzowanych połączeń Wi-Fi Direct/Bluetooth oraz długotrwałych tuneli wychodzących.
+- Ustal baseline zachowania switchportów, Power over Ethernet, DNS i TLS. Mały host bez wpisu w inwentaryzacji, nawiązujący okresowe szyfrowane połączenia, jest silniejszym sygnałem niż sam „Raspberry Pi OUI”.
+- Podczas ćwiczeń zinwentaryzuj, oznacz, określ zakres, zaszyfruj, zapewnij zdalny kill, wyznacz termin zwrotu i upewnij się, że utrata urządzenia nie umożliwi ujawnienia danych uwierzytelniających nadających się do ponownego użycia.
 
-## Backhaul komórkowy i eSIM
+## Łącze backhaul przez sieć komórkową i eSIM
 
-Modem komórkowy omija bramę internetową celu i może utrzymywać dostępność implantu za NAT-em operatora za pośrednictwem wychodzącego rendezvous. Adresy mobilne mogą się zmieniać lub być współdzielone; operator komórkowy nadal ma silne dowody dotyczące abonenta i sieci: tożsamość SIM/eSIM, IMSI, przypisane adresy/porty, informacje o czasie obsługi komórki/sektora, dane konta/płatności oraz roamingu.
+Modem komórkowy omija bramę internetową celu i może utrzymywać dostępność dropa za NAT-em operatora poprzez wychodzące rendezvous. Adresy mobilne mogą się zmieniać lub być współdzielone; operator komórkowy nadal posiada silne dowody dotyczące abonenta i sieci: tożsamość SIM/eSIM, IMSI, przypisane adresy/porty, synchronizację z komórką/sektorem, a także dane konta/płatności i roamingu.
 
-Z perspektywy przedsiębiorstwa nieoczekiwane modemy i osobiste hotspoty wykrywaj za pomocą pomiarów bezprzewodowych/RF, inwentaryzacji USB/PCI punktów końcowych, ograniczeń MDM, monitorowania rogue SSID i inspekcji fizycznych. Implant wykorzystujący łączność komórkową do sterowania nadal może zostać wykryty przez swoje lokalne zachowanie Ethernet/Wi-Fi i emisje radiowe.
+Z perspektywy przedsiębiorstwa nieoczekiwane modemy i osobiste hotspoty należy wykrywać za pomocą pomiarów bezprzewodowych/RF, inwentaryzacji USB/PCI endpointów, ograniczeń MDM, monitorowania rogue SSID oraz inspekcji fizycznej. Drop używający sieci komórkowej do sterowania nadal może zostać wykryty na podstawie lokalnego zachowania Ethernet/Wi-Fi i emisji radiowych.
 
-W przypadku autoryzowanych ćwiczeń organizacja powinna być właścicielem subskrypcji i modemu, rejestrować identyfikatory u kontrolera oraz sprawdzić, czy warunki operatora/dostawcy zezwalają na taki ruch. Etykieta prepaid lub zakup za kryptowalutę nie usuwa rejestrów wież, urządzeń ani punktów sprzedaży.
+W przypadku autoryzowanych ćwiczeń organizacja powinna być właścicielem subskrypcji i modemu, zarejestrować identyfikatory u kontrolera oraz sprawdzić, czy warunki operatora/dostawcy zezwalają na taki ruch. Etykieta prepaid lub zakup za pomocą kryptowaluty nie usuwa danych wież, urządzenia ani punktu sprzedaży.
 
 ## Randomizacja MAC i fingerprinting urządzeń
 
-Nowoczesne systemy mogą używać lokalnie administrowanego losowego adresu MAC dla każdej sieci. Ogranicza to pasywne długoterminowe śledzenie za pomocą stałego fabrycznego adresu MAC; nie ukrywa jednak:
+Współczesne systemy mogą używać lokalnie administrowanego, losowego adresu MAC dla każdej sieci. Ogranicza to pasywne długoterminowe śledzenie na podstawie stabilnego fabrycznego adresu MAC, ale nie ukrywa:
 
-- czasu wysyłania sond i nawiązywania asocjacji oraz zestawu żądanych możliwości sieciowych;
-- elementów informacyjnych 802.11, obsługiwanych szybkości i zachowania charakterystycznego dla dostawcy;
-- opcji DHCP/nazwy hosta, identyfikatorów IPv6 oraz fingerprintu captive portalu/przeglądarki;
+- czasu wysyłania probe/association oraz zestawu żądanych możliwości sieci;
+- elementów informacji 802.11, obsługiwanych szybkości i zachowania specyficznego dla dostawcy;
+- opcji/hostname DHCP, identyfikatorów IPv6 oraz fingerprintu captive portalu/przeglądarki;
 - uwierzytelnionej tożsamości 802.1X lub certyfikatu;
-- konta wyższej warstwy, tunelu i wzorca ruchu; ani
+- konta na wyższej warstwie, tunelu i wzorca ruchu; ani
 - obserwacji fizycznej.
 
-Obrońcy nie powinni używać list dozwolonych adresów MAC jako mechanizmu uwierzytelniania. Powiąż tożsamość radiową z certyfikatem i stanem urządzenia oraz traktuj zmieniające się adresy MAC jako normalne, chyba że inne dane kontekstowe są anomalne.
+Obrońcy nie powinni używać allowlist MAC jako mechanizmu uwierzytelniania. Powiąż tożsamość radiową z certyfikatem/postawą urządzenia i traktuj zmieniające się adresy MAC jako normalne, chyba że inne elementy kontekstu są anomalne.
 
 ## Przejęcie łącza satelitarnego
 
-Kaspersky udokumentował wykorzystanie przez Turla słabości starszego jednokierunkowego Internetu satelitarnego DVB-S. W opisanym modelu legalny zdalny abonent wysyłał żądania wychodzące przez łącze naziemne, ale odbierał dane downstream za pośrednictwem niezaszyfrowanej satelitarnej transmisji szerokopasmowej. Aktor znajdujący się w zasięgu satelity mógł obserwować downlink, wybrać adres IP aktywnego abonenta i doprowadzić do kierowania odpowiedzi C2 na ten adres IP. Zarówno legalny abonent, jak i aktor odbierali transmisję; aktor wydobywał ruch dla wybranego portu, podczas gdy legalny abonent odrzucał niezamówione pakiety. Operator C2 sprawiał wówczas wrażenie, jakby korzystał z adresu dostawcy satelitarnego znajdującego się w innej lokalizacji geograficznej.<sup>[[2]](#references)</sup>
+Kaspersky udokumentował wykorzystywanie przez Turla słabości starszego, jednokierunkowego Internetu satelitarnego DVB-S. W opisanym modelu uprawniony zdalny abonent wysyłał żądania wychodzące przez łącze naziemne, ale odbierał dane downstream za pośrednictwem nieszyfrowanej, szerokopasmowej transmisji satelitarnej. Aktor znajdujący się w zasięgu satelity mógł obserwować downlink, wybrać adres IP aktywnego abonenta i doprowadzić do tego, aby odpowiedzi C2 były kierowane na ten adres IP. Zarówno uprawniony abonent, jak i aktor odbierali transmisję; aktor wyodrębniał ruch dla wybranego portu, podczas gdy uprawniony abonent odrzucał niezamówione pakiety. Operator C2 sprawiał wówczas wrażenie, jakby korzystał z adresu dostawcy usług satelitarnych w innej lokalizacji geograficznej.<sup>[[2]](#references)</sup>
 ```text
 actor uplink request -> C2 server -> Internet -> satellite gateway
 satellite broadcast
@@ -106,23 +108,24 @@ satellite broadcast
 |                            |
 legitimate subscriber          actor receiver
 ```
-Było to specyficzne dla danego protokołu/usługi, ograniczone przepustowością i nie było równoznaczne z przejęciem współczesnego dwukierunkowego, szyfrowanego terminala satelitarnego. Nie ukrywało również ścieżki wychodzących żądań aktora przed dostatecznie kompetentnym obserwatorem. Możliwości wykrycia obejmują asymetryczny/niemożliwy routing, ruch do subskrybenta, który nie zainicjował połączenia, nietypowe porty docelowe, telemetrię dostawcy, lokalizację odbiornika/dochodzenie RF oraz konfigurację malware. Wykorzystaj ten przypadek do zakwestionowania założenia, że geolokalizacja adresu IP C2 wskazuje lokalizację jego kontrolera — nie jako instrukcję budowy.
+Było to specyficzne dla danego protokołu/usługi, ograniczone przepustowością i nie było równoważne z przejęciem nowoczesnego, dwukierunkowego, szyfrowanego terminala satelitarnego. Nie ukrywało również ścieżki wychodzących żądań aktora przed odpowiednio kompetentnym obserwatorem. Możliwości wykrycia obejmują asymetryczny/niemożliwy routing, ruch do subskrybenta, który nie zainicjował przepływu, nietypowe porty docelowe, telemetrię dostawcy, ustalenie lokalizacji odbiornika/dochodzenie RF oraz konfigurację malware. Wykorzystaj ten przypadek do zakwestionowania założenia, że geolokalizacja adresu IP C2 wskazuje lokalizację jego operatora — nie jako instrukcję budowy.
 
 ## Arkusz korelacji fizyczno-cyfrowej
 
 Gdy pozornie lokalne źródło budzi podejrzenia, utwórz jedną oś czasu:
 
 1. ujednolić zegary AP, RADIUS, DHCP, DNS, proxy, VPN, EDR, przełączników i systemów kontroli dostępu fizycznego;
-2. zidentyfikować pierwsze nawiązanie połączenia radiowego lub uruchomienie łącza, a nie tylko pierwszy alert;
-3. powiązać stację z certyfikatem, stanem urządzenia, fingerprintem DHCP oraz lokalizacją przełącznika/AP;
-4. poszukać jednoczesnej aktywności zdalnego sterowania/tunelowania na pobliskich systemach;
-5. przeanalizować dostawy, odwiedzających, odstępstwa inwentaryzacyjne, nagrania z kamer i ustalenia RF zgodnie z obowiązującymi zasadami/prawem;
-6. zabezpieczyć podejrzane urządzenie i ulotny stan sieci; nie wyłączać zasilania bez namysłu;
-7. ustalić, czy pozorne źródło to infrastruktura kontrolowana przez aktora, czy inna ofiara.
+2. zidentyfikować pierwsze skojarzenie radiowe lub zestawienie łącza, a nie tylko pierwszy alert;
+3. powiązać stację z certyfikatem, posture urządzenia, fingerprintem DHCP oraz lokalizacją przełącznika/AP;
+4. sprawdzić, czy na pobliskich systemach jednocześnie występowała aktywność zdalnego sterowania/tunelowania;
+5. przeanalizować dostawy, odwiedzających, wyjątki magazynowe, kamery i ustalenia RF zgodnie z obowiązującymi zasadami/prawem;
+6. zabezpieczyć podejrzane urządzenie i ulotny stan sieci; nie wyłączać go bez namysłu;
+7. ustalić, czy pozorne źródło jest infrastrukturą kontrolowaną przez aktora, czy kolejną ofiarą.
 
 ## References
 
-- [1] [Volexity — Atak Nearest Neighbor: jak rosyjska grupa APT uzbroiła pobliskie sieci Wi-Fi](https://www.volexity.com/blog/2024/11/22/the-nearest-neighbor-attack-how-a-russian-apt-weaponized-nearby-wi-fi-networks-for-covert-access/)
-- [2] [Kaspersky Securelist — Turla satelitarna: command and control APT na niebie](https://securelist.com/satellite-turla-apt-command-and-control-in-the-sky/72081/)
+- [1] [Volexity — Atak najbliższego sąsiada: jak rosyjska APT uzbroiła pobliskie sieci Wi-Fi](https://www.volexity.com/blog/2024/11/22/the-nearest-neighbor-attack-how-a-russian-apt-weaponized-nearby-wi-fi-networks-for-covert-access/)
+- [2] [Kaspersky Securelist — Satelitarny Turla: command and control APT na niebie](https://securelist.com/satellite-turla-apt-command-and-control-in-the-sky/72081/)
 - [3] [MITRE ATT&CK — Dodawanie sprzętu (T1200)](https://attack.mitre.org/techniques/T1200/)
 - [4] [NIST SP 800-153 — Wytyczne dotyczące zabezpieczania bezprzewodowych sieci lokalnych](https://csrc.nist.gov/pubs/sp/800/153/final)
+{{#include ../banners/hacktricks-training.md}}

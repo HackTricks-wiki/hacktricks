@@ -1,35 +1,37 @@
 # Odporne na przejęcie autoryzowane węzły terenowe
 
-Umieszczony na miejscu Raspberry Pi, mini-PC, travel router lub urządzenie komórkowe może zapewnić autoryzowanemu red teamowi trwały punkt dostępu. Jest jednak również prawdopodobnym celem wykrycia, kradzieży i identyfikacji. Właściwym celem projektowym jest zatem **stabilny, kontrolowany dostęp przy niewielkich uprawnieniach węzła terenowego**, a nie nieidentyfikowalny implant.
+{{#include ../banners/hacktricks-training.md}}
 
-Niniejszy przewodnik dotyczy wyłącznie sprzętu umieszczonego za pisemną zgodą właściciela obiektu. Kawiarnia, sąsiad, hotel lub współdzielony budynek nie są objęte zakresem tylko dlatego, że ich sieć jest osiągalna. Nie ukrywaj sprzętu w miejscu, którego właściciel nie wyraził zgody, nie omijaj captive portalu, nie używaj danych uwierzytelniających innej osoby, nie ingeruj w monitoring ani nie próbuj usuwać dowodów po wykryciu.
+Umieszczony na miejscu Raspberry Pi, mini-PC, travel router lub urządzenie cellular może zapewnić autoryzowanemu red teamowi trwały punkt obserwacyjny. Jest on również prawdopodobnym punktem wykrycia, kradzieży i atrybucji. Właściwym celem projektowym jest zatem **stabilny, kontrolowany dostęp przy niewielkich uprawnieniach węzła terenowego**, a nie niemożliwy do prześledzenia implant.
+
+Ten przewodnik dotyczy wyłącznie sprzętu umieszczonego za pisemną zgodą właściciela obiektu. Kawiarnia, sąsiad, hotel lub współdzielony budynek nie wchodzą w zakres tylko dlatego, że ich sieć jest osiągalna. Nie ukrywaj sprzętu w miejscu, którego właściciel nie wyraził zgody, nie omijaj captive portal, nie używaj danych uwierzytelniających innej osoby, nie zakłócaj monitoringu ani nie próbuj usuwać dowodów po wykryciu.
 
 {% hint style="warning" %}
-Nie istnieje niezawodne ustawienie „nie pozostawiaj śladów”. Informacje o asocjacji radiowej, DHCP/NAT, operatorze, kamerach, zakupie, urządzeniu, dostawcy, kontrolerze i miejscach docelowych mogą przetrwać po usunięciu urządzenia. Odpowiedzialny red team usuwa z węzła **osobiste i niezwiązane z zadaniem sekrety**, zachowuje chronione informacje umożliwiające identyfikację po stronie kontrolera i projektuje rozwiązanie tak, aby przejęcie było łatwe do opanowania.
+Nie istnieje niezawodne ustawienie „nie pozostawiaj śladów”. Dane dotyczące asocjacji radiowej, DHCP/NAT, operatora, kamer, zakupu, urządzenia, dostawcy, kontrolera i miejsca docelowego mogą przetrwać po usunięciu urządzenia. Odpowiedzialny red team usuwa z węzła **osobiste i niezwiązane z nim sekrety**, zachowuje chronioną atrybucję po stronie kontrolera i sprawia, że przejęcie można tanio ograniczyć.
 {% endhint %}
 
 ## Zalety i wady
 
-**Zalety:** realistyczne źródło wewnętrzne lub zlokalizowane w pobliżu celu; stabilne testy z dużą szybkością; weryfikacja NAC, egress, inwentaryzacji fizycznej i pokrycia SOC; możliwość działania mimo zmian adresu operatora; ograniczony dostęp można centralnie odwołać.
+**Zalety:** realistyczne źródło wewnętrzne lub znajdujące się blisko celu; stabilne testy o wysokiej przepustowości; weryfikacja NAC, egress, inwentaryzacji fizycznej i pokrycia SOC; możliwość kontynuowania pracy mimo zmian adresu operatora; dostęp o ograniczonym zakresie można centralnie unieważnić.
 
-**Wady:** fizyczne umieszczenie tworzy silne dowody; utrata urządzenia może ujawnić dane uwierzytelniające urządzenia, profile sieciowe i zebrane dane; powtarzalny ruch sterujący jest wykrywalny; zmiany zasilania, portali i sieci radiowych pogarszają niezawodność; szeroki tunel może stać się niekontrolowanym punktem pivot.
+**Wady:** fizyczne umieszczenie tworzy silne dowody; utrata urządzenia może ujawnić dane uwierzytelniające urządzenia, profile sieci i zebrane dane; powtarzalny ruch control jest wykrywalny; zasilanie, portale i zmiany radiowe pogarszają niezawodność; szeroki tunel może stać się niekontrolowanym pivotem.
 
 ## Model zagrożeń i niezmienniki projektowe
 
-Załóż, że znalazca może wyjąć pamięć masową, przeanalizować firmware, skopiować każdy sekret przechowywany przez oprogramowanie, obserwować późniejsze zachowanie sieci oraz przekazać urządzenie klientowi lub organom ścigania. Szyfrowanie całego dysku chroni wyłączone urządzenie wyłącznie w ramach określonego modelu zagrożeń; działający, odblokowany węzeł i klucze zwolnione do pamięci to odrębne przypadki.
+Załóż, że znalazca może usunąć pamięć masową, przeanalizować firmware, skopiować każdy sekret przechowywany przez software, obserwować późniejsze zachowanie sieciowe i przekazać urządzenie klientowi lub organom ścigania. Szyfrowanie całego dysku chroni wyłączone urządzenie wyłącznie w ramach określonego modelu zagrożeń; uruchomiony i odblokowany węzeł oraz klucze zwolnione do pamięci to różne przypadki.
 
 | Niezmiennik | Praktyczna konsekwencja |
 |---|---|
-| Brak bezpośredniej tożsamości operatora względem węzła | Operator loguje się do firmowego gatewaya; węzeł ma odrębną tożsamość urządzenia |
-| Brak materiałów z osobistej stacji roboczej | Brak osobistego klucza SSH, profilu przeglądarki, poczty e-mail, menedżera haseł, parowania z telefonem lub cache CLI chmury |
-| Brak głównego sekretu kontrolera | Jeden węzeł nie może rejestrować innego, zmieniać polityki ani odszyfrowywać innych zadań |
-| Tylko połączenia wychodzące i wąski zakres | Sieć terenowa nie akceptuje listenera zarządzania; węzeł łączy się wyłącznie z nazwanymi usługami rendezvous, aktualizacji i czasu |
-| Krótkotrwałe uprawnienia o ograniczonym zakresie | Każde poświadczenie dotyczy jednego urządzenia, odbiorcy, usługi i terminu ważności oraz ma natychmiastową ścieżkę odwołania |
-| Minimalna ilość danych lokalnych | Wyniki są przesyłane strumieniowo do kontrolera; cache jest szyfrowany, a jego rozmiar i TTL są ograniczone oraz nie ma on charakteru nadrzędnego |
-| Odpowiedzialność kontrolera przetrwa przejęcie | Mapowanie zasobu na zadanie, zatwierdzenia, dostęp operatorów i polecenia są przechowywane centralnie, z kontrolą dostępu |
-| Utrata zatrzymuje działanie | Wykrycie lub niewyjaśniona zmiana stanu uruchamia zatrzymanie, odwołanie uprawnień, powiadomienie i zachowanie dowodów — nie zdalne niszczenie |
+| Brak bezpośredniej tożsamości operatora względem węzła | Operator loguje się do gateway organizacji; węzeł ma odrębną tożsamość urządzenia |
+| Brak materiałów z osobistej stacji roboczej | Brak osobistego klucza SSH, profilu przeglądarki, poczty e-mail, password managera, parowania telefonu lub cache CLI cloud |
+| Brak głównego sekretu kontrolera | Jeden węzeł nie może zarejestrować innego, zmienić policy ani odszyfrować danych innych engagementów |
+| Tylko ruch wychodzący i wąski zakres | Sieć terenowa nie akceptuje żadnego listenera zarządzania; węzeł łączy się wyłącznie z nazwanymi usługami rendezvous/update/time |
+| Krótkotrwałe uprawnienia o ograniczonym zakresie | Każde poświadczenie ma jedno urządzenie, audience, usługę, termin wygaśnięcia i natychmiastową ścieżkę revocation |
+| Minimalna ilość danych lokalnych | Wyniki są przesyłane strumieniowo do kontrolera; cache są szyfrowane, a ich rozmiar i TTL są ograniczone oraz nie mają charakteru nadrzędnego |
+| Odpowiedzialność kontrolera przetrwa przejęcie | Mapowanie zasobu do engagementu, zgody, dostęp operatora i polecenia są przechowywane centralnie i objęte kontrolą dostępu |
+| Utrata zatrzymuje pracę | Wykrycie lub niewyjaśniona zmiana stanu uruchamia zatrzymanie, revoke, powiadomienie i zachowanie dowodów — nie zdalne niszczenie |
 
-Bazowy model IoT firmy NIST grupuje identyfikację urządzenia, konfigurację, ochronę danych, dostęp logiczny, bezpieczne aktualizacje oprogramowania oraz świadomość stanu cyberbezpieczeństwa jako podstawowe możliwości. W szczególności uznaje świadomość stanu i rejestry zdarzeń przechowywane poza urządzeniem za wsparcie w badaniu kompromitacji.<sup>[[1]](#references)</sup>
+Baseline IoT firmy NIST grupuje identyfikację urządzenia, konfigurację, ochronę danych, dostęp logiczny, bezpieczne aktualizacje software oraz świadomość stanu cybersecurity jako podstawowe możliwości. W szczególności uznaje świadomość stanu i zdarzenia rejestrowane poza urządzeniem za wsparcie w badaniu kompromitacji.<sup>[[1]](#references)</sup>
 
 ## Architektura referencyjna
 ```text
@@ -43,55 +45,55 @@ rendezvous/broker <==== outbound mTLS or WireGuard ==== field node
 |                                                     |-- approved site Wi-Fi/Ethernet
 +---- allowlisted owned test services                 +-- organization cellular fallback
 ```
-Brama musi wiedzieć, który nazwany operator dotarł do którego nazwanego urządzenia. Węzeł terenowy potrzebuje jedynie poświadczenia urządzenia na potrzeby rendezvous. Nigdy nie poznaje źródłowego adresu ani sekretu uwierzytelniającego operatora, a operator nigdy nie kopiuje do niego prywatnego klucza zarządzania. Ogranicza to możliwe do odzyskania powiązanie z osobą **z pamięci masowej węzła terenowego**, nie niszcząc rozliczalności ćwiczenia.
+Brama musi wiedzieć, który nazwany operator dotarł do którego nazwanego urządzenia. Węzeł terenowy potrzebuje jedynie poświadczenia urządzenia na potrzeby rendezvous. Nigdy nie poznaje źródłowego adresu ani sekretu uwierzytelniającego operatora, a operator nigdy nie kopiuje do niego prywatnego klucza zarządzania. Ogranicza to możliwe do odzyskania powiązanie osobowe **z pamięci masowej urządzenia terenowego**, bez niszczenia rozliczalności ćwiczenia.
 
-W przypadku większej floty system workload identity może wydawać krótkotrwałe tożsamości X.509 i automatycznie rotować klucze. SPIFFE zaleca używanie X.509 SVID, gdy jest to możliwe, oraz opisuje krótkie okresy ważności i częstą rotację jako sposoby ograniczania ekspozycji wynikającej z kompromitacji klucza.<sup>[[2]](#references)</sup> Mały zespół może zastosować te same właściwości przy użyciu prywatnego CA i automatycznych certyfikatów dla poszczególnych urządzeń; instalowanie SPIRE nie jest wymagane tylko po to, aby spełnić ten wzorzec.
+W przypadku większej floty system workload identity może wystawiać krótkotrwałe tożsamości X.509 i automatycznie rotować klucze. SPIFFE zaleca używanie X.509 SVID tam, gdzie to możliwe, oraz opisuje krótkie okresy ważności i częstą rotację jako metody ograniczania ekspozycji wynikającej z kompromitacji klucza.<sup>[[2]](#references)</sup> Mały zespół może zastosować te same właściwości za pomocą prywatnego CA i zautomatyzowanych certyfikatów dla poszczególnych urządzeń; instalowanie SPIRE nie jest wymagane wyłącznie po to, aby spełnić ten wzorzec.
 
 ## Krok 1: autoryzacja i rejestracja rozmieszczenia
 
-1. Zapisz właściciela, lokalizację, dokładnie dozwoloną strefę rozmieszczenia, dozwolone sieci, okno oceny, dozwolone miejsca docelowe/działania oraz kontakty awaryjne.
+1. Zapisz właściciela, lokalizację, dokładną dozwoloną strefę rozmieszczenia, dozwolone sieci, okno oceny, dozwolone miejsca docelowe/działania oraz kontakty awaryjne.
 2. Zapisz model, numer seryjny, numer seryjny pamięci masowej, przewodowe/bezprzewodowe adresy MAC, IMEI modemu/eSIM lub ICCID karty SIM, zasilacz oraz aktualne zdjęcie.
-3. Nadaj urządzeniu niezwiązaną z osobą identyfikację zaangażowania, na przykład `E2026-014-DROP03`. Nie umieszczaj nazwy klienta w rozgłaszanych nazwach hostów ani SSID.
-4. Poinformuj kontrolera ćwiczenia oraz najmniejszą niezbędną grupę odpowiedzialną za bezpieczeństwo fizyczne/SOC, co w ramach tego testu oznaczają stany „zgubione”, „przeniesione” i „odnalezione”.
-5. Ustal z wyprzedzeniem, kto może je odebrać oraz jak znalazca może to zgłosić. Etykieta bezpieczeństwa może pomijać poufne informacje o kliencie, jednocześnie udostępniając kontrolowany kontakt zwrotny.
-6. Ustaw automatyczne wygaśnięcie autoryzacji. Dalsza łączność po zakończeniu zakresu nie może przedłużać uprawnień.
+3. Nadaj urządzeniu nieosobisty identyfikator zaangażowania, na przykład `E2026-014-DROP03`. Nie umieszczaj nazwy klienta w rozgłaszanych nazwach hostów ani SSID.
+4. Poinformuj kontrolera ćwiczenia oraz najmniejszą niezbędną grupę odpowiedzialną za bezpieczeństwo fizyczne/SOC, co w ramach tego testu oznaczają pojęcia „zgubione”, „przemieszczone” i „odnalezione”.
+5. Ustal z wyprzedzeniem, kto może je odebrać oraz w jaki sposób znalazca może to zgłosić. Etykieta bezpieczeństwa może pomijać poufne informacje o kliencie, jednocześnie podając kontrolowany numer kontaktowy.
+6. Ustaw automatyczny termin wygaśnięcia autoryzacji. Dalsza łączność po zakończeniu zakresu nie może przedłużać uprawnień.
 
-## Krok 2: utworzenie minimalnego obrazu możliwego do odzyskania
+## Krok 2: budowa minimalnego obrazu możliwego do odzyskania
 
-Użyj obsługiwanego obrazu systemu operacyjnego, zweryfikuj jego podpis/sumę kontrolną za pośrednictwem udokumentowanego kanału dostawcy, zainstaluj aktualizacje bezpieczeństwa i zachowaj odtwarzalny manifest kompilacji. Jeśli oprogramowanie na to pozwala, preferuj bazę tylko do odczytu lub immutable z małą zapisywalną partycją danych.
+Użyj obsługiwanego obrazu systemu operacyjnego, zweryfikuj jego podpis/sumę kontrolną za pośrednictwem udokumentowanego kanału dostawcy, zainstaluj aktualizacje bezpieczeństwa i zachowaj odtwarzalny manifest kompilacji. Preferuj bazę tylko do odczytu lub immutable z niewielką zapisywalną partycją danych, jeśli oprogramowanie na to pozwala.
 
-1. Usuń domyślne konta, usługi demonstracyjne, kompilatory i pakiety, które nie są potrzebne do autoryzowanego workload.
-2. Wyłącz lokalny GUI, Bluetooth, protokoły wykrywania, udostępnianie plików, Wi-Fi P2P i administrację przychodzącą, chyba że ćwiczenie wyraźnie wymaga któregoś z tych elementów.
-3. Włącz secure boot i measured boot/zwalnianie klucza oparte na TPM, jeśli sprzęt rzeczywiście je obsługuje; nie twierdź, że konfiguracja Raspberry Pi zapewnia measured boot klasy PC bez zweryfikowania dokładnego modelu.
-4. Zaszyfruj lokalny stan zapisywalny oraz skonfiguruj ścisły maksymalny rozmiar i czas retencji. Szyfrowanie jest mechanizmem opóźniania/ograniczania skutków, a nie dowodem, że uruchomiony węzeł niczego nie ujawnia.
-5. Wysyłaj ważne logi poza urządzenie. Ogranicz lokalne dzienniki, aby zapobiec wyczerpaniu pamięci masowej, ale nie konfiguruj czyszczenia logów ani usuwania antyforensic.
+1. Usuń domyślne konta, usługi demonstracyjne, kompilatory i pakiety niepotrzebne dla autoryzowanego obciążenia.
+2. Wyłącz lokalny GUI, Bluetooth, protokoły wykrywania, udostępnianie plików, Wi-Fi P2P oraz administrację przychodzącą, chyba że ćwiczenie wyraźnie wymaga któregoś z tych elementów.
+3. Włącz secure boot oraz measured boot/zwalnianie kluczy oparte na TPM, jeśli sprzęt rzeczywiście je obsługuje; nie twierdź, że konfiguracja Raspberry Pi zapewnia measured boot klasy PC bez zweryfikowania dokładnego modelu.
+4. Szyfruj lokalny stan zapisywalny i skonfiguruj ścisły maksymalny rozmiar oraz czas przechowywania. Szyfrowanie jest mechanizmem opóźniania/ograniczania skutków, a nie dowodem, że uruchomiony węzeł niczego nie ujawnia.
+5. Wysyłaj ważne logi poza urządzenie. Ogranicz lokalne dzienniki, aby zapobiec wyczerpaniu pamięci masowej, ale nie konfiguruj czyszczenia logów ani usuwania anti-forensic.
 6. Przechowuj manifest obrazu, wersje pakietów, hash konfiguracji oraz instrukcje odzyskiwania u kontrolera.
-7. Odtwórz obraz na urządzeniu zapasowym na podstawie manifestu i uruchom ten sam test sprawności. Projekt, który może odzyskać wyłącznie jego twórca, nie jest gotowy do użycia w terenie.
+7. Odtwórz obraz zapasowego urządzenia na podstawie manifestu i uruchom ten sam test kondycji. Projekt, który może odzyskać wyłącznie jego twórca, nie jest gotowy do użycia w terenie.
 
 ## Krok 3: wydawanie tożsamości z jednokierunkowym zaufaniem
 
 Utwórz trzy różne tożsamości:
 
 - **tożsamość urządzenia**, akceptowaną wyłącznie przez rendezvous dla tego urządzenia;
-- **tożsamość operatora**, akceptowaną przez bramę organizacji i chronioną za pomocą odpornego na phishing MFA; oraz
+- **tożsamość operatora**, akceptowaną przez bramę organizacji i chronioną za pomocą phishing-resistant MFA; oraz
 - **tożsamość kontrolera/wdrożenia**, używaną do podpisywania zatwierdzonych zadań lub konfiguracji, przechowywaną poza operatorem i węzłem terenowym.
 
-Węzeł powinien mieć klucz publiczny potrzebny do weryfikowania podpisanych zadań, nigdy klucz podpisujący. Przechwycone poświadczenie urządzenia nie może służyć do uwierzytelniania w cloud consoles, source repositories, kontach płatniczych, innych węzłach ani środowisku produkcyjnym klienta.
+Węzeł powinien posiadać klucz publiczny potrzebny do weryfikowania podpisanych zadań, ale nigdy klucz podpisujący. Przechwycone poświadczenie urządzenia nie może służyć do uwierzytelniania w cloud consoles, source repositories, payment accounts, innych węzłach ani środowisku produkcyjnym klienta.
 
-Używaj krótkich okresów ważności certyfikatów, jeśli automatyczne odnawianie jest niezawodne. Gdy długotrwały klucz WireGuard jest konieczny z przyczyn operacyjnych, traktuj jego klucz publiczny jako uchwyt revocation i ograniczaj go za pomocą adresu tunelu przypisanego do peera, polityki firewalla oraz autoryzacji brokera. Zachowaj przetestowaną akcję kontrolera, która natychmiast usuwa tego peera.
+Używaj krótkich okresów ważności certyfikatów, jeśli automatyczne odnawianie jest niezawodne. Gdy długotrwały klucz WireGuard jest konieczny z powodów operacyjnych, traktuj jego klucz publiczny jako uchwyt unieważnienia i ograniczaj go za pomocą adresu tunelu przypisanego do konkretnego peera, polityki firewall oraz autoryzacji brokera. Utrzymuj przetestowaną akcję kontrolera, która natychmiast usuwa tego peera.
 
 ## Krok 4: stabilny outbound rendezvous
 
-Poniższy wzorzec z własnego labu zapewnia stabilne zarządzanie przez NAT bez wystawiania usługi inbound. Jest to zwykła sieć WireGuard, a nie covert reverse shell. Używaj adresów dokumentacyjnych i zastępuj je wyłącznie endpointami należącymi do organizacji.
+Poniższy wzorzec dla posiadanego laboratorium zapewnia stabilne zarządzanie przez NAT bez wystawiania usługi przychodzącej. Jest to zwykła sieć WireGuard, a nie ukryty reverse shell. Używaj adresów dokumentacyjnych i zastępuj je wyłącznie endpointami należącymi do organizacji.
 
-W organizacyjnym rendezvous przypisz `10.77.0.1/32`; węzłowi terenowemu przypisz `10.77.0.20/32`. Wpis peera bramy powinien akceptować wyłącznie pojedynczy adres węzła:
+W rendezvous organizacji przypisz `10.77.0.1/32`; węzłowi terenowemu przypisz `10.77.0.20/32`. Wpis peera bramy powinien akceptować wyłącznie pojedynczy adres węzła:
 ```ini
 # rendezvous: /etc/wireguard/wg-field.conf (relevant peer only)
 [Peer]
 PublicKey = <DROP03_PUBLIC_KEY>
 AllowedIPs = 10.77.0.20/32
 ```
-Węzeł nawiązuje połączenie wychodzące z punktem rendezvous i utrzymuje mapowanie NAT tylko wtedy, gdy jest to wymagane:
+Węzeł nawiązuje połączenie wychodzące z rendezvous i utrzymuje mapowanie NAT tylko wtedy, gdy jest to wymagane:
 ```ini
 # field node: /etc/wireguard/wg-field.conf
 [Interface]
@@ -104,136 +106,136 @@ Endpoint = vpn.redteam.example:51820
 AllowedIPs = 10.77.0.1/32
 PersistentKeepalive = 25
 ```
-WireGuard dokumentuje 25 sekund jako rozsądny interwał keepalive w wielu implementacjach NAT/firewall, gdy wymagana jest ciągła dostępność; gdy nie jest potrzebny, lepiej pozostawić go wyłączonego.<sup>[[3]](#references)</sup> `AllowedIPs = 10.77.0.1/32` celowo sprawia, że jest to ścieżka zarządzania, a nie pivot przez trasę domyślną.
+WireGuard dokumentuje 25 sekund jako rozsądny interwał keepalive w wielu implementacjach NAT/firewall, gdy wymagana jest trwałość połączenia; pozostawienie tej funkcji wyłączonej jest preferowane, gdy nie jest potrzebna.<sup>[[3]](#references)</sup> `AllowedIPs = 10.77.0.1/32` celowo tworzy ścieżkę zarządzania, a nie pivot z użyciem trasy domyślnej.
 
-Następnie zastosuj kontrole poza WireGuard:
+Następnie zastosuj controls poza WireGuard:
 
 1. Rozwiązuj `vpn.redteam.example` przez zatwierdzoną ścieżkę bootstrap DNS i przypisz oczekiwany endpoint organizacji w rekordach wdrożenia.
-2. Na węźle zezwól na wychodzący DHCP/RA, wymagane DNS/NTP, endpoint rendezvous oraz minimalną zatwierdzoną ścieżkę aktualizacji. Odrzucaj niezamówiony ruch przychodzący na każdym uplinku.
-3. Na rendezvous zezwól `10.77.0.20` na dostęp wyłącznie do brokera/usługi health wymaganej podczas ćwiczenia. Nie przekazuj go ogólnie do sieci klienta.
-4. Umieść interaktywny dostęp operatora za gatewayem organizacji. Unikaj udostępniania SSH z węzła przez tunnel, jeśli podpisany interfejs pull-job spełnia wymagania assessmentu.
-5. Skonfiguruj service manager tak, aby uruchamiał tunnel po uzyskaniu łączności sieciowej, restartował go po awarii z ograniczonym backoffem i generował alert po powtarzających się awariach. Pętla restartów nie może przeciążać infrastruktury obiektu ani ukrywać przyczyny problemu.
-6. Weryfikuj latest handshake peera, ale nie traktuj „istnieje handshake” jako dowodu, że urządzenie nie zostało skompromitowane.
+2. Na node zezwól na wychodzący DHCP/RA, wymagane DNS/NTP, endpoint rendezvous oraz minimalną zatwierdzoną ścieżkę aktualizacji. Odrzucaj niezamówiony ruch przychodzący na każdym uplinku.
+3. Na rendezvous zezwól, aby `10.77.0.20` docierał wyłącznie do brokera/usługi health wymaganej podczas ćwiczenia. Nie przekazuj go ogólnie do client network.
+4. Umieść interaktywny dostęp operatora za organization gateway. Unikaj udostępniania SSH z node przez tunnel, jeśli podpisany interfejs pull-job spełnia wymagania assessment.
+5. Skonfiguruj service manager tak, aby uruchamiał tunnel po uruchomieniu networkingu, restartował go po awarii z ograniczonym backoffem i wysyłał alert po wielokrotnych awariach. Pętla restartów nie może przeciążać venue ani ukrywać podstawowego problemu.
+6. Weryfikuj latest handshake peer, ale nie traktuj „handshake istnieje” jako dowodu, że device nie został skompromitowany.
 
-TURN może zapewnić dostępność wyłącznie przez relay dla specjalnie zaprojektowanego control plane WebRTC, a message queue może tolerować okresowe przerwy w działaniu usługi. TURN jawnie przekazuje klientowi publiczny adres relay za NAT; jego serwer pozostaje obserwatorem.<sup>[[4]](#references)</sup> Wybierz jedną architekturę kontroli zamiast nakładania tunnelów bez określonego obserwatora lub uzasadnionej korzyści z niezawodności.
+TURN może zapewnić dostępność wyłącznie przez relay dla purpose-built WebRTC control plane, a message queue może tolerować okresowe przerwy w działaniu usługi. TURN jawnie zapewnia client publiczny adres relay za NAT; jego server pozostaje obserwatorem.<sup>[[4]](#references)</sup> Wybierz jedną architekturę control zamiast łączenia tunnelów bez określonej korzyści obserwacyjnej lub niezawodności.
 
-## Step 5: stabilność uplinku bez osobistych linków
+## Krok 5: stabilność uplinku bez osobistych łączy
 
-Dla autoryzowanego węzła obiektowego preferuj następującą kolejność:
+Dla autoryzowanego venue node preferuj następującą kolejność:
 
-1. przewodowa sieć dostarczona przez klienta lub dedykowany VLAN testowy;
+1. przewodowe łącze dostarczone przez clienta lub dedykowany test VLAN;
 2. zatwierdzony przez właściciela profil enterprise/guest Wi-Fi;
 3. zakontraktowany przez organizację fallback cellular/prywatny APN.
 
-Nigdy nie konfiguruj osobistego hotspotu telefonu, domowego SSID, osobistego eSIM, osobistego konta Apple/Google ani profilu Wi-Fi wyeksportowanego z codziennego laptopa. To właśnie te artefakty zostaną powiązane z przechwyconym urządzeniem.
+Nigdy nie konfiguruj personal phone hotspot, domowego SSID, personal eSIM, personal Apple/Google account ani profilu Wi-Fi wyeksportowanego z codziennego laptopa. To dokładnie te artifacts, z którymi połączy się capture.
 
 Dla każdego zatwierdzonego uplinku:
 
-- zapisz SSID/BSSID albo switch/VLAN oraz oczekiwane zachowanie captive portalu;
-- ustaw deterministyczny priorytet i health check do własnego endpointu;
-- dopilnuj, aby failover zmieniał wyłącznie underlay; tożsamości urządzenia i operatora pozostają przy brokerze;
-- upewnij się, że DNS, IPv6 i ruch aplikacyjny nie omijają rendezvous podczas przełączania;
-- generuj alert przy nieznanym SSID/BSSID, zmianie SIM, nowym gatewayu domyślnym, zmianie publicznego IP/ASN lub jednoczesnych uplinkach;
-- przed wdrożeniem przetestuj utratę zasilania, odnowienie DHCP, restart AP, zmianę publicznego IP, 24-godzinną bezczynność, utratę tunnelu oraz powrót primary-secondary-primary.
+- zapisz SSID/BSSID lub switch/VLAN oraz oczekiwane zachowanie captive portalu;
+- ustaw deterministyczny priorytet i health check do kontrolowanego endpointu;
+- zapewnij, aby failover zmieniał wyłącznie underlay; tożsamości device i operatora pozostają przy brokerze;
+- upewnij się, że DNS, IPv6 i application traffic nie omijają rendezvous podczas przełączania;
+- wysyłaj alert przy nieznanym SSID/BSSID, zmianie SIM, nowym default gateway, zmianie public IP/ASN lub jednoczesnych uplinkach;
+- przed deployment przetestuj utratę zasilania, odnowienie DHCP, restart AP, zmianę public IP, 24-godzinną bezczynność, utratę tunnel oraz odzyskiwanie primary-to-secondary-to-primary.
 
-Prywatne adresowanie MAC może ograniczyć przypadkowe śledzenie między sieciami, ale stabilny MAC dla danej sieci jest często wymagany przez autoryzowany NAC. Zapisz, jak faktycznie działa wybrany OS, i nie zmieniaj adresu w sposób obchodzący kontrolę dostępu właściciela.
+Prywatne adresowanie MAC może ograniczyć przypadkowe śledzenie między networkami, ale stabilny MAC przypisany do network jest często wymagany przez autoryzowany NAC. Zapisz, jak faktycznie działa wybrany OS, i nie zmieniaj adresu w celu obejścia access control właściciela.
 
-## Step 6: ograniczanie pracy i danych
+## Krok 6: ogranicz zakres pracy i danych
 
-Bezpieczny węzeł obiektowy nie powinien przyjmować dowolnego tekstu shell z mailboxa. Zdefiniuj podpisane typy jobów, takie jak `health`, `fetch-owned-url`, `capture-approved-interface-for-60s` lub inną akcję wyraźnie określoną w rules of engagement. Ponownie zweryfikuj na węźle cel, czas trwania, rate, rozmiar danych wyjściowych i zakres.
+Bezpieczny field node nie powinien przyjmować dowolnego tekstu shell z mailboxa. Zdefiniuj podpisane typy jobów, takie jak `health`, `fetch-owned-url`, `capture-approved-interface-for-60s` lub inne działanie wyraźnie wymienione w rules of engagement. Ponownie zweryfikuj destination, duration, rate, output size i scope na node.
 
-1. Nadaj każdemu jobowi unikalny ID, odbiorców urządzenia, czas wystawienia, termin wygaśnięcia, odwołanie do zakresu i maksymalny rozmiar danych wyjściowych.
-2. Podpisz go tożsamością kontrolera/wdrożenia.
-3. Odrzucaj nieznane pola, wygasłe lub ponownie użyte joby oraz joby przeznaczone dla innego urządzenia.
-4. Strumieniuj wyniki do własnego collectora; szyfruj i stosuj TTL dla każdego nieuniknionego lokalnego spoola.
-5. Rejestruj w kontrolerze zaakceptowany/odrzucony ID joba i hash wyniku. Nie umieszczaj wrażliwych parametrów komend w publicznym kanale monitoringu.
-6. Przerwij przetwarzanie po wygaśnięciu autoryzacji, nieudanej rotacji tożsamości lub oznaczeniu urządzenia jako quarantined przez kontroler.
+1. Nadaj każdemu jobowi unikalny ID, device audience, issue time, expiry, scope reference i maximum output.
+2. Podpisz go tożsamością controller/deployment.
+3. Odrzucaj nieznane pola, wygasłe lub powtórnie użyte joby oraz joby przeznaczone dla innego device.
+4. Strumieniuj wyniki do kontrolowanego collectora; zaszyfruj i ustaw TTL dla każdego nieuniknionego lokalnego spool.
+5. Loguj w controllerze zaakceptowany/odrzucony job ID i hash wyniku. Nie umieszczaj w publicznym kanale monitoringu wrażliwych parametrów command.
+6. Przerwij przetwarzanie po wygaśnięciu autoryzacji, nieudanej rotacji identity lub oznaczeniu device jako quarantined przez controller.
 
 ## Monitoring pod kątem wykrycia, utraty lub kompromitacji
 
-Monitoring może poinformować kontroler, że zaobserwowany stan się zmienił. Nie może wiarygodnie potwierdzić, że „śledczy znaleźli urządzenie”, a próby inwigilowania responderów lub sondowania ich systemów wykraczałyby poza autoryzowany assessment.
+Monitoring może poinformować controller, że zaobserwowany stan uległ zmianie. Nie może wiarygodnie potwierdzić, że „investigators znaleźli device”, a próby monitorowania responders lub sondowania ich systemów wykraczałyby poza autoryzowany assessment.
 
-### Zbieraj stan poza urządzeniem
+### Zbieraj stan poza device
 
-Wysyłaj do kontrolera podpisany, niskowolumenowy rekord health w losowym, ale ograniczonym operacyjnie interwale. Uwzględniaj wyłącznie informacje potrzebne kontrolerowi:
+Wysyłaj do controller podpisany, niskowolumenowy rekord health w losowym, ale ograniczonym przedziale operacyjnym. Uwzględniaj wyłącznie dane potrzebne controllerowi:
 
-- ID urządzenia, boot ID/licznik i monotoniczny uptime;
-- hash konfiguracji/image i wersję software;
-- numer seryjny certyfikatu urządzenia oraz stan odnowienia;
-- klasę uplinku, interfejs, BSSID lub kontekst switcha zgodnie z autoryzacją, hash gatewaya domyślnego oraz publiczny IP/ASN zaobserwowany przez własną usługę;
-- wiek handshake tunnelu, liczniki pakietów i długość kolejki;
-- stan switcha obudowy lub hardware-tamper, jeśli właściciel zatwierdził sensor;
-- obciążenie dysku, temperaturę, szacowane odchylenie zegara i ID ostatniego pomyślnego joba;
-- numer sekwencyjny i podpis ujawniające replay lub luki.
+- device ID, boot ID/counter i monotonic uptime;
+- hash konfiguracji/image oraz software version;
+- serial device-certificate i stan odnowienia;
+- uplink class, interface, BSSID lub switch context, jeśli autoryzowane, hash default gateway oraz public IP/ASN zaobserwowane przez kontrolowaną usługę;
+- wiek tunnel handshake, packet counters i queue depth;
+- stan enclosure switch lub hardware-tamper, jeśli właściciel zatwierdził sensor;
+- disk pressure, temperature, szacowane clock offset i ID ostatniego pomyślnego joba;
+- sequence number i signature ujawniające replay lub luki.
 
-Centralnie przechowuj authentication gatewaya, decyzje policy, dostęp operatora, przesyłanie jobów, hashe wyników, zdarzenia audytowe providera i alerty. CISA zaleca centralizowanie logów, ochronę przed usunięciem, wyznaczanie baseline'u normalnej aktywności oraz wskazanie kontaktów incident response.<sup>[[5]](#references)</sup>
+Centralnie przechowuj authentication gateway, decyzje policy, dostęp operatora, submission jobów, hashe wyników, provider audit events i alerty. CISA zaleca centralizowanie logów, ochronę przed usunięciem, ustalenie baseline normalnej aktywności oraz wyznaczenie kontaktów incident-response.<sup>[[5]](#references)</sup>
 
 ### Wskaźniki wykrycia/kompromitacji
 
-| Sygnał | Możliwe wyjaśnienia | Działanie kontrolera |
+| Sygnał | Możliwe wyjaśnienia | Działanie controller |
 |---|---|---|
-| Brak heartbeat | awaria zasilania/sieci, zmiana portalu, uszkodzenie, celowe blokowanie lub usunięcie | potwierdź stan u providera/obiektu; nie łącz ponownie przez niezatwierdzoną ścieżkę |
-| Nieoczekiwana zmiana licznika bootów | odcięcie zasilania, crash, usunięcie lub maintenance | wstrzymaj joby; porównaj czas i zdarzenia w obiekcie |
-| Zmieniony hash konfiguracji/image | błąd aktualizacji, awaria storage lub tampering | zatrzymaj pracę; revoke, jeśli nie jest to release zatwierdzony przez kontroler |
-| Nowy uplink/BSSID/gateway/ASN | wymiana AP, roaming, przeniesienie urządzenia lub interception | porównaj z zatwierdzonym inventory; quarantine niewyjaśnionej zmiany |
-| Powtarzające się odrzucone joby/podpisy | uszkodzenie, replay lub nieautoryzowany kontroler | zatrzymaj przetwarzanie i zbadaj logi gatewaya/kontrolera |
-| Credential urządzenia użyty dwukrotnie lub z niezgodnych ścieżek | sklonowany key, ponowne użycie snapshotu lub zmiana sieci | natychmiast revoke; zachowaj oba rekordy sesji |
-| Nieoczekiwany lokalny login, interfejs, proces lub zdarzenie privilege | maintenance lub kompromitacja | odizoluj przez policy brokera; zachowaj evidence |
-| Zmiana stanu switcha obudowy | service, przemieszczenie lub wykrycie | powiadom wskazany kontakt obiektu; nie uruchamiaj destrukcyjnego działania |
-| Zawiadomienie providera o abuse, zapytanie dotyczące konta lub alert SOC | wykrycie, błędna konfiguracja lub ruch poza zakresem | zatrzymaj aktywność i uruchom proces deconfliction/incident |
-| Użycie sentinel credential | ktoś odczytał pozbawiony uprawnień decoy secret unikalny dla tego węzła | revoke prawdziwą tożsamość urządzenia i zachowaj ślad alertu |
+| Brak heartbeat | awaria zasilania/network, zmiana portalu, uszkodzenie, celowe blokowanie lub usunięcie | potwierdź stan providera/site; nie łącz ponownie przez niezatwierdzoną ścieżkę |
+| Nieoczekiwana zmiana boot counter | odcięcie zasilania, crash, usunięcie lub maintenance | quarantine jobów; porównaj czas i zdarzenia site |
+| Zmiana config/image hash | błąd aktualizacji, awaria storage lub tampering | zatrzymaj pracę; revoke, jeśli nie jest to release zatwierdzony przez controller |
+| Nowy uplink/BSSID/gateway/ASN | wymiana AP, roaming, przeniesienie device lub interception | porównaj z zatwierdzonym inventory; quarantine niewyjaśnionej zmiany |
+| Wielokrotnie odrzucony job/signature | corruption, replay lub unauthorized controller | zatrzymaj processing i zbadaj logi gateway/controller |
+| Device credential użyty dwukrotnie lub z niezgodnych ścieżek | cloned key, ponowne użycie snapshotu lub zmiana network | natychmiast revoke; zachowaj oba rekordy sesji |
+| Nieoczekiwany local login, interface, process lub privilege event | maintenance lub compromise | odizoluj przez broker policy; zachowaj evidence |
+| Przejście stanu enclosure switch | service, przemieszczenie lub wykrycie | powiadom wskazany site contact; nie uruchamiaj destructive action |
+| Provider abuse notice/account query lub SOC alert | detection, misconfiguration lub traffic poza scope | zatrzymaj aktywność i uruchom proces deconfliction/incident |
+| Użycie sentinel credential | ktoś odczytał pozbawiony uprawnień decoy secret unikalny dla tego node | revoke real device identity i zachowaj ślad alertu |
 
-Sentinel credential musi zapewniać **brak dostępu**, wywoływać wyłącznie należącą do organizacji usługę alertową i być ujawniony w rules of engagement. Jest tripwire'em wykrywającym nieautoryzowany odczyt, a nie beaconem do śledzenia osoby, która znalazła sprzęt.
+Sentinel credential musi zapewniać **brak dostępu**, wywoływać wyłącznie należącą do organizacji usługę alertów i być ujawniony w rules of engagement. Jest tripwire’em wykrywającym nieautoryzowany odczyt, a nie beaconem do śledzenia osoby, która znalazła equipment.
 
 ### Progi alertów
 
 Używaj reguł stanowych, a nie jednego dramatycznego alarmu „caught”:
 
 - **warning:** jeden pominięty interwał, normalna zmiana adresu lub wzrost kolejki;
-- **degraded:** trzy kolejne pominięcia, opóźnienie odnowienia, utrata primary uplinku lub powtarzający się restart;
-- **quarantine:** niezatwierdzona zmiana hasha/boot/uplinku, zduplikowany credential, użycie sentinel lub nieoczekiwane zdarzenie uprzywilejowane;
-- **confirmed discovery/loss:** raport obiektu/kontrolera, niezgodność inventory fizycznego, odzyskanie urządzenia przez nieplanowaną osobę lub zweryfikowana eskalacja providera/SOC.
+- **degraded:** trzy kolejne pominięcia, opóźnienie renewal, utrata primary uplink lub repeated restart;
+- **quarantine:** niezatwierdzona zmiana hash/boot/uplink, duplicate credential, użycie sentinel lub nieoczekiwane privileged event;
+- **confirmed discovery/loss:** raport site/controller, niezgodność physical inventory, odzyskanie device przez nieplanowaną osobę lub potwierdzona eskalacja providera/SOC.
 
-Testuj dostarczanie alertów przez kanał niezależny od węzła obiektowego. Unikaj wysyłania wrażliwych danych klienta/urządzenia na osobiste komunikatory lub konta konsumenckie push.
+Testuj dostarczanie alertów przez kanał niezależny od field node. Unikaj wysyłania wrażliwych danych client/device do personal messaging lub consumer push accounts.
 
-## Runbook podejrzenia wykrycia lub przechwycenia
+## Runbook dla podejrzenia wykrycia lub capture
 
-1. **Stop:** wstrzymaj nowe joby i sesje operatorów. Nie wysyłaj sondy „sprawdź, czy jesteś obserwowany”.
-2. **Quarantine:** skonfiguruj brokera tak, aby odrzucał tożsamość urządzenia i jego routes, zachowując istniejące logi.
-3. **Revoke:** revoke certyfikat/key urządzenia, token kolejki, credential aktualizacji i każdy single-purpose service token. Zawieś SIM organizacji, jeśli prawdopodobna jest fizyczna utrata.
-4. **Preserve:** wykonaj snapshot rekordów kontrolera, gatewaya, providera i alertów; zapisz zaufany czas, osobę podejmującą działanie i ostatnią znaną konfigurację. Nie czyść ani nie zdalnie wipe'uj węzła.
-5. **Notify:** skontaktuj się z kontrolerem ćwiczenia, kontaktem incident po stronie klienta oraz kontaktami prawnymi/privacy określonymi w autoryzacji. Jeśli znalazła je osoba trzecia, użyj wcześniej uzgodnionego procesu odzyskiwania.
-6. **Assess:** załóż, że każdy secret i cached result na węźle jest ujawniony. Dokładnie określ, do czego każdy secret mógł zapewnić dostęp i czy został użyty po podejrzanym zdarzeniu.
-7. **Contain downstream:** obróć dotknięte service credentials, unieważnij oczekujące joby i sprawdź logi własnych targetów/providerów pod kątem nieoczekiwanego zachowania.
-8. **Recover safely:** odzyskaj urządzenie wyłącznie przez autoryzowaną osobę; sfotografuj i zapakuj je, zapisz chain of custody oraz pozyskaj forensic evidence zgodnie z instrukcjami klienta.
-9. **Resume with a new identity:** nigdy po cichu nie włączaj ponownie przechwyconego credentiala. Odbuduj urządzenie ze znanego manifestu, napraw błąd kontroli i uzyskaj wyraźną zgodę.
+1. **Stop:** wstrzymaj nowe joby i sesje operatorów. Nie wysyłaj sondy „sprawdź, czy jesteśmy obserwowani”.
+2. **Quarantine:** ustaw broker tak, aby odrzucał device identity i jej routes, zachowując istniejące logi.
+3. **Revoke:** revoke device certificate/key, queue token, update credential i każdy single-purpose service token. Zawieś SIM organizacji, jeśli prawdopodobna jest fizyczna utrata.
+4. **Preserve:** wykonaj snapshot rekordów controller, gateway, provider i alert; zapisz trusted time, osobę wykonującą działanie oraz ostatnią znaną konfigurację. Nie czyść ani nie wykonuj remote wipe node.
+5. **Notify:** skontaktuj się z exercise controller, client incident contact oraz wskazanymi w autoryzacji kontaktami legal/privacy. Jeśli znalazła go strona trzecia, użyj wcześniej uzgodnionego procesu recovery.
+6. **Assess:** załóż, że każdy secret i cached result na node został ujawniony. Dokładnie określ, do czego mógł służyć każdy secret i czy został użyty po podejrzanym zdarzeniu.
+7. **Contain downstream:** zmień dane uwierzytelniające dotkniętych usług, unieważnij oczekujące joby i sprawdź logi należących do organizacji targetów/providerów pod kątem nieoczekiwanego działania.
+8. **Recover safely:** odzyskaj device wyłącznie przez autoryzowaną osobę; sfotografuj i zapakuj go, zapisz chain of custody oraz pozyskaj forensic evidence zgodnie z instrukcjami clienta.
+9. **Resume with a new identity:** nigdy po cichu nie włączaj ponownie przejętego credential. Odbuduj system z known manifest, napraw control failure i uzyskaj wyraźną zgodę.
 
-Aktualne wytyczne NIST dotyczące incident response integrują przygotowanie, wykrywanie, reakcję i odzyskiwanie w ramach zarządzania ryzykiem cyberbezpieczeństwa całej organizacji; najpierw zachowaj dane, aby klient mógł ustalić, co się stało, i wybrać odpowiednią reakcję.<sup>[[6]](#references)</sup>
+Aktualne wytyczne NIST dotyczące incident-response integrują preparation, detection, response i recovery z zarządzaniem ryzykiem cyberbezpieczeństwa w całej organizacji; najpierw zachowaj dane, aby client mógł ustalić, co się stało, i wybrać odpowiednią reakcję.<sup>[[6]](#references)</sup>
 
-## Capture drill przed wdrożeniem
+## Capture drill przed deployment
 
-Przekaż odblokowane urządzenie testowe lub kopię jego storage osobnemu reviewerowi i poproś go o zinwentaryzowanie:
+Przekaż odblokowane urządzenie testowe lub kopię jego storage niezależnemu reviewerowi i poproś go o wyliczenie:
 
-1. identyfikatorów urządzenia/obiektu/engagementu;
-2. nazw operatorów, kont osobistych, sieci domowych/stacji roboczych i kontaktów recovery;
-3. destynacji oraz credentiali kontrolera/brokera;
-4. profili sieci klienta i cached results;
-5. innych urządzeń/projektów dostępnych przy użyciu każdego secreta;
-6. credentiali wartości lub płatności;
-7. tego, co kontroler może revoke i jak szybko;
-8. tego, jaka aktywność pozostaje przypisywalna na podstawie centralnych logów.
+1. identyfikatorów device/site/engagement;
+2. nazw operatorów, personal accounts, home/workstation networks i recovery contacts;
+3. destinations i credentials controller/broker;
+4. client network profiles i cached results;
+5. innych devices/projects osiągalnych przy użyciu każdego secret;
+6. credentials o wartości lub związanych z płatnościami;
+7. tego, co controller może revoke i jak szybko;
+8. tego, jaka aktywność pozostaje możliwa do przypisania na podstawie central logs.
 
-Kryteria zaliczenia: zero kont osobistych/kluczy stacji roboczych; zero uprawnień cross-engagement lub enrollment authority; brak credentiala płatniczego; ograniczony szyfrowany cache; jedna udokumentowana akcja device-revocation; pełna accountability po stronie kontrolera. Każdy nieoczekiwany osobisty link lub capability lateral traktuj jako blocker wydania.
+Kryteria zaliczenia: zero personal accounts/workstation keys; zero cross-engagement lub enrollment authority; brak payment credential; ograniczony encrypted cache; jedno udokumentowane device-revocation action; pełna accountability po stronie controller. Każde nieoczekiwane osobiste powiązanie lub lateral capability traktuj jako release blocker.
 
 ## Zamknięcie
 
-1. Zatrzymaj joby i wyłącz route brokera po zakończeniu zakresu.
-2. Odzyskaj i uzgodnij dokładne inventory; zgłoś każdy brak.
-3. Zachowaj logi/wyniki oraz, jeśli wymagane, forensic image zgodnie z planem retencji engagementu.
-4. Revoke tożsamości urządzenia, SIM, kolejki, aktualizacji i usług, nawet jeśli sprzęt został odzyskany.
-5. Dopiero po zachowaniu danych i akceptacji wyczyść lub zniszcz media zgodnie z zatwierdzonym przez właściciela procesem utylizacji danych i zapisz wykonanie. To zarządzanie cyklem życia, a nie concealment.
-6. Usuń rezerwacje NAC/DHCP obiektu, routes brokera, DNS, role cloud, reguły alertów i tymczasowe kontakty.
-7. Udokumentuj zaobserwowane wykrycie, brakującą telemetrię, czas do quarantine oraz każdy artefakt ujawniony przez capture.
+1. Zatrzymaj joby i wyłącz broker route po zakończeniu scope.
+2. Odzyskaj i uzgodnij dokładny inventory; zgłoś wszystko, czego brakuje.
+3. Zachowaj logs/results oraz, jeśli wymagane, forensic image zgodnie z engagement retention plan.
+4. Revoke device, SIM, queue, update i service identities, nawet jeśli hardware odzyskano.
+5. Dopiero po preservation/acceptance wyczyść lub zniszcz media zgodnie z zatwierdzonym przez właściciela procesem data disposal i zapisz wykonanie. To lifecycle management, nie concealment.
+6. Usuń venue NAC/DHCP reservations, broker routes, DNS, cloud roles, alert rules i tymczasowe kontakty.
+7. Udokumentuj zaobserwowane detection, brakującą telemetry, time to quarantine oraz każdy artifact ujawniony przez capture.
 
 ## References
 
@@ -241,5 +243,6 @@ Kryteria zaliczenia: zero kont osobistych/kluczy stacji roboczych; zero uprawnie
 - [2] [SPIFFE — Koncepcje i krótkotrwałe tożsamości workloadów](https://spiffe.io/docs/latest/spiffe/concepts/)
 - [3] [WireGuard — Quick Start: Persistent Keepalive](https://www.wireguard.com/quickstart/)
 - [4] [RFC 8656 — Traversal Using Relays around NAT (TURN)](https://www.rfc-editor.org/rfc/rfc8656.html)
-- [5] [CISA — Używanie logowania w systemach biznesowych](https://www.cisa.gov/audiences/small-and-medium-businesses/secure-your-business/use-logging-on-business-systems)
+- [5] [CISA — Używanie loggingu w systemach biznesowych](https://www.cisa.gov/audiences/small-and-medium-businesses/secure-your-business/use-logging-on-business-systems)
 - [6] [NIST SP 800-61 Rev. 3 — Zalecenia i uwagi dotyczące Incident Response](https://csrc.nist.gov/pubs/sp/800/61/r3/final)
+{{#include ../banners/hacktricks-training.md}}
