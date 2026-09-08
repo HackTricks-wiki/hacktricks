@@ -1,49 +1,51 @@
-# 隐私操作系统
+# Privacy Operating Systems
 
-注重隐私的操作系统可以减少 routing 和 persistence 错误，但没有任何系统能够弥补可识别行为或已被入侵的硬件。
+{{#include ../banners/hacktricks-training.md}}
+
+以隐私为重点的操作系统可以减少 routing 和 persistence 方面的错误，但任何系统都无法弥补可识别行为或已被入侵的硬件。
 
 ## 选择隔离模型
 
-| 系统 | 最适合 | Persistence | Network enforcement | 主要权衡 |
+| System | Best fit | Persistence | Network enforcement | Main tradeoff |
 |---|---|---|---|---|
-| **维护良好的 OS 上的 Tor Browser** | 偶尔进行 anonymous web browsing | Browser state 通常仅限当前 session | 仅 Browser traffic | 其他应用和主机仍在 Tor 之外 |
-| **Tails** | 便携、amnesic、单一用途的 sessions | 可选的加密 Persistent Storage | Internet traffic 强制通过 Tor | 重启和工作流不便；firmware/hardware trust |
-| **Whonix** | 需要强制 Tor routing 的持久化应用 | Persistent VMs | Gateway/Workstation split | Host/hypervisor 和 identity mixing 仍然存在 |
-| **Qubes-Whonix** | 面向高级用户的强 compartment separation | Per-qube | Dedicated network qubes 和 Whonix | 硬件要求和操作复杂度 |
+| **Tor Browser on a maintained OS** | 偶尔进行匿名 Web 浏览 | 浏览器状态通常仅限当前会话 | 仅浏览器流量 | 其他应用和主机仍在 Tor 之外 |
+| **Tails** | 便携、无痕的单一用途会话 | 可选的加密 Persistent Storage | Internet 流量强制通过 Tor | 重启和工作流不便；固件/硬件信任问题 |
+| **Whonix** | 需要强制 Tor 路由的持久化应用 | 持久化 VMs | Gateway/Workstation 分离 | 主机/hypervisor 和身份混用问题仍然存在 |
+| **Qubes-Whonix** | 面向高级用户的强隔离 | 按 qube 分离 | 专用 network qubes 和 Whonix | 硬件要求高且操作复杂 |
 
 ## Tails
 
-Tails 可独立从 removable media 启动，通过 Tor routing Internet traffic，并且设计目标是尽量不留下本地 state。其自身的 warnings 强调：它无法防御已被入侵的 BIOS/firmware/hardware、identifying disclosures、file metadata，或能够关联两端的强大 observer。<sup>[[1]](#references)</sup>
+Tails 可从可移动介质独立启动，通过 Tor 路由 Internet 流量，并且设计目标是尽量减少本地状态。其自身的警告强调：它无法防护已被入侵的 BIOS/firmware/hardware、身份识别信息泄露、文件 metadata，或能够关联通信两端的强大观察者。<sup>[[1]](#references)</sup>
 
 ### 单一用途的 Tails 工作流
 
-1. 在受信任且已更新的计算机上从官方网站下载 Tails，并遵循官方的 verification/install 流程。
-2. 仅使用受支持的 USB drive 启动 Tails；不要同时将其作为通用 file-transfer drive 使用。
-3. 在你实际控制的硬件上启动。live OS 无法抵御 hardware keylogger 或恶意 firmware。
-4. 除非工作流确实需要，否则保持 Persistent Storage disabled。如果启用，只持久化必要的 categories，并使用强 passphrase。
-5. 连接到合法网络。如果 captive portal 无法避免，仅将 Tails' Unsafe Browser 用于该 portal，不要披露任何不必要的 identity，完成后立即关闭，并在进行任何 sensitive activity 之前连接到 Tor。<sup>[[2]](#references)</sup>
+1. 在受信任且已更新的计算机上从官方网站下载 Tails，并按照官方 verification/install 流程操作。
+2. 仅使用受支持的 USB drive 启动 Tails；不要同时将其用作常规文件传输 drive。
+3. 在由你实际控制的硬件上启动。live OS 无法抵御硬件 keylogger 或恶意 firmware。
+4. 除非工作流确实需要，否则保持 Persistent Storage 禁用。如果启用，只持久化必要的类别，并使用强 passphrase。
+5. 连接到合法网络。如果 captive portal 不可避免，请仅使用 Tails' Unsafe Browser 处理 portal，不要披露任何不必要的身份信息，完成后立即关闭，并在进行任何敏感活动前连接到 Tor。<sup>[[2]](#references)</sup>
 6. 如果 direct Tor visibility 或 blocking 很重要，请配置 Tor bridge。
-7. 每个 session 仅执行 **一种 contextual identity/purpose**。Tails 建议在不应相互关联的 activities 之间重新启动。<sup>[[1]](#references)</sup>
-8. 在发布前检查并清理 files。不要在可能绕过预期 context 的 application 中打开下载的 active documents。
-9. 完成后完全 shut down，并确保 USB physical security。
+7. 每个会话只执行**一种上下文身份/目的**。Tails 建议在不应关联的活动之间重新启动。<sup>[[1]](#references)</sup>
+8. 在发布文件前检查并清理文件。不要在可能绕过预期上下文的应用中打开下载的 active documents。
+9. 完成后完全关机，并确保 USB 在物理上安全。
 
 ## Whonix
 
-Whonix 将 Tor-routing **Gateway** 与 **Workstation** 分离；Workstation 中的 applications 无法直接获知 external IP。这能显著减少 proxy/DNS 错误，但 host、hypervisor、行为和 documents 仍可能暴露 identity。Whonix 明确警告，不要使用同一个 workstation 处理多个 identities，也不要混合 anonymous 和 non-anonymous activity。<sup>[[3]](#references)</sup>
+Whonix 将 Tor-routing **Gateway** 与 **Workstation** 分离，Workstation 中的应用无法直接获知外部 IP。这可以有效减少 proxy/DNS 错误，但主机、hypervisor、行为和文档仍可能暴露身份。Whonix 明确警告，不要将一个 workstation 用于多个身份，也不要混合 anonymous 和 non-anonymous 活动。<sup>[[3]](#references)</sup>
 
-### Compartment 工作流
+### 隔离工作流
 
 1. 从官方来源验证 Whonix image 和 virtualization platform。
 2. 使用前修补 host、hypervisor、Gateway 和 Workstation。
-3. 为每个 identity 或 engagement 克隆一个全新的 Workstation；一旦引入了 identity-bearing state，绝不要再克隆该 VM。
+3. 为每个身份或 engagement 克隆一个全新的 Workstation；一旦引入包含身份信息的状态，绝不要再克隆 VM。
 4. 不要让 personal accounts、host shared folders、clipboard synchronization、USB devices 以及 time/location data 进入 Workstation。
-5. 使用 snapshots 进行 recovery，不要将其作为 backups 或 identity separation 的替代方案。
-6. 确认 Gateway 停止时 Workstation 无法访问 Internet。
-7. 对于风险尤其高的 files，使用 disposable VM/qube，并且只导出 sanitized result。
+5. 使用 snapshots 进行恢复，不要将其替代 backups 或 identity separation。
+6. 确认 Gateway 停止后，Workstation 无法访问 Internet。
+7. 对于风险特别高的文件，使用 disposable VM/qube，并且只导出经过清理的结果。
 
 ## Qubes OS 和 Qubes-Whonix
 
-Qubes 通过基于 Xen 的 qubes 以 compartmentalization 实现 security。其设计限制了一个 domain 中的 compromise 自动影响其他 domains，但位于**同一个** qube 内的 applications 彼此并未隔离。<sup>[[4]](#references)</sup> Disposable qubes 可为不受信任的 sites、files 和 devices 提供 fresh state。<sup>[[5]](#references)</sup>
+Qubes 通过基于 Xen 的 qubes，利用 compartmentalization 实现安全。其设计限制了一个 domain 中的 compromise 自动影响其他 domain，但位于**同一** qube 内的应用彼此并不隔离。<sup>[[4]](#references)</sup> Disposable qubes 可为不受信任的网站、文件和设备提供全新的状态。<sup>[[5]](#references)</sup>
 
 一种实用的布局：
 ```text
@@ -58,25 +60,26 @@ disp-untrusted       links and document rendering
 规则：
 
 - 为每个 qube 指定一个信任级别和身份用途。
-- 将机密信息保存在离线 vault qube 中，并使用明确的 qube 间复制/文件操作。
-- 在 disposable 中打开未经请求的文件和链接。
+- 将 secrets 保存在离线 vault qube 中，并使用明确的 qube 间复制/文件操作。
+- 在 disposables 中打开未经请求的文件和链接。
 - 仅通过 Whonix 或专用 VPN qube 路由指定的 qube。
-- 为窗口使用明显不同的标签，并在处理敏感工作时停止无关的 qube。
-- 不要假设两个 qube 能防止关联分析，因为它们可能共享账户、内容、时间安排或付款信息。
+- 清晰标记窗口，并在敏感操作期间停止无关的 qube。
+- 不要认为两个 qube 就能防止关联；如果它们共享账户、内容、时间安排或支付信息，仍然可能被关联。
 
-## Verification and maintenance
+## 验证与维护
 
-- 按照官方说明验证 installer signatures/checksums。
+- 按照官方说明验证安装程序的签名/校验和。
 - 先更新模板，然后重启依赖它们的 qube/VM。
 - 确认 network-deny 行为、DNS、IPv6、时钟、剪贴板、共享目录和 USB 分配。
 - 检查 Persistent Storage 和 VM snapshots 中是否存在旧的身份相关数据。
 - 对 seeds/keys 保留加密的离线备份，并在隔离环境中测试恢复。
-- 在怀疑遭到 compromise 后重建 compartment；仅更改其 egress IP 不足以解决问题。
+- 在怀疑遭到 compromise 后重建 compartment；仅更改其 egress IP 并不足够。
 
 ## References
 
-- [1] [Tails — 警告：Tails 是安全的，但并非万能](https://tails.net/doc/about/warnings/index.en.html)
+- [1] [Tails — 警告：Tails 安全但并非万能](https://tails.net/doc/about/warnings/index.en.html)
 - [2] [Tails — 使用 captive portal 登录网络](https://tails.net/doc/anonymous_internet/unsafe_browser/index.en.html)
-- [3] [Whonix — Whonix 和 Tor 的限制](https://www.whonix.org/wiki/Warning)
+- [3] [Whonix — Whonix 和 Tor 的局限性](https://www.whonix.org/wiki/Warning)
 - [4] [Qubes OS — 安全设计目标](https://doc.qubes-os.org/en/latest/developer/system/security-design-goals.html)
 - [5] [Qubes OS — 如何使用 disposables](https://doc.qubes-os.org/en/latest/user/how-to-guides/how-to-use-disposables.html)
+{{#include ../banners/hacktricks-training.md}}

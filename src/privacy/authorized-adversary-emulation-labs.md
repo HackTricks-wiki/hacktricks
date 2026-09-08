@@ -1,16 +1,18 @@
-# 已授权的对手模拟实验室
+# Authorized Adversary-Emulation Labs
 
-这些练习复现的是**可观测的架构**，而不是未经授权的 compromise。请在安装了 Docker 的专用 Linux 实验主机上运行，不要使用敏感凭据，也不要存在通往第三方目标的路由。名称已固定，以便明确 teardown。
+{{#include ../banners/hacktricks-training.md}}
+
+这些练习复现的是**可观测的架构**，而不是未经授权的入侵。请在专用的 Linux lab 主机上运行，并使用 Docker；不要配置敏感凭据，也不要设置通往第三方目标的路由。名称是固定的，以便明确执行 teardown。
 
 {% hint style="danger" %}
-不要将下方自有的容器、AP、路由器、账户或 synthetic transactions 替换为公共代理、邻居的 Wi-Fi、你无权控制的 production CDN tenant，或真实的 illicit funds。书面授权必须覆盖每个系统和无线电环境。
+不要将下方的自有容器、AP、路由器、账户或 synthetic transactions 替换为公共代理、邻居的 Wi-Fi、你无权控制的生产 CDN tenant，或真实的非法资金。书面授权必须涵盖每个系统和 radio environment。
 {% endhint %}
 
-## 实验室 1：自有 ORB 和 redirector chain
+## Lab 1: owned ORB and redirector chain
 
-**目标：**展示目标只记录出口，而每个 relay 都能看到相邻 hops。在没有 compromised devices 的情况下，模拟 T1090.003/T1584 结构。
+**目标：**展示 target 只记录出口，而每个 relay 都能看到相邻 hops。在没有被入侵设备的情况下，复现 T1090.003/T1584 结构。
 
-**要求：**Docker Engine，以及以 `ht-orb-` 开头的未使用容器名称。
+**要求：**Docker Engine，以及名称以 `ht-orb-` 开头的未使用容器名称。
 
 ### 构建
 ```bash
@@ -39,23 +41,23 @@ docker logs ht-orb-r2
 docker inspect -f '{{range .NetworkSettings.Networks}}{{.NetworkID}} {{.IPAddress}}{{println}}{{end}}' \
 ht-orb-r1 ht-orb-r2 ht-orb-target
 ```
-预期结果：Nginx 在 `ht-orb-target` 上记录 `ht-orb-r2` 的地址，而不是 one-shot client 的地址。Relay 日志仅显示来自其相邻网络的连接。Docker control-plane 检查仍可重建完整路径——类似于 provider/controller 证据。
+预期结果：Nginx 在 `ht-orb-target` 上记录的是 `ht-orb-r2` 的地址，而不是 one-shot client 的地址。Relay 日志显示，连接仅来自其相邻网络。Docker control-plane inspection 仍可重建完整路径——类似于 provider/controller 证据。
 
-### Detection experiments
+### 检测实验
 
-1. 每 60 秒重复请求，并绘制到达间隔时间和字节数。
-2. 将 `ht-orb-r2` 替换为新的命名容器/地址，但保持相同的 cadence 和 application request；确认仅基于 IP 的规则会丢失该链路，而行为仍能将其关联起来。
-3. 在 lab host 上使用 `tcpdump` 监听三个 Docker bridge，并比较时间戳。
-4. 停止 `ht-orb-r2`；验证 entry 到 target 之间不存在直接 fallback。
+1. 每隔 60 秒重复请求，并绘制请求间隔时间和字节数的图表。
+2. 将 `ht-orb-r2` 替换为新的命名容器/地址，但保持相同的请求频率和应用请求；确认仅基于 IP 的规则无法保持关联链，而行为仍能将其关联起来。
+3. 在 lab host 上对三个 Docker bridge 使用 `tcpdump` 抓包，并比较时间戳。
+4. 停止 `ht-orb-r2`；确认 entry 到 target 之间不存在直接 fallback。
 
-### Teardown
+### 拆除
 ```bash
 docker rm -f ht-orb-r1 ht-orb-r2 ht-orb-target
 docker network rm ht-orb-entry ht-orb-transit ht-orb-target
 ```
 ## Lab 2: SNI/Host mismatch 和 redirector logging
 
-**目标：** 在私有本地 edge 上复现 domain fronting 背后的 routing primitive，并展示其可见位置。不涉及 public CDN。
+**目标：**在私有本地 edge 上复现 domain fronting 背后的路由原语，并展示其可见位置。不涉及公共 CDN。
 
 ### 构建本地 TLS edge
 ```bash
@@ -91,15 +93,15 @@ curl -k --resolve front.lab:8443:127.0.0.1 \
 -H 'Host: origin.lab' https://front.lab:8443/
 docker logs ht-front-edge
 ```
-预期的日志字段包括 `sni=front.lab host=origin.lab`。除非使用 ECH，否则客户端到 edge 的数据包捕获会暴露 SNI；HTTP Host 在该链路上是加密的。终止 TLS 的 edge 可以看到两者。
+预期的日志字段包括 `sni=front.lab host=origin.lab`。除非使用 ECH，否则 client-to-edge 的数据包捕获会暴露 SNI；HTTP Host 在该链路上是加密的。终止 TLS 的 edge 可以看到两者。
 
-现在发送一个普通请求，并确认策略拒绝该请求：
+现在发送一个普通请求，并确认 policy 拒绝该请求：
 ```bash
 curl -k --resolve front.lab:8443:127.0.0.1 https://front.lab:8443/
 ```
 ### 检测断言
 
-仅在标准化端口和大小写，并检查已知的 reverse-proxy 例外后，对 `sni != host` 发出警报。在分配严重性之前，添加进程和 tenant/origin 上下文。
+仅在标准化端口和大小写并检查已知的 reverse-proxy 例外后，针对 `sni != host` 发出告警。在分配严重性之前，添加进程以及 tenant/origin 上下文。
 
 ### 清理
 ```bash
@@ -107,9 +109,9 @@ docker rm -f ht-front-edge ht-front-target
 docker network rm ht-front-net
 rm -rf -- "$ht_front_dir"
 ```
-## 实验 3：fast-flux DNS telemetry
+## Lab 3: fast-flux DNS telemetry
 
-**目标：**生成安全的低 TTL/类似多 ASN 的 DNS 数据集，并验证一项分析规则。返回的 RFC 5737 文档地址在此用途下不可路由。
+**目标：**生成一个安全的低 TTL/类似 multi-ASN 的 DNS 数据集，并验证一项分析规则。返回的 RFC 5737 文档地址在此用途下不可路由。
 
 ### 运行权威服务器
 ```bash
@@ -142,50 +144,50 @@ dig @127.0.0.1 -p 1053 flux.lab A +noall +answer
 done
 docker logs ht-flux-dns
 ```
-预期结果：每个回答包含三个文档 IP 和 5 秒 TTL。真正的 fast flux 还会随时间轮换子集；更改 zone serial/addresses，并重启这个临时 server，以创建多个 epoch。
+预期结果：每个应答都包含三个 documentation IP，且 TTL 为 5 秒。真正的 fast flux 也会随时间轮换子集；修改 zone serial/地址并重启此 disposable server，以创建多个 epoch。
 
 ### 分析验证
 
-对于五分钟的时间窗口，计算 `median(TTL)`、不同回答的数量、不同的 synthetic ASN/geography labels 以及 answer churn。至少需要两个可疑维度，再加上一个 process/follow-on event。对已知 CDN 样本运行相同的分析，以衡量误报率。
+对于五分钟的时间窗口，计算 `median(TTL)`、不同应答数量、不同的 synthetic ASN/geography 标签以及应答 churn。至少需要两个可疑维度，以及一个 process/follow-on event。使用已知 CDN 样本运行相同的分析，以测量误报率。
 
 ### 拆除
 ```bash
 docker rm -f ht-flux-dns
 rm -rf -- "$ht_dns_dir"
 ```
-## 实验 4：nearest-neighbor wireless pivot
+## 实验 4：近邻无线 pivot
 
-**目标：** 使用两个自有的“组织”复现 APT28 的边界不匹配问题。由于 Wi-Fi 硬件/driver 命令各不相同，本实验规定可验证的角色和证据，而不是假设某一条 `hostapd` 命令适用于所有无线电设备。
+**目标：** 使用两个自有的“组织”复现 APT28 的边界失配。由于 Wi-Fi 硬件/driver 命令各不相同，本实验规定可验证的角色和证据，而不是假设某一条 `hostapd` 命令适用于所有无线电设备。
 
 ### 设备
 
-- 两个由你拥有、运行在隔离实验频道/SSID `HT-NEIGHBOR` 和 `HT-TARGET` 上的 AP；
-- 一个只能从 `HT-TARGET` 访问的 target service；
-- 一个由你拥有、能够同时关联两个 AP 的双 radio Linux pivot；
-- 一台位于 `HT-NEIGHBOR` 后方的 remote-control workstation；
-- RADIUS/NAC 或 AP association logs、DHCP logs，以及 pivot audit/process logs。
+- 两个由你拥有的 AP，运行在隔离的实验信道/SSID `HT-NEIGHBOR` 和 `HT-TARGET` 上；
+- 一个只能从 `HT-TARGET` 访问的目标服务；
+- 一个由你拥有、能够关联到两个 AP 的双无线电 Linux pivot；
+- 一台位于 `HT-NEIGHBOR` 后方的远程控制工作站；
+- RADIUS/NAC 或 AP 关联日志、DHCP 日志以及 pivot 审计/进程日志。
 
-### 流程
+### 步骤
 
-1. 对设置进行物理隔离或衰减，使两个 SSID 都不会离开授权区域。使用 survey 进行确认。
-2. 为 `HT-TARGET` 配置一个 exercise identity，并在首次运行时故意省略 device-certificate/posture validation。记录该条件作为测试条件。
-3. 将 pivot 的第一个 interface 加入 `HT-NEIGHBOR`，第二个 interface 加入 `HT-TARGET`。**不要**启用通用 bridge；仅允许 target service/port 通过 host firewall。
-4. 从 workstation 向 pivot 打开 authenticated tunnel，并通过该 tunnel 请求 target service。
-5. 记录 pivot process/interface creation、两个 AP associations、target RADIUS event、DHCP lease 和 target source address。
-6. 要求 detection team 在没有 controller map 的情况下重建该链路。
-7. 在 `HT-TARGET` 上启用 EAP-TLS/managed-device posture，移除 pivot 获准使用的 target certificate 并重复测试。访问应在 admission 阶段失败。
-8. 使用首次出现的 randomized MAC 重复测试。验证 certificate/device decision 仍然有效，并确认没有任何规则仅将 MAC 视为 identity。
+1. 对环境进行物理隔离或衰减，使两个 SSID 都不会超出授权区域。使用 survey 进行确认。
+2. 为 `HT-TARGET` 配置一个演练身份，并在首次运行时故意省略设备证书/posture 验证。将其记录为本次测试的条件。
+3. 将 pivot 的第一个接口加入 `HT-NEIGHBOR`，第二个接口加入 `HT-TARGET`。**不要**启用通用 bridge；仅通过主机防火墙放行目标服务/端口。
+4. 从工作站向 pivot 打开一个 authenticated tunnel，并通过该 tunnel 请求目标服务。
+5. 记录 pivot 进程/接口的创建、与两个 AP 的关联、目标 RADIUS 事件、DHCP lease 以及目标端的源地址。
+6. 要求 detection team 在没有 controller map 的情况下重建整个链路。
+7. 在 `HT-TARGET` 上启用 EAP-TLS/managed-device posture，移除 pivot 获准使用的目标证书并重复测试。访问应在 admission 阶段失败。
+8. 使用首次出现的 randomized MAC 重复测试。验证证书/设备决策仍然有效，并确认没有任何规则仅将 MAC 视为身份。
 
 ### 成功标准
 
-- target 最初看到的是本地 Wi-Fi client，而不是 workstation。
-- Joined telemetry 识别出一个同时具有 neighbor-control 和 target-radio 路径的 pivot。
-- Certificate/device-backed admission 阻止第二次运行。
-- 没有数据包到达隔离实验环境之外的 network。
+- 目标最初看到的是本地 Wi-Fi client，而不是工作站。
+- 关联的 telemetry 能识别出一个同时具有邻居控制路径和目标无线电路径的 pivot。
+- 基于证书/设备的 admission 会阻止第二次运行。
+- 没有数据包到达隔离实验环境之外的网络。
 
 ## 实验 5：dead-drop resolver sequence
 
-**目标：** 检测一个读取看似合法的 object、解码 pointer，并立即联系第二个 service 的 process。
+**目标：** 检测一个读取外观合法的对象、解码指针并立即联系第二个服务的进程。
 
 ### 构建
 ```bash
@@ -201,14 +203,14 @@ python -c 'import base64,urllib.request; p=urllib.request.urlopen("http://ht-ddr
 docker logs ht-ddr-web
 docker logs ht-ddr-c2
 ```
-编码内容为 `http://ht-ddr-c2:80/`。有效的检测会将同一个短生命周期进程/容器读取 `/profile.txt`、解码内容并在数秒内连接 `ht-ddr-c2` 这几个事件关联起来。对对象响应进行哈希并保留。
+编码内容为 `http://ht-ddr-c2:80/`。有效的 detection 会将同一个短生命周期的 process/container 读取 `/profile.txt`、解码内容并在数秒内连接 `ht-ddr-c2` 关联起来。对对象响应执行 Hash 并予以保留。
 
-### 拆除
+### Teardown
 ```bash
 docker rm -f ht-ddr-web ht-ddr-c2
 docker network rm ht-ddr-net
 ```
-## 实验室 6：合成 peel-chain 与 bridge graph
+## 实验室 6：synthetic peel-chain 和 bridge graph
 
 **目标：** 在不使用真实资产、账户或服务的情况下练习价值追踪。
 
@@ -241,7 +243,7 @@ print(f'{e["time"]} {e["chain"]}: {src} -> {e["destination"]} {e["amount"]} [{e[
 frontier.add(e["destination"])
 PY
 ```
-分析人员应识别 peel/change 模式，将 bridge link 视为一项需要单独支持的推断，计算 fee/value 差异，并将该 exchange 标记为 off-chain evidence request。更改一个 value/time，并记录 confidence 如何变化。
+分析人员应识别 peel/change pattern，将 bridge link 作为单独支持的推断，计算 fee/value difference，并将该 exchange 标记为 off-chain 证据请求。更改一个 value/time，并记录置信度如何变化。
 
 ### 拆解
 ```bash
@@ -249,7 +251,7 @@ rm -rf -- "$ht_graph_dir"
 ```
 ## 实验 7：被动流量信号传感器
 
-**目标：** 在不创建 shell、persistence 或 remote access 的情况下，模拟被动、由 magic value 激活的 implant 的网络特征。监听器仅绑定到 loopback，并记录一个无害事件。
+**目标：**模拟被动、由 magic value 激活的 implant 的网络特征，但不创建 shell、persistence 或 remote access。监听器仅绑定到 loopback，并记录一个无害事件。
 ```bash
 ht_signal_dir="$(mktemp -d)"
 cat >"$ht_signal_dir/listener.py" <<'PY'
@@ -279,30 +281,31 @@ wait "$ht_signal_pid"
 cat "$ht_signal_dir/events.log"
 rm -rf -- "$ht_signal_dir"
 ```
-预期结果：普通流量不会产生 application event；只有指定的 token 会产生事件。在运行期间捕获 loopback 流量，并验证 network sensor 仍能看到两个 datagram。然后评估能够检测异常的长时间运行 packet listener 或 packet-capture filter 的主机控制措施。真正的 RedPenguin passive implants 会在 router 上检查流量并提供危险功能；本 lab 特意不执行这些操作。
+预期结果：普通流量不会产生 application event；只有指定 token 会产生事件。在运行期间捕获 loopback traffic，并验证 network sensor 仍能看到两个 datagrams。然后评估能够检测意外的长期运行 packet listener 或 packet-capture filter 的 host controls。真实的 RedPenguin passive implants 会在路由器上检查流量并提供危险功能；本实验刻意不执行这两项操作。
 
 ## Exercise report template
 
-对于每个 lab，记录：
+对于每个实验，记录：
 
 - authorization 和隔离范围；
 - hypothesis 和 ATT&CK technique；
 - topology 和 observer table；
-- 准确的开始/结束时间以及 configuration hashes；
-- 每个 sensor 的预期 events；
-- 实际观察到的 events 和 retention gaps；
-- analytic logic、threshold 和 false-positive sample；
+- 确切的 start/end time 以及 configuration hashes；
+- 每个 sensor 的预期事件；
+- 实际观察到的事件和 retention gaps；
+- analytic logic、threshold 以及 false-positive sample；
 - target team 是否重建了该路径；
 - mitigation retest result；以及
 - teardown/recovery evidence。
 
-在 mitigation 后重新运行 detection，并移除每个 lab resource 之前，exercise 均不完整。
+在 mitigation 后重新运行 detection 并移除所有 lab resource 之前，实验均不完整。
 
 ## References
 
 - [1] [MITRE ATT&CK — Multi-hop Proxy (T1090.003)](https://attack.mitre.org/techniques/T1090/003/)
 - [2] [MITRE ATT&CK — Domain Fronting (T1090.004)](https://attack.mitre.org/techniques/T1090/004/)
 - [3] [MITRE ATT&CK — Fast Flux DNS (T1568.001)](https://attack.mitre.org/techniques/T1568/001/)
-- [4] [Volexity — 最近邻攻击](https://www.volexity.com/blog/2024/11/22/the-nearest-neighbor-attack-how-a-russian-apt-weaponized-nearby-wi-fi-networks-for-covert-access/)
+- [4] [Volexity — 最近邻攻击：俄罗斯 APT 如何将附近 Wi-Fi 网络武器化以实现隐蔽访问](https://www.volexity.com/blog/2024/11/22/the-nearest-neighbor-attack-how-a-russian-apt-weaponized-nearby-wi-fi-networks-for-covert-access/)
 - [5] [MITRE ATT&CK — Dead Drop Resolver (T1102.001)](https://attack.mitre.org/techniques/T1102/001/)
 - [6] [MITRE ATT&CK — Traffic Signaling (T1205)](https://attack.mitre.org/techniques/T1205/)
+{{#include ../banners/hacktricks-training.md}}
