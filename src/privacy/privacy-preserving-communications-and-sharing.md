@@ -1,0 +1,189 @@
+# Privacy-Preserving Communications and Sharing
+
+End-to-end encryption content की सुरक्षा करता है। यह अपने-आप account, phone number, contact graph, IP address, push token, notification preview, timing, file metadata या recipient behavior को छिपाता नहीं है। किसी tool का चयन इस आधार पर करें कि वह कौन-सा metadata हटाता है और किन observers को शामिल करता है।
+
+## Communication models की तुलना करें
+
+| Tool/model | उपयोगी विशेषता | शेष observers और सीमाएँ |
+|---|---|---|
+| Signal | Mature E2EE; usernames number share किए बिना contact शुरू कर सकते हैं; sealed sender service metadata को कम करता है | Registration के लिए phone number आवश्यक है; service, push provider, contacts और endpoints कुछ observations बनाए रखते हैं |
+| SimpleX | कोई global user identifier नहीं; per-contact queues; optional Tor transport | Relay timing/transport, push service, invitations और endpoints; नया/छोटा ecosystem |
+| Briar | Direct synchronization; online होने पर Tor; offline में Bluetooth/Wi-Fi; कोई central message store नहीं | Contacts और endpoints; local radio observers; Android-focused; दोनों sides उपलब्ध होने चाहिए या Mailbox का उपयोग करना होगा |
+| OnionShare | Temporary onion service पर direct file/receive/chat/site; कोई storage provider नहीं | Sender computer ही service है; link bearer access सीखता है; timing और endpoints बने रहते हैं |
+| `age` encrypted file | Transport से स्वतंत्र सरल recipient-key encryption | Transport sender/recipient/timing/size देखता है; filenames/archive metadata और endpoints बने रहते हैं |
+| Ordinary email + TLS | Server-to-server channel encryption | दोनों mail providers सामान्यतः content पढ़ सकते हैं और routing/account metadata रख सकते हैं |
+
+## Signal: number disclosure के बिना private contact
+
+Signal usernames नए contact को user's phone number बताए बिना chat शुरू कर सकते हैं, लेकिन registration के लिए phone number अभी भी आवश्यक है।<sup>[[1]](#references)</sup> Sealed sender एक incremental metadata protection है, सभी IP/timing correlation के विरुद्ध protection नहीं।<sup>[[2]](#references)</sup>
+
+### Workflow
+
+1. Signal को official app store/project से install करें और पहले OS update करें।
+2. ऐसे number से register करें जिसका उपयोग करने का आपको कानूनी अधिकार है। Rented SMS activations, किसी अन्य व्यक्ति का number या false identity से प्राप्त provider account का उपयोग न करें।
+3. **Settings → Privacy → Phone Number** में threat model के अनुसार तय करें कि number कौन देख सकता है और number से account कौन खोज सकता है।
+4. नए-contact discovery के लिए username बनाएँ। इसका exact link/QR पहले से authenticated channel के माध्यम से share करें; usernames बदल सकते हैं और profile name नहीं होते।
+5. यदि सुविधा linkage के योग्य नहीं है तो contact upload/permissions disable करें और जहाँ platform support करता हो, contacts manually add करें।
+6. Sensitive content भेजने से पहले contact details खोलें और safety number/QR की तुलना दूसरे channel या आमने-सामने करें।
+7. Linked devices, registration lock/PIN, notification previews, screen security, call relaying, disappearing-message defaults और backup behavior की समीक्षा करें।
+8. Non-sensitive test message भेजें और call करें। दोनों sides पर lock-screen, desktop, wearable और cloud-notification traces की जाँच करें।
+9. बदले हुए safety number या unexpected linked device को investigation event मानें, न कि ऐसा alert जिसे automatically dismiss करना हो।
+
+Pseudonymous profile photo, bio, group membership या schedule को identifying Signal context के साथ mix न करें।
+
+## SimpleX: global identifier के बिना per-contact connections
+
+SimpleX messages को unidirectional queues के माध्यम से route करता है और network-wide user identifier assign नहीं करता। इसकी अपनी policy transport sessions, temporary server data, push-notification tradeoffs और endpoint responsibility का documentation देती है।<sup>[[3]](#references)</sup>
+
+### Workflow
+
+1. Official project/store से maintained client download करें और publisher verify करें। जब identities को mix नहीं करना हो, dedicated OS/app profile का उपयोग करें।
+2. Context-specific display name और image के साथ **local** profile बनाएँ। Backup के बिना app delete करने पर profile और connections खो सकते हैं।
+3. First launch पर notification mode सोच-समझकर चुनें। Instant mobile push Apple/Google infrastructure को अतिरिक्त metadata expose कर सकता है।
+4. एक contact के लिए one-time invitation link बनाएँ। इसे authenticated channel के माध्यम से transfer करें; live invitation प्राप्त करने वाला कोई भी व्यक्ति इसका उपयोग करने का प्रयास कर सकता है।
+5. Connect होने के बाद contact details खोलें और security code की तुलना आमने-सामने या independent verified channel पर करें।<sup>[[4]](#references)</sup>
+6. जहाँ supported हो, unrelated groups में उसी profile को recycle करने के बजाय per-group incognito profile का उपयोग करें।
+7. यदि local network/server को direct IP नहीं दिखना चाहिए तो client के supported Tor transport को configure करें। बदलाव के बाद connection confirm करें; unsupported system proxy को force न करें।
+8. Delivery receipts, link previews, calls, automatic downloads और database export/backup की समीक्षा करें। इनमें से प्रत्येक metadata या endpoint exposure बदलता है।
+9. Duplicated live profile state चलाए बिना spare isolated device पर recovery test करें; project चेतावनी देता है कि concurrent copies conversations को बाधित कर सकती हैं।
+
+Global identifier न होने से contact content, profile reuse, invitation delivery, timing या social graph के माध्यम से user की पहचान नहीं कर सकता—ऐसा नहीं है।
+
+## Briar: direct और disruption-resistant messaging
+
+Briar devices के बीच directly synchronize करता है, online होने पर Tor के माध्यम से और local outages के दौरान Bluetooth/Wi-Fi के माध्यम से। Official threat model short-range radio की केवल limited adversarial monitoring मानता है, इसलिए local wireless invisible नहीं है।<sup>[[5]](#references)</sup>
+
+### Workflow
+
+1. Official Briar distribution से install करें और package source verify करें। Current security updates वाले supported Android device का उपयोग करें।
+2. Unique context nickname और strong password के साथ local account बनाएँ। Password-reset path नहीं है; जाँचें कि unlock secret recover किया जा सकता है।
+3. जहाँ संभव हो, एक-दूसरे के QR codes scan करके contacts को face-to-face add करें। इससे contact authenticate होता है और correlatable channel के माध्यम से link भेजने से बचा जा सकता है।
+4. Connectivity settings में केवल आवश्यक transports enable करें: Tor/Internet, Wi-Fi और/या Bluetooth। आवश्यक न होने पर local radios disable करें।
+5. Asynchronous delivery के लिए dedicated powered device पर Briar Mailbox का मूल्यांकन करें; इसकी inventory रखें और इसे message server की तरह physically protect करें।
+6. Internet उपलब्ध होने पर benign test भेजें, फिर owner-authorized location में Internet disabled करके planned outage path test करें।
+7. Android backups, notification previews, screenshots और exported content की जाँच करें। Endpoint unlocked/compromised होने पर local encrypted storage exposed होता है।
+8. Lost contacts/devices हटाएँ और physical custody या account password compromise होने पर पूरे context को retire करें।
+
+## OnionShare: direct temporary transfer
+
+OnionShare sender/receiver के computer पर onion service चलाता है; files किसी storage provider पर upload नहीं होतीं और traffic Tor के अंदर end-to-end encrypted होता है।<sup>[[6]](#references)</sup> Complete onion URL एक bearer capability है और इसे सुरक्षित रखना आवश्यक है।
+
+### GUI file-sharing workflow
+
+1. OnionShare को official signed distribution से install करें और recipient side पर Tor Browser install करें।
+2. Files की **sanitized copies** dedicated staging directory में रखें। OnionShare को personal home directory पर point न करें।
+3. **Share Files** खोलें, केवल staged files add करें, private key/access protection enabled रखें और एक recipient के लिए **Stop sharing after files have been sent** enabled रखें।
+4. Sharing शुरू करें और complete onion URL को पहले से authenticated E2EE channel के माध्यम से भेजें। इसे email, issue trackers या public chats में paste न करें।
+5. Recipient Tor Browser में URL खोलता है, sender के साथ expected filenames/size verify करता है और download करता है।
+6. जब file स्वयं security boundary हो, तो integrity के लिए दोनों sides pre-agreed या separately delivered SHA-256 digest की तुलना करें।
+7. Confirm करें कि download के बाद OnionShare रुक गया है; अन्यथा इसे manually stop करें और application close करें।
+8. Retention policy के अनुसार staged copy delete करें और unintended filename disclosure के लिए OnionShare history/log settings की जाँच करें।
+
+### CLI workflow
+
+Official CLI files को positional arguments के रूप में स्वीकार करता है और default single completed share के बाद रुक जाता है। Official CLI/Tor installed host पर:
+```bash
+# Inspect the installed version and options first
+onionshare-cli --help
+
+# Share one sanitized file; stop after one hour even if unused
+onionshare-cli --auto-stop-timer 3600 ./staging/report-clean.pdf
+```
+परिणामी full URL सुरक्षित रूप से प्रदान करें। जब तक threat model में परिणामी exposure की स्पष्ट आवश्यकता न हो, `--public`, `--no-autostop-sharing`, verbose filename logging या persistence न जोड़ें।<sup>[[7]](#references)</sup>
+
+प्राप्त documents को hostile मानें। उन्हें identity-bearing host पर खोलने के बजाय disposable VM/Dangerzone-style renderer में खोलें।
+
+## `age` के साथ किसी file को स्वतंत्र रूप से Encrypt करें
+
+Transport-independent encryption तब उपयोगी है जब कोई storage/email provider object को देख सकता हो। यह sender, recipient, size, timing या filename को तब तक छिपाता नहीं है, जब तक उन्हें अलग से handle न किया जाए।
+
+### Recipient setup
+```bash
+# Creates a secret identity file; protect its permissions and backup
+age-keygen -o recipient-identity.txt
+
+# Derive a public recipient file safe to share
+age-keygen -y recipient-identity.txt > recipient-public.txt
+```
+दूसरे channel के माध्यम से public recipient string को Authenticate करें। इसके बाद sender चलाता है:
+```bash
+age -R recipient-public.txt -o package.tar.age package.tar
+```
+प्राप्तकर्ता एक नए path पर decrypt करता है:
+```bash
+age --decrypt -i recipient-identity.txt -o package-restored.tar package.tar.age
+```
+आधिकारिक CLI चेतावनी देता है कि `-o` मौजूदा output को overwrite कर देता है, इसलिए एक नई directory का उपयोग करें और उसे स्थानांतरित करने से पहले digest/content सत्यापित करें।<sup>[[8]](#references)</sup> identity file को ciphertext के साथ कभी न भेजें।
+
+## पुनरुत्पाद्य file-sanitization pipeline
+
+Metadata stripping format-specific होता है। जब authenticity, forensics या chain of custody महत्वपूर्ण हो, तो encrypted original को सुरक्षित रखें; एक copy पर काम करें।
+
+### JPEG उदाहरण
+```bash
+mkdir -p ./clean
+
+# Inventory embedded metadata
+exiftool -a -u -g1 ./original/photo.jpg
+
+# Write a new JPEG while retaining color-profile/color-space information
+exiftool -all= --icc_profile:all -tagsfromfile @ -colorspacetags \
+-o ./clean/photo.jpg ./original/photo.jpg
+
+# Re-inspect the output
+exiftool -a -u -g1 ./clean/photo.jpg
+```
+यह ExifTool की अधिक सुरक्षित JPEG guidance का पालन करता है: बिना सोचे हर tag हटाने से color information भी हट सकती है।<sup>[[9]](#references)</sup> इसके बाद faces, reflections, screens, landmarks और damage/noise के unique patterns के लिए pixels का visually निरीक्षण करें।
+
+### Office/PDF workflow
+
+1. Editable original को encrypted रखें और publication context से offline रखें।
+2. Authoring application में comments, tracked changes, hidden slides/sheets, embedded files, personal templates और document properties हटाएँ।
+3. Dedicated clean profile से नया PDF export करें; cloud printer पर “print” न करें।
+4. Format-aware tools और disposable visual renderer, दोनों से निरीक्षण करें:
+```bash
+exiftool -a -u -g1 ./clean/report.pdf
+pdfinfo ./clean/report.pdf
+```
+5. Rendered output में names, paths, email addresses और revision text खोजें। Rasterization active structures को हटा सकता है, लेकिन accessibility/search को नुकसान पहुंचाता है और visible content या writing style को नहीं हटाता।
+6. Final artifact का hash बनाएं और publication compartment के माध्यम से **केवल** उसी copy को transfer करें।
+
+## Privacy Pass: service designers के लिए anonymous authorization
+
+Privacy Pass token **issuance** को **redemption** से अलग करता है। कोई origin यह जान सकता है कि client के पास issuer-approved token है, लेकिन client के specific issuance interaction के बारे में जाने बिना। Token का दोबारा उपयोग, unique metadata, timing या collusion linkability को फिर से उत्पन्न कर सकते हैं।<sup>[[10]](#references)</sup>
+
+Safe deployment pattern:
+
+1. वह statement परिभाषित करें जिसे token साबित करता है (उदाहरण के लिए, rate-limit eligibility), न कि कोई छिपी हुई global identity।
+2. Standardized architecture और issuance protocols का उपयोग करें; blind-signature cryptography को scratch से implement न करें।
+3. जहां वांछित property के लिए आवश्यक हो, issuer/attester और origin administration को अलग रखें।
+4. Public/private token metadata को न्यूनतम रखें और सुनिश्चित करें कि anonymity sets पर्याप्त बड़े हों।
+5. जहां supported हो, उपयोग से पहले batches issue करें ताकि issuance time आसानी से redemption time से match न हो सके।
+6. प्रत्येक token को केवल एक बार redeem करें, origin-bound challenge को validate करें और expired token state को delete करें।
+7. Cookies, IP logging और application accounts को token privacy property को चुपचाप निष्प्रभावी करने से रोकें।
+8. Test करें कि timing, metadata या unique errors का उपयोग करके issuer और origin logs किसी controlled issuance और redemption event को join कर सकते हैं या नहीं।
+
+Privacy Pass एक application feature है, ऐसी चीज नहीं जिसे कोई user arbitrary account पर bolt कर सके।
+
+## Communications verification checklist
+
+- [ ] Contact/invitation/key को independently authenticated किया गया।
+- [ ] Phone number, username, profile, group और contact-upload exposure को समझा गया।
+- [ ] Direct IP, relay, Tor, push-provider और local-radio observers की सूची बनाई गई।
+- [ ] Notification previews, wearables, linked desktops और backups का परीक्षण किया गया।
+- [ ] Files को sanitized और आवश्यकता होने पर encrypted किया गया तथा disposable context में खोला गया।
+- [ ] Unrelated identities को bridge किए बिना recovery काम करती है।
+- [ ] Logs, history और temporary share services के लिए shutdown/retention rule मौजूद है।
+
+## References
+
+- [1] [Signal — Phone Number Privacy और Usernames](https://support.signal.org/hc/en-us/articles/6829998083994-Phone-Number-Privacy-and-Usernames-Deeper-Dive)
+- [2] [Signal — Sealed Sender](https://signal.org/blog/sealed-sender/)
+- [3] [SimpleX — Privacy Policy और Conditions of Use](https://simplex.chat/privacy/) and [Protocol design](https://simplex.chat/docs/simplex.html)
+- [4] [SimpleX — Privacy और security guide](https://simplex.chat/docs/guide/privacy-security.html)
+- [5] [Briar — यह कैसे काम करता है](https://briarproject.org/how-it-works/) and [Quick Start](https://briarproject.org/quick-start/)
+- [6] [OnionShare — Security Design](https://docs.onionshare.org/2.6/en/security.html)
+- [7] [OnionShare 2.6.3 — Advanced Usage और CLI](https://docs.onionshare.org/2.6.3/en/advanced.html)
+- [8] [`age` — official CLI और usage](https://github.com/FiloSottile/age)
+- [9] [ExifTool FAQ — Safely removing metadata](https://exiftool.org/faq.html#Q32)
+- [10] [RFC 9576 — Privacy Pass Architecture](https://www.rfc-editor.org/rfc/rfc9576.html), [RFC 9577 — HTTP Authentication](https://www.rfc-editor.org/rfc/rfc9577.html), and [RFC 9578 — Issuance Protocols](https://www.rfc-editor.org/rfc/rfc9578.html)
