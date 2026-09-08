@@ -101,6 +101,30 @@
   - [Web3 Signing Workflow Compromise Safe Delegatecall Proxy Takeover](blockchain/blockchain-and-crypto-currencies/web3-signing-workflow-compromise-safe-delegatecall-proxy-takeover.md)
 - [Lua Sandbox Escape](generic-methodologies-and-resources/lua/bypass-lua-sandboxes/README.md)
 
+# 🕵️ Privacy
+
+- [Offensive Privacy, Attribution Evasion and OPSEC](privacy/README.md)
+  - [Anonymous Internet Access Technique Catalog](privacy/anonymous-internet-access-techniques.md)
+  - [Anonymous Payment Technique Catalog](privacy/anonymous-payment-techniques.md)
+  - [Capture-Resilient Authorized Field Nodes](privacy/capture-resilient-authorized-field-nodes.md)
+  - [Offensive Infrastructure and Attribution Evasion](privacy/offensive-infrastructure-and-attribution-evasion.md)
+  - [Covert Physical and Wireless Access](privacy/covert-physical-wireless-access.md)
+  - [Government and APT Case Studies](privacy/government-and-apt-case-studies.md)
+  - [Financial Obfuscation Tradecraft](privacy/financial-obfuscation-tradecraft.md)
+  - [Attribution, Detection and Countermeasures](privacy/attribution-detection-and-countermeasures.md)
+  - [Authorized Adversary-Emulation Labs](privacy/authorized-adversary-emulation-labs.md)
+  - [Threat Modeling and Identity Separation](privacy/threat-modeling-and-identity-separation.md)
+  - [Network Privacy and Anonymous Connectivity](privacy/network-privacy-and-anonymous-connectivity.md)
+  - [Advanced Network Privacy Architectures](privacy/advanced-network-privacy-architectures.md)
+  - [Privacy Operating Systems](privacy/privacy-operating-systems.md)
+  - [Privacy-Preserving Communications and Sharing](privacy/privacy-preserving-communications-and-sharing.md)
+  - [Authorized Red-Team Infrastructure](privacy/authorized-red-team-infrastructure.md)
+  - [Private Digital Payments](privacy/private-digital-payments.md)
+  - [Cryptocurrency Privacy](privacy/cryptocurrency-privacy.md)
+  - [Privacy-Preserving Payment Protocols](privacy/privacy-preserving-payment-protocols.md)
+  - [Reproducible Privacy Testing](privacy/reproducible-privacy-testing.md)
+  - [Operational Privacy Playbooks](privacy/operational-privacy-playbooks.md)
+
 # 🧙‍♂️ Generic Hacking
 
 - [Archive Extraction Path Traversal](generic-hacking/archive-extraction-path-traversal.md)
