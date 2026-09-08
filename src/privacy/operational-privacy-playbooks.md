@@ -1,5 +1,7 @@
 # Operational Privacy Playbooks
 
+{{#include ../banners/hacktricks-training.md}}
+
 These playbooks combine the controls from the rest of this section. They are starting points, not guarantees: update the threat model whenever a new observer, account, device, location, payment, file or counterparty enters the workflow.
 
 ## Universal preflight
@@ -128,3 +130,4 @@ When a compartment leaks or may be linked:
 - [ ] Wallet nodes/backends and crypto protocol assumptions remain current.
 - [ ] Logs and receipts are minimal, encrypted, access-controlled and within retention.
 - [ ] Old compartments and engagement infrastructure were fully retired.
+{{#include ../banners/hacktricks-training.md}}

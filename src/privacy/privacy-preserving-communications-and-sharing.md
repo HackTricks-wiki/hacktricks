@@ -1,5 +1,7 @@
 # Privacy-Preserving Communications and Sharing
 
+{{#include ../banners/hacktricks-training.md}}
+
 End-to-end encryption protects content. It does not automatically hide the account, phone number, contact graph, IP address, push token, notification preview, timing, file metadata or recipient behavior. Select a tool by the metadata it removes and the observers it introduces.
 
 ## Compare communication models
@@ -199,3 +201,4 @@ Privacy Pass is an application feature, not something a user can bolt onto an ar
 - [8] [`age` — official CLI and usage](https://github.com/FiloSottile/age)
 - [9] [ExifTool FAQ — Safely removing metadata](https://exiftool.org/faq.html#Q32)
 - [10] [RFC 9576 — Privacy Pass Architecture](https://www.rfc-editor.org/rfc/rfc9576.html), [RFC 9577 — HTTP Authentication](https://www.rfc-editor.org/rfc/rfc9577.html), and [RFC 9578 — Issuance Protocols](https://www.rfc-editor.org/rfc/rfc9578.html)
+{{#include ../banners/hacktricks-training.md}}

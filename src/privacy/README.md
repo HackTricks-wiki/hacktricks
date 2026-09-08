@@ -1,5 +1,7 @@
 # Offensive Privacy, Attribution Evasion and OPSEC
 
+{{#include ../banners/hacktricks-training.md}}
+
 This section studies privacy from the viewpoint of a red team, an intrusion operator and the defender trying to reconstruct that operator. **Anonymity is not merely hiding an IP address.** Mature operations separate the people, endpoints, accounts, infrastructure, network paths, payloads and payments that could be joined into an attribution graph.
 
 The material deliberately includes techniques reported in government and APT operations: operational-relay-box (ORB) networks, compromised edge devices, residential exits, redirector tiers, fast flux, domain fronting, dead-drop resolvers, nearby wireless pivots, covert drop devices, satellite-link abuse, false personas and financial layering. Each technique is presented as:
@@ -136,3 +138,4 @@ Then select the smallest sustainable controls. A complicated plan that is routin
 - [5] [W3C — Mitigating Browser Fingerprinting in Web Specifications](https://www.w3.org/TR/fingerprinting-guidance/)
 - [6] [MITRE ATT&CK — Acquire Infrastructure (T1583) and Compromise Infrastructure (T1584)](https://attack.mitre.org/techniques/T1584/)
 - [7] [MITRE ATT&CK — Proxy (T1090)](https://attack.mitre.org/techniques/T1090/)
+{{#include ../banners/hacktricks-training.md}}

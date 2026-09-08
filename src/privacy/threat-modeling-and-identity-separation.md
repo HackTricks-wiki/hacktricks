@@ -1,5 +1,7 @@
 # Threat Modeling & Identity Separation
 
+{{#include ../banners/hacktricks-training.md}}
+
 The most common anonymity failure is not broken cryptography. It is **linkage**: one identifier, timing pattern, device, account, payment, file, or human habit connects two contexts that were supposed to remain separate.
 
 ## Build a privacy threat model
@@ -139,3 +141,4 @@ Sanitization can damage evidence or authenticity. Preserve an encrypted original
 - [9] [Signal — Phone Number Privacy and Usernames: Deeper Dive](https://support.signal.org/hc/en-us/articles/6829998083994-Phone-Number-Privacy-and-Usernames-Deeper-Dive)
 - [10] [Proton — What is encrypted within Proton Mail?](https://proton.me/support/what-is-encrypted-within-protonmail)
 - [11] [Tails — Warnings: Tails is safe but not magic](https://tails.net/doc/about/warnings/index.en.html)
+{{#include ../banners/hacktricks-training.md}}

@@ -1,5 +1,7 @@
 # Private Digital Payments
 
+{{#include ../banners/hacktricks-training.md}}
+
 Payment privacy is the controlled disclosure of transaction data. It is not a way to make illegal funds legitimate, evade tax or sanctions, defeat KYC, use false identities, or hide an unauthorized engagement. A payment can be private from a merchant while remaining fully visible to an issuer, network, employer, tax authority, or investigator.
 
 The [Anonymous Payment Technique Catalog](anonymous-payment-techniques.md) is the normalized inventory with `Pros`, `Cons`, lawful step-by-step `Procedure`, and `Detection` for each family. This page expands conventional payment methods.
@@ -116,3 +118,4 @@ For crypto-specific choices, continue to [Cryptocurrency Privacy](cryptocurrency
 - [6] [FinCEN — Final Rule on Prepaid Access](https://www.fincen.gov/resources/statutes-regulations/guidance/final-rule-definitions-and-other-regulations-relating)
 - [7] [Directive (EU) 2018/843](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32018L0843) and [Regulation (EU) 2024/1624](https://eur-lex.europa.eu/eli/reg/2024/1624)
 - [8] [Capital One — Using virtual credit cards](https://www.capitalone.com/help-center/credit-cards/using-virtual-credit-cards/), [Google Pay — Virtual cards](https://support.google.com/googlepay/answer/7643925?hl=en), [EMVCo — Payment Tokenisation](https://www.emvco.com/emv-technologies/payment-tokenisation/), and [Visa — Token Service Provisioning](https://developer.visa.com/capabilities/token-service-provisioning)
+{{#include ../banners/hacktricks-training.md}}

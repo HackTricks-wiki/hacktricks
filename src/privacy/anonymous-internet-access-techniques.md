@@ -1,5 +1,7 @@
 # Anonymous Internet Access Technique Catalog
 
+{{#include ../banners/hacktricks-training.md}}
+
 This is the canonical access-path inventory. It covers protocol and operational **families**, not every vendor name. No Internet path guarantees anonymity: account, browser, endpoint, timing, payment, cloud-control-plane and physical evidence can defeat a perfect-looking route.
 
 Every entry uses the same fields. “Procedure” means a lawful deployment or an owned-lab emulation. Where the real technique depends on compromising a router, stealing access or abusing an unwilling intermediary, the reproduction substitutes systems owned by the exercise.
@@ -688,3 +690,4 @@ No client-side test proves that an investigator or defender is watching. Monitor
 - [26] [RFC 4786 — Operation of Anycast Services](https://www.rfc-editor.org/rfc/rfc4786.html)
 - [27] [RFC 9000 — QUIC connection migration](https://www.rfc-editor.org/rfc/rfc9000.html) and [RFC 8684 — Multipath TCP](https://www.rfc-editor.org/rfc/rfc8684.html)
 - [28] [GitHub — GitHub-hosted runners reference](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)
+{{#include ../banners/hacktricks-training.md}}

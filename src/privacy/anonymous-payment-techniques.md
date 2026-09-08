@@ -1,5 +1,7 @@
 # Anonymous Payment Technique Catalog
 
+{{#include ../banners/hacktricks-training.md}}
+
 This catalog covers payment **families** from ordinary cash through blind-signature e-cash and public-chain obfuscation. “Anonymous” always means anonymous from a named observer. A merchant, issuer, mint, exchange, blockchain analyst, network provider, employer and physical observer see different facts.
 
 The procedures below are for lawful funds, truthful accounts and authorized procurement. Techniques whose purpose in the cited cases was laundering, sanctions evasion or identity fraud are explained and detected, but their procedure is a synthetic forensic exercise—not instructions for performing the crime.
@@ -685,3 +687,4 @@ Payment denial, a compliance review or a wallet going offline does not prove tha
 - [24] [GSMA Open Gateway — Carrier Billing API](https://open-gateway.gsma.com/docs/carrier-billing/api-reference)
 - [25] [Open Banking Standards — Payment Initiation Services](https://standards.openbanking.org.uk/customer-experience-guidelines/payment-initiation-services/v4-0/)
 - [26] [Apple Developer — StoreKit](https://developer.apple.com/documentation/storekit/)
+{{#include ../banners/hacktricks-training.md}}

@@ -1,5 +1,7 @@
 # Advanced Network Privacy Architectures
 
+{{#include ../banners/hacktricks-training.md}}
+
 Complexity is useful only when it removes a specific observer or failure mode. A unique tunnel stack, custom packet shape, rare user agent, or frequently rotating infrastructure can become a stronger fingerprint than a standard configuration used by thousands of people.
 
 The [Anonymous Internet Access Technique Catalog](anonymous-internet-access-techniques.md) supplies the common `Pros`/`Cons`/`Procedure`/`Detection` schema. This page expands the more complex architectures and trust boundaries.
@@ -165,3 +167,4 @@ For an authorized red team, any attempt to make traffic less recognizable must b
 - [6] [Tor Project — Onion Service advanced settings and client authorization](https://community.torproject.org/onion-services/advanced/)
 - [7] [AWS — Data encryption in Amazon WorkSpaces Secure Browser](https://docs.aws.amazon.com/workspaces-web/latest/adminguide/data-encryption.html)
 - [8] [I2P — Threat Model](https://www.i2p.net/en/docs/overview/threat-model/) and [Garlic Routing](https://www.i2p.net/en/docs/overview/garlic-routing/)
+{{#include ../banners/hacktricks-training.md}}

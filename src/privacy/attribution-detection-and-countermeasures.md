@@ -1,5 +1,7 @@
 # Attribution, Detection and Countermeasures
 
+{{#include ../banners/hacktricks-training.md}}
+
 Attribution-evasion infrastructure is designed to make individual indicators disposable. Defenders should preserve raw evidence, model relationships, and hunt for behavior that survives a change of IP, domain or persona.
 
 ## Evidence hierarchy
@@ -207,3 +209,4 @@ Always keep at least two hypotheses: actor-operated infrastructure versus compro
 - [5] [FATF — Virtual Assets Red Flag Indicators](https://www.fatf-gafi.org/en/publications/Methodsandtrends/Virtual-assets-red-flag-indicators.html)
 - [6] [CISA AA24-038A — PRC actors compromise and maintain persistent access](https://www.cisa.gov/sites/default/files/2024-03/aa24-038a_csa_prc_state_sponsored_actors_compromise_us_critical_infrastructure_3.pdf)
 - [7] [NSA — Enhanced visibility and hardening guidance for communications infrastructure](https://www.nsa.gov/Press-Room/Press-Releases-Statements/Press-Release-View/Article/3982793/guidance-urges-visibility-and-device-hardening-against-prc-affiliated-threat-ac/)
+{{#include ../banners/hacktricks-training.md}}

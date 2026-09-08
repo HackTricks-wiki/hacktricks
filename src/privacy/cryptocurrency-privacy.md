@@ -1,5 +1,7 @@
 # Cryptocurrency Privacy
 
+{{#include ../banners/hacktricks-training.md}}
+
 Cryptocurrency privacy is a protocol-and-operations question, not a synonym for secrecy or immunity. Public ledgers, exchanges, wallet servers, network peers, merchants and later transactions expose different parts of the graph.
 
 Start with the [Anonymous Payment Technique Catalog](anonymous-payment-techniques.md) for the per-technique pros/cons/procedure/detection format. This page expands cryptocurrency-specific mechanics and operational limits.
@@ -146,3 +148,4 @@ For Bitcoin Silent Payments, fully shielded Zcash, GNU Taler, federated Chaumian
 - [15] [FinCEN — Application of FinCEN's Regulations to Persons Administering, Exchanging, or Using Virtual Currencies](https://www.fincen.gov/resources/statutes-regulations/guidance/application-fincens-regulations-persons-administering)
 - [16] [Regulation (EU) 2023/1113](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32023R1113)
 - [17] [US OFAC — Sanctions Compliance Guidance for the Virtual Currency Industry](https://ofac.treasury.gov/system/files/126/virtual_currency_guidance_brochure.pdf) and [US IRS — Digital asset transaction FAQs](https://www.irs.gov/individuals/international-taxpayers/frequently-asked-questions-on-digital-asset-transactions)
+{{#include ../banners/hacktricks-training.md}}

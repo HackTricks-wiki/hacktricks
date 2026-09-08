@@ -1,5 +1,7 @@
 # Reproducible Privacy Testing
 
+{{#include ../banners/hacktricks-training.md}}
+
 A privacy setup is not finished when it connects. It is finished when its claimed boundary has been tested under normal use, failure, recovery and teardown. Test against infrastructure you own or are authorized to inspect; public “leak test” sites become another observer.
 
 ## Build a small authorized test environment
@@ -254,3 +256,4 @@ Evidence retention/deletion date:
 - [2] [WireGuard — Routing and Network Namespaces](https://www.wireguard.com/netns/)
 - [3] [ExifTool — FAQ and metadata guidance](https://exiftool.org/faq.html)
 - [4] [NIST SP 800-115 — Technical Guide to Information Security Testing and Assessment](https://csrc.nist.gov/pubs/sp/800/115/final)
+{{#include ../banners/hacktricks-training.md}}

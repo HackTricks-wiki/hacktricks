@@ -1,5 +1,7 @@
 # Covert Physical and Wireless Access
 
+{{#include ../banners/hacktricks-training.md}}
+
 For a detailed, owner-approved implementation covering outbound rendezvous, power/uplink recovery, minimal device-held secrets, capture testing and monitoring for possible discovery, see [Capture-Resilient Authorized Field Nodes](capture-resilient-authorized-field-nodes.md).
 
 Changing the network path can also change apparent physical origin. A sophisticated actor may use a nearby compromised system, a hidden device, public access, cellular backhaul or a satellite receiver so that target logs point away from the operator. None of these removes physical, radio or provider evidence; it moves attribution into different datasets.
@@ -132,3 +134,4 @@ When an apparently local source is suspicious, build one timeline:
 - [2] [Kaspersky Securelist — Satellite Turla: APT command and control in the sky](https://securelist.com/satellite-turla-apt-command-and-control-in-the-sky/72081/)
 - [3] [MITRE ATT&CK — Hardware Additions (T1200)](https://attack.mitre.org/techniques/T1200/)
 - [4] [NIST SP 800-153 — Guidelines for Securing Wireless Local Area Networks](https://csrc.nist.gov/pubs/sp/800/153/final)
+{{#include ../banners/hacktricks-training.md}}
