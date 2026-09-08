@@ -1,16 +1,18 @@
 # Gemagtigde Adversary-Emulation-laboratoriums
 
-Hierdie oefeninge reproduseer **waarneembare argitektuur**, nie ongemagtigde kompromittering nie. Voer dit uit op ’n toegewyde Linux-laboratoriumgasheer met Docker, sonder sensitiewe credentials en sonder ’n roete na derdeparty-teikens. Die name is vasgestel sodat afbreek eksplisiet is.
+{{#include ../banners/hacktricks-training.md}}
+
+Hierdie oefeninge reproduseer **waarneembare argitektuur**, nie ongemagtigde kompromittering nie. Voer dit op ’n toegewyde Linux-labgasheer met Docker uit, sonder sensitiewe credentials en sonder ’n roete na derdeparty-teikens. Die name is vasgestel sodat teardown eksplisiet is.
 
 {% hint style="danger" %}
-Moenie die besitte containers, APs, routers, accounts of sintetiese transaksies hieronder vervang met publieke proxies, ’n buurman se Wi-Fi, ’n produksie-CDN-tenant wat jy nie beheer nie, of werklike onwettige fondse nie. Skriftelike magtiging moet elke stelsel en radio-omgewing dek.
+Moenie die besitte containers, AP's, routers, accounts of sintetiese transaksies hieronder vervang met openbare proxies, ’n buurman se Wi-Fi, ’n production CDN-tenant wat jy nie beheer nie, of werklike onwettige fondse nie. Skriftelike magtiging moet elke stelsel en radio-omgewing dek.
 {% endhint %}
 
 ## Lab 1: besitte ORB- en redirector-ketting
 
 **Doelwit:** wys dat ’n target slegs die exit aanteken terwyl elke relay aangrensende hops sien. Dit emuleer T1090.003/T1584-struktuur sonder gekompromitteerde toestelle.
 
-**Vereistes:** Docker Engine en ongebruikte containernamen wat met `ht-orb-` begin.
+**Vereistes:** Docker Engine en ongebruikte containernames wat met `ht-orb-` begin.
 
 ### Bou
 ```bash
@@ -39,23 +41,23 @@ docker logs ht-orb-r2
 docker inspect -f '{{range .NetworkSettings.Networks}}{{.NetworkID}} {{.IPAddress}}{{println}}{{end}}' \
 ht-orb-r1 ht-orb-r2 ht-orb-target
 ```
-Verwagte resultaat: Nginx teken die `ht-orb-r2`-adres op `ht-orb-target` aan, nie die eenmalige kliënt s'n nie. Relay-logboeke toon verbindings slegs vanaf hul aangrensende netwerk. Docker-control-plane-inspeksie kan steeds die volledige pad rekonstrueer—analoog aan provider/controller-bewyse.
+Verwagte resultaat: Nginx teken die `ht-orb-r2`-adres op `ht-orb-target` aan, nie die eenmalige client nie. Relay-logs toon slegs verbindings vanaf hul aangrensende netwerk. Docker-control-plane-inspeksie rekonstrueer steeds die volledige pad—analoog aan provider/controller-bewyse.
 
 ### Opsporingseksperimente
 
-1. Herhaal versoeke elke 60 sekondes en stel die inter-aankomsttyd en grepe grafies voor.
-2. Vervang `ht-orb-r2` met 'n nuwe benoemde container/adres, maar behou dieselfde tempo en application request; bevestig dat 'n IP-only-reël die ketting verloor, terwyl die gedrag dit steeds koppel.
-3. Leg verkeer op die drie Docker-brûe vas met `tcpdump` op die lab-host en vergelyk tydstempels.
-4. Stop `ht-orb-r2`; verifieer dat daar geen direkte terugval vanaf entry na target is nie.
+1. Herhaal versoeke elke 60 sekondes en karteer die tyd tussen aankomste en grepe.
+2. Vervang `ht-orb-r2` met ’n nuwe benoemde container/adres, maar behou dieselfde ritme en application request; bevestig dat ’n slegs-IP-reël die ketting verloor, terwyl die gedrag dit steeds koppel.
+3. Neem verkeer op die drie Docker-bridges vas met `tcpdump` op die lab-host en vergelyk tydstempels.
+4. Stop `ht-orb-r2`; verifieer dat daar geen direkte fallback vanaf die entry na die target is nie.
 
-### Aftakeling
+### Afbou
 ```bash
 docker rm -f ht-orb-r1 ht-orb-r2 ht-orb-target
 docker network rm ht-orb-entry ht-orb-transit ht-orb-target
 ```
 ## Lab 2: SNI/Host mismatch and redirector logging
 
-**Doelwit:** reproduseer die routing-primitief agter domain fronting op ’n private plaaslike edge en wys waar dit sigbaar is. Geen publieke CDN is betrokke nie.
+**Doelstelling:** reproduseer die routing-primitief agter domain fronting op ’n private plaaslike edge en wys waar dit sigbaar is. Geen publieke CDN is betrokke nie.
 
 ### Bou ’n plaaslike TLS-edge
 ```bash
@@ -85,21 +87,21 @@ docker run -d --name ht-front-edge --network ht-front-net -p 127.0.0.1:8443:443 
 -v "$ht_front_dir/default.conf:/etc/nginx/conf.d/default.conf:ro" \
 -v "$ht_front_dir:/etc/nginx/tls:ro" nginx:alpine
 ```
-### Stuur en neem die wanpassing waar
+### Stuur en observeer die wanpassing
 ```bash
 curl -k --resolve front.lab:8443:127.0.0.1 \
 -H 'Host: origin.lab' https://front.lab:8443/
 docker logs ht-front-edge
 ```
-Verwagte log-velde sluit `sni=front.lab host=origin.lab` in. Die pakketvaslegging van kliënt na edge stel SNI bloot, tensy ECH gebruik word; die HTTP Host is op daardie skakel geënkripteer. Die terminerende edge sien albei.
+Verwagte log-velde sluit `sni=front.lab host=origin.lab` in. Die client-to-edge-packet capture stel SNI bloot tensy ECH gebruik word; die HTTP Host is op daardie verbinding geënkripteer. Die terminating edge sien albei.
 
 Stuur nou ’n normale versoek en bevestig dat die beleid dit verwerp:
 ```bash
 curl -k --resolve front.lab:8443:127.0.0.1 https://front.lab:8443/
 ```
-### Opsporingsaanspraak
+### Detection assertion
 
-Waarsku slegs op `sni != host` nadat poorte en kas genormaliseer is en bekende reverse-proxy-uitsonderings nagegaan is. Voeg proses- en tenant/origin-konteks by voordat erns toegeken word.
+Genereer slegs 'n alert op `sni != host` nadat poorte/hoofletters genormaliseer is en bekende reverse-proxy-uitsonderings nagegaan is. Voeg proses- en tenant/origin-konteks by voordat erns toegeken word.
 
 ### Afbreek
 ```bash
@@ -109,7 +111,7 @@ rm -rf -- "$ht_front_dir"
 ```
 ## Lab 3: fast-flux DNS telemetry
 
-**Doelwit:** genereer ’n veilige low-TTL/multi-ASN-like DNS-dataset en valideer ’n analytic. Die teruggestuurde RFC 5737-dokumentasieadresse is vir hierdie doel non-routable.
+**Doelwit:** genereer ’n veilige DNS-datastel met lae TTL/multi-ASN-agtige eienskappe en valideer ’n analitiese reël. Die teruggestuurde RFC 5737-dokumentasieadresse is vir hierdie doel nie-roeteerbaar nie.
 
 ### Begin ’n authoritative server
 ```bash
@@ -142,52 +144,52 @@ dig @127.0.0.1 -p 1053 flux.lab A +noall +answer
 done
 docker logs ht-flux-dns
 ```
-Verwagte resultaat: elke antwoord bevat drie dokumentasie-IP's en 'n TTL van 5 sekondes. Regte fast flux roteer ook stelle met verloop van tyd; verander die sone se reeksnommer/adresse en herbegin hierdie weggooibare bediener om verskeie tydperke te skep.
+Verwagte resultaat: elke antwoord bevat drie documentation IPs en ’n TTL van 5 sekondes. Regte fast flux roteer ook subsets met verloop van tyd; verander die zone serial/addresses en herbegin hierdie disposable server om veelvuldige epochs te skep.
 
 ### Analitiese validering
 
-Bereken vir 'n venster van vyf minute `median(TTL)`, unieke antwoorde, unieke sintetiese ASN-/geografie-etikette en antwoordwisseling. Vereis minstens twee verdagte dimensies plus 'n proses-/opvolgingsgebeurtenis. Voer dieselfde analise teen 'n bekende CDN-steekproef uit om vals positiewe te meet.
+Bereken vir ’n vyfminutevenster `median(TTL)`, unieke antwoorde, unieke synthetic ASN/geography labels en answer churn. Vereis ten minste twee verdagte dimensies plus ’n process/follow-on event. Voer dieselfde analise teen ’n bekende CDN-sample uit om false positives te meet.
 
-### Afbreek
+### Opruiming
 ```bash
 docker rm -f ht-flux-dns
 rm -rf -- "$ht_dns_dir"
 ```
-## Lab 4: wireless pivot na die naaste buur
+## Lab 4: nearest-neighbor wireless pivot
 
-**Doelwit:** reproduseer die APT28-grenswanpassing met twee “organisasies” wat jy besit. Omdat Wi-Fi-hardeware/driver-opdragte verskil, spesifiseer hierdie lab verifieerbare rolle en bewyse eerder as om voor te gee dat een `hostapd`-opdrag vir elke radio werk.
+**Doelwit:** reproduseer die APT28-grenswanpassing met twee “organisasies” wat jy besit. Omdat Wi-Fi-hardeware/driver-opdragte verskil, spesifiseer hierdie lab verifieerbare rolle en bewysmateriaal eerder as om voor te gee dat een `hostapd`-opdrag vir elke radio werk.
 
 ### Toerusting
 
 - twee APs wat jy besit, op geïsoleerde lab-kanale/SSIDs `HT-NEIGHBOR` en `HT-TARGET`;
-- een target service wat slegs vanaf `HT-TARGET` bereikbaar is;
-- een dual-radio Linux pivot wat jy besit en aan albei APs kan koppel;
-- een remote-control workstation agter `HT-NEIGHBOR`;
+- een target-diens wat slegs vanaf `HT-TARGET` bereikbaar is;
+- een dual-radio Linux pivot wat jy besit en wat aan albei APs kan assosieer;
+- een remote-control-werkstasie agter `HT-NEIGHBOR`;
 - RADIUS/NAC- of AP-assosiasielogboeke, DHCP-logboeke en pivot-oudit-/proseslogboeke.
 
 ### Prosedure
 
-1. Isoleer of verswak die opstelling fisies sodat geen SSID die gemagtigde area verlaat nie. Bevestig dit met ’n opname.
-2. Stel `HT-TARGET` met ’n exercise identity op en laat toestelsertifikaat-/posture-validasie doelbewus weg vir die eerste lopie. Teken dit aan as die toestand wat getoets word.
-3. Koppel die pivot se eerste interface aan `HT-NEIGHBOR` en die tweede interface aan `HT-TARGET`. Moenie ’n algemene bridge aktiveer nie; laat slegs die target service/port deur ’n host firewall.
-4. Open vanaf die workstation ’n geauthentiseerde tunnel na die pivot en versoek die target service daardeur.
-5. Teken die pivot-proses/interface-skepping, albei AP-assosiasies, die target se RADIUS-gebeurtenis, DHCP-lease en target-bronadres aan.
+1. Isoleer of verswak die opstelling fisies sodat geen SSID die gemagtigde gebied verlaat nie. Bevestig dit met ’n survey.
+2. Konfigureer `HT-TARGET` met ’n oefenidentiteit en laat toestelsertifikaat-/posture-validasie doelbewus vir die eerste uitvoering weg. Teken dit aan as die toestand wat getoets word.
+3. Assosieer die pivot se eerste interface met `HT-NEIGHBOR` en die tweede interface met `HT-TARGET`. Moenie ’n algemene bridge aktiveer nie; laat slegs die target-diens/-poort deur ’n host firewall toe.
+4. Open vanaf die werkstasie ’n geauthentiseerde tunnel na die pivot en versoek die target-diens daardeur.
+5. Teken die pivot-proses-/interface-skepping, albei AP-assosiasies, die target se RADIUS-gebeurtenis, DHCP-lease en target-bronadres aan.
 6. Vra die detection-span om die ketting sonder die controller map te rekonstrueer.
-7. Aktiveer EAP-TLS/managed-device posture op `HT-TARGET`, verwyder die pivot se goedgekeurde target-sertifikaat en herhaal. Toegang behoort tydens admission te misluk.
-8. Herhaal met ’n first-seen randomized MAC. Verifieer dat die sertifikaat-/toestelbesluit steeds werk en dat geen reël die MAC alleen as identiteit behandel nie.
+7. Aktiveer EAP-TLS/managed-device posture op `HT-TARGET`, verwyder die pivot se goedgekeurde target-sertifikaat en herhaal. Toegang behoort tydens toelating te misluk.
+8. Herhaal met ’n eerste-gesiene randomized MAC. Verifieer dat die sertifikaat-/toestelbesluit steeds werk en dat geen reël die MAC alleen as identiteit behandel nie.
 
 ### Sukseskriteria
 
-- Die target sien aanvanklik ’n plaaslike Wi-Fi-kliënt eerder as die workstation.
+- Die target sien aanvanklik ’n plaaslike Wi-Fi-kliënt eerder as die werkstasie.
 - Joined telemetry identifiseer een pivot met gelyktydige neighbor-control- en target-radio-paaie.
-- Sertifikaat-/toestelgebaseerde admission blokkeer die tweede lopie.
+- Sertifikaat-/toestelgebaseerde toelating blokkeer die tweede uitvoering.
 - Geen packet bereik ’n netwerk buite die geïsoleerde lab nie.
 
 ## Lab 5: dead-drop resolver sequence
 
-**Doelwit:** bespeur ’n proses wat ’n wettig lykende objek lees, ’n pointer dekodeer en onmiddellik met ’n tweede diens kontak maak.
+**Doelwit:** bespeur ’n proses wat ’n legitiem lykende objek lees, ’n pointer dekodeer en onmiddellik met ’n tweede diens kontak maak.
 
-### Bou
+### Bou ('n opstelling)
 ```bash
 docker network create ht-ddr-net
 docker run -d --name ht-ddr-c2 --network ht-ddr-net nginx:alpine
@@ -201,18 +203,18 @@ python -c 'import base64,urllib.request; p=urllib.request.urlopen("http://ht-ddr
 docker logs ht-ddr-web
 docker logs ht-ddr-c2
 ```
-Die geënkodeerde inhoud is `http://ht-ddr-c2:80/`. ’n Werkende opsporing koppel dieselfde kortlewende proses/houer wat `/profile.txt` lees, die inhoud dekodeer en binne sekondes met `ht-ddr-c2` kontak maak. Hash en bewaar die objekrespons.
+Die geënkodeerde inhoud is `http://ht-ddr-c2:80/`. ’n Werkende detection koppel dieselfde kortstondige process/container wat `/profile.txt` lees, die inhoud decodeer en binne sekondes met `ht-ddr-c2` verbinding maak. Hash en bewaar die object response.
 
-### Ontmanteling
+### Teardown
 ```bash
 docker rm -f ht-ddr-web ht-ddr-c2
 docker network rm ht-ddr-net
 ```
-## Lab 6: synthetic peel-chain en bridge graph
+## Lab 6: synthetic peel-chain and bridge graph
 
-**Doelwit:** oefen waarde-nasporing sonder werklike bates, rekeninge of dienste.
+**Doelwit:** oefen waardenasporing sonder werklike bates, rekeninge of dienste.
 
-### Skep en spoor die dataset na
+### Skep en spoor die datastel na
 ```bash
 ht_graph_dir="$(mktemp -d)"
 cat >"$ht_graph_dir/edges.csv" <<'EOF'
@@ -241,15 +243,15 @@ print(f'{e["time"]} {e["chain"]}: {src} -> {e["destination"]} {e["amount"]} [{e[
 frontier.add(e["destination"])
 PY
 ```
-Analiste moet die peel/change-patroon identifiseer, die bridge-skakel as ’n afsonderlik gesteunde afleiding hanteer, die fee-/waardeverskil bereken en die exchange as ’n off-chain-bewysversoek merk. Verander een waarde/tyd en dokumenteer hoe vertroue verander.
+Ontleders moet die peel/change-patroon identifiseer, die bridge link as ’n afsonderlik ondersteunde afleiding hanteer, die fooi/waardeverskil bereken en die exchange as ’n off-chain-bewysversoek merk. Verander een waarde/tyd en dokumenteer hoe die vertroue verander.
 
-### Ontleding
+### Afbreek
 ```bash
 rm -rf -- "$ht_graph_dir"
 ```
-## Laboratorium 7: passiewe traffic-signaling sensor
+## Lab 7: passiewe traffic-signaling sensor
 
-**Doelwit:** emuleer die network signature van ’n passiewe, deur ’n magic value geaktiveerde implant sonder om ’n shell, persistence of remote access te skep. Die listener bind slegs aan loopback en teken ’n onskadelike gebeurtenis aan.
+**Doelwit:** emuleer die netwerksignatuur van ’n passiewe, deur ’n magic value geaktiveerde implant sonder om ’n shell, persistence of remote access te skep. Die listener bind slegs aan loopback en teken ’n onskadelike gebeurtenis aan.
 ```bash
 ht_signal_dir="$(mktemp -d)"
 cat >"$ht_signal_dir/listener.py" <<'PY'
@@ -279,24 +281,24 @@ wait "$ht_signal_pid"
 cat "$ht_signal_dir/events.log"
 rm -rf -- "$ht_signal_dir"
 ```
-Verwagte resultaat: gewone verkeer produseer geen toepassinggebeurtenis nie; slegs die aangewese token doen dit. Leg loopback-verkeer tydens die uitvoering vas en verifieer dat ’n netwerk sensor steeds albei datagramme kan sien. Evalueer dan gasheerbeheermaatreëls wat ’n onverwagte langlopende packet listener of packet-capture-filter opspoor. Werklike RedPenguin-passiewe implants het verkeer op ’n router geïnspekteer en gevaarlike funksionaliteit gebied; hierdie laboratorium doen doelbewus geen van die twee nie.
+Verwagte resultaat: gewone verkeer lewer geen application event nie; slegs die aangewese token doen dit. Capture loopback-verkeer tydens die uitvoering en verifieer dat ’n network sensor steeds albei datagrams kan sien. Evalueer dan host controls wat ’n onverwagte langlopende packet listener of packet-capture filter opspoor. Werklike RedPenguin passive implants het verkeer op ’n router geïnspekteer en gevaarlike funksionaliteit gebied; hierdie lab doen doelbewus geen van die twee nie.
 
-## Oefeningsverslagsjabloon
+## Labverslagtemplate
 
-Teken die volgende vir elke laboratorium aan:
+Teken vir elke lab die volgende aan:
 
-- magtiging en geïsoleerde omvang;
-- hipotese en ATT&CK-tegniek;
-- topologie en waarnemerstabel;
-- presiese begin- en eindtyd en konfigurasie-hashes;
-- verwagte gebeurtenisse per sensor;
-- gebeurtenisse wat werklik waargeneem is en retensiegapings;
-- analitiese logika, drempel en vals-positiewe voorbeeld;
-- of die teikenspan die pad gerekonstrueer het;
-- hertoetsresultaat van die versagtingsmaatreël; en
-- bewys van afbreek/herstel.
+- authorization en geïsoleerde scope;
+- hypothesis en ATT&CK technique;
+- topology en observer table;
+- presiese begin-/eindtyd en configuration hashes;
+- verwagte events per sensor;
+- events wat werklik waargeneem is en retention gaps;
+- analytic logic, threshold en false-positive sample;
+- of die target team die path gerekonstrueer het;
+- mitigation retest-resultaat; en
+- teardown/recovery-bewyse.
 
-’n Oefening is onvolledig totdat die opsporing ná versagting herhaal is en elke laboratoriumhulpbron verwyder is.
+’n Exercise is onvolledig totdat die detection ná mitigation herhaal is en elke lab-resource verwyder is.
 
 ## References
 
@@ -306,3 +308,4 @@ Teken die volgende vir elke laboratorium aan:
 - [4] [Volexity — The Nearest Neighbor Attack](https://www.volexity.com/blog/2024/11/22/the-nearest-neighbor-attack-how-a-russian-apt-weaponized-nearby-wi-fi-networks-for-covert-access/)
 - [5] [MITRE ATT&CK — Dead Drop Resolver (T1102.001)](https://attack.mitre.org/techniques/T1102/001/)
 - [6] [MITRE ATT&CK — Traffic Signaling (T1205)](https://attack.mitre.org/techniques/T1205/)
+{{#include ../banners/hacktricks-training.md}}
