@@ -2,52 +2,58 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Zana za Reversing Zinazotumia ImGui
+## Zana za Reversing zinazotumia ImGui
 
-Software:
+Programu:
 
 - ReverseKit: [https://github.com/zer0condition/ReverseKit](https://github.com/zer0condition/ReverseKit)
 
 ## Wasm decompiler / Wat compiler
 
-Online:
+Mtandaoni:
 
 - Tumia [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) kufanya **decompile** kutoka wasm (binary) hadi wat (clear text)
 - Tumia [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) kufanya **compile** kutoka wat hadi wasm
 - Unaweza pia kujaribu [web-wasmdec](https://wwwg.github.io/web-wasmdec/) kwa decompilation.
 
-Software:
+Programu:
 
 - [https://www.pnfsoftware.com/jeb/demo](https://www.pnfsoftware.com/jeb/demo)
 - [https://github.com/wwwg/wasmdec](https://github.com/wwwg/wasmdec)
+
+## Node.js / V8 bytecode iliyohifadhiwa
+
+{{#ref}}
+nodejs-v8-cached-bytecode.md
+{{#endref}}
 
 ## .NET decompiler
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
 
-dotPeek ni decompiler inayofanya **decompile na kuchunguza formats nyingi**, ikijumuisha **libraries** (.dll), **Windows metadata file**s (.winmd), na **executables** (.exe). Baada ya kufanyiwa decompile, assembly inaweza kuhifadhiwa kama Visual Studio project (.csproj).
+dotPeek ni decompiler inayofanya **decompile na kuchunguza miundo mbalimbali**, ikiwemo **libraries** (.dll), **faili za metadata za Windows** (.winmd), na **executables** (.exe). Baada ya kufanyiwa decompile, assembly inaweza kuhifadhiwa kama mradi wa Visual Studio (.csproj).
 
-Faida hapa ni kwamba ikiwa source code iliyopotea inahitaji kurejeshwa kutoka kwenye legacy assembly, hatua hii inaweza kuokoa muda. Zaidi ya hayo, dotPeek hutoa navigation rahisi katika decompiled code, na kuifanya kuwa mojawapo ya zana bora za **Xamarin algorithm analysis.**
+Faida hapa ni kwamba ikiwa source code iliyopotea inahitaji kurejeshwa kutoka kwa assembly ya zamani, hatua hii inaweza kuokoa muda. Zaidi ya hayo, dotPeek hutoa urambazaji rahisi katika code iliyofanyiwa decompile, na kuifanya kuwa mojawapo ya zana bora kwa **uchanganuzi wa algorithm za Xamarin.**
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
-Ikiwa na add-in model pana na API inayopanua tool ili kukidhi mahitaji yako mahususi, .NET reflector huokoa muda na kurahisisha development. Hebu tuangalie huduma nyingi za reverse engineering zinazotolewa na tool hii:
+Ikiwa na mfumo mpana wa add-in na API inayopanua zana ili kukidhi mahitaji yako mahususi, .NET reflector huokoa muda na kurahisisha development. Hebu tuangalie huduma nyingi za reverse engineering zinazotolewa na zana hii:
 
-- Hutoa ufahamu kuhusu jinsi data inavyopita kupitia library au component
-- Hutoa ufahamu kuhusu implementation na matumizi ya .NET languages na frameworks
-- Hupata functionality ambayo haijaandikwa kwenye documentation na ambayo haijawekwa wazi, ili kupata zaidi kutoka kwenye APIs na technologies zinazotumika.
+- Hutoa mwonekano wa jinsi data inavyopita kwenye library au component
+- Hutoa mwonekano wa utekelezaji na matumizi ya lugha na frameworks za .NET
+- Hupata functionality isiyo na documentation na isiyowekwa wazi ili kupata zaidi kutoka kwa APIs na technologies zinazotumika.
 - Hupata dependencies na assemblies tofauti
-- Hufuatilia mahali halisi pa errors katika code yako, third-party components, na libraries.
-- Hufanya debug kwenye source ya .NET code yote unayofanyia kazi.
+- Hufuatilia eneo halisi la errors kwenye code yako, third-party components, na libraries.
+- Hufanya debugging ndani ya source ya code yote ya .NET unayofanyia kazi.
 
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
-[ILSpy plugin for Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Unaweza kuitumia kwenye OS yoyote (unaweza kui-install moja kwa moja kutoka VSCode, hakuna haja ya ku-download git. Bonyeza **Extensions** kisha **search ILSpy**).\
-Ikiwa unahitaji kufanya **decompile**, **modify** na **recompile** tena, unaweza kutumia [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) au fork yake inayodumishwa kikamilifu, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Right Click -> Modify Method** ili kubadilisha kitu ndani ya function).
+[ILSpy plugin for Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Unaweza kuitumia kwenye OS yoyote (unaweza kui-install moja kwa moja kutoka VSCode, hakuna haja ya ku-download git. Bofya **Extensions** na **tafuta ILSpy**).\
+Ikiwa unahitaji kufanya **decompile**, **modify** na **recompile** tena unaweza kutumia [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) au fork yake inayodumishwa kikamilifu, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Right Click -> Modify Method** ili kubadilisha kitu ndani ya function).
 
 ### DNSpy Logging
 
-Ili kufanya **DNSpy i-log taarifa fulani kwenye file**, unaweza kutumia snippet hii:
+Ili kufanya **DNSpy iandike baadhi ya taarifa kwenye faili**, unaweza kutumia snippet hii:
 ```cs
 using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
@@ -55,7 +61,7 @@ File.AppendAllText(path, "Password: " + password + "\n");
 ```
 ### DNSpy Debugging
 
-Ili kufanya debugging ya code kwa kutumia DNSpy, unahitaji:
+Ili ku-debug code kwa kutumia DNSpy unahitaji:
 
 Kwanza, badilisha **Assembly attributes** zinazohusiana na **debugging**:
 
@@ -72,17 +78,17 @@ DebuggableAttribute.DebuggingModes.DisableOptimizations |
 DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints |
 DebuggableAttribute.DebuggingModes.EnableEditAndContinue)]
 ```
-Na bofya **compile**:
+Na ubofye **compile**:
 
-![DNSpy Logging - DNSpy Debugging: Na bofya compile](<../../images/image (314) (1).png>)
+![DNSpy Logging - DNSpy Debugging: And click on compile](<../../images/image (314) (1).png>)
 
-Kisha hifadhi faili mpya kupitia _**File >> Save module...**_:
+Kisha hifadhi file mpya kupitia _**File >> Save module...**_:
 
-![DNSpy Logging - DNSpy Debugging: Kisha hifadhi faili mpya kupitia File Save module](<../../images/image (602).png>)
+![DNSpy Logging - DNSpy Debugging: Then save the new file via File Save module](<../../images/image (602).png>)
 
-Hili ni muhimu kwa sababu usipofanya hivyo, wakati wa **runtime** **optimisations** kadhaa zitatumika kwenye code na kuna uwezekano kwamba wakati wa debugging **break-point haitawahi kugongwa** au baadhi ya **variables hazitakuwepo**.
+Hii ni muhimu kwa sababu usipofanya hivyo, wakati wa **runtime** **optimisations** kadhaa zitatumika kwenye code na kuna uwezekano kwamba wakati wa debugging **break-point haitawahi kugongwa** au baadhi ya **variables hazitakuwepo**.
 
-Kisha, ikiwa application yako ya .NET inaendeshwa na **IIS**, unaweza **kuianzisha upya** kwa:
+Kisha, ikiwa application yako ya .NET inaendeshwa na **IIS**, unaweza kuiwasha upya kwa:
 ```
 iisreset /noforce
 ```
@@ -94,19 +100,19 @@ Kisha chagua **w3wp.exe** ili kuunganisha kwenye **IIS server** na ubofye **atta
 
 ![DNSpy Logging - DNSpy Debugging: Kisha chagua w3wp.exe ili kuunganisha kwenye IIS server na ubofye attach](<../../images/image (113).png>)
 
-Sasa kwa kuwa tunafanya debugging ya process, ni wakati wa kuisimamisha na kupakia modules zote. Kwanza bofya _Debug >> Break All_, kisha bofya _**Debug >> Windows >> Modules**_:
+Kwa kuwa sasa tunafanya debugging ya process, ni wakati wa kuisimamisha na kupakia modules zote. Kwanza bofya _Debug >> Break All_, kisha bofya _**Debug >> Windows >> Modules**_:
 
-![DNSpy Logging - DNSpy Debugging: Sasa kwa kuwa tunafanya debugging ya process, ni wakati wa kuisimamisha na kupakia modules zote. Kwanza bofya Debug Break All, kisha bofya Debug Windows Modules](<../../images/image (132).png>)
+![DNSpy Logging - DNSpy Debugging: Kwa kuwa sasa tunafanya debugging ya process, ni wakati wa kuisimamisha na kupakia modules zote. Kwanza bofya Debug Break All, kisha bofya Debug Windows Modules](<../../images/image (132).png>)
 
-![DNSpy Logging - DNSpy Debugging: Sasa kwa kuwa tunafanya debugging ya process, ni wakati wa kuisimamisha na kupakia modules zote. Kwanza bofya Debug Break All, kisha bofya Debug Windows Modules](<../../images/image (834).png>)
+![DNSpy Logging - DNSpy Debugging: Kwa kuwa sasa tunafanya debugging ya process, ni wakati wa kuisimamisha na kupakia modules zote. Kwanza bofya Debug Break All, kisha bofya Debug Windows Modules](<../../images/image (834).png>)
 
-Bofya module yoyote ndani ya **Modules** na uchague **Open All Modules**:
+Bofya module yoyote kwenye **Modules** na uchague **Open All Modules**:
 
-![DNSpy Logging - DNSpy Debugging: Bofya module yoyote ndani ya Modules na uchague Open All Modules](<../../images/image (922).png>)
+![DNSpy Logging - DNSpy Debugging: Bofya module yoyote kwenye Modules na uchague Open All Modules](<../../images/image (922).png>)
 
-Bofya kulia module yoyote ndani ya **Assembly Explorer** na uchague **Sort Assemblies**:
+Bofya kulia module yoyote katika **Assembly Explorer** na uchague **Sort Assemblies**:
 
-![DNSpy Logging - DNSpy Debugging: Bofya kulia module yoyote ndani ya Assembly Explorer na uchague Sort Assemblies](<../../images/image (339).png>)
+![DNSpy Logging - DNSpy Debugging: Bofya kulia module yoyote katika Assembly Explorer na uchague Sort Assemblies](<../../images/image (339).png>)
 
 ## Java decompiler
 
@@ -117,45 +123,45 @@ Bofya kulia module yoyote ndani ya **Assembly Explorer** na uchague **Sort Assem
 
 ### Kutumia IDA
 
-- **Load rundll32** (64bits katika C:\Windows\System32\rundll32.exe na 32 bits katika C:\Windows\SysWOW64\rundll32.exe)
+- **Load rundll32** (64bits in C:\Windows\System32\rundll32.exe and 32 bits in C:\Windows\SysWOW64\rundll32.exe)
 - Chagua **Windbg** debugger
 - Chagua "**Suspend on library load/unload**"
 
 ![Debugging DLLs - Kutumia IDA: Chagua " Suspend on library load/unload "](<../../images/image (868).png>)
 
-- Sanidi **parameters** za execution kwa kuweka **path ya DLL** na function unayotaka kuita:
+- Sanidi **parameters** za execution kwa kuweka **path to the DLL** na function unayotaka kuita:
 
-![Debugging DLLs - Kutumia IDA: Sanidi parameters za execution kwa kuweka path ya DLL na function unayotaka kuita](<../../images/image (704).png>)
+![Debugging DLLs - Kutumia IDA: Sanidi parameters za execution kwa kuweka path to the DLL na function unayotaka kuita](<../../images/image (704).png>)
 
-Kisha, unapoanza debugging, **execution itasimamishwa kila DLL inapopakiwa**, hivyo rundll32 inapopakia DLL yako, execution itasimamishwa.
+Kisha, unapoanza debugging, **execution itasimamishwa kila DLL inapopakiwa**, kwa hiyo, rundll32 inapopakia DLL yako execution itasimamishwa.
 
-Njia hii husimama kwenye matukio ya module-load, lakini kufikia entry point ya DLL iliyopakiwa si rahisi moja kwa moja kama ilivyo kwenye workflow ya x64dbg hapa chini.
+Njia hii husimamisha execution kwenye matukio ya module-load, lakini kufikia entry point ya DLL iliyopakiwa si ya moja kwa moja kama ilivyo kwenye x64dbg workflow iliyo hapa chini.
 
 ### Kutumia x64dbg/x32dbg
 
-- **Load rundll32** (64bits katika C:\Windows\System32\rundll32.exe na 32 bits katika C:\Windows\SysWOW64\rundll32.exe)
-- **Badilisha Command Line** ( _File --> Change Command Line_ ) na uweke path ya dll na function unayotaka kuita, kwa mfano: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
+- **Load rundll32** (64bits in C:\Windows\System32\rundll32.exe and 32 bits in C:\Windows\SysWOW64\rundll32.exe)
+- **Change the Command Line** ( _File --> Change Command Line_ ) na uweke path ya dll na function unayotaka kuita, kwa mfano: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
 - Badilisha _Options --> Settings_ na uchague "**DLL Entry**".
-- Kisha **anza execution**, debugger itasimama kwenye kila dll main; wakati fulani **itasimama kwenye dll Entry ya dll yako**. Kuanzia hapo, tafuta tu sehemu unazotaka kuweka breakpoint.
+- Kisha **start the execution**, debugger itasimama kwenye kila dll main; wakati fulani **utasimama kwenye dll Entry ya dll yako**. Kuanzia hapo, tafuta tu sehemu unazotaka kuweka breakpoint.
 
-Kumbuka kwamba execution inaposimamishwa kwa sababu yoyote katika win64dbg, unaweza kuona **uko kwenye code ipi** kwa kuangalia **juu ya dirisha la win64dbg**:
+Kumbuka kwamba execution inaposimamishwa kwa sababu yoyote katika win64dbg unaweza kuona **uko kwenye code ipi** kwa kuangalia **juu ya win64dbg window**:
 
-![Using IDA - Kutumia x64dbg/x32dbg: Kumbuka kwamba execution inaposimamishwa kwa sababu yoyote katika win64dbg, unaweza kuona uko kwenye code ipi kwa kuangalia juu ya dirisha la win64dbg](<../../images/image (842).png>)
+![Using IDA - Kutumia x64dbg/x32dbg: Kumbuka kwamba execution inaposimamishwa kwa sababu yoyote katika win64dbg unaweza kuona uko kwenye code ipi kwa kuangalia juu ya win64dbg window](<../../images/image (842).png>)
 
-Kiashiria hiki kinathibitisha wakati execution imesimamishwa ndani ya DLL unayotaka ku-debug.
+Kiashiria hiki huthibitisha execution inaposimamishwa ndani ya DLL unayotaka kufanya debugging.
 
 ## GUI Apps / Videogames
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) ni programu muhimu ya kutafuta mahali ambapo values muhimu zimehifadhiwa ndani ya memory ya game inayoendeshwa na kuzibadilisha. Maelezo zaidi katika:
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) ni program muhimu ya kutafuta mahali ambapo values muhimu zimehifadhiwa ndani ya memory ya game inayoendelea na kuzibadilisha. Maelezo zaidi katika:
 
 
 {{#ref}}
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE) ni front-end/reverse engineering tool ya GNU Project Debugger (GDB), inayolenga games. Hata hivyo, inaweza kutumika kwa kazi yoyote inayohusiana na reverse-engineering
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE) ni front-end/reverse engineering tool ya GNU Project Debugger (GDB), inayolenga games. Hata hivyo, inaweza kutumika kwa mambo yoyote yanayohusiana na reverse-engineering
 
-[**Decompiler Explorer**](https://dogbolt.org/) ni web front-end ya decompilers kadhaa. Web service hii hukuwezesha kulinganisha output ya decompilers tofauti kwenye executables ndogo.
+[**Decompiler Explorer**](https://dogbolt.org/) ni web front-end ya decompilers kadhaa. Web service hii hukuruhusu kulinganisha output ya decompilers tofauti kwenye executables ndogo.
 
 ## ARM & MIPS
 
@@ -166,49 +172,49 @@ https://github.com/nongiach/arm_now
 
 ## Shellcodes
 
-### Debugging shellcode with blobrunner
+### Kufanya debugging ya shellcode kwa kutumia blobrunner
 
-[**BlobRunner**](https://github.com/OALabs/BlobRunner) hutenga **shellcode**, huchapisha **memory address** yake, na kusitisha execution.\
-Ambatisha debugger kama IDA au x64dbg, weka breakpoint kwenye address iliyochapishwa, kisha endeleza execution ili ku-debug shellcode.
+[**BlobRunner**](https://github.com/OALabs/BlobRunner) hutenga **shellcode**, huchapisha **memory address** yake, na kusimamisha execution.\
+Unganisha debugger kama vile IDA au x64dbg, weka breakpoint kwenye address iliyochapishwa, kisha endeleza execution ili kufanya debugging ya shellcode.
 
-Ukurasa wa releases wa github una zips zilizo na releases zilizocompile: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
-Unaweza kupata toleo lililobadilishwa kidogo la Blobrunner kwenye link ifuatayo. Ili kulicompile, **unda C/C++ project katika Visual Studio Code, copy na paste code, kisha build**.
+Github page ya releases ina zips zilizo na releases zilizocompile: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
+Unaweza kupata toleo lililobadilishwa kidogo la Blobrunner kwenye link ifuatayo. Ili kulicompile, **create a C/C++ project in Visual Studio Code, copy and paste the code and build it**.
 
 
 {{#ref}}
 blobrunner.md
 {{#endref}}
 
-### Debugging shellcode with jmp2it
+### Kufanya debugging ya shellcode kwa kutumia jmp2it
 
-[**jmp2it**](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) inafanana na BlobRunner. Hutenga shellcode na kuingia kwenye infinite loop. Ambatisha debugger, endeleza execution kwa **sekunde 2–5**, isimamishe ndani ya loop hiyo, kisha step hadi kwenye call inayofuata inayohamisha execution kwenda kwenye shellcode iliyotengwa.
+[**jmp2it**](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) ni sawa na BlobRunner. Hutenga shellcode na kuingia kwenye infinite loop. Unganisha debugger, endeleza kwa **2–5 seconds**, simamisha ndani ya loop hiyo, kisha step hadi kwenye call inayofuata inayohamisha execution kwenda kwenye shellcode iliyotengwa.
 
-![Debugger ikiwa imesimama kwenye infinite loop ya jmp2it mara tu kabla ya call kwenda kwenye shellcode iliyotengwa](<../../images/image (509).png>)
+![Debugger ikiwa imesimamishwa kwenye infinite loop ya jmp2it mara moja kabla ya call ya shellcode iliyotengwa](<../../images/image (509).png>)
 
 Unaweza kupakua toleo lililocompile la [jmp2it kwenye releases page](https://github.com/adamkramer/jmp2it/releases/).
 
-### Debugging shellcode using Cutter
+### Kufanya debugging ya shellcode kwa kutumia Cutter
 
 [**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) ni GUI ya radare. Kwa kutumia Cutter unaweza ku-emulate shellcode na kuichunguza dynamically.
 
-Kumbuka kwamba Cutter inakuruhusu kutumia "Open File" na "Open Shellcode". Katika hali yangu, nilipofungua shellcode kama file ili-decompile kwa usahihi, lakini nilipoifungua kama shellcode haikufanya hivyo:
+Kumbuka kwamba Cutter inakuruhusu kutumia "Open File" na "Open Shellcode". Katika hali yangu nilipofungua shellcode kama file ili-decompile kwa usahihi, lakini nilipoifungua kama shellcode haikufanya hivyo:
 
 ![Cutter ikionyesha matokeo tofauti ya analysis wakati bytes zilezile zinafunguliwa kama file au kama shellcode](<../../images/image (562).png>)
 
-Ili kuanza emulation katika sehemu unayotaka, weka bp hapo na inaonekana Cutter itaanza emulation moja kwa moja kutoka hapo:
+Ili kuanza emulation mahali unapopataka, weka bp hapo na inaonekana Cutter itaanza emulation automatically kutoka hapo:
 
 ![Kuweka breakpoint kwenye shellcode entry inayotakiwa kabla ya kuanza Cutter emulation](<../../images/image (589).png>)
 
-![Cutter emulator ikiwa imesimama kwenye shellcode breakpoint iliyochaguliwa](<../../images/image (387).png>)
+![Cutter emulator ikiwa imesimamishwa kwenye shellcode breakpoint iliyochaguliwa](<../../images/image (387).png>)
 
-Unaweza kuona stack, kwa mfano ndani ya hex dump:
+Kwa mfano, unaweza kuona stack ndani ya hex dump:
 
-![Kuangalia stack ya shellcode iliyo-emulate kwenye Cutter's hex dump](<../../images/image (186).png>)
+![Kuangalia stack ya shellcode iliyo-emulate katika hex dump ya Cutter](<../../images/image (186).png>)
 
-### Deobfuscating shellcode and getting executed functions
+### Ku-deobfuscate shellcode na kupata functions zinazotekelezwa
 
 Unapaswa kujaribu [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152).\
-Itakuambia mambo kama **functions zipi** shellcode inatumia na kama shellcode **inaji-decode** yenyewe kwenye memory.
+Itakuambia vitu kama **functions zipi** shellcode inatumia na ikiwa shellcode **inaji-decode** yenyewe kwenye memory.
 ```bash
 scdbg.exe -f shellcode # Get info
 scdbg.exe -f shellcode -r #show analysis report at end of run
@@ -219,35 +225,35 @@ scdbg.exe -f shellcode /foff 0x0000004D #Start the executing in that offset
 ```
 scDbg pia ina graphical launcher ambapo unaweza kuchagua options unazotaka na kutekeleza shellcode
 
-![scDbg graphical launcher for selecting shellcode emulation and tracing options](<../../images/image (258).png>)
+![Graphical launcher ya scDbg kwa kuchagua options za shellcode emulation na tracing](<../../images/image (258).png>)
 
-Option ya **Create Dump** itadump shellcode ya mwisho ikiwa kuna mabadiliko yaliyofanywa kwa shellcode dynamically kwenye memory (ni muhimu kwa kupakua shellcode iliyodecodewa). **start offset** inaweza kuwa muhimu kuanzisha shellcode kwenye offset maalum. Option ya **Debug Shell** ni muhimu kwa ajili ya ku-debug shellcode kwa kutumia scDbg terminal (hata hivyo, naona options zozote zilizoelezwa awali zinafaa zaidi kwa jambo hili kwa sababu utaweza kutumia Ida au x64dbg).
+Option ya **Create Dump** ita-dump shellcode ya mwisho ikiwa mabadiliko yoyote yamefanywa kwa shellcode dynamically kwenye memory (ni muhimu kwa kupakua decoded shellcode). **start offset** inaweza kuwa muhimu kwa kuanzisha shellcode kwenye offset maalum. Option ya **Debug Shell** ni muhimu kwa ku-debug shellcode kwa kutumia terminal ya scDbg (hata hivyo, naona options zilizoelezwa hapo awali ni bora zaidi kwa jambo hili kwa kuwa utaweza kutumia Ida au x64dbg).
 
-### Disassembling using CyberChef
+### Disassembling kwa kutumia CyberChef
 
-Pakia faili yako ya shellcode kama input na utumie recipe ifuatayo kuidecompile: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
+Upload shellcode file yako kama input na utumie recipe ifuatayo ku-decompile: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
 
 ## MBA obfuscation deobfuscation
 
-**Mixed Boolean-Arithmetic (MBA)** obfuscation huficha expressions rahisi kama vile `x + y` nyuma ya formulas zinazochanganya arithmetic (`+`, `-`, `*`) na bitwise operators (`&`, `|`, `^`, `~`, shifts). Jambo muhimu ni kwamba identities hizi kwa kawaida huwa sahihi tu chini ya **fixed-width modular arithmetic**, kwa hivyo carries na overflows ni muhimu:
+**Mixed Boolean-Arithmetic (MBA)** obfuscation huficha expressions rahisi kama vile `x + y` nyuma ya formulas zinazochanganya arithmetic (`+`, `-`, `*`) na bitwise operators (`&`, `|`, `^`, `~`, shifts). Jambo muhimu ni kwamba identities hizi kwa kawaida huwa sahihi tu chini ya **fixed-width modular arithmetic**, kwa hiyo carries na overflows ni muhimu:
 ```c
 (x ^ y) + 2 * (x & y) == x + y
 ```
-Ukirahisisha aina hii ya expression kwa kutumia zana za jumla za algebra, unaweza kupata matokeo yasiyo sahihi kwa urahisi kwa sababu semantiki za bit-width zilipuuzwa.<sup>[[1]](#references)</sup>
+Ukirahisisha aina hii ya expression kwa kutumia generic algebra tooling unaweza kupata matokeo yasiyo sahihi kwa urahisi kwa sababu semantics za bit-width zilipuuzwa.<sup>[[1]](#references)</sup>
 
-### Mtiririko wa kazi wa vitendo
+### Practical workflow
 
 1. **Hifadhi bit-width ya awali** kutoka kwenye lifted code/IR/decompiler output (`8/16/32/64` bits).
 2. **Classify expression** kabla ya kujaribu kuirahisisha:
 - **Linear**: weighted sums za bitwise atoms
-- **Semilinear**: linear pamoja na constant masks kama `x & 0xFF`
-- **Polynomial**: products zinatokea
+- **Semilinear**: linear pamoja na constant masks kama vile `x & 0xFF`
+- **Polynomial**: products zinaonekana
 - **Mixed**: products na bitwise logic zimechanganywa, mara nyingi zikiwa na repeated subexpressions
-3. **Thibitisha kila candidate rewrite** kwa random testing au SMT proof. Ikiwa equivalence haiwezi kuthibitishwa, hifadhi expression ya awali badala ya kubashiri.
+3. **Thibitisha kila candidate rewrite** kwa random testing au SMT proof. Ikiwa equivalence haiwezi kuthibitishwa, hifadhi expression ya awali badala ya kubahatisha.
 
 ### CoBRA
 
-[**CoBRA**](https://github.com/trailofbits/CoBRA) ni MBA simplifier ya vitendo kwa malware analysis na protected-binary reversing. Huainisha expression na kuipeleka kupitia specialized pipelines badala ya kutumia generic rewrite pass moja kwa kila kitu.<sup>[[2]](#references)</sup>
+[**CoBRA**](https://github.com/trailofbits/CoBRA) ni MBA simplifier ya vitendo kwa malware analysis na protected-binary reversing. Huweka expression katika kundi na kuipeleka kupitia specialized pipelines badala ya kutumia generic rewrite pass moja kwa kila kitu.<sup>[[2]](#references)</sup>
 
 Matumizi ya haraka:
 ```bash
@@ -262,42 +268,42 @@ cobra-cli --mba "(x&0xFF)+(x&0xFF00)" --bitwidth 16
 # Ask CoBRA to prove the rewrite with Z3
 cobra-cli --mba "(a^b)+(a&b)+(a&b)" --verify
 ```
-Kesi muhimu:
+Matukio muhimu:
 
-- **Linear MBA**: CoBRA hutathmini expression kwenye Boolean inputs, hutengeneza signature, na kuendesha kwa wakati mmoja recovery methods kadhaa kama pattern matching, ANF conversion, na coefficient interpolation.
+- **Linear MBA**: CoBRA hutathmini expression kwenye inputs za Boolean, huunda signature, na hushindanishwa kwa mbinu kadhaa za recovery kama vile pattern matching, ANF conversion, na coefficient interpolation.
 - **Semilinear MBA**: constant-masked atoms hujengwa upya kwa bit-partitioned reconstruction ili masked regions zibaki sahihi.
-- **Polynomial/Mixed MBA**: products hugawanywa kuwa cores, na repeated subexpressions zinaweza kuhamishiwa kwenye temporaries kabla ya kurahisisha outer relation.
+- **Polynomial/Mixed MBA**: products hugawanywa kuwa cores, na repeated subexpressions zinaweza kuinuliwa kuwa temporaries kabla ya kurahisisha outer relation.
 
-Mfano wa mixed identity ambayo mara nyingi inafaa kujaribu kuirecover:
+Mfano wa mixed identity ambao kwa kawaida inafaa kujaribu ku-recover:
 ```c
 (x & y) * (x | y) + (x & ~y) * (~x & y)
 ```
-Hii inaweza kurahisishwa kuwa:
+Hii inaweza kufupishwa kuwa:
 ```c
 x * y
 ```
-### Maelezo ya Reversing
+### Maelezo ya reversing
 
 - Pendelea kuendesha CoBRA kwenye **lifted IR expressions** au matokeo ya decompiler baada ya kutenga computation halisi.
-- Tumia `--bitwidth` wazi wakati expression ilitokana na **masked arithmetic** au registers nyembamba.
-- Ikiwa unahitaji hatua thabiti zaidi ya proof, angalia maelezo ya Z3 hapa:
+- Tumia `--bitwidth` kwa uwazi wakati expression ilitokana na masked arithmetic au registers zenye upana mdogo.
+- Ikiwa unahitaji hatua yenye proof thabiti zaidi, angalia maelezo ya karibu ya Z3 hapa:
 
 
 {{#ref}}
 satisfiability-modulo-theories-smt-z3.md
 {{#endref}}
 
-- CoBRA pia inasambazwa kama **LLVM pass plugin** (`libCobraPass.so`), ambayo ni muhimu unapotaka kunormalize LLVM IR yenye MBA nyingi kabla ya **analysis passes** zinazofuata.
-- **Unsupported carry-sensitive mixed-domain residuals** zinapaswa kuchukuliwa kama ishara ya kuhifadhi expression ya awali na kuchanganua carry path mwenyewe.
+- CoBRA pia huja kama **LLVM pass plugin** (`libCobraPass.so`), ambayo ni muhimu unapotaka kunormalize LLVM IR yenye MBA nyingi kabla ya analysis passes zinazofuata.
+- Mixed-domain residuals zisizotumia carry zinazoathiriwa na carry zinapaswa kuchukuliwa kama ishara ya kubakiza expression ya awali na kufikiri kuhusu carry path mwenyewe.
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
-Obfuscator hii hubadilisha operations za programu kuwa instruction sequences zinazotumia `mov`, na hutumia signal/exception handling kubadilisha control flow. Kwa maelezo zaidi:
+Obfuscator hii hubadilisha operations za program kuwa instruction sequences zinazotumia `mov`, na hutumia signal/exception handling kubadilisha control flow. Kwa maelezo:
 
 - [https://www.youtube.com/watch?v=2VF_wPkiBJY](https://www.youtube.com/watch?v=2VF_wPkiBJY)
 - [https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf)
 
-Kwa binaries zinazotumika, [demovfuscator](https://github.com/kirschju/demovfuscator) inaweza kufanya deobfuscate ya matokeo. Ina dependencies kadhaa.
+Kwa binaries zinazoungwa mkono, [demovfuscator](https://github.com/kirschju/demovfuscator) inaweza ku-deobfuscate matokeo. Ina utegemezi kadhaa.
 ```
 apt-get install libcapstone-dev
 apt-get install libz3-dev
@@ -308,20 +314,20 @@ Ikiwa unacheza **CTF, workaround hii ya kutafuta flag** inaweza kuwa muhimu sana
 
 ## Rust
 
-Ili kupata **entry point**, tafuta functions kwa kutumia `::main` kama ilivyo kwenye:
+Ili kupata **entry point**, tafuta functions kwa `::main` kama ilivyo kwenye:
 
-![Kupata Rust entry point katika Ghidra kwa kutafuta majina ya functions kwa double-colon main](<../../images/image (1080).png>)
+![Kupata Rust entry point katika Ghidra kwa kutafuta majina ya functions yenye main iliyotenganishwa kwa double-colon](<../../images/image (1080).png>)
 
-Katika hali hii binary iliitwa authenticator, kwa hiyo ni rahisi kutambua kwamba hii ndiyo main function inayovutia.\
-Ukiwa na **name** ya **functions** zinazoitwa, zitafute kwenye **Internet** ili ujifunze kuhusu **inputs** na **outputs** zake.
+Katika hali hii binary iliitwa authenticator, kwa hiyo ni dhahiri kwamba hii ndiyo main function inayovutia.\
+Ukiwa na **name** ya **functions** zinazoitwa, zitafute kwenye **Internet** ili kujifunza kuhusu **inputs** na **outputs** zake.
 
 ### Kurejesha Rust strings kutoka ELF firmware
 
-Katika binaries za **Rust ELF**, strings nyingi tuli hazirejelewi kama pointers za C-style zilizo NUL-terminated. Muundo wa kawaida wa `rustc` ni **pointer/length tuple** ndani ya **`.data.rel.ro`** inayoelekeza kwenye string blob halisi iliyohifadhiwa kwenye **`.rodata`**:
+Katika binaries za **Rust ELF**, static strings nyingi hazirejelewi kama pointers za C-style zilizokamilishwa na NUL. Muundo wa kawaida wa `rustc` ni **pointer/length tuple** ndani ya **`.data.rel.ro`** inayoelekeza kwenye string blob halisi iliyohifadhiwa kwenye **`.rodata`**:
 ```text
 [8-byte little-endian pointer][8-byte little-endian length]
 ```
-Hii inamaanisha kuwa `strings` au uchanganuzi chaguomsingi wa Ghidra unaweza kuunganisha strings zilizo karibu au kukosa kabisa cross-references.<sup>[[3]](#references)</sup>
+Hii inamaanisha kwamba `strings` au uchanganuzi chaguomsingi wa Ghidra unaweza kuunganisha strings zilizo karibu au kukosa kabisa cross-references.<sup>[[3]](#references)</sup>
 
 Mtiririko wa kazi wa haraka:
 ```bash
@@ -330,10 +336,10 @@ objdump -h <bin>
 ```
 1. Pata anwani pepe na ukubwa wa **`.rodata`**.
 2. Hesabu **`.data.rel.ro`** neno moja kwa wakati mmoja.
-3. Chukulia thamani yoyote iliyo ndani ya masafa ya anwani ya `.rodata` kuwa pointer ya string inayoweza kuwa sahihi.
+3. Chukulia thamani yoyote iliyo ndani ya masafa ya anwani ya `.rodata` kuwa pointer ya string inayoweza kufaa.
 4. Chukulia neno linalofuata kuwa urefu unaowezekana.
-5. Tumia vichujio vya sanity (kwa mfano, hifadhi urefu ulio kati ya **4** na **100** bytes).
-6. Soma bytes `length` hasa kutoka `.rodata` badala ya kuendelea kuscan hadi `0x00`.
+5. Tumia vichujio vya sanity (kwa mfano, hifadhi urefu wa kati ya **4** na **100** bytes).
+6. Soma bytes za `length` hasa kutoka `.rodata` badala ya kuendelea kusoma hadi `0x00`.
 
 Mantiki ndogo ya extractor:
 ```python
@@ -344,9 +350,9 @@ if rodata_start <= ptr < rodata_end and 4 <= length <= 100:
 start = ptr - rodata_start
 print(rodata[start:start+length])
 ```
-Hii ni muhimu hasa katika firmware reversing kwa sababu Rust strings zilizopatikana mara nyingi hufichua **HTTP routes, RPC names, log messages, assertions, filenames, config keys, command handlers, na auth-related logic**.
+Hii ni muhimu sana katika firmware reversing kwa sababu strings za Rust zilizorejeshwa mara nyingi hufichua **HTTP routes, RPC names, log messages, assertions, filenames, config keys, command handlers, na auth-related logic**.
 
-Ikiwa Ghidra itakosa strings hizo, endesha custom script/plugin inayotumia heuristic hiyo hiyo na kuunda string data kwenye `.rodata` offsets zilizorejelewa. Zana za `rust-strings` na `RustStrings.py` zilizochapishwa na Pen Test Partners ni marejeo mazuri ya kurekebisha wazo hili kwa **word sizes, endianness, na section layouts** nyingine.<sup>[[4]](#references)</sup><sup>[[5]](#references)</sup>
+Ikiwa Ghidra itakosa strings hizo, endesha custom script/plugin inayotumia heuristic hiyo hiyo na kuunda string data kwenye `.rodata` offsets zilizoelekezwa. Zana zilizochapishwa za `rust-strings` na `RustStrings.py` kutoka Pen Test Partners ni marejeo mazuri ya kurekebisha wazo hili kwa **word sizes, endianness, na section layouts** nyinginezo.<sup>[[4]](#references)</sup><sup>[[5]](#references)</sup>
 
 ## **Delphi**
 
@@ -356,9 +362,9 @@ Ikiwa unahitaji kureverse Delphi binary, ninapendekeza utumie IDA plugin [https:
 
 Bonyeza **Alt+F7** katika IDA ili kupakia Python plugin, kisha uchague plugin file.
 
-Plugin hii itaendesha binary na kutatua function names dynamically mwanzoni mwa debugging. Baada ya kuanza debugging, bonyeza tena kitufe cha Start (kile cha kijani au f9), na breakpoint itagonga mwanzoni mwa real code.
+Plugin hii itatekeleza binary na kutatua function names dynamically mwanzoni mwa debugging. Baada ya kuanza debugging, bonyeza tena Start button (ile ya kijani au f9), na breakpoint itagonga mwanzoni mwa real code.
 
-Ukibonyeza kitufe katika graphical application, debugger inaweza kusimama kwenye function iliyoitwa na kitufe hicho.
+Ukibonyeza button katika graphical application, debugger inaweza kusimama kwenye function iliyoitwa na button hiyo.
 
 ## Golang
 
@@ -366,11 +372,11 @@ Ikiwa unahitaji kureverse Golang binary, ninapendekeza utumie IDA plugin [https:
 
 Bonyeza **Alt+F7** katika IDA ili kupakia Python plugin, kisha uchague plugin file.
 
-Hii itatatua names za functions.
+Hii itatatua majina ya functions.
 
-## Python Iliyocompiliwa
+## Compiled Python
 
-Katika ukurasa huu unaweza kupata jinsi ya kupata Python code kutoka kwenye ELF/EXE python compiled binary:
+Katika ukurasa huu unaweza kupata jinsi ya kupata python code kutoka kwenye ELF/EXE python compiled binary:
 
 
 {{#ref}}
@@ -379,7 +385,7 @@ Katika ukurasa huu unaweza kupata jinsi ya kupata Python code kutoka kwenye ELF/
 
 ## GBA - Game Boy Advance
 
-Ukipata **binary** ya mchezo wa GBA, unaweza kutumia zana mbalimbali za **ku-emulate** na **ku-debug**:
+Ukipata **binary** ya mchezo wa GBA, unaweza kutumia tools mbalimbali kuufanyia **emulate** na **debug**:
 
 - [**no$gba**](https://problemkaputt.de/gba.htm) (_Pakua debug version_) - Ina debugger yenye interface
 - [**mgba** ](https://mgba.io)- Ina CLI debugger
@@ -390,7 +396,7 @@ Katika [**no$gba**](https://problemkaputt.de/gba.htm), kwenye _**Options --> Emu
 
 ![no$gba controls configuration showing Game Boy Advance button mappings](<../../images/image (581).png>)
 
-Zinapobonyezwa, kila **key ina value** ya kuitambua:
+Inapobonyezwa, kila **key ina value** ya kuitambulisha:
 ```
 A = 1
 B = 2
@@ -403,13 +409,13 @@ DOWN = 128
 R = 256
 L = 256
 ```
-Kwa hiyo, katika aina hii ya program, sehemu ya kuvutia itakuwa **jinsi program inavyoshughulikia user input**. Katika anwani **0x4000130** utapata function inayopatikana mara nyingi: **KEYINPUT**.
+Kwa hiyo, katika aina hii ya program, sehemu ya kuvutia itakuwa **jinsi program inavyoshughulikia ingizo la mtumiaji**. Katika anwani **0x4000130** utapata function inayopatikana mara kwa mara: **KEYINPUT**.
 
 ![Mwonekano wa Ghidra wa binary ya GBA inayorejelea KEYINPUT kwenye anwani 0x4000130](<../../images/image (447).png>)
 
-Katika picha iliyotangulia unaweza kuona kwamba function inaitwa kutoka **FUN_080015a8** (anwani: _0x080015fa_ na _0x080017ac_).
+Katika picha iliyotangulia unaweza kuona kwamba function inaitwa kutoka kwa **FUN_080015a8** (anwani: _0x080015fa_ na _0x080017ac_).
 
-Katika function hiyo, baada ya init operations kadhaa (zisizo na umuhimu):
+Katika function hiyo, baada ya baadhi ya shughuli za init (zisizo na umuhimu):
 ```c
 void FUN_080015a8(void)
 
@@ -430,7 +436,7 @@ FUN_08000dd0(&DAT_02009584,0x6000000,&DAT_030000dc);
 FUN_08000354(&DAT_030000dc,0x3c);
 uVar4 = DAT_030004d8;
 ```
-Imepata code hii:
+Imepatikana msimbo huu:
 ```c
 do {
 DAT_030004da = uVar4; //This is the last key pressed
@@ -442,7 +448,7 @@ uVar2 = DAT_030004dc;
 uVar1 = *puVar6;
 if ((uVar1 & DAT_030004da & ~uVar4) != 0) {
 ```
-`if` ya mwisho inakagua ikiwa **`uVar4`** iko kwenye **Keys** za mwisho na si key ya sasa; hii pia huitwa kuachilia kitufe (key ya sasa imehifadhiwa kwenye **`uVar1`**).
+If ya mwisho inakagua ikiwa **`uVar4`** iko kwenye **Keys** za mwisho na si key ya sasa, pia huitwa kuachilia kitufe (key ya sasa imehifadhiwa kwenye **`uVar1`**).
 ```c
 if (uVar1 == 4) {
 DAT_030000d4 = 0;
@@ -470,17 +476,17 @@ FUN_08000864();
 if (uVar1 == 0x10) {
 DAT_030000d8 = DAT_030000d8 + 0x3a;
 ```
-Katika msimbo uliotangulia unaweza kuona kwamba tunalinganisha **uVar1** (mahali ambapo **value ya kitufe kilichobonyezwa** ipo) na baadhi ya values:
+Katika code iliyotangulia unaweza kuona kwamba tunalinganisha **uVar1** (mahali ambapo **value of the pressed button** ipo) na values fulani:
 
 - Kwanza, inalinganishwa na **value 4** (kitufe cha **SELECT**): Katika challenge, kitufe hiki husafisha screen
-- Kisha inalinganisha value hiyo na **8** (kitufe cha **START**); katika challenge hii, njia hiyo hukagua ikiwa code iliyoingizwa ni halali.
-- Katika hali hii, var **`DAT_030000d8`** inalinganishwa na 0xf3, na ikiwa value ni sawa, code fulani hutekelezwa.
+- Kisha inalinganisha value hiyo na **8** (kitufe cha **START**); katika challenge hii, path hiyo hukagua ikiwa code iliyoingizwa ni valid.
+- Katika hali hii, var **`DAT_030000d8`** inalinganishwa na 0xf3, na ikiwa value hiyo ni sawa, code fulani hutekelezwa.
 - Katika hali nyingine zote, counter (`DAT_030000d4`) hukaguliwa na kuongezwa.\
-Counter ikiwa chini ya 8, values za vitufe vilivyobonyezwa hukusanywa katika `DAT_030000d8`.
+Wakati counter iko chini ya 8, values za keys zilizobonyezwa hukusanywa katika `DAT_030000d8`.
 
-Kwa hiyo, katika challenge hii, kwa kujua values za vitufe, ulihitaji **kubonyeza mchanganyiko wenye urefu wa chini ya 8 ambao jumla yake ni 0xf3.**
+Kwa hivyo, katika challenge hii, ukijua values za buttons, ulihitaji **kubonyeza combination yenye urefu wa chini ya 8 ambayo jumla yake ni 0xf3.**
 
-**Reference ya tutorial hii:** [archived Nostalgia challenge writeup](https://web.archive.org/web/20220328215728/https://exp.codes/Nostalgia/).<sup>[[6]](#references)</sup>
+**Reference ya tutorial hii:** [maelezo ya challenge ya Nostalgia yaliyohifadhiwa kwenye archive](https://web.archive.org/web/20220328215728/https://exp.codes/Nostalgia/).<sup>[[6]](#references)</sup>
 
 ## Game Boy
 
@@ -498,8 +504,8 @@ https://www.youtube.com/watch?v=VVbRe7wr3G4
 
 - [1] [Kurahisisha MBA obfuscation kwa kutumia CoBRA](https://blog.trailofbits.com/2026/04/03/simplifying-mba-obfuscation-with-cobra/)
 - [2] [Repository ya Trail of Bits CoBRA](https://github.com/trailofbits/CoBRA)
-- [3] [Kudecode Rust strings - Pen Test Partners](https://www.pentestpartners.com/security-blog/decoding-rust-strings/)
+- [3] [Decoding Rust strings - Pen Test Partners](https://www.pentestpartners.com/security-blog/decoding-rust-strings/)
 - [4] [pentestpartners/reverse-engineering - rust-strings](https://github.com/pentestpartners/reverse-engineering/blob/main/rust-strings)
 - [5] [pentestpartners/reverse-engineering - RustStrings.py](https://github.com/pentestpartners/reverse-engineering/blob/main/RustStrings.py)
-- [6] [Nostalgia - GBA reversing tutorial (archived)](https://web.archive.org/web/20220328215728/https://exp.codes/Nostalgia/)
+- [6] [Nostalgia - GBA reversing tutorial (iliyohifadhiwa kwenye archive)](https://web.archive.org/web/20220328215728/https://exp.codes/Nostalgia/)
 {{#include ../../banners/hacktricks-training.md}}
