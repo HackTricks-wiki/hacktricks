@@ -164,6 +164,42 @@ systemctl restart vulnerable.service
 
 If you cannot restart services yourself but can edit a socket-activated unit, you may only need to **wait for a client connection** to trigger execution of the backdoored service as root.<sup>[[17]](#references)</sup>
 
+### systemd generator directories
+
+**System generators** are executables launched by the system manager before it loads unit files, both during boot and configuration reloads. Therefore, write access to a system-generator directory (or to an existing executable generator) is a direct root-code-execution primitive that is easy to miss when an audit checks only `*.service` and `*.timer` files.<sup>[[35]](#references)[[36]](#references)</sup>
+
+The usual search order is `/run/systemd/system-generators/`, `/etc/systemd/system-generators/`, `/usr/local/lib/systemd/system-generators/`, and `/usr/lib/systemd/system-generators/` (some distributions expose `/lib/systemd/system-generators/` through the `/usr` merge). An executable with the same name in an earlier directory shadows the later one. Do not confuse these **input executable directories** with `/run/systemd/generator`, `/run/systemd/generator.early`, and `/run/systemd/generator.late`, which contain transient unit output produced by generators.<sup>[[35]](#references)</sup>
+
+Quick checks:
+
+```bash
+for d in /run/systemd/system-generators /etc/systemd/system-generators \
+         /usr/local/lib/systemd/system-generators /usr/lib/systemd/system-generators \
+         /lib/systemd/system-generators; do
+    [ -e "$d" ] || continue
+    namei -l "$d"
+    find "$d" -maxdepth 1 -writable -ls 2>/dev/null
+    getfacl -p "$d" "$d"/* 2>/dev/null
+done
+```
+
+A newly created generator must have its executable bit set. If the write primitive controls bytes but not mode, target an already executable generator; truncating it in place normally preserves its metadata. If the directory itself is writable, create and mark a new entry executable.<sup>[[35]](#references)</sup>
+
+```bash
+cat > /etc/systemd/system-generators/zz-update <<'EOF'
+#!/bin/sh
+cp /bin/bash /tmp/rootbash
+chown 0:0 /tmp/rootbash
+chmod 4755 /tmp/rootbash
+rm -f "$0"
+EOF
+chmod 755 /etc/systemd/system-generators/zz-update
+```
+
+Triggering `systemctl daemon-reload` against the **system** manager requires suitable authorization, but it re-runs every system generator; otherwise wait for a privileged reload, package operation, or reboot. User-generator directories such as `~/.config/systemd/user-generators/` execute under the user manager and do **not** provide root by themselves.<sup>[[35]](#references)</sup>
+
+For hardening and hunting, verify every path component and ACL rather than only the final mode bits, baseline hashes/package ownership of generators, and alert on create, rename, content, or permission changes in all system-generator input directories. Monitoring the write is important because a one-shot generator can delete itself after execution, while the generated unit tree under `/run/systemd/generator*` is rebuilt on the next reload.<sup>[[35]](#references)[[36]](#references)</sup>
+
 ### Overwrite a restrictive `php.ini` used by a privileged PHP sandbox
 
 Some custom daemons validate user-supplied PHP by running `php` with a **restricted `php.ini`** (for example, `disable_functions=exec,system,...`). If the sandboxed code still has **any write primitive** (like `file_put_contents`) and you can reach the **exact `php.ini` path** used by the daemon, you can **overwrite that config** to lift restrictions and then submit a second payload that runs with elevated privileges.<sup>[[2]](#references)</sup>
@@ -344,6 +380,8 @@ initcall_blacklist=algif_aead_init
 
 This kind of mitigation is worth remembering for other kernel LPEs too: if exploitation depends on a specific optional interface, disabling or blacklisting that interface can break the exploit path even before a full kernel upgrade is available.<sup>[[6]](#references)[[28]](#references)</sup>
 
+
+
 ## References
 
 - [1] [HTB Bamboo – hijacking a root-executed script in a user-writable PaperCut directory](https://0xdf.gitlab.io/2026/02/03/htb-bamboo.html)
@@ -380,5 +418,6 @@ This kind of mitigation is worth remembering for other kernel LPEs too: if explo
 - [32] [Git `ls-tree` documentation](https://git-scm.com/docs/git-ls-tree)
 - [33] [Git configuration documentation](https://git-scm.com/docs/git-config)
 - [34] [`openat2(2)` — Linux manual page](https://man7.org/linux/man-pages/man2/openat2.2.html)
-
+- [35] [systemd generator documentation](https://github.com/systemd/systemd/blob/main/man/systemd.generator.xml)
+- [36] [Elastic Security Labs — Linux Detection Engineering: persistence mechanisms](https://www.elastic.co/security-labs/threat-command/primer-on-persistence-mechanisms)
 {{#include ../../banners/hacktricks-training.md}}
