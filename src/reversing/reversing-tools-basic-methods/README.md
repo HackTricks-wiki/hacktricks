@@ -21,6 +21,12 @@ Software:
 - [https://www.pnfsoftware.com/jeb/demo](https://www.pnfsoftware.com/jeb/demo)
 - [https://github.com/wwwg/wasmdec](https://github.com/wwwg/wasmdec)
 
+## Node.js / V8 cached bytecode
+
+{{#ref}}
+nodejs-v8-cached-bytecode.md
+{{#endref}}
+
 ## .NET decompiler
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
