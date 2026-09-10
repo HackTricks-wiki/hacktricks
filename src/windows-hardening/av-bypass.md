@@ -916,6 +916,64 @@ After replacing the original files and restarting the service stack:
 
 This case study demonstrates how purely client-side trust decisions and simple signature checks can be defeated with a few byte patches.
 
+## Microsoft Defender `BTR.sys` trusted-functionality abuse
+
+Defender's **Boot-Time Removal** driver is a useful counterexample to classic BYOVD. `BTR.sys` is a legitimate Microsoft-signed remediation component with no memory-corruption bug and no IOCTL interface; after gaining administrator access and `SeLoadDriverPrivilege`, an operator can instead forge its private remediation transaction and obtain intended Ring-0 file/registry operations. This is a **post-compromise AV/EDR-neutralization primitive, not initial access or privilege escalation**, and the driver can be extracted from the target's own `MpEngine.dll` `BOOTTIMETOOL` resource rather than importing a conspicuous third-party driver.<sup>[[36]](#references)</sup>
+
+### Staging the one-shot driver
+
+Defender normally drops the resource as a random `[a-z]{8}.sys` file and registers a similarly named kernel service. `DriverEntry` reads the service's `Args` value, opens the referenced NTFS ADS, decrypts and validates the action list, writes feedback, and returns `0xC0000056` (`STATUS_DELETE_PENDING`) after successful execution so the driver unloads instead of remaining resident. A forged service has the following characteristic values.<sup>[[36]](#references)[[37]](#references)</sup>
+
+```text
+Type         = 1
+Start        = 1
+ErrorControl = 0
+ImagePath    = \??\C:\Windows\System32\drivers\<random>.sys
+Group        = Boot Bus Extender
+Args         = C:\Windows\System32\drivers\<random>.sys:changelist
+```
+
+The `:changelist` stream contains one RC4-encrypted blob. The analyzed builds reuse a fixed 256-byte key, so encryption is not an authorization boundary. A valid plaintext has a 24-byte global header (`Magic=0xFEE1DEAD`, `Version=2`, `PayloadOffset=0x10`, header CRC and a payload-derived transaction ID), followed by a null-terminated UTF-16 feedback path and any number of items. Each item has a 16-byte header (`DataSize`, `Action`, `HeaderCRC`, `DataCRC`) plus action-specific data ending in **exactly four NUL bytes**. Every header/data region is checked independently with CRC-32 polynomial `0xEDB88320`, initial state `0xFFFFFFFF`, and **no final XOR** (`~CRC32`); the CRC state is reset for every region.<sup>[[36]](#references)[[37]](#references)</sup>
+
+The accepted action IDs expose these kernel primitives.<sup>[[36]](#references)[[37]](#references)</sup>
+
+| ID | Item data | Result |
+| --- | --- | --- |
+| 1 | `[UTF-16 path]` | Delete a file, including a locked file |
+| 2 | `[UTF-16 path]` | Remove an empty directory |
+| 3 | `[Flags][source][destination]` | Move a file into an attacker-selected protected path; an empty destination means delete |
+| 4 | `[Flags][key path]` | Recursively delete a registry key |
+| 5 | `[Flags][key path + "\\" + value]` | Delete a registry value |
+| 6 | `[Flags][type][size][key path + "\\" + value][data]` | Create/update a registry value and create missing key paths |
+
+For actions 5 and 6, the on-wire key/value separator is **two consecutive backslashes**; a conventionally formatted path will not be split correctly. The feedback file mostly mirrors the request, but the first four data bytes of each item become its resulting `NTSTATUS`. For actions 1 and 2, which have no leading flags field, BTR shifts the path into the four reserved trailing bytes to make space for that status.<sup>[[36]](#references)</sup>
+
+### `BTR_CLI` workflow and early-boot window
+
+[`BTR_CLI`](https://github.com/Dump-GUY/BTR_CLI) implements the complete chain: extract `BTR.sys` from local Defender, create `<random>.sys:changelist` and a feedback stream, serialize/checksum/encrypt chained actions, directly create the service registry key, then call `NtLoadDriver` for `-trigger now` or leave it as a system-start driver for `-trigger boot`. Direct registry staging avoids the normal SCM `CreateServiceW` path and therefore does **not** produce service-install Event ID 7045. Boot-triggered artifacts can later be removed with `BTR_CLI.exe -cleanup <service_name>`.<sup>[[36]](#references)[[37]](#references)</sup>
+
+```powershell
+# Runtime: remove protected security-service registrations from Ring 0
+BTR_CLI.exe -chain -item "4|HKLM\SYSTEM\CurrentControlSet\Services\WdFilter" -item "4|HKLM\SYSTEM\CurrentControlSet\Services\WinDefend" -trigger now
+
+# Boot: delete a security driver before its user-mode protection stack starts
+BTR_CLI.exe -a 1 -s "C:\Windows\System32\drivers\wd\WdFilter.sys" -trigger boot
+```
+
+`Start=0` is not usable because BTR performs file I/O from `DriverEntry` before the storage stack and `SystemRoot` link are ready. `Start=1` plus the high-priority `Boot Bus Extender` group instead executes in Phase 1: NTFS is usable, but many system-start security drivers and user-mode EDR services have not initialized. Boot-start filters such as `WdFilter` may already be loaded, yet BTR can remove their binaries or service configuration before the next start and can delete service executables before SCM launches them. ELAM does not close this gap because BTR runs after boot-start evaluation and carries a valid Microsoft signature.<sup>[[36]](#references)</sup>
+
+Multiple actions execute in one transaction. The PoC prepends Action 1 for the hard-coded `\SystemRoot\Temp\BootClean.log`: BTR creates this log, then consumes its own delete request and removes it before unloading. This reduces evidence, while placing feedback in `<random>.sys:<random>.dat` allows removal of the driver and both streams together.<sup>[[36]](#references)[[37]](#references)</sup>
+
+### High-signal detection correlations
+
+Signature-only rules and the Microsoft vulnerable-driver blocklist do not address abuse of intended BTR functionality. Prefer these behavioral correlations, while distinguishing legitimate Defender lineage from an arbitrary launcher.<sup>[[36]](#references)</sup>
+
+- **Sysmon 15:** `.sys:changelist` creation is universal to BTR staging. A `.dat` ADS attached to the same `.sys` is especially suspicious because legitimate Defender normally places feedback below `C:\ProgramData\Microsoft\Windows Defender\Scans\RebootActions\`.
+- **Sysmon 12/13 without System 7045:** correlate direct creation of `HKLM\SYSTEM\CurrentControlSet\Services\<random>` containing `Args=...:changelist` and `Group=Boot Bus Extender` with no matching SCM installation event.
+- **Sysmon 6 -> 23:** correlate a known BTR driver load from non-Defender lineage with subsequent file deletion attributed to `System`/PID 4, particularly for security binaries.
+- **Sysmon 11 -> 23:** alert on rapid creation and deletion of `\SystemRoot\Temp\BootClean.log` by `System`/PID 4.
+- Restrict and audit assignment/enabling of `SeLoadDriverPrivilege`; a Microsoft signature alone is insufficient trust when a security-tool driver is staged by `cmd.exe`, PowerShell, or an unknown process.
+
 ## Abusing Protected Process Light (PPL) To Tamper AV/EDR With LOLBINs
 
 Protected Process Light (PPL) enforces a signer/level hierarchy so that only equal-or-higher protected processes can tamper with each other. Offensively, if you can legitimately launch a PPL-enabled binary and control its arguments, you can convert benign functionality (e.g., logging) into a constrained, PPL-backed write primitive against protected directories used by AV/EDR.<sup>[[16]](#references)[[17]](#references)[[18]](#references)[[19]](#references)[[20]](#references)</sup>
@@ -1369,5 +1427,7 @@ Sleep(exec_delay_seconds * 1000); // config-controlled delay to outlive sandboxe
 - [33] [blog.xpnsec.com - Hiding Your Dotnet Etw](https://blog.xpnsec.com/hiding-your-dotnet-etw)
 - [34] [repnz/etw-providers-docs](https://github.com/repnz/etw-providers-docs)
 - [35] [trustedsec.com - Abusing Chrome Remote Desktop On Red Team Operations A Practical Guide](https://trustedsec.com/blog/abusing-chrome-remote-desktop-on-red-team-operations-a-practical-guide)
+- [36] [Check Point Research - BTR Reforged: Weaponizing Defender's Remediation Driver as a Kernel Operation Primitive](https://research.checkpoint.com/2026/btr-reforged-weaponizing-defenders-remediation-driver-as-a-kernel-operation-primitive/)
+- [37] [Dump-GUY - BTR_CLI](https://github.com/Dump-GUY/BTR_CLI)
 
 {{#include ../banners/hacktricks-training.md}}
