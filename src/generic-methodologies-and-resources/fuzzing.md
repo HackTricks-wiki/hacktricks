@@ -4,28 +4,28 @@
 
 ## Mutational Grammar Fuzzing: Coverage vs. Semantics
 
-**mutational grammar fuzzing** では、入力を **grammar-valid** な状態に保ちながら mutation します。coverage-guided mode では、**new coverage** を trigger した sample だけが corpus seed として保存されます。**language targets**（parsers、interpreters、engines）では、ある construct の output が別の construct の input になるような **semantic/dataflow chains** を必要とする bug を、これによって見逃す可能性があります。<sup>[[1]](#references)</sup>
+**mutational grammar fuzzing** では、入力を **grammar-valid** な状態に保ちながら変異させます。coverage-guided モードでは、**new coverage** を発生させたサンプルのみが corpus seed として保存されます。**language targets**（parser、interpreter、engine）では、ある構造体の出力が別の構造体の入力になるような **semantic/dataflow chain** を必要とするバグを見逃す可能性があります。<sup>[[1]](#references)</sup>
 
-**Failure mode:** fuzzer は `document()` と `generate-id()`（または類似の primitives）を個別に exercise する seeds を見つけますが、**chained dataflow** を保持しないため、“closer-to-bug” な sample は coverage を追加しないものとして drop されます。依存する step が **3+** ある場合、random recombination は高コストになり、coverage feedback も search を guide できません。<sup>[[1]](#references)</sup>
+**Failure mode:** fuzzer は `document()` と `generate-id()`（または類似の primitive）を個別に実行する seed を見つけますが、**chained dataflow** を保持しないため、「bug に近い」サンプルは coverage を追加しないものとして破棄されます。依存するステップが 3 つ以上ある場合、ランダムな再結合は高コストになり、coverage feedback では探索を誘導できません。<sup>[[1]](#references)</sup>
 
-**Implication:** dependency-heavy grammars では、**mutational** phase と **generative** phase を **hybridizing** するか、単なる coverage ではなく **function chaining** patterns に generation を bias することを検討してください。<sup>[[1]](#references)</sup>
+**Implication:** 依存関係の多い grammar では、**mutational phase** と **generative phase** を **hybridize** するか、coverage だけでなく **function chaining** パターンを優先するよう generation に bias をかけることを検討してください。<sup>[[1]](#references)</sup>
 
 ## Corpus Diversity Pitfalls
 
-Coverage-guided mutation は **greedy** です。new-coverage sample はすぐに保存され、多くの場合、大きな unchanged regions も保持されます。時間の経過とともに、corpora は structural diversity の低い **near-duplicates** になります。Aggressive minimization は有用な context を削除する可能性があるため、実用的な compromise は、**minimum token threshold** に達した時点で停止する **grammar-aware minimization** です（noise を減らしつつ、mutation-friendly であり続けるのに十分な surrounding structure を維持します）。<sup>[[1]](#references)</sup>
+Coverage-guided mutation は **greedy** です。new coverage を持つサンプルはすぐに保存され、多くの場合、大部分の変更されていない領域も保持されます。時間の経過とともに、corpus は構造的多様性の低い **near-duplicate** で構成されるようになります。過度な minimization は有用な context を削除する可能性があるため、実用的な妥協策は、**minimum token threshold** に達した時点で停止する **grammar-aware minimization** です（noise を減らしつつ、mutation-friendly であり続けるのに十分な周辺構造を維持します）。<sup>[[1]](#references)</sup>
 
-mutational fuzzing における実用的な corpus rule は、大量の near-duplicates よりも、coverage を最大化する **structurally different な少数の seeds** を優先することです。実際には、通常は次のようになります。<sup>[[1]](#references)[[3]](#references)</sup>
+mutational fuzzing における実用的な corpus のルールは、多数の near-duplicate よりも、coverage を最大化する構造的に異なる少数の seed を **prefer** することです。実際には、通常は次のようになります。<sup>[[1]](#references)[[3]](#references)</sup>
 
-- **real-world samples**（public corpora、crawling、captured traffic、target ecosystem の file sets）から開始する。
-- すべての valid sample を保持するのではなく、**coverage-based corpus minimization** で distill する。
-- mutations が irrelevant bytes に大半の cycles を費やすのではなく、meaningful fields に着地するよう、seeds を **十分に小さく** 保つ。
-- 大幅な harness/instrumentation の変更後には corpus minimization を再実行する。reachability が変化すると、「best」な corpus も変わるためです。
+- **real-world samples**（public corpus、crawling、captured traffic、target ecosystem から取得した file set）から開始する。
+- すべての valid sample を保持するのではなく、**coverage-based corpus minimization** で絞り込む。
+- mutation が意味のある field に適用されるよう、seed は十分に小さく保つ。これにより、無関係な byte に大半の cycle を費やすことを避ける。
+- 大規模な harness/instrumentation の変更後は corpus minimization を再実行する。reachability が変化すると、「最適な」corpus も変わるためである。
 
 ## Comparison-Aware Mutation For Magic Values
 
-fuzzers が plateau する一般的な理由は syntax ではなく、**hard comparisons** です。具体的には、magic bytes、length checks、enum strings、checksums、または `memcmp`、switch tables、cascaded comparisons によって guard された parser dispatch values などです。Pure random mutation では、これらの values を byte-by-byte で推測しようとして cycles を無駄にします。
+fuzzer が plateau に達する一般的な理由は syntax ではなく、magic byte、length check、enum string、checksum、または `memcmp`、switch table、連続した comparison によって保護された parser dispatch value などの **hard comparison** です。Pure random mutation では、これらの値を byte 単位で推測しようとして cycle を浪費します。
 
-これらの targets には **comparison tracing**（例えば AFL++ の `CMPLOG` / Redqueen-style workflows）を使用し、fuzzer が failed comparisons の operands を observe できるようにします。これにより、fuzzer はそれらを満たす values に向けて mutations を bias できます。<sup>[[3]](#references)</sup>
+このような target には **comparison tracing**（例えば AFL++ の `CMPLOG` / Redqueen-style workflow）を使用し、fuzzer が failed comparison の operand を観測できるようにします。これにより、それらを満たす値に向けて mutation を bias できます。<sup>[[3]](#references)</sup>
 ```bash
 ./configure --cc=afl-clang-fast
 make
@@ -38,37 +38,71 @@ cp ./target ./target.cmplog
 
 afl-fuzz -i in -o out -c ./target.cmplog -- ./target.afl @@
 ```
-**実践的な注意点：**
+**実践的な注意点:**
 
-- これは、対象が **file signatures**、**protocol verbs**、**type tags**、または **version-dependent feature bits** によって深いロジックへのアクセスを制御している場合に、特に有効です。
-- 実際のサンプル、protocol specs、または debug logs から抽出した **dictionaries** と組み合わせてください。grammar tokens、chunk names、verbs、delimiters を含む小規模な dictionary のほうが、巨大で汎用的な wordlist より価値があることがよくあります。
-- 対象が多数の sequential checks を実行する場合は、最初の “magic” comparisons を先に解決し、その後、得られた corpus を再度 minimize してください。これにより、後続ステージがすでに有効な prefixes から開始できます。
+- これは、target が **file signatures**、**protocol verbs**、**type tags**、または **version-dependent feature bits** の背後に深いロジックを隠している場合に特に有用です。
+- 実際のサンプル、protocol specs、または debug logs から抽出した **dictionaries** と組み合わせてください。grammar tokens、chunk names、verbs、delimiters を含む小規模な dictionary は、大規模な汎用 wordlist よりも価値があることがよくあります。
+- target が多数の sequential checks を実行する場合は、最初に最も早い「magic」比較を解決し、その後、得られた corpus を再度 minimize してください。これにより、後続ステージはすでに有効な prefixes から開始できます。
 
-## Stateful Fuzzing: Sequences Are Seeds
+## Edge Coverage で異なる Path が区別できない場合の、より豊富な Feedback
 
-**protocols**、**authenticated workflows**、**multi-stage parsers** では、興味深い単位は単一の blob ではなく、**message sequence** であることがよくあります。transcript 全体を1つの file に連結して盲目的に mutate する方法は、通常は非効率です。fragile state に到達するのが後続の message だけであっても、fuzzer はすべてのステップを均等に mutate してしまうためです。<sup>[[4]](#references)</sup>
+通常の edge coverage では、異なる caller を経由して同じ helper を通過する executions や、function 内で異なる branch combinations を選択する executions を区別できません。これは、**route** から edge までの経路が live state を決定する、shared decoders、protocol dispatchers、interpreter helpers で重要になります。すべての calling context を単純に追跡するのも危険です。coverage map と queue が爆発的に増大する可能性があるためです。そのため、context-sensitive fuzzing の研究では、call graph 全体を context-sensitive として扱うのではなく、有望な contexts のみを段階的に詳細化することが推奨されています。<sup>[[14]](#references)</sup>
 
-より効果的な方法は、**sequence 自体を seed として扱い**、**observable state**（response codes、protocol states、parser phases、返される object types）を追加の feedback として使用することです。<sup>[[4]](#references)</sup>
+最近の AFL++ builds では、通常の edge coverage に加えて **Ball-Larus per-function path coverage** が提供されています。これは function を通る各 acyclic path に feature を割り当てます。loop back-edges は削除されるため、この feedback で区別できるのは branch combinations であり、**loop iteration counts ではありません**。まずは緩やかな level `1` から開始し、path の数が指数関数的に増加する可能性があるため、より厳格な modes は疑わしい parser/state-machine code に限定してください。<sup>[[13]](#references)</sup>
+```bash
+make clean
+export CC=afl-clang-fast
+export CXX=afl-clang-fast++
+export AFL_LLVM_PATH=1                 # 1=relaxed, 2=restricted, 3=strict
+./configure
+make -j"$(nproc)"
+afl-fuzz -i in -o out -- ./target @@
+```
+多くの security-relevant な箇所から呼び出される helper では、LTO mode により、各関数パスをその直接の call site と組み合わせられます:<sup>[[13]](#references)</sup>
+```bash
+make clean
+export CC=afl-clang-lto
+export CXX=afl-clang-lto++
+export AFL_LLVM_LTO_CALLER=1
+export AFL_LLVM_LTO_PATH=1
+./configure
+make -j"$(nproc)"
+afl-fuzz -i in -o out -- ./target @@
+```
+**Campaign guidance:** richer feedbackは控えめに適用し、そのcoverage-map/queueコストを監視してください。<sup>[[13]](#references)[[14]](#references)</sup>
 
-- **valid prefix messages** は安定させ、mutations は **transition-driving** message に集中させます。
-- 次のステップが prior responses に依存する場合は、identifiers と server-generated values を cache します。
-- serialized transcript 全体を opaque blob として mutate するよりも、message ごとの mutation/splicing を優先します。
-- protocol が意味のある response codes を公開している場合は、それらを **cheap state oracle** として使用し、より深く進行する sequences を優先します。
+- 通常のedge-coverageインスタンスを並行して実行してください。追加のqueue/mapコストによって1秒あたりの実行回数が大幅に低下しない場合にのみ、richer feedbackは有用です。
+- 大規模なtemplate-heavy libraryや汎用utility codeがmapの大部分を占める場合は、`AFL_LLVM_ALLOWLIST`を使用してpath/caller instrumentationを制限してください。
+- 非循環pathが過剰なfunctionはAFL++でスキップできます。コンパイル中のwarningは、targetにallowlistingまたはより緩いlevelが必要であることを示します。
+- Caller + path coverageがサポートするcaller depthは1つだけです。これをより深いcontext stackと組み合わせないでください。
+- Path IDはLLVMのmajor version間で変わる可能性があります。1つのcampaignではtoolchainを固定し、PATHベースのcorpusを、build間でfeature IDが安定しているかのように同期しないでください。
+- このfeedbackは`CMPLOG`を補完します。comparison tracingは**guardを通過する値**を解決する一方、path/caller feedbackは**どのrouteとbranchの組み合わせがそこへ到達したか**を保持します。
 
-これは、authenticated bugs、hidden transitions、または “only-after-handshake” parser bugs が vanilla file-style fuzzing で見落とされやすい理由と同じです。fuzzer は単に structure だけでなく、**order、state、dependencies** も維持しなければなりません。<sup>[[4]](#references)</sup>
+## Stateful Fuzzing: SequenceはSeed
+
+**protocol**、**authenticated workflow**、**multi-stage parser**では、興味深い単位は単一のblobではなく、**message sequence**であることがよくあります。transcript全体を1つのfileに連結して盲目的にmutateする方法は、通常非効率的です。fuzzerが各stepを同じようにmutateするため、fragileなstateに到達するのが後続のmessageだけであっても区別しないからです。<sup>[[4]](#references)</sup>
+
+より効果的なpatternは、**sequence自体をseedとして扱い**、observable state（response code、protocol state、parser phase、返されたobject type）を追加のfeedbackとして使用することです。<sup>[[4]](#references)</sup>
+
+- **valid prefix message**は安定させ、**transition-driving** messageにmutationsを集中させます。
+- 次のstepがそれらに依存する場合は、前のresponseからidentifierとserver-generated valueをcacheします。
+- serialized transcript全体をopaque blobとしてmutateするより、message単位のmutation/splicingを優先します。
+- protocolが意味のあるresponse codeを公開している場合は、それらを**安価なstate oracle**として使用し、より深く進行するsequenceを優先します。
+
+これは、authenticated bug、hidden transition、または「handshake後にのみ発生する」parser bugがvanillaのfile-style fuzzingで見逃されやすい理由と同じです。fuzzerはstructureだけでなく、**order、state、dependency**を保持する必要があります。<sup>[[4]](#references)</sup>
 
 ## Single-Machine Diversity Trick (Jackalope-Style)
 
-**generative novelty** と **coverage reuse** を hybridize する実践的な方法は、persistent server に対して短命な workers を **restart** することです。各 worker は empty corpus から開始し、`T` 秒後に sync し、combined corpus に対してさらに `T` 秒実行し、再度 sync してから終了します。これにより、蓄積された coverage を活用しながら、**各 generation で fresh structures** を得られます。<sup>[[1]](#references)[[2]](#references)</sup>
+**generative novelty**と**coverage reuse**をhybridizeする実用的な方法は、persistent serverに対して短命のworkerをrestartすることです。各workerはempty corpusから開始し、`T`秒後にsyncし、統合されたcorpusでさらに`T`秒実行して再度syncした後、exitします。これにより、蓄積されたcoverageを活用しながら、**各generationでfreshなstructure**を得られます。<sup>[[1]](#references)[[2]](#references)</sup>
 
 **Server:**
 ```bash
 /path/to/fuzzer -start_server 127.0.0.1:8337 -out serverout
 ```
-**Sequential workers（ループの例）：**
+**Sequential workers (example loop):**
 
 <details>
-<summary>Jackalope worker の再起動ループ</summary>
+<summary>Jackalope worker restart loop</summary>
 ```python
 import subprocess
 import time
@@ -99,69 +133,69 @@ p.kill()
 
 **Notes:**
 
-- `-in empty` は各 generation で **fresh corpus** を強制します。
-- `-server_update_interval T` は **delayed sync**（novelty を先に、reuse を後に）を近似します。
-- grammar fuzzing mode では、**initial server sync** はデフォルトでスキップされます（`-skip_initial_server_sync` は不要です）。
-- 最適な `T` は **target-dependent** です。worker が「easy」な coverage の大部分を見つけた後に切り替える方法が、通常は最も効果的です。
+- `-in empty` は、各 generation で **fresh corpus** を強制します。
+- `-server_update_interval T` は **delayed sync** を近似します（最初は novelty、その後に reuse）。
+- grammar fuzzing mode では、**initial server sync** はデフォルトで skip されます（`-skip_initial_server_sync` は不要です）。
+- 最適な `T` は **target-dependent** です。worker が “easy” な coverage の大部分を発見した後に切り替えると、通常は最も効果的です。
 
 ## Snapshot Fuzzing For Hard-To-Harness Targets
 
-テスト対象の code が **large setup cost**（VM の boot、login の完了、packet の受信、container の parsing、service の initialization）の後でしか到達可能にならない場合、便利な代替手段が **snapshot fuzzing** です。ready 状態の process または VM state を capture し、各 test case を target の input path に inject して crash/timeout まで execute した後、snapshot を restore します。これにより initialization や protocol prefixes の繰り返しを避けられ、**network services**、**firmware**、**post-auth attack surfaces**、**binary-only targets** に有用です。<sup>[[9]](#references)[[10]](#references)</sup>
+テスト対象の code が **大きな setup cost**（VM の boot、login の完了、packet の受信、container の parse、service の初期化）の後でしか到達可能にならない場合、便利な代替手段が **snapshot fuzzing** です。ready 状態の process または VM state を capture し、各 test case を target の input path に inject して crash/timeout まで実行し、その後 snapshot を restore します。これにより initialization や protocol prefix の繰り返しを避けられ、**network services**、**firmware**、**post-auth attack surfaces**、**binary-only targets** に有用です。<sup>[[9]](#references)[[10]](#references)</sup>
 
-1. interesting state の準備が完了するまで target を実行します。
-2. その時点で **memory + registers** を snapshot します。
+1. 目的の state が ready になるまで target を実行します。
+2. その時点で **memory + registers** の snapshot を取得します。
 3. 各 test case について、mutated input を関連する guest/process buffer に直接書き込みます。
 4. crash/timeout/reset まで実行します。
-5. snapshot を restore します。VM targets では、サポートされている場合は **dirty pages** のみを restore してから繰り返します。
+5. snapshot を restore します。VM targets では、サポートされている場合は **dirty pages** のみを restore し、その後繰り返します。
 
-snapshot は、最初の高コストな parse/dispatch step の可能な限り近くに配置します。たとえば `recv`/`read` の後、または packet-deserialization point の後です。また、target が使用する input buffer を記録します。これは、input processing のより深い位置へ snapshot を移動して処理の繰り返しを避ける、adaptive-placement principle に従うものです。<sup>[[11]](#references)</sup>
+snapshot は、最初の高コストな parse/dispatch step に可能な限り近い位置、たとえば `recv`/`read` の後、または packet-deserialization point に配置し、target が使用する input buffer を記録します。これは、作業の繰り返しを避けるために snapshot を input processing のさらに深い位置へ移動する adaptive-placement principle に従ったものです。<sup>[[11]](#references)</sup>
 
 ## Harness Introspection: Find Shallow Fuzzers Early
 
-campaign が停滞した場合、問題は mutator ではなく **harness** にあることがよくあります。**reachability/coverage introspection** を使用して、fuzz target から statically reachable でありながら、dynamically covered されることがほとんどない、またはまったくない functions を見つけます。通常、これらの functions は次の3つの問題のいずれかを示します。<sup>[[12]](#references)</sup>
+campaign が停滞した場合、問題は mutator ではなく **harness** にあることがよくあります。**reachability/coverage introspection** を使用して、fuzz target から static には reach 可能ですが、dynamic にはほとんど、またはまったく coverage されていない functions を見つけます。通常、これらの functions は次の 3 つの問題のいずれかを示します。<sup>[[12]](#references)</sup>
 
-- harness が target に入るタイミングが遅すぎる、または早すぎる。
+- harness が target に入るのが早すぎる、または遅すぎる。
 - seed corpus に feature family 全体が欠けている。
-- target には、巨大な「do everything」harness 1つではなく、**second harness** が本当に必要である。
+- target には、1 つの oversized な “do everything” harness ではなく、**second harness** が本当に必要である。
 
 OSS-Fuzz / ClusterFuzz-style workflows を使用している場合、Fuzz Introspector は static reachability と runtime coverage を比較し、timed run または public corpus から reports を生成できます。<sup>[[12]](#references)</sup>
 ```bash
 python3 infra/helper.py introspector libdwarf --seconds=30
 python3 infra/helper.py introspector libdwarf --public-corpora
 ```
-レポートを使用して、未テストの parser path 用に新しい harness を追加するか、特定の feature の corpus を拡張するか、monolithic harness をより小さな entry point に分割するかを判断します。
+このレポートを使用して、未テストの parser path 用に新しい harness を追加するか、特定の feature 用に corpus を拡張するか、monolithic harness をより小さな entry point に分割するかを判断します。
 
 ## Graph-First Fuzz Target Selection And Mutation Triage
 
-すでに **static-analysis findings**、**mutation-testing survivors**、**coverage reports** がある場合、それらを独立したリストとして triage しないでください。まず **call graph** を構築し、ノードに **cyclomatic complexity**、**entrypoint/untrusted-input reachability**、外部の findings を付加してから、graph に関する問いを検討します。<sup>[[5]](#references)[[6]](#references)</sup>
+すでに **static-analysis findings**、**mutation-testing survivors**、**coverage reports** がある場合、それらを独立したリストとして triage しないでください。まず **call graph** を構築し、各 node に **cyclomatic complexity**、**entrypoint/untrusted-input reachability**、外部 findings を注釈として付与し、そのうえで graph に関する問いを検討します。<sup>[[5]](#references)[[6]](#references)</sup>
 
-- どの高 complexity 関数が untrusted input から到達可能か？
-- どの mutation survivor が parser/handler から security-critical code への path 上にあるか？
-- どの関数が、異常に大きな **blast radius** を持つ architectural choke point か？
+- untrusted input から到達可能な高 complexity の function はどれか？
+- parser/handler から security-critical code へ至る path 上に、どの mutation survivor が存在するか？
+- 異常に大きな **blast radius** を持つ、architectural choke point となる function はどれか？
 
-通常、これは「lowest coverage」だけを見るよりも優れた fuzz target を明らかにします。**high complexity** で **external reachability** が確認された parser/decoder は、coverage が低くても attacker-controlled path が存在しない孤立した internal helper より、強力な harness 候補です。
+通常、これは「coverage が最も低いもの」だけを基準にするより、優れた fuzz target を明らかにします。**high complexity** で **external reachability** が確認された parser/decoder は、coverage が低くても attacker-controlled path を持たない孤立した internal helper より、強力な harness 候補です。
 
 ### Practical triage workflow
 
-1. codebase から **code graph** を構築し、関数ごとの complexity/branch metrics を抽出します。
-2. attacker-controlled input を受け付ける **entrypoint**（request handler、decoder、importer、protocol parser、CLI/file reader）を列挙します。
-3. それらの entrypoint から候補関数への **path query** を実行し、到達可能な attack surface と dead/internal-only code を分離します。
-4. 以下の条件を組み合わせて満たすノードを優先します。
+1. codebase から **code graph** を構築し、function ごとの complexity/branch metrics を抽出します。
+2. attacker-controlled input を受け入れる **entrypoint** を列挙します：request handler、decoder、importer、protocol parser、CLI/file reader。
+3. それらの entrypoint から候補 function への **path query** を実行し、到達可能な attack surface と dead/internal-only code を分離します。
+4. 以下を組み合わせて満たす node を優先します：
 - 高い **cyclomatic complexity**
 - **untrusted input からの reachability** が確認されている
-- 大きな **blast radius** または多数の downstream dependents
-- **SARIF** findings、audit notes、mutation survivors などの裏付け情報
-5. 特に hex/Base64/IP/message decoder などの **parser/codec** を中心に、スコアの高いノードから focused harness を作成します。
+- 大きな **blast radius** または多数の downstream dependent
+- **SARIF** findings、audit notes、mutation survivor などの裏付けとなる証拠
+5. 特に hex/Base64/IP/message decoder などの **parser/codec** を対象として、スコアの高い node 用の focused harness を先に作成します。
 
 ### Mutation survivors: equivalent vs actionable
 
-Mutation testing では、ノイズの多い survivor list が生成されることがよくあります。すべての survivor を security gap とみなす前に、graph を使って以下を確認します。
+Mutation testing では、しばしば大量の survivor list が生成されます。すべての survivor を security gap とみなす前に、graph を使用して以下を確認します：
 
 - mutated function は attacker-controlled entrypoint から到達可能か？
-- すべての call path が、mutated check より強い invariant によって制約されているか？
-- そのノードは dead code、formatting-only logic、または影響の大きい arithmetic/parser path のいずれに存在するか？
+- すべての call path は、mutated check より強い invariant によって制約されているか？
+- その node は dead code、formatting-only logic、または影響の大きい arithmetic/parser path に位置しているか？
 
-到達不能なまま、または構造的に制約された survivor は、多くの場合 **equivalent mutant** です。一方、**reachable** のままで **boundary conditions**、**overflow/carry paths**、または **security-critical arithmetic/parsing** に関わる survivor は、以下に昇格させるべきです。
+到達不能なまま、または構造的に制約されている survivor は、**equivalent mutant** であることが多いです。一方、**reachable** のままで、**boundary condition**、**overflow/carry path**、または **security-critical arithmetic/parsing** に関与する survivor は、以下に昇格させるべきです：
 
 - 新しい fuzz harness
 - 直接的な property/invariant test
@@ -169,15 +203,15 @@ Mutation testing では、ノイズの多い survivor list が生成されるこ
 
 ### Correlate external findings onto the graph
 
-SAST pipeline が **SARIF** を出力する場合、**file + line range** に基づいて findings を graph node に投影し、graph を使って影響範囲を拡張します。<sup>[[6]](#references)</sup>
+SAST pipeline が **SARIF** を export する場合、**file + line range** によって findings を graph node に投影し、graph を使用して影響範囲を拡張します。<sup>[[6]](#references)</sup>
 
-- flagged function の **blast radius** を計算する
+- flag された function の **blast radius** を計算する
 - finding が entrypoint からのいずれかの path 上にあるか確認する
 - 同じ choke point に集約される近接した findings を cluster 化する
 
-これは、特定の関数に fuzzing の時間を割くかどうかを判断する際に有用です。**reachable** で **complex**、かつすでに **SAST hits** があるノードは、complex であるだけで attacker path が存在しないノードより、優れた target であることがよくあります。
+これは、特定の function に fuzzing の時間を費やすか判断する際に有用です。**reachable** で、**complex** かつすでに **SAST hits** がある node は、complex であっても attacker path を持たない node より、より適切な target であることが多いです。
 
-Trailmark を使用した workflow の例です。<sup>[[6]](#references)</sup>
+Trailmark を使用した example workflow。<sup>[[6]](#references)</sup>
 ```bash
 uv pip install trailmark
 trailmark analyze --complexity 10 path/to/project
@@ -191,35 +225,35 @@ engine.preanalysis()
 engine.complexity_hotspots(10)
 engine.paths_between("handle_request", "parse_ipv6")
 ```
-重要な methodology は、**complexity x exposure x impact** の交差点です。グラフを使って、期待される security value が最も高い fuzz target を選び、その後 mutation survivors を使って、harness が stress すべき境界と invariant を判断します。<sup>[[5]](#references)</sup>
+重要な methodology は、**complexity x exposure x impact** の交差部分です。graph を使って、期待される security value が最も高い fuzz target を選び、その後 mutation survivors を使って、harness が stress すべき boundaries と invariants を決定します。<sup>[[5]](#references)</sup>
 
 ## gosentry による Go Fuzzing: より強力な Engine、Typed Inputs、そして Differential Checks
 
-Go target にすでに native な `testing.F` harness がある場合、実用的な upgrade path は、[gosentry](https://github.com/trailofbits/gosentry) を使って同じ harness を実行することです。gosentry は fork された Go toolchain で、`go test -fuzz` を維持しながら backend を **LibAFL** に置き換えます。<sup>[[7]](#references)[[8]](#references)</sup>
+Go target にすでに native な `testing.F` harness がある場合、実用的な upgrade path は、[gosentry](https://github.com/trailofbits/gosentry) を使って同じ harness を実行することです。gosentry は fork された Go toolchain であり、`go test -fuzz` を維持しながら backend を **LibAFL** に置き換えます。<sup>[[7]](#references)[[8]](#references)</sup>
 ```bash
 ./bin/go test -fuzz=FuzzHarness --focus-on-new-code=false --catch-races=true --catch-leaks=true
 ```
-これは、native Go fuzzer が **hard comparisons**、**typed inputs**、または **parser-heavy formats** で停滞する場合に有用です。方法論は同じです。
+これは、native Go fuzzer が **hard comparisons**、**typed inputs**、または **parser-heavy formats** で停止した場合に有用です。方法論は同じです。
 
-- seed には引き続き `f.Add(...)` を使用し、callback には `f.Fuzz(...)` を使用します。
-- 同じ harness を再利用しますが、stock toolchain の代わりに gosentry の `go` binary で実行します。
-- 結果として得られる campaign は通常の coverage-guided run として扱います。ただし、LibAFL の scheduling/mutation と、周辺の detector の改善が加わります。
+- seed には引き続き `f.Add(...)`、callback には `f.Fuzz(...)` を使用します。
+- 同じ harness を再利用しますが、stock toolchain ではなく gosentry の `go` binary で実行します。
+- 生成された campaign は通常の coverage-guided run として扱いますが、LibAFL の scheduling/mutation と、周辺のより優れた detectors を利用できます。
 
-### silent failures を fuzz findings に変える
+### silent failures を fuzz findings に変換する
 
-Go の assessment で繰り返し発生する問題は、危険な挙動がデフォルトでは crash しないことです。gosentry では、「bad but silent」な状態を複数のクラスで findings に昇格できます。<sup>[[7]](#references)[[8]](#references)</sup>
+Go の assessment では、危険な挙動がデフォルトで **crash** しないことがよくあります。gosentry では、「bad but silent」な状態を複数の種類の findings に昇格できます。<sup>[[7]](#references)[[8]](#references)</sup>
 
-- `--panic-on=pkg.Func,...` により、指定した logging/error path を crash と同様に動作させます（それ以外の場合は log を出力して処理を続行する `log.Fatal` 型の code path に有用です）。
-- `--catch-races=true` により、新たに発見された queue entry を Go race detector で再実行します。
-- `--catch-leaks=true` により、新しい queue entry を `goleak` で再実行し、goroutine leak が発生した時点で停止します。
-- LibAFL の hang handling により、**infinite loops / very slow inputs** を timeout として消失させず、fuzz findings として保持します。
-- デフォルトで組み込まれている arithmetic overflow checks に加え、go-panikint-style instrumentation による任意の truncation checks も利用できます。
+- `--panic-on=pkg.Func,...` を使用すると、指定した logging/error paths を crash のように動作させられます（通常は log のみ出力して処理を続行する `log.Fatal` 型の code paths に有用）。
+- `--catch-races=true` を使用すると、新たに発見された queue entries を Go race detector で再実行できます。
+- `--catch-leaks=true` を使用すると、新しい queue entries を `goleak` で再実行し、goroutine leaks の発生時に停止できます。
+- LibAFL の hang handling により、**infinite loops / very slow inputs** を timeout として消失させず、fuzz findings として保持できます。
+- デフォルトで組み込みの arithmetic overflow checks が有効です。また、go-panikint-style instrumentation による truncation checks もオプションで利用できます。
 
-これは、security impact が memory corruption ではなく、**panicless parser failure**、**concurrency bug**、または **DoS-only hang** である target に特に有効です。
+これは、security impact が memory corruption ではなく、**panicless parser failure**、**concurrency bug**、または **DoS-only hang** である target に特に有用です。
 
-### typed Go API 向けの struct-aware fuzzing
+### typed Go APIs の struct-aware fuzzing
 
-Native Go fuzzing は主に `[]byte`、`string`、数値などの scalar を想定しています。test 対象の code が typed object を受け取る場合、gosentry では bytes を基盤として mutation しながら、struct、slice、array、pointer などの **composite values** を直接 fuzz できます。<sup>[[7]](#references)[[8]](#references)</sup>
+Native Go fuzzing は主に `[]byte`、`string`、数値などの scalars を想定しています。テスト対象の code が typed objects を受け取る場合、gosentry は bytes を内部で mutation しながら、structs、slices、arrays、pointers などの **composite values** を直接 fuzzing できます。<sup>[[7]](#references)[[8]](#references)</sup>
 ```go
 type Input struct {
 Data []byte
@@ -234,24 +268,24 @@ Process(in)
 })
 }
 ```
-これは、fuzzing専用の fake wire format を構築する際に使用してください。そうしないと、harness 専用の parsing code によって logic bug が隠れてしまいます。differential または grammar-based の campaign では、harness の input を単一の `[]byte` または `string` とし、代わりに callback 内で parse してください。
+fake wire format を構築すると、harness 専用の parsing code によって logic bugs が隠れてしまうため、fuzzing の目的だけでこれを使用することは避けてください。Differential または grammar-based campaign では、harness input を単一の `[]byte` または `string` として保持し、代わりに callback 内で parse してください。
 
-### parser と protocol input の grammar-based fuzzing
+### parser と protocol input の Grammar-based fuzzing
 
-parser、format、input language に対して、gosentry は LibAFL 上で **Nautilus grammar fuzzing** を実行できます。grammar は production rule の JSON array であり、harness は通常、単一の `[]byte` または `string` 引数を受け取るようにします。<sup>[[7]](#references)[[8]](#references)</sup>
+parser、format、input language に対して、gosentry は LibAFL 上で **Nautilus grammar fuzzing** を実行できます。grammar は production rule の JSON array であり、harness は通常、単一の `[]byte` または `string` 引数を受け取る必要があります。<sup>[[7]](#references)[[8]](#references)</sup>
 ```bash
 ./bin/go test -fuzz=FuzzGrammarJSON --use-grammar --grammar=./testdata/JSON.json --focus-on-new-code=false
 ```
 Methodology notes:
 
-- byte-level mutations が early syntax checks でほとんど停止する場合は、grammar mode を使用します。
-- full specification をモデル化するのではなく、language/protocol の **security-relevant subset** に grammar を絞ります。
-- terminals/nonterminals では大きな boundary values を使用して、integer、length、state-machine の境界を stress します。
-- grammar mode は inputs を grammar-valid に保ちますが、target が受け取るのは依然として **bytes/strings** であるため、parsing と semantic checks は harness された code 内に残ります。
+- byte-level mutations が初期の syntax checks でほとんど失敗する場合は、grammar mode を使用する。
+- full specification をモデル化するのではなく、grammar を言語や protocol の **security-relevant subset** に絞る。
+- terminals/nonterminals では大きな境界値を使用して、integer、length、state-machine のエッジを検証する。
+- grammar mode により入力は grammar-valid に保たれるが、target が受け取るのは依然として **bytes/strings** であるため、parsing と semantic checks は harnessed code 内で引き続き実行される。
 
-### Differential fuzzing: crashes だけでなく implementations を比較する
+### Differential fuzzing: クラッシュだけでなく実装を比較する
 
-Go ecosystems で有効なパターンは、**grammar-based differential fuzzing** です。valid な structured inputs を生成し、それらを2つの parsers、clients、または state-transition engines に渡します。<sup>[[7]](#references)[[8]](#references)</sup>
+Go ecosystems で有効なパターンは、**grammar-based differential fuzzing** である。これは、valid な構造化入力を生成し、2 つの parsers、clients、または state-transition engines に入力する手法である。<sup>[[7]](#references)[[8]](#references)</sup>
 ```go
 f.Fuzz(func(t *testing.T, data []byte) {
 gotA, errA := ParseA(data)
@@ -263,35 +297,39 @@ _ = gotA
 _ = gotB
 })
 ```
-これらを findings として扱います：
+以下を findings として扱います。
 
-- 一方の実装は panic する一方で、もう一方は正常に reject する
-- accepted/rejected input の不一致
+- 一方の実装は panic するが、もう一方は正常に reject する
+- 受理される入力と reject される入力の不一致
 - 異なる parse tree または decoded object
-- state transition、nonce、balance、state root の相違
+- state transition、nonce、balance、または state root の相違
 
-これは、純粋な crash fuzzing では見落とされがちな **consensus mismatch**、**parser ambiguity**、**spec-vs-implementation drift** を発見する実践的な方法です。
+これは、純粋な crash fuzzing では見逃しやすい **consensus mismatches**、**parser ambiguity**、**spec-vs-implementation drift** を見つける実践的な方法です。
 
 ### coverage reporting に campaign corpus を再利用する
 
-campaign の後、保存された queue corpus を replay して、別の corpus を手動で export することなく Go coverage report を生成できます。<sup>[[7]](#references)[[8]](#references)</sup>
+campaign 後、保存した queue corpus を replay して、別の corpus を手動で export することなく Go coverage report を生成できます。<sup>[[7]](#references)[[8]](#references)</sup>
 ```bash
 ./bin/go test -fuzz=FuzzHarness --generate-coverage .
 ```
-同じ **package** から、かつ同じ `-fuzz` target を指定してコマンドを実行し、gosentry が正しい cached campaign state を解決できるようにします。
+同じ package から、かつ同じ `-fuzz` target を指定してコマンドを実行し、gosentry が正しい cached campaign state を解決できるようにします。
+
+
 
 ## References
 
 - [1] [Mutational grammar fuzzing](https://projectzero.google/2026/03/mutational-grammar-fuzzing.html)
 - [2] [Jackalope](https://github.com/googleprojectzero/Jackalope)
 - [3] [AFL++ Fuzzing in Depth](https://aflplus.plus/docs/fuzzing_in_depth/)
-- [4] [AFLNet Five Years Later: Coverage-Guided Protocol Fuzzing の5年後](https://arxiv.org/abs/2412.20324)
-- [5] [Trailmark は code を graphs に変換する](https://blog.trailofbits.com/2026/04/23/trailmark-turns-code-into-graphs/)
+- [4] [AFLNet Five Years Later: On Coverage-Guided Protocol Fuzzing](https://arxiv.org/abs/2412.20324)
+- [5] [Trailmark が code を graphs に変換](https://blog.trailofbits.com/2026/04/23/trailmark-turns-code-into-graphs/)
 - [6] [trailofbits/trailmark](https://github.com/trailofbits/trailmark)
 - [7] [Go fuzzing には toolkit の半分が欠けていた。toolchain を fork して修正した。](https://blog.trailofbits.com/2026/05/12/go-fuzzing-was-missing-half-the-toolkit.-we-forked-the-toolchain-to-fix-it./)
 - [8] [trailofbits/gosentry](https://github.com/trailofbits/gosentry)
-- [9] [SNPSFuzzer: Snapshots を使用した Stateful Network Protocols 向け高速 Greybox Fuzzer](https://arxiv.org/abs/2202.03643)
-- [10] [Grammar がなくても問題なし：System-Call Descriptions なしで Linux Kernel を Fuzzing するために](https://seclab.bu.edu/papers/FuzzNG-ndss2023.pdf)
-- [11] [Snappy: Adaptive and Mutable Snapshots による効率的な Fuzzing](https://project-theseus.nl/publication/2022/snappy/)
+- [9] [SNPSFuzzer: Snapshots を使用した Stateful Network Protocols 向けの Fast Greybox Fuzzer](https://arxiv.org/abs/2202.03643)
+- [10] [Grammar がなくても問題なし: System-Call Descriptions なしで Linux Kernel を Fuzzing するために](https://seclab.bu.edu/papers/FuzzNG-ndss2023.pdf)
+- [11] [Snappy: Adaptive and Mutable Snapshots による Efficient Fuzzing](https://project-theseus.nl/publication/2022/snappy/)
 - [12] [Fuzz Introspector](https://google.github.io/oss-fuzz/advanced-topics/fuzz-introspector/)
+- [13] [AFL++ LLVM instrumentation: path and caller coverage](https://github.com/AFLplusplus/AFLplusplus/blob/stable/instrumentation/README.llvm.md)
+- [14] [Predictive Context-sensitive Fuzzing](https://www.ndss-symposium.org/ndss-paper/predictive-context-sensitive-fuzzing/)
 {{#include ../banners/hacktricks-training.md}}
