@@ -1,27 +1,48 @@
-# macOS PID Reuse
+# Kutumia Tena PID
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
 
-## PID Reuse
+## Kutumia Tena PID
 
-Wakati **XPC service** ya macOS inakagua process iliyopiga simu kwa kutumia **PID** na si **audit token**, huwa vulnerable kwa shambulio la PID reuse. Shambulio hili linategemea **race condition** ambapo **exploit** inatuma **messages kwa XPC** service kwa **abusing** functionality yake, na **mara tu baada ya hapo**, inatekeleza **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** kwa binary iliyoruhusiwa.<sup>[[1]](#references)[[2]](#references)</sup>
+Wakati **XPC service** ya macOS inathibitisha caller kwa kutafuta **PID** yake badala ya kutumia credentials zilizounganishwa na message iliyopokelewa, inaweza kuwa vulnerable kwa PID reuse attack. Primitive ya kivitendo si kusubiri PID namespace izunguke: attacker hutuma XPC request na mara moja huita **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** ikiwa na `POSIX_SPAWN_SETEXEC`, na kubadilisha process image ya attacker kuwa **allowed binary huku ikihifadhi PID ileile**.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Function hii itafanya **binary iliyoruhusiwa iwe na umiliki wa PID**, lakini **XPC message hasidi itakuwa imetumwa** muda mfupi kabla. Kwa hiyo, ikiwa **XPC** service **inatumia** **PID** ku-**authenticate** mtumaji na kuiangalia **BAADA** ya kutekelezwa kwa **`posix_spawn`**, itadhani kwamba message imetoka kwenye process **iliyoidhinishwa**.<sup>[[1]](#references)[[2]](#references)</sup>
+Ikiwa server inatoa request kwenye queue na kisha tu kutafuta PID hiyo ya nambari ili kupata live process kwa ajili ya code-signing, entitlement, path, au parent-process checks, itaona replacement binary badala ya process iliyotuma message. `POSIX_SPAWN_START_SUSPENDED` huweka replacement inayoaminika ikiwa hai na thabiti wakati server inafanya check.<sup>[[1]](#references)[[2]](#references)</sup>
+
+### Kinachoshindaniwa hasa
+
+Mlolongo vulnerable ni **message-identity TOCTOU**, si tu “PIDs zinaweza kurudiwa”:<sup>[[1]](#references)[[2]](#references)</sup>
+
+1. Attacker process huanzisha au kuendelea na XPC connection na kuweka privileged request kwenye queue.
+2. Kabla service haijabadilisha PID ya connection kuwa `SecCodeRef` au process object nyingine, attacker hu-overlay process hiyo hiyo kwa approved executable akitumia `POSIX_SPAWN_SETEXEC`.
+3. Service huthibitisha approved image iliyopo kwa sasa kwenye PID hiyo, kisha hu-dispatch attacker-controlled request ambayo tayari ilikuwa kwenye queue.
+
+PID bridge yoyote katika authorization data flow inatia shaka: `-[NSXPCConnection processIdentifier]`, `xpc_connection_get_pid`, au `audit_token_to_pid` ikifuatiwa na `SecCodeCopyGuestWithAttributes`/`kSecGuestAttributePid`, `proc_pidpath`, `NSRunningApplication(processIdentifier:)`, au custom signature verifier. PID inayotumika kwa logging pekee haitoshi; thibitisha kwamba inafika kwenye allow/deny decision. Pia kagua error paths: kujaribu audit-token lookup kwanza lakini **kurudi kwenye PID endapo itashindwa** kunarudisha race hiyo hiyo. Fallback pattern hii ilionekana katika analysis ya 2026 ya privileged XPC services za Intego.<sup>[[3]](#references)</sup>
+
+### Static na dynamic triage ya haraka
+
+Anza kwenye connection handler na ufuatilie kila PID-producing call hadi kwenye code-signing, entitlement, executable-path, au version checks. Commands hizi hutoa first pass ya haraka kwenye helper inayoshukiwa; stripped binaries bado mara nyingi huonyesha imported symbols, Objective-C selectors, au diagnostic strings:<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
+```bash
+BIN="/path/to/privileged/helper"
+nm -um "$BIN" 2>/dev/null | rg 'xpc_connection_get_pid|SecCodeCopyGuestWithAttributes'
+otool -ov "$BIN" 2>/dev/null | rg 'processIdentifier|auditToken|setCodeSigningRequirement'
+strings -a "$BIN" | rg -i 'guest.*pid|signature.*pid|process identifier|audit token|peer.*requirement'
+```
+Wakati wa jaribio linalodhibitiwa, vunja au hook chanzo cha PID na verifier wake. Hit kwenye `xpc_connection_get_pid` au `-processIdentifier` ni dalili ya kuanzia tu; ushahidi muhimu ni lookup ya baadaye ya **integer hiyo hiyo** baada ya request kupokelewa. Frida pia inaweza ku-hook verifier maalum wa application na privileged selector ili kupima kama selector inatekelezwa wakati PID race inashinda.<sup>[[3]](#references)</sup>
 
 ### Mfano wa exploit
 
-Ukipata function **`shouldAcceptNewConnection`** au function inayoitwa nayo ambayo **inaita** **`processIdentifier`** na haiiti **`auditToken`**, kuna uwezekano mkubwa kwamba inathibitisha process PID badala ya audit token.\
-Kwa mfano, katika picha hii (iliyochukuliwa kutoka kwenye reference):<sup>[[1]](#references)</sup>
+Ukipata function **`shouldAcceptNewConnection`** au function inayoitwa nayo inayofanya **calling** **`processIdentifier`** na haifanyi **calling** **`auditToken`**. Kuna uwezekano mkubwa kwamba inathibitisha **PID ya process** na si audit token.\
+Kwa mfano katika picha hii (iliyochukuliwa kutoka kwenye reference):<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../../../../images/image (306).png" alt="https://wojciechregula.blog/images/2020/04/pid.png"><figcaption></figcaption></figure>
 
-Angalia mfano huu wa exploit (tena, uliochukuliwa kutoka kwenye reference) ili kuona sehemu 2 za exploit:<sup>[[1]](#references)</sup>
+Angalia exploit hii ya mfano (tena, imechukuliwa kutoka kwenye reference) ili kuona sehemu 2 za exploit:<sup>[[1]](#references)</sup>
 
-- Moja inayotengeneza forks kadhaa
-- **Kila fork** itatuma **payload** kwa XPC service huku ikitekeleza **`posix_spawn`** mara tu baada ya kutuma message.
+- Moja ambayo **hutengeneza fork kadhaa**
+- **Kila fork** **itatuma** **payload** kwa XPC service huku ikitekeleza **`posix_spawn`** mara tu baada ya kutuma message.
 
 > [!CAUTION]
-> Ili exploit ifanye kazi, ni muhimu kuweka ` export`` `` `**`OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`** au kuiweka ndani ya exploit:
+> Unapofanya race kwa `fork()` kutoka kwenye process ya Objective-C, zindua exploit kwa `OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES` ikiwa ime-exportiwa au embed marker ya `__objc_fork_ok`:
 >
 > ```objectivec
 > asm(".section __DATA,__objc_fork_ok\n"
@@ -31,7 +52,7 @@ Angalia mfano huu wa exploit (tena, uliochukuliwa kutoka kwenye reference) ili k
 
 {{#tabs}}
 {{#tab name="NSTasks"}}
-Chaguo la kwanza kwa kutumia **`NSTasks`** na argument ya ku-launch children ili ku-exploit RC
+Option ya kwanza ikitumia **`NSTasks`** na argument ya ku-launch children ili ku-exploit RC
 ```objectivec
 // Code from https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/
 // gcc -framework Foundation expl.m -o expl
@@ -140,7 +161,7 @@ return 0;
 {{#endtab}}
 
 {{#tab name="fork"}}
-Mfano huu unatumia **`fork`** ya moja kwa moja kuzindua **children watakaotumia race condition ya PID**, kisha kutumia race condition nyingine kupitia **Hard link**:
+Mfano huu unatumia **`fork`** ya moja kwa moja kuanzisha **children watakaotumia vibaya PID race condition** na kisha kutumia vibaya **race condition** nyingine kupitia Hard link:
 ```objectivec
 // export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 // gcc -framework Foundation expl.m -o expl
@@ -276,17 +297,54 @@ return 0;
 {{#endtab}}
 {{#endtabs}}
 
+## Kufanya race iweze kurudiwa
+
+Pointi zifuatazo za tuning hujitokeza mara kwa mara katika exploits zinazofanya kazi za PID-reuse na majaribio ya hivi karibuni ya privileged-helper:<sup>[[1]](#references)[[3]](#references)</sup>
+
+- Tuma request na uite `posix_spawn` mara moja; **usisubiri** reply. Request lazima iwe tayari imewekwa kwenye queue wakati lookup ya PID ya server inafanyika baada ya image replacement.
+- Weka `POSIX_SPAWN_SETEXEC | POSIX_SPAWN_START_SUSPENDED` pamoja. Flag ya kwanza huhifadhi PID ya mchakato unaoshiriki kwenye race; ya pili huzuia target halali kutoka au kubadilisha state kabla ya validation.
+- Tumia racers kadhaa wanaoishi kwa muda mfupi na urudie sequence kamili ya connection/request/exec. Idadi bora hutegemea target; children wengi kupita kiasi wanaweza kupunguza kasi ya service na kufanya window iwe mbaya zaidi.
+- Replacement lazima ikidhi **requirement yote** ya server. Tumia binary halali ya client inapowezekana na ukague designated requirement yake kwanza kwa `codesign -d -r- "/path/to/client.app"`.
+- Kwanza ita selector iliyowekwa wazi isiyo na madhara au method ya kusoma pekee. Hii hutenganisha kushinda authentication na kufanikiwa kutumia privileged primitive ya baadaye.
+
+## Kuepuka PID bridge
+
+Kwenye macOS 13+, Foundation hutoa `-[NSXPCConnection setCodeSigningRequirement:]`. Weka peer requirement mara moja tu na **kabla ya** `resume`; requirement strings zenye muundo usio sahihi husababisha exception (au Swift fatal error), na message kutoka kwa peer ambaye hatimizi requirement hubatilisha connection. Hii huwezesha XPC kutekeleza code identity ya peer bila application code kufanya PID resolution.<sup>[[6]](#references)</sup>
+```objectivec
+- (BOOL)listener:(NSXPCListener *)l shouldAcceptNewConnection:(NSXPCConnection *)c {
+@try {
+NSString *req = @"anchor apple generic and identifier \"com.example.client\" "
+@"and certificate leaf[subject.OU] = \"TEAMID\"";
+[c setCodeSigningRequirement:req];
+} @catch (NSException *e) {
+return NO;
+}
+c.exportedInterface = [NSXPCInterface interfaceWithProtocol:@protocol(Helper)];
+c.exportedObject = self;
+[c resume];
+return YES;
+}
+```
+Kwa API ya kisasa ya low-level listener kwenye macOS 26+, `xpc_listener_set_peer_requirement` hutumia `xpc_peer_requirement_t` iliyothibitishwa wakati listener haifanyi kazi. XPC huacha requests ambazo hazikidhi sharti hilo; peer sessions zinazoundwa kutoka kwa listener **hazirithi** sharti hilo, kwa hivyo tumia pia session requirement inayofaa wakati sessions hizo zina-authorize operations zenye privileged access.<sup>[[7]](#references)</sup>
+
+> [!WARNING]
+> Usijaribu “kurekebisha” hili kwa kunakili audit token kisha kuibadilisha kuwa PID kwa ajili ya `SecCode` lookup halisi. Hifadhi identity iliyotokana na audit token wakati wote wa uamuzi wa authorization, au tumia XPC peer-requirement API kutoka mwanzo hadi mwisho.<sup>[[2]](#references)[[6]](#references)</sup> Connection-wide audit-token APIs pia zina aina tofauti ya race, iliyoelezwa katika [macOS xpc_connection_get_audit_token Attack](macos-xpc_connection_get_audit_token-attack.md).
+
 ## Mifano mingine
 
-- [**Intego X9: Kwa nini antivirus yako ya macOS haipaswi kuamini PIDs**](https://blog.quarkslab.com/intego_lpe_macos_2.html) - LPE dhidi ya helper yenye privileged ya AV iliyothibitisha clients kwa kutumia PID.<sup>[[3]](#references)</sup>
-- [**Kutumia vibaya GOG Galaxy XPC service kwa privilege escalation katika macOS**](https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos)<sup>[[4]](#references)</sup>
+- [**Intego X9: Kwa nini macOS antivirus yako haipaswi kuamini PIDs**](https://blog.quarkslab.com/intego_lpe_macos_2.html) - LPE dhidi ya privileged helper ya antivirus iliyowa-authenticate clients kwa kutumia PID.<sup>[[3]](#references)</sup>
+- [**Kutumia vibaya GOG Galaxy XPC service kwa privilege escalation kwenye macOS**](https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos)<sup>[[4]](#references)</sup>
 - [**Rootpipe Reborn (Sehemu ya II)**](https://objective-see.org/blog/blog_0x41.html)<sup>[[5]](#references)</sup>
+
+
 
 ## References
 
 - [1] [Jifunze XPC exploitation - Sehemu ya 2: Sema hapana kwa PID!](https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/)
 - [2] [Usiiamini PID! Hadithi za logic bug rahisi na mahali pa kuipata - Samuel Groß (WarCon 2018)](https://saelo.github.io/presentations/warcon18_dont_trust_the_pid.pdf)
-- [3] [Intego X9: Kwa nini antivirus yako ya macOS haipaswi kuamini PIDs](https://blog.quarkslab.com/intego_lpe_macos_2.html)
-- [4] [Kutumia vibaya GOG Galaxy XPC service kwa privilege escalation katika macOS](https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos)
+- [3] [Intego X9: Kwa nini macOS antivirus yako haipaswi kuamini PIDs](https://blog.quarkslab.com/intego_lpe_macos_2.html)
+- [4] [Kutumia vibaya GOG Galaxy XPC service kwa privilege escalation kwenye macOS](https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos)
 - [5] [Rootpipe Reborn (Sehemu ya II)](https://objective-see.org/blog/blog_0x41.html)
+- [6] [Apple Developer — `NSXPCConnection.setCodeSigningRequirement`](https://developer.apple.com/documentation/foundation/nsxpcconnection/setcodesigningrequirement(_:))
+- [7] [Apple Developer — `xpc_listener_set_peer_requirement`](https://developer.apple.com/documentation/xpc/xpc_listener_set_peer_requirement)
 {{#include ../../../../../../banners/hacktricks-training.md}}
