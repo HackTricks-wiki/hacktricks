@@ -46,6 +46,44 @@ afl-fuzz -i in -o out -c ./target.cmplog -- ./target.afl @@
 - Pair it with **dictionaries** extracted from real samples, protocol specs, or debug logs. A small dictionary with grammar tokens, chunk names, verbs, and delimiters is often more valuable than a massive generic wordlist.
 - If the target performs many sequential checks, solve the earliest “magic” comparisons first and then minimize the resulting corpus again so later stages start from already-valid prefixes.
 
+## Richer Feedback When Edge Coverage Collapses Different Paths
+
+Normal edge coverage cannot distinguish two executions that traverse the same helper through different callers or take different branch combinations inside a function. This matters in shared decoders, protocol dispatchers, and interpreter helpers where the **route** to an edge determines the live state. Tracking every calling context naively is also dangerous: the coverage map and queue can explode. Context-sensitive fuzzing research therefore recommends refining only promising contexts rather than treating the entire call graph as context-sensitive.<sup>[[14]](#references)</sup>
+
+Recent AFL++ builds provide **Ball-Larus per-function path coverage** in addition to normal edge coverage. It assigns a feature to each acyclic path through a function; loop back-edges are removed, so this feedback distinguishes branch combinations but **not loop iteration counts**. Start with relaxed level `1`, then scope stricter modes to suspicious parser/state-machine code because the number of paths can grow exponentially.<sup>[[13]](#references)</sup>
+
+```bash
+make clean
+export CC=afl-clang-fast
+export CXX=afl-clang-fast++
+export AFL_LLVM_PATH=1                 # 1=relaxed, 2=restricted, 3=strict
+./configure
+make -j"$(nproc)"
+afl-fuzz -i in -o out -- ./target @@
+```
+
+For a helper called from many security-relevant sites, LTO mode can combine each function path with its immediate call site:<sup>[[13]](#references)</sup>
+
+```bash
+make clean
+export CC=afl-clang-lto
+export CXX=afl-clang-lto++
+export AFL_LLVM_LTO_CALLER=1
+export AFL_LLVM_LTO_PATH=1
+./configure
+make -j"$(nproc)"
+afl-fuzz -i in -o out -- ./target @@
+```
+
+**Campaign guidance:** apply richer feedback conservatively and monitor its coverage-map/queue cost.<sup>[[13]](#references)[[14]](#references)</sup>
+
+- Run an ordinary edge-coverage instance in parallel; richer feedback is useful only if the extra queue/map cost does not destroy executions per second.
+- Use `AFL_LLVM_ALLOWLIST` to restrict path/caller instrumentation when large template-heavy libraries or generic utility code dominate the map.
+- Functions with excessive acyclic paths can be skipped by AFL++; warnings during compilation are evidence that the target needs allowlisting or a less strict level.
+- Caller + path coverage supports only one caller depth. Do not combine it with deeper context stacks.
+- Path IDs can change across LLVM major versions. Keep the toolchain fixed for a campaign and do not synchronize PATH-based corpora as if their feature IDs were stable across builds.
+- This feedback complements `CMPLOG`: comparison tracing solves **what value passes a guard**, whereas path/caller feedback preserves **which route and branch combination reached it**.
+
 ## Stateful Fuzzing: Sequences Are Seeds
 
 For **protocols**, **authenticated workflows**, and **multi-stage parsers**, the interesting unit is often not a single blob but a **message sequence**. Concatenating the whole transcript into one file and mutating it blindly is usually inefficient because the fuzzer mutates every step equally, even when only the later message reaches the fragile state.<sup>[[4]](#references)</sup>
@@ -300,6 +338,8 @@ After a campaign, replay the saved queue corpus to generate a Go coverage report
 
 Run the command from the **same package** and with the **same `-fuzz` target** so gosentry resolves the right cached campaign state.
 
+
+
 ## References
 
 - [1] [Mutational grammar fuzzing](https://projectzero.google/2026/03/mutational-grammar-fuzzing.html)
@@ -314,5 +354,6 @@ Run the command from the **same package** and with the **same `-fuzz` target** s
 - [10] [No Grammar, No Problem: Towards Fuzzing the Linux Kernel without System-Call Descriptions](https://seclab.bu.edu/papers/FuzzNG-ndss2023.pdf)
 - [11] [Snappy: Efficient Fuzzing with Adaptive and Mutable Snapshots](https://project-theseus.nl/publication/2022/snappy/)
 - [12] [Fuzz Introspector](https://google.github.io/oss-fuzz/advanced-topics/fuzz-introspector/)
-
+- [13] [AFL++ LLVM instrumentation: path and caller coverage](https://github.com/AFLplusplus/AFLplusplus/blob/stable/instrumentation/README.llvm.md)
+- [14] [Predictive Context-sensitive Fuzzing](https://www.ndss-symposium.org/ndss-paper/predictive-context-sensitive-fuzzing/)
 {{#include ../banners/hacktricks-training.md}}
