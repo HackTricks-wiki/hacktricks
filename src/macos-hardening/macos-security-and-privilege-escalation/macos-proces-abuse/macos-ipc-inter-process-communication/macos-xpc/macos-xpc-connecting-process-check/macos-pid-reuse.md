@@ -1,27 +1,48 @@
-# Ponovna upotreba PID-a
+# Ponovna upotreba macOS PID-a
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
 
 ## Ponovna upotreba PID-a
 
-Kada macOS **XPC service** proverava pozvani process na osnovu **PID-a**, a ne na osnovu **audit token-a**, ranjiv je na napad ponovne upotrebe PID-a. Ovaj napad se zasniva na **race condition-u**, pri čemu će **exploit** **slati poruke XPC** service-u **zloupotrebljavajući** njegovu funkcionalnost, a **odmah nakon toga** izvršiti **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** sa **dozvoljenim** binary-jem.<sup>[[1]](#references)[[2]](#references)</sup>
+Kada macOS **XPC service** autentifikuje pozivaoca tako što razrešava njegov **PID**, umesto korišćenja kredencijala vezanih za primljenu poruku, može biti ranjiv na napad ponovne upotrebe PID-a. Praktični primitiv nije čekanje da se PID namespace preklopi: attacker šalje XPC zahtev i odmah poziva **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** sa opcijom `POSIX_SPAWN_SETEXEC`, zamenjujući image attacker-ovog procesa sa **dozvoljenim binary-jem, uz zadržavanje PID-a**.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Ova funkcija će omogućiti da **dozvoljeni binary preuzme PID**, ali je **malicious XPC poruka poslata** neposredno pre toga. Dakle, ako **XPC** service koristi **PID** za **autentifikaciju** pošiljaoca i proverava ga **NAKON** izvršavanja **`posix_spawn`**, smatraće da poruka dolazi od **autorizovanog** process-a.<sup>[[1]](#references)[[2]](#references)</sup>
+Ako server skine zahtev iz reda i tek zatim razreši taj numerički PID u aktivan proces radi provere code-signing-a, entitlement-a, putanje ili parent-process provera, videće replacement binary umesto procesa koji je poslao poruku. `POSIX_SPAWN_START_SUSPENDED` održava trusted replacement aktivnim i stabilnim dok server obavlja proveru.<sup>[[1]](#references)[[2]](#references)</sup>
 
-### Primer exploit-a
+### Šta se zapravo utrkuje
 
-Ako pronađete funkciju **`shouldAcceptNewConnection`** ili funkciju koju ona poziva, a koja poziva **`processIdentifier`**, ali ne poziva **`auditToken`**, to vrlo verovatno znači da proverava **PID process-a**, a ne audit token.\
+Ranjivi sled je **TOCTOU identiteta poruke**, a ne samo činjenica da se „PID-ovi mogu ponoviti“:<sup>[[1]](#references)[[2]](#references)</sup>
+
+1. Attacker proces uspostavlja ili nastavlja XPC connection i stavlja privileged zahtev u red.
+2. Pre nego što service pretvori PID connection-a u `SecCodeRef` ili drugi objekat procesa, attacker preklapa isti proces odobrenim executable-om koristeći `POSIX_SPAWN_SETEXEC`.
+3. Service validira odobreni image koji je trenutno vezan za taj PID, a zatim prosleđuje već ubačen attacker-controlled zahtev.
+
+Svaki PID bridge u authorization data flow-u je sumnjiv: `-[NSXPCConnection processIdentifier]`, `xpc_connection_get_pid` ili `audit_token_to_pid`, nakon čega slede `SecCodeCopyGuestWithAttributes`/`kSecGuestAttributePid`, `proc_pidpath`, `NSRunningApplication(processIdentifier:)` ili custom signature verifier. PID korišćen samo za logging nije dovoljan; potvrdite da stiže do allow/deny odluke. Takođe proverite error paths: pokušaj audit-token lookup-a, uz **fallback na PID u slučaju neuspeha**, ponovo uvodi istu race condition. Ovaj fallback pattern pojavio se u analizi privilegovanih XPC services kompanije Intego iz 2026. godine.<sup>[[3]](#references)</sup>
+
+### Brza statička i dinamička triage analiza
+
+Počnite od connection handler-a i pratite svaki poziv koji proizvodi PID do provera code-signing-a, entitlement-a, executable-path-a ili version provera. Ove komande pružaju brzi prvi pregled kandidata za helper; stripped binary-ji i dalje često otkrivaju imported symbols, Objective-C selectors ili diagnostic strings:<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
+```bash
+BIN="/path/to/privileged/helper"
+nm -um "$BIN" 2>/dev/null | rg 'xpc_connection_get_pid|SecCodeCopyGuestWithAttributes'
+otool -ov "$BIN" 2>/dev/null | rg 'processIdentifier|auditToken|setCodeSigningRequirement'
+strings -a "$BIN" | rg -i 'guest.*pid|signature.*pid|process identifier|audit token|peer.*requirement'
+```
+Tokom kontrolisanog testa, prekinite ili zakačite i izvor PID-a i njegov verifikator. Pogodak na `xpc_connection_get_pid` ili `-processIdentifier` samo je trag; korisni dokazi su kasnije traženje **istog celog broja** nakon što je zahtev primljen. Frida može dodatno da zakači verifier specifičan za aplikaciju i privilegovani selector, kako bi se izmerilo da li se selector izvršava kada PID race bude uspešan.<sup>[[3]](#references)</sup>
+
+### Exploit example
+
+Ako pronađete funkciju **`shouldAcceptNewConnection`** ili funkciju koju ona poziva, a koja **poziva** **`processIdentifier`** i ne poziva **`auditToken`**, to vrlo verovatno znači da **proverava PID procesa**, a ne audit token.\
 Na primer, kao na ovoj slici (preuzetoj iz reference):<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../../../../images/image (306).png" alt="https://wojciechregula.blog/images/2020/04/pid.png"><figcaption></figcaption></figure>
 
 Pogledajte ovaj primer exploit-a (takođe preuzet iz reference) da biste videli 2 dela exploit-a:<sup>[[1]](#references)</sup>
 
-- Onaj koji **generiše nekoliko fork-ova**
-- **Svaki fork** će **poslati** **payload** XPC service-u i odmah nakon slanja poruke izvršiti **`posix_spawn`**.
+- Deo koji **generiše nekoliko fork-ova**
+- **Svaki fork** će **poslati** **payload** XPC service-u dok izvršava **`posix_spawn`** odmah nakon slanja poruke.
 
 > [!CAUTION]
-> Da bi exploit radio, važno je da ` export`` `` `**`OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`** ili da se unutar exploit-a doda:
+> Kada koristite race sa `fork()` iz Objective-C procesa, pokrenite exploit sa eksportovanom promenljivom `OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES` ili ugradite oznaku `__objc_fork_ok`:
 >
 > ```objectivec
 > asm(".section __DATA,__objc_fork_ok\n"
@@ -31,7 +52,7 @@ Pogledajte ovaj primer exploit-a (takođe preuzet iz reference) da biste videli 
 
 {{#tabs}}
 {{#tab name="NSTasks"}}
-Prva opcija koja koristi **`NSTasks`** i argument za pokretanje child process-a radi exploitovanja RC
+Prva opcija koja koristi **`NSTasks`** i argument za pokretanje child procesa radi exploitovanja RC
 ```objectivec
 // Code from https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/
 // gcc -framework Foundation expl.m -o expl
@@ -140,7 +161,7 @@ return 0;
 {{#endtab}}
 
 {{#tab name="fork"}}
-Ovaj primer koristi sirovi **`fork`** za pokretanje **child procesa koji će iskoristiti PID race condition**, a zatim iskoristiti **drugi race condition putem Hard link-a:**
+Ovaj primer koristi sirovi **`fork`** za pokretanje **dece koja će iskoristiti PID race condition**, a zatim iskorišćava **još jedan race condition putem Hard link-a:**
 ```objectivec
 // export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 // gcc -framework Foundation expl.m -o expl
@@ -276,17 +297,54 @@ return 0;
 {{#endtab}}
 {{#endtabs}}
 
+## Učiniti race reproducibilnim
+
+Sledeće tačke za podešavanje ponavljaju se u funkcionalnim exploitima za ponovnu upotrebu PID-a i novijem testiranju privilegovanih pomoćnih procesa:<sup>[[1]](#references)[[3]](#references)</sup>
+
+- Pošaljite zahtev i odmah pozovite `posix_spawn`; **nemojte** čekati odgovor. Zahtev već mora biti u redu čekanja dok serverova pretraga PID-a nastupa nakon zamene image-a.
+- Zadržite `POSIX_SPAWN_SETEXEC | POSIX_SPAWN_START_SUSPENDED` zajedno. Prva zastavica čuva PID procesa koji učestvuje u race-u; druga sprečava da validna meta izađe ili promeni stanje pre validacije.
+- Koristite više kratkotrajnih racer-a i ponavljajte kompletnu sekvencu povezivanja/zahteva/exec-a. Optimalan broj zavisi od mete; previše child procesa može usporiti servis i pogoršati window.
+- Zamena mora ispunjavati **ceo** zahtev servera. Kad god je moguće, ponovo koristite legitimni client binary i prvo proverite njegov designated requirement pomoću `codesign -d -r- "/path/to/client.app"`.
+- Najpre pozovite bezopasan exported selector ili read-only metod. Tako razdvajate uspešnu autentikaciju od uspešnog iskorišćavanja kasnijeg privilegovanog primitive-a.
+
+## Izbegavanje PID bridge-a
+
+Na macOS 13 i novijim verzijama, Foundation izlaže `-[NSXPCConnection setCodeSigningRequirement:]`. Podesite peer requirement tačno jednom i **pre** `resume`; neispravni requirement string-ovi izazivaju exception (ili Swift fatal error), a poruka peer-a koji ne ispunjava requirement poništava konekciju. Ovo omogućava da XPC nametne code identity peer-a bez toga da application code razrešava PID.<sup>[[6]](#references)</sup>
+```objectivec
+- (BOOL)listener:(NSXPCListener *)l shouldAcceptNewConnection:(NSXPCConnection *)c {
+@try {
+NSString *req = @"anchor apple generic and identifier \"com.example.client\" "
+@"and certificate leaf[subject.OU] = \"TEAMID\"";
+[c setCodeSigningRequirement:req];
+} @catch (NSException *e) {
+return NO;
+}
+c.exportedInterface = [NSXPCInterface interfaceWithProtocol:@protocol(Helper)];
+c.exportedObject = self;
+[c resume];
+return YES;
+}
+```
+Za moderni low-level listener API na macOS 26+, `xpc_listener_set_peer_requirement` primenjuje validirani `xpc_peer_requirement_t` dok je listener neaktivan. XPC odbacuje zahteve koji ga ne ispunjavaju; peer sesije kreirane iz listenera **ne nasleđuju** ovaj zahtev, zato primenite i odgovarajući session requirement kada te sesije autorizuju privilegovane operacije.<sup>[[7]](#references)</sup>
+
+> [!WARNING]
+> Nemojte ovo „popravljati” kopiranjem audit tokena, a zatim njegovim pretvaranjem nazad u PID za stvarni `SecCode` lookup. Identitet izveden iz audit tokena zadržite kroz odluku o autorizaciji ili koristite XPC peer-requirement API end-to-end.<sup>[[2]](#references)[[6]](#references)</sup> API-ji za audit token na nivou konekcije takođe imaju posebnu klasu race uslova, obrađenu u [macOS xpc_connection_get_audit_token Attack](macos-xpc_connection_get_audit_token-attack.md).
+
 ## Drugi primeri
 
-- [**Intego X9: Zašto vaš macOS antivirus ne bi trebalo da veruje PID-ovima**](https://blog.quarkslab.com/intego_lpe_macos_2.html) - LPE protiv privilegovanog pomoćnog procesa antivirusnog programa koji je autentifikovao klijente pomoću PID-a.<sup>[[3]](#references)</sup>
+- [**Intego X9: Zašto vaš macOS antivirus ne bi trebalo da veruje PID-ovima**](https://blog.quarkslab.com/intego_lpe_macos_2.html) - LPE protiv privilegovanog helper-a antivirusnog programa koji je klijente autentifikovao pomoću PID-a.<sup>[[3]](#references)</sup>
 - [**Iskorišćavanje GOG Galaxy XPC servisa za eskalaciju privilegija u macOS-u**](https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos)<sup>[[4]](#references)</sup>
 - [**Rootpipe Reborn (Deo II)**](https://objective-see.org/blog/blog_0x41.html)<sup>[[5]](#references)</sup>
+
+
 
 ## References
 
 - [1] [Naučite XPC exploitation - Deo 2: Recite ne PID-u!](https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/)
-- [2] [Ne verujte PID-u! Priče o jednostavnom logičkom propustu i gde ga pronaći - Samuel Groß (WarCon 2018)](https://saelo.github.io/presentations/warcon18_dont_trust_the_pid.pdf)
+- [2] [Ne verujte PID-u! Priče o jednostavnom logic bug-u i mestima na kojima ga možete pronaći - Samuel Groß (WarCon 2018)](https://saelo.github.io/presentations/warcon18_dont_trust_the_pid.pdf)
 - [3] [Intego X9: Zašto vaš macOS antivirus ne bi trebalo da veruje PID-ovima](https://blog.quarkslab.com/intego_lpe_macos_2.html)
 - [4] [Iskorišćavanje GOG Galaxy XPC servisa za eskalaciju privilegija u macOS-u](https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos)
 - [5] [Rootpipe Reborn (Deo II)](https://objective-see.org/blog/blog_0x41.html)
+- [6] [Apple Developer — `NSXPCConnection.setCodeSigningRequirement`](https://developer.apple.com/documentation/foundation/nsxpcconnection/setcodesigningrequirement(_:))
+- [7] [Apple Developer — `xpc_listener_set_peer_requirement`](https://developer.apple.com/documentation/xpc/xpc_listener_set_peer_requirement)
 {{#include ../../../../../../banners/hacktricks-training.md}}
