@@ -1,27 +1,48 @@
-# macOS PID Reuse
+# Ponowne użycie PID
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
 
-## PID Reuse
+## Ponowne użycie PID
 
-Gdy **XPC service** macOS sprawdza wywołujący proces na podstawie **PID**, a nie **audit token**, jest podatny na atak polegający na ponownym użyciu PID. Atak ten opiera się na **race condition**, w której **exploit** będzie **wysyłać wiadomości do XPC service**, **abusing** jego funkcjonalności, a **zaraz potem** wykona **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** z użyciem **dozwolonego** pliku binarnego.<sup>[[1]](#references)[[2]](#references)</sup>
+Gdy **usługa XPC** systemu macOS uwierzytelnia wywołującego, rozwiązując jego **PID** zamiast używać poświadczeń powiązanych z odebraną wiadomością, może być podatna na atak polegający na ponownym użyciu PID. Praktyczny prymityw nie polega na oczekiwaniu na przepełnienie przestrzeni nazw PID: attacker wysyła żądanie XPC, a następnie natychmiast wywołuje **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** z opcją `POSIX_SPAWN_SETEXEC`, zastępując obraz procesu attackera **dozwolonym plikiem binarnym przy zachowaniu PID**.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Funkcja ta sprawi, że **dozwolony plik binarny będzie właścicielem PID**, ale **złośliwa wiadomość XPC zostanie wysłana** chwilę wcześniej. Jeśli więc **XPC** service używa **PID** do **uwierzytelniania** nadawcy i sprawdza go **PO** wykonaniu **`posix_spawn`**, uzna, że wiadomość pochodzi od **autoryzowanego** procesu.<sup>[[1]](#references)[[2]](#references)</sup>
+Jeśli serwer pobierze żądanie z kolejki, a dopiero potem powiąże ten numeryczny PID z aktywnym procesem w celu sprawdzenia podpisu kodu, entitlementu, ścieżki lub procesu nadrzędnego, zobaczy zastępczy plik binarny zamiast procesu, który wysłał wiadomość. `POSIX_SPAWN_START_SUSPENDED` utrzymuje zaufany proces zastępczy aktywny i stabilny podczas wykonywania przez serwer sprawdzenia.<sup>[[1]](#references)[[2]](#references)</sup>
 
-### Przykład exploita
+### Co jest faktycznie wyścigiem
 
-Jeśli znajdziesz funkcję **`shouldAcceptNewConnection`** lub wywoływaną przez nią funkcję, która wywołuje **`processIdentifier`**, a nie wywołuje **`auditToken`**, najprawdopodobniej oznacza to, że **weryfikuje PID procesu**, a nie audit token.\
-Na przykład na tym obrazie (pochodzącym ze źródła):<sup>[[1]](#references)</sup>
+Podatna sekwencja to **TOCTOU tożsamości wiadomości**, a nie po prostu „PID-y mogą się powtarzać”:<sup>[[1]](#references)[[2]](#references)</sup>
+
+1. Proces attackera ustanawia lub wznawia połączenie XPC i umieszcza uprzywilejowane żądanie w kolejce.
+2. Zanim usługa przekształci PID połączenia w `SecCodeRef` lub inny obiekt procesu, attacker nakłada na ten sam proces zatwierdzony plik wykonywalny za pomocą `POSIX_SPAWN_SETEXEC`.
+3. Usługa weryfikuje zatwierdzony obraz aktualnie powiązany z tym PID, a następnie obsługuje znajdujące się już w kolejce żądanie kontrolowane przez attackera.
+
+Każdy most PID w przepływie danych autoryzacji jest podejrzany: `-[NSXPCConnection processIdentifier]`, `xpc_connection_get_pid` lub `audit_token_to_pid`, po których następują `SecCodeCopyGuestWithAttributes`/`kSecGuestAttributePid`, `proc_pidpath`, `NSRunningApplication(processIdentifier:)` lub niestandardowy verifier podpisu. Samo użycie PID wyłącznie do logowania nie wystarcza; należy potwierdzić, że dociera on do decyzji allow/deny. Sprawdź również ścieżki błędów: próba wyszukania na podstawie audit tokena w pierwszej kolejności, ale **powrót do PID w razie niepowodzenia**, przywraca ten sam wyścig. Ten wzorzec fallback pojawił się w analizie uprzywilejowanych usług XPC firmy Intego z 2026 roku.<sup>[[3]](#references)</sup>
+
+### Szybki triage statyczny i dynamiczny
+
+Rozpocznij od handlera połączenia i prześledź każde wywołanie generujące PID aż do sprawdzeń podpisu kodu, entitlementu, ścieżki pliku wykonywalnego lub wersji. Te polecenia zapewniają szybki pierwszy przegląd potencjalnego helpera; nawet stripped binaries często ujawniają importowane symbole, selektory Objective-C lub strings diagnostyczne:<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
+```bash
+BIN="/path/to/privileged/helper"
+nm -um "$BIN" 2>/dev/null | rg 'xpc_connection_get_pid|SecCodeCopyGuestWithAttributes'
+otool -ov "$BIN" 2>/dev/null | rg 'processIdentifier|auditToken|setCodeSigningRequirement'
+strings -a "$BIN" | rg -i 'guest.*pid|signature.*pid|process identifier|audit token|peer.*requirement'
+```
+Podczas kontrolowanego testu przerwij lub zahookuj zarówno źródło PID, jak i jego weryfikator. Trafienie w `xpc_connection_get_pid` lub `-processIdentifier` jest tylko wskazówką; użyteczne dowody pojawiają się przy późniejszym wyszukaniu **tej samej liczby całkowitej** po odebraniu żądania. Frida może dodatkowo zahookować verifier specyficzny dla aplikacji oraz uprzywilejowany selector, aby zmierzyć, czy selector zostanie wykonany, gdy wyścig PID zakończy się powodzeniem.<sup>[[3]](#references)</sup>
+
+### Przykład Exploit
+
+Jeśli znajdziesz funkcję **`shouldAcceptNewConnection`** lub wywoływaną przez nią funkcję, która wywołuje **`processIdentifier`**, ale nie wywołuje **`auditToken`**, oznacza to z dużym prawdopodobieństwem, że **weryfikuje PID procesu**, a nie audit token.\
+Jak na przykład na tym obrazie (pochodzącym z reference):<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../../../../images/image (306).png" alt="https://wojciechregula.blog/images/2020/04/pid.png"><figcaption></figcaption></figure>
 
-Sprawdź ten przykład exploita (ponownie pochodzący ze źródła), aby zobaczyć 2 części exploita:<sup>[[1]](#references)</sup>
+Sprawdź ten przykład Exploit (również pochodzący z reference), aby zobaczyć 2 części Exploit:<sup>[[1]](#references)</sup>
 
-- Jeden, który **tworzy kilka forków**
-- **Każdy fork** będzie **wysyłać** **payload** do XPC service, wykonując **`posix_spawn`** zaraz po wysłaniu wiadomości.
+- Jedna, która **generuje kilka forków**
+- **Każdy fork** będzie **wysyłać** **payload** do usługi XPC, wykonując **`posix_spawn`** zaraz po wysłaniu wiadomości.
 
 > [!CAUTION]
-> Aby exploit działał, należy ` export`` `` `**`OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`** lub umieścić w exploicie:
+> Podczas wykonywania wyścigu z `fork()` z procesu Objective-C uruchom Exploit z wyeksportowanym `OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES` lub osadź marker `__objc_fork_ok`:
 >
 > ```objectivec
 > asm(".section __DATA,__objc_fork_ok\n"
@@ -31,7 +52,7 @@ Sprawdź ten przykład exploita (ponownie pochodzący ze źródła), aby zobaczy
 
 {{#tabs}}
 {{#tab name="NSTasks"}}
-Pierwsza opcja wykorzystująca **`NSTasks`** i argument do uruchomienia procesów potomnych w celu wykorzystania RC
+Pierwsza opcja wykorzystująca **`NSTasks`** i argument do uruchomienia dzieci w celu wykorzystania RC
 ```objectivec
 // Code from https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/
 // gcc -framework Foundation expl.m -o expl
@@ -140,7 +161,7 @@ return 0;
 {{#endtab}}
 
 {{#tab name="fork"}}
-Ten przykład używa surowego **`fork`** do uruchomienia **procesów potomnych, które wykorzystają race condition PID**, a następnie wykorzystuje **inną race condition za pośrednictwem dowiązania twardego:**
+Ten przykład używa surowego **`fork`**, aby uruchomić **procesy potomne, które wykorzystają warunek wyścigu PID**, a następnie wykorzystuje **inny warunek wyścigu za pośrednictwem Hard linku:**
 ```objectivec
 // export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 // gcc -framework Foundation expl.m -o expl
@@ -276,17 +297,54 @@ return 0;
 {{#endtab}}
 {{#endtabs}}
 
+## Uczynienie race powtarzalnym
+
+Poniższe punkty dostrajania powtarzają się w działających exploitach ponownego użycia PID oraz w niedawnych testach uprzywilejowanych helperów:<sup>[[1]](#references)[[3]](#references)</sup>
+
+- Wyślij żądanie i natychmiast wywołaj `posix_spawn`; **nie** czekaj na odpowiedź. Żądanie musi być już umieszczone w kolejce, gdy wyszukiwanie PID przez serwer nastąpi po podmianie obrazu.
+- Używaj razem `POSIX_SPAWN_SETEXEC | POSIX_SPAWN_START_SUSPENDED`. Pierwsza flaga zachowuje PID procesu biorącego udział w race; druga zapobiega zakończeniu lub zmianie stanu prawidłowego celu przed walidacją.
+- Użyj kilku krótkotrwałych procesów biorących udział w race i ponawiaj całą sekwencję connection/request/exec. Optymalna liczba zależy od celu; nadmiar procesów potomnych może spowolnić usługę i pogorszyć dostępne okno czasowe.
+- Podmiana musi spełniać **całe** wymaganie serwera. Jeśli to możliwe, ponownie użyj prawidłowego binarnego pliku klienta i najpierw sprawdź jego designated requirement za pomocą `codesign -d -r- "/path/to/client.app"`.
+- Najpierw wywołaj nieszkodliwy exported selector lub metodę tylko do odczytu. Pozwala to rozdzielić pomyślne uwierzytelnienie od skutecznego wykorzystania późniejszego uprzywilejowanego primitive.
+
+## Unikanie mostu PID
+
+W macOS 13+ Foundation udostępnia `-[NSXPCConnection setCodeSigningRequirement:]`. Ustaw peer requirement dokładnie raz i **przed** `resume`; nieprawidłowo sformatowane ciągi requirement powodują wyjątek (lub fatal error w Swift), a wiadomość od peer, który nie spełnia requirement, unieważnia connection. Dzięki temu XPC może egzekwować code identity peer bez rozwiązywania PID przez kod aplikacji.<sup>[[6]](#references)</sup>
+```objectivec
+- (BOOL)listener:(NSXPCListener *)l shouldAcceptNewConnection:(NSXPCConnection *)c {
+@try {
+NSString *req = @"anchor apple generic and identifier \"com.example.client\" "
+@"and certificate leaf[subject.OU] = \"TEAMID\"";
+[c setCodeSigningRequirement:req];
+} @catch (NSException *e) {
+return NO;
+}
+c.exportedInterface = [NSXPCInterface interfaceWithProtocol:@protocol(Helper)];
+c.exportedObject = self;
+[c resume];
+return YES;
+}
+```
+W przypadku nowoczesnego niskopoziomowego API listenera na macOS 26+ funkcja `xpc_listener_set_peer_requirement` stosuje zweryfikowany `xpc_peer_requirement_t`, gdy listener jest nieaktywny. XPC odrzuca żądania, które go nie spełniają; sesje peerów utworzone przez listener nie dziedziczą tego wymagania, dlatego należy również zastosować odpowiednie wymaganie sesji, gdy te sesje autoryzują uprzywilejowane operacje.<sup>[[7]](#references)</sup>
+
+> [!WARNING]
+> Nie próbuj tego „naprawiać”, kopiując token audytu, a następnie konwertując go z powrotem do PID-u na potrzeby właściwego wyszukania `SecCode`. Zachowaj tożsamość uzyskaną z tokenu audytu przez cały proces decyzyjny autoryzacji albo korzystaj z API wymagań peerów XPC od początku do końca.<sup>[[2]](#references)[[6]](#references)</sup> API tokenu audytu dotyczące całego połączenia mają również odrębną klasę race condition, omówioną w [macOS xpc_connection_get_audit_token Attack](macos-xpc_connection_get_audit_token-attack.md).
+
 ## Inne przykłady
 
-- [**Intego X9: Dlaczego Twój antywirus macOS nie powinien ufać PID-om**](https://blog.quarkslab.com/intego_lpe_macos_2.html) - LPE przeciwko uprzywilejowanemu helperowi AV, który uwierzytelniał klientów na podstawie PID.<sup>[[3]](#references)</sup>
+- [**Intego X9: Dlaczego Twój antywirus dla macOS nie powinien ufać PID-om**](https://blog.quarkslab.com/intego_lpe_macos_2.html) - LPE przeciwko uprzywilejowanemu helperowi antywirusa, który uwierzytelniał klientów na podstawie PID-u.<sup>[[3]](#references)</sup>
 - [**Wykorzystanie usługi GOG Galaxy XPC do eskalacji uprawnień w macOS**](https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos)<sup>[[4]](#references)</sup>
 - [**Rootpipe Reborn (część II)**](https://objective-see.org/blog/blog_0x41.html)<sup>[[5]](#references)</sup>
 
+
+
 ## References
 
-- [1] [Nauka wykorzystywania XPC - część 2: Powiedz „nie” PID-owi!](https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/)
-- [2] [Nie ufaj PID-owi! Historie prostego błędu logicznego i miejsca, w którym można go znaleźć - Samuel Groß (WarCon 2018)](https://saelo.github.io/presentations/warcon18_dont_trust_the_pid.pdf)
-- [3] [Intego X9: Dlaczego Twój antywirus macOS nie powinien ufać PID-om](https://blog.quarkslab.com/intego_lpe_macos_2.html)
+- [1] [Nauka wykorzystywania XPC — część 2: Nie ufaj PID-owi!](https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/)
+- [2] [Nie ufaj PID-owi! Historie prostego błędu logicznego i miejsca, w którym można go znaleźć — Samuel Groß (WarCon 2018)](https://saelo.github.io/presentations/warcon18_dont_trust_the_pid.pdf)
+- [3] [Intego X9: Dlaczego Twój antywirus dla macOS nie powinien ufać PID-om](https://blog.quarkslab.com/intego_lpe_macos_2.html)
 - [4] [Wykorzystanie usługi GOG Galaxy XPC do eskalacji uprawnień w macOS](https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos)
 - [5] [Rootpipe Reborn (część II)](https://objective-see.org/blog/blog_0x41.html)
+- [6] [Apple Developer — `NSXPCConnection.setCodeSigningRequirement`](https://developer.apple.com/documentation/foundation/nsxpcconnection/setcodesigningrequirement(_:))
+- [7] [Apple Developer — `xpc_listener_set_peer_requirement`](https://developer.apple.com/documentation/xpc/xpc_listener_set_peer_requirement)
 {{#include ../../../../../../banners/hacktricks-training.md}}
