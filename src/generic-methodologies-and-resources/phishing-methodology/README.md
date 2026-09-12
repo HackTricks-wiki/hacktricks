@@ -427,6 +427,53 @@ Check out the following page for some examples:
 phishing-documents.md
 {{#endref}}
 
+## Trojanized Coding Challenges and Developer Recruitment Attacks
+
+A recruiter lure can deliver an otherwise functional coding assessment, impose a short deadline, and tell the candidate not to inspect a specific startup file or use automated review. The victim then supplies the execution primitive by running `npm install`, `npm start`, or the documented entry point. This does not require a CVE or a malicious public package: the archive can already contain an attacker-controlled package under `node_modules/`, and an early `require()`/`import` can execute its top-level code and spawn a detached implant.<sup>[[14]](#references)</sup>
+
+This differs from [dependency confusion](../../pentesting-web/dependency-confusion.md): registry precedence is irrelevant when Node resolves a bundled local directory. It also differs from a lifecycle-script-only attack: `--ignore-scripts` can suppress `preinstall`/`postinstall`, but it cannot make later application startup safe when a module has malicious import-time side effects.<sup>[[14]](#references)</sup>
+
+### Audit the bootstrap and dependency graph
+
+Treat a received project as untrusted executable content and review it in a disposable, credential-free environment with egress denied. Inspect the archive before extracting it, then trace every import reachable from `package.json` scripts and startup files such as `server.js`, `index.js`, and `app.js`; a working UI or [Express](../../network-services-pentesting/pentesting-web/nodejs-express.md) application does not make its bootstrap code benign.<sup>[[14]](#references)</sup>
+
+```bash
+unzip -l challenge.zip | less
+jq '{scripts,dependencies,devDependencies}' package.json
+rg -n 'require\(|import .* from|import\(' server.js index.js app.js
+find node_modules \( -path '*/.cache/*' -o -name package.json \) -type f -print
+npm ls --all --json > npm-tree.json
+npm view '<package>@<version>' dist.integrity dist.tarball
+rg -n 'child_process|spawn|fork|exec|detached|stdio.*ignore|worker_threads|eval\(' .
+```
+
+Compare bundled package contents and versions with the lockfile and expected registry tarball; a package that is absent from the registry, marked extraneous, missing integrity metadata, or hidden in `node_modules/.cache` deserves manual review. High-signal code includes top-level `child_process.spawn()`/`fork()` calls with `detached: true`, ignored stdio, dynamic `require`, worker creation, `eval`, and payload paths outside the project.<sup>[[14]](#references)</sup>
+
+### Authentication UI is not an execution boundary
+
+An OTP/JWT/login screen may protect only the decoy routes. If authentication middleware imports a component whose top-level code registers with C2 or starts a worker, the implant executes while the application is loading - before any request is authenticated - and continues after a failed login. Conversely, the first successful request can be used only as a persistence trigger or can start a second worker. Audit module initialization, middleware construction, worker creation, and route registration order instead of assuming that protected routes gate all sensitive execution.<sup>[[14]](#references)</sup>
+
+### Persistence through developer workflows
+
+A post-compromise implant can relaunch through tools a developer uses routinely:<sup>[[14]](#references)</sup>
+
+- **VS Code extension:** create an unpacked extension with a plausible display name, `StartupFinished` activation, and an `extension.js` entry point that starts an external Node.js payload. Copying a publisher string from installed metadata or `state.vscdb` does **not** copy a valid signature or trusted status. Hunt for new unpacked extension directories, startup activation, external process creation, and changes that disable Workspace Trust.
+- **Git hooks:** append a launcher to `.git/hooks/post-checkout` and `.git/hooks/post-merge`; execution is deferred until a later checkout or merge. Inspect executable hooks for Node.js paths outside the repository, background-launch syntax, or unusual markers. See also the [Git attack surface](../../network-services-pentesting/pentesting-web/git.md).
+- **OS autostarts:** masquerade a copied script/runtime as a trusted updater, then use a current-user Run key or scheduled task on Windows, `@reboot` cron on Linux, or a `RunAtLoad`/`KeepAlive` LaunchAgent on macOS. WSL can bridge both environments through a Windows task that launches `wscript.exe` and `wsl.exe`. See the existing [Windows](../../windows-hardening/windows-local-privilege-escalation/README.md), [Linux cron](../../linux-hardening/processes-crontab-systemd-dbus/payloads-to-execute.md), and [macOS auto-start](../../macos-hardening/macos-auto-start-locations.md) coverage.
+
+A protected-directory read used to choose between per-user and SYSTEM task creation is only a privilege heuristic; it is not an elevation primitive, and creating a `/ru SYSTEM /rl highest` task still requires sufficient existing rights.<sup>[[14]](#references)</sup>
+
+### High-signal hunting pivots
+
+The following pivots are more durable than campaign-specific hashes or domains:<sup>[[14]](#references)</sup>
+
+- A project startup process spawning an unexpected detached Node.js child, especially from a hidden `node_modules` path.
+- A copied Node runtime renamed as an updater; on Windows, compare the PE subsystem because changing Console to Windows GUI suppresses the terminal window.
+- Newly created editor extensions, executable `post-checkout`/`post-merge` hooks, or cron/tasks/LaunchAgents that execute JavaScript from user-writable directories.
+- `HTTP CONNECT` proxy tunneling accompanied by `curl.exe --proxy-anyauth --proxy-user`, which can delegate NTLM/Negotiate authentication through the victim's logon context.
+- C2 registration that treats an HTTP `400` JSON body as success, extracts fields such as `socketId`, `pollInterval`, or `jitterTime`, and reuses the identifier in later tokenized polling.
+- A localhost TCP listener used as a mutex. Do not rely only on one fixed port: a port can be derived from a host identifier to distribute instances across a range.
+
 ## Phishing MFA
 
 ### Via Proxy MitM
@@ -711,5 +758,6 @@ Defence tips:
 - [11] [Hijacking traffic to Microsoft's windows.com with bitflipping (BleepingComputer)](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 - [12] [Love? Actually: Fake dating app used as lure in targeted spyware campaign in Pakistan](https://www.welivesecurity.com/en/eset-research/love-actually-fake-dating-app-used-lure-targeted-spyware-campaign-pakistan/)
 - [13] [ESET GhostChat IoCs and samples](https://github.com/eset/malware-ioc/tree/master/ghostchat)
+- [14] [Mirage Kitten Deploys NodeRabbit and PollCat Through Trojanized Coding Challenges](https://securelist.com/mirage-kitten-new-backdoors-noderabbit-pollcat/121244)
 
 {{#include ../../banners/hacktricks-training.md}}
