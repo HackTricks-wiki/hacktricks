@@ -119,6 +119,23 @@ if __name__ == "__main__":
 ###
 ```
 
+### Runtime dependency hooks and header-based exfiltration
+
+A compromised SDK can copy secrets at constructors or import functions that legitimately receive plaintext credentials, then continue the expected operation so the application shows no obvious failure. In one npm supply-chain compromise, calls inserted before wallet initialization captured complete mnemonic phrases, while a second hook captured hexadecimal private keys only when the input was a string (the byte-array branch recorded only the literal `bytes`).<sup>[[12]](#references)[[13]](#references)</sup>
+
+Names such as *analytics*, *tracing* or *anonymous telemetry* are not evidence that collected data is safe. Audit the complete dataflow from sensitive API parameters through telemetry calls, queues and encoders to network sinks. The same implant queued `method:value:timestamp` records, batched them for two seconds, joined records with `|`, Base64-encoded the result and sent it in `X-Request-Id` rather than in the HTTP body.<sup>[[12]](#references)[[13]](#references)</sup>
+
+The implementation also reconstructed its destination from decimal character codes with `String.fromCharCode`, selected a plausible infrastructure-like hostname and labeled empty-body POSTs as `application/grpc-web+proto`. It preferred `fetch`, fell back to Node.js `https.request`, enabled browser `keepalive`, and suppressed synchronous, promise and request errors so credential handling would remain non-blocking across browser and server runtimes.<sup>[[12]](#references)[[13]](#references)</sup>
+
+Useful review, hunting and incident-scoping pivots for this pattern include:<sup>[[12]](#references)[[13]](#references)</sup>
+
+- Trace newly added logging/telemetry calls near password, token, signing-key, mnemonic and authentication-configuration entry points; inspect arguments rather than comments or function names.
+- Constant-fold numeric character arrays, split-string concatenations and URL builders. Also inspect bundled/transpiled output because plaintext indicators may exist only after runtime reconstruction.
+- Hunt for POSTs with empty bodies but unusually long, high-entropy or Base64-like values in identifiers such as request, trace or correlation headers. Correlate them with uncommon destinations, misleading protocol content types and DNS activity.
+- Flag combinations of timers, queues, encoders, ignored promises, empty exception handlers, `keepalive` and browser/Node transport fallbacks around sensitive code.
+- Scope **execution**, not only installation: review lockfiles, package caches, build hosts, containers and deployed browser bundles, then determine whether the hooked entry point ran. Distinguish input branches because overloaded APIs may leak only some argument types.
+- Upgrading removes the malicious code but cannot revoke material already transmitted. Rotate exposed credentials; for hierarchical deterministic wallets, generate new seed material and migrate assets rather than deriving more accounts from the exposed mnemonic.
+
 ### HTTP/3 / QUIC
 
 If the egress controls are tuned for classic **TCP/443** inspection but are permissive with **UDP/443**, forcing **HTTP/3** can move the transfer into **QUIC** instead of TLS-over-TCP. The attacker endpoint needs native HTTP/3 support (for example, a reverse proxy or upload endpoint already advertising `Alt-Svc: h3`).
@@ -632,5 +649,7 @@ Then copy-paste the text into the windows-shell and a file called nc.exe will be
 - [9] [QUIC-Exfil: Exploiting QUIC's Server Preferred Address Feature to Perform Data Exfiltration Attacks](https://arxiv.org/abs/2505.05292)
 - [10] [Put Blob (REST API) - Azure Storage](https://learn.microsoft.com/en-us/rest/api/storageservices/put-blob)
 - [11] [Rclone documentation](https://rclone.org/docs/#configuration-encryption)
+- [12] [InjectiveLabs malicious key-derivation telemetry commit](https://github.com/InjectiveLabs/injective-ts/commit/01219285b16ce85c70cdf47a71a551ff5e41f1ed)
+- [13] [Not-So-Anonymous Telemetry: The @injectivelabs/sdk-ts Backdoor](https://securitylabs.datadoghq.com/articles/not-so-anonymous-telemetry-injectivelabs-sdk-ts-backdoor)
 
 {{#include ../banners/hacktricks-training.md}}
