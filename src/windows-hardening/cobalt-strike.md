@@ -10,36 +10,36 @@
 
 ### Peer2Peer Listeners
 
-Bu listener'ların beacon'ları doğrudan C2 ile iletişim kurmak zorunda değildir; diğer beacon'lar üzerinden C2 ile iletişim kurabilirler.
+Bu listener'ların beacon'larının doğrudan C2 ile iletişim kurması gerekmez; diğer beacon'lar üzerinden C2 ile iletişim kurabilirler.
 
-`Cobalt Strike -> Listeners -> Add/Edit` seçeneğine gidin ve TCP veya SMB beacon'larını seçin.
+`Cobalt Strike -> Listeners -> Add/Edit` seçeneğine gidin, ardından TCP veya SMB beacon'larını seçin.
 
-* **TCP beacon, seçilen portta bir listener oluşturur**. Bir TCP beacon'a bağlanmak için başka bir beacon'dan `connect <ip> <port>` komutunu kullanın.
+* **TCP beacon, seçilen portta bir listener ayarlar**. Bir TCP beacon'a bağlanmak için başka bir beacon'dan `connect <ip> <port>` komutunu kullanın.
 * **smb beacon, seçilen ada sahip bir pipename üzerinde dinleme yapar**. Bir SMB beacon'a bağlanmak için `link [target] [pipe]` komutunu kullanmanız gerekir.
 
-### Payload üretme ve host etme
+### Generate & Host payloads
 
-#### Payload'ları dosyalarda üretme
+#### Generate payloads in files
 
 `Attacks -> Packages ->`
 
-* HTA dosyaları için **`HTMLApplication`**
-* Macro içeren bir Office belgesi için **`MS Office Macro`**
-* Bir .exe, .dll veya service .exe için **`Windows Executable`**
-* **stageless** bir .exe, .dll veya service .exe için **`Windows Executable (S)`** (stageless, staged'e göre daha iyidir; daha az IoC içerir)
+* **`HTMLApplication`**, HTA dosyaları için
+* **`MS Office Macro`**, macro içeren bir Office belgesi için
+* **`Windows Executable`**, bir .exe, .dll veya service .exe için
+* **`Windows Executable (S)`**, **stageless** bir .exe, .dll veya service .exe için (staged yerine stageless daha iyidir, daha az IoC)
 
-#### Payload üretme ve host etme
+#### Generate & Host payloads
 
-`Attacks -> Web Drive-by -> Scripted Web Delivery (S)` seçeneği, beacon'ı Cobalt Strike'tan indirmek için bitsadmin, exe, powershell ve python gibi formatlarda bir script/executable üretir.
+`Attacks -> Web Drive-by -> Scripted Web Delivery (S)` seçeneği, beacon'ı Cobalt Strike'tan indirmek için bitsadmin, exe, powershell ve python gibi formatlarda bir script/executable oluşturur.
 
-#### Payload'ları host etme
+#### Host Payloads
 
-Bir web server'da host etmek istediğiniz dosya zaten varsa `Attacks -> Web Drive-by -> Host File` seçeneğine gidin ve host edilecek dosyayı ve web server yapılandırmasını seçin.
+Host etmek istediğiniz dosya zaten bir web server üzerindeyse `Attacks -> Web Drive-by -> Host File` seçeneğine gidin ve host edilecek dosyayı ve web server yapılandırmasını seçin.
 
-### Beacon seçenekleri
+### Beacon Options
 
 <details>
-<summary>Beacon seçenekleri ve komutları</summary>
+<summary>Beacon options and commands</summary>
 ```bash
 # Execute local .NET binary
 execute-assembly </path/to/executable.exe>
@@ -194,48 +194,63 @@ beacon> ssh 10.10.17.12:22 username password
 
 ### Custom implants / Linux Beacons
 
-- Custom bir agentin kayıt/check-in işlemi gerçekleştirmek ve görevleri almak için yalnızca Cobalt Strike Team Server HTTP/S protokolünü (varsayılan malleable C2 profile) konuşması gerekir. Cobalt Strike UI'ını görev atama ve çıktı almak için yeniden kullanmak üzere profile tanımlanan aynı URI'leri/header'ları/metadata crypto mekanizmalarını uygulayın.<sup>[[1]](#references)[[4]](#references)[[5]](#references)[[6]](#references)[[7]](#references)</sup>
-- Bir Aggressor Script (ör. `CustomBeacon.cna`), Windows dışı beacon için payload üretimini sarmalayabilir; böylece operatörler listener'ı seçip doğrudan GUI üzerinden ELF payload'ları oluşturabilir.
-- Team Server'a sunulan örnek Linux task handler'ları: `sleep`, `cd`, `pwd`, `shell` (rastgele komutları çalıştırır), `ls`, `upload`, `download` ve `exit`. Bunlar Team Server'ın beklediği task ID'lerine karşılık gelir ve uygun formatta çıktı döndürmek üzere server-side uygulanmalıdır.
-- Linux üzerinde BOF desteği, Beacon Object Files'ı [TrustedSec's ELFLoader](https://github.com/trustedsec/ELFLoader) ile process içinde yükleyerek eklenebilir (Outflank-style BOF'ları da destekler); bu sayede modular post-exploitation, yeni process'ler oluşturmadan implantın context/privileges'ı içinde çalıştırılabilir.<sup>[[2]](#references)[[3]](#references)</sup>
-- Windows Beacon'larıyla pivoting parity sağlamak için custom beacon içine bir SOCKS handler gömün: operatör `socks <port>` çalıştırdığında implant, operatör araçlarını ele geçirilmiş Linux host üzerinden internal network'lere yönlendirmek üzere local bir proxy açmalıdır.
+- Custom bir agent'ın register/check-in işlemi gerçekleştirmek ve task almak için yalnızca Cobalt Strike Team Server HTTP/S protocol'ünü (varsayılan malleable C2 profile) konuşması gerekir. Cobalt Strike UI'ını tasking ve output için yeniden kullanmak üzere profile'da tanımlanan aynı URI'leri/header'ları/metadata crypto'yu implement edin.<sup>[[1]](#references)[[4]](#references)[[5]](#references)[[6]](#references)[[7]](#references)</sup>
+- Bir Aggressor Script (ör. `CustomBeacon.cna`), Windows olmayan beacon için payload generation işlemini wrap ederek operator'ların listener'ı seçmesini ve doğrudan GUI üzerinden ELF payload'ları üretmesini sağlayabilir.
+- Team Server'a sunulan örnek Linux task handler'ları: `sleep`, `cd`, `pwd`, `shell` (rastgele komutları exec eder), `ls`, `upload`, `download` ve `exit`. Bunlar Team Server'ın beklediği task ID'lerine map edilir ve output'u doğru formatta döndürmek için server-side implement edilmeleri gerekir.
+- Linux'ta BOF desteği, Beacon Object Files'ı [TrustedSec's ELFLoader](https://github.com/trustedsec/ELFLoader) ile in-process yükleyerek eklenebilir (Outflank-style BOF'ları da destekler). Bu, yeni process'ler başlatmadan modular post-exploitation işlemlerinin implant'ın context/privileges'ı içinde çalıştırılmasını sağlar.<sup>[[2]](#references)[[3]](#references)</sup>
+- Windows Beacons ile pivoting parity'sini korumak için custom beacon'a bir SOCKS handler embed edin: operator `socks <port>` çalıştırdığında implant, operator tooling'ini compromised Linux host üzerinden internal network'lere route etmek üzere local bir proxy açmalıdır.
 
 ## Opsec
 
 ### Execute-Assembly
 
-**`execute-assembly`**, belirtilen programı çalıştırmak için remote process injection kullanan bir **sacrificial process** kullanır. Bir process içine injection yapmak için her EDR'ın kontrol ettiği belirli Win API'leri kullandığından bu işlem oldukça gürültülüdür. Ancak aynı process içinde bir şey yüklemek için kullanılabilecek bazı custom araçlar vardır:
+**`execute-assembly`**, belirtilen programı çalıştırmak için remote process injection kullanan bir **sacrificial process** kullanır. Bir process'e inject etmek için her EDR'ın kontrol ettiği belirli Win API'leri kullanıldığından bu işlem oldukça gürültülüdür. Bununla birlikte, aynı process içinde bir şey yüklemek için kullanılabilecek bazı custom tool'lar vardır:
 
 - [https://github.com/anthemtotheego/InlineExecute-Assembly](https://github.com/anthemtotheego/InlineExecute-Assembly)
 - [https://github.com/kyleavery/inject-assembly](https://github.com/kyleavery/inject-assembly)
-- Cobalt Strike içinde BOF (Beacon Object Files) de kullanabilirsiniz: [https://github.com/CCob/BOF.NET](https://github.com/CCob/BOF.NET)
+- Cobalt Strike'ta BOF (Beacon Object Files) da kullanabilirsiniz: [https://github.com/CCob/BOF.NET](https://github.com/CCob/BOF.NET)
 
-`https://github.com/outflanknl/HelpColor` agressor script'i, Cobalt Strike içinde komutlara renk ekleyen `helpx` komutunu oluşturur; bu renkler komutların BOF (yeşil), Frok&Run (sarı) ve benzeri mi, yoksa ProcessExecution, injection ve benzeri mi (kırmızı) olduğunu gösterir. Bu da hangi komutların daha stealthy olduğunu anlamaya yardımcı olur.
+`https://github.com/outflanknl/HelpColor` agressor script'i, Cobalt Strike'ta komutlara renk ekleyen `helpx` komutunu oluşturur. Bu komutlar, bunların BOF (yeşil), Frok&Run (sarı) veya benzeri olduğunu ya da ProcessExecution, injection veya benzeri (kırmızı) olduğunu belirtir. Bu da hangi komutların daha stealthy olduğunu anlamaya yardımcı olur.
 
-### Act as the user
+### Modern in-process post-execution
+
+Recent version'lar, classic COFF BOF'un fazla kısıtlı olduğu durumlarda iki alternatif ekler:
+
+- **Beacon Interpreter**, C'yi Team Server üzerinde intermediate bytecode'a compile eder ve Beacon içine embed edilmiş bir VM'de execute eder. Bytecode, native executable code yerine data olarak kalır; bu nedenle BOF yüklemek için normalde gereken ek executable allocation ve RW'den RX'e permission transition işleminden kaçınır. Script'ler Beacon API'yi import edebilir ve BOF-style Dynamic Function Resolution (DFR) prototype'ları declare edebilir.
+- **BOF-PE**, eksiksiz bir EXE veya DLL'i mevcut Beacon'a yükler. Bu format normal PE import'larını, exception handling'i, daha gelişmiş C++'ı ve external library'leri desteklerken Beacon API'yi korur. Bu, küçük bir COFF BOF'tan daha ağırdır; bu nedenle yalnızca ek runtime faydalı olduğunda tercih edin.
+```bash
+# Compile a C script on the Team Server and execute its bytecode
+beacon-interpreter /path/to/script.c
+
+# Execute a BOF-PE in the current Beacon
+inline-execute-pe /path/to/tool.x64.exe
+```
+Bu mekanizmalar loader kaynaklı sinyalleri azaltır; script'in eylemleri veya Windows API çağrıları tarafından üretilen telemetry'yi azaltmaz.<sup>[[8]](#references)</sup>
+
+### Kullanıcı gibi davranın
 
 `Seatbelt.exe LogonEvents ExplicitLogonEvents PoweredOnEvents` gibi event'leri kontrol edebilirsiniz:
 
-- Security EID 4624 - Genel çalışma saatlerini öğrenmek için tüm interactive logon'ları kontrol edin.
-- System EID 12,13 - Shutdown/startup/sleep sıklığını kontrol edin.
-- Security EID 4624/4625 - Gelen geçerli/geçersiz NTLM girişimlerini kontrol edin.
-- Security EID 4648 - Plaintext credentials kullanılarak logon gerçekleştirildiğinde bu event oluşturulur. Bir process bunu oluşturduysa binary, credentials'ları bir config file içinde veya kodun içinde clear text olarak barındırıyor olabilir.
+- Security EID 4624 - Olağan çalışma saatlerini öğrenmek için tüm etkileşimli logon'ları kontrol edin.
+- System EID 12,13 - Kapatma/açılış/uyku sıklığını kontrol edin.
+- Security EID 4624/4625 - Gelen geçerli/geçersiz NTLM denemelerini kontrol edin.
+- Security EID 4648 - Bu event, plaintext credentials kullanılarak logon gerçekleştirildiğinde oluşturulur. Bir process bunu oluşturduysa binary, credentials'ı bir config dosyasında veya kodun içinde clear text olarak barındırıyor olabilir.
 
-Cobalt Strike'tan `jump` kullanırken, yeni process'in daha meşru görünmesi için `wmi_msbuild` method'unu kullanmak daha iyidir.
+Cobalt Strike'tan `jump` kullanırken yeni process'in daha meşru görünmesi için `wmi_msbuild` method'unu kullanmak daha iyidir.
 
-### Use computer accounts
+### Computer account'ları kullanın
 
-Defender'ların kullanıcılar tarafından oluşturulan şüpheli davranışları kontrol etmesi ve `*$` gibi **service accounts ve computer accounts'ı monitoring kapsamı dışında bırakması** yaygındır. Lateral movement veya privilege escalation gerçekleştirmek için bu account'ları kullanabilirsiniz.
+Defender'ların user'lar tarafından oluşturulan anormal davranışları kontrol etmesi ve `*$` gibi **service account'ları ve computer account'ları monitoring kapsamı dışında bırakması** yaygındır. Lateral movement veya privilege escalation gerçekleştirmek için bu account'ları kullanabilirsiniz.
 
-### Use stageless payloads
+### Stageless payload'ları kullanın
 
-Stageless payload'lar, C2 server'dan ikinci bir stage indirmeleri gerekmediğinden staged payload'lardan daha az gürültülüdür. Bu, initial connection sonrasında herhangi bir network traffic oluşturmamaları ve network-based defenses tarafından tespit edilme olasılıklarının daha düşük olması anlamına gelir.
+Stageless payload'lar, C2 server'dan ikinci bir stage indirmeleri gerekmediği için staged payload'lardan daha az gürültülüdür. Bu, initial connection'dan sonra herhangi bir network traffic oluşturmamaları ve network-based defense'lar tarafından tespit edilme olasılıklarının daha düşük olması anlamına gelir.
 
-### Tokens & Token Store
+### Token'lar ve Token Store
 
-Token çalarken veya oluştururken dikkatli olun; bir EDR thread token'larını enumerate edebilir ve process içinde **farklı bir kullanıcıya ait bir token** veya hatta SYSTEM token'ı tespit edebilir.
+Token çalarken veya oluştururken dikkatli olun; bir EDR thread token'larını enumerate edebilir ve process içinde **farklı bir user'a ait bir token** veya hatta SYSTEM token'ı tespit edebilir.
 
-Bu özellik token'ların **beacon başına** saklanmasını sağlar; böylece aynı token'ı tekrar tekrar çalmak gerekmez. Bu, lateral movement için veya çalınan bir token'ı birden fazla kez kullanmanız gerektiğinde faydalıdır:
+Bu özellik token'ları **beacon başına** saklamanızı sağlar; böylece aynı token'ı tekrar tekrar çalmanız gerekmez. Bu, lateral movement için veya çalınmış bir token'ı birden fazla kez kullanmanız gerektiğinde faydalıdır:
 
 - `token-store steal <pid>`
 - `token-store steal-and-use <pid>`
@@ -244,63 +259,78 @@ Bu özellik token'ların **beacon başına** saklanmasını sağlar; böylece ay
 - `token-store remove <id>`
 - token-store remove-all
 
-Lateral movement gerçekleştirirken genellikle **yeni bir token oluşturmak** veya pass the hash attack gerçekleştirmek yerine bir token **çalmak** daha iyidir.
+Lateral movement gerçekleştirirken genellikle **yeni bir token oluşturmak** veya pass the hash attack gerçekleştirmek yerine **bir token çalmak** daha iyidir.
 
 ### Guardrails
 
-Cobalt Strike, defender'lar tarafından tespit edilebilecek belirli komutların veya action'ların kullanılmasını engellemeye yardımcı olan **Guardrails** adlı bir özelliğe sahiptir. Guardrails; lateral movement veya privilege escalation için yaygın olarak kullanılan `make_token`, `jump`, `remote-exec` ve diğer belirli komutları engelleyecek şekilde yapılandırılabilir.
+Cobalt Strike, defender'lar tarafından tespit edilebilecek belirli command'lerin veya action'ların kullanılmasını önlemeye yardımcı olan **Guardrails** adlı bir özelliğe sahiptir. Guardrails; lateral movement veya privilege escalation için yaygın olarak kullanılan `make_token`, `jump`, `remote-exec` ve diğer command'ler gibi belirli command'leri engelleyecek şekilde yapılandırılabilir.
 
-Ayrıca [https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks](https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks) reposu da bir payload çalıştırmadan önce değerlendirebileceğiniz bazı check'ler ve fikirler içerir.
+Ayrıca [https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks](https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks) adresindeki repo da bir payload çalıştırmadan önce değerlendirebileceğiniz bazı check'ler ve fikirler içerir.
 
-### Tickets encryption
+### Ticket encryption
 
-Bir AD ortamında ticket'ların encryption yöntemine dikkat edin. Varsayılan olarak bazı araçlar Kerberos ticket'ları için AES encryption'dan daha az güvenli olan RC4 encryption'ı kullanır; güncel ortamlar ise varsayılan olarak AES kullanır. Bu durum, weak encryption algorithm'leri izleyen defender'lar tarafından tespit edilebilir.
+Bir AD ortamında ticket'ların encryption'ına dikkat edin. Varsayılan olarak bazı tool'lar Kerberos ticket'ları için AES encryption'dan daha az güvenli olan RC4 encryption'ı kullanır; güncel ortamlar ise varsayılan olarak AES kullanır. Bu durum, weak encryption algorithm'leri izleyen defender'lar tarafından tespit edilebilir.
 
-### Avoid Defaults
+### Varsayılanlardan kaçının
 
-Cobalt Stricke kullanılırken SMB pipe'ları varsayılan olarak `msagent_####` ve `"status_####"` adlarına sahip olur. Bu adları değiştirin. Mevcut pipe'ların adlarını Cobal Strike'ta şu komutla kontrol etmek mümkündür: `ls \\.\pipe\`
+Cobalt Strike kullanırken SMB pipe'ları varsayılan olarak `msagent_####` ve `"status_####"` adlarına sahip olur. Bu adları değiştirin. Mevcut pipe'ların adlarını Cobalt Strike'tan şu command ile kontrol etmek mümkündür: `ls \\.\pipe\`
 
-Ayrıca SSH session'larıyla `\\.\pipe\postex_ssh_####` adlı bir pipe oluşturulur. Bunu `set ssh_pipename "<new_name>";` ile değiştirin.
+Ayrıca SSH session'larında `\\.\pipe\postex_ssh_####` adlı bir pipe oluşturulur. Bunu `set ssh_pipename "<new_name>";` ile değiştirin.
 
-Poext exploitation attack sırasında `\\.\pipe\postex_####` pipe'ları da `set pipename "<new_name>"` ile değiştirilebilir.
+Ayrıca post-ex exploitation attack sırasında `\\.\pipe\postex_####` pipe'ları `set pipename "<new_name>"` ile değiştirilebilir.
 
-Cobalt Strike profile'larında aşağıdakiler gibi unsurları da değiştirebilirsiniz:
+Cobalt Strike profile'larında aşağıdaki unsurları da değiştirebilirsiniz:
 
 - `rwx` kullanmaktan kaçınma
-- Process injection davranışının nasıl çalıştığı (`process-inject {...}` block'u içinde hangi API'lerin kullanılacağı)
-- "fork and run" işleminin nasıl çalıştığı (`post-ex {…}` block'u içinde)
+- Process injection davranışının nasıl çalıştığı (`process-inject {...}` bloğunda hangi API'lerin kullanılacağı)
+- "fork and run" işleminin nasıl çalıştığı (`post-ex {…}` bloğunda)
 - Sleep süresi
-- Memory'de yüklenecek binary'lerin maksimum boyutu
-- `stage {...}` block'u ile memory footprint ve DLL içeriği
+- Memory'ye yüklenecek binary'lerin maksimum boyutu
+- `stage {...}` bloğuyla memory footprint ve DLL içeriği
 - Network traffic
 
-### Bypass memory scanning
+### Sleepmask ve BeaconGate
 
-Bazı ERD'ler memory'yi bilinen malware signature'ları için tarar. Coblat Strike, `sleep_mask` function'ını memory'de backdoor'u encrypt edebilecek bir BOF olarak değiştirmenize olanak tanır.
+Sleepmask, Beacon'ı ve takip edilen heap allocation'larını dormant durumdayken dönüştürür, ardından task execution için geri yükler. Güncel sürümler evasive bir default sağlar; ancak memory layout, allocation veya call-stack gereksinimleri farklı olduğunda custom Sleepmask BOF'ları hâlâ faydalıdır. 4.13 sürümünden itibaren default Sleepmask, BeaconGate üzerinden proxy'lenen API'ler için return address'i de spoof eder.<sup>[[8]](#references)</sup>
 
-### Noisy proc injections
+**BeaconGate**, bu tasarımı `Sleep` işlevinin ötesine taşır: seçilen WinAPI çağrıları `FUNCTION_CALL` structure'ları olarak temsil edilir ve çağrıyı yürütürken Beacon'ı maskeyebilen Sleepmask BOF'una iletilir. Profile, bir group'u (`Comms`, `Core`, `Cleanup` veya `All`) ya da yalnızca tek tek API'leri gate edebilir:<sup>[[9]](#references)</sup>
+```text
+stage {
+set sleep_mask "true";
+set syscall_method "Indirect";
 
-Bir process'e code inject etmek genellikle oldukça gürültülüdür; bunun nedeni **normal hiçbir process'in genellikle bu action'ı gerçekleştirmemesi ve bunu yapma yöntemlerinin oldukça sınırlı olmasıdır**. Bu nedenle davranış tabanlı detection system'ları tarafından tespit edilebilir. Ayrıca **diskte bulunmayan code içeren thread'leri** tarayan EDR'lar tarafından da tespit edilebilir (JIT kullanan browser'lar gibi process'lerde bu durum yaygın olsa da). Örnek: [https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2](https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2)
+beacon_gate {
+VirtualAlloc;       # Routed through BeaconGate
+VirtualAllocEx;
+InternetConnectA;
+}
+}
+```
+`beacon_gate` altında listelenen bir API için gate, `syscall_method` üzerinde önceliğe sahiptir; listelenmeyen API'ler yine de yapılandırılmış syscall yöntemini kullanabilir. `beacon_gate disable` ve `beacon_gate enable`, özelliği çalışma zamanında açıp kapatır. `All` seçeneğini düşünmeden etkinleştirmekten kaçının: `ps` gibi komutlar tekrar tekrar `OpenProcess`/`CloseHandle` çağırır ve her çağrı Beacon'u maskeliyor ve maske kaldırıyorsa CPU kullanımında ani artışa neden olabilir. Sleepmask-VS, custom gate'leri canlı bir implant üzerinden tekrar tekrar test etmeden debug etmek için taklit edilmiş Beacon/Sleepmask durumu sağlar.<sup>[[9]](#references)</sup>
 
-### Spawnas | PID and PPID relationships
+### Gürültülü proc injections
 
-Yeni bir process spawn ederken detection'dan kaçınmak için process'ler arasındaki **normal parent-child** relationship'i korumak önemlidir. svchost.exec, iexplorer.exe'yi çalıştırıyorsa bu şüpheli görünür; çünkü normal bir Windows ortamında svchost.exe, iexplorer.exe'nin parent'ı değildir.
+Bir process'e code enjekte etmek genellikle oldukça gürültülüdür; bunun nedeni, **hiçbir normal process'in genellikle bu işlemi gerçekleştirmemesi ve bunu yapma yöntemlerinin oldukça sınırlı olmasıdır**. Bu nedenle, behaviour-based detection systems tarafından tespit edilebilir. Ayrıca EDR'ler, **diskte bulunmayan code içeren thread'ler** için network'ü tarayarak da bunu tespit edebilir (JIT kullanan browser'lar gibi process'ler bunu yaygın olarak gerçekleştirse de). Örnek: [https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2](https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2)
 
-Cobalt Strike'ta yeni bir beacon spawn edildiğinde, varsayılan olarak yeni listener'ı çalıştırmak için **`rundll32.exe`** kullanan bir process oluşturulur. Bu yöntem çok stealthy değildir ve EDR'lar tarafından kolayca tespit edilebilir. Ayrıca `rundll32.exe` herhangi bir argüman olmadan çalıştırıldığından daha da şüpheli görünür.
+### Spawnas | PID ve PPID ilişkileri
 
-Aşağıdaki Cobalt Strike komutuyla yeni beacon'ı spawn etmek için farklı bir process belirleyebilir ve tespit edilme olasılığını azaltabilirsiniz:
+Yeni bir process oluştururken, tespit edilmekten kaçınmak için process'ler arasındaki **normal bir parent-child** ilişkisini korumak önemlidir. svchost.exec, iexplorer.exe'yi çalıştırıyorsa bu şüpheli görünür; çünkü normal bir Windows ortamında svchost.exe, iexplorer.exe'nin parent'ı değildir.
+
+Cobalt Strike'ta yeni bir beacon oluşturulduğunda, varsayılan olarak yeni listener'ı çalıştırmak için **`rundll32.exe`** kullanan bir process oluşturulur. Bu yöntem çok stealth değildir ve EDR'ler tarafından kolayca tespit edilebilir. Ayrıca `rundll32.exe`, herhangi bir argüman olmadan çalıştırıldığından daha da şüpheli görünür.
+
+Aşağıdaki Cobalt Strike komutuyla, yeni beacon'u spawn etmek için farklı bir process belirleyebilir ve böylece daha az tespit edilebilir hâle getirebilirsiniz:
 ```bash
 spawnto x86 svchost.exe
 ```
-You can aso change this setting **`spawnto_x86` and `spawnto_x64`** in a profile.
+You can also change this setting **`spawnto_x86` and `spawnto_x64`** in a profile.
 
-### Saldırgan trafiğini Proxy'leme
+### Saldırgan trafiğini proxy'leme
 
-Saldırganlar bazen araçları yerel olarak, Linux makinelerde bile çalıştırabilmeli ve victim'ların trafiğinin araca ulaşmasını sağlamalıdır (ör. NTLM relay).
+Saldırganların bazen araçları yerel olarak, hatta Linux makinelerde bile çalıştırabilmesi ve kurbanların trafiğinin araca ulaşmasını sağlaması gerekir (ör. NTLM relay).
 
-Ayrıca bazen bir pass-the.hash veya pass-the-ticket saldırısı gerçekleştirmek için saldırganın bu hash'i veya ticket'ı yerel olarak **kendi LSASS process'ine eklemesi** ve ardından buradan pivot etmesi, victim makinesinin bir LSASS process'ini değiştirmekten daha stealth olabilir.
+Ayrıca bazen bir pass-the-hash veya pass-the-ticket saldırısı gerçekleştirmek için saldırganın bu hash'i veya ticket'ı yerel olarak kendi LSASS process'ine **eklemesi** ve ardından buradan pivot etmesi, kurban makinenin LSASS process'ini değiştirmekten daha stealth olabilir.
 
-Ancak **oluşturulan traffic konusunda dikkatli olmanız** gerekir; backdoor process'inizden alışılmadık traffic (Kerberos?) gönderiyor olabilirsiniz. Bunun için bir browser process'ine pivot edebilirsiniz (ancak kendinizi bir process'e inject ederken yakalanabilirsiniz; bu nedenle bunu stealth bir şekilde yapmayı düşünün).
+Ancak **oluşturulan trafik konusunda dikkatli olmanız** gerekir; backdoor process'inizden alışılmadık bir trafik (Kerberos?) gönderiyor olabilirsiniz. Bunun için bir browser process'ine pivot edebilirsiniz (ancak kendinizi bir process'e inject ederken yakalanabilirsiniz; bu nedenle bunu stealth bir şekilde yapmayı düşünün).
 
 
 ### AV'lerden kaçınma
@@ -317,19 +347,19 @@ av-bypass.md
 
 #### Artifact Kit
 
-Genellikle `/opt/cobaltstrike/artifact-kit` içinde, Cobalt Strike'ın binary beacon'ları oluşturmak için kullanacağı payload'ların kodunu ve pre-compiled template'lerini (`/src-common` içinde) bulabilirsiniz.
+Genellikle `/opt/cobaltstrike/artifact-kit` altında, Cobalt Strike'ın binary beacon'lar oluşturmak için kullanacağı payload'ların kodunu ve önceden derlenmiş template'lerini (`/src-common` içinde) bulabilirsiniz.
 
-Oluşturulan backdoor (veya yalnızca compiled template) ile [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) kullanarak Defender'ın tetiklenmesine neyin neden olduğunu bulabilirsiniz. Bu genellikle bir string'dir. Bu nedenle, bu string'in final binary'de görünmemesi için backdoor'ı oluşturan kodu değiştirebilirsiniz.
+Oluşturulan backdoor (veya yalnızca derlenmiş template) ile [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) kullanarak Defender'ın tetiklenmesine neyin neden olduğunu bulabilirsiniz. Bu genellikle bir string'dir. Bu nedenle backdoor'u oluşturan kodu, söz konusu string final binary'de görünmeyecek şekilde değiştirebilirsiniz.
 
-Kodu değiştirdikten sonra aynı directory'den `./build.sh` komutunu çalıştırın ve `dist-pipe/` klasörünü Windows client'taki `C:\Tools\cobaltstrike\ArtifactKit` konumuna kopyalayın.
+Kodu değiştirdikten sonra aynı dizinden `./build.sh` komutunu çalıştırın ve `dist-pipe/` klasörünü Windows client'taki `C:\Tools\cobaltstrike\ArtifactKit` konumuna kopyalayın.
 ```
 pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 ```
-Don't forget to load the aggressive script `dist-pipe\artifact.cna` to indicate Cobalt Strike to use the resources from disk that we want and not the ones loaded.
+`dist-pipe\artifact.cna` aggressive script'ini yüklemeyi unutmayın; böylece Cobalt Strike, yüklenen kaynakları değil, istediğimiz disk üzerindeki kaynakları kullanır.
 
 #### Resource Kit
 
-ResourceKit klasörü, Cobalt Strike'ın PowerShell, VBA ve HTA dahil script tabanlı payload'ları için şablonları içerir.
+ResourceKit klasörü, PowerShell, VBA ve HTA dahil olmak üzere Cobalt Strike'ın script tabanlı payload'ları için şablonları içerir.
 
 Şablonlarla birlikte [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) kullanarak defender'ın (bu durumda AMSI) neyi beğenmediğini bulabilir ve bunu değiştirebilirsiniz:
 ```
@@ -341,13 +371,13 @@ Don't forget to load the aggressive script `ResourceKit\resources.cna` to indica
 
 #### Function hooks | Syscall
 
-Function hooking is a very common method of EDRs to detect malicious activity. Cobalt Strike allows you to bypass these hooks by using **syscalls** instead of the standard Windows API calls using the **`None`** config, or use the **`Nt*`** version of a function with the **`Direct`** setting, or just jumping over the **`Nt*`** function with the **`Indirect`** option in the malleable profile. Depending on the system, one option might be stealthier than the other.
+Function hooking is a very common method of EDRs to detect malicious activity. Cobalt Strike allows you to bypass these hooks by using **syscalls** instead of the standard Windows API calls using the **`None`** config, or use the `Nt*` version of a function with the **`Direct`** setting, or just jumping over the `Nt*` function with the **`Indirect`** option in the malleable profile. Depending on the system, an option might be more stealthy than the other.
 
 This can be set in the profile or using the command **`syscall-method`**
 
 However, this could also be noisy.
 
-One option provided by Cobalt Strike to bypass function hooks is to remove those hooks with: [**unhook-bof**](https://github.com/Cobalt-Strike/unhook-bof).
+Some option granted by Cobalt Strike to bypass function hooks is to remove those hooks with: [**unhook-bof**](https://github.com/Cobalt-Strike/unhook-bof).
 
 You could also check which functions are hooked with [**https://github.com/Mr-Un1k0d3r/EDRs**](https://github.com/Mr-Un1k0d3r/EDRs) or [**https://github.com/matterpreter/OffensiveCSharp/tree/master/HookDetector**](https://github.com/matterpreter/OffensiveCSharp/tree/master/HookDetector)
 
@@ -379,13 +409,17 @@ pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 ```
 </details>
 
+
+
 ## References
 
 - [1] [Cobalt Strike Linux Beacon (özel implant PoC)](https://github.com/EricEsquivel/CobaltStrike-Linux-Beacon)
-- [2] [TrustedSec ELFLoader & Linux BOFs](https://github.com/trustedsec/ELFLoader)
+- [2] [TrustedSec ELFLoader ve Linux BOF'ları](https://github.com/trustedsec/ELFLoader)
 - [3] [Outflank nix BOF şablonu](https://github.com/outflanknl/nix_bof_template)
-- [4] [Unit42 tarafından Cobalt Strike metadata encryption analizi](https://unit42.paloaltonetworks.com/cobalt-strike-metadata-encryption-decryption/)
-- [5] [Cobalt Strike trafiği hakkında SANS ISC günlüğü](https://isc.sans.edu/diary/27968)
+- [4] [Unit42'nin Cobalt Strike metadata şifrelemesi analizi](https://unit42.paloaltonetworks.com/cobalt-strike-metadata-encryption-decryption/)
+- [5] [SANS ISC'nin Cobalt Strike trafiği hakkındaki günlüğü](https://isc.sans.edu/diary/27968)
 - [6] [cs-decrypt-metadata-py](https://blog.didierstevens.com/2021/10/22/new-tool-cs-decrypt-metadata-py/)
 - [7] [SentinelOne CobaltStrikeParser](https://github.com/Sentinel-One/CobaltStrikeParser)
+- [8] [Cobalt Strike 4.13: Çeviride Kayboldu](https://www.cobaltstrike.com/blog/cobalt-strike-413-lost-in-translation)
+- [9] [Cobalt Strike 4.10: BeaconGate Üzerinden](https://www.cobaltstrike.com/blog/cobalt-strike-410-through-the-beacongate?p=6046)
 {{#include ../banners/hacktricks-training.md}}
