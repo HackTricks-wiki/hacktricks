@@ -997,6 +997,7 @@
   - [ios Heap Exploitation](binary-exploitation/ios-exploiting/ios-example-heap-exploit.md)
   - [ios Physical UAF - IOSurface](binary-exploitation/ios-exploiting/ios-physical-uaf-iosurface.md)
   - [Webkit Dfg Store Barrier Uaf Angle Oob](binary-exploitation/ios-exploiting/webkit-dfg-store-barrier-uaf-angle-oob.md)
+  - [XNU vm_map COW Aliasing and Vnode TOCTOU](binary-exploitation/ios-exploiting/xnu-vm-map-cow-vnode-toctou.md)
 
 # 🤖 AI
 - [AI Security](AI/README.md)
