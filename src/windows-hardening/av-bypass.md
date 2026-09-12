@@ -454,6 +454,40 @@ autotok.sh Confused.exe  # wrapper that performs the 3 steps above sequentially
 - [**Nimcrypt**](https://github.com/icyguider/nimcrypt): Nimcrypt is a .NET PE Crypter written in Nim
 - [**inceptor**](https://github.com/klezVirus/inceptor)**:** Inceptor is able to convert existing EXE/DLL into shellcode and then load them
 
+### LLVM compiler-assisted per-function self-masking
+
+Instead of masking an entire implant only while it sleeps, a modified LLVM X86 backend can keep selected functions XOR-masked whenever they are inactive. The Function Peekaboo PoC selects demangled names containing `REG_`, injects position-independent entry/exit stubs around the final machine code, and emits one shared masking handler in `.text`; source-level signatures and the Windows x64 calling convention remain unchanged.<sup>[[38]](#references)[[39]](#references)</sup>
+
+#### Backend control-flow transformation
+
+This belongs after instruction selection and optimization because the transformation must cover **every emitted return** and know the exact x86 layout. A pre-emission `MachineFunctionPass` finds the last `MachineInstr::isReturn()`, deletes it so the final path falls through into the appended epilogue, and replaces earlier returns with `JMP_1 handler`. Keep any compiler-generated stack/frame teardown preceding each return; redirect only the return instruction itself.<sup>[[38]](#references)[[39]](#references)</sup>
+
+`X86AsmPrinter::emitFunctionBodyStart()` and `emitFunctionBodyEnd()` emit the per-function stubs, while `emitEndOfAsmFile()` emits the handler. Symbols shared between emission stages allow a prologue branch to target its later epilogue; for a manually emitted near `je`, write `0F 84` followed by the four-byte MC expression `target - address_after_je`. Calls and jumps to the handler can instead be emitted as `MCInst` objects (`CALL64pcrel32` and `JMP_1`). A pass must return `false` for an unselected function when it changed nothing; the PoC incorrectly returns `true` on that path.<sup>[[38]](#references)[[39]](#references)</sup>
+
+#### Metadata and pre-CRT initialization
+
+The PoC places an XOR key and 16-byte records containing a loader-relocated function pointer plus a runtime length in `.funcmeta`. Although the C field is a `uint32_t`, the handler accesses a QWORD at record offset `+8`, consuming the length and its padding, and advances records by `0x10`. PE section names occupy only eight bytes, so the runtime lookup sees `.funcmet`. An external patcher adds an executable `.stub`, saves the old entry-point RVA in the stub, and redirects `AddressOfEntryPoint`; the PIC stub obtains the image base from `gs:[0x60]` → `[PEB+0x10]`, walks PE32+ imports to resolve an already imported `VirtualProtect`, and runs before the CRT.<sup>[[38]](#references)[[39]](#references)</sup>
+
+Initialization sets a sentinel in `gs:[0xE8]` and calls every metadata function. Its permanently readable prologue records the function start in `gs:[0xF0]`, detects the sentinel, and skips the still-clear body. The epilogue then uses `call handler`; after the handler saves 13 registers (`0x68` bytes), the return address at `[rsp+0x68]` is the transformed function's end, so `end - start` can be written into its metadata record. The stub clears the sentinel and jumps to `ImageBase + original_entry_point_RVA` after all bodies have been masked.<sup>[[38]](#references)[[39]](#references)</sup>
+
+During a normal call, the prologue calls the same symmetric handler to decode the body. The final path falls into the appended epilogue, while every earlier return jumps straight to the shared handler. The normal epilogue also uses `jmp handler` rather than `call`, so after re-masking, the handler's `ret` consumes the original caller's return address and preserves the function result in `RAX`.<sup>[[38]](#references)[[39]](#references)</sup>
+
+#### Masking primitive and analysis indicators
+
+The handler finds the current record, skips the fixed visible prologue (`0x46` bytes in this build), changes the remainder to `PAGE_EXECUTE_READWRITE`, XORs it byte-by-byte with the low key byte, and then sets it to `PAGE_EXECUTE_READ`. The same loop therefore decodes on entry and encodes on every normal exit.<sup>[[38]](#references)[[39]](#references)</sup>
+
+High-signal indicators for this design include:<sup>[[38]](#references)[[39]](#references)</sup>
+
+- an entry point inside an executable `.stub` and a `.funcmet` section holding a key plus relocated `.text` pointers;
+- pre-CRT PEB, import-table, and section-table parsing, followed by calls through each metadata pointer;
+- identical `call`/`pop` PIC prologues and many return sites redirected to one handler;
+- writes to `gs:[0xE8]`, `gs:[0xF0]`, and `gs:[0xF8]` followed by repeated `VirtualProtect` transitions and bytewise XOR writes into image-backed executable pages.
+
+This is memory-scanner evasion, not cryptographic protection: the patched file still contains the original clear body, and a debugger can break on `VirtualProtect` or the XOR loop and dump the active function. The single-byte XOR, readable metadata, and fixed `0x46` boundary also make offline recovery straightforward.<sup>[[38]](#references)[[39]](#references)</sup>
+
+> [!WARNING]
+> The PoC's TEB slots are thread-local but the modified code pages are process-wide. Concurrent or recursive entry can therefore re-toggle instructions while another invocation is executing; exceptions and nonlocal exits can also bypass re-masking. A robust implementation must synchronize transitions, restore the protection actually returned through `lpflOldProtect`, avoid hard-coded stub lengths, audit both `call` and `jmp` paths for x64 stack alignment, and call `FlushInstructionCache` after rewriting executable bytes. Microsoft explicitly makes the caller responsible for instruction-cache coherency when executable code is modified.<sup>[[38]](#references)[[39]](#references)[[40]](#references)</sup>
+
 ## SmartScreen & MoTW
 
 You may have seen this screen when downloading some executables from the internet and executing them.
@@ -1429,5 +1463,8 @@ Sleep(exec_delay_seconds * 1000); // config-controlled delay to outlive sandboxe
 - [35] [trustedsec.com - Abusing Chrome Remote Desktop On Red Team Operations A Practical Guide](https://trustedsec.com/blog/abusing-chrome-remote-desktop-on-red-team-operations-a-practical-guide)
 - [36] [Check Point Research - BTR Reforged: Weaponizing Defender's Remediation Driver as a Kernel Operation Primitive](https://research.checkpoint.com/2026/btr-reforged-weaponizing-defenders-remediation-driver-as-a-kernel-operation-primitive/)
 - [37] [Dump-GUY - BTR_CLI](https://github.com/Dump-GUY/BTR_CLI)
+- [38] [MDSec Function Peekaboo companion code](https://github.com/mdsecactivebreach/functionpeekaboo)
+- [39] [MDSec - Function Peekaboo: Crafting Self-Masking Functions Using LLVM](https://mdsec.co.uk/2025/10/function-peekaboo-crafting-self-masking-functions-using-llvm/)
+- [40] [Microsoft Learn - VirtualProtect](https://learn.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualprotect)
 
 {{#include ../banners/hacktricks-training.md}}
