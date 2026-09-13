@@ -243,6 +243,54 @@ The **Create Dump** option will dump the final shellcode if any change is done t
 
 Upload your shellcode file as input and use the following recipe to decompile it: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
 
+## Architecture-neutral semantic binary analysis with P-Code graphs
+
+[`pcode_graph`](https://github.com/quarkslab/pcode_graph) lifts a function, basic block, executable section or arbitrary byte range through Ghidra SLEIGH/`pypcode`, then converts the low-level P-Code into a compact **control and data-flow graph (CDG)**. This is useful when mnemonic counts or instruction order are too compiler-, optimization- or architecture-specific for function identification, binary diffing, deobfuscation or semantic gadget search.<sup>[[7]](#references)[[8]](#references)</sup>
+
+Install the package and inspect a selected function or address range with the CLI as follows.<sup>[[7]](#references)[[8]](#references)</sup>
+
+```bash
+python3 -m pip install pcode_graph
+
+# Inspect the intermediate representation and its analysis
+cdg pcode sample.o > sample.pcode
+cdg table sample.o > sample-analysis.md
+
+# Render the complete CDG, or only its data dependencies
+cdg html sample.o -f target -o target.html
+cdg md sample.o -f target -o target.md
+cdg html --dataflow-only sample.o -f target -o target-dataflow.html
+
+# Lift an address range from a recognized binary; override its architecture if needed
+cdg md sample.elf -c 0x401000:0x401080 -a x86_64 -o chunk.md
+```
+
+The CLI can select a symbol with `-f/--function`, a half-open address range with `-c/--chunk`, and an explicit architecture with `-a/--arch`. `pcode` prints raw lifted operations, while `table` exposes operation indexes, CFG predecessors/successors, reaching definitions, reachability and definitions leaving the analyzed region.<sup>[[7]](#references)[[8]](#references)</sup>
+
+### What the CDG preserves
+
+The graph builder indexes branch destinations, removes unreachable code and computes reaching definitions before recursively connecting meaningful inputs to their uses. P-Code temporaries are therefore represented by dependencies rather than retained as important nodes; simplification also removes nodes whose information is already implied by graph connectivity. Nodes represent input/output registers, constants, operations, Phi merges, memory reads/writes and begin/external/end states.<sup>[[8]](#references)</sup>
+
+A data-flow-only graph is insensitive to reordering independent instructions, but a Phi node alone does not identify which condition selects each incoming definition. Including control edges captures that condition and external transfers such as returns, at the cost of losing that instruction-permutation invariance.<sup>[[8]](#references)</sup>
+
+### Cross-architecture function and gadget matching
+
+For ML-assisted retrieval, `graph_to_data` exports a CDG as a PyTorch Geometric `Data` object. Use `map_calling_convention_registers` for cross-architecture work: it encodes registers by ABI role (argument position, return-value width, and so on), so equivalent roles on x86, ARM and MIPS share features. `map_registers` is the simpler one-hot physical-register encoding for a single architecture.<sup>[[7]](#references)[[8]](#references)</sup>
+
+A practical pipeline is to embed known vulnerable and patched implementations, then rank unknown stripped functions by cosine similarity. The demonstrated baseline applies GINE convolutions to node and edge features, pools after every layer, concatenates those graph-level states and L2-normalizes the final embedding; normalized embeddings can be compared with a dot product. Training uses balanced supervised-contrastive batches containing several compiler/architecture variants of each function so every anchor has both positive and negative comparisons.<sup>[[8]](#references)</sup>
+
+Choose graph outputs according to the task: retaining only ABI return registers generally reduces noise for complete-function matching, whereas a ROP gadget index should preserve writes to every relevant general-purpose register and processor flag because later gadgets may depend on any state change.<sup>[[8]](#references)</sup>
+
+### Analysis caveats
+
+Treat a high similarity score as a triage lead, not proof that two functions or vulnerabilities are identical. In particular, validate these failure modes before trusting the result:<sup>[[8]](#references)</sup>
+
+- Wrong architecture metadata may produce plausible-looking but incorrect P-Code instead of a hard decoding error.
+- Bad function boundaries or embedded data can contaminate the lifted region.
+- The graph does not perform pointer-alias analysis, so separate memory nodes do not express whether addresses can refer to the same location.
+- The described CFG is at P-Code-operation granularity, and adding control-flow edges makes the representation sensitive to independent instruction ordering.
+- Output-register selection and analysis timeouts can bias a corpus; keep extraction policy identical for query and reference functions.
+
 ## MBA obfuscation deobfuscation
 
 **Mixed Boolean-Arithmetic (MBA)** obfuscation hides simple expressions such as `x + y` behind formulas that mix arithmetic (`+`, `-`, `*`) and bitwise operators (`&`, `|`, `^`, `~`, shifts). The important part is that these identities are usually only correct under **fixed-width modular arithmetic**, so carries and overflows matter:
@@ -542,5 +590,7 @@ https://www.youtube.com/watch?v=VVbRe7wr3G4
 - [4] [pentestpartners/reverse-engineering - rust-strings](https://github.com/pentestpartners/reverse-engineering/blob/main/rust-strings)
 - [5] [pentestpartners/reverse-engineering - RustStrings.py](https://github.com/pentestpartners/reverse-engineering/blob/main/RustStrings.py)
 - [6] [Nostalgia - GBA reversing tutorial (archived)](https://web.archive.org/web/20220328215728/https://exp.codes/Nostalgia/)
+- [7] [Quarkslab pcode_graph repository](https://github.com/quarkslab/pcode_graph)
+- [8] [From P-Code to GNN: Extracting Binary Code Semantics](https://blog.quarkslab.com/from-p-code-to-gnn-extract-binary-code-semantics.html)
 
 {{#include ../../banners/hacktricks-training.md}}
