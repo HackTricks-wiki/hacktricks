@@ -1,4 +1,4 @@
-# Writable Sys Path +Dll Hijacking Privesc
+# Writable Sys Path +DLL Hijacking Privesc
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -15,7 +15,7 @@ For more information about **DLL hijacking**, see:
 ./
 {{#endref}}
 
-## Privesc with Dll Hijacking
+## Privesc with DLL Hijacking
 
 ### Finding a Missing DLL
 
@@ -66,7 +66,7 @@ if ($envPath -notlike "*$folderPath*") {
 > [!TIP]
 > **Boot logging is only required for services that start too early** to observe otherwise. If you can **trigger the target service/program on demand** (for example, by interacting with its COM interface, restarting the service, or relaunching a scheduled task), it is usually faster to keep a normal Procmon capture with filters such as **`Path contains .dll`**, **`Result is NAME NOT FOUND`**, and **`Path begins with <writable_machine_path>`**.
 
-### Missed Dlls
+### Missed DLLs
 
 Running this in a free **virtual (vmware) Windows 11 machine** I got these results:
 
