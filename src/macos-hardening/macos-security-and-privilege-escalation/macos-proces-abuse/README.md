@@ -165,6 +165,12 @@ Function Hooking involves **intercepting function calls** or messages within a s
 macos-function-hooking.md
 {{#endref}}
 
+### ARM64/ARM64e Call-Stack Spoofing
+
+{{#ref}}
+arm64-arm64e-call-stack-spoofing.md
+{{#endref}}
+
 ### Inter Process Communication
 
 Inter Process Communication (IPC) refers to different methods by which separate processes **share and exchange data**. While IPC is fundamental for many legitimate applications, it can also be misused to subvert process isolation, leak sensitive information, or perform unauthorized actions.

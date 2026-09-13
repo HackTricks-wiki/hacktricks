@@ -256,6 +256,7 @@
     - [macOS Shell Applications Injection](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-bash-applications-injection.md)
     - [macOS Electron Applications Injection](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-electron-applications-injection.md)
     - [macOS Function Hooking](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-function-hooking.md)
+    - [ARM64/ARM64e Call-Stack Spoofing](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/arm64-arm64e-call-stack-spoofing.md)
     - [macOS IPC - Inter Process Communication](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-ipc-inter-process-communication/README.md)
       - [macOS MIG - Mach Interface Generator](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-ipc-inter-process-communication/macos-mig-mach-interface-generator.md)
       - [macOS XPC](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-ipc-inter-process-communication/macos-xpc/README.md)
