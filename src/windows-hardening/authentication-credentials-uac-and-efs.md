@@ -22,6 +22,15 @@ $a = Get-ApplockerPolicy -effective
 $a.rulecollections
 ```
 
+`Test-AppLockerPolicy` evaluates candidate files for a specific identity against an AppLocker policy. Test the account whose token will execute the payload because rules can target users or groups; `Get-AppLockerFileInformation` is also useful to inspect the path, hash, and publisher metadata on which rules may match.<sup>[[5]](#references)</sup>
+
+```powershell
+$policy = Get-AppLockerPolicy -Effective
+$user = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+Test-AppLockerPolicy -PolicyObject $policy -Path C:\Users\Public\payload.exe -User $user
+Get-AppLockerFileInformation -Path C:\Users\Public\payload.exe | Format-List
+```
+
 This registry path contains the configurations and policies applied by AppLocker, providing a way to review the current set of rules enforced on the system:
 
 - `HKLM\Software\Policies\Microsoft\Windows\SrpV2`
@@ -172,7 +181,9 @@ Also, check this [web page](https://cube0x0.github.io/Relaying-for-gMSA/) about 
 
 ## LAPS
 
-The **Local Administrator Password Solution (LAPS)**, available for download from [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), enables the management of local Administrator passwords. These passwords, which are **randomized**, unique, and **regularly changed**, are stored centrally in Active Directory. Access to these passwords is restricted through ACLs to authorized users. With sufficient permissions granted, the ability to read local admin passwords is provided.
+Distinguish **legacy Microsoft LAPS** from the native **Windows LAPS** implementation during enumeration. Windows LAPS shipped in the April 11, 2023 Windows updates and can back up a managed local administrator password to **Windows Server Active Directory** or **Microsoft Entra ID**. In AD-backed deployments it can additionally encrypt passwords, retain encrypted password history, and manage a domain controller's DSRM password. The downloadable legacy MSI is deprecated on newer Windows versions, although Windows LAPS can operate in legacy-emulation mode.<sup>[[6]](#references)</sup>
+
+Because legacy Microsoft LAPS and Windows LAPS are separate implementations, identify which one is deployed before applying attribute- or cmdlet-specific attacks. The linked page covers discovery, ACL enumeration, retrieval, expiration manipulation, and offline recovery without duplicating those procedures here.<sup>[[6]](#references)</sup>
 
 {{#ref}}
 active-directory-methodology/laps.md
@@ -268,11 +279,14 @@ The SSPI will be in charge of finding the adequate protocol for two machines tha
 authentication-credentials-uac-and-efs/uac-user-account-control.md
 {{#endref}}
 
+
+
 ## References
 
 - [1] [Bypassing AppLocker and PowerShell constrained language mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode)
 - [2] [howto ~ decrypt EFS files](https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files)
 - [3] [Relaying for gMSA](https://cube0x0.github.io/Relaying-for-gMSA/)
 - [4] [15 Ways to Bypass the PowerShell Execution Policy](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)
-
+- [5] [Use the AppLocker Windows PowerShell cmdlets](https://learn.microsoft.com/en-us/windows/security/application-security/application-control/app-control-for-business/applocker/use-the-applocker-windows-powershell-cmdlets)
+- [6] [Windows LAPS overview](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-overview)
 {{#include ../banners/hacktricks-training.md}}
