@@ -61,6 +61,33 @@ AI-Prompts.md
 > MCP servers invite users to have an AI agent helping them in every kind of everyday tasks, like reading and responding emails, checking issues and pull requests, writing code, etc. However, this also means that the AI agent has access to sensitive data, such as emails, source code, and other private information. Therefore, any kind of vulnerability in the MCP server could lead to catastrophic consequences, such as data exfiltration, remote code execution, or even complete system compromise.
 > It's recommended to never trust a MCP server that you don't control.
 
+### Unauthenticated Dangerous Tools: Intended Functionality as RCE
+
+A remotely reachable MCP server does not need a memory-corruption or command-injection vulnerability to provide initial access. If it accepts unauthenticated requests and intentionally advertises a shell, file-write, database, container, Kubernetes, or cloud-administration tool, a caller can invoke that capability directly. The operation runs with the MCP server process's UID, environment variables, filesystem access, cloud identity, mounted sockets, and network reachability.<sup>[[33]](#references)[[34]](#references)</sup>
+
+A practical assessment should exercise the protocol itself rather than only fingerprinting the HTTP service:<sup>[[33]](#references)[[34]](#references)</sup>
+
+1. Locate the MCP transport and send `initialize`; retain any negotiated session identifier and complete the transport-specific initialized handshake.
+2. Request `tools/list` and inspect both tool names and `inputSchema` definitions. Prioritize command execution, unrestricted reads/writes, SQL execution, secret access, and infrastructure administration.
+3. Call a selected tool with arguments matching its schema. Start with a harmless proof such as `id`, `whoami`, or writing a marker inside an approved test directory.
+4. Treat a successful JSON-RPC response separately from proof that the requested action executed; validate the side effect or expected output.
+
+The core JSON-RPC sequence used by automated scanners can be reduced to the following messages (session/transport headers are omitted):<sup>[[33]](#references)[[34]](#references)</sup>
+
+```json
+{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"audit","version":"1.0"}}}
+{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}
+{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"execute_command","arguments":{"command":"id"}}}
+```
+
+N4D Mesh Controller operationalized this technique by classifying discovered tool names and schemas before invoking `tools/call`. Runtime replay of a current agent confirmed `initialize` → `tools/list` → `tools/call` against an inert `execute_command` fixture; older scanners identified as `n4d-vps`, while a newer agent used the generic client name `n`, which is only meaningful when correlated with other telemetry.<sup>[[33]](#references)[[34]](#references)</sup>
+
+For detection, correlate public-source `initialize` → `tools/list` bursts with subsequent calls to high-impact tools, and record the authenticated principal (or absence of one), client identity, tool name, arguments, result, and spawned child process. Alert when MCP processes launch shells, `curl`/`wget`, or executables from `/tmp`, `/var/tmp`, or `/dev/shm`; also monitor access to cloud metadata and privileged local sockets.<sup>[[34]](#references)</sup>
+
+For hardening, bind local-only MCP services to loopback or place remote transports behind authenticated proxies, enforce authorization independently in every tool handler, and remove capabilities that are not required. Legitimate execution tools should run in short-lived unprivileged sandboxes with a read-only root filesystem, no host mounts or credentials, blocked metadata access, constrained egress, and CPU/memory/time limits.<sup>[[34]](#references)</sup>
+
+After a tool yields OS execution, continue with [Linux post-exploitation](../linux-hardening/post-exploitation/linux-post-exploitation/README.md); if the foothold is used to expose an internal service through an outbound relay, see [Tunneling and Port Forwarding](../generic-hacking/tunneling-and-port-forwarding.md).<sup>[[34]](#references)</sup>
+
 ### Prompt Injection via Direct MCP Data | Line Jumping Attack | Tool Poisoning
 
 As explained in the blogs:
@@ -534,6 +561,8 @@ Another suspicious primitive is **native-code preloading**. A skill that sets `L
 - [30] [REC in MCPJam inspector due to HTTP Endpoint exposes](https://github.com/MCPJam/inspector/security/advisories/GHSA-232v-j27c-5pp6)
 - [31] [HTB Kobold: MCPJam RCE, PrivateBin LFI-to-RCE, and Docker Host Takeover](https://0xdf.gitlab.io/2026/08/01/htb-kobold.html)
 - [32] [Anatomy of a Deception: Uncovering the 'omnicogg' Dropper in ClawHub](https://research.jfrog.com/post/omnicogg-malicious-skill/)
+- [33] [N4D Mesh Controller — original campaign research](https://blog.offensive-intel.com/n4d-mesh-controller/)
+- [34] [N4D Mesh Controller: New Infrastructure, a UPX-Packed Agent Labeled "go-titan," and How to Hunt for It](https://securitylabs.datadoghq.com/articles/n4d-mesh-controller-go-titan-new-infrastructure-hunting/)
 
 {{#include ../banners/hacktricks-training.md}}
 
