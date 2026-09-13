@@ -437,6 +437,42 @@ On the operator side, rebuild the file and run the dumper locally to recover cre
 base64 -d sqlstudio.b64 > sqlstudio.bin
 ```
 
+## Telegram Desktop `tdata` session theft
+
+Telegram Desktop keeps authorization and account state in its **`tdata`** directory. A copied session can be loaded by compatible tooling to authenticate without the account password while that authorization remains valid; if local-data encryption is enabled, the stealer also needs its passcode. An authenticated session can then expose identity data, dialog and membership metadata, messages, and downloadable media.<sup>[[10]](#references)</sup>
+
+### Discovery and acquisition
+
+Search both installed and portable layouts; Microsoft Store package names vary, so enumerate package directories containing `TelegramMessenge` and inspect their `LocalCache\Roaming` subtree.<sup>[[10]](#references)</sup>
+
+```powershell
+# Standard Telegram Desktop installation
+$env:APPDATA + '\Telegram Desktop\tdata'
+
+# Microsoft Store packages
+Get-ChildItem "$env:LOCALAPPDATA\Packages" -Directory |
+  Where-Object Name -Like '*TelegramMessenge*' |
+  ForEach-Object { Get-ChildItem "$($_.FullName)\LocalCache\Roaming" -Recurse -Directory -Filter tdata -ErrorAction SilentlyContinue }
+
+# Portable/nonstandard copies (expensive and noisy)
+Get-ChildItem C:\ -Recurse -Directory -Filter tdata -ErrorAction SilentlyContinue
+```
+
+If ordinary reads fail and the process token **already contains and enables** `SeBackupPrivilege`, backup-aware access provides a fallback; it does not obtain the privilege or elevate the process. `CreateFileW` with `FILE_FLAG_BACKUP_SEMANTICS` can request backup/restore semantics and override file security checks when the required token privileges are present, but the flag alone does not defeat an incompatible sharing lock.<sup>[[10]](#references)[[11]](#references)</sup>
+
+For live locked files, create/read a **Volume Shadow Copy**; for ACL-blocked files, `robocopy /B` uses backup mode and overrides file and directory ACLs.<sup>[[10]](#references)[[12]](#references)</sup>
+
+```cmd
+whoami /priv
+robocopy "%APPDATA%\Telegram Desktop\tdata" "C:\Temp\tdata" /E /B
+```
+
+A bandwidth-conscious implant may submit only the file-path inventory first, receive a snapshot identifier plus the paths already stored by the C2, and upload only missing files. Therefore, small incremental transfers after recursive `tdata` enumeration can still represent successful session theft.<sup>[[10]](#references)</sup>
+
+### Detection and containment
+
+Correlate recursive access to `tdata` by a non-Telegram process with `SeBackupPrivilege` enablement, backup-semantics file opens, VSS activity, or a child `robocopy.exe` using `/B`. Also hunt for rapid enumeration of both `%APPDATA%` and `%LOCALAPPDATA%\Packages`, followed by outbound connections from the same process. After compromise, use **Settings → Devices** (or **Privacy & Security → Active Sessions**) to terminate unrecognized sessions; enabling two-step verification alone does not revoke an authorization that was already stolen.<sup>[[10]](#references)[[13]](#references)</sup>
+
 ## Passkeys / WebAuthn credential theft from Chrome on Windows
 
 If code execution is obtained as the **victim user** on a Windows host using **Chrome + Google Password Manager synced passkeys**, passkeys become an interesting post-exploitation target even **without admin/SYSTEM**.<sup>[[4]](#references)</sup>
@@ -507,5 +543,9 @@ This means **hardware binding prevents off-device export but not same-user use o
 - [7] [0xWord – Hacking Windows: Ataques a Sistemas y Redes Microsoft](https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html)
 - [8] [How the Active Directory Data Store Really Works: Inside NTDS.dit (Part 1)](https://blog.chrisse.se/?p=762)
 - [9] [en.hackndo.com - Remote Lsass Dump Passwords](https://en.hackndo.com/remote-lsass-dump-passwords)
+- [10] [Kaspersky Securelist – Armored Likho Expands Its Cyber-Espionage Arsenal with the Still Toolkit](https://securelist.com/armored-likho-still-toolkit/121033)
+- [11] [Microsoft Learn – CreateFileW function and `FILE_FLAG_BACKUP_SEMANTICS`](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew)
+- [12] [Microsoft Learn – Robocopy `/B` backup mode](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/robocopy)
+- [13] [Telegram FAQ – terminating active sessions](https://telegram.org/faq)
 
 {{#include ../../banners/hacktricks-training.md}}
