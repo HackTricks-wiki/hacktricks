@@ -885,6 +885,7 @@
 - [Physical Attacks](hardware-physical-access/physical-attacks.md)
 - [Escaping from KIOSKs](hardware-physical-access/escaping-from-gui-applications.md)
 - [Firmware Analysis](hardware-physical-access/firmware-analysis/README.md)
+  - [UEFI IFR and NVRAM Security-Setting Patching](hardware-physical-access/firmware-analysis/uefi-ifr-nvram-security-setting-patching.md)
   - [Android Mediatek Secure Boot Bl2 Ext Bypass El3](hardware-physical-access/firmware-analysis/android-mediatek-secure-boot-bl2_ext-bypass-el3.md)
   - [Bootloader testing](hardware-physical-access/firmware-analysis/bootloader-testing.md)
   - [Firmware Integrity](hardware-physical-access/firmware-analysis/firmware-integrity.md)
