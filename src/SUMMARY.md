@@ -436,6 +436,7 @@
   - [Android Anti Instrumentation And Ssl Pinning Bypass](mobile-pentesting/android-app-pentesting/android-anti-instrumentation-and-ssl-pinning-bypass.md)
   - [Android Application Level Virtualization](mobile-pentesting/android-app-pentesting/android-application-level-virtualization.md)
   - [Android Applications Basics](mobile-pentesting/android-app-pentesting/android-applications-basics.md)
+  - [Android SELinux Policy Analysis](mobile-pentesting/android-app-pentesting/android-selinux-policy-analysis.md)
   - [Android Enterprise Work Profile Bypass](mobile-pentesting/android-app-pentesting/android-enterprise-work-profile-bypass.md)
   - [Android Hce Nfc Emv Relay Attacks](mobile-pentesting/android-app-pentesting/android-hce-nfc-emv-relay-attacks.md)
   - [Android Physical Attacks](mobile-pentesting/android-app-pentesting/android-physical-attacks.md)
