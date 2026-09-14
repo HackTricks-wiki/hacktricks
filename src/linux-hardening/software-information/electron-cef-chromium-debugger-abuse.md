@@ -182,14 +182,69 @@ For additional historical browser-automation and Chromium security cases, see th
 
 ### Enabling CDP inside a live Chromium process
 
-On Windows, [**CDP-Enabler**](https://github.com/deathflamingo/CDP-Enabler) demonstrated that the command-line restriction is not the only way to activate CDP: code already capable of injecting into an existing `msedge.exe` can invoke Chromium's non-exported `content::DevToolsAgentHost::StartRemoteDebuggingServer` and expose the authenticated live profile without restarting the browser.<sup>[[15]](#references)</sup>
+Chrome's default-profile restriction only blocks the command-line activation path. With sufficient same-user access to manipulate the browser process, the original [**CDP-Enabler**](https://github.com/deathflamingo/CDP-Enabler) and the Cobalt Strike [**CDP-Enable-BOF**](https://github.com/kingofthenops/CDP-Enable-BOF) invoke Chromium's non-exported `content::DevToolsAgentHost::StartRemoteDebuggingServer` inside the already-running `chrome.exe` or `msedge.exe`. The endpoint therefore belongs to the real profile, retaining its tabs, extensions, cookies and authenticated state.<sup>[[15]](#references)[[16]](#references)[[20]](#references)</sup>
 
-The demonstrated chain injects a DLL with `VirtualAllocEx`/`WriteProcessMemory`/`CreateRemoteThread`, resolves internal Edge symbols (first from PDBs and then with version-specific byte signatures), subclasses the browser window, and posts a message so the final server-start call executes on the browser **UI thread**. The socket is bound to loopback, after which normal CDP primitives can retrieve cookies, capture tabs, inspect network traffic, or evaluate JavaScript in authenticated pages.<sup>[[15]](#references)</sup>
+For ordinary Chrome/Edge processes, the BOF finds the browser window and loaded `chrome.dll`/`msedge.dll`, scans the remote PE for masked signatures, allocates stubs and a context block, temporarily replaces the window procedure, and dispatches the final call on the browser **UI thread**. The relevant runtime inputs are `StartRemoteDebuggingServer`, Chromium's `operator new`, `TCPServerSocketFactory::CreateForHttpServer`, and the factory vtable; resolving Chromium's allocator avoids freeing an object allocated from the wrong heap. Execution stops unless each mandatory signature has a unique match.<sup>[[15]](#references)[[16]](#references)</sup>
+
+The current BOF exposes these operator commands; `chrome-iso` is a separate path for Chrome's Windows Process Isolation boundary.<sup>[[16]](#references)</sup>
+
+```text
+cdp-enable chrome
+cdp-enable edge 9301
+cdp-enable chrome-iso
+python .\grab_cookies.py --port 9222 --output cookies.json
+```
+
+The `chrome-iso` path avoids write/thread handles to the isolated process. It identifies the installed `chrome.dll` whose PE image size matches the live process, resolves symbols from that local image, and uses Chromium's `WindowImpl` dispatch plus synchronous `WM_COPYDATA` and an existing-image User32 hook to reach the UI thread.<sup>[[16]](#references)</sup>
 
 > [!WARNING]
-> This is a **post-compromise/process-injection** technique, not an unauthenticated network bypass. It is highly build-dependent because the relevant C++ symbols are not exported and signatures can change after browser updates.<sup>[[15]](#references)</sup>
+> This is a **post-compromise browser-process manipulation** technique, not an unauthenticated network bypass. It is build-dependent because the relevant C++ symbols are not exported and can change after browser updates.<sup>[[15]](#references)[[16]](#references)[[20]](#references)</sup>
 
-For detection, do not rely only on `--remote-debugging-*` command-line telemetry: also correlate unusual handles and memory operations against browser processes (`PROCESS_VM_OPERATION`, `PROCESS_VM_WRITE`, thread creation), DLL injection, and unexpected loopback listening sockets owned by Chrome/Edge.<sup>[[15]](#references)</sup>
+#### Refreshing signatures after browser updates
+
+Use the exact version of `chrome.dll` or `msedge.dll` installed on the target and its matching PDB. `symchk.exe` from the Windows SDK downloads the symbols; the repository scripts then locate `StartRemoteDebuggingServer`, derive the allocator/socket-factory inputs, or validate every signature embedded in the BOF.<sup>[[16]](#references)[[20]](#references)</sup>
+
+```powershell
+# Run from a directory containing the exact target DLL
+& 'C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\symchk.exe' /v chrome.dll /s 'srv*C:\symbols*https://chromium-browser-symsrv.commondatastorage.googleapis.com'
+symchk /v /ocx edge-symchk.txt /s 'SRV*C:\symbols*https://msdl.microsoft.com/download/symbols' .\msedge.dll
+
+python .\find_start_server.py .\chrome.dll 'C:\symbols\...\chrome.dll.pdb'
+python .\find_cdp_inputs.py .\chrome.dll 'C:\symbols\...\chrome.dll.pdb'
+python .\find_cdp_inputs.py .\chrome.dll --validate-bof-signatures
+```
+
+A zero-hit or multi-hit result must not be replaced with an arbitrary address. If a known `operator new` or `CreateForHttpServer` pattern changed too much to seed a new mask, use `pe_signature_finder.py` with the PDB to inspect that symbol and derive a byte sequence which is unique in the target module.<sup>[[16]](#references)[[20]](#references)</sup>
+
+#### Authenticated-browser extraction with CDP Toolkit
+
+This technique does not decrypt App-Bound Encryption (ABE) offline or remove device binding. It instead treats the legitimate browser as a **decryption oracle and authenticated interaction proxy**: `Storage.getCookies` asks the live browser for its cookie store, while navigation/screencast workflows keep requests, storage, enterprise authentication and device-bound behavior inside the victim's existing browser.<sup>[[17]](#references)[[20]](#references)</sup>
+
+After routing the loopback CDP listener through the operator's pivot, [**CDP Toolkit**](https://github.com/kingofthenops/CDP-toolkit) can enumerate and collect common artifacts.<sup>[[17]](#references)[[20]](#references)</sup>
+
+```powershell
+pip install -e .
+cdptk discover --cdp-endpoint http://127.0.0.1:9222
+cdptk tabs list --cdp-endpoint http://127.0.0.1:9222
+cdptk cookies dump --cdp-endpoint http://127.0.0.1:9222 --out cookies.json
+cdptk tabs screenshot 1 --cdp-endpoint http://127.0.0.1:9222 --out tab.png
+cdptk history search azure --cdp-endpoint http://127.0.0.1:9222 --limit 50
+cdptk bookmarks list --cdp-endpoint http://127.0.0.1:9222 --out bookmarks.json
+cdptk saved-passwords list --cdp-endpoint http://127.0.0.1:9222
+cdptk extensions list --cdp-endpoint http://127.0.0.1:9222
+```
+
+`discover`, `tabs list`, `cookies dump`, and `tabs screenshot` are mostly wrappers around `/json/version`, the target list, `Storage.getCookies`, and `Page.captureScreenshot`. History, bookmarks, extensions and password metadata instead require a temporary `chrome://`/`edge://` WebUI target: the toolkit waits for the surface to render, inspects its model or DOM, collects the result, and closes the target.<sup>[[17]](#references)[[20]](#references)</sup>
+
+`saved-passwords dump` goes further: it opens the real saved-login origin, focuses a credential field, selects the native autofill suggestion using CDP input events, and reads the populated values. The origin/port/path must closely match the saved-password realm; visible mode is the reliable default because the suggestion popup is native browser UI.<sup>[[17]](#references)[[20]](#references)</sup>
+
+For live interaction, `browser-takeover screencast` streams frames and sends input to a real target (including background or off-screen modes). `browser-takeover proxy` instead accepts HTTP and HTTPS `CONNECT` locally and makes upstream requests through hidden Chrome targets, falling back to background tabs where hidden targets are unavailable; this preserves the victim's network/authentication context but is less faithful for complex client-side applications because the operator browser renders the returned content.<sup>[[17]](#references)[[20]](#references)</sup>
+
+#### Detection on Windows
+
+Sysmon Event ID **8** records `CreateRemoteThread`, while Event ID **10** records one process opening another and includes `GrantedAccess`. Correlate Event 8 targeting `chrome.exe`/`msedge.exe` with Event 10 from the same source process, user and time window; the observed `0x143a` mask includes `PROCESS_CREATE_THREAD` (`0x0002`), `PROCESS_VM_OPERATION` (`0x0008`), `PROCESS_VM_READ` (`0x0010`), **`PROCESS_VM_WRITE` (`0x0020`)**, `PROCESS_QUERY_INFORMATION` (`0x0400`) and `PROCESS_QUERY_LIMITED_INFORMATION` (`0x1000`). This is broader process-injection hunting rather than a unique CDP-Enable-BOF signature, so baseline legitimate browser-management, accessibility and security tooling.<sup>[[18]](#references)[[19]](#references)[[20]](#references)</sup>
+
+The Event 8/`0x143a` correlation targets the ordinary injection path; it may not cover `chrome-iso`, whose documented path requests only query-limited process handles and transfers execution through an existing-image User32 hook.<sup>[[16]](#references)</sup> Do not rely only on `--remote-debugging-*` command-line telemetry: also hunt for unusual browser-process handles/memory operations and unexpected loopback listeners owned by Chrome or Edge.<sup>[[15]](#references)[[20]](#references)</sup>
 
 ### Post-Exploitation
 
@@ -226,4 +281,9 @@ For macOS-specific Chromium relaunch, extension, and CDP tradecraft, see [macOS 
 - [13] [Google Project Zero Issue 1944 (Chromium bug tracker)](https://bugs.chromium.org/p/project-zero/issues/detail?id=1944)
 - [14] [Changes to remote debugging switches to improve security - Chrome for Developers](https://developer.chrome.com/blog/remote-debugging-port)
 - [15] [Injecting CDP into a Running Edge Browser: A Deep Dive into Runtime Browser Instrumentation](https://deathflamingo.com/blog/cdp_enabler/)
+- [16] [kingofthenops/CDP-Enable-BOF](https://github.com/kingofthenops/CDP-Enable-BOF)
+- [17] [kingofthenops/CDP-toolkit](https://github.com/kingofthenops/CDP-toolkit)
+- [18] [Microsoft - Process Security and Access Rights](https://learn.microsoft.com/en-us/windows/win32/procthread/process-security-and-access-rights)
+- [19] [Microsoft Sysinternals - Sysmon event reference](https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon)
+- [20] [SpecterOps - Return of the Cookie Monster](https://specterops.io/blog/2026/08/13/chrome-devtools-protocol-cookie-theft/)
 {{#include ../../banners/hacktricks-training.md}}
