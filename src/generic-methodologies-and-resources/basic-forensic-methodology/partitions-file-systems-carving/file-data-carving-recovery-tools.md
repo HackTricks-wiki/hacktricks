@@ -4,28 +4,34 @@
 
 ## Strumenti di Carving e Recupero
 
-Altri strumenti su [https://github.com/Claudio-C/awesome-datarecovery](https://github.com/Claudio-C/awesome-datarecovery)
+Esegui sempre il carving su una **copia verificata**, non sul dispositivo originale. Consulta [Image Acquisition & Mount](../image-acquisition-and-mount.md) per le procedure di acquisizione in sola lettura e hashing.
+
+Altri strumenti in [https://github.com/Claudio-C/awesome-datarecovery](https://github.com/Claudio-C/awesome-datarecovery)
 
 ### Autopsy
 
-Lo strumento più comune utilizzato in ambito forense per estrarre file dalle immagini è [**Autopsy**](https://www.autopsy.com/download/). Scaricalo, installalo e fagli analizzare il file per trovare file "nascosti". Nota che Autopsy è progettato per supportare immagini disco e altri tipi di immagini, ma non file semplici.
+Lo strumento più comune utilizzato in ambito forense per estrarre file dalle immagini è [**Autopsy**](https://www.autopsy.com/download/). Scaricalo, installalo e fagli analizzare il file per trovare file "nascosti". Nota che Autopsy è progettato per supportare disk image e altri tipi di immagini, ma non file semplici.
 
 ### Binwalk <a href="#binwalk" id="binwalk"></a>
 
-**Binwalk** è uno strumento per analizzare file binari e individuare contenuti incorporati. È installabile tramite `apt` e il suo codice sorgente si trova su [GitHub](https://github.com/ReFirmLabs/binwalk).
+**Binwalk** è uno strumento per analizzare file binari e individuare contenuti incorporati. **Binwalk v3** è una riscrittura in Rust con estrazione automatica (`-e`), carving raw di oggetti noti e sconosciuti (`-c`), scansione ricorsiva/Matryoshka (`-M`) e thread worker configurabili. Il progetto consiglia la build Docker quando sono necessari tutti gli estrattori esterni; `cargo install binwalk` installa la CLI Rust, ma non tali dipendenze esterne.<sup>[[11]](#references)</sup>
 
-**Comandi utili**:
+**Comandi utili di v3**:
 ```bash
-sudo apt install binwalk         # Installation
-binwalk firmware.bin             # Display embedded data
-binwalk -e firmware.bin          # Extract recognised objects (safe-default)
-binwalk --dd " .* " firmware.bin  # Extract *everything* (use with care)
+cargo install binwalk                 # CLI only; install extractors separately
+binwalk firmware.bin                  # Identify embedded content
+binwalk -e firmware.bin               # Extract recognised objects
+binwalk -c -d carved firmware.bin     # Carve known and unknown objects
+binwalk -Me -d extracted firmware.bin # Extract and recursively scan results
+binwalk -e -l results.json firmware.bin
 ```
-⚠️  **Nota di sicurezza** – Le versioni dalla **2.1.2b** alla **2.3.3** sono interessate da una vulnerabilità di **Path Traversal** (CVE-2022-4510); l'avviso non indica alcuna versione pip corretta. Evita di estrarre campioni non attendibili con le release interessate oppure isola lo strumento con un container/UID non privilegiato.<sup>[[4]](#references)</sup>
+La ricetta legacy v2 `--dd='.*'` **non** è l'equivalente v3 di `-c`; controlla prima `binwalk --version` quando segui comandi di vecchi CTF/write-up.<sup>[[11]](#references)</sup>
+
+⚠️  **Nota di sicurezza** – Le versioni **dalla 2.1.2b alla 2.3.3** sono affette da una vulnerabilità di **Path Traversal** (CVE-2022-4510); l'advisory non indica alcuna versione pip corretta. Evita di estrarre sample non attendibili con release affette, oppure isola il tool usando un container/un UID non privilegiato.<sup>[[4]](#references)</sup>
 
 ### Foremost
 
-Un altro strumento comune per trovare file nascosti è **foremost**. Puoi trovare il file di configurazione di foremost in `/etc/foremost.conf`. Se vuoi cercare solo file specifici, decommentali. Se non decommenti nulla, foremost cercherà i tipi di file configurati per impostazione predefinita.
+Un altro tool comune per trovare file nascosti è **foremost**. Puoi trovare il file di configurazione di foremost in `/etc/foremost.conf`. Se vuoi cercare solo alcuni file specifici, decommentali. Se non decommenti nulla, foremost cercherà i tipi di file configurati di default.
 ```bash
 sudo apt-get install foremost
 foremost -v -i file.img -o output
@@ -33,7 +39,7 @@ foremost -v -i file.img -o output
 ```
 ### **Scalpel**
 
-**Scalpel** è un altro tool che può essere utilizzato per trovare ed estrarre **file incorporati in un file**. In questo caso, sarà necessario decommentare dal file di configurazione (_/etc/scalpel/scalpel.conf_) i tipi di file che si desidera estrarre.
+**Scalpel** è un altro tool che può essere utilizzato per trovare ed estrarre **file incorporati in un file**. In questo caso, dovrai decommentare dal file di configurazione (_/etc/scalpel/scalpel.conf_) i tipi di file che vuoi estrarre.
 ```bash
 sudo apt-get install scalpel
 scalpel file.img -o output
@@ -42,9 +48,9 @@ scalpel file.img -o output
 
 Questo strumento è incluso in kali, ma puoi trovarlo qui: <https://github.com/simsong/bulk_extractor>
 
-Bulk Extractor può analizzare un'immagine di prova e recuperare **frammenti pcap**, **artefatti di rete (URL, domini, IP, MAC, e-mail)** e molti altri oggetti **in parallelo utilizzando più scanner**.
+Bulk Extractor può analizzare un'immagine di evidenza ed estrarre **frammenti pcap**, **artefatti di rete (URL, domini, IP, MAC, e-mail)** e molti altri oggetti **in parallelo utilizzando più scanner**.
 
-La release v2.1.1 documenta una build Autotools e l'impostazione `-S jpeg_carve_mode=2` per il carving di tutti i file JPEG contigui.<sup>[[2]](#references)</sup>
+La release v2.1.1 documenta una build Autotools e l'impostazione `-S jpeg_carve_mode=2` per estrarre tutti i JPEG contigui.<sup>[[2]](#references)</sup>
 ```bash
 # Build from source – v2.1.1 (April 2024) requires C++17
 git clone --branch v2.1.1 --recurse-submodules https://github.com/simsong/bulk_extractor.git
@@ -57,19 +63,31 @@ sudo make install
 # Scan an image and carve contiguous JPEGs
 bulk_extractor -o out_folder -S jpeg_carve_mode=2 /evidence/disk.img
 ```
-Il file `bulk_diff.py` incluso confronta due esecuzioni di bulk_extractor, mentre `bulk_extractor_reader.py` legge il report e i file delle feature.<sup>[[3]](#references)</sup>
+Lo script `bulk_diff.py` incluso confronta due esecuzioni di bulk_extractor, mentre `bulk_extractor_reader.py` legge il report e i file delle feature.<sup>[[3]](#references)</sup>
 
 ### PhotoRec
 
 Puoi trovarlo su <https://www.cgsecurity.org/wiki/TestDisk_Download>
 
-Include versioni GUI e CLI. Puoi selezionare i **tipi di file** che vuoi che PhotoRec cerchi.
+Include versioni GUI e CLI. Puoi selezionare i **file-types** che vuoi che PhotoRec cerchi.
 
-![Esegui ogni scanner, esegui il carving aggressivo dei JPEG e genera un bodyfile - PhotoRec: include versioni GUI e CLI. Puoi selezionare i tipi di file che vuoi che PhotoRec cerchi](<../../../images/image (242).png>)
+![Esegui ogni scanner, esegui il carving aggressivo dei JPEG e genera un bodyfile - PhotoRec: include versioni GUI e CLI. Puoi selezionare i file-types che vuoi che PhotoRec cerchi](<../../../images/image (242).png>)
 
-### ddrescue + ddrescueview (imaging di unità in errore)
+### The Sleuth Kit `tsk_recover` (prima i metadati)
 
-Quando un'unità fisica è instabile, è buona pratica **crearne prima un'immagine** ed eseguire gli strumenti di carving solo sull'immagine. `ddrescue` (progetto GNU) è incentrato sulla copia affidabile dei dischi danneggiati, mantenendo un log dei settori illeggibili.
+Prima del raw signature carving, prova il recupero consapevole del filesystem quando i metadati del volume sono ancora analizzabili. Per impostazione predefinita, `tsk_recover` esporta solo i file non allocati; `-a` seleziona i file allocati ed `-e` esporta entrambi. Per un'immagine di un intero disco, passa a `-o` il **settore iniziale** della partizione ottenuto da `mmls` (non convertirlo in byte). Se l'input è già un'immagine della partizione, ometti `-o`.<sup>[[12]](#references)</sup>
+```bash
+sudo apt install sleuthkit
+mmls disk.img                         # Note the partition start sector, e.g. 2048
+mkdir recovered-deleted recovered-all
+tsk_recover -o 2048 disk.img recovered-deleted/
+tsk_recover -e -o 2048 disk.img recovered-all/
+```
+Questo passaggio può preservare nomi e percorsi derivati dal filesystem che il carving basato su header/footer non può conservare; esegui successivamente Foremost, Scalpel o PhotoRec per le voci i cui metadati sono mancanti o inutilizzabili.<sup>[[12]](#references)</sup>
+
+### ddrescue + ddrescueview (creazione di immagini di unità in errore)
+
+Quando un'unità fisica è instabile, è buona pratica **creare prima un'immagine** ed eseguire gli strumenti di carving esclusivamente sull'immagine. `ddrescue` (progetto GNU) si concentra sulla copia affidabile dei dischi danneggiati, mantenendo un log dei settori illeggibili.
 ```bash
 sudo apt install gddrescue ddrescueview   # On Debian-based systems
 # First pass – try to get as much data as possible without retries
@@ -80,11 +98,11 @@ sudo ddrescue -d -r3 /dev/sdX suspect.img suspect.log
 # Visualise the status map (green=good, red=bad)
 ddrescueview suspect.log
 ```
-L’opzione **`--cluster-size`** controlla quanti settori vengono copiati alla volta; valori più piccoli possono essere utili con unità lente.<sup>[[7]](#references)</sup>
+L'opzione **`--cluster-size`** controlla quanti settori vengono copiati alla volta; valori più piccoli possono essere utili con unità lente.<sup>[[7]](#references)</sup>
 
-### Extundelete / Ext4magic (undelete EXT 3/4)
+### Extundelete / Ext4magic (EXT 3/4 undelete)
 
-Se il file system di origine è basato su Linux EXT, potresti riuscire a recuperare i file eliminati di recente **senza eseguire un full carving**; questi strumenti basati sul journal funzionano su un filesystem non montato o su un’immagine in sola lettura.<sup>[[8]](#references)[[9]](#references)</sup>
+Se il file system di origine è basato su Linux EXT, potresti riuscire a recuperare i file eliminati di recente **senza eseguire un full carving**; questi strumenti basati sul journal funzionano su un filesystem non montato o su un'immagine in sola lettura.<sup>[[8]](#references)[[9]](#references)</sup>
 ```bash
 # Attempt journal-based undelete (metadata must still be present)
 extundelete disk.img --restore-all
@@ -94,50 +112,52 @@ ext4magic disk.img -M -d ./recovered
 ```
 > **Nota sulla compatibilità** – ext4magic è abbandonato; la pagina del progetto avverte che i filesystem attuali non sono più compatibili con esso.<sup>[[10]](#references)</sup>
 
-> 🛈 Se il file system è stato montato dopo l'eliminazione, i blocchi di dati potrebbero essere già stati riutilizzati; in tal caso è comunque necessario un corretto carving (Foremost/Scalpel).
+> 🛈 Se il file system è stato montato dopo l'eliminazione, i blocchi di dati potrebbero essere già stati riutilizzati – in tal caso è comunque necessario eseguire un corretto carving (Foremost/Scalpel).
 
 ### binvis
 
-Controlla il [codice](https://code.google.com/archive/p/binvis/) e lo [strumento della pagina web](https://binvis.io/#/).
+Consulta il [codice](https://code.google.com/archive/p/binvis/) e lo [strumento della pagina web](https://binvis.io/#/).
 
 #### Funzionalità di BinVis
 
 - **Visualizzatore della struttura** visivo e attivo
 - Più grafici per diversi punti di interesse
-- Focus su porzioni di un campione
+- Analisi focalizzata su porzioni di un campione
 - **Visualizzazione di stringhe e risorse**, ad esempio negli eseguibili PE o ELF
-- Ottenimento di **pattern** per la crittoanalisi dei file
-- **Individuazione** di algoritmi di packer o encoder
+- Individuazione di **pattern** per la crittoanalisi sui file
+- **Rilevamento** di algoritmi di packer o encoder
 - **Identificazione** della Steganography tramite pattern
-- **Confronto visivo** di file binari
+- **Diffing** binario **visuale**
 
 BinVis è un ottimo **punto di partenza per acquisire familiarità con un target sconosciuto** in uno scenario di black-boxing.
 
-## Strumenti specifici per il Data Carving
+## Strumenti specifici di Data Carving
 
 ### FindAES
 
-Cerca chiavi AES ricercando i relativi key schedule. È in grado di trovare chiavi da 128, 192 e 256 bit, come quelle utilizzate da TrueCrypt e BitLocker.
+Cerca chiavi AES analizzando i relativi key schedule. È in grado di trovare chiavi da 128, 192 e 256 bit, come quelle utilizzate da TrueCrypt e BitLocker.
 
-Scaricalo [qui](https://sourceforge.net/projects/findaes/).
+Scarica [qui](https://sourceforge.net/projects/findaes/).
 
-### YARA-X (triaging degli artefatti sottoposti a carving)
+### YARA-X (triage degli artefatti estratti)
 
-[YARA-X](https://github.com/VirusTotal/yara-x) è una riscrittura di YARA in Rust introdotta nel 2024; VirusTotal riferisce che alcune regole con espressioni regolari e loop complessi possono essere eseguite significativamente più velocemente.<sup>[[5]](#references)</sup> La sua CLI si chiama `yr` e il comando `scan` supporta scansioni ricorsive, il numero di thread e l'output dei metadati.<sup>[[6]](#references)</sup>
+[YARA-X](https://github.com/VirusTotal/yara-x) è una riscrittura di YARA in Rust introdotta nel 2024; VirusTotal riferisce che alcune regole basate su espressioni regolari e cicli complessi possono essere eseguite molto più velocemente.<sup>[[5]](#references)</sup> La sua CLI si chiama `yr` e il comando `scan` supporta scansioni ricorsive, il numero di thread e l'output dei metadati.<sup>[[6]](#references)</sup>
 ```bash
 # Scan every carved object produced by bulk_extractor
 yr scan --recursive --threads 8 --print-meta rules/index.yar out_folder/
 ```
 ## Strumenti complementari
 
-Puoi usare [**viu** ](https://github.com/atanunq/viu) per visualizzare immagini dal terminale.  \
+Puoi usare [**viu** ](https://github.com/atanunq/viu)per visualizzare immagini dal terminale.  \
 Puoi usare lo strumento da riga di comando Linux **pdftotext** per trasformare un pdf in testo e leggerlo.
+
+
 
 
 
 ## References
 
-- [1] [Note sulla release di Autopsy 4.21](https://github.com/sleuthkit/autopsy/releases/tag/autopsy-4.21.0)
+- [1] [Note di rilascio di Autopsy 4.21](https://github.com/sleuthkit/autopsy/releases/tag/autopsy-4.21.0)
 - [2] [README di bulk_extractor v2.1.1](https://github.com/simsong/bulk_extractor/blob/v2.1.1/README.md)
 - [3] [README degli strumenti Python di bulk_extractor](https://raw.githubusercontent.com/simsong/bulk_extractor/v2.1.1/python/README.txt)
 - [4] [Path traversal in binwalk (CVE-2022-4510) - Database degli avvisi di GitHub](https://github.com/advisories/GHSA-3cm8-v4mc-gppg)
@@ -147,4 +167,6 @@ Puoi usare lo strumento da riga di comando Linux **pdftotext** per trasformare u
 - [8] [extundelete](https://extundelete.sourceforge.net/)
 - [9] [Manuale di ext4magic](https://ext4magic.sourceforge.net/manpage_en.html)
 - [10] [Stato del progetto ext4magic](https://sourceforge.net/projects/ext4magic/)
+- [11] [README di Binwalk v3](https://github.com/ReFirmLabs/binwalk/blob/master/README.md)
+- [12] [The Sleuth Kit: manuale di tsk_recover](https://sleuthkit.org/sleuthkit/man/tsk_recover.html)
 {{#include ../../../banners/hacktricks-training.md}}
