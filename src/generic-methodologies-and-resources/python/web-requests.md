@@ -1,10 +1,10 @@
-# Żądania webowe
+# Żądania HTTP
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Python Requests
 
-Te przykłady używają udokumentowanych argumentów żądań, właściwości odpowiedzi, krotek plików multipart oraz sesji w Requests.<sup>[[1]](#references)</sup> Przykłady z `verify=False` wyłączają weryfikację certyfikatu TLS i powinny być ograniczone do kontrolowanych testów.<sup>[[1]](#references)</sup>
+Te przykłady używają udokumentowanych argumentów żądań, właściwości odpowiedzi, krotek plików multipart oraz sesji biblioteki Requests.<sup>[[1]](#references)</sup> Przykłady z `verify=False` wyłączają weryfikację certyfikatu TLS i powinny być ograniczone do kontrolowanych testów.<sup>[[1]](#references)</sup>
 ```python
 import random
 import re
@@ -76,9 +76,54 @@ return resp.json()
 def get_random_string(guid, path):
 return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
+## Przygotowane żądania do kontroli payloadu
+
+`PreparedRequest` udostępnia końcowy adres URL, nagłówki i zakodowane body przed wysłaniem. Zbuduj go za pomocą `Session.prepare_request()` (zamiast `Request.prepare()`), gdy muszą zostać zastosowane cookies sesji lub uwierzytelnianie; gdy przygotowany przepływ musi również uwzględniać ustawienia proxy/CA ze środowiska, jawnie połącz je za pomocą `merge_environment_settings()`.<sup>[[1]](#references)</sup>
+```python
+s = requests.Session()
+req = requests.Request("POST", url, data=b"role=user")
+prepped = s.prepare_request(req)
+prepped.body = b"role=admin%26debug%3D1"
+prepped.headers["Content-Length"] = str(len(prepped.body))
+
+env = s.merge_environment_settings(prepped.url, {}, None, None, None)
+r = s.send(prepped, timeout=(3.05, 15), allow_redirects=False, **env)
+print(r.request.headers)
+print(r.request.body)
+```
+Jest to przydatne, gdy exploit wymaga niestandardowego kodowania lub podczas porównywania payloadu skonstruowanego z requestem zapisanym w `response.request`. Nie jest to primitive raw-HTTP: Requests przechowuje nagłówki w mapowaniu niewrażliwym na wielkość liter, więc przypisanie zduplikowanej nazwy zastępuje poprzednią wartość. Użyj sendera niższego poziomu w przypadku nieprawidłowych linii requestu lub odrębnych zduplikowanych pól `Content-Length`/`Transfer-Encoding`, wymaganych przez [HTTP request-smuggling tests](../../pentesting-web/http-request-smuggling/README.md).<sup>[[1]](#references)</sup>
+
+## Izolacja sesji, niejawne dane uwierzytelniające i stan TLS
+
+Sesja domyślnie ufa konfiguracji środowiska. Jeśli nie podano jawnego uwierzytelniania, Requests może pobrać dane uwierzytelniające Basic z `.netrc`; może również zaimportować konfigurację proxy oraz ścieżki do CA bundle ze zmiennych środowiskowych. W przypadku skryptów pobierających URL-e kontrolowane przez atakującego wyłącz te niejawne źródła i jawnie skonfiguruj wyłącznie przeznaczone proxy/CA dla labu. Wydania starsze niż 2.32.4 mogły wybrać dane uwierzytelniające z `.netrc` dla niewłaściwego hosta po otrzymaniu złośliwie spreparowanego URL-a, a `Session.trust_env = False` jest udokumentowanym obejściem, gdy aktualizacja nie jest możliwa.<sup>[[1]](#references)[[4]](#references)</sup>
+```python
+s = requests.Session()
+s.trust_env = False
+s.verify = "/path/to/lab-ca.pem"  # Prefer a lab CA over verify=False
+s.proxies = {
+"http": "http://127.0.0.1:8080",
+"https": "http://127.0.0.1:8080",
+}
+```
+Utrzymuj sesję, która używa `verify=False`, oddzielnie od sesji wymagających zweryfikowanego TLS. W Requests przed wersją 2.32.0 połączenie otwarte najpierw z `verify=False` mogło zostać ponownie użyte dla późniejszych żądań do tego samego originu, nawet gdy te żądania określały `verify=True`; aktualizacja naprawia ten problem ze stanem puli, ale izolacja ułatwia także audytowanie skryptów exploitów.<sup>[[5]](#references)</sup>
+
+## Niezawodne pętle exploitów
+
+Requests nie ma domyślnego limitu czasu. Limit czasu `(connect, read)` nie jest całkowitym terminem typu wall-clock: komponent `read` ogranicza czas oczekiwania klienta między odebranymi bajtami. Wyłącz automatyczne przekierowania, gdy target kontroluje `Location`, a następnie zweryfikuj każdy hop przed wysłaniem nowego żądania; jeśli przekierowania są włączone, sprawdź `response.history`. W przypadku dużych lub złośliwych odpowiedzi użyj `stream=True`, iteruj po ograniczonych fragmentach i zamknij odpowiedź za pomocą context managera, aby zwolnić połączenie z puli.<sup>[[1]](#references)</sup>
+```python
+limit = 2 * 1024 * 1024
+body = bytearray()
+
+with s.get(url, timeout=(3.05, 10), allow_redirects=False, stream=True) as r:
+print(r.status_code, r.headers.get("Location"))
+for chunk in r.iter_content(64 * 1024):
+if len(body) + len(chunk) > limit:
+raise ValueError("response exceeds limit")
+body.extend(chunk)
+```
 ## Python cmd do wykorzystania RCE
 
-Pętla poleceń dziedziczy po Pythonowym `Cmd`; jej metoda `default` obsługuje nierozpoznane prefiksy poleceń, `cmdloop` rozdziela wiersze wejściowe, a `re.DOTALL` pozwala wzorcowi ekstrakcji obejmować znaki nowej linii.<sup>[[2]](#references)[[3]](#references)</sup>
+Pętla poleceń dziedziczy po `Cmd` z Python; jej metoda `default` obsługuje nierozpoznane prefiksy poleceń, `cmdloop` rozdziela wiersze wejściowe, a `re.DOTALL` pozwala wzorcowi ekstrakcji obejmować znaki nowej linii.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 import requests
 import re
@@ -108,6 +153,8 @@ term.cmdloop()
 ## References
 
 - [1] [Interfejs deweloperski Requests](https://requests.readthedocs.io/en/stable/api/)
-- [2] [Python `cmd` — Obsługa interpreterów poleceń zorientowanych liniowo](https://docs.python.org/3/library/cmd.html)
+- [2] [Python `cmd` — Obsługa interpreterów poleceń zorientowanych na wiersze](https://docs.python.org/3/library/cmd.html)
 - [3] [Python `re` — Operacje na wyrażeniach regularnych](https://docs.python.org/3/library/re.html)
+- [4] [Requests podatne na leak poświadczeń `.netrc` za pośrednictwem złośliwych URL-i](https://github.com/psf/requests/security/advisories/GHSA-9hjg-9r4m-mvj7)
+- [5] [Obiekt `Session` Requests nie weryfikuje żądań po wykonaniu pierwszego żądania z `verify=False`](https://github.com/psf/requests/security/advisories/GHSA-9wx4-h78v-vm56)
 {{#include ../../banners/hacktricks-training.md}}
