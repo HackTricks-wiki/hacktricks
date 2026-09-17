@@ -1,10 +1,10 @@
-# Web Requests
+# वेब Requests
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Python Requests
 
-इन उदाहरणों में Requests के documented request arguments, response properties, multipart file tuples और sessions का उपयोग किया गया है।<sup>[[1]](#references)</sup> `verify=False` वाले उदाहरण TLS certificate verification को disable करते हैं और इनका उपयोग केवल controlled testing तक सीमित होना चाहिए।<sup>[[1]](#references)</sup>
+इन उदाहरणों में Requests के documented request arguments, response properties, multipart file tuples और sessions का उपयोग किया गया है।<sup>[[1]](#references)</sup> `verify=False` वाले उदाहरण TLS certificate verification को disable करते हैं और इन्हें केवल controlled testing तक सीमित रखना चाहिए।<sup>[[1]](#references)</sup>
 ```python
 import random
 import re
@@ -76,9 +76,54 @@ return resp.json()
 def get_random_string(guid, path):
 return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
+## payload control के लिए Prepared requests
+
+एक `PreparedRequest` भेजे जाने से पहले final URL, headers और encoded body दिखाता है। जब session cookies या authentication लागू करना आवश्यक हो, तो इसे `Request.prepare()` के बजाय `Session.prepare_request()` से बनाएं; जब prepared-flow को environment proxy/CA settings का भी पालन करना हो, तो उन्हें `merge_environment_settings()` के साथ स्पष्ट रूप से merge करें।<sup>[[1]](#references)</sup>
+```python
+s = requests.Session()
+req = requests.Request("POST", url, data=b"role=user")
+prepped = s.prepare_request(req)
+prepped.body = b"role=admin%26debug%3D1"
+prepped.headers["Content-Length"] = str(len(prepped.body))
+
+env = s.merge_environment_settings(prepped.url, {}, None, None, None)
+r = s.send(prepped, timeout=(3.05, 15), allow_redirects=False, **env)
+print(r.request.headers)
+print(r.request.body)
+```
+यह तब उपयोगी होता है जब किसी exploit के लिए non-standard encoding की आवश्यकता हो या `response.request` में stored request के साथ constructed payload की तुलना करनी हो। यह raw-HTTP primitive नहीं है: Requests headers को case-insensitive mapping में store करता है, इसलिए duplicate name assign करने पर पिछली value replace हो जाती है। malformed request lines या [HTTP request-smuggling tests](../../pentesting-web/http-request-smuggling/README.md) के लिए आवश्यक distinct duplicate `Content-Length`/`Transfer-Encoding` fields भेजने हेतु lower-level sender का उपयोग करें।<sup>[[1]](#references)</sup>
+
+## Session isolation, implicit credentials और TLS state
+
+Session default रूप से environment configuration पर trust करता है। यदि कोई explicit authentication supplied नहीं है, तो Requests `.netrc` से Basic credentials प्राप्त कर सकता है; यह environment variables से proxy configuration और CA bundle paths भी import कर सकता है। attacker-controlled URLs fetch करने वाली scripts के लिए, उन implicit inputs को disable करें और केवल intended lab proxy/CA को explicitly configure करें। 2.32.4 से पहले के releases maliciously crafted URL दिए जाने पर गलत host के लिए `.netrc` credentials select कर सकते थे, जबकि upgrade संभव न होने पर `Session.trust_env = False` documented workaround है।<sup>[[1]](#references)[[4]](#references)</sup>
+```python
+s = requests.Session()
+s.trust_env = False
+s.verify = "/path/to/lab-ca.pem"  # Prefer a lab CA over verify=False
+s.proxies = {
+"http": "http://127.0.0.1:8080",
+"https": "http://127.0.0.1:8080",
+}
+```
+ऐसे session, जो `verify=False` का उपयोग करते हैं, उन्हें उन sessions से अलग रखें जिनमें verified TLS आवश्यक है। Requests 2.32.0 से पहले, `verify=False` के साथ पहली बार खोला गया connection बाद के same-origin requests के लिए फिर से उपयोग किया जा सकता था, भले ही उन requests में `verify=True` निर्दिष्ट हो; upgrade करने से यह pool-state समस्या ठीक हो जाती है, लेकिन isolation से exploit scripts का audit करना भी आसान हो जाता है।<sup>[[5]](#references)</sup>
+
+## विश्वसनीय exploit loops
+
+Requests में कोई default timeout नहीं होता। `(connect, read)` timeout कुल wall-clock deadline नहीं है: read component यह सीमित करता है कि client प्राप्त bytes के बीच कितनी देर प्रतीक्षा करेगा। जब target `Location` को नियंत्रित करता हो, तो automatic redirects disable करें और नया request भेजने से पहले प्रत्येक hop को validate करें; यदि redirects enabled हों, तो `response.history` inspect करें। बड़े या hostile responses के लिए `stream=True` का उपयोग करें, सीमित आकार के chunks में iterate करें, और context manager के साथ response को close करें ताकि pooled connection release हो जाए।<sup>[[1]](#references)</sup>
+```python
+limit = 2 * 1024 * 1024
+body = bytearray()
+
+with s.get(url, timeout=(3.05, 10), allow_redirects=False, stream=True) as r:
+print(r.status_code, r.headers.get("Location"))
+for chunk in r.iter_content(64 * 1024):
+if len(body) + len(chunk) > limit:
+raise ValueError("response exceeds limit")
+body.extend(chunk)
+```
 ## RCE exploit करने के लिए Python cmd
 
-कमांड लूप Python के `Cmd` को subclass करता है; इसकी `default` method अपरिचित command prefixes को संभालती है, `cmdloop` input lines को dispatch करता है, और `re.DOTALL` extraction pattern को newlines तक फैलने देता है।<sup>[[2]](#references)[[3]](#references)</sup>
+कमांड लूप Python के `Cmd` को subclass करता है; इसका `default` method अपरिचित command prefixes को संभालता है, `cmdloop` input lines को dispatch करता है, और `re.DOTALL` extraction pattern को newlines तक विस्तारित होने देता है।<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 import requests
 import re
@@ -107,7 +152,9 @@ term.cmdloop()
 ```
 ## References
 
-- [1] [Requests डेवलपर इंटरफ़ेस](https://requests.readthedocs.io/en/stable/api/)
-- [2] [Python `cmd` — रेखा-उन्मुख कमांड इंटरप्रेटर्स के लिए समर्थन](https://docs.python.org/3/library/cmd.html)
-- [3] [Python `re` — रेगुलर एक्सप्रेशन ऑपरेशंस](https://docs.python.org/3/library/re.html)
+- [1] [Requests Developer Interface](https://requests.readthedocs.io/en/stable/api/)
+- [2] [Python `cmd` — line-oriented command interpreters के लिए support](https://docs.python.org/3/library/cmd.html)
+- [3] [Python `re` — Regular expression operations](https://docs.python.org/3/library/re.html)
+- [4] [Requests में malicious URLs के माध्यम से `.netrc` credentials leak के प्रति vulnerability](https://github.com/psf/requests/security/advisories/GHSA-9hjg-9r4m-mvj7)
+- [5] [पहली request को `verify=False` के साथ करने के बाद Requests `Session` object requests को verify नहीं करता](https://github.com/psf/requests/security/advisories/GHSA-9wx4-h78v-vm56)
 {{#include ../../banners/hacktricks-training.md}}
