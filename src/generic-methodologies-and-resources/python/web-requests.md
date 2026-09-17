@@ -4,7 +4,7 @@
 
 ## Python Requests
 
-Αυτά τα παραδείγματα χρησιμοποιούν τα τεκμηριωμένα ορίσματα αιτημάτων, τις ιδιότητες αποκρίσεων, τις πλειάδες αρχείων multipart και τα sessions του Requests.<sup>[[1]](#references)</sup> Τα παραδείγματα με `verify=False` απενεργοποιούν την επαλήθευση πιστοποιητικών TLS και θα πρέπει να περιορίζονται σε ελεγχόμενες δοκιμές.<sup>[[1]](#references)</sup>
+Αυτά τα παραδείγματα χρησιμοποιούν τα τεκμηριωμένα ορίσματα αιτημάτων, τις ιδιότητες αποκρίσεων, τις πλειάδες αρχείων multipart και τις sessions του Requests.<sup>[[1]](#references)</sup> Τα παραδείγματα με `verify=False` απενεργοποιούν την επαλήθευση πιστοποιητικών TLS και θα πρέπει να περιορίζονται σε ελεγχόμενες δοκιμές.<sup>[[1]](#references)</sup>
 ```python
 import random
 import re
@@ -76,9 +76,54 @@ return resp.json()
 def get_random_string(guid, path):
 return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
-## Εντολή Python για εκμετάλλευση ενός RCE
+## Προετοιμασμένα requests για έλεγχο payload
 
-Ο βρόχος εντολών κληρονομεί από την `Cmd` της Python· η μέθοδός του `default` χειρίζεται μη αναγνωρισμένα prefixes εντολών, το `cmdloop` διανέμει γραμμές εισόδου και το `re.DOTALL` επιτρέπει στο pattern εξαγωγής να εκτείνεται σε πολλές γραμμές.<sup>[[2]](#references)[[3]](#references)</sup>
+Ένα `PreparedRequest` εκθέτει το τελικό URL, τα headers και το encoded body πριν σταλεί. Δημιουργήστε το με `Session.prepare_request()` (αντί για `Request.prepare()`) όταν πρέπει να εφαρμοστούν τα session cookies ή το authentication· όταν η prepared ροή πρέπει επίσης να τηρεί τις ρυθμίσεις proxy/CA του environment, συγχωνεύστε τις ρητά με `merge_environment_settings()`.<sup>[[1]](#references)</sup>
+```python
+s = requests.Session()
+req = requests.Request("POST", url, data=b"role=user")
+prepped = s.prepare_request(req)
+prepped.body = b"role=admin%26debug%3D1"
+prepped.headers["Content-Length"] = str(len(prepped.body))
+
+env = s.merge_environment_settings(prepped.url, {}, None, None, None)
+r = s.send(prepped, timeout=(3.05, 15), allow_redirects=False, **env)
+print(r.request.headers)
+print(r.request.body)
+```
+Αυτό είναι χρήσιμο όταν ένα exploit χρειάζεται μη τυπική κωδικοποίηση ή όταν συγκρίνετε το payload που κατασκευάστηκε με το request που αποθηκεύτηκε στο `response.request`. Δεν αποτελεί primitive για raw HTTP: το Requests αποθηκεύει τα headers σε mapping χωρίς διάκριση πεζών-κεφαλαίων, επομένως η ανάθεση ενός διπλότυπου ονόματος αντικαθιστά την προηγούμενη τιμή. Χρησιμοποιήστε sender χαμηλότερου επιπέδου για malformed request lines ή διακριτά διπλότυπα πεδία `Content-Length`/`Transfer-Encoding` που απαιτούνται για [HTTP request-smuggling tests](../../pentesting-web/http-request-smuggling/README.md).<sup>[[1]](#references)</sup>
+
+## Απομόνωση session, implicit credentials και κατάσταση TLS
+
+Ένα session εμπιστεύεται τις ρυθμίσεις του περιβάλλοντος από προεπιλογή. Αν δεν παρέχεται explicit authentication, το Requests μπορεί να αποκτήσει Basic credentials από το `.netrc`· μπορεί επίσης να εισαγάγει ρυθμίσεις proxy και paths για CA bundles από environment variables. Για scripts που πραγματοποιούν fetch σε URLs ελεγχόμενα από attacker, απενεργοποιήστε αυτά τα implicit inputs και ρυθμίστε explicit μόνο το intended lab proxy/CA. Οι εκδόσεις πριν από την 2.32.4 μπορούσαν να επιλέξουν credentials από το `.netrc` για λάθος host όταν τους δινόταν ένα maliciously crafted URL, ενώ το `Session.trust_env = False` είναι το τεκμηριωμένο workaround όταν η αναβάθμιση είναι αδύνατη.<sup>[[1]](#references)[[4]](#references)</sup>
+```python
+s = requests.Session()
+s.trust_env = False
+s.verify = "/path/to/lab-ca.pem"  # Prefer a lab CA over verify=False
+s.proxies = {
+"http": "http://127.0.0.1:8080",
+"https": "http://127.0.0.1:8080",
+}
+```
+Διατηρήστε ξεχωριστό ένα session που χρησιμοποιεί `verify=False` από τα sessions που απαιτούν επαληθευμένο TLS. Στα Requests πριν από την έκδοση 2.32.0, μια σύνδεση που άνοιξε αρχικά με `verify=False` μπορούσε να επαναχρησιμοποιηθεί για μεταγενέστερα requests του ίδιου origin, ακόμη και όταν αυτά τα requests καθόριζαν `verify=True`; η αναβάθμιση διορθώνει αυτό το ζήτημα κατάστασης του pool, όμως η απομόνωση διευκολύνει επίσης τον έλεγχο των exploit scripts.<sup>[[5]](#references)</sup>
+
+## Αξιόπιστοι βρόχοι exploit
+
+Το Requests δεν έχει προεπιλεγμένο timeout. Ένα timeout `(connect, read)` δεν αποτελεί συνολικό deadline ρολογιού: το στοιχείο read περιορίζει για πόσο χρόνο περιμένει ο client μεταξύ των ληφθέντων bytes. Απενεργοποιήστε τα automatic redirects όταν ο στόχος ελέγχει το `Location` και, στη συνέχεια, επικυρώστε κάθε hop πριν στείλετε νέο request· αν τα redirects είναι ενεργοποιημένα, ελέγξτε το `response.history`. Για μεγάλες ή hostile responses, χρησιμοποιήστε `stream=True`, κάντε iteration σε chunks περιορισμένου μεγέθους και κλείστε το response με έναν context manager, ώστε να απελευθερωθεί η pooled connection.<sup>[[1]](#references)</sup>
+```python
+limit = 2 * 1024 * 1024
+body = bytearray()
+
+with s.get(url, timeout=(3.05, 10), allow_redirects=False, stream=True) as r:
+print(r.status_code, r.headers.get("Location"))
+for chunk in r.iter_content(64 * 1024):
+if len(body) + len(chunk) > limit:
+raise ValueError("response exceeds limit")
+body.extend(chunk)
+```
+## Python cmd για exploit ενός RCE
+
+Ο βρόχος εντολών κληρονομεί από το Python `Cmd`· η μέθοδός του `default` διαχειρίζεται μη αναγνωρισμένα prefixes εντολών, το `cmdloop` δρομολογεί τις γραμμές εισόδου και το `re.DOTALL` επιτρέπει στο pattern εξαγωγής να εκτείνεται σε πολλές γραμμές.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 import requests
 import re
@@ -107,7 +152,9 @@ term.cmdloop()
 ```
 ## References
 
-- [1] [Διεπαφή προγραμματιστή Requests](https://requests.readthedocs.io/en/stable/api/)
-- [2] [Python `cmd` — Υποστήριξη για διερμηνευτές εντολών προσανατολισμένους σε γραμμές](https://docs.python.org/3/library/cmd.html)
-- [3] [Python `re` — Λειτουργίες regular expression](https://docs.python.org/3/library/re.html)
+- [1] [Διεπαφή προγραμματιστών του Requests](https://requests.readthedocs.io/en/stable/api/)
+- [2] [Python `cmd` — Υποστήριξη για command interpreters προσανατολισμένους σε γραμμές](https://docs.python.org/3/library/cmd.html)
+- [3] [Python `re` — Λειτουργίες regular expressions](https://docs.python.org/3/library/re.html)
+- [4] [Το Requests είναι ευάλωτο σε leak διαπιστευτηρίων `.netrc` μέσω κακόβουλων URLs](https://github.com/psf/requests/security/advisories/GHSA-9hjg-9r4m-mvj7)
+- [5] [Το αντικείμενο `Session` του Requests δεν επαληθεύει τα requests μετά την πραγματοποίηση του πρώτου request με `verify=False`](https://github.com/psf/requests/security/advisories/GHSA-9wx4-h78v-vm56)
 {{#include ../../banners/hacktricks-training.md}}
