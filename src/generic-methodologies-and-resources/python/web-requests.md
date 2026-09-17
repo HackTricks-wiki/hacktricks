@@ -4,7 +4,7 @@
 
 ## Python Requests
 
-У цих прикладах використовуються задокументовані аргументи запитів Requests, властивості відповідей, кортежі multipart-файлів і сесії.<sup>[[1]](#references)</sup> У прикладах із `verify=False` вимкнено перевірку сертифікатів TLS; їх слід обмежити контрольованим тестуванням.<sup>[[1]](#references)</sup>
+У цих прикладах використовуються задокументовані аргументи запитів Requests, властивості відповідей, кортежі multipart-файлів і сесії.<sup>[[1]](#references)</sup> Приклади з `verify=False` вимикають перевірку TLS-сертифіката, тому їх слід обмежити контрольованим тестуванням.<sup>[[1]](#references)</sup>
 ```python
 import random
 import re
@@ -76,9 +76,54 @@ return resp.json()
 def get_random_string(guid, path):
 return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
-## Python cmd для експлуатації RCE
+## Підготовлені запити для керування payload
 
-Цикл команд є підкласом Python's `Cmd`; його метод `default` обробляє нерозпізнані префікси команд, `cmdloop` розподіляє рядки введення, а `re.DOTALL` дає змогу шаблону вилучення охоплювати переноси рядків.<sup>[[2]](#references)[[3]](#references)</sup>
+`PreparedRequest` надає доступ до фінальної URL-адреси, заголовків і кодованого тіла перед його надсиланням. Створюйте його за допомогою `Session.prepare_request()` (а не `Request.prepare()`), коли потрібно застосувати cookies або автентифікацію сесії; якщо підготовлений потік також має враховувати налаштування proxy/CA із середовища, явно об’єднайте їх за допомогою `merge_environment_settings()`.<sup>[[1]](#references)</sup>
+```python
+s = requests.Session()
+req = requests.Request("POST", url, data=b"role=user")
+prepped = s.prepare_request(req)
+prepped.body = b"role=admin%26debug%3D1"
+prepped.headers["Content-Length"] = str(len(prepped.body))
+
+env = s.merge_environment_settings(prepped.url, {}, None, None, None)
+r = s.send(prepped, timeout=(3.05, 15), allow_redirects=False, **env)
+print(r.request.headers)
+print(r.request.body)
+```
+Це корисно, коли exploit потребує нестандартного кодування або коли потрібно порівняти payload, сформований із запитом, збереженим у `response.request`. Це не примітив для raw-HTTP: Requests зберігає заголовки у відображенні без урахування регістру, тому присвоєння дубльованого імені замінює попереднє значення. Для некоректних рядків запиту або окремих дубльованих полів `Content-Length`/`Transfer-Encoding`, необхідних для [HTTP request-smuggling tests](../../pentesting-web/http-request-smuggling/README.md), використовуйте sender нижчого рівня.<sup>[[1]](#references)</sup>
+
+## Ізоляція сесії, неявні облікові дані та стан TLS
+
+Сесія за замовчуванням довіряє конфігурації середовища. Якщо явну автентифікацію не вказано, Requests може отримати Basic облікові дані з `.netrc`; також він може імпортувати конфігурацію proxy та шляхи до набору CA із змінних середовища. Для скриптів, які отримують дані з URL, контрольованих attacker, вимкніть ці неявні джерела та явно налаштуйте лише призначені proxy/CA для lab. Версії до 2.32.4 могли вибрати облікові дані `.netrc` для неправильного хоста, якщо їм передати URL зі зловмисно сформованими даними, тоді як `Session.trust_env = False` є документованим workaround, коли оновлення неможливе.<sup>[[1]](#references)[[4]](#references)</sup>
+```python
+s = requests.Session()
+s.trust_env = False
+s.verify = "/path/to/lab-ca.pem"  # Prefer a lab CA over verify=False
+s.proxies = {
+"http": "http://127.0.0.1:8080",
+"https": "http://127.0.0.1:8080",
+}
+```
+Тримайте сесію, яка використовує `verify=False`, окремо від сесій, що потребують перевіреного TLS. У Requests до версії 2.32.0 з’єднання, спочатку відкрите з `verify=False`, могло повторно використовуватися для подальших запитів до того самого origin, навіть якщо для цих запитів було вказано `verify=True`; оновлення виправляє цю проблему зі станом пулу, але ізоляція також спрощує аудит exploit-скриптів.<sup>[[5]](#references)</sup>
+
+## Надійні цикли експлуатації
+
+Requests не має тайм-ауту за замовчуванням. Тайм-аут `(connect, read)` не є загальним обмеженням часу виконання: компонент `read` обмежує час, протягом якого клієнт очікує між отриманням байтів. Вимикайте автоматичні перенаправлення, коли ціль контролює `Location`, а потім перевіряйте кожен перехід перед надсиланням нового запиту; якщо перенаправлення ввімкнено, перевіряйте `response.history`. Для великих або ворожих відповідей використовуйте `stream=True`, перебирайте дані обмеженими фрагментами та закривайте відповідь за допомогою контекстного менеджера, щоб pooled connection було звільнено.<sup>[[1]](#references)</sup>
+```python
+limit = 2 * 1024 * 1024
+body = bytearray()
+
+with s.get(url, timeout=(3.05, 10), allow_redirects=False, stream=True) as r:
+print(r.status_code, r.headers.get("Location"))
+for chunk in r.iter_content(64 * 1024):
+if len(body) + len(chunk) > limit:
+raise ValueError("response exceeds limit")
+body.extend(chunk)
+```
+## Команда Python для експлуатації RCE
+
+Командний цикл успадковує `Cmd` у Python; його метод `default` обробляє нерозпізнані префікси команд, `cmdloop` розподіляє рядки введення, а `re.DOTALL` дає змогу шаблону вилучення охоплювати переноси рядків.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 import requests
 import re
@@ -108,6 +153,8 @@ term.cmdloop()
 ## References
 
 - [1] [Інтерфейс розробника Requests](https://requests.readthedocs.io/en/stable/api/)
-- [2] [Python `cmd` — підтримка інтерпретаторів команд, орієнтованих на рядки](https://docs.python.org/3/library/cmd.html)
+- [2] [Python `cmd` — підтримка інтерпретаторів командного рядка](https://docs.python.org/3/library/cmd.html)
 - [3] [Python `re` — операції з регулярними виразами](https://docs.python.org/3/library/re.html)
+- [4] [Requests: витік облікових даних `.netrc` через шкідливі URL-адреси](https://github.com/psf/requests/security/advisories/GHSA-9hjg-9r4m-mvj7)
+- [5] [Об'єкт `Session` Requests не перевіряє запити після виконання першого запиту з `verify=False`](https://github.com/psf/requests/security/advisories/GHSA-9wx4-h78v-vm56)
 {{#include ../../banners/hacktricks-training.md}}
