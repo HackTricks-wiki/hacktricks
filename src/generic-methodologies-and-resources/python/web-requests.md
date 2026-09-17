@@ -1,10 +1,10 @@
-# Webanfragen
+# Web Requests
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Python Requests
 
-Diese Beispiele verwenden die dokumentierten Anfrageargumente, Antwort-Eigenschaften, Multipart-Dateitupel und Sessions von Requests.<sup>[[1]](#references)</sup> Die Beispiele mit `verify=False` deaktivieren die TLS-Zertifikatsüberprüfung und sollten auf kontrollierte Tests beschränkt werden.<sup>[[1]](#references)</sup>
+Diese Beispiele verwenden die dokumentierten Request-Argumente, Response-Eigenschaften, Multipart-Dateitupel und Sessions von Requests.<sup>[[1]](#references)</sup> Die Beispiele mit `verify=False` deaktivieren die Überprüfung von TLS-Zertifikaten und sollten auf kontrollierte Tests beschränkt werden.<sup>[[1]](#references)</sup>
 ```python
 import random
 import re
@@ -76,9 +76,54 @@ return resp.json()
 def get_random_string(guid, path):
 return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
-## Python cmd zum Exploit einer RCE
+## Vorbereitete Requests zur Payload-Steuerung
 
-Die Befehlsschleife erbt von Pythons `Cmd`; ihre `default`-Methode verarbeitet nicht erkannte Befehlspräfixe, `cmdloop` verteilt Eingabezeilen, und `re.DOTALL` ermöglicht es dem Extraktionsmuster, sich über mehrere Zeilen zu erstrecken.<sup>[[2]](#references)[[3]](#references)</sup>
+Ein `PreparedRequest` stellt die finale URL, Header und den encodierten Body bereit, bevor er gesendet wird. Erstelle ihn mit `Session.prepare_request()` (statt `Request.prepare()`), wenn Session-Cookies oder Authentifizierung angewendet werden müssen; wenn der vorbereitete Ablauf außerdem Proxy-/CA-Einstellungen der Umgebung berücksichtigen muss, führe sie ausdrücklich mit `merge_environment_settings()` zusammen.<sup>[[1]](#references)</sup>
+```python
+s = requests.Session()
+req = requests.Request("POST", url, data=b"role=user")
+prepped = s.prepare_request(req)
+prepped.body = b"role=admin%26debug%3D1"
+prepped.headers["Content-Length"] = str(len(prepped.body))
+
+env = s.merge_environment_settings(prepped.url, {}, None, None, None)
+r = s.send(prepped, timeout=(3.05, 15), allow_redirects=False, **env)
+print(r.request.headers)
+print(r.request.body)
+```
+Dies ist nützlich, wenn ein Exploit eine nicht standardmäßige Kodierung benötigt oder wenn die erstellte Payload mit dem in `response.request` gespeicherten Request verglichen wird. Es handelt sich nicht um ein Raw-HTTP-Primitiv: Requests speichert Header in einem Mapping ohne Beachtung der Groß-/Kleinschreibung, sodass das Zuweisen eines doppelten Namens den vorherigen Wert ersetzt. Verwende einen Sender auf niedrigerer Ebene für fehlerhafte Request-Zeilen oder verschiedene doppelte `Content-Length`-/`Transfer-Encoding`-Felder, die für [HTTP request-smuggling tests](../../pentesting-web/http-request-smuggling/README.md) benötigt werden.<sup>[[1]](#references)</sup>
+
+## Session-Isolierung, implizite Zugangsdaten und TLS-Zustand
+
+Eine Session vertraut standardmäßig auf die Umgebungskonfiguration. Wenn keine explizite Authentifizierung angegeben wird, kann Requests Basic-Credentials aus `.netrc` beziehen; außerdem kann es Proxy-Konfigurationen und Pfade zu CA-Bundles aus Umgebungsvariablen importieren. Bei Scripts, die von Angreifern kontrollierte URLs abrufen, deaktiviere diese impliziten Eingaben und konfiguriere nur den vorgesehenen Lab-Proxy bzw. das vorgesehene CA-Bundle explizit. Releases vor 2.32.4 konnten bei einer bösartig erstellten URL `.netrc`-Credentials für den falschen Host auswählen, während `Session.trust_env = False` der dokumentierte Workaround ist, wenn ein Upgrade nicht möglich ist.<sup>[[1]](#references)[[4]](#references)</sup>
+```python
+s = requests.Session()
+s.trust_env = False
+s.verify = "/path/to/lab-ca.pem"  # Prefer a lab CA over verify=False
+s.proxies = {
+"http": "http://127.0.0.1:8080",
+"https": "http://127.0.0.1:8080",
+}
+```
+Halte eine Session, die `verify=False` verwendet, getrennt von Sessions, die verifiziertes TLS erfordern. In Requests vor Version 2.32.0 konnte eine Verbindung, die zuerst mit `verify=False` geöffnet wurde, für spätere Same-Origin-Requests wiederverwendet werden, selbst wenn diese Requests `verify=True` angaben; ein Upgrade behebt dieses Problem mit dem Pool-Zustand, aber die Isolation erleichtert auch die Prüfung von Exploit-Skripten.<sup>[[5]](#references)</sup>
+
+## Zuverlässige Exploit-Schleifen
+
+Requests hat standardmäßig kein Timeout. Ein `(connect, read)`-Timeout ist keine absolute Frist für die gesamte Ausführung: Die `read`-Komponente begrenzt, wie lange der Client zwischen empfangenen Bytes wartet. Deaktiviere automatische Redirects, wenn ein Target `Location` kontrolliert, und validiere jeden Hop, bevor du einen neuen Request sendest; wenn Redirects aktiviert sind, überprüfe `response.history`. Verwende für große oder bösartige Responses `stream=True`, iteriere in begrenzten Chunks und schließe die Response mit einem Context Manager, damit die gepoolte Verbindung freigegeben wird.<sup>[[1]](#references)</sup>
+```python
+limit = 2 * 1024 * 1024
+body = bytearray()
+
+with s.get(url, timeout=(3.05, 10), allow_redirects=False, stream=True) as r:
+print(r.status_code, r.headers.get("Location"))
+for chunk in r.iter_content(64 * 1024):
+if len(body) + len(chunk) > limit:
+raise ValueError("response exceeds limit")
+body.extend(chunk)
+```
+## Python-Befehl zur Ausnutzung einer RCE
+
+Die command loop leitet sich von Pythons `Cmd` ab; ihre `default`-Methode verarbeitet nicht erkannte command prefixes, `cmdloop` verteilt Eingabezeilen, und `re.DOTALL` ermöglicht es dem Extraktionsmuster, sich über Zeilenumbrüche zu erstrecken.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 import requests
 import re
@@ -108,6 +153,8 @@ term.cmdloop()
 ## References
 
 - [1] [Requests-Entwicklerschnittstelle](https://requests.readthedocs.io/en/stable/api/)
-- [2] [Python `cmd` – Unterstützung für zeilenorientierte Befehlsinterpreter](https://docs.python.org/3/library/cmd.html)
-- [3] [Python `re` – Operationen mit regulären Ausdrücken](https://docs.python.org/3/library/re.html)
+- [2] [Python `cmd` — Unterstützung für zeilenorientierte Befehlsinterpreter](https://docs.python.org/3/library/cmd.html)
+- [3] [Python `re` — Operationen mit regulären Ausdrücken](https://docs.python.org/3/library/re.html)
+- [4] [Requests ist über bösartige URLs für einen `.netrc`-Anmeldedaten-leak anfällig](https://github.com/psf/requests/security/advisories/GHSA-9hjg-9r4m-mvj7)
+- [5] [Das Requests-`Session`-Objekt überprüft Requests nicht, nachdem der erste Request mit `verify=False` durchgeführt wurde](https://github.com/psf/requests/security/advisories/GHSA-9wx4-h78v-vm56)
 {{#include ../../banners/hacktricks-training.md}}
