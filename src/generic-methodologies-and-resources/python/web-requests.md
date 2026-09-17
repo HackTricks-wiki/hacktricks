@@ -4,7 +4,7 @@
 
 ## Python Requests
 
-これらの例では、Requestsでdocumentedされているrequest arguments、response properties、multipart file tuples、sessionsを使用します。<sup>[[1]](#references)</sup> `verify=False`の例ではTLS certificate verificationを無効化しているため、controlled testingに限定してください。<sup>[[1]](#references)</sup>
+これらの例では、Requestsのドキュメントに記載されたリクエスト引数、レスポンスプロパティ、multipartファイルタプル、セッションを使用します。<sup>[[1]](#references)</sup> `verify=False`の例ではTLS証明書の検証を無効にするため、管理されたテスト環境に限定して使用してください。<sup>[[1]](#references)</sup>
 ```python
 import random
 import re
@@ -76,9 +76,54 @@ return resp.json()
 def get_random_string(guid, path):
 return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
-## Python cmd to exploit an RCE
+## ペイロード制御のための Prepared request
 
-コマンドループは Python の `Cmd` をサブクラス化しています。`default` メソッドは認識されないコマンドプレフィックスを処理し、`cmdloop` は入力行をディスパッチします。また、`re.DOTALL` により抽出パターンが改行をまたいでマッチできます。<sup>[[2]](#references)[[3]](#references)</sup>
+`PreparedRequest` は、送信前の最終的な URL、headers、encoded body を公開します。session cookies または authentication を適用する必要がある場合は、`Request.prepare()` ではなく `Session.prepare_request()` を使用して構築します。prepared-flow でも環境の proxy/CA settings を適用する必要がある場合は、`merge_environment_settings()` で明示的に統合します。<sup>[[1]](#references)</sup>
+```python
+s = requests.Session()
+req = requests.Request("POST", url, data=b"role=user")
+prepped = s.prepare_request(req)
+prepped.body = b"role=admin%26debug%3D1"
+prepped.headers["Content-Length"] = str(len(prepped.body))
+
+env = s.merge_environment_settings(prepped.url, {}, None, None, None)
+r = s.send(prepped, timeout=(3.05, 15), allow_redirects=False, **env)
+print(r.request.headers)
+print(r.request.body)
+```
+これは、exploit で標準外の encoding が必要な場合や、構築した payload と `response.request` に保存された request を比較する場合に便利です。これは raw-HTTP primitive ではありません。Requests は headers を大文字と小文字を区別しない mapping として保存するため、同じ名前を代入すると以前の値が置き換えられます。Malformed な request line や、[HTTP request-smuggling tests](../../pentesting-web/http-request-smuggling/README.md) で必要となる個別の重複した `Content-Length`/`Transfer-Encoding` フィールドを扱うには、より低レベルの sender を使用してください。<sup>[[1]](#references)</sup>
+
+## Session の分離、暗黙の credentials、TLS state
+
+Session はデフォルトで環境設定を信頼します。明示的な authentication が指定されていない場合、Requests は `.netrc` から Basic credentials を取得することがあります。また、環境変数から proxy 設定や CA bundle のパスを取り込むこともあります。攻撃者が制御する URL を取得する script では、これらの暗黙的な入力を無効にし、意図した lab proxy/CA のみを明示的に設定してください。2.32.4 より前の release では、悪意を持って細工された URL が指定された場合に、誤った host 用の `.netrc` credentials が選択される可能性がありました。upgrade が不可能な場合は、`Session.trust_env = False` が documented workaround です。<sup>[[1]](#references)[[4]](#references)</sup>
+```python
+s = requests.Session()
+s.trust_env = False
+s.verify = "/path/to/lab-ca.pem"  # Prefer a lab CA over verify=False
+s.proxies = {
+"http": "http://127.0.0.1:8080",
+"https": "http://127.0.0.1:8080",
+}
+```
+`verify=False`を使用するsessionは、検証済みTLSを要求するsessionとは分離してください。Requests 2.32.0より前では、`verify=False`で最初に開かれたconnectionが、その後のリクエストで`verify=True`が指定されていても、同じoriginへのリクエストで再利用される可能性がありました。アップグレードによりこのpool-stateの問題は修正されますが、分離することでexploit scriptの監査も容易になります。<sup>[[5]](#references)</sup>
+
+## 信頼性の高いexploit loop
+
+Requestsにはデフォルトのtimeoutがありません。`(connect, read)` timeoutは、wall-clock全体に対するdeadlineではありません。readコンポーネントは、受信したbytes間でclientが待機する時間を制限します。targetが`Location`を制御できる場合はautomatic redirectを無効にし、新しいリクエストを送信する前に各hopを検証してください。redirectを有効にしている場合は、`response.history`を確認します。大きいレスポンスや悪意のあるレスポンスには、`stream=True`を使用してbounded chunk単位で反復し、context managerでレスポンスをcloseして、pool内のconnectionが解放されるようにしてください。<sup>[[1]](#references)</sup>
+```python
+limit = 2 * 1024 * 1024
+body = bytearray()
+
+with s.get(url, timeout=(3.05, 10), allow_redirects=False, stream=True) as r:
+print(r.status_code, r.headers.get("Location"))
+for chunk in r.iter_content(64 * 1024):
+if len(body) + len(chunk) > limit:
+raise ValueError("response exceeds limit")
+body.extend(chunk)
+```
+## RCEをexploitするPython cmd
+
+コマンドループはPythonの`Cmd`をサブクラス化し、その`default`メソッドは認識されないコマンドプレフィックスを処理し、`cmdloop`は入力行をディスパッチし、`re.DOTALL`によって抽出パターンが改行をまたげるようになります。<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 import requests
 import re
@@ -107,7 +152,9 @@ term.cmdloop()
 ```
 ## References
 
-- [1] [Requests 開発者インターフェース](https://requests.readthedocs.io/en/stable/api/)
-- [2] [Python `cmd` — 行指向コマンドインタープリターのサポート](https://docs.python.org/3/library/cmd.html)
-- [3] [Python `re` — 正規表現操作](https://docs.python.org/3/library/re.html)
+- [1] [Requests Developer Interface](https://requests.readthedocs.io/en/stable/api/)
+- [2] [Python `cmd` — 行指向けコマンドインタープリターのサポート](https://docs.python.org/3/library/cmd.html)
+- [3] [Python `re` — 正規表現の操作](https://docs.python.org/3/library/re.html)
+- [4] [悪意のある URL による `.netrc` credentials leak に対して脆弱な Requests](https://github.com/psf/requests/security/advisories/GHSA-9hjg-9r4m-mvj7)
+- [5] [最初のリクエストを `verify=False` で実行した後、Requests の `Session` object がリクエストを検証しない](https://github.com/psf/requests/security/advisories/GHSA-9wx4-h78v-vm56)
 {{#include ../../banners/hacktricks-training.md}}
