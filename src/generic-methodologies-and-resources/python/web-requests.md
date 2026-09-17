@@ -4,7 +4,7 @@
 
 ## Python Requests
 
-Hierdie voorbeelde gebruik Requests se gedokumenteerde versoekargumente, antwoordeienskappe, multipart-lêer-tuples en sessies.<sup>[[1]](#references)</sup> Die `verify=False`-voorbeelde deaktiveer TLS-sertifikaatverifikasie en moet tot beheerde toetsing beperk word.<sup>[[1]](#references)</sup>
+Hierdie voorbeelde gebruik Requests se gedokumenteerde versoekargumente, response-eienskappe, multipart-lêer-tuples en sessions.<sup>[[1]](#references)</sup> Die `verify=False`-voorbeelde deaktiveer TLS-sertifikaatverifikasie en behoort tot beheerde toetsing beperk te word.<sup>[[1]](#references)</sup>
 ```python
 import random
 import re
@@ -76,9 +76,54 @@ return resp.json()
 def get_random_string(guid, path):
 return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
-## Python cmd om 'n RCE te exploit
+## Voorbereide versoeke vir payload-beheer
 
-Die command loop subclass Python se `Cmd`; sy `default`-metode hanteer onherkende command prefixes, `cmdloop` stuur invoerlyne, en `re.DOTALL` laat die ekstraksiepatroon oor nuwe lyne strek.<sup>[[2]](#references)[[3]](#references)</sup>
+’n `PreparedRequest` stel die finale URL, headers en geënkodeerde body bloot voordat dit gestuur word. Bou dit met `Session.prepare_request()` (eerder as `Request.prepare()`) wanneer sessiekoekies of authentication toegepas moet word; wanneer die prepared-flow ook omgewingsproxy-/CA-instellings moet eerbiedig, voeg dit uitdruklik saam met `merge_environment_settings()`.<sup>[[1]](#references)</sup>
+```python
+s = requests.Session()
+req = requests.Request("POST", url, data=b"role=user")
+prepped = s.prepare_request(req)
+prepped.body = b"role=admin%26debug%3D1"
+prepped.headers["Content-Length"] = str(len(prepped.body))
+
+env = s.merge_environment_settings(prepped.url, {}, None, None, None)
+r = s.send(prepped, timeout=(3.05, 15), allow_redirects=False, **env)
+print(r.request.headers)
+print(r.request.body)
+```
+Dit is nuttig wanneer ’n exploit nie-standaardkodering benodig, of wanneer die payload wat saamgestel is, vergelyk word met die request wat in `response.request` gestoor is. Dit is nie ’n raw-HTTP-primitief nie: Requests stoor headers in ’n hoofletter-onsensitiewe mapping, dus vervang die toewysing van ’n duplikaatnaam die vorige waarde. Gebruik ’n laer-vlak-sender vir misvormde request-reëls of afsonderlike duplikaat-`Content-Length`-/`Transfer-Encoding`-velde wat benodig word vir [HTTP request-smuggling-toetse](../../pentesting-web/http-request-smuggling/README.md).<sup>[[1]](#references)</sup>
+
+## Sessie-isolasie, implisiete geloofsbriewe en TLS-toestand
+
+’n Sessie vertrou by verstek op omgewingskonfigurasie. As geen eksplisiete verifikasie verskaf word nie, kan Requests Basic-geloofsbriewe vanaf `.netrc` verkry; dit kan ook proxy-konfigurasie en CA-bundelpaaie vanaf omgewingsveranderlikes invoer. Vir skrifte wat aanvaller-beheerde URL's haal, deaktiveer daardie implisiete invoere en konfigureer slegs die beoogde lab-proxy/CA eksplisiet. Vrystellings voor 2.32.4 kon `.netrc`-geloofsbriewe vir die verkeerde host kies wanneer ’n kwaadwillig saamgestelde URL verskaf is, terwyl `Session.trust_env = False` die gedokumenteerde oplossing is wanneer ’n opgradering onmoontlik is.<sup>[[1]](#references)[[4]](#references)</sup>
+```python
+s = requests.Session()
+s.trust_env = False
+s.verify = "/path/to/lab-ca.pem"  # Prefer a lab CA over verify=False
+s.proxies = {
+"http": "http://127.0.0.1:8080",
+"https": "http://127.0.0.1:8080",
+}
+```
+Hou ’n sessie wat `verify=False` gebruik apart van sessies wat geverifieerde TLS vereis. In Requests voor 2.32.0 kon ’n verbinding wat eers met `verify=False` geopen is, vir latere same-origin requests hergebruik word, selfs wanneer daardie requests `verify=True` gespesifiseer het; opgradering herstel daardie pool-state-kwessie, maar isolasie maak exploit-skripte ook makliker om te oudit.<sup>[[5]](#references)</sup>
+
+## Betroubare exploit-lusse
+
+Requests het geen verstek-timeout nie. ’n `(connect, read)`-timeout is nie ’n totale wall-clock-sperdatum nie: die read-komponent beperk hoe lank die client tussen ontvangde grepe wag. Deaktiveer outomatiese redirects wanneer ’n teiken `Location` beheer, en valideer elke hop voordat ’n nuwe request gestuur word; indien redirects geaktiveer is, inspekteer `response.history`. Vir groot of vyandige responses, gebruik `stream=True`, itereer in begrensde chunks, en maak die response met ’n context manager toe sodat die pooled connection vrygestel word.<sup>[[1]](#references)</sup>
+```python
+limit = 2 * 1024 * 1024
+body = bytearray()
+
+with s.get(url, timeout=(3.05, 10), allow_redirects=False, stream=True) as r:
+print(r.status_code, r.headers.get("Location"))
+for chunk in r.iter_content(64 * 1024):
+if len(body) + len(chunk) > limit:
+raise ValueError("response exceeds limit")
+body.extend(chunk)
+```
+## Python cmd om 'n RCE uit te buit
+
+Die command loop subklassifiseer Python se `Cmd`; sy `default`-metode hanteer onbekende command-voorvoegsels, `cmdloop` stuur invoerlyne aan, en `re.DOTALL` laat die extraction-patroon oor nuwe lyne strek.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 import requests
 import re
@@ -107,7 +152,9 @@ term.cmdloop()
 ```
 ## References
 
-- [1] [Requests-ontwikkelaarskoppelvlak](https://requests.readthedocs.io/en/stable/api/)
-- [2] [Python `cmd` — Ondersteuning vir lyngebaseerde bevelinterpreteerders](https://docs.python.org/3/library/cmd.html)
-- [3] [Python `re` — Bewerkings met reguliere uitdrukkings](https://docs.python.org/3/library/re.html)
+- [1] [Requests Developer Interface](https://requests.readthedocs.io/en/stable/api/)
+- [2] [Python `cmd` — Ondersteuning vir lyngeoriënteerde command interpreters](https://docs.python.org/3/library/cmd.html)
+- [3] [Python `re` — Bewerkings met regular expressions](https://docs.python.org/3/library/re.html)
+- [4] [Requests kwesbaar vir `.netrc` credentials leak via malicious URLs](https://github.com/psf/requests/security/advisories/GHSA-9hjg-9r4m-mvj7)
+- [5] [Requests `Session`-objek verifieer nie requests nadat die eerste request met `verify=False` gemaak is nie](https://github.com/psf/requests/security/advisories/GHSA-9wx4-h78v-vm56)
 {{#include ../../banners/hacktricks-training.md}}
