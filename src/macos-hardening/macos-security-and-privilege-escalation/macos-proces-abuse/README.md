@@ -210,6 +210,14 @@ It's possible to inject JVM options through **`_JAVA_OPTIONS`**, **`JAVA_TOOL_OP
 macos-java-apps-injection.md
 {{#endref}}
 
+### Node.js Injection
+
+**`NODE_OPTIONS`** preloads attacker JavaScript via `--require` (file) or `--import data:text/javascript,…` (fileless, Node ≥ 20.6); **`NODE_REPL_EXTERNAL_MODULE`** loads a module into an interactive REPL, and **`ELECTRON_RUN_AS_NODE`** re-enables all of this on Electron binaries.
+
+{{#ref}}
+macos-nodejs-applications-injection.md
+{{#endref}}
+
 ### .Net Applications Injection
 
 It's possible to inject code into .NET applications through **`DOTNET_STARTUP_HOOKS`** before `Main`, or by abusing the .NET debugging functionality when its prerequisites are present.
@@ -303,12 +311,20 @@ macos-ruby-applications-injection.md
 
 ### Python Injection
 
-The **`PYTHONWARNINGS`** and **`BROWSER`** standard-library chain can execute a command during warning-filter parsing. A file-backed alternative places `sitecustomize.py` on **`PYTHONPATH`** so normal `site` initialization imports it before the target script. Interactive-only variables such as **`PYTHONSTARTUP`** have narrower applicability.
+The **`PYTHONWARNINGS`** and **`BROWSER`** standard-library chain can execute a command during warning-filter parsing. A file-backed alternative places `sitecustomize.py` on **`PYTHONPATH`** so normal `site` initialization imports it before the target script. **`PYTHONBREAKPOINT`** runs a chosen callable/module when the code reaches `breakpoint()`. Interactive-only variables such as **`PYTHONSTARTUP`** have narrower applicability.
 
 Note that executables compiled with **`pyinstaller`** won't use these environmental variables even if they are running using an embedded python.
 
 {{#ref}}
 macos-python-applications-injection.md
+{{#endref}}
+
+### Vim/Neovim Injection
+
+**`VIMINIT`** (and its `EXINIT` fallback) are executed as Ex commands on a normal startup, so `:!cmd` / `:call system(...)` yield code execution when a victim opens Vim/Neovim with a controlled environment:
+
+{{#ref}}
+macos-vim-applications-injection.md
 {{#endref}}
 
 Separately, Homebrew commonly installs Python below `/opt/homebrew`, where members of the local `admin` group may be able to replace the launcher. That is a writable-binary hijack rather than environment-variable injection; verify ownership and ACLs before treating it as exploitable.
