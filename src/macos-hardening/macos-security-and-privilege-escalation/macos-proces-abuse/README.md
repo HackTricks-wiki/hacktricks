@@ -285,7 +285,7 @@ macos-octave-applications-injection.md
 
 ### PowerShell Injection
 
-On macOS and Linux, **`XDG_CONFIG_HOME`** can redirect PowerShell user profiles that execute when `pwsh` starts.
+`pwsh` is a cross-platform .NET app, so several environment variables give pre-command execution: **`XDG_CONFIG_HOME`** redirects the profile scripts that run at startup, **`PSModulePath`** hijacks module auto-loading (a planted `.psm1` runs at import time and can shadow built-in cmdlets), and the .NET **`CORECLR_PROFILER`**/**`COR_PROFILER`** and **`DOTNET_STARTUP_HOOKS`** variables load attacker code into the process before `Main`.
 
 {{#ref}}
 macos-powershell-applications-injection.md

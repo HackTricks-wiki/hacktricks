@@ -338,6 +338,30 @@ test -e /tmp/vim-executed && echo 'VIMINIT executed'
 
 Batch mode (`vim -es`/`-Es`) skips these variables, but a normal interactive startup runs them.
 
+### **PowerShell (pwsh): PSModulePath, DOTNET_STARTUP_HOOKS & CLR profiler**
+
+PowerShell Core (`pwsh`) runs on Linux/macOS (and Windows) and is a **.NET application**, so several environment variables turn any `pwsh` invocation with an inherited environment into code execution — useful against cron/systemd jobs, CI runners and privileged wrappers that shell out to `pwsh`.
+
+- `PSModulePath`: PowerShell recursively searches every directory in this list for `.psd1`/`.psm1` modules and **auto-loads** one the first time a command it exports is referenced. Prepend a directory and your module's top-level code runs at import time; because resolution is *Alias → Function → Cmdlet*, an exported function can even shadow a built-in cmdlet the victim calls.<sup>[[10]](#references)</sup>
+- `XDG_CONFIG_HOME`: relocates `powershell/Microsoft.PowerShell_profile.ps1`, executed at startup (unless `-NoProfile`).
+- `DOTNET_STARTUP_HOOKS`: managed assembly whose `StartupHook.Initialize()` runs before `Main` (shared by every .NET app).
+- `CORECLR_ENABLE_PROFILING=1` + `CORECLR_PROFILER={guid}` + `CORECLR_PROFILER_PATH=/path/evil.so`: the CLR profiling API loads an attacker library into the process at startup (path vars beat the registry; `DOTNET_*` is the newer alias). On Windows PowerShell 5.1 (.NET Framework) use `COR_ENABLE_PROFILING`/`COR_PROFILER`/`COR_PROFILER_PATH`. MITRE ATT&CK T1574.012.<sup>[[11]](#references)</sup>
+
+```bash
+# PSModulePath module auto-load hijack
+mkdir -p /tmp/evil/Hijack
+printf 'New-Item -ItemType File /tmp/ps-mod-exec -Force|Out-Null\nfunction Invoke-Report{}\nExport-ModuleMember -Function Invoke-Report\n' > /tmp/evil/Hijack/Hijack.psm1
+printf "@{ModuleVersion='1.0';RootModule='Hijack.psm1';FunctionsToExport=@('Invoke-Report')}\n" > /tmp/evil/Hijack/Hijack.psd1
+PSModulePath="/tmp/evil:$PSModulePath" pwsh -Command 'Invoke-Report'
+test -e /tmp/ps-mod-exec && echo 'PSModulePath auto-load executed'
+```
+
+On Windows, `PSExecutionPolicyPreference=Bypass` additionally removes the "unsigned scripts blocked" guardrail so a planted profile/module actually runs. See the dedicated page for full PoCs:
+
+{{#ref}}
+../../macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-powershell-applications-injection.md
+{{#endref}}
+
 ### **PAGER, MANPAGER, GIT_PAGER, GIT_EDITOR & LESSOPEN**
 
 Some tools do not just read a path from the environment; they pass the value to a **shell**, an **editor**, or an **input preprocessor**. This makes the following variables especially interesting when a privileged wrapper runs `git`, `man`, `less`, or similar text viewers:
@@ -402,5 +426,7 @@ One background job, one stopped and last command didn't finish correctly:
 - [7] [GNU Bash Manual - Bash Variables (`PS4`) & The Set Builtin (`xtrace`/`SHELLOPTS`)](https://www.gnu.org/software/bash/manual/html_node/Bash-Variables.html)
 - [8] [PEP 553 - Built-in breakpoint() and PYTHONBREAKPOINT](https://peps.python.org/pep-0553/)
 - [9] [Vim documentation - starting.txt (`VIMINIT`, `EXINIT`)](https://vimhelp.org/starting.txt.html#initialization)
+- [10] [about_PSModulePath & PowerShell module auto-loading](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_psmodulepath)
+- [11] [.NET debugging & profiling config settings (`CORECLR_`/`DOTNET_`/`COR_` profiler variables)](https://learn.microsoft.com/en-us/dotnet/core/runtime-config/debugging-profiling)
 
 {{#include ../../banners/hacktricks-training.md}}
