@@ -229,7 +229,7 @@ macos-.net-applications-injection.md
 
 ### Shell Injection
 
-Non-interactive Bash reads **`BASH_ENV`**; zsh reads **`$ZDOTDIR/.zshenv`**; and fish reads configuration below **`XDG_CONFIG_HOME`** or **`XDG_DATA_DIRS`**. Each can execute a controlled startup file before the intended command:
+Non-interactive Bash reads **`BASH_ENV`**; interactive POSIX shells read **`ENV`**; zsh reads **`$ZDOTDIR/.zshenv`**; and fish reads configuration below **`XDG_CONFIG_HOME`** or **`XDG_DATA_DIRS`**. Each can execute a controlled startup file before the intended command. Bash also runs a command substitution placed in **`PS4`** whenever xtrace is enabled (e.g. inherited **`SHELLOPTS=xtrace`**):
 
 {{#ref}}
 macos-bash-applications-injection.md
@@ -302,7 +302,7 @@ macos-perl-applications-injection.md
 
 ### Ruby Injection
 
-I't also possible to abuse ruby env variables to make arbitrary scripts execute arbitrary code:
+It's also possible to abuse ruby env variables (**`RUBYOPT`**, **`RUBYLIB`**) to make arbitrary scripts execute arbitrary code:
 
 
 {{#ref}}
