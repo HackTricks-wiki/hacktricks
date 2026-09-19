@@ -76,6 +76,8 @@ jobs:
         run: |
           gh --version
           wget --version | head -n 1
+          cp .github/build_compact_search_index.py /tmp/build_compact_search_index.py
+          cp theme/ht_searcher.js /tmp/ht_searcher.js
           mkdir -p scripts
           cd scripts
           wget -O get_and_save_refs.py https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/master/scripts/get_and_save_refs.py
@@ -153,6 +155,7 @@ jobs:
           MDBOOK_BOOK__LANGUAGE=$BRANCH mdbook build || (echo "Error logs" && cat hacktricks-preprocessor-error.log && echo "" && echo "" && echo "Debug logs" && (cat hacktricks-preprocessor.log | tail -n 20) && exit 1)
           cp /tmp/immutable-images/* ./book/images/
           cp /tmp/discount.js ./book/discount.js
+          cp /tmp/ht_searcher.js ./book/theme/ht_searcher.js
       
       - name: Push search index to hacktricks-searchindex repo
         shell: bash
@@ -182,7 +185,7 @@ jobs:
           git clone --depth 1 https://x-access-token:${TOKEN}@github.com/${TARGET_REPO}.git /tmp/searchindex-repo
           
           # Compress the searchindex file
-          python3 .github/build_compact_search_index.py "$ASSET" "$COMPACT_ASSET"
+          python3 /tmp/build_compact_search_index.py "$ASSET" "$COMPACT_ASSET"
           gzip -9 -k -f "$ASSET"
           gzip -9 -k -f "$COMPACT_ASSET"
           
