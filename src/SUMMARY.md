@@ -665,6 +665,7 @@
 - [3632 - Pentesting distcc](network-services-pentesting/3632-pentesting-distcc.md)
 - [3690 - Pentesting Subversion (svn server)](network-services-pentesting/3690-pentesting-subversion-svn-server.md)
 - [3702/UDP - Pentesting WS-Discovery](network-services-pentesting/3702-udp-pentesting-ws-discovery.md)
+- [4000,10080 - Pentesting TiDB](network-services-pentesting/4000-10080-pentesting-tidb.md)
 - [4369 - Pentesting Erlang Port Mapper Daemon (epmd)](network-services-pentesting/4369-pentesting-erlang-port-mapper-daemon-epmd.md)
 - [4786 - Cisco Smart Install](network-services-pentesting/4786-cisco-smart-install.md)
 - [4840 - OPC Unified Architecture](network-services-pentesting/4840-pentesting-opc-ua.md)
