@@ -4,11 +4,11 @@
 
 ## Πλαίσιο του Repository
 
-Αυτό είναι το κύριο repository του HackTricks mdBook. Το σχετικό cloud book βρίσκεται στο:
+Αυτό είναι το κύριο HackTricks mdBook repository. Το σχετικό cloud book βρίσκεται στο:
 
 `/Users/carlospolop/git/hacktricks-cloud`
 
-Οι αλλαγές στη συμπεριφορά του shared theme/search συχνά πρέπει να εφαρμόζονται και στα δύο repositories.
+Οι αλλαγές στη συμπεριφορά του κοινόχρηστου theme/search συχνά πρέπει να εφαρμοστούν και στα δύο repositories.
 
 ## Συμβόλαιο Φόρτωσης του Search Index
 
@@ -16,28 +16,29 @@
 
 `theme/ht_searcher.js`
 
-Ενδέχεται να υπάρχει επίσης ένα generated αντίγραφο στο:
+Ενδέχεται επίσης να υπάρχει ένα generated αντίγραφο στο:
 
 `book/theme/ht_searcher.js`
 
-Αν το production κάνει deploy τον ήδη built κατάλογο `book/`, ενημερώστε και τα δύο αντίγραφα ή κάντε rebuild το
+Αν το production κάνει deploy τον ήδη built φάκελο `book/`, ενημερώστε και τα δύο αντίγραφα ή κάντε rebuild το
 book πριν από το deployment.
 
 Η πολιτική source του search index είναι σημαντική και ευαίσθητη ως προς το κόστος:
 
 - Σε public hosts, φορτώνετε κάθε language-specific και fallback candidate μόνο από το
-`HackTricks-wiki/hacktricks-searchindex`. Ποτέ μην κάνετε fallback στο mdBook output του ίδιου origin·
-η παροχή του μεγάλου index από το `hacktricks.wiki` σε production είναι δαπανηρή.
+`HackTricks-wiki/hacktricks-searchindex`. Ποτέ μην κάνετε fallback στο mdBook output του same-origin·
+το serving του μεγάλου index από το `hacktricks.wiki` σε production είναι ακριβό.
 - Σε localhost, hosts `.local`/`.internal`, loopback, RFC1918, carrier-grade NAT, link-local ή
 private IPv6 addresses, φορτώνετε μόνο το same-origin mdBook output, ώστε τα local/container deployments
-να παραμένουν self-contained.
+να παραμένουν self-contained. Για μια non-English σελίδα, δοκιμάστε πρώτα το language-prefixed local path
+(για παράδειγμα `/es/searchindex.js`) και χρησιμοποιήστε το root English index μόνο ως fallback.
 
 Για αυτό το repo, το αναμενόμενο local fallback είναι:
 
 `/searchindex.js`
 
-Σε private hosts, το cloud index δεν είναι διαθέσιμο από αυτό το origin και δεν πρέπει να προκαλεί remote
-download. Σε public hosts, πρέπει να χρησιμοποιεί τα remote αρχεία `searchindex-cloud-<lang>.js.gz`.
+Σε private hosts, το cloud index δεν είναι διαθέσιμο από αυτό το origin και δεν πρέπει να ενεργοποιεί
+remote download. Σε public hosts, πρέπει να χρησιμοποιούνται τα remote `searchindex-cloud-<lang>.js.gz` files.
 
 ## Δημοσίευση του Search Index
 
@@ -59,7 +60,7 @@ fallback. Και τα δύο είναι XOR-encrypted gzip payloads που χρ�
 `theme/ht_searcher.js`.
 
 Ο loader πρέπει να παραμένει lazy: η κανονική πλοήγηση στις σελίδες δεν πρέπει να δημιουργεί το search worker
-ούτε να κατεβάζει index μέχρι ο επισκέπτης να ανοίξει ή να χρησιμοποιήσει το search. Οι remote compressed
+ούτε να κατεβάζει index μέχρι ο visitor να ανοίξει ή να χρησιμοποιήσει το search. Τα remote compressed
 responses αποθηκεύονται στο Cache Storage για 24 ώρες ανά origin, ώστε οι επόμενες σελίδες να μπορούν να τα
 επαναχρησιμοποιήσουν. Διατηρήστε το stale-cache fallback όταν η ανανέωση ενός expired entry αποτυγχάνει.
 
@@ -75,11 +76,11 @@ responses αποθηκεύονται στο Cache Storage για 24 ώρες α�
 - `hacktricks-preprocessor-error.log`
 - `hacktricks-preprocessor.log`
 
-## Editing Notes
+## Σημειώσεις Επεξεργασίας
 
-- Προτιμήστε το `rg` για αναζητήσεις.
-- Κρατήστε το generated `book/` output εκτός των commits, εκτός αν ζητηθεί ρητά. Οι διορθώσεις του search loader
-αποτελούν εξαίρεση όταν οι ήδη built σελίδες πρέπει να διορθωθούν άμεσα.
-- Αν αλλάζετε τη συμπεριφορά του shared theme, συγκρίνετε και ενημερώστε το αντίστοιχο αρχείο στο
+- Προτιμήστε το `rg` για αναζήτηση.
+- Κρατήστε το generated `book/` output εκτός των commits, εκτός αν ζητηθεί ρητά. Οι διορθώσεις του
+search loader αποτελούν εξαίρεση όταν οι ήδη built σελίδες πρέπει να διορθωθούν άμεσα.
+- Αν αλλάζετε κοινόχρηστη συμπεριφορά του theme, συγκρίνετε και ενημερώστε το αντίστοιχο αρχείο στο
 `/Users/carlospolop/git/hacktricks-cloud`.
-- Μην επαναφέρετε άσχετες local changes.
+- Μην κάνετε revert άσχετων local changes.
