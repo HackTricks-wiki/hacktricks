@@ -41,4 +41,11 @@ runs:
         INPUT_GITHUB_TOKEN: ${{ inputs.github-token }}
         INPUT_COVERED_BY: ${{ inputs.covered-by }}
         INPUT_MERGE_COMMENT_AUTHOR: ${{ inputs.merge-comment-author }}
-      run: python3 "${{ github.action_path }}/decide.py"
+      run: |
+        if [ -f "${{ github.action_path }}/decide.py" ]; then
+          python3 "${{ github.action_path }}/decide.py"
+        else
+          echo "Missing invalidation helper; keeping the safe invalidation." >&2
+          echo "needed=true" >> "$GITHUB_OUTPUT"
+          echo "reason=missing helper; conservative fallback" >> "$GITHUB_OUTPUT"
+        fi
