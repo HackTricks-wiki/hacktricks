@@ -4,15 +4,15 @@ Orientación para futuros agentes que trabajen en este repositorio.
 
 ## Contexto del repositorio
 
-Este es el repositorio principal de mdBook de HackTricks. El libro relacionado sobre cloud se encuentra en:
+Este es el repositorio principal de HackTricks mdBook. El libro relacionado con cloud se encuentra en:
 
 `/Users/carlospolop/git/hacktricks-cloud`
 
-Los cambios en el comportamiento compartido del theme/search a menudo deben aplicarse en ambos repositorios.
+Los cambios en el comportamiento compartido del tema o de la búsqueda a menudo deben aplicarse en ambos repositorios.
 
 ## Contrato de carga del índice de búsqueda
 
-La UI de búsqueda personalizada se encuentra en:
+La interfaz de búsqueda personalizada se encuentra en:
 
 `theme/ht_searcher.js`
 
@@ -20,46 +20,49 @@ También puede existir una copia generada en:
 
 `book/theme/ht_searcher.js`
 
-Si production está desplegando el directorio `book/` ya construido, actualiza ambas copias o vuelve a construir el
-book antes del deployment.
+Si production está despleciendo el directorio `book/` ya compilado, actualiza ambas copias o vuelve a compilar el
+book antes del despliegue.
 
-El orden de carga del índice de búsqueda es importante y sensible a los costes:
+La política de origen del índice de búsqueda es importante y sensible a los costes:
 
-1. Carga todos los índices de búsqueda específicos de cada idioma y de respaldo desde el repositorio de GitHub:
-`HackTricks-wiki/hacktricks-searchindex`
-2. Solo si fallan todos los candidatos alojados en GitHub, usa como alternativa el output de mdBook del mismo origen.
+- En hosts públicos, carga todos los candidatos específicos de cada idioma y de fallback únicamente desde
+`HackTricks-wiki/hacktricks-searchindex`. Nunca uses como fallback el output de mdBook del mismo origen;
+servir el índice grande desde `hacktricks.wiki` en production es caro.
+- En localhost, hosts `.local`/`.internal`, loopback, RFC1918, NAT de nivel de operador, direcciones link-local o
+direcciones IPv6 privadas, carga únicamente el output de mdBook del mismo origen para que los despliegues
+locales/de contenedor sigan siendo autocontenidos.
 
-No coloques la alternativa local `/searchindex.js` antes de cualquier alternativa alojada en GitHub, como
-`searchindex-en.js.gz`. Servir `searchindex.js` desde `hacktricks.wiki` en production es caro.
-
-Para este repositorio, la alternativa local esperada es:
+Para este repositorio, el fallback local esperado es:
 
 `/searchindex.js`
 
-El índice de cloud no debe usar una alternativa local de este origen. Debe depender de los archivos remotos
-`searchindex-cloud-<lang>.js.gz`.
+En hosts privados, el índice cloud no está disponible desde este origen y no debe provocar una descarga remota.
+En hosts públicos debe usar los archivos remotos `searchindex-cloud-<lang>.js.gz`.
 
 ## Publicación del índice de búsqueda
 
-Los workflows que publican índices de búsqueda comprimidos y encrypted en
+Los workflows que publican índices de búsqueda comprimidos y cifrados en
 `HackTricks-wiki/hacktricks-searchindex` son:
 
 - `.github/workflows/build_master.yml`
 - `.github/workflows/translate_all.yml`
 
-El archivo fuente generado es `book/searchindex.js`. Los nombres de los artifacts remotos publicados son:
+El archivo fuente generado es `book/searchindex.js`. Los nombres de los artefactos remotos publicados son:
 
 - `searchindex-v2-en.json.gz` (índice compacto preferido)
 - `searchindex-v2-<lang>.json.gz` (índice compacto preferido)
 - `searchindex-en.js.gz`
 - `searchindex-<lang>.js.gz`
 
-El browser loader prioriza el artifact compacto v2 y mantiene el artifact `.js.gz` como alternativa legacy.
-Ambos son payloads gzip encrypted con XOR usando la key definida en `theme/ht_searcher.js`.
+El loader del navegador prefiere el artefacto compacto v2 y conserva el artefacto `.js.gz` como
+fallback heredado. Ambos son payloads gzip cifrados mediante XOR usando la clave definida en `theme/ht_searcher.js`.
 
-El loader debe seguir siendo lazy: la navegación normal por las páginas no debe crear el search worker ni descargar un índice hasta que el visitante abra o use la búsqueda. Las respuestas remotas comprimidas se guardan en Cache Storage durante 24 horas por origin para que las páginas posteriores puedan reutilizarlas. Conserva la alternativa de la stale-cache al actualizar una entrada expirada si falla la actualización.
+El loader debe seguir siendo lazy: la navegación normal por las páginas no debe crear el search worker ni descargar un
+índice hasta que el visitante abra o use la búsqueda. Las respuestas remotas comprimidas se guardan en Cache
+Storage durante 24 horas por origen para que las páginas posteriores puedan reutilizarlas. Conserva el
+fallback de caché obsoleta cuando falla la actualización de una entrada caducada.
 
-## Build y validación
+## Compilación y validación
 
 Comprobaciones locales habituales:
 
@@ -73,8 +76,9 @@ Si `mdbook build` falla, comprueba:
 
 ## Notas de edición
 
-- Prioriza `rg` para las búsquedas.
-- Mantén el output generado de `book/` fuera de los commits salvo que se solicite explícitamente. Las correcciones del search loader son una excepción cuando las páginas ya construidas deban corregirse inmediatamente.
-- Si cambias el comportamiento compartido del theme, compara y actualiza el archivo correspondiente en
+- Prefiere `rg` para buscar.
+- Mantén el output generado de `book/` fuera de los commits salvo que se solicite explícitamente. Las correcciones del
+loader de búsqueda son una excepción cuando las páginas ya compiladas deban corregirse de inmediato.
+- Si cambias el comportamiento compartido del tema, compara y actualiza el archivo correspondiente en
 `/Users/carlospolop/git/hacktricks-cloud`.
 - No reviertas cambios locales no relacionados.
