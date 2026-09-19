@@ -214,6 +214,23 @@ The **`execute-assembly`** uses a **sacrificial process** using remote process i
 
 The agressor script `https://github.com/outflanknl/HelpColor` will create the `helpx` command in Cobalt Strike which will put colors in commands indicating if they are BOFs (green), if they are Frok&Run (yellow) and similar, or if they are ProcessExecution, injection or similar (red). Which helps to know which commands are more stealthy.
 
+### Modern in-process post-execution
+
+Recent versions add two alternatives when a classic COFF BOF is too constrained:
+
+- **Beacon Interpreter** compiles C on the Team Server to intermediate bytecode and executes it in a VM embedded in Beacon. The bytecode remains data rather than native executable code, so this avoids the extra executable allocation and RW-to-RX permission transition normally required to load a BOF. Scripts can import the Beacon API and declare BOF-style Dynamic Function Resolution (DFR) prototypes.
+- **BOF-PE** loads a complete EXE or DLL in the current Beacon. This format supports normal PE imports, exception handling, richer C++ and external libraries while retaining the Beacon API. This is heavier than a small COFF BOF, so choose it only when the additional runtime is useful.
+
+```bash
+# Compile a C script on the Team Server and execute its bytecode
+beacon-interpreter /path/to/script.c
+
+# Execute a BOF-PE in the current Beacon
+inline-execute-pe /path/to/tool.x64.exe
+```
+
+These mechanisms reduce loader-related signals, not the telemetry produced by the script's actions or Windows API calls.<sup>[[8]](#references)</sup>
+
 ### Act as the user
 
 You could check events like `Seatbelt.exe LogonEvents ExplicitLogonEvents PoweredOnEvents`: 
@@ -276,9 +293,26 @@ In Cobalt Strike profiles you can also modify things like:
 - The memory footprint and DLL content with `stage {...}` block
 - The network traffic
 
-### Bypass memory scanning
+### Sleepmask and BeaconGate
 
-Some ERDs scan memory for some know malware signatures. Coblat Strike allows to modify the `sleep_mask` function as a BOF that will be able to encrypt in memory the bacldoor.
+A Sleepmask transforms Beacon and its tracked heap allocations while it is dormant, then restores them for task execution. Current releases provide an evasive default, but custom Sleepmask BOFs remain useful when memory layout, allocation or call-stack requirements differ. As of 4.13, the default Sleepmask also spoofs the return address for APIs proxied through BeaconGate.<sup>[[8]](#references)</sup>
+
+**BeaconGate** extends this design beyond `Sleep`: selected WinAPI calls are represented as `FUNCTION_CALL` structures and forwarded to the Sleepmask BOF, which can mask Beacon while executing the call. The profile can gate a group (`Comms`, `Core`, `Cleanup` or `All`) or only individual APIs:<sup>[[9]](#references)</sup>
+
+```text
+stage {
+    set sleep_mask "true";
+    set syscall_method "Indirect";
+
+    beacon_gate {
+        VirtualAlloc;       # Routed through BeaconGate
+        VirtualAllocEx;
+        InternetConnectA;
+    }
+}
+```
+
+For an API listed under `beacon_gate`, the gate takes precedence over `syscall_method`; APIs not listed can still use the configured syscall method. `beacon_gate disable` and `beacon_gate enable` toggle the feature at runtime. Avoid enabling `All` blindly: commands such as `ps` repeatedly call `OpenProcess`/`CloseHandle` and can produce a CPU spike when every call masks and unmasks Beacon. Sleepmask-VS provides mocked Beacon/Sleepmask state for debugging custom gates without repeatedly testing them through a live implant.<sup>[[9]](#references)</sup>
 
 ### Noisy proc injections
 
@@ -389,6 +423,8 @@ pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 
 </details>
 
+
+
 ## References
 
 - [1] [Cobalt Strike Linux Beacon (custom implant PoC)](https://github.com/EricEsquivel/CobaltStrike-Linux-Beacon)
@@ -398,5 +434,6 @@ pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 - [5] [SANS ISC diary on Cobalt Strike traffic](https://isc.sans.edu/diary/27968)
 - [6] [cs-decrypt-metadata-py](https://blog.didierstevens.com/2021/10/22/new-tool-cs-decrypt-metadata-py/)
 - [7] [SentinelOne CobaltStrikeParser](https://github.com/Sentinel-One/CobaltStrikeParser)
-
+- [8] [Cobalt Strike 4.13: Lost In Translation](https://www.cobaltstrike.com/blog/cobalt-strike-413-lost-in-translation)
+- [9] [Cobalt Strike 4.10: Through the BeaconGate](https://www.cobaltstrike.com/blog/cobalt-strike-410-through-the-beacongate?p=6046)
 {{#include ../banners/hacktricks-training.md}}

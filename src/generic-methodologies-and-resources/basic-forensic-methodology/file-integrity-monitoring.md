@@ -72,6 +72,14 @@ Example `osquery` FIM configuration focused on attacker persistence paths:<sup>[
 
 If you need **process attribution** instead of only path-level changes, prefer audit-backed telemetry such as `osquery` `process_file_events` or Wazuh `whodata` mode.<sup>[[1]](#references)[[3]](#references)[[9]](#references)</sup>
 
+#### `io_uring`: syscall telemetry is not FIM
+
+On modern Linux, watching `openat(2)`, `write(2)`, or other syscall entry points is **not equivalent to monitoring the resulting filesystem operation**. The 2025 **Curing** proof of concept queued file and network requests through `io_uring`, so products or policies attached only to the corresponding per-operation syscall entries lost process telemetry. In the same tests, a path-scoped FIM component still observed file modifications, showing that this is a **hook-placement blind spot**, not a permission bypass or a way to defeat every FIM backend.<sup>[[10]](#references)</sup>
+
+When validating a sensor, modify the same canary through several paths: normal `write`, `mmap` + `msync`, `truncate`, `sendfile`/`copy_file_range`, atomic replacement, and `io_uring`. Check not only that the final hash drift is found, but also whether the event preserves the responsible process, container/cgroup, namespace-visible path, inode, and rename pair. A missing real-time event followed by a periodic-scan mismatch must be treated as **telemetry loss**, not as a routine unexplained change.<sup>[[10]](#references)[[11]](#references)</sup>
+
+For eBPF-based monitoring, prefer common kernel enforcement points over a list of syscall-entry probes. For example, Tetragon's file-access policy uses `security_file_permission` to cover ordinary I/O, `sendfile`, `copy_file_range`, AIO, and `io_uring`; it separately covers memory mappings with `security_mmap_file` and size changes with `security_path_truncate`. This also illustrates why one hook is rarely complete coverage.<sup>[[11]](#references)</sup>
+
 ### Windows
 
 On Windows, FIM is stronger when you combine **change journals** with **high-signal process/file telemetry**:<sup>[[6]](#references)[[7]](#references)</sup>
@@ -125,5 +133,7 @@ Container FIM frequently misses the real write path. With Docker `overlay2`, the
 - [7] [fsutil usn](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/fsutil-usn)
 - [8] [OverlayFS storage driver](https://docs.docker.com/engine/storage/drivers/overlayfs-driver/)
 - [9] [Wazuh FIM advanced settings](https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/advanced-settings.html)
+- [10] [io_uring Rootkit Bypasses Linux Security Tools (ARMO)](https://www.armosec.io/blog/io_uring-rootkit-bypasses-linux-security/)
+- [11] [Filename access: covering synchronous, asynchronous, mapped, and truncation paths (Tetragon)](https://tetragon.io/docs/use-cases/filename-access/)
 
 {{#include ../../banners/hacktricks-training.md}}

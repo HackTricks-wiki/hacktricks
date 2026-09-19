@@ -203,20 +203,92 @@ macos-dirty-nib.md
 
 ### Java Applications Injection
 
-It's possible to abuse certain java capabilities (like the **`_JAVA_OPTS`** env variable) to make a java application execute **arbitrary code/commands**.
+It's possible to inject JVM options through **`_JAVA_OPTIONS`**, **`JAVA_TOOL_OPTIONS`**, or **`JDK_JAVA_OPTIONS`** and load a Java or native agent before the application starts.
 
 
 {{#ref}}
 macos-java-apps-injection.md
 {{#endref}}
 
+### Node.js Injection
+
+**`NODE_OPTIONS`** preloads attacker JavaScript via `--require` (file) or `--import data:text/javascript,…` (fileless, Node ≥ 20.6); **`NODE_REPL_EXTERNAL_MODULE`** loads a module into an interactive REPL, and **`ELECTRON_RUN_AS_NODE`** re-enables all of this on Electron binaries.
+
+{{#ref}}
+macos-nodejs-applications-injection.md
+{{#endref}}
+
 ### .Net Applications Injection
 
-It's possible to inject code into .Net applications by **abusing the .Net debugging functionality** (not protected by macOS protections such as runtime hardening).
+It's possible to inject code into .NET applications through **`DOTNET_STARTUP_HOOKS`** before `Main`, or by abusing the .NET debugging functionality when its prerequisites are present.
 
 
 {{#ref}}
 macos-.net-applications-injection.md
+{{#endref}}
+
+### Shell Injection
+
+Non-interactive Bash reads **`BASH_ENV`**; interactive POSIX shells read **`ENV`**; zsh reads **`$ZDOTDIR/.zshenv`**; and fish reads configuration below **`XDG_CONFIG_HOME`** or **`XDG_DATA_DIRS`**. Each can execute a controlled startup file before the intended command. Bash also runs a command substitution placed in **`PS4`** whenever xtrace is enabled (e.g. inherited **`SHELLOPTS=xtrace`**):
+
+{{#ref}}
+macos-bash-applications-injection.md
+{{#endref}}
+
+### PHP Injection
+
+**`PHPRC`** or **`PHP_INI_SCAN_DIR`** can load controlled PHP configuration whose **`auto_prepend_file`** executes before the target script.
+
+{{#ref}}
+macos-php-applications-injection.md
+{{#endref}}
+
+### Lua Injection
+
+The standalone Lua interpreter executes code or an `@file` from **`LUA_INIT`** (or its version-specific variant) before processing the target script.
+
+{{#ref}}
+macos-lua-applications-injection.md
+{{#endref}}
+
+### R Injection
+
+**`R_PROFILE_USER`** and **`R_PROFILE`** redirect startup profiles containing R code. **`R_DEFAULT_PACKAGES`** / **`R_SCRIPT_DEFAULT_PACKAGES`** plus an R library path can instead auto-load an installed package.
+
+{{#ref}}
+macos-r-applications-injection.md
+{{#endref}}
+
+### Julia Injection
+
+**`JULIA_DEPOT_PATH`** redirects the depot whose `config/startup.jl` is automatically executed.
+
+{{#ref}}
+macos-julia-applications-injection.md
+{{#endref}}
+
+### Erlang and Elixir Injection
+
+**`ERL_AFLAGS`**, **`ERL_FLAGS`**, or **`ERL_ZFLAGS`** can inject an Erlang VM **`-eval`** expression without requiring a payload file; Elixir workloads commonly start the same VM.
+
+{{#ref}}
+macos-erlang-elixir-applications-injection.md
+{{#endref}}
+
+### GNU Octave Injection
+
+**`OCTAVE_SITE_INITFILE`** and **`OCTAVE_VERSION_INITFILE`** redirect Octave startup scripts.
+
+{{#ref}}
+macos-octave-applications-injection.md
+{{#endref}}
+
+### PowerShell Injection
+
+`pwsh` is a cross-platform .NET app, so several environment variables give pre-command execution: **`XDG_CONFIG_HOME`** redirects the profile scripts that run at startup, **`PSModulePath`** hijacks module auto-loading (a planted `.psm1` runs at import time and can shadow built-in cmdlets), and the .NET **`CORECLR_PROFILER`**/**`COR_PROFILER`** and **`DOTNET_STARTUP_HOOKS`** variables load attacker code into the process before `Main`.
+
+{{#ref}}
+macos-powershell-applications-injection.md
 {{#endref}}
 
 ### Perl Injection
@@ -230,7 +302,7 @@ macos-perl-applications-injection.md
 
 ### Ruby Injection
 
-I't also possible to abuse ruby env variables to make arbitrary scripts execute arbitrary code:
+It's also possible to abuse ruby env variables (**`RUBYOPT`**, **`RUBYLIB`**) to make arbitrary scripts execute arbitrary code:
 
 
 {{#ref}}
@@ -239,28 +311,23 @@ macos-ruby-applications-injection.md
 
 ### Python Injection
 
-If the environment variable **`PYTHONINSPECT`** is set, the python process will drop into a python cli once it's finished. It's also possible to use **`PYTHONSTARTUP`** to indicate a python script to execute at the beginning of an interactive session.\
-However, note that **`PYTHONSTARTUP`** script won't be executed when **`PYTHONINSPECT`** creates the interactive session.
-
-Other env variables such as **`PYTHONPATH`** and **`PYTHONHOME`** could also be useful to make a python command execute arbitrary code.
+The **`PYTHONWARNINGS`** and **`BROWSER`** standard-library chain can execute a command during warning-filter parsing. A file-backed alternative places `sitecustomize.py` on **`PYTHONPATH`** so normal `site` initialization imports it before the target script. **`PYTHONBREAKPOINT`** runs a chosen callable/module when the code reaches `breakpoint()`. Interactive-only variables such as **`PYTHONSTARTUP`** have narrower applicability.
 
 Note that executables compiled with **`pyinstaller`** won't use these environmental variables even if they are running using an embedded python.
 
-> [!CAUTION]
-> Overall I couldn't find a way to make python execute arbitrary code abusing environment variables.\
-> However, most of the people install pyhton using **Hombrew**, which will install pyhton in a **writable location** for the default admin user. You can hijack it with something like:
->
-> ```bash
-> mv /opt/homebrew/bin/python3 /opt/homebrew/bin/python3.old
-> cat > /opt/homebrew/bin/python3 <<EOF
-> #!/bin/bash
-> # Extra hijack code
-> /opt/homebrew/bin/python3.old "$@"
-> EOF
-> chmod +x /opt/homebrew/bin/python3
-> ```
->
-> Even **root** will run this code when running python.
+{{#ref}}
+macos-python-applications-injection.md
+{{#endref}}
+
+### Vim/Neovim Injection
+
+**`VIMINIT`** (and its `EXINIT` fallback) are executed as Ex commands on a normal startup, so `:!cmd` / `:call system(...)` yield code execution when a victim opens Vim/Neovim with a controlled environment:
+
+{{#ref}}
+macos-vim-applications-injection.md
+{{#endref}}
+
+Separately, Homebrew commonly installs Python below `/opt/homebrew`, where members of the local `admin` group may be able to replace the launcher. That is a writable-binary hijack rather than environment-variable injection; verify ownership and ACLs before treating it as exploitable.
 
 
 ## Detection

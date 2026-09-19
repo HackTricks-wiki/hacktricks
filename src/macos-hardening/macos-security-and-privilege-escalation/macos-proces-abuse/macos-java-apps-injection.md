@@ -18,6 +18,13 @@ sudo find / -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
 
 The environment variable **`_JAVA_OPTIONS`** can be used to inject arbitrary Java VM parameters when a Java application starts.<sup>[[1]](#references)</sup>
 
+The Java launch stack also recognizes two better-defined variables with different scopes:
+
+- `JAVA_TOOL_OPTIONS` is read when the VM is created, including some embedded launch paths that do not pass through the `java` launcher. It can inject instrumentation options such as `-javaagent`, `-agentlib`, or `-agentpath`.<sup>[[4]](#references)</sup>
+- `JDK_JAVA_OPTIONS` is prepended by the `java` launcher to its command line. Options that select the main class or terminate the launcher are prohibited, but `-javaagent` is accepted.<sup>[[5]](#references)</sup>
+
+All three variables should be treated as JVM code-execution controls when an attacker can also provide a compatible readable agent. `_JAVA_OPTIONS` is a HotSpot implementation detail, so validate it against the exact vendor and version; `JAVA_TOOL_OPTIONS` or `JDK_JAVA_OPTIONS` are preferable for portable testing.
+
 ```bash
 # Write your payload in a script called /tmp/payload.sh
 export _JAVA_OPTIONS='-Xms2m -Xmx5m -XX:OnOutOfMemoryError="/tmp/payload.sh"'
@@ -88,6 +95,12 @@ export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 # Or
 
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
+
+# The same agent with the standardized VM initialization variable:
+JAVA_TOOL_OPTIONS='-javaagent:/tmp/Agent.jar' java -jar /path/to/application.jar
+
+# Or through the JDK java launcher:
+JDK_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar' java -jar /path/to/application.jar
 ```
 
 > [!CAUTION]
@@ -176,5 +189,7 @@ Notice that Android Studio in this example tries to load **`/Applications/Androi
 - [1] [OpenJDK — `_JAVA_OPTIONS` parsing in `arguments.cpp`](https://cr.openjdk.org/~never/bsd_headers/src/share/vm/runtime/arguments.cpp.html)
 - [2] [Oracle Java — `java.lang.instrument` package specification](https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html)
 - [3] [JetBrains — Configuring JVM options and platform properties](https://intellij-support.jetbrains.com/hc/en-us/articles/206544869-Configuring-JVM-options-and-platform-properties)
+- [4] [Oracle Java — `JAVA_TOOL_OPTIONS`](https://docs.oracle.com/javase/8/docs/technotes/guides/troubleshoot/envvars002.html)
+- [5] [The `java` launcher — `JDK_JAVA_OPTIONS`](https://docs.oracle.com/en/java/javase/25/docs/specs/man/java.html#using-the-jdk_java_options-launcher-environment-variable)
 
 {{#include ../../../banners/hacktricks-training.md}}
