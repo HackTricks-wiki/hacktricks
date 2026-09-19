@@ -75,6 +75,12 @@ On an unencrypted or already-unlocked Windows volume, an offline environment can
 
 Devices such as **USB Rubber Ducky** and Teensy boards can enumerate as trusted HID keyboards and inject predefined keystrokes. The payload initially has the privileges and desktop access of the logged-on session; UAC prompts, screen locking, keyboard layout, timing, and endpoint USB policy still constrain it.<sup>[[15]](#references)</sup>
 
+Programmable peripherals can also attack host kernel parsers and coordinate several USB devices for heap grooming and information disclosure:
+
+{{#ref}}
+../binary-exploitation/linux-kernel-exploitation/usb-audio-descriptor-oob-kaslr-leak.md
+{{#endref}}
+
 ### Volume Shadow Copy
 
 Administrator or backup privileges can create a shadow copy or save registry hives so locked files such as **SAM** and **SYSTEM** can be acquired. This is a post-compromise collection technique, not a privilege bypass, and should be correlated with `diskshadow`/VSS and registry-hive export events.
