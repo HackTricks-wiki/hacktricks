@@ -119,21 +119,26 @@
         (octets[0] === 192 && octets[1] === 168);
     }
 
-    function loadLocal(local){
-      if(!local) return null;
-      try {
-        importScripts(abs(local));
-        console.log('Loaded private-network search index:', local);
-        return takeLegacyIndex();
-      } catch(e){
-        console.error('local', local, 'failed ->', e);
-        return null;
-      }
+    function localCandidates(local, lang){
+      if(!local) return [];
+      const safeLang = /^[a-z]{2,3}$/.test(lang) ? lang : 'en';
+      return safeLang === 'en' ? [local] : ['/' + safeLang + local, local];
     }
 
-    async function loadWithPolicy(remotes, local, privateHost){
+    function loadLocal(locals){
+      for(const local of locals){
+        try {
+          importScripts(abs(local));
+          console.log('Loaded private-network search index:', local);
+          return takeLegacyIndex();
+        } catch(e){ console.warn('local', local, 'failed ->', e); }
+      }
+      return null;
+    }
+
+    async function loadWithPolicy(remotes, locals, privateHost){
       /* Private deployments stay self-contained; public deployments never use costly origin indexes. */
-      if(privateHost) return loadLocal(local);
+      if(privateHost) return loadLocal(locals);
       for(const source of remotes){
         try {
           const data = await loadRemote(source);
@@ -353,9 +358,9 @@
             language => 'searchindex-cloud-v2-' + language + '.json.gz',
             language => 'searchindex-cloud-' + language + '.js.gz', lang);
 
-          const main = await loadWithPolicy(mainSources, '/searchindex.js', privateHost);
+          const main = await loadWithPolicy(mainSources, localCandidates('/searchindex.js', lang), privateHost);
           if(main) built.push(buildIndex(main, false));
-          const cloud = await loadWithPolicy(cloudSources, null, privateHost);
+          const cloud = await loadWithPolicy(cloudSources, localCandidates(null, lang), privateHost);
           if(cloud) built.push(buildIndex(cloud, true));
           if(!built.length){ postMessage({ready:false, error:'no-index'}); return; }
           postMessage({ready:true});
