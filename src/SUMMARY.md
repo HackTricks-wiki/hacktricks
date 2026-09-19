@@ -981,6 +981,7 @@
 - [Common Exploiting Problems](binary-exploitation/common-exploiting-problems.md)
   - [QEMU/KVM VM Escape Chains](binary-exploitation/qemu-kvm-vm-escape-chains.md)
 - [Adreno A7xx Sds Rb Priv Bypass Gpu Smmu Kernel Rw](binary-exploitation/linux-kernel-exploitation/adreno-a7xx-sds-rb-priv-bypass-gpu-smmu-kernel-rw.md)
+- [Android Kernel SELinux Bypass After Arbitrary R/W](binary-exploitation/linux-kernel-exploitation/android-kernel-selinux-bypass.md)
 - [Af Unix Msg Oob Uaf Skb Primitives](binary-exploitation/linux-kernel-exploitation/af-unix-msg-oob-uaf-skb-primitives.md)
 - [Arm64 Static Linear Map Kaslr Bypass](binary-exploitation/linux-kernel-exploitation/arm64-static-linear-map-kaslr-bypass.md)
 - [Futex PI UAF to Pipe Physical R/W and Workqueue Execution](binary-exploitation/linux-kernel-exploitation/futex-pi-uaf-pipe-buffer-workqueue-usermodehelper.md)
