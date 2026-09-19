@@ -354,6 +354,39 @@ Hunting cues
 - Archived JS/VBS attachments spawning `powershell.exe` with `-enc`/`FromBase64String` in the command line.
 - `wscript.exe` launching `powershell.exe -nop -w hidden` from user temp paths.
 
+## MSC documents as execution containers (GrimResource)
+
+Microsoft Management Console files (`.msc`) are XML console definitions normally opened by `mmc.exe`. **GrimResource** weaponizes a `StringTable` reference to an `apds.dll` resource containing an old XSS primitive, so a user opening the crafted console causes JavaScript to run inside `mmc.exe`. Observed samples combined `transformNode`-based obfuscation with **DotNetToJScript** to instantiate a .NET payload without the usual Office-macro path.<sup>[[9]](#references)</sup>
+
+For static triage, treat an untrusted MSC as text and do **not** double-click it:<sup>[[9]](#references)</sup>
+
+```bash
+file lure.msc
+xmllint --format lure.msc > lure.formatted.xml
+grep -Eina 'apds\.dll|res://|StringTable|transformNode|ActiveXObject|FromBase64String' lure.formatted.xml
+strings -el lure.msc | grep -Ei 'powershell|cmd\.exe|http|base64'
+```
+
+High-signal runtime pivots are `mmc.exe` loading the CLR or script components, creating network connections, or spawning `powershell.exe`, `cmd.exe`, `wscript.exe`, `cscript.exe`, `mshta.exe`, `rundll32.exe`, or an unexpected executable. The format is legitimate, so detections should correlate **origin + suspicious XML/script content + `mmc.exe` behavior** instead of blocking every MSC.<sup>[[9]](#references)</sup>
+
+## PDF/QR redirectors and payload gating
+
+A PDF does not need an exploit to be useful. Recent campaigns place a **QR code or ordinary link** in a benign-looking document, move the browser session away from mail controls, and personalize the destination with the recipient address. Microsoft documented 2025 PDFs whose QR URLs were unique per recipient and led to RaccoonO365 credential-harvesting infrastructure; a parallel chain used IP/environment gating to return a JavaScript/MSI path to selected visitors but a benign PDF to scanners or disallowed clients.<sup>[[10]](#references)</sup>
+
+Triage both PDF actions and rendered QR codes. A QR may be vector-drawn rather than stored as an extractable image, so rasterize every page as well as extracting embedded images:
+
+```bash
+pdfid.py lure.pdf
+pdfdetach -list lure.pdf
+qpdf --qdf --object-streams=disable lure.pdf expanded.pdf
+grep -aE '/(URI|OpenAction|AA|Launch|EmbeddedFile)|https?://' expanded.pdf
+pdfimages -png lure.pdf image
+pdftoppm -png -r 300 lure.pdf page
+zbarimg --quiet image-*.png page-*.png
+```
+
+Inspect decoded destinations and redirects from an isolated analysis system without authenticating. Useful hunting features include QR-only PDFs with nearly empty mail bodies, the recipient email embedded in a query parameter, several redirects through reputable hosting, and different content returned according to IP, geolocation, cookies, referrer, or user agent. Compare requests with controlled profiles because a single sandbox fetch can receive only the decoy.<sup>[[10]](#references)</sup>
+
 ## Windows files to steal NTLM hashes
 
 Check the page about **places to steal NTLM creds**:
@@ -361,6 +394,8 @@ Check the page about **places to steal NTLM creds**:
 {{#ref}}
 ../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md
 {{#endref}}
+
+
 
 
 ## References
@@ -373,5 +408,6 @@ Check the page about **places to steal NTLM creds**:
 - [6] [MITRE ATT&CK – Steganography (T1027.003)](https://attack.mitre.org/techniques/T1027/003/)
 - [7] [MITRE ATT&CK – Process Hollowing (T1055.012)](https://attack.mitre.org/techniques/T1055/012/)
 - [8] [MITRE ATT&CK – Trusted Developer Utilities Proxy Execution: MSBuild (T1127.001)](https://attack.mitre.org/techniques/T1127/001/)
-
+- [9] [Elastic Security Labs – GrimResource: Microsoft Management Console for initial access and evasion](https://www.elastic.co/security-labs/threat-command/grimresource)
+- [10] [Microsoft Security Blog – Threat actors leverage tax season to deploy tax-themed phishing campaigns](https://www.microsoft.com/en-us/security/blog/2025/04/03/threat-actors-leverage-tax-season-to-deploy-tax-themed-phishing-campaigns/)
 {{#include ../../banners/hacktricks-training.md}}

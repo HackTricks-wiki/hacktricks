@@ -822,6 +822,37 @@ hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt -j $- -k $!
 ```
 
+#### Grammar-driven combinator attacks (encrypted Office example)
+
+A password can be long and contain several character classes while still having a small **effective search space** when it follows a known grammar. For an encrypted Office document obtained during an authorized assessment, `office2john.py` extracts the password-verification record; this enables local guessing without online lockouts, throttling, or MFA. It does not bypass the document encryption.<sup>[[2]](#references)[[5]](#references)</sup>
+
+Strip the filename field that John prepends so Hashcat receives only the verifier:<sup>[[2]](#references)</sup>
+
+```bash
+python3 /path/to/office2john.py secrets.xlsx | sed 's/^[^:]*://' > office.hash
+head -c 40 office.hash; echo
+```
+
+Select `-m` from the extracted prefix rather than from the file extension. Hashcat maps `$office$*2007*`, `$office$*2010*`, and `$office$*2013*` to modes `9400`, `9500`, and `9600`; legacy `$oldoffice$0/$1` and `$oldoffice$3/$4` records use modes `9700` and `9800`, respectively.<sup>[[3]](#references)</sup>
+
+If intelligence from password reuse, policies, hints, or people familiar with the user reveals a grammar such as `<word><number><optional !><word>`, materialize the independently enumerable prefix as the left dictionary. This example tests numbers `0` through `99`; replace the range and transformations with evidence from the assessment.<sup>[[5]](#references)</sup>
+
+```bash
+while IFS= read -r word; do
+  for number in $(seq 0 99); do
+    printf '%s%s\n%s%s!\n' "$word" "$number" "$word" "$number"
+  done
+done < words.txt > wordsAndNumbers.txt
+```
+
+Hashcat attack mode `1` appends every line of the right dictionary to every line of the left dictionary, so files containing `L` and `R` lines produce `L × R` candidates before any applied rules. The following command is specifically for a legacy `$oldoffice$3/$4` record; change the mode for other Office formats.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
+
+```bash
+hashcat -m 9800 -a 1 office.hash wordsAndNumbers.txt english-88k-upper.txt
+```
+
+This preprocessing pattern generalizes to other offline-verifiable formats: enumerate only plausible capitalization, dates, separators, digits, or punctuation for one component, then combine it with the remaining component instead of brute-forcing the nominal full length.<sup>[[4]](#references)[[5]](#references)</sup>
+
 - **Mask attack** (`-a 3`)
 
 ```bash
@@ -903,5 +934,9 @@ Cracking Common Application Hashes
 ## References
 
 - [1] [Inside GoBruteforcer: AI-generated server defaults, weak passwords, and crypto-focused campaigns](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
+- [2] [John the Ripper: `office2john.py`](https://github.com/openwall/john/blob/bleeding-jumbo/run/office2john.py)
+- [3] [Hashcat example hashes and Microsoft Office modes](https://hashcat.net/wiki/doku.php?id=example_hashes)
+- [4] [Hashcat combinator attack](https://hashcat.net/wiki/doku.php?id=combinator_attack)
+- [5] [Estate planning of credentials](https://pentestpartners.com/security-blog/estate-planning-of-credentials)
 
 {{#include ../banners/hacktricks-training.md}}
