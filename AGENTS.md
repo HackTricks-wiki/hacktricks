@@ -4,41 +4,40 @@ Hinweise für zukünftige Agents, die in diesem Repository arbeiten.
 
 ## Repository-Kontext
 
-Dies ist das zentrale HackTricks-mdBook-Repository. Das zugehörige Cloud-Buch befindet sich unter:
+Dies ist das wichtigste HackTricks-mdBook-Repository. Das zugehörige Cloud-Buch befindet sich unter:
 
 `/Users/carlospolop/git/hacktricks-cloud`
 
-Änderungen am gemeinsamen Theme-/Suchverhalten müssen häufig in beiden Repositories vorgenommen werden.
+Änderungen am gemeinsamen Theme-/Search-Verhalten müssen häufig in beiden Repositories vorgenommen werden.
 
-## Vertrag zum Laden des Suchindex
+## Vertrag zum Laden des Search-Index
 
-Die benutzerdefinierte Suchoberfläche befindet sich in:
+Die benutzerdefinierte Search-UI befindet sich in:
 
 `theme/ht_searcher.js`
 
-Es kann außerdem eine generierte Kopie unter folgendem Pfad geben:
+Möglicherweise gibt es auch eine generierte Kopie unter:
 
 `book/theme/ht_searcher.js`
 
-Wenn die Produktion das bereits erstellte Verzeichnis `book/` bereitstellt, aktualisiere beide Kopien oder erstelle das Buch neu.
+Wenn die Production das bereits erstellte `book/`-Verzeichnis deployt, aktualisiere beide Kopien oder baue das Buch vor dem Deployment neu.
 
-Die Reihenfolge beim Laden des Suchindex ist wichtig und kostenrelevant:
+Die Quellrichtlinie für den Search-Index ist wichtig und kostenabhängig:
 
-1. Lade jeden sprachspezifischen und jeden Fallback-Suchindex aus dem GitHub-Repository:
-`HackTricks-wiki/hacktricks-searchindex`
-2. Verwende den Same-Origin-mdBook-Output nur dann als Fallback, wenn alle von GitHub gehosteten Kandidaten fehlschlagen.
+- Auf öffentlichen Hosts dürfen alle sprachspezifischen und fallback-Kandidaten ausschließlich von
+`HackTricks-wiki/hacktricks-searchindex` geladen werden. Führe niemals einen Fallback auf die mdBook-Ausgabe derselben Origin durch; das Bereitstellen des großen Index von `hacktricks.wiki` in der Production ist teuer.
+- Auf Localhost-, `.local`-/`.internal`-Hosts, Loopback-, RFC1918-, Carrier-Grade-NAT-, Link-Local- oder privaten IPv6-Adressen darf nur die mdBook-Ausgabe derselben Origin geladen werden, damit lokale/Container-Deployments in sich geschlossen bleiben.
 
-Platziere den lokalen `/searchindex.js`-Fallback nicht vor einem von GitHub gehosteten Fallback wie `searchindex-en.js.gz`. Das Bereitstellen von `searchindex.js` von `hacktricks.wiki` ist in der Produktion teuer.
-
-Für dieses Repository lautet der erwartete lokale Fallback:
+Für dieses Repo ist der erwartete lokale Fallback:
 
 `/searchindex.js`
 
-Der Cloud-Index sollte keinen lokalen Fallback von dieser Origin verwenden. Er sollte sich auf die entfernten Dateien `searchindex-cloud-<lang>.js.gz` stützen.
+Auf privaten Hosts ist der Cloud-Index von dieser Origin aus nicht verfügbar und darf keinen Remote-Download auslösen. Auf öffentlichen Hosts sollten die Remote-Dateien `searchindex-cloud-<lang>.js.gz` verwendet werden.
 
-## Veröffentlichung des Suchindex
+## Veröffentlichung des Search-Index
 
-Die Workflows, die verschlüsselte komprimierte Suchindizes in `HackTricks-wiki/hacktricks-searchindex` veröffentlichen, sind:
+Die Workflows, die verschlüsselte komprimierte Search-Indexes in
+`HackTricks-wiki/hacktricks-searchindex` veröffentlichen, sind:
 
 - `.github/workflows/build_master.yml`
 - `.github/workflows/translate_all.yml`
@@ -50,9 +49,9 @@ Die generierte Quelldatei ist `book/searchindex.js`. Die Namen der veröffentlic
 - `searchindex-en.js.gz`
 - `searchindex-<lang>.js.gz`
 
-Der Browser-Loader bevorzugt das kompakte v2-Artefakt und verwendet das `.js.gz`-Artefakt weiterhin als Legacy-Fallback. Beide sind XOR-verschlüsselte gzip-Payloads und verwenden den in `theme/ht_searcher.js` definierten Schlüssel.
+Der Browser-Loader bevorzugt das kompakte v2-Artefakt und behält das `.js.gz`-Artefakt als Legacy-Fallback bei. Beide sind XOR-verschlüsselte gzip-Payloads und verwenden den in `theme/ht_searcher.js` definierten Schlüssel.
 
-Der Loader muss lazy bleiben: Bei der normalen Seitennavigation darf weder der Search Worker erstellt noch ein Index heruntergeladen werden, bevor der Besucher die Suche öffnet oder verwendet. Komprimierte Remote-Antworten werden 24 Stunden pro Origin im Cache Storage gespeichert, damit nachfolgende Seiten sie wiederverwenden können. Behalte den Fallback auf den veralteten Cache bei, wenn die Aktualisierung eines abgelaufenen Eintrags fehlschlägt.
+Der Loader muss lazy bleiben: Die normale Seitennavigation darf weder den Search-Worker erstellen noch einen Index herunterladen, bevor der Besucher die Search öffnet oder verwendet. Komprimierte Remote-Antworten werden 24 Stunden pro Origin im Cache Storage gespeichert, damit nachfolgende Seiten sie wiederverwenden können. Behalte den Stale-Cache-Fallback bei, wenn die Aktualisierung eines abgelaufenen Eintrags fehlschlägt.
 
 ## Build und Validierung
 
@@ -61,14 +60,15 @@ Der Loader muss lazy bleiben: Bei der normalen Seitennavigation darf weder der S
 - `node --check theme/ht_searcher.js`
 - `mdbook build`
 
-Wenn `mdbook build` fehlschlägt, überprüfe:
+Wenn `mdbook build` fehlschlägt, prüfe:
 
 - `hacktricks-preprocessor-error.log`
 - `hacktricks-preprocessor.log`
 
 ## Hinweise zur Bearbeitung
 
-- Verwende zum Suchen bevorzugt `rg`.
-- Halte generierte `book/`-Ausgaben aus Commits heraus, sofern dies nicht ausdrücklich angefordert wurde. Änderungen am Search Loader sind eine Ausnahme, wenn die bereits erstellten Seiten sofort korrigiert werden müssen.
-- Wenn du das gemeinsame Theme-Verhalten änderst, vergleiche die entsprechende Datei in `/Users/carlospolop/git/hacktricks-cloud` und aktualisiere sie ebenfalls.
+- Bevorzuge `rg` für die Suche.
+- Halte generierte `book/`-Ausgaben aus Commits heraus, sofern dies nicht ausdrücklich angefordert wurde. Änderungen am Search-Loader sind eine Ausnahme, wenn die bereits erstellten Seiten sofort korrigiert werden müssen.
+- Wenn du das Verhalten des gemeinsamen Themes änderst, vergleiche die entsprechende Datei in
+`/Users/carlospolop/git/hacktricks-cloud` und aktualisiere sie ebenfalls.
 - Mache keine nicht zusammenhängenden lokalen Änderungen rückgängig.
