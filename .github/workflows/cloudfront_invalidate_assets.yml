@@ -13,6 +13,8 @@ on:
 permissions:
   id-token: write
   contents: read
+  actions: read
+  pull-requests: read
 
 jobs:
   invalidate:
@@ -88,8 +90,19 @@ jobs:
           paths=$(paste -sd' ' /tmp/invalidate_paths.txt)
           echo "paths=$paths" >> "$GITHUB_OUTPUT"
 
+      # A push to the default branch fans out into several workflows that each
+      # invalidate an overlapping set of paths, and CloudFront bills every path
+      # past the first 1000 a month. Skip the ones another run already covers.
+      - name: Check whether this invalidation is still needed
+        id: invalidation
+        uses: ./.github/actions/invalidation-needed
+        with:
+          github-token: ${{ github.token }}
+          covered-by: translate_all.yml
+          merge-comment-author: "carlospolop"
+
       - name: Create CloudFront invalidation
-        if: steps.paths.outputs.paths != ''
+        if: steps.paths.outputs.paths != '' && steps.invalidation.outputs.needed == 'true'
         shell: bash
         run: |
           set -euo pipefail

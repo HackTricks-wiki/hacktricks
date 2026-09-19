@@ -116,6 +116,84 @@ The results feed directly into your race orchestration strategy (e.g., number of
    - When Thread A resumes and performs the privileged action, it observes stale state and performs the attacker-controlled operation.
 4. **Clean up** – Delete the directory chain and symbolic links to avoid leaving suspicious artifacts or breaking legitimate IPC users.<sup>[[1]](#references)</sup>
 
+## Applied chain: mutable Cloud Files placeholders + Object Manager path switching
+
+[ShieldBreak](https://github.com/MSNightmare/ShieldBreak), published as a bypass for RoguePlanet (CVE-2026-50656), demonstrates a broader exploitation pattern: make a privileged scanner classify one representation of a logical file, then change both its bytes and namespace resolution before remediation uses it. The PoC combines a Cloud Files hydration TOCTOU, an Object Manager shadow-directory fallback, CLFS-generated-name capture, and a local administrative-share link to turn Defender cleanup into a protected DLL write.<sup>[[3]](#references)[[4]](#references)</sup>
+
+### 1. Substitute content through Cloud Files hydration
+
+Register an attacker-writable directory as a Cloud Files sync root, connect a `CF_CALLBACK_TYPE_FETCH_DATA` callback, and create a placeholder whose advertised size matches a deterministic detection trigger such as the EICAR ZIP. The first fetch returns the trigger and flips callback state; later fetches return the payload. After the scanner has classified the first representation, obtain the transfer key and restart hydration with payload-sized metadata, then force hydration to EOF.<sup>[[4]](#references)</sup>
+
+```cpp
+CfRegisterSyncRoot(sync_root, &registration, &policies, flags);
+CfConnectSyncRoot(sync_root, callbacks, &state, connect_flags, &connection);
+CfCreatePlaceholders(sync_root, &placeholder, 1, 0, &created);
+// First FETCH_DATA => detection trigger; later FETCH_DATA => payload.
+CfGetTransferKey(placeholder_handle, &transfer_key);
+opInfo.Type = CF_OPERATION_TYPE_RESTART_HYDRATION;
+CfExecute(&opInfo, &restart_params);
+CfHydratePlaceholder(placeholder_handle, {0}, CF_EOF, 0, NULL);
+```
+
+The security boundary fails if scan, verdict, and remediation refer only to a pathname or placeholder identity: neither guarantees that a later hydration returns the bytes that were inspected.<sup>[[4]](#references)</sup>
+
+### 2. Switch an invariant path through a shadow-directory fallback
+
+Create a target Object Manager directory and a second directory with `NtCreateDirectoryObjectEx`, passing the target handle as its shadow/fallback directory. Put a same-named `WD_SCAN` entry in both resolution layers: the visible entry points to the normal working directory, while the fallback entry points to `\CLFS\??\<working-directory>`. Supply Defender only the invariant path below; deleting the visible link while the operation is active makes the same string fall through to the CLFS-backed entry.<sup>[[4]](#references)</sup>
+
+```text
+\\.\globalroot\BaseNamedObjects\Restricted\WD_SHADOW_<GUID>\WD_SCAN\BERLIN
+```
+
+This is distinct from using shadow directories only to slow lookup: the attacker changes the **meaning** of a previously accepted path without modifying its string.<sup>[[4]](#references)</sup>
+
+### 3. Capture the generated name and install a filename-specific link
+
+Monitor the working directory with `ReadDirectoryChangesW`. On the first `FILE_ACTION_ADDED`, remove the visible `WD_SCAN` link to activate fallback lookup. Capture the second generated filename, open that CLFS-related file, and lock the range `0..MAXLONGLONG` with `LockFileEx`. While the privileged operation is stalled, replace `WD_SCAN` in the visible directory with a real Object Manager directory and create a child symbolic link named from the observed filename (the PoC strips its final four characters). Point it to the protected destination through local SMB:<sup>[[4]](#references)</sup>
+
+```text
+\??\UNC\127.0.0.1\C$\Windows\System32\phoneinfo.dll
+```
+
+The unprivileged process cannot write that destination itself, but Defender's SYSTEM context can traverse the loopback administrative share. Combining generated-name observation with a filename-specific Object Manager link avoids having to predict the remediation artifact in advance.<sup>[[4]](#references)</sup>
+
+### 4. Stabilize the cleanup race and trigger a privileged loader
+
+Before scanning, the PoC stores a valid PE (`ntdll.dll`) in the placeholder's `:stream` NTFS alternate data stream. After redirection creates the protected base file, it opens `phoneinfo.dll:stream` with execute access and keeps a `PAGE_EXECUTE_READ | SEC_IMAGE` mapping alive while cleanup resumes; the live file/section objects constrain deletion or replacement during the final race. The restarted hydration now returns the payload DLL rather than EICAR, so the protected base file contains attacker-controlled code.<sup>[[4]](#references)</sup>
+
+A protected write is then converted to SYSTEM execution by placing a crafted `Report.wer` under `C:\ProgramData\Microsoft\Windows\WER\ReportQueue\...` and invoking `\Microsoft\Windows\Windows Error Reporting\QueueReporting` through the Task Scheduler COM API. In this chain, privileged WER processing loads the planted `C:\Windows\System32\phoneinfo.dll`; a named-pipe connection is used as the payload execution signal.<sup>[[4]](#references)</sup>
+
+### Detection pivots
+
+Useful correlations are more specific than any single temporary filename and cover all namespace transitions in the chain:<sup>[[4]](#references)</sup>
+
+- A newly registered Cloud Files provider followed by EICAR detection and `CF_OPERATION_TYPE_RESTART_HYDRATION` on the same placeholder.
+- Object Manager paths containing `WD_TARGET_*`, `WD_SHADOW_*`, or `WD_SCAN`, especially a scan path below `\\.\globalroot\BaseNamedObjects\Restricted\`.
+- CLFS file creation followed by an exclusive whole-file lock and loopback access to `\\127.0.0.1\C$\Windows\System32\*.dll` from a privileged security process.
+- Creation of a System32 DLL together with an NTFS ADS, followed by `SEC_IMAGE` mapping of the stream.
+- An attacker-created WER queue entry followed by an unusual manual run of `\Microsoft\Windows\Windows Error Reporting\QueueReporting` and an image load of the planted DLL.
+
+## Applied chain: oplock-gated mount-point switch against privileged remediation
+
+A reusable LPE pattern appears when a privileged scanner checks an attacker-controlled file and later remediates it by reopening the **pathname** rather than continuing through validated handles. FalconFlank is a public example targeting CrowdStrike Falcon's Office macro-removal workflow; the repository claims testing on Windows 11 25H2 and Windows Server 2025 with the relevant policy enabled, but publishes no CVE, affected-build range, vendor advisory, or patch status, so treat the product-specific claim as unverified and build-dependent.<sup>[[5]](#references)[[6]](#references)</sup>
+
+### Race layout
+
+1. Build a writable tree whose final relative name is useful at the intended destination. The example uses `%TEMP%\\Flanker_{GUID}\\WindowsPowerShell\\v1.0\\bcrypt.dll`, but initially writes an OLE macro document—not a PE DLL—to `bcrypt.dll`. Content-based detection triggers the remediation while the attacker-controlled basename is preserved for the later side-load.<sup>[[5]](#references)</sup>
+2. Open the directories with broad sharing and `FILE_OPEN_REPARSE_POINT`, then request an asynchronous RH oplock on the trigger with `FSCTL_REQUEST_OPLOCK`, `OPLOCK_LEVEL_CACHE_READ | OPLOCK_LEVEL_CACHE_HANDLE`, and `REQUEST_OPLOCK_INPUT_FLAG_REQUEST`. Wait for the overlapped event and use its completion as the path-switch cue. An RH oplock-break notification is advisory rather than proof that every conflicting operation is blocked, so exploitability still depends on the victim's exact open/remediation sequence.<sup>[[5]](#references)[[7]](#references)</sup>
+3. After the break, remove the leaf directory with `FileDispositionInformationEx` (information class 64) using delete plus POSIX-semantics flags, close its handle, and apply an `IO_REPARSE_TAG_MOUNT_POINT` to the now-empty parent with `FSCTL_SET_REPARSE_POINT_EX`. The mount point redirects the unchanged suffix into a protected tree such as `\\SystemRoot\\System32\\WindowsPowerShell`; setting a reparse point fails if the directory is not empty, which explains the preceding deletion step.<sup>[[5]](#references)[[8]](#references)</sup>
+4. Resume the privileged workflow. If it resolves the string again without proving that the directory chain and final object are the ones previously inspected, the same logical pathname now reaches the attacker-selected protected directory. In the example, success is tested by reopening `C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\bcrypt.dll` read/write from the original process; this distinguishes the confused-deputy write primitive from the later code-execution stage.<sup>[[5]](#references)</sup>
+5. Replace the resulting file with the real DLL and activate a privileged loader. The PoC uses `CreateTransaction` + `CreateFileTransacted`, truncates the file, maps the DLL-sized replacement, copies the PE, and commits; TxF binds the file handle and subsequent handle-based operations to the transaction, but it is a post-race replacement mechanism rather than the source of the privilege boundary failure.<sup>[[5]](#references)[[9]](#references)</sup>
+6. Finally, run an existing privileged scheduled task whose executable probes the planted adjacent filename. FalconFlank invokes `\\Microsoft\\Windows\\Application Experience\\MareBackup`, waits for the DLL to connect to `\\??\\pipe\\FALCONFLANK`, and then deletes the planted file. Do not assume a particular resulting token solely from the task name—verify the launched process, module path, integrity level, and token on the tested build.<sup>[[5]](#references)</sup>
+
+The core audit question is therefore not “does the service validate the original input path?” but “does every privileged mutation remain bound to the same opened file and directory objects that were validated?” Holding handles across check and use, opening child objects relative to a trusted directory handle, rejecting unexpected reparse tags, and revalidating file identity before mutation close this class of pathname-substitution bug.<sup>[[1]](#references)[[8]](#references)</sup>
+
+### Detection and PoC triage
+
+High-signal detection correlates the namespace transition with the privileged consumer: an OLE header under a DLL basename in a GUID-named temporary tree, an oplock break, POSIX-style removal of the leaf directory, creation of a mount point targeting a protected Windows directory, and creation or modification of the same basename below that destination. For the public example, add `C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\bcrypt.dll`, manual execution of `MareBackup`, and the `FALCONFLANK` named pipe as narrower pivots; none is sufficient alone.<sup>[[5]](#references)</sup>
+
+When reproducing the PoC, account for three reliability defects in the published source: it calls `FlushFileBuffers` with the embedded byte-array pointer rather than the file handle, tests a stale `HRESULT` after `GetFolder`, `GetTask`, and `Run`, and uses unbounded retry/wait loops for directory deletion, reparse creation, the oplock event, and pipe connection.<sup>[[5]](#references)</sup>
+
 ## Operational considerations
 
 - **Combine primitives** – You can use a long name *per level* in a directory chain for even higher latency until you exhaust the `UNICODE_STRING` size.
@@ -134,5 +212,12 @@ The results feed directly into your race orchestration strategy (e.g., number of
 
 - [1] [Project Zero – Windows Exploitation Techniques: Winning Race Conditions with Path Lookups](https://projectzero.google/2025/12/windows-exploitation-techniques.html)
 - [2] [googleprojectzero/symboliclink-testing-tools](https://github.com/googleprojectzero/symboliclink-testing-tools)
+- [3] [MSNightmare/ShieldBreak](https://github.com/MSNightmare/ShieldBreak)
+- [4] [ShieldBreak.cpp (commit be016d8)](https://github.com/MSNightmare/ShieldBreak/blob/be016d8c18c8355a12753286c1ce9d5a48a0dab4/ShieldBreak.cpp)
+- [5] [FalconFlank.cpp (commit 702b574)](https://github.com/MSNightmare/FalconFlank/blob/702b57477a9f0a99ddabef56e7ebe6c1e99c2435/FalconFlank.cpp)
+- [6] [MSNightmare/FalconFlank](https://github.com/MSNightmare/FalconFlank)
+- [7] [Microsoft Learn - FSCTL_REQUEST_OPLOCK](https://learn.microsoft.com/en-us/windows/win32/api/winioctl/ni-winioctl-fsctl_request_oplock)
+- [8] [Microsoft Learn - FSCTL_SET_REPARSE_POINT_EX](https://learn.microsoft.com/en-us/windows-hardware/drivers/ifs/fsctl-set-reparse-point-ex)
+- [9] [Microsoft Learn - How to Use Transactional NTFS](https://learn.microsoft.com/en-us/windows/win32/fileio/how-to-use-transactional-ntfs)
 
 {{#include ../../banners/hacktricks-training.md}}

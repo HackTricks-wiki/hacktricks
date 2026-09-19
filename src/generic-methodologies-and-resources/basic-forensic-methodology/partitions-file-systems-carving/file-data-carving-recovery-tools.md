@@ -4,6 +4,8 @@
 
 ## Carving & Recovery tools
 
+Always carve a **verified copy**, not the original device. See [Image Acquisition & Mount](../image-acquisition-and-mount.md) for read-only acquisition and hashing workflows.
+
 More tools in [https://github.com/Claudio-C/awesome-datarecovery](https://github.com/Claudio-C/awesome-datarecovery)
 
 ### Autopsy
@@ -12,16 +14,20 @@ The most common tool used in forensics to extract files from images is [**Autops
 
 ### Binwalk <a href="#binwalk" id="binwalk"></a>
 
-**Binwalk** is a tool for analyzing binary files to find embedded content. It's installable via `apt` and its source is on [GitHub](https://github.com/ReFirmLabs/binwalk).
+**Binwalk** is a tool for analyzing binary files to find embedded content. **Binwalk v3** is a Rust rewrite with automatic extraction (`-e`), raw carving of known and unknown objects (`-c`), recursive/Matryoshka scanning (`-M`) and configurable worker threads. The project recommends its Docker build when all external extractors are required; `cargo install binwalk` installs the Rust CLI but not those external dependencies.<sup>[[11]](#references)</sup>
 
-**Useful commands**:
+**Useful v3 commands**:
 
 ```bash
-sudo apt install binwalk         # Installation
-binwalk firmware.bin             # Display embedded data
-binwalk -e firmware.bin          # Extract recognised objects (safe-default)
-binwalk --dd " .* " firmware.bin  # Extract *everything* (use with care)
+cargo install binwalk                 # CLI only; install extractors separately
+binwalk firmware.bin                  # Identify embedded content
+binwalk -e firmware.bin               # Extract recognised objects
+binwalk -c -d carved firmware.bin     # Carve known and unknown objects
+binwalk -Me -d extracted firmware.bin # Extract and recursively scan results
+binwalk -e -l results.json firmware.bin
 ```
+
+The legacy v2 `--dd='.*'` recipe is **not** the v3 equivalent of `-c`; first check `binwalk --version` when following old CTF/write-up commands.<sup>[[11]](#references)</sup>
 
 ⚠️  **Security note** – Versions **2.1.2b through 2.3.3** are affected by a **Path Traversal** vulnerability (CVE-2022-4510); the advisory lists no patched pip version. Avoid extracting untrusted samples with affected releases, or isolate the tool with a container/non-privileged UID.<sup>[[4]](#references)</sup>
 
@@ -74,6 +80,20 @@ You can find it in <https://www.cgsecurity.org/wiki/TestDisk_Download>
 It comes with GUI and CLI versions. You can select the **file-types** you want PhotoRec to search for.
 
 ![Run every scanner, carve JPEGs aggressively and generate a bodyfile - PhotoRec: It comes with GUI and CLI versions. You can select the file-types you want PhotoRec to search for](<../../../images/image (242).png>)
+
+### The Sleuth Kit `tsk_recover` (metadata-first)
+
+Before raw signature carving, try filesystem-aware recovery when the volume metadata is still parseable. `tsk_recover` exports only unallocated files by default; `-a` selects allocated files and `-e` exports both. For a whole-disk image, pass the partition's **start sector** from `mmls` to `-o` (do not convert it to bytes). If the input is already a partition image, omit `-o`.<sup>[[12]](#references)</sup>
+
+```bash
+sudo apt install sleuthkit
+mmls disk.img                         # Note the partition start sector, e.g. 2048
+mkdir recovered-deleted recovered-all
+tsk_recover -o 2048 disk.img recovered-deleted/
+tsk_recover -e -o 2048 disk.img recovered-all/
+```
+
+This pass can preserve filesystem-derived names and paths that header/footer carving cannot; run Foremost, Scalpel or PhotoRec afterwards for entries whose metadata is missing or unusable.<sup>[[12]](#references)</sup>
 
 ### ddrescue + ddrescueview (imaging failing drives)
 
@@ -149,6 +169,8 @@ You can use the linux command line tool **pdftotext** to transform a pdf into te
 
 
 
+
+
 ## References
 
 - [1] [Autopsy 4.21 release notes](https://github.com/sleuthkit/autopsy/releases/tag/autopsy-4.21.0)
@@ -161,5 +183,6 @@ You can use the linux command line tool **pdftotext** to transform a pdf into te
 - [8] [extundelete](https://extundelete.sourceforge.net/)
 - [9] [ext4magic manual](https://ext4magic.sourceforge.net/manpage_en.html)
 - [10] [ext4magic project status](https://sourceforge.net/projects/ext4magic/)
-
+- [11] [Binwalk v3 README](https://github.com/ReFirmLabs/binwalk/blob/master/README.md)
+- [12] [The Sleuth Kit: tsk_recover manual](https://sleuthkit.org/sleuthkit/man/tsk_recover.html)
 {{#include ../../../banners/hacktricks-training.md}}

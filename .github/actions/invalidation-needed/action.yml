@@ -1,0 +1,44 @@
+name: Invalidation needed
+description: >
+  Decide whether this run has to create a CloudFront invalidation, or whether a
+  run that covers it is already guaranteed to happen later.
+
+inputs:
+  covered-by:
+    description: >
+      Comma separated workflow file names whose own invalidation is a superset of
+      this one. While such a workflow is handling this same commit there is
+      nothing left for this run to invalidate.
+    required: false
+    default: ""
+  merge-comment-author:
+    description: >
+      Login whose "merge" comment makes the auto-merge workflow merge a pull
+      request. Each pending merge becomes a push, and therefore an invalidation.
+    required: false
+    default: carlospolop
+  github-token:
+    description: Token used to read workflow runs and pull requests.
+    required: true
+
+outputs:
+  needed:
+    description: "true when this run must create the invalidation itself."
+    value: ${{ steps.decide.outputs.needed }}
+  reason:
+    description: Why the invalidation was kept or skipped.
+    value: ${{ steps.decide.outputs.reason }}
+
+runs:
+  using: composite
+  steps:
+    # Written against the standard library and run with python3 so it works the
+    # same on a bare runner and inside the translator container, neither of which
+    # is guaranteed to ship the gh CLI or jq.
+    - id: decide
+      shell: bash
+      env:
+        INPUT_GITHUB_TOKEN: ${{ inputs.github-token }}
+        INPUT_COVERED_BY: ${{ inputs.covered-by }}
+        INPUT_MERGE_COMMENT_AUTHOR: ${{ inputs.merge-comment-author }}
+      run: python3 "${{ github.action_path }}/decide.py"

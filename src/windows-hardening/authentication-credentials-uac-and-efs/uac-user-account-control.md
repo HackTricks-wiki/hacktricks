@@ -197,7 +197,25 @@ Akagi64.exe 33 C:\Windows\System32\cmd.exe
 ```
 
 - `WinPwnage` quickly compares the local build against its known UAC methods, which is useful to discard dead PoCs fast.<sup>[[4]](#references)</sup>
-- `UACME` remains the best public catalogue to map a bypass to a precise build. Recent releases added new methods and re-tested existing ones against **Windows 11 25H2**, so re-check the README/release notes before assuming an old blog post still applies unchanged.<sup>[[3]](#references)</sup>
+- `UACME` remains the best public catalogue to map a bypass to a precise build. Version 3.7.1 added methods 83–85, while the preceding release re-tested existing methods against **Windows 11 25H2**; re-check the method table and release notes instead of assuming an old PoC still applies unchanged.<sup>[[3]](#references)[[9]](#references)</sup>
+
+### Always Notify-capable WNF/UIAccess chains (UACME 3.7.1)
+
+`Always Notify` does not eliminate every UAC bypass. UACME 3.7.1 implements three new x64 methods that combine user-controlled environment/protocol state with elevated scheduled-task or UIAccess behavior, and marks all of them `AlwaysNotify compatible`:<sup>[[3]](#references)[[9]](#references)</sup>
+
+- **83 — UnifiedConsent:** redirect `SystemRoot` so the WNF-triggered `\Microsoft\Windows\ConsentUX\UnifiedConsent\UnifiedConsentSyncTask` makes elevated `taskhostw.exe` side-load `unifiedconsent.dll`. UACME tracks it from Windows 10 build 19041.
+- **84 — TabTip:** use the same environment-variable primitive against UIAccess `TabTip.exe`, which loads `windows.storage.dll`, `ApplicationTargetedFeatureDatabase.dll`, or `rsaenh.dll` depending on the build, then pivot from the resulting high-integrity UIAccess context. UACME tracks it from Windows 8.1 / Server 2016.
+- **85 — Narrator:** hijack the per-user `feedback-hub` protocol, drive Narrator with `Alt+CapsLock+F`, then launch a writable copy of `osk.exe` that side-loads `OskSupport.dll`. This requires an interactive desktop and is tracked from Windows 10 1809 / Server 2019.
+
+After building the payload units and Akagi as documented by UACME, invoke the matching method number (the optional command defaults to `cmd.exe`):
+
+```cmd
+Akagi64.exe 83 C:\Windows\System32\cmd.exe
+Akagi64.exe 84 C:\Windows\System32\cmd.exe
+Akagi64.exe 85 C:\Windows\System32\cmd.exe
+```
+
+Methods 84 and 85 depend on UIAccess/desktop interaction, so do not expect them to work unchanged from Session 0 or a non-interactive service shell. All three manipulate environment/protocol state and stage DLLs; inspect the implementation and remove those artifacts after testing.<sup>[[3]](#references)[[9]](#references)</sup>
 
 ### UAC Bypass – fodhelper.exe (Registry hijack)
 
@@ -334,9 +352,12 @@ Some post-2024 chains no longer look like the classic `HKCU\Software\Classes` re
 ../windows-local-privilege-escalation/windows-c-payloads.md
 {{#endref}}
 
-### Administrator Protection (25H2) drive-letter hijack via per-logon-session DOS device map
+### Administrator Protection (preview) drive-letter hijack via per-logon-session DOS device map
 
-For the full `RAiLaunchAdminProcess` / UIAccess attack surface on Windows 11 25H2, check the dedicated page:
+> [!NOTE]
+> As of August 2026, Microsoft still documents Administrator Protection as an **Insider preview**: the October 2025 rollout was reverted and is planned for a later date. Confirm that **Admin Approval Mode with Administrator protection** is actually enabled and the device has been rebooted before testing these chains; a stock 25H2 version string alone does not prove the feature is active.<sup>[[10]](#references)</sup>
+
+For the full `RAiLaunchAdminProcess` / UIAccess attack surface on Windows 11 25H2 preview builds, check the dedicated page:
 
 {{#ref}}
 ../windows-local-privilege-escalation/uiaccess-admin-protection-bypass.md
@@ -361,6 +382,16 @@ $auth = Get-NtTokenId -Authentication -Token $id
 New-NtSymbolicLink "\Sessions\0\DosDevices/$auth/C:" "\??\\C:\\Users\\attacker\\loot"
 ```
 
+On preview hosts, Administrator Protection records approvals and failures as ETW events **15031** and **15032** under the `Microsoft-Windows-LUA` provider. The events include the requester SID, application path, outcome, managed administrator account, and authentication method, so repeated exploit attempts or failed UI driving are not telemetry-free.<sup>[[10]](#references)</sup>
+
+```cmd
+logman start AdminProtectionTrace -p {93c05d69-51a3-485e-877f-1806a8731346} -ets
+rem reproduce the elevation attempt
+logman stop AdminProtectionTrace -ets
+```
+
+
+
 ## References
 
 - [1] [LOLBAS: Iscsicpl.exe](https://lolbas-project.github.io/lolbas/Binaries/Iscsicpl/)
@@ -371,5 +402,6 @@ New-NtSymbolicLink "\Sessions\0\DosDevices/$auth/C:" "\??\\C:\\Users\\attacker\\
 - [6] [Check Point Research – Operation TrueChaos: 0-Day Exploitation Against Southeast Asian Government Targets](https://research.checkpoint.com/2026/operation-truechaos-0-day-exploitation-against-southeast-asian-government-targets/)
 - [7] [Project Zero – Bypassing Windows Administrator Protection](https://projectzero.google/2026/26/windows-administrator-protection.html)
 - [8] [Sigma / Detection.FYI – Bypass UAC Using SilentCleanup Task](https://detection.fyi/sigmahq/sigma/windows/registry/registry_set/registry_set_bypass_uac_using_silentcleanup_task/)
-
+- [9] [R41N3RZUF477 – UnifiedConsent, TabTip and Narrator Always Notify bypasses](https://github.com/hfiref0x/UACME/issues/173)
+- [10] [Microsoft Learn – Administrator protection](https://learn.microsoft.com/en-us/windows/security/application-security/application-control/administrator-protection/)
 {{#include ../../banners/hacktricks-training.md}}

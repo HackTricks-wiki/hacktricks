@@ -279,6 +279,12 @@ This creates a **deterministic reset primitive**, breaking reversibility assumpt
 - Compare reported/public counters against an independent reference implementation.
 - Remember that a valid proof can still prove the **wrong statement** if the guest program is buggy.
 
+## State-Dependent Authorization
+
+{{#ref}}
+state-divergence-default-value-authorization-bypasses.md
+{{#endref}}
+
 ## DeFi/AMM Exploitation
 
 If you are researching practical exploitation of DEXes and AMMs (Uniswap v4 hooks, rounding/precision abuse, flash‑loan amplified threshold‑crossing swaps), check:
