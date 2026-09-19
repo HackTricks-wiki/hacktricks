@@ -13,6 +13,8 @@
 
     const XOR_KEY = 'Prevent_Online_AVs_From_Flagging_HackTricks_Search_Gzip_As_Malicious_394h7gt8rf9u3rf9g';
     const MAX = 30;
+    const CACHE_NAME = 'ht-search-indices-v2';
+    const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
     const PRIMARY_OPTIONS = {bool:'AND', expand:true};
     const SUPPLEMENTAL_OPTIONS = {bool:'OR', expand:true};
 
@@ -50,8 +52,43 @@
       return takeLegacyIndex();
     }
 
+    async function fetchSearchAsset(url){
+      let cache = null, cached = null;
+      const metadataUrl = url + (url.includes('?') ? '&' : '?') + '__ht_cache_timestamp=1';
+
+      if(typeof caches !== 'undefined'){
+        try {
+          cache = await caches.open(CACHE_NAME);
+          const entries = await Promise.all([cache.match(url), cache.match(metadataUrl)]);
+          cached = entries[0] || null;
+          const cachedAt = entries[1] ? Number(await entries[1].text()) : 0;
+          if(cached && cachedAt && Date.now() - cachedAt < CACHE_TTL_MS){
+            console.log('Using cached search index:', url);
+            return cached;
+          }
+        } catch(error){ console.warn('search cache read failed ->', error); }
+      }
+
+      try {
+        const response = await fetch(url, {mode:'cors'});
+        if(!response.ok && cached) return cached;
+        if(response.ok && cache){
+          try {
+            await Promise.all([
+              cache.put(url, response.clone()),
+              cache.put(metadataUrl, new Response(String(Date.now())))
+            ]);
+          } catch(error){ console.warn('search cache write failed ->', error); }
+        }
+        return response;
+      } catch(error){
+        if(cached) return cached;
+        throw error;
+      }
+    }
+
     async function loadRemote(source){
-      const response = await fetch(source.url, {mode:'cors'});
+      const response = await fetchSearchAsset(source.url);
       if(!response.ok) throw new Error('HTTP ' + response.status);
       const encrypted = new Uint8Array(await response.arrayBuffer());
       const text = await decompressGzip(xorDecryptInPlace(encrypted, XOR_KEY));
@@ -314,12 +351,6 @@
     };
   `;
 
-  const workerUrl = URL.createObjectURL(new Blob([workerCode], {type:'application/javascript'}));
-  const worker = new Worker(workerUrl);
-  URL.revokeObjectURL(workerUrl);
-  const htmlLang = (document.documentElement.lang || 'en').toLowerCase();
-  worker.postMessage({type:'init', lang:htmlLang.split('-')[0]});
-
   const wrap = document.getElementById('search-wrapper');
   const bar = document.getElementById('searchbar');
   const list = document.getElementById('searchresults');
@@ -329,13 +360,12 @@
 
   if(!wrap || !bar || !list || !listOut || !header || !icon){
     console.error('[HT Search] Missing DOM elements', {wrap:!!wrap, bar:!!bar, list:!!list, listOut:!!listOut, header:!!header, icon:!!icon});
-    worker.terminate();
     return;
   }
 
-  icon.textContent = '⏳';
-  icon.setAttribute('aria-label','Loading search …');
-  icon.setAttribute('title','Search is loading, please wait...');
+  icon.textContent = '🔍';
+  icon.setAttribute('aria-label','Open search (S)');
+  icon.removeAttribute('title');
 
   const setIconState = state => {
     if(state === 'ready'){
@@ -354,6 +384,7 @@
   };
 
   const HOT=83, ESC=27, DOWN=40, UP=38, ENTER=13;
+  let worker=null, workerStarted=false;
   let debounce, teaserCount=0, ready=false, pendingQuery='', requestId=0;
   const escapeHTML = (()=>{const M={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&#34;',"'":'&#39;'};return s=>s.replace(/[&<>'"]/g,c=>M[c]);})();
   const URL_MARK='highlight';
@@ -397,6 +428,7 @@
   }
 
   function sendQuery(query){
+    startWorker();
     if(!ready){pendingQuery=query;return;}
     pendingQuery='';
     const id=++requestId;
@@ -404,6 +436,7 @@
   }
 
   function showUI(show){
+    if(show)startWorker();
     wrap.classList.toggle('hidden',!show);
     icon.setAttribute('aria-expanded',show);
     if(show){window.scrollTo(0,0);bar.focus();bar.select();}
@@ -427,7 +460,7 @@
     debounce=setTimeout(()=>sendQuery(query),120);
   });
 
-  worker.onmessage=({data})=>{
+  function handleWorkerMessage({data}){
     if(data&&data.ready!==undefined){
       ready=Boolean(data.ready);
       setIconState(ready?'ready':'error');
@@ -437,6 +470,18 @@
     }
     if(!data||data.id!==requestId||data.query!==bar.value.trim())return;
     render(data.docs||[],data.query||'');
-  };
-  worker.onerror=error=>{console.error('[HT Search] worker failed',error);ready=false;setIconState('error');};
+  }
+
+  function startWorker(){
+    if(workerStarted)return;
+    workerStarted=true;
+    setIconState('loading');
+    const workerUrl=URL.createObjectURL(new Blob([workerCode],{type:'application/javascript'}));
+    worker=new Worker(workerUrl);
+    URL.revokeObjectURL(workerUrl);
+    worker.onmessage=handleWorkerMessage;
+    worker.onerror=error=>{console.error('[HT Search] worker failed',error);ready=false;setIconState('error');};
+    const htmlLang=(document.documentElement.lang||'en').toLowerCase();
+    worker.postMessage({type:'init',lang:htmlLang.split('-')[0]});
+  }
 })();
