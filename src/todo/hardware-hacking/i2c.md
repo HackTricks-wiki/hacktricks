@@ -212,10 +212,52 @@ Any key to exit
 [0xA0+0x00+0x69+0x41+0x41+0x41+0x20+0x48+0x69+0x20+0x44+0x72+0x65+0x67+0x21+0x20+0x41+0x41+0x41+0x00+]
 ```
 
+
+## Black-box I2C protocol reconstruction
+
+### Identify the bus from live pins
+
+When the peripheral has no pinout or datasheet, start passively with a high-impedance logic analyzer while the original host operates. After establishing a common ground and safe logic level, classify constant pins as likely rails, grounds, or pulled-up signals, then compare the active lines with common buses: UART has asynchronous, independently directed TX/RX; conventional SPI normally exposes clock, chip select, and separate data directions; I2C has a regular clock plus one bidirectional data line. An I2C decode should then reveal 7-bit target addresses, read/write direction, ACK/NACKs, and recurring payloads.<sup>[[2]](#references)[[4]](#references)</sup>
+
+Capture several legitimate exchanges and preserve both the decoded bytes and raw timing. Repeated frames are useful known-answer tests for later serializers, while changes between requests can expose likely opcode, index, offset, length, sequence, or checksum fields.<sup>[[4]](#references)</sup>
+
+### Recover the framing from host firmware
+
+If the peripheral firmware is inaccessible, extract the **host** firmware and find the component that opens the I2C device. Search strings and symbols for the peripheral name, `/dev/i2c-`, command builders, response parsers, reset/initialization routines, and checksum functions. For every builder, record exact field offsets, constants, accepted argument sizes, payload length, checksum coverage, checksum byte order, and returned frame length instead of inferring the format from function names.<sup>[[4]](#references)</sup>
+
+A checksum function named `crc16_ccitt` is not enough to select a preset. Determine the shift direction, table index byte, polynomial represented by the table, initial register, input/output reflection, final XOR/inversion, and the serializer's wire endianness. For example, a right-shifting low-byte table based on reversed polynomial `0x8408`, initialized with `0xFFFF` and complemented at the end, identifies **CRC-16/X-25 (IBM-SDLC)**. A correct checksum is often necessary to get test cases past integrity validation and into the command parser.<sup>[[4]](#references)</sup>
+
+After reconstructing the format, search distinctive symbol names and constants in public code. In the MJA1 case, an independently located SDK wrapper confirmed command IDs, argument validation, response definitions, and the mirrored CRC implementation; use such source as validation, not as a substitute for checking the exact target binary and on-wire byte order.<sup>[[4]](#references)[[5]](#references)</sup>
+
+### Send frames from a rooted Linux host
+
+A compromised embedded Linux host can exercise the peripheral without adding another bus controller. Open the relevant adapter, select the 7-bit address with `I2C_SLAVE`, and send a frame produced by a dedicated serializer; retain a raw-frame mode for mutation and fuzzing.<sup>[[4]](#references)</sup>
+
+```c
+int fd = open("/dev/i2c-0", O_RDWR);
+if (fd < 0 || ioctl(fd, I2C_SLAVE, target_addr) < 0)
+    err(1, "I2C setup");
+if (write(fd, cmd, cmd_len) != cmd_len)
+    err(1, "I2C write");
+ssize_t n = read(fd, resp, resp_size);
+if (n < 0)
+    err(1, "I2C read");
+```
+
+Cross-compile against a toolchain compatible with the target CPU and libc, and compare analyzer traces from the test client with legitimate traffic. Transaction boundaries, write/read ordering, delays, and peripheral state may matter even when the visible bytes match.<sup>[[4]](#references)</sup>
+
+### Response-guided opcode enumeration
+
+Once the shortest valid frame and checksum are known, enumerate the complete opcode width and use the protocol's explicit **unsupported-command** response as the negative baseline. A different result—such as invalid arguments, invalid state, or an undocumented status—suggests that decoding reached an implemented or partially implemented handler. It does **not** establish exploitability; prioritize the candidate for structured length, argument, state, and command-sequence fuzzing.<sup>[[4]](#references)</sup>
+
+If a test wedges the peripheral, automate one isolated case per boot from an external controller: connect over SSH, execute the case, save the raw request/response and timing, reboot or power-cycle, wait for health checks to recover, and continue. Moving the component to a microcontroller-controlled fixture can later provide deterministic resets, direct power control, and faster fuzzing.<sup>[[4]](#references)</sup>
+
 ## References
 
 - [1] [Bus Pirate documentation — I²C](https://docs.buspirate.com/docs/devices/i2c-eeprom/)
 - [2] [NXP — I²C-bus specification and user manual](https://www.nxp.com/docs/en/user-guide/UM10204.pdf)
 - [3] [Microchip — AT24C256C I²C serial EEPROM datasheet](https://ww1.microchip.com/downloads/en/DeviceDoc/AT24C256C-I2C-Compatible-Two-Wire-Serial-EEPROM-256-Kbit-32,768-x-8-20005915A.pdf)
+- [4] [Quarkslab — Black Box Probing: a Security Analysis of Xiaomi's MJA1 Secure Chip](https://blog.quarkslab.com/black-box-probing-a-security-analysis-of-xiaomis-mja1-secure-chip.html)
+- [5] [Mijia BLE SDK MJA1 cryptography wrapper](https://github.com/iomonad/handshow-firmware/tree/master/components/vendor/common/mijia_ble/libs/cryptography/mja1)
 
 {{#include ../../banners/hacktricks-training.md}}
