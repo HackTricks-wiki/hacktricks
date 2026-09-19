@@ -23,21 +23,21 @@ There may also be a generated copy at:
 If production is deploying the already-built `book/` directory, update both copies or rebuild the
 book before deployment.
 
-The search index loading order is important and cost-sensitive:
+The search index source policy is important and cost-sensitive:
 
-1. Load every language-specific and fallback search index from the GitHub repository:
-   `HackTricks-wiki/hacktricks-searchindex`
-2. Only if all GitHub-hosted candidates fail, fall back to the same-origin mdBook output.
-
-Do not place the local `/searchindex.js` fallback before any GitHub-hosted fallback such as
-`searchindex-en.js.gz`. Serving `searchindex.js` from `hacktricks.wiki` in production is expensive.
+- On public hosts, load every language-specific and fallback candidate only from
+  `HackTricks-wiki/hacktricks-searchindex`. Never fall back to the same-origin mdBook output;
+  serving the large index from `hacktricks.wiki` in production is expensive.
+- On localhost, `.local`/`.internal` hosts, loopback, RFC1918, carrier-grade NAT, link-local, or
+  private IPv6 addresses, load only the same-origin mdBook output so local/container deployments
+  remain self-contained.
 
 For this repo, the expected local fallback is:
 
 `/searchindex.js`
 
-The cloud index should not use a local fallback from this origin. It should rely on the remote
-`searchindex-cloud-<lang>.js.gz` files.
+On private hosts, the cloud index is unavailable from this origin and must not trigger a remote
+download. On public hosts it should use the remote `searchindex-cloud-<lang>.js.gz` files.
 
 ## Search Index Publishing
 
