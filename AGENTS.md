@@ -4,67 +4,68 @@ Wskazówki dla przyszłych agentów pracujących w tym repozytorium.
 
 ## Kontekst repozytorium
 
-To jest główne repozytorium HackTricks mdBook. Powiązana cloud book znajduje się pod adresem:
+To główne repozytorium HackTricks mdBook. Powiązana książka cloud znajduje się pod adresem:
 
 `/Users/carlospolop/git/hacktricks-cloud`
 
-Zmiany dotyczące współdzielonego theme/search behavior często trzeba zastosować w obu repozytoriach.
+Zmiany dotyczące współdzielonego theme/zachowania wyszukiwania często trzeba zastosować w obu repozytoriach.
 
 ## Kontrakt ładowania indeksu wyszukiwania
 
-Niestandardowy interfejs search znajduje się w:
+Niestandardowy interfejs wyszukiwania znajduje się w:
 
 `theme/ht_searcher.js`
 
-Może także istnieć wygenerowana kopia pod adresem:
+Może również istnieć wygenerowana kopia pod adresem:
 
 `book/theme/ht_searcher.js`
 
-Jeśli production wdraża już zbudowany katalog `book/`, zaktualizuj obie kopie lub przebuduj
-book przed deploymentem.
+Jeśli produkcja wdraża już zbudowany katalog `book/`, zaktualizuj obie kopie albo przebuduj
+book przed wdrożeniem.
 
-Polityka źródła search index jest ważna i wrażliwa na koszty:
+Polityka źródła indeksu wyszukiwania jest ważna i wrażliwa na koszty:
 
-- Na publicznych hostach ładuj każdego language-specific i fallback candidate wyłącznie z
-`HackTricks-wiki/hacktricks-searchindex`. Nigdy nie stosuj fallbacku do outputu mdBook z tego samego originu;
-serwowanie dużego indexu z `hacktricks.wiki` w production jest kosztowne.
-- Na localhost, hostach `.local`/`.internal`, loopback, RFC1918, carrier-grade NAT, link-local lub
-prywatnych adresach IPv6 ładuj wyłącznie output mdBook z tego samego originu, aby lokalne/container deployments
-pozostały self-contained.
+- Na publicznych hostach ładuj każdego kandydata specyficznego dla języka oraz fallback wyłącznie z
+`HackTricks-wiki/hacktricks-searchindex`. Nigdy nie używaj fallbacku do wyjścia mdBook z tego samego originu;
+serwowanie dużego indeksu z `hacktricks.wiki` w produkcji jest kosztowne.
+- Na localhost, hostach `.local`/`.internal`, loopback, RFC1918, carrier-grade NAT, adresach link-local lub
+prywatnych adresach IPv6 ładuj wyłącznie wyjście mdBook z tego samego originu, aby lokalne/wdrożenia kontenerowe
+pozostały samowystarczalne. Dla strony w języku innym niż angielski najpierw wypróbuj lokalną ścieżkę z prefiksem języka
+(na przykład `/es/searchindex.js`), a główny indeks angielski użyj wyłącznie jako fallbacku.
 
-Dla tego repozytorium oczekiwany local fallback to:
+Dla tego repozytorium oczekiwanym lokalnym fallbackiem jest:
 
 `/searchindex.js`
 
-Na prywatnych hostach cloud index jest niedostępny z tego originu i nie może powodować remote
-downloadu. Na publicznych hostach należy używać zdalnych plików `searchindex-cloud-<lang>.js.gz`.
+Na prywatnych hostach indeks cloud jest niedostępny z tego originu i nie może powodować zdalnego pobierania.
+Na publicznych hostach należy używać zdalnych plików `searchindex-cloud-<lang>.js.gz`.
 
 ## Publikowanie indeksu wyszukiwania
 
-Workflowy publikujące zaszyfrowane skompresowane search indexes do
+Workflowy publikujące zaszyfrowane, skompresowane indeksy wyszukiwania do
 `HackTricks-wiki/hacktricks-searchindex` to:
 
 - `.github/workflows/build_master.yml`
 - `.github/workflows/translate_all.yml`
 
-Wygenerowany source file to `book/searchindex.js`. Nazwy publikowanych remote artifacts to:
+Wygenerowany plik źródłowy to `book/searchindex.js`. Nazwy publikowanych zdalnych artefaktów to:
 
-- `searchindex-v2-en.json.gz` (preferowany compact index)
-- `searchindex-v2-<lang>.json.gz` (preferowany compact index)
+- `searchindex-v2-en.json.gz` (preferowany kompaktowy indeks)
+- `searchindex-v2-<lang>.json.gz` (preferowany kompaktowy indeks)
 - `searchindex-en.js.gz`
 - `searchindex-<lang>.js.gz`
 
-Browser loader preferuje compact v2 artifact i zachowuje artifact `.js.gz` jako legacy
-fallback. Oba są payloadami gzip zaszyfrowanymi XOR z użyciem klucza zdefiniowanego w `theme/ht_searcher.js`.
+Loader przeglądarkowy preferuje kompaktowy artefakt v2 i zachowuje artefakt `.js.gz` jako legacy
+fallback. Oba są zaszyfrowanymi za pomocą XOR payloadami gzip, używającymi klucza zdefiniowanego w `theme/ht_searcher.js`.
 
-Loader musi pozostać lazy: standardowa nawigacja po stronach nie może tworzyć search workera ani pobierać
-indexu, dopóki visitor nie otworzy lub nie użyje search. Zdalne skompresowane responses są przechowywane w Cache
-Storage przez 24 godziny dla każdego originu, aby kolejne strony mogły ich ponownie użyć. Zachowaj stale-cache
-fallback, gdy odświeżenie wygasłego wpisu zakończy się niepowodzeniem.
+Loader musi pozostać lazy: zwykła nawigacja po stronach nie może tworzyć search workera ani pobierać indeksu,
+dopóki odwiedzający nie otworzy lub nie użyje wyszukiwania. Zdalne skompresowane odpowiedzi są przechowywane
+w Cache Storage przez 24 godziny dla każdego originu, aby kolejne strony mogły ich ponownie użyć. Zachowaj
+stale-cache fallback na wypadek, gdy odświeżenie wygasłego wpisu się nie powiedzie.
 
-## Build i walidacja
+## Budowanie i walidacja
 
-Typowe local checks:
+Typowe kontrole lokalne:
 
 - `node --check theme/ht_searcher.js`
 - `mdbook build`
@@ -76,9 +77,9 @@ Jeśli `mdbook build` zakończy się niepowodzeniem, sprawdź:
 
 ## Uwagi dotyczące edycji
 
-- Do wyszukiwania preferuj `rg`.
-- Nie umieszczaj wygenerowanego outputu `book/` w commitach, chyba że wyraźnie o to poproszono. Search loader fixes
-są wyjątkiem, gdy już zbudowane pages muszą zostać natychmiast poprawione.
-- Jeśli zmieniasz shared theme behavior, porównaj i zaktualizuj odpowiadający plik w
-`/Users/carlospolop/git/hacktricks-cloud`.
-- Nie wycofuj niezwiązanych local changes.
+- Preferuj `rg` do wyszukiwania.
+- Nie umieszczaj wygenerowanego wyjścia `book/` w commitach, chyba że wyraźnie o to poproszono. Wyjątkiem są poprawki
+  search loadera, gdy już zbudowane strony muszą zostać natychmiast skorygowane.
+- Jeśli zmieniasz współdzielone zachowanie theme, porównaj i zaktualizuj odpowiadający plik w
+  `/Users/carlospolop/git/hacktricks-cloud`.
+- Nie cofaj niezwiązanych lokalnych zmian.
