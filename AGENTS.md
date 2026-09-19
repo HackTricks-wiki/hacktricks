@@ -4,15 +4,15 @@ Orientações para futuros agentes que trabalham neste repositório.
 
 ## Contexto do repositório
 
-Este é o repositório principal do HackTricks mdBook. O livro relacionado à cloud está em:
+Este é o repositório principal do mdBook do HackTricks. O livro relacionado à cloud está em:
 
 `/Users/carlospolop/git/hacktricks-cloud`
 
-Alterações no comportamento compartilhado de tema/pesquisa geralmente precisam ser aplicadas em ambos os repositórios.
+Alterações no comportamento compartilhado de theme/search geralmente precisam ser aplicadas em ambos os repositórios.
 
 ## Contrato de carregamento do índice de pesquisa
 
-A interface de pesquisa personalizada está em:
+A UI de pesquisa personalizada está em:
 
 `theme/ht_searcher.js`
 
@@ -20,12 +20,12 @@ Também pode haver uma cópia gerada em:
 
 `book/theme/ht_searcher.js`
 
-Se a produção estiver implantando o diretório `book/` já compilado, atualize ambas as cópias ou recompile o
-book antes da implantação.
+Se a produção estiver fazendo deploy do diretório `book/` já compilado, atualize ambas as cópias ou recompile o
+book antes do deploy.
 
 A ordem de carregamento do índice de pesquisa é importante e sensível a custos:
 
-1. Carregue todos os índices de pesquisa específicos de idioma e de fallback do repositório do GitHub:
+1. Carregue todos os índices de pesquisa específicos de cada idioma e de fallback do repositório do GitHub:
 `HackTricks-wiki/hacktricks-searchindex`
 2. Somente se todos os candidatos hospedados no GitHub falharem, use como fallback a saída do mdBook na mesma origem.
 
@@ -54,11 +54,15 @@ O arquivo-fonte gerado é `book/searchindex.js`. Os nomes dos artefatos remotos 
 - `searchindex-en.js.gz`
 - `searchindex-<lang>.js.gz`
 
-O loader do navegador prioriza o artefato compacto v2 e mantém o artefato `.js.gz` como fallback
-legado. Ambos são payloads gzip criptografados com XOR usando a chave definida em
-`theme/ht_searcher.js`.
+O carregador do navegador prioriza o artefato compacto v2 e mantém o artefato `.js.gz` como
+fallback legado. Ambos são payloads gzip criptografados com XOR usando a chave definida em `theme/ht_searcher.js`.
 
-## Compilação e validação
+O carregador deve continuar lazy: a navegação normal pelas páginas não deve criar o search worker nem baixar um
+índice até que o visitante abra ou use a pesquisa. As respostas remotas comprimidas são persistidas no Cache
+Storage por 24 horas por origem, para que páginas subsequentes possam reutilizá-las. Preserve o
+fallback de cache obsoleto quando a atualização de uma entrada expirada falhar.
+
+## Build e validação
 
 Verificações locais comuns:
 
@@ -70,11 +74,11 @@ Se `mdbook build` falhar, verifique:
 - `hacktricks-preprocessor-error.log`
 - `hacktricks-preprocessor.log`
 
-## Observações de edição
+## Notas de edição
 
 - Prefira `rg` para pesquisas.
-- Mantenha a saída gerada de `book/` fora dos commits, a menos que solicitado explicitamente. Correções do
-  search loader são uma exceção quando as páginas já compiladas precisam ser corrigidas imediatamente.
-- Ao alterar o comportamento compartilhado do tema, compare e atualize o arquivo correspondente em
+- Mantenha a saída gerada de `book/` fora dos commits, a menos que solicitado explicitamente. Correções no search loader são
+uma exceção quando as páginas já compiladas precisam ser corrigidas imediatamente.
+- Se alterar o comportamento compartilhado do theme, compare e atualize o arquivo correspondente em
 `/Users/carlospolop/git/hacktricks-cloud`.
 - Não reverta alterações locais não relacionadas.
