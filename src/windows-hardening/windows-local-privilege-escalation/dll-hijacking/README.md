@@ -1,4 +1,4 @@
-# Dll Hijacking
+# DLL Hijacking
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -123,7 +123,7 @@ Fast hunting pivots:
 advanced-html-staged-dll-sideloading.md
 {{#endref}}
 
-## Finding missing Dlls
+## Finding missing DLLs
 
 The most common way to find missing Dlls inside a system is running [procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon) from sysinternals, **setting** the **following 2 filters**:
 
@@ -138,7 +138,7 @@ and just show the **File System Activity**:
 If you are looking for **missing dlls in general** you **leave** this running for some **seconds**.\
 If you are looking for a **missing DLL inside a specific executable**, set another filter such as **"Process Name" "contains" `<exec name>`**, execute it, and stop capturing events.<sup>[[9]](#references)</sup>
 
-## Exploiting Missing Dlls
+## Exploiting Missing DLLs
 
 To escalate privileges, look for a **DLL that a privileged process tries to load** from a location you can write to. This can happen when you control a directory searched before the directory containing the legitimate DLL, or when the requested DLL does not exist and you can write to one of the searched directories.
 
@@ -167,6 +167,8 @@ Finally, a DLL can be loaded by absolute path rather than by name. In that case,
 There are other ways to alter the ways to alter the search order but I'm not going to explain them here.
 
 ### Chaining an arbitrary file write into a missing-DLL hijack
+
+**Related technique:** [oplock-gated mount-point switching against privileged remediation](../kernel-race-condition-object-manager-slowdown.md#applied-chain-oplock-gated-mount-point-switch-against-privileged-remediation).
 
 1. Use **ProcMon** filters (`Process Name` = target EXE, `Path` ends with `.dll`, `Result` = `NAME NOT FOUND`) to collect DLL names that the process probes but cannot find.<sup>[[14]](#references)</sup>
 2. If the binary runs on a **schedule/service**, dropping a DLL with one of those names into the **application directory** (search-order entry #1) will be loaded on the next execution. In one .NET scanner case the process looked for `hostfxr.dll` in `C:\samples\app\` before loading the real copy from `C:\Program Files\dotnet\fxr\...`.
@@ -366,7 +368,7 @@ dumpbin /imports C:\path\Tools\putty\Putty.exe
 dumpbin /export /path/file.dll
 ```
 
-For a full guide on how to **abuse Dll Hijacking to escalate privileges** with permissions to write in a **System Path folder** check:
+For a full guide on how to **abuse DLL Hijacking to escalate privileges** with permissions to write in a **System Path folder** check:
 
 
 {{#ref}}
@@ -380,16 +382,16 @@ Other interesting automated tools to discover this vulnerability are **PowerSplo
 
 ### Example
 
-In case you find an exploitable scenario one of the most important things to successfully exploit it would be to **create a dll that exports at least all the functions the executable will import from it**. Anyway, note that Dll Hijacking comes handy in order to [escalate from Medium Integrity level to High **(bypassing UAC)**](../../authentication-credentials-uac-and-efs/index.html#uac) or from[ **High Integrity to SYSTEM**](../index.html#from-high-integrity-to-system)**.** You can find an example of **how to create a valid dll** inside this dll hijacking study focused on dll hijacking for execution: [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
+In case you find an exploitable scenario one of the most important things to successfully exploit it would be to **create a dll that exports at least all the functions the executable will import from it**. Anyway, note that DLL Hijacking comes handy in order to [escalate from Medium Integrity level to High **(bypassing UAC)**](../../authentication-credentials-uac-and-efs/index.html#uac) or from[ **High Integrity to SYSTEM**](../index.html#from-high-integrity-to-system)**.** You can find an example of **how to create a valid dll** inside this dll hijacking study focused on DLL hijacking for execution: [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
 Moreover, in the **next sectio**n you can find some **basic dll codes** that might be useful as **templates** or to create a **dll with non required functions exported**.
 
-## **Creating and compiling Dlls**
+## **Creating and compiling DLLs**
 
-### **Dll Proxifying**
+### **DLL Proxifying**
 
-Basically a **Dll proxy** is a Dll capable of **execute your malicious code when loaded** but also to **expose** and **work** as **exected** by **relaying all the calls to the real library**.
+Basically a **DLL proxy** is a DLL capable of **execute your malicious code when loaded** but also to **expose** and **work** as **exected** by **relaying all the calls to the real library**.
 
-With the tool [**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant) or [**Spartacus**](https://github.com/Accenture/Spartacus) you can actually **indicate an executable and select the library** you want to proxify and **generate a proxified dll** or **indicate the Dll** and **generate a proxified dll**.
+With the tool [**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant) or [**Spartacus**](https://github.com/Accenture/Spartacus) you can actually **indicate an executable and select the library** you want to proxify and **generate a proxified dll** or **indicate the DLL** and **generate a proxified dll**.
 
 ### **Meterpreter**
 

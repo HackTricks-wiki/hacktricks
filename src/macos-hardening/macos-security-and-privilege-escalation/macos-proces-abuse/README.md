@@ -210,6 +210,14 @@ It's possible to inject JVM options through **`_JAVA_OPTIONS`**, **`JAVA_TOOL_OP
 macos-java-apps-injection.md
 {{#endref}}
 
+### Node.js Injection
+
+**`NODE_OPTIONS`** preloads attacker JavaScript via `--require` (file) or `--import data:text/javascript,…` (fileless, Node ≥ 20.6); **`NODE_REPL_EXTERNAL_MODULE`** loads a module into an interactive REPL, and **`ELECTRON_RUN_AS_NODE`** re-enables all of this on Electron binaries.
+
+{{#ref}}
+macos-nodejs-applications-injection.md
+{{#endref}}
+
 ### .Net Applications Injection
 
 It's possible to inject code into .NET applications through **`DOTNET_STARTUP_HOOKS`** before `Main`, or by abusing the .NET debugging functionality when its prerequisites are present.
@@ -221,7 +229,7 @@ macos-.net-applications-injection.md
 
 ### Shell Injection
 
-Non-interactive Bash reads **`BASH_ENV`**; zsh reads **`$ZDOTDIR/.zshenv`**; and fish reads configuration below **`XDG_CONFIG_HOME`** or **`XDG_DATA_DIRS`**. Each can execute a controlled startup file before the intended command:
+Non-interactive Bash reads **`BASH_ENV`**; interactive POSIX shells read **`ENV`**; zsh reads **`$ZDOTDIR/.zshenv`**; and fish reads configuration below **`XDG_CONFIG_HOME`** or **`XDG_DATA_DIRS`**. Each can execute a controlled startup file before the intended command. Bash also runs a command substitution placed in **`PS4`** whenever xtrace is enabled (e.g. inherited **`SHELLOPTS=xtrace`**):
 
 {{#ref}}
 macos-bash-applications-injection.md
@@ -277,7 +285,7 @@ macos-octave-applications-injection.md
 
 ### PowerShell Injection
 
-On macOS and Linux, **`XDG_CONFIG_HOME`** can redirect PowerShell user profiles that execute when `pwsh` starts.
+`pwsh` is a cross-platform .NET app, so several environment variables give pre-command execution: **`XDG_CONFIG_HOME`** redirects the profile scripts that run at startup, **`PSModulePath`** hijacks module auto-loading (a planted `.psm1` runs at import time and can shadow built-in cmdlets), and the .NET **`CORECLR_PROFILER`**/**`COR_PROFILER`** and **`DOTNET_STARTUP_HOOKS`** variables load attacker code into the process before `Main`.
 
 {{#ref}}
 macos-powershell-applications-injection.md
@@ -294,7 +302,7 @@ macos-perl-applications-injection.md
 
 ### Ruby Injection
 
-I't also possible to abuse ruby env variables to make arbitrary scripts execute arbitrary code:
+It's also possible to abuse ruby env variables (**`RUBYOPT`**, **`RUBYLIB`**) to make arbitrary scripts execute arbitrary code:
 
 
 {{#ref}}
@@ -303,12 +311,20 @@ macos-ruby-applications-injection.md
 
 ### Python Injection
 
-The **`PYTHONWARNINGS`** and **`BROWSER`** standard-library chain can execute a command during warning-filter parsing. A file-backed alternative places `sitecustomize.py` on **`PYTHONPATH`** so normal `site` initialization imports it before the target script. Interactive-only variables such as **`PYTHONSTARTUP`** have narrower applicability.
+The **`PYTHONWARNINGS`** and **`BROWSER`** standard-library chain can execute a command during warning-filter parsing. A file-backed alternative places `sitecustomize.py` on **`PYTHONPATH`** so normal `site` initialization imports it before the target script. **`PYTHONBREAKPOINT`** runs a chosen callable/module when the code reaches `breakpoint()`. Interactive-only variables such as **`PYTHONSTARTUP`** have narrower applicability.
 
 Note that executables compiled with **`pyinstaller`** won't use these environmental variables even if they are running using an embedded python.
 
 {{#ref}}
 macos-python-applications-injection.md
+{{#endref}}
+
+### Vim/Neovim Injection
+
+**`VIMINIT`** (and its `EXINIT` fallback) are executed as Ex commands on a normal startup, so `:!cmd` / `:call system(...)` yield code execution when a victim opens Vim/Neovim with a controlled environment:
+
+{{#ref}}
+macos-vim-applications-injection.md
 {{#endref}}
 
 Separately, Homebrew commonly installs Python below `/opt/homebrew`, where members of the local `admin` group may be able to replace the launcher. That is a writable-binary hijack rather than environment-variable injection; verify ownership and ACLs before treating it as exploitable.

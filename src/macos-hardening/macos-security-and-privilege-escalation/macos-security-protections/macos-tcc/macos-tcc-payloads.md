@@ -670,6 +670,28 @@ ffmpeg -f avfoundation -i ":1" -t 5 /tmp/recording.wav
 {{#endtab}}
 {{#endtabs}}
 
+### System Audio (Core Audio process taps)
+
+- **Entitlement**: No dedicated system-audio-capture entitlement for an unsandboxed client (normal sandbox restrictions still apply)
+- **Usage description**: `NSAudioCaptureUsageDescription`
+- **TCC**: System Audio Recording (independent from the Microphone grant)
+
+On **macOS 14.2+**, Core Audio process taps can copy the outgoing audio of selected processes, a group of processes, or the global mix without installing a virtual loopback driver. The low-level chain is `CATapDescription` -> `AudioHardwareCreateProcessTap` -> private aggregate device -> `AudioDeviceIOProc`; the first attempt to start recording through an aggregate containing the tap causes macOS to request System Audio Recording access. A bundle must contain `NSAudioCaptureUsageDescription` or the consent flow cannot work correctly.<sup>[[7]](#references)</sup>
+
+For a fast payload, [`catap`](https://github.com/sbetko/catap) wraps the tap, aggregate-device, IO callback, WAV writer, and cleanup lifecycle:<sup>[[8]](#references)</sup>
+
+```bash
+python3 -m venv /tmp/catap-env
+source /tmp/catap-env/bin/activate
+pip install catap
+catap list-apps
+catap record Safari -d 10 -o /tmp/safari.wav
+catap record --system -d 10 -o /tmp/system-mix.wav
+```
+
+> [!WARNING]
+> TCC attributes a CLI capture to the **hosting terminal app**, not merely to the Python process. Without the System Audio Recording grant, the Core Audio graph may start and deliver correctly sized but **zero-filled buffers**, which is easy to mistake for a working capture of a quiet target. Grant the host, restart it, and repeat with a known audible source; `catap` also reports when a recording contained only silence.<sup>[[8]](#references)</sup>
+
 ### Location
 
 > [!TIP]
@@ -1053,5 +1075,7 @@ int main() {
 - [4] [Apple Developer - Capture HDR content with ScreenCaptureKit (WWDC24)](https://developer.apple.com/videos/play/wwdc2024/10088/)
 - [5] [vsociety - CVE-2023-26818: MacOS TCC Bypass with Telegram using DyLib Injection Part1](https://vsociety.medium.com/cve-2023-26818-macos-tcc-bypass-with-telegram-using-dylib-injection-part1-768b34efd8c4)
 - [6] [Vicarius vsociety - CVE-2023-26818: Exploit macOS TCC Bypass w/ Telegram (Part 1)](https://www.vicarius.io/vsociety/posts/cve-2023-26818-exploit-macos-tcc-bypass-w-telegram-part-1-2)
+- [7] [Apple Developer - Capturing system audio with Core Audio taps](https://developer.apple.com/documentation/coreaudio/capturing-system-audio-with-core-audio-taps)
+- [8] [catap - Python bindings and recorder for Core Audio process taps](https://github.com/sbetko/catap)
 
 {{#include ../../../../banners/hacktricks-training.md}}
