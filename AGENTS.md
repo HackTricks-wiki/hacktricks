@@ -2,71 +2,72 @@
 
 Riglyne vir toekomstige agents wat in hierdie repository werk.
 
-## Repositorykonteks
+## Repository-konteks
 
-Dit is die hoof HackTricks mdBook-repository. Die verwante cloud-book is by:
+Dit is die hoof HackTricks mdBook-repository. Die verwante cloud-boek is by:
 
 `/Users/carlospolop/git/hacktricks-cloud`
 
 Veranderinge aan gedeelde theme-/search-gedrag moet dikwels in albei repositories toegepas word.
 
-## Kontrak vir die laai van die soekindeks
+## Kontrak vir die laai van die search-indeks
 
-Die pasgemaakte search-UI is in:
+Die custom search-UI is in:
 
 `theme/ht_searcher.js`
 
-Daar kan ook 'n gegenereerde kopie wees by:
+Daar kan ook ’n gegenereerde kopie by wees:
 
 `book/theme/ht_searcher.js`
 
 As production die reeds geboude `book/`-directory deploy, dateer albei kopieë op of rebuild die
-book voor deployment.
+boek voor deployment.
 
-Die bronbeleid vir die search index is belangrik en kostesensitief:
+Die bronbeleid vir die search-indeks is belangrik en koste-sensitief:
 
 - Op publieke hosts, laai elke taalspesifieke en fallback-kandidaat slegs vanaf
-`HackTricks-wiki/hacktricks-searchindex`. Moet nooit terugval na die same-origin mdBook-output nie;
-om die groot index vanaf `hacktricks.wiki` in production te bedien, is duur.
-- Op localhost, `.local`/`.internal`-hosts, loopback, RFC1918, carrier-grade NAT, link-local of
-private IPv6-adresse, laai slegs die same-origin mdBook-output sodat
-local/container-deployments selfonderhoudend bly.
+`HackTricks-wiki/hacktricks-searchindex`. Moet nooit terugval na die same-origin mdBook-uitset
+nie; om die groot indeks vanaf `hacktricks.wiki` in production te bedien, is duur.
+- Op localhost, `.local`-/`.internal`-hosts, loopback, RFC1918, carrier-grade NAT, link-local of
+private IPv6-adresse, laai slegs die same-origin mdBook-uitset sodat plaaslike/container
+deployments selfstandig bly. Vir ’n nie-Engelse bladsy, probeer eers die taalgeprefikse plaaslike
+pad (byvoorbeeld `/es/searchindex.js`) en gebruik die root Engelse indeks slegs as ’n fallback.
 
-Vir hierdie repo is die verwagte local fallback:
+Vir hierdie repo is die verwagte plaaslike fallback:
 
 `/searchindex.js`
 
-Op private hosts is die cloud-index nie vanaf hierdie origin beskikbaar nie en moet dit nie 'n
+Op private hosts is die cloud-indeks nie vanaf hierdie origin beskikbaar nie en mag dit nie ’n
 remote download aktiveer nie. Op publieke hosts moet dit die remote
 `searchindex-cloud-<lang>.js.gz`-lêers gebruik.
 
-## Publisering van die soekindeks
+## Publisering van die search-indeks
 
-Die workflows wat encrypted compressed search indexes na
+Die workflows wat encrypted compressed search-indekse na
 `HackTricks-wiki/hacktricks-searchindex` publiseer, is:
 
 - `.github/workflows/build_master.yml`
 - `.github/workflows/translate_all.yml`
 
-Die gegenereerde source file is `book/searchindex.js`. Die gepubliseerde remote artifact-name is:
+Die gegenereerde bronlêer is `book/searchindex.js`. Die gepubliseerde remote artifact-name is:
 
-- `searchindex-v2-en.json.gz` (preferred compact index)
-- `searchindex-v2-<lang>.json.gz` (preferred compact index)
+- `searchindex-v2-en.json.gz` (voorkeur kompakte indeks)
+- `searchindex-v2-<lang>.json.gz` (voorkeur kompakte indeks)
 - `searchindex-en.js.gz`
 - `searchindex-<lang>.js.gz`
 
-Die browser loader verkies die compact v2-artifact en hou die `.js.gz`-artifact as 'n legacy
+Die browser loader verkies die kompakte v2-artifact en behou die `.js.gz`-artifact as ’n legacy
 fallback. Albei is XOR-encrypted gzip-payloads wat die sleutel gebruik wat in
 `theme/ht_searcher.js` gedefinieer is.
 
-Die loader moet lazy bly: normale page navigation mag nie die search worker skep of 'n index
+Die loader moet lazy bly: normale bladsynavigasie mag nie die search worker skep of ’n indeks
 download voordat die besoeker search oopmaak of gebruik nie. Remote compressed responses word
-24 uur per origin in Cache Storage gestoor sodat daaropvolgende bladsye dit kan hergebruik.
-Behoud die stale-cache fallback wanneer die verfrissing van 'n vervalde entry misluk.
+24 uur per origin in Cache Storage bewaar sodat daaropvolgende bladsye dit kan hergebruik. Behou
+die stale-cache-fallback wanneer die verfrissing van ’n vervalde entry misluk.
 
 ## Bou en validering
 
-Algemene plaaslike kontroles:
+Algemene plaaslike checks:
 
 - `node --check theme/ht_searcher.js`
 - `mdbook build`
@@ -79,8 +80,8 @@ As `mdbook build` misluk, kontroleer:
 ## Redigeringsnotas
 
 - Verkies `rg` vir soektogte.
-- Hou gegenereerde `book/`-output uit commits, tensy dit uitdruklik versoek word. Search-loader-fixes
-  is 'n uitsondering wanneer die reeds geboude bladsye onmiddellik reggestel moet word.
+- Hou gegenereerde `book/`-uitset uit commits, tensy dit uitdruklik versoek word. Search-loader-
+  fixes is ’n uitsondering wanneer die reeds geboude bladsye onmiddellik reggestel moet word.
 - As gedeelde theme-gedrag verander word, vergelyk en dateer die ooreenstemmende lêer in
   `/Users/carlospolop/git/hacktricks-cloud` op.
-- Moenie onverwante plaaslike veranderinge terugrol nie.
+- Moenie onverwante plaaslike veranderinge terugstel nie.
