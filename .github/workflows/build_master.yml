@@ -81,7 +81,7 @@ jobs:
           
           # Compress the searchindex file
           cd "${GITHUB_WORKSPACE}"
-          node .github/build_compact_search_index.mjs "$ASSET" "$COMPACT_ASSET"
+          python3 .github/build_compact_search_index.py "$ASSET" "$COMPACT_ASSET"
           gzip -9 -k -f "$ASSET"
           gzip -9 -k -f "$COMPACT_ASSET"
           
