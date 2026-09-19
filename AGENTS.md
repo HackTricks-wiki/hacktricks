@@ -57,6 +57,11 @@ The generated source file is `book/searchindex.js`. The published remote artifac
 The browser loader prefers the compact v2 artifact and keeps the `.js.gz` artifact as a legacy
 fallback. Both are XOR-encrypted gzip payloads using the key defined in `theme/ht_searcher.js`.
 
+The loader must stay lazy: normal page navigation must not create the search worker or download an
+index until the visitor opens or uses search. Remote compressed responses are persisted in Cache
+Storage for 24 hours per origin so subsequent pages can reuse them. Preserve the stale-cache
+fallback when refreshing an expired entry fails.
+
 ## Build And Validation
 
 Common local checks:
