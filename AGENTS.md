@@ -30,7 +30,8 @@ The search index source policy is important and cost-sensitive:
   serving the large index from `hacktricks.wiki` in production is expensive.
 - On localhost, `.local`/`.internal` hosts, loopback, RFC1918, carrier-grade NAT, link-local, or
   private IPv6 addresses, load only the same-origin mdBook output so local/container deployments
-  remain self-contained.
+  remain self-contained. For a non-English page, try the language-prefixed local path first (for
+  example `/es/searchindex.js`) and use the root English index only as a fallback.
 
 For this repo, the expected local fallback is:
 
