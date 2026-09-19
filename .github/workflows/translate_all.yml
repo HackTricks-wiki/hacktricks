@@ -23,6 +23,8 @@ permissions:
   packages: write
   id-token: write
   contents: write
+  actions: read
+  pull-requests: read
 
 jobs:
   translate:
@@ -340,7 +342,18 @@ jobs:
               --cache-control max-age=300
           fi
 
+      # A push to the default branch fans out into several workflows that each
+      # invalidate an overlapping set of paths, and CloudFront bills every path
+      # past the first 1000 a month. Skip the ones another run already covers.
+      - name: Check whether this invalidation is still needed
+        id: invalidation
+        uses: ./.github/actions/invalidation-needed
+        with:
+          github-token: ${{ github.token }}
+          merge-comment-author: "carlospolop"
+
       - name: Invalidate translated HTML and SEO assets once
+        if: steps.invalidation.outputs.needed == 'true'
         shell: bash
         run: |
           set -euo pipefail

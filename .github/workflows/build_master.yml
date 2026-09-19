@@ -19,6 +19,8 @@ permissions:
   packages: write
   id-token: write
   contents: write
+  actions: read
+  pull-requests: read
 
 jobs:
   run-translation:
@@ -208,7 +210,19 @@ jobs:
           aws s3 cp ./src/robots.txt s3://hacktricks-wiki/robots.txt --content-type text/plain --cache-control max-age=300
           aws s3 cp ./src/robots.txt s3://hacktricks-wiki/en/robots.txt --content-type text/plain --cache-control max-age=300
 
+      # A push to the default branch fans out into several workflows that each
+      # invalidate an overlapping set of paths, and CloudFront bills every path
+      # past the first 1000 a month. Skip the ones another run already covers.
+      - name: Check whether this invalidation is still needed
+        id: invalidation
+        uses: ./.github/actions/invalidation-needed
+        with:
+          github-token: ${{ github.token }}
+          covered-by: translate_all.yml
+          merge-comment-author: "carlospolop"
+
       - name: Invalidate CloudFront HTML and SEO assets
+        if: steps.invalidation.outputs.needed == 'true'
         run: |
           # /en/* covers /en/robots.txt and /en/sitemap.xml; only invalidate
           # root SEO files separately.
