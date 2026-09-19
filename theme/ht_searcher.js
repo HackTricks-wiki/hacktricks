@@ -100,8 +100,40 @@
       return importLegacyIndex(text);
     }
 
-    async function loadWithFallback(remotes, local){
-      /* Exhaust every GitHub-hosted index before touching the production origin. */
+    function isPrivateHost(hostname){
+      const host = (hostname || '').toLowerCase().replace(/^\[|\]$/g, '');
+      if(host === 'localhost' || host.endsWith('.localhost') || host.endsWith('.local') ||
+         host === 'host.docker.internal' || host.endsWith('.internal')) return true;
+      if(host.includes(':')){
+        if(host === '::1') return true;
+        if(host.startsWith('::ffff:')) return isPrivateHost(host.slice(7));
+        const first = parseInt(host.split(':')[0] || '0', 16);
+        return (first & 0xfe00) === 0xfc00 || (first & 0xffc0) === 0xfe80;
+      }
+      const octets = host.split('.').map(Number);
+      if(octets.length !== 4 || octets.some(value => !Number.isInteger(value) || value < 0 || value > 255)) return false;
+      return octets[0] === 0 || octets[0] === 10 || octets[0] === 127 ||
+        (octets[0] === 100 && octets[1] >= 64 && octets[1] <= 127) ||
+        (octets[0] === 169 && octets[1] === 254) ||
+        (octets[0] === 172 && octets[1] >= 16 && octets[1] <= 31) ||
+        (octets[0] === 192 && octets[1] === 168);
+    }
+
+    function loadLocal(local){
+      if(!local) return null;
+      try {
+        importScripts(abs(local));
+        console.log('Loaded private-network search index:', local);
+        return takeLegacyIndex();
+      } catch(e){
+        console.error('local', local, 'failed ->', e);
+        return null;
+      }
+    }
+
+    async function loadWithPolicy(remotes, local, privateHost){
+      /* Private deployments stay self-contained; public deployments never use costly origin indexes. */
+      if(privateHost) return loadLocal(local);
       for(const source of remotes){
         try {
           const data = await loadRemote(source);
@@ -109,15 +141,7 @@
           return data;
         } catch(e){ console.warn('search index', source.url, 'failed ->', e); }
       }
-      if(!local) return null;
-      try {
-        importScripts(abs(local));
-        console.log('Loaded local fallback:', local);
-        return takeLegacyIndex();
-      } catch(e){
-        console.error('local', local, 'failed ->', e);
-        return null;
-      }
+      return null;
     }
 
     function decodeTypedArray(encoded, Type){
@@ -320,6 +344,7 @@
       if(data.type === 'init'){
         try {
           const lang = data.lang || 'en';
+          const privateHost = isPrivateHost(data.hostname);
           const base = 'https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-searchindex/master';
           const mainSources = remoteSources(base,
             language => 'searchindex-v2-' + language + '.json.gz',
@@ -328,9 +353,9 @@
             language => 'searchindex-cloud-v2-' + language + '.json.gz',
             language => 'searchindex-cloud-' + language + '.js.gz', lang);
 
-          const main = await loadWithFallback(mainSources, '/searchindex.js');
+          const main = await loadWithPolicy(mainSources, '/searchindex.js', privateHost);
           if(main) built.push(buildIndex(main, false));
-          const cloud = await loadWithFallback(cloudSources, null);
+          const cloud = await loadWithPolicy(cloudSources, null, privateHost);
           if(cloud) built.push(buildIndex(cloud, true));
           if(!built.length){ postMessage({ready:false, error:'no-index'}); return; }
           postMessage({ready:true});
@@ -482,6 +507,6 @@
     worker.onmessage=handleWorkerMessage;
     worker.onerror=error=>{console.error('[HT Search] worker failed',error);ready=false;setIconState('error');};
     const htmlLang=(document.documentElement.lang||'en').toLowerCase();
-    worker.postMessage({type:'init',lang:htmlLang.split('-')[0]});
+    worker.postMessage({type:'init',lang:htmlLang.split('-')[0],hostname:window.location.hostname});
   }
 })();
