@@ -2,6 +2,10 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+{{#ref}}
+../../generic-methodologies-and-resources/pentesting-network/dds-rtps-security.md
+{{#endref}}
+
 ## **Introduction**
 
 ### Related resources
