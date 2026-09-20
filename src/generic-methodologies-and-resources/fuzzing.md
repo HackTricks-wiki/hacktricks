@@ -160,6 +160,63 @@ When the code you want to test only becomes reachable **after a large setup cost
 
 Place the snapshot as close as practical to the first expensive parse/dispatch step, such as after a `recv`/`read` or packet-deserialization point, and record the input buffer used by the target. This follows the adaptive-placement principle of moving the snapshot deeper into input processing to avoid repeating work.<sup>[[11]](#references)</sup>
 
+## Linux Kernel Race Exploration With MAccConc
+
+[MAccConc](https://github.com/googleprojectzero/MAccConc) turns timing-sensitive Linux-kernel races into repeatable memory-access schedules. It can automatically enumerate two-context **A-B-A** executions or let an analyst impose order constraints in a terminal UI/GUI. This is experimental research tooling rather than a complete concurrency fuzzer: it currently needs LLVM 23+ and the project's patched kernel, the command-line tools support two test threads, and the proposed userspace fuzzing layer is not implemented.<sup>[[15]](#references)[[16]](#references)</sup>
+
+### Collect cross-context communication points
+
+Build the instrumented kernel with KASAN outline callbacks and the patched KCOV memory-record support. The project README also recommends disabling sibling-call optimization so call stacks remain usable.<sup>[[15]](#references)[[16]](#references)</sup>
+
+```text
+CONFIG_KASAN=y
+CONFIG_KASAN_OUTLINE=y
+CONFIG_KCOV=y
+CONFIG_KCOV_EXT_RECORDS=y
+CONFIG_KCOV_MEMORY=y
+CONFIG_KALLSYMS_ALL=y
+CONFIG_DEBUG_INFO_DWARF5=y
+CONFIG_PREEMPT=y
+CONFIG_RANDOMIZE_BASE=n
+```
+
+```bash
+export KCFLAGS="-fno-optimize-sibling-calls -mllvm -sanitizer-coverage-prune-blocks=false"
+```
+
+KASAN outline mode (`asan-instrumentation-with-call-threshold=0`) converts instrumented accesses into helper calls. The MAccConc kernel patches disable `asan-opt-same-temp` so consecutive accesses are not merged; disable the `asan-opt-globals` optimization too when global-variable races must be visible. KCOV carries the resulting records to userspace. Compare accesses from different execution contexts and retain pairs whose byte ranges overlap and where at least one side writes; model `kfree()` as a write so lifetime transitions become candidates too.<sup>[[15]](#references)</sup>
+
+For work that escapes the initiating task, such as packet processing or RCU callbacks, the subsystem must propagate a KCOV remote-coverage handle. Upstream remote KCOV is opt-in and is not automatically available for arbitrary background work, so missing propagation can make a real interaction invisible.<sup>[[15]](#references)[[17]](#references)</sup>
+
+### Identify the same dynamic access on every run
+
+Do not replay against a concrete heap address, which may change after each allocation, or only against an instruction address, which is ambiguous inside helpers such as `memcpy()` and `spin_lock()`. MAccConc uses a **count-augmented stack trace**: each frame identifies a callee plus the invocation count within its caller, and the final element identifies the memory-access instruction. SanitizerCoverage function-entry/exit records let userspace reconstruct this dynamic identifier, which remains stable across address changes and unrelated control-flow noise.<sup>[[15]](#references)</sup>
+
+### Convert candidate pairs into forced schedules
+
+The patched `KCOV_SET_DI` ioctl associates a count-augmented access identifier with a shared-flag action.<sup>[[15]](#references)</sup>
+
+| Action | Semantics |
+| --- | --- |
+| `DI_STACK_WAKE_PRE` | Set flag *N* immediately before the selected access. |
+| `DI_STACK_WAIT` | Before the selected access, spin until flag *N* is set or the configured limit expires. |
+| `DI_STACK_WAKE_POST` | Set flag *N* immediately after the selected access. |
+
+For a partial **A-happens-before-B** constraint, attach `DI_STACK_WAKE_POST` to A and `DI_STACK_WAIT` to B using the same flag. For a fully specified two-context schedule, start B blocked, then make A wake B and wait at the first transfer point; B performs the inverse operation at the next transfer. The latter acts like deterministic context switching and is what the automatic A-B-A explorer uses.<sup>[[15]](#references)</sup>
+
+A minimal campaign is to compile the four-hook test case (`test_setup`, two thread functions, and `test_end`) as a shared library, collect an unconstrained trace, then enumerate A-B-A candidates or add manual constraints around suspicious accesses.<sup>[[16]](#references)</sup>
+
+```bash
+cc -shared -fPIC -o testcase.so testcase.c
+./kcov-autorace ./testcase.so
+# or interactively:
+./kcov-terminal ./testcase.so
+```
+
+Interpret timeouts separately from successful reorderings: a requested order may be impossible because a lock or an initialization/publication dependency prevents the second context from reaching its injection point. Also keep KASAN's blind spots in mind: direct stack accesses are usually not hooked unless they might be out of bounds, globals are omitted with the default optimization, and current compilers cannot emit ASAN and TSAN hooks simultaneously. Finally, the prototype loses its KCOV buffer when a guest panics, so preserve an independent crash console/oracle.<sup>[[15]](#references)</sup>
+
+For future concurrency-guided fuzzing, record per-input or per-syscall memory-access summaries, pair operations that would form cross-context communication points, and then explore only those combinations. VM snapshots stabilize global state and addresses; without snapshots, allocation-site metadata can abstract objects across runs. This is a proposed extension, not a feature of the current MAccConc userspace tools.<sup>[[15]](#references)</sup>
+
 ## Harness Introspection: Find Shallow Fuzzers Early
 
 When a campaign stalls, the problem is often not the mutator but the **harness**. Use **reachability/coverage introspection** to find functions that are statically reachable from your fuzz target but rarely or never covered dynamically. Those functions usually indicate one of three issues.<sup>[[12]](#references)</sup>
@@ -356,4 +413,7 @@ Run the command from the **same package** and with the **same `-fuzz` target** s
 - [12] [Fuzz Introspector](https://google.github.io/oss-fuzz/advanced-topics/fuzz-introspector/)
 - [13] [AFL++ LLVM instrumentation: path and caller coverage](https://github.com/AFLplusplus/AFLplusplus/blob/stable/instrumentation/README.llvm.md)
 - [14] [Predictive Context-sensitive Fuzzing](https://www.ndss-symposium.org/ndss-paper/predictive-context-sensitive-fuzzing/)
+- [15] [MAccConc: Exploring Linux Kernel Race Conditions with Controlled Memory-Access Interleavings](https://projectzero.google/2026/09/maccconc-race-condition.html)
+- [16] [googleprojectzero/MAccConc](https://github.com/googleprojectzero/MAccConc)
+- [17] [KCOV: code coverage for fuzzing](https://docs.kernel.org/dev-tools/kcov.html)
 {{#include ../banners/hacktricks-training.md}}
