@@ -1417,8 +1417,6 @@ summary {
     padding: 1.5rem;
     color: var(--menu-bar-link-color-hover);
     cursor: pointer;
-    font-size: 1.8rem;
-    font-weight: 100;
 }
 
 summary::-webkit-details-marker {
