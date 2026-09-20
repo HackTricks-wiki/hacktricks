@@ -33,6 +33,7 @@
     - [Hardware, Drivers and Linux](generic-methodologies-and-resources/pentesting-wifi/wifi-hardware-drivers-and-linux.md)
       - [Nexmon Monitor and Injection on Android](generic-methodologies-and-resources/pentesting-wifi/enable-nexmon-monitor-and-injection-on-android.md)
     - [Reconnaissance and Wardriving](generic-methodologies-and-resources/pentesting-wifi/wifi-reconnaissance-and-wardriving.md)
+      - [Wi-Fi Reconnaissance Setups](generic-methodologies-and-resources/pentesting-wifi/wifi-reconnaissance-setups.md)
     - [Wi-Fi Tools Reference](generic-methodologies-and-resources/pentesting-wifi/wifi-tools-reference.md)
   - [Open Wi-Fi (OPN)](generic-methodologies-and-resources/pentesting-wifi/open-wifi-opn.md)
   - [WEP](generic-methodologies-and-resources/pentesting-wifi/wep.md)
