@@ -2,14 +2,14 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-W Internecie znajduje się kilka blogów, które **podkreślają zagrożenia związane z pozostawianiem drukarek skonfigurowanych z LDAP i domyślnymi/słabymi** danymi logowania.  \
-Dzieje się tak, ponieważ atakujący może **nakłonić drukarkę do uwierzytelnienia się względem złośliwego serwera LDAP** (zwykle wystarczy `nc -vv -l -p 389` lub `slapd -d 2`) i przechwycić **poświadczenia drukarki w postaci jawnego tekstu**.
+W Internecie znajduje się kilka blogów, które **podkreślają zagrożenia związane z pozostawianiem drukarek skonfigurowanych z LDAP i domyślnymi/słabymi** danymi uwierzytelniającymi do logowania.  \
+Dzieje się tak, ponieważ attacker może **nakłonić drukarkę do uwierzytelnienia się względem rogue LDAP server** (zwykle wystarczy `nc -vv -l -p 389` lub `slapd -d 2`) i przechwycić **dane uwierzytelniające drukarki w jawnym tekście**.
 
-Ponadto wiele drukarek zawiera **logi z nazwami użytkowników** lub może nawet umożliwiać **pobranie wszystkich nazw użytkowników** z kontrolera domeny.
+Ponadto niektóre drukarki będą zawierać **logi z nazwami użytkowników** lub mogą nawet umożliwiać **pobranie wszystkich nazw użytkowników** z Domain Controller.
 
-Wszystkie te **wrażliwe informacje** oraz powszechny **brak zabezpieczeń** sprawiają, że drukarki są bardzo interesujące dla atakujących.
+Wszystkie te **wrażliwe informacje** oraz powszechny **brak bezpieczeństwa** sprawiają, że drukarki są bardzo interesujące dla attackerów.
 
-Kilka wprowadzających wpisów na ten temat:
+Kilka wprowadzających blogów na ten temat:
 
 - [https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/](https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/)<sup>[[4]](#references)</sup>
 - [https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)<sup>[[5]](#references)</sup>
@@ -19,22 +19,24 @@ Kilka wprowadzających wpisów na ten temat:
 ## Konfiguracja drukarki
 
 - **Lokalizacja**: Lista serwerów LDAP zwykle znajduje się w interfejsie webowym (np. *Network ➜ LDAP Setting ➜ Setting Up LDAP*).
-- **Zachowanie**: Wiele wbudowanych serwerów webowych umożliwia modyfikowanie serwerów LDAP **bez ponownego wprowadzania danych logowania** (funkcja zwiększająca wygodę użytkowania → zagrożenie bezpieczeństwa).
-- **Eksploitacja**: Przekieruj adres serwera LDAP na hosta kontrolowanego przez atakującego i użyj przycisku *Test Connection* / *Address Book Sync*, aby wymusić na drukarce wykonanie bindowania do tego hosta.
+- **Działanie**: Wiele wbudowanych serwerów webowych umożliwia modyfikowanie serwerów LDAP **bez ponownego wprowadzania danych uwierzytelniających** (funkcja użyteczności → ryzyko bezpieczeństwa).
+- **Exploit**: Przekieruj adres serwera LDAP na hosta kontrolowanego przez attackera i użyj przycisku *Test Connection* / *Address Book Sync*, aby wymusić wykonanie przez drukarkę bind do Ciebie.
 
 ---
 
-## Przechwytywanie poświadczeń
+## Przechwytywanie danych uwierzytelniających
 
 ### Method 1 – Netcat Listener
 ```bash
-sudo nc -k -v -l -p 389     # LDAPS → 636 (or 3269)
+sudo nc -k -v -l -p 389     # Plain LDAP only
 ```
-Małe/stare urządzenia wielofunkcyjne mogą wysyłać prosty *simple-bind* jawnym tekstem, który netcat może przechwycić. Nowoczesne urządzenia zwykle najpierw wykonują zapytanie anonimowe, a następnie próbują wykonać bind, dlatego wyniki mogą się różnić.<sup>[[1]](#references)</sup>
+Małe/stare urządzenia MFP mogą wysyłać prosty *simple-bind*, w którym bind DN i hasło są widoczne w surowym strumieniu BER. Nowoczesne urządzenia zwykle najpierw wykonują anonimowe zapytanie, a następnie próbują wykonać bind, dlatego wyniki bywają różne.<sup>[[1]](#references)</sup>
 
-### Metoda 2 – Pełny Rogue LDAP server (zalecane)
+Zwykły listener `nc` na portach 636/3269 odbiera wyłącznie ciphertext TLS; testowanie LDAPS wymaga endpointu LDAP obsługującego TLS, a przekierowanie powinno zakończyć się niepowodzeniem, gdy urządzenie prawidłowo weryfikuje certyfikat serwera.
 
-Ponieważ wiele urządzeń wykona anonimowe wyszukiwanie *przed* uwierzytelnieniem, uruchomienie rzeczywistego demona LDAP zapewnia znacznie bardziej niezawodne wyniki:<sup>[[1]](#references)</sup>
+### Metoda 2 – Full Rogue LDAP server (zalecane)
+
+Ponieważ wiele urządzeń wykona anonimowe wyszukiwanie *przed* uwierzytelnieniem, uruchomienie rzeczywistego demona LDAP zapewnia znacznie bardziej wiarygodne wyniki:<sup>[[1]](#references)</sup>
 ```bash
 # Debian/Ubuntu example
 sudo apt install slapd ldap-utils
@@ -43,70 +45,93 @@ sudo dpkg-reconfigure slapd   # set any base-DN – it will not be validated
 # run slapd in foreground / debug 2
 slapd -d 2 -h "ldap:///"      # only LDAP, no LDAPS
 ```
-Gdy drukarka wykona lookup, w debug output zobaczysz credentials w clear text.
+Gdy drukarka wykona wyszukiwanie, zobaczysz dane uwierzytelniające w jawnym tekście w danych wyjściowych debugowania.
 
-> 💡  Możesz również użyć `impacket/examples/ldapd.py` (Python rogue LDAP) lub `Responder -w -r -f`, aby harvestować hashe NTLMv2 przez LDAP/SMB.
+> 💡  Responder zawiera rogue LDAP i SMB authentication services. Proste LDAP bind może ujawnić skonfigurowane hasło, podczas gdy uwierzytelnianie NTLM generuje dane challenge-response; nie opisuj obu rezultatów jako hasła w jawnym tekście.
 
 ---
 
-## Recent Pass-Back Vulnerabilities (2024-2025)
+## Najnowsze luki Pass-Back (2024-2025)
 
-Pass-back to *nie* problem teoretyczny – vendorzy nadal publikują advisories w 2024/2025, które dokładnie opisują tę klasę ataków.
+Pass-back *nie jest* teoretycznym problemem – vendorzy nadal publikują w 2024/2025 advisories dokładnie opisujące tę klasę ataków.
 
-### Xerox VersaLink – CVE-2024-12510 & CVE-2024-12511
+### Xerox VersaLink – CVE-2024-12510 i CVE-2024-12511
 
-Firmware ≤ 57.69.91 urządzeń Xerox VersaLink C70xx MFP pozwalał uwierzytelnionemu adminowi (lub dowolnej osobie, gdy pozostawiono domyślne credentials) na:
+Firmware ≤ 57.69.91 urządzeń MFP Xerox VersaLink C70xx pozwalał uwierzytelnionemu administratorowi (lub dowolnej osobie, jeśli pozostały domyślne dane uwierzytelniające) na:
 
-* **CVE-2024-12510 – LDAP pass-back**: zmianę adresu serwera LDAP i wywołanie lookup, co powodowało, że urządzenie leakowało skonfigurowane Windows credentials do hosta kontrolowanego przez atakującego.
-* **CVE-2024-12511 – SMB/FTP pass-back**: identyczny problem za pośrednictwem miejsc docelowych *scan-to-folder*, prowadzący do wycieku credentials NetNTLMv2 lub FTP w clear text.<sup>[[2]](#references)</sup>
+* **CVE-2024-12510 – LDAP pass-back**: zmianę adresu serwera LDAP i wywołanie wyszukiwania, powodując leak skonfigurowanych danych uwierzytelniających Windows na host kontrolowany przez atakującego.
+* **CVE-2024-12511 – SMB/FTP pass-back**: identyczny problem za pośrednictwem miejsc docelowych *scan-to-folder*, powodujący leak danych NetNTLMv2 lub danych uwierzytelniających FTP w jawnym tekście.<sup>[[2]](#references)</sup>
 
-Prosty listener, taki jak:
+Wystarczy prosty listener, taki jak:
 ```bash
 sudo nc -k -v -l -p 389     # capture LDAP bind
 ```
-lub nieuczciwy serwer SMB (`impacket-smbserver`) wystarczy do przechwycenia poświadczeń.
+lub fałszywy serwer SMB (`impacket-smbserver`) wystarczy do przechwycenia poświadczeń.
 
-### Canon imageRUNNER / imageCLASS – advisory z 20 maja 2025 r.
+### Canon imageRUNNER / imageCLASS – komunikat z 20 maja 2025 r.
 
-Canon potwierdził słabość **SMTP/LDAP pass-back** w dziesiątkach linii produktów Laser i MFP. Atakujący z dostępem administratora może zmodyfikować konfigurację serwera i pobrać zapisane poświadczenia LDAP **lub** SMTP (wiele organizacji używa uprzywilejowanego konta, aby umożliwić skanowanie do poczty).<sup>[[3]](#references)</sup>
+Firma Canon potwierdziła lukę typu **SMTP/LDAP pass-back** w dziesiątkach linii produktów Laser i MFP. Atakujący z dostępem administratora może zmodyfikować konfigurację serwera i pobrać zapisane poświadczenia LDAP **lub** SMTP (wiele organizacji używa uprzywilejowanego konta, aby umożliwić skanowanie do poczty e-mail).<sup>[[3]](#references)</sup>
 
 Wytyczne producenta wyraźnie zalecają:
 
-1. Jak najszybszą aktualizację do załatanego firmware, gdy tylko będzie dostępny.
+1. Jak najszybszą aktualizację do dostępnego firmware'u zawierającego poprawki.
 2. Używanie silnych, unikalnych haseł administratora.
-3. Unikanie uprzywilejowanych kont AD podczas integracji drukarek.
+3. Unikanie uprzywilejowanych kont AD do integracji drukarek.
 
 ---
 
-## Narzędzia do automatycznej enumeracji / exploitation
+### Urządzenia Brother i warianty OEM – dostęp administratora wyprowadzany z numeru seryjnego do poświadczeń usług
+
+Skoordynowane ujawnienie z 2025 roku wykazało szczególnie użyteczny łańcuch ataku na podatnych urządzeniach Brother; część zestawu podatności dotyczy również modeli OEM, dlatego należy zweryfikować dokładny model względem komunikatu producenta. Nieuwierzytelniony atakujący może uzyskać numer seryjny urządzenia przez HTTP/HTTPS/IPP na podatnym firmware, a numery seryjne mogą być również dostępne za pośrednictwem protokołów zarządzania, takich jak SNMP lub PJL. Jeśli hasło fabryczne nigdy nie zostało zmienione, numer seryjny deterministycznie pozwala wyprowadzić hasło administratora. Po uwierzytelnieniu odrębna luka pass-back CVE-2024-51984 ujawnia skonfigurowane hasła zewnętrznych usług, takich jak LDAP lub FTP, w postaci jawnego tekstu, zamieniając dostęp do zarządzania drukarką w możliwe do ponownego użycia poświadczenia sieciowe. Firmware usuwa ujawnianie haseł usług, ale wcześniej wyprodukowane urządzenia nadal wymagają od operatora zastąpienia początkowego hasła administratora wyprowadzanego z numeru seryjnego.<sup>[[6]](#references)</sup>
+
+Obecna wersja Metasploit zawiera moduł pomocniczy, który wykrywa numer seryjny przez HTTP, SNMP lub PJL, generuje potencjalne początkowe hasło i opcjonalnie weryfikuje je w konsoli internetowej. `DiscoverSerialVia=AUTO` próbuje obsługiwanych ścieżek wykrywania; użyj `TargetSerial`, jeśli spis zasobów zawiera już numer seryjny.<sup>[[7]](#references)</sup>
+```text
+msfconsole -q
+use auxiliary/admin/misc/brother_default_admin_auth_bypass_cve_2024_51978
+set RHOSTS <printer-ip>
+set DiscoverSerialVia AUTO
+run
+```
+Używaj wyniku wyłącznie do walidacji autoryzowanych zasobów. To, czy hasło zadziała, zależy od konkretnego modelu oraz, co najważniejsze, od tego, czy fabryczne hasło administratora zostało już zmienione.<sup>[[6]](#references)[[7]](#references)</sup>
+
+---
+
+## Zautomatyzowane narzędzia do enumeracji / exploitation
 
 | Narzędzie | Zastosowanie | Przykład |
 |------|---------|---------|
 | **PRET** (Printer Exploitation Toolkit) | Nadużycia PostScript/PJL/PCL, dostęp do systemu plików, sprawdzanie domyślnych poświadczeń, *SNMP discovery* | `python pret.py 192.168.1.50 pjl` |
 | **Praeda** | Pobieranie konfiguracji (w tym książek adresowych i poświadczeń LDAP) przez HTTP/HTTPS | `perl praeda.pl -t 192.168.1.50` |
-| **Responder / ntlmrelayx** | Przechwytywanie i przekazywanie hashy NetNTLM z mechanizmu SMB/FTP pass-back | `responder -I eth0 -wrf` |
-| **impacket-ldapd.py** | Lekka usługa rogue LDAP do odbierania bindów w postaci jawnego tekstu | `python ldapd.py -debug` |
+| **Responder / ntlmrelayx** | Uruchamianie rogue authentication services oraz przechwytywanie/przekazywanie NetNTLM z callbacków SMB | `sudo responder -I eth0 -v` |
+| **Metasploit Brother auxiliary** | Wykrywanie numeru seryjnego, wyprowadzanie potencjalnego fabrycznego hasła administratora i weryfikowanie dostępu do konsoli webowej | `use auxiliary/admin/misc/brother_default_admin_auth_bypass_cve_2024_51978` |
 
 ---
 
 ## Hardening i wykrywanie
 
-1. **Niezwłocznie instaluj poprawki / aktualizuj firmware** urządzeń MFP (sprawdzaj biuletyny PSIRT producenta).
-2. **Konta usługowe z minimalnymi uprawnieniami** – nigdy nie używaj Domain Admin do LDAP/SMB/SMTP; ogranicz je do zakresów OU z dostępem *read-only*.
-3. **Ogranicz dostęp zarządzający** – umieść interfejsy web/IPP/SNMP drukarek w VLAN-ie zarządzającym lub za ACL/VPN.
-4. **Wyłącz nieużywane protokoły** – FTP, Telnet, raw-9100 oraz starsze szyfry SSL.
-5. **Włącz rejestrowanie audytowe** – niektóre urządzenia mogą wysyłać do syslog informacje o błędach LDAP/SMTP; koreluj nieoczekiwane bindy.
-6. **Monitoruj bindy LDAP w postaci jawnego tekstu** z nietypowych źródeł (drukarki powinny normalnie komunikować się wyłącznie z kontrolerami domeny).
-7. **SNMPv3 lub wyłącz SNMP** – community `public` często ujawnia konfigurację urządzenia i LDAP.
+1. **Niezwłocznie instaluj poprawki / aktualizuj firmware** urządzeń MFP (sprawdzaj biuletyny PSIRT dostawcy).
+2. **Zastępuj fabryczne hasła administratora** – sam firmware nie usuwa początkowych haseł wyprowadzanych z numeru seryjnego z wcześniej wyprodukowanych urządzeń Brother/OEM, których dotyczy problem.<sup>[[6]](#references)</sup>
+3. **Konta usług z minimalnymi uprawnieniami** – nigdy nie używaj Domain Admin do LDAP/SMB/SMTP; ogranicz je do zakresów OU z dostępem *read-only*.
+4. **Ogranicz dostęp zarządzający** – umieść interfejsy web/IPP/SNMP drukarki w sieci VLAN zarządzania lub za ACL/VPN.
+5. **Ogranicz ruch wychodzący drukarki** – zezwalaj każdemu urządzeniu na komunikację wyłącznie z oczekiwanymi miejscami docelowymi DC/LDAP, poczty, DNS/NTP, druku i plików skanów. Pass-back wymaga callbacku do endpointu wybranego przez atakującego.
+6. **Wyłącz nieużywane protokoły** – FTP, Telnet, raw-9100 oraz starsze szyfry SSL.
+7. **Włącz logowanie audytowe** – niektóre urządzenia mogą wysyłać nieudane operacje LDAP/SMTP do sysloga; koreluj nieoczekiwane bindy.
+8. **Monitoruj miejsca docelowe uwierzytelniania** – generuj alerty, gdy drukarka inicjuje połączenie LDAP, SMB, SMTP lub FTP z hostem spoza listy dozwolonych, szczególnie bezpośrednio po zalogowaniu do zarządzania lub zmianie konfiguracji.
+9. **SNMPv3 lub wyłącz SNMP** – społeczność `public` często powoduje leak informacji o urządzeniu i numerze seryjnym.
 
 ---
 
-## Referencje
+
+
+---
+
+## References
 
 - [1] [To tylko drukarka… Co najgorszego może się wydarzyć?](https://grimhacker.com/2018/03/09/just-a-printer/)
-- [2] [Drukarka wielofunkcyjna Xerox Versalink C7025: podatności na atak pass-back (naprawione)](https://www.rapid7.com/blog/post/2025/02/14/xerox-versalink-c7025-multifunction-printer-pass-back-attack-vulnerabilities-fixed/)
-- [3] [CP2025-004: ograniczanie / usuwanie podatności w drukarkach produkcyjnych, wielofunkcyjnych drukarkach biurowych / do małych biur oraz drukarkach laserowych](https://psirt.canon/advisory-information/cp2025-004/)
-- [4] [Uzyskiwanie poświadczeń domenowych przez drukarkę za pomocą Netcat](https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/)
-- [5] [Exploiting Multifunction Printers During A Penetration Test Engagement](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
-
+- [2] [Drukarka wielofunkcyjna Xerox Versalink C7025: podatności związane z atakiem Pass-Back (naprawione)](https://www.rapid7.com/blog/post/2025/02/14/xerox-versalink-c7025-multifunction-printer-pass-back-attack-vulnerabilities-fixed/)
+- [3] [Łagodzenie/naprawa podatności CP2025-004 dotyczącej drukarek produkcyjnych, wielofunkcyjnych drukarek biurowych/domowych oraz drukarek laserowych](https://psirt.canon/advisory-information/cp2025-004/)
+- [4] [Uzyskiwanie poświadczeń domenowych przez drukarkę za pomocą Netcata](https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/)
+- [5] [Exploitation wielofunkcyjnych drukarek podczas pentestingu](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
+- [6] [Wiele urządzeń Brother: wiele podatności (NAPRAWIONE)](https://www.rapid7.com/blog/post/multiple-brother-devices-multiple-vulnerabilities-fixed/)
+- [7] [Metasploit: moduł obejścia uwierzytelniania domyślnego administratora Brother](https://github.com/rapid7/metasploit-framework/blob/master/modules/auxiliary/admin/misc/brother_default_admin_auth_bypass_cve_2024_51978.rb)
 {{#include ../../banners/hacktricks-training.md}}
