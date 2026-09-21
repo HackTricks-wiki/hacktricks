@@ -12,6 +12,7 @@ Windows supports several mechanisms that can be used to execute commands on remo
 - [**DCOM Exec**](dcomexec.md)
 - [**RDPexec**](rdpexec.md)
 - [**SCMexec**](scmexec.md)
+- [**SCCM / MECM client execution**](../active-directory-methodology/sccm-management-point-relay-sql-policy-secrets.md#7-sccm-client-execution-for-lateral-movement)
 - **Pass the cookie** (cloud)<sup>[[1]](#references)</sup>
 - **Pass the PRT** (cloud)<sup>[[2]](#references)</sup>
 - **Pass the Microsoft Entra ID certificate** (cloud)<sup>[[3]](#references)</sup>
