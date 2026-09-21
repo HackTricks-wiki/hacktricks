@@ -52,7 +52,7 @@
   - [Wi-Fi Mesh and EasyMesh](generic-methodologies-and-resources/pentesting-wifi/wifi-mesh-and-easymesh.md)
   - [Modern Wi-Fi: Roaming, 6 GHz and MLO](generic-methodologies-and-resources/pentesting-wifi/modern-wifi-roaming-6ghz-and-mlo.md)
   - [Evil Twin, Rogue AP and Client Association Attacks](generic-methodologies-and-resources/pentesting-wifi/evil-twin-rogue-ap-and-client-association-attacks.md)
-    - [Evil Twin EAP-TLS](generic-methodologies-and-resources/pentesting-wifi/evil-twin-eap-tls.md)
+    - [Enterprise EAP Evil Twin (including EAP-TLS)](generic-methodologies-and-resources/pentesting-wifi/evil-twin-eap-tls.md)
   - [Wi-Fi DoS and Management-Frame Attacks](generic-methodologies-and-resources/pentesting-wifi/wifi-dos-and-management-frame-attacks.md)
   - [Post-Association and Client-Isolation Attacks](generic-methodologies-and-resources/pentesting-wifi/wifi-post-association-and-client-isolation-attacks.md)
   - [FragAttacks and Fragile Frames](generic-methodologies-and-resources/pentesting-wifi/fragattacks.md)
