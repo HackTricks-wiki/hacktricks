@@ -437,6 +437,12 @@ On the operator side, rebuild the file and run the dumper locally to recover cre
 base64 -d sqlstudio.b64 > sqlstudio.bin
 ```
 
+## Browser session and cookie theft via Chrome DevTools Protocol
+
+{{#ref}}
+../../linux-hardening/software-information/electron-cef-chromium-debugger-abuse.md#enabling-cdp-inside-a-live-chromium-process
+{{#endref}}
+
 ## Passkeys / WebAuthn credential theft from Chrome on Windows
 
 If code execution is obtained as the **victim user** on a Windows host using **Chrome + Google Password Manager synced passkeys**, passkeys become an interesting post-exploitation target even **without admin/SYSTEM**.<sup>[[4]](#references)</sup>
