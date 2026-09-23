@@ -7,14 +7,20 @@ on:
     paths-ignore:
       - '.gitignore'
       - 'book/**'
+      - Dockerfile
+      - '.github/**'
   workflow_dispatch:
 
-concurrency: build_master
+concurrency:
+  group: build-master
+  cancel-in-progress: true
 
 permissions:
   packages: write
   id-token: write
   contents: write
+  actions: read
+  pull-requests: read
 
 jobs:
   run-translation:
@@ -42,14 +48,6 @@ jobs:
             --default-lang en \
             --site-name "HackTricks"
       
-      - name: Install GitHub CLI
-        run: |
-          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
-          && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
-          && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
-          && sudo apt update \
-          && sudo apt install gh -y
-      
       - name: Push search index to hacktricks-searchindex repo
         shell: bash
         env:
@@ -58,8 +56,10 @@ jobs:
           set -euo pipefail
 
           ASSET="book/searchindex.js"
+          COMPACT_ASSET="/tmp/searchindex-v2.json"
           TARGET_REPO="HackTricks-wiki/hacktricks-searchindex"
           FILENAME="searchindex-en.js"
+          COMPACT_FILENAME="searchindex-v2-en.json"
 
           if [ ! -f "$ASSET" ]; then
             echo "Expected $ASSET to exist after build" >&2
@@ -73,7 +73,7 @@ jobs:
           fi
 
           # Clone the searchindex repo
-          git clone https://x-access-token:${TOKEN}@github.com/${TARGET_REPO}.git /tmp/searchindex-repo
+          git clone --depth 1 https://x-access-token:${TOKEN}@github.com/${TARGET_REPO}.git /tmp/searchindex-repo
           
           cd /tmp/searchindex-repo
           git config user.name "GitHub Actions"
@@ -81,7 +81,9 @@ jobs:
           
           # Compress the searchindex file
           cd "${GITHUB_WORKSPACE}"
+          python3 .github/build_compact_search_index.py "$ASSET" "$COMPACT_ASSET"
           gzip -9 -k -f "$ASSET"
+          gzip -9 -k -f "$COMPACT_ASSET"
           
           # Show compression stats
           ORIGINAL_SIZE=$(wc -c < "$ASSET")
@@ -107,13 +109,15 @@ jobs:
           print(f"Encrypted: {len(data)} bytes")
           EOF
           python3 /tmp/xor_encrypt.py "$KEY" "${ASSET}.gz" "${ASSET}.gz.enc"
+          python3 /tmp/xor_encrypt.py "$KEY" "${COMPACT_ASSET}.gz" "${COMPACT_ASSET}.gz.enc"
           
           # Copy the encrypted .gz version to the searchindex repo
           cd /tmp/searchindex-repo
           cp "${GITHUB_WORKSPACE}/${ASSET}.gz.enc" "${FILENAME}.gz"
+          cp "${COMPACT_ASSET}.gz.enc" "${COMPACT_FILENAME}.gz"
           
           # Stage the updated file
-          git add "${FILENAME}.gz"
+          git add "${FILENAME}.gz" "${COMPACT_FILENAME}.gz"
           
           # Commit and push with retry logic
           if git diff --staged --quiet; then
@@ -143,15 +147,16 @@ jobs:
                       echo "Detected history rewrite, re-cloning repository..."
                       cd /tmp
                       rm -rf searchindex-repo
-                      git clone https://x-access-token:${TOKEN}@github.com/${TARGET_REPO}.git searchindex-repo
+                      git clone --depth 1 https://x-access-token:${TOKEN}@github.com/${TARGET_REPO}.git searchindex-repo
                       cd searchindex-repo
                       git config user.name "GitHub Actions"
                       git config user.email "github-actions@github.com"
                       
-                      # Re-copy the .gz version
-                      cp "${GITHUB_WORKSPACE}/${ASSET}.gz" "${FILENAME}.gz"
+                      # Re-copy the encrypted gzip payloads expected by the site loader.
+                      cp "${GITHUB_WORKSPACE}/${ASSET}.gz.enc" "${FILENAME}.gz"
+                      cp "${COMPACT_ASSET}.gz.enc" "${COMPACT_FILENAME}.gz"
                       
-                      git add "${FILENAME}.gz"
+                      git add "${FILENAME}.gz" "${COMPACT_FILENAME}.gz"
                       TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
                       git commit -m "Update searchindex files - ${TIMESTAMP}"
                       echo "Re-cloned and re-committed, will retry push..."
@@ -174,7 +179,7 @@ jobs:
 
       # Login in AWs
       - name: Configure AWS credentials using OIDC
-        uses: aws-actions/configure-aws-credentials@v3
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: us-east-1
@@ -212,7 +217,19 @@ jobs:
           aws s3 cp ./src/robots.txt s3://hacktricks-wiki/robots.txt --content-type text/plain --cache-control max-age=300
           aws s3 cp ./src/robots.txt s3://hacktricks-wiki/en/robots.txt --content-type text/plain --cache-control max-age=300
 
+      # A push to the default branch fans out into several workflows that each
+      # invalidate an overlapping set of paths, and CloudFront bills every path
+      # past the first 1000 a month. Skip the ones another run already covers.
+      - name: Check whether this invalidation is still needed
+        id: invalidation
+        uses: ./.github/actions/invalidation-needed
+        with:
+          github-token: ${{ github.token }}
+          covered-by: translate_all.yml
+          merge-comment-author: "carlospolop"
+
       - name: Invalidate CloudFront HTML and SEO assets
+        if: steps.invalidation.outputs.needed == 'true'
         run: |
           # /en/* covers /en/robots.txt and /en/sitemap.xml; only invalidate
           # root SEO files separately.
