@@ -263,6 +263,49 @@ If you simplify this kind of expression with generic algebra tooling you can eas
    - **Mixed**: products and bitwise logic are interleaved, often with repeated subexpressions
 3. **Verify every candidate rewrite** with random testing or an SMT proof. If the equivalence cannot be proven, keep the original expression instead of guessing.
 
+### Bypass flattened control flow with a narrow execution slice
+
+Recovering the complete control-flow graph is often unnecessary. With control-flow flattening, opaque predicates, large dispatchers, or MBA-heavy code, follow references from encrypted blobs and output buffers to the smallest routine that transforms them. Then reproduce only that data-flow slice, or execute it independently; the dispatcher is not part of the required solution if the relevant state can be initialized directly.<sup>[[7]](#references)</sup>
+
+A practical workflow is:<sup>[[7]](#references)</sup>
+
+1. Inventory executable and data sections, relocations, and cross-references. Dump candidate tables from `.rodata` while preserving their byte order and element width.
+2. Identify the last routine that writes the plaintext or output buffer. Record its inputs, referenced tables, imported calls, and required global state.
+3. Lift only those operations into a fixed-width Python model. If the slice still depends on too much state, invoke the routine under Unicorn, QEMU, or a debugger and hook irrelevant imports instead of emulating the whole program.
+4. Validate that the extractor actually derives its output from the supplied binary: remove silent fallbacks, search it for embedded answers, and run it against unseen builds with changed strings, keys, identifiers, layouts, and obfuscation seeds.
+
+Useful first-pass commands are:<sup>[[7]](#references)</sup>
+
+```bash
+readelf -SW target
+objdump -s -j .rodata target > rodata.txt
+objdump -d target | rg 'adrp|add|ldr|str'
+```
+
+#### Detect MBA expressions that are disguised constants
+
+An apparently input-dependent byte expression may cancel its input completely. After extracting its tables, evaluate the expression over the complete 8-bit domain; a singleton output set proves that byte is constant without recovering the surrounding state machine.<sup>[[7]](#references)</sup>
+
+```python
+def mba(a, b, c, d, e, x):
+    return ((((a | (~x & 0xff)) & c) +
+             ((x | b) & d)) ^ e) & 0xff
+
+decoded = bytearray()
+for row in zip(A, B, C, D, E):
+    outputs = {mba(*row, x) for x in range(256)}
+    if len(outputs) != 1:
+        raise ValueError("expression depends on x")
+    decoded.append(outputs.pop())
+print(decoded)
+```
+
+Keep the final mask because the original addition has byte-width wraparound. For a wider domain, ask an SMT solver whether `f(x1) != f(x2)` is satisfiable for two same-width symbolic inputs: `unsat` proves invariance, while `sat` provides a counterexample and means the input cannot be discarded.<sup>[[7]](#references)</sup>
+
+#### Recognize environment-bound decoding
+
+Anti-analysis checks need not branch or crash. A decoder can mix a sensor result into a key bit, an opaque-predicate constant, or flattened-dispatcher state, continue normally, and produce plausible but false plaintext in an emulator. Therefore, patching only visible failure branches is insufficient; trace data dependencies from environment probes into decoder state, compare the same slice on the authentic device and emulator, and test how forcing each sensor result changes the final buffer.<sup>[[7]](#references)</sup>
+
 ### CoBRA
 
 [**CoBRA**](https://github.com/trailofbits/CoBRA) is a practical MBA simplifier for malware analysis and protected-binary reversing. It classifies the expression and routes it through specialized pipelines instead of applying one generic rewrite pass to everything.<sup>[[2]](#references)</sup>
@@ -542,5 +585,6 @@ https://www.youtube.com/watch?v=VVbRe7wr3G4
 - [4] [pentestpartners/reverse-engineering - rust-strings](https://github.com/pentestpartners/reverse-engineering/blob/main/rust-strings)
 - [5] [pentestpartners/reverse-engineering - RustStrings.py](https://github.com/pentestpartners/reverse-engineering/blob/main/RustStrings.py)
 - [6] [Nostalgia - GBA reversing tutorial (archived)](https://web.archive.org/web/20220328215728/https://exp.codes/Nostalgia/)
+- [7] [Defeating AI-Assisted Reverse Engineering, or at Least Trying To](http://blog.quarkslab.com/defeating-ai-assisted-reverse-engineering-or-at-least-trying-to.html)
 
 {{#include ../../banners/hacktricks-training.md}}
