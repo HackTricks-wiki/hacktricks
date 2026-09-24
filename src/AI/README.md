@@ -1,10 +1,10 @@
-# AI in Cybersecurity
+# AI in der Cybersicherheit
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Zentrale Machine-Learning-Algorithmen
+## Wichtigste Machine-Learning-Algorithmen
 
-Der beste Ausgangspunkt, um etwas über AI zu lernen, ist, zu verstehen, wie die wichtigsten Machine-Learning-Algorithmen funktionieren. Dies hilft dir zu verstehen, wie AI funktioniert, wie du sie einsetzen und wie du sie angreifen kannst:
+Der beste Ausgangspunkt, um etwas über AI zu lernen, besteht darin, zu verstehen, wie die wichtigsten Machine-Learning-Algorithmen funktionieren. Dies hilft dir zu verstehen, wie AI funktioniert, wie du sie einsetzen und wie du sie angreifen kannst:
 
 
 {{#ref}}
@@ -26,9 +26,9 @@ Der beste Ausgangspunkt, um etwas über AI zu lernen, ist, zu verstehen, wie die
 ./AI-Deep-Learning.md
 {{#endref}}
 
-### LLMs-Architektur
+### LLM-Architektur
 
-Auf der folgenden Seite findest du die Grundlagen jeder Komponente, um ein einfaches LLM mit Transformers zu erstellen:
+Auf der folgenden Seite findest du die Grundlagen jeder Komponente, um mithilfe von Transformern ein einfaches LLM zu erstellen:
 
 
 {{#ref}}
@@ -39,7 +39,7 @@ AI-llm-architecture/README.md
 
 ### AI-Risikoframeworks
 
-Zwei nützliche Frameworks als Ausgangspunkt für die Bewertung von AI-Systemrisiken sind die OWASP Machine Learning Security Top 10 und Googles Secure AI Framework (SAIF). Sie ergänzen sich, stellen jedoch keine vollständige Liste von AI-Risikoframeworks dar.<sup>[[1]](#references)[[2]](#references)</sup>
+Zwei nützliche Frameworks für den Einstieg in die Bewertung von AI-Systemrisiken sind die OWASP Machine Learning Security Top 10 und Googles Secure AI Framework (SAIF). Sie ergänzen sich, stellen jedoch keine vollständige Liste von AI-Risikoframeworks dar.<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 {{#ref}}
@@ -48,7 +48,7 @@ AI-Risk-Frameworks.md
 
 ### Sicherheit von AI-Prompts
 
-LLMs haben die Nutzung von AI in den letzten Jahren stark ausgeweitet, sind jedoch nicht perfekt und können durch adversarial Prompts getäuscht werden. Dies ist ein sehr wichtiges Thema, um zu verstehen, wie man AI sicher einsetzt und wie man sie angreift:
+LLMs haben die Nutzung von AI in den letzten Jahren explosionsartig ausgeweitet, sind jedoch nicht perfekt und können durch adversariale Prompts ausgetrickst werden. Dies ist ein sehr wichtiges Thema, um zu verstehen, wie man AI sicher einsetzt und wie man sie angreift:
 
 
 {{#ref}}
@@ -75,19 +75,23 @@ KYC-Bypass-Using-AI.md
 
 ### AI Model Context Protocol
 
-MCP (Model Context Protocol) ist ein offenes Protokoll zur Verbindung von AI-Anwendungen mit Tools und Datenquellen. Da MCP-Server Daten und Aktionen offenlegen können, müssen Assessments Autorisierung, Einwilligung, Validierung von Tool-Eingaben und die Überprüfung von Trust Boundaries einschließen.<sup>[[3]](#references)</sup>
+MCP (Model Context Protocol) ist ein offenes Protokoll zur Verbindung von AI-Anwendungen mit Tools und Datenquellen. Da MCP-Server Daten und Aktionen bereitstellen können, müssen Assessments Autorisierung, Einwilligung, Validierung von Tool-Eingaben und eine Überprüfung von Trust Boundaries umfassen.<sup>[[3]](#references)</sup>
 
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### AI-gestütztes Fuzzing und automatisierte Vulnerability Discovery
+### AI-gestütztes Fuzzing & automatisierte Schwachstellenerkennung
 
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
+
+### AI-gestützte Reverse Engineering
+
+[Partial lifting, invariant MBA detection, environment-bound decoding, and automated-extractor validation](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
 
 ### Web-Black-Box-AI-Pentester-Bots
 
@@ -100,7 +104,7 @@ Web-Black-Box-AI-Pentester-Bots.md
 
 ## References
 
-- [1] [OWASP Machine-Learning-Sicherheits-Top-10](https://owasp.org/www-project-machine-learning-security-top-10/)
+- [1] [OWASP Machine Learning Security Top 10](https://owasp.org/www-project-machine-learning-security-top-10/)
 - [2] [Google — Secure AI Framework (SAIF)](https://saif.google/)
-- [3] [Model Context Protocol — Einführung](https://modelcontextprotocol.io/docs/getting-started/intro)
+- [3] [Model Context Protocol — Introduction](https://modelcontextprotocol.io/docs/getting-started/intro)
 {{#include ../banners/hacktricks-training.md}}
