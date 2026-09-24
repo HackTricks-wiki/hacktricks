@@ -2,9 +2,9 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Główne algorytmy machine learning
+## Główne algorytmy uczenia maszynowego
 
-Najlepszym punktem wyjścia do nauki o AI jest zrozumienie działania głównych algorytmów machine learning. Pomoże Ci to zrozumieć, jak działa AI, jak go używać i jak je atakować:
+Najlepszym punktem wyjścia do nauki o AI jest zrozumienie działania głównych algorytmów uczenia maszynowego. Pomoże Ci to zrozumieć, jak działa AI, jak go używać i jak je atakować:
 
 
 {{#ref}}
@@ -28,7 +28,7 @@ Najlepszym punktem wyjścia do nauki o AI jest zrozumienie działania głównych
 
 ### Architektura LLM
 
-Na poniższej stronie znajdziesz podstawy każdego komponentu potrzebnego do zbudowania podstawowego LLM przy użyciu transformerów:
+Na poniższej stronie znajdziesz podstawy każdego komponentu potrzebnego do zbudowania podstawowego LLM z użyciem transformerów:
 
 
 {{#ref}}
@@ -39,7 +39,7 @@ AI-llm-architecture/README.md
 
 ### Frameworki ryzyka AI
 
-Dwa przydatne frameworki na początek do oceny ryzyka systemów AI to OWASP Machine Learning Security Top 10 oraz Secure AI Framework (SAIF) firmy Google. Uzupełniają się one wzajemnie, ale nie stanowią wyczerpującej listy frameworków ryzyka AI.<sup>[[1]](#references)[[2]](#references)</sup>
+Dwa przydatne frameworki na początek do oceny ryzyka systemów AI to OWASP Machine Learning Security Top 10 oraz Google's Secure AI Framework (SAIF). Uzupełniają się one, zamiast stanowić wyczerpującą listę frameworków ryzyka AI.<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 {{#ref}}
@@ -66,7 +66,7 @@ AI-Models-RCE.md
 
 ### Omijanie KYC wspomagane przez AI
 
-Generative video można połączyć z virtual-camera injection i manipulacją camera API, aby ominąć słabe procedury KYC, weryfikacji wieku i biometrycznego wykrywania żywotności:
+Generative video można łączyć z virtual-camera injection i manipulacją camera API w celu ominięcia słabych mechanizmów KYC, weryfikacji wieku i biometrycznych procedur liveness:
 
 
 {{#ref}}
@@ -75,23 +75,27 @@ KYC-Bypass-Using-AI.md
 
 ### Model Context Protocol AI
 
-MCP (Model Context Protocol) to otwarty protokół służący do łączenia aplikacji AI z narzędziami i źródłami danych. Ponieważ serwery MCP mogą udostępniać dane i wykonywać działania, oceny muszą obejmować autoryzację, zgodę, walidację danych wejściowych narzędzi oraz analizę granic zaufania.<sup>[[3]](#references)</sup>
+MCP (Model Context Protocol) to otwarty protokół służący do łączenia aplikacji AI z narzędziami i źródłami danych. Ponieważ serwery MCP mogą udostępniać dane i działania, oceny muszą obejmować autoryzację, zgodę, walidację danych wejściowych narzędzi oraz analizę granic zaufania.<sup>[[3]](#references)</sup>
 
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### Fuzzing wspomagany przez AI i automatyczne wykrywanie podatności
+### Fuzzing wspomagany przez AI i zautomatyzowane wykrywanie podatności
 
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
-### Webowe black-box AI pentester bots
+### Inżynieria wsteczna wspomagana przez AI
 
-Agenci wykorzystujący LLM mogą automatyzować długotrwałe procesy black-box web pentesting, gdy są wspierani przez obserwowalność, orkiestrację, obsługę uwierzytelnionych sesji oraz adversarial validation:
+[Częściowe lifting, wykrywanie niezmienniczego MBA, dekodowanie zależne od środowiska i walidacja automated-extractor](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
+
+### Webowe boty black-box AI pentester
+
+Agenci zasilani przez LLM mogą automatyzować długotrwałe procesy black-box web pentesting, jeśli zapewni się im obserwowalność, orkiestrację, obsługę uwierzytelnionych sesji i adversarial validation:
 
 
 {{#ref}}
@@ -102,5 +106,5 @@ Web-Black-Box-AI-Pentester-Bots.md
 
 - [1] [OWASP Machine Learning Security Top 10](https://owasp.org/www-project-machine-learning-security-top-10/)
 - [2] [Google — Secure AI Framework (SAIF)](https://saif.google/)
-- [3] [Model Context Protocol — Wprowadzenie](https://modelcontextprotocol.io/docs/getting-started/intro)
+- [3] [Model Context Protocol — Introduction](https://modelcontextprotocol.io/docs/getting-started/intro)
 {{#include ../banners/hacktricks-training.md}}
