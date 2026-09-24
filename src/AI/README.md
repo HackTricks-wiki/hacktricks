@@ -1,10 +1,10 @@
-# AI in Kubersekuriteit
+# AI in Cybersecurity
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Belangrikste Machine Learning-algoritmes
+## Belangrikste Machine Learning Algorithms
 
-Die beste beginpunt om oor AI te leer, is om te verstaan hoe die belangrikste machine learning-algoritmes werk. Dit sal jou help om te verstaan hoe AI werk, hoe om dit te gebruik en hoe om dit aan te val:
+Die beste beginpunt om oor AI te leer, is om te verstaan hoe die belangrikste machine learning algorithms werk. Dit sal jou help om te verstaan hoe AI werk, hoe om dit te gebruik en hoe om dit aan te val:
 
 
 {{#ref}}
@@ -26,47 +26,47 @@ Die beste beginpunt om oor AI te leer, is om te verstaan hoe die belangrikste ma
 ./AI-Deep-Learning.md
 {{#endref}}
 
-### LLMs-argitektuur
+### LLMs Architecture
 
-Op die volgende bladsy vind jy die basiese beginsels van elke komponent om ’n basiese LLM met transformers te bou:
+Op die volgende bladsy sal jy die grondbeginsels van elke komponent vind om ’n basiese LLM met transformers te bou:
 
 
 {{#ref}}
 AI-llm-architecture/README.md
 {{#endref}}
 
-## AI-sekuriteit
+## AI Security
 
-### AI-risikoraamwerke
+### AI Risk Frameworks
 
-Twee nuttige beginraamwerke vir die beoordeling van AI-stelselrisiko is die OWASP Machine Learning Security Top 10 en Google se Secure AI Framework (SAIF). Hulle vul mekaar aan eerder as om ’n volledige lys van AI-risikoraamwerke te wees.<sup>[[1]](#references)[[2]](#references)</sup>
+Twee nuttige raamwerke om mee te begin vir die assessering van AI-stelselrisiko is die OWASP Machine Learning Security Top 10 en Google se Secure AI Framework (SAIF). Hulle vul mekaar aan eerder as om ’n omvattende lys van AI risk frameworks te wees.<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 {{#ref}}
 AI-Risk-Frameworks.md
 {{#endref}}
 
-### AI-prompts-sekuriteit
+### AI Prompts Security
 
-LLMs het die gebruik van AI die afgelope jare laat ontplof, maar hulle is nie perfek nie en kan deur adversarial prompts mislei word. Dit is ’n baie belangrike onderwerp om te verstaan hoe om AI veilig te gebruik en hoe om dit aan te val:
+LLMs het die gebruik van AI die afgelope jare drasties laat toeneem, maar hulle is nie perfek nie en kan deur adversarial prompts mislei word. Dit is ’n baie belangrike onderwerp om te verstaan hoe om AI veilig te gebruik en hoe om dit aan te val:
 
 
 {{#ref}}
 AI-Prompts.md
 {{#endref}}
 
-### RCE in AI-modelle
+### AI Models RCE
 
-Dit is baie algemeen dat ontwikkelaars en maatskappye modelle wat van die Internet afgelaai is, uitvoer; die laai van ’n model alleen kan egter genoeg wees om arbitrêre kode op die stelsel uit te voer. Dit is ’n baie belangrike onderwerp om te verstaan hoe om AI veilig te gebruik en hoe om dit aan te val:
+Dit is baie algemeen dat developers en maatskappye models uitvoer wat van die Internet afgelaai is; om ’n model bloot te laai, kan egter genoeg wees om arbitrêre code op die stelsel uit te voer. Dit is ’n baie belangrike onderwerp om te verstaan hoe om AI veilig te gebruik en hoe om dit aan te val:
 
 
 {{#ref}}
 AI-Models-RCE.md
 {{#endref}}
 
-### AI-ondersteunde KYC-bypass
+### AI-Assisted KYC Bypass
 
-Generatiewe video kan met virtuele-kamera-inspuiting en kameramanipulasie via API’s gekombineer word om swak KYC-, ouderdomsverifikasie- en biometriese-liveness-werkvloeie te omseil:
+Generative video kan met virtual-camera injection en camera API manipulation gekombineer word om swak KYC-, ouderdomsverifikasie- en biometric-liveness-workflows te omseil:
 
 
 {{#ref}}
@@ -75,23 +75,27 @@ KYC-Bypass-Using-AI.md
 
 ### AI Model Context Protocol
 
-MCP (Model Context Protocol) is ’n oop protokol om AI-toepassings met tools en databronne te verbind. Omdat MCP-bedieners data en aksies kan blootstel, moet assesserings magtiging, toestemming, tool-invoervalidering en ’n hersiening van trust boundaries insluit.<sup>[[3]](#references)</sup>
+MCP (Model Context Protocol) is ’n oop protokol om AI applications aan tools en data sources te koppel. Omdat MCP servers data en actions kan blootstel, moet assessments authorization, consent, tool-input validation en trust-boundary review insluit.<sup>[[3]](#references)</sup>
 
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### AI-ondersteunde fuzzing & outomatiese kwesbaarheidsontdekking
+### AI-Assisted Fuzzing & Automated Vulnerability Discovery
 
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
+### AI-Assisted Reverse Engineering
+
+[Partial lifting, invariant MBA detection, environment-bound decoding, and automated-extractor validation](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
+
 ### Web Black-Box AI Pentester Bots
 
-LLM-aangedrewe agente kan langdurige black-box-web-pentesting-werkvloeie outomatiseer wanneer hulle deur observability, orkestrasie, geverifieerde sessiehantering en adversarial validation ondersteun word:
+LLM-powered agents kan langdurige black-box web pentesting-workflows outomatiseer wanneer hulle deur observability, orchestration, authenticated session handling en adversarial validation ondersteun word:
 
 
 {{#ref}}
@@ -101,6 +105,6 @@ Web-Black-Box-AI-Pentester-Bots.md
 ## References
 
 - [1] [OWASP Machine Learning Security Top 10](https://owasp.org/www-project-machine-learning-security-top-10/)
-- [2] [Google — Veilige AI-raamwerk (SAIF)](https://saif.google/)
-- [3] [Model Context Protocol — Inleiding](https://modelcontextprotocol.io/docs/getting-started/intro)
+- [2] [Google — Secure AI Framework (SAIF)](https://saif.google/)
+- [3] [Model Context Protocol — Introduction](https://modelcontextprotocol.io/docs/getting-started/intro)
 {{#include ../banners/hacktricks-training.md}}
