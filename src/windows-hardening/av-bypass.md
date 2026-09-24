@@ -539,6 +539,51 @@ It's about injecting the post-exploitation malicious code **into its own process
 
 You can also load C# Assemblies **from PowerShell**, check out [Invoke-SharpLoader](https://github.com/S3cur3Th1sSh1t/Invoke-SharpLoader) and [S3cur3th1sSh1t's video](https://www.youtube.com/watch?v=oe11Q-3Akuk).
 
+## NativeAOT WebAssembly repackaging of .NET tools (WasmForge)
+
+Normal `execute-assembly` techniques retain recognizable MSIL and eventually initialize a CLR. **WasmForge** changes the execution substrate instead: it migrates a C# project to the experimental NativeAOT-LLVM WASI target, compiles it ahead of time to WebAssembly, and embeds that module in a Wazero-based Windows PE host. The resulting process does not need the target's CLR, JIT, or `dotnet` host, so rules based only on managed assembly names, CLR loading, AMSI, or .NET ETW lose direct visibility. This is an evasion/packaging technique, not a privilege boundary bypass—the guest keeps the original tool's permissions and observable OS behavior.<sup>[[38]](#references)[[39]](#references)</sup>
+
+### Building a C# project
+
+The recommended build path is the project's Docker environment because it includes the .NET 10 SDK, NativeAOT-LLVM workload, WASI SDK 24.0, linker, and signing dependencies. A `.csproj` is auto-detected; the one-shot build performs migration, compatibility patching, WASM compilation, PE forging, and signing.<sup>[[39]](#references)</sup>
+
+```bash
+# From the WasmForge repository
+make docker-build
+make docker-run DOCKER_SRC=/path/to/Seatbelt DOCKER_PROJECT=seatbelt
+
+# Equivalent direct build when all prerequisites are installed
+GOOS=windows GOARCH=amd64 ./wasmforge build --win32-apis \
+  -o seatbelt.exe /path/to/Seatbelt/Seatbelt/
+```
+
+For troubleshooting or reviewing generated code, split the process into `wasmforge dotnet-migrate <dir>`, `wasmforge dotnet-patch <dir>`, `dotnet publish -c Release -r wasi-wasm`, and a final `wasmforge build --wasm <module> --nativeaot --win32-apis -o <output.exe>`. The build image also uses a `wasm-component-ld` wrapper to avoid the WASI Preview 2 component encoding and produce the plain module expected by the embedded runtime.<sup>[[38]](#references)[[39]](#references)</sup>
+
+### Bridging wasm32 C# to x64 Win32
+
+This is not a transparent recompile. NativeAOT-WASI lacks or changes Windows-oriented BCL features, and a wasm32 guest normally allocates four-byte pointer slots while x64 APIs can return eight-byte pointers. WasmForge addresses both problems with the following generated layers:<sup>[[38]](#references)</sup>
+
+1. A source patcher fixes AOT-specific semantic differences and redirects unsupported registry, pipes, WMI, identity, directory-service, file-version, LSA, and similar calls to `Wf*` helpers.
+2. A P/Invoke scanner emits NativeAOT `DirectPInvoke` mappings so `[DllImport]` calls bind to linked C bridge symbols rather than dynamically loading the declared DLL inside the guest.
+3. Host-bound pointers use `ulong` in C# and `uint64_t` in C. A generic dispatcher forwards the call to the host's Win32 handler; an `out8_mask` marks genuine eight-byte output slots whose upper halves must be retained. Unmarked wasm32-shaped outputs use snapshot/restore protection so an x64 write cannot corrupt the adjacent four bytes.
+4. Dedicated host bridges handle operations that do not fit generic syscall dispatch, such as LSA ticket-cache access, Kerberos/BCrypt operations with structured results, TCP KDC traffic, and LDAP queries.
+
+For example, a wrapper for `version.dll!VerQueryValueW` passes four host addresses and sets bits 2 and 3 (`0xC`) because the value pointer and length are eight-byte output slots. The wrapper itself stays generic and delegates the DLL name, export name, arguments, and mask to `wf_call_v2`; the host performs pointer translation and invokes the native API.<sup>[[38]](#references)</sup>
+
+```c
+uint32_t version_VerQueryValueW_v2(uint64_t block, uint64_t subblock,
+    uint64_t value_out, uint64_t length_out) {
+    return (uint32_t)wf_call_v2("version.dll", "VerQueryValueW", 4,
+        0xC, block, subblock, value_out, length_out);
+}
+```
+
+### Limitations and detection pivots
+
+Reflection-heavy code, dynamic assembly loading, arbitrary native callbacks, and complex x64 structures returned into WASM memory can still require per-tool patches or fail outright. Generic WASI Preview 2 sockets may also reach no-op stubs, so supported tools use protocol-specific host shims. Validate each command against a native build instead of assuming feature parity.<sup>[[38]](#references)[[39]](#references)</sup>
+
+The technique shifts telemetry rather than making the payload invisible. Detection can pivot to a PE containing or materializing a WASM module, Wazero-like runtime behavior, unusual host/guest memory allocation and copying, generic direct Win32 dispatch, signing and PE-resource anomalies, plus the resulting API calls and network traffic. The absence of CLR-load, AMSI, or .NET ETW events should therefore not be treated as evidence that a process is benign.<sup>[[38]](#references)</sup>
+
 ## Using Other Programming Languages
 
 As proposed in [**https://github.com/deeexcee-io/LOI-Bins**](https://github.com/deeexcee-io/LOI-Bins), it's possible to execute malicious code using other languages by giving the compromised machine access **to the interpreter environment installed on the Attacker Controlled SMB share**.
@@ -1429,5 +1474,7 @@ Sleep(exec_delay_seconds * 1000); // config-controlled delay to outlive sandboxe
 - [35] [trustedsec.com - Abusing Chrome Remote Desktop On Red Team Operations A Practical Guide](https://trustedsec.com/blog/abusing-chrome-remote-desktop-on-red-team-operations-a-practical-guide)
 - [36] [Check Point Research - BTR Reforged: Weaponizing Defender's Remediation Driver as a Kernel Operation Primitive](https://research.checkpoint.com/2026/btr-reforged-weaponizing-defenders-remediation-driver-as-a-kernel-operation-primitive/)
 - [37] [Dump-GUY - BTR_CLI](https://github.com/Dump-GUY/BTR_CLI)
+- [38] [Praetorian - GhostPack Necromancy: Reforging C# Tools with WasmForge](https://praetorian.com/blog/wasmforge-csharp-ghostpack-edr-evasion)
+- [39] [WasmForge - Compiling C# / .NET Projects](https://github.com/praetorian-inc/wasmforge/blob/main/docs/CSHARP.md)
 
 {{#include ../banners/hacktricks-training.md}}
