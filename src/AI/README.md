@@ -1,4 +1,4 @@
-# AI u sajber-bezbednosti
+# AI u cybersecurityju
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -28,18 +28,18 @@ Najbolja polazna tačka za učenje o AI jeste razumevanje načina rada glavnih a
 
 ### Arhitektura LLM-ova
 
-Na sledećoj stranici pronaći ćete osnove svake komponente potrebne za izgradnju osnovnog LLM-a pomoću transformera:
+Na sledećoj stranici pronaći ćete osnove svake komponente potrebne za izgradnju osnovnog LLM-a pomoću transformers:
 
 
 {{#ref}}
 AI-llm-architecture/README.md
 {{#endref}}
 
-## Bezbednost AI-ja
+## AI bezbednost
 
 ### Okviri za AI rizike
 
-Dva korisna početna okvira za procenu rizika AI sistema jesu OWASP Machine Learning Security Top 10 i Google-ov Secure AI Framework (SAIF). Oni se međusobno dopunjuju, a ne predstavljaju iscrpan spisak okvira za AI rizike.<sup>[[1]](#references)[[2]](#references)</sup>
+Dva korisna početna okvira za procenu rizika AI-sistema jesu OWASP Machine Learning Security Top 10 i Google Secure AI Framework (SAIF). Oni se međusobno dopunjuju, ali ne predstavljaju iscrpnu listu okvira za AI rizike.<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 {{#ref}}
@@ -48,50 +48,54 @@ AI-Risk-Frameworks.md
 
 ### Bezbednost AI promptova
 
-LLM-ovi su poslednjih godina naglo proširili upotrebu AI-ja, ali nisu savršeni i mogu biti prevareni adversarial promptovima. Ovo je veoma važna tema za razumevanje bezbednog korišćenja AI-ja i načina njegovog napadanja:
+LLM-ovi su poslednjih godina doveli do naglog širenja upotrebe AI-ja, ali nisu savršeni i mogu biti prevareni adversarial promptovima. Ovo je veoma važna tema za razumevanje bezbedne upotrebe AI-ja i načina na koji se on može napasti:
 
 
 {{#ref}}
 AI-Prompts.md
 {{#endref}}
 
-### RCE AI modela
+### RCE u AI modelima
 
-Veoma je uobičajeno da developeri i kompanije pokreću modele preuzete sa Interneta; međutim, samo učitavanje modela može biti dovoljno za izvršavanje proizvoljnog koda na sistemu. Ovo je veoma važna tema za razumevanje bezbednog korišćenja AI-ja i načina njegovog napadanja:
+Veoma je uobičajeno da developeri i kompanije pokreću modele preuzete sa Interneta, međutim samo učitavanje modela može biti dovoljno za izvršavanje proizvoljnog koda na sistemu. Ovo je veoma važna tema za razumevanje bezbedne upotrebe AI-ja i načina na koji se on može napasti:
 
 
 {{#ref}}
 AI-Models-RCE.md
 {{#endref}}
 
-### KYC bypass uz pomoć AI-ja
+### AI-assisted KYC bypass
 
-Generativni video može da se kombinuje sa injectionom virtuelne kamere i manipulacijom camera API-ja radi zaobilaženja slabih KYC procedura, verifikacije uzrasta i provera biometrijske prisutnosti:
+Generativni video može da se kombinuje sa virtual-camera injection i manipulacijom camera API-ja kako bi se zaobišli slabi KYC, age-verification i biometric liveness procesi:
 
 
 {{#ref}}
 KYC-Bypass-Using-AI.md
 {{#endref}}
 
-### Model Context Protocol za AI
+### AI Model Context Protocol
 
-MCP (Model Context Protocol) je otvoreni protokol za povezivanje AI aplikacija sa alatima i izvorima podataka. Pošto MCP serveri mogu da izlože podatke i radnje, procene moraju da obuhvate autorizaciju, saglasnost, validaciju unosa alata i proveru granica poverenja.<sup>[[3]](#references)</sup>
+MCP (Model Context Protocol) je otvoreni protokol za povezivanje AI aplikacija sa alatima i izvorima podataka. Pošto MCP serveri mogu da izlože podatke i radnje, procene moraju da obuhvate authorization, consent, tool-input validation i proveru granica poverenja.<sup>[[3]](#references)</sup>
 
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### Fuzzing uz pomoć AI-ja i automatizovano otkrivanje ranjivosti
+### AI-assisted fuzzing i automatizovano otkrivanje ranjivosti
 
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
-### Web Black-Box AI Pentester botovi
+### AI-assisted reverse engineering
 
-Agenti pokretani pomoću LLM-a mogu da automatizuju dugotrajne black-box web pentesting tokove kada imaju podršku za observability, orkestraciju, upravljanje autentifikovanim sesijama i adversarial validaciju:
+[Partial lifting, invariant MBA detection, environment-bound decoding, and automated-extractor validation](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
+
+### Web Black-Box AI Pentester Bots
+
+Agenti pokretani pomoću LLM-ova mogu da automatizuju dugotrajne black-box web pentesting procese kada imaju podršku za observability, orchestration, authenticated session handling i adversarial validation:
 
 
 {{#ref}}
@@ -100,7 +104,7 @@ Web-Black-Box-AI-Pentester-Bots.md
 
 ## References
 
-- [1] [OWASP Top 10 bezbednosti mašinskog učenja](https://owasp.org/www-project-machine-learning-security-top-10/)
+- [1] [OWASP Machine Learning Security Top 10](https://owasp.org/www-project-machine-learning-security-top-10/)
 - [2] [Google — Secure AI Framework (SAIF)](https://saif.google/)
 - [3] [Model Context Protocol — Uvod](https://modelcontextprotocol.io/docs/getting-started/intro)
 {{#include ../banners/hacktricks-training.md}}

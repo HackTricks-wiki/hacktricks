@@ -1,10 +1,10 @@
-# Alati za Reverse Engineering i osnovne metode
+# Alati za reversing i osnovne metode
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Alati za Reverse Engineering zasnovani na ImGui
+## Alati za reversing zasnovani na ImGui
 
-Software:
+Softver:
 
 - ReverseKit: [https://github.com/zer0condition/ReverseKit](https://github.com/zer0condition/ReverseKit)
 
@@ -12,11 +12,11 @@ Software:
 
 Online:
 
-- Koristite [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) za **dekompajliranje** iz wasm-a (binary) u wat (clear text)
-- Koristite [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) za **kompajliranje** iz wat-a u wasm
-- Za dekompajliranje možete isprobati i [web-wasmdec](https://wwwg.github.io/web-wasmdec/).
+- Koristite [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) za **decompile** iz wasm (binary) u wat (clear text)
+- Koristite [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) za **compile** iz wat u wasm
+- Takođe možete isprobati [web-wasmdec](https://wwwg.github.io/web-wasmdec/) za decompilation.
 
-Software:
+Softver:
 
 - [https://www.pnfsoftware.com/jeb/demo](https://www.pnfsoftware.com/jeb/demo)
 - [https://github.com/wwwg/wasmdec](https://github.com/wwwg/wasmdec)
@@ -31,25 +31,25 @@ nodejs-v8-cached-bytecode.md
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
 
-dotPeek je decompiler koji **dekompajlira i ispituje više formata**, uključujući **libraries** (.dll), **Windows metadata files** (.winmd) i **executables** (.exe). Nakon dekompajliranja, assembly se može sačuvati kao Visual Studio projekat (.csproj).
+dotPeek je decompiler koji **decompiles i ispituje više formata**, uključujući **biblioteke** (.dll), **Windows metadata file** (.winmd) i **izvršne datoteke** (.exe). Nakon decompilation-a, assembly se može sačuvati kao Visual Studio projekat (.csproj).
 
-Prednost je u tome što, ako izgubljeni source code zahteva restauraciju iz legacy assembly-ja, ova radnja može uštedeti vreme. Pored toga, dotPeek pruža praktičnu navigaciju kroz dekompajlirani code, što ga čini jednim od savršenih alata za **Xamarin algorithm analysis.**
+Prednost je u tome što, ako je potrebno obnoviti izgubljeni source code iz legacy assembly-ja, ova radnja može uštedeti vreme. Osim toga, dotPeek omogućava praktičnu navigaciju kroz decompiled code, što ga čini jednim od idealnih alata za **Xamarin algorithm analysis.**
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
 Sa sveobuhvatnim add-in modelom i API-jem koji proširuje alat kako bi odgovarao vašim tačnim potrebama, .NET reflector štedi vreme i pojednostavljuje development. Pogledajmo mnoštvo reverse engineering usluga koje ovaj alat pruža:
 
-- Pruža uvid u to kako podaci prolaze kroz library ili component
-- Pruža uvid u implementaciju i upotrebu .NET jezika i framework-a
-- Pronalazi nedokumentovanu i neizloženu funkcionalnost kako bi se izvuklo više iz korišćenih API-ja i tehnologija.
-- Pronalazi dependencies i različite assemblies
-- Prati tačnu lokaciju grešaka u vašem code-u, third-party components i libraries.
-- Omogućava debugging u source-u celokupnog .NET code-a sa kojim radite.
+- Omogućava uvid u to kako podaci prolaze kroz biblioteku ili komponentu
+- Omogućava uvid u implementaciju i upotrebu .NET jezika i framework-a
+- Pronalazi nedokumentovane i neeksponirane funkcionalnosti kako bi se izvuklo više iz korišćenih API-ja i tehnologija.
+- Pronalazi dependencies i različite assembly-je
+- Pronalazi tačnu lokaciju grešaka u vašem code-u, third-party komponentama i bibliotekama.
+- Omogućava debugging source-a celokupnog .NET code-a sa kojim radite.
 
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
-[ILSpy plugin for Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Možete ga koristiti na bilo kom OS-u (možete ga direktno instalirati iz VSCode-a, nema potrebe da preuzimate git. Kliknite na **Extensions** i **search ILSpy**).\
-Ako treba da **decompile**, **modify** i ponovo **recompile**, možete koristiti [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) ili aktivno održavani fork, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Right Click -> Modify Method** da biste promenili nešto unutar funkcije).
+[ILSpy plugin for Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Možete ga koristiti na bilo kom OS-u (možete ga direktno instalirati iz VSCode-a, bez potrebe za preuzimanjem git-a. Kliknite na **Extensions** i **search ILSpy**).\
+Ako je potrebno da **decompile**, **modify** i ponovo **recompile**-ujete, možete koristiti [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) ili njegov aktivno održavani fork, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Right Click -> Modify Method** da biste promenili nešto unutar funkcije).
 
 ### DNSpy Logging
 
@@ -63,9 +63,9 @@ File.AppendAllText(path, "Password: " + password + "\n");
 
 Da biste otklanjali greške u kodu koristeći DNSpy, potrebno je da:
 
-Najpre promenite **Assembly attributes** povezane sa **debugging**:
+Prvo promenite atribute **Assembly** koji se odnose na **debugging**:
 
-![DNSpy Logging - DNSpy Debugging: Najpre promenite Assembly attributes povezane sa debugging](<../../images/image (973).png>)
+![DNSpy Logging - DNSpy Debugging: Prvo promenite atribute Assembly koji se odnose na debugging](<../../images/image (973).png>)
 
 Iz:
 ```aspnet
@@ -82,86 +82,86 @@ I kliknite na **compile**:
 
 ![DNSpy Logging - DNSpy Debugging: I kliknite na compile](<../../images/image (314) (1).png>)
 
-Zatim sačuvajte novu datoteku putem _**File >> Save module...**_:
+Zatim sačuvajte novu datoteku preko _**File >> Save module...**_:
 
-![DNSpy Logging - DNSpy Debugging: Zatim sačuvajte novu datoteku putem File Save module](<../../images/image (602).png>)
+![DNSpy Logging - DNSpy Debugging: Zatim sačuvajte novu datoteku preko File Save module](<../../images/image (602).png>)
 
-Ovo je neophodno zato što će se, ako to ne uradite, tokom **runtime**-a na kod primeniti nekoliko **optimisations**, pa je moguće da se tokom debugging-a **break-point nikada ne aktivira** ili da neke **variables ne postoje**.
+Ovo je neophodno zato što će se, ako to ne uradite, tokom **runtime** izvršiti nekoliko **optimisations** nad kodom i moguće je da se tokom debagovanja **break-point nikada ne pogodi** ili da neke **variables ne postoje**.
 
-Zatim, ako se vaša .NET aplikacija **pokreće** preko **IIS**-a, možete je **restartovati** pomoću:
+Zatim, ako se vaša .NET aplikacija **pokreće** preko **IIS**, možete je **restartovati** pomoću:
 ```
 iisreset /noforce
 ```
-Zatim, da biste započeli debugging, trebalo bi da zatvorite sve otvorene fajlove i u **Debug Tab** izaberete **Attach to Process...**:
+Zatim, da biste započeli debugging, zatvorite sve otvorene fajlove i unutar **Debug Tab** izaberite **Attach to Process...**:
 
-![DNSpy Logging - DNSpy Debugging: Zatim, da biste započeli debugging, trebalo bi da zatvorite sve otvorene fajlove i u Debug Tab izaberete Attach to Process](<../../images/image (318).png>)
+![DNSpy Logging - DNSpy Debugging: Zatim, da biste započeli debugging, zatvorite sve otvorene fajlove i unutar Debug Tab izaberite Attach to Process](<../../images/image (318).png>)
 
-Zatim izaberite **w3wp.exe** da biste ga povezali sa **IIS serverom** i kliknite na **attach**:
+Zatim izaberite **w3wp.exe** da biste ga prikačili na **IIS server** i kliknite na **attach**:
 
-![DNSpy Logging - DNSpy Debugging: Zatim izaberite w3wp.exe da biste ga povezali sa IIS serverom i kliknite na attach](<../../images/image (113).png>)
+![DNSpy Logging - DNSpy Debugging: Zatim izaberite w3wp.exe da biste ga prikačili na IIS server i kliknite na attach](<../../images/image (113).png>)
 
-Sada kada debugujemo proces, vreme je da ga zaustavimo i učitamo sve module. Prvo kliknite na _Debug >> Break All_, a zatim na _**Debug >> Windows >> Modules**_:
+Sada kada debugujemo proces, potrebno je da ga zaustavimo i učitamo sve module. Najpre kliknite na _Debug >> Break All_, a zatim kliknite na _**Debug >> Windows >> Modules**_:
 
-![DNSpy Logging - DNSpy Debugging: Sada kada debugujemo proces, vreme je da ga zaustavimo i učitamo sve module. Prvo kliknite na Debug Break All, a zatim na Debug Windows Modules](<../../images/image (132).png>)
+![DNSpy Logging - DNSpy Debugging: Sada kada debugujemo proces, potrebno je da ga zaustavimo i učitamo sve module. Najpre kliknite na Debug Break All, a zatim kliknite na Debug Windows Modules](<../../images/image (132).png>)
 
-![DNSpy Logging - DNSpy Debugging: Sada kada debugujemo proces, vreme je da ga zaustavimo i učitamo sve module. Prvo kliknite na Debug Break All, a zatim na Debug Windows Modules](<../../images/image (834).png>)
+![DNSpy Logging - DNSpy Debugging: Sada kada debugujemo proces, potrebno je da ga zaustavimo i učitamo sve module. Najpre kliknite na Debug Break All, a zatim kliknite na Debug Windows Modules](<../../images/image (834).png>)
 
-Kliknite na bilo koji modul u prozoru **Modules** i izaberite **Open All Modules**:
+Kliknite na bilo koji modul u odeljku **Modules** i izaberite **Open All Modules**:
 
-![DNSpy Logging - DNSpy Debugging: Kliknite na bilo koji modul u prozoru Modules i izaberite Open All Modules](<../../images/image (922).png>)
+![DNSpy Logging - DNSpy Debugging: Kliknite na bilo koji modul u odeljku Modules i izaberite Open All Modules](<../../images/image (922).png>)
 
-Kliknite desnim tasterom miša na bilo koji modul u **Assembly Explorer** i kliknite na **Sort Assemblies**:
+Kliknite desnim tasterom na bilo koji modul u **Assembly Explorer** i kliknite na **Sort Assemblies**:
 
-![DNSpy Logging - DNSpy Debugging: Kliknite desnim tasterom miša na bilo koji modul u Assembly Explorer i kliknite na Sort Assemblies](<../../images/image (339).png>)
+![DNSpy Logging - DNSpy Debugging: Kliknite desnim tasterom na bilo koji modul u Assembly Explorer i kliknite na Sort Assemblies](<../../images/image (339).png>)
 
 ## Java decompiler
 
 [https://github.com/skylot/jadx](https://github.com/skylot/jadx)\
 [https://github.com/java-decompiler/jd-gui/releases](https://github.com/java-decompiler/jd-gui/releases)
 
-## Debugging DLL-ova
+## Debugging DLLs
 
-### Korišćenje IDA-e
+### Using IDA
 
-- **Učitajte rundll32** (64-bitni se nalazi u C:\Windows\System32\rundll32.exe, a 32-bitni u C:\Windows\SysWOW64\rundll32.exe)
+- **Load rundll32** (64bits in C:\Windows\System32\rundll32.exe and 32 bits in C:\Windows\SysWOW64\rundll32.exe)
 - Izaberite **Windbg** debugger
 - Izaberite "**Suspend on library load/unload**"
 
-![Debugging DLL-ova - Korišćenje IDA-e: Izaberite " Suspend on library load/unload "](<../../images/image (868).png>)
+![Debugging DLLs - Using IDA: Izaberite " Suspend on library load/unload "](<../../images/image (868).png>)
 
-- Konfigurišite **parameters** izvršavanja tako što ćete uneti **path do DLL-a** i funkciju koju želite da pozovete:
+- Konfigurišite **parameters** izvršavanja tako što ćete uneti **path to the DLL** i funkciju koju želite da pozovete:
 
-![Debugging DLL-ova - Korišćenje IDA-e: Konfigurišite parameters izvršavanja tako što ćete uneti path do DLL-a i funkciju koju želite da pozovete](<../../images/image (704).png>)
+![Debugging DLLs - Using IDA: Konfigurišite parameters izvršavanja tako što ćete uneti path to the DLL i funkciju koju želite da pozovete](<../../images/image (704).png>)
 
-Zatim, kada započnete debugging, **izvršavanje će biti zaustavljeno kada se učita svaki DLL**, pa će, kada rundll32 učita vaš DLL, izvršavanje biti zaustavljeno.
+Zatim, kada započnete debugging, **izvršavanje će biti zaustavljeno svaki put kada se učita DLL**, odnosno, kada rundll32 učita vaš DLL, izvršavanje će biti zaustavljeno.
 
-Ovaj metod se zaustavlja pri događajima učitavanja modula, ali je dostizanje entry point-a učitanog DLL-a manje direktno nego kod x64dbg workflow-a u nastavku.
+Ovaj metod se zaustavlja prilikom događaja učitavanja modula, ali je dolazak do entry point-a učitanog DLL-a manje direktan nego kod x64dbg workflow-a u nastavku.
 
-### Korišćenje x64dbg/x32dbg
+### Using x64dbg/x32dbg
 
-- **Učitajte rundll32** (64-bitni se nalazi u C:\Windows\System32\rundll32.exe, a 32-bitni u C:\Windows\SysWOW64\rundll32.exe)
-- **Promenite Command Line** ( _File --> Change Command Line_ ) i postavite path do dll-a i funkciju koju želite da pozovete, na primer: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
+- **Load rundll32** (64bits in C:\Windows\System32\rundll32.exe and 32 bits in C:\Windows\SysWOW64\rundll32.exe)
+- **Change the Command Line** ( _File --> Change Command Line_ ) i postavite path do dll-a i funkciju koju želite da pozovete, na primer: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
 - Promenite _Options --> Settings_ i izaberite "**DLL Entry**".
-- Zatim **započnite izvršavanje**; debugger će se zaustaviti na svakom dll main-u i u jednom trenutku ćete se **zaustaviti u dll Entry vašeg dll-a**. Odatle samo pronađite mesta na koja želite da postavite breakpoint.
+- Zatim **start the execution**; debugger će se zaustaviti na svakom dll main-u i u nekom trenutku ćete se **zaustaviti u dll Entry vašeg dll-a**. Odatle samo pronađite mesta na koja želite da postavite breakpoint.
 
-Imajte na umu da, kada se izvršavanje iz bilo kog razloga zaustavi u win64dbg-u, možete videti **u kom kodu se nalazite** tako što ćete pogledati **vrh prozora win64dbg-a**:
+Imajte na umu da, kada se izvršavanje iz bilo kog razloga zaustavi u win64dbg-u, možete videti **u kom code-u se nalazite** na **vrhu win64dbg prozora**:
 
-![Korišćenje IDA-e - Korišćenje x64dbg/x32dbg: Imajte na umu da, kada se izvršavanje iz bilo kog razloga zaustavi u win64dbg-u, možete videti u kom kodu se nalazite na vrhu prozora win64dbg-a](<../../images/image (842).png>)
+![Using IDA - Using x64dbg/x32dbg: Imajte na umu da, kada se izvršavanje iz bilo kog razloga zaustavi u win64dbg-u, možete videti u kom code-u se nalazite na vrhu win64dbg prozora](<../../images/image (842).png>)
 
-Ovaj indikator potvrđuje kada je izvršavanje zaustavljeno unutar DLL-a koji želite da debugujete.
+Ovaj indikator potvrđuje da je izvršavanje zaustavljeno unutar DLL-a koji želite da debugujete.
 
-## GUI aplikacije / videoigre
+## GUI Apps / Videogames
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) je koristan program za pronalaženje mesta na kojima se važne vrednosti čuvaju unutar memorije pokrenute igre i njihovu izmenu. Više informacija:
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) je koristan program za pronalaženje mesta na kojima se važne vrednosti čuvaju u memoriji pokrenute igre i njihovu izmenu. Više informacija:
 
 
 {{#ref}}
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE) je front-end/reverse engineering alat za GNU Project Debugger (GDB), usmeren na igre. Međutim, može se koristiti za bilo šta povezano sa reverse engineering-om.
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE) je front-end/reverse engineering alat za GNU Project Debugger (GDB), namenjen igrama. Međutim, može se koristiti za bilo šta povezano sa reverse engineering-om.
 
-[**Decompiler Explorer**](https://dogbolt.org/) je web front-end za veliki broj decompilera. Ovaj web servis vam omogućava da uporedite izlaz različitih decompilera na malim izvršnim fajlovima.
+[**Decompiler Explorer**](https://dogbolt.org/) je web front-end za više decompiler-a. Ovaj web servis vam omogućava da uporedite izlaz različitih decompiler-a na malim executable fajlovima.
 
 ## ARM & MIPS
 
@@ -172,49 +172,49 @@ https://github.com/nongiach/arm_now
 
 ## Shellcodes
 
-### Debugging shellcode-a pomoću blobrunner-a
+### Debugging a shellcode with blobrunner
 
 [**BlobRunner**](https://github.com/OALabs/BlobRunner) alocira **shellcode**, ispisuje njegovu **memory address** i pauzira izvršavanje.\
-Povežite debugger, kao što su IDA ili x64dbg, postavite breakpoint na ispisanu adresu i nastavite izvršavanje da biste debugovali shellcode.
+Prikačite debugger kao što su IDA ili x64dbg, postavite breakpoint na ispisanu adresu i nastavite izvršavanje da biste debugovali shellcode.
 
-Github stranica sa releases sadrži zip fajlove sa kompajliranim izdanjima: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
-Blago izmenjenu verziju Blobrunner-a možete pronaći na sledećem linku. Da biste je kompajlirali, samo **kreirajte C/C++ projekat u Visual Studio Code-u, kopirajte i nalepite kod i build-ujte ga**.
+Github stranica sa releases sadrži zip fajlove sa kompajliranim releases verzijama: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
+Blago izmenjenu verziju Blobrunner-a možete pronaći na sledećem linku. Da biste je kompajlirali, samo **create a C/C++ project in Visual Studio Code, copy and paste the code and build it**.
 
 
 {{#ref}}
 blobrunner.md
 {{#endref}}
 
-### Debugging shellcode-a pomoću jmp2it-a
+### Debugging a shellcode with jmp2it
 
-[**jmp2it**](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) je sličan alatu BlobRunner. Alocira shellcode i ulazi u beskonačnu petlju. Povežite debugger, nastavite izvršavanje **2–5 sekundi**, pauzirajte unutar te petlje i izvršite step do sledećeg poziva koji prenosi izvršavanje na alocirani shellcode.
+[**jmp2it**](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) je sličan alatu BlobRunner. Alocira shellcode i ulazi u beskonačnu petlju. Prikačite debugger, nastavite izvršavanje tokom **2–5 sekundi**, pauzirajte unutar te petlje i pređite do sledećeg poziva koji prenosi izvršavanje na alocirani shellcode.
 
-![Debugger pauziran u beskonačnoj petlji jmp2it-a neposredno pre poziva alociranog shellcode-a](<../../images/image (509).png>)
+![Debugger pauziran u beskonačnoj petlji alata jmp2it neposredno pre poziva alociranog shellcode-a](<../../images/image (509).png>)
 
 Kompajliranu verziju alata [jmp2it možete preuzeti na releases stranici](https://github.com/adamkramer/jmp2it/releases/).
 
-### Debugging shellcode-a pomoću Cutter-a
+### Debugging shellcode using Cutter
 
 [**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) je GUI alata radare. Pomoću Cutter-a možete emulirati shellcode i dinamički ga analizirati.
 
-Imajte na umu da Cutter omogućava opcije "Open File" i "Open Shellcode". U mom slučaju, kada sam otvorio shellcode kao fajl, ispravno ga je dekompajlirao, ali kada sam ga otvorio kao shellcode, nije:
+Imajte na umu da Cutter omogućava opcije "Open File" i "Open Shellcode". U mom slučaju, kada sam otvorio shellcode kao fajl, pravilno ga je dekompajlirao, ali kada sam ga otvorio kao shellcode, nije:
 
 ![Cutter prikazuje različite rezultate analize pri otvaranju istih bajtova kao fajla ili kao shellcode-a](<../../images/image (562).png>)
 
-Da biste započeli emulaciju na mestu koje želite, tamo postavite bp i Cutter će, po svemu sudeći, automatski započeti emulaciju od tog mesta:
+Da biste započeli emulaciju na mestu koje želite, postavite bp tamo; Cutter će je, po svemu sudeći, automatski započeti od tog mesta:
 
-![Postavljanje breakpoint-a na željeni entry shellcode-a pre pokretanja Cutter emulacije](<../../images/image (589).png>)
+![Postavljanje breakpoint-a na željeni shellcode entry pre pokretanja Cutter emulacije](<../../images/image (589).png>)
 
-![Cutter emulator pauziran na izabranom breakpoint-u shellcode-a](<../../images/image (387).png>)
+![Cutter emulator pauziran na izabranom shellcode breakpoint-u](<../../images/image (387).png>)
 
 Na primer, stack možete videti unutar hex dump-a:
 
-![Prikaz emuliranog stack-a shellcode-a u Cutter-ovom hex dump-u](<../../images/image (186).png>)
+![Prikaz emuliranog shellcode stack-a u Cutter-ovom hex dump-u](<../../images/image (186).png>)
 
-### Deobfuscating shellcode-a i pronalaženje izvršenih funkcija
+### Deobfuscating shellcode and getting executed functions
 
 Trebalo bi da isprobate [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152).\
-Reći će vam stvari poput toga **koje funkcije** shellcode koristi i da li se shellcode **decoding-uje** u memoriji.
+Reći će vam, između ostalog, **koje functions** shellcode koristi i da li se shellcode **decoding** sam u memoriji.
 ```bash
 scdbg.exe -f shellcode # Get info
 scdbg.exe -f shellcode -r #show analysis report at end of run
@@ -223,37 +223,76 @@ scdbg.exe -f shellcode -d #Dump decoded shellcode
 scdbg.exe -f shellcode /findsc #Find offset where starts
 scdbg.exe -f shellcode /foff 0x0000004D #Start the executing in that offset
 ```
-scDbg takođe poseduje grafički pokretač u kojem možete izabrati željene opcije i izvršiti shellcode
+scDbg takođe ima grafički launcher u kojem možete izabrati željene opcije i izvršiti shellcode
 
-![Grafički pokretač scDbg-a za izbor opcija emulacije i praćenja shellcode-a](<../../images/image (258).png>)
+![scDbg grafički launcher za izbor opcija emulacije i praćenja shellcode-a](<../../images/image (258).png>)
 
-Opcija **Create Dump** izbacuje konačni shellcode ako je shellcode dinamički izmenjen u memoriji (korisno za preuzimanje dekodiranog shellcode-a). Opcija **start offset** može biti korisna za pokretanje shellcode-a na određenom offsetu. Opcija **Debug Shell** korisna je za otklanjanje grešaka u shellcode-u pomoću scDbg terminala (međutim, smatram da su bilo koje od prethodno objašnjenih opcija bolje za ovu namenu, jer ćete moći da koristite Ida ili x64dbg).
+Opcija **Create Dump** će sačuvati finalni shellcode ako se bilo koja izmena dinamički izvrši nad shellcode-om u memoriji (korisno za preuzimanje dekodiranog shellcode-a). **start offset** može biti koristan za pokretanje shellcode-a na određenom offsetu. Opcija **Debug Shell** korisna je za debugovanje shellcode-a pomoću scDbg terminala (međutim, smatram da su bilo koje od prethodno objašnjenih opcija bolje za ovo, jer ćete moći da koristite Ida ili x64dbg).
 
-### Disasembliranje pomoću CyberChef-a
+### Disassembling pomoću CyberChef-a
 
-Otpremite svoj shellcode fajl kao ulaz i upotrebite sledeći recept da biste ga disasemblirali: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
+Otpremite svoj shellcode fajl kao ulaz i koristite sledeći recipe za njegovo dekompajliranje: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
 
-## Dekodiranje MBA obfuscation
+## MBA obfuscation deobfuscation
 
-**Mixed Boolean-Arithmetic (MBA)** obfuscation skriva jednostavne izraze kao što je `x + y` iza formula koje kombinuju aritmetičke (`+`, `-`, `*`) i bitovske operatore (`&`, `|`, `^`, `~`, pomeranja). Važno je da su ovi identiteti obično ispravni samo u okviru **modularne aritmetike fiksne širine**, zbog čega su prenosi i prekoračenja bitni:
+**Mixed Boolean-Arithmetic (MBA)** obfuscation skriva jednostavne izraze kao što je `x + y` iza formula koje kombinuju aritmetičke (`+`, `-`, `*`) i bitovske operatore (`&`, `|`, `^`, `~`, shifts). Važno je da su ove jednakosti obično tačne samo u uslovima **modularne aritmetike fiksne širine**, tako da su prenosi i prekoračenja važni:
 ```c
 (x ^ y) + 2 * (x & y) == x + y
 ```
-Ako ovu vrstu izraza pojednostavite pomoću generičkih alata za algebru, lako možete dobiti pogrešan rezultat jer je semantika širine bitova zanemarena.<sup>[[1]](#references)</sup>
+Ako ovu vrstu izraza pojednostavite pomoću generičkih alata za algebru, lako možete dobiti pogrešan rezultat jer je semantika širine bita zanemarena.<sup>[[1]](#references)</sup>
 
 ### Praktični tok rada
 
-1. **Zadržite originalnu širinu bitova** iz lifted koda/IR/decompiler izlaza (`8/16/32/64` bita).
+1. **Zadržite originalnu širinu bita** iz lifted koda/IR/decompiler izlaza (`8/16/32/64` bita).
 2. **Klasifikujte izraz** pre nego što pokušate da ga pojednostavite:
-- **Linearni**: ponderisani zbirovi bitwise atoma
-- **Semilinearni**: linearni izrazi uvećani za konstantne maske kao što je `x & 0xFF`
+- **Linearni**: ponderisane sume bitwise atoma
+- **Semilinearni**: linearni izrazi sa konstantnim maskama kao što je `x & 0xFF`
 - **Polinomski**: pojavljuju se proizvodi
 - **Mešoviti**: proizvodi i bitwise logika su isprepletani, često sa ponovljenim podizrazima
-3. **Proverite svaku potencijalnu transformaciju** pomoću nasumičnog testiranja ili SMT dokaza. Ako se ekvivalencija ne može dokazati, zadržite originalni izraz umesto da nagađate.
+3. **Proverite svaku predloženu transformaciju** nasumičnim testiranjem ili SMT dokazom. Ako ekvivalencija ne može da se dokaže, zadržite originalni izraz umesto da nagađate.
+
+### Zaobiđite spljošteni tok kontrole pomoću uskog izvršnog isečka
+
+Potpuna rekonstrukcija grafa toka kontrole često nije neophodna. Kod control-flow flattening-a, opaque predikata, velikih dispatcher-a ili koda sa mnogo MBA izraza, pratite reference od šifrovanih blobova i izlaznih bafera do najmanje rutine koja ih transformiše. Zatim reprodukujte samo taj data-flow isečak ili ga izvršite nezavisno; dispatcher nije deo potrebnog rešenja ako relevantno stanje može direktno da se inicijalizuje.<sup>[[7]](#references)</sup>
+
+Praktični tok rada je:<sup>[[7]](#references)</sup>
+
+1. Popišite izvršne i data sekcije, relokacije i cross-reference-e. Izdvojite potencijalne tabele iz `.rodata`, uz očuvanje njihovog redosleda bajtova i širine elemenata.
+2. Identifikujte poslednju rutinu koja upisuje plaintext ili izlazni bafer. Zabeležite njene ulaze, referencirane tabele, importovane pozive i potrebno globalno stanje.
+3. Podignite samo te operacije u Python model sa fiksnom širinom. Ako isečak i dalje zavisi od previše stanja, pozovite rutinu pomoću Unicorn-a, QEMU-a ili debugger-a i presretnite nebitne importe umesto da emulirate ceo program.
+4. Proverite da extractor zaista izvodi svoj izlaz iz dostavljenog binary-ja: uklonite tihe fallback-e, pretražite ga za ugrađenim odgovorima i pokrenite ga nad nepoznatim build-ovima sa izmenjenim stringovima, ključevima, identifikatorima, rasporedima i obfuscation seed-ovima.
+
+Korisne komande za prvi prolaz su:<sup>[[7]](#references)</sup>
+```bash
+readelf -SW target
+objdump -s -j .rodata target > rodata.txt
+objdump -d target | rg 'adrp|add|ldr|str'
+```
+#### Detect MBA expressions that are disguised constants
+
+Naizgled izraz bajtova koji zavisi od ulaza može u potpunosti poništiti svoj ulaz. Nakon izdvajanja svojih tabela, evaluirajte izraz nad celim 8-bitnim domenom; skup izlaza koji sadrži samo jednu vrednost dokazuje da je taj bajt konstanta, bez potrebe za rekonstrukcijom okolne state machine.<sup>[[7]](#references)</sup>
+```python
+def mba(a, b, c, d, e, x):
+return ((((a | (~x & 0xff)) & c) +
+((x | b) & d)) ^ e) & 0xff
+
+decoded = bytearray()
+for row in zip(A, B, C, D, E):
+outputs = {mba(*row, x) for x in range(256)}
+if len(outputs) != 1:
+raise ValueError("expression depends on x")
+decoded.append(outputs.pop())
+print(decoded)
+```
+Zadržite završnu masku jer originalno sabiranje ima prelivanje širine bajta. Za širi domen, pitajte SMT solver da li je `f(x1) != f(x2)` zadovoljivo za dva simbolička ulaza iste širine: `unsat` dokazuje invarijantnost, dok `sat` pruža kontraprimer i znači da se ulaz ne može odbaciti.<sup>[[7]](#references)</sup>
+
+#### Prepoznavanje dekodiranja vezanog za okruženje
+
+Anti-analysis provere ne moraju da granaju izvršavanje ili izazovu pad. Dekoder može da umeša rezultat senzora u bit ključa, konstantu opaque-predicate-a ili stanje flattened-dispatcher-a, da nastavi normalno i proizvede uverljiv, ali netačan plaintext u emulatoru. Zato patch-ovanje samo vidljivih grana za grešku nije dovoljno; pratite zavisnosti podataka od probe okruženja do stanja dekodera, uporedite isti slice na autentičnom uređaju i emulatoru i testirajte kako forsiranje svakog rezultata senzora menja konačni bafer.<sup>[[7]](#references)</sup>
 
 ### CoBRA
 
-[**CoBRA**](https://github.com/trailofbits/CoBRA) je praktični MBA simplifier za analizu malware-a i reversing zaštićenih binarnih fajlova. On klasifikuje izraz i usmerava ga kroz specijalizovane pipeline-ove umesto da na sve primenjuje jedan generički rewrite pass.<sup>[[2]](#references)</sup>
+[**CoBRA**](https://github.com/trailofbits/CoBRA) je praktičan MBA simplifier za malware analysis i protected-binary reversing. On klasifikuje izraz i prosleđuje ga kroz specijalizovane pipeline-ove, umesto da na sve primenjuje jedan generički rewrite pass.<sup>[[2]](#references)</sup>
 
 Brza upotreba:
 ```bash
@@ -270,7 +309,7 @@ cobra-cli --mba "(a^b)+(a&b)+(a&b)" --verify
 ```
 Korisni slučajevi:
 
-- **Linear MBA**: CoBRA evaluira izraz nad Boolean ulazima, izvodi potpis i paralelno pokreće nekoliko metoda za oporavak, kao što su uparivanje obrazaca, ANF konverzija i interpolacija koeficijenata.
+- **Linear MBA**: CoBRA evaluira izraz na Boolean ulazima, izvodi potpis i istovremeno primenjuje nekoliko metoda za oporavak, kao što su uparivanje obrazaca, ANF konverzija i interpolacija koeficijenata.
 - **Semilinear MBA**: atomi sa konstantnom maskom ponovo se izgrađuju rekonstrukcijom particionisanom po bitovima, tako da maskirani regioni ostanu ispravni.
 - **Polynomial/Mixed MBA**: proizvodi se razlažu na jezgra, a ponovljeni podizrazi mogu se izdvojiti u privremene promenljive pre pojednostavljivanja spoljne relacije.
 
@@ -282,64 +321,64 @@ Ovo se može svesti na:
 ```c
 x * y
 ```
-### Beleške o Reversing-u
+### Reversing beleške
 
-- Prednost dajte pokretanju CoBRA nad **lifted IR expressions** ili izlazom decompiler-a nakon što izolujete tačno izračunavanje.
-- Koristite `--bitwidth` eksplicitno kada je izraz potekao iz maskirane aritmetike ili registara male širine.
-- Ako vam je potreban jači proof korak, proverite lokalne Z3 beleške ovde:
+- Preporučuje se pokretanje alata CoBRA nad **lifted IR izrazima** ili izlazom decompiler-a nakon izolovanja tačnog izračunavanja.
+- Koristite `--bitwidth` eksplicitno kada je izraz potekao iz maskirane aritmetike ili registara manje širine.
+- Ako vam je potreban snažniji korak dokazivanja, pogledajte lokalne Z3 beleške ovde:
 
 
 {{#ref}}
 satisfiability-modulo-theories-smt-z3.md
 {{#endref}}
 
-- CoBRA se takođe isporučuje kao **LLVM pass plugin** (`libCobraPass.so`), što je korisno kada želite da normalizujete MBA-heavy LLVM IR pre kasnijih analysis pass-ova.
-- Nepodržane carry-sensitive mixed-domain rezidue treba tretirati kao signal da zadržite originalni izraz i ručno analizirate carry path.
+- CoBRA se takođe isporučuje kao **LLVM pass plugin** (`libCobraPass.so`), što je korisno kada želite da normalizujete LLVM IR sa mnogo MBA izraza pre kasnijih pass-ova za analizu.
+- Nepodržane mešovite rezidue osetljive na carry treba posmatrati kao signal da zadržite originalni izraz i ručno analizirate putanju carry-ja.
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
-Ovaj obfuscator zamenjuje programske operacije sekvencama instrukcija zasnovanim na `mov` i koristi signal/exception handling za izmenu control flow-a. Detalji:
+Ovaj obfuscator zamenjuje operacije programa sekvencama instrukcija zasnovanim na `mov` instrukciji i koristi signal/exception handling za izmenu toka kontrole. Za detalje:
 
 - [https://www.youtube.com/watch?v=2VF_wPkiBJY](https://www.youtube.com/watch?v=2VF_wPkiBJY)
 - [https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf)
 
-Za podržane binarne fajlove, [demovfuscator](https://github.com/kirschju/demovfuscator) može da deobfuscate-uje rezultat. Ima nekoliko dependencies.
+Za podržane binarne datoteke, [demovfuscator](https://github.com/kirschju/demovfuscator) može da deobfuscate-uje rezultat. Ima nekoliko dependencies.
 ```
 apt-get install libcapstone-dev
 apt-get install libz3-dev
 ```
 I [instalirajte keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md) (`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`)
 
-Ako radite **CTF, ovaj workaround za pronalaženje flag-a** može biti veoma koristan: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
+Ako radite **CTF, ovo zaobilaženje za pronalaženje flag-a** može biti veoma korisno: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
 
 ## Rust
 
 Da biste pronašli **entry point**, pretražite funkcije pomoću `::main`, kao u primeru:
 
-![Pronalaženje Rust entry point-a u Ghidri pretraživanjem naziva funkcija za main sa dvostrukom dvotačkom](<../../images/image (1080).png>)
+![Pronalaženje Rust entry point-a u Ghidra-i pretraživanjem naziva funkcija pomoću main-a sa dvostrukom dvotačkom](<../../images/image (1080).png>)
 
-U ovom slučaju binary se zvao authenticator, pa je prilično očigledno da je to zanimljiva main funkcija.\
-Kada znate **nazive** pozvanih **funkcija**, pretražite ih na **Internetu** da biste saznali više o njihovim **ulazima** i **izlazima**.
+U ovom slučaju binary se zvao authenticator, tako da je prilično očigledno da je ovo zanimljiva main funkcija.\
+Na osnovu **naziva** pozvanih **funkcija**, pretražite ih na **Internetu** da biste saznali više o njihovim **inputima** i **outputima**.
 
-### Rekonstrukcija Rust stringova iz ELF firmware-a
+### Oporavak Rust stringova iz ELF firmware-a
 
-U **Rust ELF** binary-jima, mnogi statički stringovi nisu referencirani kao C-style pokazivači završeni sa NUL znakom. Uobičajeni `rustc` raspored je **tuple pokazivača/dužine** unutar **`.data.rel.ro`**, koji pokazuje na stvarni blob stringa smešten u **`.rodata`**:
+U **Rust ELF** binarnim fajlovima, mnogi statički stringovi nisu referencirani kao C-style pokazivači završeni NUL karakterom. Uobičajen `rustc` raspored je **tuple pokazivača/dužine** unutar **`.data.rel.ro`**, koji pokazuje na stvarni blob stringa smešten u **`.rodata`**:
 ```text
 [8-byte little-endian pointer][8-byte little-endian length]
 ```
-To znači da `strings` ili podrazumevana Ghidra analiza mogu spojiti susedne stringove ili u potpunosti propustiti unakrsne reference.<sup>[[3]](#references)</sup>
+To znači da `strings` ili podrazumevana Ghidra analiza mogu spojiti susedne stringove ili potpuno propustiti unakrsne reference.<sup>[[3]](#references)</sup>
 
 Brzi tok rada:
 ```bash
 readelf -S <bin>
 objdump -h <bin>
 ```
-1. Dobijte virtuelnu adresu i veličinu **`.rodata`**.
-2. Nabrojte **`.data.rel.ro`** jednu reč po jednu.
-3. Tretirajte svaku vrednost unutar opsega adresa **`.rodata`** kao kandidata za pokazivač na string.
+1. Pronađite virtuelnu adresu i veličinu sekcije **`.rodata`**.
+2. Nabrojte **`.data.rel.ro`** reč po reč.
+3. Tretirajte svaku vrednost unutar opsega adresa sekcije `.rodata` kao kandidata za pokazivač na string.
 4. Tretirajte sledeću reč kao kandidatsku dužinu.
-5. Primenite sanity filtere (na primer, zadržite dužine između **4** i **100** bajtova).
-6. Pročitajte tačno `length` bajtova iz **`.rodata`** umesto skeniranja do `0x00`.
+5. Primeni sanity filtere (na primer, zadržite dužine između **4** i **100** bajtova).
+6. Pročitajte tačno `length` bajtova iz sekcije `.rodata` umesto skeniranja do `0x00`.
 
 Minimalna logika ekstraktora:
 ```python
@@ -350,19 +389,19 @@ if rodata_start <= ptr < rodata_end and 4 <= length <= 100:
 start = ptr - rodata_start
 print(rodata[start:start+length])
 ```
-Ovo je posebno korisno pri reverse engineeringu firmware-a, jer pronađeni Rust stringovi često otkrivaju **HTTP rute, RPC nazive, log poruke, assertions, nazive fajlova, config ključeve, command handlers i logiku povezanu sa autentikacijom**.
+Ovo je naročito korisno pri reverse engineeringu firmware-a, jer pronađeni Rust stringovi često otkrivaju **HTTP rute, RPC imena, poruke dnevnika, assertions, imena fajlova, config ključeve, command handlers i logiku povezanu sa autentikacijom**.
 
-Ako Ghidra ne pronađe te stringove, pokrenite custom script/plugin koji primenjuje istu heuristiku i kreira string podatke na referenciranim `.rodata` offsetima. Objavljeni alati `rust-strings` i `RustStrings.py` kompanije Pen Test Partners predstavljaju dobre reference za prilagođavanje ove ideje drugim **veličinama reči, endianness-u i rasporedima sekcija**.<sup>[[4]](#references)</sup><sup>[[5]](#references)</sup>
+Ako Ghidra ne pronađe te stringove, pokrenite prilagođeni script/plugin koji primenjuje istu heuristiku i kreira string podatke na referenciranim `.rodata` offsetima. Objavljeni alati `rust-strings` i `RustStrings.py` kompanije Pen Test Partners predstavljaju dobre reference za prilagođavanje ove ideje drugim **veličinama reči, endianness-u i rasporedima sekcija**.<sup>[[4]](#references)</sup><sup>[[5]](#references)</sup>
 
 ## **Delphi**
 
-Za Delphi kompajlirane binarne fajlove možete koristiti [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
+Za Delphi kompajlovane binarne fajlove možete koristiti [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
 
 Ako morate da radite reverse engineering Delphi binarnog fajla, predlažem da koristite IDA plugin [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
 
 Pritisnite **Alt+F7** u IDA-i da učitate Python plugin, a zatim izaberite fajl plugina.
 
-Ovaj plugin će izvršiti binarni fajl i dinamički razrešiti nazive funkcija na početku debugging-a. Nakon pokretanja debugging-a ponovo pritisnite dugme Start (zeleno dugme ili f9) i breakpoint će se aktivirati na početku pravog koda.
+Ovaj plugin će izvršiti binarni fajl i dinamički razrešiti imena funkcija na početku debugging-a. Nakon pokretanja debugging-a ponovo pritisnite dugme Start (zeleno dugme ili f9) i breakpoint će se aktivirati na početku stvarnog koda.
 
 Ako pritisnete dugme u grafičkoj aplikaciji, debugger može da se zaustavi u funkciji koju je to dugme pozvalo.
 
@@ -372,11 +411,11 @@ Ako morate da radite reverse engineering Golang binarnog fajla, predlažem da ko
 
 Pritisnite **Alt+F7** u IDA-i da učitate Python plugin, a zatim izaberite fajl plugina.
 
-Ovo će razrešiti nazive funkcija.
+Ovo će razrešiti imena funkcija.
 
-## Kompajlirani Python
+## Compiled Python
 
-Na ovoj stranici možete pronaći kako da dobijete Python kod iz ELF/EXE Python kompajliranog binarnog fajla:
+Na ovoj stranici možete pronaći kako da dobijete Python kod iz ELF/EXE Python kompajlovanog binarnog fajla:
 
 
 {{#ref}}
@@ -392,9 +431,9 @@ Ako dobijete **binary** GBA igre, možete koristiti različite alate za njenu **
 - [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Ghidra plugin
 - [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Ghidra plugin
 
-U [**no$gba**](https://problemkaputt.de/gba.htm), u _**Options --> Emulation Setup --> Controls**_** ** možete videti kako se pritiskaju **dugmad** na Game Boy Advance-u
+U [**no$gba**](https://problemkaputt.de/gba.htm), u _**Options --> Emulation Setup --> Controls**_** ** možete videti kako da pritisnete **dugmad** Game Boy Advance-a
 
-![konfiguracija no$gba kontrola koja prikazuje mapiranja dugmadi na Game Boy Advance-u](<../../images/image (581).png>)
+![no$gba konfiguracija kontrola koja prikazuje mapiranja dugmadi Game Boy Advance-a](<../../images/image (581).png>)
 
 Kada se pritisne, svaki **taster ima vrednost** koja ga identifikuje:
 ```
@@ -409,9 +448,9 @@ DOWN = 128
 R = 256
 L = 256
 ```
-Dakle, kod ove vrste programa, zanimljiv deo će biti **kako program obrađuje korisnički unos**. Na adresi **0x4000130** pronaći ćete često korišćenu funkciju: **KEYINPUT**.
+Dakle, u ovoj vrsti programa, zanimljiv deo će biti **način na koji program obrađuje korisnički unos**. Na adresi **0x4000130** pronaći ćete često korišćenu funkciju: **KEYINPUT**.
 
-![Ghidra prikaz GBA binarne datoteke koja referencira KEYINPUT na adresi 0x4000130](<../../images/image (447).png>)
+![Ghidra prikaz GBA binary-ja koji upućuje na KEYINPUT na adresi 0x4000130](<../../images/image (447).png>)
 
 Na prethodnoj slici možete videti da se funkcija poziva iz **FUN_080015a8** (adrese: _0x080015fa_ i _0x080017ac_).
 
@@ -448,7 +487,7 @@ uVar2 = DAT_030004dc;
 uVar1 = *puVar6;
 if ((uVar1 & DAT_030004da & ~uVar4) != 0) {
 ```
-Poslednji `if` proverava da li se **`uVar4`** nalazi u **poslednjem Keys** i da nije trenutni taster; to se takođe naziva otpuštanjem dugmeta (trenutni taster se čuva u **`uVar1`**).
+Poslednji if proverava da li se **`uVar4`** nalazi u poslednjem Keys i da nije trenutni taster; to se takođe naziva otpuštanjem dugmeta (trenutni taster se čuva u **`uVar1`**).
 ```c
 if (uVar1 == 4) {
 DAT_030000d4 = 0;
@@ -476,17 +515,17 @@ FUN_08000864();
 if (uVar1 == 0x10) {
 DAT_030000d8 = DAT_030000d8 + 0x3a;
 ```
-U prethodnom kodu možete videti da poredimo **uVar1** (mesto gde se nalazi **vrednost pritisnutog dugmeta**) sa određenim vrednostima:
+U prethodnom kodu možete videti da poredimo **uVar1** (mesto na kojem se nalazi **vrednost pritisnutog dugmeta**) sa nekim vrednostima:
 
-- Prvo se poredi sa **vrednošću 4** (dugme **SELECT**): u challenge-u ovo dugme briše ekran
-- Zatim se vrednost poredi sa **8** (dugme **START**); u ovom challenge-u ta putanja proverava da li je uneti kod validan.
-- U ovom slučaju, var **`DAT_030000d8`** se poredi sa 0xf3 i ako je vrednost ista, izvršava se određeni kod.
+- Prvo se poredi sa **vrednošću 4** (dugme **SELECT**): u ovom izazovu ovo dugme briše ekran
+- Zatim se vrednost poredi sa **8** (dugme **START**); u ovom izazovu ta putanja proverava da li je uneti kod validan.
+- U ovom slučaju, varijabla **`DAT_030000d8`** se poredi sa 0xf3 i, ako je vrednost ista, izvršava se određeni kod.
 - U svim ostalim slučajevima proverava se i uvećava brojač (`DAT_030000d4`).\
-Dok je brojač manji od 8, vrednosti pritisnutih tastera se akumuliraju u `DAT_030000d8`.
+Dok je brojač manji od 8, vrednosti pritisnutih tastera akumuliraju se u `DAT_030000d8`.
 
-Dakle, u ovom challenge-u, znajući vrednosti dugmadi, trebalo je da **pritisnete kombinaciju dužine manje od 8 čiji je zbir 0xf3.**
+Dakle, u ovom izazovu, znajući vrednosti dugmadi, trebalo je da **pritisnete kombinaciju kraću od 8 čiji je zbir 0xf3.**
 
-**Referenca za ovaj tutorijal:** [archived Nostalgia challenge writeup](https://web.archive.org/web/20220328215728/https://exp.codes/Nostalgia/).<sup>[[6]](#references)</sup>
+**Referenca za ovaj tutorijal:** [arhivirani writeup Nostalgia izazova](https://web.archive.org/web/20220328215728/https://exp.codes/Nostalgia/).<sup>[[6]](#references)</sup>
 
 ## Game Boy
 
@@ -502,10 +541,11 @@ https://www.youtube.com/watch?v=VVbRe7wr3G4
 
 ## References
 
-- [1] [Pojednostavljivanje MBA obfuscation-a pomoću CoBRA](https://blog.trailofbits.com/2026/04/03/simplifying-mba-obfuscation-with-cobra/)
+- [1] [Pojednostavljivanje MBA obfuscation pomoću CoBRA](https://blog.trailofbits.com/2026/04/03/simplifying-mba-obfuscation-with-cobra/)
 - [2] [CoBRA repository kompanije Trail of Bits](https://github.com/trailofbits/CoBRA)
 - [3] [Dekodiranje Rust stringova - Pen Test Partners](https://www.pentestpartners.com/security-blog/decoding-rust-strings/)
 - [4] [pentestpartners/reverse-engineering - rust-strings](https://github.com/pentestpartners/reverse-engineering/blob/main/rust-strings)
 - [5] [pentestpartners/reverse-engineering - RustStrings.py](https://github.com/pentestpartners/reverse-engineering/blob/main/RustStrings.py)
-- [6] [Nostalgia - GBA reversing tutorijal (arhivirano)](https://web.archive.org/web/20220328215728/https://exp.codes/Nostalgia/)
+- [6] [Nostalgia - GBA reversing tutorijal (arhiviran)](https://web.archive.org/web/20220328215728/https://exp.codes/Nostalgia/)
+- [7] [Pobijanje AI-assisted reverse engineeringa ili barem pokušaj](http://blog.quarkslab.com/defeating-ai-assisted-reverse-engineering-or-at-least-trying-to.html)
 {{#include ../../banners/hacktricks-training.md}}
