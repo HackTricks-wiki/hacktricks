@@ -44,6 +44,12 @@ There are different things in Windows that could **prevent you from enumerating 
 ../authentication-credentials-uac-and-efs/
 {{#endref}}
 
+Physical access can also turn an offline UEFI NVRAM edit into pre-boot DMA and a Windows `SYSTEM` memory-patching chain:
+
+{{#ref}}
+../../hardware-physical-access/firmware-analysis/uefi-ifr-nvram-security-setting-patching.md
+{{#endref}}
+
 ### Admin Protection / UIAccess silent elevation
 
 UIAccess processes launched through `RAiLaunchAdminProcess` can be abused to reach High IL without prompts when AppInfo secure-path checks are bypassed. Check the dedicated UIAccess/Admin Protection bypass workflow here:
