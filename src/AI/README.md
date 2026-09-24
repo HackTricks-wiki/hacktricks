@@ -4,7 +4,7 @@
 
 ## मुख्य Machine Learning Algorithms
 
-AI के बारे में सीखने की सबसे अच्छी शुरुआत यह समझना है कि मुख्य machine learning algorithms कैसे काम करते हैं। इससे आपको यह समझने में मदद मिलेगी कि AI कैसे काम करता है, इसका उपयोग कैसे करना है और इस पर हमला कैसे करना है:
+AI के बारे में सीखने की सबसे अच्छी शुरुआत यह समझना है कि मुख्य machine learning algorithms कैसे काम करते हैं। इससे आपको यह समझने में मदद मिलेगी कि AI कैसे काम करता है, इसका उपयोग कैसे करना है और इस पर attack कैसे करना है:
 
 
 {{#ref}}
@@ -28,7 +28,7 @@ AI के बारे में सीखने की सबसे अच्�
 
 ### LLMs Architecture
 
-अगले पेज पर आपको transformers का उपयोग करके एक basic LLM बनाने के लिए प्रत्येक component की basics मिलेंगी:
+निम्नलिखित page पर आपको transformers का उपयोग करके basic LLM बनाने के लिए प्रत्येक component की मूल बातें मिलेंगी:
 
 
 {{#ref}}
@@ -39,7 +39,7 @@ AI-llm-architecture/README.md
 
 ### AI Risk Frameworks
 
-AI-system risk का आकलन करने के लिए दो उपयोगी शुरुआती frameworks OWASP Machine Learning Security Top 10 और Google's Secure AI Framework (SAIF) हैं। ये एक-दूसरे के पूरक हैं, न कि AI risk frameworks की exhaustive list।<sup>[[1]](#references)[[2]](#references)</sup>
+AI-system risk का आकलन करने के लिए दो उपयोगी शुरुआती frameworks हैं: OWASP Machine Learning Security Top 10 और Google का Secure AI Framework (SAIF)। ये एक-दूसरे के पूरक हैं, न कि AI risk frameworks की पूरी सूची।<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 {{#ref}}
@@ -48,7 +48,7 @@ AI-Risk-Frameworks.md
 
 ### AI Prompts Security
 
-पिछले वर्षों में LLMs ने AI के उपयोग को बहुत बढ़ा दिया है, लेकिन वे perfect नहीं हैं और adversarial prompts से trick किए जा सकते हैं। AI का सुरक्षित रूप से उपयोग करने और उस पर हमला करने का तरीका समझने के लिए यह एक बहुत महत्वपूर्ण विषय है:
+LLMs ने पिछले कुछ वर्षों में AI के उपयोग को बहुत बढ़ा दिया है, लेकिन वे perfect नहीं हैं और adversarial prompts से trick किए जा सकते हैं। AI का सुरक्षित रूप से उपयोग करने और इस पर attack करने का तरीका समझने के लिए यह एक बहुत महत्वपूर्ण topic है:
 
 
 {{#ref}}
@@ -57,7 +57,7 @@ AI-Prompts.md
 
 ### AI Models RCE
 
-Developers और companies के लिए Internet से downloaded models चलाना बहुत common है, हालांकि केवल model load करना ही system पर arbitrary code execute करने के लिए पर्याप्त हो सकता है। AI का सुरक्षित रूप से उपयोग करने और उस पर हमला करने का तरीका समझने के लिए यह एक बहुत महत्वपूर्ण विषय है:
+Developers और companies द्वारा Internet से download किए गए models को run करना बहुत common है, लेकिन केवल model load करना ही system पर arbitrary code execute करने के लिए पर्याप्त हो सकता है। AI का सुरक्षित रूप से उपयोग करने और इस पर attack करने का तरीका समझने के लिए यह एक बहुत महत्वपूर्ण topic है:
 
 
 {{#ref}}
@@ -89,9 +89,13 @@ AI-MCP-Servers.md
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
+### AI-Assisted Reverse Engineering
+
+[Partial lifting, invariant MBA detection, environment-bound decoding, और automated-extractor validation](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
+
 ### Web Black-Box AI Pentester Bots
 
-LLM-powered agents लंबे समय तक चलने वाले black-box web pentesting workflows को automate कर सकते हैं, जब उन्हें observability, orchestration, authenticated session handling और adversarial validation का support प्राप्त हो:
+LLM-powered agents observability, orchestration, authenticated session handling और adversarial validation द्वारा supported होने पर लंबे समय तक चलने वाले black-box web pentesting workflows को automate कर सकते हैं:
 
 
 {{#ref}}
