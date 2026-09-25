@@ -184,12 +184,6 @@
     })
   }
 
-  function isWifiPentestingPage() {
-    return /(?:^|\/)generic-methodologies-and-resources\/pentesting-wifi(?:\/|$)/i.test(
-      window.location.pathname
-    )
-  }
-
   async function fetchLegacySponsor() {
     var currentUrl = encodeURIComponent(window.location.href)
     var url = "https://hacktricks.wiki/sponsor?current_url=" + currentUrl
@@ -271,18 +265,8 @@
 
     try {
       var useBsa = shouldUseBsa()
-      var useWifiSponsor = isWifiPentestingPage()
-      if (useWifiSponsor) {
-        window.__hacktricksAdsProvider = "legacy-wifi"
-      } else {
-        window.__hacktricksAdsProvider = useBsa ? "bsa" : "legacy"
-      }
+      window.__hacktricksAdsProvider = useBsa ? "bsa" : "legacy"
       console.info("HackTricks ads provider:", window.__hacktricksAdsProvider)
-
-      if (useWifiSponsor) {
-        await loadLegacySponsor()
-        return
-      }
 
       if (useBsa) {
         await loadBsaSponsor()
