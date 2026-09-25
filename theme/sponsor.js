@@ -47,15 +47,6 @@
     brokenId: "bsa-zone_1773065859037-5_123456",
     actualId: "bsa-zone_1770367111944-8_123456",
   }
-  var WIFI_PENTESTING_SPONSOR = {
-    cta: "Get certified!",
-    description:
-      "Learn the fundamentals of Wi-Fi security, audit networks, perform common attacks, and protect against them. Earn your Certified WiFiChallenge Professional (CWP) certification.",
-    image_url: "/images/wifichallenge-academy.png",
-    link: "http://wifchall.com/hacktricks",
-    name: "Certified WiFiChallenge Professional (CWP)",
-    slug: "wifichallenge",
-  }
   var bsaScriptPromise
 
   function getBsaScriptSrc() {
@@ -240,9 +231,7 @@
   }
 
   async function loadLegacySponsor() {
-    var sponsor = isWifiPentestingPage()
-      ? WIFI_PENTESTING_SPONSOR
-      : await fetchLegacySponsor()
+    var sponsor = await fetchLegacySponsor()
     renderLegacySideSponsor(sponsor)
     renderLegacyTopSponsor(sponsor)
     renderLegacyBottomSponsor(sponsor)
@@ -284,7 +273,7 @@
       var useBsa = shouldUseBsa()
       var useWifiSponsor = isWifiPentestingPage()
       if (useWifiSponsor) {
-        window.__hacktricksAdsProvider = "wifichallenge"
+        window.__hacktricksAdsProvider = "legacy-wifi"
       } else {
         window.__hacktricksAdsProvider = useBsa ? "bsa" : "legacy"
       }
