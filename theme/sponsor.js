@@ -48,6 +48,7 @@
     actualId: "bsa-zone_1770367111944-8_123456",
   }
   var bsaScriptPromise
+  var legacySponsorPromise
 
   function getBsaScriptSrc() {
     return BSA_SCRIPT_BASE + "?" + (new Date() - (new Date() % 600000))
@@ -184,17 +185,26 @@
     })
   }
 
-  async function fetchLegacySponsor() {
-    var currentUrl = encodeURIComponent(window.location.href)
-    var url = "https://hacktricks.wiki/sponsor?current_url=" + currentUrl
-    var response = await fetch(url, { method: "GET" })
-
-    if (!response.ok) {
-      throw new Error("Response status: " + response.status)
+  function fetchLegacySponsor() {
+    if (legacySponsorPromise) {
+      return legacySponsorPromise
     }
 
-    var json = await response.json()
-    return json.sponsor
+    var currentUrl = encodeURIComponent(window.location.href)
+    var url = "https://hacktricks.wiki/sponsor?current_url=" + currentUrl
+    legacySponsorPromise = fetch(url, { method: "GET" })
+      .then(function(response) {
+        if (!response.ok) {
+          throw new Error("Response status: " + response.status)
+        }
+
+        return response.json()
+      })
+      .then(function(json) {
+        return json.sponsor
+      })
+
+    return legacySponsorPromise
   }
 
   function renderLegacySideSponsor(sponsor) {
