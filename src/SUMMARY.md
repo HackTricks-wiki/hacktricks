@@ -249,6 +249,7 @@
         - [UTS Namespace](linux-hardening/containers-namespaces/container-security/protections/namespaces/uts-namespace.md)
 - [Post-Exploitation]()
   - [Linux Post-Exploitation](linux-hardening/post-exploitation/linux-post-exploitation/README.md)
+    - [Linux Fileless Execution](linux-hardening/post-exploitation/linux-post-exploitation/linux-fileless-execution.md)
     - [Trojanized System Daemons and Reverse Proxies](linux-hardening/post-exploitation/linux-post-exploitation/trojanized-system-daemons-and-reverse-proxies.md)
 
 # 🍏 MacOS Hardening
