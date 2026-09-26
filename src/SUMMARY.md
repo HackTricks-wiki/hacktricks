@@ -1038,6 +1038,7 @@
   - [Ai Assisted Fuzzing And Vulnerability Discovery](AI/AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md)
   - [Web Black-Box AI Pentester Bots](AI/Web-Black-Box-AI-Pentester-Bots.md)
   - [AI Security Methodology](AI/AI-Deep-Learning.md)
+  - [Mechanistic-Interpretability-Guided Adversarial Attacks](AI/AI-Mechanistic-Interpretability-Adversarial-Attacks.md)
   - [Burp MCP: LLM-assisted traffic review](AI/AI-Burp-MCP.md)
   - [AI MCP Security](AI/AI-MCP-Servers.md)
   - [AI Model Data Preparation](AI/AI-Model-Data-Preparation-and-Evaluation.md)
