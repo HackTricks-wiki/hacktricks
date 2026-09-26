@@ -604,6 +604,10 @@ As described in [**this blog post**](https://trustedsec.com/blog/abusing-chrome-
 
 ## Advanced Evasion
 
+{{#ref}}
+virtualized-payload-execution.md
+{{#endref}}
+
 Evasion is a very complicated topic, sometimes you have to take into account many different sources of telemetry in just one system, so it's pretty much impossible to stay completely undetected in mature environments.
 
 Every environment you go against will have their own strengths and weaknesses.

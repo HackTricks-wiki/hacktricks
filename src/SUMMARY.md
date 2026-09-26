@@ -454,6 +454,7 @@
 - [Basic PowerShell for Pentesters](windows-hardening/basic-powershell-for-pentesters/README.md)
   - [PowerView/SharpView](windows-hardening/basic-powershell-for-pentesters/powerview.md)
 - [Antivirus (AV) Bypass](windows-hardening/av-bypass.md)
+  - [Virtualized Payload Execution and Custom VM Evasion](windows-hardening/virtualized-payload-execution.md)
 - [Cobalt Strike](windows-hardening/cobalt-strike.md)
 - [Mythic](windows-hardening/mythic.md)
 - [Protocol Handler Shell Execute Abuse](windows-hardening/protocol-handler-shell-execute-abuse.md)

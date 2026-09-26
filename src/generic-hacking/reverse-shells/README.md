@@ -8,6 +8,12 @@
 
 ## [Shells - Windows](windows.md)
 
+## Virtualized Windows payload execution
+
+{{#ref}}
+../../windows-hardening/virtualized-payload-execution.md
+{{#endref}}
+
 ---
 
 ## [MSFVenom - CheatSheet](msfvenom.md)
