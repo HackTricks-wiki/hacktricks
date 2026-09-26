@@ -70,6 +70,48 @@ If you develop your own tools, there will be no known bad signatures, but this t
 
 I highly recommend you check out this [YouTube playlist](https://www.youtube.com/playlist?list=PLj05gPj8rk_pkb12mDe4PgYZ5qPxhGKGf) about practical AV Evasion.
 
+### LLM-guided adversarial-oracle loop
+
+Static evasion can be treated as a controlled optimization problem: a scanner supplies the objective result, while an LLM or other automation proposes one source/build change per iteration. First separate **named/fixed-pattern detections** (strings or byte/YARA-like rules) from **statistical/ML detections** (`Wacatac.B!ml`, `ML.Attribute.HighConfidence`, etc.); renaming a token may fix the former but is unlikely to move a classifier whose feature vector includes imports, section layout, entropy, signing metadata and symbol distributions.<sup>[[41]](#references)[[42]](#references)</sup>
+
+A reproducible experiment loop is:<sup>[[41]](#references)[[42]](#references)</sup>
+
+1. Build a labeled corpus from the same source tree (typically 20–40 binaries) and record **per-engine**, not only aggregate, results.
+2. For persistent named detections, compare detected and clean samples using strings/tokens, import sets, section names, signing fields and byte ranges. Rank candidates by prevalence or lift (for example, present in most detected samples but few clean ones).
+3. For ML results, compare the complete PE structure with a vanilla binary produced by the same compiler/toolchain. Concentrate on compound deviations instead of assuming that one suspicious string controls the result.
+4. Change **one variable only**, then build at least 10 control and 10 variant samples in parallel. Upload both arms in the same window so daily model/signature drift is not mistaken for an improvement.
+5. Stop at a defined threshold (for example, fewer than 25% detections) only when the targeted engine improves **and** the payload passes an independent behavioral-equivalence test. A clean-rate goal alone is unsafe because an agent can achieve it by deleting the functionality being tested.
+
+The [`reduce-golang-detections-skill`](https://github.com/praetorian-inc/reduce-golang-detections-skill) bundles a PE structural analyzer for this loop. It extracts sections, imports/exports, resources, entropy, Authenticode and Go-specific metadata, then compares a sample corpus with a clean compiler baseline.<sup>[[41]](#references)</sup>
+
+```bash
+python3 -m venv .venv && . .venv/bin/activate
+pip install pefile lief
+
+# The analyzer and references/ directory are supplied by the skill repository
+python3 pe_structural_analyzer.py ./samples/ \
+  --baseline ./vanilla-go.exe \
+  --detections ./detections.json
+```
+
+#### Go `gopclntab` ghost profiles
+
+Go binaries retain a function-name table used by runtime operations such as stack traces and reflection. Consequently, `-trimpath -ldflags="-s -w"` may leave recognizable package/function strings while also removing expected build information; public obfuscators can likewise acquire their own signatures. Inspect the actual executable rather than assuming stripping removed its Go identity:<sup>[[42]](#references)</sup>
+
+```bash
+go tool objdump reference.exe | awk '$1 == "TEXT" {print $2}' > reference-symbols.txt
+go tool objdump payload.exe   | awk '$1 == "TEXT" {print $2}' > payload-symbols.txt
+```
+
+A **ghost profile** preserves the Go toolchain fingerprint but changes the distribution in `gopclntab`: extract non-standard-library `TEXT` symbols from one large legitimate Go project, serialize the package/function/method profile, and reproduce it with generated packages, renamed functions and harmless typed-method stubs. Prefer one internally coherent, method-dense project over arbitrary padding or a mixture of unrelated projects. In the reported tests, larger coherent profiles reduced ML detections, whereas fully stripping names, faking an MSVC linker/Rich header, or deleting `.symtab` introduced contradictions and increased detections.<sup>[[42]](#references)</sup>
+
+#### Correlating signing and build metadata
+
+Treat Authenticode fields and signer-tool arguments as a joint fingerprint. Split otherwise comparable builds into signed/unsigned or metadata variants, find byte-identical values present in every detected member, and mutate only that candidate combination using plausible per-build alternatives. Validate the result with a fresh same-window control batch; do not simultaneously change the subject, issuer, product URL, sections and imports because the causal trigger would be lost.<sup>[[42]](#references)</sup>
+
+> [!WARNING]
+> VirusTotal submissions are distributed to security vendors. Use synthetic infrastructure, customer names and target identifiers, and assume every uploaded binary is burned. VirusTotal is a measurement oracle rather than endpoint ground truth: cloud and local engines can disagree. This workflow only reduces static pressure; immutable behavioral indicators (for example, a fixed COM GUID or the runtime use of a vulnerable signed driver) require a behavioral test environment and cannot be hidden by reshaping the file.<sup>[[42]](#references)</sup>
+
 ### **Dynamic analysis**
 
 Dynamic analysis is when the AV runs your binary in a sandbox and watches for malicious activity (e.g. trying to decrypt and read your browser's passwords, performing a minidump on LSASS, etc.). This part can be a bit trickier to work with, but here are some things you can do to evade sandboxes.
@@ -1466,5 +1508,7 @@ Sleep(exec_delay_seconds * 1000); // config-controlled delay to outlive sandboxe
 - [38] [MDSec Function Peekaboo companion code](https://github.com/mdsecactivebreach/functionpeekaboo)
 - [39] [MDSec - Function Peekaboo: Crafting Self-Masking Functions Using LLVM](https://mdsec.co.uk/2025/10/function-peekaboo-crafting-self-masking-functions-using-llvm/)
 - [40] [Microsoft Learn - VirtualProtect](https://learn.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualprotect)
+- [41] [Praetorian — reduce-golang-detections-skill](https://github.com/praetorian-inc/reduce-golang-detections-skill)
+- [42] [Praetorian — Adversarial Oracles: LLM-Guided EDR Signature Reduction](https://praetorian.com/blog/llm-edr-signature-reduction)
 
 {{#include ../banners/hacktricks-training.md}}
