@@ -12,6 +12,7 @@ Windows supports several mechanisms that can be used to execute commands on remo
 - [**DCOM Exec**](dcomexec.md)
 - [**RDPexec**](rdpexec.md)
 - [**SCMexec**](scmexec.md)
+- [**WSUS external database relay and update injection**](wsus-external-database-relay-update-injection.md)
 - **Pass the cookie** (cloud)<sup>[[1]](#references)</sup>
 - **Pass the PRT** (cloud)<sup>[[2]](#references)</sup>
 - **Pass the Microsoft Entra ID certificate** (cloud)<sup>[[3]](#references)</sup>
