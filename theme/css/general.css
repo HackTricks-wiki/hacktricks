@@ -281,12 +281,47 @@ table tbody tr:nth-child(2n) {
 
 
 blockquote {
-    margin: 20px 0;
-    padding: 0 20px;
+    position: relative;
+    box-sizing: border-box;
+    max-width: 720px;
+    margin: 32px auto;
+    padding: 42px clamp(24px, 6vw, 52px) 26px;
     color: var(--fg);
     background-color: var(--quote-bg);
-    border-block-start: .1em solid var(--quote-border);
-    border-block-end: .1em solid var(--quote-border);
+    border: 1px solid var(--quote-border);
+    border-radius: 16px;
+    box-shadow: 0 14px 34px var(--admonition-shadow);
+    font-family: Georgia, Cambria, "Times New Roman", Times, serif;
+    font-size: 1.08em;
+    font-style: italic;
+    line-height: 1.8;
+    text-align: center;
+}
+
+blockquote::before {
+    content: "\201C";
+    position: absolute;
+    top: 4px;
+    left: 50%;
+    color: var(--particle-color);
+    font-family: Georgia, Cambria, "Times New Roman", Times, serif;
+    font-size: 4.8rem;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 1;
+    transform: translateX(-50%);
+}
+
+.content blockquote p {
+    line-height: inherit;
+}
+
+blockquote > :first-child {
+    margin-top: 0;
+}
+
+blockquote > :last-child {
+    margin-bottom: 0;
 }
 
 .admonition,
@@ -322,6 +357,11 @@ blockquote.danger {
     border-block-end: none;
     border-radius: 12px;
     box-shadow: 0 12px 28px var(--admonition-shadow), inset 4px 0 0 var(--admonition-accent);
+    font-family: var(--body-font);
+    font-size: 1em;
+    font-style: normal;
+    line-height: inherit;
+    text-align: start;
 }
 
 .blockquote-tag {
