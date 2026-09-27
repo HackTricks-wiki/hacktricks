@@ -5,6 +5,8 @@ const vm = require("node:vm")
 
 const root = path.join(__dirname, "..")
 const sponsorSource = fs.readFileSync(path.join(root, "theme/sponsor.js"), "utf8")
+const translationWorkflow = fs.readFileSync(path.join(root, ".github/workflows/translate_all.yml"), "utf8")
+assert.ok(translationWorkflow.includes("cp /tmp/immutable-images/* ./book/images/"))
 const imageResolver = sponsorSource.match(/  function resolveSponsorImageUrl\(imageUrl\) \{[\s\S]*?\n  \}\n/)
 assert.ok(imageResolver, "sponsor image resolver must exist")
 const resolve = vm.runInNewContext(imageResolver[0] + "\nresolveSponsorImageUrl", {
@@ -14,6 +16,7 @@ const resolve = vm.runInNewContext(imageResolver[0] + "\nresolveSponsorImageUrl"
 })
 
 for (const name of ["lee", "azrte", "grte", "lhe", "arte"]) {
+  assert.ok(translationWorkflow.includes(`src/images/${name}-sponsor-v1.webp`), `${name} is missing from the translation snapshot`)
   const image = path.join(root, "src/images", `${name}-sponsor-v1.webp`)
   const bytes = fs.readFileSync(image)
   assert.equal(bytes.toString("ascii", 0, 4), "RIFF")
