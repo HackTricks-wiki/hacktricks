@@ -2,171 +2,204 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Network privacy は routing の選択であり、完全な identity ではありません。経路を選ぶ際は、**source**、**destination**、**content**、**timing** のうち、誰がどれを結び付けられないようにする必要があるかを考えてください。
+Network privacy は routing の選択であり、完全な identity ではありません。誰から **source**、**destination**、**content**、**timing** への接続を不可能にしたいのかを考えて、経路を選択してください。
 
-標準化された inventory（すべての access-path family に対する `Pros`、`Cons`、step-by-step の `Procedure`、`Detection`）については、まず [Anonymous Internet Access Technique Catalog](anonymous-internet-access-techniques.md) を参照してください。このページでは、一般的に deploy 可能な選択肢を詳しく説明します。
+正規化された inventory（すべての access-path family に対する `Pros`、`Cons`、手順ごとの `Procedure`、`Detection`）については、まず [Anonymous Internet Access Technique Catalog](anonymous-internet-access-techniques.md) を確認してください。このページでは、一般的に deploy 可能な選択肢を詳しく説明します。
 
 ## 各 observer が通常確認できる情報
 
-| Path | Local network / ISP | Intermediary | Destination | Main limitation | Relative speed |
+| 経路 | Local network / ISP | Intermediary | Destination | 主な制約 | 相対速度 |
 |---|---|---|---|---|---|
-| Direct HTTPS | Source、destination の metadata、timing/volume | Hosting/CDN は connection を確認 | Source IP、browser/app data | source-IP privacy がない | 最速 |
-| Commercial VPN | VPN に接続した source、通常の destination metadata は見えない | VPN は source と destination の metadata を確認 | VPN egress IP | 1 つの provider が correlation point になる | 通常は高速 |
-| Self-hosted VPN/VPS | VPS に接続した source | Host/account/payment/control-plane logs | VPS egress IP | rented server/account に容易に attribution できる | 通常は高速 |
-| Tor Browser | Tor/bridge に接続した source、timing/volume | 各 relay は限定された一部のみ確認 | Tor exit、browser data | 遅い、account/endpoint/correlation risks | 中速/低速 |
-| Tails/Whonix | より強い routing boundaries を持つ同様の Tor path | 同じ Tor limitations | Tor exit/application data | Operational mistakes と host/hardware は残る | 中速/低速 |
-| Public guest Wi-Fi + HTTPS | Venue は local device/timing と destination を確認 | Venue の ISP は metadata を確認 | Guest public IP | 物理的な captive-portal/device correlation | 高速/変動 |
-| Cellular hotspot | Carrier は subscriber/device/location と destination を確認 | 使用時は VPN/Tor | Carrier、VPN、または Tor egress IP | Mobile subscription と location は永続的な identifier | 高速/変動 |
-| Mixnet | Access は mixnet の利用、timing/volume を確認 | 複数の mixing node | Gateway/egress | 発展途上の ecosystem、latency と bandwidth cost | 最低速 |
+| Direct HTTPS | Source、destination metadata、timing/volume | Hosting/CDN は connection を認識 | Source IP、browser/app data | source-IP privacy がない | 最速 |
+| Commercial VPN | Source が VPN に接続していること、通常の destination metadata | VPN は source と destination metadata を認識 | VPN egress IP | 1 つの provider が correlation point になる | 通常は高速 |
+| Self-hosted VPN/VPS | Source が VPS に接続していること | Host/account/payment/control-plane logs | VPS egress IP | rented server/account に容易に attribution できる | 通常は高速 |
+| Tor Browser | Source が Tor/bridge に接続していること、timing/volume | 各 relay は情報の一部だけを認識 | Tor exit、browser data | 低速、account/endpoint/correlation risks | 中速/低速 |
+| Tails/Whonix | より強い routing boundaries を持つ同様の Tor path | 同じ Tor の制約 | Tor exit/application data | Operational mistakes と host/hardware は残る | 中速/低速 |
+| Public guest Wi-Fi + HTTPS | Venue は local device/timing と destinations を認識 | Venue の ISP は metadata を認識 | Guest public IP | Physical/captive-portal/device correlation | 高速/変動 |
+| Cellular hotspot | Carrier は subscriber/device/location と destinations を認識 | 使用していれば VPN/Tor | Carrier、VPN、または Tor egress IP | Mobile subscription と location は持続的な identifier | 高速/変動 |
+| Mixnet | Access は mixnet の使用、timing/volume を認識 | 複数の mixing node | Gateway/egress | Emerging ecosystem、latency と bandwidth cost | 最低速 |
 
-HTTPS は transit 中の content を保護しますが、すべての metadata を保護するわけではありません。EFF によると、page path、credentials、messages が暗号化されていても、domain、time、traffic size は intermediary から見える場合があります。<sup>[[1]](#references)</sup>
+HTTPS は transit 中の content を保護しますが、すべての metadata を保護するわけではありません。EFF は、page paths、credentials、messages が暗号化されていても、domain、time、traffic size は intermediary から見える可能性があると説明しています。<sup>[[1]](#references)</sup>
 
-## VPN: 高速な privacy と集中した trust
+## VPNs: 集中した trust による高速な privacy
 
-VPN は、access ISP から destination metadata を隠したり、untrusted network 上の first hop を保護したり、安定した engagement egress address を提示したり、private network に到達したりする用途に有用です。ただし、VPN によって user が anonymous になるわけではありません。VPN は source connection を確認でき、destination metadata を観測できます。また、accounts、cookies、GPS、fingerprints、payment information は残ります。<sup>[[1]](#references)</sup>
+VPN は、access ISP から destination metadata を隠したり、untrusted network 上の first hop を保護したり、安定した engagement egress address を提示したり、private network に到達したりする場合に便利です。ただし、VPN は user を anonymous にするものではありません。VPN は source connection を認識し、destination metadata を観察できます。また、accounts、cookies、GPS、fingerprints、payment information は残ります。<sup>[[1]](#references)</sup>
 
-### Provider evaluation checklist
+### Provider の評価 checklist
 
-1. **Ownership and jurisdiction:** legal entity、parent company、operating countries、infrastructure subcontractors、適用される legal process を特定します。
-2. **Collected data:** account/billing、source IP、connection timestamps、bandwidth、crash telemetry、DNS queries、destination logs を区別します。“No browsing logs” は “no data” を意味しません。
-3. **Retention and deletion:** 正確な保存期間と、backups、fraud systems、processors が同じ schedule に従うかを確認します。
-4. **Evidence:** scope、date、findings、remediation が公開された audits、reproducible/open clients、transparency reports、documented incidents を優先します。
-5. **Protocol and client:** 維持管理された WireGuard、OpenVPN、またはレビュー済みの別の protocol、automatic updates、DNS と IPv6 handling、kill switch、platform ごとの leak tests を確認します。
-6. **Business model:** 無料または補助金で運営される service の資金源を理解します。App-store への掲載だけでは、trustworthy な operation の証拠になりません。
-7. **Payment fit:** alternative payment により VPN への billing disclosure は減らせますが、すべての connection で観測される source IP が消えるわけではありません。
+1. **Ownership and jurisdiction:** legal entity、parent company、operating countries、infrastructure subcontractors、適用される legal process を特定する。
+2. **Collected data:** account/billing、source IP、connection timestamps、bandwidth、crash telemetry、DNS queries、destination logs を区別する。“No browsing logs” は “no data” を意味しない。
+3. **Retention and deletion:** 正確な retention duration と、backups、fraud systems、processors が同じ schedule に従うかを確認する。
+4. **Evidence:** scope、date、findings、remediation が公開された audits、reproducible/open clients、transparency reports、documented incidents を優先する。
+5. **Protocol and client:** 維持管理された WireGuard、OpenVPN、または review 済みの別の protocol、automatic updates、DNS と IPv6 handling、kill switch、platform ごとの leak tests を確認する。
+6. **Business model:** free または subsidized service がどのように資金提供されているかを理解する。App-store の存在だけでは trustworthy operation の証拠にならない。
+7. **Payment fit:** alternative payment により VPN に対する billing disclosure を減らせる可能性はあるが、各 connection で観測される source IP が消えるわけではない。
 
 ### VPN の configure と verify
 
-1. Provider/organization の signed client を公式 source から install します。
-2. documented route を bypass する必要がない限り、**full tunnel** を選択します。Split tunneling は correlation と leak paths を作ります。
-3. fail-closed/always-on behavior を有効にし、reconnect 中の traffic を block します。
-4. DNS を tunnel 経由にし、IPv4 と IPv6 の両方を test します。安全に tunnel できない場合に限り protocol を disable し、その functionality loss を受け入れます。
-5. sleep/wake、network switching、captive-portal login、tunnel crash、hotspot tethering を test します。NCSC は、一部の platform では tethered clients が phone の VPN を bypass する可能性があると警告しています。<sup>[[2]](#references)</sup>
-6. organization-controlled test endpoint を使用して、観測された IPv4、IPv6、DNS resolver、connection timing を記録します。sensitive engagement を無作為な “leak test” sites に公開しないでください。
-7. client、OS、network、または policy を変更した後に再度 test します。
+1. Provider/organization の signed client を official source から install する。
+2. documented route が bypass する必要がない限り、**full tunnel** を選択する。Split tunneling は correlation と leak paths を作る。
+3. fail-closed/always-on behavior を有効にし、reconnect 中の traffic を block する。
+4. DNS を tunnel 経由で送信し、IPv4 と IPv6 の両方を test する。安全に tunnel できない場合に限り protocol を disable し、functionality loss を受け入れる。
+5. sleep/wake、network switching、captive-portal login、tunnel crash、hotspot tethering を test する。NCSC は、一部の platform では tethered clients が phone の VPN を bypass する可能性があると警告しています。<sup>[[2]](#references)</sup>
+6. organization-controlled test endpoint を使用して、observed IPv4、IPv6、DNS resolver、connection timing を記録する。sensitive engagement を無作為な “leak test” sites に expose しない。
+7. client、OS、network、policy を変更した後に再度 test する。
 
-## Tor Browser: より強い web unlinkability
+### Hostile-LAN routing bypasses
 
-Tor は複数の relay を通る circuit を構築するため、通常、単一の relay が source と destination の両方を知ることはありません。Destination には user の IP ではなく Tor exit が見え、local network には通常 Tor connection が見えます。<sup>[[3]](#references)</sup> Tor は low-latency TCP applications 向けに設計されているため、速度が遅く、両端を correlation できる adversary に対する protection を保証できません。<sup>[[4]](#references)</sup>
+VPN は “connected” と表示されたままでも、OS が VPN で packet を encrypt する**前**に route を選択するため、選択された packet が bypass する可能性があります。TunnelCrack は、一般的な routing exceptions を悪用する 2 つの方法を示しました。**LocalNet** は Internet destination が directly connected subnet 上にあるように見せ、一方 **ServerIP** は VPN-gateway resolution を spoof し、target address が VPN transport に必要な clear-network exception を継承するようにします。これらは WireGuard、OpenVPN、IPsec、TLS 自体の break ではなく、client/routing failures です。HTTPS payloads は end-to-end encrypted のままですが、local observer は destination/timing metadata と cleartext protocol data を復元できます。<sup>[[18]](#references)</sup>
+
+TunnelVision は、DHCP option 121 を通じて同じ pre-encryption primitive を適用します。malicious または compromised DHCP server は、VPN の catch-all route よりも specific な classless route を install し、任意の host または range に対して physical interface を選択できます。VPN control channel は稼働し続ける可能性があるため、tunnel disconnection だけで trigger される kill switch は activate せず、単一の public “IP leak” check では selective bypass を見逃す可能性があります。<sup>[[19]](#references)</sup>
+
+physical interface 上で DHCP と authenticated VPN transport のみを許可する packet-filter kill switch は、これを fail-closed behavior にできるはずです。ただし、targeted route injection は依然として selective-denial side channel を作成できます。High-consequence Linux workloads では、より強力な [route-enforced network-namespace pattern](advanced-network-privacy-architectures.md#enforce-the-route-per-workload) を優先してください。この pattern では、application namespace に physical interface も clear-network default route もありません。<sup>[[19]](#references)</sup>
+
+#### Owned-lab verification
+
+正確な client/OS/version を、owned AP、DHCP server、VPN endpoint、destination 上で test してください。routing と packet-filter implementations は platform-specific であるため、product-wide claims はすぐに古くなります。test server だけでなく endpoint 自体でも capture してください。egress-IP website だけでは、すべての destination が tunnel に従っていることを証明できません。<sup>[[18]](#references)[[19]](#references)</sup>
+
+1. VPN に接続し、VPN-server address を記録して、すべての IPv4/IPv6 routing table と policy-routing rule を保存する。Windows では `route print`、macOS では `netstat -rn`、Linux では以下の commands を使用する。
+2. 複数の owned destination IP について selected route を query する。documented VPN transport endpoint を除き、next hop/interface は tunnel でなければならない。
+3. TunnelVision では、controlled DHCP network 上で lease を renew し、**owned test destination のみに** option 121 route を install する。pass の条件は、traffic が引き続き tunneled または blocked されることであり、physical interface 上で destination traffic として送信されることではない。
+4. LocalNet では、client に `203.0.113.0/24` のような lab-only public documentation subnet を割り当て、owned test destination をその内部に配置する。LAN access を有効にしても Internet-class destinations が tunnel を bypass しないことを verify する。
+5. ServerIP では、VPN connection 前に controlled DNS が owned VPN hostname を owned test destination に resolve するようにし、lab gateway が VPN transport を実際の owned VPN endpoint に forward するようにする。client は spoofed address 宛ての無関係な application traffic を exempt してはならない。
+6. “local network access” を enabled と disabled の両方にして、reconnect、sleep/wake、network switching、VPN-process crash の後にも繰り返す。IPv4、IPv6、DNS を個別に test する。
+7. physical-interface capture を inspect する。そこには DHCP と VPN server 宛ての encrypted packets が含まれ、owned test destination に直接 address された packets は含まれていないはずである。また、rejected bypass が user prompts または connectivity repair の後に silently fall back できないことも確認する。
+```bash
+# Run route monitoring and capture in separate terminals.
+TEST_IP=203.0.113.10 # replace with the owned test endpoint
+ip -4 route show table all
+ip -6 route show table all
+ip route get "$TEST_IP"
+ip monitor route
+sudo tcpdump -ni any "host $TEST_IP"
+```
+## Tor Browser: より強固なWeb unlinkability
+
+Torは複数のrelayを通る回路を構築するため、通常、単一のrelayが送信元と宛先の両方を知ることはありません。宛先からはユーザーのIPではなくTor exitが見え、ローカルネットワークからは通常Tor接続が見えます。<sup>[[3]](#references)</sup> Torは低遅延のTCPアプリケーション向けに設計されているため低速であり、両端を相関分析できる攻撃者に対する保護を保証することはできません。<sup>[[4]](#references)</sup>
 
 ### Safe Tor Browser workflow
 
-1. Tor Browser は Tor Project または公式 mirror からのみ download し、可能な場合は signature を verify します。
-2. Tor SOCKS port を指定した通常の browser ではなく、**Tor Browser** を使用します。通常の browser は DNS/WebRTC や identifying state を leak する可能性があります。<sup>[[5]](#references)</sup>
-3. default の size、fonts、extensions、privacy settings を維持します。Additional add-ons により browser がより unique になる可能性があります。<sup>[[6]](#references)</sup>
-4. breakage の増加を許容できる場合は、**Safer** または **Safest** security level を選択します。
-5. direct Tor が block されている場合、または通常の relay IP が許容できない local visibility を生む場合は bridge を使用します。Bridge は容易な recognition を減らしますが、traffic analysis を排除するものではありません。<sup>[[7]](#references)</sup>
-6. identifying account に login したり、identifying information を提供したり、download した active documents を外部の networked application で開いたりしないでください。
-7. 各 identity に別々の session/context を使用します。“New circuit” は browser/application identity の消去と同じではありません。必要に応じて **New Identity** を使用するか、isolated environment を restart します。
-8. authenticated HTTPS または authenticated onion service を優先します。Tor exit は暗号化されていない HTTP traffic を観測できます。
+1. Tor BrowserはTor Projectまたは公式mirrorからのみダウンロードし、可能な場合はsignatureを検証します。
+2. 通常のbrowserをTor SOCKS portに向けるのではなく、**Tor Browser**を使用します。通常のbrowserはDNS/WebRTCや識別可能なstateをleakする可能性があります。<sup>[[5]](#references)</sup>
+3. デフォルトのサイズ、font、extension、privacy設定を維持します。追加のadd-onによりbrowserがよりuniqueになる可能性があります。<sup>[[6]](#references)</sup>
+4. 破損が増えても許容できる場合は、セキュリティレベルとして**Safer**または**Safest**を選択します。
+5. 直接Torがblockされている場合、または通常のrelay IPによって許容できないほどローカルで可視化される場合はbridgeを使用します。bridgeは簡単な識別を困難にしますが、traffic analysisを排除するものではありません。<sup>[[7]](#references)</sup>
+6. 識別可能なaccountにloginしたり、識別情報を提供したり、ダウンロードしたactive documentを外部ネットワーク接続アプリケーションで開いたりしないでください。
+7. identityごとに別のsession/contextを使用します。「New circuit」はbrowser/application identityを消去することと同じではありません。必要に応じて**New Identity**を使用するか、隔離された環境をrestartします。
+8. 認証済みHTTPSまたは認証済みonion serviceを優先します。Tor exitは暗号化されていないHTTP trafficを監視できます。
 
 ### Tor plus VPN
 
-これらを組み合わせても、自動的に安全性が高まるわけではありません。Tor の前に VPN を置くと、ISP から direct Tor relay connections を隠せますが、VPN には source が見えます。Tor の前に VPN を置く場合、VPN には Tor 後の activity が安定して見え、anonymity set が小さくなる可能性があります。Misconfiguration は leaks を生むことがあります。Tor Project は、このような組み合わせを advanced で明確な threat model がある場合にのみ推奨しています。<sup>[[8]](#references)</sup>
+両者を組み合わせても、自動的に安全になるわけではありません。Torの前にVPNを置くと、ISPから直接のTor relay接続を隠せる一方、VPNには送信元が見えます。Torの前にVPNを置かず、Torの後にVPNを置くと、VPNにはTor後の活動が安定して見えるため、anonymity setが小さくなる可能性があります。設定ミスによってleakが発生することもあります。Tor Projectは、このような組み合わせを高度で明確なthreat modelの場合にのみ推奨しています。<sup>[[8]](#references)</sup>
 
 ## Public and guest Wi-Fi
 
-Modern HTTPS により、passive neighbors は適切に暗号化された web content を通常読めませんが、guest Wi-Fi は anonymity ではありません。Venue は association times、device identifiers、captive-portal data、destinations、DHCP details を記録できます。また、cameras、purchases、transport、physical observation により user を特定できます。偽の、似た名前の hotspot によって portal credentials を取得されたり、暗号化されていない traffic を操作されたりする可能性もあります。<sup>[[9]](#references)</sup>
+現代のHTTPSでは、適切に暗号化されたWeb contentを受動的な近隣ユーザーが通常読み取ることはできませんが、guest Wi-Fiは匿名性を提供しません。施設は接続時刻、device identifier、captive portal data、宛先、DHCPの詳細を記録できます。camera、購入履歴、transport、物理的な監視によってユーザーを特定できる場合もあります。また、似た名前の偽hotspotによってportal credentialsを取得されたり、暗号化されていないtrafficを改ざんされたりする可能性があります。<sup>[[9]](#references)</sup>
 
 ### Lawful guest-network workflow
 
-1. Guests 向けに提供された network、または owner が明示的に permission を付与した network のみを使用します。スタッフに正確な SSID と portal procedure を確認します。
-2. 到着前に endpoint と travel router を update します。file/printer sharing、inbound discovery、auto-join、remembered-network probing を disable します。
-3. OS の private/randomized Wi-Fi address を有効にします。現在の Apple systems は open/weak networks で rotating addresses を使用でき、modern Android randomization は通常 SSID ごとに persistent です。これは 1 つの local identifier のみを減らします。<sup>[[10]](#references)</sup><sup>[[11]](#references)</sup>
-4. privileged workstation と guest network の間に、organization-controlled travel router または low-trust bridge device を置くことを優先します。これにより firewall/VPN policy を集中管理できますが、venue から router が見えなくなるわけではありません。<sup>[[12]](#references)</sup>
-5. captive portal は designated low-trust device/browser からのみ完了します。supposedly anonymous context で personal または reused credentials を入力しないでください。connectivity 確立後は portal browser を閉じます。
-6. sensitive activity の前に full-tunnel VPN または Tor を開始し、fail-closed behavior を確認します。
-7. 使用後は network を forget し、portal account/data-retention policy を確認します。
+1. guest向けに提供されたnetwork、または所有者から明示的な許可を得たnetworkのみを使用します。staffに正確なSSIDとportalの手順を確認します。
+2. 到着前にendpointとtravel routerをupdateします。file/printer sharing、inbound discovery、auto-join、記憶済みnetworkのprobeを無効にします。
+3. OSのprivate/randomized Wi-Fi addressを有効にします。現在のApple systemはopen/weak network上でrotating addressを使用でき、modern Androidのrandomizationは通常SSIDごとにpersistentです。これは1つのローカルidentifierを減らすだけです。<sup>[[10]](#references)</sup><sup>[[11]](#references)</sup>
+4. privileged workstationとguest networkの間には、組織が管理するtravel routerまたはlow-trust bridge deviceを優先します。これによりfirewall/VPN policyを一元化できますが、施設からrouterが見えなくなるわけではありません。<sup>[[12]](#references)</sup>
+5. captive portalへの入力は、指定されたlow-trust device/browserからのみ行います。匿名contextであるはずの環境に、個人用または再利用されたcredentialsを入力しないでください。接続が確立したらportal browserを閉じます。
+6. sensitive activityの前にfull-tunnel VPNまたはTorを開始し、fail-closed動作を確認します。
+7. 使用後はnetworkをforgetし、portalのaccount/data-retention policyを確認します。
 
 {% hint style="danger" %}
-Neighbor の Wi-Fi を Cracking すること、portal を bypass すること、leaked guest credentials を使用すること、別の guest の access を clone すること、または café に Raspberry Pi を隠すことは unauthorized activity であり、privacy technique ではありません。安全な代替手段は、lawful guest network、client-approved site、または property owner's written consent を得て設置・回収する documented drop node です。
+近隣のWi-FiをCrackingしたり、portalをbypassしたり、leaked guest credentialsを使用したり、他のguestのaccessをcloneしたり、caféにRaspberry Piを隠したりする行為は、unauthorized activityであり、privacy techniqueではありません。安全な代替手段は、lawful guest network、client-approved site、またはproperty ownerの書面による同意を得て設置・回収する、文書化されたdrop nodeです。
 {% endhint %}
 
 ## Travel routers
 
-Travel router は workstation を hostile local broadcasts から isolate し、firewall を enforce し、一貫した internal SSID を提供し、VPN に自動 reconnect できます。ただし、anonymous ではありません。Upstream からは radio identity と traffic timing が見え、VPN provider からは tunnel source が見えます。
+travel routerは、敵対的なローカルbroadcastからworkstationを隔離し、firewallを適用し、一貫した内部SSIDを提供し、VPNへ自動的に再接続できます。**匿名ではありません**。upstreamからはradio identityとtraffic timingが見え、VPN providerからはtunnel sourceが見えます。
 
-- Supported OpenWrt/vendor firmware を使用し、unused services を削除します。
-- Ethernet または unique password を設定した dedicated management SSID 経由で administer します。
-- WAN-side administration、UPnP、WPS、file sharing、unsolicited inbound traffic を disable します。
-- Supported and permitted な場合のみ、randomized/private WAN MAC を使用します。
-- DNS と IPv6 を含む VPN policy を router 上で enforce し、tunnel failure 時には egress を block します。
-- Phone hotspot が tethered devices を phone の VPN 経由にするとは限りません。必ず test してください。
+- 対応しているOpenWrt/vendor firmwareを使用し、不要なserviceを削除します。
+- Ethernetまたはunique passwordを設定した専用management SSID経由で管理します。
+- WAN-side administration、UPnP、WPS、file sharing、未承諾のinbound trafficを無効にします。
+- 対応しており、かつ許可されている場合のみ、randomized/private WAN MACを使用します。
+- DNSとIPv6を含むVPN policyをrouter上で適用し、tunnelが失敗した場合はegressをblockします。
+- phone hotspotがtethered deviceをphoneのVPN経由でtunnelすると想定しないでください。実際にtestします。
 
-## Cellular、SIM、eSIM
+## Cellular, SIMs and eSIMs
 
-Cellular は便利ですが anonymous ではありません。Operators は subscriber/device identifiers と、network attachment から導出される location を保持します。eSIM も mobile subscription です。Prepaid だからといって reliably unregistered になるわけではありません。要件は country により異なり、変更されます。<sup>[[13]](#references)</sup>
+Cellularは便利ですが匿名ではありません。operatorはsubscriber/device identifierと、networkへの接続から導出されるlocationを保持します。eSIMもmobile subscriptionです。Prepaidだからといって確実にunregisteredとは限りません。要件は国によって異なり、変更されます。<sup>[[13]](#references)</sup>
 
-Operationally:
+運用上は、次の点に注意します。
 
-- personal data の exposure を減らすために、separate で supported な device を使用します。fictional subscriber を作成するためではありません。
-- threat model に co-location が含まれる場合、personal phone と “separate” device を常に一緒に持ち歩かないでください。
-- unused cellular、Wi-Fi、Bluetooth、location access を disable します。power off は UI toggle より強い radio boundary です。
-- sensitive traffic を approved VPN/Tor path 内に置きます。ただし、carrier は subscription/device location と tunnel endpoint を引き続き把握できます。
-- national regulator または local counsel に current registration and retention rules を確認します。“anonymous SIM countries” の online lists に依存しないでください。
+- 個人データの露出を減らすため、別の対応deviceを使用します。架空のsubscriberを作成するためではありません。
+- co-locationがthreat modelに含まれる場合、personal phoneと「別の」deviceを常に一緒に持ち歩かないでください。
+- 使用していないcellular、Wi-Fi、Bluetooth、location accessを無効にします。電源を切ることは、UI toggleより強力なradio boundaryです。
+- sensitive trafficを承認済みのVPN/Tor path内に置きます。ただし、carrierにはsubscription/deviceのlocationとtunnel endpointが依然として分かることを認識してください。
+- 現在のregistrationおよびretention ruleをnational regulatorまたはlocal counselに確認します。「anonymous SIM countries」のonline listに依存しないでください。
 
-## DNS と TLS metadata
+## DNS and TLS metadata
 
-- **DoH/DoT/DoQ** は client と resolver の間の DNS を暗号化し、単純な local reading または modification を防ぎますが、resolver には queries と transport identifiers が見えます。Trust を移動するだけで、anonymity を提供するものではありません。<sup>[[14]](#references)</sup>
-- **ODoH** は proxy を追加し、proxy と target が collude しない限り resolver が client IP を知る必要をなくします。Traffic analysis は明示的に out of scope です。<sup>[[15]](#references)</sup>
-- **TLS Encrypted Client Hello (ECH)** は、client、DNS、server が対応している場合、TLS handshake 内の inner server name を保護できます。Destination IP、timing、volume、endpoint は引き続き見えます。<sup>[[16]](#references)</sup>
-- 正しく configured された VPN または Tor environment では、DNS はその environment が support する route に従うべきです。別の resolver を追加すると、新しい observer または fingerprint が生じる可能性があります。
+- **DoH/DoT/DoQ**はclientとresolver間のDNSを暗号化し、単純なローカルでの読み取りや改ざんを防ぎます。ただしresolverにはqueryとtransport identifierが見えます。trustの移転であり、匿名性を提供するものではありません。<sup>[[14]](#references)</sup>
+- **ODoH**はproxyを追加するため、proxyとtargetがcolludeしない限り、resolverはclient IPを知る必要がありません。Traffic analysisは明示的に対象外です。<sup>[[15]](#references)</sup>
+- **TLS Encrypted Client Hello (ECH)**は、client、DNS、serverが対応している場合、TLS handshake内のinner server nameを保護できます。destination IP、timing、volume、endpointは引き続き可視です。<sup>[[16]](#references)</sup>
+- 正しく設定されたVPNまたはTor environmentでは、DNSはそのenvironmentがサポートするrouteに従う必要があります。別のresolverを追加すると、新たなobserverやfingerprintが発生する可能性があります。
 
 ### Encrypted-DNS/ECH verification workflow
 
-1. DNS を VPN/Tor environment、OS、application のどれが control するか決定します。無関係な resolver を stacking せず、意図した **1 つ**の layer で configure します。
-2. 公開された privacy/retention policy に基づいて resolver を選択し、platform が対応している場合は strict encrypted mode を有効にします。Opportunistic fallback により、気付かないうちに plaintext に戻る可能性があります。
-3. 自分が control する authoritative test zone の unique subdomain を query し、authoritative log が意図した recursive resolver を確認していることを確認します。
-4. Authorization を得た上で、test device の traffic のみを capture します。Access network が plaintext DNS を読めないことを確認しつつ、encrypted resolver/tunnel endpoint は見えることを認識します。
-5. Blocked/unreachable な encrypted resolver を test します。Pass condition は、選択した fail-closed または documented fallback behavior であり、偶発的な clear query ではありません。
-6. ECH については、controlled ECH-enabled host を使用し、client/server diagnostics を inspect して **inner** ClientHello が accepted されたことを確認します。HTTPS record が提供されているだけでは ECH succeeded の証明になりません。
-7. Network changes、captive portals、browser updates、VPN reconnects の後に repeat します。どの component が DNS/ECH を所有するかを記録し、後続の administrators が bypass を作らないようにします。
+1. DNSをVPN/Tor environment、OS、applicationのいずれがcontrolするかを決めます。関係のないresolverをstackするのではなく、意図した**1つ**のlayerで設定します。
+2. 公開されたprivacy/retention policyに基づいてresolverを選択し、platformが対応している場合はstrict encrypted modeを有効にします。opportunistic fallbackでは、気付かないうちにplaintextへ戻る可能性があります。
+3. 自分が管理するauthoritative test zone下のunique subdomainにqueryし、authoritative logに意図したrecursive resolverが記録されることを確認します。
+4. 許可を得たうえで、test deviceのtrafficのみをcaptureします。access networkがplaintext DNSを読み取れないことを確認します。ただし、access networkからencrypted resolver/tunnel endpointが見えることは認識してください。
+5. blockまたは到達不能なencrypted resolverをtestします。pass条件は、選択したfail-closedまたは文書化されたfallback動作であり、偶然のclear queryではありません。
+6. ECHについては、管理下のECH-enabled hostを使用し、client/server diagnosticsを調べて**inner** ClientHelloが受理されたことを確認します。HTTPS recordを提供しているだけでは、ECHの成功は証明できません。
+7. network変更、captive portal、browser update、VPN reconnectの後に再実行します。後のadministratorがbypassを作らないよう、どのcomponentがDNS/ECHを所有するかを記録します。
 
 ## Mixnets
 
-Nym や Katzenpost などの Mixnets は、fixed-size packets、delay、reordering、cover traffic を追加し、timing correlation に resist します。これらの properties には latency と bandwidth が必要であり、independent deployment-scale evidence は限定的です。現在の consumer mixnets は、Tor/VPN より高速または guaranteed な replacement ではなく、**emerging/high-latency options** として扱ってください。<sup>[[17]](#references)</sup>
+NymやKatzenpostなどのMixnetは、fixed-size packet、delay、reordering、cover trafficを追加し、timing correlationに対抗します。これらの特性にはlatencyとbandwidthのコストがあり、独立したdeployment-scaleの証拠は限られています。現在のconsumer向けMixnetは、Tor/VPNのより高速または保証された代替ではなく、**emerging/high-latency options**として扱ってください。<sup>[[17]](#references)</sup>
 
 ### Evaluation workflow
 
-1. Maintained client と、正確に supported された application を特定します。Undocumented proxy 経由で arbitrary browser/system traffic を無理に送らないでください。
-2. Entry、mix nodes、gateway、destination、collusion assumptions に関する current threat model を読みます。
-3. Official signed source から separate test compartment に install し、benign な自分の endpoint のみを使用します。
-4. Delivery latency、message-size limits、reliability、retransmission、gateway unavailable 時の behavior を測定します。
-5. Local traffic と自分の endpoint を inspect し、意図した path と source を確認します。Replies が同じ privacy design を使用するか確認します。
-6. Shutdown/failure を test します。Application が direct Internet access に silently fallback してはいけません。
-7. 速度だけを理由に cover traffic を disable したり、delays を減らしたり、unusual fixed routes を選択したりしないでください。これらの変更により、記載された anonymity model が無効になる可能性があります。
-8. Specific deployment、independent analysis、operational reliability が consequence level を満たすまで experimental として扱います。
+1. 維持管理されているclientと、正確に対応しているapplicationを特定します。文書化されていないproxyを通して、任意のbrowser/system trafficを無理に流さないでください。
+2. entry、mix node、gateway、destination、collusionの前提について、現在のthreat modelを読みます。
+3. 公式のsigned sourceから別のtest compartmentにinstallし、無害な自分のendpointのみを使用します。
+4. delivery latency、message-size limit、reliability、retransmission、gatewayが利用できない場合の動作を測定します。
+5. local trafficと自分が管理するendpointを調べ、意図したpathとsourceを確認します。replyが同じprivacy designを使用するか確認します。
+6. shutdown/failureをtestします。applicationがdirect Internet accessへ黙ってfallbackしてはなりません。
+7. 速度のためにcover trafficを無効化したり、delayを短縮したり、通常と異なるfixed routeを選択したりしないでください。これらの変更により、明示されたanonymity modelが無効になる可能性があります。
+8. 特定のdeployment、独立したanalysis、運用上のreliabilityが影響の大きさに見合うまで、experimentalなものとして扱います。
 
 ## Network preflight checklist
 
-- [ ] Authorization が access network、target、dates、source infrastructure を対象としている。
-- [ ] Endpoint に unrelated identities や active sync sessions が存在しない。
-- [ ] IPv4、IPv6、DNS、reconnect behavior が plan と一致している。
-- [ ] Destination からは expected egress のみが見えている。
-- [ ] Captive portal と hotspot behavior を sensitive traffic なしで test 済みである。
-- [ ] Local sharing/discovery と automatic network joining が disable されている。
-- [ ] Observer table と residual traffic-correlation risk を受け入れている。
-- [ ] Provider policy、retention、emergency contact が最新である。
+- [ ] Authorizationがaccess network、target、dates、source infrastructureを対象としている。
+- [ ] endpointに無関係なidentityやactive sync sessionが存在しない。
+- [ ] IPv4、IPv6、DNS、reconnect behaviorが計画と一致している。
+- [ ] 制御されたDHCP/local-subnet route injectionによって、test trafficがphysical interfaceへ移動しない。
+- [ ] destinationから見えるのは想定したegressだけである。
+- [ ] captive portalとhotspotの動作を、sensitive trafficなしでtest済みである。
+- [ ] local sharing/discoveryとautomatic network joiningが無効になっている。
+- [ ] observer tableと残存するtraffic-correlation riskを受け入れている。
+- [ ] provider policy、retention、emergency contactが最新である。
 
-Split-knowledge relays、route-enforced workloads、pluggable transports、onion services、I2P、disposable remote browsers については、[Advanced Network Privacy Architectures](advanced-network-privacy-architectures.md) を参照してください。
+split-knowledge relay、route-enforced workload、pluggable transport、onion service、I2P、disposable remote browserについては、[Advanced Network Privacy Architectures](advanced-network-privacy-architectures.md)に進んでください。
+
+
 
 ## References
 
-- [1] [EFF — VPN の選び方](https://ssd.eff.org/module/choosing-vpn-thats-right-you)
+- [1] [EFF — VPNの選び方](https://ssd.eff.org/module/choosing-vpn-thats-right-you)
 - [2] [UK NCSC — Device security guidance: Virtual Private Networks](https://www.ncsc.gov.uk/collection/device-security-guidance/infrastructure/virtual-private-networks)
-- [3] [Tor Project — Tor が提供する privacy と anonymity の保護](https://support.torproject.org/about-tor/introduction/protections/)
-- [4] [Tor Specifications — Tor の短い introduction](https://spec.torproject.org/intro/)
-- [5] [Tor Project — 他の browser で Tor を使用する](https://support.torproject.org/tor-browser/security/using-tor-with-other-browsers/)
-- [6] [Tor Project — Tor Browser の plugins と add-ons](https://support.torproject.org/tor-browser/features/plugins/)
-- [7] [Tor Project — Tor の unblocking](https://support.torproject.org/tor-browser/circumvention/unblocking-tor/)
-- [8] [Tor Project — VPN と Tor Browser の併用](https://support.torproject.org/tor-browser/general/vpn-with-tor/)
-- [9] [FTC Consumer Advice — Public Wi-Fi Networks は安全か？](https://consumer.ftc.gov/articles/are-public-wi-fi-networks-safe-what-you-need-know)
-- [10] [Apple Platform Security — Apple devices における Wi-Fi privacy](https://support.apple.com/guide/security/wi-fi-privacy-with-apple-devices-sec31e483abf/web)
-- [11] [Android Open Source Project — MAC randomization の実装](https://source.android.com/docs/core/connect/wifi-mac-randomization)
-- [12] [UK NCSC — Secure Privileged Access Workstations の principles](https://www.ncsc.gov.uk/files/ncsc-principles-for-secure-privileged-access-workstations--paws-.pdf)
+- [3] [Tor Project — Torが提供するprivacyとanonymityの保護](https://support.torproject.org/about-tor/introduction/protections/)
+- [4] [Tor Specifications — Torの簡単な紹介](https://spec.torproject.org/intro/)
+- [5] [Tor Project — Torを他のbrowserで使用する](https://support.torproject.org/tor-browser/security/using-tor-with-other-browsers/)
+- [6] [Tor Project — Tor Browserのpluginとadd-on](https://support.torproject.org/tor-browser/features/plugins/)
+- [7] [Tor Project — Torのblockを解除する](https://support.torproject.org/tor-browser/circumvention/unblocking-tor/)
+- [8] [Tor Project — Tor BrowserをVPNとともに使用する](https://support.torproject.org/tor-browser/general/vpn-with-tor/)
+- [9] [FTC Consumer Advice — Public Wi-Fi networkは安全か？](https://consumer.ftc.gov/articles/are-public-wi-fi-networks-safe-what-you-need-know)
+- [10] [Apple Platform Security — Apple deviceにおけるWi-Fi privacy](https://support.apple.com/guide/security/wi-fi-privacy-with-apple-devices-sec31e483abf/web)
+- [11] [Android Open Source Project — MAC randomizationの実装](https://source.android.com/docs/core/connect/wifi-mac-randomization)
+- [12] [UK NCSC — Secure Privileged Access Workstationの原則](https://www.ncsc.gov.uk/files/ncsc-principles-for-secure-privileged-access-workstations--paws-.pdf)
 - [13] [GSMA — Mandatory SIM registration: policy and regulatory perspectives](https://www.gsma.com/solutions-and-impact/connectivity-for-good/mobile-for-development/programme/digital-identity/mandatory-sim-registration-policy-and-regulatory-perspectives-in-the-absence-of-data-protection-laws/)
-- [14] [RFC 8932 — DNS Privacy Service Operators への recommendations](https://www.rfc-editor.org/rfc/rfc8932.html)
+- [14] [RFC 8932 — DNS Privacy Service Operatorへの推奨事項](https://www.rfc-editor.org/rfc/rfc8932.html)
 - [15] [RFC 9230 — Oblivious DNS over HTTPS](https://www.rfc-editor.org/rfc/rfc9230.html)
 - [16] [RFC 9849 — TLS Encrypted Client Hello](https://www.rfc-editor.org/rfc/rfc9849.html)
 - [17] [Katzenpost — Threat Model](https://katzenpost.network/docs/threat_model/)
+- [18] [Xue et al. — Bypassing Tunnels: Routing Tableの悪用によるVPN Client Trafficのleak](https://www.usenix.org/system/files/usenixsecurity23-xue.pdf)
+- [19] [Leviathan Security — TunnelVision: 攻撃者がRouting-Based VPNのcloakを解除し、VPN Leakを引き起こす方法](https://www.leviathansecurity.com/blog/tunnelvision)
 {{#include ../banners/hacktricks-training.md}}
