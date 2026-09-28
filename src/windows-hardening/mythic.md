@@ -137,6 +137,55 @@ Install it with:
   bare `rundll32.exe`, this is one of the easiest Apollo-side changes to make
   before running assembly/PowerShell-heavy tasking.
 
+### Detection-aware .NET agent build pipeline
+
+A detection-aware Apollo fork should be treated as a **whole build-system problem**, not as a final `obfuscate.exe` step. This case study complements the general [AV evasion methodology](av-bypass.md) and the [.NET inspection tools](../reversing/reversing-tools-basic-methods/README.md): changes to wire identifiers, IL metadata, dependency packaging, reflection, and dynamically compiled tasks form one compatibility boundary.<sup>[[8]](#references)</sup>
+
+#### YARA-aware protocol mutation
+
+Audit public file/memory rules before changing code. For example, Elastic's `Multi_Trojan_Mythic_4beb7e17` matches when any **7 of 11** Mythic JSON/action strings are present, including `task_id`, `post_response`, `c2_profile`, `get_tasking`, and `get_delegate_tasks`. Renaming enough fields can defeat that threshold, but these are protocol values rather than cosmetic symbols: the agent and the corresponding server/profile implementation must change together.<sup>[[7]](#references)[[8]](#references)</sup>
+
+This only removes one static feature set. Check-in cadence, message shape, task/response flow, and runtime string reconstruction can remain behavioral or memory indicators; consequently, validate both the built artifact and an exercised callback rather than treating a clean string scan as success.<sup>[[8]](#references)</sup>
+
+#### Merge before applying global transforms
+
+Resource embedding with tools such as Costura leaves companion assemblies as compressed resources. An obfuscator that visits only the outer module therefore misses their type names and metadata; obfuscating each DLL independently can instead assign incompatible names to cross-assembly contracts. Merge build outputs at the IL level first (for example with [ILRepack](https://github.com/gluck/il-repack)), then apply one rename map to the resulting module.<sup>[[8]](#references)</sup>
+
+```text
+agent.exe + dependency DLLs
+          -> ILRepack -> merged.exe
+          -> dnlib IL/metadata transforms
+          -> AsmResolver PE/resource patching
+          -> final payload
+```
+
+A custom pass can use [dnlib](https://github.com/0xd4d/dnlib) for managed IL/metadata transforms and [AsmResolver](https://github.com/Washi1337/AsmResolver) for post-write PE/resource patching. In the case study, eligible `ldstr` instructions became integer-token/decryptor calls backed by a fresh 16-byte rolling-XOR key, while symbols and namespaces were mapped to plausible enterprise-style names instead of short sequential identifiers. Other passes removed selected compiler/debugger attributes, scrubbed merger/embedding references, renamed resources, and patched version information. Reseed names, dead code, and encryption material for each independent build: changing ciphertext removes stable bytes, but a stable decryptor or recognizable transformation pattern is itself a signature.<sup>[[8]](#references)</sup>
+
+#### Keep dynamic tasks synchronized with the payload
+
+Apollo can compile task source server-side, send the DLL bytes, and load them with `Assembly.Load()`. Once the base agent's public types are renamed, later tasks compiled against the original API no longer resolve. Treat the exported rename map as a payload-specific ABI artifact:<sup>[[8]](#references)</sup>
+
+1. Bind the map and type context to the exact payload/build identifier.
+2. For each task build, retrieve that map and rewrite a temporary source tree.
+3. Rewrite only resolved namespace, type, nested/generic type, field, and property references, then compile against the obfuscated merged assembly.
+4. Reject missing or mismatched maps before task delivery, and run an initialization test after compilation.
+
+Blind global replacement is unsafe because an identifier may also occur in a string, local declaration, member access, framework type, or unrelated namespace. If a text/regex rewriter is retained, protect those contexts explicitly and regression-test it whenever the map schema or a rename pass changes.<sup>[[8]](#references)</sup>
+
+#### Make reflection contracts namespace-independent
+
+Discovery code that checks `t.FullName.StartsWith("Tasks.")` makes the namespace load-bearing and fails after namespace remapping. Discover by a stable type relationship instead, while preserving command class names if dispatch still uses `t.Name`:<sup>[[8]](#references)</sup>
+
+```csharp
+foreach (Type t in _tasksAsm.GetExportedTypes())
+{
+    if (t.IsSubclassOf(typeof(Tasking)) && !t.IsAbstract)
+        _loadedTaskTypes[t.Name] = t;
+}
+```
+
+Maintain an explicit allowlist of reflection-visible names, serializer fields, entry points, and cross-assembly APIs that must not be renamed. Finally, decompile the result with ILSpy/dnSpy, scan both file and memory representations, and exercise every command/loader path in an EDR lab; a build that starts successfully can still contain tasks broken by renaming or behavior detected only after execution.<sup>[[8]](#references)</sup>
+
 This agent has a lot of commands that makes it very similar to Cobalt Strike's Beacon with some extras. Among them, it supports:
 
 ### Common actions
@@ -334,5 +383,7 @@ When used on Linux or macOS it has some interesting commands:
 - [4] [Browser Scripts - Mythic Documentation](https://docs.mythic-c2.net/operational-pieces/browser-scripts)
 - [5] [Mythic 3.3->3.4 Updates](https://docs.mythic-c2.net/updating/mythic-3.3-greater-than-3.4-updates)
 - [6] [Transforming Red Team Ops with Mythic's Hidden Gems: Browser Scripting](https://specterops.io/blog/2025/08/21/transforming-red-team-ops-with-mythics-hidden-gems-browser-scripting/)
+- [7] [Elastic protections-artifacts: Multi_Trojan_Mythic YARA rules](https://github.com/elastic/protections-artifacts/blob/main/yara/rules/Multi_Trojan_Mythic.yar)
+- [8] [From Fork to Framework: What Modifying Apollo Taught Us About Agent Invasion](https://bishopfox.com/blog/from-fork-to-framework-what-modifying-apollo-taught-us-about-agent-invasion)
 
 {{#include ../banners/hacktricks-training.md}}
