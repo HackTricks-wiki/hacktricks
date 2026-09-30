@@ -437,11 +437,43 @@ If you press a button in the graphical application, the debugger can stop in the
 
 ## Golang
 
-If you have to reverse a Golang binary I would suggest you to use the IDA plugin [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
+For ordinary Go binaries, [IDAGolangHelper](https://github.com/sibears/IDAGolangHelper) can recover runtime structures and improve function names in IDA. Load its Python plugin with **Alt+F7**.
 
-Press **Alt+F7** in IDA to load a Python plugin, then select the plugin file.
+### Recover metadata without the symbol table
 
-This will resolve the names of the functions.
+A stripped Go executable still needs runtime metadata to map program counters to functions. [GoReSym](https://github.com/mandiant/GoReSym) locates and parses structures such as `pclntab` and `moduledata` using code derived from the Go runtime. This can recover function boundaries, names, source paths, types and build details without relying on the conventional symbol table.<sup>[[9]](#references)[[13]](#references)</sup>
+
+```bash
+GoReSym.exe -t -d -p /path/to/sample.exe > goresym.json
+```
+
+An obfuscator can leave those structures usable while replacing the recovered names. Garble, for example, hashes identifiers and package paths and removes build, module and debug information.<sup>[[12]](#references)</sup> The obfuscated package token must remain consistent across functions from that package. Group functions by the repeated token, infer one package from its callees, strings and APIs, then propagate that package label to the entire group.<sup>[[13]](#references)</sup>
+
+### Recover Garble names with GoResolver
+
+[GoResolver](https://github.com/volexity/GoResolver) combines runtime-symbol extraction with clean-reference generation and control-flow-graph (CFG) matching. Use this sequence:<sup>[[10]](#references)[[13]](#references)</sup>
+
+1. **Identify the compiler version.** Try `BuildInfo` and embedded version strings first. If the obfuscator removed them, compare portions of the bundled Go runtime with versioned reference runtimes. In Volexity's tests, about `2%` of the runtime was enough to distinguish major Go versions. Treat this as an empirical optimization, not a universal threshold.<sup>[[13]](#references)</sup>
+2. **Build matching references.** Generate clean binaries for the identified Go version, target architecture and likely libraries. Matching the toolchain reduces compiler-generated CFG differences.<sup>[[10]](#references)[[13]](#references)</sup>
+3. **Compare functions.** GoGrapher matches function CFGs and emits normalized scores from `0.0` to `1.0`. Its basic-block matching is based on a weighted comparison of similar instructions. High-confidence matches map randomized functions to the clean implementation. Weaker matches can still identify a package or module.<sup>[[8]](#references)[[11]](#references)[[13]](#references)</sup>
+4. **Validate and import.** Confirm proposed names with call relationships, constants, strings and side effects, then import the JSON report with the GoResolver plugin for IDA or Ghidra.<sup>[[10]](#references)[[13]](#references)</sup>
+
+Install the toolchain and run the combined extractor and graph matcher:<sup>[[10]](#references)</sup>
+
+```bash
+python3 -m venv goresolver-env
+source goresolver-env/bin/activate
+pip install goresolver
+
+# Automatic Go-version detection and reference selection
+goresolver resolve -o report.json /path/to/sample.exe
+
+# Override the version/libraries and confidence threshold when known
+goresolver resolve -v go1.23.4 -l os/exec net/http \
+  -t 0.9 -o report.json /path/to/sample.exe
+```
+
+The default significant-match threshold is `0.9`. The `--extract` and `--graph` switches can isolate either stage, while the default runs both because the recovered runtime metadata and CFG evidence complement each other.<sup>[[10]](#references)</sup> CFG scores are heuristic: inlining, build flags, architecture and library-version differences can change graph shape, so preserve unresolved functions instead of forcing low-confidence names.<sup>[[13]](#references)</sup>
 
 ## Compiled Python
 
@@ -586,5 +618,11 @@ https://www.youtube.com/watch?v=VVbRe7wr3G4
 - [5] [pentestpartners/reverse-engineering - RustStrings.py](https://github.com/pentestpartners/reverse-engineering/blob/main/RustStrings.py)
 - [6] [Nostalgia - GBA reversing tutorial (archived)](https://web.archive.org/web/20220328215728/https://exp.codes/Nostalgia/)
 - [7] [Defeating AI-Assisted Reverse Engineering, or at Least Trying To](http://blog.quarkslab.com/defeating-ai-assisted-reverse-engineering-or-at-least-trying-to.html)
+- [8] [An Approach to Comparing Control Flow Graphs Based on Basic Block Matching](https://www.ijcse.com/docs/INDJCSE20-11-03-237.pdf)
+- [9] [Mandiant GoReSym](https://github.com/mandiant/GoReSym)
+- [10] [Volexity GoResolver](https://github.com/volexity/GoResolver)
+- [11] [Volexity GoGrapher](https://github.com/volexity/GoGrapher)
+- [12] [Garble obfuscation mechanism](https://github.com/burrowers/garble#mechanism)
+- [13] [GoResolver: Using Control-Flow Graph Similarity to Automatically Deobfuscate Golang Binaries](https://volexity.com/blog/2025/04/01/goresolver-using-control-flow-graph-similarity-to-deobfuscate-golang-binaries-automatically)
 
 {{#include ../../banners/hacktricks-training.md}}
