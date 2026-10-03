@@ -345,6 +345,27 @@ Instead of a summary, it printed the attacker's hidden message. The user didn't 
 -   **Use content boundaries:** The AI could be designed to distinguish system/developer instructions from all other text. If an external source says "ignore your instructions," the AI should see that as just part of the text to summarize, not an actual directive. In other words, **maintain a strict separation between trusted instructions and untrusted data**.
 -   **Monitoring and logging:** For AI systems that pull in third-party data, have monitoring that flags if the AI's output contains phrases like "I have been OWNED" or anything clearly unrelated to the user's query. This can help detect an indirect injection attack in progress and shut down the session or alert a human operator.
 
+### Malware-to-Analyst Prompt Injection
+
+Analyst-targeting malware prompt injection was first demonstrated publicly in a Windows proof of concept and was later observed in a macOS implant.<sup>[[23]](#references)[[24]](#references)</sup> A sample can turn its own **strings, resources, stdout/stderr, or sandbox output** into an indirect-prompt-injection carrier. The payload does not need to escape the sandbox: it targets the workflow that extracts attacker-controlled text and concatenates it into an LLM triage prompt. A model that mistakes this data for control-plane state may abort, truncate, or refuse the analysis.<sup>[[24]](#references)</sup>
+
+A stronger variant **spoofs the analysis harness itself** instead of using one obvious instruction. For example, a sample can embed a Markdown-fenced cascade of fake `system` messages, reuse the harness delimiter (such as `{{DATA}}`), and report invented token expiry, out-of-memory, disk-full, tool-failure, or prompt-injection events. Repetition plus familiar framing makes hostile sample data resemble trusted orchestrator telemetry.<sup>[[24]](#references)</sup>
+
+Review an LLM-assisted malware pipeline for this failure path:<sup>[[24]](#references)</sup>
+
+1. A parser extracts strings, decoded resources, command output, OCR, or sandbox logs from the sample.
+2. The orchestrator interpolates that text into the same prompt scaffold as system/developer instructions or accepts sample-supplied role/message objects.
+3. Attacker-chosen delimiters or role labels are interpreted structurally rather than as evidence.
+4. The model changes its analysis because of fabricated state that the orchestrator never independently observed.
+
+**Hardening and detection:**<sup>[[24]](#references)</sup>
+
+- Keep sample-derived bytes in a typed, explicitly **untrusted data channel**; never deserialize attacker-provided `role`, `system`, or message-array fields into privileged model messages.
+- Use length-delimited or schema-bound fields instead of string-concatenated prompt templates. Escape or reject occurrences of the pipeline's own sentinel tokens and role markers before rendering them for the model.
+- Treat failure state as out-of-band control data: only the orchestrator may assert OOM, token expiry, disk exhaustion, or tool failure. Require corroborating runtime telemetry before changing the workflow.
+- Detect repeated pseudo-system headers, copied harness delimiters, and failure claims inside binaries or process output. Preserve the original artifact and hash; sanitization should affect only the model-facing representation.
+- Regression-test every ingestion path (static strings, decoded blobs, stdout/stderr, OCR, tool output, and sandbox reports) with adversarial samples, and alert when analysis ends in an unexplained refusal, early stop, or abnormal truncation.
+
 ### Web-Based Indirect Prompt Injection (IDPI) in the Wild
 
 Real-world IDPI campaigns show that attackers **layer multiple delivery techniques** so at least one survives parsing, filtering or human review. Common web-specific delivery patterns include:<sup>[[15]](#references)</sup>
@@ -820,5 +841,7 @@ This means **timing alone** can be enough to leak secrets through an ordinary ch
 - [20] [OpenAI reasoning guide](https://developers.openai.com/api/docs/guides/reasoning)
 - [21] [Fooling Around with Encrypted Reasoning Blobs](https://blog.cryptographyengineering.com/2026/05/29/fooling-around-with-encrypted-reasoning-blobs/)
 - [22] [SpecterOps – Tokenization Confusion](https://specterops.io/blog/2025/06/03/tokenization-confusion/)
+- [23] [Check Point Research – AI Evasion: Prompt Injection](https://research.checkpoint.com/2025/ai-evasion-prompt-injection/)
+- [24] [SentinelLABS – macOS.Gaslight: Rust Backdoor Turns Prompt Injection on the Analyst, Not the Sandbox](https://www.sentinelone.com/labs/macos-gaslight-rust-backdoor-turns-prompt-injection-on-the-analyst-not-the-sandbox/)
 
 {{#include ../banners/hacktricks-training.md}}
