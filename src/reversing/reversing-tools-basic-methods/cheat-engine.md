@@ -2,215 +2,267 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) は、実行中のゲームのメモリ内に重要な値が保存されている場所を見つけ、変更するための便利なプログラムです。\
-ダウンロードして実行すると、ツールの使い方に関する **tutorial** が表示されます。ツールの使い方を学びたい場合は、tutorial を完了することを強くおすすめします。
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) は、実行中の game の memory 内で重要な値が保存されている場所を見つけ、変更するための便利な program です。\
+ダウンロードして実行すると、tool の使い方を説明する **tutorial** が表示されます。tool の使い方を学びたい場合は、tutorial を完了することを強く推奨します。
 
-## 何を検索していますか？
+## 何を検索しますか？
 
-![Cheat Engine - 何を検索していますか？: 何を検索していますか？](<../../images/image (762).png>)
+![Cheat Engine - 何を検索しますか？: 何を検索しますか？](<../../images/image (762).png>)
 
-このツールは、プログラムの **メモリ内のどこにある値**（通常は数値）が **保存されているか**を見つけるのに非常に便利です。\
-**通常、数値**は **4bytes** 形式で保存されますが、**double** や **float** 形式で見つかる場合もあります。また、**数値以外のもの**を探したいこともあるでしょう。そのため、何を **検索するか**を必ず **選択**する必要があります。
+この tool は、program の **memory 内のどこに値**（通常は number）が**保存されているか**を見つけるのに非常に便利です。\
+**通常、number** は **4bytes** 形式で保存されますが、**double** や **float** 形式で見つかる場合もあります。また、**number 以外のもの**を探したい場合もあるでしょう。そのため、何を**検索するか**を確実に**選択**する必要があります。
 
-![Cheat Engine - 何を検索していますか？: 通常、数値は4bytes形式で保存されますが、doubleやfloat形式で見つかる場合もあり、数値以外のものを探したい場合もあります。](<../../images/image (324).png>)
+![Cheat Engine - 何を検索しますか？: 通常、number は 4bytes 形式で保存されますが、double や float 形式で見つかる場合もあります。また、別のものを探したい場合もあります...](<../../images/image (324).png>)
 
-また、**検索**の **種類**を **変更**することもできます。
+また、**search** の種類を**変更**することもできます。
 
-![Cheat Engine - 何を検索していますか？: 検索の種類を変更することもできます](<../../images/image (311).png>)
+![Cheat Engine - 何を検索しますか？: また、異なる種類の search を指定できます](<../../images/image (311).png>)
 
-メモリをスキャンしている間、**ゲームを停止する**ためのチェックボックスを有効にすることもできます。
+memory を scan している間、**game を停止する**ための box に check を入れることもできます。
 
-![Cheat Engine - 何を検索していますか？: メモリをスキャンしている間、ゲームを停止することもできます](<../../images/image (1052).png>)
+![Cheat Engine - 何を検索しますか？: memory を scan している間、game を停止するための box に check を入れることもできます](<../../images/image (1052).png>)
 
 ### Hotkeys
 
-_**Edit --> Settings --> Hotkeys**_ では、**ゲームを停止する**など、さまざまな目的のために異なる **hotkeys** を設定できます（メモリをスキャンしたいときに非常に便利です）。その他のオプションも利用できます。
+_**Edit --> Settings --> Hotkeys**_ では、**game の停止**など、さまざまな目的に異なる **hotkeys** を設定できます（memory を scan したい場合などに非常に便利です）。その他の options も利用できます。
 
-![何を検索していますか？ - Hotkeys: Edit -- Settings -- Hotkeys では、ゲームを停止するなど、さまざまな目的のために異なる hotkeys を設定できます（メモリをスキャンしたいときに非常に便利です）。](<../../images/image (864).png>)
+![何を検索しますか？ - Hotkeys: Edit -- Settings -- Hotkeys では、game の停止など、さまざまな目的に異なる hotkeys を設定できます（memory を scan したい場合などに非常に便利です）](<../../images/image (864).png>)
 
 ## 値の変更
 
-探している **値**が保存されている場所を **見つけた**ら（詳細は次の手順で説明します）、その値をダブルクリックし、さらに値自体をダブルクリックすることで **変更**できます。
+探している**値**が保存されている場所を**見つけた**ら（詳細は以下の steps で説明します）、その値を double click し、続けて値自体を double click することで**変更**できます。
 
-![Hotkeys - 値の変更: 探している値が保存されている場所を見つけたら（詳細は次の手順で説明します）、その値をダブルクリックし、さらに値自体をダブルクリックすることで変更できます](<../../images/image (563).png>)
+![Hotkeys - 値の変更: 探している値が保存されている場所を見つけたら（詳細は以下の steps で説明します）、その値を double click し、続けて値自体を double click することで変更できます](<../../images/image (563).png>)
 
-最後に、チェックを **有効化**してメモリに変更を適用します。
+最後に **check** を付けると、memory に変更が適用されます。
 
-![Hotkeys - 値の変更: 最後にチェックを有効化してメモリに変更を適用します](<../../images/image (385).png>)
+![Hotkeys - 値の変更: 最後に check を付けると、memory に変更が適用されます](<../../images/image (385).png>)
 
-**メモリ**への **変更**はすぐに **適用**されます（ゲームが再びこの値を使用するまで、ゲーム内の値は **更新されない**ことに注意してください）。
+memory への**変更**は直ちに**適用**されます（ただし、game が再びこの値を使用するまで、game 内の値は**更新されない**ことに注意してください）。
 
 ## 値の検索
 
-ここでは、改善したい重要な値（ユーザーの体力など）があり、その値をメモリ内から探していると仮定します。
+ここでは、改善したい重要な値（user の life など）があり、その値を memory 内から探していると仮定します。
 
-### 既知の変更による検索
+### 既知の変化による検索
 
-値 100 を探していると仮定し、その値を検索する **scan**を実行すると、多数の一致が見つかります。
+値 100 を探していると仮定します。その値を検索するために **scan** を実行すると、多くの一致が見つかります。
 
-![値の検索 - 既知の変更による検索: 値100を探していると仮定し、その値を検索するscanを実行すると、多数の一致が見つかります](<../../images/image (108).png>)
+![値の検索 - 既知の変化による検索: 値 100 を探していると仮定し、その値を検索するために scan を実行すると、多くの一致が見つかります](<../../images/image (108).png>)
 
-次に、**値が変化する**ような操作を行い、ゲームを **停止**して **next scan**を実行します。
+次に、**値が変化する**ような操作を行い、game を**停止**して**次の scan**を実行します。
 
-![値の検索 - 既知の変更による検索: 次に、値が変化するような操作を行い、ゲームを停止してnext scanを実行します](<../../images/image (684).png>)
+![値の検索 - 既知の変化による検索: 次に、値が変化するような操作を行い、game を停止して次の scan を実行します](<../../images/image (684).png>)
 
-Cheat Engine は、**100 から新しい値に変化した値**を検索します。これで、探していた値の **address**が **見つかりました**。これを変更できます。\
-_まだ複数の値が残っている場合は、その値をもう一度変更し、別の「next scan」を実行してaddressを絞り込んでください。_
+Cheat Engine は、**100 から新しい値へ変化した値**を検索します。これで、探していた値の**address**を**見つける**ことができました。これを変更できるようになります。\
+_まだ複数の値が残っている場合は、その値を再度変更し、別の "next scan" を実行して address を絞り込みます。_
 
-### Unknown Value、既知の変更
+### 不明な値、既知の変化
 
-**値がわからない**ものの、**どのように変更させるか**（さらに変更量も）わかっている場合は、その数値を検索できます。
+**値自体は分からない**ものの、**どのように変化させられるか**（変化量も含めて）分かっている場合は、その number を探すことができます。
 
-まず、タイプ "**Unknown initial value**" の scan を実行します。
+まず、"**Unknown initial value**" タイプの scan を実行します。
 
-![既知の変更による検索 - Unknown Value、既知の変更: まず、タイプ「Unknown initial value」のscanを実行します](<../../images/image (890).png>)
+![既知の変化による検索 - 不明な値、既知の変化: まず、" Unknown initial value " タイプの scan を実行します](<../../images/image (890).png>)
 
-次に値を変更し、**値**が **どのように変化したか**を指定します（この例では 1 減少しました）。その後、**next scan**を実行します。
+次に、値を変化させ、**値がどのように変化したか**を指定します（この例では 1 減少しました）。その後、**next scan** を実行します。
 
-![既知の変更による検索 - Unknown Value、既知の変更: 次に値を変更し、値がどのように変化したかを指定します（この例では1減少しました）。その後next scanを実行します](<../../images/image (371).png>)
+![既知の変化による検索 - 不明な値、既知の変化: 次に値を変化させ、値がどのように変化したかを指定します（この例では 1 減少しました）。その後、next scan を実行します](<../../images/image (371).png>)
 
-指定した方法で変更されたすべての値が表示されます。
+選択した方法で変更された**すべての値**が表示されます。
 
-![既知の変更による検索 - Unknown Value、既知の変更: 指定した方法で変更されたすべての値が表示されます](<../../images/image (569).png>)
+![既知の変化による検索 - 不明な値、既知の変化: 選択した方法で変更されたすべての値が表示されます](<../../images/image (569).png>)
 
 値を見つけたら、変更できます。
 
-**変更の種類**には多数の候補があるため、結果を絞り込むためにこれらの **手順**を何度でも実行できます。
+変更方法には**多くの種類**があるため、結果を絞り込むためにこれらの**手順を何度でも**実行できます。
 
-![既知の変更による検索 - Unknown Value、既知の変更: 変更の種類には多数の候補があるため、結果を絞り込むためにこれらの手順を何度でも実行できます](<../../images/image (574).png>)
+![既知の変化による検索 - 不明な値、既知の変化: 変更方法には多くの種類があるため、結果を絞り込むためにこれらの手順を何度でも実行できます](<../../images/image (574).png>)
 
-### Random Memory Address - Finding the code
+### ランダムな Memory Address - code の検索
 
-これまで、値を保存している address を見つける方法を学びました。しかし、**ゲームを実行するたびに、そのaddressがメモリ内の異なる場所に存在する可能性が高い**です。そこで、常にそのaddressを見つけられる方法を確認します。
+ここまでで、値を保存している address の見つけ方を学びました。しかし、**game を実行するたびに、その address が memory 上の異なる場所にある可能性が高い**です。そこで、常にその address を見つけられる方法を確認しましょう。
 
-前述のテクニックを使い、現在のゲームが重要な値を保存している address を見つけます。次に（必要であればゲームを停止してから）、見つかった **address**を **right click**し、"**Find out what accesses this address**" または "**Find out what writes to this address**" を選択します。
+前述した tricks を使い、現在の game が重要な値を保存している address を見つけます。次に（必要であれば game を停止してから）、見つかった **address** を **right click** し、"**Find out what accesses this address**" または "**Find out what writes to this address**" を選択します。
 
-![Unknown Value、既知の変更 - Random Memory Address - Finding the code: 前述のテクニックを使い、現在のゲームが重要な値を保存しているaddressを見つけます。次に...](<../../images/image (1067).png>)
+![不明な値、既知の変化 - ランダムな Memory Address - code の検索: 前述した tricks を使い、現在の game が重要な値を保存している address を見つけます。次に...](<../../images/image (1067).png>)
 
-**最初のオプション**は、どの **code**の **部分**がこの **address**を **使用しているか**を確認するのに役立ちます（ゲームの **code**をどこで変更できるかを知るなど、他の目的にも役立ちます）。\
-**2 番目のオプション**はより **具体的**で、このケースでは値が **どこから書き込まれているか**を知りたいので、より役立ちます。
+**最初の option** は、どの **code の部分**がこの **address**を**使用しているか**を確認するのに役立ちます（game の **code を変更できる場所**を知るなど、他の用途にも便利です）。\
+**2 番目の option** はより**具体的**で、この場合は値が**どこから書き込まれているか**を知りたいので、こちらの方が役立ちます。
 
-いずれかのオプションを選択すると、**debugger**がプログラムに **attach**され、新しい **empty window**が表示されます。次に **ゲームをプレイ**し、その **値**を **変更**します（ゲームを再起動しないでください）。**window**には、**値**を **変更しているaddress**が表示されます。
+いずれかの option を選択すると、**debugger** が program に**attach**され、新しい**空の window**が表示されます。ここで **game をプレイ**し、その**値を変更**します（game は restart しないでください）。すると、**値を変更している address** で **window** が埋められます。
 
-![Unknown Value、既知の変更 - Random Memory Address - Finding the code: いずれかのオプションを選択すると、debuggerがプログラムにattachされ、新しいempty windowが表示されます。次に...](<../../images/image (91).png>)
+![不明な値、既知の変化 - ランダムな Memory Address - code の検索: いずれかの option を選択すると、debugger が program に attach され、新しい空の window が表示されます。次に...](<../../images/image (91).png>)
 
-値を変更している address が見つかったので、これで **codeを自由に変更**できます（Cheat Engine では、非常に簡単に NOPs に変更できます）。
+値を変更している address が見つかったので、これで**自由に code を変更**できます（Cheat Engine を使えば、NOPs への変更もすぐに行えます）。
 
-![Unknown Value、既知の変更 - Random Memory Address - Finding the code: 値を変更しているaddressが見つかったので、これでcodeを自由に変更できます（Cheat Engineでは、非常に簡単にNOPsに変更できます）。](<../../images/image (1057).png>)
+![不明な値、既知の変化 - ランダムな Memory Address - code の検索: 値を変更している address が見つかったので、これで自由に code を変更できます（Cheat Engine...](<../../images/image (1057).png>)
 
-これで、数値に影響を与えないように変更したり、常に有利な方向に作用するように変更したりできます。
+これで、code が number に影響を与えないように変更したり、常に有利な方向に影響するように変更したりできます。
 
-### Random Memory Address - Finding the pointer
+### ランダムな Memory Address - pointer の検索
 
-前の手順に従い、関心のある値が保存されている場所を見つけます。次に "**Find out what writes to this address**" を使って、この値を書き込んでいる address を確認し、それをダブルクリックして disassembly view を表示します。
+前の steps に従い、対象の値がある場所を見つけます。次に、"**Find out what writes to this address**" を使って、この値を書き込んでいる address を確認し、それを double click して disassembly view を開きます。
 
-![Random Memory Address - Finding the code - Random Memory Address - Finding the pointer: 前の手順に従い、関心のある値が保存されている場所を見つけます。次に「Find out...」を使います](<../../images/image (1039).png>)
+![ランダムな Memory Address - code の検索 - ランダムな Memory Address - pointer の検索: 前の steps に従い、対象の値がある場所を見つけます。次に、" Find out...](<../../images/image (1039).png>)
 
-次に、**"\[]" の間にある hex value**（この場合は $edx の値）を **検索する新しい scan**を実行します。
+次に、**"\[]" の間にある hex value**（この場合は $edx の値）を**検索する新しい scan**を実行します。
 
-![Random Memory Address - Finding the code - Random Memory Address - Finding the pointer: 次に、「 ()」の間にあるhex value（この場合は$edxの値）を検索する新しいscanを実行します](<../../images/image (994).png>)
+![ランダムな Memory Address - code の検索 - ランダムな Memory Address - pointer の検索: 次に、" ()" の間にある hex value（この場合は $edx の値）を検索する新しい scan を実行します](<../../images/image (994).png>)
 
-(_複数表示された場合は、通常、最も小さい address を選択します_)\
-これで、**関心のある値を変更する pointer が見つかりました**。
+(_複数表示された場合は、通常、最も小さい address のものが必要です_)\
+これで、対象の値を変更する **pointer を見つけました**。
 
-"**Add Address Manually**" をクリックします。
+"**Add Address Manually**" を click します。
 
-![Random Memory Address - Finding the code - Random Memory Address - Finding the pointer: 「Add Address Manually」をクリックします](<../../images/image (990).png>)
+![ランダムな Memory Address - code の検索 - ランダムな Memory Address - pointer の検索: " Add Address Manually " を click します](<../../images/image (990).png>)
 
-次に "Pointer" チェックボックスをクリックし、見つかった address をテキストボックスに追加します（この例では、前の画像で見つかった address は "Tutorial-i386.exe"+2426B0 でした）。
+次に、"Pointer" check box を click し、見つかった address を text box に追加します（この例では、前の画像で見つかった address は "Tutorial-i386.exe"+2426B0 でした）。
 
-![Random Memory Address - Finding the code - Random Memory Address - Finding the pointer: 次に「Pointer」チェックボックスをクリックし、見つかったaddressをテキストボックスに追加します（この例では...](<../../images/image (392).png>)
+![ランダムな Memory Address - code の検索 - ランダムな Memory Address - pointer の検索: 次に、"Pointer" check box を click し、見つかった address を text box に追加します（この例では...](<../../images/image (392).png>)
 
-（入力した pointer address から、最初の "Address" が自動的に入力されることに注目してください）
+（入力した pointer address に基づき、最初の "Address" が自動的に入力されることに注目してください）
 
-OK をクリックすると、新しい pointer が作成されます。
+OK を click すると、新しい pointer が作成されます。
 
-![Random Memory Address - Finding the code - Random Memory Address - Finding the pointer: OKをクリックすると、新しいpointerが作成されます](<../../images/image (308).png>)
+![ランダムな Memory Address - code の検索 - ランダムな Memory Address - pointer の検索: OK を click すると、新しい pointer が作成されます](<../../images/image (308).png>)
 
-これで、その値が保存されている **memory address**が異なっていても、値を変更するたびに重要な値を **変更**できます。
+これで、値がある memory address が変わっても、その値を変更するたびに**重要な値を変更**できます。
 
 ### Code Injection
 
-Code injection は、target process に code の一部を inject し、その後 code の実行経路を自分で記述した code に reroute する technique です（ポイントを減らす代わりに増やす、といった処理）。
+Code injection は、target process に code の一部を inject し、その後 code の実行を自分で書いた code を通るように reroute する technique です（life を減らす代わりに points を与えるなど）。
 
-たとえば、プレイヤーの life を 1 減らしている address を見つけたとします。
+たとえば、player の life を 1 減らしている address を見つけたとします。
 
-![Random Memory Address - Finding the pointer - Code Injection: プレイヤーのlifeを1減らしているaddressを見つけたとします](<../../images/image (203).png>)
+![ランダムな Memory Address - pointer の検索 - Code Injection: player の life を 1 減らしている address を見つけたとします](<../../images/image (203).png>)
 
-Show disassembler をクリックして **disassemble code**を表示します。\
-次に **CTRL+a** をクリックして Auto assemble window を開き、_**Template --> Code Injection**_ を選択します。
+Show disassembler を click して **disassemble code** を表示します。\
+次に **CTRL+a** を click して Auto assemble window を開き、_**Template --> Code Injection**_ を選択します。
 
-![Random Memory Address - Finding the pointer - Code Injection: 次にCTRL+aをクリックしてAuto assemble windowを開き、Template -- Code Injectionを選択します](<../../images/image (902).png>)
+![ランダムな Memory Address - pointer の検索 - Code Injection: 次に CTRL+a を click して Auto assemble window を開き、Template -- Code Injection を選択します](<../../images/image (902).png>)
 
 **変更したい instruction の address**を入力します（通常は自動入力されます）。
 
-![Random Memory Address - Finding the pointer - Code Injection: 変更したいinstructionのaddressを入力します（通常は自動入力されます）](<../../images/image (744).png>)
+![ランダムな Memory Address - pointer の検索 - Code Injection: 変更したい instruction の address を入力します（通常は自動入力されます）](<../../images/image (744).png>)
 
 template が生成されます。
 
-![Random Memory Address - Finding the pointer - Code Injection: templateが生成されます](<../../images/image (944).png>)
+![ランダムな Memory Address - pointer の検索 - Code Injection: template が生成されます](<../../images/image (944).png>)
 
-"**newmem**" セクションに新しい assembly code を挿入し、実行したくない場合は "**originalcode**" から元の code を削除します**。** この例では、inject された code により 1 減らす代わりに 2 ポイント増加します。
+"**newmem**" section に新しい assembly code を挿入し、元の code を実行したくない場合は "**originalcode**" から削除します**。**この例では、injected code が 1 減らす代わりに 2 points を加えます。
 
-![Random Memory Address - Finding the pointer - Code Injection: 「newmem」セクションに新しいassembly codeを挿入し、実行したくない場合は「originalcode」から元のcodeを削除します](<../../images/image (521).png>)
+![ランダムな Memory Address - pointer の検索 - Code Injection: " newmem " section に新しい assembly code を挿入し、元の code を実行したくない場合は " originalcode " から削除します。](<../../images/image (521).png>)
 
-**execute などをクリックすれば、code が program に inject され、機能の behaviour が変わります！**
+**execute などを click すれば、program に code が inject され、機能の挙動が変わります！**
 
-## Cheat Engine 7.x (2023-2025) の Advanced features
+## AOB signatures を使用した relocation-safe code injection
 
-Cheat Engine は version 7.0 以降も進化を続けており、modern software（ゲームだけではありません！）を分析する際に非常に便利な、quality-of-life 機能や *offensive-reversing* 機能がいくつも追加されています。以下は、red-team/CTF 作業で最もよく使用する追加機能をまとめた **非常に簡潔な field guide** です。<sup>[[1]](#references)</sup>
+`game.exe+123456` に hook する script は、ASLR や software update の後に動作しなくなる可能性があります。**Array of Bytes (AOB) signature** は、周辺の machine code から instruction を見つけます。`aobscanmodule` を使って検索対象を 1 つの module に限定します。signature は、1 つの match だけが返るのに十分な長さにします。relocation bytes、addresses、その他変化する可能性のある bytes には wildcard を使用します。restore する必要がある instruction 全体を wildcard にしてはいけません。<sup>[[4]](#references)</sup>
 
-### Pointer Scanner 2 の improvements
-* `Pointers must end with specific offsets` と新しい **Deviation** slider（≥7.4）により、update 後に rescan する際の false positives を大幅に減らせます。multi-map comparison（`.PTR` → *Compare results with other saved pointer map*）と組み合わせて、わずか数分で **単一の resilient base-pointer** を取得できます。
-* Bulk-filter shortcut：最初の scan 後に `Ctrl+A → Space` を押してすべてを mark し、その後 `Ctrl+I`（invert）を押すと、rescan に失敗した address の選択を解除できます。
+Memory View で instruction を選択し、**Tools → Auto Assemble → Template → AOB Injection** を使用します。生成された `[DISABLE]` block は重要です。上書きされたすべての byte を restore し、allocation を free する必要があります。<sup>[[4]](#references)</sup>
 
-### Ultimap 3 – Intel PT tracing
-*7.5 以降、旧 Ultimap は **Intel Processor-Trace (IPT)** を基盤として再実装されています*。これにより、**single-stepping**なしで target が実行する *すべての branch* を記録できるようになりました（user-mode only であり、ほとんどの anti-debug gadget を発動させません）。
+<details>
+<summary>最小限の x64 AOB injection skeleton</summary>
+```asm
+[ENABLE]
+aobscanmodule(INJECT,game.exe,F3 0F 11 83 A0 00 00 00 48 8B)
+alloc(newmem,1024,INJECT)
+label(return)
+registersymbol(INJECT)
+newmem:
+movss [rbx+000000A0],xmm0
+jmp return
+INJECT:
+jmp newmem
+nop
+nop
+nop
+return:
+[DISABLE]
+INJECT:
+db F3 0F 11 83 A0 00 00 00
+unregistersymbol(INJECT)
+dealloc(newmem)
 ```
-Memory View → Tools → Ultimap 3 → check «Intel PT»
-Select number of buffers → Start
+</details>
+
+scriptを有効にする前に、以下を確認してください。
+
+1. AOBが返すアドレスが**1つ**であること。複数返る場合は、両側に安定した命令を追加します。
+2. jumpが完全な命令を置き換えていること。命令を途中で分割してはいけません。
+3. allocated caveが生成されたjumpから到達可能であること。x64では、遠い位置へのallocationに14バイトのjumpが必要になる場合があります。
+4. injected codeが、元のfunctionが想定するregister、flags、stack alignmentを保持していること。
+5. disable blockが元のバイト列を正確に復元すること。tableを保存する前に、enableとdisableを何度かテストします。
+
+## Reliable pointer workflow
+
+1回の実行で見つかったpointerは候補にすぎません。複数回の新規実行でpointer mapを作成し、それらすべてに対してrescanします。captureの間にtargetを再起動し、ASLRとheap allocationが変化するようにします。baseがmoduleまたは別の安定したsymbolであるpathを優先します。1つのsave、level、またはobject instanceでしか機能しないpathは除外します。
+
+**pointer must end with specific offsets** filterとそのdeviation optionは、build間で近くのfieldが移動した場合に有用なpathを維持できます。7.5 releaseでは、このdeviation controlも追加されました。これはfilterであり、pointer chainが安定していることの証明ではありません。<sup>[[1]](#references)</sup>
+
+pointer scanningではstructureの移動が多すぎる場合、そのstructureにaccessするinstructionをhookします。registerからlive object pointerをallocated symbolに取り込みます。これはentity listやmanaged objectで、より信頼性が高いことがよくあります。
+
+## Tracing code instead of scanning values
+
+valueが直接変更される場合は、**Find out what writes to this address**を使用します。所有するobjectが必要な場合、またはwriteがcopied dataを介して行われる場合は、**Find out what accesses this address**を使用します。targetでは1つのactionだけを実行します。その後、hit countとregister stateを比較します。
+
+**Ultimap 2**は、対応するIntel CPU上でIntel Processor Traceを使用します。すべてのinstructionをstep実行する場合よりも中断を少なくして、実行されたcontrol flowを記録します。対象のactionの実行中に実行されたcodeでfilterし、idle capture中にも実行されたcodeを除外します。Intel PTはstealth featureではありません。targetはtracing、timingの変化、またはCheat Engine自体を検出できます。<sup>[[1]](#references)</sup>
+
+Cheat Engine 7.5では、Windowsが提供するIntel PT interfaceも追加されました。古いDBVM-backed Ultimap modeとIntel PT modeでは、hardwareとOSの要件が異なります。DBVMに対応するCPUがIntel PTにも対応しているとは限りません。<sup>[[1]](#references)</sup>
+
+## Debugger and breakpoint selection
+
+動作する中で、最も侵襲性の低いdebuggerを選択します。
+
+- **Windows debugger**は単純ですが、通常のdebug eventを生成します。Anti-debugging checkで検出される可能性があります。
+- **VEH debugger**はvectored exception handlerを通じてbreakpointを処理します。基本的なdebugger checkの一部を回避できますが、不可視ではありません。
+- **Hardware breakpoint**はinstruction byteをpatchしませんが、x86/x64で使用できるdebug-register slotの数は少数です。
+- **Software breakpoint**は1バイトを`INT3`に置き換えます。検出しやすく、integrity checkと競合する可能性があります。
+- **DBVM debugger**は一部のoperationをguest OSより下の層に移します。より強い権限を持つため、設定を誤るとhostをcrashさせる可能性があります。
+
+Cheat Engine 7.5では、通常のrelative jumpを配置する十分な空きがない場合に、exception handlerと`INT3`を基にした1バイトjumpを使用できます。これはsoftware breakpointと同じように扱ってください。exception flowを確認し、anti-tamper checkを回避できるとは考えないでください。<sup>[[1]](#references)</sup>
+
+DBVMはhypervisorであり、一般的な不可視化switchではありません。使う場合は、破棄可能なlabに限定してください。control interfaceをuntrusted codeに公開しないでください。Kernel anti-cheatやendpoint productは、driver、hypervisor state、または変更されたmemoryを検出できる場合があります。
+
+## Managed runtimes and recent 7.6/7.7 features
+
+Mono、IL2CPP、.NET、Javaのtargetでは、利用可能な場合はblind scanよりもruntime metadataを優先します。**Mono → Activate mono features**または対応するruntime information windowを開きます。まずclass、field、またはmethodを特定します。その後、managed methodがJIT compileされた時点でnative disassemblyを使用します。
+
+7.6 lineでは、executable-memory-only signature用の`AOBSCANEX`、`gdbserver` debugger interface、Java metadata inspection、高速化されたIL2CPP enumeration、ARM memory taggingで使用されるupper pointer byteを無視するpointer-scan optionが追加されました。7.7 lineでは、native Linux build、`HOOK`/`UNHOOK`、`aobscanfunction`、改善されたgeneric Mono method lookup、強化されたPDB structure support、基本的なUnreal Engine structure dissectionが追加されました。<sup>[[3]](#references)</sup>
+
+これらの追加機能により、次のworkflowが利用できます。
+
+1. metadataからmanaged methodまたはstatic fieldをresolveします。
+2. そのmethod用に生成されたnative codeをtraceまたはdisassembleします。
+3. `AOBSCANEX`または`aobscanfunction`を使用して、安定したexecutable signatureを特定します。
+4. reversible hookを生成します。original instructionを保持し、disable pathをvalidateします。
+5. targetを更新するたびにsignatureを再確認します。matchに成功しても、周辺のlogicが同じ意味を持つとは限りません。
+
+## Remote targets with `ceserver`
+
+`ceserver`は、process enumeration、memory access、debuggingをCheat Engine GUIに公開します。Official buildはLinuxとAndroidに対応しています。target上で一致するarchitectureを実行し、**Network** tabから接続します。Androidでは、default portのforwardingによりnetworkへの公開を避けられます。<sup>[[3]](#references)</sup>
+```bash
+adb push ceserver_arm64 /data/local/tmp/ceserver
+adb shell 'su -c "chmod 700 /data/local/tmp/ceserver && /data/local/tmp/ceserver"'
+adb forward tcp:52736 tcp:52736
 ```
-数秒後にキャプチャを停止し、**right-click → Save execution list to file** を選択します。ブランチアドレスと `Find out what addresses this instruction accesses` セッションを組み合わせると、高頻度で実行されるゲームロジックのホットスポットを非常に高速に特定できます。
+サードパーティ製の `frida-ceserver` bridge は、iOS targets に対して Cheat Engine互換のインターフェースを提供できます。これは公式の `ceserver` ではなく、サポートされる操作が異なる場合があります。<sup>[[2]](#references)</sup>
 
-### 1-byte `jmp` / auto-patch templates
-Version 7.5では、SEH handlerをインストールし、元の場所にINT3を配置する *one-byte* JMP stub（0xEB）が導入されました。これは、5-byte relative jumpでpatchできない命令に対して **Auto Assembler → Template → Code Injection** を使用すると自動的に生成されます。これにより、packedまたはサイズ制約のあるroutine内でも「tight」なhookが可能になります。<sup>[[1]](#references)</sup>
+この protocol が debugger-level access を許可すると仮定してください。loopback に bind するか、SSH/ADB tunnel の背後に配置してください。TCP 52736 を信頼できない network に公開しないでください。session が終了したら server を停止してください。
 
-### Kernel-level stealth with DBVM (AMD & Intel)
-*DBVM* はCE内蔵のType-2 hypervisorです。最近のbuildではついに **AMD-V/SVM support** が追加され、Ryzen/EPYC hosts上で `Driver → Load DBVM` を実行できるようになりました。DBVMを使用すると、次の操作が可能です。
-1. Ring-3/anti-debug checksから見えないhardware breakpointsを作成する。
-2. user-mode driverが無効でも、pageableまたはprotectedなkernel memory regionsを読み書きする。
-3. VM-EXIT-less timing-attack bypassesを実行する（例：hypervisorから `rdtsc` をqueryする）。
+## Operational safety
 
-**Tip:** Windows 11でHVCI/Memory-Integrityが有効になっている場合、DBVMはloadを拒否します → 無効にするか、専用のVM-hostをbootしてください。
+自分が所有している、またはテストする権限を持つ software のみに attach してください。online game や production endpoint のそばで Cheat Engine を実行しないでください。Memory writes、injected code、drivers、DBVM によって target が crash したり、破損したりする可能性があります。<sup>[[3]](#references)</sup>
 
-### Remote / cross-platform debugging with **ceserver**
-CEには現在、*ceserver* の完全なrewriteが同梱されており、TCP経由で **Linux, Android, macOS & iOS** targetsにattachできます。人気のあるforkでは *Frida* が統合され、dynamic instrumentationとCEのGUIを組み合わせられます。phone上で実行されているUnityまたはUnreal gamesをpatchする必要がある場合に最適です：
-```
-# on the target (arm64)
-./ceserver_arm64 &
-# on the analyst workstation
-adb forward tcp:52736 tcp:52736   # (or ssh tunnel)
-Cheat Engine → "Network" icon → Host = localhost → Connect
-```
-Frida bridgeについては、GitHubの`bb33bb/frida-ceserver`を参照してください。<sup>[[1]](#references)[[2]](#references)</sup>
+build は公式サイトから download するか、公開されている source を compile してください。Security products は、memory editors、debuggers、drivers を hack tools として分類することがよくあります。host protection をグローバルに無効化しないでください。専用の VM または lab host を使用し、実行前に artifact を検証してください。<sup>[[3]](#references)</sup>
 
-### その他の注目すべき機能
-* **Patch Scanner**（MemView → Tools）– executable sections内の予期しないコード変更を検出します。malware analysisに便利です。
-* **Structure Dissector 2** – アドレスをドラッグして`Ctrl+D`を押し、*Guess fields*を選択すると、C-structuresを自動評価できます。
-* **.NET & Mono Dissector** – Unity gameのサポートが改善され、CE Lua consoleから直接メソッドを呼び出せます。
-* **Big-Endian custom types** – byte orderを反転してscan/editできます（console emulatorsやnetwork packet buffersに便利です）。
-* AutoAssembler/Lua windowsの**Autosave & tabs**に加え、複数行のinstruction rewrite用の`reassemble()`も利用できます。<sup>[[1]](#references)</sup>
 
-### InstallationとOPSECに関する注意事項（2024-2025）
-* 公式installerにはInnoSetupの**ad-offers**（`RAV`など）が含まれています。PUPsを避けるには、**必ず*Decline*をクリックする**か、sourceからcompileしてください。AVsは`cheatengine.exe`を*HackTool*として検出しますが、これは想定内です。
-* Modern anti-cheat drivers（EAC/Battleye、ACE-BASE.sys、mhyprot2.sys）は、名前を変更してもCEのwindow classを検出します。reversing用のcopyは**使い捨てのVM内**で実行するか、network playを無効にしてから実行してください。
-* user-mode accessだけが必要な場合は、Windows 11 24H2 Secure-BootでBSODを引き起こす可能性があるCEのunsigned driverのloadingを避けるため、**`Settings → Extra → Kernel mode debug = off`**を選択してください。
-
----
 
 ## References
 
-- [1] [Cheat Engine 7.5 release notes (GitHub)](https://github.com/cheat-engine/cheat-engine/releases/tag/7.5)
-- [2] [frida-ceserver cross-platform bridge](https://github.com/bb33bb/frida-ceserver-Mac-and-IOS)
-
+- [1] [Cheat Engine 7.5 リリースノート](https://github.com/cheat-engine/cheat-engine/releases/tag/7.5)
+- [2] [remote targets 用 frida-ceserver bridge](https://github.com/gmh5225/frida-ceserver)
+- [3] [Cheat Engine 公式リリースニュース](https://www.cheatengine.org/)
+- [4] [Cheat Engine Wiki: Auto Assembler AOBs](https://wiki.cheatengine.org/index.php?title=Tutorials:AOBs)
 {{#include ../../banners/hacktricks-training.md}}
