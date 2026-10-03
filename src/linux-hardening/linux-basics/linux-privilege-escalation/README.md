@@ -62,6 +62,9 @@ Always **search the kernel version in Google**, maybe your kernel version is wri
 Additional kernel exploitation techniques:
 
 {{#ref}}
+../../main-system-information/kernel-lpe-cves/linux-local-privilege-escalation-detection.md
+{{#endref}}
+{{#ref}}
 ../../../binary-exploitation/linux-kernel-exploitation/adreno-a7xx-sds-rb-priv-bypass-gpu-smmu-kernel-rw.md
 {{#endref}}
 {{#ref}}
