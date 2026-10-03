@@ -116,6 +116,45 @@ The results feed directly into your race orchestration strategy (e.g., number of
    - When Thread A resumes and performs the privileged action, it observes stale state and performs the attacker-controlled operation.
 4. **Clean up** – Delete the directory chain and symbolic links to avoid leaving suspicious artifacts or breaking legitimate IPC users.<sup>[[1]](#references)</sup>
 
+## Applied chain: mutable Cloud Files placeholder name + junction traversal
+
+`CfCreatePlaceholders()` creates files or directories below a registered Cloud Files sync root. In CVE-2025-55680, `cldflt.sys` validated a placeholder's relative name and later created the object while still referencing the caller's mutable buffer. This converted a filename-validation TOCTOU into privileged file creation outside the sync root.<sup>[[10]](#references)[[11]](#references)</sup>
+
+### Why locking the pages did not lock the data
+
+The vulnerable `HsmpOpCreatePlaceholders()` path allocated an MDL for the caller's payload, called `ProbeForRead()` and `MmProbeAndLockPages()`, and mapped those pages into kernel virtual address space. An MDL describes and locks the physical pages so that they remain resident. It does **not** snapshot their bytes. User mode can therefore modify the same physical memory while the driver reads it through the system mapping.<sup>[[10]](#references)[[12]](#references)</sup>
+
+The relevant request and use path was:<sup>[[10]](#references)</sup>
+
+1. `cldapi.dll` sent Cloud Files control code `0x903BC` with tag `IO_REPARSE_TAG_CLOUD` (`0x9000001A`) and create-placeholder operation `0xC0000001`.
+2. Each payload record contained 16-bit offset/length pairs for the relative name and file identity. Most fixed fields were copied to a stack record, but the variable-length name remained in the mapped user pages.
+3. The driver scanned the UTF-16 name and rejected a backslash or colon.
+4. It then built a `UNICODE_STRING` whose `Buffer` still pointed into the mapped payload and assigned it to `OBJECT_ATTRIBUTES.ObjectName`.
+5. `FltCreateFileEx2()` read that pointer again. A concurrent writer could therefore make validation observe one string and file creation observe another.
+
+This is a **double-fetch** even though both reads use a kernel virtual address: the security boundary depends on the backing storage, not on which virtual mapping the driver dereferences.<sup>[[10]](#references)</sup>
+
+### Race layout
+
+The disclosed exploit strategy used repeated requests, mutator threads, and a junction to turn the double-fetch into path redirection:<sup>[[10]](#references)</sup>
+
+1. Register an attacker-controlled directory with `CfRegisterSyncRoot()` and create `JUSTASTRING` below it as a junction to a protected destination.
+2. Prepare a shared placeholder record with the valid single-component name `JUSTASTRINGDnewfile.dll`.
+3. Have mutator threads toggle the UTF-16 `D` code unit between `D` and `\`. The second representation is `JUSTASTRING\newfile.dll`.
+4. In parallel, have worker threads repeatedly submit create-placeholder requests that reference the same payload, while a monitor checks the protected destination.
+5. A winning iteration validates the separator-free representation, then follows the junction when the later create sees the representation containing `\`.
+
+The primitive only establishes protected file or directory creation. Turning it into code execution still requires control of the created file's contents and a privileged consumer, such as a suitable DLL side-loading target. The original analysis used this final class of chain but did not publish the loader, payload, or a complete standalone exploit.<sup>[[10]](#references)</sup>
+
+### Driver review and remediation checklist
+
+For pointer-bearing IOCTLs and other kernel interfaces, treat every read from caller-backed memory as volatile. `ProbeForRead()`, page locking, and a kernel mapping establish accessibility and residency, not immutability.<sup>[[10]](#references)[[12]](#references)</sup>
+
+- Copy the complete variable-length record into private kernel memory once. Validate offsets, lengths, alignment, integer additions, UTF-16 boundaries, and forbidden characters only against that snapshot.
+- Build every later `UNICODE_STRING`, `OBJECT_ATTRIBUTES`, and file-identity pointer from the same snapshot. Do not mix copied metadata with variable-length fields that still reference caller pages.
+- Keep the trusted sync-root directory open by handle. If nested paths are intentionally supported, resolve components relative to trusted directory handles and explicitly handle unexpected reparse points rather than validating one pathname and resolving it again later.
+- Add a concurrency regression test that aliases the input pages through a second user mapping and mutates security-sensitive fields while the request is processed. A successful fix must make the result independent of all writes made after the snapshot.
+
 ## Applied chain: mutable Cloud Files placeholders + Object Manager path switching
 
 [ShieldBreak](https://github.com/MSNightmare/ShieldBreak), published as a bypass for RoguePlanet (CVE-2026-50656), demonstrates a broader exploitation pattern: make a privileged scanner classify one representation of a logical file, then change both its bytes and namespace resolution before remediation uses it. The PoC combines a Cloud Files hydration TOCTOU, an Object Manager shadow-directory fallback, CLFS-generated-name capture, and a local administrative-share link to turn Defender cleanup into a protected DLL write.<sup>[[3]](#references)[[4]](#references)</sup>
@@ -219,5 +258,8 @@ When reproducing the PoC, account for three reliability defects in the published
 - [7] [Microsoft Learn - FSCTL_REQUEST_OPLOCK](https://learn.microsoft.com/en-us/windows/win32/api/winioctl/ni-winioctl-fsctl_request_oplock)
 - [8] [Microsoft Learn - FSCTL_SET_REPARSE_POINT_EX](https://learn.microsoft.com/en-us/windows-hardware/drivers/ifs/fsctl-set-reparse-point-ex)
 - [9] [Microsoft Learn - How to Use Transactional NTFS](https://learn.microsoft.com/en-us/windows/win32/fileio/how-to-use-transactional-ntfs)
+- [10] [Exodus Intelligence - Microsoft Windows Cloud Files Minifilter TOCTOU Privilege Escalation](https://blog.exodusintel.com/2025/10/20/microsoft-windows-cloud-files-minifilter-toctou-privilege-escalation/)
+- [11] [Microsoft Learn - CfCreatePlaceholders function](https://learn.microsoft.com/en-us/windows/win32/api/cfapi/nf-cfapi-cfcreateplaceholders)
+- [12] [Microsoft Learn - MmProbeAndLockPages function](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/nf-wdm-mmprobeandlockpages)
 
 {{#include ../../banners/hacktricks-training.md}}
