@@ -261,6 +261,48 @@ The XML configuration file for Users and Groups outlines how these changes are i
 
 Furthermore, additional methods for executing code or maintaining persistence, such as leveraging logon/logoff scripts, modifying registry keys for autoruns, installing software via .msi files, or editing service configurations, can also be considered. These techniques provide various avenues for maintaining access and controlling target systems through the abuse of GPOs.
 
+### Domain-wide policy-only impact
+
+GPO abuse does not need to launch malware. A principal that can create a GPO and modify the `gPLink` of the domain root can turn trusted policy processing into a domain-wide impact channel. These are separate permissions: membership in **Group Policy Creator Owners** can provide GPO creation rights, while linking at the domain root requires write access to that domain object's `gPLink` or an equivalent privileged role. The malicious link also remains a control-plane persistence mechanism that can reapply settings after endpoint cleanup.<sup>[[18]](#references)</sup>
+
+An attacker can combine legitimate **client-side extensions (CSEs)** so there is no ransomware executable, script, service, or scheduled task for process-focused detection to find. Common impact primitives include the following:<sup>[[18]](#references)</sup>
+
+| Policy component | Example impact |
+| --- | --- |
+| Files Group Policy Preferences | Copy attacker-controlled notes or content from SYSVOL to desktops and local drive roots. |
+| Registry / Administrative Templates | Set logon banners, security options, firewall state, or other policy-backed registry values. |
+| Desktop and Personalization policies | Replace user wallpaper and the computer lock-screen image with content hosted in SYSVOL. |
+| Security Settings in `GptTmpl.inf` | Disable a local account or change security options and user-right assignments. |
+
+User settings can also be made computer-scoped through **Group Policy loopback processing**. In Replace mode, the user's normal GPO list is replaced by the list derived from the computer location. In Merge mode, both lists are applied and the computer-derived list has precedence. This allows a user setting such as wallpaper to affect anyone who signs in to an in-scope machine.<sup>[[18]](#references)[[20]](#references)</sup>
+
+Do not assume that the visible impact starts when the directory object changes. A client may cache the policy during background refresh while a foreground-only setting waits for boot or logon. This can separate the GPO creation or link event from the later organization-wide effect. Review the directory timeline even when endpoint symptoms appear after a reboot.<sup>[[18]](#references)</sup>
+
+### GPO/GPT detection and forensics
+
+Monitor both halves of a GPO. With the audit policy and relevant SACLs configured, **Audit Directory Service Changes** on every domain controller can record Event ID `5137` for object creation, `5136` for object modification, and `5141` for object deletion. Prioritize new `groupPolicyContainer` objects, domain-root or sensitive-OU `gPLink` changes, and modifications to `gPCMachineExtensionNames`, `gPCUserExtensionNames`, `gPCFileSysPath`, or `versionNumber`.<sup>[[18]](#references)[[19]](#references)</sup>
+
+```powershell
+# Run against collected DC Security logs or locally on a DC
+Get-WinEvent -FilterHashtable @{LogName='Security'; Id=5136,5137,5141} |
+  Where-Object { $_.Message -match 'groupPolicyContainer|gPLink|gPC(FileSysPath|MachineExtensionNames|UserExtensionNames)|versionNumber' } |
+  Select-Object TimeCreated, Id, MachineName, Message
+```
+
+The AD audit trail is not enough because the **GPT is stored as files in SYSVOL**. File-integrity monitoring should cover `\\<domain>\SYSVOL\<domain>\Policies\` and alert on unexpected scripts or payload files plus changes to `ScheduledTasks.xml`, `Registry.pol`, and `GptTmpl.inf`. Security Event ID `4663` can show access to audited SYSVOL objects, while Sysmon Event ID `11` records file creation. Correlate each GPT write with an approved change, replication activity, its GPC attributes, and its version. A template-file change without a corresponding `5136` can indicate direct SYSVOL editing, although broken auditing or replication can produce the same mismatch.<sup>[[18]](#references)</sup>
+
+On affected endpoints, reconstruct application time and scope from `Microsoft-Windows-GroupPolicy/Operational`, `gpresult`/RSOP, and the Group Policy `History`, `Shadow`, and `State` registry trees. A `Loopback-GPO-List` entry is evidence that user policy was selected from the computer's scope, not proof by itself that the policy was malicious.<sup>[[18]](#references)[[20]](#references)</sup>
+
+```text
+HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Group Policy\History
+HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Group Policy\Shadow
+HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Group Policy\State\Machine\GPO-List
+HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Group Policy\History
+HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Group Policy\State\<SID>\Loopback-GPO-List
+```
+
+Containment must start at the policy source: unlink or remove the malicious GPO, revert the GPT and staged SYSVOL content, confirm replication across domain controllers, and only then force a clean policy refresh on endpoints. Otherwise, the next refresh can restore the unwanted state.<sup>[[18]](#references)</sup>
+
 ### Redirecting GPC/GPT retrieval to authenticated rogue services
 
 A GPO consists of an LDAP **Group Policy Container (GPC)** with metadata and an SMB-hosted **Group Policy Template (GPT)** with the policy files. During refresh, the client follows the container's `gPLink`, reads the referenced GPC and its `gPCFileSysPath`, then downloads the GPT from that UNC path. Consequently, write access to either the GPC itself or the `gPLink` of an OU, Site or Domain can be converted into privileged policy processing.<sup>[[12]](#references)[[13]](#references)[[14]](#references)[[15]](#references)</sup>
@@ -454,5 +496,8 @@ Notes:
 - [15] [Simulating legitimate Active Directory services on the network: the case of GPO exploitation](https://synacktiv.com/en/publications/simulating-legitimate-active-directory-services-on-the-network-the-case-of-gpo.html)
 - [16] [Synacktiv GPOddity](https://github.com/synacktiv/GPOddity)
 - [17] [Synacktiv OUned](https://github.com/synacktiv/OUned)
+- [18] [Group Policy hijacked: PAYLOAD ransomware weaponizes Active Directory GPO](https://securelist.com/tr/payload-ransomware-via-group-policy/121335/)
+- [19] [Audit Directory Service Changes - Microsoft Learn](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/audit-directory-service-changes)
+- [20] [Loopback processing of Group Policy - Microsoft Learn](https://learn.microsoft.com/en-us/troubleshoot/windows-server/group-policy/loopback-processing-of-group-policy)
 
 {{#include ../../../banners/hacktricks-training.md}}
