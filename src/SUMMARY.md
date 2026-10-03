@@ -713,7 +713,7 @@
 - [6379 - Pentesting Redis](network-services-pentesting/6379-pentesting-redis.md)
 - [8009 - Pentesting Apache JServ Protocol (AJP)](network-services-pentesting/8009-pentesting-apache-jserv-protocol-ajp.md)
 - [8086 - Pentesting InfluxDB](network-services-pentesting/8086-pentesting-influxdb.md)
-- [8089 - Pentesting Splunkd](network-services-pentesting/8089-splunkd.md)
+- [8000, 8089 - Pentesting Splunk](network-services-pentesting/8089-splunkd.md)
 - [8333,18333,38333,18444 - Pentesting Bitcoin](network-services-pentesting/8333-18333-38333-18444-pentesting-bitcoin.md)
 - [9000 - Pentesting FastCGI](network-services-pentesting/9000-pentesting-fastcgi.md)
 - [9001 - Pentesting HSQLDB](network-services-pentesting/9001-pentesting-hsqldb.md)
