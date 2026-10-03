@@ -93,6 +93,10 @@ AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 
 [Partial lifting, invariant MBA detection, environment-bound decoding, and automated-extractor validation](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
 
+### AI-Guided Static Detection Reduction
+
+[LLM-guided scanner-oracle loops and Go binary ghost profiles](../windows-hardening/av-bypass.md#llm-guided-adversarial-oracle-loop)
+
 ### Web Black-Box AI Pentester Bots
 
 LLM-powered agents can automate long-running black-box web pentesting workflows when they are supported by observability, orchestration, authenticated session handling, and adversarial validation:
