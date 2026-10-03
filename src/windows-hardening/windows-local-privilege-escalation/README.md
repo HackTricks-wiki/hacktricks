@@ -935,6 +935,12 @@ arbitrary-kernel-rw-token-theft.md
 windows-kernel-rootkits-and-dkom.md
 {{#endref}}
 
+Related Windows kernel-exploitation material:
+
+{{#ref}}
+../../binary-exploitation/windows-kernel-type-confusion-to-npfs-arbitrary-rw.md
+{{#endref}}
+
 For race-condition bugs where the vulnerable call opens an attacker-controlled Object Manager path, deliberately slowing the lookup (using max-length components or deep directory chains) can stretch the window from microseconds to tens of microseconds:
 
 {{#ref}}
