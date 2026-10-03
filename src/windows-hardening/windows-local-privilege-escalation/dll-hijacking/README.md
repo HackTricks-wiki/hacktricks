@@ -739,6 +739,30 @@ Defensive pivots
 - Threads created by a proxy DLL that immediately call `LoadLibrary` on a second DLL with a decrypted name.
 - Full-export proxy DLLs placed next to vendor executables inside writable staging directories such as `ProgramData`, `%TEMP%`, or unpacked archive paths.
 
+### Export stubs instead of a transparent proxy
+
+A replacement DLL does not always preserve the decoy application's functionality. A simpler variant exports the expected symbols but parks calls in an infinite `Sleep`, while `DllMain(DLL_PROCESS_ATTACH)` starts the malicious worker. The host therefore resolves its imports but its normal UI or service logic stops. A fallback path may still locate a genuine copy of the DLL and resolve its functions dynamically if a sleeping stub returns. An additional, non-imported export such as `RunDLL` can expose the same loader through `rundll32.exe <dll>,RunDLL` or another launcher.<sup>[[26]](#references)</sup>
+
+This behavior is distinct from full proxying: export-table compatibility is retained, but successful application behavior is deliberately sacrificed. During triage, compare the suspect and genuine export tables, then inspect apparently trivial exports for sleep loops and follow `DllMain`-created worker threads instead of assuming the imported functions contain the payload logic.<sup>[[26]](#references)</sup>
+
+### Host-aware encrypted payload routing
+
+The same sideloaded dependency can support several signed host executables and select its next stage from the current process image name. One host can read an external encrypted blob while another extracts a payload from the malicious DLL's resources; each blob may contain the same implant with different configuration, such as alternate C2 endpoints. After decryption, the loader can verify the DOS/NT PE signatures, manually map the image into the current process, and invoke its `DllMain` only when validation succeeds.<sup>[[26]](#references)</sup>
+
+Hunt for a signed executable loading an unsigned or differently signed dependency from its application directory, followed by resource access or reads of extensionless high-entropy files, private executable memory, and a PE image that has no corresponding loaded-module path. If multiple sibling executables load the same local DLL, compare their subsequent file/resource access because the host identity may select a different encrypted payload.<sup>[[26]](#references)</sup>
+
+### File-association Startup trigger
+
+A sideload chain can be relaunched at logon without placing an executable or shortcut in the Startup folder: register the signed host as the handler for an attacker-chosen extension, then place a file with that extension in `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup`. Explorer processes the item through its file association and starts the registered handler, which loads the colocated malicious dependency again.<sup>[[26]](#references)</sup>
+
+Correlate a new custom extension/ProgID below `HKCU\Software\Classes` (especially a suspicious `shell\open\command`) with a same-extension file created in the per-user Startup directory. Inspect the handler executable's adjacent DLLs; deleting only the unusual Startup file does not remove the sideloaded components.<sup>[[26]](#references)</sup>
+
+### Delayed watchdog injection and critical-process protection
+
+A post-sideload implant can keep a watchdog inside another process while avoiding an immediately executable remote region. One observed sequence targeted `svchost.exe`: allocate remote memory, write restart code, set the page to `PAGE_NOACCESS`, create its thread suspended, wait about 60 seconds, change the page to read/write/execute, and resume the thread. The watchdog then restarts the original implant if it stops.<sup>[[26]](#references)</sup>
+
+Detection must correlate the complete source/target sequence rather than only alerting on the final RWX page: remote allocation/write, a suspended remote thread, a long-lived `PAGE_NOACCESS` region, a delayed protection transition, and `ResumeThread` against the same process. The implant may also mark its own process critical so forced termination causes a system bug check, while an unhandled-exception path restarts ordinary crashes; isolate the host before terminating a process exhibiting this combination.<sup>[[26]](#references)</sup>
+
 ## References
 
 - [1] [Red Canary – Intelligence Insights: January 2026](https://redcanary.com/blog/threat-intelligence/intelligence-insights-january-2026/)
@@ -766,5 +790,6 @@ Defensive pivots
 - [23] [Microsoft Learn – Task Actions](https://learn.microsoft.com/en-us/windows/win32/taskschd/task-actions)
 - [24] [MITRE ATT&CK – T1574.014 AppDomainManager](https://attack.mitre.org/techniques/T1574/014/)
 - [25] [Unit 42 – CL-STA-1062 Targets Southeast Asian Governments and Critical Infrastructure](https://unit42.paloaltonetworks.com/cl-sta-1062-tinyrct-backdoor/)
+- [26] [Kaspersky Securelist – ValleyRAT backdoor distributed through signed QN Wallpaper adware](https://securelist.com/valleyrat-backdoor-adware/121175/)
 
 {{#include ../../../banners/hacktricks-training.md}}
