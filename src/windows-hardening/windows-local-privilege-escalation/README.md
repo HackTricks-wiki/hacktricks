@@ -935,6 +935,10 @@ arbitrary-kernel-rw-token-theft.md
 windows-kernel-rootkits-and-dkom.md
 {{#endref}}
 
+{{#ref}}
+kernel-mode-file-access-check-bypass.md
+{{#endref}}
+
 For race-condition bugs where the vulnerable call opens an attacker-controlled Object Manager path, deliberately slowing the lookup (using max-length components or deep directory chains) can stretch the window from microseconds to tens of microseconds:
 
 {{#ref}}
