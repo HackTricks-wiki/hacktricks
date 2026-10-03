@@ -87,6 +87,27 @@ Administrator or backup privileges can create a shadow copy or save registry hiv
 
 ## BadUSB / HID Implant Techniques
 
+### NFC-triggered Android HID gadget
+
+A rooted Android phone can become a programmable USB keyboard only when its USB controller and kernel provide **USB gadget/HID support**. On compatible devices, Kali NetHunter exposes gadget profiles through **USB Arsenal**. Another option is [USB Gadget Tool](https://github.com/tejado/android-usb-gadget), which creates ConfigFS gadget functions and may expose keyboard/mouse character devices such as `/dev/hidg0` and `/dev/hidg1`. The tool only creates the gadget endpoint; a separate process must write HID reports to it. Root access cannot compensate for a kernel that lacks ConfigFS, HID gadget support, or a usable USB Device Controller.<sup>[[19]](#references)[[20]](#references)[[21]](#references)</sup>
+
+This endpoint can be combined with Android NFC as a physical trigger. The [NFC-to-HID](https://github.com/androidmalware/NFC-to-HID) app reads a tag UID, converts it to its expected representation, checks a local whitelist, and sends a configured Rubber Ducky-style keyboard sequence after a match. The connected host sees ordinary keyboard input and needs no NFC software.<sup>[[22]](#references)[[24]](#references)</sup>
+
+Validate enumeration and keyboard layout in a blank text editor before using shortcuts or commands. A harmless payload is:<sup>[[24]](#references)</sup>
+
+```text
+DELAY 1000
+STRING NFC HID test successful
+ENTER
+```
+
+Important trust boundaries:<sup>[[22]](#references)[[23]](#references)[[24]](#references)</sup>
+
+- A **UID whitelist is identification, not authentication**. UIDs are public and some token types or emulators permit cloning or impersonation. A copied allowed UID follows the same dispatch path as the original token.
+- The **NfcScreenOff** Magisk module patches the NFC service so it behaves as though the screen is on and unlocked. If the phone is already attached to a host, this can let someone trigger the payload without unlocking the phone.
+- Passwords, API tokens, and commands stored in the payload are recoverable secrets on a rooted or bootloader-unlocked device. Typing a password over HID is reusable-password automation, not passwordless authentication.
+- HID injection acts with the active desktop's privileges and depends on focus, timing, and the host keyboard layout. Require recent user confirmation before dispatching sensitive actions, avoid privileged secrets in scripts, and use a cryptographic challenge-response authenticator for real authentication.
+
 ### Wi-Fi managed cable implants
 
 - ESP32-S3 based implants such as **Evil Crow Cable Wind** hide inside USB-A→USB-C or USB-C↔USB-C cables, enumerate purely as a USB keyboard, and expose their C2 stack over Wi-Fi. The operator only needs to power the cable from the victim host, create a hotspot named `Evil Crow Cable Wind` with password `123456789`, and browse to [http://cable-wind.local/](http://cable-wind.local/) (or its DHCP address) to reach the embedded HTTP interface.<sup>[[8]](#references)</sup>
@@ -220,5 +241,11 @@ After the tenth cycle the EC sets a flag that instructs the BIOS to wipe NVRAM a
 - [16] [Microsoft Learn - BitLocker operations guide](https://learn.microsoft.com/en-us/windows/security/operating-system-security/data-protection/bitlocker/operations-guide)
 - [17] [Microsoft Learn - holding Shift and automatic logon behavior](https://learn.microsoft.com/en-us/troubleshoot/windows-client/user-profiles-and-logon/hold-shift-key-shutting-down-not-disable-automatic-logon)
 - [18] [CGSecurity - CmosPwd documentation and downloads](https://www.cgsecurity.org/wiki/CmosPwd)
+- [19] [Kali Linux Documentation - NetHunter USB-Arsenal](https://www.kali.org/docs/nethunter/nethunter-usbarsenal/)
+- [20] [Linux kernel documentation - USB HID gadget driver](https://docs.kernel.org/usb/gadget_hid.html)
+- [21] [USB Gadget Tool](https://github.com/tejado/android-usb-gadget)
+- [22] [NFC-to-HID](https://github.com/androidmalware/NFC-to-HID)
+- [23] [NfcScreenOff](https://github.com/Jon8RFC/NfcScreenOff)
+- [24] [Turn a Rooted Android Phone into an NFC Authenticator and Automation Tool for Your PC](https://mobile-hacker.com/2026/09/21/turn-a-rooted-android-phone-into-an-nfc-authenticator-and-automation-tool-for-your-pc/)
 
 {{#include ../banners/hacktricks-training.md}}
