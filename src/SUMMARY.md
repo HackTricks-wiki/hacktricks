@@ -1017,6 +1017,7 @@
 - [Arm64 Static Linear Map Kaslr Bypass](binary-exploitation/linux-kernel-exploitation/arm64-static-linear-map-kaslr-bypass.md)
 - [Futex PI UAF to Pipe Physical R/W and Workqueue Execution](binary-exploitation/linux-kernel-exploitation/futex-pi-uaf-pipe-buffer-workqueue-usermodehelper.md)
 - [Ksmbd Streams Xattr Oob Write Cve 2025 37947](binary-exploitation/linux-kernel-exploitation/ksmbd-streams_xattr-oob-write-cve-2025-37947.md)
+- [net/sched action-IDR UAF exploitation (CVE-2026-53264)](binary-exploitation/linux-kernel-exploitation/net-sched-action-idr-uaf-cve-2026-53264.md)
 - [Pixel Bigwave Bigo Job Timeout Uaf Kernel Write](binary-exploitation/linux-kernel-exploitation/pixel-bigwave-bigo-job-timeout-uaf-kernel-write.md)
 - [Linux kernel exploitation - toctou](binary-exploitation/linux-kernel-exploitation/posix-cpu-timers-toctou-cve-2025-38352.md)
 - [PS5 compromission](binary-exploitation/freebsd-ptrace-rfi-vm_map-prot_exec-bypass-ps5.md)
