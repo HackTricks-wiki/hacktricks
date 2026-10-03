@@ -28,6 +28,22 @@ The exact path matters. If the sudo rule allows `/usr/bin/python3`, use that exa
 sudo /usr/bin/python3 -c 'import os; os.setuid(0); os.setgid(0); os.system("/bin/sh")'
 ```
 
+## Sudo-allowed `tee`: arbitrary privileged file write
+
+GNU `tee` copies standard input to every path supplied as a file operand. Therefore, a sudo rule that permits root execution of `/usr/bin/tee` with caller-controlled arguments grants an arbitrary root file creation or overwrite primitive. Adding `-a` changes the primitive to append. A `PASSWD:` tag only requires sudo authentication; it does not constrain the destination or the bytes read from standard input.<sup>[[2]](#references)[[16]](#references)[[17]](#references)</sup>
+
+First inspect the exact rule, then prove the primitive with a non-destructive destination. The final `>/dev/null` only suppresses `tee`'s copy to standard output.<sup>[[16]](#references)[[17]](#references)</sup>
+
+```bash
+sudo -l
+printf '%s\n' 'controlled-write' | sudo /usr/bin/tee /root/tee-proof >/dev/null
+printf '%s\n' 'appended-line' | sudo /usr/bin/tee -a /root/tee-proof >/dev/null
+```
+
+Putting `sudo` before the producer does not elevate a later shell redirection because the caller's shell opens the destination. The privileged process must be the writer, as in the pipeline above.<sup>[[1]](#references)[[15]](#references)</sup>
+
+After confirming the write, choose an appropriate root-code-execution sink from [Arbitrary File Write to Root](../interesting-files-permissions/write-to-root.md). One observed chain used root `tee` to create a temporary file under `/etc/cron.d/`, launched a backdoor through a user-controlled script, and deleted the cron file after execution. This leaves less persistent filesystem evidence than a permanent cron entry, but sudo and file-creation telemetry may still record the chain.<sup>[[16]](#references)</sup>
+
 ## Sudo-allowed editors
 
 If `sudo -l` allows a user to run an interactive editor as root, treat it as a command-execution surface, not as a harmless file-editing permission. Editors can often execute shell commands, read arbitrary files, write arbitrary files, or invoke external helpers from inside the editor.<sup>[[1]](#references)[[12]](#references)[[13]](#references)[[14]](#references)</sup>
@@ -82,6 +98,7 @@ Pagers such as `less` can also expose shell execution.<sup>[[14]](#references)</
 ## Defensive notes
 
 - Avoid granting interpreters or interactive editors through sudo.<sup>[[1]](#references)</sup>
+- Do not grant generic file writers such as `tee` with unrestricted operands. Use a root-owned wrapper that selects a fixed destination and rejects caller-controlled paths.<sup>[[2]](#references)[[16]](#references)</sup>
 - Prefer fixed, root-owned wrappers that perform one narrow administrative action.<sup>[[1]](#references)[[2]](#references)</sup>
 - If an interpreter is unavoidable, restrict the exact script path and prevent user-controlled arguments, writable imports, `PYTHONPATH`, and unsafe environment preservation.<sup>[[2]](#references)[[3]](#references)[[4]](#references)</sup>
 - If file editing is required, restrict the exact file path and consider `sudoedit` with patched sudo versions and strict environment handling.<sup>[[1]](#references)[[2]](#references)</sup>
@@ -104,5 +121,7 @@ Pagers such as `less` can also expose shell execution.<sup>[[14]](#references)</
 - [13] [Vim: usr_21.txt](https://vimhelp.org/usr_21.txt.html)
 - [14] [less(1) — Linux manual page](https://man7.org/linux/man-pages/man1/less.1.html)
 - [15] [Redirections — Bash Reference Manual](https://www.gnu.org/s/bash/manual/html_node/Redirections.html)
+- [16] [Volexity — VerdantBamboo: Just Another BRICKSTORM in the Firewall](https://www.volexity.com/blog/2026/06/04/verdantbamboo-just-another-brickstorm-in-the-firewall/)
+- [17] [GNU Coreutils — `tee`: Redirect output to multiple files or processes](https://www.gnu.org/software/coreutils/manual/html_node/tee-invocation.html)
 
 {{#include ../../banners/hacktricks-training.md}}
