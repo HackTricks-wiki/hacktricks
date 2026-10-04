@@ -732,6 +732,7 @@
 - [44818/UDP/TCP - Pentesting EthernetIP](network-services-pentesting/44818-ethernetip.md)
 - [47808/udp - Pentesting BACNet](network-services-pentesting/47808-udp-bacnet.md)
 - [50030,50060,50070,50075,50090 - Pentesting Hadoop](network-services-pentesting/50030-50060-50070-50075-50090-pentesting-hadoop.md)
+- [55555 - Pentesting SolarWinds Access Rights Manager gRPC](network-services-pentesting/55555-pentesting-solarwinds-arm.md)
 
 # 🕸️ Pentesting Web
 
