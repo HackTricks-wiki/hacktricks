@@ -44,6 +44,27 @@ with zipfile.ZipFile("slip.zip", "w") as z:
 
 Dropping that ZIP into the monitored inbox results in `C:\samples\app\0xdf.txt`, proving traversal outside `C:\samples\queue\` and enabling follow-on primitives (e.g., DLL hijacks).
 
+### User-controlled extraction root
+
+Also test the **directory passed to the extractor**, not only archive member names. An application may derive that directory from a title, project name or other request field. A value such as `../../../../app/module` can move the extraction root outside the upload area before the extractor processes any members. In that case even an archive containing only the safe basename `api.py` can overwrite application code.<sup>[[14]](#references)[[15]](#references)</sup>
+
+```python
+# Vulnerable pattern: the ZIP entries themselves need no ../ components.
+extract_root = os.path.join(site_root, "public", "files", user_title)
+archive.extractall(extract_root)
+```
+
+This is a separate containment boundary from classic Zip-Slip. Validate both the resolved extraction root and every resolved member path. A root check can use path components instead of a string prefix:<sup>[[14]](#references)</sup>
+
+```python
+base = Path(site_root, "public", "files").resolve()
+dest = (base / user_title).resolve()
+if not dest.is_relative_to(base):
+    raise ValueError("extraction root escapes its base")
+```
+
+For a safe test, upload a valid archive containing one canary file and place traversal sequences in each field that may select its extraction directory. Monitor both the intended directory and a disposable outside path. If the destination can reach an imported module, overwriting it can become code execution when workers reload; an HTTP 500 or connection reset during that reload does not prove that the write failed.<sup>[[14]](#references)[[15]](#references)</sup> See also the broader [file upload methodology](../pentesting-web/file-upload/README.md).
+
 ## Advanced Archive-Breakout Primitives
 
 Treat extraction as a sequence of filesystem mutations, not as independent filename checks. An entry that is safe when parsed can become unsafe after an earlier member creates or replaces a link; the same issue appears when an extractor caches a directory as safe and later changes its type.<sup>[[11]](#references)</sup>
@@ -180,4 +201,6 @@ If extraction succeeds, `exfil` remains visibly inside the output tree but share
 - [11] [Joshua Rogers – Hacking fun with zip-slips, tar-slips, symlinks, hardlinks, collisions, and more](https://joshua.hu/tarslip-zipslip-symlink-hardlink-generator)
 - [12] [Python Security Announce – CVE-2026-11940 tarfile extraction filter bypass](https://mail.python.org/archives/list/security-announce@python.org/thread/LD6QIISNQFQYOIEPJNEUIPV7S3V76FZH/)
 - [13] [GitHub Security Advisory – node-tar hardlink target escape through symlink chain](https://github.com/isaacs/node-tar/security/advisories/GHSA-83g3-92jg-28cx)
+- [14] [Rhino Security Labs CVE PoC – user-controlled SCORM extraction root](https://raw.githubusercontent.com/RhinoSecurityLabs/CVEs/master/CVE-2026-39405/README.md)
+- [15] [Rhino Security Labs – Multiple Vulnerabilities in Frappe LMS Leading to Remote Code Execution](https://rhinosecuritylabs.com/research/multiple-vulnerabilities-in-frappe-lms-leading-to-remote-code-execution/)
 {{#include ../banners/hacktricks-training.md}}
