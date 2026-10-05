@@ -2486,24 +2486,20 @@ CONF
 Writeup: [https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/](https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/)<sup>[[53]](#references)</sup>\
 Minimal example: [https://github.com/johnboiles/coremediaio-dal-minimal-example](https://github.com/johnboiles/coremediaio-dal-minimal-example)<sup>[[54]](#references)</sup>
 
-- Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
-- TCC bypass: [🟠](https://emojipedia.org/large-orange-circle)
-  - DAL plug-ins load into any process that opens the camera, so you inherit that app's Camera TCC access
+- **Legacy mechanism:** Deprecated since macOS 12.3. macOS 14.1 and later disable legacy video plug-ins by default. A user must restore legacy video support from Recovery before this path can work; a writable directory alone is insufficient. [Apple's current support guidance](https://support.apple.com/en-us/108387).
+- Root required to write the plug-in directory. Any code execution depends on a compatible client that still loads DAL plug-ins; this was not runtime-tested on macOS 26.
 
 #### Location
 
 - **`/Library/CoreMediaIO/Plug-Ins/DAL/*.plugin`**
   - Root required
-  - **Trigger**: any process that enumerates video devices (opens the camera) loads every DAL plug-in — e.g. FaceTime, Zoom, Safari/Chrome camera use, or `system_profiler SPCameraDataType`
+  - **Trigger:** A compatible camera client enumerates devices **after legacy support has been restored**. Client library validation can block a third-party plug-in.
 
 #### Description & Exploitation
 
-CoreMediaIO **DAL** (Device Abstraction Layer) plug-ins are user-space bundles loaded **in-process** by every application that accesses a camera. A malicious `.plugin` dropped in the DAL directory therefore runs inside many high-value, camera-entitled processes (this is the same mechanism legitimately used by virtual-camera software such as OBS).<sup>[[53]](#references)[[54]](#references)</sup>
+CoreMediaIO **DAL** (Device Abstraction Layer) plug-ins were loaded in-process by some camera applications. Apple's [camera-extension presentation](https://developer.apple.com/videos/play/wwdc2022/10022/) specifically says legacy DAL plug-ins did **not** work with FaceTime, QuickTime Player, or Photo Booth, and that many other clients enforce library validation. Modern [Core Media I/O extensions](https://developer.apple.com/documentation/coremediaio) run out of process with a separate installation and approval model. The historical in-process technique does not imply a general Camera TCC bypass on current macOS.<sup>[[53]](#references)[[54]](#references)</sup>
 
-Verified on macOS 26 (read-only): `/Library/CoreMediaIO/Plug-Ins/DAL` exists (root-owned).
-
-> [!CAUTION]
-> On recent macOS, library validation on the **client** process can prevent loading a third-party DAL plug-in unless it is properly signed/notarized; this vector is most reliable against clients that do not enforce library validation.
+Read-only observation on macOS 26: `/Library/CoreMediaIO/Plug-Ins/DAL` exists and is root-owned. Neither legacy support nor loading in any client was verified.
 
 ### Directory Service Plugins
 
