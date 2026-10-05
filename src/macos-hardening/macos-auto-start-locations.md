@@ -735,6 +735,31 @@ exit 0
 
 After the test extension calls `chrome.runtime.sendNativeMessage('org.hacktricks.marker', {ping: 1})` from its service worker or extension page, the marker proves the host started. This minimal host does not implement Chrome's length-prefixed response protocol, so the extension may report a messaging error after the marker is written. Remove the test manifest, host, and marker to clean up. On macOS 26.5.2 the Chrome app and both manifest directories were present; **the active Chrome profile was not modified or exercised**.
 
+### Karabiner-Elements key-event commands
+
+- **Write target:** `~/.config/karabiner/karabiner.json` in an account where Karabiner-Elements is installed and running. [Karabiner's file-location guide](https://karabiner-elements.pqrs.org/docs/json/location/) says the app watches and reloads this file after a write. JSON files in `assets/complex_modifications` are only importable presets; merely writing one there does not enable a rule.
+- **Trigger:** The configured key event after the rule is active. The [`to.shell_command` reference](https://karabiner-elements.pqrs.org/docs/json/complex-modifications-manipulator-definition/to/shell-command/) documents command execution. This is not code execution on login or on every file write.
+- **Execution identity:** The signed-in user running Karabiner's user process. Its own permission grants and any TCC access are app and version dependent.
+
+For a disposable test account, add this rule object to the selected profile's `complex_modifications.rules` array in `karabiner.json`, preserving the rest of that profile. Press F18 to create a harmless marker, then remove this rule and the marker. Choosing F18 avoids replacing an ordinary typing key:
+
+```json
+{
+  "description": "Write a marker on F18",
+  "manipulators": [
+    {
+      "type": "basic",
+      "from": { "key_code": "f18" },
+      "to": [
+        { "shell_command": "/usr/bin/touch /tmp/ht-karabiner-f18" }
+      ]
+    }
+  ]
+}
+```
+
+Karabiner-Elements was not installed in `/Applications` on the macOS 26.5.2 test machine, so this is a documentation-backed PoC rather than a local runtime result.
+
 ### Git hooks in a local repository
 
 - **Write target:** An executable hook such as `<repo>/.git/hooks/post-checkout`. If `core.hooksPath` has already been set, use that configured directory instead. A hook committed as an ordinary tracked source file is not automatically installed into a clone.
