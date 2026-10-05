@@ -222,7 +222,7 @@ https://fosterelli.co/privilege-escalation-via-docker.html
 ## Gruppo lxc/lxd
 
 {{#ref}}
-./
+lxd-privilege-escalation.md
 {{#endref}}
 
 ## Gruppo Adm
