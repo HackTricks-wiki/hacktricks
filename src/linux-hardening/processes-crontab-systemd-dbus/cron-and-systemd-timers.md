@@ -30,3 +30,4 @@ A root-run parser that feeds untrusted text into Bash arithmetic can execute sub
 ## Observe short-lived work
 
 A single process snapshot may miss a job that runs for milliseconds. Compare timer/cron declarations with logs and, when authorized, process-event monitoring such as `pspy` or audit. Correlate the scheduled owner, exact command line, and files that the task reads or writes. A loopback scheduler web UI is a separate interface; see the [Crontab UI example](../linux-basics/linux-privilege-escalation/README.md#crontab-ui-alseambusher-running-as-root--web-based-scheduler-privesc).
+{{#include ../../banners/hacktricks-training.md}}

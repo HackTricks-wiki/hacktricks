@@ -39,3 +39,4 @@ getent passwd
 - Jenkins and other CI services may run jobs under a powerful local account. Inspect the service user, writable job/workspace paths, and local administration interface before testing a pipeline or plugin.
 
 A service name or installed package is only a lead. The privilege boundary is the combination of reachable input, process identity, writable configuration, and the command or file it ultimately controls.
+{{#include ../../banners/hacktricks-training.md}}

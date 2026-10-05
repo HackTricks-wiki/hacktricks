@@ -39,3 +39,4 @@ printenv SSH_AUTH_SOCK KRB5CCNAME GNUPGHOME 2>/dev/null
 ```
 
 Shell history, startup files, SSH keys, application configuration, GPG keyrings, and Kerberos caches can reveal credentials or writable persistence points. A writable `authorized_keys` or shell startup file for a more privileged account deserves review. The [post-exploitation page](../post-exploitation/README.md) covers GPG homedir relocation and credential hunting; [Linux Active Directory](linux-active-directory.md) covers Kerberos cache and keytab reuse. The [PAM page](../software-information/pam-pluggable-authentication-modules.md) explains authentication-policy risks.
+{{#include ../../banners/hacktricks-training.md}}

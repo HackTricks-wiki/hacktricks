@@ -19,3 +19,4 @@ When an assessment leads to a vulnerable Linux executable, use the relevant mate
 - [Libc heap exploitation](../../binary-exploitation/libc-heap/README.md) and [format strings](../../binary-exploitation/format-strings/README.md) cover other common memory-corruption paths.
 
 Kernel-specific case studies are linked from [Kernel/LPE/CVE material](../main-system-information/kernel-lpe-cves/README.md).
+{{#include ../../banners/hacktricks-training.md}}

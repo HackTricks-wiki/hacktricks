@@ -12,3 +12,4 @@ Inspect the host's kernel, filesystem, privileged helpers, and available escape 
 - [Checklist: Linux privilege escalation](linux-privilege-escalation-checklist.md) lists host checks and links to deeper material.
 - [Escaping from jails](escaping-from-limited-bash.md) covers limited shells and constrained environments.
 - [Kernel/LPE/CVE material](kernel-lpe-cves/README.md) groups focused local privilege escalation and vulnerability write-ups.
+{{#include ../../banners/hacktricks-training.md}}

@@ -27,3 +27,4 @@ printenv HISTFILE HISTSIZE HISTCONTROL BASH_ENV ENV 2>/dev/null
 A user-writable startup file can execute commands on a future shell launch. A system-wide startup file or a privileged user's startup file is more sensitive if a lower-privileged account can modify it. Non-interactive Bash can also read the file named by `BASH_ENV`; the [environment variables](linux-environment-variables.md#bash_env--env) page explains that behavior and other interpreter hooks. Verify which files the actual shell reads for login, interactive, and non-interactive sessions before claiming a persistence path.
 
 Check history, dotfiles, and backups for secrets as described in [users and sessions](../user-information/user-and-session-triage.md). If a privileged script resolves commands by name, combine this review with the [PATH hijacking guidance](linux-environment-variables.md#path).
+{{#include ../../banners/hacktricks-training.md}}
