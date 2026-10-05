@@ -62,3 +62,14 @@ Contributor A's table already broadly claims shell/SSH, Apple user plug-ins, dev
 - [x] **`/etc/paths`, `/etc/paths.d/*` PATH hijack** — `path_helper` from `/etc/zprofile`. *Root.*
 
 Accuracy reminders for whoever writes BTM: CVE-2022-42821 is Gatekeeper ("Achilles"), **not** a BTM bypass; the real BTM bypasses are Wardle's behavioral ones (`sfltool resetbtm`, SIGSTOP the agent) with no CVE.
+
+### Contributor B — batch 3 scope (AI coding-agent CLIs + browser extensions)
+
+Unclaimed by A's table (A took VS Code tasks + Chrome native messaging). B is adding:
+
+- [x] **AI coding-agent CLIs** — config files that run shell/launch processes when the dev uses the tool. Validated present on this host: Claude Code (`~/.claude/settings.json` has `hooks`+`statusLine`), Codex (`~/.codex/config.toml` with `[mcp_servers.*]` launching `command`), Gemini (`~/.gemini/settings.json` `hooks`), Cursor (`~/.cursor/hooks.json` with `beforeShellExecution` etc.). Ref: CVE-2025-59536 (Check Point). *Conditional.*
+- [x] **Chromium External Extensions + enterprise-policy force-install** — `External Extensions/*.json` auto-install and `ExtensionInstallForcelist` managed pref (Chrome `com.google.Chrome`, Brave `com.brave.Browser`, Edge `com.microsoft.Edge`). Explicitly NOT native messaging (A's). *Conditional.*
+
+B will NOT touch: Chrome native messaging, VS Code tasks (A owns these).
+
+(Status: batch 3 committed — AI CLIs incl. Claude managed-settings root path; Chromium External Extensions + ExtensionInstallForcelist + cross-link to macos-chromium-injection for Secure Preferences.)
