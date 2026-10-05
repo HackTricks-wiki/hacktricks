@@ -1856,17 +1856,18 @@ Writeup: [Remote Mac Exploitation Via Custom URL Schemes (Objective-See)](https:
 #### Location
 
 - An app bundle's `Info.plist` declaring **`CFBundleURLTypes`/`CFBundleURLSchemes`** (custom URL scheme) or **`CFBundleDocumentTypes`** (file extension/UTI)
-- Per-user effective defaults: **`~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist`** (`LSHandlers` array), settable via `LSSetDefaultHandlerForURLScheme`
+- Per-user effective defaults may appear in **`~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist`** (`LSHandlers` array). Apple's supported API for choosing a URL-scheme default is `LSSetDefaultHandlerForURLScheme`; writing that plist directly is not a documented registration or cache-update method.
 
 #### Description & Exploitation
 
-As soon as an app hits the filesystem, **LaunchServices** parses its bundle and registers its URL schemes / document types. Afterwards, invoking that scheme — e.g. a `myscheme://` link in a web page the victim visits — **launches the handler app**, giving code execution triggered purely by a user action. `LSSetDefaultHandlerForURLScheme` (or editing the `LSHandlers` array) lets an attacker **steal an existing scheme** from the legitimate app.<sup>[[52]](#references)</sup>
+Launch Services obtains URL-scheme and document claims from a registered app's `Info.plist`. [Apple's registration guide](https://developer.apple.com/library/archive/documentation/Carbon/Conceptual/LaunchServicesConcepts/LSCTasks/LSCTasks.html) says registration can happen when Finder discovers the app, at boot or login, or through an explicit registration API; merely writing an app somewhere is not a guaranteed immediate trigger. After registration, opening a matching URL or document can launch the selected handler app, subject to the user's default-handler choice and normal macOS launch checks. The supported `LSSetDefaultHandlerForURLScheme` API changes a user-preferred URL handler; it does not make a newly dropped app automatically execute.<sup>[[52]](#references)</sup>
 
 ```bash
-# Force (re)registration of a dropped app and inspect scheme handlers
-/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /tmp/Evil.app
+# Inspect known handlers without registering an app or changing defaults
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -dump | grep -A3 "scheme:"
 ```
+
+No app was registered and no handler preference was changed on the macOS 26.5.2 research Mac. To test an actual handler, use a disposable user account, register a marker-only app with a unique scheme, invoke its URL, then remove the app and its registration.
 
 For enumerating/abusing file-extension and URL-scheme handlers in depth, see:
 
