@@ -1602,8 +1602,8 @@ This copy test produced `marker fired: True` on macOS 26.5.2; the original launc
 Writeup: [https://theevilbit.github.io/beyond/beyond_0032/](https://theevilbit.github.io/beyond/beyond_0032/)<sup>[[38]](#references)</sup>
 
 - Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
-  - But a malicious app declaring the plugin must be placed in the Dock
-  - The plugin loads into a **non-sandboxed, unsigned** helper with **library validation disabled**, and is **not shown in the Background Task Management** UI (stealthier than a LaunchAgent)
+  - Requires an app declaring the plug-in to be discovered/registered and processed by the Dock
+  - The plugin loads into an **Apple-signed** helper that has no app-sandbox entitlement and has **library validation disabled**. This helper was not shown in the Background Task Management UI in the cited research; visibility on a target release should be checked.
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Location
@@ -1612,7 +1612,9 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0032/](https://theevilbit.g
 
 #### Description & Exploitation
 
-When an app declares `NSDockTilePlugIn`, the Dock loads the referenced bundle into the **`com.apple.dock.external.extra`** XPC helper (`...extra.arm64` on Apple Silicon) **as soon as the app's tile is present in the Dock — the app itself does not need to be launched**. The helper runs **unsigned and non-sandboxed with library validation disabled**. The principal class' **`setDockTile:`** method is invoked on load; from there you can subscribe to distributed notifications (e.g. `com.apple.screenIsLocked`) to re-trigger code on later events.<sup>[[38]](#references)</sup>
+When an app declares `NSDockTilePlugIn`, the Dock can load the referenced bundle into the **`com.apple.dock.external.extra`** XPC helper (`...extra.arm64` on Apple Silicon) at login or when its tile is added; the app itself need not launch. This requires the app to be discovered/registered and accepted by macOS. The helper is **Apple-signed**, has no `com.apple.security.app-sandbox` entitlement, and has `com.apple.security.cs.disable-library-validation`. The principal class' **`setDockTile:`** method is invoked on load; from there it can subscribe to distributed notifications (e.g. `com.apple.screenIsLocked`) for later events.<sup>[[38]](#references)</sup>
+
+On macOS 26.5.2, read-only `codesign` inspection confirmed the helper's Apple signature and entitlements, and several installed apps declared `NSDockTilePlugIn`. No new plug-in was installed or loaded on that Mac, so execution of a newly written bundle on that release remains untested.
 
 ```bash
 # Enumerate apps already shipping a Dock tile plugin (hijack / template targets)
@@ -1699,7 +1701,7 @@ Writeup: [https://www.jamf.com/blog/malicious-profiles-come/](https://www.jamf.c
 
 #### Description & Exploitation
 
-A `.mobileconfig` is not a direct code-execution primitive, but it is a durable **control/MITM persistence layer**: it can install a **trusted root CA** (`com.apple.security.root`), set a **global or PAC proxy** (`com.apple.proxy.*`), force **managed preferences** (`com.apple.ManagedClient.preferences`), or apply restrictions. Setting **`PayloadRemovalDisallowed=true`** (or delivering it via MDM/supervision) makes it **user-unremovable**, which is the persistence.<sup>[[44]](#references)</sup>
+A `.mobileconfig` is not a direct code-execution primitive, but it can persist configuration such as a **trusted root CA** (`com.apple.security.root`), a **global or PAC proxy** (`com.apple.proxy.*`), **managed preferences** (`com.apple.ManagedClient.preferences`), or restrictions. On macOS 10.15 and later, Apple's [`PayloadRemovalDisallowed` definition](https://developer.apple.com/documentation/devicemanagement/toplevel) says setting it to `true` on a **manually installed** profile without a removal-password payload requires **administrator authentication** to remove it; it does not make that profile absolutely unremovable. MDM-installed profiles have separate management and removal rules.<sup>[[44]](#references)</sup>
 
 > [!WARNING]
 > A plain configuration profile has **no payload type that drops an arbitrary `LaunchDaemon`/`LaunchAgent`**. Installing a daemon that way requires full **MDM enrollment** plus a management agent/script — do not treat `.mobileconfig` as a launchd delivery mechanism.

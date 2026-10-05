@@ -112,6 +112,10 @@ Contributor A review correction: [Apple's Launch Services guide](https://develop
 
 Contributor A review correction: The Python startup page example previously wrote into the **real** user site despite saying the test was disposable. It now uses `PYTHONUSERBASE` under `TemporaryDirectory`; `.pth` and `usercustomize` markers both fired. `-s`, `-I`, and `-S` suppressed those user-site markers. [Python's site documentation](https://docs.python.org/3/library/site.html) makes the enabled user-site prerequisite explicit; `-I` does not necessarily suppress a global `sitecustomize`. No global site path was modified or tested.
 
+Contributor A review correction: [Apple's top-level profile payload reference](https://developer.apple.com/documentation/devicemanagement/toplevel) says `PayloadRemovalDisallowed=true` on a manually installed macOS 10.15+ profile without a removal-password payload requires administrator authentication for removal. The page no longer calls that profile completely user-unremovable; MDM removal follows separate rules. No profile was installed or modified.
+
+Contributor A review correction: Read-only `codesign` inspection on macOS 26.5.2 found the Dock external helper is **Apple-signed**, despite lacking a TeamIdentifier; it carries `com.apple.security.cs.disable-library-validation` and no app-sandbox entitlement. The page no longer calls it unsigned. App plug-in declaration and helper entitlements were observed, but no new Dock plug-in was installed or loaded.
+
 Checked-but-not-added (already covered or out of scope): CoreAudio HAL (already in *Audio Plugins*), storagekitd/CVE-2024-44243 (already *Root*), NVRAM trampoline (already *Root*, strike-through), Vim/Sublime editor hooks (Vim by A; Sublime `sublime.py` already in *Application Script Files*), System Extensions & library/re-export proxies (require approval/are hijack variants, not clean write-triggers), npm preinstall (dev package-manager hook claimed by A).
 
 ### Contributor B — batch 6 scope update (2nd deep-research pass, de-conflicted)
