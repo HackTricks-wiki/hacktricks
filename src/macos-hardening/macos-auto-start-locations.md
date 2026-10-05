@@ -2,7 +2,10 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-This section is heavily based on the blog series [**Beyond the good ol' LaunchAgents**](https://theevilbit.github.io/beyond/), the goal is to add **more Autostart Locations** (if possible), indicate **which techniques are still working** nowadays with latest version of macOS (13.4) and to specify the **permissions** needed.
+This section is heavily based on the blog series [**Beyond the good ol' LaunchAgents**](https://theevilbit.github.io/beyond/). Its goal is to identify locations where a file write can lead to later code execution, the event that triggers execution, and the permissions required. A location's presence is not proof that the mechanism is enabled. The local checks noted below were performed on macOS 26.5.2 (5 October 2026); they do not establish behavior on every macOS release.
+
+> [!NOTE]
+> “Write-triggered” does not always mean “runs immediately after writing.” Some locations are read only at login, when a specific application starts, or when a user performs an action. A writable payload inside an already configured job is also distinct from permission to register a new job. Test in a disposable account or VM before relying on a technique.
 
 ## Sandbox Bypass
 
@@ -17,21 +20,19 @@ This section is heavily based on the blog series [**Beyond the good ol' LaunchAg
 #### Locations
 
 - **`/Library/LaunchAgents`**
-  - **Trigger**: Reboot
+  - **Trigger**: User login (or explicit registration)
   - Root required
 - **`/Library/LaunchDaemons`**
-  - **Trigger**: Reboot
+  - **Trigger**: System boot (or explicit registration)
   - Root required
 - **`/System/Library/LaunchAgents`**
-  - **Trigger**: Reboot
-  - Root required
+  - **Trigger**: User login; protected Apple system location
 - **`/System/Library/LaunchDaemons`**
-  - **Trigger**: Reboot
-  - Root required
+  - **Trigger**: System boot; protected Apple system location
 - **`~/Library/LaunchAgents`**
   - **Trigger**: Relog-in
-- **`~/Library/LaunchDemons`**
-  - **Trigger**: Relog-in
+
+There is no `~/Library/LaunchDaemons` location scanned by `launchd`. Per-user jobs belong in `~/Library/LaunchAgents`; the system daemon directory is `/Library/LaunchDaemons`. [Apple's launchd startup guide](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html) documents the scanned locations.
 
 > [!TIP]
 > As interesting fact, **`launchd`** has an embedded property list in a the Mach-o section `__Text.__config` which contains other well known services launchd must start. Moreover, these services can contain the `RequireSuccess`, `RequireRun` and `RebootOnSuccess` that means that they must be run and complete successfully.
@@ -47,32 +48,36 @@ This section is heavily based on the blog series [**Beyond the good ol' LaunchAg
 - `/System/Library/LaunchAgents`: Per-user agents provided by Apple.
 - `/System/Library/LaunchDaemons`: System-wide daemons provided by Apple.
 
-When a user logs in the plists located in `/Users/$USER/Library/LaunchAgents` and `/Users/$USER/Library/LaunchDemons` are started with the **logged users permissions**.
+When a user logs in, `launchd` loads the plists in that user's `~/Library/LaunchAgents` with that user's permissions. Jobs are started according to their keys; merely loading a plist does not imply immediate process execution.
 
 The **main difference between agents and daemons is that agents are loaded when the user logs in and the daemons are loaded at system startup** (as there are services like ssh that needs to be executed before any user access the system). Also agents may use GUI while daemons need to run in the background.
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN">
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
     <key>Label</key>
         <string>com.apple.someidentifier</string>
     <key>ProgramArguments</key>
     <array>
-        <string>bash -c 'touch /tmp/launched'</string> <!--Prog to execute-->
+        <string>/bin/sh</string>
+        <string>-c</string>
+        <string>touch /tmp/launched</string>
     </array>
     <key>RunAtLoad</key><true/> <!--Execute at system startup-->
     <key>StartInterval</key>
     <integer>800</integer> <!--Execute each 800s-->
     <key>KeepAlive</key>
     <dict>
-        <key>SuccessfulExit</key></false> <!--Re-execute if exit unsuccessful-->
+        <key>SuccessfulExit</key><false/> <!--Re-execute if exit unsuccessful-->
         <!--If previous is true, then re-execute in successful exit-->
     </dict>
 </dict>
 </plist>
 ```
+
+Each `ProgramArguments` element is a separate argument; `launchd` does not parse a single string as a shell command. The corrected example above can be syntax checked without loading it using `plutil -lint /path/to/example.plist`. See the local `man launchd.plist` entry for `ProgramArguments`, `RunAtLoad`, and `KeepAlive`.
 
 There are cases where an **agent needs to be executed before the user logins**, these are called **PreLoginAgents**. For example, this is useful to provide assistive technology at login. They can be found also in `/Library/LaunchAgents`(see [**here**](https://github.com/HelmutJ/CocoaSampleCode/tree/master/PreLoginAgents) an example).
 
@@ -104,7 +109,7 @@ printf '%s\n' "$pw" | sudo -S launchctl load /Library/LaunchDaemons/com.finder.h
 nohup "$HOME/.agent" >/dev/null 2>&1 &
 ```
 > [!WARNING]
-> If a plist is owned by a user, even if it's in a daemon system wide folders, the **task will be executed as the user** and not as root. This can prevent some privilege escalation attacks.
+> A daemon plist placed in `/Library/LaunchDaemons` is not made safe by giving it user ownership. `launchd` requires appropriate ownership and permissions for system jobs and may reject an insecure plist. A root-owned daemon normally runs as root unless its configuration selects another account. Check the job's `UserName`, `GroupName`, ownership, and `launchctl` diagnostics; do not infer execution identity from the plist owner's name alone.
 
 #### More info about launchd
 
@@ -1267,6 +1272,9 @@ It doesn't look like this is working anymore.<sup>[[26]](#references)</sup>
 
 ### Periodic
 
+> [!CAUTION]
+> **Historical mechanism:** On the macOS 26.5.2 test machine, `/usr/sbin/periodic`, `/etc/defaults/periodic.conf`, `/etc/periodic`, and the `com.apple.periodic-*` launch daemons are absent. Do not assume that creating `/etc/periodic` on a current system will schedule its contents. Check for both the command and an enabled scheduler on the target release before using the example below.
+
 Writeup: [https://theevilbit.github.io/beyond/beyond_0019/](https://theevilbit.github.io/beyond/beyond_0019/)<sup>[[27]](#references)</sup>
 
 - Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
@@ -1326,7 +1334,11 @@ weekly_local="/etc/weekly.local"			# Local scripts
 monthly_local="/etc/monthly.local"			# Local scripts
 ```
 
-If you manage to write any of the files `/etc/daily.local`, `/etc/weekly.local` or `/etc/monthly.local` it will be **executed sooner or later**.
+On older systems with `periodic` and its launch daemons installed and enabled, `/etc/daily.local`, `/etc/weekly.local`, and `/etc/monthly.local` were additional execution paths. A harmless read-only check is:
+
+```bash
+test -x /usr/sbin/periodic && ls /System/Library/LaunchDaemons/com.apple.periodic-*.plist
+```
 
 > [!WARNING]
 > Note that the periodic script will be **executed as the owner of the script**. So if a regular user owns the script, it will be executed as that user (this might prevent privilege escalation attacks).
