@@ -1690,7 +1690,7 @@ python3 -c 'import json;d=json.load(open("'"$HOME"'/.claude/settings.json"));pri
 Writeup: [Chrome external extensions](https://developer.chrome.com/docs/extensions/how-to/distribute/install-extensions)<sup>[[49]](#references)</sup>, [ExtensionInstallForcelist abuse on macOS](https://macsecurity.net/view/492-extensioninstallforcelist-chrome-policy-mac)<sup>[[50]](#references)</sup>
 
 - Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
-  - Requires the Chromium browser installed; the extension runs on browser start
+  - Requires a supported browser and an installed, enabled extension. External Extensions on macOS require a user confirmation; managed force-install requires an applicable enterprise policy.
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 > [!NOTE]
@@ -1698,7 +1698,7 @@ Writeup: [Chrome external extensions](https://developer.chrome.com/docs/extensio
 
 #### Location
 
-- **External Extensions JSON** (auto-installed on browser start):
+- **External Extensions JSON** (discovered on browser start, then subject to an enable prompt on macOS):
   - Chrome: `~/Library/Application Support/Google/Chrome/External Extensions/<extID>.json` (per-user) or `/Library/Application Support/Google/Chrome/External Extensions/` (all users)
   - Brave: `~/Library/Application Support/BraveSoftware/Brave-Browser/External Extensions/`
   - Edge: `~/Library/Application Support/Microsoft Edge/External Extensions/`
@@ -1707,21 +1707,22 @@ Writeup: [Chrome external extensions](https://developer.chrome.com/docs/extensio
 
 #### Description & Exploitation
 
-On browser launch, Chromium scans *External Extensions* and applies `ExtensionInstallForcelist`, installing/pinning extensions **without user consent**. A force-installed extension cannot be removed by the user — that is the persistence.<sup>[[49]](#references)</sup><sup>[[50]](#references)</sup>
+These are two different installation routes. Chrome's [external-install documentation](https://developer.chrome.com/docs/extensions/how-to/distribute/install-extensions) says **Windows and macOS users must confirm and enable** an extension offered through an *External Extensions* file; it does not execute merely because that JSON file was written. For all-user installation on macOS, Chrome also requires the external-extension file to be protected from unprivileged modification. A managed `ExtensionInstallForcelist` or `ExtensionSettings` policy can install and pin an extension without that user interaction; [Google's Mac policy guide](https://support.google.com/chrome/a/answer/7517624) describes the managed configuration and says force-installed extensions cannot be removed by the user. That is a policy deployment path, not a per-user `defaults write` shortcut.<sup>[[49]](#references)</sup>
 
 > [!WARNING]
-> On macOS the `external_update_url`/forcelist URL must point to the **Chrome Web Store** (self-hosted CRX for external install is blocked), and non-Web-Store force-install needs MDM/MCX/Chrome Enterprise Core. For a fully attacker-controlled extension, launch the browser with `--load-extension=/path` (developer load) from a malicious wrapper/LaunchAgent instead. Direct edits to `Secure Preferences`/`Preferences` are rejected by a per-profile HMAC, so use these mechanisms rather than editing the profile DB. When the policy is set, Chrome shows **"Managed by your organization"** — on a non-enterprise Mac that is a malware indicator.
+> On macOS, an *External Extensions* JSON manifest must point to a **Chrome Web Store** update URL, not a local CRX. Managed policy deployment has its own enterprise prerequisites and may permit a managed self-hosted update URL. For a local unpacked extension in a test profile, Chrome's developer-mode `--load-extension=/path` switch is a separate mechanism and does not make an External Extensions JSON file self-executing. Do not treat a write to `Secure Preferences` as equivalent to either documented registration route.
 
 ```bash
-# Per-user auto-install on next Chrome launch (Web Store extension by ID)
-mkdir -p ~/Library/Application\ Support/Google/Chrome/External\ Extensions
-cat > ~/Library/Application\ Support/Google/Chrome/External\ Extensions/<EXT_ID>.json <<'JSON'
+# In a disposable browser account, propose a Chrome Web Store extension for enablement
+ext_id='replace_with_32_character_web_store_id'
+external_dir="$HOME/Library/Application Support/Google/Chrome/External Extensions"
+mkdir -p "$external_dir"
+cat > "$external_dir/$ext_id.json" <<'JSON'
 { "external_update_url": "https://clients2.google.com/service/update2/crx" }
 JSON
-
-# Policy force-install (shows "Managed by your organization"); Brave=com.brave.Browser, Edge=com.microsoft.Edge
-defaults write com.google.Chrome ExtensionInstallForcelist -array "<EXT_ID>;https://clients2.google.com/service/update2/crx"
 ```
+
+Start Chrome in that disposable account and observe the enable prompt; the extension's own behavior is the execution PoC once the user accepts. After the test, remove the manifest and disable/uninstall the extension in that profile. This path was **not** exercised in the active Chrome profile on the research Mac. The managed-policy route was likewise not deployed there.
 
 Force-install and External Extensions reference **Chrome Web Store** extension IDs; for the lower-level trick of silently injecting a local extension by editing the profile's HMAC-signed `Secure Preferences`, and other Chromium-process abuse, see:
 
