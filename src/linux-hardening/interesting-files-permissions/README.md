@@ -4,6 +4,7 @@
 
 File ownership, write access, mount options, and executable privileges can change a local user's effective reach. Begin by identifying the target file or execution path, then use the relevant page:
 
+- [SUID, SGID, ACLs, and sensitive files](suid-sgid-and-acl-triage.md) gives a starting workflow for executable privileges and hidden access grants.
 - [Arbitrary file write to root](write-to-root.md) describes how writes to privileged paths can be turned into escalation.
 - [Linux capabilities](linux-capabilities.md) explains per-process and per-file capabilities.
 - [SUID shared library and linker abuse](suid-shared-library-and-linker-abuse.md) covers dynamic loading around privileged binaries.

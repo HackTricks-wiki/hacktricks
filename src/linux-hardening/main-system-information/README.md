@@ -4,8 +4,10 @@
 
 Inspect the host's kernel, filesystem, privileged helpers, and available escape routes before choosing a local escalation technique. The [privilege escalation checklist](linux-privilege-escalation-checklist.md) gives a compact order of operations.
 
+- [Kernel vulnerability assessment and runtime exposure](kernel-vulnerability-assessment.md) checks build applicability, reachability, and active mitigations.
 - [Kernel modules and modprobe abuse](kernel-modules-and-modprobe.md) covers module loading and helper-path exposure.
 - [Sudo command abuse](sudo-command-abuse.md) examines ways delegated commands can cross privilege boundaries.
+- [Symlinks, hardlinks, and file descriptors](filesystem-links-and-file-descriptors.md) covers path redirection and inherited or deleted-open files.
 - [Filesystem, inodes and recovery](filesystem-inodes-and-recovery.md) explains filesystem behavior useful during investigation.
 - [Checklist: Linux privilege escalation](linux-privilege-escalation-checklist.md) lists host checks and links to deeper material.
 - [Escaping from jails](escaping-from-limited-bash.md) covers limited shells and constrained environments.

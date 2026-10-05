@@ -79,6 +79,17 @@ Pagers such as `less` can also expose shell execution.<sup>[[14]](#references)</
 !/bin/sh
 ```
 
+## Other sudo and doas rule hazards
+
+Start with `sudo -l`, `sudo -V`, and any applicable `doas` policy. Read the allowed command, run-as user, arguments, environment, and defaults together. Permission to run as a non-root service account can still expose that account's files or a route to root.
+
+- `SETENV`, `env_keep`, `secure_path`, and `LD_PRELOAD` can turn an otherwise narrow command into an import, library, or PATH hijack. See the [environment-variable guide](../linux-basics/linux-environment-variables.md) and [SUID/linker abuse](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md).
+- A sudo-allowed Python script may import code from a writable directory or cached `.pyc` file. The [privilege escalation guide](../linux-basics/linux-privilege-escalation/README.md) details the cache case.
+- `sudoedit` and argument wildcards require exact version and rule checks; the [checklist](linux-privilege-escalation-checklist.md) includes the sudoedit file-edit issue.
+- Archivers and other utility programs may have execution hooks. Test the exact allowed arguments against [GTFOBins](https://gtfobins.github.io/) rather than assuming that only shells or interpreters execute commands.
+- Sudo timestamp reuse depends on the cache policy, owning user, terminal/session, and permissions. The [privilege escalation guide](../linux-basics/linux-privilege-escalation/README.md#reusing-sudo-tokens) covers the checks.
+- `doas` has its own rules and configuration. Check permitted commands and writable configuration paths as described in the [doas section](../linux-basics/linux-privilege-escalation/README.md#doas).
+
 ## Defensive notes
 
 - Avoid granting interpreters or interactive editors through sudo.<sup>[[1]](#references)</sup>
