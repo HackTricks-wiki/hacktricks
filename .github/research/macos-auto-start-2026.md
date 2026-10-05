@@ -73,3 +73,8 @@ Unclaimed by A's table (A took VS Code tasks + Chrome native messaging). B is ad
 B will NOT touch: Chrome native messaging, VS Code tasks (A owns these).
 
 (Status: batch 3 committed — AI CLIs incl. Claude managed-settings root path; Chromium External Extensions + ExtensionInstallForcelist + cross-link to macos-chromium-injection for Secure Preferences.)
+
+### Contributor B — batch 4 (more, unclaimed)
+
+- [x] **URL Scheme & File-Type Handlers (LaunchServices)** — `CFBundleURLTypes`/`CFBundleDocumentTypes`, `com.apple.launchservices.secure.plist` `LSHandlers`; triggered by clicking a link (ties to browsers) or opening a file type. Cross-links `macos-file-extension-apps`. *Conditional.* Ref: Objective-See.
+- [x] **sudo plugins (`/etc/sudo.conf`)** — `Plugin` lines load a shared object run as root on every `sudo`. *Root.* Ref: sigma-star. (Not PAM/Authz — distinct from A's legacy items.)

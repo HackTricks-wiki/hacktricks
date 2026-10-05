@@ -1691,6 +1691,35 @@ Force-install and External Extensions reference **Chrome Web Store** extension I
 macos-security-and-privilege-escalation/macos-proces-abuse/macos-chromium-injection.md
 {{#endref}}
 
+### URL Scheme & File-Type Handlers (LaunchServices)
+
+Writeup: [Remote Mac Exploitation Via Custom URL Schemes (Objective-See)](https://objective-see.org/blog/blog_0x38.html)<sup>[[52]](#references)</sup>
+
+- Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+  - The trigger is the victim clicking a link (e.g. in Chrome/Brave/Safari) or opening a file of the registered type
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
+
+#### Location
+
+- An app bundle's `Info.plist` declaring **`CFBundleURLTypes`/`CFBundleURLSchemes`** (custom URL scheme) or **`CFBundleDocumentTypes`** (file extension/UTI)
+- Per-user effective defaults: **`~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist`** (`LSHandlers` array), settable via `LSSetDefaultHandlerForURLScheme`
+
+#### Description & Exploitation
+
+As soon as an app hits the filesystem, **LaunchServices** parses its bundle and registers its URL schemes / document types. Afterwards, invoking that scheme — e.g. a `myscheme://` link in a web page the victim visits — **launches the handler app**, giving code execution triggered purely by a user action. `LSSetDefaultHandlerForURLScheme` (or editing the `LSHandlers` array) lets an attacker **steal an existing scheme** from the legitimate app.<sup>[[52]](#references)</sup>
+
+```bash
+# Force (re)registration of a dropped app and inspect scheme handlers
+/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /tmp/Evil.app
+/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -dump | grep -A3 "scheme:"
+```
+
+For enumerating/abusing file-extension and URL-scheme handlers in depth, see:
+
+{{#ref}}
+macos-security-and-privilege-escalation/macos-file-extension-apps.md
+{{#endref}}
+
 ## Root Sandbox Bypass
 
 > [!TIP]
@@ -2308,6 +2337,30 @@ Writeup: [https://www.microsoft.com/en-us/security/blog/2025/01/13/analyzing-cve
 
 `storagekitd` holds the entitlement **`com.apple.rootless.install.heritable`** and spawned the binaries of filesystem bundles with that SIP-bypassing capability **inherited**. By planting a malicious filesystem bundle, an attacker could run code with a SIP bypass to install **persistent kernel extensions** or write into SIP-protected `LaunchDaemon` directories — persistence that survives and defeats normal protections.<sup>[[46]](#references)</sup> Apple fixed it in macOS Sequoia 15.2.
 
+### sudo plugins (/etc/sudo.conf)
+
+Writeup: [On Writing Sudo Plugins (sigma-star)](https://blog.sigma-star.io/2025/07/on-writing-sudo-plugins/)<sup>[[51]](#references)</sup>
+
+- Useful to bypass sandbox: [🔴](https://emojipedia.org/large-red-circle) (needs root to write `/etc/sudo.conf`)
+- Root required to install; the plugin then runs inside **every `sudo` invocation** (setuid-root context)
+
+#### Location
+
+- **`/etc/sudo.conf`** — `Plugin` lines load shared objects from **`/usr/libexec/sudo/`** (or an absolute path). Absent by default (sudo uses a built-in policy), so creating it is a clean hook.
+
+#### Description & Exploitation
+
+`sudo` loads its policy/approval/audit plugins from `/etc/sudo.conf`. Because `sudo` is setuid-root, a malicious shared-object plugin executes with **root privileges every time any user runs `sudo`** — durable root persistence that also sees each sudo command.<sup>[[51]](#references)</sup> macOS ships sudo 1.9.x which supports the plugin API.
+
+```bash
+# As root: load a malicious audit/approval plugin on every sudo
+cat > /etc/sudo.conf <<'CONF'
+Plugin sudoers_policy sudoers.so
+Plugin ht_audit /usr/libexec/sudo/ht_audit.so
+CONF
+# ht_audit.so's constructor / audit_open runs as root on the next `sudo <anything>`
+```
+
 ## Persistence techniques and tools
 
 - [https://github.com/cedowens/Persistent-Swift](https://github.com/cedowens/Persistent-Swift)
@@ -2365,5 +2418,7 @@ Writeup: [https://www.microsoft.com/en-us/security/blog/2025/01/13/analyzing-cve
 - [48] [New Vulnerability in GitHub Copilot and Cursor - Rules File Backdoor (Pillar Security)](https://www.pillar.security/blog/new-vulnerability-in-github-copilot-and-cursor-how-hackers-can-weaponize-code-agents)
 - [49] [Chrome - Alternative installation methods (External Extensions)](https://developer.chrome.com/docs/extensions/how-to/distribute/install-extensions)
 - [50] [Remove ExtensionInstallForcelist in Chrome on Mac (macsecurity.net)](https://macsecurity.net/view/492-extensioninstallforcelist-chrome-policy-mac)
+- [51] [On Writing Sudo Plugins (sigma-star)](https://blog.sigma-star.io/2025/07/on-writing-sudo-plugins/)
+- [52] [Remote Mac Exploitation Via Custom URL Schemes (Objective-See)](https://objective-see.org/blog/blog_0x38.html)
 
 {{#include ../banners/hacktricks-training.md}}
