@@ -36,6 +36,8 @@ Interesting information, passwords or API keys in the environment variables?
 
 Check the kernel version and if there is some exploit that can be used to escalate privileges
 
+The [Kernel/LPE/CVE section](../../main-system-information/kernel-lpe-cves/README.md) collects local escalation cases and links to the deeper Linux kernel write-ups in Binary Exploitation. Verify the affected build and configuration before testing a case study.
+
 ```bash
 cat /proc/version
 uname -a
