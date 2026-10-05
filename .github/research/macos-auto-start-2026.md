@@ -110,6 +110,8 @@ Contributor A review correction: [Anthropic's current security and permission do
 
 Contributor A review correction: [Apple's Launch Services guide](https://developer.apple.com/library/archive/documentation/Carbon/Conceptual/LaunchServicesConcepts/LSCTasks/LSCTasks.html) says an app must become known to Finder, be found at boot/login, or be registered explicitly; arbitrary file creation is not immediate registration. The URL-handler section now uses a read-only inventory command and no longer treats direct `LSHandlers` plist editing as a supported default-handler change. No app/default registration was changed locally.
 
+Contributor A review correction: The Python startup page example previously wrote into the **real** user site despite saying the test was disposable. It now uses `PYTHONUSERBASE` under `TemporaryDirectory`; `.pth` and `usercustomize` markers both fired. `-s`, `-I`, and `-S` suppressed those user-site markers. [Python's site documentation](https://docs.python.org/3/library/site.html) makes the enabled user-site prerequisite explicit; `-I` does not necessarily suppress a global `sitecustomize`. No global site path was modified or tested.
+
 Checked-but-not-added (already covered or out of scope): CoreAudio HAL (already in *Audio Plugins*), storagekitd/CVE-2024-44243 (already *Root*), NVRAM trampoline (already *Root*, strike-through), Vim/Sublime editor hooks (Vim by A; Sublime `sublime.py` already in *Application Script Files*), System Extensions & library/re-export proxies (require approval/are hijack variants, not clean write-triggers), npm preinstall (dev package-manager hook claimed by A).
 
 ### Contributor B — batch 6 scope update (2nd deep-research pass, de-conflicted)

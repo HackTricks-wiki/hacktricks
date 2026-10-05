@@ -1880,7 +1880,7 @@ macos-security-and-privilege-escalation/macos-file-extension-apps.md
 Writeup: [https://docs.python.org/3/library/site.html](https://docs.python.org/3/library/site.html)<sup>[[56]](#references)</sup>
 
 - Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
-  - Runs the next time the victim starts any non-sandboxed `python3`
+  - Runs when the relevant Python interpreter starts with that site directory enabled; the trigger is not universal across virtual environments, Python builds, or startup flags
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
   - Runs with the privileges/TCC of whatever process launched the interpreter
 
@@ -1888,34 +1888,44 @@ Writeup: [https://docs.python.org/3/library/site.html](https://docs.python.org/3
 
 - **`$(python3 -m site --user-site)/*.pth`** (macOS framework builds: `~/Library/Python/<X.Y>/lib/python/site-packages/`)
   - No root required (user-writable)
-  - **Trigger**: any `python3` start — the `site` module processes every `.pth` in site dirs
+  - **Trigger**: startup of that Python build with its user site enabled; the `site` module processes `.pth` files in active site directories
 - **`<user-site>/usercustomize.py`**
   - No root required
-  - **Trigger**: any `python3` start (auto-imported when the user site is enabled)
+  - **Trigger**: startup with the user site enabled (auto-imported by `site`)
 - **`<prefix>/site-packages/sitecustomize.py`** (e.g. `/opt/homebrew/lib/python3.13/site-packages/`, or system paths)
   - Root/admin may be required depending on the interpreter location
-  - **Trigger**: any `python3` start
+  - **Trigger**: startup of an interpreter that includes that site directory
 
 #### Description & Exploitation
 
-At startup the `site` module scans each `site-packages` directory for `.pth` files. Besides adding paths, **any `.pth` line that begins with `import ` is executed as Python code on every interpreter start**, whether or not the module is ever used. Python also auto-imports `usercustomize` (user site) and `sitecustomize` (global) when present.<sup>[[56]](#references)</sup> Each is a write-to-execute primitive that fires the next time the user — or a cron job, build script, or LaunchAgent — runs `python3`. The user-site variants need **no root**, and only `-S`/`-I` suppress the behavior.
+At startup, Python normally imports `site` and scans its active `site-packages` directories for `.pth` files. Besides adding paths, a `.pth` line beginning with `import ` executes Python code even if the named module is never otherwise used. Python also tries to import `sitecustomize` and, **when the user site is enabled**, `usercustomize`.<sup>[[56]](#references)</sup> The trigger is a later start of an interpreter that sees the modified directory. `-S` disables `site` processing; `-s`, `-I`, or `PYTHONNOUSERSITE` disable the **user-site** variants. `-I` does not generally disable a global `sitecustomize`. Virtual environments may also exclude the user site. Check `python3 -m site` for the specific interpreter.
 
-Verified on macOS 26 (the markers below were proven with disposable directories, not the real user site):
+The following PoC was run on macOS 26.5.2. `PYTHONUSERBASE` moves the user site into a temporary directory for this test; no real user site is modified:
 
-```bash
-# user site dir (no root needed to write here)
-US=$(python3 -m site --user-site)       # ~/Library/Python/3.13/lib/python/site-packages
-mkdir -p "$US"
+```python
+import os, pathlib, subprocess, tempfile
 
-# (A) executable .pth line
-echo 'import os; os.system("touch /tmp/pth_poc")' > "$US/evil.pth"
-
-# (B) usercustomize.py
-printf 'import os\nos.system("touch /tmp/uc_poc")\n' > "$US/usercustomize.py"
-
-# either one runs on the next interpreter start:
-python3 -c "pass"
+with tempfile.TemporaryDirectory(prefix='ht-python-site-') as root:
+    env = os.environ.copy()
+    env['PYTHONUSERBASE'] = root
+    env.pop('PYTHONNOUSERSITE', None)
+    user_site = pathlib.Path(subprocess.check_output(
+        ['python3', '-m', 'site', '--user-site'], env=env, text=True
+    ).strip())
+    user_site.mkdir(parents=True)
+    pth_marker = pathlib.Path(root) / 'pth.marker'
+    user_marker = pathlib.Path(root) / 'user.marker'
+    (user_site / 'ht_probe.pth').write_text(
+        'import pathlib; pathlib.Path(' + repr(str(pth_marker)) + ').touch()\n'
+    )
+    (user_site / 'usercustomize.py').write_text(
+        'import pathlib; pathlib.Path(' + repr(str(user_marker)) + ').touch()\n'
+    )
+    subprocess.run(['python3', '-c', 'pass'], env=env, check=True)
+    print('pth:', pth_marker.exists(), 'usercustomize:', user_marker.exists())
 ```
+
+Both markers appeared. Repeating with `-s`, `-I`, or `-S` prevented both **user-site** markers in this test. `sitecustomize` in a global site directory was not tested.
 
 ## Root Sandbox Bypass
 
