@@ -15,6 +15,14 @@ find /etc/apache2 /etc/httpd /etc/nginx -maxdepth 3 -type f 2>/dev/null | head -
 
 Inspect virtual-host names, document roots, proxy routes, upload directories, PHP execution settings, and config files containing credentials. A loopback listener may be reachable through a proxy or SSH tunnel. To test a named virtual host against a local listener, send the intended `Host` header or use `curl --resolve` with the correct address and port. Virtual-host enumeration can also reveal names absent from the default response. Check whether Apache permits `.htaccess` overrides and whether upload paths can execute PHP before treating a writable upload directory as code execution. A deployed JavaScript source map may expose source paths or client-side secrets; treat recovered values as clues and verify their actual privileges. For web-specific checks, see [Apache](../../network-services-pentesting/pentesting-web/apache.md) and [Nginx](../../network-services-pentesting/pentesting-web/nginx.md).
 
+```bash
+curl -i -H 'Host: admin.example.local' http://127.0.0.1:8080/
+ffuf -w wordlist.txt -u http://127.0.0.1:8080/ -H 'Host: FUZZ.example.local' -fs 1234 # replace 1234 with the default response size
+grep -R 'sourceMappingURL' /var/www /opt 2>/dev/null | head
+```
+
+Filter virtual-host results against the default response size or another stable baseline so every guessed name does not look valid. A source map is useful only if it is actually deployed or otherwise readable.
+
 Reverse proxies can change which client headers an application trusts. Compare direct and proxied requests before assuming that `X-Forwarded-For`, `X-Forwarded-Host`, or similar headers establish a caller's identity. Review proxy and application configuration together.
 
 ## Authentication and service identities
