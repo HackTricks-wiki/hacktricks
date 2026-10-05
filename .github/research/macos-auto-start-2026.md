@@ -23,3 +23,19 @@ Working checklist for the [macOS Auto Start](../../src/macos-hardening/macos-aut
 - Absent: `/usr/sbin/periodic`, `/etc/defaults/periodic.conf`, `/etc/periodic`, and `/System/Library/LaunchDaemons/com.apple.periodic-daily.plist`. A system or user `~/Library/LaunchDaemons` is not a documented scanned location.
 - iTerm, Google Chrome, and Visual Studio Code are installed; Hammerspoon, BetterTouchTool, Alfred, Karabiner-Elements, and xbar were not found in `/Applications` under their usual names. This says nothing about other install locations.
 - These checks establish path and component presence only. They do not establish that a particular service or plug-in is enabled or that a PoC executes.
+
+## Contributor B (Opus 4.8) — coordination log
+
+To avoid duplicated techniques on the shared PR. **Done / already in the page (do not re-add):**
+
+- [x] **Application Script Files** (theevilbit 10) — user-writable interpreted scripts shipped in/used by apps (Sublime `sublime.py`, Homebrew `brew`, IDLE `idlemain.py`, Wireshark `ChmodBPF`). Added under *Conditional Sandbox Bypass*. Validated read-only: `/opt/homebrew/bin/brew` is a user-writable Bash script on this host.
+- [x] **Dock Tile Plugins** (theevilbit 32) — `NSDockTilePlugIn` loaded into the non-sandboxed, unsigned `com.apple.dock.external.extra` XPC helper; not shown in BTM. Added under *Conditional*. Validated: Calendar/App Store/System Settings + 3rd-party Warp/ChatGPT declare it on macOS 26.
+- [x] **Widgets / WidgetKit** (theevilbit 33) — `com.apple.notificationcenterui.plist` `widgets.instances`. Added under *Conditional*.
+- [x] **launchd Boot Tasks** (theevilbit 34) — `__TEXT,__config` tasks (`/etc/rc.server`, `deferred_install`, …). Added under *Root*.
+- [x] **NVRAM `apple-trusted-trampoline`** (theevilbit 35) — strike-through/impractical note under *Root* (needs SIP off + Apple-signed payload).
+
+**Contributor B will take next (claiming to avoid overlap):** Configuration Profiles (`.mobileconfig`) deploying agents; Mail.app rules (Run AppleScript); Calendar.app alerts (run script / open file); `~/.ssh/config` `LocalCommand`/`ProxyCommand`/`Match exec`; debugger init files (`~/.lldbinit`, `~/.gdbinit`); `LESSOPEN`/pager hooks.
+
+**Left to Contributor A (your existing table):** SMAppService/BTM, WatchPaths/QueueDirectories/StartOnMount, shell startup refinements, Apple user plug-ins (Input Methods, Scripting Additions, Services/Quick Actions), per-app triggers (Chrome native messaging, VS Code, Raycast, Karabiner, Automator/Shortcuts), git hooks / editor init / package-manager hooks, legacy privileged review.
+
+Ping convention: before adding anything from the other side's list, grep the page for the `###` heading first.
