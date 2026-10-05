@@ -79,6 +79,42 @@ The **main difference between agents and daemons is that agents are loaded when 
 
 Each `ProgramArguments` element is a separate argument; `launchd` does not parse a single string as a shell command. The corrected example above can be syntax checked without loading it using `plutil -lint /path/to/example.plist`. See the local `man launchd.plist` entry for `ProgramArguments`, `RunAtLoad`, and `KeepAlive`.
 
+#### File-event triggers in existing jobs
+
+An **already loaded** agent or daemon can use `WatchPaths` to start when a named path changes. `QueueDirectories` starts a job while a directory is non-empty; `StartOnMount` starts on a volume mount. [Apple's launchd guide](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html#//apple_ref/doc/uid/10000172i-CH2-SW9) includes `WatchPaths` and `QueueDirectories` examples. A write to a watched file triggers the **job already configured**; it gives arbitrary code execution only if the writer can also control the job's executable, script, or data that the job interprets. Merely writing a new plist outside a scanned or registered location does not load it.
+
+This self-cleaning PoC registers a uniquely named **temporary user agent**, changes only its own watched file, and removes the agent. It was run successfully on macOS 26.5.2 without a logout or restart:
+
+```python
+import os, pathlib, plistlib, subprocess, tempfile, time, uuid
+
+label = f"org.hacktricks.watchtest.{uuid.uuid4().hex}"
+target = f"gui/{os.getuid()}"
+with tempfile.TemporaryDirectory(prefix="ht-watch-") as root:
+    base = pathlib.Path(root)
+    watched, marker, plist = base / "watched", base / "ran", base / "agent.plist"
+    watched.write_text("before\n")
+    plist.write_bytes(plistlib.dumps({
+        "Label": label,
+        "ProgramArguments": ["/usr/bin/touch", str(marker)],
+        "WatchPaths": [str(watched)],
+        "RunAtLoad": False,
+    }))
+    subprocess.run(["launchctl", "bootstrap", target, str(plist)], check=True)
+    try:
+        marker.unlink(missing_ok=True)
+        watched.write_text("after\n")
+        for _ in range(30):
+            if marker.exists():
+                break
+            time.sleep(0.1)
+        print("watch fired:", marker.exists())
+    finally:
+        subprocess.run(["launchctl", "bootout", f"{target}/{label}"], check=True)
+```
+
+The local run printed `watch fired: True`, and `bootout` succeeded. `launchctl bootstrap` is used here only inside the isolated PoC; it is **not** needed for a job that is already loaded. To assess an existing job safely, read its plist and the resolved `ProgramArguments` path, then check whether the relevant executable or interpreted file is writable without altering it.
+
 There are cases where an **agent needs to be executed before the user logins**, these are called **PreLoginAgents**. For example, this is useful to provide assistive technology at login. They can be found also in `/Library/LaunchAgents`(see [**here**](https://github.com/HelmutJ/CocoaSampleCode/tree/master/PreLoginAgents) an example).
 
 > [!TIP]
@@ -144,13 +180,17 @@ Writeup (xterm): [https://theevilbit.github.io/beyond/beyond_0018/](https://thee
 
 #### Locations
 
-- **`~/.zshrc`, `~/.zlogin`, `~/.zshenv.zwc`**, **`~/.zshenv`, `~/.zprofile`**
-  - **Trigger**: Open a terminal with zsh
+- **`~/.zshenv`** (or a newer compiled **`~/.zshenv.zwc`**)
+  - **Trigger**: Any ordinary zsh invocation, including a noninteractive `zsh -c`; `zsh -f` skips user startup files.
+- **`~/.zshrc`**
+  - **Trigger**: Interactive zsh starts.
+- **`~/.zprofile`, `~/.zlogin`**
+  - **Trigger**: Login zsh starts; these are read before and after `.zshrc`, respectively.
 - **`/etc/zshenv`, `/etc/zprofile`, `/etc/zshrc`, `/etc/zlogin`**
   - **Trigger**: Open a terminal with zsh
   - Root required
 - **`~/.zlogout`**
-  - **Trigger**: Exit a terminal with zsh
+  - **Trigger**: A login zsh exits normally, not every terminal or shell exit.
 - **`/etc/zlogout`**
   - **Trigger**: Exit a terminal with zsh
   - Root required
@@ -164,14 +204,24 @@ Writeup (xterm): [https://theevilbit.github.io/beyond/beyond_0018/](https://thee
 
 #### Description & Exploitation
 
-When initiating a shell environment such as `zsh` or `bash`, **certain startup files are run**. macOS currently uses `/bin/zsh` as the default shell. This shell is automatically accessed when the Terminal application is launched or when a device is accessed via SSH. While `bash` and `sh` are also present in macOS, they need to be explicitly invoked to be used.<sup>[[2]](#references)</sup>
+When initiating a shell environment such as `zsh` or `bash`, **certain startup files are run**. macOS currently uses `/bin/zsh` as the default shell. Whether Terminal or SSH starts a login or interactive shell depends on their configuration; do not assume that every file above runs in every session. While `bash` and `sh` are also present in macOS, they need to be explicitly invoked to be used.<sup>[[2]](#references)</sup> The [zsh startup-file reference](https://zsh.sourceforge.io/Doc/Release/Files.html) specifies the ordering, the `ZDOTDIR` override, and the `.zwc` rule.
 
-The man page of zsh, which we can read with **`man zsh`** has a long description of the startup files.
+The following read-only experiment used a disposable `ZDOTDIR` on macOS 26.5.2. It shows which user files were read; no real shell startup file was changed:
 
 ```bash
-# Example executino via ~/.zshrc
-echo "touch /tmp/hacktricks" >> ~/.zshrc
+lab=$(mktemp -d)
+for name in zshenv zprofile zshrc zlogin zlogout; do
+  printf 'print -r -- %s >> "$ZDOTDIR/seen"\n' "$name" > "$lab/.$name"
+done
+for flags in -c -ic -lc -lic; do
+  : > "$lab/seen"
+  ZDOTDIR="$lab" /bin/zsh "$flags" ':'
+  printf '%s: %s\n' "$flags" "$(tr '\n' ' ' < "$lab/seen")"
+done
+rm -r "$lab"
 ```
+
+The observed order was `-c`: `zshenv`; `-ic`: `zshenv zshrc`; `-lc`: `zshenv zprofile zlogin`; `-lic`: `zshenv zprofile zshrc zlogin zlogout`. `ZDOTDIR` must already point to the alternate directory; merely writing files in an arbitrary directory is not enough.
 
 ### Re-opened Applications
 
@@ -631,6 +681,60 @@ This tool allows to indicate applications or scripts to execute when some shortc
 
 It allows to create workflows that can execute code when certain conditions are met. Potentially it's possible for an attacker to create a workflow file and make Alfred load it (it's needed to pay the premium version to use workflows).
 
+### Visual Studio Code automatic workspace tasks
+
+- **Write target:** `.vscode/tasks.json` inside a workspace the user will open.
+- **Trigger:** Opening that workspace in VS Code, but only when the folder is trusted **and** automatic tasks have been allowed. An untrusted workspace never runs automatic tasks; the default setting prompts the user before the first automatic run. [VS Code task documentation](https://code.visualstudio.com/docs/debugtest/tasks#_run-behavior) and [Workspace Trust documentation](https://code.visualstudio.com/docs/editing/workspaces/workspace-trust) describe both gates.
+- **Execution identity:** The VS Code user's account, through the configured task process. This is application-specific execution, not login persistence.
+
+In a **new, disposable workspace**, place this marker-only task in `.vscode/tasks.json`:
+
+```json
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "autostart-marker",
+      "type": "process",
+      "command": "/usr/bin/touch",
+      "args": ["${workspaceFolder}/.autostart-task-ran"],
+      "problemMatcher": [],
+      "runOptions": { "runOn": "folderOpen" }
+    }
+  ]
+}
+```
+
+After opening the trusted workspace and allowing automatic tasks, check for `.autostart-task-ran`. Remove the task entry and marker to clean up. **This was verified against Microsoft's documentation and the installed VS Code 1.139.1 bundle; it was not run in the active desktop session.**
+
+### Chrome native messaging hosts
+
+- **Write target:** `~/Library/Application Support/Google/Chrome/NativeMessagingHosts/<host-name>.json` for the current user, or `/Library/Google/Chrome/NativeMessagingHosts/<host-name>.json` for all users (admin write needed). Chromium and Chrome for Testing use different directories; see [Chrome's current path table](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging#native-messaging-host-location).
+- **Trigger:** An installed Chrome extension with the `nativeMessaging` permission calls `chrome.runtime.connectNative()` or `chrome.runtime.sendNativeMessage()` using the manifest's exact host name. Chrome then starts the host executable. Opening Chrome alone does not execute an arbitrary new native host; creating a manifest without a calling extension does nothing. [Chrome's native messaging guide](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging) documents this handshake.
+- **Execution identity:** The Chrome user's account. The manifest must name an absolute executable path and explicitly allow the calling extension origin.
+
+In a disposable browser account with a test extension, the following pair of files demonstrates the write-to-execution link. The manifest's filename must match its `name`, and `TEST_EXTENSION_ID` must be replaced by that extension's actual ID:
+
+```json
+{
+  "name": "org.hacktricks.marker",
+  "description": "Native messaging marker test",
+  "path": "/absolute/path/to/ht-native-host.sh",
+  "type": "stdio",
+  "allowed_origins": ["chrome-extension://TEST_EXTENSION_ID/"]
+}
+```
+
+Save this JSON as `~/Library/Application Support/Google/Chrome/NativeMessagingHosts/org.hacktricks.marker.json`. The marker-only executable at the manifest's `path` can contain:
+
+```sh
+#!/bin/sh
+/usr/bin/touch "$HOME/Library/Caches/ht-native-host-ran"
+exit 0
+```
+
+After the test extension calls `chrome.runtime.sendNativeMessage('org.hacktricks.marker', {ping: 1})` from its service worker or extension page, the marker proves the host started. This minimal host does not implement Chrome's length-prefixed response protocol, so the extension may report a messaging error after the marker is written. Remove the test manifest, host, and marker to clean up. On macOS 26.5.2 the Chrome app and both manifest directories were present; **the active Chrome profile was not modified or exercised**.
+
 ### SSHRC
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0006/](https://theevilbit.github.io/beyond/beyond_0006/)<sup>[[14]](#references)</sup>
@@ -669,17 +773,24 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0003/](https://theevilbit.g
 
 #### Locations
 
-- **`~/Library/Application Support/com.apple.backgroundtaskmanagementagent`**
-  - **Trigger:** Login
-  - Exploit payload stored calling **`osascript`**
-- **`/var/db/com.apple.xpc.launchd/loginitems.501.plist`**
-  - **Trigger:** Login
-  - Root required
+- **Registered login-item helper app:** `<MainApp>.app/Contents/Library/LoginItems/<Helper>.app` (common bundled location).
+  - **Trigger:** Registration may start the helper immediately; it then starts on later user logins, subject to approval.
+- **Registered bundled agent/daemon:** `<MainApp>.app/Contents/Library/LaunchAgents/<name>.plist` or `Contents/Library/LaunchDaemons/<name>.plist`.
+  - **Trigger:** An approved agent may start on registration and at later logins; an approved daemon starts at boot. A daemon requires admin approval.
 
 #### Description
 
-In System Preferences -> Users & Groups -> **Login Items** you can find **items to be executed when the user logs in**.\
-It it's possible to list them, add and remove from the command line:<sup>[[15]](#references)</sup>
+In **System Settings → General → Login Items & Extensions**, users can review login and background items. macOS 13 and later provide [`SMAppService`](https://developer.apple.com/documentation/servicemanagement/smappservice) to register bundled login items, launch agents, and launch daemons. Its [`register()` behavior](https://developer.apple.com/documentation/servicemanagement/smappservice/register%28%29) differs by type and approval state. **Writing a helper into an app bundle is not sufficient to register a new login item.** Conversely, if an already registered helper executable is writable, changing that executable can affect its next launch without a new registration; verify the actual path and code-signing checks first.
+
+The following is a read-only way to look for bundled helpers on a Mac; it neither registers nor launches any of them:
+
+```bash
+find /Applications -path '*/Contents/Library/LoginItems/*.app' -o \
+  -path '*/Contents/Library/LaunchAgents/*.plist' -o \
+  -path '*/Contents/Library/LaunchDaemons/*.plist' 2>/dev/null
+```
+
+Older login items can also be managed through Apple events. It is possible to list, add, and remove them from the command line, although adding them changes the user's persistent login configuration and may require Automation approval:<sup>[[15]](#references)</sup>
 
 ```bash
 #List all items:
@@ -692,9 +803,7 @@ osascript -e 'tell application "System Events" to make login item at end with pr
 osascript -e 'tell application "System Events" to delete login item "itemname"'
 ```
 
-These items are stored in the file **`~/Library/Application Support/com.apple.backgroundtaskmanagementagent`**
-
-**Login items** can **also** be indicated in using the API [SMLoginItemSetEnabled](https://developer.apple.com/documentation/servicemanagement/1501557-smloginitemsetenabled?language=objc) which will store the configuration in **`/var/db/com.apple.xpc.launchd/loginitems.501.plist`**
+`~/Library/Application Support/com.apple.backgroundtaskmanagementagent` is an implementation detail, not a supported place to install a payload by simply writing a file. The older `SMLoginItemSetEnabled` API is superseded for new helpers by `SMAppService`; the page's former `/var/db/com.apple.xpc.launchd/loginitems.501.plist` path was absent on the macOS 26.5.2 test machine. Use the registration API and system UI state when assessing modern login items, not an assumed database path.
 
 ### ZIP as Login Item
 
