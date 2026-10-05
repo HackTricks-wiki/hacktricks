@@ -48,7 +48,7 @@ tr '\0' '\n' </proc/$$/environ | sort -u
 tr '\0' '\n' </proc/<PID>/environ | sort -u
 ```
 
-If you are looking for **credentials** or **interesting service configuration** inside inherited environments, also check [Linux Post Exploitation](../post-exploitation/linux-post-exploitation/README.md).
+If you are looking for **credentials** or **interesting service configuration** inside inherited environments, also check [Linux Post Exploitation](../post-exploitation/README.md).
 
 ## Common variables
 
@@ -391,7 +391,7 @@ GIT_CONFIG_VALUE_0='sh -c "exec sh 0<&1 1>&1"' \
 git -p help
 ```
 
-From a post-exploitation perspective, also remember that inherited environments often contain **credentials**, **proxy settings**, **service tokens**, or **cloud keys**. Check [Linux Post Exploitation](../post-exploitation/linux-post-exploitation/README.md) for `/proc/<PID>/environ` and `systemd` `Environment=` hunting.
+From a post-exploitation perspective, also remember that inherited environments often contain **credentials**, **proxy settings**, **service tokens**, or **cloud keys**. Check [Linux Post Exploitation](../post-exploitation/README.md) for `/proc/<PID>/environ` and `systemd` `Environment=` hunting.
 
 ### PS1
 
