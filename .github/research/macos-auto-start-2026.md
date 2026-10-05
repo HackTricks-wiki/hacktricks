@@ -1,6 +1,6 @@
 # macOS write-triggered execution research checklist
 
-Working checklist for the [macOS Auto Start](../../src/macos-hardening/macos-auto-start-locations.md) update. A checked item means the mechanism and its current trigger were assessed; it does **not** mean a payload was installed on the research machine. The local machine is macOS 26.5.2. Do not register a job, restart, log out, modify live preferences, or change a security database on that machine. Use read-only inspection and disposable, isolated files; mark untested runtime behavior explicitly.
+Working checklist for the [macOS Auto Start](../../src/macos-hardening/macos-auto-start-locations.md) update. A checked item means the mechanism and its current trigger were assessed; it does **not** mean a persistent payload was installed on the research machine. The local machine is macOS 26.5.2. Do not restart, log out, modify live preferences, or change a security database on that machine. Use read-only inspection and disposable, isolated files; a uniquely named, temporary user agent is allowed only with explicit cleanup in `finally`. Mark untested runtime behavior explicitly.
 
 | Area | Status | Questions / evidence still needed |
 | --- | --- | --- |
@@ -14,7 +14,7 @@ Working checklist for the [macOS Auto Start](../../src/macos-hardening/macos-aut
 | Scheduled/event mechanisms | [ ] | cron, at, Folder Actions, Calendar alerts, `launchd` path/mount/time triggers; check enabled state and event conditions on current macOS. |
 | Privileged legacy mechanisms | [ ] | PAM, Authorization Plugins, BSM `audit_warn`, Apache, CUPS, `man.conf`, StartupItems, `emond`, periodic, XQuartz, kexts; mark absent/deprecated/disabled mechanisms. Periodic components are absent locally. |
 | Other developer-tool hooks | [ ] | Git hooks, editor init files, debugger init files, package manager hooks, build tool configs. Decide which require prior user/project action and whether they belong under conditional execution. |
-| Safe PoC review | [ ] | For each added section: exact writable path, trigger, execution identity, prerequisite, marker-only PoC where feasible, cleanup, and whether this Mac was only inspected or actually tested. No sudo, reboot, logout, live login item, auth database, or service registration in local tests. |
+| Safe PoC review | [ ] | For each added section: exact writable path, trigger, execution identity, prerequisite, marker-only PoC where feasible, cleanup, and whether this Mac was only inspected or actually tested. No sudo, reboot, logout, live login item, auth database, or persistent service registration in local tests. |
 | Final review and PR integration | [ ] | Re-read the page and PR diff for duplicate techniques, broken links, stale claims, Markdown build, and changes made by the other contributor before each push. |
 
 ## Local read-only observations (5 October 2026)
@@ -23,6 +23,17 @@ Working checklist for the [macOS Auto Start](../../src/macos-hardening/macos-aut
 - Absent: `/usr/sbin/periodic`, `/etc/defaults/periodic.conf`, `/etc/periodic`, and `/System/Library/LaunchDaemons/com.apple.periodic-daily.plist`. A system or user `~/Library/LaunchDaemons` is not a documented scanned location.
 - iTerm, Google Chrome, and Visual Studio Code are installed; Hammerspoon, BetterTouchTool, Alfred, Karabiner-Elements, and xbar were not found in `/Applications` under their usual names. This says nothing about other install locations.
 - These checks establish path and component presence only. They do not establish that a particular service or plug-in is enabled or that a PoC executes.
+
+## Contributor A verified progress
+
+- [x] `launchd` `WatchPaths`: a unique temporary user agent was bootstrapped in `gui/<uid>`, a file in a temporary directory was changed, a marker appeared, and `bootout` succeeded. The self-cleaning PoC is on the page. Apple's launchd guide documents `WatchPaths` and `QueueDirectories`; `StartOnMount` remains documentation-only here.
+- [x] zsh startup order: isolated `ZDOTDIR` test observed `-c` → `zshenv`, `-ic` → `zshenv zshrc`, `-lc` → `zshenv zprofile zlogin`, `-lic` → all plus `zlogout`. No real dotfile was changed.
+- [x] Git `post-checkout` hook: executed a marker in a temporary repository after a branch switch, then removed the repository.
+- [x] Vim `~/.vimrc`: executed a marker with a temporary `HOME`, then removed it. Neovim was not installed locally and is documentation-only.
+- [ ] VS Code `runOn: folderOpen`: official documentation confirms the trusted-workspace and automatic-task approval gates; VS Code 1.139.1 is installed. The active desktop was not used for a runtime test.
+- [ ] Chrome native messaging: official Chrome documentation confirms manifest paths, extension permissions, allowed origins, and host startup on `connectNative`/`sendNativeMessage`. Chrome and both standard manifest directories exist locally. The active Chrome profile was not changed or used for a runtime test.
+- [x] Classic user and system launchd plist inventory (read only): parsed 464 system agents, 422 system daemons, 6 `/Library` agents, 7 `/Library` daemons, and 9 user agents. `WatchPaths` occurred in 4 system agents and 4 system daemons; `QueueDirectories` in 2 and 5; `StartOnMount` in 1 system daemon. Nine user plists and two absolute `Program`/first-argument targets were writable according to `os.access`, which does not prove a job is enabled, signature validation would pass, or a sandbox could write them. App-bundled helpers and interpreted arguments still need review.
+- [x] Modern Service Management paths and approval rules were checked against Apple's `SMAppService` docs and a read-only local bundle inventory; multiple bundled helper entries were found in `/Applications`. A mere write to an unregistered helper does not make it a login item.
 
 ## Contributor B (Opus 4.8) — coordination log
 

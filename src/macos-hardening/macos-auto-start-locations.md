@@ -735,6 +735,47 @@ exit 0
 
 After the test extension calls `chrome.runtime.sendNativeMessage('org.hacktricks.marker', {ping: 1})` from its service worker or extension page, the marker proves the host started. This minimal host does not implement Chrome's length-prefixed response protocol, so the extension may report a messaging error after the marker is written. Remove the test manifest, host, and marker to clean up. On macOS 26.5.2 the Chrome app and both manifest directories were present; **the active Chrome profile was not modified or exercised**.
 
+### Git hooks in a local repository
+
+- **Write target:** An executable hook such as `<repo>/.git/hooks/post-checkout`. If `core.hooksPath` has already been set, use that configured directory instead. A hook committed as an ordinary tracked source file is not automatically installed into a clone.
+- **Trigger:** The corresponding Git operation. For example, `post-checkout` runs after `git checkout` or `git switch`, and can also run after a clone or worktree creation. [Git's hook reference](https://git-scm.com/docs/githooks) lists the events and executable-bit requirement; [`core.hooksPath`](https://git-scm.com/docs/git-config#Documentation/git-config.txt-corehooksPath) changes the lookup directory.
+- **Execution identity:** The account running Git. The hook can execute only if the repository's effective hooks directory is writable to the actor and the user later performs the relevant Git operation.
+
+This marker-only PoC creates an entirely disposable repository, installs one hook, and switches a branch. It was executed successfully with Apple Git 2.50.1 on macOS 26.5.2:
+
+```bash
+lab=$(mktemp -d)
+git -C "$lab" init -q
+git -C "$lab" -c user.name=Test -c user.email=test@example.invalid \
+  commit --allow-empty -qm baseline
+cat > "$lab/.git/hooks/post-checkout" <<EOF
+#!/bin/sh
+/usr/bin/touch "$lab/ran"
+EOF
+chmod 700 "$lab/.git/hooks/post-checkout"
+git -C "$lab" checkout -qb probe
+test -e "$lab/ran" && echo 'post-checkout fired'
+rm -r "$lab"
+```
+
+### Vim startup configuration
+
+- **Write target:** `~/.vimrc` for the user who will launch Vim (or another startup file selected by Vim's initialization order). [Vim's startup reference](https://vimhelp.org/starting.txt.html) documents the file and the `VIMINIT`/`EXINIT` overrides.
+- **Trigger:** A subsequent ordinary Vim start that loads this configuration. Vim's `-u NONE` bypasses the user vimrc. This is editor-specific execution, not an OS login trigger.
+- **Execution identity:** The Vim user's account.
+
+The following isolated PoC was run against macOS's `/usr/bin/vim`; it writes no real Vim preferences or open documents:
+
+```bash
+lab=$(mktemp -d)
+printf 'call writefile(["ran"], "%s/marker")\n' "$lab" > "$lab/.vimrc"
+env -u VIMINIT -u EXINIT HOME="$lab" /usr/bin/vim -c 'qa!' >/dev/null 2>&1
+test -e "$lab/marker" && echo 'vimrc fired'
+rm -r "$lab"
+```
+
+Neovim has a separate user configuration path, `$XDG_CONFIG_HOME/nvim/init.lua` or `init.vim`, and also loads scripts in its `plugin/` runtime directories according to its [startup documentation](https://neovim.io/doc/user/starting/). Neovim was not installed on the macOS 26.5.2 test machine, so this variant was not run there.
+
 ### SSHRC
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0006/](https://theevilbit.github.io/beyond/beyond_0006/)<sup>[[14]](#references)</sup>
