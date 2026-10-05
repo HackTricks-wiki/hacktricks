@@ -84,3 +84,14 @@ B will NOT touch: Chrome native messaging, VS Code tasks (A owns these).
 
 - [x] **URL Scheme & File-Type Handlers (LaunchServices)** — `CFBundleURLTypes`/`CFBundleDocumentTypes`, `com.apple.launchservices.secure.plist` `LSHandlers`; triggered by clicking a link (ties to browsers) or opening a file type. Cross-links `macos-file-extension-apps`. *Conditional.* Ref: Objective-See.
 - [x] **sudo plugins (`/etc/sudo.conf`)** — `Plugin` lines load a shared object run as root on every `sudo`. *Root.* Ref: sigma-star. (Not PAM/Authz — distinct from A's legacy items.)
+
+### Contributor B — batch 5 scope update (from deep-research workflow, de-conflicted)
+
+Deep-research fan-out (106 agents) surfaced plug-in load points not in Contributor A's table nor on the page. Added only genuinely NEW, on-box-verified vectors (macOS 26, read-only):
+
+- [x] **CoreMIDI Drivers (MIDIServer)** — `~/Library/Audio/MIDI Drivers/*.plugin` (user, no root) + `/Library/...` (root). Verified `MIDIServer` carries `com.apple.security.cs.disable-library-validation`; user dir exists and is writable. *Sandbox Bypass.* Ref [53] codecolorist.
+- [x] **CoreMediaIO DAL Plug-Ins** — `/Library/CoreMediaIO/Plug-Ins/DAL/*.plugin` (root); loads in-process into any camera client. Verified dir exists. Library-validation caveat baked in. *Root.* Refs [53][54].
+- [x] **Directory Service Plugins** — `/Library/DirectoryServices/PlugIns/*.dsplug` loaded by root/unsandboxed `dspluginhelperd`. Verified dir + helper exist. *Root.* Ref [53].
+- [x] **Sploitlight note** added to the existing *Spotlight Plugins* section — CVE-2025-31199 TCC bypass via `mdworker` privileged read (fixed 15.4). Ref [55].
+
+Checked-but-not-added (already covered or out of scope): CoreAudio HAL (already in *Audio Plugins*), storagekitd/CVE-2024-44243 (already *Root*), NVRAM trampoline (already *Root*, strike-through), Vim/Sublime editor hooks (Vim by A; Sublime `sublime.py` already in *Application Script Files*), System Extensions & library/re-export proxies (require approval/are hijack variants, not clean write-triggers), npm preinstall (dev package-manager hook claimed by A).

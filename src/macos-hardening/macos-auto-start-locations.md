@@ -395,6 +395,44 @@ Writeup: [https://posts.specterops.io/audio-unit-plug-ins-896d3434a882](https://
 
 According to the previous writeups it's possible to **compile some audio plugins** and get them loaded.<sup>[[6]](#references)[[7]](#references)</sup>
 
+### CoreMIDI Drivers (MIDIServer)
+
+Writeup: [https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/](https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/)<sup>[[53]](#references)</sup>
+
+- Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+  - Your code runs inside the `MIDIServer` process, not your app's sandbox
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
+  - `MIDIServer` runs under its own `seatbelt` sandbox profile
+
+#### Location
+
+- **`~/Library/Audio/MIDI Drivers/*.plugin`**
+  - No root required (user-writable)
+  - **Trigger**: `MIDIServer` (re)starts. It is launched on demand the first time any process uses CoreMIDI (opening *Audio MIDI Setup*, GarageBand, a DAW, or a page that uses WebMIDI)
+- **`/Library/Audio/MIDI Drivers/*.plugin`**
+  - Root required
+  - **Trigger**: same as above
+
+#### Description & Exploitation
+
+Apple's `MIDIServer` (`/System/Library/Frameworks/CoreMIDI.framework/MIDIServer`) loads MIDI **driver** bundles from the `Audio/MIDI Drivers` directories. The binary is Apple-signed but ships with the `com.apple.security.cs.disable-library-validation` entitlement, so it will load a bundle that is **unsigned or ad-hoc signed by a different team**, yielding code execution inside a separate, Apple-owned process **without root**.<sup>[[53]](#references)</sup>
+
+Verified on macOS 26 (read-only):
+
+```bash
+# user-writable, no root needed
+ls -ld ~/Library/"Audio/MIDI Drivers"            # exists, owned by the user
+codesign -d --entitlements :- /System/Library/Frameworks/CoreMIDI.framework/MIDIServer 2>/dev/null \
+  | grep disable-library-validation              # -> com.apple.security.cs.disable-library-validation
+```
+
+A driver is a standard bundle that exports a `MIDIDriverInterface` factory; placing the payload in the factory/constructor makes it run as soon as `MIDIServer` enumerates the drivers. Build it, drop it as `~/Library/Audio/MIDI Drivers/Evil.plugin`, then trigger a load without any logout/reboot:
+
+```bash
+# starts MIDIServer, which scans the driver directories
+open -a "Audio MIDI Setup"
+```
+
 ### QuickLook Plugins
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0012/](https://theevilbit.github.io/beyond/beyond_0012/)<sup>[[8]](#references)</sup>
@@ -1432,6 +1470,9 @@ Then **change** the code of the function **`GetMetadataForFile`** to execute you
 
 Finally, **build and copy your new `.mdimporter`** to one of the three previous locations. You can check whether it is loaded by **monitoring the logs** or running **`mdimport -L`**.
 
+> [!TIP]
+> Even though the importer sandbox is very restrictive, `mdworker` indexes files with **privileged read access**. A malicious `.mdimporter` can therefore read the *content* of files inside TCC-protected locations (Downloads, Pictures, Desktop, …) and exfiltrate harvested metadata without any TCC prompt — the **"Sploitlight" TCC bypass (CVE-2025-31199)**, patched in macOS Sequoia 15.4.<sup>[[55]](#references)</sup>
+
 ### ~~Preference Pane~~
 
 > [!CAUTION]
@@ -2400,6 +2441,49 @@ CONF
 # ht_audit.so's constructor / audit_open runs as root on the next `sudo <anything>`
 ```
 
+### CoreMediaIO DAL Plug-Ins
+
+Writeup: [https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/](https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/)<sup>[[53]](#references)</sup>\
+Minimal example: [https://github.com/johnboiles/coremediaio-dal-minimal-example](https://github.com/johnboiles/coremediaio-dal-minimal-example)<sup>[[54]](#references)</sup>
+
+- Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+- TCC bypass: [🟠](https://emojipedia.org/large-orange-circle)
+  - DAL plug-ins load into any process that opens the camera, so you inherit that app's Camera TCC access
+
+#### Location
+
+- **`/Library/CoreMediaIO/Plug-Ins/DAL/*.plugin`**
+  - Root required
+  - **Trigger**: any process that enumerates video devices (opens the camera) loads every DAL plug-in — e.g. FaceTime, Zoom, Safari/Chrome camera use, or `system_profiler SPCameraDataType`
+
+#### Description & Exploitation
+
+CoreMediaIO **DAL** (Device Abstraction Layer) plug-ins are user-space bundles loaded **in-process** by every application that accesses a camera. A malicious `.plugin` dropped in the DAL directory therefore runs inside many high-value, camera-entitled processes (this is the same mechanism legitimately used by virtual-camera software such as OBS).<sup>[[53]](#references)[[54]](#references)</sup>
+
+Verified on macOS 26 (read-only): `/Library/CoreMediaIO/Plug-Ins/DAL` exists (root-owned).
+
+> [!CAUTION]
+> On recent macOS, library validation on the **client** process can prevent loading a third-party DAL plug-in unless it is properly signed/notarized; this vector is most reliable against clients that do not enforce library validation.
+
+### Directory Service Plugins
+
+Writeup: [https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/](https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/)<sup>[[53]](#references)</sup>
+
+- Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
+
+#### Location
+
+- **`/Library/DirectoryServices/PlugIns/*.dsplug`**
+  - Root required
+  - **Trigger**: loaded at boot (and on service restart) by the root, non-sandboxed `dspluginhelperd` (`/usr/libexec/dspluginhelperd`)
+
+#### Description & Exploitation
+
+`dspluginhelperd` loads Directory Service plug-in bundles (`.dsplug`) via `CPluginHandler::LoadPlugins`. Because the helper runs as **root and unsandboxed**, a bundle written here executes as root on the next boot — a persistence/code-execution primitive distinct from PAM and Authorization Plugins.<sup>[[53]](#references)</sup>
+
+Verified on macOS 26 (read-only): `/Library/DirectoryServices/PlugIns` exists and `/usr/libexec/dspluginhelperd` is present (root-owned).
+
 ## Persistence techniques and tools
 
 - [https://github.com/cedowens/Persistent-Swift](https://github.com/cedowens/Persistent-Swift)
@@ -2459,5 +2543,8 @@ CONF
 - [50] [Remove ExtensionInstallForcelist in Chrome on Mac (macsecurity.net)](https://macsecurity.net/view/492-extensioninstallforcelist-chrome-policy-mac)
 - [51] [On Writing Sudo Plugins (sigma-star)](https://blog.sigma-star.io/2025/07/on-writing-sudo-plugins/)
 - [52] [Remote Mac Exploitation Via Custom URL Schemes (Objective-See)](https://objective-see.org/blog/blog_0x38.html)
+- [53] [Two macOS persistence tricks abusing plugins (codecolorist)](https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/)
+- [54] [CoreMediaIO DAL minimal example (johnboiles)](https://github.com/johnboiles/coremediaio-dal-minimal-example)
+- [55] [Sploitlight: Analyzing a Spotlight-based macOS TCC vulnerability (Microsoft)](https://www.microsoft.com/en-us/security/blog/2025/07/28/sploitlight-analyzing-a-spotlight-based-macos-tcc-vulnerability/)
 
 {{#include ../banners/hacktricks-training.md}}
