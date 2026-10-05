@@ -1069,6 +1069,14 @@ If we print the job file, we find that it contains the same information we got u
 
 To assess a candidate safely, inspect the event's alert in Calendar and the selected file's permissions. This path was documented from Apple's guide and **not** run on the research Mac because testing it would modify a live calendar and wait for a desktop event. A test in a disposable account can select a marker-only app bundle, set a near-future Open file alert, confirm launch, and delete the event and app afterward.
 
+### Automator actions and Quick Actions
+
+- **Write targets:** `~/Library/Automator/*.action` (user) and `/Library/Automator/*.action` (administrator) for action bundles. A saved Quick Action workflow is commonly kept in `~/Library/Services/*.workflow`; check the actual workflow path selected by the user. [Apple's Automator framework reference](https://developer.apple.com/documentation/automator) lists the action search directories.
+- **Trigger:** Automator loads available action bundles when it runs, but an action's task runs when a workflow that uses it executes. A Quick Action runs when the user selects it from Finder, Services, or another exposed menu. A Folder Action workflow runs when items are added to its **already attached** folder, and a Calendar Alarm workflow runs at its event time. [Apple's workflow types](https://support.apple.com/guide/automator/aut7cac58839/mac) distinguish these events. Merely writing an action or workflow does not attach a folder or schedule a calendar event.
+- **Execution identity and gates:** The account running the workflow; Automator or the invoking app must load the action and any current code-signing or privacy checks must allow it. A writable action bundle already referenced by an active workflow is a different case from installing a new action and waiting for selection.
+
+The user `Automator` and `Services` directories were present on the macOS 26.5.2 test Mac; `/Library/Automator` was absent. No live workflow was created, attached, or executed. Use a disposable account and a marker-only action/workflow to confirm a particular load path. The separate [Folder Actions](#folder-actions) section covers that event source in more detail.
+
 ### Folder Actions
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0024/](https://theevilbit.github.io/beyond/beyond_0024/)<sup>[[17]](#references)</sup>\
@@ -1261,6 +1269,14 @@ cp /Applications/Google\ Chrome.app/Contents/Resources/app.icns /tmp/Google\ Chr
 defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</key><dict><key>file-data</key><dict><key>_CFURLString</key><string>/tmp/Google Chrome.app</string><key>_CFURLStringType</key><integer>0</integer></dict></dict></dict>'
 killall Dock
 ```
+
+### Input Methods
+
+- **Write target:** A code-bearing input-method app bundle installed in `~/Library/Input Methods/` (user) or `/Library/Input Methods/` (administrator). This differs from Apple's plain-text `.inputplugin` keyboard-mapping files, which are not an arbitrary-code payload by themselves.
+- **Trigger:** The user adds/enables the input source in **System Settings → Keyboard → Text Input** and then selects or uses it. A bundle merely copied into the directory is not proof that macOS will launch it. [Apple's current Input Sources guide](https://support.apple.com/guide/mac-help/mchl84525d76/mac) describes enabling and switching sources; [Apple's InputMethodKit documentation](https://developer.apple.com/documentation/inputmethodkit) covers code-bearing input methods.
+- **Execution identity and gates:** The method runs for the signed-in user, subject to input-method registration, code-signing, and current macOS security checks. Existing enabled methods with a writable executable need a separate path and signature review.
+
+Apple's [older third-party input-method note](https://developer.apple.com/library/archive/qa/qa1810/_index.html) already warned that copying certain palette methods into these directories does not even make them appear in Input Sources. On the macOS 26.5.2 research Mac, the user directory exists, but no bundle was installed or activated, so this is a documented conditional path rather than a local runtime result.
 
 ### Color Pickers
 
