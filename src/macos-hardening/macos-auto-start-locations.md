@@ -1360,6 +1360,85 @@ plutil -p ~/Library/Containers/com.apple.notificationcenterui/Data/Library/Prefe
   | grep -iE "widgets?\." | head
 ```
 
+### Mail.app Rules (Run AppleScript)
+
+Writeup: [https://www.n00py.io/2016/10/using-email-for-persistence-on-os-x/](https://www.n00py.io/2016/10/using-email-for-persistence-on-os-x/)<sup>[[42]](#references)</sup>
+
+- Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+  - But Mail.app must be configured with an account and running; the trigger is an inbound email
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
+  - Editing the rules/scripts from outside Mail may require Mail to be closed and Full Disk Access on modern macOS
+
+#### Location
+
+- **`~/Library/Mail/V10/MailData/SyncedRules.plist`** (local rules; `V10` on Sonoma/Sequoia, `V11`+ on newer)
+- **`~/Library/Mobile Documents/com~apple~mail/Data/V10/MailData/ubiquitous_SyncedRules.plist`** (iCloud-synced rules, take precedence)
+- Rule enablement: **`RulesActiveState.plist`**; AppleScript payload: **`~/Library/Application Scripts/com.apple.mail/*.scpt`**
+
+#### Description & Exploitation
+
+An Apple Mail **rule** can have a *"Run AppleScript"* action. By adding a rule that matches a crafted **subject line** and runs an attacker script, the adversary gets **remotely-triggerable, stealthy** code execution in Mail's context whenever the magic email arrives — a vector that evades many persistence scanners because no LaunchAgent/Login Item is created.<sup>[[42]](#references)</sup> Setting the rule to also **delete** the trigger email hides the evidence. Defenders can hunt for it directly:<sup>[[43]](#references)</sup>
+
+```bash
+# Enumerate Mail rules that invoke AppleScript
+grep -A1 -i "AppleScript" ~/Library/Mail/V*/MailData/SyncedRules.plist 2>/dev/null
+plutil -p ~/Library/Mail/V*/MailData/SyncedRules.plist 2>/dev/null | grep -iE "AppleScript|ShouldTransfer|Delete"
+```
+
+### Configuration Profiles (.mobileconfig)
+
+Writeup: [https://www.jamf.com/blog/malicious-profiles-come/](https://www.jamf.com/blog/malicious-profiles-come/)<sup>[[44]](#references)</sup>
+
+- Useful to bypass sandbox: [🔴](https://emojipedia.org/large-red-circle)
+  - Modern macOS requires a **manual user approval** in System Settings → *Device Management* (silent `profiles install` is gone outside MDM)
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
+
+#### Location
+
+- Installed profiles live under **`/Library/Managed Preferences/`** and **`/var/db/ConfigurationProfiles/`**; a profile is an XML plist with a `PayloadContent` array.
+
+#### Description & Exploitation
+
+A `.mobileconfig` is not a direct code-execution primitive, but it is a durable **control/MITM persistence layer**: it can install a **trusted root CA** (`com.apple.security.root`), set a **global or PAC proxy** (`com.apple.proxy.*`), force **managed preferences** (`com.apple.ManagedClient.preferences`), or apply restrictions. Setting **`PayloadRemovalDisallowed=true`** (or delivering it via MDM/supervision) makes it **user-unremovable**, which is the persistence.<sup>[[44]](#references)</sup>
+
+> [!WARNING]
+> A plain configuration profile has **no payload type that drops an arbitrary `LaunchDaemon`/`LaunchAgent`**. Installing a daemon that way requires full **MDM enrollment** plus a management agent/script — do not treat `.mobileconfig` as a launchd delivery mechanism.
+
+```bash
+# Inspect installed profiles (user context)
+profiles list            # per-user
+sudo profiles show       # system (root)
+```
+
+### DYLD_INSERT_LIBRARIES Persistence
+
+- Useful to bypass sandbox: [🔴](https://emojipedia.org/large-red-circle)
+  - dyld **strips** `DYLD_*` for SIP/platform binaries, hardened-runtime apps and setuid targets, so it only injects into unprotected processes and does **not** bypass SIP/the hardened runtime
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
+
+#### Location
+
+- Reliable form: the **`EnvironmentVariables`** dict inside a malicious `LaunchAgent`/`LaunchDaemon` plist (runs at login/boot)
+- Dead/historical (report only): **`~/.MacOSX/environment.plist`** (removed in 10.8) and **`/etc/launchd.conf`** (removed in 10.10)
+
+#### Description & Exploitation
+
+If an attacker can get `DYLD_INSERT_LIBRARIES` into a victim process' environment, dyld loads the attacker dylib (its constructor runs) into that process. The persistent variant embeds the variable in a LaunchAgent so every launch of the job re-injects. Note that `launchctl setenv DYLD_*` is filtered on modern macOS, so embed it in the plist instead.<sup>[[45]](#references)</sup>
+
+```xml
+<key>EnvironmentVariables</key>
+<dict>
+    <key>DYLD_INSERT_LIBRARIES</key>
+    <string>/tmp/evil.dylib</string>
+</dict>
+```
+
+For the full mechanics of dylib injection/hijacking see:
+
+{{#ref}}
+macos-security-and-privilege-escalation/macos-proces-abuse/macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md
+{{#endref}}
+
 ## Root Sandbox Bypass
 
 > [!TIP]
@@ -1943,6 +2022,40 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0035/](https://theevilbit.g
 
 The `rc.trampoline` boot task runs a **platform (Apple-signed) binary** stored in the `apple-trusted-trampoline` NVRAM variable at boot, but **only when the `rc.trampoline=1` boot-arg is set and SIP is disabled** (with a ~390&nbsp;KB size limit and a blocking/return-fast constraint). Because it requires **root + SIP disabled + an Apple-signed payload**, it is essentially impractical for real-world persistence and is listed here only for completeness.<sup>[[41]](#references)</sup>
 
+### /etc/paths and /etc/paths.d (PATH hijack)
+
+- Useful to bypass sandbox: [🔴](https://emojipedia.org/large-red-circle) (needs root to write)
+- Root required
+
+#### Location
+
+- **`/etc/paths`** and **`/etc/paths.d/*`** — read by **`path_helper`** (invoked from `/etc/zprofile`) to build the default `PATH` at login.
+
+#### Description & Exploitation
+
+Both are root-owned. Prepending an attacker-controlled directory (by editing `/etc/paths` or dropping a file in `/etc/paths.d/`) makes that directory appear early in every new login shell's `PATH`, so a malicious binary named like a common command (`ls`, `git`, …) **shadows** the real one and runs the next time the victim invokes it.
+
+```bash
+# e.g. Homebrew already ships a /etc/paths.d entry; an attacker drops their own
+echo "/private/tmp/evil" | sudo tee /etc/paths.d/00-evil
+# -> /private/tmp/evil is prepended to PATH for new login shells
+```
+
+### storagekitd SIP Bypass (CVE-2024-44243)
+
+Writeup: [https://www.microsoft.com/en-us/security/blog/2025/01/13/analyzing-cve-2024-44243-a-macos-system-integrity-protection-bypass-through-kernel-extensions/](https://www.microsoft.com/en-us/security/blog/2025/01/13/analyzing-cve-2024-44243-a-macos-system-integrity-protection-bypass-through-kernel-extensions/)<sup>[[46]](#references)</sup>
+
+- Useful to bypass sandbox: [🔴](https://emojipedia.org/large-red-circle) (needs root)
+- Root required; result **bypasses SIP**. Affected macOS **15.0–15.1**, fixed in **15.2**
+
+#### Location
+
+- Drop a filesystem bundle in **`/Library/Filesystems/`**.
+
+#### Description & Exploitation
+
+`storagekitd` holds the entitlement **`com.apple.rootless.install.heritable`** and spawned the binaries of filesystem bundles with that SIP-bypassing capability **inherited**. By planting a malicious filesystem bundle, an attacker could run code with a SIP bypass to install **persistent kernel extensions** or write into SIP-protected `LaunchDaemon` directories — persistence that survives and defeats normal protections.<sup>[[46]](#references)</sup> Apple fixed it in macOS Sequoia 15.2.
+
 ## Persistence techniques and tools
 
 - [https://github.com/cedowens/Persistent-Swift](https://github.com/cedowens/Persistent-Swift)
@@ -1991,5 +2104,10 @@ The `rc.trampoline` boot task runs a **platform (Apple-signed) binary** stored i
 - [39] [Beyond the good ol' LaunchAgents - 33 - Widgets](https://theevilbit.github.io/beyond/beyond_0033/)
 - [40] [Beyond the good ol' LaunchAgents - 34 - launchd boot tasks](https://theevilbit.github.io/beyond/beyond_0034/)
 - [41] [Beyond the good ol' LaunchAgents - 35 - Persist through the NVRAM (apple-trusted-trampoline)](https://theevilbit.github.io/beyond/beyond_0035/)
+- [42] [Using email for persistence on OS X (n00py)](https://www.n00py.io/2016/10/using-email-for-persistence-on-os-x/)
+- [43] [Suspicious Apple Mail Rule Plist Modification (Elastic)](https://www.elastic.co/guide/en/security/current/suspicious-apple-mail-rule-plist-modification.html)
+- [44] [Malicious Profiles - One of the Most Serious Threats to Macs (Jamf)](https://www.jamf.com/blog/malicious-profiles-come/)
+- [45] [The Art of Mac Malware Vol.1 - Ch.0x2 Persistence (dyld)](https://taomm.org/PDFs/vol1/CH%200x02%20Persistence.pdf)
+- [46] [Analyzing CVE-2024-44243, a macOS SIP bypass through kernel extensions (Microsoft)](https://www.microsoft.com/en-us/security/blog/2025/01/13/analyzing-cve-2024-44243-a-macos-system-integrity-protection-bypass-through-kernel-extensions/)
 
 {{#include ../banners/hacktricks-training.md}}

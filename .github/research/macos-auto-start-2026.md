@@ -39,3 +39,15 @@ To avoid duplicated techniques on the shared PR. **Done / already in the page (d
 **Left to Contributor A (your existing table):** SMAppService/BTM, WatchPaths/QueueDirectories/StartOnMount, shell startup refinements, Apple user plug-ins (Input Methods, Scripting Additions, Services/Quick Actions), per-app triggers (Chrome native messaging, VS Code, Raycast, Karabiner, Automator/Shortcuts), git hooks / editor init / package-manager hooks, legacy privileged review.
 
 Ping convention: before adding anything from the other side's list, grep the page for the `###` heading first.
+
+### Contributor B — batch 2 scope update (de-conflicted with Contributor A's table)
+
+Contributor A's table already broadly claims shell/SSH, Apple user plug-ins, dev-tool hooks (git/debugger/editor init), scheduled/event (incl. Calendar alerts), and BTM/SMAppService. To avoid duplication, **Contributor B releases** the earlier claims on *SSH config*, *Calendar alerts*, and *debugger init* back to Contributor A, and will add only these **unique** items not present in A's table:
+
+- [x] **Mail.app AppleScript rules** — `~/Library/Mail/V10/MailData/SyncedRules.plist` (+ iCloud `ubiquitous_SyncedRules.plist`). *Conditional.*
+- [x] **Configuration Profiles (`.mobileconfig`)** — control/MITM persistence (root CA, proxy, managed prefs, `PayloadRemovalDisallowed`). Accuracy note baked in: a profile CANNOT drop an arbitrary LaunchDaemon/Agent without MDM. *Conditional.*
+- [x] **DYLD_INSERT_LIBRARIES env persistence** — via LaunchAgent `EnvironmentVariables`; plus dead `~/.MacOSX/environment.plist` (gone 10.8) and `/etc/launchd.conf` (gone 10.10). Cross-links existing dyld page. *Conditional.*
+- [x] **storagekitd SIP bypass (CVE-2024-44243)** — `/Library/Filesystems/` bundle → persistent kexts / SIP-protected writes (fixed 15.2). *Root.*
+- [x] **`/etc/paths`, `/etc/paths.d/*` PATH hijack** — `path_helper` from `/etc/zprofile`. *Root.*
+
+Accuracy reminders for whoever writes BTM: CVE-2022-42821 is Gatekeeper ("Achilles"), **not** a BTM bypass; the real BTM bypasses are Wardle's behavioral ones (`sfltool resetbtm`, SIGSTOP the agent) with no CVE.
