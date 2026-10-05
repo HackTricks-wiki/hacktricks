@@ -1874,6 +1874,48 @@ For enumerating/abusing file-extension and URL-scheme handlers in depth, see:
 macos-security-and-privilege-escalation/macos-file-extension-apps.md
 {{#endref}}
 
+### Python startup files (`.pth` / `usercustomize` / `sitecustomize`)
+
+Writeup: [https://docs.python.org/3/library/site.html](https://docs.python.org/3/library/site.html)<sup>[[56]](#references)</sup>
+
+- Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+  - Runs the next time the victim starts any non-sandboxed `python3`
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
+  - Runs with the privileges/TCC of whatever process launched the interpreter
+
+#### Location
+
+- **`$(python3 -m site --user-site)/*.pth`** (macOS framework builds: `~/Library/Python/<X.Y>/lib/python/site-packages/`)
+  - No root required (user-writable)
+  - **Trigger**: any `python3` start — the `site` module processes every `.pth` in site dirs
+- **`<user-site>/usercustomize.py`**
+  - No root required
+  - **Trigger**: any `python3` start (auto-imported when the user site is enabled)
+- **`<prefix>/site-packages/sitecustomize.py`** (e.g. `/opt/homebrew/lib/python3.13/site-packages/`, or system paths)
+  - Root/admin may be required depending on the interpreter location
+  - **Trigger**: any `python3` start
+
+#### Description & Exploitation
+
+At startup the `site` module scans each `site-packages` directory for `.pth` files. Besides adding paths, **any `.pth` line that begins with `import ` is executed as Python code on every interpreter start**, whether or not the module is ever used. Python also auto-imports `usercustomize` (user site) and `sitecustomize` (global) when present.<sup>[[56]](#references)</sup> Each is a write-to-execute primitive that fires the next time the user — or a cron job, build script, or LaunchAgent — runs `python3`. The user-site variants need **no root**, and only `-S`/`-I` suppress the behavior.
+
+Verified on macOS 26 (the markers below were proven with disposable directories, not the real user site):
+
+```bash
+# user site dir (no root needed to write here)
+US=$(python3 -m site --user-site)       # ~/Library/Python/3.13/lib/python/site-packages
+mkdir -p "$US"
+
+# (A) executable .pth line
+echo 'import os; os.system("touch /tmp/pth_poc")' > "$US/evil.pth"
+
+# (B) usercustomize.py
+printf 'import os\nos.system("touch /tmp/uc_poc")\n' > "$US/usercustomize.py"
+
+# either one runs on the next interpreter start:
+python3 -c "pass"
+```
+
 ## Root Sandbox Bypass
 
 > [!TIP]
@@ -2615,5 +2657,6 @@ Read-only observation on macOS 26: `/Library/DirectoryServices/PlugIns` and `/us
 - [53] [Two macOS persistence tricks abusing plugins (codecolorist)](https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/)
 - [54] [CoreMediaIO DAL minimal example (johnboiles)](https://github.com/johnboiles/coremediaio-dal-minimal-example)
 - [55] [Sploitlight: Analyzing a Spotlight-based macOS TCC vulnerability (Microsoft)](https://www.microsoft.com/en-us/security/blog/2025/07/28/sploitlight-analyzing-a-spotlight-based-macos-tcc-vulnerability/)
+- [56] [Python `site` module documentation (.pth / usercustomize / sitecustomize)](https://docs.python.org/3/library/site.html)
 
 {{#include ../banners/hacktricks-training.md}}

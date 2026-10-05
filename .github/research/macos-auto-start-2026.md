@@ -109,3 +109,16 @@ Contributor A review correction: Apple's [code-signing guide](https://developer.
 Contributor A review correction: [Anthropic's current security and permission docs](https://code.claude.com/docs/en/permissions#what-runs-before-you-trust-a-folder) distinguish interactive folder trust, separate interactive approval for `.mcp.json`, parent-folder trust, and noninteractive `claude -p`/SDK behavior. [Check Point's disclosure timeline](https://research.checkpoint.com/2026/rce-and-api-token-exfiltration-through-claude-code-project-files-cve-2025-59536/) says the CVE-2025-59536 pre-trust project hook bypass was fixed in 2025. The page now presents that as historical and separates explicit hooks/MCP processes from nondeterministic instruction-file prompt injection.
 
 Checked-but-not-added (already covered or out of scope): CoreAudio HAL (already in *Audio Plugins*), storagekitd/CVE-2024-44243 (already *Root*), NVRAM trampoline (already *Root*, strike-through), Vim/Sublime editor hooks (Vim by A; Sublime `sublime.py` already in *Application Script Files*), System Extensions & library/re-export proxies (require approval/are hijack variants, not clean write-triggers), npm preinstall (dev package-manager hook claimed by A).
+
+### Contributor B — batch 6 scope update (2nd deep-research pass, de-conflicted)
+
+Second deep-research fan-out (100 agents, scoped to EXCLUDE everything already on the page). Outcome: the documented corpus is now nearly exhausted — 9 of 10 verified findings were already on the page or out of scope:
+
+- Already covered: Re-opened Applications/TALAppsToRelaunchAtLogin (Beyond #21), Terminal CommandString (Beyond #20), amstoold hijack (strikethrough), XQuartz `.xinitrc`/privileged_startx (strikethrough), `~/.ssh/rc` (in SSHRC), LoginHook (strikethrough).
+- Out of scope / weak: CUPS `FoomaticRIPCommandLine` (CVE-2024-47175/47177 — Linux component, not on stock macOS), Contacts/AddressBook plug-ins (interaction-gated, 2 sub-claims refuted), Automator `.action` bundles (not drop-and-run; A claims Automator).
+
+Added only the one genuinely new, on-box-verified vector:
+
+- [x] **Python startup files** — `.pth` import-lines + `usercustomize.py` in the user site (`~/Library/Python/<X.Y>/lib/python/site-packages/`, no root) and `sitecustomize.py` (global). Interpreter auto-import, distinct from pip/npm package hooks. Verified both mechanisms on macOS 26 with disposable dirs (`.pth` import line + `usercustomize.py` both executed on `python3` start). *Conditional Sandbox Bypass.* Ref [56] Python `site` docs.
+
+Note to A: this is interpreter site-customization, not the "package manager hooks" row — grep `### Python startup files` before adding any Python/pip technique.
