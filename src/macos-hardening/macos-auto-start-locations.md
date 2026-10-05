@@ -154,8 +154,8 @@ nohup "$HOME/.agent" >/dev/null 2>&1 &
 One of the first things `launchd` would do is to **start** all the **daemons** like:
 
 - **Timer daemons** based on time to be executed:
-  - atd (`com.apple.atrun.plist`): Has a `StartInterval` of 30min
-  - crond (`com.apple.systemstats.daily.plist`): Has `StartCalendarInterval` to start at 00:15
+  - `com.apple.atrun.plist` invokes `/usr/libexec/atrun` with `StartInterval = 30` seconds in macOS 26.5.2; its effective enabled state can differ from the plist's `Disabled` key because launchd keeps overrides separately.
+  - `com.vix.cron.plist` invokes `/usr/sbin/cron` while `/usr/lib/cron/tabs` contains jobs. `com.apple.systemstats.daily` is a different scheduled service, not the cron daemon.
 - **Network daemons** like:
   - `org.cups.cups-lpd`: Listens in TCP (`SockType: stream`) with `SockServiceName: printer`
     - SockServiceName must be either a port or a service from `/etc/services`
@@ -483,9 +483,9 @@ The root user one is stored in **`/private/var/root/Library/Preferences/com.appl
 
 #### Location
 
-- **`/usr/lib/cron/tabs/`, `/private/var/at/tabs`, `/private/var/at/jobs`, `/etc/periodic/`**
+- **`/usr/lib/cron/tabs/`**
   - Root required for direct write access. No root required if you can execute `crontab <file>`
-  - **Trigger**: Depends on the cron job
+  - **Trigger**: The schedule in the installed crontab. `at` and `periodic` are separate mechanisms below.
 
 #### Description & Exploitation
 
@@ -495,22 +495,28 @@ List the cron jobs of the **current user** with:
 crontab -l
 ```
 
-You can also see all the cron jobs of the users in **`/usr/lib/cron/tabs/`** and **`/var/at/tabs/`** (needs root).
-
-In MacOS several folders executing scripts with **certain frequency** can be found in:
+The system cron daemon's launchd plist has a `QueueDirectories` entry for `/usr/lib/cron/tabs`; that is where installed user crontabs are kept. Inspecting other users' crontabs needs root:
 
 ```bash
-# The one with the cron jobs is /usr/lib/cron/tabs/
-ls -lR /usr/lib/cron/tabs/ /private/var/at/jobs /etc/periodic/
+plutil -p /System/Library/LaunchDaemons/com.vix.cron.plist
+ls -ld /usr/lib/cron/tabs
 ```
 
-There you can find the regular **cron** **jobs**, the **at** **jobs** (not very used) and the **periodic** **jobs** (mainly used for cleaning temporary files). The daily periodic jobs can be executed for example with: `periodic daily`.<sup>[[10]](#references)</sup>
-
-To add a **user cronjob programmatically** it's possible to use:
+In a disposable account, a marker-only user cron entry can be installed with `crontab` and removed after observing it. Running `crontab <file>` **replaces the account's entire existing crontab**, so save and restore it if it is not disposable:<sup>[[10]](#references)</sup>
 
 ```bash
-echo '* * * * * /bin/bash -c "touch /tmp/cron3"' > /tmp/cron
-crontab /tmp/cron
+lab=$(mktemp -d)
+had_original=0
+if crontab -l > "$lab/original" 2>/dev/null; then had_original=1; fi
+cleanup_cron_poc() {
+  if [ "$had_original" -eq 1 ]; then crontab "$lab/original"; else crontab -r; fi
+  rm -r "$lab"
+}
+trap cleanup_cron_poc EXIT
+printf '* * * * * /usr/bin/touch %s/ran\n' "$lab" > "$lab/new"
+crontab "$lab/new"
+sleep 65
+test -e "$lab/ran" && echo 'cron fired'
 ```
 
 ### iTerm2
@@ -895,7 +901,14 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0014/](https://theevilbit.g
 
 `at` tasks are designed for **scheduling one-time tasks** to be executed at certain times. Unlike cron jobs, `at` tasks are automatically removed post-execution. It's crucial to note that these tasks are persistent across system reboots, marking them as potential security concerns under certain conditions.<sup>[[16]](#references)</sup>
 
-By **default** they are **disabled** but the **root** user can **enable** **them** with:
+The bundled `com.apple.atrun.plist` has `Disabled = true`, but launchd keeps effective enabled/disabled overrides separately. On the macOS 26.5.2 test machine, `launchctl print-disabled system` reported `com.apple.atrun` as **enabled** despite that bundled key. Check effective state before claiming that `at` jobs will run:
+
+```bash
+launchctl print-disabled system | grep 'com.apple.atrun'
+launchctl print system/com.apple.atrun
+```
+
+An administrator can enable a disabled `atrun` service with `launchctl`; the following historical example changes system service state and was **not** run on the research Mac:
 
 ```bash
 sudo launchctl load -F /System/Library/LaunchDaemons/com.apple.atrun.plist
@@ -1772,7 +1785,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0019/](https://theevilbit.g
 
 #### Description & Exploitation
 
-The periodic scripts (**`/etc/periodic`**) are executed because of the **launch daemons** configured in `/System/Library/LaunchDaemons/com.apple.periodic*`. Note that scripts stored in `/etc/periodic/` are **executed** as the **owner of the file,** so this won't work for a potential privilege escalation.<sup>[[27]](#references)</sup>
+On older releases, the periodic scripts (**`/etc/periodic`**) were scheduled by **launch daemons** in `/System/Library/LaunchDaemons/com.apple.periodic*`. From macOS Big Sur 11.5, the periodic runner executed scripts in the periodic directories as the **owner of each file**, closing a former privilege-escalation path.<sup>[[27]](#references)</sup> The commands and directory listings below are historical output, not a macOS 26.5.2 test result.
 
 ```bash
 # Launch daemons that will execute the periodic scripts
@@ -1821,7 +1834,7 @@ test -x /usr/sbin/periodic && ls /System/Library/LaunchDaemons/com.apple.periodi
 ```
 
 > [!WARNING]
-> Note that the periodic script will be **executed as the owner of the script**. So if a regular user owns the script, it will be executed as that user (this might prevent privilege escalation attacks).
+> The owner-based rule applied to scripts directly in the periodic directories. The historical `999.local` wrapper used to source `/etc/daily.local`, `/etc/weekly.local`, or `/etc/monthly.local` without that same ownership check; when the scheduler ran as root, these local files ran as root. This distinction and the Big Sur 11.5 change are documented in the [original research](https://theevilbit.github.io/beyond/beyond_0019/). None of these paths should be assumed active when `periodic` is absent.
 
 ### PAM
 
