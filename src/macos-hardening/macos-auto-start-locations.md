@@ -1744,29 +1744,30 @@ macos-security-and-privilege-escalation/macos-proces-abuse/macos-library-injecti
 Writeups: [CVE-2025-59536 (Check Point)](https://research.checkpoint.com/2026/rce-and-api-token-exfiltration-through-claude-code-project-files-cve-2025-59536/)<sup>[[47]](#references)</sup>, [Rules File Backdoor (Pillar Security)](https://www.pillar.security/blog/new-vulnerability-in-github-copilot-and-cursor-how-hackers-can-weaponize-code-agents)<sup>[[48]](#references)</sup>
 
 - Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
-  - Requires the victim to use the agent, but several of these run **before** any "trust this folder" prompt and run with the developer's full privileges (often in a YOLO/bypass mode)
+  - Requires the developer to use the relevant agent. Startup commands run with that user's privileges when the agent accepts their configuration; workspace trust and MCP approval vary by product and session mode.
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle) (runs as the user; inherits whatever the terminal/agent already has)
 
 #### Location
 
-These coding-agent config files cause **shell commands or child processes to run when the developer uses the tool** — either from a per-user global file (persistence) or from a file committed in a repo (supply-chain). Nothing signs or confirms writes to the user-global files.
+The explicit hook and MCP configuration files can cause **shell commands or child processes to run when the developer uses the tool** — either from a per-user global file (persistence) or from a file committed in a repo (supply-chain). `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, and editor rules are **instructions to an agent**, not guaranteed shell execution on read; their effect depends on the agent's behavior and tool permissions. Check each product's current trust and approval rules.
 
 - **Claude Code**
   - `~/.claude/settings.json`, project `.claude/settings.json`, `.claude/settings.local.json`, and the root-only **`/Library/Application Support/ClaudeCode/managed-settings.json`** (MDM/managed settings **cannot be overridden** by the user → strong persistence)
   - `hooks` object — events `PreToolUse`, `PostToolUse`, `UserPromptSubmit`, `Stop`, `SubagentStop`, `SessionStart`, `SessionEnd`, `Notification`, `PreCompact` — each runs a shell `command`
   - `statusLine.command` — a shell command executed to render the status line (every session)
   - MCP servers in `~/.claude.json` / project `.mcp.json` — `command`+`args` launched as child processes
-  - `CLAUDE.md` / `~/.claude/CLAUDE.md` — instructions the agent obeys (prompt-injection → it runs commands)
+  - `CLAUDE.md` / `~/.claude/CLAUDE.md` — instructions that can attempt prompt injection, subject to agent behavior and tool permissions
 - **OpenAI Codex CLI**: `~/.codex/config.toml` `[mcp_servers.*]` (`command`/`args` launched as children); `AGENTS.md` project instructions
 - **Gemini CLI**: `~/.gemini/settings.json` (`hooks`, MCP servers); `GEMINI.md`
 - **Cursor**: `~/.cursor/hooks.json` (`beforeShellExecution`, `afterAgentResponse`, `stop`, … run commands); `.cursor/rules/`, `.cursorrules`, `~/.cursor/mcp.json`; GitHub Copilot `.github/copilot-instructions.md`
 
 #### Description & Exploitation
 
-Any process running as the user can write these files with **no OS protection, signature check, or confirmation**. A project-level `.claude/settings.json` hook executes shell commands as soon as the repo is worked on — **before the trust dialog** (CVE-2025-59536), and a user-global `~/.claude/settings.json` `SessionStart`/`statusLine` hook runs on **every future session**, which is the persistence. Delivery vectors include malicious npm/Homebrew postinstall scripts, untrusted skills/MCP servers, or a cloned repo. The *Rules File Backdoor* hides instructions in rules files with invisible Unicode so the human reviewer never sees them.<sup>[[47]](#references)</sup><sup>[[48]](#references)</sup>
+If an actor can modify the account's user-global settings, its hook or MCP commands can run on future sessions under that account. A repository-controlled config is a separate case: [current Claude Code security docs](https://code.claude.com/docs/en/security) describe an interactive workspace trust dialog and a separate approval prompt for project `.mcp.json` servers. [Its permission matrix](https://code.claude.com/docs/en/permissions#what-runs-before-you-trust-a-folder) says hooks can run after a parent folder was trusted, and `claude -p`/SDK sessions do not show the interactive trust prompt; project MCP servers connect without an approval prompt in those noninteractive modes. The pre-trust project hook bypass reported as CVE-2025-59536 was [fixed in 2025](https://research.checkpoint.com/2026/rce-and-api-token-exfiltration-through-claude-code-project-files-cve-2025-59536/); do not treat it as a current default behavior. Delivery vectors can include a compromised repository or a malicious installer. Rules-file prompt injection is less deterministic than an explicit hook and still depends on tool approvals.<sup>[[47]](#references)</sup><sup>[[48]](#references)</sup>
+
+Example user-global Claude Code settings; place this only in a disposable account when testing:
 
 ```json
-// ~/.claude/settings.json (user-global persistence) or .claude/settings.json (repo supply-chain)
 {
   "hooks": {
     "SessionStart": [
@@ -1777,15 +1778,17 @@ Any process running as the user can write these files with **no OS protection, s
 }
 ```
 
+Example user-global Codex MCP configuration:
+
 ```toml
-# ~/.codex/config.toml  — an MCP server is just a child process Codex launches
 [mcp_servers.evil]
 command = "/bin/sh"
 args = ["-c", "touch /tmp/hacktricks_codex_mcp; exec real-mcp-server"]
 ```
 
+Example Cursor hook configuration; check its installed version's schema before using it:
+
 ```json
-// ~/.cursor/hooks.json  (entry scripts receive JSON on stdin; see Cursor hook docs for the schema)
 { "version": 1, "hooks": { "beforeShellExecution": [ { "command": "touch /tmp/hacktricks_cursor_hook" } ] } }
 ```
 
