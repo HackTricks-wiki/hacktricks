@@ -330,6 +330,8 @@ crictl --runtime-endpoint unix:///host/var/run/crio/crio.sock ps 2>/dev/null
 
 If one of these succeeds, the path from "mounted socket" to "start a more privileged sibling container" is usually much shorter than any kernel breakout path.
 
+The same daemon access can also establish **host persistence**. A helper container with a writable host-root bind mount can receive files through `docker cp`, then use `docker exec` to place an SSH key, service unit, or other persistence file under the mounted host path. The security boundary is the daemon's authority to create the host mount; `docker cp` is only a staging step. Audit both newly created containers and writes to host authentication or startup paths after a runtime socket is exposed.
+
 ## Writable Host Path Task Hijack
 
 A writable host mount does not need to expose `/` to be dangerous. If the mounted path contains scripts, config files, hooks, plugins, or files consumed later by a host-side scheduled task or service, the container may be able to change what the host executes.

@@ -6,6 +6,8 @@ SUID binaries are usually reviewed for direct command execution, but custom SUID
 
 This page focuses on generic technique patterns: missing libraries, writable library directories, `RPATH`/`RUNPATH`, `LD_PRELOAD` through sudo, linker configuration, and SUID hardlink confusion.
 
+For the ELF program headers, dynamic section, and loader behavior behind these checks, see [ELF basic information](../../binary-exploitation/basic-stack-binary-exploitation-methodology/elf-tricks.md).
+
 ## Fast Enumeration
 
 Start by finding unusual SUID files and checking whether they are dynamically linked:<sup>[[1]](#references)[[3]](#references)</sup>

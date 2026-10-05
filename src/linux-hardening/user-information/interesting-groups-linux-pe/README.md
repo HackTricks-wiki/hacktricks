@@ -251,7 +251,7 @@ Finally, if you don't like any of the suggestions of before, or they aren't work
 ../../containers-namespaces/container-security/
 {{#endref}}
 
-If you have write permissions over the docker socket read [**this post about how to escalate privileges abusing the docker socket**](../../1-linux-basics/linux-privilege-escalation/index.html#writable-docker-socket)**.**
+If you have write permissions over the docker socket read [**this post about how to escalate privileges abusing the docker socket**](../../linux-basics/linux-privilege-escalation/index.html#writable-docker-socket)**.**
 
 {{#ref}}
 https://github.com/KrustyHack/docker-privilege-escalation
@@ -264,7 +264,7 @@ https://fosterelli.co/privilege-escalation-via-docker.html
 ## lxc/lxd Group
 
 {{#ref}}
-./
+lxd-privilege-escalation.md
 {{#endref}}
 
 ## Adm Group

@@ -59,6 +59,10 @@ Quick operator takeaway: always map the **full service graph** before patching. 
 In a setup with multiple auth modules, the process follows a strict order. If the `pam_securetty` module finds the login terminal unauthorized, root logins are blocked, yet all modules are still processed due to its "required" status. The `pam_env` sets environment variables, potentially aiding in user experience. The `pam_ldap` and `pam_unix` modules work together to authenticate the user, with `pam_unix` attempting to use a previously supplied password, enhancing efficiency and flexibility in authentication methods.<sup>[[1]](#references)[[13]](#references)[[15]](#references)[[16]](#references)[[17]](#references)</sup>
 
 
+## `pam_permit` in a service stack
+
+`pam_permit.so` returns success for PAM checks. If a lower-privileged user can modify a service's effective PAM policy, inserting it with a control flag that short-circuits the authentication stack can remove the password check for that service. For `sudo`, inspect `/etc/pam.d/sudo` and any included `common-auth` or `system-auth` file before deciding which services are affected. A PAM authentication bypass does **not** grant a new sudoers rule; the user must still be authorized to run the requested command. Check rule order and any earlier `required` failures rather than assuming that a single `sufficient pam_permit.so` line always succeeds.
+
 ## Backdooring PAM – Hooking `pam_unix.so`
 
 A classic persistence trick in high-value Linux environments is to **swap the legitimate PAM library with a trojanised drop-in**. On a host whose PAM stack loads `pam_unix.so`, SSH or console authentication can invoke its `pam_sm_authenticate()` entry point; a malicious replacement can capture credentials or implement a *magic* password bypass.<sup>[[2]](#references)[[11]](#references)</sup>
