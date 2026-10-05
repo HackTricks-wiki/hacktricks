@@ -196,9 +196,11 @@ Writeup (xterm): [https://theevilbit.github.io/beyond/beyond_0018/](https://thee
   - Root required
 - Potentially more in: **`man zsh`**
 - **`~/.bashrc`**
-  - **Trigger**: Open a terminal with bash
-- `/etc/profile` (didn't work)
-- `~/.profile` (didn't work)
+  - **Trigger**: Start interactive **non-login** Bash. An interactive login Bash reads it only if a login file explicitly sources it.
+- **`~/.bash_profile`, `~/.bash_login`, `~/.profile`**
+  - **Trigger**: Start login Bash; the first readable file in that order runs. `~/.profile` is skipped when either earlier file exists.
+- **`/etc/profile`**
+  - **Trigger**: Start login Bash; changing it requires root.
 - `~/.xinitrc`, `~/.xserverrc`, `/opt/X11/etc/X11/xinit/xinitrc.d/`
   - **Trigger**: Expected to trigger with xterm, but it **isn't installed** and even after installed this error is thrown: xterm: `DISPLAY is not set`<sup>[[3]](#references)</sup>
 
@@ -222,6 +224,8 @@ rm -r "$lab"
 ```
 
 The observed order was `-c`: `zshenv`; `-ic`: `zshenv zshrc`; `-lc`: `zshenv zprofile zlogin`; `-lic`: `zshenv zprofile zshrc zlogin zlogout`. `ZDOTDIR` must already point to the alternate directory; merely writing files in an arbitrary directory is not enough.
+
+[Bash's startup reference](https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html) distinguishes login from interactive shells. On the macOS 26.5.2 test machine, an isolated `HOME` containing all four user startup files produced: `bash -c` → none, `bash -ic` → `.bashrc`, `bash -lc` and `bash -lic` → `.bash_profile` only. Removing `.bash_profile` made login Bash read `.bash_login`, then `.profile` when that was also removed. `BASH_ENV` can point noninteractive Bash at a file, but that environment variable must already be set in the invoking process. An explicit `exit` from a login Bash can also load `~/.bash_logout`.
 
 ### Re-opened Applications
 
@@ -844,6 +848,42 @@ rm -r "$lab"
 ```
 
 Neovim has a separate user configuration path, `$XDG_CONFIG_HOME/nvim/init.lua` or `init.vim`, and also loads scripts in its `plugin/` runtime directories according to its [startup documentation](https://neovim.io/doc/user/starting/). Neovim was not installed on the macOS 26.5.2 test machine, so this variant was not run there.
+
+### SSH client configuration commands
+
+- **Write target:** `~/.ssh/config`, or another file it already includes. This is a **client** configuration file; it is separate from the server-side `~/.ssh/rc` described below.
+- **Trigger:** A matching `ssh` invocation. `Match exec` runs a local command while the client evaluates its configuration, even for `ssh -G`, which prints configuration without connecting. `ProxyCommand` runs when the client sets up a matching connection. `LocalCommand` runs only after a successful connection and requires `PermitLocalCommand yes` (the default is `no`). These have different timing and prerequisites; a write alone does not execute them. See the upstream [OpenSSH `ssh_config(5)`](https://github.com/openssh/openssh-portable/blob/master/ssh_config.5).
+- **Execution identity:** The local user running `ssh`. A matching host, an applicable configuration file, and any required connection are necessary. `ssh -F` can select a different configuration file.
+
+This marker-only PoC was run with Apple's SSH client on macOS 26.5.2. `-G` exercises `Match exec` without making a network connection or reading the user's real SSH configuration:
+
+```bash
+lab=$(mktemp -d)
+cat > "$lab/config" <<EOF
+Match host example.invalid exec "/usr/bin/touch $lab/marker"
+    User nobody
+EOF
+ssh -G -F "$lab/config" example.invalid >/dev/null
+test -e "$lab/marker" && echo 'Match exec fired'
+rm -r "$lab"
+```
+
+### Debugger initialization files
+
+- **Write target:** `~/.lldbinit` or the higher-priority application-specific file such as `~/.lldbinit-lldb`. LLDB reads one at debugger startup. A current-directory `.lldbinit` is **not** executed by default; the user must enable `target.load-cwd-lldbinit` or pass `--local-lldbinit`. See the [LLDB manual](https://lldb.llvm.org/man/lldb.html).
+- **Trigger and identity:** The user starts LLDB without `--no-lldbinit`; commands run as that user. Merely opening a project does not imply the project's `.lldbinit` runs.
+
+The following marker-only test ran against LLDB on macOS 26.5.2, with an isolated home and working directory:
+
+```bash
+lab=$(mktemp -d)
+printf 'script open("%s/marker", "w").write("ran")\n' "$lab" > "$lab/.lldbinit"
+(cd "$lab" && HOME="$lab" lldb -b -o quit >/dev/null)
+test -e "$lab/marker" && echo 'lldbinit fired'
+rm -r "$lab"
+```
+
+For **GDB**, the [upstream startup documentation](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Startup.html) lists `$HOME/Library/Preferences/gdb/gdbinit` and then `~/.gdbinit` on macOS. A current-directory `.gdbinit` is subject to the [auto-load safe path](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Auto_002dloading-safe-path.html), and `-nx`/`-nh` suppress initialization files. GDB was not installed on the test Mac, so this variant was not run locally.
 
 ### SSHRC
 
