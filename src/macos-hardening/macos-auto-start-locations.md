@@ -1061,6 +1061,14 @@ The filename contains the queue, the job number, and the time it’s scheduled t
 
 If we print the job file, we find that it contains the same information we got using `at -c`.
 
+### Calendar open-file alerts
+
+- **Write target:** An executable app bundle or another file **already selected** by a Calendar event's custom **Open file** alert. Creating or editing the alert itself requires access to that calendar event through Calendar or an accepted calendar data source; a random file write does not create an alert.
+- **Trigger:** The alert's scheduled time on a Mac where Calendar processes the event. A recurring event can repeat the action. [Apple's current Calendar guide](https://support.apple.com/guide/calendar/icl1012/mac) confirms the **Custom → Open file** alert option on macOS 26.
+- **Execution identity and gates:** Calendar opens the chosen file for the signed-in user through its associated application. Launching an app bundle may execute its code as that user, subject to Gatekeeper, quarantine, and other macOS checks. A plain script file may merely open in an editor; its extension alone does not prove code execution.
+
+To assess a candidate safely, inspect the event's alert in Calendar and the selected file's permissions. This path was documented from Apple's guide and **not** run on the research Mac because testing it would modify a live calendar and wait for a desktop event. A test in a disposable account can select a marker-only app bundle, set a near-future Open file alert, confirm launch, and delete the event and app afterward.
+
 ### Folder Actions
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0024/](https://theevilbit.github.io/beyond/beyond_0024/)<sup>[[17]](#references)</sup>\
@@ -2505,20 +2513,19 @@ Read-only observation on macOS 26: `/Library/CoreMediaIO/Plug-Ins/DAL` exists an
 
 Writeup: [https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/](https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/)<sup>[[53]](#references)</sup>
 
-- Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
-- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
+- **Legacy, conditional mechanism:** Requires root to install and a plug-in that is actually configured and loaded. DirectoryService's plug-in API is deprecated; consult the target Mac's Open Directory configuration before treating this as a boot trigger.
 
 #### Location
 
 - **`/Library/DirectoryServices/PlugIns/*.dsplug`**
   - Root required
-  - **Trigger**: loaded at boot (and on service restart) by the root, non-sandboxed `dspluginhelperd` (`/usr/libexec/dspluginhelperd`)
+  - **Trigger:** `dspluginhelperd` loads an eligible configured plug-in when Open Directory needs it. [Apple's plug-in runtime guide](https://developer.apple.com/library/archive/documentation/Networking/Conceptual/Open_Dir_Plugin/RuntimeEnviornment/RuntimeEnviornment.html) says plug-ins not configured for startup may load lazily when their node is opened.
 
 #### Description & Exploitation
 
-`dspluginhelperd` loads Directory Service plug-in bundles (`.dsplug`) via `CPluginHandler::LoadPlugins`. Because the helper runs as **root and unsandboxed**, a bundle written here executes as root on the next boot — a persistence/code-execution primitive distinct from PAM and Authorization Plugins.<sup>[[53]](#references)</sup>
+`dspluginhelperd` supports legacy DirectoryService plug-in bundles. A malicious plug-in can be a privileged execution path where the legacy plug-in is accepted and activated, distinct from PAM and Authorization Plugins. The directory's presence does not demonstrate that a newly written plug-in will run on the next boot. Apple's local `dspluginhelperd(8)` and `opendirectoryd(8)` manuals on macOS 26.5 still list the helper and this legacy path.<sup>[[53]](#references)</sup>
 
-Verified on macOS 26 (read-only): `/Library/DirectoryServices/PlugIns` exists and `/usr/libexec/dspluginhelperd` is present (root-owned).
+Read-only observation on macOS 26: `/Library/DirectoryServices/PlugIns` and `/usr/libexec/dspluginhelperd` exist. No plug-in was installed, configured, or loaded during this test.
 
 ## Persistence techniques and tools
 
