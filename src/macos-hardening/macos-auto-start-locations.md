@@ -1265,6 +1265,101 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0009/](https://theevilbit.g
 
 It doesn't look like this is working anymore.<sup>[[26]](#references)</sup>
 
+### Application Script Files
+
+Writeup: [https://theevilbit.github.io/beyond/beyond_0010/](https://theevilbit.github.io/beyond/beyond_0010/)<sup>[[37]](#references)</sup>
+
+- Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+  - But you need the targeted application to be installed and run/used by the victim
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
+
+#### Location
+
+Any **interpreted script that ships inside (or is used by) an application and that the current user can modify**. Code-signature checks on a bundle normally cover the signed Mach-O, not plain-text helper scripts, so these can be tampered with and run on the next launch. Common examples:
+
+- **`/Applications/Sublime Text.app/Contents/MacOS/sublime.py`** – runs every time Sublime Text starts (user level)
+- **`/opt/homebrew/bin/brew`** (Apple Silicon) or **`/usr/local/bin/brew`** (Intel) – `brew` is a user-writable Bash script executed every time the victim runs `brew` (user level)
+- **IDLE** `idlemain.py` inside `Python 3.x.app` (root level)
+- **`/Library/Application Support/Wireshark/ChmodBPF/ChmodBPF`** – run at load via launchd (root level)
+
+#### Description & Exploitation
+
+Many apps read interpreted scripts (Python, Ruby, shell…) at runtime rather than embedding that logic in the signed binary. If those files are writable by the attacker, injecting a line yields code execution in the app's context the next time the user launches/uses it — without dropping a new binary that KnockKnock/BlockBlock would flag.<sup>[[37]](#references)</sup>
+
+```bash
+# Homebrew launcher is a user-writable Bash script on Apple Silicon; inject AFTER the shebang
+# (appending at the end would not run because brew execs its real logic earlier)
+sed -i '' '1a\
+touch /tmp/hacktricks_appscript
+' /opt/homebrew/bin/brew          # runs on the next `brew ...` invocation
+
+# Sublime Text startup script
+echo "import os; os.system('touch /tmp/hacktricks_appscript')" >> "/Applications/Sublime Text.app/Contents/MacOS/sublime.py"
+```
+
+### Dock Tile Plugins
+
+Writeup: [https://theevilbit.github.io/beyond/beyond_0032/](https://theevilbit.github.io/beyond/beyond_0032/)<sup>[[38]](#references)</sup>
+
+- Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+  - But a malicious app declaring the plugin must be placed in the Dock
+  - The plugin loads into a **non-sandboxed, unsigned** helper with **library validation disabled**, and is **not shown in the Background Task Management** UI (stealthier than a LaunchAgent)
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
+
+#### Location
+
+- **`<App>.app/Contents/PlugIns/<name>.docktileplugin`**, referenced with the **`NSDockTilePlugIn`** key in the app's `Info.plist`; the plugin's own `Info.plist` sets **`NSPrincipalClass`**.
+
+#### Description & Exploitation
+
+When an app declares `NSDockTilePlugIn`, the Dock loads the referenced bundle into the **`com.apple.dock.external.extra`** XPC helper (`...extra.arm64` on Apple Silicon) **as soon as the app's tile is present in the Dock — the app itself does not need to be launched**. The helper runs **unsigned and non-sandboxed with library validation disabled**. The principal class' **`setDockTile:`** method is invoked on load; from there you can subscribe to distributed notifications (e.g. `com.apple.screenIsLocked`) to re-trigger code on later events.<sup>[[38]](#references)</sup>
+
+```bash
+# Enumerate apps already shipping a Dock tile plugin (hijack / template targets)
+for a in /Applications/*.app /System/Applications/*.app; do
+  v=$(/usr/libexec/PlistBuddy -c 'Print :NSDockTilePlugIn' "$a/Contents/Info.plist" 2>/dev/null) \
+    && echo "$a -> $v"
+done
+# e.g. on macOS 26: Calendar.app, App Store.app, System Settings.app, plus 3rd-party Warp.app / ChatGPT.app
+```
+
+```objc
+// Principal class, built as MyPlugin.docktileplugin, placed in <App>.app/Contents/PlugIns/
+// App Info.plist:    NSDockTilePlugIn = MyPlugin.docktileplugin
+// Plugin Info.plist: NSPrincipalClass = MyDockPlugin , CFBundlePackageType = BNDL
+@interface MyDockPlugin : NSObject <NSDockTilePlugIn>
+@end
+@implementation MyDockPlugin
+- (void)setDockTile:(NSDockTile *)dockTile {
+    system("touch /tmp/hacktricks_docktile");   // runs when the tile is added to the Dock / at login
+}
+@end
+```
+
+### Widgets (Notification Center / WidgetKit)
+
+Writeup: [https://theevilbit.github.io/beyond/beyond_0033/](https://theevilbit.github.io/beyond/beyond_0033/)<sup>[[39]](#references)</sup>
+
+- Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+  - The widget extension runs in its **own process**, and adding one does **not** raise a Background Task Management alert
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
+  - The config plist lives inside a TCC-protected container, so editing it from outside needs Full Disk Access or a TCC bypass
+
+#### Location
+
+- Widget extension bundle: **`<App>.app/Contents/PlugIns/<Widget>.appex`**
+- Active/registered widgets: **`~/Library/Containers/com.apple.notificationcenterui/Data/Library/Preferences/com.apple.notificationcenterui.plist`** (keys `widgets.instances` and `widgets.widgets`)
+
+#### Description & Exploitation
+
+A WidgetKit extension shipped inside an app runs in **its own process** managed by Notification Center. Registering an instance in `widgets.instances` (a base64 `NSKeyedArchiver`-encoded `CHSWidget` blob with embedded `INIntent` data) and restarting NotificationCenter makes the widget load and execute its `TimelineProvider`/intent code.<sup>[[39]](#references)</sup>
+
+```bash
+# Inspect currently-registered widgets (file present on stock macOS)
+plutil -p ~/Library/Containers/com.apple.notificationcenterui/Data/Library/Preferences/com.apple.notificationcenterui.plist \
+  | grep -iE "widgets?\." | head
+```
+
 ## Root Sandbox Bypass
 
 > [!TIP]
@@ -1817,6 +1912,37 @@ RunService ()
 }
 ```
 
+### launchd Boot Tasks
+
+Writeup: [https://theevilbit.github.io/beyond/beyond_0034/](https://theevilbit.github.io/beyond/beyond_0034/)<sup>[[40]](#references)</sup>
+
+- Useful to bypass sandbox: [🔴](https://emojipedia.org/large-red-circle) (needs root)
+- Root required, plus either a **SIP bypass** or the **`kTCCServiceSystemPolicySysAdminFiles`**/Full Disk Access permission, depending on the path
+
+#### Location
+
+`launchd` embeds a plist in its **`__TEXT,__config`** section describing early "boot tasks". Several reference scripts/binaries that do **not** exist by default and can be created by an attacker:
+
+- SIP-bypass set: **`/Library/Apple/usr/libexec/finish_demo_restore`**, **`/private/var/install/shutdown_installer_tasks`**, **`/private/var/install/deferred_install`**
+- TCC/FDA set: **`/etc/rc.server`**, **`/etc/rc.cdrom`**, **`/etc/rc.netboot`** (`rc.netboot` pre-exists only on Sequoia+)
+
+#### Description & Exploitation
+
+Dump the embedded task table to see which files `launchd` will run and the supported keys (`Program`, `ProgramArguments`, `PerformAfterUserspaceReboot`, `RequireSuccess`…):
+
+```bash
+otool -X -s __TEXT __config /sbin/launchd | awk '{print $2 $3 $4 $5}' | \
+  xxd -r -p | hexdump -v -e '1/4 "%08x"' -e '"\n"' | xxd -r -p
+```
+
+Creating one of the referenced files (e.g. `/etc/rc.server`) makes `launchd` execute it on the next (userspace) reboot. The most useful entries are gated by SIP or require TCC SysAdminFiles/Full Disk Access, so this is a root-level, reboot-triggered technique.<sup>[[40]](#references)</sup>
+
+### ~~NVRAM (`apple-trusted-trampoline`)~~
+
+Writeup: [https://theevilbit.github.io/beyond/beyond_0035/](https://theevilbit.github.io/beyond/beyond_0035/)<sup>[[41]](#references)</sup>
+
+The `rc.trampoline` boot task runs a **platform (Apple-signed) binary** stored in the `apple-trusted-trampoline` NVRAM variable at boot, but **only when the `rc.trampoline=1` boot-arg is set and SIP is disabled** (with a ~390&nbsp;KB size limit and a blocking/return-fast constraint). Because it requires **root + SIP disabled + an Apple-signed payload**, it is essentially impractical for real-world persistence and is listed here only for completeness.<sup>[[41]](#references)</sup>
+
 ## Persistence techniques and tools
 
 - [https://github.com/cedowens/Persistent-Swift](https://github.com/cedowens/Persistent-Swift)
@@ -1860,5 +1986,10 @@ RunService ()
 - [34] [Beyond the good ol' LaunchAgents - 23 - emond, The Event Monitor Daemon](https://theevilbit.github.io/beyond/beyond_0023/)
 - [35] [Beyond the good ol' LaunchAgents - 29 - amstoold](https://theevilbit.github.io/beyond/beyond_0029/)
 - [36] [Beyond the good ol' LaunchAgents - 15 - xsanctl](https://theevilbit.github.io/beyond/beyond_0015/)
+- [37] [Beyond the good ol' LaunchAgents - 10 - Application script files](https://theevilbit.github.io/beyond/beyond_0010/)
+- [38] [Beyond the good ol' LaunchAgents - 32 - Dock Tile Plugins](https://theevilbit.github.io/beyond/beyond_0032/)
+- [39] [Beyond the good ol' LaunchAgents - 33 - Widgets](https://theevilbit.github.io/beyond/beyond_0033/)
+- [40] [Beyond the good ol' LaunchAgents - 34 - launchd boot tasks](https://theevilbit.github.io/beyond/beyond_0034/)
+- [41] [Beyond the good ol' LaunchAgents - 35 - Persist through the NVRAM (apple-trusted-trampoline)](https://theevilbit.github.io/beyond/beyond_0035/)
 
 {{#include ../banners/hacktricks-training.md}}
