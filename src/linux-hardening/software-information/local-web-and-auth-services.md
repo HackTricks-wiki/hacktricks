@@ -26,8 +26,8 @@ getent passwd
 ```
 
 - [PAM](pam-pluggable-authentication-modules.md) governs service-specific authentication; writable policy or module paths can change login behavior.
-- LDAP/SSSD configuration can reveal directory endpoints, bind identities, and access rules. Review file permissions before inspecting secrets; [Linux Active Directory](../user-information/linux-active-directory.md) and [FreeIPA](freeipa-pentesting.md) cover ticket and directory use.
-- Postfix aliases can pipe received mail to local commands. Review alias maps and the ownership of referenced scripts before claiming a mail-flow execution path; see [SMTP and mail service testing](../../network-services-pentesting/pentesting-smtp/README.md).
+- LDAP/SSSD configuration can reveal directory endpoints, bind identities, and access rules. A recovered bind password may permit LDAP queries beyond the current OS account; test the exact bind identity and directory ACLs. Review file permissions before inspecting secrets; [Linux Active Directory](../user-information/linux-active-directory.md) and [FreeIPA](freeipa-pentesting.md) cover ticket and directory use.
+- Postfix aliases can pipe received mail to local commands. If a lower-privileged user can change the referenced script, mail delivery may trigger their code under the delivery identity. Review alias maps and script ownership before claiming that path; see [SMTP and mail service testing](../../network-services-pentesting/pentesting-smtp/README.md).
 - Jenkins and other CI services may run jobs under a powerful local account. Inspect the service user, writable job/workspace paths, and local administration interface before testing a pipeline or plugin.
 
 A service name or installed package is only a lead. The privilege boundary is the combination of reachable input, process identity, writable configuration, and the command or file it ultimately controls.
