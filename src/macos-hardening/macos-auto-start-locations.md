@@ -1568,27 +1568,34 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0010/](https://theevilbit.g
 
 #### Location
 
-Any **interpreted script that ships inside (or is used by) an application and that the current user can modify**. Code-signature checks on a bundle normally cover the signed Mach-O, not plain-text helper scripts, so these can be tampered with and run on the next launch. Common examples:
+An **interpreted script that an installed application or tool actually executes** and that the actor can modify. Confirm the file's permissions and the calling path; finding a `.sh` or `.py` file alone is insufficient. Apple's [code-signing guide](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/Procedures/Procedures.html) says signed app bundles seal resources, including scripts. Editing an in-bundle script breaks that seal and may be detected or blocked when the bundle is validated. An external script such as Homebrew's launcher has different signing and trust behavior. Historical examples from the writeup include:
 
-- **`/Applications/Sublime Text.app/Contents/MacOS/sublime.py`** – runs every time Sublime Text starts (user level)
-- **`/opt/homebrew/bin/brew`** (Apple Silicon) or **`/usr/local/bin/brew`** (Intel) – `brew` is a user-writable Bash script executed every time the victim runs `brew` (user level)
-- **IDLE** `idlemain.py` inside `Python 3.x.app` (root level)
-- **`/Library/Application Support/Wireshark/ChmodBPF/ChmodBPF`** – run at load via launchd (root level)
+- **`/Applications/Sublime Text.app/Contents/MacOS/sublime.py`** – a script used by older Sublime Text releases; the file and its startup use must be checked for the installed version. It was absent on the test Mac.
+- **`/opt/homebrew/bin/brew`** (Apple Silicon) or **`/usr/local/bin/brew`** (Intel) – a Bash launcher executed when that `brew` path is invoked, if installed and writable by the actor. `/opt/homebrew/bin/brew` was a writable Bash script on the test Mac; that is a local observation, not a general Homebrew permission rule.
+- **IDLE's `idlemain.py`** inside a Python app bundle – may require admin permission to write, but runs with the IDLE user's identity.
+- **`/Library/Application Support/Wireshark/ChmodBPF/ChmodBPF`** – a historical root-run shell script when the corresponding `org.wireshark.ChmodBPF` launchd job is installed. The script and job were absent on the test Mac.
 
 #### Description & Exploitation
 
-Many apps read interpreted scripts (Python, Ruby, shell…) at runtime rather than embedding that logic in the signed binary. If those files are writable by the attacker, injecting a line yields code execution in the app's context the next time the user launches/uses it — without dropping a new binary that KnockKnock/BlockBlock would flag.<sup>[[37]](#references)</sup>
+Some tools and apps execute interpreted scripts at runtime. A writable script can execute added commands when its specific caller next runs, provided signature validation, quarantine, and other checks allow it. The original research demonstrated several 2019 installations; re-check their paths and triggers on the target version.<sup>[[37]](#references)</sup>
 
-```bash
-# Homebrew launcher is a user-writable Bash script on Apple Silicon; inject AFTER the shebang
-# (appending at the end would not run because brew execs its real logic earlier)
-sed -i '' '1a\
-touch /tmp/hacktricks_appscript
-' /opt/homebrew/bin/brew          # runs on the next `brew ...` invocation
+```python
+# Marker-only injection test on a COPY of Homebrew's launcher. The relocated
+# copy may fail its normal Homebrew logic; the marker checks script execution.
+import pathlib, subprocess, tempfile
 
-# Sublime Text startup script
-echo "import os; os.system('touch /tmp/hacktricks_appscript')" >> "/Applications/Sublime Text.app/Contents/MacOS/sublime.py"
+source = pathlib.Path('/opt/homebrew/bin/brew')
+with tempfile.TemporaryDirectory(prefix='ht-script-copy-') as root:
+    target = pathlib.Path(root) / 'brew'
+    marker = pathlib.Path(root) / 'ran'
+    lines = source.read_text().splitlines(keepends=True)
+    target.write_text(lines[0] + '/usr/bin/touch ' + str(marker) + '\n' + ''.join(lines[1:]))
+    target.chmod(0o700)
+    subprocess.run([str(target), '--version'], capture_output=True, timeout=15)
+    print('marker fired:', marker.exists())
 ```
+
+This copy test produced `marker fired: True` on macOS 26.5.2; the original launcher was untouched. It proves the insertion point executes in the copy, not that a modified signed app bundle or real Homebrew installation would pass every launch check.
 
 ### Dock Tile Plugins
 
