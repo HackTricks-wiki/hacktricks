@@ -74,6 +74,33 @@ The **main difference between agents and daemons is that agents are loaded when 
 </plist>
 ```
 
+#### Inline AppleScript LaunchAgent and Apple-like masquerading
+
+A user-writable LaunchAgent can keep the complete payload inside `ProgramArguments` by launching `/bin/sh -c` and passing an obfuscated script to `osascript -e`. Combining `RunAtLoad` with `KeepAlive` reruns it at login and after termination. This needs no administrator privileges when the plist is placed in `~/Library/LaunchAgents`.<sup>[[37]](#references)[[38]](#references)</sup>
+
+```xml
+<plist version="1.0"><dict>
+<key>Label</key><string>com.apple.systemupdate</string>
+<key>RunAtLoad</key><true/>
+<key>KeepAlive</key><true/>
+<key>ProgramArguments</key><array>
+<string>/bin/sh</string><string>-c</string>
+<string>osascript -e '[OBFUSCATED APPLESCRIPT]'</string>
+</array>
+<key>StandardOutPath</key><string>/dev/null</string>
+<key>StandardErrorPath</key><string>/dev/null</string>
+</dict></plist>
+```
+
+Apple-like names do not make a user agent legitimate. One observed pattern used the path `~/Library/LaunchAgents/com.apple.mdworker.plist` but the different label `com.apple.systemupdate`. Useful hunting signals are a filename/label mismatch, a long inline `osascript -e` argument, output redirected to `/dev/null`, and network or archiving utilities spawned below `osascript`.<sup>[[37]](#references)[[38]](#references)</sup>
+
+```bash
+plutil -p ~/Library/LaunchAgents/*.plist 2>/dev/null |
+  rg 'Label|ProgramArguments|osascript|/bin/(ba)?sh|/dev/null|RunAtLoad|KeepAlive'
+```
+
+For the adjacent stages, see [AppleScript execution and analysis](macos-security-and-privilege-escalation/macos-security-protections/macos-tcc/macos-tcc-bypasses/macos-apple-scripts.md), [macOS Keychain access](macos-red-teaming/macos-keychain.md), [ClickFix/pastejacking](../generic-methodologies-and-resources/phishing-methodology/clipboard-hijacking.md), and [malware analysis](../generic-methodologies-and-resources/basic-forensic-methodology/malware-analysis.md).
+
 There are cases where an **agent needs to be executed before the user logins**, these are called **PreLoginAgents**. For example, this is useful to provide assistive technology at login. They can be found also in `/Library/LaunchAgents`(see [**here**](https://github.com/HelmutJ/CocoaSampleCode/tree/master/PreLoginAgents) an example).
 
 > [!TIP]
@@ -1848,5 +1875,7 @@ RunService ()
 - [34] [Beyond the good ol' LaunchAgents - 23 - emond, The Event Monitor Daemon](https://theevilbit.github.io/beyond/beyond_0023/)
 - [35] [Beyond the good ol' LaunchAgents - 29 - amstoold](https://theevilbit.github.io/beyond/beyond_0029/)
 - [36] [Beyond the good ol' LaunchAgents - 15 - xsanctl](https://theevilbit.github.io/beyond/beyond_0015/)
+- [37] [Catching Mac OS stealers in the wild — cmd + R(esearch)](https://cmdresearch.bearblog.dev/catching-mac-os-stealers-in-the-wild/)
+- [38] [Catching macOS Stealers in the Wild — Objective-See](https://objective-see.org/blog/blog_0x88.html)
 
 {{#include ../banners/hacktricks-training.md}}
