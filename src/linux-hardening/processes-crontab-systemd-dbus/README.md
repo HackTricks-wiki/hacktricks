@@ -10,3 +10,4 @@ Scheduled jobs and interprocess communication can launch code with privileges di
 - [Payloads to execute](payloads-to-execute.md) collects payloads that can be used when an execution path has been identified.
 
 For a wider review of cron jobs and systemd services, use the [Linux privilege escalation checklist](../main-system-information/linux-privilege-escalation-checklist.md).
+{{#include ../../banners/hacktricks-training.md}}

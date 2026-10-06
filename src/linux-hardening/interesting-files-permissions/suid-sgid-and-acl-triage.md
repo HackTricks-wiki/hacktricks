@@ -26,3 +26,4 @@ ls -la /etc/sudoers.d /etc/ld.so.preload /etc/ld.so.conf.d 2>/dev/null
 ```
 
 A writable parent directory may permit replacement even when the file itself is root-owned. An ACL may quietly grant access to a sudoers drop-in, service unit, cron script, library path, or credential file. Check both the ACL and the full path. If arbitrary privileged file writes are possible, follow [Arbitrary File Write to Root](write-to-root.md); for linker configuration and preload cases, see the [`ld.so` example](ld.so.conf-example.md). Treat exposed backups, `.env` files, database configs, SSH material, and history as possible credential sources, with access governed by the actual permissions of each file.
+{{#include ../../banners/hacktricks-training.md}}

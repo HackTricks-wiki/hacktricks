@@ -8,3 +8,4 @@ Local listeners, Unix sockets, and network-facing software may expose paths that
 - [Local network and socket triage](local-network-and-socket-triage.md) covers loopback services, Unix sockets, and container networks.
 - [Socket command injection](socket-command-injection.md) covers commands accepted through exposed local sockets.
 - [Cisco vManage](cisco-vmanage.md) documents a product-specific target and related checks.
+{{#include ../../banners/hacktricks-training.md}}

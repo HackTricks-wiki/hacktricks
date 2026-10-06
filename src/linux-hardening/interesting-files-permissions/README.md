@@ -12,3 +12,4 @@ File ownership, write access, mount options, and executable privileges can chang
 - [NFS `no_root_squash` and `no_all_squash` misconfiguration](nfs-no_root_squash-misconfiguration-pe.md) covers remote filesystem identity mapping.
 - [Wildcard spare tricks](wildcards-spare-tricks.md) covers argument expansion in privileged commands.
 - [SELinux](selinux.md) explains policy enforcement and relevant investigation steps.
+{{#include ../../banners/hacktricks-training.md}}

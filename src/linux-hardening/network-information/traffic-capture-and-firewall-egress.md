@@ -44,3 +44,4 @@ printenv http_proxy https_proxy all_proxy no_proxy 2>/dev/null
 ```
 
 Separate DNS failure from TCP, TLS, or proxy failure. Test the specific destination and protocol relevant to the assessment; ICMP reachability does not imply that TCP or UDP is permitted. If a proxy is configured, compare the intended proxied request with the same target under the applicable `no_proxy` rules. A local port forward can also make a loopback service available elsewhere, so review active listeners and SSH tunnels when the firewall view and observed exposure disagree.
+{{#include ../../banners/hacktricks-training.md}}

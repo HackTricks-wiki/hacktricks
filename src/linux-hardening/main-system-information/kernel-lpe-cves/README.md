@@ -20,3 +20,4 @@ The Binary Exploitation section goes deeper into exploit primitives, memory layo
 - [Arm64 static linear-map KASLR bypass](../../../binary-exploitation/linux-kernel-exploitation/arm64-static-linear-map-kaslr-bypass.md): address discovery for arm64 kernel exploitation.
 - [Adreno A7xx GPU/SMMU privilege bypass](../../../binary-exploitation/linux-kernel-exploitation/adreno-a7xx-sds-rb-priv-bypass-gpu-smmu-kernel-rw.md): an Android GPU path to kernel memory access.
 - [Pixel Bigwave job-timeout use-after-free](../../../binary-exploitation/linux-kernel-exploitation/pixel-bigwave-bigo-job-timeout-uaf-kernel-write.md): an Android accelerator bug used for kernel writes.
+{{#include ../../../banners/hacktricks-training.md}}

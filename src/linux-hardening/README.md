@@ -13,3 +13,4 @@ Use this section to investigate Linux hosts, understand privilege boundaries, an
 - [Processes, crontab, systemd, and D-Bus](processes-crontab-systemd-dbus/README.md): scheduled execution and interprocess communication.
 - [Containers and namespaces](containers-namespaces/README.md): runtimes, isolation boundaries, and container hardening.
 - [Post-exploitation](post-exploitation/README.md): credential discovery, persistence, and host-level follow-up techniques.
+{{#include ../banners/hacktricks-training.md}}

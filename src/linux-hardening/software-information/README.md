@@ -12,3 +12,4 @@ Installed software adds authentication hooks, management interfaces, and service
 - [Splunk LPE and persistence](splunk-lpe-and-persistence.md) covers local escalation and persistence paths in Splunk deployments.
 - [Node inspector and CEF debugger abuse](electron-cef-chromium-debugger-abuse.md) covers exposed debugging interfaces.
 - [Android rooting framework manager auth bypass and syscall hooks](android-rooting-frameworks-manager-auth-bypass-syscall-hook.md) covers that specialized Linux-based software stack.
+{{#include ../../banners/hacktricks-training.md}}

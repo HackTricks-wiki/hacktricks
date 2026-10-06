@@ -9,3 +9,4 @@ User identity, group membership, and delegated credentials determine which resou
 - [Interesting groups for Linux privilege escalation](interesting-groups-linux-pe/README.md) covers group-granted access, including LXD/LXC.
 - [SSH forwarding agent exploitation](ssh-forward-agent-exploitation.md) examines risks from forwarded SSH credentials.
 - [Linux Active Directory](linux-active-directory.md) covers hosts joined to an AD environment.
+{{#include ../../banners/hacktricks-training.md}}
