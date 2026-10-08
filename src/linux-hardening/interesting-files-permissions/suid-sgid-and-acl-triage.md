@@ -16,6 +16,10 @@ Focus on custom or recently changed executables, unusual owners, and files on wr
 
 A SUID program that invokes a shell, relative command, or library from a writable path may cross a trust boundary. See [SUID shared-library and linker abuse](suid-shared-library-and-linker-abuse.md), the [PATH guidance](../linux-basics/linux-environment-variables.md#path), and the [user-ID explanation](../user-information/euid-ruid-suid.md). For known command-specific escapes, check [GTFOBins](https://gtfobins.github.io/) against the exact binary and invocation allowed on the host.
 
+### snap-confine and tmpfiles cleanup
+
+CVE-2026-3888 is a race involving privileged `snap-confine` and systemd-tmpfiles cleanup of `/tmp`. A passive review can check whether `snap-confine` is setuid or has file capabilities, compare the installed `snapd` package with the fixed version for that **Ubuntu release**, and inspect the effective `/tmp` age rule and cleanup timer. A matching package and rule are prerequisites, not proof that the race is reachable: runtime timer state, snap layout, package backports, and rule overrides also matter. Older releases may require non-default configuration. Do not run a race probe during routine enumeration. See the [Ubuntu CVE record](https://ubuntu.com/security/CVE-2026-3888) for release-specific package status and the [Qualys advisory](https://blog.qualys.com/vulnerabilities-threat-research/2026/03/17/cve-2026-3888-important-snap-flaw-enables-local-privilege-escalation-to-root) for the component interaction.
+
 ## Inspect ACLs and sensitive paths
 
 ```bash
