@@ -95,6 +95,10 @@ Start with `sudo -l`, `sudo -V`, and any applicable `doas` policy. Read the allo
 - Sudo timestamp reuse depends on the cache policy, owning user, terminal/session, and permissions. The [privilege escalation guide](../linux-basics/linux-privilege-escalation/README.md#reusing-sudo-tokens) covers the checks.
 - `doas` has its own rules and configuration. Check permitted commands and writable configuration paths as described in the [doas section](../linux-basics/linux-privilege-escalation/README.md#doas).
 
+### Privileged Below logging directory
+
+[CVE-2025-27591](https://github.com/facebookincubator/below/security/advisories/GHSA-9mc5-7qhg-fp3w) affected Below releases before 0.9.0 that created a world-writable `/var/log/below` directory. If a service or a permitted sudo command runs an affected build as root, a user who can write and traverse a non-sticky log directory may be able to replace a log entry with a symlink before the privileged process opens it. Review the installed package's patch status, the exact privileged execution path, effective directory access, sticky bit and ACLs, and metadata for `/var/log/below/error_root.log`. A world-writable path or a sudo rule alone does not establish the full chain. A sticky directory or vendor backport changes the assessment. Passive enumeration should inspect metadata only; it need not create a link or run the privileged program.
+
 ### Root-run Python archive restore scripts
 
 A tightly scoped sudo rule for a Python restore script still needs a review of its archive input. If the caller can select or replace the archive and the script extracts it as root with `tarfile.extractall(filter="data")`, check the interpreter's security updates before trusting the filter. CPython fixed several symlink and hard-link filter bypasses, including CVE-2025-4517, in 3.9.23, 3.10.18, 3.11.13, 3.12.11, and 3.13.4. Distribution backports can fix an earlier version, so the displayed interpreter version alone is not proof of exposure.<sup>[[16]](#references)[[17]](#references)</sup>
