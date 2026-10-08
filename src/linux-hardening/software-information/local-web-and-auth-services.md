@@ -59,5 +59,11 @@ done
 
 An authenticated API session can be a privileged execution path when `cobblerd` runs as root. In affected implementations, `background_import` passes user-controlled `rsync_flags` into a shell command, and rendering a user-controlled Cheetah autoinstall template can evaluate Python. Check the API permissions and installed version before testing either path. Restrict access to the management API, patch the authentication bypass, and keep configuration and credential files readable only by the service administrators.
 
+## Motion and motionEye configuration
+
+Inspect `/etc/motioneye/motioneye.conf` for `conf_path`, then review `motion.conf` and a small number of `camera-*.conf` files in that directory. Report whether a readable `# @admin_password` hash exists without printing it. [Older motionEye releases wrote these files with broad read permissions](https://github.com/motioneye-project/motioneye/security/advisories/GHSA-rhgp-6wq6-9j67); the fix is in 0.44.0. Check the Motion `webcontrol_port`, `webcontrol_parms`, `webcontrol_auth_method`, and `webcontrol_localhost` settings together: advanced control (`2` or `3`) with disabled authentication can expose powerful operations to a local user, including on a loopback listener. [Motion documents the values and defaults](https://motion-project.github.io/motion_config.html).
+
+An admin session against motionEye before 0.43.1b5 could turn a camera filename setting into command execution when Motion processed it ([CVE-2025-60787](https://github.com/motioneye-project/motioneye/security/advisories/GHSA-j945-qm58-4gjx)). Confirm the running version, service identity, usable authentication path, and whether a camera is configured before claiming an escalation. Configuration alone does not prove the service is running or privileged.
+
 A service name or installed package is only a lead. The privilege boundary is the combination of reachable input, process identity, writable configuration, and the command or file it ultimately controls.
 {{#include ../../banners/hacktricks-training.md}}
