@@ -40,4 +40,14 @@ Check the unit, drop-ins, `EnvironmentFile=`, helper scripts, relative commands,
 An empty but writable `/etc/systemd/system/<unit>.service.d` directory matters even when the unit file and every existing drop-in are protected: the user may create a new `.conf` override. Check that the directory is writable and searchable by the current identity, the unit is loaded and runs as root, and whether a daemon reload followed by a restart will occur. A reload or restart permission, timer, or later boot can make the change effective; directory write access alone does not execute it immediately.
 
 For running services, follow literal `EnvironmentFile=` paths from the unit's `[Service]` section, including files whose names do not start with `.env`. If a low-privilege user can read one, list credential-like key names such as `API_TOKEN` or `APP_SECRET_KEY` without printing the values into shared logs. Check drop-in overrides and optional `-` prefixes when assessing the effective unit. Readability is a credential-exposure lead; the value must still be valid for a privileged action to yield escalation.
+
+## Xvfb framebuffer files
+
+`Xvfb -fbdir <directory>` uses memory-mapped files named `Xvfb_screen<n>` for its virtual screens. If another user's running Xvfb process names a directory whose screen files are readable by the current user, the framebuffer may expose that user's desktop content. Confirm the process, file ownership and permissions together; a readable file by itself does not prove that useful content is on the screen. Inspect paths and metadata first, without copying image data into shared enumeration output. The [Xvfb manual](https://xorg.freedesktop.org/archive/X11R7.5/doc/man/man1/Xvfb.1.html) documents the `-fbdir` behavior.
+
+```bash
+pgrep -a -x Xvfb
+ls -l /path/from/-fbdir/Xvfb_screen*
+```
+
 {{#include ../../banners/hacktricks-training.md}}

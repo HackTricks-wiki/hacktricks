@@ -184,6 +184,7 @@
   - [Linux - Kernel Vulnerability Assessment](linux-hardening/main-system-information/kernel-vulnerability-assessment.md)
   - [Linux - Kernel Modules and modprobe Abuse](linux-hardening/main-system-information/kernel-modules-and-modprobe.md)
   - [Linux - Sudo Command Abuse](linux-hardening/main-system-information/sudo-command-abuse.md)
+  - [Linux - SUSE Session and Disk-Service Escalation Indicators](linux-hardening/main-system-information/suse-session-and-disk-service-escalation.md)
   - [Linux - Symlinks, Hardlinks, and File Descriptors](linux-hardening/main-system-information/filesystem-links-and-file-descriptors.md)
   - [Linux - Filesystem, Inodes and Recovery](linux-hardening/main-system-information/filesystem-inodes-and-recovery.md)
   - [Linux - Privilege Escalation Checklist](linux-hardening/main-system-information/linux-privilege-escalation-checklist.md)

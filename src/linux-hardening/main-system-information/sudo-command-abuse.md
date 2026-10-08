@@ -91,6 +91,12 @@ Start with `sudo -l`, `sudo -V`, and any applicable `doas` policy. Read the allo
 - Sudo timestamp reuse depends on the cache policy, owning user, terminal/session, and permissions. The [privilege escalation guide](../linux-basics/linux-privilege-escalation/README.md#reusing-sudo-tokens) covers the checks.
 - `doas` has its own rules and configuration. Check permitted commands and writable configuration paths as described in the [doas section](../linux-basics/linux-privilege-escalation/README.md#doas).
 
+### Root-run Python archive restore scripts
+
+A tightly scoped sudo rule for a Python restore script still needs a review of its archive input. If the caller can select or replace the archive and the script extracts it as root with `tarfile.extractall(filter="data")`, check the interpreter's security updates before trusting the filter. CPython fixed several symlink and hard-link filter bypasses, including CVE-2025-4517, in 3.9.23, 3.10.18, 3.11.13, 3.12.11, and 3.13.4. Distribution backports can fix an earlier version, so the displayed interpreter version alone is not proof of exposure.<sup>[[16]](#references)[[17]](#references)</sup>
+
+For a passive review, read the exact sudo command and script, trace which argument chooses the archive, and check whether the current user can write the archive or its containing directory. Confirm the installed vendor patch and extraction destination separately; `filter="data"` does not make every untrusted archive safe.<sup>[[16]](#references)[[17]](#references)</sup>
+
 ## Defensive notes
 
 - Avoid granting interpreters or interactive editors through sudo.<sup>[[1]](#references)</sup>
@@ -116,5 +122,7 @@ Start with `sudo -l`, `sudo -V`, and any applicable `doas` policy. Read the allo
 - [13] [Vim: usr_21.txt](https://vimhelp.org/usr_21.txt.html)
 - [14] [less(1) — Linux manual page](https://man7.org/linux/man-pages/man1/less.1.html)
 - [15] [Redirections — Bash Reference Manual](https://www.gnu.org/s/bash/manual/html_node/Redirections.html)
+- [16] [Python 3.9.23–3.13.4 security releases](https://discuss.python.org/t/python-3-13-4-3-12-11-3-11-13-3-10-18-and-3-9-23-are-now-available/94367)
+- [17] [tarfile extraction filters — Python documentation](https://docs.python.org/3/library/tarfile.html#extraction-filters)
 
 {{#include ../../banners/hacktricks-training.md}}
