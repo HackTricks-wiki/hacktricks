@@ -378,6 +378,8 @@ netexec ldap dc.corp.local -u 'APP01$' -p app01 -k --gmsa
 
 Then evaluate the recovered gMSA like any other credential: inspect local/domain group membership, logon rights, SPNs, delegation, and reachable services before trying pass-the-hash. This ACL-based retrieval path is distinct from [Golden gMSA/dMSA](golden-dmsa-gmsa.md), which derives managed passwords after KDS root-key compromise.<sup>[[20]](#references)</sup>
 
+A readable copy of an `msDS-ManagedPassword` blob in a file, share, or backup is a separate exposure path: the LDAP read ACL cannot protect a copy stored elsewhere. Validate that the data is a managed-password blob before interpreting it, and distinguish this from both an authorized LDAP read and KDS root-key derivation.
+
 ### Kerberoast
 
 Kerberoasting involves obtaining **TGS tickets** used by services tied to user accounts and cracking their encryption—which is based on user passwords—**offline**.
@@ -603,6 +605,8 @@ Once you get **Domain Admin** or even better **Enterprise Admin** privileges, yo
 [**More information about DCSync attack can be found here**](dcsync.md).
 
 [**More information about how to steal the NTDS.dit can be found here**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
+
+A readable backup archive containing `ntds.dit` together with the `SYSTEM` hive should be treated as exposed directory material even before extraction. A stale password hash does not make other object attributes safe: fields such as `description` may contain credentials or operational notes. Inspect archive member names first and keep extracted database contents out of routine enumeration output.
 
 ### Privesc as Persistence
 

@@ -46,7 +46,9 @@ Rubeus.exe s4u /user:sqlservice /domain:testlab.local /rc4:2b576acbe6bcfda7294d6
 
 If the compromised account has **T2A4D**, you can usually complete the full **`S4U2Self -> S4U2Proxy`** chain from only the service key/TGT.<sup>[[2]](#references)</sup>
 
-If it only has **`msDS-AllowedToDelegateTo`** (the classic **"Use Kerberos only"** mode), the delegation can still be abusable, but the evidence ticket for S4U2Proxy must be a **real forwardable user-to-service ticket** for the delegating service. In practice that means stealing or capturing a victim TGS from **LSASS/ccache** and feeding it into the second stage (`/tgs:` in Rubeus). A **non-forwardable** S4U2Self ticket is **not** enough for classic constrained delegation; if that is your only evidence ticket, check [Resource-based Constrained Delegation](resource-based-constrained-delegation.md) instead.<sup>[[2]](#references)</sup>
+If it only has **`msDS-AllowedToDelegateTo`** (the classic **"Use Kerberos only"** mode), the delegation can still be abusable, but the evidence ticket for S4U2Proxy must be a **forwardable user-to-service ticket** for the delegating service. One route is capturing a victim TGS from **LSASS/ccache** and feeding it into the second stage (`/tgs:` in Rubeus). A **non-forwardable** S4U2Self ticket is **not** enough for classic constrained delegation; if that is your only evidence ticket, check [Resource-based Constrained Delegation](resource-based-constrained-delegation.md) instead.<sup>[[2]](#references)</sup>
+
+Another conditional route is a first [RBCD](resource-based-constrained-delegation.md) hop to the delegating service: if it produces a **forwardable** ticket for the intended user and service, that ticket can be tested as evidence for a later Kerberos-only S4U2Proxy hop. Confirm the first ticket's flags, the delegating service's SPN, its target allow-list, and any user delegation restrictions; control of an RBCD attribute alone does not establish the second hop.
 
 ### Cross-domain constrained delegation notes (2025+)
 
