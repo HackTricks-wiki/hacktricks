@@ -334,7 +334,7 @@ krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 
 ### Patch & Mitigations
 * KB patch for **CVE-2025-33073** adds a check in `mrxsmb.sys::SmbCeCreateSrvCall` that blocks any SMB connection whose target contains marshalled info (`CredUnmarshalTargetInfo` ≠ `STATUS_INVALID_PARAMETER`).<sup>[[5]](#references)[[6]](#references)</sup>
-* Enforce **SMB signing** to prevent reflection even on unpatched hosts.
+* Enforce **SMB signing** on SMB relay destinations. For other destinations, assess that protocol's own signing or Extended Protection requirements and patch level; SMB signing alone does not determine whether an HTTPS WinRM relay is possible.
 * Monitor DNS records resembling `*<base64>...*` and block coercion vectors (PetitPotam, DFSCoerce, AuthIP...).
 
 ### Detection ideas

@@ -38,6 +38,7 @@ whoami /priv | findstr /i impersonate
 Operational notes:
 
 - If your shell runs under a restricted token lacking SeImpersonatePrivilege (common for Local Service/Network Service in some contexts), regain the account’s default privileges using FullPowers, then run a Potato. Example: `FullPowers.exe -c "cmd /c whoami /priv" -z`<sup>[[10]](#references)[[11]](#references)</sup>
+- A process token can have fewer privileges than another token for the same service account or logon session. In some configurations, a same-session named-pipe client can expose a different token with SeImpersonatePrivilege, but the service's configured `RequiredPrivileges` and `whoami /priv` describe different things and do not prove such a token is available. Verify the actual token before considering an impersonation path.
 - PrintSpoofer needs the Print Spooler service running and reachable over the local RPC endpoint (spoolss). In hardened environments where Spooler is disabled post-PrintNightmare, prefer RoguePotato/GodPotato/DCOMPotato/EfsPotato.
 - RoguePotato requires an OXID resolver reachable on TCP/135. If egress is blocked, use a redirector/port-forwarder (see example below). Older builds needed the -f flag.
 - EfsPotato/SharpEfsPotato abuse MS-EFSR; if one pipe is blocked, try alternative pipes (lsarpc, efsrpc, samr, lsass, netlogon).
