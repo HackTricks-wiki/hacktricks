@@ -97,6 +97,10 @@ A tightly scoped sudo rule for a Python restore script still needs a review of i
 
 For a passive review, read the exact sudo command and script, trace which argument chooses the archive, and check whether the current user can write the archive or its containing directory. Confirm the installed vendor patch and extraction destination separately; `filter="data"` does not make every untrusted archive safe.<sup>[[16]](#references)[[17]](#references)</sup>
 
+### Sudo-allowed needrestart configuration
+
+`needrestart -c` loads a caller-selected Perl configuration file and evaluates its contents. If `sudo -l` allows `needrestart` as root with arguments permitting `-c`, and the caller can choose a readable configuration file in a writable location, that permission can lead to root code execution. Check the exact sudo run-as and argument rule; a rule permitting only a fixed argument list may block this path. This is separate from the needrestart interpreter-scanning vulnerabilities: updating the package or disabling `interpscan` does not make an unrestricted root `-c` grant safe.<sup>[[2]](#references)[[18]](#references)[[19]](#references)</sup>
+
 ## Defensive notes
 
 - Avoid granting interpreters or interactive editors through sudo.<sup>[[1]](#references)</sup>
@@ -124,5 +128,7 @@ For a passive review, read the exact sudo command and script, trace which argume
 - [15] [Redirections — Bash Reference Manual](https://www.gnu.org/s/bash/manual/html_node/Redirections.html)
 - [16] [Python 3.9.23–3.13.4 security releases](https://discuss.python.org/t/python-3-13-4-3-12-11-3-11-13-3-10-18-and-3-9-23-are-now-available/94367)
 - [17] [tarfile extraction filters — Python documentation](https://docs.python.org/3/library/tarfile.html#extraction-filters)
+- [18] [needrestart configuration option and evaluation — upstream source](https://github.com/liske/needrestart/blob/master/needrestart)
+- [19] [needrestart command behavior — GTFOBins](https://gtfobins.org/gtfobins/needrestart/)
 
 {{#include ../../banners/hacktricks-training.md}}
