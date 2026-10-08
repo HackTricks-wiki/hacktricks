@@ -2143,6 +2143,8 @@ find / -name '*.db' -o -name '*.sqlite' -o -name '*.sqlite3' 2>/dev/null
 find / -type f \( -name "*_history" -o -name ".sudo_as_admin_successful" -o -name ".profile" -o -name "*bashrc" -o -name "httpd.conf" -o -name "*.plan" -o -name ".htpasswd" -o -name ".git-credentials" -o -name "*.rhosts" -o -name "hosts.equiv" -o -name "Dockerfile" -o -name "docker-compose.yml" \) 2>/dev/null
 ```
 
+If a readable shell history contains a `sudo` command followed by a short, password-like line, inspect the surrounding lines manually. A password entered into the normal `sudo` prompt is not saved in shell history; a following line is only a possible accidental shell input, not proof of a valid password. The `.sudo_as_admin_successful` marker records prior use, not current authorization.
+
 ### Hidden files
 
 ```bash
@@ -2175,6 +2177,8 @@ find /var /etc /bin /sbin /home /usr/local/bin /usr/local/sbin /usr/bin /usr/gam
 
 Read the code of [**linPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS), it searches for **several possible files that could contain passwords**.\
 **Another interesting tool** that you can use to do so is: [**LaZagne**](https://github.com/AlessandroZ/LaZagne) which is an open source application used to retrieve lots of passwords stored on a local computer for Windows, Linux & Mac.
+
+If `/etc/guacamole/guacamole.properties` is readable, review its `mysql-*`, `postgresql-*`, or `sqlserver-*` database connection settings. Where the account is authorized to read the Guacamole JDBC tables, `guacamole_connection_parameter` may contain saved SSH `username`, `password`, `private-key`, or `passphrase` values. Start with connection IDs and parameter names, then inspect only relevant rows; a saved value may be a dynamic token or a vault reference rather than a reusable secret. See the [Guacamole JDBC schema](https://guacamole.apache.org/doc/gug/jdbc-auth-schema.html) and [SSH connection parameters](https://guacamole.apache.org/doc/gug/configuring-guacamole.html).
 
 ### Logs
 
