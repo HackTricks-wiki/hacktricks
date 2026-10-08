@@ -882,9 +882,7 @@ For more specific attack methods in various attack scenarios, please refer to th
 
 ### Explanation
 
-The description at https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc is remarkably thorough. Below is a quotation of the original text.<sup>[[15]](#references)</sup>
-
-Using built-in default version 1 certificate templates, an attacker can craft a CSR to include application policies that are preferred over the configured Extended Key Usage attributes specified in the template. The only requirement is enrollment rights, and it can be used to generate client authentication, certificate request agent, and codesigning certificates using the **_WebServer_** template
+The [original ESC15 research](https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc) explains how application policies supplied in a request for a V1 template can override the configured Extended Key Usage on an **unpatched issuing CA**.<sup>[[15]](#references)</sup> A candidate also needs a published, enrollable template that permits the required subject/request properties and has no blocking approval or signature gate. Enrollment rights alone do not prove exploitation. Certificate Request Agent use can additionally depend on a suitable second template and enrollment-agent restrictions; confirm the CA patch state and issuance result before claiming that path.
 
 ### Abuse
 
