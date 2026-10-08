@@ -530,11 +530,11 @@ Certipy v4.0.0 - by Oliver Lyak (ly4k)
 
 ### Explanation
 
-The new value **`CT_FLAG_NO_SECURITY_EXTENSION`** (`0x80000`) for **`msPKI-Enrollment-Flag`**, referred to as ESC9, prevents the embedding of the **new `szOID_NTDS_CA_SECURITY_EXT` security extension** in a certificate. This flag becomes relevant when `StrongCertificateBindingEnforcement` is set to `1` (the default setting), which contrasts with a setting of `2`. Its relevance is heightened in scenarios where a weaker certificate mapping for Kerberos or Schannel might be exploited (as in ESC10), given that the absence of ESC9 would not alter the requirements.<sup>[[7]](#references)</sup>
+The **`CT_FLAG_NO_SECURITY_EXTENSION`** (`0x80000`) value for **`msPKI-Enrollment-Flag`**, referred to as ESC9, omits the `szOID_NTDS_CA_SECURITY_EXT` SID extension from a certificate. Older ESC9 examples depend on KDC compatibility behavior (`StrongCertificateBindingEnforcement=1`) or a separate weak Schannel mapping route. Value `1` is a **historical compatibility setting**, not a current default: Microsoft says the KDC override stopped being supported with the September 9, 2025 Windows security update. Check the target's actual update and authentication endpoint before applying an older recipe.<sup>[[7]](#references)</sup> See [Microsoft's rollout guidance](https://support.microsoft.com/en-us/servicing/os/windows-server/2022/05/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers).
 
 The conditions under which this flag's setting becomes significant include:
 
-- `StrongCertificateBindingEnforcement` is not adjusted to `2` (with the default being `1`), or `CertificateMappingMethods` includes the `UPN` flag.
+- On an older, compatible KDC, the effective certificate-binding policy permits the mapping; alternatively, the Schannel endpoint separately enables UPN mapping through `CertificateMappingMethods` bit `0x4`.
 - The certificate is marked with the `CT_FLAG_NO_SECURITY_EXTENSION` flag within the `msPKI-Enrollment-Flag` setting.
 - Any client authentication EKU is specified by the certificate.
 - `GenericWrite` permissions are available over any account to compromise another.
@@ -581,22 +581,22 @@ certipy auth -pfx administrator.pfx -domain corp.local
 
 ### Explanation
 
-Two registry key values on the domain controller are referred to by ESC10:
+Two separate certificate-mapping policies are often discussed under ESC10. Read the setting on the endpoint that actually handles the relevant authentication:
 
-- The default value for `CertificateMappingMethods` under `HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\Schannel` is `0x18` (`0x8 | 0x10`), previously set to `0x1F`.
-- The default setting for `StrongCertificateBindingEnforcement` under `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Kdc` is `1`, previously `0`.<sup>[[7]](#references)</sup>
+- Schannel `CertificateMappingMethods` under `HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\Schannel` controls TLS client-certificate mapping on the application server. The UPN bit is `0x4`; the default is `0x18` (`0x8 | 0x10`) on updated systems.
+- KDC `StrongCertificateBindingEnforcement` under `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Kdc` historically controlled Kerberos certificate-binding compatibility. Value `1` is not a reliable current default, and Microsoft ended support for this override with the September 9, 2025 Windows security update. Its state does not by itself describe Schannel's UPN mapping.<sup>[[7]](#references)</sup>
 
 **Case 1**
 
-When `StrongCertificateBindingEnforcement` is configured as `0`.
+Historically, when an older KDC honored `StrongCertificateBindingEnforcement=0`; verify update level because the override is no longer supported on current patched systems.
 
 **Case 2**
 
-If `CertificateMappingMethods` includes the `UPN` bit (`0x4`).
+When the Schannel client-certificate endpoint has `CertificateMappingMethods` UPN bit (`0x4`) enabled. This is a separate setting from KDC strong-binding enforcement and still requires an enrollable client-authentication certificate plus effective control of the mapped account attribute.
 
 ### Abuse Case 1
 
-With `StrongCertificateBindingEnforcement` configured as `0`, an account A with `GenericWrite` permissions can be exploited to compromise any account B.
+In an older deployment where the KDC still honors `StrongCertificateBindingEnforcement=0`, control of an account's `userPrincipalName` can form part of a weak-mapping path to another account. The required certificate enrollment, mapping, target identity, and successful authentication must be checked separately; a `GenericWrite` ACE or registry value alone does not establish takeover.
 
 For instance, having `GenericWrite` permissions over `Jane@corp.local`, an attacker aims to compromise `Administrator@corp.local`. The procedure mirrors ESC9, allowing any certificate template to be utilized.
 
