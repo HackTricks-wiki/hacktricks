@@ -2137,6 +2137,8 @@ find / -type f -mmin -5 ! -path "/proc/*" ! -path "/sys/*" ! -path "/run/*" ! -p
 find / -name '*.db' -o -name '*.sqlite' -o -name '*.sqlite3' 2>/dev/null
 ```
 
+For readable application databases, inspect table and column names for usernames and password hashes. Finding a hash, recovering its password, and proving reuse for a local account are separate steps; a generic 32-character hexadecimal string is not enough to infer MD5 or account access.
+
 ### \*\_history, .sudo_as_admin_successful, profile, bashrc, httpd.conf, .plan, .htpasswd, .git-credentials, .rhosts, hosts.equiv, Dockerfile, docker-compose.yml files
 
 ```bash
