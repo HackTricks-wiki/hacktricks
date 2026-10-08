@@ -1376,7 +1376,7 @@ BASH_ENV=/dev/shm/shell.sh sudo /usr/bin/systeminfo   # or any permitted script/
 
 ### Terraform via sudo with preserved HOME (!env_reset)
 
-If sudo leaves the environment intact (`!env_reset`) while allowing `terraform apply`, `$HOME` stays as the calling user. Terraform therefore loads **$HOME/.terraformrc** as root and honors `provider_installation.dev_overrides`.<sup>[[25]](#references)</sup>
+When sudo allows Terraform as a more privileged user, `!env_reset` is a clue to check which environment variables actually survive that specific rule. Confirm the effective `HOME` or `TF_CLI_CONFIG_FILE` before treating a caller-writable `.terraformrc` or `terraform.rc` as the active CLI configuration. A `provider_installation.dev_overrides` entry matters only if the fixed Terraform command loads that provider and the caller can place its executable in the selected directory.<sup>[[25]](#references)</sup>
 
 - Point the required provider at a writable directory and drop a malicious plugin named after the provider (e.g., `terraform-provider-examples`):
 
@@ -1405,7 +1405,7 @@ Terraform will fail the Go plugin handshake but executes the payload as root bef
 
 ### TF_VAR overrides + symlink validation bypass
 
-Terraform variables can be provided via `TF_VAR_<name>` environment variables, which survive when sudo preserves the environment. Weak validations such as `strcontains(var.source_path, "/root/examples/") && !strcontains(var.source_path, "..")` can be bypassed with symlinks:<sup>[[25]](#references)</sup>
+Terraform variables can be provided via `TF_VAR_<name>` environment variables if the specific sudo rule preserves them. A source-symlink **read** also needs a provider that follows the link and copies the protected result to a caller-readable destination. A destination-symlink **write** separately needs a caller-controlled destination entry and a privileged provider that follows it on write; a later scheduled job is only one possible consequence. Inspect the exact sudo grant, relevant `.tf` files, selected CLI config, and path ownership with read-only commands such as `sudo -l`, `stat`, and `readlink` before testing either route. Weak lexical validations such as `strcontains(var.source_path, "/root/examples/") && !strcontains(var.source_path, "..")` do not resolve symlinks:<sup>[[25]](#references)</sup>
 
 ```bash
 mkdir -p /dev/shm/root/examples
