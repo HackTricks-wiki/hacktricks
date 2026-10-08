@@ -168,6 +168,8 @@ Then load `/tmp/tls.pcap` and `/tmp/sslkeys.log` into Wireshark. This only works
 
 Unix sockets are local IPC endpoints.<sup>[[5]](#references)</sup> They may expose HTTP APIs, custom protocols, or unsafe command handlers.<sup>[[12]](#references)[[14]](#references)</sup>
 
+A root-owned socket with group write permission is an authorization boundary, not a vulnerability by itself. Compare its group and mode with the current account, identify the listening process, and review what that process accepts from clients before assigning risk. In particular, a privileged service that executes submitted PHP may cross a second boundary if it also trusts a caller-selected `php.ini` path or lets a caller change `disable_functions` or `open_basedir`; inspect the effective configuration and service validation path. The [PHP configuration guide](../../network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/README.md) explains those directives. Socket metadata alone does not establish code execution.
+
 Find sockets.<sup>[[1]](#references)[[5]](#references)</sup>
 
 ```bash
