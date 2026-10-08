@@ -388,6 +388,8 @@ reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v RunAsPPL /t REG_DWORD /d 0 
 
 hMailServer stores its DB password in `C:\Program Files (x86)\hMailServer\Bin\hMailServer.ini` under `[Database] Password=`. The value is Blowfish-encrypted with the static key `THIS_KEY_IS_NOT_SECRET` and 4-byte word endianness swaps. Use the hex string from the INI with this Python snippet:<sup>[[2]](#references)</sup>
 
+First confirm that the current account can read **both** the INI and the corresponding SQL CE `.sdf` database. The INI password protects the database; it is separate from the mailbox account hashes stored inside it. Inspect or upgrade a **copy** of an in-use database, never the live file.
+
 ```python
 from Crypto.Cipher import Blowfish
 import binascii
@@ -412,7 +414,7 @@ $conn = New-Object System.Data.SqlServerCe.SqlCeConnection("Data Source=C:\Windo
 $cmd = $conn.CreateCommand(); $cmd.CommandText = "SELECT accountaddress,accountpassword FROM hm_accounts"; $cmd.ExecuteReader()
 ```
 
-The `accountpassword` column uses the hMailServer hash format (hashcat mode `1421`). Cracking these values can provide reusable credentials for WinRM/SSH pivots.
+The `accountpassword` column uses the hMailServer hash format (hashcat mode `1421`). A cracked mailbox password becomes a Windows user pivot only if that password is reused by a local/domain account and that account has the required remote-logon rights.
 
 ## LSA Logon Callback Interception (LsaApLogonUserEx2)
 

