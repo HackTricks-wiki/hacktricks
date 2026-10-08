@@ -1320,7 +1320,7 @@ Important notes:
 
 - Reusing the original header is key because Python checks the cache metadata against the source file, not whether the bytecode body really matches the source.
 - This is especially useful when the source file is root-owned and not writable, but the containing `__pycache__` directory is.
-- The attack fails if the privileged process uses `PYTHONDONTWRITEBYTECODE=1`, imports from a location with safe permissions, or removes write access to every directory in the import path.
+- `PYTHONDONTWRITEBYTECODE=1` and `python -B` stop Python from writing new `.pyc` files; they do **not** stop it from loading an already valid, attacker-replaced cache. The critical boundary is whether a lower-privileged user can replace a cache that the privileged import will accept. Python checks timestamp/size or hash metadata before loading cached bytecode. See the [Python import reference](https://docs.python.org/3.12/reference/import.html#cached-bytecode-invalidation) and [command-line documentation](https://docs.python.org/3.12/using/cmdline.html#envvar-PYTHONDONTWRITEBYTECODE).
 
 Minimal proof-of-concept shape:
 
@@ -1344,7 +1344,7 @@ subprocess.run(["sudo", "/opt/app/runner.py"])
 Hardening:
 
 - Ensure no directory in the privileged Python import path is writable by low-privileged users, including `__pycache__`.
-- For privileged runs, consider `PYTHONDONTWRITEBYTECODE=1` and periodic checks for unexpected writable `__pycache__` directories.
+- Audit cache-directory ownership and permissions, including existing `.pyc` files. Disabling bytecode writes can reduce new cache creation, but does not neutralize a replaceable existing cache.
 - Treat writable local Python modules and writable cache directories the same way you would treat writable shell scripts or shared libraries executed by root.
 
 ### BASH_ENV preserved via sudo env_keep → root shell
