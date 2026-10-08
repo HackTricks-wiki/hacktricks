@@ -101,6 +101,14 @@ For a passive review, read the exact sudo command and script, trace which argume
 
 `needrestart -c` loads a caller-selected Perl configuration file and evaluates its contents. If `sudo -l` allows `needrestart` as root with arguments permitting `-c`, and the caller can choose a readable configuration file in a writable location, that permission can lead to root code execution. Check the exact sudo run-as and argument rule; a rule permitting only a fixed argument list may block this path. This is separate from the needrestart interpreter-scanning vulnerabilities: updating the package or disabling `interpscan` does not make an unrestricted root `-c` grant safe.<sup>[[2]](#references)[[18]](#references)[[19]](#references)</sup>
 
+### Sudo-run Python imports under another account
+
+A fixed Python entry point can still import a module that the caller can edit or replace, including when sudo runs the script as a **non-root** service user. For a literal `from utils import status`, review local `utils/__init__.py` and `utils/status.py` as well as the package directory permissions. Confirm the script's import path, the exact allowed sudo arguments, and whether the relevant action reaches that import before treating the writable file as an execution path. Inspect files and permissions without importing or running the script during enumeration.<sup>[[2]](#references)[[3]](#references)</sup>
+
+### Sudo-run Apache with a caller-controlled configuration
+
+If a sudo rule permits a privileged `apachectl`, `apache2ctl`, or `httpd` invocation with a caller-controlled `-f` configuration file, review that file and its parent directory permissions. Apache's [`LoadModule`](https://httpd.apache.org/docs/2.4/mod/mod_so.html#loadmodule) directive takes a module name followed by the **module filename**; [`LoadFile`](https://httpd.apache.org/docs/2.4/mod/mod_so.html#loadfile) also loads a file. [`Include` and `IncludeOptional`](https://httpd.apache.org/docs/2.4/mod/core.html#include) can extend the configuration or expose file contents through errors. A custom wrapper may validate these paths, drop privileges, or restrict arguments, so a writable config alone is a review candidate rather than proof of code execution. Check path canonicalization, symlinks, and directive parsing before drawing a conclusion.
+
 ## Defensive notes
 
 - Avoid granting interpreters or interactive editors through sudo.<sup>[[1]](#references)</sup>
