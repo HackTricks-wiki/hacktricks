@@ -2171,6 +2171,8 @@ ls -alhR /opt/lampp/htdocs/ 2>/dev/null
 
 ### **Backups**
 
+Inspect readable files inside backup directories as well as files whose **names** contain `backup`: an archive with an opaque name or an encrypted extension can still expose old application data. An encrypted archive is only an exposure candidate. Password recovery, inspection of its contents, recovery of an application hash, and reuse of that password for a Unix account are separate steps to verify; a hash in an archive does not establish a local login.
+
 ```bash
 find /var /etc /bin /sbin /home /usr/local/bin /usr/local/sbin /usr/bin /usr/games /usr/sbin /root /tmp -type f \( -name "*backup*" -o -name "*\.bak" -o -name "*\.bck" -o -name "*\.bk" \) 2>/dev/null
 ```
