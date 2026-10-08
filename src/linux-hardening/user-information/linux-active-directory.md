@@ -49,6 +49,8 @@ find /tmp /run/user -maxdepth 2 -name 'krb5cc*' -ls 2>/dev/null
 
 This quickly tells you whether the host trusts AD, whether SSSD is caching identities or tickets, and whether **machine/service keytabs** or **KCM secrets** are available for abuse.<sup>[[4]](#references)[[10]](#references)</sup>
 
+Treat `/var/lib/sss/db/cache_*.ldb` separately from Kerberos ccaches and `/var/lib/sss/secrets/secrets.ldb`. The `cache_*.ldb` files can hold offline password verifiers when a domain has `cache_credentials = true` **and** the user previously authenticated on that host. They are normally readable only with privileged access. A cache file or enabled setting alone does not prove a usable, current password; review the effective per-domain setting and actual cached identities before drawing that conclusion. See [Red Hat's SSSD credential-cache documentation](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/epub/configuring_authentication_and_authorization_in_rhel/overview-single-sign-on_introduction-to-system-authentication). For a separate Linux-to-AD identity boundary, [mixed-vendor Kerberos name mapping](https://www.pentestpartners.com/security-blog/a-broken-marriage-abusing-mixed-vendor-kerberos-stacks/) matters only when a service accepts the ticket and maps its principal to the relevant Unix account.
+
 ## Playing with tickets
 
 ### Pass The Ticket
