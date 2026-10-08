@@ -1964,7 +1964,7 @@ This bug is caused when creating a new ssh key in those OS, as **only 32,768 var
 
 ### SSH Interesting configuration values
 
-- **PasswordAuthentication:** Specifies whether password authentication is allowed. The default is `no`.
+- **PasswordAuthentication:** Specifies whether password authentication is allowed. The upstream OpenSSH default is `yes`; distribution configuration can override it.
 - **PubkeyAuthentication:** Specifies whether public key authentication is allowed. The default is `yes`.
 - **PermitEmptyPasswords**: When password authentication is allowed, it specifies whether the server allows login to accounts with empty password strings. The default is `no`.
 
@@ -1978,12 +1978,16 @@ These files influence who can log in and how:
 
 ### PermitRootLogin
 
-Specifies whether root can log in using ssh, default is `no`. Possible values:
+Specifies whether root can log in using ssh. The upstream OpenSSH default is `prohibit-password`; distribution configuration can override it. Possible values:
 
 - `yes`: root can login using password and private key
 - `without-password` or `prohibit-password`: root can only login with a private key
 - `forced-commands-only`: Root can login only using private key and if the commands options are specified
 - `no` : no
+
+### Trusted SSH user certificate authorities
+
+`TrustedUserCAKeys` names public keys that sshd trusts to sign **user** certificates. If the corresponding private CA key is readable by a lower-privileged user, review who may obtain a certificate and which account principals it could authenticate as. `AuthorizedPrincipalsFile` or `AuthorizedPrincipalsCommand` can restrict accepted names; when neither is configured, the certificate must contain the target account name. `PermitRootLogin prohibit-password` blocks root password authentication but can still permit certificate authentication. An exposed key path alone does not prove access: confirm the public/private key pair, effective `Match` rules, account policy, key passphrase, revocation, and accepted signature algorithms. Do not include private-key bytes in enumeration output. See the [OpenSSH server configuration manual](https://man.openbsd.org/sshd_config#TrustedUserCAKeys).
 
 ### AuthorizedKeysFile
 
