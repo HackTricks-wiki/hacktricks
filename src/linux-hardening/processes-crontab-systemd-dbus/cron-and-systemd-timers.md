@@ -27,6 +27,8 @@ Review writable script chains, `EnvironmentFile=` paths, drop-ins, symlinks, rel
 
 A root-run parser that feeds untrusted text into Bash arithmetic can execute substitutions in that text. The [privilege escalation guide](../linux-basics/linux-privilege-escalation/README.md#bash-arithmetic-expansion-injection-in-cron-log-parsers) gives a worked example. Confirm the input source and parsing command before treating every arithmetic expression as exploitable.
 
+Also inspect privileged jobs that materialize files from another user's Git repository. A script may use `git ls-tree` and `git cat-file` rather than `git checkout`, yet still trust attacker-controlled tree paths when it joins them to a staging directory. Absolute paths and `..` components can escape that directory unless the destination is normalized and checked for containment before writing. `git -c safe.directory=*` permits access to repositories with different ownership; it does not by itself create the arbitrary-write condition.
+
 ## Observe short-lived work
 
 A single process snapshot may miss a job that runs for milliseconds. Compare timer/cron declarations with logs and, when authorized, process-event monitoring such as `pspy` or audit. Correlate the scheduled owner, exact command line, and files that the task reads or writes. A loopback scheduler web UI is a separate interface; see the [Crontab UI example](../linux-basics/linux-privilege-escalation/README.md#crontab-ui-alseambusher-running-as-root--web-based-scheduler-privesc).

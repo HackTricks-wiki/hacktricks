@@ -868,6 +868,10 @@ Get-ChildItem 'C:\Program Files', 'C:\Program Files (x86)' | ft Parent,Name,Last
 Get-ChildItem -path Registry::HKEY_LOCAL_MACHINE\SOFTWARE | ft Name
 ```
 
+#### Checkmk Windows agent repair path
+
+[CVE-2024-0670](https://checkmk.com/werk/16361) affects older Checkmk Windows agents that wrote command files in `C:\Windows\Temp` and then executed a pre-existing write-protected file when replacement failed. The vendor fixed the issue in 2.1.0p40, 2.2.0p23, 2.3.0b1, and 2.4.0b1. Check the full installed patch level and whether the affected agent operation can run; a branch-only label such as `2.1` cannot establish exposure. Enumeration can inspect version, service state, and Temp permissions without creating files or triggering agent commands.
+
 ### Write Permissions
 
 Check if you can modify some config file to read some special file or if you can modify some binary that is going to be executed by an Administrator account (schedtasks).
@@ -1213,6 +1217,8 @@ reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AltDef
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AltDefaultUserName
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AltDefaultPassword
 ```
+
+Treat `DefaultUserName` and `DefaultDomainName` as account context, not credentials. A nonempty `DefaultPassword` or `AltDefaultPassword` value is a plaintext registry finding. If `AutoAdminLogon=1` but no plaintext password is readable, that is only a lead: [Sysinternals Autologon can store the password as an LSA secret](https://learn.microsoft.com/en-us/sysinternals/downloads/autologon), and ordinary registry reads do not establish whether that secret exists or can be retrieved. Review access rights and the actual logon configuration before reporting a credential exposure.
 
 ### Credentials manager / Windows vault
 

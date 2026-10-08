@@ -38,5 +38,26 @@ getent passwd
 - Postfix aliases can pipe received mail to local commands. If a lower-privileged user can change the referenced script, mail delivery may trigger their code under the delivery identity. Review alias maps and script ownership before claiming that path; see [SMTP and mail service testing](../../network-services-pentesting/pentesting-smtp/README.md).
 - Jenkins and other CI services may run jobs under a powerful local account. Inspect the service user, writable job/workspace paths, and local administration interface before testing a pipeline or plugin.
 
+## Gogs repository file writes
+
+For a local Gogs service, correlate the `gogs web` process owner with the executable version and `custom/conf/app.ini`. The configuration can reveal the service identity, repository root, listener address, and whether registration is disabled. A loopback-only listener is still reachable by local users. Gogs versions through 0.13.3 have an authenticated `PutContents` symlink file-write issue ([CVE-2025-8110](https://github.com/advisories/GHSA-mq8m-42gh-wq7r)): a repository writer can commit a symlink and then direct the API write through it. The resulting file access has the privileges of the Gogs process, so a root-owned instance needs prompt attention. Validate the deployed fix and authentication requirements before claiming a usable path; an API error does not prove that the file write failed.
+
+## Cobbler provisioning API
+
+Cobbler's management service exposes an XML-RPC API, commonly on port `25151`. Check the listener and the `cobblerd` process owner before assessing its impact; a loopback-only API can still be reached by a user on the host. Review the authentication and authorization modules in `/etc/cobbler/modules.conf`, the service settings in `/etc/cobbler/settings` or `/etc/cobbler/settings.yaml`, and permissions on `/etc/cobbler/users.conf`, `/etc/cobbler/users.digest`, and `/var/lib/cobbler/web.ss`. The digest and shared-secret files contain credential material, so record their readability without printing their contents by default.
+
+```bash
+ps -eo user,pid,args | grep '[c]obblerd'
+ss -ltn 2>/dev/null | grep ':25151'
+for file in /etc/cobbler/modules.conf /etc/cobbler/settings /etc/cobbler/settings.yaml \
+            /etc/cobbler/users.conf /etc/cobbler/users.digest /var/lib/cobbler/web.ss; do
+    [ -e "$file" ] && ls -l "$file"
+done
+```
+
+**CVE-2024-47533** is an XML-RPC authentication bypass in Cobbler 3.0.0 through 3.2.2 and 3.3.0 through 3.3.6. A shared-secret read error returned the predictable value `-1`, which the API accepted as a password. The corresponding fixes are 3.2.3 and 3.3.7. A package version is a lead; verify the deployed code and any backported fix before reporting exposure.
+
+An authenticated API session can be a privileged execution path when `cobblerd` runs as root. In affected implementations, `background_import` passes user-controlled `rsync_flags` into a shell command, and rendering a user-controlled Cheetah autoinstall template can evaluate Python. Check the API permissions and installed version before testing either path. Restrict access to the management API, patch the authentication bypass, and keep configuration and credential files readable only by the service administrators.
+
 A service name or installed package is only a lead. The privilege boundary is the combination of reachable input, process identity, writable configuration, and the command or file it ultimately controls.
 {{#include ../../banners/hacktricks-training.md}}

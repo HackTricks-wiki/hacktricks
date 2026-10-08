@@ -233,6 +233,8 @@ find / -group root -perm -g=w 2>/dev/null
 
 Membership in the `docker` group grants root-level access to the Docker daemon on standard rootful installs. Because bind mounts are read-write by default, a user who can control that daemon can mount the host's `/` into a container and alter host files; this effectively gives root on the host.<sup>[[13]](#references)[[14]](#references)[[15]](#references)</sup>
 
+Group membership may be out of sync between `/etc/group`, `/etc/gshadow`, and the current process token. If a user is absent from `id -nG` but `newgrp docker` succeeds, check the group shown by `id` in the new shell and test whether the Docker socket is actually writable and serves a rootful daemon. The group name alone does not establish host control. Bound any automated `newgrp` probe so a password prompt cannot stall enumeration.
+
 ```bash
 docker image #Get images from the docker service
 

@@ -1027,6 +1027,8 @@ sudo conntrack -L 2>/dev/null | head -n 20
 lsof -i
 ```
 
+If an active `/etc/inetd.conf` entry runs GNU Inetutils `telnetd` as root, check the configured binary version and the local listener even when the port is bound only to loopback. GNU Inetutils 1.9.3 through 2.7 had a [telnet authentication bypass](https://seclists.org/oss-sec/2026/q1/89) in which client-supplied `USER` reached `login -f` (CVE-2026-24061). A process or version string is an indicator; confirm vendor patch status and the actual daemon before treating it as exposed. The [Telnet guide](../../../network-services-pentesting/pentesting-telnet.md) has more detail.
+
 ### Outbound filtering quick triage
 
 If the host can run commands but callbacks fail, separate DNS, transport, proxy, and route filtering quickly:
