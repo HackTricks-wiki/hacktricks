@@ -98,7 +98,7 @@ sudo -V | grep "Sudo ver" | grep "1\.[01234567]\.[0-9]\+\|1\.8\.1[0-9]\*\|1\.8\.
 
 ### Sudo < 1.9.17p1
 
-Sudo versions before 1.9.17p1 (**1.9.14 - 1.9.17 < 1.9.17p1**) allows unprivileged local users to escalate their privileges to root via sudo `--chroot` option when `/etc/nsswitch.conf` file is used from a user controlled directory.<sup>[[28]](#references)[[29]](#references)</sup>  
+Upstream sudo **1.9.14 through 1.9.17** allows unprivileged local users to escalate to root via the `--chroot` option when sudo loads `/etc/nsswitch.conf` from a user-controlled directory; upstream fixed this in **1.9.17p1**. Check every executable root-setuid sudo binary in the relevant paths, since `sudo -V` reports only the binary selected by `PATH`. Distribution packages may backport the fix without changing the upstream version string, so verify the vendor package status too. See the [sudo maintainer's advisory](https://www.openwall.com/lists/oss-security/2025/06/30/3).<sup>[[28]](#references)[[29]](#references)</sup>
 
 Here is a [PoC](https://github.com/pr0v3rbs/CVE-2025-32463_chwoot) to exploit that [vulnerability](https://nvd.nist.gov/vuln/detail/CVE-2025-32463). Before running the exploit, make sure that your `sudo` version is vulnerable and that it supports the `chroot` feature.  
 
@@ -106,7 +106,7 @@ For more information, refer to the original [vulnerability advisory](https://www
 
 ### Sudo host-based rules bypass (CVE-2025-32462)
 
-Sudo before 1.9.17p1 (reported affected range: **1.8.8–1.9.17**) can evaluate host-based sudoers rules using the **user-supplied hostname** from `sudo -h <host>` instead of the **real hostname**. If sudoers grants broader privileges on another host, you can **spoof** that host locally.<sup>[[29]](#references)</sup>
+Upstream sudo **1.8.8 through 1.9.17** can evaluate host-based sudoers rules using the **user-supplied hostname** from `sudo -h <host>` instead of the **real hostname**; upstream fixed this in **1.9.17p1**. The user must still have a matching sudoers entry on the selected host. Review vendor backports and alternate sudo binaries as well as the local policy. See the [sudo maintainer's advisory](https://www.openwall.com/lists/oss-security/2025/06/30/2).<sup>[[29]](#references)</sup>
 
 Requirements:
 - Vulnerable sudo version
@@ -127,7 +127,7 @@ sudo -h devbox id
 sudo -h devbox -i
 ```
 
-If resolution of the spoofed name blocks, add it to `/etc/hosts` or use a hostname that already appears in logs/configs to avoid DNS lookups.
+If resolution of the selected name blocks, verify how that name resolves on the host. Merely seeing a name in a log or configuration file does not make it resolvable, and changing `/etc/hosts` normally requires privileged write access.
 
 #### sudo < v1.8.28
 
