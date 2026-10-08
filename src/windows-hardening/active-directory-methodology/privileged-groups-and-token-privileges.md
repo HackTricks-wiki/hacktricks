@@ -48,7 +48,7 @@ For more details, visit [ired.team](https://ired.team/offensive-security-experim
 
 ## AD Recycle Bin
 
-Membership in this group allows for the reading of deleted Active Directory objects, which can reveal sensitive information:
+Deleted-object visibility is controlled by effective directory permissions; a group name alone does not prove that the current identity can list or restore an object. AD Recycle Bin must have been enabled before the deletion for full restore, and a restore also requires Reanimate-Tombstones on the naming-context root, rename rights, and CREATE_CHILD on the destination container. [Microsoft's Recycle Bin guidance](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/get-started/adac/active-directory-recycle-bin) and [undelete authorization rules](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/c7279698-8aed-4e0b-b750-97c29f11b004) distinguish these conditions. An authorized identity with deleted-object read access can inspect records that may reveal sensitive information:
 
 ```bash
 Get-ADObject -filter 'isDeleted -eq $true' -includeDeletedObjects -Properties *
