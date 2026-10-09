@@ -64,6 +64,8 @@ Error executing command as another user: Not authorized
 
 On an SSH session without a registered authentication agent, `pkexec` may fail with this error even when the policy would otherwise allow the action; polkit documents `pkttyagent` as a text authentication agent for non-desktop sessions. The exact behavior is version- and distribution-dependent, so verify the local policy and agent setup. One workaround reported for affected NixOS versions uses **2 different SSH sessions**.<sup>[[1]](#references)[[4]](#references)[[5]](#references)</sup>
 
+An ACL that denies one account access to `su` governs that executable, not every route to an administrator-authorized action. If an administrator credential is independently exposed, review whether a separate action such as starting a transient system service through `systemd-run` is permitted by the effective polkit policy, which identity the authentication agent accepts, and which identity the resulting service would use. [Polkit distinguishes authentication as the session owner from an administrator](https://polkit.pages.freedesktop.org/polkit/polkit.8.html), while [systemd-run can request a transient service from the system manager](https://systemd.io/CONTROL_GROUP_INTERFACE/). A history entry, installed command, or readable policy file alone does not establish authorization or credential validity; passive review should not submit credentials or start a unit.
+
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
