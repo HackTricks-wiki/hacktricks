@@ -37,6 +37,17 @@ ipcs -m
 
 System V segments are distinct from POSIX shared-memory files under `/dev/shm`. A segment created for only a moment may be absent from a single `ipcs` snapshot, so empty output does not clear a helper that uses shared memory. Review its source or binary behavior and any `sudo` rule that launches it; do not invoke the privileged helper just to make a segment appear during enumeration. The [IPC namespace guide](../containers-namespaces/container-security/protections/namespaces/ipc-namespace.md) explains how namespaces affect visibility.<sup>[[2]](#references)[[3]](#references)</sup>
 
+## Consul agent script checks
+
+Consul can run script health checks with the operating-system identity of its agent. If an agent runs as root, enables `enable_script_checks`, and permits a lower-privileged user to register a service with a script check through the local HTTP API, that user may cause root-run commands. Binding the API only to `127.0.0.1` still permits local users to reach it. The `enable_local_script_checks` setting is narrower: it excludes script checks submitted through HTTP API registrations. When Consul ACLs are enabled, service registration requires `service:write`; an `acl.default_policy=allow` line by itself does not prove that an anonymous caller can register. Review the actual agent identity, loaded settings, API binding, and authorization together.<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
+
+```bash
+ps -eo user,args | grep '[c]onsul agent'
+ls -l /etc/consul.d 2>/dev/null
+```
+
+Follow the running agent's `-config-dir` and `-config-file` arguments to the relevant configuration, and inspect only the script-check and ACL field names and settings. Configuration files may also contain gossip keys or tokens; avoid pasting them into shared logs. Do not register a service or run a health check merely to enumerate this condition.
+
 ## Follow the service execution chain
 
 ```bash
@@ -65,5 +76,8 @@ ls -l /path/from/-fbdir/Xvfb_screen*
 1. [Linux `shmget(2)` manual](https://man7.org/linux/man-pages/man2/shmget.2.html)
 2. [Linux `ipcs(1)` manual](https://man7.org/linux/man-pages/man1/ipcs.1.html)
 3. [OpenBSD `ipcs(1)` manual](https://man.openbsd.org/ipcs.1)
+4. [Consul agent configuration: script checks](https://developer.hashicorp.com/consul/docs/reference/agent/configuration-file/general)
+5. [Consul agent service registration API](https://developer.hashicorp.com/consul/api-docs/agent/service)
+6. [Consul ACL configuration](https://developer.hashicorp.com/consul/docs/reference/agent/configuration-file/acl)
 
 {{#include ../../banners/hacktricks-training.md}}

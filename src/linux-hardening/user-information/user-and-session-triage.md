@@ -30,6 +30,8 @@ tmux ls 2>/dev/null
 
 A `screen` or `tmux` socket can expose an existing shell if its permissions allow the current user to attach. Check the owner and socket mode before attempting access; another user's session is not automatically attachable. An active sudo timestamp or SSH agent socket may also matter, but their reuse depends on user identity, permissions, and policy. For agent forwarding abuse, see [SSH forwarding agent exploitation](ssh-forward-agent-exploitation.md).
 
+An [OpenSSH multiplex control socket](https://man.openbsd.org/ssh_config#ControlMaster) is separate from `SSH_AUTH_SOCK`: `ControlMaster` and `ControlPath` let later SSH clients share an existing authenticated connection, while `ControlPersist` can keep the master available after the first session ends. Inspect the current user's `.ssh/config` and shallow `.ssh` socket paths, including the owner and permissions. A socket filename alone does not prove that the master is live, that the current user may connect, or which remote account it uses.
+
 ## Review user artifacts
 
 ```bash

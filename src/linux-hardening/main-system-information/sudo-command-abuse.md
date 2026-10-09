@@ -84,6 +84,7 @@ Pagers such as `less` can also expose shell execution.<sup>[[14]](#references)</
 Start with `sudo -l`, `sudo -V`, and any applicable `doas` policy. Read the allowed command, run-as user, arguments, environment, and defaults together. Permission to run as a non-root service account can still expose that account's files or a route to root.
 
 - `SETENV`, `env_keep`, `secure_path`, and `LD_PRELOAD` can turn an otherwise narrow command into an import, library, or PATH hijack. See the [environment-variable guide](../linux-basics/linux-environment-variables.md) and [SUID/linker abuse](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md).
+- For a sudo rule that runs a shell script, compare preserved variables with the script itself. A construct such as `if $CHECK_CONTENT; then` runs the expanded value as a command, so preserving `CHECK_CONTENT` can permit command execution even when the script path and arguments are fixed. Whether the branch is reachable and the environment is actually retained must be checked for the specific rule.<sup>[[2]](#references)[[22]](#references)</sup>
 - A sudo-allowed Python script may import code from a writable directory or cached `.pyc` file. The [privilege escalation guide](../linux-basics/linux-privilege-escalation/README.md) details the cache case.
 - A custom root-owned wrapper may appear safe because its binaries and scripts are not writable, yet its decision to run a privileged action may depend on a flag, local API value, or service state that an unprivileged user can change. Trace each gate back to its input and authorization checks. During enumeration, inspect configuration and permissions without changing operational state; a `systemd-run` call inside the wrapper is only relevant if the gate can be influenced.
 - A backup client allowed through sudo as root may accept a caller-selected configuration file (for example, `npbackup-cli -c`). Check the exact run-as user and permitted arguments, then whether the caller controls the configuration path, backup source paths, and repository or read/restore options. An encrypted repository secret in a readable config may still be usable by the client, but the rule alone does not prove repository access or root-file disclosure. Validate authorization without running a backup or dumping its contents.
@@ -95,6 +96,12 @@ Start with `sudo -l`, `sudo -V`, and any applicable `doas` policy. Read the allo
 - Sudo timestamp reuse depends on the cache policy, owning user, terminal/session, and permissions. The [privilege escalation guide](../linux-basics/linux-privilege-escalation/README.md#reusing-sudo-tokens) covers the checks.
 - `doas` has its own rules and configuration. Check permitted commands and writable configuration paths as described in the [doas section](../linux-basics/linux-privilege-escalation/README.md#doas).
 
+### Sudo-run build and package tools
+
+An unrestricted sudo grant for Foundry's `forge` can matter even when the RunAs identity is another non-root user. Compiler options such as `--use` can select a local executable, and `forge flatten -o` selects an output file. Check the installed Forge version, exact sudo arguments, accessible project and compiler paths, output permissions, and effective environment before treating the grant as exploitable. A relative helper executable found through `PATH` is a version- and environment-dependent route, not a property to assume for every Forge build.<sup>[[23]](#references)[[24]](#references)</sup>
+
+An unrestricted root-capable `pacman` grant permits more than package queries: `-U` accepts a local package, packages can contain install scripts, and `--hookdir` selects another hook directory. Review the effective sudo rule, argument restrictions and exclusions before testing; passive enumeration does not need to install a package or run a hook.<sup>[[25]](#references)[[26]](#references)</sup>
+
 ### Sudo-run preset and plugin loaders
 
 Python tools that accept a caller-selected preset or plugin directory may import code with the privileges granted by sudo. For example, BBOT accepts a preset with `-p`, and its [custom-module documentation](https://www.blacklanternsecurity.com/bbot/Stable/dev/module_howto/#load-modules-from-custom-locations) describes `module_dirs` entries that select additional Python module directories. If the effective sudo rule permits a caller-selected preset and the caller controls a module in the selected directory, the import can execute code as the privileged user, potentially before the tool rejects an invalid module. Check the installed version, exact sudo run-as and argument policy, and ownership of the preset and module paths without loading the module during enumeration.
@@ -102,6 +109,10 @@ Python tools that accept a caller-selected preset or plugin directory may import
 ### Sudo-run Backdrop command line tool
 
 [Bee](https://github.com/backdrop-contrib/bee) is a PHP command line tool for Backdrop CMS. Its `eval` (`php-eval`) and `php-script` commands can run caller-supplied PHP. A sudo rule that permits the Bee executable as root with unrestricted arguments can therefore expose root code execution when Bee can bootstrap a Backdrop installation. Run it from the site directory or select a site using the global `--root=<directory>` option; simply finding Bee or a Backdrop `settings.php` file does not prove the sudo permission, a usable site, or successful bootstrap. Review the effective sudo rule, any command exclusions, the executable's identity, and access to the site before testing. During passive enumeration, inspect the rule and file paths without invoking Bee. See the [Bee command changelog](https://github.com/backdrop-contrib/bee/blob/1.x-1.x/CHANGELOG.md) for the PHP command additions.
+
+### Sudo-run terminal servers
+
+`mosh-server` starts an interactive terminal server as the invoking user. It chooses a high UDP port and session key, reports both to the caller, and normally launches that user's login shell when a client connects. An unrestricted root-capable sudo grant for `mosh-server` is therefore a shell review candidate, even though the server command itself detaches. Check the effective RunAs identity, permitted arguments and exclusions, installed binary, shell, client availability, and UDP access. Passive enumeration should inspect the sudo rule without starting a server or printing any live session key. See the [Mosh server manual](https://manpages.debian.org/unstable/mosh/mosh-server.1.en.html) and [upstream design notes](https://github.com/mobile-shell/mosh#how-it-works).
 
 ### Privileged backup wrappers that rewrite a caller's task file
 
@@ -112,6 +123,18 @@ On Linux, `fs.protected_regular` can deny an `O_CREAT` write to another user's r
 ### Argument wildcards on privileged packet tools
 
 In a sudo rule for `tcpdump`, a `*` in the **argument pattern** can match whitespace and slashes, so a pathname-looking restriction may still allow additional option text. This differs from a wildcard in the command's executable path; inspect the complete RunAs rule and any later denials. If options can be injected, the permitted invocation and installed [`tcpdump` option semantics](https://github.com/the-tcpdump-group/tcpdump/blob/master/tcpdump.1.in) determine whether `-F`, `-V`, `-r`, `-w`, or `-Z` gives a useful read/write primitive. `-V` reads a list of capture filenames, not an arbitrary general-purpose file dump. AppArmor or another MAC policy can block file access even when sudo permits the command; a profile file on disk does not prove that it is loaded or enforcing. Review authorization and policy passively before drawing a conclusion. The [sudoers manual](https://www.sudo.ws/docs/man/1.9.14/sudoers.man.pdf) describes the wildcard distinction.
+
+### Sudo-run Nmap wrappers
+
+When a sudo-allowed `nmap` path is a shell wrapper, inspect the exact permitted path and every option it forwards. Blocking the familiar `--script` spelling does not necessarily block NSE code loading: Nmap's [`--datadir`](https://nmap.org/book/man-misc-options.html) selects data files, and NSE [loads `nse_main.lua`](https://nmap.org/book/nse-implementation.html) from the selected data directory when scripting is enabled. Some installed builds also accept alternate long-option spellings, so compare restrictions with that binary's actual parser. [`--excludefile`](https://nmap.org/book/man-target-specification.html) is a separate file-read surface; parser errors may disclose text. Check the effective sudo rule, wrapper logic, Nmap version, directory control, and MAC policy without running scans during enumeration.
+
+### Sudo-run Mercurial pull hooks
+
+A fixed source in `sudo hg pull /fixed/source` still leaves the **receiving** repository selected by the current working directory unless the command fixes it with `-R`. A caller-controlled receiving repo can define hooks in `.hg/hgrc`, and a hook may run as the sudo RunAs user. [Mercurial ignores repository configuration owned by an untrusted user or group](https://mercurial-scm.org/help/topics/config), so inspect the RunAs account's trusted users/groups and the exact working directory before treating this as code execution. Reading the policy and config is sufficient for a passive review; do not pull or invoke a hook to enumerate it.
+
+### Sudo-run rsync archive copies
+
+For `sudo rsync -a ... /writable/source/* /fixed/destination/`, a `*` in the **sudoers argument pattern** can match spaces and admit an extra option between source and destination. This is distinct from shell expansion of filenames. If the caller can populate the source and the destination is writable by the privileged rsync process, [`--chown`](https://download.samba.org/pub/rsync/rsync.1) can request privileged ownership while archive mode preserves permission bits, potentially creating an owned SetUID file. Check the exact [sudoers wildcard semantics](https://man7.org/linux/man-pages/man5/sudoers.5.html), rsync version, later denials, filesystem `nosuid`, and MAC policy. A matching rule is a review candidate, not proof of successful privilege escalation.
 
 ### Sudo-run packet-filter rule export
 
@@ -170,5 +193,10 @@ If a sudo rule permits a privileged `apachectl`, `apache2ctl`, or `httpd` invoca
 - [19] [needrestart command behavior — GTFOBins](https://gtfobins.org/gtfobins/needrestart/)
 - [20] [iptables-save(8) — netfilter manual page](https://www.man7.org/linux/man-pages/man8/iptables-save.8.html)
 - [21] [iptables-extensions(8): comment match — netfilter manual page](https://www.man7.org/linux/man-pages/man8/iptables-extensions.8.html)
+- [22] [Simple Command Expansion — Bash Reference Manual](https://www.gnu.org/s/bash/manual/html_node/Simple-Command-Expansion.html)
+- [23] [Forge compiler options — Foundry documentation](https://getfoundry.sh/forge/reference/forge-inspect/)
+- [24] [Forge flatten — Foundry documentation](https://getfoundry.sh/forge/reference/forge-flatten/)
+- [25] [pacman(8) — Arch manual pages](https://man.archlinux.org/man/pacman.8.en)
+- [26] [PKGBUILD(5) install scripts — Arch manual pages](https://man.archlinux.org/man/core/pacman/PKGBUILD.5.en)
 
 {{#include ../../banners/hacktricks-training.md}}

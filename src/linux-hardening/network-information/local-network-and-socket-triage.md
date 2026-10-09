@@ -116,6 +116,8 @@ curl -k -i https://127.0.0.1:8443/
 
 The goal is to identify the protocol, authentication scheme, version, and whether the service trusts local clients.
 
+For an aiohttp listener, review its static-route configuration as well as its version. CVE-2024-23334 affects aiohttp before 3.9.2 when a static route enables `follow_symlinks=True`: requests to that route can read files outside the static root. If the service runs as root, it may expose files readable by root, provided the route is reachable. A version banner or loopback bind alone does not establish the vulnerable configuration or file access.<sup>[[27]](#references)</sup>
+
 ## Capturing Loopback Traffic
 
 Local traffic can expose headers, bearer tokens, Basic Auth credentials, or application-specific secrets.<sup>[[17]](#references)[[25]](#references)</sup> Capture only in authorized environments.
@@ -262,5 +264,6 @@ Prioritize services that are local-only, run as a more privileged user, expose a
 - [24] [ip-link(8) — Linux manual page](https://man7.org/linux/man-pages/man8/ip-link.8.html)
 - [25] [The OAuth 2.0 Authorization Framework: Bearer Token Usage (RFC 6750)](https://www.rfc-editor.org/rfc/rfc6750.html)
 - [26] [CWE-78: Improper Neutralization of Special Elements used in an OS Command](https://cwe.mitre.org/data/definitions/78.html)
+- [27] [aiohttp maintainer advisory: static route traversal with follow_symlinks](https://github.com/aio-libs/aiohttp/security/advisories/GHSA-5h86-8mv2-jq9f)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1466,6 +1466,8 @@ Protect the server configuration and backups with restrictive ACLs, keep the CA 
 reg query "HKCU\Software\SimonTatham\PuTTY\Sessions" /s | findstr "HKEY_CURRENT_USER HostName PortNumber UserName PublicKeyFile PortForwardings ConnectionSharing ProxyPassword ProxyUsername" #Check the values saved in each session, user/password could be there
 ```
 
+Solar-PuTTY is a separate session manager. Its native encrypted store may be at `%APPDATA%\SolarWinds\FreeTools\Solar-PuTTY\data.dat`, while an exported session backup can be named `sessions-backup.dat` and stored elsewhere. [SolarWinds' export guide](https://thwack.solarwinds.com/discussion/comment/115591) says exports are password-encrypted and can contain sessions, keys, scripts, tags, and relationships; its [support forum](https://thwack.solarwinds.com/discussion/4520/saved-session-lost) identifies the native store. Check file permissions and paths first. Finding either file does not reveal its password or prove that any saved credential remains valid or has higher privileges.
+
 ### Putty SSH Host Keys
 
 ```
@@ -1694,6 +1696,7 @@ cesi.conf
 supervisord.conf
 tomcat-users.xml
 *.kdbx
+*.psafe3
 KeePass.config
 Ntds.dit
 SAM
@@ -1731,11 +1734,13 @@ TypedURLs       #IE
 %USERPROFILE%\LocalS~1\Tempor~1\Content.IE5\index.dat
 ```
 
+Password Safe v3 databases commonly use the `.psafe3` extension. Treat a matching filename as an encrypted vault candidate; its presence does not establish that you can read it, unlock it, or use any stored credentials. Check accessible user profiles and configured file-sharing roots when reviewing where such files are stored.
+
 Search all of the proposed files:
 
 ```
 cd C:\
-dir /s/b /A:-D RDCMan.settings == *.rdg == *_history* == httpd.conf == .htpasswd == .gitconfig == .git-credentials == Dockerfile == docker-compose.yml == access_tokens.db == accessTokens.json == azureProfile.json == appcmd.exe == scclient.exe == *.gpg$ == *.pgp$ == *config*.php == elasticsearch.y*ml == kibana.y*ml == *.p12$ == *.cer$ == known_hosts == *id_rsa* == *id_dsa* == *.ovpn == tomcat-users.xml == web.config == *.kdbx == KeePass.config == Ntds.dit == SAM == SYSTEM == security == software == FreeSSHDservice.ini == sysprep.inf == sysprep.xml == *vnc*.ini == *vnc*.c*nf* == *vnc*.txt == *vnc*.xml == php.ini == https.conf == https-xampp.conf == my.ini == my.cnf == access.log == error.log == server.xml == ConsoleHost_history.txt == pagefile.sys == NetSetup.log == iis6.log == AppEvent.Evt == SecEvent.Evt == default.sav == security.sav == software.sav == system.sav == ntuser.dat == index.dat == bash.exe == wsl.exe 2>nul | findstr /v ".dll"
+dir /s/b /A:-D RDCMan.settings == *.rdg == *_history* == httpd.conf == .htpasswd == .gitconfig == .git-credentials == Dockerfile == docker-compose.yml == access_tokens.db == accessTokens.json == azureProfile.json == appcmd.exe == scclient.exe == *.gpg$ == *.pgp$ == *config*.php == elasticsearch.y*ml == kibana.y*ml == *.p12$ == *.cer$ == known_hosts == *id_rsa* == *id_dsa* == *.ovpn == tomcat-users.xml == web.config == *.kdbx == *.psafe3 == KeePass.config == Ntds.dit == SAM == SYSTEM == security == software == FreeSSHDservice.ini == sysprep.inf == sysprep.xml == *vnc*.ini == *vnc*.c*nf* == *vnc*.txt == *vnc*.xml == php.ini == https.conf == https-xampp.conf == my.ini == my.cnf == access.log == error.log == server.xml == ConsoleHost_history.txt == pagefile.sys == NetSetup.log == iis6.log == AppEvent.Evt == SecEvent.Evt == default.sav == security.sav == software.sav == system.sav == ntuser.dat == index.dat == bash.exe == wsl.exe 2>nul | findstr /v ".dll"
 ```
 
 ```
