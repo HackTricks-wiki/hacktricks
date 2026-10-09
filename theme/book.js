@@ -17,6 +17,33 @@ function playground_text(playground, hidden = true) {
     }
 }
 
+(function openContentLinksInNewTabs() {
+    var content = document.querySelector("#content main");
+    if (!content) {
+        return;
+    }
+
+    Array.from(content.querySelectorAll("a[href]")).forEach(function (link) {
+        var href = link.getAttribute("href");
+
+        // Heading permalinks are page controls, not links to other content.
+        if (!href || link.classList.contains("header") || /^(?:javascript|data):/i.test(href)) {
+            return;
+        }
+
+        link.setAttribute("target", "_blank");
+
+        var rel = (link.getAttribute("rel") || "").split(/\s+/).filter(Boolean);
+        if (rel.indexOf("noopener") === -1) {
+            rel.push("noopener");
+        }
+        if (rel.indexOf("noreferrer") === -1) {
+            rel.push("noreferrer");
+        }
+        link.setAttribute("rel", rel.join(" "));
+    });
+})();
+
 (function codeSnippets() {
     function fetch_with_timeout(url, options, timeout = 6000) {
         return Promise.race([

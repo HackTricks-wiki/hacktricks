@@ -30,6 +30,8 @@ Image and build hygiene matter as much as runtime posture. Use minimal images, r
 
 For Kubernetes, current hardening baselines are more opinionated than many operators still assume. The built-in **Pod Security Standards** treat `restricted` as the "current best practice" profile: `allowPrivilegeEscalation` should be `false`, workloads should run as non-root, seccomp should be explicitly set to `RuntimeDefault` or `Localhost`, and capability sets should be dropped aggressively. During assessment, this matters because a cluster that is only using `warn` or `audit` labels may look hardened on paper while still admitting risky pods in practice.<sup>[[1]](#references)</sup>
 
+When a Pod has a mounted service-account token, assess its permissions **per target namespace**. A rule listing Pods in one namespace does not establish permission in another; a token mounted in a different Pod can have different rights. Use `kubectl auth can-i list pods -n <target-namespace>` and `kubectl auth can-i list secrets -n <target-namespace>` with the identity actually under review. An allowed Secret-list check is a serious lead because a list response can include Secret contents, but it does not prove a privileged token is present. Host access additionally requires a usable workload-creation right, admission of the proposed `hostPath` mount, and a node/pod security context that permits the intended file operation. See Kubernetes' [authorization checks](https://kubernetes.io/docs/reference/access-authn-authz/authorization/) and [RBAC privilege-escalation guidance](https://kubernetes.io/docs/concepts/security/rbac-good-practices/).
+
 ## Modern Triage Questions
 
 Before diving into escape-specific pages, answer these quick questions:

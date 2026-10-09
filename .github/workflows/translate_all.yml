@@ -92,6 +92,11 @@ jobs:
             src/images/arte-badge-v1.webp \
             src/images/grte-badge-v1.webp \
             src/images/azrte-badge-v1.webp \
+            src/images/lee-sponsor-v1.webp \
+            src/images/azrte-sponsor-v1.webp \
+            src/images/grte-sponsor-v1.webp \
+            src/images/lhe-sponsor-v1.webp \
+            src/images/arte-sponsor-v1.webp \
             /tmp/immutable-images/
           cp theme/discount.js /tmp/discount.js
           wget -O /tmp/seo_postprocess.py https://raw.githubusercontent.com/HackTricks-wiki/hacktricks/master/scripts/seo_postprocess.py

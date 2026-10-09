@@ -62,6 +62,25 @@ Rotation modes affect detection:
 
 Defenders should correlate the IP with authenticated session, TLS/client fingerprint, HTTP ordering, device cookie and behavior. A supposedly local residential login followed by another country while all higher-layer features remain identical is stronger than reputation alone. Conversely, address sharing and mobile handoff create legitimate churn, so never treat residential/proxy classification as a verdict.
 
+### Proxyware control planes and reseller overlap
+
+Do not model a residential pool as a flat list of exits. Analysis of the IPIDEA ecosystem exposed a reusable **two-tier control plane**: an embedded SDK first reports device/enrollment metadata to a Tier One domain and receives scheduling plus Tier Two `connect`/`proxy` IP:port pairs. The node periodically polls the Tier Two connect port for an encoded task, opens a second connection to the paired proxy port, and relays the supplied bytes to the requested destination. Nominally different SDKs and proxy brands had separate discovery domains but converged on shared Tier Two infrastructure and overlapping exit pools through common ownership and reseller relationships.<sup>[[13]](#references)</sup>
+
+```text
+enrolled node -> Tier One domain        -> Tier Two IP:port pairs
+enrolled node -> Tier Two connect port  -> destination + connection ID
+enrolled node -> Tier Two proxy port   <-> customer bytes -> destination
+```
+
+This produces more durable hunting pivots than a residential IP block:<sup>[[13]](#references)</sup>
+
+- an unexpected utility, VPN, game or embedded-device process sends a stable device ID/customer key and receives a changing server list;
+- the endpoint polls a direct IP on an unusual port, then connects to another port on the same address immediately before opening a new destination socket;
+- several apparent brands share Tier Two addresses, protocol grammar, SDK code or exit-node overlap;
+- distinct applications contacting different Tier One domains receive addresses from the same Tier Two pool.
+
+The overlap also limits attribution: seeing an IP in one vendor's advertised pool does not establish which reseller, customer or threat actor used it at the relevant time. Preserve flow timestamps, process lineage, Tier One response bodies and Tier Two task identifiers.<sup>[[13]](#references)</sup> In an authorized exercise, emulate this hierarchy only with organization-owned endpoints; never enroll consumer devices or third-party proxyware.
+
 ## Multi-hop proxy chains
 
 MITRE distinguishes external proxies from **multi-hop proxies (T1090.003)**. The important property is not hop count but separation of knowledge and administration.<sup>[[3]](#references)</sup>
@@ -74,6 +93,24 @@ operator --encrypted--> entry A --encrypted/relayed--> exit B --> target
 If one party operates A and B, shared logs or flow timing can reconstruct the circuit. Adding sequential commercial VPNs from the same endpoint/account may add latency while leaving common identity, payment and timing evidence. Tor reduces this problem with independently selected relays and a shared client design, but a low-latency interactive network cannot promise resistance to an observer that measures both ends.
 
 Common failures are DNS or IPv6 bypass, applications opening their own sockets, management traffic reaching relays directly, synchronized activity, reused SSH keys, and logging into identifying accounts. The correct verification is a failure test: stop every relay in turn and show that the workload cannot fall back to a clear path.
+
+### Tunnel collapse and upstream leakage
+
+A relay architecture is often most attributable when it fails. Unit 42 documented a multi-tier espionage path using victim-facing VPSs, relay VPSs, residential proxies, Tor and other proxy services; when a tunnel was omitted or collapsed, hidden upstream infrastructure connected directly to relay and victim-facing systems. The same investigation also used an X.509 certificate briefly exposed on upstream infrastructure as a cross-tier pivot.<sup>[[14]](#references)</sup>
+
+Keep the **data plane** (`victim <-> exit`) separate from the **control plane** (`operator/upstream -> relay administration`). Retain ingress and authentication logs at every owned tier, certificate histories and short failed connections—not only successful C2 sessions. A source that appears only during relay outages or directly administers multiple victim-facing nodes is a stronger upstream candidate than an ordinary exit, but its ASN/geolocation is still a hypothesis, not proof of an operator's identity.
+
+An authorized lab should make the workload fail closed. For a workload isolated in a Linux network namespace, the first route must use the tunnel; after removing it, both the request and route lookup must fail rather than select the physical uplink:
+
+```bash
+ip netns exec workload ip route get "$OWNED_TEST_IP"  # expect: dev wg0
+ip -n workload link set wg0 down
+ip netns exec workload curl --fail --connect-timeout 3 \
+  --resolve "$OWNED_TEST_HOST:443:$OWNED_TEST_IP" "https://$OWNED_TEST_HOST/health"
+ip netns exec workload ip route get "$OWNED_TEST_IP"  # expect: unreachable
+```
+
+Repeat the test for DNS and IPv6 and at each relay boundary. If any probe succeeds, record the actual interface/source address before repairing policy routing or the firewall; that observation is the attribution leak an investigator would see.
 
 ## Redirector tiers and traffic shaping
 
@@ -236,4 +273,6 @@ If one ordinary provider can fill every column, the architecture provides concea
 - [10] [MITRE ATT&CK — Multi-Stage Channels (T1104)](https://attack.mitre.org/techniques/T1104/)
 - [11] [MITRE ATT&CK — Protocol Tunneling (T1572)](https://attack.mitre.org/techniques/T1572/)
 - [12] [MITRE ATT&CK — Traffic Signaling (T1205)](https://attack.mitre.org/techniques/T1205/)
+- [13] [Google Threat Intelligence Group — Disrupting the World's Largest Residential Proxy Network](https://cloud.google.com/blog/topics/threat-intelligence/disrupting-largest-residential-proxy-network)
+- [14] [Unit 42 — The Shadow Campaigns: Uncovering Global Espionage](https://unit42.paloaltonetworks.com/shadow-campaigns-uncovering-global-espionage/)
 {{#include ../banners/hacktricks-training.md}}
