@@ -28,6 +28,8 @@ Get-ScheduledTask | where {$_.TaskPath -notlike "\Microsoft*"} | ft TaskName,Tas
 schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgroup administrators user /add"
 ```
 
+An enabled task that runs as SYSTEM deserves review even when its task definition and action file are protected. [Task Scheduler requires execute permission on the task to run it on demand](https://learn.microsoft.com/en-us/windows/win32/taskschd/security-contexts-for-running-tasks). If a low-privilege user has that permission, inspect the exact action, especially PowerShell scripts that modify Active Directory ACLs or reset account-protection settings. Check the task's `AllowDemandStart` setting and verify the script's inputs and effects; permission to start a fixed task alone does not imply arbitrary code execution.
+
 ## Folders
 
 All the binaries located in the **Startup folders are going to be executed on startup**. The common startup folders are the ones listed a continuation, but the startup folder is indicated in the registry. [Read this to learn where.](privilege-escalation-with-autorun-binaries.md#startup-path)
@@ -40,6 +42,10 @@ dir /b "%appdata%\Microsoft\Windows\Start Menu\Programs\Startup" 2>nul
 Get-ChildItem "C:\Users\All Users\Start Menu\Programs\Startup"
 Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ```
+
+A higher-privileged user's Startup entry may launch a protected script that repeatedly opens files from a directory another user can write. Review the entry's **actual logon identity**, the script's input directory and ACLs, and the exact action before treating that directory as an escalation path. In particular, [`hh.exe` opens compiled HTML Help (`.chm`) files](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/htmlhelp/about-the-html-help-executable-program); a script that passes caller-supplied files to it crosses a content trust boundary even if it checks the filename or first bytes. [HTML Help policies can restrict executable shortcuts](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/htmlhelp/system-policies-for-shortcut-and-winhelp-commands), so confirm the installed policy and reachable content behavior. A `.chm` extension or magic bytes alone do not prove higher-privilege code execution. Inspect the autorun, process command line, and path permissions without opening the untrusted file during enumeration.
+
+The same content boundary exists when a higher-privileged person **manually opens** a `.chm` from a documentation folder that another user can replace. Confirm the exact file and parent-directory write rights, the actual viewer identity and opening event, and the effective HTML Help policy. A writable folder or a request to review documentation does not establish that the higher identity opened attacker-controlled content.
 
 > **FYI**: Archive extraction *path traversal* vulnerabilities (such as the one abused in WinRAR prior to 7.13 – CVE-2025-8088) can be leveraged to **deposit payloads directly inside these Startup folders during decompression**, resulting in code execution on the next user logon.  For a deep-dive into this technique see:
 
@@ -345,6 +351,19 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command" /v ""
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Classes\htmlfile\shell\open\command' -Name ""
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command' -Name ""
 ```
+
+### Context menu COM handlers
+
+Explorer context menu handlers are shell extensions registered under keys such as `HKLM\SOFTWARE\Classes\Directory\shellex\ContextMenuHandlers` and `HKLM\SOFTWARE\Classes\Folder\shellex\ContextMenuHandlers`. A handler's default value, or sometimes its key name, is a CLSID. Follow that CLSID to `HKLM\SOFTWARE\Classes\CLSID\{CLSID}\InprocServer32`; its default value names the DLL loaded when the handler is invoked.
+
+```powershell
+reg query "HKLM\SOFTWARE\Classes\Directory\shellex\ContextMenuHandlers" /s
+reg query "HKLM\SOFTWARE\Classes\CLSID\{CLSID}\InprocServer32" /ve
+Get-Acl 'Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{CLSID}\InprocServer32' |
+  Select-Object -ExpandProperty Access
+```
+
+Check both 32-bit and 64-bit registry views. `HKCR` merges per-user and machine-wide class registrations, so verify which underlying key a process will resolve. A low-privilege identity that can change a machine-wide `InprocServer32` value may redirect a more privileged process to another DLL, but the escalation requires that process to invoke the handler. A writable DLL path can create a similar risk even when the registry value itself is protected.
 
 ### Image File Execution Options
 

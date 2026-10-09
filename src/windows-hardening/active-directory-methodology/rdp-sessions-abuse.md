@@ -34,6 +34,12 @@ beacon> inject 4960 x64 tcp-local
 
 Check **other ways to steal sessions with other tools** [**in this page.**](../../network-services-pentesting/pentesting-rdp.md#session-stealing)
 
+## Cross-Session Authentication Relay
+
+An **active console or RDP session** belonging to another domain user is also a lead when you have a lower-privileged shell on the same host. DCOM cross-session activation can cause a suitable COM server in that interactive session to authenticate, and tooling such as RemotePotato0 or KrbRelay can capture or relay that authentication. The logged-on user need not be a domain administrator: a narrowly scoped directory right, such as permission to read a gMSA managed password, can be enough for a further pivot.<sup>[[6]](#references)[[7]](#references)[[9]](#references)</sup>
+
+Start with the session ID and identity from `query user`, `qwinsta`, or the existing winPEAS session inventory. Treat them as **candidates**, not proof of a relay path. The COM class, its impersonation and authentication levels, session accessibility, firewall/OXID routing, target protocol protections, and the logged-on principal's effective rights all matter. KrbRelay documents cross-session LDAP, HTTP, SMB, and NTLM examples, but these paths are version- and configuration-dependent. LDAP channel binding is another target-side relay barrier. In particular, the RemotePotato0 project notes that its original RPC-to-LDAP exploit scenario was fixed in 2022; do not infer LDAP relay success from a visible session alone.<sup>[[6]](#references)[[7]](#references)[[8]](#references)[[10]](#references)</sup>
+
 ## RDPInception
 
 If a user access via **RDP into a machine** where an **attacker** is **waiting** for him, the attacker will be able to **inject a beacon in the RDP session of the user** and if the **victim mounted his drive** when accessing via RDP, the **attacker could access it**.
@@ -163,5 +169,10 @@ ad-certificates/account-persistence.md
 - [3] [NetExec - Shadow RDP plugin PR #465](https://github.com/Pennyw0rth/NetExec/pull/465)
 - [4] [NetExec - schtask_as module](https://github.com/Pennyw0rth/NetExec/blob/main/nxc/modules/schtask_as.py)
 - [5] [NetExec - Request PFX via scheduled task PR #908](https://github.com/Pennyw0rth/NetExec/pull/908)
+- [6] [RemotePotato0 - cross-session DCOM activation and current limitations](https://github.com/antonioCoco/RemotePotato0)
+- [7] [KrbRelay - cross-session relay examples and CLSID requirements](https://github.com/cube0x0/KrbRelay)
+- [8] [Microsoft - query session command](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/query-session)
+- [9] [Microsoft - ms-DS-GroupMSAMembership attribute](https://learn.microsoft.com/en-us/windows/win32/adschema/a-msds-groupmsamembership)
+- [10] [Microsoft - LDAP channel binding and relay protection](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/ldap-channel-binding)
 
 {{#include ../../banners/hacktricks-training.md}}

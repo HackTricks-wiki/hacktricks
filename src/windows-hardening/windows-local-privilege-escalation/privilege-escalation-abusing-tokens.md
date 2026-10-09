@@ -17,6 +17,8 @@ access-tokens.md
 
 This privilege allows a process to impersonate (but not create) a token when it can obtain a handle to that token. A privileged token can be acquired from a Windows service (DCOM) by inducing it to perform NTLM authentication against an exploit, subsequently enabling execution of a process with SYSTEM privileges.<sup>[[2]](#references)</sup> This primitive can be exploited using tools such as [JuicyPotato](https://github.com/ohpe/juicy-potato), [RogueWinRM](https://github.com/antonioCoco/RogueWinRM) (which requires WinRM to be disabled), [SweetPotato](https://github.com/CCob/SweetPotato), and [PrintSpoofer](https://github.com/itm4n/PrintSpoofer).
 
+A loopback-only web application can be a separate coercion lead if a local user can reach an authenticated endpoint that makes a request to a caller-selected URL under a more privileged identity. Review the endpoint's authorization and URL restrictions, the actual outbound client identity and authentication behavior, and whether that client can reach a listener controlled by the lower-privileged user. An enabled `SeImpersonatePrivilege`, an IIS listener, or a URL-fetch parameter alone does not establish a privileged token or an escalation path. Keep this review passive; do not send coercion requests during enumeration. See Microsoft's [client impersonation](https://learn.microsoft.com/en-us/windows/win32/secauthz/client-impersonation) and [IIS application-pool identity](https://learn.microsoft.com/en-us/iis/manage/configuring-security/application-pool-identities) documentation.
+
 Modern operator notes:
 
 - **JuicyPotato is legacy**: on Windows 10 1809+/Server 2019+, prefer **GodPotato**, **SigmaPotato**, **PrintNotifyPotato**, **RoguePotato**, **SharpEfsPotato/EfsPotato**, or **PrintSpoofer** depending on which RPC/COM surface is still reachable.
@@ -165,6 +167,8 @@ mimikatz # sekurlsa::minidump lsass.dmp
 mimikatz # sekurlsa::logonpasswords
 ```
 
+A previously saved, readable LSASS dump may be available without the current account having permission to capture the live protected process. Treat a dump file or similarly named archive as a lead only: verify access and contents, then assess whether any recovered credential is still valid and grants a higher-privilege context. File names alone do not prove that an archive contains a dump or that credentials are reusable.
+
 #### RCE
 
 If you want to get a `NT SYSTEM` shell you could use:
@@ -180,7 +184,7 @@ import-module psgetsys.ps1; [MyProcess]::CreateProcessFromParent(<system_pid>,<c
 
 ### SeManageVolumePrivilege
 
-This right (Perform volume maintenance tasks) allows opening raw volume device handles (e.g., \\.\C:) for direct disk I/O that bypasses NTFS ACLs. With it you can copy bytes of any file on the volume by reading the underlying blocks, enabling arbitrary file read of sensitive material (e.g., machine private keys in %ProgramData%\Microsoft\Crypto\, registry hives, SAM/NTDS via VSS).<sup>[[5]](#references)</sup> It’s particularly impactful on CA servers where exfiltrating the CA private key enables forging a Golden Certificate to impersonate any principal.<sup>[[6]](#references)</sup>
+This right (Perform volume maintenance tasks) can support privileged volume operations, but it does not by itself guarantee a readable raw-volume handle or arbitrary file access. Device ACLs, token state, Windows version, and the requested operation still matter. A permitted volume-control operation may instead change filesystem ACLs; that is a mutating, potentially volume-wide action. On a CA host, certificate abuse also requires access to usable private-key material, and EFS-protected files still require an authorized decryption or recovery key. See the detailed prerequisites below.<sup>[[5]](#references)</sup>
 
 See detailed techniques and mitigations:
 

@@ -6,6 +6,8 @@ SUID binaries are usually reviewed for direct command execution, but custom SUID
 
 This page focuses on generic technique patterns: missing libraries, writable library directories, `RPATH`/`RUNPATH`, `LD_PRELOAD` through sudo, linker configuration, and SUID hardlink confusion.
 
+For the ELF program headers, dynamic section, and loader behavior behind these checks, see [ELF basic information](../../binary-exploitation/basic-stack-binary-exploitation-methodology/elf-tricks.md).
+
 ## Fast Enumeration
 
 Start by finding unusual SUID files and checking whether they are dynamically linked:<sup>[[1]](#references)[[3]](#references)</sup>
@@ -13,16 +15,16 @@ Start by finding unusual SUID files and checking whether they are dynamically li
 ```bash
 find / -perm -4000 -type f -ls 2>/dev/null
 file /path/to/suid-binary
-ldd /path/to/suid-binary 2>/dev/null
 readelf -d /path/to/suid-binary 2>/dev/null | egrep 'NEEDED|RPATH|RUNPATH'
 ```
+
+Use `readelf` for an unfamiliar executable: [`ldd` may execute an untrusted ELF interpreter](https://man7.org/linux/man-pages/man1/ldd.1.html). `readelf` shows direct dependencies, so confirm the path actually chosen by the loader separately.<sup>[[1]](#references)[[3]](#references)</sup>
 
 Focus on non-standard locations, custom application paths, binaries owned by root but outside package-managed directories, and dependencies loaded from writable directories.<sup>[[1]](#references)</sup>
 
 Useful writeability checks:
 
 ```bash
-ldd /path/to/suid-binary 2>/dev/null
 readelf -d /path/to/suid-binary 2>/dev/null | egrep 'RPATH|RUNPATH'
 find / -writable -type d 2>/dev/null | head -n 50
 ```
@@ -30,6 +32,8 @@ find / -writable -type d 2>/dev/null | head -n 50
 ## Missing Shared Object Injection
 
 Some custom SUID binaries try to load a shared object that does not exist. If the missing path is under a directory controlled by the attacker, the binary may load attacker-supplied code as the effective user.<sup>[[1]](#references)</sup>
+
+The same boundary applies to a **custom binary allowed through sudo** when it calls `dlopen()` on an absolute `.so` path under a caller-writable home or configuration directory. This late library load may be absent from `ldd` and ELF `NEEDED` entries. A bounded `strings` review or a trace of an **unprivileged** invocation can reveal the attempted path; an application password or menu choice may gate the lookup. Confirm the effective sudo rule, the exact path and parent-directory permissions, and that the privileged invocation reaches that lookup before treating it as escalation. Do not invoke the sudo target merely to enumerate it.
 
 Find failed library lookups with `strace`'s syscall filter:<sup>[[2]](#references)</sup>
 
@@ -65,15 +69,22 @@ The exploitable condition is not the missing library alone. The attacker must be
 
 Sometimes all dependencies exist, but one of the directories used to resolve them is writable. This may allow replacing a loaded library or planting a higher-priority library with the same name.<sup>[[1]](#references)</sup>
 
+The same review applies to a custom ELF **allowed through sudo**, even when the ELF has no SUID bit and the permitted RunAs account is not root. Compare its `DT_NEEDED` entries with the library pathname the loader will resolve; then check whether the caller can write that file or replace it through a writable, searchable parent directory. Confirm the exact sudo RunAs rule, symlinks and ACLs, loader policy, and that the target process loads the library as the higher-privileged account. A writable `.so` or a dependency name alone is only a lead; inspect metadata without running the sudo command.<sup>[[1]](#references)[[3]](#references)[[5]](#references)</sup>
+
 Review dependency paths:<sup>[[1]](#references)[[3]](#references)</sup>
 
 ```bash
-ldd /path/to/suid-binary 2>/dev/null
 readelf -d /path/to/suid-binary 2>/dev/null | egrep 'NEEDED|RPATH|RUNPATH'
 namei -om /path/to/library.so
 ```
 
 If the directory is writable, validate with a copy-safe approach in a lab. Replacing system libraries on a live host can leave concurrently starting processes with inconsistent library versions.<sup>[[8]](#references)</sup>
+
+### Writable libraries inside a chroot
+
+A chroot alone does not close inherited file descriptors or confine all filesystem access. If a sandbox leaves a directory descriptor pointing outside its new root, and the jailed process can dereference that descriptor (for example through an accessible `/proc/<pid>/fd/` entry), host paths may remain reachable. This is a filesystem boundary issue; it does not by itself grant root privileges.<sup>[[11]](#references)[[12]](#references)</sup>
+
+Check separately whether the jailed user can write a library directory that a **host root-SUID executable** will use when launched from the jail. The loader resolves dependencies in the process's filesystem view, so an attacker-controlled library there may execute with the SUID program's effective identity. Confirm the exact executable, its SUID bit and mount policy, the descriptor's target and access permissions, the jail's library search path, and that the program can actually reach the host executable. A file capability on the sandbox launcher, a writable jail, or a host SUID binary alone is only a lead; the full chain depends on the sandbox's implementation.<sup>[[1]](#references)[[11]](#references)[[12]](#references)</sup>
 
 ## RPATH and RUNPATH
 
@@ -113,18 +124,18 @@ This means a plain SUID binary is usually not vulnerable just because the user c
 LD_PRELOAD=/tmp/proof.so /path/to/suid-binary
 ```
 
-The common exception is a sudo policy that permits setting or preserving loader variables for the target command. Inspect `sudo -l` for entries such as `env_keep+=LD_PRELOAD` or `env_keep+=LD_LIBRARY_PATH`; if the target is dynamically linked, it may load attacker-controlled code:<sup>[[4]](#references)[[5]](#references)</sup>
+The common exception is a sudo policy that permits a command-line environment assignment for the target, such as a `SETENV` tag or applicable `setenv` option. If the target is dynamically linked and sudo accepts `LD_PRELOAD=/path/to/library`, the target may load caller-controlled code. Check the effective rule and target identity. Merely adding `LD_PRELOAD` to `env_keep` is not sufficient on systems where the dynamic loader strips an inherited `LD_PRELOAD` before the SUID `sudo` process starts; a command-line assignment is evaluated by sudo after its own startup.<sup>[[1]](#references)[[4]](#references)[[5]](#references)</sup>
 
 ```bash
 sudo -l
-# Look for env_keep+=LD_PRELOAD or env_keep+=LD_LIBRARY_PATH
+# Check SETENV/setenv and the target command's allowed arguments
 sudo LD_PRELOAD=/tmp/proof.so /allowed/command
 ```
 
 Do not confuse these cases; the loader and sudo policy rules above distinguish them:<sup>[[1]](#references)[[4]](#references)[[5]](#references)</sup>
 
 - `LD_PRELOAD` against a normal SUID binary: usually blocked by secure execution.
-- `LD_PRELOAD` preserved by sudo: potentially exploitable.
+- `LD_PRELOAD` accepted as a sudo command-line assignment for a privileged, dynamically linked target: potentially exploitable.
 - Missing `.so` in a writable path: exploitable when the SUID binary naturally loads that path.
 - `RPATH`/`RUNPATH` to a writable directory: exploitable when a needed library can be controlled.
 - `/etc/ld.so.preload` or linker config write access: system-wide and high impact.
@@ -184,5 +195,7 @@ The abuse is not that a hardlink changes permissions. The abuse is path confusio
 - [8] [Dynamic Linker Hardening (The GNU C Library)](https://www.sourceware.org/glibc/manual/latest/html_node/Dynamic-Linker-Hardening.html)
 - [9] [Hard Links (GNU Findutils)](https://www.gnu.org/software/findutils/manual/html_node/find_html/Hard-Links.html)
 - [10] [objdump (GNU Binary Utilities)](https://www.sourceware.org/binutils/docs/binutils/objdump.html)
+- [11] [chroot(2) — Linux manual page](https://man7.org/linux/man-pages/man2/chroot.2.html)
+- [12] [proc_pid_fd(5) — Linux manual page](https://man7.org/linux/man-pages/man5/proc_pid_fd.5.html)
 
 {{#include ../../banners/hacktricks-training.md}}

