@@ -48,6 +48,7 @@
     actualId: "bsa-zone_1770367111944-8_123456",
   }
   var bsaScriptPromise
+  var legacySponsorPromise
 
   function getBsaScriptSrc() {
     return BSA_SCRIPT_BASE + "?" + (new Date() - (new Date() % 600000))
@@ -124,6 +125,12 @@
       return ""
     }
 
+    // Keep the database and old PNG URLs unchanged for rollback and older clients.
+    var optimized = /^\/images\/(lee|azrte|grte|lhe|arte)\.png$/i.exec(value)
+    if (optimized) {
+      value = "/images/" + optimized[1].toLowerCase() + "-sponsor-v1.webp"
+    }
+
     if (/^https:\/\//i.test(value)) {
       return value
     }
@@ -184,17 +191,29 @@
     })
   }
 
-  async function fetchLegacySponsor() {
-    var currentUrl = encodeURIComponent(window.location.href)
-    var url = "https://hacktricks.wiki/sponsor?current_url=" + currentUrl
-    var response = await fetch(url, { method: "GET" })
-
-    if (!response.ok) {
-      throw new Error("Response status: " + response.status)
+  function fetchLegacySponsor() {
+    if (legacySponsorPromise) {
+      return legacySponsorPromise
     }
 
-    var json = await response.json()
-    return json.sponsor
+    var currentUrl = encodeURIComponent(window.location.href)
+    var url = "https://cloud.hacktricks.wiki/sponsor?current_url=" + currentUrl
+    legacySponsorPromise = fetch(url, {
+      method: "GET",
+      headers: { "X-HackTricks-Sponsor-Request": "ht-sponsor-v1" },
+    })
+      .then(function(response) {
+        if (!response.ok) {
+          throw new Error("Response status: " + response.status)
+        }
+
+        return response.json()
+      })
+      .then(function(json) {
+        return json.sponsor
+      })
+
+    return legacySponsorPromise
   }
 
   function renderLegacySideSponsor(sponsor) {
@@ -291,5 +310,17 @@
     }
   }
 
-  initSponsor()
+  function scheduleSponsorLoad() {
+    var afterPageLoad = function() {
+      window.setTimeout(initSponsor, 1000)
+    }
+
+    if (document.readyState === "complete") {
+      afterPageLoad()
+    } else {
+      window.addEventListener("load", afterPageLoad, { once: true })
+    }
+  }
+
+  scheduleSponsorLoad()
 })()
