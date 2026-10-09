@@ -16,6 +16,19 @@ find /path/to/tree -type f -links +1 -ls 2>/dev/null
 
 A symlink redirects pathname resolution; a hardlink is another name for the same inode on the same filesystem. If a privileged task reads or writes a predictable path inside a user-writable directory, a user may be able to redirect that path to a sensitive target. Check ownership and permissions on every parent directory, not just the final file. `fs.protected_symlinks` and `fs.protected_hardlinks` reduce common cross-user attacks but do not make arbitrary writable paths safe.
 
+For a sudo-allowed ACL wrapper, inspect how it validates a caller-selected file before calling `setfacl`. A lexical prefix check and rejection of `..` do not prevent a symlink inside the allowed directory from resolving outside it; `test -f` follows the link too. Confirm that the wrapper reaches the ACL operation with sufficient privilege, the caller controls the link, and the resulting ACL grants the access needed on the target **and its parent directories**. Some consumers reject files with writable ACLs or loose modes, so an ACL change alone does not establish a working escalation path.
+
+## Review privileged writes into user-mounted FUSE filesystems
+
+An active standalone `user_allow_other` line in `/etc/fuse.conf` permits a non-root user to request `allow_other` or `allow_root` on a FUSE mount. Those mount options can let a root process reach a filesystem implemented by the mounting user. If a sudo-allowed helper writes a secret-bearing log or other output relative to a caller-controlled working directory, review whether that directory can be a user-mounted FUSE filesystem. The FUSE implementation can observe writes even when the resulting file appears root-owned or mode `0600` on an ordinary filesystem.
+
+```bash
+grep -n '^[[:space:]]*user_allow_other[[:space:]]*$' /etc/fuse.conf 2>/dev/null
+sudo -l
+```
+
+This is a **candidate**, not proof of disclosure. Confirm the actual sudo/run-as identity and arguments, the helper's output path and sensitive content, access to `/dev/fuse`, successful mounting with `allow_other` or `allow_root`, and whether the privileged process can enter the mount. Do not run the privileged helper or mount a filesystem during routine enumeration. See the [libfuse policy description](https://github.com/libfuse/libfuse/blob/master/util/fuse.conf) and [libfuse access FAQ](https://github.com/libfuse/libfuse/wiki/FAQ#why-dont-other-users-have-access-to-the-mounted-filesystem).
+
 ## Look for path races
 
 The dangerous pattern is a privileged program checking one pathname and later opening the same pathname without keeping a safe reference to the checked object. An attacker who controls a parent directory can replace a file or symlink between the two operations. The same issue appears in temporary files, timer-driven scripts, archive extraction, and backup workflows. Confirm the actual read/write operation and the target's permissions before claiming impact.

@@ -27,6 +27,17 @@ lsof +L1 2>/dev/null
 
 Deleted executables and deleted-but-open files remain referenced until their last descriptor closes. They can preserve evidence or accessible secrets. Process environments and memory may contain credentials, but reading another process is constrained by ownership, `/proc` mount options, Yama ptrace policy, and other security controls. See [file descriptors](../main-system-information/filesystem-links-and-file-descriptors.md) and [post-exploitation credential hunting](../post-exploitation/README.md) for related techniques.
 
+## Privileged office automation sockets
+
+LibreOffice and OpenOffice can expose their UNO API through an `--accept=socket,host=<host>,port=<port>;urp;` argument. A root-owned office process with a reachable endpoint may let a lower-privileged local user invoke API services in that process's security context. The `SystemShellExecute` service includes an operation for launching a system command. Binding to loopback limits remote reachability but still leaves the socket reachable to local users unless another control prevents access.<sup>[[7]](#references)[[8]](#references)</sup>
+
+```bash
+ps -eo user,args | grep -E '[s]office|[l]ibreoffice|[o]penoffice'
+ss -ltn 2>/dev/null
+```
+
+Correlate the process owner, exact `--accept` argument, and current listening address and port. A configured acceptor that failed to bind is only a lead; do not connect to or invoke the API during passive enumeration. Avoid starting a privileged office instance merely to test this condition.
+
 ## System V shared memory consumed by privileged processes
 
 A root-owned helper can create a System V shared-memory segment that another user can write. If the helper later trusts data from that segment in a shell command or another sensitive operation, the segment crosses a privilege boundary even when the executable and its files are protected. `shmget()` takes access permissions from the low nine bits of its flags; mode `0666` permits other users to write, whereas an `IPC_CREAT` flag does not narrow those permissions. Inspect active segments passively with `ipcs -m` and correlate their owner, mode, and lifetime with the privileged process and its input handling. A world-writable segment alone does not establish command execution.<sup>[[1]](#references)[[2]](#references)</sup>
@@ -79,5 +90,7 @@ ls -l /path/from/-fbdir/Xvfb_screen*
 4. [Consul agent configuration: script checks](https://developer.hashicorp.com/consul/docs/reference/agent/configuration-file/general)
 5. [Consul agent service registration API](https://developer.hashicorp.com/consul/api-docs/agent/service)
 6. [Consul ACL configuration](https://developer.hashicorp.com/consul/docs/reference/agent/configuration-file/acl)
+7. [LibreOffice help: opening a socket for external API clients](https://help.libreoffice.org/latest/en-US/text/sbasic/shared/03/sf_intro.html)
+8. [LibreOffice SDK: `XSystemShellExecute`](https://api.libreoffice.org/docs/idl/ref/interfacecom_1_1sun_1_1star_1_1system_1_1XSystemShellExecute.html)
 
 {{#include ../../banners/hacktricks-training.md}}

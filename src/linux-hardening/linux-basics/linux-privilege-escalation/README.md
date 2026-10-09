@@ -313,6 +313,10 @@ This is especially valuable when a process still has a deleted secret, script, d
 
 You can use tools like [**pspy**](https://github.com/DominicBreuker/pspy) to monitor processes. This can be very useful to identify vulnerable processes being executed frequently or when a set of requirements are met.
 
+#### Linux ProcMon under sudo
+
+[ProcMon for Linux](https://github.com/microsoft/ProcMon-for-Linux) can trace selected processes and system calls and save a SQLite trace. If `sudo -l` allows an unrestricted root-capable `procmon` command, consider whether it could observe another user's process input or output. The permission is only a review lead: tracer support, effective policy, and the activity of a suitable process all matter. Trace files can contain secrets, so inspect authorized exports carefully and avoid collecting unrelated processes.
+
 ### Process memory
 
 Some services of a server save **credentials in clear text inside the memory**.\
@@ -1242,6 +1246,14 @@ In this example the user `demo` can run `vim` as `root`, it is now trivial to ge
 ```
 sudo vim -c '!sh'
 ```
+
+### Unquoted Bash comparison in a sudo script
+
+In Bash, the right side of `[[ "$protected" == $candidate ]]` is a pattern. If a root-capable sudo script fills `candidate` from a caller-controlled file, a value such as `prefix*` can match the start of a protected string. Different success and error paths may then expose a prefix oracle. Quote the right side (`[[ "$protected" == "$candidate" ]]`) when literal equality is intended. Review the actual sudo arguments, input provenance, and observable branch behavior before treating an unquoted comparison as exploitable. The [GNU Bash manual](https://www.gnu.org/software/bash/manual/html_node/Conditional-Constructs.html) defines this pattern behavior.
+
+### PrusaSlicer project files under sudo
+
+An unrestricted root-capable sudo grant for `prusaslicer` or `prusa-slicer` deserves review if the caller can choose the `.3mf` project being sliced. A project can carry a post-processing script that runs when G-code is exported; crafted projects could execute commands in PrusaSlicer through 2.6.1 ([CVE-2023-47268](https://security-tracker.debian.org/tracker/CVE-2023-47268)). Confirm the effective sudo rule, binary version and vendor patches, project source, and whether the relevant export path runs before concluding that the privilege boundary is reachable. A fixed project argument or effective `NOEXEC` policy can change the outcome. Merely finding the slicer installed does not establish a privilege escalation path.
 
 ### SETENV
 

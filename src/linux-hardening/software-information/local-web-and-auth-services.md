@@ -15,6 +15,10 @@ find /etc/apache2 /etc/httpd /etc/nginx -maxdepth 3 -type f 2>/dev/null | head -
 
 Inspect virtual-host names, document roots, proxy routes, upload directories, PHP execution settings, and config files containing credentials. A loopback listener may be reachable through a proxy or SSH tunnel. To test a named virtual host against a local listener, send the intended `Host` header or use `curl --resolve` with the correct address and port. Virtual-host enumeration can also reveal names absent from the default response. Check whether Apache permits `.htaccess` overrides and whether upload paths can execute PHP before treating a writable upload directory as code execution. A deployed JavaScript source map may expose source paths or client-side secrets; treat recovered values as clues and verify their actual privileges. For web-specific checks, see [Apache](../../network-services-pentesting/pentesting-web/apache.md) and [Nginx](../../network-services-pentesting/pentesting-web/nginx.md).
 
+File-backed CMS stores can hold administrator password verifiers outside conventional `.php` configuration files. Examples include a site's `data/database.js` or `data/settings/pass.php`. Check file ownership and readability before manual review, and keep hashes out of automated shared output. A recoverable application password is a separate privilege boundary from a Unix account: verify any claimed reuse against the specific account and permitted authentication method.
+
+Dolibarr stores database connection settings, including `dolibarr_main_db_pass`, in `htdocs/conf/conf.php` ([configuration reference](https://wiki.dolibarr.org/index.php/Configuration_file)). A readable file is a credential lead; only a separate, verified account-password reuse or another database permission would turn it into a local privilege escalation. Inspect permissions first and avoid printing the value in automated output.
+
 ```bash
 curl -i -H 'Host: admin.example.local' http://127.0.0.1:8080/
 ffuf -w wordlist.txt -u http://127.0.0.1:8080/ -H 'Host: FUZZ.example.local' -fs 1234 # replace 1234 with the default response size
@@ -31,6 +35,8 @@ If an application submits a login form with `GET`, the username and password can
 
 Inspect only readable access logs and keep credential values out of shared command output. Long request lines may also contain a referrer and user agent, so a short-line filter can hide the very request of interest. The common Apache, httpd, and Nginx access-log locations are `/var/log/apache2/access.log`, `/var/log/httpd/access_log`, and `/var/log/nginx/access.log`. Rotated logs may contain older credentials. [Log-file access through LFI](../../pentesting-web/file-inclusion/README.md#read-access-logs-to-harvest-get-based-auth-tokens-token-replay) is a related route to the same data.
 
+Suricata's EVE JSON logs can also record FTP `USER` and `PASS` commands with their `command_data` when FTP event logging is enabled. Check readability of `/var/log/suricata/eve*.json*`, including rotated or compressed files, before reviewing a small relevant slice locally. A readable EVE file is only a lead: confirm that FTP events were logged, that the data includes a usable credential, and that it crosses a privilege boundary. Avoid printing `command_data` in shared enumeration output. Suricata documents the [FTP event fields](https://docs.suricata.io/en/suricata-8.0.2/output/eve/eve-json-format.html) and [EVE rotation and filename variants](https://docs.suricata.io/en/suricata-7.0.15/output/eve/eve-json-output.html).
+
 ## Generated Apache configuration and piped logs
 
 [remco](https://github.com/HeavyHorst/remco) can watch a key/value backend, render a template into an Apache configuration file, and run a reload command. Inspect the running remco process identity, its configured template source and destination, watched key prefixes, and whether a backend value is inserted directly into an Apache directive such as `ServerName`. A local backend listener alone does not establish that the current user can write a watched key; verify backend authentication and permissions before claiming an escalation.
@@ -38,6 +44,8 @@ Inspect only readable access logs and keep credential values out of shared comma
 An unescaped newline in a writable backend value can turn one intended directive value into additional Apache directives. [Apache piped logs](https://httpd.apache.org/docs/2.4/logs.html#piped) are especially sensitive: `CustomLog` or `ErrorLog` with a `|` command starts a helper under the parent httpd identity, often root; `|$` asks Apache to use a shell. Review generated configuration and its reload path without changing backend data or restarting the service during enumeration. Keep the full piped command private because its arguments may contain secrets.
 
 ## Authentication and service identities
+
+Monit's control file is usually `~/.monitrc` or `/etc/monitrc`, but `monit -c` can select another path. A readable file may contain `set httpd` and `allow user:password` entries for its web interface, often on local port 2812. Check the file's owner and permissions before reviewing it, and keep password values out of shared enumeration output. Web credentials grant only the configured Monit role; read-only users cannot invoke control actions. A separate Unix-account escalation requires confirmed password reuse or a privileged Monit action the authenticated role can actually trigger. See the [Monit control-file and authentication documentation](https://www.mmonit.com/monit/documentation/monit.html).
 
 ```bash
 find /etc/pam.d /etc/sssd /etc/postfix -maxdepth 2 -type f -ls 2>/dev/null

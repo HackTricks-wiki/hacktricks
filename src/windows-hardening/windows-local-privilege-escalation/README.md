@@ -595,6 +595,10 @@ todos %username%" && echo.
 )
 ```
 
+### Snort dynamic preprocessor directories
+
+Snort 2 can load shared libraries from a `dynamicpreprocessor directory` declared in the configuration selected with `snort.exe -c <config>`. For a scheduled task or service that runs Snort under a different account, inspect that exact configuration and the declared module directory ACL. If your token can create files there, the path is a review candidate for code execution when that task or service next loads modules. Verify the run-as account's effective privileges, the active configuration, module compatibility, and any deny or share restrictions; a writable directory alone does not establish escalation. [Snort's dynamic-preprocessor documentation](https://www.snort.org/documents/dpx-readme) describes runtime module loading.
+
 ### Memory Password mining
 
 You can create a memory dump of a running process using **procdump** from sysinternals. Services like FTP have the **credentials in clear text in memory**, try to dump the memory and read the credentials.
@@ -617,6 +621,12 @@ Service Triggers let Windows start a service when certain conditions occur (name
 {{#ref}}
 service-triggers.md
 {{#endref}}
+
+### Visual Studio diagnostic collector service
+
+Visual Studio installations with C/C++ tooling may include `VSStandardCollectorService150`, a diagnostic service configured to run as `LocalSystem`. [CVE-2024-20656](https://www.mdsec.co.uk/2024/01/cve-2024-20656-local-privilege-escalation-in-vsstandardcollectorservice150-service/) used a junction and object-manager-link race to redirect a service DACL reset. The demonstrated escalation also required a usable Visual Studio Setup WMI Provider MSI repair path and its `C:\ProgramData\Microsoft\VisualStudio\SetupWMI\MofCompiler.exe` target. The component was fixed in January 2024.
+
+For passive triage, inspect that one service's account and binary path, check whether the Setup WMI compiler path exists, and verify the installed component's patch status. A service entry, Visual Studio product version, or compiler file alone does not establish that the host is vulnerable. Inspection need not start the service or run a repair.
 
 Get a list of services:
 
@@ -853,6 +863,12 @@ msfvenom -p windows/exec CMD="net localgroup administrators username /add" -f ex
 ### Recovery Actions
 
 Windows allows users to specify actions to be taken if a service fails. This feature can be configured to point to a binary. If this binary is replaceable, privilege escalation might be possible. More details can be found in the [official documentation](<https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc753662(v=ws.11)?redirectedfrom=MSDN>).
+
+## Scheduled Windows Driver Kit helper inputs
+
+The optional Windows Driver Kit includes `StandaloneRunner.exe`, which can consume `command.txt`, `reboot.rsf`, and a project `working\rsf.rsf` file from its run directory. A scheduled task or service that starts this helper with a privileged account can turn low-privilege write access to those inputs into command execution in that account's context, even when the helper executable itself is protected. Confirm the privileged consumer and that **both** sidecar files can be created or modified; finding the helper alone is insufficient.
+
+For a scheduled task, inspect its action's [`WorkingDirectory`](https://learn.microsoft.com/en-us/windows/win32/taskschd/execaction-workingdirectory) and the ACLs of the two sidecar paths. If the task does not specify a working directory, the executable's directory is only a lead to verify, not proof of where the task reads its inputs. The project working-file prerequisite must also be satisfied. Check the actual task principal rather than assuming it runs as SYSTEM.
 
 ## Applications
 
@@ -1451,6 +1467,22 @@ else { Write "Not Installed." }
 ```
 
 ## Files and Registry (Credentials)
+
+### Custom local administrator password rotation
+
+A homegrown password rotator may store an encrypted local administrator password in a local service while keeping its datastore credentials in a readable `.env` file or beside the updater binary. Review the updater's scheduled task, account, configuration ACLs, listener, and datastore permissions together. A loopback-only datastore is still reachable to a local user who has valid credentials, but authentication alone does not prove permission to read the relevant records. If the encryption seed or key material is accessible beside the ciphertext, review the exact key derivation before trusting the encryption. A scheme that deterministically derives an AES key from an exposed seed using Go's [`math/rand`](https://pkg.go.dev/math/rand) is unsuitable for protecting that password; Go documents that package as inappropriate for security-sensitive randomness. Confirm that any recovered password is current and belongs to a local Administrators-group account before treating it as an escalation path. A scheduled task, `.env` path, or encrypted blob alone proves none of those conditions. Keep passwords and key material out of routine enumeration output.
+
+Use [Windows LAPS](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-concepts-overview) for managed local administrator passwords. Its directory or Entra-backed storage and access controls are distinct from a custom local datastore; [Elasticsearch roles](https://www.elastic.co/guide/en/elasticsearch/reference/current/authorization.html/) likewise decide whether an authenticated datastore user can read a specific index.
+
+### Java server plugin archives and credential reuse
+
+Some Java server plugins are distributed as JAR archives in a server's `plugins` directory. A readable custom plugin may contain configuration or bytecode with an embedded service credential. Review the archive only when authorized and keep recovered secrets out of routine enumeration output. A plugin path alone does not prove that a secret exists, and a recovered service password leads to higher privileges only if it is also valid for a more privileged account. Check the relevant file ACLs and replace reused credentials with distinct secrets. See [PaperMC's plugin installation guide](https://docs.papermc.io/paper/adding-plugins/) for the directory layout and [Oracle's JAR documentation](https://docs.oracle.com/javase/8/docs/technotes/guides/jar/index.html) for archive contents.
+
+### Openfire embedded database credentials
+
+An Openfire installation using its embedded database may keep `openfire.script` under `Openfire\embedded-db`. If the current account can read it, review the `OFUSER` records and the `passwordKey` property together. Openfire's [user-provider documentation](https://download.igniterealtime.org/openfire/docs/latest/documentation/javadoc/org/jivesoftware/openfire/user/DefaultUserProvider.html) says passwords can be stored in plain text or encrypted with a key held in that property. A recovered password only matters for escalation if it is still valid for a more privileged identity; the file name alone proves neither read access nor credential reuse. The path is an inventory cue, so keep database content and credentials out of routine enumeration output.
+
+The separate `Openfire\conf\openfire.xml` file can reveal the admin console's configured ports and bind interface even when an external database is used. Openfire commonly binds its admin console to loopback; that still leaves a local account able to reach the address if the listener is running. Check the actual listener, authorized admin role, plugin-upload policy, and Openfire service identity together. An admin who can install a plugin may cause plugin code to run in the service's context, which can be highly privileged when the service runs as LocalSystem. A matching account password or a readable configuration path alone does not prove admin-console access or code execution. See the vendor's [installation and plugin-management guide](https://download.igniterealtime.org/openfire/docs/latest/documentation/install-guide.html) and [plugin-upload API property](https://download.igniterealtime.org/openfire/docs/latest/documentation/javadoc/org/jivesoftware/admin/servlet/PluginServlet.html).
 
 ### Forensic management server configuration
 
