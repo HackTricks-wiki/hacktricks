@@ -51,8 +51,7 @@ Within each profile folder, you can find several important files:<sup>[[1]](#ref
 
 Additionally, checking the browser’s anti-phishing settings can be done by searching for `browser.safebrowsing` entries in `prefs.js`, indicating whether safe browsing features are enabled or disabled.<sup>[[2]](#references)</sup>
 
-To try to decrypt the master password, you can use [https://github.com/unode/firefox_decrypt](https://github.com/unode/firefox_decrypt)\
-With the following script and call you can specify a password file to brute force:
+To decrypt saved logins from an accessible profile, the [Firefox Primary Password](https://support.mozilla.org/en-US/kb/use-primary-password-protect-stored-logins), if configured, must be supplied or recovered separately; the profile does not reveal that password. Confirm that any recovered login authenticates to its web account. Unix root access requires separate proof that the credential is also accepted by Unix authentication for root. You can review saved logins with [firefox_decrypt](https://github.com/unode/firefox_decrypt). The following example tests candidate Primary Passwords from a password file:
 
 ```bash:brute.sh
 #!/bin/bash
@@ -96,6 +95,8 @@ Within these directories, most user data can be found in the **Default/** or **C
 - **Thumbnails**: Stores website thumbnails.
 - **Preferences**: A file rich in information, including settings for plugins, extensions, pop-ups, notifications, and more.
 - **Browser’s built-in anti-phishing**: To check if anti-phishing and malware protection are enabled, run `grep 'safebrowsing' ~/Library/Application Support/Google/Chrome/Default/Preferences`. Look for `{"enabled: true,"}` in the output.<sup>[[2]](#references)</sup>
+
+A Chromium profile's `Local Extension Settings/<extension-id>/` directory may hold extension-local state, including password-manager key material. For example, [Passbolt says its encrypted private key is held in browser extension local storage](https://www.passbolt.com/docs/user/faq/why-a-browser-extension/), and its [Chrome extension ID](https://chromewebstore.google.com/detail/passbolt-open-source-pass/didegimhafipceonhjepacocaffmoppf) identifies the relevant directory. Directory presence alone neither proves a key is present nor unlocks a vault: the user must have access to the profile data, a usable private key and passphrase, and an authorized recovery/authentication path to the server. A vault item containing an operating-system account password requires separate account-reuse verification. Routine enumeration should report only the storage path, without dumping its LevelDB files or secret values.
 
 ## **SQLite DB Data Recovery**
 

