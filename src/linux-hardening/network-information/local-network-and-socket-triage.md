@@ -24,6 +24,8 @@ Important patterns:
 - `10.0.0.0/8`, `172.16.0.0/12`, or `192.168.0.0/16` on `veth*`, `docker*`, `br-*`, `cni*`: likely container or local lab networks.<sup>[[23]](#references)[[24]](#references)</sup>
 - Unix sockets under `/run`, `/var/run`, `/tmp`, or application directories: local IPC surfaces.<sup>[[5]](#references)</sup>
 
+A loopback listener launched through [`socat` with `EXEC`](https://man7.org/linux/man-pages/man1/socat.1.html) can pass local client input to a separate program. Correlate the listener's command, executable path, effective child identity, local reachability, and authentication before treating a root-owned custom service as a privilege-escalation lead. A memory-safety flaw or unsafe input-to-command path requires evidence from the specific binary and build; the port number, `socat` process, or root owner alone does not establish it. Passive enumeration should stop at process, socket, and file metadata rather than sending input to the service.
+
 Map local ports with lightweight probes.<sup>[[6]](#references)[[7]](#references)</sup>
 
 ```bash

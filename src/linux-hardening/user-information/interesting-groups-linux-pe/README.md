@@ -36,6 +36,10 @@ find / -perm -4000 2>/dev/null
 
 If **pkexec is a SUID binary**, it can execute a program as another user only when polkit authorizes the requested action; the SUID bit alone does not guarantee root. Check the installed policy and the target session's authorization instead of assuming membership in **sudo** or **admin** is sufficient.<sup>[[4]](#references)[[5]](#references)</sup>
 
+For the separate [CVE-2021-4034](https://www.qualys.com/2022/01/25/cve-2021-4034/pwnkit.txt) path, first verify that `pkexec` is an executable **root-owned SUID** file. An installed binary without that bit is not the local SUID escalation described by the advisory. An upstream version string is only a lead: distributions can [backport the fix into older package versions](https://ubuntu.com/security/CVE-2021-4034), so check the installed vendor package and mitigations before calling it vulnerable.
+
+[CVE-2021-3560](https://securitylab.github.com/advisories/GHSL-2021-074-polkit/) is a different polkit path: a D-Bus authorization race, not a `pkexec` SUID flaw. Review the installed vendor polkit package and whether a reachable privileged D-Bus action can make a useful change; an account-creation route also needs a suitable service such as AccountsService, and any new group's sudo access depends on the effective sudo policy. A reported polkit version or installed service alone is only a candidate, especially where vendors [backport fixes](https://access.redhat.com/security/cve/cve-2021-3560). Passive enumeration should not trigger the race.
+
 On distributions that still use the older Local Authority backend, inspect its group rules with:
 
 ```bash

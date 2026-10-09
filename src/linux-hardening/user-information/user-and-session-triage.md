@@ -16,6 +16,8 @@ stat -c '%A %U:%G %n' /etc/passwd /etc/shadow /etc/group
 
 `getent` includes directory-backed accounts that a plain read of `/etc/passwd` can miss. Review UID 0 accounts, login shells, home directories, supplementary groups, and accounts whose configuration unexpectedly permits interactive login. The [interesting groups](interesting-groups-linux-pe/README.md) page covers delegated access such as `sudo`, `docker`, `disk`, and `shadow`. Check actual filesystem ACLs and local policy before treating a group name as a privilege.
 
+Also compare numeric UIDs across local account names. Two names in [`/etc/passwd`](https://man7.org/linux/man-pages/man5/passwd.5.html) can refer to the same Unix file identity, while their login authentication records may differ. A newly added alias with a shared nonzero UID can therefore lead to another user's files or processes after successful authentication; it does not grant root unless that UID or a separate privilege path does. Shared UIDs can be intentional. Verify the account source (`/etc/passwd` versus NSS), creation history, shell and home, actual authentication policy, and whether the accounts are authorized to share the identity. A local-only duplicate check cannot rule out a directory-backed alias.
+
 ## Find active and recent sessions
 
 ```bash

@@ -179,6 +179,8 @@ Practical notes follow the module types and `type=` filter documented for `pam_e
 - `auth optional pam_exec.so quiet expose_authtok ...` is the usual choice for **credential capture** because it runs before the session opens.
 - `type=session` or `type=auth` can be used to constrain execution to a specific PAM phase and avoid noisy double execution.
 
+For privilege review, an absolute `pam_exec.so` helper path that the current user can write is a candidate even when the file is marked append-only (`a`): [the attribute permits appending](https://man7.org/linux/man-pages/man1/chattr.1.html), which may be enough to alter a shell script's later behavior. First confirm that the PAM service and event actually reach that line, the helper and its parent path are trusted, and the command runs under a more privileged identity; [`seteuid` changes which PAM UID is used](https://man7.org/linux/man-pages/man8/pam_exec.8.html). A writable file or `lsattr` result alone does not prove privileged execution.
+
 ### Surviving distro tooling: `authselect`
 
 On RHEL and Fedora-family systems that use `authselect`, direct edits to generated files such as `/etc/pam.d/system-auth` or `/etc/pam.d/password-auth` may be **overwritten by `authselect`**. For persistence, operators often patch the active custom profile under `/etc/authselect/custom/<profile>/` and then re-select it.<sup>[[5]](#references)[[19]](#references)</sup>

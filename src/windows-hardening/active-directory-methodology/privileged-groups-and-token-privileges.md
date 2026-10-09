@@ -362,6 +362,8 @@ sc.exe \\dc01 qc <service>
 .\PsService.exe security <service>
 ```
 
+Failure to list services does not rule out access to a **known service**. The Service Control Manager checks `SC_MANAGER_ENUMERATE_SERVICE` for listing separately from `SC_MANAGER_CONNECT`; opening a named service checks its own rights, including `SERVICE_CHANGE_CONFIG` and `SERVICE_START`. Review the effective token and that service's ACL even when a general `sc.exe query` fails. Configuration rights alone are only a candidate: the service identity, start/stop rights, and a usable trigger still determine whether a higher-privilege transition is possible. See [Microsoft's service access-rights reference](https://learn.microsoft.com/en-us/windows/win32/services/service-security-and-access-rights).
+
 If a service ACL gives this group change/start rights, point the service at an arbitrary command, start it as `LocalSystem`, and then restore the original `binPath`. If service control is locked down, fall back to the `Backup Operators` techniques above to copy `NTDS.dit`.
 
 ## References

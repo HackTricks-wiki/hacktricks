@@ -169,6 +169,8 @@ Practical offensive implications:
 - A **misconfigured JEA** role is especially valuable when it exposes dangerous commands such as `Start-Process`, broad wildcards, writable providers, or custom proxy functions that let you escape the intended restrictions.
 - Endpoints backed by **RunAs virtual accounts** or **gMSAs** change the effective security context of the commands you run. In particular, a gMSA-backed endpoint can provide **network identity on the second hop** even when a normal WinRM session would hit the classic delegation problem.
 
+For a custom restricted endpoint, inspect its effective command and script permissions separately: a short `Get-Command` list alone does not prove that an existing `.ps1` cannot run. [JEA role capabilities](https://learn.microsoft.com/en-us/powershell/scripting/security/remoting/jea/role-capabilities) explicitly control which script paths can be invoked; other custom endpoints may apply different session rules. If a permitted script uses a stored `SecureString` to create a credential for another host, a blob made without an explicit key uses [Windows DPAPI](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.security/convertfrom-securestring) and generally needs the protecting user and machine context to decrypt. Review the script's ACL, permitted invocation, run-as identity, and downstream credential rights before treating writable source or a copied blob as a cross-host escalation path. Do not print the protected value during passive enumeration.
+
 ## Windows-native WinRM lateral movement
 
 ### `winrs.exe`
