@@ -954,17 +954,13 @@ certipy auth -pfx 'administrator.pfx' -dc-ip '10.0.0.100'
 
 ### Explanation
 
-**ESC16 (Elevation of Privilege via Missing szOID_NTDS_CA_SECURITY_EXT Extension)** refers to the scenario where, if the configuration of AD CS does not enforce the inclusion of the **szOID_NTDS_CA_SECURITY_EXT** extension in all certificates, an attacker can exploit this by:
-
-1. Requesting a certificate **without SID binding**.
-    
-2. Using this certificate **for authentication as any account**, such as impersonating a high-privilege account (e.g., a Domain Administrator).
+**ESC16 (Elevation of Privilege via Missing szOID_NTDS_CA_SECURITY_EXT Extension)** describes CA-wide suppression of the **szOID_NTDS_CA_SECURITY_EXT** SID extension. This is a configuration indicator, not proof that a certificate can authenticate as another account. Impersonation also requires control of the relevant account attributes or mapping, an enrollable client-authentication template, and a certificate mapping path accepted by the actual domain controller or service. A patched KDC in Full Enforcement rejects certificates without a SID extension unless they have another strong mapping; the UPN-only Kerberos procedure below applies to older or compatibility-mode KDCs that still accept weak mapping. See [Microsoft's certificate mapping and enforcement guidance](https://support.microsoft.com/en-us/servicing/os/windows-server/2022/05/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers).
 
 You can also refer to this article to learn more about the detailed principle:https://medium.com/@muneebnawaz3849/ad-cs-esc16-misconfiguration-and-exploitation-9264e022a8c6<sup>[[16]](#references)</sup>
 
 ### Abuse
 
-The following is referenced to [this link](https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation#esc16-security-extension-disabled-on-ca-globally),Click to see more detailed usage methods.<sup>[[14]](#references)</sup>
+The following historical UPN-only Kerberos example is based on [Certipy's ESC16 documentation](https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation#esc16-security-extension-disabled-on-ca-globally). It requires a KDC that still accepts the resulting weak mapping; `StrongCertificateBindingEnforcement=1` is no longer a supported override after the September 9, 2025 Windows security update.<sup>[[14]](#references)</sup>
 
 To identify whether the Active Directory Certificate Services (AD CS) environment is vulnerable to **ESC16**
 
@@ -1000,7 +996,7 @@ certipy shadow \
     auto
 ```
 
-**Step 4: Request a certificate as the "victim" user from _any suitable client authentication template_ (e.g., "User") on the ESC16-vulnerable CA.** Because the CA is vulnerable to ESC16, it will automatically omit the SID security extension from the issued certificate, regardless of the template's specific settings for this extension. Set the Kerberos credential cache environment variable (shell command):
+**Step 4: Request a certificate as the "victim" user from a client-authentication template the account can enroll in (e.g., "User") on the ESC16-configured CA.** The CA omits the SID security extension from the issued certificate, but this alone does not establish a usable authentication mapping. Set the Kerberos credential cache environment variable (shell command):
 
 ```bash
 export KRB5CCNAME=victim.ccache
@@ -1024,7 +1020,7 @@ certipy account \
     -user 'victim' update
 ```
 
-**Step 6: Authenticate as the target administrator.**
+**Step 6: On an older or compatibility-mode KDC that accepts this weak mapping, authenticate as the target administrator.**
 
 ```bash
 certipy auth \

