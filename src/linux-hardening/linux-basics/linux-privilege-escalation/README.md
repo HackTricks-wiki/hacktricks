@@ -1427,7 +1427,7 @@ This is not a direct vulnerability by itself, but it expands the situations wher
 
 ### Sudo env_keep+=PATH / insecure secure_path → PATH hijack
 
-If `sudo -l` shows `env_keep+=PATH` or a `secure_path` containing attacker-writable entries (e.g., `/home/<user>/bin`), any relative command inside the sudo-allowed target can be shadowed.<sup>[[3]](#references)</sup>
+If `sudo -l` shows `env_keep+=PATH` or a `secure_path` containing attacker-writable entries (e.g., `/home/<user>/bin`), an unqualified external command inside the sudo-allowed target may be shadowed.<sup>[[3]](#references)</sup> An absent effective `secure_path` also merits review **if** the command's sudo environment preserves a caller-controlled `PATH`; absence alone does not prove that it does. Read the permitted script without running it, then verify the exact RunAs and argument rule, the effective command search path, and an earlier writable and traversable directory containing the command name. Authentication, `NOEXEC`, shell builtins, and absolute command paths can change the outcome.
 
 - Requirements: a sudo rule (often `NOPASSWD`) running a script/binary that calls commands without absolute paths (`free`, `df`, `ps`, etc.) and a writable PATH entry that is searched first.
 

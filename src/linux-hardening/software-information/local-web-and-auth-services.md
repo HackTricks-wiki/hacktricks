@@ -39,6 +39,8 @@ Filter virtual-host results against the default response size or another stable 
 
 Reverse proxies can change which client headers an application trusts. Compare direct and proxied requests before assuming that `X-Forwarded-For`, `X-Forwarded-Host`, or similar headers establish a caller's identity. Review proxy and application configuration together.
 
+If PHP copies `$_SERVER['HTTP_X_FORWARDED_FOR']` into a string passed to [`system()`](https://www.php.net/manual/en/function.system.php), review whether the reachable request path permits a caller-supplied header and whether shell metacharacters reach that string unchanged. A command such as `sudo iptables` embedded at the start does **not** make later shell-separated commands run as root; those run as the web worker unless a separate effective sudo rule permits escalation. Confirm the worker identity, the exact `sudo -l` grant and authentication requirement, and the command's argument boundary before claiming a root path. Inspect source and policy without sending an injection probe during routine host enumeration.
+
 ## Login credentials in access logs
 
 If an application submits a login form with `GET`, the username and password can become query parameters in the request URI. Web server access logs often record that URI. An account allowed to read those logs, for example through the `adm` group on some Linux systems, may therefore obtain another user's password. Check the actual log permissions and whether the password is reused for a local account before treating this as a privilege escalation path.

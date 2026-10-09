@@ -1239,6 +1239,8 @@ os.setuid(0)
 os.system("/bin/bash")
 ```
 
+For a **custom** executable with effective `CAP_SETUID`, inspect the reachable code path instead of assuming the capability alone grants a shell. Caller-controlled text passed as the *format string* to [`printf`](https://man7.org/linux/man-pages/man3/printf.3.html) can expose or alter process memory; a useful privilege transition still depends on a vulnerable call, controllable input, and a later action after `setuid(0)`. If that action launches an external helper by name, verify the effective identity at the launch, the actual `PATH`, and whether an earlier searched directory is writable and traversable by the caller. An ineffective file capability, `no_new_privs`, a fixed trusted helper path, or an unreachable branch changes the result. Review the binary or available source offline; do not invoke a suspicious privileged helper during routine enumeration.
+
 ## CAP_SETGID
 
 **This capability allows a process to change its effective group ID, subject to the credential and capability rules enforced by the kernel**.<sup>[[14]](#references)</sup>

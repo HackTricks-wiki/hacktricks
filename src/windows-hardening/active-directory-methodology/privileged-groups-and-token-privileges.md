@@ -20,6 +20,8 @@ Get-NetGroupMember -Identity "Account Operators" -Recurse
 
 Adding new users is permitted, as well as local login to the DC.<sup>[[1]](#references)</sup>
 
+A conditional path from account management to local administrator access is an **ordinary group delegated to read a computer's LAPS password**. Check effective membership-write rights on that exact group, whether it is protected, and whether a new or controlled account can actually join it. Refresh the account's token before testing the target computer's LAPS read permission. For encrypted Windows LAPS, directory read permission and password-decryption authority are separate requirements; group membership or Account Operators membership alone does not establish either. See [Microsoft's Account Operators scope](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups) and [Windows LAPS delegation](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-scenarios-windows-server-active-directory).
+
 ## AdminSDHolder group
 
 The **AdminSDHolder** group's Access Control List (ACL) is crucial as it sets permissions for all "protected groups" within Active Directory, including high-privilege groups. This mechanism ensures the security of these groups by preventing unauthorized modifications.

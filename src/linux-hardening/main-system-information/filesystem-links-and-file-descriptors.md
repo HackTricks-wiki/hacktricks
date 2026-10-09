@@ -41,6 +41,8 @@ Archive **creation** can also disclose files across identities. Info-ZIP `zip -r
 
 GNU `tar` has a different default: it normally stores a symlink as a link, while [`-h` / `--dereference` follows it during archive creation](https://www.gnu.org/software/tar/manual/html_node/dereference.html). For a privileged scheduled backup, inspect the exact `tar` invocation, whether a lower-privileged user can replace an input pathname before `tar` reads it, and whether the resulting archive is accessible to that user. A temporary checksum or other sidecar in a writable staging directory can become such an input when explicitly named in a later `tar -h` command. The race window, job identity, symlink policy, target readability under that identity, and archive ACL all need verification. Do not replace files, run the job, or unpack sensitive archives during passive checks.
 
+Ansible's [`synchronize` module](https://docs.ansible.com/projects/ansible/latest/collections/ansible/posix/synchronize_module.html) wraps rsync; `copy_links: true` copies a symlink's referent instead of the link. For a scheduled backup, check whether a lower-privileged user can create a link inside the exact source tree, whether the synchronization identity can read its target, and whether the resulting copy or archive is readable by that user. The playbook, link placement, run-as identity, and output permissions must all line up; a writable upload directory or `copy_links` setting alone is only a review lead. Inspect metadata and the playbook without creating links or triggering the job.
+
 ## Inspect open descriptors
 
 ```bash

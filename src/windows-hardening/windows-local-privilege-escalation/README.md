@@ -641,6 +641,8 @@ Example: "Windows Help and Support" (Windows + F1), search for "command prompt",
 
 ## Services
 
+For a service whose `ImagePath` is `nssm.exe`, inspect the service's actual run-as account and its `HKLM\SYSTEM\CurrentControlSet\Services\<name>\Parameters\Application` value: [NSSM stores the child application there](https://git.nssm.cc/nssm/nssm/src/96e7f4484a3dc962482c240909fd52b0e0226a60/registry.h), while `AppDirectory` is its configured working directory. Check the child executable and its parent-directory ACLs before treating the wrapper's permissions as the whole service boundary. A local WCF or SOAP endpoint exposed by that child is a separate review lead: confirm the listener is reachable by the lower-privileged user, the exact operation accepts their input, and the service child executes the unsafe operation under a higher identity. The service account, an endpoint URL, or a writable path alone does not prove escalation; avoid invoking service operations during passive enumeration.
+
 Service Triggers let Windows start a service when certain conditions occur (named pipe/RPC endpoint activity, ETW events, IP availability, device arrival, GPO refresh, etc.). Even without SERVICE_START rights you can often start privileged services by firing their triggers. See enumeration and activation techniques here:
 
 -
