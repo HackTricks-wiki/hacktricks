@@ -552,9 +552,7 @@ Read the following page for more wildcard exploitation tricks:
 
 ### Bash arithmetic expansion injection in cron log parsers
 
-Bash performs parameter expansion and command substitution before arithmetic evaluation in ((...)), $((...)) and let. If a root cron/parser reads untrusted log fields and feeds them into an arithmetic context, an attacker can inject a command substitution $(...) that executes as root when the cron runs.<sup>[[22]](#references)</sup>
-
-- Why it works: In Bash, expansions occur in this order: parameter/variable expansion, command substitution, arithmetic expansion, then word splitting and pathname expansion. So a value like `$(/bin/bash -c 'id > /tmp/pwn')0` is first substituted (running the command), then the remaining numeric `0` is used for the arithmetic so the script continues without errors.
+Bash arithmetic can interpret untrusted text as an expression. In affected Bash contexts, an array subscript inside that expression can evaluate a command substitution. If a privileged cron/parser places attacker-controlled log text into such an arithmetic comparison, the substitution can run with the parser's identity.<sup>[[22]](#references)</sup> This depends on the exact Bash expression and version; a bare `$(...)0` string in an expanded variable is not, by itself, a reliable demonstration of re-evaluation.
 
 - Typical vulnerable pattern:
   ```bash
@@ -566,12 +564,14 @@ Bash performs parameter expansion and command substitution before arithmetic eva
   done < /var/www/app/log/application.log
   ```
 
-- Exploitation: Get attacker-controlled text written into the parsed log so that the numeric-looking field contains a command substitution and ends with a digit. Ensure your command does not print to stdout (or redirect it) so the arithmetic remains valid.
+- Safe local behavior probe for the array-subscript mechanism (no privileged process or file change):
   ```bash
-  # Injected field value inside the log (e.g., via a crafted HTTP request that the app logs verbatim):
-  $(/bin/bash -c 'cp /bin/bash /tmp/sh; chmod +s /tmp/sh')0
-  # When the root cron parser evaluates (( total += count )), your command runs as root.
+  code='x[$(printf marker >&2)]'
+  [[ 200 -eq "$code" ]]
+  # Bash may print "marker" while evaluating the arithmetic operand.
   ```
+
+Trace the actual scheduled script and the literal input path it opens. Even when the log file itself is not writable, a user who can write and traverse its non-sticky parent may be able to replace its directory entry; `namei -l` helps distinguish those permissions. A different writable log path, an unreadable scheduler, or a parser that never evaluates that field as Bash arithmetic does not establish this path.
 
 ### Cron script overwriting and symlink
 
