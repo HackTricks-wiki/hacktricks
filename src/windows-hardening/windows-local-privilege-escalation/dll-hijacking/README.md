@@ -24,6 +24,19 @@ An application can also implement its **own DLL loader**. A privileged process m
 windows-cpython-build-landmark-sys-path-hijacking.md
 {{#endref}}
 
+### Post-installation PE import grafting
+
+Classic side-loading leaves the trusted PE unchanged and wins DLL name resolution. **Import grafting** instead modifies a PE already loaded by the trusted program. The attacker adds an import descriptor and associated lookup/IAT entries for an attacker-controlled DLL. When Windows recursively resolves that dependency, it maps the added DLL and runs its initialization code inside the otherwise legitimate process. This is an on-disk PE modification, not the same operation as replacing a live IAT function pointer with a runtime hook.<sup>[[26]](#references)[[27]](#references)</sup>
+
+The modified PE can be an intermediate vendor DLL rather than the executable launched by the user or Task Scheduler. A reusable chain is:<sup>[[27]](#references)</sup>
+
+1. Copy the legitimate executable and its dependencies to an attacker-controlled directory.
+2. Patch one dependency's import structures so they reference the malicious DLL, while retaining the dependency's expected exports and normal behavior.
+3. Configure an autorun or scheduled task to start the legitimate executable. The loader maps the altered dependency and then the newly imported DLL. See [Privilege Escalation with Autoruns](../privilege-escalation-with-autorun-binaries.md#scheduled-tasks) for task enumeration.
+4. Keep expensive work out of `DllMain`; the observed loader created a worker thread and continued the staged decryption there.
+
+This differs from a vendor-side supply-chain compromise when the vendor package is clean and the import modification occurs after installation. Triage every module in the staged directory, not only the host EXE: compare dependency import lists and hashes with a known-good installation, verify signatures, and investigate vendor binaries launched from unexpected writable locations such as `C:\ProgramData`. A scheduled task pointing at a copied crash reporter or updater in such a directory is a particularly useful pivot.<sup>[[27]](#references)</sup>
+
 
 ### AppDomainManager hijacking (`<exe>.config` + attacker assembly)
 
@@ -768,5 +781,7 @@ Defensive pivots
 - [23] [Microsoft Learn – Task Actions](https://learn.microsoft.com/en-us/windows/win32/taskschd/task-actions)
 - [24] [MITRE ATT&CK – T1574.014 AppDomainManager](https://attack.mitre.org/techniques/T1574/014/)
 - [25] [Unit 42 – CL-STA-1062 Targets Southeast Asian Governments and Critical Infrastructure](https://unit42.paloaltonetworks.com/cl-sta-1062-tinyrct-backdoor/)
+- [26] [Microsoft Learn – PE format](https://learn.microsoft.com/en-us/windows/win32/debug/pe-format)
+- [27] [FortiGuard Labs – Uncovering a SectopRAT Variant Embedded in Legitimate Software](https://www.fortinet.com/blog/threat-research/uncovering-a-sectoprat-variant-embedded-in-legitimate-software)
 
 {{#include ../../../banners/hacktricks-training.md}}
