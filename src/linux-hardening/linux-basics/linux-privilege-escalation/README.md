@@ -1486,6 +1486,10 @@ export -f /usr/sbin/service
 
 Then, when you call the suid binary, this function will be executed
 
+### Custom SUID copy wrappers
+
+A root-owned SUID utility that accepts source and destination paths can cross two different trust boundaries. If it builds a shell command from either argument (for example, passing a constructed `cp` command to `system()`), shell metacharacters may execute another command with its effective privileges. Even if it invokes `cp` safely without a shell, an unrestricted destination can permit an arbitrary privileged write to files such as `/etc/passwd`. Review the wrapper's argument handling, effective UID behavior, destination restrictions, and whether the copied file keeps caller-controlled contents; a generic `cp` error or SUID bit alone is not proof of either path. Enumerate the binary and permissions passively before any manual testing.
+
 ### Writable script executed by a SUID wrapper
 
 A common custom-app misconfiguration is a root-owned SUID binary wrapper that executes a script, while the script itself is writable by low-priv users.

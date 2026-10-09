@@ -15,6 +15,14 @@ ss -lntup
 
 A cross-user parent-child relationship can be normal, but an unexpected transition warrants review of the parent command, arguments, executable, working directory, and referenced files. Use [users and sessions](../user-information/user-and-session-triage.md) to interpret the owner and login context.
 
+### Privileged login shells sharing a terminal
+
+A privileged interactive shell that runs `su --login <user>` without an independent pseudo-terminal may leave its terminal shared with the lower-privileged login shell. If that user's startup file is controllable and code in it can use `TIOCSTI` to inject terminal input, the input may reach the privileged shell when it resumes. [The util-linux `su` manual](https://man7.org/linux/man-pages/man1/su.1.html#SECURITY_NOTES) describes the shared-terminal risk and recommends `su --pty`/`-P` for interactive use; `su -c` starts a separate session without a controlling terminal. The risk requires the actual parent shell, terminal relationship, target startup file, and kernel policy. A process name or `su -l` argument alone is only a review lead.
+
+Inspect the observed process tree and TTY columns, then the readable launcher and startup-file ownership/permissions. On Linux, `/proc/sys/dev/tty/legacy_tiocsti` can help interpret the policy when present; its absence is not proof of safety. [The Linux `TIOCSTI` manual](https://man7.org/linux/man-pages/man2/TIOCSTI.2const.html) notes that since Linux 6.2 the operation may require `CAP_SYS_ADMIN` when this sysctl is false. Do not invoke the ioctl merely to enumerate the host.
+
+A database account can sometimes alter the target user's startup file without direct filesystem write access. PostgreSQL server-side `COPY ... TO 'filename'` writes as the database server's OS account, but [PostgreSQL limits](https://www.postgresql.org/docs/current/sql-copy.html) this file form to database superusers or roles such as `pg_write_server_files`. Confirm both the database role and server OS file permissions; an application connection string alone does not grant file-write authority. Keep the privileged launcher and the database account's capabilities separate when assessing the chain.
+
 ## Inspect runtime artifacts
 
 ```bash
@@ -72,6 +80,16 @@ Check the unit, drop-ins, `EnvironmentFile=`, helper scripts, relative commands,
 An empty but writable `/etc/systemd/system/<unit>.service.d` directory matters even when the unit file and every existing drop-in are protected: the user may create a new `.conf` override. Check that the directory is writable and searchable by the current identity, the unit is loaded and runs as root, and whether a daemon reload followed by a restart will occur. A reload or restart permission, timer, or later boot can make the change effective; directory write access alone does not execute it immediately.
 
 For running services, follow literal `EnvironmentFile=` paths from the unit's `[Service]` section, including files whose names do not start with `.env`. If a low-privilege user can read one, list credential-like key names such as `API_TOKEN` or `APP_SECRET_KEY` without printing the values into shared logs. Check drop-in overrides and optional `-` prefixes when assessing the effective unit. Readability is a credential-exposure lead; the value must still be valid for a privileged action to yield escalation.
+
+### Privileged processing of untrusted uploads
+
+A root-run file watcher can hand files from a user-writable upload directory to a short-lived parser or extractor. Follow the running watcher's parent script or service and confirm the exact directory, who can place files there, the child command and its arguments, and the identity under which the child runs. A process snapshot may show the watcher while missing the extractor between uploads. Do not place a test payload or trigger the watcher during passive enumeration.
+
+One concrete example is Binwalk's extraction mode (`-e`) processing attacker-controlled PFS data. [CVE-2022-4510](https://github.com/ReFirmLabs/binwalk/pull/617) allowed the PFS extractor to write outside its intended directory, including a plugin path that Binwalk could later load. Upstream included the fix in [2.3.4](https://github.com/ReFirmLabs/binwalk/releases/tag/v2.3.4), but distribution backports can retain an older displayed version; check the installed package's security status, such as the [Debian tracker](https://security-tracker.debian.org/tracker/CVE-2022-4510), before judging applicability. An installed Binwalk version alone does not establish a privilege-escalation path: extraction must actually be invoked by a more privileged process on input the lower-privileged user can control.
+
+### Scheduled builds with local dependencies
+
+A scheduled `cargo run` recompiles source as the job's run-as user. Inspect the manifest's local `{ path = "..." }` dependencies and the source and parent-directory permissions of each dependency, not just the main crate. If a lower-privileged user can modify a dependency that Cargo compiles and the scheduled job runs its result, the compiled code can execute as that run-as user. Confirm the effective scheduler command, working directory, dependency resolution, and whether a rebuild will occur; a writable Rust source file elsewhere is only a lead. Reading the manifest and path metadata is enough for passive triage. See the [Cargo path-dependency documentation](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#specifying-path-dependencies).
 
 ## Xvfb framebuffer files
 

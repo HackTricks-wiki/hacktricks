@@ -14,7 +14,19 @@ getcap -r / 2>/dev/null
 
 Focus on custom or recently changed executables, unusual owners, and files on writable mounts. A `nosuid` mount can suppress set-ID behavior; file capabilities are a separate privilege mechanism described in [Linux capabilities](linux-capabilities.md). Compare a suspicious binary with its package and check what it executes, opens, or loads with elevated identity.
 
+A familiar SUID program can itself be replaced or backdoored. A recent modification time is a lead, not proof: for a **specific suspicious packaged binary**, resolve its owning package and compare the installed file with package metadata rather than verifying every package during routine enumeration:
+
+```bash
+dpkg -S /usr/bin/passwd                  # Debian-family: identify the owner
+dpkg --verify passwd                     # Verify only that package
+rpm -V --noscripts -f /usr/bin/passwd    # RPM-family: owning package, no verify scriptlets
+```
+
+`dpkg --verify` checks file contents only where the package database has a recorded checksum; RPM also compares metadata such as mode and ownership. Focus on a mismatch for the **privileged executable itself**: stripped installations can report missing documentation or locale files elsewhere in the same package. Compare a suspect executable with a trusted vendor package and review the exact changed code. Legitimate local changes, absent checksums, and compromised package metadata limit what either command proves. Run neither the suspicious SUID program nor a package verification script as part of passive triage. See the [dpkg verification manual](https://manpages.debian.org/bookworm/dpkg/dpkg.1.en.html) and [RPM verification manual](https://rpm.org/docs/4.20.x/man/rpm.8).
+
 A SUID program that invokes a shell, relative command, or library from a writable path may cross a trust boundary. See [SUID shared-library and linker abuse](suid-shared-library-and-linker-abuse.md), the [PATH guidance](../linux-basics/linux-environment-variables.md#path), and the [user-ID explanation](../user-information/euid-ruid-suid.md). For known command-specific escapes, check [GTFOBins](https://gtfobins.github.io/) against the exact binary and invocation allowed on the host.
+
+Apply the same dependency review to SGID wrappers. A wrapper that runs a shell or helper by an absolute path can still be unsafe if a lower-privileged user can replace that file; the spawned code may inherit the wrapper's effective group. Check the exact invoked path, its write access (including ACLs), the wrapper's effective group, and whether it drops privileges before launching the child. An interpreter may also discard inherited effective IDs, so distinguish a review candidate from a demonstrated transition. A writable shell elsewhere on the host alone does not prove that a privileged wrapper calls it.
 
 ### Privileged wrappers that pass SQL to the SQLite CLI
 
@@ -27,6 +39,10 @@ A custom SUID/SGID wrapper may check access to a caller-selected pathname and th
 ### Netdata `ndsudo` search path
 
 [CVE-2024-32019](https://github.com/netdata/netdata/security/advisories/GHSA-pmhq-4cxq-wj93) affected some Netdata `ndsudo` builds. The root-owned SUID helper searched for its permitted external commands using a caller-supplied `PATH`. Review an installed helper, including one outside the caller's usual `PATH`, only when the current account can execute it. Confirm its owner, SUID bit, executable access (including group/ACL grants), installed build and vendor patch status, and whether `NoNewPrivs` or a `nosuid` mount blocks the identity change. Netdata lists patched builds `v1.45.3` and `v1.45.0-169`; distribution backports need separate confirmation. A dashboard version or the mere presence of `ndsudo` is insufficient evidence of a reachable escalation. The path issue also requires the helper to resolve an external command through a location the caller controls.
+
+### Firejail join privilege boundary
+
+[CVE-2022-31214](https://seclists.org/oss-sec/2022/q2/188) affected Firejail's privileged `--join` logic: a crafted join target could make the setuid-root helper accept an attacker-controlled mount namespace and copy unsafe security state. For passive triage, confirm that the **current identity can execute** a root-owned setuid Firejail binary, that setuid is effective on its mount and in its process context, and that the installed build lacks the fix. Upstream fixed the issue in [0.9.70](https://github.com/netblue30/firejail/releases/tag/0.9.70); distribution packages may [backport it](https://github.com/netblue30/firejail/issues/5191) while still displaying an older version. Those prerequisites identify a review candidate, not a successful join or root shell. Do not construct a fake jail or invoke `--join` during enumeration.
 
 ### snap-confine and tmpfiles cleanup
 

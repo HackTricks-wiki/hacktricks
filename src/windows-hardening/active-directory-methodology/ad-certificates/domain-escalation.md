@@ -185,6 +185,8 @@ Notable permissions applicable to certificate templates include:<sup>[[6]](#refe
 - **WriteDacl:** Allows for the adjustment of access controls, potentially granting an attacker FullControl.
 - **WriteProperty:** Authorizes the editing of any object properties.
 
+Also review the DACL on the `CN=Certificate Templates,CN=Public Key Services,CN=Services,...` container. An applicable `CreateChild` ACE scoped to the [`pKICertificateTemplate` class](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-adsc/db4b45f7-e57a-4ae1-9b8f-1b107b69d98c), or broad full control, is a candidate for creating a new template object. [Microsoft documents](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-wcce/9279abb2-3dfa-4631-845c-43c187ac4b44) that the container holds these template objects. Review matching deny ACEs and inheritance before deciding whether creation is effective. A created template does not by itself issue a certificate: a CA must publish it, the requesting principal needs enrollment access, and the certificate must map to the intended identity at the authentication endpoint.
+
 ### Abuse
 
 To identify principals with edit rights on templates and other PKI objects, enumerate with Certify:
