@@ -58,6 +58,8 @@ Get-ADObject -filter 'isDeleted -eq $true' -includeDeletedObjects -Properties *
 
 This is useful for **recovering previous privilege paths**. Deleted objects can still expose `lastKnownParent`, `memberOf`, `sIDHistory`, `adminCount`, old SPNs, or the DN of a deleted privileged group that can later be restored by another operator.
 
+Application-defined attributes may also retain old credential material while an object remains in the deleted state. Treat this as a separate review lead: the current identity must be allowed to enumerate the deleted object **and** read that attribute, the value must be a usable credential, and a still-active principal must accept it. Group membership or a deleted account name alone proves none of those steps; avoid printing credential values during routine enumeration. [Microsoft's Recycle Bin documentation](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/get-started/adac/active-directory-recycle-bin) describes attribute preservation after deletion.
+
 ```powershell
 Get-ADObject -Filter 'isDeleted -eq $true' -IncludeDeletedObjects `
   -Properties samAccountName,lastKnownParent,memberOf,sIDHistory,adminCount,servicePrincipalName |

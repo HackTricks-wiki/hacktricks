@@ -26,6 +26,8 @@ chmod -R 644 *.php
 
 The expanded `--reference=.drf.php` overrides the explicit owner/mode, causing matching files to inherit metadata from `.drf.php` (and, with the setup above, making them writable by the attacker).<sup>[[6]](#references)</sup>
 
+Review the entire privileged helper, not just its `chown` line. An ownership change can clear set-user-ID or set-group-ID bits; [POSIX leaves the privileged case implementation-defined](https://pubs.opengroup.org/onlinepubs/9699919799.2013edition/functions/chown.html). A later `chmod` in the same job may restore those bits on files it selected earlier, changing the outcome. Confirm the actual command order, writable glob directory, affected file and link behavior, resulting owner and mode, and whether the mount honors set-user-ID before treating this as an executable privilege path. An unreadable helper leaves those steps unknown.
+
 *PoC & tool*: [`wildpwn`](https://github.com/localh0t/wildpwn) (combined attack).<sup>[[7]](#references)</sup>
 See also the classic DefenseCode paper for details.<sup>[[6]](#references)</sup>
 

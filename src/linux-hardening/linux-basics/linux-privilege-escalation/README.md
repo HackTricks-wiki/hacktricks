@@ -2242,10 +2242,10 @@ import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s
 
 ### Logrotate exploitation
 
-A vulnerability in `logrotate` lets users with **write permissions** on a log file or its parent directories potentially gain escalated privileges. This is because `logrotate`, often running as **root**, can be manipulated to execute arbitrary files, especially in directories like _**/etc/bash_completion.d/**_. It's important to check permissions not just in _/var/log_ but also in any directory where log rotation is applied.
+A privileged `logrotate` job can create a cross-user file-write path when it actually rotates a log below a directory that a lower-privileged user can replace or redirect during rotation. A writable log alone is only a lead. Confirm the exact active rule and its `create`, `olddir`, and `su` directives; the scheduler's effective identity; write and search rights on the log's parent; and whether the installed build and policy allow the destination change. A later privileged shell must also load the resulting file for a startup-file write to become command execution. Inspect the schedule, rule, version/packaging, and path metadata without triggering a rotation or attempting the race.
 
 > [!TIP]
-> This vulnerability affects `logrotate` version `3.18.0` and older
+> Do not treat `3.18.0` or any version string alone as an exploitability cutoff. [Upstream's change log](https://github.com/logrotate/logrotate/blob/main/ChangeLog.md) records directory and symlink hardening in multiple releases, and distributions may backport fixes. The [upstream manual](https://github.com/logrotate/logrotate/blob/main/logrotate.8.in) recommends `su` when root rotates logs in directories controlled by non-privileged users; verify the effective rule and actual behavior.
 
 More detailed information about the vulnerability can be found on this page: [https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition](https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition).<sup>[[37]](#references)</sup>
 
