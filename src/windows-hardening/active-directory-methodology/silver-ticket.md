@@ -65,7 +65,7 @@ The CIFS service is highlighted as a common target for accessing the victim's fi
 
 ### Example: MSSQL service (MSSQLSvc) + Potato to SYSTEM
 
-If you have the NTLM hash (or AES key) of a SQL service account (e.g., sqlsvc) you can forge a TGS for the MSSQL SPN and impersonate any user to the SQL service. From there, enable xp_cmdshell to execute commands as the SQL service account. If that token has SeImpersonatePrivilege, chain a Potato to elevate to SYSTEM.<sup>[[4]](#references)</sup>
+If you have the NTLM hash (or AES key) for the account that owns a **registered, exact SQL service SPN**, a forged service ticket may be accepted by that service. The service class and hostname in the ticket must match the actual SPN; do not assume every installation uses `MSSQLSvc/`. The claimed identity must also map to a SQL login with the permissions needed to enable and run `xp_cmdshell`. Successful `xp_cmdshell` commands run under the SQL service process identity (or a configured proxy for non-sysadmin callers). Inspect that **process token** for enabled `SeImpersonatePrivilege` before considering a separate Potato path; a service configuration or SPN alone does not prove it.<sup>[[4]](#references)</sup>
 
 ```bash
 # Forge a silver ticket for MSSQLSvc (AES example)
