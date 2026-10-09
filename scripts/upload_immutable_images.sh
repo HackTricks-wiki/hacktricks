@@ -15,7 +15,12 @@ for image in \
   hacktricks-summer-discount-2026-v1.webp \
   arte-badge-v1.webp \
   grte-badge-v1.webp \
-  azrte-badge-v1.webp; do
+  azrte-badge-v1.webp \
+  lee-sponsor-v1.webp \
+  azrte-sponsor-v1.webp \
+  grte-sponsor-v1.webp \
+  lhe-sponsor-v1.webp \
+  arte-sponsor-v1.webp; do
   source_path="./book/images/${image}"
   if [ ! -f "$source_path" ]; then
     echo "Missing immutable image: $source_path" >&2

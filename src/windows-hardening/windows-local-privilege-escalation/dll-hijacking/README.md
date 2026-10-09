@@ -18,6 +18,8 @@ Several methods are employed for DLL hijacking, each with its effectiveness depe
 5. **WinSxS DLL Replacement**: Substituting the legitimate DLL with a malicious counterpart in the WinSxS directory, a method often associated with DLL side-loading.
 6. **Relative Path DLL Hijacking**: Placing the malicious DLL in a user-controlled directory with the copied application, resembling Binary Proxy Execution techniques.
 
+An application can also implement its **own DLL loader**. A privileged process may enumerate a child directory such as `Libraries` or `Plugins` and pass a selected DLL to a helper, independently of the normal Windows DLL search order. If another account can create files in that exact directory, treat it as a review lead: confirm the process identity, the directory's effective ACL, the file-selection rule, and a reachable load operation. A writable directory beside an executable does not establish that the process loads DLLs from it.
+
 {{#ref}}
 windows-cpython-build-landmark-sys-path-hijacking.md
 {{#endref}}
