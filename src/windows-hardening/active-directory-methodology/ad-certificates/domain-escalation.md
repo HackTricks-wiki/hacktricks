@@ -119,9 +119,11 @@ The **“enrollment agent”** enrolls in such a **template** and uses the resul
 
 - The Enterprise CA grants enrollment rights to low-privileged users.
 - Manager approval is bypassed.
-- The template's schema version is either 1 or exceeds 2, and it specifies an Application Policy Issuance Requirement that necessitates the Certificate Request Agent EKU.
+- A version 1 target template may accept an enrollment agent without newer granular issuance-policy controls; for version 2 or newer, evaluate its application-policy issuance requirements and authorized signatures rather than excluding the template by version alone.
 - An EKU defined in the certificate template permits domain authentication.
 - Restrictions for enrollment agents are not applied on the CA.
+
+The target template must also be published by the chosen CA, permit the target account to enroll, and support the intended domain-authentication use. Check required subject/SAN attributes on that account; for example, a template that builds a subject email from AD cannot issue for an account without the required `mail` value. An agent certificate alone does not satisfy these target-template gates.
 
 ### Abuse
 

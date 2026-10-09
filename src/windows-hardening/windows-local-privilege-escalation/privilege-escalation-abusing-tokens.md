@@ -180,7 +180,7 @@ import-module psgetsys.ps1; [MyProcess]::CreateProcessFromParent(<system_pid>,<c
 
 ### SeManageVolumePrivilege
 
-This right (Perform volume maintenance tasks) allows opening raw volume device handles (e.g., \\.\C:) for direct disk I/O that bypasses NTFS ACLs. With it you can copy bytes of any file on the volume by reading the underlying blocks, enabling arbitrary file read of sensitive material (e.g., machine private keys in %ProgramData%\Microsoft\Crypto\, registry hives, SAM/NTDS via VSS).<sup>[[5]](#references)</sup> It’s particularly impactful on CA servers where exfiltrating the CA private key enables forging a Golden Certificate to impersonate any principal.<sup>[[6]](#references)</sup>
+This right (Perform volume maintenance tasks) can support privileged volume operations, but it does not by itself guarantee a readable raw-volume handle or arbitrary file access. Device ACLs, token state, Windows version, and the requested operation still matter. A permitted volume-control operation may instead change filesystem ACLs; that is a mutating, potentially volume-wide action. On a CA host, certificate abuse also requires access to usable private-key material, and EFS-protected files still require an authorized decryption or recovery key. See the detailed prerequisites below.<sup>[[5]](#references)</sup>
 
 See detailed techniques and mitigations:
 
