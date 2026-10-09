@@ -29,6 +29,8 @@ An application's authentication controller can also contain a literal login pass
 
 Dolibarr stores database connection settings, including `dolibarr_main_db_pass`, in `htdocs/conf/conf.php` ([configuration reference](https://wiki.dolibarr.org/index.php/Configuration_file)). A readable file is a credential lead; only a separate, verified account-password reuse or another database permission would turn it into a local privilege escalation. Inspect permissions first and avoid printing the value in automated output.
 
+A self-hosted Mattermost installation may keep `SqlSettings.DataSource` in `/opt/mattermost/config/config.json`; [Mattermost documents](https://docs.mattermost.com/deployment-guide/server/troubleshooting) both that usual path and deployments that store active configuration in a database instead. A readable file can expose an application database credential, but it does not establish database access or Unix root access. Verify the active configuration source, the database role's actual rights, any separately recovered application password, and whether that password works for a specific higher-privileged Unix account. Password-hash format can change across Mattermost versions; record the config path and access metadata during enumeration without printing the connection string or querying the database.
+
 ```bash
 curl -i -H 'Host: admin.example.local' http://127.0.0.1:8080/
 ffuf -w wordlist.txt -u http://127.0.0.1:8080/ -H 'Host: FUZZ.example.local' -fs 1234 # replace 1234 with the default response size
