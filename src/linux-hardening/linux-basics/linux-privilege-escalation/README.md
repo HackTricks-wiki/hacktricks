@@ -2256,11 +2256,9 @@ This vulnerability is very similar to [**CVE-2016-1247**](https://www.cvedetails
 
 **Vulnerability reference:** [**https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure\&qid=e026a0c5f83df4fd532442e1324ffa4f**](https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f).<sup>[[20]](#references)</sup>
 
-If, for whatever reason, a user is able to **write** an `ifcf-<whatever>` script to _/etc/sysconfig/network-scripts_ **or** it can **adjust** an existing one, then your **system is pwned**.<sup>[[20]](#references)</sup>
+An `ifcfg-*` file is a review lead when a lower-privileged user can create or change it **and** a privileged network-activation path will read that exact file. Confirm the effective file and directory permissions, the selected interface, the installed `ifup`/`ifdown` implementation, and who invokes it. A writable file alone does not cause execution. [Red Hat's RHEL 7 networking guide](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7/html/networking_guide/sec-using_networkmanager_with_sysconfig_files) distinguishes legacy network scripts from NetworkManager: the latter does not itself trigger the former. [RHEL 8 documents](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/configuring_and_managing_networking/assembly_legacy-network-scripts-support-in-rhel_configuring-and-managing-networking) that its default `ifup`/`ifdown` use NetworkManager, while the optional legacy package supplies shell scripts.
 
-Network scripts, _ifcg-eth0_ for example are used for network connections. They look exactly like .INI files. However, they are \~sourced\~ on Linux by Network Manager (dispatcher.d).
-
-In my case, the `NAME=` attributed in these network scripts is not handled correctly. If you have **white/blank space in the name the system tries to execute the part after the white/blank space**. This means that **everything after the first blank space is executed as root**.
+On a system actually using privileged legacy scripts, an unquoted, shell-sourced `ifcfg-*` assignment such as `NAME=` can cross a code-execution boundary. Verify the exact parser, value, and activation path; do not infer shell interpretation from the filename or NetworkManager's presence. A sudo-allowed wrapper that writes caller input into an `ifcfg-*` file and then calls legacy `ifup` is a separate route to this boundary even when the caller cannot directly edit the file.
 
 For example: _/etc/sysconfig/network-scripts/ifcfg-1337_
 

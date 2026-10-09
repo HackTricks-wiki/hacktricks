@@ -266,6 +266,8 @@ This can force **automatic module loading** or change interpreter behavior befor
 
 If a sudo rule allows environment overrides and its privileged command eventually launches Perl, also review `PERL5DB`. Perl documents that `PERL5OPT=-d` starts the debugger and that `PERL5DB` supplies debugger initialization code when Perl starts with a bare `-d` switch. Unsetting only `PERL5LIB` and `PERLLIB` does not remove this path. The variables must survive sudo and the wrapper, and the Perl process must not ignore them through taint or set-ID handling; inspect the exact rule and execution chain without running the privileged helper during enumeration. See [perlrun's environment-variable reference](https://perldoc.perl.org/perlrun#ENVIRONMENT).
 
+Perl's built-in [`@INC` search path](https://perldoc.perl.org/perlvar#@INC) is another module trust boundary even without preserved environment variables. For a privileged Perl process, correlate an actual `use` or `require` statement with the resolved module name, search order, and a lower-privileged user's ability to create or replace that module under a searched directory. A writable library directory alone does not establish that the privileged process will load code from it.
+
 ```bash
 mkdir -p /tmp/perllib
 cat > /tmp/perllib/HT.pm <<'EOF'
