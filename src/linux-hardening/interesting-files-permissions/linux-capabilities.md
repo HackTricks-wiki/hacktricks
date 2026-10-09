@@ -568,6 +568,8 @@ libc.ptrace(PTRACE_DETACH, pid, None, None)
 /usr/bin/gdb = cap_sys_ptrace+ep
 ```
 
+A capability on a debugger is a review lead only. Check whether the current process can execute that exact file (including group and ACL permissions), whether `CAP_SYS_PTRACE` is effective after execution, and whether a higher-privileged target is visible and attachable in the same PID namespace. `no_new_privs`, a `nosuid` mount, the capability bounding set, Yama, seccomp, or an LSM can change the result. See [`capabilities(7)`](https://man7.org/linux/man-pages/man7/capabilities.7.html) and the [kernel's Yama documentation](https://docs.kernel.org/admin-guide/LSM/Yama.html). Enumerate file and process metadata without attaching to a target.
+
 Create a shellcode with msfvenom to inject in memory via gdb
 
 ```python
@@ -1034,10 +1036,10 @@ file.close()
 
 **Example with environment + CAP_DAC_READ_SEARCH (Docker breakout)**
 
-Confirm `CAP_DAC_OVERRIDE` with `capsh --print` as shown in the preceding `CAP_DAC_READ_SEARCH` environment example.<sup>[[14]](#references)[[26]](#references)</sup>
+`CAP_DAC_READ_SEARCH` permits `open_by_handle_at(2)`, but does **not** bypass write permission checks. Writing through a resolved handle additionally requires write access for the process's effective filesystem UID/GID or ACL, or `CAP_DAC_OVERRIDE`. The host-relevant filesystem reference, supported file handles, writable mount, and runtime/LSM policy must also permit the operation. Check the effective capabilities and identity; neither capability alone proves a writable host target. See [capabilities(7)](https://man7.org/linux/man-pages/man7/capabilities.7.html) and [open_by_handle_at(2)](https://man7.org/linux/man-pages/man2/open_by_handle_at.2.html).<sup>[[14]](#references)[[26]](#references)</sup>
 
 First of all read the previous section that [**abuses DAC_READ_SEARCH capability to read arbitrary files**](linux-capabilities.md#cap_dac_read_search) of the host and **compile** the exploit.\
-Then, **compile the following version of the shocker exploit** that will allow you to **write arbitrary files** inside the hosts filesystem:
+The following historical sample attempts to open a resolved file with `O_RDWR`; it succeeds only when the preceding filesystem and write-permission conditions hold:
 
 ```c
 #include <stdio.h>

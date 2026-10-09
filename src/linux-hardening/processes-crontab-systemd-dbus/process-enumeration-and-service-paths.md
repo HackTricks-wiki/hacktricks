@@ -69,6 +69,8 @@ ls -l /etc/consul.d 2>/dev/null
 
 Follow the running agent's `-config-dir` and `-config-file` arguments to the relevant configuration, and inspect only the script-check and ACL field names and settings. Configuration files may also contain gossip keys or tokens; avoid pasting them into shared logs. Do not register a service or run a health check merely to enumerate this condition.
 
+A separate local-file path exists when a lower-privileged user can **write and search** the directory named by a root-run agent's `-config-dir`: a new `.hcl` or `.json` service definition may be loaded from that directory. Directory search and write can permit adding a file even when listing the directory is denied. For root command execution, confirm the agent actually loads that directory, its **effective** script-check setting permits local definitions, the definition is loaded, and the agent keeps root privileges. [Consul documents](https://developer.hashicorp.com/consul/docs/fundamentals/agent#reloadable-configurations) which settings and health-check definitions can reload; enabling script checks itself may require a restart, so verify the installed version's behavior. When ACLs protect the agent, [`consul reload` requires `agent:write`](https://developer.hashicorp.com/consul/api-docs/agent#reload-agent); KV write permission alone does not supply it. Treat writable directory metadata as a review cue, not proof of an authorized reload, restart, or command execution. Inspect paths, permissions, and policy without writing configuration or calling the API.
+
 ## Follow the service execution chain
 
 ```bash

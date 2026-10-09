@@ -204,7 +204,7 @@ Get-PSDrive | where {$_.Provider -like "Microsoft.PowerShell.Core\FileSystem"}| 
 
 ## WSUS
 
-You can compromise the system if the updates are not requested using http**S** but http.
+An HTTP WSUS endpoint is a review lead for update-metadata interception. Exploitation also depends on whether the client uses that WSUS server, whether an attacker can intercept or control its traffic, and the client's update trust and installation policy. The URL alone does not establish code execution. [Microsoft recommends TLS for WSUS metadata](https://learn.microsoft.com/en-us/windows-server/administration/windows-server-update-services/deploy/2-configure-wsus).
 
 You start by checking if the network uses a non-SSL WSUS update by running the following in cmd:
 
@@ -235,7 +235,7 @@ PSProvider   : Microsoft.PowerShell.Core\Registry
 
 And if `HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate\AU /v UseWUServer` or `Get-ItemProperty -Path hklm:\software\policies\microsoft\windows\windowsupdate\au -name "usewuserver"` is equals to `1`.
 
-Then, **it is exploitable.** If the last registry is equals to 0, then, the WSUS entry will be ignored.
+When `UseWUServer` is `1`, the configured intranet service is used by Windows Update. This confirms a prerequisite for the HTTP interception path, but does not prove that interception, malicious-update acceptance, or elevated installation is possible. When it is `0`, this particular configured WSUS endpoint is not selected by that policy.
 
 In orther to exploit this vulnerabilities you can use tools like: [Wsuxploit](https://github.com/pimps/wsuxploit), [pyWSUS ](https://github.com/GoSecure/pywsus)- These are MiTM weaponized exploits scripts to inject 'fake' updates into non-SSL WSUS traffic.
 
@@ -255,6 +255,10 @@ Basically, this is the flaw that this bug exploits:
 > Furthermore, since the WSUS service uses the current user’s settings, it will also use its certificate store. If we generate a self-signed certificate for the WSUS hostname and add this certificate into the current user’s certificate store, we will be able to intercept both HTTP and HTTPS WSUS traffic. WSUS uses no HSTS-like mechanisms to implement a trust-on-first-use type validation on the certificate. If the certificate presented is trusted by the user and has the correct hostname, it will be accepted by the service.
 
 You can exploit this vulnerability using the tool [**WSUSpicious**](https://github.com/GoSecure/wsuspicious) (once it's liberated).
+
+### WSUS administrator-controlled updates
+
+A separate path exists when the current identity can **publish and approve** updates on a WSUS server. Check effective membership of the server's `WSUS Administrators` group and any delegated WSUS permissions, then identify the client computer group that would receive an approved update. [Microsoft requires WSUS Administrator privileges to approve updates](https://learn.microsoft.com/en-us/powershell/module/updateservices/approve-wsusupdate), and [documents the publishing trust relationship](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/bb902479%28v%3Dvs.85%29): clients must trust the signing certificate used for locally published content. Confirm that the candidate update is signed and accepted, applicable to the target, and installed in a more privileged context before treating this as an escalation path. An HTTP `WUServer` value or group name alone does not establish those conditions.
 
 ### SUSDB custom-update abuse: unsigned payloads via `.txt`/`.esd`
 
@@ -616,6 +620,8 @@ icacls 'C:\xampp\htdocs'
 For IIS, map a writable physical directory to an **active site/application** in `applicationHost.config`, then identify its configured pool and server-side handler. Code placed in a served directory runs as the pool only if IIS processes that file type and the route is reachable. Check the current user's effective create-file access, site runtime state, handler and per-path overrides before treating a writable directory as code execution.
 
 An IIS pool configured as `ApplicationPoolIdentity` or `NetworkService` commonly authenticates to domain resources as the **host computer account**, even though its local token may be low-privileged. `LocalSystem` is already highly privileged locally and also uses the computer account on the network; `LocalService` normally presents anonymous network credentials. A `SpecificUser` pool uses its configured account instead. [Microsoft documents these identity types](https://learn.microsoft.com/en-us/iis/configuration/system.applicationhost/applicationpools/add/processmodel) and [the application-pool network identity](https://learn.microsoft.com/en-us/iis/manage/configuring-security/application-pool-identities). An omitted identity setting can inherit pool defaults, which differ across IIS generations, so resolve the effective configuration instead of guessing from the pool name. If code execution reaches a pool with computer-account network identity, assess that **specific computer's** directory rights. [DCSync](../active-directory-methodology/dcsync.md) requires replication rights on the domain naming context; a machine-account ticket or host role alone does not prove them. Passive enumeration should inspect configuration and ACLs without uploading a file, making a network authentication, or requesting tickets.
+
+For a readable ASP.NET handler that starts a helper process, trace any request-derived value through authentication, decryption, validation, and command construction. A handler that concatenates a decoded token into `ProcessStartInfo("cmd", "/c ...")` may let shell metacharacters change the command; [Microsoft documents `cmd`'s special characters](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/cmd). Establish that an untrusted caller can actually influence the decoded value and reach the handler, then resolve the effective application-pool or impersonated identity and the child process's identity. A readable source line, a localhost listener, or a token-format weakness alone does not prove privileged command execution. Review source and pool configuration without sending forged requests or running the helper during passive enumeration.
 
 ### Memory Password mining
 
@@ -1820,6 +1826,8 @@ Get-Childitem –Path C:\ -Include *unattend*,*sysprep* -File -Recurse -ErrorAct
 
 Check accessible Recycle Bin entries for deleted backups and configuration archives as well as files whose names explicitly mention credentials. A useful `.7z`, `.zip`, or `.rar` backup may be months old and have an ordinary filename. Windows stores the original path and deletion time in a `$I` record and the deleted file as its paired `$R` entry; inspect the metadata and the current identity's read access before opening an archive. Visibility depends on the volume, user SID, and file permissions, so an empty listing does not prove that no recoverable backup exists. Treat an archive name as a review candidate, not proof that it contains a valid secret.
 
+An accessible deleted `.pfx` can also be a **code-signing** lead. If it contains an accessible private key, the key can sign a changed PowerShell script; [PowerShell requires a code-signing certificate with a private key](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.security/set-authenticodesignature), and [AppLocker publisher rules evaluate the signer's identity and rule scope](https://learn.microsoft.com/en-us/windows/security/application-security/application-control/app-control-for-business/applocker/understanding-the-publisher-rule-condition-in-applocker). Cross-account execution requires the current identity to modify the exact script, an effective rule that accepts the resulting signature for the script and target account, and a scheduled task or other higher-privilege consumer that actually runs it. A `.pfx` filename, certificate subject, or writable script alone does not establish the chain. Review metadata, ACLs, policy, and the scheduled command before opening private-key material or triggering the task.
+
 Also review accessible messaging-client profile databases, notes, and received files for credential leads. A BitLocker recovery export may be stored as HTML or TXT, sometimes inside a named backup archive. Such material can provide access to a separate encrypted data volume containing older backups; inspect the volume and archive only when access is authorized. If a backup includes `NTDS.dit`, offline domain credential recovery also requires the matching `SYSTEM` hive, as described in the [backup and privileged-groups workflow](../active-directory-methodology/privileged-groups-and-token-privileges.md). File names and a locked volume alone do not establish that a usable recovery key or domain backup exists.
 
 To **recover passwords** saved by several programs you can use: [http://www.nirsoft.net/password_recovery_tools.html](http://www.nirsoft.net/password_recovery_tools.html)
@@ -1839,8 +1847,12 @@ reg query "HKCU\Software\OpenSSH\Agent\Key"
 
 ### Browsers History
 
-You should check for dbs where passwords from **Chrome or Firefox** are stored.\
+You should check for dbs where passwords from **Chrome, Edge, or Firefox** are stored.\
 Also check for the history, bookmarks and favourites of the browsers so maybe some **passwords are** stored there.
+
+For the current user's conventional Edge **Default** profile, `Login Data` is under `%LOCALAPPDATA%\Microsoft\Edge\User Data\Default`, while `Local State` is in its parent `User Data` directory. [Microsoft documents the default profile location](https://learn.microsoft.com/en-us/deployedge/edge-learnmore-create-user-directory-vars); another profile or a `UserDataDir` policy can move it. File presence is only a credential-store lead: confirm readable files, the applicable user's DPAPI context or other authorized key material, and whether a saved login belongs to a more privileged account. Path-only enumeration need not open the database or print decrypted passwords.
+
+For Firefox, [Mozilla documents](https://support.mozilla.org/en-US/kb/recovering-important-data-from-an-old-profile) that a profile's `key4.db` and `logins.json` are the paired key and encrypted-login files. Their presence is only a lead: check whether both files are readable, whether saved entries exist, and whether a Primary Password protects the key before concluding that credentials are usable. If a recovered credential belongs to a domain account, review that account's effective group-control rights and the group's [LAPS password read or decrypt rights](../active-directory-methodology/laps.md) separately; browser artifacts alone do not establish an administrator path.
 
 Tools to extract passwords from browsers:
 

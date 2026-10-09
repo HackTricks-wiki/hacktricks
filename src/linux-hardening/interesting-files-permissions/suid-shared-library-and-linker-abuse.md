@@ -79,6 +79,12 @@ namei -om /path/to/library.so
 
 If the directory is writable, validate with a copy-safe approach in a lab. Replacing system libraries on a live host can leave concurrently starting processes with inconsistent library versions.<sup>[[8]](#references)</sup>
 
+### Writable libraries inside a chroot
+
+A chroot alone does not close inherited file descriptors or confine all filesystem access. If a sandbox leaves a directory descriptor pointing outside its new root, and the jailed process can dereference that descriptor (for example through an accessible `/proc/<pid>/fd/` entry), host paths may remain reachable. This is a filesystem boundary issue; it does not by itself grant root privileges.<sup>[[11]](#references)[[12]](#references)</sup>
+
+Check separately whether the jailed user can write a library directory that a **host root-SUID executable** will use when launched from the jail. The loader resolves dependencies in the process's filesystem view, so an attacker-controlled library there may execute with the SUID program's effective identity. Confirm the exact executable, its SUID bit and mount policy, the descriptor's target and access permissions, the jail's library search path, and that the program can actually reach the host executable. A file capability on the sandbox launcher, a writable jail, or a host SUID binary alone is only a lead; the full chain depends on the sandbox's implementation.<sup>[[1]](#references)[[11]](#references)[[12]](#references)</sup>
+
 ## RPATH and RUNPATH
 
 `RPATH` and `RUNPATH` are dynamic-section entries that tell the loader where to search for libraries. They are dangerous in SUID programs when they point to attacker-writable directories.<sup>[[1]](#references)</sup>
@@ -188,5 +194,7 @@ The abuse is not that a hardlink changes permissions. The abuse is path confusio
 - [8] [Dynamic Linker Hardening (The GNU C Library)](https://www.sourceware.org/glibc/manual/latest/html_node/Dynamic-Linker-Hardening.html)
 - [9] [Hard Links (GNU Findutils)](https://www.gnu.org/software/findutils/manual/html_node/find_html/Hard-Links.html)
 - [10] [objdump (GNU Binary Utilities)](https://www.sourceware.org/binutils/docs/binutils/objdump.html)
+- [11] [chroot(2) — Linux manual page](https://man7.org/linux/man-pages/man2/chroot.2.html)
+- [12] [proc_pid_fd(5) — Linux manual page](https://man7.org/linux/man-pages/man5/proc_pid_fd.5.html)
 
 {{#include ../../banners/hacktricks-training.md}}

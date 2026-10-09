@@ -23,6 +23,8 @@ tcpflow -r /tmp/loopback.pcap 2>/dev/null
 
 `tcpflow` reconstructs plaintext TCP streams; `tshark` can filter and extract fields from a capture. For TLS traffic, decryption requires endpoint keys or a supported client configured for `SSLKEYLOGFILE` before the connection. The [local network triage page](local-network-and-socket-triage.md#tls-key-logging) shows that workflow. Do not treat an encrypted capture as readable plaintext.
 
+Stored incident artifacts can change that assessment. A [Linux core dump is an image of process memory](https://man7.org/linux/man-pages/man5/core.5.html), which may retain a session key; if a readable dump and packet capture came from the same process and session, an analyst may be able to decrypt that traffic. Inventory artifact paths and permissions first, then verify the process identity, capture time, protocol, and key format separately. Decrypted traffic or a recovered archive is a disclosure lead, not proof of another account's access: any partial SSH key material still needs to be reconstructed, matched to the corresponding public key, and accepted by that account's SSH policy. Avoid dumping core contents or capture payloads in broad enumeration output.
+
 ## Identify firewall layers
 
 ```bash
