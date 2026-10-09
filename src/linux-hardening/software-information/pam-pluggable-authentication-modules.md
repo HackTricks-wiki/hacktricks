@@ -54,6 +54,8 @@ When analyzing or modifying PAM, the **location of an inserted rule** determines
 
 Quick operator takeaway: always map the **full service graph** before patching. For example, `sshd -> password-auth -> system-auth` on some distros or `sshd -> system-remote-login -> system-login -> system-auth` on others means the same one-line implant may fan out much wider than intended.<sup>[[1]](#references)[[13]](#references)</sup>
 
+A custom `auth` module may add an interactive challenge to `sudo` after the account password. Inspect the effective `/etc/pam.d/sudo` stack, included policy, module arguments, and permissions on any referenced local data file before reviewing the challenge manually. A readable challenge word list alone does not bypass the password check or create a sudoers grant. A privileged transition still requires the correct account authentication, completion of every required PAM step, and a root-capable sudo rule; unattended enumeration should not trigger the challenge.
+
 #### Example Scenario
 
 In a setup with multiple auth modules, the process follows a strict order. If the `pam_securetty` module finds the login terminal unauthorized, root logins are blocked, yet all modules are still processed due to its "required" status. The `pam_env` sets environment variables, potentially aiding in user experience. The `pam_ldap` and `pam_unix` modules work together to authenticate the user, with `pam_unix` attempting to use a previously supplied password, enhancing efficiency and flexibility in authentication methods.<sup>[[1]](#references)[[13]](#references)[[15]](#references)[[16]](#references)[[17]](#references)</sup>
@@ -147,6 +149,8 @@ For package-integrity checks, RPM verifies installed-file metadata, `debsums -s`
 * Check for world-writable or unusual ownership under `/lib/security/`.
 * `auditd` rule: `-w /lib/security/pam_unix.so -p wa -k pam-backdoor`.
 * Grep PAM configs for unexpected modules: `grep -R "pam_[a-z].*\.so" /etc/pam.d/ | grep -v pam_unix`.
+
+That `pam_` grep misses custom modules with other `.so` basenames. Review the **active** `auth`, `account`, `password`, and `session` lines in `/etc/pam.d` (and `/etc/pam.conf` where used), including their control flag and any included stack. An unfamiliar module placed as `auth sufficient` before the normal password check merits package-ownership and binary review; [PAM's control syntax](https://man7.org/linux/man-pages/man5/pam.d.5.html) can let success end that part of the stack early. A module name, unusual timestamp, or `nodelay` option alone does not prove a bypass. If behavior suggests a timing leak, inspect the implementation and service reachability first; routine enumeration should not repeatedly submit authentication guesses.
 
 ### Quick triage commands (post-compromise or threat hunting)
 ```bash

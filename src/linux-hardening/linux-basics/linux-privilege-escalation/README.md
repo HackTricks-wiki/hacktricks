@@ -1907,8 +1907,7 @@ This is a high-impact ACL persistence/privesc path because it is easy to miss in
 
 ## Open shell sessions
 
-In **old versions** you may **hijack** some **shell** session of a different user (**root**).\
-In **newest versions** you will be able to **connect** to screen sessions only of **your own user**. However, you could find **interesting information inside the session**.
+Cross-user GNU Screen access depends on the **running session's configuration and ACL**, not its version alone. [GNU Screen documents](https://www.gnu.org/software/screen/manual/html_node/Multiuser-Session.html) that it must be built with multiuser support; `multiuser on` and an `acladd` or suitable `aclchg` grant allow another user to attach. [The manual also requires setuid-root](https://www.gnu.org/software/screen/manual/html_node/Invoking-Screen.html) for the cross-user session lookup. A visible root-owned socket or a SUID `screen` binary alone does not establish an attachable root shell. Confirm the live session is multiuser, the current user has effective input/command permission, and the shell in that session runs as the privileged owner before treating it as escalation.
 
 ### screen sessions hijacking
 

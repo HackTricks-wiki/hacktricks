@@ -615,6 +615,8 @@ Select-String -Path 'C:\xampp\apache\conf\httpd.conf' -Pattern '^\s*DocumentRoot
 icacls 'C:\xampp\htdocs'
 ```
 
+For a conventional WAMP installation, the service may point to a versioned `C:\wamp64\bin\apache\apache*\bin\httpd.exe` (or `C:\wamp\...` for a 32-bit layout), with configuration beside it under `conf\httpd.conf` and a default `C:\wamp64\www` or `C:\wamp\www` root. Check the exact service image, its run-as identity, the effective `DocumentRoot` (including `${INSTALL_DIR}` expansion and virtual-host overrides), and the root ACL together. A writable WAMP directory does not establish that Apache runs as `SYSTEM` or executes the submitted file. [Apache documents how a Windows service selects its configuration](https://httpd.apache.org/docs/2.4/platform/windows.html#winnt-service).
+
 ### Writable IIS root and application-pool network identity
 
 For IIS, map a writable physical directory to an **active site/application** in `applicationHost.config`, then identify its configured pool and server-side handler. Code placed in a served directory runs as the pool only if IIS processes that file type and the route is reachable. Check the current user's effective create-file access, site runtime state, handler and per-path overrides before treating a writable directory as code execution.
@@ -887,6 +889,14 @@ msfvenom -p windows/exec CMD="net localgroup administrators username /add" -f ex
 ### Recovery Actions
 
 Windows allows users to specify actions to be taken if a service fails. This feature can be configured to point to a binary. If this binary is replaceable, privilege escalation might be possible. More details can be found in the [official documentation](<https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc753662(v=ws.11)?redirectedfrom=MSDN>).
+
+## Scheduled task script targets
+
+For an enabled task that runs `cmd.exe /c` with a `.bat` or `.cmd` file, check the script named in the **action arguments** as well as `cmd.exe`. The same applies to an interpreter's explicit file argument, such as PowerShell `-File`. A caller-writable script or parent directory is a cross-account execution lead only when the configured task principal differs from the caller and the task actually reaches that action. An append-only ACL can matter for scripts, but an earlier `exit` or other control flow may make appended lines unreachable. Confirm effective ACLs, [task execution context](https://learn.microsoft.com/en-us/windows/win32/taskschd/security-contexts-for-running-tasks), working directory, trigger, and application-control policy before claiming escalation. Inventory should not modify the script or start the task.
+
+## Named streams on accessible files
+
+On NTFS, a readable file can have a named `:$DATA` stream whose contents are not shown by an ordinary directory listing. For a small, relevant set of accessible backups or configuration files, review stream **names and sizes** before opening any content; Windows exposes them through [`FindFirstStreamW` / `FindNextStreamW`](https://learn.microsoft.com/en-us/windows/win32/fileio/file-streams), and PowerShell's [`Get-Item -Stream *`](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-item). A stream name suggesting a secret is only a lead. Check the file's effective read access, the filesystem's stream support, whether the stream contains usable credentials, and the account they actually authenticate as. Avoid recursive stream scans and printing stream contents during routine enumeration.
 
 ## Scheduled Windows Driver Kit helper inputs
 
@@ -1496,6 +1506,10 @@ else { Write "Not Installed." }
 
 ## Files and Registry (Credentials)
 
+### Shared spreadsheets with protected sheets
+
+If a readable shared workbook is suspected of holding account data, distinguish **file encryption** from worksheet protection or hidden columns. [Microsoft states](https://support.microsoft.com/en-us/excel/protection-and-security-in-excel) that worksheet protection controls editing and is not a security feature; it does not by itself establish that the workbook contents are encrypted. Review only authorized, relevant files and avoid printing candidate secrets during broad enumeration. A readable `.xlsx` path, a protected sheet, or a hidden column alone does not prove that credentials exist or that any account has higher privileges; verify the actual data and current account rights separately.
+
 ### CI server retained change patches
 
 A CI server may retain submitted source changes under its data directory even after the build finishes. [TeamCity documents](https://www.jetbrains.com/help/teamcity/teamcity-data-directory.html) `system/changes` as storage for remote-run changes; the data directory can be configured and is not necessarily under `ProgramData`. A readable patch can preserve removed or added references to a credential file, an encryption key, or a script that uses both. For example, a PowerShell `ConvertTo-SecureString -Key` workflow needs the AES key as well as the encrypted string; [Microsoft documents](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.security/convertfrom-securestring) that the key is supplied separately. Review only accessible patch names first, then inspect relevant content under authorization without printing secrets in routine enumeration output. A patch path, an encrypted value, or a key reference alone does not prove a valid credential or higher-privilege access. Restrict data-directory ACLs and avoid committing secrets to build changes.
@@ -1810,6 +1824,8 @@ TypedURLs       #IE
 ```
 
 Password Safe v3 databases commonly use the `.psafe3` extension. Treat a matching filename as an encrypted vault candidate; its presence does not establish that you can read it, unlock it, or use any stored credentials. Check accessible user profiles and configured file-sharing roots when reviewing where such files are stored.
+
+A readable KeePass `.kdbx` is likewise only an encrypted-vault lead. Unlocking it requires the actual master-password and any configured key-file or account factors. If an authorized review finds an LM:NT hash pair in an entry, verify the named account and whether the NT hash is current and accepted by the target's NTLM service before considering [pass-the-hash](../ntlm/README.md#pass-the-hash). A vault entry does not grant Administrator or SYSTEM rights on its own; remote service access, account rights, and any separate service-execution step must also hold. Inventory should report the vault path and readability, not print the database or stored credentials.
 
 Search all of the proposed files:
 
