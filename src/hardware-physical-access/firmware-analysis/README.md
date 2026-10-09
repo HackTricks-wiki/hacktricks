@@ -10,6 +10,9 @@
 
 ### Related resources
 
+{{#ref}}
+uefi-ifr-nvram-security-setting-patching.md
+{{#endref}}
 
 {{#ref}}
 synology-encrypted-archive-decryption.md

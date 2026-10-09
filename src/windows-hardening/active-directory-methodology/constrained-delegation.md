@@ -46,7 +46,9 @@ Rubeus.exe s4u /user:sqlservice /domain:testlab.local /rc4:2b576acbe6bcfda7294d6
 
 If the compromised account has **T2A4D**, you can usually complete the full **`S4U2Self -> S4U2Proxy`** chain from only the service key/TGT.<sup>[[2]](#references)</sup>
 
-If it only has **`msDS-AllowedToDelegateTo`** (the classic **"Use Kerberos only"** mode), the delegation can still be abusable, but the evidence ticket for S4U2Proxy must be a **real forwardable user-to-service ticket** for the delegating service. In practice that means stealing or capturing a victim TGS from **LSASS/ccache** and feeding it into the second stage (`/tgs:` in Rubeus). A **non-forwardable** S4U2Self ticket is **not** enough for classic constrained delegation; if that is your only evidence ticket, check [Resource-based Constrained Delegation](resource-based-constrained-delegation.md) instead.<sup>[[2]](#references)</sup>
+If it only has **`msDS-AllowedToDelegateTo`** (the classic **"Use Kerberos only"** mode), the delegation can still be abusable, but the evidence ticket for S4U2Proxy must be a **forwardable user-to-service ticket** for the delegating service. One route is capturing a victim TGS from **LSASS/ccache** and feeding it into the second stage (`/tgs:` in Rubeus). A **non-forwardable** S4U2Self ticket is **not** enough for classic constrained delegation; if that is your only evidence ticket, check [Resource-based Constrained Delegation](resource-based-constrained-delegation.md) instead.<sup>[[2]](#references)</sup>
+
+Another conditional route is a first [RBCD](resource-based-constrained-delegation.md) hop to the delegating service: if it produces a **forwardable** ticket for the intended user and service, that ticket can be tested as evidence for a later Kerberos-only S4U2Proxy hop. Confirm the first ticket's flags, the delegating service's SPN, its target allow-list, and any user delegation restrictions; control of an RBCD attribute alone does not establish the second hop.
 
 ### Cross-domain constrained delegation notes (2025+)
 
@@ -110,9 +112,9 @@ getST.py -dc-ip "$DC_IP" -spn "$DELEGATED_SPN" \
 
 For live jacking, reverse the two LDAP writes immediately after ticket acquisition to avoid breaking the legitimate service. On DCs with computer-account auditing enabled, hunt for Security event **4742** where `servicePrincipalName` is removed from one computer and shortly added to another, especially when the SPN hostname differs from the destination's `dNSHostName`. Correlate with event **4769**: S4U2Self presents the same account as client/service, while S4U2Proxy populates **Transited Services**.<sup>[[5]](#references)</sup>
 
-### Automating delegation setup from low-priv creds
+### Configuring delegation on a controlled account
 
-If you already hold **GenericAll/WriteDACL** over a computer or service account, you can push the required attributes remotely without RSAT using **bloodyAD** (2024+):
+This path requires **effective write access** to the computer or service account's delegation attributes (for example, `GenericAll`, or `WriteDACL` followed by an ACL change) **and** the `SeEnableDelegationPrivilege` user right for the account making the LDAP change. Microsoft requires that privilege when `msDS-AllowedToDelegateTo` is modified; object-control rights alone do not bypass it. Check both prerequisites before using an LDAP client such as **bloodyAD** to set protocol-transition delegation.<sup>[[Microsoft ADTS modify-operation security checks](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/c714e48c-ea21-48b0-913d-fc065ab3dda3)]</sup>
 
 ```bash
 # Set TRUSTED_TO_AUTH_FOR_DELEGATION and point delegation to CIFS/DC
@@ -120,7 +122,7 @@ KRB5CCNAME=owned.ccache bloodyAD -d corp.local -k --host dc.corp.local add uac W
 KRB5CCNAME=owned.ccache bloodyAD -d corp.local -k --host dc.corp.local set object WEBSRV$ msDS-AllowedToDelegateTo -v 'cifs/dc.corp.local'
 ```
 
-This lets you build a constrained delegation path for privesc without DA privileges as soon as you can write those attributes.
+An existing computer account can be a candidate even when `ms-DS-MachineAccountQuota` is zero; that quota limits the default new-computer creation route, not rights over an existing object. To use the configured delegation, you also need control of the delegating account's key or password, a valid service principal name, and a target user whose credentials are delegable. These conditions and effective directory access must be checked separately.
 
 - Step 1: **Get TGT of the allowed service**
 

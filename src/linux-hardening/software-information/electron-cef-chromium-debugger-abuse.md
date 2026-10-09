@@ -178,6 +178,8 @@ ws.send(
 
 STAR Labs showed that exposed WebDriver/CDP services can enable arbitrary file reads and RCE; DNS rebinding can complete the exploit chain in some configurations.<sup>[[9]](#references)</sup>
 
+ChromeDriver's WebDriver service is distinct from Chrome DevTools/CDP. Its [`goog:chromeOptions.binary` capability](https://developer.chrome.com/docs/chromedriver/capabilities) selects the browser executable launched for a new session. If an unprivileged caller can reach a ChromeDriver service running as root and submit a session with a caller-controlled executable path, that launch can cross the service's privilege boundary. An empty `/sessions` response does not settle whether new sessions can be created. Inspect process owner, actual listener reachability, session authorization, executable access, and confinement before concluding the path is usable; a process name or usual port alone is insufficient. [Google's security guidance](https://developer.chrome.com/docs/chromedriver/security-considerations) says to run ChromeDriver under an unprivileged account. Passive enumeration should not create a WebDriver session.
+
 For additional historical browser-automation and Chromium security cases, see the Counter WebDriver write-up and Project Zero issues 773, 1742, and 1944.<sup>[[10]](#references)[[11]](#references)[[12]](#references)[[13]](#references)</sup>
 
 ### Enabling CDP inside a live Chromium process
