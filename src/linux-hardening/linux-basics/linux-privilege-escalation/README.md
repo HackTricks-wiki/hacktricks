@@ -333,6 +333,8 @@ However, remember that **as a regular user you can read the memory of the proces
 > - **kernel.yama.ptrace_scope = 2**: Only admin can use ptrace, as it required CAP_SYS_PTRACE capability.
 > - **kernel.yama.ptrace_scope = 3**: No processes may be traced with ptrace. Once set, a reboot is needed to enable ptracing again.
 
+A same-UID process that briefly unlocks a password vault can be a separate credential boundary. When tracing is permitted, an active, dumpable process may expose the vault password through its input syscalls or memory, even though the encrypted vault file itself remains protected. `ptrace_scope=0` is only one prerequisite: matching credentials, target dumpability, other Linux security modules, and the process lifetime also matter. A vault entry becoming a Unix root login requires a separate credential-reuse check. Routine enumeration should report the policy and candidate process or vault paths, not capture input or print secrets. See the [kernel's Yama documentation](https://cdn.kernel.org/doc/html/latest/admin-guide/LSM/Yama.html) and [ptrace access checks](https://man7.org/linux/man-pages/man2/ptrace.2.html).
+
 #### GDB
 
 If you have access to the memory of an FTP service (for example) you could get the Heap and search inside of its credentials.
@@ -557,6 +559,8 @@ Read the following page for more wildcard exploitation tricks:
 ### Bash arithmetic expansion injection in cron log parsers
 
 Bash arithmetic can interpret untrusted text as an expression. In affected Bash contexts, an array subscript inside that expression can evaluate a command substitution. If a privileged cron/parser places attacker-controlled log text into such an arithmetic comparison, the substitution can run with the parser's identity.<sup>[[22]](#references)</sup> This depends on the exact Bash expression and version; a bare `$(...)0` string in an expanded variable is not, by itself, a reliable demonstration of re-evaluation.
+
+The input can also come from file metadata or another field read from a user-writable location. For example, a privileged cleanup script that reads an image `Producer` tag and compares it with `[[ "$producer" -eq "expected" ]]` performs an arithmetic comparison, even though the variable is quoted. Trace the scheduled identity, which files can supply the tag, any transformations before the comparison, and the exact Bash behavior. For text labels, use a string comparison; for numbers, validate the input as decimal digits before arithmetic. See the [Bash arithmetic rules](https://www.gnu.org/software/bash/manual/html_node/Shell-Arithmetic.html).
 
 - Typical vulnerable pattern:
   ```bash
@@ -1768,6 +1772,8 @@ doas vim
 :!/bin/sh
 ```
 
+A root-capable `doas` rule for the original Python-based `dstat` also merits a plugin-path review. Its [manual](https://github.com/dstat-real/dstat/blob/master/docs/dstat.1) and [source](https://github.com/dstat-real/dstat/blob/master/dstat) list `/usr/share/dstat/` and `/usr/local/share/dstat/` among locations for `dstat_*.py` plugins. If the current user can write and search a location actually used by the installed build, a selected plugin may run with the `doas` RunAs identity. Confirm the effective rule, plugin lookup in that build, directory and parent permissions or ACLs, and whether the caller can select a plugin; a `dstat` rule or writable directory alone is only a lead. Other `dstat` implementations can use different plugin systems. Inspect metadata passively without loading a plugin.
+
 ### Sudo Hijacking
 
 If you know that a **user usually connects to a machine and uses `sudo`** to escalate privileges and you got a shell within that user context, you can **create a new sudo executable** that will execute your code as root and then the user's command. Then, **modify the $PATH** of the user context (for example adding the new path in .bash_profile) so when the user executes sudo, your sudo executable is executed.
@@ -2188,6 +2194,8 @@ Read the code of [**linPEAS**](https://github.com/carlospolop/privilege-escalati
 If `/etc/guacamole/guacamole.properties` is readable, review its `mysql-*`, `postgresql-*`, or `sqlserver-*` database connection settings. Where the account is authorized to read the Guacamole JDBC tables, `guacamole_connection_parameter` may contain saved SSH `username`, `password`, `private-key`, or `passphrase` values. Start with connection IDs and parameter names, then inspect only relevant rows; a saved value may be a dynamic token or a vault reference rather than a reusable secret. See the [Guacamole JDBC schema](https://guacamole.apache.org/doc/gug/jdbc-auth-schema.html) and [SSH connection parameters](https://guacamole.apache.org/doc/gug/configuring-guacamole.html).
 
 The [pswm password manager](https://github.com/Julynx/pswm#usage) stores an encrypted vault at `~/.local/share/pswm/pswm` by default. If another user's vault is visible, check its ownership and whether your account can actually read it. The vault path alone does not reveal credentials; recovering its master password, finding a reusable account password, and confirming that account's privileges are separate steps.
+
+[Passpie's default database](https://passpie.readthedocs.io/en/latest/faq.html#what-is-a-passpie-database) is `~/.passpie/`, with a `.keys` keyring and encrypted `.pass` credential files under group directories. A visible database directory is a path lead only: confirm access to the key and relevant encrypted entry, any required master passphrase, and whether a recovered credential belongs to a more privileged account. Passpie also supports [custom database paths](https://passpie.readthedocs.io/en/latest/getting_started.html#multiple-databases), so the default path is not exhaustive. Automated enumeration should list metadata without exporting credentials or printing key material.
 
 ### Logs
 

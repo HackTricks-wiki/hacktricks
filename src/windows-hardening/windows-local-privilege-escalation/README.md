@@ -351,7 +351,9 @@ Veeam Backup & Replication and Cloud Connect use a core backup service on **TCP/
 The cited PoC demonstrates command execution as SYSTEM when its additional prerequisites hold; the vendor's advisory describes the credential-disclosure issue.
 ## KrbRelayUp
 
-A **local privilege escalation** vulnerability exists in Windows **domain** environments under specific conditions. These conditions include environments where **LDAP signing is not enforced,** users possess self-rights allowing them to configure **Resource-Based Constrained Delegation (RBCD),** and the capability for users to create computers within the domain. It is important to note that these **requirements** are met using **default settings**.
+A local Kerberos relay can cross from a lower-privileged logon to a privileged directory write when a suitable COM server authenticates and the relayed principal has rights on the target object. [KrbRelay documents](https://github.com/cube0x0/KrbRelay) both RBCD and `msDS-KeyCredentialLink` (shadow-credential) LDAP writes; KrbRelayUp automates some of these paths. An RBCD chain requires applicable delegation and target-object rights, while a shadow-credential chain requires key-credential write rights and a KDC that supports the certificate authentication path. Neither path follows from domain membership alone.
+
+Check the actual DC's [LDAP signing](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/ldap-signing) and [LDAPS channel-binding](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/ldap-channel-binding) policy, the relayed identity's object ACL, and the selected COM class's authentication and impersonation levels. The caller's logon type and credential context matter: a WinRM session can behave differently from an interactive or new-credentials logon. Firewall/OXID routing and installed updates can change the result too. Treat a permissive policy or matching ACL as a review candidate; passive enumeration should not trigger COM coercion, relay authentication, or directory writes. A machine-account shadow credential may lead to a machine ticket and, only if that account has the required directory replication rights, a separate DCSync path.
 
 Find the **exploit in** [**https://github.com/Dec0ne/KrbRelayUp**](https://github.com/Dec0ne/KrbRelayUp)
 
@@ -608,6 +610,12 @@ Get-CimInstance Win32_Service -Filter "Name='Apache2.4'" | Select-Object Name, S
 Select-String -Path 'C:\xampp\apache\conf\httpd.conf' -Pattern '^\s*DocumentRoot\s+'
 icacls 'C:\xampp\htdocs'
 ```
+
+### Writable IIS root and application-pool network identity
+
+For IIS, map a writable physical directory to an **active site/application** in `applicationHost.config`, then identify its configured pool and server-side handler. Code placed in a served directory runs as the pool only if IIS processes that file type and the route is reachable. Check the current user's effective create-file access, site runtime state, handler and per-path overrides before treating a writable directory as code execution.
+
+An IIS pool configured as `ApplicationPoolIdentity` or `NetworkService` commonly authenticates to domain resources as the **host computer account**, even though its local token may be low-privileged. `LocalSystem` is already highly privileged locally and also uses the computer account on the network; `LocalService` normally presents anonymous network credentials. A `SpecificUser` pool uses its configured account instead. [Microsoft documents these identity types](https://learn.microsoft.com/en-us/iis/configuration/system.applicationhost/applicationpools/add/processmodel) and [the application-pool network identity](https://learn.microsoft.com/en-us/iis/manage/configuring-security/application-pool-identities). An omitted identity setting can inherit pool defaults, which differ across IIS generations, so resolve the effective configuration instead of guessing from the pool name. If code execution reaches a pool with computer-account network identity, assess that **specific computer's** directory rights. [DCSync](../active-directory-methodology/dcsync.md) requires replication rights on the domain naming context; a machine-account ticket or host role alone does not prove them. Passive enumeration should inspect configuration and ACLs without uploading a file, making a network authentication, or requesting tickets.
 
 ### Memory Password mining
 
@@ -898,6 +906,10 @@ Get-ChildItem -path Registry::HKEY_LOCAL_MACHINE\SOFTWARE | ft Name
 #### Checkmk Windows agent repair path
 
 [CVE-2024-0670](https://checkmk.com/werk/16361) affects older Checkmk Windows agents that wrote command files in `C:\Windows\Temp` and then executed a pre-existing write-protected file when replacement failed. The vendor fixed the issue in 2.1.0p40, 2.2.0p23, 2.3.0b1, and 2.4.0b1. Check the full installed patch level and whether the affected agent operation can run; a branch-only label such as `2.1` cannot establish exposure. Enumeration can inspect version, service state, and Temp permissions without creating files or triggering agent commands.
+
+#### ADSelfService Plus SAML service review
+
+[CVE-2022-47966](https://www.manageengine.com/security/advisory/CVE/cve-2022-47966.html) affected ADSelfService Plus build 6210 and earlier; the vendor fixed it in build 6211. It is relevant only if SAML SSO **is or was** enabled. An installed-product entry or service path is therefore a lead, not a vulnerability verdict: confirm the exact build, the SAML configuration history, network reachability of the service, and the account it runs under. Code execution through the service inherits that account's privileges; SYSTEM execution requires a SYSTEM-run instance. A readable `OfflineBackup_*.ezip` in the product's Backup directory is a separate encrypted backup lead, not evidence of a usable credential or this SAML flaw. Record its path and access rights without unpacking it during routine enumeration.
 
 ### Write Permissions
 
