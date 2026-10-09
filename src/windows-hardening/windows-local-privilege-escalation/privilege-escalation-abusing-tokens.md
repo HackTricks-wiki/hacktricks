@@ -167,6 +167,8 @@ mimikatz # sekurlsa::minidump lsass.dmp
 mimikatz # sekurlsa::logonpasswords
 ```
 
+A previously saved, readable LSASS dump may be available without the current account having permission to capture the live protected process. Treat a dump file or similarly named archive as a lead only: verify access and contents, then assess whether any recovered credential is still valid and grants a higher-privilege context. File names alone do not prove that an archive contains a dump or that credentials are reusable.
+
 #### RCE
 
 If you want to get a `NT SYSTEM` shell you could use:

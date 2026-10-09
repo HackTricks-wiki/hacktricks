@@ -131,7 +131,7 @@ If resolution of the selected name blocks, verify how that name resolves on the 
 
 #### sudo < v1.8.28
 
-From @sickrov
+This [upstream Runas UID bypass](https://ubuntu.com/security/CVE-2019-14287) requires an effective sudo rule that permits a command as `ALL` users while excluding root, such as `(ALL, !root) /bin/bash`. The caller must also be allowed to use that rule, including any authentication requirement. Check the installed package advisory: vendors backported the fix into releases whose displayed upstream version is still below 1.8.28. A `!root` rule or an old version alone does not confirm exposure. Do not test a privileged command during passive enumeration.
 
 ```
 sudo -u#-1 /bin/bash
