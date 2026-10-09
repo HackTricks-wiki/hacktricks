@@ -173,6 +173,7 @@ Microsoft introduced a three-phase rollout (Compatibility → Audit → Enforcem
 - **ESC1/ESC6 alone is no longer the whole story** in 2025+ environments. If you request a cert for another principal, you usually also need a strong mapping artifact such as the SID extension or an explicit mapping.
 - **ESC15 (EKUwu)** is mostly valuable in unpatched environments because it turns harmless **v1** templates such as **WebServer** into authentication- or enrollment-agent-capable certs by injecting **Application Policies**. Kerberos PKINIT still evaluates EKUs, but **LDAP Schannel** also honors Application Policies, which keeps LDAP-based abuse relevant.<sup>[[1]](#references)</sup>
 - **ESC16** is a CA-wide knob: if the CA disables the SID security extension globally, every issued certificate falls back toward weaker mapping behavior unless the attack chain injects a SID by another supported format.
+- **ESC7 rights are distinct:** a CA `ManageCA` grant can permit changes to settings such as `EDITF_ATTRIBUTESUBJECTALTNAME2` (ESC6), while `ManageCertificates` governs request approval. An explicit Deny on certificate-manager rights can block that approval route even if an Allow is also present; assess the effective CA ACL before chaining settings and templates. See [Microsoft's CA ACL assessment](https://learn.microsoft.com/en-us/defender-for-identity/security-assessment-edit-vulnerable-ca-setting).
 
 ---
 
@@ -185,6 +186,8 @@ Microsoft introduced a three-phase rollout (Compatibility → Audit → Enforcem
 * Restrict web enrollment (`certsrv`) and CES/NDES endpoints to trusted networks or behind client-certificate authentication.
 * Enforce RPC enrollment encryption (`certutil -setreg CA\InterfaceFlags +IF_ENFORCEENCRYPTICERTREQUEST`) to mitigate ESC11 (RPC relay). The flag is **on by default**, but is often disabled for legacy clients, which re-opens relay risk.
 * Secure **IIS-based enrollment endpoints** (CES/Certsrv): disable NTLM where possible or require HTTPS + Extended Protection to block ESC8 relays.
+
+Assess ESC11 on the host running the CA, which may be a domain member server rather than a domain controller. Read the active CA's `InterfaceFlags` under `HKLM\SYSTEM\CurrentControlSet\Services\CertSvc\Configuration`; an unreadable or missing value is an unknown result, not proof that RPC encryption is disabled. A clear `IF_ENFORCEENCRYPTICERTREQUEST` bit is a configuration lead that still needs a reachable enrollment RPC endpoint, coercible credentials, and a usable certificate template. For ESC8, an HTTP NTLM challenge alone is insufficient: confirm that a working enrollment endpoint exists.
 
 ---
 

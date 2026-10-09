@@ -45,6 +45,36 @@ A VPN is useful for hiding destination metadata from the access ISP, protecting 
 6. Use an organization-controlled test endpoint to record observed IPv4, IPv6, DNS resolver, and connection timing. Do not expose a sensitive engagement to random “leak test” sites.
 7. Re-test after client, OS, network, or policy changes.
 
+### Hostile-LAN routing bypasses
+
+A VPN can remain visibly “connected” while selected packets bypass it because the operating system chooses a route **before** the VPN encrypts the packet. TunnelCrack demonstrated two ways to abuse common routing exceptions: **LocalNet** makes an Internet destination appear to be on the directly connected subnet, while **ServerIP** spoofs VPN-gateway resolution so a target address inherits the clear-network exception needed by the VPN transport. These are client/routing failures rather than breaks in WireGuard, OpenVPN, IPsec, or TLS; HTTPS payloads remain end-to-end encrypted, but the local observer can recover destination/timing metadata and any cleartext protocol data.<sup>[[18]](#references)</sup>
+
+TunnelVision applies the same pre-encryption primitive through DHCP option 121. A malicious or compromised DHCP server can install a classless route that is more specific than the VPN's catch-all route, selecting the physical interface for an arbitrary host or range. The VPN control channel can stay alive, so a kill switch triggered only by tunnel disconnection may not activate and a single public “IP leak” check can miss selective bypasses.<sup>[[19]](#references)</sup>
+
+A packet-filter kill switch that permits only DHCP and the authenticated VPN transport on the physical interface should turn this into fail-closed behavior, but targeted route injection can still create a selective-denial side channel. For high-consequence Linux workloads, prefer the stronger [route-enforced network-namespace pattern](advanced-network-privacy-architectures.md#enforce-the-route-per-workload), where the application namespace has no physical interface or clear-network default route.<sup>[[19]](#references)</sup>
+
+#### Owned-lab verification
+
+Test the exact client/OS/version on an owned AP, DHCP server, VPN endpoint, and destination; product-wide claims age quickly because routing and packet-filter implementations are platform-specific. Capture on the endpoint itself as well as the test server—an egress-IP website alone does not prove that every destination follows the tunnel.<sup>[[18]](#references)[[19]](#references)</sup>
+
+1. Connect the VPN, record the VPN-server address, and save every IPv4/IPv6 routing table and policy-routing rule. On Windows use `route print`; on macOS use `netstat -rn`; on Linux use the commands below.
+2. Query the selected route for several owned destination IPs. The next hop/interface must be the tunnel, except for the documented VPN transport endpoint.
+3. For TunnelVision, renew the lease on the controlled DHCP network and install an option 121 route **only for an owned test destination**. A pass means traffic is still tunneled or blocked—never emitted as destination traffic on the physical interface.
+4. For LocalNet, assign the client a lab-only public documentation subnet such as `203.0.113.0/24` and place the owned test destination within it. Verify that enabling LAN access does not make Internet-class destinations bypass the tunnel.
+5. For ServerIP, before VPN connection have controlled DNS resolve the owned VPN hostname to the owned test destination, while the lab gateway forwards the VPN transport to the real owned VPN endpoint. The client must not exempt unrelated application traffic to the spoofed address.
+6. Repeat with “local network access” both enabled and disabled, after reconnect, sleep/wake, network switching, and a VPN-process crash. Test IPv4, IPv6, and DNS independently.
+7. Inspect the physical-interface capture. It should contain DHCP and encrypted packets to the VPN server, not packets addressed directly to the owned test destination. Also confirm that a rejected bypass cannot silently fall back after user prompts or connectivity repair.
+
+```bash
+# Run route monitoring and capture in separate terminals.
+TEST_IP=203.0.113.10 # replace with the owned test endpoint
+ip -4 route show table all
+ip -6 route show table all
+ip route get "$TEST_IP"
+ip monitor route
+sudo tcpdump -ni any "host $TEST_IP"
+```
+
 ## Tor Browser: stronger web unlinkability
 
 Tor builds a circuit through multiple relays so no single relay normally knows both source and destination. The destination sees a Tor exit rather than the user's IP; the local network normally sees a Tor connection.<sup>[[3]](#references)</sup> Tor is designed for low-latency TCP applications, so it is slower and cannot guarantee protection against an adversary able to correlate both ends.<sup>[[4]](#references)</sup>
@@ -142,6 +172,7 @@ Mixnets such as Nym or Katzenpost add fixed-size packets, delay, reordering, and
 - [ ] Authorization covers the access network, target, dates, and source infrastructure.
 - [ ] The endpoint contains no unrelated identities or active sync sessions.
 - [ ] IPv4, IPv6, DNS, and reconnect behavior match the plan.
+- [ ] Controlled DHCP/local-subnet route injection cannot move test traffic onto the physical interface.
 - [ ] The destination sees only the expected egress.
 - [ ] Captive portal and hotspot behavior have been tested without sensitive traffic.
 - [ ] Local sharing/discovery and automatic network joining are disabled.
@@ -149,6 +180,8 @@ Mixnets such as Nym or Katzenpost add fixed-size packets, delay, reordering, and
 - [ ] Provider policy, retention, and emergency contact are current.
 
 For split-knowledge relays, route-enforced workloads, pluggable transports, onion services, I2P, and disposable remote browsers, continue to [Advanced Network Privacy Architectures](advanced-network-privacy-architectures.md).
+
+
 
 ## References
 
@@ -169,4 +202,6 @@ For split-knowledge relays, route-enforced workloads, pluggable transports, onio
 - [15] [RFC 9230 — Oblivious DNS over HTTPS](https://www.rfc-editor.org/rfc/rfc9230.html)
 - [16] [RFC 9849 — TLS Encrypted Client Hello](https://www.rfc-editor.org/rfc/rfc9849.html)
 - [17] [Katzenpost — Threat Model](https://katzenpost.network/docs/threat_model/)
+- [18] [Xue et al. — Bypassing Tunnels: Leaking VPN Client Traffic by Abusing Routing Tables](https://www.usenix.org/system/files/usenixsecurity23-xue.pdf)
+- [19] [Leviathan Security — TunnelVision: How Attackers Can Decloak Routing-Based VPNs for a Total VPN Leak](https://www.leviathansecurity.com/blog/tunnelvision)
 {{#include ../banners/hacktricks-training.md}}
