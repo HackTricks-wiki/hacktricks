@@ -353,6 +353,12 @@ chmod +x /host/path/to/hook.sh
 
 The interesting part is the trust boundary: the write happens from inside the container, but execution happens later in the host service context. This turns a narrow hostPath or bind mount into a delayed host-code-execution primitive.
 
+## Root-Owned Files on a Shared Host Path
+
+A container account that can become root may be able to place a root-owned file on a writable path also used by the host. If container UID 0 maps to host UID 0, both views refer to the same file, and the host mount honors SUID execution, a host user who can run a root-owned SUID executable on that path may cross the host privilege boundary. The container does not have to run with `--privileged` for this particular file-ownership issue. See [user namespace mappings](protections/namespaces/user-namespace.md) and the [SUID discussion](privileged-containers.md) for the separate conditions.
+
+Review the path from **both sides**: compare a benign file's ownership and identity, check the container's `uid_map` and `gid_map`, and inspect the host's mount options and execution policy. Container-side `rw` without `nosuid` is only a candidate; it cannot establish host ownership, host mount flags, a host user's access, or whether AppArmor/SELinux blocks execution. `noexec` constrains execution in the view where it applies. The `shared:` and `master:` tags in `/proc/self/mountinfo` describe mount propagation, not whether the file's contents are shared with the host. A bind mount may lack those tags. Credential reuse that provides a host login is a separate step from the shared-file privilege boundary.
+
 ## Mount-Related CVEs
 
 Host mounts also intersect with runtime vulnerabilities. Important recent examples include:
