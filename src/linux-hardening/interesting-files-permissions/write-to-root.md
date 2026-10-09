@@ -70,6 +70,10 @@ Hardening must cover both repository ingestion and the final filesystem operatio
 - Avoid check-then-open symlink races: open relative to a trusted directory descriptor and, on Linux, use `openat2()` with `RESOLVE_BENEATH` plus `RESOLVE_NO_SYMLINKS` for attacker-controlled paths.
 - Prefer a normal checkout in an isolated directory over reimplementing checkout from plumbing output. If raw-object ingestion is required, enable receive-side validation such as `receive.fsckObjects=true`; do not downgrade the pathname-related `receive.fsck.*` findings needed to reject crafted trees.
 
+### Privileged configuration deployment
+
+Some management services store intended system state in a configuration file and later deploy it with elevated privileges. For example, [openmediavault stores configuration in `/etc/openmediavault/config.xml`](https://docs.openmediavault.org/en/7.x/faq.html), and its [RPC interface](https://docs.openmediavault.org/en/8.x/development/tools/omv_rpc.html) can apply service changes. If a lower-privileged account can write or replace that file, review whether it can also request an authorized deployment and whether the selected module consumes the changed field as root. SSH account keys, scheduled commands, and package installation each have different prerequisites; mere file presence or a writable XML file does not prove any of them. Check the file and parent permissions, the caller's groups and RPC authorization, installed version, and the actual consumer without editing the configuration or invoking an apply operation during enumeration.
+
 ### Cron & Time files
 
 If you can **write cron-related files that root executes**, you can usually get code execution the next time the job runs. Interesting targets include:<sup>[[14]](#references)[[20]](#references)</sup>
