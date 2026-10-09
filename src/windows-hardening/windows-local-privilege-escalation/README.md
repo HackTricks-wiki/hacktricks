@@ -1730,7 +1730,7 @@ Get-Childitem –Path C:\ -Include *unattend*,*sysprep* -File -Recurse -ErrorAct
 
 ### Credentials in the RecycleBin
 
-You should also check the Bin to look for credentials inside it
+Check accessible Recycle Bin entries for deleted backups and configuration archives as well as files whose names explicitly mention credentials. A useful `.7z`, `.zip`, or `.rar` backup may be months old and have an ordinary filename. Windows stores the original path and deletion time in a `$I` record and the deleted file as its paired `$R` entry; inspect the metadata and the current identity's read access before opening an archive. Visibility depends on the volume, user SID, and file permissions, so an empty listing does not prove that no recoverable backup exists. Treat an archive name as a review candidate, not proof that it contains a valid secret.
 
 To **recover passwords** saved by several programs you can use: [http://www.nirsoft.net/password_recovery_tools.html](http://www.nirsoft.net/password_recovery_tools.html)
 
