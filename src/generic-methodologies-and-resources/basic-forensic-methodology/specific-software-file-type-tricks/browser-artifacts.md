@@ -51,8 +51,7 @@ Within each profile folder, you can find several important files:<sup>[[1]](#ref
 
 Additionally, checking the browser’s anti-phishing settings can be done by searching for `browser.safebrowsing` entries in `prefs.js`, indicating whether safe browsing features are enabled or disabled.<sup>[[2]](#references)</sup>
 
-To try to decrypt the master password, you can use [https://github.com/unode/firefox_decrypt](https://github.com/unode/firefox_decrypt)\
-With the following script and call you can specify a password file to brute force:
+To decrypt saved logins from an accessible profile, the [Firefox Primary Password](https://support.mozilla.org/en-US/kb/use-primary-password-protect-stored-logins), if configured, must be supplied or recovered separately; the profile does not reveal that password. Confirm that any recovered login authenticates to its web account. Unix root access requires separate proof that the credential is also accepted by Unix authentication for root. You can review saved logins with [firefox_decrypt](https://github.com/unode/firefox_decrypt). The following example tests candidate Primary Passwords from a password file:
 
 ```bash:brute.sh
 #!/bin/bash
