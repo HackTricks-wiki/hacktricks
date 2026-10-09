@@ -397,19 +397,19 @@ lnkparse login.vbs.lnk
 # C:\Windows\SYSVOL\sysvol\<domain>\scripts\login.vbs
 ```
 
-- BloodHound displays the `logonScript` (scriptPath) attribute on user nodes when present.
+- BloodHound displays the user object's `scriptPath` logon-script attribute when present. GPO-configured logon scripts are a separate policy reference, so inspect the applicable GPO as well.
 
 ### Validate write access (don’t trust share listings)
-Automated tooling may show SYSVOL/NETLOGON as read-only, but underlying NTFS ACLs can still allow writes. Always test:
+Automated tooling may show SYSVOL/NETLOGON as read-only even when the exact script has a different NTFS ACL. Start with read-only inspection of that file and its parent directory; matching Allow ACEs remain candidates because effective SMB and NTFS access, Deny ACEs, and the current token all matter:
 
-```bash
-# Interactive write test
-smbclient \\<dc>\SYSVOL -U <user>%<pass>
-smb: \\> cd <domain>\scripts\
-smb: \\<domain>\scripts\\> put smallfile.txt login.vbs   # check size/time change
+```powershell
+Get-Acl -LiteralPath '\\dc.example.test\SYSVOL\example.test\scripts\login.vbs' |
+  Format-List Owner,AccessToString
+Get-Acl -LiteralPath '\\dc.example.test\SYSVOL\example.test\scripts' |
+  Format-List Owner,AccessToString
 ```
 
-If file size or mtime changes, you have write. Preserve originals before modifying.
+An authorized write test should be target-specific and reversible, with the original script backed up and restored. Do not overwrite a working logon script merely to test access; a successful write can run at the next user's logon.
 
 ### Poison a VBScript logon script for RCE
 Append a command that launches a PowerShell reverse shell (generate from revshells.com) and keep original logic to avoid breaking business function:
