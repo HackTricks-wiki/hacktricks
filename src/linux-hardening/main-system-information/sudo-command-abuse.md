@@ -95,9 +95,27 @@ Start with `sudo -l`, `sudo -V`, and any applicable `doas` policy. Read the allo
 - Sudo timestamp reuse depends on the cache policy, owning user, terminal/session, and permissions. The [privilege escalation guide](../linux-basics/linux-privilege-escalation/README.md#reusing-sudo-tokens) covers the checks.
 - `doas` has its own rules and configuration. Check permitted commands and writable configuration paths as described in the [doas section](../linux-basics/linux-privilege-escalation/README.md#doas).
 
+### Sudo-run preset and plugin loaders
+
+Python tools that accept a caller-selected preset or plugin directory may import code with the privileges granted by sudo. For example, BBOT accepts a preset with `-p`, and its [custom-module documentation](https://www.blacklanternsecurity.com/bbot/Stable/dev/module_howto/#load-modules-from-custom-locations) describes `module_dirs` entries that select additional Python module directories. If the effective sudo rule permits a caller-selected preset and the caller controls a module in the selected directory, the import can execute code as the privileged user, potentially before the tool rejects an invalid module. Check the installed version, exact sudo run-as and argument policy, and ownership of the preset and module paths without loading the module during enumeration.
+
+### Sudo-run Backdrop command line tool
+
+[Bee](https://github.com/backdrop-contrib/bee) is a PHP command line tool for Backdrop CMS. Its `eval` (`php-eval`) and `php-script` commands can run caller-supplied PHP. A sudo rule that permits the Bee executable as root with unrestricted arguments can therefore expose root code execution when Bee can bootstrap a Backdrop installation. Run it from the site directory or select a site using the global `--root=<directory>` option; simply finding Bee or a Backdrop `settings.php` file does not prove the sudo permission, a usable site, or successful bootstrap. Review the effective sudo rule, any command exclusions, the executable's identity, and access to the site before testing. During passive enumeration, inspect the rule and file paths without invoking Bee. See the [Bee command changelog](https://github.com/backdrop-contrib/bee/blob/1.x-1.x/CHANGELOG.md) for the PHP command additions.
+
+### Privileged backup wrappers that rewrite a caller's task file
+
+A root-run shell wrapper may accept a task file selected by the caller, strip `../` from source paths, check that each result starts with an allowed directory, rewrite the task file, and then pass its *pathname* to a backup program. Review the transformed path after full canonical resolution: a single string-replacement pass can expose a new traversal sequence that a lexical prefix check accepts. Also check whether the backup program reads the transformed in-memory data or opens the file again. If it opens the file again, a failed rewrite can leave the original input in place.
+
+On Linux, `fs.protected_regular` can deny an `O_CREAT` write to another user's regular file in a world-writable sticky directory. That denial is protective, but a shell wrapper that ignores the write error may still continue with the original task file. Confirm the setting, the file's owner and directory, and whether the wrapper stops on failure. The path is only a file-disclosure candidate when the effective sudo rule permits the wrapper as a privileged user, the caller controls the task input and readable backup destination, and the backup utility actually includes protected sources. Inspect these conditions without running the backup during enumeration.
+
 ### Argument wildcards on privileged packet tools
 
 In a sudo rule for `tcpdump`, a `*` in the **argument pattern** can match whitespace and slashes, so a pathname-looking restriction may still allow additional option text. This differs from a wildcard in the command's executable path; inspect the complete RunAs rule and any later denials. If options can be injected, the permitted invocation and installed [`tcpdump` option semantics](https://github.com/the-tcpdump-group/tcpdump/blob/master/tcpdump.1.in) determine whether `-F`, `-V`, `-r`, `-w`, or `-Z` gives a useful read/write primitive. `-V` reads a list of capture filenames, not an arbitrary general-purpose file dump. AppArmor or another MAC policy can block file access even when sudo permits the command; a profile file on disk does not prove that it is loaded or enforcing. Review authorization and policy passively before drawing a conclusion. The [sudoers manual](https://www.sudo.ws/docs/man/1.9.14/sudoers.man.pdf) describes the wildcard distinction.
+
+### Sudo-run packet-filter rule export
+
+An unrestricted root-capable grant for both `iptables` and `iptables-save` (or the matching `ip6tables` pair) deserves a file-write review. The `comment` match accepts caller-chosen rule text, while `iptables-save -f` writes the serialized ruleset to a selected pathname.<sup>[[20]](#references)[[21]](#references)</sup> A useful payload depends on how the installed backend serializes comments and whether the destination file accepts other lines in the export; `iptables-save` alone does not provide arbitrary chosen content. Check the exact sudo RunAs identity, arguments and exclusions, available match extension, backend, and destination permissions. During enumeration, inspect the grant without changing firewall rules or writing a file.
 
 ### Privileged Below logging directory
 
@@ -150,5 +168,7 @@ If a sudo rule permits a privileged `apachectl`, `apache2ctl`, or `httpd` invoca
 - [17] [tarfile extraction filters — Python documentation](https://docs.python.org/3/library/tarfile.html#extraction-filters)
 - [18] [needrestart configuration option and evaluation — upstream source](https://github.com/liske/needrestart/blob/master/needrestart)
 - [19] [needrestart command behavior — GTFOBins](https://gtfobins.org/gtfobins/needrestart/)
+- [20] [iptables-save(8) — netfilter manual page](https://www.man7.org/linux/man-pages/man8/iptables-save.8.html)
+- [21] [iptables-extensions(8): comment match — netfilter manual page](https://www.man7.org/linux/man-pages/man8/iptables-extensions.8.html)
 
 {{#include ../../banners/hacktricks-training.md}}

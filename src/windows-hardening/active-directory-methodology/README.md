@@ -378,6 +378,8 @@ netexec ldap dc.corp.local -u 'APP01$' -p app01 -k --gmsa
 
 Then evaluate the recovered gMSA like any other credential: inspect local/domain group membership, logon rights, SPNs, delegation, and reachable services before trying pass-the-hash. This ACL-based retrieval path is distinct from [Golden gMSA/dMSA](golden-dmsa-gmsa.md), which derives managed passwords after KDS root-key compromise.<sup>[[20]](#references)</sup>
 
+A computer principal may also have outbound control over other computer objects or groups. After obtaining one, inspect its nested memberships and effective ACLs separately: a write right on another computer object may enable an account change, and group membership rights may lead to a logon role. A staged-account flag, predictable naming convention, or `GenericWrite` edge alone does not prove the full path.
+
 A readable copy of an `msDS-ManagedPassword` blob in a file, share, or backup is a separate exposure path: the LDAP read ACL cannot protect a copy stored elsewhere. Validate that the data is a managed-password blob before interpreting it, and distinguish this from both an authorized LDAP read and KDS root-key derivation.
 
 ### Kerberoast

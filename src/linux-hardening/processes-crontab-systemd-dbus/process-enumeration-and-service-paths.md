@@ -27,6 +27,16 @@ lsof +L1 2>/dev/null
 
 Deleted executables and deleted-but-open files remain referenced until their last descriptor closes. They can preserve evidence or accessible secrets. Process environments and memory may contain credentials, but reading another process is constrained by ownership, `/proc` mount options, Yama ptrace policy, and other security controls. See [file descriptors](../main-system-information/filesystem-links-and-file-descriptors.md) and [post-exploitation credential hunting](../post-exploitation/README.md) for related techniques.
 
+## System V shared memory consumed by privileged processes
+
+A root-owned helper can create a System V shared-memory segment that another user can write. If the helper later trusts data from that segment in a shell command or another sensitive operation, the segment crosses a privilege boundary even when the executable and its files are protected. `shmget()` takes access permissions from the low nine bits of its flags; mode `0666` permits other users to write, whereas an `IPC_CREAT` flag does not narrow those permissions. Inspect active segments passively with `ipcs -m` and correlate their owner, mode, and lifetime with the privileged process and its input handling. A world-writable segment alone does not establish command execution.<sup>[[1]](#references)[[2]](#references)</sup>
+
+```bash
+ipcs -m
+```
+
+System V segments are distinct from POSIX shared-memory files under `/dev/shm`. A segment created for only a moment may be absent from a single `ipcs` snapshot, so empty output does not clear a helper that uses shared memory. Review its source or binary behavior and any `sudo` rule that launches it; do not invoke the privileged helper just to make a segment appear during enumeration. The [IPC namespace guide](../containers-namespaces/container-security/protections/namespaces/ipc-namespace.md) explains how namespaces affect visibility.<sup>[[2]](#references)[[3]](#references)</sup>
+
 ## Follow the service execution chain
 
 ```bash
@@ -49,5 +59,11 @@ For running services, follow literal `EnvironmentFile=` paths from the unit's `[
 pgrep -a -x Xvfb
 ls -l /path/from/-fbdir/Xvfb_screen*
 ```
+
+## References
+
+1. [Linux `shmget(2)` manual](https://man7.org/linux/man-pages/man2/shmget.2.html)
+2. [Linux `ipcs(1)` manual](https://man7.org/linux/man-pages/man1/ipcs.1.html)
+3. [OpenBSD `ipcs(1)` manual](https://man.openbsd.org/ipcs.1)
 
 {{#include ../../banners/hacktricks-training.md}}

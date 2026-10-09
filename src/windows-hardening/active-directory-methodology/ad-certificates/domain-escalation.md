@@ -25,7 +25,9 @@
   - The Active Directory (AD) prioritizes the subjectAltName (SAN) in a certificate for identity verification if present. This means that by specifying the SAN in a CSR, a certificate can be requested to impersonate any user (e.g., a domain administrator). Whether a SAN can be specified by the requester is indicated in the certificate template's AD object through the `mspki-certificate-name-flag` property. This property is a bitmask, and the presence of the `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` flag permits the specification of the SAN by the requester.
 
 > [!CAUTION]
-> The configuration outlined permits low-privileged users to request certificates with any SAN of choice, enabling authentication as any domain principal through Kerberos or SChannel.
+> These settings identify an ESC1 template candidate, not a completed impersonation path. Check that the target principal can enroll on a CA publishing the template, that CA enrollment is allowed, and that the issued certificate satisfies the authentication endpoint's strong SID mapping rules. Current patched KDCs can reject a requested UPN when the certificate's SID does not match the target; see [Microsoft's certificate mapping guidance](https://support.microsoft.com/en-us/servicing/os/windows-server/2022/05/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers).
+
+Enrollment rights granted to **Domain Computers** may make a staged computer identity eligible even when the original user cannot enroll. Assess the computer principal's rights separately. Check `msPKI-Minimal-Key-Size` before making a request: a template requiring 4096-bit RSA keys rejects a client's 2048-bit default. A target SID supplied in the request can address a SID mismatch only when the CA and KDC accept the resulting certificate and mapping; neither the template flags nor an Enroll ACE alone proves that.
 
 This feature is sometimes enabled to support the on-the-fly generation of HTTPS or host certificates by products or deployment services, or due to a lack of understanding.
 
@@ -802,7 +804,7 @@ All it need to do just specify the template, it will get a certificate with OIDT
 certipy req -u "John@domain.local" -p "password" -dc-ip 192.168.100.100 -target "DC01.domain.local" -ca 'DC01-CA' -template 'VulnerableTemplate'
 ```
 
-## Vulnerable Certificate Renewal Configuration- ESC14
+## Explicit Certificate Mapping Abuse — ESC14
 
 ### Explanation
 
@@ -826,7 +828,10 @@ The `altSecurityIdentities` attribute supports various formats for mapping, such
 - `X509:<RFC822>EmailAddress` (maps by an RFC822 name, typically an email address, from the SAN)
 - `X509:<SHA1-PUKEY>Thumbprint-of-Raw-PublicKey` (maps by a SHA1 hash of the certificate's raw public key - generally strong)
 
-The security of these mappings depends heavily on the specificity, uniqueness, and cryptographic strength of the chosen certificate identifiers used in the mapping string. Even with strong certificate binding modes enabled on Domain Controllers (which primarily affect implicit mappings based on SAN UPNs/DNS and the SID extension), a poorly configured `altSecurityIdentities` entry can still present a direct path for impersonation if the mapping logic itself is flawed or too permissive.
+The security of these mappings depends on the identifiers in the mapping. Microsoft classifies mappings based on email or subject names, including `X509:<RFC822>`, as **weak**. In Full Enforcement mode, a certificate without a strong mapping is rejected; the September 2025 Windows security update removed the option to return to Compatibility mode. A weak mapping alone is therefore not a reliable current impersonation path. Check the domain controller's actual patch level and certificate-mapping behavior before assessing a weak-mapping scenario. Write access to `altSecurityIdentities` is a separate lead: an attacker with an appropriate trusted certificate may be able to add a **strong** explicit mapping, subject to effective permissions and certificate validation. See [Microsoft KB5014754](https://support.microsoft.com/en-us/servicing/os/windows-server/2022/05/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers) and [the ESC14 research](https://specterops.io/blog/2024/02/28/adcs-esc14-abuse-technique/).
+
+Certificate authentication failures also need diagnosis: a disabled target account or expired password can prevent login even when the certificate itself remains valid.
+
 ### Abuse Scenario
 
 ESC14 targets **explicit certificate mappings** in Active Directory (AD), specifically the `altSecurityIdentities` attribute. If this attribute is set (by design or misconfiguration), attackers can impersonate accounts by presenting certificates that match the mapping.
@@ -844,7 +849,7 @@ ESC14 targets **explicit certificate mappings** in Active Directory (AD), specif
 - Owner*.
 #### Scenario B: Target Has Weak Mapping via X509RFC822 (Email)
 
-- **Precondition**: The target has a weak X509RFC822 mapping in altSecurityIdentities. An attacker can set the victim's mail attribute to match the target's X509RFC822 name, enroll a certificate as the victim, and use it to authenticate as the target.
+- **Historical/conditional precondition**: The target has a weak X509RFC822 mapping in `altSecurityIdentities`, the attacker can edit an enrollee's `mail` attribute, and a suitable template includes that email in a client-authentication certificate without a conflicting SID binding. Authentication also requires an environment that still accepts the weak mapping; Full Enforcement rejects weak-only certificate mappings. A writable `mail` attribute alone is only a lead.
 #### Scenario C: Target Has X509IssuerSubject Mapping
 
 - **Precondition**: The target has a weak X509IssuerSubject explicit mapping in `altSecurityIdentities`.The attacker can set the `cn` or `dNSHostName` attribute on a victim principal to match the subject of the target’s X509IssuerSubject mapping. Then, the attacker can enroll a certificate as the victim, and use this certificate to authenticate as the target.

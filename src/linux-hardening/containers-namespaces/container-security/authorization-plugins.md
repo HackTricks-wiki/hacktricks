@@ -61,6 +61,8 @@ docker exec -it --privileged <container_id> bash
 
 If the daemon accepts the second step, the user has recovered a privileged interactive process inside a container the policy author believed was constrained.
 
+A restricted `sudo` rule can expose the same route even when the caller cannot access the Docker socket directly. For example, a root-capable `/usr/bin/docker exec *` grant may let the caller supply Docker's `--privileged` and `--user root` options. A running container is still required; on some Linux hosts its ID is visible in a `containerd-shim` process command line when `docker ps` is denied. Treat the rule as a review lead: confirm the effective sudo policy, the daemon's authorization controls, user namespaces, and whether the resulting process can reach a host device or writable host mount. Docker documents the exec options in its [CLI reference](https://docs.docker.com/reference/cli/docker/container/exec/).
+
 ### Full Example: Bind Mount Through Raw API
 
 Some broken policies inspect only one JSON shape. If the root filesystem bind mount is not blocked consistently, the host can still be mounted:

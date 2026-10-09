@@ -112,9 +112,9 @@ getST.py -dc-ip "$DC_IP" -spn "$DELEGATED_SPN" \
 
 For live jacking, reverse the two LDAP writes immediately after ticket acquisition to avoid breaking the legitimate service. On DCs with computer-account auditing enabled, hunt for Security event **4742** where `servicePrincipalName` is removed from one computer and shortly added to another, especially when the SPN hostname differs from the destination's `dNSHostName`. Correlate with event **4769**: S4U2Self presents the same account as client/service, while S4U2Proxy populates **Transited Services**.<sup>[[5]](#references)</sup>
 
-### Automating delegation setup from low-priv creds
+### Configuring delegation on a controlled account
 
-If you already hold **GenericAll/WriteDACL** over a computer or service account, you can push the required attributes remotely without RSAT using **bloodyAD** (2024+):
+This path requires **effective write access** to the computer or service account's delegation attributes (for example, `GenericAll`, or `WriteDACL` followed by an ACL change) **and** the `SeEnableDelegationPrivilege` user right for the account making the LDAP change. Microsoft requires that privilege when `msDS-AllowedToDelegateTo` is modified; object-control rights alone do not bypass it. Check both prerequisites before using an LDAP client such as **bloodyAD** to set protocol-transition delegation.<sup>[[Microsoft ADTS modify-operation security checks](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/c714e48c-ea21-48b0-913d-fc065ab3dda3)]</sup>
 
 ```bash
 # Set TRUSTED_TO_AUTH_FOR_DELEGATION and point delegation to CIFS/DC
@@ -122,7 +122,7 @@ KRB5CCNAME=owned.ccache bloodyAD -d corp.local -k --host dc.corp.local add uac W
 KRB5CCNAME=owned.ccache bloodyAD -d corp.local -k --host dc.corp.local set object WEBSRV$ msDS-AllowedToDelegateTo -v 'cifs/dc.corp.local'
 ```
 
-This lets you build a constrained delegation path for privesc without DA privileges as soon as you can write those attributes.
+An existing computer account can be a candidate even when `ms-DS-MachineAccountQuota` is zero; that quota limits the default new-computer creation route, not rights over an existing object. To use the configured delegation, you also need control of the delegating account's key or password, a valid service principal name, and a target user whose credentials are delegable. These conditions and effective directory access must be checked separately.
 
 - Step 1: **Get TGT of the allowed service**
 

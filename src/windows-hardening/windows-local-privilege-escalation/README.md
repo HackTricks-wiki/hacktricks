@@ -1347,6 +1347,8 @@ You can **extract many DPAPI masterkeys** from memory with the Mimikatz `sekurls
 
 **mRemoteNG uses a different connection store.** Inspect readable XML under `%APPDATA%\mRemoteNG` and user Documents, including files with ordinary names such as `config.xml`. Identify the connection schema and encrypted `Password` attributes before treating an XML file as a credential lead. The stored value is not a DPAPI/RDCMan password; recovery depends on the file's encryption settings and whether a custom master password was used. Avoid printing encrypted values during broad enumeration.
 
+**Remote Desktop Plus profile exports** may also be readable in user directories or a shared administration folder. A legacy `profiles.xml` export has `Data/Profile` entries with `ProfileName`, `Password`, and `Secure` elements. Treat a nonempty password element as a credential lead, without printing it or assuming it is plaintext: [the vendor notes](https://www.donkz.nl/) that profile protection can be bound to the creating account and computer, or configured less strictly. Confirm the file's origin and recovery conditions before relying on it.
+
 ### Sticky Notes
 
 People often use the StickyNotes app on Windows workstations to **save passwords** and other information, not realizing it is a database file. This file is located at `C:\Users\<user>\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite` and is always worth searching for and examining.
@@ -1450,6 +1452,14 @@ else { Write "Not Installed." }
 
 ## Files and Registry (Credentials)
 
+### Forensic management server configuration
+
+Velociraptor server configurations, commonly named `server.config.yaml`, can contain the internal CA's `CA.private_key`. If a lower-privileged user can read that key, they may be able to mint an API client certificate. Whether this leads to higher privileges depends on the server's user roles, API reachability, and the identity under which the server or target agent executes. A client configuration contains different material; finding one does not establish access to the server CA. Some deployments keep the CA private key offline, so a readable server configuration may also lack the signing key.
+
+On a Windows server, inspect the ACL of the **server** configuration in its installation directory and any protected backup copies. One possible location is `%ProgramFiles%\VelociraptorServer\server.config.yaml`; use the service's configured path when it differs. Confirm that the current identity can read the file and that `CA.private_key` is actually present. Avoid printing the private key in logs or enumeration output. The vendor's `config api_client` workflow uses the CA key to issue a client certificate, but an effective server-side role is also needed; creating or changing one can require datastore write access or a restart. An existing privileged server identity may provide a route even when those writes are unavailable. API queries with execution rights run in the relevant server or agent context, which can be highly privileged.
+
+Protect the server configuration and backups with restrictive ACLs, keep the CA signing key offline where possible, and limit API roles and listener access. See the [Velociraptor API documentation](https://docs.velociraptor.app/docs/server_automation/server_api/) and [security configuration guidance](https://docs.velociraptor.app/docs/deployment/security/).
+
 ### Putty Creds
 
 ```bash
@@ -1533,6 +1543,8 @@ Example content:
 %SYSTEMROOT%\System32\config\SYSTEM
 %SYSTEMROOT%\System32\config\RegBack\system
 ```
+
+Readable Windows Imaging (`.wim`) backup files can also contain offline `SAM`, `SECURITY`, and `SYSTEM` hives. Prioritize locally accessible backup or image directories and inspect an image's **member names** before extracting anything; a `.wim` filename alone does not prove hive exposure, and routine `install.wim`, `boot.wim`, and recovery images are common false leads. An SMB share is a separate access path and should be checked only when that share is in scope. See Microsoft's [Windows image guidance](https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/work-with-windows-images) and [registry hive file reference](https://learn.microsoft.com/en-us/windows/win32/sysinfo/registry-hives).
 
 ### Cloud Credentials
 
@@ -1733,6 +1745,8 @@ Get-Childitem –Path C:\ -Include *unattend*,*sysprep* -File -Recurse -ErrorAct
 ### Credentials in the RecycleBin
 
 Check accessible Recycle Bin entries for deleted backups and configuration archives as well as files whose names explicitly mention credentials. A useful `.7z`, `.zip`, or `.rar` backup may be months old and have an ordinary filename. Windows stores the original path and deletion time in a `$I` record and the deleted file as its paired `$R` entry; inspect the metadata and the current identity's read access before opening an archive. Visibility depends on the volume, user SID, and file permissions, so an empty listing does not prove that no recoverable backup exists. Treat an archive name as a review candidate, not proof that it contains a valid secret.
+
+Also review accessible messaging-client profile databases, notes, and received files for credential leads. A BitLocker recovery export may be stored as HTML or TXT, sometimes inside a named backup archive. Such material can provide access to a separate encrypted data volume containing older backups; inspect the volume and archive only when access is authorized. If a backup includes `NTDS.dit`, offline domain credential recovery also requires the matching `SYSTEM` hive, as described in the [backup and privileged-groups workflow](../active-directory-methodology/privileged-groups-and-token-privileges.md). File names and a locked volume alone do not establish that a usable recovery key or domain backup exists.
 
 To **recover passwords** saved by several programs you can use: [http://www.nirsoft.net/password_recovery_tools.html](http://www.nirsoft.net/password_recovery_tools.html)
 

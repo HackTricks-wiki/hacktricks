@@ -24,6 +24,8 @@ If this is the case, to **become root you can just execute**:
 sudo su
 ```
 
+If `sudo -l` permits a constrained `adduser` invocation with only a username, check whether it creates a same-named primary group that does not yet exist. A new account in that group may gain privileges if the effective sudoers policy already grants them to `%group`; verify both the group-creation behavior and the group rule before treating this as an escalation path. Creating an account changes the system, so inspect the policy first.
+
 ### PE - Method 2
 
 Find all suid binaries and check if there is the binary **Pkexec**:

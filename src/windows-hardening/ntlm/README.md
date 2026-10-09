@@ -342,6 +342,8 @@ krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 * Kerberos AP-REQ containing a subsession key and a client principal equal to the hostname.
 * Windows Event 4624/4648 SYSTEM logons immediately followed by remote SMB writes from the same host.<sup>[[5]](#references)</sup>
 
+A serialized target-information DNS name can also steer coerced authentication toward an attacker for a **cross-protocol relay** to an AD CS web-enrollment endpoint. This is a separate outcome from same-host reflection: the [ESC8 enrollment conditions](../active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints--esc8), DNS-write rights, a coercion path, and the target's patch level must be assessed independently.
+
 For the **March 2026** local reflection variant that abuses **SMB arbitrary ports** and **TCP connection reuse** to reach `NT AUTHORITY\SYSTEM`, see:
 
 {{#ref}}

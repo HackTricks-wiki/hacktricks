@@ -25,6 +25,18 @@ Filter virtual-host results against the default response size or another stable 
 
 Reverse proxies can change which client headers an application trusts. Compare direct and proxied requests before assuming that `X-Forwarded-For`, `X-Forwarded-Host`, or similar headers establish a caller's identity. Review proxy and application configuration together.
 
+## Login credentials in access logs
+
+If an application submits a login form with `GET`, the username and password can become query parameters in the request URI. Web server access logs often record that URI. An account allowed to read those logs, for example through the `adm` group on some Linux systems, may therefore obtain another user's password. Check the actual log permissions and whether the password is reused for a local account before treating this as a privilege escalation path.
+
+Inspect only readable access logs and keep credential values out of shared command output. Long request lines may also contain a referrer and user agent, so a short-line filter can hide the very request of interest. The common Apache, httpd, and Nginx access-log locations are `/var/log/apache2/access.log`, `/var/log/httpd/access_log`, and `/var/log/nginx/access.log`. Rotated logs may contain older credentials. [Log-file access through LFI](../../pentesting-web/file-inclusion/README.md#read-access-logs-to-harvest-get-based-auth-tokens-token-replay) is a related route to the same data.
+
+## Generated Apache configuration and piped logs
+
+[remco](https://github.com/HeavyHorst/remco) can watch a key/value backend, render a template into an Apache configuration file, and run a reload command. Inspect the running remco process identity, its configured template source and destination, watched key prefixes, and whether a backend value is inserted directly into an Apache directive such as `ServerName`. A local backend listener alone does not establish that the current user can write a watched key; verify backend authentication and permissions before claiming an escalation.
+
+An unescaped newline in a writable backend value can turn one intended directive value into additional Apache directives. [Apache piped logs](https://httpd.apache.org/docs/2.4/logs.html#piped) are especially sensitive: `CustomLog` or `ErrorLog` with a `|` command starts a helper under the parent httpd identity, often root; `|$` asks Apache to use a shell. Review generated configuration and its reload path without changing backend data or restarting the service during enumeration. Keep the full piped command private because its arguments may contain secrets.
+
 ## Authentication and service identities
 
 ```bash
@@ -41,6 +53,10 @@ getent passwd
 ## Gogs repository file writes
 
 For a local Gogs service, correlate the `gogs web` process owner with the executable version and `custom/conf/app.ini`. The configuration can reveal the service identity, repository root, listener address, and whether registration is disabled. A loopback-only listener is still reachable by local users. Gogs versions through 0.13.3 have an authenticated `PutContents` symlink file-write issue ([CVE-2025-8110](https://github.com/advisories/GHSA-mq8m-42gh-wq7r)): a repository writer can commit a symlink and then direct the API write through it. The resulting file access has the privileges of the Gogs process, so a root-owned instance needs prompt attention. Validate the deployed fix and authentication requirements before claiming a usable path; an API error does not prove that the file write failed.
+
+## Gitea repository-description XSS and privileged viewers
+
+Gitea 1.22.0 allowed stored JavaScript in a repository description ([CVE-2024-6886](https://github.com/advisories/GHSA-4h4p-553m-46qh)); 1.22.1 fixed it. A user who can edit a description can affect a more privileged browser session if that user views the repository and activates the malicious link. That browser identity can then expose private repository content or other application data. A separate local escalation requires a credential or permission reachable through that content, such as a reused administrator password; the Gitea process owner alone does not establish root impact. Check the deployed version, description-edit access, viewer workflow, and actual browser interaction before claiming the chain.
 
 ## Cobbler provisioning API
 
