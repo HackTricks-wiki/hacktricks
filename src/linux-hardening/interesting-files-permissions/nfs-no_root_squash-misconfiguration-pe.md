@@ -12,6 +12,8 @@ With NFS AUTH_SYS/AUTH_UNIX, the server bases file-permission checks on the `uid
 
 If an allowed client can mount a writable export in **`/etc/exports`** configured with **`no_root_squash`**, its UID/GID 0 requests can write there as the server's root user.<sup>[[4]](#references)</sup>
 
+`root_squash` only remaps UID/GID 0; under AUTH_SYS, a permitted client's **nonzero numeric UID/GID** can still match a different account on the server. A writable export can therefore become a cross-user path even with root squashing if the client can create a file as that numeric identity and the server permits access. For a SUID/SGID handoff, also verify the resulting file owner, executable access, server mount's `nosuid` state, ACLs, and SELinux or other policy. The exported pathname, `rw` option, or matching number alone does not prove the client is allowed, the export is active, or that the two hosts share the same effective identity mapping. Inspect `/etc/exports` and local metadata passively; do not mount a new share or create a test file during enumeration.<sup>[[4]](#references)[[5]](#references)</sup>
+
 For more information about **NFS** check:
 
 {{#ref}}

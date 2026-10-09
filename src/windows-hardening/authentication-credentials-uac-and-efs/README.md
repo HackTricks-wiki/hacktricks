@@ -205,6 +205,8 @@ Notes:
 - gMSAs are often granted local rights like WinRM; validate group membership (e.g., Remote Management Users) to plan lateral movement.
 - If you only need the blob to compute the NTLM yourself, see MSDS-MANAGEDPASSWORD_BLOB structure.
 
+Another ACL path is a write grant on the gMSA object itself. `msDS-GroupMSAMembership` is the security descriptor used to decide which principals may retrieve the managed password. Its schema GUID is `888eedd6-ce04-df40-b462-b8a50e41ba38`. An exact `WriteProperty` ACE on that attribute for a group you control can be a candidate to change the reader list; it is different from already being listed as a reader. Confirm the complete DACL, deny and inherited ACEs, and effective permissions before treating the path as usable. A new group membership also needs a refreshed token/session before attempting a password read.<sup>[[7]](#references)</sup>
+
 
 
 ## LAPS
@@ -315,5 +317,6 @@ uac-user-account-control.md
 - [4] [darthsidious – Bypassing AppLocker and PowerShell Constrained Language Mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode)
 - [5] [NetSPI – 15 Ways to Bypass the PowerShell Execution Policy](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)
 - [6] [howto ~ decrypt EFS files](https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files)
+- [7] [Microsoft - ms-DS-GroupMSAMembership attribute](https://learn.microsoft.com/en-us/windows/win32/adschema/a-msds-groupmsamembership)
 
 {{#include ../../banners/hacktricks-training.md}}
