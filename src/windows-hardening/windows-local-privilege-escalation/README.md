@@ -1951,6 +1951,12 @@ Then **read this to learn about UAC and UAC bypasses:**
 ../authentication-credentials-uac-and-efs/uac-user-account-control.md
 {{#endref}}
 
+## Upload Directory Junctions into a Served Root
+
+An application may create a predictable upload subdirectory, write a caller-supplied filename into it, and then process the file. If a low-privilege user can remove and replace that subdirectory with an NTFS junction before the server-side write, the write may follow the junction into a web-served directory. A script placed there can run as the web-service identity if the server executes that file type. This is an application-specific arbitrary-write boundary; a writable upload directory or an existing junction alone does not prove it.
+
+Check the exact path construction and timing in the upload handler, the user's effective delete/create rights on the subdirectory, the destination's effective ACLs, whether the writer follows reparse points, and whether the web server executes files in that destination. Confirm the writer's and web server's process identities separately. Passive inventory can show directory ACLs and reparse metadata, but it cannot establish the handler's behavior or a future junction swap. If execution lands in a service account, inspect the **actual process token** before considering any separate token-privilege path.
+
 ## From Arbitrary Folder Delete/Move/Rename to SYSTEM EoP
 
 The technique described [**in this blog post**](https://www.zerodayinitiative.com/blog/2022/3/16/abusing-arbitrary-file-deletes-to-escalate-privilege-and-other-great-tricks) with a exploit code [**available here**](https://github.com/thezdi/PoC/tree/main/FilesystemEoPs).<sup>[[31]](#references)[[32]](#references)</sup>
