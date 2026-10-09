@@ -152,6 +152,8 @@ Start-Transcript -Path "C:\transcripts\transcript0.txt" -NoClobber
 Stop-Transcript
 ```
 
+`C:\Transcripts` is only an example. [PowerShell transcription policy](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_group_policy_settings#turn-on-powershell-transcription) normally writes under each user's Documents folder, but an `OutputDirectory` setting or `Start-Transcript -OutputDirectory` can redirect files to a shared or hidden folder. Check the effective output path and file ACL before reviewing a transcript: it may contain command arguments and output, including credentials. A readable transcript is a lead only when its contents disclose a usable higher-privilege identity and that identity can log on in the relevant context.
+
 ### PowerShell Module Logging
 
 Details of PowerShell pipeline executions are recorded, encompassing executed commands, command invocations, and parts of scripts. However, complete execution details and output results might not be captured.
@@ -647,6 +649,8 @@ Example: "Windows Help and Support" (Windows + F1), search for "command prompt",
 
 ## Services
 
+The Service Control Manager (SCM) object's [`SC_MANAGER_CREATE_SERVICE` right](https://learn.microsoft.com/en-us/windows/win32/services/service-security-and-access-rights) is separate from rights on an existing service. A successful read-only [`OpenSCManager` access request](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-openscmanagerw) for that right is a review lead, not proof that a new service can run. [`CreateService` returns a handle](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-createservicew) with the service access requested at creation; later reopening the service performs a separate access check and may fail even when the original handle could be used. Verify the effective local or remote token, granted handle rights, service account, start policy, and executable path separately. Do not create or start a service during passive enumeration.
+
 For an NSClient++ monitoring agent, a readable `nsclient.ini` is a **configuration review lead**: it may hold web credentials, while `boot.ini` can redirect the configuration to another location. Check the actual service account, WEB listener and access policy, and whether the authenticated role can change settings or scripts. Privileged execution additionally requires `CheckExternalScripts` (or another enabled execution path), an effective right to register or modify a command, and a trigger that runs it under the service identity. A loopback-only listener can still be reachable to a local user, but the file path, password, or listener alone does not establish those rights. Review metadata and permissions without displaying secrets or invoking the web API during passive enumeration. See the [NSClient++ file layout](https://nsclient.org/docs/concepts/file-layout/), [web and script security guidance](https://nsclient.org/docs/setup/securing/), and [external-script configuration](https://nsclient.org/docs/reference/check/CheckExternalScripts/).
 
 For a service whose `ImagePath` is `nssm.exe`, inspect the service's actual run-as account and its `HKLM\SYSTEM\CurrentControlSet\Services\<name>\Parameters\Application` value: [NSSM stores the child application there](https://git.nssm.cc/nssm/nssm/src/96e7f4484a3dc962482c240909fd52b0e0226a60/registry.h), while `AppDirectory` is its configured working directory. Check the child executable and its parent-directory ACLs before treating the wrapper's permissions as the whole service boundary. A local WCF or SOAP endpoint exposed by that child is a separate review lead: confirm the listener is reachable by the lower-privileged user, the exact operation accepts their input, and the service child executes the unsafe operation under a higher identity. The service account, an endpoint URL, or a writable path alone does not prove escalation; avoid invoking service operations during passive enumeration.
@@ -809,7 +813,7 @@ for /f %a in ('reg query hklm\system\currentcontrolset\services') do del %temp%\
 get-acl HKLM:\System\CurrentControlSet\services\* | Format-List * | findstr /i "<Username> Users Path Everyone"
 ```
 
-It should be checked whether **Authenticated Users** or **NT AUTHORITY\INTERACTIVE** possess `FullControl` permissions. If so, the binary executed by the service can be altered.
+Review whether **Authenticated Users** or **NT AUTHORITY\INTERACTIVE** have write-capable registry permissions on a particular service key. An ACL entry alone does not prove effective access: deny entries, the current token, and inherited permissions matter. Registry-key rights are separate from the service object's `SERVICE_CHANGE_CONFIG` and `SERVICE_START` rights. Escalation also requires a usable service configuration field, a way to trigger the service, and a more privileged service identity. See Microsoft's [registry-key rights](https://learn.microsoft.com/en-us/windows/win32/sysinfo/registry-key-security-and-access-rights) and [service access-rights reference](https://learn.microsoft.com/en-us/windows/win32/services/service-security-and-access-rights).
 
 To change the Path of the binary executed:
 

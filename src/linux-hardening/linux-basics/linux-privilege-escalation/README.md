@@ -1963,8 +1963,7 @@ Check **Valentine box from HTB** for an example.
 
 ### Debian OpenSSL Predictable PRNG - CVE-2008-0166
 
-All SSL and SSH keys generated on Debian based systems (Ubuntu, Kubuntu, etc) between September 2006 and May 13th, 2008 may be affected by this bug.\
-This bug is caused when creating a new ssh key in those OS, as **only 32,768 variations were possible**. This means that all the possibilities can be calculated and **having the ssh public key you can search for the corresponding private key**. You can find the calculated possibilities here: [https://github.com/g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)
+Keys generated with affected Debian or derivative OpenSSL builds during the historical vulnerable period may have predictable randomness; the host's current distribution or patched OpenSSL version does not establish how an older key was generated. Check the **specific key** against a suitable historical blacklist and its provenance. Debian's [`ssh-vulnkey` manual](https://manpages.debian.org/wheezy/openssh-client/ssh-vulnkey.1.en.html) describes checking public keys and `authorized_keys`, and [DSA-1571-1](https://security-tracker.debian.org/tracker/DSA-1571-1) records the OpenSSL fix. An entry in a privileged account's `authorized_keys` is an escalation lead only if its matching private key is recoverable and the effective SSH policy still accepts that key for that account; a weak **host** key is not itself a login credential. Replace compromised keys and remove their old authorizations.
 
 ### SSH Interesting configuration values
 

@@ -15,16 +15,16 @@ Start by finding unusual SUID files and checking whether they are dynamically li
 ```bash
 find / -perm -4000 -type f -ls 2>/dev/null
 file /path/to/suid-binary
-ldd /path/to/suid-binary 2>/dev/null
 readelf -d /path/to/suid-binary 2>/dev/null | egrep 'NEEDED|RPATH|RUNPATH'
 ```
+
+Use `readelf` for an unfamiliar executable: [`ldd` may execute an untrusted ELF interpreter](https://man7.org/linux/man-pages/man1/ldd.1.html). `readelf` shows direct dependencies, so confirm the path actually chosen by the loader separately.<sup>[[1]](#references)[[3]](#references)</sup>
 
 Focus on non-standard locations, custom application paths, binaries owned by root but outside package-managed directories, and dependencies loaded from writable directories.<sup>[[1]](#references)</sup>
 
 Useful writeability checks:
 
 ```bash
-ldd /path/to/suid-binary 2>/dev/null
 readelf -d /path/to/suid-binary 2>/dev/null | egrep 'RPATH|RUNPATH'
 find / -writable -type d 2>/dev/null | head -n 50
 ```
@@ -69,10 +69,11 @@ The exploitable condition is not the missing library alone. The attacker must be
 
 Sometimes all dependencies exist, but one of the directories used to resolve them is writable. This may allow replacing a loaded library or planting a higher-priority library with the same name.<sup>[[1]](#references)</sup>
 
+The same review applies to a custom ELF **allowed through sudo**, even when the ELF has no SUID bit and the permitted RunAs account is not root. Compare its `DT_NEEDED` entries with the library pathname the loader will resolve; then check whether the caller can write that file or replace it through a writable, searchable parent directory. Confirm the exact sudo RunAs rule, symlinks and ACLs, loader policy, and that the target process loads the library as the higher-privileged account. A writable `.so` or a dependency name alone is only a lead; inspect metadata without running the sudo command.<sup>[[1]](#references)[[3]](#references)[[5]](#references)</sup>
+
 Review dependency paths:<sup>[[1]](#references)[[3]](#references)</sup>
 
 ```bash
-ldd /path/to/suid-binary 2>/dev/null
 readelf -d /path/to/suid-binary 2>/dev/null | egrep 'NEEDED|RPATH|RUNPATH'
 namei -om /path/to/library.so
 ```

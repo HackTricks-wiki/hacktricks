@@ -43,6 +43,8 @@ Get-ChildItem "C:\Users\All Users\Start Menu\Programs\Startup"
 Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ```
 
+A higher-privileged user's Startup entry may launch a protected script that repeatedly opens files from a directory another user can write. Review the entry's **actual logon identity**, the script's input directory and ACLs, and the exact action before treating that directory as an escalation path. In particular, [`hh.exe` opens compiled HTML Help (`.chm`) files](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/htmlhelp/about-the-html-help-executable-program); a script that passes caller-supplied files to it crosses a content trust boundary even if it checks the filename or first bytes. [HTML Help policies can restrict executable shortcuts](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/htmlhelp/system-policies-for-shortcut-and-winhelp-commands), so confirm the installed policy and reachable content behavior. A `.chm` extension or magic bytes alone do not prove higher-privilege code execution. Inspect the autorun, process command line, and path permissions without opening the untrusted file during enumeration.
+
 > **FYI**: Archive extraction *path traversal* vulnerabilities (such as the one abused in WinRAR prior to 7.13 – CVE-2025-8088) can be leveraged to **deposit payloads directly inside these Startup folders during decompression**, resulting in code execution on the next user logon.  For a deep-dive into this technique see:
 
 
