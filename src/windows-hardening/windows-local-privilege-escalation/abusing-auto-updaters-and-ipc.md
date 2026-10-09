@@ -308,6 +308,10 @@ Operational notes:
 - `qwinsta` is useful when `msiexec /fa` fails from a non-interactive WinRM shell and you need to understand whether an existing desktop/disconnected session can trigger the repair correctly.<sup>[[7]](#references)</sup>
 - This pattern generalizes to other endpoint agents and updaters that **stage temp scripts in world-writable locations and later execute them as SYSTEM**. Test for predictable names, missing exclusive create semantics, and repair/update flows that can be triggered on demand.
 
+### Interactive installer repair and privileged console
+
+PDF24 Creator 11.15.1 illustrates a separate MSI-repair risk: its printer-install custom action can start a visible console with SYSTEM rights during repair. The vendor changed the MSI installer in 11.15.2 to address this behavior. An older product version is only a triage lead. Check the registered or reachable MSI package, whether this user can initiate repair, whether the vulnerable custom action and log-file delay are present, and whether an interactive desktop can expose the console. The reported delay used an oplock on `faxPrnInst.log`; ordinary file writability is not the sole access condition. A non-interactive shell, inaccessible package, or patched installer can break the chain. This issue does not depend on `AlwaysInstallElevated` and differs from replacing a predictable temporary script.
+
 ---
 ## Remote supply-chain hijack via weak updater validation (WinGUp / Notepad++)
 

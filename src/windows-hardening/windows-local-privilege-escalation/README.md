@@ -1345,6 +1345,8 @@ HKCU\<SID>\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunMRU
 Use the **Mimikatz** `dpapi::rdg` module with appropriate `/masterkey` to **decrypt any .rdg files**\
 You can **extract many DPAPI masterkeys** from memory with the Mimikatz `sekurlsa::dpapi` module
 
+**mRemoteNG uses a different connection store.** Inspect readable XML under `%APPDATA%\mRemoteNG` and user Documents, including files with ordinary names such as `config.xml`. Identify the connection schema and encrypted `Password` attributes before treating an XML file as a credential lead. The stored value is not a DPAPI/RDCMan password; recovery depends on the file's encryption settings and whether a custom master password was used. Avoid printing encrypted values during broad enumeration.
+
 ### Sticky Notes
 
 People often use the StickyNotes app on Windows workstations to **save passwords** and other information, not realizing it is a database file. This file is located at `C:\Users\<user>\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite` and is always worth searching for and examining.
