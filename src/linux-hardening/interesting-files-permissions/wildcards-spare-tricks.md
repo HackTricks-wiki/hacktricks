@@ -31,6 +31,12 @@ See also the classic DefenseCode paper for details.<sup>[[6]](#references)</sup>
 
 ---
 
+## GNU `cp` in a privileged script
+
+Review a root-run script that copies from its caller-selected working directory with a bare glob, such as `cp .version * /etc/app/staged/`, when a lower-privileged user can create filenames there. GNU `cp` can parse a leading-dash filename expanded from `*` as an option. Its `--preserve=mode` option can retain source mode bits on a new copy, and `--target-directory` can change the copy destination. Either effect needs the exact script branch, destination state, effective privilege, filesystem policy, and GNU `cp` behavior to be verified; the text of a sudo rule or script alone does not prove escalation. Prefixing operands with `./` or terminating option parsing with `--` prevents this leading-dash interpretation for GNU `cp` ([GNU Coreutils FAQ](https://www.gnu.org/software/coreutils/faq/coreutils-faq.html), [`cp` manual](https://www.gnu.org/software/coreutils/manual/html_node/cp-invocation.html)).
+
+---
+
 ## tar
 
 ### GNU tar

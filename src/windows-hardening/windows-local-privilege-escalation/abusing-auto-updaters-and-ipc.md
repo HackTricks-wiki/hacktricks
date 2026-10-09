@@ -154,6 +154,8 @@ For named-pipe-heavy targets, PipeViewer is a quick way to spot weak DACLs and r
 
 If the target authenticates callers only by PID, image path, or process name, treat that as a speed bump rather than a boundary: injecting into the legitimate client, or making the connection from an allow-listed process, is often enough to satisfy the server’s checks. For named pipes specifically, [this page about client impersonation and pipe abuse](named-pipe-client-impersonation.md) covers the primitive in more depth.
 
+For a privileged **cleanup or restore broker**, inspect the path trust boundary as well as the pipe ACL. A lower-privileged caller may be able to select a restore destination or rename a staged backup artifact in a shared directory even when the service executable and its install directory are protected. Confirm separately that the caller can reach the restore command, can modify the exact staged input or filename, that the broker runs under a higher identity, and that its restore operation actually writes to the selected protected path. A writable staging directory or a readable pipe alone does not establish an arbitrary privileged write; the destination mapping and service behavior need code review or controlled testing. Do not invoke an unknown cleanup command during passive enumeration because it may delete user files.
+
 ---
 ## 8) Modular add-in brokers authenticated only by vendor signatures (Lenovo Vantage pattern)
 
