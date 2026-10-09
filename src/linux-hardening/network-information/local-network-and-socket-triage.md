@@ -64,6 +64,8 @@ nmap -sT -Pn -p 80,443,8000,8080,9000 172.17.0.0/24
 
 The technique is useful when a web panel, debug endpoint, or helper service is hidden from external scans but reachable from the compromised host or container network.
 
+A loopback notebook service may authenticate with a startup token printed to its process output. If that output is redirected to a log readable by another local account, the token can cross a user boundary and permit code execution in the notebook server's account. Correlate the listening process owner, log destination and permissions, current token configuration, and notebook access controls before treating a log path as an escalation lead. List log metadata during passive enumeration; do not print tokens or connect to the service merely to classify the host.
+
 ## Local Pivot With socat or SSH
 
 If a service is bound to loopback, expose it through an allowed channel instead of changing the service itself.

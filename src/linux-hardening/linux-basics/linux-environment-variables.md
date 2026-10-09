@@ -194,6 +194,8 @@ ldso=$(ls /lib64/ld-linux-*.so.* /lib/*-linux-gnu/ld-linux-*.so.* 2>/dev/null | 
 
 `GLIBC_TUNABLES` changes early glibc behavior (for example, allocator tunables) and is very handy in exploit labs. It also matters from a security perspective because the **dynamic loader parses it very early**. The 2023 **Looney Tunables** bug was a good reminder that a single environment variable parsed in the loader can become a **local privilege-escalation primitive** against SUID programs.<sup>[[6]](#references)</sup>
 
+For CVE-2023-4911, compare the **installed distribution package release** with its vendor's fixed release and verify the loader actually used for new processes. An upstream version string alone is unreliable: Debian backported the affected parser into its 2.31 package, while distributions backported fixes without changing the upstream number. A practical privilege transition also needs an executable privileged target whose identity change is not blocked by `NoNewPrivs`, a `nosuid` mount, or another mitigation. Avoid running a malformed `GLIBC_TUNABLES` crash probe during passive enumeration. See the [Ubuntu tracker](https://ubuntu.com/security/CVE-2023-4911), [Debian tracker](https://security-tracker.debian.org/tracker/CVE-2023-4911), and [Red Hat advisory](https://access.redhat.com/security/cve/cve-2023-4911) for release-specific applicability; Ubuntu's [security notice](https://ubuntu.com/security/notices/USN-6409-1) also calls for a reboot after updating.
+
 ```bash
 GLIBC_TUNABLES=glibc.malloc.tcache_count=0 ./binary
 ```
