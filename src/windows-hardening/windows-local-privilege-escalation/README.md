@@ -98,7 +98,9 @@ This [site](https://msrc.microsoft.com/update-guide/vulnerability) is handy for 
 - _post/windows/gather/enum_patches_
 - _post/multi/recon/local_exploit_suggester_
 - [_watson_](https://github.com/rasta-mouse/Watson)
-- [_winpeas_](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) _(Winpeas has watson embedded)_
+- [_winpeas_](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) — inventories the OS build, installed updates, and selected advisory candidates; verify the exact product and superseding updates before treating a result as applicable.
+
+For a version-specific local exploit, check the **running process architecture** as well as the OS architecture. On 64-bit Windows, a 32-bit process is subject to [WOW64 file-system redirection](https://learn.microsoft.com/en-us/windows/win32/winprog64/file-system-redirector): `%windir%\System32` usually resolves to the 32-bit system directory, while `%windir%\Sysnative` gives that process access to the native system directory. The alias is unavailable to a 64-bit process. An OS build or missing-KB candidate does not prove exploitability; compare the running build, installed or superseding update, process architecture, and exploit prerequisites with the [Microsoft security bulletin](https://learn.microsoft.com/en-us/security-updates/securitybulletins/2016/ms16-032) for the exact issue.
 
 **Locally with system information**
 
@@ -644,6 +646,8 @@ Example: "Windows Help and Support" (Windows + F1), search for "command prompt",
 ## Services
 
 For a service whose `ImagePath` is `nssm.exe`, inspect the service's actual run-as account and its `HKLM\SYSTEM\CurrentControlSet\Services\<name>\Parameters\Application` value: [NSSM stores the child application there](https://git.nssm.cc/nssm/nssm/src/96e7f4484a3dc962482c240909fd52b0e0226a60/registry.h), while `AppDirectory` is its configured working directory. Check the child executable and its parent-directory ACLs before treating the wrapper's permissions as the whole service boundary. A local WCF or SOAP endpoint exposed by that child is a separate review lead: confirm the listener is reachable by the lower-privileged user, the exact operation accepts their input, and the service child executes the unsafe operation under a higher identity. The service account, an endpoint URL, or a writable path alone does not prove escalation; avoid invoking service operations during passive enumeration.
+
+For a custom WCF operation, trace a caller-controlled string into any PowerShell runspace. [`Pipeline.Commands.AddScript` adds script text](https://learn.microsoft.com/en-us/dotnet/api/system.management.automation.runspaces.commandcollection.addscript), and [`Pipeline.Invoke` runs the pipeline](https://learn.microsoft.com/en-us/dotnet/api/system.management.automation.runspaces.pipeline.invoke). A [`netTcpBinding` with Windows transport credentials](https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/wcf/transport-of-nettcpbinding) authenticates the client, but authorization to call that **specific** operation and the runspace's effective identity must be checked separately. A path from a lower-privileged caller's input to `AddScript` under a higher service identity is a code-execution boundary; a listening port, authenticated client, or unused method in an unrelated assembly alone is not proof. Review the deployed service, contract, authorization, and impersonation settings statically without invoking the endpoint during enumeration.
 
 Service Triggers let Windows start a service when certain conditions occur (named pipe/RPC endpoint activity, ETW events, IP availability, device arrival, GPO refresh, etc.). Even without SERVICE_START rights you can often start privileged services by firing their triggers. See enumeration and activation techniques here:
 
@@ -1419,7 +1423,7 @@ You can **extract many DPAPI masterkeys** from memory with the Mimikatz `sekurls
 
 ### Sticky Notes
 
-People often use the StickyNotes app on Windows workstations to **save passwords** and other information, not realizing it is a database file. This file is located at `C:\Users\<user>\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite` and is always worth searching for and examining.
+People sometimes save passwords and other information in sticky-note applications. Microsoft's packaged Sticky Notes app commonly stores notes at `C:\Users\<user>\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite`; older or different apps may use other user-profile stores, including LevelDB. Identify the installed app and storage format before treating a missing SQLite file as absence of notes.
 
 If Sticky Notes is using SQLite write-ahead logging, a copy of `plum.sqlite` alone can omit recent committed notes. Keep the matching `plum.sqlite-wal` with a consistent copy of the database, and include `plum.sqlite-shm` when available; the shared-memory index can be rebuilt, but the WAL is part of the database's persistent state. See [SQLite's WAL documentation](https://www.sqlite.org/wal.html). A note containing an account name or password is only a credential lead: verify the account, permitted access, and password reuse separately. An encrypted password-manager record additionally requires its actual decryption key and application-specific interpretation before it can establish a higher-privilege login.
 
