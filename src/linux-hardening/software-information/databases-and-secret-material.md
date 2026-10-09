@@ -28,7 +28,7 @@ For PostgreSQL, inspect `pg_policies` and `pg_class.relrowsecurity` to distingui
 ## Review key and token stores
 
 ```bash
-find /home /root -maxdepth 4 -type f \( -name 'id_*' -o -name '*.p12' -o -name '*.pfx' -o -name '*.kdb' -o -name '*.kdbx' -o -name '*.gpg' -o -name '.git-credentials' \) -ls 2>/dev/null
+find /home /root -maxdepth 4 -type f \( -name 'id_*' -o -name '*.ppk' -o -name '*.p12' -o -name '*.pfx' -o -name '*.kdb' -o -name '*.kdbx' -o -name '*.gpg' -o -name '.git-credentials' \) -ls 2>/dev/null
 find /home /root -maxdepth 4 -type d -name '.gnupg' -ls 2>/dev/null
 printenv SSH_AUTH_SOCK KRB5CCNAME GNUPGHOME 2>/dev/null
 ```
@@ -36,6 +36,8 @@ printenv SSH_AUTH_SOCK KRB5CCNAME GNUPGHOME 2>/dev/null
 An SSH private key, agent socket, Kerberos cache, GPG keyring, or PKCS#12 bundle is useful only if the current user can access it and any required passphrase or policy permits use. Inspect ownership and permissions first. The [users and sessions](../user-information/user-and-session-triage.md), [Linux AD](../user-information/linux-active-directory.md), and [post-exploitation](../post-exploitation/README.md) pages explain the corresponding access paths. Git history, old backups, and shell history can also retain secrets after a live config has been cleaned. A readable `.git` directory can preserve deleted source and earlier committed credentials even when the working tree is empty; check access and review history manually rather than dumping it during automated enumeration.
 
 [KeePass 1.x uses `.kdb`, while KeePass 2.x uses `.kdbx`](https://keepass.info/help/v2/version.html). Treat a matching filename as a possible encrypted vault, since other products may use the `.kdb` suffix. A readable vault does not reveal its entries without the required master password or key file; an SSH key stored as an attachment is a separate lead whose host access must be validated.
+
+A support archive can contain both a KeePass vault and a process memory dump. For [KeePass 2.x before 2.54, CVE-2023-32784](https://nvd.nist.gov/vuln/detail/CVE-2023-32784) makes the master password potentially recoverable from a corresponding dump; an encrypted vault or unrelated dump alone is insufficient. Inspect archive entries and access rights manually without bulk extraction or printing secrets during routine enumeration. PuTTY private keys can appear as `.ppk` files or as `PuTTY-User-Key-File` text in a vault entry; confirm the key's intended account, encryption, and accepted host separately.
 
 A readable `.har` HTTP archive can preserve browser requests and responses, including authentication headers, cookies, and form fields. It may be saved directly or inside a support attachment. Check ownership and access first, then inspect only the relevant entries; a filename alone does not prove a reusable credential. Automated enumeration should list the archive path without printing captured values. [Microsoft Edge documentation](https://learn.microsoft.com/en-us/microsoft-edge/devtools/network/reference#save-all-network-requests-to-a-har-file) explains the sensitive-data export option.
 

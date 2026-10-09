@@ -599,6 +599,16 @@ todos %username%" && echo.
 
 Snort 2 can load shared libraries from a `dynamicpreprocessor directory` declared in the configuration selected with `snort.exe -c <config>`. For a scheduled task or service that runs Snort under a different account, inspect that exact configuration and the declared module directory ACL. If your token can create files there, the path is a review candidate for code execution when that task or service next loads modules. Verify the run-as account's effective privileges, the active configuration, module compatibility, and any deny or share restrictions; a writable directory alone does not establish escalation. [Snort's dynamic-preprocessor documentation](https://www.snort.org/documents/dpx-readme) describes runtime module loading.
 
+### Privileged web service with a writable document root
+
+On a Windows Apache installation, compare the service's executable path and run-as account with the `DocumentRoot` in its active `httpd.conf`. For a conventional XAMPP layout, inspect `C:\xampp\apache\conf\httpd.conf` and the ACL on its configured document root, often `C:\xampp\htdocs`. If a lower-privileged user can create files in that root while Apache runs as `LocalSystem`, server-side code execution may cross the host privilege boundary. Confirm the service is running, that the exact path is served, and that a server-side handler processes the file type; a writable root by itself proves only file creation. Inspect ACLs without writing a probe:
+
+```powershell
+Get-CimInstance Win32_Service -Filter "Name='Apache2.4'" | Select-Object Name, State, StartName, PathName
+Select-String -Path 'C:\xampp\apache\conf\httpd.conf' -Pattern '^\s*DocumentRoot\s+'
+icacls 'C:\xampp\htdocs'
+```
+
 ### Memory Password mining
 
 You can create a memory dump of a running process using **procdump** from sysinternals. Services like FTP have the **credentials in clear text in memory**, try to dump the memory and read the credentials.
@@ -1652,6 +1662,17 @@ Example of web.config with credentials:
     </forms>
 </authentication>
 ```
+
+### Backup archives in an IIS webroot
+
+An old ZIP backup placed directly in a served webroot may expose prior configuration files and reusable credentials. Check the site's configured physical path and whether the archive is actually reachable over HTTP before treating it as an exposure. The default `C:\inetpub\wwwroot` path is only a candidate. A quick local inventory can list names and sizes without opening archives:
+
+```powershell
+Get-ChildItem -LiteralPath 'C:\inetpub\wwwroot' -File -Filter '*.zip' -ErrorAction SilentlyContinue |
+  Where-Object Name -Match 'backup' | Select-Object Name, Length
+```
+
+An archive name does not establish that it contains a secret or that a recovered credential grants higher privilege.
 
 ### OpenVPN credentials
 

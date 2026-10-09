@@ -33,6 +33,8 @@ find / -writable -type d 2>/dev/null | head -n 50
 
 Some custom SUID binaries try to load a shared object that does not exist. If the missing path is under a directory controlled by the attacker, the binary may load attacker-supplied code as the effective user.<sup>[[1]](#references)</sup>
 
+The same boundary applies to a **custom binary allowed through sudo** when it calls `dlopen()` on an absolute `.so` path under a caller-writable home or configuration directory. This late library load may be absent from `ldd` and ELF `NEEDED` entries. A bounded `strings` review or a trace of an **unprivileged** invocation can reveal the attempted path; an application password or menu choice may gate the lookup. Confirm the effective sudo rule, the exact path and parent-directory permissions, and that the privileged invocation reaches that lookup before treating it as escalation. Do not invoke the sudo target merely to enumerate it.
+
 Find failed library lookups with `strace`'s syscall filter:<sup>[[2]](#references)</sup>
 
 ```bash
@@ -115,18 +117,18 @@ This means a plain SUID binary is usually not vulnerable just because the user c
 LD_PRELOAD=/tmp/proof.so /path/to/suid-binary
 ```
 
-The common exception is a sudo policy that permits setting or preserving loader variables for the target command. Inspect `sudo -l` for entries such as `env_keep+=LD_PRELOAD` or `env_keep+=LD_LIBRARY_PATH`; if the target is dynamically linked, it may load attacker-controlled code:<sup>[[4]](#references)[[5]](#references)</sup>
+The common exception is a sudo policy that permits a command-line environment assignment for the target, such as a `SETENV` tag or applicable `setenv` option. If the target is dynamically linked and sudo accepts `LD_PRELOAD=/path/to/library`, the target may load caller-controlled code. Check the effective rule and target identity. Merely adding `LD_PRELOAD` to `env_keep` is not sufficient on systems where the dynamic loader strips an inherited `LD_PRELOAD` before the SUID `sudo` process starts; a command-line assignment is evaluated by sudo after its own startup.<sup>[[1]](#references)[[4]](#references)[[5]](#references)</sup>
 
 ```bash
 sudo -l
-# Look for env_keep+=LD_PRELOAD or env_keep+=LD_LIBRARY_PATH
+# Check SETENV/setenv and the target command's allowed arguments
 sudo LD_PRELOAD=/tmp/proof.so /allowed/command
 ```
 
 Do not confuse these cases; the loader and sudo policy rules above distinguish them:<sup>[[1]](#references)[[4]](#references)[[5]](#references)</sup>
 
 - `LD_PRELOAD` against a normal SUID binary: usually blocked by secure execution.
-- `LD_PRELOAD` preserved by sudo: potentially exploitable.
+- `LD_PRELOAD` accepted as a sudo command-line assignment for a privileged, dynamically linked target: potentially exploitable.
 - Missing `.so` in a writable path: exploitable when the SUID binary naturally loads that path.
 - `RPATH`/`RUNPATH` to a writable directory: exploitable when a needed library can be controlled.
 - `/etc/ld.so.preload` or linker config write access: system-wide and high impact.
