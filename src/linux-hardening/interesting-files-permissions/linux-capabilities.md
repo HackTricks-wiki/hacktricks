@@ -365,9 +365,9 @@ getcap /usr/sbin/tcpdump
 /usr/sbin/tcpdump = cap_net_admin,cap_net_raw+eip
 ```
 
-### The special case of "empty" capabilities
+### The special case of an omitted capability name
 
-A file can carry an empty capability set (`getcap myelf` returns `myelf =ep`). An empty set grants no capabilities; when combined with a root-owned set-user-ID bit, the program can still change the executing process's effective and saved IDs to 0 without gaining file capabilities. An unowned, non-SUID/SGID file with `=ep` does not run as root.<sup>[[14]](#references)</sup>
+In libcap's text format, `getcap myelf` reporting `myelf =ep` means **all capabilities** are marked effective and permitted, subject to the executing process's bounding set, user namespace, and other execution restrictions. The empty file capability set is `myelf =` (with no `e` or `p`); it is distinct from a file with no capability attribute. An `=ep` file does not by itself change the process UID to root, but a program able to use `CAP_DAC_READ_SEARCH` or `CAP_DAC_OVERRIDE` may read files its Unix UID otherwise could not. Confirm the actual executable's file mode, namespace, and effective capabilities before treating its input options as a privileged file-read path. See libcap's [capability text format](https://man7.org/linux/man-pages/man7/cap_text_formats.7.html) and [empty-value behavior](https://man7.org/linux/man-pages/man8/getcap.8.html).<sup>[[14]](#references)</sup>
 
 ## CAP_SYS_ADMIN
 

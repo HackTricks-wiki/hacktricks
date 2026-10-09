@@ -202,6 +202,8 @@ An example of a privesc like the previous one:
 
 ESC4 is when a user has write privileges over a certificate template. This can for instance be abused to overwrite the configuration of the certificate template to make the template vulnerable to ESC1.
 
+A template that already lets the enrollee supply the subject but has only Server Authentication usage is not, by itself, a user-logon template. With effective template-control rights, an attacker could change its authentication EKUs or application policies before requesting a certificate; [Microsoft documents the Smartcard Logon EKU's sign-in purpose](https://learn.microsoft.com/en-us/windows-server/identity/ad-cs/certificate-template-concepts). Verify that a CA publishes the modified template, the requester can enroll, approval/signature requirements are satisfied, and the issued certificate maps to the intended account. In particular, [patched domain controllers in Full Enforcement](https://support.microsoft.com/en-us/servicing/os/windows-server/2022/05/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers) reject certificates without strong mapping; adding a target UPN to a request does not bypass that requirement.
+
 As we can see in the path above, only `JOHNPC` has these privileges, but our user `JOHN` has the new `AddKeyCredentialLink` edge to `JOHNPC`. Since this technique is related to certificates, I have implemented this attack as well, which is known as [Shadow Credentials](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab).<sup>[[8]](#references)</sup> Here’s a little sneak peak of Certipy’s `shadow auto` command to retrieve the NT hash of the victim.
 
 ```bash

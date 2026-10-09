@@ -8,6 +8,8 @@ Host mounts are one of the most important practical container-escape surfaces be
 
 This page exists separately from the individual protection pages because the abuse model is cross-cutting. A writable host mount is dangerous partly because of mount namespaces, partly because of user namespaces, partly because of AppArmor or SELinux coverage, and partly because of what exact host path was exposed. Treating it as its own topic makes the attack surface much easier to reason about.
 
+Also compare a host-writable directory with the corresponding path inside each container. If it is mounted over a directory of executable startup scripts, a lower-privileged host user may be able to plant code that a higher-privileged container entrypoint loads on its next restart. Confirm the exact bind source and destination, directory write/search permissions, entrypoint loop and executable-file requirement, runtime UID, and a real restart trigger. Container UID 0 is not automatically host UID 0; user-namespace mapping and mount policy determine the host effect. Passive review should report paths and permissions without writing a script or restarting the workload.
+
 ## `/proc` Exposure
 
 procfs contains both ordinary process information and high-impact kernel control interfaces. A bind mount such as `-v /proc:/host/proc` or a container view that exposes unexpected writable proc entries can therefore lead to information disclosure, denial of service, or direct host code execution.

@@ -892,7 +892,7 @@ Windows allows users to specify actions to be taken if a service fails. This fea
 
 ## Scheduled task script targets
 
-For an enabled task that runs `cmd.exe /c` with a `.bat` or `.cmd` file, check the script named in the **action arguments** as well as `cmd.exe`. The same applies to an interpreter's explicit file argument, such as PowerShell `-File`. A caller-writable script or parent directory is a cross-account execution lead only when the configured task principal differs from the caller and the task actually reaches that action. An append-only ACL can matter for scripts, but an earlier `exit` or other control flow may make appended lines unreachable. Confirm effective ACLs, [task execution context](https://learn.microsoft.com/en-us/windows/win32/taskschd/security-contexts-for-running-tasks), working directory, trigger, and application-control policy before claiming escalation. Inventory should not modify the script or start the task.
+For an enabled task that runs `cmd.exe /c` with a `.bat` or `.cmd` file, check the script named in the **action arguments** as well as `cmd.exe`. The same applies to an interpreter's explicit file argument, such as PowerShell `-File`. If a scheduled batch file contains a literal PowerShell `-File` call, inspect that referenced script's ACL too; variables, conditionals, and shell chaining require manual tracing. A caller-writable script or parent directory is a cross-account execution lead only when the configured task principal differs from the caller and the task actually reaches that action. An append-only ACL can matter for scripts, but an earlier `exit` or other control flow may make appended lines unreachable. Confirm effective ACLs, [task execution context](https://learn.microsoft.com/en-us/windows/win32/taskschd/security-contexts-for-running-tasks), working directory, trigger, and application-control policy before claiming escalation. Inventory should not modify the script or start the task.
 
 ## Named streams on accessible files
 
@@ -926,6 +926,14 @@ Get-ChildItem -path Registry::HKEY_LOCAL_MACHINE\SOFTWARE | ft Name
 #### ADSelfService Plus SAML service review
 
 [CVE-2022-47966](https://www.manageengine.com/security/advisory/CVE/cve-2022-47966.html) affected ADSelfService Plus build 6210 and earlier; the vendor fixed it in build 6211. It is relevant only if SAML SSO **is or was** enabled. An installed-product entry or service path is therefore a lead, not a vulnerability verdict: confirm the exact build, the SAML configuration history, network reachability of the service, and the account it runs under. Code execution through the service inherits that account's privileges; SYSTEM execution requires a SYSTEM-run instance. A readable `OfflineBackup_*.ezip` in the product's Backup directory is a separate encrypted backup lead, not evidence of a usable credential or this SAML flaw. Record its path and access rights without unpacking it during routine enumeration.
+
+#### Jenkins controller and domain-account boundaries
+
+On a Windows Jenkins controller, distinguish permission to create or configure a job from permission to start it: [Jenkins documents these as separate `Job/Create`, `Job/Configure`, and `Job/Build` rights](https://www.jenkins.io/doc/book/security/access-control/permissions/). A configured schedule or remote trigger may provide another build route, but confirm that it is enabled and the build actually runs. Execution has the identity of the controller or selected agent, and a stored credential is usable only if the job can access its scope. Separately, inspect access to `JENKINS_HOME` metadata: Jenkins keeps credential material and encryption keys in `credentials.xml`, `secrets/hudson.util.Secret`, and `secrets/master.key` ([Jenkins secret storage](https://www.jenkins.io/doc/developer/security/secrets/)). Their presence alone does not reveal a password; verify **read access to the required files** and a distinct account-reuse path without printing secrets in shared output. If that account has an AD user-object `scriptPath` write right, confirm a writable script path and a real logon or scheduled consumer running as the target user before treating it as cross-user execution. Further group control requires separately verified effective AD rights.
+
+#### Printer driver support DLL permissions
+
+An installed printer driver may keep support DLLs under `C:\ProgramData` and load them in a more privileged print process. Review the exact driver directory and DLL ACLs, including parent directories and reparse points, even if printer WMI enumeration is denied. For the [Ricoh printer-driver issue CVE-2019-19363](https://www.ricoh.com/info/2020/0122_1), the reported path was `C:\ProgramData\RICOH_DRV\<driver>\_common\dlz`; [the original disclosure](https://www.pentagrid.ch/de/blog/local-privilege-escalation-in-ricoh-printer-drivers-for-windows-cve-2019-19363/) describes DLL loading by `PrintIsolationHost.exe`. A writable ACL is only a lead: verify effective write access after deny entries, that the relevant driver is installed and loads the file under a privileged identity, and whether the vendor's updated driver or security program has fixed the installation. Do not infer vulnerability from the directory name or driver version alone.
 
 ### Write Permissions
 
@@ -1214,6 +1222,8 @@ Check for **restricted services** from the outside
 ```bash
 netstat -ano #Opened ports?
 ```
+
+For a local listener, correlate its PID with the process owner, executable path, and any service or scheduled task that starts it. A remote-control service can give access as its desktop user only if its authentication and command controls permit it. A custom TCP application running as a higher-privileged account is a separate review target: the listener and binary path are passive leads, while an authenticated memory-corruption route requires analysis of that exact binary and its reachable input. If an exposed port appears to belong to a system process, compare it with [`netsh interface portproxy show all`](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/netsh-interface) before attributing the backend service; a forwarding rule alone does not prove the destination is reachable or vulnerable.
 
 ### Routing Table
 

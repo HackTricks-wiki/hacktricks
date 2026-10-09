@@ -39,6 +39,8 @@ The dangerous pattern is a privileged program checking one pathname and later op
 
 Archive **creation** can also disclose files across identities. Info-ZIP `zip -r` normally follows a symlink placed inside the source tree and stores the target's contents; `-y`/`--symlinks` instead stores the link itself. If a lower-privileged user can add a link in a backed-up directory, check the exact archiver/options, the backup job's read identity, and whether the resulting archive is readable by that user. A writable source directory or a symlink alone does not establish disclosure. Review link and archive metadata without triggering the backup or extracting secret content during enumeration. See the [Info-ZIP option documentation](https://sources.debian.org/src/zip/3.0-3/man/zip.1/#L1638).
 
+GNU `tar` has a different default: it normally stores a symlink as a link, while [`-h` / `--dereference` follows it during archive creation](https://www.gnu.org/software/tar/manual/html_node/dereference.html). For a privileged scheduled backup, inspect the exact `tar` invocation, whether a lower-privileged user can replace an input pathname before `tar` reads it, and whether the resulting archive is accessible to that user. A temporary checksum or other sidecar in a writable staging directory can become such an input when explicitly named in a later `tar -h` command. The race window, job identity, symlink policy, target readability under that identity, and archive ACL all need verification. Do not replace files, run the job, or unpack sensitive archives during passive checks.
+
 ## Inspect open descriptors
 
 ```bash

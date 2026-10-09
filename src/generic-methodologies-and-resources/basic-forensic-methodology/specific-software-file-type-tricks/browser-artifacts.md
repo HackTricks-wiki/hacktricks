@@ -97,6 +97,8 @@ Within these directories, most user data can be found in the **Default/** or **C
 - **Preferences**: A file rich in information, including settings for plugins, extensions, pop-ups, notifications, and more.
 - **Browser’s built-in anti-phishing**: To check if anti-phishing and malware protection are enabled, run `grep 'safebrowsing' ~/Library/Application Support/Google/Chrome/Default/Preferences`. Look for `{"enabled: true,"}` in the output.<sup>[[2]](#references)</sup>
 
+A Chromium profile's `Local Extension Settings/<extension-id>/` directory may hold extension-local state, including password-manager key material. For example, [Passbolt says its encrypted private key is held in browser extension local storage](https://www.passbolt.com/docs/user/faq/why-a-browser-extension/), and its [Chrome extension ID](https://chromewebstore.google.com/detail/passbolt-open-source-pass/didegimhafipceonhjepacocaffmoppf) identifies the relevant directory. Directory presence alone neither proves a key is present nor unlocks a vault: the user must have access to the profile data, a usable private key and passphrase, and an authorized recovery/authentication path to the server. A vault item containing an operating-system account password requires separate account-reuse verification. Routine enumeration should report only the storage path, without dumping its LevelDB files or secret values.
+
 ## **SQLite DB Data Recovery**
 
 As you can observe in the previous sections, both Chrome and Firefox use **SQLite** databases to store the data. It's possible to **recover deleted entries using the tool** [**sqlparse**](https://github.com/padfoot999/sqlparse) **or** [**sqlparse_gui**](https://github.com/mdegrazia/SQLite-Deleted-Records-Parser/releases).
