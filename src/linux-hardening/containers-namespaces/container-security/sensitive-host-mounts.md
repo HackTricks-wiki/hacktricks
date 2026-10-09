@@ -8,6 +8,10 @@ Host mounts are one of the most important practical container-escape surfaces be
 
 This page exists separately from the individual protection pages because the abuse model is cross-cutting. A writable host mount is dangerous partly because of mount namespaces, partly because of user namespaces, partly because of AppArmor or SELinux coverage, and partly because of what exact host path was exposed. Treating it as its own topic makes the attack surface much easier to reason about.
 
+Also compare a host-writable directory with the corresponding path inside each container. If it is mounted over a directory of executable startup scripts, a lower-privileged host user may be able to plant code that a higher-privileged container entrypoint loads on its next restart. Confirm the exact bind source and destination, directory write/search permissions, entrypoint loop and executable-file requirement, runtime UID, and a real restart trigger. Container UID 0 is not automatically host UID 0; user-namespace mapping and mount policy determine the host effect. Passive review should report paths and permissions without writing a script or restarting the workload.
+
+A Linux container may sit inside a management VM that shares part of a separate Windows host filesystem. [VirtualBox shared folders](https://docs.oracle.com/en/virtualization/virtualbox/7.1/user/guestadditions.html) are one way host files become visible in a guest, but root in that VM is still a distinct identity from a Windows administrator. If the share exposes a readable user's SSH private key, treat it as a credential lead: verify the exact host-backed mount, key ownership and access, the matching account, and the Windows SSH server's **effective** authorized-key policy before concluding that it permits a host login. Modern [Windows OpenSSH](https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_keymanagement) commonly uses a separate `administrators_authorized_keys` file for administrator accounts. Keep private-key contents out of routine enumeration output; mount and key-path metadata are enough for passive triage.
+
 ## `/proc` Exposure
 
 procfs contains both ordinary process information and high-impact kernel control interfaces. A bind mount such as `-v /proc:/host/proc` or a container view that exposes unexpected writable proc entries can therefore lead to information disclosure, denial of service, or direct host code execution.
@@ -352,6 +356,14 @@ chmod +x /host/path/to/hook.sh
 ```
 
 The interesting part is the trust boundary: the write happens from inside the container, but execution happens later in the host service context. This turns a narrow hostPath or bind mount into a delayed host-code-execution primitive.
+
+## Root-Owned Files on a Shared Host Path
+
+A container account that can become root may be able to place a root-owned file on a writable path also used by the host. If container UID 0 maps to host UID 0, both views refer to the same file, and the host mount honors SUID execution, a host user who can run a root-owned SUID executable on that path may cross the host privilege boundary. The container does not have to run with `--privileged` for this particular file-ownership issue. See [user namespace mappings](protections/namespaces/user-namespace.md) and the [SUID discussion](privileged-containers.md) for the separate conditions.
+
+Review the path from **both sides**: compare a benign file's ownership and identity, check the container's `uid_map` and `gid_map`, and inspect the host's mount options and execution policy. Container-side `rw` without `nosuid` is only a candidate; it cannot establish host ownership, host mount flags, a host user's access, or whether AppArmor/SELinux blocks execution. `noexec` constrains execution in the view where it applies. The `shared:` and `master:` tags in `/proc/self/mountinfo` describe mount propagation, not whether the file's contents are shared with the host. A bind mount may lack those tags. Credential reuse that provides a host login is a separate step from the shared-file privilege boundary.
+
+The host's runtime storage can create a similar path even without an explicit bind mount. [CVE-2021-41091](https://github.com/moby/moby/security/advisories/GHSA-3fwx-pjgw-3558) allowed an unprivileged host user to traverse Docker data subdirectories and execute files from a container filesystem; Moby fixed the permissions in 20.10.9 and notes that running containers must be restarted to correct their directories. Review exact mounted `overlay2/<id>/merged` paths and each parent's search permission, then establish whether container UID 0 maps to host UID 0, a real root-owned SetUID executable is present and reachable, and the host view permits SetUID execution. Rootless or user-namespace-remapped containers, `nosuid`, `noexec`, `no_new_privs`, and MAC policy can change the result. A runtime version or traversable path alone is a review lead, not proof of host-root execution; inspect mount and file metadata without running a candidate executable.
 
 ## Mount-Related CVEs
 

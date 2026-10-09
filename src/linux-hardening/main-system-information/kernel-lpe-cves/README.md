@@ -4,6 +4,8 @@
 
 These case studies cover distinct local privilege escalation primitives. Check the affected product or kernel, configuration, and prerequisites in each article before applying a technique. For broader host enumeration, use the [Linux privilege escalation checklist](../linux-privilege-escalation-checklist.md).
 
+For Dirty Pipe (CVE-2022-0847), the [original research](https://dirtypipe.cm4all.com/) identifies upstream stable fixes at 5.10.102, 5.15.25, and 5.16.11. A kernel version in an older affected range is only a review lead: distribution kernels can backport fixes under different release names, and the relevant target file must be readable for the page-cache write primitive. Overwriting a readable SUID executable is one possible privilege path when its set-ID transition remains effective; modifying `/etc/passwd` and then authenticating can also depend on the local PAM stack. Check the installed vendor kernel package, running kernel after reboot, target permissions, mount `nosuid`, and `no_new_privs` before assessing reachability. Do not run a write probe during passive enumeration. See [Ubuntu's release-specific status](https://ubuntu.com/security/CVE-2022-0847).
+
 - [VMware Tools service discovery, CVE-2025-41244](vmware-tools-service-discovery-untrusted-search-path-cve-2025-41244.md): privileged execution through untrusted process-path discovery.
 - [AF_ALG splice page-cache overwrite, CVE-2026-31431](copy-fail-af_alg-splice-page-cache-overwrite-cve-2026-31431.md): a kernel page-cache overwrite path.
 - [POSIX CPU timers TOCTOU, CVE-2025-38352](posix-cpu-timers-toctou-cve-2025-38352.md): a race in timer handling.

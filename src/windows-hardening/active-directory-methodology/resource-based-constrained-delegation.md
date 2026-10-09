@@ -34,6 +34,10 @@ Assume the attacker already has **write-equivalent privileges over the victim co
    3. The non-forwardable ticket can still work in this RBCD flow because Service A is authorized in the target resource's security descriptor.
 4. The attacker can **pass-the-ticket** and **impersonate** the user to gain **access to the victim ServiceB**.<sup>[[1]](#references)</sup>
 
+`MachineAccountQuota=0` closes the default computer-creation route, but does not remove write rights over the target computer object or control of an existing account. A controlled ordinary user without an SPN may sometimes be used as the delegating principal through the [SPN-less U2U method](#spn-less-cross-domain--cross-forest-rbcd), including within one domain. That route still needs an effective RBCD write right, control of the delegating user's credentials, a delegable impersonated identity, compatible Kerberos encryption behavior, and an account-disrupting NT-hash change. Treat these as separate prerequisites; an empty RBCD attribute or zero quota alone proves neither success nor safety.
+
+An existing RBCD descriptor can also name a **group** rather than the delegating computer directly. If you control an SPN-bearing computer account and can add it to that group, the new membership may supply the delegation path without changing the target computer's RBCD attribute. Check the group's effective membership-write ACL (including deny ACEs), nested membership and token refresh, the descriptor trustee SID, the impersonated account's delegation restrictions, and the target service SPN before concluding that the path works.
+
 To check the _**MachineAccountQuota**_ of the domain you can use:
 
 ```bash
