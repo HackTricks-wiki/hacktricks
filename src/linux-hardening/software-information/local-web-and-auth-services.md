@@ -69,6 +69,8 @@ An unescaped newline in a writable backend value can turn one intended directive
 
 Monit's control file is usually `~/.monitrc` or `/etc/monitrc`, but `monit -c` can select another path. A readable file may contain `set httpd` and `allow user:password` entries for its web interface, often on local port 2812. Check the file's owner and permissions before reviewing it, and keep password values out of shared enumeration output. Web credentials grant only the configured Monit role; read-only users cannot invoke control actions. A separate Unix-account escalation requires confirmed password reuse or a privileged Monit action the authenticated role can actually trigger. See the [Monit control-file and authentication documentation](https://www.mmonit.com/monit/documentation/monit.html).
 
+For Webmin, `/etc/webmin/miniserv.conf` identifies server settings and `/etc/webmin/webmin.acl` records which modules users may access; [Webmin documents the module-grant boundary](https://webmin.com/docs/development/creating-modules/). A Unix password or readable ACL file does not itself grant a Webmin session. Confirm the actual authentication mapping, reachable listener, authenticated account, effective Package Updates module permission, installed code or vendor fix, and Webmin process identity. In affected builds through 1.910, [CVE-2019-12840](https://nvd.nist.gov/vuln/detail/CVE-2019-12840) allowed an account with that module permission to execute commands through its update handler. Report the configuration paths and permissions during passive enumeration without printing credentials or attempting an update.
+
 ```bash
 find /etc/pam.d /etc/sssd /etc/postfix -maxdepth 2 -type f -ls 2>/dev/null
 systemctl cat sssd postfix jenkins 2>/dev/null
