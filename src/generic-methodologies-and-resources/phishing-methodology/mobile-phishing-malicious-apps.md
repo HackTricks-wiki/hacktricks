@@ -1,51 +1,51 @@
-# Mobiele Phishing en Verspreiding van Kwaadwillige Apps (Android en iOS)
+# Mobiele uitvissing en verspreiding van kwaadwillige apps (Android en iOS)
 
 {{#include ../../banners/hacktricks-training.md}}
 
 > [!INFO]
-> Hierdie bladsy dek tegnieke wat bedreigingsakteurs gebruik om **kwaadwillige Android APKs** en **iOS-mobiele-konfigurasieprofiele** deur middel van phishing te versprei (SEO, sosiale manipulasie, vals winkels, dating-apps, ens.).
-> Die materiaal is aangepas uit die SarangTrap-veldtog wat deur Zimperium zLabs blootgelê is (2025), en ander openbare navorsing.<sup>[[1]](#references)</sup>
+> Hierdie bladsy dek tegnieke wat bedreigingsakteurs gebruik om **kwaadwillige Android-APK’s** en **iOS-mobielekonfigurasieprofiele** deur uitvissing te versprei (SEO, sosiale manipulasie, vals winkels, dating-apps, ens.).
+> Die materiaal is aangepas uit die SarangTrap-veldtog wat Zimperium zLabs in 2025 blootgelê het, en ander openbare navorsing.<sup>[[1]](#references)</sup>
 
 ## Aanvalsvloei
 
-1. **SEO/Phishing-infrastruktuur**
-   * Registreer dosyne domeine wat soortgelyk lyk (dating, wolkdeling, motordiens…).
-     – Gebruik sleutelwoorde en emoji’s in die plaaslike taal in die `<title>`-element om hoër in Google se ranglys te verskyn.
-     – Bied *beide* Android- (`.apk`) en iOS-installeringsinstruksies op dieselfde bestemmingsbladsy aan.
-2. **Eerste Fase-aflaai**
-   * Android: direkte skakel na ’n *unsigned* APK of een van ’n “third-party store”.
-   * iOS: ’n `itms-services://`- of gewone HTTPS-skakel na ’n kwaadwillige **mobileconfig**-profiel (sien hieronder).
-3. **Android-gedrag ná installering**
-   * C2-beheerde uitvoering, misbruik van toestemmings, omseiling van droppers, versameling in die agtergrond en ander malware-gedrag ná installering word op die toegewyde Android Malware Post-Exploitation-bladsy hieronder behandel.
+1. **SEO-/uitvissingsinfrastruktuur**
+   * Registreer dosyne domeine wat soos egte domeine lyk (dating, wolkdeling, motordiens…).  
+     – Gebruik sleutelwoorde in plaaslike tale en emoji’s in die `<title>`-element om hoër in Google-resultate te rangskik.  
+     – Bied *beide* Android- (`.apk`) en iOS-installasie-instruksies op dieselfde bestemmingsbladsy aan.
+2. **Eerste-fase-aflaai**
+   * Android: direkte skakel na ’n *ongtekende* APK of een van ’n “third-party store”.  
+   * iOS: `itms-services://`- of gewone HTTPS-skakel na ’n kwaadwillige **mobileconfig**-profiel (sien hieronder).
+3. **Android-gedrag ná installasie**
+   * C2-beheerde uitvoering, misbruik van toestemmings, omseiling van dropper-beskerming, versameling in die agtergrond en ander gedrag van wanware ná installasie word op die toegewyde Android Malware Post-Exploitation-bladsy hieronder bespreek.
 4. **iOS-afleweringstegniek**
-   * ’n Enkele **mobile-configuration profile** kan `PayloadType=com.apple.sharedlicenses`, `com.apple.managedConfiguration`, ens. aanvra om die toestel by MDM-agtige toesig in te skryf.
+   * ’n Enkele **mobielekonfigurasieprofiel** kan `PayloadType=com.apple.sharedlicenses`, `com.apple.managedConfiguration`, ens. aanvra om die toestel by “MDM”-agtige toesig in te skryf.  
    * Instruksies vir sosiale manipulasie:
-     1. Maak Settings ➜ *Profiel afgelaai* oop.
-     2. Tik drie keer op *Installeer* (skermkiekies op die phishing-bladsy).
-     3. Vertrou die ongetekende profiel ➜ die aanvaller kry *Contacts*- en *Photo*-entitlements sonder App Store-oorsig.
-5. **iOS Web Clip-lading (phishing-app-ikoon)**
-   * `com.apple.webClip.managed`-ladings kan **’n phishing-URL met ’n handelsmerkikoon/-etiket aan die Home Screen vaspen**.
-   * Web Clips kan **volskerm** werk (verberg die blaaierkoppelvlak) en as **nie-verwyderbaar** gemerk word, wat die slagoffer dwing om die profiel te verwyder om die ikoon te verwyder.<sup>[[3]](#references)</sup>
+     1. Maak Settings oop ➜ *Profile downloaded*.
+     2. Tik drie keer op *Install* (skermkiekies verskyn op die uitvissingsbladsy).  
+     3. Vertrou die ongetekende profiel ➜ die aanvaller kry die *Contacts*- en *Photo*-regte sonder App Store-oorsig.
+5. **iOS Web Clip-looisagteware (ikoon van ’n uitvissing-app)**
+   * `com.apple.webClip.managed`-payloads kan ’n uitvissings-URL met ’n handelsmerkikoon/-etiket **aan die tuisskerm vaspen**.
+   * Web Clips kan **volskerm** loop (verberg die blaaierkoppelvlak) en as **nie-verwyderbaar** gemerk word, wat die slagoffer dwing om die profiel te verwyder om die ikoon te verwyder.<sup>[[3]](#references)</sup>
 6. **Netwerklaag**
-   * Gewone HTTP, dikwels op poort 80 met ’n HOST-opskrif soos `api.<phishingdomain>.com`.
+   * Gewone HTTP, dikwels op poort 80, met ’n HOST-opskrif soos `api.<phishingdomain>.com`.
    * `User-Agent: Dalvik/2.1.0 (Linux; U; Android 13; Pixel 6 Build/TQ3A.230805.001)` (geen TLS → maklik om raak te sien).
 
-## Android Malware Post-Exploitation
+## Android-wanware ná uitbuiting
 
-Vir Android-malware-taktieke ná installering, soos C2, misbruik van Accessibility, overlays, ATS-outomatisering, gelaagde DEX-laaiing, premium SMS en volharding, sien:
+Vir Android-wanwaretegnieke ná installasie, soos C2, misbruik van Accessibility, oorleggings, ATS-outomatisering, gefaseerde DEX-laai, premium SMS en volharding, sien:
 
 {{#ref}}
 ../basic-forensic-methodology/android-malware-post-exploitation.md
 {{#endref}}
 
-## APK-smokkelary via Socket.IO/WebSocket + Vals Google Play-bladsye
+## APK-smokkelary met Socket.IO/WebSocket en vals Google Play-bladsye
 
-Aanvallers vervang toenemend statiese APK-skakels met ’n Socket.IO/WebSocket-kanaal wat in lokmiddels ingebed is wat soos Google Play lyk. Dit verberg die URL van die lading, omseil URL-/uitbreidingsfilters en behou ’n realistiese installeringservaring.<sup>[[2]](#references)[[4]](#references)</sup>
+Aanvallers vervang toenemend statiese APK-skakels met ’n Socket.IO/WebSocket-kanaal wat in lokmiddels ingebed is wat soos Google Play lyk. Dit verberg die payload-URL, omseil URL-/uitbreidingsfilters en behou ’n realistiese installasie-ervaring.<sup>[[2]](#references)[[4]](#references)</sup>
 
 Tipiese kliëntvloei wat in die praktyk waargeneem is:
 
 <details>
-<summary>Vals Socket.IO Play-aflaaier (JavaScript)</summary>
+<summary>Socket.IO-aflaaier wat Google Play naboots (JavaScript)</summary>
 
 ```javascript
 // Open Socket.IO channel and request payload
@@ -69,12 +69,12 @@ socket.on("downloadComplete", () => {
 
 </details>
 
-Waarom dit eenvoudige kontroles omseil:
-- Geen statiese APK-URL word blootgestel nie; die payload word in die geheue uit WebSocket-raampies gerekonstrueer.
-- URL-/MIME-/uitbreidingsfilters wat direkte .apk-antwoorde blokkeer, kan dalk binêre data miskyk wat via WebSockets/Socket.IO getonnel word.
-- Kruipers en URL-sandkaste wat nie WebSockets uitvoer nie, sal nie die payload ophaal nie.
+Waarom dit eenvoudige beheermaatreëls ontduik:
+- Geen statiese APK-URL word blootgestel nie; die payload word in die geheue uit WebSocket-rame gerekonstrueer.
+- URL-/MIME-/uitbreidingsfilters wat direkte .apk-antwoorde blokkeer, kan binêre data miskyk wat via WebSockets/Socket.IO getonnel word.
+- Crawlers en URL-sandboxes wat nie WebSockets uitvoer nie, sal nie die payload ophaal nie.
 
-Sien ook WebSocket-tradecraft en -nutsgoed:
+Sien ook WebSocket tradecraft en gereedskap:
 
 {{#ref}}
 ../../pentesting-web/websocket-attacks.md
@@ -83,8 +83,8 @@ Sien ook WebSocket-tradecraft en -nutsgoed:
 
 ## References
 
-- [1] [Die Donker Kant van Romantiek: SarangTrap-afpersingsveldtog](https://zimperium.com/blog/the-dark-side-of-romance-sarangtrap-extortion-campaign)
+- [1] [Die donker kant van romanse: SarangTrap-afpersingsveldtog](https://zimperium.com/blog/the-dark-side-of-romance-sarangtrap-extortion-campaign)
 - [2] [Socket.IO](https://socket.io)
 - [3] [Web Clips-payloadinstellings vir Apple-toestelle](https://support.apple.com/guide/deployment/web-clips-payload-settings-depbc7c7808/web)
-- [4] [Banker-Trojaan wat Indonesiese en Viëtnamese Android-gebruikers teiken](https://dti.domaintools.com/banker-trojan-targeting-indonesian-and-vietnamese-android-users/)
+- [4] [Bankertrojaan teiken Indonesiese en Viëtnamese Android-gebruikers](https://dti.domaintools.com/banker-trojan-targeting-indonesian-and-vietnamese-android-users/)
 {{#include ../../banners/hacktricks-training.md}}
