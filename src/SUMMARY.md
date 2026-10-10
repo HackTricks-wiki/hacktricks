@@ -366,6 +366,7 @@
   - [Arbitrary Kernel Rw Token Theft](windows-hardening/windows-local-privilege-escalation/arbitrary-kernel-rw-token-theft.md)
   - [Windows Kernel Rootkits and DKOM](windows-hardening/windows-local-privilege-escalation/windows-kernel-rootkits-and-dkom.md)
   - [Kernel Race Condition Object Manager Slowdown](windows-hardening/windows-local-privilege-escalation/kernel-race-condition-object-manager-slowdown.md)
+  - [Kernel-Mode File Access Check Bypasses](windows-hardening/windows-local-privilege-escalation/kernel-mode-file-access-check-bypass.md)
   - [Notepad Plus Plus Plugin Autoload Persistence](windows-hardening/windows-local-privilege-escalation/notepad-plus-plus-plugin-autoload-persistence.md)
   - [Abusing Tokens](windows-hardening/windows-local-privilege-escalation/privilege-escalation-abusing-tokens.md)
   - [Access Tokens](windows-hardening/windows-local-privilege-escalation/access-tokens.md)
