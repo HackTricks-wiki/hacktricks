@@ -1,12 +1,13 @@
-# Access Token'ları
+# Erişim Token'ları
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Access Token'ları
+## Erişim Token'ları
 
-Sisteme **oturum açan her kullanıcı**, o oturum için **güvenlik bilgilerini içeren bir access token'a sahiptir**. Sistem, kullanıcı oturum açtığında bir access token oluşturur. Kullanıcı adına **çalıştırılan her process**, **access token'ın bir kopyasına sahiptir**. Token; kullanıcıyı, kullanıcının gruplarını ve kullanıcının yetkilerini tanımlar. Ayrıca token, mevcut oturum açma oturumunu tanımlayan bir logon SID (Security Identifier) içerir.
+Her process'in güvenlik bağlamını tanımlayan bir **primary access token**'ı vardır. Bir thread normalde bu token'ı kullanır, ancak geçici olarak bir **impersonation token**'ı da olabilir. Token'lar kullanıcı SID'sini, grup SID'lerini, ayrıcalıkları, bütünlük bilgilerini ve logon oturumu için bir logon SID'sini içerir. Process'ler genellikle ebeveynlerinin primary token'ına bir başvuru devralır; bu token'ın içeriğinin bağımsız bir kopyasını almazlar.<sup>[[4]](#references)</sup>
 
 Bu bilgileri `whoami /all` komutunu çalıştırarak görebilirsiniz.
+
 ```
 whoami /all
 
@@ -50,87 +51,133 @@ SeUndockPrivilege             Remove computer from docking station Disabled
 SeIncreaseWorkingSetPrivilege Increase a process working set       Disabled
 SeTimeZonePrivilege           Change the time zone                 Disabled
 ```
-veya Sysinternals'ın _Process Explorer_ aracını kullanarak (işlemi seçin ve "Security" sekmesine erişin):
 
-![Access Tokens - Access Tokens: veya Sysinternals'ın Process Explorer aracını kullanarak (işlemi seçin ve "Security" sekmesine erişin)](<../../images/image (772).png>)
+veya Sysinternals’tan _Process Explorer_ kullanarak (süreci seçip "Security" sekmesine erişin):
+
+![Access Tokens - Access Tokens: or using Process Explorer from Sysinternals (select process and access"Security" tab)](<../../images/image (772).png>)
 
 ### Yerel yönetici
 
-Yerel bir yönetici oturum açtığında, **iki access token oluşturulur**: Biri yönetici haklarına, diğeri normal haklara sahip olur. **Varsayılan olarak**, bu kullanıcı bir işlem çalıştırdığında **normal** (yönetici olmayan) **haklara** sahip olan token kullanılır. Bu kullanıcı herhangi bir şeyi **yönetici olarak** ("Run as Administrator" gibi) **çalıştırmayı** denediğinde, izin istemek için **UAC** kullanılır.\
-[**UAC hakkında daha fazla bilgi edinmek için bu sayfayı okuyun**](../authentication-credentials-uac-and-efs/index.html#uac)**.**
+**UAC Admin Approval Mode** bir yönetici için geçerliyse, etkileşimli oturum açma işlemi tam yönetici token’ı ve filtrelenmiş bir token oluşturur. Explorer ve sıradan alt süreçler varsayılan olarak filtrelenmiş token’ı kullanır. **Run as administrator** gibi bir yükseltme isteği, UAC’den programı tam token’la başlatmasını ister. Kesin davranış, yerleşik Administrator hesabına ve Admin Approval Mode’un devre dışı olmasına bağlı olarak değişir.<sup>[[5]](#references)</sup>
 
-Pratikte bu, **yükseltilmemiş bir yönetici shell'inin genellikle filtrelenmiş bir token ile çalıştığı** anlamına gelir. Bu nedenle `whoami /groups`, işlem yükseltilene kadar genellikle **`BUILTIN\Administrators` grubunu `Deny only` olarak** gösterir. Dahili olarak Windows, **bağlantılı bir yükseltilmiş token'ı** (`TokenLinkedToken`) tutar ve durumu `TokenElevationType` gibi alanlarla takip eder.
+Atlatma teknikleri ve ilke ayrıntıları için özel [**UAC sayfasını**](../authentication-credentials-uac-and-efs/uac-user-account-control.md) okuyun.
+
+Uygulamada bu, **yükseltilmemiş bir yönetici kabuğunun genellikle filtrelenmiş bir token’la çalıştığı** anlamına gelir. Bu nedenle süreç yükseltilene kadar `whoami /groups` çıktısında **`BUILTIN\Administrators` genellikle `Deny only` olarak görünür**. Windows, dahili olarak **bağlantılı yükseltilmiş bir token** (`TokenLinkedToken`) tutar ve durumu `TokenElevationType` gibi alanlarla izler.
 
 ### Kimlik bilgileriyle kullanıcı taklidi
 
-Başka bir kullanıcının **geçerli kimlik bilgilerine** sahipseniz, bu kimlik bilgileriyle **yeni bir logon session** oluşturabilirsiniz:
+Başka herhangi bir kullanıcının **geçerli kimlik bilgilerine** sahipseniz, bu kimlik bilgileriyle **yeni bir oturum açma oturumu oluşturabilirsiniz** :
+
 ```
 runas /user:domain\username cmd.exe
 ```
-**access token** ayrıca **LSASS** içindeki oturum açma oturumlarına dair bir **reference** içerir; bu, process'in ağdaki bazı nesnelere erişmesi gerekiyorsa kullanışlıdır.\
-Şunları kullanarak **network services'e erişmek için farklı kimlik bilgileri kullanan** bir process başlatabilirsiniz:
+
+**access token**, **LSASS** içindeki oturum açma oturumlarına yönelik bir **reference** da içerir. Bu, süreç ağdaki bazı nesnelere erişmek istediğinde kullanışlıdır.\
+Şu komutu kullanarak **ağ hizmetlerine erişmek için farklı kimlik bilgileri kullanan** bir süreç başlatabilirsiniz:
+
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
-Bu, network içindeki nesnelere erişmek için kullanabileceğiniz geçerli credentials'a sahip olduğunuzda, ancak bu credentials mevcut host içinde geçerli olmadığında kullanışlıdır; çünkü bu credentials yalnızca network içinde kullanılacaktır (mevcut host üzerinde mevcut user privileges kullanılacaktır).
+
+Bu, ağdaki nesnelere erişmek için kullanabileceğiniz kimlik bilgilerine sahipseniz ancak bu kimlik bilgileri yalnızca ağda kullanılacağından mevcut ana bilgisayarda geçerli değilse işe yarar (mevcut ana bilgisayarda mevcut kullanıcı ayrıcalıklarınız kullanılır).
 
 #### `runas /netonly` ayrıntıları
 
-`runas /netonly` (ve `make_token` gibi C2 yardımcıları), bir **`LOGON32_LOGON_NEW_CREDENTIALS`** token oluşturur. Bu, lateral movement sırasında anlaşılması çok önemlidir, çünkü:<sup>[[3]](#references)</sup>
+`runas /netonly` (ve `make_token` gibi C2 yardımcıları) bir **`LOGON32_LOGON_NEW_CREDENTIALS`** token'ı oluşturur. Yanal hareket sırasında bunu anlamak çok faydalıdır:<sup>[[3]](#references)</sup>
 
-- **Yerel olarak**, yeni process mevcut token ile **aynı yerel identity**, gruplar, integrity level ve erişim kararlarının çoğunu korur.
-- **Uzaktan**, outbound authentication SMB / WinRM / LDAP / HTTP / Kerberos / NTLM için **sağlanan credentials**'ı kullanabilir.
-- Bu nedenle `whoami`, network access **alternate account** olarak gerçekleşirken bile **orijinal local user**'ı göstermeye devam edebilir.
+- **Yerel olarak**, yeni süreç mevcut token ile **aynı yerel kimliği**, grupları, bütünlük düzeyini ve erişim kararlarının çoğunu kullanmaya devam eder.
+- **Uzaktan**, giden kimlik doğrulaması SMB / WinRM / LDAP / HTTP / Kerberos / NTLM için **sağlanan kimlik bilgilerini** kullanabilir.
+- Bu nedenle ağ erişimi **alternatif hesap** olarak gerçekleşirken `whoami` hâlâ **orijinal yerel kullanıcıyı** gösterebilir.
 
-Bu seçenek, credentials domain içinde veya başka bir host üzerinde geçerli olduğunda, ancak user'ın mevcut makineye **locally log on** olması mümkün olmadığında veya olmaması gerektiğinde oldukça kullanışlıdır.
+Bu, kimlik bilgilerinin etki alanında veya başka bir ana bilgisayarda geçerli olduğu ancak kullanıcının mevcut makinede **yerel olarak oturum açamadığı ya da açmaması gerektiği** durumlarda harika bir seçenektir.
 
 ### Token türleri
 
-Kullanılabilen iki token türü vardır:
+Kullanılabilir iki token türü vardır:<sup>[[4]](#references)[[6]](#references)</sup>
 
-- **Primary Token**: Bir process'in security credentials'ının temsili olarak görev yapar. Primary token'ların oluşturulması ve process'lerle ilişkilendirilmesi, yükseltilmiş privileges gerektiren işlemlerdir ve privilege separation ilkesini vurgular. Genellikle token oluşturulmasından bir authentication service, token'ın user'ın operating system shell'i ile ilişkilendirilmesinden ise bir logon service sorumludur. Process'lerin oluşturulduklarında parent process'lerinin primary token'ını devraldığını belirtmek gerekir.
-- **Impersonation Token**: Bir server application'ın secure objects'a erişmek için client identity'sini geçici olarak benimsemesini sağlar. Bu mekanizma dört operation level'a ayrılır:
-- **Anonymous**: Server access'i, kimliği belirlenemeyen bir user'ın access'ine benzer şekilde sağlar.
-- **Identification**: Server'ın client identity'sini doğrulamasına izin verir, ancak bunu object access için kullanmasına izin vermez.
-- **Impersonation**: Server'ın client identity'si altında çalışmasını sağlar.
-- **Delegation**: Impersonation'a benzer, ancak server'ın etkileşimde bulunduğu remote systems'a bu identity assumption'ı genişletmesini ve credentials'ın korunmasını sağlar.
+- **Primary token**: Bir sürecin güvenlik bağlamını temsil eder. Bir alt süreç normalde üst sürecin primary token'ını devralır; açık token kullanan süreç oluşturma API'leri ise kendi token erişimi ve çağıran ayrıcalığı gereksinimlerini uygular.
+- **Impersonation token**: Bir sunucu iş parçacığının erişim denetimleri için geçici olarak istemcinin güvenlik bağlamını kullanmasını sağlar. Dört düzeyi vardır:
+  - **Anonymous**: Sunucuya kimliği belirlenemeyen bir kullanıcınınkine benzer erişim sağlar.
+  - **Identification**: Sunucunun istemci kimliğini doğrulamasını sağlar ancak bu kimliğin nesne erişimi için kullanılmasına izin vermez.
+  - **Impersonation**: Sunucunun istemcinin kimliği altında çalışmasını sağlar.
+  - **Delegation**: Kimlik doğrulama mekanizması ve hesap yapılandırması yetkilendirmeyi desteklediğinde sunucunun istemciyi uzak sistemlerde taklit etmesini sağlar.
+
+#### Kullanımdan önce ele geçirilmiş bir token'ı değerlendirin
+
+Yalnızca kullanıcı adına bakarak token seçmeyin. Aynı hesap; farklı oturum açma oturumları, hizmet SID'leri, ayrıcalıklar, bütünlük düzeyleri, kısıtlamalar ve ağ kimlik bilgileri içeren birden fazla token'a sahip olabilir.<sup>[[9]](#references)</sup> `GetTokenInformation` ile en az **`TokenType`**, **`TokenImpersonationLevel`**, **`TokenElevationType`**, **`TokenLinkedToken`**, **`TokenIntegrityLevel`**, **`TokenSessionId`**, **`TokenIsRestricted`** / **`TokenHasRestrictions`** ve **`TokenStatistics.AuthenticationId`** değerlerini sorgulayın.<sup>[[7]](#references)</sup>
+
+Kısıtlanmış bir token; yalnızca reddetme amacıyla kullanılan SID'ler, kaldırılmış ayrıcalıklar ve kısıtlayıcı SID'ler içerebilir. Kısıtlayıcı SID'ler varsa Windows bir erişim denetimini etkin SID'lerle, diğerini ise kısıtlayıcı SID'lerle gerçekleştirir; **her iki denetimin de erişime izin vermesi gerekir**. Bu nedenle çıktıda çekici görünen bir kullanıcı SID'si veya etkin bir grup, tek başına token'ın hedef nesneye erişebileceğini kanıtlamaz.<sup>[[8]](#references)</sup>
+
+Belgelenmiş token ve süreç oluşturma gereksinimleri için şu karar akışını kullanın:<sup>[[6]](#references)[[9]](#references)[[10]](#references)</sup>
+
+1. Bir **primary token**, `CreateProcessWithTokenW` veya `CreateProcessAsUserW` işlevine verilebilmesi için `TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY` erişim haklarına sahip bir tanıtıcı gerektirir.
+2. Bir **impersonation token**'ı `DuplicateTokenEx(..., SecurityImpersonation, TokenPrimary, ...)` ile dönüştürün. Identification düzeyindeki token'lar kimlik verilerini açığa çıkarabilir ancak erişim denetimlerini istemci olarak gerçekleştiremez.
+3. `CreateProcessWithTokenW`, `SeImpersonatePrivilege` gerektirir ve alt süreci çağıranın oturumunda başlatır. `CreateProcessAsUserW` ise token'ın oturumunu kullanır; ancak normalde `SeIncreaseQuotaPrivilege` gerektirir ve `SeAssignPrimaryTokenPrivilege` de gerekebilir. Kimlik bilgileri mevcutsa ancak bu ayrıcalıklar yoksa belgelenmiş alternatif `CreateProcessWithLogonW`'dir.
+
+#### Yalnızca süreç sahiplerini değil, token tanıtıcılarını da arayın
+
+Her sürecin primary token'ını açmak, hizmetlerin ve aracı süreçlerin içinde sıradan tanıtıcılar olarak tutulan **impersonation token'ları** gözden kaçırabilir. Yeniden kullanılabilir bir tanıtıcı tablosu iş akışı; sistem tanıtıcılarını numaralandırmak, token nesnelerini filtrelemek, her sahibini `PROCESS_DUP_HANDLE` ile açmak, aday tanıtıcıyı mevcut sürece çoğaltmak ve ardından yukarıdaki alanları sorgulamaktır. Çoğaltılan tanıtıcının `TOKEN_QUERY` ve `TOKEN_DUPLICATE` haklarını içerdiğini doğrulayın; bir token tanıtıcısının görülmesi, onun kullanılabilir bir primary token'a çoğaltılabileceği anlamına gelmez. Korunan süreçler ve süreç DACL'leri, sahip süreç tanıtıcısının açılmasını yine de engelleyebilir.<sup>[[11]](#references)[[12]](#references)</sup>
+
+`SharpToken`, hem süreç primary token'larının hem de tutulan token tanıtıcılarının numaralandırılmasını otomatikleştirir. `list_token` her kullanıcı adı için tercih edilen tek adayı tutarken `list_all_token` tüm adayları yazdırır. Bir PID belirtmek, numaralandırmayı tek bir sahip süreciyle sınırlar.<sup>[[12]](#references)</sup>
+
+```cmd
+SharpToken.exe list_token
+SharpToken.exe list_all_token
+SharpToken.exe list_all_token 1234
+SharpToken.exe execute "DOMAIN\User" "cmd /c whoami /all"
+```
+
+For manual inspection ve erişim kontrolleri için **TokenUniverse** process/thread token'larını açabilir, mevcut token handle'larını arayabilir, kısıtlamaları ve logon session'larını inceleyebilir, token'ları çoğaltabilir ve çeşitli process oluşturma yöntemlerini test edebilir.<sup>[[13]](#references)</sup> Temel cross-process handle primitive'i için bkz.:
+
+{{#ref}}
+leaked-handle-exploitation.md
+{{#endref}}
 
 #### Impersonate Tokens
 
-Yeterli privileges'a sahipseniz, metasploit'in _**incognito**_ module'ünü kullanarak diğer **tokens**'ları kolayca **list** edebilir ve **impersonate** edebilirsiniz. Bu, **diğer user gibiymişsiniz gibi actions gerçekleştirmek** için kullanışlı olabilir. Bu technique ile **privileges escalate** de edebilirsiniz.
+Yeterli yetkiniz varsa, metasploit'in _**incognito**_ modülünü kullanarak diğer **token**'ları kolayca **listeleyebilir** ve **impersonate** edebilirsiniz. Bu, **diğer kullanıcıymış gibi işlem yapmak** için yararlı olabilir. Bu teknikle **privilege escalation** da yapabilirsiniz.
 
-Operasyon sırasında kolayca unutulabilen bazı pratik notlar:<sup>[[1]](#references)</sup>
+İşlem sırasında kolayca gözden kaçabilecek bazı pratik notlar:<sup>[[1]](#references)</sup>
 
-- **`CreateProcessWithTokenW`**, caller'ın **`SeImpersonatePrivilege`** privilege'ına sahip olmasını gerektirir ve yeni process **caller'ın session'ında** çalışır.
-- **`CreateProcessAsUserW`**, `CreateProcessWithTokenW` `1314` hatasıyla başarısız olduğunda veya token tarafından referans verilen **session'da** launch etmeniz gerektiğinde kullanılan olağan fallback'tir.
-- Bir token **`LogonUser(LOGON32_LOGON_NETWORK)`** üzerinden geliyorsa genellikle bir **impersonation token**'dır; bu nedenle process spawn etmeyi denemeden önce **`DuplicateTokenEx(..., TokenPrimary, ...)`** kullanmanız gerekir.
-- Her impersonation token eşit derecede kullanışlı değildir: **`SecurityIdentification`**, user'ı inspect etmenize izin verir, ancak **onun gibi hareket etmenize** izin vermez. Bir coercion primitive veya pipe/RPC client size yalnızca identification-level token veriyorsa **`TokenImpersonationLevel`** değerini kontrol edin ve **`SecurityImpersonation`** veya daha üst bir seviye sağlayan bir primitive'e geçin.
+- **`CreateProcessWithTokenW`**, çağıran tarafta **`SeImpersonatePrivilege`** gerektirir ve yeni process **çağıranın session'ında** çalışır.
+- **`CreateProcessAsUserW`**, `CreateProcessWithTokenW` çağrısı `1314` hatasıyla başarısız olursa, yalnızca çağıran taraf gerekli privilege'lara sahipse yedek seçenek olarak kullanılabilir. Alt process'in **token'ın belirttiği session'da** çalışması gerektiğinde de doğru seçimdir.<sup>[[9]](#references)[[10]](#references)</sup>
+- Bir token **`LogonUser(LOGON32_LOGON_NETWORK)`** çağrısından geliyorsa, genellikle bir **impersonation token**'ıdır. Bu nedenle onunla process başlatmayı denemeden önce **`DuplicateTokenEx(..., TokenPrimary, ...)`** kullanmanız gerekir.
+- Her impersonation token aynı ölçüde kullanışlı değildir: **`SecurityIdentification`**, kullanıcıyı incelemenize izin verir ancak **onun adına işlem yapmanıza izin vermez**. Bir coercion primitive'i veya pipe/RPC client size yalnızca identification seviyesinde bir token veriyorsa **`TokenImpersonationLevel`** değerini kontrol edin ve **`SecurityImpersonation`** veya daha üst seviyede token sağlayan bir primitive'e geçin.
 
-#### LSASS'e dokunmadan token theft
+#### LSASS'a dokunmadan token çalma
 
-Zaten bir **service** veya **SYSTEM** context'ine sahipseniz ve **privileged bir user log on olmuşsa**, bu user'ın token'ını steal etmek veya duplicate etmek çoğu zaman **LSASS** dump etmekten daha sessizdir. Gerçek intrusion'ların çoğunda bu, aşağıdakiler için yeterlidir:<sup>[[2]](#references)</sup>
+Zaten bir **service** veya **SYSTEM** context'ine sahipseniz ve **privileged bir kullanıcı oturum açmışsa**, o kullanıcının token'ını çalmak veya çoğaltmak çoğu zaman **LSASS**'ı dump etmekten daha az dikkat çeker. Gerçek dünyadaki birçok saldırıda bu, şunları yapmak için yeterlidir:<sup>[[2]](#references)</sup>
 
-- local actions'ı bu user olarak çalıştırmak
-- remote resources'lara bu user olarak erişmek
-- öncesinde reusable credentials extract etmeden AD operations gerçekleştirmek
+- yerel işlemleri o kullanıcı olarak yürütmek
+- uzak kaynaklara o kullanıcı olarak erişmek
+- önce tekrar kullanılabilir kimlik bilgilerini çıkarmadan AD işlemleri gerçekleştirmek
 
-Privileged context'ten **session/user token hijacking** örnekleri için [**WTS Impersonator**](../stealing-credentials/wts-impersonator.md) sayfasına bakın. **`WTSQueryUserToken`** gibi API'lerin **highly trusted services** için tasarlandığını ve normalde **`LocalSystem` + `SeTcbPrivilege`** gerektirdiğini unutmayın; bu nedenle bunlar öncelikle service-level bir context'i zaten kontrol ettiğinizde kullanışlıdır. Önce **SYSTEM** elde etmenin privilege-specific yolları için aşağıdaki sayfalara bakın.
+Privileged bir context'ten **session/user token hijacking** örnekleri için [**WTS Impersonator**](../stealing-credentials/wts-impersonator.md) sayfasına bakın. **`WTSQueryUserToken`** gibi API'lerin **yüksek düzeyde güvenilen service'ler** için tasarlandığını ve normalde **`LocalSystem` + `SeTcbPrivilege`** gerektirdiğini unutmayın. Bu nedenle, öncelikle bir service-level context'i zaten kontrol ettiğinizde işe yararlar. Önce **SYSTEM** elde etmenin privilege'a özgü yolları için aşağıdaki sayfalara bakın.
 
 ### Token Privileges
 
-Privileges escalate etmek için hangi **token privileges'ın abuse edilebileceğini** öğrenin:
+**Privilege escalation için kötüye kullanılabilecek token privilege'larını** öğrenin:
 
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-[**Tüm olası token privileges'larına ve bazı tanımlarına bu external page üzerinden**](https://github.com/gtworek/Priv2Admin) göz atın.
+[**Tüm olası token privilege'larını ve bazı tanımlarını bu harici sayfada**](https://github.com/gtworek/Priv2Admin) inceleyin.
 
 ## References
 
-- [1] [Understanding and Abusing Access Tokens — Part II](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
-- [2] [Abusing Windows' tokens to compromise Active Directory without touching LSASS](https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/)
-- [3] [Demystifying Cobalt Strike's "make_token" Command](https://www.fox-it.com/nl-en/demystifying-cobalt-strike-s-make_token-command/)
-
+- [1] [Access Token'ları Anlamak ve Kötüye Kullanmak — Bölüm II](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+- [2] [LSASS'a dokunmadan Active Directory'yi ele geçirmek için Windows token'larını kötüye kullanmak](https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/)
+- [3] [Cobalt Strike'ın "make_token" Komutunu Açıklığa Kavuşturmak](https://www.fox-it.com/nl-en/demystifying-cobalt-strike-s-make_token-command/)
+- [4] [Access Tokens - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/secauthz/access-tokens)
+- [5] [Kullanıcı Hesabı Denetimi nasıl çalışır - Microsoft Learn](https://learn.microsoft.com/en-us/windows/security/application-security/application-control/user-account-control/how-it-works)
+- [6] [Impersonation Seviyeleri - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/secauthz/impersonation-levels)
+- [7] [TOKEN_INFORMATION_CLASS enumeration - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ne-winnt-token_information_class)
+- [8] [Kısıtlı Token'lar - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/secauthz/restricted-tokens)
+- [9] [CreateProcessWithTokenW function - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
+- [10] [CreateProcessAsUserW function - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessasuserw)
+- [11] [DuplicateHandle function - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/api/handleapi/nf-handleapi-duplicatehandle)
+- [12] [BeichenDream/SharpToken](https://github.com/BeichenDream/SharpToken)
+- [13] [diversenok/TokenUniverse](https://github.com/diversenok/TokenUniverse)
 {{#include ../../banners/hacktricks-training.md}}

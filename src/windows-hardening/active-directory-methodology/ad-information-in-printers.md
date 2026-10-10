@@ -2,14 +2,14 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-İnternette, yazıcıların LDAP ile varsayılan/zayıf **oturum açma kimlik bilgileriyle yapılandırılmış şekilde bırakılmasının tehlikelerini vurgulayan** çeşitli blog yazıları bulunmaktadır.  \
-Bunun nedeni, bir saldırganın **yazıcıyı sahte bir LDAP sunucusuna karşı authenticate olmaya kandırabilmesi** (genellikle `nc -vv -l -p 389` veya `slapd -d 2` yeterlidir) ve yazıcının **kimlik bilgilerini düz metin olarak** ele geçirebilmesidir.
+İnternette, varsayılan/zayıf oturum açma kimlik bilgileriyle LDAP kullanacak şekilde yapılandırılmış yazıcıları açık bırakmanın tehlikelerine **dikkat çeken** çeşitli bloglar var.  \
+Bunun nedeni, bir saldırganın **yazıcıyı sahte bir LDAP sunucusuna karşı kimlik doğrulaması yapmaya kandırabilmesi** (genellikle `nc -vv -l -p 389` veya `slapd -d 2` yeterlidir) ve yazıcının **kimlik bilgilerini düz metin olarak** ele geçirebilmesidir.
 
-Ayrıca birçok yazıcıda **kullanıcı adlarını içeren loglar** bulunur veya yazıcılar Domain Controller'dan **tüm kullanıcı adlarını indirme** yeteneğine sahip olabilir.
+Ayrıca, bazı yazıcılar **kullanıcı adlarını içeren günlükler** barındırır veya hatta Domain Controller'dan **tüm kullanıcı adlarını indirebilir**.
 
 Tüm bu **hassas bilgiler** ve yaygın **güvenlik eksikliği**, yazıcıları saldırganlar için oldukça ilgi çekici hâle getirir.
 
-Konuyla ilgili bazı giriş niteliğinde blog yazıları:
+Konuyla ilgili bazı giriş niteliğinde bloglar:
 
 - [https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/](https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/)<sup>[[4]](#references)</sup>
 - [https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)<sup>[[5]](#references)</sup>
@@ -19,24 +19,27 @@ Konuyla ilgili bazı giriş niteliğinde blog yazıları:
 ## Yazıcı Yapılandırması
 
 - **Konum**: LDAP sunucu listesi genellikle web arayüzünde bulunur (ör. *Network ➜ LDAP Setting ➜ Setting Up LDAP*).
-- **Davranış**: Birçok gömülü web sunucusu, **kimlik bilgilerini yeniden girmeden LDAP sunucusu değişikliklerine** izin verir (kullanılabilirlik özelliği → güvenlik riski).
-- **Exploit**: LDAP sunucusu adresini saldırganın kontrolündeki bir host'a yönlendirin ve yazıcıyı size bind olmaya zorlamak için *Test Connection* / *Address Book Sync* düğmesini kullanın.
+- **Davranış**: Birçok gömülü web sunucusu, kimlik bilgilerini **yeniden girmeden** LDAP sunucusunun değiştirilmesine izin verir (kullanılabilirlik özelliği → güvenlik riski).
+- **İstismar**: LDAP sunucusu adresini saldırganın kontrolündeki bir ana bilgisayara yönlendirin ve yazıcıyı size bağlanmaya zorlamak için *Test Connection* / *Address Book Sync* düğmesine basın.
 
 ---
 
 ## Kimlik Bilgilerini Yakalama
 
-### Method 1 – Netcat Listener
+### Yöntem 1 – Netcat Dinleyicisi
+
 ```bash
 sudo nc -k -v -l -p 389     # Plain LDAP only
 ```
-Küçük/eski MFP'ler, bind DN'sinin ve parolanın ham BER akışında görünür olduğu basit bir *simple-bind* gönderebilir. Modern cihazlar genellikle önce anonim bir sorgu gerçekleştirir ve ardından bind işlemini dener; bu nedenle sonuçlar değişiklik gösterir.<sup>[[1]](#references)</sup>
 
-636/3269 portlarında çalışan basit bir `nc` listener yalnızca TLS ciphertext alır; LDAPS'i test etmek için TLS destekli bir LDAP endpoint gerekir ve cihaz sunucu sertifikasını doğru şekilde doğruladığında yönlendirme başarısız olmalıdır.
+Küçük/eski MFP'ler, bind DN'si ve parolası ham BER akışında görünür olan basit bir *simple-bind* gönderebilir. Modern cihazlar genellikle önce anonim bir sorgu yapıp ardından bind işlemini dener; bu nedenle sonuçlar değişebilir.<sup>[[1]](#references)</sup>
 
-### Method 2 – Rogue LDAP server (önerilir)
+636/3269 portunda çalışan basit bir `nc` dinleyicisi yalnızca TLS şifreli verisini alır; LDAPS'yi test etmek için TLS destekli bir LDAP uç noktası gerekir ve cihaz sunucu sertifikasını doğru şekilde doğruluyorsa yönlendirme başarısız olmalıdır.
 
-Birçok cihaz kimlik doğrulamasından *önce* anonim bir arama gerçekleştireceğinden, gerçek bir LDAP daemon kurmak çok daha güvenilir sonuçlar sağlar:<sup>[[1]](#references)</sup>
+### Yöntem 2 – Tam Rogue LDAP server (önerilen)
+
+Birçok cihaz kimlik doğrulamasından *önce* anonim bir arama yapacağından, gerçek bir LDAP daemon'u çalıştırmak çok daha güvenilir sonuçlar sağlar:<sup>[[1]](#references)</sup>
+
 ```bash
 # Debian/Ubuntu example
 sudo apt install slapd ldap-utils
@@ -45,46 +48,50 @@ sudo dpkg-reconfigure slapd   # set any base-DN – it will not be validated
 # run slapd in foreground / debug 2
 slapd -d 2 -h "ldap:///"      # only LDAP, no LDAPS
 ```
-Yazıcı lookup işlemini gerçekleştirdiğinde debug çıktısında clear-text kimlik bilgilerini göreceksiniz.
 
-> 💡  Responder, rogue LDAP ve SMB authentication servislerini içerir. Basit bir LDAP bind yapılandırılmış parolayı açığa çıkarabilirken NTLM authentication challenge-response materyali üretir; her iki sonucu da clear-text parola olarak tanımlamayın.
+Yazıcı lookup işlemini gerçekleştirdiğinde debug çıktısında clear-text kimlik bilgilerini görürsünüz.
+
+> 💡  Responder, rogue LDAP ve SMB kimlik doğrulama hizmetleri içerir. Basit bir LDAP bind işlemi yapılandırılmış parolayı açığa çıkarabilir; NTLM kimlik doğrulaması ise challenge-response verisi üretir. Bu iki sonucu da clear-text parola olarak tanımlamayın.
 
 ---
 
-## Recent Pass-Back Vulnerabilities (2024-2025)
+## Yakın Zamandaki Pass-Back Güvenlik Açıkları (2024-2025)
 
-Pass-back *teorik bir sorun değildir* – vendor'lar 2024/2025 yıllarında bu saldırı sınıfını tam olarak tanımlayan advisory'ler yayımlamaya devam ediyor.
+Pass-back teorik bir sorun *değildir* – satıcılar 2024/2025'te bu saldırı sınıfını tam olarak açıklayan güvenlik duyuruları yayımlamaya devam ediyor.
 
-### Xerox VersaLink – CVE-2024-12510 & CVE-2024-12511
+### Xerox VersaLink – CVE-2024-12510 ve CVE-2024-12511
 
-Xerox VersaLink C70xx MFP'lerinin 57.69.91 ve önceki firmware sürümleri, authenticated bir admin'in (veya default creds hâlâ geçerliyse herhangi bir kişinin):
+Xerox VersaLink C70xx MFP'lerin ≤ 57.69.91 ürün yazılımı sürümleri, kimliği doğrulanmış bir yöneticinin (veya varsayılan kimlik bilgileri değiştirilmemişse herhangi birinin) şunları yapmasına olanak tanıyordu:
 
-* **CVE-2024-12510 – LDAP pass-back**: LDAP server adresini değiştirmesine ve bir lookup tetiklemesine izin vererek cihazın yapılandırılmış Windows kimlik bilgilerini attacker-controlled host'a leak etmesine,
-* **CVE-2024-12511 – SMB/FTP pass-back**: *scan-to-folder* hedefleri üzerinden aynı sorunun oluşmasına ve NetNTLMv2 veya FTP clear-text kimlik bilgilerinin leak edilmesine olanak tanıyordu.<sup>[[2]](#references)</sup>
+* **CVE-2024-12510 – LDAP pass-back**: LDAP sunucusu adresini değiştirmek ve bir lookup işlemi başlatmak; bunun sonucunda cihaz, yapılandırılmış Windows kimlik bilgilerini saldırganın kontrolündeki ana bilgisayara leak eder.
+* **CVE-2024-12511 – SMB/FTP pass-back**: *scan-to-folder* hedefleri üzerinden aynı sorun; NetNTLMv2 veya FTP clear-text kimlik bilgileri leak edilir.<sup>[[2]](#references)</sup>
 
 Şu tür basit bir listener:
+
 ```bash
 sudo nc -k -v -l -p 389     # capture LDAP bind
 ```
-veya sahte bir SMB server (`impacket-smbserver`) kimlik bilgilerini toplamak için yeterlidir.
 
-### Canon imageRUNNER / imageCLASS – 20 Mayıs 2025 tarihli Advisory
+veya kötü amaçlı bir SMB sunucusu (`impacket-smbserver`) kimlik bilgilerini toplamak için yeterlidir.  
 
-Canon, düzinelerce Laser & MFP ürün serisinde bir **SMTP/LDAP pass-back** zafiyetini doğruladı. Admin erişimine sahip bir attacker, server yapılandırmasını değiştirebilir ve LDAP **veya** SMTP için kayıtlı kimlik bilgilerini elde edebilir (birçok kuruluş scan-to-mail özelliğine izin vermek için ayrıcalıklı bir hesap kullanır).<sup>[[3]](#references)</sup>
+### Canon imageRUNNER / imageCLASS – 20 Mayıs 2025 tarihli güvenlik duyurusu
 
-Vendor rehberi açıkça şunları önerir:
+Canon, düzinelerce Laser ve MFP ürün serisinde **SMTP/LDAP pass-back** güvenlik açığı bulunduğunu doğruladı. Yönetici erişimine sahip bir saldırgan sunucu yapılandırmasını değiştirebilir ve LDAP **veya** SMTP için kayıtlı kimlik bilgilerini alabilir (birçok kurum, tarama-e-posta entegrasyonu için ayrıcalıklı bir hesap kullanır).<sup>[[3]](#references)</sup>
 
-1. Kullanılabilir olur olmaz patched firmware sürümüne güncelleme yapılması.
-2. Güçlü ve benzersiz admin parolalarının kullanılması.
-3. Printer integration için ayrıcalıklı AD hesaplarının kullanılmaması.
+Üreticinin yönergeleri açıkça şunları öneriyor:
+
+1. Yama içeren firmware’i kullanıma sunulur sunulmaz yüklemek.
+2. Güçlü ve benzersiz yönetici parolaları kullanmak.
+3. Yazıcı entegrasyonu için ayrıcalıklı AD hesapları kullanmaktan kaçınmak.
 
 ---
 
-### Brother cihazları ve OEM varyantları – service credentials'a serial üzerinden admin erişimi
+### Brother cihazları ve OEM varyantları – seri numarasından türetilen yönetici erişimiyle servis kimlik bilgilerine ulaşma
 
-2025 yılında gerçekleştirilen coordinated disclosure, etkilenen Brother cihazlarında özellikle kullanışlı bir chain ortaya koydu; vulnerability set'in bazı bölümleri OEM modellerini de etkiler, bu nedenle tam modeli vendor advisory ile doğrulayın. Unauthenticated bir attacker, vulnerable firmware üzerinde HTTP/HTTPS/IPP aracılığıyla cihaz serial bilgisini elde edebilir; serial bilgileri SNMP veya PJL gibi management protocol'leri üzerinden de erişilebilir olabilir. Factory password hiç değiştirilmediyse serial, administrator password'ünü deterministik olarak üretir. Authenticate olduktan sonra ayrı pass-back flaw olan CVE-2024-51984, LDAP veya FTP gibi yapılandırılmış external-service password'lerini plaintext olarak açığa çıkarır ve printer-management erişimini yeniden kullanılabilir network credentials'a dönüştürür. Firmware, service-password disclosure sorununu düzeltir; ancak daha önce üretilmiş cihazlarda operator'ün serial üzerinden türetilen initial administrator password'ünü değiştirmesi gerekir.<sup>[[6]](#references)</sup>
+2025’te yapılan koordineli bir açıklama, etkilenen Brother cihazlarında özellikle işe yarar bir saldırı zincirini ortaya koydu. Güvenlik açıkları kümesinin bazı kısımları OEM modellerini de etkiliyor; bu nedenle tam modelin üretici güvenlik duyurusunda yer aldığını doğrulayın. Kimliği doğrulanmamış bir saldırgan, güvenlik açığı bulunan firmware’de HTTP/HTTPS/IPP üzerinden cihazın seri numarasını elde edebilir. Seri numaraları SNMP veya PJL gibi yönetim protokolleri üzerinden de alınabilir. Fabrika parolası hiç değiştirilmediyse seri numarası, yönetici parolasını belirleyici şekilde verir. Kimlik doğrulamasının ardından ayrı pass-back güvenlik açığı CVE-2024-51984, LDAP veya FTP gibi harici servisler için yapılandırılmış parolaları düz metin olarak açığa çıkarır ve yazıcı yönetimi erişimini ağda yeniden kullanılabilir kimlik bilgilerine dönüştürür. Firmware güncellemesi servis parolalarının açığa çıkması sorununu giderir, ancak daha önce üretilmiş cihazlarda operatörün seri numarasından türetilen ilk yönetici parolasını değiştirmesi gerekir.<sup>[[6]](#references)</sup>
 
-Güncel Metasploit, serial bilgisini HTTP, SNMP veya PJL üzerinden bulan, candidate initial password'ü üreten ve isteğe bağlı olarak bunu web console'a karşı doğrulayan bir auxiliary module içerir. `DiscoverSerialVia=AUTO`, desteklenen discovery path'lerini dener; asset inventory serial bilgisini zaten içeriyorsa bunun yerine `TargetSerial` sağlayın.<sup>[[7]](#references)</sup>
+Güncel Metasploit sürümünde, seri numarasını HTTP, SNMP veya PJL üzerinden keşfeden, olası ilk parolayı oluşturan ve isteğe bağlı olarak web konsolunda doğrulayan bir auxiliary modül bulunur. `DiscoverSerialVia=AUTO` desteklenen keşif yollarını dener; varlık envanterinde seri numarası zaten varsa bunun yerine `TargetSerial` belirtin.<sup>[[7]](#references)</sup>
+
 ```text
 msfconsole -q
 use auxiliary/admin/misc/brother_default_admin_auth_bypass_cve_2024_51978
@@ -92,32 +99,33 @@ set RHOSTS <printer-ip>
 set DiscoverSerialVia AUTO
 run
 ```
-Yetkili varlıkları doğrulamak için sonucu kullanın. Parolanın çalışıp çalışmayacağı, tam modele ve kritik olarak fabrika yöneticisi parolasının daha önce değiştirilip değiştirilmediğine bağlıdır.<sup>[[6]](#references)[[7]](#references)</sup>
+
+Sonucu yalnızca yetkili varlıkları doğrulamak için kullanın. Parolanın çalışıp çalışmayacağı tam modele ve en önemlisi fabrika yöneticisi parolasının daha önce değiştirilip değiştirilmediğine bağlıdır.<sup>[[6]](#references)[[7]](#references)</sup>
 
 ---
 
-## Automated Enumeration / Exploitation Tools
+## Otomatik Keşif / Exploitation Araçları
 
-| Tool | Purpose | Example |
+| Araç | Amaç | Örnek |
 |------|---------|---------|
-| **PRET** (Printer Exploitation Toolkit) | PostScript/PJL/PCL abuse, file-system access, default-creds check, *SNMP discovery* | `python pret.py 192.168.1.50 pjl` |
-| **Praeda** | HTTP/HTTPS üzerinden yapılandırmayı (adres defterleri ve LDAP kimlik bilgileri dahil) toplama | `perl praeda.pl -t 192.168.1.50` |
-| **Responder / ntlmrelayx** | Rogue authentication services çalıştırma ve SMB callbacks üzerinden NetNTLM yakalama/relay etme | `sudo responder -I eth0 -v` |
-| **Metasploit Brother auxiliary** | Bir seri numarası keşfetme, aday fabrika yöneticisi parolasını türetme ve web konsolu erişimini doğrulama | `use auxiliary/admin/misc/brother_default_admin_auth_bypass_cve_2024_51978` |
+| **PRET** (Printer Exploitation Toolkit) | PostScript/PJL/PCL kötüye kullanımı, dosya sistemi erişimi, default-creds kontrolü, *SNMP keşfi* | `python pret.py 192.168.1.50 pjl` |
+| **Praeda** | HTTP/HTTPS üzerinden yapılandırma bilgilerini (adres defterleri ve LDAP kimlik bilgileri dahil) toplama | `perl praeda.pl -t 192.168.1.50` |
+| **Responder / ntlmrelayx** | Sahte kimlik doğrulama hizmetleri çalıştırma ve SMB callback'lerinden NetNTLM yakalama/aktarma | `sudo responder -I eth0 -v` |
+| **Metasploit Brother auxiliary** | Seri numarasını keşfetme, olası fabrika yöneticisi parolasını türetme ve web konsolu erişimini doğrulama | `use auxiliary/admin/misc/brother_default_admin_auth_bypass_cve_2024_51978` |
 
 ---
 
-## Hardening & Detection
+## Güçlendirme ve Tespit
 
-1. **MFP'leri derhal patch / firmware-update edin** (vendor PSIRT bültenlerini kontrol edin).
-2. **Fabrika yöneticisi parolalarını değiştirin** – yalnızca firmware, daha önce üretilmiş etkilenen Brother/OEM cihazlarındaki seri numarasından türetilen başlangıç parolalarını kaldırmaz.<sup>[[6]](#references)</sup>
-3. **Least-Privilege Service Accounts** – LDAP/SMB/SMTP için asla Domain Admin kullanmayın; yalnızca *salt okunur* OU kapsamlarıyla sınırlandırın.
-4. **Management Access'i kısıtlayın** – yazıcı web/IPP/SNMP arayüzlerini bir management VLAN'ına veya ACL/VPN arkasına yerleştirin.
-5. **Yazıcı egress'ini sınırlandırın** – her cihazın yalnızca beklenen DC/LDAP, mail, DNS/NTP, print ve scan-file hedefleriyle iletişim kurmasına izin verin. Pass-back, attacker tarafından seçilen bir endpoint'e callback gerektirir.
-6. **Kullanılmayan protokolleri devre dışı bırakın** – FTP, Telnet, raw-9100 ve eski SSL şifreleri.
-7. **Audit Logging'i etkinleştirin** – bazı cihazlar LDAP/SMTP hatalarını syslog'a yazabilir; beklenmeyen bind işlemlerini ilişkilendirin.
-8. **Authentication hedeflerini izleyin** – bir yazıcı allowlist dışında bir host'a LDAP, SMB, SMTP veya FTP başlattığında, özellikle bir management login'i ya da yapılandırma değişikliğinin hemen ardından uyarı verin.
-9. **SNMPv3 kullanın veya SNMP'yi devre dışı bırakın** – `public` community değeri genellikle cihaz ve seri numarası bilgilerini leak eder.
+1. MFP'lere derhal **yama uygulayın / firmware güncellemesi yapın** (satıcının PSIRT duyurularını kontrol edin).
+2. **Fabrika yöneticisi parolalarını değiştirin** – yalnızca firmware güncellemesi, daha önce üretilmiş etkilenen Brother/OEM cihazlarında seri numarasından türetilen başlangıç parolalarını kaldırmaz.<sup>[[6]](#references)</sup>
+3. **En Az Ayrıcalıklı Hizmet Hesapları** – LDAP/SMB/SMTP için hiçbir zaman Domain Admin kullanmayın; kapsamı *salt okunur* OU'larla sınırlayın.
+4. **Yönetim Erişimini Kısıtlayın** – yazıcı web/IPP/SNMP arayüzlerini bir yönetim VLAN'ına veya ACL/VPN arkasına yerleştirin.
+5. **Yazıcıların dışarıya bağlantılarını sınırlandırın** – her cihazın yalnızca beklenen DC/LDAP, mail, DNS/NTP, print ve scan-file hedeflerine bağlanmasına izin verin. Pass-back, saldırganın seçtiği bir uç noktaya callback gerektirir.
+6. **Kullanılmayan Protokolleri Devre Dışı Bırakın** – FTP, Telnet, raw-9100, eski SSL şifreleri.
+7. **Denetim Günlüğünü Etkinleştirin** – bazı cihazlar LDAP/SMTP hatalarını syslog'a yazabilir; beklenmeyen bind olaylarını ilişkilendirin.
+8. **Kimlik doğrulama hedeflerini izleyin** – özellikle yönetim oturum açma veya yapılandırma değişikliğinin hemen ardından bir yazıcı izin verilenler listesi dışındaki bir ana bilgisayara LDAP, SMB, SMTP veya FTP bağlantısı başlattığında uyarı verin.
+9. **SNMPv3 kullanın veya SNMP'yi devre dışı bırakın** – `public` community değeri genellikle cihaz ve seri numarası bilgilerini sızdırır.
 
 ---
 
@@ -128,10 +136,10 @@ Yetkili varlıkları doğrulamak için sonucu kullanın. Parolanın çalışıp 
 ## References
 
 - [1] [Bu sadece bir yazıcı… Olabilecek en kötü şey nedir?](https://grimhacker.com/2018/03/09/just-a-printer/)
-- [2] [Xerox Versalink C7025 Çok İşlevli Yazıcı: Pass-Back Attack Güvenlik Açıkları (Düzeltildi)](https://www.rapid7.com/blog/post/2025/02/14/xerox-versalink-c7025-multifunction-printer-pass-back-attack-vulnerabilities-fixed/)
-- [3] [Üretim Yazıcıları, Ofis/Küçük Ofis Çok İşlevli Yazıcıları ve Lazer Yazıcılar için CP2025-004 Güvenlik Açığı Azaltma/Giderme](https://psirt.canon/advisory-information/cp2025-004/)
-- [4] [Netcat ile Bir Yazıcı Üzerinden Domain Kimlik Bilgilerini Elde Etme](https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/)
-- [5] [Bir Penetration Test Çalışması Sırasında Çok İşlevli Yazıcılardan Yararlanma](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
+- [2] [Xerox Versalink C7025 Çok İşlevli Yazıcı: Pass-Back Saldırısı Güvenlik Açıkları (Düzeltildi)](https://www.rapid7.com/blog/post/2025/02/14/xerox-versalink-c7025-multifunction-printer-pass-back-attack-vulnerabilities-fixed/)
+- [3] [CP2025-004 Üretim Yazıcıları, Ofis/Küçük Ofis Çok İşlevli Yazıcıları ve Lazer Yazıcılar için Güvenlik Açığı Azaltma/Giderme](https://psirt.canon/advisory-information/cp2025-004/)
+- [4] [Netcat ile Yazıcı Üzerinden Etki Alanı Kimlik Bilgilerini Elde Etme](https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/)
+- [5] [Bir Penetrasyon Testi Çalışması Sırasında Çok İşlevli Yazıcıları Exploit Etme](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
 - [6] [Birden Fazla Brother Cihazı: Birden Fazla Güvenlik Açığı (DÜZELTİLDİ)](https://www.rapid7.com/blog/post/multiple-brother-devices-multiple-vulnerabilities-fixed/)
-- [7] [Metasploit: Brother varsayılan yönetici authentication bypass modülü](https://github.com/rapid7/metasploit-framework/blob/master/modules/auxiliary/admin/misc/brother_default_admin_auth_bypass_cve_2024_51978.rb)
+- [7] [Metasploit: Brother varsayılan yönetici kimlik doğrulama atlatma modülü](https://github.com/rapid7/metasploit-framework/blob/master/modules/auxiliary/admin/misc/brother_default_admin_auth_bypass_cve_2024_51978.rb)
 {{#include ../../banners/hacktricks-training.md}}
