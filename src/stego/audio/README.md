@@ -5,43 +5,48 @@
 Motifs courants :
 
 - Messages dans le spectrogramme
-- Embedding LSB dans des fichiers WAV
+- Dissimulation LSB dans un fichier WAV
 - Encodage DTMF / tonalités de numérotation
-- Payloads dans les métadonnées
+- Charges utiles dans les métadonnées
 
 ## Triage rapide
 
 Avant d’utiliser des outils spécialisés :
 
-- Vérifier les détails du codec/conteneur et les anomalies :
-- `file audio`
-- `ffmpeg -v info -i audio -f null -`
-- Si l’audio contient un contenu ressemblant à du bruit ou une structure tonale, examiner rapidement un spectrogramme.
+- Vérifiez les détails du codec/conteneur et les anomalies :
+  - `file audio`
+  - `ffmpeg -v info -i audio -f null -`
+- Si l’audio contient du bruit ou une structure tonale, examinez rapidement un spectrogramme.
+
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
-## Spectrogram steganography
+
+## Stéganographie par spectrogramme
 
 ### Technique
 
-Le spectrogram stego dissimule des données en modelant l’énergie au fil du temps et des fréquences afin qu’elles deviennent visibles dans un graphique temps-fréquence, tandis que l’audio peut ressembler à des tonalités ou à du bruit.<sup>[[3]](#references)</sup>
+La stéganographie par spectrogramme dissimule des données en façonnant l’énergie dans le temps et les fréquences afin qu’elles deviennent visibles sur un graphique temps-fréquence, tandis que l’audio peut ressembler à des tonalités ou à du bruit.<sup>[[3]](#references)</sup>
 
 ### Sonic Visualiser
 
-Outil principal pour l’inspection des spectrogrammes :
+Outil principal pour examiner les spectrogrammes :
 
 - [Sonic Visualiser](https://www.sonicvisualiser.org/)<sup>[[3]](#references)</sup>
 
 ### Alternatives
 
-- Audacity (vue en spectrogramme et filtres).<sup>[[6]](#references)</sup>
+- Audacity (vue spectrogramme et filtres).<sup>[[6]](#references)</sup>
 - `sox` peut générer des spectrogrammes depuis la CLI :
+
 ```bash
 sox input.wav -n spectrogram -o spectrogram.png
 ```
+
 ## Décodage FSK / modem
 
-Un audio modulé par déplacement de fréquence ressemble souvent à une alternance de tonalités uniques dans un spectrogramme. Une fois que vous avez une estimation approximative de la fréquence centrale, du décalage et du débit en bauds, effectuez une recherche par force brute avec `minimodem`:<sup>[[1]](#references)</sup>
+Un signal audio à modulation par déplacement de fréquence ressemble souvent à une alternance de tons uniques dans un spectrogramme. Une fois que vous avez estimé approximativement la fréquence centrale, l’écart et le débit en bauds, faites du brute force avec `minimodem` :<sup>[[1]](#references)</sup>
+
 ```bash
 # Visualize the band to pick baud/frequency
 sox noise.wav -n spectrogram -o spec.png
@@ -52,41 +57,44 @@ minimodem -f noise.wav 300
 minimodem -f noise.wav 1200
 minimodem -f noise.wav 2400
 ```
-`minimodem` prend en charge les modes FSK Bell et autres, ainsi que les fréquences mark/space personnalisées ; consultez ses options plutôt que de supposer que chaque enregistrement peut être détecté automatiquement. Essayez `--rx-invert`, un mode baud explicite ou `--samplerate <Hz>` lorsque la sortie est brouillée.<sup>[[4]](#references)</sup>
+
+`minimodem` prend en charge Bell et d’autres modes FSK, ainsi que des fréquences mark/space personnalisées ; consultez ses options au lieu de supposer que tout enregistrement peut être autodétecté. Essayez `--rx-invert`, un mode de débit en bauds explicite ou `--samplerate <Hz>` si la sortie est brouillée.<sup>[[4]](#references)</sup>
 
 ## WAV LSB
 
 ### Technique
 
-Pour le PCM non compressé (WAV), chaque échantillon est un entier. La modification des bits de poids faible change très légèrement la forme d’onde, ce qui permet aux attaquants de dissimuler :
+Dans le cas du PCM non compressé (WAV), chaque échantillon est un entier. La modification des bits de poids faible change très légèrement la forme d’onde, ce qui permet aux attaquants de cacher des données :
 
-- 1 bit par échantillon (ou davantage)
-- Des données entrelacées sur plusieurs canaux
+- 1 bit par échantillon (ou plus)
+- Entrelacées entre les canaux
 - Avec un pas ou une permutation
 
 Autres familles de dissimulation audio que vous pouvez rencontrer :
 
 - Codage de phase
 - Dissimulation par écho
-- Insertion à étalement de spectre
-- Canaux côté codec (dépendants du format et de l’outil)
+- Incorporation à étalement de spectre
+- Canaux auxiliaires côté codec (selon le format et l’outil)
 
 ### WavSteg
 
 Les commandes suivantes utilisent WavSteg de la boîte à outils `ragibson/Steganography`.<sup>[[2]](#references)</sup>
+
 ```bash
 python3 WavSteg.py -r -b 1 -s sound.wav -o out.bin
 python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
 ```
+
 ### DeepSound
 
-- Le dépôt officiel et les versions de DeepSound.<sup>[[7]](#references)</sup>
+- Dépôt officiel et versions de DeepSound.<sup>[[7]](#references)</sup>
 
 ## DTMF / tonalités de numérotation
 
 ### Technique
 
-DTMF représente chaque signal du clavier à l’aide d’une fréquence d’un groupe de fréquences basses et d’une fréquence d’un groupe de fréquences hautes. Si l’audio ressemble à des tonalités de clavier ou à des bips réguliers à double fréquence, testez tôt le décodage DTMF.<sup>[[5]](#references)</sup>
+Le DTMF représente chaque signal du clavier à l’aide d’une fréquence d’un groupe bas et d’une fréquence d’un groupe haut. Si l’audio ressemble à des tonalités de clavier ou à des bips réguliers à deux fréquences, essayez rapidement le décodage DTMF.<sup>[[5]](#references)</sup>
 
 Décodeurs en ligne :
 

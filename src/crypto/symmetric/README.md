@@ -2,30 +2,30 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Éléments à rechercher dans les CTFs
+## Ce qu’il faut rechercher dans les CTFs
 
-- **Mauvaise utilisation des modes** : motifs ECB, malléabilité CBC, réutilisation du nonce en CTR/GCM.
-- **Padding oracles** : erreurs/délais différents en cas de mauvais padding.
-- **Confusion concernant le MAC** : utilisation de CBC-MAC avec des messages de longueur variable, ou erreurs de type MAC-then-encrypt.
+- **Mauvaise utilisation des modes** : motifs ECB, malléabilité de CBC, réutilisation de nonce dans CTR/GCM.
+- **Padding oracles** : erreurs ou délais différents en cas de padding incorrect.
+- **Confusion sur le MAC** : utilisation de CBC-MAC avec des messages de longueur variable, ou erreurs de type MAC-then-encrypt.
 - **XOR partout** : les chiffrements par flot et les constructions personnalisées se réduisent souvent à un XOR avec un keystream.
 
 ## Modes AES et mauvaise utilisation
 
-NIST spécifie les modes de confidentialité ECB, CBC et CTR dans SP 800-38A, ainsi que le chiffrement authentifié GCM dans SP 800-38D.<sup>[[2]](#references)[[3]](#references)</sup>
+NIST spécifie les modes de confidentialité ECB, CBC et CTR dans la norme SP 800-38A, ainsi que le chiffrement authentifié GCM dans la norme SP 800-38D.<sup>[[2]](#references)[[3]](#references)</sup>
 
 ### ECB : Electronic Codebook
 
-ECB leak les motifs : des blocs de plaintext identiques produisent des blocs de ciphertext identiques. Cela permet :
+ECB révèle des motifs : des blocs de texte en clair identiques donnent des blocs chiffrés identiques. Cela permet :
 
-- Le cut-and-paste / la réorganisation de blocs
+- Le Cut-and-paste / la réorganisation de blocs
 - La suppression de blocs (si le format reste valide)
 
-Si vous pouvez contrôler le plaintext et observer le ciphertext (ou des cookies), essayez de créer des blocs répétés (par exemple, beaucoup de `A`) et recherchez les répétitions.
+Si vous pouvez contrôler le texte en clair et observer le texte chiffré (ou des cookies), essayez de créer des blocs répétés (par exemple, de nombreux `A`) et recherchez les répétitions.
 
 ### CBC : Cipher Block Chaining
 
-- CBC est **malleable** : inverser des bits dans `C[i-1]` inverse des bits prévisibles dans `P[i]`, tout en rendant `P[i-1]` illisible. Modifier l'IV cible le premier bloc de plaintext sans rendre illisible un bloc de plaintext précédent.
-- Si le système expose un padding valide par rapport à un padding invalide, vous disposez peut-être d'un **padding oracle**.
+- CBC est **malléable** : inverser des bits dans `C[i-1]` inverse des bits prévisibles dans `P[i]`, tout en corrompant également `P[i-1]`. Modifier l’IV cible le premier bloc de texte en clair sans corrompre de bloc précédent.
+- Si le système distingue un padding valide d’un padding invalide, vous avez peut-être affaire à un **padding oracle**.
 
 ### CTR
 
@@ -34,169 +34,171 @@ CTR transforme AES en chiffrement par flot : `C = P XOR keystream`.
 Si un nonce/IV est réutilisé avec la même clé :
 
 - `C1 XOR C2 = P1 XOR P2` (réutilisation classique du keystream)
-- Avec un plaintext connu, vous pouvez récupérer le keystream et déchiffrer les autres.
+- Avec du texte en clair connu, vous pouvez retrouver le keystream et déchiffrer d’autres messages.
 
-**Motifs d'exploitation de la réutilisation du nonce/IV**
+**Schémas d’exploitation de la réutilisation du nonce/IV**
 
-- Récupérez le keystream partout où le plaintext est connu ou devinable :
+- Récupérer le keystream partout où le texte en clair est connu ou devinable :
 
-```text
-keystream[i..] = ciphertext[i..] XOR known_plaintext[i..]
-```
+  ```text
+  keystream[i..] = ciphertext[i..] XOR known_plaintext[i..]
+  ```
 
-Appliquez les octets de keystream récupérés pour déchiffrer tout autre ciphertext produit avec la même clé+IV aux mêmes offsets.
-- Les données très structurées (par exemple, les certificats ASN.1/X.509, les headers de fichiers, JSON/CBOR) fournissent de grandes régions de plaintext connu. Vous pouvez souvent effectuer un XOR entre le ciphertext du certificat et le corps prévisible du certificat afin de dériver le keystream, puis déchiffrer d'autres secrets chiffrés avec l'IV réutilisé. Voir également [TLS & Certificates](../tls-and-certificates/README.md) pour les structures de certificats courantes.<sup>[[1]](#references)</sup>
-- Lorsque plusieurs secrets au **format/taille sérialisé identique** sont chiffrés avec la même clé+IV, l'alignement des champs leak même sans plaintext connu complet. Exemple : les clés RSA PKCS#8 de même taille de modulus placent les facteurs premiers aux mêmes offsets (environ 99,6 % d'alignement pour 2048 bits). Effectuer un XOR entre deux ciphertexts utilisant le keystream réutilisé isole `p ⊕ p'` / `q ⊕ q'`, ce qui peut être brute-forcé en quelques secondes.<sup>[[1]](#references)</sup>
-- Les IV par défaut des libraries (par exemple, une valeur constante `000...01`) constituent un piège critique : chaque chiffrement répète le même keystream, transformant CTR en one-time pad réutilisé.<sup>[[1]](#references)</sup>
+  Appliquez les octets de keystream récupérés pour déchiffrer tout autre texte chiffré produit avec la même clé+IV aux mêmes offsets.
+- Les données très structurées (p. ex., certificats ASN.1/X.509, en-têtes de fichiers, JSON/CBOR) fournissent de grandes zones de texte en clair connu. Vous pouvez souvent effectuer un XOR entre le texte chiffré du certificat et le corps prévisible du certificat pour dériver le keystream, puis déchiffrer d’autres secrets chiffrés avec le même IV réutilisé. Voir aussi [TLS & Certificates](../tls-and-certificates/README.md) pour les structures habituelles des certificats.<sup>[[1]](#references)</sup>
+- Lorsque plusieurs secrets au **même format sérialisé et de même taille** sont chiffrés avec la même clé+IV, l’alignement des champs peut fuiter des informations même sans texte en clair connu complet. Exemple : les clés RSA PKCS#8 de même taille de module placent les facteurs premiers aux mêmes offsets (alignement d’environ 99,6 % pour 2048 bits). Effectuer un XOR entre deux textes chiffrés avec le keystream réutilisé isole `p ⊕ p'` / `q ⊕ q'`, qui peuvent être retrouvés par brute force en quelques secondes.<sup>[[1]](#references)</sup>
+- Les IV par défaut des bibliothèques (p. ex., la constante `000...01`) constituent un piège critique : chaque chiffrement répète le même keystream, transformant CTR en masque jetable réutilisé.<sup>[[1]](#references)</sup>
 
-**Malleability de CTR**
+**Malléabilité de CTR**
 
-- CTR fournit uniquement la confidentialité : inverser des bits dans le ciphertext inverse de manière déterministe les mêmes bits dans le plaintext. Sans authentication tag, les attackers peuvent modifier les données (par exemple, altérer des clés, des flags ou des messages) sans être détectés.
-- Utilisez AEAD (GCM, GCM-SIV, ChaCha20-Poly1305, etc.) et imposez la vérification du tag afin de détecter les bit-flips.
+- CTR ne garantit que la confidentialité : inverser des bits dans le texte chiffré inverse de façon déterministe les mêmes bits dans le texte en clair. Sans tag d’authentification, les attaquants peuvent modifier les données (p. ex., changer des clés, des indicateurs ou des messages) sans être détectés.
+- Utilisez AEAD (GCM, GCM-SIV, ChaCha20-Poly1305, etc.) et imposez la vérification du tag pour détecter les inversions de bits.
 
 ### GCM
 
-GCM est également fortement compromis en cas de réutilisation du nonce. Si la même clé+nonce est utilisée plus d'une fois, vous obtenez généralement :
+GCM est également gravement vulnérable en cas de réutilisation du nonce. Si la même clé+nonce est utilisée plusieurs fois, vous obtenez généralement :
 
-- La réutilisation du keystream pour le chiffrement (comme avec CTR), permettant de récupérer le plaintext lorsqu'un plaintext est connu.
-- La perte des garanties d'intégrité. Selon ce qui est exposé (plusieurs paires message/tag utilisant le même nonce), les attackers peuvent être en mesure de forger des tags.
+- La réutilisation du keystream pour le chiffrement (comme avec CTR), permettant de retrouver le texte en clair lorsqu’une partie de celui-ci est connue.
+- La perte des garanties d’intégrité. Selon les éléments exposés (plusieurs paires message/tag utilisant le même nonce), les attaquants peuvent être en mesure de forger des tags.
 
-Conseils opérationnels :
+Recommandations opérationnelles :
 
-- Traitez la « réutilisation du nonce » dans AEAD comme une vulnérabilité critique.
-- Les AEAD résistants aux mauvaises utilisations, comme AES-GCM-SIV, réduisent les conséquences de la réutilisation du nonce. Les callers doivent tout de même fournir des nonces uniques comme l'exige l'interface de la construction ; une réutilisation accidentelle a des conséquences limitées par rapport à GCM ordinaire.<sup>[[3]](#references)[[4]](#references)</sup>
-- Si vous avez plusieurs ciphertexts utilisant le même nonce, commencez par vérifier les relations de type `C1 XOR C2 = P1 XOR P2`.
+- Considérez la « réutilisation du nonce » dans AEAD comme une vulnérabilité critique.
+- Les AEAD résistants aux erreurs d’utilisation, tels que AES-GCM-SIV, limitent les conséquences de la réutilisation du nonce. Les appelants doivent tout de même fournir des nonces uniques, comme l’exige l’interface de la construction ; une réutilisation accidentelle a des conséquences limitées par rapport à GCM classique.<sup>[[3]](#references)[[4]](#references)</sup>
+- Si vous avez plusieurs textes chiffrés avec le même nonce, commencez par vérifier les relations du type `C1 XOR C2 = P1 XOR P2`.
 
 ### Outils
 
-- [CyberChef](https://gchq.github.io/CyberChef/) pour des expériences rapides.<sup>[[8]](#references)</sup>
-- Le package Python [PyCryptodome](https://www.pycryptodome.org/) pour le scripting.<sup>[[9]](#references)</sup>
+- [CyberChef](https://gchq.github.io/CyberChef/) pour des essais rapides.<sup>[[8]](#references)</sup>
+- Le package [PyCryptodome](https://www.pycryptodome.org/) de Python pour l’automatisation.<sup>[[9]](#references)</sup>
 
-## Motifs d'exploitation d'ECB
+## Schémas d’exploitation d’ECB
 
 ECB (Electronic Code Book) chiffre chaque bloc indépendamment :
 
-- des blocs de plaintext identiques produisent des blocs de ciphertext identiques
-- cela leak la structure et permet des attacks de type cut-and-paste
+- des blocs de texte en clair identiques → des blocs de texte chiffré identiques
+- cela révèle la structure et permet des attaques de type cut-and-paste
 
-![Diagramme de blocs du déchiffrement en mode ECB](https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/ECB_decryption.svg/601px-ECB_decryption.svg.png)
+![Schéma de déchiffrement du mode ECB](https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/ECB_decryption.svg/601px-ECB_decryption.svg.png)
 
 ### Idée de détection : motif de token/cookie
 
-Si vous vous connectez plusieurs fois et que vous obtenez **toujours le même cookie**, le ciphertext peut être déterministe (ECB ou IV fixe).
+Si vous vous connectez plusieurs fois et obtenez **toujours le même cookie**, le texte chiffré peut être déterministe (ECB ou IV fixe).
 
-Si vous créez deux users avec des layouts de plaintext presque identiques (par exemple, de longs caractères répétés) et observez des blocs de ciphertext répétés aux mêmes offsets, ECB est un suspect de premier plan.
+Si vous créez deux utilisateurs dont les mises en page en texte clair sont presque identiques (p. ex., avec de longues chaînes de caractères répétées) et que vous observez des blocs de texte chiffré répétés aux mêmes offsets, ECB est un suspect de premier ordre.
 
-### Motifs d'exploitation
+### Schémas d’exploitation
 
-#### Suppression de blocs entiers
+#### Supprimer des blocs entiers
 
-Si le format du token ressemble à `<username>|<password>` et que la limite de bloc est alignée, vous pouvez parfois créer un user de manière à ce que le bloc `admin` soit aligné, puis supprimer les blocs précédents afin d'obtenir un token valide pour `admin`.
+Si le format du token ressemble à `<username>|<password>` et que la limite des blocs est bien alignée, vous pouvez parfois créer un utilisateur de façon à aligner le bloc `admin`, puis supprimer les blocs précédents pour obtenir un token valide pour `admin`.
 
-#### Déplacement de blocs
+#### Déplacer des blocs
 
-Si le backend tolère le padding ou les espaces supplémentaires (`admin` contre `admin    `), vous pouvez :
+Si le backend tolère le padding ou les espaces supplémentaires (`admin` vs `admin    `), vous pouvez :
 
 - Aligner un bloc contenant `admin   `
-- Échanger/réutiliser ce bloc de ciphertext dans un autre token
+- Échanger/réutiliser ce bloc de texte chiffré dans un autre token
 
 ## Padding Oracle
 
-### De quoi s'agit-il ?
+### De quoi s’agit-il
 
-En mode CBC, si le serveur révèle (directement ou indirectement) si le plaintext déchiffré possède un **padding PKCS#7 valide**, vous pouvez souvent :<sup>[[7]](#references)</sup>
+En mode CBC, si le serveur révèle (directement ou indirectement) si le texte en clair déchiffré a un **padding PKCS#7 valide**, vous pouvez souvent :<sup>[[7]](#references)</sup>
 
-- Déchiffrer le ciphertext sans la clé
-- Construire un ciphertext qui se déchiffre en plaintext choisi lorsque vous pouvez soumettre des blocs précédents ou des IV forgés et que l'application accepte le message résultant avec un padding valide
+- Déchiffrer le texte chiffré sans la clé
+- Construire un texte chiffré qui se déchiffre en texte en clair choisi, lorsque vous pouvez soumettre des blocs précédents ou des IV forgés et que l’application accepte le message résultant avec un padding valide
 
-L'oracle peut être :
+L’oracle peut être :
 
-- Un message d'erreur spécifique
-- Un status HTTP / une taille de réponse différente
+- Un message d’erreur spécifique
+- Un code d’état HTTP / une taille de réponse différents
 - Une différence de timing
 
 ### Exploitation pratique
 
-PadBuster est l'outil classique :
+PadBuster est l’outil classique :
 
 {{#ref}}
 https://github.com/AonCyberLabs/PadBuster
 {{#endref}}
 
 Exemple :
+
 ```bash
 perl ./padBuster.pl http://10.10.10.10/index.php "RVJDQrwUdTRWJUVUeBKkEA==" 16 \
--encoding 0 -cookies "login=RVJDQrwUdTRWJUVUeBKkEA=="
+  -encoding 0 -cookies "login=RVJDQrwUdTRWJUVUeBKkEA=="
 ```
+
 Notes :
 
-- La taille de bloc est souvent `16` pour AES.
+- La taille de bloc est souvent de `16` pour AES.
 - `-encoding 0` signifie Base64.
-- Utilisez `-error` si l'oracle est une chaîne spécifique.
+- Utilisez `-error` si l’oracle renvoie une chaîne spécifique.
 
-### Pourquoi cela fonctionne
+### Pourquoi ça fonctionne
 
 Le déchiffrement CBC calcule `P[i] = D(C[i]) XOR C[i-1]`. En modifiant des octets dans `C[i-1]` et en observant si le padding est valide, vous pouvez récupérer `P[i]` octet par octet.
 
-## Bit-flipping dans CBC
+## Bit-flipping in CBC
 
-Même sans padding oracle, CBC est malléable. Si vous pouvez modifier des blocs de ciphertext et que l'application utilise le plaintext déchiffré comme données structurées (par exemple, `role=user`), vous pouvez inverser des bits spécifiques afin de modifier certains octets du plaintext à une position choisie dans le bloc suivant.
+Même sans padding oracle, CBC est malléable. Si vous pouvez modifier des blocs de ciphertext et que l’application utilise le plaintext déchiffré comme données structurées (par exemple, `role=user`), vous pouvez inverser certains bits pour modifier des octets précis du plaintext à une position donnée dans le bloc suivant.
 
-Pattern CTF typique :
+Schéma typique en CTF :
 
 - Token = `IV || C1 || C2 || ...`
-- Vous contrôlez les octets dans `C[i]`
-- Vous ciblez les octets du plaintext dans `P[i+1]` car `P[i+1] = D(C[i+1]) XOR C[i]`
+- Vous contrôlez des octets dans `C[i]`
+- Vous ciblez des octets du plaintext dans `P[i+1]`, car `P[i+1] = D(C[i+1]) XOR C[i]`
 
-Il ne s'agit pas en soi d'une compromission de la confidentialité, mais c'est une primitive courante d'élévation de privilèges lorsque l'intégrité est absente.
+Cela ne compromet pas à lui seul la confidentialité, mais constitue un primitive courante de privilege-escalation lorsque l’intégrité n’est pas assurée.
 
 ## CBC-MAC
 
-CBC-MAC est sécurisé uniquement dans des conditions spécifiques (notamment les **messages de longueur fixe** et une séparation correcte des domaines). AES-CMAC est une construction standardisée qui gère correctement les entrées de longueur variable.<sup>[[5]](#references)</sup>
+CBC-MAC n’est sécurisé que sous certaines conditions (notamment des **messages de longueur fixe** et une séparation de domaine correcte). AES-CMAC est une construction standardisée qui prend en charge les entrées de longueur variable de manière sûre.<sup>[[5]](#references)</sup>
 
-### Pattern classique de forgery avec longueur variable
+### Schéma classique de forgery avec longueur variable
 
 CBC-MAC est généralement calculé ainsi :
 
 - IV = 0
 - `tag = last_block( CBC_encrypt(key, message, IV=0) )`
 
-Si vous pouvez obtenir les tags de messages choisis, vous pouvez souvent créer un tag pour une concaténation (ou une construction associée) sans connaître la clé, en exploitant la manière dont CBC enchaîne les blocs.
+Si vous pouvez obtenir les tags de messages choisis, vous pouvez souvent créer un tag pour une concaténation (ou une construction apparentée) sans connaître la clé, en exploitant la façon dont CBC enchaîne les blocs.
 
-Cela apparaît fréquemment dans les cookies/tokens de CTF qui authentifient le username ou le rôle avec CBC-MAC.
+Cela apparaît souvent dans les cookies/tokens de CTF qui authentifient le nom d’utilisateur ou le rôle avec CBC-MAC.
 
 ### Alternatives plus sûres
 
-- Utiliser HMAC (SHA-256/512)
-- Utiliser CMAC (AES-CMAC) correctement
-- Inclure la longueur du message / une séparation des domaines
+- Utilisez HMAC (SHA-256/512)
+- Utilisez correctement CMAC (AES-CMAC)
+- Incluez la longueur du message / une séparation de domaine
 
-## Stream ciphers : XOR et RC4
+## Chiffrements par flot : XOR et RC4
 
 ### Le modèle mental
 
-La plupart des situations impliquant des stream ciphers se réduisent à :
+La plupart des situations impliquant des chiffrements par flot se ramènent à :
 
 `ciphertext = plaintext XOR keystream`
 
 Donc :
 
-- Si vous connaissez le plaintext, vous récupérez le keystream.
+- Si vous connaissez le plaintext, vous retrouvez le keystream.
 - Si le keystream est réutilisé (même clé+nonce), `C1 XOR C2 = P1 XOR P2`.
 
 ### Chiffrement basé sur XOR
 
-Si vous connaissez un segment de plaintext à la position `i`, vous pouvez récupérer les octets du keystream et déchiffrer d'autres ciphertexts aux mêmes positions.
+Si vous connaissez un segment de plaintext à la position `i`, vous pouvez retrouver les octets du keystream et déchiffrer d’autres ciphertexts à ces positions.
 
-Autosolvers :
+Outils d’automatisation :
 
 - [https://wiremask.eu/tools/xor-cracker/](https://wiremask.eu/tools/xor-cracker/)
 
 ### RC4
 
-RC4 est un stream cipher legacy ; le chiffrement et le déchiffrement correspondent à la même opération XOR. Ses biais connus le rendent inadapté aux nouveaux systèmes, et TLS interdit explicitement ses suites de chiffrement.<sup>[[6]](#references)</sup>
+RC4 est un chiffrement par flot obsolète ; le chiffrement et le déchiffrement sont la même opération XOR. Ses biais connus le rendent inadapté aux nouveaux systèmes, et TLS interdit explicitement ses suites de chiffrement.<sup>[[6]](#references)</sup>
 
-Si vous pouvez obtenir le chiffrement RC4 d'un plaintext connu avec la même clé, vous pouvez récupérer le keystream et déchiffrer d'autres messages de même longueur/offset.
+Si vous pouvez obtenir le chiffrement RC4 d’un plaintext connu avec la même clé, vous pouvez retrouver le keystream et déchiffrer d’autres messages de même longueur et au même décalage.
 
 Writeup de référence (HTB Kryptos) :
 
@@ -206,13 +208,13 @@ https://0xrick.github.io/hack-the-box/kryptos/
 
 ## References
 
-- [1] [Trail of Bits – Négligence contre savoir-faire en cryptographie](https://blog.trailofbits.com/2026/02/18/carelessness-versus-craftsmanship-in-cryptography/)
-- [2] [NIST SP 800-38A - Recommandation pour les modes opératoires des chiffrements par blocs](https://csrc.nist.gov/pubs/sp/800/38/a/final)
-- [3] [NIST SP 800-38D - Recommandation pour Galois/Counter Mode (GCM) et GMAC](https://csrc.nist.gov/pubs/sp/800/38/d/final)
+- [1] [Trail of Bits – Négligence et savoir-faire en cryptographie](https://blog.trailofbits.com/2026/02/18/carelessness-versus-craftsmanship-in-cryptography/)
+- [2] [NIST SP 800-38A - Recommandation sur les modes de fonctionnement des chiffrements par blocs](https://csrc.nist.gov/pubs/sp/800/38/a/final)
+- [3] [NIST SP 800-38D - Recommandation sur le mode Galois/Counter (GCM) et GMAC](https://csrc.nist.gov/pubs/sp/800/38/d/final)
 - [4] [RFC 8452 - AES-GCM-SIV : chiffrement authentifié résistant à la réutilisation des nonces](https://www.rfc-editor.org/rfc/rfc8452)
-- [5] [RFC 4493 - L'algorithme AES-CMAC](https://www.rfc-editor.org/rfc/rfc4493)
+- [5] [RFC 4493 - L’algorithme AES-CMAC](https://www.rfc-editor.org/rfc/rfc4493)
 - [6] [RFC 7465 - Interdiction des suites de chiffrement RC4](https://www.rfc-editor.org/rfc/rfc7465)
-- [7] [OWASP Web Security Testing Guide - Test du padding oracle](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/09-Testing_for_Weak_Cryptography/02-Testing_for_Padding_Oracle)
+- [7] [OWASP Web Security Testing Guide - Test des attaques par padding oracle](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/09-Testing_for_Weak_Cryptography/02-Testing_for_Padding_Oracle)
 - [8] [GCHQ CyberChef](https://gchq.github.io/CyberChef/)
 - [9] [Documentation PyCryptodome](https://www.pycryptodome.org/)
 {{#include ../../banners/hacktricks-training.md}}
