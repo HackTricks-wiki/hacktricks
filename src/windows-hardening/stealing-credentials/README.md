@@ -443,6 +443,12 @@ On the operator side, rebuild the file and run the dumper locally to recover cre
 base64 -d sqlstudio.b64 > sqlstudio.bin
 ```
 
+## Browser session and cookie theft via Chrome DevTools Protocol
+
+{{#ref}}
+../../linux-hardening/software-information/electron-cef-chromium-debugger-abuse.md#enabling-cdp-inside-a-live-chromium-process
+{{#endref}}
+
 ## Telegram Desktop `tdata` session theft
 
 Telegram Desktop keeps authorization and account state in its **`tdata`** directory. A copied session can be loaded by compatible tooling to authenticate without the account password while that authorization remains valid; if local-data encryption is enabled, the stealer also needs its passcode. An authenticated session can then expose identity data, dialog and membership metadata, messages, and downloadable media.<sup>[[10]](#references)</sup>
