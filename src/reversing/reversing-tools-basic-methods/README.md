@@ -8,6 +8,12 @@ Software:
 
 - ReverseKit: [https://github.com/zer0condition/ReverseKit](https://github.com/zer0condition/ReverseKit)
 
+## Windows kernel debugging
+
+{{#ref}}
+windows-kernel-debugging-kernelflirt.md
+{{#endref}}
+
 ## Wasm decompiler / Wat compiler
 
 Online:
