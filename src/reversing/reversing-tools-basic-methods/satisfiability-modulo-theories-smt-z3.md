@@ -1,10 +1,11 @@
-# Baie basies gesproke sal hierdie tool ons help om waardes vir veranderlikes te vind wat aan sekere voorwaardes moet voldoen, aangesien dit baie lastig sal wees om dit met die hand te bereken. Daarom kan jy die voorwaardes waaraan die veranderlikes moet voldoen, aan Z3 aandui, en dit sal sommige waardes vind (indien moontlik).
+# Baie basies gesproke sal hierdie hulpmiddel ons help om waardes te vind vir veranderlikes wat aan sekere voorwaardes moet voldoen; dit sal baie lastig wees om hulle met die hand te bereken. Daarom kan jy vir Z3 aandui aan watter voorwaardes die veranderlikes moet voldoen, en dit sal waardes vind (indien moontlik).
 
 {{#include ../../banners/hacktricks-training.md}}
 
 # Basiese Bewerkings
 
-## Booles/And/Or/Not
+## Boolese Waardes/En/Of/Nie
+
 ```python
 # pip3 install z3-solver
 from z3 import *
@@ -20,7 +21,9 @@ s.add(And(Or(x, y, Not(z)), y))
 s.check() # If response is "sat" then the model is satisfiable, if "unsat" something is wrong
 print(s.model()) # Print valid values to satisfy the model
 ```
+
 ## Ints/Simplify/Reals
+
 ```python
 from z3 import *
 
@@ -44,7 +47,9 @@ print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 set_option(precision=30)
 print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 ```
+
 ## Drukmodel
+
 ```python
 from z3 import *
 
@@ -56,11 +61,13 @@ s.check()
 m = s.model()
 print("x = %s" % m[x])
 for d in m.decls():
-print("%s = %s" % (d.name(), m[d]))
+    print("%s = %s" % (d.name(), m[d]))
 ```
-# Masjienrekene
 
-Moderne CPU's en hoofstroom-programmeertale gebruik rekenkunde oor bitvektore met vaste grootte. Masjienrekene is in Z3Py beskikbaar as Bit-Vectors.
+# Masjienaritmetiek
+
+Moderne CPU's en hoofstroom-programmeertale gebruik rekenkunde oor bitvektore met vaste grootte. Masjienaritmetiek is in Z3Py beskikbaar as Bit-Vectors.
+
 ```python
 from z3 import *
 
@@ -75,9 +82,11 @@ a = BitVecVal(-1, 32)
 b = BitVecVal(65535, 32)
 print(simplify(a == b)) # This is False
 ```
-## Getekende/Ongetekende Getalle
 
-Z3 verskaf spesiale getekende weergawes van rekenkundige bewerkings wanneer dit ’n verskil maak of die bit-vektor as geteken of ongeteken hanteer word. In Z3Py stem die operatore `<`, `<=`, `>`, `>=`, `/`, `%` en `>>` ooreen met die getekende weergawes. Die ooreenstemmende ongetekende operatore is `ULT`, `ULE`, `UGT`, `UGE`, `UDiv`, `URem` en `LShR`.<sup>[[1]](#references)</sup>
+## Getekende/ongtekende getalle
+
+Z3 bied spesiale getekende weergawes van rekenkundige bewerkings waar dit saak maak of die bisvektor as geteken of ongeteken behandel word. In Z3Py stem die operators `<`, `<=`, `>`, `>=`, `/`, `%` en `>>` ooreen met die getekende weergawes. Die ooreenstemmende ongetekende operators is `ULT`, `ULE`, `UGT`, `UGE`, `UDiv`, `URem` en `LShR`.<sup>[[1]](#references)</sup>
+
 ```python
 from z3 import *
 
@@ -95,11 +104,13 @@ solve(x < 0)
 # Using unsigned version of <
 solve(ULT(x, 0))
 ```
+
 ## Funksies
 
-Geïnterpreteerde funksies soos rekenkundige funksies het ’n vaste standaardinterpretasie. Ongeïnterpreteerde funksies en konstantes is maksimaal buigsaam; hulle laat enige interpretasie toe wat konsekwent is met die beperkings op die funksie of konstante.<sup>[[1]](#references)</sup>
+Geïnterpreteerde funksies soos rekenkundige funksies het ’n vaste standaardinterpretasie. Ongeïnterpreteerde funksies en konstantes is maksimaal buigsaam; hulle laat enige interpretasie toe wat met die beperkings op die funksie of konstante strook.<sup>[[1]](#references)</sup>
 
 Voorbeeld: `f` wat twee keer op `x` toegepas word, lewer weer `x` op, maar `f` wat een keer op `x` toegepas word, verskil van `x`.
+
 ```python
 from z3 import *
 
@@ -118,13 +129,15 @@ s.add(f(x) == 4) # Find the value that generates 4 as response
 s.check()
 print(s.model())
 ```
-# Patrone vir Reversing
 
-As jy volledige simboliese uitvoering oor ’n binary nodig het in plaas daarvan om slegs ’n paar checks handmatig te lift, kyk na [Angr - Examples](angr/angr-examples.md). In die praktyk is ’n baie algemene workflow om die relevante predicates uit die decompiler/assembly te herwin en slegs die interessante arithmetic- of memory-constraints in Z3 te herbou.
+# Patrone vir reversing
 
-## Modelleer gebruiker-beheerde data eers as bytes
+As jy volledige simboliese uitvoering oor ’n binêre lêer nodig het in plaas daarvan om net ’n paar kontroles met die hand op te lig, kyk na [Angr - Examples](angr/angr-examples.md). In die praktyk is ’n baie algemene werksvloei om die relevante predikate uit die decompiler/assembly te herwin en slegs die interessante rekenkundige of geheuebeperkings in Z3 te herbou.
 
-Vir reversing is dit gewoonlik beter om met `BitVec(..., 8)` vir elke invoerbyte te begin en dan words presies te herbou soos die target dit doen. Dit behou wrap-around, signedness bugs, shifts, rotates en byte-order-kwessies.<sup>[[2]](#references)</sup>
+## Modelleer gebruikerbeheerde data eers as grepe
+
+Vir reversing is dit gewoonlik beter om met `BitVec(..., 8)` vir elke invoergreep te begin en dan woorde presies te herbou soos die teiken dit doen. Dit behou wrap-around, signedness-foute, skuiwe, rotasies en byte-volgordeprobleme.<sup>[[2]](#references)</sup>
+
 ```python
 from z3 import *
 
@@ -139,16 +152,18 @@ s.add(RotateRight(dword, 8) == 0x41444342)
 print(s.check())
 print(hex(s.model().eval(dword).as_long()))
 ```
-Nuttige helpers wanneer assembly- of decompilerkode vertaal word:
 
-- `Concat`: bou 16/32/64-bis-waardes vanaf grepe op
-- `Extract`: vergelyk hoë/lae woorde of emuleer masks/shifts
-- `ZeroExt` / `SignExt`: modelleer zero/sign extension-bugs korrek
+Nuttige helpers wanneer assembly- of decompiler-kode vertaal word:
+
+- `Concat`: stel 16/32/64-bit-waardes uit grepe saam
+- `Extract`: vergelyk hoë/lae woorde of boots masks/shifts na
+- `ZeroExt` / `SignExt`: modelleer zero/sign-extension-foute korrek
 - `LShR` / `RotateLeft` / `RotateRight`: algemeen in crackmes, hashes en obfuscators
 
-## Modelleer memory/register-tabelle met arrays
+## Modelleer geheue-/registertabelle met arrays
 
-Wanneer 'n check van `buf[i]`, lookup tables of geëmuleerde memory afhang, kan `Array` netjieser wees as om dosyne afsonderlike veranderlikes te skep.<sup>[[3]](#references)</sup>
+Wanneer ’n kontrole afhang van `buf[i]`, lookup tables of geëmuleerde geheue, kan `Array` netjieser wees as om dosyne aparte veranderlikes te skep.<sup>[[3]](#references)</sup>
+
 ```python
 from z3 import *
 
@@ -157,19 +172,21 @@ mem = Store(mem, BitVecVal(0x1000, 32), BitVecVal(0x41, 8))
 mem = Store(mem, BitVecVal(0x1001, 32), BitVecVal(0x42, 8))
 
 word = Concat(
-Select(mem, BitVecVal(0x1001, 32)),
-Select(mem, BitVecVal(0x1000, 32))
+    Select(mem, BitVecVal(0x1001, 32)),
+    Select(mem, BitVecVal(0x1000, 32))
 )
 
 s = Solver()
 s.add(word == 0x4241)
 print(s.check())
 ```
-Dit is veral handig wanneer die binary waardes in die geheue rondkopieer voordat dit hulle valideer, of wanneer jy die effek van ’n paar `mov`/`xor`/`add`-operasies wil modelleer sonder om die hele program uit te voer.
+
+Dit is veral handig wanneer die binary waardes in die geheue rondkopieer voordat dit valideer, of wanneer jy die uitwerking van ’n paar `mov`/`xor`/`add`-bewerkings wil modelleer sonder om die hele program uit te voer.
 
 ## Inkrementele solving is ideaal vir branch-triage
 
-Wanneer jy reeds die basisbeperkings onttrek het, gebruik `push()` / `pop()` (of aannames) om alternatiewe branches te toets sonder om die solver elke keer te herbou:<sup>[[3]](#references)</sup>
+Wanneer jy die basisbeperkings reeds onttrek het, gebruik `push()` / `pop()` (of assumptions) om alternatiewe branches te toets sonder om die solver elke keer van voor af op te bou:<sup>[[3]](#references)</sup>
+
 ```python
 from z3 import *
 
@@ -187,26 +204,30 @@ s.add(x < 0x100)
 print("branch 2:", s.check())
 s.pop()
 ```
-Dit is nuttig wanneer jy path conditions wat uit ’n decompiler herwin is, herafspeel, of wanneer jy vinnig wil identifiseer watter vergelyking die model `unsat` maak.
 
-## Optimaliseer vir beter payloads
+Dit is nuttig wanneer jy padvoorwaardes wat van ’n decompiler herwin is, herspeel, of wanneer jy vinnig wil identifiseer watter vergelyking die model `unsat` maak.
 
-Sodra ’n model satisfiseerbaar is, kan `Optimize()` jou help om ’n meer bruikbare oplossing te kry: verkies byvoorbeeld drukbare bytes, minimaliseer ’n checksum-komponent, of maksimeer ’n sekere struktuur wat die herwonne wagwoord makliker maak om te tik of te kopieer.<sup>[[3]](#references)</sup>
+## Optimaliseer vir mooier payloads
+
+Sodra ’n model bevredigbaar is, kan `Optimize()` jou help om ’n bruikbaarder oplossing te kry: verkies byvoorbeeld drukbare bytes, minimaliseer ’n kontrolesomkomponent, of maksimeer ’n struktuur wat die herwonne wagwoord makliker maak om te tik of te kopieer.<sup>[[3]](#references)</sup>
+
 ```python
 from z3 import *
 
 key = [BitVec(f'k{i}', 8) for i in range(6)]
 o = Optimize()
 for c in key:
-o.add(c != 0)
-o.add_soft(And(c >= 0x20, c <= 0x7e))
+    o.add(c != 0)
+    o.add_soft(And(c >= 0x20, c <= 0x7e))
 
 print(o.check())
 print(bytes(o.model()[c].as_long() for c in key))
 ```
-## Strings/sequences vir formaat-swaar serials
 
-As die teiken hoofsaaklik prefixes, suffixes, substrings of regex-agtige struktuur kontroleer, kan `String`/`Seq`-constraints makliker wees as byte-vir-byte bit-vectors:<sup>[[3]](#references)</sup>
+## String-/Seq-beperkings vir reeksnommers met ingewikkelde formate
+
+As die teiken hoofsaaklik voorvoegsels, agtervoegsels, subtekenstringe of regex-agtige strukture nagaan, kan `String`-/`Seq`-beperkings makliker wees as bisvektore wat bis vir bis werk:<sup>[[3]](#references)</sup>
+
 ```python
 from z3 import *
 
@@ -217,62 +238,64 @@ s.add(PrefixOf(StringVal("HTB{"), serial))
 s.add(SuffixOf(StringVal("}"), serial))
 s.add(Contains(serial, StringVal("_")))
 ```
-Wanneer die binary egter begin om rekenkundige bewerkings, rotasies, checksums of casts oor karakters uit te voer, is dit gewoonlik beter om terug te skakel na 8-bit bit-vectors.
+
+Wanneer die binary egter rekenkundige bewerkings, rotasies, kontrolesomme of type casts op karakters begin uitvoer, is dit gewoonlik beter om terug te keer na 8-bit-bitvektore.
 
 # Voorbeelde
 
-## Sudoku solver
+## Sudoku-oplosser
+
 ```python
 # 9x9 matrix of integer variables
 X = [[Int("x_%s_%s" % (i+1, j+1)) for j in range(9)]
-for i in range(9)]
+     for i in range(9)]
 
 # each cell contains a value in {1, ..., 9}
 cells_c = [And(1 <= X[i][j], X[i][j] <= 9)
-for i in range(9) for j in range(9)]
+           for i in range(9) for j in range(9)]
 
 # each row contains a digit at most once
 rows_c = [Distinct(X[i]) for i in range(9)]
 
 # each column contains a digit at most once
 cols_c = [Distinct([X[i][j] for i in range(9)])
-for j in range(9)]
+          for j in range(9)]
 
 # each 3x3 square contains a digit at most once
 sq_c = [Distinct([X[3*i0 + i][3*j0 + j]
-for i in range(3) for j in range(3)])
-for i0 in range(3) for j0 in range(3)]
+                  for i in range(3) for j in range(3)])
+        for i0 in range(3) for j0 in range(3)]
 
 sudoku_c = cells_c + rows_c + cols_c + sq_c
 
 # sudoku instance, we use '0' for empty cells
 instance = ((0,0,0,0,9,4,0,3,0),
-(0,0,0,5,1,0,0,0,7),
-(0,8,9,0,0,0,0,4,0),
-(0,0,0,0,0,0,2,0,8),
-(0,6,0,2,0,1,0,5,0),
-(1,0,2,0,0,0,0,0,0),
-(0,7,0,0,0,0,5,2,0),
-(9,0,0,0,6,5,0,0,0),
-(0,4,0,9,7,0,0,0,0))
+            (0,0,0,5,1,0,0,0,7),
+            (0,8,9,0,0,0,0,4,0),
+            (0,0,0,0,0,0,2,0,8),
+            (0,6,0,2,0,1,0,5,0),
+            (1,0,2,0,0,0,0,0,0),
+            (0,7,0,0,0,0,5,2,0),
+            (9,0,0,0,6,5,0,0,0),
+            (0,4,0,9,7,0,0,0,0))
 
 instance_c = [If(instance[i][j] == 0, True, X[i][j] == instance[i][j])
-for i in range(9) for j in range(9)]
+              for i in range(9) for j in range(9)]
 
 s = Solver()
 s.add(sudoku_c + instance_c)
 if s.check() == sat:
-m = s.model()
-r = [[m.evaluate(X[i][j]) for j in range(9)]
-for i in range(9)]
-print_matrix(r)
+    m = s.model()
+    r = [[m.evaluate(X[i][j]) for j in range(9)]
+         for i in range(9)]
+    print_matrix(r)
 else:
-print("failed to solve")
+    print("failed to solve")
 ```
-## Verwysings
+
+## References
 
 - [1] [Z3Py-gids met voorbeelde (ericpony z3py-tutorial)](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
-- [2] [Z3-gids - Bit-Vectors-teorie (Microsoft z3guide)](https://microsoft.github.io/z3guide/)
-- [3] [Programmering van Z3 (Nikolaj Bjørner, Leonardo de Moura, Lev Nachmanson, Christoph Wintersteiger)](https://theory.stanford.edu/~nikolaj/programmingz3.html)
-
+- [2] [Z3-gids - bitvektorteorie (Microsoft z3guide)](https://microsoft.github.io/z3guide/)
+- [3] [Programmering met Z3 (Nikolaj Bjørner, Leonardo de Moura, Lev Nachmanson, Christoph Wintersteiger)](https://theory.stanford.edu/~nikolaj/programmingz3.html)
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,52 +2,52 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Hierdie bladsy dokumenteer ’n klas DeFi/AMM-uitbuitingstegnieke teen DEX’e in Uniswap v4-styl, wat kernwiskunde met pasgemaakte hooks uitbrei. ’n Bunni V2-voorval illustreer ’n verwante fout: ’n fout met afrondingsrigting in onttrekkingsrekeningkunde het die aktiewe likiditeit onderskat, en ’n latere swap het dié onderskatting in ’n winsgewende sandwich blootgelê.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+Hierdie bladsy dokumenteer ’n klas DeFi/AMM-uitbuitingstegnieke teen DEX’e in die styl van Uniswap v4, wat kernwiskunde met custom hooks uitbrei. ’n Bunni V2-voorval illustreer ’n verwante fout: ’n fout in die afrondingsrigting van onttrekkingsrekeningkunde het aktiewe likiditeit onderskat, en ’n latere swap het daardie onderskatting in ’n winsgewende sandwich blootgelê.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 
-Kernidee: as ’n hook bykomende rekeningkunde implementeer wat van vastepuntwiskunde, tick-afronding en drempellogika afhanklik is, kan ’n aanvaller presiese exact-input-swaps saamstel wat spesifieke drempels oorsteek, sodat afrondingsverskille in hul guns ophoop. Deur die patroon te herhaal en dan die opgeblase saldo te onttrek, word wins gerealiseer, dikwels gefinansier met ’n flash loan.
+Kernidee: as ’n hook bykomende rekeningkunde implementeer wat van fixed-point-wiskunde, tick-afronding en drempellogika afhanklik is, kan ’n aanvaller exact-input-swaps saamstel wat spesifieke drempels oorsteek sodat afrondingsverskille in hul guns ophoop. Deur die patroon te herhaal en daarna die opgeblase saldo te onttrek, realiseer hulle wins, dikwels gefinansier met ’n flash loan.
 
 ## Agtergrond: Uniswap v4-hooks en swap-vloei
 
 - Hooks is kontrakte wat die PoolManager op spesifieke lewensiklus-punte aanroep (bv. beforeSwap/afterSwap, beforeAddLiquidity/afterAddLiquidity, beforeRemoveLiquidity/afterRemoveLiquidity, beforeInitialize/afterInitialize, beforeDonate/afterDonate).<sup>[[4]](#references)</sup>
-- Poele word geïnisialiseer met ’n PoolKey wat die hook-kontrak insluit. ’n Nie-nul hook-adres aktiveer die callbacks wat vir daardie poel gekies is.<sup>[[4]](#references)[[14]](#references)</sup>
-- Hooks kan **pasgemaakte deltas** teruggee wat die finale balansveranderings van ’n swap- of likiditeitsaksie wysig (pasgemaakte rekeningkunde). Daardie deltas word aan die einde van die oproep as netto saldo’s vereffen, dus hoop enige afrondingsfout in hook-wiskunde voor vereffening op.<sup>[[4]](#references)</sup>
-- Kernwiskunde gebruik vastepuntformate soos Q64.96 vir sqrtPriceX96 en tick-rekenkunde met 1.0001^tick. Enige pasgemaakte wiskunde wat hierop gebou word, moet afrondingsemantiek noukeurig ewenaar om afwyking van die invariant te voorkom.<sup>[[12]](#references)[[13]](#references)</sup>
-- Swaps kan exactInput of exactOutput wees. In v3/v4 beweeg die prys langs ticks; die oorsteek van ’n tick-grens kan reeks-likiditeit aktiveer/deaktiveer. Hooks kan ekstra logika vir drempel-/tick-oorsteekpunte implementeer.<sup>[[9]](#references)[[11]](#references)</sup>
+- Pools word geïnisialiseer met ’n PoolKey wat die hook-kontrak insluit. ’n Nie-nul hook-adres aktiveer die terugroepe wat vir daardie pool gekies is.<sup>[[4]](#references)[[14]](#references)</sup>
+- Hooks kan **custom deltas** terugstuur wat die finale balansveranderings van ’n swap of likiditeitsaksie wysig (custom accounting). Daardie deltas word aan die einde van die oproep as netto saldo’s vereffen, dus hoop enige afrondingsfout in die hook se wiskunde voor vereffening op.<sup>[[4]](#references)</sup>
+- Kernwiskunde gebruik fixed-point-formate soos Q64.96 vir sqrtPriceX96, en tick-rekenkunde met 1.0001^tick. Enige custom-wiskunde wat hierop gebou word, moet die afrondingssemantiek noukeurig ooreen laat stem om invariant-drywing te voorkom.<sup>[[12]](#references)[[13]](#references)</sup>
+- Swaps kan exactInput of exactOutput wees. In v3/v4 beweeg die prys langs ticks; die oorsteek van ’n tick-grens kan reeks-likiditeit aktiveer/deaktiveer. Hooks kan bykomende logika vir drempel-/tick-oorgange implementeer.<sup>[[9]](#references)[[11]](#references)</sup>
 
-## Kwesbaarheidsarchetipe: presisie-/afrondingsafwyking wanneer drempels oorgesteek word
+## Kwesbaarheidsarchetipe: presisie-/afrondingsdrywing wanneer drempels oorgesteek word
 
-’n Tipiese kwesbare patroon in pasgemaakte hooks:
+’n Tipiese kwesbare patroon in custom hooks:
 
-1. Die hook bereken likiditeits- of saldodeltas per swap met behulp van heelgetaldeling, mulDiv of vastepuntomskakelings (bv. token ↔ likiditeit met sqrtPrice en tick-reekse).
-2. Drempellogika (bv. herbalansering, stapsgewyse herverdeling of aktivering per reeks) word geaktiveer wanneer ’n swapgrootte of prysbeweging ’n interne grens oorsteek.
-3. Afronding word inkonsekwent toegepas (bv. afkapping na nul, floor teenoor ceil) tussen die voorwaartse berekening en die vereffeningspad. Klein verskille kanselleer nie uit nie en krediteer eerder die oproeper.
-4. Presies gedoseerde exact-input-swaps wat hierdie grense oorsteek, oes die positiewe afrondingsreserwe herhaaldelik. Die aanvaller onttrek later die opgehoopte krediet.
+1. Die hook bereken likiditeits- of balansdeltas per swap met behulp van heelgetalverdeling, mulDiv of fixed-point-omskakelings (bv. token ↔ likiditeit met sqrtPrice en tick-reekse).
+2. Drempellogika (bv. herbalansering, stapsgewyse herverdeling of aktivering per reeks) word geaktiveer wanneer ’n swap se grootte of prysbeweging ’n interne grens oorsteek.
+3. Afronding word inkonsekwent toegepas (bv. afkapping na nul, floor teenoor ceil) tussen die voorwaartse berekening en die vereffeningspad. Klein verskille kanselleer mekaar nie uit nie en krediteer eerder die oproeper.
+4. Exact-input-swaps wat presies groot genoeg is om daardie grense te oorbrug, oes die positiewe afrondingsres in herhaling. Die aanvaller onttrek later die opgehoopte krediet.
 
-Voorvereistes vir die aanval
-- ’n Poel wat ’n pasgemaakte v4-hook gebruik wat bykomende wiskunde op elke swap uitvoer (bv. ’n LDF/herbalanseerder).
-- Minstens een uitvoeringspad waar afronding die swap-inisieerder bevoordeel wanneer drempels oorgesteek word.
-- Die vermoë om baie swaps atomies te herhaal (flash loans is ideaal om tydelike kapitaal te voorsien en gas te amortiseer).
+Aanvalvoorvereistes
+- ’n Pool wat ’n custom v4-hook gebruik wat bykomende wiskunde op elke swap uitvoer (bv. ’n LDF/herbalanseerder).
+- Ten minste een uitvoeringspad waar afronding die swap-inisieerder bevoordeel wanneer drempels oorgesteek word.
+- Die vermoë om baie swaps atomies te herhaal (flash loans is ideaal om tydelike kapitaal te verskaf en gaskoste te amortiseer).
 
 ## Praktiese aanvalmetodologie
 
-1) Identifiseer kandidaatpoele met hooks
-- Lys v4-poele op en kontroleer PoolKey.hooks != address(0).
-- Ondersoek die hook-bytecode/ABI vir callbacks: beforeSwap/afterSwap en enige pasgemaakte herbalanseringsmetodes.
+1) Identifiseer kandidaat-pools met hooks
+- Lys v4-pools op en kontroleer PoolKey.hooks != address(0).
+- Ondersoek die hook se bytecode/ABI vir terugroepe: beforeSwap/afterSwap en enige custom-herbalanseringsmetodes.
 - Soek wiskunde wat: deur likiditeit deel, tussen tokenbedrae en likiditeit omskakel, of BalanceDelta met afronding saamvoeg.
 
 2) Modelleer die hook se wiskunde en drempels
-- Herskep die hook se likiditeits-/herverdelingsformule: insette sluit tipies sqrtPriceX96, tickLower/Upper, currentTick, fooivlak en netto likiditeit in.
+- Herskep die hook se likiditeits-/herverdelingsformule: insette sluit gewoonlik sqrtPriceX96, tickLower/Upper, currentTick, fooi-vlak en netto likiditeit in.
 - Karteer drempel-/stapfunksies: ticks, emmergrense of LDF-breekpunte. Bepaal aan watter kant van elke grens die delta afgerond word.
 - Identifiseer waar omskakelings tussen uint256/int256 plaasvind, SafeCast gebruik word, of op mulDiv met implisiete floor staatgemaak word.
 
 3) Stel exact-input-swaps in om grense oor te steek
-- Gebruik Foundry/Hardhat-simulasies om die minimum Δin te bereken wat nodig is om die prys net oor ’n grens te beweeg en die hook se vertakking te aktiveer.
-- Bevestig dat afterSwap-vereffening die oproeper meer as die koste krediteer, wat ’n positiewe BalanceDelta of krediet in die hook se rekeningkunde laat.
+- Gebruik Foundry/Hardhat-simulasies om die minimale Δin te bereken wat nodig is om die prys net oor ’n grens te skuif en die hook se vertakking te aktiveer.
+- Verifieer dat afterSwap-vereffening die oproeper meer krediteer as wat dit kos, en ’n positiewe BalanceDelta of krediet in die hook se rekeningkunde laat.
 - Herhaal swaps om krediet op te bou; roep dan die hook se onttrekkings-/vereffeningspad aan.
 
-In v4 moet die swap-lus vanuit ’n PoolManager-ontsluit-callback loop; negatiewe `amountSpecified` dui op exact input, en `sqrtPriceLimitX96` moet streng binne die geldige reeks wees. ’n Nulpryslimiet veroorsaak ’n revert, daarom gebruik die pseudokode hieronder die ondergrens vir ’n zero-for-one-swap.<sup>[[9]](#references)[[10]](#references)[[11]](#references)</sup>
+In v4 moet die swap-lus vanaf ’n PoolManager-unlock-terugroep uitgevoer word; ’n negatiewe `amountSpecified` dui op exact input, en `sqrtPriceLimitX96` moet streng binne die geldige reeks wees. ’n Nul-pryslimiet herroep, dus gebruik die pseudokode hieronder die onderste grens vir ’n zero-for-one-swap.<sup>[[9]](#references)[[10]](#references)[[11]](#references)</sup>
 
-Voorbeeld van ’n Foundry-styl-toetsharnas (pseudokode)
+Voorbeeld van ’n Foundry-styl-toetstuig (pseudokode)
 ```solidity
 function test_precision_rounding_abuse() public {
     // 1) Arrange: set up pool with hook
@@ -83,15 +83,15 @@ function test_precision_rounding_abuse() public {
 ```
 
 Kalibrering van die exactInput
-- Bereken die teiken met core TickMath: sqrtP_next = sqrtP_current × 1.0001^(Δtick) in reëlewaardeterme; die Q64.96-resultaat word deur TickMath afgerond.<sup>[[13]](#references)</sup>
-- Benader ’n token0 (zero-for-one)-invoer met die Q64.96-bewuste formule: Δx ≈ L × |ΔsqrtP| × 2^96 / (sqrtP_next × sqrtP_current). Pas die rigtingspesifieke afronding van die core-roetine toe.<sup>[[12]](#references)</sup>
-- Verstel Δin met ±1 wei rondom die grens om die vertakking te vind waar die hook in jou guns afrond.
+- Bereken die teiken met core TickMath: sqrtP_next = sqrtP_current × 1.0001^(Δtick) in reële waardes; die Q64.96-resultaat word deur TickMath afgerond.<sup>[[13]](#references)</sup>
+- Benader ’n token0 (zero-for-one)-invoer met die Q64.96-bewuste formule: Δx ≈ L × |ΔsqrtP| × 2^96 / (sqrtP_next × sqrtP_current). Pas die afronding in die kernroetine se rigtingspesifieke afronding.<sup>[[12]](#references)</sup>
+- Pas Δin met ±1 wei rondom die grens aan om die tak te vind waar die hook in jou guns afrond.
 
 4) Versterk met flash loans
-- Leen ’n groot notional (bv. 3M USDT of 2000 WETH) om baie iterasies atomies uit te voer.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
-- Voer die gekalibreerde ruil-lus uit, en onttrek en betaal dan terug binne die flash loan-callback.
+- Leen ’n groot nominale bedrag (bv. 3M USDT of 2000 WETH) om baie iterasies atomies uit te voer.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+- Voer die gekalibreerde ruil-lus uit, en onttrek dan en betaal terug binne die flash loan-callback.
 
-Aave V3-flash loan-skelet
+Aave V3-flitsleningskelet
 ```solidity
 function executeOperation(
     address[] calldata assets,
@@ -114,46 +114,46 @@ function executeOperation(
 }
 ```
 
-5) Uittrede en kruisketting-replikasie
+5) Uitgang en kettingoorgrens-replikasie
 - As hooks op verskeie kettings ontplooi is, herhaal dieselfde kalibrasie vir elke ketting.
-- In die Bunni-voorval het flash-loan-likiditeit en brugroetes per ketting verskil. Neem dus hierdie kettingspesifieke beperkings in ag wanneer jy die ontleding reproduseer.<sup>[[1]](#references)[[2]](#references)</sup>
+- In die Bunni-insident het flitslening-likiditeit en brugroetes per ketting verskil; hou dus rekening met hierdie kettingspesifieke beperkings wanneer jy die ontleding herhaal.<sup>[[1]](#references)[[2]](#references)</sup>
 
-## Algemene hoofoorsake in hook-wiskunde
+## Algemene grondoorsake in hook-wiskunde
 
-- Gemengde afrondingssemantiek: mulDiv rond af, terwyl latere paaie in die praktyk opwaarts afrond; of omskakelings tussen tokens en likiditeit gebruik verskillende afrondings.
-- Tick-belyningsfoute: ongeronde ticks in een pad gebruik en in ’n ander pad volgens tick-spasiëring afrond.
-- BalanceDelta-teken-/oorloopkwessies wanneer daar tydens vereffening tussen int256 en uint256 omgeskakel word.
+- Gemengde afrondingssemantiek: mulDiv rond af, terwyl latere paaie in effek opwaarts afrond; of omskakelings tussen tokens en likiditeit gebruik verskillende afronding.
+- Foute met tick-belyning: afgeronde ticks word in een pad gebruik, maar tick-gespasieerde afronding in ’n ander.
+- BalanceDelta-teken-/oorloopprobleme wanneer daar tydens vereffening tussen int256 en uint256 omgeskakel word.
 - Presisieverlies in Q64.96-omskakelings (sqrtPriceX96) wat nie in die omgekeerde kartering weerspieël word nie.
-- Akkumulasiepaaie: remainders per swap word as krediete nagespoor wat die aanroeper kan onttrek, eerder as om verbrand te word of nul-som te wees.
+- Opeenhopingspaaie: resbedrae per swap word as krediete nagespoor wat die oproeper kan onttrek, eerder as om dit te verbrand of ’n nulsom te handhaaf.
 
-## Pasgemaakte rekeningkunde en delta-amplifikasie
+## Pasgemaakte rekeningkunde en delta-versterking
 
-- Uniswap v4 se pasgemaakte rekeningkunde laat hooks toe om deltas terug te gee wat direk aanpas wat die aanroeper skuld of ontvang. As die hook krediete intern naspoor, kan afrondingsresidue oor baie klein bewerkings ophoop **voordat** die finale vereffening plaasvind.<sup>[[4]](#references)</sup>
-- As die hook ’n versoenbare onttrekkingspad blootstel, kan ’n aanvaller `swap → withdraw → swap` binne dieselfde PoolManager-ontsluitterugroeping afwissel. Dit dwing die hook om deltas op effens verskillende toestande te herbereken terwyl die saldo’s hangende bly totdat die ontsluiting vereffen word.<sup>[[4]](#references)[[10]](#references)</sup>
-- Wanneer jy hooks hersien, volg altyd hoe BalanceDelta/HookDelta geskep en vereffen word. ’n Enkele bevooroordeelde afronding in een vertakking kan ’n opbouende krediet word wanneer deltas herhaaldelik herbereken word.
+- Uniswap v4 se pasgemaakte rekeningkunde laat hooks toe om delta’s terug te gee wat direk aanpas wat die oproeper skuld of ontvang. As die hook krediete intern naspoor, kan afrondingsreste oor baie klein bewerkings ophoop **voordat** die finale vereffening plaasvind.<sup>[[4]](#references)</sup>
+- As die hook ’n versoenbare onttrekkingspad blootstel, kan ’n aanvaller `swap → withdraw → swap` binne dieselfde PoolManager-ontsluitterugroep afwissel. Dit dwing die hook om delta’s op effens verskillende toestande te herbereken terwyl saldo’s hangende bly totdat die ontsluiting vereffen word.<sup>[[4]](#references)[[10]](#references)</sup>
+- Wanneer jy hooks nagaan, spoor altyd na hoe BalanceDelta/HookDelta geskep en vereffen word. Een bevooroordeelde afronding in ’n vertakking kan ’n saamgestelde krediet word wanneer delta’s herhaaldelik herbereken word.
 
 ## Verdedigingsriglyne
 
-- Differensiële toetsing: vergelyk die hook se wiskunde met ’n verwysingsimplementering wat hoëpresisie-rasionale rekenkunde gebruik, en bevestig gelykheid of ’n begrensde fout wat altyd teen die aanvaller werk (nooit ten gunste van die aanroeper nie).
+- Differensiële toetsing: vergelyk die hook se wiskunde met ’n verwysingsimplementering wat hoëpresisie-rasionale rekenkunde gebruik, en bevestig gelykheid of ’n begrensde fout wat altyd die gebruiker benadeel (nooit die oproeper bevoordeel nie).
 - Invariant-/eienskaptoetse:
-  - Die som van deltas (tokens, likiditeit) oor swap-paaie en hook-aanpassings moet waarde behou, afgegesien van fooie.
-  - Geen pad behoort oor herhaalde exactInput-iterasies ’n positiewe netto krediet vir die swap-inisieerder te skep nie.
-  - Toetse op drempel-/tick-grense met ±1 wei-insette vir beide exactInput en exactOutput.
-- Afrondingsbeleid: sentraliseer afrondingshelpers wat altyd teen die gebruiker afrond; skakel inkonsekwente casts en implisiete afronding af.
-- Vereffeningsbestemmings: stuur onvermydelike afrondingsresidue na die protokol se tesourie of verbrand dit; skryf dit nooit aan msg.sender toe nie.
-- Tempo-beperkings/beskermingsmaatreëls: stel minimum swap-groottes vir herbalanseringsnellers in; deaktiveer herbalanserings as deltas kleiner as een wei is; kontroleer of deltas binne verwagte reekse val.
-- Hersien hook-terugroepe omvattend: beforeSwap/afterSwap en voor-/ná-likiditeitsveranderinge moet ooreenstem oor tick-belyning en delta-afronding.
+  - Die som van delta’s (tokens, likiditeit) oor swap-paaie en hook-aanpassings moet waarde behou, met uitsondering van fooie.
+  - Geen pad behoort oor herhaalde exactInput-iterasies netto positiewe krediet vir die swap-inisieerder te skep nie.
+  - Toets drempel-/tick-grense met insette van ±1 wei vir beide exactInput en exactOutput.
+- Afrondingsbeleid: sentraliseer afrondingshulpfunksies wat altyd teen die gebruiker afrond; skakel inkonsekwente casts en implisiete afronding af.
+- Vereffeningsbestemmings: voeg onvermydelike afrondingsreste by die protokol se tesourie of verbrand dit; skryf dit nooit aan msg.sender toe nie.
+- Tempo-beperkings/veiligheidsmaatreëls: stel minimum swap-groottes vir herbalansering-snellers; deaktiveer herbalansering as delta’s kleiner as ’n wei is; kontroleer delta’s teen verwagte reekse.
+- Hersien hook-terugroepe holisties: beforeSwap/afterSwap en before/after-likiditeitsveranderinge moet ooreenstem oor tick-belyning en delta-afronding.
 
 ## Gevallestudie: Bunni V2 (2025‑09‑02)
 
-- Protokol: Bunni V2, ’n Uniswap v4-hook wat ’n Liquidity Density Function (LDF) gebruik om tokendigtheid en totale-likiditeitsramings te bereken.<sup>[[1]](#references)[[2]](#references)</sup>
-- Geaffekteerde poele: USDC/USDT op Ethereum en weETH/ETH op Unichain, altesaam ongeveer $8.4M.<sup>[[1]](#references)</sup>
-- Stap 1 (prysverskuiwing): die aanvaller het ~3M USDT deur ’n flash loan geleen en dit omgeruil om die tick tot ~5000 te verskuif, waardeur die **aktiewe** USDC-saldo tot ~28 wei gekrimp het.<sup>[[1]](#references)</sup>
-- Stap 2 (dreinering deur afronding): 44 klein onttrekkings het afronding na onder in `BunniHubLogic::withdraw()` uitgebuit om die aktiewe USDC-saldo van 28 wei tot 4 wei te verminder (-85.7%), terwyl slegs ’n klein fraksie van LP-aandele verbrand is. Die totale likiditeit het met ~84.4% afgeneem.<sup>[[1]](#references)[[2]](#references)</sup>
-- Stap 3 (likiditeitsherstel-sandwich): ’n groot swap het die tick na ~839,189 verskuif (1 USDC ≈ 2.77e36 USDT). Likiditeitsramings het omgekeer en met ~16.8% toegeneem, wat ’n sandwich moontlik gemaak het waarin die aanvaller teen die opgeblaasde prys teruggeswap het en met wins uitgetree het.<sup>[[1]](#references)</sup>
-- Regstelling wat in die nadoodse verslag geïdentifiseer is: verander die opdatering van die idle-saldo om **opwaarts** af te rond, sodat herhaalde mikro-onttrekkings nie meer die aktiewe saldo van die poel afwaarts laat ratel nie.<sup>[[1]](#references)</sup>
+- Protokol: Bunni V2, ’n Uniswap v4-hook wat ’n Liquidity Density Function (LDF) gebruik om tokendigtheid en ramings van totale likiditeit te bereken.<sup>[[1]](#references)[[2]](#references)</sup>
+- Geaffekteerde poele: USDC/USDT op Ethereum en weETH/ETH op Unichain, met ’n totale waarde van sowat $8.4M.<sup>[[1]](#references)</sup>
+- Stap 1 (prysverskuiwing): die aanvaller het ~3M USDT deur ’n flitslening geleen en dit geruil om die tick tot ~5000 te verskuif, wat die **aktiewe** USDC-saldo tot ~28 wei laat daal het.<sup>[[1]](#references)</sup>
+- Stap 2 (afrondingsdreinering): 44 klein onttrekkings het afronding na onder in `BunniHubLogic::withdraw()` uitgebuit om die aktiewe USDC-saldo van 28 wei tot 4 wei te verminder (-85.7%), terwyl slegs ’n klein fraksie van LP-aandele verbrand is. Totale likiditeit het met ~84.4% afgeneem.<sup>[[1]](#references)[[2]](#references)</sup>
+- Stap 3 (likiditeitsterugslag-sandwich): ’n Groot swap het die tick na ~839,189 verskuif (1 USDC ≈ 2.77e36 USDT). Likiditeitsramings het omgeswaai en met ~16.8% toegeneem, wat ’n sandwich moontlik gemaak het waarin die aanvaller teen die opgeblaasde prys teruggeruil en met wins uitgetree het.<sup>[[1]](#references)</sup>
+- Oplossing wat in die nadoodse verslag geïdentifiseer is: verander die opdatering van die ongebruikte saldo sodat dit **opwaarts** afrond. Herhaalde mikro-onttrekkings sal dan nie meer die poel se aktiewe saldo trapsgewys afwaarts dryf nie.<sup>[[1]](#references)</sup>
 
-Vereenvoudigde kwesbare reël (en regstelling in die nadoodse verslag).<sup>[[1]](#references)</sup>
+Vereenvoudigde kwesbare reël (en die oplossing uit die nadoodse verslag).<sup>[[1]](#references)</sup>
 ```solidity
 // BunniHubLogic::withdraw() idle balance update (simplified)
 uint256 newBalance = balance - balance.mulDiv(shares, currentTotalSupply);
@@ -163,26 +163,26 @@ uint256 newBalance = balance - balance.mulDivUp(shares, currentTotalSupply);
 
 ## Jagkontrolelys
 
-- Gebruik die pool ’n hooks-adres wat nie nul is nie? Watter callbacks is geaktiveer?
-- Is daar herverdelings/herbalanserings per swap wat pasgemaakte wiskunde gebruik? Enige tick-/drempellogika?
-- Waar word divisions/mulDiv, Q64.96-omskakelings of SafeCast gebruik? Is afrondingssemantiek konsekwent deurgaans?
-- Kan jy ’n Δin konstrueer wat ’n grens net-net oorsteek en ’n gunstige afrondingstak oplewer? Toets albei rigtings en beide exactInput en exactOutput.
-- Hou die hook krediete of delta’s per oproeper by wat later onttrek kan word? Maak seker dat oorblyfsels geneutraliseer word.
+- Gebruik die pool ’n nie-nul hooks-adres? Watter callbacks is geaktiveer?
+- Is daar herverdelings/herbalanserings per swap met pasgemaakte wiskunde? Enige tick-/drempellogika?
+- Waar word delings, mulDiv, Q64.96-omskakelings of SafeCast gebruik? Is afrondingsgedrag oral konsekwent?
+- Kan jy ’n Δin opstel wat net-net ’n grens oorskry en ’n gunstige afrondingstak oplewer? Toets albei rigtings en sowel exactInput as exactOutput.
+- Hou die hook krediete of delta’s per oproeper by wat later onttrek kan word? Maak seker dat oorskiet geneutraliseer word.
 
 ## References
 
-- [1] [Bunni Exploit-nadoodse ondersoek (Sep 2025)](https://blog.bunni.xyz/posts/exploit-post-mortem/)
-- [2] [Bunni V2 Exploit: Volledige Hack-analise](https://www.quillaudits.com/blog/hack-analysis/bunni-v2-exploit)
-- [3] [Bunni V2 Exploit: $8.3M gedreineer via ’n likiditeitsfout (opsomming)](https://quillaudits.medium.com/bunni-v2-exploit-8-3m-drained-50acbdcd9e7b)
-- [4] [Uniswap v4 Core-witskrif](https://app.uniswap.org/whitepaper-v4.pdf)
+- [1] [Bunni-uitbuiting: Nadoodse verslag (Sep 2025)](https://blog.bunni.xyz/posts/exploit-post-mortem/)
+- [2] [Bunni V2-uitbuiting: Volledige hack-ontleding](https://www.quillaudits.com/blog/hack-analysis/bunni-v2-exploit)
+- [3] [Bunni V2-uitbuiting: $8.3M gedreineer weens ’n likiditeitsfout (opsomming)](https://quillaudits.medium.com/bunni-v2-exploit-8-3m-drained-50acbdcd9e7b)
+- [4] [Uniswap v4-kern-witskrif](https://app.uniswap.org/whitepaper-v4.pdf)
 - [5] [Agtergrond oor Uniswap v4 (QuillAudits-navorsing)](https://www.quillaudits.com/research/uniswap-development)
-- [6] [Likiditeitsmeganika in Uniswap v4 core](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/liquidity-mechanics-in-uniswap-v4-core)
-- [7] [Swap-meganika in Uniswap v4 core](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/swap-mechanics-in-uniswap-v4-core)
+- [6] [Likiditeitsmeganika in Uniswap v4-kern](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/liquidity-mechanics-in-uniswap-v4-core)
+- [7] [Swap-meganika in Uniswap v4-kern](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/swap-mechanics-in-uniswap-v4-core)
 - [8] [Uniswap v4 Hooks en sekuriteitsoorwegings](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/uniswap-v4-hooks-and-security)
-- [9] [Uniswap v4 core Pool.sol](https://github.com/Uniswap/v4-core/blob/main/src/libraries/Pool.sol)
-- [10] [Uniswap v4 core PoolManager.sol](https://github.com/Uniswap/v4-core/blob/main/src/PoolManager.sol)
+- [9] [Uniswap v4-kern Pool.sol](https://github.com/Uniswap/v4-core/blob/main/src/libraries/Pool.sol)
+- [10] [Uniswap v4-kern PoolManager.sol](https://github.com/Uniswap/v4-core/blob/main/src/PoolManager.sol)
 - [11] [Uniswap v4 SwapParams](https://github.com/Uniswap/v4-core/blob/main/src/types/PoolOperation.sol)
-- [12] [Uniswap v4 core SqrtPriceMath.sol](https://github.com/Uniswap/v4-core/blob/main/src/libraries/SqrtPriceMath.sol)
-- [13] [Uniswap v4 core TickMath.sol](https://github.com/Uniswap/v4-core/blob/main/src/libraries/TickMath.sol)
+- [12] [Uniswap v4-kern SqrtPriceMath.sol](https://github.com/Uniswap/v4-core/blob/main/src/libraries/SqrtPriceMath.sol)
+- [13] [Uniswap v4-kern TickMath.sol](https://github.com/Uniswap/v4-core/blob/main/src/libraries/TickMath.sol)
 - [14] [Uniswap v4 PoolKey](https://github.com/Uniswap/v4-core/blob/main/src/types/PoolKey.sol)
 {{#include ../../banners/hacktricks-training.md}}
