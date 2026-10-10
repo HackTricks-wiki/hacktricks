@@ -4,70 +4,70 @@
 
 ## Temel Kavramlar
 
-- **Akıllı Sözleşmeler**, belirli koşullar karşılandığında blockchain üzerinde çalışan ve aracı olmadan anlaşmaların yürütülmesini otomatikleştiren programlar olarak tanımlanır.
-- **Merkeziyetsiz Uygulamalar (dApps)**, kullanıcı dostu bir ön yüz ve şeffaf, denetlenebilir bir arka uç sunarak akıllı sözleşmeler üzerine kurulur.
-- **Token'lar ve Coin'ler** farklı işlevlere sahiptir: coin'ler dijital para olarak hizmet ederken token'lar belirli bağlamlarda değeri veya sahipliği temsil eder.
-  - **Utility Token'lar** hizmetlere erişim sağlar; **Security Token'lar** ise varlık sahipliğini ifade eder.
-- **DeFi**, Merkeziyetsiz Finans anlamına gelir ve merkezi otoriteler olmadan finansal hizmetler sunar.
-- **DEX** ve **DAO'lar**, sırasıyla Merkeziyetsiz Borsa Platformları ve Merkeziyetsiz Otonom Organizasyonlar anlamına gelir.
+- **Smart Contracts**, belirli koşullar karşılandığında blockchain üzerinde çalışan programlardır; aracı olmadan anlaşmaların yürütülmesini otomatikleştirir.
+- **Decentralized Applications (dApps)**, kullanıcı dostu bir ön yüz ve şeffaf, denetlenebilir bir arka uç sunarak smart contract’lar üzerine kurulur.
+- **Tokens & Coins** farklı kavramlardır: coin’ler dijital para olarak kullanılırken token’lar belirli bağlamlarda değeri veya sahipliği temsil eder.
+  - **Utility Tokens** hizmetlere erişim sağlar; **Security Tokens** ise varlık sahipliğini ifade eder.
+- **DeFi**, merkezi otoriteler olmadan finansal hizmetler sunan Decentralized Finance anlamına gelir.
+- **DEX** ve **DAO** sırasıyla Decentralized Exchange Platforms ve Decentralized Autonomous Organizations anlamına gelir.
 
-## Konsensüs Mekanizmaları
+## Mutabakat Mekanizmaları
 
-Konsensüs mekanizmaları, blockchain üzerindeki işlemlerin güvenli ve üzerinde uzlaşılmış biçimde doğrulanmasını sağlar:
+Mutabakat mekanizmaları, blockchain üzerindeki işlemlerin güvenli ve üzerinde anlaşılmış biçimde doğrulanmasını sağlar:
 
-- **İş İspatı (PoW)**, işlemlerin doğrulanması için hesaplama gücünden yararlanır.
-- **Hisse İspatı (PoS)**, doğrulayıcıların belirli miktarda token bulundurmasını gerektirir ve PoW'a kıyasla enerji tüketimini azaltır.<sup>[[1]](#references)</sup>
+- **Proof of Work (PoW)**, işlemleri doğrulamak için hesaplama gücünden yararlanır.
+- **Proof of Stake (PoS)**, doğrulayıcıların belirli miktarda token bulundurmasını gerektirir ve PoW’a kıyasla enerji tüketimini azaltır.<sup>[[1]](#references)</sup>
 
-## Bitcoin'in Temelleri
+## Bitcoin’in Temelleri
 
 ### İşlemler
 
-Bitcoin işlemleri, adresler arasında para aktarımını içerir. İşlemler dijital imzalarla doğrulanır; böylece yalnızca özel anahtarın sahibi transfer başlatabilir.<sup>[[2]](#references)</sup>
+Bitcoin işlemleri, adresler arasında fon aktarımını kapsar. İşlemler dijital imzalarla doğrulanır; böylece yalnızca private key’in sahibi aktarım başlatabilir.<sup>[[2]](#references)</sup>
 
 #### Temel Bileşenler:
 
-- **Çoklu İmzalı İşlemler**, bir işlemi yetkilendirmek için birden fazla imza gerektirir.<sup>[[3]](#references)</sup>
-- İşlemler **girdilerden** (fonların kaynağı), **çıktılardan** (varış noktası), **ücretlerden** (madencilere ödenen) ve **script'lerden** (işlem kuralları) oluşur.
+- **Multisignature Transactions**, bir işlemi yetkilendirmek için birden fazla imza gerektirir.<sup>[[3]](#references)</sup>
+- İşlemler **inputs** (fonların kaynağı), **outputs** (hedef), **fees** (madencilere ödenen ücretler) ve **scripts** (işlem kuralları) bileşenlerinden oluşur.
 
 ### Lightning Network
 
-Bir kanal içinde birden fazla işleme izin vererek Bitcoin'in ölçeklenebilirliğini artırmayı amaçlar; blockchain'e yalnızca son durumu yayınlar.
+Bir kanal içinde birden fazla işleme izin vererek ve blockchain’e yalnızca son durumu yayınlayarak Bitcoin’in ölçeklenebilirliğini artırmayı amaçlar.
 
-## Bitcoin Gizliliğine Yönelik Endişeler
+## Bitcoin Gizliliğine İlişkin Endişeler
 
-**Ortak Girdi Sahipliği** ve **UTXO Para Üstü Adresi Tespiti** gibi gizlilik saldırıları, işlem örüntülerinden yararlanır. **Mixer'lar** ve **CoinJoin** gibi stratejiler, kullanıcılar arasındaki işlem bağlantılarını gizleyerek anonimliği artırır.
+**Common Input Ownership** ve **UTXO Change Address Detection** gibi gizlilik saldırıları, işlem örüntülerinden yararlanır. **Mixers** ve **CoinJoin** gibi yöntemler, kullanıcılar arasındaki işlem bağlantılarını belirsizleştirerek anonimliği artırır.
 
-## Bitcoin'leri Anonim Olarak Edinme
+## Bitcoin’leri Anonim Olarak Edinme
 
-Yöntemler arasında nakit karşılığında alım satım, madencilik ve mixer kullanımı bulunur. **CoinJoin**, izlemeyi zorlaştırmak için birden fazla işlemi birleştirirken **PayJoin**, daha fazla gizlilik sağlamak amacıyla CoinJoin'leri sıradan işlemler gibi gösterir.
+Yöntemler arasında nakit işlemleri, mining ve mixer kullanımı bulunur. **CoinJoin**, iz sürmeyi zorlaştırmak için birden fazla işlemi karıştırırken **PayJoin**, daha fazla gizlilik sağlamak amacıyla CoinJoin işlemlerini normal işlemler gibi gösterir.
 
 # Bitcoin Gizlilik Saldırılarının Özeti
 
-Bitcoin dünyasında işlemlerin gizliliği ve kullanıcıların anonimliği genellikle endişe konusudur. Saldırganların Bitcoin gizliliğini tehlikeye atabileceği yaygın yöntemlere dair basitleştirilmiş bir genel bakış aşağıdadır.<sup>[[6]](#references)</sup>
+Bitcoin dünyasında işlemlerin gizliliği ve kullanıcıların anonimliği sıklıkla endişe konusu olur. Aşağıda, saldırganların Bitcoin gizliliğini tehlikeye atabileceği bazı yaygın yöntemlere ilişkin basitleştirilmiş bir genel bakış yer alıyor.<sup>[[6]](#references)</sup>
 
 ## **Ortak Girdi Sahipliği Varsayımı**
 
-İşin karmaşıklığı nedeniyle farklı kullanıcılara ait girdilerin tek bir işlemde birleştirilmesi genellikle nadirdir. Bu nedenle **aynı işlemdeki iki girdi adresinin genellikle aynı sahibine ait olduğu varsayılır**.
+İşin karmaşıklığı nedeniyle farklı kullanıcılara ait girdilerin tek bir işlemde birleştirilmesi genellikle nadir görülür. Bu nedenle, **aynı işlemdeki iki girdi adresinin genellikle aynı sahibine ait olduğu varsayılır**.
 
-## **UTXO Para Üstü Adresi Tespiti**
+## **UTXO Değişim Adresi Tespiti**
 
-Bir UTXO veya **Harcanmamış İşlem Çıktısı**, bir işlemde tamamen harcanmalıdır. Yalnızca bir kısmı başka bir adrese gönderilirse kalan miktar yeni bir para üstü adresine gider. Gözlemciler bu yeni adresin göndericiye ait olduğunu varsayabilir; bu da gizliliği tehlikeye atar.
+Bir UTXO, yani **Harcanmamış İşlem Çıktısı**, bir işlemde tamamen harcanmalıdır. Yalnızca bir kısmı başka bir adrese gönderilirse geri kalanı yeni bir değişim adresine aktarılır. Gözlemciler bu yeni adresin gönderene ait olduğunu varsayabilir; bu da gizliliği tehlikeye atar.
 
 ### Örnek
 
-Bunu önlemek için karıştırma hizmetleri kullanmak veya birden fazla adres kullanmak sahipliği gizlemeye yardımcı olabilir.
+Bunu azaltmak için mixing hizmetleri kullanmak veya birden fazla adres kullanmak sahipliği belirsizleştirmeye yardımcı olabilir.
 
-## **Sosyal Ağlarda ve Forumlarda İfşa**
+## **Sosyal Ağlarda ve Forumlarda Bilgilerin Açığa Çıkması**
 
-Kullanıcılar bazen Bitcoin adreslerini çevrimiçi paylaşır; bu da **adresi sahibiyle ilişkilendirmeyi kolaylaştırır**.
+Kullanıcılar bazen Bitcoin adreslerini çevrimiçi paylaşır; bu da **adresi sahibine bağlamayı kolaylaştırır**.
 
 ## **İşlem Grafiği Analizi**
 
-İşlemler grafikler şeklinde görselleştirilebilir ve fon akışına dayalı olarak kullanıcılar arasındaki olası bağlantıları açığa çıkarabilir.
+İşlemler grafikler halinde görselleştirilebilir ve fon akışına dayanarak kullanıcılar arasındaki olası bağlantılar ortaya çıkarılabilir.
 
-## **Gereksiz Girdi Sezgiseli (Optimal Para Üstü Sezgiseli)**
+## **Gereksiz Girdi Sezgiseli (Optimal Change Heuristic)**
 
-Bu sezgisel yöntem, göndericiye dönen para üstünü tahmin etmek için birden fazla girdi ve çıktı içeren işlemlerin analizine dayanır.
+Bu sezgisel yöntem, gönderene geri dönen değişim çıktısını tahmin etmek için birden fazla girdi ve çıktı içeren işlemlerin analizine dayanır.
 
 ### Örnek
 
@@ -76,26 +76,26 @@ Bu sezgisel yöntem, göndericiye dönen para üstünü tahmin etmek için birde
 3 btc     1 btc
 ```
 
-Daha fazla input eklemek change output'unu herhangi bir tekil input'tan daha büyük hâle getirirse, bu durum sezgisel yöntemi yanıltabilir.
+Daha fazla input eklemek, change çıktısını tek bir input'tan daha büyük hâle getirirse sezgisel yöntemi yanıltabilir.
 
 ## **Zorunlu Adres Yeniden Kullanımı**
 
-Saldırganlar, alıcının gelecekteki işlemlerde bu küçük tutarları başka input'larla birleştirmesini ve böylece adresleri birbirine bağlamasını umarak daha önce kullanılmış adreslere küçük miktarlar gönderebilir.
+Saldırganlar, alıcının bu tutarları gelecekteki işlemlerde başka input'larla birleştirerek adresleri birbirine bağlamasını umarak daha önce kullanılmış adreslere küçük miktarlar gönderebilir.
 
-### Cüzdanların Doğru Davranışı
+### Doğru Cüzdan Davranışı
 
-Cüzdanlar, bu gizlilik leak'ini önlemek için daha önce kullanılmış ve bakiyesi boş olan adreslere gönderilen coin'leri kullanmaktan kaçınmalıdır.
+Cüzdanlar, bu privacy leak'i önlemek için daha önce kullanılmış ve boş olan adreslere alınan coin'leri kullanmaktan kaçınmalıdır.
 
 ## **Diğer Blockchain Analizi Teknikleri**
 
-- **Kesin Ödeme Tutarları:** Change içermeyen işlemler, aynı kullanıcıya ait iki adres arasında gerçekleşmiş olabilir.
-- **Yuvarlak Tutarlar:** Bir işlemdeki yuvarlak tutar, bunun bir ödeme olduğunu; yuvarlak olmayan çıktının ise muhtemelen change olduğunu düşündürür.
-- **Cüzdan Parmak İzi:** Farklı cüzdanların kendilerine özgü işlem oluşturma kalıpları vardır. Bu sayede analistler kullanılan yazılımı ve potansiyel olarak change adresini belirleyebilir.
-- **Tutar ve Zaman Korelasyonları:** İşlem zamanlarının veya tutarlarının açıklanması, işlemlerin izlenebilir olmasına yol açabilir.
+- **Kesin Ödeme Tutarları:** Change içermeyen işlemler, muhtemelen aynı kullanıcıya ait iki adres arasında gerçekleşmiştir.
+- **Yuvarlak Tutarlar:** Bir işlemdeki yuvarlak tutar, bunun bir ödeme olduğunu düşündürür; yuvarlak olmayan çıktı ise muhtemelen change'tir.
+- **Cüzdan Parmak İzi Çıkarma:** Farklı cüzdanların kendilerine özgü işlem oluşturma örüntüleri vardır. Bu örüntüler, analistlerin kullanılan yazılımı ve muhtemelen change adresini belirlemesine olanak tanır.
+- **Tutar ve Zaman Korelasyonları:** İşlem zamanlarının veya tutarlarının açıklanması, işlemlerin izlenebilir hâle gelmesine yol açabilir.
 
 ## **Trafik Analizi**
 
-Saldırganlar, ağ trafiğini izleyerek işlemleri veya blokları IP adresleriyle ilişkilendirebilir ve kullanıcı gizliliğini tehlikeye atabilir. Bu, özellikle bir kuruluşun çok sayıda Bitcoin node'u çalıştırdığı durumlarda geçerlidir; çünkü bu, işlemleri izleme kapasitesini artırır.
+Saldırganlar, ağ trafiğini izleyerek işlemleri veya blokları IP adresleriyle ilişkilendirebilir ve kullanıcı gizliliğini tehlikeye atabilir. Bir kuruluşun çok sayıda Bitcoin node'u işletmesi, işlemleri izleme kapasitesini artırdığından bu risk özellikle yüksektir.
 
 ## Daha Fazla Bilgi
 
@@ -106,59 +106,59 @@ Gizlilik saldırıları ve savunmalarının kapsamlı bir listesi için [Bitcoin
 ## Anonim Olarak Bitcoin Edinme Yöntemleri
 
 - **Nakit İşlemler**: Bitcoin'i nakit kullanarak edinmek.
-- **Nakit Alternatifleri**: Hediye kartları satın alıp bunları çevrimiçi ortamda Bitcoin ile takas etmek.
-- **Mining**: Bitcoin kazanmanın en gizli yöntemi mining'dir; özellikle tek başına yapıldığında, çünkü mining pool'ları madencinin IP adresini öğrenebilir. [Mining Pool Bilgileri](https://en.bitcoin.it/wiki/Pooled_mining)
+- **Nakit Alternatifleri**: Hediye kartları satın alıp bunları çevrimiçi olarak Bitcoin ile takas etmek.
+- **Mining**: Bitcoin kazanmanın en gizli yöntemi mining yapmaktır. Bu işlem özellikle tek başına yapıldığında daha gizlidir; çünkü mining pool'ları madencinin IP adresini öğrenebilir. [Mining Pool'ları Hakkında Bilgi](https://en.bitcoin.it/wiki/Pooled_mining)
 - **Hırsızlık**: Teorik olarak Bitcoin çalmak, onu anonim olarak edinmenin başka bir yolu olabilir; ancak bu yasa dışıdır ve önerilmez.
 
-## Mixing Hizmetleri
+## Mixing Servisleri
 
-Bir kullanıcı, bir mixing hizmeti kullanarak **bitcoin gönderebilir** ve karşılığında **farklı bitcoin'ler alabilir**; bu da asıl sahibin izini sürmeyi zorlaştırır. Ancak bunun için hizmetin kayıt tutmayacağına ve bitcoin'leri gerçekten geri göndereceğine güvenmek gerekir. Alternatif mixing seçenekleri arasında Bitcoin casinoları da bulunur.
+Bir mixing service kullanarak kullanıcı **bitcoin gönderip** karşılığında **farklı bitcoin'ler alabilir**; bu da asıl sahibin izini sürmeyi zorlaştırır. Ancak bunun için servisin kayıt tutmayacağına ve bitcoin'leri gerçekten iade edeceğine güvenmek gerekir. Alternatif mixing seçenekleri arasında Bitcoin casinoları da bulunur.
 
 ## CoinJoin
 
-**CoinJoin**, farklı kullanıcılara ait birden fazla işlemi tek bir işlemde birleştirerek input'ları output'larla eşleştirmeye çalışanların işini zorlaştırır. Etkili olmasına rağmen, input ve output tutarları benzersiz olan işlemlerin izi yine de sürülebilir.
+**CoinJoin**, farklı kullanıcılara ait birden fazla işlemi tek bir işlemde birleştirerek input'ları output'larla eşleştirmeye çalışanların işini zorlaştırır. Etkili olmasına rağmen, benzersiz input ve output boyutlarına sahip işlemlerin izi yine de sürülebilir.
 
 CoinJoin kullanmış olabilecek örnek işlemler: `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` ve `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`.
 
-Daha fazla bilgi için [CoinJoin](https://coinjoin.io/en) sayfasını ziyaret edin. Yatırma işlemlerini daha sonraki çekimlerden ayıran bir Ethereum smart contract mixer için [Tornado Cash](https://tornado.cash) sayfasına bakın.
+Daha fazla bilgi için [CoinJoin](https://coinjoin.io/en) sayfasını ziyaret edin. Para yatırma işlemlerini daha sonraki çekimlerden ayıran bir Ethereum smart contract mixer için [Tornado Cash](https://tornado.cash) sayfasına bakın.
 
 ## PayJoin
 
-CoinJoin'in bir çeşidi olan **PayJoin** (veya P2EP), iki taraf arasındaki (ör. müşteri ve satıcı) işlemi, CoinJoin'in ayırt edici özelliği olan eşit tutarlı output'ları kullanmadan sıradan bir işlem gibi gösterir. Bu, tespit edilmesini son derece zorlaştırır ve işlem gözetimi yapan kuruluşların kullandığı yaygın input-ortak-sahiplik sezgisel yöntemini geçersiz kılabilir.
+CoinJoin'in bir çeşidi olan **PayJoin** (veya P2EP), iki taraf arasındaki (ör. müşteri ve satıcı) işlemi, CoinJoin'in ayırt edici eşit output özelliğini taşımayan sıradan bir işlem gibi gösterir. Bu, PayJoin'i tespit etmeyi son derece zorlaştırır ve işlem gözetimi yapan kuruluşların kullandığı yaygın-input-sahipliği sezgisel yöntemini geçersiz kılabilir.
 
 ```plaintext
 2 btc --> 3 btc
 5 btc     4 btc
 ```
 
-Yukarıdakine benzer işlemler, standart bitcoin işlemlerinden ayırt edilemeden gizliliği artıran PayJoin işlemleri olabilir.
+Yukarıdakine benzer işlemler, standart bitcoin işlemlerinden ayırt edilemezken gizliliği artıran PayJoin işlemleri olabilir.
 
-**PayJoin kullanımı, geleneksel gözetim yöntemlerini önemli ölçüde sekteye uğratabilir** ve işlemsel gizliliği sağlamaya yönelik umut verici bir gelişme sunar.
+**PayJoin kullanımı, geleneksel gözetim yöntemlerini önemli ölçüde sekteye uğratabilir** ve işlemsel gizlilik arayışında umut verici bir gelişme sunar.
 
 # Kripto Para Gizliliği İçin En İyi Uygulamalar
 
-## **Cüzdan Senkronizasyon Teknikleri**
+## **Cüzdan Eşitleme Teknikleri**
 
-Gizliliği ve güvenliği korumak için cüzdanları blockchain ile senkronize etmek çok önemlidir. İki yöntem öne çıkar:
+Gizliliği ve güvenliği korumak için cüzdanları blockchain ile eşitlemek çok önemlidir. İki yöntem öne çıkar:
 
-- **Full node**: Tüm blockchain'i indirerek maksimum gizlilik sağlar. Şimdiye kadar yapılmış tüm işlemler yerel olarak saklanır; böylece saldırganların kullanıcının hangi işlemlerle veya adreslerle ilgilendiğini belirlemesi imkânsız hâle gelir.
-- **İstemci tarafında blok filtreleme**: Bu yöntemde, cüzdanların ağ gözlemcilerine belirli ilgi alanlarını açığa çıkarmadan ilgili işlemleri belirleyebilmesi için blockchain'deki her blok için filtreler oluşturulur. Hafif cüzdanlar bu filtreleri indirir ve yalnızca kullanıcının adresleriyle eşleşme bulunduğunda tam blokları alır.
+- **Full node**: Tüm blockchain'i indirerek maksimum gizlilik sağlar. Şimdiye kadar yapılmış tüm işlemler yerel olarak saklandığından, saldırganların kullanıcının hangi işlemlerle veya adreslerle ilgilendiğini belirlemesi imkânsız hale gelir.
+- **İstemci tarafında blok filtreleme**: Bu yöntemde, cüzdanların belirli ilgi alanlarını ağ gözlemcilerine açığa çıkarmadan ilgili işlemleri belirleyebilmesi için blockchain'deki her blok için filtreler oluşturulur. Hafif cüzdanlar bu filtreleri indirir ve yalnızca kullanıcının adresleriyle eşleşme bulunduğunda tam blokları alır.
 
 ## **Anonimlik İçin Tor Kullanımı**
 
-Bitcoin eşler arası bir ağ üzerinde çalıştığından, IP adresinizi gizlemek ve ağla etkileşim kurarken gizliliği artırmak için Tor kullanmanız önerilir.
+Bitcoin eşler arası bir ağda çalıştığından, IP adresinizi gizlemek ve ağla etkileşim kurarken gizliliği artırmak için Tor kullanmanız önerilir.
 
-## **Adres Tekrarı Kullanımını Önleme**
+## **Adres Yeniden Kullanımını Önleme**
 
-Gizliliği korumak için her işlemde yeni bir adres kullanmak hayati önem taşır. Adresleri tekrar kullanmak, işlemleri aynı varlıkla ilişkilendirerek gizliliği tehlikeye atabilir. Modern cüzdanlar tasarımlarıyla adres tekrarını önermemektedir.
+Gizliliği korumak için her işlemde yeni bir adres kullanmak önemlidir. Adresleri yeniden kullanmak, işlemleri aynı varlığa bağlayarak gizliliği tehlikeye atabilir. Modern cüzdanlar, tasarımları gereği adreslerin yeniden kullanımını caydırır.
 
 ## **İşlem Gizliliği Stratejileri**
 
-- **Birden fazla işlem**: Bir ödemeyi birkaç işleme bölmek, işlem tutarını gizleyerek gizlilik saldırılarını engelleyebilir.
-- **Para üstü çıktılarından kaçınma**: Para üstü çıktısı gerektirmeyen işlemleri seçmek, para üstü tespit yöntemlerini sekteye uğratarak gizliliği artırır.
-- **Birden fazla para üstü çıktısı**: Para üstü oluşturmaktan kaçınmak mümkün değilse, birden fazla para üstü çıktısı oluşturmak yine de gizliliği artırabilir.
+- **Birden fazla işlem**: Bir ödemeyi birkaç işleme bölmek, işlem tutarını belirsizleştirerek gizlilik saldırılarını engelleyebilir.
+- **Para üstünü önleme**: Para üstü çıktısı gerektirmeyen işlemleri tercih etmek, para üstü tespit yöntemlerini bozarak gizliliği artırır.
+- **Birden fazla para üstü çıktısı**: Para üstünü önlemek mümkün değilse, birden fazla para üstü çıktısı oluşturmak yine de gizliliği artırabilir.
 
-# **Monero: Anonimliğin Simgesi**
+# **Monero: Anonimlik Feneri**
 
 Monero, işlem gizliliğine öncelik verecek şekilde tasarlanmıştır.
 
@@ -166,19 +166,19 @@ Monero, işlem gizliliğine öncelik verecek şekilde tasarlanmıştır.
 
 ## **Gas'ı Anlamak**
 
-Gas, Ethereum'da işlemleri yürütmek için gereken hesaplama çabasını ölçer ve **gwei** cinsinden fiyatlandırılır. Örneğin, 2.310.000 gwei (veya 0,00231 ETH) maliyetindeki bir işlemde gas limiti ve taban ücret bulunur; doğrulayıcıların işlemi bloğa eklemesini teşvik etmek için bir öncelik ücreti de ödenir. Kullanıcılar fazla ödeme yapmadıklarından emin olmak için bir azami ücret belirleyebilir; aşan tutar iade edilir.<sup>[[5]](#references)</sup>
+Gas, Ethereum'da işlemleri yürütmek için gereken hesaplama eforunu ölçer ve **gwei** cinsinden fiyatlandırılır. Örneğin, 2.310.000 gwei (veya 0,00231 ETH) tutarındaki bir işlemde gas limiti ve taban ücret bulunur; doğrulayıcıların işlemi dahil etmesini teşvik etmek için öncelik ücreti de eklenir. Kullanıcılar fazla ödeme yapmadıklarından emin olmak için bir maksimum ücret belirleyebilir; artan tutar iade edilir.<sup>[[5]](#references)</sup>
 
-## **İşlemleri Yürütme**
+## **İşlemleri Gerçekleştirme**
 
-Ethereum'daki işlemlerde gönderici ve alıcı bulunur; bunlar kullanıcı adresleri veya akıllı sözleşme adresleri olabilir. İşlemler ücret gerektirir ve bir bloğa eklenmelidir. Bir işlemdeki temel bilgiler alıcı, göndericinin imzası, değer, isteğe bağlı veri, gas limiti ve ücretleri içerir. Özellikle göndericinin adresi imzadan çıkarılır; bu nedenle işlem verilerinde yer alması gerekmez.<sup>[[4]](#references)</sup>
+Ethereum işlemlerinde, kullanıcı adresi veya akıllı sözleşme adresi olabilen bir gönderici ve alıcı bulunur. İşlemler ücret gerektirir ve bir bloğa dahil edilmelidir. İşlemdeki temel bilgiler alıcı, göndericinin imzası, değer, isteğe bağlı veri, gas limiti ve ücretlerdir. Özellikle, göndericinin adresi imzadan çıkarılır; dolayısıyla işlem verilerinde bulunması gerekmez.<sup>[[4]](#references)</sup>
 
-Bu uygulamalar ve mekanizmalar, gizliliğe ve güvenliğe öncelik verirken kripto paralarla işlem yapmak isteyen herkes için temel niteliktedir.
+Bu uygulamalar ve mekanizmalar, gizliliğe ve güvenliğe öncelik verirken kripto para kullanmak isteyen herkes için temel niteliktedir.
 
 ## Değer Odaklı Web3 Red Teaming
 
-- Fonları kimin, nasıl hareket ettirebileceğini anlamak için değer taşıyan bileşenleri (imzalayıcılar, oracle'lar, köprüler, otomasyon) envanterleyin.
-- Ayrıcalık yükseltme yollarını ortaya çıkarmak için her bileşeni ilgili MITRE AADAPT taktikleriyle eşleştirin.
-- Etkiyi doğrulamak ve istismar edilebilir ön koşulları belgelemek için flash loan/oracle/kimlik bilgisi zincirler arası saldırı zincirlerini prova edin.
+- Fonları kimin ve nasıl hareket ettirebileceğini anlamak için değer taşıyan bileşenlerin (imzalayıcılar, oracle'lar, bridge'ler, otomasyon) envanterini çıkarın.
+- Ayrıcalık yükseltme yollarını ortaya çıkarmak için her bileşeni ilgili MITRE AADAPT taktikleriyle eşleyin.
+- Etkiyi doğrulamak ve istismar edilebilir önkoşulları belgelemek için flash loan/oracle/kimlik bilgisi zincirler arası saldırı zincirlerini prova edin.
 
 {{#ref}}
 value-centric-web3-red-teaming.md
@@ -186,7 +186,7 @@ value-centric-web3-red-teaming.md
 
 ## Web3 İmzalama İş Akışının Ele Geçirilmesi
 
-- Cüzdan arayüzlerine yönelik tedarik zinciri müdahaleleri, imzalama işleminin hemen öncesinde EIP-712 yüklerini değiştirerek delegatecall tabanlı proxy ele geçirmelerinde kullanılabilecek geçerli imzaları toplayabilir (ör. Safe masterCopy'nin slot-0 üzerine yazılması).
+- Wallet UI'larının tedarik zincirine müdahale edilmesi, imzalama işleminden hemen önce EIP-712 yüklerini değiştirebilir ve delegatecall tabanlı proxy ele geçirmeleri için geçerli imzaları toplayabilir (ör. Safe masterCopy'nin slot-0 üzerine yazılması).
 
 {{#ref}}
 web3-signing-workflow-compromise-safe-delegatecall-proxy-takeover.md
@@ -194,7 +194,7 @@ web3-signing-workflow-compromise-safe-delegatecall-proxy-takeover.md
 
 ## Hesap Soyutlama (ERC-4337)
 
-- Akıllı hesaplarda sık görülen hata türleri arasında `EntryPoint` erişim denetimini atlatma, imzasız gas alanları, durum bilgisi içeren doğrulama, ERC-1271 tekrar saldırıları ve doğrulama sonrasında revert yoluyla ücretlerin tüketilmesi yer alır.
+- Akıllı hesaplarda yaygın hata türleri arasında `EntryPoint` erişim denetiminin atlanması, imzasız gas alanları, durum bilgili doğrulama, ERC-1271 replay ve doğrulama sonrasında revert yoluyla ücretlerin tüketilmesi bulunur.
 
 {{#ref}}
 erc-4337-smart-account-security-pitfalls.md
@@ -202,7 +202,7 @@ erc-4337-smart-account-security-pitfalls.md
 
 ## Akıllı Sözleşme Güvenliği
 
-- Test paketlerindeki kör noktaları bulmak için mutation testing:
+- Test paketlerindeki kör noktaları bulmak için mutasyon testi:
 
 {{#ref}}
 ../smart-contract-security/mutation-testing-with-slither.md
@@ -210,15 +210,15 @@ erc-4337-smart-account-security-pitfalls.md
 
 ## ZK Kanıtı / zkVM Guest Bütünlüğü
 
-Bir prover, bir iddiayı doğrulamak için **zkVM** veya uygulamaya özgü bir kanıt devresi kullandığında, doğrulayıcı yalnızca **guest programının yazıldığı şekilde çalıştığını** öğrenir. Guest'te **güvenli olmayan serileştirme**, **tanımsız davranış** veya **eksik anlamsal kısıtlamalar** varsa, kötü niyetli bir prover doğrulanan ancak **genel metriklerin veya iddia edilen değişmezin yanlış olduğu** bir kanıt üretebilir.<sup>[[7]](#references)</sup>
+Bir prover, bir iddiayı doğrulamak için **zkVM** veya uygulamaya özgü bir kanıt devresi kullandığında, verifier yalnızca **guest programının yazıldığı şekilde çalıştığını** öğrenir. Guest'te **güvenli olmayan serileştirme**, **tanımsız davranış** veya **eksik anlamsal kısıtlamalar** varsa kötü amaçlı bir prover, **genel metrikler veya iddia edilen değişmez yanlış olduğu halde** doğrulanan bir kanıt üretebilir.<sup>[[7]](#references)</sup>
 
-### Kanıt guest'lerinde güvenli olmayan serileştirme
+### Kanıt guest'leri içinde güvenli olmayan serileştirme
 
-- Kanıt tarafından gizlenmiş olsalar bile, özel witness/devre baytlarını **güvenilmeyen saldırgan girdisi** olarak değerlendirin.
-- Baytlar önceden, başka bir yolla doğrulanmadıkça `rkyv::access_unchecked` gibi denetimsiz yardımcılarla serileştirmelerini çözmekten kaçının.
-- Güvenilmeyen serileştirilmiş verilerden yüklenen enum ayırt edicileri, göreli işaretçiler, uzunluklar ve dizinler; kontrol akışını veya bellek erişimini etkilemeden önce doğrulanmalıdır.
+- Kanıt tarafından gizlenmiş olsalar bile özel witness/devre baytlarını **güvenilmeyen saldırgan girdisi** olarak ele alın.
+- Baytlar daha önce başka bir yolla doğrulanmadıysa `rkyv::access_unchecked` gibi denetimsiz yardımcılarla serileştirmeyi açmayın.
+- Güvenilmeyen serileştirilmiş verilerden yüklenen enum ayıraçları, göreli işaretçiler, uzunluklar ve dizinler; kontrol akışını veya bellek erişimini etkilemeden önce doğrulanmalıdır.
 
-Pratik denetim kalıbı:
+Uygulamalı denetim kalıbı:
 
 ```rust
 let private_circuit_bytes = sp1_zkvm::io::read_vec();
@@ -227,30 +227,30 @@ let ops = unsafe {
 };
 ```
 
-Bir alan `op.kind` gibi bir enum ise ve saldırgan **aralık dışı bir discriminant** enjekte edebiliyorsa, bu değer üzerindeki sonraki her `match` şüpheli hâle gelir.
+`op.kind` gibi bir alan enum ise ve saldırgan **aralık dışı bir discriminant** enjekte edebiliyorsa, bu değer üzerindeki sonraki her `match` şüpheli hâle gelir.
 
-### Jump-table / UB bypass
+### Jump-table / UB denetimini atlatma
 
-Rust büyük bir `match` ifadesini **jump table** olarak derliyorsa, geçersiz bir enum discriminant’ı **tanımsız kontrol akışına** yol açabilir. Tehlikeli bir örüntü şöyledir:<sup>[[7]](#references)[[9]](#references)</sup>
+Rust büyük bir `match` ifadesini **jump table**'a dönüştürürse, geçersiz bir enum discriminant’ı **tanımsız kontrol akışına** yol açabilir. Tehlikeli bir örüntü:<sup>[[7]](#references)[[9]](#references)</sup>
 
 1. Bir `match`, **güvenlik açısından kritik sayaçları/kısıtlamaları** günceller.
-2. İkinci bir `match`, **gerçek talimat semantiğini** uygular.
-3. Aralık dışı bir discriminant, ilk jump table’ın sınırlarının ötesinde indeksleme yaparak ikinci tabloyla ilişkili koda ulaşır.
+2. İkinci bir `match`, **gerçek komut semantiğini** uygular.
+3. Aralık dışı bir discriminant ilk jump table'ın dışındaki bir indekse karşılık gelir ve ikinci jump table'la ilişkili bir koda atlar.
 
-Sonuç: İşlem yine de yürütülür, ancak muhasebe yolu atlanır. Bir zkVM’de bu durum, daha az gate, daha az maliyetli işlem veya sınırlandırılmış diğer kaynakların olduğundan az gösterildiği imkânsız metrikleri bildiren sahte proof’lar oluşturabilir.
+Sonuç: İşlem yine yürütülür, ancak muhasebe yolu atlanır. Bir zkVM'de bu, imkânsız metrikler bildiren sahte kanıtlar üretebilir; örneğin daha az gate, daha az maliyetli işlem veya diğer kaynak sınırlarının yanlış bildirilmesi.
 
 İnceleme kontrol listesi:
 
-- Witness/private input’tan deserialize edilen, saldırganın kontrol ettiği enum’ları arayın.
+- Witness/özel girdiden deserialize edilen, saldırganın kontrolündeki enum değerlerini arayın.
 - Aynı opcode/kind alanı üzerinde tekrarlanan `match` ifadelerini inceleyin.
-- `unsafe` + denetlenmemiş deserialization + büyük opcode dispatch birleşimini yüksek riskli kabul edin.
-- Gerektiğinde derlenmiş binary’yi reverse engineer edin; jump-table yerleşimi kaynak koddan daha önemli olabilir.
+- `unsafe` + denetimsiz deserialization + büyük opcode dispatch birleşimini yüksek riskli kabul edin.
+- Gerektiğinde derlenmiş binary üzerinde tersine mühendislik yapın; jump table düzeni, kaynak koddan daha önemli olabilir.
 
-### Reversible/specialized interpreter’larda eksik semantik kısıtlamalar
+### Tersinir/özelleştirilmiş yorumlayıcılarda eksik semantik kısıtlamalar
 
-Yalnızca bellek güvenliğini doğrulamayın; proof’un uygulaması gereken **semantik kuralları** da doğrulayın.
+Yalnızca bellek güvenliğini doğrulamayın; kanıtın uygulaması gereken **semantik kuralları** da doğrulayın.
 
-Reversible/quantum-like talimat kümelerinde, birbirinden farklı olması gereken operand’ların gerçekten farklı olmasının kısıtlandığından emin olun. Şöyle uygulanan Toffoli/CCX benzeri bir işlem:<sup>[[7]](#references)[[8]](#references)</sup>
+Tersinir/kuantum benzeri komut kümelerinde, birbirinden farklı olması gereken operandların gerçekten farklı olmasını sağlayan kısıtlamalar bulunduğundan emin olun. Şu şekilde uygulanmış Toffoli/CCX benzeri bir işlem:<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```rust
 let v = cond & self.qubit(op.q_control1) & self.qubit(op.q_control2);
@@ -263,21 +263,21 @@ konuk reddetmezse güvensiz hale gelir:
 op.q_control1 == op.q_control2 == op.q_target
 ```
 
-Bu durumda geçiş şu hale indirgenir:
+Bu durumda geçiş şu hale gelir:
 
 ```text
 q = q ^ (q & q) = 0
 ```
 
-This, **deterministik bir reset primitive’i** oluşturur; geri döndürülebilirlik varsayımlarını bozar ve amaçlanmayan hesaplamaların daha düşük maliyetle yapılmasını sağlar. Kaynak kullanımını doğrulayan proof sistemlerinde bu, saldırganların işlevsel kontrolleri geçerken doğrulayıcının uygulandığına inandığı maliyet modelini atlatmasına olanak tanıyabilir.
+Bu, **deterministik bir sıfırlama primitive'i** oluşturur; tersinirlik varsayımlarını bozar ve amaçlanmayan hesaplamaların daha düşük maliyetle yapılmasını sağlar. Kaynak kullanımını doğrulayan proof sistemlerinde saldırganların, doğrulayıcının uygulandığını sandığı maliyet modelini atlatırken işlevsel kontrolleri geçmesini sağlayabilir.
 
-### ZK sistemlerinde neler test edilmeli
+### ZK sistemlerinde test edilmesi gerekenler
 
-- Tüm guest parser’ları hatalı witness/private-input kodlamalarıyla fuzz testine tabi tutun.
-- Opcode dispatch işleminden önce enum aralığının doğrulandığını kontrol edin.
-- Operand aliasing ve diğer geçersiz talimat biçimleri için anlamsal kontroller ekleyin.
-- Bildirilen/genel sayaçları bağımsız bir referans uygulamayla karşılaştırın.
-- Guest programı hatalıysa geçerli bir proof’un **yanlış ifadeyi** kanıtlayabileceğini unutmayın.
+- Tüm guest parser'ları hatalı witness/private-input kodlamalarıyla fuzz edin.
+- Opcode dispatch işleminden önce enum aralıklarının doğrulandığından emin olun.
+- Operand aliasing ve diğer geçersiz instruction biçimleri için anlamsal kontroller ekleyin.
+- Bildirilen/public sayaçları bağımsız bir referans uygulamasıyla karşılaştırın.
+- Guest program hatalıysa geçerli bir proof'un yine de **yanlış bir ifadeyi** kanıtlayabileceğini unutmayın.
 
 ## Duruma Bağlı Yetkilendirme
 
@@ -287,13 +287,13 @@ state-divergence-default-value-authorization-bypasses.md
 
 ## DeFi/AMM Exploitation
 
-DEX’lerin ve AMM’lerin pratikte istismar edilmesini (Uniswap v4 hooks, yuvarlama/hassasiyet suistimali, flash loan ile güçlendirilmiş eşik aşan swap’ler) araştırıyorsanız şuraya göz atın:
+DEX ve AMM'lerin pratikte nasıl exploit edildiğini araştırıyorsanız (Uniswap v4 hooks, yuvarlama/hassasiyet suistimali, flash loan ile güçlendirilmiş eşik aşan swap'ler), şuraya bakın:
 
 {{#ref}}
 defi-amm-hook-precision.md
 {{#endref}}
 
-Sanal bakiyeleri önbelleğe alan ve `supply == 0` olduğunda zehirlenebilen çok varlıklı ağırlıklı havuzlar için şunu inceleyin:
+Sanal bakiyeleri önbelleğe alan ve `supply == 0` olduğunda zehirlenebilen çok varlıklı weighted pool'lar için şunu inceleyin:
 
 {{#ref}}
 defi-amm-virtual-balance-cache-exploitation.md
@@ -302,12 +302,12 @@ defi-amm-virtual-balance-cache-exploitation.md
 ## References
 
 - [1] [Proof of stake - Wikipedia](https://en.wikipedia.org/wiki/Proof_of_stake)
-- [2] [Açık Anahtar ve Özel Anahtar Açıklaması - Mycryptopedia](https://www.mycryptopedia.com/public-key-private-key-explained/)
+- [2] [Public Key & Private Key Açıklaması - Mycryptopedia](https://www.mycryptopedia.com/public-key-private-key-explained/)
 - [3] [Çoklu imzalı işlemler nedir? - Bitcoin Stack Exchange](https://bitcoin.stackexchange.com/questions/3718/what-are-multi-signature-transactions)
 - [4] [İşlemler | ethereum.org](https://ethereum.org/en/developers/docs/transactions/)
 - [5] [Gas ve ücretler | ethereum.org](https://ethereum.org/en/developers/docs/gas/)
 - [6] [Gizlilik - Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy#Forced_address_reuse)
-- [7] [Trail of Bits - Google’ın kuantum kriptanalizine yönelik zero-knowledge proof’unu alt ettik](https://blog.trailofbits.com/2026/04/17/we-beat-googles-zero-knowledge-proof-of-quantum-cryptanalysis/)
-- [8] [Kuantum Güvenlik Açıklarına Karşı Eliptik Eğri Kripto Para Birimlerinin Güvenceye Alınması: Kaynak Tahminleri ve Azaltımlar (yamalanmış sürüm)](https://arxiv.org/abs/2603.28846v2)
+- [7] [Trail of Bits - Google'ın kuantum kriptanaliz sıfır bilgi proof'unu yendik](https://blog.trailofbits.com/2026/04/17/we-beat-googles-zero-knowledge-proof-of-quantum-cryptanalysis/)
+- [8] [Eliptik Eğri Kripto Para Birimlerini Kuantum Açıklarına Karşı Güvence Altına Alma: Kaynak Tahminleri ve Önlemler (yamalanmış sürüm)](https://arxiv.org/abs/2603.28846v2)
 - [9] [Trail of Bits proof-of-concept deposu](https://github.com/trailofbits/quantum-zk-proof-poc)
 {{#include ../../banners/hacktricks-training.md}}
