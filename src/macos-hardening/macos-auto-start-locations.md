@@ -115,6 +115,33 @@ with tempfile.TemporaryDirectory(prefix="ht-watch-") as root:
 
 The local run printed `watch fired: True`, and `bootout` succeeded. `launchctl bootstrap` is used here only inside the isolated PoC; it is **not** needed for a job that is already loaded. To assess an existing job safely, read its plist and the resolved `ProgramArguments` path, then check whether the relevant executable or interpreted file is writable without altering it.
 
+#### Inline AppleScript LaunchAgent and Apple-like masquerading
+
+A user-writable LaunchAgent can keep the complete payload inside `ProgramArguments` by launching `/bin/sh -c` and passing an obfuscated script to `osascript -e`. Combining `RunAtLoad` with `KeepAlive` reruns it at login and after termination. This needs no administrator privileges when the plist is placed in `~/Library/LaunchAgents`.<sup>[[57]](#references)[[58]](#references)</sup>
+
+```xml
+<plist version="1.0"><dict>
+<key>Label</key><string>com.apple.systemupdate</string>
+<key>RunAtLoad</key><true/>
+<key>KeepAlive</key><true/>
+<key>ProgramArguments</key><array>
+<string>/bin/sh</string><string>-c</string>
+<string>osascript -e '[OBFUSCATED APPLESCRIPT]'</string>
+</array>
+<key>StandardOutPath</key><string>/dev/null</string>
+<key>StandardErrorPath</key><string>/dev/null</string>
+</dict></plist>
+```
+
+Apple-like names do not make a user agent legitimate. One observed pattern used the path `~/Library/LaunchAgents/com.apple.mdworker.plist` but the different label `com.apple.systemupdate`. Useful hunting signals are a filename/label mismatch, a long inline `osascript -e` argument, output redirected to `/dev/null`, and network or archiving utilities spawned below `osascript`.<sup>[[57]](#references)[[58]](#references)</sup>
+
+```bash
+plutil -p ~/Library/LaunchAgents/*.plist 2>/dev/null |
+  rg 'Label|ProgramArguments|osascript|/bin/(ba)?sh|/dev/null|RunAtLoad|KeepAlive'
+```
+
+For the adjacent stages, see [AppleScript execution and analysis](macos-security-and-privilege-escalation/macos-security-protections/macos-tcc/macos-tcc-bypasses/macos-apple-scripts.md), [macOS Keychain access](macos-red-teaming/macos-keychain.md), [ClickFix/pastejacking](../generic-methodologies-and-resources/phishing-methodology/clipboard-hijacking.md), and [malware analysis](../generic-methodologies-and-resources/basic-forensic-methodology/malware-analysis.md).
+
 There are cases where an **agent needs to be executed before the user logins**, these are called **PreLoginAgents**. For example, this is useful to provide assistive technology at login. They can be found also in `/Library/LaunchAgents`(see [**here**](https://github.com/HelmutJ/CocoaSampleCode/tree/master/PreLoginAgents) an example).
 
 > [!TIP]
@@ -2703,5 +2730,7 @@ Read-only observation on macOS 26: `/Library/DirectoryServices/PlugIns` and `/us
 - [54] [CoreMediaIO DAL minimal example (johnboiles)](https://github.com/johnboiles/coremediaio-dal-minimal-example)
 - [55] [Sploitlight: Analyzing a Spotlight-based macOS TCC vulnerability (Microsoft)](https://www.microsoft.com/en-us/security/blog/2025/07/28/sploitlight-analyzing-a-spotlight-based-macos-tcc-vulnerability/)
 - [56] [Python `site` module documentation (.pth / usercustomize / sitecustomize)](https://docs.python.org/3/library/site.html)
+- [57] [Catching Mac OS stealers in the wild — cmd + R(esearch)](https://cmdresearch.bearblog.dev/catching-mac-os-stealers-in-the-wild/)
+- [58] [Catching macOS Stealers in the Wild — Objective-See](https://objective-see.org/blog/blog_0x88.html)
 
 {{#include ../banners/hacktricks-training.md}}
