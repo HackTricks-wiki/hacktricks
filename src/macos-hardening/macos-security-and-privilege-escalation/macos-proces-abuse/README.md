@@ -1,151 +1,155 @@
-# macOS Process Abuse
+# macOS Süreç İstismarı
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Processes Basic Information
+## Süreçler Hakkında Temel Bilgiler
 
-Bir process, çalışan bir executable'ın instance'ıdır; ancak process'ler code çalıştırmaz, bunu thread'ler yapar. Bu nedenle **process'ler, çalışan thread'ler için yalnızca container'lardır** ve memory, descriptor, port, permission gibi kaynakları sağlar.
+Bir süreç, çalışan bir yürütülebilir dosyanın örneğidir. Ancak süreçler kod çalıştırmaz; kodu thread'ler çalıştırır. Dolayısıyla **süreçler, bellek, tanımlayıcılar, portlar, izinler... sağlayan thread kapsayıcılarından ibarettir**.
 
-Geleneksel olarak process'ler, **`fork`** çağrısı yapılarak diğer process'lerin içinde başlatılırdı (PID 1 hariç). Bu çağrı mevcut process'in birebir kopyasını oluşturur ve ardından **child process** genellikle yeni executable'ı yükleyip çalıştırmak için **`execve`** çağrısı yapardı. Daha sonra bu process'i herhangi bir memory kopyalama işlemi olmadan hızlandırmak için **`vfork`** kullanıma sunuldu.\
-Ardından **`posix_spawn`**, **`vfork`** ve **`execve`** işlemlerini tek bir çağrıda birleştirerek ve flag'leri kabul ederek kullanıma sunuldu:
+Geleneksel olarak süreçler, **`fork`** çağrısıyla başka süreçlerin içinde başlatılırdı (PID 1 hariç). `fork`, mevcut sürecin birebir kopyasını oluştururdu; ardından **alt süreç** genellikle yeni yürütülebilir dosyayı yükleyip çalıştırmak için **`execve`** çağrısı yapardı. Daha sonra, bellek kopyalama işlemi olmadan bu süreci hızlandırmak için **`vfork`** kullanıma sunuldu.\
+Ardından **`posix_spawn`**, **`vfork`** ile **`execve`** işlevlerini tek bir çağrıda birleştirmek ve bayrakları kabul etmek üzere kullanıma sunuldu:
 
-- `POSIX_SPAWN_RESETIDS`: Effective id'leri real id'lere sıfırlar
-- `POSIX_SPAWN_SETPGROUP`: Process group affiliation'ını ayarlar
-- `POSUX_SPAWN_SETSIGDEF`: Signal default behaviour'ını ayarlar
-- `POSIX_SPAWN_SETSIGMASK`: Signal mask'ını ayarlar
-- `POSIX_SPAWN_SETEXEC`: Aynı process içinde Exec işlemi yapar (`execve` gibi, ancak daha fazla option ile)
-- `POSIX_SPAWN_START_SUSPENDED`: Suspended olarak başlatır
-- `_POSIX_SPAWN_DISABLE_ASLR`: ASLR olmadan başlatır
-- `_POSIX_SPAWN_NANO_ALLOCATOR:` libmalloc'ın Nano allocator'ını kullanır
-- `_POSIX_SPAWN_ALLOW_DATA_EXEC:` Data segment'lerinde `rwx` kullanımına izin verir
-- `POSIX_SPAWN_CLOEXEC_DEFAULT`: Varsayılan olarak exec(2) sırasında tüm file description'ları kapatır
-- `_POSIX_SPAWN_HIGH_BITS_ASLR:` ASLR slide'ın high bit'lerini randomize eder
+- `POSIX_SPAWN_RESETIDS`: Etkin kimlikleri gerçek kimliklere sıfırla
+- `POSIX_SPAWN_SETPGROUP`: Süreç grubu üyeliğini ayarla
+- `POSUX_SPAWN_SETSIGDEF`: Varsayılan sinyal davranışını ayarla
+- `POSIX_SPAWN_SETSIGMASK`: Sinyal maskesini ayarla
+- `POSIX_SPAWN_SETEXEC`: Aynı süreçte exec yap (`execve` gibi, ancak daha fazla seçenekle)
+- `POSIX_SPAWN_START_SUSPENDED`: Askıya alınmış durumda başlat
+- `_POSIX_SPAWN_DISABLE_ASLR`: ASLR olmadan başlat
+- `_POSIX_SPAWN_NANO_ALLOCATOR:` libmalloc'ın Nano allocator'ını kullan
+- `_POSIX_SPAWN_ALLOW_DATA_EXEC:` Veri segmentlerinde `rwx` iznine izin ver
+- `POSIX_SPAWN_CLOEXEC_DEFAULT`: Varsayılan olarak exec(2) sırasında tüm dosya tanımlayıcılarını kapat
+- `_POSIX_SPAWN_HIGH_BITS_ASLR:` ASLR kaydırmasının yüksek bitlerini rastgeleleştir
 
-Ayrıca `posix_spawn`, oluşturulan process'in özelliklerini kontrol eden **`posix_spawnattr`** ayarlarını ve file descriptor'ları değiştiren **`posix_spawn_file_actions`** girişlerini kabul eder.
+Ayrıca `posix_spawn`, oluşturulan sürecin özelliklerini denetleyen **`posix_spawnattr`** ayarlarını ve dosya tanımlayıcılarını değiştiren **`posix_spawn_file_actions`** girdilerini kabul eder.
 
-Bir process sonlandığında **return code'u parent process'e** (parent sonlandıysa yeni parent PID 1'dir) `SIGCHLD` signal'i ile gönderir. Parent'ın bu değeri `wait4()` veya `waitid()` çağrısıyla alması gerekir; bu gerçekleşene kadar child, hâlâ listelenen ancak resource tüketmeyen bir zombie state'inde kalır.
+Bir süreç sonlandığında, `SIGCHLD` sinyaliyle **dönüş kodunu üst sürece gönderir** (üst süreç sonlanmışsa yeni üst süreç PID 1 olur). Üst sürecin bu değeri almak için `wait4()` veya `waitid()` çağrısı yapması gerekir. Bu gerçekleşene kadar alt süreç, hâlâ listelenmesine rağmen kaynak tüketmediği zombi durumunda kalır.
 
-### PIDs
+### PID'ler
 
-PID'ler, yani process identifier'lar, benzersiz bir process'i tanımlar. XNU'da **PID'ler** 64-bit'tir, monotonik olarak artar ve (abuse'ları önlemek için) **asla wrap olmaz**.
+PID'ler, yani süreç tanımlayıcıları, benzersiz bir süreci tanımlar. XNU'da **PID'ler** **64 bittir**, monoton biçimde artar ve **asla başa sarmaz** (istismarları önlemek için).
 
-### Process Groups, Sessions & Coalations
+### Süreç Grupları, Oturumlar ve Koalisyonlar
 
-**Process'ler**, onları yönetmeyi kolaylaştırmak için **group'lar** içine yerleştirilebilir. Örneğin bir shell script'indeki command'lar aynı process group içinde olur; böylece örneğin kill kullanılarak **birlikte signal gönderilebilir**.\
-Process'leri **session'lar içinde group'lamak** da mümkündür. Bir process bir session başlattığında (`setsid(2)`), child process'ler kendi session'larını başlatmadıkları sürece bu session içine yerleştirilir.
+**Süreçler**, yönetimlerini kolaylaştırmak için **gruplara** yerleştirilebilir. Örneğin, bir kabuk betiğindeki komutlar aynı süreç grubunda olur; böylece örneğin `kill` kullanarak **hepsine birlikte sinyal göndermek** mümkün olur.\
+Süreçleri **oturumlarda gruplamak** da mümkündür. Bir süreç oturum başlattığında (`setsid(2)`), kendi oturumlarını başlatmadıkları sürece alt süreçler bu oturuma yerleştirilir.
 
-Coalition, Darwin'de process'leri group'lamanın başka bir yoludur. Bir process'in coalition'a katılması, pool resource'larına erişmesine, bir ledger'ı paylaşmasına veya Jetsam ile karşılaşmasına olanak tanır. Coalition'ların farklı rolleri vardır: Leader, XPC service, Extension.
+Koalisyon, Darwin'de süreçleri gruplamanın başka bir yoludur. Bir koalisyona katılan süreç, havuz kaynaklarına erişebilir, bir ledger'ı paylaşabilir veya Jetsam'e tabi olabilir. Koalisyonların farklı rolleri vardır: Leader, XPC service, Extension.
 
-### Credentials & Personae
+### Kimlik Bilgileri ve Personalar
 
-Her process, sistemdeki **privilege'larını tanımlayan** **credential'lara** sahiptir. Her process'in bir primary `uid`'si ve bir primary `gid`'si vardır (birden fazla group'a ait olabilir).\
-Binary `setuid/setgid` bit'ine sahipse user ve group id'sini değiştirmek de mümkündür.\
-**Yeni uid/gid'ler ayarlamak** için çeşitli function'lar vardır.
+Her süreç, sistemdeki **ayrıcalıklarını tanımlayan kimlik bilgilerine** sahiptir. Her sürecin bir birincil `uid` ve bir birincil `gid` değeri bulunur (ancak süreç birden fazla gruba üye olabilir).\
+İkili dosyada `setuid/setgid` biti varsa kullanıcı ve grup kimliklerini değiştirmek de mümkündür.\
+Yeni uid/gid değerleri **ayarlamak** için çeşitli işlevler vardır.
 
-**`persona`** syscall'ı alternatif bir **credential** set'i sağlar. Bir persona'yı benimsemek, onun uid, gid ve group membership'lerini **aynı anda** devralmak anlamına gelir. [**Source code**](https://github.com/apple/darwin-xnu/blob/main/bsd/sys/persona.h) içinde struct'ı bulmak mümkündür:
+**`persona`** sistem çağrısı, **alternatif** bir **kimlik bilgileri** kümesi sağlar. Bir persona'yı benimsemek, onun uid, gid ve grup üyeliklerini **aynı anda** üstlenir. [**Kaynak kodunda**](https://github.com/apple/darwin-xnu/blob/main/bsd/sys/persona.h) şu yapıyı bulmak mümkündür:
+
 ```c
 struct kpersona_info { uint32_t persona_info_version;
-uid_t    persona_id; /* overlaps with UID */
-int      persona_type;
-gid_t    persona_gid;
-uint32_t persona_ngroups;
-gid_t    persona_groups[NGROUPS];
-uid_t    persona_gmuid;
-char     persona_name[MAXLOGNAME + 1];
+    uid_t    persona_id; /* overlaps with UID */
+    int      persona_type;
+    gid_t    persona_gid;
+    uint32_t persona_ngroups;
+    gid_t    persona_groups[NGROUPS];
+    uid_t    persona_gmuid;
+    char     persona_name[MAXLOGNAME + 1];
 
-/* TODO: MAC policies?! */
+    /* TODO: MAC policies?! */
 }
 ```
-## Threads Temel Bilgileri
 
-1. **POSIX Threads (pthreads):** macOS, C/C++ için standart bir threading API'sinin parçası olan POSIX thread'lerini (`pthreads`) destekler. macOS'taki pthreads uygulaması, herkese açık `libpthread` projesinden gelen `/usr/lib/system/libsystem_pthread.dylib` içinde bulunur. Bu kütüphane, thread'leri oluşturmak ve yönetmek için gerekli işlevleri sağlar.
-2. **Thread Oluşturma:** Yeni thread'ler oluşturmak için `pthread_create()` işlevi kullanılır. Bu işlev dahili olarak, XNU kernel'ine (macOS'un temel aldığı kernel) özgü daha düşük seviyeli bir system call olan `bsdthread_create()` işlevini çağırır. Bu system call, scheduling policy'leri ve stack size da dahil olmak üzere thread davranışını belirleyen `pthread_attr`'dan (attributes) türetilen çeşitli flag'leri alır.
-- **Varsayılan Stack Size:** Yeni thread'ler için varsayılan stack size 512 KB'dir. Bu değer tipik işlemler için yeterlidir, ancak daha fazla veya daha az alana ihtiyaç duyulması halinde thread attributes aracılığıyla ayarlanabilir.
-3. **Thread Initialization:** `__pthread_init()` işlevi, thread kurulumu sırasında kritik bir rol oynar ve stack'in konumu ile size bilgilerini içerebilen environment variable'ları ayrıştırmak için `env[]` argümanını kullanır.
+## Threads Hakkında Temel Bilgiler
 
-#### macOS'ta Thread Termination
+1. **POSIX Threads (pthreads):** macOS, C/C++ için standart bir thread API'sinin parçası olan POSIX threads'ü (`pthreads`) destekler. macOS'taki pthreads uygulaması, herkese açık `libpthread` projesinden gelen `/usr/lib/system/libsystem_pthread.dylib` içinde bulunur. Bu kütüphane, thread'leri oluşturmak ve yönetmek için gerekli işlevleri sağlar.
+2. **Thread Oluşturma:** Yeni thread'ler oluşturmak için `pthread_create()` işlevi kullanılır. Bu işlev, dahili olarak `bsdthread_create()` işlevini çağırır. Bu, XNU kernel'ine (macOS'un temel aldığı kernel) özgü daha düşük seviyeli bir sistem çağrısıdır. Sistem çağrısı, thread davranışını belirleyen ve zamanlama politikalarıyla stack boyutunu da içeren `pthread_attr` (öznitelikler) üzerinden alınan çeşitli flag'leri kullanır.
+   - **Varsayılan Stack Boyutu:** Yeni thread'ler için varsayılan stack boyutu 512 KB'tır. Bu, tipik işlemler için yeterlidir ancak daha fazla ya da daha az alana ihtiyaç duyulursa thread öznitelikleri aracılığıyla ayarlanabilir.
+3. **Thread Başlatma:** `__pthread_init()` işlevi, thread kurulumu sırasında önemli bir rol oynar. Stack'in konumu ve boyutuyla ilgili ayrıntıları içerebilen ortam değişkenlerini ayrıştırmak için `env[]` argümanını kullanır.
 
-1. **Thread'lerden Çıkış:** Thread'ler genellikle `pthread_exit()` çağrılarak sonlandırılır. Bu işlev, bir thread'in gerekli temizleme işlemlerini gerçekleştirerek düzgün şekilde çıkmasını ve herhangi bir joiner'a dönüş değeri göndermesini sağlar.
-2. **Thread Cleanup:** `pthread_exit()` çağrıldığında, ilişkili tüm thread yapılarını kaldıran `pthread_terminate()` işlevi çağrılır. Bu işlev Mach thread port'larını serbest bırakır (Mach, XNU kernel'indeki iletişim alt sistemidir) ve thread ile ilişkili kernel seviyesindeki yapıları kaldıran bir syscall olan `bsdthread_terminate` işlevini çağırır.
+#### macOS'ta Thread Sonlandırma
 
-#### Synchronization Mechanisms
+1. **Thread'lerden Çıkış:** Thread'ler genellikle `pthread_exit()` çağrılarak sonlandırılır. Bu işlev, bir thread'in gerekli temizleme işlemlerini yaparak düzgün biçimde çıkmasını ve bir dönüş değerini bekleyen thread'lere göndermesini sağlar.
+2. **Thread Temizleme:** `pthread_exit()` çağrıldığında, ilgili tüm thread yapılarını kaldıran `pthread_terminate()` işlevi çağrılır. Bu işlev, Mach thread portlarını (Mach, XNU kernel'indeki iletişim alt sistemidir) serbest bırakır ve thread ile ilişkili kernel düzeyindeki yapıları kaldıran bir sistem çağrısı olan `bsdthread_terminate` işlevini çağırır.
 
-Paylaşılan kaynaklara erişimi yönetmek ve race condition'ları önlemek için macOS çeşitli synchronization primitive'leri sağlar. Bunlar, data integrity ve system stability sağlamak amacıyla multi-threading ortamlarında kritik öneme sahiptir:
+#### Senkronizasyon Mekanizmaları
+
+Paylaşılan kaynaklara erişimi yönetmek ve race condition'ları önlemek için macOS çeşitli senkronizasyon ilkelleri sağlar. Bunlar, veri bütünlüğünü ve sistem kararlılığını sağlamak açısından çok thread'li ortamlarda kritik öneme sahiptir:
 
 1. **Mutex'ler:**
-- **Regular Mutex (Signature: 0x4D555458):** 60 byte memory footprint'e sahip standart mutex (mutex için 56 byte ve signature için 4 byte).
-- **Fast Mutex (Signature: 0x4d55545A):** Regular mutex'e benzer, ancak daha hızlı işlemler için optimize edilmiştir ve boyutu yine 60 byte'tır.
-2. **Condition Variables:**
-- Belirli condition'ların gerçekleşmesini beklemek için kullanılır; boyutu 44 byte'tır (40 byte artı 4 byte signature).
-- **Condition Variable Attributes (Signature: 0x434e4441):** 12 byte boyutundaki condition variable'lar için configuration attributes.
-3. **Once Variable (Signature: 0x4f4e4345):**
-- Bir initialization code parçasının yalnızca bir kez çalıştırılmasını sağlar. Boyutu 12 byte'tır.
-4. **Read-Write Locks:**
-- Birden fazla reader'a veya aynı anda tek bir writer'a izin vererek paylaşılan data'ya verimli erişim sağlar.
-- **Read Write Lock (Signature: 0x52574c4b):** Boyutu 196 byte'tır.
-- **Read Write Lock Attributes (Signature: 0x52574c41):** Read-write lock'lar için 20 byte boyutundaki attributes.
+   - **Normal Mutex (İmza: 0x4D555458):** Bellekte 60 bayt yer kaplayan standart mutex (mutex için 56 bayt, imza için 4 bayt).
+   - **Fast Mutex (İmza: 0x4d55545A):** Normal mutex'e benzer ancak daha hızlı işlemler için optimize edilmiştir; boyutu yine 60 bayttır.
+2. **Condition Variable'lar:**
+   - Belirli koşulların gerçekleşmesini beklemek için kullanılır; boyutu 44 bayttır (40 bayt ve 4 baytlık imza).
+   - **Condition Variable Öznitelikleri (İmza: 0x434e4441):** Condition variable'lar için 12 bayt boyutundaki yapılandırma öznitelikleri.
+3. **Once Variable (İmza: 0x4f4e4345):**
+   - Bir başlatma kodu parçasının yalnızca bir kez çalıştırılmasını sağlar. Boyutu 12 bayttır.
+4. **Read-Write Lock'lar:**
+   - Paylaşılan verilere verimli erişim sağlayarak aynı anda birden fazla okuyucuya ya da tek bir yazıcıya izin verir.
+   - **Read Write Lock (İmza: 0x52574c4b):** Boyutu 196 bayttır.
+   - **Read Write Lock Öznitelikleri (İmza: 0x52574c41):** Read-write lock'lar için 20 bayt boyutundaki öznitelikler.
 
 > [!TIP]
-> Bu object'lerin son 4 byte'ı overflow'ları tespit etmek için kullanılır.
+> Bu nesnelerin son 4 baytı taşmaları tespit etmek için kullanılır.
 
 ### Thread Local Variables (TLV)
 
-Mach-O dosyaları (macOS'taki executable'ların formatı) bağlamında **Thread Local Variables (TLV)**, multi-threaded bir application'daki **her thread'e** özgü variable'ları tanımlamak için kullanılır. Bu, her thread'in bir variable'ın kendi ayrı instance'ına sahip olmasını sağlar ve mutex'ler gibi açık synchronization mechanism'larına ihtiyaç duymadan conflict'leri önlemek ve data integrity'yi korumak için bir yol sunar.
+Mach-O dosyaları (macOS'taki yürütülebilir dosya biçimi) bağlamında **Thread Local Variables (TLV)**, çok thread'li bir uygulamadaki **her thread'e özgü** değişkenleri tanımlamak için kullanılır. Böylece her thread'in bir değişkene ait kendine özgü bir örneği olur; bu da mutex gibi açık senkronizasyon mekanizmalarına ihtiyaç duymadan çakışmaları önlemenin ve veri bütünlüğünü korumanın bir yolunu sağlar.
 
-C ve ilgili dillerde, **`__thread`** keyword'ünü kullanarak thread-local variable tanımlayabilirsiniz. Örneğinizde şu şekilde çalışır:
+C ve ilgili dillerde, **`__thread`** anahtar sözcüğünü kullanarak thread-local bir değişken tanımlayabilirsiniz. Örneğinizde şöyle çalışır:
+
 ```c
 cCopy code__thread int tlv_var;
 
 void main (int argc, char **argv){
-tlv_var = 10;
+    tlv_var = 10;
 }
 ```
-Bu snippet, `tlv_var` değişkenini thread-local bir değişken olarak tanımlar. Bu kodu çalıştıran her thread kendi `tlv_var` değişkenine sahip olur ve bir thread'in `tlv_var` üzerinde yaptığı değişiklikler başka bir thread'deki `tlv_var` değişkenini etkilemez.
 
-Mach-O binary içinde thread-local değişkenlerle ilgili veriler belirli section'larda düzenlenir:
+Bu snippet, `tlv_var`'ı thread-local bir değişken olarak tanımlar. Bu kodu çalıştıran her thread'in kendine ait bir `tlv_var` değişkeni olur ve bir thread'in `tlv_var` üzerinde yaptığı değişiklikler başka bir thread'deki `tlv_var` değişkenini etkilemez.
 
-- **`__DATA.__thread_vars`**: Bu section, thread-local değişkenlerin türleri ve initialization durumu gibi metadata bilgilerini içerir.
-- **`__DATA.__thread_bss`**: Bu section, açıkça initialize edilmemiş thread-local değişkenler için kullanılır. Sıfırla initialize edilen veriler için ayrılmış memory'nin bir parçasıdır.
+Mach-O binary dosyasında thread-local değişkenlerle ilgili veriler belirli bölümlerde düzenlenir:
 
-Mach-O ayrıca thread sonlandığında thread-local değişkenleri yönetmek için **`tlv_atexit`** adlı özel bir API sağlar. Bu API, bir thread sonlandığında thread-local verileri temizleyen özel function'lar olan **destructor**'ları **register** etmenize olanak tanır.
+- **`__DATA.__thread_vars`**: Bu bölüm, thread-local değişkenlerin türleri ve başlatılma durumu gibi metadata bilgilerini içerir.
+- **`__DATA.__thread_bss`**: Bu bölüm, açıkça başlatılmamış thread-local değişkenler için kullanılır. Bellekte sıfırla başlatılan veriler için ayrılan bir alanın parçasıdır.
 
-### Threading Priorities
+Mach-O ayrıca, bir thread sona erdiğinde thread-local değişkenleri yönetmek için **`tlv_atexit`** adlı özel bir API sağlar. Bu API, bir thread sonlandığında thread-local verileri temizleyen özel işlevler olan **destructor'ları kaydetmenize** olanak tanır.
 
-Thread priority'lerini anlamak, operating system'in hangi thread'leri ne zaman çalıştıracağına nasıl karar verdiğine bakmayı gerektirir. Bu karar, her thread'e atanan priority level'dan etkilenir. macOS ve Unix-like sistemlerde bu işlem `nice`, `renice` ve Quality of Service (QoS) class'ları gibi kavramlar kullanılarak gerçekleştirilir.
+### Thread Öncelikleri
 
-#### Nice and Renice
+Thread önceliklerini anlamak, işletim sisteminin hangi thread'leri ne zaman çalıştıracağına nasıl karar verdiğine bakmayı gerektirir. Bu karar, her thread'e atanan öncelik düzeyinden etkilenir. macOS ve Unix benzeri sistemlerde bu işlem `nice`, `renice` ve Quality of Service (QoS) sınıfları gibi kavramlarla gerçekleştirilir.
+
+#### Nice ve Renice
 
 1. **Nice:**
-- Bir process'in `nice` değeri, priority'sini etkileyen bir sayıdır. Her process, -20 (en yüksek priority) ile 19 (en düşük priority) arasında bir nice değerine sahiptir. Bir process oluşturulduğunda varsayılan nice değeri genellikle 0'dır.
-- Daha düşük bir nice değeri (-20'ye daha yakın), bir process'i daha "selfish" hale getirir ve daha yüksek nice değerlerine sahip diğer process'lere kıyasla daha fazla CPU zamanı almasını sağlar.
+   - Bir sürecin `nice` değeri, önceliğini etkileyen bir sayıdır. Her sürecin -20 (en yüksek öncelik) ile 19 (en düşük öncelik) arasında bir nice değeri vardır. Bir süreç oluşturulduğunda varsayılan nice değeri genellikle 0'dır.
+   - Daha düşük bir nice değeri (-20'ye daha yakın) süreci daha "bencil" hale getirir ve nice değeri daha yüksek olan diğer süreçlere kıyasla daha fazla CPU zamanı almasını sağlar.
 2. **Renice:**
-- `renice`, hâlihazırda çalışan bir process'in nice değerini değiştirmek için kullanılan bir command'dir. Bu, yeni nice değerlerine göre CPU zamanı tahsisini artırmak veya azaltmak amacıyla process'lerin priority'sini dinamik olarak ayarlamak için kullanılabilir.
-- Örneğin, bir process'in geçici olarak daha fazla CPU kaynağına ihtiyacı varsa, `renice` kullanarak nice değerini düşürebilirsiniz.
+   - `renice`, hâlihazırda çalışan bir sürecin nice değerini değiştirmek için kullanılan bir komuttur. Yeni nice değerlerine göre süreçlerin CPU zamanı tahsisini dinamik olarak artırmak veya azaltmak için kullanılabilir.
+   - Örneğin, bir süreç geçici olarak daha fazla CPU kaynağına ihtiyaç duyarsa `renice` kullanarak nice değerini düşürebilirsiniz.
 
-#### Quality of Service (QoS) Classes
+#### Quality of Service (QoS) Sınıfları
 
-QoS class'ları, özellikle **Grand Central Dispatch (GCD)** desteğine sahip macOS gibi sistemlerde thread priority'lerini yönetmek için daha modern bir yaklaşımdır. QoS class'ları, developer'ların işleri önem veya aciliyetlerine göre farklı level'lara **categorize** etmelerini sağlar. macOS, bu QoS class'larına göre thread prioritization işlemini otomatik olarak yönetir:
+QoS sınıfları, özellikle **Grand Central Dispatch (GCD)** desteği sunan macOS gibi sistemlerde, thread önceliklerini yönetmeye yönelik daha modern bir yaklaşımdır. QoS sınıfları, geliştiricilerin işleri önem veya aciliyet düzeylerine göre farklı kategorilere **ayırmasına** olanak tanır. macOS, bu QoS sınıflarına göre thread önceliklerini otomatik olarak yönetir:
 
 1. **User Interactive:**
-- Bu class, hâlihazırda user ile etkileşim hâlinde olan veya iyi bir user experience sağlamak için anında sonuç gerektiren task'ler içindir. Interface'in responsive kalması için bu task'lere en yüksek priority verilir (ör. animation'lar veya event handling).
+   - Bu sınıf, kullanıcıyla doğrudan etkileşim hâlinde olan veya iyi bir kullanıcı deneyimi sağlamak için anında sonuç gerektiren görevler içindir. Arayüzün duyarlı kalmasını sağlamak için bu görevlere en yüksek öncelik verilir (ör. animasyonlar veya olay işleme).
 2. **User Initiated:**
-- Bir document açmak veya computation gerektiren bir button'a tıklamak gibi user'ın başlattığı ve anında sonuç beklediği task'lerdir. Bunlar yüksek priority'ye sahiptir ancak user interactive seviyesinin altındadır.
+   - Belge açmak veya hesaplama gerektiren bir düğmeye tıklamak gibi, kullanıcının başlattığı ve hemen sonuç beklediği görevler içindir. Bunlar yüksek önceliklidir ancak User Interactive sınıfının altındadır.
 3. **Utility:**
-- Bunlar uzun süren ve genellikle bir progress indicator gösteren task'lerdir (ör. file download etme veya data import etme). User-initiated task'lerden daha düşük priority'ye sahiptirler ve hemen tamamlanmaları gerekmez.
+   - Bunlar uzun süren ve genellikle ilerleme göstergesi sunan görevlerdir (ör. dosya indirme, veri içe aktarma). Kullanıcı tarafından başlatılan görevlere kıyasla daha düşük önceliğe sahiptirler ve hemen tamamlanmaları gerekmez.
 4. **Background:**
-- Bu class, background'da çalışan ve user tarafından görünmeyen task'ler içindir. Indexing, syncing veya backup gibi task'ler buna örnektir. En düşük priority'ye ve system performance üzerinde minimum etkiye sahiptirler.
+   - Bu sınıf, arka planda çalışan ve kullanıcı tarafından görülmeyen görevler içindir. İndeksleme, eşitleme veya yedekleme gibi görevler bu sınıfa girebilir. En düşük önceliğe sahiptirler ve sistem performansına etkileri en azdır.
 
-QoS class'larını kullanan developer'ların kesin priority numaralarını yönetmesi gerekmez; bunun yerine task'in niteliğine odaklanabilirler ve system CPU kaynaklarını buna göre optimize eder.
+Geliştiriciler, QoS sınıflarını kullanarak kesin öncelik numaralarını yönetmek yerine görevin niteliğine odaklanabilir; sistem de CPU kaynaklarını buna göre optimize eder.
 
-Ayrıca scheduler'ın dikkate alacağı bir scheduling parameter set'i belirtmek için kullanılan farklı **thread scheduling policies** vardır. Bu işlem `thread_policy_[set/get]` kullanılarak yapılabilir. Bu, race condition attack'lerinde faydalı olabilir.
+Ayrıca, scheduler'ın dikkate alacağı bir dizi zamanlama parametresi belirlemek için farklı **thread scheduling policy**'ler bulunur. Bu, `thread_policy_[set/get]` kullanılarak yapılabilir. Bu, race condition saldırılarında işe yarayabilir.
 
-## macOS Process Abuse
+## macOS Süreçlerinin Kötüye Kullanımı
 
-macOS, **process'lerin etkileşime girmesi, iletişim kurması ve data paylaşması** için birçok mekanizma sağlar. Bu mekanizmalar normal system operation için gerekli olsa da attacker'lar bunları injection, code execution veya data access amacıyla abuse edebilir.
+macOS, **süreçlerin etkileşime girmesi, iletişim kurması ve veri paylaşması** için pek çok mekanizma sağlar. Bu mekanizmalar normal sistem işleyişi için gerekli olsa da saldırganlar bunları injection, code execution veya data access için kötüye kullanabilir.
 
 ### Library Injection
 
-Library Injection, attacker'ın **bir process'i malicious bir library yüklemeye zorladığı** bir technique'tir. Inject edildikten sonra library, hedef process'in context'inde çalışır ve attacker'a process ile aynı permission ve access seviyelerini sağlar.
+Library Injection, saldırganın **bir süreci kötü amaçlı bir library yüklemeye zorladığı** bir tekniktir. Library enjekte edildikten sonra hedef sürecin bağlamında çalışır ve saldırgana süreçle aynı izinleri ve erişimi sağlar.
 
 
 {{#ref}}
@@ -154,7 +158,7 @@ macos-library-injection/
 
 ### Function Hooking
 
-Function Hooking, bir software code içindeki **function call'larını** veya mesajları **intercept etmeyi** içerir. Function'ları hook'layarak attacker, bir process'in **davranışını değiştirebilir**, sensitive data'yı gözlemleyebilir veya execution flow'un kontrolünü ele geçirebilir.
+Function Hooking, yazılım kodundaki işlev çağrılarını veya mesajları **araya girerek yakalamayı** içerir. Saldırgan, işlevleri hook ederek bir sürecin davranışını **değiştirebilir**, hassas verileri gözlemleyebilir ve hatta yürütme akışını kontrol edebilir.
 
 
 {{#ref}}
@@ -163,7 +167,7 @@ macos-function-hooking.md
 
 ### Inter Process Communication
 
-Inter Process Communication (IPC), ayrı process'lerin **data paylaşmasını ve exchange etmesini** sağlayan farklı method'ları ifade eder. IPC birçok legitimate application için temel nitelikte olsa da process isolation'ı subvert etmek, sensitive information'ı leak etmek veya unauthorized action gerçekleştirmek amacıyla da misuse edilebilir.
+Inter Process Communication (IPC), ayrı süreçlerin **veri paylaşmak ve alışverişinde bulunmak** için kullandığı farklı yöntemleri ifade eder. IPC birçok meşru uygulamanın temelini oluştururken süreç yalıtımını bozmak, hassas bilgileri leak etmek veya yetkisiz eylemler gerçekleştirmek için de kötüye kullanılabilir.
 
 
 {{#ref}}
@@ -172,7 +176,7 @@ macos-ipc-inter-process-communication/
 
 ### Electron Applications Injection
 
-Belirli env variable'ları kullanarak çalıştırılan Electron application'ları process injection'a karşı vulnerable olabilir:
+Belirli env değişkenleriyle çalıştırılan Electron uygulamaları process injection'a karşı savunmasız olabilir:
 
 
 {{#ref}}
@@ -181,7 +185,7 @@ macos-electron-applications-injection.md
 
 ### Chromium Injection
 
-**man in the browser attack** gerçekleştirmek için `--load-extension` ve `--use-fake-ui-for-media-stream` flag'lerini kullanmak mümkündür; bu, keystroke'ları, traffic'i ve cookie'leri çalmaya, page'lere script inject etmeye olanak tanır...:
+`--load-extension` ve `--use-fake-ui-for-media-stream` flag'lerini kullanarak tuş vuruşlarını ve trafiği çalmaya, cookies'leri ele geçirmeye, sayfalara script enjekte etmeye izin veren bir **man in the browser attack** gerçekleştirmek mümkündür...:
 
 
 {{#ref}}
@@ -190,7 +194,7 @@ macos-chromium-injection.md
 
 ### Dirty NIB
 
-NIB file'ları bir application içindeki **user interface (UI) element'lerini** ve bunların etkileşimlerini **tanımlar**. Ancak arbitrary command'ler **execute edebilirler** ve bir **NIB file değiştirilirse**, **Gatekeeper zaten execute edilmiş bir application'ın yeniden execute edilmesini engellemez**. Bu nedenle arbitrary program'ları arbitrary command'ler execute ettirmek için kullanılabilirler:
+NIB dosyaları, bir uygulamadaki **user interface (UI) öğelerini** ve bunların etkileşimlerini **tanımlar**. Ancak **keyfi komutlar çalıştırabilirler** ve bir **NIB dosyası değiştirilmişse** Gatekeeper, daha önce çalıştırılmış bir uygulamanın yeniden çalıştırılmasını **engellemez**. Bu nedenle keyfi programlara keyfi komutlar çalıştırmak için kullanılabilirler:
 
 
 {{#ref}}
@@ -199,7 +203,7 @@ macos-dirty-nib.md
 
 ### Java Applications Injection
 
-Application başlamadan önce **`_JAVA_OPTIONS`**, **`JAVA_TOOL_OPTIONS`** veya **`JDK_JAVA_OPTIONS`** üzerinden JVM option'larını inject etmek ve bir Java veya native agent yüklemek mümkündür.
+Uygulama başlamadan önce bir Java veya native agent yüklemek için **`_JAVA_OPTIONS`**, **`JAVA_TOOL_OPTIONS`** veya **`JDK_JAVA_OPTIONS`** üzerinden JVM seçenekleri enjekte etmek mümkündür.
 
 
 {{#ref}}
@@ -208,7 +212,7 @@ macos-java-apps-injection.md
 
 ### Node.js Injection
 
-**`NODE_OPTIONS`**, `--require` (file) veya `--import data:text/javascript,…` (fileless, Node ≥ 20.6) aracılığıyla attacker JavaScript'ini preload eder; **`NODE_REPL_EXTERNAL_MODULE`** bir module'ü interactive REPL içine yükler ve **`ELECTRON_RUN_AS_NODE`**, bunların tamamını Electron binary'leri üzerinde yeniden etkinleştirir.
+**`NODE_OPTIONS`**, `--require` (file) veya `--import data:text/javascript,…` (fileless, Node ≥ 20.6) aracılığıyla saldırganın JavaScript kodunu önceden yükler; **`NODE_REPL_EXTERNAL_MODULE`** bir modülü etkileşimli bir REPL'e yükler ve **`ELECTRON_RUN_AS_NODE`** bu özelliklerin tümünü Electron binary'lerinde yeniden etkinleştirir.
 
 {{#ref}}
 macos-nodejs-applications-injection.md
@@ -216,7 +220,7 @@ macos-nodejs-applications-injection.md
 
 ### .Net Applications Injection
 
-`Main`'den önce **`DOTNET_STARTUP_HOOKS`** aracılığıyla .NET application'larına code inject etmek veya prerequisites mevcut olduğunda .NET debugging functionality'yi abuse etmek mümkündür.
+`Main` çalışmadan önce **`DOTNET_STARTUP_HOOKS`** aracılığıyla .NET uygulamalarına kod enjekte etmek veya gerekli ön koşullar mevcutken .NET debugging işlevselliğini kötüye kullanmak mümkündür.
 
 
 {{#ref}}
@@ -225,7 +229,7 @@ macos-.net-applications-injection.md
 
 ### Shell Injection
 
-Non-interactive Bash **`BASH_ENV`** dosyasını okur; interactive POSIX shell'leri **`ENV`** dosyasını okur; zsh **`$ZDOTDIR/.zshenv`** dosyasını okur; fish ise **`XDG_CONFIG_HOME`** veya **`XDG_DATA_DIRS`** altındaki configuration'ı okur. Bunların her biri, intended command'den önce controlled bir startup file execute edebilir. Bash ayrıca xtrace etkinleştirildiğinde (ör. inherited **`SHELLOPTS=xtrace`**) **`PS4`** içine yerleştirilmiş bir command substitution'ı çalıştırır:
+Etkileşimsiz Bash **`BASH_ENV`** dosyasını okur; etkileşimli POSIX shell'leri **`ENV`** dosyasını okur; zsh **`$ZDOTDIR/.zshenv`** dosyasını okur; fish ise **`XDG_CONFIG_HOME`** veya **`XDG_DATA_DIRS`** altındaki yapılandırmayı okur. Her biri, hedeflenen komuttan önce kontrol edilen bir startup dosyası çalıştırabilir. Bash ayrıca xtrace etkinleştirildiğinde (ör. devralınan **`SHELLOPTS=xtrace`** ile) **`PS4`** içine yerleştirilen bir command substitution'ı çalıştırır:
 
 {{#ref}}
 macos-bash-applications-injection.md
@@ -233,7 +237,7 @@ macos-bash-applications-injection.md
 
 ### PHP Injection
 
-**`PHPRC`** veya **`PHP_INI_SCAN_DIR`**, **`auto_prepend_file`** değeri target script'ten önce execute edilen controlled bir PHP configuration yükleyebilir.
+**`PHPRC`** veya **`PHP_INI_SCAN_DIR`**, **`auto_prepend_file`** yönergesi hedef script'ten önce çalışan, kontrol edilebilir bir PHP yapılandırma dosyasını yükleyebilir.
 
 {{#ref}}
 macos-php-applications-injection.md
@@ -241,7 +245,7 @@ macos-php-applications-injection.md
 
 ### Lua Injection
 
-Standalone Lua interpreter, target script'i process etmeden önce **`LUA_INIT`** (veya version-specific variant'ı) üzerinden code ya da bir `@file` execute eder.
+Bağımsız Lua interpreter'ı, hedef script'i işlemeden önce **`LUA_INIT`** (veya sürüme özel varyantı) içindeki kodu ya da `@file`'ı çalıştırır.
 
 {{#ref}}
 macos-lua-applications-injection.md
@@ -249,7 +253,7 @@ macos-lua-applications-injection.md
 
 ### R Injection
 
-**`R_PROFILE_USER`** ve **`R_PROFILE`**, R code içeren startup profile'larını redirect eder. **`R_DEFAULT_PACKAGES`** / **`R_SCRIPT_DEFAULT_PACKAGES`** ve bir R library path kullanılarak bunun yerine installed bir package otomatik olarak load edilebilir.
+**`R_PROFILE_USER`** ve **`R_PROFILE`**, R kodu içeren startup profile'larını farklı konumlara yönlendirir. **`R_DEFAULT_PACKAGES`** / **`R_SCRIPT_DEFAULT_PACKAGES`** ile bir R library path kullanılarak kurulu bir package'ın otomatik yüklenmesi de sağlanabilir.
 
 {{#ref}}
 macos-r-applications-injection.md
@@ -257,7 +261,7 @@ macos-r-applications-injection.md
 
 ### Julia Injection
 
-**`JULIA_DEPOT_PATH`**, `config/startup.jl` dosyası otomatik olarak execute edilen depot'u redirect eder.
+**`JULIA_DEPOT_PATH`**, `config/startup.jl` dosyasının otomatik çalıştırıldığı depot'u farklı bir konuma yönlendirir.
 
 {{#ref}}
 macos-julia-applications-injection.md
@@ -265,7 +269,7 @@ macos-julia-applications-injection.md
 
 ### Erlang and Elixir Injection
 
-**`ERL_AFLAGS`**, **`ERL_FLAGS`** veya **`ERL_ZFLAGS`**, payload file gerektirmeden bir Erlang VM **`-eval`** expression'ı inject edebilir; Elixir workload'ları genellikle aynı VM'i başlatır.
+**`ERL_AFLAGS`**, **`ERL_FLAGS`** veya **`ERL_ZFLAGS`**, payload file gerektirmeden bir Erlang VM **`-eval`** ifadesi enjekte edebilir; Elixir workload'ları genellikle aynı VM'i başlatır.
 
 {{#ref}}
 macos-erlang-elixir-applications-injection.md
@@ -273,7 +277,7 @@ macos-erlang-elixir-applications-injection.md
 
 ### GNU Octave Injection
 
-**`OCTAVE_SITE_INITFILE`** ve **`OCTAVE_VERSION_INITFILE`**, Octave startup script'lerini redirect eder.
+**`OCTAVE_SITE_INITFILE`** ve **`OCTAVE_VERSION_INITFILE`**, Octave startup script'lerini farklı konumlara yönlendirir.
 
 {{#ref}}
 macos-octave-applications-injection.md
@@ -281,7 +285,7 @@ macos-octave-applications-injection.md
 
 ### PowerShell Injection
 
-`pwsh` cross-platform bir .NET app olduğundan, çeşitli environment variable'lar command öncesi execution sağlar: **`XDG_CONFIG_HOME`**, startup sırasında çalışan profile script'lerini redirect eder; **`PSModulePath`**, module auto-loading işlemini hijack eder (yerleştirilmiş bir `.psm1`, import sırasında çalışır ve built-in cmdlet'leri shadow edebilir); .NET **`CORECLR_PROFILER`**/**`COR_PROFILER`** ve **`DOTNET_STARTUP_HOOKS`** variable'ları ise `Main`'den önce attacker code'unu process içine yükler.
+`pwsh` platformlar arası bir .NET uygulamasıdır; bu nedenle bazı env değişkenleri komuttan önce kod çalıştırılmasını sağlar: **`XDG_CONFIG_HOME`** başlangıçta çalışan profile script'lerini farklı konuma yönlendirir, **`PSModulePath`** module auto-loading'i ele geçirir (yerleştirilen bir `.psm1` import sırasında çalışır ve yerleşik cmdlet'leri gölgeleyebilir) ve .NET'in **`CORECLR_PROFILER`**/**`COR_PROFILER`** ile **`DOTNET_STARTUP_HOOKS`** değişkenleri, `Main` öncesinde saldırgan kodunu sürece yükler.
 
 {{#ref}}
 macos-powershell-applications-injection.md
@@ -289,7 +293,7 @@ macos-powershell-applications-injection.md
 
 ### Perl Injection
 
-Bir Perl script'inin aşağıdaki yöntemlerle arbitrary code execute etmesini sağlamak için farklı option'ları inceleyin:
+Bir Perl script'inin aşağıdaki yöntemlerle keyfi kod çalıştırmasını sağlayacak farklı seçenekleri inceleyin:
 
 
 {{#ref}}
@@ -298,7 +302,7 @@ macos-perl-applications-injection.md
 
 ### Ruby Injection
 
-Arbitrary script'lerin arbitrary code execute etmesini sağlamak için Ruby env variable'larını (**`RUBYOPT`**, **`RUBYLIB`**) abuse etmek de mümkündür:
+Keyfi script'lerin keyfi kod çalıştırmasını sağlamak için Ruby env değişkenlerini (**`RUBYOPT`**, **`RUBYLIB`**) kötüye kullanmak da mümkündür:
 
 
 {{#ref}}
@@ -307,9 +311,9 @@ macos-ruby-applications-injection.md
 
 ### Python Injection
 
-**`PYTHONWARNINGS`** ve **`BROWSER`** standard-library chain'i, warning-filter parsing sırasında bir command execute edebilir. File-backed alternative olarak **`PYTHONPATH`** üzerine `sitecustomize.py` yerleştirilir; böylece normal `site` initialization, target script'ten önce bunu import eder. **`PYTHONBREAKPOINT`**, code `breakpoint()`'a ulaştığında seçilen callable/module'ü çalıştırır. **`PYTHONSTARTUP`** gibi yalnızca interactive olan variable'ların uygulanabilirliği daha sınırlıdır.
+**`PYTHONWARNINGS`** ve **`BROWSER`** standard-library zinciri, warning-filter ayrıştırması sırasında bir komut çalıştırabilir. File-backed bir alternatif olarak `sitecustomize.py` dosyasını **`PYTHONPATH`** üzerine yerleştirebilirsiniz; böylece normal `site` başlatma işlemi, hedef script'ten önce bu dosyayı import eder. **`PYTHONBREAKPOINT`**, kod `breakpoint()` noktasına geldiğinde seçilen bir callable/module'ü çalıştırır. **`PYTHONSTARTUP`** gibi yalnızca etkileşimli kullanımda geçerli değişkenler daha dar bir kullanım alanına sahiptir.
 
-`pyinstaller` ile compile edilmiş executable'ların embedded python kullanarak çalışsalar bile bu environment variable'ları kullanmayacağını unutmayın.
+**`pyinstaller`** ile derlenen executable'ların, embedded python kullanarak çalışsalar bile bu env değişkenlerini kullanmayacağını unutmayın.
 
 {{#ref}}
 macos-python-applications-injection.md
@@ -317,36 +321,36 @@ macos-python-applications-injection.md
 
 ### Vim/Neovim Injection
 
-**`VIMINIT`** (ve fallback olarak **`EXINIT`**), normal startup sırasında Ex command'leri olarak execute edilir; bu nedenle controlled bir environment ile victim Vim/Neovim açtığında `:!cmd` / `:call system(...)` code execution sağlar:
+**`VIMINIT`** (ve onun `EXINIT` fallback'i), normal başlangıç sırasında Ex komutları olarak çalıştırılır. Bu nedenle kurban, kontrollü bir ortamda Vim/Neovim açtığında `:!cmd` / `:call system(...)` code execution sağlar:
 
 {{#ref}}
 macos-vim-applications-injection.md
 {{#endref}}
 
-Ayrı olarak Homebrew, Python'ı genellikle `/opt/homebrew` altında kurar; burada local `admin` group üyeleri launcher'ı değiştirebilir. Bu, environment-variable injection yerine writable-binary hijack'tir; exploitable olarak değerlendirmeden önce ownership ve ACL'leri doğrulayın.
+Ayrıca Homebrew, Python'ı genellikle `/opt/homebrew` altına yükler; yerel `admin` grubunun üyeleri burada launcher'ı değiştirebilir. Bu, env değişkeni injection'ı değil, yazılabilir bir binary'nin ele geçirilmesidir; istismar edilebilir kabul etmeden önce sahipliği ve ACL'leri doğrulayın.
 
 
 ## Detection
 
 ### Shield
 
-[**Shield**](https://github.com/theevilbit/Shield), process injection'ı detect edip block eden, open-source ve **EndpointSecurity** tabanlı bir application'dır. Endpoint Security üzerinden hangi signal'ların gözlemlenebilir olduğunu anlamak için iyi bir reference'tır; şu durumlarda alert üretir:<sup>[[1]](#references)</sup><sup>[[2]](#references)</sup>
+[**Shield**](https://github.com/theevilbit/Shield), process injection'ı algılayıp engelleyen, açık kaynaklı **EndpointSecurity** tabanlı bir uygulamadır. Endpoint Security üzerinden hangi sinyallerin gözlemlenebildiğini anlamak için iyi bir kaynaktır; çünkü aşağıdaki durumlarda uyarı verir:<sup>[[1]](#references)</sup><sup>[[2]](#references)</sup>
 
-- Process exec sırasında **injection environment variable'ları**: `DYLD_INSERT_LIBRARIES`, `CFNETWORK_LIBRARY_PATH`, `RAWCAMERA_BUNDLE_PATH` ve `ELECTRON_RUN_AS_NODE`.
-- **`task_for_pid`** call'ları — bir process'in başka bir process'in task port'unu istemesi; bu, o process'e injection yapmanın prerequisite'idir.
-- **Electron debugging argument'ları** — Electron app'ini debug mode'da başlatan ve herkesin app'e attach olup code çalıştırmasına izin veren `--inspect`, `--inspect-brk` ve `--remote-debugging-port`.<sup>[[3]](#references)</sup>
-- **Privilege level'lar arasında symlink/hardlink oluşturulması** — klasik "normal user olarak bir link yerleştirip privileged bir location'ı göstermesini sağlama" primitive'i. **Symlink'ler alert edilebilir ancak block edilemez**: EndpointSecurity, oluşturulmadan önce link destination'ını expose etmez.
+- Süreç exec işlemlerindeki **injection env değişkenleri**: `DYLD_INSERT_LIBRARIES`, `CFNETWORK_LIBRARY_PATH`, `RAWCAMERA_BUNDLE_PATH` ve `ELECTRON_RUN_AS_NODE`.
+- **`task_for_pid`** çağrıları — bir sürecin başka bir sürecin task port'unu istemesi; o sürece injection yapmak için bu gereklidir.
+- **Electron debugging argümanları** — `--inspect`, `--inspect-brk` ve `--remote-debugging-port`. Bunlar bir Electron uygulamasını debug mode'da başlatır ve herhangi birinin bağlanıp uygulamada kod çalıştırmasına olanak tanır.<sup>[[3]](#references)</sup>
+- **Ayrıcalık düzeyleri arasında symlink/hardlink oluşturulması** — "normal kullanıcı olarak bir link oluşturup onu ayrıcalıklı bir konuma yönlendirme" şeklindeki klasik yöntem. **Symlink'ler için uyarı verilebilir ancak engellenemez**: EndpointSecurity, oluşturulmadan önce link'in hedefini göstermez.
 
-### Calls made by other processes
+### Other Processes tarafından yapılan çağrılar
 
-[**Bu blog post'ta**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html), diğer **process'lerin bir process'e code inject ettiğini** tespit etmek ve ardından bu diğer process hakkında bilgi almak için **`task_name_for_pid`** function'ının nasıl kullanılabileceğini görebilirsiniz.<sup>[[4]](#references)</sup>
+[**Bu blog yazısında**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html), başka **bir sürece kod enjekte eden süreçler** hakkında bilgi almak ve ardından söz konusu süreç hakkında bilgi edinmek için **`task_name_for_pid`** işlevinin nasıl kullanılabileceğini bulabilirsiniz.<sup>[[4]](#references)</sup>
 
-Bu function'ı çağırmak için process'i çalıştıran user ile **aynı uid**'ye veya **root** yetkisine sahip olmanız gerekir (function, code inject etmenin bir yolunu değil, process hakkında bilgi döndürür).
+Bu işlevi çağırmak için süreci çalıştıranla **aynı uid**'ye veya **root** yetkisine sahip olmanız gerektiğini unutmayın (işlev, sürece injection yapmanın yolunu değil, süreç hakkındaki bilgileri döndürür).
 
 ## References
 
-- [1] [Shield — open source macOS process-injection detection (GitHub)](https://github.com/theevilbit/Shield)
+- [1] [Shield — açık kaynaklı macOS process-injection algılama aracı (GitHub)](https://github.com/theevilbit/Shield)
 - [2] [Apple Developer — EndpointSecurity framework](https://developer.apple.com/documentation/endpointsecurity)
-- [3] [Metnew - Why Electron apps can't store your secrets confidentially: --inspect option](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)
-- [4] [Scott Knight - Detecting task modifications](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html)
+- [3] [Metnew - Electron uygulamaları neden sırlarınızı gizli tutamaz: --inspect seçeneği](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)
+- [4] [Scott Knight - Task değişikliklerini algılama](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html)
 {{#include ../../../banners/hacktricks-training.md}}
