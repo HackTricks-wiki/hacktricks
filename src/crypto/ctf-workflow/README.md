@@ -1,183 +1,191 @@
-# Flujo de trabajo de Crypto CTF
+# Flujo de trabajo de CTF de criptografía
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Lista de comprobación de triage
+## Lista de verificación de triage
 
-1. Identifica qué tienes: encoding vs encryption vs hash vs signature vs MAC.
-2. Determina qué está controlado: plaintext/ciphertext, IV/nonce, key, oracle (padding/error/timing), partial leakage.
-3. Clasifica: symmetric (AES/CTR/GCM), public-key (RSA/ECC), hash/MAC (SHA/MD5/HMAC), classical (Vigenere/XOR).
-4. Aplica primero las comprobaciones con mayor probabilidad: decode de capas, known-plaintext XOR, reutilización de nonce, uso incorrecto del modo, comportamiento del oracle.
-5. Escala a métodos avanzados solo cuando sea necesario: lattices (LLL/Coppersmith), SMT/Z3, side-channels.
+1. Identifica qué tienes: codificación, cifrado, hash, firma o MAC.
+2. Determina qué puedes controlar: texto plano/cifrado, IV/nonce, clave, oracle (relleno/error/tiempo), filtración parcial.
+3. Clasifica: simétrica (AES/CTR/GCM), clave pública (RSA/ECC), hash/MAC (SHA/MD5/HMAC), clásica (Vigenère/XOR).
+4. Prueba primero las comprobaciones con mayor probabilidad de éxito: decodificar capas, XOR con texto conocido, reutilización de nonce, uso incorrecto de modos, comportamiento del oracle.
+5. Recurre a métodos avanzados solo cuando sea necesario: retículas (LLL/Coppersmith), SMT/Z3, canales laterales.
 
-## Recursos online y utilities
+## Recursos y utilidades en línea
 
-Son útiles cuando la tarea consiste en identificar y eliminar capas, o cuando necesitas confirmar rápidamente una hipótesis.
+Son útiles para identificar y eliminar capas, o cuando necesitas confirmar rápidamente una hipótesis.
 
-### Consultas de hashes
+### Búsquedas de hashes
 
-- Busca un hash de challenge cuando se sepa que es sintético/público.
+- Busca el hash del desafío si se sabe que es sintético/público.
 - CrackStation.<sup>[[1]](#references)</sup>
 - MD5Decrypt.<sup>[[2]](#references)</sup>
-- Búsqueda en hashes.org.<sup>[[3]](#references)</sup>
+- Búsqueda de hashes.org.<sup>[[3]](#references)</sup>
 - OnlineHashCrack.<sup>[[4]](#references)</sup>
 - GPUHash.me.<sup>[[5]](#references)</sup>
 - Hash Toolkit.<sup>[[6]](#references)</sup>
 
-No envíes hashes de passwords reales ni material confidencial de challenges a servicios de lookup de terceros. Prefiere un ataque offline con wordlist/rules cuando la divulgación, los términos de servicio o las reglas de la competición sean motivo de preocupación.
+No envíes hashes de contraseñas reales ni material confidencial de desafíos a servicios de búsqueda de terceros. Si te preocupan la divulgación, los términos del servicio o las reglas de la competencia, prefiere un ataque offline con wordlist/reglas.
 
-### Helpers de identificación
+### Herramientas de identificación
 
-- CyberChef (Magic, decoding y conversion).<sup>[[7]](#references)</sup>
-- dCode (playground de cipher/encoding).<sup>[[8]](#references)</sup>
-- Boxentriq (solvers de substitution).<sup>[[9]](#references)</sup>
+- CyberChef (Magic, decodificación y conversión).<sup>[[7]](#references)</sup>
+- dCode (entorno para cifrados/codificaciones).<sup>[[8]](#references)</sup>
+- Boxentriq (solucionadores de sustitución).<sup>[[9]](#references)</sup>
 
 ### Plataformas de práctica / referencias
 
-- CryptoHack (challenges prácticos de cryptography).<sup>[[10]](#references)</sup>
-- Cryptopals (errores clásicos de modern-cryptography).<sup>[[11]](#references)</sup>
+- CryptoHack (desafíos prácticos de criptografía).<sup>[[10]](#references)</sup>
+- Cryptopals (errores clásicos de la criptografía moderna).<sup>[[11]](#references)</sup>
 
-### Decoding automatizado
+### Decodificación automatizada
 
 - Ciphey.<sup>[[12]](#references)</sup>
-- python-codext (prueba muchas bases/encodings).<sup>[[13]](#references)</sup>
+- python-codext (prueba muchas bases/codificaciones).<sup>[[13]](#references)</sup>
 
-## Encodings y classical ciphers
+## Codificaciones y cifrados clásicos
 
 ### Técnica
 
-Muchas tareas de crypto en CTF son transforms en capas: base encoding + simple substitution + compression. El objetivo es identificar las capas y eliminarlas de forma segura.
+Muchos desafíos de criptografía CTF usan transformaciones en capas: codificación base + sustitución simple + compresión. El objetivo es identificar las capas y eliminarlas de forma segura.
 
-### Encodings: prueba muchas bases
+### Codificaciones: prueba varias bases
 
-Si sospechas de un encoding en capas (base64 → base32 → …), prueba:
+Si sospechas que hay codificación en capas (base64 → base32 → …), prueba:
 
 - CyberChef "Magic"
 - `codext` (python-codext): `codext <string>`
 
 Indicadores comunes:
 
-- Base64: `A-Za-z0-9+/=` (el padding `=` es común)
-- Base32: `A-Z2-7=` (a menudo incluye mucho padding `=`)
-- Ascii85/Base85: puntuación densa; a veces está envuelto en `<~ ~>`
+- Base64: `A-Za-z0-9+/=` (el relleno `=` es habitual)
+- Base32: `A-Z2-7=` (a menudo tiene mucho relleno `=`)
+- Ascii85/Base85: puntuación densa; a veces está entre `<~ ~>`
 
-### Substitution / monoalphabetic
+### Sustitución / monoalfabética
 
-- Boxentriq cryptogram solver.<sup>[[9]](#references)</sup>
+- Solucionador de criptogramas de Boxentriq.<sup>[[9]](#references)</sup>
 - quipqiup.<sup>[[14]](#references)</sup>
 
 ### Caesar / ROT / Atbash
 
-- Nayuki automatic Caesar-cipher breaker.<sup>[[15]](#references)</sup>
-- Rumkin Atbash tool.<sup>[[16]](#references)</sup>
+- Descifrador automático de cifrado Caesar de Nayuki.<sup>[[15]](#references)</sup>
+- Herramienta Atbash de Rumkin.<sup>[[16]](#references)</sup>
 
 ### Vigenère
 
-- dCode Vigenère tool.<sup>[[8]](#references)</sup>
-- Guballa Vigenère solver.<sup>[[17]](#references)</sup>
+- Herramienta Vigenère de dCode.<sup>[[8]](#references)</sup>
+- Solucionador Vigenère de Guballa.<sup>[[17]](#references)</sup>
 
-### Bacon cipher
+### Cifrado Bacon
 
-A menudo aparece como grupos de 5 bits o 5 letras:
+A menudo aparece en grupos de 5 bits o 5 letras:
+
 ```
 00111 01101 01010 00000 ...
 AABBB ABBAB ABABA AAAAA ...
 ```
+
 ### Morse
+
 ```
 .... --- .-.. -.-. .- .-. .- -.-. --- .-.. .-
 ```
-### Runes
 
-Las runas suelen ser alfabetos de sustitución; busca "futhark cipher" y prueba con tablas de mapeo.
+### Runas
+
+Las runas suelen ser alfabetos de sustitución; busca "futhark cipher" y prueba tablas de correspondencia.
 
 ## Compresión en challenges
 
 ### Técnica
 
-La compresión aparece constantemente como una capa adicional (zlib/deflate/gzip/xz/zstd), a veces anidada. Si la salida casi se puede analizar, pero parece basura, sospecha de la compresión.
+La compresión aparece constantemente como una capa adicional (zlib/deflate/gzip/xz/zstd), a veces anidada. Si la salida casi se puede analizar, pero parece basura, sospecha que hay compresión.
 
 ### Identificación rápida
 
 - `file <blob>`
 - Busca bytes mágicos:
-- gzip: `1f 8b`
-- zlib: comúnmente `78 01`, `78 5e`, `78 9c` o `78 da` (el segundo byte depende de los flags de compresión)
-- zip: `50 4b 03 04`
-- bzip2: `42 5a 68` (`BZh`)
-- xz: `fd 37 7a 58 5a 00`
-- zstd: `28 b5 2f fd`
+  - gzip: `1f 8b`
+  - zlib: normalmente `78 01`, `78 5e`, `78 9c` o `78 da` (el segundo byte depende de las opciones de compresión)
+  - zip: `50 4b 03 04`
+  - bzip2: `42 5a 68` (`BZh`)
+  - xz: `fd 37 7a 58 5a 00`
+  - zstd: `28 b5 2f fd`
 
-### Raw DEFLATE
+### DEFLATE sin procesar
 
 CyberChef tiene **Raw Deflate/Raw Inflate**, que suele ser la forma más rápida cuando el blob parece comprimido, pero `zlib` falla.
 
-### CLI útiles
+### CLI útil
+
 ```bash
 python3 - blob.bin <<'PY'
 import sys, zlib
 data = open(sys.argv[1], 'rb').read()
 for wbits in [zlib.MAX_WBITS, -zlib.MAX_WBITS]:
-try:
-print(zlib.decompress(data, wbits=wbits)[:200])
-except Exception:
-pass
+  try:
+    print(zlib.decompress(data, wbits=wbits)[:200])
+  except Exception:
+    pass
 PY
 ```
-## Constructos comunes de crypto en CTF
+
+## Construcciones criptográficas comunes en CTF
 
 ### Técnica
 
-Estos aparecen con frecuencia porque son errores realistas de desarrolladores o bibliotecas comunes utilizadas incorrectamente. El objetivo suele ser reconocerlos y aplicar un workflow conocido de extracción o reconstrucción.
+Aparecen con frecuencia porque reflejan errores realistas de desarrolladores o el uso incorrecto de bibliotecas comunes. El objetivo suele ser reconocerlos y aplicar un flujo de trabajo conocido de extracción o reconstrucción.
 
 ### Fernet
 
-Pista típica: dos cadenas Base64 (token + key).
+Pista típica: dos cadenas Base64 (token + clave).
 
-- Decoder/notas: Asecuritysite Fernet decoder.<sup>[[18]](#references)</sup>
+- Decodificador/notas: decodificador Fernet de Asecuritysite.<sup>[[18]](#references)</sup>
 - En Python: `from cryptography.fernet import Fernet`
 
 ### Shamir Secret Sharing
 
-Si ves varios shares y se menciona un threshold `t`, probablemente sea Shamir.
+Si ves varias shares y se menciona un umbral `t`, probablemente se trate de Shamir.
 
-- Online reconstructor (solo para shares de CTF no sensibles).<sup>[[19]](#references)</sup>
+- Recontructor en línea (solo para shares de CTF no sensibles).<sup>[[19]](#references)</sup>
 
 ### Formatos salted de OpenSSL
 
 A veces los CTF proporcionan salidas de `openssl enc` (el encabezado suele comenzar con `Salted__`).
 
-Ayudantes de bruteforce:
+Herramientas auxiliares de fuerza bruta:
 
 - `bruteforce-salted-openssl`.<sup>[[20]](#references)</sup>
 - `easy_BFopensslCTF`.<sup>[[21]](#references)</sup>
 
-### Toolset general
+### Conjunto general de herramientas
 
 - RsaCtfTool.<sup>[[22]](#references)</sup>
 - featherduster.<sup>[[23]](#references)</sup>
 - cryptovenom.<sup>[[24]](#references)</sup>
 
-## Setup local recomendado
+## Configuración local recomendada
 
 Stack práctico para CTF:
 
-- Python más `pycryptodome` para primitives simétricas y prototipado rápido.<sup>[[25]](#references)</sup>
-- SageMath para aritmética modular, CRT, lattices y trabajo con RSA/ECC.<sup>[[26]](#references)</sup>
-- Z3 para challenges basados en constraints (cuando la crypto se reduce a constraints).<sup>[[27]](#references)</sup>
+- Python más `pycryptodome` para primitivas simétricas y prototipado rápido.<sup>[[25]](#references)</sup>
+- SageMath para aritmética modular, CRT, retículos y trabajo con RSA/ECC.<sup>[[26]](#references)</sup>
+- Z3 para desafíos basados en restricciones (cuando la criptografía se reduce a restricciones).<sup>[[27]](#references)</sup>
 
-Paquetes de Python sugeridos:
+Paquetes de Python recomendados:
+
 ```bash
 pip install pycryptodome gmpy2 sympy pwntools z3-solver
 ```
+
 ## References
 
 - [1] [CrackStation](https://crackstation.net/)
 - [2] [MD5Decrypt](https://md5decrypt.net/)
-- [3] [búsqueda de hashes](https://hashes.org/search.php)
+- [3] [búsqueda de hashes.org](https://hashes.org/search.php)
 - [4] [OnlineHashCrack](https://www.onlinehashcrack.com/)
 - [5] [GPUHash.me](https://gpuhash.me/)
-- [6] [Kit de herramientas para hashes](https://hashtoolkit.com/reverse-hash)
+- [6] [Hash Toolkit](https://hashtoolkit.com/reverse-hash)
 - [7] [GCHQ CyberChef](https://gchq.github.io/CyberChef/)
 - [8] [herramientas de dCode](https://www.dcode.fr/tools-list)
 - [9] [herramientas de descifrado de códigos de Boxentriq](https://www.boxentriq.com/code-breaking)
@@ -187,16 +195,16 @@ pip install pycryptodome gmpy2 sympy pwntools z3-solver
 - [13] [python-codext](https://github.com/dhondta/python-codext)
 - [14] [quipqiup](https://quipqiup.com/)
 - [15] [Nayuki - Descifrador automático de cifrado César](https://www.nayuki.io/page/automatic-caesar-cipher-breaker-javascript)
-- [16] [Rumkin - Cifrado Atbash](https://rumkin.com/tools/cipher/atbash/)
-- [17] [Solucionador de Vigenère de Guballa](https://www.guballa.de/vigenere-solver)
-- [18] [Asecuritysite - Decodificador Fernet](https://asecuritysite.com/encryption/ferdecode)
-- [19] [Recontructor de secreto compartido de Shamir](https://christian.gen.co/secrets/)
+- [16] [Rumkin - cifrado Atbash](https://rumkin.com/tools/cipher/atbash/)
+- [17] [Solucionador de cifrado Vigenère de Guballa](https://www.guballa.de/vigenere-solver)
+- [18] [Asecuritysite - decodificador Fernet](https://asecuritysite.com/encryption/ferdecode)
+- [19] [Recontructor de Shamir secret-sharing](https://christian.gen.co/secrets/)
 - [20] [bruteforce-salted-openssl](https://github.com/glv2/bruteforce-salted-openssl)
 - [21] [easy_BFopensslCTF](https://github.com/carlospolop/easy_BFopensslCTF)
 - [22] [RsaCtfTool](https://github.com/RsaCtfTool/RsaCtfTool)
 - [23] [featherduster](https://github.com/nccgroup/featherduster)
 - [24] [cryptovenom](https://github.com/lockedbyte/cryptovenom)
-- [25] [Documentación de PyCryptodome](https://pycryptodome.readthedocs.io/en/latest/)
+- [25] [documentación de PyCryptodome](https://pycryptodome.readthedocs.io/en/latest/)
 - [26] [SageMath](https://www.sagemath.org/)
 - [27] [Z3](https://github.com/Z3Prover/z3)
 {{#include ../../banners/hacktricks-training.md}}

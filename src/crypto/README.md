@@ -2,13 +2,13 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Esta sección se centra en la criptografía práctica para pruebas de seguridad y CTFs: reconocer patrones comunes, seleccionar herramientas adecuadas y aplicar ataques conocidos.
+Esta sección se centra en la criptografía práctica para pruebas de seguridad y CTFs: reconocer patrones comunes, elegir herramientas adecuadas y aplicar ataques conocidos.
 
-Para consultar técnicas que ocultan datos dentro de archivos, visita la sección **Stego**.
+Para consultar técnicas que ocultan datos dentro de archivos, ve a la sección **Stego**.
 
 ## Cómo usar esta sección
 
-Comienza identificando la primitiva y sus parámetros. Después, determina qué controla u observa el atacante, como un oracle, un valor leak o la reutilización de un nonce, antes de seleccionar un ataque.
+Empieza por identificar la primitiva y sus parámetros. Luego determina qué controla o ve el atacante, como un oracle, un valor filtrado o la reutilización de un nonce, antes de elegir un ataque.
 
 ### Flujo de trabajo de CTF
 
@@ -46,7 +46,7 @@ tls-and-certificates/README.md
 crypto-in-malware/README.md
 {{#endref}}
 
-### Miscelánea
+### Varios
 
 {{#ref}}
 ctf-misc/README.md
@@ -54,13 +54,15 @@ ctf-misc/README.md
 
 ## Configuración rápida
 
-Crea un entorno aislado de Python e instala los paquetes de uso habitual. La documentación de PyCryptodome recomienda instalar `pycryptodome` con `pip`; SageMath proporciona instrucciones de instalación independientes para cada plataforma compatible.<sup>[[1]](#references)[[2]](#references)</sup>
+Crea un entorno aislado de Python e instala los paquetes de uso común. La documentación de PyCryptodome recomienda instalar `pycryptodome` con `pip`; SageMath proporciona instrucciones de instalación independientes para cada plataforma compatible.<sup>[[1]](#references)[[2]](#references)</sup>
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install pycryptodome gmpy2 sympy pwntools
 ```
-SageMath suele ser útil para realizar cálculos algebraicos, de lattice, RSA y de curvas elípticas.<sup>[[2]](#references)</sup>
+
+SageMath suele ser útil para realizar cálculos algebraicos, de retículas, RSA y de curvas elípticas.<sup>[[2]](#references)</sup>
 
 ## References
 

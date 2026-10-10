@@ -2,55 +2,59 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Esta sección cubre la inspección de X.509, las codificaciones, las conversiones y los errores de validación relevantes para la seguridad.
+Esta sección abarca la inspección de X.509, las codificaciones, las conversiones y los errores de validación relevantes para la seguridad.
 
 ## Análisis de X.509
 
 OpenSSL puede mostrar los campos decodificados de un certificado, mientras que `asn1parse` muestra la estructura ASN.1 subyacente.<sup>[[1]](#references)[[2]](#references)</sup>
+
 ```bash
 openssl x509 -in cert.pem -noout -text
 openssl asn1parse -in cert.pem
 ```
+
 Revisa al menos:
 
-- el sujeto, el emisor y el Subject Alternative Name (SAN);
-- el key usage y el extended key usage;
-- las basic constraints y las restricciones de longitud de ruta;
+- el sujeto, el emisor y el Nombre alternativo del sujeto (SAN);
+- el uso de clave y el uso extendido de clave;
+- las restricciones básicas y las restricciones de longitud de ruta;
 - los tiempos de validez `notBefore` y `notAfter`;
 - los parámetros de la clave pública y el algoritmo de firma.
 
-Las firmas legacy, como las firmas de certificados basadas en MD5 o SHA-1, son hallazgos especialmente importantes, aunque la aceptación exacta y el impacto dependen del validador y del contexto de confianza.<sup>[[3]](#references)</sup>
+Las firmas heredadas, como las de certificados basadas en MD5 o SHA-1, son hallazgos particularmente importantes, aunque la aceptación y el impacto exactos dependen del validador y del contexto de confianza.<sup>[[3]](#references)</sup>
 
-RFC 5280 define el perfil X.509 de Internet y las reglas de procesamiento para extensiones como SAN, key usage, name constraints y basic constraints.<sup>[[3]](#references)</sup>
+RFC 5280 define el perfil X.509 de Internet y las reglas de procesamiento de extensiones como SAN, uso de clave, restricciones de nombre y restricciones básicas.<sup>[[3]](#references)</sup>
 
-## Encodings and Containers
+## Codificaciones y contenedores
 
 - **Codificación textual de estilo PEM:** datos Base64 entre delimitadores `BEGIN` y `END`.
-- **DER:** la representación binaria Distinguished Encoding Rules.
-- **PKCS#7/CMS (`.p7b`):** normalmente contiene certificados y una cadena de certificados, pero no claves privadas.
-- **PKCS#12 (`.p12` o `.pfx`):** puede contener claves privadas, certificados y certificados complementarios.
+- **DER:** representación binaria de las Distinguished Encoding Rules.
+- **PKCS#7/CMS (`.p7b`):** suele incluir certificados y una cadena de certificados, pero no claves privadas.
+- **PKCS#12 (`.p12` o `.pfx`):** puede incluir claves privadas, certificados y certificados complementarios.
 
-RFC 7468 especifica las codificaciones textuales utilizadas para estructuras PKIX, PKCS y CMS; el comando `pkcs12` de OpenSSL crea y analiza archivos PKCS#12.<sup>[[4]](#references)[[5]](#references)</sup>
+RFC 7468 especifica las codificaciones textuales utilizadas para las estructuras PKIX, PKCS y CMS; el comando `pkcs12` de OpenSSL crea y analiza archivos PKCS#12.<sup>[[4]](#references)[[5]](#references)</sup>
+
 ```bash
 openssl x509 -in cert.cer -outform PEM -out cert.pem
 openssl x509 -in cert.pem -outform DER -out cert.der
 openssl pkcs12 -in file.pfx -out out.pem
 ```
-Trata `out.pem` como sensible: a menos que se utilicen opciones como `-nokeys`, la salida puede contener material de clave privada.<sup>[[5]](#references)</sup>
 
-## Lista de comprobación de la revisión de seguridad
+Trata `out.pem` como información sensible: salvo que se usen opciones como `-nokeys`, la salida puede contener material de clave privada.<sup>[[5]](#references)</sup>
+
+## Lista de verificación de revisión de seguridad
 
 Aplica los requisitos de procesamiento de certificados de RFC 5280 al revisar un validador o una decisión de confianza.<sup>[[3]](#references)</sup>
 
-- Verifica la cadena completa hasta un ancla de confianza explícitamente confiable; no confíes implícitamente en raíces proporcionadas por el usuario.
-- Confirma el nombre de host o la identidad del servicio con los valores SAN.<sup>[[8]](#references)</sup>
-- Aplica las restricciones básicas, las restricciones de nombre, el uso de clave y el uso extendido de clave.
-- Rechaza los certificados expirados o aún no válidos, así como los algoritmos de clave o firma no permitidos.
+- Verifica la cadena completa hasta un ancla de confianza explícita; no confíes implícitamente en las raíces proporcionadas por el usuario.
+- Comprueba el nombre de host o la identidad del servicio con los valores de SAN.<sup>[[8]](#references)</sup>
+- Aplica las restricciones básicas, las restricciones de nombres, el uso de claves y el uso extendido de claves.
+- Rechaza los certificados caducados o que aún no sean válidos, así como los algoritmos de clave o firma no permitidos.
 - Vincula las identidades de los certificados de cliente con la cuenta de aplicación y el contexto de autorización correctos.
 
 ## Registros de Certificate Transparency
 
-Certificate Transparency proporciona registros auditables públicamente de los certificados emitidos.<sup>[[6]](#references)</sup> Busca un dominio con crt.sh durante el descubrimiento autorizado de activos.<sup>[[7]](#references)</sup>
+Certificate Transparency proporciona registros de certificados emitidos que son auditables públicamente.<sup>[[6]](#references)</sup> Busca un dominio con crt.sh durante el descubrimiento autorizado de activos.<sup>[[7]](#references)</sup>
 
 ## References
 
