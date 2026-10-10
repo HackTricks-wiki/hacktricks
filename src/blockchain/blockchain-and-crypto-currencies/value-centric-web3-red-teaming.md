@@ -1,108 +1,108 @@
-# Red Teaming Web3 με επίκεντρο την αξία (MITRE AADAPT)
+# Red Teaming με επίκεντρο την αξία στο Web3 (MITRE AADAPT)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Το framework MITRE Adversarial Actions in Digital Asset Payment Techniques (AADAPT) κατηγοριοποιεί adversarial actions και techniques που στοχεύουν συστήματα digital assets.<sup>[[1]](#references)</sup> Αντιμετωπίστε το ως **βασικό κορμό threat modeling**: καταγράψτε κάθε component που μπορεί να κάνει mint, να τιμολογήσει, να εξουσιοδοτήσει ή να δρομολογήσει assets, αντιστοιχίστε αυτά τα touchpoints σε techniques του AADAPT και, στη συνέχεια, σχεδιάστε red-team scenarios που μετρούν αν το περιβάλλον μπορεί να αντισταθεί σε μη αναστρέψιμη οικονομική απώλεια.
+Το πλαίσιο MITRE Adversarial Actions in Digital Asset Payment Techniques (AADAPT) κατηγοριοποιεί τις αντίπαλες ενέργειες και τεχνικές που στοχεύουν συστήματα ψηφιακών περιουσιακών στοιχείων.<sup>[[1]](#references)</sup> Αντιμετωπίστε το ως **βασικό πλαίσιο μοντελοποίησης απειλών**: καταγράψτε κάθε στοιχείο που μπορεί να εκδώσει, να αποτιμήσει, να εξουσιοδοτήσει ή να δρομολογήσει περιουσιακά στοιχεία, αντιστοιχίστε αυτά τα σημεία επαφής στις τεχνικές AADAPT και, στη συνέχεια, σχεδιάστε σενάρια red-team που μετρούν αν το περιβάλλον μπορεί να αποτρέψει μη αναστρέψιμες οικονομικές απώλειες.
 
-## 1. Καταγραφή components που περιέχουν αξία
-Δημιουργήστε έναν χάρτη όλων όσων μπορούν να επηρεάσουν την κατάσταση αξίας, ακόμη κι αν βρίσκονται off-chain.<sup>[[2]](#references)</sup>
+## 1. Καταγράψτε τα στοιχεία που φέρουν αξία
+Χαρτογραφήστε όλα όσα μπορούν να επηρεάσουν την κατάσταση της αξίας, ακόμη κι αν βρίσκονται εκτός αλυσίδας.<sup>[[2]](#references)</sup>
 
-- **Custodial signing services** (HSM/KMS clusters, Vault/KMaaS, signing APIs που χρησιμοποιούνται από bots ή back-office jobs). Καταγράψτε key IDs, policies, automation identities και approval workflows.
-- **Admin & upgrade paths** για contracts (proxy admins, governance timelocks, emergency pause keys, parameter registries). Συμπεριλάβετε ποιος/τι μπορεί να τα καλέσει και υπό ποιο quorum ή delay.
-- **On-chain protocol logic** που διαχειρίζεται lending, AMMs, vaults, staking, bridges ή settlement rails. Τεκμηριώστε τα invariants που θεωρούν δεδομένα (oracle prices, collateral ratios, rebalance cadence…).
-- **Off-chain automation** που δημιουργεί transactions (market-making bots, CI/CD pipelines, cron jobs, serverless functions). Συχνά διαθέτουν API keys ή service principals που μπορούν να ζητήσουν signatures.
-- **Oracles & data feeds** (aggregator composition, quorum, deviation thresholds, update cadence). Σημειώστε κάθε upstream πηγή από την οποία εξαρτάται η automated risk logic.
-- **Bridges και cross-chain routers** (lock/mint contracts, relayers, settlement jobs) που συνδέουν chains ή custodial stacks.
+- **Υπηρεσίες υπογραφής θεματοφυλακής** (συστάδες HSM/KMS, Vault/KMaaS, API υπογραφής που χρησιμοποιούνται από bots ή εργασίες back-office). Καταγράψτε αναγνωριστικά κλειδιών, πολιτικές, ταυτότητες αυτοματισμού και ροές εργασιών έγκρισης.
+- **Διαδρομές διαχείρισης και αναβάθμισης** για contracts (διαχειριστές proxy, governance timelocks, κλειδιά έκτακτης παύσης, μητρώα παραμέτρων). Συμπεριλάβετε ποιος ή τι μπορεί να τις καλέσει, καθώς και την απαιτούμενη απαρτία ή καθυστέρηση.
+- **Λογική πρωτοκόλλου on-chain** για lending, AMMs, vaults, staking, bridges ή rails διακανονισμού. Καταγράψτε τις παραδοχές στις οποίες βασίζονται (τιμές oracle, λόγοι εξασφάλισης, συχνότητα rebalance…).
+- **Αυτοματισμοί off-chain** που δημιουργούν συναλλαγές (bots market-making, αγωγοί CI/CD, εργασίες cron, serverless functions). Συχνά διαθέτουν API keys ή service principals που μπορούν να ζητήσουν υπογραφές.
+- **Oracles και data feeds** (σύνθεση aggregator, απαρτία, όρια απόκλισης, συχνότητα ενημέρωσης). Σημειώστε κάθε upstream πηγή στην οποία βασίζεται η αυτοματοποιημένη λογική διαχείρισης κινδύνου.
+- **Bridges και cross-chain routers** (contracts lock/mint, relayers, εργασίες διακανονισμού) που συνδέουν αλυσίδες ή συστήματα θεματοφυλακής.
 
-Παραδοτέο: ένα value-flow diagram που δείχνει πώς μετακινούνται τα assets, ποιος εξουσιοδοτεί τη μετακίνηση και ποια external signals επηρεάζουν την business logic.
+Παραδοτέο: ένα διάγραμμα ροής αξίας που δείχνει πώς κινούνται τα περιουσιακά στοιχεία, ποιος εξουσιοδοτεί τις κινήσεις και ποια εξωτερικά σήματα επηρεάζουν την επιχειρησιακή λογική.
 
-## 2. Αντιστοίχιση components σε AADAPT behaviors
-Μετατρέψτε την ταξινομία του AADAPT σε συγκεκριμένους attack candidates για κάθε component.<sup>[[2]](#references)</sup>
+## 2. Αντιστοιχίστε τα στοιχεία με συμπεριφορές AADAPT
+Μετατρέψτε την ταξινομία AADAPT σε συγκεκριμένα υποψήφια attack paths ανά στοιχείο.<sup>[[2]](#references)</sup>
 
-| Component | Primary AADAPT focus |
+| Στοιχείο | Κύρια εστίαση AADAPT |
 | --- | --- |
-| Signing/KMS estates | Credential theft, policy bypass, signing-abuse, governance takeover |
-| Oracles/feeds | Input poisoning, aggregation manipulation, deviation-threshold evasion |
-| On-chain protocols | Flash-loan economic manipulation, invariant breaking, parameter reconfiguration |
-| Automation pipelines | Compromised bot/CI identities, batch replay, unauthorized deployment |
-| Bridges/routers | Cross-chain evasion, rapid hop laundering, settlement desynchronization |
+| Υποδομές signing/KMS | Κλοπή διαπιστευτηρίων, παράκαμψη πολιτικών, κατάχρηση signing, κατάληψη governance |
+| Oracles/feeds | Δηλητηρίαση εισόδων, χειραγώγηση aggregation, αποφυγή ορίων απόκλισης |
+| Πρωτόκολλα on-chain | Οικονομική χειραγώγηση μέσω flash loan, παραβίαση invariants, αναδιαμόρφωση παραμέτρων |
+| Αγωγοί αυτοματισμού | Παραβιασμένες ταυτότητες bot/CI, επανάληψη batch, μη εξουσιοδοτημένο deployment |
+| Bridges/routers | Αποφυγή ελέγχων cross-chain, γρήγορο laundering μέσω διαδοχικών hops, αποσυγχρονισμός διακανονισμού |
 
-Αυτή η αντιστοίχιση διασφαλίζει ότι ελέγχετε όχι μόνο τα contracts, αλλά κάθε identity/automation που μπορεί έμμεσα να κατευθύνει την αξία.
+Αυτή η αντιστοίχιση διασφαλίζει ότι ελέγχετε όχι μόνο τα contracts, αλλά και κάθε ταυτότητα ή αυτοματισμό που μπορεί να κατευθύνει έμμεσα την αξία.
 
-## 3. Ιεράρχηση με βάση τη feasibility του attacker και το business impact
+## 3. Ιεραρχήστε με βάση την ευκολία εκμετάλλευσης από τον επιτιθέμενο και τον επιχειρηματικό αντίκτυπο
 
-1. **Operational weaknesses**: εκτεθειμένα CI credentials, υπερβολικά προνομιούχα IAM roles, λανθασμένα διαμορφωμένα KMS policies, automation accounts που μπορούν να ζητήσουν arbitrary signatures, public buckets με bridge configs κ.λπ.
-2. **Value-specific weaknesses**: ευάλωτες oracle parameters, upgradable contracts χωρίς multi-party approvals, flash-loan-sensitive liquidity, governance actions που παρακάμπτουν timelocks.
+1. **Λειτουργικές αδυναμίες**: εκτεθειμένα διαπιστευτήρια CI, υπερβολικά προνομιούχοι ρόλοι IAM, εσφαλμένα διαμορφωμένες πολιτικές KMS, λογαριασμοί αυτοματισμού που μπορούν να ζητούν αυθαίρετες υπογραφές, δημόσια buckets με ρυθμίσεις bridge κ.λπ.
+2. **Αδυναμίες ειδικές για την αξία**: εύθραυστες παράμετροι oracle, αναβαθμίσιμα contracts χωρίς εγκρίσεις πολλών μερών, ρευστότητα ευάλωτη σε flash loan, ενέργειες governance που παρακάμπτουν τα timelocks.
 
-Διαχειριστείτε την ουρά όπως ένας adversary: ξεκινήστε από τα operational footholds που θα μπορούσαν να επιτύχουν σήμερα και, στη συνέχεια, προχωρήστε σε βαθιές διαδρομές protocol/economic manipulation.<sup>[[2]](#references)</sup>
+Δουλέψτε τη λίστα όπως ένας αντίπαλος: ξεκινήστε από τα λειτουργικά footholds που μπορούν να αξιοποιηθούν σήμερα και, στη συνέχεια, προχωρήστε σε βαθύτερες διαδρομές χειραγώγησης πρωτοκόλλου ή οικονομικών μηχανισμών.<sup>[[2]](#references)</sup>
 
-## 4. Εκτέλεση σε controlled, production-realistic environments
-- **Forked mainnets / isolated testnets**: αναπαραγάγετε bytecode, storage και liquidity, ώστε τα flash-loan paths, τα oracle drifts και τα bridge flows να εκτελούνται end-to-end χωρίς να αγγίζουν πραγματικά funds.<sup>[[2]](#references)</sup>
-- **Blast-radius planning**: ορίστε circuit breakers, pausable modules, rollback runbooks και test-only admin keys πριν ενεργοποιήσετε ένα scenario.
-- **Stakeholder coordination**: ενημερώστε custodians, oracle operators, bridge partners και compliance, ώστε οι monitoring teams τους να αναμένουν την κίνηση.
-- **Legal sign-off**: τεκμηριώστε scope, authorization και stop conditions όταν οι simulations ενδέχεται να διασχίσουν regulated rails.
+## 4. Εκτελέστε σε ελεγχόμενα περιβάλλοντα ρεαλιστικά ως προς την παραγωγή
+- **Forks mainnet / απομονωμένα testnets**: αναπαραγάγετε bytecode, storage και ρευστότητα, ώστε οι διαδρομές flash loan, οι αποκλίσεις oracle και οι ροές bridge να εκτελούνται από άκρη σε άκρη χωρίς να αγγίζονται πραγματικά κεφάλαια.<sup>[[2]](#references)</sup>
+- **Σχεδιασμός ακτίνας επιπτώσεων**: ορίστε circuit breakers, modules με δυνατότητα παύσης, runbooks επαναφοράς και admin keys μόνο για δοκιμές πριν ενεργοποιήσετε ένα σενάριο.
+- **Συντονισμός ενδιαφερόμενων μερών**: ενημερώστε θεματοφύλακες, χειριστές oracle, συνεργάτες bridge και ομάδες συμμόρφωσης, ώστε οι ομάδες παρακολούθησής τους να αναμένουν τη σχετική κίνηση.
+- **Νομική έγκριση**: τεκμηριώστε το πεδίο, την εξουσιοδότηση και τις συνθήκες διακοπής, όταν οι προσομοιώσεις ενδέχεται να επηρεάσουν ρυθμιζόμενα rails.
 
-## 5. Telemetry ευθυγραμμισμένο με AADAPT techniques
-Εγκαταστήστε telemetry streams, ώστε κάθε scenario να παράγει actionable detection data.<sup>[[2]](#references)</sup>
+## 5. Τηλεμετρία ευθυγραμμισμένη με τις τεχνικές AADAPT
+Οργανώστε τις ροές τηλεμετρίας έτσι ώστε κάθε σενάριο να παράγει αξιοποιήσιμα δεδομένα ανίχνευσης.<sup>[[2]](#references)</sup>
 
-- **Chain-level traces**: πλήρη call graphs, gas usage, transaction nonces και block timestamps — για την ανακατασκευή flash-loan bundles, reentrancy-like structures και cross-contract hops.
-- **Application/API logs**: συνδέστε κάθε on-chain tx με ένα human ή automation identity (session ID, OAuth client, API key, CI job ID), μαζί με IPs και auth methods.
-- **KMS/HSM logs**: key ID, caller principal, policy result, destination address και reason codes για κάθε signature. Δημιουργήστε baseline για change windows και high-risk operations.
-- **Oracle/feed metadata**: σύνθεση data source ανά update, reported value, deviation από rolling averages, thresholds που ενεργοποιήθηκαν και failover paths που χρησιμοποιήθηκαν.
-- **Bridge/swap traces**: συσχετίστε lock/mint/unlock events μεταξύ chains με correlation IDs, chain IDs, relayer identity και hop timing.
-- **Anomaly markers**: derived metrics όπως slippage spikes, abnormal collateralization ratios, unusual gas density ή cross-chain velocity.
+- **Traces σε επίπεδο αλυσίδας**: πλήρη call graphs, χρήση gas, nonces συναλλαγών και timestamps blocks, ώστε να ανασυνθέτετε bundles flash loan, δομές παρόμοιες με reentrancy και hops μεταξύ contracts.
+- **Logs εφαρμογών/API**: συνδέστε κάθε on-chain tx με μια ανθρώπινη ή αυτοματοποιημένη ταυτότητα (session ID, OAuth client, API key, CI job ID), μαζί με IP και μεθόδους authentication.
+- **Logs KMS/HSM**: key ID, principal καλούντος, αποτέλεσμα πολιτικής, διεύθυνση προορισμού και reason codes για κάθε υπογραφή. Καθορίστε baseline για τα χρονικά παράθυρα αλλαγών και τις λειτουργίες υψηλού κινδύνου.
+- **Metadata oracle/feed**: σύνθεση πηγών δεδομένων ανά ενημέρωση, αναφερόμενη τιμή, απόκλιση από κυλιόμενους μέσους όρους, όρια που ενεργοποιήθηκαν και διαδρομές failover που χρησιμοποιήθηκαν.
+- **Traces bridge/swap**: συσχετίστε συμβάντα lock/mint/unlock μεταξύ αλυσίδων με correlation IDs, chain IDs, ταυτότητα relayer και χρονισμό hop.
+- **Δείκτες ανωμαλιών**: παράγωγες μετρικές, όπως αιχμές slippage, ασυνήθιστοι λόγοι εξασφάλισης, ασυνήθιστη πυκνότητα gas ή ταχύτητα κινήσεων μεταξύ αλυσίδων.
 
-Προσθέστε παντού scenario IDs ή synthetic user IDs, ώστε οι analysts να μπορούν να ευθυγραμμίζουν τα observables με το AADAPT technique που εξετάζεται.
+Προσθέστε παντού scenario IDs ή συνθετικά user IDs, ώστε οι αναλυτές να μπορούν να συσχετίζουν τα παρατηρήσιμα στοιχεία με την τεχνική AADAPT που δοκιμάζεται.
 
-## 6. Purple-team loop & maturity metrics
-1. Εκτελέστε το scenario στο controlled environment και καταγράψτε τα detections (alerts, dashboards, responders που ειδοποιήθηκαν).<sup>[[2]](#references)</sup>
-2. Αντιστοιχίστε κάθε βήμα στα συγκεκριμένα AADAPT techniques και στα observables που παράγονται στα chain/app/KMS/oracle/bridge planes.
-3. Διατυπώστε και αναπτύξτε detection hypotheses (threshold rules, correlation searches, invariant checks).
-4. Επαναλάβετε μέχρι το mean time to detect (MTTD) και το mean time to contain (MTTC) να ικανοποιούν τα business tolerances και τα playbooks να σταματούν αξιόπιστα την απώλεια αξίας.
+## 6. Κύκλος Purple Team και μετρικές ωριμότητας
+1. Εκτελέστε το σενάριο στο ελεγχόμενο περιβάλλον και καταγράψτε τις ανιχνεύσεις (alerts, dashboards, ειδοποιήσεις προς responders).<sup>[[2]](#references)</sup>
+2. Αντιστοιχίστε κάθε βήμα στις συγκεκριμένες τεχνικές AADAPT και στα παρατηρήσιμα στοιχεία που παράγονται στα επίπεδα chain/app/KMS/oracle/bridge.
+3. Διατυπώστε και αναπτύξτε υποθέσεις ανίχνευσης (κανόνες ορίων, αναζητήσεις συσχέτισης, έλεγχοι invariants).
+4. Επαναλάβετε μέχρι ο μέσος χρόνος ανίχνευσης (MTTD) και ο μέσος χρόνος περιορισμού (MTTC) να ανταποκρίνονται στις επιχειρηματικές ανοχές και τα playbooks να σταματούν αξιόπιστα την απώλεια αξίας.
 
 Παρακολουθήστε την ωριμότητα του προγράμματος σε τρεις άξονες:<sup>[[2]](#references)</sup>
-- **Visibility**: κάθε critical value path διαθέτει telemetry σε κάθε plane.
-- **Coverage**: ποσοστό των prioritized AADAPT techniques που εξετάζονται end-to-end.
-- **Response**: ικανότητα pause contracts, revoke keys ή freeze flows πριν από μη αναστρέψιμη απώλεια.
+- **Ορατότητα**: κάθε κρίσιμη διαδρομή αξίας διαθέτει τηλεμετρία σε κάθε επίπεδο.
+- **Κάλυψη**: ποσοστό των ιεραρχημένων τεχνικών AADAPT που έχουν δοκιμαστεί από άκρη σε άκρη.
+- **Απόκριση**: δυνατότητα παύσης contracts, ανάκλησης κλειδιών ή παγώματος ροών πριν από μη αναστρέψιμη απώλεια.
 
-Τυπικά milestones: (1) ολοκληρωμένο value inventory + AADAPT mapping, (2) πρώτο end-to-end scenario με υλοποιημένα detections, (3) quarterly purple-team cycles που επεκτείνουν το coverage και μειώνουν τα MTTD/MTTC.<sup>[[2]](#references)</sup>
+Συνήθη ορόσημα: (1) ολοκληρωμένη καταγραφή αξίας και αντιστοίχιση AADAPT, (2) πρώτο σενάριο από άκρη σε άκρη με υλοποιημένες ανιχνεύσεις, (3) τριμηνιαίοι κύκλοι purple-team που διευρύνουν την κάλυψη και μειώνουν τους MTTD/MTTC.<sup>[[2]](#references)</sup>
 
-## 7. Scenario templates
-Χρησιμοποιήστε αυτά τα επαναχρησιμοποιήσιμα blueprints για να σχεδιάσετε simulations που αντιστοιχούν άμεσα σε AADAPT behaviors.<sup>[[2]](#references)</sup>
+## 7. Πρότυπα σεναρίων
+Χρησιμοποιήστε αυτά τα επαναλήψιμα σχέδια για να σχεδιάσετε προσομοιώσεις που αντιστοιχούν άμεσα σε συμπεριφορές AADAPT.<sup>[[2]](#references)</sup>
 
-### Scenario A – Flash-loan economic manipulation
-- **Objective**: δανειστείτε transient capital μέσα σε μία transaction, ώστε να παραμορφώσετε AMM prices/liquidity και να ενεργοποιήσετε mispriced borrows, liquidations ή mints πριν από την αποπληρωμή.
-- **Execution**:
-1. Κάντε fork το target chain και τροφοδοτήστε τα pools με production-like liquidity.
-2. Δανειστείτε μεγάλο notional μέσω flash loan.
-3. Εκτελέστε calibrated swaps για να διασχίσετε price/threshold boundaries από τα οποία εξαρτάται η lending, vault ή derivative logic.
-4. Καλέστε το victim contract αμέσως μετά την παραμόρφωση (borrow, liquidate, mint) και αποπληρώστε το flash loan.
-- **Measurement**: Επιτεύχθηκε η παραβίαση του invariant; Ενεργοποιήθηκαν slippage/price-deviation monitors, circuit breakers ή governance pause hooks; Πόσος χρόνος χρειάστηκε μέχρι τα analytics να επισημάνουν το abnormal gas/call graph pattern;
+### Σενάριο A – Οικονομική χειραγώγηση μέσω flash loan
+- **Στόχος**: δανειστείτε προσωρινό κεφάλαιο μέσα σε μία συναλλαγή, για να στρεβλώσετε τις τιμές/τη ρευστότητα AMM και να ενεργοποιήσετε δανεισμούς, ρευστοποιήσεις ή εκδόσεις σε λανθασμένη τιμή πριν από την αποπληρωμή.
+- **Εκτέλεση**:
+  1. Κάντε fork την αλυσίδα-στόχο και τροφοδοτήστε τα pools με ρευστότητα παρόμοια με εκείνη της παραγωγής.
+  2. Δανειστείτε μεγάλο ποσό μέσω flash loan.
+  3. Εκτελέστε κατάλληλα ρυθμισμένα swaps, ώστε να ξεπεράσετε τα όρια τιμής/κατωφλίου στα οποία βασίζονται η λογική lending, vault ή παραγώγων.
+  4. Καλέστε αμέσως μετά τη στρέβλωση το contract-στόχο (borrow, liquidate, mint) και αποπληρώστε το flash loan.
+- **Μέτρηση**: Πέτυχε η παραβίαση του invariant; Ενεργοποιήθηκαν monitors slippage/απόκλισης τιμών, circuit breakers ή hooks παύσης governance; Πόσος χρόνος χρειάστηκε μέχρι τα analytics να επισημάνουν το ασυνήθιστο μοτίβο gas/call graph;
 
-### Scenario B – Oracle/data-feed poisoning
-- **Objective**: προσδιορίστε αν manipulated feeds μπορούν να ενεργοποιήσουν destructive automated actions (mass liquidations, incorrect settlements).
-- **Execution**:
-1. Στο fork/testnet, αναπτύξτε ένα malicious feed ή προσαρμόστε τα aggregator weights/quorum/update cadence πέρα από το tolerated deviation.
-2. Αφήστε τα dependent contracts να καταναλώσουν τις poisoned values και να εκτελέσουν τη standard logic τους.
-- **Measurement**: Feed-level out-of-band alerts, fallback oracle activation, min/max bound enforcement και latency μεταξύ anomaly onset και operator response.
+### Σενάριο B – Δηλητηρίαση oracle/data feed
+- **Στόχος**: προσδιορίστε αν τα παραποιημένα feeds μπορούν να ενεργοποιήσουν καταστροφικές αυτοματοποιημένες ενέργειες (μαζικές ρευστοποιήσεις, εσφαλμένους διακανονισμούς).
+- **Εκτέλεση**:
+  1. Στο fork/testnet, αναπτύξτε ένα κακόβουλο feed ή αλλάξτε τα βάρη aggregator/την απαρτία/τη συχνότητα ενημέρωσης πέρα από την ανεκτή απόκλιση.
+  2. Αφήστε τα εξαρτώμενα contracts να χρησιμοποιήσουν τις δηλητηριασμένες τιμές και να εκτελέσουν την κανονική τους λογική.
+- **Μέτρηση**: Alerts εκτός ορίων στο επίπεδο feed, ενεργοποίηση εφεδρικού oracle, επιβολή ελάχιστων/μέγιστων ορίων και καθυστέρηση μεταξύ έναρξης της ανωμαλίας και απόκρισης του χειριστή.
 
-### Scenario C – Credential/signing abuse
-- **Objective**: ελέγξτε αν η παραβίαση ενός signer ή automation identity επιτρέπει unauthorized upgrades, parameter changes ή treasury drains.
-- **Execution**:
-1. Καταγράψτε τα identities με sensitive signing rights (operators, CI tokens, service accounts που καλούν KMS/HSM, multisig participants).
-2. Προσομοιώστε compromise (επαναχρησιμοποιήστε τα credentials/keys τους εντός του lab scope).
-3. Επιχειρήστε privileged actions: upgrade proxies, change risk parameters, mint/pause assets ή trigger governance proposals.
-- **Measurement**: Δημιουργούν τα KMS/HSM logs anomaly alerts (time-of-day, destination drift, burst high-risk operations); Μπορούν τα policies ή τα multisig thresholds να αποτρέψουν unilateral abuse; Εφαρμόζονται throttles/rate limits ή additional approvals;
+### Σενάριο C – Κατάχρηση διαπιστευτηρίων/υπογραφής
+- **Στόχος**: ελέγξτε αν η παραβίαση ενός μόνο signer ή μιας ταυτότητας αυτοματισμού επιτρέπει μη εξουσιοδοτημένες αναβαθμίσεις, αλλαγές παραμέτρων ή άδειασμα του treasury.
+- **Εκτέλεση**:
+  1. Καταγράψτε τις ταυτότητες με ευαίσθητα δικαιώματα υπογραφής (operators, CI tokens, service accounts που καλούν KMS/HSM, συμμετέχοντες σε multisig).
+  2. Προσομοιώστε την παραβίαση (επαναχρησιμοποιήστε τα διαπιστευτήρια/κλειδιά τους εντός του πεδίου του lab).
+  3. Επιχειρήστε προνομιούχες ενέργειες: αναβάθμιση proxy, αλλαγή παραμέτρων κινδύνου, έκδοση/παύση περιουσιακών στοιχείων ή υποβολή προτάσεων governance.
+- **Μέτρηση**: Δημιουργούν τα logs KMS/HSM alerts ανωμαλιών (ώρα της ημέρας, αλλαγή διεύθυνσης προορισμού, έξαρση λειτουργιών υψηλού κινδύνου); Μπορούν οι πολιτικές ή τα όρια multisig να αποτρέψουν τη μονομερή κατάχρηση; Επιβάλλονται throttles/rate limits ή πρόσθετες εγκρίσεις;
 
-### Scenario D – Cross-chain evasion & traceability gaps
-- **Objective**: αξιολογήστε πόσο αποτελεσματικά μπορούν οι defenders να εντοπίσουν και να ανακόψουν assets που μεταφέρονται γρήγορα μέσω bridges, DEX routers και privacy hops.
-- **Execution**:
-1. Συνδέστε lock/mint operations μέσω common bridges, παρεμβάλλετε swaps/mixers σε κάθε hop και διατηρήστε correlation IDs ανά hop.
-2. Επιταχύνετε τις transfers για να πιέσετε το monitoring latency (multi-hop μέσα σε λεπτά/blocks).
-- **Measurement**: Χρόνος για τη συσχέτιση events μεταξύ telemetry και commercial chain analytics, πληρότητα του reconstructed path, ικανότητα εντοπισμού choke points για freezing σε πραγματικό incident και alert fidelity για abnormal cross-chain velocity/value.
+### Σενάριο D – Αποφυγή ελέγχων cross-chain και κενά ιχνηλασιμότητας
+- **Στόχος**: αξιολογήστε πόσο αποτελεσματικά μπορούν οι αμυνόμενοι να εντοπίζουν και να ανακόπτουν περιουσιακά στοιχεία που ξεπλένονται γρήγορα μέσω bridges, DEX routers και hops ιδιωτικότητας.
+- **Εκτέλεση**:
+  1. Συνδέστε μεταξύ τους λειτουργίες lock/mint μέσω κοινών bridges, παρεμβάλλετε swaps/mixers σε κάθε hop και διατηρήστε correlation IDs ανά hop.
+  2. Επιταχύνετε τις μεταφορές για να δοκιμάσετε την καθυστέρηση παρακολούθησης (πολλαπλά hops μέσα σε λεπτά/blocks).
+- **Μέτρηση**: Χρόνος συσχέτισης συμβάντων μεταξύ τηλεμετρίας και εμπορικών chain analytics, πληρότητα της ανασυντεθειμένης διαδρομής, δυνατότητα εντοπισμού choke points για πάγωμα σε πραγματικό περιστατικό και ακρίβεια των alerts για ασυνήθιστη ταχύτητα/αξία κινήσεων μεταξύ αλυσίδων.
 
 ## References
 
-- [1] [AADAPT(TM) Cyber Threat Framework for Digital Assets (MITRE)](https://www.mitre.org/sites/default/files/2025-05/PR-25-1118-aadpt-cyber-threat-framework-for-digital-assets.pdf)
-- [2] [Το MITRE AADAPT Framework ως Roadmap για Red Team (Bishop Fox)](https://bishopfox.com/blog/mitre-aadapt-framework-as-a-red-team-roadmap)
+- [1] [Πλαίσιο κυβερνοαπειλών AADAPT(TM) για ψηφιακά περιουσιακά στοιχεία (MITRE)](https://www.mitre.org/sites/default/files/2025-05/PR-25-1118-aadpt-cyber-threat-framework-for-digital-assets.pdf)
+- [2] [Το πλαίσιο MITRE AADAPT ως οδικός χάρτης για Red Team (Bishop Fox)](https://bishopfox.com/blog/mitre-aadapt-framework-as-a-red-team-roadmap)
 {{#include ../../banners/hacktricks-training.md}}
