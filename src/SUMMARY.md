@@ -192,6 +192,7 @@
   - [Linux - Kernel/LPE/CVE Material](linux-hardening/main-system-information/kernel-lpe-cves/README.md)
     - [Linux - Vmware Tools Service Discovery Untrusted Search Path Cve 2025 41244](linux-hardening/main-system-information/kernel-lpe-cves/vmware-tools-service-discovery-untrusted-search-path-cve-2025-41244.md)
     - [Linux - Copy Fail Af Alg Splice Page Cache Overwrite Cve 2026 31431](linux-hardening/main-system-information/kernel-lpe-cves/copy-fail-af_alg-splice-page-cache-overwrite-cve-2026-31431.md)
+    - [Open vSwitch Forwarded SKB Marker Stripping to ESP Page Cache Writes](linux-hardening/main-system-information/kernel-lpe-cves/open-vswitch-forwarded-skb-marker-stripping-esp-page-cache-write.md)
     - [Linux - Posix Cpu Timers Toctou Cve 2025 38352](linux-hardening/main-system-information/kernel-lpe-cves/posix-cpu-timers-toctou-cve-2025-38352.md)
     - [Linux - Ptrace Exit Race Pidfd Getfd Fd Theft](linux-hardening/main-system-information/kernel-lpe-cves/linux-ptrace-exit-race-pidfd_getfd-fd-theft.md)
 - [Linux - User Information](linux-hardening/user-information/README.md)
