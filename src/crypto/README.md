@@ -2,13 +2,13 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Dieser Abschnitt konzentriert sich auf praktische Kryptografie für Security-Tests und CTFs: das Erkennen gängiger Muster, die Auswahl geeigneter Tools und die Anwendung bekannter Angriffe.
+Dieser Abschnitt behandelt praktische Kryptografie für Security-Tests und CTFs: gängige Muster erkennen, geeignete Tools auswählen und bekannte Angriffe anwenden.
 
-Für Techniken, die Daten in Dateien verstecken, siehe den Abschnitt **Stego**.
+Techniken, bei denen Daten in Dateien verborgen werden, findest du im Abschnitt **Stego**.
 
 ## Verwendung dieses Abschnitts
 
-Beginne damit, das Primitive und seine Parameter zu identifizieren. Bestimme anschließend, was der Angreifer kontrolliert oder beobachtet, beispielsweise ein Oracle, einen geleakten Wert oder die Wiederverwendung einer Nonce, bevor du einen Angriff auswählst.
+Identifiziere zunächst die Primitive und ihre Parameter. Ermittle anschließend, was der Angreifer kontrolliert oder beobachten kann, etwa ein Oracle, einen geleakten Wert oder die Wiederverwendung eines Nonce, bevor du einen Angriff auswählst.
 
 ### CTF-Workflow
 
@@ -52,15 +52,17 @@ crypto-in-malware/README.md
 ctf-misc/README.md
 {{#endref}}
 
-## Schnelle Einrichtung
+## Schnellstart
 
-Erstelle eine isolierte Python-Umgebung und installiere häufig verwendete Pakete. Die Dokumentation von PyCryptodome empfiehlt, `pycryptodome` mit `pip` zu installieren; SageMath stellt separate Installationsanleitungen für jede unterstützte Plattform bereit.<sup>[[1]](#references)[[2]](#references)</sup>
+Erstelle eine isolierte Python-Umgebung und installiere häufig verwendete Pakete. Die Dokumentation von PyCryptodome empfiehlt, `pycryptodome` mit `pip` zu installieren; SageMath bietet separate Installationsanleitungen für jede unterstützte Plattform.<sup>[[1]](#references)[[2]](#references)</sup>
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install pycryptodome gmpy2 sympy pwntools
 ```
-SageMath ist häufig für algebraische, Gitter-, RSA- und Elliptic-Curve-Berechnungen nützlich.<sup>[[2]](#references)</sup>
+
+SageMath ist oft für algebraische Berechnungen sowie Berechnungen mit Gittern, RSA und elliptischen Kurven nützlich.<sup>[[2]](#references)</sup>
 
 ## References
 

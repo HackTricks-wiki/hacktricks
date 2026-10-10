@@ -1,49 +1,53 @@
-# Dokument-Steganografie
+# Dokumenten-Steganografie
 
 {{#include ../../banners/hacktricks-training.md}}
 
 Viele Dokumentformate sind strukturierte Container und keine einzelnen Datenströme:<sup>[[1]](#references)</sup><sup>[[3]](#references)</sup>
 
-- PDF (eingebettete Dateien, Datenströme)
-- Office OOXML (`.docx/.xlsx/.pptx` sind ZIPs)
-- Legacy-RTF- und OLE/Compound-File-Binary-Dokumente. RTF speichert Steuerwörter und Gruppen in einem textorientierten Format, während OLE-Compound-Files eine dateisystemähnliche Hierarchie aus Speicherobjekten und Datenströmen bereitstellen; beide erfordern eine formatspezifische Untersuchung auf versteckte oder eingebettete Daten.<sup>[[5]](#references)</sup><sup>[[6]](#references)</sup>
+- PDF (eingebettete Dateien, Streams)
+- Office OOXML (`.docx/.xlsx/.pptx` sind ZIP-Dateien)
+- Ältere RTF- und OLE/Compound-File-Binary-Dokumente. RTF speichert Steuerwörter und Gruppen in einem textorientierten Format, während OLE-Compound-Files eine dateisystemähnliche Hierarchie aus Speicherobjekten und Streams bereitstellen; beide erfordern eine formatspezifische Prüfung auf versteckte oder eingebettete Daten.<sup>[[5]](#references)</sup><sup>[[6]](#references)</sup>
 
 ## PDF
 
 ### Technik
 
-PDF-Dateien können Objekte, Datenströme, JavaScript und eingebettete Dateien enthalten. Bei der Analyse gehören folgende Aufgaben zu den üblichen Vorgehensweisen:
+PDF-Dateien können Objekte, Streams, JavaScript und eingebettete Dateien enthalten. Zu den üblichen Aufgaben bei der Analyse gehören:
 
 - Eingebettete Anhänge extrahieren.
-- Objektdatenströme erweitern, damit Objekte leichter untersucht werden können.
-- JavaScript, eingebettete Bilder und ungewöhnliche Datenströme identifizieren.<sup>[[1]](#references)</sup><sup>[[2]](#references)</sup>
+- Objekt-Streams erweitern, damit sich Objekte leichter untersuchen lassen.
+- JavaScript, eingebettete Bilder und ungewöhnliche Streams identifizieren.<sup>[[1]](#references)</sup><sup>[[2]](#references)</sup>
 
 ### Schnellprüfungen
+
 ```bash
 pdfinfo file.pdf
 pdfdetach -list file.pdf
 pdfdetach -saveall file.pdf
 qpdf --qdf --object-streams=disable file.pdf out.pdf
 ```
-Die Kombination `--qdf --object-streams=disable` erzeugt eine besser lesbare Darstellung und entfernt object streams, was die manuelle Prüfung erleichtert.<sup>[[2]](#references)</sup> Durchsuche anschließend `out.pdf` nach verdächtigen Objekten und Zeichenfolgen.
+
+Die Kombination `--qdf --object-streams=disable` erzeugt eine besser lesbare Darstellung und entfernt Objekt-Streams, was die manuelle Prüfung erleichtert.<sup>[[2]](#references)</sup> Durchsuche anschließend `out.pdf` nach verdächtigen Objekten und Zeichenfolgen.
 
 ## Office OOXML
 
 ### Technik
 
-Office Open XML-Dateien (`.docx`, `.xlsx` und `.pptx`) verwenden Open Packaging Conventions: ein ZIP-basiertes Paket aus Teilen und XML relationship files.<sup>[[3]](#references)</sup><sup>[[4]](#references)</sup> Betrachte das Paket als relationship graph und untersuche Medien, externe Beziehungen und ungewöhnliche custom parts.
+Office Open XML-Dateien (`.docx`, `.xlsx` und `.pptx`) verwenden Open Packaging Conventions: ein ZIP-basiertes Paket aus Teilen und XML-Beziehungsdateien.<sup>[[3]](#references)</sup><sup>[[4]](#references)</sup> Betrachte das Paket als Beziehungsgraph und prüfe Medien, externe Beziehungen und ungewöhnliche benutzerdefinierte Teile.
 
 In der Praxis:
 
-- Das Dokument ist ein Verzeichnisbaum aus XML und Assets.
-- Die `_rels/`-relationship files können auf externe Ressourcen oder versteckte Teile verweisen.
-- Eingebettete Daten befinden sich häufig in `word/media/`, custom XML parts oder ungewöhnlichen Beziehungen.
+- Das Dokument ist ein Verzeichnisbaum aus XML-Dateien und Assets.
+- Die Beziehungsdateien in `_rels/` können auf externe Ressourcen oder verborgene Teile verweisen.
+- Eingebettete Daten befinden sich häufig in `word/media/`, benutzerdefinierten XML-Teilen oder ungewöhnlichen Beziehungen.
 
 ### Schnellprüfungen
+
 ```bash
 7z l file.docx
 7z x file.docx -oout
 ```
+
 Untersuche anschließend:
 
 - `word/document.xml`
@@ -52,7 +56,7 @@ Untersuche anschließend:
 
 ## References
 
-- [1] [Poppler-Handbuch zu pdfdetach](https://manpages.debian.org/trixie/poppler-utils/pdfdetach.1.en.html)
+- [1] [Poppler-pdfdetach-Handbuch](https://manpages.debian.org/trixie/poppler-utils/pdfdetach.1.en.html)
 - [2] [qpdf-Dokumentation – QDF-Modus und Objekt-Streams](https://qpdf.readthedocs.io/en/stable/cli.html#qdf-mode)
 - [3] [Microsoft Learn – Grundlagen der Open Packaging Conventions](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/opc/open-packaging-conventions-overview)
 - [4] [ECMA-376 – Office Open XML-Dateiformate](https://ecma-international.org/publications-and-standards/standards/ecma-376/)

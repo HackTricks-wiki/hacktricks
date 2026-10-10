@@ -2,25 +2,25 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Dieser Abschnitt konzentriert sich auf das **Finden und Extrahieren versteckter Daten** aus Bildern, Audio, Video, Dokumenten, Archiven und Text. Steganografie verbirgt die Existenz einer Kommunikation, indem Daten in andere Daten eingebettet werden.<sup>[[1]](#references)</sup>
+Dieser Abschnitt konzentriert sich darauf, **versteckte Daten** in Bildern, Audio, Videos, Dokumenten, Archiven und Texten **zu finden und zu extrahieren**. Steganografie verbirgt die Existenz einer Kommunikation, indem Daten in andere Daten eingebettet werden.<sup>[[1]](#references)</sup>
 
 Wenn du nach kryptografischen Angriffen suchst, gehe zum Abschnitt **Crypto**.
 
-## Entry Point
+## Einstiegspunkt
 
-Betrachte Steganografie als Forensikproblem: Identifiziere den tatsächlichen Container, untersuche Orte mit hoher Signalstärke (Metadaten, angehängte Daten, eingebettete Dateien) und wende erst danach Techniken zur Extraktion auf Inhaltsebene an.
+Betrachte Steganografie als forensisches Problem: Identifiziere den tatsächlichen Container, untersuche gezielt aussagekräftige Bereiche (Metadaten, angehängte Daten, eingebettete Dateien) und wende erst danach Techniken zur Extraktion auf Inhaltsebene an.
 
-### Workflow & Triage
+### Workflow & triage
 
-Ein strukturierter Workflow, der die Identifizierung des Containers, die Untersuchung von Metadaten und Strings, Carving sowie formatspezifische Verzweigungen priorisiert.
+Ein strukturierter Workflow, der die Identifizierung des Containers, die Untersuchung von Metadaten und Strings, das Carving und formatspezifische Verzweigungen priorisiert.
 
 {{#ref}}
 workflow/README.md
 {{#endref}}
 
-### Images
+### Bilder
 
-Hier findet sich der größte Teil der CTF-Stego-Fälle: LSB/Bit-Planes (PNG/BMP), ungewöhnliche Chunk-/Dateiformate, JPEG-Tools und Tricks mit mehrteiligen GIFs.
+Hier findet sich der Großteil der CTF-Stego-Aufgaben: LSB/Bit-Ebenen (PNG/BMP), ungewöhnliche Chunks oder Dateiformate, JPEG-Tools und Tricks mit mehreren GIF-Frames.
 
 {{#ref}}
 images/README.md
@@ -28,7 +28,7 @@ images/README.md
 
 ### Audio
 
-Spektrogramm-Nachrichten, LSB-Einbettung in Samples und Töne von Telefontastaturen (DTMF) sind wiederkehrende Muster.
+Spektrogramm-Nachrichten, LSB-Einbettung in Samples und Töne der Telefontastatur (DTMF) sind wiederkehrende Muster.
 
 {{#ref}}
 audio/README.md
@@ -36,23 +36,23 @@ audio/README.md
 
 ### Text
 
-Wenn Text normal dargestellt wird, sich aber unerwartet verhält, solltest du Unicode-Homoglyphen, Zero-Width-Zeichen oder auf Whitespace basierende Codierung in Betracht ziehen.
+Wenn Text normal dargestellt wird, sich aber unerwartet verhält, solltest du Unicode-Homoglyphen, Zero-Width-Zeichen oder eine auf Leerzeichen basierende Kodierung in Betracht ziehen.
 
 {{#ref}}
 text/README.md
 {{#endref}}
 
-### Documents
+### Dokumente
 
-PDFs und Office-Dateien sind in erster Linie Container; Angriffe drehen sich normalerweise um eingebettete Dateien/Streams, Objekt-/Beziehungsgraphen und die ZIP-Extraktion.
+PDFs und Office-Dateien sind zuerst einmal Container; Angriffe drehen sich meist um eingebettete Dateien/Streams, Objekt- und Beziehungsgraphen sowie die ZIP-Extraktion.
 
 {{#ref}}
 documents/README.md
 {{#endref}}
 
-### Malware and delivery-style steganography
+### Steganografie in Malware und bei der Payload-Auslieferung
 
-Bei der Payload-Zustellung können Dateien verwendet werden, die gültig aussehen, etwa GIF- oder PNG-Bilder, die markerbegrenzte Text-Payloads enthalten, anstatt Daten in Pixeln zu verstecken.
+Bei der Payload-Auslieferung können gültig wirkende Dateien wie GIF- oder PNG-Bilder verwendet werden, die durch Marker begrenzte Text-Payloads enthalten, anstatt Daten in Pixeln zu verbergen.
 
 {{#ref}}
 malware-and-network/README.md
@@ -60,5 +60,5 @@ malware-and-network/README.md
 
 ## References
 
-- [1] [NIST CSRC Glossar - Steganografie](https://csrc.nist.gov/glossary/term/steganography)
+- [1] [NIST CSRC-Glossar – Steganografie](https://csrc.nist.gov/glossary/term/steganography)
 {{#include ../banners/hacktricks-training.md}}
