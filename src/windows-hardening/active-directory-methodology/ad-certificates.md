@@ -4,115 +4,120 @@
 
 ## Εισαγωγή
 
-### Στοιχεία ενός Πιστοποιητικού
+### Στοιχεία ενός πιστοποιητικού
 
-- Το **Subject** του πιστοποιητικού υποδηλώνει τον κάτοχό του.
-- Ένα **Public Key** συνδυάζεται με ένα ιδιωτικά διατηρούμενο κλειδί, ώστε να συνδέεται το πιστοποιητικό με τον νόμιμο κάτοχό του.
-- Η **Validity Period**, η οποία ορίζεται από τις ημερομηνίες **NotBefore** και **NotAfter**, καθορίζει τη διάρκεια ισχύος του πιστοποιητικού.
-- Ένας μοναδικός **Serial Number**, που παρέχεται από το Certificate Authority (CA), αναγνωρίζει κάθε πιστοποιητικό.
-- Το **Issuer** αναφέρεται στο CA που εξέδωσε το πιστοποιητικό.
-- Το **SubjectAlternativeName** επιτρέπει πρόσθετα ονόματα για το subject, ενισχύοντας την ευελιξία της ταυτοποίησης.
-- Τα **Basic Constraints** προσδιορίζουν αν το πιστοποιητικό αφορά CA ή τελική οντότητα και καθορίζουν περιορισμούς χρήσης.
-- Τα **Extended Key Usages (EKUs)** καθορίζουν τους συγκεκριμένους σκοπούς του πιστοποιητικού, όπως υπογραφή κώδικα ή κρυπτογράφηση email, μέσω Object Identifiers (OIDs).
-- Ο **Signature Algorithm** καθορίζει τη μέθοδο υπογραφής του πιστοποιητικού.
-- Η **Signature**, η οποία δημιουργείται με το ιδιωτικό κλειδί του issuer, εγγυάται την αυθεντικότητα του πιστοποιητικού.<sup>[[4]](#references)</sup>
+- Το **Subject** του πιστοποιητικού δηλώνει τον κάτοχό του.
+- Ένα **Public Key** συνδυάζεται με ένα ιδιωτικά κατεχόμενο κλειδί, ώστε να συνδέει το πιστοποιητικό με τον νόμιμο κάτοχό του.
+- Η **Validity Period**, η οποία ορίζεται από τις ημερομηνίες **NotBefore** και **NotAfter**, προσδιορίζει τη διάρκεια ισχύος του πιστοποιητικού.
+- Ένας μοναδικός **Serial Number**, ο οποίος παρέχεται από την Αρχή Πιστοποίησης (CA), προσδιορίζει κάθε πιστοποιητικό.
+- Το **Issuer** αναφέρεται στην CA που εξέδωσε το πιστοποιητικό.
+- Το **SubjectAlternativeName** επιτρέπει τον καθορισμό πρόσθετων ονομάτων για το subject, προσφέροντας μεγαλύτερη ευελιξία στην ταυτοποίηση.
+- Το **Basic Constraints** προσδιορίζει αν το πιστοποιητικό προορίζεται για CA ή για τελική οντότητα και ορίζει περιορισμούς χρήσης.
+- Τα **Extended Key Usages (EKUs)** καθορίζουν τους ειδικούς σκοπούς του πιστοποιητικού, όπως την υπογραφή κώδικα ή την κρυπτογράφηση email, μέσω Object Identifiers (OIDs).
+- Το **Signature Algorithm** καθορίζει τη μέθοδο υπογραφής του πιστοποιητικού.
+- Το **Signature**, το οποίο δημιουργείται με το ιδιωτικό κλειδί του εκδότη, εγγυάται τη γνησιότητα του πιστοποιητικού.<sup>[[4]](#references)</sup>
 
-### Ειδικές 고려σεις
+### Ειδικές επισημάνσεις
 
-- Τα **Subject Alternative Names (SANs)** επεκτείνουν τη δυνατότητα εφαρμογής ενός πιστοποιητικού σε πολλαπλές ταυτότητες, κάτι κρίσιμο για servers με πολλαπλά domains. Οι ασφαλείς διαδικασίες έκδοσης είναι απαραίτητες για την αποφυγή κινδύνων impersonation από attackers που χειραγωγούν την προδιαγραφή SAN.<sup>[[4]](#references)</sup>
+- Τα **Subject Alternative Names (SANs)** διευρύνουν τη δυνατότητα εφαρμογής ενός πιστοποιητικού σε πολλαπλές ταυτότητες, κάτι κρίσιμο για διακομιστές με πολλούς τομείς. Οι ασφαλείς διαδικασίες έκδοσης είναι απαραίτητες για την αποτροπή κινδύνων πλαστοπροσωπίας από attackers που χειρίζονται τις προδιαγραφές SAN.<sup>[[4]](#references)</sup>
 
-### Certificate Authorities (CAs) στο Active Directory (AD)
+### Αρχές Πιστοποίησης (CAs) στο Active Directory (AD)
 
-Το AD CS αναγνωρίζει τα CA certificates σε ένα AD forest μέσω καθορισμένων containers, καθένα από τα οποία επιτελεί μοναδικό ρόλο:<sup>[[4]](#references)</sup>
+Το AD CS αναγνωρίζει τα πιστοποιητικά CA σε ένα AD forest μέσω καθορισμένων containers, καθένα από τα οποία εξυπηρετεί έναν μοναδικό ρόλο:<sup>[[4]](#references)</sup>
 
-- Το container **Certification Authorities** περιέχει trusted root CA certificates.
-- Το container **Enrolment Services** περιγράφει τα Enterprise CAs και τα certificate templates τους.
-- Το object **NTAuthCertificates** περιλαμβάνει CA certificates που είναι εξουσιοδοτημένα για authentication στο AD.
+- Το container **Certification Authorities** περιέχει αξιόπιστα πιστοποιητικά root CA.
+- Το container **Enrolment Services** περιλαμβάνει πληροφορίες για τις Enterprise CAs και τα certificate templates τους.
+- Το αντικείμενο **NTAuthCertificates** περιλαμβάνει πιστοποιητικά CA εξουσιοδοτημένα για authentication στο AD.
 - Το container **AIA (Authority Information Access)** διευκολύνει την επικύρωση της αλυσίδας πιστοποιητικών με intermediate και cross CA certificates.
 
-### Απόκτηση Πιστοποιητικού: Ροή Αιτήματος Client Certificate
+### Απόκτηση πιστοποιητικού: Ροή αιτήματος πιστοποιητικού client
 
-1. Η διαδικασία αιτήματος ξεκινά όταν οι clients εντοπίζουν ένα Enterprise CA.
-2. Δημιουργείται ένα CSR, το οποίο περιέχει ένα public key και άλλα στοιχεία, μετά τη δημιουργία ζεύγους public-private key.
-3. Το CA αξιολογεί το CSR σε σχέση με τα διαθέσιμα certificate templates και εκδίδει το πιστοποιητικό βάσει των permissions του template.
-4. Μετά την έγκριση, το CA υπογράφει το πιστοποιητικό με το ιδιωτικό του κλειδί και το επιστρέφει στον client.<sup>[[4]](#references)</sup>
+1. Η διαδικασία αιτήματος ξεκινά όταν οι clients εντοπίζουν μια Enterprise CA.
+2. Δημιουργείται ένα CSR, το οποίο περιέχει ένα public key και άλλα στοιχεία, αφού δημιουργηθεί ένα ζεύγος public-private key.
+3. Η CA αξιολογεί το CSR με βάση τα διαθέσιμα certificate templates και εκδίδει το πιστοποιητικό σύμφωνα με τα δικαιώματα του template.
+4. Μετά την έγκριση, η CA υπογράφει το πιστοποιητικό με το ιδιωτικό της κλειδί και το επιστρέφει στον client.<sup>[[4]](#references)</sup>
 
-### Certificate Templates
+### Certificate templates
 
-Τα templates αυτά, τα οποία ορίζονται μέσα στο AD, περιγράφουν τις ρυθμίσεις και τα permissions για την έκδοση πιστοποιητικών, συμπεριλαμβανομένων των επιτρεπόμενων EKUs και των δικαιωμάτων enrollment ή τροποποίησης, και είναι κρίσιμα για τη διαχείριση της πρόσβασης στις certificate services.<sup>[[4]](#references)</sup>
+Αυτά τα templates, τα οποία ορίζονται στο AD, καθορίζουν τις ρυθμίσεις και τα δικαιώματα για την έκδοση πιστοποιητικών, συμπεριλαμβανομένων των επιτρεπόμενων EKUs και των δικαιωμάτων εγγραφής ή τροποποίησης, τα οποία είναι κρίσιμα για τη διαχείριση της πρόσβασης στις υπηρεσίες πιστοποιητικών.<sup>[[4]](#references)</sup>
 
-**Η έκδοση του template στο schema έχει σημασία.** Τα παλαιότερα templates **v1** (για παράδειγμα, το ενσωματωμένο template **WebServer**) δεν διαθέτουν αρκετούς σύγχρονους μηχανισμούς enforcement. Η έρευνα **ESC15/EKUwu** έδειξε ότι σε **v1 templates**, ο requester μπορεί να ενσωματώσει **Application Policies/EKUs** στο CSR, τα οποία έχουν **προτεραιότητα έναντι των** EKUs που έχουν ρυθμιστεί στο template, επιτρέποντας client-auth, enrollment agent ή code-signing certificates μόνο με enrollment rights. Προτιμήστε **v2/v3 templates**, αφαιρέστε ή αντικαταστήστε τα προεπιλεγμένα v1 templates και περιορίστε αυστηρά τα EKUs στον προβλεπόμενο σκοπό.<sup>[[1]](#references)</sup>
+**Η έκδοση του schema του template έχει σημασία.** Τα παλαιότερα templates **v1** (για παράδειγμα, το ενσωματωμένο template **WebServer**) δεν διαθέτουν αρκετούς σύγχρονους μηχανισμούς επιβολής πολιτικών. Η έρευνα **ESC15/EKUwu** έδειξε ότι σε templates **v1**, ο αιτών μπορεί να ενσωματώσει **Application Policies/EKUs** στο CSR, τα οποία **υπερισχύουν των** EKUs που έχουν ρυθμιστεί στο template, επιτρέποντας την έκδοση πιστοποιητικών client-auth, enrollment agent ή code-signing μόνο με δικαιώματα εγγραφής. Προτιμήστε templates **v2/v3**, αφαιρέστε ή αντικαταστήστε τις προεπιλογές v1 και περιορίστε αυστηρά τα EKUs στον προβλεπόμενο σκοπό τους.<sup>[[1]](#references)</sup>
 
-## Certificate Enrollment
+## Εγγραφή πιστοποιητικών
 
-Η διαδικασία enrollment για certificates ξεκινά από έναν administrator, ο οποίος **δημιουργεί ένα certificate template**. Στη συνέχεια, το template **δημοσιεύεται** από ένα Enterprise Certificate Authority (CA). Έτσι το template γίνεται διαθέσιμο για enrollment από clients, μέσω της προσθήκης του ονόματος του template στο πεδίο `certificatetemplates` ενός object του Active Directory.<sup>[[4]](#references)</sup>
+Η διαδικασία εγγραφής πιστοποιητικών ξεκινά από έναν administrator που **δημιουργεί ένα certificate template**, το οποίο στη συνέχεια **δημοσιεύεται** από μια Enterprise Certificate Authority (CA). Έτσι το template γίνεται διαθέσιμο για εγγραφή από clients, διαδικασία που πραγματοποιείται προσθέτοντας το όνομα του template στο πεδίο `certificatetemplates` ενός αντικειμένου Active Directory.<sup>[[4]](#references)</sup>
 
-Για να ζητήσει ένας client certificate, πρέπει να έχουν εκχωρηθεί **enrollment rights**. Αυτά τα δικαιώματα ορίζονται μέσω security descriptors στο certificate template και στο ίδιο το Enterprise CA. Για να είναι επιτυχές ένα αίτημα, πρέπει να έχουν εκχωρηθεί permissions και στις δύο τοποθεσίες.
+Για να μπορεί ένας client να ζητήσει πιστοποιητικό, πρέπει να του παραχωρηθούν **δικαιώματα εγγραφής**. Αυτά τα δικαιώματα ορίζονται μέσω security descriptors στο certificate template και στην ίδια την Enterprise CA. Για να είναι επιτυχές το αίτημα, πρέπει να παραχωρηθούν δικαιώματα και στις δύο τοποθεσίες.
 
-### Template Enrollment Rights
+### Δικαιώματα εγγραφής template
 
-Αυτά τα δικαιώματα καθορίζονται μέσω Access Control Entries (ACEs), οι οποίες περιγράφουν permissions όπως:
+Αυτά τα δικαιώματα καθορίζονται μέσω Access Control Entries (ACEs), οι οποίες ορίζουν δικαιώματα όπως:
 
-- Τα δικαιώματα **Certificate-Enrollment** και **Certificate-AutoEnrollment**, καθένα από τα οποία συνδέεται με συγκεκριμένα GUIDs.
-- Τα **ExtendedRights**, τα οποία επιτρέπουν όλα τα extended permissions.
-- Τα **FullControl/GenericAll**, τα οποία παρέχουν πλήρη έλεγχο στο template.
+- Δικαιώματα **Certificate-Enrollment** και **Certificate-AutoEnrollment**, καθένα από τα οποία συνδέεται με συγκεκριμένα GUIDs.
+- **ExtendedRights**, που επιτρέπουν όλα τα εκτεταμένα δικαιώματα.
+- **FullControl/GenericAll**, που παρέχουν πλήρη έλεγχο του template.
 
-### Enterprise CA Enrollment Rights
+### Δικαιώματα εγγραφής Enterprise CA
 
-Τα δικαιώματα του CA περιγράφονται στο security descriptor του, το οποίο είναι προσβάσιμο μέσω της κονσόλας διαχείρισης Certificate Authority. Ορισμένες ρυθμίσεις επιτρέπουν ακόμη και σε low-privileged users απομακρυσμένη πρόσβαση, γεγονός που μπορεί να αποτελέσει security concern.
+Τα δικαιώματα της CA περιγράφονται στο security descriptor της, στο οποίο υπάρχει πρόσβαση μέσω της κονσόλας διαχείρισης Certificate Authority. Ορισμένες ρυθμίσεις επιτρέπουν ακόμη και σε χρήστες με χαμηλά προνόμια απομακρυσμένη πρόσβαση, κάτι που ενδέχεται να αποτελεί κίνδυνο για την ασφάλεια.
 
-### Additional Issuance Controls
+### Πρόσθετοι έλεγχοι έκδοσης
 
 Ενδέχεται να εφαρμόζονται ορισμένοι έλεγχοι, όπως:
 
-- **Manager Approval**: Θέτει τα αιτήματα σε κατάσταση pending μέχρι να εγκριθούν από certificate manager.
-- **Enrolment Agents and Authorized Signatures**: Καθορίζουν τον αριθμό των απαιτούμενων υπογραφών σε ένα CSR και τα απαραίτητα Application Policy OIDs.
+- **Έγκριση διαχειριστή**: Διατηρεί τα αιτήματα σε εκκρεμότητα μέχρι να εγκριθούν από certificate manager.
+- **Enrolment Agents και Authorized Signatures**: Καθορίζουν τον αριθμό των απαιτούμενων υπογραφών σε ένα CSR και τα απαραίτητα Application Policy OIDs.
 
-### Μέθοδοι Αιτήματος Πιστοποιητικών
+### Μέθοδοι αιτήματος πιστοποιητικών
 
-Τα certificates μπορούν να ζητηθούν μέσω:
+Τα πιστοποιητικά μπορούν να ζητηθούν μέσω:
 
-1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), με χρήση DCOM interfaces.
-2. **ICertPassage Remote Protocol** (MS-ICPR), μέσω named pipes ή TCP/IP.
-3. Του **certificate enrollment web interface**, με εγκατεστημένο τον ρόλο Certificate Authority Web Enrollment.
-4. Του **Certificate Enrollment Service** (CES), σε συνδυασμό με το service Certificate Enrollment Policy (CEP).
-5. Του **Network Device Enrollment Service** (NDES) για network devices, με χρήση του Simple Certificate Enrollment Protocol (SCEP).
+1. Του **Windows Client Certificate Enrollment Protocol** (MS-WCCE), με χρήση διεπαφών DCOM.
+2. Του **ICertPassage Remote Protocol** (MS-ICPR), μέσω named pipes ή TCP/IP.
+3. Της **web interface εγγραφής πιστοποιητικών**, με εγκατεστημένο τον ρόλο Certificate Authority Web Enrollment.
+4. Της **Certificate Enrollment Service** (CES), σε συνδυασμό με την υπηρεσία Certificate Enrollment Policy (CEP).
+5. Της **Network Device Enrollment Service** (NDES) για συσκευές δικτύου, με χρήση του Simple Certificate Enrollment Protocol (SCEP).
 
-Οι Windows users μπορούν επίσης να ζητήσουν certificates μέσω του GUI (`certmgr.msc` ή `certlm.msc`) ή μέσω command-line tools (`certreq.exe` ή της εντολής `Get-Certificate` του PowerShell).
+Οι χρήστες Windows μπορούν επίσης να ζητήσουν πιστοποιητικά μέσω του GUI (`certmgr.msc` ή `certlm.msc`) ή εργαλείων γραμμής εντολών (`certreq.exe` ή της εντολής PowerShell `Get-Certificate`).
+
 ```bash
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
-## Έλεγχος ταυτότητας με πιστοποιητικό
 
-Το Active Directory (AD) υποστηρίζει έλεγχο ταυτότητας με πιστοποιητικό, χρησιμοποιώντας κυρίως τα πρωτόκολλα **Kerberos** και **Secure Channel (Schannel)**.
+## Πιστοποίηση με πιστοποιητικό
 
-### Διαδικασία ελέγχου ταυτότητας Kerberos
+Το Active Directory (AD) υποστηρίζει πιστοποίηση με πιστοποιητικό, κυρίως μέσω των πρωτοκόλλων **Kerberos** και **Secure Channel (Schannel)**.
 
-Στη διαδικασία ελέγχου ταυτότητας Kerberos, το αίτημα ενός χρήστη για ένα Ticket Granting Ticket (TGT) υπογράφεται με χρήση του **ιδιωτικού κλειδιού** του πιστοποιητικού του χρήστη. Αυτό το αίτημα υποβάλλεται σε διάφορες επικυρώσεις από τον domain controller, συμπεριλαμβανομένων της **ισχύος**, της **αλυσίδας** και της **κατάστασης ανάκλησης** του πιστοποιητικού. Οι επικυρώσεις περιλαμβάνουν επίσης την επαλήθευση ότι το πιστοποιητικό προέρχεται από αξιόπιστη πηγή και την επιβεβαίωση της παρουσίας του εκδότη στο **NTAUTH certificate store**. Οι επιτυχείς επικυρώσεις οδηγούν στην έκδοση ενός TGT. Το αντικείμενο **`NTAuthCertificates`** στο AD, βρίσκεται στη διεύθυνση:
+### Διαδικασία πιστοποίησης Kerberos
+
+Στη διαδικασία πιστοποίησης Kerberos, το αίτημα ενός χρήστη για Ticket Granting Ticket (TGT) υπογράφεται με το **ιδιωτικό κλειδί** του πιστοποιητικού του. Το αίτημα υποβάλλεται σε διάφορους ελέγχους από τον ελεγκτή τομέα, μεταξύ άλλων για την **εγκυρότητα**, την **αλυσίδα πιστοποιητικών** και την **κατάσταση ανάκλησης** του πιστοποιητικού. Οι έλεγχοι περιλαμβάνουν επίσης την επαλήθευση ότι το πιστοποιητικό προέρχεται από αξιόπιστη πηγή και την επιβεβαίωση ότι ο εκδότης υπάρχει στο **χώρο αποθήκευσης πιστοποιητικών NTAUTH**. Αν οι έλεγχοι ολοκληρωθούν με επιτυχία, εκδίδεται ένα TGT. Το αντικείμενο **`NTAuthCertificates`** στο AD βρίσκεται στη διεύθυνση:
+
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
-είναι κεντρικής σημασίας για την建立 εμπιστοσύνης κατά την certificate authentication.<sup>[[4]](#references)</sup>
 
-Από την ανάπτυξη του **KB5014754**, η σύγχρονη Kerberos certificate auth αφορά κυρίως το **mapping strength**, όχι μόνο τα EKUs.<sup>[[2]](#references)</sup> Σε hardened forests:
+είναι κεντρικής σημασίας για την εδραίωση εμπιστοσύνης στην πιστοποίηση μέσω certificate.<sup>[[4]](#references)</sup>
 
-- Ένα certificate που περιέχει μόνο **UPN/DNS SAN** μπορεί να μην επαρκεί πλέον για logon.
-- Το KDC προτιμά ένα **strong binding**, συνήθως το **SID security extension** (`1.3.6.1.4.1.311.25.2`) ή ένα strong explicit mapping στο `altSecurityIdentities`.
-- Αν το cert δεν διαθέτει strong mapping, οι DCs καταγράφουν τα **Kdcsvc Event ID 39/41** σε compatibility mode και απορρίπτουν το auth σε enforcement mode.
-- Σε mixed attack paths, τα **ESC9/ESC16** έχουν σημασία επειδή αφαιρούν το SID extension από τα issued certs· οι operators βασίζονται στη συνέχεια σε explicit mappings ή σε SAN URL SID formats, όπου το υποστηρίζει το attack path.
+Μετά τη διάθεση του **KB5014754**, η σύγχρονη πιστοποίηση Kerberos μέσω certificate αφορά κυρίως την **ισχύ της αντιστοίχισης** και όχι μόνο τα EKU.<sup>[[2]](#references)</sup> Σε hardened forests:
 
-### Secure Channel (Schannel) Authentication
+- Ένα certificate που περιέχει μόνο **UPN/DNS SAN** μπορεί να μην αρκεί πλέον για σύνδεση.
+- Το KDC προτιμά μια **ισχυρή σύνδεση**, συνήθως μέσω της **επέκτασης ασφαλείας SID** (`1.3.6.1.4.1.311.25.2`) ή μιας ισχυρής ρητής αντιστοίχισης στο `altSecurityIdentities`.
+- Αν το certificate δεν διαθέτει ισχυρή αντιστοίχιση, οι DC καταγράφουν το **Kdcsvc Event ID 39/41** σε λειτουργία συμβατότητας και αρνούνται την πιστοποίηση σε λειτουργία επιβολής.
+- Σε μικτές διαδρομές επίθεσης, τα **ESC9/ESC16** έχουν σημασία επειδή αφαιρούν την επέκταση SID από τα certificates που εκδίδονται. Στη συνέχεια, οι operators βασίζονται σε ρητές αντιστοιχίσεις ή σε μορφές SID URL στο SAN, εφόσον τις υποστηρίζει η διαδρομή επίθεσης.
 
-Το Schannel διευκολύνει ασφαλείς συνδέσεις TLS/SSL, όπου κατά τη διάρκεια ενός handshake ο client παρουσιάζει ένα certificate το οποίο, αν επικυρωθεί επιτυχώς, εξουσιοδοτεί την πρόσβαση. Το mapping ενός certificate σε έναν AD account μπορεί να περιλαμβάνει τη συνάρτηση **S4U2Self** του Kerberos ή το **Subject Alternative Name (SAN)** του certificate, μεταξύ άλλων μεθόδων.<sup>[[4]](#references)</sup>
+### Πιστοποίηση Secure Channel (Schannel)
 
-Το Schannel αποτελεί επίσης το πρακτικό fallback όταν το **PKINIT** δεν είναι διαθέσιμο. Για παράδειγμα, αν ένας domain controller δεν διαθέτει κατάλληλο certificate **Smart Card Logon**, τα `certipy auth`/PKINIT tooling μπορεί να αποτύχουν να αποκτήσουν TGT, όμως το ίδιο certificate μπορεί να εξακολουθεί να χρησιμοποιείται μέσω **LDAPS** ή **LDAP StartTLS** για authentication και LDAP operations.
+Το Schannel διευκολύνει ασφαλείς συνδέσεις TLS/SSL. Κατά τη χειραψία, ο client παρουσιάζει ένα certificate το οποίο, αν επικυρωθεί με επιτυχία, εξουσιοδοτεί την πρόσβαση. Η αντιστοίχιση ενός certificate σε έναν λογαριασμό AD μπορεί να χρησιμοποιεί τη λειτουργία **S4U2Self** του Kerberos ή το **Subject Alternative Name (SAN)** του certificate, μεταξύ άλλων μεθόδων.<sup>[[4]](#references)</sup>
 
-### AD Certificate Services Enumeration
+Το Schannel αποτελεί επίσης την πρακτική εναλλακτική όταν το **PKINIT** δεν είναι διαθέσιμο. Για παράδειγμα, αν ένας domain controller δεν διαθέτει κατάλληλο certificate **Smart Card Logon**, τα εργαλεία `certipy auth`/PKINIT μπορεί να αποτύχουν να λάβουν TGT, αλλά το ίδιο certificate μπορεί να χρησιμοποιηθεί για πιστοποίηση και λειτουργίες LDAP μέσω **LDAPS** ή **LDAP StartTLS**.
 
-Οι certificate services του AD μπορούν να απαριθμηθούν μέσω LDAP queries, αποκαλύπτοντας πληροφορίες σχετικά με τις **Enterprise Certificate Authorities (CAs)** και τις διαμορφώσεις τους. Αυτό είναι προσβάσιμο από οποιονδήποτε domain-authenticated user χωρίς special privileges. Εργαλεία όπως τα **[Certify](https://github.com/GhostPack/Certify)** και **[Certipy](https://github.com/ly4k/Certipy)** χρησιμοποιούνται για enumeration και vulnerability assessment σε περιβάλλοντα AD CS.
+### Απαρίθμηση των AD Certificate Services
+
+Οι υπηρεσίες certificates του AD μπορούν να απαριθμηθούν μέσω ερωτημάτων LDAP, αποκαλύπτοντας πληροφορίες για τις **Enterprise Certificate Authorities (CAs)** και τις ρυθμίσεις τους. Αυτές οι πληροφορίες είναι προσβάσιμες από οποιονδήποτε χρήστη έχει πιστοποιηθεί στον domain, χωρίς ειδικά προνόμια. Εργαλεία όπως τα **[Certify](https://github.com/GhostPack/Certify)** και **[Certipy](https://github.com/ly4k/Certipy)** χρησιμοποιούνται για απαρίθμηση και αξιολόγηση ευπαθειών σε περιβάλλοντα AD CS.
 
 Οι εντολές για τη χρήση αυτών των εργαλείων περιλαμβάνουν:
+
 ```bash
 # Enumerate trusted root CA certificates, Enterprise CAs, and web endpoints
 Certify.exe cas
@@ -140,6 +145,7 @@ certipy auth -pfx administrator.pfx -dc-ip 10.10.10.10 -ldap-shell
 certutil.exe -TCAInfo
 certutil -v -dstemplate
 ```
+
 {{#ref}}
 ad-certificates/domain-escalation.md
 {{#endref}}
@@ -148,45 +154,47 @@ ad-certificates/domain-escalation.md
 
 ## Πρόσφατες ευπάθειες και ενημερώσεις ασφαλείας (2022-2025)
 
-| Έτος | ID / Όνομα | Επίπτωση | Βασικά συμπεράσματα |
+| Έτος | ID / Όνομα | Επιπτώσεις | Βασικά συμπεράσματα |
 |------|-----------|--------|----------------|
-| 2022 | **CVE-2022-26923** – “Certifried” / ESC6 | *Privilege escalation* μέσω spoofing πιστοποιητικών λογαριασμών υπολογιστών κατά το PKINIT. | Το patch περιλαμβάνεται στις ενημερώσεις ασφαλείας της **10ης Μαΐου 2022**. Οι έλεγχοι auditing και strong-mapping εισήχθησαν μέσω του **KB5014754**· τα περιβάλλοντα θα πρέπει πλέον να βρίσκονται σε λειτουργία *Full Enforcement*.  |
-| 2023 | **CVE-2023-35350 / 35351** | *Remote code-execution* στα roles AD CS Web Enrollment (certsrv) και CES. | Τα public PoCs είναι περιορισμένα, όμως τα ευάλωτα components του IIS είναι συχνά εκτεθειμένα εσωτερικά. Εφαρμόστε το patch που κυκλοφόρησε στο Patch Tuesday του **Ιουλίου 2023**.  |
-| 2024 | **CVE-2024-49019** – “EKUwu” / ESC15 | Σε **v1 templates**, ένας requester με δικαιώματα enrollment μπορεί να ενσωματώσει **Application Policies/EKUs** στο CSR, τα οποία έχουν προτεραιότητα έναντι των EKUs του template, παράγοντας client-auth, enrollment agent ή code-signing certificates. | Έχει γίνει patch από τις **12 Νοεμβρίου 2024**. Αντικαταστήστε ή κάντε supersede τα v1 templates (π.χ. το προεπιλεγμένο WebServer), περιορίστε τα EKUs σύμφωνα με τον σκοπό τους και περιορίστε τα δικαιώματα enrollment.  |
+| 2022 | **CVE-2022-26923** – “Certifried” / ESC6 | *Κλιμάκωση προνομίων* μέσω πλαστογράφησης πιστοποιητικών λογαριασμών μηχανημάτων κατά το PKINIT. | Το patch περιλαμβάνεται στις ενημερώσεις ασφαλείας της **10ης Μαΐου 2022**. Οι έλεγχοι και οι μηχανισμοί ισχυρής αντιστοίχισης εισήχθησαν μέσω του **KB5014754**· τα περιβάλλοντα θα πρέπει πλέον να βρίσκονται σε λειτουργία *Full Enforcement*.  |
+| 2023 | **CVE-2023-35350 / 35351** | *Απομακρυσμένη εκτέλεση κώδικα* στους ρόλους AD CS Web Enrollment (certsrv) και CES. | Τα δημόσια PoC είναι περιορισμένα, αλλά τα ευάλωτα στοιχεία IIS είναι συχνά εκτεθειμένα εσωτερικά. Εγκαταστήστε το patch που κυκλοφόρησε στο Patch Tuesday του **Ιουλίου 2023**.  |
+| 2024 | **CVE-2024-49019** – “EKUwu” / ESC15 | Σε **v1 templates**, ένας αιτών με δικαιώματα enrollment μπορεί να ενσωματώσει **Application Policies/EKUs** στο CSR, τα οποία υπερισχύουν των EKUs του template και οδηγούν στην έκδοση πιστοποιητικών για client-auth, enrollment agent ή code-signing. | Έχει διορθωθεί από τις **12 Νοεμβρίου 2024**. Αντικαταστήστε ή καταργήστε τα v1 templates (π.χ. το προεπιλεγμένο WebServer), περιορίστε τα EKUs ανάλογα με τον σκοπό και περιορίστε τα δικαιώματα enrollment. |
 
-### Χρονοδιάγραμμα hardening της Microsoft (KB5014754)
+### Χρονοδιάγραμμα ενίσχυσης ασφάλειας της Microsoft (KB5014754)
 
-Η Microsoft εισήγαγε ένα rollout τριών φάσεων (Compatibility → Audit → Enforcement) για να απομακρύνει το Kerberos certificate authentication από τα weak implicit mappings. Από τις **11 Φεβρουαρίου 2025**, οι domain controllers μεταβαίνουν αυτόματα σε **Full Enforcement** αν δεν έχει οριστεί η registry value `StrongCertificateBindingEnforcement`. Η Microsoft ενημέρωσε αργότερα το χρονοδιάγραμμα, ώστε η επιστροφή σε compatibility mode να παραμένει δυνατή έως την ενημέρωση ασφαλείας της **9ης Σεπτεμβρίου 2025**.<sup>[[2]](#references)</sup> Οι administrators θα πρέπει:
+Η Microsoft εισήγαγε μια ανάπτυξη τριών φάσεων (Compatibility → Audit → Enforcement), ώστε ο Kerberos certificate authentication να απομακρυνθεί από τις αδύναμες έμμεσες αντιστοιχίσεις. Από τις **11 Φεβρουαρίου 2025**, οι domain controllers μεταβαίνουν αυτόματα σε **Full Enforcement**, αν δεν έχει οριστεί η τιμή μητρώου `StrongCertificateBindingEnforcement`. Αργότερα, η Microsoft ενημέρωσε το χρονοδιάγραμμα, ώστε να παραμείνει δυνατή η επιστροφή σε compatibility mode έως την ενημέρωση ασφαλείας της **9ης Σεπτεμβρίου 2025**.<sup>[[2]](#references)</sup> Οι διαχειριστές θα πρέπει:
 
-1. Να κάνουν patch σε όλους τους DCs και τους AD CS servers (Μάιος 2022 ή νεότερο).
-2. Να παρακολουθούν τα Event ID 39/41 για weak mappings κατά τη φάση *Audit*.
-3. Να επανεκδίδουν client-auth certificates με το νέο **SID extension** ή να ρυθμίζουν strong manual mappings πριν το enforcement αποκλείσει τα weak mappings.
+1. Να εγκαταστήσουν τα patches σε όλους τους DC και τους AD CS servers (Μάιος 2022 ή νεότερα).
+2. Να παρακολουθούν τα Event ID 39/41 για αδύναμες αντιστοιχίσεις κατά τη φάση *Audit*.
+3. Να επανεκδώσουν τα client-auth certificates με τη νέα **SID extension** ή να διαμορφώσουν ισχυρές χειροκίνητες αντιστοιχίσεις, προτού η enforcement αποκλείσει τις αδύναμες αντιστοιχίσεις.
 
-### Σημειώσεις για operators σε hardened forests
+### Σημειώσεις για operators σε ενισχυμένα forests
 
-- Το **ESC1/ESC6 από μόνο του δεν αποτελεί πλέον ολόκληρη την εικόνα** σε περιβάλλοντα 2025+. Αν ζητήσετε certificate για άλλο principal, συνήθως χρειάζεστε επίσης ένα strong mapping artifact, όπως το SID extension ή ένα explicit mapping.
-- Το **ESC15 (EKUwu)** είναι κυρίως χρήσιμο σε unpatched περιβάλλοντα, επειδή μετατρέπει ακίνδυνα **v1** templates, όπως το **WebServer**, σε authentication- ή enrollment-agent-capable certificates μέσω injection **Application Policies**. Το Kerberos PKINIT εξακολουθεί να αξιολογεί τα EKUs, όμως το **LDAP Schannel** επίσης αναγνωρίζει τα Application Policies, γεγονός που διατηρεί σχετικό το LDAP-based abuse.<sup>[[1]](#references)</sup>
-- Το **ESC16** είναι ρύθμιση σε επίπεδο CA: αν το CA απενεργοποιήσει global το SID security extension, κάθε certificate που εκδίδεται επιστρέφει σε ασθενέστερη συμπεριφορά mapping, εκτός αν η attack chain εισάγει SID μέσω άλλης υποστηριζόμενης μορφής.
+- **Τα ESC1/ESC6 από μόνα τους δεν είναι πλέον όλη η ιστορία** σε περιβάλλοντα του 2025 και μετά. Αν ζητήσετε πιστοποιητικό για άλλο principal, συνήθως χρειάζεστε επίσης ένα ισχυρό τεκμήριο αντιστοίχισης, όπως τη SID extension ή μια ρητή αντιστοίχιση.
+- Το **ESC15 (EKUwu)** είναι κυρίως χρήσιμο σε περιβάλλοντα χωρίς patch, καθώς μετατρέπει αβλαβή **v1** templates, όπως το **WebServer**, σε templates που μπορούν να εκδώσουν πιστοποιητικά για authentication ή enrollment agent, εισάγοντας **Application Policies**. Το Kerberos PKINIT εξακολουθεί να ελέγχει τα EKUs, αλλά το **LDAP Schannel** λαμβάνει επίσης υπόψη τα Application Policies, διατηρώντας σχετική την κατάχρηση μέσω LDAP.<sup>[[1]](#references)</sup>
+- Το **ESC16** είναι ρύθμιση σε επίπεδο CA: αν η CA απενεργοποιήσει συνολικά τη SID security extension, κάθε πιστοποιητικό που εκδίδεται επιστρέφει σε ασθενέστερη συμπεριφορά αντιστοίχισης, εκτός αν η αλυσίδα επίθεσης εισάγει SID με άλλη υποστηριζόμενη μορφή.
+- **Τα δικαιώματα ESC7 είναι διακριτά:** μια εκχώρηση `ManageCA` στην CA μπορεί να επιτρέψει αλλαγές σε ρυθμίσεις όπως το `EDITF_ATTRIBUTESUBJECTALTNAME2` (ESC6), ενώ το `ManageCertificates` ελέγχει την έγκριση αιτημάτων. Μια ρητή Deny για δικαιώματα certificate-manager μπορεί να αποκλείσει αυτή τη διαδρομή έγκρισης, ακόμη κι αν υπάρχει και Allow· αξιολογήστε το αποτελεσματικό ACL της CA πριν συνδυάσετε ρυθμίσεις και templates. Δείτε την [αξιολόγηση ACL CA της Microsoft](https://learn.microsoft.com/en-us/defender-for-identity/security-assessment-edit-vulnerable-ca-setting).
 
 ---
 
-## Βελτιώσεις σε Detection και Hardening
+## Βελτιώσεις εντοπισμού και ενίσχυσης ασφάλειας
 
-* Το **Defender for Identity AD CS sensor (2023-2024)** εμφανίζει πλέον posture assessments για ESC1-ESC8/ESC11 και δημιουργεί real-time alerts, όπως *“Domain-controller certificate issuance for a non-DC”* (ESC8) και *“Prevent Certificate Enrollment with arbitrary Application Policies”* (ESC15). Βεβαιωθείτε ότι sensors έχουν αναπτυχθεί σε όλους τους AD CS servers, ώστε να αξιοποιούνται αυτές οι detections.<sup>[[3]](#references)</sup>
+* Ο αισθητήρας **Defender for Identity AD CS (2023-2024)** εμφανίζει πλέον αξιολογήσεις κατάστασης για ESC1-ESC8/ESC11 και δημιουργεί ειδοποιήσεις σε πραγματικό χρόνο, όπως *“Έκδοση πιστοποιητικού domain controller για μη-DC”* (ESC8) και *“Αποτροπή enrollment πιστοποιητικών με αυθαίρετα Application Policies”* (ESC15). Βεβαιωθείτε ότι οι αισθητήρες έχουν εγκατασταθεί σε όλους τους AD CS servers για να αξιοποιήσετε αυτούς τους εντοπισμούς.<sup>[[3]](#references)</sup>
 * Απενεργοποιήστε ή περιορίστε αυστηρά την επιλογή **“Supply in the request”** σε όλα τα templates· προτιμήστε ρητά καθορισμένες τιμές SAN/EKU.
-* Αφαιρέστε τα **Any Purpose** ή **No EKU** από τα templates, εκτός αν απαιτούνται απολύτως (αντιμετωπίζει σενάρια ESC2).
-* Απαιτήστε **manager approval** ή αποκλειστικές ροές εργασίας Enrollment Agent για ευαίσθητα templates (π.χ. WebServer / CodeSigning).
-* Περιορίστε το web enrollment (`certsrv`) και τα CES/NDES endpoints σε trusted networks ή τοποθετήστε τα πίσω από client-certificate authentication.
-* Επιβάλετε RPC enrollment encryption (`certutil -setreg CA\InterfaceFlags +IF_ENFORCEENCRYPTICERTREQUEST`) για τον περιορισμό του ESC11 (RPC relay). Το flag είναι **ενεργοποιημένο από προεπιλογή**, όμως συχνά απενεργοποιείται για legacy clients, γεγονός που επαναφέρει τον κίνδυνο relay.
-* Ασφαλίστε τα **IIS-based enrollment endpoints** (CES/Certsrv): απενεργοποιήστε το NTLM όπου είναι δυνατό ή απαιτήστε HTTPS + Extended Protection για τον αποκλεισμό των ESC8 relays.
+* Αφαιρέστε τα **Any Purpose** ή **No EKU** από τα templates, εκτός αν είναι απολύτως απαραίτητα (αντιμετωπίζει σενάρια ESC2).
+* Απαιτήστε **έγκριση manager** ή ειδικές ροές εργασίας Enrollment Agent για ευαίσθητα templates (π.χ. WebServer / CodeSigning).
+* Περιορίστε τα web enrollment endpoints (`certsrv`) και τα endpoints CES/NDES σε έμπιστα δίκτυα ή πίσω από authentication με client certificate.
+* Επιβάλετε κρυπτογράφηση RPC enrollment (`certutil -setreg CA\InterfaceFlags +IF_ENFORCEENCRYPTICERTREQUEST`) για τον μετριασμό του ESC11 (RPC relay). Η σημαία είναι **ενεργοποιημένη από προεπιλογή**, αλλά συχνά απενεργοποιείται για legacy clients, επαναφέροντας τον κίνδυνο relay.
+* Ασφαλίστε τα **IIS-based enrollment endpoints** (CES/Certsrv): απενεργοποιήστε το NTLM όπου είναι δυνατό ή απαιτήστε HTTPS + Extended Protection για να αποκλείσετε τα ESC8 relays.
+
+Αξιολογήστε το ESC11 στον host που εκτελεί την CA, ο οποίος μπορεί να είναι domain member server και όχι domain controller. Διαβάστε το `InterfaceFlags` της ενεργής CA, στη διαδρομή `HKLM\SYSTEM\CurrentControlSet\Services\CertSvc\Configuration`· μια μη αναγνώσιμη ή απούσα τιμή αποτελεί άγνωστο αποτέλεσμα, όχι απόδειξη ότι η κρυπτογράφηση RPC είναι απενεργοποιημένη. Ένα καθαρό bit `IF_ENFORCEENCRYPTICERTREQUEST` αποτελεί ένδειξη ρύθμισης που χρειάζεται περαιτέρω διερεύνηση και εξακολουθεί να απαιτεί προσβάσιμο enrollment RPC endpoint, διαπιστευτήρια που μπορούν να εξαναγκαστούν και κατάλληλο certificate template. Για το ESC8, μια πρόκληση HTTP NTLM από μόνη της δεν αρκεί: επιβεβαιώστε ότι υπάρχει λειτουργικό enrollment endpoint.
 
 ---
 
-## Αναφορές
+## References
 
 - [1] [EKUwu: Όχι απλώς άλλο ένα AD CS ESC](https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc)
-- [2] [KB5014754: Αλλαγές στο certificate-based authentication σε Windows domain controllers](https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16)
-- [3] [Assessments ασφαλείας για certificates - Microsoft Defender for Identity](https://learn.microsoft.com/en-us/defender-for-identity/security-posture-assessments/certificates)
-- [4] [Certified Pre-Owned: Abusing Active Directory Certificate Services](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
-
+- [2] [KB5014754: Αλλαγές στο authentication μέσω πιστοποιητικών σε Windows domain controllers](https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16)
+- [3] [Αξιολογήσεις κατάστασης ασφάλειας πιστοποιητικών - Microsoft Defender for Identity](https://learn.microsoft.com/en-us/defender-for-identity/security-posture-assessments/certificates)
+- [4] [Certified Pre-Owned: Κατάχρηση των Active Directory Certificate Services](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
 {{#include ../../banners/hacktricks-training.md}}
