@@ -139,6 +139,48 @@ Notes:
 
 ---
 
+## AI Agent Artifact Discovery and Post-Exploitation
+
+After obtaining access to a user context, local agent state can consolidate identity, authentication, project, tool, and conversation data that would otherwise be spread across terminals, IDEs, cloud CLIs, and browser sessions. This is same-user post-compromise collection—not a privilege-escalation primitive—and its impact depends on the validity and scope of any recovered tokens and integrations.<sup>[[14]](#references)[[15]](#references)</sup>
+
+### High-value roots
+
+Blacklight uses the same relative catalog below under `$HOME` on Linux/macOS and `%USERPROFILE%` on Windows. Treat it as a versioned starting point because agent layouts and schemas change frequently.<sup>[[14]](#references)[[15]](#references)</sup>
+
+| Agent | High-value artifacts |
+| --- | --- |
+| Codex | `.codex/auth.json`, `config.toml`, `rules/`, `history.jsonl`, `session_index.jsonl`, `sessions/`, `archived_sessions/` |
+| Claude Code | `.claude/.credentials.json`, `settings.json`, `.claude.json`, `history.jsonl`, `sessions/`, `projects/`, `plugins/`, `mcp-needs-auth-cache.json` |
+| Cursor | `.cursor/cli-config.json`, `mcp.json`, `prompt_history.json`, `chats/`, `projects/`, `plans/`, `extensions/`, `ai-tracking/ai-code-tracking.db` |
+| Antigravity CLI | `.gemini/antigravity-cli/settings.json`, `mcp_config.json`, `history.jsonl`, `conversations/`, `conversation_summaries.db`, `brain/`, `log/` |
+
+Authentication files can expose access, refresh, or identity material; settings and rules reveal approval policy, sandbox exceptions, trusted roots, MCP endpoints, and command permissions; session indexes and workspace metadata reveal recency, volume, repositories, internal paths, and likely follow-on systems. Correlate these classes instead of treating every artifact as an isolated secret: identity + token state + trusted project + integration metadata can show both who the user is and where the agent can act.<sup>[[14]](#references)[[15]](#references)</sup>
+
+### Metadata-first triage and selective collection
+
+1. **Scout known roots first.** Test cataloged paths for existence and type, then record only metadata such as path, size, modification time, artifact family, and counts. Blacklight provides a Windows BOF (`ai_path_scout.x64.o`), Windows native/managed executables, and Linux/macOS shared libraries for this bounded discovery phase.<sup>[[14]](#references)[[15]](#references)</sup>
+2. **Do not pull transcripts blindly.** Prioritize authentication and policy/configuration paths, then rank sessions by recency and size. Scout does not read session bodies and its Windows executable tier returns at most three newest and three largest recognized session files per tool, leaving acquisition as an operator decision.<sup>[[14]](#references)[[15]](#references)</sup>
+3. **Analyze selected copies offline.** The parser recognizes supported JSONL and SQLite artifacts even when they are nested or renamed, produces ranked redacted reports, and preserves exact source paths for a dedicated secret scanner. Bound the run with include/exclude, file-count, and file-size controls rather than applying broad regex collection to the whole profile.<sup>[[14]](#references)[[15]](#references)</sup>
+
+```bash
+blacklight sessions ~/Downloads/HOST-001/ \
+  --run-id HOST-001 \
+  --output-directory out/results/HOST-001/reports \
+  --max-files 10000
+```
+
+For SQLite stores, make a temporary read-only snapshot and validate the schema before parsing. Cursor `chats/**/store.db` files are recognized through their expected `blobs`/`meta` structure and can yield JSON messages plus titles and timestamps; Antigravity conversation databases should be handled more conservatively by collecting schema and row counts while excluding `body`, `content`, and `message` columns.<sup>[[14]](#references)[[15]](#references)</sup>
+
+### Detecting artifact access
+
+Use the same confirmed roots for defensive inventory, but distinguish **changes** from actual **reads**:<sup>[[14]](#references)[[15]](#references)</sup>
+
+- On Linux, osquery `file_events` records changes; opt-in `file_accesses` can add access telemetry but is high volume and should be narrowly scoped.<sup>[[14]](#references)</sup>
+- On macOS, FSEvents-backed `file_events` does not prove a read. Process-linked visibility requires `es_process_file_events`, an appropriately signed osquery build, Endpoint Security support, and Full Disk Access.<sup>[[14]](#references)[[15]](#references)</sup>
+- On Windows, file modification events also do not prove access. Confirm reads with Security event `4663` only after enabling **Audit File System** and applying a read-audit SACL to each monitored root; `ReadData` appears as access mask `0x1` / access token `%%4416`.<sup>[[14]](#references)</sup>
+
+---
+
 ## Pentesting Remote MCP Servers
 
 Remote MCP servers expose a JSON‑RPC 2.0 API that fronts LLM‑centric capabilities (Prompts, Resources, Tools). They inherit classic web API flaws while adding async transports (SSE/streamable HTTP) and per‑session semantics.<sup>[[3]](#references)</sup>
@@ -254,5 +296,7 @@ Impact highlights
 - [11] [OS command injection in mcp-remote when connecting to untrusted MCP servers (JFrog Security Research, JFSA-2025-001290844)](https://research.jfrog.com/vulnerabilities/mcp-remote-command-injection-rce-jfsa-2025-001290844/)
 - [12] [When OAuth Becomes a Weapon: Lessons from CVE-2025-6514](https://amlalabs.com/blog/oauth-cve-2025-6514/)
 - [13] [What the Miasma campaign reveals about the new supply chain threat model and the underground market for developer credentials](https://www.tenable.com/blog/what-the-miasma-campaign-reveals-about-the-new-supply-chain-threat-model-and-the-underground)
+- [14] [SpecterOps Blacklight — endpoint AI agent artifact discovery and analysis toolkit](https://github.com/SpecterOps/Blacklight)
+- [15] [Blacklight: Illuminating AI Agent Artifacts for Attackers and Defenders](https://specterops.io/blog/2026/08/12/blacklight-ai-agent-endpoint-artifacts/)
 
 {{#include ../../banners/hacktricks-training.md}}
