@@ -1,108 +1,108 @@
-# Web3 Red Teaming usmeren na vrednost (MITRE AADAPT)
+# Red teaming Web3 sistema usmerenog na vrednost (MITRE AADAPT)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-MITRE Adversarial Actions in Digital Asset Payment Techniques (AADAPT) framework kategorizuje adversarial actions i techniques usmerene na sisteme digitalne imovine.<sup>[[1]](#references)</sup> Tretirajte ga kao **osnovu za threat-modeling**: popišite svaku komponentu koja može da kreira, procenjuje, autorizuje ili usmerava imovinu, mapirajte te tačke dodira na AADAPT techniques, a zatim pokrenite red-team scenarije koji mere da li okruženje može da se odupre nepovratnom ekonomskom gubitku.
+MITRE-ov okvir Adversarial Actions in Digital Asset Payment Techniques (AADAPT) kategorizuje protivničke aktivnosti i tehnike usmerene na sisteme digitalne imovine.<sup>[[1]](#references)</sup> Tretirajte ga kao **osnovu za modelovanje pretnji**: popišite svaku komponentu koja može da kreira, vrednuje, autorizuje ili usmerava imovinu, mapirajte te tačke kontakta na AADAPT tehnike, a zatim osmislite red-team scenarije kojima se procenjuje može li okruženje da spreči nepovratan ekonomski gubitak.
 
 ## 1. Popišite komponente koje nose vrednost
-Napravite mapu svega što može da utiče na stanje vrednosti, čak i ako se nalazi off-chain.<sup>[[2]](#references)</sup>
+Napravite mapu svega što može da utiče na stanje vrednosti, čak i ako se nalazi van lanca.<sup>[[2]](#references)</sup>
 
-- **Custodial signing services** (HSM/KMS klasteri, Vault/KMaaS, signing API-ji koje koriste botovi ili back-office poslovi). Zabeležite key ID-jeve, policies, automation identities i approval workflows.
-- **Admin i upgrade putanje** za contracts (proxy admins, governance timelocks, emergency pause keys, parameter registries). Uključite ko ili šta može da ih pozove i pod kojim quorum-om ili delay-em.
-- **On-chain protocol logic** koja obrađuje lending, AMM-ove, vaults, staking, bridges ili settlement rails. Dokumentujte invariants na koje se oslanjaju (oracle prices, collateral ratios, rebalance cadence…).
-- **Off-chain automation** koja kreira transactions (market-making botovi, CI/CD pipelines, cron jobs, serverless functions). Oni često poseduju API keys ili service principals koji mogu da zahtevaju signatures.
-- **Oracles i data feeds** (sastav aggregator-a, quorum, deviation thresholds, update cadence). Zabeležite svaki upstream na koji se automated risk logic oslanja.
-- **Bridges i cross-chain routers** (lock/mint contracts, relayers, settlement jobs) koji povezuju chains ili custodial stacks.
+- **Custodial signing servisi** (HSM/KMS klasteri, Vault/KMaaS, API-ji za potpisivanje koje koriste botovi ili pozadinski poslovi). Zabeležite ID-jeve ključeva, pravila, identitete za automatizaciju i tokove odobravanja.
+- **Administrativne i nadogradne putanje** za ugovore (proxy administratori, governance timelock-i, ključevi za hitno pauziranje, registri parametara). Navedite ko ili šta može da ih poziva i pod kojim kvorumom ili odlaganjem.
+- **On-chain protokolska logika** za pozajmljivanje, AMM-ove, vault-ove, staking, bridge-ove ili rail-ove za poravnanje. Dokumentujte pretpostavljene invarijante (cene orakla, odnosi kolaterala, učestalost rebalansiranja…).
+- **Off-chain automatizacija** koja sklapa transakcije (market-making botovi, CI/CD pipeline-ovi, cron poslovi, serverless funkcije). Često raspolažu API ključevima ili service principal-ima koji mogu da zatraže potpise.
+- **Orakli i data feed-ovi** (sastav agregatora, kvorum, pragovi odstupanja, učestalost ažuriranja). Zabeležite svaki upstream izvor na koji se oslanja automatizovana logika za upravljanje rizikom.
+- **Bridge-ovi i cross-chain ruteri** (ugovori za zaključavanje/kreiranje tokena, relayer-i, poslovi za poravnanje) koji povezuju lance ili custodial sisteme.
 
-Isporučivi rezultat: dijagram toka vrednosti koji prikazuje kako se assets kreću, ko autorizuje kretanje i koji external signals utiču na business logic.
+Rezultat: dijagram toka vrednosti koji prikazuje kako se imovina kreće, ko odobrava njeno kretanje i koji spoljašnji signali utiču na poslovnu logiku.
 
-## 2. Mapirajte komponente na AADAPT behaviors
-Prevedite AADAPT taxonomy u konkretne attack candidates za svaku komponentu.<sup>[[2]](#references)</sup>
+## 2. Mapirajte komponente na AADAPT ponašanja
+Pretvorite AADAPT taksonomiju u konkretne kandidate za napade po komponentama.<sup>[[2]](#references)</sup>
 
-| Component | Primarni AADAPT fokus |
+| Komponenta | Primarni fokus AADAPT-a |
 | --- | --- |
-| Signing/KMS estates | Credential theft, policy bypass, signing-abuse, governance takeover |
-| Oracles/feeds | Input poisoning, aggregation manipulation, deviation-threshold evasion |
-| On-chain protocols | Flash-loan economic manipulation, invariant breaking, parameter reconfiguration |
-| Automation pipelines | Compromised bot/CI identities, batch replay, unauthorized deployment |
-| Bridges/routers | Cross-chain evasion, rapid hop laundering, settlement desynchronization |
+| Signing/KMS sistemi | Krađa kredencijala, zaobilaženje pravila, zloupotreba potpisivanja, preuzimanje governance-a |
+| Orakli/feed-ovi | Trovanje ulaznih podataka, manipulacija agregacijom, izbegavanje pragova odstupanja |
+| On-chain protokoli | Ekonomska manipulacija flash loan-om, narušavanje invarijanti, ponovna konfiguracija parametara |
+| Pipeline-ovi za automatizaciju | Kompromitovani bot/CI identiteti, ponavljanje batch-a, neovlašćeno postavljanje |
+| Bridge-ovi/ruteri | Cross-chain izbegavanje, brzo prebacivanje radi pranja, desinhronizacija poravnanja |
 
-Ovo mapiranje obezbeđuje da ne testirate samo contracts, već i svaki identity/automation koji može indirektno da usmerava vrednost.
+Ovo mapiranje osigurava da testirate ne samo ugovore, već i svaki identitet/automatizaciju koji mogu indirektno da usmeravaju vrednost.
 
-## 3. Odredite prioritete prema izvodljivosti za attackera i poslovnom uticaju
+## 3. Odredite prioritete prema izvodljivosti napadača i poslovnom uticaju
 
-1. **Operational weaknesses**: izloženi CI credentials, previše privilegovane IAM roles, pogrešno konfigurisane KMS policies, automation accounts koji mogu da zahtevaju proizvoljne signatures, public buckets sa bridge configs itd.
-2. **Value-specific weaknesses**: fragilni oracle parameters, upgradable contracts bez multi-party approvals, flash-loan sensitive liquidity, governance actions koje zaobilaze timelocks.
+1. **Operativne slabosti**: izloženi CI kredencijali, IAM uloge sa prevelikim privilegijama, pogrešno konfigurisana KMS pravila, automation nalozi koji mogu da zatraže proizvoljne potpise, javni bucket-i sa bridge konfiguracijama itd.
+2. **Slabosti specifične za vrednost**: krhki parametri orakla, nadogradivi ugovori bez odobrenja više strana, likvidnost podložna flash loan napadima, governance radnje koje zaobilaze timelock-e.
 
-Vodite queue kao adversary: počnite od operational footholds koji bi mogli da uspeju danas, a zatim pređite na duboke protocol/economic manipulation paths.<sup>[[2]](#references)</sup>
+Radite kroz red kao protivnik: počnite od operativnih uporišnih tačaka koje bi mogle da uspeju već danas, a zatim pređite na dublje putanje protokolske/ekonomske manipulacije.<sup>[[2]](#references)</sup>
 
-## 4. Izvršavajte u kontrolisanim okruženjima realističnim za production
-- **Forked mainnets / isolated testnets**: replicirajte bytecode, storage i liquidity kako bi flash-loan paths, oracle drifts i bridge flows radili end-to-end bez dodirivanja stvarnih funds.<sup>[[2]](#references)</sup>
-- **Blast-radius planning**: definišite circuit breakers, pausable modules, rollback runbooks i test-only admin keys pre detoniranja scenarija.
-- **Stakeholder coordination**: obavestite custodians, oracle operators, bridge partners i compliance kako bi njihovi monitoring timovi očekivali saobraćaj.
-- **Legal sign-off**: dokumentujte scope, authorization i stop conditions kada simulations mogu da obuhvate regulated rails.
+## 4. Izvršavajte scenarije u kontrolisanim okruženjima koja realistično odražavaju produkciju
+- **Fork-ovi mainnet-a / izolovani testnet-i**: replicirajte bytecode, skladište i likvidnost kako bi flash-loan putanje, odstupanja orakla i bridge tokovi mogli da se izvrše od početka do kraja bez dodirivanja stvarnih sredstava.<sup>[[2]](#references)</sup>
+- **Planiranje dometa uticaja**: definišite circuit breaker-e, module koji mogu da se pauziraju, runbook-ove za rollback i admin ključeve namenjene samo za testiranje pre aktiviranja scenarija.
+- **Koordinacija sa zainteresovanim stranama**: obavestite custodiane, operatere orakla, bridge partnere i timove za usklađenost kako bi njihovi timovi za nadzor očekivali saobraćaj.
+- **Pravno odobrenje**: dokumentujte opseg, ovlašćenje i uslove za prekid kada bi simulacije mogle da obuhvate regulisane tokove.
 
-## 5. Telemetrija usklađena sa AADAPT techniques
-Instrumentišite telemetry streams tako da svaki scenario proizvodi podatke korisne za detection.<sup>[[2]](#references)</sup>
+## 5. Telemetrija usklađena sa AADAPT tehnikama
+Prikupite telemetriju tako da svaki scenario proizvede podatke za detekciju na osnovu kojih se može delovati.<sup>[[2]](#references)</sup>
 
-- **Chain-level traces**: kompletni call graphs, gas usage, transaction nonces, block timestamps — za rekonstrukciju flash-loan bundles, reentrancy-like structures i cross-contract hops.
-- **Application/API logs**: povežite svaki on-chain tx sa human ili automation identity-jem (session ID, OAuth client, API key, CI job ID), uz IP adrese i auth methods.
-- **KMS/HSM logs**: key ID, caller principal, policy result, destination address i reason codes za svaki signature. Uspostavite baseline change windows i high-risk operations.
-- **Oracle/feed metadata**: composition data source-a po update-u, reported value, deviation od rolling averages, aktivirani thresholds i korišćeni failover paths.
-- **Bridge/swap traces**: korelišite lock/mint/unlock events između chains pomoću correlation IDs, chain IDs, relayer identity-ja i hop timing-a.
-- **Anomaly markers**: izvedene metrics kao što su slippage spikes, abnormal collateralization ratios, unusual gas density ili cross-chain velocity.
+- **Traces na nivou lanca**: potpuni grafovi poziva, potrošnja gasa, nonce transakcija, vremenske oznake blokova — za rekonstrukciju flash-loan paketa, struktura nalik reentrancy-ju i poziva između ugovora.
+- **Aplikaциони/API logovi**: povežite svaku on-chain transakciju sa ljudskim ili automatizovanim identitetom (ID sesije, OAuth klijent, API ključ, ID CI posla), uz IP adrese i metode autentifikacije.
+- **KMS/HSM logovi**: ID ključa, pozivajući principal, rezultat provere pravila, odredišna adresa i šifre razloga za svaki potpis. Postavite osnovne vrednosti za vremenske prozore promena i visokorizične operacije.
+- **Metapodaci orakla/feed-a**: sastav izvora podataka za svako ažuriranje, prijavljena vrednost, odstupanje od pokretnih proseka, aktivirani pragovi i korišćene putanje za prebacivanje na rezervni izvor.
+- **Bridge/swap traces**: povežite događaje zaključavanja/kreiranja tokena/otključavanja između lanaca pomoću ID-jeva korelacije, ID-jeva lanaca, identiteta relayer-a i vremena između hop-ova.
+- **Oznake anomalija**: izvedene metrike kao što su skokovi slippage-a, neuobičajeni odnosi kolaterala, neuobičajena gustina gasa ili brzina kretanja između lanaca.
 
-Označite sve scenario IDs ili synthetic user IDs kako bi analysts mogli da usklade observables sa AADAPT technique-om koji se testira.
+Označite sve ID-jevima scenarija ili sintetičkim ID-jevima korisnika kako bi analitičari mogli da povežu uočene podatke sa AADAPT tehnikom koja se testira.
 
-## 6. Purple-team loop i metrics zrelosti
-1. Pokrenite scenario u kontrolisanom okruženju i zabeležite detections (alerts, dashboards, responders koji su paged).<sup>[[2]](#references)</sup>
-2. Mapirajte svaki korak na konkretne AADAPT techniques i observables proizvedene u chain/app/KMS/oracle/bridge planes.
-3. Formulišite i deploy-ujte detection hypotheses (threshold rules, correlation searches, invariant checks).
-4. Ponavljajte postupak dok mean time to detect (MTTD) i mean time to contain (MTTC) ne budu u granicama poslovnih tolerancija i dok playbooks pouzdano ne zaustave gubitak vrednosti.
+## 6. Purple-team ciklus i metrike zrelosti
+1. Pokrenite scenario u kontrolisanom okruženju i zabeležite detekcije (upozorenja, kontrolne table, obavešteni reagovaoci).<sup>[[2]](#references)</sup>
+2. Povežite svaki korak sa konkretnim AADAPT tehnikama i uočenim podacima u slojevima chain/app/KMS/oracle/bridge.
+3. Formulišite i postavite hipoteze za detekciju (pravila praga, pretrage korelacija, provere invarijanti).
+4. Ponavljajte testove dok srednje vreme detekcije (MTTD) i srednje vreme obuzdavanja (MTTC) ne budu u okviru poslovnih tolerancija, a uputstva za postupanje pouzdano zaustavljaju gubitak vrednosti.
 
-Pratite zrelost programa kroz tri ose:<sup>[[2]](#references)</sup>
-- **Visibility**: svaki kritični value path ima telemetry u svakom plane-u.
-- **Coverage**: udeo prioritizovanih AADAPT techniques testiranih end-to-end.
-- **Response**: sposobnost da se contracts pauziraju, keys opozovu ili flows zamrznu pre nepovratnog gubitka.
+Pratite zrelost programa na tri ose:<sup>[[2]](#references)</sup>
+- **Vidljivost**: svaka kritična putanja vrednosti ima telemetriju u svakom sloju.
+- **Pokrivenost**: udeo prioritetnih AADAPT tehnika testiranih od početka do kraja.
+- **Reagovanje**: mogućnost pauziranja ugovora, opoziva ključeva ili zamrzavanja tokova pre nepovratnog gubitka.
 
-Tipične milestones: (1) završen value inventory + AADAPT mapping, (2) prvi end-to-end scenario sa implementiranim detections, (3) kvartalni purple-team cycles koji proširuju coverage i smanjuju MTTD/MTTC.<sup>[[2]](#references)</sup>
+Tipične prekretnice: (1) završen popis vrednosti i AADAPT mapiranje, (2) prvi scenario od početka do kraja sa implementiranim detekcijama, (3) kvartalni purple-team ciklusi koji proširuju pokrivenost i skraćuju MTTD/MTTC.<sup>[[2]](#references)</sup>
 
-## 7. Scenario templates
-Koristite ove ponovljive blueprints za dizajniranje simulations koje se direktno mapiraju na AADAPT behaviors.<sup>[[2]](#references)</sup>
+## 7. Predlošci scenarija
+Koristite ove ponovljive nacrte za osmišljavanje simulacija koje se direktno mapiraju na AADAPT ponašanja.<sup>[[2]](#references)</sup>
 
-### Scenario A – Flash-loan economic manipulation
-- **Objective**: pozajmiti privremeni capital unutar jedne transaction kako bi se izmenile AMM prices/liquidity i aktivirali mispriced borrows, liquidations ili mints pre otplate.
-- **Execution**:
-1. Forkujte target chain i napunite pools production-like liquidity-jem.
-2. Pozajmite veliki notional putem flash loan-a.
-3. Izvršite kalibrisane swaps kako biste prešli price/threshold boundaries na koje se oslanjaju lending, vault ili derivative logic.
-4. Pozovite victim contract odmah nakon distortion-a (borrow, liquidate, mint) i otplatite flash loan.
-- **Measurement**: Da li je invariant violation uspela? Da li su slippage/price-deviation monitors, circuit breakers ili governance pause hooks aktivirani? Koliko je vremena bilo potrebno da analytics označi abnormal gas/call graph pattern?
+### Scenario A – Ekonomska manipulacija flash loan-om
+- **Cilj**: pozajmiti privremeni kapital u okviru jedne transakcije kako bi se izmenile AMM cene/likvidnost i pokrenulo precenjeno pozajmljivanje, likvidacije ili kreiranje tokena pre vraćanja sredstava.
+- **Izvršenje**:
+  1. Napravite fork ciljnog lanca i napunite pool-ove likvidnošću nalik produkcionoj.
+  2. Pozajmite veliku nominalnu vrednost putem flash loan-a.
+  3. Izvršite precizno podešene swap-ove da biste prešli granice cena/pragova na koje se oslanja logika pozajmljivanja, vault-a ili derivata.
+  4. Odmah nakon izmene pozovite ugovor koji je meta (pozajmite, likvidirajte, kreirajte tokene) i vratite flash loan.
+- **Merenje**: Da li je narušavanje invarijante uspelo? Da li su aktivirani nadzori za slippage/odstupanje cena, circuit breaker-i ili governance hook-ovi za pauziranje? Koliko je vremena bilo potrebno da analitika označi neuobičajen obrazac gasa/grafa poziva?
 
-### Scenario B – Oracle/data-feed poisoning
-- **Objective**: utvrditi da li manipulated feeds mogu da pokrenu destruktivne automated actions (mass liquidations, incorrect settlements).
-- **Execution**:
-1. U fork/testnet okruženju deploy-ujte malicious feed ili podesite aggregator weights/quorum/update cadence izvan tolerisane deviation.
-2. Dozvolite da dependent contracts konzumiraju poisoned values i izvrše svoju standardnu logic.
-- **Measurement**: Feed-level out-of-band alerts, fallback oracle activation, min/max bound enforcement i latency između početka anomaly-ja i operator response-a.
+### Scenario B – Trovanje orakla/data feed-a
+- **Cilj**: utvrditi mogu li manipulisani feed-ovi da pokrenu destruktivne automatizovane radnje (masovne likvidacije, pogrešna poravnanja).
+- **Izvršenje**:
+  1. U fork-u/testnet-u postavite zlonamerni feed ili prilagodite ponderisanje agregatora/kvorum/učestalost ažuriranja tako da odstupanje premaši dozvoljene granice.
+  2. Sačekajte da zavisni ugovori preuzmu zatrovane vrednosti i izvrše svoju standardnu logiku.
+- **Merenje**: Vanpojasna upozorenja na nivou feed-a, aktiviranje rezervnog orakla, sprovođenje minimalnih/maksimalnih granica i kašnjenje između početka anomalije i reakcije operatera.
 
-### Scenario C – Credential/signing abuse
-- **Objective**: testirati da li compromise jednog signer-a ili automation identity-ja omogućava unauthorized upgrades, parameter changes ili treasury drains.
-- **Execution**:
-1. Popišite identities sa osetljivim signing rights (operators, CI tokens, service accounts koji pozivaju KMS/HSM, multisig participants).
-2. Simulirajte compromise (ponovo koristite njihove credentials/keys u okviru lab scope-a).
-3. Pokušajte privileged actions: upgrade proxies, promenite risk parameters, mint/pause assets ili pokrenite governance proposals.
-- **Measurement**: Da li KMS/HSM logs generišu anomaly alerts (time-of-day, destination drift, burst high-risk operations)? Mogu li policies ili multisig thresholds da spreče unilateral abuse? Da li se primenjuju throttles/rate limits ili additional approvals?
+### Scenario C – Zloupotreba kredencijala/potpisivanja
+- **Cilj**: testirati da li kompromitovanje jednog potpisnika ili identiteta za automatizaciju omogućava neovlašćene nadogradnje, izmene parametara ili pražnjenje trezora.
+- **Izvršenje**:
+  1. Popišite identitete sa osetljivim pravima za potpisivanje (operateri, CI tokeni, service nalozi koji pozivaju KMS/HSM, učesnici multisig-a).
+  2. Simulirajte kompromitovanje (ponovo upotrebite njihove kredencijale/ključeve u okviru laboratorijskog opsega).
+  3. Pokušajte privilegovane radnje: nadogradite proxy-je, promenite parametre rizika, kreirajte/pauzirajte imovinu ili pokrenite governance predloge.
+- **Merenje**: Da li KMS/HSM logovi generišu upozorenja o anomalijama (doba dana, promena odredišta, nalet visokorizičnih operacija)? Mogu li pravila ili multisig pragovi da spreče jednostranu zloupotrebu? Da li su primenjeni throttling/ograničenja brzine ili dodatna odobrenja?
 
-### Scenario D – Cross-chain evasion & traceability gaps
-- **Objective**: proceniti koliko dobro defenders mogu da prate i brzo zaustave assets koji se peru kroz bridges, DEX routers i privacy hops.
-- **Execution**:
-1. Povežite lock/mint operations kroz common bridges, ubacite swaps/mixers na svaki hop i održavajte per-hop correlation IDs.
-2. Ubrzajte transfers da biste opteretili monitoring latency (multi-hop u roku od nekoliko minuta/blocks).
-- **Measurement**: Vreme potrebno za korelaciju events-a kroz telemetry + commercial chain analytics, potpunost reconstructed path-a, sposobnost identifikovanja choke points za freeze u real incidentu i alert fidelity za abnormal cross-chain velocity/value.
+### Scenario D – Izbegavanje između lanaca i nedostaci u sledljivosti
+- **Cilj**: proceniti koliko dobro branioci mogu da prate i zaustavljaju imovinu koja se brzo pere preko bridge-ova, DEX rutera i privacy hop-ova.
+- **Izvršenje**:
+  1. Povežite operacije zaključavanja/kreiranja tokena preko uobičajenih bridge-ova, umetnite swap-ove/mixere na svaki hop i održavajte ID-jeve korelacije za svaki hop.
+  2. Ubrzajte transfere da biste opteretili brzinu nadzora (više hop-ova u roku od nekoliko minuta/blokova).
+- **Merenje**: Vreme potrebno da se događaji povežu između telemetrijskih sistema i komercijalne analitike lanca, potpunost rekonstruisane putanje, mogućnost identifikovanja tačaka za zamrzavanje u stvarnom incidentu i preciznost upozorenja za neuobičajenu brzinu/vrednost kretanja između lanaca.
 
 ## References
 
-- [1] [AADAPT(TM) Cyber Threat Framework za Digital Assets (MITRE)](https://www.mitre.org/sites/default/files/2025-05/PR-25-1118-aadpt-cyber-threat-framework-for-digital-assets.pdf)
-- [2] [MITRE AADAPT Framework kao Red Team Roadmap (Bishop Fox)](https://bishopfox.com/blog/mitre-aadapt-framework-as-a-red-team-roadmap)
+- [1] [AADAPT(TM) okvir za sajber pretnje digitalnoj imovini (MITRE)](https://www.mitre.org/sites/default/files/2025-05/PR-25-1118-aadpt-cyber-threat-framework-for-digital-assets.pdf)
+- [2] [MITRE AADAPT okvir kao red-team putokaz (Bishop Fox)](https://bishopfox.com/blog/mitre-aadapt-framework-as-a-red-team-roadmap)
 {{#include ../../banners/hacktricks-training.md}}
