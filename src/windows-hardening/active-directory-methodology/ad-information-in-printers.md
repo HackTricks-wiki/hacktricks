@@ -1,42 +1,45 @@
-# Πληροφορίες σε Εκτυπωτές
+# Πληροφορίες σε εκτυπωτές
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Υπάρχουν αρκετά blogs στο Internet που **επισημαίνουν τους κινδύνους από την παραμονή εκτυπωτών ρυθμισμένων με LDAP και default/weak** credentials σύνδεσης.  \
-Αυτό συμβαίνει επειδή ένας attacker θα μπορούσε να **εξαπατήσει τον εκτυπωτή ώστε να πραγματοποιήσει authenticate σε έναν rogue LDAP server** (συνήθως αρκεί ένα `nc -vv -l -p 389` ή `slapd -d 2`) και να καταγράψει τα **credentials του εκτυπωτή σε clear-text**.
+Υπάρχουν αρκετά ιστολόγια στο Internet που **επισημαίνουν τους κινδύνους από εκτυπωτές με ρυθμισμένο LDAP και προεπιλεγμένα/αδύναμα** διαπιστευτήρια σύνδεσης.  \
+Αυτό συμβαίνει επειδή ένας attacker μπορεί να **παραπλανήσει τον εκτυπωτή ώστε να πραγματοποιήσει authentication σε έναν κακόβουλο LDAP server** (συνήθως αρκεί ένα `nc -vv -l -p 389` ή `slapd -d 2`) και να καταγράψει τα **διαπιστευτήρια του εκτυπωτή σε απλό κείμενο**.
 
-Επίσης, αρκετοί εκτυπωτές περιέχουν **logs με usernames** ή μπορεί ακόμη και να έχουν τη δυνατότητα **λήψης όλων των usernames** από το Domain Controller.
+Επίσης, αρκετοί εκτυπωτές διατηρούν **logs με usernames** ή μπορούν ακόμη και να **κατεβάσουν όλα τα usernames** από τον Domain Controller.
 
-Όλες αυτές οι **sensitive πληροφορίες** και η συνηθισμένη **έλλειψη ασφάλειας** καθιστούν τους εκτυπωτές ιδιαίτερα ενδιαφέροντες για τους attackers.
+Όλες αυτές οι **ευαίσθητες πληροφορίες** και η συνήθης **έλλειψη ασφάλειας** κάνουν τους εκτυπωτές ιδιαίτερα ενδιαφέροντες για attackers.
 
-Μερικά εισαγωγικά blogs σχετικά με το θέμα:
+Μερικά εισαγωγικά ιστολόγια σχετικά με το θέμα:
 
 - [https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/](https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/)<sup>[[4]](#references)</sup>
 - [https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)<sup>[[5]](#references)</sup>
 
 ---
 
-## Διαμόρφωση Εκτυπωτή
+## Διαμόρφωση εκτυπωτή
 
-- **Τοποθεσία**: Η λίστα των LDAP servers βρίσκεται συνήθως στο web interface (π.χ. *Network ➜ LDAP Setting ➜ Setting Up LDAP*).
-- **Συμπεριφορά**: Πολλοί embedded web servers επιτρέπουν τροποποιήσεις του LDAP server **χωρίς εκ νέου εισαγωγή credentials** (χαρακτηριστικό usability → security risk).
-- **Exploit**: Ανακατευθύνετε τη διεύθυνση του LDAP server σε έναν attacker-controlled host και χρησιμοποιήστε το κουμπί *Test Connection* / *Address Book Sync* για να εξαναγκάσετε τον εκτυπωτή να κάνει bind σε εσάς.
+- **Τοποθεσία**: Η λίστα των LDAP server βρίσκεται συνήθως στο web interface (π.χ. *Network ➜ LDAP Setting ➜ Setting Up LDAP*).
+- **Συμπεριφορά**: Πολλοί ενσωματωμένοι web server επιτρέπουν την τροποποίηση των LDAP server **χωρίς να απαιτείται εκ νέου εισαγωγή διαπιστευτηρίων** (λειτουργία ευχρηστίας → κίνδυνος ασφάλειας).
+- **Exploit**: Ανακατευθύνετε τη διεύθυνση του LDAP server σε ένα host που ελέγχετε και χρησιμοποιήστε το κουμπί *Test Connection* / *Address Book Sync* για να αναγκάσετε τον εκτυπωτή να κάνει bind σε εσάς.
 
 ---
 
-## Συλλογή Credentials
+## Υποκλοπή διαπιστευτηρίων
 
 ### Μέθοδος 1 – Netcat Listener
+
 ```bash
 sudo nc -k -v -l -p 389     # Plain LDAP only
 ```
-Μικρά/παλιά MFPs ενδέχεται να στέλνουν ένα απλό *simple-bind*, του οποίου το bind DN και το password είναι ορατά στο raw BER stream. Οι σύγχρονες συσκευές συνήθως εκτελούν πρώτα ένα anonymous query και στη συνέχεια επιχειρούν το bind, επομένως τα αποτελέσματα διαφέρουν.<sup>[[1]](#references)</sup>
 
-Ένας απλός listener `nc` στις θύρες 636/3269 λαμβάνει μόνο TLS ciphertext· για τη δοκιμή LDAPS απαιτείται ένα TLS-capable LDAP endpoint, ενώ η ανακατεύθυνση θα πρέπει να αποτυγχάνει όταν η συσκευή επικυρώνει σωστά το server certificate.
+Μικροί/παλιοί MFPs μπορεί να στείλουν ένα απλό *simple-bind*, του οποίου το bind DN και ο κωδικός πρόσβασης είναι ορατά στο ακατέργαστο BER stream. Οι σύγχρονες συσκευές συνήθως εκτελούν πρώτα ένα anonymous query και μετά επιχειρούν το bind, οπότε τα αποτελέσματα ποικίλλουν.<sup>[[1]](#references)</sup>
 
-### Μέθοδος 2 – Full Rogue LDAP server (συνιστάται)
+Ένας απλός listener `nc` στις θύρες 636/3269 λαμβάνει μόνο κρυπτογραφημένο κείμενο TLS· για τη δοκιμή LDAPS απαιτείται ένα LDAP endpoint με υποστήριξη TLS, ενώ η ανακατεύθυνση θα πρέπει να αποτύχει όταν η συσκευή επαληθεύει σωστά το πιστοποιητικό του server.
 
-Επειδή πολλές συσκευές εκτελούν ένα anonymous search *πριν* από την authentication, η εγκατάσταση ενός πραγματικού LDAP daemon παρέχει πολύ πιο αξιόπιστα αποτελέσματα:<sup>[[1]](#references)</sup>
+### Μέθοδος 2 – Πλήρης rogue LDAP server (συνιστάται)
+
+Επειδή πολλές συσκευές εκτελούν ένα anonymous search *πριν* από την αυθεντικοποίηση, η εκκίνηση ενός πραγματικού LDAP daemon δίνει πολύ πιο αξιόπιστα αποτελέσματα:<sup>[[1]](#references)</sup>
+
 ```bash
 # Debian/Ubuntu example
 sudo apt install slapd ldap-utils
@@ -45,46 +48,50 @@ sudo dpkg-reconfigure slapd   # set any base-DN – it will not be validated
 # run slapd in foreground / debug 2
 slapd -d 2 -h "ldap:///"      # only LDAP, no LDAPS
 ```
-Όταν ο printer εκτελεί το lookup του, θα δείτε τα credentials σε clear-text στο debug output.
 
-> 💡  Το Responder περιλαμβάνει rogue LDAP και SMB authentication services. Ένα απλό LDAP bind μπορεί να εκθέσει το configured password, ενώ το NTLM authentication παράγει challenge-response material· μην περιγράφετε και τα δύο αποτελέσματα ως password σε clear-text.
+Όταν ο εκτυπωτής πραγματοποιήσει το lookup, θα δείτε τα διαπιστευτήρια σε απλό κείμενο στην έξοδο αποσφαλμάτωσης.
+
+> 💡  Το Responder περιλαμβάνει rogue υπηρεσίες ελέγχου ταυτότητας LDAP και SMB. Ένα απλό LDAP bind μπορεί να εκθέσει τον διαμορφωμένο κωδικό πρόσβασης, ενώ ο έλεγχος ταυτότητας NTLM παράγει υλικό challenge-response· μην περιγράφετε και τα δύο αποτελέσματα ως κωδικό πρόσβασης σε απλό κείμενο.
 
 ---
 
-## Πρόσφατα Pass-Back Vulnerabilities (2024-2025)
+## Πρόσφατες ευπάθειες Pass-Back (2024-2025)
 
-Το pass-back *δεν* είναι θεωρητικό ζήτημα – οι vendors συνεχίζουν να δημοσιεύουν advisories το 2024/2025 που περιγράφουν ακριβώς αυτή την attack class.
+Το Pass-back δεν είναι *θεωρητικό ζήτημα* – οι προμηθευτές εξακολουθούν να δημοσιεύουν ανακοινώσεις το 2024/2025 που περιγράφουν ακριβώς αυτή την κατηγορία επίθεσης.
 
 ### Xerox VersaLink – CVE-2024-12510 & CVE-2024-12511
 
-Το firmware ≤ 57.69.91 των Xerox VersaLink C70xx MFPs επέτρεπε σε έναν authenticated admin (ή σε οποιονδήποτε, όταν παρέμεναν τα default creds) να:
+Το firmware ≤ 57.69.91 των Xerox VersaLink C70xx MFP επέτρεπε σε έναν πιστοποιημένο admin (ή σε οποιονδήποτε, όταν παρέμεναν τα προεπιλεγμένα creds) να:
 
-* **CVE-2024-12510 – LDAP pass-back**: αλλάξει τη διεύθυνση του LDAP server και να ενεργοποιήσει ένα lookup, προκαλώντας στη συσκευή να κάνει leak τα configured Windows credentials προς το host που ελέγχει ο attacker.
-* **CVE-2024-12511 – SMB/FTP pass-back**: ίδιο ζήτημα μέσω προορισμών *scan-to-folder*, με διαρροή NetNTLMv2 ή FTP clear-text creds.<sup>[[2]](#references)</sup>
+* **CVE-2024-12510 – LDAP pass-back**: αλλάξει τη διεύθυνση του LDAP server και να ενεργοποιήσει ένα lookup, με αποτέλεσμα η συσκευή να διαρρεύσει τα διαμορφωμένα διαπιστευτήρια Windows σε host που ελέγχεται από τον attacker.
+* **CVE-2024-12511 – SMB/FTP pass-back**: ίδιο ζήτημα μέσω προορισμών *scan-to-folder*, με διαρροή NetNTLMv2 ή FTP creds σε απλό κείμενο.<sup>[[2]](#references)</sup>
 
 Ένας απλός listener όπως:
+
 ```bash
 sudo nc -k -v -l -p 389     # capture LDAP bind
 ```
-ή ένας rogue SMB server (`impacket-smbserver`) αρκεί για τη συλλογή των credentials.
 
-### Canon imageRUNNER / imageCLASS – Advisory 20 May 2025
+ή ένας rogue SMB server (`impacket-smbserver`) αρκεί για τη συλλογή των credentials.  
 
-Η Canon επιβεβαίωσε μια αδυναμία **SMTP/LDAP pass-back** σε δεκάδες σειρές προϊόντων Laser & MFP. Ένας attacker με admin access μπορεί να τροποποιήσει τη διαμόρφωση του server και να ανακτήσει τα αποθηκευμένα credentials για LDAP **ή** SMTP (πολλοί οργανισμοί χρησιμοποιούν privileged account για να επιτρέπουν τη λειτουργία scan-to-mail).<sup>[[3]](#references)</sup>
+### Canon imageRUNNER / imageCLASS – Ενημέρωση ασφαλείας, 20 Μαΐου 2025
 
-Οι οδηγίες του vendor συνιστούν ρητά:
+Η Canon επιβεβαίωσε αδυναμία **SMTP/LDAP pass-back** σε δεκάδες σειρές προϊόντων Laser & MFP. Ένας attacker με πρόσβαση διαχειριστή μπορεί να τροποποιήσει τη διαμόρφωση του server και να ανακτήσει τα αποθηκευμένα credentials για LDAP **ή** SMTP (πολλοί οργανισμοί χρησιμοποιούν privileged account για τη λειτουργία scan-to-mail).<sup>[[3]](#references)</sup>
 
-1. Ενημέρωση σε patched firmware μόλις είναι διαθέσιμο.
-2. Χρήση ισχυρών και μοναδικών admin passwords.
-3. Αποφυγή privileged AD accounts για την ενσωμάτωση με τον printer.
+Οι οδηγίες του κατασκευαστή συνιστούν ρητά:
+
+1. Ενημέρωση στο patched firmware μόλις γίνει διαθέσιμο.
+2. Χρήση ισχυρών, μοναδικών κωδικών πρόσβασης διαχειριστή.
+3. Αποφυγή χρήσης privileged AD accounts για την ενσωμάτωση εκτυπωτών.
 
 ---
 
-### Brother devices και OEM variants – πρόσβαση admin που προκύπτει από το serial σε service credentials
+### Συσκευές Brother και παραλλαγές OEM – πρόσβαση διαχειριστή και σε credentials υπηρεσιών μέσω σειριακού αριθμού
 
-Μια coordinated disclosure του 2025 απέδειξε μια ιδιαίτερα χρήσιμη αλυσίδα σε επηρεαζόμενες συσκευές Brother· τμήματα του vulnerability set επηρεάζουν επίσης μοντέλα OEM, επομένως επαληθεύστε το ακριβές μοντέλο σύμφωνα με το advisory του vendor. Ένας unauthenticated attacker μπορεί να αποκτήσει το serial της συσκευής μέσω HTTP/HTTPS/IPP σε vulnerable firmware, ενώ τα serials μπορεί επίσης να είναι διαθέσιμα μέσω management protocols όπως SNMP ή PJL. Αν το factory password δεν έχει αλλάξει ποτέ, το serial παράγει ντετερμινιστικά το administrator password. Μετά το authentication, το ξεχωριστό pass-back flaw CVE-2024-51984 εκθέτει σε plaintext τα διαμορφωμένα passwords εξωτερικών services, όπως LDAP ή FTP, μετατρέποντας την πρόσβαση στο printer management σε επαναχρησιμοποιήσιμα network credentials. Το firmware διορθώνει την αποκάλυψη των service passwords, όμως οι συσκευές που είχαν κατασκευαστεί προηγουμένως εξακολουθούν να απαιτούν από τον operator την αντικατάσταση του αρχικού administrator password που προκύπτει από το serial.<sup>[[6]](#references)</sup>
+Μια συντονισμένη γνωστοποίηση ευπάθειας το 2025 παρουσίασε μια ιδιαίτερα χρήσιμη αλυσίδα επίθεσης σε επηρεαζόμενες συσκευές Brother· μέρος του συνόλου ευπαθειών επηρεάζει επίσης μοντέλα OEM, επομένως επαληθεύστε το ακριβές μοντέλο βάσει της ενημέρωσης ασφαλείας του κατασκευαστή. Ένας attacker χωρίς έλεγχο ταυτότητας μπορεί να αποκτήσει τον σειριακό αριθμό της συσκευής μέσω HTTP/HTTPS/IPP σε ευάλωτο firmware, ενώ οι σειριακοί αριθμοί ενδέχεται να είναι διαθέσιμοι και μέσω πρωτοκόλλων διαχείρισης, όπως SNMP ή PJL. Αν ο εργοστασιακός κωδικός πρόσβασης δεν έχει αλλάξει ποτέ, ο σειριακός αριθμός προσδιορίζει ντετερμινιστικά τον κωδικό πρόσβασης διαχειριστή. Αφού πραγματοποιήσει έλεγχο ταυτότητας, η ξεχωριστή αδυναμία pass-back CVE-2024-51984 αποκαλύπτει σε plaintext κωδικούς πρόσβασης εξωτερικών υπηρεσιών που έχουν διαμορφωθεί, όπως LDAP ή FTP, μετατρέποντας την πρόσβαση διαχείρισης του εκτυπωτή σε επαναχρησιμοποιήσιμα credentials δικτύου. Το firmware διορθώνει την αποκάλυψη κωδικών πρόσβασης υπηρεσιών, αλλά για συσκευές που έχουν ήδη κατασκευαστεί, ο χειριστής πρέπει και πάλι να αντικαταστήσει τον αρχικό κωδικό πρόσβασης διαχειριστή που παράγεται από τον σειριακό αριθμό.<sup>[[6]](#references)</sup>
 
-Το τρέχον Metasploit περιλαμβάνει auxiliary module που εντοπίζει το serial μέσω HTTP, SNMP ή PJL, δημιουργεί το υποψήφιο αρχικό password και προαιρετικά το επαληθεύει στο web console. Το `DiscoverSerialVia=AUTO` δοκιμάζει τις υποστηριζόμενες διαδρομές discovery· χρησιμοποιήστε `TargetSerial` όταν το asset inventory περιέχει ήδη το serial.<sup>[[7]](#references)</sup>
+Οι τρέχουσες εκδόσεις του Metasploit περιλαμβάνουν auxiliary module που εντοπίζει τον σειριακό αριθμό μέσω HTTP, SNMP ή PJL, δημιουργεί έναν πιθανό αρχικό κωδικό πρόσβασης και, προαιρετικά, επαληθεύει αν λειτουργεί στην web κονσόλα. Η επιλογή `DiscoverSerialVia=AUTO` δοκιμάζει τις υποστηριζόμενες μεθόδους εντοπισμού· δώστε αντί γι’ αυτήν την επιλογή `TargetSerial` όταν ο σειριακός αριθμός περιλαμβάνεται ήδη στην απογραφή των assets.<sup>[[7]](#references)</sup>
+
 ```text
 msfconsole -q
 use auxiliary/admin/misc/brother_default_admin_auth_bypass_cve_2024_51978
@@ -92,32 +99,33 @@ set RHOSTS <printer-ip>
 set DiscoverSerialVia AUTO
 run
 ```
-Χρησιμοποιήστε το αποτέλεσμα μόνο για την επικύρωση εξουσιοδοτημένων assets. Το αν λειτουργεί ο κωδικός πρόσβασης εξαρτάται από το ακριβές μοντέλο και, κυρίως, από το αν ο εργοστασιακός κωδικός πρόσβασης administrator έχει ήδη αλλάξει.<sup>[[6]](#references)[[7]](#references)</sup>
+
+Χρησιμοποιήστε το αποτέλεσμα μόνο για την επικύρωση εξουσιοδοτημένων assets. Το αν λειτουργεί ο κωδικός πρόσβασης εξαρτάται από το ακριβές μοντέλο και, κυρίως, από το αν έχει ήδη αλλάξει ο εργοστασιακός κωδικός πρόσβασης διαχειριστή.<sup>[[6]](#references)[[7]](#references)</sup>
 
 ---
 
-## Automated Enumeration / Exploitation Tools
+## Εργαλεία αυτοματοποιημένης απαρίθμησης / εκμετάλλευσης
 
-| Tool | Purpose | Example |
+| Εργαλείο | Σκοπός | Παράδειγμα |
 |------|---------|---------|
-| **PRET** (Printer Exploitation Toolkit) | Κατάχρηση PostScript/PJL/PCL, πρόσβαση στο file system, έλεγχος default-creds, *SNMP discovery* | `python pret.py 192.168.1.50 pjl` |
-| **Praeda** | Συλλογή configuration (συμπεριλαμβανομένων address books και LDAP creds) μέσω HTTP/HTTPS | `perl praeda.pl -t 192.168.1.50` |
-| **Responder / ntlmrelayx** | Εκτέλεση rogue authentication services και capture/relay NetNTLM από SMB callbacks | `sudo responder -I eth0 -v` |
-| **Metasploit Brother auxiliary** | Εντοπισμός serial, derivation του υποψήφιου εργοστασιακού κωδικού πρόσβασης administrator και επαλήθευση πρόσβασης στην web console | `use auxiliary/admin/misc/brother_default_admin_auth_bypass_cve_2024_51978` |
+| **PRET** (Printer Exploitation Toolkit) | Κατάχρηση PostScript/PJL/PCL, πρόσβαση στο σύστημα αρχείων, έλεγχος προεπιλεγμένων διαπιστευτηρίων, *εντοπισμός SNMP* | `python pret.py 192.168.1.50 pjl` |
+| **Praeda** | Συλλογή ρυθμίσεων (συμπεριλαμβανομένων βιβλίων διευθύνσεων και διαπιστευτηρίων LDAP) μέσω HTTP/HTTPS | `perl praeda.pl -t 192.168.1.50` |
+| **Responder / ntlmrelayx** | Εκκίνηση κακόβουλων υπηρεσιών ελέγχου ταυτότητας και συλλογή/αναμετάδοση NetNTLM από callbacks SMB | `sudo responder -I eth0 -v` |
+| **Metasploit Brother auxiliary** | Εντοπισμός σειριακού αριθμού, υπολογισμός του πιθανού εργοστασιακού κωδικού πρόσβασης διαχειριστή και επαλήθευση πρόσβασης στην web console | `use auxiliary/admin/misc/brother_default_admin_auth_bypass_cve_2024_51978` |
 
 ---
 
-## Hardening & Detection
+## Ενίσχυση ασφάλειας και ανίχνευση
 
-1. **Κάντε άμεσα patch / firmware-update** στα MFPs (ελέγξτε τα PSIRT bulletins του vendor).
-2. **Αντικαταστήστε τους εργοστασιακούς κωδικούς πρόσβασης administrator** – το firmware από μόνο του δεν αφαιρεί τους αρχικούς κωδικούς πρόσβασης που προκύπτουν από το serial number σε ήδη κατασκευασμένες επηρεαζόμενες συσκευές Brother/OEM.<sup>[[6]](#references)</sup>
-3. **Service Accounts με Least Privilege** – μην χρησιμοποιείτε ποτέ Domain Admin για LDAP/SMB/SMTP· περιορίστε τα σε *read-only* OU scopes.
-4. **Περιορίστε την πρόσβαση διαχείρισης** – τοποθετήστε τα web/IPP/SNMP interfaces του printer σε management VLAN ή πίσω από ACL/VPN.
-5. **Περιορίστε το egress του printer** – επιτρέψτε σε κάθε συσκευή να επικοινωνεί μόνο με τους αναμενόμενους προορισμούς DC/LDAP, mail, DNS/NTP, print και scan-file. Το pass-back απαιτεί callback σε endpoint που επιλέγει ο attacker.
-6. **Απενεργοποιήστε τα μη χρησιμοποιούμενα πρωτόκολλα** – FTP, Telnet, raw-9100, παλαιότερα SSL ciphers.
-7. **Ενεργοποιήστε Audit Logging** – ορισμένες συσκευές μπορούν να καταγράφουν αποτυχίες LDAP/SMTP μέσω syslog· συσχετίστε μη αναμενόμενα binds.
-8. **Παρακολουθείτε τους authentication destinations** – δημιουργήστε alert όταν ένας printer ξεκινά LDAP, SMB, SMTP ή FTP προς host εκτός της allowlist του, ειδικά αμέσως μετά από management login ή αλλαγή configuration.
-9. **SNMPv3 ή απενεργοποίηση του SNMP** – το community `public` συχνά κάνει leak πληροφορίες συσκευής και serial.
+1. **Εγκαθιστάτε άμεσα ενημερώσεις κώδικα / firmware** στους MFP (ελέγχετε τα δελτία PSIRT των προμηθευτών).
+2. **Αντικαθιστάτε τους εργοστασιακούς κωδικούς πρόσβασης διαχειριστή** – το firmware από μόνο του δεν αφαιρεί τους αρχικούς κωδικούς πρόσβασης που παράγονται από τον σειριακό αριθμό σε ήδη κατασκευασμένες επηρεαζόμενες συσκευές Brother/OEM.<sup>[[6]](#references)</sup>
+3. **Λογαριασμοί υπηρεσίας με ελάχιστα προνόμια** – μη χρησιμοποιείτε ποτέ Domain Admin για LDAP/SMB/SMTP· περιορίστε την πρόσβαση σε *μόνο για ανάγνωση* OU.
+4. **Περιορίζετε την πρόσβαση διαχείρισης** – τοποθετείτε τις διεπαφές web/IPP/SNMP του εκτυπωτή σε VLAN διαχείρισης ή πίσω από ACL/VPN.
+5. **Περιορίζετε την εξερχόμενη κίνηση του εκτυπωτή** – επιτρέπετε σε κάθε συσκευή να επικοινωνεί μόνο με τους αναμενόμενους προορισμούς DC/LDAP, mail, DNS/NTP, εκτύπωσης και αρχείων σάρωσης. Το Pass-back απαιτεί callback σε endpoint που επιλέγει ο attacker.
+6. **Απενεργοποιείτε τα αχρησιμοποίητα πρωτόκολλα** – FTP, Telnet, raw-9100, παλαιότερα SSL ciphers.
+7. **Ενεργοποιείτε την καταγραφή ελέγχου** – ορισμένες συσκευές μπορούν να καταγράφουν μέσω syslog τις αποτυχημένες προσπάθειες LDAP/SMTP· συσχετίζετε μη αναμενόμενα binds.
+8. **Παρακολουθείτε τους προορισμούς ελέγχου ταυτότητας** – ενεργοποιείτε ειδοποίηση όταν ένας εκτυπωτής ξεκινά σύνδεση LDAP, SMB, SMTP ή FTP προς host εκτός της allowlist του, ιδιαίτερα αμέσως μετά από σύνδεση στη διαχείριση ή αλλαγή ρυθμίσεων.
+9. **SNMPv3 ή απενεργοποίηση του SNMP** – το community `public` συχνά διαρρέει πληροφορίες συσκευής και σειριακού αριθμού.
 
 ---
 
@@ -127,11 +135,11 @@ run
 
 ## References
 
-- [1] [Είναι απλώς ένας printer… Ποιο είναι το χειρότερο που θα μπορούσε να συμβεί;](https://grimhacker.com/2018/03/09/just-a-printer/)
-- [2] [Xerox Versalink C7025 Multifunction Printer: Ευπάθειες Pass-Back Attack (Fixed)](https://www.rapid7.com/blog/post/2025/02/14/xerox-versalink-c7025-multifunction-printer-pass-back-attack-vulnerabilities-fixed/)
-- [3] [CP2025-004 Mitigation/Remediation ευπάθειας για Production Printers, Office/Small Office Multifunction Printers και Laser Printers](https://psirt.canon/advisory-information/cp2025-004/)
-- [4] [Απόκτηση Domain Credentials μέσω Printer με Netcat](https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/)
-- [5] [Εκμετάλλευση Multifunction Printers κατά τη διάρκεια Penetration Test Engagement](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
-- [6] [Multiple Brother Devices: Multiple Vulnerabilities (FIXED)](https://www.rapid7.com/blog/post/multiple-brother-devices-multiple-vulnerabilities-fixed/)
-- [7] [Metasploit: Brother default administrator authentication bypass module](https://github.com/rapid7/metasploit-framework/blob/master/modules/auxiliary/admin/misc/brother_default_admin_auth_bypass_cve_2024_51978.rb)
+- [1] [Είναι απλώς ένας εκτυπωτής… Ποιο είναι το χειρότερο που θα μπορούσε να συμβεί;](https://grimhacker.com/2018/03/09/just-a-printer/)
+- [2] [Πολυλειτουργικός εκτυπωτής Xerox Versalink C7025: ευπάθειες επίθεσης Pass-Back (διορθώθηκαν)](https://www.rapid7.com/blog/post/2025/02/14/xerox-versalink-c7025-multifunction-printer-pass-back-attack-vulnerabilities-fixed/)
+- [3] [CP2025-004 Μετριασμός/Αποκατάσταση ευπάθειας για εκτυπωτές παραγωγής, πολυλειτουργικούς εκτυπωτές γραφείου/μικρού γραφείου και εκτυπωτές laser](https://psirt.canon/advisory-information/cp2025-004/)
+- [4] [Απόκτηση διαπιστευτηρίων domain μέσω εκτυπωτή με το Netcat](https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/)
+- [5] [Εκμετάλλευση πολυλειτουργικών εκτυπωτών κατά τη διάρκεια μιας δοκιμής διείσδυσης](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
+- [6] [Πολλαπλές συσκευές Brother: πολλαπλές ευπάθειες (ΔΙΟΡΘΩΘΗΚΑΝ)](https://www.rapid7.com/blog/post/multiple-brother-devices-multiple-vulnerabilities-fixed/)
+- [7] [Metasploit: module παράκαμψης ελέγχου ταυτότητας προεπιλεγμένου διαχειριστή Brother](https://github.com/rapid7/metasploit-framework/blob/master/modules/auxiliary/admin/misc/brother_default_admin_auth_bypass_cve_2024_51978.rb)
 {{#include ../../banners/hacktricks-training.md}}

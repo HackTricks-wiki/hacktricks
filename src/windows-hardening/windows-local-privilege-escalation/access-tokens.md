@@ -1,12 +1,13 @@
-# Access Tokens
+# Διακριτικά πρόσβασης
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Access Tokens
+## Διακριτικά πρόσβασης
 
-Κάθε **χρήστης που έχει συνδεθεί** στο σύστημα **διαθέτει ένα access token με πληροφορίες ασφαλείας** για τη συγκεκριμένη περίοδο σύνδεσης. Το σύστημα δημιουργεί ένα access token όταν ο χρήστης συνδέεται. **Κάθε διεργασία που εκτελείται** για λογαριασμό του χρήστη **διαθέτει ένα αντίγραφο του access token**. Το token προσδιορίζει τον χρήστη, τις ομάδες του χρήστη και τα δικαιώματα του χρήστη. Ένα token περιέχει επίσης ένα logon SID (Security Identifier), το οποίο προσδιορίζει την τρέχουσα περίοδο σύνδεσης.
+Κάθε διεργασία έχει ένα **πρωτεύον διακριτικό πρόσβασης** που καθορίζει το πλαίσιο ασφαλείας της. Ένα νήμα χρησιμοποιεί κανονικά αυτό το διακριτικό, αλλά μπορεί επίσης να έχει προσωρινά ένα **διακριτικό πλαστοπροσωπίας**. Τα διακριτικά περιέχουν το SID του χρήστη, SID ομάδων, προνόμια, πληροφορίες ακεραιότητας και ένα SID σύνδεσης για την περίοδο σύνδεσης. Οι διεργασίες συνήθως κληρονομούν μια αναφορά στο πρωτεύον διακριτικό της γονικής διεργασίας· δεν λαμβάνουν ανεξάρτητο αντίγραφο του περιεχομένου του.<sup>[[4]](#references)</sup>
 
-Μπορείτε να δείτε αυτές τις πληροφορίες εκτελώντας την εντολή `whoami /all`
+Μπορείτε να δείτε αυτές τις πληροφορίες εκτελώντας το `whoami /all`
+
 ```
 whoami /all
 
@@ -50,87 +51,132 @@ SeUndockPrivilege             Remove computer from docking station Disabled
 SeIncreaseWorkingSetPrivilege Increase a process working set       Disabled
 SeTimeZonePrivilege           Change the time zone                 Disabled
 ```
-ή χρησιμοποιώντας το _Process Explorer_ από το Sysinternals (επιλέξτε τη διεργασία και ανοίξτε την καρτέλα "Security"):
 
-![Access Tokens - Access Tokens: ή χρησιμοποιώντας το Process Explorer από το Sysinternals (επιλέξτε τη διεργασία και ανοίξτε την καρτέλα "Security")](<../../images/image (772).png>)
+ή χρησιμοποιώντας το _Process Explorer_ από το Sysinternals (επιλέξτε τη διεργασία και ανοίξτε την καρτέλα «Security»):
 
-### Τοπικός administrator
+![Access Tokens - Access Tokens: ή χρησιμοποιώντας το Process Explorer από το Sysinternals (επιλέξτε τη διεργασία και ανοίξτε την καρτέλα «Security»)](<../../images/image (772).png>)
 
-Όταν ένας τοπικός administrator κάνει login, **δημιουργούνται δύο access tokens**: Ένα με δικαιώματα administrator και ένα άλλο με κανονικά δικαιώματα. **Από προεπιλογή**, όταν αυτός ο χρήστης εκτελεί μια διεργασία, χρησιμοποιείται εκείνη με **κανονικά** (μη-administrator) **δικαιώματα**. Όταν αυτός ο χρήστης προσπαθεί να **εκτελέσει** οτιδήποτε **ως administrator** (για παράδειγμα, με την επιλογή "Run as Administrator"), θα χρησιμοποιηθεί το **UAC** για να ζητήσει άδεια.\
-Αν θέλετε να [**μάθετε περισσότερα για το UAC, διαβάστε αυτή τη σελίδα**](../authentication-credentials-uac-and-efs/index.html#uac)**.**
+### Τοπικός διαχειριστής
 
-Στην πράξη, αυτό σημαίνει ότι ένα **μη-elevated admin shell συνήθως εκτελείται με filtered token**. Γι' αυτό το `whoami /groups` συχνά εμφανίζει το **`BUILTIN\Administrators` ως `Deny only`** μέχρι να γίνει elevate η διεργασία. Εσωτερικά, τα Windows διατηρούν ένα **linked elevated token** (`TokenLinkedToken`) και παρακολουθούν την κατάσταση με πεδία όπως το `TokenElevationType`.
+Όταν εφαρμόζεται το **UAC Admin Approval Mode** σε έναν διαχειριστή, η διαδραστική σύνδεση δημιουργεί ένα πλήρες token διαχειριστή και ένα φιλτραρισμένο token. Από προεπιλογή, ο Explorer και οι συνήθεις θυγατρικές διεργασίες χρησιμοποιούν το φιλτραρισμένο token. Ένα αίτημα ανύψωσης, όπως **Εκτέλεση ως διαχειριστής**, ζητά από το UAC να εκκινήσει το πρόγραμμα με το πλήρες token. Η ακριβής συμπεριφορά διαφέρει για τον ενσωματωμένο λογαριασμό Administrator και όταν το Admin Approval Mode είναι απενεργοποιημένο.<sup>[[5]](#references)</sup>
 
-### Impersonation χρήστη με credentials
+Διαβάστε την ειδική [**σελίδα UAC**](../authentication-credentials-uac-and-efs/uac-user-account-control.md) για τεχνικές παράκαμψης και λεπτομέρειες πολιτικής.
 
-Αν διαθέτετε **έγκυρα credentials οποιουδήποτε άλλου χρήστη**, μπορείτε να **δημιουργήσετε** ένα **νέο logon session** με αυτά τα credentials:
+Στην πράξη, αυτό σημαίνει ότι ένα **μη ανυψωμένο κέλυφος διαχειριστή συνήθως εκτελείται με φιλτραρισμένο token**. Γι’ αυτό η εντολή `whoami /groups` εμφανίζει συχνά το **`BUILTIN\Administrators` ως `Deny only`** μέχρι να ανυψωθεί η διεργασία. Εσωτερικά, τα Windows διατηρούν ένα **συνδεδεμένο ανυψωμένο token** (`TokenLinkedToken`) και παρακολουθούν την κατάσταση με πεδία όπως το `TokenElevationType`.
+
+### Impersonation χρήστη μέσω διαπιστευτηρίων
+
+Αν έχετε **έγκυρα διαπιστευτήρια οποιουδήποτε άλλου χρήστη**, μπορείτε να **δημιουργήσετε** μια **νέα περίοδο σύνδεσης** με αυτά τα διαπιστευτήρια:
+
 ```
 runas /user:domain\username cmd.exe
 ```
-Το **access token** περιέχει επίσης μια **reference** των sessions σύνδεσης μέσα στο **LSASS**, κάτι που είναι χρήσιμο αν η διεργασία χρειάζεται να αποκτήσει πρόσβαση σε ορισμένα αντικείμενα του network.\
-Μπορείτε να εκκινήσετε μια διεργασία που **χρησιμοποιεί διαφορετικά credentials για πρόσβαση σε network services** χρησιμοποιώντας:
+
+Το **access token** περιέχει επίσης μια **αναφορά** στις περιόδους σύνδεσης μέσα στο **LSASS**. Αυτό είναι χρήσιμο αν η διεργασία χρειάζεται να αποκτήσει πρόσβαση σε ορισμένα αντικείμενα του δικτύου.\
+Μπορείτε να εκκινήσετε μια διεργασία που **χρησιμοποιεί διαφορετικά διαπιστευτήρια για την πρόσβαση σε υπηρεσίες δικτύου** με:
+
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
-Αυτό είναι χρήσιμο αν έχετε έγκυρα credentials για πρόσβαση σε objects του network, αλλά αυτά τα credentials δεν είναι valid μέσα στο current host, καθώς πρόκειται να χρησιμοποιηθούν μόνο στο network (στο current host θα χρησιμοποιηθούν τα privileges του current user).
 
-#### Λεπτομέρειες του `runas /netonly`
+Αυτό είναι χρήσιμο αν έχετε διαπιστευτήρια που παρέχουν πρόσβαση σε αντικείμενα στο δίκτυο, αλλά αυτά τα διαπιστευτήρια δεν είναι έγκυρα στον τρέχοντα host, καθώς θα χρησιμοποιηθούν μόνο στο δίκτυο (στον τρέχοντα host θα χρησιμοποιηθούν τα προνόμια του τρέχοντος χρήστη).
 
-Το `runas /netonly` (και C2 helpers όπως το `make_token`) δημιουργεί ένα **`LOGON32_LOGON_NEW_CREDENTIALS`** token. Αυτό είναι πολύ χρήσιμο για την κατανόηση του lateral movement, επειδή:<sup>[[3]](#references)</sup>
+#### Λεπτομέρειες για το `runas /netonly`
 
-- **Τοπικά**, το νέο process διατηρεί την **ίδια local identity**, τα groups, το integrity level και τις περισσότερες ίδιες access decisions με το current token.
-- **Απομακρυσμένα**, το outbound authentication μπορεί να χρησιμοποιήσει τα **supplied credentials** για SMB / WinRM / LDAP / HTTP / Kerberos / NTLM.
-- Επομένως, το `whoami` μπορεί να εξακολουθεί να εμφανίζει τον **αρχικό local user**, ενώ η network access πραγματοποιείται ως ο **alternate account**.
+Το `runas /netonly` (και βοηθητικά εργαλεία C2 όπως το `make_token`) δημιουργεί ένα token **`LOGON32_LOGON_NEW_CREDENTIALS`**. Είναι πολύ χρήσιμο να το κατανοήσετε κατά τη μετακίνηση πλευρικά, επειδή:<sup>[[3]](#references)</sup>
 
-Αυτή είναι μια εξαιρετική επιλογή όταν τα credentials είναι valid στο domain ή σε κάποιο άλλο host, αλλά ο user **δεν μπορεί ή δεν πρέπει να κάνει log on locally** στο current machine.
+- **Τοπικά**, η νέα διεργασία διατηρεί την **ίδια τοπική ταυτότητα**, τις ομάδες, το επίπεδο ακεραιότητας και τις περισσότερες από τις ίδιες αποφάσεις πρόσβασης με το τρέχον token.
+- **Απομακρυσμένα**, ο εξερχόμενος έλεγχος ταυτότητας μπορεί να χρησιμοποιεί τα **παρεχόμενα διαπιστευτήρια** για SMB / WinRM / LDAP / HTTP / Kerberos / NTLM.
+- Επομένως, το `whoami` μπορεί να εξακολουθεί να εμφανίζει τον **αρχικό τοπικό χρήστη**, ενώ η πρόσβαση στο δίκτυο γίνεται ως ο **εναλλακτικός λογαριασμός**.
 
-### Τύποι tokens
+Αυτή είναι μια πολύ καλή επιλογή όταν τα διαπιστευτήρια είναι έγκυρα στον τομέα ή σε άλλον host, αλλά ο χρήστης **δεν μπορεί ή δεν πρέπει να συνδεθεί τοπικά** στο τρέχον μηχάνημα.
 
-Υπάρχουν δύο διαθέσιμοι τύποι tokens:
+### Τύποι token
 
-- **Primary Token**: Λειτουργεί ως αναπαράσταση των security credentials ενός process. Η δημιουργία και η συσχέτιση primary tokens με processes είναι ενέργειες που απαιτούν elevated privileges, τονίζοντας την αρχή του privilege separation. Συνήθως, μια authentication service είναι υπεύθυνη για τη δημιουργία του token, ενώ μια logon service χειρίζεται τη συσχέτισή του με το operating system shell του user. Αξίζει να σημειωθεί ότι τα processes κληρονομούν το primary token του parent process κατά τη δημιουργία τους.
-- **Impersonation Token**: Επιτρέπει σε μια server application να υιοθετεί προσωρινά την identity του client για την πρόσβαση σε secure objects. Αυτός ο μηχανισμός χωρίζεται σε τέσσερα levels λειτουργίας:
-- **Anonymous**: Παρέχει στον server access παρόμοια με αυτήν ενός unidentified user.
-- **Identification**: Επιτρέπει στον server να επαληθεύσει την identity του client χωρίς να τη χρησιμοποιεί για object access.
-- **Impersonation**: Επιτρέπει στον server να λειτουργεί υπό την identity του client.
-- **Delegation**: Παρόμοιο με το Impersonation, αλλά περιλαμβάνει τη δυνατότητα επέκτασης αυτής της identity assumption σε remote systems με τα οποία αλληλεπιδρά ο server, διασφαλίζοντας τη διατήρηση των credentials.
+Υπάρχουν δύο διαθέσιμοι τύποι token:<sup>[[4]](#references)[[6]](#references)</sup>
+
+- **Primary token**: Αντιπροσωπεύει το πλαίσιο ασφαλείας μιας διεργασίας. Μια θυγατρική διεργασία συνήθως κληρονομεί το primary token της γονικής διεργασίας, ενώ τα API δημιουργίας διεργασιών με ρητό token επιβάλλουν τις δικές τους απαιτήσεις πρόσβασης στο token και προνομίων του καλούντος.
+- **Impersonation token**: Επιτρέπει σε ένα νήμα διακομιστή να χρησιμοποιεί προσωρινά το πλαίσιο ασφαλείας ενός πελάτη για ελέγχους πρόσβασης. Έχει τέσσερα επίπεδα:
+  - **Anonymous**: Παρέχει στον διακομιστή πρόσβαση αντίστοιχη με εκείνη ενός μη αναγνωρισμένου χρήστη.
+  - **Identification**: Επιτρέπει στον διακομιστή να επαληθεύσει την ταυτότητα του πελάτη χωρίς να τη χρησιμοποιήσει για πρόσβαση σε αντικείμενα.
+  - **Impersonation**: Επιτρέπει στον διακομιστή να ενεργεί με την ταυτότητα του πελάτη.
+  - **Delegation**: Επιτρέπει στον διακομιστή να κάνει impersonate τον πελάτη σε απομακρυσμένα συστήματα, όταν ο μηχανισμός ελέγχου ταυτότητας και οι ρυθμίσεις του λογαριασμού υποστηρίζουν delegation.
+
+#### Αξιολογήστε ένα token που αποκτήσατε πριν το χρησιμοποιήσετε
+
+Μην επιλέγετε token μόνο βάσει του ονόματος χρήστη. Ο ίδιος λογαριασμός μπορεί να έχει πολλά token με διαφορετικές περιόδους σύνδεσης, service SID, προνόμια, επίπεδα ακεραιότητας, περιορισμούς και διαπιστευτήρια δικτύου.<sup>[[9]](#references)</sup> Αναζητήστε τουλάχιστον τα **`TokenType`**, **`TokenImpersonationLevel`**, **`TokenElevationType`**, **`TokenLinkedToken`**, **`TokenIntegrityLevel`**, **`TokenSessionId`**, **`TokenIsRestricted`** / **`TokenHasRestrictions`** και **`TokenStatistics.AuthenticationId`** με το `GetTokenInformation`.<sup>[[7]](#references)</sup>
+
+Ένα περιορισμένο token μπορεί να περιέχει SID με δικαιώματα μόνο άρνησης, αφαιρεμένα προνόμια και SID περιορισμού. Όταν υπάρχουν SID περιορισμού, τα Windows εκτελούν έναν έλεγχο πρόσβασης με τα ενεργοποιημένα SID και έναν δεύτερο με τα SID περιορισμού· **και οι δύο έλεγχοι πρέπει να επιτρέπουν την πρόσβαση**. Επομένως, ένα ελκυστικό SID χρήστη ή μια ενεργοποιημένη ομάδα στην έξοδο δεν αποδεικνύει από μόνο του ότι το token μπορεί να αποκτήσει πρόσβαση στο αντικείμενο-στόχο.<sup>[[8]](#references)</sup>
+
+Χρησιμοποιήστε αυτή τη ροή αποφάσεων για τις τεκμηριωμένες απαιτήσεις token και δημιουργίας διεργασιών:<sup>[[6]](#references)[[9]](#references)[[10]](#references)</sup>
+
+1. Ένα **primary token** χρειάζεται ένα handle με `TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY` προτού δοθεί στο `CreateProcessWithTokenW` ή στο `CreateProcessAsUserW`.
+2. Μετατρέψτε ένα **impersonation token** με `DuplicateTokenEx(..., SecurityImpersonation, TokenPrimary, ...)`. Τα token επιπέδου Identification μπορούν να αποκαλύψουν δεδομένα ταυτότητας, αλλά δεν μπορούν να εκτελέσουν ελέγχους πρόσβασης ως εκείνος ο πελάτης.
+3. Το `CreateProcessWithTokenW` απαιτεί το `SeImpersonatePrivilege` και εκκινεί τη θυγατρική διεργασία στην περίοδο σύνδεσης του καλούντος. Αντίθετα, το `CreateProcessAsUserW` χρησιμοποιεί την περίοδο σύνδεσης του token, αλλά συνήθως απαιτεί το `SeIncreaseQuotaPrivilege` και ενδέχεται να απαιτεί το `SeAssignPrimaryTokenPrivilege`. Αν υπάρχουν διαθέσιμα διαπιστευτήρια και λείπουν αυτά τα προνόμια, η τεκμηριωμένη εναλλακτική είναι το `CreateProcessWithLogonW`.
+
+#### Αναζητήστε handles token, όχι μόνο κατόχους διεργασιών
+
+Το άνοιγμα του primary token κάθε διεργασίας μπορεί να παραβλέψει **impersonation token που διατηρούνται ως συνηθισμένα handles** μέσα σε υπηρεσίες και διεργασίες broker. Μια επαναχρησιμοποιήσιμη ροή εργασίας για τον πίνακα handles είναι να απαριθμήσετε τα handles του συστήματος, να φιλτράρετε τα αντικείμενα token, να ανοίξετε κάθε κάτοχο με `PROCESS_DUP_HANDLE`, να αντιγράψετε το υποψήφιο handle στην τρέχουσα διεργασία και, στη συνέχεια, να ελέγξετε τα παραπάνω πεδία. Επιβεβαιώστε ότι το διπλότυπο handle περιλαμβάνει τα `TOKEN_QUERY` και `TOKEN_DUPLICATE`· το ότι εντοπίστηκε ένα handle token δεν σημαίνει ότι μπορεί να αντιγραφεί σε ένα αξιοποιήσιμο primary token. Οι προστατευμένες διεργασίες και οι DACL διεργασιών εξακολουθούν να μπορούν να εμποδίσουν το handle της διεργασίας-κατόχου.<sup>[[11]](#references)[[12]](#references)</sup>
+
+Το `SharpToken` αυτοματοποιεί την απαρίθμηση τόσο των primary token διεργασιών όσο και των διατηρούμενων handles token. Το `list_token` διατηρεί έναν προτιμώμενο υποψήφιο ανά όνομα χρήστη, ενώ το `list_all_token` εμφανίζει όλους τους υποψηφίους. Ένα PID περιορίζει την απαρίθμηση σε μία διεργασία-κάτοχο.<sup>[[12]](#references)</sup>
+
+```cmd
+SharpToken.exe list_token
+SharpToken.exe list_all_token
+SharpToken.exe list_all_token 1234
+SharpToken.exe execute "DOMAIN\User" "cmd /c whoami /all"
+```
+
+Για μη αυτόματο έλεγχο και επαλήθευση πρόσβασης, το **TokenUniverse** μπορεί να ανοίγει tokens διεργασιών/νημάτων, να αναζητά υπάρχοντα handles tokens, να επιθεωρεί περιορισμούς και logon sessions, να αντιγράφει tokens και να δοκιμάζει διάφορες μεθόδους δημιουργίας διεργασιών.<sup>[[13]](#references)</sup> Για το υποκείμενο primitive handles μεταξύ διεργασιών, δείτε:
+
+{{#ref}}
+leaked-handle-exploitation.md
+{{#endref}}
 
 #### Impersonate Tokens
 
-Χρησιμοποιώντας το _**incognito**_ module του metasploit, αν έχετε επαρκή privileges, μπορείτε εύκολα να κάνετε **list** και **impersonate** άλλα **tokens**. Αυτό μπορεί να είναι χρήσιμο για την εκτέλεση **actions σαν να ήσασταν ο άλλος user**. Θα μπορούσατε επίσης να κάνετε **escalate privileges** με αυτήν την technique.
+Χρησιμοποιώντας το module _**incognito**_ του metasploit, αν έχετε αρκετά προνόμια, μπορείτε εύκολα να **εμφανίσετε** και να **προσποιηθείτε** άλλα **tokens**. Αυτό μπορεί να είναι χρήσιμο για να εκτελείτε **ενέργειες σαν να ήσασταν ο άλλος χρήστης**. Θα μπορούσατε επίσης να **κλιμακώσετε προνόμια** με αυτήν την τεχνική.
 
-Μερικές πρακτικές σημειώσεις που είναι εύκολο να ξεχαστούν κατά το operation:<sup>[[1]](#references)</sup>
+Μερικές πρακτικές σημειώσεις που είναι εύκολο να ξεχαστούν κατά τη χρήση:<sup>[[1]](#references)</sup>
 
-- Το **`CreateProcessWithTokenW`** απαιτεί **`SeImpersonatePrivilege`** από τον caller και το νέο process θα εκτελεστεί στο **session του caller**.
-- Το **`CreateProcessAsUserW`** είναι το συνηθισμένο fallback όταν το `CreateProcessWithTokenW` αποτυγχάνει με `1314` ή όταν χρειάζεται να γίνει launch στο **session που αναφέρεται από το token**.
-- Αν ένα token προέρχεται από το **`LogonUser(LOGON32_LOGON_NETWORK)`**, συνήθως είναι **impersonation token**, επομένως χρειάζεται **`DuplicateTokenEx(..., TokenPrimary, ...)`** πριν προσπαθήσετε να κάνετε spawn ένα process με αυτό.
-- Δεν είναι όλα τα impersonation tokens εξίσου χρήσιμα: το **`SecurityIdentification`** σάς επιτρέπει να επιθεωρείτε τον user, αλλά **όχι να ενεργείτε ως αυτός**. Αν ένα coercion primitive ή ένας pipe/RPC client σάς παρέχει μόνο token επιπέδου identification, ελέγξτε το **`TokenImpersonationLevel`** και χρησιμοποιήστε ένα primitive που παρέχει **`SecurityImpersonation`** ή ανώτερο level.
+- Το **`CreateProcessWithTokenW`** απαιτεί **`SeImpersonatePrivilege`** από τον caller και η νέα διεργασία θα εκτελεστεί στο **session του caller**.
+- Το **`CreateProcessAsUserW`** είναι πιθανή εναλλακτική όταν το `CreateProcessWithTokenW` αποτυγχάνει με `1314`, μόνο αν ο caller πληροί τις απαιτήσεις προνομίων του. Είναι επίσης η σωστή επιλογή όταν η θυγατρική διεργασία πρέπει να εκτελεστεί στο **session που αναφέρεται από το token**.<sup>[[9]](#references)[[10]](#references)</sup>
+- Αν ένα token προέρχεται από **`LogonUser(LOGON32_LOGON_NETWORK)`**, συνήθως είναι **impersonation token**, οπότε χρειάζεται **`DuplicateTokenEx(..., TokenPrimary, ...)`** πριν επιχειρήσετε να εκκινήσετε διεργασία με αυτό.
+- Δεν είναι όλα τα impersonation tokens εξίσου χρήσιμα: το **`SecurityIdentification`** σάς επιτρέπει να επιθεωρήσετε τον χρήστη, αλλά **όχι να ενεργήσετε ως αυτός**. Αν ένα coercion primitive ή ένας client pipe/RPC σάς δώσει μόνο token επιπέδου identification, ελέγξτε το **`TokenImpersonationLevel`** και επιλέξτε primitive που παρέχει **`SecurityImpersonation`** ή ανώτερο επίπεδο.
 
-#### Token theft χωρίς να αγγίξετε το LSASS
+#### Κλοπή token χωρίς πρόσβαση στο LSASS
 
-Αν έχετε ήδη context ενός **service** ή του **SYSTEM** και ένας **privileged user είναι logged on**, η κλοπή ή η αντιγραφή του token αυτού του user είναι συχνά πιο αθόρυβη από το dumping του **LSASS**. Σε πολλές πραγματικές intrusions, αυτό αρκεί για να:<sup>[[2]](#references)</sup>
+Αν έχετε ήδη context **service** ή **SYSTEM** και είναι συνδεδεμένος ένας **προνομιούχος χρήστης**, η κλοπή ή αντιγραφή του token αυτού του χρήστη είναι συχνά πιο διακριτική από την εξαγωγή δεδομένων από το **LSASS**. Σε πολλές πραγματικές εισβολές, αυτό αρκεί για να:<sup>[[2]](#references)</sup>
 
-- εκτελέσετε local actions ως αυτός ο user
-- αποκτήσετε πρόσβαση σε remote resources ως αυτός ο user
-- εκτελέσετε AD operations χωρίς να εξαγάγετε πρώτα reusable credentials
+- εκτελείτε τοπικές ενέργειες ως αυτός ο χρήστης
+- αποκτάτε πρόσβαση σε απομακρυσμένους πόρους ως αυτός ο χρήστης
+- εκτελείτε λειτουργίες AD χωρίς να εξαγάγετε πρώτα επαναχρησιμοποιήσιμα credentials
 
-Για παραδείγματα **session/user token hijacking** από privileged context, δείτε το [**WTS Impersonator**](../stealing-credentials/wts-impersonator.md). Έχετε υπόψη ότι APIs όπως το **`WTSQueryUserToken`** προορίζονται για **highly trusted services** και κανονικά απαιτούν **`LocalSystem` + `SeTcbPrivilege`**, επομένως είναι κυρίως χρήσιμα όταν έχετε ήδη τον έλεγχο ενός service-level context. Για privilege-specific τρόπους απόκτησης του **SYSTEM** αρχικά, δείτε τις παρακάτω σελίδες.
+Για παραδείγματα **παραβίασης session/user token** από προνομιούχο context, δείτε το [**WTS Impersonator**](../stealing-credentials/wts-impersonator.md). Να θυμάστε ότι API όπως το **`WTSQueryUserToken`** προορίζονται για **υπηρεσίες υψηλής εμπιστοσύνης** και συνήθως απαιτούν **`LocalSystem` + `SeTcbPrivilege`**, επομένως είναι κυρίως χρήσιμα αφού αποκτήσετε ήδη έλεγχο σε context επιπέδου service. Για τρόπους απόκτησης **SYSTEM** που απαιτούν συγκεκριμένα προνόμια, δείτε τις παρακάτω σελίδες.
 
-### Privileges των tokens
+### Token Privileges
 
-Μάθετε ποια **token privileges μπορούν να γίνουν abuse για privilege escalation:**
-
+Μάθετε ποια **token privileges μπορούν να χρησιμοποιηθούν για κλιμάκωση προνομίων:**
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-Δείτε [**όλα τα πιθανά token privileges και ορισμένους ορισμούς σε αυτήν την external page**](https://github.com/gtworek/Priv2Admin).
+Δείτε [**όλα τα πιθανά token privileges και ορισμένους ορισμούς σε αυτήν την εξωτερική σελίδα**](https://github.com/gtworek/Priv2Admin).
 
 ## References
 
-- [1] [Understanding and Abusing Access Tokens — Part II](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
-- [2] [Abusing Windows' tokens to compromise Active Directory without touching LSASS](https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/)
-- [3] [Demystifying Cobalt Strike's "make_token" Command](https://www.fox-it.com/nl-en/demystifying-cobalt-strike-s-make_token-command/)
-
+- [1] [Κατανόηση και κατάχρηση Access Tokens — Μέρος II](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+- [2] [Κατάχρηση των Windows tokens για παραβίαση του Active Directory χωρίς πρόσβαση στο LSASS](https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/)
+- [3] [Αποσαφήνιση της εντολής "make_token" του Cobalt Strike](https://www.fox-it.com/nl-en/demystifying-cobalt-strike-s-make_token-command/)
+- [4] [Access Tokens - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/secauthz/access-tokens)
+- [5] [Πώς λειτουργεί το User Account Control - Microsoft Learn](https://learn.microsoft.com/en-us/windows/security/application-security/application-control/user-account-control/how-it-works)
+- [6] [Επίπεδα Impersonation - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/secauthz/impersonation-levels)
+- [7] [Απαρίθμηση TOKEN_INFORMATION_CLASS - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ne-winnt-token_information_class)
+- [8] [Περιορισμένα Tokens - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/secauthz/restricted-tokens)
+- [9] [Συνάρτηση CreateProcessWithTokenW - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
+- [10] [Συνάρτηση CreateProcessAsUserW - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessasuserw)
+- [11] [Συνάρτηση DuplicateHandle - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/api/handleapi/nf-handleapi-duplicatehandle)
+- [12] [BeichenDream/SharpToken](https://github.com/BeichenDream/SharpToken)
+- [13] [diversenok/TokenUniverse](https://github.com/diversenok/TokenUniverse)
 {{#include ../../banners/hacktricks-training.md}}
