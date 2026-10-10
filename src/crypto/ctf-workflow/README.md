@@ -1,22 +1,22 @@
-# Crypto CTF Workflow
+# Робочий процес Crypto CTF
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Чекліст triage
+## Контрольний список первинного аналізу
 
-1. Визначте, що саме у вас є: кодування, encryption, hash, signature чи MAC.
-2. Визначте, що контролюється: plaintext/ciphertext, IV/nonce, key, oracle (padding/error/timing), частковий leak.
-3. Класифікуйте: symmetric (AES/CTR/GCM), public-key (RSA/ECC), hash/MAC (SHA/MD5/HMAC), classical (Vigenere/XOR).
-4. Спочатку застосуйте перевірки з найвищою ймовірністю успіху: декодування шарів, known-plaintext XOR, повторне використання nonce, неправильне використання mode, поведінка oracle.
-5. Переходьте до advanced methods лише за потреби: lattices (LLL/Coppersmith), SMT/Z3, side-channels.
+1. Визначте, що саме маєте: кодування, шифрування, hash, підпис чи MAC.
+2. Визначте, що можна контролювати: plaintext/ciphertext, IV/nonce, key, oracle (padding/error/timing), частковий витік даних.
+3. Класифікуйте: симетричне (AES/CTR/GCM), з відкритим ключем (RSA/ECC), hash/MAC (SHA/MD5/HMAC), класичне (Vigenere/XOR).
+4. Спершу перевірте найімовірніші варіанти: шари декодування, XOR із відомим plaintext, повторне використання nonce, неправильне використання режиму, поведінку oracle.
+5. Переходьте до просунутих методів лише за потреби: lattices (LLL/Coppersmith), SMT/Z3, side-channel атаки.
 
 ## Онлайн-ресурси та утиліти
 
-Вони корисні, коли завдання полягає в ідентифікації та поетапному знятті шарів або коли потрібно швидко підтвердити гіпотезу.
+Ці ресурси корисні для визначення типу даних і зняття шарів кодування, а також для швидкої перевірки гіпотези.
 
 ### Пошук hash
 
-- Виконайте пошук hash challenge, якщо відомо, що він synthetic/public.
+- Пошукайте hash із завдання, якщо він, імовірно, синтетичний або публічний.
 - CrackStation.<sup>[[1]](#references)</sup>
 - MD5Decrypt.<sup>[[2]](#references)</sup>
 - Пошук на hashes.org.<sup>[[3]](#references)</sup>
@@ -24,130 +24,136 @@
 - GPUHash.me.<sup>[[5]](#references)</sup>
 - Hash Toolkit.<sup>[[6]](#references)</sup>
 
-Не надсилайте справжні password hashes або конфіденційні матеріали challenge до сторонніх сервісів пошуку. Якщо є ризики, пов’язані з розголошенням, умовами використання або правилами змагання, віддавайте перевагу offline-атаці зі wordlist/rule.
+Не надсилайте реальні password hash або конфіденційні матеріали завдання стороннім сервісам пошуку. Якщо є ризик розголошення, порушення умов використання чи правил змагання, надавайте перевагу офлайн-атаці зі словником і правилами.
 
 ### Допоміжні засоби ідентифікації
 
-- CyberChef (Magic, декодування та конвертація).<sup>[[7]](#references)</sup>
-- dCode (майданчик для cipher/encoding).<sup>[[8]](#references)</sup>
-- Boxentriq (розв’язувачі substitution).<sup>[[9]](#references)</sup>
+- CyberChef (Magic, декодування та перетворення).<sup>[[7]](#references)</sup>
+- dCode (середовище для шифрів і кодувань).<sup>[[8]](#references)</sup>
+- Boxentriq (розв’язувачі шифрів заміни).<sup>[[9]](#references)</sup>
 
-### Платформи для практики / reference
+### Платформи для практики / довідкові матеріали
 
-- CryptoHack (практичні cryptography challenges).<sup>[[10]](#references)</sup>
-- Cryptopals (класичні вразливості modern cryptography).<sup>[[11]](#references)</sup>
+- CryptoHack (практичні завдання з криптографії).<sup>[[10]](#references)</sup>
+- Cryptopals (класичні помилки в сучасній криптографії).<sup>[[11]](#references)</sup>
 
 ### Автоматичне декодування
 
 - Ciphey.<sup>[[12]](#references)</sup>
-- python-codext (перебирає багато base/encoding).<sup>[[13]](#references)</sup>
+- python-codext (перебирає багато систем числення та кодувань).<sup>[[13]](#references)</sup>
 
-## Encoding та classical ciphers
+## Кодування та класичні шифри
 
-### Technique
+### Методика
 
-Багато crypto-завдань CTF — це багатошарові перетворення: base encoding + проста substitution + compression. Мета — ідентифікувати шари та безпечно знімати їх поетапно.
+Багато завдань із криптографії на CTF — це ланцюжки перетворень: кодування base + проста заміна + стиснення. Мета — визначити шари та безпечно зняти їх.
 
-### Encoding: спробуйте багато base
+### Кодування: спробуйте різні системи числення
 
-Якщо ви підозрюєте layered encoding (base64 → base32 → …), спробуйте:
+Якщо підозрюєте багатошарове кодування (base64 → base32 → …), спробуйте:
 
 - CyberChef "Magic"
 - `codext` (python-codext): `codext <string>`
 
 Типові ознаки:
 
-- Base64: `A-Za-z0-9+/=` (padding `=` є поширеним)
-- Base32: `A-Z2-7=` (часто багато `=` padding)
-- Ascii85/Base85: щільна пунктуація; іноді обгортається в `<~ ~>`
+- Base64: `A-Za-z0-9+/=` (символ `=` часто використовується для доповнення)
+- Base32: `A-Z2-7=` (часто багато символів `=` для доповнення)
+- Ascii85/Base85: багато розділових знаків; іноді обгорнуто в `<~ ~>`
 
-### Substitution / monoalphabetic
+### Заміна / моноалфавітний шифр
 
-- Boxentriq cryptogram solver.<sup>[[9]](#references)</sup>
+- Розв’язувач криптограм Boxentriq.<sup>[[9]](#references)</sup>
 - quipqiup.<sup>[[14]](#references)</sup>
 
 ### Caesar / ROT / Atbash
 
-- Nayuki automatic Caesar-cipher breaker.<sup>[[15]](#references)</sup>
-- Rumkin Atbash tool.<sup>[[16]](#references)</sup>
+- Автоматичний зламувач шифру Caesar від Nayuki.<sup>[[15]](#references)</sup>
+- Інструмент Atbash від Rumkin.<sup>[[16]](#references)</sup>
 
 ### Vigenère
 
-- dCode Vigenère tool.<sup>[[8]](#references)</sup>
-- Guballa Vigenère solver.<sup>[[17]](#references)</sup>
+- Інструмент dCode для Vigenère.<sup>[[8]](#references)</sup>
+- Розв’язувач Vigenère від Guballa.<sup>[[17]](#references)</sup>
 
-### Bacon cipher
+### Шифр Bacon
 
-Часто зустрічається у вигляді груп із 5 бітів або 5 літер:
+Часто трапляється у вигляді груп із 5 бітів або 5 літер:
+
 ```
 00111 01101 01010 00000 ...
 AABBB ABBAB ABABA AAAAA ...
 ```
+
 ### Morse
+
 ```
 .... --- .-.. -.-. .- .-. .- -.-. --- .-.. .-
 ```
+
 ### Руни
 
-Руни часто є substitution alphabets; шукайте "futhark cipher" і спробуйте таблиці відповідностей.
+Руни часто є алфавітами для підстановки; шукайте «шифр футарком» і спробуйте таблиці відповідностей.
 
-## Стиснення у challenge
+## Стиснення у завданнях
 
-### Техніка
+### Методика
 
-Стиснення постійно зустрічається як додатковий рівень (zlib/deflate/gzip/xz/zstd), іноді вкладений. Якщо output майже парситься, але виглядає як сміття, підозрюйте стиснення.
+Стиснення постійно трапляється як додатковий шар (zlib/deflate/gzip/xz/zstd), іноді вкладений. Якщо вивід майже розбирається, але схожий на сміття, запідозріть стиснення.
 
-### Швидка ідентифікація
+### Швидке визначення
 
 - `file <blob>`
-- Шукайте магічні байти:
-- gzip: `1f 8b`
-- zlib: зазвичай `78 01`, `78 5e`, `78 9c` або `78 da` (другий байт залежить від compression flags)
-- zip: `50 4b 03 04`
-- bzip2: `42 5a 68` (`BZh`)
-- xz: `fd 37 7a 58 5a 00`
-- zstd: `28 b5 2f fd`
+- Шукайте сигнатурні байти:
+  - gzip: `1f 8b`
+  - zlib: зазвичай `78 01`, `78 5e`, `78 9c` або `78 da` (другий байт залежить від прапорців стиснення)
+  - zip: `50 4b 03 04`
+  - bzip2: `42 5a 68` (`BZh`)
+  - xz: `fd 37 7a 58 5a 00`
+  - zstd: `28 b5 2f fd`
 
 ### Raw DEFLATE
 
-CyberChef має **Raw Deflate/Raw Inflate**, що часто є найшвидшим шляхом, коли blob виглядає стисненим, але `zlib` не спрацьовує.
+У CyberChef є **Raw Deflate/Raw Inflate** — часто це найшвидший спосіб, якщо дані схожі на стиснені, але `zlib` не спрацьовує.
 
-### Корисні CLI
+### Корисні CLI-команди
+
 ```bash
 python3 - blob.bin <<'PY'
 import sys, zlib
 data = open(sys.argv[1], 'rb').read()
 for wbits in [zlib.MAX_WBITS, -zlib.MAX_WBITS]:
-try:
-print(zlib.decompress(data, wbits=wbits)[:200])
-except Exception:
-pass
+  try:
+    print(zlib.decompress(data, wbits=wbits)[:200])
+  except Exception:
+    pass
 PY
 ```
+
 ## Поширені криптографічні конструкції CTF
 
-### Technique
+### Техніка
 
-Вони часто трапляються, оскільки є реалістичними помилками розробників або результатом неправильного використання поширених бібліотек. Зазвичай мета полягає у розпізнаванні та застосуванні відомого workflow для extraction або reconstruction.
+Вони трапляються часто, оскільки відображають реалістичні помилки розробників або неправильне використання поширених бібліотек. Зазвичай потрібно розпізнати їх і застосувати відомий процес вилучення або відновлення.
 
 ### Fernet
 
-Типова підказка: два рядки Base64 (token + key).
+Типова підказка: два рядки Base64 (токен + ключ).
 
-- Decoder/notes: Asecuritysite Fernet decoder.<sup>[[18]](#references)</sup>
-- In Python: `from cryptography.fernet import Fernet`
+- Декодер/нотатки: декодер Fernet від Asecuritysite.<sup>[[18]](#references)</sup>
+- У Python: `from cryptography.fernet import Fernet`
 
-### Shamir Secret Sharing
+### Розділення секрету Шаміра
 
-Якщо ви бачите кілька shares і згадується threshold `t`, найімовірніше, це Shamir.
+Якщо є кілька часток і згадується поріг `t`, імовірно, це Shamir.
 
-- Online reconstructor (лише для несекретних CTF shares).<sup>[[19]](#references)</sup>
+- Онлайн-відновлювач (лише для несекретних часток CTF).<sup>[[19]](#references)</sup>
 
-### OpenSSL salted formats
+### Формати OpenSSL із сіллю
 
-У CTF іноді надаються результати `openssl enc` (заголовок часто починається з `Salted__`).
+У CTF іноді надають результати `openssl enc` (заголовок часто починається з `Salted__`).
 
-Bruteforce helpers:
+Інструменти для перебору:
 
 - `bruteforce-salted-openssl`.<sup>[[20]](#references)</sup>
 - `easy_BFopensslCTF`.<sup>[[21]](#references)</sup>
@@ -158,18 +164,20 @@ Bruteforce helpers:
 - featherduster.<sup>[[23]](#references)</sup>
 - cryptovenom.<sup>[[24]](#references)</sup>
 
-## Рекомендоване локальне налаштування
+## Рекомендоване локальне середовище
 
 Практичний стек для CTF:
 
-- Python разом із `pycryptodome` для симетричних примітивів і швидкого прототипування.<sup>[[25]](#references)</sup>
-- SageMath для модульної арифметики, CRT, lattice та роботи з RSA/ECC.<sup>[[26]](#references)</sup>
-- Z3 для challenges на основі обмежень (коли криптографічна задача зводиться до обмежень).<sup>[[27]](#references)</sup>
+- Python із `pycryptodome` для симетричних примітивів і швидкого прототипування.<sup>[[25]](#references)</sup>
+- SageMath для модульної арифметики, CRT, ґраток, а також роботи з RSA/ECC.<sup>[[26]](#references)</sup>
+- Z3 для завдань на основі обмежень (коли криптографічну задачу можна звести до обмежень).<sup>[[27]](#references)</sup>
 
-Рекомендовані Python packages:
+Рекомендовані пакети Python:
+
 ```bash
 pip install pycryptodome gmpy2 sympy pwntools z3-solver
 ```
+
 ## References
 
 - [1] [CrackStation](https://crackstation.net/)
@@ -177,19 +185,19 @@ pip install pycryptodome gmpy2 sympy pwntools z3-solver
 - [3] [пошук hashes.org](https://hashes.org/search.php)
 - [4] [OnlineHashCrack](https://www.onlinehashcrack.com/)
 - [5] [GPUHash.me](https://gpuhash.me/)
-- [6] [Набір інструментів для хешів](https://hashtoolkit.com/reverse-hash)
+- [6] [Hash Toolkit](https://hashtoolkit.com/reverse-hash)
 - [7] [GCHQ CyberChef](https://gchq.github.io/CyberChef/)
 - [8] [інструменти dCode](https://www.dcode.fr/tools-list)
-- [9] [інструменти для зламування кодів Boxentriq](https://www.boxentriq.com/code-breaking)
+- [9] [інструменти Boxentriq для зламу шифрів](https://www.boxentriq.com/code-breaking)
 - [10] [CryptoHack](https://cryptohack.org/)
 - [11] [Cryptopals](https://cryptopals.com/)
 - [12] [Ciphey](https://github.com/Ciphey/Ciphey)
 - [13] [python-codext](https://github.com/dhondta/python-codext)
 - [14] [quipqiup](https://quipqiup.com/)
-- [15] [Nayuki - автоматичний зламувальник шифру Цезаря](https://www.nayuki.io/page/automatic-caesar-cipher-breaker-javascript)
-- [16] [Rumkin - шифр Atbash](https://rumkin.com/tools/cipher/atbash/)
-- [17] [засіб розв'язання шифру Віженера Guballa](https://www.guballa.de/vigenere-solver)
-- [18] [Asecuritysite - декодер Fernet](https://asecuritysite.com/encryption/ferdecode)
+- [15] [Nayuki — автоматичний злам шифру Цезаря](https://www.nayuki.io/page/automatic-caesar-cipher-breaker-javascript)
+- [16] [Rumkin — шифр Atbash](https://rumkin.com/tools/cipher/atbash/)
+- [17] [розв'язувач шифру Віженера Guballa](https://www.guballa.de/vigenere-solver)
+- [18] [Asecuritysite — декодер Fernet](https://asecuritysite.com/encryption/ferdecode)
 - [19] [реконструктор розподілу секрету Шаміра](https://christian.gen.co/secrets/)
 - [20] [bruteforce-salted-openssl](https://github.com/glv2/bruteforce-salted-openssl)
 - [21] [easy_BFopensslCTF](https://github.com/carlospolop/easy_BFopensslCTF)

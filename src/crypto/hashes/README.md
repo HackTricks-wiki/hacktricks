@@ -1,80 +1,86 @@
-# Хеші, MAC і KDF
+# Хеші, MAC та KDF
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Поширені CTF-патерни
+## Поширені шаблони CTF
 
-- «Підпис» насправді є `hash(secret || message)` → length extension.
-- Хеші паролів без salt → швидший повторний cracking і атаки з попередньо обчисленими таблицями.
-- Плутанина між hash і MAC (hash != authentication).
+- «Підпис» насправді є `hash(secret || message)` → атака розширення довжини.
+- Хеші паролів без солі → швидший повторний перебір і атаки з попередньо обчисленими таблицями.
+- Плутанина між хешем і MAC (hash != authentication).
 
-## Атака length extension для hash
+## Атака розширення довжини хешу
 
-### Техніка
+### Методика
 
-Length-extension attack може бути можливою, коли сервер обчислює «підпис» на кшталт:
+Атака розширення довжини може бути можливою, коли сервер обчислює «підпис» на кшталт:
 
 `sig = HASH(secret || message)`
 
-і використовує hash Merkle-Damgård, наприклад MD5, SHA-1 або SHA-256.
+і використовує хеш Merkle–Damgård, як-от MD5, SHA-1 або SHA-256.
 
 Якщо вам відомі:
 
 - `message`
 - `sig`
-- hash function
-- (або ви можете brute-force) `len(secret)`
+- функція хешування
+- (або ви можете перебрати) `len(secret)`
 
-Тоді можна обчислити дійсний підпис для:
+Тоді ви можете обчислити дійсний підпис для:
 
 `message || padding || appended_data`
 
-не знаючи secret.<sup>[[1]](#references)</sup>
+не знаючи секрету.<sup>[[1]](#references)</sup>
 
 ### Важливе обмеження: HMAC не вразливий
 
-Length-extension attacks застосовуються до вразливих prefix constructions, таких як `HASH(secret || message)`. Вони не розкривають HMAC construction (наприклад, HMAC-SHA256), яка поєднує key з окремими inner і outer hash operations.<sup>[[1]](#references)[[2]](#references)</sup>
+Атаки розширення довжини застосовуються до вразливих префіксних конструкцій, як-от `HASH(secret || message)`. Вони не розкривають конструкцію HMAC (наприклад, HMAC-SHA256), яка поєднує ключ з окремими внутрішнім і зовнішнім застосуваннями хеш-функції.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### Інструменти
 
 - [`hash_extender`](https://github.com/iagox86/hash_extender)<sup>[[3]](#references)</sup>
-- [`hashpumpy`](https://pypi.org/project/hashpumpy/), Python bindings для HashPump length-extension tool<sup>[[7]](#references)</sup>
+- [`hashpumpy`](https://pypi.org/project/hashpumpy/), Python-прив’язки для інструмента розширення довжини HashPump<sup>[[7]](#references)</sup>
 
-### Хороше пояснення
+### Гарне пояснення
 
 [Everything you need to know about hash length extension attacks](https://www.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)<sup>[[1]](#references)</sup>
 
-## Хешування та cracking паролів
+## Хешування та зламування паролів
 
 ### Перші запитання<sup>[[4]](#references)</sup>
 
-- Чи використовується **salt**? (шукайте формати `salt$hash`)
-- Це **fast hash** (MD5/SHA1/SHA256) чи **slow KDF** (bcrypt/scrypt/argon2/PBKDF2)?
-- Чи маєте ви **format hint** (hashcat mode / John format)?
+- Чи використовується **сіль**? (шукайте формати `salt$hash`)
+- Це **швидкий хеш** (MD5/SHA1/SHA256) чи **повільний KDF** (bcrypt/scrypt/argon2/PBKDF2)?
+- Чи є підказка щодо **формату** (режим hashcat / формат John)?
 
-### Практичний workflow<sup>[[5]](#references)[[6]](#references)</sup>
+### Практичний процес<sup>[[5]](#references)[[6]](#references)</sup>
 
-1. Визначте hash:
-- `hashid <hash>`
-- `hashcat --example-hashes | rg -n "<pattern>"`
-2. Якщо hash без salt і поширений: спробуйте online DBs та identification tooling із crypto workflow section.
-3. В іншому разі виконайте cracking:
-- `hashcat -m <mode> -a 0 hashes.txt wordlist.txt`
-- `john --wordlist=wordlist.txt --format=<fmt> hashes.txt`
+1. Визначте хеш:
+   - `hashid <hash>`
+   - `hashcat --example-hashes | rg -n "<pattern>"`
+2. Якщо хеш без солі й поширений: спробуйте онлайн-бази даних та інструменти ідентифікації з розділу про роботу з криптографією.
+3. В іншому разі зламуйте:
+   - `hashcat -m <mode> -a 0 hashes.txt wordlist.txt`
+   - `john --wordlist=wordlist.txt --format=<fmt> hashes.txt`
 
-### Поширені помилки, які можна використати
+### Поширені помилки, якими можна скористатися
 
-- Той самий пароль повторно використовується різними користувачами → зламайте один і виконайте pivot.
-- Обрізані hashes / custom transforms → нормалізуйте й повторіть спробу.
-- Слабкі KDF parameters (наприклад, мала кількість PBKDF2 iterations) → усе ще піддаються cracking.
+- Один пароль використовується різними користувачами → зламайте один і перейдіть до інших.
+- Обрізані хеші / власні перетворення → нормалізуйте й повторіть спробу.
+- Слабкі параметри KDF (наприклад, мала кількість ітерацій PBKDF2) → пароль усе ще можна зламати.
+
+### Chosen-input bcrypt oracle with an appended secret
+
+Доступна для виклику допоміжна функція, що повертає `bcrypt(user_input || secret)`, може розкрити інформацію про доданий секрет, якщо її реалізація bcrypt непомітно обрізає вхідні дані після 72 **байтів**. Обмеження кількості символів до кодування в UTF-8 не забезпечує дотримання цього ліміту в байтах: багатобайтові символи можуть заповнити вхідні дані bcrypt, залишивши місце лише для невеликого префікса секрету. Тоді вибрані вхідні дані та повернуті хеші можуть дати змогу офлайн перевіряти байти-кандидати суфікса. Для цього потрібен контроль над введенням допоміжної функції, знання її точного перетворення й кодування, а також реалізація, яка справді обрізає дані; сам факт наявності функції для виклику чи хешу bcrypt не підтверджує, що цей ланцюжок можливий. [pyca/bcrypt documents](https://github.com/pyca/bcrypt#maximum-password-length), що поточна версія `hashpw` викликає помилку для вхідних даних довжиною понад 72 байти, тоді як попередні версії непомітно їх обрізали. Інші обгортки можуть попередньо хешувати або відхиляти довгі вхідні дані, тому перевірте встановлену реалізацію, а не припускайте, що обрізання відбувається.
+
+Використання відновленого секрету для іншого облікового запису також потребує доказів, що його відкритий хеш було згенеровано з **тим самим** секретом і перетворенням, а також окремого способу отримати облікові дані чи виконати вхід. Допоміжну функцію хешування, запущену від імені root, варто розглядати як oracle лише тоді, коли користувач із нижчими привілеями може викликати її згідно з чинною політикою; пасивне перерахування хоста не зобов’язане викликати її чи надсилати вибрані паролі.
 
 ## References
 
-- [1] [SkullSecurity - Усе, що потрібно знати про hash length-extension attacks](https://www.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
-- [2] [NIST FIPS 198-1 - Keyed-Hash Message Authentication Code](https://csrc.nist.gov/pubs/fips/198-1/final)
+- [1] [SkullSecurity — усе, що потрібно знати про атаки розширення довжини хешу](https://www.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
+- [2] [NIST FIPS 198-1 — код автентифікації повідомлень на основі ключованого хешу](https://csrc.nist.gov/pubs/fips/198-1/final)
 - [3] [hash_extender](https://github.com/iagox86/hash_extender)
-- [4] [OWASP - Пам’ятка зі зберігання паролів](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html)
-- [5] [Hashcat - приклади hashes](https://hashcat.net/wiki/doku.php?id=example_hashes)
-- [6] [John the Ripper - параметри командного рядка](https://www.openwall.com/john/doc/OPTIONS.shtml)
-- [7] [PyPI: `hashpumpy` Python bindings для HashPump](https://pypi.org/project/hashpumpy/)
+- [4] [Пам’ятка OWASP щодо зберігання паролів](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html)
+- [5] [Приклади хешів hashcat](https://hashcat.net/wiki/doku.php?id=example_hashes)
+- [6] [Параметри командного рядка John the Ripper](https://www.openwall.com/john/doc/OPTIONS.shtml)
+- [7] [PyPI: Python-прив’язки `hashpumpy` для HashPump](https://pypi.org/project/hashpumpy/)
 {{#include ../../banners/hacktricks-training.md}}
