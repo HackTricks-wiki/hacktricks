@@ -581,6 +581,26 @@ By allowing access to the Interpreter Binaries and the environment on the SMB sh
 
 The repo indicates: Defender still scans the scripts but by utilising Go, Java, PHP etc we have **more flexibility to bypass static signatures**. Testing with random un-obfuscated reverse shell scripts in these languages has proved successful.
 
+## WebAssembly re-hosting for static-analysis evasion
+
+Instead of editing a heavily signatured Go tool, it can be compiled as a `wasip1` guest and embedded in a separate native loader. The guest is built against a patched GOROOT in which unsupported operations such as `net.Dial`, `net.Listen`, `os/exec` and `os.Pipe` delegate through `//go:wasmimport`; a Wazero host module then implements sockets, process operations, Win32 calls and macOS framework calls. This keeps the original project's Go API usage intact while moving most of its logic into an encrypted WASM module that static PE tooling may not understand.<sup>[[41]](#references)</sup>
+
+### Bridging linear memory to native APIs
+
+A guest pointer is a 32-bit offset into WASM linear memory, not a host virtual address. Before a native call, the bridge can translate an argument only when it is marked as a local pointer and falls in the range `0x10000 <= value < wasmMemorySize`, producing `wasmMemoryBase + value`. The lower bound avoids rewriting small handles, flags and `nil`; per-API masks generated from `win32metadata` distinguish real pointers from handles, sizes and remote-process addresses, with overrides for inaccurate or ambiguous metadata.<sup>[[41]](#references)</sup>
+
+Native APIs may also return host pointers through guest output buffers. A mirror table can assign such objects guest-memory representations and retain a reverse mapping to the original host address. COM requires mirroring both the interface and its vtable: data pointers can be followed and mirrored, whereas executable pointers in `MEM_IMAGE` regions must remain opaque tokens because WASM cannot execute native instructions. This model does not directly support host-to-guest callback APIs such as `EnumWindows` or `SetWindowsHookEx`.<sup>[[41]](#references)</sup>
+
+### Per-build WASM VM polymorphism
+
+The runtime and payload can be transformed together on every build: shuffle the opcode-to-handler table, rewrite every guest opcode to the new mapping, randomize section identifiers, replace the standard `\0asm` magic with a build-specific marker and change runtime cache magic. Identical source then yields bytewise-different modules, and ordinary WASM tooling cannot parse the payload until the analyst recovers the custom mapping and framing from the host loader.<sup>[[41]](#references)</sup>
+
+For reverse engineering, start with the native host rather than carving only on `\0asm`: identify the compiled marker, module-decryption path, opcode dispatch table and `env` host-function registrations, then reconstruct a standard module or instrument the import boundary. The bridge remains a useful behavioral choke point because calls for networking, process creation, registry access, dynamic loading and generic Win32 dispatch cross it even when the embedded bytecode changes between builds.<sup>[[41]](#references)</sup>
+
+### Camouflaging the outer Go executable
+
+Changing the guest alone still leaves a recognizable loader. The demonstrated outer-binary transformations splice dense symbol profiles harvested from legitimate Go projects into `gopclntab`, rotate a small plausible set of DLL imports, and vary PE `VERSIONINFO` plus Authenticode identity strings. These transformations target static and machine-learning features of the container; they do not remove the runtime behavior exposed by the host shims.<sup>[[41]](#references)</sup>
+
 ## TokenStomping
 
 Token stomping manipulates the access token of a security product such as an EDR or AV. Reducing the token's privileges can leave the process running while preventing it from performing privileged inspection or remediation actions.
@@ -1466,5 +1486,6 @@ Sleep(exec_delay_seconds * 1000); // config-controlled delay to outlive sandboxe
 - [38] [MDSec Function Peekaboo companion code](https://github.com/mdsecactivebreach/functionpeekaboo)
 - [39] [MDSec - Function Peekaboo: Crafting Self-Masking Functions Using LLVM](https://mdsec.co.uk/2025/10/function-peekaboo-crafting-self-masking-functions-using-llvm/)
 - [40] [Microsoft Learn - VirtualProtect](https://learn.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualprotect)
+- [41] [Praetorian - Enter the WasmForge: Compiling Sliver into WebAssembly](https://praetorian.com/blog/wasmforge-sliver-webassembly)
 
 {{#include ../banners/hacktricks-training.md}}
