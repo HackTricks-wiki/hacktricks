@@ -2,17 +2,17 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Questa sezione si concentra sul **trovare ed estrarre dati nascosti** da immagini, audio, video, documenti, archivi e testo. La steganografia nasconde l'esistenza di una comunicazione incorporando dati all'interno di altri dati.<sup>[[1]](#references)</sup>
+Questa sezione si concentra sulla **ricerca e l'estrazione di dati nascosti** da immagini, audio, video, documenti, archivi e testo. La steganografia nasconde l'esistenza di una comunicazione incorporando dati all'interno di altri dati.<sup>[[1]](#references)</sup>
 
-Se sei qui per gli attacchi crittografici, vai alla sezione **Crypto**.
+Se cerchi attacchi crittografici, vai alla sezione **Crypto**.
 
 ## Punto di ingresso
 
-Affronta la steganografia come un problema di analisi forense: identifica il contenitore reale, esamina le posizioni ad alto valore informativo (metadati, dati aggiunti, file incorporati) e solo dopo applica tecniche di estrazione a livello di contenuto.
+Affronta la steganografia come un problema di analisi forense: identifica il contenitore effettivo, esamina le posizioni con maggiori probabilità di contenere informazioni rilevanti (metadati, dati aggiunti, file incorporati) e solo dopo applica tecniche di estrazione a livello di contenuto.
 
-### Workflow e triage
+### Flusso di lavoro e triage
 
-Un workflow strutturato che dà priorità all'identificazione del contenitore, all'ispezione di metadati/stringhe, al carving e alla diramazione specifica per formato.
+Un flusso di lavoro strutturato che dà priorità all'identificazione del contenitore, all'ispezione di metadati e stringhe, al carving e all'analisi specifica per formato.
 
 {{#ref}}
 workflow/README.md
@@ -20,7 +20,7 @@ workflow/README.md
 
 ### Immagini
 
-Dove si trova la maggior parte della stego nei CTF: LSB/bit-plane (PNG/BMP), anomalie nei chunk/formati dei file, strumenti per JPEG e trucchi con GIF multi-frame.
+È qui che si trova la maggior parte della stego nei CTF: LSB/piani di bit (PNG/BMP), anomalie di chunk e formati di file, strumenti per JPEG e trucchi con GIF multiframe.
 
 {{#ref}}
 images/README.md
@@ -28,7 +28,7 @@ images/README.md
 
 ### Audio
 
-I messaggi negli spettrogrammi, l'embedding LSB nei sample e i toni dei tasti telefonici (DTMF) sono pattern ricorrenti.
+I messaggi negli spettrogrammi, l'incorporamento LSB nei campioni e i toni dei tastierini telefonici (DTMF) sono schemi ricorrenti.
 
 {{#ref}}
 audio/README.md
@@ -50,9 +50,9 @@ I PDF e i file Office sono innanzitutto contenitori; gli attacchi ruotano solita
 documents/README.md
 {{#endref}}
 
-### Steganografia per malware e delivery
+### Malware e steganografia per la distribuzione dei payload
 
-La delivery del payload può utilizzare file dall'aspetto valido, come immagini GIF o PNG, che trasportano payload testuali delimitati da marker invece di nascondere i dati nei pixel.
+La distribuzione dei payload può avvenire tramite file apparentemente validi, come immagini GIF o PNG, che contengono payload testuali delimitati da marker invece di nascondere dati nei pixel.
 
 {{#ref}}
 malware-and-network/README.md

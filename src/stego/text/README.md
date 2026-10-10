@@ -1,50 +1,54 @@
-# Steganografia del testo
+# Steganografia nel testo
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Percorso pratico
 
-Se il testo normale si comporta in modo imprevisto, conserva le prove originali, ispeziona i relativi codepoint e normalizza solo una copia.
+Se il testo semplice si comporta in modo inatteso, conserva le prove originali, esamina i suoi codepoint e normalizza solo una copia.
 
 ### Tecnica
 
-La steganografia del testo si basa spesso su caratteri che vengono visualizzati in modo identico o invisibile:
+La steganografia testuale si basa spesso su caratteri che vengono visualizzati in modo identico o invisibile:
 
-- Homoglyphs: codepoint Unicode diversi che sembrano uguali (ad esempio, la `a` latina e la `а` cirillica)<sup>[[1]](#references)</sup>
-- Caratteri zero-width: joiner, non-joiner e spazi zero-width<sup>[[2]](#references)</sup>
-- Codifiche degli spazi bianchi: spazi rispetto a tab, pattern di spazi finali e pattern deliberati della lunghezza delle righe<sup>[[3]](#references)[[4]](#references)</sup>
+- Omoglifi: codepoint Unicode diversi che sembrano uguali (ad esempio, `a` latina e `а` cirillica)<sup>[[1]](#references)</sup>
+- Caratteri a larghezza zero: joiner, non-joiner e spazi a larghezza zero<sup>[[2]](#references)</sup>
+- Codifiche basate sugli spazi: spazi rispetto a tabulazioni, schemi di spazi finali e schemi deliberati di lunghezza delle righe<sup>[[3]](#references)[[4]](#references)</sup>
 
-Casi aggiuntivi ad alto valore diagnostico:
+Altri casi ad alto segnale:
 
 - Controlli bidirezionali, che possono riordinare visivamente il testo<sup>[[1]](#references)</sup>
-- Variation selectors e caratteri combinanti, che possono trasportare uno stato nascosto lasciando il testo visibile quasi invariato<sup>[[1]](#references)</sup>
+- Selettori di variazione e caratteri combinanti, che possono contenere informazioni nascoste lasciando il testo visibile quasi invariato<sup>[[1]](#references)</sup>
 
 ### Strumenti di decodifica
 
-- [Encoder/decoder di Unicode homoglyph e caratteri zero-width](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)<sup>[[2]](#references)</sup>
+- [Encoder/decoder di omoglifi Unicode e caratteri a larghezza zero](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)<sup>[[2]](#references)</sup>
 
-### Ispeziona i codepoint
+### Esaminare i codepoint
+
 ```bash
 python3 - <<'PY'
 import sys
 s=sys.stdin.read()
 for i,ch in enumerate(s):
-if ord(ch) > 127 or ch.isspace():
-print(i, hex(ord(ch)), repr(ch))
+  if ord(ch) > 127 or ch.isspace():
+    print(i, hex(ord(ch)), repr(ch))
 PY
 ```
-## Canali CSS `unicode-range`
 
-Le regole `@font-face` possono essere sfruttate per codificare byte nelle voci `unicode-range: U+..`. Estrai i codepoint, concatena i valori esadecimali e decodificali:<sup>[[3]](#references)</sup>
+## Canali `unicode-range` CSS
+
+Le regole `@font-face` possono essere abusate per codificare byte nelle voci `unicode-range: U+..`. Estrai i codepoint, concatena i valori esadecimali e decodificali:<sup>[[3]](#references)</sup>
+
 ```bash
 grep -o "U+[0-9A-Fa-f]\+" styles.css | tr -d 'U+\n' | xxd -r -p
 ```
-Se gli intervalli contengono più valori per dichiarazione, dividili prima sulle virgole e normalizzali (`tr ',+' '\n'`). Python può analizzare ed emettere i byte quando la formattazione è incoerente.<sup>[[3]](#references)</sup>
+
+Se gli intervalli contengono più valori per dichiarazione, separali prima in corrispondenza delle virgole e normalizzali (`tr ',+' '\n'`). Python può analizzarli e generare i byte quando la formattazione è incoerente.<sup>[[3]](#references)</sup>
 
 ## References
 
-- [1] [Unicode Technical Report #36: Considerazioni sulla sicurezza Unicode](https://www.unicode.org/reports/tr36/)
-- [2] [Irongeek: Steganografia Unicode con caratteri a larghezza zero e omoglifi](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)
+- [1] [Rapporto tecnico Unicode #36: considerazioni sulla sicurezza Unicode](https://www.unicode.org/reports/tr36/)
+- [2] [Irongeek: steganografia Unicode con caratteri a larghezza zero e omoglifi](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)
 - [3] [0xdf: Flagvent 2025 (Medium) — Lista dei desideri di Babbo Natale](https://0xdf.gitlab.io/flagvent2025/medium)
-- [4] [Manuale Debian: steganografia degli spazi bianchi con `stegsnow`](https://manpages.debian.org/trixie/stegsnow/stegsnow.1.en.html)
+- [4] [Manuale Debian: steganografia tramite spazi bianchi con `stegsnow`](https://manpages.debian.org/trixie/stegsnow/stegsnow.1.en.html)
 {{#include ../../banners/hacktricks-training.md}}

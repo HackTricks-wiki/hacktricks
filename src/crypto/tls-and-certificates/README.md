@@ -2,55 +2,59 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Questa sezione tratta l'ispezione di X.509, le codifiche, le conversioni e gli errori di validazione rilevanti per la sicurezza.
+Questa sezione tratta l’ispezione di X.509, le codifiche, le conversioni e gli errori di validazione rilevanti per la sicurezza.
 
-## Analisi di X.509
+## Parsing X.509
 
-OpenSSL può stampare i campi decodificati di un certificato, mentre `asn1parse` mostra la struttura ASN.1 sottostante.<sup>[[1]](#references)[[2]](#references)</sup>
+OpenSSL può mostrare i campi decodificati di un certificato, mentre `asn1parse` mostra la struttura ASN.1 sottostante.<sup>[[1]](#references)[[2]](#references)</sup>
+
 ```bash
 openssl x509 -in cert.pem -noout -text
 openssl asn1parse -in cert.pem
 ```
-Esamina almeno:
+
+Esaminare almeno:
 
 - il subject, l'issuer e il Subject Alternative Name (SAN);
 - key usage ed extended key usage;
-- basic constraints e i path-length constraints;
-- i tempi di validità `notBefore` e `notAfter`;
+- basic constraints e path-length constraints;
+- gli orari di validità `notBefore` e `notAfter`;
 - i parametri della chiave pubblica e l'algoritmo di firma.
 
-Le firme legacy, come le firme dei certificati basate su MD5 o SHA-1, sono finding particolarmente importanti, sebbene l'accettazione esatta e l'impatto dipendano dal validator e dal contesto di trust.<sup>[[3]](#references)</sup>
+Le firme legacy, come quelle dei certificati basate su MD5 o SHA-1, sono risultati particolarmente importanti, anche se l'accettazione e l'impatto esatti dipendono dal validator e dal contesto di trust.<sup>[[3]](#references)</sup>
 
 RFC 5280 definisce il profilo Internet X.509 e le regole di elaborazione per estensioni come SAN, key usage, name constraints e basic constraints.<sup>[[3]](#references)</sup>
 
-## Encodings and Containers
+## Codifiche e contenitori
 
-- **PEM-style textual encoding:** dati Base64 tra i delimitatori `BEGIN` e `END`.
-- **DER:** la rappresentazione binaria secondo le Distinguished Encoding Rules.
+- **Codifica testuale in stile PEM:** dati Base64 tra delimitatori `BEGIN` ed `END`.
+- **DER:** rappresentazione binaria delle Distinguished Encoding Rules.
 - **PKCS#7/CMS (`.p7b`):** contiene comunemente certificati e una catena di certificati, ma non chiavi private.
 - **PKCS#12 (`.p12` o `.pfx`):** può contenere chiavi private, certificati e certificati di supporto.
 
-RFC 7468 specifica le codifiche testuali utilizzate per le strutture PKIX, PKCS e CMS; il comando `pkcs12` di OpenSSL crea ed esegue il parsing dei file PKCS#12.<sup>[[4]](#references)[[5]](#references)</sup>
+RFC 7468 specifica le codifiche testuali usate per le strutture PKIX, PKCS e CMS; il comando `pkcs12` di OpenSSL crea e analizza file PKCS#12.<sup>[[4]](#references)[[5]](#references)</sup>
+
 ```bash
 openssl x509 -in cert.cer -outform PEM -out cert.pem
 openssl x509 -in cert.pem -outform DER -out cert.der
 openssl pkcs12 -in file.pfx -out out.pem
 ```
-Tratta `out.pem` come sensibile: a meno che non vengano usate opzioni come `-nokeys`, l'output può contenere materiale relativo a chiavi private.<sup>[[5]](#references)</sup>
+
+Considera `out.pem` come contenuto sensibile: a meno che non vengano usate opzioni come `-nokeys`, l'output potrebbe contenere materiale relativo a chiavi private.<sup>[[5]](#references)</sup>
 
 ## Checklist di revisione della sicurezza
 
-Applica i requisiti di elaborazione dei certificati definiti nell'RFC 5280 durante la revisione di un validator o di una decisione di trust.<sup>[[3]](#references)</sup>
+Applica i requisiti di elaborazione dei certificati definiti in RFC 5280 quando esamini un validatore o una decisione di attendibilità.<sup>[[3]](#references)</sup>
 
-- Verifica la catena completa fino a un anchor esplicitamente trusted; non fidarti implicitamente delle root fornite dall'utente.
-- Conferma l'hostname o l'identità del servizio confrontandoli con i valori SAN.<sup>[[8]](#references)</sup>
-- Applica i basic constraints, i name constraints, il key usage e l'extended key usage.
+- Verifica l'intera catena fino a un'ancora esplicitamente attendibile; non considerare implicitamente attendibili le root fornite dall'utente.
+- Verifica il nome host o l'identità del servizio confrontandoli con i valori SAN.<sup>[[8]](#references)</sup>
+- Applica i vincoli di base, i vincoli sui nomi, l'uso della chiave e l'uso esteso della chiave.
 - Rifiuta i certificati scaduti o non ancora validi e gli algoritmi di chiave o firma non consentiti.
-- Associa le identità dei certificati client all'account applicativo corretto e al contesto di autorizzazione.
+- Associa le identità dei certificati client all'account applicativo e al contesto di autorizzazione corretti.
 
 ## Log di Certificate Transparency
 
-Certificate Transparency fornisce log pubblicamente verificabili dei certificati emessi.<sup>[[6]](#references)</sup> Cerca un dominio con crt.sh durante la discovery autorizzata degli asset.<sup>[[7]](#references)</sup>
+Certificate Transparency fornisce log pubblicamente verificabili dei certificati emessi.<sup>[[6]](#references)</sup> Cerca un dominio con crt.sh durante l'individuazione autorizzata degli asset.<sup>[[7]](#references)</sup>
 
 ## References
 
