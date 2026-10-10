@@ -4,132 +4,135 @@
 
 ## Browser Artifacts <a href="#id-3def" id="id-3def"></a>
 
-Browser artifacts में web browsers द्वारा stored विभिन्न प्रकार का data शामिल होता है, जैसे navigation history, bookmarks और cache data। ये artifacts operating system के भीतर specific folders में रखे जाते हैं। इनके location और name अलग-अलग browsers में भिन्न होते हैं, लेकिन आमतौर पर इनमें समान प्रकार का data stored होता है।
+Browser artifacts में वेब ब्राउज़र द्वारा संग्रहीत विभिन्न प्रकार के डेटा शामिल होते हैं, जैसे नेविगेशन हिस्ट्री, बुकमार्क और cache डेटा। ये artifacts ऑपरेटिंग सिस्टम के भीतर विशिष्ट फ़ोल्डरों में रखे जाते हैं। इनका स्थान और नाम ब्राउज़र के अनुसार अलग-अलग होता है, लेकिन आम तौर पर इनमें समान प्रकार का डेटा संग्रहीत होता है।
 
-सबसे common browser artifacts का summary:
+यहाँ सबसे आम browser artifacts का सारांश दिया गया है:
 
-- **Navigation History**: User द्वारा visit की गई websites को track करता है, जो malicious sites पर visits की पहचान करने के लिए useful है।
-- **Autocomplete Data**: Frequent searches पर आधारित suggestions, navigation history के साथ combine करने पर insights प्रदान करते हैं।
-- **Bookmarks**: User द्वारा quick access के लिए saved sites।
-- **Extensions and Add-ons**: User द्वारा installed browser extensions या add-ons।
-- **Cache**: Website loading times को improve करने के लिए web content (जैसे images और JavaScript files) को store करता है, जो forensic analysis के लिए valuable है।
-- **Logins**: Stored login credentials।
-- **Favicons**: Websites से associated icons, जो tabs और bookmarks में दिखाई देते हैं और user visits के बारे में additional information के लिए useful हैं।
-- **Browser Sessions**: Open browser sessions से related data।
-- **Downloads**: Browser के माध्यम से downloaded files के records।
-- **Form Data**: Web forms में entered information, जिसे future autofill suggestions के लिए saved किया जाता है।
-- **Thumbnails**: Websites की preview images।
-- **Custom Dictionary.txt**: User द्वारा browser के dictionary में added words।
+- **Navigation History**: उपयोगकर्ता द्वारा देखी गई वेबसाइटों का रिकॉर्ड रखती है, जो दुर्भावनापूर्ण साइटों पर विज़िट की पहचान करने में उपयोगी है।
+- **Autocomplete Data**: अक्सर की गई खोजों पर आधारित सुझाव, जो navigation history के साथ मिलाने पर उपयोगी जानकारी देते हैं।
+- **Bookmarks**: उपयोगकर्ता द्वारा जल्दी पहुँचने के लिए सहेजी गई साइटें।
+- **Extensions and Add-ons**: उपयोगकर्ता द्वारा इंस्टॉल किए गए browser extensions या add-ons।
+- **Cache**: वेबसाइट लोड होने का समय कम करने के लिए वेब सामग्री (जैसे, images और JavaScript files) संग्रहीत करता है और forensic analysis के लिए उपयोगी है।
+- **Logins**: संग्रहीत login credentials।
+- **Favicons**: वेबसाइटों से जुड़े icons, जो tabs और bookmarks में दिखाई देते हैं और उपयोगकर्ता की विज़िट के बारे में अतिरिक्त जानकारी देने में उपयोगी हैं।
+- **Browser Sessions**: खुले browser sessions से संबंधित डेटा।
+- **Downloads**: ब्राउज़र के ज़रिए डाउनलोड की गई फ़ाइलों का रिकॉर्ड।
+- **Form Data**: वेब फ़ॉर्म में दर्ज की गई जानकारी, जिसे भविष्य में autofill सुझावों के लिए सहेजा जाता है।
+- **Thumbnails**: वेबसाइटों की preview images।
+- **Custom Dictionary.txt**: उपयोगकर्ता द्वारा ब्राउज़र के dictionary में जोड़े गए शब्द।
 
 ## Firefox
 
-Firefox user data को profiles के भीतर organize करता है, जो operating system के आधार पर specific locations में stored होते हैं:<sup>[[1]](#references)</sup>
+Firefox उपयोगकर्ता का डेटा profiles के भीतर व्यवस्थित करता है, जिन्हें ऑपरेटिंग सिस्टम के आधार पर अलग-अलग स्थानों पर संग्रहीत किया जाता है:<sup>[[1]](#references)</sup>
 
 - **Linux**: `~/.mozilla/firefox/`
 - **MacOS**: `/Users/$USER/Library/Application Support/Firefox/Profiles/`
 - **Windows**: `%userprofile%\AppData\Roaming\Mozilla\Firefox\Profiles\`
 
-इन directories के भीतर मौजूद `profiles.ini` file user profiles की list देती है। प्रत्येक profile का data `profiles.ini` में `Path` variable के भीतर named folder में stored होता है, जो स्वयं `profiles.ini` वाली directory में स्थित होता है। यदि किसी profile का folder missing है, तो हो सकता है कि उसे delete कर दिया गया हो।
+इन directories में मौजूद `profiles.ini` फ़ाइल उपयोगकर्ता के profiles की सूची देती है। प्रत्येक profile का डेटा, `profiles.ini` के उसी directory में मौजूद `profiles.ini` के `Path` variable में दिए गए नाम वाले फ़ोल्डर में संग्रहीत होता है। यदि किसी profile का फ़ोल्डर मौजूद नहीं है, तो हो सकता है कि उसे हटा दिया गया हो।
 
-प्रत्येक profile folder के भीतर कई important files मिल सकती हैं:<sup>[[1]](#references)</sup>
+हर profile फ़ोल्डर में कई महत्वपूर्ण फ़ाइलें मिल सकती हैं:<sup>[[1]](#references)</sup>
 
-- **places.sqlite**: History, bookmarks और downloads को store करता है। Windows पर [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html) जैसे tools history data access कर सकते हैं।
-- History और downloads information extract करने के लिए specific SQL queries का उपयोग करें।
+- **places.sqlite**: History, bookmarks और downloads संग्रहीत करता है। Windows पर [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html) जैसे tools से history डेटा देखा जा सकता है।
+  - History और downloads की जानकारी निकालने के लिए विशिष्ट SQL queries का उपयोग करें।
 - **bookmarkbackups**: Bookmarks के backups रखता है।
-- **formhistory.sqlite**: Web form data store करता है।
-- **handlers.json**: Protocol handlers manage करता है।
-- **persdict.dat**: Custom dictionary words।
-- **addons.json** और **extensions.sqlite**: Installed add-ons और extensions की information।
-- **cookies.sqlite**: Cookie storage, जिसका inspection Windows पर [MZCookiesView](https://www.nirsoft.net/utils/mzcv.html) के माध्यम से किया जा सकता है।
-- **cache2/entries** या **startupCache**: Cache data, जिसे [MozillaCacheView](https://www.nirsoft.net/utils/mozilla_cache_viewer.html) जैसे tools के माध्यम से access किया जा सकता है।
-- **favicons.sqlite**: Favicons store करता है।
-- **prefs.js**: User settings और preferences।
-- **downloads.sqlite**: Older downloads database, जिसे अब places.sqlite में integrate कर दिया गया है।
-- **thumbnails**: Website thumbnails।
-- **logins.json**: Encrypted login information।
-- **key4.db** या **key3.db**: Sensitive information को secure करने के लिए encryption keys store करता है।
+- **formhistory.sqlite**: वेब फ़ॉर्म का डेटा संग्रहीत करता है।
+- **handlers.json**: Protocol handlers प्रबंधित करता है।
+- **persdict.dat**: Custom dictionary के शब्द।
+- **addons.json** और **extensions.sqlite**: इंस्टॉल किए गए add-ons और extensions की जानकारी।
+- **cookies.sqlite**: Cookies संग्रहीत करता है; Windows पर इसकी जाँच के लिए [MZCookiesView](https://www.nirsoft.net/utils/mzcv.html) उपलब्ध है।
+- **cache2/entries** या **startupCache**: Cache डेटा, जिसे [MozillaCacheView](https://www.nirsoft.net/utils/mozilla_cache_viewer.html) जैसे tools से देखा जा सकता है।
+- **favicons.sqlite**: Favicons संग्रहीत करता है।
+- **prefs.js**: उपयोगकर्ता की settings और preferences।
+- **downloads.sqlite**: पुराने downloads database को अब places.sqlite में शामिल कर दिया गया है।
+- **thumbnails**: वेबसाइटों के thumbnails।
+- **logins.json**: एन्क्रिप्ट की गई login जानकारी।
+- **key4.db** या **key3.db**: संवेदनशील जानकारी सुरक्षित रखने के लिए encryption keys संग्रहीत करता है।
 
-इसके अतिरिक्त, browser की anti-phishing settings को check करने के लिए `prefs.js` में `browser.safebrowsing` entries search की जा सकती हैं। ये entries बताती हैं कि safe browsing features enabled हैं या disabled।<sup>[[2]](#references)</sup>
+इसके अलावा, ब्राउज़र की anti-phishing settings देखने के लिए `prefs.js` में `browser.safebrowsing` entries खोजें। इनसे पता चलता है कि safe browsing सुविधाएँ सक्षम हैं या अक्षम।<sup>[[2]](#references)</sup>
 
-Master password को decrypt करने का प्रयास करने के लिए [https://github.com/unode/firefox_decrypt](https://github.com/unode/firefox_decrypt) का उपयोग कर सकते हैं\
-निम्न script और call के साथ brute force करने के लिए password file specify की जा सकती है:
+किसी उपलब्ध profile से सहेजे गए logins को decrypt करने के लिए, यदि [Firefox Primary Password](https://support.mozilla.org/en-US/kb/use-primary-password-protect-stored-logins) कॉन्फ़िगर किया गया है, तो उसे देना होगा या अलग से recover करना होगा; profile से वह password पता नहीं चलता। पुष्टि करें कि recover किया गया कोई भी login उसके वेब खाते में authenticate होता है। Unix root access के लिए अलग से यह साबित करना आवश्यक है कि credential Unix authentication में root के लिए भी स्वीकार किया जाता है। सहेजे गए logins की समीक्षा [firefox_decrypt](https://github.com/unode/firefox_decrypt) से की जा सकती है। निम्नलिखित उदाहरण password file से संभावित Primary Passwords को जाँचता है:
+
 ```bash:brute.sh
 #!/bin/bash
 
 #./brute.sh top-passwords.txt 2>/dev/null | grep -A2 -B2 "chrome:"
 passfile=$1
 while read pass; do
-echo "Trying $pass"
-echo "$pass" | python firefox_decrypt.py
+  echo "Trying $pass"
+  echo "$pass" | python firefox_decrypt.py
 done < $passfile
 ```
-![Browsers Artifacts - Firefox: echo "$pass" | python firefox decrypt.py](<../../../images/image (692).png>)
+
+![ब्राउज़र artifacts - Firefox: echo "$pass" | python firefox decrypt.py](<../../../images/image (692).png>)
 
 ## Google Chrome
 
-Google Chrome operating system के आधार पर user profiles को विशेष locations में store करता है:<sup>[[1]](#references)</sup>
+Google Chrome, operating system के आधार पर विशिष्ट स्थानों पर user profiles संग्रहीत करता है:<sup>[[1]](#references)</sup>
 
 - **Linux**: `~/.config/google-chrome/`
 - **Windows**: `C:\Users\XXX\AppData\Local\Google\Chrome\User Data\`
 - **MacOS**: `/Users/$USER/Library/Application Support/Google/Chrome/`
 
-इन directories के अंदर, अधिकांश user data **Default/** या **ChromeDefaultData/** folders में मिल सकता है। निम्न files में महत्वपूर्ण data होता है:<sup>[[1]](#references)</sup>
+इन directories में, अधिकांश user data **Default/** या **ChromeDefaultData/** folders में मिल सकता है। इन files में महत्वपूर्ण data होता है:<sup>[[1]](#references)</sup>
 
-- **History**: URLs, downloads और search keywords रखता है। Windows पर history पढ़ने के लिए [ChromeHistoryView](https://www.nirsoft.net/utils/chrome_history_view.html) का उपयोग किया जा सकता है। "Transition Type" column के विभिन्न अर्थ होते हैं, जिनमें links पर user clicks, typed URLs, form submissions और page reloads शामिल हैं।
-- **Cookies**: Cookies store करता है। Inspection के लिए [ChromeCookiesView](https://www.nirsoft.net/utils/chrome_cookies_view.html) उपलब्ध है।
-- **Cache**: Cached data रखता है। Inspection के लिए Windows users [ChromeCacheView](https://www.nirsoft.net/utils/chrome_cache_view.html) का उपयोग कर सकते हैं।
+- **History**: इसमें URLs, downloads और search keywords होते हैं। Windows पर, history पढ़ने के लिए [ChromeHistoryView](https://www.nirsoft.net/utils/chrome_history_view.html) का उपयोग किया जा सकता है। "Transition Type" column के कई अर्थ हैं, जिनमें links पर user के clicks, typed URLs, form submissions और page reloads शामिल हैं।
+- **Cookies**: इसमें cookies संग्रहीत होती हैं। निरीक्षण के लिए [ChromeCookiesView](https://www.nirsoft.net/utils/chrome_cookies_view.html) उपलब्ध है।
+- **Cache**: इसमें cached data होता है। निरीक्षण के लिए Windows users [ChromeCacheView](https://www.nirsoft.net/utils/chrome_cache_view.html) का उपयोग कर सकते हैं।
 
-Electron-based desktop apps (जैसे Discord) भी Chromium Simple Cache का उपयोग करते हैं और disk पर विस्तृत artifacts छोड़ते हैं। देखें:
+  Electron-आधारित desktop apps (जैसे, Discord) भी Chromium Simple Cache का उपयोग करते हैं और disk पर विस्तृत artifacts छोड़ते हैं। देखें:
 
-{{#ref}}
-discord-cache-forensics.md
-{{#endref}}
-- **Bookmarks**: User bookmarks।
-- **Web Data**: Form history रखता है।
-- **Favicons**: Website favicons store करता है।
-- **Login Data**: Usernames और passwords जैसे login credentials शामिल होते हैं।
-- **Current Session**/**Current Tabs**: Current browsing session और open tabs का data।
-- **Last Session**/**Last Tabs**: Chrome बंद होने से पहले last session के दौरान active sites की information।
-- **Extensions**: Browser extensions और addons के लिए directories।
-- **Thumbnails**: Website thumbnails store करता है।
-- **Preferences**: Information से भरपूर file, जिसमें plugins, extensions, pop-ups, notifications और अन्य settings शामिल होती हैं।
-- **Browser’s built-in anti-phishing**: यह जाँचने के लिए कि anti-phishing और malware protection enabled हैं या नहीं, `grep 'safebrowsing' ~/Library/Application Support/Google/Chrome/Default/Preferences` चलाएँ। Output में `{"enabled: true,"}` देखें।<sup>[[2]](#references)</sup>
+  {{#ref}}
+  discord-cache-forensics.md
+  {{#endref}}
+- **Bookmarks**: User के bookmarks।
+- **Web Data**: इसमें form history होती है।
+- **Favicons**: इसमें website favicons संग्रहीत होते हैं।
+- **Login Data**: इसमें usernames और passwords जैसे login credentials होते हैं।
+- **Current Session**/**Current Tabs**: मौजूदा browsing session और खुले tabs का data।
+- **Last Session**/**Last Tabs**: Chrome बंद होने से पहले पिछले session में सक्रिय sites की जानकारी।
+- **Extensions**: Browser extensions और addons की directories।
+- **Thumbnails**: इसमें website thumbnails संग्रहीत होते हैं।
+- **Preferences**: plugins, extensions, pop-ups, notifications आदि की settings समेत, जानकारी से भरपूर एक file।
+- **ब्राउज़र का अंतर्निहित anti-phishing**: anti-phishing और malware protection सक्षम हैं या नहीं, यह जाँचने के लिए `grep 'safebrowsing' ~/Library/Application Support/Google/Chrome/Default/Preferences` चलाएँ। Output में `{"enabled: true,"}` देखें।<sup>[[2]](#references)</sup>
+
+Chromium profile की `Local Extension Settings/<extension-id>/` directory में extension-local state हो सकती है, जिसमें password-manager key material भी शामिल है। उदाहरण के लिए, [Passbolt के अनुसार उसकी encrypted private key browser extension के local storage में रखी जाती है](https://www.passbolt.com/docs/user/faq/why-a-browser-extension/), और उसकी [Chrome extension ID](https://chromewebstore.google.com/detail/passbolt-open-source-pass/didegimhafipceonhjepacocaffmoppf) संबंधित directory की पहचान करती है। केवल directory मौजूद होने से यह साबित नहीं होता कि उसमें key है या vault unlock हो सकता है: user के पास profile data, उपयोग योग्य private key और passphrase, तथा server तक पहुँचने का अधिकृत recovery/authentication path होना चाहिए। किसी vault item में मौजूद operating-system account password के लिए account reuse की अलग से पुष्टि आवश्यक है। नियमित enumeration में केवल storage path की जानकारी दें; इसकी LevelDB files या secret values न निकालें।
 
 ## **SQLite DB Data Recovery**
 
-जैसा कि पिछले sections में देखा जा सकता है, Chrome और Firefox दोनों data store करने के लिए **SQLite** databases का उपयोग करते हैं। **tool** [**sqlparse**](https://github.com/padfoot999/sqlparse) **या** [**sqlparse_gui**](https://github.com/mdegrazia/SQLite-Deleted-Records-Parser/releases) **का उपयोग करके deleted entries को recover करना संभव है**।
+जैसा कि पिछले sections में देखा जा सकता है, Chrome और Firefox दोनों data संग्रहीत करने के लिए **SQLite** databases का उपयोग करते हैं। [**sqlparse**](https://github.com/padfoot999/sqlparse) **या** [**sqlparse_gui**](https://github.com/mdegrazia/SQLite-Deleted-Records-Parser/releases) **tool का उपयोग करके deleted entries recover करना संभव है।**
 
 ## **Internet Explorer 11**
 
-Internet Explorer 11 अपने data और metadata को विभिन्न locations में manage करता है, जिससे stored information और उससे संबंधित details को अलग करना तथा आसानी से access और manage करना संभव होता है।
+Internet Explorer 11 अपना data और metadata कई स्थानों पर रखता है, जिससे संग्रहीत जानकारी और उससे संबंधित विवरण अलग-अलग रहते हैं तथा उन्हें आसानी से देखा और प्रबंधित किया जा सकता है।
 
 ### Metadata Storage
 
-Internet Explorer का metadata `%userprofile%\Appdata\Local\Microsoft\Windows\WebCache\WebcacheVX.data` में store होता है (VX का अर्थ V01, V16 या V24 है)। इसके साथ, `V01.log` file में `WebcacheVX.data` के modification time से discrepancies दिखाई दे सकती हैं, जो `esentutl /r V01 /d` का उपयोग करके repair की आवश्यकता दर्शाती हैं। ESE database में मौजूद इस metadata को photorec और [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) जैसे tools का उपयोग करके क्रमशः recover और inspect किया जा सकता है। **Containers** table में वे specific tables या containers पहचाने जा सकते हैं जहाँ प्रत्येक data segment store होता है, जिसमें Skype जैसे अन्य Microsoft tools के cache details भी शामिल हैं।
+Internet Explorer का metadata `%userprofile%\Appdata\Local\Microsoft\Windows\WebCache\WebcacheVX.data` में संग्रहीत होता है (जहाँ VX, V01, V16 या V24 हो सकता है)। इसके साथ मौजूद `V01.log` file का modification time, `WebcacheVX.data` से अलग हो सकता है। यह `esentutl /r V01 /d` से repair की आवश्यकता का संकेत हो सकता है। ESE database में रखा यह metadata photorec और [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) जैसे tools से क्रमशः recover और inspect किया जा सकता है। **Containers** table में देखा जा सकता है कि प्रत्येक data segment किन tables या containers में संग्रहीत है; इसमें Skype जैसे अन्य Microsoft tools के cache का विवरण भी शामिल है।
 
 ### Cache Inspection
 
-[IECacheView](https://www.nirsoft.net/utils/ie_cache_viewer.html) tool cache inspection की अनुमति देता है और इसके लिए cache data extraction folder location आवश्यक होती है। Cache के metadata में filename, directory, access count, URL origin तथा cache creation, access, modification और expiry times दर्शाने वाले timestamps शामिल होते हैं।
+[IECacheView](https://www.nirsoft.net/utils/ie_cache_viewer.html) tool cache inspect करने देता है। इसके लिए cache data extraction folder का स्थान देना आवश्यक है। Cache metadata में filename, directory, access count, URL origin, और cache बनने, access होने, modify होने तथा expire होने के timestamps शामिल हैं।
 
 ### Cookies Management
 
-[IECookiesView](https://www.nirsoft.net/utils/iecookies.html) का उपयोग करके cookies को explore किया जा सकता है। इसके metadata में names, URLs, access counts और समय से संबंधित विभिन्न details शामिल होती हैं। Persistent cookies `%userprofile%\Appdata\Roaming\Microsoft\Windows\Cookies` में store होती हैं, जबकि session cookies memory में रहती हैं।
+[IECookiesView](https://www.nirsoft.net/utils/iecookies.html) से cookies देखी जा सकती हैं। इनके metadata में names, URLs, access counts और समय से जुड़ी अलग-अलग जानकारी शामिल होती है। Persistent cookies `%userprofile%\Appdata\Roaming\Microsoft\Windows\Cookies` में संग्रहीत होती हैं, जबकि session cookies memory में रहती हैं।
 
 ### Download Details
 
-Downloads metadata [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) के माध्यम से access किया जा सकता है। Specific containers में URL, file type और download location जैसी information होती है। Physical files `%userprofile%\Appdata\Roaming\Microsoft\Windows\IEDownloadHistory` के अंतर्गत मिल सकती हैं।
+Downloads का metadata [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) से देखा जा सकता है। विशिष्ट containers में URL, file type और download location जैसी जानकारी होती है। वास्तविक files `%userprofile%\Appdata\Roaming\Microsoft\Windows\IEDownloadHistory` में मिल सकती हैं।
 
 ### Browsing History
 
-Browsing history review करने के लिए [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html) का उपयोग किया जा सकता है। इसके लिए extracted history files की location और Internet Explorer का configuration आवश्यक है। यहाँ metadata में modification और access times के साथ access counts भी शामिल होते हैं। History files `%userprofile%\Appdata\Local\Microsoft\Windows\History` में located होती हैं।
+Browsing history देखने के लिए [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html) का उपयोग किया जा सकता है। इसके लिए extracted history files का स्थान देना और Internet Explorer को configure करना आवश्यक है। इस metadata में modification और access times के साथ access counts भी शामिल होते हैं। History files `%userprofile%\Appdata\Local\Microsoft\Windows\History` में होती हैं।
 
 ### Typed URLs
 
-Typed URLs और उनके usage timings registry में `NTUSER.DAT` के अंतर्गत `Software\Microsoft\InternetExplorer\TypedURLs` और `Software\Microsoft\InternetExplorer\TypedURLsTime` में store होते हैं। ये user द्वारा दर्ज किए गए last 50 URLs और उनके last input times को track करते हैं।
+Typed URLs और उनके उपयोग का समय, registry में `NTUSER.DAT` के अंतर्गत `Software\Microsoft\InternetExplorer\TypedURLs` और `Software\Microsoft\InternetExplorer\TypedURLsTime` में संग्रहीत होते हैं। इनमें user द्वारा दर्ज किए गए पिछले 50 URLs और उनके दर्ज किए जाने का अंतिम समय track होता है।
 
 ## Microsoft Edge
 
-Microsoft Edge user data को `%userprofile%\Appdata\Local\Packages` में store करता है। विभिन्न data types के paths हैं:<sup>[[1]](#references)</sup>
+Microsoft Edge user data `%userprofile%\Appdata\Local\Packages` में संग्रहीत करता है। विभिन्न प्रकार के data के paths ये हैं:<sup>[[1]](#references)</sup>
 
 - **Profile Path**: `C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge_XXX\AC`
 - **History, Cookies, and Downloads**: `C:\Users\XX\AppData\Local\Microsoft\Windows\WebCache\WebCacheV01.dat`
@@ -139,28 +142,28 @@ Microsoft Edge user data को `%userprofile%\Appdata\Local\Packages` में
 
 ## Safari
 
-Safari data `/Users/$User/Library/Safari` पर store होता है। प्रमुख files में शामिल हैं:<sup>[[3]](#references)</sup>
+Safari data `/Users/$User/Library/Safari` में संग्रहीत होता है। मुख्य files में शामिल हैं:<sup>[[3]](#references)</sup>
 
-- **History.db**: `history_visits` और `history_items` tables में URLs और visit timestamps होते हैं। Query करने के लिए `sqlite3` का उपयोग करें।
-- **Downloads.plist**: Download की गई files की information।
-- **Bookmarks.plist**: Bookmarked URLs store करता है।
-- **TopSites.plist**: सबसे अधिक visit की गई sites।
-- **Extensions.plist**: Safari browser extensions की list। Retrieve करने के लिए `plutil` या `pluginkit` का उपयोग करें।
+- **History.db**: इसमें URLs और visit timestamps वाले `history_visits` और `history_items` tables होते हैं। Query करने के लिए `sqlite3` का उपयोग करें।
+- **Downloads.plist**: Download की गई files की जानकारी।
+- **Bookmarks.plist**: Bookmarked URLs संग्रहीत करता है।
+- **TopSites.plist**: सबसे अधिक देखी गई sites।
+- **Extensions.plist**: Safari browser extensions की सूची। इन्हें पाने के लिए `plutil` या `pluginkit` का उपयोग करें।
 - **UserNotificationPermissions.plist**: Push notifications की अनुमति वाले domains। Parse करने के लिए `plutil` का उपयोग करें।
-- **LastSession.plist**: Last session के tabs। Parse करने के लिए `plutil` का उपयोग करें।
-- **Browser’s built-in anti-phishing**: `defaults read com.apple.Safari WarnAboutFraudulentWebsites` का उपयोग करके check करें। 1 का response दर्शाता है कि feature active है।<sup>[[2]](#references)</sup>
+- **LastSession.plist**: पिछले session के tabs। Parse करने के लिए `plutil` का उपयोग करें।
+- **ब्राउज़र का अंतर्निहित anti-phishing**: `defaults read com.apple.Safari WarnAboutFraudulentWebsites` से जाँचें। Response `1` होने का अर्थ है कि यह सुविधा सक्रिय है।<sup>[[2]](#references)</sup>
 
 ## Opera
 
-Opera का data `/Users/$USER/Library/Application Support/com.operasoftware.Opera` में रहता है और history तथा downloads के लिए Chrome का format share करता है।
+Opera का data `/Users/$USER/Library/Application Support/com.operasoftware.Opera` में रहता है और history तथा downloads के लिए Chrome वाला format उपयोग करता है।
 
-- **Browser’s built-in anti-phishing**: `grep` का उपयोग करके Preferences file में `fraud_protection_enabled` को `true` पर set किया गया है या नहीं, यह check करें।<sup>[[2]](#references)</sup>
+- **ब्राउज़र का अंतर्निहित anti-phishing**: `grep` का उपयोग करके Preferences file में जाँचें कि `fraud_protection_enabled` का मान `true` है या नहीं।<sup>[[2]](#references)</sup>
 
-ये paths और commands विभिन्न web browsers द्वारा store किए गए browsing data को access और समझने के लिए महत्वपूर्ण हैं।
+अलग-अलग web browsers में संग्रहीत browsing data तक पहुँचने और उसे समझने के लिए ये paths और commands महत्वपूर्ण हैं।
 
 ## References
 
-- [1] [Web Browsers Forensics: A Guide On Doing Web Browsers Forensic Analysis](https://nasbench.medium.com/web-browsers-forensics-7e99940c579a)
-- [2] [macOS Incident Response | Part 3: System Manipulation](https://www.sentinelone.com/labs/macos-incident-response-part-3-system-manipulation/)
-- [3] [OS X Incident Response: Scripting and Analysis by Jaron Bradley](https://books.google.com/books?id=jfMqCgAAQBAJ\&pg=PA128\&lpg=PA128\&dq=%22This+file)
+- [1] [Web Browsers Forensics: Web Browsers के forensic analysis की मार्गदर्शिका](https://nasbench.medium.com/web-browsers-forensics-7e99940c579a)
+- [2] [macOS Incident Response | भाग 3: System Manipulation](https://www.sentinelone.com/labs/macos-incident-response-part-3-system-manipulation/)
+- [3] [OS X Incident Response: Jaron Bradley द्वारा Scripting और Analysis](https://books.google.com/books?id=jfMqCgAAQBAJ\&pg=PA128\&lpg=PA128\&dq=%22This+file)
 {{#include ../../../banners/hacktricks-training.md}}
