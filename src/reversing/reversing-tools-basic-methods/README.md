@@ -443,6 +443,29 @@ Press **Alt+F7** in IDA to load a Python plugin, then select the plugin file.
 
 This will resolve the names of the functions.
 
+### Recovering the Go string table
+
+Go binaries place string bytes from every linked package in one contiguous table. The entries are not NUL-terminated and runtime structures do not expose the table base or size. However, the compiler orders entries first by length and then alphabetically across operating systems and architectures. After finding one entry, an analyst can therefore walk adjacent entries and use data cross-references to associate strings with code.<sup>[[10]](#references)</sup>
+
+[GoStringExtractor](https://github.com/volexity/GoStringExtractor) automates this workflow in IDA Pro and Ghidra. Let auto-analysis finish first because the plugin relies on data-segment cross-references. Its default anchor is the runtime string `entersyscall`, after which it can scan in either direction, define the recovered strings in the database, and export a JSON mapping of strings to referencing functions.<sup>[[8]](#references)</sup>
+
+Filter the report by the package of the referencing function to separate application or malware code from linked library noise. This technique cannot recover literals destroyed by obfuscation such as Garble's `-literals` transformation. It can still organize runtime strings that remain unobfuscated.<sup>[[8]](#references)[[10]](#references)</sup>
+
+### Recovering Go runtime types
+
+Go embeds runtime type information used by features such as garbage collection. When build information is stripped or the disassembler does not parse this metadata, instructions may appear to load arbitrary data addresses and the target region remains untyped. Recovering the metadata turns those addresses into readable type references and makes package capabilities easier to understand.<sup>[[10]](#references)</sup>
+
+[GoResolver](https://github.com/volexity/GoResolver) can extract symbols and parse runtime types into a JSON report. The current CLI uses the `resolve` subcommand:<sup>[[9]](#references)</sup>
+
+```bash
+pip install goresolver
+goresolver resolve -x -y -o report.json sample_bin.exe
+```
+
+The `-y`/`--types` option enables type parsing. Import the report with GoResolver's IDA Pro or Ghidra plugin to define the recovered types and apply their references in the analysis database. In the report format introduced with this feature, omitting `-y` leaves the RTTI address and recovered-types members null.<sup>[[9]](#references)[[10]](#references)</sup>
+
+GoResolver supports PE, ELF, and Mach-O samples for x86, AMD64, ARM, and ARM64, so the same workflow applies to Go binaries from Windows, Linux, and macOS.<sup>[[9]](#references)</sup>
+
 ## Compiled Python
 
 In this page you can find how to get the python code from an ELF/EXE python compiled binary:
@@ -586,5 +609,8 @@ https://www.youtube.com/watch?v=VVbRe7wr3G4
 - [5] [pentestpartners/reverse-engineering - RustStrings.py](https://github.com/pentestpartners/reverse-engineering/blob/main/RustStrings.py)
 - [6] [Nostalgia - GBA reversing tutorial (archived)](https://web.archive.org/web/20220328215728/https://exp.codes/Nostalgia/)
 - [7] [Defeating AI-Assisted Reverse Engineering, or at Least Trying To](http://blog.quarkslab.com/defeating-ai-assisted-reverse-engineering-or-at-least-trying-to.html)
+- [8] [Volexity GoStringExtractor repository](https://github.com/volexity/GoStringExtractor)
+- [9] [Volexity GoResolver repository](https://github.com/volexity/GoResolver)
+- [10] [Go Get 'Em: Updates to Volexity Golang Tooling](https://www.volexity.com/blog/2025/08/11/go-get-em-updates-to-volexity-golang-tooling/)
 
 {{#include ../../banners/hacktricks-training.md}}
