@@ -2,9 +2,10 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Logo na motion design za Hacktricks na_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
+_Nembo za HackTricks na usanifu wa michoro inayosogea vimetengenezwa na_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
 
-### Endesha HackTricks Kwenye Kompyuta Yako Locally
+### Endesha HackTricks Kwenye Kompyuta Yako
+
 ```bash
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
@@ -31,13 +32,16 @@ export HT_LANG="master" # Leave master for English
 # Run the docker container indicating the path to the hacktricks folder
 docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $HT_LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-Nakala yako ya ndani ya HackTricks itapatikana kwenye [http://localhost:3337](http://localhost:3337) baada ya <5 minutes (inahitaji kujenga kitabu, kuwa mvumilivu).
 
-Vinginevyo, ikiwa una Docker Compose, unaweza tu kuendesha yafuatayo kutoka kwenye repo root:
+Nakala yako ya ndani ya HackTricks **itapatikana kwenye [http://localhost:3337](http://localhost:3337)** baada ya dakika <5 (kitabu kinahitaji kujengwa, tafadhali subiri).
+
+Vinginevyo, ikiwa una Docker Compose, unaweza tu kutekeleza yafuatayo kutoka kwenye mzizi wa repo:
+
 ```bash
 docker compose up
 ```
-Hii hutumia `docker-compose.yml` iliyojumuishwa kuhudumia branch iliyochaguliwa kwa sasa kwenye host kupitia [http://localhost:3337](http://localhost:3337), ikiwa na live reload. Ili kubadilisha lugha unapotumia Compose, chagua branch ya lugha unayotaka kabla ya kuanzisha service.
+
+Hii hutumia `docker-compose.yml` iliyojumuishwa ili kutoa branch iliyochaguliwa kwa sasa kwenye host kwenye [http://localhost:3337](http://localhost:3337), ikiwa na live reload. Ili kubadilisha lugha unapotumia Compose, chagua branch ya lugha unayotaka kabla ya kuanzisha huduma.
 
 ## Washirika wa HackTricks
 
@@ -49,11 +53,11 @@ Hii hutumia `docker-compose.yml` iliyojumuishwa kuhudumia branch iliyochaguliwa 
 
 <figure class="sponsor-logo"><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-STM Cyber hutoa penetration testing, security audits, exploit na research work, tools, pamoja na huduma za security-awareness. Tovuti yake inaeleza kuwa ina timu ya penetration testers, programmers, na security researchers yenye uzoefu wa zaidi ya muongo mmoja.<sup>[[1]](#references)</sup>
+STM Cyber hutoa huduma za penetration testing, ukaguzi wa usalama, kazi za exploit na utafiti, zana, na uhamasishaji kuhusu usalama. Tovuti yao inaeleza kuwa wana timu ya wataalamu wa penetration testing, watengenezaji programu, na watafiti wa usalama wenye uzoefu wa zaidi ya muongo mmoja.<sup>[[1]](#references)</sup>
 
-Unaweza kuangalia **blogu** yao kwenye [**https://blog.stmcyber.com**](https://blog.stmcyber.com).
+Unaweza kuangalia **blog** yao kwenye [**https://blog.stmcyber.com**](https://blog.stmcyber.com).
 
-**STM Cyber** pia inaunga mkono miradi ya cybersecurity ya open source kama HackTricks :)
+**STM Cyber** pia huunga mkono miradi ya usalama wa mtandao ya open source kama HackTricks :)
 
 ---
 
@@ -61,9 +65,9 @@ Unaweza kuangalia **blogu** yao kwenye [**https://blog.stmcyber.com**](https://b
 
 <figure class="sponsor-logo"><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-Intigriti ni mtoa huduma wa security unaotumia jamii ya watafiti duniani kote, akitoa bug bounty na penetration-testing services. Platform yake inaunganisha bug bounty coverage endelevu na PTaaS ya mahitaji maalum pamoja na managed vulnerability disclosure programs.<sup>[[2]](#references)</sup>
+Intigriti ni mtoa huduma wa usalama unaotegemea umati, anayetoa huduma za bug bounty na penetration testing kupitia jumuiya ya kimataifa ya watafiti. Jukwaa lake linachanganya huduma endelevu za bug bounty na PTaaS ya mahitaji na programu zinazosimamiwa za ufichuaji wa udhaifu.<sup>[[2]](#references)</sup>
 
-**Bug bounty tip**: Jiunge na Intigriti kupitia [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) na uchunguze bug bounty programs zake.
+**Kidokezo cha bug bounty**: Jiunge na Intigriti kupitia [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) na uchunguze programu zake za bug bounty.
 
 ---
 
@@ -71,9 +75,9 @@ Intigriti ni mtoa huduma wa security unaotumia jamii ya watafiti duniani kote, a
 
 <figure class="sponsor-logo"><img src="images/modern_security_logo.png" alt="Modern Security"><figcaption></figcaption></figure>
 
-Modern Security hutoa mafunzo ya AI security yanayojifunzwa kwa kasi yako mwenyewe na yenye mazoezi ya vitendo, kwa security engineers, wataalamu wa AppSec, na developers. AI Security Certification yake inashughulikia misingi ya LLM na agents, RAG na vector databases, threat modeling, prompt-injection na MCP attacks, pamoja na defensive architecture.<sup>[[3]](#references)</sup>
+Modern Security hutoa mafunzo ya usalama wa AI ya kujifunza kwa kasi yako mwenyewe na yanayohusisha vitendo, kwa wahandisi wa usalama, wataalamu wa AppSec, na watengenezaji programu. Cheti chake cha Usalama wa AI kinashughulikia misingi ya LLM na agent, RAG na hifadhidata za vekta, threat modeling, mashambulizi ya prompt-injection na MCP, pamoja na usanifu wa ulinzi.<sup>[[3]](#references)</sup>
 
-👉 Maelezo zaidi kuhusu kozi ya AI Security:
+👉 Maelezo zaidi kuhusu kozi ya Usalama wa AI:  
 https://www.modernsecurity.io/courses/ai-security-certification
 
 ---
@@ -82,9 +86,9 @@ https://www.modernsecurity.io/courses/ai-security-certification
 
 <figure class="sponsor-logo"><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi** hutoa APIs za Google na search engines nyingine, ikirejesha structured SERP data yenye vipengele kama matokeo yanayotambua eneo, Maps, Shopping, na Knowledge Graph.<sup>[[4]](#references)</sup>
+**SerpApi** hutoa APIs za Google na injini nyingine za utafutaji, zikirejesha data ya SERP iliyopangwa yenye vipengele kama matokeo yanayotambua eneo, Maps, Shopping, na Knowledge Graph.<sup>[[4]](#references)</sup>
 
-Kwa maelezo zaidi, angalia [**blogu**](https://serpapi.com/blog/) yao, jaribu mfano kwenye [**playground**](https://serpapi.com/playground), au [**fungua akaunti ya bure**](https://serpapi.com/users/sign_up).
+Kwa maelezo zaidi, angalia [**blog**](https://serpapi.com/blog/) yao, jaribu mfano kwenye [**playground**](https://serpapi.com/playground) yao, au [**fungua akaunti ya bure**](https://serpapi.com/users/sign_up).
 
 ---
 
@@ -92,9 +96,9 @@ Kwa maelezo zaidi, angalia [**blogu**](https://serpapi.com/blog/) yao, jaribu mf
 
 <figure class="sponsor-logo"><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-**8kSec Academy** hutoa kozi za mobile na AI-security zinazojifunzwa kwa kasi yako mwenyewe. Catalog yake inashughulikia mobile application auditing na reversing kwa kutumia tools kama Ghidra, Frida, na LLDB, pamoja na AI/LLM attack and defense labs.<sup>[[5]](#references)[[6]](#references)</sup>
+**8kSec Academy** hutoa kozi za mobile na usalama wa AI ambazo unaweza kujifunza kwa kasi yako mwenyewe. Orodha yake ya kozi inashughulikia ukaguzi na reverse engineering ya programu za mobile kwa kutumia zana kama Ghidra, Frida, na LLDB, pamoja na maabara za mashambulizi na ulinzi wa AI/LLM.<sup>[[5]](#references)[[6]](#references)</sup>
 
-Vinjari [catalog ya kozi za 8kSec Academy](https://academy.8ksec.io/).
+Vinjari [orodha ya kozi za 8kSec Academy](https://academy.8ksec.io/).
 
 ---
 
@@ -102,9 +106,9 @@ Vinjari [catalog ya kozi za 8kSec Academy](https://academy.8ksec.io/).
 
 <figure class="sponsor-logo"><img src="images/logo-naxus.png" alt=""><figcaption></figcaption></figure>
 
-**Naxus** inatangaza offensive-AI platform inayochora ramani ya code na infrastructure, kisha kutumia static na dynamic agents kutafuta na kuthibitisha udhaifu unaoweza kutumiwa, ikiwa na ushahidi wa proof-of-concept na mwongozo wa remediation.<sup>[[7]](#references)</sup>
+**Naxus** hutangaza jukwaa la offensive-AI linalochora ramani ya code na miundombinu, kisha kutumia mawakala tuli na tendaji kutafuta na kuthibitisha udhaifu unaoweza kutumiwa, likitoa ushahidi wa proof-of-concept na mwongozo wa kurekebisha.<sup>[[7]](#references)</sup>
 
-**Code security tip**: Ichunguze Naxus kwa ajili ya vulnerability discovery inayolenga code na infrastructure.
+**Kidokezo cha usalama wa code**: Chunguza Naxus kwa ajili ya kugundua udhaifu unaohusu code na miundombinu.
 
 ---
 
@@ -112,11 +116,11 @@ Vinjari [catalog ya kozi za 8kSec Academy](https://academy.8ksec.io/).
 
 <figure class="sponsor-logo"><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-WebSec hutoa penetration testing, security subscriptions, staffing, na vulnerability-assessment services. Tovuti yake inasema kuwa inafanya kazi kimataifa na inashughulikia offensive security, defensive security, pamoja na governance, risk, na compliance work.<sup>[[8]](#references)</sup>
+WebSec hutoa huduma za penetration testing, usajili wa huduma za usalama, utoaji wa wataalamu, na tathmini ya udhaifu. Tovuti yao inasema kuwa wanafanya kazi kimataifa na wanashughulikia usalama wa mashambulizi, usalama wa ulinzi, pamoja na kazi za utawala, hatari, na uzingatiaji.<sup>[[8]](#references)</sup>
 
-Kwa maelezo zaidi, tembelea [**tovuti**](https://websec.net/en/) yao au [**blogu**](https://websec.net/blog/).
+Kwa maelezo zaidi, tembelea [**tovuti**](https://websec.net/en/) au [**blog**](https://websec.net/blog/) yao.
 
-Mbali na hayo, WebSec pia ni **mfuasi aliyejitolea wa HackTricks.**
+Mbali na yaliyo hapo juu, WebSec pia ni **mfuasi thabiti wa HackTricks.**
 
 ---
 
@@ -125,13 +129,13 @@ Mbali na hayo, WebSec pia ni **mfuasi aliyejitolea wa HackTricks.**
 <figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
 
 
-**Imeundwa kwa ajili ya uwanja. Imejengwa kukuzingatia wewe.**\
-[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) hutoa mafunzo ya cybersecurity yanayoongozwa na wataalamu, yenye maudhui na labs zilizoundwa maalum na zinazotegemea real infrastructures. Programu zake hubadilishwa kulingana na mahitaji ya mashirika na huanzia assessment hadi implementation.<sup>[[9]](#references)</sup> Kwa maswali kuhusu mafunzo maalum, wasiliana nao [**hapa**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
+**Imejengwa kwa ajili ya kazi za nyanjani. Imeundwa kukufaa.**\
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) hutoa mafunzo ya usalama wa mtandao yanayoongozwa na wataalamu, yenye maudhui na maabara yaliyoundwa mahususi na yanayotegemea miundombinu halisi. Programu zao hulinganishwa na mahitaji ya mashirika na hujumuisha hatua kuanzia tathmini hadi utekelezaji.<sup>[[9]](#references)</sup> Kwa maswali kuhusu mafunzo maalum, wasiliana nao [**hapa**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
 
-**Kinachofanya mafunzo yao yawe tofauti:**
-* Maudhui na labs zilizoundwa maalum
-* Zinaungwa mkono na tools na platforms za kiwango cha juu
-* Zimeundwa na kufundishwa na practitioners
+**Mambo yanayotofautisha mafunzo yao:**
+* Maudhui na maabara zilizoundwa mahususi
+* Zinaungwa mkono na zana na majukwaa ya kiwango cha juu
+* Zimeundwa na kufundishwa na wataalamu waliobobea
 
 ---
 
@@ -139,9 +143,9 @@ Mbali na hayo, WebSec pia ni **mfuasi aliyejitolea wa HackTricks.**
 
 <figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
-Last Tower Solutions inalenga consulting ya cybersecurity kwa sekta za **Education** na **FinTech**, ikijumuisha cloud assessments, internal na external penetration tests, vulnerability assessments, na compliance support.<sup>[[10]](#references)</sup>
+Last Tower Solutions hujikita katika ushauri wa usalama wa mtandao kwa **Elimu** na **FinTech**, ikijumuisha tathmini za cloud, penetration tests za ndani na nje, tathmini za udhaifu, na usaidizi wa uzingatiaji.<sup>[[10]](#references)</sup>
 
-Endelea kupata taarifa na habari za hivi punde kuhusu cybersecurity kwa kutembelea [**blogu**](https://www.lasttowersolutions.com/blog) yetu.
+Pata habari na taarifa za hivi punde kuhusu usalama wa mtandao kwa kutembelea [**blog**](https://www.lasttowersolutions.com/blog) yetu.
 
 ---
 
@@ -149,34 +153,34 @@ Endelea kupata taarifa na habari za hivi punde kuhusu cybersecurity kwa kutembel
 
 <figure class="sponsor-logo"><img src="images/k8studio.png" alt="k8studio logo"><figcaption></figcaption></figure>
 
-K8Studio ni Kubernetes IDE ya desktop yenye CloudMaps visualization, multi-cluster navigation, RBAC, Helm, logs, YAML, na terminal views. Vendor anasema inaunganisha kupitia kubeconfig bila kusakinisha agents na inasaidia macOS, Windows, Linux, pamoja na air-gapped clusters.<sup>[[11]](#references)</sup>
+K8Studio ni IDE ya Kubernetes ya kompyuta ya mezani yenye uonyeshaji wa CloudMaps, urambazaji wa multi-cluster, RBAC, Helm, kumbukumbu, YAML, na mwonekano wa terminal. Mtoa huduma anasema inaunganisha kupitia kubeconfig bila kusakinisha agents na inasaidia macOS, Windows, Linux, na clusters zilizotengwa na mtandao.<sup>[[11]](#references)</sup>
 
 ---
 
 ## Leseni na Kanusho
 
-Angalia ingizo la HackTricks Values & FAQ katika References hapa chini.
+Tazama kipengee cha HackTricks Values & FAQ katika References hapa chini.
 
 ## Takwimu za Github
 
-![Takwimu za HackTricks Github](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
+![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
 ## References
 
 - [1] [STM Cyber](https://www.stmcyber.com/)
 - [2] [Intigriti](https://www.intigriti.com/)
-- [3] [Udhibitisho wa AI Security – Modern Security](https://www.modernsecurity.io/courses/ai-security-certification)
+- [3] [Cheti cha Usalama wa AI – Modern Security](https://www.modernsecurity.io/courses/ai-security-certification)
 - [4] [SerpApi](https://serpapi.com/)
 - [5] [8kSec Academy](https://academy.8ksec.io/)
-- [6] [AI Security ya Vitendo: Attacks, Defenses, na Applications](https://academy.8ksec.io/course/practical-ai-security)
+- [6] [Usalama wa AI wa Vitendo: Mashambulizi, Ulinzi, na Matumizi](https://academy.8ksec.io/course/practical-ai-security)
 - [7] [Naxus](https://www.naxusai.com/)
 - [8] [WebSec](https://websec.net/)
 - [9] [Cyber Helmets](https://cyberhelmets.com/)
 - [10] [Last Tower Solutions](https://www.lasttowersolutions.com/)
 - [11] [K8Studio](https://k8studio.io/)
-- [12] [Intigriti HackTricks referral](https://go.intigriti.com/hacktricks)
+- [12] [Rufaa ya Intigriti HackTricks](https://go.intigriti.com/hacktricks)
 - [13] [Modern Security](https://modernsecurity.io/)
 - [14] [Video ya udhamini wa WebSec](https://www.youtube.com/watch?v=Zq2JycGDCPM)
 - [15] [Kozi za Cyber Helmets](https://cyberhelmets.com/courses/?ref=hacktricks)
-- [16] [HackTricks Values & FAQ](welcome/hacktricks-values-and-faq.md)
+- [16] [Maadili na Maswali Yanayoulizwa Mara kwa Mara ya HackTricks](welcome/hacktricks-values-and-faq.md)
 {{#include banners/hacktricks-training.md}}
