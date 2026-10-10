@@ -1,188 +1,192 @@
-# Blockchain and暗号通貨
+# Blockchainと暗号通貨
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## 基本概念
 
-- **Smart Contracts** は、特定の条件が満たされたときに blockchain 上で実行されるプログラムとして定義され、仲介者なしで合意事項の履行を自動化します。
-- **Decentralized Applications (dApps)** は smart contracts を基盤として構築され、使いやすいフロントエンドと、透明性があり監査可能なバックエンドを備えています。
-- **Tokens & Coins** は、coins がデジタルマネーとして機能する一方、tokens は特定のコンテキストにおける価値や所有権を表すという点で異なります。
-- **Utility Tokens** はサービスへのアクセスを与え、**Security Tokens** は資産の所有権を示します。
-- **DeFi** は Decentralized Finance の略で、中央権威なしに金融サービスを提供します。
+- **Smart Contracts** は、特定の条件が満たされたときに blockchain 上で実行されるプログラムとして定義され、中間者を介さずに合意の履行を自動化します。
+- **Decentralized Applications (dApps)** は smart contracts を基盤とし、使いやすいフロントエンドと、透明性が高く監査可能なバックエンドを備えています。
+- **Tokens & Coins** は用途が異なり、coins はデジタル通貨として機能する一方、tokens は特定の状況における価値や所有権を表します。
+  - **Utility Tokens** はサービスへのアクセスを許可し、**Security Tokens** は資産の所有権を示します。
+- **DeFi** は Decentralized Finance の略で、中央機関を介さずに金融サービスを提供します。
 - **DEX** と **DAOs** は、それぞれ Decentralized Exchange Platforms と Decentralized Autonomous Organizations を指します。
 
 ## Consensus Mechanisms
 
-Consensus mechanisms は blockchain 上で安全かつ合意されたトランザクション検証を確実にします。
+Consensus mechanisms は、blockchain 上のトランザクションが安全に検証され、合意されることを保証します。
 
 - **Proof of Work (PoW)** は、トランザクションの検証に計算能力を利用します。
-- **Proof of Stake (PoS)** は、validators に一定量の tokens の保有を要求し、PoW と比較してエネルギー消費を削減します。<sup>[[1]](#references)</sup>
+- **Proof of Stake (PoS)** では、validator が一定量の tokens を保有する必要があり、PoW と比べてエネルギー消費を抑えられます。<sup>[[1]](#references)</sup>
 
 ## Bitcoin の基本
 
 ### Transactions
 
-Bitcoin transactions では、addresses 間で資金を移転します。Transactions は digital signatures によって検証され、private key の所有者だけが移転を開始できることを保証します。<sup>[[2]](#references)</sup>
+Bitcoin transactions は、アドレス間で資金を送金します。トランザクションはデジタル署名によって検証され、秘密鍵の所有者だけが送金を開始できるようにします。<sup>[[2]](#references)</sup>
 
-#### 主な構成要素：
+#### 主な構成要素:
 
-- **Multisignature Transactions** は、transaction を承認するために複数の signatures を必要とします。<sup>[[3]](#references)</sup>
-- Transactions は、**inputs**（資金源）、**outputs**（送金先）、**fees**（miners に支払われる手数料）、**scripts**（transaction のルール）で構成されます。
+- **Multisignature Transactions** では、トランザクションの承認に複数の署名が必要です。<sup>[[3]](#references)</sup>
+- Transactions は、**inputs** (資金の送信元)、**outputs** (送信先)、**fees** (miner に支払われる手数料)、**scripts** (トランザクションのルール) で構成されます。
 
 ### Lightning Network
 
-複数の transactions を channel 内で実行し、最終状態のみを blockchain にブロードキャストすることで、Bitcoin の scalability を向上させることを目的とします。
+channel 内で複数のトランザクションを可能にし、最終状態のみを blockchain に送信することで、Bitcoin の scalability 向上を目指します。
 
 ## Bitcoin のプライバシーに関する懸念
 
-**Common Input Ownership** や **UTXO Change Address Detection** などの privacy attacks は、transaction patterns を悪用します。**Mixers** や **CoinJoin** などの strategies は、users 間の transaction links を隠すことで anonymity を向上させます。
+**Common Input Ownership** や **UTXO Change Address Detection** などのプライバシー攻撃は、トランザクションのパターンを悪用します。**Mixers** や **CoinJoin** などの手法は、ユーザー間のトランザクションのつながりをわかりにくくすることで、匿名性を高めます。
 
-## Bitcoin を匿名で取得する
+## Bitcoin を匿名で入手する
 
-方法には、現金取引、mining、mixers の利用などがあります。**CoinJoin** は複数の transactions を混合して追跡を困難にし、**PayJoin** は CoinJoins を通常の transactions に見せかけて、より高い privacy を実現します。
+方法には、現金での取引、mining、mixers の利用などがあります。**CoinJoin** は複数のトランザクションを混ぜて追跡を困難にし、**PayJoin** は CoinJoin を通常のトランザクションに見せかけ、プライバシーをさらに高めます。
 
-# Bitcoin Privacy Attacks の概要
+# Bitcoin のプライバシー攻撃の概要
 
-Bitcoin の世界では、transactions の privacy と users の anonymity はしばしば懸念事項となります。以下では、attackers が Bitcoin の privacy を侵害する一般的な方法を簡単に説明します。<sup>[[6]](#references)</sup>
+Bitcoin の世界では、トランザクションのプライバシーやユーザーの匿名性がしばしば懸念されます。以下に、攻撃者が Bitcoin のプライバシーを侵害する一般的な手法を簡単に説明します。<sup>[[6]](#references)</sup>
 
 ## **Common Input Ownership Assumption**
 
-複雑さのため、異なる users の inputs が 1 つの transaction にまとめられることは一般的にまれです。そのため、**同じ transaction 内の 2 つの input addresses は、同じ owner に属すると想定されることが多くなります**。
+複雑さのため、異なるユーザーの inputs が1つのトランザクションにまとめられることは一般にまれです。そのため、**同じトランザクションに含まれる2つの入力アドレスは、同じ所有者に属すると推定されることがよくあります**。
 
 ## **UTXO Change Address Detection**
 
-UTXO、つまり **Unspent Transaction Output** は、transaction 内で全額を使用する必要があります。その一部だけが別の address に送られた場合、残りは新しい change address に送られます。Observers は、この新しい address が sender に属すると推測できるため、privacy が侵害されます。
+UTXO、すなわち **Unspent Transaction Output** は、トランザクション内で全額を使用する必要があります。その一部だけを別のアドレスに送ると、残額は新しいお釣り用アドレスに送られます。観察者は、この新しいアドレスが送信者のものだと推定できるため、プライバシーが損なわれる可能性があります。
 
 ### 例
 
-これを軽減するには、mixing services の利用や複数の addresses の使用によって ownership を分かりにくくできます。
+これを軽減するには、mixing services を利用したり、複数のアドレスを使ったりして、所有者を特定しにくくする方法があります。
 
-## **Social Networks & Forums Exposure**
+## **ソーシャルネットワークやフォーラムでの露出**
 
-Users が online で Bitcoin addresses を共有することがあり、**その address と owner を簡単に結び付けられる**ようになります。
+ユーザーが Bitcoin アドレスをオンラインで共有することがあり、その結果、**アドレスとその所有者を簡単に結び付けられる**場合があります。
 
 ## **Transaction Graph Analysis**
 
-Transactions は graphs として可視化でき、資金の流れに基づいて users 間の潜在的なつながりを明らかにします。
+Transactions はグラフとして可視化でき、資金の流れに基づいてユーザー間のつながりが明らかになる可能性があります。
 
 ## **Unnecessary Input Heuristic (Optimal Change Heuristic)**
 
-この heuristic は、複数の inputs と outputs を持つ transactions を分析し、どの output が sender に戻される change なのかを推測するものです。
+この heuristic は、複数の inputs と outputs を持つトランザクションを分析し、どの output がお釣りとして送信者に戻るものかを推測します。
 
 ### 例
+
 ```bash
 2 btc --> 4 btc
 3 btc     1 btc
 ```
-入力を追加することで、変更出力が単一の入力よりも大きくなる場合、heuristicを混乱させる可能性があります。
 
-## **Forced Address Reuse**
+入力を追加した結果、change outputがどの単一の入力よりも大きくなると、heuristicが誤認する可能性があります。
 
-攻撃者は、過去に使用されたアドレスに少額を送信し、受取人が将来のトランザクションでそれらを他の入力と統合することで、アドレス同士がリンクされることを期待する場合があります。
+## **強制的なアドレス再利用**
 
-### Correct Wallet Behavior
+攻撃者は、過去に使用されたアドレスに少額を送金し、受取人が今後のトランザクションでその資金を他の入力とまとめることで、アドレス同士が関連付けられることを狙う場合があります。
 
-Walletは、既に使用済みで残高が空のアドレスで受け取ったコインを使用しないようにして、このprivacy leakを防ぐべきです。
+### Walletの正しい動作
 
-## **Other Blockchain Analysis Techniques**
+Walletは、このプライバシーleakを防ぐため、使用済みで残高がゼロのアドレスで受け取ったコインの使用を避けるべきです。
 
-- **Exact Payment Amounts:** 変更がないトランザクションは、同じユーザーが所有する2つのアドレス間で行われた可能性が高いです。
-- **Round Numbers:** トランザクション内の切りのよい金額は支払いであることを示唆し、切りのよくない出力は変更である可能性が高いです。
-- **Wallet Fingerprinting:** Walletごとに固有のトランザクション作成パターンがあるため、analystは使用されたソフトウェアを特定し、変更アドレスを推測できる可能性があります。
-- **Amount & Timing Correlations:** トランザクションの時刻や金額を開示すると、トランザクションがtraceableになる可能性があります。
+## **その他のBlockchain分析手法**
 
-## **Traffic Analysis**
+- **正確な支払い金額:** お釣りがないトランザクションは、同じユーザーが所有する2つのアドレス間で行われた可能性があります。
+- **切りのよい金額:** トランザクションの金額が切りのよい数字であれば、支払いであることが示唆され、切りのよくない金額の出力はお釣りである可能性があります。
+- **Walletのフィンガープリンティング:** Walletごとにトランザクション作成パターンが異なるため、分析者は使用されたソフトウェアを特定し、お釣り用アドレスを推測できる可能性があります。
+- **金額とタイミングの相関:** トランザクションの時刻や金額を公開すると、トランザクションが追跡可能になることがあります。
 
-ネットワークトラフィックを監視することで、攻撃者はトランザクションやブロックをIPアドレスにリンクし、ユーザーのprivacyを侵害できる可能性があります。これは、あるentityが多数のBitcoin nodeを運用している場合に特に当てはまり、トランザクションを監視する能力が高まります。
+## **トラフィック分析**
 
-## More
+ネットワークトラフィックを監視することで、攻撃者はトランザクションやブロックをIPアドレスと関連付け、ユーザーのプライバシーを侵害できる可能性があります。多くのBitcoinノードを運用する組織は、トランザクションを監視する能力が高まるため、特にその傾向があります。
 
-privacy攻撃と防御の包括的な一覧については、[Bitcoin Privacy on Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy)を参照してください。
+## さらに詳しく
 
-# Anonymous Bitcoin Transactions
+プライバシー攻撃と防御の包括的な一覧は、[Bitcoin Privacy on Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy)を参照してください。
 
-## Ways to Get Bitcoins Anonymously
+# 匿名のBitcoinトランザクション
 
-- **Cash Transactions**: 現金でbitcoinを入手する。
-- **Cash Alternatives**: gift cardを購入し、オンラインでbitcoinと交換する。
-- **Mining**: bitcoinを得る最もprivateな方法はMiningです。特にsoloで行う場合はprivate性が高くなります。これは、mining poolがminerのIPアドレスを把握する可能性があるためです。[Mining Pools Information](https://en.bitcoin.it/wiki/Pooled_mining)
-- **Theft**: 理論上は、bitcoinを盗むことも匿名で入手する方法の一つですが、違法であり推奨されません。
+## 匿名でBitcoinを入手する方法
 
-## Mixing Services
+- **現金取引**: 現金でbitcoinを入手する。
+- **現金の代替手段**: ギフトカードを購入し、オンラインでbitcoinと交換する。
+- **マイニング**: bitcoinを入手する最もプライバシー性の高い方法はマイニングです。特に単独で行う方法が適しています。マイニングプールはマイナーのIPアドレスを把握している可能性があるためです。[マイニングプールの情報](https://en.bitcoin.it/wiki/Pooled_mining)
+- **窃盗**: 理論上、bitcoinを盗むことも匿名で入手する方法の1つですが、違法であり、推奨されません。
 
-mixing serviceを使用すると、ユーザーは**bitcoinを送信**し、**異なるbitcoinを受け取る**ことができるため、元の所有者のtraceを困難にできます。ただし、これはserviceがlogsを保存せず、実際にbitcoinを返すことを信頼する必要があります。代替のmixing手段にはBitcoin casinoがあります。
+## Mixingサービス
+
+Mixingサービスを利用すると、ユーザーは**bitcoinを送信**し、その代わりに**別のbitcoinを受け取る**ことができ、元の所有者を追跡するのが難しくなります。ただし、サービスがログを保存せず、実際にbitcoinを返すことを信頼する必要があります。Bitcoinカジノも、代替となるmixingの選択肢です。
 
 ## CoinJoin
 
-**CoinJoin**は、異なるユーザーによる複数のトランザクションを1つに統合し、入力と出力を照合しようとする者にとって、その処理を複雑にします。効果的ではあるものの、入力と出力のサイズがuniqueなトランザクションは、依然としてtraceされる可能性があります。
+**CoinJoin**は、複数のユーザーのトランザクションを1つにまとめ、入力と出力を対応付けようとする人の作業を複雑にします。効果的ではありますが、入力と出力のサイズが独特なトランザクションは、依然として追跡される可能性があります。
 
-CoinJoinが使用された可能性のあるトランザクションの例には、`402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a`および`85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`があります。
+CoinJoinが使われた可能性のあるトランザクションの例として、`402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a`および`85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`があります。
 
-詳細については、[CoinJoin](https://coinjoin.io/en)を参照してください。depositと後のwithdrawalを分離するEthereum smart-contract mixerについては、[Tornado Cash](https://tornado.cash)を参照してください。
+詳細は[CoinJoin](https://coinjoin.io/en)を参照してください。入金と後の出金を分離するEthereumのsmart-contract mixerについては、[Tornado Cash](https://tornado.cash)を参照してください。
 
 ## PayJoin
 
-CoinJoinのvariantである**PayJoin**（またはP2EP）は、2者（例：customerとmerchant）間のトランザクションを、CoinJoinに特徴的な同額の出力を持たない通常のトランザクションとして偽装します。これにより検出が極めて困難になり、トランザクション監視entityが使用するcommon-input-ownership heuristicが無効になる可能性があります。
+CoinJoinの派生方式である**PayJoin**（またはP2EP）は、2者（例: 顧客と販売者）の間のトランザクションを、CoinJoinに特徴的な同額の出力を使わずに、通常のトランザクションに見せかけます。そのため検出が非常に難しくなり、トランザクション監視組織が使う、共通入力の所有者を推定するheuristicを無効化できる可能性があります。
+
 ```plaintext
 2 btc --> 3 btc
 5 btc     4 btc
 ```
-上記のようなトランザクションはPayJoinである可能性があり、標準的なbitcoinトランザクションと区別できないままプライバシーを高められます。
 
-**PayJoinの利用は従来の監視手法を大きく妨げる可能性があり**、トランザクションプライバシーの実現に向けた有望な発展です。
+上記のようなトランザクションはPayJoinである可能性があり、標準的なbitcoinトランザクションと区別できないまま、プライバシーを高められます。
 
-# Cryptocurrencyのプライバシーに関するBest Practices
+**PayJoinの利用は、従来の監視手法を大きく妨げる可能性があり**、トランザクションのプライバシーを追求するうえで有望な発展です。
 
-## **Walletの同期技術**
+# 暗号通貨のプライバシーに関するベストプラクティス
 
-プライバシーとセキュリティを維持するには、Walletをblockchainと同期することが重要です。特に次の2つの方法があります。
+## **ウォレットの同期方法**
 
-- **Full node**: blockchain全体をダウンロードすることで、Full nodeは最大限のプライバシーを確保します。これまでに行われたすべてのトランザクションがローカルに保存されるため、攻撃者がユーザーの関心対象であるトランザクションやアドレスを特定することはできません。
-- **Client-side block filtering**: この方法では、blockchain内のすべてのblockに対するfilterを作成し、ネットワーク監視者に具体的な関心対象を公開せずに、Walletが関連するトランザクションを特定できるようにします。軽量Walletはこれらのfilterをダウンロードし、ユーザーのアドレスとの一致が見つかった場合にのみfull blockを取得します。
+プライバシーとセキュリティを保つには、ブロックチェーンとウォレットを同期することが重要です。特に優れた方法は2つあります。
+
+- **フルノード**: ブロックチェーン全体をダウンロードすることで、フルノードは最大限のプライバシーを確保します。これまでに行われたすべてのトランザクションがローカルに保存されるため、攻撃者がユーザーの関心のあるトランザクションやアドレスを特定することはできません。
+- **クライアント側ブロックフィルタリング**: この方法では、ブロックチェーン内の各ブロックに対してフィルターを作成し、特定の関心をネットワーク監視者に明かさずに、ウォレットが関連するトランザクションを特定できるようにします。軽量ウォレットはこれらのフィルターをダウンロードし、ユーザーのアドレスとの一致が見つかった場合にのみ、ブロック全体を取得します。
 
 ## **匿名性のためのTorの利用**
 
-Bitcoinはpeer-to-peer network上で動作するため、Torを使用してIP addressを隠し、networkとのやり取りにおけるプライバシーを高めることが推奨されます。
+Bitcoinはピアツーピアネットワーク上で動作するため、IPアドレスを隠し、ネットワークとの通信時のプライバシーを高める目的でTorの使用が推奨されます。
 
-## **Addressの再利用防止**
+## **アドレスの再利用を防ぐ**
 
-プライバシーを守るには、トランザクションごとに新しいaddressを使用することが重要です。addressを再利用すると、トランザクションが同一のエンティティに関連付けられ、プライバシーが侵害される可能性があります。最新のWalletは、その設計によってaddressの再利用を避けるようになっています。
+プライバシーを守るには、トランザクションごとに新しいアドレスを使うことが重要です。アドレスを再利用すると、トランザクションが同一の主体に結び付けられ、プライバシーが損なわれる可能性があります。最新のウォレットは、その設計によってアドレスの再利用を避けるよう促します。
 
-## **トランザクションプライバシーのためのStrategies**
+## **トランザクションのプライバシー対策**
 
-- **Multiple transactions**: 支払いを複数のトランザクションに分割すると、トランザクション金額を分かりにくくし、プライバシー攻撃を阻止できます。
-- **Change avoidance**: change outputを必要としないトランザクションを選択すると、changeの検出手法を妨害してプライバシーを高められます。
-- **Multiple change outputs**: changeを避けられない場合でも、複数のchange outputを生成することでプライバシーを改善できます。
+- **複数のトランザクション**: 支払いを複数のトランザクションに分割すると、トランザクション金額を分かりにくくし、プライバシー攻撃を妨げられます。
+- **お釣りの回避**: お釣りの出力を必要としないトランザクションを選ぶことで、お釣りを特定する手法を妨げ、プライバシーを高められます。
+- **複数のお釣り出力**: お釣りを避けられない場合でも、複数のお釣り出力を生成すれば、プライバシーを改善できます。
 
-# **Monero: 匿名性の象徴**
+# **Monero: 匿名性の灯台**
 
-Moneroは、トランザクションプライバシーを優先するように設計されています。
+Moneroは、トランザクションのプライバシーを優先するように設計されています。
 
 # **Ethereum: Gasとトランザクション**
 
-## **Gasの理解**
+## **Gasを理解する**
 
-GasはEthereum上で操作を実行するために必要な計算量を表し、**gwei**で価格が設定されます。たとえば、2,310,000 gwei（または0.00231 ETH）のコストがかかるトランザクションには、Gas limitとbase feeが含まれ、validatorによる取り込みを促すためのpriority feeも設定されます。ユーザーはmax feeを設定して過払いを防ぐことができ、余った分は返金されます。<sup>[[5]](#references)</sup>
+Gasは、Ethereum上で処理を実行するために必要な計算量を表し、**gwei**で価格が設定されます。たとえば、2,310,000 gwei（または0.00231 ETH）のトランザクションには、Gas上限と基本手数料があり、バリデーターに取り込んでもらうための優先手数料も設定されます。ユーザーは最大手数料を設定することで、過払いを防げます。超過分は返金されます。<sup>[[5]](#references)</sup>
 
 ## **トランザクションの実行**
 
-Ethereumのトランザクションにはsenderとrecipientが含まれ、それぞれuser addressまたはsmart contract addressにできます。トランザクションにはfeeが必要であり、blockに含められなければなりません。トランザクションに含まれる重要な情報は、recipient、senderのsignature、value、任意のdata、Gas limit、feeです。特に、senderのaddressはsignatureから導出されるため、トランザクションdataに含める必要はありません。<sup>[[4]](#references)</sup>
+Ethereumのトランザクションには送信者と受信者が含まれ、どちらもユーザーアドレスまたはスマートコントラクトアドレスにできます。トランザクションには手数料が必要で、ブロックに含められなければなりません。トランザクションの必須情報には、受信者、送信者の署名、価値、任意のデータ、Gas上限、手数料が含まれます。特筆すべき点として、送信者のアドレスは署名から導出されるため、トランザクションデータに含める必要はありません。<sup>[[4]](#references)</sup>
 
-これらの実践と仕組みは、プライバシーとセキュリティを重視しながらcryptocurrencyを利用したい人にとっての基盤となります。
+これらの慣行や仕組みは、プライバシーとセキュリティを重視しながら暗号通貨を利用したい人にとって、基礎となるものです。
 
 ## Value-Centric Web3 Red Teaming
 
-- valueを持つcomponent（signer、oracle、bridge、automation）を一覧化し、誰がどのようにfundを移動できるのかを把握する。
-- 各componentを関連するMITRE AADAPT tacticにマッピングし、privilege escalationの経路を明らかにする。
-- flash-loan/oracle/credential/cross-chainのattack chainをrehearseし、影響を検証するとともに、exploit可能な前提条件を記録する。
+- 価値を持つコンポーネント（signer、oracle、bridge、automation）を棚卸しし、誰がどのように資金を移動できるかを把握する。
+- 各コンポーネントを関連するMITRE AADAPTの戦術に対応付け、権限昇格の経路を明らかにする。
+- flash-loan/oracle/credential/cross-chainの攻撃チェーンをリハーサルし、影響を検証して、悪用可能な前提条件を記録する。
 
 {{#ref}}
 value-centric-web3-red-teaming.md
 {{#endref}}
 
-## Web3 Signing WorkflowのCompromise
+## Web3署名ワークフローの侵害
 
-- Wallet UIのsupply-chain tamperingによって、signing直前にEIP-712 payloadを改変し、delegatecallベースのproxy takeover（例: Safe masterCopyのslot-0 overwrite）に利用できる有効なsignatureを収集される可能性がある。
+- wallet UIへのサプライチェーン改ざんにより、署名直前にEIP-712 payloadを改変し、delegatecallベースのproxy takeover（例: Safe masterCopyのslot-0上書き）に利用できる有効な署名を窃取する可能性があります。
 
 {{#ref}}
 web3-signing-workflow-compromise-safe-delegatecall-proxy-takeover.md
@@ -190,98 +194,106 @@ web3-signing-workflow-compromise-safe-delegatecall-proxy-takeover.md
 
 ## Account Abstraction (ERC-4337)
 
-- 一般的なsmart-accountのfailure modeには、`EntryPoint`のaccess controlのbypass、unsigned gas field、stateful validation、ERC-1271 replay、validation後のrevertによるfee-drainなどがあります。
+- smart accountでよくある障害モードには、`EntryPoint`のアクセス制御の回避、署名されていないGasフィールド、stateful validation、ERC-1271のリプレイ、validation後のrevertによる手数料の枯渇があります。
 
 {{#ref}}
 erc-4337-smart-account-security-pitfalls.md
 {{#endref}}
 
-## Smart Contract Security
+## スマートコントラクトのセキュリティ
 
-- test suiteのblind spotを見つけるためのmutation testing:
+- テストスイートの盲点を見つけるためのmutation testing:
 
 {{#ref}}
 ../smart-contract-security/mutation-testing-with-slither.md
 {{#endref}}
 
-## ZK Proof / zkVM Guest Integrity
+## ZK Proof / zkVM Guestの完全性
 
-proverが**zkVM**またはapplication-specific proof circuitを使用してclaimを証明する場合、verifierが知ることができるのは、**guest programが記述どおりに実行された**という事実だけです。guestに**unsafe deserialization**、**undefined behavior**、または**missing semantic constraints**が含まれている場合、悪意のあるproverは、**public metricsまたはclaimed invariantがfalse**であるにもかかわらず検証に成功するproofを生成できます。<sup>[[7]](#references)</sup>
+proverが**zkVM**またはアプリケーション固有のproof circuitを使って主張を証明する場合、verifierが知るのは、**guest programが記述どおりに実行された**ということだけです。guestに**安全でないデシリアライズ**、**未定義動作**、または**意味上の制約の不足**があると、悪意のあるproverは、検証には成功するものの、**公開されたメトリクスや主張された不変条件が偽である**proofを生成する可能性があります。<sup>[[7]](#references)</sup>
 
-### proof guest内のUnsafe deserialization
+### proof guest内の安全でないデシリアライズ
 
-- private witness/circuit bytesは、proofによって隠されている場合でも、**untrusted attacker input**として扱う。
-- bytesがすでにout-of-bandで検証されている場合を除き、`rkyv::access_unchecked`などのunchecked helperを使用してdeserializeすることを避ける。
-- untrusted serialized dataから読み込まれるenum discriminant、relative pointer、length、indexは、control flowまたはmemory accessに影響を与える前に検証する必要がある。
+- private witness/circuitのバイト列は、proofによって隠されていても、**信頼できない攻撃者入力**として扱う。
+- バイト列がすでに別の方法で検証されている場合を除き、`rkyv::access_unchecked`など、チェックを行わないヘルパーでデシリアライズしない。
+- 信頼できないシリアライズ済みデータから読み込まれるenumのdiscriminant、relative pointer、length、indexは、制御フローやメモリアクセスに影響する前に検証する。
 
-実践的なaudit pattern:
+実践的な監査パターン:
+
 ```rust
 let private_circuit_bytes = sp1_zkvm::io::read_vec();
 let ops = unsafe {
-rkyv::access_unchecked::<rkyv::Archived<Vec<Op>>>(&private_circuit_bytes)
+    rkyv::access_unchecked::<rkyv::Archived<Vec<Op>>>(&private_circuit_bytes)
 };
 ```
-`op.kind` のようなフィールドが enum であり、攻撃者が **範囲外の discriminant** を注入できる場合、その値に対する下流のすべての `match` は疑わしいものになります。
 
-### Jump-table / UB counter bypass
+`op.kind`のようなフィールドがenumであり、攻撃者が**範囲外の判別値**を注入できる場合、その値に対する後続の`match`はすべて疑わしいものとして扱います。
 
-Rust が大規模な `match` を **jump table** に変換する場合、無効な enum discriminant によって **undefined control flow** が発生する可能性があります。危険なパターンは次のとおりです:<sup>[[7]](#references)[[9]](#references)</sup>
+### Jump-table / UBによるカウンタ回避
 
-1. 1つ目の `match` が **security-critical counters/constraints** を更新する。
-2. 2つ目の `match` が **実際の命令セマンティクス** を実行する。
-3. 範囲外の discriminant が最初の jump table の先をインデックスし、2つ目の jump table に関連付けられたコードへ到達する。
+Rustが大きな`match`を**jump table**に変換する場合、無効なenum判別値によって**未定義の制御フロー**が発生する可能性があります。危険なパターンは次のとおりです。<sup>[[7]](#references)[[9]](#references)</sup>
 
-結果: operation は実行されるものの、accounting path はスキップされます。zkVM では、より少ない gates、より少ない高コストな operations、その他の制限対象リソースなど、実現不可能な metrics を報告する proof を偽造できます。
+1. 1つ目の`match`が**セキュリティ上重要なカウンタや制約**を更新する。
+2. 2つ目の`match`が**実際の命令の意味論**を実行する。
+3. 範囲外の判別値が1つ目のjump tableの範囲外をインデックスし、2つ目のjump tableに関連付けられたコードへ到達する。
 
-Review checklist:
+結果：操作は実行される一方で、計上処理はスキップされます。zkVMでは、ゲート数、コストの高い操作の数、その他の制限付きリソースを実際より少なく報告するなど、不可能なメトリクスを示す証明を偽造できる可能性があります。
 
-- witness/private input から deserialize された、攻撃者が制御可能な enum を探す。
-- 同じ opcode/kind フィールドに対する、繰り返し使用される `match` statements を調査する。
-- `unsafe` + unchecked deserialization + 大規模な opcode dispatch の組み合わせを high-risk とみなす。
-- 必要に応じて生成された binary を reverse engineer する。jump-table の layout は source より重要になる場合があります。
+確認項目：
 
-### reversible/specialized interpreters における semantic constraints の欠落
+- witness/private inputからデシリアライズされる、攻撃者制御のenumを探す。
+- 同じopcode/kindフィールドに対して、繰り返し使われる`match`文を調べる。
+- `unsafe`、未検証のデシリアライズ、大規模なopcode dispatchが組み合わさっている場合は、高リスクとして扱う。
+- 必要に応じて生成されたバイナリをリバースエンジニアリングする。jump tableのレイアウトは、ソースコード以上に重要な場合がある。
 
-memory safety だけを validate せず、proof が enforce すべき **semantic rules** も validate してください。
+### 可逆/特化型インタプリタにおける意味論的制約の欠如
 
-reversible/quantum-like instruction sets では、distinct でなければならない operands が実際に distinct であることを ensure してください。次のように実装された Toffoli/CCX-like operation は:<sup>[[7]](#references)[[8]](#references)</sup>
+メモリ安全性だけを検証してはいけません。証明で強制するべき**意味論上のルール**も検証してください。
+
+可逆/量子風の命令セットでは、異なる必要があるオペランドが実際に異なるよう制約されていることを確認してください。Toffoli/CCX風の操作が次のように実装されている場合：<sup>[[7]](#references)[[8]](#references)</sup>
+
 ```rust
 let v = cond & self.qubit(op.q_control1) & self.qubit(op.q_control2);
 *self.qubit_mut(op.q_target) ^= v;
 ```
-ゲストが拒否しない場合、安全でなくなる：
+
+ゲストが拒否しない場合、危険になる：
+
 ```text
 op.q_control1 == op.q_control2 == op.q_target
 ```
-その場合、遷移は次のように崩れます：
+
+その場合、遷移は次の形に集約されます：
+
 ```text
 q = q ^ (q & q) = 0
 ```
-これにより、**決定論的なリセットプリミティブ**が生成され、可逆性の前提が崩れ、意図されていない計算をより低コストで実行できるようになります。リソース使用量を証明する proof system では、攻撃者が機能チェックを満たしながら、verifier が適用していると考えているコストモデルを回避できる可能性があります。
 
-### ZK systems でテストすべき項目
+これは**決定論的なリセットプリミティブ**を生み出し、可逆性の前提を崩すとともに、意図しない計算をより低コストで可能にします。リソース使用量を証明するシステムでは、攻撃者が機能チェックを満たしつつ、検証者が適用されていると信じているコストモデルを回避できる可能性があります。
 
-- すべての guest parser に対して、malformed な witness/private-input encoding を用いて fuzzing を行う。
-- opcode dispatch の前に enum の範囲検証を行う。
-- operand aliasing やその他の無効な命令形式に対する semantic check を追加する。
-- 報告されたカウンターおよび public counter を、独立した reference implementation と比較する。
-- guest program にバグがある場合、有効な proof でも**誤った statement**を証明できることを忘れない。
+### ZKシステムでテストすべきこと
 
-## State-Dependent Authorization
+- 不正なwitness/private-inputエンコーディングを使い、すべてのゲストパーサーに対してファジングを行う。
+- opcodeのディスパッチ前にenumの範囲が検証されることを確認する。
+- オペランドのエイリアシングや、その他の無効な命令形式に対するセマンティックチェックを追加する。
+- 報告されたカウンター／公開カウンターを、独立した参照実装と照合する。
+- ゲストプログラムにバグがあれば、有効な証明でも**誤った命題**を証明している可能性があることを忘れない。
+
+## 状態依存の認可
 
 {{#ref}}
 state-divergence-default-value-authorization-bypasses.md
 {{#endref}}
 
-## DeFi/AMM Exploitation
+## DeFi/AMMの悪用
 
-DEX および AMM の実践的な exploitation（Uniswap v4 hooks、丸め誤差・precision の悪用、flash loan により増幅された threshold-crossing swap）を調査している場合は、以下を確認してください。
+DEXやAMMの実践的な悪用（Uniswap v4 hooks、丸め／精度の悪用、flash loanで増幅した閾値突破スワップ）を調査している場合は、以下を確認してください。
 
 {{#ref}}
 defi-amm-hook-precision.md
 {{#endref}}
 
-virtual balance を cache し、`supply == 0` のときに poison される可能性がある multi-asset weighted pool については、以下を調査してください。
+仮想残高をキャッシュし、`supply == 0` のときに汚染される可能性があるマルチアセットの加重プールについては、以下を調べてください。
 
 {{#ref}}
 defi-amm-virtual-balance-cache-exploitation.md
@@ -289,13 +301,13 @@ defi-amm-virtual-balance-cache-exploitation.md
 
 ## References
 
-- [1] [Proof of stake - Wikipedia](https://en.wikipedia.org/wiki/Proof_of_stake)
-- [2] [Public Key と Private Key の解説 - Mycryptopedia](https://www.mycryptopedia.com/public-key-private-key-explained/)
-- [3] [multi-signature transaction とは？ - Bitcoin Stack Exchange](https://bitcoin.stackexchange.com/questions/3718/what-are-multi-signature-transactions)
-- [4] [Transaction | ethereum.org](https://ethereum.org/en/developers/docs/transactions/)
-- [5] [Gas と fee | ethereum.org](https://ethereum.org/en/developers/docs/gas/)
-- [6] [Privacy - Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy#Forced_address_reuse)
-- [7] [Trail of Bits - Google の quantum cryptanalysis に対する zero-knowledge proof を破った方法](https://blog.trailofbits.com/2026/04/17/we-beat-googles-zero-knowledge-proof-of-quantum-cryptanalysis/)
-- [8] [Quantum Vulnerability から Elliptic Curve Cryptocurrency を保護する：Resource Estimate と Mitigation（patched version）](https://arxiv.org/abs/2603.28846v2)
-- [9] [Trail of Bits proof-of-concept repository](https://github.com/trailofbits/quantum-zk-proof-poc)
+- [1] [プルーフ・オブ・ステーク - Wikipedia](https://en.wikipedia.org/wiki/Proof_of_stake)
+- [2] [公開鍵と秘密鍵の解説 - Mycryptopedia](https://www.mycryptopedia.com/public-key-private-key-explained/)
+- [3] [マルチシグトランザクションとは？ - Bitcoin Stack Exchange](https://bitcoin.stackexchange.com/questions/3718/what-are-multi-signature-transactions)
+- [4] [トランザクション | ethereum.org](https://ethereum.org/en/developers/docs/transactions/)
+- [5] [Gasと手数料 | ethereum.org](https://ethereum.org/en/developers/docs/gas/)
+- [6] [プライバシー - Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy#Forced_address_reuse)
+- [7] [Trail of Bits - Googleの量子暗号解析に対するゼロ知識証明を破った](https://blog.trailofbits.com/2026/04/17/we-beat-googles-zero-knowledge-proof-of-quantum-cryptanalysis/)
+- [8] [楕円曲線暗号通貨の量子脆弱性対策：リソース推定と緩和策（パッチ適用版）](https://arxiv.org/abs/2603.28846v2)
+- [9] [Trail of Bitsの概念実証リポジトリ](https://github.com/trailofbits/quantum-zk-proof-poc)
 {{#include ../../banners/hacktricks-training.md}}
