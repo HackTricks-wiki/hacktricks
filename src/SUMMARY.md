@@ -576,6 +576,7 @@
   - [Buckets](network-services-pentesting/pentesting-web/buckets/README.md)
     - [Firebase Database](network-services-pentesting/pentesting-web/buckets/firebase-database.md)
   - [CGI](network-services-pentesting/pentesting-web/cgi.md)
+  - [Citrix NetScaler ADC and Gateway](network-services-pentesting/pentesting-web/citrix-netscaler.md)
   - [Custom Protocols](network-services-pentesting/pentesting-web/custom-protocols.md)
   - [Django](network-services-pentesting/pentesting-web/django.md)
   - [Dotnet Soap Wsdl Client Exploitation](network-services-pentesting/pentesting-web/dotnet-soap-wsdl-client-exploitation.md)
