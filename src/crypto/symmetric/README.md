@@ -1,204 +1,206 @@
-# Symmetric Crypto
+# 対称暗号
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## CTFsで探すもの
+## CTFで確認すること
 
-- **Mode misuse**: ECB patterns、CBC malleability、CTR/GCM nonce reuse。
-- **Padding oracles**: 不正な padding に対する異なるエラーやタイミング。
-- **MAC confusion**: 可変長メッセージで CBC-MAC を使用する、または MAC-then-encrypt の誤り。
-- **XOR everywhere**: stream ciphers や custom constructions は、多くの場合 keystream との XOR に帰着する。
+- **モードの誤用**: ECBのパターン、CBCの改ざん可能性、CTR/GCMのnonce再利用。
+- **Padding oracle**: 不正なpaddingに対するエラーや処理時間の違い。
+- **MACの混同**: 可変長メッセージでのCBC-MACの使用や、MAC-then-encryptの誤り。
+- **あらゆる場面でのXOR**: ストリーム暗号や独自の構成は、多くの場合、キーストリームとのXORに帰着する。
 
-## AES modes and misuse
+## AESのモードと誤用
 
-NIST は SP 800-38A で ECB、CBC、CTR の confidentiality modes を、SP 800-38D で GCM authenticated encryption を規定している。<sup>[[2]](#references)[[3]](#references)</sup>
+NISTはSP 800-38AでECB、CBC、CTRの機密性モードを、SP 800-38DでGCM認証付き暗号化を規定しています。<sup>[[2]](#references)[[3]](#references)</sup>
 
 ### ECB: Electronic Codebook
 
-ECB は patterns を leak する: 同一の plaintext blocks → 同一の ciphertext blocks。これにより、以下が可能になる:
+ECB leaks パターン: 同じ平文ブロック → 同じ暗号文ブロック。これにより、次のことが可能になります。
 
-- Cut-and-paste / block reordering
-- Block deletion（format が有効なままの場合）
+- Cut-and-paste / ブロックの並べ替え
+- ブロックの削除（フォーマットが有効なままの場合）
 
-plaintext を制御して ciphertext（または cookies）を観測できる場合は、repeated blocks（例: 多数の `A`）を作成し、繰り返しを探す。
+平文を制御して暗号文（またはcookie）を確認できる場合は、同じブロックを繰り返す（例: `A`を多数並べる）ようにし、繰り返しが現れるか確認してください。
 
 ### CBC: Cipher Block Chaining
 
-- CBC は **malleable**: `C[i-1]` の bits を反転すると、`P[i]` の予測可能な bits が反転すると同時に、`P[i-1]` も壊れる。IV を変更すると、前の plaintext block を壊さずに最初の plaintext block を狙える。
-- システムが valid padding と invalid padding を区別して公開する場合、**padding oracle** が存在する可能性がある。
+- CBCは**改ざん可能**です: `C[i-1]`のビットを反転すると、`P[i]`の予測可能なビットが反転すると同時に、`P[i-1]`も破損します。IVを変更すると、先行する平文ブロックを破損させずに最初の平文ブロックを狙えます。
+- システムがpaddingの有効・無効を外部に示す場合、**padding oracle**が存在する可能性があります。
 
 ### CTR
 
-CTR は AES を stream cipher に変換する: `C = P XOR keystream`。
+CTRはAESをストリーム暗号に変換します: `C = P XOR keystream`。
 
-同じ key で nonce/IV が再利用されると:
+同じkeyでnonce/IVが再利用されると:
 
-- `C1 XOR C2 = P1 XOR P2`（classic keystream reuse）
-- known plaintext があれば、keystream を復元して他の ciphertext を decrypt できる。
+- `C1 XOR C2 = P1 XOR P2`（典型的なキーストリーム再利用）
+- 既知平文があれば、キーストリームを復元して他のデータを復号できます。
 
-**Nonce/IV reuse exploitation patterns**
+**Nonce/IV再利用の悪用パターン**
 
-- plaintext が既知または推測可能な箇所の keystream を復元する:
+- 平文が既知または推測可能な範囲でキーストリームを復元する:
 
-```text
-keystream[i..] = ciphertext[i..] XOR known_plaintext[i..]
-```
+  ```text
+  keystream[i..] = ciphertext[i..] XOR known_plaintext[i..]
+  ```
 
-復元した keystream bytes を、同じ key+IV で同じ offsets において生成された他の ciphertext に適用して decrypt する。
-- 構造化されたデータ（例: ASN.1/X.509 certificates、file headers、JSON/CBOR）は、大きな known-plaintext regions を提供する。certificate の ciphertext と予測可能な certificate body を XOR して keystream を導出し、その後、再利用された IV で暗号化された他の secrets を decrypt できる場合が多い。一般的な certificate layouts については [TLS & Certificates](../tls-and-certificates/README.md) も参照。<sup>[[1]](#references)</sup>
-- **同じ serialized format/size** の複数の secrets が同じ key+IV で暗号化される場合、full known plaintext がなくても field alignment が leak する。例: 同じ modulus size の PKCS#8 RSA keys では、prime factors が一致する offsets に配置される（2048-bit では約 99.6% の alignment）。再利用された keystream の下で 2 つの ciphertext を XOR すると、`p ⊕ p'` / `q ⊕ q'` が分離され、数秒で brute-recover できる。<sup>[[1]](#references)</sup>
-- Libraries の default IV（例: constant `000...01`）は critical footgun である: すべての encryption が同じ keystream を繰り返すため、CTR が reused one-time pad になる。<sup>[[1]](#references)</sup>
+  同じ key+IV を同じオフセットで使って生成された他の ciphertext を復号するには、復元した keystream のバイトを適用します。
+- 構造が高度に規則的なデータ（例: ASN.1/X.509 certificates、file headers、JSON/CBOR）には、既知平文が大量に含まれます。certificate の ciphertext と予測可能な certificate body を XOR して keystream を導出し、IV が再利用された状態で暗号化された他の秘密情報を復号できる場合があります。一般的な certificate の構造については [TLS & Certificates](../tls-and-certificates/README.md) も参照してください。<sup>[[1]](#references)</sup>
+- **同じシリアライズ形式/サイズ**の複数の秘密情報が同じ key+IV で暗号化されている場合、完全な既知平文がなくてもフィールドの配置が漏えいします。例: 同じ modulus サイズの PKCS#8 RSA keys では、素因数が同じオフセットに配置されます（2048-bit で約 99.6% の配置一致）。再利用された keystream で暗号化された2つの ciphertext を XOR すると `p ⊕ p'` / `q ⊕ q'` が得られ、数秒で総当たりにより復元できます。<sup>[[1]](#references)</sup>
+- ライブラリのデフォルト IV（例: 固定値 `000...01`）は重大な落とし穴です。暗号化のたびに同じ keystream が使われ、CTR が one-time pad の再利用状態になります。<sup>[[1]](#references)</sup>
 
-**CTR malleability**
+**CTR の改ざん可能性**
 
-- CTR は confidentiality のみを提供する: ciphertext の bits を反転すると、plaintext の同じ bits が deterministic に反転する。authentication tag がなければ、attackers は検知されずに data（例: keys、flags、messages）を tamper できる。
-- AEAD（GCM、GCM-SIV、ChaCha20-Poly1305 など）を使用し、tag verification を強制して bit-flips を検知する。
+- CTR が提供するのは機密性のみです。ciphertext のビットを反転させると、plaintext の同じビットが決定的に反転します。認証タグがなければ、攻撃者はデータ（例: keys、flags、メッセージ）を検知されずに改ざんできます。
+- AEAD（GCM、GCM-SIV、ChaCha20-Poly1305 など）を使用し、ビット反転を検出するためにタグ検証を必ず行ってください。
 
 ### GCM
 
-GCM も nonce reuse によって大きく破綻する。同じ key+nonce が複数回使用されると、通常は以下が発生する:
+GCM も nonce が再利用されると深刻な問題が起きます。同じ key+nonce が複数回使われると、通常は次の問題が発生します。
 
-- Encryption における keystream reuse（CTR と同様）。いずれかの plaintext が既知であれば、plaintext recovery が可能になる。
-- Integrity guarantees の喪失。何が公開されているか（同じ nonce の下にある複数の message/tag pairs）によっては、attackers が tags を forge できる可能性がある。
+- 暗号化時に keystream が再利用される（CTR と同様）。平文が一部でも既知なら、plaintext を復元できます。
+- integrity guarantees が失われます。同じ nonce での複数の message/tag ペアなど、露出している情報によっては、攻撃者がタグを偽造できる場合があります。
 
-Operational guidance:
+運用上の指針:
 
-- AEAD における "nonce reuse" は critical vulnerability として扱う。
-- AES-GCM-SIV などの misuse-resistant AEADs は、nonce-reuse による被害を軽減する。callers は construction の interface が要求する unique nonces を引き続き提供すべきである。accidental reuse の影響は、通常の GCM と比較して bounded consequences になる。<sup>[[3]](#references)[[4]](#references)</sup>
-- 同じ nonce の下に複数の ciphertexts がある場合は、まず `C1 XOR C2 = P1 XOR P2` style relations を確認する。
+- AEAD における「nonce の再利用」は重大な脆弱性として扱ってください。
+- AES-GCM-SIV などの misuse-resistant AEAD は、nonce 再利用の影響を軽減します。それでも呼び出し側は、その方式の interface で求められるように一意な nonce を指定してください。通常の GCM と比べ、誤って再利用した場合の影響は限定されます。<sup>[[3]](#references)[[4]](#references)</sup>
+- 同じ nonce で暗号化された複数の ciphertext がある場合は、まず `C1 XOR C2 = P1 XOR P2` のような関係が成り立つか確認してください。
 
 ### Tools
 
-- 素早い実験には [CyberChef](https://gchq.github.io/CyberChef/)。<sup>[[8]](#references)</sup>
-- Scripting には Python の [PyCryptodome](https://www.pycryptodome.org/) package。<sup>[[9]](#references)</sup>
+- 手早い実験には [CyberChef](https://gchq.github.io/CyberChef/) を使用します。<sup>[[8]](#references)</sup>
+- スクリプト作成には Python の [PyCryptodome](https://www.pycryptodome.org/) package を使用します。<sup>[[9]](#references)</sup>
 
-## ECB exploitation patterns
+## ECB の悪用パターン
 
-ECB（Electronic Code Book）は各 block を独立して encrypt する:
+ECB（Electronic Code Book）は各 block を個別に暗号化します。
 
-- 同一の plaintext blocks → 同一の ciphertext blocks
-- これにより structure が leak し、cut-and-paste style attacks が可能になる
+- 同一の plaintext block → 同一の ciphertext block
+- これにより構造が漏えいし、cut-and-paste style attack が可能になります
 
 ![ECB mode decryption block diagram](https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/ECB_decryption.svg/601px-ECB_decryption.svg.png)
 
-### Detection idea: token/cookie pattern
+### 検出の考え方: token/cookie のパターン
 
-何度も login して **常に同じ cookie を取得する** 場合、ciphertext は deterministic（ECB または fixed IV）かもしれない。
+複数回ログインして**毎回同じ cookie が返ってくる**場合、ciphertext は決定的に生成されている（ECB または固定 IV）可能性があります。
 
-ほぼ同一の plaintext layouts（例: 長く繰り返す characters）を持つ 2 人の users を作成し、同じ offsets に repeated ciphertext blocks が現れる場合、ECB が有力な suspect である。
+ほぼ同じ plaintext layout（例: 長い文字列の繰り返し）を持つ2人のユーザーを作成し、同じオフセットに繰り返し現れる ciphertext block があれば、ECB が強く疑われます。
 
-### Exploitation patterns
+### 悪用パターン
 
-#### Removing entire blocks
+#### block 全体を削除する
 
-token format が `<username>|<password>` のようなもので block boundary が一致する場合、`admin` block が aligned になるように user を craft し、先行する blocks を削除して `admin` 用の valid token を取得できる場合がある。
+token の形式が `<username>|<password>` のようなもので、block boundary が一致していれば、`admin` block が境界に合うようにユーザーを作成し、先行する block を削除して `admin` の有効な token を取得できることがあります。
 
-#### Moving blocks
+#### block を移動する
 
-backend が padding/extra spaces（`admin` と `admin    `）を許容する場合、以下ができる:
+backend が padding/余分なスペース（`admin` と `admin    ` など）を許容する場合、次のことができます。
 
-- `admin   ` を含む block を Align する
-- その ciphertext block を別の token に Swap/reuse する
+- `admin   ` を含む block を配置する
+- その ciphertext block を別の token に入れ替える/再利用する
 
 ## Padding Oracle
 
-### What it is
+### 概要
 
-CBC mode で、server が decrypted plaintext に **valid PKCS#7 padding** があるかどうかを直接または間接的に明らかにする場合、以下が可能になることが多い:<sup>[[7]](#references)</sup>
+CBC mode で、サーバーが復号後の plaintext に**有効な PKCS#7 padding があるかどうか**を（直接または間接的に）明らかにする場合、次のことができる可能性があります。<sup>[[7]](#references)</sup>
 
-- key なしで ciphertext を decrypt する
-- craft した preceding blocks または IVs を submit でき、application が結果として validly padded message を受け入れる場合に、chosen plaintext に decrypt される ciphertext を construct する
+- key を使わずに ciphertext を復号する
+- 細工した先行 block または IV を送信でき、アプリケーションが padding の有効なメッセージを受け入れる場合、選択した plaintext に復号される ciphertext を作成する
 
-oracle は以下の形を取る:
+oracle となる情報には、次のようなものがあります。
 
-- Specific error message
+- 特定の error message
 - 異なる HTTP status / response size
-- Timing difference
+- timing の違い
 
-### Practical exploitation
+### 実際の悪用
 
-PadBuster は classic tool である:
+PadBuster は定番の tool です。
 
 {{#ref}}
 https://github.com/AonCyberLabs/PadBuster
 {{#endref}}
 
-Example:
+例:
+
 ```bash
 perl ./padBuster.pl http://10.10.10.10/index.php "RVJDQrwUdTRWJUVUeBKkEA==" 16 \
--encoding 0 -cookies "login=RVJDQrwUdTRWJUVUeBKkEA=="
+  -encoding 0 -cookies "login=RVJDQrwUdTRWJUVUeBKkEA=="
 ```
-Notes:
 
-- Block size は AES では `16` であることが多いです。
-- `-encoding 0` は Base64 を意味します。
-- oracle が特定の文字列の場合は `-error` を使用します。
+メモ:
+
+- AESでは、ブロックサイズは`16`であることがよくあります。
+- `-encoding 0`はBase64を意味します。
+- oracleが特定の文字列を返す場合は、`-error`を使用します。
 
 ### 仕組み
 
-CBC の復号では `P[i] = D(C[i]) XOR C[i-1]` が計算されます。`C[i-1]` のバイトを変更し、padding が有効かどうかを監視することで、`P[i]` をバイト単位で復元できます。
+CBCの復号では`P[i] = D(C[i]) XOR C[i-1]`が計算されます。`C[i-1]`のバイトを変更し、paddingが有効かどうかを観察することで、`P[i]`を1バイトずつ復元できます。
 
-## CBC での Bit-flipping
+## CBCでのBit-flipping
 
-padding oracle がなくても、CBC は malleable です。ciphertext ブロックを変更でき、アプリケーションが復号後の plaintext を構造化データ（例: `role=user`）として使用している場合、特定のビットを反転させることで、次のブロックの選択した位置にある plaintext のバイトを変更できます。
+padding oracleがなくても、CBCにはmalleabilityがあります。暗号文ブロックを変更でき、アプリケーションが復号した平文を構造化データ（例: `role=user`）として使う場合、次のブロックの指定した位置にある平文バイトの特定のビットを反転できます。
 
-典型的な CTF のパターン:
+CTFでよくあるパターン:
 
 - Token = `IV || C1 || C2 || ...`
-- `C[i]` のバイトを制御できる
-- `P[i+1]` の plaintext バイトを標的にする。これは `P[i+1] = D(C[i+1]) XOR C[i]` であるため
+- `C[i]`のバイトを制御できる
+- `P[i+1] = D(C[i+1]) XOR C[i]`なので、`P[i+1]`の平文バイトを標的にする
 
-これは単独では confidentiality の破りではありませんが、integrity が存在しない場合によく使われる privilege-escalation primitive です。
+これはそれ自体で機密性を破るものではありませんが、完全性が欠如している場合によく使われる権限昇格の手段です。
 
 ## CBC-MAC
 
-CBC-MAC は、特定の条件（特に **fixed-length messages** と正しい domain separation）の下でのみ secure です。AES-CMAC は variable-length inputs を安全に処理できる標準化された construction です。<sup>[[5]](#references)</sup>
+CBC-MACが安全なのは、特定の条件（特に**メッセージ長が固定されていること**と、適切なdomain separation）を満たす場合に限られます。AES-CMACは、可変長入力を安全に処理する標準化された構成です。<sup>[[5]](#references)</sup>
 
-### Classic variable-length forgery pattern
+### 可変長での古典的な偽造パターン
 
-CBC-MAC は通常、次のように計算されます:
+CBC-MACは通常、次のように計算されます。
 
 - IV = 0
 - `tag = last_block( CBC_encrypt(key, message, IV=0) )`
 
-選択した messages に対する tags を取得できる場合、CBC がブロックを chain する仕組みを悪用することで、key を知らなくても concatenation（または関連する construction）に対する tag を作成できることがあります。
+選択したメッセージのtagを取得できる場合、CBCのブロック連鎖の仕組みを悪用することで、鍵を知らなくても連結したメッセージ（または関連する構成）のtagを作成できることがあります。
 
-これは、username または role を CBC-MAC で MAC する CTF の cookies/tokens で頻繁に見られます。
+これは、ユーザー名やroleをCBC-MACで認証するCTFのcookieやtokenでよく見られます。
 
-### Safer alternatives
+### より安全な代替手段
 
-- HMAC (SHA-256/512) を使用する
-- CMAC (AES-CMAC) を正しく使用する
-- message length / domain separation を含める
+- HMAC (SHA-256/512)を使う
+- CMAC (AES-CMAC)を正しく使う
+- メッセージ長やdomain separationを含める
 
-## Stream ciphers: XOR and RC4
+## ストリーム暗号: XORとRC4
 
-### The mental model
+### 基本的な考え方
 
-多くの stream cipher の状況は、次の形に帰着します:
+ストリーム暗号を使う状況の多くは、次の式に帰着します。
 
 `ciphertext = plaintext XOR keystream`
 
-したがって:
+つまり:
 
-- plaintext が分かれば、keystream を復元できる
-- keystream が再利用される場合（同じ key+nonce）、`C1 XOR C2 = P1 XOR P2`
+- 平文がわかれば、keystreamを復元できます。
+- keystreamが再利用されている（同じkey+nonce）場合、`C1 XOR C2 = P1 XOR P2`となります。
 
-### XOR-based encryption
+### XORベースの暗号化
 
-位置 `i` の plaintext segment が分かれば、keystream のバイトを復元し、その位置にある他の ciphertexts を復号できます。
+位置`i`の平文の一部がわかれば、keystreamのバイトを復元し、その位置にある他の暗号文を復号できます。
 
-Autosolvers:
+自動解読ツール:
 
 - [https://wiremask.eu/tools/xor-cracker/](https://wiremask.eu/tools/xor-cracker/)
 
 ### RC4
 
-RC4 は legacy の stream cipher です。encrypt/decrypt は同じ XOR operation です。既知の biases があるため新しい systems には不適切であり、TLS はその cipher suites を明示的に禁止しています。<sup>[[6]](#references)</sup>
+RC4は旧式のストリーム暗号で、暗号化と復号は同じXOR演算です。既知のbiasがあるため、新しいシステムには適しておらず、TLSではそのcipher suiteが明示的に禁止されています。<sup>[[6]](#references)</sup>
 
-同じ key を使った既知の plaintext の RC4 encryption を取得できれば、keystream を復元し、同じ length/offset の他の messages を復号できます。
+同じ鍵で既知の平文をRC4で暗号化させることができれば、keystreamを復元し、同じ長さ・オフセットの他のメッセージを復号できます。
 
-Reference writeup (HTB Kryptos):
+参考writeup (HTB Kryptos):
 
 {{#ref}}
 https://0xrick.github.io/hack-the-box/kryptos/
@@ -206,13 +208,13 @@ https://0xrick.github.io/hack-the-box/kryptos/
 
 ## References
 
-- [1] [Trail of Bits – cryptography における不注意と職人技](https://blog.trailofbits.com/2026/02/18/carelessness-versus-craftsmanship-in-cryptography/)
-- [2] [NIST SP 800-38A - Block Cipher Modes of Operation に関する推奨事項](https://csrc.nist.gov/pubs/sp/800/38/a/final)
-- [3] [NIST SP 800-38D - Galois/Counter Mode (GCM) および GMAC に関する推奨事項](https://csrc.nist.gov/pubs/sp/800/38/d/final)
-- [4] [RFC 8452 - AES-GCM-SIV: Nonce Misuse-Resistant Authenticated Encryption](https://www.rfc-editor.org/rfc/rfc8452)
-- [5] [RFC 4493 - The AES-CMAC Algorithm](https://www.rfc-editor.org/rfc/rfc4493)
-- [6] [RFC 7465 - Prohibiting RC4 Cipher Suites](https://www.rfc-editor.org/rfc/rfc7465)
-- [7] [OWASP Web Security Testing Guide - Padding Oracle のテスト](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/09-Testing_for_Weak_Cryptography/02-Testing_for_Padding_Oracle)
+- [1] [Trail of Bits – 暗号技術における不注意と熟練の技](https://blog.trailofbits.com/2026/02/18/carelessness-versus-craftsmanship-in-cryptography/)
+- [2] [NIST SP 800-38A - ブロック暗号の動作モードに関する推奨事項](https://csrc.nist.gov/pubs/sp/800/38/a/final)
+- [3] [NIST SP 800-38D - Galois/Counter Mode (GCM)およびGMACに関する推奨事項](https://csrc.nist.gov/pubs/sp/800/38/d/final)
+- [4] [RFC 8452 - AES-GCM-SIV: nonceの誤用に耐性のある認証付き暗号化](https://www.rfc-editor.org/rfc/rfc8452)
+- [5] [RFC 4493 - AES-CMACアルゴリズム](https://www.rfc-editor.org/rfc/rfc4493)
+- [6] [RFC 7465 - RC4 cipher suiteの禁止](https://www.rfc-editor.org/rfc/rfc7465)
+- [7] [OWASP Web Security Testing Guide - Padding Oracleのテスト](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/09-Testing_for_Weak_Cryptography/02-Testing_for_Padding_Oracle)
 - [8] [GCHQ CyberChef](https://gchq.github.io/CyberChef/)
-- [9] [PyCryptodome documentation](https://www.pycryptodome.org/)
+- [9] [PyCryptodomeドキュメント](https://www.pycryptodome.org/)
 {{#include ../../banners/hacktricks-training.md}}

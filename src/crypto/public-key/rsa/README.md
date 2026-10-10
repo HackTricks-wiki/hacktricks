@@ -1,85 +1,86 @@
-# RSA Attacks
+# RSA攻撃
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Fast triage
+## 迅速なトリアージ
 
-以下を収集します:
+収集する情報:
 
-- `n`、`e`、`c`（および追加の ciphertext）
-- メッセージ間の関係（同じ plaintext？shared modulus？structured plaintext？）
-- あらゆる leak（`p/q` の一部、`d` のビット、`dp/dq`、既知の padding）
+- `n`、`e`、`c`（および追加の暗号文）
+- メッセージ間の関係（同じ平文か、法を共有しているか、構造化された平文か）
+- あらゆる leak（`p/q` の一部、`d` のビット、`dp/dq`、既知のパディング）
 
-次に試します:
+次に試すこと:
 
-- Factorization check（Factordb / 小さめの値なら `sage: factor(n)`）
-- Low exponent patterns（`e=3`、broadcast）
-- Common modulus / repeated primes
-- 何かがほぼ判明している場合の lattice methods（Coppersmith/LLL）
+- 素因数分解の確認（Factordb / 小さめの数なら `sage: factor(n)`）
+- 小さい指数のパターン（`e=3`、broadcast）
+- Common modulus / 素因数の再利用
+- ほぼ既知の情報がある場合は格子法（Coppersmith/LLL）
 
-## Common RSA attacks
+## RSAの一般的な攻撃
 
 ### Common modulus
 
-2つの ciphertext `c1, c2` が、異なる exponent `e1, e2`（かつ `gcd(e1,e2)=1`）を使用して、同じ modulus `n` の下で **同じ message** を暗号化している場合、拡張 Euclidean algorithm を使って `m` を復元できます:
+2つの暗号文 `c1, c2` が、異なる指数 `e1, e2`（かつ `gcd(e1,e2)=1`）を使い、**同じ法** `n` の下で**同じメッセージ**を暗号化している場合、拡張ユークリッドの互除法を使って `m` を復元できます。
 
-`m = c1^a * c2^b mod n` where `a*e1 + b*e2 = 1`.
+`m = c1^a * c2^b mod n` ただし `a*e1 + b*e2 = 1`
 
-Example outline:
+手順の概要:
 
-1. `(a, b) = xgcd(e1, e2)` を計算し、`a*e1 + b*e2 = 1` とする
-2. `a < 0` の場合、`c1^a` を `inv(c1)^{-a} mod n` として扱う（`b` についても同様）
-3. 乗算し、`n` を法として reduce する
+1. `(a, b) = xgcd(e1, e2)` を計算し、`a*e1 + b*e2 = 1` を求める
+2. `a < 0` の場合、`c1^a` を `inv(c1)^{-a} mod n` として解釈する（`b` も同様）
+3. 乗算し、`n` で剰余を取る
 
-### Shared primes across moduli
+### 法をまたいで共有される素因数
 
-同じ challenge から複数の RSA modulus を入手した場合、prime の共有を確認します:
+同じチャレンジから複数のRSA法を入手した場合、素因数を共有していないか確認します。
 
-- `gcd(n1, n2) != 1` は、壊滅的な key-generation failure を意味します。
+- `gcd(n1, n2) != 1` は、鍵生成に致命的な問題があることを意味します。
 
-これは CTFs で、「many keys quickly を生成した」または「bad randomness」といった状況で頻繁に発生します。
+CTFでは「多数の鍵を短時間で生成した」や「乱数が不適切」といった状況で、よく発生します。
 
 ### Sparse / short-sleeve moduli
 
-一部の壊れた big-integer generators は、public modulus に直接 structure を leak します。各 limb には小さな random subfield だけが含まれ、残りの bits は `0` になります。実際には、これは `n` 全体にわたる **regularly spaced zero blocks** として現れ、多くの場合 32-bit または 128-bit limbs に整列しています。<sup>[[1]](#references)</sup>
+壊れた一部の多倍長整数ジェネレーターでは、公開法に構造が直接漏れます。各limbに含まれるのは小さなランダムサブフィールドだけで、残りのビットは `0` です。実際には、`n` の中に**一定間隔で並んだゼロブロック**として現れ、多くの場合、32ビットまたは128ビットのlimbに揃っています。<sup>[[1]](#references)</sup>
 
-Quick checks:
+すばやく確認する方法:
 
-- `n` を hex で dump し、固定 stride で繰り返される zero windows を探す。
-- `n` を limbs（`2^32`、`2^64`、`2^128`）として再分割し、各 limb が異常に小さくないか調べる。
-- host-key generation が弱い疑いがある場合、**badkeys** などの tooling で public SSH/TLS keys を audit する。<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
+- `n` を16進数で表示し、一定の間隔で繰り返されるゼロのまとまりを探す。
+- `n` をlimb（`2^32`、`2^64`、`2^128`）に分割し、各limbが異常に小さくないか確認する。
+- ホスト鍵の生成が弱いと疑われる場合、**badkeys** などのツールで公開SSH/TLS鍵を監査する。<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
 
-これは statistical bias よりも深刻です。private factors `p` と `q` の両方が short-sleeved の場合、modulus が **easy to factor** になる可能性があります。<sup>[[1]](#references)</sup>
+これは単なる統計的な偏りより深刻です。秘密の因数 `p` と `q` がどちらもshort-sleeveなら、法を**容易に素因数分解できる**可能性があります。<sup>[[1]](#references)</sup>
 
-### Polynomial factorization of structured RSA keys
+### 構造化されたRSA鍵の多項式因数分解
 
-想定される limb width を `w` とし、modulus を base `B = 2^w` で表します:
+limb幅を `w` と推定したら、法を底 `B = 2^w` で表します。
 
 - `n = Σ_i n_i B^i`
 - `f_n(x) = Σ_i n_i x^i`
 
-evaluation は multiplicative であるため、`f_a(B) * f_c(B) = (f_a * f_c)(B)` となります。factor にも sparse limb coefficients がある場合:
+評価は乗法的なので、`f_a(B) * f_c(B) = (f_a * f_c)(B)` が成り立ちます。因数の係数も疎なlimbであれば、次のようになります。
 
 - `n = p*q`
 - `f_n(x) = f_p(x) * f_q(x)`
 
-Attack outline:
+攻撃の概要:
 
-1. limb width `w` を推測する。
-2. base `2^w` を使用して、public modulus `n` を `f_n(x)` に変換する。
-3. `f_n(x)` を integers 上で factor する。
-4. candidate factors を `B = 2^w` で evaluate する。
-5. どの candidates の積が `n` になるか verify する。
+1. limb幅 `w` を推定する。
+2. 底 `2^w` を使い、公開法 `n` を `f_n(x)` に変換する。
+3. 整数上で `f_n(x)` を因数分解する。
+4. 候補となる因数を `B = 2^w` に代入する。
+5. どの候補の積が `n` になるか検証する。
 
-これは **normal RSA を break するものではありません**。prime factors 自体が非常に小さく、高度に structured な limb coefficients を持つ場合にのみ機能します。<sup>[[1]](#references)</sup>
+これは**通常のRSAを破るものではありません**。素因数自体のlimb係数が非常に小さく、高度に構造化されている場合にのみ有効です。<sup>[[1]](#references)</sup>
 
-### Shifted limb leakage
+### シフトされたlimbのleak
 
-sparse bytes は、常に各 limb の low end に整列しているとは限りません。base-`2^w` による直接 conversion で大きな coefficients が生成される場合は、`2^i p` と `2^j q` がその limb basis で sparse になるような shifts `i,j` を探索します。product polynomial は引き続き public modulus から導出して factor でき、元の integer factors に recombine できます。<sup>[[1]](#references)</sup>
+疎なバイト列が、各limbの下位側に揃っているとは限りません。底 `2^w` による直接変換で大きな係数が生じる場合は、そのlimb基数で `2^i p` と `2^j q` が疎になるようなシフト `i,j` を探します。公開法から積の多項式を導出して因数分解し、元の整数の因数に再構成することができます。<sup>[[1]](#references)</sup>
 
-### Implementation smell: byte-to-limb RNG bug
+### 実装上の問題の兆候: バイトからlimbへのRNGバグ
 
-危険な pattern は、**32-bit limbs** の数を計算し、それだけの数の **bytes** しか allocate せず、それらを limb array に copy することです:
+危険なパターンとして、**32ビットlimb**の個数を計算し、その数だけの**バイト**しか確保せず、それらをlimb配列にコピーする実装があります。
+
 ```csharp
 int numLimbs = bits / 32;
 byte[] array = new byte[numLimbs];
@@ -87,81 +88,83 @@ rngProvider.GetNonZeroBytes(array);
 Array.Copy(array, 0, bignumLimbs, 0, numLimbs);
 bignumLimbs[numLimbs - 1] |= 0x80000000;
 ```
-これにより、各 32-bit limb には **8 ビットのエントロピー**しかなく、最後の limb には強制的に最上位ビットが設定されます。その結果生成される RSA 素数は、公開鍵だけから認識して factor できることがよくあります。<sup>[[1]](#references)</sup>
 
-### Related DSA failure mode
+これにより、各32ビット limb のエントロピーはわずか **8 bits** となり、最後の limb には強制的に最上位 bit が設定されます。この方法で生成された RSA 素数は、公開鍵だけから特定して素因数分解できることがよくあります。<sup>[[1]](#references)</sup>
 
-同じ壊れた big-integer routine が DSA の private exponent 生成にも再利用されている場合、公開鍵 `y = g^x` から `x` の探索空間が**劇的に縮小され、構造化されている**ことが leak する可能性があります。limb pattern が判明すると、**baby-step giant-step** などの discrete-log attacks が公開パラメータに対して実用的になる場合があります。<sup>[[1]](#references)</sup>
+### 関連する DSA の故障モード
+
+同じ壊れた big-integer routine が DSA の秘密指数生成にも再利用されている場合、公開鍵 `y = g^x` から、`x` の探索空間が**大幅に縮小され、特定の構造を持つ**ことが leak する可能性があります。limb のパターンが判明すれば、**baby-step giant-step** などの離散対数攻撃が公開パラメータに対して実用的になることがあります。<sup>[[1]](#references)</sup>
 
 ### Håstad broadcast / low exponent
 
-同じ plaintext が、小さい `e`（多くの場合 `e=3`）を使用する複数の recipient に、適切な padding なしで送信されている場合、CRT と integer root により `m` を復元できます。
+同じ平文が、適切な padding なしで小さな `e`（多くの場合 `e=3`）を使う複数の受信者に送信されている場合、CRT と整数根を使って `m` を復元できます。
 
-Technical condition:
+技術的な条件:
 
-pairwise-coprime な modulus `n_i` の下で、同じ message の `e` 個の ciphertexts がある場合:
+同じメッセージの `e` 個の暗号文が、互いに素な法 `n_i` の下で得られている場合:
 
-- CRT を使用して、積 `N = Π n_i` 上で `M = m^e` を復元する
-- `m^e < N` の場合、`M` は真の integer power であり、`m = integer_root(M, e)` となる
+- CRT を使い、積 `N = Π n_i` に対して `M = m^e` を復元する
+- `m^e < N` なら、`M` は真の整数べき乗であり、`m = integer_root(M, e)` となる
 
-### Wiener attack: small private exponent
+### Wiener attack: 小さすぎる秘密指数
 
-`d` が小さすぎる場合、continued fractions により `e/n` から復元できます。
+`d` が小さすぎる場合、連分数を使って `e/n` から復元できます。
 
-### Textbook RSA pitfalls
+### 教科書的 RSA の落とし穴
 
-以下のようなものを見つけた場合:
+次のような場合:
 
-- OAEP/PSS なしの raw modular exponentiation
-- Deterministic encryption
+- OAEP/PSS を使わず、生の modular exponentiation を使用している
+- Deterministic encryption を使用している
 
-algebraic attacks や oracle abuse が発生する可能性が大幅に高くなります。
+代数的攻撃や oracle の悪用がはるかに容易になります。
 
-### Tools
+### ツール
 
 - RsaCtfTool: https://github.com/Ganapati/RsaCtfTool
-- SageMath (CRT, roots, CF): https://www.sagemath.org/
+- SageMath (CRT、roots、CF): https://www.sagemath.org/
 
-## Related-message patterns
+## 関連メッセージのパターン
 
-同じ modulus の下に、algebraically related な messages（例: `m2 = a*m1 + b`）を含む 2 つの ciphertexts がある場合、Franklin–Reiter などの "related-message" attacks を探します。通常、以下が必要です:
+同じ modulus の下で、代数的に関連するメッセージ（例: `m2 = a*m1 + b`）の暗号文が2つある場合は、Franklin–Reiter などの「related-message」攻撃を検討してください。通常、次の条件が必要です:
 
 - 同じ modulus `n`
 - 同じ exponent `e`
-- plaintexts 間の既知の relationship
+- 平文間の関係が既知
 
-実際には、Sage で `n` を法とする polynomials を設定し、GCD を計算して解決することがよくあります。
+実際には、Sage で `n` を法とする多項式を設定し、GCD を計算して解くことがよくあります。
 
 ## Lattices / Coppersmith
 
-partial bits、structured plaintext、または unknown を小さくする close relations がある場合に使用します。
+部分ビット、構造化された平文、または未知の値が小さくなるような近い関係がある場合に使います。
 
-Lattice methods (LLL/Coppersmith) は、partial information があるときに登場します:
+Lattice 手法 (LLL/Coppersmith) は、部分的な情報がある場合に使われます:
 
-- Partially known plaintext (unknown tail を含む structured message)
-- Partially known `p`/`q` (high bits が leak している)
-- Related values 間の small unknown differences
+- 一部が既知の平文（末尾が未知の構造化メッセージ）
+- 一部が既知の `p`/`q`（上位 bits が leak している）
+- 関連する値同士の未知の差が小さい
 
-### What to recognize
+### 見分けるポイント
 
-Challenges における典型的な hints:
+チャレンジでよくあるヒント:
 
-- "We leaked the top/bottom bits of p"
-- "The flag is embedded like: `m = bytes_to_long(b\"HTB{\" + unknown + b\"}\")`"
-- "We used RSA but with a small random padding"
+- 「p の上位/下位 bits を leak した」
+- 「flag は次のように埋め込まれている: `m = bytes_to_long(b\"HTB{\" + unknown + b\"}\")`」
+- 「RSA を使ったが、小さなランダム padding を付けた」
 
-### Tooling
+### ツール
 
-実際には、LLL と特定の instance 用の既知の template に Sage を使用します。
+実際には、LLL には Sage を使い、特定の問題に合った既知の template を利用します。
 
-Good starting points:
+参考になる出発点:
 
 - Sage CTF crypto templates: https://github.com/defund/coppersmith
-- A survey-style reference: https://martinralbrecht.wordpress.com/2013/05/06/coppersmiths-method/
+- サーベイ形式の参考資料: https://martinralbrecht.wordpress.com/2013/05/06/coppersmiths-method/
 
 ## References
 
-- [1] [Trail of Bits - polynomials による「short-sleeve」RSA keys の factoring](https://blog.trailofbits.com/2026/06/12/factoring-short-sleeve-rsa-keys-with-polynomials/)
+- [1] [Trail of Bits - 多項式を使った「short-sleeve」RSA key の素因数分解](https://blog.trailofbits.com/2026/06/12/factoring-short-sleeve-rsa-keys-with-polynomials/)
 - [2] [badkeys](https://badkeys.info/)
-- [3] [badkeys standalone tool](https://github.com/badkeys/badkeys)
+- [3] [badkeys 単体ツール](https://github.com/badkeys/badkeys)
 {{#include ../../../banners/hacktricks-training.md}}
+

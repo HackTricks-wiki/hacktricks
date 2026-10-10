@@ -1,155 +1,163 @@
-# 画像ステガノグラフィー
+# 画像ステガノグラフィ
 
 {{#include ../../banners/hacktricks-training.md}}
 
-CTF における画像 stego のほとんどは、次のいずれかに分類されます。
+多くのCTF画像ste goは、次のいずれかに分類されます。
 
 - LSB/bit-planes（PNG/BMP）
-- Metadata/comment payloads
-- PNG chunk の異常 / corruption repair
-- JPEG DCT-domain tools（OutGuess など）
-- Frame-based（GIF/APNG）
+- メタデータ/comment payloads
+- PNG chunkの異常/破損の修復
+- JPEG DCT-domain tools（OutGuessなど）
+- フレームベース（GIF/APNG）
 
-## 初動トリアージ
+## 初期トリアージ
 
-詳細な content analysis の前に、container-level の証拠を優先します。
+詳細な内容分析に進む前に、まずコンテナレベルの証拠を優先して確認します。
 
-- ファイルを検証し、構造を調査します: `file`、`magick identify -verbose`、format validators（例: `pngcheck`）。
-- Metadata と表示可能な文字列を抽出します: `exiftool -a -u -g1`、`strings`。
-- 埋め込みまたは追記された content を確認します: `binwalk` およびファイル末尾の検査（`tail | xxd`）。
-- container に応じて分岐します:
-- PNG/BMP: bit-planes/LSB および chunk-level anomalies。
-- JPEG: metadata + DCT-domain tooling（OutGuess/F5-style families）。
-- GIF/APNG: frame extraction、frame differencing、palette tricks。
+- ファイルを検証して構造を調べます。`file`、`magick identify -verbose`、形式検証ツール（例：`pngcheck`）を使います。
+- メタデータと可視文字列を抽出します。`exiftool -a -u -g1`、`strings`を使います。
+- 埋め込み/追記コンテンツを確認します。`binwalk`とファイル末尾の確認（`tail | xxd`）を使います。
+- コンテナに応じて調査方法を分けます。
+  - PNG/BMP：bit-planes/LSBとchunkレベルの異常
+  - JPEG：メタデータとDCT-domain tooling（OutGuess/F5系）
+  - GIF/APNG：フレーム抽出、フレーム差分、palette tricks
 
 ## Bit-planes / LSB
 
 ### Technique
 
-PNG/BMP は、pixel を **bit-level manipulation** しやすい形式で保存するため、CTF でよく使われます。一般的な hide/extract の仕組みは次のとおりです。
+PNG/BMPは、ピクセルをbit-level manipulationしやすい形式で保存するため、CTFでよく使われます。典型的な隠蔽/抽出の仕組みは次のとおりです。
 
-- 各 pixel channel（R/G/B/A）には複数の bit があります。
-- 各 channel の **least significant bit**（LSB）を変更しても、画像はほとんど変化しません。
-- Attackers は、stride、permutation、または channel ごとの選択を使いながら、これらの low-order bit に data を隠します。
+- 各ピクセルのチャンネル（R/G/B/A）には、複数のビットがあります。
+- 各チャンネルの**最下位ビット**（LSB）を変更しても、画像への影響はごくわずかです。
+- 攻撃者はこれらの下位ビットにデータを隠します。stride、permutation、チャンネルごとの選択が使われることもあります。
 
-Challenges で想定されるパターン:
+チャレンジで想定されるもの：
 
-- payload が 1 つの channel のみに存在する（例: `R` LSB）。
-- payload が alpha channel に存在する。
-- 抽出後に payload が compressed/encoded されている。
-- message が複数の plane に分散されている、または plane 間の XOR によって隠されている。
+- payloadが1つのチャンネル（例：`R`のLSB）だけにある。
+- payloadがalpha channelにある。
+- 抽出後にpayloadが圧縮/エンコードされている。
+- メッセージが複数のplaneに分散されている、またはplane間のXORで隠されている。
 
-遭遇する可能性があるその他の family（implementation-dependent）:
+遭遇する可能性のあるその他の手法（実装によって異なります）：
 
-- **LSB matching**（単に bit を反転するのではなく、target bit に合わせるために +/-1 の調整を行う）
-- **Palette/index-based hiding**（indexed PNG/GIF で、raw RGB ではなく color index に payload を格納する）
-- **Alpha-only payloads**（RGB view では完全に見えない）
+- **LSB matching**（ビットを反転するだけでなく、目標ビットに合わせて値を±1調整する）
+- **Palette/index-based hiding**（indexed PNG/GIFで、raw RGBではなくcolor indicesにpayloadを隠す）
+- **Alpha-only payloads**（RGB viewでは完全に見えない）
 
 ### Tooling
 
 #### zsteg
 
-`zsteg` は PNG/BMP に対する多数の LSB/bit-plane extraction patterns を列挙します:
+`zsteg`は、PNG/BMP向けに多数のLSB/bit-plane抽出パターンを列挙します。
+
 ```bash
 zsteg -a file.png
 ```
+
 Repo: https://github.com/zed-0xff/zsteg
 
 #### StegoVeritas / Stegsolve
 
-- `stegoVeritas`: metadata、image transforms、LSB variants の brute forcing を含む一連の transforms を実行します。
-- `stegsolve`: 手動で使用する visual filters（channel isolation、plane inspection、XOR など）。
+- `stegoVeritas`: 一連の変換を実行する（メタデータ、画像変換、LSBの各種パターンの総当たり）。
+- `stegsolve`: 手動で視覚的なフィルターを適用する（チャンネル分離、プレーン検査、XORなど）。
 
-Stegsolve の download: https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve
+Stegsolve download: https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve
 
-#### FFTベースの可視化トリック
+#### FFT-based visibility tricks
 
-FFT は LSB extraction ではありません。content が frequency space に意図的に隠されている場合や、微妙な patterns を確認する場合に使用します。
+FFTはLSB抽出ではなく、コンテンツが周波数領域に意図的に隠されている場合や、微妙なパターンを見つけるために使います。
 
 - EPFL demo: http://bigwww.epfl.ch/demo/ip/demos/FFT/
 - Fourifier: https://www.ejectamenta.com/Fourifier-fullscreen/
 - FFTStegPic: https://github.com/0xcomposure/FFTStegPic
 
-CTF でよく使用される Web-based triage:
+CTFでよく使われるWebベースのトリアージツール:
 
 - Aperi’Solve: https://aperisolve.com/
 - StegOnline: https://stegonline.georgeom.net/
 
-## PNG の internals: chunks、corruption、hidden data
+## PNGの内部構造: チャンク、破損、隠しデータ
 
 ### Technique
 
-PNG は chunked format です。多くの challenge では、payload は pixel values ではなく container/chunk level に保存されています。
+PNGはチャンク形式です。多くのチャレンジでは、ペイロードはピクセル値ではなく、コンテナ／チャンクのレベルに格納されています。
 
-- **`IEND` の後にある extra bytes**（多くの viewer は trailing bytes を無視します）
-- **payload を含む non-standard ancillary chunks**
-- **dimensions を隠したり、修正するまで parsers を壊したりする corrupted headers**
+- **`IEND`の後の余分なバイト**（多くのビューアは末尾のバイトを無視する）
+- **ペイロードを含む非標準の補助チャンク**
+- **寸法を隠したり、修正するまでパーサーを停止させたりする破損したヘッダー**
 
-確認すべき signal の高い chunk locations:
+重点的に確認するチャンク:
 
-- `tEXt` / `iTXt` / `zTXt`（text metadata。一部は compressed）
-- `iCCP`（ICC profile）および carrier として使用されるその他の ancillary chunks
-- `eXIf`（PNG 内の EXIF data）
+- `tEXt` / `iTXt` / `zTXt`（テキストメタデータ。圧縮されている場合もある）
+- `iCCP`（ICCプロファイル）や、データの格納に使われるその他の補助チャンク
+- `eXIf`（PNG内のEXIFデータ）
 
 ### Triage commands
+
 ```bash
 magick identify -verbose file.png
 pngcheck -v file.png
 ```
-確認すべき点:
 
-- 不自然な width/height/bit-depth/colour-type の組み合わせ
+確認すべき点：
+
+- 幅/高さ/ビット深度/色タイプの不自然な組み合わせ
 - CRC/chunk エラー（pngcheck は通常、正確なオフセットを示します）
 - `IEND` の後に追加データがあるという警告
 
-より詳細な chunk の表示が必要な場合:
+chunk の詳細を確認する場合：
+
 ```bash
 pngcheck -vp file.png
 exiftool -a -u -g1 file.png
 ```
-Useful references:
 
-- PNG specification (structure, chunks): https://www.w3.org/TR/PNG/
-- File format tricks (PNG/JPEG/GIF corner cases): https://github.com/corkami/docs
+参考資料:
 
-## JPEG: metadata、DCT-domain tools、ELA の制限
+- PNG仕様（構造、チャンク）: https://www.w3.org/TR/PNG/
+- ファイル形式のテクニック（PNG/JPEG/GIFの特殊なケース）: https://github.com/corkami/docs
 
-### Technique
+## JPEG: メタデータ、DCT-domainツール、ELAの限界
 
-JPEG は raw pixels として保存されず、DCT domain で圧縮されます。そのため、JPEG stego tools は PNG LSB tools とは異なります。
+### 手法
 
-- Metadata/comment payloads は file-level です（high-signal で、すばやく確認できます）
-- DCT-domain stego tools は frequency coefficients に bits を埋め込みます
+JPEGは生のピクセルとして保存されるのではなく、DCT domainで圧縮されます。そのため、JPEGのstegoツールはPNG LSBツールとは異なります。
 
-Operationally、JPEG は次のように扱います。
+- メタデータやコメントのペイロードはファイルレベルにあり（high-signalで、すばやく調査できる）
+- DCT-domainのstegoツールは周波数係数にビットを埋め込む
 
-- Metadata segments の container（high-signal で、すばやく確認できます）
-- Specialized stego tools が動作する compressed signal domain（DCT coefficients）
+実運用では、JPEGを次のように扱います。
 
-### Quick checks
+- メタデータセグメントを格納するコンテナ（high-signalで、すばやく調査できる）
+- 専用のstegoツールが動作する圧縮信号領域（DCT係数）
+
+### すばやく確認する方法
+
 ```bash
 exiftool file.jpg
 strings -n 6 file.jpg | head
 binwalk file.jpg
 ```
-High-signal locations:
+
+高シグナルな場所:
 
 - EXIF/XMP/IPTC metadata
 - JPEG comment segment (`COM`)
-- Application segments (`APP1` for EXIF, `APPn` for vendor data)
+- Application segments（EXIF用の`APP1`、ベンダーデータ用の`APPn`）
 
-### Common tools
+### 一般的なツール
 
 - OutGuess: https://github.com/resurrecting-open-source-projects/outguess
 - OpenStego: https://www.openstego.com/
 
-If you are specifically facing steghide payloads in JPEGs, consider using `stegseek` (faster bruteforce than older scripts):
+JPEG内のsteghide payloadを特に調査している場合は、`stegseek`の使用を検討してください（古いスクリプトよりbruteforceが高速）:
 
 - [https://github.com/RickdeJager/stegseek](https://github.com/RickdeJager/stegseek)
 
 ### Error Level Analysis
 
-ELA highlights different recompression artifacts; it can point you to regions that were edited, but it’s not a stego detector by itself:
+ELAは再圧縮によるアーティファクトの違いを強調します。編集された領域の特定に役立ちますが、それ自体はstego検出ツールではありません:
 
 - [https://29a.ch/sandbox/2012/imageerrorlevelanalysis/](https://29a.ch/sandbox/2012/imageerrorlevelanalysis/)
 
@@ -157,71 +165,80 @@ ELA highlights different recompression artifacts; it can point you to regions th
 
 ### 手法
 
-アニメーション画像の場合、メッセージは次のいずれかだと想定します。
+アニメーション画像では、メッセージが次のいずれかにあると想定します:
 
-- 単一のフレーム内にある（簡単）
-- フレーム全体に分散している（順序が重要）
-- 連続するフレームの差分を取った場合にのみ表示される
+- 単一フレーム内（簡単）
+- 複数のフレームに分散（順序が重要）
+- 連続するフレームの差分を取ったときにのみ表示される
 
-### フレームを抽出する
+### フレームの抽出
+
 ```bash
 ffmpeg -i anim.gif frame_%04d.png
 ```
-その後、フレームを通常の PNG として扱います: `zsteg`、`pngcheck`、チャンネル分離。
+
+次に、フレームを通常のPNGとして扱います: `zsteg`、`pngcheck`、チャンネル分離。
 
 代替ツール:
 
-- `gifsicle --explode anim.gif`（高速なフレーム抽出）
-- フレームごとの変換には `imagemagick`/`magick`
+- `gifsicle --explode anim.gif` (高速なフレーム抽出)
+- `imagemagick`/`magick` によるフレームごとの変換
 
-フレーム差分が決定的な手掛かりになることがよくあります:
+フレーム差分の比較が決め手になることもよくあります:
+
 ```bash
 magick frame_0001.png frame_0002.png -compose difference -composite diff.png
 ```
-### APNG pixel-count encoding
 
-- APNG コンテナを検出する: `exiftool -a -G1 file.png | grep -i animation` または `file`。
-- リタイミングせずにフレームを抽出する: `ffmpeg -i file.png -vsync 0 frames/frame_%03d.png`。
-- フレームごとのピクセル数としてエンコードされた payloads を復元する:
+### APNGピクセル数エンコーディング
+
+- APNGコンテナを検出する: `exiftool -a -G1 file.png | grep -i animation` または `file`。
+- タイミングを変更せずにフレームを抽出する: `ffmpeg -i file.png -vsync 0 frames/frame_%03d.png`。
+- フレームごとのピクセル数としてエンコードされたpayloadを復元する:
+
 ```python
 from PIL import Image
 import glob
 out = []
 for f in sorted(glob.glob('frames/frame_*.png')):
-counts = Image.open(f).getcolors()
-target = dict(counts).get((255, 0, 255, 255))  # adjust the target color
-out.append(target or 0)
+    counts = Image.open(f).getcolors()
+    target = dict(counts).get((255, 0, 255, 255))  # adjust the target color
+    out.append(target or 0)
 print(bytes(out).decode('latin1'))
 ```
-Animated challenges では、各フレーム内の特定の色の数として各 byte をエンコードしている場合があります。各フレームのカウントを連結すると、message を復元できます。<sup>[[1]](#references)</sup>
 
-## passphrase で保護された埋め込み
+アニメーション形式の challenge では、各フレーム内の特定の色の数を各バイトとして符号化している場合があります。各フレームの数を連結すると、メッセージを復元できます。<sup>[[1]](#references)</sup>
 
-pixel-level manipulation ではなく passphrase によって保護された embedding が疑われる場合、通常はこれが最も速い方法です。
+## パスワード保護された埋め込み
+
+pixel-level manipulation ではなく passphrase で保護された embedding が疑われる場合、通常はこれが最も手早い方法です。
 
 ### steghide
 
-`JPEG, BMP, WAV, AU` をサポートし、暗号化された payload の埋め込みと抽出が可能です。
+`JPEG, BMP, WAV, AU` に対応し、暗号化された payload を埋め込み・抽出できます。
+
 ```bash
 steghide info file
 steghide extract -sf file --passphrase 'password'
 ```
-Repo: https://github.com/StefanoDeVuono/steghide
+
+リポジトリ: https://github.com/StefanoDeVuono/steghide
 
 ### StegCracker
+
 ```bash
 stegcracker file.jpg wordlist.txt
 ```
+
 Repo: https://github.com/Paradoxis/StegCracker
 
 ### stegpy
 
-PNG/BMP/GIF/WebP/WAVに対応。
+PNG/BMP/GIF/WebP/WAVに対応しています。
 
 Repo: https://github.com/dhsdshdhk/stegpy
 
-## 参考資料
+## References
 
-- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
-
+- [1] [Flagvent 2025 (Medium) — pink、サンタのウィッシュリスト、クリスマスのメタデータ、キャプチャされたノイズ](https://0xdf.gitlab.io/flagvent2025/medium)
 {{#include ../../banners/hacktricks-training.md}}

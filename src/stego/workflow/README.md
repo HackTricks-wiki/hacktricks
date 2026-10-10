@@ -2,146 +2,174 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-ほとんどの stego 問題は、ランダムなツールを試すよりも、体系的な triage によって迅速に解決できます。
+ほとんどの stego 問題は、手当たり次第にツールを試すより、体系的にトリアージするほうが速く解決できます。
 
-## Core flow
+## 基本的な流れ
 
-### Quick triage checklist
+### 初動トリアージのチェックリスト
 
-目標は、次の2つの質問に効率的に答えることです。
+効率よく次の2つの疑問に答えることが目的です。
 
-1. 実際の container/format は何か？
-2. payload は metadata、追加された bytes、embedded files、または content-level stego のどこにあるか？
+1. 実際のコンテナ/フォーマットは何か？
+2. ペイロードはメタデータ、追加バイト列、埋め込みファイル、コンテンツレベルの stego のどこにあるか？
 
-#### 1) Identify the container
+#### 1) コンテナを特定する
+
 ```bash
 file target
 ls -lah target
 ```
-`file` と拡張子が一致しない場合は、サフィックスを信用せず、シグネチャを調査してください。`file` もヒューリスティックであり、不正な形式の入力や polyglot input によって誤判定されることがあります。必要に応じて、一般的な形式をコンテナとして扱ってください（たとえば、OOXML ドキュメントは ZIP パッケージです）。<sup>[[2]](#references)</sup>
+
+`file`の判定と拡張子が一致しない場合は、拡張子を鵜呑みにせず、シグネチャを調べてください。`file`もヒューリスティックなツールであり、不正な形式の入力やポリグロット入力によって判定を誤ることがあります。一般的な形式は、適切にコンテナとして扱ってください（たとえば、OOXMLドキュメントはZIPパッケージです）。<sup>[[2]](#references)</sup>
 
 #### 2) メタデータと明らかな文字列を探す
+
 ```bash
 exiftool target
 strings -n 6 target | head
 strings -n 6 target | tail
 ```
+
 複数のエンコーディングを試す:
+
 ```bash
 strings -e l -n 6 target | head
 strings -e b -n 6 target | head
 ```
-#### 3) 付加データ / 埋め込みファイルを確認する
+
+#### 3) 追記データ / 埋め込みファイルを確認する
+
 ```bash
 binwalk target
 binwalk -e target
 ```
-抽出に失敗したものの signatures が報告された場合は、`dd` でオフセットを手動で carve し、carve した領域に対して `file` を再実行します。
+
+抽出に失敗してもシグネチャが報告された場合は、`dd`でオフセットを手動で切り出し、切り出した領域に対して`file`を再実行します。
 
 #### 4) 画像の場合
 
-- 異常を調査します: `magick identify -verbose file`
-- PNG/BMP の場合は、bit-plane/LSB を列挙します: `zsteg -a file.png`
-- PNG 構造を検証します: `pngcheck -v file.png`
-- channel/plane の変換でコンテンツが明らかになる可能性がある場合は、visual filters（Stegsolve / StegoVeritas）を使用します
+- 異常を調査: `magick identify -verbose file`
+- PNG/BMPの場合、bit-plane/LSBを列挙: `zsteg -a file.png`
+- PNGの構造を検証: `pngcheck -v file.png`
+- チャネル/プレーン変換でコンテンツが明らかになる可能性がある場合は、視覚フィルター（Stegsolve / StegoVeritas）を使用
 
-#### 5) audio の場合
+#### 5) 音声の場合
 
-- 最初に spectrogram を確認します（Sonic Visualiser）
-- streams を decode/inspect します: `ffmpeg -v info -i file -f null -`
-- audio が構造化された tones に似ている場合は、DTMF decoding を試します
+- まずスペクトログラムを確認（Sonic Visualiser）
+- ストリームをデコード/調査: `ffmpeg -v info -i file -f null -`
+- 音声が構造化されたトーンに似ている場合は、DTMFデコードを試す
 
-### 基本ツール
+### 基本的なツール
 
-これらは、高頻度で発生する container-level のケース、つまり metadata payloads、appended bytes、拡張子を偽装した embedded files を検出します。<sup>[[1]](#references)[[3]](#references)</sup>
+これらのツールで、高頻度のコンテナレベルのケース（メタデータペイロード、末尾に追加されたバイト、拡張子を偽装した埋め込みファイル）を検出できます。<sup>[[1]](#references)[[3]](#references)</sup>
 
 #### Binwalk
+
 ```bash
 binwalk file
 binwalk -e file
 binwalk --dd '.*' file
 ```
+
 Repo: https://github.com/ReFirmLabs/binwalk
 
 #### Foremost
+
 ```bash
 foremost -i file
 ```
-プロジェクトリポジトリ：`korczis/foremost`。<sup>[[4]](#references)</sup>
+
+プロジェクトリポジトリ: `korczis/foremost`.<sup>[[4]](#references)</sup>
 
 #### Exiftool / Exiv2
+
 ```bash
 exiftool file
 exiv2 file
 ```
-#### ファイル / 文字列
+
+#### file / strings
+
 ```bash
 file file
 strings -n 6 file
 ```
+
 #### cmp
+
 ```bash
 cmp original.jpg stego.jpg -b -l
 ```
-### Container、appended data、polyglot tricks
 
-多くのsteganography challengeでは、有効なファイルの後ろに追加されたバイト列や、拡張子を偽装した埋め込みarchiveが使われます。
+### コンテナ、追記データ、ポリグロットのテクニック
 
-#### Appended payloads
+ステガノグラフィの課題では、有効なファイルの後ろに余分なバイトが付いていたり、拡張子を偽装したアーカイブが埋め込まれていたりすることがよくあります。
 
-多くの形式は末尾のバイト列を無視します。ZIP/PDF/scriptをimage/audio containerの末尾に追加できます。
+#### 追記されたペイロード
 
-簡易チェック:
+多くの形式では末尾のバイトが無視されます。ZIP/PDF/scriptを画像や音声のコンテナに追記できます。
+
+簡単なチェック:
+
 ```bash
 binwalk file
 tail -c 200 file | xxd
 ```
-オフセットが分かっている場合は、`dd` で carve します:
+
+オフセットが分かっている場合は、`dd`でデータを切り出します:
+
 ```bash
 dd if=file of=carved.bin bs=1 skip=<offset>
 file carved.bin
 ```
+
 #### Magic bytes
 
-`file` が判別できない場合は、`xxd` で magic bytes を探し、既知のシグネチャと比較します:
+`file`コマンドで判別できない場合は、`xxd`でmagic bytesを確認し、既知のシグネチャと比較します。
+
 ```bash
 xxd -g 1 -l 32 file
 ```
+
 #### Zip-in-disguise
 
-拡張子が zip でなくても、`7z` と `unzip` を試してください：
+拡張子が zip でなくても、`7z` と `unzip` を試してください:
+
 ```bash
 7z l file
 unzip -l file
 ```
-### Near-stegoの奇妙な例
 
-stegoの隣接領域で定期的に見られるパターンへのクイックリンク（バイナリからのQR、点字など）。
+### stego周辺の奇妙なもの
 
-#### バイナリからのQRコード
+stegoの近くによく現れるパターン（バイナリから生成されたQRコード、点字など）へのクイックリンク。
 
-blobの長さが完全平方数の場合、画像/QR用のraw pixelsである可能性があります。
+#### バイナリから生成されたQRコード
+
+blobの長さが完全平方数なら、画像やQRコードの生ピクセルデータかもしれません。
+
 ```python
 import math
 math.isqrt(2500)  # 50
 ```
-Binary-to-image helper:
 
-- dCode binary-image helper.<sup>[[5]](#references)</sup>
+バイナリ画像ヘルパー:
+
+- dCodeのバイナリ画像ヘルパー。<sup>[[5]](#references)</sup>
 
 #### 点字
 
-- Branah Braille translator.<sup>[[6]](#references)</sup>
+- Branahの点字翻訳ツール。<sup>[[6]](#references)</sup>
 
-より幅広い steganography utilities と technique-specific resources については、同梱の stego-toolkit と 0xRick の curated list を参照してください。<sup>[[1]](#references)[[7]](#references)</sup>
+ステガノグラフィツールや手法別のリソースを幅広く探すには、同梱のstego-toolkitと0xRickがまとめたリストを参照してください。<sup>[[1]](#references)[[7]](#references)</sup>
 
 ## References
 
-- [1] [DominicBreuker/stego-toolkit - 最も人気のある steganography tools をまとめた Docker image](https://github.com/DominicBreuker/stego-toolkit)
-- [2] [Daston et al. — ECMA-376 Open Packaging Conventions](https://ecma-international.org/publications-and-standards/standards/ecma-376/)
-- [3] [korczis/foremost](https://github.com/ReFirmLabs/binwalk)
+- [1] [DominicBreuker/stego-toolkit - 人気のステガノグラフィツールをまとめたDockerイメージ](https://github.com/DominicBreuker/stego-toolkit)
+- [2] [Daston et al. — ECMA-376 Office Open XMLパッケージ規約](https://ecma-international.org/publications-and-standards/standards/ecma-376/)
+- [3] [ReFirmLabs/binwalk](https://github.com/ReFirmLabs/binwalk)
 - [4] [korczis/foremost](https://github.com/korczis/foremost)
-- [5] [dCode — Binary Image](https://www.dcode.fr/binary-image)
-- [6] [Branah — Braille Translator](https://www.branah.com/braille-translator)
-- [7] [0xRick - Steganography Resources](https://0xrick.github.io/lists/stego/)
+- [5] [dCode — バイナリ画像](https://www.dcode.fr/binary-image)
+- [6] [Branah — 点字翻訳ツール](https://www.branah.com/braille-translator)
+- [7] [0xRick - ステガノグラフィのリソース](https://0xrick.github.io/lists/stego/)
 {{#include ../../banners/hacktricks-training.md}}

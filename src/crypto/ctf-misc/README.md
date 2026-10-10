@@ -1,24 +1,24 @@
-# Crypto CTF Misc
+# Crypto CTF その他
 
 {{#include ../../banners/hacktricks-training.md}}
 
-このセクションでは、cryptography challenge に登場するものの、他のカテゴリにはうまく分類できない手法をまとめています。
+このセクションでは、暗号関連のチャレンジに登場するものの、他のカテゴリにはうまく分類できないテクニックを紹介します。
 
-## 難解言語
+## 難解プログラミング言語
 
-### 手法
+### テクニック
 
-難解言語のプログラムを実行し、その出力を decode する必要がある challenge では、次のワークフローを使用します。
+チャレンジで難解プログラミング言語のプログラムを実行し、その出力をデコードする必要がある場合は、この手順を使います。
 
-challenge で標準的な言語に見えない code が与えられた場合:
+標準的な言語には見えないコードがチャレンジで与えられた場合：
 
-- 特徴的な token や instruction sequence を検索して、言語を特定します。
-- オンライン interpreter または Docker image を使用します。
-- 出力が奇妙な場合は、実行後に layered encoding/compression がないか確認します。
+- 特徴的なトークンや命令の並びを検索し、言語を特定します。
+- オンラインインタープリターまたはDockerイメージを使います。
+- 出力がおかしい場合は、実行後にエンコードや圧縮が重ねられていないか確認します。
 
-便利な言語一覧として、Esolang wiki があります。<sup>[[1]](#references)</sup>
+便利な言語一覧として、Esolang wikiがあります。<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [Esolang、難解プログラミング言語の wiki](https://esolangs.org/wiki/Main_Page)
+- [1] [Esolang、難解プログラミング言語のwiki](https://esolangs.org/wiki/Main_Page)
 {{#include ../../banners/hacktricks-training.md}}
