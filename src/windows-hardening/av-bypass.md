@@ -1386,6 +1386,37 @@ Good hunting opportunities mentioned by the authors:
 - P3 is a **cross-process transfer trick**, not a full execution primitive by itself: the copied parameter still needs an execute-permission change and an execution redirection method.
 - `RtlCreateProcessReflection` / Dirty Vanity was considered by the authors but rejected because it internally reaches suspicious primitives such as `NtWriteVirtualMemory` and `NtCreateThreadEx`.
 
+## Console standard-input buffer injection
+
+An injector that creates or controls an **interactive console child** can turn its redirected standard-input pipe into a remote payload-transfer primitive. `WriteFile` on the pipe's write end delivers a byte stream through the child's `hStdInput`. The console program then buffers the data in writable memory inside the child. This avoids both `VirtualAllocEx` and `WriteProcessMemory`; it is not a privilege escalation primitive and does not apply generically to GUI processes. The demonstrated targets were `netsh.exe` and `nslookup.exe`.<sup>[[41]](#references)</sup>
+
+### Payload placement and execution
+
+The input must not contain `0x0D` (CR), `0x0A` (LF), or `0x1A` (SUB/Ctrl+Z). These bytes can terminate or submit the input, causing the program to parse it as a command and discard or overwrite the useful buffer. Prepend a distinctive marker that also avoids these bytes, scan readable target regions for it, and calculate the entry point as `marker_addr + sizeof(marker)`.<sup>[[41]](#references)</sup>
+
+The complete chain is:<sup>[[41]](#references)</sup>
+
+1. Create a compatible interactive child with an inherited or redirected `hStdInput` pipe.
+2. Send `marker || payload` with `WriteFile` on the parent-side pipe handle.
+3. Search the child memory for the marker and identify the page range containing the payload.
+4. Use `VirtualProtectEx` to add execute permission to that range.
+5. Hijack a child thread and redirect its `RIP` to the first byte after the marker.
+
+```text
+CreateProcess(interactive_child, redirected_stdin)
+WriteFile(stdin_pipe, marker || payload)
+marker_addr = scan_child_memory(marker)
+payload_addr = marker_addr + sizeof(marker)
+VirtualProtectEx(payload_page, executable)
+hijack_thread(RIP = payload_addr)
+```
+
+Unlike process-parameter poisoning, this transfer path does not require a suspended child or specially formatted `lpCommandLine`/`lpEnvironment` data. It still leaves remote memory reads, a writable-to-executable protection transition, and thread-context manipulation as observable execution steps.<sup>[[41]](#references)</sup>
+
+### Detection correlation
+
+Detection should correlate the whole sequence rather than depend on the usual `VirtualAllocEx` + `WriteProcessMemory` pair: creation of an interactive console child, binary or unusually large writes to its standard-input pipe, remote scanning of its memory, `VirtualProtectEx` making a console command-buffer page executable, and a subsequent thread-context or instruction-pointer change. The parent retaining the pipe handle and then changing protections in the same child is especially useful context for separating this chain from normal interactive input.<sup>[[41]](#references)</sup>
+
 ## SantaStealer Tradecraft for Fileless Evasion and Credential Theft
 
 SantaStealer (aka BluelineStealer) illustrates how modern info-stealers blend AV bypass, anti-analysis and credential access in a single workflow.<sup>[[24]](#references)</sup>
@@ -1466,5 +1497,6 @@ Sleep(exec_delay_seconds * 1000); // config-controlled delay to outlive sandboxe
 - [38] [MDSec Function Peekaboo companion code](https://github.com/mdsecactivebreach/functionpeekaboo)
 - [39] [MDSec - Function Peekaboo: Crafting Self-Masking Functions Using LLVM](https://mdsec.co.uk/2025/10/function-peekaboo-crafting-self-masking-functions-using-llvm/)
 - [40] [Microsoft Learn - VirtualProtect](https://learn.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualprotect)
+- [41] [Zero Salarium - EDR Evasion: Process Injection Without WriteProcessMemory](https://zerosalarium.com/2026/09/edr-evasion-process-injection-without-WriteProcessMemory.html)
 
 {{#include ../banners/hacktricks-training.md}}
