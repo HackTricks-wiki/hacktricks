@@ -1,8 +1,8 @@
-# Forensics de la caché de Discord (Chromium Disk Cache)
+# Análisis forense de la cache de Discord (cache en disco de Chromium)
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Esta página resume cómo realizar un triage de los artefactos de la caché de Discord Desktop para encontrar medios almacenados localmente en caché, endpoints de webhook y correlacionar actividad. El cliente de escritorio de Discord utiliza Electron, y Electron almacena datos de sesión, como la caché de disco, bajo `sessionData`.<sup>[[3]](#references)[[4]](#references)</sup>
+Esta página resume cómo hacer triage de artefactos de la cache de Discord Desktop para buscar archivos multimedia almacenados localmente, endpoints de webhook y correlacionar actividad. El cliente de escritorio de Discord usa Electron, y Electron almacena datos de sesión, como la cache en disco, en `sessionData`.<sup>[[3]](#references)[[4]](#references)</sup>
 
 ## Dónde buscar (Windows/macOS/Linux)
 
@@ -10,89 +10,91 @@ Esta página resume cómo realizar un triage de los artefactos de la caché de D
 - macOS: `~/Library/Application Support/discord/Cache/Cache_Data`
 - Linux: `~/.config/discord/Cache/Cache_Data`
 
-Estas son las rutas predeterminadas utilizadas por el parser referenciado; Electron permite que una aplicación sobrescriba `sessionData`, por lo que se debe confirmar la ruta real del perfil durante la adquisición.<sup>[[2]](#references)[[4]](#references)</sup>
+Estas son las rutas predeterminadas que usa el parser citado; Electron permite que una aplicación sobrescriba `sessionData`, así que confirma la ruta real del perfil durante la adquisición.<sup>[[2]](#references)[[4]](#references)</sup>
 
-La estructura `index` + `data_#` + `f_######` coincide con el backend de caché de disco blockfile de Chromium; no se debe etiquetar como Simple Cache sin verificar el backend, ya que Chromium documenta implementaciones de caché distintas.<sup>[[5]](#references)</sup>
+La estructura `index` + `data_#` + `f_######` coincide con el backend de cache en disco blockfile de Chromium; no la clasifiques como Simple Cache sin verificar el backend, ya que Chromium documenta distintas implementaciones de cache.<sup>[[5]](#references)</sup>
 
 Estructuras clave en disco dentro de `Cache_Data`:
-- `index`: índice de caché Blockfile utilizado para localizar entradas.
-- `data_#`: archivos de bloques de tamaño fijo que pueden contener metadatos de caché, cabeceras HTTP y datos de respuesta.
-- `f_######`: archivos independientes utilizados para datos mayores que el límite del archivo de bloques; estos archivos contienen los datos almacenados sin las cabeceras de los archivos de bloques.
+- `index`: índice de cache Blockfile que se usa para localizar entradas.
+- `data_#`: archivos de bloques de tamaño fijo que pueden contener metadatos de cache, encabezados HTTP y datos de respuesta.
+- `f_######`: archivos separados que se usan para datos que superan el límite de los archivos de bloques; estos archivos contienen los datos almacenados sin los encabezados de los archivos de bloques.
 
-Eliminar mensajes, canales o servidores no garantiza la eliminación de los bytes que ya están almacenados localmente en la caché, pero Chromium puede expulsar o recrear los archivos de caché en cualquier momento. Trata los artefactos supervivientes como evidencia oportunista y utiliza las horas de modificación de los archivos solo como señales aproximadas de escritura local que deben correlacionarse con otra telemetría.<sup>[[5]](#references)[[6]](#references)</sup>
+Eliminar mensajes, canales o servidores no garantiza que se eliminen los bytes ya almacenados localmente en la cache, pero Chromium puede desalojar o recrear archivos de cache en cualquier momento. Trata los artefactos que sobrevivan como evidencia oportunista, y usa las horas de modificación de los archivos solo como señales aproximadas de escrituras locales que deben correlacionarse con otra telemetría.<sup>[[5]](#references)[[6]](#references)</sup>
 
 ## Qué se puede recuperar
 
-Dependiendo de lo que se haya obtenido y aún no se haya expulsado, el triage puede recuperar archivos adjuntos almacenados en caché, medios, URLs y hashes de archivos; la caché por sí sola no demuestra que un elemento haya sido exfiltrado.<sup>[[1]](#references)[[2]](#references)[[5]](#references)</sup>
+Según lo que se haya descargado y aún no se haya desalojado, el triage puede recuperar archivos adjuntos, contenido multimedia, URL y hashes de archivos almacenados en la cache; la cache por sí sola no demuestra que un elemento haya sido exfiltrado.<sup>[[1]](#references)[[2]](#references)[[5]](#references)</sup>
 
-- Archivos adjuntos y miniaturas referenciados por URLs del CDN de Discord.
-- Imágenes, GIFs y vídeos (por ejemplo, `.jpg`, `.png`, `.gif`, `.webp`, `.mp4` y `.webm`).
-- URLs de webhook, como `https://discord.com/api/webhooks/...`.<sup>[[2]](#references)[[7]](#references)</sup>
+- Archivos adjuntos y miniaturas referenciados por URL de Discord CDN.
+- Imágenes, GIF y videos (por ejemplo, `.jpg`, `.png`, `.gif`, `.webp`, `.mp4` y `.webm`).
+- URL de webhook, como `https://discord.com/api/webhooks/...`.<sup>[[2]](#references)[[7]](#references)</sup>
 - Llamadas a la API de Discord, como `https://discord.com/api/vX/...`.<sup>[[2]](#references)</sup>
-- Hashes SHA-256 de los medios recuperados para compararlos con datasets conocidos o feeds de intelligence.<sup>[[1]](#references)[[2]](#references)</sup>
+- Hashes SHA-256 de contenido multimedia recuperado para compararlos con conjuntos de datos conocidos o feeds de inteligencia.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## Triage rápido (manual)
 
-- Busca en la caché artefactos de alta señal. Estos patrones reflejan las expresiones de URL del parser referenciado y son filtros de triage, no indicadores exhaustivos.<sup>[[2]](#references)</sup>
-- Endpoints de webhook:
-- Windows: findstr /S /I /C:"https://discord.com/api/webhooks/" "%AppData%\discord\Cache\Cache_Data\*"
-- Linux/macOS: strings -a Cache_Data/* | grep -i "https://discord.com/api/webhooks/"
-- URLs de archivos adjuntos/CDN:
-- strings -a Cache_Data/* | grep -Ei "https://(cdn|media)\.discordapp\.com/attachments/"
-- Llamadas a la API de Discord:
-- strings -a Cache_Data/* | grep -Ei "https://discord(app)?\.com/api/v[0-9]+/"
-- Ordena las entradas almacenadas en caché por hora de modificación para crear una secuencia aproximada; `mtime` es una señal del sistema de archivos y no establece por sí solo cuándo se obtuvo o envió un objeto de Discord.<sup>[[2]](#references)[[5]](#references)[[6]](#references)</sup>
-- Windows PowerShell: Get-ChildItem "$env:AppData\discord\Cache\Cache_Data" -File -Recurse | Sort-Object LastWriteTime | Select-Object LastWriteTime, FullName
+- Usa grep en la cache para buscar artefactos de alta señal. Estos patrones reflejan las expresiones de URL del parser citado y son filtros de triage, no indicadores exhaustivos.<sup>[[2]](#references)</sup>
+  - Endpoints de webhook:
+    - Windows: findstr /S /I /C:"https://discord.com/api/webhooks/" "%AppData%\discord\Cache\Cache_Data\*"
+    - Linux/macOS: strings -a Cache_Data/* | grep -i "https://discord.com/api/webhooks/"
+  - URL de archivos adjuntos/CDN:
+    - strings -a Cache_Data/* | grep -Ei "https://(cdn|media)\.discordapp\.com/attachments/"
+  - Llamadas a la API de Discord:
+    - strings -a Cache_Data/* | grep -Ei "https://discord(app)?\.com/api/v[0-9]+/"
+- Ordena las entradas de la cache por hora de modificación para construir una secuencia aproximada; mtime es una señal del sistema de archivos y por sí sola no establece cuándo se obtuvo o envió un objeto de Discord.<sup>[[2]](#references)[[5]](#references)[[6]](#references)</sup>
+  - Windows PowerShell: Get-ChildItem "$env:AppData\discord\Cache\Cache_Data" -File -Recurse | Sort-Object LastWriteTime | Select-Object LastWriteTime, FullName
 
-## Análisis de entradas f_* (cuerpo + cabeceras HTTP)
+## Análisis de entradas f_* (cuerpo + encabezados HTTP)
 
-En la estructura blockfile, los archivos `f_######` son flujos de datos independientes y no se garantiza que comiencen con una respuesta HTTP completa. Si un archivo adquirido contiene cabeceras HTTP serializadas seguidas de `\r\n\r\n`, divídelo en el primer delimitador e inspecciona:<sup>[[2]](#references)[[5]](#references)</sup>
-- Content-Type: Para inferir el tipo de medio
-- Content-Location o X-Original-URL: URL remota original para la previsualización/correlación
+En la estructura blockfile, los archivos `f_######` son flujos de datos separados y no se garantiza que comiencen con una respuesta HTTP completa. Si un archivo adquirido contiene encabezados HTTP serializados seguidos de `\r\n\r\n`, separa el contenido en el primer delimitador e inspecciona:<sup>[[2]](#references)[[5]](#references)</sup>
+- Content-Type: Para inferir el tipo de contenido multimedia
+- Content-Location o X-Original-URL: URL remota original para previsualización/correlación
 - Content-Encoding: Puede ser gzip/deflate/br (Brotli).
 
-A continuación, los medios pueden extraerse separando las cabeceras del cuerpo y descomprimiéndolos opcionalmente según `Content-Encoding`; el parser referenciado gestiona Brotli, gzip y deflate. La identificación mediante magic bytes es útil cuando falta `Content-Type`, pero sigue siendo una heurística.<sup>[[2]](#references)</sup>
+Luego se puede extraer el contenido multimedia separando los encabezados del cuerpo y, opcionalmente, descomprimiéndolo según `Content-Encoding`; el parser citado admite Brotli, gzip y deflate. La inspección de bytes mágicos es útil cuando no hay `Content-Type`, pero sigue siendo una heurística.<sup>[[2]](#references)</sup>
 
 ## DFIR automatizado: Discord Forensic Suite (CLI/GUI)
 
 - Repo: [Discord Forensic Suite](https://github.com/jwdfir/discord_cache_parser).<sup>[[1]](#references)</sup>
-- Función: Analiza recursivamente la carpeta de caché de Discord, encuentra URLs de webhook/API/archivos adjuntos, analiza los cuerpos `f_*`, opcionalmente extrae medios y genera informes HTML y CSV, además de una timeline cronológica opcional con hashes SHA-256.<sup>[[1]](#references)[[2]](#references)</sup>
+- Función: Analiza recursivamente la carpeta de cache de Discord, encuentra URL de webhook/API/archivos adjuntos, analiza cuerpos `f_*`, opcionalmente extrae contenido multimedia y genera informes HTML y CSV, además de una cronología opcional con hashes SHA-256.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Ejemplo de uso de la CLI:
+Ejemplo de uso de CLI:
+
 ```powershell
 # Acquire a copy of the cache for offline parsing, then run on Windows:
 python discord_forensic_suite_cli `
---cache "$env:APPDATA\discord\Cache\Cache_Data" `
---outdir "C:\IR\discord-cache" `
---output discord_cache_report `
---format both `
---timeline `
---extra `
---carve `
---verbose
+  --cache "$env:APPDATA\discord\Cache\Cache_Data" `
+  --outdir "C:\IR\discord-cache" `
+  --output discord_cache_report `
+  --format both `
+  --timeline `
+  --extra `
+  --carve `
+  --verbose
 ```
+
 La CLI define estas opciones y nombres de salida:<sup>[[2]](#references)</sup>
 - --cache: Ruta al directorio Cache_Data de Discord
 - --format html|csv|both
-- --timeline: Emite una línea de tiempo CSV ordenada (por hora de modificación)
-- --extra: También analiza Code Cache y GPUCache adyacentes
-- --carve: Extrae media de los bytes sin procesar del cache mediante firmas de media reconocidas (imágenes/vídeo)
-- Output: `<output>.html`, `<output>.csv`, opcionalmente `<output>_timeline.csv`, y una carpeta `<output>_media` con archivos extraídos o recuperados.
+- --timeline: Genera una cronología CSV ordenada (por hora de modificación)
+- --extra: También analiza Code Cache y GPUCache, que están en directorios adyacentes
+- --carve: Extrae archivos multimedia de bytes de caché sin procesar mediante firmas de medios reconocidas (imágenes/vídeo)
+- Output: `<output>.html`, `<output>.csv`, el archivo opcional `<output>_timeline.csv` y una carpeta `<output>_media` con archivos extraídos o recuperados.
 
-## Consejos para analistas
+## Consejos para el analista
 
-- Correlaciona la hora de modificación (mtime) de los archivos `f_*` y `data_*` con los intervalos de actividad del usuario o del atacante y con telemetría independiente; mtime no es una marca de tiempo de evento definitiva.<sup>[[2]](#references)[[5]](#references)[[6]](#references)</sup>
-- Calcula el hash de la media recuperada (SHA-256) y compáralo con datasets conocidos como maliciosos o de exfiltración.<sup>[[1]](#references)[[2]](#references)</sup>
-- Trata las URL de webhook extraídas como credenciales. No las invoques simplemente para comprobar si siguen activas; consérvalas de forma segura, coordina su revocación o rotación y utiliza la telemetría de red relacionada para realizar retro-hunting.<sup>[[7]](#references)</sup>
-- La eliminación en el servidor no garantiza que los bytes almacenados localmente en el cache hayan sido destruidos. Si es posible realizar la adquisición, recopila todo el directorio `Cache` y los caches adyacentes relacionados (`Code Cache`, `GPUCache`) antes de que se produzca la expulsión o la recreación del cache.<sup>[[2]](#references)[[5]](#references)[[6]](#references)</sup>
+- Correlaciona la hora de modificación (mtime) de los archivos `f_*` y `data_*` con periodos de actividad de usuarios o atacantes y con telemetría independiente; mtime no es una marca de tiempo definitiva del evento.<sup>[[2]](#references)[[5]](#references)[[6]](#references)</sup>
+- Calcula el hash de los archivos multimedia recuperados (SHA-256) y compáralos con conjuntos de datos de elementos maliciosos conocidos o de exfiltración.<sup>[[1]](#references)[[2]](#references)</sup>
+- Trata las URL de webhook extraídas como credenciales. No las invoques solo para comprobar si están activas; consérvalas de forma segura, coordina su revocación o rotación y utiliza la telemetría de red relacionada para realizar búsquedas retrospectivas.<sup>[[7]](#references)</sup>
+- La eliminación en el servidor no garantiza que se hayan destruido los bytes almacenados localmente en caché. Si es posible adquirirlos, recopila todo el directorio `Cache` y las cachés adyacentes relacionadas (`Code Cache`, `GPUCache`) antes de que se eliminen o se vuelva a crear la caché.<sup>[[2]](#references)[[5]](#references)[[6]](#references)</sup>
 
 ## References
 
-- [1] [Suite Forensic de Discord (CLI/GUI)](https://github.com/jwdfir/discord_cache_parser)
+- [1] [Suite forense de Discord (CLI/GUI)](https://github.com/jwdfir/discord_cache_parser)
 - [2] [CLI de Discord Forensic Suite](https://raw.githubusercontent.com/jwdfir/discord_cache_parser/refs/heads/main/discord_forensic_suite_cli)
-- [3] [Cómo Discord actualizó sin interrupciones a millones de usuarios a una arquitectura de 64 bits](https://discord.com/blog/how-discord-seamlessly-upgraded-millions-of-users-to-64-bit-architecture)
+- [3] [Cómo Discord actualizó sin problemas a millones de usuarios a una arquitectura de 64 bits](https://discord.com/blog/how-discord-seamlessly-upgraded-millions-of-users-to-64-bit-architecture)
 - [4] [app | Electron](https://www.electronjs.org/docs/latest/api/app)
-- [5] [Disk Cache](https://www.chromium.org/developers/design-documents/network-stack/disk-cache/)
-- [6] [Discord como C2 y las evidencias almacenadas en el cache que quedan atrás](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
-- [7] [Webhooks de Discord – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
+- [5] [Caché en disco](https://www.chromium.org/developers/design-documents/network-stack/disk-cache/)
+- [6] [Discord como C2 y las pruebas almacenadas en caché que deja atrás](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
+- [7] [Webhooks de Discord: ejecutar un webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
 {{#include ../../../banners/hacktricks-training.md}}
