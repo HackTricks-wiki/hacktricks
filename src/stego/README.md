@@ -2,17 +2,17 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Bu bölüm; görsellerden, seslerden, videolardan, belgelerden, arşivlerden ve metinlerden **gizli verileri bulmaya ve çıkarmaya** odaklanır. Steganography, verileri başka verilerin içine yerleştirerek bir iletişimin varlığını gizler.<sup>[[1]](#references)</sup>
+Bu bölüm; görsellerden, seslerden, videolardan, belgelerden, arşivlerden ve metinlerden **gizli verileri bulmaya ve çıkarmaya** odaklanır. Steganografi, verileri başka verilerin içine yerleştirerek iletişimin varlığını gizler.<sup>[[1]](#references)</sup>
 
 Kriptografik saldırılar için buradaysanız **Crypto** bölümüne gidin.
 
-## Entry Point
+## Başlangıç Noktası
 
-Steganography'yi bir adli bilişim problemi olarak ele alın: gerçek kapsayıcıyı belirleyin, yüksek sinyalli konumları (metadata, eklenmiş veriler, gömülü dosyalar) listeleyin ve ancak bundan sonra içerik düzeyinde extraction tekniklerini uygulayın.
+Steganografiyi bir adli bilişim problemi olarak ele alın: gerçek kapsayıcıyı belirleyin, yüksek sinyal değerine sahip konumları (metadata, eklenmiş veriler, gömülü dosyalar) tarayın ve ancak bundan sonra içerik düzeyinde çıkarma tekniklerini uygulayın.
 
-### İş akışı ve triage
+### İş akışı ve önceliklendirme
 
-Kapsayıcı tanımlamayı, metadata/string incelemesini, carving işlemini ve formata özel dallanmayı önceliklendiren yapılandırılmış bir iş akışı.
+Kapsayıcı tanımlamaya, metadata ve dizgeleri incelemeye, carving'e ve biçime özgü dallanmaya öncelik veren yapılandırılmış bir iş akışı.
 
 {{#ref}}
 workflow/README.md
@@ -20,7 +20,7 @@ workflow/README.md
 
 ### Görseller
 
-CTF stego işlemlerinin çoğunun bulunduğu alan: LSB/bit düzlemleri (PNG/BMP), chunk/dosya formatı anormallikleri, JPEG araçları ve çok kareli GIF hileleri.
+CTF stego çalışmalarının çoğu burada yer alır: LSB/bit düzlemleri (PNG/BMP), parça/dosya biçimi tuhaflıkları, JPEG araçları ve çok kareli GIF numaraları.
 
 {{#ref}}
 images/README.md
@@ -28,7 +28,7 @@ images/README.md
 
 ### Ses
 
-Spektrogram mesajları, sample LSB embedding ve telefon tuş takımı tonları (DTMF) tekrarlanan kalıplardır.
+Spektrogram mesajları, örneklerde LSB gömme ve telefon tuş takımı tonları (DTMF) sık karşılaşılan örüntülerdir.
 
 {{#ref}}
 audio/README.md
@@ -36,7 +36,7 @@ audio/README.md
 
 ### Metin
 
-Metin normal şekilde görüntüleniyor ancak beklenmedik davranıyorsa Unicode homoglyph'lerini, zero-width karakterleri veya whitespace tabanlı encoding'i değerlendirin.
+Metin normal şekilde görüntüleniyor ama beklenmedik davranıyorsa Unicode homogliflerini, sıfır genişlikli karakterleri veya boşluk tabanlı kodlamayı göz önünde bulundurun.
 
 {{#ref}}
 text/README.md
@@ -44,15 +44,15 @@ text/README.md
 
 ### Belgeler
 
-PDF'ler ve Office dosyaları öncelikle kapsayıcılardır; saldırılar genellikle gömülü dosyalar/stream'ler, object/relationship grafikleri ve ZIP extraction etrafında şekillenir.
+PDF ve Office dosyaları öncelikle kapsayıcılardır; saldırılar genellikle gömülü dosyalar/akışlar, nesne/ilişki grafikleri ve ZIP çıkarma etrafında şekillenir.
 
 {{#ref}}
 documents/README.md
 {{#endref}}
 
-### Malware ve delivery tarzı steganography
+### Malware ve teslimat tarzı steganografi
 
-Payload delivery, verileri piksellerde gizlemek yerine marker ile ayrılmış text payload'ları taşıyan GIF veya PNG görselleri gibi geçerli görünen dosyaları kullanabilir.
+Payload teslimatı, verileri piksellerde gizlemek yerine işaretçilerle sınırlandırılmış metin payload'ları taşıyan, GIF veya PNG görselleri gibi geçerli görünen dosyaları kullanabilir.
 
 {{#ref}}
 malware-and-network/README.md
@@ -60,5 +60,5 @@ malware-and-network/README.md
 
 ## References
 
-- [1] [NIST CSRC Sözlüğü - Steganography](https://csrc.nist.gov/glossary/term/steganography)
+- [1] [NIST CSRC Sözlüğü - Steganografi](https://csrc.nist.gov/glossary/term/steganography)
 {{#include ../banners/hacktricks-training.md}}
