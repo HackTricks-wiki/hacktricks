@@ -1036,6 +1036,7 @@
 - [Windows Exploiting (Basic Guide - OSCP lvl)](binary-exploitation/windows-exploiting-basic-guide-oscp-lvl.md)
 - [Windows Vectored Overloading](binary-exploitation/windows-vectored-overloading.md)
 - [iOS Exploiting](binary-exploitation/ios-exploiting/README.md)
+  - [LLDB debugserver qSpeedTest Global Buffer Overflow](binary-exploitation/ios-exploiting/debugserver-qspeedtest-buffer-overflow.md)
   - [ios CVE-2020-27950-mach_msg_trailer_t](binary-exploitation/ios-exploiting/CVE-2020-27950-mach_msg_trailer_t.md)
   - [ios CVE-2021-30807-IOMobileFrameBuffer](binary-exploitation/ios-exploiting/CVE-2021-30807-IOMobileFrameBuffer.md)
   - [Imessage Media Parser Zero Click Coreaudio Pac Bypass](binary-exploitation/ios-exploiting/imessage-media-parser-zero-click-coreaudio-pac-bypass.md)
