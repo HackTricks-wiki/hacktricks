@@ -73,6 +73,10 @@ Additional useful projects (actively maintained 2023-2025):
 * **Shadow attacks on signed PDFs** – attackers can place hidden content in a PDF before it is signed, then append an incremental update that changes catalog or object references so viewers display the hidden content while the original signature remains valid. The technique can evade viewers that classify such updates as harmless.<sup>[[6]](#references)</sup>
 * **Use-after-free – CVE-2024-30284 (Acrobat/Reader)** – Adobe rates this critical vulnerability as a use-after-free that can lead to arbitrary code execution; APSB24-29 was published on May 14, 2024.<sup>[[3]](#references)</sup>
 
+{{#ref}}
+../../../binary-exploitation/adobe-acrobat-reader-escript-accessor-uaf.md
+{{#endref}}
+
 ---
 
 ## YARA quick rule template

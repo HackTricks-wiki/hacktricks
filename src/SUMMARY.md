@@ -969,6 +969,7 @@
   - [Windows SEH Overflow](binary-exploitation/stack-overflow/windows-seh-overflow.md)
 - [Array Indexing](binary-exploitation/array-indexing.md)
 - [Chrome Exploiting](binary-exploitation/chrome-exploiting.md)
+- [Adobe Acrobat Reader Escript Accessor-Recursion UAF](binary-exploitation/adobe-acrobat-reader-escript-accessor-uaf.md)
 - [Common Exploiting Problems Unsafe Relocation Fixups](binary-exploitation/common-exploiting-problems-unsafe-relocation-fixups.md)
 - [Integer Overflow](binary-exploitation/integer-overflow-and-underflow.md)
 - [Format Strings](binary-exploitation/format-strings/README.md)
