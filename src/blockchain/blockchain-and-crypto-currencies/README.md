@@ -4,12 +4,12 @@
 
 ## Conceitos Básicos
 
-- **Contratos Inteligentes** são definidos como programas que executam em uma blockchain quando determinadas condições são atendidas, automatizando a execução de acordos sem intermediários.
-- **Aplicações Descentralizadas (dApps)** são baseadas em contratos inteligentes, apresentando um front-end fácil de usar e um back-end transparente e auditável.
-- **Tokens e Coins** diferenciam-se porque coins funcionam como dinheiro digital, enquanto tokens representam valor ou propriedade em contextos específicos.
-- **Utility Tokens** concedem acesso a serviços, e **Security Tokens** representam a propriedade de ativos.
+- **Smart Contracts** são definidos como programas executados em uma blockchain quando determinadas condições são atendidas, automatizando a execução de acordos sem intermediários.
+- **Aplicações Descentralizadas (dApps)** são construídas sobre smart contracts e contam com um front-end fácil de usar e um back-end transparente e auditável.
+- **Tokens e Coins** diferem porque as coins servem como dinheiro digital, enquanto os tokens representam valor ou propriedade em contextos específicos.
+  - **Utility Tokens** concedem acesso a serviços, e **Security Tokens** representam a propriedade de ativos.
 - **DeFi** significa Finanças Descentralizadas, oferecendo serviços financeiros sem autoridades centrais.
-- **DEX** e **DAOs** referem-se, respectivamente, a Plataformas de Exchange Descentralizadas e Organizações Autônomas Descentralizadas.
+- **DEX** e **DAOs** referem-se, respectivamente, a plataformas de exchange descentralizadas e organizações autônomas descentralizadas.
 
 ## Mecanismos de Consenso
 
@@ -22,167 +22,171 @@ Os mecanismos de consenso garantem validações de transações seguras e acorda
 
 ### Transações
 
-As transações de Bitcoin envolvem a transferência de fundos entre endereços. As transações são validadas por meio de assinaturas digitais, garantindo que somente o proprietário da chave privada possa iniciar transferências.<sup>[[2]](#references)</sup>
+As transações de Bitcoin envolvem a transferência de fundos entre endereços. Elas são validadas por meio de assinaturas digitais, garantindo que somente o proprietário da chave privada possa iniciar transferências.<sup>[[2]](#references)</sup>
 
-#### Componentes Principais:
+#### Componentes principais:
 
 - **Transações Multisignature** exigem várias assinaturas para autorizar uma transação.<sup>[[3]](#references)</sup>
-- As transações consistem em **inputs** (origem dos fundos), **outputs** (destino), **fees** (pagas aos miners) e **scripts** (regras da transação).
+- As transações consistem em **inputs** (origem dos fundos), **outputs** (destino), **taxas** (pagas aos mineradores) e **scripts** (regras da transação).
 
 ### Lightning Network
 
-Tem como objetivo melhorar a escalabilidade do Bitcoin, permitindo várias transações dentro de um canal e transmitindo apenas o estado final para a blockchain.
+Tem como objetivo melhorar a escalabilidade do Bitcoin ao permitir várias transações dentro de um canal, transmitindo à blockchain apenas o estado final.
 
-## Problemas de Privacidade do Bitcoin
+## Preocupações com a Privacidade do Bitcoin
 
-Ataques de privacidade, como **Common Input Ownership** e **UTXO Change Address Detection**, exploram padrões de transação. Estratégias como **Mixers** e **CoinJoin** melhoram o anonimato ao ocultar os vínculos entre as transações dos usuários.
+Ataques à privacidade, como **Propriedade Comum de Inputs** e **Detecção de Endereço de Troco UTXO**, exploram padrões de transação. Estratégias como **Mixers** e **CoinJoin** melhoram o anonimato ao ocultar as conexões entre as transações dos usuários.
 
 ## Adquirindo Bitcoins Anonimamente
 
-Os métodos incluem negociações em dinheiro, mineração e uso de mixers. **CoinJoin** mistura várias transações para dificultar a rastreabilidade, enquanto **PayJoin** disfarça CoinJoins como transações comuns para aumentar a privacidade.
+Os métodos incluem negociações em dinheiro, mineração e uso de mixers. **CoinJoin** combina várias transações para dificultar o rastreamento, enquanto **PayJoin** disfarça CoinJoins como transações comuns para aumentar a privacidade.
 
-# Resumo dos Ataques de Privacidade do Bitcoin
+# Resumo dos Ataques à Privacidade do Bitcoin
 
-No mundo do Bitcoin, a privacidade das transações e o anonimato dos usuários são frequentemente motivos de preocupação. Veja uma visão geral simplificada de vários métodos comuns pelos quais attackers podem comprometer a privacidade do Bitcoin.<sup>[[6]](#references)</sup>
+No mundo do Bitcoin, a privacidade das transações e o anonimato dos usuários costumam ser motivo de preocupação. Veja uma visão geral simplificada de vários métodos comuns pelos quais atacantes podem comprometer a privacidade do Bitcoin.<sup>[[6]](#references)</sup>
 
-## **Common Input Ownership Assumption**
+## **Pressuposto de Propriedade Comum de Inputs**
 
-Geralmente, é raro que inputs de usuários diferentes sejam combinados em uma única transação devido à complexidade envolvida. Assim, **dois endereços de input na mesma transação são frequentemente considerados como pertencentes ao mesmo proprietário**.
+Em geral, é raro que inputs de usuários diferentes sejam combinados em uma única transação devido à complexidade envolvida. Portanto, **costuma-se presumir que dois endereços de input na mesma transação pertencem ao mesmo proprietário**.
 
-## **UTXO Change Address Detection**
+## **Detecção de Endereço de Troco UTXO**
 
-Um UTXO, ou **Unspent Transaction Output**, deve ser totalmente gasto em uma transação. Se apenas uma parte dele for enviada para outro endereço, o restante irá para um novo endereço de troco. Observadores podem presumir que esse novo endereço pertence ao remetente, comprometendo a privacidade.
+Um UTXO, ou **Unspent Transaction Output**, deve ser gasto integralmente em uma transação. Se apenas parte dele for enviada para outro endereço, o restante vai para um novo endereço de troco. Observadores podem presumir que esse novo endereço pertence ao remetente, comprometendo a privacidade.
 
 ### Exemplo
 
-Para mitigar isso, serviços de mixing ou o uso de vários endereços podem ajudar a ocultar a propriedade.
+Para reduzir esse risco, serviços de mixing ou o uso de vários endereços podem ajudar a ocultar a propriedade.
 
 ## **Exposição em Redes Sociais e Fóruns**
 
-Às vezes, os usuários compartilham seus endereços de Bitcoin online, tornando **fácil associar o endereço ao seu proprietário**.
+Às vezes, os usuários compartilham seus endereços de Bitcoin online, o que **facilita associar o endereço ao seu proprietário**.
 
-## **Análise de Grafos de Transações**
+## **Análise do Grafo de Transações**
 
-As transações podem ser visualizadas como grafos, revelando possíveis conexões entre usuários com base no fluxo de fundos.
+As transações podem ser representadas como grafos, revelando possíveis conexões entre usuários com base no fluxo de fundos.
 
-## **Unnecessary Input Heuristic (Optimal Change Heuristic)**
+## **Heurística de Input Desnecessário (Heurística de Troco Ideal)**
 
-Essa heuristic baseia-se na análise de transações com vários inputs e outputs para tentar determinar qual output corresponde ao troco que retorna ao remetente.
+Essa heurística se baseia na análise de transações com vários inputs e outputs para tentar identificar qual output corresponde ao troco devolvido ao remetente.
 
 ### Exemplo
+
 ```bash
 2 btc --> 4 btc
 3 btc     1 btc
 ```
-Se adicionar mais inputs fizer com que o output do troco seja maior do que qualquer input individual, isso pode confundir a heurística.
 
-## **Forced Address Reuse**
+Se adicionar mais inputs, o change pode ficar maior do que qualquer input individual, o que pode confundir a heurística.
 
-Atacantes podem enviar pequenas quantias para endereços usados anteriormente, esperando que o destinatário os combine com outros inputs em transações futuras, vinculando assim os endereços.
+## **Reutilização Forçada de Endereços**
+
+Atacantes podem enviar pequenas quantias para endereços usados anteriormente, na esperança de que o destinatário as combine com outros inputs em transações futuras, vinculando assim os endereços entre si.
 
 ### Comportamento Correto da Wallet
 
-As wallets devem evitar usar coins recebidas em endereços já usados e vazios, para evitar esse privacy leak.
+As wallets devem evitar usar coins recebidos em endereços vazios já usados para prevenir esse leak de privacidade.
 
 ## **Outras Técnicas de Análise de Blockchain**
 
-- **Valores Exatos de Pagamento:** Transações sem troco provavelmente ocorrem entre dois endereços pertencentes ao mesmo usuário.
-- **Números Redondos:** Um número redondo em uma transação sugere que se trata de um pagamento, sendo o output não redondo provavelmente o troco.
-- **Wallet Fingerprinting:** Diferentes wallets têm padrões exclusivos de criação de transações, permitindo que analistas identifiquem o software usado e potencialmente o endereço de troco.
-- **Correlações de Valor e Tempo:** Divulgar horários ou valores de transações pode tornar as transações rastreáveis.
+- **Valores Exatos de Pagamento:** Transações sem change provavelmente ocorrem entre dois endereços pertencentes ao mesmo usuário.
+- **Valores Redondos:** Um valor redondo em uma transação sugere que se trata de um pagamento, e o output não redondo provavelmente é o change.
+- **Fingerprinting de Wallet:** Wallets diferentes têm padrões únicos de criação de transações, permitindo que analistas identifiquem o software usado e possivelmente o endereço de change.
+- **Correlações de Valor e Horário:** Divulgar horários ou valores de transações pode torná-las rastreáveis.
 
 ## **Análise de Tráfego**
 
-Ao monitorar o tráfego de rede, atacantes podem potencialmente vincular transações ou blocos a endereços IP, comprometendo a privacidade dos usuários. Isso é especialmente verdadeiro quando uma entidade opera muitos nodes de Bitcoin, aumentando sua capacidade de monitorar transações.
+Ao monitorar o tráfego de rede, atacantes podem potencialmente vincular transações ou blocos a endereços IP, comprometendo a privacidade dos usuários. Isso é especialmente relevante quando uma entidade opera muitos nós Bitcoin, ampliando sua capacidade de monitorar transações.
 
 ## Mais
 
-Para obter uma lista abrangente de ataques e defesas de privacidade, visite [Bitcoin Privacy on Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy).
+Para obter uma lista abrangente de ataques à privacidade e defesas, visite [Bitcoin Privacy on Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy).
 
 # Transações Anônimas de Bitcoin
 
-## Formas de Obter Bitcoins Anonimamente
+## Maneiras de Obter Bitcoins Anonimamente
 
 - **Transações em Dinheiro:** Adquirir bitcoin usando dinheiro.
-- **Alternativas ao Dinheiro:** Comprar gift cards e trocá-los online por bitcoin.
-- **Mining:** O método mais privado para obter bitcoins é por meio de mining, especialmente quando feito individualmente, pois mining pools podem conhecer o endereço IP do minerador. [Mining Pools Information](https://en.bitcoin.it/wiki/Pooled_mining)
-- **Roubo:** Teoricamente, roubar bitcoin poderia ser outro método para adquiri-lo anonimamente, embora seja ilegal e não recomendado.
+- **Alternativas ao Dinheiro:** Comprar cartões-presente e trocá-los online por bitcoin.
+- **Mineração:** O método mais privado para ganhar bitcoins é por meio da mineração, especialmente quando feita individualmente, pois pools de mineração podem conhecer o endereço IP do minerador. [Informações sobre Pools de Mineração](https://en.bitcoin.it/wiki/Pooled_mining)
+- **Roubo:** Teoricamente, roubar bitcoin poderia ser outra maneira de obtê-lo anonimamente, embora seja ilegal e não recomendado.
 
-## Mixing Services
+## Serviços de Mixing
 
-Ao usar um mixing service, um usuário pode **enviar bitcoins** e receber **bitcoins diferentes em troca**, dificultando o rastreamento do proprietário original. No entanto, isso exige confiar que o serviço não manterá logs e realmente devolverá os bitcoins. Outras opções de mixing incluem casinos de Bitcoin.
+Ao usar um serviço de mixing, um usuário pode **enviar bitcoins** e receber **outros bitcoins em troca**, dificultando o rastreamento do proprietário original. No entanto, isso exige confiar que o serviço não mantenha logs e realmente devolva os bitcoins. Outras opções de mixing incluem cassinos Bitcoin.
 
 ## CoinJoin
 
-**CoinJoin** combina múltiplas transações de usuários diferentes em uma só, complicando o processo para qualquer pessoa que tente associar inputs a outputs. Apesar de sua eficácia, transações com quantidades exclusivas de inputs e outputs ainda podem ser rastreadas.
+**CoinJoin** combina várias transações de usuários diferentes em uma só, dificultando o processo de correspondência entre inputs e outputs. Apesar de sua eficácia, transações com valores únicos de input e output ainda podem ser rastreadas.
 
 Exemplos de transações que podem ter usado CoinJoin incluem `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` e `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`.
 
-Para obter mais informações, visite [CoinJoin](https://coinjoin.io/en). Para um mixer de smart contract de Ethereum que separa depósitos de saques posteriores, consulte [Tornado Cash](https://tornado.cash).
+Para mais informações, visite [CoinJoin](https://coinjoin.io/en). Para um mixer de smart contracts de Ethereum que separa depósitos de saques posteriores, consulte [Tornado Cash](https://tornado.cash).
 
 ## PayJoin
 
-Uma variante do CoinJoin, **PayJoin** (ou P2EP), disfarça a transação entre duas partes (por exemplo, um cliente e um comerciante) como uma transação comum, sem os outputs iguais característicos do CoinJoin. Isso torna a detecção extremamente difícil e pode invalidar a heurística de propriedade comum dos inputs usada por entidades de vigilância de transações.
+Uma variante de CoinJoin, **PayJoin** (ou P2EP), disfarça a transação entre duas partes (por exemplo, um cliente e um comerciante) como uma transação normal, sem os outputs iguais característicos do CoinJoin. Isso torna a detecção extremamente difícil e pode invalidar a heurística de propriedade comum dos inputs usada por entidades de vigilância de transações.
+
 ```plaintext
 2 btc --> 3 btc
 5 btc     4 btc
 ```
-Transações como a acima poderiam ser PayJoin, aprimorando a privacidade enquanto permanecem indistinguíveis de transações bitcoin padrão.
 
-**A utilização de PayJoin poderia interromper significativamente os métodos tradicionais de vigilância**, tornando-o um desenvolvimento promissor na busca por privacidade transacional.
+Transações como a acima poderiam ser PayJoin, aumentando a privacidade e permanecendo indistinguíveis de transações padrão de bitcoin.
 
-# Melhores práticas para privacidade em criptomoedas
+**O uso de PayJoin poderia interromper significativamente os métodos tradicionais de vigilância**, tornando-o um avanço promissor na busca pela privacidade transacional.
 
-## **Técnicas de sincronização de wallets**
+# Boas práticas para privacidade em criptomoedas
 
-Para manter a privacidade e a segurança, sincronizar as wallets com a blockchain é crucial. Dois métodos se destacam:
+## **Técnicas de sincronização de carteiras**
 
-- **Full node**: Ao baixar toda a blockchain, um full node garante máxima privacidade. Todas as transações já realizadas são armazenadas localmente, tornando impossível para adversários identificar em quais transações ou endereços o usuário está interessado.
-- **Filtragem de blocos no lado do cliente**: Esse método envolve criar filtros para cada bloco da blockchain, permitindo que as wallets identifiquem transações relevantes sem expor interesses específicos aos observadores da rede. Wallets leves baixam esses filtros e só obtêm blocos completos quando encontram uma correspondência com os endereços do usuário.
+Para manter a privacidade e a segurança, é crucial sincronizar as carteiras com a blockchain. Dois métodos se destacam:
 
-## **Utilização do Tor para anonimato**
+- **Full node**: Ao baixar a blockchain inteira, um full node garante o máximo de privacidade. Todas as transações já realizadas são armazenadas localmente, impossibilitando que adversários identifiquem quais transações ou endereços interessam ao usuário.
+- **Filtragem de blocos no cliente**: Esse método envolve criar filtros para cada bloco da blockchain, permitindo que as carteiras identifiquem transações relevantes sem expor interesses específicos a observadores da rede. Carteiras leves baixam esses filtros e só buscam blocos completos quando encontram uma correspondência com os endereços do usuário.
 
-Como o Bitcoin opera em uma rede peer-to-peer, recomenda-se usar Tor para ocultar seu endereço IP, aumentando a privacidade ao interagir com a rede.
+## **Usando Tor para anonimato**
+
+Como Bitcoin opera em uma rede peer-to-peer, recomenda-se usar Tor para ocultar seu endereço IP, aumentando a privacidade ao interagir com a rede.
 
 ## **Prevenção da reutilização de endereços**
 
-Para proteger a privacidade, é essencial usar um novo endereço em cada transação. Reutilizar endereços pode comprometer a privacidade ao vincular transações à mesma entidade. Wallets modernas desencorajam a reutilização de endereços por meio de seu design.
+Para proteger a privacidade, é essencial usar um novo endereço para cada transação. Reutilizar endereços pode comprometer a privacidade ao vincular transações à mesma entidade. As carteiras modernas desestimulam a reutilização de endereços por meio de seu design.
 
-## **Estratégias para privacidade transacional**
+## **Estratégias para privacidade em transações**
 
-- **Múltiplas transações**: Dividir um pagamento em várias transações pode ocultar o valor da transação, frustrando ataques contra a privacidade.
-- **Evitar troco**: Optar por transações que não exigem outputs de troco aumenta a privacidade ao interromper métodos de detecção de troco.
-- **Múltiplos outputs de troco**: Se evitar o troco não for viável, gerar múltiplos outputs de troco ainda pode melhorar a privacidade.
+- **Várias transações**: Dividir um pagamento em várias transações pode ocultar o valor da transação, impedindo ataques à privacidade.
+- **Evitar troco**: Optar por transações que não exigem saídas de troco aumenta a privacidade ao dificultar métodos de detecção de troco.
+- **Várias saídas de troco**: Se não for possível evitar o troco, gerar várias saídas de troco ainda pode melhorar a privacidade.
 
-# **Monero: Um farol do anonimato**
+# **Monero: um farol de anonimato**
 
 Monero foi projetado para priorizar a privacidade das transações.
 
-# **Ethereum: Gas e transações**
+# **Ethereum: gas e transações**
 
-## **Entendendo o Gas**
+## **Entendendo gas**
 
-Gas mede o esforço computacional necessário para executar operações na Ethereum, sendo precificado em **gwei**. Por exemplo, uma transação que custa 2.310.000 gwei (ou 0,00231 ETH) envolve um limite de gas e uma taxa base, com uma taxa de prioridade para incentivar a inclusão pelo validador. Os usuários podem definir uma taxa máxima para garantir que não paguem a mais, com o excedente sendo reembolsado.<sup>[[5]](#references)</sup>
+Gas mede o esforço computacional necessário para executar operações no Ethereum e é precificado em **gwei**. Por exemplo, uma transação que custa 2.310.000 gwei (ou 0,00231 ETH) envolve um limite de gas e uma taxa base, além de uma taxa de prioridade para incentivar a inclusão pelo validador. Os usuários podem definir uma taxa máxima para garantir que não paguem a mais; o excedente é reembolsado.<sup>[[5]](#references)</sup>
 
 ## **Execução de transações**
 
-As transações na Ethereum envolvem um remetente e um destinatário, que podem ser endereços de usuários ou de smart contracts. Elas exigem uma taxa e devem ser incluídas em um bloco. As informações essenciais em uma transação incluem o destinatário, a assinatura do remetente, o valor, dados opcionais, o limite de gas e as taxas. É importante observar que o endereço do remetente é deduzido da assinatura, eliminando a necessidade de incluí-lo nos dados da transação.<sup>[[4]](#references)</sup>
+As transações no Ethereum envolvem um remetente e um destinatário, que podem ser endereços de usuários ou de smart contracts. Elas exigem uma taxa e precisam ser incluídas em um bloco. As informações essenciais de uma transação incluem o destinatário, a assinatura do remetente, o valor, dados opcionais, o limite de gas e as taxas. Vale notar que o endereço do remetente é deduzido da assinatura, eliminando a necessidade de incluí-lo nos dados da transação.<sup>[[4]](#references)</sup>
 
-Essas práticas e mecanismos são fundamentais para qualquer pessoa que queira interagir com criptomoedas priorizando privacidade e segurança.
+Essas práticas e mecanismos são fundamentais para quem deseja interagir com criptomoedas priorizando a privacidade e a segurança.
 
-## Red Teaming de Web3 centrado em valor
+## Red Teaming Web3 centrado em valor
 
-- Faça um inventário dos componentes que mantêm valor (signers, oracles, bridges, automação) para entender quem pode movimentar fundos e como.
-- Mapeie cada componente para as táticas relevantes do MITRE AADAPT a fim de expor caminhos de privilege escalation.
-- Simule cadeias de ataque envolvendo flash loans/oracles/credenciais/cross-chain para validar o impacto e documentar as precondições exploráveis.
+- Faça um inventário dos componentes que detêm valor (signers, oracles, bridges, automação) para entender quem pode movimentar fundos e como.
+- Mapeie cada componente para as táticas pertinentes do MITRE AADAPT para revelar caminhos de escalonamento de privilégios.
+- Simule cadeias de ataque com flash loans/oracles/credenciais/cross-chain para validar o impacto e documentar as precondições exploráveis.
 
 {{#ref}}
 value-centric-web3-red-teaming.md
 {{#endref}}
 
-## Comprometimento do fluxo de assinatura de Web3
+## Comprometimento do fluxo de assinatura Web3
 
-- A adulteração da supply chain de UIs de wallets pode modificar payloads EIP-712 imediatamente antes da assinatura, coletando assinaturas válidas para takeovers de proxies baseados em delegatecall (por exemplo, sobrescrita do slot-0 de `masterCopy` do Safe).
+- A adulteração da cadeia de suprimentos das interfaces de carteira pode alterar payloads EIP-712 imediatamente antes da assinatura, obtendo assinaturas válidas para takeover de proxies baseado em delegatecall (por exemplo, sobrescrita do slot-0 de Safe masterCopy).
 
 {{#ref}}
 web3-signing-workflow-compromise-safe-delegatecall-proxy-takeover.md
@@ -190,7 +194,7 @@ web3-signing-workflow-compromise-safe-delegatecall-proxy-takeover.md
 
 ## Account Abstraction (ERC-4337)
 
-- Modos comuns de falha de smart accounts incluem contornar o controle de acesso de `EntryPoint`, campos de gas sem assinatura, validação stateful, replay de ERC-1271 e drenagem de taxas por meio de revert-after-validation.
+- Modos comuns de falha em smart accounts incluem contornar o controle de acesso de `EntryPoint`, campos de gas sem assinatura, validação com estado, replay de ERC-1271 e drenagem de taxas por meio de revert após a validação.
 
 {{#ref}}
 erc-4337-smart-account-security-pitfalls.md
@@ -198,76 +202,84 @@ erc-4337-smart-account-security-pitfalls.md
 
 ## Segurança de smart contracts
 
-- Testes de mutação para encontrar pontos cegos em test suites:
+- Use mutation testing para encontrar pontos cegos em suítes de teste:
 
 {{#ref}}
 ../smart-contract-security/mutation-testing-with-slither.md
 {{#endref}}
 
-## Integridade de ZK Proof / zkVM Guest
+## Integridade de provas ZK / guests de zkVM
 
-Quando um prover usa um **zkVM** ou um circuito de proof específico da aplicação para atestar uma afirmação, o verificador apenas aprende que o **guest program foi executado conforme escrito**. Se o guest contiver **desserialização insegura**, **comportamento indefinido** ou **restrições semânticas ausentes**, um prover malicioso poderá gerar uma proof que seja validada enquanto as **métricas públicas ou o invariant declarado são falsos**.<sup>[[7]](#references)</sup>
+Quando um prover usa uma **zkVM** ou um circuito de prova específico da aplicação para atestar uma afirmação, o verificador só fica sabendo que o **programa guest foi executado conforme escrito**. Se o guest contiver **desserialização insegura**, **comportamento indefinido** ou **restrições semânticas ausentes**, um prover malicioso pode gerar uma prova que é validada enquanto as **métricas públicas ou o invariante declarado são falsos**.<sup>[[7]](#references)</sup>
 
 ### Desserialização insegura dentro de proof guests
 
-- Trate bytes de private witness/circuit como **untrusted attacker input**, mesmo que estejam ocultos pela proof.
-- Evite desserializá-los com helpers sem verificação, como `rkyv::access_unchecked`, a menos que os bytes já tenham sido validados out-of-band.
-- Discriminants de enums, ponteiros relativos, comprimentos e índices carregados de dados serializados não confiáveis devem ser validados antes de influenciarem o fluxo de controle ou o acesso à memória.
+- Trate bytes de witness/circuit privados como **entrada não confiável controlada por um atacante**, mesmo que estejam ocultos pela prova.
+- Evite desserializá-los com helpers sem verificação, como `rkyv::access_unchecked`, a menos que os bytes já tenham sido validados por um processo externo.
+- Discriminantes de enum, ponteiros relativos, comprimentos e índices carregados de dados serializados não confiáveis devem ser validados antes de influenciarem o fluxo de controle ou o acesso à memória.
 
 Padrão prático de auditoria:
+
 ```rust
 let private_circuit_bytes = sp1_zkvm::io::read_vec();
 let ops = unsafe {
-rkyv::access_unchecked::<rkyv::Archived<Vec<Op>>>(&private_circuit_bytes)
+    rkyv::access_unchecked::<rkyv::Archived<Vec<Op>>>(&private_circuit_bytes)
 };
 ```
-Se um campo como `op.kind` for um enum e um atacante puder injetar um **discriminante fora do intervalo**, todo `match` posterior sobre esse valor se torna suspeito.
+
+Se um campo como `op.kind` for um enum e um atacante puder injetar um **discriminante fora do intervalo**, todo `match` subsequente sobre esse valor se torna suspeito.
 
 ### Bypass de contadores por jump table / UB
 
-Se o Rust transformar um `match` grande em uma **jump table**, um discriminante de enum inválido poderá produzir **fluxo de controle indefinido**. Um padrão perigoso é:<sup>[[7]](#references)[[9]](#references)</sup>
+Se Rust compilar um `match` grande como uma **jump table**, um discriminante de enum inválido pode causar **fluxo de controle indefinido**. Um padrão perigoso é:<sup>[[7]](#references)[[9]](#references)</sup>
 
-1. Um `match` atualiza **contadores/restrições críticos de segurança**.
+1. Um `match` atualiza **contadores/restrições críticos para a segurança**.
 2. Um segundo `match` executa a **semântica real da instrução**.
-3. Um discriminante fora do intervalo indexa além da primeira jump table e salta para um trecho de código associado à segunda.
+3. Um discriminante fora do intervalo indexa além da primeira jump table e chega a um trecho de código associado à segunda.
 
-Resultado: a operação ainda é executada, mas o caminho de contabilização é ignorado. Em uma zkVM, isso pode forjar proofs que relatam métricas impossíveis, como menos gates, menos operações caras ou outros recursos limitados falsificados.
+Resultado: a operação ainda é executada, mas o caminho de contabilização é ignorado. Em um zkVM, isso pode forjar provas que relatam métricas impossíveis, como menos gates, menos operações caras ou outros recursos limitados falsificados.
 
-Checklist de revisão:
+Lista de verificação:
 
-- Procure enums controlados pelo atacante e desserializados a partir de witness/private input.
-- Inspecione instruções `match` repetidas sobre o mesmo campo de opcode/kind.
-- Considere `unsafe` + desserialização sem verificações + dispatch de opcode grande uma combinação de alto risco.
-- Faça reverse engineering do binário emitido quando necessário; o layout da jump table pode ser mais importante do que o código-fonte.
+- Procure enums controlados pelo atacante e desserializados a partir do witness/input privado.
+- Inspecione instruções `match` repetidas sobre o mesmo campo opcode/kind.
+- Trate `unsafe` + desserialização sem verificações + despacho de opcode grande como uma combinação de alto risco.
+- Faça engenharia reversa do binário emitido quando necessário; o layout da jump table pode ser mais importante que o código-fonte.
 
-### Restrições semânticas ausentes em interpreters reversíveis/especializados
+### Restrições semânticas ausentes em interpretadores reversíveis/especializados
 
-Não valide apenas a segurança da memória; valide também as **regras semânticas** que a proof deve impor.
+Não valide apenas a segurança da memória; valide também as **regras semânticas** que a prova deve impor.
 
-Para instruction sets reversíveis/semelhantes a quantum, certifique-se de que os operandos que precisam ser distintos estejam realmente restritos a serem distintos. Uma operação semelhante a Toffoli/CCX implementada como:<sup>[[7]](#references)[[8]](#references)</sup>
+Para conjuntos de instruções reversíveis/semelhantes aos quânticos, garanta que os operandos que precisam ser distintos sejam de fato restringidos para serem distintos. Uma operação semelhante a Toffoli/CCX implementada como:<sup>[[7]](#references)[[8]](#references)</sup>
+
 ```rust
 let v = cond & self.qubit(op.q_control1) & self.qubit(op.q_control2);
 *self.qubit_mut(op.q_target) ^= v;
 ```
-torna-se inseguro se o convidado não rejeitar:
+
+torna-se inseguro se o guest não rejeitar:
+
 ```text
 op.q_control1 == op.q_control2 == op.q_target
 ```
-Nesse caso, a transição se reduz a:
+
+Nesse caso, a transição colapsa em:
+
 ```text
 q = q ^ (q & q) = 0
 ```
-Isso cria uma **primitiva de reset determinística**, quebrando as suposições de reversibilidade e permitindo computações não intencionais mais baratas. Em sistemas de prova que atestam o uso de recursos, isso pode permitir que attackers satisfaçam verificações funcionais enquanto contornam o modelo de custo que o verifier acredita estar sendo aplicado.
+
+Isso cria uma **primitiva de reset determinística**, quebrando as suposições de reversibilidade e possibilitando cálculos não pretendidos com menor custo. Em sistemas de prova que atestam o uso de recursos, isso pode permitir que atacantes satisfaçam verificações funcionais enquanto burlam o modelo de custos que o verificador acredita estar sendo aplicado.
 
 ### O que testar em sistemas ZK
 
-- Faça fuzzing de todos os parsers do guest com codificações malformadas de witness/private-input.
-- Garanta a validação do intervalo de enums antes do dispatch do opcode.
-- Adicione verificações semânticas para aliasing de operandos e outras formas inválidas de instruções.
+- Faça fuzzing de todos os parsers guest com codificações malformadas de witness/entradas privadas.
+- Garanta a validação do intervalo de enum antes do despacho de opcode.
+- Adicione verificações semânticas para aliasing de operandos e outras formas inválidas de instrução.
 - Compare os contadores reportados/públicos com uma implementação de referência independente.
-- Lembre-se de que uma prova válida ainda pode provar a **afirmação errada** se o programa guest tiver bugs.
+- Lembre-se de que uma prova válida ainda pode provar o **enunciado errado** se o programa guest tiver bugs.
 
-## Autorização dependente do estado
+## Autorização Dependente de Estado
 
 {{#ref}}
 state-divergence-default-value-authorization-bypasses.md
@@ -275,13 +287,13 @@ state-divergence-default-value-authorization-bypasses.md
 
 ## Exploração de DeFi/AMM
 
-Se você estiver pesquisando exploração prática de DEXes e AMMs (hooks do Uniswap v4, abuso de arredondamento/precisão, swaps de crossing de limiar amplificados por flash-loan), consulte:
+Se estiver pesquisando a exploração prática de DEXes e AMMs (hooks do Uniswap v4, abuso de arredondamento/precisão, swaps que cruzam limites amplificados por flash loans), consulte:
 
 {{#ref}}
 defi-amm-hook-precision.md
 {{#endref}}
 
-Para pools ponderados multi-asset que armazenam virtual balances em cache e podem ser envenenados quando `supply == 0`, estude:
+Para pools ponderados multiativos que armazenam em cache saldos virtuais e podem ser envenenados quando `supply == 0`, estude:
 
 {{#ref}}
 defi-amm-virtual-balance-cache-exploitation.md
@@ -289,13 +301,13 @@ defi-amm-virtual-balance-cache-exploitation.md
 
 ## References
 
-- [1] [Proof of stake - Wikipedia](https://en.wikipedia.org/wiki/Proof_of_stake)
+- [1] [Prova de participação - Wikipedia](https://en.wikipedia.org/wiki/Proof_of_stake)
 - [2] [Chave pública e chave privada explicadas - Mycryptopedia](https://www.mycryptopedia.com/public-key-private-key-explained/)
-- [3] [O que são transações multi-signature? - Bitcoin Stack Exchange](https://bitcoin.stackexchange.com/questions/3718/what-are-multi-signature-transactions)
+- [3] [O que são transações com múltiplas assinaturas? - Bitcoin Stack Exchange](https://bitcoin.stackexchange.com/questions/3718/what-are-multi-signature-transactions)
 - [4] [Transações | ethereum.org](https://ethereum.org/en/developers/docs/transactions/)
 - [5] [Gas e taxas | ethereum.org](https://ethereum.org/en/developers/docs/gas/)
 - [6] [Privacidade - Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy#Forced_address_reuse)
-- [7] [Trail of Bits - Vencemos a prova zero-knowledge quântica de cryptanalysis do Google](https://blog.trailofbits.com/2026/04/17/we-beat-googles-zero-knowledge-proof-of-quantum-cryptanalysis/)
-- [8] [Protegendo criptomoedas de curvas elípticas contra vulnerabilidades quânticas: estimativas de recursos e mitigações (versão corrigida)](https://arxiv.org/abs/2603.28846v2)
-- [9] [Repositório proof-of-concept da Trail of Bits](https://github.com/trailofbits/quantum-zk-proof-poc)
+- [7] [Trail of Bits - Vencemos a prova de conhecimento zero do Google para criptoanálise quântica](https://blog.trailofbits.com/2026/04/17/we-beat-googles-zero-knowledge-proof-of-quantum-cryptanalysis/)
+- [8] [Protegendo criptomoedas de curva elíptica contra vulnerabilidades quânticas: estimativas de recursos e mitigações (versão corrigida)](https://arxiv.org/abs/2603.28846v2)
+- [9] [Repositório de prova de conceito da Trail of Bits](https://github.com/trailofbits/quantum-zk-proof-poc)
 {{#include ../../banners/hacktricks-training.md}}
