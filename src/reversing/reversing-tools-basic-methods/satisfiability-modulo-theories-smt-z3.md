@@ -1,10 +1,11 @@
-# Vrlo uopšteno, ovaj alat će nam pomoći da pronađemo vrednosti za promenljive koje moraju da ispune određene uslove, čije bi ručno izračunavanje bilo veoma naporno. Zato možete navesti uslove koje promenljive moraju da ispune u Z3-u, a on će pronaći neke vrednosti (ako je to moguće).
+# Veoma pojednostavljeno, ovaj alat će nam pomoći da pronađemo vrednosti za promenljive koje moraju da zadovolje određene uslove, jer bi njihovo ručno izračunavanje bilo veoma zamorno. Zato Z3 možete zadati uslove koje promenljive moraju da zadovolje, a on će pronaći odgovarajuće vrednosti (ako postoje).
 
 {{#include ../../banners/hacktricks-training.md}}
 
 # Osnovne operacije
 
-## Bulove vrednosti/And/Or/Not
+## Bulove vrednosti/I/ILI/NE
+
 ```python
 # pip3 install z3-solver
 from z3 import *
@@ -20,7 +21,9 @@ s.add(And(Or(x, y, Not(z)), y))
 s.check() # If response is "sat" then the model is satisfiable, if "unsat" something is wrong
 print(s.model()) # Print valid values to satisfy the model
 ```
-## Ints/Pojednostavljivanje/Reals
+
+## Celi brojevi/Pojednostavljivanje/Realni brojevi
+
 ```python
 from z3 import *
 
@@ -44,7 +47,9 @@ print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 set_option(precision=30)
 print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 ```
-## Ispisivanje modela
+
+## Ispis modela
+
 ```python
 from z3 import *
 
@@ -56,11 +61,13 @@ s.check()
 m = s.model()
 print("x = %s" % m[x])
 for d in m.decls():
-print("%s = %s" % (d.name(), m[d]))
+    print("%s = %s" % (d.name(), m[d]))
 ```
+
 # Mašinska aritmetika
 
-Moderni CPU-ovi i mainstream programski jezici koriste aritmetiku nad vektorima bitova fiksne veličine. Mašinska aritmetika je dostupna u Z3Py kao Bit-Vectors.
+Moderni CPU-i i glavni programski jezici koriste aritmetiku nad vektorima bitova fiksne veličine. Mašinska aritmetika dostupna je u Z3Py kao Bit-Vectors.
+
 ```python
 from z3 import *
 
@@ -75,9 +82,11 @@ a = BitVecVal(-1, 32)
 b = BitVecVal(65535, 32)
 print(simplify(a == b)) # This is False
 ```
-## Brojevi sa predznakom/bez predznaka
 
-Z3 pruža posebne verzije aritmetičkih operacija sa predznakom, kod kojih je važno da li se bit-vektor tretira kao broj sa predznakom ili bez predznaka. U Z3Py-ju, operatori `<`, `<=`, `>`, `>=`, `/`, `%` i `>>` odgovaraju verzijama sa predznakom. Odgovarajući operatori bez predznaka su `ULT`, `ULE`, `UGT`, `UGE`, `UDiv`, `URem` i `LShR`.<sup>[[1]](#references)</sup>
+## Brojevi sa znakom i bez znaka
+
+Z3 pruža posebne verzije aritmetičkih operacija sa znakom, kod kojih je važno da li se bit-vektor tretira kao broj sa znakom ili bez njega. U Z3Py, operatori `<`, `<=`, `>`, `>=`, `/`, `%` i `>>` odgovaraju verzijama sa znakom. Odgovarajući operatori bez znaka su `ULT`, `ULE`, `UGT`, `UGE`, `UDiv`, `URem` i `LShR`.<sup>[[1]](#references)</sup>
+
 ```python
 from z3 import *
 
@@ -95,11 +104,13 @@ solve(x < 0)
 # Using unsigned version of <
 solve(ULT(x, 0))
 ```
+
 ## Funkcije
 
-Interpretirane funkcije, kao što je aritmetika, imaju fiksnu standardnu interpretaciju. Neinterpretirane funkcije i konstante su maksimalno fleksibilne; omogućavaju svaku interpretaciju koja je u skladu sa ograničenjima nad funkcijom ili konstantom.<sup>[[1]](#references)</sup>
+Interpretirane funkcije, kao što je sabiranje, imaju fiksno standardno tumačenje. Neinterpretirane funkcije i konstante su maksimalno fleksibilne; mogu imati bilo koje tumačenje koje je u skladu sa ograničenjima nad funkcijom ili konstantom.<sup>[[1]](#references)</sup>
 
-Primer: `f` primenjen dva puta na `x` ponovo daje `x`, ali se `f` primenjen jednom na `x` razlikuje od `x`.
+Primer: `f` primenjena dva puta na `x` ponovo daje `x`, ali se `f` primenjena jednom na `x` razlikuje od `x`.
+
 ```python
 from z3 import *
 
@@ -118,13 +129,15 @@ s.add(f(x) == 4) # Find the value that generates 4 as response
 s.check()
 print(s.model())
 ```
-# Obrasci usmereni na Reversing
 
-Ako vam je potrebna potpuna symbolic execution nad binarnim fajlom umesto ručnog izdvajanja samo nekoliko provera, pogledajte [Angr - Examples](angr/angr-examples.md). U praksi, veoma čest workflow je da se relevantni predikati pronađu u decompileru/assembly-ju i da se u Z3 ponovo izgrade samo zanimljiva aritmetička ili memorijska ograničenja.
+# Obrasci usmereni na reversing
 
-## Modelujte podatke pod kontrolom korisnika prvo kao bajtove
+Ako vam je potrebno potpuno simboličko izvršavanje nad binarnim fajlom umesto da ručno izdvajate samo nekoliko provera, pogledajte [Angr - Examples](angr/angr-examples.md). U praksi se često iz dekompilatora/sklopača izdvoje relevantni predikati, a zatim se u Z3 ponovo izgrade samo zanimljiva aritmetička ograničenja ili ograničenja nad memorijom.
 
-Za reversing je obično bolje početi sa `BitVec(..., 8)` za svaki ulazni bajt, a zatim ponovo izgraditi reči tačno onako kako to radi cilj. Time se očuvaju prelivanje, greške sa predznakom, pomeranja, rotacije i problemi sa redosledom bajtova.<sup>[[2]](#references)</sup>
+## Korisnički kontrolisane podatke prvo modelujte kao bajtove
+
+Za reversing je obično bolje početi sa `BitVec(..., 8)` za svaki ulazni bajt, a zatim ponovo izgraditi reči tačno onako kako to radi ciljni program. Time se čuvaju prelivanje, greške u tretiranju predznaka, pomeranja, rotacije i problemi s redosledom bajtova.<sup>[[2]](#references)</sup>
+
 ```python
 from z3 import *
 
@@ -139,16 +152,18 @@ s.add(RotateRight(dword, 8) == 0x41444342)
 print(s.check())
 print(hex(s.model().eval(dword).as_long()))
 ```
+
 Korisni pomoćni elementi pri prevođenju assembly ili decompiler koda:
 
-- `Concat`: ponovo sastavlja 16/32/64-bitne vrednosti iz bajtova
-- `Extract`: upoređuje više/niže reči ili emulira maske/pomeranja
-- `ZeroExt` / `SignExt`: ispravno modeluje greške pri proširivanju bez znaka/sa znakom
-- `LShR` / `RotateLeft` / `RotateRight`: uobičajeno u crackmes, hash funkcijama i obfuscatorima
+- `Concat`: rekonstruiše 16/32/64-bitne vrednosti iz bajtova
+- `Extract`: poredi više/niže reči ili emulira maske/pomeranja
+- `ZeroExt` / `SignExt`: ispravno modeluju greške pri zero/sign ekstenziji
+- `LShR` / `RotateLeft` / `RotateRight`: česti u crackmes, hash funkcijama i obfuscatorima
 
-## Modelirajte tabele memorije/registara pomoću nizova
+## Modelovanje tabela memorije/registara pomoću nizova
 
-Kada provera zavisi od `buf[i]`, lookup tabela ili emulirane memorije, `Array` može biti pregledniji od kreiranja desetina zasebnih promenljivih.<sup>[[3]](#references)</sup>
+Kada provera zavisi od `buf[i]`, lookup tabela ili emulirane memorije, `Array` može biti jednostavniji od kreiranja desetina zasebnih promenljivih.<sup>[[3]](#references)</sup>
+
 ```python
 from z3 import *
 
@@ -157,19 +172,21 @@ mem = Store(mem, BitVecVal(0x1000, 32), BitVecVal(0x41, 8))
 mem = Store(mem, BitVecVal(0x1001, 32), BitVecVal(0x42, 8))
 
 word = Concat(
-Select(mem, BitVecVal(0x1001, 32)),
-Select(mem, BitVecVal(0x1000, 32))
+    Select(mem, BitVecVal(0x1001, 32)),
+    Select(mem, BitVecVal(0x1000, 32))
 )
 
 s = Solver()
 s.add(word == 0x4241)
 print(s.check())
 ```
-Ovo je naročito korisno kada binary kopira vrednosti po memoriji pre nego što ih validira, ili kada želite da modelujete efekat nekoliko `mov`/`xor`/`add` operacija bez pokretanja celog programa.
 
-## Incremental solving je odličan za analizu grana
+Ovo je naročito korisno kada binarna datoteka pre validacije kopira vrednosti po memoriji ili kada želite da modelujete efekat nekoliko operacija `mov`/`xor`/`add` bez pokretanja celog programa.
 
-Kada već izdvojite osnovna ograničenja, koristite `push()` / `pop()` (ili assumptions) za testiranje alternativnih grana bez ponovnog kreiranja solvera svaki put:<sup>[[3]](#references)</sup>
+## Inkrementalno rešavanje je odlično za procenu grana
+
+Kada već izdvojite osnovna ograničenja, koristite `push()` / `pop()` (ili pretpostavke) da biste testirali alternativne grane bez ponovnog sastavljanja solvera svaki put:<sup>[[3]](#references)</sup>
+
 ```python
 from z3 import *
 
@@ -187,26 +204,30 @@ s.add(x < 0x100)
 print("branch 2:", s.check())
 s.pop()
 ```
-Ovo je korisno kada ponovo proveravate uslove putanje oporavljene iz decompiler-a ili kada želite brzo da utvrdite koje poređenje čini model `unsat`.
 
-## Optimizacija za bolje payload-ove
+Ovo je korisno kada ponovo reprodukujete uslove putanje dobijene iz dekompilatora ili kada želite brzo da utvrdite koje poređenje čini model `unsat`.
 
-Kada je model satisfiable, `Optimize()` vam može pomoći da dobijete upotrebljivije rešenje: na primer, da preferirate bajtove koji se mogu ispisati, minimizujete komponentu checksum-a ili maksimizujete određenu strukturu koja olakšava kucanje ili kopiranje rekonstruisane lozinke.<sup>[[3]](#references)</sup>
+## Optimizujte payloads za lakšu upotrebu
+
+Kada je model zadovoljiv, `Optimize()` može da vam pomogne da dobijete upotrebljivije rešenje: na primer, da date prednost štampivim bajtovima, svedete komponentu kontrolne sume na minimum ili uvećate neku strukturu koja olakšava unos ili kopiranje oporavljene lozinke.<sup>[[3]](#references)</sup>
+
 ```python
 from z3 import *
 
 key = [BitVec(f'k{i}', 8) for i in range(6)]
 o = Optimize()
 for c in key:
-o.add(c != 0)
-o.add_soft(And(c >= 0x20, c <= 0x7e))
+    o.add(c != 0)
+    o.add_soft(And(c >= 0x20, c <= 0x7e))
 
 print(o.check())
 print(bytes(o.model()[c].as_long() for c in key))
 ```
-## String/Seq za seriale sa složenim formatom
 
-Ako cilj uglavnom proverava prefikse, sufikse, podstringove ili strukturu nalik regularnim izrazima, ograničenja `String`/`Seq` mogu biti jednostavnija od bit-vektora koji obrađuju svaki bajt pojedinačno:<sup>[[3]](#references)</sup>
+## Niske/sekvence za serijske brojeve sa složenim formatom
+
+Ako cilj uglavnom proverava prefikse, sufikse, podniske ili strukturu nalik regex-u, ograničenja `String`/`Seq` mogu biti jednostavnija od bit-vektora koji se obrađuju bajt po bajt:<sup>[[3]](#references)</sup>
+
 ```python
 from z3 import *
 
@@ -217,62 +238,64 @@ s.add(PrefixOf(StringVal("HTB{"), serial))
 s.add(SuffixOf(StringVal("}"), serial))
 s.add(Contains(serial, StringVal("_")))
 ```
-Međutim, kada binary počne da izvršava aritmetiku, rotacije, izračunavanja checksum vrednosti ili cast-ovanja nad karakterima, obično je bolje vratiti se na 8-bitne bit-vektore.
+
+Međutim, kada binarna datoteka počne da izvodi aritmetičke operacije, rotacije, izračunavanja kontrolnih suma ili kastovanja nad znakovima, obično je bolje vratiti se na 8-bitne bit-vektore.
 
 # Primeri
 
-## Sudoku solver
+## Rešavač Sudokua
+
 ```python
 # 9x9 matrix of integer variables
 X = [[Int("x_%s_%s" % (i+1, j+1)) for j in range(9)]
-for i in range(9)]
+     for i in range(9)]
 
 # each cell contains a value in {1, ..., 9}
 cells_c = [And(1 <= X[i][j], X[i][j] <= 9)
-for i in range(9) for j in range(9)]
+           for i in range(9) for j in range(9)]
 
 # each row contains a digit at most once
 rows_c = [Distinct(X[i]) for i in range(9)]
 
 # each column contains a digit at most once
 cols_c = [Distinct([X[i][j] for i in range(9)])
-for j in range(9)]
+          for j in range(9)]
 
 # each 3x3 square contains a digit at most once
 sq_c = [Distinct([X[3*i0 + i][3*j0 + j]
-for i in range(3) for j in range(3)])
-for i0 in range(3) for j0 in range(3)]
+                  for i in range(3) for j in range(3)])
+        for i0 in range(3) for j0 in range(3)]
 
 sudoku_c = cells_c + rows_c + cols_c + sq_c
 
 # sudoku instance, we use '0' for empty cells
 instance = ((0,0,0,0,9,4,0,3,0),
-(0,0,0,5,1,0,0,0,7),
-(0,8,9,0,0,0,0,4,0),
-(0,0,0,0,0,0,2,0,8),
-(0,6,0,2,0,1,0,5,0),
-(1,0,2,0,0,0,0,0,0),
-(0,7,0,0,0,0,5,2,0),
-(9,0,0,0,6,5,0,0,0),
-(0,4,0,9,7,0,0,0,0))
+            (0,0,0,5,1,0,0,0,7),
+            (0,8,9,0,0,0,0,4,0),
+            (0,0,0,0,0,0,2,0,8),
+            (0,6,0,2,0,1,0,5,0),
+            (1,0,2,0,0,0,0,0,0),
+            (0,7,0,0,0,0,5,2,0),
+            (9,0,0,0,6,5,0,0,0),
+            (0,4,0,9,7,0,0,0,0))
 
 instance_c = [If(instance[i][j] == 0, True, X[i][j] == instance[i][j])
-for i in range(9) for j in range(9)]
+              for i in range(9) for j in range(9)]
 
 s = Solver()
 s.add(sudoku_c + instance_c)
 if s.check() == sat:
-m = s.model()
-r = [[m.evaluate(X[i][j]) for j in range(9)]
-for i in range(9)]
-print_matrix(r)
+    m = s.model()
+    r = [[m.evaluate(X[i][j]) for j in range(9)]
+         for i in range(9)]
+    print_matrix(r)
 else:
-print("failed to solve")
+    print("failed to solve")
 ```
-## Reference
+
+## References
 
 - [1] [Z3Py vodič sa primerima (ericpony z3py-tutorial)](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
 - [2] [Z3 vodič - teorija bit-vektora (Microsoft z3guide)](https://microsoft.github.io/z3guide/)
-- [3] [Programiranje u Z3 (Nikolaj Bjørner, Leonardo de Moura, Lev Nachmanson, Christoph Wintersteiger)](https://theory.stanford.edu/~nikolaj/programmingz3.html)
-
+- [3] [Programiranje Z3 (Nikolaj Bjørner, Leonardo de Moura, Lev Nachmanson, Christoph Wintersteiger)](https://theory.stanford.edu/~nikolaj/programmingz3.html)
 {{#include ../../banners/hacktricks-training.md}}

