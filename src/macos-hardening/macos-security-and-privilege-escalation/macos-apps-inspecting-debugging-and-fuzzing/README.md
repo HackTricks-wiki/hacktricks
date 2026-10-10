@@ -446,6 +446,47 @@ It also checks the binary processes against **virustotal** and show information 
 
 In [**this blog post**](https://knight.sc/debugging/2019/06/03/debugging-apple-binaries-that-use-pt-deny-attach.html) you can find an example about how to **debug a running daemon** that used **`PT_DENY_ATTACH`** to prevent debugging even if SIP was disabled.<sup>[[6]](#references)</sup>
 
+`PT_DENY_ATTACH` is a Darwin-specific `ptrace(2)` request with value **31** (`0x1f`); the other arguments are ignored. A process can invoke it directly, without a fork, to refuse later parent tracing.<sup>[[10]](#references)[[12]](#references)</sup>
+
+```c
+#include <sys/ptrace.h>
+
+if (ptrace(PT_DENY_ATTACH, 0, 0, 0) == -1) {
+    /* A debugger may already be present. */
+}
+```
+
+### XNU state and call ordering
+
+The result depends on which `ptrace` request reaches XNU first:<sup>[[11]](#references)[[12]](#references)</sup>
+
+- **LLDB attaches first:** `debugserver` uses `PT_ATTACHEXC`; XNU converts it to `PT_ATTACH`, performs `KAUTH_PROCESS_CANTRACE` authorization and sets `P_LTRACED` on the target. A subsequent `PT_DENY_ATTACH` sees that flag and terminates the target with `W_EXITCODE(ENOTSUP, 0)`, normally shown by LLDB as status **45** (`0x2d`).
+- **The target denies first:** XNU sets `P_LNOATTACH`. A later attach is rejected by process-tracing authorization; the attach error path sees `P_LNOATTACH` and sends `SIGSEGV` to the attaching process, which can appear in LLDB as a lost `debugserver` connection.
+
+To distinguish these paths, enable `debugserver` logging before launching or attaching and inspect its `ptrace` requests:<sup>[[12]](#references)</sup>
+
+```bash
+export LLDB_DEBUGSERVER_LOG_FILE=./debugserver.log
+lldb ./target                 # or: lldb -p <pid>
+grep ptrace ./debugserver.log
+```
+
+### ARM64 static identification and bypass
+
+For a non-obfuscated ARM64 Mach-O, locate the imported `_ptrace` stub and inspect the call sites. The first integer argument is passed in `w0`, so this sequence exposes the anti-debug request directly. Absence of the import is not conclusive because code can resolve `ptrace` dynamically.<sup>[[7]](#references)[[10]](#references)[[12]](#references)</sup>
+
+```armasm
+movz    w0, #0x1f            ; PT_DENY_ATTACH
+bl      imp___stubs__ptrace
+```
+
+In the demonstrated sample, patching the immediate from `0x1f` to `0x0` changes the request to `PT_TRACE_ME` and allows the program to continue under LLDB. This is a **sample-specific bypass**, not a general no-op: inspect the caller's return-value checks and control flow before choosing whether to change the request, skip the call, or force a successful return.<sup>[[10]](#references)[[12]](#references)</sup>
+
+```armasm
+movz    w0, #0x0             ; PT_TRACE_ME
+bl      imp___stubs__ptrace
+```
+
 ### lldb
 
 **lldb** is the de **facto tool** for **macOS** binary **debugging**.
@@ -550,10 +591,7 @@ settings set target.x86-disassembly-flavor intel
 - Some malwares can also **detect** if the machine is **VMware** based on the MAC address (00:50:56).
 - It's also possible to find **if a process is being debugged** with a simple code such us:
   - `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //process being debugged }`
-- It can also invoke the **`ptrace`** system call with the **`PT_DENY_ATTACH`** flag. This **prevents** a deb**u**gger from attaching and tracing.
-  - You can check if the **`sysctl`** or **`ptrace`** function is being **imported** (but the malware could import it dynamically)
-  - As noted in this writeup, “[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” :<sup>[[7]](#references)</sup>\
-    “_The message Process # exited with **status = 45 (0x0000002d)** is usually a tell-tale sign that the debug target is using **PT_DENY_ATTACH**_”
+- It can also invoke the **`ptrace`** system call with the **`PT_DENY_ATTACH`** flag. Check the [PT_DENY_ATTACH section](#page-title) for its order-dependent XNU behavior, `debugserver` logging and ARM64 patching workflow.<sup>[[7]](#references)[[12]](#references)</sup>
 
 ## Core Dumps
 
@@ -690,5 +728,8 @@ litefuzz -s -a tcp://localhost:5900 -i input/screenshared-session --reportcrash 
 - [7] [alexomara.com - Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants)
 - [8] [Apple Developer Forums - Xcode structured logs and `Enable-Private-Data`](https://developer.apple.com/forums/thread/738648)
 - [9] [Super User - Showing private data in the macOS unified log](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log)
+- [10] [Apple XNU `ptrace.h` request definitions](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/ptrace.h)
+- [11] [Apple XNU `ptrace` implementation in `mach_process.c`](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/mach_process.c)
+- [12] [Reverse Society - ptrace internals: How it prevents debugger attachment](https://blog.reversesociety.co/blog/2024/anti-debugging-using-ptrace)
 
 {{#include ../../../banners/hacktricks-training.md}}
