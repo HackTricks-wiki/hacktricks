@@ -97,6 +97,48 @@ A more effective pattern is to treat the **sequence itself as the seed** and use
 
 This is the same reason authenticated bugs, hidden transitions, or “only-after-handshake” parser bugs are often missed by vanilla file-style fuzzing: the fuzzer must preserve **order, state, and dependencies**, not just structure.<sup>[[4]](#references)</sup>
 
+## Stateful Multi-Client IPC Driver Fuzzing (Android Binder)
+
+High edge coverage can still miss IPC-driver bugs because coverage does not describe **object ownership, reference counts, pending messages, cleanup order, or thread interleavings**. Android Binder is a useful model: reaching both the allocation and free paths is not enough if the fuzzer cannot make multiple processes operate on the same kernel object in the required order.<sup>[[15]](#references)</sup>
+
+### Model the protocol, not isolated `ioctl` buffers
+
+Represent a test case as an ordered grammar of **client identity + operation + structured arguments**. The Binder LKL fuzzer uses protobuf and `libprotobuf-mutator`, with one persistent context-manager client and two ordinary clients. A semantic harness then preserves the relationships which blind byte mutation would destroy.<sup>[[15]](#references)</sup>
+
+- Cache values returned by earlier operations. For example, `BC_FREE_BUFFER` must reuse a transaction-buffer pointer returned by a previous `ioctl`.
+- Generate valid default replies so synchronous transactions can finish and later operations remain reachable.
+- Reject impossible transitions such as self-transactions or multiple pending transactions to the same target.
+- Mutate scatter-gather payloads together with their `binder_buffer_object` metadata. Preserve object offsets, pointer locations, and parent/child links so the driver reaches translation and cleanup code instead of rejecting the transaction early.
+- Keep singleton bootstrap state outside the per-input reset. Binder permits only one `BINDER_SET_CONTEXT_MGR` registration per boot, so repeatedly destroying and recreating that client would make later inputs invalid.
+
+A useful lifetime-race template is to make one client transfer an object, start thread or process cleanup, and concurrently make the receiving client release the transaction buffer. In the CVE-2020-0423 example, a `BINDER_TYPE_WEAK_BINDER` transfer followed by `BINDER_THREAD_EXIT` racing with `BC_FREE_BUFFER` could free an embedded `binder_work` while the exiting thread's cleanup path still used it.<sup>[[15]](#references)</sup>
+
+### Reintroduce controlled interleavings in a userspace kernel
+
+[Linux Kernel Library (LKL)](https://github.com/lkl/linux) links the real kernel code into a userspace harness and exposes its syscall interface through `lkl_syscall`. This makes protobuf state, coverage, and KASAN easy to coordinate in one process. LKL normally runs a syscall without another kernel thread interrupting it, however. For race campaigns, insert `schedule()` points around selected lock/unlock and lifetime boundaries, then let the harness randomly choose the next client at each yield. Keep these points targeted because each one multiplies the scheduling search space. The randomized scheduler described by the researchers is **not** part of the upstream Binder fuzzer.<sup>[[15]](#references)</sup>
+
+### Build and replay serialized regression seeds
+
+The upstream harness pins a compatible `libprotobuf-mutator`, enables LKL fuzzing instrumentation and KASAN with `LKL_FUZZING=1`, and enables `CONFIG_MMU` for Binder with `MMU=1`.<sup>[[16]](#references)</sup>
+
+```bash
+PROTOBUF_MUTATOR_DIR=/tmp/libprotobuf-mutator \
+  tools/lkl/scripts/libprotobuf-mutator-build.sh
+
+make -C tools/lkl LKL_FUZZING=1 MMU=1 \
+  PROTOBUF_MUTATOR_DIR=/tmp/libprotobuf-mutator \
+  clean-conf fuzzers -j"$(nproc)"
+```
+
+After checking out a deliberately vulnerable revision or applying the rollback patches documented upstream, a serialized seed can reproduce the whole multi-client state transition without reconstructing it in an ad-hoc C proof of concept:<sup>[[16]](#references)</sup>
+
+```bash
+tools/lkl/fuzzers/binder/binder-fuzzer \
+  tools/lkl/fuzzers/binder/seeds/CVE-2023-20938
+```
+
+Treat the resulting KASAN use-after-free as confirmation that the seed reached the vulnerable lifetime path. It does **not** demonstrate the later primitives required for kernel code execution or privilege escalation.<sup>[[16]](#references)</sup>
+
 ## Single-Machine Diversity Trick (Jackalope-Style)
 
 A practical way to hybridize **generative novelty** with **coverage reuse** is to **restart short-lived workers** against a persistent server. Each worker starts from an empty corpus, syncs after `T` seconds, runs another `T` seconds on the combined corpus, syncs again, then exits. This yields **fresh structures each generation** while still leveraging accumulated coverage.<sup>[[1]](#references)[[2]](#references)</sup>
@@ -356,4 +398,6 @@ Run the command from the **same package** and with the **same `-fuzz` target** s
 - [12] [Fuzz Introspector](https://google.github.io/oss-fuzz/advanced-topics/fuzz-introspector/)
 - [13] [AFL++ LLVM instrumentation: path and caller coverage](https://github.com/AFLplusplus/AFLplusplus/blob/stable/instrumentation/README.llvm.md)
 - [14] [Predictive Context-sensitive Fuzzing](https://www.ndss-symposium.org/ndss-paper/predictive-context-sensitive-fuzzing/)
+- [15] [Android Offensive Security Blog - Binder Fuzzing](https://androidoffsec.withgoogle.com/posts/binder-fuzzing/)
+- [16] [LKL Android Binder fuzzer - build and regression-seed documentation](https://github.com/lkl/linux/blob/master/tools/lkl/fuzzers/binder/README.md)
 {{#include ../banners/hacktricks-training.md}}
