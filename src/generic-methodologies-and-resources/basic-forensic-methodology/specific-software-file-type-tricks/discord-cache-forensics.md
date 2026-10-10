@@ -1,8 +1,8 @@
-# Forensics ya Cache ya Discord (Chromium Disk Cache)
+# Uchunguzi wa Cache ya Discord (Chromium Disk Cache)
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Ukurasa huu unatoa muhtasari wa jinsi ya kufanya triage ya Discord Desktop cache artifacts kwa ajili ya media iliyohifadhiwa locally, webhook endpoints, na correlation ya shughuli. Discord desktop client hutumia Electron, na Electron huhifadhi session data kama vile disk cache chini ya `sessionData`.<sup>[[3]](#references)[[4]](#references)</sup>
+Ukurasa huu unatoa muhtasari wa jinsi ya kuchunguza awali mabaki ya cache ya Discord Desktop ili kupata media iliyohifadhiwa ndani ya kifaa, webhook endpoints, na kuoanisha shughuli. Client ya desktop ya Discord hutumia Electron, na Electron huhifadhi data ya session kama disk cache chini ya `sessionData`.<sup>[[3]](#references)[[4]](#references)</sup>
 
 ## Mahali pa kutafuta (Windows/macOS/Linux)
 
@@ -10,89 +10,91 @@ Ukurasa huu unatoa muhtasari wa jinsi ya kufanya triage ya Discord Desktop cache
 - macOS: `~/Library/Application Support/discord/Cache/Cache_Data`
 - Linux: `~/.config/discord/Cache/Cache_Data`
 
-Hizi ndizo paths za default zinazotumiwa na parser iliyorejelewa; Electron huruhusu application kubadilisha `sessionData`, kwa hivyo thibitisha profile path halisi wakati wa acquisition.<sup>[[2]](#references)[[4]](#references)</sup>
+Hizi ndizo njia chaguomsingi zinazotumiwa na parser iliyorejelewa; Electron huruhusu programu kubadilisha `sessionData`, kwa hiyo thibitisha njia halisi ya profile wakati wa ukusanyaji.<sup>[[2]](#references)[[4]](#references)</sup>
 
-Mpangilio wa `index` + `data_#` + `f_######` unaendana na Chromium's blockfile disk-cache backend; usiiite Simple Cache bila kuthibitisha backend, kwa sababu Chromium inaandika kuhusu cache implementations tofauti.<sup>[[5]](#references)</sup>
+Muundo wa `index` + `data_#` + `f_######` unalingana na backend ya Chromium ya blockfile disk-cache; usiutambulishe kama Simple Cache bila kuthibitisha backend, kwa sababu Chromium inaeleza utekelezaji tofauti wa cache.<sup>[[5]](#references)</sup>
 
-Miundo muhimu iliyo kwenye disk ndani ya `Cache_Data`:
-- `index`: Blockfile cache index inayotumika kutafuta entries.
-- `data_#`: Fixed-size block files zinazoweza kuwa na cache metadata, HTTP headers, na response data.
-- `f_######`: Files tofauti zinazotumika kwa data kubwa kuliko block-file limit; files hizi zina data iliyohifadhiwa bila block-file headers.
+Miundo muhimu iliyo kwenye diski ndani ya `Cache_Data`:
+- `index`: Index ya cache ya Blockfile inayotumiwa kupata entries.
+- `data_#`: Faili za block zenye ukubwa usiobadilika ambazo zinaweza kuwa na metadata ya cache, HTTP headers, na data ya majibu.
+- `f_######`: Faili tofauti zinazotumiwa kwa data iliyo kubwa kuliko kikomo cha block-file; faili hizi zina data iliyohifadhiwa bila block-file headers.
 
-Kufuta messages, channels, au servers hakuhakikishi kuondolewa kwa bytes ambazo tayari zimehifadhiwa locally, lakini Chromium inaweza ku-evict au kuunda upya cache files wakati wowote. Chukulia artifacts zinazosalia kama ushahidi wa fursa, na tumia file modification times kama signals za takribani za local-write pekee, ambazo lazima zi-correlate na telemetry nyingine.<sup>[[5]](#references)[[6]](#references)</sup>
+Kufuta ujumbe, channels, au servers hakuhakikishi kuondolewa kwa bytes ambazo tayari zimehifadhiwa kwenye cache ya kifaa, lakini Chromium inaweza kuondoa au kuunda upya faili za cache wakati wowote. Chukulia mabaki yaliyosalia kama ushahidi wa bahati; tumia nyakati za kubadilishwa kwa faili kama dalili za jumla tu za uandishi wa ndani, ambazo lazima zilinganishwe na telemetry nyingine.<sup>[[5]](#references)[[6]](#references)</sup>
 
-## Kinachoweza kurecovered
+## Kinachoweza kurejeshwa
 
-Kulingana na kile kilichofetched na bado hakija-evictiwa, triage inaweza kurecover cached attachments, media, URLs, na file hashes; cache pekee haithibitishi kuwa item iliexfiltrate.<sup>[[1]](#references)[[2]](#references)[[5]](#references)</sup>
+Kulingana na kilichopakuliwa na ambacho bado hakijaondolewa kwenye cache, uchunguzi wa awali unaweza kurejesha attachments, media, URLs, na hashes za faili zilizohifadhiwa kwenye cache; cache pekee haithibitishi kwamba kitu kilichotolewa nje ya mfumo.<sup>[[1]](#references)[[2]](#references)[[5]](#references)</sup>
 
 - Attachments na thumbnails zinazorejelewa na Discord CDN URLs.
-- Images, GIFs, na videos (kwa mfano, `.jpg`, `.png`, `.gif`, `.webp`, `.mp4`, na `.webm`).
+- Picha, GIFs, na videos (kwa mfano, `.jpg`, `.png`, `.gif`, `.webp`, `.mp4`, na `.webm`).
 - Webhook URLs kama `https://discord.com/api/webhooks/...`.<sup>[[2]](#references)[[7]](#references)</sup>
-- Discord API calls kama `https://discord.com/api/vX/...`.<sup>[[2]](#references)</sup>
-- SHA-256 hashes za media iliyorecovered kwa kulinganisha na known datasets au intelligence feeds.<sup>[[1]](#references)[[2]](#references)</sup>
+- Miito ya Discord API kama `https://discord.com/api/vX/...`.<sup>[[2]](#references)</sup>
+- SHA-256 hashes za media zilizorejeshwa kwa kulinganisha na datasets au feeds za taarifa za kiintelijensia zinazojulikana.<sup>[[1]](#references)[[2]](#references)</sup>
 
-## Quick triage (manual)
+## Uchunguzi wa awali wa haraka (kwa mikono)
 
-- Grep cache kwa high-signal artifacts. Patterns hizi zinaakisi URL expressions za parser iliyorejelewa, na ni triage filters, si indicators kamili.<sup>[[2]](#references)</sup>
-- Webhook endpoints:
-- Windows: findstr /S /I /C:"https://discord.com/api/webhooks/" "%AppData%\discord\Cache\Cache_Data\*"
-- Linux/macOS: strings -a Cache_Data/* | grep -i "https://discord.com/api/webhooks/"
-- Attachment/CDN URLs:
-- strings -a Cache_Data/* | grep -Ei "https://(cdn|media)\.discordapp\.com/attachments/"
-- Discord API calls:
-- strings -a Cache_Data/* | grep -Ei "https://discord(app)?\.com/api/v[0-9]+/"
-- Panga cached entries kwa modified time ili kujenga sequence ya takribani; mtime ni filesystem signal na haiwezi yenyewe kuthibitisha wakati Discord object ilifetched au ilitumwa.<sup>[[2]](#references)[[5]](#references)[[6]](#references)</sup>
-- Windows PowerShell: Get-ChildItem "$env:AppData\discord\Cache\Cache_Data" -File -Recurse | Sort-Object LastWriteTime | Select-Object LastWriteTime, FullName
+- Tafuta mabaki yenye viashiria muhimu kwenye cache. Miundo hii inafanana na URL expressions za parser iliyorejelewa; ni vichujio vya uchunguzi wa awali, si viashiria kamili.<sup>[[2]](#references)</sup>
+  - Webhook endpoints:
+    - Windows: findstr /S /I /C:"https://discord.com/api/webhooks/" "%AppData%\discord\Cache\Cache_Data\*"
+    - Linux/macOS: strings -a Cache_Data/* | grep -i "https://discord.com/api/webhooks/"
+  - Attachment/CDN URLs:
+    - strings -a Cache_Data/* | grep -Ei "https://(cdn|media)\.discordapp\.com/attachments/"
+  - Miito ya Discord API:
+    - strings -a Cache_Data/* | grep -Ei "https://discord(app)?\.com/api/v[0-9]+/"
+- Panga entries za cache kwa muda wa kubadilishwa ili kuunda mfuatano wa takriban; mtime ni kiashiria cha mfumo wa faili na peke yake haibainishi wakati ambapo kitu cha Discord kilipakuliwa au kutumwa.<sup>[[2]](#references)[[5]](#references)[[6]](#references)</sup>
+  - Windows PowerShell: Get-ChildItem "$env:AppData\discord\Cache\Cache_Data" -File -Recurse | Sort-Object LastWriteTime | Select-Object LastWriteTime, FullName
 
-## Kuchanganua f_* entries (HTTP body + headers)
+## Kuchanganua entries za f_* (HTTP body + headers)
 
-Katika blockfile layout, `f_######` files ni separate data streams na si lazima zianze na complete HTTP response. Ikiwa acquired file ina serialized HTTP headers zikifuatiwa na `\r\n\r\n`, igawanye kwenye delimiter ya kwanza na ichunguze:<sup>[[2]](#references)[[5]](#references)</sup>
-- Content-Type: Kutambua media type
-- Content-Location au X-Original-URL: Original remote URL kwa preview/correlation
+Katika muundo wa blockfile, faili za `f_######` ni data streams tofauti na hazihakikishiwi kuanza na HTTP response kamili. Ikiwa faili iliyokusanywa ina HTTP headers zilizofuatana na `\r\n\r\n`, tenganisha sehemu hizo kwenye delimiter ya kwanza kisha kagua:<sup>[[2]](#references)[[5]](#references)</sup>
+- Content-Type: Kukisia aina ya media
+- Content-Location au X-Original-URL: URL asilia ya mbali kwa ajili ya preview/ulinganisho
 - Content-Encoding: Inaweza kuwa gzip/deflate/br (Brotli).
 
-Media inaweza kuextractiwa kwa kugawanya headers kutoka kwenye body na kwa hiari ku-decompress kulingana na `Content-Encoding`; parser iliyorejelewa hushughulikia Brotli, gzip, na deflate. Magic-byte sniffing ni muhimu wakati `Content-Type` haipo, lakini bado ni heuristic.<sup>[[2]](#references)</sup>
+Kisha media inaweza kutolewa kwa kutenganisha headers na body na, kwa hiari, ku-decompress kulingana na `Content-Encoding`; parser iliyorejelewa hushughulikia Brotli, gzip, na deflate. Kukagua magic-byte husaidia wakati `Content-Type` haipo, lakini bado ni mbinu ya kukisia.<sup>[[2]](#references)</sup>
 
-## Automated DFIR: Discord Forensic Suite (CLI/GUI)
+## DFIR ya kiotomatiki: Discord Forensic Suite (CLI/GUI)
 
 - Repo: [Discord Forensic Suite](https://github.com/jwdfir/discord_cache_parser).<sup>[[1]](#references)</sup>
-- Function: Huchanganua recursively Discord's cache folder, hutafuta webhook/API/attachment URLs, huchanganua `f_*` bodies, kwa hiari hucarve media, na hutoa HTML na CSV reports pamoja na optional chronological timeline yenye SHA-256 hashes.<sup>[[1]](#references)[[2]](#references)</sup>
+- Kazi: Huchanganua kwa kujirudia folda ya cache ya Discord, hupata webhook/API/attachment URLs, huchanganua bodies za `f_*`, inaweza kwa hiari kuchonga media, na hutoa ripoti za HTML na CSV pamoja na timeline ya hiari ya mpangilio wa muda iliyo na SHA-256 hashes.<sup>[[1]](#references)[[2]](#references)</sup>
 
 Mfano wa matumizi ya CLI:
+
 ```powershell
 # Acquire a copy of the cache for offline parsing, then run on Windows:
 python discord_forensic_suite_cli `
---cache "$env:APPDATA\discord\Cache\Cache_Data" `
---outdir "C:\IR\discord-cache" `
---output discord_cache_report `
---format both `
---timeline `
---extra `
---carve `
---verbose
+  --cache "$env:APPDATA\discord\Cache\Cache_Data" `
+  --outdir "C:\IR\discord-cache" `
+  --output discord_cache_report `
+  --format both `
+  --timeline `
+  --extra `
+  --carve `
+  --verbose
 ```
-CLI hufafanua chaguo na majina haya ya matokeo:<sup>[[2]](#references)</sup>
-- --cache: Njia ya kwenda kwenye directory ya Discord Cache_Data
+
+CLI inafafanua chaguo hizi na majina ya matokeo:<sup>[[2]](#references)</sup>
+- --cache: Njia ya kuelekea kwenye saraka ya Discord Cache_Data
 - --format html|csv|both
-- --timeline: Toa timeline ya CSV iliyopangwa (kwa muda wa modified)
-- --extra: Pia scan sibling za Code Cache na GPUCache
-- --carve: Carve media kutoka kwenye raw cache bytes kwa kutumia media signatures zinazotambuliwa (images/video)
-- Output: `<output>.html`, `<output>.csv`, `<output>_timeline.csv` ya hiari, na folder ya `<output>_media` yenye files zilizotolewa au carved.
+- --timeline: Toa ratiba ya CSV iliyopangwa (kwa muda wa kurekebishwa)
+- --extra: Changanua pia Code Cache na GPUCache zilizo kwenye saraka jirani
+- --carve: Carve media kutoka kwenye baiti ghafi za cache kwa kutumia saini za media zinazotambulika (picha/video)
+- Matokeo: `<output>.html`, `<output>.csv`, hiari ya `<output>_timeline.csv`, na folda ya `<output>_media` yenye faili zilizotolewa au carved.
 
-## Vidokezo kwa mchambuzi
+## Vidokezo kwa wachambuzi
 
-- Linganisha modified time (mtime) ya files za `f_*` na `data_*` na vipindi vya shughuli za mtumiaji au attacker pamoja na telemetry huru; mtime si timestamp ya tukio yenye uhakika.<sup>[[2]](#references)[[5]](#references)[[6]](#references)</sup>
-- Fanya hash ya media iliyopatikana (SHA-256) na ulinganishe dhidi ya datasets zinazojulikana kuwa mbaya au za exfiltration.<sup>[[1]](#references)[[2]](#references)</sup>
-- Chukulia webhook URLs zilizotolewa kama credentials. Usiziinvoke kwa lengo la kujaribu tu liveness; zihifadhi kwa usalama, ratibu revocation au rotation, na tumia network telemetry inayohusiana kwa retro-hunting.<sup>[[7]](#references)</sup>
-- Deletion ya upande wa server haihakikishi kwamba cached bytes za ndani zimeharibiwa. Ikiwa acquisition inawezekana, kusanya directory nzima ya `Cache` pamoja na sibling caches zinazohusiana (`Code Cache`, `GPUCache`) kabla ya eviction au cache recreation.<sup>[[2]](#references)[[5]](#references)[[6]](#references)</sup>
+- Linganisha muda wa kurekebishwa (mtime) wa faili za `f_*` na `data_*` na vipindi vya shughuli za mtumiaji au mshambuliaji, pamoja na telemetry huru; mtime si muhuri wa muda wa tukio unaoweza kuthibitishwa.<sup>[[2]](#references)[[5]](#references)[[6]](#references)</sup>
+- Kokotoa hash za media iliyorejeshwa (SHA-256) na uzilinganishe na seti za data zinazojulikana kuwa hasidi au za uchujaji wa data.<sup>[[1]](#references)[[2]](#references)</sup>
+- Chukulia URL za webhook zilizotolewa kama credentials. Usizitumie tu kupima kama bado zinafanya kazi; zihifadhi kwa usalama, ratibu kuzifuta au kuzibadilisha, na tumia telemetry ya mtandao inayohusiana kwa retro-hunting.<sup>[[7]](#references)</sup>
+- Kufutwa kwa upande wa seva hakuhakikishi kwamba baiti zilizohifadhiwa kwenye cache ya ndani zimeangamizwa. Ikiwezekana kupata data, kusanya saraka nzima ya `Cache` na cache jirani zinazohusiana (`Code Cache`, `GPUCache`) kabla ya kuondolewa au cache kuundwa upya.<sup>[[2]](#references)[[5]](#references)[[6]](#references)</sup>
 
 ## References
 
-- [1] [Discord Forensic Suite (CLI/GUI)](https://github.com/jwdfir/discord_cache_parser)
-- [2] [Discord Forensic Suite CLI](https://raw.githubusercontent.com/jwdfir/discord_cache_parser/refs/heads/main/discord_forensic_suite_cli)
-- [3] [Jinsi Discord Ilivyowapandisha Mamilioni ya Watumiaji kwa Urahisi hadi kwenye 64-Bit Architecture](https://discord.com/blog/how-discord-seamlessly-upgraded-millions-of-users-to-64-bit-architecture)
-- [4] [app | Electron](https://www.electronjs.org/docs/latest/api/app)
-- [5] [Disk Cache](https://www.chromium.org/developers/design-documents/network-stack/disk-cache/)
-- [6] [Discord kama C2 na Ushahidi wa Cache Ulioachwa Nyuma](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
-- [7] [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
+- [1] [Kifurushi cha Uchunguzi wa KiForensiki cha Discord (CLI/GUI)](https://github.com/jwdfir/discord_cache_parser)
+- [2] [CLI ya Kifurushi cha Uchunguzi wa KiForensiki cha Discord](https://raw.githubusercontent.com/jwdfir/discord_cache_parser/refs/heads/main/discord_forensic_suite_cli)
+- [3] [Jinsi Discord Ilivyowahamisha Bila Usumbufu Mamilioni ya Watumiaji kwenda kwenye Usanifu wa 64-Bit](https://discord.com/blog/how-discord-seamlessly-upgraded-millions-of-users-to-64-bit-architecture)
+- [4] [programu | Electron](https://www.electronjs.org/docs/latest/api/app)
+- [5] [Cache ya Diski](https://www.chromium.org/developers/design-documents/network-stack/disk-cache/)
+- [6] [Discord kama C2 na ushahidi wa cache ulioachwa nyuma](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
+- [7] [Discord Webhooks – Tekeleza Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
 {{#include ../../../banners/hacktricks-training.md}}
