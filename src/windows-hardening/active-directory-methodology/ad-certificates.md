@@ -1,118 +1,123 @@
-# AD Sertifikaları
+# AD Certificates
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Giriş
+## Introduction
 
-### Bir Sertifikanın Bileşenleri
+### Components of a Certificate
 
 - Sertifikanın **Subject** alanı sahibini belirtir.
-- Bir **Public Key**, sertifikayı gerçek sahibiyle ilişkilendirmek için özel olarak tutulan bir anahtarla eşleştirilir.
+- **Public Key**, sertifikayı doğru sahibiyle ilişkilendirmek için gizli tutulan bir anahtarla eşleştirilir.
 - **NotBefore** ve **NotAfter** tarihleriyle tanımlanan **Validity Period**, sertifikanın geçerli olduğu süreyi belirtir.
-- Certificate Authority (CA) tarafından sağlanan benzersiz **Serial Number**, her sertifikayı tanımlar.
-- **Issuer**, sertifikayı yayınlayan CA'yı belirtir.
-- **SubjectAlternativeName**, subject için ek adlara izin vererek tanımlama esnekliğini artırır.
-- **Basic Constraints**, sertifikanın bir CA'ya mı yoksa bir end entity'ye mi ait olduğunu belirler ve kullanım kısıtlamalarını tanımlar.
-- **Extended Key Usages (EKUs)**, Object Identifiers (OIDs) aracılığıyla sertifikanın code signing veya email encryption gibi belirli amaçlarını tanımlar.
-- **Signature Algorithm**, sertifikanın imzalanmasında kullanılan yöntemi belirtir.
+- Certificate Authority (CA) tarafından sağlanan benzersiz bir **Serial Number**, her sertifikayı tanımlar.
+- **Issuer**, sertifikayı veren CA'yı belirtir.
+- **SubjectAlternativeName**, subject için ek adlar tanımlayarak kimlik belirleme esnekliğini artırır.
+- **Basic Constraints**, sertifikanın bir CA'ya mı yoksa bir son kullanıcı varlığına mı ait olduğunu belirler ve kullanım kısıtlamalarını tanımlar.
+- **Extended Key Usages (EKUs)**, Object Identifier'lar (OID'ler) aracılığıyla kod imzalama veya e-posta şifreleme gibi sertifikanın özel kullanım amaçlarını tanımlar.
+- **Signature Algorithm**, sertifikayı imzalamak için kullanılan yöntemi belirtir.
 - Issuer'ın özel anahtarıyla oluşturulan **Signature**, sertifikanın gerçekliğini garanti eder.<sup>[[4]](#references)</sup>
 
 ### Özel Hususlar
 
-- **Subject Alternative Names (SANs)**, bir sertifikanın birden fazla kimlik için kullanılabilmesini sağlar ve birden fazla domain'e sahip sunucular için kritik önem taşır. Saldırganların SAN belirtimini manipüle ederek impersonation riskleri oluşturmasını önlemek için güvenli issuance süreçleri hayati önem taşır.<sup>[[4]](#references)</sup>
+- **Subject Alternative Names (SANs)**, bir sertifikanın birden fazla kimlik için kullanılabilmesini sağlar. Bu, birden fazla etki alanına sahip sunucular için önemlidir. Saldırganların SAN tanımını manipüle ederek kimliğe bürünme riskini önlemek için güvenli sertifika verme süreçleri kritik öneme sahiptir.<sup>[[4]](#references)</sup>
 
-### Active Directory (AD) içindeki Certificate Authorities (CAs)
+### Active Directory'deki (AD) Certificate Authority'ler (CA'ler)
 
-AD CS, bir AD forest içindeki CA sertifikalarını, her biri benzersiz roller üstlenen belirlenmiş container'lar aracılığıyla tanır:<sup>[[4]](#references)</sup>
+AD CS, bir AD forest'ındaki CA sertifikalarını, her biri farklı bir işleve sahip belirlenmiş kapsayıcılar aracılığıyla tanır:<sup>[[4]](#references)</sup>
 
-- **Certification Authorities** container'ı, güvenilen root CA sertifikalarını içerir.
-- **Enrolment Services** container'ı, Enterprise CA'leri ve bunların certificate template'lerini açıklar.
-- **NTAuthCertificates** object'i, AD authentication için yetkilendirilmiş CA sertifikalarını içerir.
-- **AIA (Authority Information Access)** container'ı, intermediate ve cross CA sertifikalarıyla certificate chain doğrulamasını kolaylaştırır.
+- **Certification Authorities** kapsayıcısı, güvenilen kök CA sertifikalarını barındırır.
+- **Enrolment Services** kapsayıcısı, Enterprise CA'leri ve sertifika şablonlarını listeler.
+- **NTAuthCertificates** nesnesi, AD kimlik doğrulaması için yetkilendirilmiş CA sertifikalarını içerir.
+- **AIA (Authority Information Access)** kapsayıcısı, ara CA ve çapraz CA sertifikalarıyla sertifika zinciri doğrulamasını sağlar.
 
-### Sertifika Edinme: Client Certificate Request Flow
+### Sertifika Edinme: İstemci Sertifika İsteği Akışı
 
-1. Request süreci, client'ların bir Enterprise CA bulmasıyla başlar.
-2. Bir public-private key pair oluşturulduktan sonra, public key ve diğer bilgileri içeren bir CSR oluşturulur.
-3. CA, CSR'yi mevcut certificate template'lerine göre değerlendirir ve sertifikayı template'in permissions ayarlarına göre yayınlar.
-4. Onaydan sonra CA, sertifikayı özel anahtarıyla imzalar ve client'a geri gönderir.<sup>[[4]](#references)</sup>
+1. İstek süreci, istemcilerin bir Enterprise CA bulmasıyla başlar.
+2. Bir public-private key pair oluşturulduktan sonra, public key ve diğer ayrıntıları içeren bir CSR oluşturulur.
+3. CA, CSR'yi mevcut sertifika şablonlarına göre değerlendirir ve şablonun izinlerine göre sertifikayı verir.
+4. Onaylandıktan sonra CA, sertifikayı özel anahtarıyla imzalar ve istemciye geri gönderir.<sup>[[4]](#references)</sup>
 
-### Certificate Templates
+### Sertifika Şablonları
 
-AD içinde tanımlanan bu template'ler, izin verilen EKU'lar ile enrollment veya modification hakları dahil olmak üzere sertifikaların yayınlanmasına ilişkin ayarları ve izinleri belirtir. Bu özellikler, certificate services erişiminin yönetilmesi açısından kritiktir.<sup>[[4]](#references)</sup>
+AD'de tanımlanan bu şablonlar, izin verilen EKU'ler ve kayıt veya değiştirme hakları dahil olmak üzere sertifika verme ayarlarını ve izinlerini belirler. Sertifika hizmetlerine erişimi yönetmek için kritik öneme sahiptirler.<sup>[[4]](#references)</sup>
 
-**Template schema version önemlidir.** Eski **v1** template'leri (örneğin, yerleşik **WebServer** template'i) çeşitli modern enforcement kontrollerinden yoksundur. **ESC15/EKUwu** araştırması, **v1 template'lerinde** requester's CSR içine **Application Policies/EKUs** ekleyebildiğini ve bunların template'te yapılandırılmış EKU'lara **tercih edildiğini** gösterdi. Bu durum yalnızca enrollment rights ile client-auth, enrollment agent veya code-signing sertifikalarının oluşturulmasını mümkün kılar. **v2/v3 template'lerini** tercih edin, v1 varsayılanlarını kaldırın veya bunların yerine daha yeni template'ler kullanın ve EKU'ları amaçlanan kullanımla sıkı biçimde sınırlandırın.<sup>[[1]](#references)</sup>
+**Şablon şema sürümü önemlidir.** Eski **v1** şablonlarında (örneğin yerleşik **WebServer** şablonu) modern güvenlik denetimi seçeneklerinin birçoğu bulunmaz. **ESC15/EKUwu** araştırması, **v1 şablonlarında** istekte bulunanın CSR'ye **Application Policies/EKUs** ekleyebildiğini ve bunların şablonda yapılandırılmış EKU'lere **öncelik kazandığını** gösterdi. Bu, yalnızca kayıt haklarıyla client-auth, enrollment agent veya code-signing sertifikaları alınmasını mümkün kılar. **v2/v3 şablonlarını** tercih edin, v1 varsayılanlarını kaldırın veya yenileriyle değiştirin ve EKU'leri amaçlanan kullanımla sıkı biçimde sınırlandırın.<sup>[[1]](#references)</sup>
 
 ## Certificate Enrollment
 
-Sertifikalar için enrollment süreci, bir yöneticinin **bir certificate template oluşturmasıyla** başlar. Daha sonra bu template bir Enterprise Certificate Authority (CA) tarafından **publish edilir**. Bu işlem, template adının bir Active Directory object'inin `certificatetemplates` field'ına eklenmesiyle template'i client enrollment için kullanılabilir hale getirir.<sup>[[4]](#references)</sup>
+Sertifika kayıt süreci, bir yöneticinin **sertifika şablonu oluşturmasıyla** başlar. Ardından bu şablon bir Enterprise Certificate Authority (CA) tarafından **yayımlanır**. Böylece şablon istemci kaydı için kullanılabilir hale gelir. Bunun için şablonun adı bir Active Directory nesnesinin `certificatetemplates` alanına eklenir.<sup>[[4]](#references)</sup>
 
-Bir client'ın sertifika request edebilmesi için **enrollment rights** verilmelidir. Bu haklar, certificate template ve Enterprise CA üzerindeki security descriptor'lar tarafından tanımlanır. Bir request'in başarılı olması için her iki konumda da gerekli permissions verilmelidir.
+İstemcinin sertifika isteyebilmesi için **kayıt hakları** verilmelidir. Bu haklar, sertifika şablonunun ve Enterprise CA'nın güvenlik tanımlayıcılarıyla belirlenir. İsteğin başarılı olması için izinlerin her iki konumda da verilmesi gerekir.
 
-### Template Enrollment Rights
+### Şablon Kayıt Hakları
 
-Bu haklar, aşağıdakiler gibi permissions ayrıntılarını belirleyen Access Control Entries (ACEs) aracılığıyla tanımlanır:
+Bu haklar, aşağıdaki gibi izinleri tanımlayan Access Control Entry'ler (ACE'ler) aracılığıyla belirtilir:
 
-- Her biri belirli GUID'lerle ilişkilendirilmiş **Certificate-Enrollment** ve **Certificate-AutoEnrollment** hakları.
-- Tüm extended permissions'ları sağlayan **ExtendedRights**.
-- Template üzerinde tam control sağlayan **FullControl/GenericAll**.
+- Belirli GUID'lerle ilişkilendirilmiş **Certificate-Enrollment** ve **Certificate-AutoEnrollment** hakları.
+- Tüm genişletilmiş izinleri sağlayan **ExtendedRights**.
+- Şablon üzerinde tam denetim sağlayan **FullControl/GenericAll**.
 
-### Enterprise CA Enrollment Rights
+### Enterprise CA Kayıt Hakları
 
-CA'nin hakları, Certificate Authority management console üzerinden erişilebilen security descriptor'ında belirtilir. Bazı ayarlar low-privileged user'lara remote access verilmesine dahi izin verir; bu durum bir security concern oluşturabilir.
+CA'nın hakları, Certificate Authority yönetim konsolundan erişilebilen güvenlik tanımlayıcısında belirtilir. Bazı ayarlar, düşük ayrıcalıklı kullanıcıların uzaktan erişmesine bile izin verir; bu da güvenlik riski oluşturabilir.
 
-### Additional Issuance Controls
+### Ek Sertifika Verme Denetimleri
 
-Aşağıdaki gibi belirli kontroller uygulanabilir:
+Aşağıdakiler gibi belirli denetimler uygulanabilir:
 
-- **Manager Approval**: Request'leri bir certificate manager tarafından onaylanana kadar pending durumunda tutar.
-- **Enrolment Agents and Authorized Signatures**: Bir CSR üzerinde gerekli signature sayısını ve gerekli Application Policy OID'lerini belirtir.
+- **Manager Approval**: İstekleri, bir certificate manager onaylayana kadar beklemede tutar.
+- **Enrolment Agents and Authorized Signatures**: CSR için gereken imza sayısını ve gerekli Application Policy OID'lerini belirtir.
 
-### Sertifika Request Etme Yöntemleri
+### Sertifika İsteme Yöntemleri
 
-Sertifikalar aşağıdaki yöntemlerle request edilebilir:
+Sertifikalar şu yollarla istenebilir:
 
-1. DCOM interfaces kullanan **Windows Client Certificate Enrollment Protocol** (MS-WCCE).
-2. Named pipes veya TCP/IP üzerinden çalışan **ICertPassage Remote Protocol** (MS-ICPR).
-3. Certificate Authority Web Enrollment rolünün kurulu olduğu **certificate enrollment web interface**.
-4. Certificate Enrollment Policy (CEP) service ile birlikte kullanılan **Certificate Enrollment Service** (CES).
-5. Simple Certificate Enrollment Protocol (SCEP) kullanan network device'lar için **Network Device Enrollment Service** (NDES).
+1. DCOM arayüzlerini kullanan **Windows Client Certificate Enrollment Protocol** (MS-WCCE).
+2. Named pipe'lar veya TCP/IP üzerinden çalışan **ICertPassage Remote Protocol** (MS-ICPR).
+3. Certificate Authority Web Enrollment rolü yüklüyse **certificate enrollment web interface**.
+4. **Certificate Enrollment Policy (CEP)** hizmetiyle birlikte kullanılan **Certificate Enrollment Service** (CES).
+5. Simple Certificate Enrollment Protocol (SCEP) kullanan ağ cihazları için **Network Device Enrollment Service** (NDES).
 
-Windows user'ları ayrıca GUI (`certmgr.msc` veya `certlm.msc`) ya da command-line tools (`certreq.exe` veya PowerShell'ın `Get-Certificate` command'ı) aracılığıyla sertifika request edebilir.
+Windows kullanıcıları ayrıca GUI (`certmgr.msc` veya `certlm.msc`) ya da komut satırı araçları (`certreq.exe` veya PowerShell'ın `Get-Certificate` komutu) aracılığıyla da sertifika isteyebilir.
+
 ```bash
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
+
 ## Sertifika Kimlik Doğrulaması
 
 Active Directory (AD), öncelikli olarak **Kerberos** ve **Secure Channel (Schannel)** protokollerini kullanarak sertifika kimlik doğrulamasını destekler.
 
 ### Kerberos Kimlik Doğrulama Süreci
 
-Kerberos kimlik doğrulama sürecinde, kullanıcının Ticket Granting Ticket (TGT) isteği, kullanıcının sertifikasının **özel anahtarı** kullanılarak imzalanır. Bu istek, domain controller tarafından sertifikanın **geçerliliği**, **yolu** ve **iptal durumu** dahil olmak üzere çeşitli doğrulamalardan geçirilir. Doğrulamalar ayrıca sertifikanın güvenilir bir kaynaktan geldiğini doğrulamayı ve issuer'ın **NTAUTH certificate store** içindeki varlığını onaylamayı da kapsar. Doğrulamaların başarılı olması, bir TGT verilmesiyle sonuçlanır. AD'deki **`NTAuthCertificates`** nesnesi şu konumda bulunur:
+Kerberos kimlik doğrulama sürecinde, kullanıcının Ticket Granting Ticket (TGT) talebi, kullanıcının sertifikasının **özel anahtarı** kullanılarak imzalanır. Bu talep, etki alanı denetleyicisi tarafından sertifikanın **geçerliliği**, **zinciri** ve **iptal durumu** dahil olmak üzere çeşitli doğrulamalardan geçirilir. Doğrulamalar ayrıca sertifikanın güvenilir bir kaynaktan geldiğini teyit etmeyi ve verenin **NTAUTH sertifika deposunda** bulunduğunu doğrulamayı da içerir. Doğrulamalar başarılı olursa bir TGT verilir. AD'deki **`NTAuthCertificates`** nesnesi şu konumda bulunur:
+
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
-certificate authentication için güven tesisinin oluşturulmasında merkezi bir rol oynar.<sup>[[4]](#references)</sup>
 
-**KB5014754** dağıtımından bu yana modern Kerberos certificate auth, yalnızca EKU'larla değil, çoğunlukla **mapping strength** ile ilgilidir.<sup>[[2]](#references)</sup> Hardened forest'larda:
+sertifika kimlik doğrulaması için güven tesis etmenin merkezinde yer alır.<sup>[[4]](#references)</sup>
 
-- Yalnızca **UPN/DNS SAN** taşıyan bir certificate artık logon için yeterli olmayabilir.
-- KDC, genellikle **SID security extension** (`1.3.6.1.4.1.311.25.2`) veya `altSecurityIdentities` içindeki güçlü bir açık mapping olan **strong binding**'i tercih eder.
-- Certificate güçlü bir mapping içermiyorsa DC'ler compatibility mode'da **Kdcsvc Event ID 39/41** olaylarını log'lar ve enforcement mode'da auth işlemini reddeder.
-- Karma attack path'lerinde **ESC9/ESC16** önemlidir; çünkü bu teknikler issued certificate'lardan SID extension'ı çıkarır. Operator'lar daha sonra explicit mapping'lere veya attack path'in desteklediği SAN URL SID formatlarına güvenir.
+**KB5014754** dağıtımından bu yana, modern Kerberos sertifika kimlik doğrulaması yalnızca EKU’larla değil, çoğunlukla **eşleştirme gücüyle** ilgilidir.<sup>[[2]](#references)</sup> Güçlendirilmiş forest’larda:
+
+- Yalnızca **UPN/DNS SAN** içeren bir sertifika, oturum açmak için artık yeterli olmayabilir.
+- KDC, genellikle **SID security extension** (`1.3.6.1.4.1.311.25.2`) veya `altSecurityIdentities` içindeki güçlü bir açık eşleştirme olan **güçlü bir bağlamayı** tercih eder.
+- Sertifikada güçlü bir eşleştirme yoksa DC’ler uyumluluk modunda **Kdcsvc Event ID 39/41** olaylarını kaydeder ve zorunlu kılma modunda kimlik doğrulamayı reddeder.
+- Karma saldırı yollarında **ESC9/ESC16** önemlidir; çünkü verilen sertifikalardan SID extension’ı kaldırırlar. Saldırganlar daha sonra, saldırı yolunun desteklediği durumlarda açık eşleştirmelere veya SAN URL SID biçimlerine güvenir.
 
 ### Secure Channel (Schannel) Authentication
 
-Schannel, güvenli TLS/SSL bağlantılarını kolaylaştırır. Handshake sırasında client, başarılı şekilde validate edilirse access yetkisi sağlayan bir certificate sunar. Bir certificate'ın AD account'a mapping'i, diğer yöntemlerin yanı sıra Kerberos'un **S4U2Self** işlevini veya certificate'ın **Subject Alternative Name (SAN)** alanını içerebilir.<sup>[[4]](#references)</sup>
+Schannel, güvenli TLS/SSL bağlantılarını sağlar. El sıkışma sırasında istemci, başarıyla doğrulanırsa erişim yetkisi veren bir sertifika sunar. Bir sertifikanın AD hesabıyla eşleştirilmesinde, diğer yöntemlerin yanı sıra Kerberos’un **S4U2Self** işlevi veya sertifikanın **Subject Alternative Name (SAN)** alanı kullanılabilir.<sup>[[4]](#references)</sup>
 
-**PKINIT** kullanılamadığında Schannel pratik bir fallback olarak da kullanılır. Örneğin, bir domain controller uygun bir **Smart Card Logon** certificate'ına sahip değilse, `certipy auth`/PKINIT tooling bir TGT almayı başaramayabilir; ancak aynı certificate authentication ve LDAP operasyonları için **LDAPS** veya **LDAP StartTLS** ile kullanılabilir.
+**PKINIT** kullanılamadığında Schannel, pratik bir yedek seçenektir. Örneğin, bir domain controller’da uygun bir **Smart Card Logon** sertifikası yoksa `certipy auth`/PKINIT araçları TGT alma işlemini başaramayabilir; ancak aynı sertifika, kimlik doğrulaması ve LDAP işlemleri için **LDAPS** veya **LDAP StartTLS** üzerinden yine de kullanılabilir.
 
 ### AD Certificate Services Enumeration
 
-AD'nin certificate services bileşenleri LDAP sorguları üzerinden enumerate edilebilir; bu işlem **Enterprise Certificate Authorities (CAs)** ve bunların configuration'ları hakkında bilgi verir. Buna, özel privilege'lar olmadan domain-authenticated herhangi bir user erişebilir. **[Certify](https://github.com/GhostPack/Certify)** ve **[Certipy](https://github.com/ly4k/Certipy)** gibi araçlar AD CS environment'larında enumeration ve vulnerability assessment için kullanılır.
+AD’nin sertifika hizmetleri, LDAP sorguları aracılığıyla numaralandırılabilir ve **Enterprise Certificate Authorities (CA’lar)** ile yapılandırmaları hakkındaki bilgiler açığa çıkarılabilir. Bu bilgilere, özel ayrıcalıkları olmayan, domain’de kimliği doğrulanmış tüm kullanıcılar erişebilir. **[Certify](https://github.com/GhostPack/Certify)** ve **[Certipy](https://github.com/ly4k/Certipy)** gibi araçlar, AD CS ortamlarında numaralandırma ve güvenlik açığı değerlendirmesi için kullanılır.
 
-Bu araçların kullanımına ilişkin komutlar şunlardır:
+Bu araçları kullanmaya yönelik komutlar:
+
 ```bash
 # Enumerate trusted root CA certificates, Enterprise CAs, and web endpoints
 Certify.exe cas
@@ -140,53 +145,56 @@ certipy auth -pfx administrator.pfx -dc-ip 10.10.10.10 -ldap-shell
 certutil.exe -TCAInfo
 certutil -v -dstemplate
 ```
+
 {{#ref}}
 ad-certificates/domain-escalation.md
 {{#endref}}
 
 ---
 
-## Güncel Vulnerabilities ve Security Updates (2022-2025)
+## Son Güvenlik Açıkları ve Güvenlik Güncellemeleri (2022-2025)
 
-| Yıl | ID / İsim | Etki | Temel Çıkarımlar |
+| Yıl | ID / Ad | Etki | Önemli Çıkarımlar |
 |------|-----------|--------|----------------|
-| 2022 | **CVE-2022-26923** – “Certifried” / ESC6 | PKINIT sırasında machine account certificate spoofing yoluyla *Privilege escalation*. | Yama, **10 Mayıs 2022** security updates içerisinde sunulmuştur. Auditing ve strong-mapping kontrolleri **KB5014754** ile kullanıma sunulmuştur; ortamlar artık *Full Enforcement* modunda olmalıdır. |
-| 2023 | **CVE-2023-35350 / 35351** | AD CS Web Enrollment (certsrv) ve CES rollerinde *Remote code-execution*. | Public PoC'ler sınırlıdır, ancak vulnerable IIS bileşenleri çoğunlukla kurum içinde erişime açıktır. **Temmuz 2023** Patch Tuesday itibarıyla yamalanmıştır. |
-| 2024 | **CVE-2024-49019** – “EKUwu” / ESC15 | **v1 templates** üzerinde enrollment rights sahibi bir requester, CSR içerisine template EKU'larının önceliklendirdiği **Application Policies/EKUs** değerlerini ekleyebilir ve bunun sonucunda client-auth, enrollment agent veya code-signing certificates oluşturabilir. | **12 Kasım 2024** itibarıyla yamalanmıştır. v1 templates'leri (ör. varsayılan WebServer) değiştirin veya supersede edin, EKU'ları amaçlarıyla sınırlandırın ve enrollment rights değerlerini kısıtlayın. |
+| 2022 | **CVE-2022-26923** – “Certifried” / ESC6 | PKINIT sırasında makine hesabı sertifikalarını taklit ederek *yetki yükseltme*. | Yama, **10 Mayıs 2022** güvenlik güncellemelerine dahildir. Denetim ve güçlü eşleme denetimleri **KB5014754** ile kullanıma sunuldu; ortamlar artık *Full Enforcement* modunda olmalıdır. |
+| 2023 | **CVE-2023-35350 / 35351** | AD CS Web Enrollment (certsrv) ve CES rollerinde *uzaktan kod yürütme*. | Herkese açık PoC'ler sınırlıdır; ancak savunmasız IIS bileşenleri çoğunlukla şirket içi ağlarda erişime açıktır. **Temmuz 2023** Patch Tuesday itibarıyla yamalayın. |
+| 2024 | **CVE-2024-49019** – “EKUwu” / ESC15 | **v1 şablonlarında**, kayıt hakkı olan bir başvuru sahibi CSR içine, şablondaki EKU'lardan öncelikli olan **Application Policies/EKUs** değerlerini ekleyebilir; böylece client-auth, enrollment agent veya code-signing sertifikaları oluşturabilir. | **12 Kasım 2024** itibarıyla yamalanmıştır. v1 şablonlarını (ör. varsayılan WebServer) değiştirin veya yenileriyle geçersiz kılın, EKU'ları kullanım amacına göre kısıtlayın ve kayıt haklarını sınırlandırın. |
 
-### Microsoft hardening timeline (KB5014754)
+### Microsoft güçlendirme zaman çizelgesi (KB5014754)
 
-Microsoft, Kerberos certificate authentication'ı weak implicit mappings'ten uzaklaştırmak için üç aşamalı bir rollout (Compatibility → Audit → Enforcement) başlattı. **11 Şubat 2025** itibarıyla, `StrongCertificateBindingEnforcement` registry value ayarlanmamışsa domain controllers otomatik olarak **Full Enforcement** moduna geçer. Microsoft daha sonra timeline'ı güncelleyerek compatibility mode'a dönüşün **9 Eylül 2025** security update'ine kadar mümkün kalmasını sağladı.<sup>[[2]](#references)</sup> Administrators şunları yapmalıdır:
+Microsoft, Kerberos sertifika kimlik doğrulamasını zayıf örtük eşlemelerden uzaklaştırmak için üç aşamalı bir geçiş süreci (Compatibility → Audit → Enforcement) başlattı. **11 Şubat 2025** itibarıyla, `StrongCertificateBindingEnforcement` kayıt defteri değeri ayarlanmamışsa etki alanı denetleyicileri otomatik olarak **Full Enforcement** moduna geçer. Microsoft daha sonra zaman çizelgesini güncelleyerek **9 Eylül 2025** güvenlik güncellemesine kadar uyumluluk moduna dönüşün mümkün olmasını sağladı.<sup>[[2]](#references)</sup> Yöneticiler:
 
-1. Tüm DC'leri ve AD CS server'larını patch edin (Mayıs 2022 veya sonrası).
-2. *Audit* aşamasında weak mappings için Event ID 39/41 olaylarını izleyin.
-3. Enforcement weak mappings'i engellemeden önce client-auth certificates'ları yeni **SID extension** ile yeniden issue edin veya strong manual mappings yapılandırın.
+1. Tüm DC'leri ve AD CS sunucularını yamalamalıdır (Mayıs 2022 veya sonrası).
+2. *Audit* aşamasında zayıf eşlemeler için Event ID 39/41'i izlemelidir.
+3. İstemci kimlik doğrulama sertifikalarını yeni **SID extension** ile yeniden vermeli veya enforcement zayıf eşlemeleri engellemeden önce güçlü manuel eşlemeler yapılandırmalıdır.
 
-### Hardened forest'lar için operator notes
+### Güçlendirilmiş ormanlar için operatör notları
 
-- **ESC1/ESC6 artık 2025+ ortamlarında tek başına tüm hikâye değildir.** Başka bir principal için cert request ettiğinizde genellikle SID extension veya explicit mapping gibi bir strong mapping artifact'a da ihtiyaç duyarsınız.
-- **ESC15 (EKUwu)**, çoğunlukla unpatched ortamlarda değerlidir; çünkü **WebServer** gibi zararsız **v1** templates'lerini **Application Policies** inject ederek authentication veya enrollment-agent yetenekli cert'lere dönüştürür. Kerberos PKINIT hâlâ EKU'ları değerlendirir, ancak **LDAP Schannel** da Application Policies değerlerini kabul eder; bu durum LDAP tabanlı abuse yöntemlerinin geçerliliğini korur.<sup>[[1]](#references)</sup>
-- **ESC16** CA-wide bir ayardır: CA, SID security extension'ı global olarak devre dışı bırakırsa, attack chain başka bir supported format kullanarak SID inject etmediği sürece verilen tüm certificates daha zayıf mapping davranışına geri döner.
+- 2025 ve sonrasındaki ortamlarda **tek başına ESC1/ESC6 artık tüm hikâye değildir**. Başka bir principal için sertifika talep ediyorsanız genellikle SID extension veya açık bir eşleme gibi güçlü bir eşleme öğesine de ihtiyacınız vardır.
+- **ESC15 (EKUwu)**, çoğunlukla yamalanmamış ortamlarda işe yarar; **Application Policies** enjekte ederek **WebServer** gibi zararsız **v1** şablonlarını kimlik doğrulama veya enrollment agent özelliğine sahip sertifikalara dönüştürür. Kerberos PKINIT, EKU'ları değerlendirmeye devam eder; ancak **LDAP Schannel** da Application Policies değerlerini dikkate alır ve bu da LDAP tabanlı kötüye kullanımı hâlâ mümkün kılar.<sup>[[1]](#references)</sup>
+- **ESC16**, CA genelinde geçerli bir ayardır: CA, SID security extension'ı genel olarak devre dışı bırakırsa saldırı zinciri desteklenen başka bir biçimle SID eklemediği sürece verilen tüm sertifikalar daha zayıf eşleme davranışına yönelir.
+- **ESC7 hakları birbirinden farklıdır:** CA üzerindeki `ManageCA` izni, `EDITF_ATTRIBUTESUBJECTALTNAME2` (ESC6) gibi ayarlarda değişiklik yapılmasına olanak tanıyabilir; `ManageCertificates` ise istek onayını yönetir. Sertifika yöneticisi haklarında açık bir Deny, Allow izni de bulunsa bu onay yolunu engelleyebilir; ayarları ve şablonları zincirlemeden önce etkin CA ACL'ini değerlendirin. Bkz. [Microsoft'un CA ACL değerlendirmesi](https://learn.microsoft.com/en-us/defender-for-identity/security-assessment-edit-vulnerable-ca-setting).
 
 ---
 
-## Detection ve Hardening Enhancements
+## Tespit ve Güçlendirme İyileştirmeleri
 
-* **Defender for Identity AD CS sensor (2023-2024)** artık ESC1-ESC8/ESC11 için posture assessments sunar ve *“Domain-controller certificate issuance for a non-DC”* (ESC8) ile *“Prevent Certificate Enrollment with arbitrary Application Policies”* (ESC15) gibi real-time alerts üretir. Bu detections'tan yararlanmak için tüm AD CS server'larına sensor'ları deploy edin.<sup>[[3]](#references)</sup>
-* Tüm templates üzerindeki **“Supply in the request”** seçeneğini devre dışı bırakın veya kapsamını sıkı şekilde sınırlandırın; açıkça tanımlanmış SAN/EKU değerlerini tercih edin.
-* Mutlak surette gerekli olmadıkça templates'lerden **Any Purpose** veya **No EKU** değerlerini kaldırın (ESC2 senaryolarını ele alır).
-* Hassas templates'ler (ör. WebServer / CodeSigning) için **manager approval** veya özel Enrollment Agent workflow'ları zorunlu kılın.
-* Web enrollment (`certsrv`) ve CES/NDES endpoint'lerini trusted network'lerle sınırlandırın veya client-certificate authentication arkasına alın.
-* ESC11'i (RPC relay) azaltmak için RPC enrollment encryption'ı zorunlu kılın (`certutil -setreg CA\InterfaceFlags +IF_ENFORCEENCRYPTICERTREQUEST`). Flag **varsayılan olarak açıktır**, ancak legacy clients için çoğunlukla devre dışı bırakılır ve relay riskini yeniden ortaya çıkarır.
-* **IIS-based enrollment endpoint'lerini** (CES/Certsrv) güvenli hâle getirin: mümkün olduğunda NTLM'i devre dışı bırakın veya ESC8 relay'lerini engellemek için HTTPS + Extended Protection zorunlu kılın.
+* **Defender for Identity AD CS sensor (2023-2024)** artık ESC1-ESC8/ESC11 için güvenlik durumu değerlendirmeleri sunuyor ve *“Domain-controller certificate issuance for a non-DC”* (ESC8) ile *“Prevent Certificate Enrollment with arbitrary Application Policies”* (ESC15) gibi gerçek zamanlı uyarılar oluşturuyor. Bu tespitlerden yararlanmak için tüm AD CS sunucularına sensor'ları dağıtın.<sup>[[3]](#references)</sup>
+* Tüm şablonlarda **“Supply in the request”** seçeneğini devre dışı bırakın veya kapsamını sıkı biçimde sınırlandırın; SAN/EKU değerlerini açıkça tanımlamayı tercih edin.
+* Mutlaka gerekli olmadıkça şablonlardan **Any Purpose** veya **No EKU** değerlerini kaldırın (ESC2 senaryolarını ele alır).
+* Hassas şablonlar (ör. WebServer / CodeSigning) için **manager approval** veya özel Enrollment Agent iş akışları zorunlu kılın.
+* Web enrollment (`certsrv`) ve CES/NDES uç noktalarını güvenilir ağlarla veya istemci sertifikası kimlik doğrulamasının arkasında sınırlandırın.
+* ESC11'i (RPC relay) azaltmak için RPC enrollment şifrelemesini zorunlu kılın (`certutil -setreg CA\InterfaceFlags +IF_ENFORCEENCRYPTICERTREQUEST`). Bu ayar varsayılan olarak **açıktır**, ancak eski istemciler için sıklıkla devre dışı bırakılır ve relay riskini yeniden ortaya çıkarır.
+* **IIS tabanlı enrollment uç noktalarını** (CES/Certsrv) güvenli hâle getirin: mümkünse NTLM'yi devre dışı bırakın veya ESC8 relay'lerini engellemek için HTTPS + Extended Protection zorunlu kılın.
+
+ESC11'i CA'nın çalıştığı ana bilgisayarda değerlendirin; bu ana bilgisayar etki alanı denetleyicisi yerine etki alanına üye bir sunucu olabilir. Etkin CA'nın `InterfaceFlags` değerini `HKLM\SYSTEM\CurrentControlSet\Services\CertSvc\Configuration` altında okuyun; okunamayan veya bulunmayan bir değer, RPC şifrelemesinin devre dışı olduğunun kanıtı değil, bilinmeyen bir sonuçtur. `IF_ENFORCEENCRYPTICERTREQUEST` bitinin ayarlı olmaması, yine de erişilebilir bir enrollment RPC uç noktası, kimlik bilgileri elde etmeye elverişli bir yöntem ve kullanılabilir bir sertifika şablonu gerektiren bir yapılandırma ipucudur. ESC8 için yalnızca HTTP NTLM challenge bulunması yeterli değildir: çalışan bir enrollment uç noktasının bulunduğunu doğrulayın.
 
 ---
 
 ## References
 
-- [1] [EKUwu: Başka bir AD CS ESC'den ibaret değil](https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc)
-- [2] [KB5014754: Windows domain controllers üzerindeki certificate-based authentication değişiklikleri](https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16)
-- [3] [Certificates security posture assessments - Microsoft Defender for Identity](https://learn.microsoft.com/en-us/defender-for-identity/security-posture-assessments/certificates)
-- [4] [Certified Pre-Owned: Active Directory Certificate Services Abuse](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
-
+- [1] [EKUwu: Sıradan bir AD CS ESC'den ibaret değil](https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc)
+- [2] [KB5014754: Windows etki alanı denetleyicilerinde sertifika tabanlı kimlik doğrulama değişiklikleri](https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16)
+- [3] [Sertifika güvenlik durumu değerlendirmeleri - Microsoft Defender for Identity](https://learn.microsoft.com/en-us/defender-for-identity/security-posture-assessments/certificates)
+- [4] [Certified Pre-Owned: Active Directory Certificate Services'in kötüye kullanılması](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
 {{#include ../../banners/hacktricks-training.md}}

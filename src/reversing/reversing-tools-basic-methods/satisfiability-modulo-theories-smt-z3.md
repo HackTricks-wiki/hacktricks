@@ -1,10 +1,11 @@
-# Çok temel olarak, bu araç bazı koşulları karşılaması gereken değişkenlerin değerlerini bulmamıza yardımcı olur; bu değerleri elle hesaplamak oldukça zahmetli olabilir. Bu nedenle Z3'e değişkenlerin karşılaması gereken koşulları belirtebilirsiniz; Z3 de mümkünse bazı değerler bulur.
+# Çok temel olarak, bu araç bazı koşulları sağlaması gereken değişkenler için değerler bulmamıza yardımcı olur; bu değerleri elle hesaplamak oldukça zahmetli olabilir. Bu nedenle, değişkenlerin sağlaması gereken koşulları Z3'e belirtebilirsiniz; Z3 de mümkünse bazı değerler bulur.
 
 {{#include ../../banners/hacktricks-training.md}}
 
 # Temel İşlemler
 
 ## Boolean'lar/And/Or/Not
+
 ```python
 # pip3 install z3-solver
 from z3 import *
@@ -20,7 +21,9 @@ s.add(And(Or(x, y, Not(z)), y))
 s.check() # If response is "sat" then the model is satisfiable, if "unsat" something is wrong
 print(s.model()) # Print valid values to satisfy the model
 ```
-## Ints/Simplify/Reals
+
+## Tamsayılar/Sadeleştirme/Gerçel Sayılar
+
 ```python
 from z3 import *
 
@@ -44,7 +47,9 @@ print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 set_option(precision=30)
 print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 ```
+
 ## Modeli Yazdırma
+
 ```python
 from z3 import *
 
@@ -56,11 +61,13 @@ s.check()
 m = s.model()
 print("x = %s" % m[x])
 for d in m.decls():
-print("%s = %s" % (d.name(), m[d]))
+    print("%s = %s" % (d.name(), m[d]))
 ```
+
 # Makine Aritmetiği
 
-Modern CPU'lar ve yaygın programlama dilleri, sabit boyutlu bit-vektörler üzerinde aritmetik kullanır. Makine aritmetiği, Z3Py'de Bit-Vectors olarak kullanılabilir.
+Modern CPU'lar ve yaygın programlama dilleri, sabit boyutlu bit vektörleri üzerinde aritmetik işlemler kullanır. Makine aritmetiği, Z3Py'de Bit-Vectors olarak kullanılabilir.
+
 ```python
 from z3 import *
 
@@ -75,9 +82,11 @@ a = BitVecVal(-1, 32)
 b = BitVecVal(65535, 32)
 print(simplify(a == b)) # This is False
 ```
-## Signed/Unsigned Numbers
 
-Z3, bit-vector'ün signed veya unsigned olarak değerlendirilmesinin fark oluşturduğu durumlarda aritmetik işlemlerin özel signed sürümlerini sağlar. Z3Py'de `<`, `<=`, `>`, `>=`, `/`, `%` ve `>>` operatörleri signed sürümlere karşılık gelir. Bunlara karşılık gelen unsigned operatörler `ULT`, `ULE`, `UGT`, `UGE`, `UDiv`, `URem` ve `LShR`'dir.<sup>[[1]](#references)</sup>
+## İşaretli/İşaretsiz Sayılar
+
+Z3, bit-vektörünün işaretli mi yoksa işaretsiz mi ele alındığına göre farklılık gösteren aritmetik işlemlerin özel işaretli sürümlerini sunar. Z3Py'de `<`, `<=`, `>`, `>=`, `/`, `%` ve `>>` operatörleri işaretli sürümlere karşılık gelir. Bunlara karşılık gelen işaretsiz operatörler `ULT`, `ULE`, `UGT`, `UGE`, `UDiv`, `URem` ve `LShR`'dir.<sup>[[1]](#references)</sup>
+
 ```python
 from z3 import *
 
@@ -95,11 +104,13 @@ solve(x < 0)
 # Using unsigned version of <
 solve(ULT(x, 0))
 ```
+
 ## Fonksiyonlar
 
-Aritmetik gibi yorumlanan fonksiyonların sabit bir standart yorumu vardır. Yorumlanmamış fonksiyonlar ve sabitler son derece esnektir; fonksiyon veya sabit üzerindeki kısıtlamalarla tutarlı olan herhangi bir yoruma izin verirler.<sup>[[1]](#references)</sup>
+Aritmetik gibi yorumlanan fonksiyonların sabit bir standart yorumu vardır. Yorumlanmamış fonksiyonlar ve sabitler mümkün olduğunca esnektir; fonksiyon veya sabit üzerindeki kısıtlamalarla tutarlı olan herhangi bir yoruma izin verirler.<sup>[[1]](#references)</sup>
 
-Örnek: `f`, `x` üzerine iki kez uygulandığında tekrar `x` sonucunu verir, ancak `f`, `x` üzerine bir kez uygulandığında sonuç `x`'ten farklıdır.
+Örnek: `f`'nin `x`'e iki kez uygulanması yine `x` sonucunu verir, ancak `f`'nin `x`'e bir kez uygulanmasının sonucu `x`'ten farklıdır.
+
 ```python
 from z3 import *
 
@@ -118,13 +129,15 @@ s.add(f(x) == 4) # Find the value that generates 4 as response
 s.check()
 print(s.model())
 ```
-# Reversing Odaklı Kalıplar
 
-Bir binary üzerinde yalnızca birkaç kontrolü manuel olarak kaldırmak yerine tam symbolic execution yapmanız gerekiyorsa [Angr - Examples](angr/angr-examples.md) sayfasına bakın. Pratikte oldukça yaygın bir workflow, ilgili koşulları decompiler/assembly üzerinden çıkarmak ve yalnızca ilgi çekici aritmetik veya bellek kısıtlarını Z3'te yeniden oluşturmaktır.
+# Reversing Odaklı Örüntüler
 
-## Kullanıcı tarafından kontrol edilen verileri önce byte olarak modelleyin
+Bir binary üzerinde yalnızca birkaç denetimi elle kaldırmak yerine tam sembolik yürütme gerekiyorsa [Angr - Examples](angr/angr-examples.md) sayfasına göz atın. Pratikte yaygın bir iş akışı, decompiler/assembly'den ilgili yüklemleri çıkarmak ve yalnızca ilgi çekici aritmetik veya bellek kısıtlarını Z3'te yeniden oluşturmaktır.
 
-Reversing için genellikle her input byte'ı için `BitVec(..., 8)` ile başlamak ve ardından word'leri target'ın yaptığı şekilde yeniden oluşturmak daha iyidir. Bu yaklaşım wrap-around'u, signedness bug'larını, shift'leri, rotate'ları ve byte-order sorunlarını korur.<sup>[[2]](#references)</sup>
+## Önce kullanıcı denetimindeki verileri bayt olarak modelleyin
+
+Reversing için genellikle her girdi baytı için `BitVec(..., 8)` ile başlamak ve ardından kelimeleri hedefin yaptığı gibi yeniden oluşturmaktır. Bu, taşmaları, signedness hatalarını, kaydırmaları, döndürmeleri ve bayt sıralaması sorunlarını korur.<sup>[[2]](#references)</sup>
+
 ```python
 from z3 import *
 
@@ -139,16 +152,18 @@ s.add(RotateRight(dword, 8) == 0x41444342)
 print(s.check())
 print(hex(s.model().eval(dword).as_long()))
 ```
+
 Assembly veya decompiler kodunu çevirirken kullanışlı yardımcılar:
 
-- `Concat`: byte'lardan 16/32/64-bit değerleri yeniden oluşturur
-- `Extract`: yüksek/düşük word'leri karşılaştırır veya maskeleri/shift'leri taklit eder
-- `ZeroExt` / `SignExt`: zero/sign extension bug'larını doğru şekilde modeller
-- `LShR` / `RotateLeft` / `RotateRight`: crackme'lerde, hash'lerde ve obfuscator'larda yaygındır
+- `Concat`: baytlardan 16/32/64 bitlik değerleri yeniden oluşturur
+- `Extract`: üst/alt sözcükleri karşılaştırır veya maske/kaydırma işlemlerini taklit eder
+- `ZeroExt` / `SignExt`: sıfır/işaret genişletme hatalarını doğru şekilde modeller
+- `LShR` / `RotateLeft` / `RotateRight`: crackme'lerde, hash'lerde ve obfuscator'larda sık kullanılır
 
-## Array'lerle memory/register tablolarını modelleme
+## Bellek/register tablolarını dizilerle modelleme
 
-Bir check `buf[i]`, lookup table'larına veya emüle edilmiş memory'ye bağlıysa, `Array` onlarca ayrı variable oluşturmaktan daha temiz olabilir.<sup>[[3]](#references)</sup>
+Bir kontrol `buf[i]`, lookup table'lar veya emüle edilmiş belleğe bağlıysa, `Array` kullanmak onlarca ayrı değişken oluşturmaktan daha temiz olabilir.<sup>[[3]](#references)</sup>
+
 ```python
 from z3 import *
 
@@ -157,19 +172,21 @@ mem = Store(mem, BitVecVal(0x1000, 32), BitVecVal(0x41, 8))
 mem = Store(mem, BitVecVal(0x1001, 32), BitVecVal(0x42, 8))
 
 word = Concat(
-Select(mem, BitVecVal(0x1001, 32)),
-Select(mem, BitVecVal(0x1000, 32))
+    Select(mem, BitVecVal(0x1001, 32)),
+    Select(mem, BitVecVal(0x1000, 32))
 )
 
 s = Solver()
 s.add(word == 0x4241)
 print(s.check())
 ```
-Bu, özellikle binary değerleri doğrulamadan önce memory içinde kopyaladığında veya tüm programı çalıştırmadan birkaç `mov`/`xor`/`add` işleminin etkisini modellemek istediğinizde oldukça kullanışlıdır.
 
-## Incremental solving branch triage için harikadır
+Bu, özellikle binary değerleri doğrulamadan önce bellekte kopyalıyorsa veya programın tamamını çalıştırmadan birkaç `mov`/`xor`/`add` işleminin etkisini modellemek istiyorsanız çok kullanışlıdır.
 
-Temel kısıtları zaten çıkardıysanız, solver'ı her seferinde yeniden oluşturmadan alternatif branch'leri test etmek için `push()` / `pop()` (veya assumptions) kullanın:<sup>[[3]](#references)</sup>
+## Artımlı çözümleme, branch analizi için idealdir
+
+Temel kısıtları zaten çıkardıysanız, her seferinde solver'ı yeniden oluşturmadan alternatif branch'leri test etmek için `push()` / `pop()` (veya varsayımlar) kullanın:<sup>[[3]](#references)</sup>
+
 ```python
 from z3 import *
 
@@ -187,26 +204,30 @@ s.add(x < 0x100)
 print("branch 2:", s.check())
 s.pop()
 ```
-Bu, bir decompiler'dan kurtarılan path koşullarını yeniden oynatırken veya modelin `unsat` olmasına hangi karşılaştırmanın neden olduğunu hızlıca belirlemek istediğinizde kullanışlıdır.
 
-## Daha kullanışlı payload'lar için Optimize kullanın
+Bu, bir decompiler'dan elde edilen path condition'ları yeniden yürütürken veya modelin `unsat` olmasına hangi karşılaştırmanın neden olduğunu hızlıca belirlemek istediğinizde kullanışlıdır.
 
-Bir model satisfiable olduğunda, `Optimize()` daha kullanılabilir bir çözüm elde etmenize yardımcı olabilir: örneğin yazdırılabilir byte'ları tercih edebilir, bir checksum bileşenini minimize edebilir veya kurtarılan parolanın yazılmasını ya da kopyalanmasını kolaylaştıran bir yapıyı maximize edebilirsiniz.<sup>[[3]](#references)</sup>
+## Daha kullanışlı payload'lar için optimize edin
+
+Bir model karşılanabilir olduğunda, `Optimize()` daha kullanışlı bir çözüm bulmanıza yardımcı olabilir: örneğin yazdırılabilir baytları tercih edebilir, bir checksum bileşenini minimize edebilir veya elde edilen parolanın yazılmasını ya da kopyalanmasını kolaylaştıran bir yapıyı maksimize edebilirsiniz.<sup>[[3]](#references)</sup>
+
 ```python
 from z3 import *
 
 key = [BitVec(f'k{i}', 8) for i in range(6)]
 o = Optimize()
 for c in key:
-o.add(c != 0)
-o.add_soft(And(c >= 0x20, c <= 0x7e))
+    o.add(c != 0)
+    o.add_soft(And(c >= 0x20, c <= 0x7e))
 
 print(o.check())
 print(bytes(o.model()[c].as_long() for c in key))
 ```
-## Format ağırlıklı serial'lar için String/Seq
 
-Hedef ağırlıklı olarak prefix, suffix, substring veya regex benzeri yapıyı kontrol ediyorsa, `String`/`Seq` kısıtları byte byte bit-vector'lar kullanmaktan daha kolay olabilir:<sup>[[3]](#references)</sup>
+## Biçim ağırlıklı seri numaraları için dizgeler/sıralar
+
+Hedef temel olarak önekleri, sonekleri, alt dizgeleri veya regex benzeri yapıları denetliyorsa, `String`/`Seq` kısıtları bayt bayt bit vektörlerinden daha kolay olabilir:<sup>[[3]](#references)</sup>
+
 ```python
 from z3 import *
 
@@ -217,62 +238,64 @@ s.add(PrefixOf(StringVal("HTB{"), serial))
 s.add(SuffixOf(StringVal("}"), serial))
 s.add(Contains(serial, StringVal("_")))
 ```
-Ancak binary, karakterler üzerinde aritmetik işlemler, rotasyonlar, checksum'lar veya cast'ler yapmaya başladığında, genellikle 8-bit bit-vector'lara geri dönmek daha iyidir.
+
+Ancak binary, karakterler üzerinde aritmetik, döndürme, checksum veya tür dönüştürme işlemleri yapmaya başladığında genellikle 8 bitlik bit-vektörlere geri dönmek daha iyidir.
 
 # Örnekler
 
 ## Sudoku çözücü
+
 ```python
 # 9x9 matrix of integer variables
 X = [[Int("x_%s_%s" % (i+1, j+1)) for j in range(9)]
-for i in range(9)]
+     for i in range(9)]
 
 # each cell contains a value in {1, ..., 9}
 cells_c = [And(1 <= X[i][j], X[i][j] <= 9)
-for i in range(9) for j in range(9)]
+           for i in range(9) for j in range(9)]
 
 # each row contains a digit at most once
 rows_c = [Distinct(X[i]) for i in range(9)]
 
 # each column contains a digit at most once
 cols_c = [Distinct([X[i][j] for i in range(9)])
-for j in range(9)]
+          for j in range(9)]
 
 # each 3x3 square contains a digit at most once
 sq_c = [Distinct([X[3*i0 + i][3*j0 + j]
-for i in range(3) for j in range(3)])
-for i0 in range(3) for j0 in range(3)]
+                  for i in range(3) for j in range(3)])
+        for i0 in range(3) for j0 in range(3)]
 
 sudoku_c = cells_c + rows_c + cols_c + sq_c
 
 # sudoku instance, we use '0' for empty cells
 instance = ((0,0,0,0,9,4,0,3,0),
-(0,0,0,5,1,0,0,0,7),
-(0,8,9,0,0,0,0,4,0),
-(0,0,0,0,0,0,2,0,8),
-(0,6,0,2,0,1,0,5,0),
-(1,0,2,0,0,0,0,0,0),
-(0,7,0,0,0,0,5,2,0),
-(9,0,0,0,6,5,0,0,0),
-(0,4,0,9,7,0,0,0,0))
+            (0,0,0,5,1,0,0,0,7),
+            (0,8,9,0,0,0,0,4,0),
+            (0,0,0,0,0,0,2,0,8),
+            (0,6,0,2,0,1,0,5,0),
+            (1,0,2,0,0,0,0,0,0),
+            (0,7,0,0,0,0,5,2,0),
+            (9,0,0,0,6,5,0,0,0),
+            (0,4,0,9,7,0,0,0,0))
 
 instance_c = [If(instance[i][j] == 0, True, X[i][j] == instance[i][j])
-for i in range(9) for j in range(9)]
+              for i in range(9) for j in range(9)]
 
 s = Solver()
 s.add(sudoku_c + instance_c)
 if s.check() == sat:
-m = s.model()
-r = [[m.evaluate(X[i][j]) for j in range(9)]
-for i in range(9)]
-print_matrix(r)
+    m = s.model()
+    r = [[m.evaluate(X[i][j]) for j in range(9)]
+         for i in range(9)]
+    print_matrix(r)
 else:
-print("failed to solve")
+    print("failed to solve")
 ```
-## Referanslar
 
-- [1] [Örneklerle Z3Py Rehberi (ericpony z3py-tutorial)](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
-- [2] [Z3 Rehberi - Bit-Vectors teorisi (Microsoft z3guide)](https://microsoft.github.io/z3guide/)
+## References
+
+- [1] [Z3Py Rehberi, Örneklerle (ericpony z3py-tutorial)](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
+- [2] [Z3 Rehberi - Bit-Vektörleri teorisi (Microsoft z3guide)](https://microsoft.github.io/z3guide/)
 - [3] [Z3 Programlama (Nikolaj Bjørner, Leonardo de Moura, Lev Nachmanson, Christoph Wintersteiger)](https://theory.stanford.edu/~nikolaj/programmingz3.html)
-
 {{#include ../../banners/hacktricks-training.md}}
