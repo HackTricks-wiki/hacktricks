@@ -2,84 +2,85 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Triage ya haraka
+## Uchunguzi wa haraka
 
 Kusanya:
 
-- `n`, `e`, `c` (na ciphertexts zozote za ziada)
-- Mahusiano yoyote kati ya messages (plaintext ileile? modulus iliyoshirikiwa? plaintext yenye muundo?)
-- leak zozote (`p/q` kwa sehemu, bits za `d`, `dp/dq`, padding inayojulikana)
+- `n`, `e`, `c` (na ciphertext nyingine zozote)
+- Uhusiano wowote kati ya ujumbe (plaintext ileile? modulus inayoshirikiwa? plaintext yenye muundo?)
+- leaks zozote (`p/q` za sehemu, biti za `d`, `dp/dq`, padding inayojulikana)
 
 Kisha jaribu:
 
-- Ukaguzi wa factorization (Factordb / `sage: factor(n)` kwa nambari ndogo kiasi)
-- Mifumo ya low exponent (`e=3`, broadcast)
-- Common modulus / repeated primes
-- Mbinu za lattice (Coppersmith/LLL) wakati kitu kinakaribia kujulikana
+- Kukagua uwezekano wa factorization (Factordb / `sage: factor(n)` kwa nambari ndogo kiasi)
+- Miundo ya exponent ndogo (`e=3`, broadcast)
+- Modulus inayoshirikiwa / primes zinazorudiwa
+- Mbinu za lattice (Coppersmith/LLL) wakati kuna kitu kinachokaribia kujulikana
 
-## Common RSA attacks
+## Mashambulizi ya kawaida ya RSA
 
-### Common modulus
+### Modulus inayoshirikiwa
 
-Ikiwa ciphertexts mbili `c1, c2` zinasimba **ujumbe uleule** chini ya **modulus ileile** `n`, lakini zikiwa na exponents tofauti `e1, e2` (na `gcd(e1,e2)=1`), unaweza kurejesha `m` kwa kutumia extended Euclidean algorithm:
+Ikiwa ciphertext mbili `c1, c2` zimesimba **ujumbe uleule** kwa kutumia **modulus ileile** `n` lakini exponents tofauti `e1, e2` (na `gcd(e1,e2)=1`), unaweza kurejesha `m` kwa kutumia extended Euclidean algorithm:
 
 `m = c1^a * c2^b mod n` ambapo `a*e1 + b*e2 = 1`.
 
 Muhtasari wa mfano:
 
-1. Hesabu `(a, b) = xgcd(e1, e2)` ili `a*e1 + b*e2 = 1`
+1. Kokotoa `(a, b) = xgcd(e1, e2)` ili `a*e1 + b*e2 = 1`
 2. Ikiwa `a < 0`, tafsiri `c1^a` kama `inv(c1)^{-a} mod n` (vivyo hivyo kwa `b`)
-3. Zidisha na punguza modulo `n`
+3. Zidisha na upunguze modulo `n`
 
-### Shared primes across moduli
+### Primes zinazoshirikiwa kati ya moduli
 
-Ikiwa una RSA moduli nyingi kutoka kwenye challenge ileile, kagua kama zinashirikiana prime:
+Ikiwa una moduli nyingi za RSA kutoka kwa changamoto ileile, angalia kama zinashiriki prime:
 
-- `gcd(n1, n2) != 1` inaashiria hitilafu kubwa ya key-generation.
+- `gcd(n1, n2) != 1` inaashiria hitilafu kubwa katika uzalishaji wa key.
 
-Hii hujitokeza mara kwa mara katika CTFs kama "we generated many keys quickly" au "bad randomness".
+Hali hii hujitokeza mara nyingi katika CTF kama "tulitengeneza keys nyingi kwa haraka" au "randomness hafifu".
 
-### Sparse / short-sleeve moduli
+### Moduli za Sparse / short-sleeve
 
-Baadhi ya big-integer generators zilizoharibika huvuja muundo moja kwa moja kwenye public modulus: kila limb huwa na subfield ndogo tu ya random, na bits zilizobaki huwa `0`. Kwa matumizi halisi, hii huonekana kama **blocks za zero zilizotenganishwa kwa mpangilio** kote kwenye `n`, mara nyingi zikiwa zimepangiliwa kwa limbs za 32-bit au 128-bit.<sup>[[1]](#references)</sup>
+Baadhi ya jenereta zilizoharibika za nambari kubwa huvuja muundo moja kwa moja ndani ya modulus ya umma: kila limb huwa na subfield ndogo tu ya nasibu, na biti zilizosalia ni `0`. Kwa vitendo, hii huonekana kama **vitalu vya sifuri vilivyopangwa kwa nafasi sawa** kwenye `n`, mara nyingi vikiwa vimepangiliwa na limbs za biti 32 au 128.<sup>[[1]](#references)</sup>
 
 Ukaguzi wa haraka:
 
-- Dump `n` katika hex na utafute windows za zero zinazorudiwa kwa stride isiyobadilika.
-- Gawanya tena `n` kuwa limbs (`2^32`, `2^64`, `2^128`) na kagua kama kila limb ni ndogo isivyo kawaida.
-- Kagua public SSH/TLS keys kwa tooling kama **badkeys** unaposhuku weak host-key generation.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
+- Onyesha `n` katika hex na utafute madirisha ya sifuri yanayojirudia kwa stride isiyobadilika.
+- Gawa upya `n` katika limbs (`2^32`, `2^64`, `2^128`) na ukague kama kila limb ni ndogo isivyo kawaida.
+- Kagua keys za umma za SSH/TLS kwa kutumia zana kama **badkeys** unaposhuku uzalishaji dhaifu wa host-key.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
 
-Hili ni kubwa zaidi kuliko statistical bias: ikiwa private factors zote mbili `p` na `q` zina short-sleeves, modulus inaweza kuwa **rahisi kufactor**.<sup>[[1]](#references)</sup>
+Hili ni zito zaidi kuliko upendeleo wa takwimu: ikiwa factors zote mbili za faragha `p` na `q` ni short-sleeve, modulus inaweza kuwa **rahisi kufactor**.<sup>[[1]](#references)</sup>
 
-### Polynomial factorization of structured RSA keys
+### Polynomial factorization ya keys za RSA zenye muundo
 
-Kwa limb width `w` inayoshukiwa, andika modulus katika base `B = 2^w`:
+Kwa upana wa limb unaoshukiwa kuwa `w`, andika modulus katika base `B = 2^w`:
 
 - `n = Σ_i n_i B^i`
 - `f_n(x) = Σ_i n_i x^i`
 
-Kwa sababu evaluation ni multiplicative, `f_a(B) * f_c(B) = (f_a * f_c)(B)`. Ikiwa factors pia zina sparse limb coefficients, basi:
+Kwa kuwa tathmini ni ya kuzidishana, `f_a(B) * f_c(B) = (f_a * f_c)(B)`. Ikiwa coefficients za limb za factors pia ni sparse, basi:
 
 - `n = p*q`
 - `f_n(x) = f_p(x) * f_q(x)`
 
-Muhtasari wa attack:
+Muhtasari wa shambulizi:
 
-1. Kisia limb width `w`.
-2. Badilisha public modulus `n` kuwa `f_n(x)` kwa kutumia base `2^w`.
-3. Factor `f_n(x)` juu ya integers.
-4. Fanya evaluation ya candidate factors tena kwenye `B = 2^w`.
-5. Thibitisha ni candidates zipi zinazozidishwa kupata `n`.
+1. Kisia upana wa limb `w`.
+2. Geuza modulus ya umma `n` kuwa `f_n(x)` kwa kutumia base `2^w`.
+3. Factor `f_n(x)` juu ya nambari kamili.
+4. Tathmini factors zinazowezekana tena kwa `B = 2^w`.
+5. Thibitisha ni factors zipi zikizidishwa zinatoa `n`.
 
-Hii **haivunji normal RSA**. Inafanya kazi tu wakati prime factors zenyewe zina limb coefficients ndogo sana na zenye muundo maalum.<sup>[[1]](#references)</sup>
+Hili **halivunji RSA ya kawaida**. Hufanya kazi tu wakati prime factors zenyewe zina coefficients za limb ndogo sana na zenye muundo dhahiri.<sup>[[1]](#references)</sup>
 
-### Shifted limb leakage
+### Kuvuja kwa limb zilizohamishwa
 
-Sparse bytes hazipangiliwi kila mara kwenye mwisho wa chini wa kila limb. Ikiwa conversion ya moja kwa moja ya base-`2^w` inazalisha coefficients kubwa, tafuta shifts `i,j` kiasi kwamba `2^i p` na `2^j q` ziwe sparse katika limb basis hiyo. Product polynomial bado inaweza kutolewa kutoka kwenye public modulus, kufactorishwa, na kuunganishwa tena kuwa original integer factors.<sup>[[1]](#references)</sup>
+Baiti sparse hazipangiliwi kila mara kwenye mwanzo wa chini wa kila limb. Ikiwa ubadilishaji wa moja kwa moja wa base-`2^w` unatoa coefficients kubwa, tafuta shifts `i,j` ambazo hufanya `2^i p` na `2^j q` kuwa sparse katika msingi huo wa limb. Polynomial ya zao bado inaweza kutolewa kutoka kwa modulus ya umma, kufactor, na kuunganishwa tena kuwa factors asilia za nambari kamili.<sup>[[1]](#references)</sup>
 
-### Implementation smell: byte-to-limb RNG bug
+### Dalili ya hitilafu ya utekelezaji: hitilafu ya byte-to-limb RNG
 
-Pattern hatari ni kuhesabu idadi ya **32-bit limbs**, kutenga **bytes** hizo pekee, na kuzinakili kwenye limb array:
+Muundo hatari ni kukokotoa idadi ya **limbs za biti 32**, kutenga **baiti** chache tu kiasi hicho, na kuzinakili kwenye array ya limb:
+
 ```csharp
 int numLimbs = bits / 32;
 byte[] array = new byte[numLimbs];
@@ -87,81 +88,83 @@ rngProvider.GetNonZeroBytes(array);
 Array.Copy(array, 0, bignumLimbs, 0, numLimbs);
 bignumLimbs[numLimbs - 1] |= 0x80000000;
 ```
-Hii huipa kila limb ya biti-32 **biti 8 za entropy** pamoja na biti ya juu iliyolazimishwa katika limb ya mwisho. RSA primes zinazotokana na hili mara nyingi zinaweza kutambuliwa na kufactor kutoka kwenye public key pekee.<sup>[[1]](#references)</sup>
 
-### Related DSA failure mode
+Hii huipa kila limb ya biti 32 **biti 8 pekee za entropy**, pamoja na biti ya juu iliyolazimishwa kwenye limb ya mwisho. Mara nyingi primes za RSA zinazotokana na hali hii zinaweza kutambuliwa na kufactoriwa kwa kutumia public key pekee.<sup>[[1]](#references)</sup>
 
-Ikiwa routine hiyo hiyo iliyovunjika ya big-integer itatumika tena kuzalisha DSA private exponent, public key `y = g^x` inaweza ku-leak **search space iliyopunguzwa sana na yenye muundo** ya `x`. Mara tu pattern ya limb inapojulikana, mashambulizi ya discrete-log kama **baby-step giant-step** yanaweza kuwa practical dhidi ya public parameters.<sup>[[1]](#references)</sup>
+### Hali inayohusiana ya hitilafu ya DSA
 
-### Håstad broadcast / low exponent
+Ikiwa routine ileile yenye hitilafu ya big-integer itatumika tena kuzalisha private exponent ya DSA, public key `y = g^x` inaweza kufichua nafasi ya utafutaji ya `x` ambayo **imepunguzwa sana na ina muundo maalum**. Muundo wa limb ukishajulikana, mashambulizi ya discrete-log kama **baby-step giant-step** yanaweza kutumika dhidi ya public parameters.<sup>[[1]](#references)</sup>
 
-Ikiwa plaintext ile ile inatumwa kwa recipients wengi wenye `e` ndogo (mara nyingi `e=3`) na bila proper padding, unaweza kurecover `m` kupitia CRT na integer root.
+### Håstad broadcast / exponent ndogo
 
-Technical condition:
+Ikiwa plaintext ileile imetumwa kwa wapokeaji wengi kwa kutumia `e` ndogo (mara nyingi `e=3`) na bila padding inayofaa, unaweza kurejesha `m` kupitia CRT na integer root.
 
-Ikiwa una ciphertexts `e` za message ile ile chini ya moduli zilizo pairwise-coprime `n_i`:
+Sharti la kiufundi:
 
-- Tumia CRT kurecover `M = m^e` juu ya product `N = Π n_i`
-- Ikiwa `m^e < N`, basi `M` ni true integer power, na `m = integer_root(M, e)`
+Ikiwa una ciphertexts `e` za ujumbe uleule chini ya moduli zinazokaribiana kuwa coprime `n_i`:
 
-### Wiener attack: small private exponent
+- Tumia CRT kurejesha `M = m^e` kwenye product `N = Π n_i`
+- Ikiwa `m^e < N`, basi `M` ni power halisi ya integer, na `m = integer_root(M, e)`
 
-Ikiwa `d` ni ndogo sana, continued fractions zinaweza kuirecover kutoka `e/n`.
+### Shambulizi la Wiener: private exponent ndogo
 
-### Textbook RSA pitfalls
+Ikiwa `d` ni ndogo mno, continued fractions zinaweza kuirejesha kutoka `e/n`.
+
+### Mitego ya Textbook RSA
 
 Ukiona:
 
-- Hakuna OAEP/PSS, raw modular exponentiation
-- Deterministic encryption
+- Hakuna OAEP/PSS, modular exponentiation ya kawaida
+- Encryption ya deterministic
 
-basi algebraic attacks na oracle abuse huwa na uwezekano mkubwa zaidi.
+basi mashambulizi ya algebra na matumizi mabaya ya oracle huwa na uwezekano mkubwa zaidi.
 
-### Tools
+### Zana
 
 - RsaCtfTool: https://github.com/Ganapati/RsaCtfTool
 - SageMath (CRT, roots, CF): https://www.sagemath.org/
 
-## Related-message patterns
+## Miundo ya ujumbe unaohusiana
 
-Ukiona ciphertexts mbili chini ya modulus ile ile zenye messages zinazohusiana algebraically (kwa mfano, `m2 = a*m1 + b`), tafuta mashambulizi ya "related-message" kama Franklin–Reiter. Kwa kawaida haya yanahitaji:
+Ukiona ciphertexts mbili chini ya modulus ileile zenye ujumbe unaohusiana kwa algebra (kwa mfano, `m2 = a*m1 + b`), tafuta mashambulizi ya "related-message" kama Franklin–Reiter. Kwa kawaida mashambulizi haya yanahitaji:
 
-- modulus `n` ile ile
-- exponent `e` ile ile
-- relationship inayojulikana kati ya plaintexts
+- modulus `n` ileile
+- exponent `e` ileile
+- uhusiano unaojulikana kati ya plaintexts
 
-Kwa vitendo, hili mara nyingi hutatuliwa kwa Sage kwa kuunda polynomials modulo `n` na kukokotoa GCD.
+Kwa vitendo, mara nyingi hili hutatuliwa kwa kutumia Sage kuweka polynomials modulo `n` na kukokotoa GCD.
 
 ## Lattices / Coppersmith
 
-Tumia hii unapokuwa na partial bits, structured plaintext, au close relations zinazofanya unknown iwe ndogo.
+Tumia mbinu hii unapokuwa na biti za sehemu, plaintext yenye muundo maalum, au uhusiano wa karibu unaofanya thamani isiyojulikana kuwa ndogo.
 
-Lattice methods (LLL/Coppersmith) hujitokeza unapokuwa na partial information:
+Mbinu za lattice (LLL/Coppersmith) hutumika unapokuwa na taarifa za sehemu:
 
-- Partially known plaintext (structured message yenye tail isiyojulikana)
-- Partially known `p`/`q` (high bits zime-leak)
-- Small unknown differences kati ya related values
+- Plaintext inayojulikana kwa sehemu (ujumbe wenye muundo maalum na mkia usiojulikana)
+- `p`/`q` inayojulikana kwa sehemu (biti za juu zimevuja)
+- Tofauti ndogo zisizojulikana kati ya thamani zinazohusiana
 
-### What to recognize
+### Unachopaswa kutambua
 
-Dalili za kawaida katika challenges:
+Vidokezo vya kawaida kwenye challenges:
 
-- "We leaked the top/bottom bits of p"
-- "The flag is embedded like: `m = bytes_to_long(b\"HTB{\" + unknown + b\"}\")`"
-- "We used RSA but with a small random padding"
+- "Tumevuja biti za juu/chini za p"
+- "Flag imepachikwa hivi: `m = bytes_to_long(b\"HTB{\" + unknown + b\"}\")`"
+- "Tulitumia RSA lakini kwa padding ndogo ya random"
 
-### Tooling
+### Zana
 
-Kwa vitendo utatumia Sage kwa LLL na known template kwa specific instance.
+Kwa vitendo, utatumia Sage kwa LLL na template inayojulikana kwa instance husika.
 
-Good starting points:
+Sehemu nzuri za kuanzia:
 
 - Sage CTF crypto templates: https://github.com/defund/coppersmith
-- A survey-style reference: https://martinralbrecht.wordpress.com/2013/05/06/coppersmiths-method/
+- Rejea ya muhtasari: https://martinralbrecht.wordpress.com/2013/05/06/coppersmiths-method/
 
 ## References
 
-- [1] [Trail of Bits - Kufactor "short-sleeve" RSA keys with polynomials](https://blog.trailofbits.com/2026/06/12/factoring-short-sleeve-rsa-keys-with-polynomials/)
+- [1] [Trail of Bits - Kufactorisha funguo za RSA za "short-sleeve" kwa kutumia polynomials](https://blog.trailofbits.com/2026/06/12/factoring-short-sleeve-rsa-keys-with-polynomials/)
 - [2] [badkeys](https://badkeys.info/)
-- [3] [badkeys standalone tool](https://github.com/badkeys/badkeys)
+- [3] [Zana huru ya badkeys](https://github.com/badkeys/badkeys)
 {{#include ../../../banners/hacktricks-training.md}}
+

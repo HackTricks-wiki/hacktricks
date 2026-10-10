@@ -1,4 +1,4 @@
-# Crypto CTF Workflow
+# Mtiririko wa Kazi wa Crypto CTF
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,17 +6,17 @@
 
 1. Tambua ulicho nacho: encoding dhidi ya encryption dhidi ya hash dhidi ya signature dhidi ya MAC.
 2. Bainisha kinachodhibitiwa: plaintext/ciphertext, IV/nonce, key, oracle (padding/error/timing), partial leakage.
-3. Panga kwa makundi: symmetric (AES/CTR/GCM), public-key (RSA/ECC), hash/MAC (SHA/MD5/HMAC), classical (Vigenere/XOR).
-4. Tumia ukaguzi wenye uwezekano mkubwa kwanza: decode layers, known-plaintext XOR, nonce reuse, mode misuse, oracle behavior.
-5. Tumia advanced methods pale tu inapohitajika: lattices (LLL/Coppersmith), SMT/Z3, side-channels.
+3. Ainisha: symmetric (AES/CTR/GCM), public-key (RSA/ECC), hash/MAC (SHA/MD5/HMAC), classical (Vigenere/XOR).
+4. Fanya kwanza ukaguzi wenye uwezekano mkubwa zaidi: decode tabaka, known-plaintext XOR, nonce reuse, matumizi yasiyo sahihi ya mode, tabia ya oracle.
+5. Tumia mbinu za kina zaidi inapohitajika tu: lattices (LLL/Coppersmith), SMT/Z3, side-channels.
 
-## Rasilimali za mtandaoni na utilities
+## Rasilimali na zana za mtandaoni
 
-Hizi ni muhimu wakati kazi ni kutambua na kuondoa layers, au unapohitaji uthibitisho wa haraka wa hypothesis.
+Hizi ni muhimu wakati kazi ni kutambua na kuondoa tabaka, au unapohitaji kuthibitisha haraka dhana.
 
 ### Utafutaji wa hash
 
-- Tafuta challenge hash inapojulikana kuwa synthetic/public.
+- Tafuta hash ya challenge ikiwa inajulikana kuwa synthetic/public.
 - CrackStation.<sup>[[1]](#references)</sup>
 - MD5Decrypt.<sup>[[2]](#references)</sup>
 - Utafutaji wa hashes.org.<sup>[[3]](#references)</sup>
@@ -24,33 +24,33 @@ Hizi ni muhimu wakati kazi ni kutambua na kuondoa layers, au unapohitaji uthibit
 - GPUHash.me.<sup>[[5]](#references)</sup>
 - Hash Toolkit.<sup>[[6]](#references)</sup>
 
-Usiwasilishe real password hashes au confidential challenge material kwenye lookup services za third-party. Pendelea offline wordlist/rule attack wakati disclosure, terms of service, au competition rules ni jambo la kuzingatia.
+Usiwasilishe hash halisi za password au nyenzo za challenge za siri kwenye huduma za utafutaji za watu wengine. Pendelea shambulio la wordlist/rule la offline pale ambapo ufichuaji, masharti ya huduma, au kanuni za mashindano ni jambo la kuzingatia.
 
-### Vifaa vya kusaidia identification
+### Zana za kusaidia utambuzi
 
 - CyberChef (Magic, decoding, na conversion).<sup>[[7]](#references)</sup>
-- dCode (cipher/encoding playground).<sup>[[8]](#references)</sup>
-- Boxentriq (substitution solvers).<sup>[[9]](#references)</sup>
+- dCode (mazingira ya majaribio ya cipher/encoding).<sup>[[8]](#references)</sup>
+- Boxentriq (vitatua substitution).<sup>[[9]](#references)</sup>
 
-### Practice platforms / references
+### Majukwaa ya mazoezi / marejeo
 
-- CryptoHack (hands-on cryptography challenges).<sup>[[10]](#references)</sup>
-- Cryptopals (classic modern-cryptography pitfalls).<sup>[[11]](#references)</sup>
+- CryptoHack (changamoto za vitendo za cryptography).<sup>[[10]](#references)</sup>
+- Cryptopals (mitego ya kawaida ya cryptography ya kisasa).<sup>[[11]](#references)</sup>
 
-### Automated decoding
+### Decoding ya kiotomatiki
 
 - Ciphey.<sup>[[12]](#references)</sup>
-- python-codext (tries many bases/encodings).<sup>[[13]](#references)</sup>
+- python-codext (hujaribu base/encoding nyingi).<sup>[[13]](#references)</sup>
 
 ## Encodings na classical ciphers
 
-### Technique
+### Mbinu
 
-Kazi nyingi za crypto za CTF ni layered transforms: base encoding + simple substitution + compression. Lengo ni kutambua layers na kuziondoa kwa usalama.
+Kazi nyingi za crypto za CTF hutumia mabadiliko yaliyowekwa kwa tabaka: base encoding + simple substitution + compression. Lengo ni kutambua tabaka na kuziondoa kwa usalama.
 
-### Encodings: jaribu bases nyingi
+### Encodings: jaribu base nyingi
 
-Ukihisi kuna layered encoding (base64 → base32 → …), jaribu:
+Ikiwa unashuku encoding iliyowekwa kwa tabaka (base64 → base32 → …), jaribu:
 
 - CyberChef "Magic"
 - `codext` (python-codext): `codext <string>`
@@ -58,118 +58,126 @@ Ukihisi kuna layered encoding (base64 → base32 → …), jaribu:
 Viashiria vya kawaida:
 
 - Base64: `A-Za-z0-9+/=` (padding `=` ni ya kawaida)
-- Base32: `A-Z2-7=` (mara nyingi huwa na `=` padding nyingi)
-- Ascii85/Base85: punctuation nyingi; wakati mwingine hufungwa ndani ya `<~ ~>`
+- Base32: `A-Z2-7=` (mara nyingi huwa na padding nyingi ya `=`)
+- Ascii85/Base85: alama nyingi za uandishi; wakati mwingine hufungwa ndani ya `<~ ~>`
 
 ### Substitution / monoalphabetic
 
-- Boxentriq cryptogram solver.<sup>[[9]](#references)</sup>
+- Kitatua cryptogram cha Boxentriq.<sup>[[9]](#references)</sup>
 - quipqiup.<sup>[[14]](#references)</sup>
 
 ### Caesar / ROT / Atbash
 
-- Nayuki automatic Caesar-cipher breaker.<sup>[[15]](#references)</sup>
-- Rumkin Atbash tool.<sup>[[16]](#references)</sup>
+- Kivunja Caesar cipher kiotomatiki cha Nayuki.<sup>[[15]](#references)</sup>
+- Zana ya Atbash ya Rumkin.<sup>[[16]](#references)</sup>
 
 ### Vigenère
 
-- dCode Vigenère tool.<sup>[[8]](#references)</sup>
-- Guballa Vigenère solver.<sup>[[17]](#references)</sup>
+- Zana ya Vigenère ya dCode.<sup>[[8]](#references)</sup>
+- Kitatua Vigenère cha Guballa.<sup>[[17]](#references)</sup>
 
 ### Bacon cipher
 
 Mara nyingi huonekana kama makundi ya bits 5 au herufi 5:
+
 ```
 00111 01101 01010 00000 ...
 AABBB ABBAB ABABA AAAAA ...
 ```
+
 ### Morse
+
 ```
 .... --- .-.. -.-. .- .-. .- -.-. --- .-.. .-
 ```
+
 ### Runes
 
-Runes mara nyingi ni substitution alphabets; tafuta "futhark cipher" na ujaribu mapping tables.
+Runes mara nyingi ni alfabeti za kubadilisha herufi; tafuta "futhark cipher" na ujaribu kutumia majedwali ya ulinganishaji.
 
-## Compression in challenges
+## Compression kwenye challenges
 
-### Technique
+### Mbinu
 
-Compression hujitokeza mara kwa mara kama layer ya ziada (zlib/deflate/gzip/xz/zstd), wakati mwingine ikiwa nested. Ikiwa output inakaribia ku-parse lakini inaonekana kama garbage, shuku compression.
+Compression hujitokeza mara kwa mara kama safu ya ziada (zlib/deflate/gzip/xz/zstd), na wakati mwingine huwekwa katika safu nyingi. Ikiwa matokeo yanakaribia kuchanganulika lakini yanaonekana kama takataka, shuku compression.
 
-### Quick identification
+### Utambuzi wa haraka
 
 - `file <blob>`
 - Tafuta magic bytes:
-- gzip: `1f 8b`
-- zlib: kwa kawaida `78 01`, `78 5e`, `78 9c`, au `78 da` (byte ya pili hutegemea compression flags)
-- zip: `50 4b 03 04`
-- bzip2: `42 5a 68` (`BZh`)
-- xz: `fd 37 7a 58 5a 00`
-- zstd: `28 b5 2f fd`
+  - gzip: `1f 8b`
+  - zlib: mara nyingi `78 01`, `78 5e`, `78 9c`, au `78 da` (byte ya pili hutegemea flags za compression)
+  - zip: `50 4b 03 04`
+  - bzip2: `42 5a 68` (`BZh`)
+  - xz: `fd 37 7a 58 5a 00`
+  - zstd: `28 b5 2f fd`
 
 ### Raw DEFLATE
 
-CyberChef ina **Raw Deflate/Raw Inflate**, ambayo mara nyingi ndiyo njia ya haraka zaidi wakati blob inaonekana kuwa compressed lakini `zlib` inashindwa.
+CyberChef ina **Raw Deflate/Raw Inflate**, ambayo mara nyingi ndiyo njia ya haraka zaidi ikiwa blob inaonekana imebanwa lakini `zlib` inashindwa.
 
-### Useful CLI
+### CLI muhimu
+
 ```bash
 python3 - blob.bin <<'PY'
 import sys, zlib
 data = open(sys.argv[1], 'rb').read()
 for wbits in [zlib.MAX_WBITS, -zlib.MAX_WBITS]:
-try:
-print(zlib.decompress(data, wbits=wbits)[:200])
-except Exception:
-pass
+  try:
+    print(zlib.decompress(data, wbits=wbits)[:200])
+  except Exception:
+    pass
 PY
 ```
-## Miundo ya kawaida ya crypto ya CTF
+
+## Miundo ya kawaida ya crypto katika CTF
 
 ### Mbinu
 
-Haya hujitokeza mara kwa mara kwa sababu ni makosa halisi ya developers au libraries za kawaida zilizotumiwa vibaya. Kwa kawaida lengo ni kuyatambua na kutumia workflow inayojulikana ya extraction au reconstruction.
+Hivi hujitokeza mara nyingi kwa sababu ni makosa halisi ya developers au matumizi yasiyo sahihi ya libraries za kawaida. Lengo kwa kawaida ni kutambua muundo na kutumia workflow inayojulikana ya kutoa au kujenga upya data.
 
 ### Fernet
 
-Hint ya kawaida: strings mbili za Base64 (token + key).
+Kidokezo cha kawaida: strings mbili za Base64 (token + key).
 
-- Decoder/notes: Asecuritysite Fernet decoder.<sup>[[18]](#references)</sup>
+- Decoder/maelezo: Asecuritysite Fernet decoder.<sup>[[18]](#references)</sup>
 - Katika Python: `from cryptography.fernet import Fernet`
 
 ### Shamir Secret Sharing
 
 Ukiona shares nyingi na threshold `t` imetajwa, huenda ni Shamir.
 
-- Online reconstructor (kwa shares za CTF zisizo na taarifa nyeti pekee).<sup>[[19]](#references)</sup>
+- Kifaa cha kujenga upya mtandaoni (kwa shares za CTF zisizo na taarifa nyeti pekee).<sup>[[19]](#references)</sup>
 
-### OpenSSL salted formats
+### Miundo ya OpenSSL yenye chumvi
 
-Wakati mwingine CTF hutoa matokeo ya `openssl enc` (header mara nyingi huanza na `Salted__`).
+Wakati mwingine CTF hutoa matokeo ya `openssl enc` (kichwa mara nyingi huanza na `Salted__`).
 
-Bruteforce helpers:
+Vifaa vya bruteforce:
 
 - `bruteforce-salted-openssl`.<sup>[[20]](#references)</sup>
 - `easy_BFopensslCTF`.<sup>[[21]](#references)</sup>
 
-### General toolset
+### Seti ya jumla ya vifaa
 
 - RsaCtfTool.<sup>[[22]](#references)</sup>
 - featherduster.<sup>[[23]](#references)</sup>
 - cryptovenom.<sup>[[24]](#references)</sup>
 
-## Mpangilio wa local unaopendekezwa
+## Mpangilio wa ndani unaopendekezwa
 
-CTF stack ya matumizi ya vitendo:
+Seti ya vitendo ya CTF:
 
-- Python pamoja na `pycryptodome` kwa symmetric primitives na prototyping ya haraka.<sup>[[25]](#references)</sup>
-- SageMath kwa modular arithmetic, CRT, lattices, na kazi za RSA/ECC.<sup>[[26]](#references)</sup>
-- Z3 kwa challenges zinazotegemea constraints (crypto inapopunguzwa kuwa constraints).<sup>[[27]](#references)</sup>
+- Python pamoja na `pycryptodome` kwa primitives za symmetric na uundaji wa prototypes kwa haraka.<sup>[[25]](#references)</sup>
+- SageMath kwa hesabu za modular, CRT, lattices, na kazi za RSA/ECC.<sup>[[26]](#references)</sup>
+- Z3 kwa changamoto zinazotegemea constraints (crypto inapoweza kuwakilishwa kama constraints).<sup>[[27]](#references)</sup>
 
-Python packages zinazopendekezwa:
+Packages za Python zinazopendekezwa:
+
 ```bash
 pip install pycryptodome gmpy2 sympy pwntools z3-solver
 ```
+
 ## References
 
 - [1] [CrackStation](https://crackstation.net/)
@@ -177,20 +185,20 @@ pip install pycryptodome gmpy2 sympy pwntools z3-solver
 - [3] [Utafutaji wa hashes.org](https://hashes.org/search.php)
 - [4] [OnlineHashCrack](https://www.onlinehashcrack.com/)
 - [5] [GPUHash.me](https://gpuhash.me/)
-- [6] [Hash Toolkit](https://hashtoolkit.com/reverse-hash)
+- [6] [Zana ya Hash](https://hashtoolkit.com/reverse-hash)
 - [7] [GCHQ CyberChef](https://gchq.github.io/CyberChef/)
 - [8] [Zana za dCode](https://www.dcode.fr/tools-list)
-- [9] [Zana za Boxentriq za kuvunja misimbo](https://www.boxentriq.com/code-breaking)
+- [9] [Zana za kuvunja misimbo za Boxentriq](https://www.boxentriq.com/code-breaking)
 - [10] [CryptoHack](https://cryptohack.org/)
 - [11] [Cryptopals](https://cryptopals.com/)
 - [12] [Ciphey](https://github.com/Ciphey/Ciphey)
 - [13] [python-codext](https://github.com/dhondta/python-codext)
 - [14] [quipqiup](https://quipqiup.com/)
 - [15] [Nayuki - Kivunja cipher ya Caesar kiotomatiki](https://www.nayuki.io/page/automatic-caesar-cipher-breaker-javascript)
-- [16] [Rumkin - cipher ya Atbash](https://rumkin.com/tools/cipher/atbash/)
-- [17] [Kisuluhishi cha Vigenère cha Guballa](https://www.guballa.de/vigenere-solver)
-- [18] [Asecuritysite - decoder ya Fernet](https://asecuritysite.com/encryption/ferdecode)
-- [19] [Kijenzi upya cha ushiriki wa siri cha Shamir](https://christian.gen.co/secrets/)
+- [16] [Rumkin - Cipher ya Atbash](https://rumkin.com/tools/cipher/atbash/)
+- [17] [Kitatuzi cha Vigenère cha Guballa](https://www.guballa.de/vigenere-solver)
+- [18] [Asecuritysite - Dekoda ya Fernet](https://asecuritysite.com/encryption/ferdecode)
+- [19] [Kijenga upya cha ugawaji-siri wa Shamir](https://christian.gen.co/secrets/)
 - [20] [bruteforce-salted-openssl](https://github.com/glv2/bruteforce-salted-openssl)
 - [21] [easy_BFopensslCTF](https://github.com/carlospolop/easy_BFopensslCTF)
 - [22] [RsaCtfTool](https://github.com/RsaCtfTool/RsaCtfTool)
