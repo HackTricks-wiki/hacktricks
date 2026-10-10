@@ -6,12 +6,12 @@
 
 ### Componentes de un certificado
 
-- El **Subject** del certificado indica su propietario.
+- El **Subject** del certificado indica quién es su propietario.
 - Una **Public Key** se empareja con una clave privada para vincular el certificado con su propietario legítimo.
-- El **Validity Period**, definido por las fechas **NotBefore** y **NotAfter**, marca la duración efectiva del certificado.
+- El **Validity Period**, definido por las fechas **NotBefore** y **NotAfter**, determina el período de vigencia del certificado.
 - Un **Serial Number** único, proporcionado por la Certificate Authority (CA), identifica cada certificado.
-- El **Issuer** hace referencia a la CA que ha emitido el certificado.
-- **SubjectAlternativeName** permite nombres adicionales para el sujeto, lo que mejora la flexibilidad de identificación.
+- El **Issuer** hace referencia a la CA que emitió el certificado.
+- **SubjectAlternativeName** permite añadir nombres para el sujeto, lo que aporta flexibilidad a la identificación.
 - **Basic Constraints** indica si el certificado es para una CA o una entidad final, y define las restricciones de uso.
 - **Extended Key Usages (EKUs)** delimitan los fines específicos del certificado, como la firma de código o el cifrado de correo electrónico, mediante Object Identifiers (OIDs).
 - El **Signature Algorithm** especifica el método utilizado para firmar el certificado.
@@ -19,100 +19,105 @@
 
 ### Consideraciones especiales
 
-- Los **Subject Alternative Names (SANs)** amplían la aplicabilidad de un certificado a múltiples identidades, algo crucial para servidores con varios dominios. Los procesos seguros de emisión son fundamentales para evitar riesgos de suplantación por parte de atacantes que manipulen la especificación SAN.<sup>[[4]](#references)</sup>
+- Los **Subject Alternative Names (SANs)** amplían la aplicabilidad de un certificado a varias identidades, algo crucial para servidores con varios dominios. Los procesos seguros de emisión son esenciales para evitar el riesgo de suplantación por parte de atacantes que manipulen la especificación SAN.<sup>[[4]](#references)</sup>
 
 ### Certificate Authorities (CAs) en Active Directory (AD)
 
-AD CS reconoce los certificados de CA en un bosque de AD mediante contenedores designados, cada uno con funciones específicas:<sup>[[4]](#references)</sup>
+AD CS reconoce los certificados de CA de un bosque de AD mediante contenedores específicos, cada uno con una función distinta:<sup>[[4]](#references)</sup>
 
-- El contenedor **Certification Authorities** contiene los certificados de las CA raíz de confianza.
-- El contenedor **Enrolment Services** detalla las CA Enterprise y sus plantillas de certificados.
-- El objeto **NTAuthCertificates** incluye los certificados de CA autorizados para la autenticación en AD.
+- El contenedor **Certification Authorities** contiene certificados de confianza de las CA raíz.
+- El contenedor **Enrolment Services** detalla las CA empresariales y sus plantillas de certificado.
+- El objeto **NTAuthCertificates** incluye certificados de CA autorizados para la autenticación de AD.
 - El contenedor **AIA (Authority Information Access)** facilita la validación de la cadena de certificados mediante certificados intermedios y de CA cruzadas.
 
-### Adquisición de certificados: flujo de solicitud de certificados del cliente
+### Obtención de certificados: flujo de solicitud de certificado del cliente
 
-1. El proceso de solicitud comienza cuando los clientes localizan una CA Enterprise.
-2. Se crea una CSR que contiene una clave pública y otros datos, después de generar un par de claves pública-privada.
-3. La CA evalúa la CSR con respecto a las plantillas de certificados disponibles y emite el certificado según los permisos de la plantilla.
-4. Tras su aprobación, la CA firma el certificado con su clave privada y lo devuelve al cliente.<sup>[[4]](#references)</sup>
+1. El proceso de solicitud comienza cuando los clientes buscan una CA empresarial.
+2. Tras generar un par de claves pública y privada, se crea una CSR que contiene una clave pública y otros datos.
+3. La CA evalúa la CSR con las plantillas de certificado disponibles y emite el certificado según los permisos de la plantilla.
+4. Una vez aprobada, la CA firma el certificado con su clave privada y se lo devuelve al cliente.<sup>[[4]](#references)</sup>
 
-### Plantillas de certificados
+### Plantillas de certificado
 
-Definidas dentro de AD, estas plantillas especifican la configuración y los permisos para emitir certificados, incluidos los EKUs permitidos y los derechos de inscripción o modificación, que son fundamentales para gestionar el acceso a los servicios de certificados.<sup>[[4]](#references)</sup>
+Estas plantillas, definidas en AD, especifican la configuración y los permisos para emitir certificados, incluidos los EKU permitidos y los derechos de inscripción o modificación, que son fundamentales para administrar el acceso a los servicios de certificados.<sup>[[4]](#references)</sup>
 
-**La versión del esquema de la plantilla es importante.** Las plantillas **v1** heredadas (por ejemplo, la plantilla integrada **WebServer**) carecen de varios controles de enforcement modernos. La investigación sobre **ESC15/EKUwu** demostró que, en las plantillas **v1**, un solicitante puede incluir **Application Policies/EKUs** en la CSR que tienen **preferencia sobre** los EKUs configurados en la plantilla, lo que permite obtener certificados de client-auth, enrollment agent o code-signing con solo derechos de inscripción. Se recomienda utilizar plantillas **v2/v3**, eliminar o reemplazar las plantillas v1 predeterminadas y limitar estrictamente los EKUs al propósito previsto.<sup>[[1]](#references)</sup>
+**La versión del esquema de la plantilla es importante.** Las plantillas heredadas **v1** (por ejemplo, la plantilla integrada **WebServer**) carecen de varios controles de aplicación modernos. La investigación sobre **ESC15/EKUwu** demostró que, en las plantillas **v1**, quien solicita el certificado puede incluir **Application Policies/EKUs** en la CSR, que tienen **preferencia sobre** los EKU configurados en la plantilla. Esto permite obtener certificados de autenticación de cliente, de agente de inscripción o de firma de código con solo derechos de inscripción. Se recomienda usar plantillas **v2/v3**, quitar o reemplazar las plantillas v1 predeterminadas y limitar estrictamente los EKU al fin previsto.<sup>[[1]](#references)</sup>
 
 ## Inscripción de certificados
 
-El proceso de inscripción de certificados se inicia cuando un administrador **crea una plantilla de certificados**, que posteriormente es **publicada** por una Certificate Authority (CA) Enterprise. Esto hace que la plantilla esté disponible para la inscripción de clientes, un paso que se consigue añadiendo el nombre de la plantilla al campo `certificatetemplates` de un objeto de Active Directory.<sup>[[4]](#references)</sup>
+El proceso de inscripción de certificados lo inicia un administrador, que **crea una plantilla de certificado** que luego **publica** una Enterprise Certificate Authority (CA). Así, la plantilla queda disponible para que los clientes se inscriban. Para ello, se añade el nombre de la plantilla al campo `certificatetemplates` de un objeto de Active Directory.<sup>[[4]](#references)</sup>
 
-Para que un cliente pueda solicitar un certificado, deben concederse **derechos de inscripción**. Estos derechos se definen mediante descriptores de seguridad en la plantilla de certificados y en la propia CA Enterprise. Los permisos deben concederse en ambas ubicaciones para que una solicitud tenga éxito.
+Para que un cliente solicite un certificado, se le deben conceder **derechos de inscripción**. Estos derechos se definen mediante descriptores de seguridad en la plantilla de certificado y en la propia CA empresarial. Para que una solicitud se complete correctamente, se deben conceder permisos en ambas ubicaciones.
 
-### Derechos de inscripción de la plantilla
+### Derechos de inscripción de plantillas
 
 Estos derechos se especifican mediante Access Control Entries (ACEs), que detallan permisos como:
 
-- Derechos **Certificate-Enrollment** y **Certificate-AutoEnrollment**, cada uno asociado a GUIDs específicos.
+- Los derechos **Certificate-Enrollment** y **Certificate-AutoEnrollment**, cada uno asociado a GUID específicos.
 - **ExtendedRights**, que permite todos los permisos extendidos.
 - **FullControl/GenericAll**, que proporciona control total sobre la plantilla.
 
-### Derechos de inscripción de la CA Enterprise
+### Derechos de inscripción de la CA empresarial
 
-Los derechos de la CA se describen en su descriptor de seguridad, accesible mediante la consola de administración de Certificate Authority. Algunas configuraciones incluso permiten el acceso remoto a usuarios con pocos privilegios, lo que podría suponer un riesgo de seguridad.
+Los derechos de la CA se especifican en su descriptor de seguridad, al que se puede acceder desde la consola de administración de Certificate Authority. Algunos ajustes incluso permiten el acceso remoto a usuarios con pocos privilegios, lo que podría suponer un riesgo de seguridad.
 
 ### Controles adicionales de emisión
 
-Pueden aplicarse determinados controles, como:
+Pueden aplicarse ciertos controles, como:
 
-- **Manager Approval**: coloca las solicitudes en estado pendiente hasta que sean aprobadas por un administrador de certificados.
-- **Enrolment Agents and Authorized Signatures**: especifica el número de firmas necesarias en una CSR y los Application Policy OIDs requeridos.
+- **Manager Approval**: deja las solicitudes pendientes hasta que las apruebe un administrador de certificados.
+- **Enrolment Agents and Authorized Signatures**: especifica el número de firmas requeridas en una CSR y los OID de Application Policy necesarios.
 
 ### Métodos para solicitar certificados
 
 Los certificados se pueden solicitar mediante:
 
-1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), utilizando interfaces DCOM.
+1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), mediante interfaces DCOM.
 2. **ICertPassage Remote Protocol** (MS-ICPR), mediante named pipes o TCP/IP.
 3. La **interfaz web de inscripción de certificados**, con el rol Certificate Authority Web Enrollment instalado.
 4. El **Certificate Enrollment Service** (CES), junto con el servicio Certificate Enrollment Policy (CEP).
-5. El **Network Device Enrollment Service** (NDES) para dispositivos de red, utilizando el Simple Certificate Enrollment Protocol (SCEP).
+5. **Network Device Enrollment Service** (NDES) para dispositivos de red, mediante Simple Certificate Enrollment Protocol (SCEP).
 
 Los usuarios de Windows también pueden solicitar certificados mediante la GUI (`certmgr.msc` o `certlm.msc`) o herramientas de línea de comandos (`certreq.exe` o el comando `Get-Certificate` de PowerShell).
+
 ```bash
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
+
 ## Autenticación mediante certificados
 
-Active Directory (AD) admite la autenticación mediante certificados, utilizando principalmente los protocolos **Kerberos** y **Secure Channel (Schannel)**.
+Active Directory (AD) admite la autenticación mediante certificados, principalmente mediante los protocolos **Kerberos** y **Secure Channel (Schannel)**.
 
 ### Proceso de autenticación Kerberos
 
-En el proceso de autenticación Kerberos, la solicitud de un usuario para obtener un Ticket Granting Ticket (TGT) se firma utilizando la **clave privada** del certificado del usuario. Esta solicitud se somete a varias validaciones por parte del controlador de dominio, incluida la **validez**, la **ruta** y el estado de **revocación** del certificado. Las validaciones también incluyen verificar que el certificado provenga de una fuente de confianza y confirmar la presencia del emisor en el **almacén de certificados NTAUTH**. Las validaciones exitosas dan como resultado la emisión de un TGT. El objeto **`NTAuthCertificates`** en AD, ubicado en:
+Durante el proceso de autenticación Kerberos, la solicitud de un usuario para obtener un Ticket Granting Ticket (TGT) se firma con la **clave privada** del certificado del usuario. El controlador de dominio somete esta solicitud a varias validaciones, entre ellas la **validez**, la **cadena de certificación** y el estado de revocación del certificado. Las validaciones también incluyen comprobar que el certificado provenga de una fuente de confianza y confirmar que el emisor esté presente en el **almacén de certificados NTAUTH**. Si las validaciones se realizan correctamente, se emite un TGT. El objeto **`NTAuthCertificates`** de AD se encuentra en:
+
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
+
 es fundamental para establecer la confianza en la autenticación mediante certificados.<sup>[[4]](#references)</sup>
 
-Desde el despliegue de **KB5014754**, la autenticación moderna de Kerberos mediante certificados se centra principalmente en la **fuerza del mapping**, no solo en los EKU.<sup>[[2]](#references)</sup> En los forests reforzados:
+Desde el despliegue de **KB5014754**, la autenticación moderna de Kerberos mediante certificados depende principalmente de la **solidez de la asignación**, no solo de los EKU.<sup>[[2]](#references)</sup> En bosques reforzados:
 
-- Un certificado que solo incluya un **UPN/DNS SAN** puede dejar de ser suficiente para el logon.
-- El KDC prefiere un **strong binding**, normalmente la **SID security extension** (`1.3.6.1.4.1.311.25.2`) o un mapping explícito fuerte en `altSecurityIdentities`.
-- Si el certificado carece de un mapping fuerte, los DC registran **Kdcsvc Event ID 39/41** en compatibility mode y rechazan la autenticación en enforcement mode.
-- En attack paths mixtos, **ESC9/ESC16** son relevantes porque eliminan la SID extension de los certificados emitidos; los operadores recurren entonces a mappings explícitos o a formatos de SID en SAN URL cuando el attack path lo permite.
+- Puede que un certificado que solo incluya un **UPN/DNS SAN** ya no sea suficiente para iniciar sesión.
+- El KDC prefiere una **vinculación sólida**, normalmente la **extensión de seguridad SID** (`1.3.6.1.4.1.311.25.2`) o una asignación explícita sólida en `altSecurityIdentities`.
+- Si el certificado no tiene una asignación sólida, los DC registran **Kdcsvc Event ID 39/41** en modo de compatibilidad y deniegan la autenticación en modo de cumplimiento.
+- En rutas de ataque mixtas, **ESC9/ESC16** son importantes porque eliminan la extensión SID de los certificados emitidos; luego, los operadores recurren a asignaciones explícitas o a formatos de SID de SAN URL cuando la ruta de ataque lo permite.
 
-### Autenticación de Secure Channel (Schannel)
+### Autenticación de canal seguro (Schannel)
 
-Schannel facilita conexiones TLS/SSL seguras. Durante el handshake, el cliente presenta un certificado que, si se valida correctamente, autoriza el acceso. El mapping de un certificado a una cuenta de AD puede implicar la función **S4U2Self** de Kerberos o el **Subject Alternative Name (SAN)** del certificado, entre otros métodos.<sup>[[4]](#references)</sup>
+Schannel facilita conexiones TLS/SSL seguras. Durante el handshake, el cliente presenta un certificado que, si se valida correctamente, autoriza el acceso. La asignación de un certificado a una cuenta de AD puede implicar la función **S4U2Self** de Kerberos o el **Subject Alternative Name (SAN)** del certificado, entre otros métodos.<sup>[[4]](#references)</sup>
 
-Schannel también es el fallback práctico cuando **PKINIT** no está disponible. Por ejemplo, si un domain controller no dispone de un certificado adecuado de **Smart Card Logon**, `certipy auth`/PKINIT tooling puede fallar al obtener un TGT, pero el mismo certificado puede seguir siendo utilizable contra **LDAPS** o **LDAP StartTLS** para la autenticación y las operaciones LDAP.
+Schannel también es la alternativa práctica cuando **PKINIT** no está disponible. Por ejemplo, si un controlador de dominio no tiene un certificado adecuado de **Smart Card Logon**, las herramientas `certipy auth`/PKINIT pueden no conseguir un TGT, pero el mismo certificado puede seguir siendo válido para autenticarse y realizar operaciones LDAP mediante **LDAPS** o **LDAP StartTLS**.
 
 ### Enumeración de AD Certificate Services
 
-Los certificate services de AD pueden enumerarse mediante consultas LDAP, revelando información sobre las **Enterprise Certificate Authorities (CAs)** y sus configuraciones. Cualquier usuario autenticado en el dominio puede acceder a esta información sin privilegios especiales. Herramientas como **[Certify](https://github.com/GhostPack/Certify)** y **[Certipy](https://github.com/ly4k/Certipy)** se utilizan para la enumeración y la evaluación de vulnerabilidades en entornos de AD CS.
+Los servicios de certificados de AD se pueden enumerar mediante consultas LDAP, que revelan información sobre las **Enterprise Certificate Authorities (CAs)** y sus configuraciones. Cualquier usuario autenticado en el dominio puede acceder a esta información sin privilegios especiales. Se utilizan herramientas como **[Certify](https://github.com/GhostPack/Certify)** y **[Certipy](https://github.com/ly4k/Certipy)** para la enumeración y la evaluación de vulnerabilidades en entornos AD CS.
 
-Los comandos para utilizar estas herramientas incluyen:
+Entre los comandos para utilizar estas herramientas se incluyen:
+
 ```bash
 # Enumerate trusted root CA certificates, Enterprise CAs, and web endpoints
 Certify.exe cas
@@ -140,6 +145,7 @@ certipy auth -pfx administrator.pfx -dc-ip 10.10.10.10 -ldap-shell
 certutil.exe -TCAInfo
 certutil -v -dstemplate
 ```
+
 {{#ref}}
 ad-certificates/domain-escalation.md
 {{#endref}}
@@ -148,45 +154,47 @@ ad-certificates/domain-escalation.md
 
 ## Vulnerabilidades recientes y actualizaciones de seguridad (2022-2025)
 
-| Año | ID / Nombre | Impacto | Puntos clave |
+| Año | ID / Nombre | Impacto | Conclusiones clave |
 |------|-----------|--------|----------------|
-| 2022 | **CVE-2022-26923** – “Certifried” / ESC6 | *Escalada de privilegios* mediante la suplantación de certificados de cuentas de máquina durante PKINIT. | El parche se incluye en las actualizaciones de seguridad del **10 de mayo de 2022**. Los controles de auditoría y strong-mapping se introdujeron mediante **KB5014754**; los entornos ahora deberían estar en modo *Full Enforcement*.  |
-| 2023 | **CVE-2023-35350 / 35351** | *Ejecución remota de código* en los roles AD CS Web Enrollment (certsrv) y CES. | Los PoC públicos son limitados, pero los componentes IIS vulnerables suelen estar expuestos internamente. Parcheado desde el Patch Tuesday de **julio de 2023**.  |
-| 2024 | **CVE-2024-49019** – “EKUwu” / ESC15 | En las **plantillas v1**, un solicitante con permisos de enrollment puede incluir **Application Policies/EKUs** en la CSR, que tienen prioridad sobre los EKUs de la plantilla, generando certificados de client-auth, enrollment agent o code-signing. | Parcheado desde el **12 de noviembre de 2024**. Reemplace o sustituya las plantillas v1 (por ejemplo, WebServer predeterminada), restrinja los EKUs según su propósito y limite los permisos de enrollment. |
+| 2022 | **CVE-2022-26923** – “Certifried” / ESC6 | *Privilege escalation* mediante la suplantación de certificados de cuentas de equipo durante PKINIT. | El parche está incluido en las actualizaciones de seguridad del **10 de mayo de 2022**. Los controles de auditoría y strong-mapping se introdujeron mediante **KB5014754**; los entornos ahora deberían estar en modo *Full Enforcement*.  |
+| 2023 | **CVE-2023-35350 / 35351** | *Remote code-execution* en los roles de AD CS Web Enrollment (certsrv) y CES. | Los PoC públicos son limitados, pero los componentes IIS vulnerables suelen estar expuestos internamente. Se corrigió en el Patch Tuesday de **julio de 2023**.  |
+| 2024 | **CVE-2024-49019** – “EKUwu” / ESC15 | En las **plantillas v1**, un solicitante con derechos de inscripción puede incluir **Application Policies/EKUs** en el CSR, que tienen prioridad sobre los EKU de la plantilla, y obtener certificados de autenticación de cliente, de agente de inscripción o de firma de código. | Corregido a partir del **12 de noviembre de 2024**. Reemplace o sustituya las plantillas v1 (p. ej., WebServer predeterminada), restrinja los EKU según su propósito y limite los derechos de inscripción. |
 
-### Cronología de hardening de Microsoft (KB5014754)
+### Cronología del hardening de Microsoft (KB5014754)
 
-Microsoft introdujo un despliegue en tres fases (Compatibility → Audit → Enforcement) para alejar la autenticación de certificados Kerberos de los mappings implícitos débiles. Desde el **11 de febrero de 2025**, los controladores de dominio cambian automáticamente a **Full Enforcement** si el valor de registro `StrongCertificateBindingEnforcement` no está establecido. Posteriormente, Microsoft actualizó la cronología para que el fallback al modo de compatibilidad siga siendo posible hasta la actualización de seguridad del **9 de septiembre de 2025**.<sup>[[2]](#references)</sup> Los administradores deben:
+Microsoft introdujo un despliegue en tres fases (Compatibility → Audit → Enforcement) para alejar la autenticación de certificados Kerberos de las asignaciones implícitas débiles. A partir del **11 de febrero de 2025**, los controladores de dominio cambian automáticamente a **Full Enforcement** si el valor del registro `StrongCertificateBindingEnforcement` no está establecido. Posteriormente, Microsoft actualizó la cronología para que sea posible volver al modo de compatibilidad hasta la actualización de seguridad del **9 de septiembre de 2025**.<sup>[[2]](#references)</sup> Los administradores deberían:
 
-1. Aplicar los parches a todos los DC y servidores AD CS (mayo de 2022 o posteriores).
-2. Supervisar los eventos ID 39/41 para detectar mappings débiles durante la fase de *Audit*.
-3. Volver a emitir certificados de client-auth con la nueva **extensión SID** o configurar mappings manuales strong antes de que Enforcement bloquee los mappings débiles.
+1. Aplicar los parches a todos los DC y servidores AD CS (de mayo de 2022 o posteriores).
+2. Supervisar los eventos ID 39/41 para detectar asignaciones débiles durante la fase *Audit*.
+3. Volver a emitir los certificados de autenticación de cliente con la nueva **extensión SID** o configurar asignaciones manuales sólidas antes de que la aplicación de la directiva bloquee las asignaciones débiles.
 
-### Notas para operadores de forests con hardening
+### Notas para operadores de bosques reforzados
 
-- **ESC1/ESC6 por sí solos ya no representan toda la situación** en entornos de 2025+. Si solicita un cert para otra principal, normalmente también necesita un artefacto de strong mapping, como la extensión SID o un mapping explícito.
-- **ESC15 (EKUwu)** resulta principalmente útil en entornos sin parchear porque convierte plantillas **v1** inofensivas, como **WebServer**, en certificados capaces de autenticación o enrollment-agent mediante la inyección de **Application Policies**. Kerberos PKINIT sigue evaluando los EKUs, pero **LDAP Schannel** también respeta las Application Policies, lo que mantiene relevante el abuso basado en LDAP.<sup>[[1]](#references)</sup>
-- **ESC16** es un ajuste global de la CA: si la CA deshabilita globalmente la extensión de seguridad SID, todos los certificados emitidos vuelven a comportarse según mappings más débiles, a menos que la attack chain inyecte un SID mediante otro formato compatible.
+- **ESC1/ESC6 por sí solos ya no cuentan toda la historia** en entornos de 2025 en adelante. Si solicita un certificado para otra entidad principal, normalmente también necesita un artefacto de asignación sólida, como la extensión SID o una asignación explícita.
+- **ESC15 (EKUwu)** es útil sobre todo en entornos sin parchear, porque convierte plantillas **v1** aparentemente inofensivas, como **WebServer**, en certificados capaces de autenticación o de actuar como agente de inscripción mediante la inyección de **Application Policies**. Kerberos PKINIT sigue evaluando los EKU, pero **LDAP Schannel** también respeta las Application Policies, por lo que el abuso basado en LDAP sigue siendo relevante.<sup>[[1]](#references)</sup>
+- **ESC16** es una configuración que afecta a toda la CA: si la CA deshabilita globalmente la extensión de seguridad SID, todos los certificados emitidos vuelven a un comportamiento de asignación más débil, a menos que la cadena de ataque inyecte un SID mediante otro formato compatible.
+- **Los derechos ESC7 son distintos:** un permiso `ManageCA` en la CA puede permitir cambios en opciones como `EDITF_ATTRIBUTESUBJECTALTNAME2` (ESC6), mientras que `ManageCertificates` controla la aprobación de solicitudes. Una denegación explícita de los derechos de administrador de certificados puede bloquear esa vía de aprobación incluso si también existe un permiso Allow; evalúe la ACL efectiva de la CA antes de encadenar configuraciones y plantillas. Consulte [la evaluación de ACL de CA de Microsoft](https://learn.microsoft.com/en-us/defender-for-identity/security-assessment-edit-vulnerable-ca-setting).
 
 ---
 
-## Mejoras de detección y hardening
+## Mejoras en la detección y el hardening
 
-* El **sensor AD CS de Defender for Identity (2023-2024)** ahora muestra evaluaciones de posture para ESC1-ESC8/ESC11 y genera alertas en tiempo real, como *“Domain-controller certificate issuance for a non-DC”* (ESC8) y *“Prevent Certificate Enrollment with arbitrary Application Policies”* (ESC15). Asegúrese de desplegar sensores en todos los servidores AD CS para beneficiarse de estas detecciones.<sup>[[3]](#references)</sup>
+* El sensor AD CS de **Defender for Identity (2023-2024)** ahora muestra evaluaciones de la postura de seguridad para ESC1-ESC8/ESC11 y genera alertas en tiempo real, como *“Emisión de certificados de controlador de dominio para una entidad que no es un DC”* (ESC8) y *“Impedir la inscripción de certificados con Application Policies arbitrarias”* (ESC15). Asegúrese de implementar sensores en todos los servidores AD CS para aprovechar estas detecciones.<sup>[[3]](#references)</sup>
 * Deshabilite o limite estrictamente la opción **“Supply in the request”** en todas las plantillas; prefiera valores SAN/EKU definidos explícitamente.
-* Elimine **Any Purpose** o **No EKU** de las plantillas salvo que sea absolutamente necesario (aborda escenarios ESC2).
-* Requiera **aprobación del manager** o workflows de Enrollment Agent dedicados para plantillas sensibles (por ejemplo, WebServer / CodeSigning).
-* Restrinja el web enrollment (`certsrv`) y los endpoints CES/NDES a redes de confianza o sitúelos detrás de autenticación mediante client-certificate.
-* Aplique el cifrado de enrollment RPC (`certutil -setreg CA\InterfaceFlags +IF_ENFORCEENCRYPTICERTREQUEST`) para mitigar ESC11 (RPC relay). El flag está **habilitado por defecto**, pero a menudo se deshabilita para clientes legacy, lo que vuelve a abrir el riesgo de relay.
-* Proteja los **endpoints de enrollment basados en IIS** (CES/Certsrv): deshabilite NTLM cuando sea posible o requiera HTTPS + Extended Protection para bloquear los relays ESC8.
+* Elimine **Any Purpose** o **No EKU** de las plantillas, salvo que sean absolutamente necesarios (aborda los escenarios ESC2).
+* Exija la **aprobación del administrador** o flujos de trabajo específicos de Enrollment Agent para las plantillas sensibles (p. ej., WebServer / CodeSigning).
+* Restrinja la inscripción web (`certsrv`) y los endpoints CES/NDES a redes de confianza o detrás de la autenticación con certificados de cliente.
+* Aplique el cifrado de inscripción RPC (`certutil -setreg CA\InterfaceFlags +IF_ENFORCEENCRYPTICERTREQUEST`) para mitigar ESC11 (RPC relay). La opción está **activada de forma predeterminada**, pero a menudo se deshabilita para clientes heredados, lo que vuelve a abrir el riesgo de relay.
+* Proteja los **endpoints de inscripción basados en IIS** (CES/Certsrv): deshabilite NTLM cuando sea posible o exija HTTPS + Extended Protection para bloquear los ataques de relay ESC8.
+
+Evalúe ESC11 en el host que ejecuta la CA, que puede ser un servidor miembro del dominio y no un controlador de dominio. Lea `InterfaceFlags` de la CA activa en `HKLM\SYSTEM\CurrentControlSet\Services\CertSvc\Configuration`; si el valor no se puede leer o no existe, el resultado es desconocido, no una prueba de que el cifrado RPC esté deshabilitado. Que el bit `IF_ENFORCEENCRYPTICERTREQUEST` esté desactivado es una pista de configuración que aún requiere un endpoint de inscripción RPC accesible, credenciales que puedan forzarse y una plantilla de certificado utilizable. Para ESC8, un desafío HTTP NTLM por sí solo no es suficiente: confirme que exista un endpoint de inscripción funcional.
 
 ---
 
-## Referencias
+## References
 
-- [1] [EKUwu: Not just another AD CS ESC](https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc)
-- [2] [KB5014754: Certificate-based authentication changes on Windows domain controllers](https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16)
-- [3] [Certificates security posture assessments - Microsoft Defender for Identity](https://learn.microsoft.com/en-us/defender-for-identity/security-posture-assessments/certificates)
-- [4] [Certified Pre-Owned: Abusing Active Directory Certificate Services](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
-
+- [1] [EKUwu: No es otro ESC de AD CS más](https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc)
+- [2] [KB5014754: Cambios en la autenticación basada en certificados en los controladores de dominio de Windows](https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16)
+- [3] [Evaluaciones de la postura de seguridad de los certificados - Microsoft Defender for Identity](https://learn.microsoft.com/en-us/defender-for-identity/security-posture-assessments/certificates)
+- [4] [Certified Pre-Owned: Abuso de Active Directory Certificate Services](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
 {{#include ../../banners/hacktricks-training.md}}
