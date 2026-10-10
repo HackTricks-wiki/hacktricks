@@ -1038,6 +1038,7 @@
 - [iOS Exploiting](binary-exploitation/ios-exploiting/README.md)
   - [ios CVE-2020-27950-mach_msg_trailer_t](binary-exploitation/ios-exploiting/CVE-2020-27950-mach_msg_trailer_t.md)
   - [ios CVE-2021-30807-IOMobileFrameBuffer](binary-exploitation/ios-exploiting/CVE-2021-30807-IOMobileFrameBuffer.md)
+  - [CoreGraphics PDF/TrueType Glyph Rasterizer OOB Write](binary-exploitation/ios-exploiting/coregraphics-pdf-truetype-glyph-rasterizer-oob-write.md)
   - [Imessage Media Parser Zero Click Coreaudio Pac Bypass](binary-exploitation/ios-exploiting/imessage-media-parser-zero-click-coreaudio-pac-bypass.md)
   - [ios Corellium](binary-exploitation/ios-exploiting/ios-corellium.md)
   - [ios Heap Exploitation](binary-exploitation/ios-exploiting/ios-example-heap-exploit.md)
