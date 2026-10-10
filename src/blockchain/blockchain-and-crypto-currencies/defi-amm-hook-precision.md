@@ -1,51 +1,51 @@
-# DeFi/AMM Exploitation: Uniswap v4 Hook 정밀도/반올림 악용
+# DeFi/AMM Exploitation: Uniswap v4 Hook Precision/Rounding Abuse
 
 {{#include ../../banners/hacktricks-training.md}}
 
-이 페이지에서는 custom hook으로 핵심 수학 로직을 확장하는 Uniswap v4 스타일 DEX를 대상으로 한 DeFi/AMM exploitation 기법을 다룹니다. Bunni V2 incident는 이와 관련된 실패 사례를 보여줍니다. 출금 회계에서 반올림 방향 버그로 활성 유동성이 실제보다 적게 계산되었고, 이후 swap에서 이 과소 계산이 드러나 수익성 있는 sandwich 공격으로 이어졌습니다.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+이 페이지에서는 custom hook으로 core math를 확장하는 Uniswap v4 스타일 DEX를 대상으로 한 DeFi/AMM exploitation 기법을 설명합니다. Bunni V2 incident는 이와 관련된 실패 사례입니다. withdrawal accounting에서 rounding 방향 버그로 인해 active liquidity가 실제보다 적게 계산되었고, 이후 swap에서 이 과소 계산이 수익성 있는 sandwich로 이어졌습니다.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 
-핵심 아이디어: hook이 fixed-point math, tick 반올림, threshold 로직에 의존하는 추가 회계를 구현한다면, 공격자는 특정 threshold를 넘도록 exact-input swap을 구성해 반올림 오차가 자신에게 유리하게 누적되도록 할 수 있습니다. 이 패턴을 반복한 뒤 부풀려진 잔액을 출금해 수익을 실현하며, flash loan으로 자금을 조달하는 경우가 많습니다.
+핵심 아이디어: hook이 fixed-point math, tick rounding, threshold logic에 의존하는 추가 accounting을 구현하는 경우, 공격자는 특정 threshold를 넘도록 정확한 크기의 exact-input swap을 만들어 rounding 차이가 자신에게 유리하게 누적되도록 할 수 있습니다. 이 패턴을 반복한 다음 부풀려진 잔액을 인출해 수익을 실현하며, 이때 flash loan을 이용해 자금을 조달하는 경우가 많습니다.
 
 ## 배경: Uniswap v4 hooks와 swap 흐름
 
-- Hooks는 PoolManager가 특정 lifecycle 지점(예: beforeSwap/afterSwap, beforeAddLiquidity/afterAddLiquidity, beforeRemoveLiquidity/afterRemoveLiquidity, beforeInitialize/afterInitialize, beforeDonate/afterDonate)에서 호출하는 컨트랙트입니다.<sup>[[4]](#references)</sup>
-- Pool은 hook 컨트랙트를 포함하는 PoolKey로 초기화됩니다. 0이 아닌 hook 주소를 지정하면 해당 pool에 선택된 callback이 활성화됩니다.<sup>[[4]](#references)[[14]](#references)</sup>
-- Hooks는 swap 또는 liquidity 작업의 최종 잔액 변화를 수정하는 **custom delta**를 반환할 수 있습니다(custom accounting). 이러한 delta는 호출이 끝날 때 순 잔액으로 정산되므로, hook math 내부의 반올림 오류는 정산 전에 누적됩니다.<sup>[[4]](#references)</sup>
-- 핵심 math는 sqrtPriceX96에 사용되는 Q64.96 등의 fixed-point 형식과 1.0001^tick을 사용하는 tick 연산을 활용합니다. 그 위에 추가되는 custom math는 invariant drift를 방지하기 위해 반올림 규칙을 정확히 일치시켜야 합니다.<sup>[[12]](#references)[[13]](#references)</sup>
-- Swaps는 exactInput 또는 exactOutput일 수 있습니다. v3/v4에서는 가격이 tick을 따라 움직이며, tick 경계를 넘으면 구간 유동성이 활성화되거나 비활성화될 수 있습니다. Hooks는 tick 또는 threshold 통과 시 추가 로직을 구현할 수 있습니다.<sup>[[9]](#references)[[11]](#references)</sup>
+- Hooks는 PoolManager가 특정 lifecycle 시점(예: beforeSwap/afterSwap, beforeAddLiquidity/afterAddLiquidity, beforeRemoveLiquidity/afterRemoveLiquidity, beforeInitialize/afterInitialize, beforeDonate/afterDonate)에 호출하는 contract입니다.<sup>[[4]](#references)</sup>
+- Pool은 hook contract를 포함하는 PoolKey로 초기화됩니다. 0이 아닌 hook address는 해당 pool에 선택된 callback을 활성화합니다.<sup>[[4]](#references)[[14]](#references)</sup>
+- Hooks는 swap 또는 liquidity 작업의 최종 잔액 변화를 수정하는 **custom deltas**를 반환할 수 있습니다(custom accounting). 해당 delta는 호출이 끝날 때 net balance로 정산되므로, hook math 내부의 rounding error는 정산 전에 누적됩니다.<sup>[[4]](#references)</sup>
+- Core math는 sqrtPriceX96의 Q64.96 같은 fixed-point 형식과 1.0001^tick을 사용하는 tick arithmetic을 사용합니다. 그 위에 추가되는 custom math는 invariant drift를 방지하도록 rounding semantics를 신중히 맞춰야 합니다.<sup>[[12]](#references)[[13]](#references)</sup>
+- Swap은 exactInput 또는 exactOutput 방식일 수 있습니다. v3/v4에서는 가격이 tick을 따라 움직이며, tick 경계를 넘으면 range liquidity가 활성화되거나 비활성화될 수 있습니다. Hooks는 tick 경계나 threshold를 넘을 때 추가 로직을 실행할 수 있습니다.<sup>[[9]](#references)[[11]](#references)</sup>
 
-## 취약점 유형: threshold 통과에 따른 정밀도/반올림 오차 누적
+## 취약점 유형: threshold crossing에 따른 precision/rounding drift
 
 Custom hook에서 흔히 볼 수 있는 취약한 패턴:
 
-1. Hook이 정수 나눗셈, mulDiv, 또는 fixed-point 변환(예: sqrtPrice 및 tick 범위를 이용한 token ↔ liquidity 변환)으로 swap별 유동성 또는 잔액 delta를 계산합니다.
-2. Threshold 로직(예: rebalancing, 단계별 재분배, 또는 구간별 활성화)은 swap 규모나 가격 변동이 내부 경계를 넘을 때 실행됩니다.
-3. 계산 과정과 정산 경로에서 반올림이 일관되지 않게 적용됩니다(예: 0 방향 절삭, floor와 ceil의 혼용). 작은 오차는 상쇄되지 않고 호출자에게 잔액을 더해 줍니다.
-4. 해당 경계를 넘도록 정밀하게 조정한 exact-input swap으로 양의 반올림 잔여분을 반복해서 챙깁니다. 이후 공격자는 누적된 credit을 출금합니다.
+1. Hook이 integer division, mulDiv 또는 fixed-point 변환(예: sqrtPrice와 tick range를 사용한 token ↔ liquidity 변환)으로 swap마다 발생하는 liquidity 또는 balance delta를 계산합니다.
+2. Swap 크기나 가격 변동이 내부 경계를 넘으면 threshold logic(예: rebalancing, 단계별 redistribution 또는 range별 activation)이 작동합니다.
+3. Forward calculation과 settlement 경로에서 rounding이 일관되지 않게 적용됩니다(예: 0 방향 truncation, floor와 ceil의 혼용). 작은 차이가 상쇄되지 않고 caller에게 이익으로 돌아갑니다.
+4. 해당 경계를 아슬아슬하게 넘도록 크기를 조절한 exact-input swap으로 양의 rounding remainder를 반복해서 수확합니다. 이후 누적된 credit을 인출합니다.
 
 공격 전제 조건
-- 각 swap에서 추가 math(예: LDF/rebalancer)를 수행하는 custom v4 hook을 사용하는 pool.
-- threshold 통과 시 swap을 시작한 쪽에 유리한 반올림이 발생하는 실행 경로가 하나 이상 존재할 것.
-- 많은 swap을 원자적으로 반복할 수 있을 것(임시 자금을 마련하고 gas 비용을 분산하기에 flash loan이 적합).
+- 각 swap에서 추가 math를 수행하는 custom v4 hook을 사용하는 pool(예: LDF/rebalancer).
+- Threshold crossing에서 rounding이 swap initiator에게 이익이 되는 execution path가 하나 이상 존재.
+- 다수의 swap을 원자적으로 반복할 수 있는 능력(flash loan은 임시 자금을 공급하고 gas 비용을 분산하는 데 이상적).
 
 ## 실전 공격 방법론
 
-1) Hook이 있는 후보 pool 식별
+1) Hook이 있는 pool 식별
 - v4 pool을 열거하고 PoolKey.hooks != address(0)인지 확인합니다.
-- Hook bytecode/ABI에서 beforeSwap/afterSwap callback 및 custom rebalancing 메서드를 살펴봅니다.
-- 다음과 같은 math를 찾습니다. liquidity로 나누거나, token amount와 liquidity 사이를 변환하거나, BalanceDelta를 반올림과 함께 합산하는 로직입니다.
+- Hook bytecode/ABI에서 callback인 beforeSwap/afterSwap과 custom rebalancing method를 살펴봅니다.
+- 다음과 같은 math를 찾습니다. liquidity로 나누거나, token amount와 liquidity를 변환하거나, BalanceDelta를 rounding과 함께 집계하는 로직입니다.
 
-2) Hook의 math 및 threshold 모델링
-- Hook의 liquidity/redistribution 공식을 재현합니다. 입력에는 일반적으로 sqrtPriceX96, tickLower/Upper, currentTick, fee tier, net liquidity가 포함됩니다.
-- Threshold/step function을 매핑합니다. 예를 들어 tick, bucket 경계, LDF breakpoint 등이 있습니다. 각 경계의 어느 쪽에서 delta가 반올림되는지 확인합니다.
-- uint256/int256 간 변환, SafeCast 사용, 또는 암묵적으로 floor를 적용하는 mulDiv 사용 지점을 찾습니다.
+2) Hook의 math와 threshold 모델링
+- Hook의 liquidity/redistribution formula를 재현합니다. 입력에는 보통 sqrtPriceX96, tickLower/Upper, currentTick, fee tier, net liquidity가 포함됩니다.
+- Threshold/step function을 파악합니다. tick, bucket boundary 또는 LDF breakpoint를 살펴보고 각 경계에서 delta의 rounding 방향을 확인합니다.
+- uint256/int256 간 cast, SafeCast 사용 또는 암묵적으로 floor를 적용하는 mulDiv 사용 여부를 확인합니다.
 
 3) 경계를 넘도록 exact-input swap 조정
-- Foundry/Hardhat simulation을 사용해 가격을 경계 바로 너머로 이동시키고 hook의 분기를 실행하는 데 필요한 최소 Δin을 계산합니다.
-- afterSwap 정산에서 호출자에게 비용보다 많은 금액이 credit되어 양의 BalanceDelta 또는 hook 회계상의 credit이 남는지 확인합니다.
+- Foundry/Hardhat simulation으로 가격을 경계 바로 너머까지 움직여 hook의 branch를 실행하는 데 필요한 최소 Δin을 계산합니다.
+- afterSwap settlement가 caller에게 swap 비용보다 많은 금액을 credit하여 양의 BalanceDelta 또는 hook accounting상의 credit을 남기는지 확인합니다.
 - Swap을 반복해 credit을 누적한 다음 hook의 withdrawal/settlement 경로를 호출합니다.
 
-v4에서는 swap loop가 PoolManager unlock callback에서 실행되어야 합니다. 음수 `amountSpecified`는 exact input을 뜻하며, `sqrtPriceLimitX96`은 유효 범위 안에 있어야 합니다. 가격 제한을 0으로 설정하면 revert되므로, 아래 pseudocode에서는 zero-for-one swap에 하한을 사용합니다.<sup>[[9]](#references)[[10]](#references)[[11]](#references)</sup>
+v4에서는 swap loop를 PoolManager unlock callback 안에서 실행해야 합니다. 음수 `amountSpecified`는 exact input을 의미하며, `sqrtPriceLimitX96`은 유효 범위 안에 있어야 합니다. Price limit이 0이면 revert되므로, 아래 pseudocode에서는 zero-for-one swap에 하한값을 사용합니다.<sup>[[9]](#references)[[10]](#references)[[11]](#references)</sup>
 
 Foundry 스타일 테스트 harness 예시(pseudocode)
 ```solidity
@@ -82,14 +82,14 @@ function test_precision_rounding_abuse() public {
 }
 ```
 
-exactInput 보정
+exactInput 정밀 조정
 - core TickMath로 목표값을 계산합니다. 실수값 기준으로 sqrtP_next = sqrtP_current × 1.0001^(Δtick)이며, Q64.96 결과는 TickMath에서 반올림됩니다.<sup>[[13]](#references)</sup>
-- Q64.96을 고려한 공식으로 token0(zero-for-one) 입력값을 근사합니다. Δx ≈ L × |ΔsqrtP| × 2^96 / (sqrtP_next × sqrtP_current). core 루틴의 방향별 반올림 방식을 적용합니다.<sup>[[12]](#references)</sup>
-- 경계값 주변에서 Δin을 ±1 wei씩 조정해 hook이 유리하게 반올림하는 분기를 찾습니다.
+- Q64.96을 고려한 공식을 사용해 token0(zero-for-one) 입력량을 근사합니다. Δx ≈ L × |ΔsqrtP| × 2^96 / (sqrtP_next × sqrtP_current). core 루틴의 방향별 반올림 방식에 맞춥니다.<sup>[[12]](#references)</sup>
+- 경계값 전후로 Δin을 ±1 wei씩 조정해 hook이 유리하게 반올림하는 분기를 찾습니다.
 
-4) flash loan으로 증폭
-- 큰 명목 금액(예: 3M USDT 또는 2000 WETH)을 빌려 여러 차례 반복 실행합니다.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
-- 보정된 swap 루프를 실행한 다음, flash loan 콜백 내에서 자금을 인출하고 상환합니다.
+4) flash loan으로 규모 확대
+- 대규모 명목 금액(예: 3M USDT 또는 2000 WETH)을 빌려 여러 번의 반복을 원자적으로 실행합니다.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+- 보정된 swap loop를 실행한 다음, flash loan callback 내에서 자금을 인출하고 상환합니다.
 
 Aave V3 flash loan 기본 구조
 ```solidity
@@ -115,45 +115,45 @@ function executeOperation(
 ```
 
 5) Exit 및 cross-chain 복제
-- 여러 체인에 hook을 배포했다면 체인별로 동일한 보정을 반복합니다.
+- 여러 체인에 hook이 배포되어 있다면, 체인별로 동일한 보정 작업을 반복합니다.
 - Bunni 사고에서는 flash-loan 유동성과 bridge 경로가 체인마다 달랐으므로, 분석을 재현할 때 체인별 제약 조건을 고려합니다.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## hook 수학에서 흔한 근본 원인
 
-- 반올림 의미의 혼용: mulDiv는 내림하지만 이후 경로에서는 사실상 올림하거나, 토큰과 유동성 간 변환에서 서로 다른 반올림 방식을 적용하는 경우.
-- Tick 정렬 오류: 한 경로에서는 반올림하지 않은 tick을 사용하고, 다른 경로에서는 tick 간격에 맞춰 반올림하는 경우.
-- 정산 중 int256과 uint256 간 변환에서 BalanceDelta 부호/오버플로 문제가 발생하는 경우.
-- Q64.96 변환(sqrtPriceX96)에서 정밀도가 손실되지만, 역변환에는 이를 반영하지 않는 경우.
-- 누적 경로: swap별 잔여분을 caller가 인출할 수 있는 credit으로 추적해 소각하거나 합계가 0이 되도록 처리하지 않는 경우.
+- 혼합된 반올림 방식: mulDiv는 내림하지만 이후 경로에서는 사실상 올림하거나, 토큰과 유동성 간 변환에 서로 다른 반올림 방식을 적용합니다.
+- tick 정렬 오류: 한 경로에서는 반올림하지 않은 tick을 사용하고, 다른 경로에서는 tick 간격에 맞춰 반올림합니다.
+- 정산 중 int256과 uint256 사이를 변환할 때 발생하는 BalanceDelta 부호/오버플로 문제.
+- Q64.96 변환(sqrtPriceX96)에서 정밀도가 손실되지만 역변환에서는 이를 반영하지 않습니다.
+- 누적 경로: 스왑별 나머지를 caller가 출금할 수 있는 크레딧으로 추적해, 소각하거나 합계가 0이 되도록 처리하지 않습니다.
 
-## 사용자 지정 accounting 및 delta 증폭
+## 커스텀 회계 및 delta 증폭
 
-- Uniswap v4 custom accounting을 사용하면 hook이 caller의 지불액/수령액을 직접 조정하는 delta를 반환할 수 있습니다. hook이 내부적으로 credit을 추적한다면, 최종 정산 전에 여러 번의 소규모 작업을 거치며 반올림 잔여분이 누적될 수 있습니다.<sup>[[4]](#references)</sup>
-- hook에 호환되는 인출 경로가 있다면, 공격자는 동일한 PoolManager unlock callback 내에서 `swap → withdraw → swap`을 반복해 hook이 약간 달라진 상태에서 delta를 다시 계산하도록 할 수 있습니다. 이때 잔액은 unlock이 정산될 때까지 미결 상태로 유지됩니다.<sup>[[4]](#references)[[10]](#references)</sup>
-- hook을 검토할 때는 BalanceDelta/HookDelta가 생성되고 정산되는 과정을 항상 추적합니다. 한 분기에서의 편향된 반올림도 delta를 반복 계산하면 누적 credit으로 이어질 수 있습니다.
+- Uniswap v4의 커스텀 회계를 사용하면 hook이 delta를 반환해 caller가 갚거나 받을 금액을 직접 조정할 수 있습니다. hook이 내부적으로 크레딧을 추적한다면, 최종 정산 전에 여러 소규모 작업을 거치며 반올림 잔여분이 누적될 수 있습니다.<sup>[[4]](#references)</sup>
+- hook에 호환되는 출금 경로가 있다면 공격자는 동일한 PoolManager unlock callback 내에서 `swap → withdraw → swap`을 반복할 수 있습니다. 이렇게 하면 잔액이 unlock 종료 시 정산될 때까지 미결 상태로 남아 있는 동안 hook이 조금씩 달라진 상태에서 delta를 다시 계산하게 됩니다.<sup>[[4]](#references)[[10]](#references)</sup>
+- hook을 검토할 때는 BalanceDelta/HookDelta가 어떻게 생성되고 정산되는지 항상 추적합니다. 한 분기에서 발생한 단 한 번의 편향된 반올림도 delta를 반복 계산하면 누적 크레딧이 될 수 있습니다.
 
 ## 방어 지침
 
-- 차등 테스트: hook의 수학 연산을 고정밀 유리수 연산을 사용하는 참조 구현과 비교하고, 결과가 일치하거나 제한된 오차 범위 내에 있으며 항상 공격자에게 불리한지(절대로 caller에게 유리하지 않은지) 확인합니다.
-- 불변식/속성 테스트:
-  - swap 경로와 hook 조정 전반의 delta 합계(토큰, 유동성)는 수수료를 제외하고 가치를 보존해야 합니다.
-  - 반복적인 exactInput 실행에서 어떤 경로도 swap initiator에게 양의 순 credit을 생성해서는 안 됩니다.
+- 차등 테스트: 고정밀 유리수 연산을 사용하는 참조 구현과 hook의 수학적 연산을 비교하고, 항상 공격자에게 불리한(절대 caller에게 유리하지 않은) 오차 범위 내에 있거나 결과가 일치하는지 확인합니다.
+- 불변 조건/속성 테스트:
+  - 스왑 경로와 hook 조정 전반에서 token 및 유동성 delta의 합은 수수료를 제외하고 가치를 보존해야 합니다.
+  - 반복되는 exactInput 연산에서 스왑 시작자가 순 크레딧을 얻는 경로가 없어야 합니다.
   - exactInput/exactOutput 모두에서 ±1 wei 입력을 사용해 임계값/tick 경계 테스트를 수행합니다.
-- 반올림 정책: 사용자에게 항상 불리하게 반올림하는 helper를 중앙화하고, 일관되지 않은 형 변환과 암묵적 내림을 제거합니다.
-- 정산 잔여분 처리: 불가피한 반올림 잔여분은 protocol treasury에 누적하거나 소각해야 하며, msg.sender에게 귀속해서는 안 됩니다.
-- Rate limit/보호 장치: 리밸런싱 트리거의 최소 swap 규모를 설정하고, delta가 sub-wei라면 리밸런싱을 비활성화하며, delta가 예상 범위 내에 있는지 검증합니다.
-- hook callback 전체 검토: beforeSwap/afterSwap과 유동성 변경 전후 callback에서 tick 정렬 및 delta 반올림 방식이 일치해야 합니다.
+- 반올림 정책: 사용자에게 항상 불리하게 반올림하는 헬퍼를 중앙화하고, 일관되지 않은 캐스팅과 암시적 내림을 제거합니다.
+- 정산 대상: 불가피한 반올림 잔여분은 프로토콜 treasury에 적립하거나 소각하고, 절대로 msg.sender에게 귀속하지 않습니다.
+- 속도 제한/보호 장치: 리밸런싱 트리거에 최소 스왑 크기를 적용하고, delta가 sub-wei이면 리밸런싱을 비활성화하며, delta가 예상 범위에 있는지 검사합니다.
+- hook callback을 전체적으로 검토합니다. beforeSwap/afterSwap과 유동성 변경 전후의 callback은 tick 정렬 및 delta 반올림 방식이 일치해야 합니다.
 
 ## 사례 연구: Bunni V2 (2025-09-02)
 
-- 프로토콜: Uniswap v4 hook인 Bunni V2는 Liquidity Density Function (LDF)을 사용해 토큰 밀도와 총 유동성을 추정합니다.<sup>[[1]](#references)[[2]](#references)</sup>
-- 영향을 받은 pool: Ethereum의 USDC/USDT와 Unichain의 weETH/ETH로, 총 피해 규모는 약 $8.4M입니다.<sup>[[1]](#references)</sup>
-- 1단계 (가격 변동): 공격자는 약 3M USDT를 flash-borrow한 뒤 swap하여 tick을 약 5000까지 밀어 올리고, **active** USDC 잔액을 약 28 wei로 줄였습니다.<sup>[[1]](#references)</sup>
-- 2단계 (반올림을 이용한 탈취): 44회의 소액 인출로 `BunniHubLogic::withdraw()`의 내림 반올림을 악용해 LP 지분은 극히 일부만 소각하면서 active USDC 잔액을 28 wei에서 4 wei로 줄였습니다(-85.7%). 총 유동성은 약 84.4% 감소했습니다.<sup>[[1]](#references)[[2]](#references)</sup>
-- 3단계 (유동성 반등 샌드위치): 대규모 swap으로 tick을 약 839,189까지 이동시켰습니다(1 USDC ≈ 2.77e36 USDT). 유동성 추정치가 뒤집히며 약 16.8% 증가했고, 이를 이용한 샌드위치 공격에서 공격자는 부풀려진 가격에 되팔아 수익을 내고 빠져나왔습니다.<sup>[[1]](#references)</sup>
-- 사후 분석에서 확인된 수정 사항: 유휴 잔액 업데이트를 올림 처리해 반복적인 소액 인출로 pool의 active 잔액이 계속 감소하지 않도록 합니다.<sup>[[1]](#references)</sup>
+- 프로토콜: Bunni V2는 Liquidity Density Function (LDF)을 사용해 token 밀도와 총 유동성 추정치를 계산하는 Uniswap v4 hook입니다.<sup>[[1]](#references)[[2]](#references)</sup>
+- 영향을 받은 pool: Ethereum의 USDC/USDT 및 Unichain의 weETH/ETH로, 총 피해액은 약 $8.4M입니다.<sup>[[1]](#references)</sup>
+- 1단계 (가격 밀기): 공격자는 약 3M USDT를 flash-borrow한 뒤 스왑을 수행해 tick을 약 5000으로 밀어 올리고, **active** USDC 잔액을 약 28 wei까지 줄였습니다.<sup>[[1]](#references)</sup>
+- 2단계 (반올림을 이용한 탈취): 44회의 소액 출금으로 `BunniHubLogic::withdraw()`의 내림 반올림을 악용해, LP 지분 중 극히 일부만 소각하면서 active USDC 잔액을 28 wei에서 4 wei로 줄였습니다(-85.7%). 총 유동성은 약 84.4% 감소했습니다.<sup>[[1]](#references)[[2]](#references)</sup>
+- 3단계 (유동성 반등 sandwich): 대규모 스왑으로 tick이 약 839,189로 이동했습니다 (1 USDC ≈ 2.77e36 USDT). 유동성 추정치가 뒤집히며 약 16.8% 증가했고, 이로 인해 공격자는 sandwich를 통해 부풀려진 가격으로 되팔아 수익을 얻을 수 있었습니다.<sup>[[1]](#references)</sup>
+- 사후 분석에서 확인된 수정 사항: idle balance 업데이트를 올림하도록 변경해, 반복되는 소액 출금으로 pool의 active balance가 계속 감소하는 현상을 방지합니다.<sup>[[1]](#references)</sup>
 
-취약한 코드와 사후 분석에서 제시한 수정 사항을 단순화한 예시입니다.<sup>[[1]](#references)</sup>
+취약한 코드 한 줄의 단순화 버전(및 사후 분석에서 제안한 수정 사항).<sup>[[1]](#references)</sup>
 ```solidity
 // BunniHubLogic::withdraw() idle balance update (simplified)
 uint256 newBalance = balance - balance.mulDiv(shares, currentTotalSupply);
@@ -161,28 +161,28 @@ uint256 newBalance = balance - balance.mulDiv(shares, currentTotalSupply);
 uint256 newBalance = balance - balance.mulDivUp(shares, currentTotalSupply);
 ```
 
-## Hunting 체크리스트
+## 헌팅 체크리스트
 
-- 풀이 0이 아닌 hooks 주소를 사용하나요? 어떤 callbacks가 활성화되어 있나요?
-- custom math를 사용하는 스왑별 재분배/리밸런싱이 있나요? tick/threshold 로직은 있나요?
-- 나눗셈, mulDiv, Q64.96 변환 또는 SafeCast는 어디에서 사용되나요? 반올림 방식이 전체적으로 일관적인가요?
-- 경계를 간신히 넘어서 유리한 반올림 분기를 유도하는 Δin을 구성할 수 있나요? 양쪽 방향과 exactInput, exactOutput 모두 테스트하세요.
-- hook이 나중에 출금할 수 있는 caller별 크레딧이나 델타를 추적하나요? 잔여분이 중립화되는지 확인하세요.
+- 풀이 non-zero hooks 주소를 사용하나요? 어떤 콜백이 활성화되어 있나요?
+- 커스텀 수학 연산을 사용하는 스왑별 재분배/리밸런싱이 있나요? 틱/임계값 로직은 어떤가요?
+- 나눗셈/mulDiv, Q64.96 변환, SafeCast는 어디에서 사용되나요? 반올림 방식이 전역적으로 일관적인가요?
+- 경계를 간신히 넘으면서 유리한 반올림 분기로 이어지는 Δin을 만들 수 있나요? 양방향과 exactInput, exactOutput을 모두 테스트하세요.
+- 훅이 나중에 출금할 수 있도록 호출자별 크레딧이나 델타를 추적하나요? 잔여분이 상쇄되는지 확인하세요.
 
 ## References
 
-- [1] [Bunni 익스플로잇 사후 분석 (Sep 2025)](https://blog.bunni.xyz/posts/exploit-post-mortem/)
+- [1] [Bunni 익스플로잇 사후 분석 (2025년 9월)](https://blog.bunni.xyz/posts/exploit-post-mortem/)
 - [2] [Bunni V2 익스플로잇: 전체 해킹 분석](https://www.quillaudits.com/blog/hack-analysis/bunni-v2-exploit)
 - [3] [Bunni V2 익스플로잇: 유동성 결함으로 830만 달러 유출 (요약)](https://quillaudits.medium.com/bunni-v2-exploit-8-3m-drained-50acbdcd9e7b)
-- [4] [Uniswap v4 코어 백서](https://app.uniswap.org/whitepaper-v4.pdf)
+- [4] [Uniswap v4 Core 백서](https://app.uniswap.org/whitepaper-v4.pdf)
 - [5] [Uniswap v4 배경 (QuillAudits 연구)](https://www.quillaudits.com/research/uniswap-development)
-- [6] [Uniswap v4 코어의 유동성 메커니즘](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/liquidity-mechanics-in-uniswap-v4-core)
-- [7] [Uniswap v4 코어의 스왑 메커니즘](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/swap-mechanics-in-uniswap-v4-core)
+- [6] [Uniswap v4 Core의 유동성 메커니즘](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/liquidity-mechanics-in-uniswap-v4-core)
+- [7] [Uniswap v4 Core의 스왑 메커니즘](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/swap-mechanics-in-uniswap-v4-core)
 - [8] [Uniswap v4 Hooks 및 보안 고려 사항](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/uniswap-v4-hooks-and-security)
-- [9] [Uniswap v4 코어 Pool.sol](https://github.com/Uniswap/v4-core/blob/main/src/libraries/Pool.sol)
-- [10] [Uniswap v4 코어 PoolManager.sol](https://github.com/Uniswap/v4-core/blob/main/src/PoolManager.sol)
+- [9] [Uniswap v4 Core Pool.sol](https://github.com/Uniswap/v4-core/blob/main/src/libraries/Pool.sol)
+- [10] [Uniswap v4 Core PoolManager.sol](https://github.com/Uniswap/v4-core/blob/main/src/PoolManager.sol)
 - [11] [Uniswap v4 SwapParams](https://github.com/Uniswap/v4-core/blob/main/src/types/PoolOperation.sol)
-- [12] [Uniswap v4 코어 SqrtPriceMath.sol](https://github.com/Uniswap/v4-core/blob/main/src/libraries/SqrtPriceMath.sol)
-- [13] [Uniswap v4 코어 TickMath.sol](https://github.com/Uniswap/v4-core/blob/main/src/libraries/TickMath.sol)
+- [12] [Uniswap v4 Core SqrtPriceMath.sol](https://github.com/Uniswap/v4-core/blob/main/src/libraries/SqrtPriceMath.sol)
+- [13] [Uniswap v4 Core TickMath.sol](https://github.com/Uniswap/v4-core/blob/main/src/libraries/TickMath.sol)
 - [14] [Uniswap v4 PoolKey](https://github.com/Uniswap/v4-core/blob/main/src/types/PoolKey.sol)
 {{#include ../../banners/hacktricks-training.md}}
