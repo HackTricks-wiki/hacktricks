@@ -157,6 +157,67 @@ Files will be in "`squashfs-root`" directory afterwards.
 
 `$ ubidump.py <bin>`
 
+### Reconstructing split embedded root filesystems
+
+If a raw eMMC/SSD dump contains a valid filesystem header but its metadata offsets extend beyond the nominal partition, do not immediately classify it as corrupt. Embedded boot code can assemble the real root device from multiple physical ranges with Device Mapper, so carving one GPT partition produces only the first segment.<sup>[[9]](#references)</sup>
+
+#### Triage the complete media image
+
+First verify that acquisition has finished, the size is stable, and no writer still holds the image. If the filename encodes a start/end address, compare that range with the actual byte count. Recover the GPT in read-only mode and attach only the required range; do **not** run `vgchange -ay` against an untrusted physical volume on the workstation because volume-group collisions and unintended writes are possible.<sup>[[9]](#references)</sup>
+
+```bash
+stat -c '%s bytes' firmware.bin
+lsof -- firmware.bin
+fdisk -l firmware.bin
+parted firmware.bin unit B print
+
+# Inspect one partition without copying it
+sudo losetup --find --show --read-only \
+  --offset "$PART_OFF" --sizelimit "$PART_LEN" firmware.bin
+```
+
+Prefer a disposable VM when the original init logic or an LVM stack must see the whole image. Historical boot logs from a standard boot partition are especially useful: the bootloader may have logged proprietary-container offsets, component lengths, slot selection, alignment rules, and signature verification. Use those values to carve an embedded command line/kernel/initramfs, then validate each output independently with `file`, magic bytes, and `binwalk`; reading to end-of-container can accidentally append an initrd, ACPI object, or signature to the kernel.<sup>[[9]](#references)</sup>
+
+#### Recover the boot-time block map
+
+Extract the kernel's initramfs and reverse its `/init` plus any storage libraries. In [Reversing Tools & Basic Methods](../../reversing/reversing-tools-basic-methods/README.md), follow string references for `/proc/cmdline`, `/dev/mapper/`, `dmsetup`, `BLKGETSIZE64`, and partition paths; then trace the code that selects the active A/B slot and builds the table. Useful radare2 starting points are `r2 -A init`, `afl`, `pdf @ main`, and `pdf @ fcn.xxxxx`.<sup>[[9]](#references)</sup>
+
+The linear target maps consecutive ranges of a virtual device onto ranges of one or more backing devices. A recovered two-segment table commonly has this shape (all positions and lengths are 512-byte sectors):<sup>[[9]](#references)[[10]](#references)</sup>
+
+```text
+0              <seg1_sectors> linear /dev/mmcblk0p2 0
+<seg1_sectors> <seg2_sectors> linear /dev/mmcblk0p4 <tail_start>
+```
+
+Reproduce the machine-code arithmetic exactly, including integer width, shifts, and unit conversions. For example, the following expression floors a byte size to a 4-KiB boundary and only then converts it to 512-byte sectors; replacing it with `p4_bytes // 512` shifts the selected tail by `p4_bytes % 4096` whenever the partition is not page-aligned.<sup>[[9]](#references)</sup>
+
+```python
+p4_sectors = (p4_bytes >> 12) << 3
+effective_bytes = p4_sectors * 512
+tail_start = effective_bytes - tail_distance
+```
+
+Reconstruct a flat analysis image by copying the ranges in table order with bounded chunks rather than loading the complete media dump into memory. This also avoids creating host-side mapper devices. Keep the GPT-derived offsets, reversed sector counts, and resulting output length as separate assertions.<sup>[[9]](#references)</sup>
+
+#### Distinguish corruption from a constant reconstruction error
+
+For SquashFS, check the `hsqs` magic and decode the little-endian 64-bit `bytes_used` field at superblock offset 40 before running `unsquashfs`. If extraction fails in several unrelated structures, search a broad window around the expected positions and require strong structural candidates: a decompressible metadata block, several consecutive valid directory entries, plausible inode fields, a root inode consistent with the inode count, or valid integrity-metadata structure. A single magic match is insufficient.<sup>[[9]](#references)</sup>
+
+```python
+import struct
+
+with open("rootfs.img", "rb") as f:
+    sb = f.read(96)
+assert sb[:4] == b"hsqs"
+bytes_used = struct.unpack_from("<Q", sb, 40)[0]
+nominal_end = (bytes_used + 4095) & ~4095
+print(hex(bytes_used), hex(nominal_end))
+```
+
+When the same signed delta makes independent structures valid—for example, directory metadata and a verity record—the likely cause is a systematic segment-start error rather than missing bytes. Return to the reversed arithmetic and look for discarded remainders, signedness, overflow, or sector/page rounding before attempting orphan recovery or patching filesystem metadata.<sup>[[9]](#references)</sup>
+
+Finally, keep protection boundaries separate: TPM-sealed LUKS volumes protect data confidentiality, whereas a signed dm-verity mapping protects root-filesystem integrity. A software TPM does not recover a key sealed to the original physical TPM, and booting a modified SquashFS through a research-only init that omits verity verification does not forge its signature or break dm-verity.<sup>[[9]](#references)</sup>
+
 ## Analyzing Firmware
 
 Once the firmware is obtained, it's essential to dissect it for understanding its structure and potential vulnerabilities. This process involves utilizing various tools to analyze and extract valuable data from the firmware image.
@@ -574,5 +635,7 @@ This turns "encrypted firmware" into a more general problem: **recover the appli
 - [6] [Now You See mi: Now You're Pwned](https://labs.taszk.io/articles/post/nowyouseemi/)
 - [7] [Synacktiv - Exploiting the Tesla Wall Connector from its charge port connector - Part 2: bypassing the anti-downgrade](https://www.synacktiv.com/en/publications/exploiting-the-tesla-wall-connector-from-its-charge-port-connector-part-2-bypassing)
 - [8] [Make it Blink: Over-the-Air Exploitation of the Philips Hue Bridge](https://www.synacktiv.com/en/publications/make-it-blink-over-the-air-exploitation-of-the-philips-hue-bridge.html)
+- [9] [ROOT Tesla OS on QEMU Part 1: Unpacking](https://cn0xroot.wordpress.com/2026/09/19/root-tesla-os-on-qemu-part-1-unpacking)
+- [10] [Linux kernel documentation - dm-linear](https://docs.kernel.org/admin-guide/device-mapper/linear.html)
 
 {{#include ../../banners/hacktricks-training.md}}
