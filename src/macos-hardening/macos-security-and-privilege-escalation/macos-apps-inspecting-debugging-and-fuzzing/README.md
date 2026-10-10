@@ -555,6 +555,24 @@ settings set target.x86-disassembly-flavor intel
   - As noted in this writeup, “[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” :<sup>[[7]](#references)</sup>\
     “_The message Process # exited with **status = 45 (0x0000002d)** is usually a tell-tale sign that the debug target is using **PT_DENY_ATTACH**_”
 
+#### `fork()` process handoff
+
+A process can evade a debugger that remains attached to the original PID by calling `fork()` near startup, terminating the parent (`fork()` returns a positive child PID) and continuing the protected logic only in the child (`fork()` returns `0`). Resolving `fork` with `dlsym(RTLD_DEFAULT, "fork")` also removes the direct `_fork` call site, but this is only an anti-analysis obstacle: the symbol-name string and the dynamic-resolution data flow remain visible in the Mach-O binary.<sup>[[10]](#references)[[11]](#references)</sup>
+
+On arm64, detect this pattern by following data flow rather than fixed addresses: the first two arguments to `dlsym` are passed in `x0` and `x1`, `RTLD_DEFAULT` may appear as `-2` (for example, `movn x0, #1`), and an `adrp`/`add` pair commonly constructs the address of the `"fork"` string. After the `bl` to the `dlsym` stub, trace the returned pointer from `x0` through its null check and storage to a later indirect `blr`. Then follow the `fork()` result in `w0`: zero selects the child continuation while positive and `-1` values select the parent/error path.<sup>[[10]](#references)[[11]](#references)</sup>
+
+A static bypass is to suppress the indirect call and force the existing result check to take the child path. For example, if the compiler generated the sequence shown below, patch the `blr` and result store to `nop`, provide a synthetic zero result, and retain the comparison/branch logic. The application then continues under the original PID without creating a child; instruction registers and branch targets must be adapted to the analyzed build.<sup>[[10]](#references)[[11]](#references)</sup>
+
+```armasm
+ldr  x8, [sp, #0x10]
+nop                              ; patched blr x8
+nop                              ; patched str w0, [sp, #0xc]
+mov  w8, #0                      ; patched ldr w8, [sp, #0xc]
+subs w8, w8, #0
+cset w8, eq
+tbnz w8, #0, child_continuation
+```
+
 ## Core Dumps
 
 Core dumps are created if:
@@ -690,5 +708,7 @@ litefuzz -s -a tcp://localhost:5900 -i input/screenshared-session --reportcrash 
 - [7] [alexomara.com - Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants)
 - [8] [Apple Developer Forums - Xcode structured logs and `Enable-Private-Data`](https://developer.apple.com/forums/thread/738648)
 - [9] [Super User - Showing private data in the macOS unified log](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log)
+- [10] [tony-go/antidebug-examples - fork examples](https://github.com/tony-go/antidebug-examples/tree/main/fork)
+- [11] [Reverse Society - Anti-debugging technique using dlsym and fork](https://blog.reversesociety.co/blog/2024/anti-debugging-detection-with-fork)
 
 {{#include ../../../banners/hacktricks-training.md}}
