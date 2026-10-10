@@ -1,22 +1,22 @@
-# Crypto CTF Misc
+# Kripto CTF Diverse
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Hierdie afdeling versamel tegnieke wat in kriptografie-uitdagings voorkom, maar nie netjies by die ander kategorieë pas nie.
+Hierdie afdeling versamel tegnieke wat in kriptografie-uitdagings voorkom, maar nie netjies in die ander kategorieë pas nie.
 
 ## Esoteriese tale
 
 ### Tegniek
 
-Gebruik hierdie workflow wanneer 'n uitdaging vereis dat jy 'n esoteriese-taalprogram uitvoer en die uitvoer daarvan dekodeer.
+Gebruik hierdie werkvloei wanneer ’n uitdaging vereis dat jy ’n program in ’n esoteriese taal uitvoer en die uitvoer dekodeer.
 
-As 'n uitdaging vir jou kode gee wat nie soos 'n standaardtaal lyk nie:
+As ’n uitdaging vir jou kode gee wat nie soos ’n standaardtaal lyk nie:
 
-- Identifiseer die taal deur na 'n kenmerkende token of instruksiereeks te soek.
-- Gebruik 'n aanlyn interpreter of 'n Docker image.
-- As die uitvoer vreemd is, kyk ná uitvoering vir gelaagde encoding/compression.
+- Identifiseer die taal deur na ’n kenmerkende token of instruksiereeks te soek.
+- Gebruik ’n aanlyn-tolk of ’n Docker-image.
+- As die uitvoer vreemd is, soek na gelaagde enkodering/kompressie ná uitvoering.
 
-'n Nuttige taalindeks is die Esolang-wiki.<sup>[[1]](#references)</sup>
+Die Esolang-wiki is ’n nuttige taalindeks.<sup>[[1]](#references)</sup>
 
 ## References
 

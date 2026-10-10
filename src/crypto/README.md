@@ -2,13 +2,13 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Hierdie afdeling fokus op praktiese kriptografie vir sekuriteitstoetsing en CTFs: die herkenning van algemene patrone, die keuse van geskikte nutsmiddels, en die toepassing van bekende aanvalle.
+Hierdie afdeling fokus op praktiese kriptografie vir sekuriteitstoetsing en CTFs: om algemene patrone te herken, geskikte nutsgoed te kies en bekende aanvalle toe te pas.
 
-Vir tegnieke wat data binne lêers versteek, sien die **Stego**-afdeling.
+Vir tegnieke wat data in lêers versteek, sien die **Stego**-afdeling.
 
 ## Hoe om hierdie afdeling te gebruik
 
-Begin deur die primitief en sy parameters te identifiseer. Bepaal dan wat die aanvaller beheer of waarneem, soos 'n oracle, 'n gelekte waarde, of nonce-hergebruik, voordat jy 'n aanval kies.
+Begin deur die primitief en sy parameters te identifiseer. Bepaal dan wat die aanvaller beheer of waarneem, soos ’n oracle, ’n leak-waarde of nonce-hergebruik, voordat jy ’n aanval kies.
 
 ### CTF-werkvloei
 
@@ -28,7 +28,7 @@ symmetric/README.md
 hashes/README.md
 {{#endref}}
 
-### Publieksleutel-kriptografie
+### Publieke-sleutel-kriptografie
 
 {{#ref}}
 public-key/README.md
@@ -54,13 +54,15 @@ ctf-misc/README.md
 
 ## Vinnige opstelling
 
-Skep 'n geïsoleerde Python-omgewing en installeer algemeen gebruikte pakkette. PyCryptodome se dokumentasie beveel aan dat `pycryptodome` met `pip` geïnstalleer word; SageMath verskaf afsonderlike installasie-instruksies vir elke ondersteunde platform.<sup>[[1]](#references)[[2]](#references)</sup>
+Skep ’n geïsoleerde Python-omgewing en installeer pakkette wat algemeen gebruik word. PyCryptodome se dokumentasie beveel aan dat jy `pycryptodome` met `pip` installeer; SageMath bied afsonderlike installasie-instruksies vir elke ondersteunde platform.<sup>[[1]](#references)[[2]](#references)</sup>
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install pycryptodome gmpy2 sympy pwntools
 ```
-SageMath is dikwels nuttig vir algebraïese, rooster-, RSA- en elliptiese-kurweberekeninge.<sup>[[2]](#references)</sup>
+
+SageMath is dikwels nuttig vir algebraïese, rooster-, RSA- en elliptiesekromme-berekeninge.<sup>[[2]](#references)</sup>
 
 ## References
 

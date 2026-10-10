@@ -2,17 +2,17 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Hierdie afdeling fokus op **die vind en onttrekking van versteekte data** uit beelde, oudio, video, dokumente, argiewe en teks. Steganografie verberg die bestaan van ’n kommunikasie deur data binne ander data in te bed.<sup>[[1]](#references)</sup>
+Hierdie afdeling fokus op **die vind en onttrekking van versteekte data** uit beelde, oudio, video, dokumente, argiewe en teks. Steganografie verberg die bestaan van ’n kommunikasie deur data binne ander data in te sluit.<sup>[[1]](#references)</sup>
 
-As jy hier is vir kriptografiese attacks, gaan na die **Crypto**-afdeling.
+As jy hier is vir kriptografiese aanvalle, gaan na die **Crypto**-afdeling.
 
 ## Beginpunt
 
-Benader steganografie as ’n forensiese probleem: identifiseer die werklike houer, enumereer liggings met ’n hoë sein (metadata, aangehegte data, ingebedde lêers), en pas eers daarna inhoudsvlak-onttrekkingstegnieke toe.
+Benader steganografie as ’n forensiese probleem: identifiseer die werklike houer, ondersoek plekke met baie potensiële inligting (metadata, aangehegte data, ingebedde lêers), en pas eers daarna tegnieke toe om inhoud te onttrek.
 
-### Workflow & triage
+### Werkvloei en aanvanklike ondersoek
 
-’n Gestruktureerde workflow wat prioriteit gee aan houer-identifikasie, metadata/string-inspeksie, carving en formaatspesifieke vertakking.
+’n Gestruktureerde werkvloei wat prioriteit gee aan die identifisering van houers, die ondersoek van metadata en stringe, carving en formaatspesifieke vertakkings.
 
 {{#ref}}
 workflow/README.md
@@ -20,7 +20,7 @@ workflow/README.md
 
 ### Beelde
 
-Waar die meeste CTF stego voorkom: LSB/bit-planes (PNG/BMP), eienaardighede in chunks/lêerformate, JPEG-tooling en multi-frame GIF-truuks.
+Waar die meeste CTF-stego voorkom: LSB/bit-vlakke (PNG/BMP), ongewone brokkies/lêerformate, JPEG-nutsgoed en truuks met GIF-lêers met veelvuldige rame.
 
 {{#ref}}
 images/README.md
@@ -28,7 +28,7 @@ images/README.md
 
 ### Oudio
 
-Spektrogramboodskappe, sample-LSB-inbedding en telefoonsleutelbordtone (DTMF) is herhalende patrone.
+Boodskappe in spektrogramme, LSB-inbedding in monsters en toonkodes van telefoonsleutelborde (DTMF) is algemene patrone.
 
 {{#ref}}
 audio/README.md
@@ -36,7 +36,7 @@ audio/README.md
 
 ### Teks
 
-As teks normaal weergegee word maar onverwags optree, oorweeg Unicode-homogliewe, zero-width-karakters of whitespace-gebaseerde encoding.
+As teks normaal vertoon word maar onverwags optree, oorweeg Unicode-homogliewe, nulwydtekarakters of enkodering wat op witspasie gebaseer is.
 
 {{#ref}}
 text/README.md
@@ -44,15 +44,15 @@ text/README.md
 
 ### Dokumente
 
-PDF’s en Office-lêers is eerstens houers; attacks draai gewoonlik om ingebedde lêers/streams, objek-/verhoudingsgrafieke en ZIP-onttrekking.
+PDF- en Office-lêers is eerstens houers; aanvalle draai gewoonlik om ingebedde lêers/strome, objek-/verhoudingsgrafieke en ZIP-onttrekking.
 
 {{#ref}}
 documents/README.md
 {{#endref}}
 
-### Malware- en delivery-styl-steganografie
+### Malware en steganografie vir aflewering
 
-Payload delivery kan lêers gebruik wat geldig lyk, soos GIF- of PNG-beelde, wat marker-afgebakende teks-payloads bevat eerder as om data in pixels te versteek.
+Loodsvragaflewering kan lêers gebruik wat geldig lyk, soos GIF- of PNG-beelde, wat merkerafgebakende teksloodsvragte bevat eerder as data wat in pixels versteek is.
 
 {{#ref}}
 malware-and-network/README.md
@@ -60,5 +60,5 @@ malware-and-network/README.md
 
 ## References
 
-- [1] [NIST CSRC Glossary - Steganografie](https://csrc.nist.gov/glossary/term/steganography)
+- [1] [NIST CSRC-woordelys - Steganografie](https://csrc.nist.gov/glossary/term/steganography)
 {{#include ../banners/hacktricks-training.md}}
