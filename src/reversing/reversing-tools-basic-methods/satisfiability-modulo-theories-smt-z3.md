@@ -1,10 +1,11 @@
-# 基本来说，这个工具可以帮助我们找到满足某些条件的变量值，而手动计算这些值会非常麻烦。因此，你可以将变量需要满足的条件告知 Z3，它会找到一些值（如果可能）。
+# 简单来说，这个工具可以帮助我们找到满足某些条件的变量值，而手动计算这些值会非常麻烦。因此，你可以告诉 Z3 变量需要满足哪些条件，它就会找出一些值（如果存在的话）。
 
 {{#include ../../banners/hacktricks-training.md}}
 
 # 基本操作
 
-## Booleans/And/Or/Not
+## 布尔值/与/或/非
+
 ```python
 # pip3 install z3-solver
 from z3 import *
@@ -20,7 +21,9 @@ s.add(And(Or(x, y, Not(z)), y))
 s.check() # If response is "sat" then the model is satisfiable, if "unsat" something is wrong
 print(s.model()) # Print valid values to satisfy the model
 ```
+
 ## Ints/Simplify/Reals
+
 ```python
 from z3 import *
 
@@ -44,7 +47,9 @@ print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 set_option(precision=30)
 print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 ```
+
 ## 打印模型
+
 ```python
 from z3 import *
 
@@ -56,11 +61,13 @@ s.check()
 m = s.model()
 print("x = %s" % m[x])
 for d in m.decls():
-print("%s = %s" % (d.name(), m[d]))
+    print("%s = %s" % (d.name(), m[d]))
 ```
+
 # 机器算术
 
-现代 CPU 和主流编程语言使用固定大小 bit-vectors 上的算术运算。Machine arithmetic 在 Z3Py 中以 Bit-Vectors 的形式提供。
+现代 CPU 和主流编程语言使用定长位向量进行算术运算。Z3Py 通过 Bit-Vectors 提供机器算术。
+
 ```python
 from z3 import *
 
@@ -75,9 +82,11 @@ a = BitVecVal(-1, 32)
 b = BitVecVal(65535, 32)
 print(simplify(a == b)) # This is False
 ```
+
 ## 有符号/无符号数
 
-Z3 提供了特殊的有符号算术运算版本，因为在处理位向量时，将其视为有符号数还是无符号数会产生差异。在 Z3Py 中，运算符 `<`、`<=`、`>`、`>=`、`/`、`%` 和 `>>` 对应有符号版本。相应的无符号运算符为 `ULT`、`ULE`、`UGT`、`UGE`、`UDiv`、`URem` 和 `LShR`。<sup>[[1]](#references)</sup>
+Z3 提供了专门的有符号算术运算；对于这些运算，将位向量视为有符号还是无符号会产生区别。在 Z3Py 中，运算符 `<`、`<=`、`>`、`>=`、`/`、`%` 和 `>>` 对应有符号版本。对应的无符号运算符是 `ULT`、`ULE`、`UGT`、`UGE`、`UDiv`、`URem` 和 `LShR`。<sup>[[1]](#references)</sup>
+
 ```python
 from z3 import *
 
@@ -95,11 +104,13 @@ solve(x < 0)
 # Using unsigned version of <
 solve(ULT(x, 0))
 ```
-## Functions
 
-像算术这样的已解释函数具有固定的标准解释。未解释函数和常量具有最大的灵活性；它们允许任何与函数或常量相关约束一致的解释。<sup>[[1]](#references)</sup>
+## 函数
 
-示例：`f` 对 `x` 应用两次后再次得到 `x`，但对 `x` 应用一次 `f` 的结果与 `x` 不同。
+算术等解释函数具有固定的标准解释。未解释函数和常量则具有最大程度的灵活性；它们可以采用任何符合函数或常量相关约束的解释。<sup>[[1]](#references)</sup>
+
+示例：`f` 对 `x` 应用两次后得到 `x`，但对 `x` 应用一次后得到的结果不同于 `x`。
+
 ```python
 from z3 import *
 
@@ -118,13 +129,15 @@ s.add(f(x) == 4) # Find the value that generates 4 as response
 s.check()
 print(s.model())
 ```
-# 面向 Reversing 的模式
 
-如果需要对 binary 进行完整的 symbolic execution，而不是手动 lifting 少量检查，请查看 [Angr - Examples](angr/angr-examples.md)。在实践中，一个非常常见的 workflow 是从 decompiler/assembly 中恢复相关 predicates，然后仅在 Z3 中重建有意义的 arithmetic 或 memory constraints。
+# 面向逆向分析的模式
 
-## 首先将 user-controlled data 建模为 bytes
+如果你需要对二进制文件进行完整的符号执行，而不是手动提升少数几个检查，请查看 [Angr - Examples](angr/angr-examples.md)。实际上，常见的工作流程是从反编译器输出或汇编中提取相关谓词，然后只在 Z3 中重建有趣的算术或内存约束。
 
-对于 Reversing，通常最好先为每个输入 byte 使用 `BitVec(..., 8)`，然后按照 target 的确切方式重建 words。这样可以保留 wrap-around、signedness bugs、shifts、rotates 以及 byte-order 问题。<sup>[[2]](#references)</sup>
+## 首先将用户可控数据建模为字节
+
+进行逆向分析时，通常最好先为每个输入字节使用 `BitVec(..., 8)`，然后按照目标程序的实际方式重建字。这样可以保留回绕行为、符号位问题、移位、循环移位和字节序问题。<sup>[[2]](#references)</sup>
+
 ```python
 from z3 import *
 
@@ -139,16 +152,18 @@ s.add(RotateRight(dword, 8) == 0x41444342)
 print(s.check())
 print(hex(s.model().eval(dword).as_long()))
 ```
-翻译 assembly 或反编译器代码时的实用辅助函数：
+
+翻译汇编或反编译代码时常用的辅助函数：
 
 - `Concat`：从字节重建 16/32/64 位值
 - `Extract`：比较高位/低位字，或模拟掩码/移位
-- `ZeroExt` / `SignExt`：正确建模零扩展/符号扩展 bug
-- `LShR` / `RotateLeft` / `RotateRight`：常用于 crackmes、hashes 和 obfuscators
+- `ZeroExt` / `SignExt`：正确模拟零扩展/符号扩展错误
+- `LShR` / `RotateLeft` / `RotateRight`：常见于 crackmes、哈希和混淆器
 
-## 使用 arrays 建模内存/寄存器表
+## 使用数组模拟内存/寄存器表
 
-当检查依赖于 `buf[i]`、lookup tables 或 emulated memory 时，使用 `Array` 可能比创建几十个独立变量更简洁。<sup>[[3]](#references)</sup>
+如果检查依赖于 `buf[i]`、查找表或模拟内存，使用 `Array` 会比创建数十个独立变量更简洁。<sup>[[3]](#references)</sup>
+
 ```python
 from z3 import *
 
@@ -157,19 +172,21 @@ mem = Store(mem, BitVecVal(0x1000, 32), BitVecVal(0x41, 8))
 mem = Store(mem, BitVecVal(0x1001, 32), BitVecVal(0x42, 8))
 
 word = Concat(
-Select(mem, BitVecVal(0x1001, 32)),
-Select(mem, BitVecVal(0x1000, 32))
+    Select(mem, BitVecVal(0x1001, 32)),
+    Select(mem, BitVecVal(0x1000, 32))
 )
 
 s = Solver()
 s.add(word == 0x4241)
 print(s.check())
 ```
-当 binary 在验证值之前将其复制到内存中的其他位置时，这尤其有用；或者当你希望在不运行整个程序的情况下，建模少量 `mov`/`xor`/`add` 操作的效果时，也很有用。
 
-## Incremental solving 非常适合 branch triage
+当二进制文件在验证值之前，先将它们复制到内存中的其他位置时，这尤其有用；如果你想在不运行整个程序的情况下，模拟几条 `mov`/`xor`/`add` 操作的效果，也同样适用。
 
-当你已经提取出基础约束后，可以使用 `push()` / `pop()`（或 assumptions）来测试不同的 branch，而无需每次都重新构建 solver：<sup>[[3]](#references)</sup>
+## 增量求解非常适合分支筛选
+
+提取出基本约束后，可以使用 `push()` / `pop()`（或 assumptions）来测试不同分支，而不必每次都重新构建 solver：<sup>[[3]](#references)</sup>
+
 ```python
 from z3 import *
 
@@ -187,26 +204,30 @@ s.add(x < 0x100)
 print("branch 2:", s.check())
 s.pop()
 ```
-当重放从 decompiler 中恢复的路径条件时，或者想快速确定哪个比较操作导致模型变为 `unsat` 时，这非常有用。
 
-## Optimize 以获得更实用的 payloads
+当重放从反编译器中恢复的路径条件时，或想快速找出哪个比较导致模型变成 `unsat` 时，这很有用。
 
-模型可满足后，`Optimize()` 可以帮助你获得更实用的解决方案：例如，优先选择可打印字节、最小化 checksum 组件，或最大化某种结构，使恢复出的密码更易于输入或复制。<sup>[[3]](#references)</sup>
+## 优化以获得更易用的 payload
+
+模型可满足后，`Optimize()` 可以帮你得到更实用的解：例如，优先选择可打印字节、最小化校验和的某个组成部分，或最大化某种结构，让恢复出的密码更容易输入或复制。<sup>[[3]](#references)</sup>
+
 ```python
 from z3 import *
 
 key = [BitVec(f'k{i}', 8) for i in range(6)]
 o = Optimize()
 for c in key:
-o.add(c != 0)
-o.add_soft(And(c >= 0x20, c <= 0x7e))
+    o.add(c != 0)
+    o.add_soft(And(c >= 0x20, c <= 0x7e))
 
 print(o.check())
 print(bytes(o.model()[c].as_long() for c in key))
 ```
-## 格式密集型序列的字符串/序列
 
-如果目标主要检查前缀、后缀、子字符串或类似 regex 的结构，那么 `String`/`Seq` 约束可能比逐字节 bit-vectors 更容易：<sup>[[3]](#references)</sup>
+## 格式繁杂的序列中的字符串/序列
+
+如果目标主要检查前缀、后缀、子字符串或类似正则表达式的结构，那么使用 `String`/`Seq` 约束可能比逐字节使用位向量更简单：<sup>[[3]](#references)</sup>
+
 ```python
 from z3 import *
 
@@ -217,62 +238,64 @@ s.add(PrefixOf(StringVal("HTB{"), serial))
 s.add(SuffixOf(StringVal("}"), serial))
 s.add(Contains(serial, StringVal("_")))
 ```
-然而，一旦 binary 开始对字符执行算术运算、旋转、校验和或类型转换，通常最好改回使用 8-bit bit-vectors。
+
+然而，一旦二进制程序开始对字符进行算术运算、旋转、校验和计算或类型转换，通常最好切换回 8-bit bit-vectors。
 
 # 示例
 
 ## 数独求解器
+
 ```python
 # 9x9 matrix of integer variables
 X = [[Int("x_%s_%s" % (i+1, j+1)) for j in range(9)]
-for i in range(9)]
+     for i in range(9)]
 
 # each cell contains a value in {1, ..., 9}
 cells_c = [And(1 <= X[i][j], X[i][j] <= 9)
-for i in range(9) for j in range(9)]
+           for i in range(9) for j in range(9)]
 
 # each row contains a digit at most once
 rows_c = [Distinct(X[i]) for i in range(9)]
 
 # each column contains a digit at most once
 cols_c = [Distinct([X[i][j] for i in range(9)])
-for j in range(9)]
+          for j in range(9)]
 
 # each 3x3 square contains a digit at most once
 sq_c = [Distinct([X[3*i0 + i][3*j0 + j]
-for i in range(3) for j in range(3)])
-for i0 in range(3) for j0 in range(3)]
+                  for i in range(3) for j in range(3)])
+        for i0 in range(3) for j0 in range(3)]
 
 sudoku_c = cells_c + rows_c + cols_c + sq_c
 
 # sudoku instance, we use '0' for empty cells
 instance = ((0,0,0,0,9,4,0,3,0),
-(0,0,0,5,1,0,0,0,7),
-(0,8,9,0,0,0,0,4,0),
-(0,0,0,0,0,0,2,0,8),
-(0,6,0,2,0,1,0,5,0),
-(1,0,2,0,0,0,0,0,0),
-(0,7,0,0,0,0,5,2,0),
-(9,0,0,0,6,5,0,0,0),
-(0,4,0,9,7,0,0,0,0))
+            (0,0,0,5,1,0,0,0,7),
+            (0,8,9,0,0,0,0,4,0),
+            (0,0,0,0,0,0,2,0,8),
+            (0,6,0,2,0,1,0,5,0),
+            (1,0,2,0,0,0,0,0,0),
+            (0,7,0,0,0,0,5,2,0),
+            (9,0,0,0,6,5,0,0,0),
+            (0,4,0,9,7,0,0,0,0))
 
 instance_c = [If(instance[i][j] == 0, True, X[i][j] == instance[i][j])
-for i in range(9) for j in range(9)]
+              for i in range(9) for j in range(9)]
 
 s = Solver()
 s.add(sudoku_c + instance_c)
 if s.check() == sat:
-m = s.model()
-r = [[m.evaluate(X[i][j]) for j in range(9)]
-for i in range(9)]
-print_matrix(r)
+    m = s.model()
+    r = [[m.evaluate(X[i][j]) for j in range(9)]
+         for i in range(9)]
+    print_matrix(r)
 else:
-print("failed to solve")
+    print("failed to solve")
 ```
-## 参考资料
 
-- [1] [带示例的 Z3Py 指南（ericpony z3py-tutorial）](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
-- [2] [Z3 指南 - Bit-Vectors 理论（Microsoft z3guide）](https://microsoft.github.io/z3guide/)
-- [3] [Programming Z3（Nikolaj Bjørner、Leonardo de Moura、Lev Nachmanson、Christoph Wintersteiger）](https://theory.stanford.edu/~nikolaj/programmingz3.html)
+## References
 
+- [1] [Z3Py 示例指南 (ericpony z3py-tutorial)](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
+- [2] [Z3 指南 - 位向量理论 (Microsoft z3guide)](https://microsoft.github.io/z3guide/)
+- [3] [Z3 编程 (Nikolaj Bjørner, Leonardo de Moura, Lev Nachmanson, Christoph Wintersteiger)](https://theory.stanford.edu/~nikolaj/programmingz3.html)
 {{#include ../../banners/hacktricks-training.md}}
