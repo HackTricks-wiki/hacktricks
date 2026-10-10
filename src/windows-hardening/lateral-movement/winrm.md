@@ -2,57 +2,58 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-WinRM є одним із найзручніших транспортів для **lateral movement** у середовищах Windows, оскільки надає віддалену оболонку через **WS-Man/HTTP(S)** без необхідності використовувати прийоми створення служб через SMB. Якщо ціль відкриває **5985/5986**, а ваш principal має дозвіл на використання remoting, часто можна дуже швидко перейти від "valid creds" до "interactive shell".
+WinRM — один із найзручніших транспортів для **lateral movement** у середовищах Windows, оскільки він надає віддалений shell через **WS-Man/HTTP(S)** без потреби в хитрощах зі створенням служб SMB. Якщо ціль відкриває **5985/5986**, а ваш principal має право на remoting, часто можна дуже швидко перейти від «valid creds» до інтерактивного shell.
 
-Для **protocol/service enumeration**, listeners, увімкнення WinRM, `Invoke-Command` і загального використання клієнтів дивіться:
+Щоб дізнатися про **перелік протоколів/служб**, listeners, увімкнення WinRM, `Invoke-Command` і загальне використання клієнта, дивіться:
 
 {{#ref}}
 ../../network-services-pentesting/5985-5986-pentesting-winrm.md
 {{#endref}}
 
-## Чому оператори надають перевагу WinRM
+## Чому оператори обирають WinRM
 
-- Використовує **HTTP/HTTPS** замість SMB/RPC, тому часто працює там, де виконання у стилі PsExec заблоковане.
-- За використання **Kerberos** не надсилає на ціль облікові дані, придатні для повторного використання.
-- Коректно працює з **Windows**, **Linux** та Python-інструментами (`winrs`, `evil-winrm`, `pypsrp`, `netexec`).
-- Інтерактивний шлях PowerShell remoting запускає на цілі **`wsmprovhost.exe`** у контексті автентифікованого користувача, що з операційного погляду відрізняється від виконання через служби.
+- Використовує **HTTP/HTTPS** замість SMB/RPC, тому часто працює там, де заблоковане виконання в стилі PsExec.
+- З **Kerberos** не потрібно надсилати цільовій системі облікові дані, які можна повторно використати.
+- Добре працює з інструментами для **Windows**, **Linux** і **Python** (`winrs`, `evil-winrm`, `pypsrp`, `netexec`).
+- Інтерактивний шлях PowerShell remoting запускає на цільовій системі **`wsmprovhost.exe`** у контексті автентифікованого користувача, що з операційного погляду відрізняється від виконання через служби.
 
-## Модель доступу та prerequisites
+## Модель доступу та передумови
 
-На практиці успішний lateral movement через WinRM залежить від **трьох** речей:
+На практиці успішний WinRM lateral movement залежить від **трьох** умов:
 
-1. На цілі є **WinRM listener** (`5985`/`5986`), а правила firewall дозволяють доступ.
-2. Обліковий запис може **authenticate** до endpoint.
-3. Обліковому запису дозволено **open a remoting session**.
+1. На цільовій системі є **WinRM listener** (`5985`/`5986`) і правила firewall дозволяють підключення.
+2. Обліковий запис може **автентифікуватися** на кінцевій точці.
+3. Обліковому запису дозволено **відкривати remoting-сесію**.
 
 Поширені способи отримати такий доступ:
 
-- **Local Administrator** на цілі.
-- Членство в **Remote Management Users** на новіших системах або у **WinRMRemoteWMIUsers__** на системах/компонентах, які все ще враховують цю групу.
-- Явно делеговані права remoting через локальні security descriptors / зміни PowerShell remoting ACL.
+- **Local Administrator** на цільовій системі.
+- Членство в групі **Remote Management Users** у новіших системах або **WinRMRemoteWMIUsers__** у системах/компонентах, які досі враховують цю групу.
+- Явно делеговані права на remoting через дескриптори безпеки локальної системи / зміни ACL PowerShell remoting.
 
-Якщо ви вже контролюєте хост із правами адміністратора, пам’ятайте, що також можете **делегувати доступ до WinRM без повного членства в групі адміністраторів**, використовуючи методи, описані тут:
+Якщо ви вже контролюєте машину з правами адміністратора, пам’ятайте, що також можете **делегувати доступ до WinRM без членства в групі адміністраторів** за допомогою описаних тут методів:
 
 {{#ref}}
 ../active-directory-methodology/security-descriptors.md
 {{#endref}}
 
-### Authentication gotchas, важливі під час lateral movement
+### Нюанси автентифікації, важливі під час lateral movement
 
-- **Kerberos requires a hostname/FQDN**. Якщо підключатися за IP-адресою, клієнт зазвичай переходить до **NTLM/Negotiate**.
-- У **workgroup** або в edge cases із cross-trust NTLM зазвичай вимагає або **HTTPS**, або додавання цілі до **TrustedHosts** на клієнті.
-- Для **local accounts** через Negotiate у workgroup UAC remote restrictions можуть блокувати доступ, якщо не використовується вбудований обліковий запис Administrator або `LocalAccountTokenFilterPolicy=1`.
-- PowerShell remoting за замовчуванням використовує **`HTTP/<host>` SPN**. У середовищах, де **`HTTP/<host>`** уже зареєстрований за іншим service account, WinRM Kerberos може завершитися помилкою `0x80090322`; використовуйте SPN із зазначенням порту або перейдіть на **`WSMAN/<host>`**, якщо цей SPN існує.<sup>[[3]](#references)</sup>
+- Для **Kerberos потрібне ім’я хоста/FQDN**. Якщо підключитися за IP-адресою, клієнт зазвичай переходить на **NTLM/Negotiate**.
+- У **workgroup** або в окремих випадках із перехресними довірчими відносинами для NTLM зазвичай потрібен або **HTTPS**, або додавання цільової системи до **TrustedHosts** на клієнті.
+- Під час використання локальних облікових записів через Negotiate у workgroup обмеження UAC для віддаленого доступу можуть блокувати підключення, якщо не використовується вбудований обліковий запис Administrator або не встановлено `LocalAccountTokenFilterPolicy=1`.
+- За замовчуванням PowerShell remoting використовує **`HTTP/<host>` SPN**. У середовищах, де `HTTP/<host>` уже зареєстрований за іншим обліковим записом служби, автентифікація WinRM Kerberos може завершитися помилкою `0x80090322`; використовуйте SPN із зазначеним портом або перейдіть на **`WSMAN/<host>`**, якщо такий SPN існує.<sup>[[3]](#references)</sup>
 
-Якщо під час password spraying вам вдалося отримати валідні облікові дані, перевірка їх через WinRM часто є найшвидшим способом з’ясувати, чи можна використати їх для отримання shell:
+Якщо під час password spraying ви отримали дійсні облікові дані, перевірити їх через WinRM — часто найшвидший спосіб з’ясувати, чи дають вони доступ до shell:
 
 {{#ref}}
 ../active-directory-methodology/password-spraying.md
 {{#endref}}
 
-## Lateral movement з Linux до Windows
+## Lateral movement із Linux до Windows
 
 ### NetExec / CrackMapExec для перевірки та одноразового виконання
+
 ```bash
 # Validate creds and execute a simple command
 netexec winrm <HOST_FQDN> -u <USER> -p '<PASSWORD>' -x "whoami /all"
@@ -63,9 +64,11 @@ netexec winrm <HOST_FQDN> -u <USER> -H <NTHASH> -x "hostname"
 # PowerShell command instead of cmd.exe
 netexec winrm <HOST_FQDN> -u <USER> -H <NTHASH> -X '$PSVersionTable'
 ```
-### Evil-WinRM для інтерактивних shell
 
-`evil-winrm` залишається найзручнішим варіантом для інтерактивної роботи з Linux, оскільки підтримує **паролі**, **NT-хеші**, **квитки Kerberos**, **клієнтські сертифікати**, передавання файлів і завантаження PowerShell/.NET у пам'ять.
+### Evil-WinRM для інтерактивних оболонок
+
+`evil-winrm` залишається найзручнішим інтерактивним варіантом у Linux, оскільки підтримує **паролі**, **NT-хеші**, **квитки Kerberos**, **клієнтські сертифікати**, передавання файлів і завантаження PowerShell/.NET у пам’ять.
+
 ```bash
 # Password
 evil-winrm -i <HOST_FQDN> -u <USER> -p '<PASSWORD>'
@@ -77,119 +80,146 @@ evil-winrm -i <HOST_FQDN> -u <USER> -H <NTHASH>
 export KRB5CCNAME=./user.ccache
 evil-winrm -i <HOST_FQDN> -r <REALM.LOCAL>
 ```
-### Граничний випадок Kerberos SPN: `HTTP` проти `WSMAN`
 
-Коли стандартний **`HTTP/<host>`** SPN спричиняє помилки Kerberos, спробуйте запитати або використати ticket **`WSMAN/<host>`**. Це трапляється в посилених або нестандартних корпоративних середовищах, де **`HTTP/<host>`** уже прив’язаний до іншого облікового запису служби.<sup>[[3]](#references)</sup>
+### Граничний випадок Kerberos SPN: `HTTP` vs `WSMAN`
+
+Якщо SPN за замовчуванням **`HTTP/<host>`** спричиняє збої Kerberos, спробуйте запросити або використати натомість квиток **`WSMAN/<host>`**. Таке трапляється в захищених або нестандартно налаштованих корпоративних середовищах, де **`HTTP/<host>`** уже прив’язаний до іншого облікового запису служби.<sup>[[3]](#references)</sup>
+
 ```bash
 # Example: use a WSMAN ticket instead of the default HTTP SPN
 export KRB5CCNAME=administrator@WSMAN_srv01.domain.local@DOMAIN.LOCAL.ccache
 evil-winrm -i srv01.domain.local -r DOMAIN.LOCAL --spn WSMAN
 ```
-Це також корисно після зловживання **RBCD / S4U**, коли ви спеціально підробили або запросили service ticket **WSMAN**, а не загальний ticket `HTTP`.
 
-### Автентифікація на основі сертифіката
+Це також корисно після зловживання **RBCD / S4U**, якщо ви підробили або запросили квиток служби **WSMAN**, а не звичайний квиток `HTTP`.
 
-WinRM також підтримує **автентифікацію клієнта за сертифікатом**, але сертифікат має бути зіставлений на цільовій системі з **локальним обліковим записом**. З offensive perspective це важливо, коли:
+### Автентифікація на основі сертифікатів
 
-- ви викрали або експортували дійсний сертифікат клієнта та приватний ключ, які вже зіставлені для WinRM;
-- ви використали **AD CS / Pass-the-Certificate**, щоб отримати сертифікат для principal, а потім перейти до іншого шляху автентифікації;
-- ви працюєте в середовищах, які навмисно уникають віддаленого керування на основі паролів.
+WinRM також підтримує **автентифікацію за клієнтським сертифікатом**, але на цільовій системі сертифікат має бути прив’язаний до **локального облікового запису**. З погляду атакувальника це важливо, коли:
+
+- ви викрали або експортували дійсний клієнтський сертифікат і закритий ключ, уже прив’язані до WinRM;
+- ви використали **AD CS / Pass-the-Certificate**, щоб отримати сертифікат для суб’єкта, а потім перейти до іншого шляху автентифікації;
+- ви працюєте в середовищах, де навмисно уникають віддаленого доступу на основі паролів.
+
 ```bash
 evil-winrm -i <HOST_FQDN> -S -c user.crt -k user.key
 ```
-Client-certificate WinRM зустрічається значно рідше, ніж password/hash/Kerberos auth, але коли він доступний, то може забезпечити шлях для **passwordless lateral movement**, який зберігається після ротації пароля.
 
-### Python / automation with `pypsrp`
+Client-certificate WinRM трапляється набагато рідше, ніж автентифікація за паролем/хешем/Kerberos, але за наявності може забезпечити **lateral movement без пароля**, який зберігається після ротації пароля.
 
-Якщо вам потрібна automation, а не operator shell, `pypsrp` надає WinRM/PSRP із Python із підтримкою **NTLM**, **certificate auth**, **Kerberos** і **CredSSP**.<sup>[[2]](#references)</sup>
+### Python / автоматизація за допомогою `pypsrp`
+
+Якщо вам потрібна автоматизація, а не shell оператора, `pypsrp` дає змогу працювати з WinRM/PSRP із Python і підтримує **NTLM**, **автентифікацію за сертифікатом**, **Kerberos** та **CredSSP**.<sup>[[2]](#references)</sup>
+
 ```python
 from pypsrp.client import Client
 
 client = Client(
-"srv01.domain.local",
-username="DOMAIN\\user",
-password="Password123!",
-ssl=False,
+    "srv01.domain.local",
+    username="DOMAIN\\user",
+    password="Password123!",
+    ssl=False,
 )
 stdout, stderr, rc = client.execute_cmd("whoami /all")
 print(stdout, stderr, rc)
 ```
-Якщо вам потрібен точніший контроль, ніж надає високорівнева обгортка `Client`, API нижчого рівня `WSMan` + `RunspacePool` корисні для розв’язання двох поширених задач оператора:
 
-- примусове використання **`WSMAN`** як служби/SPN Kerberos замість очікуваного за замовчуванням `HTTP`, яке використовують багато клієнтів PowerShell;
-- підключення до **нестандартної кінцевої точки PSRP**, наприклад **JEA** / custom session configuration, замість `Microsoft.PowerShell`.
+
+Якщо потрібен точніший контроль, ніж надає високорівнева обгортка `Client`, низькорівневі API `WSMan` + `RunspacePool` стануть у пригоді для двох поширених задач оператора:
+
+- примусово використовувати **`WSMAN`** як службу/SPN Kerberos замість очікуваного за замовчуванням **`HTTP`**, який використовують багато клієнтів PowerShell;
+- підключатися до **кінцевої точки PSRP, що не є типовою**, наприклад **JEA** / користувацької конфігурації сеансу, замість `Microsoft.PowerShell`.
+
 ```python
 from pypsrp.wsman import WSMan
 from pypsrp.powershell import PowerShell, RunspacePool
 
 wsman = WSMan(
-"srv01.domain.local",
-auth="kerberos",
-ssl=False,
-negotiate_service="WSMAN",
+    "srv01.domain.local",
+    auth="kerberos",
+    ssl=False,
+    negotiate_service="WSMAN",
 )
 
 with wsman, RunspacePool(wsman, configuration_name="MyJEAEndpoint") as pool, PowerShell(pool) as ps:
-ps.add_script("whoami; Get-Command")
-output = ps.invoke()
-print(output)
+    ps.add_script("whoami; Get-Command")
+    output = ps.invoke()
+    print(output)
 ```
-### Custom PSRP endpoints and JEA мають значення під час lateral movement
 
-Успішна автентифікація WinRM **не завжди означає**, що ви потрапите до стандартної необмеженої кінцевої точки `Microsoft.PowerShell`. Зрілі середовища можуть надавати **custom session configurations** або кінцеві точки **JEA** із власними ACLs і поведінкою run-as.<sup>[[1]](#references)</sup>
+### Власні кінцеві точки PSRP та JEA мають значення під час lateral movement
 
-Якщо ви вже маєте code execution на Windows-хості й хочете зрозуміти, які поверхні remoting доступні, перелічіть зареєстровані кінцеві точки:
+Успішна автентифікація WinRM **не** завжди означає, що ви потрапите до стандартної необмеженої кінцевої точки `Microsoft.PowerShell`. У зрілих середовищах можуть бути доступні **власні конфігурації сеансів** або кінцеві точки **JEA** з власними ACL та поведінкою запуску від імені іншого користувача.<sup>[[1]](#references)</sup>
+
+Якщо ви вже маєте code execution на хості Windows і хочете з’ясувати, які інтерфейси remoting доступні, перелічіть зареєстровані кінцеві точки:
+
 ```powershell
 Get-PSSessionConfiguration | Select-Object Name, Permission
 ```
-Коли існує корисний endpoint, явно націлюйтеся на нього замість shell за замовчуванням:
+
+Коли доступний корисний endpoint, явно вказуйте його як ціль замість оболонки за замовчуванням:
+
 ```powershell
 Enter-PSSession -ComputerName srv01.domain.local -ConfigurationName MyJEAEndpoint
 ```
-Практичні наслідки для offensive:
 
-- **restricted** endpoint усе одно може бути достатнім для lateral movement, якщо він надає доступ лише до потрібних cmdlets/functions для керування службами, доступу до файлів, створення процесів або довільного виконання команд .NET / external.
-- **Misconfigured JEA** role особливо цінна, якщо вона надає доступ до небезпечних команд, таких як `Start-Process`, широких wildcard-масок, доступних для запису providers або custom proxy functions, які дають змогу вийти за межі передбачених обмежень.
-- Endpoints, що працюють із **RunAs virtual accounts** або **gMSAs**, змінюють ефективний security context команд, які ви запускаєте. Зокрема, endpoint на основі gMSA може надати **network identity on the second hop**, навіть коли звичайна WinRM-сесія стикається з класичною проблемою delegation.
+Практичні наслідки для offensive security:
 
-## Windows-native WinRM lateral movement
+- **Обмеженого** endpoint може бути достатньо для lateral movement, якщо він відкриває саме ті cmdlet-и/функції, які потрібні для керування службами, доступу до файлів, створення процесів або довільного виконання .NET / зовнішніх команд.
+- **Неправильно налаштована JEA**-роль особливо цінна, якщо вона відкриває небезпечні команди, як-от `Start-Process`, широкі шаблони підстановки, доступні для запису провайдери або власні proxy-функції, що дають змогу вийти за межі передбачених обмежень.
+- Endpoint-и, що використовують **віртуальні облікові записи RunAs** або **gMSA**, змінюють ефективний контекст безпеки команд, які ви запускаєте. Зокрема, endpoint на основі gMSA може надати **мережеву ідентичність на другому переході**, навіть якщо звичайна WinRM-сесія зіткнулася б із типовою проблемою делегування.
+
+Для власного обмеженого endpoint перевіряйте окремо його ефективні дозволи на команди та скрипти: короткий список `Get-Command` сам по собі не доводить, що наявний `.ps1` не можна запустити. [JEA role capabilities](https://learn.microsoft.com/en-us/powershell/scripting/security/remoting/jea/role-capabilities) явно визначають, які шляхи до скриптів можна викликати; інші власні endpoint-и можуть застосовувати інші правила сесії. Якщо дозволений скрипт використовує збережений `SecureString` для створення облікових даних іншого хоста, blob, створений без явного ключа, використовує [Windows DPAPI](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.security/convertfrom-securestring) і зазвичай для розшифрування потребує контексту користувача й комп’ютера, що захищали його. Перш ніж вважати доступний для запису вихідний код або скопійований blob шляхом підвищення привілеїв між хостами, перевірте ACL скрипту, дозволені способи виклику, ідентичність run-as і права облікових даних на цільовому хості. Не виводьте захищене значення під час пасивного переліку.
+
+Для власної JEA-функції, що приймає шлях до файлу, перевіряйте разом ACL зареєстрованого endpoint, зіставлені можливості ролі та ефективну ідентичність run-as. Користувач може мати `NoLanguage`, тоді як тіло функції виконується в режимі мови за замовчуванням системи; віртуальний обліковий запис також може мати права локального адміністратора. Якщо функція перевіряє дозволений каталог за допомогою звичайного префікса рядка, а потім читає вказаний шлях, компоненти `..` можуть вивести шлях за межі цього каталогу. Межу визначає нормалізований шлях, доступний для ідентичності функції, а не режим мови користувача чи видимий префікс. Перш ніж вважати доступний для читання файл `.psrc` або `.pssc` знахідкою щодо привілейованого читання файлів, підтвердьте доступність функції та перевірку кінцевого шляху. Див. рекомендації Microsoft щодо [JEA role capability](https://learn.microsoft.com/en-us/powershell/scripting/security/remoting/jea/role-capabilities) і [security considerations](https://learn.microsoft.com/en-us/powershell/scripting/security/remoting/jea/security-considerations).
+
+## Lateral movement через вбудовані засоби Windows і WinRM
 
 ### `winrs.exe`
 
-`winrs.exe` вбудований у систему та корисний, коли вам потрібне **native WinRM command execution** без відкриття інтерактивної PowerShell remoting-сесії:
+`winrs.exe` вбудований у систему й корисний, коли потрібне **виконання команд через вбудований WinRM** без відкриття інтерактивної сесії PowerShell remoting:
+
 ```cmd
 winrs -r:srv01.domain.local cmd /c whoami
 winrs -r:https://srv01.domain.local:5986 -u:DOMAIN\\user -p:Password123! hostname
 ```
+
 Два прапорці легко забути, хоча на практиці вони важливі:
 
-- `/noprofile` часто потрібен, коли **remote principal** не є локальним адміністратором.
-- `/allowdelegate` дає змогу **remote shell** використовувати ваші облікові дані для доступу до **третього хоста** (наприклад, коли команді потрібен доступ до `\\fileserver\share`).
+- `/noprofile` часто потрібен, якщо віддалений суб’єкт не є **локальним адміністратором**.
+- `/allowdelegate` дає змогу віддаленій оболонці використовувати ваші облікові дані для доступу до **третього хоста** (наприклад, коли команді потрібен `\\fileserver\share`).
+
 ```cmd
 winrs -r:srv01.domain.local /noprofile cmd /c set
 winrs -r:srv01.domain.local /allowdelegate cmd /c dir \\fileserver.domain.local\share
 ```
+
 На практиці `winrs.exe` зазвичай створює віддалений ланцюжок процесів, подібний до:
+
 ```text
 svchost.exe (DcomLaunch) -> winrshost.exe -> cmd.exe /c <command>
 ```
-Це варто запам’ятати, оскільки цей спосіб відрізняється від service-based exec і від інтерактивних PSRP-сесій.
+
+Це варто пам’ятати, оскільки цей спосіб відрізняється від виконання через служби та інтерактивних сеансів PSRP.
 
 ### `winrm.cmd` / WS-Man COM замість PowerShell remoting
 
-Також можна виконувати команди через **WinRM transport** без `Enter-PSSession`, викликаючи класи WMI через WS-Man. У цьому випадку transport залишається WinRM, а примітивом віддаленого виконання стає **WMI `Win32_Process.Create`**:
+Також можна виконувати команди через **транспорт WinRM** без `Enter-PSSession`, викликаючи класи WMI через WS-Man. Транспортом залишається WinRM, а примітивом віддаленого виконання стає **WMI `Win32_Process.Create`**:
+
 ```cmd
 winrm invoke Create wmicimv2/Win32_Process @{CommandLine="cmd.exe /c whoami > C:\\Windows\\Temp\\who.txt"} -r:srv01.domain.local
 ```
-Цей підхід корисний, коли:
 
-- PowerShell logging активно моніториться.
-- Вам потрібен **WinRM transport**, але не класичний PS remoting workflow.
-- Ви створюєте або використовуєте custom tooling навколо COM-об’єкта **`WSMan.Automation`**.
+Такий підхід корисний, коли:
+
+- Журналювання PowerShell активно відстежується.
+- Вам потрібен **транспорт WinRM**, але не класичний робочий процес PS remoting.
+- Ви створюєте або використовуєте власні інструменти на основі COM-об’єкта **`WSMan.Automation`**.
 
 ## NTLM relay до WinRM (WS-Man)
 
-Коли SMB relay заблоковано через signing, а LDAP relay обмежено, **WS-Man/WinRM** все ще може бути привабливою ціллю для relay. Сучасний `ntlmrelayx.py` містить **WinRM relay servers** і може виконувати relay до цілей **`wsman://`** або **`winrms://`**.
+Коли SMB relay блокується через підписування, а LDAP relay обмежений, **WS-Man/WinRM** усе ще може бути привабливою ціллю для relay. Сучасний `ntlmrelayx.py` містить **сервери WinRM relay** і може виконувати relay на цілі **`wsman://`** або **`winrms://`**.
+
 ```bash
 # Relay to HTTP WinRM
 ntlmrelayx.py -t wsman://srv01.domain.local --no-smb-server -smb2support
@@ -197,31 +227,30 @@ ntlmrelayx.py -t wsman://srv01.domain.local --no-smb-server -smb2support
 # Relay to HTTPS WinRM
 ntlmrelayx.py -t winrms://srv01.domain.local --no-smb-server -smb2support
 ```
-Два практичні зауваження:
 
-- Relay найкорисніший, коли ціль приймає **NTLM**, а relayed principal має дозвіл використовувати WinRM.
-- Останній код Impacket спеціально обробляє запити **`WSMANIDENTIFY: unauthenticated`**, тому probes у стилі `Test-WSMan` не переривають процес Relay.
+Дві практичні примітки:
 
-Щодо обмежень multi-hop після отримання першої WinRM-сесії дивіться:
+- Relay найкорисніший, коли ціль приймає **NTLM**, а ретрансльованому суб’єкту дозволено використовувати WinRM.
+- У новішому коді Impacket спеціально обробляються запити **`WSMANIDENTIFY: unauthenticated`**, щоб проби на кшталт `Test-WSMan` не переривали процес relay.
+
+Щоб дізнатися про обмеження багатопереходового доступу після встановлення першого сеансу WinRM, дивіться:
 
 {{#ref}}
 ../active-directory-methodology/kerberos-double-hop-problem.md
 {{#endref}}
 
-## Примітки щодо OPSEC і виявлення
+## Нотатки щодо OPSEC і виявлення
 
-- **Interactive PowerShell remoting** зазвичай створює **`wsmprovhost.exe`** на цілі.
+- **Інтерактивне віддалене керування PowerShell** зазвичай створює на цілі процес **`wsmprovhost.exe`**.
 - **`winrs.exe`** зазвичай створює **`winrshost.exe`**, а потім запитаний дочірній процес.
-- Користувацькі кінцеві точки **JEA** можуть виконувати дії як віртуальні облікові записи **`WinRM_VA_*`** або як налаштований **gMSA**, що змінює телеметрію та поведінку другого переходу порівняно зі shell у контексті звичайного користувача.<sup>[[1]](#references)</sup>
-- Очікуйте телеметрію **network logon**, події служби WinRM і журналювання PowerShell operational/script-block, якщо використовуєте PSRP, а не raw `cmd.exe`.
-- Якщо потрібна лише одна команда, `winrs.exe` або одноразове виконання через WinRM може бути менш помітним, ніж довготривала інтерактивна remoting-сесія.
-- Якщо доступний Kerberos, віддавайте перевагу **FQDN + Kerberos** замість IP + NTLM, щоб зменшити проблеми з довірою та потребу в незручних змінах клієнтського `TrustedHosts`.
+- Користувацькі кінцеві точки **JEA** можуть виконувати дії від імені віртуальних облікових записів **`WinRM_VA_*`** або налаштованого **gMSA**, що змінює телеметрію та поведінку під час другого переходу порівняно з оболонкою у звичайному контексті користувача.<sup>[[1]](#references)</sup>
+- Якщо використовуєте PSRP, а не необроблений `cmd.exe`, очікуйте телеметрію мережевого входу, події служби WinRM, а також журналювання PowerShell Operational і блоків сценаріїв.
+- Якщо потрібна лише одна команда, `winrs.exe` або одноразове виконання через WinRM може бути менш помітним, ніж тривалий інтерактивний сеанс віддаленого керування.
+- Якщо доступний Kerberos, віддавайте перевагу **FQDN + Kerberos**, а не IP + NTLM, щоб зменшити кількість проблем із довірою та потребу в незручних змінах `TrustedHosts` на стороні клієнта.
 
-## Посилання
+## References
 
-- [1] [Microsoft: JEA Security Considerations](https://learn.microsoft.com/en-us/powershell/scripting/security/remoting/jea/security-considerations?view=powershell-7.6)
-- [2] [pypsrp README](https://github.com/jborean93/pypsrp)
-- [3] [Microsoft: Error `0x80090322` when connecting PowerShell to a remote server via WinRM](https://learn.microsoft.com/en-us/troubleshoot/windows-server/system-management-components/error-0x80090322-when-connecting-powershell-to-remote-server-via-winrm)
-
-
+- [1] [Microsoft: міркування щодо безпеки JEA](https://learn.microsoft.com/en-us/powershell/scripting/security/remoting/jea/security-considerations?view=powershell-7.6)
+- [2] [README pypsrp](https://github.com/jborean93/pypsrp)
+- [3] [Microsoft: помилка `0x80090322` під час підключення PowerShell до віддаленого сервера через WinRM](https://learn.microsoft.com/en-us/troubleshoot/windows-server/system-management-components/error-0x80090322-when-connecting-powershell-to-remote-server-via-winrm)
 {{#include ../../banners/hacktricks-training.md}}
