@@ -190,6 +190,7 @@
   - [Linux - Privilege Escalation Checklist](linux-hardening/main-system-information/linux-privilege-escalation-checklist.md)
   - [Linux - Escaping from Jails](linux-hardening/main-system-information/escaping-from-limited-bash.md)
   - [Linux - Kernel/LPE/CVE Material](linux-hardening/main-system-information/kernel-lpe-cves/README.md)
+    - [Linux Local Privilege Escalation Detection](linux-hardening/main-system-information/kernel-lpe-cves/linux-local-privilege-escalation-detection.md)
     - [Linux - Vmware Tools Service Discovery Untrusted Search Path Cve 2025 41244](linux-hardening/main-system-information/kernel-lpe-cves/vmware-tools-service-discovery-untrusted-search-path-cve-2025-41244.md)
     - [Linux - Copy Fail Af Alg Splice Page Cache Overwrite Cve 2026 31431](linux-hardening/main-system-information/kernel-lpe-cves/copy-fail-af_alg-splice-page-cache-overwrite-cve-2026-31431.md)
     - [Linux - Posix Cpu Timers Toctou Cve 2025 38352](linux-hardening/main-system-information/kernel-lpe-cves/posix-cpu-timers-toctou-cve-2025-38352.md)
