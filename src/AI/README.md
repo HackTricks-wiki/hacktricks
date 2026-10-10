@@ -46,6 +46,12 @@ Two useful starting frameworks for assessing AI-system risk are the OWASP Machin
 AI-Risk-Frameworks.md
 {{#endref}}
 
+### Mechanistic-Interpretability-Guided Adversarial Attacks
+
+{{#ref}}
+AI-Mechanistic-Interpretability-Adversarial-Attacks.md
+{{#endref}}
+
 ### AI Prompts Security
 
 LLMs have made the use of AI explode in the last years, but they are not perfect and can be tricked by adversarial prompts. This is a very important topic to understand how to use AI safely and how to attack it:
