@@ -118,6 +118,120 @@ supraudit S -C -o /tmp/output /dev/auditpipe
 The XPC library uses `kdebug` to log actions by calling `xpc_ktrace_pid0` and `xpc_ktrace_pid1`. The codes it uses are undocumented, so they need to be added to `/usr/share/misc/trace.codes`. They have the prefix `0x29`; for example, `0x29000004` is `XPC_serializer_pack`.\
 The utility `xpcproxy` uses the prefix `0x22`, for example: `0x2200001c: xpcproxy:will_do_preexec`.
 
+## Auditing Application-type XPC helpers
+
+An `XPCService.ServiceType` of `Application` is a useful starting point when auditing framework-provided helpers: enumerate the bundles, retain the running services, and inspect the helper's identifier and entitlements. Search both `/System/Library/Frameworks` and `/System/Library/PrivateFrameworks`; the exact inventory changes across macOS releases.<sup>[[7]](#references)</sup>
+
+```bash
+find /System/Library/Frameworks /System/Library/PrivateFrameworks \
+  -type d -name '*.xpc' -print0 2>/dev/null |
+while IFS= read -r -d '' bundle; do
+    plist="$bundle/Contents/Info.plist"
+    [ "$(plutil -extract XPCService.ServiceType raw -o - "$plist" 2>/dev/null)" = Application ] || continue
+
+    exe=$(plutil -extract CFBundleExecutable raw -o - "$plist" 2>/dev/null) || continue
+    bin="$bundle/Contents/MacOS/$exe"
+    ps -axo comm= | awk -v b="$bin" '{sub(/^[[:space:]]+/, ""); if ($0==b) found=1} END {exit !found}' || continue
+
+    printf '\n%s\n  id: %s\n' "$bundle" \
+      "$(plutil -extract CFBundleIdentifier raw -o - "$plist" 2>/dev/null)"
+    codesign -d --entitlements :- "$bundle" 2>&1
+done
+```
+
+### Triage the listener and recover a minimal protocol
+
+Locate `-[<delegate> listener:shouldAcceptNewConnection:]` in the helper. A path that sets `exportedInterface` and `exportedObject`, resumes the connection, and returns `YES`/`1` without checking the peer's audit token, code requirement, or entitlement exposes the RPC interface to any client that can resolve the service. This only proves **reachability**: impact still requires an exported method that performs a privileged operation without adequate per-client/per-method authorization or that unsafely processes attacker-controlled input.<sup>[[7]](#references)</sup>
+
+Recover only the selectors needed for testing. Objective-C selector metadata reveals the argument count; argument uses in the decompiler usually refine the types (for example, values passed to `-[EKEvent setStartDate:]` and `setEndDate:` are `NSDate *`), while the indirect invocation at the end of the method reveals the reply-block parameters. A partial local protocol is sufficient for `NSXPCInterface`; reconstructing the complete private protocol is unnecessary.<sup>[[7]](#references)</sup>
+
+### Connect with the reconstructed interface
+
+For an application XPC service, load any framework that defines required private classes, create the connection with `initWithServiceName:`, assign the reconstructed remote interface, install error/interruption/invalidation handlers, and only then resume it. Keep the run loop alive for asynchronous replies. Re-run the client inside a sandboxed application when testing a sandbox boundary—a successful standalone client is not evidence of a sandbox escape.<sup>[[7]](#references)</sup>
+
+<details>
+<summary>Minimal Objective-C client</summary>
+
+```objectivec
+@protocol RecoveredProtocol
+- (void)createEventIntentWithStartDate:(NSDate *)start
+                               endDate:(NSDate *)end
+                             withReply:(void (^)(id object, id error))reply;
+@end
+
+[[NSBundle bundleWithPath:@"/System/Library/PrivateFrameworks/AppPredictionFoundation.framework"] load];
+NSXPCConnection *c = [[NSXPCConnection alloc]
+    initWithServiceName:@"com.apple.proactive.AppPredictionIntentsHelperService"];
+c.remoteObjectInterface = [NSXPCInterface interfaceWithProtocol:@protocol(RecoveredProtocol)];
+c.interruptionHandler = ^{ NSLog(@"interrupted"); };
+c.invalidationHandler = ^{ NSLog(@"invalidated"); };
+[c resume];
+id proxy = [c remoteObjectProxyWithErrorHandler:^(NSError *e) { NSLog(@"%@", e); }];
+[proxy createEventIntentWithStartDate:[NSDate date]
+                              endDate:[NSDate dateWithTimeIntervalSinceNow:3600]
+                            withReply:^(id obj, id err) { NSLog(@"%@ %@", obj, err); }];
+[[NSRunLoop currentRunLoop] run];
+```
+
+Compile with `clang -fblocks -framework Foundation -o xpc_client xpc_client.m`.<sup>[[7]](#references)</sup>
+
+</details>
+
+### Use secure-coding failures as type oracles
+
+An `NSCocoaErrorDomain` error such as code `4101` may hide the useful serialization exception. Search the macOS unified log/Console for the service name: the exception identifies both the unexpected class and the classes allowed for that selector argument. For a reply, extend the **client-side** interface allowlist with `setClasses:forSelector:argumentIndex:ofReply:`; with `ofReply:YES`, index `0` means the first parameter of the reply block, not the first method parameter.<sup>[[7]](#references)</sup>
+
+Configure the interface before assigning it to the connection and calling `[c resume]`:<sup>[[7]](#references)</sup>
+
+```objectivec
+NSXPCInterface *iface = [NSXPCInterface interfaceWithProtocol:@protocol(RecoveredProtocol)];
+NSMutableSet *classes = [NSMutableSet setWithArray:@[
+    NSDate.class, NSString.class, NSNumber.class,
+    NSDictionary.class, NSArray.class, NSData.class
+]];
+Class intentClass = NSClassFromString(@"INIntent");
+if (intentClass) [classes addObject:intentClass];
+[iface setClasses:classes
+      forSelector:@selector(createEventIntentWithStartDate:endDate:withReply:)
+    argumentIndex:0
+          ofReply:YES];
+c.remoteObjectInterface = iface;
+```
+
+The reverse case is also useful: if the server rejects a Foundation input and logs a single allowed private class, the log reveals the expected wire type and its framework. Load that framework, inspect the class's methods/properties to refine generic `id` types, and construct the private object dynamically. `NSInvocation` arguments begin at index `2` because indexes `0` and `1` are the hidden `self` and `_cmd` arguments.<sup>[[7]](#references)</sup>
+
+<details>
+<summary>Construct a private argument with NSInvocation</summary>
+
+```objectivec
+Class cls = NSClassFromString(@"LNStaticDeferredLocalizedString");
+id allocated = [cls alloc];
+SEL initializer = NSSelectorFromString(@"initWithKey:table:bundleURL:");
+NSMethodSignature *signature = [allocated methodSignatureForSelector:initializer];
+NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
+[invocation setTarget:allocated];
+[invocation setSelector:initializer];
+
+NSString *key = @"KEY";
+NSString *table = @"Localizable";
+NSURL *bundleURL = NSBundle.mainBundle.bundleURL;
+[invocation setArgument:&key atIndex:2];
+[invocation setArgument:&table atIndex:3];
+[invocation setArgument:&bundleURL atIndex:4];
+[invocation invoke];
+
+__unsafe_unretained id privateObject = nil;
+[invocation getReturnValue:&privateObject];
+```
+
+</details>
+
+For the related workflow against launchd-registered, system-wide Mach services, see:
+
+{{#ref}}
+../../macos-xpc-mach-services-abuse.md
+{{#endref}}
+
 ## XPC Event Messages
 
 Applications can **subscribe** to different event **messages**, enabling them to be **initiated on-demand** when such events happen. The **setup** for these services is done in l**aunchd plist files**, located in the **same directories as the previous ones** and containing an extra **`LaunchEvent`** key.
@@ -493,5 +607,6 @@ It is possible to find these communications using `netstat`, `nettop`, or the op
 - [4] [Apple Developer — `JoinExistingSession`](https://developer.apple.com/documentation/bundleresources/information_property_list/xpcservice/joinexistingsession)
 - [5] [hot3eed/xpcspy](https://github.com/hot3eed/xpcspy)
 - [6] [NewOSXBook — XPoCe2](https://newosxbook.com/tools/XPoCe2.html)
+- [7] [Reverse Society - Attacking macOS XPC Helpers: Protocol Reverse Engineering](https://blog.reversesociety.co/blog/2025/how-to-attack-macos-application-xpc-helpers)
 
 {{#include ../../../../../banners/hacktricks-training.md}}
