@@ -2,13 +2,13 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Esta seção se concentra em criptografia prática para testes de segurança e CTFs: reconhecer padrões comuns, selecionar ferramentas adequadas e aplicar ataques conhecidos.
+Esta seção aborda criptografia prática para testes de segurança e CTFs: reconhecer padrões comuns, selecionar ferramentas adequadas e aplicar ataques conhecidos.
 
 Para técnicas que ocultam dados dentro de arquivos, consulte a seção **Stego**.
 
 ## Como usar esta seção
 
-Comece identificando a primitiva e seus parâmetros. Em seguida, determine o que o atacante controla ou observa, como uma oracle, um valor leaked ou a reutilização de um nonce, antes de selecionar um ataque.
+Comece identificando a primitiva e seus parâmetros. Em seguida, determine o que o atacante controla ou observa, como um oracle, um valor vazado ou reutilização de nonce, antes de selecionar um ataque.
 
 ### Fluxo de trabalho de CTF
 
@@ -54,12 +54,14 @@ ctf-misc/README.md
 
 ## Configuração rápida
 
-Crie um ambiente Python isolado e instale os pacotes normalmente utilizados. A documentação do PyCryptodome recomenda instalar `pycryptodome` com `pip`; o SageMath fornece instruções de instalação separadas para cada plataforma compatível.<sup>[[1]](#references)[[2]](#references)</sup>
+Crie um ambiente Python isolado e instale os pacotes mais usados. A documentação do PyCryptodome recomenda instalar `pycryptodome` com `pip`; o SageMath fornece instruções de instalação específicas para cada plataforma compatível.<sup>[[1]](#references)[[2]](#references)</sup>
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install pycryptodome gmpy2 sympy pwntools
 ```
+
 SageMath costuma ser útil para cálculos algébricos, de lattice, RSA e de curvas elípticas.<sup>[[2]](#references)</sup>
 
 ## References
