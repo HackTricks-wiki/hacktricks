@@ -2,23 +2,23 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-本节汇总了密码学挑战中会出现、但无法很好地归入其他类别的技术。
+本节汇集了在密码学挑战中出现、但不容易归入其他类别的技术。
 
-## Esoteric languages
+## 奇特语言
 
 ### 技术
 
-当挑战要求运行 Esoteric language 程序并解码其输出时，可以使用以下流程。
+当挑战要求运行奇特语言程序并解码其输出时，可使用以下流程。
 
-如果挑战提供的代码看起来不像标准语言：
+如果挑战给出的代码看起来不像常见语言：
 
-- 通过搜索具有独特特征的 token 或指令序列来识别该语言。
-- 使用在线解释器或 Docker image。
-- 如果输出内容很奇怪，请在执行后检查是否存在分层编码或压缩。
+- 搜索具有辨识度的标记或指令序列，以识别该语言。
+- 使用在线解释器或 Docker 镜像。
+- 如果输出看起来很奇怪，请检查执行后是否还经过分层编码或压缩。
 
-一个实用的语言索引是 Esolang wiki。<sup>[[1]](#references)</sup>
+Esolang wiki 是一个实用的语言索引。<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [Esolang，Esoteric programming languages wiki](https://esolangs.org/wiki/Main_Page)
+- [1] [Esolang，奇特编程语言维基](https://esolangs.org/wiki/Main_Page)
 {{#include ../../banners/hacktricks-training.md}}
