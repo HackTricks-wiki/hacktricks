@@ -1,11 +1,11 @@
-# Inligting in Drukkers
+# Inligting in drukkers
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Daar is verskeie blogs op die Internet wat die **gevare beklemtoon daarvan om drukkers met LDAP en verstek-/swak** aanmeldbewyse opgestel te laat.  \
-Dit is omdat 'n aanvaller die **drukker kan mislei om teen 'n rogue LDAP-bediener te authenticate** (tipies is 'n `nc -vv -l -p 389` of `slapd -d 2` voldoende) en die drukker se **bewyse in clear-text** kan vaslê.
+Daar is verskeie blogs op die Internet wat **die gevare uitlig van drukkers wat met LDAP en verstek-/swak aanmeldbewyse opgestel is**.  \
+Dit is omdat ’n aanvaller **die drukker kan mislei om teen ’n kwaadwillige LDAP-bediener te autentiseer** (gewoonlik is `nc -vv -l -p 389` of `slapd -d 2` genoeg) en die drukker se **aanmeldbewyse in gewone teks vas te lê**.
 
-Daarbenewens sal verskeie drukkers **logs met gebruikersname** bevat of selfs in staat wees om **alle gebruikersname** vanaf die Domain Controller af te laai.
+Daarbenewens bevat verskeie drukkers **logboeke met gebruikersname**, of kan hulle selfs **alle gebruikersname** van die Domain Controller **aflaai**.
 
 Al hierdie **sensitiewe inligting** en die algemene **gebrek aan sekuriteit** maak drukkers baie interessant vir aanvallers.
 
@@ -16,27 +16,30 @@ Enkele inleidende blogs oor die onderwerp:
 
 ---
 
-## Drukkerkonfigurasie
+## Drukkeropstelling
 
 - **Ligging**: Die LDAP-bedienerlys word gewoonlik in die webkoppelvlak gevind (bv. *Network ➜ LDAP Setting ➜ Setting Up LDAP*).
-- **Gedrag**: Baie ingebedde webbedieners laat LDAP-bedienerwysigings **toe sonder om bewyse weer in te voer** (bruikbaarheidsfunksie → sekuriteitsrisiko).
-- **Exploit**: Herlei die LDAP-bedieneradres na 'n aanvallerbeheerde gasheer en gebruik die *Test Connection* / *Address Book Sync*-knoppie om die drukker te dwing om teen jou te bind.
+- **Gedrag**: Baie ingebedde webbedieners laat toe dat LDAP-bedieners gewysig word **sonder om aanmeldbewyse weer in te voer** (gebruikersvriendelike kenmerk → sekuriteitsrisiko).
+- **Uitbuiting**: Herlei die LDAP-bedieneradres na ’n gasheer wat deur die aanvaller beheer word en gebruik die *Test Connection* / *Address Book Sync*-knoppie om die drukker te dwing om aan jou te bind.
 
 ---
 
-## Vaslegging van Bewyse
+## Vaslegging van aanmeldbewyse
 
-### Metode 1 – Netcat Listener
+### Metode 1 – Netcat-luisteraar
+
 ```bash
 sudo nc -k -v -l -p 389     # Plain LDAP only
 ```
-Klein/ou MFPs kan ’n eenvoudige *simple-bind* stuur waarvan die bind DN en wagwoord in die rou BER-stroom sigbaar is. Moderne toestelle voer gewoonlik eers ’n anonymous query uit en probeer daarna die bind, so resultate wissel.<sup>[[1]](#references)</sup>
 
-’n Gewone `nc`-listener op 636/3269 ontvang slegs TLS-ciphertext; om LDAPS te toets, vereis ’n TLS-capable LDAP-endpoint, en redirection behoort te misluk wanneer die toestel die bedienersertifikaat korrek valideer.
+Klein/ou MFP's kan 'n eenvoudige *simple-bind* stuur waarvan die bind-DN en wagwoord in die rou BER-stroom sigbaar is. Moderne toestelle voer gewoonlik eers 'n anonieme navraag uit en probeer dan die bind, so die resultate wissel.<sup>[[1]](#references)</sup>
 
-### Method 2 – Volledige Rogue LDAP server (aanbeveel)
+'n Gewone `nc`-luisteraar op 636/3269 ontvang slegs TLS-syferteks; om LDAPS te toets, is 'n TLS-bekwame LDAP-eindpunt nodig, en herleiding behoort te misluk wanneer die toestel die bediener se sertifikaat korrek valideer.
 
-Omdat baie toestelle ’n anonymous search *voor* authentication sal uitvoer, lewer dit baie meer betroubare resultate om ’n werklike LDAP-daemon op te stel:<sup>[[1]](#references)</sup>
+### Method 2 – Full Rogue LDAP server (recommended)
+
+Omdat baie toestelle 'n anonieme soektog sal uitvoer *voordat* hulle staaf, lewer die opstelling van 'n werklike LDAP-daemon baie meer betroubare resultate:<sup>[[1]](#references)</sup>
+
 ```bash
 # Debian/Ubuntu example
 sudo apt install slapd ldap-utils
@@ -45,46 +48,50 @@ sudo dpkg-reconfigure slapd   # set any base-DN – it will not be validated
 # run slapd in foreground / debug 2
 slapd -d 2 -h "ldap:///"      # only LDAP, no LDAPS
 ```
-Wanneer die printer sy lookup uitvoer, sal jy die clear-text credentials in die debug-uitset sien.
 
-> 💡  Responder sluit rogue LDAP- en SMB-authentication services in. ’n Eenvoudige LDAP bind kan die gekonfigureerde password blootlê, terwyl NTLM authentication challenge-response-materiaal produseer; moenie albei uitkomste as ’n clear-text password beskryf nie.
+Wanneer die drukker sy opsoek uitvoer, sal jy die geloofsbriewe in gewone teks in die ontfoutingsuitset sien.
+
+> 💡 Responder sluit rogue LDAP- en SMB-verifikasiedienste in. ’n Eenvoudige LDAP-bind kan die gekonfigureerde wagwoord blootlê, terwyl NTLM-verifikasie challenge-response-materiaal oplewer; moenie albei uitkomste as ’n wagwoord in gewone teks beskryf nie.
 
 ---
 
-## Onlangse Pass-Back Vulnerabilities (2024-2025)
+## Onlangse Pass-Back-kwesbaarhede (2024-2025)
 
-Pass-back is *nie* ’n teoretiese probleem nie – vendors publiseer steeds advisories in 2024/2025 wat presies hierdie attack class beskryf.
+Pass-back is *nie* ’n teoretiese probleem nie – verskaffers publiseer steeds in 2024/2025 sekuriteitsadvies wat hierdie aanvalsklas presies beskryf.
 
 ### Xerox VersaLink – CVE-2024-12510 & CVE-2024-12511
 
-Firmware ≤ 57.69.91 van Xerox VersaLink C70xx MFPs het ’n geauthentiseerde admin (of enigiemand wanneer default creds behoue bly) toegelaat om:
+Firmware ≤ 57.69.91 van Xerox VersaLink C70xx MFP’s het ’n geverifieerde admin (of enigiemand wanneer die verstekbewyse onveranderd is) toegelaat om:
 
-* **CVE-2024-12510 – LDAP pass-back**: die LDAP-serveradres te verander en ’n lookup te trigger, wat veroorsaak dat die device die gekonfigureerde Windows credentials na die attacker-controlled host leë.
-* **CVE-2024-12511 – SMB/FTP pass-back**: identiese probleem via *scan-to-folder*-bestemmings, wat NetNTLMv2 of FTP clear-text creds leë.<sup>[[2]](#references)</sup>
+* **CVE-2024-12510 – LDAP pass-back**: die LDAP-bedieneradres te verander en ’n opsoek te aktiveer, wat veroorsaak dat die toestel die gekonfigureerde Windows-bewyse na die aanvallerbeheerde gasheer lek.
+* **CVE-2024-12511 – SMB/FTP pass-back**: dieselfde probleem via *scan-to-folder*-bestemmings, wat NetNTLMv2- of FTP-bewyse in gewone teks laat lek.<sup>[[2]](#references)</sup>
 
 ’n Eenvoudige listener soos:
+
 ```bash
 sudo nc -k -v -l -p 389     # capture LDAP bind
 ```
-of ’n rogue SMB server (`impacket-smbserver`) is genoeg om die credentials te harvest.
 
-### Canon imageRUNNER / imageCLASS – Advisory 20 May 2025
+of ’n kwaadwillige SMB-bediener (`impacket-smbserver`) is genoeg om die geloofsbriewe te harvest.  
 
-Canon het ’n **SMTP/LDAP pass-back**-swakheid in dosyne Laser- en MFP-produklyne bevestig. ’n Aanvaller met admin access kan die bedienerkonfigurasie wysig en die gestoorde credentials vir LDAP **of** SMTP herwin (baie organisasies gebruik ’n bevoorregte rekening om scan-to-mail toe te laat).<sup>[[3]](#references)</sup>
+### Canon imageRUNNER / imageCLASS – Advies van 20 Mei 2025
 
-Die vendor guidance beveel uitdruklik die volgende aan:
+Canon het ’n **SMTP/LDAP pass-back**-swakheid in tientalle Laser- en MFP-produkreekse bevestig. ’n Aanvaller met admin-toegang kan die bedienerkonfigurasie wysig en die gestoorde LDAP- **of** SMTP-geloofsbriewe bekom (baie organisasies gebruik ’n bevoorregte rekening om skandeer-na-e-pos toe te laat).<sup>[[3]](#references)</sup>
 
-1. Dateer op na patched firmware sodra dit beskikbaar is.
-2. Gebruik sterk, unieke admin passwords.
-3. Vermy bevoorregte AD-rekeninge vir printer-integrasie.
+Die verskaffer se leiding beveel uitdruklik die volgende aan:
+
+1. Dateer op na fermware met die regstelling sodra dit beskikbaar is.
+2. Gebruik sterk, unieke admin-wagwoorde.
+3. Vermy die gebruik van bevoorregte AD-rekeninge vir drukkerintegrasie.
 
 ---
 
-### Brother devices en OEM-variante – serial-derived admin access tot service credentials
+### Brother-toestelle en OEM-variante – reeksnommer-afgeleide admin-toegang tot diensgeloofsbriewe
 
-’n 2025 coordinated disclosure het ’n besonder nuttige chain op geaffekteerde Brother devices gedemonstreer; dele van die vulnerability set raak ook OEM-modelle, dus moet jy die presiese model teen sy vendor advisory verifieer. ’n Unauthenticated attacker kan die device serial via HTTP/HTTPS/IPP op vulnerable firmware bekom, terwyl serials ook deur management protocols soos SNMP of PJL beskikbaar kan wees. Indien die factory password nooit verander is nie, lewer die serial deterministies die administrator password. Ná authentication stel die afsonderlike pass-back flaw CVE-2024-51984 gekonfigureerde external-service passwords soos LDAP of FTP in plaintext bloot, wat printer-management access in herbruikbare network credentials omskep. Firmware herstel die service-password disclosure, maar devices wat voorheen vervaardig is, vereis steeds dat die operator die serial-derived initial administrator password vervang.<sup>[[6]](#references)</sup>
+’n Gekoördineerde openbaarmaking in 2025 het ’n besonder nuttige aanvalsketting op geaffekteerde Brother-toestelle gedemonstreer; dele van die kwesbaarheidstel raak ook OEM-modelle, dus moet die presiese model teen die verskaffer se advies nagegaan word. ’n Aanvaller sonder verifikasie kan die toestel se reeksnommer via HTTP/HTTPS/IPP op kwesbare fermware bekom, terwyl reeksnommers ook via bestuursprotokolle soos SNMP of PJL beskikbaar kan wees. As die fabriekswagwoord nooit verander is nie, bepaal die reeksnommer die administrateurwagwoord. Ná verifikasie stel die afsonderlike pass-back-fout CVE-2024-51984 gekonfigureerde wagwoorde vir eksterne dienste, soos LDAP of FTP, in gewone teks bloot; só word drukkerbestuurtoegang omskep in herbruikbare netwerkgeloofsbriewe. Fermware herstel die blootlegging van dienswagwoorde, maar vir toestelle wat reeds vervaardig is, moet die operateur steeds die aanvanklike administrateurwagwoord wat van die reeksnommer afgelei is, vervang.<sup>[[6]](#references)</sup>
 
-Huidige Metasploit sluit ’n auxiliary module in wat die serial oor HTTP, SNMP of PJL ontdek, die kandidaat initial password genereer en dit opsioneel teen die web console verifieer. `DiscoverSerialVia=AUTO` probeer die ondersteunde discovery paths; verskaf eerder `TargetSerial` wanneer die asset inventory reeds die serial bevat.<sup>[[7]](#references)</sup>
+Die huidige Metasploit bevat ’n auxiliary-module wat die reeksnommer via HTTP, SNMP of PJL ontdek, die moontlike aanvanklike wagwoord genereer en dit opsioneel teen die webkonsole verifieer. `DiscoverSerialVia=AUTO` probeer die ondersteunde ontdekkingsroetes; verskaf eerder `TargetSerial` wanneer die bate-inventaris reeds die reeksnommer bevat.<sup>[[7]](#references)</sup>
+
 ```text
 msfconsole -q
 use auxiliary/admin/misc/brother_default_admin_auth_bypass_cve_2024_51978
@@ -92,32 +99,33 @@ set RHOSTS <printer-ip>
 set DiscoverSerialVia AUTO
 run
 ```
-Gebruik die resultaat slegs om gemagtigde bates te valideer. Of die wagwoord werk, hang af van die presiese model en, krities, daarvan af of die fabrieksadministrateurwagwoord reeds verander is.<sup>[[6]](#references)[[7]](#references)</sup>
+
+Gebruik die resultaat slegs om gemagtigde bates te valideer. Of die wagwoord werk, hang af van die presiese model en, veral, of die fabrieksadministrateurwagwoord reeds verander is.<sup>[[6]](#references)[[7]](#references)</sup>
 
 ---
 
-## Outomatiese Enumerasie / Exploitation Tools
+## Outomatiese Enumeration / Exploitation Tools
 
 | Tool | Doel | Voorbeeld |
 |------|---------|---------|
-| **PRET** (Printer Exploitation Toolkit) | Misbruik van PostScript/PJL/PCL, lêerstelseltoegang, kontrole van verstekbewyse, *SNMP-discovery* | `python pret.py 192.168.1.50 pjl` |
+| **PRET** (Printer Exploitation Toolkit) | Misbruik van PostScript/PJL/PCL, toegang tot die lêerstelsel, nagaan van verstekbewyse, *SNMP-discovery* | `python pret.py 192.168.1.50 pjl` |
 | **Praeda** | Oes konfigurasie (insluitend adresboeke en LDAP-bewyse) via HTTP/HTTPS | `perl praeda.pl -t 192.168.1.50` |
-| **Responder / ntlmrelayx** | Begin rogue authentication services en vang/relay NetNTLM vanaf SMB callbacks | `sudo responder -I eth0 -v` |
-| **Metasploit Brother auxiliary** | Ontdek ’n reeksnommer, lei die kandidaat-fabrieksadministrateurwagwoord af en verifieer toegang tot die webkonsole | `use auxiliary/admin/misc/brother_default_admin_auth_bypass_cve_2024_51978` |
+| **Responder / ntlmrelayx** | Laat rogue-verifikasiedienste loop en vang/relê NetNTLM vanaf SMB-callbacks | `sudo responder -I eth0 -v` |
+| **Metasploit Brother auxiliary** | Ontdek ’n reeksnommer, lei die moontlike fabrieksadministrateurwagwoord af en verifieer toegang tot die webkonsole | `use auxiliary/admin/misc/brother_default_admin_auth_bypass_cve_2024_51978` |
 
 ---
 
-## Verharding & Opsporing
+## Verharding en Opsporing
 
-1. **Patch / firmware-update** MFP’s betyds (kyk na die verskaffer se PSIRT-bulletins).
-2. **Vervang fabrieksadministrateurwagwoorde** – firmware alleen verwyder nie reeksnommer-afgeleide aanvanklike wagwoorde van voorheen vervaardigde, geaffekteerde Brother/OEM-toestelle nie.<sup>[[6]](#references)</sup>
-3. **Diensrekeninge met die minste voorregte** – moet nooit Domain Admin vir LDAP/SMB/SMTP gebruik nie; beperk dit tot *leesalleen*-OU-omvang.
-4. **Beperk bestuurstoegang** – plaas drukker-web-/IPP-/SNMP-koppelvlakke in ’n bestuurs-VLAN of agter ’n ACL/VPN.
-5. **Beperk drukker-egress** – laat elke toestel slegs met die verwagte DC/LDAP-, pos-, DNS/NTP-, druk- en skandeer-lêerbestemmings kommunikeer. Pass-back vereis ’n callback na ’n aanvallergekose endpoint.
-6. **Deaktiveer Ongebruikte Protokolle** – FTP, Telnet, rou-9100, ouer SSL-ciphers.
-7. **Aktiveer ouditlogging** – sommige toestelle kan LDAP/SMTP-foute na syslog stuur; korreleer onverwagte binds.
-8. **Monitor authentication destinations** – waarsku wanneer ’n drukker LDAP, SMB, SMTP of FTP na ’n gasheer buite sy allowlist inisieer, veral onmiddellik ná ’n bestuursaanmelding of konfigurasieverandering.
-9. **SNMPv3 of deaktiveer SNMP** – community `public` lek dikwels toestel- en reeksnommerinligting.
+1. **Dateer MFP’s betyds op met patches/firmware** (raadpleeg die PSIRT-bulletins van die verskaffer).
+2. **Vervang fabrieksadministrateurwagwoorde** – firmware alleen verwyder nie reeksnommer-afgeleide aanvanklike wagwoorde van voorheen vervaardigde, geraakte Brother/OEM-toestelle nie.<sup>[[6]](#references)</sup>
+3. **Diensrekeninge met die minste voorregte** – gebruik nooit Domain Admin vir LDAP/SMB/SMTP nie; beperk dit tot *leesalleen*-OU-reikwydtes.
+4. **Beperk bestuurstoegang** – plaas die drukker se web-/IPP-/SNMP-koppelvlakke in ’n bestuurs-VLAN of agter ’n ACL/VPN.
+5. **Beperk drukkeruitgaande verkeer** – laat elke toestel toe om slegs met die verwagte DC/LDAP-, e-pos-, DNS/NTP-, druk- en skandeer-lêerbestemmings te kommunikeer. Pass-back vereis ’n callback na ’n aanvallergekose eindpunt.
+6. **Deaktiveer ongebruikte protokolle** – FTP, Telnet, raw-9100 en ouer SSL-syfersuites.
+7. **Aktiveer ouditregistrasie** – sommige toestelle kan LDAP-/SMTP-foute na syslog stuur; korreleer onverwagte bindings.
+8. **Monitor verifikasi bestemmings** – waarsku wanneer ’n drukker LDAP, SMB, SMTP of FTP begin gebruik na ’n gasheer buite sy toelatingslys, veral onmiddellik ná ’n aanmelding by die bestuurskoppelvlak of ’n konfigurasieverandering.
+9. **Gebruik SNMPv3 of deaktiveer SNMP** – die community `public` lek dikwels toestel- en reeksnommerinligting.
 
 ---
 
@@ -128,10 +136,10 @@ Gebruik die resultaat slegs om gemagtigde bates te valideer. Of die wagwoord wer
 ## References
 
 - [1] [Dis net ’n drukker… Wat is die ergste wat kan gebeur?](https://grimhacker.com/2018/03/09/just-a-printer/)
-- [2] [Xerox Versalink C7025-multifunksiedrukker: Pass-Back-aanvalskwesbaarhede (reggestel)](https://www.rapid7.com/blog/post/2025/02/14/xerox-versalink-c7025-multifunction-printer-pass-back-attack-vulnerabilities-fixed/)
-- [3] [CP2025-004 Kwesbaarheidsversagting/-remediëring vir produksiedrukkers, multifunksiedrukkers vir kantoor-/kleinkantoorgebruik en laserdrukkers](https://psirt.canon/advisory-information/cp2025-004/)
+- [2] [Xerox Versalink C7025-multifunksiedrukker: kwesbaarhede vir Pass-Back-aanvalle (reggestel)](https://www.rapid7.com/blog/post/2025/02/14/xerox-versalink-c7025-multifunction-printer-pass-back-attack-vulnerabilities-fixed/)
+- [3] [CP2025-004: Versagting/herstel van kwesbaarhede vir produksiedrukkers, multifunksiedrukkers vir kantore/klein kantore en laserdrukkers](https://psirt.canon/advisory-information/cp2025-004/)
 - [4] [Verkryging van domeinbewyse deur ’n drukker met Netcat](https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/)
-- [5] [Exploitation van multifunksiedrukkers tydens ’n penetration testing-opdrag](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
-- [6] [Veelvuldige Brother-toestelle: Veelvuldige kwesbaarhede (REGGESTEL)](https://www.rapid7.com/blog/post/multiple-brother-devices-multiple-vulnerabilities-fixed/)
-- [7] [Metasploit: Brother default administrator authentication bypass-module](https://github.com/rapid7/metasploit-framework/blob/master/modules/auxiliary/admin/misc/brother_default_admin_auth_bypass_cve_2024_51978.rb)
+- [5] [Uitbuiting van multifunksiedrukkers tydens ’n penetrasietoetsopdrag](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
+- [6] [Verskeie Brother-toestelle: Verskeie kwesbaarhede (REGGESTEL)](https://www.rapid7.com/blog/post/multiple-brother-devices-multiple-vulnerabilities-fixed/)
+- [7] [Metasploit: Brother-module vir die omseiling van verstekadministrateurverifikasie](https://github.com/rapid7/metasploit-framework/blob/master/modules/auxiliary/admin/misc/brother_default_admin_auth_bypass_cve_2024_51978.rb)
 {{#include ../../banners/hacktricks-training.md}}
