@@ -2,117 +2,122 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## はじめに
+## Introduction
 
-### Certificate のコンポーネント
+### Components of a Certificate
 
-- **Subject** は、certificate の所有者を示します。
-- **Public Key** は非公開で保持される key とペアになり、certificate を正当な所有者に関連付けます。
-- **Validity Period** は **NotBefore** と **NotAfter** の日付で定義され、certificate の有効期間を示します。
-- Certificate Authority (CA) によって提供される一意の **Serial Number** は、各 certificate を識別します。
-- **Issuer** は certificate を発行した CA を指します。
-- **SubjectAlternativeName** は subject に追加の名前を指定でき、識別の柔軟性を高めます。
-- **Basic Constraints** は certificate が CA 用か end entity 用かを識別し、使用制限を定義します。
-- **Extended Key Usages (EKUs)** は、Object Identifiers (OIDs) を使用して、code signing や email encryption など、certificate の具体的な用途を定めます。
-- **Signature Algorithm** は certificate の署名に使用する method を指定します。
-- Issuer の private key で作成される **Signature** は、certificate の真正性を保証します。<sup>[[4]](#references)</sup>
+- **Subject** は証明書の所有者を示します。
+- **Public Key** は秘密鍵と対になり、証明書と正当な所有者を結び付けます。
+- **Validity Period** は **NotBefore** と **NotAfter** の日付で定義され、証明書の有効期間を示します。
+- Certificate Authority (CA) が付与する一意の **Serial Number** により、各証明書を識別します。
+- **Issuer** は証明書を発行した CA を指します。
+- **SubjectAlternativeName** を使用すると、対象に追加の名前を設定でき、識別の柔軟性が高まります。
+- **Basic Constraints** は、証明書が CA 用かエンドエンティティ用かを示し、使用制限を定義します。
+- **Extended Key Usages (EKUs)** は、Object Identifiers (OIDs) を通じて、コード署名やメール暗号化など、証明書の具体的な用途を定義します。
+- **Signature Algorithm** は証明書の署名に使用する方法を指定します。
+- 発行者の秘密鍵で作成される **Signature** により、証明書の真正性が保証されます。<sup>[[4]](#references)</sup>
 
-### 特別な考慮事項
+### Special Considerations
 
-- **Subject Alternative Names (SANs)** は certificate を複数の identity に適用できるように拡張します。これは複数の domain を持つ server にとって重要です。攻撃者が SAN の指定を操作して impersonation を行うリスクを避けるには、安全な発行プロセスが不可欠です。<sup>[[4]](#references)</sup>
+- **Subject Alternative Names (SANs)** によって証明書を複数の識別情報に適用できるため、複数のドメインを持つサーバーでは特に重要です。攻撃者が SAN の指定を操作してなりすますリスクを避けるには、安全な発行プロセスが不可欠です。<sup>[[4]](#references)</sup>
 
-### Active Directory (AD) における Certificate Authorities (CAs)
+### Certificate Authorities (CAs) in Active Directory (AD)
 
-AD CS は、専用の container を通じて AD forest 内の CA certificate を認識します。それぞれの container は固有の役割を持ちます。<sup>[[4]](#references)</sup>
+AD CS は、AD フォレスト内の CA 証明書を指定されたコンテナーで管理します。それぞれのコンテナーには固有の役割があります。<sup>[[4]](#references)</sup>
 
-- **Certification Authorities** container には、信頼された root CA certificate が格納されます。
-- **Enrolment Services** container には、Enterprise CA とその certificate template の詳細が含まれます。
-- **NTAuthCertificates** object には、AD authentication に使用することを許可された CA certificate が含まれます。
-- **AIA (Authority Information Access)** container は、intermediate CA certificate および cross CA certificate を使用した certificate chain の検証を可能にします。
+- **Certification Authorities** コンテナーには、信頼されたルート CA 証明書が格納されます。
+- **Enrolment Services** コンテナーには、Enterprise CA とその証明書テンプレートに関する情報が格納されます。
+- **NTAuthCertificates** オブジェクトには、AD 認証で使用を許可された CA 証明書が含まれます。
+- **AIA (Authority Information Access)** コンテナーは、中間 CA 証明書やクロス CA 証明書を使用した証明書チェーンの検証を可能にします。
 
-### Certificate の取得: Client Certificate Request の flow
+### Certificate Acquisition: Client Certificate Request Flow
 
-1. request process は、client が Enterprise CA を検索することから始まります。
-2. public-private key pair の生成後、public key とその他の詳細を含む CSR が作成されます。
-3. CA は CSR を利用可能な certificate template と照合して評価し、template の permission に基づいて certificate を発行します。
-4. 承認されると、CA は private key で certificate に署名し、client に返します。<sup>[[4]](#references)</sup>
+1. クライアントが Enterprise CA を見つけることで、要求プロセスが始まります。
+2. 公開鍵とその他の情報を含む CSR は、公開鍵と秘密鍵のペアを生成した後に作成されます。
+3. CA は、利用可能な証明書テンプレートに照らして CSR を評価し、テンプレートの権限に基づいて証明書を発行します。
+4. 承認されると、CA は秘密鍵で証明書に署名し、クライアントに返します。<sup>[[4]](#references)</sup>
 
-### Certificate Template
+### Certificate Templates
 
-AD 内で定義されるこれらの template は、許可される EKU、enrollment 権限、変更権限など、certificate の発行に関する設定と permission を定義します。これは certificate service への access を管理するうえで重要です。<sup>[[4]](#references)</sup>
+AD 内で定義されるこれらのテンプレートは、証明書の発行に関する設定と権限を規定します。許可される EKU、登録権限や変更権限などが含まれ、証明書サービスへのアクセス管理に欠かせません。<sup>[[4]](#references)</sup>
 
-**Template の schema version は重要です。** Legacy の **v1** template（組み込みの **WebServer** template など）には、複数の modern な enforcement 設定がありません。**ESC15/EKUwu** の research により、**v1 template** では requester が CSR に **Application Policies/EKUs** を埋め込むことができ、それらが template に設定された EKU より**優先される**ことが示されました。これにより、enrollment 権限だけで client-auth、enrollment agent、または code-signing certificate を発行できます。**v2/v3 template** を優先し、v1 の default を削除または置き換え、EKU を意図した用途に厳密に限定してください。<sup>[[1]](#references)</sup>
+**テンプレートのスキーマバージョンは重要です。** レガシーな **v1** テンプレート（組み込みの **WebServer** テンプレートなど）には、最新の強制設定がいくつかありません。**ESC15/EKUwu** の調査で示されたように、**v1 テンプレート**では、要求者が CSR に埋め込んだ **Application Policies/EKUs** が、テンプレートに設定された EKU より**優先される**ことがあります。その結果、登録権限しかなくても、client-auth、enrollment agent、またはコード署名用の証明書を取得できる可能性があります。**v2/v3 テンプレート**を優先し、v1 のデフォルト設定を削除または置き換え、EKU を意図した用途に厳密に限定してください。<sup>[[1]](#references)</sup>
 
 ## Certificate Enrollment
 
-certificate の enrollment process は、administrator が **certificate template を作成**することで開始され、その後 Enterprise Certificate Authority (CA) によって **publish** されます。これにより template が client enrollment に利用可能になります。この処理は、Active Directory object の `certificatetemplates` field に template の名前を追加することで実行されます。<sup>[[4]](#references)</sup>
+証明書の登録プロセスは、管理者が**証明書テンプレートを作成**し、Enterprise Certificate Authority (CA) がそれを**公開**することで開始されます。これによりテンプレートがクライアントの登録に利用できるようになります。これは、Active Directory オブジェクトの `certificatetemplates` フィールドにテンプレート名を追加して行います。<sup>[[4]](#references)</sup>
 
-client が certificate を request するには、**enrollment 権限**を付与する必要があります。これらの権限は、certificate template と Enterprise CA 自体の security descriptor によって定義されます。request を成功させるには、両方の場所で permission を付与する必要があります。
+クライアントが証明書を要求するには、**登録権限**が必要です。この権限は、証明書テンプレート自体と Enterprise CA 自体に設定されたセキュリティ記述子によって定義されます。要求を成功させるには、両方の場所で権限を付与する必要があります。
 
-### Template Enrollment 権限
+### Template Enrollment Rights
 
-これらの権限は Access Control Entries (ACEs) を通じて指定され、次のような permission が定義されます。
+これらの権限は Access Control Entries (ACEs) で指定され、以下のようなアクセス許可が含まれます。
 
-- **Certificate-Enrollment** および **Certificate-AutoEnrollment** 権限。それぞれ特定の GUID に関連付けられています。
-- **ExtendedRights**。すべての拡張 permission を許可します。
-- **FullControl/GenericAll**。template に対する完全な control を提供します。
+- **Certificate-Enrollment** と **Certificate-AutoEnrollment** の権限。それぞれ固有の GUID が関連付けられています。
+- すべての拡張権限を許可する **ExtendedRights**。
+- テンプレートを完全に制御できる **FullControl/GenericAll**。
 
-### Enterprise CA Enrollment 権限
+### Enterprise CA Enrollment Rights
 
-CA の権限は、その security descriptor に記述されており、Certificate Authority management console から access できます。一部の設定では low-privileged user に remote access まで許可されるため、security 上の懸念となる可能性があります。
+CA の権限は、そのセキュリティ記述子に記載されており、Certificate Authority 管理コンソールから確認できます。一部の設定では、低い権限のユーザーにリモートアクセスを許可することもでき、セキュリティ上の懸念となる可能性があります。
 
-### 追加の発行制御
+### Additional Issuance Controls
 
-次のような control が適用される場合があります。
+次のような追加の制御が適用される場合があります。
 
-- **Manager Approval**: certificate manager による承認が完了するまで request を pending 状態にします。
-- **Enrolment Agents and Authorized Signatures**: CSR に必要な signature 数と、必要な Application Policy OID を指定します。
+- **Manager Approval**: 証明書マネージャーが承認するまで、要求を保留状態にします。
+- **Enrolment Agents and Authorized Signatures**: CSR に必要な署名数と、必要な Application Policy OIDs を指定します。
 
-### Certificate を request する method
+### Methods to Request Certificates
 
-certificate は次の方法で request できます。
+証明書は、次の方法で要求できます。
 
-1. DCOM interface を使用する **Windows Client Certificate Enrollment Protocol** (MS-WCCE)。
-2. named pipe または TCP/IP を介した **ICertPassage Remote Protocol** (MS-ICPR)。
-3. Certificate Authority Web Enrollment role が install された **certificate enrollment web interface**。
-4. Certificate Enrollment Policy (CEP) service と組み合わせた **Certificate Enrollment Service** (CES)。
-5. Simple Certificate Enrollment Protocol (SCEP) を使用して network device 用の certificate を発行する **Network Device Enrollment Service** (NDES)。
+1. DCOM インターフェイスを使用する **Windows Client Certificate Enrollment Protocol** (MS-WCCE)。
+2. 名前付きパイプまたは TCP/IP を使用する **ICertPassage Remote Protocol** (MS-ICPR)。
+3. Certificate Authority Web Enrollment ロールがインストールされた **certificate enrollment web interface**。
+4. **Certificate Enrollment Policy (CEP)** サービスと連携する **Certificate Enrollment Service** (CES)。
+5. **Simple Certificate Enrollment Protocol** (SCEP) を使用するネットワークデバイス向けの **Network Device Enrollment Service** (NDES)。
 
-Windows user は GUI（`certmgr.msc` または `certlm.msc`）や command-line tool（`certreq.exe` または PowerShell の `Get-Certificate` command）からも certificate を request できます。
+Windows ユーザーは、GUI（`certmgr.msc` または `certlm.msc`）やコマンドラインツール（`certreq.exe` または PowerShell の `Get-Certificate` コマンド）からも証明書を要求できます。
+
 ```bash
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
-## Certificate Authentication
 
-Active Directory (AD) は、主に **Kerberos** および **Secure Channel (Schannel)** protocol を利用した certificate authentication をサポートします。
+## 証明書認証
 
-### Kerberos Authentication Process
+Active Directory (AD) は、主に **Kerberos** および **Secure Channel (Schannel)** プロトコルを利用した証明書認証をサポートしています。
 
-Kerberos authentication process では、ユーザーの Ticket Granting Ticket (TGT) の要求が、ユーザーの certificate の **private key** を使用して署名されます。この要求は、domain controller によって複数の検証を受けます。検証には、certificate の **validity**、**path**、**revocation status** が含まれます。また、certificate が trusted source から発行されたものであること、および issuer が **NTAUTH certificate store** に存在することも確認されます。検証に成功すると、TGT が発行されます。AD 内の **`NTAuthCertificates`** object は、次の場所にあります：
+### Kerberos 認証プロセス
+
+Kerberos 認証プロセスでは、ユーザーの Ticket Granting Ticket (TGT) 要求は、ユーザーの証明書の **private key** を使用して署名されます。この要求は、ドメインコントローラーによって、証明書の **有効性**、**パス**、**失効状態**など、いくつかの検証を受けます。また、証明書が信頼できるソースから発行されたこと、および発行者が **NTAUTH 証明書ストア**に存在することも確認されます。検証に成功すると、TGT が発行されます。AD 内の **`NTAuthCertificates`** オブジェクトは、次の場所にあります:
+
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
-は、certificate authentication における trust の確立の中心となります。<sup>[[4]](#references)</sup>
 
-**KB5014754** の rollout 以降、modern Kerberos certificate auth では、単に EKU だけでなく、主に **mapping strength** が重視されます。<sup>[[2]](#references)</sup> hardened forest では:
+は、証明書認証の信頼を確立するうえで中心的な役割を果たします。<sup>[[4]](#references)</sup>
 
-- **UPN/DNS SAN** のみを含む certificate では、logon に不十分な場合があります。
-- KDC は **strong binding** を優先します。通常は **SID security extension** (`1.3.6.1.4.1.311.25.2`) または `altSecurityIdentities` における strong explicit mapping が使用されます。
-- certificate に strong mapping がない場合、DC は compatibility mode では **Kdcsvc Event ID 39/41** を log に記録し、enforcement mode では auth を拒否します。
-- 複合した attack path では、発行された certificate から SID extension を削除する **ESC9/ESC16** が重要になります。その後、operator は explicit mappings、または attack path が対応している場合は SAN URL SID format に依存します。
+**KB5014754** の展開以降、最新の Kerberos 証明書認証では、EKU だけでなく、主に**マッピングの強度**が重要になっています。<sup>[[2]](#references)</sup> 強化されたフォレストでは、次のようになります。
 
-### Secure Channel (Schannel) Authentication
+- **UPN/DNS SAN** のみを含む証明書では、ログオンに不十分な場合があります。
+- KDC は、通常は **SID セキュリティ拡張**（`1.3.6.1.4.1.311.25.2`）または `altSecurityIdentities` の強力な明示的マッピングによる、**強いバインディング**を優先します。
+- 証明書に強いマッピングがない場合、互換モードでは DC が **Kdcsvc Event ID 39/41** をログに記録し、強制モードでは認証を拒否します。
+- 複合的な攻撃経路では、発行される証明書から SID 拡張を削除する **ESC9/ESC16** が重要です。その後、攻撃経路が対応していれば、攻撃者は明示的なマッピングや SAN URL の SID 形式に依存します。
 
-Schannel は安全な TLS/SSL 接続を実現します。handshake 中に client が certificate を提示し、その certificate が正常に検証されると access が認可されます。certificate から AD account への mapping には、Kerberos の **S4U2Self** function や certificate の **Subject Alternative Name (SAN)** などが使用されます。<sup>[[4]](#references)</sup>
+### Secure Channel (Schannel) 認証
 
-**PKINIT** が利用できない場合、Schannel は実用的な fallback としても機能します。たとえば、domain controller に適切な **Smart Card Logon** certificate がない場合、`certipy auth`/PKINIT tooling は TGT の取得に失敗する可能性があります。しかし、同じ certificate を **LDAPS** または **LDAP StartTLS** に対する authentication や LDAP operations に使用できる場合があります。
+Schannel は安全な TLS/SSL 接続を実現します。ハンドシェイク中にクライアントが証明書を提示し、その証明書が正常に検証されると、アクセスが許可されます。証明書を AD アカウントにマッピングする方法としては、Kerberos の **S4U2Self** 機能や、証明書の **Subject Alternative Name (SAN)** などがあります。<sup>[[4]](#references)</sup>
 
-### AD Certificate Services Enumeration
+**PKINIT** が利用できない場合、Schannel は実用的なフォールバックにもなります。たとえば、ドメインコントローラーに適切な **Smart Card Logon** 証明書がない場合、`certipy auth`/PKINIT ツールでは TGT の取得に失敗することがあります。しかし、同じ証明書を **LDAPS** または **LDAP StartTLS** での認証や LDAP 操作に利用できる場合があります。
 
-AD の certificate services は LDAP queries を通じて enumeration でき、**Enterprise Certificate Authorities (CAs)** とその configurations に関する情報が明らかになります。これは special privileges のない、domain-authenticated user であれば誰でも利用できます。**[Certify](https://github.com/GhostPack/Certify)** や **[Certipy](https://github.com/ly4k/Certipy)** などの tools は、AD CS environments における enumeration と vulnerability assessment に使用されます。
+### AD Certificate Services の列挙
 
-これらの tools を使用する commands は次のとおりです:
+AD の証明書サービスは LDAP クエリで列挙でき、**Enterprise Certificate Authorities (CAs)** とその構成に関する情報を取得できます。これは、特別な権限のないドメイン認証済みユーザーであれば誰でも利用できます。**[Certify](https://github.com/GhostPack/Certify)** や **[Certipy](https://github.com/ly4k/Certipy)** などのツールは、AD CS 環境での列挙や脆弱性評価に使用されます。
+
+これらのツールを使用するコマンドは次のとおりです。
+
 ```bash
 # Enumerate trusted root CA certificates, Enterprise CAs, and web endpoints
 Certify.exe cas
@@ -140,53 +145,56 @@ certipy auth -pfx administrator.pfx -dc-ip 10.10.10.10 -ldap-shell
 certutil.exe -TCAInfo
 certutil -v -dstemplate
 ```
+
 {{#ref}}
 ad-certificates/domain-escalation.md
 {{#endref}}
 
 ---
 
-## 最近の脆弱性とセキュリティ更新（2022-2025）
+## 最近の脆弱性とセキュリティ更新プログラム（2022-2025）
 
 | 年 | ID / 名前 | 影響 | 主なポイント |
 |------|-----------|--------|----------------|
-| 2022 | **CVE-2022-26923** – “Certifried” / ESC6 | PKINIT 中に machine account の証明書を spoofing することによる *Privilege escalation*。 | **2022 年 5 月 10 日**の security updates に patch が含まれています。監査と strong-mapping controls は **KB5014754** により導入されました。現在、環境は *Full Enforcement* mode である必要があります。 |
-| 2023 | **CVE-2023-35350 / 35351** | AD CS Web Enrollment（certsrv）および CES roles における *Remote code-execution*。 | 公開 PoC は限定的ですが、脆弱な IIS components が内部で公開されていることは少なくありません。2023 年 7 月の Patch Tuesday 時点で patch 済みです。 |
-| 2024 | **CVE-2024-49019** – “EKUwu” / ESC15 | **v1 templates** では、enrollment rights を持つ requester が CSR に **Application Policies/EKUs** を埋め込むことができ、template EKUs より優先されます。その結果、client-auth、enrollment agent、または code-signing certificates を生成できます。 | **2024 年 11 月 12 日**時点で patch 済みです。v1 templates（例: default WebServer）を置き換えるか supersede し、EKUs を用途に限定して、enrollment rights を制限してください。 |
+| 2022 | **CVE-2022-26923** – “Certifried” / ESC6 | PKINIT中にマシンアカウントの証明書を偽装することによる*権限昇格*。 | パッチは**2022年5月10日**のセキュリティ更新プログラムに含まれています。監査と強力なマッピングの制御は**KB5014754**で導入されました。環境は現在、*Full Enforcement* モードになっている必要があります。 |
+| 2023 | **CVE-2023-35350 / 35351** | AD CS Web Enrollment（certsrv）およびCESロールにおける*リモートコード実行*。 | 公開PoCは限られていますが、脆弱なIISコンポーネントが内部ネットワークに公開されていることはよくあります。**2023年7月**のPatch Tuesdayの更新プログラムを適用してください。 |
+| 2024 | **CVE-2024-49019** – “EKUwu” / ESC15 | **v1テンプレート**では、登録権限を持つ要求者がCSRに**Application Policies/EKUs**を埋め込むと、テンプレートのEKUより優先され、クライアント認証、Enrollment Agent、またはコード署名用の証明書が発行される可能性があります。 | **2024年11月12日**時点でパッチが提供されています。v1テンプレート（デフォルトのWebServerなど）を置き換えるか後継テンプレートを用意し、EKUを用途に合わせて制限し、登録権限を限定してください。 |
 
-### Microsoft hardening timeline（KB5014754）
+### Microsoftのハードニングタイムライン（KB5014754）
 
-Microsoft は、Kerberos certificate authentication を weak implicit mappings から移行するため、Compatibility → Audit → Enforcement の 3 段階の rollout を導入しました。`StrongCertificateBindingEnforcement` registry value が設定されていない場合、**2025 年 2 月 11 日**時点で domain controllers は自動的に **Full Enforcement** に切り替わります。Microsoft はその後 timeline を更新し、**2025 年 9 月 9 日**の security update までは compatibility mode への fallback を可能にしました。<sup>[[2]](#references)</sup> Administrators は次を実施してください。
+Microsoftは、Kerberos証明書認証を脆弱な暗黙的マッピングから移行するため、3段階（Compatibility → Audit → Enforcement）の展開を導入しました。**2025年2月11日**時点では、`StrongCertificateBindingEnforcement`レジストリ値が設定されていない場合、ドメインコントローラーは自動的に**Full Enforcement**へ切り替わります。その後Microsoftはタイムラインを更新し、**2025年9月9日**のセキュリティ更新プログラムまでは互換モードへのフォールバックが可能となりました。<sup>[[2]](#references)</sup> 管理者は次の対応を行ってください。
 
-1. すべての DC と AD CS servers に patch を適用する（2022 年 5 月以降）。
-2. *Audit* phase 中に Event ID 39/41 を監視し、weak mappings を検出する。
-3. enforcement により weak mappings が block される前に、新しい **SID extension** を使用して client-auth certificates を再発行するか、strong manual mappings を設定する。
+1. すべてのDCとAD CSサーバーにパッチを適用する（2022年5月以降）。
+2. *Audit*段階で、脆弱なマッピングを示すイベントID 39/41を監視する。
+3. Enforcementによって脆弱なマッピングがブロックされる前に、新しい**SID extension**を含むクライアント認証証明書を再発行するか、強力な手動マッピングを設定する。
 
-### Hardened forests における operator notes
+### ハードニングされたフォレストでのオペレーター向け注意事項
 
-- **ESC1/ESC6 だけでは、2025 年以降の environments における全体像ではありません**。別の principal 用に cert を request する場合、通常は SID extension や明示的な mapping などの strong mapping artifact も必要です。
-- **ESC15（EKUwu）**は、主に unpatched environments で有効です。これは **WebServer** などの無害な **v1** templates に **Application Policies** を inject することで、authentication または enrollment-agent 機能を持つ cert に変えます。Kerberos PKINIT は引き続き EKUs を評価しますが、**LDAP Schannel** も Application Policies を honor するため、LDAP-based abuse が引き続き relevant になります。<sup>[[1]](#references)</sup>
-- **ESC16** は CA-wide knob です。CA が SID security extension を globally disable すると、attack chain が別の supported format で SID を inject しない限り、発行されるすべての certificate は weaker mapping behavior に fallback します。
+- **2025年以降の環境では、ESC1/ESC6だけが全てではありません**。別のプリンシパルの証明書を要求する場合、通常はSID extensionや明示的なマッピングなど、強力なマッピングを示す情報も必要です。
+- **ESC15（EKUwu）**は、未パッチ環境で特に有効です。**Application Policies**を挿入することで、**WebServer**などの無害な**v1**テンプレートを、認証またはEnrollment Agentに利用できる証明書に変えられます。Kerberos PKINITは引き続きEKUを評価しますが、**LDAP Schannel**もApplication Policiesを参照するため、LDAPを介した悪用の可能性は残ります。<sup>[[1]](#references)</sup>
+- **ESC16**はCA全体に適用される設定です。CAがSID security extensionを全体的に無効にすると、攻撃チェーンが別のサポート対象形式でSIDを挿入しない限り、発行されるすべての証明書で脆弱なマッピングが使われる可能性が高まります。
+- **ESC7の権限は別々のものです**。CAの`ManageCA`権限があれば、`EDITF_ATTRIBUTESUBJECTALTNAME2`（ESC6）などの設定を変更できる一方、`ManageCertificates`は要求の承認を制御します。証明書マネージャー権限に明示的なDenyが設定されていると、Allowも存在する場合でも承認経路がブロックされることがあります。設定やテンプレートを連鎖させる前に、CA ACLの実効権限を評価してください。[MicrosoftによるCA ACLの評価](https://learn.microsoft.com/en-us/defender-for-identity/security-assessment-edit-vulnerable-ca-setting)を参照してください。
 
 ---
 
-## Detection と Hardening の強化
+## 検出とハードニングの強化
 
-* **Defender for Identity AD CS sensor（2023-2024）**は現在、ESC1-ESC8/ESC11 の posture assessments を表示し、*“Domain-controller certificate issuance for a non-DC”*（ESC8）や *“Prevent Certificate Enrollment with arbitrary Application Policies”*（ESC15）などの real-time alerts を生成します。これらの detections を活用するため、すべての AD CS servers に sensors が deploy されていることを確認してください。<sup>[[3]](#references)</sup>
-* すべての templates で **“Supply in the request”** option を disable するか、厳密に scope してください。明示的に定義された SAN/EKU を優先します。
-* 絶対に必要な場合を除き、templates から **Any Purpose** または **No EKU** を削除します（ESC2 scenarios に対応）。
-* sensitive templates（例: WebServer / CodeSigning）には **manager approval** または専用の Enrollment Agent workflows を要求します。
-* web enrollment（`certsrv`）および CES/NDES endpoints を trusted networks に限定するか、client-certificate authentication の背後に配置します。
-* RPC enrollment encryption（`certutil -setreg CA\InterfaceFlags +IF_ENFORCEENCRYPTICERTREQUEST`）を enforce して ESC11（RPC relay）を mitigate します。この flag は **デフォルトで on** ですが、legacy clients のために disable されていることが多く、relay risk が再び発生します。
-* **IIS-based enrollment endpoints**（CES/Certsrv）を secure にします。可能な場合は NTLM を disable するか、HTTPS + Extended Protection を要求して ESC8 relays を block します。
+* **Defender for Identity AD CS sensor（2023-2024）**では、ESC1-ESC8/ESC11のセキュリティ態勢評価が表示されるようになり、「*Domain-controller certificate issuance for a non-DC*」（ESC8）や「*Prevent Certificate Enrollment with arbitrary Application Policies*」（ESC15）などのリアルタイムアラートが生成されます。これらの検出を利用するには、すべてのAD CSサーバーにsensorを展開してください。<sup>[[3]](#references)</sup>
+* すべてのテンプレートで**「Supply in the request」**オプションを無効にするか、適用範囲を厳しく制限してください。SAN/EKUは明示的に定義することを推奨します。
+* 絶対に必要な場合を除き、テンプレートから**Any Purpose**または**No EKU**を削除してください（ESC2のシナリオに対処）。
+* 機密性の高いテンプレート（WebServer / CodeSigningなど）には、**manager approval**または専用のEnrollment Agentワークフローを必須にしてください。
+* Web enrollment（`certsrv`）とCES/NDESエンドポイントを信頼できるネットワークに限定するか、クライアント証明書認証の背後に配置してください。
+* RPC enrollment encryption（`certutil -setreg CA\InterfaceFlags +IF_ENFORCEENCRYPTICERTREQUEST`）を強制し、ESC11（RPC relay）を軽減してください。このフラグは**デフォルトで有効**ですが、レガシークライアントのために無効化されていることが多く、その場合はrelayのリスクが再び生じます。
+* **IISベースのenrollmentエンドポイント**（CES/Certsrv）を保護してください。可能であればNTLMを無効にするか、HTTPSとExtended Protectionを必須にしてESC8 relayを防いでください。
+
+CAが稼働しているホストでESC11を評価してください。このホストはドメインコントローラーではなく、ドメインメンバーサーバーの場合があります。アクティブなCAの`InterfaceFlags`を`HKLM\SYSTEM\CurrentControlSet\Services\CertSvc\Configuration`で確認してください。値を読み取れない、または見つからない場合は結果不明であり、RPC encryptionが無効である証拠にはなりません。`IF_ENFORCEENCRYPTICERTREQUEST`ビットがクリアされている場合は設定上の手掛かりになりますが、実際に悪用するには、到達可能なenrollment RPCエンドポイント、強制可能な認証情報、および利用可能な証明書テンプレートが必要です。ESC8では、HTTP NTLM challengeだけでは不十分です。機能するenrollmentエンドポイントが存在することを確認してください。
 
 ---
 
 ## References
 
-- [1] [EKUwu: Not just another AD CS ESC](https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc)
-- [2] [KB5014754: Certificate-based authentication changes on Windows domain controllers](https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16)
-- [3] [Certificates security posture assessments - Microsoft Defender for Identity](https://learn.microsoft.com/en-us/defender-for-identity/security-posture-assessments/certificates)
-- [4] [Certified Pre-Owned: Abusing Active Directory Certificate Services](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
-
+- [1] [EKUwu: もうひとつのAD CS ESCではない](https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc)
+- [2] [KB5014754: Windowsドメインコントローラーにおける証明書ベース認証の変更](https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16)
+- [3] [証明書のセキュリティ態勢評価 - Microsoft Defender for Identity](https://learn.microsoft.com/en-us/defender-for-identity/security-posture-assessments/certificates)
+- [4] [Certified Pre-Owned: Active Directory Certificate Servicesの悪用](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
 {{#include ../../banners/hacktricks-training.md}}
