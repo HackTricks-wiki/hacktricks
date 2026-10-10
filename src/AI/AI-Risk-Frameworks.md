@@ -2,182 +2,189 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Udhaifu 10 Bora wa Machine Learning wa OWASP
+## OWASP Top 10 Machine Learning Vulnerabilities
 
-Owasp imebainisha udhaifu 10 bora wa machine learning ambao unaweza kuathiri mifumo ya AI. Udhaifu huu unaweza kusababisha masuala mbalimbali ya usalama, yakiwemo data poisoning, model inversion, na adversarial attacks. Kuelewa udhaifu huu ni muhimu kwa ajili ya kujenga mifumo salama ya AI.
+OWASP imetambua udhaifu 10 wa juu wa machine learning unaoweza kuathiri mifumo ya AI. Udhaifu huu unaweza kusababisha masuala mbalimbali ya usalama, yakiwemo data poisoning, model inversion na adversarial attacks. Kuelewa udhaifu huu ni muhimu katika kujenga mifumo salama ya AI.
 
-Kwa orodha iliyosasishwa na yenye maelezo ya kina ya udhaifu 10 bora wa machine learning, rejelea mradi wa [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/).<sup>[[1]](#references)</sup>
+Kwa orodha iliyosasishwa na ya kina ya udhaifu 10 wa juu wa machine learning, rejelea mradi wa [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/).<sup>[[1]](#references)</sup>
 
-- **Input Manipulation Attack**: Mshambuliaji huongeza mabadiliko madogo, ambayo mara nyingi hayaonekani, kwenye **data inayoingia** ili model ifanye uamuzi usio sahihi.\
-*Mfano*: Matone machache ya rangi kwenye alama ya kusimama huifanya gari linalojiendesha "kuona" alama ya kikomo cha kasi.
+- **Input Manipulation Attack**: Mshambulizi huongeza mabadiliko madogo, ambayo mara nyingi hayaonekani, kwenye **data inayoingia** ili modeli ifanye uamuzi usio sahihi.\
+    *Mfano*: Matone machache ya rangi kwenye alama ya stop hudanganya gari linalojiendesha na kulifanya "kuona" alama ya kikomo cha mwendo.
 
-- **Data Poisoning Attack**: **Training set** huchafuliwa kimakusudi kwa samples mbaya, na hivyo kuifundisha model sheria zenye madhara.\
-*Mfano*: Binaries za malware huwekewa lebo kimakosa kuwa "benign" katika mkusanyiko wa data wa mafunzo wa antivirus, na kuruhusu malware zinazofanana kupita baadaye.
+- **Data Poisoning Attack**: **Training set** huchafuliwa kimakusudi kwa sampuli zisizofaa, na hivyo kufundisha modeli kanuni hatari.\
+*Mfano*: Faili hasidi za programu hasidi huwekewa lebo isiyo sahihi ya "benign" kwenye mkusanyiko wa data ya mafunzo ya antivirus, na hivyo kuruhusu programu hasidi zinazofanana kupenya baadaye.
 
-- **Model Inversion Attack**: Kwa kuchunguza matokeo, mshambuliaji huunda **reverse model** inayorejesha features nyeti za inputs asili.\
-*Mfano*: Kuunda upya picha ya MRI ya mgonjwa kutokana na predictions za model ya kugundua cancer.
+- **Model Inversion Attack**: Kwa kuchunguza matokeo, mshambulizi huunda **reverse model** inayorejesha sifa nyeti za ingizo asilia.\
+*Mfano*: Kuunda upya picha ya MRI ya mgonjwa kutokana na utabiri wa modeli ya kugundua saratani.
 
-- **Membership Inference Attack**: Mpinzani hujaribu kubaini ikiwa **record maalum** ilitumika wakati wa training kwa kutambua tofauti za confidence.\
-*Mfano*: Kuthibitisha kuwa muamala wa benki wa mtu fulani unaonekana katika training data ya model ya kugundua udanganyifu.
+- **Membership Inference Attack**: Mshambuliaji hujaribu kubaini kama **rekodi mahususi** ilitumika wakati wa mafunzo kwa kutambua tofauti za confidence.\
+*Mfano*: Kuthibitisha kuwa muamala wa benki wa mtu fulani upo kwenye data ya mafunzo ya modeli ya kugundua ulaghai.
 
-- **Model Theft**: Kuuliza maswali mara kwa mara humwezesha mshambuliaji kujifunza mipaka ya maamuzi na **kuiga tabia ya model** (pamoja na IP).\
-*Mfano*: Kukusanya jozi za kutosha za Q&A kutoka kwa API ya ML-as-a-Service ili kujenga model ya ndani inayokaribiana nayo.
+- **Model Theft**: Kuuliza modeli mara kwa mara humwezesha mshambuliaji kujifunza decision boundaries na **kunakili tabia ya modeli** (na IP).\
+*Mfano*: Kukusanya Q&A pairs za kutosha kutoka kwenye API ya ML-as-a-Service ili kujenga modeli ya ndani inayokaribiana sana na ya awali.
 
-- **AI Supply-Chain Attack**: Kuhatarisha component yoyote (data, libraries, pre-trained weights, CI/CD) katika **ML pipeline** ili kuharibu models zinazotokana nayo.\
-*Mfano*: Dependency iliyochafuliwa kwenye model-hub husakinisha model ya sentiment-analysis yenye backdoor katika apps nyingi.
+- **AI Supply‑Chain Attack**: Kukiuka sehemu yoyote (data, libraries, pre-trained weights, CI/CD) ya **ML pipeline** ili kuharibu modeli zinazofuata.\
+*Mfano*: Dependency iliyotiwa sumu kwenye model-hub husakinisha modeli ya sentiment-analysis yenye backdoor kwenye programu nyingi.
 
-- **Transfer Learning Attack**: Logic hasidi hupandikizwa kwenye **pre-trained model** na huendelea kuwepo baada ya fine-tuning kwenye task ya mwathirika.\
-*Mfano*: Vision backbone yenye trigger iliyofichwa bado hubadilisha labels baada ya kurekebishwa kwa ajili ya medical imaging.
+- **Transfer Learning Attack**: Mantiki hasidi hupandikizwa kwenye **pre-trained model** na kubaki baada ya fine-tuning kwa kazi ya mwathiriwa.\
+*Mfano*: Vision backbone yenye trigger iliyofichwa bado hubadilisha lebo baada ya kurekebishwa kwa ajili ya picha za kimatibabu.
 
-- **Model Skewing**: Data yenye upendeleo au labels zisizo sahihi **hubadilisha outputs za model** ili kuunga mkono ajenda ya mshambuliaji.\
-*Mfano*: Kuingiza emails za spam "safi" zilizopewa lebo ya ham ili spam filter ziruhusu emails zinazofanana baadaye.
+- **Model Skewing**: Data yenye upendeleo mdogo au lebo zisizo sahihi **hubadilisha matokeo ya modeli** ili kuunga mkono ajenda ya mshambuliaji.\
+*Mfano*: Kuingiza barua pepe za spam "safi" zilizowekewa lebo ya ham, ili kichujio cha spam kiruhusu barua pepe zinazofanana kupita baadaye.
 
-- **Output Integrity Attack**: Mshambuliaji **hubadilisha predictions za model wakati wa usafirishaji**, bila kuibadilisha model yenyewe, na hivyo kupotosha mifumo inayofuata.\
-*Mfano*: Kubadilisha uamuzi wa malware classifier kutoka "malicious" kuwa "benign" kabla ya hatua ya file-quarantine kuuona.
+- **Output Integrity Attack**: Mshambuliaji **hubadilisha utabiri wa modeli wakati wa uwasilishaji**, si modeli yenyewe, na hivyo kudanganya mifumo inayofuata.\
+*Mfano*: Kubadilisha uamuzi wa malware classifier kutoka "malicious" hadi "benign" kabla mfumo wa kuweka faili karantini haujauona.
 
-- **Model Poisoning** --- Mabadiliko ya moja kwa moja na yaliyolengwa kwenye **model parameters** zenyewe, mara nyingi baada ya kupata write access, ili kubadilisha tabia.\
-*Mfano*: Kubadilisha weights za model ya kugundua udanganyifu iliyo production ili miamala kutoka kwa kadi fulani iidhinishwe kila mara.
+- **Model Poisoning** --- Mabadiliko ya moja kwa moja na lengwa kwenye **model parameters** zenyewe, mara nyingi baada ya kupata ruhusa ya kuandika, ili kubadilisha tabia.\
+*Mfano*: Kurekebisha weights za modeli ya kugundua ulaghai iliyo production ili miamala kutoka kwa kadi fulani iidhinishwe kila wakati.
 
 
 ## Hatari za Google SAIF
 
-[SAIF (Security AI Framework)](https://saif.google/secure-ai-framework) ya Google inaeleza hatari mbalimbali zinazohusishwa na mifumo ya AI:<sup>[[2]](#references)</sup>
+[SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/risks) ya Google inaeleza hatari mbalimbali zinazohusishwa na mifumo ya AI:<sup>[[2]](#references)</sup>
 
-- **Data Poisoning**: Wahusika hasidi hubadilisha au kuingiza training/tuning data ili kupunguza usahihi, kupandikiza backdoors, au kupotosha matokeo, na hivyo kudhoofisha uadilifu wa model katika mzunguko mzima wa data.
+- **Data Poisoning**: Watu hasidi hubadilisha au kuingiza data ya mafunzo/tuning ili kupunguza usahihi, kupandikiza backdoors au kupotosha matokeo, na hivyo kudhoofisha uadilifu wa modeli katika mzunguko mzima wa maisha ya data.
 
-- **Unauthorized Training Data**: Kuingiza datasets zenye hakimiliki, nyeti, au zisizoruhusiwa huleta madeni ya kisheria, kimaadili, na kiutendaji kwa sababu model hujifunza kutokana na data ambayo haikuruhusiwa kutumia.
+- **Unauthorized Training Data**: Kutumia datasets zenye hakimiliki, nyeti au zisizoruhusiwa husababisha hatari za kisheria, kimaadili na kiutendaji kwa sababu modeli hujifunza kutokana na data ambayo haikuruhusiwa kuitumia.
 
-- **Model Source Tampering**: Supply-chain au insider manipulation ya model code, dependencies, au weights kabla au wakati wa training inaweza kupachika logic iliyofichwa ambayo huendelea kuwepo hata baada ya retraining.
+- **Model Source Tampering**: Uingiliaji wa supply-chain au wa mtu wa ndani kwenye code, dependencies au weights za modeli kabla au wakati wa mafunzo unaweza kupandikiza mantiki iliyofichwa ambayo hubaki hata baada ya mafunzo kufanywa upya.
 
-- **Excessive Data Handling**: Udhibiti dhaifu wa kuhifadhi data na governance husababisha mifumo kuhifadhi au kuchakata data ya kibinafsi zaidi ya inavyohitajika, na kuongeza hatari ya kufichuka na ya kutotii kanuni.
+- **Excessive Data Handling**: Udhibiti dhaifu wa uhifadhi na usimamizi wa data husababisha mifumo kuhifadhi au kuchakata data binafsi zaidi ya inavyohitajika, na kuongeza hatari za ufichuzi na kutofuata kanuni.
 
-- **Model Exfiltration**: Washambuliaji huiba model files/weights, na kusababisha kupotea kwa intellectual property na kuwezesha services za kuiga au mashambulizi yanayofuata.
+- **Model Exfiltration**: Washambuliaji huiba faili/weights za modeli, na kusababisha upotevu wa intellectual property na kuwezesha huduma zinazoiga modeli au mashambulizi yanayofuata.
 
-- **Model Deployment Tampering**: Wapinzani hubadilisha model artifacts au serving infrastructure ili model inayoendesha itofautiane na toleo lililokaguliwa, na hivyo kubadilisha behaviour.
+- **Model Deployment Tampering**: Washambuliaji hubadilisha model artifacts au serving infrastructure ili modeli inayoendeshwa iwe tofauti na toleo lililokaguliwa, na hivyo huenda kubadilisha tabia yake.
 
-- **Denial of ML Service**: Kufurika kwa APIs au kutuma inputs za “sponge” kunaweza kumaliza compute/energy na kuifanya model isitumikike, sawa na mashambulizi ya kawaida ya DoS.
+- **Denial of ML Service**: Kufurika kwa maombi kwenye APIs au kutuma ingizo za “sponge” kunaweza kumaliza rasilimali za compute/energy na kuizima modeli, sawa na mashambulizi ya kawaida ya DoS.
 
-- **Model Reverse Engineering**: Kwa kukusanya idadi kubwa ya jozi za input-output, washambuliaji wanaweza kuiga au kudistil model, na hivyo kuwezesha bidhaa za kuiga na adversarial attacks zilizobinafsishwa.
+- **Model Reverse Engineering**: Kwa kukusanya idadi kubwa ya jozi za ingizo na matokeo, washambuliaji wanaweza kunakili au kudistil modeli, na hivyo kuwezesha bidhaa za kuiga na adversarial attacks zilizobinafsishwa.
 
-- **Insecure Integrated Component**: Plugins, agents, au upstream services zilizo hatarini huwawezesha washambuliaji kuingiza code au kuongeza privileges ndani ya AI pipeline.
+- **Insecure Integrated Component**: Plugins, agents au huduma za upstream zilizo hatarini huwaruhusu washambuliaji kuingiza code au kuongeza ruhusa ndani ya AI pipeline.
 
-- **Prompt Injection**: Kuunda prompts (moja kwa moja au kwa njia isiyo ya moja kwa moja) ili kuficha instructions zinazopuuza dhamira ya mfumo, na kuifanya model itekeleze commands zisizotarajiwa.
+- **Prompt Injection**: Kuunda prompts (moja kwa moja au kwa njia isiyo ya moja kwa moja) ili kupitisha kwa siri maagizo yanayobatilisha nia ya mfumo, na kuifanya modeli itekeleze amri zisizotarajiwa.
 
-- **Model Evasion**: Inputs zilizoundwa kwa uangalifu huifanya model iweke classification isiyo sahihi, ihallucinate, au itoe maudhui yasiyoruhusiwa, na hivyo kupunguza usalama na uaminifu.
+- **Model Evasion**: Ingizo zilizoundwa kwa umakini huifanya modeli iainishe vibaya, itoe hallucinations au maudhui yaliyopigwa marufuku, na hivyo kudhoofisha usalama na uaminifu.
 
-- **Sensitive Data Disclosure**: Model hufichua taarifa za kibinafsi au za siri kutoka kwenye training data au user context yake, na kukiuka faragha na kanuni.
+- **Sensitive Data Disclosure**: Modeli hufichua taarifa binafsi au za siri kutoka kwenye data yake ya mafunzo au muktadha wa mtumiaji, na kukiuka faragha na kanuni.
 
-- **Inferred Sensitive Data**: Model hubaini attributes za kibinafsi ambazo hazikutolewa kamwe, na hivyo kusababisha madhara mapya ya faragha kupitia inference.
+- **Inferred Sensitive Data**: Modeli hukisia sifa binafsi ambazo hazikuwahi kutolewa, na kusababisha madhara mapya ya faragha kupitia inference.
 
-- **Insecure Model Output**: Responses ambazo hazijasafishwa hupitisha code yenye madhara, misinformation, au maudhui yasiyofaa kwa users au mifumo inayofuata.
+- **Insecure Model Output**: Majibu ambayo hayajasafishwa hupitisha code hatari, taarifa potofu au maudhui yasiyofaa kwa watumiaji au mifumo inayofuata.
 
-- **Rogue Actions**: Agents zilizounganishwa kwa uhuru hutekeleza operations za ulimwengu halisi zisizotarajiwa (file writes, API calls, purchases, n.k.) bila usimamizi wa kutosha wa user.
+- **Rogue Actions**: Agents zilizounganishwa kwa uhuru hutekeleza shughuli zisizotarajiwa katika ulimwengu halisi (kuandika faili, kuita API, kufanya manunuzi, n.k.) bila uangalizi wa kutosha wa mtumiaji.
 
 ## Mitre AI ATLAS Matrix
 
-[MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS) hutoa framework pana ya kuelewa na kupunguza hatari zinazohusishwa na mifumo ya AI. Inaainisha attack techniques na tactics mbalimbali ambazo wapinzani wanaweza kutumia dhidi ya AI models, pamoja na jinsi ya kutumia mifumo ya AI kutekeleza mashambulizi tofauti.<sup>[[3]](#references)</sup>
+[MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS) hutoa mfumo wa kina wa kuelewa na kupunguza hatari zinazohusishwa na mifumo ya AI. Inaweka katika makundi mbinu na mikakati mbalimbali ya mashambulizi ambayo washambuliaji wanaweza kutumia dhidi ya modeli za AI, na pia jinsi ya kutumia mifumo ya AI kutekeleza mashambulizi mbalimbali.<sup>[[3]](#references)</sup>
 
 ## LLMJacking (Token Theft & Resale of Cloud-hosted LLM Access)
 
-Washambuliaji huiba active session tokens au cloud API credentials na kutumia LLMs za kulipia, zinazohifadhiwa kwenye cloud, bila idhini. Mara nyingi access huuzwa tena kupitia reverse proxies zinazotumia account ya mwathirika, kwa mfano deployments za "oai-reverse-proxy". Madhara yanajumuisha hasara ya kifedha, matumizi ya model kinyume na policy, na attribution kwa victim tenant.<sup>[[5]](#references)</sup><sup>[[6]](#references)</sup><sup>[[7]](#references)</sup>
+Washambuliaji huiba session tokens zinazotumika au cloud API credentials na kutumia LLM za kulipia zinazopangishwa kwenye cloud bila idhini. Mara nyingi ufikiaji huo huuzwa tena kupitia reverse proxies zinazotumia akaunti ya mwathiriwa, kama vile deployment za "oai-reverse-proxy". Madhara yake ni pamoja na hasara ya kifedha, matumizi ya modeli kinyume na sera, na kuhusishwa kwa shughuli hizo na tenant ya mwathiriwa.<sup>[[5]](#references)</sup><sup>[[6]](#references)</sup><sup>[[7]](#references)</sup>
 
 TTPs:
-- Kukusanya tokens kutoka kwenye developer machines au browsers zilizoambukizwa; kuiba CI/CD secrets; kununua cookies zilizovuja.<sup>[[5]](#references)</sup>
-- Kuanzisha reverse proxy inayopitisha requests kwa provider halisi, ikificha upstream key na ku-multiplex customers wengi.<sup>[[5]](#references)</sup><sup>[[7]](#references)</sup>
-- Kutumia vibaya direct base-model endpoints ili kupita enterprise guardrails na rate limits.<sup>[[4]](#references)</sup>
+- Kukusanya tokens kutoka kwenye mashine za developer au browsers zilizoambukizwa; kuiba secrets za CI/CD; kununua cookies zilizovuja.<sup>[[5]](#references)</sup>
+- Kuanzisha reverse proxy inayotuma maombi kwa mtoa huduma halisi, kuficha upstream key na kushughulikia wateja wengi kwa pamoja.<sup>[[5]](#references)</sup><sup>[[7]](#references)</sup>
+- Kutumia vibaya endpoints za base-model za moja kwa moja ili kukwepa guardrails za biashara na vikomo vya kasi.<sup>[[4]](#references)</sup>
 
 Mitigations:
-- Funga tokens kwenye device fingerprint, IP ranges, na client attestation; tumia expirations fupi na refresh kupitia MFA.
-- Punguza scope ya keys kwa kiwango cha chini (bila tool access, read-only inapowezekana); zizungushe unapogundua anomaly.
-- Sitisha traffic yote upande wa server nyuma ya policy gateway inayotekeleza safety filters, quotas za kila route, na tenant isolation.
-- Fuatilia matumizi yasiyo ya kawaida (ongezeko la ghafla la matumizi ya fedha, regions zisizo za kawaida, UA strings) na auto-revoke sessions zinazotiliwa shaka.
-- Pendelea mTLS au signed JWTs zinazotolewa na IdP yako badala ya static API keys zenye muda mrefu.
+- Funga tokens kwenye device fingerprint, safu za IP na client attestation; weka muda mfupi wa kuisha na uhitaji MFA ili kuzisasisha.
+- Punguza ruhusa za keys kadiri iwezekanavyo (bila ufikiaji wa tools, read-only inapowezekana); zizungushe panapotokea hitilafu isiyo ya kawaida.
+- Elekeza trafiki yote upande wa server kupitia policy gateway inayotekeleza safety filters, quotas kwa kila route na utenganishaji wa tenants.
+- Fuatilia mifumo isiyo ya kawaida ya matumizi (ongezeko la ghafla la gharama, maeneo yasiyo ya kawaida, UA strings) na ubatilishe kiotomatiki sessions zinazotiliwa shaka.
+- Pendelea mTLS au signed JWTs zinazotolewa na IdP yako badala ya API keys tuli za muda mrefu.
 
-## Kuimarisha usalama wa self-hosted LLM inference
+## Kuimarisha inference ya LLM inayopangishwa ndani
 
-Kuendesha local LLM server kwa data za siri huunda attack surface tofauti na APIs za cloud-hosted: inference/debug endpoints zinaweza kuvuja prompts, serving stack kwa kawaida hufichua reverse proxy, na GPU device nodes hutoa access kwa `ioctl()` surfaces kubwa. Ikiwa unatathmini au ku-deploy on-prem inference service, kagua angalau mambo yafuatayo.<sup>[[8]](#references)</sup>
+Kuendesha server ya LLM ya ndani kwa data za siri huleta attack surface tofauti na APIs zinazopangishwa kwenye cloud: endpoints za inference/debug zinaweza kuvuja prompts, stack ya serving kwa kawaida hufichua reverse proxy, na GPU device nodes hutoa ufikiaji wa `ioctl()` surfaces nyingi. Ikiwa unakagua au kupeleka huduma ya inference ya on-prem, pitia angalau mambo yafuatayo.<sup>[[8]](#references)</sup>
 
-### Prompt leakage kupitia debug na monitoring endpoints
+### Kuvuja kwa prompts kupitia endpoints za debug na monitoring
 
-Ichukulie inference API kama **multi-user sensitive service**. Debug au monitoring routes zinaweza kufichua prompt contents, slot state, model metadata, au taarifa za internal queue. Katika `llama.cpp`, endpoint ya `/slots` ni nyeti hasa kwa sababu hufichua per-slot state na inalenga tu ukaguzi/udhibiti wa slots.<sup>[[8]](#references)</sup>
+Chukulia inference API kama **huduma nyeti ya watumiaji wengi**. Routes za debug au monitoring zinaweza kufichua maudhui ya prompt, hali ya slot, metadata ya modeli au taarifa za ndani za foleni. Katika `llama.cpp`, endpoint ya `/slots` ni nyeti hasa kwa sababu hufichua hali ya kila slot na imekusudiwa tu kukagua/kudhibiti slots.<sup>[[8]](#references)</sup>
 
-- Weka reverse proxy mbele ya inference server na **ukatae kwa default**.
-- Ruhusu tu combinations halisi za HTTP method + path zinazohitajika na client/UI.
+- Weka reverse proxy mbele ya inference server na **kataza kwa chaguo-msingi**.
+- Ruhusu tu mchanganyiko mahususi wa HTTP method + path unaohitajika na client/UI.
 - Zima introspection endpoints kwenye backend yenyewe inapowezekana, kwa mfano `llama-server --no-slots`.<sup>[[9]](#references)</sup>
-- Funga reverse proxy kwenye `127.0.0.1` na uifichue kupitia authenticated transport kama SSH local port forwarding badala ya kuichapisha kwenye LAN.
+- Funga reverse proxy kwenye `127.0.0.1` na uifikie kupitia njia ya usafirishaji iliyothibitishwa kama SSH local port forwarding badala ya kuichapisha kwenye LAN.
 
 Mfano wa allowlist kwa nginx:
+
 ```nginx
 map "$request_method:$uri" $llm_whitelist {
-default 0;
+    default 0;
 
-"GET:/health"              1;
-"GET:/v1/models"           1;
-"POST:/v1/completions"     1;
-"POST:/v1/chat/completions" 1;
+    "GET:/health"              1;
+    "GET:/v1/models"           1;
+    "POST:/v1/completions"     1;
+    "POST:/v1/chat/completions" 1;
 }
 
 server {
-listen 127.0.0.1:80;
+    listen 127.0.0.1:80;
 
-location / {
-if ($llm_whitelist = 0) { return 403; }
-proxy_pass http://unix:/run/llama-cpp/llama-cpp.sock:;
-}
+    location / {
+        if ($llm_whitelist = 0) { return 403; }
+        proxy_pass http://unix:/run/llama-cpp/llama-cpp.sock:;
+    }
 }
 ```
-### Containers zisizo na root bila network na UNIX sockets
 
-Ikiwa inference daemon inaunga mkono kusikiliza kwenye UNIX socket, pendelea hiyo badala ya TCP na endesha container bila **network stack**:<sup>[[8]](#references)</sup>
+### Containers zisizo na root zisizo na mtandao na UNIX sockets
+
+Ikiwa daemon ya inference inaweza kusikiliza kwenye UNIX socket, pendelea kutumia hiyo badala ya TCP na endesha container bila **network stack**:<sup>[[8]](#references)</sup>
+
 ```bash
 podman run --rm -d \
---network none \
---user 1000:1000 \
---userns=keep-id \
---umask=007 \
---volume /var/lib/models:/models:ro \
---volume /srv/llm/socks:/run/llama-cpp \
-ghcr.io/ggml-org/llama.cpp:server-cuda13 \
---host /run/llama-cpp/llama-cpp.sock \
---model /models/model.gguf \
---parallel 4 \
---no-slots
+  --network none \
+  --user 1000:1000 \
+  --userns=keep-id \
+  --umask=007 \
+  --volume /var/lib/models:/models:ro \
+  --volume /srv/llm/socks:/run/llama-cpp \
+  ghcr.io/ggml-org/llama.cpp:server-cuda13 \
+    --host /run/llama-cpp/llama-cpp.sock \
+    --model /models/model.gguf \
+    --parallel 4 \
+    --no-slots
 ```
+
 Faida:
-- `--network none` huondoa mwonekano wa TCP/IP wa inbound/outbound na huepuka user-mode helpers ambazo rootless containers zingehitaji vinginevyo.
-- UNIX socket hukuruhusu kutumia POSIX permissions/ACLs kwenye socket path kama safu ya kwanza ya access control.
-- `--userns=keep-id` na rootless Podman hupunguza athari za container breakout kwa sababu container root si host root.
-- Read-only model mounts hupunguza uwezekano wa model tampering kutoka ndani ya container.
+- `--network none` huondoa uwezekano wa kuwasiliana kupitia TCP/IP zinazoingia/kutoka na huepusha kutumia wasaidizi wa user-mode ambao vinginevyo kontena zisizo na root zingehitaji.
+- UNIX socket hukuwezesha kutumia ruhusa/ACL za POSIX kwenye njia ya socket kama safu ya kwanza ya udhibiti wa ufikiaji.
+- `--userns=keep-id` na Podman isiyo na root hupunguza athari za kuvunja kontena kwa sababu root ya kontena si root ya host.
+- Mounts za modeli za kusoma pekee hupunguza uwezekano wa modeli kuchezewa kutoka ndani ya kontena.
 
-Kwa deployments zinazoendelea, vizuizi vilevile vinaweza kuonyeshwa kupitia Podman Quadlet units. Ikiwa GPU access imekabidhiwa kupitia Container Device Interface, weka CDI device specification iwe finyu iwezekanavyo badala ya kufichua kila accelerator node.<sup>[[10]](#references)</sup><sup>[[11]](#references)</sup>
+Kwa deployments zinazoendelea, vikwazo vilevile vinaweza kuwakilishwa kama vitengo vya Podman Quadlet. Ikiwa ufikiaji wa GPU unatolewa kupitia Container Device Interface, weka maelezo ya kifaa cha CDI kuwa finyu iwezekanavyo badala ya kufichua kila nodi ya accelerator.<sup>[[10]](#references)</sup><sup>[[11]](#references)</sup>
 
-### Kupunguza GPU device-node
+### Kupunguza idadi ya nodi za vifaa vya GPU
 
-Kwa inference inayotegemea GPU, faili za `/dev/nvidia*` ni local attack surfaces zenye thamani kubwa kwa sababu zinafichua `ioctl()` handlers kubwa za driver na huenda zikafichua shared GPU memory-management paths.<sup>[[8]](#references)</sup>
+Kwa inference inayotumia GPU, faili za `/dev/nvidia*` ni maeneo muhimu ya mashambulizi ya ndani kwa sababu zinafichua vishikizo vikubwa vya driver `ioctl()` na huenda njia za usimamizi wa kumbukumbu ya GPU zinazoshirikiwa.<sup>[[8]](#references)</sup>
 
-- Usiziache `/dev/nvidia*` zikiwa world writable.
-- Zuia `nvidia`, `nvidiactl`, na `nvidia-uvm` kwa kutumia `NVreg_DeviceFileUID/GID/Mode`, udev rules, na ACLs ili tu mapped container UID iweze kuzifungua.
-- Blacklist modules zisizohitajika kama `nvidia_drm`, `nvidia_modeset`, na `nvidia_peermem` kwenye headless inference hosts.
-- Preload modules zinazohitajika pekee wakati wa boot badala ya kuruhusu runtime kuzifanyia `modprobe` opportunistically wakati wa inference startup.
+- Usiziache `/dev/nvidia*` zikiwa na ruhusa za kuandikwa na kila mtu.
+- Zuia `nvidia`, `nvidiactl`, na `nvidia-uvm` kwa kutumia `NVreg_DeviceFileUID/GID/Mode`, sheria za udev, na ACL ili UID ya kontena iliyopangwa pekee iweze kuzifungua.
+- Zima moduli zisizohitajika kama vile `nvidia_drm`, `nvidia_modeset`, na `nvidia_peermem` kwenye host za inference zisizo na skrini.
+- Pakia mapema moduli zinazohitajika tu wakati wa kuwasha badala ya kuiacha runtime iendeshe `modprobe` kwa fursa wakati wa kuanzisha inference.
 
 Mfano:
+
 ```bash
 options nvidia NVreg_DeviceFileUID=0
 options nvidia NVreg_DeviceFileGID=0
 options nvidia NVreg_DeviceFileMode=0660
 ```
-Jambo moja muhimu la kukagua ni **`/dev/nvidia-uvm`**. Hata kama workload haitumii waziwazi `cudaMallocManaged()`, CUDA runtimes za hivi karibuni bado zinaweza kuhitaji `nvidia-uvm`. Kwa kuwa device hii inashirikiwa na hushughulikia usimamizi wa GPU virtual memory, ichukulie kama surface ya cross-tenant data exposure. Ikiwa inference backend inaiunga mkono, Vulkan backend inaweza kuwa trade-off ya kuvutia kwa sababu inaweza kuepuka kabisa kuanika `nvidia-uvm` kwa container.<sup>[[8]](#references)</sup>
 
-### LSM confinement kwa inference workers
+Jambo moja muhimu la kukagua ni **`/dev/nvidia-uvm`**. Hata kama workload haitumii `cudaMallocManaged()` moja kwa moja, CUDA runtimes za hivi karibuni bado zinaweza kuhitaji `nvidia-uvm`. Kwa kuwa kifaa hiki kinashirikiwa na hushughulikia usimamizi wa kumbukumbu pepe ya GPU, kichukulie kama eneo linaloweza kusababisha data kufichuliwa kati ya tenants. Ikiwa inference backend inaiunga mkono, Vulkan backend inaweza kuwa chaguo la kuvutia kwa sababu inaweza kuepusha kabisa kuipa container ufikiaji wa `nvidia-uvm`.<sup>[[8]](#references)</sup>
 
-AppArmor/SELinux/seccomp inapaswa kutumiwa kama defense in depth kuzunguka inference process:<sup>[[8]](#references)</sup>
+### Kuweka wafanyakazi wa inference chini ya vizuizi vya LSM
 
-- Ruhusu tu shared libraries, model paths, socket directory, na GPU device nodes zinazohitajika kwa kweli.
-- Kataa wazi capabilities zenye hatari kubwa kama `sys_admin`, `sys_module`, `sys_rawio`, na `sys_ptrace`.
-- Weka model directory ikiwa read-only na punguza writable paths kwa runtime socket/cache directories pekee.
-- Fuatilia denial logs kwa sababu hutoa detection telemetry muhimu wakati model server au post-exploitation payload inapojaribu kutoroka kutoka kwenye behaviour inayotarajiwa.
+AppArmor/SELinux/seccomp inapaswa kutumiwa kama safu ya ziada ya ulinzi kuzunguka mchakato wa inference:<sup>[[8]](#references)</sup>
 
-Mfano wa AppArmor rules kwa worker inayotumia GPU:
+- Ruhusu tu shared libraries, njia za model, saraka ya socket na nodi za kifaa cha GPU zinazohitajika.
+- Kataa waziwazi uwezo ulio hatarishi sana kama `sys_admin`, `sys_module`, `sys_rawio` na `sys_ptrace`.
+- Weka saraka ya model katika hali ya kusomwa tu na uruhusu uandishi kwenye njia za saraka za runtime socket/cache pekee.
+- Fuatilia denial logs kwa sababu hutoa telemetry muhimu ya ugunduzi pale model server au payload ya post-exploitation inapojaribu kukwepa tabia inayotarajiwa.
+
+Mfano wa sheria za AppArmor kwa worker inayotumia GPU:
+
 ```text
 deny capability sys_admin,
 deny capability sys_module,
@@ -190,62 +197,63 @@ deny capability sys_ptrace,
 /var/lib/models/** r,
 owner /srv/llm/** rw,
 ```
-## Phantom Squatting: Domains Zinazobuniwa na LLM kama Vector ya AI Supply-Chain
 
-Phantom squatting ni **sawa na domain/URL ya slopsquatting**. Badala ya kubuni jina la package lisilokuwepo, LLM hubuni **portal, API, webhook, billing, SSO, download au support domain** inayoonekana halali kwa brand halisi, kisha mshambuliaji husajili namespace hiyo kabla ya binadamu au agent kuitumia.<sup>[[12]](#references)</sup><sup>[[13]](#references)</sup>
+## Phantom Squatting: Vikoa Vinavyobuniwa na LLM kama Njia ya Kushambulia Mnyororo wa Ugavi wa AI
 
-Hili ni muhimu kwa sababu katika workflows nyingi zinazosaidiwa na AI, output ya model huchukuliwa kuwa **trusted dependency**:
-- Developers hubandika endpoint iliyopendekezwa kwenye code au miunganisho ya CI/CD.
-- AI agents hufetch documentation, schemas, APKs, ZIPs au webhook targets automatically.
-- Runbooks au docs zinazozalishwa zinaweza kuingiza fake URL kana kwamba ni authoritative.
+Phantom squatting ni **sawa na slopsquatting kwa vikoa/URL**. Badala ya kubuni jina la kifurushi lisilokuwepo, LLM hubuni **kikoa cha portal, API, webhook, billing, SSO, download au support** kinachoonekana kuwa halisi kwa chapa iliyopo, na mshambuliaji husajili nafasi hiyo ya majina kabla ya binadamu au agent kuitumia.<sup>[[12]](#references)</sup><sup>[[13]](#references)</sup>
 
-### Offensive workflow
+Hili ni muhimu kwa sababu katika mifumo mingi ya kazi inayosaidiwa na AI, matokeo ya modeli huchukuliwa kama **tegemezi linaloaminika**:
+- Wasanidi programu hubandika endpoint iliyopendekezwa kwenye msimbo au miunganisho ya CI/CD.
+- AI agents hupakua nyaraka, schemas, APKs, ZIPs au lengwa za webhook kiotomatiki.
+- Runbooks au nyaraka zinazozalishwa zinaweza kujumuisha URL bandia kana kwamba ni rasmi.
 
-1. **Probe hallucination surface**: uliza maswali mahususi kuhusu brand yanayohusu workflows halisi kama `admin`, `billing`, `sandbox`, `benefits`, `api`, `download`, `support`, `webhook`, au portal za `mobile app`.<sup>[[12]](#references)</sup>
-2. **Normalize candidates**: resolve URLs zilizozalishwa, collapse majibu ya NXDOMAIN hadi parent registerable domain, na deduplicate prompt families. Prompt corpora zinapaswa kubaki diverse, kwa mfano kwa kuondoa near-duplicates zenye **Jaccard similarity**.
-3. **Prioritize hallucinations zinazotabirika**:
-- **Thermal Hallucination Persistence (THP)**: fake domain ileile huonekana katika temperatures mbalimbali, ikiwemo temperature ya chini kama `T=0.1`.
-- **Cross-model consensus**: familia nyingi za LLM huzalisha fake domain ileile.
-4. **Register and weaponize** parent domain, kisha host phishing, fake APK/ZIP downloads, credential harvesters, malicious docs, au API endpoints zinazokusanya secrets/webhook payloads. **Pure domain-level hallucinations** ndizo rahisi zaidi ku-monetize kwa sababu mshambuliaji anadhibiti namespace nzima; subdomain/path hallucinations bado zinaweza kutumiwa vibaya wakati parent iliyonenormalishwa haijasajiliwa.
-5. **Exploit zero-reputation window**: domains zilizosajiliwa hivi karibuni mara nyingi hazina blocklist history, URL reputation, wala telemetry iliyokomaa, hivyo zinaweza kupita controls hadi detections zifikie. Attackers wanaweza kurefusha window hii kwa crawler-only benign responses, redirect cloaking, CAPTCHA gates, au delayed payload staging.
+### Mtiririko wa mashambulizi
+
+1. **Chunguza sehemu zinazoweza kubuniwa**: uliza maswali yanayohusu chapa kuhusu mifumo halisi ya kazi kama portal za `admin`, `billing`, `sandbox`, `benefits`, `api`, `download`, `support`, `webhook` au `mobile app`.<sup>[[12]](#references)</sup>
+2. **Sanifisha zinazowezekana**: tatua URL zilizozalishwa, geuza majibu ya NXDOMAIN kuwa kikoa cha juu zaidi kinachoweza kusajiliwa, na ondoa marudio ya familia za prompt. Prompt corpus zinapaswa kuwa tofauti; kwa mfano, ondoa zinazokaribiana kwa kutumia **Jaccard similarity**.
+3. **Panga kwa kipaumbele uvumbuzi unaotabirika**:
+   - **Thermal Hallucination Persistence (THP)**: kikoa kilekile cha bandia hujitokeza katika viwango tofauti vya joto, ikiwemo joto la chini kama `T=0.1`.
+   - **Makubaliano kati ya modeli**: familia nyingi za LLM huzalisha kikoa kilekile cha bandia.
+4. **Sajili na geuza kikoa cha juu kuwa silaha**, kisha weka phishing, upakuaji wa APK/ZIP bandia, zana za kukusanya taarifa za kuingia, nyaraka hasidi au endpoints za API zinazokusanya siri/payload za webhook. **Vikoa vinavyobuniwa pekee** ndivyo rahisi zaidi kupata faida kwa sababu mshambuliaji anadhibiti nafasi nzima ya majina; uvumbuzi wa subdomain/path bado unaweza kutumiwa vibaya ikiwa kikoa cha juu kilichosanifishwa hakijasajiliwa.
+5. **Tumia fursa ya kipindi ambacho sifa haijulikani**: vikoa vipya vilivyosajiliwa mara nyingi havina historia ya blocklist, sifa ya URL na telemetry iliyokomaa, hivyo vinaweza kupita udhibiti hadi utambuzi uanze kufanya kazi. Washambuliaji wanaweza kurefusha kipindi hiki kwa majibu salama kwa crawler pekee, kuficha uelekezaji upya, vizuizi vya CAPTCHA au kuchelewesha uandaaji wa payload.
 
 ### Kwa nini ni hatari kwa agents
 
-Kwa victim wa binadamu, fake domain kwa kawaida bado huhitaji kubofya na kufanya kitendo kingine. Kwa **agentic workflow**, LLM inaweza kuwa **lure** na **executor** kwa wakati mmoja: agent hupokea hallucinated URL, huifetch, huparse response, na baadaye inaweza ku-leak tokens, kutekeleza instructions, kudownload dependency, au kusukuma poisoned data kwenye CI/CD bila human review yoyote.<sup>[[12]](#references)</sup>
+Kwa mwathiriwa binadamu, kikoa bandia kwa kawaida bado kinahitaji kubofya na hatua nyingine. Katika **mchakato wa kazi unaoendeshwa na agent**, LLM inaweza kuwa **chambo** na pia **mtekelezaji**: agent hupokea URL iliyobuniwa, huitembelea, huchanganua jibu, kisha inaweza kuvuja tokeni, kutekeleza maagizo, kupakua tegemezi au kusukuma data yenye sumu kwenye CI/CD bila ukaguzi wowote wa binadamu.<sup>[[12]](#references)</sup>
 
-### Practical attacker prompts
+### Prompts za vitendo za mshambuliaji
 
-High-yield prompts kwa kawaida huonekana kama enterprise tasks za kawaida badala ya phishing lures zilizo wazi:<sup>[[12]](#references)</sup>
-- “What is the payment sandbox URL for `<brand>` integrations?”
-- “What webhook endpoint should I use for `<brand>` build notifications?”
-- “Where is the employee benefits / billing / SSO portal for `<brand>`?”
-- “Give me the direct Android APK or desktop client download for `<brand>`.”
+Prompts zenye matokeo mengi kwa kawaida huonekana kama kazi za kawaida za biashara badala ya chambo za wazi za phishing:<sup>[[12]](#references)</sup>
+- “URL ya payment sandbox kwa miunganisho ya `<brand>` ni ipi?”
+- “Nitumie endpoint gani ya webhook kwa arifa za build za `<brand>`?”
+- “Portal ya employee benefits / billing / SSO ya `<brand>` iko wapi?”
+- “Nipe APK ya Android au upakuaji wa moja kwa moja wa desktop client ya `<brand>`.”
 
-### Defensive inversion
+### Mbinu ya kujilinda
 
-Chukulia hili kama tatizo la proactive domain-monitoring, si tatizo la prompt-injection pekee:<sup>[[12]](#references)</sup>
-- Unda **brand prompt corpus** na mara kwa mara probe LLMs ambazo users/agents wako wanategemea.
-- Hifadhi hallucinated URLs na fuatilia zipi zilizo stable katika temperatures/models mbalimbali.
-- Fuatilia **Adversarial Exploitation Window (AEW)**: muda kati ya hallucination ya kwanza na attacker registration. AEW chanya humaanisha defenders wanaweza pre-register, sinkhole, au pre-block kabla ya weaponization.
-- Fuatilia transitions za **NXDOMAIN → registered** kwa parent domains.
-- Baada ya registration, triage registrar, creation date, nameservers, privacy shielding, page content, screenshots, parked-page status, na brand-asset similarity.
-- Ongeza policy gates ili agents/developers **wasiamini LLM-generated domains by default**: hitaji allowlists, ownership validation, CT/RDAP checks, au human approval kabla ya matumizi ya kwanza.
+Chukulia hili kama tatizo la ufuatiliaji wa vikoa wa mapema, si tatizo la prompt-injection pekee:<sup>[[12]](#references)</sup>
+- Tengeneza **brand prompt corpus** na uchunguze mara kwa mara LLM ambazo watumiaji/agents wako huzitegemea.
+- Hifadhi URL zilizobuniwa na ufuatilie zile zinazobaki thabiti katika viwango tofauti vya joto/modeli.
+- Fuatilia **Adversarial Exploitation Window (AEW)**: muda kati ya uvumbuzi wa kwanza na usajili wa mshambuliaji. AEW chanya humaanisha watetezi wanaweza kusajili mapema, kuelekeza kwenye sinkhole au kuzuia kabla ya kutumiwa kwa mashambulizi.
+- Fuatilia mabadiliko ya **NXDOMAIN → kimesajiliwa** kwa vikoa vya juu.
+- Kikoa kinaposajiliwa, kagua msajili, tarehe ya kuundwa, nameservers, ufichaji wa taarifa za mmiliki, maudhui ya ukurasa, picha za skrini, hali ya ukurasa wa matangazo na ufanano wa vipengee vya chapa.
+- Ongeza vizuizi vya sera ili agents/wasanidi **wasiamini vikoa vilivyozalishwa na LLM kwa chaguomsingi**: hitaji orodha za ruhusa, uthibitishaji wa umiliki, ukaguzi wa CT/RDAP au idhini ya binadamu kabla ya matumizi ya kwanza.
 
-Hili linaingia katika AI risk buckets kadhaa kwa wakati mmoja: **AI supply-chain attack**, **insecure model output**, na **rogue actions** wakati agents hutumia hallucinated URL autonomously.
+Hili linahusiana na makundi kadhaa ya hatari za AI kwa wakati mmoja: **shambulio la mnyororo wa ugavi wa AI**, **matokeo ya modeli yasiyo salama**, na **vitendo vya kiholela** wakati agents zinapotumia URL iliyobuniwa kiotomatiki.
 
 ## References
 
-- [1] [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/)
-- [2] [Google SAIF (Secure AI Framework) – Risks](https://saif.google/secure-ai-framework/risks)
-- [3] [MITRE ATLAS Threat Matrix](https://atlas.mitre.org/)
-- [4] [Unit 42 – Risks za Code Assistant LLMs: Harmful Content, Misuse na Deception](https://unit42.paloaltonetworks.com/code-assistant-llms/)
-- [5] [Sysdig – LLMjacking: Stolen Cloud Credentials Zilizotumiwa katika AI Attack Mpya](https://sysdig.com/blog/llmjacking-stolen-cloud-credentials-used-in-new-ai-attack/)
-- [6] [Muhtasari wa LLMJacking scheme – The Hacker News](https://thehackernews.com/2024/05/researchers-uncover-llmjacking-scheme.html)
-- [7] [oai-reverse-proxy (reselling stolen LLM access)](https://gitgud.io/khanon/oai-reverse-proxy)
-- [8] [Synacktiv - Deep-dive katika deployment ya on-premise low-privileged LLM server](https://www.synacktiv.com/en/publications/deep-dive-into-the-deployment-of-an-on-premise-low-privileged-llm-server.html)
-- [9] [llama.cpp server README](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md)
+- [1] [OWASP Top 10 ya Udhaifu wa Machine Learning](https://owasp.org/www-project-machine-learning-security-top-10/)
+- [2] [Google SAIF (Mfumo Salama wa AI) – Hatari](https://saif.google/secure-ai-framework/risks)
+- [3] [MITRE ATLAS: Matriki ya Vitisho](https://atlas.mitre.org/)
+- [4] [Unit 42 – Hatari za Code Assistant LLMs: Maudhui Yenye Madhara, Matumizi Mabaya na Udanganyifu](https://unit42.paloaltonetworks.com/code-assistant-llms/)
+- [5] [Sysdig – LLMjacking: Sifa za Kuingia Zilizoibwa za Cloud Zatumika katika Shambulio Jipya la AI](https://sysdig.com/blog/llmjacking-stolen-cloud-credentials-used-in-new-ai-attack/)
+- [6] [Muhtasari wa mpango wa LLMJacking – The Hacker News](https://thehackernews.com/2024/05/researchers-uncover-llmjacking-scheme.html)
+- [7] [oai-reverse-proxy (kuuza tena ufikiaji wa LLM ulioibwa)](https://gitgud.io/khanon/oai-reverse-proxy)
+- [8] [Synacktiv - Uchambuzi wa kina wa uwekaji wa seva ya LLM ya ndani yenye ruhusa ndogo](https://www.synacktiv.com/en/publications/deep-dive-into-the-deployment-of-an-on-premise-low-privileged-llm-server.html)
+- [9] [README ya seva ya llama.cpp](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md)
 - [10] [Podman quadlets: podman-systemd.unit](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html)
-- [11] [CNCF Container Device Interface (CDI) specification](https://github.com/cncf-tags/container-device-interface/blob/main/SPEC.md)
-- [12] [Unit 42 – Phantom Squatting: Domains Zinazobuniwa na AI kama Vector ya Software Supply Chain](https://unit42.paloaltonetworks.com/phantom-squatting-hallucinated-web-domains/)
-- [13] [Socket – Slopsquatting: Jinsi AI Hallucinations Zinavyochochea Aina Mpya ya Supply Chain Attacks](https://socket.dev/blog/slopsquatting-how-ai-hallucinations-are-fueling-a-new-class-of-supply-chain-attacks)
+- [11] [Vipimo vya CNCF Container Device Interface (CDI)](https://github.com/cncf-tags/container-device-interface/blob/main/SPEC.md)
+- [12] [Unit 42 – Phantom Squatting: Vikoa Vinavyobuniwa na AI kama Njia ya Kushambulia Mnyororo wa Ugavi wa Programu](https://unit42.paloaltonetworks.com/phantom-squatting-hallucinated-web-domains/)
+- [13] [Socket – Slopsquatting: Jinsi Uvumbuzi wa AI Unavyochochea Aina Mpya ya Mashambulizi ya Mnyororo wa Ugavi](https://socket.dev/blog/slopsquatting-how-ai-hallucinations-are-fueling-a-new-class-of-supply-chain-attacks)
 {{#include ../banners/hacktricks-training.md}}
