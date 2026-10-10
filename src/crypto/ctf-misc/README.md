@@ -1,24 +1,24 @@
-# Crypto CTF Misc
+# Kripto CTF - razno
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Ovaj odeljak prikuplja tehnike koje se pojavljuju u kriptografskim izazovima, ali se ne uklapaju uredno ni u jednu drugu kategoriju.
+Ovaj odeljak obuhvata tehnike koje se pojavljuju u kriptografskim izazovima, ali se ne uklapaju lako ni u jednu drugu kategoriju.
 
-## Ezoterični jezici
+## Ezoterički jezici
 
 ### Tehnika
 
-Koristite ovaj postupak kada izazov zahteva pokretanje programa napisanog na ezoteričnom jeziku i dekodiranje njegovog izlaza.
+Koristite ovaj postupak kada izazov zahteva pokretanje programa napisanog na ezoteričkom jeziku i dekodiranje njegovog izlaza.
 
-Ako izazov sadrži kod koji ne izgleda kao kod standardnog jezika:
+Ako izazov sadrži kod koji ne liči na standardni jezik:
 
-- Identifikujte jezik pretragom karakterističnog tokena ili niza instrukcija.
+- Pronađite jezik tako što ćete pretražiti prepoznatljiv token ili niz instrukcija.
 - Koristite online interpreter ili Docker image.
-- Ako je izlaz neobičan, nakon izvršavanja potražite višeslojno kodiranje/kompresiju.
+- Ako je izlaz neobičan, proverite da li je nakon izvršavanja primenjeno dodatno kodiranje ili kompresija.
 
-Korisni indeks jezika je Esolang wiki.<sup>[[1]](#references)</sup>
+Korisni indeks jezika nalazi se na Esolang wikiju.<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [Esolang, wiki ezoteričnih programskih jezika](https://esolangs.org/wiki/Main_Page)
+- [1] [Esolang, wiki ezoteričkih programskih jezika](https://esolangs.org/wiki/Main_Page)
 {{#include ../../banners/hacktricks-training.md}}

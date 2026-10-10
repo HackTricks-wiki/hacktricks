@@ -2,57 +2,57 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Ovaj odeljak se fokusira na **pronalaženje i izdvajanje skrivenih podataka** iz slika, audio i video zapisa, dokumenata, arhiva i teksta. Steganografija prikriva postojanje komunikacije ugrađivanjem podataka u druge podatke.<sup>[[1]](#references)</sup>
+Ovaj odeljak se bavi **pronalaženjem i izdvajanjem skrivenih podataka** iz slika, zvuka, video-snimaka, dokumenata, arhiva i teksta. Steganografija prikriva postojanje komunikacije tako što ugrađuje podatke u druge podatke.<sup>[[1]](#references)</sup>
 
 Ako ste ovde zbog kriptografskih napada, pređite na odeljak **Crypto**.
 
-## Entry Point
+## Ulazna tačka
 
-Pristupite steganografiji kao forenzičkom problemu: identifikujte pravi kontejner, popišite lokacije sa visokim signalom (metapodaci, dodati podaci, ugrađene datoteke), a tek zatim primenite tehnike ekstrakcije na nivou sadržaja.
+Pristupite steganografiji kao forenzičkom problemu: utvrdite koji je stvarni kontejner, proverite lokacije sa najviše potencijalnih tragova (metapodatke, dodate podatke, ugrađene datoteke), a tek zatim primenite tehnike izdvajanja na nivou sadržaja.
 
-### Workflow & triage
+### Tok rada i trijaža
 
-Strukturisan tok rada koji daje prioritet identifikaciji kontejnera, pregledu metapodataka/stringova, carving-u i grananju specifičnom za format.
+Strukturisani tok rada koji daje prioritet utvrđivanju kontejnera, pregledu metapodataka i nizova, izdvajanju podataka i grananju prema konkretnom formatu.
 
 {{#ref}}
 workflow/README.md
 {{#endref}}
 
-### Images
+### Slike
 
-Ovde se nalazi najveći deo CTF stega sadržaja: LSB/bit-plane (PNG/BMP), neobičnosti chunk/file formata, alati za JPEG i trikovi sa GIF datotekama sa više frejmova.
+Ovde se nalazi većina CTF steganografije: LSB/bit-planes (PNG/BMP), neobičnosti u chunk/file-format strukturama, alati za JPEG i trikovi sa GIF-ovima sa više frejmova.
 
 {{#ref}}
 images/README.md
 {{#endref}}
 
-### Audio
+### Zvuk
 
-Poruke u spektrogramu, LSB ugrađivanje u uzorke i tonovi telefonske tastature (DTMF) obrasci su koji se često ponavljaju.
+Poruke u spektrogramu, ugrađivanje u LSB uzoraka i tonovi telefonske tastature (DTMF) česti su obrasci.
 
 {{#ref}}
 audio/README.md
 {{#endref}}
 
-### Text
+### Tekst
 
-Ako se tekst normalno prikazuje, ali se ponaša neočekivano, razmotrite Unicode homoglife, zero-width karaktere ili kodiranje zasnovano na razmacima.
+Ako se tekst prikazuje uobičajeno, ali se ponaša neočekivano, razmotrite Unicode homoglife, znakove nulte širine ili kodiranje zasnovano na razmacima.
 
 {{#ref}}
 text/README.md
 {{#endref}}
 
-### Documents
+### Dokumenti
 
-PDF i Office datoteke su prvenstveno kontejneri; napadi se obično vrte oko ugrađenih datoteka/stream-ova, grafova objekata/relacija i ZIP ekstrakcije.
+PDF i Office datoteke su pre svega kontejneri; napadi se obično zasnivaju na ugrađenim datotekama i tokovima, grafovima objekata i relacija i izdvajanju ZIP sadržaja.
 
 {{#ref}}
 documents/README.md
 {{#endref}}
 
-### Malware and delivery-style steganography
+### Malware i steganografija za isporuku payload-a
 
-Isporuka payload-a može koristiti datoteke koje izgledaju validno, kao što su GIF ili PNG slike, a koje nose tekstualne payload-e razgraničene markerima umesto skrivanja podataka u pikselima.
+Za isporuku payload-a mogu da se koriste datoteke koje izgledaju ispravno, kao što su GIF ili PNG slike, a koje sadrže tekstualne payload-e omeđene markerima umesto podataka skrivenih u pikselima.
 
 {{#ref}}
 malware-and-network/README.md
@@ -60,5 +60,5 @@ malware-and-network/README.md
 
 ## References
 
-- [1] [NIST CSRC Glossary - Steganografija](https://csrc.nist.gov/glossary/term/steganography)
+- [1] [NIST CSRC Rečnik pojmova - Steganografija](https://csrc.nist.gov/glossary/term/steganography)
 {{#include ../banners/hacktricks-training.md}}
