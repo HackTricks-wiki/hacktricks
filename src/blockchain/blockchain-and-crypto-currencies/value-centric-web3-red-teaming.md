@@ -2,107 +2,107 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-MITRE Adversarial Actions in Digital Asset Payment Techniques（AADAPT）框架对针对数字资产系统的对抗性行动和技术进行分类。<sup>[[1]](#references)</sup> 将其视为 **threat-modeling 骨架**：枚举所有能够铸造、定价、授权或路由资产的组件，将这些接触点映射到 AADAPT 技术，然后推动 red-team 场景，以衡量环境抵御不可逆经济损失的能力。
+MITRE 数字资产支付技术中的对抗性行动（AADAPT）框架对针对数字资产系统的对抗性行动和技术进行分类。<sup>[[1]](#references)</sup> 将其视为**威胁建模的基础框架**：枚举每个能够铸造、定价、授权或路由资产的组件，将这些接触点映射到 AADAPT 技术，然后设计 Red Team 场景，衡量环境能否抵御不可逆的经济损失。
 
-## 1. 清点承载价值的组件
-构建一张能够影响价值状态的所有事物的地图，即使它们位于链下。<sup>[[2]](#references)</sup>
+## 1. 清点持有价值的组件
+绘制所有可能影响价值状态的组件图，即使它们位于链下也不例外。<sup>[[2]](#references)</sup>
 
-- **托管签名服务**（HSM/KMS 集群、Vault/KMaaS、bot 或后台任务使用的签名 API）。记录 key ID、策略、自动化身份和审批工作流。
-- **合约的 Admin 与升级路径**（proxy admin、治理 timelock、紧急暂停密钥、参数注册表）。包括谁/什么可以调用它们，以及需要满足何种 quorum 或 delay。
-- **处理链上协议逻辑**的组件，包括 lending、AMM、vault、staking、bridge 或结算通道。记录它们所假设的不变量（oracle 价格、抵押率、再平衡周期……）。
-- **构建交易的链下自动化**（做市 bot、CI/CD pipeline、cron 任务、serverless 函数）。这些组件通常持有 API key 或 service principal，可请求签名。
-- **Oracle 与数据 feed**（聚合器组成、quorum、偏差阈值、更新周期）。记录自动化风险逻辑所依赖的每个上游来源。
-- **Bridge 与跨链 router**（lock/mint 合约、relayer、结算任务），用于连接不同链或托管体系。
+- **托管签名服务**（HSM/KMS 集群、Vault/KMaaS、机器人或后台任务使用的签名 API）。记录密钥 ID、策略、自动化身份和审批工作流。
+- **合约管理与升级路径**（代理管理员、治理 timelock、紧急暂停密钥、参数注册表）。记录谁/什么可以调用这些路径，以及所需的法定人数或延迟。
+- **链上协议逻辑**，用于处理借贷、AMM、Vault、质押、跨链桥或结算通道。记录其依赖的假设（预言机价格、抵押率、再平衡周期……）。
+- **链下自动化**，用于构建交易（做市机器人、CI/CD 流水线、cron 任务、无服务器函数）。这些通常持有可请求签名的 API 密钥或服务主体。
+- **预言机与数据馈送**（聚合器组成、法定人数、偏差阈值、更新频率）。记录自动化风险逻辑所依赖的每个上游来源。
+- **跨链桥与跨链路由器**（锁定/铸造合约、中继器、结算任务），用于连接不同链或托管系统。
 
-交付成果：绘制价值流图，展示资产如何移动、谁授权移动，以及哪些外部信号会影响业务逻辑。
+交付成果：一张价值流图，展示资产如何流动、由谁授权，以及哪些外部信号会影响业务逻辑。
 
 ## 2. 将组件映射到 AADAPT 行为
-将 AADAPT 分类法转化为每个组件对应的具体攻击候选。<sup>[[2]](#references)</sup>
+将 AADAPT 分类法转化为各组件对应的具体攻击候选项。<sup>[[2]](#references)</sup>
 
-| Component | Primary AADAPT focus |
+| 组件 | AADAPT 主要关注点 |
 | --- | --- |
-| Signing/KMS estates | Credential theft, policy bypass, signing-abuse, governance takeover |
-| Oracles/feeds | Input poisoning, aggregation manipulation, deviation-threshold evasion |
-| On-chain protocols | Flash-loan economic manipulation, invariant breaking, parameter reconfiguration |
-| Automation pipelines | Compromised bot/CI identities, batch replay, unauthorized deployment |
-| Bridges/routers | Cross-chain evasion, rapid hop laundering, settlement desynchronization |
+| 签名/KMS 系统 | 凭证窃取、策略绕过、签名滥用、治理接管 |
+| 预言机/数据馈送 | 输入投毒、聚合操纵、规避偏差阈值 |
+| 链上协议 | Flash-loan 经济操纵、破坏不变量、重新配置参数 |
+| 自动化流水线 | 机器人/CI 身份遭入侵、批次重放、未授权部署 |
+| 跨链桥/路由器 | 跨链规避、快速跳转洗钱、结算不同步 |
 
-这种映射确保测试的不只是合约，还包括所有能够间接操控价值的 identity/automation。
+此映射可确保测试的不只是合约，还包括所有能够间接左右价值的身份/自动化系统。
 
 ## 3. 根据攻击者可行性与业务影响确定优先级
 
-1. **运营弱点**：暴露的 CI credential、权限过大的 IAM role、配置错误的 KMS policy、能够请求任意签名的 automation account、包含 bridge 配置的公开 bucket 等。
-2. **价值特定弱点**：脆弱的 oracle 参数、缺少多方审批的可升级合约、对 flash-loan 敏感的流动性、可绕过 timelock 的治理操作。
+1. **运营弱点**：暴露的 CI 凭证、权限过大的 IAM 角色、配置错误的 KMS 策略、可请求任意签名的自动化账户、公开存储桶中的跨链桥配置等。
+2. **价值相关弱点**：脆弱的预言机参数、缺少多方审批的可升级合约、对 Flash-loan 敏感的流动性、绕过 timelock 的治理操作。
 
-像 adversary 一样处理队列：先从今天就可能成功的运营 foothold 开始，然后深入到协议和经济操纵路径。<sup>[[2]](#references)</sup>
+像攻击者一样安排测试队列：先从当下就可能奏效的运营立足点入手，再深入测试协议/经济操纵路径。<sup>[[2]](#references)</sup>
 
-## 4. 在受控且贴近生产的环境中执行
-- **Forked mainnet / 隔离 testnet**：复制 bytecode、storage 和流动性，使 flash-loan 路径、oracle 漂移和 bridge 流程能够端到端运行，同时不接触真实资金。<sup>[[2]](#references)</sup>
-- **Blast radius 规划**：在引爆场景前定义 circuit breaker、可暂停模块、rollback runbook 和仅供测试使用的 admin key。
-- **利益相关者协调**：通知 custodian、oracle operator、bridge partner 和合规团队，使其监控团队预期会出现相关流量。
-- **法律批准**：当模拟可能触及受监管通道时，记录范围、授权和停止条件。
+## 4. 在受控且贴近生产环境的环境中执行
+- **主网分叉/隔离测试网**：复现字节码、存储和流动性，以便端到端运行 Flash-loan 路径、预言机偏移和跨链桥流转，而不触及真实资金。<sup>[[2]](#references)</sup>
+- **影响范围规划**：在触发场景前，定义断路器、可暂停模块、回滚运行手册和仅用于测试的管理员密钥。
+- **协调利益相关方**：通知托管方、预言机运营方、跨链桥合作伙伴和合规团队，确保其监控团队预先知悉相关流量。
+- **法律批准**：当模拟可能触及受监管通道时，记录测试范围、授权和停止条件。
 
-## 5. 使 Telemetry 与 AADAPT 技术对齐
-对 telemetry 流进行 instrument，使每个场景都产生可执行的检测数据。<sup>[[2]](#references)</sup>
+## 5. 使遥测与 AADAPT 技术相匹配
+配置遥测流，确保每个场景都能产生可用于采取行动的检测数据。<sup>[[2]](#references)</sup>
 
-- **链级 trace**：完整的 call graph、gas 使用量、交易 nonce、区块时间戳，用于重建 flash-loan bundle、类似 reentrancy 的结构和跨合约跳转。
-- **应用/API 日志**：将每笔链上 tx 关联回人类或 automation identity（session ID、OAuth client、API key、CI job ID），并记录 IP 和认证方式。
-- **KMS/HSM 日志**：记录每次签名的 key ID、caller principal、policy 结果、目标地址和 reason code。建立变更窗口和高风险操作的基线。
-- **Oracle/feed metadata**：记录每次更新的数据源组成、报告值、与滚动平均值的偏差、触发的阈值以及执行的 failover 路径。
-- **Bridge/swap trace**：使用 correlation ID、chain ID、relayer identity 和 hop timing，关联不同链上的 lock/mint/unlock 事件。
-- **异常标记**：生成 slippage 峰值、异常抵押率、不寻常的 gas 密度或跨链速度等派生指标。
+- **链上追踪**：完整调用图、gas 用量、交易 nonce、区块时间戳——用于重建 Flash-loan bundle、类似重入的结构和跨合约跳转。
+- **应用/API 日志**：将每笔链上交易关联到人工或自动化身份（会话 ID、OAuth 客户端、API 密钥、CI 作业 ID），并记录 IP 和认证方式。
+- **KMS/HSM 日志**：记录每次签名的密钥 ID、调用方主体、策略结果、目标地址和原因代码。为变更时段和高风险操作建立基线。
+- **预言机/数据馈送元数据**：记录每次更新的数据源组成、报告值、与滚动平均值的偏差、触发的阈值以及启用的故障转移路径。
+- **跨链桥/兑换追踪**：通过关联 ID、链 ID、中继器身份和跳转时间，关联不同链上的锁定/铸造/解锁事件。
+- **异常标记**：派生指标，例如滑点激增、抵押率异常、gas 密度异常或跨链速度异常。
 
-为所有内容添加 scenario ID 或 synthetic user ID，使分析人员能够将 observables 与正在测试的 AADAPT 技术对应起来。
+为所有数据添加场景 ID 或合成用户 ID，以便分析人员将观测数据与所测试的 AADAPT 技术对应起来。
 
-## 6. Purple-team 循环与成熟度指标
-1. 在受控环境中运行场景，并记录检测结果（alert、dashboard、被呼叫的 responder）。<sup>[[2]](#references)</sup>
-2. 将每个步骤映射到具体的 AADAPT 技术，以及在 chain/app/KMS/oracle/bridge 层产生的 observables。
-3. 制定并部署检测假设（threshold rule、correlation search、invariant check）。
-4. 重复运行，直到 mean time to detect（MTTD）和 mean time to contain（MTTC）符合业务容忍度，并且 playbook 能够可靠地阻止价值损失。
+## 6. Purple Team 循环与成熟度指标
+1. 在受控环境中运行场景并收集检测结果（告警、仪表盘、响应人员是否收到通知）。<sup>[[2]](#references)</sup>
+2. 将每个步骤映射到具体的 AADAPT 技术，以及链上/应用/KMS/预言机/跨链桥各层产生的观测数据。
+3. 制定并部署检测假设（阈值规则、关联搜索、不变量检查）。
+4. 重复运行，直到平均检测时间（MTTD）和平均遏制时间（MTTC）达到业务容忍范围，并且操作手册能够可靠地阻止价值损失。
 
-从三个轴跟踪项目成熟度：<sup>[[2]](#references)</sup>
-- **可见性**：每条关键价值路径在各个层面都有 telemetry。
-- **覆盖率**：端到端测试的优先 AADAPT 技术占比。
-- **响应能力**：在发生不可逆损失前暂停合约、撤销密钥或冻结流程的能力。
+从三个维度跟踪项目成熟度：<sup>[[2]](#references)</sup>
+- **可见性**：每条关键价值路径的每一层都有遥测数据。
+- **覆盖率**：端到端测试的优先级 AADAPT 技术所占比例。
+- **响应能力**：在发生不可逆损失前暂停合约、撤销密钥或冻结资金流的能力。
 
-典型里程碑包括：(1) 完成价值清点和 AADAPT 映射；(2) 完成首个实现检测能力的端到端场景；(3) 每季度执行 Purple-team 循环，扩大覆盖率并降低 MTTD/MTTC。<sup>[[2]](#references)</sup>
+典型里程碑：(1) 完成价值清点和 AADAPT 映射；(2) 首次端到端场景测试并部署检测机制；(3) 每季度开展 Purple Team 演练，扩大覆盖范围并缩短 MTTD/MTTC。<sup>[[2]](#references)</sup>
 
 ## 7. 场景模板
-使用以下可重复的蓝图设计能够直接映射到 AADAPT 行为的模拟。<sup>[[2]](#references)</sup>
+使用这些可重复的蓝图设计直接映射到 AADAPT 行为的模拟场景。<sup>[[2]](#references)</sup>
 
 ### 场景 A – Flash-loan 经济操纵
-- **目标**：在单笔交易中借入短期资金，扭曲 AMM 价格/流动性，并在归还前触发错误定价的借款、清算或铸造。
+- **目标**：在单笔交易中借入临时资金，扭曲 AMM 价格/流动性，并在还款前触发错误定价的借款、清算或铸造。
 - **执行**：
-1. Fork 目标链，并使用接近生产环境的流动性为池子注资。
-2. 通过 flash loan 借入大额名义资金。
-3. 执行经过校准的 swap，使价格/阈值跨越 lending、vault 或 derivative 逻辑所依赖的边界。
-4. 在扭曲发生后立即调用受害合约（borrow、liquidate、mint），然后归还 flash loan。
-- **测量**：不变量破坏是否成功？是否触发 slippage/price-deviation monitor、circuit breaker 或 governance pause hook？analytics 多久能够标记出异常的 gas/call graph 模式？
+  1. 分叉目标链，并以接近生产环境的流动性为资金池注资。
+  2. 通过 Flash-loan 借入大额名义资金。
+  3. 执行经过校准的兑换，以跨越借贷、Vault 或衍生品逻辑依赖的价格/阈值边界。
+  4. 在价格扭曲后立即调用受害合约（借款、清算、铸造），然后偿还 Flash-loan。
+- **测量**：是否成功违反不变量？滑点/价格偏差监控、断路器或治理暂停钩子是否触发？分析系统多久能标记异常 gas/调用图模式？
 
-### 场景 B – Oracle/数据 feed poisoning
-- **目标**：确定被操纵的 feed 是否能够触发破坏性自动操作（大规模清算、错误结算）。
+### 场景 B – 预言机/数据馈送投毒
+- **目标**：确定被操纵的数据馈送是否会触发破坏性的自动化操作（大规模清算、错误结算）。
 - **执行**：
-1. 在 fork/testnet 中部署恶意 feed，或调整 aggregator 权重、quorum/update cadence，使其超出可容忍的偏差。
-2. 让依赖合约使用被 poisoning 的数值，并执行其标准逻辑。
-- **测量**：feed 层面的带外 alert、fallback oracle 激活、最小/最大边界强制执行，以及从异常开始到 operator 响应之间的延迟。
+  1. 在分叉链/测试网上部署恶意数据馈送，或调整聚合器权重/法定人数/更新频率，使其超出可容忍偏差范围。
+  2. 让依赖这些数据的合约读取被投毒的数值并执行其标准逻辑。
+- **测量**：数据馈送层的带外告警、备用预言机启用情况、最小/最大边界的强制执行，以及从异常出现到运营人员响应的延迟。
 
-### 场景 C – Credential/签名滥用
-- **目标**：测试攻陷单个 signer 或 automation identity 是否会导致未授权升级、参数修改或 treasury drain。
+### 场景 C – 凭证/签名滥用
+- **目标**：测试攻陷单个签名者或自动化身份是否会导致未授权升级、参数变更或资金库被清空。
 - **执行**：
-1. 枚举具有敏感签名权限的 identity（operator、CI token、调用 KMS/HSM 的 service account、multisig participant）。
-2. 模拟 compromise（在 lab 范围内重新使用其 credential/key）。
-3. 尝试特权操作：升级 proxy、修改风险参数、mint/pause asset，或触发 governance proposal。
-- **测量**：KMS/HSM 日志是否产生 anomaly alert（操作时间、目标地址漂移、高风险操作突发）？policy 或 multisig threshold 能否阻止单方面滥用？是否强制执行 throttle/rate limit 或额外审批？
+  1. 枚举拥有敏感签名权限的身份（运营人员、CI 令牌、调用 KMS/HSM 的服务账户、多签参与者）。
+  2. 模拟身份遭入侵（在实验室范围内重新使用其凭证/密钥）。
+  3. 尝试执行特权操作：升级代理、修改风险参数、铸造/暂停资产或发起治理提案。
+- **测量**：KMS/HSM 日志是否会触发异常告警（操作时段、目标地址偏移、高风险操作突增）？策略或多签阈值能否阻止单方面滥用？是否强制执行限流/速率限制或额外审批？
 
 ### 场景 D – 跨链规避与可追踪性缺口
-- **目标**：评估 defenders 追踪并快速拦截通过 bridge、DEX router 和隐私 hop 迅速 laundering 的资产的能力。
+- **目标**：评估防御方追踪并拦截经跨链桥、DEX 路由器和隐私跳转快速洗钱的资产的能力。
 - **执行**：
-1. 在常见 bridge 之间串联 lock/mint 操作，在每个 hop 中交错执行 swap/mixer，并维护每个 hop 的 correlation ID。
-2. 加速 transfer 以对监控延迟施压（在数分钟/区块内完成 multi-hop）。
-- **测量**：跨 telemetry 与商业 chain analytics 关联事件所需的时间、重建路径的完整性、真实事件中识别可冻结 choke point 的能力，以及针对异常跨链速度/价值的 alert fidelity。
+  1. 串联常见跨链桥上的锁定/铸造操作，在每次跳转中穿插兑换/混币器，并为每次跳转保留关联 ID。
+  2. 加快转账速度以对监控延迟进行压力测试（数分钟/数个区块内完成多次跳转）。
+- **测量**：关联遥测数据与商业链上分析结果所需的时间、重建路径的完整性、真实事件中识别冻结关口的能力，以及对异常跨链速度/价值的告警准确度。
 
 ## References
 
-- [1] [面向数字资产的 AADAPT(TM) Cyber Threat Framework（MITRE）](https://www.mitre.org/sites/default/files/2025-05/PR-25-1118-aadpt-cyber-threat-framework-for-digital-assets.pdf)
-- [2] [MITRE AADAPT Framework 作为 Red Team 路线图（Bishop Fox）](https://bishopfox.com/blog/mitre-aadapt-framework-as-a-red-team-roadmap)
+- [1] [数字资产网络威胁框架 AADAPT(TM)（MITRE）](https://www.mitre.org/sites/default/files/2025-05/PR-25-1118-aadpt-cyber-threat-framework-for-digital-assets.pdf)
+- [2] [将 MITRE AADAPT 框架用作 Red Team 路线图（Bishop Fox）](https://bishopfox.com/blog/mitre-aadapt-framework-as-a-red-team-roadmap)
 {{#include ../../banners/hacktricks-training.md}}
