@@ -4,180 +4,187 @@
 
 ## OWASP Top 10 Machine Learning Vulnerabilities
 
-Το Owasp έχει εντοπίσει τις 10 κορυφαίες ευπάθειες του machine learning που μπορούν να επηρεάσουν τα AI συστήματα. Αυτές οι ευπάθειες μπορούν να οδηγήσουν σε διάφορα προβλήματα ασφάλειας, όπως data poisoning, model inversion και adversarial attacks. Η κατανόηση αυτών των ευπαθειών είναι κρίσιμη για τη δημιουργία ασφαλών AI συστημάτων.
+Το Owasp έχει εντοπίσει τις 10 κορυφαίες ευπάθειες machine learning που μπορούν να επηρεάσουν τα συστήματα AI. Αυτές οι ευπάθειες μπορούν να οδηγήσουν σε διάφορα ζητήματα ασφάλειας, όπως data poisoning, model inversion και adversarial attacks. Η κατανόηση αυτών των ευπαθειών είναι καθοριστική για τη δημιουργία ασφαλών συστημάτων AI.
 
-Για μια ενημερωμένη και λεπτομερή λίστα των 10 κορυφαίων ευπαθειών του machine learning, ανατρέξτε στο project [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/).<sup>[[1]](#references)</sup>
+Για μια ενημερωμένη και λεπτομερή λίστα με τις 10 κορυφαίες ευπάθειες machine learning, ανατρέξτε στο project [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/).<sup>[[1]](#references)</sup>
 
-- **Input Manipulation Attack**: Ένας attacker προσθέτει μικροσκοπικές, συχνά αόρατες αλλαγές στα **εισερχόμενα δεδομένα**, ώστε το model να λάβει λανθασμένη απόφαση.\
-*Παράδειγμα*: Μερικές κηλίδες μπογιάς σε μια πινακίδα stop ξεγελούν ένα self-driving αυτοκίνητο, κάνοντάς το να "δει" πινακίδα ορίου ταχύτητας.
+- **Input Manipulation Attack**: Ένας επιτιθέμενος προσθέτει μικροσκοπικές, συχνά αόρατες αλλαγές στα **εισερχόμενα δεδομένα**, ώστε το μοντέλο να πάρει λανθασμένη απόφαση.\
+    *Παράδειγμα*: Μερικές πιτσιλιές μπογιάς σε μια πινακίδα STOP ξεγελούν ένα αυτοοδηγούμενο αυτοκίνητο, κάνοντάς το να «δει» πινακίδα ορίου ταχύτητας.
 
-- **Data Poisoning Attack**: Το **training set** μολύνεται σκόπιμα με κακά δείγματα, διδάσκοντας στο model επιβλαβείς κανόνες.\
-*Παράδειγμα*: Binaries malware επισημαίνονται λανθασμένα ως "benign" σε ένα training corpus antivirus, επιτρέποντας σε παρόμοιο malware να παρακάμψει τον έλεγχο αργότερα.
+- **Data Poisoning Attack**: Το **σύνολο εκπαίδευσης** αλλοιώνεται σκόπιμα με κακόβουλα δείγματα, διδάσκοντας στο μοντέλο επιβλαβείς κανόνες.\
+*Παράδειγμα*: Δυαδικά αρχεία malware χαρακτηρίζονται εσφαλμένα ως «benign» σε ένα σώμα δεδομένων εκπαίδευσης antivirus, επιτρέποντας σε παρόμοιο malware να ξεφύγει αργότερα.
 
-- **Model Inversion Attack**: Με probing των outputs, ένας attacker δημιουργεί ένα **reverse model** που ανακατασκευάζει ευαίσθητα χαρακτηριστικά των αρχικών inputs.\
-*Παράδειγμα*: Αναδημιουργία της εικόνας MRI ενός ασθενούς από τις προβλέψεις ενός model ανίχνευσης καρκίνου.
+- **Model Inversion Attack**: Εξετάζοντας τα αποτελέσματα, ένας επιτιθέμενος δημιουργεί ένα **αντίστροφο μοντέλο** που ανακατασκευάζει ευαίσθητα χαρακτηριστικά των αρχικών εισόδων.\
+*Παράδειγμα*: Αναδημιουργία της εικόνας MRI ενός ασθενούς από τις προβλέψεις ενός μοντέλου ανίχνευσης καρκίνου.
 
-- **Membership Inference Attack**: Ο adversary ελέγχει αν ένα **συγκεκριμένο record** χρησιμοποιήθηκε κατά το training, εντοπίζοντας διαφορές στο confidence.\
-*Παράδειγμα*: Επιβεβαίωση ότι μια τραπεζική συναλλαγή ενός ατόμου περιλαμβάνεται στα training data ενός model ανίχνευσης απάτης.
+- **Membership Inference Attack**: Ο αντίπαλος ελέγχει αν μια **συγκεκριμένη εγγραφή** χρησιμοποιήθηκε κατά την εκπαίδευση, εντοπίζοντας διαφορές στη βεβαιότητα του μοντέλου.\
+*Παράδειγμα*: Επιβεβαίωση ότι οι τραπεζικές συναλλαγές ενός ατόμου περιλαμβάνονται στα δεδομένα εκπαίδευσης ενός μοντέλου ανίχνευσης απάτης.
 
-- **Model Theft**: Τα επαναλαμβανόμενα queries επιτρέπουν σε έναν attacker να μάθει τα decision boundaries και να **κλωνοποιήσει τη συμπεριφορά του model** (και το IP του).\
-*Παράδειγμα*: Συλλογή αρκετών ζευγών Q&A από ένα ML‑as‑a‑Service API, ώστε να δημιουργηθεί ένα σχεδόν ισοδύναμο local model.
+- **Model Theft**: Η επαναλαμβανόμενη υποβολή ερωτημάτων επιτρέπει σε έναν επιτιθέμενο να μάθει τα όρια απόφασης και να **κλωνοποιήσει τη συμπεριφορά του μοντέλου** (και την IP του).\
+*Παράδειγμα*: Συλλογή αρκετών ζευγών ερωτήσεων και απαντήσεων από ένα API ML-as-a-Service για τη δημιουργία ενός σχεδόν ισοδύναμου τοπικού μοντέλου.
 
-- **AI Supply‑Chain Attack**: Παραβίαση οποιουδήποτε component (data, libraries, pre‑trained weights, CI/CD) στο **ML pipeline**, με σκοπό τη διαφθορά των downstream models.\
-*Παράδειγμα*: Ένα poisoned dependency σε model-hub εγκαθιστά ένα backdoored model ανάλυσης συναισθήματος σε πολλές εφαρμογές.
+- **AI Supply‑Chain Attack**: Η παραβίαση οποιουδήποτε στοιχείου (δεδομένα, βιβλιοθήκες, προεκπαιδευμένα βάρη, CI/CD) στο **ML pipeline** μπορεί να αλλοιώσει τα μοντέλα που θα προκύψουν.\
+*Παράδειγμα*: Μια μολυσμένη εξάρτηση από ένα model hub εγκαθιστά ένα μοντέλο ανάλυσης συναισθήματος με backdoor σε πολλές εφαρμογές.
 
-- **Transfer Learning Attack**: Κακόβουλη λογική εισάγεται σε ένα **pre‑trained model** και επιβιώνει από το fine‑tuning για το task του θύματος.\
-*Παράδειγμα*: Ένα vision backbone με κρυφό trigger συνεχίζει να αντιστρέφει τα labels μετά την προσαρμογή του για medical imaging.
+- **Transfer Learning Attack**: Κακόβουλη λογική εμφυτεύεται σε ένα **προεκπαιδευμένο μοντέλο** και επιβιώνει από το fine-tuning για την εργασία του θύματος.\
+*Παράδειγμα*: Ένα vision backbone με κρυφό trigger εξακολουθεί να αντιστρέφει ετικέτες μετά την προσαρμογή του για ιατρική απεικόνιση.
 
-- **Model Skewing**: Διακριτικά biased ή mislabeled data **μετατοπίζουν τα outputs του model**, ώστε να εξυπηρετούν την ατζέντα του attacker.\
-*Παράδειγμα*: Εισαγωγή "καθαρών" spam emails με label ham, ώστε ένα spam filter να επιτρέπει παρόμοια μελλοντικά emails.
+- **Model Skewing**: Μεροληπτικά ή εσφαλμένα επισημασμένα δεδομένα **μετατοπίζουν τις εξόδους του μοντέλου** διακριτικά, ώστε να εξυπηρετούν την ατζέντα του επιτιθέμενου.\
+*Παράδειγμα*: Εισαγωγή «καθαρών» email spam με ετικέτα ham, ώστε ένα φίλτρο spam να επιτρέπει τη διέλευση παρόμοιων μελλοντικών email.
 
-- **Output Integrity Attack**: Ο attacker **αλλάζει τις predictions του model κατά τη μεταφορά**, χωρίς να αλλάζει το ίδιο το model, εξαπατώντας τα downstream systems.\
-*Παράδειγμα*: Αλλαγή της verdict ενός malware classifier από "malicious" σε "benign" πριν το στάδιο file-quarantine τη δει.
+- **Output Integrity Attack**: Ο επιτιθέμενος **αλλάζει τις προβλέψεις του μοντέλου κατά τη μεταφορά**, όχι το ίδιο το μοντέλο, εξαπατώντας τα συστήματα που τις επεξεργάζονται στη συνέχεια.\
+*Παράδειγμα*: Αλλαγή της ετυμηγορίας «malicious» ενός ταξινομητή malware σε «benign» προτού το στάδιο καραντίνας αρχείου τη λάβει.
 
-- **Model Poisoning** --- Άμεσες, στοχευμένες αλλαγές στις ίδιες τις **παραμέτρους του model**, συνήθως αφού αποκτηθεί write access, για την αλλαγή της συμπεριφοράς του.\
-*Παράδειγμα*: Τροποποίηση των weights ενός model ανίχνευσης απάτης σε production, ώστε οι συναλλαγές από συγκεκριμένες κάρτες να εγκρίνονται πάντα.
+- **Model Poisoning** --- Άμεσες, στοχευμένες αλλαγές στις ίδιες τις **παραμέτρους του μοντέλου**, συχνά μετά την απόκτηση δικαιωμάτων εγγραφής, για την αλλαγή της συμπεριφοράς του.\
+*Παράδειγμα*: Τροποποίηση των βαρών ενός μοντέλου ανίχνευσης απάτης σε περιβάλλον παραγωγής, ώστε να εγκρίνονται πάντα συναλλαγές από συγκεκριμένες κάρτες.
 
 
-## Google SAIF Risks
+## Κίνδυνοι Google SAIF
 
-Το [SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/risks) της Google περιγράφει διάφορους κινδύνους που σχετίζονται με AI συστήματα:<sup>[[2]](#references)</sup>
+Το [SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/risks) της Google περιγράφει διάφορους κινδύνους που σχετίζονται με τα συστήματα AI:<sup>[[2]](#references)</sup>
 
-- **Data Poisoning**: Κακόβουλοι actors τροποποιούν ή εισάγουν training/tuning data, ώστε να μειώσουν την ακρίβεια, να εγκαταστήσουν backdoors ή να παραμορφώσουν τα αποτελέσματα, υπονομεύοντας την ακεραιότητα του model σε ολόκληρο τον data-lifecycle.
+- **Data Poisoning**: Κακόβουλοι παράγοντες τροποποιούν ή εισάγουν δεδομένα εκπαίδευσης/ρύθμισης, ώστε να μειώσουν την ακρίβεια, να εμφυτεύσουν backdoors ή να στρεβλώσουν τα αποτελέσματα, υπονομεύοντας την ακεραιότητα του μοντέλου σε ολόκληρο τον κύκλο ζωής των δεδομένων.
 
-- **Unauthorized Training Data**: Η εισαγωγή copyrighted, ευαίσθητων ή μη επιτρεπόμενων datasets δημιουργεί νομικές, δεοντολογικές και performance liabilities, επειδή το model μαθαίνει από data που δεν επιτρεπόταν ποτέ να χρησιμοποιήσει.
+- **Unauthorized Training Data**: Η εισαγωγή συνόλων δεδομένων που προστατεύονται από πνευματικά δικαιώματα, είναι ευαίσθητα ή δεν έχουν εγκριθεί δημιουργεί νομικούς, ηθικούς και λειτουργικούς κινδύνους, επειδή το μοντέλο μαθαίνει από δεδομένα που δεν επιτρεπόταν να χρησιμοποιήσει.
 
-- **Model Source Tampering**: Supply-chain ή insider manipulation του model code, των dependencies ή των weights πριν ή κατά τη διάρκεια του training μπορεί να ενσωματώσει hidden logic που παραμένει ακόμη και μετά το retraining.
+- **Model Source Tampering**: Η χειραγώγηση του κώδικα, των εξαρτήσεων ή των βαρών του μοντέλου πριν ή κατά την εκπαίδευση, είτε μέσω της αλυσίδας εφοδιασμού είτε από εσωτερικό παράγοντα, μπορεί να ενσωματώσει κρυφή λογική που παραμένει ακόμη και μετά την επανεκπαίδευση.
 
-- **Excessive Data Handling**: Αδύναμοι έλεγχοι data-retention και governance οδηγούν τα systems στην αποθήκευση ή επεξεργασία περισσότερων personal data από όσα είναι απαραίτητα, αυξάνοντας το exposure και το compliance risk.
+- **Excessive Data Handling**: Οι ανεπαρκείς έλεγχοι διατήρησης δεδομένων και διακυβέρνησης οδηγούν τα συστήματα στην αποθήκευση ή επεξεργασία περισσότερων προσωπικών δεδομένων από όσα είναι απαραίτητα, αυξάνοντας την έκθεση και τον κίνδυνο μη συμμόρφωσης.
 
-- **Model Exfiltration**: Attackers κλέβουν model files/weights, προκαλώντας απώλεια intellectual property και επιτρέποντας copy-cat services ή follow-on attacks.
+- **Model Exfiltration**: Οι επιτιθέμενοι κλέβουν αρχεία/βάρη μοντέλων, προκαλώντας απώλεια πνευματικής ιδιοκτησίας και επιτρέποντας τη δημιουργία υπηρεσιών-αντιγράφων ή επακόλουθες επιθέσεις.
 
-- **Model Deployment Tampering**: Adversaries τροποποιούν model artifacts ή τη serving infrastructure, ώστε το running model να διαφέρει από την εγκεκριμένη έκδοση, αλλάζοντας ενδεχομένως τη συμπεριφορά του.
+- **Model Deployment Tampering**: Οι αντίπαλοι τροποποιούν τα τεχνουργήματα του μοντέλου ή την υποδομή εξυπηρέτησης, με αποτέλεσμα το μοντέλο που εκτελείται να διαφέρει από την ελεγμένη έκδοση και ενδεχομένως να αλλάζει συμπεριφορά.
 
-- **Denial of ML Service**: Η πλημμύρα APIs ή η αποστολή “sponge” inputs μπορεί να εξαντλήσει compute/energy και να θέσει το model εκτός λειτουργίας, όπως στις κλασικές DoS attacks.
+- **Denial of ML Service**: Η πλημμύρα των API με αιτήματα ή η αποστολή εισόδων τύπου «sponge» μπορεί να εξαντλήσει υπολογιστικούς πόρους/ενέργεια και να θέσει το μοντέλο εκτός λειτουργίας, όπως στις κλασικές επιθέσεις DoS.
 
-- **Model Reverse Engineering**: Με τη συλλογή μεγάλου αριθμού input-output pairs, οι attackers μπορούν να κλωνοποιήσουν ή να distil το model, τροφοδοτώντας imitation products και customized adversarial attacks.
+- **Model Reverse Engineering**: Συλλέγοντας μεγάλο αριθμό ζευγών εισόδου-εξόδου, οι επιτιθέμενοι μπορούν να κλωνοποιήσουν ή να αποστάξουν το μοντέλο, τροφοδοτώντας προϊόντα-απομιμήσεις και προσαρμοσμένες adversarial attacks.
 
-- **Insecure Integrated Component**: Ευάλωτα plugins, agents ή upstream services επιτρέπουν στους attackers να εισάγουν code ή να κάνουν privilege escalation μέσα στο AI pipeline.
+- **Insecure Integrated Component**: Ευάλωτα plugins, agents ή upstream υπηρεσίες επιτρέπουν στους επιτιθέμενους να εισάγουν κώδικα ή να κλιμακώσουν δικαιώματα μέσα στο AI pipeline.
 
-- **Prompt Injection**: Η δημιουργία prompts (άμεσα ή έμμεσα) για τη μεταφορά οδηγιών που παρακάμπτουν το system intent, προκαλώντας στο model την εκτέλεση unintended commands.
+- **Prompt Injection**: Η διαμόρφωση prompts, άμεσα ή έμμεσα, ώστε να παρεισφρήσουν οδηγίες που παρακάμπτουν τον σκοπό του συστήματος και κάνουν το μοντέλο να εκτελεί ακούσιες εντολές.
 
-- **Model Evasion**: Προσεκτικά σχεδιασμένα inputs προκαλούν στο model mis-classification, hallucination ή output disallowed content, υποβαθμίζοντας την ασφάλεια και την εμπιστοσύνη.
+- **Model Evasion**: Ειδικά σχεδιασμένες είσοδοι προκαλούν στο μοντέλο εσφαλμένη ταξινόμηση, hallucinations ή την παραγωγή μη επιτρεπόμενου περιεχομένου, υπονομεύοντας την ασφάλεια και την εμπιστοσύνη.
 
-- **Sensitive Data Disclosure**: Το model αποκαλύπτει private ή confidential information από τα training data ή το user context, παραβιάζοντας το privacy και τους κανονισμούς.
+- **Sensitive Data Disclosure**: Το μοντέλο αποκαλύπτει ιδιωτικές ή εμπιστευτικές πληροφορίες από τα δεδομένα εκπαίδευσής του ή το πλαίσιο του χρήστη, παραβιάζοντας το απόρρητο και τους κανονισμούς.
 
-- **Inferred Sensitive Data**: Το model συμπεραίνει personal attributes που δεν δόθηκαν ποτέ, δημιουργώντας νέες βλάβες privacy μέσω inference.
+- **Inferred Sensitive Data**: Το μοντέλο συνάγει προσωπικά χαρακτηριστικά που δεν του δόθηκαν ποτέ, δημιουργώντας νέες επιπτώσεις στο απόρρητο μέσω εξαγωγής συμπερασμάτων.
 
-- **Insecure Model Output**: Unsanitized responses μεταφέρουν harmful code, misinformation ή inappropriate content σε users ή downstream systems.
+- **Insecure Model Output**: Μη φιλτραρισμένες απαντήσεις μεταφέρουν επιβλαβή κώδικα, παραπληροφόρηση ή ακατάλληλο περιεχόμενο σε χρήστες ή συστήματα που τις επεξεργάζονται στη συνέχεια.
 
-- **Rogue Actions**: Autonomously-integrated agents εκτελούν unintended real-world operations (file writes, API calls, purchases κ.λπ.) χωρίς επαρκή user oversight.
+- **Rogue Actions**: Agents ενσωματωμένοι με δυνατότητα αυτόνομης λειτουργίας εκτελούν ακούσιες ενέργειες στον πραγματικό κόσμο (εγγραφή αρχείων, κλήσεις API, αγορές κ.λπ.) χωρίς επαρκή εποπτεία από τον χρήστη.
 
-## Mitre AI ATLAS Matrix
+## Μήτρα MITRE AI ATLAS
 
-Το [MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS) παρέχει ένα ολοκληρωμένο framework για την κατανόηση και τον μετριασμό των κινδύνων που σχετίζονται με AI συστήματα. Κατηγοριοποιεί διάφορες attack techniques και tactics που μπορεί να χρησιμοποιήσουν οι adversaries εναντίον AI models, καθώς και τρόπους χρήσης AI systems για την εκτέλεση διαφορετικών attacks.<sup>[[3]](#references)</sup>
+Η [MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS) παρέχει ένα ολοκληρωμένο πλαίσιο για την κατανόηση και τον μετριασμό των κινδύνων που σχετίζονται με τα συστήματα AI. Κατηγοριοποιεί διάφορες τεχνικές και τακτικές επιθέσεων που μπορεί να χρησιμοποιήσουν αντίπαλοι εναντίον μοντέλων AI, καθώς και τρόπους χρήσης συστημάτων AI για την εκτέλεση διαφορετικών επιθέσεων.<sup>[[3]](#references)</sup>
 
-## LLMJacking (Token Theft & Resale of Cloud-hosted LLM Access)
+## LLMJacking (Κλοπή Token και Μεταπώληση Πρόσβασης σε LLM που Φιλοξενούνται στο Cloud)
 
-Οι attackers κλέβουν ενεργά session tokens ή cloud API credentials και καλούν επί πληρωμή, cloud-hosted LLMs χωρίς εξουσιοδότηση. Η πρόσβαση συχνά μεταπωλείται μέσω reverse proxies που προωθούν το account του θύματος, π.χ. deployments "oai-reverse-proxy". Οι συνέπειες περιλαμβάνουν οικονομική απώλεια, misuse του model εκτός policy και απόδοση των ενεργειών στον victim tenant.<sup>[[5]](#references)</sup><sup>[[6]](#references)</sup><sup>[[7]](#references)</sup>
+Οι επιτιθέμενοι κλέβουν ενεργά session tokens ή διαπιστευτήρια cloud API και χρησιμοποιούν επί πληρωμή LLM που φιλοξενούνται στο cloud χωρίς εξουσιοδότηση. Η πρόσβαση συχνά μεταπωλείται μέσω reverse proxies που προωθούν τα αιτήματα μέσω του λογαριασμού του θύματος, π.χ. υλοποιήσεις "oai-reverse-proxy". Οι συνέπειες περιλαμβάνουν οικονομική ζημία, χρήση του μοντέλου εκτός πολιτικής και απόδοση της δραστηριότητας στον tenant του θύματος.<sup>[[5]](#references)</sup><sup>[[6]](#references)</sup><sup>[[7]](#references)</sup>
 
 TTPs:
-- Συλλογή tokens από μολυσμένα developer machines ή browsers· κλοπή CI/CD secrets· αγορά leaked cookies.<sup>[[5]](#references)</sup>
-- Δημιουργία reverse proxy που προωθεί requests στον αυθεντικό provider, αποκρύπτοντας το upstream key και εξυπηρετώντας πολλούς customers μέσω multiplexing.<sup>[[5]](#references)</sup><sup>[[7]](#references)</sup>
-- Κατάχρηση direct base-model endpoints για παράκαμψη των enterprise guardrails και των rate limits.<sup>[[4]](#references)</sup>
+- Συλλογή tokens από μολυσμένους υπολογιστές προγραμματιστών ή browsers· κλοπή μυστικών CI/CD· αγορά leaked cookies.<sup>[[5]](#references)</sup>
+- Δημιουργία reverse proxy που προωθεί αιτήματα στον αυθεντικό πάροχο, αποκρύπτει το upstream key και εξυπηρετεί πολλούς πελάτες μέσω της ίδιας υποδομής.<sup>[[5]](#references)</sup><sup>[[7]](#references)</sup>
+- Κατάχρηση των άμεσων base-model endpoints για παράκαμψη των enterprise guardrails και των ορίων ρυθμού αιτημάτων.<sup>[[4]](#references)</sup>
 
-Μετριασμοί:
-- Σύνδεση των tokens με device fingerprint, IP ranges και client attestation· επιβολή σύντομων expirations και refresh με MFA.
-- Περιορισμός των keys στο ελάχιστο (χωρίς tool access, read-only όπου εφαρμόζεται)· rotation σε περίπτωση anomaly.
-- Τερματισμός όλης της traffic server-side πίσω από policy gateway που επιβάλλει safety filters, per-route quotas και tenant isolation.
-- Παρακολούθηση για unusual usage patterns (αιφνίδιες αυξήσεις δαπανών, atypical regions, UA strings) και αυτόματο revoke ύποπτων sessions.
-- Προτίμηση mTLS ή signed JWTs που εκδίδονται από το IdP σας αντί για long-lived static API keys.
+Μετριασμός:
+- Συσχέτιση των tokens με αποτύπωμα συσκευής, εύρη IP και attestation πελάτη· επιβολή σύντομων χρόνων λήξης και ανανέωση με MFA.
+- Περιορισμός των keys στα απολύτως απαραίτητα (χωρίς πρόσβαση σε εργαλεία, μόνο για ανάγνωση όπου εφαρμόζεται)· ανανέωσή τους όταν εντοπίζεται ανωμαλία.
+- Δρομολόγηση όλης της κίνησης από την πλευρά του server μέσω policy gateway που επιβάλλει φίλτρα ασφάλειας, ποσοστώσεις ανά route και απομόνωση tenant.
+- Παρακολούθηση ασυνήθιστων μοτίβων χρήσης (απότομες αυξήσεις δαπανών, ασυνήθιστες περιοχές, συμβολοσειρές UA) και αυτόματη ανάκληση ύποπτων sessions.
+- Προτίμηση σε mTLS ή signed JWTs που εκδίδονται από το IdP σας αντί για μακρόβια στατικά API keys.
 
-## Hardening self-hosted LLM inference
+## Ενίσχυση της ασφάλειας self-hosted LLM inference
 
-Η εκτέλεση ενός local LLM server για confidential data δημιουργεί διαφορετικό attack surface από τα cloud-hosted APIs: τα inference/debug endpoints μπορεί να κάνουν leak prompts, το serving stack συνήθως εκθέτει ένα reverse proxy και τα GPU device nodes παρέχουν πρόσβαση σε μεγάλες επιφάνειες `ioctl()`. Αν αξιολογείτε ή αναπτύσσετε μια on-prem inference service, ελέγξτε τουλάχιστον τα παρακάτω σημεία.<sup>[[8]](#references)</sup>
+Η εκτέλεση ενός τοπικού server LLM για εμπιστευτικά δεδομένα δημιουργεί διαφορετική επιφάνεια επίθεσης από τα cloud-hosted APIs: τα endpoints inference/debug ενδέχεται να διαρρεύσουν prompts, το stack εξυπηρέτησης συνήθως εκθέτει ένα reverse proxy και οι κόμβοι συσκευών GPU παρέχουν πρόσβαση σε μεγάλες επιφάνειες `ioctl()`. Αν αξιολογείτε ή αναπτύσσετε μια υπηρεσία inference on-prem, εξετάστε τουλάχιστον τα ακόλουθα σημεία.<sup>[[8]](#references)</sup>
 
-### Prompt leakage μέσω debug και monitoring endpoints
+### Διαρροή prompt μέσω endpoints αποσφαλμάτωσης και παρακολούθησης
 
-Αντιμετωπίστε το inference API ως **multi-user sensitive service**. Τα debug ή monitoring routes μπορεί να εκθέσουν prompt contents, slot state, model metadata ή πληροφορίες για την internal queue. Στο `llama.cpp`, το endpoint `/slots` είναι ιδιαίτερα ευαίσθητο, επειδή εκθέτει per-slot state και προορίζεται μόνο για slot inspection/management.<sup>[[8]](#references)</sup>
+Αντιμετωπίστε το API inference ως **ευαίσθητη υπηρεσία πολλών χρηστών**. Τα routes αποσφαλμάτωσης ή παρακολούθησης μπορούν να εκθέσουν το περιεχόμενο των prompts, την κατάσταση των slots, τα metadata του μοντέλου ή πληροφορίες για την εσωτερική ουρά. Στο `llama.cpp`, το endpoint `/slots` είναι ιδιαίτερα ευαίσθητο, επειδή εκθέτει την κατάσταση ανά slot και προορίζεται μόνο για επιθεώρηση/διαχείριση slots.<sup>[[8]](#references)</sup>
 
-- Τοποθετήστε ένα reverse proxy μπροστά από τον inference server και **αρνηθείτε τα πάντα από προεπιλογή**.
-- Επιτρέψτε μόνο τα ακριβή combinations HTTP method + path που χρειάζονται από τον client/UI.
-- Απενεργοποιήστε τα introspection endpoints στο ίδιο το backend όποτε είναι δυνατό, για παράδειγμα `llama-server --no-slots`.<sup>[[9]](#references)</sup>
-- Συνδέστε το reverse proxy στο `127.0.0.1` και εκθέστε το μέσω authenticated transport, όπως SSH local port forwarding, αντί να το δημοσιεύσετε στο LAN.
+- Τοποθετήστε ένα reverse proxy μπροστά από τον server inference και **απορρίπτετε εξ ορισμού**.
+- Επιτρέψτε μόνο τους ακριβείς συνδυασμούς HTTP method + path που χρειάζεται ο client/UI.
+- Απενεργοποιήστε τα endpoints introspection στο backend όποτε είναι δυνατόν, για παράδειγμα με `llama-server --no-slots`.<sup>[[9]](#references)</sup>
+- Συνδέστε το reverse proxy στη διεύθυνση `127.0.0.1` και εκθέστε το μέσω πιστοποιημένης σύνδεσης, όπως SSH local port forwarding, αντί να το δημοσιεύσετε στο LAN.
 
 Παράδειγμα allowlist με nginx:
+
 ```nginx
 map "$request_method:$uri" $llm_whitelist {
-default 0;
+    default 0;
 
-"GET:/health"              1;
-"GET:/v1/models"           1;
-"POST:/v1/completions"     1;
-"POST:/v1/chat/completions" 1;
+    "GET:/health"              1;
+    "GET:/v1/models"           1;
+    "POST:/v1/completions"     1;
+    "POST:/v1/chat/completions" 1;
 }
 
 server {
-listen 127.0.0.1:80;
+    listen 127.0.0.1:80;
 
-location / {
-if ($llm_whitelist = 0) { return 403; }
-proxy_pass http://unix:/run/llama-cpp/llama-cpp.sock:;
-}
+    location / {
+        if ($llm_whitelist = 0) { return 403; }
+        proxy_pass http://unix:/run/llama-cpp/llama-cpp.sock:;
+    }
 }
 ```
-### Rootless containers χωρίς network και UNIX sockets
 
-Αν το inference daemon υποστηρίζει ακρόαση σε UNIX socket, προτιμήστε το αντί για TCP και εκτελέστε το container με **no network stack**:<sup>[[8]](#references)</sup>
+### Rootless containers χωρίς δίκτυο και UNIX sockets
+
+Αν ο inference daemon υποστηρίζει ακρόαση σε UNIX socket, προτιμήστε το αντί για TCP και εκτελέστε το container **χωρίς στοίβα δικτύου**:<sup>[[8]](#references)</sup>
+
 ```bash
 podman run --rm -d \
---network none \
---user 1000:1000 \
---userns=keep-id \
---umask=007 \
---volume /var/lib/models:/models:ro \
---volume /srv/llm/socks:/run/llama-cpp \
-ghcr.io/ggml-org/llama.cpp:server-cuda13 \
---host /run/llama-cpp/llama-cpp.sock \
---model /models/model.gguf \
---parallel 4 \
---no-slots
+  --network none \
+  --user 1000:1000 \
+  --userns=keep-id \
+  --umask=007 \
+  --volume /var/lib/models:/models:ro \
+  --volume /srv/llm/socks:/run/llama-cpp \
+  ghcr.io/ggml-org/llama.cpp:server-cuda13 \
+    --host /run/llama-cpp/llama-cpp.sock \
+    --model /models/model.gguf \
+    --parallel 4 \
+    --no-slots
 ```
+
 Οφέλη:
-- Το `--network none` καταργεί την εισερχόμενη/εξερχόμενη έκθεση μέσω TCP/IP και αποφεύγει user-mode helpers που διαφορετικά θα χρειάζονταν τα rootless containers.
+- Το `--network none` αφαιρεί την έκθεση σε εισερχόμενη/εξερχόμενη κίνηση TCP/IP και αποφεύγει τους user-mode helpers που διαφορετικά θα χρειάζονταν τα rootless containers.
 - Ένα UNIX socket σάς επιτρέπει να χρησιμοποιείτε POSIX permissions/ACLs στη διαδρομή του socket ως πρώτο επίπεδο ελέγχου πρόσβασης.
-- Τα `--userns=keep-id` και τα rootless Podman μειώνουν τον αντίκτυπο ενός container breakout, επειδή το root του container δεν είναι το root του host.
-- Τα read-only model mounts μειώνουν την πιθανότητα τροποποίησης του model από το εσωτερικό του container.
+- Τα `--userns=keep-id` και το rootless Podman μειώνουν τον αντίκτυπο ενός container breakout, επειδή το root του container δεν είναι το root του host.
+- Τα read-only model mounts μειώνουν την πιθανότητα παραποίησης των μοντέλων μέσα από το container.
 
-Για persistent deployments, οι ίδιοι περιορισμοί μπορούν να εκφραστούν ως Podman Quadlet units. Αν η πρόσβαση σε GPU εκχωρείται μέσω του Container Device Interface, διατηρήστε το CDI device specification όσο το δυνατόν πιο περιορισμένο, αντί να εκθέτετε κάθε accelerator node.<sup>[[10]](#references)</sup><sup>[[11]](#references)</sup>
+Για μόνιμες εγκαταστάσεις, οι ίδιοι περιορισμοί μπορούν να εκφραστούν ως μονάδες Podman Quadlet. Αν η πρόσβαση στην GPU εκχωρείται μέσω του Container Device Interface, διατηρήστε την προδιαγραφή συσκευής CDI όσο το δυνατόν πιο περιορισμένη, αντί να εκθέτετε κάθε κόμβο accelerator.<sup>[[10]](#references)</sup><sup>[[11]](#references)</sup>
 
-### Ελαχιστοποίηση GPU device-node
+### Ελαχιστοποίηση των GPU device nodes
 
-Για GPU-backed inference, τα αρχεία `/dev/nvidia*` είναι επιφάνειες τοπικής επίθεσης υψηλής αξίας, επειδή εκθέτουν μεγάλους driver `ioctl()` handlers και δυνητικά κοινόχρηστες διαδρομές διαχείρισης μνήμης GPU.<sup>[[8]](#references)</sup>
+Για inference με GPU, τα αρχεία `/dev/nvidia*` αποτελούν επιφάνειες επίθεσης υψηλής αξίας σε τοπικό επίπεδο, επειδή εκθέτουν μεγάλους handlers του driver `ioctl()` και ενδεχομένως κοινόχρηστες διαδρομές διαχείρισης μνήμης GPU.<sup>[[8]](#references)</sup>
 
-- Μην αφήνετε τα `/dev/nvidia*` writable από όλους.
-- Περιορίστε τα `nvidia`, `nvidiactl` και `nvidia-uvm` με `NVreg_DeviceFileUID/GID/Mode`, udev rules και ACLs, ώστε μόνο το mapped container UID να μπορεί να τα ανοίξει.
-- Κάντε blacklist τα περιττά modules, όπως τα `nvidia_drm`, `nvidia_modeset` και `nvidia_peermem`, σε headless inference hosts.
-- Κάντε preload μόνο τα απαιτούμενα modules κατά την εκκίνηση, αντί να επιτρέπετε στο runtime να εκτελεί opportunistically `modprobe` κατά την εκκίνηση του inference.
+- Μην αφήνετε τα `/dev/nvidia*` εγγράψιμα από όλους.
+- Περιορίστε τα `nvidia`, `nvidiactl` και `nvidia-uvm` με `NVreg_DeviceFileUID/GID/Mode`, κανόνες udev και ACLs, ώστε να μπορούν να τα ανοίγουν μόνο τα αντιστοιχισμένα UID του container.
+- Κάντε blacklist περιττών modules, όπως τα `nvidia_drm`, `nvidia_modeset` και `nvidia_peermem`, σε headless hosts για inference.
+- Κάντε preload μόνο των απαιτούμενων modules κατά την εκκίνηση, αντί να αφήνετε το runtime να εκτελεί `modprobe` κατά την εκκίνηση του inference.
 
 Παράδειγμα:
+
 ```bash
 options nvidia NVreg_DeviceFileUID=0
 options nvidia NVreg_DeviceFileGID=0
 options nvidia NVreg_DeviceFileMode=0660
 ```
-Ένα σημαντικό σημείο ελέγχου είναι το **`/dev/nvidia-uvm`**. Ακόμη και αν το workload δεν χρησιμοποιεί ρητά τη `cudaMallocManaged()`, τα πρόσφατα CUDA runtimes ενδέχεται να απαιτούν το `nvidia-uvm`. Επειδή αυτή η συσκευή είναι κοινόχρηστη και χειρίζεται τη διαχείριση της εικονικής μνήμης της GPU, αντιμετωπίστε την ως επιφάνεια έκθεσης δεδομένων μεταξύ tenants. Αν το inference backend το υποστηρίζει, ένα Vulkan backend μπορεί να αποτελεί ενδιαφέρον trade-off, επειδή ενδέχεται να αποφεύγει εντελώς την έκθεση του `nvidia-uvm` στο container.<sup>[[8]](#references)</sup>
 
-### Περιορισμός LSM για inference workers
+Ένα σημαντικό σημείο ελέγχου είναι το **`/dev/nvidia-uvm`**. Ακόμη κι αν το workload δεν χρησιμοποιεί ρητά το `cudaMallocManaged()`, τα πρόσφατα CUDA runtimes ενδέχεται και πάλι να απαιτούν το `nvidia-uvm`. Επειδή αυτή η συσκευή είναι κοινόχρηστη και διαχειρίζεται την εικονική μνήμη της GPU, αντιμετωπίστε την ως επιφάνεια διαρροής δεδομένων μεταξύ tenants. Αν το υποστηρίζει το inference backend, ένα backend Vulkan μπορεί να αποτελεί ενδιαφέρον συμβιβασμό, καθώς ενδέχεται να αποφεύγει εντελώς την έκθεση του `nvidia-uvm` στο container.<sup>[[8]](#references)</sup>
 
-Τα AppArmor/SELinux/seccomp θα πρέπει να χρησιμοποιούνται ως defense in depth γύρω από τη διεργασία inference:<sup>[[8]](#references)</sup>
+### Περιορισμός LSM για workers inference
 
-- Επιτρέψτε μόνο τις shared libraries, τα model paths, τον κατάλογο socket και τα GPU device nodes που απαιτούνται πραγματικά.
-- Απαγορεύστε ρητά capabilities υψηλού κινδύνου, όπως τα `sys_admin`, `sys_module`, `sys_rawio` και `sys_ptrace`.
-- Διατηρήστε τον κατάλογο του μοντέλου μόνο για ανάγνωση και περιορίστε τα writable paths αποκλειστικά στους καταλόγους runtime socket/cache.
-- Παρακολουθείτε τα denial logs, επειδή παρέχουν χρήσιμα detection telemetry όταν ο model server ή ένα post-exploitation payload προσπαθεί να διαφύγει από την αναμενόμενη συμπεριφορά του.
+Τα AppArmor/SELinux/seccomp πρέπει να χρησιμοποιούνται ως πρόσθετο επίπεδο άμυνας γύρω από τη διεργασία inference:<sup>[[8]](#references)</sup>
 
-Παράδειγμα κανόνων AppArmor για worker που χρησιμοποιεί GPU:
+- Επιτρέψτε μόνο τις κοινόχρηστες βιβλιοθήκες, τις διαδρομές μοντέλων, τον κατάλογο socket και τους κόμβους συσκευών GPU που απαιτούνται πράγματι.
+- Απαγορεύστε ρητά δυνατότητες υψηλού κινδύνου, όπως `sys_admin`, `sys_module`, `sys_rawio` και `sys_ptrace`.
+- Διατηρήστε τον κατάλογο μοντέλων μόνο για ανάγνωση και περιορίστε τις εγγράψιμες διαδρομές μόνο στους καταλόγους socket/cache του runtime.
+- Παρακολουθείτε τα αρχεία καταγραφής απαγορεύσεων, καθώς παρέχουν χρήσιμα δεδομένα τηλεμετρίας για τον εντοπισμό περιπτώσεων όπου ο model server ή ένα payload post-exploitation προσπαθεί να ξεφύγει από την αναμενόμενη συμπεριφορά του.
+
+Παράδειγμα κανόνων AppArmor για worker με GPU:
+
 ```text
 deny capability sys_admin,
 deny capability sys_module,
@@ -190,62 +197,63 @@ deny capability sys_ptrace,
 /var/lib/models/** r,
 owner /srv/llm/** rw,
 ```
-## Phantom Squatting: Domains που έχουν hallucinated από LLM ως διάνυσμα AI Supply-Chain
 
-Το Phantom Squatting είναι το **ισοδύναμο domain/URL του slopsquatting**. Αντί να κάνει hallucinate ένα ανύπαρκτο όνομα package, το LLM κάνει hallucinate ένα εύλογο **portal, API, webhook, billing, SSO, download ή support domain** για ένα πραγματικό brand, και ένας attacker κάνει register αυτό το namespace πριν το χρησιμοποιήσει άνθρωπος ή agent.<sup>[[12]](#references)</sup><sup>[[13]](#references)</sup>
+## Phantom Squatting: domains που επινοούνται από LLM ως διάνυσμα επίθεσης στην αλυσίδα εφοδιασμού AI
 
-Αυτό έχει σημασία επειδή σε πολλά AI-assisted workflows το output του model αντιμετωπίζεται ως **trusted dependency**:
-- Οι developers επικολλούν το προτεινόμενο endpoint σε integrations κώδικα ή CI/CD.
-- Οι AI agents κάνουν αυτόματα fetch documentation, schemas, APKs, ZIPs ή webhook targets.
-- Τα παραγόμενα runbooks ή docs μπορεί να ενσωματώνουν το fake URL σαν να ήταν authoritative.
+Το Phantom Squatting είναι το **ισοδύναμο σε domain/URL του slopsquatting**. Αντί να επινοεί ένα ανύπαρκτο όνομα πακέτου, το LLM επινοεί ένα εύλογο **domain πύλης, API, webhook, χρέωσης, SSO, λήψεων ή υποστήριξης** για μια υπαρκτή επωνυμία, και ένας attacker καταχωρίζει αυτόν τον χώρο ονομάτων πριν τον χρησιμοποιήσει κάποιος άνθρωπος ή agent.<sup>[[12]](#references)</sup><sup>[[13]](#references)</sup>
 
-### Offensive workflow
+Αυτό έχει σημασία επειδή σε πολλές ροές εργασίας με υποβοήθηση AI, η έξοδος του μοντέλου αντιμετωπίζεται ως **έμπιστη εξάρτηση**:
+- Οι developers επικολλούν το προτεινόμενο endpoint σε κώδικα ή ενσωματώσεις CI/CD.
+- Οι AI agents ανακτούν αυτόματα τεκμηρίωση, schemas, APK, ZIP ή προορισμούς webhook.
+- Τα runbooks ή η τεκμηρίωση που δημιουργούνται μπορούν να ενσωματώσουν το ψεύτικο URL σαν να ήταν έγκυρο.
 
-1. **Probe the hallucination surface**: κάντε brand-specific ερωτήσεις για ρεαλιστικά workflows, όπως `admin`, `billing`, `sandbox`, `benefits`, `api`, `download`, `support`, `webhook` ή `mobile app` portals.<sup>[[12]](#references)</sup>
-2. **Normalize candidates**: κάντε resolve τα generated URLs, μετατρέψτε τις απαντήσεις NXDOMAIN στο parent registerable domain και αφαιρέστε τα duplicates από τις prompt families. Τα prompt corpora πρέπει να παραμένουν diverse, για παράδειγμα αφαιρώντας near-duplicates με **Jaccard similarity**.
-3. **Prioritize predictable hallucinations**:
-- **Thermal Hallucination Persistence (THP)**: το ίδιο fake domain εμφανίζεται σε διαφορετικές θερμοκρασίες, συμπεριλαμβανομένης χαμηλής θερμοκρασίας όπως `T=0.1`.
-- **Cross-model consensus**: πολλές οικογένειες LLM παράγουν το ίδιο fake domain.
-4. **Register and weaponize** το parent domain και στη συνέχεια φιλοξενήστε phishing, fake APK/ZIP downloads, credential harvesters, malicious docs ή API endpoints που συλλέγουν secrets/webhook payloads. Οι **pure domain-level hallucinations** είναι οι ευκολότερες για monetization, επειδή ο attacker ελέγχει ολόκληρο το namespace· οι subdomain/path hallucinations μπορούν επίσης να γίνουν abused όταν το normalized parent δεν είναι registered.
-5. **Exploit the zero-reputation window**: τα newly registered domains συχνά δεν διαθέτουν blocklist history, URL reputation και mature telemetry, επομένως μπορούν να παρακάμψουν τα controls μέχρι να ενημερωθούν τα detections. Οι attackers μπορούν να επεκτείνουν αυτό το window με benign responses μόνο για crawlers, redirect cloaking, CAPTCHA gates ή delayed payload staging.
+### Επιθετική ροή εργασίας
 
-### Why it is dangerous for agents
+1. **Διερεύνηση της επιφάνειας παραισθήσεων**: κάντε ερωτήσεις ειδικές για την επωνυμία σχετικά με ρεαλιστικές ροές εργασίας, όπως πύλες `admin`, `billing`, `sandbox`, `benefits`, `api`, `download`, `support`, `webhook` ή `mobile app`.<sup>[[12]](#references)</sup>
+2. **Κανονικοποίηση των υποψηφίων**: επιλύστε τα URL που δημιουργούνται, συμπτύξτε τις απαντήσεις NXDOMAIN στο γονικό domain που μπορεί να καταχωριστεί και αφαιρέστε τα διπλότυπα από τις οικογένειες prompts. Τα σώματα prompts πρέπει να παραμένουν ποικίλα, για παράδειγμα αφαιρώντας σχεδόν διπλότυπα με **ομοιότητα Jaccard**.
+3. **Ιεράρχηση προβλέψιμων παραισθήσεων**:
+   - **Thermal Hallucination Persistence (THP)**: το ίδιο ψεύτικο domain εμφανίζεται σε διαφορετικές θερμοκρασίες, ακόμη και σε χαμηλή θερμοκρασία, όπως `T=0.1`.
+   - **Συναίνεση μεταξύ μοντέλων**: πολλαπλές οικογένειες LLM δημιουργούν το ίδιο ψεύτικο domain.
+4. **Καταχωρίστε και οπλίστε** το γονικό domain και, στη συνέχεια, φιλοξενήστε phishing, ψεύτικες λήψεις APK/ZIP, εργαλεία συλλογής διαπιστευτηρίων, κακόβουλα έγγραφα ή endpoints API που συλλέγουν μυστικά/φορτία webhook. Οι **παραισθήσεις αποκλειστικά σε επίπεδο domain** είναι οι ευκολότερες για monetization, επειδή ο attacker ελέγχει ολόκληρο τον χώρο ονομάτων· οι παραισθήσεις subdomain/path μπορούν επίσης να αξιοποιηθούν όταν το κανονικοποιημένο γονικό domain δεν είναι καταχωρισμένο.
+5. **Εκμεταλλευτείτε το παράθυρο μηδενικής φήμης**: τα πρόσφατα καταχωρισμένα domains συχνά δεν έχουν ιστορικό σε blocklists, φήμη URL και ώριμη τηλεμετρία, οπότε μπορούν να παρακάμψουν τους ελέγχους μέχρι να προλάβουν να ενεργοποιηθούν οι μηχανισμοί εντοπισμού. Οι attackers μπορούν να παρατείνουν αυτό το παράθυρο με αβλαβείς αποκρίσεις μόνο για crawlers, cloaking ανακατευθύνσεων, πύλες CAPTCHA ή καθυστερημένη προετοιμασία payload.
 
-Για ένα human victim, το fake domain συνήθως απαιτεί ακόμη ένα click και μια επιπλέον ενέργεια. Σε ένα **agentic workflow**, το LLM μπορεί να είναι ταυτόχρονα το **lure** και ο **executor**: ο agent λαμβάνει το hallucinated URL, κάνει fetch σε αυτό, κάνει parse την απάντηση και στη συνέχεια μπορεί να κάνει leak tokens, να εκτελέσει instructions, να κατεβάσει ένα dependency ή να προωθήσει poisoned data σε CI/CD χωρίς human review.<sup>[[12]](#references)</sup>
+### Γιατί είναι επικίνδυνο για τους agents
 
-### Practical attacker prompts
+Για ένα ανθρώπινο θύμα, το ψεύτικο domain συνήθως εξακολουθεί να απαιτεί ένα κλικ και μια επιπλέον ενέργεια. Σε μια **agentic ροή εργασίας**, το LLM μπορεί να είναι ταυτόχρονα το **δόλωμα** και ο **εκτελεστής**: ο agent λαμβάνει το domain που επινοήθηκε, το ανακτά, αναλύει την απόκριση και μπορεί στη συνέχεια να κάνει leak tokens, να εκτελέσει οδηγίες, να κατεβάσει μια εξάρτηση ή να προωθήσει αλλοιωμένα δεδομένα στο CI/CD χωρίς ανθρώπινο έλεγχο.<sup>[[12]](#references)</sup>
 
-Τα high-yield prompts συνήθως μοιάζουν με κανονικές enterprise tasks αντί για explicit phishing lures:<sup>[[12]](#references)</sup>
-- “Ποιο είναι το payment sandbox URL για integrations του `<brand>`;”
-- “Ποιο webhook endpoint πρέπει να χρησιμοποιήσω για build notifications του `<brand>`;”
-- “Πού βρίσκεται το employee benefits / billing / SSO portal για το `<brand>`;”
-- “Δώσε μου το direct Android APK ή desktop client download για το `<brand>`.”
+### Πρακτικά prompts για attackers
 
-### Defensive inversion
+Τα prompts υψηλής απόδοσης συνήθως μοιάζουν με συνηθισμένες εταιρικές εργασίες και όχι με προφανή δολώματα phishing:<sup>[[12]](#references)</sup>
+- “Ποιο είναι το URL του payment sandbox για τις ενσωματώσεις του `<brand>`;”
+- “Ποιο endpoint webhook πρέπει να χρησιμοποιήσω για τις ειδοποιήσεις build του `<brand>`;”
+- “Πού βρίσκεται η πύλη παροχών εργαζομένων / χρέωσης / SSO για το `<brand>`;”
+- “Δώσε μου την απευθείας λήψη APK Android ή desktop client για το `<brand>`.”
 
-Αντιμετωπίστε το ως πρόβλημα proactive domain-monitoring και όχι απλώς ως πρόβλημα prompt-injection:<sup>[[12]](#references)</sup>
-- Δημιουργήστε ένα **brand prompt corpus** και κάντε περιοδικά probe στα LLMs από τα οποία εξαρτώνται οι users/agents σας.
-- Αποθηκεύστε τα hallucinated URLs και παρακολουθήστε ποια παραμένουν stable μεταξύ temperatures/models.
-- Παρακολουθήστε το **Adversarial Exploitation Window (AEW)**: τον χρόνο μεταξύ του πρώτου hallucination και του attacker registration. Θετικό AEW σημαίνει ότι οι defenders μπορούν να κάνουν pre-register, sinkhole ή pre-block πριν από το weaponization.
-- Παρακολουθήστε τις μεταβάσεις **NXDOMAIN → registered** για τα parent domains.
-- Μετά το registration, κάντε triage στον registrar, την creation date, τους nameservers, το privacy shielding, το page content, τα screenshots, το parked-page status και το brand-asset similarity.
-- Προσθέστε policy gates, ώστε οι agents/developers να **μην εμπιστεύονται domains που έχουν δημιουργηθεί από LLM by default**: απαιτήστε allowlists, ownership validation, CT/RDAP checks ή human approval πριν από την πρώτη χρήση.
+### Αμυντική αντιστροφή
 
-Αυτό εντάσσεται ταυτόχρονα σε αρκετά AI risk buckets: **AI supply-chain attack**, **insecure model output** και **rogue actions**, όταν οι agents καταναλώνουν αυτόνομα το hallucinated URL.
+Αντιμετωπίστε το ως πρόβλημα προληπτικής παρακολούθησης domains και όχι μόνο ως πρόβλημα prompt injection:<sup>[[12]](#references)</sup>
+- Δημιουργήστε ένα **corpus prompts για επωνυμίες** και διερευνάτε περιοδικά τα LLM στα οποία βασίζονται οι χρήστες/agents σας.
+- Αποθηκεύστε τα URL που επινοήθηκαν και παρακολουθήστε ποια παραμένουν σταθερά σε διαφορετικές θερμοκρασίες/μοντέλα.
+- Παρακολουθήστε το **Adversarial Exploitation Window (AEW)**: τον χρόνο μεταξύ της πρώτης παραισθήσεως και της καταχώρισης από attacker. Θετικό AEW σημαίνει ότι οι defenders μπορούν να προβούν σε προληπτική καταχώριση, sinkhole ή αποκλεισμό πριν από την οπλοποίηση.
+- Παρακολουθήστε τις μεταβάσεις **NXDOMAIN → registered** για τα γονικά domains.
+- Κατά την καταχώριση, εξετάστε τον registrar, την ημερομηνία δημιουργίας, τους nameservers, την απόκρυψη στοιχείων, το περιεχόμενο της σελίδας, τα screenshots, την κατάσταση parked page και την ομοιότητα με στοιχεία της επωνυμίας.
+- Προσθέστε ελέγχους πολιτικής ώστε οι agents/developers να **μην εμπιστεύονται εξ ορισμού domains που δημιουργούνται από LLM**: απαιτήστε allowlists, επικύρωση ιδιοκτησίας, ελέγχους CT/RDAP ή ανθρώπινη έγκριση πριν από την πρώτη χρήση.
+
+Αυτό εμπίπτει ταυτόχρονα σε αρκετές κατηγορίες κινδύνου AI: **επίθεση στην αλυσίδα εφοδιασμού AI**, **μη ασφαλής έξοδος μοντέλου** και **μη εξουσιοδοτημένες ενέργειες** όταν agents καταναλώνουν αυτόνομα το domain που επινοήθηκε.
 
 ## References
 
-- [1] [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/)
-- [2] [Google SAIF (Secure AI Framework) – Risks](https://saif.google/secure-ai-framework/risks)
+- [1] [OWASP Top 10 ευπαθειών Machine Learning](https://owasp.org/www-project-machine-learning-security-top-10/)
+- [2] [Google SAIF (Secure AI Framework) – Κίνδυνοι](https://saif.google/secure-ai-framework/risks)
 - [3] [MITRE ATLAS Threat Matrix](https://atlas.mitre.org/)
-- [4] [Unit 42 – Οι κίνδυνοι των Code Assistant LLMs: επιβλαβές περιεχόμενο, misuse και deception](https://unit42.paloaltonetworks.com/code-assistant-llms/)
-- [5] [Sysdig – LLMjacking: Stolen Cloud Credentials Used in New AI Attack](https://sysdig.com/blog/llmjacking-stolen-cloud-credentials-used-in-new-ai-attack/)
-- [6] [Επισκόπηση του LLMJacking scheme – The Hacker News](https://thehackernews.com/2024/05/researchers-uncover-llmjacking-scheme.html)
-- [7] [oai-reverse-proxy (reselling stolen LLM access)](https://gitgud.io/khanon/oai-reverse-proxy)
-- [8] [Synacktiv - Deep-dive into the deployment of an on-premise low-privileged LLM server](https://www.synacktiv.com/en/publications/deep-dive-into-the-deployment-of-an-on-premise-low-privileged-llm-server.html)
-- [9] [llama.cpp server README](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md)
+- [4] [Unit 42 – Οι κίνδυνοι των LLM Code Assistant: επιβλαβές περιεχόμενο, κακή χρήση και εξαπάτηση](https://unit42.paloaltonetworks.com/code-assistant-llms/)
+- [5] [Sysdig – LLMjacking: κλεμμένα διαπιστευτήρια cloud χρησιμοποιούνται σε νέα επίθεση AI](https://sysdig.com/blog/llmjacking-stolen-cloud-credentials-used-in-new-ai-attack/)
+- [6] [Επισκόπηση του σχήματος LLMJacking – The Hacker News](https://thehackernews.com/2024/05/researchers-uncover-llmjacking-scheme.html)
+- [7] [oai-reverse-proxy (μεταπώληση κλεμμένης πρόσβασης σε LLM)](https://gitgud.io/khanon/oai-reverse-proxy)
+- [8] [Synacktiv - Σε βάθος ανάλυση της ανάπτυξης ενός on-premise διακομιστή LLM με περιορισμένα δικαιώματα](https://www.synacktiv.com/en/publications/deep-dive-into-the-deployment-of-an-on-premise-low-privileged-llm-server.html)
+- [9] [README του διακομιστή llama.cpp](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md)
 - [10] [Podman quadlets: podman-systemd.unit](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html)
-- [11] [CNCF Container Device Interface (CDI) specification](https://github.com/cncf-tags/container-device-interface/blob/main/SPEC.md)
-- [12] [Unit 42 – Phantom Squatting: Domains που έχουν hallucinated από AI ως διάνυσμα Software Supply Chain](https://unit42.paloaltonetworks.com/phantom-squatting-hallucinated-web-domains/)
-- [13] [Socket – Slopsquatting: Πώς τα AI Hallucinations τροφοδοτούν μια νέα κατηγορία Supply Chain Attacks](https://socket.dev/blog/slopsquatting-how-ai-hallucinations-are-fueling-a-new-class-of-supply-chain-attacks)
+- [11] [Προδιαγραφή CNCF Container Device Interface (CDI)](https://github.com/cncf-tags/container-device-interface/blob/main/SPEC.md)
+- [12] [Unit 42 – Phantom Squatting: domains που επινοούνται από AI ως διάνυσμα επίθεσης στην αλυσίδα εφοδιασμού λογισμικού](https://unit42.paloaltonetworks.com/phantom-squatting-hallucinated-web-domains/)
+- [13] [Socket – Slopsquatting: πώς οι παραισθήσεις AI τροφοδοτούν μια νέα κατηγορία επιθέσεων στην αλυσίδα εφοδιασμού](https://socket.dev/blog/slopsquatting-how-ai-hallucinations-are-fueling-a-new-class-of-supply-chain-attacks)
 {{#include ../banners/hacktricks-training.md}}
