@@ -24,6 +24,32 @@ An application can also implement its **own DLL loader**. A privileged process m
 windows-cpython-build-landmark-sys-path-hijacking.md
 {{#endref}}
 
+### Archive-packaged subdirectory side-loading and flag-gated persistence
+
+A side-loading bundle does not need to keep the executable and DLL in the same directory. If a legitimate application requests a relative path such as `lib\te64.dll`, preserve that layout inside the archive and replace the expected library. The host executable can be renamed to look like a document while the `lib` directory is hidden:<sup>[[26]](#references)</sup>
+
+```text
+<document-themed-name>.exe
+lib\
+    te64.dll
+```
+
+After extraction, launching the renamed host makes its normal DLL-loading logic execute the attacker-controlled library inside the legitimate process. This does not require a vulnerability in the host application. It relies on controlling the files and relative directory structure that accompany it. Current ATT&CK versions classify DLL side-loading and DLL search-order hijacking as **T1574.001**; **T1574.008** covers search-order interception of programs rather than DLL loading.<sup>[[26]](#references)[[27]](#references)[[28]](#references)</sup>
+
+The loaded DLL can separate installation from C2 with a required command-line marker. One observed pattern performs the following sequence when the marker is absent, then enables its network logic only when the scheduled task relaunches it with that marker:<sup>[[26]](#references)</sup>
+
+1. Copy the execution chain into a randomly named directory below `C:\ProgramData`.
+2. Register a recurring scheduled task whose action includes a marker such as `-run` or `cuVn`.
+3. Exit without starting C2 communication.
+4. On the task-triggered run, detect the marker and enter the C2 and command-execution loop.
+
+A command-line implementation can resemble:<sup>[[26]](#references)</sup>
+
+```cmd
+schtasks.exe /Create /TN SystemHealthMonitor /TR "C:\ProgramData\<random>\<host>.exe -run" /SC MINUTE /MO 5 /F
+```
+
+This **flag gate** can defeat one-shot sandboxes because the user-launched process may only copy files, create a task, and terminate. During analysis, inspect the registered task action and execute that exact command line in an isolated environment. For hunting, correlate a document-named executable launched from an archive extraction path with DLL loads from a hidden relative subdirectory, a new random directory under `C:\ProgramData`, and a scheduled-task action containing an unusual fixed argument.<sup>[[26]](#references)</sup>
 
 ### AppDomainManager hijacking (`<exe>.config` + attacker assembly)
 
@@ -768,5 +794,8 @@ Defensive pivots
 - [23] [Microsoft Learn – Task Actions](https://learn.microsoft.com/en-us/windows/win32/taskschd/task-actions)
 - [24] [MITRE ATT&CK – T1574.014 AppDomainManager](https://attack.mitre.org/techniques/T1574/014/)
 - [25] [Unit 42 – CL-STA-1062 Targets Southeast Asian Governments and Critical Infrastructure](https://unit42.paloaltonetworks.com/cl-sta-1062-tinyrct-backdoor/)
+- [26] [Volexity – APT Meets GPT: Targeted Operations with Untamed LLMs](https://www.volexity.com/blog/2025/10/08/apt-meets-gpt-targeted-operations-with-untamed-llms/)
+- [27] [MITRE ATT&CK – DLL (T1574.001)](https://attack.mitre.org/techniques/T1574/001/)
+- [28] [MITRE ATT&CK – Path Interception by Search Order Hijacking (T1574.008)](https://attack.mitre.org/techniques/T1574/008/)
 
 {{#include ../../../banners/hacktricks-training.md}}
