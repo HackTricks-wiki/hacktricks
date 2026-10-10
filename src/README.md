@@ -2,9 +2,10 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Логотипи Hacktricks і motion design від_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
+_Логотипи та motion design HackTricks —_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
 
-### Запустити HackTricks локально
+### Запустіть HackTricks локально
+
 ```bash
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
@@ -31,13 +32,16 @@ export HT_LANG="master" # Leave master for English
 # Run the docker container indicating the path to the hacktricks folder
 docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $HT_LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-Ваша локальна копія HackTricks буде доступна за адресою [http://localhost:3337](http://localhost:3337) менш ніж за 5 хвилин (потрібно зібрати книгу, будьте терплячі).
 
-Альтернативно, якщо у вас є Docker Compose, просто виконайте наведену нижче команду з кореня репозиторію:
+Ваша локальна копія HackTricks буде **доступна за адресою [http://localhost:3337](http://localhost:3337)** менш ніж за 5 хвилин (потрібно зібрати книгу, зачекайте).
+
+Або, якщо у вас є Docker Compose, просто виконайте таку команду з кореневої папки репозиторію:
+
 ```bash
 docker compose up
 ```
-Це використовує вбудований `docker-compose.yml`, щоб обслуговувати гілку, наразі вибрану на хості, за адресою [http://localhost:3337](http://localhost:3337) із live reload. Щоб змінити мову під час використання Compose, виберіть потрібну мовну гілку перед запуском сервісу.
+
+Це використовує вбудований `docker-compose.yml`, щоб обслуговувати гілку, на яку зараз переключено на хості, за адресою [http://localhost:3337](http://localhost:3337) із live reload. Щоб змінити мову під час використання Compose, переключіться на потрібну мовну гілку перед запуском сервісу.
 
 ## Партнери HackTricks
 
@@ -49,11 +53,11 @@ docker compose up
 
 <figure class="sponsor-logo"><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-STM Cyber надає послуги penetration testing, аудиту безпеки, розробки експлойтів і досліджень, інструменти та послуги з підвищення обізнаності щодо безпеки. На сайті компанії зазначено, що її команда складається з penetration testers, програмістів і дослідників безпеки з понад десятирічним досвідом.<sup>[[1]](#references)</sup>
+STM Cyber надає послуги з penetration testing, аудиту безпеки, розробки експлойтів і дослідницької роботи, створення інструментів та підвищення обізнаності з безпеки. На сайті компанія описує команду тестувальників на проникнення, програмістів і дослідників безпеки з понад десятирічним досвідом.<sup>[[1]](#references)</sup>
 
-Ви можете переглянути їхній **блог** за адресою [**https://blog.stmcyber.com**](https://blog.stmcyber.com).
+Відвідайте їхній **блог** за адресою [**https://blog.stmcyber.com**](https://blog.stmcyber.com).
 
-**STM Cyber** також підтримує open source проєкти з кібербезпеки, як-от HackTricks :)
+**STM Cyber** також підтримує open-source проєкти з кібербезпеки, як-от HackTricks :)
 
 ---
 
@@ -61,19 +65,19 @@ STM Cyber надає послуги penetration testing, аудиту безпе
 
 <figure class="sponsor-logo"><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-Intigriti — це провайдер краудсорсингових послуг безпеки, який через глобальну спільноту дослідників пропонує bug bounty та penetration-testing послуги. Її платформа поєднує безперервне bug bounty покриття з PTaaS на вимогу та керованими програмами розкриття вразливостей.<sup>[[2]](#references)</sup>
+Intigriti — це краудсорсингова платформа безпеки, яка надає послуги bug bounty та penetration testing завдяки глобальній спільноті дослідників. Платформа поєднує безперервне покриття bug bounty з послугами PTaaS на вимогу та керованими програмами розкриття вразливостей.<sup>[[2]](#references)</sup>
 
-**Порада щодо bug bounty**: приєднайтеся до Intigriti через [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) і ознайомтеся з її bug bounty програмами.
+**Порада щодо bug bounty**: Приєднуйтеся до Intigriti за посиланням [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) та ознайомтеся з їхніми програмами bug bounty.
 
 ---
 
-### [Modern Security – AI & Application Security Training Platform](https://modernsecurity.io/)
+### [Modern Security – Платформа навчання AI та безпеки застосунків](https://modernsecurity.io/)
 
 <figure class="sponsor-logo"><img src="images/modern_security_logo.png" alt="Modern Security"><figcaption></figcaption></figure>
 
-Modern Security пропонує практичне навчання з AI security у власному темпі для security engineers, фахівців AppSec і розробників. Її AI Security Certification охоплює основи LLM та агентів, RAG і vector databases, threat modeling, prompt-injection і MCP attacks, а також defensive architecture.<sup>[[3]](#references)</sup>
+Modern Security пропонує навчання з безпеки AI у власному темпі з практичними завданнями для інженерів із безпеки, фахівців AppSec і розробників. Сертифікація з безпеки AI охоплює основи LLM і агентів, RAG і векторні бази даних, моделювання загроз, атаки prompt injection і MCP, а також захисну архітектуру.<sup>[[3]](#references)</sup>
 
-👉 Докладніше про курс AI Security:
+👉 Докладніше про курс із безпеки AI:  
 https://www.modernsecurity.io/courses/ai-security-certification
 
 ---
@@ -82,29 +86,29 @@ https://www.modernsecurity.io/courses/ai-security-certification
 
 <figure class="sponsor-logo"><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi** надає API для Google та інших пошукових систем, повертаючи структуровані дані SERP із такими функціями, як результати з урахуванням місцезнаходження, Maps, Shopping і Knowledge Graph.<sup>[[4]](#references)</sup>
+**SerpApi** надає API для Google та інших пошукових систем, повертаючи структуровані дані SERP із такими можливостями, як результати з урахуванням місцезнаходження, Maps, Shopping і Knowledge Graph.<sup>[[4]](#references)</sup>
 
-Щоб дізнатися більше, перегляньте їхній [**блог**](https://serpapi.com/blog/), випробуйте приклад у їхньому [**playground**](https://serpapi.com/playground) або [**створіть безкоштовний акаунт**](https://serpapi.com/users/sign_up).
+Докладніше читайте в їхньому [**блозі**](https://serpapi.com/blog/), спробуйте приклад у їхньому [**середовищі для експериментів**](https://serpapi.com/playground) або [**створіть безкоштовний обліковий запис**](https://serpapi.com/users/sign_up).
 
 ---
 
-### [8kSec Academy – In-Depth Mobile & AI Security Courses](https://academy.8ksec.io/)
+### [8kSec Academy – Поглиблені курси з безпеки мобільних пристроїв та AI](https://academy.8ksec.io/)
 
 <figure class="sponsor-logo"><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-**8kSec Academy** пропонує курси з mobile та AI security у власному темпі. Каталог охоплює аудит і reverse engineering мобільних застосунків за допомогою таких інструментів, як Ghidra, Frida і LLDB, а також лабораторні роботи з атак і захисту AI/LLM.<sup>[[5]](#references)[[6]](#references)</sup>
+**8kSec Academy** пропонує курси з безпеки мобільних пристроїв і AI, які проходять у власному темпі. Каталог охоплює аудит і реверс-інжиніринг мобільних застосунків за допомогою таких інструментів, як Ghidra, Frida та LLDB, а також лабораторні роботи з атак і захисту AI/LLM.<sup>[[5]](#references)[[6]](#references)</sup>
 
 Перегляньте [каталог курсів 8kSec Academy](https://academy.8ksec.io/).
 
 ---
 
-### [NaxusAI – AI Powered Security Scanner](https://www.naxusai.com/)
+### [NaxusAI – Сканер безпеки на базі AI](https://www.naxusai.com/)
 
 <figure class="sponsor-logo"><img src="images/logo-naxus.png" alt=""><figcaption></figcaption></figure>
 
-**Naxus** просуває offensive-AI платформу, яка створює карту коду та інфраструктури, а потім використовує static і dynamic agents для пошуку та перевірки експлуатованих слабких місць із доказами proof-of-concept і рекомендаціями щодо виправлення.<sup>[[7]](#references)</sup>
+**Naxus** пропонує платформу offensive AI, яка картографує код та інфраструктуру, а потім використовує статичні й динамічні агенти для пошуку й перевірки експлуатованих слабких місць, надаючи підтвердження концепції та рекомендації щодо усунення.<sup>[[7]](#references)</sup>
 
-**Порада щодо безпеки коду**: ознайомтеся з Naxus для пошуку вразливостей у коді та інфраструктурі.
+**Порада щодо безпеки коду**: Дізнайтеся про Naxus для пошуку вразливостей у коді та інфраструктурі.
 
 ---
 
@@ -112,11 +116,11 @@ https://www.modernsecurity.io/courses/ai-security-certification
 
 <figure class="sponsor-logo"><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-WebSec надає послуги penetration testing, підписки на послуги безпеки, staffing і оцінювання вразливостей. На сайті компанії зазначено, що вона працює на міжнародному рівні та охоплює offensive security, defensive security, а також напрямки governance, risk і compliance.<sup>[[8]](#references)</sup>
+WebSec надає послуги penetration testing, підписки на послуги безпеки, підбору персоналу та оцінювання вразливостей. На сайті зазначено, що компанія працює на міжнародному рівні та займається offensive security, defensive security, а також управлінням, ризиками й відповідністю вимогам.<sup>[[8]](#references)</sup>
 
-Щоб дізнатися більше, відвідайте їхній [**вебсайт**](https://websec.net/en/) або [**блог**](https://websec.net/blog/).
+Докладніше дивіться на їхньому [**сайті**](https://websec.net/en/) або в [**блозі**](https://websec.net/blog/).
 
-Окрім зазначеного вище, WebSec також є **відданим прихильником HackTricks.**
+Крім того, WebSec — це **відданий прихильник HackTricks.**
 
 ---
 
@@ -125,13 +129,13 @@ WebSec надає послуги penetration testing, підписки на по
 <figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
 
 
-**Створено для польових умов. Створено навколо вас.**\
-[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) надає навчання з кібербезпеки під керівництвом експертів, із власноруч розробленим контентом і лабораторними роботами на основі реальної інфраструктури. Їхні програми адаптовані до потреб організацій і охоплюють етапи від оцінювання до впровадження.<sup>[[9]](#references)</sup> Щодо індивідуального навчання звертайтеся [**сюди**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
+**Створено для роботи. Створено з урахуванням ваших потреб.**\
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) пропонує навчання з кібербезпеки під керівництвом експертів, із індивідуально розробленими матеріалами й лабораторними роботами на основі реальних інфраструктур. Програми адаптуються до потреб організацій і охоплюють етапи від оцінювання до впровадження.<sup>[[9]](#references)</sup> Щоб дізнатися про індивідуальне навчання, зверніться [**сюди**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
 
-**Що вирізняє їхнє навчання:**
-* Власноруч розроблений контент і лабораторні роботи
-* Підтримка інструментами та платформами найвищого рівня
-* Розроблено та викладається практиками
+**Чим вирізняється їхнє навчання:**
+* Індивідуально розроблені матеріали й лабораторні роботи
+* Підтримка провідних інструментів і платформ
+* Створено й викладається практиками
 
 ---
 
@@ -139,36 +143,36 @@ WebSec надає послуги penetration testing, підписки на по
 
 <figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
-Last Tower Solutions зосереджується на консалтингу з кібербезпеки для сфер **Education** і **FinTech**, зокрема на оцінюванні cloud, внутрішніх і зовнішніх penetration tests, оцінюванні вразливостей та підтримці compliance.<sup>[[10]](#references)</sup>
+Last Tower Solutions спеціалізується на консалтингу з кібербезпеки для **освіти** та **FinTech**, зокрема на оцінюванні хмарних середовищ, внутрішньому й зовнішньому penetration testing, оцінюванні вразливостей і підтримці з питань відповідності вимогам.<sup>[[10]](#references)</sup>
 
-Будьте в курсі останніх подій у сфері кібербезпеки, відвідавши наш [**блог**](https://www.lasttowersolutions.com/blog).
+Дізнавайтеся про останні новини кібербезпеки та будьте в курсі подій, відвідавши наш [**блог**](https://www.lasttowersolutions.com/blog).
 
 ---
 
-### [K8Studio - The Smarter GUI to Manage Kubernetes.](https://k8studio.io/)
+### [K8Studio — зручніший GUI для керування Kubernetes.](https://k8studio.io/)
 
 <figure class="sponsor-logo"><img src="images/k8studio.png" alt="k8studio logo"><figcaption></figcaption></figure>
 
-K8Studio — це desktop Kubernetes IDE із візуалізацією CloudMaps, навігацією між кластерами, RBAC, Helm, logs, YAML і terminal views. Постачальник зазначає, що програма підключається через kubeconfig без встановлення агентів і підтримує macOS, Windows, Linux та air-gapped clusters.<sup>[[11]](#references)</sup>
+K8Studio — це настільне IDE для Kubernetes із візуалізацією CloudMaps, навігацією між кластерами, RBAC, Helm, журналами, YAML і терміналом. За словами постачальника, підключення відбувається через kubeconfig без встановлення агентів; підтримуються macOS, Windows, Linux і ізольовані від мережі кластери.<sup>[[11]](#references)</sup>
 
 ---
 
-## Ліцензія та відмова від відповідальності
+## Ліцензія та застереження
 
-Перегляньте запис HackTricks Values & FAQ у References нижче.
+Див. статтю HackTricks «Цінності та поширені запитання» в розділі References нижче.
 
 ## Статистика Github
 
-![Статистика Github HackTricks](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
+![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
 ## References
 
 - [1] [STM Cyber](https://www.stmcyber.com/)
 - [2] [Intigriti](https://www.intigriti.com/)
-- [3] [Сертифікація AI Security – Modern Security](https://www.modernsecurity.io/courses/ai-security-certification)
+- [3] [Сертифікація з безпеки AI – Modern Security](https://www.modernsecurity.io/courses/ai-security-certification)
 - [4] [SerpApi](https://serpapi.com/)
 - [5] [8kSec Academy](https://academy.8ksec.io/)
-- [6] [Практична AI Security: атаки, захист і застосування](https://academy.8ksec.io/course/practical-ai-security)
+- [6] [Практична безпека AI: атаки, захист і застосування](https://academy.8ksec.io/course/practical-ai-security)
 - [7] [Naxus](https://www.naxusai.com/)
 - [8] [WebSec](https://websec.net/)
 - [9] [Cyber Helmets](https://cyberhelmets.com/)
@@ -178,5 +182,5 @@ K8Studio — це desktop Kubernetes IDE із візуалізацією CloudMa
 - [13] [Modern Security](https://modernsecurity.io/)
 - [14] [Відео про спонсорство WebSec](https://www.youtube.com/watch?v=Zq2JycGDCPM)
 - [15] [Курси Cyber Helmets](https://cyberhelmets.com/courses/?ref=hacktricks)
-- [16] [HackTricks Values & FAQ](welcome/hacktricks-values-and-faq.md)
+- [16] [Цінності та поширені запитання HackTricks](welcome/hacktricks-values-and-faq.md)
 {{#include banners/hacktricks-training.md}}
