@@ -1,183 +1,190 @@
-# Riesgos de AI
+# Riesgos de la IA
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## OWASP Top 10 Machine Learning Vulnerabilities
 
-Owasp ha identificado las 10 principales vulnerabilidades de machine learning que pueden afectar a los sistemas de AI. Estas vulnerabilidades pueden provocar diversos problemas de seguridad, incluidos data poisoning, model inversion y adversarial attacks. Comprender estas vulnerabilidades es crucial para crear sistemas de AI seguros.
+OWASP ha identificado las 10 principales vulnerabilidades de machine learning que pueden afectar a los sistemas de IA. Estas vulnerabilidades pueden provocar diversos problemas de seguridad, como data poisoning, model inversion y ataques adversariales. Comprender estas vulnerabilidades es crucial para crear sistemas de IA seguros.
 
-Para consultar una lista actualizada y detallada de las 10 principales vulnerabilidades de machine learning, consulta el proyecto [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/).<sup>[[1]](#references)</sup>
+Para consultar una lista actualizada y detallada de las 10 principales vulnerabilidades de machine learning, visita el proyecto [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/).<sup>[[1]](#references)</sup>
 
-- **Input Manipulation Attack**: Un atacante añade pequeños cambios, a menudo invisibles, a los **datos entrantes** para que el modelo tome una decisión incorrecta.\
-*Ejemplo*: Unos pocos puntos de pintura en una señal de stop engañan a un coche autónomo para que "vea" una señal de límite de velocidad.
+- **Input Manipulation Attack**: Un atacante añade pequeños cambios, a menudo invisibles, a los **datos entrantes** para que el modelo tome una decisión equivocada.\
+    *Ejemplo*: Unas pocas salpicaduras de pintura en una señal de stop engañan a un coche autónomo para que «vea» una señal de límite de velocidad.
 
-- **Data Poisoning Attack**: El **conjunto de entrenamiento** se contamina deliberadamente con muestras incorrectas, enseñando al modelo reglas perjudiciales.\
-*Ejemplo*: Los binarios de malware se etiquetan erróneamente como "benignos" en un corpus de entrenamiento de antivirus, permitiendo que malware similar pase desapercibido posteriormente.
+- **Data Poisoning Attack**: El **conjunto de entrenamiento** se contamina deliberadamente con muestras maliciosas, lo que enseña al modelo reglas dañinas.\
+*Ejemplo*: En un corpus de entrenamiento de antivirus se etiquetan como «benignos» archivos binarios de malware, lo que permite que malware similar evada la detección más adelante.
 
-- **Model Inversion Attack**: Al analizar las salidas, un atacante crea un **modelo inverso** que reconstruye características sensibles de las entradas originales.\
-*Ejemplo*: Recrear la imagen MRI de un paciente a partir de las predicciones de un modelo de detección de cáncer.
+- **Model Inversion Attack**: Mediante el análisis de las respuestas, un atacante crea un **modelo inverso** que reconstruye características sensibles de las entradas originales.\
+*Ejemplo*: Reconstruir la imagen de resonancia magnética de un paciente a partir de las predicciones de un modelo de detección de cáncer.
 
-- **Membership Inference Attack**: El adversario comprueba si un **registro específico** se utilizó durante el entrenamiento observando diferencias en los niveles de confianza.\
-*Ejemplo*: Confirmar que la transacción bancaria de una persona aparece en los datos de entrenamiento de un modelo de detección de fraude.
+- **Membership Inference Attack**: El adversario comprueba si un **registro específico** se usó durante el entrenamiento detectando diferencias en los niveles de confianza.\
+*Ejemplo*: Confirmar que las transacciones bancarias de una persona aparecen en los datos de entrenamiento de un modelo de detección de fraude.
 
-- **Model Theft**: Las consultas repetidas permiten a un atacante aprender los límites de decisión y **clonar el comportamiento del modelo** (y su IP).\
-*Ejemplo*: Recopilar suficientes pares de preguntas y respuestas de una API de ML-as-a-Service para crear un modelo local prácticamente equivalente.
+- **Model Theft**: Las consultas repetidas permiten que un atacante aprenda los límites de decisión y **clone el comportamiento del modelo** (y la propiedad intelectual).\
+*Ejemplo*: Recopilar suficientes pares de preguntas y respuestas de una API de ML-as-a-Service para crear un modelo local casi equivalente.
 
-- **AI Supply-Chain Attack**: Comprometer cualquier componente (datos, libraries, pesos preentrenados, CI/CD) del **pipeline de ML** para corromper los modelos posteriores.\
-*Ejemplo*: Una dependencia contaminada de un model-hub instala un modelo de análisis de sentimientos con backdoor en numerosas aplicaciones.
+- **AI Supply‑Chain Attack**: Comprometer cualquier componente (datos, bibliotecas, pesos preentrenados, CI/CD) del **pipeline de ML** para corromper los modelos posteriores.\
+*Ejemplo*: Una dependencia envenenada de un model hub instala un modelo de análisis de sentimiento con una puerta trasera en muchas aplicaciones.
 
-- **Transfer Learning Attack**: Se implanta lógica maliciosa en un **modelo preentrenado** que sobrevive al fine-tuning realizado para la tarea de la víctima.\
-*Ejemplo*: Un backbone de visión con un trigger oculto continúa cambiando las etiquetas después de adaptarse a imágenes médicas.
+- **Transfer Learning Attack**: Se introduce lógica maliciosa en un **modelo preentrenado** que sobrevive al fine-tuning para la tarea de la víctima.\
+*Ejemplo*: Un modelo base de visión con un activador oculto sigue cambiando las etiquetas después de adaptarse para la obtención de imágenes médicas.
 
-- **Model Skewing**: Los datos sutilmente sesgados o etiquetados incorrectamente **desplazan las salidas del modelo** para favorecer la agenda del atacante.\
-*Ejemplo*: Inyectar correos de spam "limpios" etiquetados como ham para que un filtro antispam permita pasar correos futuros similares.
+- **Model Skewing**: Los datos sutilmente sesgados o mal etiquetados **desvían las salidas del modelo** para favorecer los objetivos del atacante.\
+*Ejemplo*: Inyectar correos electrónicos de spam «limpios» etiquetados como correo legítimo para que un filtro de spam deje pasar otros similares en el futuro.
 
-- **Output Integrity Attack**: El atacante **altera las predicciones del modelo durante el tránsito**, no el modelo en sí, engañando a los sistemas posteriores.\
-*Ejemplo*: Cambiar el veredicto "malicioso" de un clasificador de malware a "benigno" antes de que la fase de cuarentena del archivo lo reciba.
+- **Output Integrity Attack**: El atacante **altera las predicciones del modelo durante la transmisión**, no el modelo en sí, para engañar a los sistemas posteriores.\
+*Ejemplo*: Cambiar el veredicto de «malicioso» a «benigno» de un clasificador de malware antes de que lo reciba la etapa de cuarentena de archivos.
 
-- **Model Poisoning** --- Cambios directos y dirigidos en los **parámetros del modelo**, normalmente después de obtener acceso de escritura, para modificar su comportamiento.\
-*Ejemplo*: Ajustar los pesos de un modelo de detección de fraude en producción para que las transacciones de determinadas tarjetas siempre sean aprobadas.
+- **Model Poisoning** --- Cambios directos y específicos en los **parámetros del modelo**, a menudo tras obtener acceso de escritura, para alterar su comportamiento.\
+*Ejemplo*: Modificar los pesos de un modelo de detección de fraude en producción para que siempre apruebe las transacciones de ciertas tarjetas.
 
 
 ## Riesgos de Google SAIF
 
-El [SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/risks) de Google describe diversos riesgos asociados a los sistemas de AI:<sup>[[2]](#references)</sup>
+[SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/risks) de Google describe varios riesgos asociados a los sistemas de IA:<sup>[[2]](#references)</sup>
 
-- **Data Poisoning**: Los actores maliciosos alteran o inyectan datos de entrenamiento o tuning para degradar la precisión, implantar backdoors o sesgar los resultados, debilitando la integridad del modelo durante todo el ciclo de vida de los datos.
+- **Data Poisoning**: Actores maliciosos alteran o inyectan datos de entrenamiento o ajuste para reducir la precisión, implantar puertas traseras o sesgar los resultados, lo que compromete la integridad del modelo a lo largo de todo el ciclo de vida de los datos.
 
-- **Unauthorized Training Data**: Ingerir datasets con copyright, sensibles o no autorizados crea responsabilidades legales, éticas y de rendimiento porque el modelo aprende de datos que nunca tuvo permiso para utilizar.
+- **Unauthorized Training Data**: La incorporación de conjuntos de datos protegidos por derechos de autor, sensibles o cuyo uso no está permitido genera responsabilidades legales, éticas y de rendimiento, ya que el modelo aprende de datos que no tenía autorización para usar.
 
-- **Model Source Tampering**: La manipulación de la supply chain o por parte de insiders del código del modelo, sus dependencias o pesos, antes o durante el entrenamiento, puede incorporar lógica oculta que persiste incluso después del retraining.
+- **Model Source Tampering**: La manipulación del código del modelo, las dependencias o los pesos antes o durante el entrenamiento, ya sea en la cadena de suministro o por parte de personal interno, puede incorporar lógica oculta que persiste incluso después del reentrenamiento.
 
-- **Excessive Data Handling**: Unos controles débiles de retención y gobernanza de datos hacen que los sistemas almacenen o procesen más datos personales de los necesarios, aumentando la exposición y el riesgo de incumplimiento.
+- **Excessive Data Handling**: Los controles deficientes de retención y gobernanza de datos llevan a los sistemas a almacenar o procesar más datos personales de los necesarios, lo que aumenta la exposición y los riesgos de incumplimiento normativo.
 
-- **Model Exfiltration**: Los atacantes roban archivos o pesos del modelo, provocando la pérdida de propiedad intelectual y permitiendo servicios que lo imitan o ataques posteriores.
+- **Model Exfiltration**: Los atacantes roban archivos o pesos del modelo, lo que provoca la pérdida de propiedad intelectual y permite crear servicios imitadores o llevar a cabo ataques posteriores.
 
-- **Model Deployment Tampering**: Los adversarios modifican artefactos del modelo o la infraestructura de serving para que el modelo en ejecución difiera de la versión validada, cambiando potencialmente su comportamiento.
+- **Model Deployment Tampering**: Los adversarios modifican los artefactos del modelo o la infraestructura que lo sirve para que el modelo en ejecución difiera de la versión verificada, lo que puede cambiar su comportamiento.
 
-- **Denial of ML Service**: Inundar las APIs o enviar entradas "sponge" puede agotar la capacidad de cómputo o energía y dejar el modelo fuera de servicio, imitando los ataques DoS clásicos.
+- **Denial of ML Service**: Inundar las API o enviar entradas «esponja» puede agotar los recursos de computación o energía y dejar el modelo fuera de servicio, de forma similar a los ataques DoS clásicos.
 
-- **Model Reverse Engineering**: Al recopilar grandes cantidades de pares de entrada y salida, los atacantes pueden clonar o destilar el modelo, impulsando productos imitadores y ataques adversariales personalizados.
+- **Model Reverse Engineering**: Al recopilar grandes cantidades de pares de entrada y salida, los atacantes pueden clonar o destilar el modelo, lo que favorece la creación de productos imitadores y ataques adversariales personalizados.
 
-- **Insecure Integrated Component**: Los plugins, agentes o servicios upstream vulnerables permiten a los atacantes inyectar código o escalar privilegios dentro del pipeline de AI.
+- **Insecure Integrated Component**: Los complementos, agentes o servicios upstream vulnerables permiten a los atacantes inyectar código o escalar privilegios dentro del pipeline de IA.
 
-- **Prompt Injection**: Crear prompts, directa o indirectamente, para introducir instrucciones que anulen la intención del sistema, haciendo que el modelo ejecute comandos no deseados.
+- **Prompt Injection**: Crear prompts (directa o indirectamente) para introducir instrucciones que anulan la intención del sistema y hacen que el modelo ejecute comandos no deseados.
 
-- **Model Evasion**: Las entradas cuidadosamente diseñadas hacen que el modelo clasifique incorrectamente, alucine o genere contenido no permitido, erosionando la seguridad y la confianza.
+- **Model Evasion**: Las entradas diseñadas cuidadosamente hacen que el modelo clasifique incorrectamente, genere alucinaciones o produzca contenido no permitido, lo que debilita la seguridad y la confianza.
 
-- **Sensitive Data Disclosure**: El modelo revela información privada o confidencial de sus datos de entrenamiento o del contexto del usuario, infringiendo la privacidad y las normativas.
+- **Sensitive Data Disclosure**: El modelo revela información privada o confidencial de sus datos de entrenamiento o del contexto del usuario, lo que infringe la privacidad y la normativa.
 
-- **Inferred Sensitive Data**: El modelo deduce atributos personales que nunca se proporcionaron, creando nuevos daños a la privacidad mediante inferencias.
+- **Inferred Sensitive Data**: El modelo deduce atributos personales que nunca se proporcionaron, lo que genera nuevos daños a la privacidad mediante inferencias.
 
-- **Insecure Model Output**: Las respuestas no sanitizadas transmiten código dañino, desinformación o contenido inapropiado a los usuarios o sistemas posteriores.
+- **Insecure Model Output**: Las respuestas sin sanitizar proporcionan código dañino, desinformación o contenido inapropiado a los usuarios o sistemas posteriores.
 
-- **Rogue Actions**: Los agentes integrados de forma autónoma ejecutan operaciones no deseadas en el mundo real (escrituras de archivos, llamadas a APIs, compras, etc.) sin una supervisión adecuada del usuario.
+- **Rogue Actions**: Los agentes integrados de forma autónoma ejecutan operaciones no deseadas en el mundo real (escritura de archivos, llamadas a API, compras, etc.) sin una supervisión adecuada del usuario.
 
 ## Matriz MITRE AI ATLAS
 
-La [MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS) proporciona un marco integral para comprender y mitigar los riesgos asociados a los sistemas de AI. Categoriza diversas técnicas y tácticas de ataque que los adversarios pueden utilizar contra modelos de AI, así como las formas de utilizar sistemas de AI para realizar distintos ataques.<sup>[[3]](#references)</sup>
+La [MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS) ofrece un marco integral para comprender y mitigar los riesgos asociados a los sistemas de IA. Clasifica diversas técnicas de ataque y tácticas que los adversarios pueden usar contra los modelos de IA, así como formas de utilizar sistemas de IA para realizar distintos ataques.<sup>[[3]](#references)</sup>
 
-## LLMJacking (Robo y reventa de tokens y acceso a LLM alojados en la cloud)
+## LLMJacking (robo de tokens y reventa de acceso a LLM alojados en la nube)
 
-Los atacantes roban tokens de sesión activos o credenciales de API de la cloud y utilizan LLM de pago alojados en la cloud sin autorización. El acceso suele revenderse mediante reverse proxies que se colocan delante de la cuenta de la víctima, por ejemplo, despliegues de "oai-reverse-proxy". Las consecuencias incluyen pérdidas económicas, uso indebido del modelo fuera de la policy y atribución al tenant de la víctima.<sup>[[5]](#references)</sup><sup>[[6]](#references)</sup><sup>[[7]](#references)</sup>
+Los atacantes roban tokens de sesión activos o credenciales de API de la nube e invocan LLM alojados en la nube y de pago sin autorización. A menudo revenden el acceso mediante reverse proxies que se conectan a la cuenta de la víctima, por ejemplo, implementaciones de «oai-reverse-proxy». Entre las consecuencias se incluyen pérdidas económicas, uso indebido del modelo fuera de las políticas y atribución de la actividad al tenant de la víctima.<sup>[[5]](#references)</sup><sup>[[6]](#references)</sup><sup>[[7]](#references)</sup>
 
 TTPs:
-- Recopilar tokens de máquinas de desarrolladores o browsers infectados; robar secretos de CI/CD; comprar cookies filtradas.<sup>[[5]](#references)</sup>
-- Configurar un reverse proxy que reenvíe las peticiones al proveedor legítimo, ocultando la clave upstream y multiplexando a muchos clientes.<sup>[[5]](#references)</sup><sup>[[7]](#references)</sup>
-- Abusar de endpoints de base-model directos para eludir los guardrails empresariales y los rate limits.<sup>[[4]](#references)</sup>
+- Recopilar tokens de máquinas de desarrolladores infectadas o navegadores; robar secretos de CI/CD; comprar cookies filtradas.<sup>[[5]](#references)</sup>
+- Configurar un reverse proxy que reenvíe las solicitudes al proveedor legítimo, oculte la clave upstream y permita atender a muchos clientes.<sup>[[5]](#references)</sup><sup>[[7]](#references)</sup>
+- Abusar de endpoints de modelos base directos para eludir las medidas de seguridad empresariales y los límites de velocidad.<sup>[[4]](#references)</sup>
 
 Mitigaciones:
-- Vincular los tokens a la huella del dispositivo, rangos de IP y attestation del cliente; aplicar expiraciones cortas y renovar con MFA.
-- Limitar las claves al mínimo necesario (sin acceso a tools, en modo read-only cuando corresponda); rotarlas cuando se detecten anomalías.
-- Terminar todo el tráfico en el servidor detrás de un policy gateway que aplique filtros de seguridad, cuotas por ruta y aislamiento de tenants.
-- Supervisar patrones de uso inusuales (picos repentinos de gasto, regiones atípicas, cadenas UA) y revocar automáticamente las sesiones sospechosas.
-- Preferir mTLS o JWT firmados emitidos por el IdP frente a API keys estáticas de larga duración.
+- Vincular los tokens a la huella digital del dispositivo, rangos de IP y attestations del cliente; exigir expiraciones breves y renovar con MFA.
+- Limitar las claves al mínimo necesario (sin acceso a herramientas, de solo lectura cuando corresponda); rotarlas si se detectan anomalías.
+- Terminar todo el tráfico en el servidor tras una puerta de enlace de políticas que aplique filtros de seguridad, cuotas por ruta y aislamiento entre tenants.
+- Supervisar patrones de uso inusuales (aumentos repentinos del gasto, regiones atípicas, cadenas UA) y revocar automáticamente las sesiones sospechosas.
+- Preferir mTLS o JWT firmados emitidos por el IdP en lugar de claves de API estáticas de larga duración.
 
-## Refuerzo de la inferencia de LLM self-hosted
+## Refuerzo de la inferencia de LLM autohospedados
 
-Ejecutar un servidor de LLM local para datos confidenciales crea una superficie de ataque diferente a la de las APIs alojadas en la cloud: los endpoints de inference/debug pueden filtrar prompts, el serving stack suele exponer un reverse proxy y los device nodes de la GPU proporcionan acceso a grandes superficies `ioctl()`. Si estás evaluando o desplegando un servicio de inference on-prem, revisa al menos los siguientes puntos.<sup>[[8]](#references)</sup>
+Ejecutar un servidor local de LLM para datos confidenciales crea una superficie de ataque distinta a la de las API alojadas en la nube: los endpoints de inferencia y depuración pueden filtrar prompts, la pila de serving suele exponer un reverse proxy y los nodos de dispositivo GPU proporcionan acceso a amplias superficies de `ioctl()`. Si estás evaluando o desplegando un servicio de inferencia on-prem, revisa como mínimo los siguientes puntos.<sup>[[8]](#references)</sup>
 
-### Filtración de prompts mediante endpoints de debug y monitoring
+### Filtración de prompts mediante endpoints de depuración y monitorización
 
-Trata la API de inference como un **servicio sensible multiusuario**. Las rutas de debug o monitoring pueden exponer el contenido de los prompts, el estado de los slots, los metadatos del modelo o información sobre las colas internas. En `llama.cpp`, el endpoint `/slots` es especialmente sensible porque expone el estado de cada slot y solo está destinado a la inspección o gestión de slots.<sup>[[8]](#references)</sup>
+Trata la API de inferencia como un **servicio sensible multiusuario**. Las rutas de depuración o monitorización pueden exponer el contenido de los prompts, el estado de los slots, los metadatos del modelo o información de las colas internas. En `llama.cpp`, el endpoint `/slots` es especialmente sensible porque expone el estado de cada slot y está destinado únicamente a inspeccionar o gestionar slots.<sup>[[8]](#references)</sup>
 
-- Coloca un reverse proxy delante del servidor de inference y **deniega por defecto**.
-- Permite únicamente las combinaciones exactas de método HTTP + path que necesite el cliente/UI.
-- Desactiva los endpoints de introspection en el propio backend siempre que sea posible, por ejemplo `llama-server --no-slots`.<sup>[[9]](#references)</sup>
-- Vincula el reverse proxy a `127.0.0.1` y expónlo mediante un transporte autenticado, como el port forwarding local de SSH, en lugar de publicarlo en la LAN.
+- Coloca un reverse proxy delante del servidor de inferencia y **deniega el acceso de forma predeterminada**.
+- Añade a la allowlist únicamente las combinaciones exactas de método HTTP y ruta que necesite el cliente o la UI.
+- Desactiva los endpoints de introspección en el backend siempre que sea posible, por ejemplo, con `llama-server --no-slots`.<sup>[[9]](#references)</sup>
+- Vincula el reverse proxy a `127.0.0.1` y accede a él mediante un transporte autenticado, como el reenvío de puertos local de SSH, en lugar de publicarlo en la LAN.
 
 Ejemplo de allowlist con nginx:
+
 ```nginx
 map "$request_method:$uri" $llm_whitelist {
-default 0;
+    default 0;
 
-"GET:/health"              1;
-"GET:/v1/models"           1;
-"POST:/v1/completions"     1;
-"POST:/v1/chat/completions" 1;
+    "GET:/health"              1;
+    "GET:/v1/models"           1;
+    "POST:/v1/completions"     1;
+    "POST:/v1/chat/completions" 1;
 }
 
 server {
-listen 127.0.0.1:80;
+    listen 127.0.0.1:80;
 
-location / {
-if ($llm_whitelist = 0) { return 403; }
-proxy_pass http://unix:/run/llama-cpp/llama-cpp.sock:;
-}
+    location / {
+        if ($llm_whitelist = 0) { return 403; }
+        proxy_pass http://unix:/run/llama-cpp/llama-cpp.sock:;
+    }
 }
 ```
-### Contenedores rootless sin red y sockets UNIX
 
-Si el daemon de inferencia admite escuchar en un socket UNIX, prefiera esa opción en lugar de TCP y ejecute el contenedor **sin pila de red**:<sup>[[8]](#references)</sup>
+### Contenedores rootless sin red y con sockets UNIX
+
+Si el daemon de inferencia admite escuchar en un socket UNIX, prefiérelo a TCP y ejecuta el contenedor **sin stack de red**:<sup>[[8]](#references)</sup>
+
 ```bash
 podman run --rm -d \
---network none \
---user 1000:1000 \
---userns=keep-id \
---umask=007 \
---volume /var/lib/models:/models:ro \
---volume /srv/llm/socks:/run/llama-cpp \
-ghcr.io/ggml-org/llama.cpp:server-cuda13 \
---host /run/llama-cpp/llama-cpp.sock \
---model /models/model.gguf \
---parallel 4 \
---no-slots
+  --network none \
+  --user 1000:1000 \
+  --userns=keep-id \
+  --umask=007 \
+  --volume /var/lib/models:/models:ro \
+  --volume /srv/llm/socks:/run/llama-cpp \
+  ghcr.io/ggml-org/llama.cpp:server-cuda13 \
+    --host /run/llama-cpp/llama-cpp.sock \
+    --model /models/model.gguf \
+    --parallel 4 \
+    --no-slots
 ```
-Beneficios:
-- `--network none` elimina la exposición TCP/IP entrante/saliente y evita los helpers en modo usuario que, de otro modo, necesitarían los contenedores rootless.
-- Un socket UNIX permite usar permisos/ACL POSIX en la ruta del socket como primera capa de control de acceso.
-- `--userns=keep-id` y Podman rootless reducen el impacto de un breakout del contenedor porque el root del contenedor no es el root del host.
-- Los montajes de modelos de solo lectura reducen la posibilidad de manipulación del modelo desde dentro del contenedor.
 
-Para despliegues persistentes, las mismas restricciones pueden expresarse mediante unidades de Podman Quadlet. Si el acceso a la GPU se delega mediante Container Device Interface, mantén la especificación del dispositivo CDI lo más limitada posible en lugar de exponer todos los nodos de aceleradores.<sup>[[10]](#references)</sup><sup>[[11]](#references)</sup>
+Beneficios:
+- `--network none` elimina la exposición TCP/IP entrante y saliente y evita los ayudantes de modo usuario que, de otro modo, necesitarían los contenedores sin privilegios de root.
+- Un socket UNIX permite usar permisos/ACL de POSIX en la ruta del socket como primera capa de control de acceso.
+- `--userns=keep-id` y Podman sin privilegios de root reducen el impacto de una salida del contenedor, porque el root del contenedor no es el root del host.
+- Los montajes de modelos de solo lectura reducen la posibilidad de que se manipulen los modelos desde dentro del contenedor.
+
+En implementaciones persistentes, las mismas restricciones se pueden expresar como unidades de Podman Quadlet. Si el acceso a la GPU se delega mediante Container Device Interface, mantén la especificación del dispositivo CDI lo más limitada posible, en lugar de exponer todos los nodos de aceleradores.<sup>[[10]](#references)</sup><sup>[[11]](#references)</sup>
 
 ### Minimización de nodos de dispositivo de GPU
 
-Para inferencia respaldada por GPU, los archivos `/dev/nvidia*` son superficies de ataque locales de alto valor porque exponen grandes manejadores `ioctl()` del driver y posibles rutas compartidas de gestión de memoria de la GPU.<sup>[[8]](#references)</sup>
+Para la inferencia con GPU, los archivos `/dev/nvidia*` son superficies de ataque locales de alto valor, ya que exponen grandes controladores `ioctl()` y, potencialmente, rutas compartidas de gestión de memoria de la GPU.<sup>[[8]](#references)</sup>
 
 - No dejes `/dev/nvidia*` con permisos de escritura para todo el mundo.
-- Restringe `nvidia`, `nvidiactl` y `nvidia-uvm` con `NVreg_DeviceFileUID/GID/Mode`, reglas de udev y ACLs para que solo el UID del contenedor asignado pueda abrirlos.
-- Incluye en la blacklist los módulos innecesarios, como `nvidia_drm`, `nvidia_modeset` y `nvidia_peermem`, en hosts de inferencia sin interfaz gráfica.
-- Precarga solo los módulos necesarios durante el arranque en lugar de permitir que el runtime ejecute `modprobe` de forma oportunista durante el inicio de la inferencia.
+- Restringe `nvidia`, `nvidiactl` y `nvidia-uvm` mediante `NVreg_DeviceFileUID/GID/Mode`, reglas de udev y ACL, para que solo el UID asignado al contenedor pueda abrirlos.
+- Incluye en la lista negra los módulos innecesarios, como `nvidia_drm`, `nvidia_modeset` y `nvidia_peermem`, en hosts de inferencia sin interfaz gráfica.
+- Precarga solo los módulos necesarios durante el arranque, en lugar de permitir que el runtime los cargue oportunistamente mediante `modprobe` al iniciar la inferencia.
 
 Ejemplo:
+
 ```bash
 options nvidia NVreg_DeviceFileUID=0
 options nvidia NVreg_DeviceFileGID=0
 options nvidia NVreg_DeviceFileMode=0660
 ```
-Un punto de revisión importante es **`/dev/nvidia-uvm`**. Aunque la carga de trabajo no utilice explícitamente `cudaMallocManaged()`, los runtimes recientes de CUDA aún pueden requerir `nvidia-uvm`. Debido a que este dispositivo es compartido y gestiona la memoria virtual de la GPU, debe tratarse como una superficie de exposición de datos entre tenants. Si el backend de inferencia lo admite, un backend de Vulkan puede ser una alternativa interesante, ya que podría evitar exponer `nvidia-uvm` al contenedor por completo.<sup>[[8]](#references)</sup>
+
+Un punto importante de revisión es **`/dev/nvidia-uvm`**. Aunque la carga de trabajo no use explícitamente `cudaMallocManaged()`, los runtimes recientes de CUDA pueden seguir necesitando `nvidia-uvm`. Como este dispositivo es compartido y gestiona la memoria virtual de la GPU, trátalo como una superficie de exposición de datos entre tenants. Si el backend de inferencia lo admite, un backend de Vulkan puede ser una alternativa interesante, ya que quizá evite exponer `nvidia-uvm` al contenedor.<sup>[[8]](#references)</sup>
 
 ### Confinamiento LSM para workers de inferencia
 
-AppArmor/SELinux/seccomp deben utilizarse como defensa en profundidad alrededor del proceso de inferencia:<sup>[[8]](#references)</sup>
+AppArmor/SELinux/seccomp deberían usarse como defensa en profundidad alrededor del proceso de inferencia:<sup>[[8]](#references)</sup>
 
-- Permitir únicamente las bibliotecas compartidas, las rutas de los modelos, el directorio de sockets y los nodos de dispositivos GPU que realmente sean necesarios.
-- Denegar explícitamente capacidades de alto riesgo como `sys_admin`, `sys_module`, `sys_rawio` y `sys_ptrace`.
-- Mantener el directorio del modelo en modo de solo lectura y limitar las rutas con permisos de escritura únicamente a los directorios de sockets/caché del runtime.
-- Supervisar los logs de denegaciones, ya que proporcionan telemetría útil para la detección cuando el servidor del modelo o un payload de post-exploitation intenta escapar de su comportamiento esperado.
+- Permite únicamente las bibliotecas compartidas, las rutas de modelos, el directorio de sockets y los nodos de dispositivos GPU que sean realmente necesarios.
+- Deniega explícitamente capacidades de alto riesgo como `sys_admin`, `sys_module`, `sys_rawio` y `sys_ptrace`.
+- Mantén el directorio de modelos en modo de solo lectura y limita las rutas de escritura únicamente a los directorios de sockets/caché del runtime.
+- Supervisa los registros de denegaciones, ya que proporcionan telemetría útil para la detección cuando el servidor de modelos o un payload de post-exploitation intenta escapar del comportamiento esperado.
 
-Ejemplo de reglas de AppArmor para un worker respaldado por GPU:
+Ejemplo de reglas de AppArmor para un worker con GPU:
+
 ```text
 deny capability sys_admin,
 deny capability sys_module,
@@ -190,62 +197,63 @@ deny capability sys_ptrace,
 /var/lib/models/** r,
 owner /srv/llm/** rw,
 ```
-## Phantom Squatting: dominios alucinados por LLM como vector de la cadena de suministro de AI
 
-Phantom squatting es el **equivalente de dominio/URL de slopsquatting**. En lugar de alucinar un nombre de paquete inexistente, el LLM alucina un **dominio plausible de portal, API, webhook, facturación, SSO, descarga o soporte** para una marca real, y un atacante registra ese namespace antes de que un humano o agente lo utilice.<sup>[[12]](#references)</sup><sup>[[13]](#references)</sup>
+## Phantom Squatting: Dominios alucinados por LLM como vector de la cadena de suministro de IA
 
-Esto es importante porque, en muchos flujos de trabajo asistidos por AI, la salida del modelo se trata como una **dependencia de confianza**:
-- Los desarrolladores pegan el endpoint sugerido en el código o en integraciones de CI/CD.
-- Los agentes de AI obtienen automáticamente documentación, esquemas, APKs, ZIPs o destinos de webhook.
-- Los runbooks o documentos generados pueden incluir la URL falsa como si fuera autoritativa.
+Phantom squatting es el **equivalente de dominio/URL de slopsquatting**. En lugar de alucinar un nombre de paquete inexistente, el LLM alucina un **dominio de portal, API, webhook, facturación, SSO, descarga o soporte** plausible para una marca real, y un atacante registra ese espacio de nombres antes de que una persona o un agente lo use.<sup>[[12]](#references)</sup><sup>[[13]](#references)</sup>
 
-### Flujo de trabajo ofensivo
+Esto importa porque, en muchos flujos de trabajo asistidos por IA, la salida del modelo se trata como una **dependencia confiable**:
+- Los desarrolladores pegan el endpoint sugerido en código o en integraciones de CI/CD.
+- Los agentes de IA obtienen automáticamente documentación, esquemas, APK, ZIP o destinos de webhook.
+- Los runbooks o documentos generados pueden incluir la URL falsa como si fuera una fuente autorizada.
 
-1. **Sondear la superficie de alucinación**: hacer preguntas específicas sobre una marca acerca de flujos de trabajo realistas, como portales de `admin`, `billing`, `sandbox`, `benefits`, `api`, `download`, `support`, `webhook` o `mobile app`.<sup>[[12]](#references)</sup>
-2. **Normalizar candidatos**: resolver las URLs generadas, reducir las respuestas NXDOMAIN al dominio principal registrable y deduplicar las familias de prompts. Los corpora de prompts deben mantenerse diversos, por ejemplo, eliminando casi duplicados mediante **similitud de Jaccard**.
-3. **Priorizar las alucinaciones predecibles**:
-- **Thermal Hallucination Persistence (THP)**: el mismo dominio falso aparece con distintas temperaturas, incluida una temperatura baja como `T=0.1`.
-- **Consenso entre modelos**: varias familias de LLM generan el mismo dominio falso.
-4. **Registrar y weaponize** el dominio principal, y después alojar phishing, descargas falsas de APK/ZIP, credential harvesters, documentos maliciosos o endpoints de API que recopilen secretos/payloads de webhook. Las **alucinaciones puras a nivel de dominio** son las más fáciles de monetizar porque el atacante controla todo el namespace; las alucinaciones de subdominio/ruta también pueden abusarse cuando el dominio principal normalizado no está registrado.
-5. **Explotar la ventana de reputación cero**: los dominios recién registrados suelen carecer de historial en blocklists, reputación de URL y telemetría madura, por lo que pueden evadir los controles hasta que las detecciones se pongan al día. Los atacantes pueden ampliar esta ventana mediante respuestas benignas solo para crawlers, redirect cloaking, CAPTCHA gates o staging retrasado del payload.
+### Flujo de ataque
+
+1. **Sondear la superficie de alucinación**: hacer preguntas específicas sobre la marca acerca de flujos de trabajo realistas, como portales de `admin`, `billing`, `sandbox`, `benefits`, `api`, `download`, `support`, `webhook` o `mobile app`.<sup>[[12]](#references)</sup>
+2. **Normalizar los candidatos**: resolver las URL generadas, reducir las respuestas NXDOMAIN al dominio registrable principal y eliminar prompts duplicados. Los corpus de prompts deben mantenerse variados; por ejemplo, descartando casi duplicados mediante la **similitud de Jaccard**.
+3. **Dar prioridad a las alucinaciones predecibles**:
+   - **Persistencia de alucinación térmica (THP)**: el mismo dominio falso aparece con distintas temperaturas, incluso con temperaturas bajas, como `T=0.1`.
+   - **Consenso entre modelos**: distintas familias de LLM generan el mismo dominio falso.
+4. **Registrar y convertir en arma** el dominio principal; después, alojar phishing, descargas falsas de APK/ZIP, recolectores de credenciales, documentos maliciosos o endpoints de API que recopilen secretos o cargas útiles de webhook. Las **alucinaciones que abarcan únicamente el dominio** son las más fáciles de monetizar porque el atacante controla todo el espacio de nombres; las alucinaciones de subdominios/rutas también pueden explotarse si el dominio principal normalizado aún no está registrado.
+5. **Explotar la ventana sin reputación**: los dominios recién registrados suelen carecer de historial en listas de bloqueo, reputación de URL y telemetría consolidada, por lo que pueden eludir controles hasta que las detecciones se pongan al día. Los atacantes pueden alargar esta ventana con respuestas benignas solo para crawlers, ocultamiento mediante redirecciones, desafíos CAPTCHA o preparación diferida de la carga útil.
 
 ### Por qué es peligroso para los agentes
 
-Para una víctima humana, el dominio falso normalmente todavía requiere un clic y otra acción. En un **flujo de trabajo agentic**, el LLM puede ser tanto el **señuelo** como el **ejecutor**: el agente recibe la URL alucinada, la obtiene, analiza la respuesta y después puede filtrar tokens, ejecutar instrucciones, descargar una dependencia o introducir datos envenenados en CI/CD sin ninguna revisión humana.<sup>[[12]](#references)</sup>
+Para una víctima humana, el dominio falso suele requerir un clic y otra acción. En un **flujo de trabajo agéntico**, el LLM puede ser tanto el **señuelo** como el **ejecutor**: el agente recibe la URL alucinada, la obtiene, analiza la respuesta y luego puede filtrar tokens, ejecutar instrucciones, descargar una dependencia o insertar datos envenenados en CI/CD sin revisión humana.<sup>[[12]](#references)</sup>
 
 ### Prompts prácticos para atacantes
 
-Los prompts de mayor rendimiento normalmente parecen tareas empresariales normales en lugar de señuelos de phishing explícitos:<sup>[[12]](#references)</sup>
+Los prompts de alto rendimiento suelen parecer tareas empresariales normales, no señuelos explícitos de phishing:<sup>[[12]](#references)</sup>
 - “¿Cuál es la URL del sandbox de pagos para las integraciones de `<brand>`?”
-- “¿Qué endpoint de webhook debo usar para las notificaciones de build de `<brand>`?”
+- “¿Qué endpoint de webhook debería usar para las notificaciones de compilación de `<brand>`?”
 - “¿Dónde está el portal de beneficios para empleados / facturación / SSO de `<brand>`?”
-- “Dame la descarga directa del APK de Android o del cliente de escritorio de `<brand>`.”
+- “Dame el enlace directo para descargar el APK de Android o el cliente de escritorio de `<brand>`.”
 
 ### Inversión defensiva
 
-Trata esto como un problema de monitorización proactiva de dominios, no solo como un problema de prompt injection:<sup>[[12]](#references)</sup>
-- Crear un **corpus de prompts sobre marcas** y sondear periódicamente los LLM de los que dependen los usuarios/agentes.
-- Almacenar las URLs alucinadas y hacer seguimiento de cuáles son estables entre temperaturas/modelos.
-- Hacer seguimiento de la **Adversarial Exploitation Window (AEW)**: el tiempo entre la primera alucinación y el registro por parte del atacante. Un AEW positivo significa que los defensores pueden registrar previamente, sinkholear o bloquear previamente el dominio antes de su weaponization.
-- Monitorizar las transiciones **NXDOMAIN → registrado** de los dominios principales.
-- Al registrarse, analizar el registrar, la fecha de creación, los nameservers, el ocultamiento de privacidad, el contenido de la página, las capturas de pantalla, el estado de página aparcada y la similitud con los activos de la marca.
-- Añadir policy gates para que los agentes/desarrolladores **no confíen por defecto en dominios generados por LLM**: exigir allowlists, validación de propiedad, comprobaciones CT/RDAP o aprobación humana antes del primer uso.
+Trátalo como un problema de monitorización proactiva de dominios, no solo como un problema de prompt injection:<sup>[[12]](#references)</sup>
+- Crea un **corpus de prompts de marcas** y sondea periódicamente los LLM de los que dependen tus usuarios/agentes.
+- Almacena las URL alucinadas y registra cuáles se mantienen estables entre temperaturas y modelos.
+- Registra la **Ventana de Explotación Adversaria (AEW)**: el tiempo entre la primera alucinación y el registro por parte del atacante. Una AEW positiva significa que los defensores pueden registrar de antemano, redirigir a un sinkhole o bloquear antes de que el dominio se convierta en arma.
+- Supervisa las transiciones **NXDOMAIN → registrado** de los dominios principales.
+- Al registrarse un dominio, analiza el registrador, la fecha de creación, los servidores de nombres, la protección de privacidad, el contenido de la página, las capturas de pantalla, el estado de página aparcada y la similitud con los recursos de marca.
+- Añade controles de políticas para que los agentes/desarrolladores **no confíen de forma predeterminada en dominios generados por LLM**: exige listas de permitidos, validación de propiedad, comprobaciones CT/RDAP o aprobación humana antes del primer uso.
 
-Esto encaja simultáneamente en varias categorías de riesgo de AI: **ataque a la cadena de suministro de AI**, **salida insegura del modelo** y **acciones rogue** cuando los agentes consumen autónomamente la URL alucinada.
+Esto encaja en varias categorías de riesgo de IA a la vez: **ataque a la cadena de suministro de IA**, **salida insegura del modelo** y **acciones no autorizadas** cuando los agentes consumen de forma autónoma la URL alucinada.
 
 ## References
 
-- [1] [OWASP Top 10 de vulnerabilidades de Machine Learning](https://owasp.org/www-project-machine-learning-security-top-10/)
-- [2] [Google SAIF (Secure AI Framework) – Riesgos](https://saif.google/secure-ai-framework/risks)
+- [1] [Las 10 principales vulnerabilidades de Machine Learning de OWASP](https://owasp.org/www-project-machine-learning-security-top-10/)
+- [2] [Google SAIF (Secure AI Framework): riesgos](https://saif.google/secure-ai-framework/risks)
 - [3] [Matriz de amenazas MITRE ATLAS](https://atlas.mitre.org/)
-- [4] [Unit 42 – Los riesgos de los LLM de asistentes de código: contenido dañino, uso indebido y engaño](https://unit42.paloaltonetworks.com/code-assistant-llms/)
-- [5] [Sysdig – LLMjacking: credenciales de Cloud robadas utilizadas en un nuevo ataque de AI](https://sysdig.com/blog/llmjacking-stolen-cloud-credentials-used-in-new-ai-attack/)
-- [6] [Resumen del esquema de LLMJacking – The Hacker News](https://thehackernews.com/2024/05/researchers-uncover-llmjacking-scheme.html)
+- [4] [Unit 42: Los riesgos de los LLM asistentes de código: contenido dañino, uso indebido y engaño](https://unit42.paloaltonetworks.com/code-assistant-llms/)
+- [5] [Sysdig: LLMjacking: credenciales de nube robadas utilizadas en un nuevo ataque de IA](https://sysdig.com/blog/llmjacking-stolen-cloud-credentials-used-in-new-ai-attack/)
+- [6] [Resumen del esquema LLMJacking – The Hacker News](https://thehackernews.com/2024/05/researchers-uncover-llmjacking-scheme.html)
 - [7] [oai-reverse-proxy (reventa de acceso robado a LLM)](https://gitgud.io/khanon/oai-reverse-proxy)
-- [8] [Synacktiv - Análisis detallado del despliegue de un servidor LLM on-premise con pocos privilegios](https://www.synacktiv.com/en/publications/deep-dive-into-the-deployment-of-an-on-premise-low-privileged-llm-server.html)
+- [8] [Synacktiv - Análisis detallado de la implementación de un servidor LLM local con pocos privilegios](https://www.synacktiv.com/en/publications/deep-dive-into-the-deployment-of-an-on-premise-low-privileged-llm-server.html)
 - [9] [README del servidor llama.cpp](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md)
 - [10] [Quadlets de Podman: podman-systemd.unit](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html)
 - [11] [Especificación de Container Device Interface (CDI) de CNCF](https://github.com/cncf-tags/container-device-interface/blob/main/SPEC.md)
-- [12] [Unit 42 – Phantom Squatting: dominios alucinados por AI como vector de la cadena de suministro de software](https://unit42.paloaltonetworks.com/phantom-squatting-hallucinated-web-domains/)
-- [13] [Socket – Slopsquatting: cómo las alucinaciones de AI están impulsando una nueva clase de ataques a la cadena de suministro](https://socket.dev/blog/slopsquatting-how-ai-hallucinations-are-fueling-a-new-class-of-supply-chain-attacks)
+- [12] [Unit 42: Phantom Squatting: dominios alucinados por IA como vector de la cadena de suministro de software](https://unit42.paloaltonetworks.com/phantom-squatting-hallucinated-web-domains/)
+- [13] [Socket: Slopsquatting: cómo las alucinaciones de IA impulsan una nueva clase de ataques a la cadena de suministro](https://socket.dev/blog/slopsquatting-how-ai-hallucinations-are-fueling-a-new-class-of-supply-chain-attacks)
 {{#include ../banners/hacktricks-training.md}}
