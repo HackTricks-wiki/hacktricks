@@ -1,108 +1,108 @@
-# Waardegesentreerde Web3 Red Teaming (MITRE AADAPT)
+# Web3-rooi-spanwerk gefokus op waarde (MITRE AADAPT)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Die MITRE Adversarial Actions in Digital Asset Payment Techniques (AADAPT)-raamwerk kategoriseer adversarial actions en techniques wat digitale batestelsels teiken.<sup>[[1]](#references)</sup> Behandel dit as ’n **ruggraat vir threat modeling**: inventariseer elke komponent wat bates kan mint, prys, autoriseer of roeteer, karteer daardie raakpunte na AADAPT techniques, en dryf dan red-team-scenario’s wat meet of die omgewing onomkeerbare ekonomiese verlies kan weerstaan.
+Die MITRE Adversarial Actions in Digital Asset Payment Techniques (AADAPT)-raamwerk kategoriseer teenstanderaksies en -tegnieke wat digitale batestelsels teiken.<sup>[[1]](#references)</sup> Gebruik dit as ’n **grondslag vir bedreigingsmodellering**: lys elke komponent wat bates kan skep, prys, magtig of aanstuur, koppel daardie raakpunte aan AADAPT-tegnieke en ontwerp dan rooi-span-scenario’s om te meet of die omgewing onomkeerbare ekonomiese verliese kan weerstaan.
 
 ## 1. Inventariseer komponente wat waarde dra
-Bou ’n kaart van alles wat die waardetoestand kan beïnvloed, selfs al is dit off-chain.<sup>[[2]](#references)</sup>
+Stel ’n kaart op van alles wat die waardetoestand kan beïnvloed, selfs al is dit off-chain.<sup>[[2]](#references)</sup>
 
-- **Custodial signing services** (HSM/KMS-clusters, Vault/KMaaS, signing APIs wat deur bots of back-office-jobs gebruik word). Leg key IDs, policies, automation identities en approval workflows vas.
-- **Admin- en upgrade-paaie** vir contracts (proxy admins, governance timelocks, emergency pause keys, parameter registries). Sluit in wie/wat dit kan call, en onder watter quorum of delay.
-- **On-chain protocol-logika** wat lending, AMMs, vaults, staking, bridges of settlement rails hanteer. Dokumenteer die invariants wat hulle aanvaar (oracle prices, collateral ratios, rebalance cadence…).
-- **Off-chain automation** wat transactions bou (market-making bots, CI/CD-pipelines, cron jobs, serverless functions). Hulle hou dikwels API keys of service principals wat signatures kan versoek.
-- **Oracles en data feeds** (aggregator composition, quorum, deviation thresholds, update cadence). Noteer elke upstream waarop geoutomatiseerde risk logic steun.
-- **Bridges en cross-chain routers** (lock/mint contracts, relayers, settlement jobs) wat chains of custodial stacks aan mekaar verbind.
+- **Custodial ondertekeningsdienste** (HSM/KMS-klusters, Vault/KMaaS, ondertekenings-API’s wat deur bots of back-office-take gebruik word). Teken sleutel-ID’s, beleide, outomatiseringsidentiteite en goedkeuringswerkvloeie aan.
+- **Admin- en opgraderingspaaie** vir kontrakte (proxy-admins, governance-timelocks, noodpouseersleutels, parameterregisters). Sluit in wie/wat hulle kan oproep, en onder watter kworum of vertraging.
+- **On-chain-protokollogika** vir uitleen, AMM’s, kluise, staking, brûe of vereffeningsrelings. Dokumenteer die aannames waarop hulle invariantes berus (oracle-pryse, kollateraliseringsverhoudings, herbalanseringsfrekwensie…).
+- **Off-chain-outomatisering** wat transaksies bou (markmakende bots, CI/CD-pyplyne, cron-take, serverless-funksies). Hulle bevat dikwels API-sleutels of dienshoofde wat handtekeninge kan aanvra.
+- **Oracles en datavoere** (samestelling van aggregators, kworum, afwykingsdrempels, opdateringsfrekwensie). Noteer elke stroomopbron waarop outomatiese risikologika staatmaak.
+- **Brûe en cross-chain-routers** (lock/mint-kontrakte, relayers, vereffeningstake) wat kettings of custodial-stapels aan mekaar koppel.
 
-Aflewerbare resultaat: ’n value-flow-diagram wat wys hoe bates beweeg, wie beweging autoriseer, en watter eksterne seine business logic beïnvloed.
+Aflewerbare resultaat: ’n waardevloeidiagram wat wys hoe bates beweeg, wie die beweging magtig en watter eksterne seine besigheidslogika beïnvloed.
 
-## 2. Karteer komponente na AADAPT-gedrag
-Vertaal die AADAPT-taxonomy na konkrete attack candidates per komponent.<sup>[[2]](#references)</sup>
+## 2. Koppel komponente aan AADAPT-gedrag
+Vertaal die AADAPT-taksonomie na konkrete aanvalskandidate per komponent.<sup>[[2]](#references)</sup>
 
 | Komponent | Primêre AADAPT-fokus |
 | --- | --- |
-| Signing/KMS-estates | Credential theft, policy bypass, signing-abuse, governance takeover |
-| Oracles/feeds | Input poisoning, aggregation manipulation, deviation-threshold evasion |
-| On-chain protocols | Flash-loan economic manipulation, invariant breaking, parameter reconfiguration |
-| Automation pipelines | Compromised bot/CI identities, batch replay, unauthorized deployment |
-| Bridges/routers | Cross-chain evasion, rapid hop laundering, settlement desynchronization |
+| Ondertekening/KMS-omgewings | Credential theft, policy bypass, signing-abuse, governance takeover |
+| Oracles/datavoere | Input poisoning, aggregation manipulation, deviation-threshold evasion |
+| On-chain-protokolle | Flash-loan-ekonomiese manipulasie, invariant-breaking, parameter-herkonfigurasie |
+| Outomatiseringspyplyne | Gekompromitteerde bot-/CI-identiteite, batch-replay, ongemagtigde ontplooiing |
+| Brûe/routers | Cross-chain-ontduiking, vinnige hop-wassery, vereffeningsdesinchronisasie |
 
-Hierdie kartering verseker dat jy nie net die contracts toets nie, maar elke identity/automation wat waarde indirek kan stuur.
+Hierdie koppeling verseker dat jy nie net die kontrakte toets nie, maar ook elke identiteit/outomatisering wat waarde indirek kan stuur.
 
-## 3. Prioritiseer volgens attacker feasibility teenoor business impact
+## 3. Prioritiseer volgens aanvaller se haalbaarheid teenoor besigheidsimpak
 
-1. **Operational weaknesses**: exposed CI credentials, over-privileged IAM roles, misconfigured KMS policies, automation accounts wat arbitrary signatures kan versoek, public buckets met bridge configs, ens.
-2. **Value-specific weaknesses**: fragile oracle parameters, upgradable contracts sonder multi-party approvals, flash-loan-sensitive liquidity, governance actions wat timelocks omseil.
+1. **Operasionele swakhede**: blootgestelde CI-geloofsbriewe, IAM-rolle met oormatige voorregte, verkeerd opgestelde KMS-beleide, outomatiseringsrekeninge wat arbitrêre handtekeninge kan aanvra, publieke buckets met brugkonfigurasies, ens.
+2. **Waarde-spesifieke swakhede**: brose oracle-parameters, opgradeerbare kontrakte sonder goedkeuring deur verskeie partye, likiditeit wat vatbaar is vir flash loans, governance-aksies wat timelocks omseil.
 
-Werk deur die queue soos ’n adversary: begin met die operational footholds wat vandag kan slaag, en beweeg dan na diep protocol/economic manipulation paths.<sup>[[2]](#references)</sup>
+Werk deur die lys soos ’n teenstander: begin met die operasionele vastrapplekke wat vandag kan slaag, en beweeg dan aan na diep protokol-/ekonomiese manipulasiepaaie.<sup>[[2]](#references)</sup>
 
-## 4. Voer uit in beheerde, produksie-realistiese omgewings
-- **Forked mainnets / geïsoleerde testnets**: repliseer bytecode, storage en liquidity sodat flash-loan paths, oracle drifts en bridge flows end-to-end kan loop sonder om regte fondse te raak.<sup>[[2]](#references)</sup>
-- **Blast-radius planning**: definieer circuit breakers, pausable modules, rollback runbooks en test-only admin keys voordat ’n scenario geaktiveer word.
-- **Stakeholder coordination**: stel custodians, oracle operators, bridge partners en compliance in kennis sodat hul monitoring-teams die traffic verwag.
-- **Legal sign-off**: dokumenteer scope, authorization en stop conditions wanneer simulations regulated rails kan kruis.
+## 4. Voer uit in beheerde, produksiegetroue omgewings
+- **Geforkte mainnets / geïsoleerde testnets**: herhaal bytecode, berging en likiditeit sodat flash-loan-paaie, oracle-afwykings en brugvloeie end-tot-end uitgevoer kan word sonder om regte fondse aan te raak.<sup>[[2]](#references)</sup>
+- **Beplanning van ontploffingsradius**: bepaal stroombrekers, pouseerbare modules, terugrolprosedures en admin-sleutels vir toetsing voordat ’n scenario afgevuur word.
+- **Koördinering met belanghebbendes**: stel custodians, oracle-operateurs, brugvennote en compliance in kennis sodat hul moniteringspanne die verkeer verwag.
+- **Regsgoedkeuring**: dokumenteer omvang, magtiging en stopvoorwaardes wanneer simulasies gereguleerde relings kan raak.
 
-## 5. Telemetry wat met AADAPT techniques belyn is
-Instrumenteer telemetry streams sodat elke scenario actionable detection data produseer.<sup>[[2]](#references)</sup>
+## 5. Telemetrie in lyn met AADAPT-tegnieke
+Instrumenteer telemetriestrome sodat elke scenario bruikbare opsporingsdata oplewer.<sup>[[2]](#references)</sup>
 
-- **Chain-level traces**: volledige call graphs, gas usage, transaction nonces, block timestamps—om flash-loan bundles, reentrancy-like structures en cross-contract hops te rekonstrueer.
-- **Application/API logs**: koppel elke on-chain tx terug aan ’n human of automation identity (session ID, OAuth client, API key, CI job ID) met IPs en auth methods.
-- **KMS/HSM logs**: key ID, caller principal, policy result, destination address en reason codes vir elke signature. Stel ’n baseline van change windows en high-risk operations op.
-- **Oracle/feed metadata**: per-update data source composition, reported value, deviation from rolling averages, thresholds triggered en failover paths exercised.
-- **Bridge/swap traces**: korreleer lock/mint/unlock-events oor chains met correlation IDs, chain IDs, relayer identity en hop timing.
-- **Anomaly markers**: afgeleide metrics soos slippage spikes, abnormale collateralization ratios, ongewone gas density of cross-chain velocity.
+- **Nasporings op kettingvlak**: volledige oproepgrafieke, gasverbruik, transaksienonces, bloktydstempels—om flash-loan-bundels, strukture soortgelyk aan reentrancy en spronge tussen kontrakte te rekonstrueer.
+- **Toepassings-/API-logboeke**: koppel elke on-chain-transaksie terug aan ’n menslike of outomatiseringsidentiteit (sessie-ID, OAuth-kliënt, API-sleutel, CI-taak-ID), met IP’s en verifikasiemetodes.
+- **KMS/HSM-logboeke**: sleutel-ID, oproeper-prinsipaal, beleidsresultaat, bestemmingsadres en redekodes vir elke handtekening. Stel basislyne vir veranderingsvensters en hoërisiko-bedrywighede op.
+- **Oracle-/voermetadata**: samestelling van databronne per opdatering, gerapporteerde waarde, afwyking van rollende gemiddeldes, geaktiveerde drempels en gebruikte terugvalpaaie.
+- **Brug-/ruilnasporings**: korreleer lock/mint/unlock-gebeurtenisse oor kettings heen met korrelasie-ID’s, ketting-ID’s, relayer-identiteit en tydsberekening van elke hop.
+- **Anomalie-merkers**: afgeleide maatstawwe soos skielike slippage, abnormale kollateraliseringsverhoudings, ongewone gasdigtheid of cross-chain-snelheid.
 
-Tag alles met scenario IDs of synthetic user IDs sodat analysts observables kan belyn met die AADAPT technique wat uitgeoefen word.
+Merk alles met scenario-ID’s of sintetiese gebruiker-ID’s sodat ontleders waarneembare data kan koppel aan die AADAPT-tegniek wat getoets word.
 
-## 6. Purple-team-loop en maturity metrics
-1. Voer die scenario in die beheerde omgewing uit en versamel detections (alerts, dashboards, responders wat gepage word).<sup>[[2]](#references)</sup>
-2. Karteer elke stap na die spesifieke AADAPT techniques plus die observables wat in die chain/app/KMS/oracle/bridge-planes geproduseer word.
-3. Formuleer en deploy detection hypotheses (threshold rules, correlation searches, invariant checks).
-4. Voer dit weer uit totdat mean time to detect (MTTD) en mean time to contain (MTTC) aan business tolerances voldoen en playbooks die waardeverlies betroubaar stop.
+## 6. Purple-team-siklus en volwassenheidsmaatstawwe
+1. Voer die scenario in die beheerde omgewing uit en teken opsporings vas (waarskuwings, dashboards, respondente wat gepageer is).<sup>[[2]](#references)</sup>
+2. Koppel elke stap aan die spesifieke AADAPT-tegnieke en die waarneembare data wat in die ketting-/toepassings-/KMS-/oracle-/brugvlakke opgelewer word.
+3. Formuleer en ontplooi opsporingshipoteses (drempelreëls, korrelasiesoektogte, invariantkontroles).
+4. Herhaal totdat die gemiddelde tyd om op te spoor (MTTD) en die gemiddelde tyd om in te perk (MTTC) binne besigheidstoleransies val en speelboeke die waardeverlies betroubaar stop.
 
-Volg program maturity op drie axes:<sup>[[2]](#references)</sup>
-- **Visibility**: elke kritieke value path het telemetry in elke plane.
-- **Coverage**: proporsie van geprioritiseerde AADAPT techniques wat end-to-end uitgeoefen word.
-- **Response**: vermoë om contracts te pause, keys te revoke of flows te freeze voordat onomkeerbare verlies plaasvind.
+Volg die program se volwassenheid op drie asse na:<sup>[[2]](#references)</sup>
+- **Sigbaarheid**: elke kritieke waardepad het telemetrie in elke vlak.
+- **Dekking**: die verhouding van geprioritiseerde AADAPT-tegnieke wat end-tot-end getoets is.
+- **Reaksie**: die vermoë om kontrakte te pouseer, sleutels te herroep of vloeie te vries voordat onomkeerbare verliese plaasvind.
 
-Tipiese milestones: (1) voltooide value inventory + AADAPT mapping, (2) eerste end-to-end scenario met detections geïmplementeer, (3) kwartaallikse purple-team-cycles wat coverage uitbrei en MTTD/MTTC verlaag.<sup>[[2]](#references)</sup>
+Tipiese mylpale: (1) voltooide waarde-inventaris en AADAPT-kartering, (2) eerste end-tot-end-scenario met geïmplementeerde opsporings, (3) kwartaallikse purple-team-siklusse wat dekking uitbrei en MTTD/MTTC verminder.<sup>[[2]](#references)</sup>
 
-## 7. Scenario templates
-Gebruik hierdie herhaalbare blueprints om simulations te ontwerp wat direk na AADAPT-gedrag karteer.<sup>[[2]](#references)</sup>
+## 7. Scenarioprototipes
+Gebruik hierdie herhaalbare bloudrukke om simulasies te ontwerp wat direk met AADAPT-gedrag ooreenstem.<sup>[[2]](#references)</sup>
 
-### Scenario A – Flash-loan economic manipulation
-- **Objective**: leen tydelike kapitaal binne een transaction om AMM-pryse/liquidity te verdraai en misgeprysde borrows, liquidations of mints te trigger voordat dit terugbetaal word.
-- **Execution**:
-1. Fork die target chain en seed pools met production-like liquidity.
-2. Leen ’n groot notional via flash loan.
-3. Voer gekalibreerde swaps uit om prys-/threshold-grense te kruis waarop lending-, vault- of derivative logic steun.
-4. Invoke die victim contract onmiddellik ná die distortion (borrow, liquidate, mint) en betaal die flash loan terug.
-- **Measurement**: Het die invariant violation geslaag? Is slippage/price-deviation monitors, circuit breakers of governance pause hooks getrigger? Hoe lank het dit geneem voordat analytics die abnormale gas/call-graph-patroon gemerk het?
+### Scenario A – Ekonomiese manipulasie met ’n flash loan
+- **Doelwit**: leen tydelike kapitaal binne een transaksie om AMM-pryse/likiditeit te verdraai en verkeerd geprysde lenings, likwidasies of minting te veroorsaak voordat die lening terugbetaal word.
+- **Uitvoering**:
+  1. Fork die teikenketting en vul poele met produksie-agtige likiditeit.
+  2. Leen ’n groot nominale bedrag via ’n flash loan.
+  3. Voer gekalibreerde swaps uit om prys-/drempelgrense te oorskry waarop uitleen-, kluis- of afgeleide logika staatmaak.
+  4. Roep die slagofferkontrak onmiddellik ná die verdraaiing aan (leen, likwideer, mint) en betaal die flash loan terug.
+- **Meting**: Het die inbreuk op ’n invariant geslaag? Is slippage-/prysafwykingsmonitors, stroombrekers of governance-pouseerhakies geaktiveer? Hoe lank het dit geduur voordat ontledings die abnormale gas-/oproepgrafiekpatroon opgemerk het?
 
-### Scenario B – Oracle/data-feed poisoning
-- **Objective**: bepaal of manipulated feeds destruktiewe geoutomatiseerde actions kan trigger (mass liquidations, incorrect settlements).
-- **Execution**:
-1. Deploy in die fork/testnet ’n malicious feed of pas aggregator weights/quorum/update cadence aan tot buite die tolerated deviation.
-2. Laat afhanklike contracts die poisoned values consume en hul standard logic uitvoer.
-- **Measurement**: Feed-level out-of-band alerts, fallback oracle activation, min/max bound enforcement en latency tussen anomaly onset en operator response.
+### Scenario B – Vergiftiging van oracle/datavoer
+- **Doelwit**: bepaal of gemanipuleerde voere vernietigende outomatiese aksies (massa-likwidasies, verkeerde vereffenings) kan veroorsaak.
+- **Uitvoering**:
+  1. Ontplooi in die fork/testnet ’n kwaadwillige voer, of pas aggregator-gewigte/kworum/opdateringsfrekwensie aan tot buite die aanvaarbare afwyking.
+  2. Laat afhanklike kontrakte die vergiftigde waardes gebruik en hul standaardlogika uitvoer.
+- **Meting**: Voerwaarskuwings buite normale perke, aktivering van ’n terugval-oracle, afdwinging van minimum-/maksimumgrense en die vertraging tussen die begin van die anomalie en die operateur se reaksie.
 
-### Scenario C – Credential/signing-abuse
-- **Objective**: toets of die kompromittering van ’n enkele signer of automation identity unauthorized upgrades, parameter changes of treasury drains moontlik maak.
-- **Execution**:
-1. Inventariseer identities met sensitive signing rights (operators, CI tokens, service accounts wat KMS/HSM invoke, multisig participants).
-2. Simuleer compromise (hergebruik hul credentials/keys binne die lab-scope).
-3. Probeer privileged actions: upgrade proxies, change risk parameters, mint/pause assets of trigger governance proposals.
-- **Measurement**: Genereer KMS/HSM logs anomaly alerts (time-of-day, destination drift, burst of high-risk operations)? Kan policies of multisig thresholds unilateral abuse voorkom? Word throttles/rate limits of additional approvals afgedwing?
+### Scenario C – Misbruik van geloofsbriewe/ondertekening
+- **Doelwit**: toets of die kompromittering van ’n enkele ondertekenaar of outomatiseringsidentiteit ongemagtigde opgraderings, parameterveranderings of dreinering van die tesourie moontlik maak.
+- **Uitvoering**:
+  1. Lys identiteite met sensitiewe ondertekeningsregte (operateurs, CI-tokens, diensrekeninge wat KMS/HSM aanroep, multisig-deelnemers).
+  2. Simuleer kompromittering (hergebruik hul geloofsbriewe/sleutels binne die laboratoriumomvang).
+  3. Probeer bevoorregte aksies: gradeer proxies op, verander risikoparameters, mint/pause bates of begin governance-voorstelle.
+- **Meting**: Genereer KMS/HSM-logboeke anomaliewaarskuwings (tyd van die dag, afwyking in bestemming, ’n vlaag hoërisiko-bedrywighede)? Kan beleide of multisig-drempels eensydige misbruik voorkom? Word versnellers/koerslimiete of bykomende goedkeurings afgedwing?
 
-### Scenario D – Cross-chain evasion & traceability gaps
-- **Objective**: evalueer hoe goed defenders assets kan traceer en interdict wat vinnig deur bridges, DEX routers en privacy hops launder word.
-- **Execution**:
-1. Chain lock/mint-operations oor algemene bridges aan mekaar, interleave swaps/mixers op elke hop, en behou per-hop correlation IDs.
-2. Versnel transfers om monitoring latency te stres (multi-hop binne minute/blocks).
-- **Measurement**: Tyd om events oor telemetry + commercial chain analytics te korreleer, volledigheid van die gerekonstruueerde path, vermoë om choke points te identifiseer om in ’n werklike incident te freeze, en alert fidelity vir abnormale cross-chain velocity/value.
+### Scenario D – Cross-chain-ontduiking en leemtes in naspeurbaarheid
+- **Doelwit**: evalueer hoe goed verdedigers bates kan naspoor en onderskep wanneer hulle vinnig deur brûe, DEX-routers en privaatheidshops gewas word.
+- **Uitvoering**:
+  1. Ketting lock/mint-bedrywighede oor algemene brûe aaneen, wissel swaps/mixers by elke hop af en behou korrelasie-ID’s per hop.
+  2. Versnel oordragte om moniteringvertraging te beproef (verskeie hops binne minute/blokke).
+- **Meting**: Tyd om gebeurtenisse oor telemetrie en kommersiële kettingontledings heen te korreleer, volledigheid van die gerekonstrueerde pad, vermoë om knelpunte vir bevriesing tydens ’n werklike voorval te identifiseer, en waarskuwingsgetrouheid vir abnormale cross-chain-snelheid/-waarde.
 
 ## References
 
-- [1] [AADAPT(TM) Cyber Threat Framework for Digital Assets (MITRE)](https://www.mitre.org/sites/default/files/2025-05/PR-25-1118-aadpt-cyber-threat-framework-for-digital-assets.pdf)
-- [2] [MITRE AADAPT Framework as a Red Team Roadmap (Bishop Fox)](https://bishopfox.com/blog/mitre-aadapt-framework-as-a-red-team-roadmap)
+- [1] [AADAPT(TM)-kubervoorbedreigingsraamwerk vir digitale bates (MITRE)](https://www.mitre.org/sites/default/files/2025-05/PR-25-1118-aadpt-cyber-threat-framework-for-digital-assets.pdf)
+- [2] [Die MITRE AADAPT-raamwerk as ’n rooi-spanpadkaart (Bishop Fox)](https://bishopfox.com/blog/mitre-aadapt-framework-as-a-red-team-roadmap)
 {{#include ../../banners/hacktricks-training.md}}
