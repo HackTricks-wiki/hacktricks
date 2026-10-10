@@ -605,6 +605,7 @@
   - [MeshCentral](network-services-pentesting/pentesting-web/meshcentral.md)
   - [Microsoft Sharepoint](network-services-pentesting/pentesting-web/microsoft-sharepoint.md)
   - [Moodle](network-services-pentesting/pentesting-web/moodle.md)
+  - [NetAlertX](network-services-pentesting/pentesting-web/netalertx.md)
   - [NextJS](network-services-pentesting/pentesting-web/nextjs.md)
   - [Nginx](network-services-pentesting/pentesting-web/nginx.md)
   - [NodeJS Express](network-services-pentesting/pentesting-web/nodejs-express.md)
