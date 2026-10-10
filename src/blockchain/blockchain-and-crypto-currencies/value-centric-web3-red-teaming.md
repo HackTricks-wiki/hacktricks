@@ -1,108 +1,108 @@
-# Value-Centric Web3 Red Teaming (MITRE AADAPT)
+# 価値中心のWeb3 Red Teaming（MITRE AADAPT）
 
 {{#include ../../banners/hacktricks-training.md}}
 
-MITRE Adversarial Actions in Digital Asset Payment Techniques (AADAPT) framework は、デジタル資産システムを標的とする敵対的なアクションと technique を分類します。<sup>[[1]](#references)</sup> これを **threat-modeling の基盤**として扱い、資産の mint、価格付け、承認、またはルーティングを行えるすべてのコンポーネントを列挙し、それらの接点を AADAPT techniques にマッピングして、環境が不可逆的な経済的損失に耐えられるかを測定する red-team シナリオを実行します。
+MITRE Adversarial Actions in Digital Asset Payment Techniques（AADAPT）フレームワークは、デジタル資産システムを標的とする敵対的な行動や手法を分類しています。<sup>[[1]](#references)</sup> これを**脅威モデリングの基盤**として扱い、資産の発行、価格設定、承認、ルーティングを行えるあらゆるコンポーネントを列挙し、それらの接点をAADAPTの手法に対応付けます。そのうえで、環境が取り返しのつかない経済的損失に耐えられるかを測定するred-teamシナリオを実施します。
 
-## 1. 価値を持つコンポーネントのインベントリ作成
-オンチェーンでなくても、value state に影響を与えられるすべての要素をマッピングします。<sup>[[2]](#references)</sup>
+## 1. 価値を持つコンポーネントの一覧化
+オンチェーンかどうかにかかわらず、価値の状態に影響を与えうるすべての要素をマッピングします。<sup>[[2]](#references)</sup>
 
-- **Custodial signing services**（HSM/KMS clusters、Vault/KMaaS、bot や back-office jobs が使用する signing APIs）。key IDs、policies、automation identities、approval workflows を記録します。
-- **Admin & upgrade paths** for contracts（proxy admins、governance timelocks、emergency pause keys、parameter registries）。それらを呼び出せる主体または要素と、必要な quorum または delay も含めます。
-- **On-chain protocol logic** handling lending、AMMs、vaults、staking、bridges、または settlement rails。前提としている invariants（oracle prices、collateral ratios、rebalance cadence…）を文書化します。
-- **Off-chain automation** that builds transactions（market-making bots、CI/CD pipelines、cron jobs、serverless functions）。これらは、signature を要求できる API keys や service principals を保持していることがよくあります。
-- **Oracles & data feeds**（aggregator composition、quorum、deviation thresholds、update cadence）。automated risk logic が依存するすべての upstream を記録します。
-- **Bridges and cross-chain routers**（lock/mint contracts、relayers、settlement jobs）。chain 間または custodial stacks 間を接続する要素です。
+- **カストディ型署名サービス**（HSM/KMSクラスター、Vault/KMaaS、botやバックオフィスのジョブが使用する署名API）。キーID、ポリシー、自動化ID、承認ワークフローを記録します。
+- コントラクトの**管理・アップグレード経路**（proxy admin、ガバナンスのtimelock、緊急停止キー、パラメータレジストリ）。実行可能な主体と方法、および必要なquorumや遅延も含めます。
+- レンディング、AMM、vault、staking、bridge、決済レールを扱う**オンチェーンプロトコルのロジック**。前提とするinvariant（oracle価格、担保比率、リバランス頻度など）を文書化します。
+- トランザクションを構築する**オフチェーン自動化**（マーケットメイクbot、CI/CDパイプライン、cronジョブ、serverless function）。これらは、署名を要求できるAPIキーやservice principalを保持していることがよくあります。
+- **Oracleとデータフィード**（aggregatorの構成、quorum、乖離しきい値、更新頻度）。自動化されたリスクロジックが依存する上流データソースをすべて記録します。
+- チェーンやカストディスタックを接続する**bridgeとクロスチェーンrouter**（lock/mintコントラクト、relayer、決済ジョブ）。
 
-成果物: assets がどのように移動し、誰がその移動を承認し、どの外部シグナルが business logic に影響するかを示す value-flow diagram。
+成果物：資産の移動、移動を承認する主体、ビジネスロジックに影響する外部シグナルを示した価値フロー図。
 
-## 2. コンポーネントを AADAPT behaviors にマッピング
-AADAPT taxonomy を各コンポーネントに対する具体的な attack candidates に変換します。<sup>[[2]](#references)</sup>
+## 2. コンポーネントをAADAPTの行動に対応付ける
+AADAPTの分類を、各コンポーネントに対する具体的な攻撃候補に落とし込みます。<sup>[[2]](#references)</sup>
 
-| Component | Primary AADAPT focus |
+| コンポーネント | 主なAADAPTの観点 |
 | --- | --- |
-| Signing/KMS estates | Credential theft、policy bypass、signing-abuse、governance takeover |
-| Oracles/feeds | Input poisoning、aggregation manipulation、deviation-threshold evasion |
-| On-chain protocols | Flash-loan economic manipulation、invariant breaking、parameter reconfiguration |
-| Automation pipelines | Compromised bot/CI identities、batch replay、unauthorized deployment |
-| Bridges/routers | Cross-chain evasion、rapid hop laundering、settlement desynchronization |
+| Signing/KMS環境 | 認証情報の窃取、ポリシーの迂回、署名の不正利用、ガバナンスの乗っ取り |
+| Oracle/フィード | 入力の汚染、集約の操作、乖離しきい値の回避 |
+| オンチェーンプロトコル | Flash-loanによる経済的操作、invariantの破壊、パラメータの再設定 |
+| 自動化パイプライン | bot/CI IDの侵害、バッチのリプレイ、不正なデプロイ |
+| Bridge/router | クロスチェーンでの追跡回避、迅速なhopによる資金洗浄、決済の不整合 |
 
-このマッピングにより、contracts だけでなく、間接的に value を操作できるすべての identity/automation もテストできます。
+この対応付けにより、コントラクトだけでなく、間接的に価値の流れを操作できるすべてのIDや自動化もテストできます。
 
-## 3. attacker feasibility と business impact に基づく優先順位付け
+## 3. 攻撃者にとっての実現可能性とビジネスへの影響で優先順位を付ける
 
-1. **Operational weaknesses**: exposed CI credentials、over-privileged IAM roles、misconfigured KMS policies、任意の signatures を要求できる automation accounts、bridge configs を含む public buckets など。
-2. **Value-specific weaknesses**: 脆弱な oracle parameters、multi-party approvals のない upgradable contracts、flash-loan に敏感な liquidity、timelocks を bypass できる governance actions。
+1. **運用上の弱点**：露出したCI認証情報、過剰な権限を持つIAMロール、設定ミスのあるKMSポリシー、任意の署名を要求できる自動化アカウント、bridge設定を含む公開バケットなど。
+2. **価値に特有の弱点**：脆弱なoracleパラメータ、複数者承認のないアップグレード可能なコントラクト、Flash-loanの影響を受けやすい流動性、timelockを迂回できるガバナンスアクション。
 
-adversary のように queue に取り組みます。まず、今日成功する可能性がある operational footholds から始め、その後、深い protocol/economic manipulation paths へ進みます。<sup>[[2]](#references)</sup>
+攻撃者のように優先順位付けした項目を進めます。まず、今日すぐに悪用されうる運用上の足掛かりから始め、その後、プロトコルや経済に対する高度な操作経路へ進みます。<sup>[[2]](#references)</sup>
 
-## 4. 管理された production-realistic environments で実行
-- **Forked mainnets / isolated testnets**: bytecode、storage、liquidity を再現し、real funds に触れることなく flash-loan paths、oracle drifts、bridge flows を end-to-end で実行します。<sup>[[2]](#references)</sup>
-- **Blast-radius planning**: scenario を実行する前に、circuit breakers、pausable modules、rollback runbooks、test-only admin keys を定義します。
-- **Stakeholder coordination**: custodians、oracle operators、bridge partners、compliance に通知し、それぞれの monitoring teams が該当 traffic を想定できるようにします。
-- **Legal sign-off**: simulations が regulated rails を越える可能性がある場合、scope、authorization、stop conditions を文書化します。
+## 4. 管理された本番環境に近い環境で実行する
+- **Forkしたmainnet／隔離されたtestnet**：bytecode、storage、流動性を再現し、実資金に触れることなく、Flash-loan経路、oracleの乖離、bridgeフローをエンドツーエンドで実行します。<sup>[[2]](#references)</sup>
+- **影響範囲の計画**：シナリオを実行する前に、circuit breaker、一時停止可能なモジュール、rollback手順書、テスト専用のadmin keyを定めます。
+- **関係者との調整**：カストディアン、oracle運用者、bridgeパートナー、コンプライアンス部門に通知し、監視チームが発生するトラフィックを把握できるようにします。
+- **法務承認**：シミュレーションが規制対象の決済レールに及ぶ可能性がある場合は、スコープ、承認、停止条件を記録します。
 
-## 5. AADAPT techniques に対応した telemetry
-すべての scenario が実行可能な detection data を生成するよう、telemetry streams を instrument します。<sup>[[2]](#references)</sup>
+## 5. AADAPTの手法に沿ったテレメトリ
+各シナリオから検知に役立つデータが得られるよう、テレメトリストリームを計測します。<sup>[[2]](#references)</sup>
 
-- **Chain-level traces**: full call graphs、gas usage、transaction nonces、block timestamps。flash-loan bundles、reentrancy-like structures、cross-contract hops を再構成するために使用します。
-- **Application/API logs**: 各 on-chain tx を human または automation identity（session ID、OAuth client、API key、CI job ID）に関連付け、IPs と auth methods も記録します。
-- **KMS/HSM logs**: 各 signature について、key ID、caller principal、policy result、destination address、reason codes を記録します。change windows と high-risk operations の baseline を作成します。
-- **Oracle/feed metadata**: update ごとの data source composition、reported value、rolling averages からの deviation、triggered thresholds、実行された failover paths。
-- **Bridge/swap traces**: correlation IDs、chain IDs、relayer identity、hop timing とともに、chain 間の lock/mint/unlock events を関連付けます。
-- **Anomaly markers**: slippage spikes、abnormal collateralization ratios、unusual gas density、cross-chain velocity などの derived metrics。
+- **チェーンレベルのtrace**：完全なcall graph、gas使用量、トランザクションnonce、ブロックのtimestampを記録し、Flash-loanのbundle、reentrancyに類似する構造、コントラクト間のhopを再構成します。
+- **アプリケーション/APIログ**：各オンチェーントランザクションを、人または自動化ID（session ID、OAuth client、API key、CI job ID）に、IPアドレスと認証方式を含めて紐付けます。
+- **KMS/HSMログ**：すべての署名について、key ID、呼び出し元principal、ポリシーの判定結果、送信先アドレス、理由コードを記録します。変更可能時間帯と高リスク操作のベースラインを設定します。
+- **Oracle/フィードのメタデータ**：更新ごとのデータソース構成、報告値、移動平均からの乖離、発動したしきい値、実行されたfailover経路を記録します。
+- **Bridge/swapのtrace**：相関ID、chain ID、relayer ID、hopのタイミングを用いて、チェーン間のlock/mint/unlockイベントを関連付けます。
+- **異常マーカー**：slippageの急増、異常な担保比率、不自然なgas密度、異常なクロスチェーン移動速度などの派生指標を記録します。
 
-すべてに scenario IDs または synthetic user IDs を付与し、analysts が observables と実行対象の AADAPT technique を関連付けられるようにします。
+すべてにシナリオIDまたは合成ユーザーIDを付与し、分析担当者が観測データを実施中のAADAPT手法に対応付けられるようにします。
 
-## 6. Purple-team loop と maturity metrics
-1. controlled environment で scenario を実行し、detections（alerts、dashboards、responders paged）を取得します。<sup>[[2]](#references)</sup>
-2. 各 step を specific AADAPT techniques と、chain/app/KMS/oracle/bridge planes で生成された observables にマッピングします。
-3. detection hypotheses（threshold rules、correlation searches、invariant checks）を策定して deploy します。
-4. mean time to detect (MTTD) と mean time to contain (MTTC) が business tolerances を満たし、playbooks が value loss を確実に停止できるまで再実行します。
+## 6. Purple-teamのサイクルと成熟度指標
+1. 管理された環境でシナリオを実行し、検知状況（alert、dashboard、呼び出された対応要員）を記録します。<sup>[[2]](#references)</sup>
+2. 各手順を特定のAADAPT手法と、chain/app/KMS/oracle/bridge各プレーンで得られた観測データに対応付けます。
+3. 検知の仮説（しきい値ルール、相関検索、invariantチェック）を策定し、導入します。
+4. 平均検知時間（MTTD）と平均封じ込め時間（MTTC）がビジネス上の許容範囲に収まり、手順書によって価値の損失を確実に止められるまで再実行します。
 
-program maturity を次の 3 軸で追跡します。<sup>[[2]](#references)</sup>
-- **Visibility**: すべての critical value paths に、各 plane の telemetry が存在する。
-- **Coverage**: 優先度付けされた AADAPT techniques のうち、end-to-end で実行された割合。
-- **Response**: irreversible loss の前に contracts を pause し、keys を revoke し、flows を freeze する能力。
+プログラムの成熟度を次の3つの軸で追跡します。<sup>[[2]](#references)</sup>
+- **可視性**：重要な価値経路すべてについて、各プレーンにテレメトリが存在する。
+- **網羅性**：優先順位付けしたAADAPT手法のうち、エンドツーエンドで実施した割合。
+- **対応力**：取り返しのつかない損失が発生する前に、コントラクトの一時停止、キーの失効、資金フローの凍結を実行できる能力。
 
-一般的な milestones: (1) 完了した value inventory + AADAPT mapping、(2) detections を実装した最初の end-to-end scenario、(3) coverage を拡大し、MTTD/MTTC を短縮する quarterly purple-team cycles。<sup>[[2]](#references)</sup>
+一般的なマイルストーン：(1) 価値の棚卸しとAADAPTへの対応付けを完了、(2) 検知機能を実装した最初のエンドツーエンドシナリオを実施、(3) 四半期ごとのPurple-teamサイクルで網羅性を高め、MTTD/MTTCを短縮。<sup>[[2]](#references)</sup>
 
-## 7. Scenario templates
-AADAPT behaviors に直接マッピングできる simulations を設計するため、これらの反復可能な blueprints を使用します。<sup>[[2]](#references)</sup>
+## 7. シナリオのテンプレート
+AADAPTの行動に直接対応するシミュレーションを設計するため、以下の再利用可能なblueprintを使用します。<sup>[[2]](#references)</sup>
 
-### Scenario A – Flash-loan economic manipulation
-- **Objective**: 1 transaction 内で一時的な capital を borrow し、AMM prices/liquidity を distort して、mispriced borrows、liquidations、または mints を trigger し、その前に返済する。
-- **Execution**:
-1. target chain を fork し、production-like liquidity で pools を seed します。
-2. flash loan を介して大きな notional を borrow します。
-3. lending、vault、または derivative logic が依存する price/threshold boundaries を越えるよう、calibrated swaps を実行します。
-4. distortion の直後に victim contract（borrow、liquidate、mint）を invoke し、flash loan を返済します。
-- **Measurement**: invariant violation は成功したか。slippage/price-deviation monitors、circuit breakers、または governance pause hooks は trigger されたか。analytics が abnormal gas/call graph pattern を検知するまでにどれだけ時間がかかったか。
+### シナリオA – Flash-loanによる経済的操作
+- **目的**：1つのトランザクション内で一時的な資本を借り入れ、AMMの価格や流動性を歪め、返済前に不適切な価格での借入、清算、mintを誘発できるか確認します。
+- **実行**：
+  1. 対象チェーンをforkし、本番環境に近い流動性でpoolを準備します。
+  2. Flash loanで大きな想定元本を借り入れます。
+  3. レンディング、vault、derivativeのロジックが依存する価格やしきい値の境界を越えるよう、調整したswapを実行します。
+  4. 価格を歪めた直後に対象コントラクトを呼び出し（借入、清算、mint）、Flash loanを返済します。
+- **測定項目**：invariant違反は成功したか。slippage/価格乖離の監視、circuit breaker、ガバナンスの一時停止hookは発動したか。異常なgas/call graphのパターンを分析システムが検知するまでにどれくらいかかったか。
 
-### Scenario B – Oracle/data-feed poisoning
-- **Objective**: manipulated feeds が destructive automated actions（mass liquidations、incorrect settlements）を trigger できるかを判定する。
-- **Execution**:
-1. fork/testnet 上で malicious feed を deploy するか、aggregator weights/quorum/update cadence を tolerated deviation の範囲を超えるように変更します。
-2. dependent contracts に poisoned values を消費させ、標準 logic を実行させます。
-- **Measurement**: feed-level out-of-band alerts、fallback oracle activation、min/max bound enforcement、anomaly onset から operator response までの latency。
+### シナリオB – Oracle/データフィードの汚染
+- **目的**：操作されたフィードが、破壊的な自動処理（大量清算、不正確な決済）を引き起こせるかを確認します。
+- **実行**：
+  1. fork/testnet上で悪意あるフィードをデプロイするか、許容される乖離を超えるようにaggregatorの重み、quorum、更新頻度を変更します。
+  2. 依存するコントラクトに汚染された値を取り込ませ、通常のロジックを実行させます。
+- **測定項目**：フィードレベルの帯域外alert、fallback oracleの起動、最小/最大値の強制、異常発生から運用者の対応までの時間。
 
-### Scenario C – Credential/signing abuse
-- **Objective**: single signer または automation identity の compromise により、unauthorized upgrades、parameter changes、または treasury drains が可能になるかをテストする。
-- **Execution**:
-1. sensitive signing rights を持つ identities（operators、CI tokens、KMS/HSM を invoke する service accounts、multisig participants）を列挙します。
-2. compromise を simulate します（lab scope 内でその credentials/keys を再利用）。
-3. privileged actions を試行します。proxy の upgrade、risk parameters の変更、assets の mint/pause、または governance proposals の trigger などです。
-- **Measurement**: KMS/HSM logs は anomaly alerts（time-of-day、destination drift、high-risk operations の burst）を raise するか。policies または multisig thresholds は unilateral abuse を防止できるか。throttles/rate limits または additional approvals は enforcement されているか。
+### シナリオC – 認証情報/署名の不正利用
+- **目的**：単一の署名者または自動化IDを侵害するだけで、不正なアップグレード、パラメータ変更、treasuryからの資金流出が可能になるかをテストします。
+- **実行**：
+  1. 機密性の高い署名権限を持つID（運用者、CI token、KMS/HSMを呼び出すservice account、multisig参加者）をすべて列挙します。
+  2. ラボのスコープ内で、それらの認証情報/キーを再利用し、侵害をシミュレーションします。
+  3. 特権操作を試みます。proxyのアップグレード、リスクパラメータの変更、資産のmint/一時停止、ガバナンス提案の実行など。
+- **測定項目**：KMS/HSMログで異常alert（時間帯、送信先の変化、高リスク操作の集中）が発生するか。ポリシーやmultisigのしきい値で単独の不正利用を防げるか。スロットル/rate limitや追加承認が適用されるか。
 
-### Scenario D – Cross-chain evasion & traceability gaps
-- **Objective**: bridges、DEX routers、privacy hops を介して rapid laundering された assets を、defenders がどの程度正確に trace し、迅速に interdict できるかを評価する。
-- **Execution**:
-1. common bridges を介した lock/mint operations を chain し、各 hop で swaps/mixers を interleave しながら、per-hop correlation IDs を維持します。
-2. monitoring latency に負荷をかけるため transfers を accelerate します（数分または数 blocks 内の multi-hop）。
-- **Measurement**: telemetry と commercial chain analytics 間で events を correlate するまでの時間、reconstructed path の完全性、real incident で freeze する choke points を特定する能力、abnormal cross-chain velocity/value に対する alert fidelity。
+### シナリオD – クロスチェーンでの追跡回避とトレーサビリティの欠落
+- **目的**：bridge、DEX router、privacy hopをまたいで迅速に資金洗浄された資産を、防御側がどの程度追跡し、阻止できるかを評価します。
+- **実行**：
+  1. 一般的なbridgeをまたぐlock/mint操作を連鎖させ、各hopでswap/mixerを挟みながら、hopごとの相関IDを維持します。
+  2. 数分/数ブロック以内に複数hopを実行して送金を加速し、監視の遅延に負荷をかけます。
+- **測定項目**：テレメトリと商用のチェーン分析をまたいでイベントを相関付けるまでの時間、経路の再構成の完全性、実際のインシデント時に凍結できる要所を特定する能力、異常なクロスチェーン移動速度/金額に対するalertの精度。
 
 ## References
 
-- [1] [デジタル資産向け AADAPT(TM) Cyber Threat Framework (MITRE)](https://www.mitre.org/sites/default/files/2025-05/PR-25-1118-aadpt-cyber-threat-framework-for-digital-assets.pdf)
-- [2] [Red Team Roadmap としての MITRE AADAPT Framework (Bishop Fox)](https://bishopfox.com/blog/mitre-aadapt-framework-as-a-red-team-roadmap)
+- [1] [AADAPT(TM) デジタル資産向けサイバー脅威フレームワーク（MITRE）](https://www.mitre.org/sites/default/files/2025-05/PR-25-1118-aadpt-cyber-threat-framework-for-digital-assets.pdf)
+- [2] [Red TeamロードマップとしてのMITRE AADAPTフレームワーク（Bishop Fox）](https://bishopfox.com/blog/mitre-aadapt-framework-as-a-red-team-roadmap)
 {{#include ../../banners/hacktricks-training.md}}
