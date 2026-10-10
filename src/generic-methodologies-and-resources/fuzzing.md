@@ -328,6 +328,10 @@ Treat the following as findings:
 
 This is a practical way to find **consensus mismatches**, **parser ambiguity**, and **spec-vs-implementation drift** that pure crash fuzzing often misses.
 
+{{#ref}}
+proof-assistant-formal-verification-security.md
+{{#endref}}
+
 ### Reuse the campaign corpus for coverage reporting
 
 After a campaign, replay the saved queue corpus to generate a Go coverage report without manually exporting a separate corpus.<sup>[[7]](#references)[[8]](#references)</sup>
