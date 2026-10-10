@@ -2,107 +2,107 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Mfumo wa MITRE Adversarial Actions in Digital Asset Payment Techniques (AADAPT) huainisha vitendo na techniques za kiadui zinazolenga mifumo ya digital asset.<sup>[[1]](#references)</sup> Uchukulie kama **msingi wa threat-modeling**: orodhesha kila component inayoweza kuunda, kuweka bei, kuidhinisha, au kuelekeza assets, linganisha sehemu hizo za mawasiliano na techniques za AADAPT, kisha endesha scenarios za red-team zinazopima ikiwa mazingira yanaweza kuzuia hasara ya kiuchumi isiyoweza kurekebishwa.
+Mfumo wa MITRE Adversarial Actions in Digital Asset Payment Techniques (AADAPT) huainisha vitendo na mbinu za washambuliaji zinazolenga mifumo ya mali za kidijitali.<sup>[[1]](#references)</sup> Uchukulie kama **msingi wa threat modeling**: orodhesha kila kipengele kinachoweza kuunda, kupanga bei, kuidhinisha au kuelekeza mali, husisha sehemu hizo za mawasiliano na mbinu za AADAPT, kisha tengeneza hali za red-team zinazopima ikiwa mazingira yanaweza kuzuia hasara ya kiuchumi isiyoweza kurejeshwa.
 
-## 1. Orodhesha components zenye thamani
+## 1. Orodhesha vipengele vinavyobeba thamani
 Tengeneza ramani ya kila kitu kinachoweza kuathiri hali ya thamani, hata kama kiko off-chain.<sup>[[2]](#references)</sup>
 
-- **Huduma za kusaini za custodial** (HSM/KMS clusters, Vault/KMaaS, signing APIs zinazotumiwa na bots au back-office jobs). Rekodi key IDs, policies, automation identities, na approval workflows.
-- **Njia za admin & upgrade** za contracts (proxy admins, governance timelocks, emergency pause keys, parameter registries). Jumuisha nani/kitu gani kinaweza kuziita, na chini ya quorum au delay gani.
-- **Mantiki ya protocol iliyo on-chain** inayoshughulikia lending, AMMs, vaults, staking, bridges, au settlement rails. Andika invariants wanazotegemea (oracle prices, collateral ratios, rebalance cadence…).
-- **Automation ya off-chain** inayounda transactions (market-making bots, CI/CD pipelines, cron jobs, serverless functions). Mara nyingi huwa na API keys au service principals zinazoweza kuomba signatures.
-- **Oracles & data feeds** (aggregator composition, quorum, deviation thresholds, update cadence). Tambua kila upstream inayotegemewa na risk logic ya kiotomatiki.
-- **Bridges na cross-chain routers** (lock/mint contracts, relayers, settlement jobs) zinazounganisha chains au custodial stacks.
+- **Huduma za utiaji saini za uangalizi** (vikundi vya HSM/KMS, Vault/KMaaS, API za utiaji saini zinazotumiwa na bots au kazi za back-office). Rekodi vitambulisho vya funguo, sera, utambulisho wa automation na michakato ya uidhinishaji.
+- **Njia za usimamizi na uboreshaji** wa contracts (wasimamizi wa proxy, governance timelocks, funguo za kusitisha dharura, sajili za vigezo). Jumuisha nani/nini kinaweza kuziita, na kwa quorum au ucheleweshaji upi.
+- **Mantiki ya itifaki ya on-chain** inayoshughulikia ukopeshaji, AMMs, vaults, staking, bridges au njia za settlement. Andika invariants inazozitegemea (bei za oracle, uwiano wa dhamana, marudio ya rebalance…).
+- **Automation ya off-chain** inayounda transactions (bots za market-making, pipeline za CI/CD, cron jobs, serverless functions). Mara nyingi huwa na API keys au service principals zinazoweza kuomba saini.
+- **Oracles na data feeds** (muundo wa aggregator, quorum, viwango vya deviation, marudio ya masasisho). Bainisha kila chanzo cha upstream kinachotegemewa na mantiki ya hatari ya automation.
+- **Bridges na routers za cross-chain** (contracts za lock/mint, relayers, kazi za settlement) zinazounganisha chains au mifumo ya uangalizi.
 
-Deliverable: mchoro wa value-flow unaoonyesha jinsi assets zinavyosogea, nani anayeidhinisha uhamishaji, na ni signals zipi za nje zinazoathiri business logic.
+Matokeo yanayohitajika: mchoro wa mtiririko wa thamani unaoonyesha jinsi mali zinavyosogea, nani anayeidhinisha uhamishaji, na ni ishara zipi za nje zinazoathiri mantiki ya biashara.
 
-## 2. Linganisha components na mienendo ya AADAPT
-Tafsiri taxonomy ya AADAPT kuwa attack candidates halisi kwa kila component.<sup>[[2]](#references)</sup>
+## 2. Linganisha vipengele na tabia za AADAPT
+Tafsiri taksonomia ya AADAPT kuwa watahiniwa halisi wa mashambulizi kwa kila kipengele.<sup>[[2]](#references)</sup>
 
-| Component | Primary AADAPT focus |
+| Kipengele | Eneo kuu la AADAPT |
 | --- | --- |
-| Signing/KMS estates | Credential theft, policy bypass, signing-abuse, governance takeover |
-| Oracles/feeds | Input poisoning, aggregation manipulation, deviation-threshold evasion |
-| On-chain protocols | Flash-loan economic manipulation, invariant breaking, parameter reconfiguration |
-| Automation pipelines | Compromised bot/CI identities, batch replay, unauthorized deployment |
-| Bridges/routers | Cross-chain evasion, rapid hop laundering, settlement desynchronization |
+| Mifumo ya utiaji saini/KMS | Wizi wa credentials, kukwepa sera, matumizi mabaya ya utiaji saini, kutwaa udhibiti wa governance |
+| Oracles/feeds | Kuweka sumu kwenye ingizo, kuchezea aggregation, kukwepa viwango vya deviation |
+| Itifaki za on-chain | Udanganyifu wa kiuchumi kwa flash-loan, kuvunja invariants, kubadilisha usanidi wa vigezo |
+| Pipeline za automation | Utambulisho wa bot/CI uliodukuliwa, kurudia batch, deployment isiyoidhinishwa |
+| Bridges/routers | Kukwepa mifumo ya cross-chain, kuficha chanzo cha fedha kwa hop za haraka, kutolingana kwa settlement |
 
-Ulinganishaji huu unahakikisha kuwa unatest si contracts pekee, bali pia kila identity/automation inayoweza kuelekeza thamani kwa njia isiyo ya moja kwa moja.
+Ulinganisho huu unahakikisha kuwa unajaribu si contracts pekee, bali pia kila utambulisho/automation inayoweza kuelekeza thamani kwa njia isiyo ya moja kwa moja.
 
-## 3. Panga kipaumbele kwa uwezekano wa attacker dhidi ya athari ya biashara
+## 3. Panga vipaumbele kwa uwezekano wa mshambuliaji kufanikiwa dhidi ya athari kwa biashara
 
-1. **Udhaifu wa kiutendaji**: CI credentials zilizo wazi, IAM roles zenye ruhusa kupita kiasi, KMS policies zilizosanidiwa vibaya, automation accounts zinazoweza kuomba signatures holela, public buckets zenye bridge configs, n.k.
-2. **Udhaifu mahususi wa thamani**: oracle parameters dhaifu, contracts zinazoweza ku-upgrade bila approvals za pande nyingi, liquidity inayoweza kuathiriwa na flash-loan, governance actions zinazopita timelocks.
+1. **Udhaifu wa kiutendaji**: CI credentials zilizo wazi, majukumu ya IAM yenye ruhusa nyingi kupita kiasi, sera za KMS zilizosanidiwa vibaya, akaunti za automation zinazoweza kuomba saini zozote, buckets za umma zenye usanidi wa bridge, n.k.
+2. **Udhaifu mahususi wa thamani**: vigezo dhaifu vya oracle, contracts zinazoweza kuboreshwa bila idhini ya wahusika wengi, liquidity inayoathiriwa na flash-loan, vitendo vya governance vinavyokwepa timelocks.
 
-Fanya kazi kwenye queue kama adversary: anza na operational footholds zinazoweza kufanikiwa leo, kisha endelea kwenye njia za kina za protocol/economic manipulation.<sup>[[2]](#references)</sup>
+Shughulikia orodha kama mshambuliaji: anza na njia za kuingia za kiutendaji zinazoweza kufanikiwa leo, kisha endelea kwenye njia changamano za udanganyifu wa itifaki/uchumi.<sup>[[2]](#references)</sup>
 
-## 4. Tekeleza katika mazingira yaliyodhibitiwa na yanayofanana na production
-- **Forked mainnets / isolated testnets**: rudufu bytecode, storage, na liquidity ili flash-loan paths, oracle drifts, na bridge flows ziendeshwe end-to-end bila kugusa fedha halisi.<sup>[[2]](#references)</sup>
-- **Mipango ya blast radius**: fafanua circuit breakers, pausable modules, rollback runbooks, na test-only admin keys kabla ya kuanzisha scenario.
-- **Uratibu wa stakeholders**: wajulishe custodians, oracle operators, bridge partners, na compliance ili monitoring teams zao zitayarishe traffic hiyo.
-- **Idhini ya kisheria**: andika scope, authorization, na stop conditions wakati simulations zinaweza kuvuka regulated rails.
+## 4. Tekeleza katika mazingira yaliyodhibitiwa yanayofanana na uzalishaji halisi
+- **Mainnets zilizoforkiwa / testnets zilizotengwa**: nakili bytecode, storage na liquidity ili njia za flash-loan, mabadiliko ya oracle na mtiririko wa bridge vifanye kazi mwanzo hadi mwisho bila kugusa fedha halisi.<sup>[[2]](#references)</sup>
+- **Kupanga ukubwa wa athari**: fafanua circuit breakers, modules zinazoweza kusitishwa, runbooks za rollback na funguo za admin za majaribio kabla ya kuanzisha hali ya majaribio.
+- **Uratibu wa wadau**: wajulishe wasimamizi wa mali, waendeshaji wa oracle, washirika wa bridge na timu za compliance ili timu zao za ufuatiliaji zitarajie trafiki hiyo.
+- **Idhini ya kisheria**: andika scope, idhini na masharti ya kusitisha pale ambapo simulations zinaweza kufikia mifumo iliyodhibitiwa.
 
-## 5. Telemetry inayolingana na techniques za AADAPT
-Sanidi telemetry streams ili kila scenario izalishe data ya detection inayoweza kuchukuliwa hatua.<sup>[[2]](#references)</sup>
+## 5. Telemetry inayolingana na mbinu za AADAPT
+Sanidi mikondo ya telemetry ili kila hali ya majaribio itoe data ya ugunduzi inayoweza kuchukuliwa hatua.<sup>[[2]](#references)</sup>
 
-- **Chain-level traces**: call graphs kamili, matumizi ya gas, transaction nonces, block timestamps—ili kujenga upya flash-loan bundles, miundo inayofanana na reentrancy, na cross-contract hops.
-- **Application/API logs**: unganisha kila on-chain tx na human au automation identity (session ID, OAuth client, API key, CI job ID) pamoja na IPs na auth methods.
-- **KMS/HSM logs**: key ID, caller principal, policy result, destination address, na reason codes kwa kila signature. Weka baseline ya change windows na high-risk operations.
-- **Oracle/feed metadata**: muundo wa data source kwa kila update, reported value, deviation kutoka rolling averages, thresholds zilizowashwa, na failover paths zilizotumika.
-- **Bridge/swap traces**: linganisha lock/mint/unlock events kati ya chains ukitumia correlation IDs, chain IDs, relayer identity, na hop timing.
-- **Anomaly markers**: metrics zinazotokana kama slippage spikes, collateralization ratios zisizo za kawaida, gas density isiyo ya kawaida, au cross-chain velocity.
+- **Traces za kiwango cha chain**: grafu kamili za miito, matumizi ya gas, nonces za transaction na mihuri ya muda ya block—ili kujenga upya bundles za flash-loan, miundo inayofanana na reentrancy na miito inayovuka contracts.
+- **Logs za programu/API**: unganisha kila tx ya on-chain na utambulisho wa mtu au automation (session ID, OAuth client, API key, CI job ID), pamoja na IPs na mbinu za uthibitishaji.
+- **Logs za KMS/HSM**: key ID, principal aliyeita, matokeo ya sera, anwani lengwa na misimbo ya sababu kwa kila saini. Weka viwango vya msingi vya muda wa mabadiliko na shughuli zenye hatari kubwa.
+- **Metadata ya oracle/feed**: muundo wa chanzo cha data kwa kila sasisho, thamani iliyoripotiwa, tofauti na wastani unaosogea, viwango vilivyochochewa na njia za failover zilizotumika.
+- **Traces za bridge/swap**: linganisha matukio ya lock/mint/unlock kwenye chains kwa kutumia correlation IDs, chain IDs, utambulisho wa relayer na muda wa kila hop.
+- **Alama za anomaly**: vipimo vilivyotokana kama ongezeko kubwa la slippage, uwiano usio wa kawaida wa dhamana, msongamano wa gas usio wa kawaida au kasi ya cross-chain.
 
-Tag kila kitu kwa scenario IDs au synthetic user IDs ili analysts waweze kuoanisha observables na technique ya AADAPT inayofanyiwa majaribio.
+Weka scenario IDs au synthetic user IDs kwenye kila kitu ili wachambuzi waweze kuoanisha vinavyoonekana na mbinu ya AADAPT inayojaribiwa.
 
-## 6. Purple-team loop & metrics za maturity
-1. Endesha scenario katika mazingira yaliyodhibitiwa na rekodi detections (alerts, dashboards, responders waliopigiwa).<sup>[[2]](#references)</sup>
-2. Linganisha kila hatua na techniques mahususi za AADAPT pamoja na observables zilizozalishwa katika chain/app/KMS/oracle/bridge planes.
-3. Unda na deploy detection hypotheses (threshold rules, correlation searches, invariant checks).
-4. Rudia hadi mean time to detect (MTTD) na mean time to contain (MTTC) zifikie tolerances za biashara, na playbooks zizuie loss ya thamani kwa uhakika.
+## 6. Mzunguko wa purple-team na vipimo vya ukomavu
+1. Endesha hali ya majaribio katika mazingira yaliyodhibitiwa na rekodi ugunduzi (alerts, dashboards, responders walioarifiwa).<sup>[[2]](#references)</sup>
+2. Linganisha kila hatua na mbinu mahususi za AADAPT pamoja na vinavyoonekana vilivyotolewa kwenye sehemu za chain/app/KMS/oracle/bridge.
+3. Tengeneza na tekeleza dhana za ugunduzi (sheria za threshold, utafutaji wa correlation, ukaguzi wa invariants).
+4. Rudia hadi muda wa wastani wa kugundua (MTTD) na muda wa wastani wa kudhibiti (MTTC) ufikie viwango vinavyokubalika kwa biashara na playbooks zisitishe kwa uhakika upotevu wa thamani.
 
-Fuatilia maturity ya program kwenye axes tatu:<sup>[[2]](#references)</sup>
-- **Visibility**: kila value path muhimu ina telemetry katika kila plane.
-- **Coverage**: asilimia ya techniques za AADAPT zilizopewa kipaumbele na kufanyiwa majaribio end-to-end.
-- **Response**: uwezo wa kusitisha contracts, kubatilisha keys, au kufreeze flows kabla ya hasara isiyoweza kurekebishwa.
+Fuatilia ukomavu wa programu kwa vipimo vitatu:<sup>[[2]](#references)</sup>
+- **Mwonekano**: kila njia muhimu ya thamani ina telemetry katika kila sehemu.
+- **Ufunikaji**: idadi ya mbinu za AADAPT zilizopewa kipaumbele zilizojaribiwa mwanzo hadi mwisho.
+- **Mwitikio**: uwezo wa kusitisha contracts, kubatilisha funguo au kusimamisha mtiririko kabla ya hasara isiyoweza kurejeshwa.
 
-Milestones za kawaida: (1) value inventory + AADAPT mapping iliyokamilika, (2) scenario ya kwanza ya end-to-end yenye detections zilizotekelezwa, (3) purple-team cycles za kila robo mwaka zinazopanua coverage na kupunguza MTTD/MTTC.<sup>[[2]](#references)</sup>
+Hatua za kawaida: (1) kukamilisha orodha ya thamani na ulinganisho wa AADAPT, (2) hali ya kwanza ya majaribio ya mwanzo hadi mwisho yenye ugunduzi uliotekelezwa, (3) mizunguko ya robo mwaka ya purple-team inayopanua ufunikaji na kupunguza MTTD/MTTC.<sup>[[2]](#references)</sup>
 
-## 7. Scenario templates
-Tumia blueprints hizi zinazoweza kurudiwa ili kubuni simulations zinazolingana moja kwa moja na mienendo ya AADAPT.<sup>[[2]](#references)</sup>
+## 7. Violezo vya hali za majaribio
+Tumia michoro hii inayoweza kurudiwa ili kubuni simulations zinazoendana moja kwa moja na tabia za AADAPT.<sup>[[2]](#references)</sup>
 
-### Scenario A – Flash-loan economic manipulation
-- **Lengo**: kukopa capital ya muda mfupi ndani ya transaction moja ili kupotosha AMM prices/liquidity na kuchochea borrows, liquidations, au mints zenye bei isiyo sahihi kabla ya kurejesha.
+### Hali A – Udanganyifu wa kiuchumi kwa flash-loan
+- **Lengo**: kukopa mtaji wa muda mfupi ndani ya transaction moja ili kupotosha bei/liquidity za AMM na kuchochea mikopo, liquidation au mint zisizo na bei sahihi kabla ya kurejesha mkopo.
 - **Utekelezaji**:
-1. Fanya fork ya target chain na ujaze pools kwa liquidity inayofanana na production.
-2. Kopa notional kubwa kupitia flash loan.
-3. Fanya swaps zilizopimwa ili kuvuka price/threshold boundaries zinazotegemewa na lending, vault, au derivative logic.
-4. Ita victim contract mara moja baada ya distortion (borrow, liquidate, mint) na urejeshe flash loan.
-- **Upimaji**: Je, invariant violation ilifanikiwa? Je, slippage/price-deviation monitors, circuit breakers, au governance pause hooks ziliwashwa? Ilichukua muda gani hadi analytics ione gas/call graph pattern isiyo ya kawaida?
+  1. Fork chain lengwa na jaza pools kwa liquidity inayofanana na ya uzalishaji.
+  2. Kopa kiasi kikubwa kupitia flash loan.
+  3. Fanya swaps zilizopimwa kwa makini ili kuvuka mipaka ya bei/threshold inayotegemewa na mantiki ya ukopeshaji, vault au derivative.
+  4. Ita contract lengwa mara tu baada ya upotoshaji (kopa, liquidate, mint) na urejeshe flash loan.
+- **Upimaji**: Je, uvunjaji wa invariant ulifanikiwa? Je, vichunguzi vya slippage/price-deviation, circuit breakers au hooks za kusitisha za governance vilichochewa? Ilipita muda gani kabla analytics haijatambua muundo usio wa kawaida wa gas/call graph?
 
-### Scenario B – Oracle/data-feed poisoning
-- **Lengo**: kubaini ikiwa feeds zilizomanipuliwa zinaweza kuchochea automated actions zenye uharibifu (mass liquidations, settlements zisizo sahihi).
+### Hali B – Kuweka sumu kwenye oracle/data feed
+- **Lengo**: kubaini kama feeds zilizochezewa zinaweza kuchochea vitendo vya kiotomatiki vinavyoharibu (liquidations nyingi, settlements zisizo sahihi).
 - **Utekelezaji**:
-1. Katika fork/testnet, deploy malicious feed au rekebisha aggregator weights/quorum/update cadence ipite deviation inayokubalika.
-2. Ruhusu contracts tegemezi zitumie values zilizo poisoned na kutekeleza logic yake ya kawaida.
-- **Upimaji**: Alerts za nje ya kawaida kwenye feed level, activation ya fallback oracle, utekelezaji wa min/max bounds, na latency kati ya kuanza kwa anomaly na response ya operator.
+  1. Kwenye fork/testnet, deploy feed hasidi au rekebisha uzito wa aggregator/quorum/marudio ya masasisho kiasi cha kuzidi deviation inayovumilika.
+  2. Acha contracts tegemezi zitumie thamani zilizowekewa sumu na kutekeleza mantiki yake ya kawaida.
+- **Upimaji**: Alerts za nje ya kiwango katika feed, kuamilishwa kwa fallback oracle, utekelezaji wa mipaka ya chini/juu, na muda kati ya kuanza kwa anomaly na mwitikio wa mwendeshaji.
 
-### Scenario C – Credential/signing abuse
-- **Lengo**: kutest ikiwa ku-compromise signer mmoja au automation identity kunawezesha upgrades, parameter changes, au treasury drains zisizoidhinishwa.
+### Hali C – Matumizi mabaya ya credentials/utiaji saini
+- **Lengo**: kujaribu ikiwa kuhujumu signer mmoja au utambulisho wa automation kunaruhusu uboreshaji, mabadiliko ya vigezo au utoaji wa fedha kutoka treasury bila idhini.
 - **Utekelezaji**:
-1. Orodhesha identities zenye signing rights nyeti (operators, CI tokens, service accounts zinazoita KMS/HSM, multisig participants).
-2. Simulate compromise (tumia tena credentials/keys zao ndani ya scope ya lab).
-3. Jaribu privileged actions: upgrade proxies, badilisha risk parameters, mint/pause assets, au anzisha governance proposals.
-- **Upimaji**: Je, KMS/HSM logs zinaibua anomaly alerts (time-of-day, destination drift, burst ya high-risk operations)? Je, policies au multisig thresholds zinaweza kuzuia abuse ya mtu mmoja? Je, throttles/rate limits au approvals za ziada zinatekelezwa?
+  1. Orodhesha utambulisho wenye haki nyeti za utiaji saini (waendeshaji, CI tokens, service accounts zinazoita KMS/HSM, washiriki wa multisig).
+  2. Igiza kuhujumu (tumia tena credentials/funguo zao ndani ya scope ya maabara).
+  3. Jaribu vitendo vya upendeleo: boresha proxies, badilisha vigezo vya hatari, mint/sitisha mali au anzisha mapendekezo ya governance.
+- **Upimaji**: Je, logs za KMS/HSM zinatoa alerts za anomaly (wakati wa siku, mabadiliko ya anwani lengwa, mlipuko wa shughuli zenye hatari kubwa)? Je, sera au viwango vya multisig vinaweza kuzuia matumizi mabaya ya upande mmoja? Je, throttles/rate limits au idhini za ziada zinatekelezwa?
 
-### Scenario D – Cross-chain evasion & traceability gaps
-- **Lengo**: kutathmini jinsi defenders wanavyoweza kufuatilia na kuzuia assets zinazolaundishwa haraka kupitia bridges, DEX routers, na privacy hops.
+### Hali D – Kukwepa ufuatiliaji wa cross-chain na mapengo ya traceability
+- **Lengo**: kutathmini jinsi watetezi wanavyoweza kufuatilia na kuzuia mali zinazofichwa haraka kupitia bridges, DEX routers na privacy hops.
 - **Utekelezaji**:
-1. Unganisha lock/mint operations katika bridges za kawaida, changanya swaps/mixers kwenye kila hop, na dumisha correlation IDs za kila hop.
-2. Harakisha transfers ili kusisitiza monitoring latency (multi-hop ndani ya dakika/blocks).
-- **Upimaji**: Muda wa kuoanisha events kati ya telemetry + commercial chain analytics, ukamilifu wa path iliyojengwa upya, uwezo wa kutambua choke points za kufreeze katika incident halisi, na alert fidelity kwa cross-chain velocity/value isiyo ya kawaida.
+  1. Unganisha shughuli za lock/mint katika bridges za kawaida, changanya swaps/mixers kwenye kila hop, na udumishe correlation IDs kwa kila hop.
+  2. Ongeza kasi ya uhamishaji ili kujaribu uwezo wa ufuatiliaji (multi-hop ndani ya dakika/blocks).
+- **Upimaji**: Muda wa kuoanisha matukio katika telemetry na analytics za kibiashara za chain, ukamilifu wa njia iliyojengwa upya, uwezo wa kutambua sehemu za kusimamishia mali katika tukio halisi, na usahihi wa alerts za kasi/thamani isiyo ya kawaida ya cross-chain.
 
 ## References
 
-- [1] [Mfumo wa AADAPT(TM) wa Cyber Threats kwa Digital Assets (MITRE)](https://www.mitre.org/sites/default/files/2025-05/PR-25-1118-aadpt-cyber-threat-framework-for-digital-assets.pdf)
-- [2] [Mfumo wa MITRE AADAPT kama Roadmap ya Red Team (Bishop Fox)](https://bishopfox.com/blog/mitre-aadapt-framework-as-a-red-team-roadmap)
+- [1] [Mfumo wa MITRE AADAPT wa Vitisho vya Mtandaoni kwa Mali za Kidijitali (MITRE)](https://www.mitre.org/sites/default/files/2025-05/PR-25-1118-aadpt-cyber-threat-framework-for-digital-assets.pdf)
+- [2] [Mfumo wa MITRE AADAPT kama Ramani ya Njia ya Red Team (Bishop Fox)](https://bishopfox.com/blog/mitre-aadapt-framework-as-a-red-team-roadmap)
 {{#include ../../banners/hacktricks-training.md}}
