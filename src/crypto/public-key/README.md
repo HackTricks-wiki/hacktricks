@@ -1,19 +1,19 @@
-# Κρυπτογραφία Δημόσιου Κλειδιού
+# Κρυπτογραφία δημόσιου κλειδιού
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Πολλές προηγμένες προκλήσεις κρυπτογραφίας σε CTF περιλαμβάνουν RSA, κρυπτογραφία ελλειπτικών καμπυλών (ECC), ECDSA, lattices ή weak randomness.
+Πολλές προηγμένες προκλήσεις κρυπτογραφίας CTF περιλαμβάνουν RSA, κρυπτογραφία ελλειπτικών καμπυλών (ECC), ECDSA, πλέγματα ή αδύναμη τυχαιότητα.
 
-## Συνιστώμενα εργαλεία
+## Προτεινόμενα εργαλεία
 
-- [SageMath](https://www.sagemath.org/) για modular arithmetic, elliptic curves και lattice reduction<sup>[[1]](#references)</sup>
-- [RsaCtfTool](https://github.com/RsaCtfTool/RsaCtfTool) για τον έλεγχο συνηθισμένων αδυναμιών του RSA<sup>[[2]](#references)</sup>
-- [FactorDB](https://factordb.com/) για τον έλεγχο του αν ένας ακέραιος έχει γνωστούς παράγοντες<sup>[[3]](#references)</sup>
-- Η Python [`ecdsa` library](https://ecdsa.readthedocs.io/) για key parsing, signing και verification<sup>[[7]](#references)</sup>
+- [SageMath](https://www.sagemath.org/) για αρθρωτή αριθμητική, ελλειπτικές καμπύλες και αναγωγή πλέγματος<sup>[[1]](#references)</sup>
+- [RsaCtfTool](https://github.com/RsaCtfTool/RsaCtfTool) για τον έλεγχο κοινών αδυναμιών του RSA<sup>[[2]](#references)</sup>
+- [FactorDB](https://factordb.com/) για να ελέγξετε αν ένας ακέραιος έχει γνωστούς παράγοντες<sup>[[3]](#references)</sup>
+- Η βιβλιοθήκη Python [`ecdsa`](https://ecdsa.readthedocs.io/) για ανάλυση κλειδιών, υπογραφή και επαλήθευση<sup>[[7]](#references)</sup>
 
 ## RSA
 
-Ξεκινήστε από εδώ όταν μια πρόκληση παρέχει τα `n`, `e` και `c`, μαζί με ένα hint όπως shared modulus, low exponent, partial key bits ή related messages.
+Ξεκινήστε από εδώ όταν μια πρόκληση παρέχει τα `n`, `e` και `c`, μαζί με μια υπόδειξη όπως κοινό modulus, μικρό εκθέτη, μερικά bits κλειδιού ή συσχετισμένα μηνύματα.
 
 {{#ref}}
 rsa/README.md
@@ -21,42 +21,42 @@ rsa/README.md
 
 ## ECC / ECDSA
 
-Αν εμπλέκονται υπογραφές, ελέγξτε για nonce reuse, bias ή leak πριν υποθέσετε ότι πρέπει να λυθεί το underlying discrete-logarithm problem.
+Αν εμπλέκονται υπογραφές, ελέγξτε για επαναχρησιμοποίηση nonce, μεροληψία ή διαρροή προτού υποθέσετε ότι πρέπει να λυθεί το υποκείμενο πρόβλημα του διακριτού λογαρίθμου.
 
-### ECDSA nonce reuse / bias
+### Επαναχρησιμοποίηση / μεροληψία nonce στο ECDSA
 
-Το ECDSA απαιτεί έναν νέο secret αριθμό `k` για κάθε μήνυμα. Αν το ίδιο `k` υπογράψει δύο διαφορετικά message hashes, το private key μπορεί να ανακτηθεί από τις public signature values.<sup>[[4]](#references)</sup>
+Το ECDSA απαιτεί έναν νέο μυστικό αριθμό `k` για κάθε μήνυμα. Αν το ίδιο `k` υπογράψει δύο διαφορετικά hashes μηνυμάτων, το ιδιωτικό κλειδί μπορεί να ανακτηθεί από τις δημόσιες τιμές των υπογραφών.<sup>[[4]](#references)</sup>
 
-Ακόμη και όταν το `k` δεν είναι ίδιο, bias ή leak των nonce bits σε πολλές υπογραφές μπορεί να επιτρέψει lattice-based recovery.<sup>[[5]](#references)</sup>
+Ακόμα κι αν το `k` δεν είναι ίδιο, η μεροληψία ή η διαρροή bits του nonce σε πολλές υπογραφές μπορεί να επιτρέψει ανάκτηση με βάση πλέγματα.<sup>[[5]](#references)</sup>
 
 Τεχνική ανάκτηση όταν το `k` επαναχρησιμοποιείται:<sup>[[4]](#references)</sup>
 
-Εξισώσεις υπογραφής ECDSA (group order `n`):
+Εξισώσεις υπογραφής ECDSA (τάξη ομάδας `n`):
 
 - `r = (kG)_x mod n`
 - `s = k^{-1}(h(m) + r*d) mod n`
 
-Αν το ίδιο `k` επαναχρησιμοποιηθεί για δύο messages `m1, m2`, παράγοντας signatures `(r, s1)` και `(r, s2)`:
+Αν το ίδιο `k` επαναχρησιμοποιηθεί για δύο μηνύματα `m1, m2`, παράγοντας τις υπογραφές `(r, s1)` και `(r, s2)`:
 
 - `k = (h(m1) - h(m2)) * (s1 - s2)^{-1} mod n`
 - `d = (s1*k - h(m1)) * r^{-1} mod n`
 
-### Invalid-curve attacks
+### Επιθέσεις με μη έγκυρη καμπύλη
 
-Αν ένα protocol δεν επικυρώνει ότι ένα input point ανήκει στην αναμενόμενη curve και στο σωστό subgroup, ένας attacker μπορεί να εξαναγκάσει operations σε weaker group και να ανακτήσει πληροφορίες για ένα secret scalar. Το SEC 1 καθορίζει public-key validation checks που αποσκοπούν στην αποτροπή τέτοιων inputs.<sup>[[6]](#references)</sup>
+Αν ένα πρωτόκολλο δεν επικυρώνει ότι ένα σημείο εισόδου ανήκει στην αναμενόμενη καμπύλη και στη σωστή υποομάδα, ένας επιτιθέμενος μπορεί να εξαναγκάσει την εκτέλεση πράξεων σε ασθενέστερη ομάδα και να ανακτήσει πληροφορίες για έναν μυστικό scalar. Το SEC 1 ορίζει ελέγχους επικύρωσης δημόσιων κλειδιών που αποσκοπούν στην αποτροπή τέτοιων εισόδων.<sup>[[6]](#references)</sup>
 
 Τεχνική σημείωση:
 
-- Επικυρώστε ότι τα points δεν είναι το point at infinity, έχουν valid coordinates, ικανοποιούν την curve equation και ανήκουν στο απαιτούμενο subgroup.<sup>[[6]](#references)</sup>
-- Σε CTF challenges, αυτό συχνά μοντελοποιείται ως ένας server που πολλαπλασιάζει ένα point επιλεγμένο από τον attacker με ένα secret scalar και επιστρέφει μια derived value.
+- Επικυρώστε ότι τα σημεία δεν είναι το σημείο στο άπειρο, έχουν έγκυρες συντεταγμένες, ικανοποιούν την εξίσωση της καμπύλης και ανήκουν στην απαιτούμενη υποομάδα.<sup>[[6]](#references)</sup>
+- Στις προκλήσεις CTF, αυτό συχνά μοντελοποιείται ως διακομιστής που πολλαπλασιάζει ένα σημείο επιλεγμένο από τον επιτιθέμενο με έναν μυστικό scalar και επιστρέφει μια παράγωγη τιμή.
 
 ## References
 
 - [1] [SageMath](https://www.sagemath.org/)
 - [2] [RsaCtfTool](https://github.com/RsaCtfTool/RsaCtfTool)
 - [3] [FactorDB](https://factordb.com/)
-- [4] [NIST FIPS 186-5: Πρότυπο Ψηφιακής Υπογραφής](https://csrc.nist.gov/pubs/fips/186-5/final)
-- [5] [Breitner and Heninger: Biased Nonce Sense — Lattice Attacks against Weak ECDSA Signatures](https://eprint.iacr.org/2019/023)
-- [6] [SEC 1 v2.0: Κρυπτογραφία Ελλειπτικών Καμπυλών](https://www.secg.org/sec1-v2.pdf)
+- [4] [NIST FIPS 186-5: Πρότυπο ψηφιακών υπογραφών](https://csrc.nist.gov/pubs/fips/186-5/final)
+- [5] [Breitner και Heninger: Μεροληπτικά nonce — Επιθέσεις πλέγματος εναντίον αδύναμων υπογραφών ECDSA](https://eprint.iacr.org/2019/023)
+- [6] [SEC 1 v2.0: Κρυπτογραφία ελλειπτικών καμπυλών](https://www.secg.org/sec1-v2.pdf)
 - [7] [Τεκμηρίωση της Python `ecdsa`](https://ecdsa.readthedocs.io/)
 {{#include ../../banners/hacktricks-training.md}}

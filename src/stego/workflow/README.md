@@ -1,147 +1,175 @@
-# Ροή εργασίας Stego
+# Stego Ροή εργασίας
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Τα περισσότερα προβλήματα Stego επιλύονται ταχύτερα με συστηματικό triage παρά με τη δοκιμή τυχαίων εργαλείων.
+Τα περισσότερα προβλήματα stego λύνονται πιο γρήγορα με συστηματική αρχική αξιολόγηση παρά με τη δοκιμή τυχαίων εργαλείων.
 
 ## Βασική ροή
 
-### Λίστα ελέγχου γρήγορου triage
+### Γρήγορη λίστα ελέγχου αρχικής αξιολόγησης
 
-Ο στόχος είναι να απαντηθούν αποτελεσματικά δύο ερωτήσεις:
+Στόχος είναι να απαντηθούν αποτελεσματικά δύο ερωτήματα:
 
-1. Ποιο είναι το πραγματικό container/format;
-2. Βρίσκεται το payload σε metadata, σε appended bytes, σε embedded files ή σε content-level stego;
+1. Ποιος είναι ο πραγματικός container/format;
+2. Βρίσκεται το payload στα metadata, σε bytes που έχουν προστεθεί, σε ενσωματωμένα αρχεία ή σε stego επιπέδου περιεχομένου;
 
-#### 1) Εντοπισμός του container
+#### 1) Αναγνώριση του container
+
 ```bash
 file target
 ls -lah target
 ```
-Αν το `file` και η επέκταση διαφωνούν, εξετάστε την υπογραφή αντί να εμπιστευτείτε την κατάληξη. Το `file` βασίζεται επίσης σε ευρετικές μεθόδους και μπορεί να παραπλανηθεί από κακοσχηματισμένη ή polyglot είσοδο. Αντιμετωπίστε τις συνηθισμένες μορφές ως containers όπου αρμόζει (για παράδειγμα, τα έγγραφα OOXML είναι πακέτα ZIP).<sup>[[2]](#references)</sup>
 
-#### 2) Αναζητήστε μεταδεδομένα και προφανή strings
+Αν το `file` και η επέκταση διαφωνούν, εξετάστε την υπογραφή αντί να εμπιστευτείτε την κατάληξη. Το `file` βασίζεται επίσης σε ευρετικές μεθόδους και μπορεί να ξεγελαστεί από κακοσχηματισμένα ή πολυγλωσσικά δεδομένα εισόδου. Αντιμετωπίστε τις συνήθεις μορφές ως containers όταν χρειάζεται (για παράδειγμα, τα έγγραφα OOXML είναι πακέτα ZIP).<sup>[[2]](#references)</sup>
+
+#### 2) Αναζητήστε μεταδεδομένα και εμφανείς συμβολοσειρές
+
 ```bash
 exiftool target
 strings -n 6 target | head
 strings -n 6 target | tail
 ```
+
 Δοκιμάστε πολλαπλές κωδικοποιήσεις:
+
 ```bash
 strings -e l -n 6 target | head
 strings -e b -n 6 target | head
 ```
+
 #### 3) Έλεγχος για προσαρτημένα δεδομένα / ενσωματωμένα αρχεία
+
 ```bash
 binwalk target
 binwalk -e target
 ```
-Αν η εξαγωγή αποτύχει αλλά αναφέρονται signatures, κάντε χειροκίνητα carve τα offsets με `dd` και εκτελέστε ξανά το `file` στην περιοχή που έγινε carve.
 
-#### 4) Αν είναι εικόνα
+Αν η εξαγωγή αποτύχει, αλλά αναφέρονται signatures, κάντε χειροκίνητα carve στα offsets με `dd` και εκτελέστε ξανά το `file` στην περιοχή που απομονώθηκε.
 
-- Ελέγξτε για anomalies: `magick identify -verbose file`
-- Αν είναι PNG/BMP, απαριθμήστε bit-planes/LSB: `zsteg -a file.png`
+#### 4) Αν πρόκειται για εικόνα
+
+- Ελέγξτε για ανωμαλίες: `magick identify -verbose file`
+- Αν είναι PNG/BMP, εξετάστε τα bit-planes/LSB: `zsteg -a file.png`
 - Επικυρώστε τη δομή PNG: `pngcheck -v file.png`
-- Χρησιμοποιήστε visual filters (Stegsolve / StegoVeritas) όταν το περιεχόμενο μπορεί να αποκαλυφθεί μέσω μετασχηματισμών καναλιών/planes
+- Χρησιμοποιήστε οπτικά φίλτρα (Stegsolve / StegoVeritas) όταν το περιεχόμενο μπορεί να αποκαλυφθεί με μετασχηματισμούς καναλιών/plane
 
-#### 5) Αν είναι audio
+#### 5) Αν πρόκειται για ήχο
 
-- Πρώτα spectrogram (Sonic Visualiser)
-- Αποκωδικοποιήστε/επιθεωρήστε streams: `ffmpeg -v info -i file -f null -`
-- Αν το audio μοιάζει με structured tones, δοκιμάστε DTMF decoding
+- Ξεκινήστε με spectrogram (Sonic Visualiser)
+- Αποκωδικοποιήστε/επιθεωρήστε τα streams: `ffmpeg -v info -i file -f null -`
+- Αν ο ήχος θυμίζει δομημένους τόνους, δοκιμάστε αποκωδικοποίηση DTMF
 
 ### Βασικά εργαλεία
 
-Αυτά εντοπίζουν συχνές περιπτώσεις σε επίπεδο container: payloads σε metadata, appended bytes και embedded files που μεταμφιέζονται μέσω extension.<sup>[[1]](#references)[[3]](#references)</sup>
+Αυτά εντοπίζουν συχνές περιπτώσεις σε επίπεδο container: payloads στα metadata, bytes που έχουν προστεθεί στο τέλος και ενσωματωμένα αρχεία που κρύβονται με παραπλανητική επέκταση.<sup>[[1]](#references)[[3]](#references)</sup>
 
 #### Binwalk
+
 ```bash
 binwalk file
 binwalk -e file
 binwalk --dd '.*' file
 ```
-Repo: https://github.com/ReFirmLabs/binwalk
+
+Αποθετήριο: https://github.com/ReFirmLabs/binwalk
 
 #### Foremost
+
 ```bash
 foremost -i file
 ```
-Αποθετήριο του project: `korczis/foremost`.<sup>[[4]](#references)</sup>
+
+Αποθετήριο έργου: `korczis/foremost`.<sup>[[4]](#references)</sup>
 
 #### Exiftool / Exiv2
+
 ```bash
 exiftool file
 exiv2 file
 ```
-#### αρχείο / συμβολοσειρές
+
+#### file / strings
+
 ```bash
 file file
 strings -n 6 file
 ```
+
 #### cmp
+
 ```bash
 cmp original.jpg stego.jpg -b -l
 ```
-### Containers, appended data και polyglot tricks
 
-Πολλές προκλήσεις στεγανογραφίας περιλαμβάνουν extra bytes μετά από ένα έγκυρο αρχείο ή embedded archives που μεταμφιέζονται μέσω extension.
+### Containers, appended data, and polyglot tricks
+
+Πολλές προκλήσεις στεγανογραφίας περιλαμβάνουν επιπλέον bytes μετά από ένα έγκυρο αρχείο ή embedded archives που μεταμφιέζονται μέσω της επέκτασης αρχείου.
 
 #### Appended payloads
 
-Πολλά formats αγνοούν τα trailing bytes. Ένα ZIP/PDF/script μπορεί να προσαρτηθεί σε ένα image/audio container.
+Πολλές μορφές αρχείων αγνοούν τα bytes στο τέλος. Ένα ZIP/PDF/script μπορεί να προσαρτηθεί σε ένα image/audio container.
 
 Γρήγοροι έλεγχοι:
+
 ```bash
 binwalk file
 tail -c 200 file | xxd
 ```
-Αν γνωρίζετε ένα offset, κάντε carve με το `dd`:
+
+Αν γνωρίζετε ένα offset, κάντε carving με `dd`:
+
 ```bash
 dd if=file of=carved.bin bs=1 skip=<offset>
 file carved.bin
 ```
+
 #### Magic bytes
 
-Όταν το `file` μπερδεύεται, αναζητήστε magic bytes με το `xxd` και συγκρίνετέ τα με γνωστές υπογραφές:
+Όταν το `file` μπερδεύεται, αναζήτησε magic bytes με το `xxd` και σύγκρινέ τα με γνωστές υπογραφές:
+
 ```bash
 xxd -g 1 -l 32 file
 ```
+
 #### Zip-in-disguise
 
-Δοκιμάστε τα `7z` και `unzip`, ακόμη κι αν η επέκταση δεν υποδεικνύει ότι πρόκειται για zip:
+Δοκιμάστε 7z και unzip, ακόμα κι αν η επέκταση δεν λέει ότι είναι zip:
+
 ```bash
 7z l file
 unzip -l file
 ```
-### Παράξενες περιπτώσεις κοντά στο stego
 
-Γρήγοροι σύνδεσμοι για μοτίβα που εμφανίζονται τακτικά δίπλα σε stego (QR-from-binary, braille κ.λπ.).
+### Παράδοξα κοντά στο stego
 
-#### QR codes από binary
+Γρήγοροι σύνδεσμοι για μοτίβα που εμφανίζονται συχνά δίπλα στο stego (QR από δυαδικά δεδομένα, braille κ.λπ.).
 
-Αν το μήκος ενός blob είναι τέλειο τετράγωνο, μπορεί να αποτελεί ακατέργαστα pixels για μια εικόνα/QR.
+#### QR codes από δυαδικά δεδομένα
+
+Αν το μήκος ενός blob είναι τέλειο τετράγωνο, μπορεί να είναι ακατέργαστα pixels για εικόνα/QR.
+
 ```python
 import math
 math.isqrt(2500)  # 50
 ```
-Βοηθητικό εργαλείο μετατροπής δυαδικού σε εικόνα:
 
-- Βοηθητικό εργαλείο binary-image του dCode.<sup>[[5]](#references)</sup>
+Βοηθητικό εργαλείο μετατροπής δυαδικών δεδομένων σε εικόνα:
 
-#### Braille
+- Βοηθητικό εργαλείο δυαδικής εικόνας του dCode.<sup>[[5]](#references)</sup>
 
-- Μεταφραστής Braille του Branah.<sup>[[6]](#references)</sup>
+#### Μπράιγ
 
-Για ευρύτερες συλλογές εργαλείων steganography και πόρων ειδικά για τεχνικές, δείτε το συνοδευτικό stego-toolkit και την επιμελημένη λίστα του 0xRick.<sup>[[1]](#references)[[7]](#references)</sup>
+- Μεταφραστής Μπράιγ της Branah.<sup>[[6]](#references)</sup>
+
+Για ευρύτερες συλλογές εργαλείων στεγανογραφίας και πόρους για συγκεκριμένες τεχνικές, δείτε το ενσωματωμένο stego-toolkit και την επιμελημένη λίστα του 0xRick.<sup>[[1]](#references)[[7]](#references)</sup>
 
 ## References
 
-- [1] [DominicBreuker/stego-toolkit - Docker image με τα δημοφιλέστερα εργαλεία steganography σε ενιαίο πακέτο](https://github.com/DominicBreuker/stego-toolkit)
-- [2] [Daston et al. — Συμβάσεις ECMA-376 Open Packaging](https://ecma-international.org/publications-and-standards/standards/ecma-376/)
-- [3] [ReFirmLabs/binwalk](https://github.com/ReFirmLabs/binwalk)
+- [1] [DominicBreuker/stego-toolkit - Εικόνα Docker με τα δημοφιλέστερα εργαλεία στεγανογραφίας σε ένα πακέτο](https://github.com/DominicBreuker/stego-toolkit)
+- [2] [Daston et al. — Συμβάσεις ανοιχτής συσκευασίας ECMA-376](https://ecma-international.org/publications-and-standards/standards/ecma-376/)
+- [3] [korczis/foremost](https://github.com/ReFirmLabs/binwalk)
 - [4] [korczis/foremost](https://github.com/korczis/foremost)
 - [5] [dCode — Δυαδική εικόνα](https://www.dcode.fr/binary-image)
-- [6] [Branah — Μεταφραστής Braille](https://www.branah.com/braille-translator)
-- [7] [0xRick - Πόροι steganography](https://0xrick.github.io/lists/stego/)
+- [6] [Branah — Μεταφραστής Μπράιγ](https://www.branah.com/braille-translator)
+- [7] [0xRick - Πόροι στεγανογραφίας](https://0xrick.github.io/lists/stego/)
 {{#include ../../banners/hacktricks-training.md}}
