@@ -27,6 +27,12 @@ Software:
 nodejs-v8-cached-bytecode.md
 {{#endref}}
 
+## Virtualized payloads and custom VMs
+
+{{#ref}}
+../../windows-hardening/virtualized-payload-execution.md
+{{#endref}}
+
 ## .NET decompiler
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
