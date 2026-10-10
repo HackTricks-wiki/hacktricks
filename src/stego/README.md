@@ -2,17 +2,17 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-यह section images, audio, video, documents, archives और text से **छिपे हुए data को खोजने और extract करने** पर केंद्रित है। Steganography, data को अन्य data के अंदर embed करके communication के अस्तित्व को छिपाती है।<sup>[[1]](#references)</sup>
+यह सेक्शन images, audio, video, documents, archives और text से **छिपा हुआ डेटा ढूँढ़ने और निकालने** पर केंद्रित है। Steganography, डेटा के भीतर डेटा एम्बेड करके संचार के अस्तित्व को छिपाती है।<sup>[[1]](#references)</sup>
 
-यदि आप cryptographic attacks के लिए आए हैं, तो **Crypto** section पर जाएँ।
+अगर आप cryptographic attacks के लिए यहाँ आए हैं, तो **Crypto** सेक्शन पर जाएँ।
 
-## Entry Point
+## शुरुआती बिंदु
 
-Steganography को forensics problem की तरह approach करें: real container की पहचान करें, high-signal locations (metadata, appended data, embedded files) को enumerate करें, और उसके बाद ही content-level extraction techniques लागू करें।
+Steganography को फॉरेंसिक समस्या की तरह देखें: असली कंटेनर की पहचान करें, उच्च-सिग्नल वाली जगहों (metadata, जोड़ा गया डेटा, embedded files) की जाँच करें, और उसके बाद ही content-level extraction techniques लागू करें।
 
-### Workflow & triage
+### कार्यप्रवाह और प्रारंभिक जाँच
 
-एक structured workflow, जो container identification, metadata/string inspection, carving और format-specific branching को प्राथमिकता देता है।
+एक व्यवस्थित कार्यप्रवाह, जिसमें कंटेनर की पहचान, metadata/string inspection, carving और format-specific branching को प्राथमिकता दी जाती है।
 
 {{#ref}}
 workflow/README.md
@@ -28,7 +28,7 @@ images/README.md
 
 ### Audio
 
-Spectrogram messages, sample LSB embedding और telephone keypad tones (DTMF) बार-बार दिखाई देने वाले patterns हैं।
+Spectrogram messages, sample LSB embedding और telephone keypad tones (DTMF) बार-बार दिखने वाले पैटर्न हैं।
 
 {{#ref}}
 audio/README.md
@@ -36,7 +36,7 @@ audio/README.md
 
 ### Text
 
-यदि text सामान्य रूप से render होता है लेकिन अप्रत्याशित व्यवहार करता है, तो Unicode homoglyphs, zero-width characters या whitespace-based encoding पर विचार करें।
+अगर text सामान्य रूप से दिखता है, लेकिन अप्रत्याशित ढंग से व्यवहार करता है, तो Unicode homoglyphs, zero-width characters या whitespace-based encoding पर विचार करें।
 
 {{#ref}}
 text/README.md
@@ -44,15 +44,15 @@ text/README.md
 
 ### Documents
 
-PDFs और Office files पहले containers होते हैं; attacks आमतौर पर embedded files/streams, object/relationship graphs और ZIP extraction के इर्द-गिर्द होते हैं।
+PDFs और Office files पहले कंटेनर होते हैं; हमले आमतौर पर embedded files/streams, object/relationship graphs और ZIP extraction के इर्द-गिर्द होते हैं।
 
 {{#ref}}
 documents/README.md
 {{#endref}}
 
-### Malware and delivery-style steganography
+### Malware और delivery-style steganography
 
-Payload delivery में valid-looking files, जैसे GIF या PNG images, का उपयोग किया जा सकता है, जिनमें pixels के अंदर data छिपाने के बजाय marker-delimited text payloads होते हैं।
+Payload delivery में GIF या PNG images जैसी सामान्य दिखने वाली files का उपयोग हो सकता है, जिनमें pixels के भीतर डेटा छिपाने के बजाय marker-delimited text payloads होते हैं।
 
 {{#ref}}
 malware-and-network/README.md
@@ -60,5 +60,5 @@ malware-and-network/README.md
 
 ## References
 
-- [1] [NIST CSRC Glossary - Steganography](https://csrc.nist.gov/glossary/term/steganography)
+- [1] [NIST CSRC शब्दावली - Steganography](https://csrc.nist.gov/glossary/term/steganography)
 {{#include ../banners/hacktricks-training.md}}

@@ -1,24 +1,24 @@
-# Crypto CTF Misc
+# Crypto CTF विविध
 
 {{#include ../../banners/hacktricks-training.md}}
 
-यह section उन techniques को एकत्र करता है जो cryptography challenges में दिखाई देती हैं, लेकिन अन्य categories में आसानी से fit नहीं होतीं।
+इस अनुभाग में cryptography challenges में इस्तेमाल होने वाली ऐसी तकनीकें शामिल हैं, जो अन्य श्रेणियों में ठीक से नहीं आतीं।
 
-## Esoteric languages
+## गूढ़ भाषाएँ
 
-### Technique
+### तकनीक
 
-जब किसी challenge में esoteric-language program चलाना और उसके output को decode करना आवश्यक हो, तब इस workflow का उपयोग करें।
+जब किसी challenge में गूढ़-भाषा के प्रोग्राम को चलाकर उसका output decode करना हो, तब यह workflow अपनाएँ।
 
-यदि किसी challenge में ऐसा code दिया गया है जो किसी standard language जैसा नहीं दिखता:
+अगर challenge में ऐसा code दिया गया है जो किसी standard भाषा जैसा नहीं दिखता:
 
-- किसी विशिष्ट token या instruction sequence को search करके language की पहचान करें।
-- किसी online interpreter या Docker image का उपयोग करें।
-- यदि output अजीब है, तो execution के बाद layered encoding/compression खोजें।
+- किसी विशिष्ट token या निर्देशों के क्रम को खोजकर भाषा की पहचान करें।
+- Online interpreter या Docker image का इस्तेमाल करें।
+- अगर output अजीब हो, तो execution के बाद encoding या compression की परतें देखें।
 
-एक उपयोगी language index Esolang wiki है।<sup>[[1]](#references)</sup>
+उपयोगी भाषाओं की सूची Esolang wiki पर है।<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [Esolang, esoteric programming languages की wiki](https://esolangs.org/wiki/Main_Page)
+- [1] [Esolang, गूढ़ प्रोग्रामिंग भाषाओं की wiki](https://esolangs.org/wiki/Main_Page)
 {{#include ../../banners/hacktricks-training.md}}

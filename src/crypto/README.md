@@ -2,13 +2,13 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-यह section security testing और CTFs के लिए practical cryptography पर केंद्रित है: common patterns पहचानना, उपयुक्त tools चुनना और ज्ञात attacks लागू करना।
+यह section security testing और CTFs के लिए practical cryptography पर केंद्रित है: आम patterns पहचानना, उपयुक्त tools चुनना और ज्ञात attacks लागू करना।
 
-Files के अंदर data छिपाने वाली techniques के लिए **Stego** section देखें।
+फ़ाइलों के अंदर data छिपाने की techniques के लिए **Stego** section देखें।
 
 ## इस section का उपयोग कैसे करें
 
-Primitive और उसके parameters की पहचान करके शुरुआत करें। फिर यह निर्धारित करें कि attacker किस चीज़ को control या observe करता है, जैसे कि oracle, leaked value या nonce reuse, और उसके बाद attack चुनें।
+सबसे पहले primitive और उसके parameters पहचानें। फिर attack चुनने से पहले तय करें कि attacker किन चीज़ों को नियंत्रित या देख सकता है, जैसे oracle, leaked value या nonce reuse।
 
 ### CTF workflow
 
@@ -22,7 +22,7 @@ ctf-workflow/README.md
 symmetric/README.md
 {{#endref}}
 
-### Hashes, MACs, और KDFs
+### Hashes, MACs और KDFs
 
 {{#ref}}
 hashes/README.md
@@ -52,18 +52,20 @@ crypto-in-malware/README.md
 ctf-misc/README.md
 {{#endref}}
 
-## त्वरित setup
+## Quick setup
 
-एक isolated Python environment बनाएँ और commonly used packages install करें। PyCryptodome का documentation `pip` के साथ `pycryptodome` install करने की recommendation देता है; SageMath प्रत्येक supported platform के लिए अलग installation guidance प्रदान करता है।<sup>[[1]](#references)[[2]](#references)</sup>
+एक isolated Python environment बनाएँ और आमतौर पर इस्तेमाल होने वाले packages install करें। PyCryptodome का documentation, `pip` से `pycryptodome` install करने की सलाह देता है; SageMath हर supported platform के लिए अलग installation guidance देता है।<sup>[[1]](#references)[[2]](#references)</sup>
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install pycryptodome gmpy2 sympy pwntools
 ```
-SageMath अक्सर बीजगणितीय, lattice, RSA और elliptic-curve गणनाओं के लिए उपयोगी होता है।<sup>[[2]](#references)</sup>
+
+SageMath अक्सर algebraic, lattice, RSA और elliptic-curve की गणनाओं के लिए उपयोगी है।<sup>[[2]](#references)</sup>
 
 ## References
 
-- [1] [PyCryptodome दस्तावेज़ीकरण - स्थापना](https://www.pycryptodome.org/src/installation)
-- [2] [SageMath दस्तावेज़ीकरण - स्थापना मार्गदर्शिका](https://doc.sagemath.org/html/en/installation/)
+- [1] [PyCryptodome दस्तावेज़ - इंस्टॉलेशन](https://www.pycryptodome.org/src/installation)
+- [2] [SageMath दस्तावेज़ - इंस्टॉलेशन गाइड](https://doc.sagemath.org/html/en/installation/)
 {{#include ../banners/hacktricks-training.md}}
