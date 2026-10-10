@@ -1,24 +1,24 @@
-# Crypto CTF 기타
+# 암호학 CTF 기타
 
 {{#include ../../banners/hacktricks-training.md}}
 
-이 섹션에서는 암호화 challenge에 등장하지만 다른 카테고리에 깔끔하게 분류되지 않는 기술을 다룹니다.
+이 섹션에서는 암호학 챌린지에 등장하지만 다른 범주에 깔끔하게 들어맞지 않는 기법을 모았습니다.
 
-## Esoteric languages
+## 난해한 언어
 
-### Technique
+### 기법
 
-challenge에서 esoteric-language 프로그램을 실행하고 그 출력을 디코딩해야 할 때 다음 workflow를 사용합니다.
+챌린지에서 난해한 언어로 작성된 프로그램을 실행하고 출력을 디코딩해야 하는 경우 다음 절차를 사용하세요.
 
-challenge에서 표준 언어처럼 보이지 않는 code를 제공하는 경우:
+표준적인 언어처럼 보이지 않는 코드를 받았다면 다음을 수행하세요.
 
-- 독특한 token이나 instruction sequence를 검색하여 언어를 식별합니다.
-- 온라인 interpreter 또는 Docker image를 사용합니다.
-- 출력이 이상하다면 실행 후 여러 단계로 적용된 encoding/compression을 확인합니다.
+- 독특한 토큰이나 명령어 시퀀스를 검색해 언어를 식별합니다.
+- 온라인 인터프리터나 Docker 이미지를 사용합니다.
+- 출력이 이상하다면 실행 후 추가로 적용된 인코딩이나 압축이 있는지 확인합니다.
 
-유용한 언어 목록으로 Esolang wiki를 참고할 수 있습니다.<sup>[[1]](#references)</sup>
+유용한 언어 목록은 Esolang wiki입니다.<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [Esolang, 에소테릭 프로그래밍 언어 wiki](https://esolangs.org/wiki/Main_Page)
+- [1] [Esolang, 난해한 프로그래밍 언어 위키](https://esolangs.org/wiki/Main_Page)
 {{#include ../../banners/hacktricks-training.md}}

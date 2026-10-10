@@ -1,217 +1,235 @@
-# Image Steganography
+# 이미지 스테가노그래피
 
 {{#include ../../banners/hacktricks-training.md}}
 
-대부분의 CTF 이미지 stego는 다음 범주 중 하나에 해당합니다:
+대부분의 CTF 이미지 스테고 문제는 다음 유형 중 하나에 해당합니다.
 
-- LSB/bit-planes (PNG/BMP)
-- Metadata/comment payloads
-- PNG chunk 이상 또는 corruption repair
-- JPEG DCT-domain tools (OutGuess 등)
-- Frame-based (GIF/APNG)
+- LSB/비트 평면 (PNG/BMP)
+- 메타데이터/주석 페이로드
+- PNG 청크 이상 현상 / 손상 복구
+- JPEG DCT 도메인 도구 (OutGuess 등)
+- 프레임 기반 (GIF/APNG)
 
-## Quick triage
+## 빠른 초기 분석
 
-심층적인 content analysis에 앞서 container-level evidence를 우선 확인합니다:
+심층적인 콘텐츠 분석에 앞서 컨테이너 수준의 증거를 우선 확인하세요.
 
-- 파일을 검증하고 구조를 확인합니다: `file`, `magick identify -verbose`, format validators (예: `pngcheck`).
-- Metadata와 visible strings를 추출합니다: `exiftool -a -u -g1`, `strings`.
-- embedded/appended content를 확인합니다: `binwalk` 및 end-of-file inspection (`tail | xxd`).
-- container에 따라 분기합니다:
-- PNG/BMP: bit-planes/LSB 및 chunk-level anomalies.
-- JPEG: metadata + DCT-domain tooling (OutGuess/F5-style families).
-- GIF/APNG: frame extraction, frame differencing, palette tricks.
+- 파일을 검증하고 구조를 살펴봅니다: `file`, `magick identify -verbose`, 형식 검증 도구 (예: `pngcheck`).
+- 메타데이터와 눈에 보이는 문자열을 추출합니다: `exiftool -a -u -g1`, `strings`.
+- 삽입되거나 덧붙은 콘텐츠를 확인합니다: `binwalk` 및 파일 끝부분 검사 (`tail | xxd`).
+- 컨테이너에 따라 다음과 같이 분석합니다.
+  - PNG/BMP: 비트 평면/LSB 및 청크 수준의 이상 현상.
+  - JPEG: 메타데이터 + DCT 도메인 도구 (OutGuess/F5 계열).
+  - GIF/APNG: 프레임 추출, 프레임 차분 분석, 팔레트 트릭.
 
-## Bit-planes / LSB
+## 비트 평면 / LSB
 
-### Technique
+### 기법
 
-PNG/BMP는 pixel을 **bit-level manipulation**하기 쉬운 방식으로 저장하기 때문에 CTF에서 자주 사용됩니다. 일반적인 hide/extract mechanism은 다음과 같습니다:
+PNG/BMP는 픽셀을 **비트 수준 조작**이 쉽도록 저장하므로 CTF에서 많이 사용됩니다. 전형적인 숨기기/추출 방식은 다음과 같습니다.
 
-- 각 pixel channel (R/G/B/A)에는 여러 bit가 있습니다.
-- 각 channel의 **least significant bit** (LSB)를 변경해도 이미지에는 거의 변화가 없습니다.
-- Attackers는 이러한 low-order bits에 data를 숨기며, 때로는 stride, permutation 또는 per-channel choice를 사용합니다.
+- 각 픽셀 채널 (R/G/B/A)에는 여러 비트가 있습니다.
+- 각 채널의 **최하위 비트** (LSB)를 바꿔도 이미지에는 거의 변화가 없습니다.
+- 공격자는 이러한 하위 비트에 데이터를 숨기며, 때로는 일정한 간격, 순열 또는 채널별 선택 방식을 사용합니다.
 
-challenges에서 예상할 수 있는 항목:
+문제에서 확인할 내용:
 
-- payload가 하나의 channel에만 있습니다 (예: `R` LSB).
-- payload가 alpha channel에 있습니다.
-- extraction 후 payload가 compressed/encoded되어 있습니다.
-- message가 여러 plane에 분산되어 있거나 plane 간 XOR를 통해 숨겨져 있습니다.
+- 페이로드가 하나의 채널에만 들어 있습니다 (예: `R` LSB).
+- 페이로드가 알파 채널에 들어 있습니다.
+- 페이로드를 추출한 뒤 압축/인코딩합니다.
+- 메시지가 여러 평면에 분산되어 있거나 평면 간 XOR로 숨겨져 있습니다.
 
-추가로 접할 수 있는 families (implementation-dependent):
+접할 수 있는 추가 계열 (구현에 따라 다름):
 
-- **LSB matching** (단순히 bit를 flipping하는 것이 아니라 target bit에 맞추기 위해 +/-1 조정)
-- **Palette/index-based hiding** (indexed PNG/GIF: raw RGB가 아닌 color indices에 payload를 저장)
-- **Alpha-only payloads** (RGB view에서는 완전히 invisible)
+- **LSB 매칭** (단순히 비트를 뒤집는 대신, 목표 비트에 맞추기 위해 +/-1 조정)
+- **팔레트/인덱스 기반 은닉** (인덱스형 PNG/GIF: 원시 RGB 대신 색상 인덱스에 페이로드 저장)
+- **알파 전용 페이로드** (RGB 보기에서는 완전히 보이지 않음)
 
-### Tooling
+### 도구
 
 #### zsteg
 
-`zsteg`는 PNG/BMP에서 다양한 LSB/bit-plane extraction patterns를 열거합니다:
+`zsteg`는 PNG/BMP의 다양한 LSB/비트 평면 추출 패턴을 열거합니다.
+
 ```bash
 zsteg -a file.png
 ```
+
 Repo: https://github.com/zed-0xff/zsteg
 
 #### StegoVeritas / Stegsolve
 
-- `stegoVeritas`: metadata, image transforms, LSB variants brute forcing 등 다양한 변환을 실행합니다.
-- `stegsolve`: 수동 시각 필터(channel isolation, plane inspection, XOR 등)를 제공합니다.
+- `stegoVeritas`: 여러 변환을 실행합니다(메타데이터, 이미지 변환, LSB 변형 무차별 대입).
+- `stegsolve`: 수동 시각 필터(채널 분리, 평면 검사, XOR 등).
 
-Stegsolve download: https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve
+Stegsolve 다운로드: https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve
 
-#### FFT 기반 visibility tricks
+#### FFT 기반 가시성 기법
 
-FFT는 LSB extraction이 아니며, content가 frequency space에 의도적으로 숨겨져 있거나 미세한 패턴으로 숨겨진 경우에 사용됩니다.
+FFT는 LSB 추출 방식이 아닙니다. 주파수 공간이나 미묘한 패턴에 콘텐츠를 의도적으로 숨긴 경우에 사용합니다.
 
-- EPFL demo: http://bigwww.epfl.ch/demo/ip/demos/FFT/
+- EPFL 데모: http://bigwww.epfl.ch/demo/ip/demos/FFT/
 - Fourifier: https://www.ejectamenta.com/Fourifier-fullscreen/
 - FFTStegPic: https://github.com/0xcomposure/FFTStegPic
 
-Web-based triage는 CTF에서 자주 사용됩니다.
+CTF에서 자주 사용하는 웹 기반 초기 분석 도구:
 
 - Aperi’Solve: https://aperisolve.com/
 - StegOnline: https://stegonline.georgeom.net/
 
-## PNG internals: chunks, corruption, and hidden data
+## PNG 내부 구조: 청크, 손상, 숨겨진 데이터
 
-### Technique
+### 기법
 
-PNG는 chunk 기반 format입니다. 많은 challenge에서 payload는 pixel values가 아니라 container/chunk level에 저장됩니다.
+PNG는 청크 기반 형식입니다. 많은 챌린지에서 페이로드는 픽셀 값이 아니라 컨테이너/청크 수준에 저장됩니다.
 
-- **`IEND` 이후의 추가 bytes** (많은 viewer는 trailing bytes를 무시함)
-- **payload를 포함하는 non-standard ancillary chunks**
-- **dimensions를 숨기거나 수정될 때까지 parser를 중단시키는 corrupted headers**
+- **`IEND` 뒤의 여분 바이트**(많은 뷰어는 뒤에 붙은 바이트를 무시함)
+- **페이로드를 담은 비표준 ancillary 청크**
+- **크기를 숨기거나 수정 전까지 파서를 망가뜨리는 손상된 헤더**
 
-검토할 가치가 높은 chunk 위치:
+검토할 가치가 높은 청크 위치:
 
-- `tEXt` / `iTXt` / `zTXt` (text metadata, 때로는 compressed)
-- `iCCP` (ICC profile) 및 carrier로 사용되는 기타 ancillary chunks
-- `eXIf` (PNG의 EXIF data)
+- `tEXt` / `iTXt` / `zTXt`(텍스트 메타데이터, 압축되어 있을 수도 있음)
+- 페이로드 전달 수단으로 사용되는 `iCCP`(ICC 프로파일) 및 기타 ancillary 청크
+- `eXIf`(PNG의 EXIF 데이터)
 
-### Triage commands
+### 초기 분석 명령
+
 ```bash
 magick identify -verbose file.png
 pngcheck -v file.png
 ```
-확인할 항목:
 
-- 이상한 width/height/bit-depth/colour-type 조합
-- CRC/chunk 오류 (`pngcheck`는 보통 정확한 offset을 표시함)
-- `IEND` 뒤에 추가 data가 있다는 경고
+찾아볼 항목:
 
-더 자세한 chunk 정보를 확인하려면:
+- 비정상적인 너비/높이/비트 심도/색상 유형 조합
+- CRC/청크 오류(`pngcheck`는 보통 정확한 오프셋을 알려줍니다)
+- `IEND` 뒤에 추가 데이터가 있다는 경고
+
+청크를 더 자세히 보려면:
+
 ```bash
 pngcheck -vp file.png
 exiftool -a -u -g1 file.png
 ```
+
 Useful references:
 
-- PNG specification (structure, chunks): https://www.w3.org/TR/PNG/
-- File format tricks (PNG/JPEG/GIF corner cases): https://github.com/corkami/docs
+- PNG 사양 (구조, 청크): https://www.w3.org/TR/PNG/
+- 파일 형식 트릭 (PNG/JPEG/GIF의 특이 사례): https://github.com/corkami/docs
 
-## JPEG: metadata, DCT-domain tools, and ELA limitations
+## JPEG: 메타데이터, DCT 도메인 도구 및 ELA의 한계
 
-### Technique
+### 기법
 
-JPEG은 raw pixels로 저장되지 않으며, DCT domain에서 압축됩니다. 따라서 JPEG stego tools는 PNG LSB tools와 다릅니다:
+JPEG는 원시 픽셀로 저장되지 않고 DCT 도메인에서 압축됩니다. 따라서 JPEG stego 도구는 PNG LSB 도구와 다릅니다.
 
-- Metadata/comment payloads는 file-level에 존재합니다(high-signal이며 빠르게 검사 가능).
-- DCT-domain stego tools는 frequency coefficients에 bits를 embed합니다.
+- 메타데이터/주석 페이로드는 파일 수준에 있으며, 신호가 뚜렷하고 빠르게 검사할 수 있습니다.
+- DCT 도메인 stego 도구는 주파수 계수에 비트를 삽입합니다.
 
-Operationally, JPEG을 다음과 같이 취급합니다:
+실제로 JPEG는 다음과 같이 취급합니다.
 
-- Metadata segments를 위한 container(high-signal이며 빠르게 검사 가능)
-- Specialized stego tools가 작동하는 compressed signal domain(DCT coefficients)
+- 메타데이터 세그먼트용 컨테이너 (신호가 뚜렷하고 빠르게 검사 가능)
+- 전문 stego 도구가 작동하는 압축 신호 도메인 (DCT 계수)
 
-### Quick checks
+### 빠른 점검
+
 ```bash
 exiftool file.jpg
 strings -n 6 file.jpg | head
 binwalk file.jpg
 ```
-신호가 강한 위치:
 
-- EXIF/XMP/IPTC metadata
-- JPEG comment segment (`COM`)
-- Application segments (`APP1` for EXIF, `APPn` for vendor data)
+유력한 위치:
 
-### 일반적인 도구
+- EXIF/XMP/IPTC 메타데이터
+- JPEG comment 세그먼트 (`COM`)
+- 애플리케이션 세그먼트 (EXIF용 `APP1`, 벤더 데이터용 `APPn`)
+
+### 일반 도구
 
 - OutGuess: https://github.com/resurrecting-open-source-projects/outguess
 - OpenStego: https://www.openstego.com/
 
-JPEG에서 특히 steghide payload를 다루는 경우, `stegseek` 사용을 고려하세요(이전 scripts보다 빠른 bruteforce):
+JPEG에서 steghide payload를 찾고 있다면 `stegseek` 사용을 고려하세요 (기존 스크립트보다 bruteforce가 빠릅니다):
 
 - [https://github.com/RickdeJager/stegseek](https://github.com/RickdeJager/stegseek)
 
 ### Error Level Analysis
 
-ELA는 서로 다른 recompression artifact를 강조합니다. 이를 통해 편집된 영역을 추정할 수 있지만, 그 자체로 stego detector는 아닙니다:
+ELA는 서로 다른 재압축 아티팩트를 강조합니다. 편집된 영역을 찾는 데 도움이 될 수 있지만, 그 자체로 stego detector는 아닙니다:
 
 - [https://29a.ch/sandbox/2012/imageerrorlevelanalysis/](https://29a.ch/sandbox/2012/imageerrorlevelanalysis/)
 
 ## 애니메이션 이미지
 
-### Technique
+### 기법
 
-애니메이션 이미지의 경우, message가 다음 중 하나라고 가정하세요:
+애니메이션 이미지에서는 메시지가 다음 위치에 있다고 가정하세요:
 
-- 단일 frame에 있음 (간단함), 또는
-- 여러 frame에 걸쳐 있음 (ordering이 중요함), 또는
-- 연속된 frame을 diff할 때만 보임
+- 단일 프레임에 있음 (간단함)
+- 여러 프레임에 걸쳐 있음 (순서가 중요함)
+- 연속된 프레임을 diff할 때만 보임
 
-### frame 추출
+### 프레임 추출
+
 ```bash
 ffmpeg -i anim.gif frame_%04d.png
 ```
-그런 다음 frame을 일반적인 PNG처럼 처리하세요: `zsteg`, `pngcheck`, 채널 분리.
 
-대체 tooling:
+그런 다음 프레임을 일반 PNG처럼 처리합니다: `zsteg`, `pngcheck`, 채널 분리.
 
-- `gifsicle --explode anim.gif` (빠른 frame 추출)
-- frame별 변환에는 `imagemagick`/`magick`
+대체 도구:
 
-Frame differencing이 결정적인 경우가 많습니다:
+- `gifsicle --explode anim.gif` (빠른 프레임 추출)
+- 프레임별 변환에는 `imagemagick`/`magick`
+
+프레임 차분이 결정적인 단서가 되는 경우가 많습니다:
+
 ```bash
 magick frame_0001.png frame_0002.png -compose difference -composite diff.png
 ```
+
 ### APNG 픽셀 수 인코딩
 
 - APNG 컨테이너 감지: `exiftool -a -G1 file.png | grep -i animation` 또는 `file`.
 - 타이밍을 변경하지 않고 프레임 추출: `ffmpeg -i file.png -vsync 0 frames/frame_%03d.png`.
-- 프레임별 픽셀 수로 인코딩된 payload 복구:
+- 프레임별 픽셀 수로 인코딩된 페이로드 복구:
+
 ```python
 from PIL import Image
 import glob
 out = []
 for f in sorted(glob.glob('frames/frame_*.png')):
-counts = Image.open(f).getcolors()
-target = dict(counts).get((255, 0, 255, 255))  # adjust the target color
-out.append(target or 0)
+    counts = Image.open(f).getcolors()
+    target = dict(counts).get((255, 0, 255, 255))  # adjust the target color
+    out.append(target or 0)
 print(bytes(out).decode('latin1'))
 ```
-Animated challenges는 각 프레임에서 특정 색상의 개수를 세어 각 바이트를 인코딩할 수 있습니다. 각 프레임의 개수를 연결하면 메시지를 복원할 수 있습니다.<sup>[[1]](#references)</sup>
 
-## 패스워드로 보호된 embedding
+애니메이션 challenge에서는 각 프레임의 특정 색상 개수를 바이트로 인코딩할 수 있으며, 개수를 이어 붙이면 메시지를 복원할 수 있습니다.<sup>[[1]](#references)</sup>
 
-픽셀 수준의 조작이 아니라 패스프레이즈로 보호된 embedding이 의심된다면, 일반적으로 이것이 가장 빠른 방법입니다.
+## Password-protected embedding
+
+픽셀 단위 조작이 아니라 passphrase로 보호된 embedding이 의심된다면, 보통 이 방법이 가장 빠릅니다.
 
 ### steghide
 
-`JPEG, BMP, WAV, AU`를 지원하며 암호화된 payload를 embed/extract할 수 있습니다.
+`JPEG, BMP, WAV, AU`를 지원하며, 암호화된 payload를 삽입하거나 추출할 수 있습니다.
+
 ```bash
 steghide info file
 steghide extract -sf file --passphrase 'password'
 ```
-Repo: https://github.com/StefanoDeVuono/steghide
+
+저장소: https://github.com/StefanoDeVuono/steghide
 
 ### StegCracker
+
 ```bash
 stegcracker file.jpg wordlist.txt
 ```
+
 Repo: https://github.com/Paradoxis/StegCracker
 
 ### stegpy
@@ -220,8 +238,7 @@ PNG/BMP/GIF/WebP/WAV를 지원합니다.
 
 Repo: https://github.com/dhsdshdhk/stegpy
 
-## 참고 자료
+## References
 
-- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
-
+- [1] [Flagvent 2025 (중간) — 핑크, 산타의 위시리스트, 크리스마스 메타데이터, 캡처된 노이즈](https://0xdf.gitlab.io/flagvent2025/medium)
 {{#include ../../banners/hacktricks-training.md}}
