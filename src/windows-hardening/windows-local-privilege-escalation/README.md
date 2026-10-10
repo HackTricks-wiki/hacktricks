@@ -270,6 +270,22 @@ This is a different trust-boundary failure from intercepting an HTTP WSUS connec
 
 For the separate attack path that relays WSUS client authentication from HTTP/8530 to LDAP, SMB, or AD CS, see [Abusing WSUS HTTP for NTLM relay](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#abusing-wsus-http-8530-for-ntlm-relay-to-ldapsmbad-cs-esc8).
 
+#### Confirm the external-database relay and procedure rights
+
+In deployments where WSUS uses an external SQL Server, first check whether the WSUS server account can authenticate to the database and whether NTLM relay reaches that listener. The server's SQL role may expose update-publishing procedures even when direct table writes are denied; a failed `UPDATE` against `SUSDB` does not establish that publishing is blocked. Inspect the effective identity, role membership, and procedure permissions in an authorized SQL session before attempting a custom update.<sup>[[38]](#references)</sup>
+
+```sql
+USE SUSDB;
+SELECT ORIGINAL_LOGIN() AS LoginName, USER_NAME() AS DatabaseUser;
+SELECT IS_ROLEMEMBER('webService') AS IsWebServiceRoleMember;
+SELECT * FROM sys.fn_my_permissions('dbo.spImportUpdate', 'OBJECT');
+SELECT * FROM sys.fn_my_permissions('dbo.spSaveXmlFragment', 'OBJECT');
+SELECT * FROM sys.fn_my_permissions('dbo.spSetBatchURL', 'OBJECT');
+SELECT * FROM sys.fn_my_permissions('dbo.spDeployUpdate', 'OBJECT');
+```
+
+The live procedure definitions and the installed `SoftwareDistributionPackage.xsd` are useful when reconstructing valid update metadata. A bundle parent and payload child each need `UpdateIdentity` (fragment type `1`), `LocalizedProperties` (`4`), and `ExtendedProperties` (`2`); capture the local revision ID returned by each `spImportUpdate` call and keep the bundle relationship, digests, size, content URL, and revision consistent. This is a stateful publishing workflow, so a single successful stored-procedure call is not proof of client-side execution.<sup>[[38]](#references)</sup>
+
 #### Build, target and approve the update
 
 The custom-update workflow uses legitimate WSUS procedures as a restricted publishing API. The important state transitions are:<sup>[[38]](#references)</sup>
