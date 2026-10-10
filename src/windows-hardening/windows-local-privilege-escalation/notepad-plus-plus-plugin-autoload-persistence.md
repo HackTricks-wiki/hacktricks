@@ -1,40 +1,43 @@
-# Persistence та Execution через Autoload плагіна Notepad++
+# Persistence через автозавантаження плагінів Notepad++ і виконання коду
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Notepad++ **автоматично завантажує кожну DLL плагіна, знайдену в його підпапках `plugins`**, під час запуску. Розміщення malicious plugin у будь-якій **доступній для запису інсталяції Notepad++** забезпечує code execution всередині `notepad++.exe` під час кожного запуску редактора. Це можна використати для **persistence**, прихованого **initial execution** або як **in-process loader**, якщо редактор запущено з підвищеними привілеями.<sup>[[1]](#references)</sup>
+Notepad++ **автоматично завантажує кожну DLL плагіна, знайдену в підпапках `plugins`**, під час запуску. Розміщення шкідливого плагіна в будь-якій **доступній для запису інсталяції Notepad++** забезпечує виконання коду в `notepad++.exe` щоразу, коли запускається редактор. Це можна використати для **закріплення**, прихованого **первинного виконання** або як **завантажувач у процесі**, якщо редактор запущено з підвищеними правами.<sup>[[1]](#references)</sup>
 
-Починаючи з **Notepad++ 7.6+**, очікувана структура для manual installation передбачає **окрему підпапку для кожного плагіна** (`plugins\<PluginName>\<PluginName>.dll`). У **portable mode** (за наявності `doLocalConf.xml` поруч із `notepad++.exe`) усе дерево application залишається локальним у цій директорії. Через це скопійовані/admin tool bundles часто стають зручною execution surface, доступною для запису користувачем.<sup>[[2]](#references)</sup>
+Починаючи з **Notepad++ 7.6+**, очікувана структура для ручного встановлення — **окрема підпапка для кожного плагіна** (`plugins\<PluginName>\<PluginName>.dll`). У **portable mode** (наявність `doLocalConf.xml` поруч із `notepad++.exe`) все дерево програми залишається в цій директорії, що часто перетворює скопійовані набори інструментів адміністратора на просту поверхню для виконання коду, доступну для запису користувачеві.<sup>[[2]](#references)</sup>
 
-## Доступні для запису locations плагінів
+## Доступні для запису розташування плагінів
 
-- Standard install: `C:\Program Files\Notepad++\plugins\<PluginName>\<PluginName>.dll` (зазвичай для запису потрібні права адміністратора).<sup>[[1]](#references)</sup>
-- Доступні для запису варіанти для low-privileged operators:<sup>[[1]](#references)</sup>
-- Використовуйте **portable build Notepad++** у директорії, доступній для запису користувачем.
-- Скопіюйте `C:\Program Files\Notepad++` у path, контрольований користувачем (наприклад, `%LOCALAPPDATA%\npp\`), і запускайте `notepad++.exe` звідти.
-- Шукайте **admin tool bundles**, розпаковані zip-копії або help-desk toolkits, які вже містять `doLocalConf.xml` і розташовані поза `Program Files`.
-- Кожен плагін має власну підпапку в `plugins` і автоматично завантажується під час startup; записи меню з’являються в **Plugins**.<sup>[[2]](#references)</sup>
+- Стандартна інсталяція: `C:\Program Files\Notepad++\plugins\<PluginName>\<PluginName>.dll` (зазвичай для запису потрібні права адміністратора).<sup>[[1]](#references)</sup>
+- Доступні для запису варіанти для операторів із низькими привілеями:<sup>[[1]](#references)</sup>
+  - Використати **portable-збірку Notepad++** у папці, доступній для запису користувачеві.
+  - Скопіювати `C:\Program Files\Notepad++` у шлях, контрольований користувачем (наприклад, `%LOCALAPPDATA%\npp\`), і запустити звідти `notepad++.exe`.
+  - Пошукати **набори інструментів адміністратора**, розпаковані копії zip-архівів або набори інструментів служби підтримки, які вже містять `doLocalConf.xml` і розташовані поза `Program Files`.
+- Кожен плагін має власну підпапку в `plugins` і автоматично завантажується під час запуску; пункти меню з’являються в розділі **Plugins**.<sup>[[2]](#references)</sup>
 
-Швидкий triage:
+Швидка перевірка:
+
 ```cmd
 where /r C:\ notepad++.exe 2>nul
 for /d %D in ("%ProgramFiles%\Notepad++" "%ProgramFiles(x86)%\Notepad++" "%LOCALAPPDATA%\*notepad*" "%USERPROFILE%\Desktop\*notepad*") do @if exist "%~fD\plugins" echo [*] %~fD
 icacls "C:\Program Files\Notepad++\plugins" 2>nul
 ```
-## Точки завантаження Plugin (примітиви виконання)
-Notepad++ очікує наявності певних **експортованих функцій**. Усі вони викликаються під час ініціалізації, що створює кілька поверхонь виконання:<sup>[[1]](#references)</sup>
-- **`DllMain`** — запускається одразу після завантаження DLL (перша точка виконання).
-- **`setInfo(NppData)`** — викликається один раз під час завантаження для передавання дескрипторів Notepad++; типове місце для реєстрації пунктів меню.
-- **`getName()`** — повертає назву Plugin, яка відображається в меню.
-- **`getFuncsArray(int *nbF)`** — повертає команди меню; навіть якщо масив порожній, функція викликається під час запуску.
-- **`beNotified(SCNotification*)`** — отримує події Notepad++ / Scintilla (корисно для відкладеного запуску payloads до дії користувача або події редактора).
+
+## Точки завантаження плагіна (примітиви виконання)
+Notepad++ очікує наявності певних **експортованих функцій**. Усі вони викликаються під час ініціалізації, створюючи кілька можливостей для виконання коду:<sup>[[1]](#references)</sup>
+- **`DllMain`** — виконується відразу після завантаження DLL (перша точка виконання).
+- **`setInfo(NppData)`** — викликається один раз під час завантаження для передавання дескрипторів Notepad++; зазвичай тут реєструють пункти меню.
+- **`getName()`** — повертає назву плагіна, яка відображається в меню.
+- **`getFuncsArray(int *nbF)`** — повертає команди меню; ця функція викликається під час запуску, навіть якщо масив порожній.
+- **`beNotified(SCNotification*)`** — отримує події Notepad++ / Scintilla (корисно, щоб відкласти запуск payload до дії користувача або події редактора).
 - **`messageProc(UINT, WPARAM, LPARAM)`** — обробник повідомлень, корисний для обміну більшими обсягами даних.
 - **`isUnicode()`** — прапорець сумісності, який перевіряється під час завантаження.
 
-Більшість export-функцій можна реалізувати як **заглушки**; виконання може відбуватися з `DllMain` або будь-якого callback вище під час autoload.
+Більшість експортованих функцій можна реалізувати як **заглушки**; виконання може відбуватися в `DllMain` або в будь-якому з наведених вище callback під час автоматичного завантаження.
 
-## Мінімальний шкідливий каркас Plugin
-Скомпілюйте DLL з очікуваними export-функціями та розмістіть її в `plugins\\MyNewPlugin\\MyNewPlugin.dll` у доступній для запису папці Notepad++:<sup>[[1]](#references)</sup>
+## Мінімальний каркас шкідливого плагіна
+Скомпілюйте DLL з очікуваними експортами та розмістіть її в `plugins\\MyNewPlugin\\MyNewPlugin.dll` у доступній для запису папці Notepad++:<sup>[[1]](#references)</sup>
+
 ```c
 BOOL APIENTRY DllMain(HMODULE h, DWORD r, LPVOID) { if (r == DLL_PROCESS_ATTACH) MessageBox(NULL, TEXT("Hello from Notepad++"), TEXT("MyNewPlugin"), MB_OK); return TRUE; }
 extern "C" __declspec(dllexport) void setInfo(NppData) {}
@@ -44,56 +47,60 @@ extern "C" __declspec(dllexport) void beNotified(SCNotification *) {}
 extern "C" __declspec(dllexport) LRESULT messageProc(UINT, WPARAM, LPARAM) { return TRUE; }
 extern "C" __declspec(dllexport) BOOL isUnicode() { return TRUE; }
 ```
-1. Зберіть DLL (Visual Studio/MinGW).
-2. Створіть підпапку плагіна в `plugins` і помістіть DLL усередину.
-3. Перезапустіть Notepad++; DLL завантажується автоматично, виконуючи `DllMain` і подальші callbacks.
 
-## Патерн тригера з низьким рівнем шуму через `beNotified`
-Для OPSEC багато payloads не повинні запускатися з `DllMain`. Тихіший патерн полягає в тому, щоб плагін завантажувався коректно, а потім виконувався лише після реалістичної події редактора, наприклад **завершення запуску**, **активації буфера** або **введення першого символу**.
+1. Зберіть DLL (Visual Studio/MinGW).
+2. Створіть підпапку плагіна в `plugins` і помістіть туди DLL.
+3. Перезапустіть Notepad++; DLL завантажиться автоматично, виконавши `DllMain` і подальші callback-функції.
+
+## Тригерний шаблон із низьким рівнем шуму через `beNotified`
+Для OPSEC багато payloads **не повинні** запускатися з `DllMain`. Тихіший підхід — дозволити плагіну завантажитися без проблем, а потім виконати код лише після реалістичної події в редакторі, наприклад **завершення запуску**, **активації буфера** або **введення першого символу**.
+
 ```c
 static bool fired = false;
 extern "C" __declspec(dllexport) void beNotified(SCNotification *n) {
-if (fired) return;
-if (n->nmhdr.code == NPPN_READY ||
-n->nmhdr.code == NPPN_BUFFERACTIVATED ||
-n->nmhdr.code == SCN_CHARADDED) {
-fired = true;
-WinExec("powershell -w hidden -nop -c <payload>", SW_HIDE);
-}
+  if (fired) return;
+  if (n->nmhdr.code == NPPN_READY ||
+      n->nmhdr.code == NPPN_BUFFERACTIVATED ||
+      n->nmhdr.code == SCN_CHARADDED) {
+    fired = true;
+    WinExec("powershell -w hidden -nop -c <payload>", SW_HIDE);
+  }
 }
 ```
-Це краще відповідає публічним offensive research, ніж гучний beacon у `DllMain`: DLL усе ще автоматично завантажується під час запуску, але шкідлива дія відкладається до моменту, коли Notepad++ справді починають використовувати.
 
-## Використання каталогу конфігурації plugin як вторинного сховища
-Notepad++ надає `NPPM_GETPLUGINSCONFIGDIR`, який повертає **каталог конфігурації plugin поточного користувача**.<sup>[[3]](#references)</sup> Шкідливий plugin може використовувати його, щоб зберігати мінімальну DLL на диску, а зашифровану конфігурацію, staged payloads або tasking files — у шляху, який не вирізняється серед звичайного стану plugin.
+Це краще відповідає відкритим дослідженням наступальних технік, ніж помітний beacon у `DllMain`: DLL усе ще автоматично завантажується під час запуску, але шкідлива дія відкладається, доки Notepad++ справді не почне використовуватися.
+
+## Використання каталогу конфігурації плагінів як додаткового сховища
+Notepad++ надає `NPPM_GETPLUGINSCONFIGDIR`, який повертає **каталог конфігурації плагінів поточного користувача**.<sup>[[3]](#references)</sup> Шкідливий плагін може скористатися цим, щоб залишити DLL на диску мінімальною, а зашифровану конфігурацію, підготовлені payload-файли або файли із завданнями зберігати за шляхом, який не вирізняється на тлі звичайного стану плагінів.
+
 ```c
 wchar_t cfg[MAX_PATH] = {0};
 SendMessage(nppData._nppHandle, NPPM_GETPLUGINSCONFIGDIR, MAX_PATH, (LPARAM)cfg);
 // Example result: %AppData%\Notepad++\plugins\config
 ```
+
 Операційно це корисно, коли потрібно:
-- невелику DLL bootstrap, що автоматично завантажується;
+- невелика autoloaded bootstrap DLL;
 - tasking для окремого користувача без повторної зміни основного plugin binary;
-- відокремити **autoload trigger** від важчої second stage.
+- відокремити **autoload trigger** від важчого second stage.
 
 ## Reflective loader plugin pattern
 Weaponized plugin може перетворити Notepad++ на **reflective DLL loader**:<sup>[[1]](#references)</sup>
-- Надати мінімальний UI/menu entry (наприклад, "LoadDLL").
+- Додати мінімальний елемент інтерфейсу/меню (наприклад, "LoadDLL").
 - Приймати **file path** або **URL** для отримання payload DLL.
-- Виконати reflective mapping DLL у поточний process і викликати експортовану entry point (наприклад, loader function усередині отриманої DLL).
-- Перевага: повторно використовувати GUI process, який виглядає легітимно, замість запуску нового loader; payload успадковує integrity `notepad++.exe` (включно з elevated contexts).
-- Компроміси: запис **unsigned plugin DLL** на диск помітний; практичний варіант — використовувати autoloaded plugin лише як stub, а справжній implant зберігати encrypted/staged в іншому місці.
+- Reflectively відобразити DLL у поточний процес і викликати експортовану точку входу (наприклад, loader function усередині отриманої DLL).
+- Перевага: повторно використати GUI-процес, що має нешкідливий вигляд, замість запуску нового loader; payload успадковує рівень цілісності `notepad++.exe` (зокрема й підвищений).
+- Компроміси: запис **unsigned plugin DLL** на диск помітний; практичний варіант — використовувати autoloaded plugin лише як stub, а справжній implant зберігати зашифрованим/підготовленим в іншому місці.
 
-## Нотатки щодо виявлення та hardening
-- Блокувати або моніторити **writes до Notepad++ plugin directories** (включно з portable copies у профілях користувачів); увімкнути controlled folder access або application allowlisting.
-- Створити alert для **new unsigned DLLs** у `plugins`, змін у portable Notepad++ trees та нетипових **child processes/network activity** від `notepad++.exe`.
-- Створити baseline легітимних plugins і досліджувати будь-яку нову DLL, яка експортує normal Notepad++ plugin interface, але також запускає shells, PowerShell або network beacons.
-- Дозволяти plugin installation лише через **Plugins Admin** і обмежити execution portable copies з untrusted paths.
+## Примітки щодо виявлення та посилення захисту
+- Блокувати або відстежувати **запис у каталоги плагінів Notepad++** (зокрема portable-копії у профілях користувачів); увімкнути контрольований доступ до папок або allowlisting програм.
+- Створювати сповіщення про **нові unsigned DLL** у `plugins`, зміни в portable-деревах Notepad++ та незвичні **дочірні процеси/мережеву активність** від `notepad++.exe`.
+- Створити базовий перелік легітимних плагінів і перевіряти будь-яку нову DLL, яка експортує стандартний інтерфейс плагіна Notepad++, але також запускає shell, PowerShell або мережеві beacon-и.
+- Дозволяти встановлення плагінів лише через **Plugins Admin** і обмежити запуск portable-копій із ненадійних шляхів.
 
 ## References
 
-- [1] [TrustedSec - Notepad++ Plugins: Plug and Payload](https://trustedsec.com/blog/notepad-plugins-plug-and-payload)
-- [2] [Notepad++ User Manual - Plugins](https://npp-user-manual.org/docs/plugins/)
-- [3] [Notepad++ User Manual - Plugin Communication](https://npp-user-manual.org/docs/plugin-communication/)
-
+- [1] [TrustedSec - Плагіни Notepad++: підключення та payload](https://trustedsec.com/blog/notepad-plugins-plug-and-payload)
+- [2] [Посібник користувача Notepad++ - Плагіни](https://npp-user-manual.org/docs/plugins/)
+- [3] [Посібник користувача Notepad++ - Взаємодія плагінів](https://npp-user-manual.org/docs/plugin-communication/)
 {{#include ../../banners/hacktricks-training.md}}
