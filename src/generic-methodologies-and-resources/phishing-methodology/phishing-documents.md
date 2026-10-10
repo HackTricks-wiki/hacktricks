@@ -161,6 +161,30 @@ An HTA is executed using **`mshta.exe`**, which is typically **installed** along
 </script>
 ```
 
+## Fake attachment cards and tracked HTA/WSF staging
+
+An HTML email can imitate a provider's native attachment-preview card instead of carrying a real attachment. One observed pattern rebuilt Gmail's card with Base64-encoded inline PNG MIME parts, wrapped the complete visual control in one anchor, and used a recipient value in `?m=<target-id>` for click and delivery correlation. The link began with `//` rather than `http://` or `https://`; browsers resolve that protocol-relative form, but simplistic extractors that only match fully qualified URLs can miss it.<sup>[[11]](#references)</sup>
+
+A reusable post-click workflow is:<sup>[[11]](#references)</sup>
+
+1. Return an HTA for `mshta.exe`, or a WSF/JScript file for Windows Script Host. Hide or resize the HTA window to reduce visible execution artifacts.
+2. Record execution separately from the payload request. An HTA can load a hidden image whose URL path contains the lure name and whose query contains `?track`; a WSF can send an HTTP `HEAD` request with the lure name in the path.
+3. Import an obfuscated JScript stage from object storage or a CDN. The script can fetch the orchestrator and its payload resources as separate objects, apply custom Base64 decoding, decrypt them with an embedded RC4 key, and execute the orchestrator in memory. Splitting the resources lets the operator replace one chain component without rebuilding the email or first-stage stager.
+
+For triage, parse the raw MIME rather than trusting the rendered attachment list. Normalize protocol-relative `href` values before URL extraction, correlate repeated inline image parts with a single enclosing link, and look for recipient identifiers in query parameters. On endpoints, correlate `mshta.exe`, `wscript.exe`, or `cscript.exe` network activity with lure text in URL paths, unusual `HEAD` requests, and a follow-on script that downloads several encrypted resources.
+
+The later execution primitives belong in the dedicated technique pages:
+
+{{#ref}}
+../../pentesting-web/deserialization/basic-.net-deserialization-objectdataprovider-gadgets-expandedwrapper-and-json.net.md
+{{#endref}}
+
+{{#ref}}
+../../windows-hardening/windows-local-privilege-escalation/dll-hijacking/README.md
+{{#endref}}
+
+For envelope/header sender spoofing and DMARC alignment testing, see [SMTP mail spoofing countermeasures](../../network-services-pentesting/pentesting-smtp/README.md#spf-pass-with-an-unaligned-visible-sender).
+
 ## Forcing NTLM Authentication
 
 There are several ways to **force NTLM authentication "remotely"**, for example, you could add **invisible images** to emails or HTML that the user will access (even HTTP MitM?). Or send the victim the **address of files** that will **trigger** an **authentication** just for **opening the folder.**
@@ -410,4 +434,5 @@ Check the page about **places to steal NTLM creds**:
 - [8] [MITRE ATT&CK – Trusted Developer Utilities Proxy Execution: MSBuild (T1127.001)](https://attack.mitre.org/techniques/T1127/001/)
 - [9] [Elastic Security Labs – GrimResource: Microsoft Management Console for initial access and evasion](https://www.elastic.co/security-labs/threat-command/grimresource)
 - [10] [Microsoft Security Blog – Threat actors leverage tax season to deploy tax-themed phishing campaigns](https://www.microsoft.com/en-us/security/blog/2025/04/03/threat-actors-leverage-tax-season-to-deploy-tax-themed-phishing-campaigns/)
+- [11] [Cisco Talos – UAT-11587 delivery chain and Antino backdoor](https://blog.talosintelligence.com/china-nexus-uat-11587-targets-government-and-policy-organizations-across-asia-with-antino-backdoor/)
 {{#include ../../banners/hacktricks-training.md}}
