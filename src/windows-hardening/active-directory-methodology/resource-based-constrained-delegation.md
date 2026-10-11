@@ -3,40 +3,40 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## Noções básicas de Resource-based Constrained Delegation
+## Fundamentos de Resource-based Constrained Delegation
 
-Resource-based constrained delegation (RBCD) é semelhante a [constrained delegation](constrained-delegation.md), mas a direção da confiança é invertida. A constrained delegation tradicional registra para quais serviços um principal pode delegar; a RBCD registra no **recurso de destino** quais principals podem personificar usuários nele.<sup>[[12]](#references)</sup>
+Resource-based constrained delegation (RBCD) é semelhante à [constrained delegation](constrained-delegation.md), mas a direção da confiança é invertida. A constrained delegation tradicional registra a quais serviços um principal pode delegar; a RBCD registra no **recurso de destino** quais principals podem personificar usuários perante ele.<sup>[[12]](#references)</sup>
 
 O atributo _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ do objeto de destino contém um descritor de segurança que identifica os principals autorizados a agir em nome de outras identidades nesse recurso.
 
-Outra diferença importante é que um principal com **permissões de gravação suficientes sobre uma conta de máquina** (`GenericAll`, `GenericWrite`, `WriteDacl`, `WriteProperty` e direitos semelhantes) pode conseguir definir _**msDS-AllowedToActOnBehalfOfOtherIdentity**_. A configuração da constrained delegation tradicional normalmente exige acesso administrativo mais privilegiado.<sup>[[1]](#references)</sup>
+Outra diferença importante é que um principal com **permissões de escrita suficientes sobre uma conta de máquina** (`GenericAll`, `GenericWrite`, `WriteDacl`, `WriteProperty` e direitos semelhantes) pode conseguir definir _**msDS-AllowedToActOnBehalfOfOtherIdentity**_. Configurar a constrained delegation tradicional normalmente exige acesso administrativo mais privilegiado.<sup>[[1]](#references)</sup>
 
-Mais precisamente, a alteração das configurações clássicas de constrained delegation normalmente é controlada pelo `SeEnableDelegationPrivilege` em um controlador de domínio, um direito geralmente detido por administradores altamente privilegiados. A RBCD transfere a decisão para o descritor de segurança do objeto de destino, portanto, o acesso de gravação à propriedade relevante do objeto de computador pode ser suficiente sem esse direito de usuário.<sup>[[1]](#references)[[2]](#references)</sup>
+Mais precisamente, a alteração das configurações clássicas de constrained delegation normalmente é controlada pelo `SeEnableDelegationPrivilege` em um controlador de domínio, um direito geralmente mantido por administradores altamente privilegiados. A RBCD transfere a decisão para o descritor de segurança do objeto de destino; portanto, acesso de escrita à propriedade relevante do objeto de computador pode ser suficiente, sem esse direito de usuário.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### Novos conceitos
 
-A flag **`TrustedToAuthForDelegation`** em `userAccountControl` costuma ser descrita como pré-requisito para **S4U2Self**, mas isso é incompleto.\
-Um principal de serviço com um SPN pode solicitar S4U2Self sem a flag. Com `TrustedToAuthForDelegation`, o ticket de serviço retornado é **encaminhável**; sem ela, o ticket normalmente **não é encaminhável**.<sup>[[5]](#references)</sup>
+A flag **`TrustedToAuthForDelegation`** em `userAccountControl` costuma ser descrita como um pré-requisito para **S4U2Self**, mas isso é incompleto.\
+Um principal de serviço com um SPN pode solicitar S4U2Self sem a flag. Com `TrustedToAuthForDelegation`, o ticket de serviço retornado é **forwardable**; sem ela, o ticket normalmente é **non-forwardable**.<sup>[[5]](#references)</sup>
 
-A constrained delegation tradicional rejeita um **TGS não encaminhável** na etapa S4U2Proxy. A RBCD pode aceitar esse ticket S4U2Self quando o descritor de segurança do destino autoriza o serviço solicitante.<sup>[[1]](#references)[[2]](#references)[[16]](#references)</sup>
+A constrained delegation tradicional rejeita um **TGS non-forwardable** na etapa S4U2Proxy. A RBCD pode aceitar esse ticket S4U2Self quando o descritor de segurança do destino autoriza o serviço solicitante.<sup>[[1]](#references)[[2]](#references)[[16]](#references)</sup>
 
 ### Estrutura do ataque
 
-> Se você tiver **privilégios equivalentes a gravação** sobre uma **conta de computador**, poderá conseguir acesso privilegiado a essa máquina.
+> Se você tiver **privilégios equivalentes a escrita** sobre uma **conta de computador**, poderá conseguir acesso privilegiado a essa máquina.
 
-Suponha que o atacante já tenha **privilégios equivalentes a gravação sobre o objeto de computador da vítima**.
+Suponha que o atacante já tenha **privilégios equivalentes a escrita sobre o objeto de computador da vítima**.
 
-1. O atacante **compromete** uma conta com um **SPN** ou **cria uma** ("Service A"). Por padrão, um usuário de domínio autenticado pode criar até 10 objetos de computador, conforme definido por **_MachineAccountQuota_**; um objeto de computador fornece automaticamente SPNs utilizáveis.
-2. O atacante **abusa do privilégio WRITE** sobre o computador da vítima (ServiceB) para configurar a **resource-based constrained delegation de modo a permitir que ServiceA personifique qualquer usuário** nesse computador da vítima (ServiceB).
+1. O atacante **compromete** uma conta com um **SPN** ou **cria uma** ("Service A"). Por padrão, um usuário autenticado do domínio pode criar até 10 objetos de computador, conforme definido por **_MachineAccountQuota_**; um objeto de computador fornece SPNs utilizáveis automaticamente.
+2. O atacante **abusa do privilégio WRITE** sobre o computador da vítima (ServiceB) para configurar **resource-based constrained delegation, permitindo que ServiceA personifique qualquer usuário** perante esse computador da vítima (ServiceB).
 3. O atacante usa o Rubeus para executar um **ataque S4U completo** (S4U2Self e S4U2Proxy) de Service A para Service B, em nome de um usuário **com acesso privilegiado a Service B**.
-   1. S4U2Self (da conta SPN comprometida ou criada): solicitar um **TGS que represente Administrator para Service A** (não encaminhável).
-   2. S4U2Proxy: usar esse **TGS não encaminhável** para solicitar um ticket de serviço que represente **Administrator** para o **host da vítima**.
-   3. O ticket não encaminhável ainda pode funcionar nesse fluxo RBCD porque Service A está autorizado no descritor de segurança do recurso de destino.
+   1. S4U2Self (a partir da conta SPN comprometida ou criada): solicita um **TGS que representa Administrator para Service A** (non-forwardable).
+   2. S4U2Proxy: usa esse **TGS non-forwardable** para solicitar um ticket de serviço que representa **Administrator** para o **host da vítima**.
+   3. O ticket non-forwardable ainda pode funcionar nesse fluxo RBCD porque Service A está autorizado no descritor de segurança do recurso de destino.
 4. O atacante pode fazer **pass-the-ticket** e **personificar** o usuário para obter **acesso ao ServiceB da vítima**.<sup>[[1]](#references)</sup>
 
-`MachineAccountQuota=0` fecha o caminho padrão de criação de computadores, mas não remove os direitos de gravação sobre o objeto de computador de destino nem o controle de uma conta existente. Às vezes, um usuário comum controlado, sem um SPN, pode ser usado como principal delegador por meio do [método U2U sem SPN](#spn-less-cross-domain--cross-forest-rbcd), inclusive dentro de um único domínio. Esse caminho ainda exige um direito efetivo de gravação de RBCD, controle das credenciais do usuário delegador, uma identidade personificada que permita delegação, comportamento compatível de criptografia Kerberos e uma alteração do hash NT que afete a conta. Considere esses requisitos como condições independentes; um atributo RBCD vazio ou uma quota zero, por si só, não prova sucesso nem segurança.
+`MachineAccountQuota=0` fecha a rota padrão de criação de computadores, mas não remove direitos de escrita sobre o objeto de computador de destino nem o controle de uma conta existente. Às vezes, um usuário comum controlado, sem SPN, pode ser usado como principal delegante por meio do [método U2U sem SPN](#spn-less-cross-domain--cross-forest-rbcd), inclusive dentro de um único domínio. Essa rota ainda exige um direito efetivo de escrita RBCD, controle das credenciais do usuário delegante, uma identidade personificada que possa ser delegada, comportamento compatível de criptografia Kerberos e uma alteração do hash NT que interrompa a conta. Trate esses requisitos como pré-requisitos separados; um atributo RBCD vazio ou uma quota zero, por si só, não comprova sucesso nem segurança.
 
-Um descritor RBCD existente também pode indicar um **grupo**, em vez de indicar diretamente o computador delegador. Se você controlar uma conta de computador com SPN e puder adicioná-la a esse grupo, a nova associação poderá fornecer o caminho de delegação sem alterar o atributo RBCD do computador de destino. Verifique a ACL efetiva de gravação de associação do grupo (incluindo ACEs de negação), as associações aninhadas e a atualização do token, o SID do trustee no descritor, as restrições de delegação da conta personificada e o SPN do serviço de destino antes de concluir que o caminho funciona.
+Um descritor RBCD existente também pode indicar um **grupo** em vez do computador delegante diretamente. Se você controlar uma conta de computador com SPN e puder adicioná-la ao grupo, a nova associação poderá fornecer o caminho de delegação sem alterar o atributo RBCD do computador de destino. Antes de concluir que o caminho funciona, verifique a ACL efetiva de escrita de associação do grupo (incluindo ACEs de negação), a associação aninhada e a atualização do token, o SID do trustee no descritor, as restrições de delegação da conta personificada e o SPN do serviço de destino.
 
 Para verificar o _**MachineAccountQuota**_ do domínio, você pode usar:
 
@@ -58,9 +58,9 @@ New-MachineAccount -MachineAccount SERVICEA -Password $(ConvertTo-SecureString '
 Get-DomainComputer SERVICEA
 ```
 
-### Configurando a Delegação Restrita Baseada em Recursos
+### Configurando a delegação restrita baseada em recursos
 
-**Usando o módulo PowerShell do Active Directory**<sup>[[4]](#references)</sup>
+**Usando o módulo do Active Directory PowerShell**<sup>[[4]](#references)</sup>
 
 ```bash
 Set-ADComputer $targetComputer -PrincipalsAllowedToDelegateToAccount SERVICEA$ #Assign delegation privileges
@@ -99,18 +99,18 @@ Agora, o ataque pode ser realizado:<sup>[[3]](#references)[[4]](#references)</su
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<aes256 hash> /aes128:<aes128 hash> /rc4:<rc4 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /domain:domain.local /ptt
 ```
 
-Você pode gerar mais tickets para mais serviços com apenas uma solicitação, usando o parâmetro `/altservice` do Rubeus:
+Você pode gerar mais tickets para mais serviços solicitando apenas uma vez usando o parâmetro `/altservice` do Rubeus:
 
 ```bash
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /altservice:krbtgt,cifs,host,http,winrm,RPCSS,wsman,ldap /domain:domain.local /ptt
 ```
 
 > [!CAUTION]
-> Usuários podem ser marcados como **"A conta é confidencial e não pode ser delegada."** Se essa flag estiver habilitada, a conta não poderá ser personificada por meio desse fluxo de delegação. O BloodHound expõe essa propriedade durante a análise.
+> Os usuários podem ser marcados como **"A conta é confidencial e não pode ser delegada."** Se essa flag estiver habilitada, a conta não poderá ser personificada por meio desse fluxo de delegação. O BloodHound expõe essa propriedade durante a análise.
 
-### Ferramentas para Linux: RBCD de ponta a ponta com Impacket (2024+)
+### Ferramentas Linux: RBCD de ponta a ponta com Impacket (2024+)
 
-Se você opera no Linux, pode executar a cadeia completa de RBCD usando as ferramentas oficiais do Impacket:<sup>[[6]](#references)[[7]](#references)</sup>
+Se você trabalha no Linux, pode executar toda a cadeia RBCD usando as ferramentas oficiais do Impacket:<sup>[[6]](#references)[[7]](#references)</sup>
 
 ```bash
 # 1) Create attacker-controlled machine account (respects MachineAccountQuota)
@@ -131,16 +131,16 @@ impacket-secretsdump -k -no-pass Administrator@victim.domain.local
 
 Notas
 - Se a assinatura LDAP/LDAPS for obrigatória, use `impacket-rbcd -use-ldaps ...`.
-- Prefira chaves AES; muitos domínios modernos restringem RC4. Tanto Impacket quanto Rubeus oferecem suporte a fluxos somente com AES.
-- O Impacket pode reescrever o `sname` ("AnySPN") para algumas ferramentas, mas obtenha o SPN correto sempre que possível (por exemplo, CIFS/LDAP/HTTP/HOST/MSSQLSvc).
+- Prefira chaves AES; muitos domínios modernos restringem RC4. Impacket e Rubeus oferecem suporte a fluxos somente com AES.
+- Impacket pode reescrever o `sname` ("AnySPN") para algumas ferramentas, mas obtenha o SPN correto sempre que possível (por exemplo, CIFS/LDAP/HTTP/HOST/MSSQLSvc).
 
 ## RBCD entre domínios e florestas
 
-Se o **principal delegante** que você controla estiver em um **domínio diferente** (ou até mesmo em uma **floresta diferente**) do computador de recurso, o abuso ainda é **RBCD**, mas o fluxo de tickets deixa de ser o usual `S4U2Self -> S4U2Proxy` de domínio único.
+Se o **principal delegado** que você controla estiver em um **domínio diferente** (ou até mesmo em uma **floresta diferente**) do computador de recurso, o abuso ainda é **RBCD**, mas o fluxo de tickets deixa de ser o usual `S4U2Self -> S4U2Proxy` de um único domínio.
 
 ### RBCD entre domínios: configure o principal estrangeiro usando o SID
 
-Ao definir `msDS-AllowedToActOnBehalfOfOtherIdentity` a partir de um **domínio diferente**, talvez não seja possível **resolver pelo nome** a máquina/o usuário estrangeiro no LDAP do domínio de destino. Nesse caso, configure a entrada de delegação usando o **SID** do principal estrangeiro, em vez do sAMAccountName/UPN.
+Ao definir `msDS-AllowedToActOnBehalfOfOtherIdentity` a partir de um **domínio diferente**, talvez não seja possível **resolver pelo nome** a máquina/usuário estrangeiro no LDAP do domínio de destino. Nesse caso, configure a entrada de delegação usando o **SID** do principal estrangeiro em vez do sAMAccountName/UPN.
 
 Isso é especialmente relevante ao retransmitir NTLM para LDAP com `ntlmrelayx.py`:<sup>[[9]](#references)</sup>
 
@@ -153,23 +153,23 @@ sudo ntlmrelayx.py -smb2support -t ldap://192.168.90.217 \
 ```
 
 Notas:
-- `--sid` instrui `ntlmrelayx.py` a tratar `--escalate-user` como um SID, o que é necessário quando a conta delegante é externa ao domínio de destino.
+- `--sid` informa ao `ntlmrelayx.py` para tratar `--escalate-user` como um SID, o que é necessário quando a conta delegadora é externa ao domínio de destino.
 - Mesmo que a ferramenta exiba `User not found in LDAP`, a gravação da delegação ainda pode ser bem-sucedida, pois o descritor de segurança armazena diretamente o SID externo.
 
 ### RBCD entre domínios: sequência S4U entre realms
 
-Depois que o principal externo estiver em `msDS-AllowedToActOnBehalfOfOtherIdentity`, o fluxo funcional entre domínios é:<sup>[[9]](#references)[[13]](#references)</sup>
+Depois que o principal externo é incluído em `msDS-AllowedToActOnBehalfOfOtherIdentity`, o fluxo funcional entre domínios é:<sup>[[9]](#references)[[13]](#references)</sup>
 
-1. Obtenha um **TGT** para o principal delegante do próprio domínio.
-2. Solicite um **TGT de referral** para `krbtgt/<target-domain>`.
-3. Solicite um **referral S4U2Self entre realms** para o usuário a ser impersonado no DC do domínio de destino.
-4. Solicite o ticket **S4U2Self** real para esse usuário novamente no domínio do delegante.
-5. Execute **S4U2Proxy** no domínio do delegante para obter um ticket de referral para o domínio de destino.
+1. Obtenha um **TGT** para o principal delegador no próprio domínio.
+2. Solicite um **TGT de encaminhamento** para `krbtgt/<target-domain>`.
+3. Solicite um **encaminhamento S4U2Self entre realms** para o usuário impersonado no DC do domínio de destino.
+4. Solicite o ticket **S4U2Self** efetivo para esse usuário no domínio do delegador.
+5. Execute **S4U2Proxy** no domínio do delegador para obter um ticket de encaminhamento para o domínio de destino.
 6. Execute o **S4U2Proxy** final no DC do domínio de destino para obter o ticket de serviço para `cifs/host.target`, `host/host.target` etc.
 
-É por isso que as ferramentas padrão para Linux costumam falhar com RBCD entre domínios:<sup>[[9]](#references)</sup>
+É por isso que as ferramentas Linux padrão costumam falhar com RBCD entre domínios:<sup>[[9]](#references)</sup>
 - o **realm** da solicitação pode precisar ser diferente do realm do TGT usado no `TGS-REQ`
-- a cadeia exige **etapas independentes de S4U2Proxy**, não apenas `S4U2Self` ou `S4U2Self` seguido imediatamente por um único `S4U2Proxy`
+- a cadeia precisa de **etapas S4U2Proxy independentes**, não apenas de `S4U2Self` ou de `S4U2Self` seguido imediatamente por um único `S4U2Proxy`
 
 ### RBCD entre domínios no Linux
 
@@ -193,33 +193,33 @@ Operacionalmente, os novos argumentos são:
 - `-targetdomain`: domínio do **computador de recurso**
 - `-targetdc`: DC do domínio do **recurso**
 
-### Limitações de RBCD entre florestas
+### Limitações de RBCD entre forests
 
-RBCD entre florestas tem uma limitação importante: **o usuário personificado precisa pertencer à mesma floresta que o principal delegante**. Em outras palavras, se a conta de máquina que você controla estiver em `valhalla.local` e o recurso de destino estiver em `asgard.local`, em geral **você não poderá personificar usuários arbitrários de `asgard.local` nesse recurso via RBCD**.<sup>[[9]](#references)</sup>
+RBCD entre forests tem uma limitação importante: **o usuário impersonado precisa pertencer à mesma forest que o principal delegante**. Em outras palavras, se a sua conta de máquina controlada está em `valhalla.local` e o recurso de destino está em `asgard.local`, geralmente **você não pode impersonar usuários arbitrários de `asgard.local` para esse recurso via RBCD**.<sup>[[9]](#references)</sup>
 
-Ainda é explorável quando:
-- o usuário da **floresta delegante** é **administrador local** (ou tem outros privilégios) no host do recurso na outra floresta
-- uma relação de confiança permite o caminho de autenticação necessário e o SID estrangeiro é aceito no descritor de segurança do computador de destino
+Ainda é possível explorá-lo quando:
+- o usuário da **forest delegante** é **administrador local** (ou tem outros privilégios) no host de recurso da outra forest
+- uma trust permite o caminho de autenticação necessário e o SID estrangeiro é aceito no descritor de segurança do computador de destino
 
-### Particularidades do protocolo RBCD entre florestas
+### Particularidades do protocolo RBCD entre forests
 
-RBCD entre florestas não é simplesmente "entre domínios mais uma relação de confiança". O fluxo observado inclui duas particularidades que ferramentas comuns historicamente não contemplam:<sup>[[9]](#references)</sup>
+RBCD entre forests não é apenas "entre domínios, mais uma trust". O fluxo observado inclui duas particularidades que ferramentas comuns historicamente deixam passar:<sup>[[9]](#references)</sup>
 
-1. Uma solicitação adicional **S4U2Proxy** que define **`PA-PAC-OPTIONS=branch-aware`**
-2. Um ticket de serviço final que pode ser retornado usando **RC4**, mesmo quando outros tipos de criptografia foram solicitados
+1. Uma solicitação **S4U2Proxy** extra que define **`PA-PAC-OPTIONS=branch-aware`**
+2. Um ticket de serviço final que pode ser retornado usando **RC4**, mesmo quando outros etypes foram solicitados
 
 O fluxo prático é:
 
-1. Obtenha um TGT para o principal delegante na floresta A.
-2. Solicite **S4U2Self** para o usuário personificado na floresta A.
-3. Solicite **S4U2Proxy** na floresta A para obter um TGT de referral para a floresta B.
-4. Envie uma segunda solicitação **S4U2Proxy** na floresta A **sem** o ticket S4U2Self como ticket adicional, mas com `branch-aware` ativado, para obter outro TGT de referral para a floresta B.
-5. Opcionalmente, solicite um ticket de serviço normal na floresta B para o principal delegante (esse ticket não é necessário para o abuso final).
-6. Use os tickets de referral das etapas 3 e 4 para solicitar o ticket **S4U2Proxy** final na floresta B para o usuário da floresta A personificado, destinado ao SPN de destino.
+1. Obtenha um TGT para o principal delegante na forest A.
+2. Solicite **S4U2Self** para o usuário impersonado na forest A.
+3. Solicite **S4U2Proxy** na forest A para obter um TGT de referral para a forest B.
+4. Envie uma segunda solicitação **S4U2Proxy** na forest A **sem** o ticket S4U2Self como ticket adicional, mas com `branch-aware` habilitado, para obter outro TGT de referral para a forest B.
+5. Opcionalmente, solicite um ticket de serviço normal na forest B para o principal delegante (esse ticket não é necessário para o abuso final).
+6. Use os tickets de referral das etapas 3 e 4 para solicitar o ticket **S4U2Proxy** final na forest B para o usuário da forest A impersonado, destinado ao SPN de destino.
 
-### RBCD entre florestas a partir do Linux
+### RBCD entre forests a partir do Linux
 
-O mesmo branch do Impacket da Synacktiv adiciona uma opção `-forest` para essa lógica:<sup>[[9]](#references)[[11]](#references)</sup>
+A mesma branch do Impacket da Synacktiv adiciona uma opção `-forest` para essa lógica:<sup>[[9]](#references)[[11]](#references)</sup>
 
 ```bash
 python3 ./getST.py -spn 'cifs/workstation.asgard.local' \
@@ -234,11 +234,11 @@ python3 ./getST.py -spn 'cifs/workstation.asgard.local' \
 
 ### RBCD recursivo em vários domínios (3+ domínios)
 
-Em **florestas com vários domínios**, tanto **S4U2Self** quanto **S4U2Proxy** podem ser **recursivos**, em vez de parar após um único referral:
+Em **florestas com vários domínios**, tanto **S4U2Self** quanto **S4U2Proxy** podem ser **recursivos**, em vez de parar após uma única referral:
 
-- **S4U2Self recursivo**: o primeiro `S4U2Self` é enviado ao **domínio do usuário personificado**, os saltos intermediários entre domínios pai/filho são percorridos com referrals `TGS-REQ` normais para `krbtgt/<REALM>`, e o **`S4U2Self` final** é enviado no **próprio domínio do principal delegante**.
-- Isso significa que **ter apenas um TGT** para uma conta de máquina pode ser suficiente para personificar um **administrador de outro domínio na mesma floresta** e solicitar `cifs/host`, `host/host`, `wsman/host` etc.
-- **S4U2Proxy recursivo** segue a cadeia de confiança da mesma forma: os saltos intermediários reutilizam o ticket anterior como TGT enquanto solicitam o próximo referral `krbtgt/<REALM>`, e apenas o último salto retorna o ticket de serviço final.<sup>[[10]](#references)</sup>
+- **S4U2Self recursivo**: o primeiro `S4U2Self` é enviado ao **domínio do usuário impersonado**; os saltos intermediários entre domínios pai e filho são percorridos com referrals `TGS-REQ` normais para `krbtgt/<REALM>`, e o **`S4U2Self` final** é enviado no **próprio domínio do principal delegador**.
+- Isso significa que **ter apenas um TGT** para uma conta de máquina pode ser suficiente para impersonar um **admin de outro domínio na mesma floresta** e solicitar `cifs/host`, `host/host`, `wsman/host` etc.
+- **S4U2Proxy recursivo** segue a cadeia de confiança da mesma maneira: os saltos intermediários reutilizam o ticket anterior como TGT enquanto solicitam a próxima referral `krbtgt/<REALM>`, e somente o último salto retorna o ticket de serviço final.<sup>[[10]](#references)</sup>
 
 Um exemplo prático na mesma floresta é:
 
@@ -251,16 +251,16 @@ KRB5CCNAME=Administrator@frperso.local@cifs_min-frperso-01.minus.sub.frperso.loc
   smbclient.py frperso.local/Administrator@min-frperso-01.minus.sub.frperso.local -k -no-pass
 ```
 
-### RBCD sem SPN entre domínios / entre florestas
+### RBCD SPN-less entre domínios / entre florestas
 
 Se o **principal delegante for um usuário sem SPN**, o último `S4U2Self` recursivo falha com **`KDC_ERR_S_PRINCIPAL_UNKNOWN`**. A solução alternativa é **repetir apenas o salto final como `S4U2Self+U2U`**.<sup>[[10]](#references)</sup>
 
 Resumo da cadeia de abuso:
 
-1. Autentique-se com o **hash NT** para induzir o KDC a usar **RC4-HMAC (etype 23)**.
-2. Primeiro, solicite **`-self -u2u`** e mantenha esse ticket separado da etapa posterior de proxy.
+1. Autentique-se com o **NT hash** para levar o KDC a usar **RC4-HMAC (etype 23)**.
+2. Primeiro, solicite **`-self -u2u`** e mantenha esse ticket separado da etapa de proxy posterior.
 3. Extraia a **chave de sessão do TGT** com `describeTicket.py`.
-4. Substitua o **hash NT** do usuário por essa **chave de sessão** usando `changepasswd.py -newhashes <session_key>`.
+4. Substitua o **NT hash** do usuário por essa **chave de sessão** usando `changepasswd.py -newhashes <session_key>`.
 5. Reutilize o ticket **`S4U2Self+U2U`** como **`-additional-ticket`** durante uma solicitação **`-proxy`** separada.
 
 ```bash
@@ -276,27 +276,27 @@ KRB5CCNAME=Administrator.ccache getST.py sub.frperso.local/Administrator -k -no-
 
 Ressalvas operacionais:
 
-- Quando o **primeiro salto de confiança já é outra forest**, prefira o algoritmo **branch-aware** (`getST.py ... -forest`) para corresponder ao comportamento nativo do Windows. Se a forest estrangeira só for alcançada mais adiante na cadeia, o fluxo recursivo não branch-aware ainda poderá funcionar.<sup>[[9]](#references)</sup>
-- Em DCs recentes com **Windows Server 2022/2025**, forçar RC4 pode falhar com **`KDC_ERR_ETYPE_NOSUPP`** devido à descontinuação do RC4; isso pode tornar o RBCD **SPN-less** impossível, embora o RBCD clássico baseado em SPN ainda funcione com AES.<sup>[[15]](#references)</sup>
-- Execute **`S4U2Self+U2U` antes de alterar o hash/senha do usuário**: `SamrChangePasswordUser` **não** recalcula as chaves Kerberos AES da conta, então alterar a senha primeiro pode impedir solicitações de tickets posteriores.<sup>[[14]](#references)</sup>
+- Quando o **primeiro salto confiável já é outra forest**, prefira o algoritmo **branch-aware** (`getST.py ... -forest`) para corresponder ao comportamento nativo do Windows. Se a forest estrangeira só for alcançada mais adiante na cadeia, o fluxo recursivo sem branch-aware ainda poderá funcionar.<sup>[[9]](#references)</sup>
+- Em DCs recentes com **Windows Server 2022/2025**, forçar RC4 pode falhar com **`KDC_ERR_ETYPE_NOSUPP`** devido à descontinuação do RC4; isso pode tornar o RBCD **sem SPN** impossível, embora o RBCD clássico baseado em SPN ainda funcione com AES.<sup>[[15]](#references)</sup>
+- Execute **`S4U2Self+U2U` antes de alterar o hash/senha do usuário**: `SamrChangePasswordUser` **não** recalcula as chaves AES Kerberos da conta, então alterar a senha primeiro pode interromper solicitações de tickets posteriores.<sup>[[14]](#references)</sup>
 - A conta personificada ainda precisa ser **delegável**: **Protected Users** e contas com **`NOT_DELEGATED`** / **"Account is sensitive and cannot be delegated"** bloqueiam a cadeia.
 
-## Observações sobre detecção / hardening
+## Notas de detecção / hardening
 
-- Caminhos de RBCD entre domínios/forests ainda costumam ser criados por meio de **abuso de ACL** ou **relay-to-LDAP**. Imponha **LDAP signing** e **LDAP channel binding** nos DCs para interromper caminhos comuns de configuração.
-- Audite quem pode gravar em `msDS-AllowedToActOnBehalfOfOtherIdentity` nos objetos de computador e resolva os SIDs armazenados, incluindo **foreign security principals**.
+- Caminhos RBCD entre domínios/forests ainda costumam ser criados por meio de **abuso de ACL** ou **relay-to-LDAP**. Aplique **LDAP signing** e **LDAP channel binding** nos DCs para interromper os caminhos comuns de configuração.
+- Audite quem pode gravar `msDS-AllowedToActOnBehalfOfOtherIdentity` em objetos de computador e resolva os SIDs armazenados, incluindo **foreign security principals**.
 - Em ambientes com muitos trusts, revise **Selective Authentication**, **SID filtering** e se usuários de uma forest estrangeira têm direitos de **administrador local** nos hosts de recursos.
 
 ### Acessando
 
-A última linha de comando executará o **ataque S4U completo e injetará o TGS** do Administrator no host da vítima, **em memória**.\
-Neste exemplo, foi solicitado um TGS para o serviço **CIFS** do Administrator, então você poderá acessar **C$**:
+A última linha de comando executará o **ataque S4U completo e injetará o TGS** de Administrator no host da vítima, **em memória**.\
+Neste exemplo, foi solicitado um TGS para o serviço **CIFS** de Administrator, então você poderá acessar **C$**:
 
 ```bash
 ls \\victim.domain.local\C$
 ```
 
-### Abusar de diferentes tickets de serviço
+### Abuse de diferentes tickets de serviço
 
 Saiba mais sobre os [**tickets de serviço disponíveis aqui**](silver-ticket.md#available-services).
 
@@ -322,7 +322,7 @@ Get-ADComputer -Filter * -Properties msDS-AllowedToActOnBehalfOfOtherIdentity |
   }
 ```
 
-Impacket (ler ou limpar com um comando):
+Impacket (ler ou limpar com um único comando):
 
 ```bash
 # Read who can delegate to VICTIM
@@ -350,20 +350,20 @@ impacket-rbcd -delegate-to 'VICTIM$' -action flush 'domain.local/jdoe:Summer2025
 
 ## Erros do Kerberos
 
-- **`KDC_ERR_ETYPE_NOTSUPP`**: Isso significa que o Kerberos está configurado para não usar DES ou RC4 e você está fornecendo apenas o hash RC4. Forneça ao Rubeus pelo menos o hash AES256 (ou forneça os hashes rc4, aes128 e aes256). Exemplo: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
+- **`KDC_ERR_ETYPE_NOTSUPP`**: Isso significa que o Kerberos está configurado para não usar DES nem RC4, e você está fornecendo apenas o hash RC4. Forneça ao Rubeus pelo menos o hash AES256 (ou forneça os hashes rc4, aes128 e aes256). Exemplo: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
 - **`KDC_ERR_S_PRINCIPAL_UNKNOWN`** durante `-self` para um usuário normal: o principal que delega provavelmente **não tem SPN**. Tente novamente o **último salto** como **`S4U2Self+U2U`**, em vez de um `S4U2Self` normal.<sup>[[10]](#references)</sup>
-- **`KDC_ERR_ETYPE_NOSUPP`** durante RBCD **sem SPN**: DCs recentes podem rejeitar o caminho **RC4-HMAC** forçado, necessário para o truque `S4U2Self+U2U` + substituição de chave de sessão. Em vez disso, tente um caminho RBCD clássico **com SPN** e AES.<sup>[[10]](#references)[[15]](#references)</sup>
-- **`KRB_AP_ERR_SKEW`**: Isso significa que o horário do computador atual é diferente do horário do DC e que o Kerberos não está funcionando corretamente.
-- **`preauth_failed`**: Isso significa que o nome de usuário + hashes fornecidos não funcionam para login. Você pode ter esquecido de incluir o "$" no nome de usuário ao gerar os hashes (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`)
-- **`KDC_ERR_BADOPTION`**: Isso pode significar que:
+- **`KDC_ERR_ETYPE_NOSUPP`** durante RBCD **sem SPN**: DCs recentes podem rejeitar o caminho **RC4-HMAC** forçado exigido pelo truque `S4U2Self+U2U` + substituição de chave de sessão. Tente um caminho RBCD clássico **com SPN** e AES.<sup>[[10]](#references)[[15]](#references)</sup>
+- **`KRB_AP_ERR_SKEW`**: Isso significa que o horário do computador atual é diferente do horário do DC, e o Kerberos não está funcionando corretamente.
+- **`preauth_failed`**: Isso significa que o nome de usuário + hashes fornecidos não permitem fazer login. Talvez você tenha esquecido de colocar o "$" no nome de usuário ao gerar os hashes (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`)
+- **`KDC_ERR_BADOPTION`**: Isso pode significar:
   - O usuário que você está tentando personificar não pode acessar o serviço desejado (porque você não pode personificá-lo ou porque ele não tem privilégios suficientes)
-  - O serviço solicitado não existe (se você pedir um ticket para winrm, mas o winrm não estiver em execução)
+  - O serviço solicitado não existe (se você solicitar um ticket para o winrm, mas o winrm não estiver em execução)
   - O fakecomputer criado perdeu os privilégios sobre o servidor vulnerável, e você precisa devolvê-los.
   - Você está abusando do KCD clássico; lembre-se de que o RBCD funciona com tickets S4U2Self não encaminháveis, enquanto o KCD exige tickets encaminháveis.
 
 ## Observações, relays e alternativas
 
-- Você também pode gravar o RBCD SD por meio dos AD Web Services (ADWS) se o LDAP estiver filtrado. Veja:
+- Você também pode gravar o RBCD SD por meio do AD Web Services (ADWS) se o LDAP estiver filtrado. Consulte:
 
 
 {{#ref}}
@@ -377,20 +377,20 @@ adws-enumeration.md
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
 {{#endref}}
 
-- Se a assinatura LDAP/vinculação de canal estiverem **desativadas** e você puder criar uma conta de máquina, ferramentas como **KrbRelayUp** podem fazer relay de uma autenticação Kerberos forçada para o LDAP, definir `msDS-AllowedToActOnBehalfOfOtherIdentity` para a conta da sua máquina no objeto do computador de destino e personificar imediatamente **Administrator** via S4U a partir de outra máquina.<sup>[[8]](#references)</sup>
+- Se a assinatura LDAP/vinculação de canal estiverem **desativadas** e você puder criar uma conta de máquina, ferramentas como **KrbRelayUp** podem fazer relay de uma autenticação Kerberos forçada para o LDAP, definir `msDS-AllowedToActOnBehalfOfOtherIdentity` para a conta da sua máquina no objeto de computador de destino e personificar imediatamente **Administrator** via S4U a partir de outro host.<sup>[[8]](#references)</sup>
 
 ## References
 
-- [1] [Abanando o cão: abusando da delegação restrita baseada em recursos para atacar o Active Directory](https://eladshamir.com/2019/01/28/Wagging-the-Dog.html)
+- [1] [Abanar o cão: abusando da delegação restrita baseada em recursos para atacar o Active Directory](https://eladshamir.com/2019/01/28/Wagging-the-Dog.html)
 - [2] [Mais uma palavra sobre delegação – harmj0y](https://blog.harmj0y.net/redteaming/another-word-on-delegation/)
 - [3] [Delegação restrita baseada em recursos do Kerberos: tomada de controle de objeto de computador](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object)
 - [4] [Netwrix – abuso da delegação restrita baseada em recursos](https://netwrix.com/en/resources/blog/resource-based-constrained-delegation-abuse/)
-- [5] [A Kerberosity matou o domínio: uma visão geral ofensiva do Kerberos](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
+- [5] [Kerberosity matou o domínio: uma visão geral ofensiva do Kerberos](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
 - [6] [Impacket rbcd.py (oficial)](https://github.com/fortra/impacket/blob/master/examples/rbcd.py)
-- [7] [Folha de consulta rápida de Linux com sintaxe recente](https://tldrbins.github.io/rbcd/)
+- [7] [Guia rápido do Linux com sintaxe recente](https://tldrbins.github.io/rbcd/)
 - [8] [0xdf – HTB Bruno (assinatura LDAP desativada → relay Kerberos para RBCD)](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
-- [9] [Synacktiv - Explorando RBCD entre domínios e florestas](https://www.synacktiv.com/en/publications/exploring-cross-domain-cross-forest-rbcd.html)
-- [10] [Synacktiv - Explorando RBCD entre domínios e florestas: parte 2](https://www.synacktiv.com/en/publications/exploring-cross-domain-cross-forest-rbcd-part-2.html)
+- [9] [Synacktiv - Explorando RBCD entre domínios e entre florestas](https://www.synacktiv.com/en/publications/exploring-cross-domain-cross-forest-rbcd.html)
+- [10] [Synacktiv - Explorando RBCD entre domínios e entre florestas: parte 2](https://www.synacktiv.com/en/publications/exploring-cross-domain-cross-forest-rbcd-part-2.html)
 - [11] [Branch do Impacket da Synacktiv - cross_forest_rbcd](https://github.com/synacktiv/impacket/tree/cross_forest_rbcd)
 - [12] [Microsoft Learn - Visão geral da delegação restrita do Kerberos](https://learn.microsoft.com/en-us/windows-server/security/kerberos/kerberos-constrained-delegation-overview)
 - [13] [Especificações abertas da Microsoft - S4U2Self entre domínios](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-sfu/f35b6902-6f5e-4cd0-be64-c50bbaaf54a5)
