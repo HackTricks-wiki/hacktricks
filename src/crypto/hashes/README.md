@@ -68,6 +68,12 @@ Length-extension attacks apply to vulnerable prefix constructions such as `HASH(
 - Truncated hashes / custom transforms → normalize and retry.
 - Weak KDF parameters (e.g., low PBKDF2 iterations) → still crackable.
 
+### Chosen-input bcrypt oracle with an appended secret
+
+A callable helper that returns `bcrypt(user_input || secret)` can expose information about an appended secret if its bcrypt implementation silently truncates input after 72 **bytes**. A character-count limit before UTF-8 encoding does not enforce that byte limit: multibyte characters can fill the bcrypt input while leaving room for just a small prefix of the secret. Chosen inputs and their returned hashes may then allow offline checks of candidate suffix bytes. This requires control of the helper's input, knowledge of its exact transform and encoding, and an implementation that actually truncates; a callable helper or a bcrypt hash alone does not establish the chain. [pyca/bcrypt documents](https://github.com/pyca/bcrypt#maximum-password-length) that current `hashpw` raises an error for inputs over 72 bytes, whereas earlier behavior silently truncated them. Other wrappers may prehash or reject long inputs, so verify the installed implementation rather than assuming truncation.
+
+Using a recovered secret against a different account also requires evidence that its exposed hash was generated with the **same** secret and transform, plus a separate credential or login path. A root-run hashing helper should be reviewed as an oracle only if the lower-privileged user can invoke it under the effective policy; passive host enumeration need not call it or submit chosen passwords.
+
 ## References
 
 - [1] [SkullSecurity - Everything you need to know about hash length-extension attacks](https://www.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)

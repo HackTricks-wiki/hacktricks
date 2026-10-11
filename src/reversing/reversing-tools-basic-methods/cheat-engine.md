@@ -156,63 +156,117 @@ So, insert your new assembly code in the "**newmem**" section and remove the ori
 
 **Click on execute and so on and your code should be injected in the program changing the behaviour of the functionality!**
 
-## Advanced features in Cheat Engine 7.x (2023-2025)
+## Relocation-safe code injection with AOB signatures
 
-Cheat Engine has continued to evolve since version 7.0 and several quality-of-life and *offensive-reversing* features have been added that are extremely handy when analysing modern software (and not only games!). Below is a **very condensed field guide** to the additions you will most likely use during red-team/CTF work.<sup>[[1]](#references)</sup>
+A script that hooks `game.exe+123456` can break after ASLR or a software update. An **Array of Bytes (AOB) signature** finds the instruction from its surrounding machine code instead. Use `aobscanmodule` to restrict the search to one module. Make the signature long enough to return one match. Wildcard relocation bytes, addresses and other bytes that may change. Do not wildcard the whole instruction that you need to restore.<sup>[[4]](#references)</sup>
 
-### Pointer Scanner 2 improvements
-* `Pointers must end with specific offsets` and the new **Deviation** slider (≥7.4) greatly reduce false positives when you rescan after an update. Use it together with multi-map comparison (`.PTR` → *Compare results with other saved pointer map*) to obtain a **single resilient base-pointer** in just a few minutes.
-* Bulk-filter shortcut: after the first scan press `Ctrl+A → Space` to mark everything, then `Ctrl+I` (invert) to deselect addresses that failed the rescan.
+In Memory View, select the instruction and use **Tools → Auto Assemble → Template → AOB Injection**. The generated `[DISABLE]` block is important. It must restore every overwritten byte and free the allocation.<sup>[[4]](#references)</sup>
 
-### Ultimap 3 – Intel PT tracing
-*From 7.5 the old Ultimap was re-implemented on top of **Intel Processor-Trace (IPT)***. This means you can now record *every* branch the target takes **without single-stepping** (user-mode only, it will not trip most anti-debug gadgets).
+<details>
+<summary>Minimal x64 AOB injection skeleton</summary>
 
+```asm
+[ENABLE]
+aobscanmodule(INJECT,game.exe,F3 0F 11 83 A0 00 00 00 48 8B)
+alloc(newmem,1024,INJECT)
+label(return)
+registersymbol(INJECT)
+newmem:
+  movss [rbx+000000A0],xmm0
+  jmp return
+INJECT:
+  jmp newmem
+  nop
+  nop
+  nop
+return:
+[DISABLE]
+INJECT:
+  db F3 0F 11 83 A0 00 00 00
+unregistersymbol(INJECT)
+dealloc(newmem)
 ```
-Memory View → Tools → Ultimap 3 → check «Intel PT»
-Select number of buffers → Start
+
+</details>
+
+Before enabling the script, verify these points:
+
+1. The AOB returns **one** address. Add stable instructions on both sides if it returns more.
+2. The jump replaces complete instructions. Never split an instruction.
+3. The allocated cave is reachable by the generated jump. On x64, a far allocation may need a 14-byte jump.
+4. The injected code preserves registers, flags and stack alignment that the original function expects.
+5. The disable block restores the exact original bytes. Test enable and disable several times before saving the table.
+
+## Reliable pointer workflow
+
+A pointer found in one run is only a candidate. Build pointer maps in several fresh executions and rescan against all of them. Restart the target between captures so ASLR and heap allocations change. Prefer paths whose base is a module or another stable symbol. Reject paths that only work with one save, level or object instance.
+
+The **pointer must end with specific offsets** filter and its deviation option can keep useful paths when a nearby field moves between builds. The 7.5 release also added this deviation control. It is a filter, not proof that a pointer chain is stable.<sup>[[1]](#references)</sup>
+
+When a structure moves too often for pointer scanning, hook the instruction that accesses it. Capture the live object pointer from a register into an allocated symbol. This is often more reliable for entity lists and managed objects.
+
+## Tracing code instead of scanning values
+
+Use **Find out what writes to this address** when the value is directly modified. Use **Find out what accesses this address** when you need the owning object or when the write happens through copied data. Trigger only one action in the target. Then compare the hit count and register state.
+
+**Ultimap 2** uses Intel Processor Trace on supported Intel CPUs. It records executed control flow with less interruption than stepping every instruction. Filter for code that executed while the interesting action occurred and remove code that also executed during an idle capture. Intel PT is not a stealth feature. The target can still detect tracing, timing changes or Cheat Engine itself.<sup>[[1]](#references)</sup>
+
+Cheat Engine 7.5 also added an Intel PT interface provided by Windows. The older DBVM-backed Ultimap mode and the Intel PT mode have different hardware and OS requirements. Do not assume that a DBVM-capable CPU supports Intel PT.<sup>[[1]](#references)</sup>
+
+## Debugger and breakpoint selection
+
+Choose the least invasive debugger that works:
+
+- **Windows debugger** is simple but creates normal debug events. Anti-debugging checks can detect it.
+- **VEH debugger** handles breakpoints through a vectored exception handler. It avoids some basic debugger checks but it is not invisible.
+- **Hardware breakpoints** do not patch the instruction bytes, but x86/x64 provides only a small number of debug-register slots.
+- **Software breakpoints** replace a byte with `INT3`. They are easy to detect and can conflict with integrity checks.
+- **DBVM debugger** moves some operations below the guest OS. It has much more privilege and can crash the host if it is misconfigured.
+
+Cheat Engine 7.5 can use a one-byte jump based on an exception handler and `INT3` when there is not enough room for a normal relative jump. Treat it like a software breakpoint. Verify exception flow and do not assume that it bypasses anti-tamper checks.<sup>[[1]](#references)</sup>
+
+DBVM is a hypervisor, not a general invisibility switch. Use it only in a disposable lab. Do not expose its control interface to untrusted code. Kernel anti-cheat and endpoint products may still detect the driver, hypervisor state or modified memory.
+
+## Managed runtimes and recent 7.6/7.7 features
+
+For Mono, IL2CPP, .NET and Java targets, prefer runtime metadata over blind scans when it is available. Open **Mono → Activate mono features** or the corresponding runtime information window. Locate the class, field or method first. Then use the native disassembly when the managed method is JIT-compiled.
+
+The 7.6 line added `AOBSCANEX` for executable-memory-only signatures, a `gdbserver` debugger interface, Java metadata inspection, faster IL2CPP enumeration and a pointer-scan option that ignores the upper pointer byte used by ARM memory tagging. The 7.7 line added native Linux builds, `HOOK`/`UNHOOK`, `aobscanfunction`, better generic Mono method lookup, improved PDB structure support and basic Unreal Engine structure dissection.<sup>[[3]](#references)</sup>
+
+These additions enable a useful workflow:
+
+1. Resolve a managed method or static field from metadata.
+2. Trace or disassemble the native code produced for that method.
+3. Use `AOBSCANEX` or `aobscanfunction` to locate a stable executable signature.
+4. Generate a reversible hook. Keep the original instructions and validate the disable path.
+5. Recheck the signature after every target update. A successful match does not guarantee that the surrounding logic still has the same meaning.
+
+## Remote targets with `ceserver`
+
+`ceserver` exposes process enumeration, memory access and debugging to the Cheat Engine GUI. Official builds cover Linux and Android. Run the matching architecture on the target and connect through the **Network** tab. On Android, forwarding the default port avoids exposing it on the network:<sup>[[3]](#references)</sup>
+
+```bash
+adb push ceserver_arm64 /data/local/tmp/ceserver
+adb shell 'su -c "chmod 700 /data/local/tmp/ceserver && /data/local/tmp/ceserver"'
+adb forward tcp:52736 tcp:52736
 ```
-After a few seconds stop the capture and **right-click → Save execution list to file**. Combine branch addresses with a `Find out what addresses this instruction accesses` session to locate high-frequency game-logic hotspots extremely fast. 
 
-### 1-byte `jmp` / auto-patch templates
-Version 7.5 introduced a *one-byte* JMP stub (0xEB) that installs an SEH handler and places an INT3 at the original location. It is generated automatically when you use **Auto Assembler → Template → Code Injection** on instructions that cannot be patched with a 5-byte relative jump. This makes “tight” hooks possible inside packed or size-constrained routines.<sup>[[1]](#references)</sup>
+The third-party `frida-ceserver` bridge can provide a Cheat Engine-compatible interface for iOS targets. It is not the official `ceserver` and its supported operations may differ.<sup>[[2]](#references)</sup>
 
-### Kernel-level stealth with DBVM (AMD & Intel)
-*DBVM* is CE’s built-in Type-2 hypervisor. Recent builds finally added **AMD-V/SVM support** so you can run `Driver → Load DBVM` on Ryzen/EPYC hosts. DBVM lets you:
-1. Create hardware breakpoints invisible to Ring-3/anti-debug checks.
-2. Read/write pageable or protected kernel memory regions even when the user-mode driver is disabled.
-3. Perform VM-EXIT-less timing-attack bypasses (e.g. query `rdtsc` from the hypervisor).
+Assume the protocol grants debugger-level access. Bind it to loopback or place it behind an SSH/ADB tunnel. Never expose TCP 52736 to an untrusted network. Stop the server when the session ends.
 
-**Tip:** DBVM will refuse to load when HVCI/Memory-Integrity is enabled on Windows 11 → turn it off or boot a dedicated VM-host.
+## Operational safety
 
-### Remote / cross-platform debugging with **ceserver**
-CE now ships a full rewrite of *ceserver* and can attach over TCP to **Linux, Android, macOS & iOS** targets. A popular fork integrates *Frida* to combine dynamic instrumentation with CE’s GUI – ideal when you need to patch Unity or Unreal games running on a phone:
+Only attach to software you own or are authorized to test. Do not run Cheat Engine beside an online game or production endpoint. Memory writes, injected code, drivers and DBVM can crash or corrupt the target.<sup>[[3]](#references)</sup>
 
-```
-# on the target (arm64)
-./ceserver_arm64 &
-# on the analyst workstation
-adb forward tcp:52736 tcp:52736   # (or ssh tunnel)
-Cheat Engine → "Network" icon → Host = localhost → Connect
-```
-For the Frida bridge see `bb33bb/frida-ceserver` on GitHub.<sup>[[1]](#references)[[2]](#references)</sup>
+Download builds from the official site or compile the published source. Security products often classify memory editors, debuggers and their drivers as hack tools. Do not disable host protection globally. Use a dedicated VM or lab host and verify the artifact before running it.<sup>[[3]](#references)</sup>
 
-### Other noteworthy goodies
-* **Patch Scanner** (MemView → Tools) – detects unexpected code changes in executable sections; handy for malware analysis.
-* **Structure Dissector 2** – drag-an-address → `Ctrl+D`, then *Guess fields* to auto-evaluate C-structures.
-* **.NET & Mono Dissector** – improved Unity game support; call methods directly from the CE Lua console.
-* **Big-Endian custom types** – reversed byte order scan/edit (useful for console emulators and network packet buffers).
-* **Autosave & tabs** for AutoAssembler/Lua windows, plus `reassemble()` for multi-line instruction rewrite.<sup>[[1]](#references)</sup>
 
-### Installation & OPSEC notes (2024-2025)
-* The official installer is wrapped with InnoSetup **ad-offers** (`RAV` etc.). **Always click *Decline*** *or compile from source* to avoid PUPs. AVs will still flag `cheatengine.exe` as a *HackTool*, which is expected.
-* Modern anti-cheat drivers (EAC/Battleye, ACE-BASE.sys, mhyprot2.sys) detect CE’s window class even when renamed. Run your reversing copy **inside a disposable VM** or after disabling network play.
-* If you only need user-mode access choose **`Settings → Extra → Kernel mode debug = off`** to avoid loading CE’s unsigned driver that may BSOD on Windows 11 24H2 Secure-Boot.
-
----
 
 ## References
 
-- [1] [Cheat Engine 7.5 release notes (GitHub)](https://github.com/cheat-engine/cheat-engine/releases/tag/7.5)
-- [2] [frida-ceserver cross-platform bridge](https://github.com/bb33bb/frida-ceserver-Mac-and-IOS)
-
+- [1] [Cheat Engine 7.5 release notes](https://github.com/cheat-engine/cheat-engine/releases/tag/7.5)
+- [2] [frida-ceserver bridge for remote targets](https://github.com/gmh5225/frida-ceserver)
+- [3] [Cheat Engine official release news](https://www.cheatengine.org/)
+- [4] [Cheat Engine Wiki: Auto Assembler AOBs](https://wiki.cheatengine.org/index.php?title=Tutorials:AOBs)
 {{#include ../../banners/hacktricks-training.md}}

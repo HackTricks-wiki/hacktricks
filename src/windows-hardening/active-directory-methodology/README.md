@@ -339,7 +339,8 @@ Regarding [**ASREPRoast**](asreproast.md) you can now find every possible vulner
   - **Other automated AD enumeration tools are:** [**AD Explorer**](bloodhound.md#ad-explorer)**,** [**ADRecon**](bloodhound.md#adrecon)**,** [**Group3r**](bloodhound.md#group3r)**,** [**PingCastle**](bloodhound.md#pingcastle)**.**
 - [**DNS records of the AD**](ad-dns-records.md) as they might contain interesting information.
 - A **tool with GUI** that you can use to enumerate the directory is **AdExplorer.exe** from **SysInternal** Suite.
-- You can also search in the LDAP database with **ldapsearch** to look for credentials in fields _userPassword_ & _unixUserPassword_, or even for _Description_. cf. [Password in AD User comment on PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment) for other methods.
+- You can also search in the LDAP database with **ldapsearch** to look for credentials in fields _userPassword_ & _unixUserPassword_, or even in user _description_ and _info_ notes. An unlabeled, password-shaped token in _info_ is only a candidate: confirm its purpose and validity separately, and keep note contents out of routine enumeration output. See [Password in AD User comment on PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment) for other methods.
+- Review **accessible** domain logon and drive-mapping scripts under `\\<dc>\NETLOGON` or `\\<dc>\SYSVOL\<domain>\scripts` when authorization permits. [Microsoft documents](https://learn.microsoft.com/en-us/troubleshoot/windows-server/active-directory/netlogon-share-not-present-after-install-ad-ds-on-full-read-only-domain-controller) the NETLOGON share's script-directory role. List names first, then inspect only relevant, readable scripts within a size limit; do not dump an entire share or echo credential values during routine enumeration. A PowerShell call to [`ConvertTo-SecureString -AsPlainText`](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.security/convertto-securestring) does **not** protect a literal password stored in the script. The call alone does not prove that a secret is hardcoded: trace its actual input, then separately verify the account, credential validity, and privileges. A domain script is a remote share review, separate from local host enumeration.
 - If you are using **Linux**, you could also enumerate the domain using [**pywerview**](https://github.com/the-useless-one/pywerview).
 - You could also try automated tools as:
   - [**tomcarver16/ADSearch**](https://github.com/tomcarver16/ADSearch)
@@ -377,6 +378,10 @@ netexec ldap dc.corp.local -u 'APP01$' -p app01 -k --gmsa
 ```
 
 Then evaluate the recovered gMSA like any other credential: inspect local/domain group membership, logon rights, SPNs, delegation, and reachable services before trying pass-the-hash. This ACL-based retrieval path is distinct from [Golden gMSA/dMSA](golden-dmsa-gmsa.md), which derives managed passwords after KDS root-key compromise.<sup>[[20]](#references)</sup>
+
+A computer principal may also have outbound control over other computer objects or groups. After obtaining one, inspect its nested memberships and effective ACLs separately: a write right on another computer object may enable an account change, and group membership rights may lead to a logon role. A staged-account flag, predictable naming convention, or `GenericWrite` edge alone does not prove the full path.
+
+A readable copy of an `msDS-ManagedPassword` blob in a file, share, or backup is a separate exposure path: the LDAP read ACL cannot protect a copy stored elsewhere. Validate that the data is a managed-password blob before interpreting it, and distinguish this from both an authorized LDAP read and KDS root-key derivation.
 
 ### Kerberoast
 
@@ -603,6 +608,8 @@ Once you get **Domain Admin** or even better **Enterprise Admin** privileges, yo
 [**More information about DCSync attack can be found here**](dcsync.md).
 
 [**More information about how to steal the NTDS.dit can be found here**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
+
+A readable backup archive containing `ntds.dit` together with the `SYSTEM` hive should be treated as exposed directory material even before extraction. A stale password hash does not make other object attributes safe: fields such as `description` may contain credentials or operational notes. Inspect archive member names first and keep extracted database contents out of routine enumeration output.
 
 ### Privesc as Persistence
 

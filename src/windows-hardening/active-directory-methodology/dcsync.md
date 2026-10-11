@@ -68,6 +68,8 @@ secretsdump.py -just-dc-ntlm -history -pwd-last-set -user-status <DOMAIN>/<USER>
 
 ### DCSync using a captured DC machine TGT (ccache)
 
+When reviewing a service on a domain controller, distinguish its local service identity from its network identity. [Microsoft documents](https://learn.microsoft.com/en-us/sql/database-engine/configure-windows/configure-windows-service-accounts-and-permissions) that SQL Server virtual accounts (`NT SERVICE\...`) access network resources as the host computer account. On a domain controller this can make the DC machine account relevant to replication-rights review, but a service foothold alone does not establish an exportable machine TGT or usable DCSync authentication. Verify the actual service identity, outbound authentication context, available ticket or credentials, and effective replication rights before treating this as a path.
+
 In unconstrained-delegation export-mode scenarios, you may capture a Domain Controller machine TGT (e.g., `DC1$@DOMAIN` for `krbtgt@DOMAIN`). You can then use that ccache to authenticate as the DC and perform DCSync without a password.<sup>[[5]](#references)</sup>
 
 ```bash
