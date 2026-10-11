@@ -6,9 +6,13 @@
 
 Some macOS security tooling delegates thread-stack collection to `/usr/sbin/spindump` or otherwise trusts a conventional metadata-driven unwinder. An implant can exploit that trust boundary by placing ABI-correct synthetic records on its stack so a sensitive API appears to have been reached through attacker-selected functions in dyld and loaded Apple frameworks instead of from unbacked implant code. This is telemetry deception, not a change to the executable or its unwind metadata.<sup>[[1]](#references)</sup>
 
+See [macOS stackshots and `spindump`](../macos-apps-inspecting-debugging-and-fuzzing/#stackshot--microstackshots) for the collection-side context.
+
 An unwinder does not prove that a compiler-generated prologue created a record. It repeatedly uses the current `PC` to choose a Mach-O recipe, applies that recipe to `SP`, `x29`, `x30`, stack memory and any declared nonvolatile registers, and uses the recovered caller `PC` to select the next recipe. If attacker-controlled memory satisfies every selected recipe, the resulting chain can be structurally valid and symbolizable even though those calls never happened.<sup>[[1]](#references)</sup>
 
 ## ARM64 frame state
+
+The [ARM64 assembly overview](../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md) provides broader register and calling-convention background.
 
 `SP` is the current allocation boundary, `x29`/`FP` conventionally points to the saved frame record, `x30`/`LR` holds the immediate return address, and `x19-x28` are callee-saved GPRs. `BL`/`BLR` write the address following the call into LR; unlike an x86 `call`, they do not push it. A non-leaf framed function therefore saves LR explicitly, normally alongside the caller FP.<sup>[[1]](#references)[[4]](#references)</sup>
 

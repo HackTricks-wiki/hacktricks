@@ -167,6 +167,8 @@ macos-function-hooking.md
 
 ### ARM64/ARM64e Call-Stack Spoofing
 
+This page covers ARM64 unwind metadata, arm64e PAC constraints, and synthetic call chains.
+
 {{#ref}}
 arm64-arm64e-call-stack-spoofing.md
 {{#endref}}
