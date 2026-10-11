@@ -20,13 +20,15 @@ LDAP relay/MITM attacks forward authentication to a domain controller to obtain 
   - **KB4520412** (Server 2019/2022) adds LDAPS CBT “what-if” telemetry.<sup>[[2]](#references)</sup>
 - **GPO (DCs)**: `Domain controller: LDAP server channel binding token requirements`
   - `Never` (default, no CBT)
-  - `When Supported` (audit: emits failures, does not block)
+  - `When Supported` (partial enforcement: CBT-capable clients must provide a valid token; clients without CBT support can still bind, and audit events are emitted)
   - `Always` (enforce: rejects LDAPS binds without valid CBT)<sup>[[1]](#references)</sup>
 - **Audit**: set **When Supported** to surface:
   - **3074** – LDAPS bind would have failed CBT validation if enforced.
   - **3075** – LDAPS bind omitted CBT data and would be rejected if enforced.
   - (Event **3039** still signals CBT failures on older builds.)<sup>[[1]](#references)[[2]](#references)</sup>
 - **Enforcement**: set **Always** once LDAPS clients send CBTs; only effective on **LDAPS** (not raw 389).<sup>[[1]](#references)</sup>
+
+`When Supported` is not audit-only: it validates CBT for capable clients while allowing clients without CBT support. The [Microsoft policy reference](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/ldap-channel-binding) describes its version-dependent defaults. LDAP signing applies to applicable binds on LDAP/389; channel binding applies to TLS-protected LDAP authentication.
 
 
 ## LDAP Signing
@@ -45,7 +47,7 @@ LDAP relay/MITM attacks forward authentication to a domain controller to obtain 
 Reg Add HKLM\SYSTEM\CurrentControlSet\Services\NTDS\Diagnostics /v "16 LDAP Interface Events" /t REG_DWORD /d 2
 ```
 
-2. Set DC GPO `LDAP server channel binding token requirements` = **When Supported** to start CBT telemetry.<sup>[[1]](#references)</sup>
+2. Set DC GPO `LDAP server channel binding token requirements` = **When Supported** for partial CBT enforcement and telemetry; validate legacy-client compatibility first.<sup>[[1]](#references)</sup>
 3. Monitor Directory Service events:<sup>[[1]](#references)[[2]](#references)</sup>
    - **2889** – unsigned/unsigned-allow binds (signing noncompliant).
    - **3074/3075** – LDAPS binds that would fail or omit CBT (requires KB4520412 on 2019/2022 and step 2 above).

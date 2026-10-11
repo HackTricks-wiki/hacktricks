@@ -54,6 +54,10 @@ These endpoints expose pipeline IDs and settings, runtime metrics, and config-re
 
 If a recovered credential targets **Elasticsearch**, check [this other page about Elasticsearch](../../network-services-pentesting/9200-pentesting-elasticsearch.md).
 
+### File input feeding a dynamic command output
+
+A pipeline configuration can be read-only to the current user while its [file input](https://www.elastic.co/docs/reference/logstash/plugins/plugins-inputs-file) watches a path the user can write. Follow the loaded pipeline from that input through any [Grok field capture](https://www.elastic.co/docs/reference/logstash/plugins/plugins-filters-grok) to an [exec output](https://www.elastic.co/docs/reference/logstash/plugins/plugins-outputs-exec). The exec output passes its `command` through a shell and substitutes `%{field}` values without sanitizing shell metacharacters. A writable input path is a privilege lead only if the running service has a higher identity, the user's file can actually enter the watched input, the filters and output conditions route its contents into the command field, and that output plugin is installed and active. Check directory search/write permissions, file-input tracking state, and the effective service account separately; do not write a test event or invoke the output during passive enumeration.
+
 ### Privilege Escalation via Writable Pipelines
 
 To attempt privilege escalation, first identify the user under which the Logstash service is actually running; do not assume it is root or the **logstash** user. Ensure you meet **one** of these criteria:

@@ -136,11 +136,26 @@ jobs:
             fi
           done
 
-          echo "Files to translate (`wc -l < /tmp/file_paths.txt`):"
+          # Ref comparison can include paths that exist only on a language branch.
+          # The translator requires every source path to exist on master.
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path_file = Path('/tmp/file_paths.txt')
+          paths = path_file.read_text().split(',') if path_file.exists() else []
+          valid = []
+          for path in paths:
+              path = path.strip()
+              if path.startswith('src/') and path.endswith('.md') and Path(path).is_file():
+                  valid.append(path)
+              elif path:
+                  print(f'Skipping missing or invalid translation source: {path}')
+          path_file.write_text(','.join(dict.fromkeys(valid)))
+          PY
+
+          echo "Files to translate:"
           cat /tmp/file_paths.txt
           echo ""
-          echo ""
-          touch /tmp/file_paths.txt
 
           if [ -s /tmp/file_paths.txt ]; then
             python scripts/translator.py \
