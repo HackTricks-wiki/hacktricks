@@ -2,12 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Tożsamość użytkownika, członkostwo w grupach i delegowane poświadczenia określają, do jakich zasobów może uzyskać dostęp proces. Przed zbadaniem opisanych poniżej ścieżek dostępu sprawdź efektywną tożsamość i grupy uzupełniające.
+Tożsamość użytkownika, przynależność do grup i delegowane poświadczenia określają, do jakich zasobów może uzyskać dostęp proces. Przed sprawdzeniem poniższych ścieżek dostępu zweryfikuj efektywną tożsamość i grupy uzupełniające.
 
-- [Użytkownicy, sesje i artefakty poświadczeń](user-and-session-triage.md) omawia enumerację kont, aktywne logowania, artefakty SSH i powłoki oraz magazyny poświadczeń.
+- [Użytkownicy, sesje i artefakty poświadczeń](user-and-session-triage.md) opisuje enumerację kont, aktywne logowania, artefakty SSH i powłoki oraz magazyny poświadczeń.
 - [Rzeczywiste, efektywne i zapisane identyfikatory użytkownika](euid-ruid-suid.md) wyjaśnia zmiany tożsamości związane z programami SUID i wykonywaniem procesów.
-- [Interesujące grupy przy eskalacji uprawnień w systemie Linux](interesting-groups-linux-pe/README.md) omawia dostęp przyznawany przez członkostwo w grupach, w tym LXD/LXC.
-- [Wykorzystywanie agenta przekazywania SSH](ssh-forward-agent-exploitation.md) omawia ryzyko związane z przekazywanymi poświadczeniami SSH.
-- [Linux Active Directory](linux-active-directory.md) omawia hosty dołączone do środowiska AD.
+- [Interesujące grupy w kontekście eskalacji uprawnień w systemie Linux](interesting-groups-linux-pe/README.md) opisuje dostęp przyznawany przez grupy, w tym LXD/LXC.
+- [Wykorzystywanie agenta przekazywania SSH](ssh-forward-agent-exploitation.md) omawia zagrożenia związane z przekazywanymi poświadczeniami SSH.
+- [Active Directory w systemie Linux](linux-active-directory.md) opisuje hosty dołączone do środowiska AD.
 
 {{#include ../../banners/hacktricks-training.md}}
