@@ -2,14 +2,14 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Instalirani softver dodaje Linux hostu mehanizme za autentifikaciju, interfejse za upravljanje i ponašanje specifično za pojedine servise. Identifikujte instaliranu komponentu i njene privilegije, a zatim pregledajte odgovarajuću stranicu:
+Instalirani softver dodaje Linux hostu mehanizme za autentifikaciju, interfejse za upravljanje i ponašanje specifično za uslugu. Identifikujte instaliranu komponentu i njene privilegije, a zatim pregledajte odgovarajuću stranicu:
 
-- [Lokalni web i servisi za autentifikaciju](local-web-and-auth-services.md) prikazuje web, proxy, PAM, LDAP, mail i CI površine na hostu.
-- [Baze podataka i tajni podaci](databases-and-secret-material.md) obuhvata lokalne DB krajnje tačke, konfiguracije aplikacija, skladišta ključeva i tokene.
-- [PAM: Pluggable Authentication Modules](pam-pluggable-authentication-modules.md) obrađuje Linux module za autentifikaciju i konfiguraciju.
-- [FreeIPA pentesting](freeipa-pentesting.md) obrađuje implementacije za upravljanje identitetima.
-- [Logstash](logstash.md) obrađuje površine za napad specifične za servis.
-- [Splunk LPE i persistence](splunk-lpe-and-persistence.md) obrađuje lokalne putanje za eskalaciju privilegija i persistence u Splunk implementacijama.
-- [Zloupotreba Node inspector-a i CEF debugger-a](electron-cef-chromium-debugger-abuse.md) obrađuje izložene interfejse za otklanjanje grešaka.
-- [Zaobilaženje autentifikacije i syscall hooks u manager-u Android rooting framework-a](android-rooting-frameworks-manager-auth-bypass-syscall-hook.md) obrađuje taj specijalizovani softverski stek zasnovan na Linux-u.
+- [Lokalne veb-usluge i usluge za autentifikaciju](local-web-and-auth-services.md) obuhvata veb-usluge na hostu, proxy, PAM, LDAP, e-poštu i CI površine napada.
+- [Baze podataka i tajni materijal](databases-and-secret-material.md) obuhvata lokalne DB krajnje tačke, konfiguracije aplikacija, skladišta ključeva i tokene.
+- [PAM: priključivi moduli za autentifikaciju](pam-pluggable-authentication-modules.md) obuhvata Linux module za autentifikaciju i konfiguraciju.
+- [FreeIPA pentesting](freeipa-pentesting.md) obuhvata instalacije za upravljanje identitetima.
+- [Logstash](logstash.md) obuhvata površine napada specifične za uslugu.
+- [Splunk LPE and persistence](splunk-lpe-and-persistence.md) obuhvata lokalno podizanje privilegija i persistence putanje u instalacijama Splunk-a.
+- [Zloupotreba Node inspector-a i CEF debugger-a](electron-cef-chromium-debugger-abuse.md) obuhvata izložene interfejse za otklanjanje grešaka.
+- [Zaobilaženje autentifikacije i syscall hooks u menadžerima Android rooting framework-a](android-rooting-frameworks-manager-auth-bypass-syscall-hook.md) obuhvata taj specijalizovani stek softvera zasnovan na Linux-u.
 {{#include ../../banners/hacktricks-training.md}}
