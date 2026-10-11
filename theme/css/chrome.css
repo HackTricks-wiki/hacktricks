@@ -52,8 +52,8 @@ a > .hljs {
 .menu-bar-link:hover {
     color: var(--menu-bar-link-color-hover);
 }
-.menu-bar-link-request-update,
-.menu-bar-link-request-update:visited {
+.menu-bar-link-update-ai,
+.menu-bar-link-update-ai:visited {
     display: inline-flex;
     align-items: center;
     border: 1px solid color-mix(in srgb, var(--links) 45%, transparent);
@@ -67,7 +67,7 @@ a > .hljs {
     font-weight: 700;
     box-shadow: inset 0 0 0 1px color-mix(in srgb, #ffffff 10%, transparent);
 }
-.menu-bar-link-request-update:hover {
+.menu-bar-link-update-ai:hover {
     color: var(--menu-bar-link-color-hover);
     border-color: color-mix(in srgb, var(--links) 70%, transparent);
     background:
@@ -161,69 +161,6 @@ body.sidebar-visible #menu-bar {
 .right-buttons a {
     text-decoration: none;
 }
-.menu-socials {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-}
-.menu-socials-toggle {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    border: 0;
-    padding: 0;
-    font: inherit;
-    background: transparent;
-    cursor: pointer;
-}
-.menu-socials-caret {
-    font-size: 14px;
-    line-height: 1;
-    opacity: 0.9;
-}
-.menu-socials-popup {
-    position: absolute;
-    right: 0;
-    top: 30px;
-    z-index: 105;
-    border-radius: 5px;
-    font-size: 14px;
-    color: var(--fg);
-    background: var(--bg);
-    border: 1px solid var(--table-border-color);
-    margin: 0;
-    padding: 0;
-    display: none;
-    flex-direction: column;
-    min-width: 140px;
-    overflow: hidden;
-}
-.menu-socials:hover .menu-socials-popup,
-.menu-socials:focus-within .menu-socials-popup {
-    display: flex;
-}
-.menu-socials-popup .menu-bar-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    border: 0;
-    margin: 0;
-    padding: 8px 20px;
-    line-height: 25px;
-    white-space: nowrap;
-    text-align: start;
-    color: inherit;
-    background: inherit;
-    font-size: inherit;
-}
-.menu-socials-popup .menu-bar-link i {
-    width: 16px;
-    text-align: center;
-}
-.menu-socials-popup .menu-bar-link:hover {
-    background-color: var(--theme-hover);
-}
-
 @media only screen and (min-width:800px) {
     #menubar-collapse {
         display: flex !important;
@@ -351,22 +288,6 @@ body.sidebar-visible #menu-bar {
     overflow: auto;
     background: transparent;
 }
-#menubar-collapse-popup.show-socials #menubar-socials-popup {
-    display: flex;
-}
-#menubar-socials-popup {
-    display: none;
-    flex-direction: column;
-    border-top: 1px solid var(--table-border-color);
-    background: transparent;
-}
-#menubar-collapse-popup #menubar-socials-popup .menu-bar-link {
-    padding-left: 34px;
-}
-#menubar-socials-popup .menu-bar-link i {
-    width: 16px;
-    text-align: center;
-}
 #menubar-collapse-popup .menu-bar-link {
     border: 0;
     margin: 0;
@@ -379,8 +300,8 @@ body.sidebar-visible #menu-bar {
     background: inherit;
     font-size: inherit;
 }
-#menubar-collapse-popup .menu-bar-link-request-update,
-#menubar-collapse-popup .menu-bar-link-request-update:visited {
+#menubar-collapse-popup .menu-bar-link-update-ai,
+#menubar-collapse-popup .menu-bar-link-update-ai:visited {
     margin: 6px 8px;
     padding: 8px 12px;
     color: var(--fg);
@@ -392,7 +313,7 @@ body.sidebar-visible #menu-bar {
 #menubar-collapse-popup .menu-bar-link:hover {
     background-color: var(--theme-hover);
 }
-#menubar-collapse-popup .menu-bar-link-request-update:hover {
+#menubar-collapse-popup .menu-bar-link-update-ai:hover {
     color: var(--menu-bar-link-color-hover);
     background:
         linear-gradient(135deg,
@@ -464,6 +385,16 @@ body.sidebar-visible #menu-bar {
     display: flex;
     margin: 0 5px;  
     align-items: center;
+}
+.left-buttons > .menu-bar-link-update-ai {
+    margin-left: 16px;
+    white-space: nowrap;
+    text-decoration: none;
+}
+@media only screen and (max-width:799px) {
+    .left-buttons > .menu-bar-link-update-ai {
+        display: none;
+    }
 }
 html:not(.js) .left-buttons button {
     display: none;
@@ -1308,13 +1239,6 @@ html:not(.sidebar-resizing) .sidebar {
     height: clamp(14px, 4vw, 16px);
     fill: currentColor;
     vertical-align: middle;
-}
-.menu-socials-popup .menu-bar-link svg,
-#menubar-socials-popup .menu-bar-link svg {
-    width: 15px;
-    height: 15px;
-    fill: currentColor;
-    vertical-align: -0.15em;
 }
 .sidebar-socials {
     display: none;
