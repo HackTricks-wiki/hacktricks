@@ -4,95 +4,112 @@
 
 ## LaunchServices Database
 
-Bu, macOS'ta yüklü olan tüm uygulamaların; desteklenen **URL schemes**, **document types**, **UTIs** ve varsayılan işleyiciler gibi her bir yüklü uygulama hakkında bilgi almak için sorgulanabilen bir database'dir.
+Bu, macOS'te yüklü tüm uygulamaların veritabanıdır. Her yüklü uygulama hakkında desteklenen **URL schemes**, **document types**, **UTIs** ve varsayılan işleyiciler gibi bilgileri almak için sorgulanabilir.
 
-Bu database'i şu şekilde dump etmek mümkündür:
+Bu veritabanını şu komutla dump etmek mümkündür:
+
 ```
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -dump
 ```
+
 Veya [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html) aracını kullanarak.
 
-**`/usr/libexec/lsd`**, veritabanının beynidir. `.lsd.installation`, `.lsd.open`, `.lsd.openurl` ve daha fazlası gibi **birkaç XPC servisi** sağlar. Ancak açığa çıkarılan XPC işlevlerini kullanabilmeleri için uygulamalara bazı **entitlement'lar** da verilmesini gerektirir; örneğin MIME türleri veya URL scheme'leri için varsayılan uygulamaları değiştirmek üzere `.launchservices.changedefaulthandler` veya `.launchservices.changeurlschemehandler` ve diğerleri.
+**`/usr/libexec/lsd`**, veritabanının beynidir. `.lsd.installation`, `.lsd.open`, `.lsd.openurl` ve daha fazlası gibi **birkaç XPC servisi** sağlar. Ancak uygulamaların sunulan XPC işlevlerini kullanabilmesi için bazı **entitlement'lar** da gerektirir; örneğin MIME type'ları veya URL scheme'leri için varsayılan uygulamaları değiştirmeye yarayan `.launchservices.changedefaulthandler` ya da `.launchservices.changeurlschemehandler` ve diğerleri.
 
-**`/System/Library/CoreServices/launchservicesd`**, `com.apple.coreservices.launchservicesd` servisini claim eder ve çalışan uygulamalar hakkında bilgi almak için sorgulanabilir. Sistem aracı **`/usr/bin/lsappinfo`** veya [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html) ile sorgulanabilir.
+**`/System/Library/CoreServices/launchservicesd`**, `com.apple.coreservices.launchservicesd` servisini sunar ve çalışan uygulamalar hakkında bilgi almak için sorgulanabilir. Sistem aracı **`/usr/bin/lsappinfo`** veya [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html) ile sorgulanabilir.
 
-Bir operator perspektifinden, genellikle **iki kullanışlı görünüm** olduğunu unutmayın:
+Bir operator olarak, genellikle **iki kullanışlı görünüm** olduğunu unutmayın:
 
-- LaunchServices / `lsd` tarafından yönetilen **registration database** (`.csstore` dosyalarıyla desteklenir).
-- `LSHandlers` array'i içinde `~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist` konumunda depolanan **kullanıcı başına effective defaults**.
+- LaunchServices / `lsd` tarafından yönetilen **kayıt veritabanı** (`.csstore` dosyalarıyla desteklenir).
+- `LSHandlers` dizisi içinde `~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist` konumunda saklanan **kullanıcı başına etkin varsayılanlar**.
 
-Bu ayrım önemlidir: Bir uygulama bir türü veya scheme'i işleyebilecek şekilde **registered** olabilir; ancak **current default** yine de başka bir bundle ID olabilir.
+Bu ayrım önemlidir: bir uygulama bir türü veya scheme'i işleyebilecek şekilde **kayıtlı** olabilir, ancak **geçerli varsayılan** yine de başka bir bundle ID olabilir.
 
-Güncel macOS sürümlerinde registration discovery `/Applications` ile sınırlı değildir: Spotlight tarafından görülebilen, erişilebilir diğer klasörlerdeki ve mount edilmiş/shared volume'lerdeki uygulamalar da registry'ye girebilir. Bu nedenle triage sırasında `lsregister -dump` çıktısındaki `path` ve volume bilgilerini koruyun ve bundle keşfedilebilir durumda kaldığı sürece bir uygulamanın unregister edilmesinin kalıcı olduğunu varsaymayın.<sup>[[4]](#references)</sup>
+Yeni macOS sürümlerinde uygulama keşfi yalnızca `/Applications` ile sınırlı değildir: Spotlight tarafından görülebilen, erişilebilir diğer klasörlerdeki ve bağlı/paylaşılan volume'lardaki uygulamalar da kayıt sistemine girebilir. Bu nedenle, triage sırasında `lsregister -dump` çıktısındaki `path` ve volume bilgilerini koruyun ve bundle keşfedilebilir durumda kaldığı sürece bir uygulamanın kaydını silmenin kalıcı olacağını varsaymayın.<sup>[[4]](#references)</sup>
 
 ## File Extension & URL scheme app handlers
 
 Aşağıdaki satır, uzantıya bağlı olarak dosyaları açabilen uygulamaları bulmak için kullanışlı olabilir:
+
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -dump | grep -E "path:|bindings:|name:"
 ```
-Veya [**SwiftDefaultApps**](https://github.com/Lord-Kamina/SwiftDefaultApps) gibi bir şey kullanın:
+
+Ya da [**SwiftDefaultApps**](https://github.com/Lord-Kamina/SwiftDefaultApps) gibi bir şey kullanın:
+
 ```bash
 ./swda getSchemes #Get all the available schemes
 ./swda getApps #Get all the apps declared
 ./swda getUTIs #Get all the UTIs
 ./swda getHandler --URL ftp #Get ftp handler
 ```
-Bir uygulamanın desteklediği uzantıları şu işlemi yaparak da kontrol edebilirsiniz:
+
+Bir uygulamanın desteklediği uzantıları şu şekilde de kontrol edebilirsiniz:
+
 ```bash
 cd /Applications/Safari.app/Contents
 grep -A3 CFBundleTypeExtensions Info.plist  | grep string
-<string>css</string>
-<string>pdf</string>
-<string>webarchive</string>
-<string>webbookmark</string>
-<string>webhistory</string>
-<string>webloc</string>
-<string>download</string>
-<string>safariextz</string>
-<string>gif</string>
-<string>html</string>
-<string>htm</string>
-<string>js</string>
-<string>jpg</string>
-<string>jpeg</string>
-<string>jp2</string>
-<string>txt</string>
-<string>text</string>
-<string>png</string>
-<string>tiff</string>
-<string>tif</string>
-<string>url</string>
-<string>ico</string>
-<string>xhtml</string>
-<string>xht</string>
-<string>xml</string>
-<string>xbl</string>
-<string>svg</string>
+				<string>css</string>
+				<string>pdf</string>
+				<string>webarchive</string>
+				<string>webbookmark</string>
+				<string>webhistory</string>
+				<string>webloc</string>
+				<string>download</string>
+				<string>safariextz</string>
+				<string>gif</string>
+				<string>html</string>
+				<string>htm</string>
+				<string>js</string>
+				<string>jpg</string>
+				<string>jpeg</string>
+				<string>jp2</string>
+				<string>txt</string>
+				<string>text</string>
+				<string>png</string>
+				<string>tiff</string>
+				<string>tif</string>
+				<string>url</string>
+				<string>ico</string>
+				<string>xhtml</string>
+				<string>xht</string>
+				<string>xml</string>
+				<string>xbl</string>
+				<string>svg</string>
 ```
-## Etkin işleyicileri listeleme
 
-**mevcut kullanıcının varsayılanları** için en kullanışlı dosya genellikle şudur:
+## Etkin işleyicileri numaralandırma
+
+**Mevcut kullanıcının varsayılanları** için genellikle en kullanışlı dosya şudur:
+
 ```bash
 ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist
 ```
-Bundan **URL scheme** handler'larını dump etmek için:
+
+**URL scheme** işleyicilerini ondan dökmek için:
+
 ```bash
 plutil -extract LSHandlers json -o - ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist |
-jq '.[] | select(.LSHandlerURLScheme != null) |
-{scheme: .LSHandlerURLScheme, handler: (.LSHandlerRoleAll // .LSHandlerRoleViewer // .LSHandlerRoleEditor)}'
+  jq '.[] | select(.LSHandlerURLScheme != null) |
+      {scheme: .LSHandlerURLScheme, handler: (.LSHandlerRoleAll // .LSHandlerRoleViewer // .LSHandlerRoleEditor)}'
 ```
-**content-type / UTI** işleyicilerini dökmek için:
+
+**content-type / UTI** handler'larını dump etmek için:
+
 ```bash
 plutil -extract LSHandlers json -o - ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist |
-jq '.[] | select(.LSHandlerContentType != null) |
-{uti: .LSHandlerContentType, handler: (.LSHandlerRoleAll // .LSHandlerRoleViewer // .LSHandlerRoleEditor)}'
+  jq '.[] | select(.LSHandlerContentType != null) |
+      {uti: .LSHandlerContentType, handler: (.LSHandlerRoleAll // .LSHandlerRoleViewer // .LSHandlerRoleEditor)}'
 ```
+
 Örnek bir dosyanın UTI ağacını çözümlemek için:
+
 ```bash
 mdls -name kMDItemContentType -name kMDItemContentTypeTree ./sample.pdf
 ```
+
 Varsayılanları sorgulamak veya değiştirmek için daha kullanıcı dostu bir CLI istiyorsanız:
+
 ```bash
 # Classic tool
 # https://github.com/moretension/duti
@@ -106,15 +123,19 @@ dutix targets show public.html
 dutix targets show ftp
 dutix apps show Safari
 ```
-### Dosyaya özgü `Open With` geçersiz kılmaları
 
-Handler çözümlemesinde **dosyaya özgü** bir katman da bulunur. LaunchServices, dosyanın UTI'sine ve kullanıcının global varsayılanına geri dönmeden önce `com.apple.LaunchServices.OpenWith` extended attribute'ını kontrol eder. Finder, tek bir dosya için **Always Open With** seçildiğinde bu özniteliği oluşturur; değeri uygulama yolu, bundle identifier ve version selector içeren binary property list'tir.<sup>[[3]](#references)</sup>
+### Dosya başına `Open With` geçersiz kılmaları
+
+Handler çözümlemesinde **dosyaya özel** bir katman da vardır. Dosyanın UTI'sine ve kullanıcının genel varsayılanına başvurmadan önce LaunchServices, `com.apple.LaunchServices.OpenWith` extended attribute'unu kontrol eder. Finder, tek bir dosya için **Always Open With** seçildiğinde bu attribute'u oluşturur; değeri uygulama yolu, bundle identifier ve sürüm seçicisi içeren bir binary property list'tir.<sup>[[3]](#references)</sup>
 
 Dosya adı uzantısına güvenmeden bunu inceleyip decode edin:
+
 ```bash
 xattr -px com.apple.LaunchServices.OpenWith ./suspicious.doc | xxd -r -p | plutil -p -
 ```
-Bu, `duti`, `dutix` veya `LSHandlers` zararsız bir global varsayılan bildirmesine rağmen tek bir lure beklenmedik bir uygulamayla açıldığında kullanışlıdır. Kontrollü bir laboratuvar için, tam opak değer Finder üzerinden yapılandırılmış bir dosyadan kopyalanabilir; bu değerin silinmesi normal türe dayalı çözümlemeyi geri yükler:
+
+Bu, `duti`, `dutix` veya `LSHandlers` zararsız bir genel varsayılan gösterdiği hâlde tek bir yem beklenmedik bir uygulamayla açıldığında işe yarar. Kontrollü bir laboratuvar ortamında, Finder üzerinden yapılandırılmış bir dosyadan opak değerin aynısı kopyalanabilir; bu değerin silinmesi tür tabanlı normal çözümlemeyi geri yükler:
+
 ```bash
 # Clone an existing per-file association
 value="$(xattr -px com.apple.LaunchServices.OpenWith ./seed.doc | tr -d '[:space:]')"
@@ -123,52 +144,57 @@ xattr -wx com.apple.LaunchServices.OpenWith "$value" ./test.doc
 # Remove the override
 xattr -d com.apple.LaunchServices.OpenWith ./test.doc
 ```
-## İlginç Info.plist anahtarları
 
-Bir uygulama bundle'ını triage ederken şu anahtarlar en önemlisidir:
+## İlgi Çekici Info.plist Anahtarları
 
-- **`CFBundleDocumentTypes`**: bundle'ın açabileceğini belirttiği belge grupları.
-- **`LSItemContentTypes`**: belge türlerini UTI'lara bağlamanın **modern / tercih edilen** yolu.
+Bir uygulama bundle'ının ilk incelemesini yaparken en önemli anahtarlar şunlardır:
+
+- **`CFBundleDocumentTypes`**: bundle'ın açabildiğini belirttiği belge grupları.
+- **`LSItemContentTypes`**: belge türlerini UTI'lere bağlamanın **modern / tercih edilen** yolu.
 - **`LSHandlerRank`**: LaunchServices tarafından kullanılan sıralama (`Owner`, `Default`, `Alternate`, `None`).
-- **`CFBundleURLTypes`** / **`CFBundleURLSchemes`**: uygulama tarafından uygulanan özel URI scheme'leri.
-- **`UTExportedTypeDeclarations`**: uygulamanın **sahip olduğu** UTI'lar.
-- **`UTImportedTypeDeclarations`**: uygulamanın sahibi olmadığı ancak sistemin tanımasını istediği UTI'lar.
+- **`CFBundleURLTypes`** / **`CFBundleURLSchemes`**: uygulamanın desteklediği özel URI şemaları.
+- **`UTExportedTypeDeclarations`**: uygulamanın **sahip olduğu** UTI'ler.
+- **`UTImportedTypeDeclarations`**: uygulamanın sahip olmadığı ancak sistemin tanımasını istediği UTI'ler.
 
-Hızlı bir triage komutu şudur:
+İlk inceleme için kullanışlı bir komut:
+
 ```bash
 plutil -p /Applications/Target.app/Contents/Info.plist | \
-rg 'CFBundleDocumentTypes|CFBundleURLTypes|LSItemContentTypes|LSHandlerRank|UTExportedTypeDeclarations|UTImportedTypeDeclarations'
+  rg 'CFBundleDocumentTypes|CFBundleURLTypes|LSItemContentTypes|LSHandlerRank|UTExportedTypeDeclarations|UTImportedTypeDeclarations'
 ```
-İnce ancak önemli bir ayrıntı: **`LSItemContentTypes`** mevcutsa, **`CFBundleTypeExtensions`**, **`CFBundleTypeMIMETypes`** ve **`CFBundleTypeOSTypes`** gibi eski anahtarlar fiilen legacy compatibility data niteliğindedir. Gerçek handler çözümlemesi için öncelikle UTI path'ine odaklanın.
 
-## Offensive notes
+İnce ama önemli bir ayrıntı: **`LSItemContentTypes`** varsa, **`CFBundleTypeExtensions`**, **`CFBundleTypeMIMETypes`** ve **`CFBundleTypeOSTypes`** gibi eski anahtarlar fiilen geriye dönük uyumluluk verileridir. Gerçek handler çözümlemesi için önce UTI yoluna odaklanın.
 
-Uygulamaların ilgi çekici hâle gelmesi için çalıştırılmaları gerekmez. Diske bırakılan veya clone edilen bir `.app` bundle'ı, **diske yazılır yazılmaz `lsd` tarafından otomatik olarak parse edilebilir** ve tanımladığı document type'lar / URL scheme'leri, kullanıcı bundle'ı hiç başlatmadan register edilebilir.
+## Saldırı notları
 
-Bu durum hem **persistence / hijacking research** hem de **initial-access chains** için kullanışlıdır:
+Uygulamaların ilgi çekici hâle gelmesi için çalıştırılmaları gerekmez. Diske bırakılan veya klonlanan bir `.app` bundle'ı, diske yazılır yazılmaz **`lsd` tarafından otomatik olarak ayrıştırılabilir**; bildirilen belge türleri / URL şemaları, kullanıcı bundle'ı hiç başlatmadan kaydedilebilir.
 
-- Malicious bir app, **nadir bir extension** veya **custom UTI** talep edebilir ve victim'ın lure file'ı açmasını bekleyebilir.
-- Malicious bir app, bir browser, Electron app, office document, chat client veya başka bir helper app üzerinden erişilebilen **custom URL scheme** register edebilir.<sup>[[1]](#references)</sup>
-- Normal default resolution'ı belirli bir candidate handler'ı test etmekten ayırmak için scheme'i LaunchServices üzerinden `open 'targetscheme://host/path?value=test'` ile çağırın; ardından belirli bir registered bundle'ı `open -b com.vendor.Target 'targetscheme://host/path?value=test'` ile hedefleyin. Bu, receiving app'in attacker-controlled URL component'lerini nasıl validate edip decode ettiğini audit etmek için kullanışlıdır.<sup>[[1]](#references)</sup>
-- Bir app bundle'ını build ettikten sonra düzenlerseniz, LaunchServices'ın bundle'ı yeniden parse etmesini şu komutla zorlayabilirsiniz:
+Bu hem **persistence / hijacking araştırmaları** hem de **ilk erişim zincirleri** için kullanışlıdır:
+
+- Kötü amaçlı bir uygulama **nadir bir uzantıyı** veya **özel bir UTI'yi** sahiplenip kurbanın yem dosyasını açmasını bekleyebilir.
+- Kötü amaçlı bir uygulama; tarayıcı, Electron uygulaması, ofis belgesi, sohbet istemcisi veya başka bir yardımcı uygulama üzerinden erişilebilen **özel bir URL şeması** kaydedebilir.<sup>[[1]](#references)</sup>
+- Normal varsayılan çözümlemeyi belirli bir aday handler'ı test etmekten ayırmak için, şemayı LaunchServices üzerinden `open 'targetscheme://host/path?value=test'` ile çağırın; ardından belirli bir kayıtlı bundle'ı hedeflemek için `open -b com.vendor.Target 'targetscheme://host/path?value=test'` komutunu kullanın. Bu, alıcı uygulamanın saldırgan denetimindeki URL bileşenlerini nasıl doğruladığını ve çözdüğünü denetlemek için kullanışlıdır.<sup>[[1]](#references)</sup>
+- Bir uygulama bundle'ını oluşturduktan sonra düzenlerseniz, LaunchServices'ın bundle'ı yeniden ayrıştırmasını şu komutla sağlayabilirsiniz:
+
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -f /tmp/Evil.app
 ```
+
 Şüpheli bundle'ları test ederken özellikle şunlara dikkat edin:
 
 - Yaygın olmayan türlerde **`LSHandlerRank=Owner`**.
-- Birçok extension talep eden geniş **`CFBundleDocumentTypes`** dizileri.
-- Tek ilgi çekici davranışı bir document veya URI handler'ın arkasında olan **Helper / wrapper apps**.
-- LaunchServices'e yönlendiren **kısayol benzeri dosyalar** (`.webloc`, `.inetloc`, `.fileloc`). `.fileloc` tarzı trick'ler ve ilgili Gatekeeper açıları için [bu diğer sayfaya](macos-security-protections/macos-fs-tricks/README.md) bakın.<sup>[[2]](#references)</sup>
+- Çok sayıda uzantıyı desteklediğini iddia eden geniş **`CFBundleDocumentTypes`** dizileri.
+- Tek ilginç davranışı bir document veya URI handler arkasında bulunan **helper / wrapper app'ler**.
+- Sonuçta LaunchServices'e yönlendirme yapan **kısayol benzeri dosyalar** (`.webloc`, `.inetloc`, `.fileloc`). `.fileloc` tarzı numaralar ve ilgili Gatekeeper konuları için [bu diğer sayfaya](macos-security-protections/macos-fs-tricks/README.md) bakın.<sup>[[2]](#references)</sup>
 
-Amacınız yalnızca bir klasöre göz atarak veya bir dosya seçerek pasif **code-execution** elde etmekse, [Quick Look generators](macos-proces-abuse/macos-quicklook-generators.md) için ayrılmış sayfaya da bakın; bu, farklı ancak yakından ilişkili bir file-handler yüzeyidir.
+Amacınız yalnızca bir klasöre göz atarak veya bir dosya seçerek pasif code-execution sağlamaksa, bu farklı ancak yakından ilişkili bir file-handler yüzeyi olduğundan [Quick Look generators](macos-proces-abuse/macos-quicklook-generators.md) için özel sayfaya da bakın.
 
 
 
 ## References
 
-- [1] [Objective-See - Özel URL Schemes Üzerinden Uzaktan Mac Exploitation](https://objective-see.org/blog/blog_0x38.html)
-- [2] [Jamf Threat Labs - Gate'i Aşmak: macOS'taki Gatekeeper Açıklarına Daha Yakından Bakış](https://www.jamf.com/blog/gatekeeper-flaws-on-macos/)
-- [3] [The Eclectic Light Company - macOS Bir Dosyayı Doğru Uygulamada Nasıl Açar](https://eclecticlight.co/2024/04/10/how-macos-opens-a-file-in-the-correct-app/)
-- [4] [The Eclectic Light Company - macOS Sequoia'da LaunchServices'i Kontrol Etme](https://eclecticlight.co/2025/03/27/controlling-launchservices-in-macos-sequoia/)
+- [1] [Objective-See - Özel URL şemalarıyla uzaktan Mac istismarı](https://objective-see.org/blog/blog_0x38.html)
+- [2] [Jamf Threat Labs - Gate'i aşmak: macOS'taki Gatekeeper kusurlarına yakından bakış](https://www.jamf.com/blog/gatekeeper-flaws-on-macos/)
+- [3] [The Eclectic Light Company - macOS bir dosyayı doğru uygulamada nasıl açar?](https://eclecticlight.co/2024/04/10/how-macos-opens-a-file-in-the-correct-app/)
+- [4] [The Eclectic Light Company - macOS Sequoia'da LaunchServices'i yönetme](https://eclecticlight.co/2025/03/27/controlling-launchservices-in-macos-sequoia/)
 {{#include ../../banners/hacktricks-training.md}}
