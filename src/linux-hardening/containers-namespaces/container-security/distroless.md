@@ -189,6 +189,8 @@ The most relevant techniques there are:
 - memexec
 - memdlopen
 
+For a Python, Node.js, or PHP service, the entry point can be an application bug such as template injection, prototype pollution, or unsafe evaluation. If it yields code execution inside the process, a `/proc/self/mem` technique may run a loader without a shell or executable file on disk. This remains execution as the container process's identity; a separate runtime or host boundary weakness is needed for a container escape. See the [read-only/noexec/distroless techniques](../../linux-basics/bypass-linux-restrictions/bypass-fs-protections-read-only-no-exec-distroless/README.md) for the prerequisites.
+
 ### Existing Binaries Already In The Image
 
 Some distroless images still contain operationally necessary binaries that become useful after compromise. A repeatedly observed example is `openssl`, because applications sometimes need it for crypto- or TLS-related tasks.

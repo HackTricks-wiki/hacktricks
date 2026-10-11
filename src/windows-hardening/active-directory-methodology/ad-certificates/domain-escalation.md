@@ -25,7 +25,9 @@
   - The Active Directory (AD) prioritizes the subjectAltName (SAN) in a certificate for identity verification if present. This means that by specifying the SAN in a CSR, a certificate can be requested to impersonate any user (e.g., a domain administrator). Whether a SAN can be specified by the requester is indicated in the certificate template's AD object through the `mspki-certificate-name-flag` property. This property is a bitmask, and the presence of the `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` flag permits the specification of the SAN by the requester.
 
 > [!CAUTION]
-> The configuration outlined permits low-privileged users to request certificates with any SAN of choice, enabling authentication as any domain principal through Kerberos or SChannel.
+> These settings identify an ESC1 template candidate, not a completed impersonation path. Check that the target principal can enroll on a CA publishing the template, that CA enrollment is allowed, and that the issued certificate satisfies the authentication endpoint's strong SID mapping rules. Current patched KDCs can reject a requested UPN when the certificate's SID does not match the target; see [Microsoft's certificate mapping guidance](https://support.microsoft.com/en-us/servicing/os/windows-server/2022/05/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers).
+
+Enrollment rights granted to **Domain Computers** may make a staged computer identity eligible even when the original user cannot enroll. Assess the computer principal's rights separately. Check `msPKI-Minimal-Key-Size` before making a request: a template requiring 4096-bit RSA keys rejects a client's 2048-bit default. A target SID supplied in the request can address a SID mismatch only when the CA and KDC accept the resulting certificate and mapping; neither the template flags nor an Enroll ACE alone proves that.
 
 This feature is sometimes enabled to support the on-the-fly generation of HTTPS or host certificates by products or deployment services, or due to a lack of understanding.
 
@@ -119,9 +121,11 @@ The **“enrollment agent”** enrolls in such a **template** and uses the resul
 
 - The Enterprise CA grants enrollment rights to low-privileged users.
 - Manager approval is bypassed.
-- The template's schema version is either 1 or exceeds 2, and it specifies an Application Policy Issuance Requirement that necessitates the Certificate Request Agent EKU.
+- A version 1 target template may accept an enrollment agent without newer granular issuance-policy controls; for version 2 or newer, evaluate its application-policy issuance requirements and authorized signatures rather than excluding the template by version alone.
 - An EKU defined in the certificate template permits domain authentication.
 - Restrictions for enrollment agents are not applied on the CA.
+
+The target template must also be published by the chosen CA, permit the target account to enroll, and support the intended domain-authentication use. Check required subject/SAN attributes on that account; for example, a template that builds a subject email from AD cannot issue for an account without the required `mail` value. An agent certificate alone does not satisfy these target-template gates.
 
 ### Abuse
 
@@ -145,6 +149,26 @@ The **users** who are allowed to **obtain** an **enrollment agent certificate**,
 
 However, it is noted that the **default** setting for CAs is to “**Do not restrict enrollment agents**.” When the restriction on enrollment agents is enabled by administrators, setting it to “Restrict enrollment agents,” the default configuration remains extremely permissive. It allows **Everyone** access to enroll in all templates as anyone.
 
+### Windows-only PowerShell PoCs with Certi-Bhai
+
+[**Certi-Bhai**](https://github.com/incredibleindishell/Certi-Bhai) exercises ESC1 and ESC2/ESC3 without Certify or Certipy. Its scripts create an exportable 2048-bit RSA key with the `X509Enrollment` COM API, build a PKCS#10 request, discover the first `pKIEnrollmentService` through LDAP, submit it through `CertificateAuthority.Request`, install the response in `Cert:\CurrentUser\My`, and export a Base64-encoded PFX. The ESC1 script adds an attacker-selected UPN SAN (`XCN_CERT_ALT_NAME_USER_PRINCIPLE_NAME`, value `0xb`), whereas the ESC2/ESC3 scripts use the first certificate to sign a PKCS#7 on-behalf-of request.<sup>[[27]](#references)</sup>
+
+```powershell
+# ESC1: supply the identity in the subject and UPN SAN
+.\ESC1\esc1.ps1 -subjectName "CN=Administrator,CN=Users,DC=corp,DC=local" `
+  -altName "administrator@corp.local" -templateName "VulnESC1" -pfxPass "PfxPass!"
+
+# ESC2/ESC3: obtain an agent-capable certificate, then enroll for the target
+.\ESC3\esc3_working.ps1 -templateName "VulnEnrollmentAgent" `
+  -target_user "administrator" -domain "CORP" -pfxPass "PfxPass!"
+```
+
+The scripts print the Base64 of the **PFX**, which includes the private key, for direct use with Rubeus. Do not replace it with `[Convert]::ToBase64String($cert.RawData)`: `RawData` encodes only the public certificate and cannot sign the PKINIT request.<sup>[[5]](#references)[[27]](#references)</sup>
+
+```powershell
+Rubeus.exe asktgt /user:administrator /certificate:<BASE64_PFX> /password:PfxPass! /nowrap
+```
+
 ## Vulnerable Certificate Template Access Control - ESC4
 
 ### **Explanation**
@@ -161,6 +185,8 @@ Notable permissions applicable to certificate templates include:<sup>[[6]](#refe
 - **WriteDacl:** Allows for the adjustment of access controls, potentially granting an attacker FullControl.
 - **WriteProperty:** Authorizes the editing of any object properties.
 
+Also review the DACL on the `CN=Certificate Templates,CN=Public Key Services,CN=Services,...` container. An applicable `CreateChild` ACE scoped to the [`pKICertificateTemplate` class](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-adsc/db4b45f7-e57a-4ae1-9b8f-1b107b69d98c), or broad full control, is a candidate for creating a new template object. [Microsoft documents](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-wcce/9279abb2-3dfa-4631-845c-43c187ac4b44) that the container holds these template objects. Review matching deny ACEs and inheritance before deciding whether creation is effective. A created template does not by itself issue a certificate: a CA must publish it, the requesting principal needs enrollment access, and the certificate must map to the intended identity at the authentication endpoint.
+
 ### Abuse
 
 To identify principals with edit rights on templates and other PKI objects, enumerate with Certify:
@@ -175,6 +201,8 @@ An example of a privesc like the previous one:
 <figure><img src="../../../images/image (814).png" alt=""><figcaption></figcaption></figure>
 
 ESC4 is when a user has write privileges over a certificate template. This can for instance be abused to overwrite the configuration of the certificate template to make the template vulnerable to ESC1.
+
+A template that already lets the enrollee supply the subject but has only Server Authentication usage is not, by itself, a user-logon template. With effective template-control rights, an attacker could change its authentication EKUs or application policies before requesting a certificate; [Microsoft documents the Smartcard Logon EKU's sign-in purpose](https://learn.microsoft.com/en-us/windows-server/identity/ad-cs/certificate-template-concepts). Verify that a CA publishes the modified template, the requester can enroll, approval/signature requirements are satisfied, and the issued certificate maps to the intended account. In particular, [patched domain controllers in Full Enforcement](https://support.microsoft.com/en-us/servicing/os/windows-server/2022/05/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers) reject certificates without strong mapping; adding a target UPN to a request does not bypass that requirement.
 
 As we can see in the path above, only `JOHNPC` has these privileges, but our user `JOHN` has the new `AddKeyCredentialLink` edge to `JOHNPC`. Since this technique is related to certificates, I have implemented this attack as well, which is known as [Shadow Credentials](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab).<sup>[[8]](#references)</sup> Here’s a little sneak peak of Certipy’s `shadow auto` command to retrieve the NT hash of the victim.
 
@@ -510,11 +538,11 @@ Certipy v4.0.0 - by Oliver Lyak (ly4k)
 
 ### Explanation
 
-The new value **`CT_FLAG_NO_SECURITY_EXTENSION`** (`0x80000`) for **`msPKI-Enrollment-Flag`**, referred to as ESC9, prevents the embedding of the **new `szOID_NTDS_CA_SECURITY_EXT` security extension** in a certificate. This flag becomes relevant when `StrongCertificateBindingEnforcement` is set to `1` (the default setting), which contrasts with a setting of `2`. Its relevance is heightened in scenarios where a weaker certificate mapping for Kerberos or Schannel might be exploited (as in ESC10), given that the absence of ESC9 would not alter the requirements.<sup>[[7]](#references)</sup>
+The **`CT_FLAG_NO_SECURITY_EXTENSION`** (`0x80000`) value for **`msPKI-Enrollment-Flag`**, referred to as ESC9, omits the `szOID_NTDS_CA_SECURITY_EXT` SID extension from a certificate. Older ESC9 examples depend on KDC compatibility behavior (`StrongCertificateBindingEnforcement=1`) or a separate weak Schannel mapping route. Value `1` is a **historical compatibility setting**, not a current default: Microsoft says the KDC override stopped being supported with the September 9, 2025 Windows security update. Check the target's actual update and authentication endpoint before applying an older recipe.<sup>[[7]](#references)</sup> See [Microsoft's rollout guidance](https://support.microsoft.com/en-us/servicing/os/windows-server/2022/05/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers).
 
 The conditions under which this flag's setting becomes significant include:
 
-- `StrongCertificateBindingEnforcement` is not adjusted to `2` (with the default being `1`), or `CertificateMappingMethods` includes the `UPN` flag.
+- On an older, compatible KDC, the effective certificate-binding policy permits the mapping; alternatively, the Schannel endpoint separately enables UPN mapping through `CertificateMappingMethods` bit `0x4`.
 - The certificate is marked with the `CT_FLAG_NO_SECURITY_EXTENSION` flag within the `msPKI-Enrollment-Flag` setting.
 - Any client authentication EKU is specified by the certificate.
 - `GenericWrite` permissions are available over any account to compromise another.
@@ -561,22 +589,22 @@ certipy auth -pfx administrator.pfx -domain corp.local
 
 ### Explanation
 
-Two registry key values on the domain controller are referred to by ESC10:
+Two separate certificate-mapping policies are often discussed under ESC10. Read the setting on the endpoint that actually handles the relevant authentication:
 
-- The default value for `CertificateMappingMethods` under `HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\Schannel` is `0x18` (`0x8 | 0x10`), previously set to `0x1F`.
-- The default setting for `StrongCertificateBindingEnforcement` under `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Kdc` is `1`, previously `0`.<sup>[[7]](#references)</sup>
+- Schannel `CertificateMappingMethods` under `HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\Schannel` controls TLS client-certificate mapping on the application server. The UPN bit is `0x4`; the default is `0x18` (`0x8 | 0x10`) on updated systems.
+- KDC `StrongCertificateBindingEnforcement` under `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Kdc` historically controlled Kerberos certificate-binding compatibility. Value `1` is not a reliable current default, and Microsoft ended support for this override with the September 9, 2025 Windows security update. Its state does not by itself describe Schannel's UPN mapping.<sup>[[7]](#references)</sup>
 
 **Case 1**
 
-When `StrongCertificateBindingEnforcement` is configured as `0`.
+Historically, when an older KDC honored `StrongCertificateBindingEnforcement=0`; verify update level because the override is no longer supported on current patched systems.
 
 **Case 2**
 
-If `CertificateMappingMethods` includes the `UPN` bit (`0x4`).
+When the Schannel client-certificate endpoint has `CertificateMappingMethods` UPN bit (`0x4`) enabled. This is a separate setting from KDC strong-binding enforcement and still requires an enrollable client-authentication certificate plus effective control of the mapped account attribute.
 
 ### Abuse Case 1
 
-With `StrongCertificateBindingEnforcement` configured as `0`, an account A with `GenericWrite` permissions can be exploited to compromise any account B.
+In an older deployment where the KDC still honors `StrongCertificateBindingEnforcement=0`, control of an account's `userPrincipalName` can form part of a weak-mapping path to another account. The required certificate enrollment, mapping, target identity, and successful authentication must be checked separately; a `GenericWrite` ACE or registry value alone does not establish takeover.
 
 For instance, having `GenericWrite` permissions over `Jane@corp.local`, an attacker aims to compromise `Administrator@corp.local`. The procedure mirrors ESC9, allowing any certificate template to be utilized.
 
@@ -780,7 +808,7 @@ All it need to do just specify the template, it will get a certificate with OIDT
 certipy req -u "John@domain.local" -p "password" -dc-ip 192.168.100.100 -target "DC01.domain.local" -ca 'DC01-CA' -template 'VulnerableTemplate'
 ```
 
-## Vulnerable Certificate Renewal Configuration- ESC14
+## Explicit Certificate Mapping Abuse — ESC14
 
 ### Explanation
 
@@ -804,7 +832,10 @@ The `altSecurityIdentities` attribute supports various formats for mapping, such
 - `X509:<RFC822>EmailAddress` (maps by an RFC822 name, typically an email address, from the SAN)
 - `X509:<SHA1-PUKEY>Thumbprint-of-Raw-PublicKey` (maps by a SHA1 hash of the certificate's raw public key - generally strong)
 
-The security of these mappings depends heavily on the specificity, uniqueness, and cryptographic strength of the chosen certificate identifiers used in the mapping string. Even with strong certificate binding modes enabled on Domain Controllers (which primarily affect implicit mappings based on SAN UPNs/DNS and the SID extension), a poorly configured `altSecurityIdentities` entry can still present a direct path for impersonation if the mapping logic itself is flawed or too permissive.
+The security of these mappings depends on the identifiers in the mapping. Microsoft classifies mappings based on email or subject names, including `X509:<RFC822>`, as **weak**. In Full Enforcement mode, a certificate without a strong mapping is rejected; the September 2025 Windows security update removed the option to return to Compatibility mode. A weak mapping alone is therefore not a reliable current impersonation path. Check the domain controller's actual patch level and certificate-mapping behavior before assessing a weak-mapping scenario. Write access to `altSecurityIdentities` is a separate lead: an attacker with an appropriate trusted certificate may be able to add a **strong** explicit mapping, subject to effective permissions and certificate validation. See [Microsoft KB5014754](https://support.microsoft.com/en-us/servicing/os/windows-server/2022/05/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers) and [the ESC14 research](https://specterops.io/blog/2024/02/28/adcs-esc14-abuse-technique/).
+
+Certificate authentication failures also need diagnosis: a disabled target account or expired password can prevent login even when the certificate itself remains valid.
+
 ### Abuse Scenario
 
 ESC14 targets **explicit certificate mappings** in Active Directory (AD), specifically the `altSecurityIdentities` attribute. If this attribute is set (by design or misconfiguration), attackers can impersonate accounts by presenting certificates that match the mapping.
@@ -822,7 +853,7 @@ ESC14 targets **explicit certificate mappings** in Active Directory (AD), specif
 - Owner*.
 #### Scenario B: Target Has Weak Mapping via X509RFC822 (Email)
 
-- **Precondition**: The target has a weak X509RFC822 mapping in altSecurityIdentities. An attacker can set the victim's mail attribute to match the target's X509RFC822 name, enroll a certificate as the victim, and use it to authenticate as the target.
+- **Historical/conditional precondition**: The target has a weak X509RFC822 mapping in `altSecurityIdentities`, the attacker can edit an enrollee's `mail` attribute, and a suitable template includes that email in a client-authentication certificate without a conflicting SID binding. Authentication also requires an environment that still accepts the weak mapping; Full Enforcement rejects weak-only certificate mappings. A writable `mail` attribute alone is only a lead.
 #### Scenario C: Target Has X509IssuerSubject Mapping
 
 - **Precondition**: The target has a weak X509IssuerSubject explicit mapping in `altSecurityIdentities`.The attacker can set the `cn` or `dNSHostName` attribute on a victim principal to match the subject of the target’s X509IssuerSubject mapping. Then, the attacker can enroll a certificate as the victim, and use this certificate to authenticate as the target.
@@ -862,9 +893,7 @@ For more specific attack methods in various attack scenarios, please refer to th
 
 ### Explanation
 
-The description at https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc is remarkably thorough. Below is a quotation of the original text.<sup>[[15]](#references)</sup>
-
-Using built-in default version 1 certificate templates, an attacker can craft a CSR to include application policies that are preferred over the configured Extended Key Usage attributes specified in the template. The only requirement is enrollment rights, and it can be used to generate client authentication, certificate request agent, and codesigning certificates using the **_WebServer_** template
+The [original ESC15 research](https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc) explains how application policies supplied in a request for a V1 template can override the configured Extended Key Usage on an **unpatched issuing CA**.<sup>[[15]](#references)</sup> A candidate also needs a published, enrollable template that permits the required subject/request properties and has no blocking approval or signature gate. Enrollment rights alone do not prove exploitation. Certificate Request Agent use can additionally depend on a suitable second template and enrollment-agent restrictions; confirm the CA patch state and issuance result before claiming that path.
 
 ### Abuse
 
@@ -934,17 +963,13 @@ certipy auth -pfx 'administrator.pfx' -dc-ip '10.0.0.100'
 
 ### Explanation
 
-**ESC16 (Elevation of Privilege via Missing szOID_NTDS_CA_SECURITY_EXT Extension)** refers to the scenario where, if the configuration of AD CS does not enforce the inclusion of the **szOID_NTDS_CA_SECURITY_EXT** extension in all certificates, an attacker can exploit this by:
-
-1. Requesting a certificate **without SID binding**.
-    
-2. Using this certificate **for authentication as any account**, such as impersonating a high-privilege account (e.g., a Domain Administrator).
+**ESC16 (Elevation of Privilege via Missing szOID_NTDS_CA_SECURITY_EXT Extension)** describes CA-wide suppression of the **szOID_NTDS_CA_SECURITY_EXT** SID extension. This is a configuration indicator, not proof that a certificate can authenticate as another account. Impersonation also requires control of the relevant account attributes or mapping, an enrollable client-authentication template, and a certificate mapping path accepted by the actual domain controller or service. A patched KDC in Full Enforcement rejects certificates without a SID extension unless they have another strong mapping; the UPN-only Kerberos procedure below applies to older or compatibility-mode KDCs that still accept weak mapping. See [Microsoft's certificate mapping and enforcement guidance](https://support.microsoft.com/en-us/servicing/os/windows-server/2022/05/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers).
 
 You can also refer to this article to learn more about the detailed principle:https://medium.com/@muneebnawaz3849/ad-cs-esc16-misconfiguration-and-exploitation-9264e022a8c6<sup>[[16]](#references)</sup>
 
 ### Abuse
 
-The following is referenced to [this link](https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation#esc16-security-extension-disabled-on-ca-globally),Click to see more detailed usage methods.<sup>[[14]](#references)</sup>
+The following historical UPN-only Kerberos example is based on [Certipy's ESC16 documentation](https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation#esc16-security-extension-disabled-on-ca-globally). It requires a KDC that still accepts the resulting weak mapping; `StrongCertificateBindingEnforcement=1` is no longer a supported override after the September 9, 2025 Windows security update.<sup>[[14]](#references)</sup>
 
 To identify whether the Active Directory Certificate Services (AD CS) environment is vulnerable to **ESC16**
 
@@ -980,7 +1005,7 @@ certipy shadow \
     auto
 ```
 
-**Step 4: Request a certificate as the "victim" user from _any suitable client authentication template_ (e.g., "User") on the ESC16-vulnerable CA.** Because the CA is vulnerable to ESC16, it will automatically omit the SID security extension from the issued certificate, regardless of the template's specific settings for this extension. Set the Kerberos credential cache environment variable (shell command):
+**Step 4: Request a certificate as the "victim" user from a client-authentication template the account can enroll in (e.g., "User") on the ESC16-configured CA.** The CA omits the SID security extension from the issued certificate, but this alone does not establish a usable authentication mapping. Set the Kerberos credential cache environment variable (shell command):
 
 ```bash
 export KRB5CCNAME=victim.ccache
@@ -1004,7 +1029,7 @@ certipy account \
     -user 'victim' update
 ```
 
-**Step 6: Authenticate as the target administrator.**
+**Step 6: On an older or compatibility-mode KDC that accepts this weak mapping, authenticate as the target administrator.**
 
 ```bash
 certipy auth \
@@ -1149,5 +1174,6 @@ Both scenarios lead to an **increase in the attack surface** from one forest to 
 - [24] [Microsoft – Audit Certification Services](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/audit-certification-services)
 - [25] [Microsoft – Event 4768: A Kerberos authentication ticket was requested](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4768)
 - [26] [Microsoft – Event 4769: A Kerberos service ticket was requested](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4769)
+- [27] [incredibleindishell/Certi-Bhai – AD CS PowerShell exploitation toolkit](https://github.com/incredibleindishell/Certi-Bhai)
 
 {{#include ../../../banners/hacktricks-training.md}}

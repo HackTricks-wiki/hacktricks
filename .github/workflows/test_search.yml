@@ -1,0 +1,30 @@
+name: Search regression tests
+
+on:
+  push:
+    paths:
+      - 'theme/ht_searcher.js'
+      - 'theme/elasticlunr.min.js'
+      - 'scripts/test_search.js'
+      - '.github/workflows/test_search.yml'
+  pull_request:
+    paths:
+      - 'theme/ht_searcher.js'
+      - 'theme/elasticlunr.min.js'
+      - 'scripts/test_search.js'
+      - '.github/workflows/test_search.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  search:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check theme/ht_searcher.js
+      - run: node --test scripts/test_search.js
