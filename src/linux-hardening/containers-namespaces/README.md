@@ -1,10 +1,10 @@
-# Kontejneri i prostori imena
+# Kontejneri i namespace-ovi
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Kontejner je Linux proces koji se izvršava uz konfiguraciju izolacije i privilegija. Proceni okruženje za izvršavanje, montirane resurse hosta, dodeljene capabilities i podešavanja prostora imena zajedno. [Pregled bezbednosti kontejnera](container-security/README.md) objašnjava ove slojeve i povezuje ih sa pojedinačnim kontrolama.
+Kontejner je Linux proces koji radi uz konfiguraciju izolacije i privilegija. Zajedno procenite runtime, montirane resurse hosta, dodeljene capabilities i podešavanja namespace-ova. [Pregled bezbednosti kontejnera](container-security/README.md) objašnjava ove slojeve i sadrži linkove ka pojedinačnim kontrolama.
 
-- [Eskalacija privilegija preko Containerd-a (`ctr`)](containerd-ctr-privilege-escalation.md) bavi se pristupom interfejsu za upravljanje containerd-om.
-- [Eskalacija privilegija preko RunC-a](runc-privilege-escalation.md) obrađuje materijal o eskalaciji specifičan za okruženje za izvršavanje.
-- [Bezbednost kontejnera](container-security/README.md) objašnjava okruženja za izvršavanje, izložene API-je, rizike slika, osetljive montirane resurse, privilegovane kontejnere, procenu i zaštite kao što su prostori imena, seccomp i obavezna kontrola pristupa.
+- [Eskalacija privilegija preko Containerd-a (`ctr`)](containerd-ctr-privilege-escalation.md) fokusira se na pristup interfejsu za upravljanje Containerd-om.
+- [Eskalacija privilegija preko RunC-a](runc-privilege-escalation.md) obrađuje materijal o eskalaciji specifičan za runtime.
+- [Bezbednost kontejnera](container-security/README.md) objašnjava runtime-ove, izložene API-je, rizike vezane za slike, osetljiva montiranja, privilegovane kontejnere, procenu i zaštite kao što su namespace-ovi, seccomp i obavezna kontrola pristupa.
 {{#include ../../banners/hacktricks-training.md}}
