@@ -1,77 +1,83 @@
-# Παράκαμψη εξουσιοδότησης μέσω απόκλισης κατάστασης και προεπιλεγμένων τιμών
+# Απόκλιση κατάστασης και παρακάμψεις εξουσιοδότησης μέσω προεπιλεγμένων τιμών
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Η εξουσιοδότηση μερικές φορές εξαρτάται από παράγωγη οικονομική κατάσταση αντί για έναν explicit ρόλο—για παράδειγμα, «ο caller κατέχει ολόκληρη την προσφορά». Αν οι τιμές αυτού του predicate προέρχονται από διαφορετικά stores, ένα stale αντίγραφο μπορεί να μετατρέψει μια νόμιμη συντόμευση ιδιοκτησίας σε authorization bypass. Το Provenance marker module απέδειξε τον επικίνδυνο συνδυασμό: ένα live υπόλοιπο caller συγκρινόταν με supply metadata τοπικά στο marker, το οποίο δεν ενημερωνόταν για assets με μη-fixed supply.<sup>[[1]](#references)</sup>
+Η εξουσιοδότηση μερικές φορές εξαρτάται από παράγωγη οικονομική κατάσταση αντί για έναν ρητό ρόλο — για παράδειγμα, «ο καλών κατέχει ολόκληρη την προσφορά». Αν οι τιμές σε αυτό το κατηγόρημα προέρχονται από διαφορετικές αποθήκες, ένα παρωχημένο αντίγραφο μπορεί να μετατρέψει μια θεμιτή παράκαμψη ελέγχου ιδιοκτησίας σε παράκαμψη εξουσιοδότησης. Το module Provenance marker ανέδειξε τον επικίνδυνο συνδυασμό: το ζωντανό υπόλοιπο του καλούντος συγκρινόταν με μεταδεδομένα προσφοράς τοπικά στο marker, τα οποία δεν ενημερώνονταν για στοιχεία με μη σταθερή προσφορά.<sup>[[1]](#references)</sup>
 
-## Έλεγχος duplicated state ως authorization boundary
+## Ελέγξτε τη διπλότυπη κατάσταση ως όριο εξουσιοδότησης
 
-Για κάθε τιμή που χρησιμοποιείται από έναν permission check, καταγράψτε **όλες τις αναπαραστάσεις**: canonical module state, object fields, cached aggregates, indexes, snapshots, bridge records και off-chain mirrors. Στη συνέχεια, ιχνηλατήστε κάθε διαδρομή create, mint, burn, transfer, reset, migration και synchronization, ώστε να προσδιορίσετε ποιο αντίγραφο ενημερώνεται σε κάθε object mode. Ένα field μπορεί να είναι authoritative για ένα mode και informational για ένα άλλο.<sup>[[1]](#references)</sup>
+Για κάθε τιμή που χρησιμοποιείται σε έναν έλεγχο δικαιωμάτων, καταγράψτε **όλες τις αναπαραστάσεις**: κανονική κατάσταση module, πεδία αντικειμένων, αποθηκευμένα αθροίσματα, ευρετήρια, στιγμιότυπα, εγγραφές bridge και off-chain αντίγραφα. Στη συνέχεια, ακολουθήστε κάθε διαδρομή δημιουργίας, mint, burn, μεταφοράς, επαναφοράς, μετεγκατάστασης και συγχρονισμού, για να προσδιορίσετε ποιο αντίγραφο ενημερώνεται σε κάθε λειτουργία αντικειμένου. Ένα πεδίο μπορεί να είναι έγκυρο για μία λειτουργία και απλώς ενημερωτικό για κάποια άλλη.<sup>[[1]](#references)</sup>
 
-Μια πρακτική ροή ελέγχου είναι:<sup>[[1]](#references)</sup>
+Μια πρακτική ροή ελέγχου είναι η εξής:<sup>[[1]](#references)</sup>
 
-1. Εντοπίστε τις protected actions και απλοποιήστε κάθε authorization branch σε ένα boolean predicate.
-2. Για κάθε operand, καταγράψτε το store του, τις update paths, τα lifecycle states και το source of truth.
-3. Δημιουργήστε transitions που ενημερώνουν μόνο μία αναπαράσταση και, στη συνέχεια, συγκρίνετε όλα τα αντίγραφα.
-4. Επιχειρήστε την protected action από έναν fresh account μετά από κάθε transition.
-5. Συνεχίστε πέρα από το bypass: αν η action τροποποιεί ένα ACL, αποδώστε στον εαυτό σας persistent roles και καλέστε τα κανονικά privileged APIs.
+1. Εντοπίστε τις προστατευμένες ενέργειες και απλοποιήστε κάθε κλάδο εξουσιοδότησης σε ένα λογικό κατηγόρημα.
+2. Για κάθε τελεστέο, καταγράψτε την αποθήκη του, τις διαδρομές ενημέρωσης, τις καταστάσεις κύκλου ζωής και την πηγή αλήθειας.
+3. Δημιουργήστε μεταβάσεις που ενημερώνουν μόνο μία αναπαράσταση και, στη συνέχεια, συγκρίνετε όλα τα αντίγραφα.
+4. Επιχειρήστε την προστατευμένη ενέργεια από έναν νέο λογαριασμό μετά από κάθε μετάβαση.
+5. Συνεχίστε και μετά την παράκαμψη: αν η ενέργεια τροποποιεί ένα ACL, αποδώστε στον εαυτό σας μόνιμους ρόλους και καλέστε τα κανονικά προνομιούχα API.
 
-Ύποπτα patterns περιλαμβάνουν `cachedSupply == balance`, `metadataOwner == caller` ή `snapshotShares == currentShares`, όταν οι δύο πλευρές έχουν διαφορετικούς κανόνες synchronization. Η ανάκτηση μιας authoritative τιμής για το ένα operand δεν καθιστά τη σύγκριση ασφαλή όταν το άλλο operand είναι stale.<sup>[[1]](#references)</sup>
+Ύποπτα μοτίβα περιλαμβάνουν τα `cachedSupply == balance`, `metadataOwner == caller` ή `snapshotShares == currentShares`, όταν οι δύο πλευρές έχουν διαφορετικούς κανόνες συγχρονισμού. Η ανάκτηση μιας έγκυρης τιμής για τον έναν τελεστέο δεν καθιστά ασφαλή τη σύγκριση, όταν ο άλλος τελεστέος είναι παρωχημένος.<sup>[[1]](#references)</sup>
 
-## Παράκαμψη ισότητας προεπιλεγμένων τιμών
+## Παράκαμψη ισότητας μέσω προεπιλεγμένης τιμής
 
-Ένα equality predicate είναι επίσης μη ασφαλές όταν και τα δύο operands μπορούν ανεξάρτητα να λάβουν την ίδια default value. Ο παρακάτω check παρέχει «πλήρη έλεγχο της προσφοράς» σε οποιονδήποτε empty account όταν το `supply` είναι μηδέν, ανεξάρτητα από το αν το μηδέν προκύπτει από stale metadata ή από ένα legitimately unfunded object.<sup>[[1]](#references)[[3]](#references)</sup>
+Ένα κατηγόρημα ισότητας είναι επίσης μη ασφαλές όταν και οι δύο τελεστέοι μπορούν ανεξάρτητα να λάβουν την ίδια προεπιλεγμένη τιμή. Ο παρακάτω έλεγχος εκχωρεί «πλήρη έλεγχο της προσφοράς» σε οποιονδήποτε κενό λογαριασμό όταν το `supply` είναι μηδέν, ανεξάρτητα από το αν το μηδέν προκύπτει από παρωχημένα μεταδεδομένα ή από ένα αντικείμενο που δεν έχει χρηματοδοτηθεί νόμιμα.<sup>[[1]](#references)[[3]](#references)</sup>
+
 ```go
 balance := bank.GetBalance(ctx, caller, denom)
 supply := marker.GetSupply() // duplicate or stale representation
 return balance.Amount.Equal(supply.Amount) // 0 == 0 -> true
 ```
-Η μετάβαση στο canonical store διορθώνει το divergence, αλλά **όχι** την περίπτωση του empty-object. Η ιδιότητα ασφάλειας πρέπει να περιλαμβάνει μια ανεξάρτητη συνθήκη εγκυρότητας· το Provenance patch χρησιμοποιεί το live bank supply και απορρίπτει nil ή supply ίσο με μηδέν πριν συγκρίνει το caller balance.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+
+Η μετάβαση στο κανονικό store διορθώνει την απόκλιση, αλλά **όχι** την περίπτωση του κενού αντικειμένου. Η ιδιότητα ασφάλειας πρέπει να περιλαμβάνει ανεξάρτητη συνθήκη εγκυρότητας· το patch του Provenance χρησιμοποιεί το live bank supply και απορρίπτει nil ή μηδενικό supply πριν συγκρίνει το υπόλοιπο του caller.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+
 ```go
 supply := bank.GetSupply(ctx, denom)
 if supply.Amount.IsNil() || supply.Amount.IsZero() {
-return false
+    return false
 }
 balance := bank.GetBalance(ctx, caller, denom)
 return supply.Equal(NewCoin(denom, balance.Amount))
 ```
-Εφαρμόστε την ίδια λογική σε counts απαρτίας, ποσοστά ιδιοκτησίας, χρέος, collateral, epochs, nonces, timestamps και counters: το `callerValue == protectedValue` δεν πρέπει να εξουσιοδοτεί έναν caller έως ότου η protected value είναι ανεξάρτητα έγκυρη και ανήκει στο αναμενόμενο domain.<sup>[[1]](#references)</sup>
 
-## ACL takeover to legitimate privileged operations
+Εφαρμόστε την ίδια συλλογιστική σε πλήθος quorum, ποσοστά ιδιοκτησίας, χρέος, collateral, epochs, nonces, timestamps και counters: το `callerValue == protectedValue` δεν πρέπει να εξουσιοδοτεί έναν caller προτού επιβεβαιωθεί ανεξάρτητα ότι η προστατευμένη τιμή είναι έγκυρη και ανήκει στο αναμενόμενο domain.<sup>[[1]](#references)</sup>
 
-Ένα bypass σε μια operation επεξεργασίας ACL αποτελεί έναν μόνιμο primitive κλιμάκωσης προνομίων. Στην περίπτωση του Provenance, ένας λογαριασμός χωρίς προνόμια και με μηδενικά tokens μπορούσε να περάσει το stale τεστ `0 == 0` για το supply, να εκχωρήσει στον εαυτό του administrative, mint και withdrawal permissions και, στη συνέχεια, να χρησιμοποιήσει ordinary message handlers για να κάνει mint assets ή να πραγματοποιήσει withdrawal από escrow. Επομένως, το exploit δεν απαιτούσε δεύτερο vulnerability μετά την αλλαγή του ACL.<sup>[[1]](#references)</sup>
+## Κατάληψη ACL για νόμιμες προνομιούχες λειτουργίες
+
+Ένα bypass σε λειτουργία επεξεργασίας ACL αποτελεί διαρκή primitive κλιμάκωσης προνομίων. Στην περίπτωση του Provenance, ένας λογαριασμός χωρίς προνόμια και με μηδέν tokens μπορούσε να περάσει τον παρωχημένο έλεγχο προσφοράς `0 == 0`, να εκχωρήσει στον εαυτό του δικαιώματα διαχείρισης, mint και ανάληψης, και έπειτα να χρησιμοποιήσει συνηθισμένους message handlers για να κάνει mint assets ή να αποσύρει escrow. Επομένως, μετά την αλλαγή ACL, το exploit δεν απαιτούσε δεύτερο vulnerability.<sup>[[1]](#references)</sup>
 
 Γενική ακολουθία exploitation:<sup>[[1]](#references)</sup>
 
-1. Βρείτε ένα object του οποίου ένα non-authoritative field διαφέρει από το live state ή του οποίου η protected value είναι η default.
-2. Χρησιμοποιήστε μια νέα/κενή identity, ώστε η local value της να ταιριάζει με αυτήν τη stale/default value.
-3. Καλέστε το role-management, ownership-transfer ή policy-update endpoint και εκχωρήστε στον εαυτό σας durable capabilities.
-4. Επιβεβαιώστε την persistence διαβάζοντας το ACL από το canonical state.
-5. Καλέστε την legitimate high-impact operation (mint, withdraw, upgrade, transfer ownership ή change policy).
+1. Βρείτε ένα αντικείμενο του οποίου ένα μη έγκυρο ως πηγή αλήθειας πεδίο διαφέρει από την τρέχουσα κατάσταση ή του οποίου η προστατευμένη τιμή είναι η προεπιλεγμένη.
+2. Χρησιμοποιήστε μια νέα/κενή ταυτότητα, ώστε η τοπική της τιμή να ταιριάζει με την παρωχημένη/προεπιλεγμένη τιμή.
+3. Καλέστε το endpoint διαχείρισης ρόλων, μεταβίβασης ιδιοκτησίας ή ενημέρωσης πολιτικής και εκχωρήστε στον εαυτό σας διαρκείς δυνατότητες.
+4. Επιβεβαιώστε ότι η αλλαγή διατηρείται, διαβάζοντας το ACL από την canonical κατάσταση.
+5. Καλέστε τη νόμιμη λειτουργία υψηλού αντίκτυπου (mint, ανάληψη, upgrade, μεταβίβαση ιδιοκτησίας ή αλλαγή πολιτικής).
 
-Κατά την αξιολόγηση του impact, ελέγξτε κάθε capability που είναι προσβάσιμη από τον νέο role, αντί να σταματήσετε στο authorization bypass. Λογαριασμοί τύπου escrow μπορεί να διατηρούν assets που δεν σχετίζονται με το object του οποίου τα stale metadata επέτρεψαν το takeover.<sup>[[1]](#references)</sup>
+Κατά την αξιολόγηση του αντίκτυπου, εξετάστε κάθε δυνατότητα που παρέχει ο νέος ρόλος, αντί να σταματήσετε στο authorization bypass. Λογαριασμοί τύπου escrow ενδέχεται να φυλάσσουν assets άσχετα με το αντικείμενο του οποίου τα παρωχημένα metadata επέτρεψαν την κατάληψη.<sup>[[1]](#references)</sup>
 
-## Invariant and stateful-fuzzing targets
+## Στόχοι για invariants και stateful fuzzing
 
-Ορίστε την authorization ανεξάρτητα από την implementation. Για ένα full-supply shortcut, το ελάχιστο invariant είναι:<sup>[[1]](#references)[[2]](#references)</sup>
+Ορίστε την εξουσιοδότηση ανεξάρτητα από την υλοποίηση. Για μια παράκαμψη full-supply, το ελάχιστο invariant είναι:<sup>[[1]](#references)[[2]](#references)</sup>
+
 ```text
 controlsAllSupply(caller, asset) == true
-=> authoritativeSupply(asset) > 0
-&& authoritativeBalance(caller, asset) == authoritativeSupply(asset)
+    => authoritativeSupply(asset) > 0
+    && authoritativeBalance(caller, asset) == authoritativeSupply(asset)
 ```
-Χρησιμοποίησε έναν model/state-machine fuzzer για να δημιουργείς sequences — όχι μεμονωμένα calls — καλύπτοντας τη δημιουργία, την αρχικοποίηση με zero-value, την activation/finalization, το minting, το burning, τα transfers, τα resets, τα migrations, τα sync calls και τις αλλαγές ACL. Μετά από κάθε transition, σύγκρινε τις duplicated representations και επιβεβαίωσε ότι ένας fresh account δεν μπορεί να εκτελέσει καμία protected action. Πρόσθεσε explicit cases για zero, one unit, partial ownership, full ownership, stale-low και stale-high values.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Οι regression properties με υψηλό signal είναι:<sup>[[1]](#references)[[2]](#references)</sup>
+Χρησιμοποιήστε έναν fuzzer μοντέλου/μηχανής καταστάσεων για να δημιουργήσετε ακολουθίες — όχι μεμονωμένες κλήσεις — που καλύπτουν τη δημιουργία, την αρχικοποίηση με μηδενική τιμή, την ενεργοποίηση/οριστικοποίηση, την έκδοση tokens, την καύση tokens, τις μεταφορές, τις επαναφορές, τις μεταφορές σε νέα συστήματα, τις κλήσεις sync και τις αλλαγές ACL. Μετά από κάθε μετάβαση, συγκρίνετε τις διπλές αναπαραστάσεις και βεβαιωθείτε ότι ένας νέος λογαριασμός δεν μπορεί να εκτελέσει καμία προστατευμένη ενέργεια. Προσθέστε ρητές περιπτώσεις για μηδενική τιμή, μία μονάδα, μερική ιδιοκτησία, πλήρη ιδιοκτησία, παρωχημένες χαμηλές και παρωχημένες υψηλές τιμές.<sup>[[1]](#references)[[2]](#references)</sup>
 
-- Το zero authoritative supply δεν υποδηλώνει ποτέ ownership ή administration.
-- Οι partial holders δεν μπορούν να γίνουν administrators όταν ένα duplicate supply ισούται με το balance τους.
-- Ένας true full holder διατηρεί το intended shortcut όταν το live supply είναι positive.
-- Τα failed self-grants δεν μεταβάλλουν το ACL ούτε ενεργοποιούν downstream privileged calls.
-- Οι mode changes δεν μπορούν να αλλάξουν σιωπηρά ποια representation θεωρεί authoritative ένα authorization check.
+Οι ιδιότητες παλινδρόμησης με το υψηλότερο σήμα είναι οι εξής:<sup>[[1]](#references)[[2]](#references)</sup>
+
+- Μηδενική έγκυρη προσφορά δεν συνεπάγεται ποτέ ιδιοκτησία ή δικαιώματα διαχείρισης.
+- Οι κάτοχοι μερικής ιδιοκτησίας δεν μπορούν να γίνουν διαχειριστές όταν μια διπλή προσφορά ισούται με το υπόλοιπό τους.
+- Ένας πραγματικός πλήρης κάτοχος διατηρεί την προβλεπόμενη συντόμευση όταν η ενεργή προσφορά είναι θετική.
+- Οι αποτυχημένες αυτο-απονομές δεν τροποποιούν την ACL ούτε ενεργοποιούν μεταγενέστερες προνομιούχες κλήσεις.
+- Οι αλλαγές λειτουργίας δεν μπορούν να αλλάξουν σιωπηρά ποια αναπαράσταση θεωρεί έγκυρη ένας έλεγχος εξουσιοδότησης.
 
 ## References
 
-- [1] [Η state divergence επιτρέπει unauthorized access (Trail of Bits)](https://blog.trailofbits.com/2026/08/25/state-divergence-enables-unauthorized-access/)
-- [2] [Provenance PR #2734 - Διόρθωση stale supply checks](https://github.com/provenance-io/provenance/pull/2734)
-- [3] [Provenance commit c81fd65 - Απόρριψη zero supply στο total-supply authorization shortcut](https://github.com/provenance-io/provenance/commit/c81fd65f8ad48de42d5a6d68e761a0851c7e72c4)
+- [1] [Η απόκλιση κατάστασης επιτρέπει μη εξουσιοδοτημένη πρόσβαση (Trail of Bits)](https://blog.trailofbits.com/2026/08/25/state-divergence-enables-unauthorized-access/)
+- [2] [Provenance PR #2734 - Διόρθωση ελέγχων παρωχημένης προσφοράς](https://github.com/provenance-io/provenance/pull/2734)
+- [3] [Provenance commit c81fd65 - Απόρριψη μηδενικής προσφοράς στη συντόμευση εξουσιοδότησης συνολικής προσφοράς](https://github.com/provenance-io/provenance/commit/c81fd65f8ad48de42d5a6d68e761a0851c7e72c4)
 {{#include ../../banners/hacktricks-training.md}}
