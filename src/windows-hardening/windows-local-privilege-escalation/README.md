@@ -2137,6 +2137,34 @@ The technique described [**in this blog post**](https://www.zerodayinitiative.co
 
 The attack basically consist of abusing the Windows Installer's rollback feature to replace legitimate files with malicious ones during the uninstallation process. For this the attacker needs to create a **malicious MSI installer** that will be used to hijack the `C:\Config.Msi` folder, which will later be used by he Windows Installer to store rollback files during the uninstallation of other MSI packages where the rollback files would have been modified to contain the malicious payload.
 
+### Windows Installer COM cleanup-path injection (CVE-2025-27727)
+
+A low-privileged client can reach the SYSTEM `msiexec.exe` service through the `CMsiConfigurationManager` COM object (CLSID/IID `{000C101C-0000-0000-C000-000000000046}`). Reverse engineering identified the relevant `IMsiServer` calls as `MsiBeginTransactionW` at vtable offset `0xA0`, `SetEEUIDirectoryAndFilter` at `0xC8`, and `CleanupTempPackages` at `0x50`. These names and offsets are reverse-engineered and can vary between builds.<sup>[[41]](#references)</sup>
+
+For a non-administrator, `SetEEUIDirectoryAndFilter` impersonates the caller only while opening the supplied path with `DELETE`, `FILE_FLAG_BACKUP_SEMANTICS`, and `FILE_FLAG_OPEN_REPARSE_POINT`. This proves that the caller can delete the directory and avoids following a reparse point, but it does **not** bind the checked file object to later cleanup or prove that Windows Installer created it.<sup>[[41]](#references)</sup>
+
+After `MsiBeginTransactionW`, `SetEEUIDirectoryAndFilter` schedules the path as a folder regardless of the caller's filter argument. The service writes a named `REG_DWORD` value under `HKLM\Software\Microsoft\Windows\CurrentVersion\Installer\TempPackages`: the value name is the caller-controlled path and data `0x00000002` is the folder flag. `CleanupTempPackages(NULL, FALSE)` then enters cleanup directly. Its elevated worker enumerates the registry values and passes folder entries to recursive `FDeleteFolder` without checking path provenance. If normal removal fails, the code also calls `LockdownPath`, clears file attributes, and retries.<sup>[[41]](#references)</sup>
+
+The minimal call sequence recovered from `msi.dll` is:<sup>[[41]](#references)</sup>
+
+```c
+CreateDirectoryW(L"C:\\Config.Msi", NULL);
+HANDLE hDir = CreateFileW(L"C:\\Config.Msi",
+    GENERIC_READ | WRITE_DAC | READ_CONTROL | DELETE,
+    FILE_SHARE_READ, NULL, OPEN_EXISTING,
+    FILE_FLAG_BACKUP_SEMANTICS, NULL);
+CMsiConfigurationManager *server = CreateMsiServer();
+server->MsiBeginTransactionW(L"PoC", 0, hWnd, &hTransaction);
+server->SetEEUIDirectoryAndFilter(L"C:\\Config.Msi", 0);
+server->CleanupTempPackages(NULL, FALSE);
+```
+
+The useful primitive is path reuse rather than a junction redirect. Register an attacker-created `C:\Config.Msi`, remove it, and let Windows Installer later recreate the same pathname with protected rollback data. Cleanup trusts the stale `TempPackages` name and deletes the new directory as SYSTEM. This bypasses the intended boundary from `FILE_FLAG_OPEN_REPARSE_POINT` and redirection-trust mitigation because no reparse point is required.<sup>[[41]](#references)</sup>
+
+This deletion primitive fits the rollback chain below: preserve the separate `Installer\Folders` record, delete the protected `C:\Config.Msi`, recreate it with a NULL DACL, and retain a handle granted `WRITE_DAC` before the installer hardens the DACL. The pre-opened handle can restore a permissive DACL with `NtSetSecurityObject`, after which the generated `.rbs` can be replaced before rollback resumes.<sup>[[41]](#references)</sup>
+
+Microsoft fixed the path by preventing `CMsiTransaction::SetEEUIDirectoryAndFilter` from calling `ScheduleFileOrFolderDelete` when the new feature gate is enabled. The COM call can still return success, but it no longer places the attacker-controlled path in `TempPackages`. Apply the April 2025 Windows security updates rather than using successful method return as a patch test.<sup>[[41]](#references)[[42]](#references)</sup>
+
 The summarized technique is the following:
 
 1. **Stage 1 – Preparing for the Hijack (leave `C:\Config.Msi` empty)**
@@ -2468,5 +2496,7 @@ C:\Windows\microsoft.net\framework\v4.0.30319\MSBuild.exe -version #Compile the 
 - [38] [SpecterOps – Turning Enterprise Update Servers Into Backdoor Factories (0_o) – Part 1](https://specterops.io/blog/2026/08/05/turning-enterprise-update-servers-into-backdoor-factories-part-1/)
 - [39] [SpecterOps – Turning Enterprise Update Servers Into Backdoor Factories (0_o) – Part 2](https://specterops.io/blog/2026/08/05/turning-enterprise-update-servers-into-backdoor-factories-part-2/)
 - [40] [bagelByt3s – NotWSUSPicious](https://github.com/bagelByt3s/NotWSUSPicious)
+- [41] [Exodus Intelligence - Microsoft Windows Installer Folder Delete Privilege Escalation](https://blog.exodusintel.com/2026/07/06/microsoft-windows-installer-folder-delete-privilege-escalation/)
+- [42] [Microsoft Security Response Center - CVE-2025-27727](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-27727)
 
 {{#include ../../banners/hacktricks-training.md}}
