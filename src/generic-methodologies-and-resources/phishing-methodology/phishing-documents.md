@@ -161,29 +161,13 @@ An HTA is executed using **`mshta.exe`**, which is typically **installed** along
 </script>
 ```
 
-## Fake attachment cards and tracked HTA/WSF staging
+## Fake attachment cards in HTML email
 
-An HTML email can imitate a provider's native attachment-preview card instead of carrying a real attachment. One observed pattern rebuilt Gmail's card with Base64-encoded inline PNG MIME parts, wrapped the complete visual control in one anchor, and used a recipient value in `?m=<target-id>` for click and delivery correlation. The link began with `//` rather than `http://` or `https://`; browsers resolve that protocol-relative form, but simplistic extractors that only match fully qualified URLs can miss it.<sup>[[11]](#references)</sup>
+An HTML email can imitate a provider's native attachment-preview card instead of carrying a real attachment. Talos observed a Gmail card rebuilt from four Base64-encoded inline PNG MIME parts. The complete visual control was wrapped in one anchor, and a recipient value in `?m=<target-id>` enabled per-recipient tracking. The link began with `//` rather than `http://` or `https://`; browsers resolve that protocol-relative form, but URL extractors that match only fully qualified URLs can miss it.<sup>[[11]](#references)</sup>
 
-A reusable post-click workflow is:<sup>[[11]](#references)</sup>
+During analysis, inspect the raw MIME instead of trusting the rendered attachment list. Reconstruct how the inline image parts form the visual card, identify its enclosing anchor, and normalize protocol-relative `href` values before extracting URLs.<sup>[[11]](#references)</sup>
 
-1. Return an HTA for `mshta.exe`, or a WSF/JScript file for Windows Script Host. Hide or resize the HTA window to reduce visible execution artifacts.
-2. Record execution separately from the payload request. An HTA can load a hidden image whose URL path contains the lure name and whose query contains `?track`; a WSF can send an HTTP `HEAD` request with the lure name in the path.
-3. Import an obfuscated JScript stage from object storage or a CDN. The script can fetch the orchestrator and its payload resources as separate objects, apply custom Base64 decoding, decrypt them with an embedded RC4 key, and execute the orchestrator in memory. Splitting the resources lets the operator replace one chain component without rebuilding the email or first-stage stager.
-
-For triage, parse the raw MIME rather than trusting the rendered attachment list. Normalize protocol-relative `href` values before URL extraction, correlate repeated inline image parts with a single enclosing link, and look for recipient identifiers in query parameters. On endpoints, correlate `mshta.exe`, `wscript.exe`, or `cscript.exe` network activity with lure text in URL paths, unusual `HEAD` requests, and a follow-on script that downloads several encrypted resources.
-
-The later execution primitives belong in the dedicated technique pages:
-
-{{#ref}}
-../../pentesting-web/deserialization/basic-.net-deserialization-objectdataprovider-gadgets-expandedwrapper-and-json.net.md
-{{#endref}}
-
-{{#ref}}
-../../windows-hardening/windows-local-privilege-escalation/dll-hijacking/README.md
-{{#endref}}
-
-For envelope/header sender spoofing and DMARC alignment testing, see [SMTP mail spoofing countermeasures](../../network-services-pentesting/pentesting-smtp/README.md#spf-pass-with-an-unaligned-visible-sender).
+For envelope/header sender spoofing and DMARC alignment testing, see [SMTP mail spoofing countermeasures](../../network-services-pentesting/pentesting-smtp/index.html#spf-pass-with-an-unaligned-visible-sender).
 
 ## Forcing NTLM Authentication
 
