@@ -148,6 +148,8 @@ When a privileged service and a low-privileged process communicate over `\\.\pip
 - This only helps until you inject into the legitimate client: once inside the trusted process, you inherit the exact PID/image/signature context the server expects.
 - For split desktop apps, instrumenting the low-privileged UI/helper process is often easier than attacking the `SYSTEM` service directly.
 
+For an end-to-end example that combines this trusted-process bypass with reconstructed Protobuf messages, an identity-derived path traversal, and privileged error cleanup, see [Abusing Enterprise Auto-Updaters and Privileged IPC](abusing-auto-updaters-and-ipc.md#reconstructing-typed-ipc-and-abusing-identity-derived-cleanup-paths).
+
 ### Hook the client according to its I/O model
 - Synchronous I/O: intercept `NtWriteFile` before the syscall consumes the buffer, and inspect/patch `NtReadFile` after it returns.<sup>[[7]](#references)</sup>
 - Overlapped I/O: store the `OVERLAPPED`/`IoStatusBlock` seen in `NtReadFile`, then inspect the buffer after `GetOverlappedResult` or the relevant wait completes.

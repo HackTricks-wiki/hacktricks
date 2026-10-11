@@ -86,6 +86,8 @@ Two practical bypasses:
 - DLL injection into an allow-listed process (e.g., nsdiag.exe) and proxy IPC from inside it.
 - Spawn an allow-listed binary suspended and bootstrap your proxy DLL without CreateRemoteThread (see §5) to satisfy driver-enforced tamper rules.<sup>[[1]](#references)[[2]](#references)</sup>
 
+A certificate-based variant is not stronger if it authenticates only the executable backing the client PID. For example, a pipe server can obtain the PID with `GetNamedPipeClientProcessId`, open it with `PROCESS_QUERY_LIMITED_INFORMATION`, resolve the image with `QueryFullProcessImageNameW`, and validate the on-disk signer. Code manually mapped into that approved process still creates the pipe handle from the same PID, so the image and certificate checks pass. Start or reuse an accepted client, inject the IPC payload, and issue requests from inside it. See [Named Pipe Client Impersonation](named-pipe-client-impersonation.md#pidsignature-checks-are-hardening-not-a-boundary) for other pipe trust failures.<sup>[[16]](#references)</sup>
+
 ---
 ## 5) Tamper-protection friendly injection: suspended process + NtContinue patch
 
@@ -181,6 +183,47 @@ Select-String -Path 'C:\Program Files\Lenovo\**\*.dll','C:\Program Files\Lenovo\
 ```
 
 Practical takeaway: whenever a helper suite exposes a broker that first authenticates the **caller process** and only then dispatches into dozens of plugin/add-in commands, do not stop after bypassing the front-door trust check. Dump the manifest/contract table and fuzz each high-privilege verb independently; the authenticated channel usually hides several second-stage bugs.
+
+---
+## 9) Reconstructing typed IPC and abusing identity-derived cleanup paths
+
+### Recover the minimum Protobuf protocol
+
+For .NET clients that ship generated Google.Protobuf classes, reconstruct the protocol from code before fuzzing raw pipe bytes. The service wrapper reveals message order and command IDs. Generated message classes reveal field numbers and wire types, while the parent class reveals `oneof` body tags. Reimplement only the registration and privileged verb needed for the test.
+
+The Cato Client case provides a compact example:<sup>[[16]](#references)[[17]](#references)</sup>
+
+```text
+ClientToService: command = field 2
+UiRegister: command 34, body field 25
+  process ID = 1, session ID = 2, UserSidString = 3
+SplitTunnelUpload: command 49, body field 37
+  enabled = 1, filepath = 2
+```
+
+This is also a useful audit pattern for other typed IPC frameworks: search generated constants for command enums, `oneof` cases, and `*FieldNumber`, then follow the legitimate UI method that constructs the request. Preserve the application's framing around the serialized message; Protobuf field recovery alone does not reveal length prefixes or request/response ordering.
+
+### Turn identity-to-path confusion into an error-path delete
+
+Treat client-supplied fields named `SID`, user, tenant, token, or account as ordinary untrusted strings until the service derives or verifies them against the real client token. If a privileged broker inserts one into a path such as `<storage>\ccst_<claimed-SID>.stp`, test traversal independently on the success and failure paths. A valid source file may expose a privileged write with a forced suffix, while a readable but malformed source can reach cleanup and delete the same attacker-selected output as `SYSTEM`.<sup>[[16]](#references)</sup>
+
+A practical review workflow is:
+
+1. Register through the authenticated IPC channel while replacing the identity field with `..\` components.
+2. Confirm path normalization escapes the intended root even when the storage directory itself is read-only to the user.
+3. Trigger a successful parse and record the final write target.
+4. Trigger a parser error only after the destination has been constructed, then trace the cleanup `DeleteFile`/directory removal under the service token.
+5. If a fixed filename suffix limits the target, redirect the chosen path through an attacker-controlled mount point and an Object Manager symbolic link.
+
+For example, a forced `.stp` cleanup target was redirected to the Windows Installer rollback directory with this namespace layout:<sup>[[16]](#references)</sup>
+
+```text
+C:\poc                         -> \RPC Control
+\RPC Control\deleteme.stp      -> \??\C:\Config.Msi
+privileged delete target       = C:\poc\deleteme.stp
+```
+
+Once the privileged process removes `C:\Config.Msi`, the prepared rollback state can be replaced and used for `SYSTEM` execution. The reusable rollback stages and the file-delete-to-folder-delete variation are documented in [From Arbitrary Folder Delete/Move/Rename to SYSTEM EoP](README.md#from-arbitrary-folder-deletemoverename-to-system-eop); do not duplicate them inside each product-specific IPC chain.
 
 ---
 ## 1) Browser-to-localhost CSRF against privileged HTTP APIs (ASUS DriverHub)
@@ -382,5 +425,7 @@ These patterns generalize to any updater that accepts unsigned manifests or fail
 - [13] [Notepad++ – hijacked infrastructure incident update](https://notepad-plus-plus.org/news/hijacked-incident-info-update/)
 - [14] [AmberWolf – Bypassing the fix for CVE-2025-0309 in Netskope Client for Windows](https://blog.amberwolf.com/blog/2026/march/patch-bypass---netskope-client-for-windows---local-privilege-escalation-via-rogue-server/)
 - [15] [Atredis – Uncovering Privilege Escalation Bugs in Lenovo Vantage](https://www.atredis.com/blog/2025/7/7/uncovering-privilege-escalation-bugs-in-lenovo-vantage)
+- [16] [Quarkslab – Cato Client: Split-Tunnel SID Path Traversal to SYSTEM via Named Pipe and Config.Msi Rollback](https://blog.quarkslab.com/cato-vpn-client-split-tunnel-and-privilege-escalation-cve-2026-10739.html)
+- [17] [Quarkslab – CatoPipePayload.c](https://blog.quarkslab.com/resources/2026-10-01_cato-client-lpe/CatoPipePayload.c)
 
 {{#include ../../banners/hacktricks-training.md}}
