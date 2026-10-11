@@ -111,7 +111,7 @@ retab
 
 Synthetic records only need to satisfy the unwinder; they do not contain a complete execution context. Returning from the sensitive API directly into the fabricated callers would normally crash. The practical design therefore places a gadget frame immediately below the API: the API returns to executable code in a loaded framework, and that gadget branches through a controlled callee-saved register to a restore bridge in the implant.<sup>[[1]](#references)</sup>
 
-A useful gadget preserves LR and transfers through a controlled register, for example an appropriate `br`, `braa` or `brab` sequence. The restore bridge must recover the original `x19-x30` values and `SP` before resuming implant execution. On arm64e, the API-to-gadget return, gadget-to-bridge branch and bridge-to-implant transition each require a pointer signed for the precise key and discriminator used by that instruction.<sup>[[1]](#references)</sup>
+A useful gadget preserves LR and transfers through a controlled register, for example an appropriate `br`, `braa` or `brab` sequence. The restore bridge must recover the original `x19-x30` values and `SP` before resuming implant execution. On arm64e, each authenticated return or branch in the API-to-gadget, gadget-to-bridge and bridge-to-implant path requires a pointer signed for the key and discriminator used by that instruction.<sup>[[1]](#references)</sup>
 
 ```text
 implant -> synthetic state -> sensitive API
