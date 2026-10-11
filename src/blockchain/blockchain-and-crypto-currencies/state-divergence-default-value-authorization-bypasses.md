@@ -1,77 +1,83 @@
-# 상태 불일치 및 기본값 권한 부여 우회
+# 상태 불일치와 기본값을 이용한 권한 우회
 
 {{#include ../../banners/hacktricks-training.md}}
 
-권한 부여는 명시적인 역할 대신 파생된 경제 상태에 의존하는 경우가 있습니다. 예를 들어 "호출자가 전체 공급량을 소유한다"와 같은 경우입니다. 해당 조건의 값이 서로 다른 저장소에서 가져오면, 오래된 중복 값으로 인해 정상적인 소유권 지름길이 권한 부여 우회로 바뀔 수 있습니다. Provenance marker 모듈은 이러한 위험한 조합을 보여 주었습니다. 실시간 호출자 잔액을 non-fixed-supply 자산에 대해 업데이트되지 않은 marker-local 공급량 메타데이터와 비교한 것입니다.<sup>[[1]](#references)</sup>
+권한 검사는 명시적인 역할 대신 파생된 경제 상태에 의존하는 경우가 있습니다. 예를 들어, "호출자가 전체 공급량을 소유한다"와 같은 검사입니다. 해당 조건의 값이 서로 다른 저장소에서 가져온다면, 오래된 중복 값 때문에 정당한 소유권 예외가 권한 우회로 이어질 수 있습니다. Provenance marker 모듈에서는 위험한 조합을 확인할 수 있었습니다. 호출자의 현재 잔액을 marker에 저장된 공급량 메타데이터와 비교했지만, 고정 공급량이 아닌 자산에서는 해당 메타데이터가 갱신되지 않았습니다.<sup>[[1]](#references)</sup>
 
-## 권한 부여 경계로서의 중복 상태 감사
+## 중복 상태를 권한 경계로 감사하기
 
-권한 검사에 사용되는 모든 값에 대해 **모든 표현**을 열거합니다. canonical module state, object fields, cached aggregates, indexes, snapshots, bridge records, off-chain mirrors를 포함합니다. 그런 다음 모든 create, mint, burn, transfer, reset, migration 및 synchronization 경로를 추적하여 각 object mode에서 어떤 복사본이 업데이트되는지 확인합니다. 어떤 필드는 한 mode에서는 authoritative하고 다른 mode에서는 informational할 수 있습니다.<sup>[[1]](#references)</sup>
+권한 검사에 사용되는 모든 값에 대해 정식 모듈 상태, 객체 필드, 캐시된 집계 값, 인덱스, 스냅샷, 브리지 레코드, 오프체인 미러 등 **모든 표현 방식**을 나열합니다. 그런 다음 생성, 발행, 소각, 전송, 초기화, 마이그레이션, 동기화 경로를 모두 추적해 객체 모드별로 어떤 사본이 갱신되는지 확인합니다. 한 필드가 특정 모드에서는 권위 있는 값이지만, 다른 모드에서는 참고용일 수 있습니다.<sup>[[1]](#references)</sup>
 
-실용적인 검토 workflow는 다음과 같습니다.<sup>[[1]](#references)</sup>
+실용적인 검토 절차는 다음과 같습니다.<sup>[[1]](#references)</sup>
 
-1. 보호된 action을 찾고 각 authorization branch를 boolean predicate로 단순화합니다.
-2. 각 operand에 대해 해당 store, update paths, lifecycle states 및 source of truth를 기록합니다.
-3. 하나의 표현만 업데이트하는 transition을 생성한 다음 모든 복사본을 비교합니다.
-4. 각 transition 이후 fresh account에서 보호된 action을 시도합니다.
-5. bypass 이후에도 계속 진행합니다. action이 ACL을 수정한다면 self-grant persistent roles를 수행하고 일반적인 privileged APIs를 호출합니다.
+1. 보호된 작업을 찾고 각 권한 분기를 불리언 조건식으로 정리합니다.
+2. 각 피연산자에 대해 저장 위치, 갱신 경로, 수명 주기 상태, 기준 데이터의 출처를 기록합니다.
+3. 한 표현 방식만 갱신하는 상태 전이를 만들고 모든 사본을 비교합니다.
+4. 각 상태 전이 후 새 계정으로 보호된 작업을 시도합니다.
+5. 우회에 그치지 말고 계속 진행합니다. 해당 작업이 ACL을 수정한다면, 스스로에게 지속적인 역할을 부여한 뒤 일반 권한 API를 호출합니다.
 
-서로 다른 synchronization rules를 가진 두 값의 비교에서 `cachedSupply == balance`, `metadataOwner == caller`, `snapshotShares == currentShares`와 같은 패턴은 의심해야 합니다. 한 operand에 대해 authoritative value를 조회하더라도 다른 operand가 오래된 값이라면 비교가 안전해지지 않습니다.<sup>[[1]](#references)</sup>
+서로 다른 동기화 규칙을 적용받는 두 값을 비교할 때 `cachedSupply == balance`, `metadataOwner == caller`, `snapshotShares == currentShares`와 같은 패턴은 의심해야 합니다. 한 피연산자에 대해 권위 있는 값을 조회하더라도 다른 피연산자가 오래된 값이라면 비교가 안전해지는 것은 아닙니다.<sup>[[1]](#references)</sup>
 
-## 기본값 동일성 우회
+## 기본값 일치 우회
 
-두 operand가 독립적으로 동일한 기본값을 가질 수 있는 경우에도 equality predicate는 안전하지 않습니다. 아래 검사는 `supply`가 0일 때 모든 빈 계정에 "전체 공급량 제어" 권한을 부여합니다. 0이 오래된 메타데이터에서 비롯되었는지, 정상적으로 자금이 공급되지 않은 object에서 비롯되었는지와 관계없이 적용됩니다.<sup>[[1]](#references)[[3]](#references)</sup>
+두 피연산자가 각각 같은 기본값을 가질 수 있는 경우에도 등호 조건식은 안전하지 않습니다. 아래 검사는 `supply`가 0일 때 모든 빈 계정에 "전체 공급량 제어" 권한을 부여합니다. 0이 오래된 메타데이터에서 비롯되었든, 자금이 아직 들어오지 않은 객체의 정상적인 값이든 상관없습니다.<sup>[[1]](#references)[[3]](#references)</sup>
+
 ```go
 balance := bank.GetBalance(ctx, caller, denom)
 supply := marker.GetSupply() // duplicate or stale representation
 return balance.Amount.Equal(supply.Amount) // 0 == 0 -> true
 ```
-canonical store로 전환하면 divergence는 해결되지만 **empty-object case**는 해결되지 않습니다. 보안 속성에는 독립적인 유효성 조건이 포함되어야 합니다. Provenance patch는 live bank supply를 사용하며, caller balance를 비교하기 전에 nil 또는 zero supply를 거부합니다.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+
+canonical store로 전환하면 divergence는 해결되지만 **빈 객체 사례**는 해결되지 않습니다. 보안 속성에는 독립적인 유효성 조건이 포함되어야 합니다. Provenance 패치는 실시간 bank supply를 사용하고, 호출자의 잔액을 비교하기 전에 nil 또는 0인 supply를 거부합니다.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+
 ```go
 supply := bank.GetSupply(ctx, denom)
 if supply.Amount.IsNil() || supply.Amount.IsZero() {
-return false
+    return false
 }
 balance := bank.GetBalance(ctx, caller, denom)
 return supply.Equal(NewCoin(denom, balance.Amount))
 ```
-quorum counts, ownership percentages, debt, collateral, epochs, nonces, timestamps, counters에도 동일한 원칙을 적용해야 합니다. `callerValue == protectedValue`는 보호된 값이 독립적으로 유효하고 예상된 도메인에 속한다는 것이 확인되기 전까지 caller를 authorize해서는 안 됩니다.<sup>[[1]](#references)</sup>
 
-## ACL takeover to legitimate privileged operations
+quorum count, 소유권 비율, 부채, 담보, epoch, nonce, timestamp, counter에도 같은 논리를 적용하세요. `callerValue == protectedValue`는 보호 대상 값이 독립적으로 유효하고 예상된 도메인에 속하는지 확인되기 전까지 caller를 승인해서는 안 됩니다.<sup>[[1]](#references)</sup>
 
-ACL을 편집하는 작업의 bypass는 지속적인 privilege-escalation primitive입니다. Provenance 사례에서는 token이 0개인 unprivileged account가 오래된 `0 == 0` supply 테스트를 통과하고, 자신에게 administrative, mint, withdrawal permission을 부여한 다음 일반 message handler를 사용해 asset을 mint하거나 escrow에서 인출할 수 있었습니다. 따라서 exploit에는 ACL 변경 이후 두 번째 vulnerability가 필요하지 않았습니다.<sup>[[1]](#references)</sup>
+## ACL 탈취로 정당한 권한 작업 수행
 
-General exploitation sequence:<sup>[[1]](#references)</sup>
+ACL 편집 작업의 bypass는 지속적인 권한 상승 수단입니다. Provenance 사례에서는 토큰이 0개인 권한 없는 계정이 오래된 `0 == 0` 공급량 검사를 통과해 자신에게 administrative, mint, withdrawal 권한을 부여한 다음, 일반 message handler를 사용해 자산을 발행하거나 escrow를 인출할 수 있었습니다. 따라서 ACL 변경 후에는 두 번째 취약점이 필요하지 않았습니다.<sup>[[1]](#references)</sup>
 
-1. non-authoritative field가 live state와 다르거나, protected value가 default인 object를 찾습니다.
-2. local value가 해당 stale/default value와 일치하도록 새로운/비어 있는 identity를 사용합니다.
-3. role-management, ownership-transfer 또는 policy-update endpoint를 호출하고 자신에게 지속적인 capability를 부여합니다.
-4. canonical state에서 ACL을 읽어 persistence를 확인합니다.
-5. legitimate high-impact operation(mint, withdraw, upgrade, transfer ownership 또는 change policy)을 호출합니다.
+일반적인 exploit 순서:<sup>[[1]](#references)</sup>
 
-Impact를 triage할 때는 authorization bypass에서 멈추지 말고 새 role에서 접근 가능한 모든 capability를 조사해야 합니다. Escrow와 유사한 account는 stale metadata가 takeover를 가능하게 한 object와 관련 없는 asset을 custody하고 있을 수 있습니다.<sup>[[1]](#references)</sup>
+1. 권위가 없는 필드가 live state와 다르거나 보호 대상 값이 기본값인 객체를 찾습니다.
+2. 새 identity 또는 빈 identity를 사용해 해당 identity의 로컬 값이 오래된 값 또는 기본값과 일치하도록 합니다.
+3. role-management, ownership-transfer 또는 policy-update endpoint를 호출해 자신에게 지속적인 권한을 부여합니다.
+4. canonical state에서 ACL을 읽어 변경이 유지되는지 확인합니다.
+5. 정당한 고영향 작업(mint, withdraw, upgrade, ownership transfer 또는 policy 변경)을 실행합니다.
 
-## Invariant and stateful-fuzzing targets
+영향을 분류할 때는 권한 bypass만 확인하고 멈추지 말고 새 role로 접근할 수 있는 모든 권한을 살펴보세요. escrow와 유사한 계정은 오래된 metadata가 탈취를 가능하게 한 객체와 무관한 자산도 보관할 수 있습니다.<sup>[[1]](#references)</sup>
 
-authorization을 implementation과 독립적으로 지정해야 합니다. full-supply shortcut의 최소 invariant는 다음과 같습니다.<sup>[[1]](#references)[[2]](#references)</sup>
+## 불변식 및 상태 기반 퍼징 대상
+
+authorization을 구현과 독립적으로 명시하세요. 전체 공급량을 대상으로 하는 shortcut의 최소 불변식은 다음과 같습니다.<sup>[[1]](#references)[[2]](#references)</sup>
+
 ```text
 controlsAllSupply(caller, asset) == true
-=> authoritativeSupply(asset) > 0
-&& authoritativeBalance(caller, asset) == authoritativeSupply(asset)
+    => authoritativeSupply(asset) > 0
+    && authoritativeBalance(caller, asset) == authoritativeSupply(asset)
 ```
-model/state-machine fuzzer를 사용해 isolated calls가 아닌 sequences를 생성하고, creation, zero-value initialization, activation/finalization, minting, burning, transfers, resets, migrations, sync calls 및 ACL changes를 포함하세요. 모든 transition 후 duplicated representations를 비교하고, fresh account가 보호된 action을 수행할 수 없는지 assert하세요. zero, one unit, partial ownership, full ownership, stale-low 및 stale-high 값에 대한 명시적 cases를 seed하세요.<sup>[[1]](#references)[[2]](#references)</sup>
 
-High-signal regression properties는 다음과 같습니다:<sup>[[1]](#references)[[2]](#references)</sup>
+모델/상태 머신 fuzzer를 사용해 개별 호출이 아닌 시퀀스를 생성하고, 생성, zero-value 초기화, 활성화/종료, minting, burning, 전송, 초기화, 마이그레이션, sync 호출, ACL 변경을 다루세요. 각 전환 후 중복 표현을 비교하고, 새 계정이 보호된 작업을 수행할 수 없는지 확인하세요. zero, one unit, 부분 소유, 전체 소유, 실제보다 낮은 stale 값, 실제보다 높은 stale 값을 명시적 케이스로 추가하세요.<sup>[[1]](#references)[[2]](#references)</sup>
 
-- Zero authoritative supply는 ownership 또는 administration을 절대 의미하지 않습니다.
-- Partial holders는 duplicate supply가 자신의 balance와 같아져도 administrators가 될 수 없습니다.
-- 실제 full holder는 live supply가 positive일 때 의도된 shortcut을 유지합니다.
-- 실패한 self-grants는 ACL을 변경하거나 이후의 privileged calls를 활성화하지 않습니다.
-- Mode changes는 authorization check가 어떤 representation을 authoritative로 취급하는지 조용히 변경할 수 없습니다.
+신호가 높은 회귀 속성은 다음과 같습니다.<sup>[[1]](#references)[[2]](#references)</sup>
+
+- 권위 있는 공급량이 zero라고 해서 소유권이나 관리 권한이 생기지는 않습니다.
+- 중복 공급량이 잔액과 같다는 이유만으로 부분 보유자가 관리자가 될 수는 없습니다.
+- 실제로 전체를 보유한 사용자는 현재 공급량이 양수일 때 의도된 단축 경로를 계속 이용할 수 있습니다.
+- 실패한 self-grant는 ACL을 변경하거나 후속 privileged 호출을 가능하게 해서는 안 됩니다.
+- 모드 변경으로 인해 권한 검사에서 어느 표현을 권위 있는 것으로 취급하는지가 조용히 바뀌어서는 안 됩니다.
 
 ## References
 
-- [1] [State divergence가 unauthorized access를 가능하게 함 (Trail of Bits)](https://blog.trailofbits.com/2026/08/25/state-divergence-enables-unauthorized-access/)
-- [2] [Provenance PR #2734 - stale supply checks 수정](https://github.com/provenance-io/provenance/pull/2734)
-- [3] [Provenance commit c81fd65 - total-supply authorization shortcut에서 zero supply 거부](https://github.com/provenance-io/provenance/commit/c81fd65f8ad48de42d5a6d68e761a0851c7e72c4)
+- [1] [상태 불일치로 무단 접근이 가능해짐 (Trail of Bits)](https://blog.trailofbits.com/2026/08/25/state-divergence-enables-unauthorized-access/)
+- [2] [Provenance PR #2734 - 오래된 공급량 검사 수정](https://github.com/provenance-io/provenance/pull/2734)
+- [3] [Provenance commit c81fd65 - 총 공급량 권한 부여 단축 경로에서 zero 공급량 거부](https://github.com/provenance-io/provenance/commit/c81fd65f8ad48de42d5a6d68e761a0851c7e72c4)
 {{#include ../../banners/hacktricks-training.md}}
