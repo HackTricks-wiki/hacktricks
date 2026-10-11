@@ -2,15 +2,14 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Το εγκατεστημένο λογισμικό προσθέτει hooks αυθεντικοποίησης, διεπαφές διαχείρισης και συμπεριφορά ειδική για κάθε υπηρεσία σε έναν Linux host. Εντοπίστε το εγκατεστημένο στοιχείο και τα δικαιώματά του και, στη συνέχεια, ανατρέξτε στη σχετική σελίδα:
+Το εγκατεστημένο λογισμικό προσθέτει hooks αυθεντικοποίησης, διεπαφές διαχείρισης και συμπεριφορά ειδική για κάθε υπηρεσία σε έναν Linux host. Εντοπίστε το εγκατεστημένο στοιχείο και τα προνόμιά του και, στη συνέχεια, εξετάστε τη σχετική σελίδα:
 
-- [Τοπικές υπηρεσίες web και αυθεντικοποίησης](local-web-and-auth-services.md) χαρτογραφεί τις επιφάνειες web, proxy, PAM, LDAP, mail και CI στην πλευρά του host.
-- [Βάσεις δεδομένων και υλικό μυστικών](databases-and-secret-material.md) καλύπτει τοπικά DB endpoints, ρυθμίσεις εφαρμογών, key stores και tokens.
-- [PAM: Pluggable Authentication Modules](pam-pluggable-authentication-modules.md) καλύπτει τις μονάδες αυθεντικοποίησης Linux και τη διαμόρφωσή τους.
-- [Pentesting του FreeIPA](freeipa-pentesting.md) καλύπτει τις εγκαταστάσεις διαχείρισης ταυτοτήτων.
-- [Logstash](logstash.md) καλύπτει τις επιφάνειες επίθεσης ειδικές για την υπηρεσία.
-- [LPE και persistence στο Splunk](splunk-lpe-and-persistence.md) καλύπτει διαδρομές τοπικής κλιμάκωσης και persistence σε εγκαταστάσεις Splunk.
-- [Κατάχρηση του Node inspector και του CEF debugger](electron-cef-chromium-debugger-abuse.md) καλύπτει εκτεθειμένες διεπαφές debugging.
-- [Παράκαμψη αυθεντικοποίησης και hooks syscall σε manager framework rooting Android](android-rooting-frameworks-manager-auth-bypass-syscall-hook.md) καλύπτει αυτήν την εξειδικευμένη στοίβα λογισμικού βασισμένη σε Linux.
-
+- [Τοπικές υπηρεσίες web και αυθεντικοποίησης](local-web-and-auth-services.md) καλύπτει επιφάνειες επίθεσης στον host που σχετίζονται με web, proxy, PAM, LDAP, mail και CI.
+- [Βάσεις δεδομένων και υλικό secrets](databases-and-secret-material.md) καλύπτει τοπικά DB endpoints, ρυθμίσεις εφαρμογών, keystores και tokens.
+- [PAM: Pluggable Authentication Modules](pam-pluggable-authentication-modules.md) καλύπτει τα Linux authentication modules και τη διαμόρφωσή τους.
+- [Pentesting FreeIPA](freeipa-pentesting.md) καλύπτει εγκαταστάσεις διαχείρισης ταυτότητας.
+- [Logstash](logstash.md) καλύπτει επιφάνειες επίθεσης ειδικές για την υπηρεσία.
+- [LPE και persistence στο Splunk](splunk-lpe-and-persistence.md) καλύπτει διαδρομές τοπικής κλιμάκωσης προνομίων και persistence σε εγκαταστάσεις Splunk.
+- [Κατάχρηση των Node inspector και CEF debugger](electron-cef-chromium-debugger-abuse.md) καλύπτει εκτεθειμένες διεπαφές debugging.
+- [Auth bypass στον manager Android rooting framework και syscall hooks](android-rooting-frameworks-manager-auth-bypass-syscall-hook.md) καλύπτει αυτήν την εξειδικευμένη στοίβα λογισμικού που βασίζεται στο Linux.
 {{#include ../../banners/hacktricks-training.md}}
