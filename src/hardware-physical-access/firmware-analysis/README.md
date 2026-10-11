@@ -110,7 +110,7 @@ After locating the region, extract the firmware modules with tools such as `binw
 
 #### Recover keys from encrypted zero padding
 
-A fixed-size field protected with repeating XOR leaks key bytes wherever the plaintext is known. In particular, zero padding discloses the keystream directly because `0x00 XOR key_byte = key_byte`. If the padding exercises every index of the repeating key, reconstruct the key from the ciphertext tail and decrypt the populated bytes; repeated plaintext can provide similar equations even when no padding remains.<sup>[[9]](#references)</sup>
+As described in [XOR-based encryption](../../crypto/symmetric/#xor-based-encryption), known plaintext reveals keystream bytes at the same offsets. A fixed-size field is especially exposed when its zero padding spans every index of a repeating XOR key: the encrypted padding reveals those key bytes directly because `0x00 XOR key_byte = key_byte`. If every key index is covered, reconstruct the key from the ciphertext tail and decrypt the populated bytes.<sup>[[9]](#references)</sup>
 
 Dell's vulnerable DVAR BIOS-password format is a concrete example: byte `0` of a 32-byte field is plaintext, while bytes `1..31` use a repeating 20-byte key.<sup>[[9]](#references)</sup>
 
