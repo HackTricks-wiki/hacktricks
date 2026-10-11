@@ -1,32 +1,35 @@
-# SeManageVolumePrivilege: nadużycie obsługi woluminów i walidacja dostępu raw
+# SeManageVolumePrivilege: Nadużycie zadań konserwacji woluminów i weryfikacja dostępu raw
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Overview
+## Przegląd
 
-Prawo użytkownika Windows: wykonywanie zadań związanych z obsługą woluminów (stała: SeManageVolumePrivilege).
+Uprawnienie użytkownika systemu Windows: Wykonywanie zadań konserwacji woluminów (stała: SeManageVolumePrivilege).
 
-To prawo zezwala na operacje związane z obsługą woluminów, takie jak defragmentacja oraz tworzenie lub usuwanie woluminów. Microsoft ostrzega, że posiadacz tego prawa może być w stanie rozszerzać pliki na obszar pamięci zawierający inne dane, a następnie odczytywać lub modyfikować uzyskane bajty.<sup>[[1]](#references)</sup>
+Uprawnienie to zezwala na operacje konserwacji woluminów, takie jak defragmentacja oraz tworzenie lub usuwanie woluminów. Microsoft ostrzega, że osoba posiadająca to uprawnienie może być w stanie rozszerzać pliki na obszar pamięci zawierający inne dane, a następnie odczytywać lub modyfikować uzyskane bajty.<sup>[[1]](#references)</sup>
 
-Nie należy utożsamiać posiadania `SeManageVolumePrivilege` z gwarantowanym dostępem do raw-disk. Microsoft dokumentuje, że otwarcie dysku fizycznego lub woluminu przez `CreateFile` w celu uzyskania bezpośredniego dostępu wymaga uprawnień administratora, a standardowe kontrole dostępu do obiektów/urządzeń nadal mają zastosowanie. W przypadku konkretnego builda lub produktu należy sprawdzić, czy token, ACL urządzenia, żądany dostęp, flagi udostępniania oraz stan woluminu umożliwiają uzyskanie raw handle, zanim ogłosi się możliwość dowolnego odczytu plików.<sup>[[3]](#references)</sup>
+Nie należy zakładać, że posiadanie `SeManageVolumePrivilege` gwarantuje dostęp do surowego dysku. Microsoft dokumentuje, że otwarcie dysku fizycznego lub woluminu przez `CreateFile` w celu uzyskania bezpośredniego dostępu wymaga uprawnień administratora, a standardowe kontrole dostępu do obiektów i urządzeń nadal obowiązują. W przypadku konkretnej kompilacji lub produktu sprawdź, czy token, lista ACL urządzenia, żądany dostęp, flagi udostępniania i stan woluminu pozwalają uzyskać uchwyt raw, zanim stwierdzisz, że możliwy jest dowolny odczyt plików.<sup>[[3]](#references)</sup>
 
-Domyślnie: Administrators na serwerach i kontrolerach domeny.<sup>[[1]](#references)</sup>
+Domyślnie: administratorzy na serwerach i kontrolerach domeny.<sup>[[1]](#references)</sup>
 
-## Abuse scenarios
+## Scenariusze nadużyć
 
-- Jeśli konto może faktycznie uzyskać czytelny raw-volume handle, parser obsługujący NTFS może ominąć ACL poszczególnych plików i odzyskać chronione lub zablokowane pliki z przydzielonych klastrów.
-- Możliwe cele obejmują zablokowaną zawartość lub zawartość chronioną przez ACL w `C:\Windows\System32`, registry hives, klucze główne DPAPI, SAM oraz — gdy są dostępne osobno przez snapshot lub offline volume — `ntds.dit`.
-- Na hostach certificate services przydatne lokalizacje software-key obejmują `%ProgramData%\Microsoft\Crypto\RSA\MachineKeys` i `%ProgramData%\Microsoft\Crypto\Keys`; odzyskanie pliku jest przydatne tylko wtedy, gdy jego key material jest exportable i może również zostać odszyfrowany.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
-- Na hoście AD CS pomyślnie odzyskany **exportable/software-backed** CA private key może umożliwić nadużycie Golden Certificate. Konstrukcje kluczy hardware-backed lub non-exportable zmieniają tę ścieżkę.<sup>[[2]](#references)</sup>
+- Jeśli konto rzeczywiście może uzyskać uchwyt raw woluminu z prawem odczytu, parser obsługujący NTFS może ominąć ACL poszczególnych plików i odzyskać chronione lub zablokowane pliki z zaalokowanych klastrów.
+- Potencjalne cele obejmują zablokowane lub chronione przez ACL dane w `C:\Windows\System32`, ule rejestru, klucze główne DPAPI, SAM oraz — jeśli są osobno dostępne za pośrednictwem migawki lub woluminu offline — `ntds.dit`.
+- Na hostach usług certyfikatów przydatne lokalizacje kluczy programowych to `%ProgramData%\Microsoft\Crypto\RSA\MachineKeys` i `%ProgramData%\Microsoft\Crypto\Keys`; odzyskanie pliku jest przydatne tylko wtedy, gdy zawarty w nim materiał klucza można wyeksportować i odszyfrować.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
+- Na hoście AD CS skuteczne odzyskanie **eksportowalnego klucza prywatnego CA opartego na oprogramowaniu** może umożliwić nadużycie Golden Certificate. Projekty wykorzystujące klucze sprzętowe lub nieeksportowalne zmieniają tę ścieżkę.<sup>[[2]](#references)</sup>
+- Niektóre narzędzia do konserwacji woluminów używają `FSCTL_SD_GLOBAL_CHANGE` do zastępowania wpisów ACL systemu plików, jeśli ta operacja jest dozwolona. Zmienia to kontrolę dostępu, zamiast pasywnie odczytywać surowe bloki, może wpłynąć na dużą część woluminu i wymaga weryfikacji w odniesieniu do rzeczywistego tokenu i zachowania urządzenia. [Kod źródłowy narzędzia](https://github.com/CsEnox/SeManageVolumeExploit) pokazuje ten konkretny mechanizm; samo posiadanie uprawnienia nie dowodzi, że operacja się powiedzie.
+- Uzyskanie dostępu do pliku przez zmianę ACL nie odszyfrowuje pliku zaszyfrowanego EFS. Do uzyskania tekstu jawnego nadal potrzebny jest pasujący klucz prywatny użytkownika lub klucz odzyskiwania. Podobnie eksportowanie klucza CA opartego na oprogramowaniu za pomocą [`certutil -exportPFX`](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/certutil) zależy od tego, czy klucz jest lokalnie dostępny, eksportowalny i osiągalny.
 
-Uwaga: nadal potrzebny jest parser struktur NTFS, chyba że korzystasz z helper tools. Wiele gotowych narzędzi abstrahuje raw access.
+Uwaga: Nadal potrzebny jest parser struktur NTFS, chyba że korzystasz z narzędzi pomocniczych. Wiele gotowych narzędzi abstrahuje dostęp raw.
 
-## Practical techniques
+## Praktyczne techniki
 
-- Otwórz raw volume handle i odczytaj klastry:
+- Otwórz uchwyt raw woluminu i odczytaj klastry:
 
 <details>
 <summary>Kliknij, aby rozwinąć</summary>
+
 ```powershell
 # Validation attempt: current Windows versions normally require an administrative token
 $fs = [System.IO.File]::Open("\\.\\C:",[System.IO.FileMode]::Open,[System.IO.FileAccess]::Read,[System.IO.FileShare]::ReadWrite)
@@ -40,33 +43,34 @@ $fs.Close()
 // C# (compile with Add-Type) – read an arbitrary offset of \\.\nusing System;
 using System.IO;
 class R {
-static void Main(string[] a){
-using(var fs = new FileStream("\\\\.\\C:", FileMode.Open, FileAccess.Read, FileShare.ReadWrite)){
-fs.Position = 0x100000; // seek
-var buf = new byte[4096];
-fs.Read(buf,0,buf.Length);
-File.WriteAllBytes("C:\\temp\\blk.bin", buf);
-}
-}
+  static void Main(string[] a){
+    using(var fs = new FileStream("\\\\.\\C:", FileMode.Open, FileAccess.Read, FileShare.ReadWrite)){
+      fs.Position = 0x100000; // seek
+      var buf = new byte[4096];
+      fs.Read(buf,0,buf.Length);
+      File.WriteAllBytes("C:\\temp\\blk.bin", buf);
+    }
+  }
 }
 ```
+
 </details>
 
-- Użyj narzędzia obsługującego NTFS, aby odzyskać określone pliki z surowego woluminu:
-- RawCopy/RawCopy64 (kopiowanie plików używanych przez system na poziomie sektorów)
-- FTK Imager lub The Sleuth Kit (obrazowanie tylko do odczytu, a następnie carving plików)
-- vssadmin/diskshadow + shadow copy, a następnie skopiuj docelowy plik z migawki (jeśli możesz utworzyć VSS; często wymaga to uprawnień administratora, ale są one zazwyczaj dostępne dla tych samych operatorów, którzy posiadają SeManageVolumePrivilege)
+- Użyj narzędzia obsługującego NTFS, aby odzyskać konkretne pliki z surowego woluminu:
+  - RawCopy/RawCopy64 (kopiowanie plików używanych na poziomie sektorów)
+  - FTK Imager lub The Sleuth Kit (obrazowanie tylko do odczytu, a następnie odzyskiwanie plików)
+  - vssadmin/diskshadow + kopia w tle, a następnie skopiuj docelowy plik z migawki (jeśli możesz utworzyć VSS; często wymaga to uprawnień administratora, ale są one powszechnie dostępne dla tych samych operatorów, którzy mają SeManageVolumePrivilege)
 
-Typowe wrażliwe ścieżki do sprawdzenia:
+Typowe ścieżki zawierające wrażliwe dane:
 - %ProgramData%\Microsoft\Crypto\RSA\MachineKeys\
 - %ProgramData%\Microsoft\Crypto\Keys\
 - C:\Windows\System32\config\SAM, SYSTEM, SECURITY (lokalne sekrety)
-- C:\Windows\NTDS\ntds.dit (kontrolery domeny – za pośrednictwem shadow copy)
-- C:\Windows\System32\CertSrv\CertEnroll\ (certyfikaty/CRL urzędu certyfikacji; klucze prywatne znajdują się w opisanym powyżej magazynie kluczy komputera)
+- C:\Windows\NTDS\ntds.dit (kontrolery domeny – przez kopię w tle)
+- C:\Windows\System32\CertSrv\CertEnroll\ (certyfikaty/CRL urzędu certyfikacji; klucze prywatne znajdują się w powyższym magazynie kluczy komputera)
 
-## Powiązanie z AD CS: Forging a Golden Certificate
+## Powiązanie z AD CS: podrabianie Golden Certificate
 
-Jeśli możesz odczytać klucz prywatny Enterprise CA z magazynu kluczy komputera, możesz podrobić certyfikaty client-auth dla dowolnych podmiotów i uwierzytelniać się za pośrednictwem PKINIT/Schannel. Jest to często określane jako Golden Certificate.<sup>[[2]](#references)</sup> Zobacz:
+Jeśli możesz odczytać klucz prywatny Enterprise CA z magazynu kluczy komputera, możesz podrobić certyfikaty uwierzytelniania klienta dla dowolnych podmiotów i uwierzytelniać się za pomocą PKINIT/Schannel. Jest to często określane jako Golden Certificate.<sup>[[2]](#references)</sup> Zobacz:
 
 {{#ref}}
 ../active-directory-methodology/ad-certificates/domain-persistence.md
@@ -74,18 +78,18 @@ Jeśli możesz odczytać klucz prywatny Enterprise CA z magazynu kluczy komputer
 
 (Sekcja: „Forging Certificates with Stolen CA Certificates (Golden Certificate) – DPERSIST1”).
 
-## Wykrywanie i hardening
+## Wykrywanie i zabezpieczenia
 
-- Ściśle ogranicz przypisywanie SeManageVolumePrivilege (Perform volume maintenance tasks) wyłącznie do zaufanych administratorów.
-- Monitoruj Sensitive Privilege Use oraz otwieranie uchwytów procesów do obiektów urządzeń, takich jak \\.\C:, \\.\PhysicalDrive0.
-- Preferuj prawidłowo skonfigurowane, oparte na HSM lub TPM, nieeksportowalne klucze CA, aby skopiowanie pliku kontenera klucza nie wystarczało do odzyskania użytecznego materiału klucza prywatnego.
-- W przypadku sekretów aplikacji znajdujących się poza ścieżką klucza CA, DPAPI lub DPAPI-NG może sprawić, że skopiowany plik danych będzie niewystarczający, ponieważ chroni go za pomocą użytkownika, komputera, grupy lub innego autoryzowanego podmiotu. Nie chroni to tekstu jawnego, który jest już dostępny dla przejętego podmiotu.<sup>[[4]](#references)</sup>
-- Utrzymuj ścieżki przesyłania, plików tymczasowych i ekstrakcji jako niewykonywalne oraz odseparowane (ochrona kontekstu web, która często uzupełnia ten łańcuch post-exploitation).
+- Zdecydowanie ogranicz przydzielanie SeManageVolumePrivilege (Perform volume maintenance tasks) wyłącznie do zaufanych administratorów.
+- Monitoruj użycie uprawnień wrażliwych i otwieranie uchwytów procesów do obiektów urządzeń, takich jak \\.\C: i \\.\PhysicalDrive0.
+- Preferuj prawidłowo skonfigurowane klucze CA oparte na HSM lub TPM i oznaczone jako nieeksportowalne, aby skopiowanie pliku kontenera klucza nie wystarczało do odzyskania użytecznego materiału klucza prywatnego.
+- W przypadku sekretów aplikacji poza ścieżką klucza CA, DPAPI lub DPAPI-NG mogą sprawić, że skopiowany plik danych nie wystarczy, ponieważ chronią go dla użytkownika, komputera, grupy lub innego uprawnionego podmiotu. Nie chroni to tekstu jawnego, do którego skompromitowany podmiot ma już dostęp.<sup>[[4]](#references)</sup>
+- Utrzymuj ścieżki przesyłania, plików tymczasowych i ekstrakcji jako niewykonywalne oraz odseparowane (zabezpieczenie kontekstu webowego, które często uzupełnia ten łańcuch działań post-exploitation).
 
 ## References
 
-- [1] [Microsoft – Wykonywanie zadań konserwacji woluminów (SeManageVolumePrivilege)](https://learn.microsoft.com/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/perform-volume-maintenance-tasks)
+- [1] [Microsoft – Wykonywanie zadań konserwacji woluminu (SeManageVolumePrivilege)](https://learn.microsoft.com/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/perform-volume-maintenance-tasks)
 - [2] [0xdf – HTB: Certificate (SeManageVolumePrivilege użyte do odczytu klucza CA → Golden Certificate)](https://0xdf.gitlab.io/2025/10/04/htb-certificate.html)
-- [3] [Microsoft - `CreateFile` physical disks and volumes](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea#physical-disks-and-volumes)
-- [4] [Microsoft - Cryptography API: Next Generation and DPAPI-NG](https://learn.microsoft.com/en-us/windows/win32/seccng/cng-portal)
+- [3] [Microsoft - `CreateFile` dla dysków fizycznych i woluminów](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea#physical-disks-and-volumes)
+- [4] [Microsoft - Interfejs Cryptography API: Next Generation i DPAPI-NG](https://learn.microsoft.com/en-us/windows/win32/seccng/cng-portal)
 {{#include ../../banners/hacktricks-training.md}}

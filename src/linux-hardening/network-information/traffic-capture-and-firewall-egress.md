@@ -1,8 +1,8 @@
-# Przechwytywanie ruchu, firewall i analiza egress
+# Przechwytywanie ruchu, zapora i analiza ruchu wychodzącego
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Po zlokalizowaniu [lokalnych listenerów i gniazd Unix](local-network-and-socket-triage.md) sprawdź, które interfejsy przenoszą ich ruch oraz które reguły firewall lub proxy wpływają na dostępność. Usługa dostępna tylko przez loopback może przesyłać poufne nagłówki HTTP, nawet jeśli nie można się z nią połączyć z innego hosta.
+Po zlokalizowaniu [lokalnych listenerów i gniazd Unix](local-network-and-socket-triage.md) sprawdź, przez które interfejsy przepływa ich ruch oraz jakie reguły zapory lub proxy wpływają na dostępność. Usługa dostępna wyłącznie przez loopback może przenosić poufne nagłówki HTTP, nawet jeśli nie można się z nią połączyć z innego hosta.
 
 ## Sprawdź uprawnienia do przechwytywania i wybierz interfejs
 
@@ -13,7 +13,7 @@ getcap "$(command -v dumpcap)" 2>/dev/null
 tcpdump -D 2>/dev/null
 ```
 
-`dumpcap` może mieć uprawnienia do przechwytywania pakietów, nawet jeśli bieżący użytkownik nie ma dostępu do sudo. Sprawdź rzeczywiste capabilities pliku wykonywalnego oraz uprawnienia grup. Przechwytuj dane z jak najmniejszej liczby interfejsów, przez jak najkrótszy czas i z użyciem odpowiedniego filtra; przechwycone dane mogą zawierać dane uwierzytelniające lub osobowe.
+`dumpcap` może mieć uprawnienia do przechwytywania pakietów, nawet jeśli bieżący użytkownik nie ma dostępu do sudo. Sprawdź rzeczywiste capabilities pliku wykonywalnego i uprawnienia grupy. Przechwytuj dane z najmniejszej użytecznej liczby interfejsów, przez najkrótszy potrzebny czas i z odpowiednim filtrem; przechwycone dane mogą zawierać dane uwierzytelniające lub osobowe.
 
 ```bash
 sudo tcpdump -i lo -s 0 -w /tmp/loopback.pcap 'tcp port 8080'
@@ -21,9 +21,9 @@ tshark -r /tmp/loopback.pcap -Y 'http.request' -T fields -e ip.src -e http.host 
 tcpflow -r /tmp/loopback.pcap 2>/dev/null
 ```
 
-`tcpflow` odtwarza strumienie TCP w postaci jawnego tekstu; `tshark` może filtrować przechwycony ruch i wyodrębniać z niego pola. W przypadku ruchu TLS odszyfrowanie wymaga kluczy endpointu lub obsługiwanego klienta skonfigurowanego do używania `SSLKEYLOGFILE` przed nawiązaniem połączenia. [Strona poświęcona analizie lokalnej sieci i gniazd](local-network-and-socket-triage.md#tls-key-logging) opisuje ten proces. Nie traktuj zaszyfrowanego przechwyconego ruchu jak czytelnego tekstu jawnego.
+`tcpflow` rekonstruuje jawne strumienie TCP; `tshark` może filtrować przechwycone dane i wyodrębniać z nich pola. W przypadku ruchu TLS odszyfrowanie wymaga kluczy endpointu lub obsługiwanego klienta skonfigurowanego przed nawiązaniem połączenia z użyciem `SSLKEYLOGFILE`. [Strona dotycząca analizy lokalnej sieci](local-network-and-socket-triage.md#tls-key-logging) opisuje ten proces. Nie traktuj zaszyfrowanego przechwycenia jako czytelnego tekstu jawnego.
 
-Zapisane artefakty incydentu mogą zmienić tę ocenę. [Zrzut pamięci procesu Linux to obraz jego pamięci](https://man7.org/linux/man-pages/man5/core.5.html), który może zawierać klucz sesji; jeśli czytelny zrzut i przechwycony ruch pochodzą z tego samego procesu i sesji, analityk może być w stanie odszyfrować ten ruch. Najpierw zinwentaryzuj ścieżki i uprawnienia artefaktów, a następnie osobno zweryfikuj tożsamość procesu, czas przechwycenia, protokół i format klucza. Odszyfrowany ruch lub odzyskane archiwum stanowią wskazówkę o możliwym ujawnieniu danych, a nie dowód dostępu do konta innej osoby: każdy częściowy materiał klucza SSH nadal trzeba zrekonstruować, dopasować do odpowiedniego klucza publicznego i sprawdzić, czy jest akceptowany przez politykę SSH tego konta. Unikaj umieszczania zawartości zrzutów pamięci lub payloadów przechwyconego ruchu w wynikach szerokiej enumeracji.
+Zapisane artefakty incydentu mogą zmienić tę ocenę. [Zrzut pamięci procesu w systemie Linux to obraz pamięci procesu](https://man7.org/linux/man-pages/man5/core.5.html), który może zawierać klucz sesji; jeśli czytelny zrzut i przechwycenie pakietów pochodzą z tego samego procesu i sesji, analityk może być w stanie odszyfrować ten ruch. Najpierw zinwentaryzuj ścieżki i uprawnienia artefaktów, a następnie osobno zweryfikuj tożsamość procesu, czas przechwycenia, protokół i format klucza. Odszyfrowany ruch lub odzyskane archiwum to wskazówka dotycząca ujawnienia, a nie dowód dostępu do konta innej osoby: wszelkie fragmenty materiału klucza SSH nadal trzeba odtworzyć, dopasować do odpowiedniego klucza publicznego i sprawdzić, czy są akceptowane przez zasady SSH tego konta. Unikaj umieszczania zawartości zrzutów pamięci lub przechwyconych ładunków w wynikach szeroko zakrojonego rozpoznania.
 
 ## Zidentyfikuj warstwy zapory
 
@@ -34,9 +34,9 @@ sudo ufw status verbose 2>/dev/null
 sudo firewall-cmd --list-all 2>/dev/null
 ```
 
-`nftables` i `iptables` mogą być udostępniane za pośrednictwem wrapperów dystrybucji, takich jak UFW lub firewalld. Odczytaj aktywne reguły i utrwaloną konfigurację wrappera; reguła widoczna w jednej reprezentacji mogła zostać wygenerowana przez inne narzędzie. Przed przypisaniem blokady usługi do konkretnej reguły sprawdź interfejs, kierunek, źródło, miejsce docelowe, protokół, port i stan połączenia. Zobacz [przegląd reguł nftables](local-network-and-socket-triage.md#nftables-review-and-authorized-rule-changes), aby zapoznać się z konkretnym przykładem.
+`nftables` i `iptables` mogą być udostępniane za pośrednictwem wrapperów dystrybucji, takich jak UFW lub firewalld. Odczytaj aktywne reguły i utrwaloną konfigurację wrappera; reguła widoczna w jednej reprezentacji mogła zostać wygenerowana przez inne narzędzie. Zanim przypiszesz blokadę usługi konkretnej regule, sprawdź interfejs, kierunek, źródło, cel, protokół, port i stan połączenia. Zobacz [przegląd reguł nftables](local-network-and-socket-triage.md#nftables-review-and-authorized-rule-changes), gdzie znajdziesz konkretny przykład.
 
-## Testowanie ruchu wychodzącego i działania proxy
+## Testowanie ruchu wychodzącego i zachowania proxy
 
 ```bash
 ip route get 1.1.1.1
@@ -45,5 +45,5 @@ curl -I --connect-timeout 3 https://example.com/
 printenv http_proxy https_proxy all_proxy no_proxy 2>/dev/null
 ```
 
-Oddziel błędy DNS od błędów TCP, TLS lub proxy. Testuj konkretny cel i protokół istotne dla oceny; osiągalność przez ICMP nie oznacza, że dozwolony jest TCP lub UDP. Jeśli skonfigurowano proxy, porównaj zamierzone żądanie kierowane przez proxy z żądaniem do tego samego celu przy zastosowaniu odpowiednich reguł `no_proxy`. Lokalne przekierowanie portu może też udostępnić usługę loopback w innym miejscu, więc sprawdź aktywne listenery i tunele SSH, gdy widok firewalla nie zgadza się z zaobserwowaną ekspozycją.
+Oddziel awarię DNS od awarii TCP, TLS lub proxy. Przetestuj konkretny cel i protokół istotne dla oceny; osiągalność przez ICMP nie oznacza, że TCP lub UDP są dozwolone. Jeśli skonfigurowano proxy, porównaj żądanie wysyłane przez proxy z żądaniem do tego samego celu przy zastosowaniu odpowiednich reguł `no_proxy`. Lokalny port forward może też udostępnić usługę loopback w innym miejscu, dlatego sprawdź aktywne nasłuchujące porty i tunele SSH, gdy widok firewalla nie zgadza się z zaobserwowaną ekspozycją.
 {{#include ../../banners/hacktricks-training.md}}
