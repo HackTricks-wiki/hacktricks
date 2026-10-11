@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Une commande shell peut se comporter différemment de l’exécutable portant le même nom si un alias, une fonction, un fichier de démarrage ou une variable d’environnement modifie son exécution. Vérifiez ces éléments avant de faire confiance au résultat d’une commande ou de supposer qu’un script utilise le même PATH qu’une session interactive.
+Une commande shell peut se comporter différemment de l’exécutable portant le même nom si un alias, une fonction, un fichier de démarrage ou une variable d’environnement modifie son fonctionnement. Vérifiez ces éléments avant de vous fier à la sortie d’une commande ou de supposer qu’un script utilise le même PATH qu’une session interactive.
 
-## Examiner le shell actuel
+## Inspecter le shell actuel
 
 ```bash
 printf '%s\n' "$SHELL" "$PATH"
@@ -14,7 +14,7 @@ command -V python3
 history | tail -50
 ```
 
-`type` et `command -V` indiquent si un nom correspond à un alias, une fonction, une commande intégrée ou un fichier. `command -v` et `which` peuvent donner des résultats différents pour les alias et les fonctions. L’historique du shell peut révéler des commandes ou des identifiants, mais il peut être incomplet, désactivé ou conservé en mémoire jusqu’à la fermeture de la session.
+`type` et `command -V` indiquent si un nom correspond à un alias, une fonction, une commande interne ou un fichier. `command -v` et `which` ne donnent pas forcément la même réponse pour les alias et les fonctions. L’historique du shell peut révéler des commandes ou des identifiants, mais il peut être incomplet, désactivé ou conservé en mémoire jusqu’à la fermeture de la session.
 
 ## Examiner les fichiers de démarrage et d’historique
 
@@ -24,9 +24,9 @@ ls -ld /etc/profile /etc/profile.d /etc/bash.bashrc 2>/dev/null
 printenv HISTFILE HISTSIZE HISTCONTROL BASH_ENV ENV 2>/dev/null
 ```
 
-Un fichier de démarrage modifiable par un utilisateur peut exécuter des commandes au prochain lancement d’un shell. Un fichier de démarrage à l’échelle du système ou celui d’un utilisateur privilégié est plus sensible si un compte aux privilèges inférieurs peut le modifier. Bash non interactif peut aussi lire le fichier indiqué par `BASH_ENV` ; la page sur les [variables d’environnement](linux-environment-variables.md#bash_env--env) explique ce comportement et d’autres hooks d’interpréteur. Vérifiez quels fichiers le shell utilisé lit réellement pour les sessions de connexion, interactives et non interactives avant d’affirmer qu’il s’agit d’un vecteur de persistance.
+Un fichier de démarrage modifiable par un utilisateur peut exécuter des commandes lors d’un prochain lancement du shell. Un fichier de démarrage global ou le fichier de démarrage d’un utilisateur privilégié est plus sensible si un compte moins privilégié peut le modifier. Bash non interactif peut également lire le fichier indiqué par `BASH_ENV` ; la page sur les [variables d’environnement](linux-environment-variables.md#bash_env--env) explique ce comportement et d’autres hooks d’interpréteur. Vérifiez quels fichiers le shell concerné lit réellement pour les sessions de connexion, interactives et non interactives avant d’affirmer qu’il s’agit d’un mécanisme de persistance.
 
-Inspectez également les fichiers chargés par un fichier de démarrage global. Par exemple, un `source /opt/app/venv/bin/activate` littéral dans `/etc/bash.bashrc` exécute le fichier d’activation comme du code shell lorsqu’un shell lit effectivement ce fichier de démarrage. Examinez le fichier d’activation, les permissions des liens symboliques et des répertoires parents, ainsi que les ACL ; un utilisateur aux privilèges inférieurs ne peut affecter un shell privilégié que si ce shell ou une tâche privilégiée charge ensuite ce fichier. Si l’accès en écriture dépend de `sudoedit`, vérifiez d’abord la règle sudoers exacte et le paquet sudo installé, corrigé par le fournisseur ; une chaîne de version en amont ne suffit pas à établir une [exposition à l’injection d’arguments de sudoedit](../main-system-information/linux-privilege-escalation-checklist.md#sudo-and-suid-commands).
+Inspectez également les fichiers chargés par un fichier de démarrage global. Par exemple, une commande littérale `source /opt/app/venv/bin/activate` dans `/etc/bash.bashrc` exécute le fichier d’activation comme du code shell lorsqu’un shell lit effectivement ce fichier de démarrage. Examinez le fichier d’activation, les permissions des liens symboliques et des répertoires parents, ainsi que les ACL ; un utilisateur moins privilégié ne peut affecter un shell privilégié que si ce shell ou une tâche privilégiée charge ensuite ce fichier. Si l’accès en écriture dépend de `sudoedit`, vérifiez d’abord la règle sudoers exacte et le paquet sudo installé, avec ses correctifs du fournisseur ; le seul numéro de version amont ne suffit pas à établir une [exposition à l’injection d’arguments de sudoedit](../main-system-information/linux-privilege-escalation-checklist.md#sudo-and-suid-commands).
 
-Vérifiez l’historique, les fichiers dotfiles et les sauvegardes à la recherche de secrets, comme décrit dans [les utilisateurs et les sessions](../user-information/user-and-session-triage.md). Si un script privilégié résout les commandes par leur nom, complétez cet examen avec les [recommandations sur le détournement de PATH](linux-environment-variables.md#path).
+Vérifiez l’historique, les dotfiles et les sauvegardes pour y repérer des secrets, comme décrit dans [utilisateurs et sessions](../user-information/user-and-session-triage.md). Si un script privilégié résout les commandes à partir de leur nom, associez cet examen aux [recommandations sur le détournement du PATH](linux-environment-variables.md#path).
 {{#include ../../banners/hacktricks-training.md}}
