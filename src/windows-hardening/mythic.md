@@ -4,304 +4,366 @@
 
 ## Šta je Mythic?
 
-Mythic je open-source, modularni i kolaborativni command and control (C2) framework dizajniran za red teaming. Omogućava operatorima da upravljaju i deploy-uju agente (payloads) na različitim operativnim sistemima, uključujući Windows, Linux i macOS. Mythic pruža browser UI za tasking više operatora, rukovanje fajlovima, upravljanje SOCKS/rpfwd funkcijama i generisanje payloads.
+Mythic je modularni framework otvorenog koda za command and control (C2), namenjen red teamingu i timskoj saradnji. Omogućava operatorima da upravljaju agentima (payloads) i pokreću ih na različitim operativnim sistemima, uključujući Windows, Linux i macOS. Mythic pruža browser UI za zadavanje zadataka većem broju operatora, rukovanje datotekama, upravljanje SOCKS/rpfwd vezama i generisanje payloads.
 
-Za razliku od monolitnih framework-a, sam Mythic repository ne sadrži payload types niti C2 profiles. Agenti, wrappers i C2 profiles se obično instaliraju kao spoljne komponente i mogu se ažurirati nezavisno od Mythic core-a.
+Za razliku od monolitnih frameworka, sam Mythic repozitorijum **ne** isporučuje tipove payloads niti C2 profile. Agenti, wrapperi i C2 profili obično se instaliraju kao spoljne komponente i mogu se ažurirati nezavisno od Mythic jezgra.
 
 ### Instalacija
 
-Da biste instalirali Mythic, pratite uputstva u zvaničnom **[Mythic repo](https://github.com/its-a-feature/Mythic)**. Uobičajeni bootstrap iz Mythic direktorijuma je:
+Da biste instalirali Mythic, pratite uputstva u zvaničnom **[Mythic repo](https://github.com/its-a-feature/Mythic)**. Uobičajeno početno podešavanje iz Mythic direktorijuma izgleda ovako:
+
 ```bash
 sudo make
 sudo ./mythic-cli start
 ```
-Ako je Mythic već pokrenut, obično možete dodati novi agent ili profile pomoću `./mythic-cli install github ...`, a zatim ponovo pokrenuti Mythic ili samo direktno pokrenuti novu komponentu.
 
-### Agenti
+Ako je Mythic već pokrenut, obično možete dodati novog agent-a ili profile pomoću komande `./mythic-cli install github ...`, a zatim ponovo pokrenuti Mythic ili direktno pokrenuti novu komponentu.
 
-Mythic podržava više agenata, odnosno **payload-ove koji izvršavaju zadatke na kompromitovanim sistemima**. Svaki agent može biti prilagođen specifičnim potrebama i može raditi na različitim operativnim sistemima.
+### Agents
 
-Mythic podrazumevano nema instalirane agente. Agenti open-source zajednice nalaze se na [**https://github.com/MythicAgents**](https://github.com/MythicAgents), a [**matrica funkcionalnosti zajednice**](https://mythicmeta.github.io/overview/agent_matrix.html) korisna je za brzu proveru podržanih operativnih sistema, formata payload-ova, wrapper-a i C2 profila.<sup>[[1]](#references)</sup>
+Mythic podržava više agent-a, odnosno **payloads koji obavljaju zadatke na kompromitovanim sistemima**. Svaki agent može da se prilagodi određenim potrebama i može da radi na različitim operativnim sistemima.
+
+Mythic podrazumevano nema instalirane agente. Open-source agenti zajednice nalaze se na [**https://github.com/MythicAgents**](https://github.com/MythicAgents), a [**matrica funkcionalnosti zajednice**](https://mythicmeta.github.io/overview/agent_matrix.html) korisna je za brzu proveru podržanih operativnih sistema, formata payload-a, wrappers i C2 profila.<sup>[[1]](#references)</sup>
 
 Da biste instalirali agenta iz te organizacije, možete pokrenuti:
+
 ```bash
 sudo ./mythic-cli install github https://github.com/MythicAgents/<agent-name>
 sudo ./mythic-cli install github https://github.com/MythicAgents/Apollo.git
 sudo -E ./mythic-cli install github https://github.com/MythicAgents/Apollo.git
 ```
-Forma `sudo -E` je korisna kada instalirate iz okruženja koje nije root. Možete dodati nove agente prethodnom komandom čak i ako je Mythic već pokrenut.
+
+Forma `sudo -E` korisna je kada instalirate iz okruženja koje nije root. Nove agente možete dodati prethodnom komandom čak i ako je Mythic već pokrenut.
 
 ### C2 Profiles
 
-C2 profiles u Mythic-u definišu **kako agenti komuniciraju sa Mythic serverom**. Oni određuju komunikacioni protokol, metode šifrovanja i druga podešavanja. C2 profiles možete kreirati i upravljati njima kroz Mythic web interfejs.
+C2 profili u Mythicu definišu **kako agenti komuniciraju sa Mythic serverom**. Oni određuju protokol komunikacije, metode šifrovanja i druga podešavanja. C2 profile možete kreirati i njima upravljati putem Mythic veb-interfejsa.
 
-Mythic se podrazumevano instalira bez profila, ali je moguće preuzeti neke profile iz repo [**https://github.com/MythicC2Profiles**](https://github.com/MythicC2Profiles) pokretanjem:
+Mythic se podrazumevano instalira bez profila, ali neke profile možete preuzeti iz repozitorijuma [**https://github.com/MythicC2Profiles**](https://github.com/MythicC2Profiles) izvršavanjem:
+
 ```bash
 sudo ./mythic-cli install github https://github.com/MythicC2Profiles/<c2-profile>
 sudo ./mythic-cli install github https://github.com/MythicC2Profiles/http
 ```
-Trenutni profili relevantni za operatore koje treba imati na umu:
+
+Trenutno relevantni profili za operatere koje treba imati na umu:
 
 - [`http`](https://github.com/MythicC2Profiles/http): osnovni asinhroni GET/POST saobraćaj.
-- [`httpx`](https://github.com/MythicC2Profiles/httpx): fleksibilniji HTTP saobraćaj sa više callback domena, fail-over/round-robin rotacijom, prilagođenim headerima/query parametrima i transformacijama poruka (`base64`, `base64url`, `xor`, `netbios`, `prepend`, `append`) smeštenim u cookies, headere, query parametre ili body.
-- [`dynamichttp`](https://github.com/MythicC2Profiles/dynamichttp): oblikovanje HTTP poruka zasnovano na JSON/TOML-u kada je statički `http` profil previše prepoznatljiv.
+- [`httpx`](https://github.com/MythicC2Profiles/httpx): fleksibilniji HTTP saobraćaj sa više callback domena, fail-over/round-robin rotacijom, prilagođenim zaglavljima/parametrima upita i transformacijama poruka (`base64`, `base64url`, `xor`, `netbios`, `prepend`, `append`) smeštenim u cookies, zaglavlja, parametre upita ili telo.
+- [`dynamichttp`](https://github.com/MythicC2Profiles/dynamichttp): oblikovanje HTTP poruka pomoću JSON/TOML konfiguracije, kada je statički `http` profil prepoznatljiv.
 
 ### Trenutne napomene o platformi
 
-- Mnogi javno dostupni agenti i profili sada se instaliraju pomoću unapred izgrađenih remote container image-a.
-Ako fork-ujete komponentu ili je lokalno izmenite, a Mythic i dalje koristi staro
-ponašanje, proverite generisane `.env` unose za `*_REMOTE_IMAGE`,
-`*_USE_BUILD_CONTEXT` i `*_USE_VOLUME`; omogućavanje
-`*_USE_BUILD_CONTEXT="true"` obično navodi Mythic da ponovo izgradi komponentu iz vašeg
-lokalnog Docker context-a, umesto da neprimetno ponovo koristi remote image.
-- Browser scripts su jedna od najvrednijih funkcija za poboljšanje rada operatora u Mythic-u:
-mogu pretvoriti sirov izlaz komandi u tabele, preglednike snimaka ekrana, linkove za preuzimanje, linkove za pretragu i dugmad koja direktno iz UI-ja izdaju naknadno tasking. Trenutne Mythic verzije omogućavaju svakom operatoru da koristi sopstvene skripte, da ih globalno ili po task-u uključuje i isključuje, a najbolji rezultati se dobijaju kada agenti vraćaju strukturirani JSON umesto plaintext-a. Ovo je naročito korisno za repetitivne `ls`, `ps`, triage i file-browser workflow-e.<sup>[[4]](#references)[[6]](#references)</sup>
-- Novije Mythic verzije takođe podržavaju interactive tasking i Push C2 obrasce,
-koji smanjuju potrebu za polling-om pomoću `sleep 0` tokom operacija sa mnogo PTY/SOCKS/rpfwd aktivnosti. Kada ih agent/profil podržava, ovo obično stvara manje opterećenje nego neprekidno slanje zahteva serveru samo da bi interaktivni kanal ostao upotrebljiv.<sup>[[3]](#references)</sup>
-- Aktuelni Mythic builder-i iz 3.4 ere svesniji su konteksta nego što stariji tekstovi sugerišu:
-build parametri se sada mogu grupisati ili sakriti na osnovu izabranog OS-a
-ili drugih build opcija, payload tipovi mogu deklarisati da li podržavaju
-više C2 profila ili više instanci istog C2 u jednom build-u, a
-C2 parameter deviations omogućavaju agentu da sakrije polja koja zapravo
-ne implementira. Ovo je važno kada prelazite između `http`, `httpx`, `smb`,
-`tcp` i `websocket`, jer bezbedan/ispravan build surface više nije
-ravna statička forma.<sup>[[5]](#references)</sup>
-- Ako pravite prilagođeni par agent/profil i ne želite Mythic-ov JSON format poruka ili podrazumevanu kriptografiju na wire-u, koristite
-`translation_container`: Mythic uklanja UUID, prosleđuje enkriptovani blob i materijal ključa translator-u putem gRPC-a i očekuje agent-native bajtove nazad. Ovo je čist način za podršku binarnim protokolima, prilagođenom framing-u ili enkripciji na strani agenta bez prepisivanja celog servera.
+- Mnogi javni agenti i profili sada se instaliraju pomoću unapred izgrađenih udaljenih kontejnerskih image-a.
+  Ako napravite fork komponente ili je lokalno zakrpite, a Mythic i dalje koristi staro
+  ponašanje, proverite generisane `.env` unose za `*_REMOTE_IMAGE`,
+  `*_USE_BUILD_CONTEXT` i `*_USE_VOLUME`; podešavanje
+  `*_USE_BUILD_CONTEXT="true"` obično navodi Mythic da ponovo izgradi komponentu
+  iz vašeg lokalnog Docker konteksta umesto da neprimetno ponovo koristi udaljeni image.
+- Browser skripte su jedna od najkorisnijih funkcija Mythic-a za operatere: mogu
+  da pretvore sirovi izlaz komandi u tabele, prikazivače snimaka ekrana, linkove za
+  preuzimanje, linkove za pretragu i dugmad koja direktno iz UI-ja pokreću naredne
+  taskove. Aktuelne verzije Mythic-a omogućavaju svakom operateru da zadrži svoje
+  skripte, da ih uključi ili isključi globalno ili za pojedinačni task, a najbolje
+  rezultate daju kada agenti vraćaju strukturirani JSON umesto običnog teksta.
+  Ovo je naročito korisno za ponavljajuće `ls`, `ps`, trijažne i file-browser tokove rada.<sup>[[4]](#references)[[6]](#references)</sup>
+- Novije verzije Mythic-a podržavaju i interaktivno tasking i Push C2 obrasce,
+  koji smanjuju potrebu za polling-om pomoću `sleep 0` tokom operacija koje se
+  intenzivno oslanjaju na PTY/SOCKS/rpfwd. Kada ih agent/profil podržava, to
+  obično pravi manje opterećenje nego neprestano slanje zahteva serveru samo da bi
+  interaktivni kanal ostao upotrebljiv.<sup>[[3]](#references)</sup>
+- Aktuelni Mythic builder-i iz ere 3.4 uzimaju više konteksta u obzir nego što
+  stariji tekstovi sugerišu: parametri za build sada mogu da se grupišu ili sakriju
+  na osnovu izabranog OS-a ili drugih opcija za build, tipovi payload-a mogu da
+  navedu da li podržavaju više C2 profila ili više instanci istog C2 u jednom
+  build-u, a odstupanja C2 parametara omogućavaju agentu da sakrije polja koja
+  zapravo ne implementira. Ovo je važno pri prelasku između `http`, `httpx`, `smb`,
+  `tcp` i `websocket`, jer bezbedan/važeći skup opcija za build više nije
+  nepromenljiv statički obrazac.<sup>[[5]](#references)</sup>
+- Ako pravite prilagođeni par agent/profil i ne želite Mythic-ov JSON format
+  poruka ili podrazumevanu kriptografiju na mreži, koristite
+  `translation_container`: Mythic uklanja UUID, prosleđuje šifrovani blob i
+  ključni materijal prevodiocu preko gRPC-a i očekuje da dobije bajtove u
+  izvornom formatu agenta. Ovo je čist način za podršku binarnim protokolima,
+  prilagođenom uokviravanju ili šifrovanju na strani agenta, bez prepravljanja
+  celog servera.
 - Imajte na umu da linked/P2P callback-ovi ne prosleđuju samo tasking. Mythic-ov
-`get_tasking` flow može takođe prenositi response-e, kao i `delegates`,
-`socks`, `rpfwd` i `interactive` podatke. U praksi, jedan egress callback može
-opsluživati inner callback-ove i pivot kanale u istoj polling petlji; ako child agenti
-sami obavljaju periodične check-in aktivnosti, `get_delegate_tasks=false` sprečava
-parent da slučajno preuzme queued jobs unutrašnjeg callback-a.
+  tok `get_tasking` može da prenosi i odgovore, kao i podatke `delegates`,
+  `socks`, `rpfwd` i `interactive`. U praksi, jedan egress callback može da opslužuje
+  unutrašnje callback-ove i pivot kanale u istoj polling petlji; ako podređeni
+  agenti obavljaju sopstvene periodične check-in-e, `get_delegate_tasks=false`
+  sprečava nadređeni agent da slučajno preuzme poslove na čekanju za unutrašnji callback.
 
-### Wrapper payloads
+## Wrapper payloads
 
-Wrapper payloads omogućavaju da zadržite istu logiku agenta, a da promenite reprezentaciju na disku koja se isporučuje ili čuva.
+Wrapper payloads omogućavaju da zadržite istu logiku agenta, a da promenite
+reprezentaciju na disku koja se isporučuje ili čuva.
 
-- `service_wrapper`: pretvara drugi payload u Windows service executable, što je korisno kada putanja izvršavanja zahteva ispravan service binary.
-- `scarecrow_wrapper`: obmotava kompatibilni shellcode ScareCrow loader-om kako bi generisao loader-backed output-e kao što su EXE/DLL/CPL.
+- `service_wrapper`: pretvara drugi payload u Windows service izvršnu datoteku, što je korisno kada putanja izvršavanja zahteva ispravnu service binarnu datoteku.
+- `scarecrow_wrapper`: obavija kompatibilni shellcode ScareCrow loader-om kako bi generisao izlaze koje podržava loader, kao što su EXE/DLL/CPL.
 
 ## [Apollo Agent](https://github.com/MythicAgents/Apollo)
 
-Apollo je Windows agent napisan u C#-u, koji koristi 4.0 .NET Framework i namenjen je korišćenju u SpecterOps training ponudama.<sup>[[2]](#references)</sup>
+Apollo je Windows agent napisan u C# koristeći 4.0 .NET Framework, namenjen
+korišćenju u edukativnim ponudama kompanije SpecterOps.<sup>[[2]](#references)</sup>
 
 Instalirajte ga pomoću:
+
 ```bash
 ./mythic-cli install github https://github.com/MythicAgents/Apollo.git
 ```
-### Beleške o trenutnoj izgradnji/profilu
 
-- Apollo trenutno može da generiše `WinExe`, `Shellcode`, `Service` i `Source` payloads.
-- Često korišćeni Apollo profili su `http`, `httpx`, `smb`, `tcp` i `websocket`.
-- `httpx` je obično fleksibilnija opcija kada su vam potrebni rotacija domena, podrška za proxy, prilagođeno smeštanje poruka i transformacije poruka, umesto starijeg statičkog `http` profila.
-- Apollo je jedan od funkcionalno najpotpunijih community agenata i trenutno omogućava Mythic-side integracije kao što su browser scripts, prikazi file/process browsera, screenshots, keylogging, SOCKS, rpfwd, Push C2 i P2P routing.
-- Apollo podržava wrapper payloads kao što su `service_wrapper` i `scarecrow_wrapper`.
-- Apollo podržava dinamičko učitavanje komandi, tako da početni payload možete zadržati malim i kasnije učitati dodatne komande ili Forge module, umesto da svaku post-exploitation mogućnost kompajlirate u prvu izgradnju.
-- Prilikom generisanja shellcode izlaza, trenutni Apollo builder takođe omogućava izbor Donut formata (`Binary`, `Base64`, `C`, `Ruby`, `Python`, `Powershell`, `C#`, `Hex`) i Donut bypass ponašanja (`None`, `Abort on fail`, `Continue on fail`). Ovo je korisno ako je krajnji cilj ponovno pakovanje shellcode-a pomoću `service_wrapper`, `scarecrow_wrapper` ili prilagođenog loadera.
-- `register_file` i `register_assembly` predstavljaju staging primitive za `execute_assembly`, `execute_pe`, `inline_assembly`, `execute_coff`, `powershell_import` i `powerpick`. U trenutnim Apollo builds, ti staged artifacts se keširaju na strani klijenta kao DPAPI-zaštićeni AES256 blobovi.
-- Rezultati komandi `ls` i `ps` posebno dobro se integrišu sa Mythic browser scripts i file/process browserom, što primetno ubrzava operator triage u kolaborativnim operacijama.
-- Apollo fork-and-run jobs nasleđuju podešavanja sacrificial procesa iz
-`spawnto_x86` / `spawnto_x64`, izbor parent procesa nasleđuju iz
-`ppid`, a zatim koriste trenutno izabrani injection primitive. U praksi, to znači da
-vaše OPSEC podešavanje za jednu komandu često utiče na `execute_assembly`,
-`powerpick`, `mimikatz`, `pth`, `dcsync`, `execute_pe` i `spawn` istovremeno.
+### Napomene o aktuelnoj build konfiguraciji/profilima
+
+- Apollo trenutno može da emituje `WinExe`, `Shellcode`, `Service` i `Source` payload-e.
+- Profili za Apollo koji se najčešće koriste su `http`, `httpx`, `smb`, `tcp` i `websocket`.
+- `httpx` je obično fleksibilnija opcija kada su vam potrebni rotacija domena, podrška za proxy, prilagođeno pozicioniranje poruka i transformacije poruka, umesto starijeg statičkog profila `http`.
+- Apollo je jedan od community agenata sa najviše funkcionalnosti i trenutno izlaže integracije na Mythic strani, kao što su skripte za browser, prikazi browsera za fajlove/procese, snimci ekrana, keylogging, SOCKS, rpfwd, Push C2 i P2P rutiranje.
+- Apollo podržava wrapper payload-e kao što su `service_wrapper` i `scarecrow_wrapper`.
+- Apollo podržava dinamičko učitavanje komandi, pa početni payload može da ostane mali, a dodatne komande ili Forge module možete učitati kasnije, umesto da svaku post-ex capability kompajlirate u prvu build konfiguraciju.
+- Prilikom generisanja shellcode izlaza, trenutni Apollo builder izlaže i izbore Donut formata (`Binary`, `Base64`, `C`, `Ruby`, `Python`, `Powershell`, `C#`, `Hex`) i Donut ponašanja za zaobilaženje (`None`, `Abort on fail`, `Continue on fail`). Ovo je korisno ako je krajnji cilj da shellcode ponovo upakujete pomoću `service_wrapper`, `scarecrow_wrapper` ili prilagođenog loader-a.
+- `register_file` i `register_assembly` su staging primitive za `execute_assembly`, `execute_pe`, `inline_assembly`, `execute_coff`, `powershell_import` i `powerpick`. U trenutnim Apollo build-ovima, ti staged artefakti se keširaju na klijentskoj strani kao DPAPI-zaštićeni AES256 blob-ovi.
+- Rezultati komandi `ls` i `ps` posebno dobro rade sa Mythic skriptama za browser i browserom za fajlove/procese, što primetno ubrzava trijažu operatora u zajedničkim operacijama.
+- Apollo fork-and-run poslovi nasleđuju podešavanja sacrificial process-a iz
+  `spawnto_x86` / `spawnto_x64`, izbor parent procesa iz `ppid`, a zatim
+  koriste trenutno izabranu injection primitive. U praksi to znači da vaša
+  OPSEC podešavanja za jednu komandu često istovremeno utiču na `execute_assembly`,
+  `powerpick`, `mimikatz`, `pth`, `dcsync`, `execute_pe` i `spawn`.
 - Trenutno dokumentovani Apollo injection backends obuhvataju `CreateRemoteThread`,
-`QueueUserAPC` (early-bird stil) i `NtCreateThreadEx` preko syscalls. Koristite
-`get_injection_techniques` pre noisy post-exploitation aktivnosti i
-`set_injection_technique` ako je potrebno da zamenite primitive koji nije
-kompatibilan sa targetom ili komandom koju želite da pokrenete.
-- `blockdlls` utiče samo na sacrificial procese kreirane za post-exploitation
-jobs. U kombinaciji sa manje sumnjivim `spawnto_x64` targetom u odnosu na podrazumevani
-goli `rundll32.exe`, ovo je jedna od najlakših Apollo-side izmena koju možete napraviti
-pre pokretanja assembly/PowerShell-heavy taskinga.
+  `QueueUserAPC` (early-bird stil) i `NtCreateThreadEx` preko syscalls. Koristite
+  `get_injection_techniques` pre bučnih post-exploitation aktivnosti i
+  `set_injection_technique` ako treba da pređete sa primitive koja nije
+  kompatibilna sa metom ili komandom koju želite da pokrenete.
+- `blockdlls` utiče samo na sacrificial procese koji se kreiraju za post-exploitation
+  poslove. U kombinaciji sa manje sumnjivim ciljem `spawnto_x64` od podrazumevanog
+  golog `rundll32.exe`, ovo je jedna od najjednostavnijih izmena na Apollo strani koju možete da napravite
+  pre pokretanja tasking-a koji se intenzivno oslanja na assembly/PowerShell.
 
-Ovaj agent ima veliki broj komandi zbog kojih je veoma sličan Cobalt Strike Beacon-u, uz nekoliko dodataka. Između ostalog, podržava:
+### Pipeline za build .NET agenta koji uvažava detekciju
+
+Apollo fork koji uvažava detekciju treba posmatrati kao **problem celog build sistema**, a ne kao završni korak `obfuscate.exe`. Ova studija slučaja dopunjuje opštu [metodologiju za AV evasion](av-bypass.md) i [alate za .NET inspekciju](../reversing/reversing-tools-basic-methods/README.md): izmene wire identifikatora, IL metapodataka, pakovanja zavisnosti, reflection-a i dinamički kompajliranih task-ova čine jednu granicu kompatibilnosti.<sup>[[8]](#references)</sup>
+
+#### Mutacija protokola uz uvažavanje YARA pravila
+
+Pre izmene koda, proverite javna pravila za fajlove/memoriju. Na primer, Elastic-ovo pravilo `Multi_Trojan_Mythic_4beb7e17` poklapa se kada je prisutno bilo kojih **7 od 11** Mythic JSON/action nizova, uključujući `task_id`, `post_response`, `c2_profile`, `get_tasking` i `get_delegate_tasks`. Preimenovanjem dovoljnog broja polja možete zaobići taj prag, ali to su vrednosti protokola, a ne kozmetički simboli: agent i odgovarajuća server/profile implementacija moraju da se menjaju zajedno.<sup>[[7]](#references)[[8]](#references)</sup>
+
+Ovim se uklanja samo jedan skup statičkih karakteristika. Učestalost check-in-a, oblik poruke, tok zadataka/odgovora i rekonstrukcija stringova tokom izvršavanja i dalje mogu biti indikatori ponašanja ili memorije; zato proverite i izgrađeni artefakt i aktivirani callback, umesto da čist rezultat skeniranja stringova smatrate uspehom.<sup>[[8]](#references)</sup>
+
+#### Spajanje pre primene globalnih transformacija
+
+Ugrađivanje resursa pomoću alata kao što je Costura ostavlja prateće assembly-je kao kompresovane resurse. Obfuscator koji obrađuje samo spoljašnji modul zato propušta njihove nazive tipova i metapodatke; zasebna obfuscation svakog DLL-a može, s druge strane, da dodeli nekompatibilna imena ugovorima između assembly-ja. Najpre spojite build izlaze na IL nivou (na primer pomoću [ILRepack](https://github.com/gluck/il-repack)), a zatim primenite jednu mapu preimenovanja na dobijeni modul.<sup>[[8]](#references)</sup>
+
+```text
+agent.exe + dependency DLLs
+          -> ILRepack -> merged.exe
+          -> dnlib IL/metadata transforms
+          -> AsmResolver PE/resource patching
+          -> final payload
+```
+
+Prilagođeni pass može da koristi [dnlib](https://github.com/0xd4d/dnlib) za transformacije upravljanog IL-a/metapodataka, a [AsmResolver](https://github.com/Washi1337/AsmResolver) za naknadno patchovanje PE-a/resursa. U studiji slučaja, podobne `ldstr` instrukcije zamenjene su pozivima koji koriste celobrojne tokene i decryptor, a oslanjaju se na novi 16-bajtni rolling-XOR ključ. Simboli i prostori imena mapirani su na uverljive nazive u poslovnom stilu umesto na kratke sekvencijalne identifikatore. Drugi pass-ovi uklonili su odabrane atribute kompajlera/debuggera, očistili reference na merger/embedding, preimenovali resurse i patchovali informacije o verziji. Za svaku nezavisnu kompilaciju ponovo generišite nazive, dead code i materijal za šifrovanje: promena šifroteksta uklanja stabilne bajtove, ali stabilan decryptor ili prepoznatljiv obrazac transformacije sam po sebi predstavlja potpis.<sup>[[8]](#references)</sup>
+
+#### Održavajte dinamičke zadatke usklađenim sa payload-om
+
+Apollo može da kompajlira izvorni kod zadatka na serveru, pošalje bajtove DLL-a i učita ih pomoću `Assembly.Load()`. Kada se preimenuju javni tipovi osnovnog agenta, kasniji zadaci kompajlirani prema originalnom API-ju više se ne razrešavaju. Tretirajte izvezenu mapu preimenovanja kao ABI artefakt specifičan za payload:<sup>[[8]](#references)</sup>
+
+1. Povežite mapu i kontekst tipova sa tačnim identifikatorom payload-a/kompilacije.
+2. Za svaku kompilaciju zadatka preuzmite tu mapu i prepišite privremeno stablo izvornog koda.
+3. Prepišite samo razrešene reference na prostore imena, tipove, ugnježdene/generičke tipove, polja i svojstva, a zatim kompajlirajte prema spojenom assembly-ju sa obfuskovanim imenima.
+4. Odbijte isporuku zadatka ako mapa nedostaje ili se ne podudara i nakon kompilacije pokrenite test inicijalizacije.
+
+Slepa globalna zamena nije bezbedna jer se identifikator može pojaviti i u stringu, lokalnoj deklaraciji, pristupu članu, tipu framework-a ili nepovezanom prostoru imena. Ako zadržite prepisivač zasnovan na tekstu/regex-u, izričito zaštitite te kontekste i testirajte regresije kad god se promene šema mape ili pass za preimenovanje.<sup>[[8]](#references)</sup>
+
+#### Učinite ugovore refleksije nezavisnim od prostora imena
+
+Kod za pronalaženje koji proverava `t.FullName.StartsWith("Tasks.")` čini prostor imena ključnim i otkazuje nakon njegovog preslikavanja. Umesto toga, tipove pronalazite na osnovu stabilne veze između njih, a nazive klasa komandi sačuvajte ako se za dispatch i dalje koristi `t.Name`:<sup>[[8]](#references)</sup>
+
+```csharp
+foreach (Type t in _tasksAsm.GetExportedTypes())
+{
+    if (t.IsSubclassOf(typeof(Tasking)) && !t.IsAbstract)
+        _loadedTaskTypes[t.Name] = t;
+}
+```
+
+Održavajte eksplicitnu listu dozvoljenih naziva vidljivih putem reflection-a, polja serializer-a, ulaznih tačaka i API-ja između sklopova koji se ne smeju preimenovati. Na kraju dekompajlirajte rezultat pomoću ILSpy/dnSpy, skenirajte prikaz u datotekama i memoriji i isprobajte svaku putanju komandi/loader-a u EDR labu; uspešno pokretanje build-a ne znači da zadaci nisu pokvareni preimenovanjem ili da se ponašanje neće otkriti tek tokom izvršavanja.<sup>[[8]](#references)</sup>
+
+Ovaj agent ima mnogo komandi, zbog čega je veoma sličan Cobalt Strike-ovom Beacon-u, uz neke dodatne mogućnosti. Između ostalog, podržava:
 
 ### Uobičajene radnje
 
-- `cat`: Ispisuje sadržaj fajla
-- `cd`: Menja trenutni working directory
-- `cp`: Kopira fajl sa jedne lokacije na drugu
-- `ls`: Prikazuje fajlove i direktorijume u trenutnom direktorijumu ili na navedenoj putanji
-- `ifconfig`: Pribavlja informacije o network adapterima i interfejsima
-- `netstat`: Pribavlja informacije o TCP i UDP konekcijama
-- `pwd`: Ispisuje trenutni working directory
-- `ps`: Prikazuje running procese na target sistemu (uz dodatne informacije)
-- `jobs`: Prikazuje sve running jobs povezane sa dugotrajnim taskingom
-- `download`: Preuzima fajl sa target sistema na lokalnu mašinu
-- `upload`: Otpremanje fajla sa lokalne mašine na target sistem
-- `reg_query`: Ispituje registry ključeve i vrednosti na target sistemu
-- `reg_write_value`: Upisuje novu vrednost u navedeni registry ključ
-- `sleep`: Menja sleep interval agenta, koji određuje koliko često agent proverava Mythic server
-- I mnoge druge; koristite `help` da biste videli kompletnu listu dostupnih komandi.
+- `cat`: Prikaži sadržaj datoteke
+- `cd`: Promeni trenutni radni direktorijum
+- `cp`: Kopiraj datoteku sa jedne lokacije na drugu
+- `ls`: Prikaži datoteke i direktorijume u trenutnom direktorijumu ili na navedenoj putanji
+- `ifconfig`: Dohvati mrežne adaptere i interfejse
+- `netstat`: Dohvati informacije o TCP i UDP vezama
+- `pwd`: Prikaži trenutni radni direktorijum
+- `ps`: Prikaži pokrenute procese na ciljnom sistemu (uz dodatne informacije)
+- `jobs`: Prikaži sve pokrenute poslove povezane sa dugotrajnim zadacima
+- `download`: Preuzmi datoteku sa ciljnog sistema na lokalni računar
+- `upload`: Otpremi datoteku sa lokalnog računara na ciljni sistem
+- `reg_query`: Upit za ključeve i vrednosti registra na ciljnom sistemu
+- `reg_write_value`: Upiši novu vrednost u navedeni ključ registra
+- `sleep`: Promeni interval spavanja agenta, koji određuje koliko često se javlja Mythic serveru
+- I mnoge druge; upotrebite `help` da biste videli celu listu dostupnih komandi.
 
 ### Eskalacija privilegija
 
-- `getprivs`: Omogućava što veći broj privilegija na tokenu trenutne niti
-- `getsystem`: Otvara handle ka winlogon procesu i duplira token, čime efektivno eskalira privilegije na SYSTEM nivo
-- `make_token`: Kreira novu logon sesiju i primenjuje je na agenta, omogućavajući impersonation drugog korisnika
-- `steal_token`: Krade primary token iz drugog procesa, omogućavajući agentu da impersonate korisnika tog procesa
-- `pth`: Pass-the-Hash napad, koji agentu omogućava autentifikaciju kao korisnik pomoću njegovog NTLM hash-a, bez potrebe za plaintext lozinkom
-- `mimikatz`: Pokreće Mimikatz komande za izvlačenje credentiala, hash-ova i drugih osetljivih informacija iz memorije ili SAM baze podataka
-- `rev2self`: Vraća token agenta na njegov primary token, čime efektivno uklanja privilegije i vraća ih na prvobitni nivo
-- `ppid`: Menja parent proces za post-exploitation jobs navođenjem novog parent process ID-ja, što omogućava bolju kontrolu nad execution contextom job-a
-- `printspoofer`: Izvršava PrintSpoofer komande za zaobilaženje security mera print spoolera, omogućavajući eskalaciju privilegija ili code execution
-- `dcsync`: Sinhronizuje Kerberos ključeve korisnika na lokalnu mašinu, omogućavajući offline password cracking ili dalje napade
-- `ticket_cache_add`: Dodaje Kerberos ticket u trenutnu logon sesiju ili u navedenu sesiju, omogućavajući ponovnu upotrebu ticketa ili impersonation
+- `getprivs`: Omogući što više privilegija na tokenu trenutne niti
+- `getsystem`: Otvori handle ka winlogon-u i dupliciraj token, čime se efektivno podižu privilegije na nivo SYSTEM
+- `make_token`: Kreiraj novu logon sesiju i primeni je na agenta, omogućavajući impersonation drugog korisnika
+- `steal_token`: Ukradi primarni token iz drugog procesa, čime agent može da impersonate korisnika tog procesa
+- `pth`: Pass-the-Hash napad, koji omogućava agentu da se autentifikuje kao korisnik pomoću njegovog NTLM hash-a, bez potrebe za lozinkom u otvorenom tekstu
+- `mimikatz`: Pokreni Mimikatz komande za izvlačenje credentials, hash-eva i drugih osetljivih informacija iz memorije ili SAM baze podataka
+- `rev2self`: Vrati token agenta na njegov primarni token, čime se privilegije efektivno vraćaju na prvobitni nivo
+- `ppid`: Promeni roditeljski proces za post-exploitation poslove navođenjem novog ID-ja roditeljskog procesa, što omogućava bolju kontrolu nad kontekstom izvršavanja poslova
+- `printspoofer`: Izvrši PrintSpoofer komande za zaobilaženje bezbednosnih mera print spooler-a, što omogućava eskalaciju privilegija ili izvršavanje koda
+- `dcsync`: Sinhronizuj korisnikove Kerberos ključeve na lokalni računar, što omogućava offline razbijanje lozinke ili dalje napade
+- `ticket_cache_add`: Dodaj Kerberos ticket u trenutnu logon sesiju ili navedenu sesiju, što omogućava ponovnu upotrebu ticket-a ili impersonation
 
 ### Izvršavanje procesa
 
-- `assembly_inject`: Omogućava injection .NET assembly loadera u udaljeni proces
-- `blockdlls`: Blokira učitavanje DLL-ova koje nije potpisao Microsoft u post-exploitation jobs
-- `execute_assembly`: Izvršava .NET assembly u kontekstu agenta
-- `execute_coff`: Izvršava COFF fajl u memoriji, omogućavajući in-memory execution kompajliranog koda
-- `execute_pe`: Izvršava unmanaged executable (PE)
-- `keylog_inject`: Injectuje keylogger u drugi proces i prosleđuje pritisnute tastere u Mythic keylog view
-- `screenshot` / `screenshot_inject`: Snima trenutnu radnu površinu direktno ili
-injectovanjem screenshot assembly-ja u target proces/sesiju
-- `get_injection_techniques`: Prikazuje dostupne injection techniques i trenutno izabranu tehniku
-- `inline_assembly`: Izvršava .NET assembly u disposable AppDomain-u, omogućavajući privremeno izvršavanje koda bez uticaja na glavni proces agenta
-- `register_assembly`: Registruje .NET assembly za kasnije izvršavanje
-- `register_file`: Registruje fajl u agent cache za kasniji `execute_*` ili PowerShell tasking
-- `run`: Izvršava binary na target sistemu, koristeći system PATH za pronalaženje executable-a
-- `set_injection_technique`: Menja injection primitive koji koriste post-exploitation jobs
-- `shinject`: Injectuje shellcode u udaljeni proces, omogućavajući in-memory execution proizvoljnog koda
-- `inject`: Injectuje agent shellcode u udaljeni proces, omogućavajući in-memory execution koda agenta
-- `spawn`: Pokreće novu agent sesiju u navedenom executable-u, omogućavajući izvršavanje shellcode-a u novom procesu
-- `spawnto_x64` i `spawnto_x86`: Menjaju podrazumevani binary koji se koristi u post-exploitation jobs na navedenu putanju, umesto korišćenja `rundll32.exe` bez parametara, što je veoma noisy.
+- `assembly_inject`: Omogućava ubacivanje .NET assembly loader-a u udaljeni proces
+- `blockdlls`: Blokiraj učitavanje DLL-ova koji nisu potpisani od strane Microsoft-a u post-exploitation poslovima
+- `execute_assembly`: Izvrši .NET assembly u kontekstu agenta
+- `execute_coff`: Izvrši COFF datoteku u memoriji, što omogućava izvršavanje kompajliranog koda u memoriji
+- `execute_pe`: Izvrši unmanaged executable (PE)
+- `keylog_inject`: Ubaci keylogger u drugi proces i prosleđuj pritiske tastera u Mythic-ov prikaz keylog-a
+- `screenshot` / `screenshot_inject`: Snimi trenutnu radnu površinu direktno ili
+  ubacivanjem screenshot assembly-ja u ciljni proces/sesiju
+- `get_injection_techniques`: Prikaži dostupne tehnike injection-a i trenutno izabranu tehniku
+- `inline_assembly`: Izvrši .NET assembly u privremenom AppDomain-u, čime se omogućava privremeno izvršavanje koda bez uticaja na glavni proces agenta
+- `register_assembly`: Registruj .NET assembly za kasnije izvršavanje
+- `register_file`: Registruj datoteku u kešu agenta za kasnije `execute_*` ili PowerShell zadatke
+- `run`: Izvrši binarnu datoteku na ciljnom sistemu, koristeći sistemsku PATH promenljivu za pronalaženje izvršne datoteke
+- `set_injection_technique`: Promeni injection primitiv koji koriste post-exploitation poslovi
+- `shinject`: Ubaci shellcode u udaljeni proces, što omogućava izvršavanje proizvoljnog koda u memoriji
+- `inject`: Ubaci shellcode agenta u udaljeni proces, što omogućava izvršavanje koda agenta u memoriji
+- `spawn`: Pokreni novu sesiju agenta u navedenoj izvršnoj datoteci, što omogućava izvršavanje shellcode-a u novom procesu
+- `spawnto_x64` i `spawnto_x86`: Promeni podrazumevanu binarnu datoteku koju koriste post-exploitation poslovi na navedenu putanju, umesto korišćenja `rundll32.exe` bez parametara, što je veoma upadljivo.
 
 ### Mythic Forge
 
-Ovo omogućava **učitavanje COFF/BOF** fajlova iz Mythic Forge-a, koji predstavlja repozitorijum pre-compiled payloads i tools koji se mogu izvršavati na target sistemu. Sa svim komandama koje mogu da se učitaju, biće moguće obavljati uobičajene radnje njihovim izvršavanjem u trenutnom procesu agenta kao BOF-ova (obično uz bolji OPSEC nego pri pokretanju zasebnog procesa).
+Ovo omogućava **učitavanje COFF/BOF** datoteka iz Mythic Forge-a, repozitorijuma unapred kompajliranih payload-ova i alata koji se mogu izvršiti na ciljnom sistemu. Pomoću svih komandi koje se mogu učitati biće moguće obavljati uobičajene radnje njihovim izvršavanjem kao BOF-ova u procesu trenutnog agenta (obično uz bolji OPSEC nego pri pokretanju zasebnog procesa).
 
-Počnite njihovu instalaciju pomoću:
+Počnite sa njihovom instalacijom ovde:
+
 ```bash
 ./mythic-cli install github https://github.com/MythicAgents/forge.git
 ```
-Zatim upotrebite `forge_collections` da prikažete COFF/BOF modules iz Mythic Forge-a, kako biste mogli da ih izaberete i učitate u memoriju agenta radi izvršavanja. Podrazumevano su u Apollo dodate sledeće 2 kolekcije:
+
+Zatim upotrebite `forge_collections` da prikažete COFF/BOF module iz Mythic Forge-a, kako biste mogli da ih izaberete i učitate u memoriju agenta radi izvršavanja. Podrazumevano se u Apollo dodaju sledeće 2 kolekcije:
 
 - `forge_collections {"collectionName":"SharpCollection"}`
 - `forge_collections {"collectionName":"SliverArmory"}`
 
-Nakon učitavanja jednog module-a, on će se pojaviti na listi kao druga komanda, na primer `forge_bof_sa-whoami` ili `forge_bof_sa-netuser`.
+Kada se učita modul, pojaviće se na listi kao dodatna komanda, na primer `forge_bof_sa-whoami` ili `forge_bof_sa-netuser`.
 
-Za BOF-ove imajte na umu da Forge **ne prosleđuje** Apollo-u samo jedan neformatirani string argumenata. On mapira BOF parametre u Mythic-ov typed-array format, a zatim ih prosleđuje u Apollo-ov `execute_coff` flow. Ako se BOF učitan preko Forge-a ponaša neobično, proverite očekivane tipove BOF argumenata / entrypoint, a ne samo command line koji ste uneli. Takođe imajte na umu da je noviji Apollo BOF loader promenio način obrade argumenata u odnosu na mnogo starije build-ove iz ere 2.3.1, pa stale BOF-ovi ili stare kolekcije mogu da zakažu isključivo zato što su se očekivanja za marshaling promenila.
+Za BOF-ove imajte na umu da Forge **ne** prosleđuje Apollo-u samo jedan ravan niz argumenata. Mapira BOF parametre u Mythic-ov format tipiziranog niza, a zatim ih prosleđuje kroz Apollo-ov tok `execute_coff`. Ako se BOF učitan iz Forge-a ponaša neočekivano, proverite očekivane tipove BOF argumenata i ulaznu tačku, a ne samo unetu komandnu liniju. Takođe imajte na umu da je noviji BOF loader u Apollo-u promenio rukovanje argumentima u odnosu na mnogo starije verzije iz perioda 2.3.1, pa zastareli BOF-ovi ili stare kolekcije mogu da ne rade isključivo zbog promenjenih očekivanja pri maršalovanju.
 
-### PowerShell & izvršavanje skripti
+### Izvršavanje PowerShell-a i skripti
 
-- `powershell_import`: Uvozi novu PowerShell skriptu (.ps1) u cache agenta radi kasnijeg izvršavanja
-- `powershell`: Izvršava PowerShell komandu u kontekstu agenta, omogućavajući napredno scripting i automation
-- `powerpick`: Ubrizgava PowerShell loader assembly u žrtveni proces i izvršava PowerShell komandu (bez PowerShell logging-a).
-- `psinject`: Izvršava PowerShell u navedenom procesu, omogućavajući ciljano izvršavanje skripti u kontekstu drugog procesa
+- `powershell_import`: Uvozi novu PowerShell skriptu (.ps1) u keš agenta za kasnije izvršavanje
+- `powershell`: Izvršava PowerShell komandu u kontekstu agenta, što omogućava napredno skriptovanje i automatizaciju
+- `powerpick`: Umeće PowerShell loader assembly u žrtveni proces i izvršava PowerShell komandu (bez PowerShell logovanja).
+- `psinject`: Izvršava PowerShell u navedenom procesu, što omogućava ciljano izvršavanje skripti u kontekstu drugog procesa
 - `shell`: Izvršava shell komandu u kontekstu agenta, slično pokretanju komande u cmd.exe
-
-### Lateral Movement
-
-- `jump_psexec`: Koristi PsExec tehniku za lateralno kretanje na novi host tako što najpre kopira izvršnu datoteku Apollo agenta (apollo.exe), a zatim je izvršava.
-- `jump_wmi`: Koristi WMI tehniku za lateralno kretanje na novi host tako što najpre kopira izvršnu datoteku Apollo agenta (apollo.exe), a zatim je izvršava.
-- `link` i `unlink`: Kreiraju i prekidaju P2P links (na primer preko SMB/TCP) između callback-ova.
-- `wmiexecute`: Izvršava komandu na lokalnom ili navedenom remote sistemu koristeći WMI, uz opcione credentials za impersonation.
-- `net_dclist`: Preuzima listu domain controller-a za navedeni domain, što je korisno za identifikovanje potencijalnih target-a za lateralno kretanje.
-- `net_localgroup`: Izlistava local groups na navedenom računaru, podrazumevano na localhost ako računar nije naveden.
-- `net_localgroup_member`: Preuzima članstvo u local group za navedenu grupu na lokalnom ili remote računaru, omogućavajući enumeraciju korisnika u određenim grupama.
-- `net_shares`: Izlistava remote shares i njihovu dostupnost na navedenom računaru, što je korisno za identifikovanje potencijalnih target-a za lateralno kretanje.
-- `socks`: Omogućava SOCKS 5 compliant proxy na target network-u, dopuštajući tunneling saobraćaja kroz kompromitovani host. Kompatibilno je sa alatima kao što je proxychains.
-- `rpfwd`: Počinje da osluškuje navedeni port na target host-u i prosleđuje saobraćaj kroz Mythic ka remote IP adresi i portu, omogućavajući remote access servisima na target network-u.
-- `listpipes`: Izlistava sve named pipes na lokalnom sistemu, što može biti korisno za lateralno kretanje ili privilege escalation interakcijom sa IPC mehanizmima.
-
-Za WMI execution primitive nižeg nivoa koje se koriste unutar `jump_wmi` ili `wmiexecute`, pogledajte [WmiExec](lateral-movement/wmiexec.md). Za šire pivoting obrasce pogledajte [Tunneling and Port Forwarding](../generic-hacking/tunneling-and-port-forwarding.md).
-
-### Miscellaneous Commands
-- `help`: Prikazuje detaljne informacije o određenim komandama ili opšte informacije o svim dostupnim komandama u agentu.
-- `clear`: Obeležava task-ove kao 'cleared', tako da ih agenti ne mogu preuzeti. Možete navesti `all` za brisanje svih task-ova ili `task Num` za brisanje određenog task-a.
-
-
-## [Poseidon Agent](https://github.com/MythicAgents/poseidon)
-
-Poseidon je Golang agent koji se kompajlira u izvršne datoteke za **Linux i macOS**.
-```bash
-./mythic-cli install github https://github.com/MythicAgents/poseidon.git
-```
-### Beleške o trenutnom build/profile stanju
-
-- Trenutni Poseidon buildovi ciljaju Linux i macOS na platformama `x86_64` i `arm64`.
-- Podržani izlazni formati uključuju native izvršne fajlove, kao i izlaze u stilu shared library-ja, poput `dylib` i `so`.
-- Poseidon podržava `http`, `websocket`, `tcp` i `dynamichttp`, a trenutni builderi nude multi-egress podešavanja kao što su `egress_order` i pragovi za failover.
-- Trenutni capability metadata za Poseidon takođe oglašava browser scripts, integraciju file/process browser-a, interactive tasking, keylogging, screenshots, Push C2, SOCKS, rpfwd i P2P, tako da može da funkcioniše kao pravi Linux/macOS pivot node, a ne samo kao jednostavan remote shell.
-- Build-time opcije poput `proxy_bypass` i `garble` vredi proveriti kada su vam potrebni čistije mrežno ponašanje ili dodatna Go binary obfuskacija.
-- `pty` je jedna od najkorisnijih novijih QoL komandi za Linux/macOS
-operacije, jer otvara interaktivni PTY i može da izloži Mythic-side
-port za potpuniju terminal interakciju bez pribegavanja starijem `sleep 0`
-+ SOCKS workaround-u.
-- Trenutna Poseidon dokumentacija je naročito zanimljiva za macOS-heavy
-tradecraft: `jxa` izvršava JavaScript for Automation u memoriji,
-`screencapture` snima desktop prijavljenog korisnika, `clipboard_monitor`
-prosleđuje promene pasteboard-a, `execute_library` učitava lokalni dylib i poziva
-funkciju iz njega, a `libinject` primorava udaljeni proces da učita dylib
-sa diska.
-- Za dugotrajne poslove imajte na umu da Poseidon izvršava post-exploitation rad
-u gorutinama/thread-ovima koji su kooperativni, a ne mogu se nasilno prekinuti. Dokumentacija
-takođe izričito navodi da trenutno ne postoji ugrađena agent
-obfuskacija, pa su build/profile-level tradecraft tehnike važnije nego kod
-komercijalnih implantata sa intenzivnom obfuskacijom.
-
-Za macOS-specifični tradecraft u vezi sa Mythic-backed operacijama, JAMF abuse-om ili MDM-as-C2 idejama, pogledajte [macOS Red Teaming](../macos-hardening/macos-red-teaming/README.md).
-
-Kada se koristi na Linuxu ili macOS-u, ima neke zanimljive komande:
-
-### Uobičajene radnje
-
-- `cat`: Ispisuje sadržaj fajla
-- `cd`: Menja trenutni working directory
-- `chmod`: Menja dozvole fajla
-- `config`: Prikazuje trenutnu konfiguraciju i informacije o hostu
-- `cp`: Kopira fajl sa jedne lokacije na drugu
-- `curl`: Izvršava jedan web request sa opcionim headerima i metodom
-- `upload`: Otpremanje fajla na cilj
-- `download`: Preuzima fajl sa ciljnog sistema na lokalnu mašinu
-- I još mnogo toga
-
-### Pretraga osetljivih informacija
-
-- `triagedirectory`: Pronalaženje zanimljivih fajlova unutar direktorijuma na hostu, kao što su osetljivi fajlovi ili credentiali.
-- `getenv`: Dobavljanje svih trenutnih environment varijabli.
-
-### macOS-specifični tradecraft
-
-- `jxa`: Izvršava JavaScript for Automation u memoriji preko `OSAScript`, što je
-korisno za native macOS post-exploitation bez ostavljanja zasebnih script
-fajlova.
-- `clipboard_monitor`: Proverava pasteboard i prijavljuje promene nazad Mythic-u,
-što je korisno za workflow-e krađe credentiala/tokena koji se oslanjaju na copy/paste.
-- `screencapture`: Snima desktop korisnika na macOS-u.
-- `execute_library`: Učitava dylib sa diska i poziva određenu eksportovanu funkciju.
-- `libinject`: Injektuje shellcode stub koji primorava drugi macOS proces da učita dylib sa diska.
-- `persist_launchd`: Direktno iz agenta kreira LaunchAgent / LaunchDaemon persistence.
 
 ### Lateralno kretanje
 
-- `ssh`: Povezuje se na host preko SSH-a koristeći određene credentiale i otvara PTY bez pokretanja ssh-a.
-- `sshauth`: Povezuje se na navedene hostove koristeći određene credentiale. Ovo se može koristiti i za izvršavanje određene komande na udaljenim hostovima preko SSH-a ili za SCP fajlova.
-- `link_tcp`: Povezuje se sa drugim agentom preko TCP-a, omogućavajući direktnu komunikaciju između agenata.
-- `link_webshell`: Povezuje se sa agentom koristeći webshell P2P profil, omogućavajući remote access web interfejsu agenta.
-- `rpfwd`: Pokreće ili zaustavlja Reverse Port Forward, omogućavajući remote access servisima na ciljnoj mreži.
-- `socks`: Pokreće ili zaustavlja SOCKS5 proxy na ciljnoj mreži, omogućavajući tunelovanje saobraćaja kroz kompromitovani host. Kompatibilno je sa alatima poput proxychains.
-- `portscan`: Skenira hostove radi pronalaženja otvorenih portova, što je korisno za identifikovanje potencijalnih ciljeva za lateralno kretanje ili dalje napade.
+- `jump_psexec`: Koristi PsExec tehniku za lateralno kretanje na novi host tako što prvo kopira izvršnu datoteku Apollo agenta (apollo.exe), a zatim je izvršava.
+- `jump_wmi`: Koristi WMI tehniku za lateralno kretanje na novi host tako što prvo kopira izvršnu datoteku Apollo agenta (apollo.exe), a zatim je izvršava.
+- `link` i `unlink`: Uspostavljaju i prekidaju P2P veze (na primer, preko SMB/TCP) između callback-ova.
+- `wmiexecute`: Izvršava komandu na lokalnom ili navedenom udaljenom sistemu pomoću WMI-ja, uz opcione akreditive za impersonaciju.
+- `net_dclist`: Dobavlja listu kontrolera domena za navedeni domen, što je korisno za pronalaženje potencijalnih ciljeva za lateralno kretanje.
+- `net_localgroup`: Prikazuje lokalne grupe na navedenom računaru; ako računar nije naveden, podrazumevano se koristi localhost.
+- `net_localgroup_member`: Dobavlja članstvo u lokalnoj grupi za navedenu grupu na lokalnom ili udaljenom računaru, što omogućava nabrajanje korisnika u određenim grupama.
+- `net_shares`: Prikazuje udaljene deljene resurse i njihovu dostupnost na navedenom računaru, što je korisno za pronalaženje potencijalnih ciljeva za lateralno kretanje.
+- `socks`: Omogućava SOCKS 5 kompatibilan proxy na ciljnoj mreži, što omogućava tunelovanje saobraćaja kroz kompromitovani host. Kompatibilan je sa alatima kao što je proxychains.
+- `rpfwd`: Počinje da osluškuje na navedenom portu na ciljnom hostu i prosleđuje saobraćaj kroz Mythic do udaljene IP adrese i porta, omogućavajući udaljeni pristup uslugama na ciljnoj mreži.
+- `listpipes`: Prikazuje sve imenovane cevi na lokalnom sistemu, što može biti korisno za lateralno kretanje ili eskalaciju privilegija putem interakcije sa IPC mehanizmima.
+
+Za WMI primitive nižeg nivoa koje se koriste ispod `jump_wmi` ili `wmiexecute`, pogledajte [WmiExec](lateral-movement/wmiexec.md). Za šire obrasce pivotiranja pogledajte [Tunelovanje i prosleđivanje portova](../generic-hacking/tunneling-and-port-forwarding.md).
+
+### Razne komande
+- `help`: Prikazuje detaljne informacije o određenim komandama ili opšte informacije o svim dostupnim komandama u agentu.
+- `clear`: Označava zadatke kao „očišćene“ tako da ih agenti ne mogu preuzeti. Možete navesti `all` da biste očistili sve zadatke ili `task Num` da biste očistili određeni zadatak.  
+
+
+## [Poseidon agent](https://github.com/MythicAgents/poseidon)
+
+Poseidon je Golang agent koji se kompajlira u izvršne datoteke za **Linux i macOS**.
+
+```bash
+./mythic-cli install github https://github.com/MythicAgents/poseidon.git
+```
+
+### Napomene o trenutnoj verziji/profilu
+
+- Trenutne Poseidon verzije ciljaju Linux i macOS na `x86_64` i `arm64`.
+- Podržani izlazni formati obuhvataju nativne izvršne datoteke i izlaze u stilu deljenih biblioteka, kao što su `dylib` i `so`.
+- Poseidon podržava `http`, `websocket`, `tcp` i `dynamichttp`, a trenutni builder-i nude podešavanja za više egress veza, kao što su `egress_order` i pragovi za failover.
+- Trenutni metapodaci o mogućnostima Poseidona navode i browser scripts, integraciju file/process browser-a, interaktivni tasking, keylogging, snimke ekrana, Push C2, SOCKS, rpfwd i P2P, tako da može da služi kao pravi Linux/macOS pivot čvor, a ne samo kao jednostavna remote shell sesija.
+- Vredi proveriti opcije pri izgradnji kao što su `proxy_bypass` i `garble` kada su vam potrebni ili čistije mrežno ponašanje ili dodatna obfuskacija Go binarnih datoteka.
+- `pty` je jedna od najkorisnijih novijih komandi za kvalitet rada u Linux/macOS operacijama, jer otvara interaktivni PTY i može da izloži Mythic port za potpuniju interakciju sa terminalom, bez pribegavanja starijem zaobilaznom rešenju `sleep 0` + SOCKS.
+- Trenutna Poseidon dokumentacija posebno je zanimljiva za tradecraft usmeren na macOS: `jxa` izvršava JavaScript for Automation u memoriji, `screencapture` snima radnu površinu prijavljenog korisnika, `clipboard_monitor` prosleđuje promene u pasteboard-u, `execute_library` učitava lokalni dylib i poziva njegovu funkciju, a `libinject` primorava udaljeni proces da učita dylib sa diska.
+- Kod dugotrajnih poslova imajte na umu da Poseidon izvršava post-exploitation rad u gorutinama/nitima koji sarađuju, pa ih nije moguće nasilno prekinuti. Dokumentacija takođe izričito navodi da trenutno nema ugrađenu obfuskaciju agenta, pa su tradecraft na nivou izgradnje/profila važniji nego kod komercijalnih implantata sa snažnom obfuskacijom.
+
+Za macOS-specifični tradecraft u Mythic operacijama, zloupotrebu JAMF-a ili ideje za MDM-as-C2, pogledajte [macOS Red Teaming](../macos-hardening/macos-red-teaming/README.md).
+
+Kada se koristi na Linux-u ili macOS-u, nudi neke zanimljive komande:
+
+### Uobičajene radnje
+
+- `cat`: Prikaži sadržaj datoteke
+- `cd`: Promeni trenutni radni direktorijum
+- `chmod`: Promeni dozvole datoteke
+- `config`: Prikaži trenutnu konfiguraciju i informacije o hostu
+- `cp`: Kopiraj datoteku sa jedne lokacije na drugu
+- `curl`: Izvrši jedan web zahtev uz opcionalna zaglavlja i metod
+- `upload`: Otpremi datoteku na cilj
+- `download`: Preuzmi datoteku sa ciljnog sistema na lokalnu mašinu
+- I mnoge druge
+
+### Pretraga osetljivih informacija
+
+- `triagedirectory`: Pronađi zanimljive datoteke u direktorijumu na hostu, kao što su osetljive datoteke ili akreditivi.
+- `getenv`: Prikaži sve trenutne promenljive okruženja.
+
+### macOS-specifični tradecraft
+
+- `jxa`: Izvrši JavaScript for Automation u memoriji preko `OSAScript`, što je korisno za nativni macOS post-exploitation bez ostavljanja zasebnih skriptnih datoteka.
+- `clipboard_monitor`: Proverava pasteboard i prosleđuje promene Mythic-u, što je korisno za krađu akreditiva/tokena koja se oslanja na copy/paste.
+- `screencapture`: Napravi snimak korisnikove radne površine na macOS-u.
+- `execute_library`: Učitaj dylib sa diska i pozovi određenu izvezenu funkciju.
+- `libinject`: Ubaci shellcode stub koji primorava drugi macOS proces da učita dylib sa diska.
+- `persist_launchd`: Kreiraj LaunchAgent / LaunchDaemon persistence direktno iz agenta.
+
+### Lateralno kretanje
+
+- `ssh`: Poveži se na host koristeći određene akreditive i otvori PTY bez pokretanja ssh procesa.
+- `sshauth`: Poveži se na navedeni host ili hostove koristeći određene akreditive. Ovo možete da koristite i za izvršavanje određene komande na udaljenim hostovima preko SSH-a ili za prenos datoteka pomoću SCP-a.
+- `link_tcp`: Poveži se sa drugim agentom preko TCP-a, što omogućava direktnu komunikaciju između agenata.
+- `link_webshell`: Poveži se sa agentom koristeći webshell P2P profil, što omogućava udaljeni pristup web interfejsu agenta.
+- `rpfwd`: Pokreni ili zaustavi Reverse Port Forward, omogućavajući udaljeni pristup servisima na ciljnoj mreži.
+- `socks`: Pokreni ili zaustavi SOCKS5 proxy na ciljnoj mreži, omogućavajući tuneliranje saobraćaja kroz kompromitovani host. Kompatibilno je sa alatima kao što je proxychains.
+- `portscan`: Skeniraj host ili hostove u potrazi za otvorenim portovima, što je korisno za pronalaženje potencijalnih ciljeva za lateralno kretanje ili dalje napade.
 
 ### Izvršavanje procesa
 
-- `shell`: Izvršava jednu shell komandu preko /bin/sh, omogućavajući direktno izvršavanje komandi na ciljnom sistemu.
-- `run`: Izvršava komandu sa diska sa argumentima, omogućavajući izvršavanje binarnih fajlova ili scriptova na ciljnom sistemu.
-- `pty`: Otvara interaktivni PTY, omogućavajući direktnu interakciju sa shell-om na ciljnom sistemu.
+- `shell`: Izvrši jednu shell komandu preko /bin/sh, što omogućava direktno izvršavanje komandi na ciljnom sistemu.
+- `run`: Izvrši komandu sa diska uz argumente, što omogućava izvršavanje binarnih datoteka ili skripti na ciljnom sistemu.
+- `pty`: Otvori interaktivni PTY, što omogućava direktnu interakciju sa shell-om na ciljnom sistemu.
 
-## Reference
+## References
 
-- [1] [Mythic Community Agent Feature Matrix](https://mythicmeta.github.io/overview/agent_matrix.html)
+- [1] [Matrica funkcija Mythic Community agenta](https://mythicmeta.github.io/overview/agent_matrix.html)
 - [2] [Apollo README](https://github.com/MythicAgents/Apollo/blob/master/README.md)
-- [3] [Mythic v3.2 Highlights: Interactive Tasking, Push C2, and Dynamic File Browser](https://posts.specterops.io/mythic-v3-2-highlights-interactive-tasking-push-c2-and-dynamic-file-browser-7035065e2b3d)
-- [4] [Browser Scripts - Mythic Documentation](https://docs.mythic-c2.net/operational-pieces/browser-scripts)
-- [5] [Mythic 3.3->3.4 Updates](https://docs.mythic-c2.net/updating/mythic-3.3-greater-than-3.4-updates)
-- [6] [Transforming Red Team Ops with Mythic's Hidden Gems: Browser Scripting](https://specterops.io/blog/2025/08/21/transforming-red-team-ops-with-mythics-hidden-gems-browser-scripting/)
-
+- [3] [Mythic v3.2: novosti — interaktivni tasking, Push C2 i dinamički preglednik datoteka](https://posts.specterops.io/mythic-v3-2-highlights-interactive-tasking-push-c2-and-dynamic-file-browser-7035065e2b3d)
+- [4] [Browser Scripts — Mythic dokumentacija](https://docs.mythic-c2.net/operational-pieces/browser-scripts)
+- [5] [Mythic 3.3->3.4 ažuriranja](https://docs.mythic-c2.net/updating/mythic-3.3-greater-than-3.4-updates)
+- [6] [Unapređenje Red Team operacija uz skrivene dragulje Mythic-a: Browser Scripting](https://specterops.io/blog/2025/08/21/transforming-red-team-ops-with-mythics-hidden-gems-browser-scripting/)
+- [7] [Elastic protections-artifacts: YARA pravila za Multi_Trojan_Mythic](https://github.com/elastic/protections-artifacts/blob/main/yara/rules/Multi_Trojan_Mythic.yar)
+- [8] [Od fork-a do framework-a: šta nas je modifikovanje Apollo-a naučilo o invaziji agenata](https://bishopfox.com/blog/from-fork-to-framework-what-modifying-apollo-taught-us-about-agent-invasion)
 {{#include ../banners/hacktricks-training.md}}
