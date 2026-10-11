@@ -10,6 +10,8 @@
 >
 > - Kyk na die [**intekeningplanne**](https://github.com/sponsors/carlospolop)!
 > - **Sluit aan by die** 💬 [**Discord-groep**](https://discord.gg/hRep4RUj7f), die [**telegram-groep**](https://t.me/peass), **volg** [**@hacktricks_live**](https://twitter.com/hacktricks_live) op **X/Twitter**, of kyk na die [**LinkedIn-bladsy**](https://www.linkedin.com/company/hacktricks/) en [**YouTube-kanaal**](https://www.youtube.com/@hacktricks_LIVE).
-> - **Deel hacking-truuks deur PRs in te dien by die** [**HackTricks**](https://github.com/carlospolop/hacktricks)- en [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)-github-repos.
+> - **Deel hacking-truuks deur PR's by die** [**HackTricks**](https://github.com/carlospolop/hacktricks) **en** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **GitHub-repos in te dien.**
 >
 > </details>
+
+
