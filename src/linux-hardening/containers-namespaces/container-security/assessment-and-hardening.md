@@ -1,45 +1,48 @@
-# Assessment And Hardening
+# Değerlendirme Ve Güçlendirme
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Genel Bakış
 
-İyi bir container assessment iki paralel soruyu yanıtlamalıdır. İlk olarak, bir attacker mevcut workload üzerinden ne yapabilir? İkinci olarak, bunu mümkün kılan operator seçimleri hangileridir? Enumeration araçları ilk soruya, hardening guidance ise ikinci soruya yardımcı olur. İkisini aynı sayfada tutmak, bu bölümü yalnızca escape teknikleri kataloğu olmaktan çıkarıp sahada kullanılabilecek bir referans hâline getirir.
+İyi bir container değerlendirmesi iki paralel soruyu yanıtlamalıdır. İlk olarak, bir saldırgan mevcut workload üzerinden ne yapabilir? İkinci olarak, bunu mümkün kılan operatör tercihleri nelerdir? Enumeration araçları ilk soruya, güçlendirme kılavuzları ise ikinci soruya yardımcı olur. Her ikisini aynı sayfada tutmak, bu bölümü yalnızca escape yöntemleri kataloğu olmaktan çıkarıp sahada başvurulabilecek daha kullanışlı bir kaynağa dönüştürür.
 
-Modern ortamlar için pratik bir güncelleme şudur: Eski container writeup'larının çoğu sessizce **rootful runtime**, **user namespace isolation olmaması** ve genellikle **cgroup v1** varsayımına dayanır. Bu varsayımlar artık güvenli değildir. Eski escape primitive'lerine zaman ayırmadan önce workload'un rootless veya userns-remapped olup olmadığını, host'un cgroup v2 kullanıp kullanmadığını ve Kubernetes ya da runtime'ın varsayılan seccomp ve AppArmor profillerini uygulayıp uygulamadığını doğrulayın. Bu ayrıntılar, ünlü bir breakout yönteminin hâlâ geçerli olup olmadığını çoğu zaman belirler.
+Modern ortamlara yönelik pratik bir güncelleme olarak, eski container yazılarının çoğunun fark ettirmeden **rootful runtime**, **user namespace izolasyonu olmaması** ve çoğu zaman **cgroup v1** varsaydığını belirtmek gerekir. Bu varsayımlar artık güvenli değil. Eski escape yöntemlerini incelemeye zaman ayırmadan önce workload'un rootless veya userns-remapped olup olmadığını, host'un cgroup v2 kullanıp kullanmadığını ve Kubernetes'in ya da runtime'ın artık varsayılan seccomp ve AppArmor profillerini uygulayıp uygulamadığını doğrulayın. Bu ayrıntılar, çok bilinen bir breakout yönteminin hâlâ işe yarayıp yaramayacağını çoğu zaman belirler.
 
-## Enumeration Tools
+## Enumeration Araçları
 
-Birçok tool, container ortamını hızlıca karakterize etmek için hâlâ kullanışlıdır:
+Container ortamını hızlıca tanımlamak için çeşitli araçlar hâlâ kullanışlıdır:
 
-- `linpeas`, birçok container göstergesini, mount edilmiş socket'leri, capability set'lerini, tehlikeli filesystem'leri ve breakout ipuçlarını tespit edebilir.
-- `CDK`, özellikle container ortamlarına odaklanır ve enumeration ile bazı otomatik escape kontrollerini içerir.
-- `amicontained`, container kısıtlamalarını, capability'leri, namespace exposure'ını ve olası breakout sınıflarını belirlemek için hafif ve kullanışlıdır.
-- `deepce`, breakout odaklı kontroller içeren başka bir container odaklı enumerator'dır.
-- `grype`, assessment yalnızca runtime escape analysis yerine image-package vulnerability review'ı da içerdiğinde kullanışlıdır.
-- `Tracee`, özellikle şüpheli process execution, file access ve container-aware event collection için yalnızca static posture yerine **runtime evidence** gerektiğinde kullanışlıdır.
-- `Inspektor Gadget`, pod'lara, container'lara, namespace'lere ve diğer üst düzey kavramlara bağlanan eBPF destekli görünürlüğe ihtiyaç duyduğunuz Kubernetes ve Linux-host investigations sırasında kullanışlıdır.
+- `linpeas` birçok container göstergesini, mount edilmiş socket'leri, capability kümelerini, tehlikeli dosya sistemlerini ve breakout ipuçlarını tespit edebilir.
+- `CDK` özellikle container ortamlarına odaklanır; enumeration ve bazı otomatik escape kontrollerini içerir.
+- `amicontained` hafiftir; container kısıtlamalarını, capability'leri, namespace görünürlüğünü ve olası breakout sınıflarını belirlemek için kullanışlıdır.
+- `deepce`, breakout odaklı kontroller içeren, container'lara yönelik başka bir enumeration aracıdır.
+- `grype`, değerlendirme yalnızca runtime escape analizini değil, image paketlerindeki zafiyetlerin incelenmesini de kapsıyorsa kullanışlıdır.
+- `Tracee`, yalnızca statik duruş yerine **runtime kanıtı** gerektiğinde; özellikle şüpheli process çalıştırma, dosya erişimi ve container farkındalığıyla olay toplama için kullanışlıdır.
+- `Inspektor Gadget`, eBPF destekli görünürlüğü pod, container, namespace ve diğer üst düzey kavramlarla ilişkilendirmeniz gereken Kubernetes ve Linux host incelemelerinde kullanışlıdır.
 
-Bu tool'ların değeri kesinlikten ziyade hız ve kapsamdır. Genel posture'u hızlıca ortaya çıkarmaya yardımcı olurlar; ancak ilgi çekici bulguların gerçek runtime, namespace, capability ve mount modeli doğrultusunda manuel olarak yorumlanması gerekir.
+Bu araçların değeri kesinlik değil, hız ve kapsamdır. Genel güvenlik duruşunu hızla ortaya çıkarmaya yardımcı olurlar; ancak önemli bulguların gerçek runtime, namespace, capability ve mount modeli bağlamında elle yorumlanması gerekir.
 
-## Hardening Priorities
+## Güçlendirme Öncelikleri
 
-En önemli hardening ilkeleri, platforma göre uygulama şekilleri değişse de kavramsal olarak basittir. Privileged container'lar kullanmaktan kaçının. Mount edilmiş runtime socket'lerinden kaçının. Çok özel bir neden olmadıkça container'lara writable host path'leri vermeyin. Mümkün olduğunda user namespace'leri veya rootless execution kullanın. Tüm capability'leri drop edin ve yalnızca workload'un gerçekten ihtiyaç duyduğu capability'leri geri ekleyin. Application compatibility sorunlarını çözmek için seccomp, AppArmor ve SELinux'u devre dışı bırakmak yerine etkin tutun. Compromised bir container'ın host üzerinde kolayca denial of service gerçekleştirememesi için kaynakları sınırlayın.
+Uygulamaları platforma göre değişse de en önemli güçlendirme ilkeleri kavramsal olarak basittir. Privileged container'lardan kaçının. Runtime socket'lerini mount etmekten kaçının. Çok özel bir neden olmadıkça container'lara yazılabilir host path'leri vermeyin. Mümkünse user namespace'leri veya rootless çalıştırmayı kullanın. Tüm capability'leri kaldırın ve yalnızca workload'un gerçekten ihtiyaç duyduklarını geri ekleyin. Uygulama uyumluluğu sorunlarını çözmek için seccomp, AppArmor ve SELinux'u devre dışı bırakmak yerine etkin tutun. Ele geçirilmiş bir container'ın host'ta kolayca hizmet reddine yol açamaması için kaynakları sınırlayın.
 
-Image ve build hygiene, runtime posture kadar önemlidir. Minimal image'lar kullanın, bunları sık sık yeniden build edin, scan edin, pratik olduğu durumlarda provenance gerektirin ve secret'ları layer'ların dışında tutun. Non-root olarak çalışan, küçük bir image'a ve dar bir syscall ile capability surface'ına sahip bir container'ı savunmak; debugging tool'ları önceden yüklenmiş, host-equivalent root olarak çalışan büyük bir convenience image'ı savunmaktan çok daha kolaydır.
+Image ve build hijyeni, runtime duruşu kadar önemlidir. Minimal image'ler kullanın, bunları sık sık yeniden oluşturup tarayın, mümkün olduğunda provenance şartı koyun ve secret'ları katmanlara eklemeyin. Non-root olarak çalışan, küçük bir image kullanan ve dar bir syscall ve capability yüzeyine sahip container'ı savunmak; host ile eşdeğer yetkilere sahip root olarak çalışan, debug araçları önceden yüklenmiş büyük bir kolaylık image'ını savunmaktan çok daha kolaydır.
 
-Kubernetes için mevcut hardening baseline'ları, birçok operator'ün hâlâ varsaydığından daha belirgin kurallara sahiptir. Yerleşik **Pod Security Standards**, `restricted` profilini "current best practice" profili olarak kabul eder: `allowPrivilegeEscalation` değeri `false` olmalıdır, workload'lar non-root olarak çalışmalıdır, seccomp açıkça `RuntimeDefault` veya `Localhost` olarak ayarlanmalıdır ve capability set'leri agresif biçimde drop edilmelidir. Assessment sırasında bu önemlidir; çünkü yalnızca `warn` veya `audit` label'larını kullanan bir cluster, pratikte riskli pod'ları kabul etmeye devam ederken kâğıt üzerinde hardened görünebilir.<sup>[[1]](#references)</sup>
+Kubernetes için güncel güçlendirme temel ölçütleri, birçok operatörün hâlâ varsaydığından daha katıdır. Yerleşik **Pod Security Standards**, `restricted` profilini "güncel en iyi uygulama" olarak ele alır: `allowPrivilegeEscalation` değeri `false` olmalı, workload'lar non-root olarak çalışmalı, seccomp açıkça `RuntimeDefault` veya `Localhost` olarak ayarlanmalı ve capability kümeleri olabildiğince kapsamlı biçimde kaldırılmalıdır. Değerlendirme sırasında bu önemlidir; çünkü yalnızca `warn` veya `audit` etiketlerini kullanan bir cluster, kâğıt üzerinde güçlendirilmiş görünürken gerçekte riskli pod'ları kabul ediyor olabilir.<sup>[[1]](#references)</sup>
 
-## Modern Triage Questions
+Bir Pod'da mount edilmiş bir service-account token varsa, izinlerini **her hedef namespace için ayrı ayrı** değerlendirin. Bir namespace'teki Pod'ları listeleyen bir kural, başka bir namespace için izin olduğunu göstermez; farklı bir Pod'a mount edilmiş token'ın yetkileri farklı olabilir. İncelenen kimlikle `kubectl auth can-i list pods -n <target-namespace>` ve `kubectl auth can-i list secrets -n <target-namespace>` komutlarını kullanın. Secret listeleme kontrolünün izinli olması ciddi bir bulgudur; çünkü liste yanıtında Secret içerikleri yer alabilir, ancak bu tek başına ayrıcalıklı bir token bulunduğunu kanıtlamaz. Host erişimi için ayrıca kullanılabilir bir workload oluşturma yetkisi, önerilen `hostPath` mount'unun kabul edilmesi ve hedeflenen dosya işlemini yapmaya izin veren bir node/pod güvenlik bağlamı gerekir. Kubernetes'in [authorization kontrollerine](https://kubernetes.io/docs/reference/access-authn-authz/authorization/) ve [RBAC ayrıcalık yükseltme kılavuzuna](https://kubernetes.io/docs/concepts/security/rbac-good-practices/) bakın.
 
-Escape-specific sayfalara geçmeden önce şu hızlı soruları yanıtlayın:
+## Modern Triage Soruları
 
-1. Workload **rootful**, **rootless** veya **userns-remapped** mi?
+Escape'e özel sayfalara geçmeden önce şu kısa soruları yanıtlayın:
+
+1. Workload **rootful**, **rootless** veya **userns-remapped** mı?
 2. Node **cgroup v1** mi yoksa **cgroup v2** mi kullanıyor?
-3. **seccomp** ve **AppArmor/SELinux** açıkça yapılandırılmış mı, yoksa yalnızca mevcut olduğunda mı inherit ediliyor?
-4. Kubernetes'te namespace gerçekten `baseline` veya `restricted` uyguluyor mu, yoksa yalnızca warning/auditing mi yapıyor?
+3. **seccomp** ve **AppArmor/SELinux** açıkça yapılandırılmış mı, yoksa yalnızca mevcut olduklarında devralınıyorlar mı?
+4. Kubernetes'te namespace gerçekten `baseline` veya `restricted` ilkesini **uyguluyor** mu, yoksa yalnızca uyarı mı veriyor ya da denetim mi yapıyor?
 
-Useful checks:
+Kullanışlı kontroller:
+
 ```bash
 id
 cat /proc/self/uid_map 2>/dev/null
@@ -54,19 +57,21 @@ kubectl get ns "$NS" -o jsonpath='{.metadata.labels}' 2>/dev/null
 kubectl get pod "$HOSTNAME" -n "$NS" -o jsonpath='{.spec.securityContext.supplementalGroupsPolicy}{"\n"}' 2>/dev/null
 kubectl get pod "$HOSTNAME" -n "$NS" -o jsonpath='{.spec.securityContext.seccompProfile.type}{"\n"}{.spec.containers[*].securityContext.allowPrivilegeEscalation}{"\n"}{.spec.containers[*].securityContext.capabilities.drop}{"\n"}' 2>/dev/null
 ```
-Burada ilginç olanlar:
 
-- `/proc/self/uid_map`, container root'un **yüksek bir host UID aralığına** eşlendiğini gösteriyorsa, daha eski host-root writeup'larının çoğu daha az ilgili hâle gelir; çünkü container içindeki root artık host-root eşdeğeri değildir.
-- `/sys/fs/cgroup` değeri `cgroup2fs` ise, `release_agent` abuse gibi eski **cgroup v1** odaklı writeup'lar artık ilk tahmininiz olmamalıdır.
-- seccomp ve AppArmor yalnızca örtük olarak miras alınıyorsa taşınabilirlik, defender'ların beklediğinden daha zayıf olabilir. Kubernetes'te açıkça `RuntimeDefault` ayarlamak, node varsayımlarına sessizce güvenmekten genellikle daha güçlüdür.
-- `supplementalGroupsPolicy` `Strict` olarak ayarlanmışsa pod, image içindeki `/etc/group` dosyasından ek grup üyeliklerini sessizce miras almamalıdır. Bu, grup tabanlı volume ve dosya erişimi davranışını daha öngörülebilir hâle getirir.
-- `pod-security.kubernetes.io/enforce=restricted` gibi namespace label'larını doğrudan kontrol etmeye değer. `warn` ve `audit` kullanışlıdır, ancak riskli bir pod'un oluşturulmasını engellemez.
+Burada dikkat çekenler:
+
+- `/proc/self/uid_map`, container root kullanıcısının **yüksek bir host UID aralığına** eşlendiğini gösteriyorsa, eski host-root yazıları daha az ilgili hâle gelir; çünkü container içindeki root artık host-root ile eşdeğer değildir.
+- `/sys/fs/cgroup` `cgroup2fs` ise, `release_agent` kötüye kullanımı gibi eski **cgroup v1** odaklı yazılar artık ilk akla gelen seçenek olmamalıdır.
+- seccomp ve AppArmor yalnızca örtük olarak devralınıyorsa, taşınabilirlik savunucuların beklediğinden daha düşük olabilir. Kubernetes'te `RuntimeDefault` değerini açıkça ayarlamak, çoğu zaman sessizce node varsayılanlarına güvenmekten daha güçlüdür.
+- `supplementalGroupsPolicy` `Strict` olarak ayarlanmışsa pod, image içindeki `/etc/group` dosyasından fazladan grup üyeliklerini sessizce devralmamalıdır; bu da grup tabanlı volume ve dosya erişimi davranışını daha öngörülebilir kılar.
+- `pod-security.kubernetes.io/enforce=restricted` gibi namespace etiketlerini doğrudan kontrol etmek faydalıdır. `warn` ve `audit` işlevseldir, ancak riskli bir pod'un oluşturulmasını engellemezler.
 
 ## Runtime Baseline Triage
 
-Runtime baseline, bir container'ın sıradan ve izole bir workload gibi mi, yoksa host'u etkileyebilecek bir control plane foothold'u gibi mi göründüğünü hızlıca belirleyen kontroldür. Bir sonraki okunacak sayfaya öncelik verebilmek için yeterli bilgiyi toplamalıdır: runtime socket abuse, host mount'ları, namespace'ler, cgroup'lar, capabilities veya image-secret incelemesi.
+Runtime baseline, bir container'ın sıradan, yalıtılmış bir workload'a mı yoksa host'u etkileyebilecek bir control plane foothold'una mı benzediğini anlamanızı sağlayan hızlı kontroldür. Sonraki adımda hangi konuyu inceleyeceğinize (runtime socket kötüye kullanımı, host mount'ları, namespace'ler, cgroup'lar, capabilities veya image secret incelemesi) öncelik vermek için yeterli bilgi toplamalıdır.
 
-Bir workload içinden yapılabilecek kullanışlı kontroller:
+Bir workload içinden yapılabilecek faydalı kontroller:
+
 ```bash
 id
 hostname
@@ -80,50 +85,58 @@ readlink /proc/self/ns/{pid,mnt,net,ipc,cgroup,user} 2>/dev/null
 mount
 find /run /var/run -maxdepth 3 \( -name docker.sock -o -name containerd.sock -o -name crio.sock -o -name podman.sock \) 2>/dev/null
 ```
-Yorum:
 
-- Eksik veya sınırsız `memory.max` / `pids.max`, temiz bir escape olmasa bile zayıf blast-radius kontrollerine işaret eder.
-- `NoNewPrivs: 0` değerine sahip, geniş yetenekli ve izin verici seccomp kullanan bir root shell, dar kapsamlı bir non-root workload'dan çok daha ilgi çekicidir.
-- Runtime socket'leri ve yazılabilir host mount'ları, zaten bir yönetim veya dosya sistemi kontrol yolu açığa çıkardıkları için genellikle kernel exploit'lerinden daha önceliklidir.
-- Paylaşılan PID, network, IPC veya cgroup namespace'leri tek başlarına her zaman tam escape sağlamaz; ancak sonraki adımı bulmayı kolaylaştırırlar.
+Yorumlama:
+
+- `memory.max` / `pids.max` değerlerinin eksik veya sınırsız olması, temiz bir escape olmasa bile etki alanını sınırlayan kontrollerin zayıf olduğuna işaret eder.
+- `NoNewPrivs: 0`, geniş yetenekler ve izin verici seccomp ile çalışan bir root shell, kısıtlı bir non-root workload'dan çok daha dikkat çekicidir.
+- Runtime socket'leri ve yazılabilir host mount'ları genellikle kernel exploit'lerinden önce gelir; çünkü bunlar zaten bir yönetim veya dosya sistemi kontrol yolu sunar.
+- Paylaşılan PID, network, IPC veya cgroup namespace'leri tek başlarına her zaman tam bir escape sağlamaz, ancak bir sonraki adımı bulmayı kolaylaştırır.
 
 ## Kaynak Tüketimi Örnekleri
 
-Kaynak kontrolleri gösterişli değildir; ancak compromise'ın blast radius'unu sınırladıkları için container security'nin bir parçasıdır. Memory, CPU veya PID limitleri olmadığında basit bir shell, host'u veya komşu workload'ları degrade etmek için yeterli olabilir.
+Kaynak kontrolleri gösterişli değildir, ancak bir ihlalin etki alanını sınırladıkları için container security'nin bir parçasıdır. Bellek, CPU veya PID limitleri olmadığında, basit bir shell bile host'un veya komşu workload'ların performansını düşürmeye yetebilir.
 
 Host'u etkileyen test örnekleri:
+
 ```bash
 stress-ng --vm 1 --vm-bytes 1G --verify -t 5m
 docker run -d --name malicious-container -c 512 busybox sh -c 'while true; do :; done'
 nc -lvp 4444 >/dev/null & while true; do cat /dev/urandom | nc <target_ip> 4444; done
 ```
-Bu örnekler kullanışlıdır; çünkü her tehlikeli container sonucunun temiz bir "escape" olmadığını gösterir. Zayıf cgroup limitleri, code execution'ı yine de gerçek bir operasyonel etkiye dönüştürebilir.
 
-Kubernetes-backed ortamlarda, DoS'u teorik olarak değerlendirmeden önce resource controls'ün mevcut olup olmadığını da kontrol edin:
+Bu örnekler, container’larda ortaya çıkabilecek her tehlikeli sonucun sorunsuz bir “escape” olmadığını gösterdiği için yararlıdır. Zayıf cgroup limitleri, code execution’ı gerçek operasyonel etkiye dönüştürebilir.
+
+Kubernetes destekli ortamlarda, DoS’u teorik bir ihtimal olarak değerlendirmeden önce kaynak denetimlerinin mevcut olup olmadığını da kontrol edin:
+
 ```bash
 kubectl get pod "$HOSTNAME" -n "$NS" -o jsonpath='{range .spec.containers[*]}{.name}{" cpu="}{.resources.limits.cpu}{" mem="}{.resources.limits.memory}{"\n"}{end}' 2>/dev/null
 cat /sys/fs/cgroup/pids.max 2>/dev/null
 cat /sys/fs/cgroup/memory.max 2>/dev/null
 cat /sys/fs/cgroup/cpu.max 2>/dev/null
 ```
-## Hardening Araçları
 
-Docker odaklı ortamlar için `docker-bench-security`, yaygın olarak kabul gören benchmark yönergelerine göre genel yapılandırma sorunlarını denetlediği için host tarafında kullanışlı bir audit temel ölçütü olmaya devam eder:
+## Güvenlik Sıkılaştırma Araçları
+
+Docker odaklı ortamlarda `docker-bench-security`, yaygın yapılandırma sorunlarını geniş çapta kabul gören benchmark yönergelerine göre denetlediği için ana makine tarafında yararlı bir denetim başlangıç noktası olmaya devam ediyor. Yapılandırma benchmark'ı, kurulu runtime'ın yeni açıklanmış bir güvenlik açığından etkilenip etkilenmediğini tespit edemeyeceğinden, runtime güvenlik duyuruları ayrıca incelenmelidir. <sup>[[2]](#references)</sup>
+
 ```bash
 git clone https://github.com/docker/docker-bench-security.git
 cd docker-bench-security
 sudo sh docker-bench-security.sh
 ```
-Araç, threat modeling'in yerini tutmaz; ancak zaman içinde biriken dikkatsiz daemon, mount, network ve runtime varsayılanlarını bulmak için yine de değerlidir.
+
+Araç, tehdit modellemesinin yerini tutmaz; ancak zaman içinde biriken özensiz daemon, mount, network ve runtime varsayılanlarını bulmak için yine de değerlidir.
 
 Kubernetes ve runtime ağırlıklı ortamlarda statik kontrolleri runtime görünürlüğüyle birlikte kullanın:
 
-- `Tracee`, container-aware runtime detection ve ele geçirilmiş bir workload'un gerçekte neleri etkilediğini doğrulamanız gerektiğinde hızlı forensics için kullanışlıdır.
-- `Inspektor Gadget`, assessment sırasında kernel-level telemetry'nin pod'lara, container'lara, DNS activity'ye, file execution'a veya network behavior'a eşlenmesi gerektiğinde kullanışlıdır.
+- `Tracee`, container farkındalığına sahip runtime tespiti ve ele geçirilmiş bir workload'un gerçekte nelere eriştiğini doğrulamanız gerektiğinde hızlı adli inceleme için kullanışlıdır.
+- `Inspektor Gadget`, değerlendirmede kernel düzeyinde telemetrinin pod'larla, container'larla, DNS etkinliğiyle, dosya yürütmeyle veya network davranışıyla eşleştirilmesi gerektiğinde kullanışlıdır.
 
 ## Kontroller
 
-Assessment sırasında hızlı bir ilk geçiş için bunları kullanın:
+Değerlendirme sırasında hızlı bir ilk kontrol için şu komutları kullanın:
+
 ```bash
 id
 capsh --print 2>/dev/null
@@ -133,17 +146,17 @@ stat -fc %T /sys/fs/cgroup 2>/dev/null
 mount
 find / -maxdepth 3 \( -name docker.sock -o -name containerd.sock -o -name crio.sock -o -name podman.sock \) 2>/dev/null
 ```
-Burada ilginç olanlar:
 
-- Geniş yetkilere sahip ve `Seccomp: 0` değerini taşıyan bir root process'i derhâl incelenmelidir.
-- Aynı zamanda **1:1 UID map** kullanan bir root process'i, düzgün şekilde izole edilmiş bir user namespace içindeki "root" process'inden çok daha ilgi çekicidir.
-- `cgroup2fs` genellikle eski **cgroup v1** escape chain'lerinin en iyi başlangıç noktası olmadığı anlamına gelir; ancak `memory.max` veya `pids.max` değerlerinin eksik olması, blast radius kontrollerinin hâlâ zayıf olduğuna işaret eder.
-- Şüpheli mount'lar ve runtime socket'leri, herhangi bir kernel exploit'inden daha hızlı bir impact yolu sağlayabilir.
-- Zayıf runtime posture ile zayıf resource limit'lerinin birleşimi, genellikle tekil ve izole bir hatadan ziyade genel olarak permissive bir container environment bulunduğunu gösterir.
+Burada dikkat çekenler:
+
+- Geniş capabilities değerlerine sahip ve `Seccomp: 0` olan bir root process hemen incelenmelidir.
+- **1:1 UID map** kullanan bir root process, uygun şekilde yalıtılmış bir user namespace içindeki "root"tan çok daha dikkat çekicidir.
+- `cgroup2fs` genellikle eski **cgroup v1** escape zincirlerinin en iyi başlangıç noktası olmadığı anlamına gelir; ancak `memory.max` veya `pids.max` değerlerinin olmaması, blast radius kontrollerinin zayıf olduğuna işaret eder.
+- Şüpheli mount'lar ve runtime socket'leri, çoğu zaman herhangi bir kernel exploit'ten daha hızlı etki yaratma yolu sunar.
+- Zayıf runtime duruşu ile zayıf kaynak limitlerinin bir arada bulunması, genellikle tekil bir hatadan ziyade genel olarak izinleri geniş bir container ortamına işaret eder.
 
 ## References
 
-- [1] [Kubernetes Pod Security Standards](https://kubernetes.io/docs/concepts/security/pod-security-standards/)
-- [2] [Docker Security Advisory: Multiple Vulnerabilities in runc, BuildKit, and Moby](https://docs.docker.com/security/security-announcements/)
-
+- [1] [Kubernetes Pod Güvenlik Standartları](https://kubernetes.io/docs/concepts/security/pod-security-standards/)
+- [2] [Docker Güvenlik Uyarısı: runc, BuildKit ve Moby'de Birden Fazla Güvenlik Açığı](https://docs.docker.com/security/security-announcements/)
 {{#include ../../../banners/hacktricks-training.md}}

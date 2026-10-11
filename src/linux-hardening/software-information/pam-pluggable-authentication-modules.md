@@ -1,15 +1,15 @@
-# PAM - Takılabilir Kimlik Doğrulama Modülleri
+# PAM - Pluggable Authentication Modules
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ### Temel Bilgiler
 
-**PAM (Takılabilir Kimlik Doğrulama Modülleri)**, **bilgisayar hizmetlerine erişmeye çalışan kullanıcıların kimliğini doğrulayan** ve erişimlerini çeşitli ölçütlere göre denetleyen bir güvenlik mekanizmasıdır. Dijital bir kapı görevlisi gibi çalışarak yalnızca yetkili kullanıcıların belirli hizmetleri kullanabilmesini sağlar ve sistemin aşırı yüklenmesini önlemek için kullanımlarını sınırlayabilir.
+**PAM (Pluggable Authentication Modules)**, **bilgisayar hizmetlerine erişmeye çalışan kullanıcıların kimliğini doğrulayan** ve çeşitli ölçütlere göre erişimlerini kontrol eden bir güvenlik mekanizmasıdır. Dijital bir kapı görevlisi gibi çalışır; yalnızca yetkili kullanıcıların belirli hizmetleri kullanabilmesini sağlarken sistemin aşırı yüklenmesini önlemek için kullanımlarını da sınırlayabilir.
 
 #### Yapılandırma Dosyaları
 
-- **Solaris**, eski merkezi `/etc/pam.conf` dosyasını destekler; ancak güncel yönergeler `/etc/pam.d` altındaki hizmet dosyalarının kullanılmasını önerir.<sup>[[10]](#references)</sup>
-- **Linux sistemleri**, hizmete özgü yapılandırmaları `/etc/pam.d` içinde depolayan dizin yaklaşımını tercih eder. Örneğin, login hizmetinin yapılandırma dosyası `/etc/pam.d/login` konumundadır.<sup>[[1]](#references)</sup>
+- **Solaris**, eski merkezi `/etc/pam.conf` dosyasını destekler; ancak güncel yönergeler, `/etc/pam.d` altındaki hizmet dosyalarının kullanılmasını tercih eder.<sup>[[10]](#references)</sup>
+- **Linux sistemleri**, dizin tabanlı yaklaşımı tercih eder ve hizmete özgü yapılandırmaları `/etc/pam.d` içinde tutar. Örneğin, login hizmetinin yapılandırma dosyası `/etc/pam.d/login` konumundadır.<sup>[[1]](#references)</sup>
 
 Login hizmeti için bir PAM yapılandırması şöyle görünebilir:
 
@@ -28,50 +28,50 @@ session required /lib/security/pam_unix_session.so
 
 #### **PAM Yönetim Alanları**
 
-Bu alanlar veya yönetim grupları, kimlik doğrulama ve oturum yönetimi sürecinin farklı yönlerinden sorumlu olan **auth**, **account**, **password** ve **session** gruplarını içerir:<sup>[[1]](#references)</sup>
+Bu alanlar veya yönetim grupları **auth**, **account**, **password** ve **session** öğelerini içerir; her biri kimlik doğrulama ve oturum yönetimi sürecinin farklı yönlerinden sorumludur:<sup>[[1]](#references)</sup>
 
 - **Auth**: Kullanıcı kimliğini doğrular; genellikle parola ister.
-- **Account**: Grup üyeliği veya günün saatine bağlı kısıtlamalar gibi koşulları denetleyerek hesabı doğrular.
+- **Account**: Grup üyeliği veya günün saati kısıtlamaları gibi koşulları denetleyerek hesap doğrulamasını yönetir.
 - **Password**: Karmaşıklık denetimleri veya sözlük saldırılarını önleme dahil parola güncellemelerini yönetir.
-- **Session**: Dizinleri bağlama veya kaynak sınırlarını ayarlama gibi hizmet oturumu başlarken ya da biterken yapılan işlemleri yönetir.
+- **Session**: Dizinleri bağlama veya kaynak sınırlarını belirleme gibi, bir hizmet oturumu başlarken ya da sona ererken yapılan işlemleri yönetir.
 
-#### **PAM Modül Denetimleri**
+#### **PAM Modülü Kontrolleri**
 
-Denetimler, modülün başarıya veya başarısızlığa vereceği yanıtı belirleyerek genel kimlik doğrulama sürecini etkiler. Bunlar şunlardır:<sup>[[1]](#references)</sup>
+Kontroller, modülün başarıya veya başarısızlığa vereceği tepkiyi belirleyerek genel kimlik doğrulama sürecini etkiler. Bunlar şunlardır:<sup>[[1]](#references)</sup>
 
-- **Required**: Zorunlu bir modülün başarısız olması, sonraki tüm modüller denetlendikten sonra sürecin başarısız olmasına neden olur.
+- **Required**: Gerekli bir modülün başarısız olması sonunda başarısızlıkla sonuçlanır; ancak bundan önce sonraki tüm modüller denetlenir.
 - **Requisite**: Başarısızlık durumunda süreç hemen sonlandırılır.
-- **Sufficient**: Daha önceki hiçbir `required` modül başarısız olmadıysa başarı hemen döndürülür ve aynı yönetim grubundaki kalan modüller atlanır.
+- **Sufficient**: Daha önce hiçbir `required` modül başarısız olmadıysa başarı hemen döndürülür ve aynı yönetim grubundaki kalan modüller atlanır.
 - **Optional**: Yalnızca yığındaki tek modülse başarısızlığa neden olur.
 
-#### Önemli Saldırı Semantiği
+#### Önem Taşıyan Saldırı Semantiği
 
-PAM'i analiz ederken veya değiştirirken, eklenen bir kuralın **konumu** hangi yığının bu kuralı göreceğini belirler:<sup>[[1]](#references)[[13]](#references)</sup>
+PAM'i analiz ederken veya değiştirirken, **eklenen bir kuralın konumu** hangi yığının bu kuralı göreceğini belirler:<sup>[[1]](#references)[[13]](#references)</sup>
 
-- `include` ve `substack`, kuralları diğer dosyalardan alır. Bu nedenle `sshd` dosyasını düzenlemek yalnızca SSH'yi etkileyebilirken `system-auth`, `common-auth` veya paylaşılan başka bir yığını düzenlemek birden çok hizmeti aynı anda etkileyebilir.<sup>[[1]](#references)[[13]](#references)</sup>
-- PAM, `[success=1 default=ignore]` gibi köşeli parantezli denetimleri de destekler. Bunlar, `pam_unix.so` dosyasını görünür biçimde değiştirmek yerine, özel bir denetim başarılı olduktan sonra **bir veya daha fazla modülü atlamak** için kötüye kullanılabilir.<sup>[[1]](#references)</sup>
+- `include` ve `substack` kuralları başka dosyalardan alır. Bu nedenle `sshd` dosyasını düzenlemek yalnızca SSH'yi etkileyebilirken `system-auth`, `common-auth` veya başka bir paylaşılan yığını düzenlemek aynı anda birden fazla hizmeti etkileyebilir.<sup>[[1]](#references)[[13]](#references)</sup>
+- PAM, `[success=1 default=ignore]` gibi köşeli parantezli kontrolleri de destekler. Bunlar, `pam_unix.so` dosyasını görünür biçimde değiştirmek yerine, özel bir denetim başarılı olduktan sonra **bir veya daha fazla modülü atlamak** için kötüye kullanılabilir.<sup>[[1]](#references)</sup>
 - `module-path` **mutlak** (`/usr/lib/security/pam_custom.so`) veya varsayılan PAM modül dizinine göre **göreli** olabilir. Modern Linux sistemlerinde gerçek dizinler genellikle `/lib/security`, `/lib64/security`, `/usr/lib/security` veya `/usr/lib/x86_64-linux-gnu/security` gibi multiarch yollarıdır.<sup>[[1]](#references)[[14]](#references)</sup>
 
-Operatörler için kısa not: değişiklik yapmadan önce daima **hizmet grafiğinin tamamını** çıkarın. Örneğin bazı dağıtımlarda `sshd -> password-auth -> system-auth`, bazılarında ise `sshd -> system-remote-login -> system-login -> system-auth` zinciri bulunur; bu durumda tek satırlık implant, amaçlanandan çok daha geniş bir alana yayılabilir.<sup>[[1]](#references)[[13]](#references)</sup>
+Operatörler için kısa not: yamalamadan önce daima **tam hizmet grafiğini** çıkarın. Örneğin, bazı dağıtımlarda `sshd -> password-auth -> system-auth`, diğerlerinde ise `sshd -> system-remote-login -> system-login -> system-auth` zinciri bulunması, aynı tek satırlık implantın amaçlanandan çok daha geniş bir alana yayılabileceği anlamına gelir.<sup>[[1]](#references)[[13]](#references)</sup>
 
-Özel bir `auth` modülü, hesap parolasından sonra `sudo` için etkileşimli bir sorgulama ekleyebilir. Sorgulamayı elle incelemeden önce, etkin `/etc/pam.d/sudo` yığınını, dahil edilen politikayı, modül argümanlarını ve başvurulan yerel veri dosyalarının izinlerini denetleyin. Okunabilir bir sorgulama sözcük listesi tek başına parola denetimini atlatmaz veya sudoers yetkisi vermez. Ayrıcalıklı geçiş için doğru hesap kimlik doğrulaması, gerekli tüm PAM adımlarının tamamlanması ve root yetkisi verebilen bir sudo kuralı gerekir; gözetimsiz numaralandırma sorgulamayı tetiklememelidir.
+Özel bir `auth` modülü, hesap parolasından sonra `sudo`'ya etkileşimli bir doğrulama isteği ekleyebilir. Doğrulama isteğini elle incelemeden önce geçerli `/etc/pam.d/sudo` yığınını, dahil edilen politikayı, modül argümanlarını ve başvurulan yerel veri dosyalarının izinlerini inceleyin. Okunabilir bir doğrulama sözcük listesi tek başına parola denetimini atlatmaz veya sudoers yetkisi sağlamaz. Ayrıcalıklı geçiş için yine de doğru hesap kimlik doğrulaması, gerekli her PAM adımının tamamlanması ve root yetkisi verebilen bir sudo kuralı gerekir; gözetimsiz numaralandırma doğrulama isteğini tetiklememelidir.
 
-Eski Ubuntu [`pam_motd` sahiplik açığı (CVE-2010-0832)](https://ubuntu.com/security/cve-2010-0832) için, kullanılan `libpam-modules` derlemesini ve bir giriş hizmetinin etkilenen session modülünü çağırıp çağırmadığını inceleyin. Ubuntu, açığı 9.10 için **1.1.0-2ubuntu1.1** ve 10.04 LTS için **1.1.1-2ubuntu5** sürümlerinde düzeltti; diğer sürümler veya üretici tarafından geriye taşınan yamalar için ayrı paket değerlendirmesi gerekir. Bildirilen senaryoda, çağıranın kendi home dizinindeki `.cache` öğesini bir symlink ile değiştirip ardından PAM girişi başlatması gerekiyordu; bu da eski modülün korunan hedefin sahipliğini değiştirmesine yol açıyordu. Tek başına bir `.cache` öğesi, `pam_motd.so` satırı veya eski kernel sürümü açığın varlığını kanıtlamaz. Pasif numaralandırma sırasında dosyaları değiştirmeden veya giriş başlatmadan önce home dizini üzerindeki denetimi, etkin modül sürümünü, giriş hizmetine erişilebilirliği, symlink işleme davranışını ve hedef izinlerini kontrol edin. [Ubuntu'nun güvenlik bildirimine](https://ubuntu.com/security/notices/USN-959-1) bakın.
+Eski Ubuntu [`pam_motd` sahiplik açığı (CVE-2010-0832)](https://ubuntu.com/security/cve-2010-0832) için, kullanılan gerçek `libpam-modules` derlemesini ve bir oturum açma hizmetinin etkilenen session modülünü çağırıp çağırmadığını inceleyin. Ubuntu, açığı 9.10 için **1.1.0-2ubuntu1.1** ve 10.04 LTS için **1.1.1-2ubuntu5** sürümlerinde düzeltti; diğer sürümler veya tedarikçi backport'ları ayrıca değerlendirilmelidir. Bildirilen saldırı yolunda, çağıranın kendi `.cache` dizinini bir symlink ile değiştirmesi ve ardından PAM üzerinden oturum açmayı tetiklemesi gerekiyordu; bu, eski modülün korumalı bir hedefin sahipliğini değiştirmesine yol açıyordu. Tek başına bir `.cache` girdisi, `pam_motd.so` satırı veya eski kernel sürümü etkilenme durumunu kanıtlamaz; pasif numaralandırma sırasında dosyaları değiştirmeden veya oturum açmayı başlatmadan home dizini üzerindeki denetimi, etkin modül sürümünü, oturum açma erişilebilirliğini, symlink işlemesini ve hedef izinlerini kontrol edin. Bkz. [Ubuntu'nun güvenlik bildirimi](https://ubuntu.com/security/notices/USN-959-1).
 
 #### Örnek Senaryo
 
-Birden çok auth modülünün bulunduğu bir yapılandırmada süreç katı bir sırayla ilerler. `pam_securetty` modülü giriş terminalinin yetkisiz olduğunu tespit ederse root girişleri engellenir; ancak "required" durumu nedeniyle tüm modüller yine de işlenir. `pam_env`, kullanıcı deneyimini iyileştirmeye yardımcı olabilecek ortam değişkenlerini ayarlar. `pam_ldap` ve `pam_unix` modülleri kullanıcıyı doğrulamak için birlikte çalışır; `pam_unix`, daha önce sağlanan bir parolayı kullanmayı deneyerek kimlik doğrulama yöntemlerinde verimliliği ve esnekliği artırır.<sup>[[1]](#references)[[13]](#references)[[15]](#references)[[16]](#references)[[17]](#references)</sup>
+Birden fazla auth modülünün bulunduğu bir kurulumda süreç katı bir sırayı izler. `pam_securetty` modülü oturum açma terminalinin yetkisiz olduğunu belirlerse root oturumları engellenir; ancak modülün "required" durumu nedeniyle tüm modüller yine de işlenir. `pam_env`, kullanıcı deneyimini iyileştirmeye yardımcı olabilecek ortam değişkenlerini ayarlar. `pam_ldap` ve `pam_unix` modülleri kullanıcıyı doğrulamak için birlikte çalışır; `pam_unix` daha önce sağlanmış bir parolayı kullanmayı deneyerek kimlik doğrulama yöntemlerinin verimliliğini ve esnekliğini artırır.<sup>[[1]](#references)[[13]](#references)[[15]](#references)[[16]](#references)[[17]](#references)</sup>
 
 
 ## Bir hizmet yığınında `pam_permit`
 
-`pam_permit.so`, PAM denetimlerinde başarı döndürür. Daha düşük ayrıcalıklı bir kullanıcı, bir hizmetin etkin PAM politikasını değiştirebiliyorsa, bunu kimlik doğrulama yığınını kısa devre yapan bir control flag ile eklemek o hizmetin parola denetimini kaldırabilir. Hangi hizmetlerin etkilendiğine karar vermeden önce `sudo` için `/etc/pam.d/sudo` dosyasını ve dahil edilen `common-auth` veya `system-auth` dosyalarını inceleyin. PAM kimlik doğrulama atlatması yeni bir sudoers kuralı **vermez**; kullanıcının yine de istenen komutu çalıştırma yetkisi olmalıdır. Tek bir `sufficient pam_permit.so` satırının her zaman başarılı olacağını varsaymak yerine kural sırasını ve daha önceki `required` başarısızlıklarını denetleyin.
+`pam_permit.so`, PAM denetimleri için başarı döndürür. Daha düşük ayrıcalıklı bir kullanıcı bir hizmetin etkin PAM politikasını değiştirebiliyorsa, bu modülü kimlik doğrulama yığınını kısa devre edecek bir kontrol bayrağıyla eklemek, söz konusu hizmetin parola denetimini kaldırabilir. Hangi hizmetlerin etkilendiğine karar vermeden önce `sudo` için `/etc/pam.d/sudo` dosyasını ve dahil edilen `common-auth` veya `system-auth` dosyalarını inceleyin. PAM kimlik doğrulama atlatması **yeni bir sudoers kuralı vermez**; kullanıcının istenen komutu çalıştırma yetkisi yine de olmalıdır. Tek bir `sufficient pam_permit.so` satırının her zaman başarılı olacağını varsaymak yerine kural sırasını ve daha önceki `required` başarısızlıklarını kontrol edin.
 
-## PAM'e Arka Kapı Ekleme – `pam_unix.so` Kancasını Kullanma
+## PAM'e Backdoor Ekleme – `pam_unix.so` Hooking
 
-Önemli Linux ortamlarında kullanılan klasik bir kalıcılık yöntemi, **meşru PAM kitaplığını trojanlaştırılmış bir yedekle değiştirmektir**. PAM yığınının `pam_unix.so` yüklediği bir ana bilgisayarda SSH veya konsol kimlik doğrulaması, bu modülün `pam_sm_authenticate()` giriş noktasını çağırabilir; kötü amaçlı bir yedek, kimlik bilgilerini ele geçirebilir veya *sihirli* bir parola atlatması uygulayabilir.<sup>[[2]](#references)[[11]](#references)</sup>
+Değerli Linux ortamlarında kullanılan klasik bir kalıcılık yöntemi, **meşru PAM kütüphanesini trojanlaştırılmış bir yedekle değiştirmektir**. PAM yığınının `pam_unix.so` yüklediği bir host'ta SSH veya konsol kimlik doğrulaması, `pam_sm_authenticate()` giriş noktasını çağırabilir; kötü amaçlı bir yedek kimlik bilgilerini yakalayabilir veya *sihirli* parola atlatması uygulayabilir.<sup>[[2]](#references)[[11]](#references)</sup>
 
-### Derleme Kısa Notları
+### Derleme Kısa Rehberi
 Aşağıdaki taslak, kimlik doğrulama belirtecine erişmek için Linux-PAM'in `pam_sm_authenticate()` hizmet giriş noktasını ve `pam_get_authtok()` işlevini kullanır.<sup>[[11]](#references)[[12]](#references)</sup>
 <details>
 <summary>Örnek `pam_unix.so` trojanı</summary>
@@ -130,7 +130,7 @@ PAM_EXTERN int pam_sm_setcred(pam_handle_t *pamh, int flags, int argc, const cha
 
 </details>
 
-Derleyin ve gizlice değiştirin (replacement/timestomp kalıbı Unit 42 tarafından belgelenmiştir). Wrapper'da sabit kodlanmış yedekleme yolunu ve aşağıdaki komutları hedefin gerçek PAM modül dizinine göre ayarlayın:<sup>[[2]](#references)</sup>
+Derleyip gizlice değiştirin (replacement/timestomp kalıbı Unit 42 tarafından belgelenmiştir). Hem wrapper'da sabit kodlanmış yedekleme yolunu hem de aşağıdaki komutları hedefin gerçek PAM modül dizinine göre ayarlayın:<sup>[[2]](#references)</sup>
 ```bash
 gcc -fPIC -shared -o pam_unix.so trojan_pam.c -ldl -lpam
 mv /lib/security/pam_unix.so /lib/security/pam_unix.so.bak
@@ -140,21 +140,21 @@ touch -r /bin/ls /lib/security/pam_unix.so  # timestomp
 ```
 
 ### OpSec İpuçları
-1. **Atomik üzerine yazma** – kısmen yazılmış bir kimlik doğrulama modülü bırakmamak için eksiksiz bir library'yi geçici bir dosyaya yazın ve ardından dosyayı hedef konuma yeniden adlandırın.
-2. Unit 42'nin AuthDoor analizinde `/usr/bin/.dbus.log` gibi bir yol gözlemlenmiştir; bu nedenle bu yol, hunting için yararlı bir göstergedir.<sup>[[2]](#references)</sup>
-3. Diğer yönetim işlemlerinin çalışmaya devam etmesi için PAM stack'in beklediği giriş noktalarını (örneğin, `pam_sm_authenticate` ve `pam_sm_setcred`) koruyun.<sup>[[11]](#references)[[18]](#references)</sup>
+1. **Atomik üzerine yazma** – kısmen yazılmış bir authentication module bırakmamak için eksiksiz bir library'yi geçici bir dosyaya yazın ve ardından hedef konuma yeniden adlandırın.
+2. Unit 42'nin AuthDoor analizinde `/usr/bin/.dbus.log` gibi bir yol gözlemlenmiştir; bu nedenle bu yol da yararlı bir hunting göstergesidir.<sup>[[2]](#references)</sup>
+3. Diğer yönetim işlemlerinin çalışmaya devam etmesi için PAM stack'in beklediği entry point'leri (`pam_sm_authenticate` ve `pam_sm_setcred` gibi) koruyun.<sup>[[11]](#references)[[18]](#references)</sup>
 
 ### Tespit
-Paket bütünlüğü denetimlerinde RPM, kurulu dosyaların metadata bilgilerini doğrular; `debsums -s` checksum hatalarını bildirir ve triage bloğundaki `dpkg -S` paket sahipliğini sorgular. Audit watch söz dizimi, bir yola yapılan yazma ve öznitelik değişikliklerini kaydeder.<sup>[[6]](#references)[[7]](#references)[[8]](#references)[[9]](#references)</sup>
-* `pam_unix.so` dosyasının MD5/SHA256 değerlerini dağıtım paketindeki değerlerle karşılaştırın.
-* Elle hash hesaplamadan değiştirilmiş library'leri tespit etmek için `rpm -V pam` veya `debsums -s libpam-modules` komutunu kullanın.
-* `/lib/security/` altındaki world-writable dosyaları veya olağandışı sahiplikleri kontrol edin.
+Package integrity kontrollerinde RPM, kurulu dosyaların metadata'sını doğrular; `debsums -s` checksum hatalarını bildirir ve triage bloğundaki `dpkg -S` package sahipliğini sorgular. Audit watch syntax'ı, bir yola yapılan yazma ve attribute değişikliklerini kaydeder.<sup>[[6]](#references)[[7]](#references)[[8]](#references)[[9]](#references)</sup>
+* `pam_unix.so` dosyasının MD5/SHA256 değerini distro package'ındaki değerle karşılaştırın.
+* Manuel hashing yapmadan değiştirilmiş library'leri tespit etmek için `rpm -V pam` veya `debsums -s libpam-modules` çalıştırın.
+* `/lib/security/` altında herkesin yazabildiği veya sahipliği olağandışı olan dosyaları kontrol edin.
 * `auditd` kuralı: `-w /lib/security/pam_unix.so -p wa -k pam-backdoor`.
-* Beklenmeyen modüller için PAM yapılandırmalarında grep yapın: `grep -R "pam_[a-z].*\.so" /etc/pam.d/ | grep -v pam_unix`.
+* Beklenmeyen modüller için PAM config dosyalarında grep yapın: `grep -R "pam_[a-z].*\.so" /etc/pam.d/ | grep -v pam_unix`.
 
-Bu `pam_` grep'i, farklı `.so` basename'lerine sahip özel modülleri gözden kaçırır. `/etc/pam.d` içindeki **etkin** `auth`, `account`, `password` ve `session` satırlarını (kullanıldığı yerlerde `/etc/pam.conf` dosyasını da), control flag'leri ve dahil edilen stack'lerle birlikte inceleyin. Normal parola denetiminden önce `auth sufficient` olarak yerleştirilmiş tanıdık olmayan bir modül, paket sahipliğinin ve binary'nin incelenmesini gerektirir; [PAM'in control söz dizimi](https://man7.org/linux/man-pages/man5/pam.d.5.html), başarı durumunda stack'in ilgili bölümünün erkenden sonlanmasına yol açabilir. Tek başına bir modül adı, olağandışı zaman damgası veya `nodelay` seçeneği bypass kanıtı değildir. Davranış bir timing leak'e işaret ediyorsa önce uygulamayı ve servise erişilebilirliği inceleyin; rutin enumeration sırasında tekrar tekrar kimlik doğrulama tahminleri göndermeyin.
+Bu `pam_` grep'i, farklı `.so` basename'lerine sahip özel modülleri gözden kaçırır. `/etc/pam.d` içindeki (ve kullanılıyorsa `/etc/pam.conf` içindeki) etkin `auth`, `account`, `password` ve `session` satırlarını; bunların control flag'lerini ve dahil edilen stack'leri de inceleyin. Normal password kontrolünden önce `auth sufficient` olarak yerleştirilmiş, tanımadığınız bir modül; package sahipliğinin ve binary'nin incelenmesini gerektirir. [PAM'in control syntax'ı](https://man7.org/linux/man-pages/man5/pam.d.5.html), başarılı bir işlemin stack'in o bölümünü erken sonlandırmasına neden olabilir. Bir modül adı, olağandışı timestamp veya `nodelay` seçeneği tek başına bir bypass olduğunu kanıtlamaz. Davranış bir timing leak'e işaret ediyorsa, önce uygulamayı ve servise erişilebilirliği inceleyin; rutin enumeration sırasında tekrar tekrar authentication tahminleri göndermeyin.
 
-### Hızlı triage komutları (sistem ihlalinden sonra veya threat hunting sırasında)
+### Hızlı triage komutları (compromise sonrası veya threat hunting için)
 ```bash
 # 1) Spot alien PAM objects
 find /{lib,usr/lib,usr/local/lib}{,64}/security -type f -printf '%p %s %M %u:%g %TY-%Tm-%Td\n' | grep -E 'pam_|libselinux'
@@ -171,27 +171,27 @@ done
 grep -R "pam_.*\.so" /etc/pam.d/ | grep -E 'plg|selinux|custom|exec'
 ```
 
-### Kalıcılık için `pam_exec`'i kötüye kullanma
-`pam_unix.so`'yu değiştirmek yerine, daha hafif bir dokunuş olarak `/etc/pam.d/sshd` dosyasına bir `pam_exec` satırı eklenebilir. Böylece bu PAM satırına ulaşan bir çağrı, normal yığını bozmadan bir yardımcı programı çalıştırır.<sup>[[4]](#references)</sup>
+### Kalıcılık için `pam_exec`'in kötüye kullanılması
+`pam_unix.so` dosyasını değiştirmek yerine, daha hafif bir yöntem `/etc/pam.d/sshd` dosyasına bir `pam_exec` satırı eklemektir. Böylece bu PAM satırına ulaşan bir çağrı, normal yığını olduğu gibi bırakırken bir yardımcı programı çalıştırır.<sup>[[4]](#references)</sup>
 ```bash
 # Run during the auth phase; expose_authtok sends the token on stdin
 auth optional pam_exec.so quiet expose_authtok /usr/local/bin/.ssh_hook.sh
 ```
 `pam_exec`, `PAM_USER`, `PAM_RHOST`, `PAM_SERVICE`, `PAM_TTY` ve `PAM_TYPE` gibi ortam değişkenlerinde PAM meta verilerini alır. `expose_authtok` ile yardımcı program, `auth` veya `password` aşamalarında parolanın en fazla `PAM_MAX_RESP_SIZE` baytını `stdin` üzerinden okuyabilir. Yardımcı programın gerçek UID yerine etkin UID ile çalışmasını istiyorsanız `seteuid` ekleyin.<sup>[[4]](#references)</sup>
 
-Aşağıdaki pratik notlarda `pam_exec` için belgelenen modül türleri ve `type=` filtresi esas alınmıştır:<sup>[[4]](#references)</sup>
+Aşağıdaki uygulama notları, `pam_exec` için belgelenen modül türlerini ve `type=` filtresini temel alır:<sup>[[4]](#references)</sup>
 
-- `session optional pam_exec.so ...`, soketleri yeniden açmak veya arka planda çalışan bir daemon başlatmak gibi **oturum açma sonrası eylemler** için daha uygundur.
-- `auth optional pam_exec.so quiet expose_authtok ...`, oturum açılmadan önce çalıştığı için **kimlik bilgisi yakalama** amacıyla genellikle tercih edilir.
-- Yürütmeyi belirli bir PAM aşamasıyla sınırlandırmak ve gereksiz çift çalışmayı önlemek için `type=session` veya `type=auth` kullanılabilir.
+- `session optional pam_exec.so ...`, soketleri yeniden açma veya ayrılmış bir daemon başlatma gibi **oturum açma sonrası eylemler** için daha uygundur.
+- `auth optional pam_exec.so quiet expose_authtok ...`, oturum açılmadan önce çalıştığı için **kimlik bilgisi yakalama** amacıyla yaygın olarak tercih edilir.
+- `type=session` veya `type=auth`, yürütmeyi belirli bir PAM aşamasıyla sınırlandırmak ve gereksiz çift yürütmeyi önlemek için kullanılabilir.
 
-Yetki incelemesinde, mevcut kullanıcının yazabildiği mutlak bir `pam_exec.so` yardımcı program yolu, dosya append-only (`a`) olarak işaretlenmiş olsa bile adaydır: [bu öznitelik dosyaya ekleme yapılmasına izin verir](https://man7.org/linux/man-pages/man1/chattr.1.html); bu, bir shell scriptinin daha sonraki davranışını değiştirmek için yeterli olabilir. Önce PAM hizmetinin ve olayın gerçekten bu satıra ulaştığını, yardımcı programın ve üst dizin yolunun güvenilir olduğunu ve komutun daha ayrıcalıklı bir kimlikle çalıştığını doğrulayın; [`seteuid`, hangi PAM UID'sinin kullanılacağını değiştirir](https://man7.org/linux/man-pages/man8/pam_exec.8.html). Tek başına yazılabilir bir dosya veya `lsattr` sonucu, ayrıcalıklı yürütmenin kanıtı değildir.
+Ayrıcalık incelemesinde, mevcut kullanıcının yazabildiği mutlak bir `pam_exec.so` yardımcı programı yolu, dosya append-only (`a`) olarak işaretlenmiş olsa bile adaydır: [bu öznitelik dosyaya ekleme yapılmasına izin verir](https://man7.org/linux/man-pages/man1/chattr.1.html) ve bu, bir shell script'inin sonraki davranışını değiştirmek için yeterli olabilir. Öncelikle PAM hizmetinin ve olayın gerçekten bu satıra ulaştığını, yardımcı programın ve üst dizin yolunun güvenilir olduğunu ve komutun daha ayrıcalıklı bir kimlikle çalıştığını doğrulayın; [`seteuid`, hangi PAM UID'sinin kullanılacağını değiştirir](https://man7.org/linux/man-pages/man8/pam_exec.8.html). Tek başına yazılabilir bir dosya veya `lsattr` sonucu, ayrıcalıklı yürütmeyi kanıtlamaz.
 
-### Distro araçlarına rağmen kalıcılık: `authselect`
+### Dağıtım araçlarına dayanıklılık: `authselect`
 
-`authselect` kullanan RHEL ve Fedora ailesi sistemlerde, `/etc/pam.d/system-auth` veya `/etc/pam.d/password-auth` gibi oluşturulmuş dosyalarda doğrudan yapılan değişiklikler **`authselect` tarafından üzerine yazılabilir**. Kalıcılık için operatörler genellikle `/etc/authselect/custom/<profile>/` altındaki etkin özel profili yamalar ve ardından yeniden seçer.<sup>[[5]](#references)[[19]](#references)</sup>
+`authselect` kullanan RHEL ve Fedora ailesi sistemlerde, `/etc/pam.d/system-auth` veya `/etc/pam.d/password-auth` gibi oluşturulan dosyalarda doğrudan yapılan düzenlemeler **`authselect` tarafından üzerine yazılabilir**. Kalıcılık için operatörler genellikle etkin özel profili `/etc/authselect/custom/<profile>/` altında yamalar ve ardından yeniden seçer.<sup>[[5]](#references)[[19]](#references)</sup>
 
-Root erişiminiz varsa tipik iş akışı:<sup>[[5]](#references)</sup>
+Root erişiminiz olduğunda izlenen tipik iş akışı:<sup>[[5]](#references)</sup>
 
 ```bash
 # Inspect the active profile first
@@ -204,32 +204,32 @@ find /etc/authselect/custom -maxdepth 2 -type f \( -name 'system-auth' -o -name 
 authselect apply-changes
 ```
 
-Bu, hem saldırı hem de triyaj açısından önemlidir: `/etc/pam.d/system-auth` dosyasında `Generated by authselect` ve `Do not modify this file manually` banner'ları varsa, gerçek kalıcılık noktası `/etc/pam.d/` yerine `/etc/authselect/custom/` altında olabilir.<sup>[[5]](#references)</sup>
+Bu, hem saldırı hem de triage açısından önemlidir: `/etc/pam.d/system-auth` dosyasında `Generated by authselect` ve `Do not modify this file manually` banner'ları varsa, gerçek persistence noktası `/etc/pam.d/` yerine `/etc/authselect/custom/` altında bulunabilir.<sup>[[5]](#references)</sup>
 
-### Sahada görülen güncel tradecraft
+### Gerçek dünyada görülen güncel tradecraft
 
-Plague Linux backdoor'u hakkında 2025'te yayımlanan güncel raporlarda, aynı temel fikrin bir adım ileri taşındığı görüldü: **statik bir bypass parolası** içeren kötü amaçlı bir PAM bileşeni ve oturum izlerini azaltmak için oturum açtıktan sonra SSH ile ilgili ortam değişkenlerinin ve shell geçmişinin (`HISTFILE=/dev/null`) temizlenmesi.<sup>[[3]](#references)</sup> Bu, hunting için yararlı bir örüntüdür; çünkü backdoor mantığı PAM'de bulunurken gizlilik izleri yalnızca kimlik doğrulama başarılı **olduktan sonra** ortaya çıkabilir.
+Plague Linux backdoor'u hakkında 2025'te yayımlanan güncel raporlar, aynı temel fikrin daha ileri taşındığını gösterdi: **statik bir bypass parolası** içeren kötü amaçlı bir PAM bileşeni ve oturum izlerini azaltmak için login sonrasında SSH ile ilgili environment variable'ların ve shell history'nin (`HISTFILE=/dev/null`) temizlenmesi.<sup>[[3]](#references)</sup> Bu, kullanışlı bir hunting pattern'dir; çünkü backdoor mantığı PAM içinde bulunurken stealth izleri yalnızca authentication başarılı **olduktan sonra** ortaya çıkabilir.
 
 
 ## References
 
 - [1] [pam.conf(5) / pam.d(5) - Linux-PAM Kılavuzu](https://man7.org/linux/man-pages/man5/pam.d.5.html)
 - [2] [Gizli Operatörün Oyun Kitabı: Küresel Telekomünikasyon Ağlarına Sızma - Unit 42](https://unit42.paloaltonetworks.com/infiltration-of-global-telecom-networks/)
-- [3] [Nextron Systems - Plague: Linux için Yeni Keşfedilen PAM Tabanlı Backdoor](https://www.nextron-systems.com/2025/08/01/plague-a-newly-discovered-pam-based-backdoor-for-linux/)
+- [3] [Nextron Systems - Plague: Linux için Yeni Keşfedilen PAM Tabanlı Bir Backdoor](https://www.nextron-systems.com/2025/08/01/plague-a-newly-discovered-pam-based-backdoor-for-linux/)
 - [4] [pam_exec(8) - Linux-PAM Kılavuzu](https://man7.org/linux/man-pages/man8/pam_exec.8.html)
-- [5] [authselect kullanarak kullanıcı kimlik doğrulamasını yapılandırma - Red Hat Enterprise Linux](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/configuring_authentication_and_authorization_in_rhel/configuring-user-authentication-using-authselect)
+- [5] [authselect kullanarak kullanıcı authentication'ını yapılandırma - Red Hat Enterprise Linux](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/configuring_authentication_and_authorization_in_rhel/configuring-user-authentication-using-authselect)
 - [6] [rpm(8) - RPM](https://rpm.org/docs/4.20.x/man/rpm.8)
 - [7] [debsums(1) - Debian Manpages](https://manpages.debian.org/unstable/debsums/debsums.1.en.html)
 - [8] [auditctl(8) - Linux kılavuz sayfası](https://man7.org/linux/man-pages/man8/auditctl.8.html)
 - [9] [dpkg-query(1) - Debian Manpages](https://manpages.debian.org/testing/dpkg/dpkg-query.1.en.html)
-- [10] [Oracle Solaris 11.4'te Kimlik Doğrulamayı Yönetme](https://docs.oracle.com/cd/E37838_01/pdf/E67470.pdf)
+- [10] [Oracle Solaris 11.4'te Authentication Yönetimi](https://docs.oracle.com/cd/E37838_01/pdf/E67470.pdf)
 - [11] [pam_sm_authenticate(3) - Linux-PAM Kılavuzu](https://man7.org/linux/man-pages/man3/pam_sm_authenticate.3.html)
 - [12] [pam_get_authtok(3) - Linux-PAM Kılavuzu](https://man7.org/linux/man-pages/man3/pam_get_authtok.3.html)
-- [13] [Sistem Düzeyinde Kimlik Doğrulama Kılavuzu - Red Hat Enterprise Linux 7](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7/html-single/system-level_authentication_guide/index)
-- [14] [Ubuntu paket dosya listesi: libpam-modules/noble/amd64](https://packages.ubuntu.com/noble/amd64/libpam-modules/filelist)
+- [13] [Sistem Düzeyinde Authentication Kılavuzu - Red Hat Enterprise Linux 7](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7/html-single/system-level_authentication_guide/index)
+- [14] [Ubuntu paket dosyası listesi: libpam-modules/noble/amd64](https://packages.ubuntu.com/noble/amd64/libpam-modules/filelist)
 - [15] [pam_env(8) - Linux-PAM Kılavuzu](https://man7.org/linux/man-pages/man8/pam_env.8.html)
 - [16] [pam_unix(8) - Linux-PAM Kılavuzu](https://man7.org/linux/man-pages/man8/pam_unix.8.html)
 - [17] [pam_ldap(5) - Debian Manpages](https://manpages.debian.org/testing/libpam-ldap/pam_ldap.5.en.html)
 - [18] [pam_sm_setcred(3) - Linux-PAM Kılavuzu](https://man7.org/linux/man-pages/man3/pam_sm_setcred.3.html)
-- [19] [Değişiklikler/Authselect'i Zorunlu Hale Getirme - Fedora Projesi Wiki](https://fedoraproject.org/wiki/Changes/Make_Authselect_Mandatory)
+- [19] [Değişiklikler/Authselect'i Zorunlu Kılma - Fedora Project Wiki](https://fedoraproject.org/wiki/Changes/Make_Authselect_Mandatory)
 {{#include ../../banners/hacktricks-training.md}}

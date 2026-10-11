@@ -1,39 +1,39 @@
-# Hashes, MACs & KDFs
+# Hashes, MACs ve KDF'ler
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Yaygın CTF kalıpları
 
-- "Signature", aslında `hash(secret || message)` şeklindedir → length extension.
-- Salt eklenmemiş parola hash'leri → daha hızlı tekrarlı cracking ve önceden hesaplanmış lookup saldırıları.
+- "Signature" aslında `hash(secret || message)` → length extension.
+- Salt eklenmemiş password hash'leri → daha hızlı tekrarlı cracking ve önceden hesaplanmış lookup saldırıları.
 - Hash ile MAC'i karıştırmak (hash != authentication).
 
 ## Hash length extension attack
 
 ### Teknik
 
-Sunucu, aşağıdaki gibi bir "signature" hesapladığında:
+Sunucu aşağıdaki gibi bir "signature" hesaplıyorsa:
 
 `sig = HASH(secret || message)`
 
-ve MD5, SHA-1 veya SHA-256 gibi bir Merkle-Damgård hash'i kullandığında length-extension attack mümkün olabilir.
+ve MD5, SHA-1 veya SHA-256 gibi bir Merkle-Damgård hash'i kullanıyorsa length-extension attack mümkün olabilir.
 
 Şunları biliyorsanız:
 
 - `message`
 - `sig`
-- hash fonksiyonu
-- (`len(secret)` değerini brute-force edebiliyorsanız)
+- hash function
+- (veya brute-force uygulayarak) `len(secret)`
 
-Şunu bilmeden geçerli bir signature hesaplayabilirsiniz:
+secret'ı bilmeden şu veri için geçerli bir signature hesaplayabilirsiniz:
 
 `message || padding || appended_data`
 
-secret'ı bilmeden.<sup>[[1]](#references)</sup>
+<sup>[[1]](#references)</sup>
 
-### Önemli kısıtlama: HMAC etkilenmez
+### Önemli sınırlama: HMAC etkilenmez
 
-Length-extension attack, `HASH(secret || message)` gibi güvenlik açığı barındıran prefix yapıları için geçerlidir. Ayrı inner ve outer hash uygulamalarıyla bir key'i birleştiren HMAC yapısını (örneğin, HMAC-SHA256) açığa çıkarmaz.<sup>[[1]](#references)[[2]](#references)</sup>
+Length-extension attack'ler, `HASH(secret || message)` gibi savunmasız prefix yapılar için geçerlidir. Anahtarı ayrı inner ve outer hash uygulamalarıyla birleştiren HMAC yapısını (örneğin HMAC-SHA256) açığa çıkarmazlar.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### Araçlar
 
@@ -42,15 +42,15 @@ Length-extension attack, `HASH(secret || message)` gibi güvenlik açığı bar�
 
 ### İyi bir açıklama
 
-[Everything you need to know about hash length extension attacks](https://www.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)<sup>[[1]](#references)</sup>
+[Hash length extension attack'leri hakkında bilmeniz gereken her şey](https://www.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)<sup>[[1]](#references)</sup>
 
-## Parola hashing ve cracking
+## Password hashing ve cracking
 
 ### İlk sorular<sup>[[4]](#references)</sup>
 
-- **Salt eklenmiş mi**? (`salt$hash` formatlarına bakın)
-- **Hızlı bir hash** (MD5/SHA1/SHA256) mi, yoksa **yavaş bir KDF** (bcrypt/scrypt/argon2/PBKDF2) mi?
-- Elinizde bir **format ipucu** (hashcat mode / John format) var mı?
+- **Salt eklenmiş mi**? (`salt$hash` biçimlerini arayın)
+- **Hızlı bir hash** mi (MD5/SHA1/SHA256), yoksa **yavaş bir KDF** mi (bcrypt/scrypt/argon2/PBKDF2)?
+- **Biçim ipucunuz** var mı (hashcat mode / John format)?
 
 ### Uygulamalı iş akışı<sup>[[5]](#references)[[6]](#references)</sup>
 
@@ -58,28 +58,28 @@ Length-extension attack, `HASH(secret || message)` gibi güvenlik açığı bar�
    - `hashid <hash>`
    - `hashcat --example-hashes | rg -n "<pattern>"`
 2. Salt eklenmemiş ve yaygın bir hash ise: çevrimiçi DB'leri ve crypto workflow bölümündeki tanımlama araçlarını deneyin.
-3. Aksi takdirde crack edin:
+3. Aksi durumda crack edin:
    - `hashcat -m <mode> -a 0 hashes.txt wordlist.txt`
    - `john --wordlist=wordlist.txt --format=<fmt> hashes.txt`
 
 ### İstismar edebileceğiniz yaygın hatalar
 
-- Aynı parolanın kullanıcılar arasında tekrar kullanılması → birini crack edin, pivot edin.
-- Kesilmiş hash'ler / özel dönüşümler → normalize edip yeniden deneyin.
-- Zayıf KDF parametreleri (ör. düşük PBKDF2 iterasyon sayısı) → yine de crack edilebilir.
+- Aynı password'ün farklı kullanıcılar tarafından yeniden kullanılması → birini crack edin, ardından pivot yapın.
+- Kısaltılmış hash'ler / özel dönüşümler → normalleştirip yeniden deneyin.
+- Zayıf KDF parametreleri (ör. düşük PBKDF2 iteration sayısı) → yine de crack edilebilir.
 
-### Eklenmiş bir secret içeren, girdi seçilebilen bcrypt oracle
+### Sonuna secret eklenen, seçilen girdileri kabul eden bcrypt oracle
 
-`bcrypt(user_input || secret)` döndüren çağrılabilir bir yardımcı, bcrypt uygulaması girdiyi 72 **byte** sonrasında sessizce kesiyorsa eklenmiş bir secret hakkında bilgi açığa çıkarabilir. UTF-8 kodlamasından önce karakter sayısına uygulanan bir limit, bu byte sınırını sağlamaz: çok baytlı karakterler bcrypt girdisini doldururken secret'ın yalnızca küçük bir ön eki için yer bırakabilir. Seçilen girdiler ve döndürülen hash'ler, aday son ek byte'larının çevrimdışı kontrol edilmesini sağlayabilir. Bunun için yardımcının girdisini kontrol edebilmeniz, tam dönüşümünü ve encoding'ini bilmeniz ve uygulamanın gerçekten kesme yapması gerekir; çağrılabilir bir yardımcı veya tek başına bir bcrypt hash'i bu zincirin varlığını kanıtlamaz. [pyca/bcrypt belgeleri](https://github.com/pyca/bcrypt#maximum-password-length), güncel `hashpw` işlevinin 72 byte'tan uzun girdilerde hata verdiğini, önceki davranışın ise bunları sessizce kestiğini belirtir. Diğer wrapper'lar girdiyi önceden hash'leyebilir veya uzun girdileri reddedebilir; bu nedenle kesme olduğunu varsaymak yerine kurulu uygulamayı doğrulayın.
+`bcrypt(user_input || secret)` döndüren ve çağrılabilen bir yardımcı program, bcrypt uygulaması girdiyi 72 **byte** sonrasında sessizce kısaltıyorsa sonuna eklenen secret hakkında bilgi açığa çıkarabilir. UTF-8 encoding öncesinde uygulanan karakter sayısı sınırı bu byte sınırını garanti etmez: çok byte'lı karakterler bcrypt girdisini doldururken secret'ın yalnızca kısa bir önekinin sığmasına yer bırakabilir. Ardından seçilen girdiler ve bunlara karşılık gelen hash'ler, aday suffix byte'larının offline olarak kontrol edilmesini sağlayabilir. Bunun için yardımcı programın girdisini kontrol edebilmek, kullandığı dönüşümü ve encoding'i tam olarak bilmek ve uygulamanın gerçekten kısaltma yapması gerekir; çağrılabilir bir yardımcı program veya tek başına bir bcrypt hash'i bu zinciri kanıtlamaz. [pyca/bcrypt belgelerine](https://github.com/pyca/bcrypt#maximum-password-length) göre güncel `hashpw`, 72 byte'ı aşan girdilerde hata verir; önceki davranış ise girdileri sessizce kısaltıyordu. Diğer wrapper'lar girdileri önceden hash'leyebilir veya uzun girdileri reddedebilir. Bu nedenle kısaltma yapıldığını varsaymak yerine kurulu uygulamayı doğrulayın.
 
-Ele geçirilen bir secret'ı farklı bir hesapta kullanmak için, o hesabın açığa çıkan hash'inin **aynı** secret ve dönüşümle oluşturulduğuna dair kanıtın yanı sıra ayrı bir credential veya login yolu da gerekir. Root olarak çalışan bir hashing yardımcısı, yalnızca düşük yetkili kullanıcı yürürlükteki policy kapsamında onu çağırabiliyorsa oracle olarak değerlendirilmelidir; pasif host enumeration işleminin bu yardımcının çağrılmasını veya seçilen parolaların gönderilmesini gerektirmesi şart değildir.
+Kurtarılan bir secret'ı farklı bir hesapta kullanmak için, o hesabın açığa çıkan hash'inin **aynı** secret ve dönüşümle üretildiğine dair kanıtın yanı sıra ayrı bir credential veya login yolu da gerekir. Root olarak çalışan bir hash'leme yardımcısı, yalnızca düşük ayrıcalıklı kullanıcı onu etkin politikaya göre çağırabiliyorsa oracle olarak değerlendirilmelidir; pasif host enumeration sırasında bu yardımcı programı çağırmak veya seçilmiş password'leri göndermek gerekmez.
 
 ## References
 
-- [1] [SkullSecurity - Hash length-extension saldırıları hakkında bilmeniz gereken her şey](https://www.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
-- [2] [NIST FIPS 198-1 - Keyed-Hash Message Authentication Code](https://csrc.nist.gov/pubs/fips/198-1/final)
+- [1] [SkullSecurity - Hash length-extension attack'leri hakkında bilmeniz gereken her şey](https://www.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
+- [2] [NIST FIPS 198-1 - Anahtarlı Hash Message Authentication Code](https://csrc.nist.gov/pubs/fips/198-1/final)
 - [3] [hash_extender](https://github.com/iagox86/hash_extender)
-- [4] [OWASP Parola Depolama İpuçları](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html)
+- [4] [OWASP Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html)
 - [5] [Hashcat örnek hash'leri](https://hashcat.net/wiki/doku.php?id=example_hashes)
 - [6] [John the Ripper komut satırı seçenekleri](https://www.openwall.com/john/doc/OPTIONS.shtml)
 - [7] [PyPI: HashPump için `hashpumpy` Python bindings](https://pypi.org/project/hashpumpy/)
