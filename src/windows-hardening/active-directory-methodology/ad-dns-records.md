@@ -70,6 +70,8 @@ bloodyAD -u DOMAIN\\user -p 'Passw0rd!' --host 10.10.10.10 dns add A evil 10.10.
 4. **DHCP → DNS spoofing** – on a default Windows DHCP+DNS deployment an unauthenticated attacker on the same subnet can overwrite any existing A record (including Domain Controllers) by sending forged DHCP requests that trigger dynamic DNS updates (Akamai “DDSpoof”, 2023).  This gives machine-in-the-middle over Kerberos/LDAP and can lead to full domain takeover.<sup>[[2]](#references)</sup>    
 5. **Certifried (CVE-2022-26923)** – change the `dNSHostName` of a machine account you control, register a matching A record, then request a certificate for that name to impersonate the DC. Tools such as **Certipy** or **BloodyAD** fully automate the flow.  
 
+An AD DNS record with [serialized target information](../ntlm/README.md#ntlm--kerberos-reflection-via-serialized-spns-cve-2025-33073) can form part of a conditional relay chain: the caller needs record-creation rights, a coercion path that causes the target computer to authenticate to that name, and a relay destination that accepts the resulting authentication. Assess the destination protocol separately; SMB signing on the incoming connection does not by itself establish whether an HTTPS WinRM destination accepts the relay. Patch level, name handling, Extended Protection and service configuration can change the outcome.
+
 ---
 
 ### Internal service hijacking via stale dynamic records (NATS case study)
