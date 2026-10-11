@@ -6,160 +6,161 @@
 
 
 
-### **Linux 로컬 권한 상승 벡터를 찾는 최고의 도구:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
+### **Linux 로컬 권한 상승 벡터를 찾는 데 가장 좋은 도구:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
 
 ### [시스템 정보](../linux-basics/linux-privilege-escalation/index.html#system-information)
 
-- [ ] **OS 정보** 수집
-- [ ] [**PATH**](../linux-basics/linux-privilege-escalation/index.html#path) 확인, **writable folder**가 있는가?
-- [ ] [**env variables**](../linux-basics/linux-privilege-escalation/index.html#env-info) 확인, 민감한 정보가 있는가?
-- [ ] **scripts를 사용하여** [**kernel exploits**](../linux-basics/linux-privilege-escalation/index.html#kernel-exploits) 검색 (DirtyCow?)
-- [ ] kernel PoC를 실행하기 전에 `uname -r`뿐만 아니라 실제 **prerequisites**를 확인한다: 아키텍처, 필요한 `CONFIG_*` 옵션/modules, namespace 생성 및 활성화된 완화 기능. 예를 들어 `unshare -Urn true`를 사용하여 user/network namespace 사용 가능 여부를 테스트한다. 최신 netfilter exploits에는 `CONFIG_USER_NS`, 권한 없는 user namespaces 및 `CONFIG_NF_TABLES`가 필요할 수 있다.<sup>[[3]](#references)</sup>
-- [ ] [**sudo version**이 취약한지](../linux-basics/linux-privilege-escalation/index.html#sudo-version) **확인**
-- [ ] [**Dmesg** signature verification failed](../linux-basics/linux-privilege-escalation/index.html#dmesg-signature-verification-failed)
-- [ ] [**kernel module 및 module-loading misconfigurations**](kernel-modules-and-modprobe.md#kernel-module-and-module-loading-misconfigurations) 검토: `insmod`, `modinfo`, `lsmod`, `dmesg`, signature enforcement 및 `modules_disabled`.
-- [ ] helper path를 수정하거나 trigger할 수 있는 경우 [**kernel.modprobe / modprobe_path abuse paths**](kernel-modules-and-modprobe.md#kernelmodprobe--modprobe_path-abuse-checks) 확인
-- [ ] writable `.ko*` 파일 및 `modules.*` metadata를 포함하여 [**writable /lib/modules paths**](kernel-modules-and-modprobe.md#writable-libmodules-review) 확인
-- [ ] 추가 시스템 enum ([date, system stats, cpu info, printers](../linux-basics/linux-privilege-escalation/index.html#more-system-enumeration))
-- [ ] [추가 defenses 열거](../linux-basics/linux-privilege-escalation/index.html#enumerate-possible-defenses)
+- [ ] **OS 정보** 확인
+- [ ] [**PATH**](../linux-basics/linux-privilege-escalation/index.html#path) 확인. **쓰기 가능한 폴더**가 있는가?
+- [ ] [**환경 변수**](../linux-basics/linux-privilege-escalation/index.html#env-info) 확인. 민감한 정보가 있는가?
+- [ ] **스크립트를 사용해** [**kernel exploit**](../linux-basics/linux-privilege-escalation/index.html#kernel-exploits) 검색 (DirtyCow?)
+- [ ] kernel PoC를 실행하기 전에 `uname -r`만 보지 말고 **실제 필수 조건**을 확인하세요. 아키텍처, 필요한 `CONFIG_*` 옵션/모듈, namespace 생성 가능 여부, 활성화된 완화책을 점검합니다. 예를 들어 `unshare -Urn true`로 user/network namespace 사용 가능 여부를 테스트하세요. 최신 netfilter exploit은 `CONFIG_USER_NS`, 비특권 user namespace, `CONFIG_NF_TABLES`가 필요할 수 있습니다.<sup>[[3]](#references)</sup>
+- [ ] [**sudo 버전**이 취약한지 **확인**](../linux-basics/linux-privilege-escalation/index.html#sudo-version)
+- [ ] [**Dmesg** 서명 검증 실패](../linux-basics/linux-privilege-escalation/index.html#dmesg-signature-verification-failed)
+- [ ] [**kernel module 및 module 로딩 설정 오류**](kernel-modules-and-modprobe.md#kernel-module-and-module-loading-misconfigurations) 검토: `insmod`, `modinfo`, `lsmod`, `dmesg`, 서명 적용, `modules_disabled`.
+- [ ] helper 경로를 수정하거나 트리거할 수 있는 경우 [**kernel.modprobe / modprobe_path 악용 경로**](kernel-modules-and-modprobe.md#kernelmodprobe--modprobe_path-abuse-checks) 확인.
+- [ ] [**쓰기 가능한 /lib/modules 경로**](kernel-modules-and-modprobe.md#writable-libmodules-review) 확인. 쓰기 가능한 `.ko*` 파일과 `modules.*` metadata도 점검합니다.
+- [ ] 추가 시스템 열거 ([날짜, 시스템 통계, CPU 정보, 프린터](../linux-basics/linux-privilege-escalation/index.html#more-system-enumeration))
+- [ ] [추가 방어책 열거](../linux-basics/linux-privilege-escalation/index.html#enumerate-possible-defenses)
 
-### [Drives](../linux-basics/linux-privilege-escalation/index.html#drives)
+### [드라이브](../linux-basics/linux-privilege-escalation/index.html#drives)
 
-- [ ] **mounted** drives 나열
-- [ ] **unmounted drive가 있는가?**
-- [ ] **fstab에 creds가 있는가?**
+- [ ] 마운트된 드라이브 **목록 확인**
+- [ ] **마운트되지 않은 드라이브가 있는가?**
+- [ ] fstab에 **자격 증명이 있는가?**
 
-### [**설치된 Software**](../linux-basics/linux-privilege-escalation/index.html#installed-software)
+### [**설치된 소프트웨어**](../linux-basics/linux-privilege-escalation/index.html#installed-software)
 
-- [ ] [**유용한 software**](../linux-basics/linux-privilege-escalation/index.html#useful-software)가 **설치되어 있는지 확인**
-- [ ] [**취약한 software**](../linux-basics/linux-privilege-escalation/index.html#vulnerable-software-installed)가 **설치되어 있는지 확인**
-- [ ] Debian/Ubuntu에서 **needrestart interpreter scanning**이 설치 및 활성화되어 있는지 확인한다: `dpkg-query -W needrestart 2>/dev/null; grep -R interpscan /etc/needrestart 2>/dev/null`. 취약한 builds는 APT 또는 `unattended-upgrades`가 needrestart를 root로 호출할 때 attacker-controlled `PYTHONPATH`/`RUBYLIB`를 재사용하거나, `/proc/<pid>/exe`에 race condition을 일으키거나, attacker-controlled Perl paths를 scan하여 privilege boundary를 넘었다.<sup>[[4]](#references)</sup>
+- [ ] [**유용한 소프트웨어**](../linux-basics/linux-privilege-escalation/index.html#useful-software)가 **설치되어 있는지 확인**
+- [ ] [**취약한 소프트웨어**](../linux-basics/linux-privilege-escalation/index.html#vulnerable-software-installed)가 **설치되어 있는지 확인**
+- [ ] Debian/Ubuntu에서는 **needrestart interpreter scanning**이 설치/활성화되어 있는지 확인합니다: `dpkg-query -W needrestart 2>/dev/null; grep -R interpscan /etc/needrestart 2>/dev/null`. 취약한 빌드는 APT나 `unattended-upgrades`가 root 권한으로 needrestart를 실행할 때 공격자가 제어하는 `PYTHONPATH`/`RUBYLIB`를 재사용하거나, `/proc/<pid>/exe`에 race condition을 일으키거나, 공격자가 제어하는 Perl 경로를 검사해 권한 경계를 넘었습니다.<sup>[[4]](#references)</sup>
 
-### [Processes](../linux-basics/linux-privilege-escalation/index.html#processes)
+### [프로세스](../linux-basics/linux-privilege-escalation/index.html#processes)
 
-- [ ] **알 수 없는 software가 실행 중인가?**
-- [ ] 어떤 software가 **필요한 것보다 높은 privileges로 실행 중인가?**
-- [ ] **실행 중인 processes의 exploits** 검색 (특히 실행 중인 version)
-- [ ] 실행 중인 process의 **binary를 수정**할 수 있는가?
-- [ ] **processes를 monitor**하고 흥미로운 process가 자주 실행되는지 확인
-- [ ] 일부 흥미로운 **process memory를 read**할 수 있는가? (passwords가 저장될 수 있는 곳)
+- [ ] **알 수 없는 소프트웨어가 실행 중인가?**
+- [ ] 소프트웨어가 필요한 수준보다 **높은 권한으로 실행 중인가?**
+- [ ] **실행 중인 프로세스의 exploit**을 검색합니다 (특히 현재 실행 중인 버전).
+- [ ] 실행 중인 프로세스의 **바이너리를 수정할 수 있는가?**
+- [ ] **프로세스를 모니터링**하고 흥미로운 프로세스가 자주 실행되는지 확인합니다.
+- [ ] 흥미로운 **프로세스 메모리**(암호가 저장되어 있을 수 있는 곳)를 **읽을 수 있는가?**
 
-### [Scheduled/Cron jobs?](../linux-basics/linux-privilege-escalation/index.html#scheduled-jobs)
+### [예약 작업/Cron 작업?](../linux-basics/linux-privilege-escalation/index.html#scheduled-jobs)
 
-- [ ] 일부 cron에 의해 [**PATH** ](../linux-basics/linux-privilege-escalation/index.html#cron-path)이 수정되고 있으며 해당 PATH에 **write**할 수 있는가?
-- [ ] cron job에 [**wildcard** ](../linux-basics/linux-privilege-escalation/index.html#cron-using-a-script-with-a-wildcard-wildcard-injection)가 있는가?
-- [ ] 일부 [**modifiable script** ](../linux-basics/linux-privilege-escalation/index.html#cron-script-overwriting-and-symlink)가 **실행 중**이거나 **modifiable folder** 안에 있는가?
-- [ ] 어떤 **script**가 [**매우 **자주 **실행**되고 있거나 실행될 수 있음](../linux-basics/linux-privilege-escalation/index.html#frequent-cron-jobs)을 발견했는가? (1, 2 또는 5분마다)
+- [ ] cron이 [**PATH** ](../linux-basics/linux-privilege-escalation/index.html#cron-path)을 수정하고 있으며 해당 경로에 **쓸 수 있는가?**
+- [ ] cron 작업에 [**wildcard** ](../linux-basics/linux-privilege-escalation/index.html#cron-using-a-script-with-a-wildcard-wildcard-injection)가 있는가?
+- [ ] [**수정 가능한 스크립트** ](../linux-basics/linux-privilege-escalation/index.html#cron-script-overwriting-and-symlink)가 **실행되고 있거나**, **수정 가능한 폴더** 안에 있는가?
+- [ ] [**매우 자주 실행되는**](../linux-basics/linux-privilege-escalation/index.html#frequent-cron-jobs) **스크립트**를 발견했는가? (1분, 2분 또는 5분마다)
 
-### [Services](../linux-basics/linux-privilege-escalation/index.html#services)
+### [서비스](../linux-basics/linux-privilege-escalation/index.html#services)
 
-- [ ] **writable .service** 파일이 있는가?
-- [ ] **service에 의해 실행되는 writable binary**가 있는가?
-- [ ] root unit이 참조하는 writable **helper, config 또는 environment file**이 있는가 (`ExecStartPre=`, `ExecStartPost=`, `EnvironmentFile=`)? `systemctl cat <unit>`을 사용하여 merged unit을 검사하고 [service/socket file abuse](../interesting-files-permissions/write-to-root.md)를 검토한다.
-- [ ] **systemd PATH에 writable folder**가 있는가?
-- [ ] `/etc/systemd/system/<unit>.d/*.conf`에 `ExecStart`/`User`를 override할 수 있는 **writable systemd unit drop-in**이 있는가?<sup>[[2]](#references)</sup>
+- [ ] **쓰기 가능한 .service** 파일이 있는가?
+- [ ] **서비스가 실행하는 쓰기 가능한 바이너리**가 있는가?
+- [ ] **root unit이 참조하는 쓰기 가능한 helper, config 또는 environment 파일**(`ExecStartPre=`, `ExecStartPost=`, `EnvironmentFile=`)이 있는가? `systemctl cat <unit>`으로 병합된 unit을 확인하고 [service/socket 파일 악용](../interesting-files-permissions/write-to-root.md)을 검토합니다.
+- [ ] 필요할 때 실행되는 권한 있는 workflow가 권한이 낮은 사용자가 쓸 수 있는 디렉터리의 helper를 실행하는가? helper와 상위 디렉터리 모두에서 [사용자 수정 가능 경로의 root 실행](../interesting-files-permissions/write-to-root.md#root-executing-user-writable-scriptsbinaries)을 확인합니다. 짧게 실행되는 helper는 workflow가 동작 중일 때만 보일 수 있습니다.
+- [ ] **systemd PATH에 쓰기 가능한 폴더**가 있는가?
+- [ ] `ExecStart`/`User`를 덮어쓸 수 있는 `/etc/systemd/system/<unit>.d/*.conf`의 **쓰기 가능한 systemd unit drop-in**이 있는가?<sup>[[2]](#references)</sup>
 
 ### [Timers](../linux-basics/linux-privilege-escalation/index.html#timers)
 
-- [ ] **writable timer**가 있는가?
+- [ ] 쓰기 가능한 **timer**가 있는가?
 
-### [Sockets](../linux-basics/linux-privilege-escalation/index.html#sockets)
+### [소켓](../linux-basics/linux-privilege-escalation/index.html#sockets)
 
-- [ ] **writable .socket** 파일이 있는가?
-- [ ] 어떤 **socket과 communicate**할 수 있는가?
-- [ ] 흥미로운 정보가 있는 **HTTP sockets**가 있는가?
-- [ ] `docker.sock`, `containerd.sock`, `crio.sock`, `podman.sock`, `buildkitd.sock` 또는 kubelet endpoint와 같은 [**container-runtime 또는 node-agent API**](../containers-namespaces/container-security/runtime-api-and-daemon-exposure.md)에 access할 수 있는가? 일반적인 CLI가 없어도 raw HTTP/gRPC API를 테스트한다.
+- [ ] 쓰기 가능한 **.socket** 파일이 있는가?
+- [ ] 소켓과 **통신할 수 있는가?**
+- [ ] 흥미로운 정보가 담긴 **HTTP 소켓**이 있는가?
+- [ ] `docker.sock`, `containerd.sock`, `crio.sock`, `podman.sock`, `buildkitd.sock` 또는 kubelet endpoint 같은 [**container-runtime 또는 node-agent API**](../containers-namespaces/container-security/runtime-api-and-daemon-exposure.md)에 접근할 수 있는가? 일반적인 CLI가 없어도 raw HTTP/gRPC API를 테스트하세요.
 
 ### [D-Bus](../linux-basics/linux-privilege-escalation/index.html#d-bus)
 
-- [ ] 어떤 **D-Bus와 communicate**할 수 있는가?
+- [ ] D-Bus와 **통신할 수 있는가?**
 
-### [Network](../linux-basics/linux-privilege-escalation/index.html#network)
+### [네트워크](../linux-basics/linux-privilege-escalation/index.html#network)
 
-- [ ] 현재 위치를 파악하기 위해 network 열거
-- [ ] 시스템 내부에서 shell을 획득하기 전에는 access할 수 없었던 **open ports**가 있는가?
-- [ ] `tcpdump`를 사용하여 traffic을 **sniff**할 수 있는가?
+- [ ] 현재 위치를 파악하기 위해 네트워크 열거
+- [ ] 시스템 내부에서 shell을 얻은 뒤에야 접근할 수 있는 **열린 포트가 있는가?**
+- [ ] `tcpdump`로 트래픽을 **스니핑할 수 있는가?**
 
-### [Users](../linux-basics/linux-privilege-escalation/index.html#users)
+### [사용자](../linux-basics/linux-privilege-escalation/index.html#users)
 
-- [ ] 일반적인 users/groups **열거**
-- [ ] **매우 큰 UID**를 가지고 있는가? **machine**이 **취약한가?**
-- [ ] 자신이 속한 [**group 덕분에 privileges를 상승**](../user-information/interesting-groups-linux-pe/index.html)시킬 수 있는가?
-- [ ] **Clipboard** data가 있는가?
-- [ ] Password Policy?
-- [ ] 이전에 발견한 모든 **known password**를 사용하여 가능한 **각각의 user**로 **login**을 시도한다. password 없이도 login을 시도한다.
+- [ ] 일반 사용자/그룹 **열거**
+- [ ] **매우 큰 UID**를 가지고 있는가? **시스템**이 **취약한가?**
+- [ ] 소속된 [**그룹을 이용해 권한을 상승할 수 있는가?**](../user-information/interesting-groups-linux-pe/index.html)
+- [ ] **클립보드** 데이터가 있는가?
+- [ ] 암호 정책은?
+- [ ] 이전에 발견한 **모든 알려진 암호를 사용해** 가능한 **각 사용자로** 로그인해 봅니다. 암호 없이도 로그인을 시도합니다.
 
-### [Writable PATH](../linux-basics/linux-privilege-escalation/index.html#writable-path-abuses)
+### [쓰기 가능한 PATH](../linux-basics/linux-privilege-escalation/index.html#writable-path-abuses)
 
-- [ ] **PATH의 일부 folder에 write privileges**가 있다면 privileges를 상승시킬 수 있음
+- [ ] PATH 내 폴더에 **쓰기 권한이 있다면** 권한을 상승할 수 있습니다.
 
-### [SUDO 및 SUID commands](../linux-basics/linux-privilege-escalation/index.html#sudo-and-suid)
+### [SUDO 및 SUID 명령](../linux-basics/linux-privilege-escalation/index.html#sudo-and-suid)
 
-- [ ] `sudo`로 **어떤 command든 실행**할 수 있는가? 이를 사용하여 root로 무엇이든 READ, WRITE 또는 EXECUTE할 수 있는가? ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] `sudo -l`이 `sudoedit`를 허용한다면, 취약한 version (`sudo -V` < 1.9.12p2)에서 `SUDO_EDITOR`/`VISUAL`/`EDITOR`를 통한 **sudoedit argument injection** (CVE-2023-22809)을 확인하여 임의의 파일을 edit할 수 있는지 검사한다. 예: `SUDO_EDITOR="vim -- /etc/sudoers" sudoedit /etc/hosts`.<sup>[[1]](#references)</sup>
-- [ ] **exploitable SUID binary**가 있는가? ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] [**sudo** commands가 **path**로 **제한**되어 있는가? 제한을 **bypass**할 수 있는가](../linux-basics/linux-privilege-escalation/index.html#sudo-execution-bypassing-paths)?
-- [ ] [**path가 지정되지 않은 Sudo/SUID binary**](../linux-basics/linux-privilege-escalation/index.html#sudo-command-suid-binary-without-command-path)가 있는가?
-- [ ] [**path를 지정하는 SUID binary**](../linux-basics/linux-privilege-escalation/index.html#suid-binary-with-command-path)가 있는가? Bypass
-- [ ] [**LD_PRELOAD vuln**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#ld_preload-ld_library_path-and-suid)
-- [ ] writable folder에 있는 SUID binary의 [**.so library 누락**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#missing-shared-object-injection)이 있는가?
-- [ ] [**SUID RPATH/RUNPATH 또는 writable library path**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#rpath-and-runpath)가 있는가?
-- [ ] [**SUDO tokens를 사용할 수 있는가**](../linux-basics/linux-privilege-escalation/index.html#reusing-sudo-tokens)? [**SUDO token을 생성**](../linux-basics/linux-privilege-escalation/index.html#var-run-sudo-ts-less-than-username-greater-than)할 수 있는가?
-- [ ] [**sudoers files를 read 또는 modify**](../linux-basics/linux-privilege-escalation/index.html#etc-sudoers-etc-sudoers-d)할 수 있는가?
-- [ ] [**/etc/ld.so.conf.d/를 modify**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#linker-configuration)할 수 있는가?
-- [ ] [**OpenBSD DOAS**](../linux-basics/linux-privilege-escalation/index.html#doas) command
+- [ ] `sudo`로 **명령을 실행할 수 있는가?** 이를 이용해 root 권한으로 무엇이든 READ, WRITE 또는 EXECUTE할 수 있는가? ([**GTFOBins**](https://gtfobins.github.io))
+- [ ] `sudo -l`에서 `sudoedit`가 허용되면 취약한 버전(`sudo -V` < 1.9.12p2)에서 `SUDO_EDITOR`/`VISUAL`/`EDITOR`를 통한 **sudoedit 인자 주입**(CVE-2023-22809)을 확인합니다. 임의 파일을 편집할 수 있습니다. 예: `SUDO_EDITOR="vim -- /etc/sudoers" sudoedit /etc/hosts`.<sup>[[1]](#references)</sup>
+- [ ] **악용 가능한 SUID 바이너리**가 있는가? ([**GTFOBins**](https://gtfobins.github.io))
+- [ ] [**sudo** 명령이 **경로**로 **제한**되어 있는가? 제한을 **우회할 수 있는가?**](../linux-basics/linux-privilege-escalation/index.html#sudo-execution-bypassing-paths)
+- [ ] [**경로가 지정되지 않은 Sudo/SUID 바이너리**](../linux-basics/linux-privilege-escalation/index.html#sudo-command-suid-binary-without-command-path)가 있는가?
+- [ ] [**경로를 지정하는 SUID 바이너리**](../linux-basics/linux-privilege-escalation/index.html#suid-binary-with-command-path)가 있는가? 우회
+- [ ] [**LD_PRELOAD 취약점**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#ld_preload-ld_library_path-and-suid)
+- [ ] 쓰기 가능한 폴더에서 [**SUID 바이너리에 필요한 .so 라이브러리가 누락**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#missing-shared-object-injection)되어 있는가?
+- [ ] [**SUID RPATH/RUNPATH 또는 쓰기 가능한 라이브러리 경로**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#rpath-and-runpath)가 있는가?
+- [ ] [**사용 가능한 SUDO token**](../linux-basics/linux-privilege-escalation/index.html#reusing-sudo-tokens)이 있는가? [**SUDO token을 만들 수 있는가?**](../linux-basics/linux-privilege-escalation/index.html#var-run-sudo-ts-less-than-username-greater-than)
+- [ ] [**sudoers 파일을 읽거나 수정할 수 있는가?**](../linux-basics/linux-privilege-escalation/index.html#etc-sudoers-etc-sudoers-d)
+- [ ] [**/etc/ld.so.conf.d/를 수정할 수 있는가?**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#linker-configuration)
+- [ ] [**OpenBSD DOAS**](../linux-basics/linux-privilege-escalation/index.html#doas) 명령
 
 ### [Capabilities](../linux-basics/linux-privilege-escalation/index.html#capabilities)
 
-- [ ] 어떤 binary에든 **예상치 못한 capability**가 있는가?
+- [ ] 바이너리에 **예상치 못한 capability**가 있는가?
 
 ### [ACLs](../linux-basics/linux-privilege-escalation/index.html#acls)
 
-- [ ] 어떤 file에든 **예상치 못한 ACL**이 있는가?
+- [ ] 파일에 **예상치 못한 ACL**이 있는가?
 
-### [Open Shell sessions](../linux-basics/linux-privilege-escalation/index.html#open-shell-sessions)
+### [열려 있는 Shell 세션](../linux-basics/linux-privilege-escalation/index.html#open-shell-sessions)
 
 - [ ] **screen**
 - [ ] **tmux**
 
 ### [SSH](../linux-basics/linux-privilege-escalation/index.html#ssh)
 
-- [ ] **Debian** [**OpenSSL Predictable PRNG - CVE-2008-0166**](../linux-basics/linux-privilege-escalation/index.html#debian-openssl-predictable-prng-cve-2008-0166)
-- [ ] [**SSH Interesting configuration values**](../linux-basics/linux-privilege-escalation/index.html#ssh-interesting-configuration-values)
+- [ ] **Debian** [**OpenSSL 예측 가능한 PRNG - CVE-2008-0166**](../linux-basics/linux-privilege-escalation/index.html#debian-openssl-predictable-prng-cve-2008-0166)
+- [ ] [**SSH에서 흥미로운 설정 값**](../linux-basics/linux-privilege-escalation/index.html#ssh-interesting-configuration-values)
 
-### [Interesting Files](../linux-basics/linux-privilege-escalation/index.html#interesting-files)
+### [흥미로운 파일](../linux-basics/linux-privilege-escalation/index.html#interesting-files)
 
-- [ ] **Profile files** - 민감한 data를 Read할 수 있는가? privesc를 위해 Write할 수 있는가?
-- [ ] **passwd/shadow files** - 민감한 data를 Read할 수 있는가? privesc를 위해 Write할 수 있는가?
-- [ ] 민감한 data가 있는 **일반적으로 흥미로운 folders** 확인
-- [ ] **이상한 위치/소유 files,** access하거나 executable files를 alter할 수 있음
-- [ ] 최근 몇 분 내 **Modified**된 항목
-- [ ] **Sqlite DB files**
-- [ ] **Hidden files**
-- [ ] **PATH의 Script/Binaries**
-- [ ] **Web files** (passwords?)
-- [ ] **Backups**?
-- [ ] **passwords를 포함하는 것으로 알려진 files**: **Linpeas** 및 **LaZagne** 사용
-- [ ] **Generic search**
+- [ ] **Profile 파일** - 민감한 데이터를 읽을 수 있는가? 권한 상승을 위해 쓸 수 있는가?
+- [ ] **passwd/shadow 파일** - 민감한 데이터를 읽을 수 있는가? 권한 상승을 위해 쓸 수 있는가?
+- [ ] 민감한 데이터가 있는지 **흔히 주목할 만한 폴더 확인**
+- [ ] **이상한 위치/소유 파일** - 실행 파일에 접근하거나 수정할 수 있는가?
+- [ ] 최근 몇 분 안에 **수정된 파일**
+- [ ] **Sqlite DB 파일**
+- [ ] **숨김 파일**
+- [ ] PATH 내 **스크립트/바이너리**
+- [ ] **웹 파일** (암호?)
+- [ ] **백업**?
+- [ ] 암호가 들어 있는 것으로 **알려진 파일**: **Linpeas**와 **LaZagne** 사용
+- [ ] **일반 검색**
 
-### [**Writable Files**](../linux-basics/linux-privilege-escalation/index.html#writable-files)
+### [**쓰기 가능한 파일**](../linux-basics/linux-privilege-escalation/index.html#writable-files)
 
-- [ ] 임의의 commands를 실행하도록 **python library를 Modify**할 수 있는가?
-- [ ] **log files를 modify**할 수 있는가? **Logtotten** exploit
-- [ ] **/etc/sysconfig/network-scripts/**를 **modify**할 수 있는가? Centos/Redhat exploit
-- [ ] [**ini, int.d, systemd 또는 rc.d files에 write**](../linux-basics/linux-privilege-escalation/index.html#init-init-d-systemd-and-rc-d)할 수 있는가?
+- [ ] 임의 명령을 실행하도록 **python 라이브러리를 수정할 수 있는가?**
+- [ ] **로그 파일을 수정할 수 있는가?** **Logtotten** exploit
+- [ ] **/etc/sysconfig/network-scripts/**를 수정할 수 있는가? Centos/Redhat exploit
+- [ ] [**ini, int.d, systemd 또는 rc.d 파일에 쓸 수 있는가?**](../linux-basics/linux-privilege-escalation/index.html#init-init-d-systemd-and-rc-d)
 
-### [**Other tricks**](../linux-basics/linux-privilege-escalation/index.html#other-tricks)
+### [**기타 트릭**](../linux-basics/linux-privilege-escalation/index.html#other-tricks)
 
-- [ ] [**NFS를 abuse하여 privileges를 상승**](../linux-basics/linux-privilege-escalation/index.html#nfs-privilege-escalation)시킬 수 있는가?
-- [ ] [**restrictive shell에서 escape**](../linux-basics/linux-privilege-escalation/index.html#escaping-from-restricted-shells)해야 하는가?
+- [ ] [**NFS를 악용해 권한을 상승할 수 있는가?**](../linux-basics/linux-privilege-escalation/index.html#nfs-privilege-escalation)
+- [ ] [**제한된 shell에서 탈출해야 하는가?**](../linux-basics/linux-privilege-escalation/index.html#escaping-from-restricted-shells)
 
 
 
 ## References
 
-- [1] [Sudo advisory: sudoedit 임의 파일 편집](https://www.sudo.ws/security/advisories/sudoedit_any/)
-- [2] [Oracle Linux docs: systemd drop-in configuration](https://docs.oracle.com/en/operating-systems/oracle-linux/8/systemd/ModifyingsystemdConfigurationFiles.html)
-- [3] [Notselwyn: CVE-2024-1086 exploit requirements and research](https://github.com/Notselwyn/CVE-2024-1086)
-- [4] [Qualys Security Advisory: needrestart의 LPEs](https://www.qualys.com/2024/11/19/needrestart/needrestart.txt)
+- [1] [Sudo 권고문: sudoedit 임의 파일 편집](https://www.sudo.ws/security/advisories/sudoedit_any/)
+- [2] [Oracle Linux 문서: systemd drop-in 설정](https://docs.oracle.com/en/operating-systems/oracle-linux/8/systemd/ModifyingsystemdConfigurationFiles.html)
+- [3] [Notselwyn: CVE-2024-1086 exploit 요구 사항 및 조사](https://github.com/Notselwyn/CVE-2024-1086)
+- [4] [Qualys 보안 권고문: needrestart의 LPE](https://www.qualys.com/2024/11/19/needrestart/needrestart.txt)
 {{#include ../../banners/hacktricks-training.md}}
