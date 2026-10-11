@@ -73,7 +73,7 @@ When reviewing a similar handler, track **both handle provenance and security co
 
 A protected file-replacement primitive becomes code execution when a privileged process later loads the replaced module. In the demonstrated chain, the destination was `C:\Windows\System32\wuapi.dll`. Activating the local-server COM class `{72566E27-1ABB-4EB3-B4F0-EB431CB1CB32}` for interface `{b4c1d279-966e-44e9-a9c5-ccaf4a77023d}` and calling `IWaaSRemediation::LaunchDetectionOnly()` caused a SYSTEM process to load that DLL.<sup>[[3]](#references)</sup>
 
-This COM call is an **activation trigger**, not [COM registry hijacking](com-hijacking.md). The file primitive supplies the planted module and the privileged loader supplies execution. For other protected-write chains, identify the exact image, DLL path, signature policy, bitness, exported functions, and reliable trigger before choosing a target. See [DLL hijacking](dll-hijacking/README.md) for loader-analysis and proxy-DLL considerations.<sup>[[3]](#references)</sup>
+This COM call is an **activation trigger**, not [COM registry hijacking](com-hijacking.md). The file primitive supplies the planted module and the privileged loader supplies execution. For other protected-write chains, identify the exact image, DLL path, signature policy, bitness, exported functions, and reliable trigger before choosing a target. See [chaining an arbitrary file write into DLL hijacking](dll-hijacking/#chaining-an-arbitrary-file-write-into-a-missing-dll-hijack) for the general loader-analysis workflow.<sup>[[3]](#references)</sup>
 
 ### Moving a Session 0 token to the interactive desktop
 
