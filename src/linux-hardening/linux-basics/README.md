@@ -2,21 +2,21 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Bu, Linux host değerlendirmesi için başlangıç noktasıdır. Sayfalar; kapsamlı bir privilege escalation iş akışını, pratik komutları, ortam değişkenlerini ve host üzerinde nelerin çalıştırılabileceğini etkileyen yaygın kısıtlamaları kapsar.
+Bu bölüm, Linux ana makinelerinin değerlendirilmesi için başlangıç noktasıdır. Sayfalarda kapsamlı bir privilege escalation iş akışı, pratik komutlar, ortam değişkenleri ve ana makinede nelerin çalıştırılabileceğini etkileyen yaygın kısıtlamalar ele alınır.
 
-- [Linux privilege escalation](linux-privilege-escalation/README.md), enumeration ve olası yerel yükseltme yollarını adım adım ele alır. Daha kısa bir görev listesi için [privilege escalation kontrol listesini](../main-system-information/linux-privilege-escalation-checklist.md) kullanın.
-- [Shell başlangıcı, takma adlar ve geçmiş](shell-startup-aliases-and-history.md), komut çözümlemeyi, başlangıç dosyalarının çalıştırılmasını ve geçmişteki ipuçlarını açıklar.
-- [Yararlı Linux komutları](useful-linux-commands.md), dosyaları, süreçleri, servisleri ve ortamı incelemeye yönelik komutları bir araya getirir.
-- [Linux ortam değişkenleri](linux-environment-variables.md), ortam değerlerinin çalıştırmayı nasıl etkilediğini ve hassas değerlerin nerelerde bulunabileceğini açıklar.
-- [Linux kısıtlamalarını aşma](bypass-linux-restrictions/README.md), dosya sistemi korumaları, `noexec` ve distroless sistemler dahil olmak üzere kısıtlı shell'leri ve çalıştırma ortamlarını ele alır.
+- [Linux privilege escalation](linux-privilege-escalation/README.md), keşif ve olası yerel yükseltme yollarını adım adım açıklar. Daha kısa bir görev listesi için [privilege escalation kontrol listesini](../main-system-information/linux-privilege-escalation-checklist.md) kullanın.
+- [Shell başlangıcı, aliases ve geçmiş](shell-startup-aliases-and-history.md), komut çözümlemesini, başlangıç dosyalarının yürütülmesini ve geçmişteki ipuçlarını açıklar.
+- [Yararlı Linux komutları](useful-linux-commands.md), dosyaları, süreçleri, servisleri ve ortamı incelemeye yarayan komutları bir araya getirir.
+- [Linux ortam değişkenleri](linux-environment-variables.md), ortam değerlerinin yürütmeyi nasıl etkilediğini ve hassas değerlerin nerelerde bulunabileceğini açıklar.
+- [Linux kısıtlamalarını Bypass etme](bypass-linux-restrictions/README.md), dosya sistemi korumaları, `noexec` ve distroless sistemler dahil olmak üzere kısıtlı shell'leri ve yürütme ortamlarını ele alır.
 
 ## Native binary exploitation
 
-Bir değerlendirme savunmasız bir Linux executable dosyasına yönlendirirse, Binary Exploitation bölümündeki ilgili materyalleri kullanın:
+Değerlendirme sonucunda savunmasız bir Linux yürütülebilir dosyasıyla karşılaşırsanız, Binary Exploitation bölümündeki ilgili içeriklerden yararlanın:
 
-- [ELF biçimi ve loader davranışı](../../binary-exploitation/basic-stack-binary-exploitation-methodology/elf-tricks.md) ile [binary korumaları ve aşma yöntemleri](../../binary-exploitation/common-binary-protections-and-bypasses/README.md), executable dosyanın düzenini ve azaltıcı önlemleri açıklar.
+- [ELF biçimi ve yükleyici davranışı](../../binary-exploitation/basic-stack-binary-exploitation-methodology/elf-tricks.md) ile [ikili dosya korumaları ve bypass yöntemleri](../../binary-exploitation/common-binary-protections-and-bypasses/README.md), yürütülebilir dosyanın düzenini ve azaltımları açıklar.
 - [Stack exploitation](../../binary-exploitation/basic-stack-binary-exploitation-methodology/README.md) ve [ROP](../../binary-exploitation/rop-return-oriented-programing/README.md), kontrol akışı saldırılarını ele alır.
-- [Libc heap exploitation](../../binary-exploitation/libc-heap/README.md) ve [format string'ler](../../binary-exploitation/format-strings/README.md), belleğin bozulmasına dayalı diğer yaygın yolları ele alır.
+- [Libc heap exploitation](../../binary-exploitation/libc-heap/README.md) ve [format strings](../../binary-exploitation/format-strings/README.md), yaygın diğer bellek bozulması yollarını ele alır.
 
-Kernel'e özgü vaka incelemelerine [Kernel/LPE/CVE materyali](../main-system-information/kernel-lpe-cves/README.md) üzerinden ulaşabilirsiniz.
+Çekirdeğe özgü vaka incelemelerine [Kernel/LPE/CVE içeriğinden](../main-system-information/kernel-lpe-cves/README.md) ulaşabilirsiniz.
 {{#include ../../banners/hacktricks-training.md}}
