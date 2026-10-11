@@ -1,6 +1,8 @@
 .dccache
 scripts/
 scripts/*
+!scripts/
+!scripts/test_search.js
 .DS_Store
 **/.DS_Store
 .vscode
