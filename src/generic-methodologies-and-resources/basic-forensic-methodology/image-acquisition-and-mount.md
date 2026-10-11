@@ -1,151 +1,233 @@
-# Uchukuaji na Mount wa Image
+# Upatikanaji na Uwekaji wa Picha
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Uchukuaji
+## Upatikanaji
 
-> Fanya uchukuaji kila wakati kwa **read-only** na **hesabu hash wakati wa kunakili**. Hifadhi kifaa cha awali kikiwa **write-blocked** na ufanyie kazi nakala zilizothibitishwa pekee.
+> Pata data kila wakati kwa hali ya **read-only** na **kokotoa hash unapoinakili**. Zuia kifaa asili kisiandikwe kwa kutumia **write-blocker**, na ufanyie kazi nakala zilizothibitishwa pekee.
+
+Rekodi mtengenezaji, modeli, nambari ya ufuatiliaji na ukubwa wa chanzo, zana na toleo lake, mihuri ya muda, mhudumu, mahali pa kuhifadhi, hitilafu na hash za upatikanaji/uthibitishaji. Hifadhi picha ya kumbukumbu na uchunguze nakala tofauti ya kufanyia kazi.<sup>[[5]](#references)[[6]](#references)</sup>
 
 ### DD
+
 ```bash
 # Generate a raw, bit-by-bit image (no on-the-fly hashing)
 dd if=/dev/sdb of=disk.img bs=4M status=progress conv=noerror,sync
 # Verify integrity afterwards
 sha256sum disk.img > disk.img.sha256
 ```
+
 ### dc3dd / dcfldd
 
-`dc3dd` ni fork inayodumishwa kikamilifu ya dcfldd (DoD Computer Forensics Lab dd).
+`dc3dd` huongeza hashing ya papo hapo, uthibitishaji wa matokeo, uwekaji wa kumbukumbu za hitilafu na matokeo yaliyogawanywa katika workflow ya `dd`. `hof=` huchagua matokeo yaliyothibitishwa kwa hash; `hash=`, `hlog=`, `log=` na `bufsz=` ni operands tofauti.<sup>[[7]](#references)</sup>
+
 ```bash
-# Create an image and calculate multiple hashes at acquisition time
-sudo dc3dd if=/dev/sdc of=/forensics/pc.img hash=sha256,sha1 hashlog=/forensics/pc.hashes log=/forensics/pc.log bs=1M
+sudo dc3dd if=/dev/sdc hof=/forensics/pc.img hash=sha256 \
+  hlog=/forensics/pc.hashes log=/forensics/pc.log bufsz=1M
 ```
+
 ### Guymager
-Imager ya picha iliyo na graphical interface na multithreaded, inayotumia matokeo ya **raw (dd)**, **EWF (E01/EWFX)** na **AFF4**, pamoja na verification ya parallel. Inapatikana katika repos nyingi za Linux (`apt install guymager`).
-```bash
-# Start in GUI mode
-sudo guymager
-# Or acquire from CLI (since v0.9.5)
-sudo guymager --simulate --input /dev/sdb --format EWF --hash sha256 --output /evidence/drive.e01
-```
+
+Guymager ni zana ya Linux yenye kiolesura cha picha na uwezo wa kutumia nyuzi nyingi kwa ajili ya kutengeneza image katika miundo ya raw/dd, EWF na AFF ya zamani. **AFF na AFF4 ni miundo tofauti**; Guymager haitangazi uwezo wa kutoa AFF4. Washa SHA-256 pamoja na uthibitishaji wa lengwa kwenye kisanduku cha mazungumzo cha acquisition, kisha iwashe kwa kutumia `sudo guymager`.<sup>[[8]](#references)</sup>
+
 ### AFF4 (Advanced Forensics Format 4)
 
-Uainisho wa AFF4 v1.0, ulioandikwa na Bradley L. Schatz na Michael I. Cohen, unafafanua kontena ya uchunguzi wa kidijitali yenye hifadhi iliyoboreshwa kwa virtualization, metadata za aina yoyote, compression na hashing zinazoweza kupanuliwa, pamoja na utendakazi wa throughput ya juu.<sup>[[1]](#references)</sup>
+Vipimo vya AFF4 v1.0 vinafafanua kontena la uchunguzi wa kidijitali lenye hifadhi iliyoboreshwa, metadata ya aina yoyote, compression na hashing zinazoweza kupanuliwa, pamoja na utendaji wa kasi ya juu.<sup>[[1]](#references)</sup>
+
+Utekelezaji rasmi wa C/C++ hutumia `-i` kwa chanzo na `-o` kwa volume ya AFF4. Unda na uhifadhi hash ya kontena la nje kama msingi wa acquisition.<sup>[[5]](#references)[[9]](#references)</sup>
+
 ```bash
-# Acquire to AFF4 using the reference tool
-pipx install aff4imager
-sudo aff4imager acquire /dev/nvme0n1 /evidence/nvme.aff4 --hash sha256
-
-# Velociraptor can also acquire AFF4 images remotely
-velociraptor --config server.yaml frontend collect --artifact Windows.Disk.Acquire --args device="\\.\\PhysicalDrive0" format=AFF4
+sudo aff4imager -i /dev/nvme0n1 -o /evidence/nvme.aff4
+sha256sum /evidence/nvme.aff4 > /evidence/nvme.aff4.sha256
 ```
-### FTK Imager (Windows & Linux)
 
-Unaweza [kupakua FTK Imager](https://accessdata.com/product-download) na kuunda picha za **raw, E01 au AFF4**:
+### FTK Imager
+
+Nyaraka za sasa za FTK Imager zinataja kutoa faili za raw/DD, E01 na AFF pamoja na uthibitishaji wa hash. Usitaje matokeo yake ya AFF kama AFF4.<sup>[[10]](#references)</sup>
+
 ```bash
 ftkimager /dev/sdb evidence --e01 --case-number 1 --evidence-number 1 \
---description 'Laptop seizure 2025-07-22' --examiner 'AnalystName' --compress 6
+          --description 'Laptop seizure 2025-07-22' --examiner 'AnalystName' --compress 6
 ```
+
 ### Zana za EWF (libewf)
-```bash
-sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examiner --format encase6 --compression best
-```
-### Kuunda Picha za Diski za Cloud
 
-*AWS* – unda **forensic snapshot** bila kuzima instance:
-```bash
-aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web-server 2025-07-22"
-# Copy the snapshot to S3 and download with aws cli / aws snowball
-```
-*Azure* – tumia `az snapshot create` na u-export kwenda kwenye URL ya SAS.
+Kwa upataji bila uangalizi, target ni `-t`, metadata ya kesi hutumia `-C/-D/-E/-e`, `-d sha256` huongeza SHA-256, na `-l` huhifadhi hitilafu za upataji na digest. Thibitisha seti kamili ya segmenti kabla ya uchanganuzi.<sup>[[11]](#references)[[12]](#references)</sup>
 
+```bash
+sudo ewfacquire -u -t /forensics/evidence -C 1 -D 'Seizure 2025-07-22' \
+  -E 1 -e 'AnalystName' -f encase6 -c deflate:best -d sha256 \
+  -l /forensics/evidence.acquire.log /dev/sdb
+ewfverify -d sha256 -l /forensics/evidence.verify.log /forensics/evidence.E01
+```
+
+### Kuunda picha za diski za cloud
+
+Snapshot ya provider ni chanzo cha kunasa hali ya wakati fulani, si picha ya forensic inayohakikisha kiotomatiki uthabiti wa application. Snapshot ya EBS haijumuishi data ambayo bado imehifadhiwa kwenye cache ya guest; sitisha writes, tuliza application, ondoa volume ya data, au simamisha instance ambayo root volume yake inanasa, ikiwa mpango wa response unaruhusu.<sup>[[13]](#references)</sup>
+
+```bash
+aws ec2 create-snapshot --volume-id vol-01234567 \
+  --description 'IR-case-1234 web-server 2025-07-22'
+```
+
+Usieleze EBS snapshots kama faili zinazoweza kunakiliwa tu hadi S3. Ili kuunda upya picha ya block bila kuunda volume, orodhesha blocks zilizotengwa kwa kutumia `ListSnapshotBlocks`, pakua kila block ya 512 KiB kwa kutumia `GetSnapshotBlock`, hakiki checksum iliyorejeshwa na ujaze kwa zero faharasa za blocks ambazo hazipo kwenye sparse snapshot.<sup>[[14]](#references)</sup>
+
+Kwa Azure, unda snapshot, toa SAS ya muda mfupi ya **kusoma tu**, pakua VHD, batilisha ufikiaji na ukokotoe hash ya matokeo. Tengeneza snapshot ya kila diski kivyake isipokuwa utaratibu wa ukusanyaji utoe consistency iliyoratibiwa.<sup>[[15]](#references)</sup>
+
+```bash
+snap=$(az snapshot create -g IR-RG -n case123-os --source "$disk_id" --query id -o tsv)
+sas=$(az snapshot grant-access --ids "$snap" --access-level Read \
+  --duration-in-seconds 3600 --query accessSas -o tsv)
+azcopy copy "$sas" case123-os.vhd
+az snapshot revoke-access --ids "$snap"
+sha256sum case123-os.vhd > case123-os.vhd.sha256
+```
 
 ## Mount
 
-### Kuchagua mbinu inayofaa
+### Chukulia images kama ingizo hasidi
 
-1. Mount **diski nzima** unapotaka jedwali asili la partitions (MBR/GPT).
-2. Mount **faili la partition moja** unapohitaji volume moja pekee.
-3. Weka viambatisho vya image katika hali ya kusoma-tu (kwa mfano, `--read-only` ya qemu-nbd).<sup>[[2]](#references)</sup> Mount filesystems katika hali ya kusoma-tu (`-o ro`).<sup>[[3]](#references)</sup> Fanyia kazi **nakala**.
+Filesystem hasidi inaweza kulenga partition na filesystem parsers za kernel ya host. QEMU inaonya wazi dhidi ya kuunganisha guest image isiyoaminika kwenye NBD ya host kwa ajili ya mounting, na libguestfs inapendekeza kutowahi kumount filesystem ya guest isiyoaminika moja kwa moja kwa kutumia loop au `kpartx`.<sup>[[2]](#references)[[16]](#references)</sup>
 
-### Raw images (dd, AFF4-extracted)
+Pendelea `guestmount` kwa image isiyojulikana au inayodhibitiwa na mshambuliaji. Huchanganua na kumount guest ndani ya appliance ndogo, kisha hufichua faili kupitia FUSE. Lazimisha format inayojulikana badala ya kutumia auto-detection, na hakikisha upande wa appliance uko read-only.<sup>[[17]](#references)</sup>
+
 ```bash
-# Identify partitions
-fdisk -l disk.img
+mkdir -p /mnt/evidence
+virt-filesystems --format=raw -a disk.img --all --long -h
+guestmount --ro --format=raw -a disk.img -i /mnt/evidence
+# Inspect/copy files, but never execute content from the image.
+guestunmount /mnt/evidence
+```
 
-# Attach the image to a network block device (does not modify the file)
+Ikiwa ukaguzi hauwezi kubaini OS, badilisha `-i` kwa kifaa mahususi cha guest kama vile `-m /dev/sda2`. Volumes zilizosimbwa kwa LUKS zinaweza kutolewa kwa kutumia selectors za `--key`; epuka kuweka key moja kwa moja kwenye historia ya shell.<sup>[[17]](#references)</sup>
+
+### Kuchagua mount ya moja kwa moja kwenye host
+
+Tumia mount ya moja kwa moja kwenye host kwa images unazoziamini tu au kwenye VM ya uchanganuzi inayoweza kutupwa:
+
+1. Mount **diski nzima** unapohitaji jedwali lake la awali la partitions.
+2. Mount **image ya partition moja** unapohitaji volume moja tu.
+3. Fanya attachment iwe ya kusoma tu na uweke wazi format ya image. Pia mount filesystem iwe ya kusoma tu. `ro` pekee haizuii ext3/ext4 kucheza tena journal, kwa hivyo tumia `ro,noload` kwa filesystems za ext zilizo dirty.<sup>[[2]](#references)[[3]](#references)</sup>
+
+`mmls` ni muhimu wakati ukubwa wa sector si baiti 512 au metadata ya partition imeharibika; `-b` huweka ukubwa halisi wa sector wa kifaa. Endelea na uchanganuzi wa partitions na filesystems hapa:<sup>[[18]](#references)</sup>
+
+{{#ref}}
+partitions-file-systems-carving/README.md
+{{#endref}}
+
+### Images ghafi (dd, zilizotolewa kutoka AFF4)
+
+```bash
+# Identify partitions without attaching the image
+mmls -b 512 disk.img
+
+# Attach a known raw image read-only and force its format
 sudo modprobe nbd max_part=16
-sudo qemu-nbd --connect=/dev/nbd0 --read-only disk.img
+sudo qemu-nbd --connect=/dev/nbd0 --read-only --format=raw disk.img
+lsblk /dev/nbd0 -o NAME,SIZE,RO,TYPE,FSTYPE,LABEL,UUID
 
-# Inspect partitions
-lsblk /dev/nbd0 -o NAME,SIZE,TYPE,FSTYPE,LABEL,UUID
-
-# Mount a partition (e.g. /dev/nbd0p2)
-sudo mount -o ro,uid=$(id -u) /dev/nbd0p2 /mnt
+# Example ext4 partition: prevent journal replay
+sudo mount -o ro,noload /dev/nbd0p2 /mnt/evidence
 ```
-Tafadhali tuma maandishi ya Kiingereza unayotaka kutafsiri.
+
+Ondoa muunganisho ukimaliza:
+
 ```bash
-sudo umount /mnt && sudo qemu-nbd --disconnect /dev/nbd0
+sudo umount /mnt/evidence
+sudo qemu-nbd --disconnect /dev/nbd0
 ```
+
+Kwa qcow2, VMDK au VHD/VHDX, thibitisha umbizo kupitia chanzo kinachoaminika au ulikague ndani ya VM ya uchanganuzi inayoweza kutupwa, kisha badilisha `--format=raw` na umbizo husika lililotajwa wazi. Usiwahi kutegemea utambuzi wa umbizo kiotomatiki upande wa host kwa ingizo lisiloaminika.<sup>[[2]](#references)</sup>
+
 ### EWF (E01/EWFX)
+
 ```bash
-# 1. Mount the EWF container
-mkdir /mnt/ewf
+# Verify, then expose the embedded raw media stream
+mkdir -p /mnt/ewf /mnt/evidence
+ewfverify evidence.E01
 ewfmount evidence.E01 /mnt/ewf
 
-# 2. Attach the exposed raw file via qemu-nbd (safer than loop)
-sudo qemu-nbd --connect=/dev/nbd1 --read-only /mnt/ewf/ewf1
-
-# 3. Mount the desired partition (XFS example; use the filesystem-specific option)
+# ewf1 is raw media data; attach it explicitly as raw and read-only
+sudo qemu-nbd --connect=/dev/nbd1 --read-only --format=raw /mnt/ewf/ewf1
+# Example XFS partition
 sudo mount -o ro,norecovery /dev/nbd1p1 /mnt/evidence
 ```
-Kwa mount zisizo na replay mahususi kwa filesystem, ext3/ext4 hutumia `noload`, huku XFS ikitumia `norecovery` na kuhitaji mode ya read-only.<sup>[[3]](#references)[[4]](#references)</sup>
 
-Vinginevyo, badilisha on the fly kwa kutumia **xmount**:
+Kwa mount zisizocheza tena (no-replay) zinazohusu filesystem maalum, ext3/ext4 hutumia `noload`, ilhali XFS hutumia `norecovery` na huhitaji hali ya read-only.<sup>[[3]](#references)[[4]](#references)</sup>
+
+`xmount` inaweza kutoa mwonekano wa raw wa kielektroniki, lakini mwonekano huo bado una jedwali asili la partitions. Ipitishe kwenye mtiririko huohuo wa `mmls`, `guestmount` iliyotengwa au NBD ya read-only badala ya ku-mount faili ya diski nzima kama filesystem.<sup>[[21]](#references)</sup>
+
 ```bash
-xmount --in ewf evidence.E01 --out raw /tmp/raw_mount
-mount -o ro /tmp/raw_mount/image.dd /mnt
+mkdir -p /tmp/raw_mount
+xmount --in aewf evidence.E?? --out raw /tmp/raw_mount
+mmls /tmp/raw_mount/evidence.dd
 ```
-### LVM / BitLocker / VeraCrypt volumes
 
-Baada ya kuambatisha block device (loop au nbd):
+### Volumes za BitLocker
+
+Tumia mode ya read-only kwenye tabaka zote mbili. `-u` bila thamani hukuomba nenosiri, hivyo huepusha kuliweka kwenye hoja za mchakato au historia ya shell.<sup>[[19]](#references)</sup>
+
 ```bash
-# LVM
-sudo vgchange -ay               # activate logical volumes
-sudo lvscan | grep "/dev/nbd0"
-
-# BitLocker (dislocker)
-sudo dislocker -V /dev/nbd0p3 -u -- /mnt/bitlocker
-sudo mount -o ro /mnt/bitlocker/dislocker-file /mnt/evidence
+mkdir -p /mnt/bitlocker /mnt/evidence
+sudo dislocker -r -V /dev/nbd0p3 -u -- /mnt/bitlocker
+sudo mount -o loop,ro /mnt/bitlocker/dislocker-file /mnt/evidence
 ```
-### Wasaidizi wa kpartx
 
-`kpartx` huweka partitions kutoka kwenye image hadi `/dev/mapper/` kiotomatiki:
+Kwa LUKS au LVM, tumia `guestmount -i --ro`; appliance yake inaweza kukagua mipangilio ya kawaida ya volume zilizofichwa na za kimantiki bila kuamilisha volume group isiyo ya mwenyeji kwenye host.<sup>[[17]](#references)</sup>
+
+### Zana saidizi za kpartx
+
+`kpartx` huunda nodi za host device-mapper, kwa hiyo haifai kwa image zisizoaminika. Ikiwa uchoraji ramani wa moja kwa moja unahitajika, ongeza `-r` ili partition mappings ziwe za kusoma pekee, na ondoa mappings kwa kupitisha njia ileile ya image iliyotumika kuziunda.<sup>[[16]](#references)[[20]](#references)</sup>
+
 ```bash
-sudo kpartx -av disk.img  # creates /dev/mapper/loop0p1, loop0p2 …
-mount -o ro /dev/mapper/loop0p2 /mnt
+sudo kpartx -arv disk.img
+sudo mount -o ro,noload /dev/mapper/loop0p2 /mnt/evidence
+sudo umount /mnt/evidence
+sudo kpartx -dv disk.img
 ```
+
 ### Makosa ya kawaida ya mount na marekebisho
 
-Kwa filesystem ya ext3/ext4 iliyo dirty, tumia `ro,noload` wakati journal replay lazima izuiwe.<sup>[[3]](#references)</sup>
-
-| Kosa | Sababu ya kawaida | Marekebisho |
-|-------|---------------|-----|
-| `cannot mount /dev/loop0 read-only` | Journaled FS (ext4) haija-unmountiwa vizuri | tumia `-o ro,noload` |
-| `bad superblock …` | Offset si sahihi au FS imeharibika | hesabu offset (`sector*size`) au endesha `fsck -n` kwenye nakala |
-| `mount: unknown filesystem type 'LVM2_member'` | LVM container | washa volume group kwa `vgchange -ay` |
+| Hitilafu | Sababu ya kawaida | Hatua salama inayofuata |
+|-------|---------------|----------------|
+| `cannot mount ... read-only` | Mfumo wa faili wenye journal ulioharibika | tumia chaguo la kuzuia replay linalohusu mfumo huo wa faili, kama `ro,noload` ya ext4 |
+| `bad superblock ...` | Partisheni/offset ya sekta isiyo sahihi au mfumo wa faili ulioharibika | thibitisha ukubwa wa sekta na offset kwa kutumia `mmls`; endesha `fsck -n` kwenye nakala iliyothibitishwa pekee |
+| `unknown filesystem type 'LVM2_member'` | Partisheni iliyochaguliwa ni volume halisi ya LVM | ruhusu libguestfs ichunguze, au tenga uanzishaji wa LVM wa mkono ndani ya VM ya matumizi ya mara moja |
 
 ### Usafishaji
 
-Kumbuka kufanya **umount** na **disconnect** vifaa vya loop/nbd ili kuepuka kuacha mappings zilizoachwa ambazo zinaweza kuharibu kazi inayofuata:
+Ondoa mount za mifumo ya faili kabla ya kutenganisha vifaa vinavyoihifadhi. Pia ondoa safu ya FUSE ya EWF/xmount na ramani zozote za crypt au device-mapper zilizoundwa:
+
 ```bash
-umount -Rl /mnt/evidence
-kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0
+sudo umount /mnt/evidence
+sudo qemu-nbd --disconnect /dev/nbd0  # or /dev/nbd1
+fusermount -u /mnt/ewf                # when ewfmount was used
+# fusermount -u /tmp/raw_mount         # when xmount was used
 ```
+
+
+
 ## References
 
-- [1] [Uainisho wa Kiwango cha AFF4 (Advanced Forensic Format v4)](https://github.com/aff4/Standard)
+- [1] [Maelezo ya Kawaida ya AFF4 (Advanced Forensic Format v4)](https://github.com/aff4/Standard)
 - [2] [Nyaraka za QEMU qemu-nbd](https://www.qemu.org/docs/master/tools/qemu-nbd.html)
 - [3] [Ukurasa wa mwongozo wa Linux wa mount(8)](https://man7.org/linux/man-pages/man8/mount.8.html)
-- [4] [Mfumo wa faili wa SGI XFS (Nyaraka za kernel ya Linux)](https://kernel.org/doc/html/v5.9/admin-guide/xfs.html)
+- [4] [Mfumo wa faili wa SGI XFS (nyaraka za Linux kernel)](https://kernel.org/doc/html/v5.9/admin-guide/xfs.html)
+- [5] [Mbinu Bora za SWGDE za Ukusanyaji wa Ushahidi wa Kidijitali](https://www.swgde.org/documents/published-complete-listing/18-f-002-2-0/)
+- [6] [Mbinu Bora za SWGDE za Upataji wa Ushahidi wa Kompyuta](https://www.swgde.org/wp-content/uploads/2024/03/2023-06-15-SWGDE-Best-Practices-for-Computer-Forensic-Acquisitions-17-F-002-2.0.pdf)
+- [7] [Ukurasa wa mwongozo wa dc3dd(1)](https://manpages.opensuse.org/Leap-16.0/dc3dd/dc3dd.1.en.html)
+- [8] [Tovuti kuu ya Guymager na nyaraka za usanidi](https://guymager.sourceforge.io/)
+- [9] [Nyaraka za c-aff4](https://github.com/Velocidex/c-aff4/blob/master/docs/index.rst)
+- [10] [Miundo na uthibitishaji wa Exterro FTK Imager](https://www.exterro.com/digital-forensics-software)
+- [11] [Mwongozo wa libewf ewfacquire(1)](https://github.com/libyal/libewf/blob/main/manuals/ewfacquire.1)
+- [12] [Mwongozo wa libewf ewfverify(1)](https://github.com/libyal/libewf/blob/main/manuals/ewfverify.1)
+- [13] [Unda snapshots za Amazon EBS](https://docs.aws.amazon.com/ebs/latest/userguide/ebs-creating-snapshot.html)
+- [14] [Soma snapshots za Amazon EBS ukitumia EBS direct APIs](https://docs.aws.amazon.com/ebs/latest/userguide/readsnapshots.html)
+- [15] [Rejeleo la snapshot la Azure CLI](https://learn.microsoft.com/en-us/cli/azure/snapshot?view=azure-cli-latest)
+- [16] [Usalama wa libguestfs](https://libguestfs.org/guestfs-security.1.html)
+- [17] [guestmount(1)](https://libguestfs.org/guestmount.1.html)
+- [18] [mmls(1)](https://sleuthkit.org/sleuthkit/man/mmls.html)
+- [19] [dislocker(1)](https://manpages.debian.org/testing/dislocker/dislocker.1.en.html)
+- [20] [kpartx(8)](https://man.archlinux.org/man/kpartx.8.en)
+- [21] [xmount(1)](https://manpages.debian.org/testing/xmount/xmount.1.en.html)
 {{#include ../../banners/hacktricks-training.md}}
