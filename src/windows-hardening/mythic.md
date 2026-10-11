@@ -4,303 +4,371 @@
 
 ## Mythic nedir?
 
-Mythic, red teaming için tasarlanmış açık kaynaklı, modüler ve iş birliğine dayalı bir command and control (C2) framework'üdür. Operatörlerin Windows, Linux ve macOS dahil olmak üzere farklı işletim sistemlerinde agent'ları (payload'ları) yönetmesine ve dağıtmasına olanak tanır. Mythic; birden fazla operatör için tasking, dosya işleme, SOCKS/rpfwd yönetimi ve payload oluşturma özelliklerine sahip bir tarayıcı arayüzü sunar.
+Mythic, red teaming için tasarlanmış açık kaynaklı, modüler ve iş birliğine dayalı bir command and control (C2) framework'üdür. Operatörlerin Windows, Linux ve macOS dahil farklı işletim sistemlerinde agent'ları (payload'ları) yönetmesine ve dağıtmasına olanak tanır. Mythic; birden fazla operatörün görev ataması, dosya işlemleri, SOCKS/rpfwd yönetimi ve payload oluşturması için bir tarayıcı arayüzü sunar.
 
-Monolitik framework'lerin aksine Mythic repository'si payload türlerini veya C2 profillerini kendisi içermez. Agent'lar, wrapper'lar ve C2 profilleri genellikle harici bileşenler olarak yüklenir ve Mythic core'dan bağımsız şekilde güncellenebilir.
+Monolitik framework'lerin aksine Mythic deposu, payload türlerini veya C2 profillerini **içermez**. Agent'lar, wrapper'lar ve C2 profilleri genellikle harici bileşenler olarak kurulur ve Mythic çekirdeğinden bağımsız olarak güncellenebilir.
 
 ### Kurulum
 
-Mythic'i kurmak için resmi **[Mythic repo](https://github.com/its-a-feature/Mythic)** üzerindeki talimatları izleyin. Mythic dizininden yaygın bir bootstrap işlemi şöyledir:
+Mythic'i kurmak için resmi **[Mythic repo](https://github.com/its-a-feature/Mythic)** üzerindeki talimatları izleyin. Mythic dizininden yaygın bir başlangıç komutu şöyledir:
+
 ```bash
 sudo make
 sudo ./mythic-cli start
 ```
-Mythic zaten çalışıyorsa genellikle `./mythic-cli install github ...` ile yeni bir agent veya profile ekleyebilir, ardından Mythic'i yeniden başlatabilir ya da yeni component'i doğrudan başlatabilirsiniz.
+
+Mythic zaten çalışıyorsa, genellikle `./mythic-cli install github ...` komutuyla yeni bir agent veya profil ekleyebilir, ardından Mythic'i yeniden başlatabilir ya da yalnızca yeni bileşeni doğrudan başlatabilirsiniz.
 
 ### Agents
 
-Mythic, **ele geçirilmiş sistemlerde görevleri gerçekleştiren payload'lar** olan birden fazla agent'ı destekler. Her agent belirli ihtiyaçlara göre özelleştirilebilir ve farklı işletim sistemlerinde çalışabilir.
+Mythic, ele geçirilmiş sistemlerde görevleri yerine getiren **payload'lar** olan birden fazla agent'ı destekler. Her agent belirli ihtiyaçlara göre özelleştirilebilir ve farklı işletim sistemlerinde çalışabilir.
 
-Mythic'te varsayılan olarak hiçbir agent yüklü değildir. Open-source topluluk agent'ları [**https://github.com/MythicAgents**](https://github.com/MythicAgents) adresinde bulunur ve [**topluluk feature matrix'i**](https://mythicmeta.github.io/overview/agent_matrix.html), desteklenen işletim sistemlerini, payload formatlarını, wrapper'ları ve C2 profillerini hızlıca kontrol etmek için kullanışlıdır.<sup>[[1]](#references)</sup>
+Mythic'te varsayılan olarak yüklü agent bulunmaz. Açık kaynak topluluğunun agent'ları [**https://github.com/MythicAgents**](https://github.com/MythicAgents) adresinde bulunur ve [**topluluk özellik matrisi**](https://mythicmeta.github.io/overview/agent_matrix.html), desteklenen işletim sistemlerini, payload biçimlerini, wrapper'ları ve C2 profillerini hızlıca kontrol etmek için kullanışlıdır.<sup>[[1]](#references)</sup>
 
-Bu org'dan bir agent yüklemek için şunu çalıştırabilirsiniz:
+Bu kuruluştan bir agent yüklemek için şu komutu çalıştırabilirsiniz:
+
 ```bash
 sudo ./mythic-cli install github https://github.com/MythicAgents/<agent-name>
 sudo ./mythic-cli install github https://github.com/MythicAgents/Apollo.git
 sudo -E ./mythic-cli install github https://github.com/MythicAgents/Apollo.git
 ```
-`sudo -E` formu, root olmayan bir ortamdan kurulum yaparken kullanışlıdır. Mythic zaten çalışıyor olsa bile, önceki komutla yeni agent'lar ekleyebilirsiniz.
+
+`sudo -E` biçimi, root olmayan bir ortamdan kurulum yaparken kullanışlıdır. Mythic zaten çalışıyor olsa bile önceki komutla yeni agent'lar ekleyebilirsiniz.
 
 ### C2 Profiles
 
-Mythic'teki C2 profiles, **agent'ların Mythic server ile nasıl iletişim kuracağını** tanımlar. İletişim protokolünü, şifreleme yöntemlerini ve diğer ayarları belirtirler. C2 profiles'ı Mythic web arayüzü üzerinden oluşturabilir ve yönetebilirsiniz.
+Mythic'teki C2 profiles, **agent'ların Mythic sunucusuyla nasıl iletişim kurduğunu** tanımlar. İletişim protokolünü, şifreleme yöntemlerini ve diğer ayarları belirtir. Mythic web arayüzü üzerinden C2 profiles oluşturabilir ve yönetebilirsiniz.
 
-Mythic varsayılan olarak hiçbir profile sahip olmadan kurulur; ancak [**https://github.com/MythicC2Profiles**](https://github.com/MythicC2Profiles) repo'sundan bazı profilleri şu komutu çalıştırarak indirmek mümkündür:
+Mythic varsayılan olarak profiles olmadan kurulur; ancak [**https://github.com/MythicC2Profiles**](https://github.com/MythicC2Profiles) repo'sundan bazı profiles indirmek mümkündür. Bunun için şunu çalıştırın:
+
 ```bash
 sudo ./mythic-cli install github https://github.com/MythicC2Profiles/<c2-profile>
 sudo ./mythic-cli install github https://github.com/MythicC2Profiles/http
 ```
-Akılda tutulması gereken mevcut operator-relevant profiller:
 
-- [`http`](https://github.com/MythicC2Profiles/http): temel asynchronous GET/POST trafiği.
-- [`httpx`](https://github.com/MythicC2Profiles/httpx): birden fazla callback domain'i, fail-over/round-robin rotation, custom headers/query parameters ve cookies, headers, query parameters veya body içine yerleştirilen message transforms (`base64`, `base64url`, `xor`, `netbios`, `prepend`, `append`) ile daha esnek HTTP trafiği.
-- [`dynamichttp`](https://github.com/MythicC2Profiles/dynamichttp): static `http` profile fazla tanınabilir olduğunda JSON/TOML-driven HTTP message shaping.
+Operatörler açısından güncel ve akılda tutulması gereken profiller:
 
-### Mevcut platform notları
+- [`http`](https://github.com/MythicC2Profiles/http): temel asenkron GET/POST trafiği.
+- [`httpx`](https://github.com/MythicC2Profiles/httpx): birden fazla callback domain'i, fail-over/round-robin rotation, özel headers/query parameters ve cookie'lere, headers'a, query parameters'a veya body'ye yerleştirilen message transforms (`base64`, `base64url`, `xor`, `netbios`, `prepend`, `append`) ile daha esnek HTTP trafiği.
+- [`dynamichttp`](https://github.com/MythicC2Profiles/dynamichttp): statik `http` profile fazla tanınabilir olduğunda JSON/TOML ile yönlendirilen HTTP message shaping.
 
-- Birçok public agent ve profile artık önceden oluşturulmuş remote container images ile yükleniyor.
-Bir component'i fork eder veya yerel olarak patch'lerseniz ve Mythic eski
-davranışı kullanmaya devam ederse, oluşturulan `.env` girdilerinde
-`*_REMOTE_IMAGE`, `*_USE_BUILD_CONTEXT` ve `*_USE_VOLUME` değerlerini inceleyin;
-`*_USE_BUILD_CONTEXT="true"` etkinleştirmek genellikle Mythic'in remote image'ı
-sessizce yeniden kullanmak yerine yerel Docker context'inizden rebuild etmesini sağlar.
-- Browser scripts, operator'ler için Mythic'in en değerli quality-of-life özelliklerinden
-biridir: ham command output'u tables, screenshot viewers, download links, search links
-ve doğrudan UI üzerinden follow-on tasking gönderen buttons'a dönüştürebilirler. Mevcut
-Mythic build'leri her operator'ün kendi script'lerini tutmasına, bunları global olarak
-veya task başına açıp kapatmasına izin verir ve en iyi sonuçlar agent'lar plaintext yerine
-structured JSON döndürdüğünde elde edilir. Bu özellik özellikle tekrarlanan `ls`, `ps`,
-triage ve file-browser workflow'ları için kullanışlıdır.<sup>[[4]](#references)[[6]](#references)</sup>
-- Daha yeni Mythic build'leri ayrıca interactive tasking ve Push C2 patterns desteği
-sunar; bu da PTY/SOCKS/rpfwd ağırlıklı operation'larda `sleep 0` polling ihtiyacını
-azaltır. Bir agent/profile bunu desteklediğinde, interactive channel'ı kullanılabilir
-tutmak için sürekli check-in göndererek server'ı hammer'lamaktan genellikle daha düşük
-overhead'li olur.<sup>[[3]](#references)</sup>
-- Mevcut 3.4-era Mythic builder'ları, eski writeup'ların ima ettiğinden daha
-context-aware'dir: build parameters artık seçilen OS veya diğer build options'a göre
-gruplanabilir veya gizlenebilir, payload types bir build içinde birden fazla C2 profile
-veya aynı C2'nin birden fazla instance'ını destekleyip desteklemediklerini belirtebilir
-ve C2 parameter deviations, bir agent'ın gerçekte implement etmediği field'ları
-gizlemesine izin verir. `http`, `httpx`, `smb`, `tcp` ve `websocket` arasında geçiş
-yaparken bu önemlidir; çünkü güvenli/geçerli build surface artık düz, static bir form
-değildir.<sup>[[5]](#references)</sup>
-- Custom bir agent/profile pair oluşturuyorsanız ve Mythic'in JSON message format'ını
-veya wire üzerindeki default crypto'yu kullanmak istemiyorsanız bir
-`translation_container` kullanın: Mythic UUID'yi çıkarır, encrypted blob ile key
-material'ı gRPC üzerinden translator'a iletir ve agent-native bytes bekler. Bu yöntem,
-binary protocols, custom framing veya agent-side encryption desteği sağlamak için
-tüm server'ı yeniden yazmadan kullanılabilecek temiz yoldur.
-- Linked/P2P callbacks'in yalnızca tasking taşımadığını unutmayın. Mythic'in
-`get_tasking` flow'u responses'ın yanı sıra `delegates`, `socks`, `rpfwd` ve
-`interactive` data da taşıyabilir. Uygulamada tek bir egress callback, aynı polling
-loop içinde inner callbacks ve pivot channels'a hizmet verebilir; child agents kendi
-periodic check-in'lerini gerçekleştiriyorsa `get_delegate_tasks=false`, parent'ın
-inner callback'in queued jobs'larını yanlışlıkla tüketmesini önler.
+### Güncel platform notları
+
+- Birçok genel kullanıma açık agent ve profile artık önceden oluşturulmuş uzak container image'larıyla kurulur.
+  Bir component'i fork ederseniz veya yerel olarak yamalarsanız ve Mythic eski
+  davranışı kullanmaya devam ederse, oluşturulan `.env` girdilerinde
+  `*_REMOTE_IMAGE`, `*_USE_BUILD_CONTEXT` ve `*_USE_VOLUME` değerlerini inceleyin;
+  `*_USE_BUILD_CONTEXT="true"` ayarını etkinleştirmek, Mythic'in uzak image'ı
+  fark ettirmeden yeniden kullanmak yerine genellikle yerel Docker context'inizden
+  yeniden build etmesini sağlar.
+- Browser scripts, operatörler için Mythic'in en kullanışlı özelliklerinden
+  biridir: ham command output'u tablolara, screenshot görüntüleyicilerine,
+  download bağlantılarına, arama bağlantılarına ve doğrudan UI üzerinden yeni
+  tasking gönderen butonlara dönüştürebilirler. Güncel Mythic build'leri her
+  operatörün kendi script'lerini kullanmasına, bunları genel olarak veya görev
+  başına açıp kapatmasına olanak tanır. En iyi sonuçlar, agent'lar plaintext
+  yerine yapılandırılmış JSON döndürdüğünde elde edilir. Bu özellik özellikle
+  tekrarlanan `ls`, `ps`, triage ve file-browser iş akışlarında kullanışlıdır.<sup>[[4]](#references)[[6]](#references)</sup>
+- Daha yeni Mythic build'leri, PTY/SOCKS/rpfwd ağırlıklı operasyonlarda
+  `sleep 0` polling ihtiyacını azaltan interactive tasking ve Push C2
+  pattern'lerini de destekler. Agent/profile destekliyorsa bu, sırf interactive
+  channel kullanılabilir kalsın diye sunucuyu sürekli check-in'lerle
+  zorlamaktan genellikle daha düşük overhead sağlar.<sup>[[3]](#references)</sup>
+- Güncel 3.4 dönemi Mythic builder'ları, eski yazıların ima ettiğinden daha
+  fazla context-aware'dir: build parameters artık seçilen OS veya diğer build
+  seçeneklerine göre gruplanabilir ya da gizlenebilir; payload type'ları bir
+  build'de birden fazla C2 profile'ı veya aynı C2'nin birden fazla instance'ını
+  destekleyip desteklemediklerini belirtebilir; C2 parameter deviation'ları ise
+  bir agent'ın gerçekten implement etmediği alanları gizlemesine olanak tanır.
+  `http`, `httpx`, `smb`, `tcp` ve `websocket` arasında geçiş yaparken bu
+  önemlidir; çünkü güvenli/geçerli build seçenekleri artık düz, statik bir form
+  değildir.<sup>[[5]](#references)</sup>
+- Özel bir agent/profile çifti oluşturuyorsanız ve Mythic'in JSON message
+  formatını veya varsayılan crypto'yu wire üzerinde kullanmak istemiyorsanız,
+  `translation_container` kullanın: Mythic UUID'yi çıkarır, şifrelenmiş blob'u
+  ve key material'ı gRPC üzerinden translator'a iletir ve karşılığında
+  agent-native byte'lar bekler. Sunucunun tamamını yeniden yazmadan binary
+  protocol'leri, özel framing'i veya agent tarafında şifrelemeyi desteklemenin
+  temiz yolu budur.
+- Linked/P2P callback'lerin yalnızca tasking'i iletmediğini unutmayın.
+  Mythic'in `get_tasking` akışı responses ile birlikte `delegates`, `socks`,
+  `rpfwd` ve `interactive` verilerini de taşıyabilir. Uygulamada, tek bir
+  egress callback aynı polling loop içinde inner callback'lere ve pivot
+  channel'larına hizmet verebilir; child agent'lar kendi periyodik check-in'lerini
+  yapıyorsa `get_delegate_tasks=false` ayarı parent'ın inner callback'in
+  kuyruğa alınmış işlerini yanlışlıkla tüketmesini önler.
 
 ### Wrapper payload'ları
 
-Wrapper payload'ları, aynı agent logic'i korurken teslim edilen veya persist edilen on-disk representation'ı değiştirmenizi sağlar.
+Wrapper payload'ları, teslim edilen veya diske kaydedilen gösterimi değiştirirken aynı agent mantığını korumanıza olanak tanır.
 
-- `service_wrapper`: başka bir payload'ı Windows service executable'a dönüştürür; execution path'in geçerli bir service binary gerektirdiği durumlarda kullanışlıdır.
-- `scarecrow_wrapper`: uyumlu shellcode'u ScareCrow loader ile wrap ederek EXE/DLL/CPL gibi loader-backed outputs oluşturur.
+- `service_wrapper`: başka bir payload'ı Windows service executable'ına dönüştürür; bu, execution path geçerli bir service binary gerektirdiğinde kullanışlıdır.
+- `scarecrow_wrapper`: uyumlu shellcode'u ScareCrow loader ile sararak EXE/DLL/CPL gibi loader destekli çıktılar oluşturur.
 
 ## [Apollo Agent](https://github.com/MythicAgents/Apollo)
 
-Apollo, SpecterOps training offerings içinde kullanılmak üzere 4.0 .NET Framework kullanan C# ile yazılmış bir Windows agent'tır.<sup>[[2]](#references)</sup>
+Apollo, SpecterOps eğitim programlarında kullanılmak üzere tasarlanmış, 4.0 .NET Framework'ü kullanan C# ile yazılmış bir Windows agent'ıdır.<sup>[[2]](#references)</sup>
 
-Şununla yükleyin:
+Şu komutla kurun:
+
 ```bash
 ./mythic-cli install github https://github.com/MythicAgents/Apollo.git
 ```
+
 ### Güncel build/profile notları
 
-- Apollo şu anda `WinExe`, `Shellcode`, `Service` ve `Source` payload'larını oluşturabilir.
+- Apollo şu anda `WinExe`, `Shellcode`, `Service` ve `Source` payload'ları üretebilir.
 - Yaygın olarak kullanılan Apollo profilleri `http`, `httpx`, `smb`, `tcp` ve `websocket`'tir.
-- `httpx`, eski statik `http` profili yerine domain rotation, proxy desteği, özel message placement ve message transforms gerektiğinde genellikle daha esnek seçenektir.
-- Apollo, daha eksiksiz özelliklere sahip community agent'larından biridir ve şu anda browser scripts, file/process browser görünümleri, screenshots, keylogging, SOCKS, rpfwd, Push C2 ve P2P routing gibi Mythic-side integrations özelliklerini sunar.
+- Domain rotation, proxy desteği, özel mesaj yerleşimi ve message transform'larına ihtiyaç duyduğunuzda `httpx`, eski statik `http` profiline kıyasla genellikle daha esnek bir seçenektir.
+- Apollo, topluluk ajanları arasında özellikleri en kapsamlı olanlardan biridir ve şu anda Mythic tarafında browser scripts, file/process browser görünümleri, screenshots, keylogging, SOCKS, rpfwd, Push C2 ve P2P routing gibi entegrasyonlar sunar.
 - Apollo, `service_wrapper` ve `scarecrow_wrapper` gibi wrapper payload'larını destekler.
-- Apollo, dynamic command loading özelliğini destekler. Böylece ilk payload'ı yalın tutabilir ve her post-ex yeteneğini ilk build'e derlemek yerine daha sonra ek commands veya Forge modules yükleyebilirsiniz.
-- Shellcode output oluşturulurken Apollo'nun mevcut builder'ı ayrıca Donut format seçeneklerini (`Binary`, `Base64`, `C`, `Ruby`, `Python`, `Powershell`, `C#`, `Hex`) ve Donut bypass davranışlarını (`None`, `Abort on fail`, `Continue on fail`) sunar. Bu, shellcode'u `service_wrapper`, `scarecrow_wrapper` veya özel bir loader ile yeniden wrap etmek istediğinizde kullanışlıdır.
-- `register_file` ve `register_assembly`, `execute_assembly`, `execute_pe`, `inline_assembly`, `execute_coff`, `powershell_import` ve `powerpick` için staging primitive'leridir. Güncel Apollo build'lerinde bu staged artifact'ler client-side olarak DPAPI-protected AES256 blob'ları şeklinde cache'lenir.
-- `ls` ve `ps` sonuçları Mythic'in browser scripts ve file/process browser özellikleriyle özellikle iyi entegre olur; bu da collaborative operations sırasında operator triage işlemini belirgin şekilde hızlandırır.
-- Apollo'nun fork-and-run jobs işlemleri sacrificial process ayarlarını
-`spawnto_x86` / `spawnto_x64` değerlerinden devralır, parent selection işlemini `ppid` değerinden devralır
-ve ardından o anda seçili injection primitive'i kullanır. Pratikte bu, tek bir command için yaptığınız
-OPSEC ayarlarının çoğu zaman aynı anda `execute_assembly`,
-`powerpick`, `mimikatz`, `pth`, `dcsync`, `execute_pe` ve `spawn` işlemlerini
-etkilemesi anlamına gelir.
-- Güncel belgelenmiş Apollo injection backend'leri arasında `CreateRemoteThread`,
-`QueueUserAPC` (early-bird style) ve syscall'lar üzerinden `NtCreateThreadEx` bulunur.
-Gürültülü post-exploitation işlemlerinden önce `get_injection_techniques` kullanın ve
-hedefle veya çalıştırmak istediğiniz command ile çakışan bir primitive'den uzaklaşmanız
-gerekiyorsa `set_injection_technique` kullanın.
-- `blockdlls`, yalnızca post-exploitation jobs için oluşturulan sacrificial process'leri etkiler.
-Varsayılan çıplak `rundll32.exe` hedefinden daha az şüpheli bir `spawnto_x64` hedefiyle
-birlikte kullanıldığında bu, assembly/PowerShell ağırlıklı tasking çalıştırmadan önce
-Apollo tarafında yapılabilecek en kolay değişikliklerden biridir.
+- Apollo, dinamik command loading'i destekler; böylece ilk payload'ı küçük tutabilir, her post-ex kabiliyetini ilk build'e derlemek yerine daha sonra ek komutlar veya Forge modules yükleyebilirsiniz.
+- Shellcode çıktısı oluştururken Apollo'nun güncel builder'ı Donut formatı seçeneklerini (`Binary`, `Base64`, `C`, `Ruby`, `Python`, `Powershell`, `C#`, `Hex`) ve Donut bypass davranışlarını (`None`, `Abort on fail`, `Continue on fail`) da sunar. Bu, shellcode'u `service_wrapper`, `scarecrow_wrapper` veya özel bir loader ile yeniden sarmalamak istediğinizde kullanışlıdır.
+- `register_file` ve `register_assembly`, `execute_assembly`, `execute_pe`, `inline_assembly`, `execute_coff`, `powershell_import` ve `powerpick` için staging primitive'leridir. Güncel Apollo build'lerinde bu staged artifact'ler istemci tarafında DPAPI korumalı AES256 blob'ları olarak önbelleğe alınır.
+- `ls` ve `ps` sonuçları Mythic'in browser scripts ve file/process browser özellikleriyle özellikle iyi entegre olur; bu da iş birliğine dayalı operasyonlarda operatör triyajını belirgin ölçüde hızlandırır.
+- Apollo'nun fork-and-run işleri, sacrificial process ayarlarını
+  `spawnto_x86` / `spawnto_x64`'ten devralır, üst process seçimini `ppid`'den
+  devralır ve ardından o anda seçili injection primitive'ini kullanır. Uygulamada
+  bu, tek bir komut için yaptığınız OPSEC ayarlarının çoğu zaman aynı anda
+  `execute_assembly`, `powerpick`, `mimikatz`, `pth`, `dcsync`, `execute_pe` ve
+  `spawn` komutlarını da etkilediği anlamına gelir.
+- Belgelenmiş güncel Apollo injection backend'leri arasında `CreateRemoteThread`,
+  syscalls üzerinden `QueueUserAPC` (early-bird tarzı) ve `NtCreateThreadEx`
+  bulunur. Gürültülü post-exploitation işlemlerinden önce
+  `get_injection_techniques` kullanın; hedefle veya çalıştırmak istediğiniz
+  komutla çakışan bir primitive'den vazgeçmeniz gerekiyorsa
+  `set_injection_technique` kullanın.
+- `blockdlls` yalnızca post-exploitation işleri için oluşturulan sacrificial
+  process'leri etkiler. Bunu, varsayılan yalın `rundll32.exe` yerine daha az
+  şüpheli bir `spawnto_x64` hedefiyle birlikte kullanmak, assembly/PowerShell
+  ağırlıklı tasking'i çalıştırmadan önce Apollo tarafında yapabileceğiniz en
+  kolay değişikliklerden biridir.
 
-Bu agent, bazı ek özelliklerle birlikte Cobalt Strike's Beacon'a oldukça benzeyen çok sayıda command içerir. Bunlar arasında şunları destekler:
+### Detection-aware .NET agent build pipeline
 
-### Yaygın işlemler
+Detection-aware bir Apollo fork'u, son aşamadaki bir **`obfuscate.exe` adımı** olarak değil, **bütün bir build-system sorunu** olarak ele alınmalıdır. Bu vaka çalışması, genel [AV evasion methodology](av-bypass.md) ve [.NET inspection tools](../reversing/reversing-tools-basic-methods/README.md) konularını tamamlar: wire identifier'larda, IL metadata'da, dependency packaging'de, reflection'da ve dinamik olarak derlenen task'lerde yapılan değişiklikler tek bir uyumluluk sınırı oluşturur.<sup>[[8]](#references)</sup>
+
+#### YARA-aware protocol mutation
+
+Kodu değiştirmeden önce herkese açık file/memory rule'larını denetleyin. Örneğin, Elastic'ın `Multi_Trojan_Mythic_4beb7e17` kuralı; `task_id`, `post_response`, `c2_profile`, `get_tasking` ve `get_delegate_tasks` dahil Mythic JSON/action string'lerinden herhangi **7'si 11'inin** bulunduğunda eşleşir. Yeterli sayıda alanı yeniden adlandırmak bu eşiği aşabilir; ancak bunlar kozmetik semboller değil, protocol değerleridir: agent ve ilgili server/profile implementasyonu birlikte değiştirilmelidir.<sup>[[7]](#references)[[8]](#references)</sup>
+
+Bu, yalnızca tek bir statik özellik kümesini ortadan kaldırır. Check-in sıklığı, mesaj yapısı, task/response akışı ve runtime string reconstruction davranışsal veya bellek göstergeleri olarak kalabilir; bu nedenle temiz bir string taramasını başarı saymak yerine hem build edilmiş artifact'i hem de çalıştırılmış bir callback'i doğrulayın.<sup>[[8]](#references)</sup>
+
+#### Global transform'ları uygulamadan önce merge edin
+
+Costura gibi araçlarla resource embedding yapıldığında companion assembly'ler sıkıştırılmış resource'lar olarak kalır. Yalnızca dış module'ü inceleyen bir obfuscator bu nedenle onların type name'lerini ve metadata'sını gözden kaçırır; her DLL'i bağımsız obfuscate etmek ise assembly'ler arası contract'lara uyumsuz adlar atanmasına yol açabilir. Önce build çıktılarınızı IL seviyesinde merge edin (örneğin [ILRepack](https://github.com/gluck/il-repack) ile), ardından ortaya çıkan module'e tek bir rename map uygulayın.<sup>[[8]](#references)</sup>
+
+```text
+agent.exe + dependency DLLs
+          -> ILRepack -> merged.exe
+          -> dnlib IL/metadata transforms
+          -> AsmResolver PE/resource patching
+          -> final payload
+```
+
+A custom pass, yönetilen IL/metadata dönüşümleri için [dnlib](https://github.com/0xd4d/dnlib), yazma sonrası PE/kaynak yaması içinse [AsmResolver](https://github.com/Washi1337/AsmResolver) kullanabilir. Vaka çalışmasında, uygun `ldstr` talimatları, yeni oluşturulmuş 16 baytlık rolling-XOR anahtarıyla desteklenen integer-token/decryptor çağrılarına dönüştürüldü; semboller ve namespace'ler ise kısa, sıralı tanımlayıcılar yerine makul kurumsal tarzda adlarla eşlendi. Diğer pass'ler seçili derleyici/hata ayıklayıcı özniteliklerini kaldırdı, birleştirme/gömme referanslarını temizledi, kaynakları yeniden adlandırdı ve sürüm bilgilerini yamaladı. Her bağımsız derlemede adları, ölü kodu ve şifreleme materyalini yeniden üretin: şifreli metni değiştirmek kararlı baytları ortadan kaldırır, ancak kararlı bir decryptor veya tanınabilir bir dönüşüm deseni başlı başına bir imzadır.<sup>[[8]](#references)</sup>
+
+#### Dinamik görevleri payload ile eşzamanlı tutun
+
+Apollo, görev kaynak kodunu sunucu tarafında derleyebilir, DLL baytlarını gönderebilir ve bunları `Assembly.Load()` ile yükleyebilir. Temel agent'ın genel türleri yeniden adlandırıldıktan sonra, özgün API'ye göre derlenen sonraki görevler artık çözümlenmez. Dışa aktarılan yeniden adlandırma eşlemesini payload'a özgü bir ABI artefaktı olarak değerlendirin:<sup>[[8]](#references)</sup>
+
+1. Eşlemeyi ve tür bağlamını tam payload/derleme tanımlayıcısına bağlayın.
+2. Her görev derlemesinde bu eşlemeyi alın ve geçici bir kaynak ağacını yeniden yazın.
+3. Yalnızca çözümlenmiş namespace, tür, iç içe/genel tür, alan ve özellik referanslarını yeniden yazın; ardından obfuscation uygulanmış birleştirilmiş assembly'ye göre derleyin.
+4. Görev tesliminden önce eksik veya eşleşmeyen eşlemeleri reddedin ve derleme sonrasında başlatma testi çalıştırın.
+
+Körlemesine genel değiştirme güvenli değildir; çünkü bir tanımlayıcı dizgede, yerel bildirimde, üye erişiminde, framework türünde veya ilgisiz bir namespace'te de geçebilir. Metin/regex tabanlı bir yeniden yazıcı kullanmaya devam edilecekse bu bağlamları açıkça koruyun ve eşleme şeması veya yeniden adlandırma pass'i değiştiğinde regresyon testleri çalıştırın.<sup>[[8]](#references)</sup>
+
+#### Reflection sözleşmelerini namespace'ten bağımsız hale getirin
+
+`t.FullName.StartsWith("Tasks.")` denetimi yapan keşif kodu, namespace'i zorunlu kılar ve namespace yeniden eşlendikten sonra başarısız olur. Bunun yerine kararlı bir tür ilişkisine göre keşif yapın; dağıtım hâlâ `t.Name` kullanıyorsa komut sınıfı adlarını koruyun:<sup>[[8]](#references)</sup>
+
+```csharp
+foreach (Type t in _tasksAsm.GetExportedTypes())
+{
+    if (t.IsSubclassOf(typeof(Tasking)) && !t.IsAbstract)
+        _loadedTaskTypes[t.Name] = t;
+}
+```
+
+Yansıma tarafından görülebilen ve yeniden adlandırılmaması gereken adlar, serializer alanları, giriş noktaları ve assembly'ler arası API'ler için açık bir allowlist tutun. Son olarak, sonucu ILSpy/dnSpy ile decompile edin, hem dosya hem de bellek temsillerini tarayın ve bir EDR lab ortamında tüm command/loader yollarını deneyin; başarıyla başlayan bir build'de bile yeniden adlandırma nedeniyle bozulmuş task'lar veya yalnızca çalıştırma sonrasında tespit edilen davranışlar bulunabilir.<sup>[[8]](#references)</sup>
+
+Bu agent, pek çok command'e sahip olduğundan bazı ek özelliklerle Cobalt Strike'ın Beacon'ına çok benzer. Desteklediği command'lerden bazıları:
+
+### Common actions
 
 - `cat`: Bir dosyanın içeriğini yazdırır
 - `cd`: Geçerli çalışma dizinini değiştirir
 - `cp`: Bir dosyayı bir konumdan başka bir konuma kopyalar
-- `ls`: Geçerli dizindeki veya belirtilen path'teki dosya ve dizinleri listeler
-- `ifconfig`: Network adapter'larını ve interface'lerini alır
-- `netstat`: TCP ve UDP connection bilgilerini alır
+- `ls`: Geçerli dizindeki veya belirtilen yoldaki dosya ve dizinleri listeler
+- `ifconfig`: Ağ bağdaştırıcılarını ve arayüzlerini getirir
+- `netstat`: TCP ve UDP bağlantı bilgilerini getirir
 - `pwd`: Geçerli çalışma dizinini yazdırır
 - `ps`: Hedef sistemde çalışan process'leri listeler (ek bilgilerle)
-- `jobs`: Long-running tasking ile ilişkili çalışan tüm job'ları listeler
-- `download`: Hedef sistemden local machine'a bir dosya indirir
-- `upload`: Local machine'dan hedef sisteme bir dosya yükler
-- `reg_query`: Hedef sistemdeki registry key'lerini ve value'larını sorgular
-- `reg_write_value`: Belirtilen registry key'e yeni bir value yazar
-- `sleep`: Agent'ın sleep interval'ını değiştirir; bu aralık agent'ın Mythic server'a ne sıklıkla check-in yaptığını belirler
-- Ve daha birçok command bulunur; kullanılabilir command'ların tam listesini görmek için `help` kullanın.
+- `jobs`: Uzun süren task'larla ilişkili çalışan tüm job'ları listeler
+- `download`: Hedef sistemdeki bir dosyayı yerel makineye indirir
+- `upload`: Yerel makinedeki bir dosyayı hedef sisteme yükler
+- `reg_query`: Hedef sistemdeki registry key'lerini ve değerlerini sorgular
+- `reg_write_value`: Belirtilen registry key'ine yeni bir değer yazar
+- `sleep`: Agent'ın Mythic server'a ne sıklıkta check-in yapacağını belirleyen bekleme aralığını değiştirir
+- Ve daha pek çok command; kullanılabilir command'lerin tam listesini görmek için `help` kullanın.
 
 ### Privilege escalation
 
-- `getprivs`: Mevcut thread token'ı üzerindeki mümkün olduğunca çok privilege'ı etkinleştirir
-- `getsystem`: winlogon'a bir handle açar ve token'ı duplicate ederek privilege'ları etkili biçimde SYSTEM seviyesine yükseltir
-- `make_token`: Yeni bir logon session oluşturur ve bunu agent'a uygular; böylece başka bir user'ın impersonation'ına izin verir
-- `steal_token`: Başka bir process'ten primary token çalar; böylece agent, o process'in user'ını impersonate edebilir
-- `pth`: Pass-the-Hash attack; agent'ın plaintext password'e ihtiyaç duymadan NTLM hash kullanarak bir user olarak authenticate olmasını sağlar
-- `mimikatz`: Credential'ları, hash'leri ve memory veya SAM database içindeki diğer hassas bilgileri çıkarmak için Mimikatz command'larını çalıştırır
-- `rev2self`: Agent'ın token'ını primary token'ına geri döndürür; privilege'ları etkili biçimde başlangıç seviyesine düşürür
-- `ppid`: Yeni bir parent process ID belirleyerek post-exploitation jobs için parent process'i değiştirir; böylece job execution context üzerinde daha iyi kontrol sağlar
-- `printspoofer`: Print spooler security önlemlerini bypass etmek ve privilege escalation veya code execution sağlamak için PrintSpoofer command'larını çalıştırır
-- `dcsync`: Bir user'ın Kerberos key'lerini local machine'a sync eder; böylece offline password cracking veya sonraki attack'ler mümkün olur
-- `ticket_cache_add`: Bir Kerberos ticket'ını mevcut veya belirtilen logon session'a ekler; böylece ticket reuse veya impersonation mümkün olur
+- `getprivs`: Geçerli thread token'ında mümkün olduğunca çok privilege etkinleştirir
+- `getsystem`: winlogon'a bir handle açar ve token'ı kopyalayarak privilege'ları SYSTEM seviyesine yükseltir
+- `make_token`: Yeni bir logon session oluşturur ve bunu agent'a uygular; başka bir kullanıcıyı taklit etmeyi sağlar
+- `steal_token`: Başka bir process'ten primary token çalar; agent'ın o process'in kullanıcısını taklit etmesini sağlar
+- `pth`: Pass-the-Hash saldırısı; plaintext parolaya gerek kalmadan kullanıcının NTLM hash'ini kullanarak kimlik doğrulamayı sağlar
+- `mimikatz`: Bellekten veya SAM database'inden credential'ları, hash'leri ve diğer hassas bilgileri çıkarmak için Mimikatz command'lerini çalıştırır
+- `rev2self`: Agent'ın token'ını primary token'ına döndürür; böylece privilege'ları özgün seviyesine indirir
+- `ppid`: Yeni bir parent process ID belirterek post-exploitation job'larının parent process'ini değiştirir ve job yürütme bağlamı üzerinde daha fazla kontrol sağlar
+- `printspoofer`: Print spooler güvenlik önlemlerini atlatmak, privilege escalation veya code execution sağlamak için PrintSpoofer command'lerini çalıştırır
+- `dcsync`: Kullanıcının Kerberos key'lerini yerel makineyle senkronize ederek offline parola kırma veya başka saldırılar yapılmasını sağlar
+- `ticket_cache_add`: Kerberos ticket'ını geçerli veya belirtilen bir logon session'a ekleyerek ticket'ın yeniden kullanılmasını veya kullanıcı taklidini sağlar
 
 ### Process execution
 
-- `assembly_inject`: Bir .NET assembly loader'ını remote process'e inject eder
-- `blockdlls`: Microsoft tarafından imzalanmamış DLL'lerin post-exploitation jobs içine yüklenmesini engeller
-- `execute_assembly`: Bir .NET assembly'yi agent context'inde çalıştırır
-- `execute_coff`: Bir COFF file'ı memory'de çalıştırır; derlenmiş code'un in-memory execution'ını sağlar
-- `execute_pe`: Unmanaged executable (PE) çalıştırır
-- `keylog_inject`: Bir keylogger'ı başka bir process'e inject eder ve keystroke'ları Mythic'in keylog view'ına stream eder
-- `screenshot` / `screenshot_inject`: Mevcut desktop'ın görüntüsünü doğrudan alır veya
-bir screenshot assembly'sini hedef process/session'a inject ederek görüntü alır
-- `get_injection_techniques`: Kullanılabilir injection technique'leri ve şu anda seçili olanı gösterir
-- `inline_assembly`: Bir .NET assembly'yi disposable AppDomain içinde çalıştırır; böylece agent'ın ana process'ini etkilemeden code'u geçici olarak çalıştırır
-- `register_assembly`: Daha sonra çalıştırılmak üzere bir .NET assembly'yi register eder
-- `register_file`: Daha sonra `execute_*` veya PowerShell tasking için agent cache'ine bir file register eder
-- `run`: Executable'ı bulmak için system PATH'ini kullanarak hedef sistemde bir binary çalıştırır
-- `set_injection_technique`: Post-exploitation jobs tarafından kullanılan injection primitive'i değiştirir
-- `shinject`: Bir remote process'e shellcode inject eder; böylece arbitrary code'un in-memory execution'ını sağlar
-- `inject`: Agent shellcode'unu bir remote process'e inject eder; böylece agent code'unun in-memory execution'ını sağlar
-- `spawn`: Belirtilen executable içinde yeni bir agent session başlatır; böylece shellcode'un yeni bir process'te çalıştırılmasını sağlar
-- `spawnto_x64` ve `spawnto_x86`: Post-exploitation jobs için kullanılan default binary'yi, params olmadan kullanılan ve oldukça gürültülü olan `rundll32.exe` yerine belirtilen path ile değiştirir.
+- `assembly_inject`: Uzak bir process'e .NET assembly loader enjekte eder
+- `blockdlls`: Post-exploitation job'larına Microsoft tarafından imzalanmamış DLL'lerin yüklenmesini engeller
+- `execute_assembly`: Agent bağlamında bir .NET assembly çalıştırır
+- `execute_coff`: Derlenmiş kodun bellekte çalıştırılmasını sağlayarak bir COFF dosyasını bellekte çalıştırır
+- `execute_pe`: Yönetilmeyen bir executable (PE) çalıştırır
+- `keylog_inject`: Başka bir process'e keylogger enjekte eder ve tuş vuruşlarını Mythic'in keylog görünümüne aktarır
+- `screenshot` / `screenshot_inject`: Geçerli masaüstünün görüntüsünü doğrudan yakalar veya
+  hedef process/session'a bir screenshot assembly enjekte ederek yakalar
+- `get_injection_techniques`: Kullanılabilir injection tekniklerini ve o anda seçili olanı gösterir
+- `inline_assembly`: Kodun agent'ın ana process'ini etkilemeden geçici olarak çalıştırılmasını sağlayarak bir .NET assembly'yi geçici bir AppDomain'de çalıştırır
+- `register_assembly`: Daha sonra çalıştırmak üzere bir .NET assembly kaydeder
+- `register_file`: Daha sonra `execute_*` veya PowerShell task'ları için agent cache'ine bir dosya kaydeder
+- `run`: Executable'ı bulmak için sistemin PATH'ini kullanarak hedef sistemde bir binary çalıştırır
+- `set_injection_technique`: Post-exploitation job'larının kullandığı injection primitive'ini değiştirir
+- `shinject`: Bellekte rastgele kod çalıştırılmasını sağlayarak uzak bir process'e shellcode enjekte eder
+- `inject`: Bellekte agent kodunun çalıştırılmasını sağlayarak uzak bir process'e agent shellcode'u enjekte eder
+- `spawn`: Yeni bir process'te shellcode çalıştırılmasını sağlayarak belirtilen executable'da yeni bir agent session başlatır
+- `spawnto_x64` ve `spawnto_x86`: Post-exploitation job'larında kullanılacak varsayılan binary'yi, çok gürültülü olan paramsız `rundll32.exe` yerine belirtilen bir yolla değiştirir.
 
 ### Mythic Forge
 
-Bu özellik, hedef sistemde çalıştırılabilen pre-compiled payload ve tool repository'si olan Mythic Forge'dan **COFF/BOF** file'larını yüklemeyi sağlar. Yüklenebilen tüm command'larla, bunları BOF olarak mevcut agent process'inde çalıştırarak yaygın işlemleri gerçekleştirmek mümkün olur (genellikle ayrı bir process spawn etmeye kıyasla daha iyi OPSEC ile).
+Bu, hedef sistemde çalıştırılabilen önceden derlenmiş payload ve araçlardan oluşan bir repository olan Mythic Forge'dan **COFF/BOF** dosyalarının yüklenmesini sağlar. Yüklenebilecek tüm command'lerle, ayrı bir process başlatmaya kıyasla genellikle daha iyi OPSEC sağlayan BOF'lar olarak geçerli agent process'inde çalıştırılarak yaygın işlemler gerçekleştirilebilir.
 
-Bunları şu şekilde yüklemeye başlayın:
+Kuruluma şununla başlayın:
+
 ```bash
 ./mythic-cli install github https://github.com/MythicAgents/forge.git
 ```
-Ardından, Mythic Forge'daki COFF/BOF modüllerini göstermek ve bunları seçip çalıştırılmak üzere agent'ın belleğine yüklemek için `forge_collections` kullanın. Varsayılan olarak Apollo'ya aşağıdaki 2 collection eklenir:
+
+Then, Mythic Forge'daki COFF/BOF modüllerini görüntülemek ve seçip yürütme için agent'ın belleğine yüklemek üzere `forge_collections` kullanın. Apollo'da varsayılan olarak aşağıdaki 2 collection eklenir:
 
 - `forge_collections {"collectionName":"SharpCollection"}`
 - `forge_collections {"collectionName":"SliverArmory"}`
 
 Bir modül yüklendikten sonra listede `forge_bof_sa-whoami` veya `forge_bof_sa-netuser` gibi başka bir komut olarak görünür.
 
-BOF'lar için Forge'un Apollo'ya yalnızca tek bir düz argüman dizesi
-göndermediğini unutmayın. BOF parametrelerini Mythic'in typed-array formatına eşler ve ardından bunları Apollo'nun `execute_coff` akışına iletir. Forge ile yüklenen bir BOF beklenmedik şekilde davranıyorsa yalnızca yazdığınız komut satırını değil, beklenen BOF argüman türlerini / entrypoint'i de kontrol edin. Ayrıca Apollo'nun daha yeni BOF loader'ının, çok daha eski 2.3.1 dönemi build'lere kıyasla argüman işleme yöntemini değiştirdiğini unutmayın. Bu nedenle eski BOF'lar veya eski collection'lar, yalnızca marshaling beklentileri değiştiği için başarısız olabilir.
+BOF'lar için Forge'un Apollo'ya yalnızca tek bir düz argüman dizesi iletmediğini unutmayın. BOF parametrelerini Mythic'in typed-array biçimine eşler ve ardından Apollo'nun `execute_coff` akışına iletir. Forge ile yüklenen bir BOF garip davranıyorsa yalnızca yazdığınız komut satırını değil, beklenen BOF argüman türlerini ve entrypoint'i de kontrol edin. Ayrıca Apollo'nun daha yeni BOF loader'ının, çok daha eski 2.3.1 dönemi derlemelerine kıyasla argüman işleme biçimini değiştirdiğini unutmayın. Bu nedenle eski BOF'lar veya collection'lar, yalnızca marshaling beklentileri değiştiği için çalışmayabilir.
 
-### PowerShell ve scripting çalıştırma
+### PowerShell ve script yürütme
 
-- `powershell_import`: Daha sonra çalıştırılmak üzere yeni bir PowerShell script'ini (.ps1) agent cache'ine aktarır
-- `powershell`: Agent bağlamında bir PowerShell komutu çalıştırarak gelişmiş scripting ve otomasyona olanak tanır
-- `powerpick`: Bir PowerShell loader assembly'sini sacrificial process'e inject eder ve bir PowerShell komutu çalıştırır (powershell logging olmadan).
-- `psinject`: PowerShell'i belirtilen bir process içinde çalıştırarak script'lerin başka bir process bağlamında hedefli şekilde yürütülmesine olanak tanır
-- `shell`: Agent bağlamında bir shell komutu çalıştırır; cmd.exe'de komut çalıştırmaya benzer
+- `powershell_import`: Daha sonra yürütülmek üzere yeni bir PowerShell script'ini (.ps1) agent önbelleğine aktarır
+- `powershell`: Agent bağlamında bir PowerShell komutu yürütür; gelişmiş scripting ve otomasyon olanağı sağlar
+- `powerpick`: PowerShell loader assembly'sini feda edilebilir bir sürece inject eder ve bir PowerShell komutu yürütür (powershell logging olmadan).
+- `psinject`: PowerShell'i belirtilen bir süreçte yürütür; başka bir sürecin bağlamında script'lerin hedefli yürütülmesini sağlar
+- `shell`: Agent bağlamında, cmd.exe'de komut çalıştırmaya benzer şekilde bir shell komutu yürütür
 
 ### Lateral Movement
 
-- `jump_psexec`: Önce Apollo agent executable'ını (apollo.exe) kopyalayıp çalıştırarak PsExec tekniğini kullanır ve yeni bir host'a lateral movement gerçekleştirir.
-- `jump_wmi`: Önce Apollo agent executable'ını (apollo.exe) kopyalayıp çalıştırarak WMI tekniğini kullanır ve yeni bir host'a lateral movement gerçekleştirir.
-- `link` ve `unlink`: Callback'ler arasında P2P bağlantıları (örneğin SMB/TCP üzerinden) oluşturur ve sonlandırır.
-- `wmiexecute`: Impersonation için isteğe bağlı credential'lar kullanarak WMI aracılığıyla local veya belirtilen remote system üzerinde bir komut çalıştırır.
-- `net_dclist`: Belirtilen domain için domain controller listesini alır; lateral movement için potansiyel hedefleri belirlemede kullanışlıdır.
-- `net_localgroup`: Belirtilen computer üzerindeki local group'ları listeler; computer belirtilmezse varsayılan olarak localhost kullanılır.
-- `net_localgroup_member`: Belirtilen group için local veya remote computer üzerindeki local group membership bilgilerini alarak belirli group'lardaki kullanıcıların enumeration'ına olanak tanır.
-- `net_shares`: Belirtilen computer üzerindeki remote share'leri ve bunların erişilebilirliğini listeler; lateral movement için potansiyel hedefleri belirlemede kullanışlıdır.
-- `socks`: Target network üzerinde SOCKS 5 uyumlu bir proxy etkinleştirerek trafiğin compromised host üzerinden tünellenmesine olanak tanır. Proxychains gibi tool'larla uyumludur.
-- `rpfwd`: Target host üzerinde belirtilen bir portu dinlemeye başlar ve trafiği Mythic üzerinden remote IP ve port'a forward eder; target network üzerindeki servislere remote access sağlar.
-- `listpipes`: Local system üzerindeki tüm named pipe'ları listeler; IPC mekanizmalarıyla etkileşime girerek lateral movement veya privilege escalation gerçekleştirmek için kullanışlı olabilir.
+- `jump_psexec`: Önce Apollo agent executable'ını (apollo.exe) kopyalayıp yürütmek suretiyle, PsExec tekniğini kullanarak yeni bir host'a lateral olarak geçer.
+- `jump_wmi`: Önce Apollo agent executable'ını (apollo.exe) kopyalayıp yürütmek suretiyle, WMI tekniğini kullanarak yeni bir host'a lateral olarak geçer.
+- `link` ve `unlink`: Callback'ler arasında (örneğin SMB/TCP üzerinden) P2P bağlantıları oluşturur ve sonlandırır.
+- `wmiexecute`: Impersonation için isteğe bağlı kimlik bilgileri kullanarak yerel veya belirtilen uzak sistemde bir komut yürütür.
+- `net_dclist`: Belirtilen domain için domain controller listesini alır; lateral movement için olası hedefleri belirlemede kullanışlıdır.
+- `net_localgroup`: Belirtilen bilgisayardaki yerel grupları listeler; bilgisayar belirtilmezse localhost kullanılır.
+- `net_localgroup_member`: Yerel veya uzak bilgisayardaki belirtilen grubun üyelerini alır; belirli gruplardaki kullanıcıları enumerate etmeyi sağlar.
+- `net_shares`: Belirtilen bilgisayardaki uzak share'leri ve bunlara erişilebilirliği listeler; lateral movement için olası hedefleri belirlemede kullanışlıdır.
+- `socks`: Hedef ağda SOCKS 5 uyumlu bir proxy etkinleştirerek trafiğin ele geçirilmiş host üzerinden tünellenmesini sağlar. proxychains gibi araçlarla uyumludur.
+- `rpfwd`: Hedef host'ta belirtilen bir portu dinlemeye başlar ve trafiği Mythic üzerinden uzak bir IP ve porta yönlendirerek hedef ağdaki servislere uzaktan erişim sağlar.
+- `listpipes`: Yerel sistemdeki tüm named pipe'ları listeler; IPC mekanizmalarıyla etkileşim kurarak lateral movement veya privilege escalation için kullanışlı olabilir.
 
-`jump_wmi` veya `wmiexecute` altında kullanılan lower-level WMI execution primitive'leri için [WmiExec](lateral-movement/wmiexec.md) sayfasına bakın. Daha geniş pivoting pattern'leri için [Tunneling and Port Forwarding](../generic-hacking/tunneling-and-port-forwarding.md) sayfasına bakın.
+`jump_wmi` veya `wmiexecute` altında kullanılan düşük seviyeli WMI yürütme primitive'leri için [WmiExec](lateral-movement/wmiexec.md) sayfasına bakın. Daha geniş pivoting örüntüleri için [Tunneling and Port Forwarding](../generic-hacking/tunneling-and-port-forwarding.md) sayfasına bakın.
 
-### Miscellaneous Commands
-- `help`: Belirli komutlar hakkında ayrıntılı bilgi veya agent'da kullanılabilir tüm komutlar hakkında genel bilgi görüntüler.
-- `clear`: Task'leri 'cleared' olarak işaretleyerek agent'lar tarafından alınmalarını engeller. Tüm task'leri temizlemek için `all`, belirli bir task'i temizlemek için `task Num` belirtebilirsiniz.
+### Çeşitli komutlar
+- `help`: Belirli komutlar veya agent'daki tüm kullanılabilir komutlar hakkında ayrıntılı bilgi görüntüler.
+- `clear`: Görevleri 'cleared' olarak işaretler; böylece agent'lar tarafından alınamazlar. Tüm görevleri temizlemek için `all`, belirli bir görevi temizlemek için `task Num` belirtebilirsiniz.  
 
 
 ## [Poseidon Agent](https://github.com/MythicAgents/poseidon)
 
 Poseidon, **Linux ve macOS** executable'larına derlenen bir Golang agent'ıdır.
+
 ```bash
 ./mythic-cli install github https://github.com/MythicAgents/poseidon.git
 ```
-### Mevcut build/profile notları
 
-- Mevcut Poseidon build'leri hem `x86_64` hem de `arm64` üzerinde Linux ve macOS'u hedefler.
-- Desteklenen çıktı formatları arasında native executable'ların yanı sıra `dylib` ve `so` gibi shared-library tarzı çıktılar da bulunur.
-- Poseidon `http`, `websocket`, `tcp` ve `dynamichttp` destekler; mevcut builder'lar `egress_order` ve failover eşikleri gibi multi-egress ayarlarını sunar.
-- Poseidon'un mevcut capability metadata'sı browser scripts, file/process browser integration, interactive tasking, keylogging, screenshots, Push C2, SOCKS, rpfwd ve P2P özelliklerini de duyurur. Bu nedenle yalnızca basit bir remote shell olmak yerine gerçek bir Linux/macOS pivot node olarak çalışabilir.
-- `proxy_bypass` ve `garble` gibi build-time seçenekleri, daha temiz network behavior veya ekstra Go binary obfuscation gerektiğinde kontrol etmeye değer.
-- `pty`, Linux/macOS operations için en kullanışlı yeni quality-of-life command'lerden biridir; interactive PTY açar ve eski `sleep 0` + SOCKS workaround'una başvurmadan daha kapsamlı terminal interaction için Mythic-side port sunabilir.
-- Poseidon'un mevcut docs'u macOS ağırlıklı tradecraft için özellikle ilgi çekicidir: `jxa`, JavaScript for Automation'ı in-memory olarak çalıştırır, `screencapture` logged-in desktop'ı yakalar, `clipboard_monitor` pasteboard değişikliklerini stream eder, `execute_library` local bir dylib yükleyip içindeki bir function'ı çağırır ve `libinject` remote bir process'in diskteki bir dylib'ı yüklemesini zorlar.
-- Long-running jobs için Poseidon'un post-exploitation çalışmalarını hard-kill edilemeyen, cooperative goroutines/threads içinde çalıştırdığını unutmayın. Docs ayrıca şu anda built-in agent obfuscation bulunmadığını açıkça belirtir; bu nedenle build/profile-level tradecraft, heavily obfuscated commercial implants'lara kıyasla daha önemlidir.
+### Güncel build/profil notları
 
-Mythic-backed operations, JAMF abuse veya MDM-as-C2 fikirleri çevresindeki macOS-specific tradecraft için [macOS Red Teaming](../macos-hardening/macos-red-teaming/README.md) bölümüne bakın.
+- Güncel Poseidon build'leri hem `x86_64` hem de `arm64` üzerinde Linux ve macOS'u hedefler.
+- Desteklenen çıktı biçimleri arasında yerel çalıştırılabilir dosyaların yanı sıra `dylib` ve `so` gibi shared library tarzı çıktılar bulunur.
+- Poseidon `http`, `websocket`, `tcp` ve `dynamichttp` destekler; güncel builder'lar `egress_order` ve failover eşikleri gibi çoklu egress ayarlarını da sunar.
+- Poseidon'ın güncel capability metadata'sı browser scripts, file/process browser entegrasyonu, interaktif tasking, keylogging, screenshots, Push C2, SOCKS, rpfwd ve P2P özelliklerini de duyurur. Bu sayede basit bir remote shell olmanın ötesinde, gerçek bir Linux/macOS pivot node olarak çalışabilir.
+- Daha temiz ağ davranışına veya ek Go binary obfuscation'a ihtiyaç duyduğunuzda `proxy_bypass` ve `garble` gibi build-time seçeneklerini incelemeye değer.
+- `pty`, Linux/macOS işlemleri için en kullanışlı yeni yaşam kalitesi komutlarından biridir; interaktif bir PTY açar ve eski `sleep 0` + SOCKS workaround'una başvurmadan daha kapsamlı terminal etkileşimi için Mythic tarafında bir port sunabilir.
+- Poseidon'ın güncel dokümanları özellikle macOS ağırlıklı tradecraft için ilgi çekicidir: `jxa`, JavaScript for Automation'ı bellekte çalıştırır; `screencapture`, oturum açmış kullanıcının masaüstünü yakalar; `clipboard_monitor`, pasteboard değişikliklerini aktarır; `execute_library`, yerel bir dylib yükleyip içindeki bir fonksiyonu çağırır; `libinject` ise uzak bir process'in diskteki bir dylib'i yüklemesini sağlar.
+- Uzun süre çalışan işler için Poseidon'ın post-exploitation çalışmalarını zorla sonlandırılabilir olmayan, işbirliğine dayalı goroutine/thread'lerde yürüttüğünü unutmayın. Dokümanlarda ayrıca yerleşik agent obfuscation bulunmadığı açıkça belirtilir. Bu nedenle build/profil düzeyindeki tradecraft, yoğun obfuscation kullanan ticari implantlara kıyasla daha önemlidir.
 
-Linux veya macOS üzerinde kullanıldığında bazı ilginç command'lere sahiptir:
+Mythic destekli işlemler, JAMF abuse veya MDM-as-C2 fikirleriyle ilgili macOS'a özgü tradecraft için [macOS Red Teaming](../macos-hardening/macos-red-teaming/README.md) sayfasına bakın.
 
-### Common actions
+Linux veya macOS'ta kullanıldığında bazı ilgi çekici komutları vardır:
+
+### Yaygın işlemler
 
 - `cat`: Bir dosyanın içeriğini yazdırır
-- `cd`: Mevcut working directory'yi değiştirir
-- `chmod`: Bir dosyanın permissions'larını değiştirir
-- `config`: Mevcut config'i ve host bilgilerini görüntüler
+- `cd`: Geçerli çalışma dizinini değiştirir
+- `chmod`: Bir dosyanın izinlerini değiştirir
+- `config`: Geçerli yapılandırmayı ve host bilgilerini görüntüler
 - `cp`: Bir dosyayı bir konumdan diğerine kopyalar
-- `curl`: İsteğe bağlı headers ve method ile tek bir web request çalıştırır
-- `upload`: Target'a bir dosya yükler
-- `download`: Target system'dan local machine'e bir dosya indirir
-- Ve çok daha fazlası
+- `curl`: İsteğe bağlı headers ve method ile tek bir web isteği gerçekleştirir
+- `upload`: Hedefe dosya yükler
+- `download`: Hedef sistemden yerel makineye dosya indirir
+- Ve daha fazlası
 
-### Sensitive Information arama
+### Hassas bilgileri arama
 
-- `triagedirectory`: Bir host üzerindeki directory içinde sensitive files veya credentials gibi ilgi çekici dosyaları bulur.
-- `getenv`: Mevcut tüm environment variables'ları alır.
+- `triagedirectory`: Bir host üzerindeki dizinde hassas dosyalar veya credentials gibi ilgi çekici dosyaları bulur.
+- `getenv`: Geçerli tüm environment variables değerlerini alır.
 
-### macOS-specific tradecraft
+### macOS'a özgü tradecraft
 
-- `jxa`: `OSAScript` üzerinden JavaScript for Automation'ı in-memory olarak çalıştırır; ayrı script dosyaları bırakmadan native macOS post-exploitation için kullanışlıdır.
-- `clipboard_monitor`: Pasteboard'u poll eder ve değişiklikleri Mythic'e bildirir; copy/paste'e dayanan credential/token theft workflow'ları için kullanışlıdır.
-- `screencapture`: macOS üzerinde kullanıcının desktop'ını capture eder.
+- `jxa`: `OSAScript` üzerinden JavaScript for Automation'ı bellekte çalıştırır. Ayrı script dosyaları bırakmadan yerel macOS post-exploitation işlemleri için kullanışlıdır.
+- `clipboard_monitor`: Pasteboard'u yoklar ve değişiklikleri Mythic'e bildirir; kopyala/yapıştır kullanımına dayanan credential/token hırsızlığı iş akışlarında kullanışlıdır.
+- `screencapture`: macOS'ta kullanıcının masaüstünü yakalar.
 - `execute_library`: Diskten bir dylib yükler ve belirli bir exported function'ı çağırır.
-- `libinject`: Başka bir macOS process'inin diskten bir dylib yüklemesini zorlayan bir shellcode stub inject eder.
-- `persist_launchd`: Doğrudan agent üzerinden LaunchAgent / LaunchDaemon persistence oluşturur.
+- `libinject`: Başka bir macOS process'inin diskten bir dylib yüklemesini sağlayan bir shellcode stub enjekte eder.
+- `persist_launchd`: Agent üzerinden doğrudan LaunchAgent / LaunchDaemon persistence oluşturur.
 
-### Lateral movement
+### Yatay hareket
 
-- `ssh`: Belirlenen credentials'ları kullanarak host'a SSH ile bağlanır ve ssh spawn etmeden bir PTY açar.
-- `sshauth`: Belirlenen credentials'ları kullanarak belirtilen host(lar)a SSH ile bağlanır. Bunu remote host'lar üzerinde SSH aracılığıyla belirli bir command çalıştırmak veya SCP ile dosya transfer etmek için de kullanabilirsiniz.
-- `link_tcp`: Agent'lar arasında doğrudan communication sağlayarak başka bir agent'a TCP üzerinden link oluşturur.
-- `link_webshell`: Webshell P2P profile kullanarak bir agent'a link oluşturur ve agent'ın web interface'ine remote access sağlar.
-- `rpfwd`: Reverse Port Forward'ı başlatır veya durdurur ve target network üzerindeki service'lere remote access sağlar.
-- `socks`: Target network üzerinde bir SOCKS5 proxy başlatır veya durdurur ve compromised host üzerinden traffic tunneling yapılmasını sağlar. Proxychains gibi tool'larla uyumludur.
-- `portscan`: Open port'ları bulmak için host(lar)ı tarar; lateral movement veya further attacks için potential target'ları belirlemede kullanışlıdır.
+- `ssh`: Belirlenen credentials bilgilerini kullanarak host'a SSH ile bağlanır ve ssh'yi başlatmadan bir PTY açar.
+- `sshauth`: Belirlenen credentials bilgilerini kullanarak belirtilen host'lara SSH ile bağlanır. Bunu uzak host'larda belirli bir komutu çalıştırmak veya dosyaları SCP ile aktarmak için de kullanabilirsiniz.
+- `link_tcp`: Agent'ler arasında doğrudan iletişim kurulmasını sağlayarak başka bir agent'a TCP üzerinden bağlanır.
+- `link_webshell`: Uzak erişim için webshell P2P profilini kullanarak bir agent'a bağlanır.
+- `rpfwd`: Hedef ağdaki servislere uzaktan erişim sağlamak için Reverse Port Forward'ı başlatır veya durdurur.
+- `socks`: Ele geçirilmiş host üzerinden trafik tünellemek için hedef ağda bir SOCKS5 proxy başlatır veya durdurur. proxychains gibi araçlarla uyumludur.
+- `portscan`: Host'ları açık portlar için tarar; yatay hareket veya daha ileri saldırılar için olası hedefleri belirlemeye yarar.
 
-### Process execution
+### Process yürütme
 
-- `shell`: `/bin/sh` üzerinden tek bir shell command çalıştırır ve target system üzerinde doğrudan command execution sağlar.
-- `run`: Arguments ile diskten bir command çalıştırır ve target system üzerinde binaries veya scripts çalıştırılmasını sağlar.
-- `pty`: Interactive PTY açar ve target system üzerindeki shell ile doğrudan interaction sağlar.
+- `shell`: Hedef sistemde komutları doğrudan çalıştırmak için `/bin/sh` üzerinden tek bir shell komutu yürütür.
+- `run`: Hedef sistemde binary veya script çalıştırmak için diskten bir komutu argümanlarıyla yürütür.
+- `pty`: Hedef sistemdeki shell ile doğrudan etkileşim kurmak için interaktif bir PTY açar.
 
 ## References
 
-- [1] [Mythic Community Agent Feature Matrix](https://mythicmeta.github.io/overview/agent_matrix.html)
+- [1] [Mythic Community Agent Özellik Matrisi](https://mythicmeta.github.io/overview/agent_matrix.html)
 - [2] [Apollo README](https://github.com/MythicAgents/Apollo/blob/master/README.md)
-- [3] [Mythic v3.2 Highlights: Interactive Tasking, Push C2, and Dynamic File Browser](https://posts.specterops.io/mythic-v3-2-highlights-interactive-tasking-push-c2-and-dynamic-file-browser-7035065e2b3d)
-- [4] [Browser Scripts - Mythic Documentation](https://docs.mythic-c2.net/operational-pieces/browser-scripts)
-- [5] [Mythic 3.3->3.4 Updates](https://docs.mythic-c2.net/updating/mythic-3.3-greater-than-3.4-updates)
-- [6] [Transforming Red Team Ops with Mythic's Hidden Gems: Browser Scripting](https://specterops.io/blog/2025/08/21/transforming-red-team-ops-with-mythics-hidden-gems-browser-scripting/)
-
+- [3] [Mythic v3.2 Öne Çıkanlar: İnteraktif Tasking, Push C2 ve Dinamik File Browser](https://posts.specterops.io/mythic-v3-2-highlights-interactive-tasking-push-c2-and-dynamic-file-browser-7035065e2b3d)
+- [4] [Browser Scripts - Mythic Dokümantasyonu](https://docs.mythic-c2.net/operational-pieces/browser-scripts)
+- [5] [Mythic 3.3->3.4 Güncellemeleri](https://docs.mythic-c2.net/updating/mythic-3.3-greater-than-3.4-updates)
+- [6] [Mythic'in Gizli Cevherleriyle Red Team Operasyonlarını Dönüştürmek: Browser Scripting](https://specterops.io/blog/2025/08/21/transforming-red-team-ops-with-mythics-hidden-gems-browser-scripting/)
+- [7] [Elastic protections-artifacts: Multi_Trojan_Mythic YARA kuralları](https://github.com/elastic/protections-artifacts/blob/main/yara/rules/Multi_Trojan_Mythic.yar)
+- [8] [Fork'tan Framework'e: Apollo'yu Değiştirmenin Agent Invasion Hakkında Öğrettikleri](https://bishopfox.com/blog/from-fork-to-framework-what-modifying-apollo-taught-us-about-agent-invasion)
 {{#include ../banners/hacktricks-training.md}}
