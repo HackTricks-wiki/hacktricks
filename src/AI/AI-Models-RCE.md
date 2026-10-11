@@ -302,7 +302,7 @@ curl -u USER:PASS -X PUT \
   --data-binary @payload.pkl
 ```
 
-A minimal reducer can execute a command as soon as the consumer unpickles the artifact. Generating the payload with the Python version declared in `MLmodel` avoids avoidable compatibility problems.<sup>[[17]](#references)[[20]](#references)</sup>
+A minimal reducer can execute a command as soon as the consumer unpickles the artifact. Generating the payload with the Python version declared in `MLmodel` avoids compatibility problems.<sup>[[17]](#references)[[20]](#references)</sup>
 
 ```python
 import os

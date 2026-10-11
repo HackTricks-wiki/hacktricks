@@ -2384,7 +2384,7 @@ Learn more and see a generalized pattern applicable to other discovery/monitorin
 - [35] [Tweet by @paragonsec](https://twitter.com/paragonsec/status/1071152249529884674)
 - [36] [redsiege.com - Logging Passwords On Linux](https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux)
 - [37] [tech.feedyourhead.at - Details Of A Logrotate Race Condition](https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition)
-- [38] [Python documentation – `site` and path configuration files](https://docs.python.org/3/library/site.html)
+- [38] [Python 3.10 documentation – `site` and path configuration files](https://docs.python.org/3.10/library/site.html)
 - [39] [0xdf – HTB: SmartHire](https://0xdf.gitlab.io/2026/09/26/htb-smarthire.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
