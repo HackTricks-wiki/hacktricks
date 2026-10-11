@@ -345,27 +345,6 @@ Instead of a summary, it printed the attacker's hidden message. The user didn't 
 -   **Use content boundaries:** The AI could be designed to distinguish system/developer instructions from all other text. If an external source says "ignore your instructions," the AI should see that as just part of the text to summarize, not an actual directive. In other words, **maintain a strict separation between trusted instructions and untrusted data**.
 -   **Monitoring and logging:** For AI systems that pull in third-party data, have monitoring that flags if the AI's output contains phrases like "I have been OWNED" or anything clearly unrelated to the user's query. This can help detect an indirect injection attack in progress and shut down the session or alert a human operator.
 
-### Malware-to-Analyst Prompt Injection
-
-Analyst-targeting malware prompt injection was first demonstrated publicly in a Windows proof of concept and was later observed in a macOS implant.<sup>[[23]](#references)[[24]](#references)</sup> A sample can turn its own **strings, resources, stdout/stderr, or sandbox output** into an indirect-prompt-injection carrier. The payload does not need to escape the sandbox: it targets the workflow that extracts attacker-controlled text and concatenates it into an LLM triage prompt. A model that mistakes this data for control-plane state may abort, truncate, or refuse the analysis.<sup>[[24]](#references)</sup>
-
-A stronger variant **spoofs the analysis harness itself** instead of using one obvious instruction. For example, a sample can embed a Markdown-fenced cascade of fake `system` messages, reuse the harness delimiter (such as `{{DATA}}`), and report invented token expiry, out-of-memory, disk-full, tool-failure, or prompt-injection events. Repetition plus familiar framing makes hostile sample data resemble trusted orchestrator telemetry.<sup>[[24]](#references)</sup>
-
-Review an LLM-assisted malware pipeline for this failure path:<sup>[[24]](#references)</sup>
-
-1. A parser extracts strings, decoded resources, command output, OCR, or sandbox logs from the sample.
-2. The orchestrator interpolates that text into the same prompt scaffold as system/developer instructions or accepts sample-supplied role/message objects.
-3. Attacker-chosen delimiters or role labels are interpreted structurally rather than as evidence.
-4. The model changes its analysis because of fabricated state that the orchestrator never independently observed.
-
-**Hardening and detection:**<sup>[[24]](#references)</sup>
-
-- Keep sample-derived bytes in a typed, explicitly **untrusted data channel**; never deserialize attacker-provided `role`, `system`, or message-array fields into privileged model messages.
-- Use length-delimited or schema-bound fields instead of string-concatenated prompt templates. Escape or reject occurrences of the pipeline's own sentinel tokens and role markers before rendering them for the model.
-- Treat failure state as out-of-band control data: only the orchestrator may assert OOM, token expiry, disk exhaustion, or tool failure. Require corroborating runtime telemetry before changing the workflow.
-- Detect repeated pseudo-system headers, copied harness delimiters, and failure claims inside binaries or process output. Preserve the original artifact and hash; sanitization should affect only the model-facing representation.
-- Regression-test every ingestion path (static strings, decoded blobs, stdout/stderr, OCR, tool output, and sandbox reports) with adversarial samples, and alert when analysis ends in an unexplained refusal, early stop, or abnormal truncation.
-
 ### Web-Based Indirect Prompt Injection (IDPI) in the Wild
 
 Real-world IDPI campaigns show that attackers **layer multiple delivery techniques** so at least one survives parsing, filtering or human review. Common web-specific delivery patterns include:<sup>[[15]](#references)</sup>
@@ -747,6 +726,10 @@ Detection idea:
 ### Clear-bomb evasion against LLM scanners
 
 A defensive LLM can be blinded if the attacker wraps the real payload with **non-executable text specifically chosen to trigger a safety refusal**. The malware still runs, but the scanner may stop at the refusal and never analyze the executable parts.
+
+Malware can also embed indirect prompt injection in data that an LLM-assisted triage pipeline extracts from the sample. A 2025 Windows proof of concept used one direct instruction, although the tested models ignored it.<sup>[[23]](#references)</sup> A later variant used a Markdown-fenced cascade of 38 fabricated `system` messages and copied `{{DATA}}` delimiters to resemble the triage harness. Its fake token-expiry, out-of-memory, disk-exhaustion, operation-failure, injection-warning, and static-analysis messages were intended to make the model abort, truncate, or refuse analysis.<sup>[[24]](#references)</sup>
+
+Treat embedded strings and output as untrusted evidence, not as pipeline state. Only independently observed orchestrator telemetry should establish tool failure or resource exhaustion; role labels, copied delimiters, and failure claims inside a sample must remain data.<sup>[[24]](#references)</sup>
 
 Operationally, treat these outcomes as **suspicious and inconclusive**, not as a clean pass:
 - Model refusal
