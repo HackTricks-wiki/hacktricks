@@ -1,165 +1,166 @@
-# Чекліст підвищення привілеїв у Linux
+# Контрольний список підвищення привілеїв у Linux
 
 {{#include ../../banners/hacktricks-training.md}}
 
-# Чекліст — підвищення привілеїв у Linux
+# Контрольний список — підвищення привілеїв у Linux
 
 
 
-### **Найкращий tool для пошуку векторів локального підвищення привілеїв у Linux:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
+### **Найкращий інструмент для пошуку векторів локального підвищення привілеїв у Linux:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
 
-### [Системна інформація](../linux-basics/linux-privilege-escalation/index.html#system-information)
+### [Інформація про систему](../linux-basics/linux-privilege-escalation/index.html#system-information)
 
 - [ ] Отримати **інформацію про ОС**
-- [ ] Перевірити [**PATH**](../linux-basics/linux-privilege-escalation/index.html#path), чи є **доступна для запису папка**?
-- [ ] Перевірити [**змінні env**](../linux-basics/linux-privilege-escalation/index.html#env-info), чи містять вони чутливі дані?
-- [ ] Шукати [**kernel exploits**](../linux-basics/linux-privilege-escalation/index.html#kernel-exploits) **за допомогою scripts** (DirtyCow?)
-- [ ] Перед запуском kernel PoC перевірити його **фактичні prerequisites**, а не лише `uname -r`: архітектуру, необхідні опції/модулі `CONFIG_*`, створення namespace та активні mitigations. Наприклад, перевірити доступність user/network namespace за допомогою `unshare -Urn true`; сучасні netfilter exploits можуть вимагати `CONFIG_USER_NS`, непривілейовані user namespaces і `CONFIG_NF_TABLES`.<sup>[[3]](#references)</sup>
-- [ ] **Перевірити**, чи є [**версія sudo** вразливою](../linux-basics/linux-privilege-escalation/index.html#sudo-version)
-- [ ] [**Dmesg**: перевірка підпису не вдалася](../linux-basics/linux-privilege-escalation/index.html#dmesg-signature-verification-failed)
-- [ ] Перевірити [**помилкові налаштування kernel module і завантаження модулів**](kernel-modules-and-modprobe.md#kernel-module-and-module-loading-misconfigurations): `insmod`, `modinfo`, `lsmod`, `dmesg`, enforcement підписів і `modules_disabled`.
-- [ ] Перевірити [**шляхи зловживання kernel.modprobe / modprobe_path**](kernel-modules-and-modprobe.md#kernelmodprobe--modprobe_path-abuse-checks), якщо шлях до helper можна змінити або викликати.
-- [ ] Перевірити [**доступні для запису шляхи /lib/modules**](kernel-modules-and-modprobe.md#writable-libmodules-review), зокрема доступні для запису файли `.ko*` і метадані `modules.*`.
-- [ ] Додаткова системна enum-інформація ([date, статистика системи, інформація про cpu, printers](../linux-basics/linux-privilege-escalation/index.html#more-system-enumeration))
-- [ ] [Перерахувати додаткові defenses](../linux-basics/linux-privilege-escalation/index.html#enumerate-possible-defenses)
+- [ ] Перевірити [**PATH**](../linux-basics/linux-privilege-escalation/index.html#path): чи є там **доступна для запису папка**?
+- [ ] Перевірити [**змінні середовища**](../linux-basics/linux-privilege-escalation/index.html#env-info): чи містять вони конфіденційні дані?
+- [ ] Шукати [**експлойти ядра**](../linux-basics/linux-privilege-escalation/index.html#kernel-exploits) **за допомогою скриптів** (DirtyCow?)
+- [ ] Перш ніж запускати PoC для ядра, перевірити його **фактичні передумови**, а не лише `uname -r`: архітектуру, потрібні параметри/модулі `CONFIG_*`, можливість створення просторів імен і активні механізми захисту. Наприклад, перевірити доступність просторів імен користувача/мережі за допомогою `unshare -Urn true`; сучасним експлойтам netfilter можуть бути потрібні `CONFIG_USER_NS`, непривілейовані простори імен користувача та `CONFIG_NF_TABLES`.<sup>[[3]](#references)</sup>
+- [ ] **Перевірити**, чи є [**версія sudo вразливою**](../linux-basics/linux-privilege-escalation/index.html#sudo-version)
+- [ ] [**Не вдалася перевірка підпису Dmesg**](../linux-basics/linux-privilege-escalation/index.html#dmesg-signature-verification-failed)
+- [ ] Переглянути [**помилкові налаштування модулів ядра та їх завантаження**](kernel-modules-and-modprobe.md#kernel-module-and-module-loading-misconfigurations): `insmod`, `modinfo`, `lsmod`, `dmesg`, примусове перевіряння підпису та `modules_disabled`.
+- [ ] Перевірити [**шляхи зловживання kernel.modprobe / modprobe_path**](kernel-modules-and-modprobe.md#kernelmodprobe--modprobe_path-abuse-checks), якщо шлях до допоміжної програми можна змінити або викликати.
+- [ ] Перевірити [**шляхи /lib/modules, доступні для запису**](kernel-modules-and-modprobe.md#writable-libmodules-review), зокрема файли `.ko*` і метадані `modules.*`, доступні для запису.
+- [ ] Додатково зібрати дані про систему ([дату, системну статистику, інформацію про CPU, принтери](../linux-basics/linux-privilege-escalation/index.html#more-system-enumeration))
+- [ ] [Перерахувати інші механізми захисту](../linux-basics/linux-privilege-escalation/index.html#enumerate-possible-defenses)
 
 ### [Диски](../linux-basics/linux-privilege-escalation/index.html#drives)
 
 - [ ] **Перелічити змонтовані** диски
-- [ ] **Є немонтований диск?**
-- [ ] **Є creds у fstab?**
+- [ ] **Є незмонтований диск?**
+- [ ] **Є облікові дані у fstab?**
 
 ### [**Встановлене ПЗ**](../linux-basics/linux-privilege-escalation/index.html#installed-software)
 
-- [ ] **Перевірити наявність**[ **корисного ПЗ**](../linux-basics/linux-privilege-escalation/index.html#useful-software) **серед встановленого**
-- [ ] **Перевірити наявність** [**вразливого ПЗ**](../linux-basics/linux-privilege-escalation/index.html#vulnerable-software-installed) **серед встановленого**
-- [ ] У Debian/Ubuntu перевірити, чи встановлено/увімкнено **сканування інтерпретаторів needrestart**: `dpkg-query -W needrestart 2>/dev/null; grep -R interpscan /etc/needrestart 2>/dev/null`. Вразливі збірки перетинали межу привілеїв, повторно використовуючи контрольовані attacker-ом `PYTHONPATH`/`RUBYLIB`, виконуючи race з `/proc/<pid>/exe` або скануючи контрольовані attacker-ом шляхи Perl, коли APT чи `unattended-upgrades` запускали needrestart від root.<sup>[[4]](#references)</sup>
+- [ ] **Перевірити, чи встановлено**[ **корисне ПЗ**](../linux-basics/linux-privilege-escalation/index.html#useful-software)
+- [ ] **Перевірити, чи встановлено** [**вразливе ПЗ**](../linux-basics/linux-privilege-escalation/index.html#vulnerable-software-installed)
+- [ ] У Debian/Ubuntu перевірити, чи встановлено/увімкнено **сканування інтерпретаторів needrestart**: `dpkg-query -W needrestart 2>/dev/null; grep -R interpscan /etc/needrestart 2>/dev/null`. У вразливих збірках межу привілеїв обходили, повторно використовуючи контрольовані зловмисником `PYTHONPATH`/`RUBYLIB`, змагаючись за доступ до `/proc/<pid>/exe` або скануючи контрольовані зловмисником шляхи Perl, коли APT чи `unattended-upgrades` запускали needrestart від root.<sup>[[4]](#references)</sup>
 
 ### [Процеси](../linux-basics/linux-privilege-escalation/index.html#processes)
 
-- [ ] Запущено невідоме **ПЗ**?
-- [ ] Чи працює якесь ПЗ з **більшими привілеями, ніж повинно**?
-- [ ] Шукати **exploits запущених процесів** (особливо для запущеної версії).
-- [ ] Чи можна **змінити binary** якогось запущеного процесу?
-- [ ] **Моніторити процеси** та перевіряти, чи часто запускається якийсь цікавий процес.
-- [ ] Чи можна **прочитати** пам’ять якогось цікавого **процесу** (де можуть зберігатися паролі)?
+- [ ] Чи запущено якесь **невідоме ПЗ**?
+- [ ] Чи працює якесь ПЗ із **вищими привілеями, ніж потрібно**?
+- [ ] Шукати **експлойти для запущених процесів** (особливо для запущеної версії).
+- [ ] Чи можете ви **змінити бінарний файл** будь-якого запущеного процесу?
+- [ ] **Відстежувати процеси** й перевіряти, чи часто запускається якийсь цікавий процес.
+- [ ] Чи можете ви **прочитати** пам’ять якогось цікавого **процесу** (де можуть зберігатися паролі)?
 
-### [Заплановані/Cron jobs?](../linux-basics/linux-privilege-escalation/index.html#scheduled-jobs)
+### [Заплановані завдання/Cron?](../linux-basics/linux-privilege-escalation/index.html#scheduled-jobs)
 
-- [ ] Чи змінюється [**PATH** ](../linux-basics/linux-privilege-escalation/index.html#cron-path)якимось cron і чи можна в нього **писати**?
-- [ ] Є [**wildcard** ](../linux-basics/linux-privilege-escalation/index.html#cron-using-a-script-with-a-wildcard-wildcard-injection)у cron job?
-- [ ] Чи **виконується** якийсь [**modifiable script** ](../linux-basics/linux-privilege-escalation/index.html#cron-script-overwriting-and-symlink)або чи знаходиться він усередині **modifiable folder**?
-- [ ] Чи виявлено, що якийсь **script** може або вже [**виконується** дуже **часто**](../linux-basics/linux-privilege-escalation/index.html#frequent-cron-jobs)? (кожні 1, 2 або 5 хвилин)
+- [ ] Чи змінюється [**PATH** ](../linux-basics/linux-privilege-escalation/index.html#cron-path)якимось cron-завданням і чи можете ви **записувати** в нього?
+- [ ] Чи є [**підстановочний символ** ](../linux-basics/linux-privilege-escalation/index.html#cron-using-a-script-with-a-wildcard-wildcard-injection)у cron-завданні?
+- [ ] Чи **виконується** якийсь [**скрипт, який можна змінити** ](../linux-basics/linux-privilege-escalation/index.html#cron-script-overwriting-and-symlink), або він міститься в **папці, яку можна змінити**?
+- [ ] Чи виявили ви, що якийсь **скрипт може виконуватися або виконується** [**дуже **часто**](../linux-basics/linux-privilege-escalation/index.html#frequent-cron-jobs)? (кожні 1, 2 або 5 хвилин)
 
-### [Сервіси](../linux-basics/linux-privilege-escalation/index.html#services)
+### [Служби](../linux-basics/linux-privilege-escalation/index.html#services)
 
-- [ ] Є **доступний для запису .service** файл?
-- [ ] Є **доступний для запису binary**, який виконується **сервісом**?
-- [ ] Є доступний для запису **helper, config або environment file, на який посилається root unit** (`ExecStartPre=`, `ExecStartPost=`, `EnvironmentFile=`)? Перевірити об’єднаний unit за допомогою `systemctl cat <unit>` і переглянути [зловживання service/socket файлами](../interesting-files-permissions/write-to-root.md).
-- [ ] Є **доступна для запису папка в systemd PATH**?
-- [ ] Є **доступний для запису systemd unit drop-in** у `/etc/systemd/system/<unit>.d/*.conf`, який може перевизначити `ExecStart`/`User`?<sup>[[2]](#references)</sup>
+- [ ] Чи є **файл .service, доступний для запису**?
+- [ ] Чи є **бінарний файл, доступний для запису**, який **запускає служба**?
+- [ ] Чи є допоміжний файл, файл конфігурації або файл середовища, на який посилається root unit (`ExecStartPre=`, `ExecStartPost=`, `EnvironmentFile=`) і який можна змінити? Перегляньте об’єднаний unit за допомогою `systemctl cat <unit>` і перевірте [зловживання файлами служб/socket](../interesting-files-permissions/write-to-root.md).
+- [ ] Чи запускає привілейований процес за запитом допоміжну програму з каталогу з нижчими привілеями, доступного для запису? Перевірте і допоміжну програму, і її батьківський каталог на наявність [запуску від root скриптів/бінарних файлів, доступних для зміни користувачем](../interesting-files-permissions/write-to-root.md#root-executing-user-writable-scriptsbinaries); короткочасні допоміжні програми можуть з’являтися лише під час виконання процесу.
+- [ ] Чи є **папка в PATH systemd, доступна для запису**?
+- [ ] Чи є **drop-in конфігурація systemd, доступна для запису**, у `/etc/systemd/system/<unit>.d/*.conf`, яка може перевизначити `ExecStart`/`User`?<sup>[[2]](#references)</sup>
 
-### [Timers](../linux-basics/linux-privilege-escalation/index.html#timers)
+### [Таймери](../linux-basics/linux-privilege-escalation/index.html#timers)
 
-- [ ] Є **доступний для запису timer**?
+- [ ] Чи є **таймер, доступний для запису**?
 
-### [Sockets](../linux-basics/linux-privilege-escalation/index.html#sockets)
+### [Сокети](../linux-basics/linux-privilege-escalation/index.html#sockets)
 
-- [ ] Є **доступний для запису .socket** файл?
-- [ ] Чи можна **взаємодіяти з будь-яким socket**?
-- [ ] **HTTP sockets** із цікавою інформацією?
-- [ ] Чи можна отримати доступ до [**API container-runtime або node-agent**](../containers-namespaces/container-security/runtime-api-and-daemon-exposure.md), наприклад `docker.sock`, `containerd.sock`, `crio.sock`, `podman.sock`, `buildkitd.sock` або endpoint kubelet? Перевірити raw HTTP/gRPC API, навіть якщо звичайний CLI відсутній.
+- [ ] Чи є **файл .socket, доступний для запису**?
+- [ ] Чи можете ви **взаємодіяти з будь-яким сокетом**?
+- [ ] **HTTP-сокети** з цікавою інформацією?
+- [ ] Чи можете ви отримати доступ до [**API середовища виконання контейнерів або агента вузла**](../containers-namespaces/container-security/runtime-api-and-daemon-exposure.md), наприклад `docker.sock`, `containerd.sock`, `crio.sock`, `podman.sock`, `buildkitd.sock` або кінцевої точки kubelet? Перевірте безпосередньо API raw HTTP/gRPC, навіть якщо звичного CLI немає.
 
 ### [D-Bus](../linux-basics/linux-privilege-escalation/index.html#d-bus)
 
-- [ ] Чи можна **взаємодіяти з будь-яким D-Bus**?
+- [ ] Чи можете ви **взаємодіяти з будь-яким D-Bus**?
 
 ### [Мережа](../linux-basics/linux-privilege-escalation/index.html#network)
 
-- [ ] Перерахувати мережу, щоб визначити, де ви перебуваєте
-- [ ] **Відкриті порти, до яких раніше не було доступу**, після отримання shell усередині машини?
-- [ ] Чи можна **перехоплювати трафік** за допомогою `tcpdump`?
+- [ ] Перерахувати мережу, щоб з’ясувати, де ви перебуваєте
+- [ ] Чи є **відкриті порти, до яких ви не мали доступу до отримання shell на машині**?
+- [ ] Чи можете ви **перехоплювати трафік** за допомогою `tcpdump`?
 
 ### [Користувачі](../linux-basics/linux-privilege-escalation/index.html#users)
 
-- [ ] Загальна **enum-інформація** про користувачів/групи
+- [ ] Загальне **перерахування користувачів/груп**
 - [ ] Чи маєте ви **дуже великий UID**? Чи є **машина** **вразливою**?
-- [ ] Чи можна [**підвищити привілеї завдяки групі**](../user-information/interesting-groups-linux-pe/index.html), до якої ви належите?
-- [ ] Дані **clipboard**?
-- [ ] Password Policy?
-- [ ] Спробувати **використати** кожен **відомий пароль**, який раніше вдалося знайти, для входу **під кожним** можливим **користувачем**. Також спробувати увійти без пароля.
+- [ ] Чи можете ви [**підвищити привілеї завдяки групі**](../user-information/interesting-groups-linux-pe/index.html), до якої належите?
+- [ ] Дані **буфера обміну**?
+- [ ] Політика паролів?
+- [ ] Спробуйте **використати** кожен **відомий пароль**, який ви раніше виявили, щоб увійти **під кожним** можливим **користувачем**. Спробуйте також увійти без пароля.
 
-### [Доступний для запису PATH](../linux-basics/linux-privilege-escalation/index.html#writable-path-abuses)
+### [PATH, доступний для запису](../linux-basics/linux-privilege-escalation/index.html#writable-path-abuses)
 
-- [ ] Якщо у вас є **права запису до якоїсь папки в PATH**, це може дозволити підвищити привілеї
+- [ ] Якщо у вас є **права на запис у якусь папку з PATH**, ви можете підвищити привілеї
 
 ### [Команди SUDO та SUID](../linux-basics/linux-privilege-escalation/index.html#sudo-and-suid)
 
-- [ ] Чи можна виконати **будь-яку команду через sudo**? Чи можна використати її для READ, WRITE або EXECUTE чогось від root? ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] Якщо `sudo -l` дозволяє `sudoedit`, перевірити **ін’єкцію аргументів sudoedit** (CVE-2023-22809) через `SUDO_EDITOR`/`VISUAL`/`EDITOR`, щоб редагувати довільні файли у вразливих версіях (`sudo -V` < 1.9.12p2). Приклад: `SUDO_EDITOR="vim -- /etc/sudoers" sudoedit /etc/hosts`.<sup>[[1]](#references)</sup>
-- [ ] Є **exploitable SUID binary**? ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] Чи обмежені [команди **sudo** **шляхом**](../linux-basics/linux-privilege-escalation/index.html#sudo-execution-bypassing-paths)? Чи можна **обійти ці обмеження**?
-- [ ] [**Sudo/SUID binary без указаного шляху**](../linux-basics/linux-privilege-escalation/index.html#sudo-command-suid-binary-without-command-path)?
-- [ ] [**SUID binary із указаним шляхом**](../linux-basics/linux-privilege-escalation/index.html#suid-binary-with-command-path)? Обхід
-- [ ] [**LD_PRELOAD vuln**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#ld_preload-ld_library_path-and-suid)
-- [ ] [**Відсутня .so library у SUID binary**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#missing-shared-object-injection) у доступній для запису папці?
-- [ ] [**SUID RPATH/RUNPATH або доступний для запису шлях до library**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#rpath-and-runpath)?
-- [ ] [**Доступні SUDO tokens**](../linux-basics/linux-privilege-escalation/index.html#reusing-sudo-tokens)? [**Чи можна створити SUDO token**](../linux-basics/linux-privilege-escalation/index.html#var-run-sudo-ts-less-than-username-greater-than)?
-- [ ] Чи можна [**прочитати або змінити файли sudoers**](../linux-basics/linux-privilege-escalation/index.html#etc-sudoers-etc-sudoers-d)?
-- [ ] Чи можна [**змінити /etc/ld.so.conf.d/**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#linker-configuration)?
+- [ ] Чи можете ви виконати **будь-яку команду через sudo**? Чи можете ви за її допомогою ЧИТАТИ, ЗАПИСУВАТИ або ВИКОНУВАТИ щось від імені root? ([**GTFOBins**](https://gtfobins.github.io))
+- [ ] Якщо `sudo -l` дозволяє `sudoedit`, перевірте **ін’єкцію аргументів sudoedit** (CVE-2023-22809) через `SUDO_EDITOR`/`VISUAL`/`EDITOR` для редагування довільних файлів у вразливих версіях (`sudo -V` < 1.9.12p2). Приклад: `SUDO_EDITOR="vim -- /etc/sudoers" sudoedit /etc/hosts`.<sup>[[1]](#references)</sup>
+- [ ] Чи є **експлуатований SUID-бінарний файл**? ([**GTFOBins**](https://gtfobins.github.io))
+- [ ] Чи обмежені команди [**sudo** **шляхом**? Чи можна **обійти** ці обмеження](../linux-basics/linux-privilege-escalation/index.html#sudo-execution-bypassing-paths)?
+- [ ] [**Команда Sudo/SUID-бінарний файл без указаного шляху**](../linux-basics/linux-privilege-escalation/index.html#sudo-command-suid-binary-without-command-path)?
+- [ ] [**SUID-бінарний файл із указаним шляхом**](../linux-basics/linux-privilege-escalation/index.html#suid-binary-with-command-path)? Обійти обмеження
+- [ ] [**Вразливість LD_PRELOAD**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#ld_preload-ld_library_path-and-suid)
+- [ ] [**Відсутня .so-бібліотека в SUID-бінарному файлі**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#missing-shared-object-injection) у папці, доступній для запису?
+- [ ] [**SUID RPATH/RUNPATH або шлях до бібліотеки, доступний для запису**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#rpath-and-runpath)?
+- [ ] [**Доступні токени SUDO**](../linux-basics/linux-privilege-escalation/index.html#reusing-sudo-tokens)? [**Чи можете ви створити токен SUDO**](../linux-basics/linux-privilege-escalation/index.html#var-run-sudo-ts-less-than-username-greater-than)?
+- [ ] Чи можете ви [**прочитати або змінити файли sudoers**](../linux-basics/linux-privilege-escalation/index.html#etc-sudoers-etc-sudoers-d)?
+- [ ] Чи можете ви [**змінити /etc/ld.so.conf.d/**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#linker-configuration)?
 - [ ] Команда [**OpenBSD DOAS**](../linux-basics/linux-privilege-escalation/index.html#doas)
 
-### [Capabilities](../linux-basics/linux-privilege-escalation/index.html#capabilities)
+### [Можливості](../linux-basics/linux-privilege-escalation/index.html#capabilities)
 
-- [ ] Чи має якийсь binary **неочікувану capability**?
+- [ ] Чи має якийсь бінарний файл **неочікувану можливість**?
 
-### [ACLs](../linux-basics/linux-privilege-escalation/index.html#acls)
+### [ACL](../linux-basics/linux-privilege-escalation/index.html#acls)
 
-- [ ] Чи має якийсь файл **неочікувану ACL**?
+- [ ] Чи має якийсь файл **неочікуваний ACL**?
 
-### [Відкриті shell-сесії](../linux-basics/linux-privilege-escalation/index.html#open-shell-sessions)
+### [Відкриті shell-сеанси](../linux-basics/linux-privilege-escalation/index.html#open-shell-sessions)
 
 - [ ] **screen**
 - [ ] **tmux**
 
 ### [SSH](../linux-basics/linux-privilege-escalation/index.html#ssh)
 
-- [ ] **Debian** [**Передбачуваний PRNG OpenSSL — CVE-2008-0166**](../linux-basics/linux-privilege-escalation/index.html#debian-openssl-predictable-prng-cve-2008-0166)
-- [ ] [**Цікаві значення конфігурації SSH**](../linux-basics/linux-privilege-escalation/index.html#ssh-interesting-configuration-values)
+- [ ] [**Передбачуваний PRNG OpenSSL у Debian — CVE-2008-0166**](../linux-basics/linux-privilege-escalation/index.html#debian-openssl-predictable-prng-cve-2008-0166)
+- [ ] [**Цікаві параметри конфігурації SSH**](../linux-basics/linux-privilege-escalation/index.html#ssh-interesting-configuration-values)
 
 ### [Цікаві файли](../linux-basics/linux-privilege-escalation/index.html#interesting-files)
 
-- [ ] **Profile files** — прочитати чутливі дані? Записати для privesc?
-- [ ] **Файли passwd/shadow** — прочитати чутливі дані? Записати для privesc?
-- [ ] **Перевірити загальновідомі цікаві папки** на наявність чутливих даних
-- [ ] **Файли в незвичних місцях/власником яких є інший користувач,** до яких ви можете отримати доступ або змінити executable files
-- [ ] **Змінені** протягом останніх хвилин
-- [ ] **Файли Sqlite DB**
+- [ ] **Файли профілю** — прочитати конфіденційні дані? Записати для підвищення привілеїв?
+- [ ] **Файли passwd/shadow** — прочитати конфіденційні дані? Записати для підвищення привілеїв?
+- [ ] **Перевірити типові цікаві папки** на наявність конфіденційних даних
+- [ ] **Файли в дивних місцях/файли з цікавим власником** — можливо, ви маєте доступ до виконуваних файлів або можете їх змінити
+- [ ] **Змінені** за останні хвилини
+- [ ] **Файли баз даних Sqlite**
 - [ ] **Приховані файли**
-- [ ] **Script/Binaries у PATH**
-- [ ] **Web files** (паролі?)
-- [ ] **Backups**?
-- [ ] **Відомі файли, що містять паролі**: використати **Linpeas** і **LaZagne**
+- [ ] **Скрипти/бінарні файли в PATH**
+- [ ] **Вебфайли** (паролі?)
+- [ ] **Резервні копії**?
+- [ ] **Відомі файли, що містять паролі**: використайте **Linpeas** і **LaZagne**
 - [ ] **Загальний пошук**
 
-### [**Доступні для запису файли**](../linux-basics/linux-privilege-escalation/index.html#writable-files)
+### [**Файли, доступні для запису**](../linux-basics/linux-privilege-escalation/index.html#writable-files)
 
-- [ ] **Змінити python library**, щоб виконати довільні команди?
-- [ ] Чи можна **змінювати log files**? Exploit **Logtotten**
-- [ ] Чи можна **змінювати /etc/sysconfig/network-scripts/**? Exploit для Centos/Redhat
-- [ ] Чи можна [**записувати в ini, int.d, systemd або rc.d files**](../linux-basics/linux-privilege-escalation/index.html#init-init-d-systemd-and-rc-d)?
+- [ ] **Змінити бібліотеку python**, щоб виконувати довільні команди?
+- [ ] Чи можете ви **змінити файли журналів**? Експлойт **Logtotten**
+- [ ] Чи можете ви **змінити /etc/sysconfig/network-scripts/**? Експлойт для Centos/Redhat
+- [ ] Чи можете ви [**записувати в файли ini, int.d, systemd або rc.d**](../linux-basics/linux-privilege-escalation/index.html#init-init-d-systemd-and-rc-d)?
 
-### [**Інші tricks**](../linux-basics/linux-privilege-escalation/index.html#other-tricks)
+### [**Інші хитрощі**](../linux-basics/linux-privilege-escalation/index.html#other-tricks)
 
-- [ ] Чи можна [**зловживати NFS для підвищення привілеїв**](../linux-basics/linux-privilege-escalation/index.html#nfs-privilege-escalation)?
-- [ ] Чи потрібно [**вийти з restrictive shell**](../linux-basics/linux-privilege-escalation/index.html#escaping-from-restricted-shells)?
+- [ ] Чи можете ви [**зловживати NFS для підвищення привілеїв**](../linux-basics/linux-privilege-escalation/index.html#nfs-privilege-escalation)?
+- [ ] Чи потрібно вам [**вийти з обмеженої оболонки**](../linux-basics/linux-privilege-escalation/index.html#escaping-from-restricted-shells)?
 
 
 
 ## References
 
-- [1] [Рекомендації Sudo: редагування довільних файлів через sudoedit](https://www.sudo.ws/security/advisories/sudoedit_any/)
-- [2] [Документація Oracle Linux: конфігурація systemd drop-in](https://docs.oracle.com/en/operating-systems/oracle-linux/8/systemd/ModifyingsystemdConfigurationFiles.html)
-- [3] [Notselwyn: вимоги до exploit і дослідження CVE-2024-1086](https://github.com/Notselwyn/CVE-2024-1086)
-- [4] [Рекомендації з безпеки Qualys: LPE у needrestart](https://www.qualys.com/2024/11/19/needrestart/needrestart.txt)
+- [1] [Рекомендація з безпеки sudo: довільне редагування файлів через sudoedit](https://www.sudo.ws/security/advisories/sudoedit_any/)
+- [2] [Документація Oracle Linux: конфігурація drop-in для systemd](https://docs.oracle.com/en/operating-systems/oracle-linux/8/systemd/ModifyingsystemdConfigurationFiles.html)
+- [3] [Notselwyn: вимоги до експлойту CVE-2024-1086 та дослідження](https://github.com/Notselwyn/CVE-2024-1086)
+- [4] [Рекомендація з безпеки Qualys: LPE у needrestart](https://www.qualys.com/2024/11/19/needrestart/needrestart.txt)
 {{#include ../../banners/hacktricks-training.md}}
