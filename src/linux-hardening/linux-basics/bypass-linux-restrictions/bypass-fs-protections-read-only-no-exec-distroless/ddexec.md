@@ -4,9 +4,9 @@
 
 ## Context
 
-In Linux in order to run a program it must exist as a file, it must be accessible in some way through the file system hierarchy (this is just how `execve()` works). This file may reside on disk or in ram (tmpfs, memfd) but you need a filepath. This has made very easy to control what is run on a Linux system, it makes easy to detect threats and attacker's tools or to prevent them from trying to execute anything of theirs at all (_e. g._ not allowing unprivileged users to place executable files anywhere).
+Linux normally executes programs from executable files stored on disk or in memory. It can identify an executable by pathname or file descriptor, so a normal filesystem pathname is not always required.<sup>[[2]](#references)</sup>
 
-But this technique is here to change all of this. If you can not start the process you want... **then you hijack one already existing**.
+DDexec / EverythingExec uses the memory of an **already running process**. The [Linux Fileless Execution](../../../post-exploitation/linux-fileless-execution.md) page covers anonymous-file execution and related detection and forensic collection; the [Memory Bypasses overview](index.html#memory-bypasses) also links MemExec and Memdlopen.<sup>[[1]](#references)</sup>
 
 This technique allows you to **bypass common protection techniques such as read-only, noexec, file-name whitelisting, hash whitelisting**.<sup>[[1]](#references)</sup>
 
@@ -91,5 +91,6 @@ Block this, EDRs.
 ## References
 
 - [1] [DDexec: A technique to run binaries filelessly and stealthily on Linux](https://github.com/arget13/DDexec)
+- [2] [execveat(2) — Linux manual page](https://manpages.debian.org/trixie/manpages-dev/execveat.2.en.html)
 
 {{#include ../../../../banners/hacktricks-training.md}}
