@@ -1,77 +1,83 @@
-# Bypass dell'autorizzazione tramite divergenza dello stato e valori predefiniti
+# Divergenza dello stato e bypass dell'autorizzazione tramite valori predefiniti
 
 {{#include ../../banners/hacktricks-training.md}}
 
-L'autorizzazione a volte dipende da uno stato economico derivato invece che da un ruolo esplicito, ad esempio: "il chiamante possiede l'intera supply". Se i valori usati in quel predicato provengono da store diversi, un duplicato obsoleto può trasformare una scorciatoia legittima per la proprietà in un authorization bypass. Il modulo Provenance marker ha dimostrato la combinazione pericolosa: un saldo live del chiamante veniva confrontato con metadati della supply locali al marker, che non venivano aggiornati per gli asset con supply non fissa.<sup>[[1]](#references)</sup>
+A volte l'autorizzazione dipende da uno stato economico derivato invece che da un ruolo esplicito, per esempio: «il chiamante possiede l'intera supply». Se i valori usati in tale condizione provengono da archivi diversi, una copia duplicata obsoleta può trasformare una legittima scorciatoia basata sulla proprietà in un bypass dell'autorizzazione. Il modulo Provenance marker ha dimostrato la pericolosa combinazione: il saldo aggiornato del chiamante veniva confrontato con i metadati locali del marker relativi alla supply, che non venivano aggiornati per gli asset con supply non fissa.<sup>[[1]](#references)</sup>
 
 ## Verificare lo stato duplicato come confine di autorizzazione
 
-Per ogni valore usato da un controllo dei permessi, elenca **tutte le rappresentazioni**: stato canonico del modulo, campi degli oggetti, aggregati memorizzati nella cache, indici, snapshot, record dei bridge e mirror off-chain. Quindi traccia ogni percorso di creazione, mint, burn, trasferimento, reset, migrazione e sincronizzazione per determinare quale copia viene aggiornata in ciascuna modalità dell'oggetto. Un campo può essere autorevole per una modalità e informativo per un'altra.<sup>[[1]](#references)</sup>
+Per ogni valore usato da un controllo dei permessi, elencate **tutte le rappresentazioni**: stato canonico del modulo, campi degli oggetti, aggregati memorizzati nella cache, indici, snapshot, record dei bridge e copie replicate off-chain. Poi tracciate ogni percorso di creazione, mint, burn, trasferimento, reset, migrazione e sincronizzazione per determinare quale copia venga aggiornata in ciascuna modalità dell'oggetto. Un campo può essere autorevole in una modalità e puramente informativo in un'altra.<sup>[[1]](#references)</sup>
 
-Un workflow pratico di revisione è:<sup>[[1]](#references)</sup>
+Un flusso di lavoro pratico per la revisione è:<sup>[[1]](#references)</sup>
 
-1. Individua le azioni protette e riduci ogni ramo di autorizzazione a un predicato booleano.
-2. Per ogni operando, annota il relativo store, i percorsi di aggiornamento, gli stati del ciclo di vita e la source of truth.
-3. Genera transizioni che aggiornino una sola rappresentazione, quindi confronta tutte le copie.
-4. Tenta l'azione protetta da un account nuovo dopo ogni transizione.
-5. Vai oltre il bypass: se l'azione modifica un ACL, assegnati ruoli persistenti e invoca le normali API privilegiate.
+1. Individuate le operazioni protette e riducete ogni ramo di autorizzazione a un predicato booleano.
+2. Per ogni operando, annotate il relativo archivio, i percorsi di aggiornamento, gli stati del ciclo di vita e la fonte autorevole.
+3. Generate transizioni che aggiornino una sola rappresentazione, quindi confrontate tutte le copie.
+4. Dopo ogni transizione, tentate di eseguire l'operazione protetta da un account appena creato.
+5. Proseguite oltre il bypass: se l'operazione modifica una ACL, autoassegnatevi ruoli persistenti e invocate le normali API privilegiate.
 
-I pattern sospetti includono `cachedSupply == balance`, `metadataOwner == caller` o `snapshotShares == currentShares` quando i due lati hanno regole di sincronizzazione diverse. Interrogare un valore autorevole per un operando non rende sicuro il confronto quando l'altro operando è obsoleto.<sup>[[1]](#references)</sup>
+Tra gli schemi sospetti figurano `cachedSupply == balance`, `metadataOwner == caller` o `snapshotShares == currentShares` quando le due parti seguono regole di sincronizzazione diverse. Recuperare un valore autorevole per un operando non rende sicuro il confronto se l'altro operando è obsoleto.<sup>[[1]](#references)</sup>
 
-## Bypass dell'uguaglianza con valore predefinito
+## Bypass tramite uguaglianza con valori predefiniti
 
-Un predicato di uguaglianza non è sicuro neanche quando entrambi gli operandi possono assumere indipendentemente lo stesso valore predefinito. Il controllo seguente concede il "controllo dell'intera supply" a qualsiasi account vuoto quando `supply` è zero, indipendentemente dal fatto che lo zero derivi da metadati obsoleti o da un oggetto legittimamente non finanziato.<sup>[[1]](#references)[[3]](#references)</sup>
+Anche un predicato di uguaglianza non è sicuro quando entrambi gli operandi possono assumere indipendentemente lo stesso valore predefinito. Il controllo seguente concede il «controllo completo della supply» a qualsiasi account vuoto quando `supply` è zero, indipendentemente dal fatto che lo zero derivi da metadati obsoleti o da un oggetto legittimamente privo di fondi.<sup>[[1]](#references)[[3]](#references)</sup>
+
 ```go
 balance := bank.GetBalance(ctx, caller, denom)
 supply := marker.GetSupply() // duplicate or stale representation
 return balance.Amount.Equal(supply.Amount) // 0 == 0 -> true
 ```
-Passare al canonical store risolve la divergenza, ma **non** il caso dell'oggetto vuoto. La proprietà di sicurezza deve includere una condizione di validità indipendente; la patch Provenance utilizza la supply bancaria live e rifiuta una supply nil o pari a zero prima di confrontarla con il saldo del chiamante.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+
+Passare allo store canonico risolve la divergenza, ma **non** il caso dell'oggetto vuoto. La proprietà di sicurezza deve includere una condizione di validità indipendente; la patch di Provenance usa il supply live della banca e rifiuta un supply nil o pari a zero prima di confrontare il saldo del chiamante.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+
 ```go
 supply := bank.GetSupply(ctx, denom)
 if supply.Amount.IsNil() || supply.Amount.IsZero() {
-return false
+    return false
 }
 balance := bank.GetBalance(ctx, caller, denom)
 return supply.Equal(NewCoin(denom, balance.Amount))
 ```
-Applica lo stesso ragionamento a conteggi del quorum, percentuali di ownership, debito, collaterale, epoch, nonce, timestamp e contatori: `callerValue == protectedValue` non deve autorizzare un caller finché il valore protetto non è indipendentemente valido e non appartiene al dominio previsto.<sup>[[1]](#references)</sup>
 
-## Takeover dell'ACL verso operazioni privilegiate legittime
+Applica lo stesso ragionamento a conteggi di quorum, percentuali di proprietà, debito, collaterale, epoch, nonce, timestamp e contatori: `callerValue == protectedValue` non deve autorizzare un chiamante finché il valore protetto non è valido in modo indipendente e non appartiene al dominio previsto.<sup>[[1]](#references)</sup>
 
-Un bypass in un'operazione di modifica dell'ACL è una primitiva durevole di privilege escalation. Nel caso Provenance, un account non privilegiato con zero token poteva superare il controllo stale `0 == 0` sulla supply, concedersi permessi amministrativi, di mint e di withdrawal, quindi usare i normali message handler per effettuare il mint degli asset o ritirare l'escrow. L'exploit non richiedeva quindi una seconda vulnerabilità dopo la modifica dell'ACL.<sup>[[1]](#references)</sup>
+## Acquisizione dell'ACL per eseguire operazioni privilegiate legittime
+
+Un bypass in un'operazione di modifica dell'ACL è una primitiva di escalation dei privilegi persistente. Nel caso Provenance, un account senza privilegi e con zero token poteva superare il controllo obsoleto `0 == 0` sull'offerta, concedersi autorizzazioni di amministrazione, mint e prelievo, e quindi usare i normali message handler per creare asset o prelevare fondi dall'escrow. Pertanto, dopo la modifica dell'ACL, l'exploit non richiedeva una seconda vulnerabilità.<sup>[[1]](#references)</sup>
 
 Sequenza generale di exploitation:<sup>[[1]](#references)</sup>
 
-1. Individua un oggetto il cui campo non authoritative differisce dallo stato live, oppure il cui valore protetto è quello di default.
-2. Usa un'identità nuova/vuota in modo che il suo valore locale corrisponda a quel valore stale/default.
-3. Chiama l'endpoint di role-management, ownership-transfer o policy-update e concediti capability durevoli.
-4. Conferma la persistenza leggendo l'ACL dallo stato canonical.
-5. Invoca l'operazione legittima ad alto impatto (mint, withdraw, upgrade, trasferimento della ownership o modifica della policy).
+1. Trova un oggetto il cui campo non autorevole differisce dallo stato corrente oppure il cui valore protetto è quello predefinito.
+2. Usa un'identità nuova/vuota, in modo che il suo valore locale corrisponda al valore obsoleto/predefinito.
+3. Chiama l'endpoint di gestione dei ruoli, trasferimento della proprietà o aggiornamento dei criteri e concediti capacità persistenti.
+4. Verifica la persistenza leggendo l'ACL dallo stato canonico.
+5. Esegui l'operazione legittima ad alto impatto (creare asset, prelevare fondi, eseguire un upgrade, trasferire la proprietà o modificare i criteri).
 
-Nel valutare l'impatto, esamina ogni capability raggiungibile dal nuovo ruolo invece di fermarti al bypass dell'autorizzazione. Gli account simili a escrow possono custodire asset non correlati all'oggetto i cui metadati stale hanno reso possibile il takeover.<sup>[[1]](#references)</sup>
+Per valutare l'impatto, esamina ogni capacità raggiungibile dal nuovo ruolo invece di fermarti al bypass dell'autorizzazione. Gli account simili a escrow possono custodire asset non correlati all'oggetto i cui metadati obsoleti hanno consentito l'acquisizione.<sup>[[1]](#references)</sup>
 
-## Target per invariant e stateful-fuzzing
+## Invarianti e obiettivi di stateful fuzzing
 
-Specifica l'autorizzazione indipendentemente dall'implementazione. Per una scorciatoia basata sulla supply completa, l'invariant minimo è:<sup>[[1]](#references)[[2]](#references)</sup>
+Specifica l'autorizzazione indipendentemente dall'implementazione. Per una scorciatoia basata sull'offerta totale, l'invariante minimo è:<sup>[[1]](#references)[[2]](#references)</sup>
+
 ```text
 controlsAllSupply(caller, asset) == true
-=> authoritativeSupply(asset) > 0
-&& authoritativeBalance(caller, asset) == authoritativeSupply(asset)
+    => authoritativeSupply(asset) > 0
+    && authoritativeBalance(caller, asset) == authoritativeSupply(asset)
 ```
-Usa un model/state-machine fuzzer per generare sequenze, non chiamate isolate, che coprano creazione, inizializzazione con valore zero, attivazione/finalizzazione, minting, burning, transfers, reset, migrazioni, chiamate di sync e modifiche all'ACL. Dopo ogni transizione, confronta le rappresentazioni duplicate e verifica che un account appena creato non possa eseguire alcuna azione protetta. Inserisci casi espliciti per valori pari a zero, un'unità, proprietà parziale, proprietà completa, stale-low e stale-high.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Le proprietà di regressione ad alto segnale sono:<sup>[[1]](#references)[[2]](#references)</sup>
+Usa un fuzzer basato su modello/macchina a stati per generare sequenze, non chiamate isolate, che coprano creazione, inizializzazione con valore zero, attivazione/finalizzazione, minting, burning, trasferimenti, reset, migrazioni, chiamate di sync e modifiche ACL. Dopo ogni transizione, confronta le rappresentazioni duplicate e verifica che un account nuovo non possa eseguire azioni protette. Prevedi casi espliciti per zero, un’unità, proprietà parziale, proprietà totale e valori inferiori o superiori a quelli aggiornati.<sup>[[1]](#references)[[2]](#references)</sup>
 
-- Un supply autorevole pari a zero non implica mai proprietà o amministrazione.
-- I partial holders non possono diventare amministratori quando un supply duplicato è uguale al loro balance.
-- Un full holder effettivo mantiene lo shortcut previsto quando il supply live è positivo.
-- I self-grants falliti non modificano l'ACL né abilitano chiamate privilegiate successive.
-- I cambi di modalità non possono modificare silenziosamente quale rappresentazione un controllo di autorizzazione considera autorevole.
+Le proprietà di regressione più significative sono:<sup>[[1]](#references)[[2]](#references)</sup>
+
+- Un’offerta autorevole pari a zero non implica mai proprietà o privilegi amministrativi.
+- I titolari di una quota parziale non possono diventare amministratori quando un’offerta duplicata corrisponde al loro saldo.
+- Un titolare effettivo dell’intera offerta mantiene la scorciatoia prevista quando l’offerta corrente è positiva.
+- I tentativi non riusciti di concedersi privilegi non modificano l’ACL né abilitano chiamate privilegiate successive.
+- Le modifiche di modalità non possono cambiare silenziosamente quale rappresentazione un controllo di autorizzazione considera autorevole.
 
 ## References
 
-- [1] [La divergenza dello stato abilita l'accesso non autorizzato (Trail of Bits)](https://blog.trailofbits.com/2026/08/25/state-divergence-enables-unauthorized-access/)
-- [2] [Provenance PR #2734 - Corregge i controlli sul supply obsoleto](https://github.com/provenance-io/provenance/pull/2734)
-- [3] [Commit Provenance c81fd65 - Rifiuta il supply pari a zero nello shortcut di autorizzazione del supply totale](https://github.com/provenance-io/provenance/commit/c81fd65f8ad48de42d5a6d68e761a0851c7e72c4)
+- [1] [La divergenza dello stato consente accessi non autorizzati (Trail of Bits)](https://blog.trailofbits.com/2026/08/25/state-divergence-enables-unauthorized-access/)
+- [2] [Provenance PR #2734 - Correzione dei controlli sull’offerta obsoleti](https://github.com/provenance-io/provenance/pull/2734)
+- [3] [Provenance commit c81fd65 - Rifiuto dell’offerta pari a zero nella scorciatoia di autorizzazione dell’offerta totale](https://github.com/provenance-io/provenance/commit/c81fd65f8ad48de42d5a6d68e761a0851c7e72c4)
 {{#include ../../banners/hacktricks-training.md}}
