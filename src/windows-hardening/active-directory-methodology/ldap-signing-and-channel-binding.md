@@ -1,61 +1,65 @@
-# LDAP Signing & Channel Binding Hardening
+# LDAP 签名与通道绑定加固
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Why it matters
+## 为什么重要
 
-LDAP relay/MITM attacks forward authentication to a domain controller to obtain an authenticated LDAP context. Two related controls reduce these paths:
+LDAP relay/MITM 攻击会将身份验证转发到域控制器，以获取经过身份验证的 LDAP 上下文。两项相关控制可减少这类攻击路径：
 
-- **LDAP channel binding (CBT)** binds applicable authentication to the TLS server certificate/channel used by LDAPS, frustrating cross-channel relay.
-- **LDAP signing** requires integrity protection for SASL LDAP binds. It does not add confidentiality; use TLS when LDAP contents also need encryption.<sup>[[2]](#references)</sup>
+- **LDAP 通道绑定 (CBT)** 将适用的身份验证绑定到 LDAPS 使用的 TLS 服务器证书/通道，阻碍跨通道 relay。
+- **LDAP 签名** 要求 SASL LDAP bind 具有完整性保护。它不会增加机密性；如果 LDAP 内容也需要加密，请使用 TLS。<sup>[[2]](#references)</sup>
 
-**Quick posture check**: tools such as `netexec ldap <dc> -u user -p pass` report observed signing and channel-binding policy. `(signing:None)` and `(channel binding:Never)` indicate missing controls, but a successful relay still depends on the captured authentication type, EPA behavior, account privileges, target protocol, and relay protections. When the relayed principal has the necessary rights, tooling such as KrbRelayUp can write `msDS-AllowedToActOnBehalfOfOtherIdentity`, configure resource-based constrained delegation (RBCD), and use the resulting delegation path to impersonate a privileged principal.<sup>[[4]](#references)</sup>
+**快速检查安全状况**：`netexec ldap <dc> -u user -p pass` 等工具会报告检测到的签名和通道绑定策略。`(signing:None)` 和 `(channel binding:Never)` 表示缺少相关控制，但 relay 是否成功仍取决于捕获的身份验证类型、EPA 行为、账户权限、目标协议以及 relay 防护。如果被 relay 的主体拥有必要权限，KrbRelayUp 等工具可以写入 `msDS-AllowedToActOnBehalfOfOtherIdentity`、配置基于资源的约束委派 (RBCD)，并利用由此产生的委派路径模拟高权限主体。<sup>[[4]](#references)</sup>
 
-**Server 2025 DCs** introduce a new GPO (**LDAP server signing requirements Enforcement**) that defaults to **Require Signing** when left **Not Configured**. To avoid enforcement you must explicitly set that policy to **Disabled**.<sup>[[1]](#references)</sup>
+**Server 2025 DC** 引入了新的 GPO（**LDAP 服务器签名要求强制执行**），当其保持 **Not Configured** 时，默认采用 **Require Signing**。若要避免强制执行，必须明确将该策略设为 **Disabled**。<sup>[[1]](#references)</sup>
 
-## LDAP Channel Binding (LDAPS only)
+## LDAP 通道绑定（仅限 LDAPS）
 
-- **Requirements**:
-- CVE-2017-8563 patch (2017) adds Extended Protection for Authentication support.<sup>[[3]](#references)</sup>
-- **KB4520412** (Server 2019/2022) adds LDAPS CBT “what-if” telemetry.<sup>[[2]](#references)</sup>
-- **GPO (DCs)**: `Domain controller: LDAP server channel binding token requirements`
-- `Never` (default, no CBT)
-- `When Supported` (audit: emits failures, does not block)
-- `Always` (enforce: rejects LDAPS binds without valid CBT)<sup>[[1]](#references)</sup>
-- **Audit**: set **When Supported** to surface:
-- **3074** – LDAPS bind would have failed CBT validation if enforced.
-- **3075** – LDAPS bind omitted CBT data and would be rejected if enforced.
-- (Event **3039** still signals CBT failures on older builds.)<sup>[[1]](#references)[[2]](#references)</sup>
-- **Enforcement**: set **Always** once LDAPS clients send CBTs; only effective on **LDAPS** (not raw 389).<sup>[[1]](#references)</sup>
+- **要求**：
+  - CVE-2017-8563 补丁（2017）增加了对身份验证扩展保护的支持。<sup>[[3]](#references)</sup>
+  - **KB4520412**（Server 2019/2022）增加了 LDAPS CBT 的“what-if”遥测。<sup>[[2]](#references)</sup>
+- **GPO（DC）**：`Domain controller: LDAP server channel binding token requirements`
+  - `Never`（默认，不使用 CBT）
+  - `When Supported`（部分强制：支持 CBT 的客户端必须提供有效令牌；不支持 CBT 的客户端仍可 bind，并会生成审计事件）
+  - `Always`（强制：拒绝缺少有效 CBT 的 LDAPS bind）<sup>[[1]](#references)</sup>
+- **审计**：设为 **When Supported** 可发现以下情况：
+  - **3074** – 如果启用强制，LDAPS bind 会因 CBT 验证失败。
+  - **3075** – LDAPS bind 未提供 CBT 数据；如果启用强制，将会被拒绝。
+  - （较旧版本中的事件 **3039** 仍表示 CBT 失败。）<sup>[[1]](#references)[[2]](#references)</sup>
+- **强制执行**：LDAPS 客户端开始发送 CBT 后，设为 **Always**；此设置仅对 **LDAPS** 有效（不适用于原始 389）。<sup>[[1]](#references)</sup>
+
+`When Supported` 不仅用于审计：它会验证支持 CBT 的客户端，同时允许不支持 CBT 的客户端连接。[Microsoft 策略参考](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/ldap-channel-binding)说明了该设置因版本而异的默认值。LDAP 签名适用于 LDAP/389 上符合条件的 bind；通道绑定则适用于受 TLS 保护的 LDAP 身份验证。
 
 
-## LDAP Signing
+## LDAP 签名
 
-- **Client GPO**: `Network security: LDAP client signing requirements` = `Require signing` (vs `Negotiate signing` default on modern Windows).<sup>[[1]](#references)</sup>
-- **DC GPO**:
-- Legacy: `Domain controller: LDAP server signing requirements` = `Require signing` (default is `None`).<sup>[[2]](#references)</sup>
-- **Server 2025**: leave legacy policy at `None` and set `LDAP server signing requirements Enforcement` = `Enabled` (Not Configured = enforced by default; set `Disabled` to avoid it).<sup>[[1]](#references)</sup>
-- **Compatibility**: Inventory non-Windows appliances and applications using simple binds or unsigned SASL binds. Microsoft documents support on maintained Windows versions; legacy-client compatibility statements should be verified against the actual client stack rather than reduced to an XP version threshold.<sup>[[2]](#references)</sup>
+- **客户端 GPO**：`Network security: LDAP client signing requirements` = `Require signing`（现代 Windows 上的默认值为 `Negotiate signing`）。<sup>[[1]](#references)</sup>
+- **DC GPO**：
+  - 旧版：`Domain controller: LDAP server signing requirements` = `Require signing`（默认值为 `None`）。<sup>[[2]](#references)</sup>
+  - **Server 2025**：将旧版策略保留为 `None`，并将 `LDAP server signing requirements Enforcement` 设为 `Enabled`（默认会强制执行 Not Configured；若要避免强制执行，请设为 `Disabled`）。<sup>[[1]](#references)</sup>
+- **兼容性**：盘点使用 simple bind 或未签名 SASL bind 的非 Windows 设备和应用程序。Microsoft 文档说明了受维护 Windows 版本上的支持情况；对于旧版客户端的兼容性声明，应根据实际客户端堆栈进行验证，而不要简化为 XP 版本门槛。<sup>[[2]](#references)</sup>
 
-## Audit-first rollout (recommended ~30 days)
+## 先审计再逐步推出（建议约 30 天）
 
-1. Enable LDAP interface diagnostics on each DC to log unsigned binds (Event **2889**):<sup>[[1]](#references)</sup>
+1. 在每台 DC 上启用 LDAP 接口诊断，以记录未签名 bind（事件 **2889**）：<sup>[[1]](#references)</sup>
+
 ```bash
 Reg Add HKLM\SYSTEM\CurrentControlSet\Services\NTDS\Diagnostics /v "16 LDAP Interface Events" /t REG_DWORD /d 2
 ```
-2. 将 DC GPO `LDAP server channel binding token requirements` 设置为 **When Supported**，以开始收集 CBT telemetry。<sup>[[1]](#references)</sup>
-3. 监控 Directory Service events：<sup>[[1]](#references)[[2]](#references)</sup>
-- **2889** – unsigned/unsigned-allow binds（signing 不合规）。
-- **3074/3075** – 可能失败或省略 CBT 的 LDAPS binds（在 2019/2022 上需要 KB4520412 以及上述第 2 步）。
-4. 分别进行以下更改以强制执行：<sup>[[1]](#references)</sup>
-- `LDAP server channel binding token requirements` = **Always**（DCs）。
-- `LDAP client signing requirements` = **Require signing**（clients）。
-- `LDAP server signing requirements` = **Require signing**（DCs）**或**（Server 2025）`LDAP server signing requirements Enforcement` = **Enabled**。
+
+2. 将 DC GPO `LDAP server channel binding token requirements` 设置为 **When Supported**，以进行部分 CBT 强制和遥测；先验证与旧版客户端的兼容性。<sup>[[1]](#references)</sup>
+3. 监控 Directory Service 事件：<sup>[[1]](#references)[[2]](#references)</sup>
+   - **2889** – 未签名/允许未签名的 bind（不符合签名要求）。
+   - **3074/3075** – 将会失败或缺少 CBT 的 LDAPS bind（在 2019/2022 上需要 KB4520412 及上述第 2 步）。
+4. 分别进行以下强制措施：<sup>[[1]](#references)</sup>
+   - `LDAP server channel binding token requirements` = **Always**（DC）。
+   - `LDAP client signing requirements` = **Require signing**（客户端）。
+   - `LDAP server signing requirements` = **Require signing**（DC），**或**（Server 2025）`LDAP server signing requirements Enforcement` = **Enabled**。
 
 ## References
 
-- [1] [TrustedSec - LDAP Channel Binding 和 LDAP Signing](https://trustedsec.com/blog/ldap-channel-binding-and-ldap-signing)
-- [2] [Microsoft KB4520412 - LDAP channel binding 和 signing requirements](https://support.microsoft.com/en-us/topic/2020-and-2023-ldap-channel-binding-and-ldap-signing-requirements-for-windows-kb4520412-ef185fb8-00f7-167d-744c-f299a66fc00a)
-- [3] [Microsoft CVE-2017-8563 - LDAP relay mitigation update](https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2017-8563)
-- [4] [0xdf – HTB Bruno（LDAP signing disabled → Kerberos relay → RBCD）](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
+- [1] [TrustedSec - LDAP 通道绑定与 LDAP 签名](https://trustedsec.com/blog/ldap-channel-binding-and-ldap-signing)
+- [2] [Microsoft KB4520412 - LDAP 通道绑定与签名要求](https://support.microsoft.com/en-us/topic/2020-and-2023-ldap-channel-binding-and-ldap-signing-requirements-for-windows-kb4520412-ef185fb8-00f7-167d-744c-f299a66fc00a)
+- [3] [Microsoft CVE-2017-8563 - LDAP relay 缓解更新](https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2017-8563)
+- [4] [0xdf – HTB Bruno（LDAP signing 已禁用 → Kerberos relay → RBCD）](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
 {{#include ../../banners/hacktricks-training.md}}

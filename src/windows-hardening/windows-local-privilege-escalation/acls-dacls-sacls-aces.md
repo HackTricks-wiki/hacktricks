@@ -2,150 +2,151 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## **Access Control List (ACL)**
+## **访问控制列表 (ACL)**
 
-Access Control List (ACL) 由一组有序的 Access Control Entries (ACEs) 组成，用于规定对象及其属性的保护方式。本质上，ACL 定义了哪些 security principals（用户或组）可以或不可以对给定对象执行哪些操作。
+访问控制列表 (ACL) 由一组有序的访问控制项 (ACE) 组成，用于规定对象及其属性的保护方式。简单来说，ACL 定义了哪些安全主体（用户或组）可以或不可以对给定对象执行哪些操作。
 
 ACL 有两种类型：
 
-- **Discretionary Access Control List (DACL)：** 指定哪些用户和组可以或不可以访问对象。
-- **System Access Control List (SACL)：** 负责对对象的访问尝试进行审计。
+- **自主访问控制列表 (DACL)：** 指定哪些用户和组可以或不可以访问对象。
+- **系统访问控制列表 (SACL)：** 控制对对象的访问尝试如何进行审计。
 
-访问文件的过程中，系统会将对象的 security descriptor 与用户的 access token 进行比对，根据 ACEs 确定是否授予访问权限以及授予的访问范围。<sup>[[1]](#references)</sup>
+访问文件时，系统会将对象的安全描述符与用户的访问令牌进行检查，根据 ACE 确定是否授予访问权限以及授予的访问范围。<sup>[[1]](#references)</sup>
 
-### **Key Components**
+如果父目录授予了完全控制权限，但子文件拒绝读取，请分别检查**子文件**的有效 DACL、所有者和继承情况。更改该文件的 DACL 需要对文件拥有 `WRITE_DAC` 权限或适用的所有者权限；[Microsoft 对 `WRITE_DAC` 的定义](https://learn.microsoft.com/en-us/windows/win32/secauthz/standard-access-rights)以及[所有者隐式访问权限的说明](https://learn.microsoft.com/en-us/windows/win32/secauthz/owner-of-a-new-object)见相关文档。仅有父目录权限并不能确保可以读取子文件，也不能确保可以更改其 DACL。
 
-- **DACL：** 包含向用户和组授予或拒绝对象访问权限的 ACEs。它本质上是决定访问权限的主要 ACL。
-- **SACL：** 用于审计对对象的访问，其中的 ACEs 定义需要记录到 Security Event Log 中的访问类型。对于检测未授权访问尝试或排查访问问题，这一点非常有价值。<sup>[[1]](#references)</sup>
+### **关键组件**
 
-### **System Interaction with ACLs**
+- **DACL：** 包含向对象授予或拒绝用户和组访问权限的 ACE。它本质上是决定访问权限的主要 ACL。
+- **SACL：** 用于审计对对象的访问，其中的 ACE 定义了要记录到 Security Event Log 中的访问类型。这对于检测未经授权的访问尝试或排查访问问题非常有用。<sup>[[1]](#references)</sup>
 
-每个用户会话都关联一个 access token，其中包含与该会话相关的 security information，包括用户、组的身份以及权限。该 token 还包含一个用于唯一标识会话的 logon SID。
+### **系统与 ACL 的交互**
 
-Local Security Authority (LSASS) 会通过检查 DACL，查找与尝试访问的 security principal 匹配的 ACEs，来处理对对象的访问请求。如果没有找到相关 ACEs，则会立即授予访问权限。否则，LSASS 会将这些 ACEs 与 access token 中 security principal 的 SID 进行比对，以确定是否允许访问。<sup>[[1]](#references)</sup>
+每个用户会话都关联着一个访问令牌，其中包含与该会话相关的安全信息，包括用户、组身份和权限。此令牌还包含一个用于唯一标识会话的登录 SID。
 
-### **Summarized Process**
+Local Security Authority (LSASS) 通过检查 DACL 中与发起访问的安全主体匹配的 ACE 来处理对象访问请求。如果未找到相关 ACE，则立即授予访问权限。否则，LSASS 会将这些 ACE 与访问令牌中的安全主体 SID 进行比对，以确定是否允许访问。<sup>[[1]](#references)</sup>
 
-- **ACLs：** 通过 DACLs 定义访问权限，并通过 SACLs 定义审计规则。
-- **Access Token：** 包含会话的用户、组和权限信息。
-- **Access Decision：** 通过将 DACL ACEs 与 access token 进行比较来决定；SACLs 用于审计。<sup>[[1]](#references)</sup>
+### **流程总结**
 
-### ACEs
+- **ACL：** 通过 DACL 定义访问权限，通过 SACL 定义审计规则。
+- **访问令牌：** 包含会话的用户、组和权限信息。
+- **访问判定：** 通过将 DACL 中的 ACE 与访问令牌进行比对来完成；SACL 用于审计。<sup>[[1]](#references)</sup>
 
-Access Control Entries (ACEs) 主要有 **三种类型**：<sup>[[1]](#references)</sup>
+### ACE
 
-- **Access Denied ACE**：在 DACL 中，此 ACE 会明确拒绝指定用户或组对对象的访问。
-- **Access Allowed ACE**：在 DACL 中，此 ACE 会明确授予指定用户或组对对象的访问权限。
-- **System Audit ACE**：位于 System Access Control List (SACL) 中，此 ACE 负责在用户或组尝试访问对象时生成审计日志。它会记录访问是被允许还是被拒绝，以及访问的具体类型。
+**访问控制项 (ACE)** 主要有**三种类型**：<sup>[[1]](#references)</sup>
 
-每个 ACE 都包含 **四个关键组件**：<sup>[[1]](#references)</sup>
+- **拒绝访问 ACE**：此 ACE 会明确拒绝指定用户或组访问对象（位于 DACL 中）。
+- **允许访问 ACE**：此 ACE 会明确授予指定用户或组访问对象的权限（位于 DACL 中）。
+- **系统审计 ACE**：此 ACE 位于系统访问控制列表 (SACL) 中，负责在用户或组尝试访问对象时生成审计日志。它会记录访问是否获准或遭拒，以及访问的具体类型。
 
-1. 用户或组的 **Security Identifier (SID)**（或图形界面中显示的 principal name）。
-2. 用于标识 ACE 类型（access denied、allowed 或 system audit）的 **flag**。
-3. 用于确定子对象是否可以从其父对象继承该 ACE 的 **Inheritance flags**。
-4. 一个 [**access mask**](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/7a53f60e-e730-4dfe-bbe9-b21b62eb790b?redirectedfrom=MSDN)，即用于指定对象所授予权限的 32 位值。
+每个 ACE 都有**四个关键组成部分**：<sup>[[1]](#references)</sup>
 
-系统会依次检查每个 ACE，直到出现以下情况之一，从而确定访问权限：<sup>[[1]](#references)</sup>
+1. 用户或组的**安全标识符 (SID)**（或图形化表示中的主体名称）。
+2. 用于标识 ACE 类型（拒绝访问、允许访问或系统审计）的**标志**。
+3. 用于确定子对象能否从父对象继承该 ACE 的**继承标志**。
+4. [**访问掩码**](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/7a53f60e-e730-4dfe-bbe9-b21b62eb790b?redirectedfrom=MSDN)，一个指定对象所授予权限的 32 位值。
 
-- **Access-Denied ACE** 明确拒绝 access token 中所标识 trustee 的请求权限。
-- 一个或多个 **Access-Allowed ACE** 明确向 access token 中的 trustee 授予所有请求的权限。
-- 检查完所有 ACEs 后，如果任何请求的权限都**未被明确允许**，则访问会被隐式**拒绝**。
+访问判定会按顺序检查每个 ACE，直到出现以下情况之一：<sup>[[1]](#references)</sup>
 
-### Order of ACEs
+- **拒绝访问 ACE** 明确拒绝访问令牌中某个受信任主体所请求的权限。
+- **允许访问 ACE** 明确向访问令牌中的某个受信任主体授予所有请求的权限。
+- 检查完所有 ACE 后，如果任何请求的权限**未被明确允许**，则会隐式**拒绝**访问。
 
-将 **ACEs**（规定谁可以或不可以访问某项内容的规则）放入称为 **DACL** 的列表时，其排列顺序非常重要。这是因为系统根据这些规则授予或拒绝访问后，就会停止检查其余规则。<sup>[[1]](#references)</sup>
+### ACE 的顺序
 
-组织这些 ACEs 有一种最佳方式，称为 **"canonical order"**。这种方法有助于确保系统运行顺畅且规则结果符合预期。对于 **Windows 2000** 和 **Windows Server 2003** 等系统，顺序如下：
+**ACE**（规定谁可以或不可以访问某项内容的规则）在名为 **DACL** 的列表中的排列方式非常重要。这是因为系统根据这些规则授予或拒绝访问后，就会停止检查其余规则。<sup>[[1]](#references)</sup>
 
-- 首先，将所有**专门针对当前对象**的规则放在来自其他位置（例如父文件夹）的规则之前。
-- 在这些专用规则中，将表示**“否”（deny）**的规则放在表示**“是”（allow）**的规则之前。
-- 对于来自其他位置的规则，从**最近的来源**开始排列，例如先放父对象的规则，然后再向更远的来源排列。同样，将**“否”**放在**“是”**之前。
+ACE 有一种最佳排列方式，称为**“规范顺序”**。这种方法有助于确保一切顺利且公平地运行。以下是 **Windows 2000** 和 **Windows Server 2003** 等系统采用的顺序：
 
-这种排列方式有两个重要作用：
+- 首先，将所有**专门针对此对象**的规则放在来自其他位置（例如父文件夹）的规则之前。
+- 在这些专属规则中，将表示**“拒绝”**的规则放在表示**“允许”**的规则之前。
+- 对于来自其他位置的规则，先放置来自**最近源**（例如父对象）的规则，再依次向上排列。同样，将**“拒绝”**放在**“允许”**之前。
 
-- 确保只要存在特定的**“否”**规则，它就会被遵守，而不受其他**“是”**规则的影响。
-- 让对象所有者可以在父文件夹或更远位置的规则生效前，最终决定谁可以访问该对象。
+这种排列有两个重要作用：
 
-通过这种方式，文件或文件夹的所有者可以精确控制访问权限，确保正确的用户能够访问，而不应访问的用户无法访问。
+- 确保专属的**“拒绝”**规则能够生效，不受其他**“允许”**规则影响。
+- 让对象所有者能够在父文件夹或更上层的规则生效之前，**最后决定**谁可以访问。
 
-![NTFS access control entry ordering diagram](https://www.ntfs.com/images/screenshots/ACEs.gif)
+通过这种方式，文件或文件夹的所有者可以精确控制访问权限，确保正确的人可以访问，而不应访问的人无法访问。
 
-因此，**"canonical order"** 的核心就是确保访问规则清晰且有效：将特定规则放在前面，并以合理的方式组织所有规则。
+![NTFS 访问控制项排序示意图](https://www.ntfs.com/images/screenshots/ACEs.gif)
 
-### GUI Example
+因此，这种**“规范顺序”**旨在让访问规则清晰且有效：将专属规则放在前面，并以合理的方式组织所有规则。
 
-[**Example from here**](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)<sup>[[2]](#references)</sup>
+### GUI 示例
 
-这是文件夹的经典 security 选项卡，其中显示了 ACL、DACL 和 ACEs：
+[**此处的示例**](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)<sup>[[2]](#references)</sup>
+
+这是文件夹的经典安全选项卡，显示了 ACL、DACL 和 ACE：
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/classicsectab.jpg](../../images/classicsectab.jpg)
 
-如果点击 **Advanced button**，将看到更多选项，例如继承：
+点击**高级按钮**后，可以看到更多选项，例如继承：
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/aceinheritance.jpg](../../images/aceinheritance.jpg)
 
-如果添加或编辑 Security Principal：
+添加或编辑安全主体时：
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/editseprincipalpointers1.jpg](../../images/editseprincipalpointers1.jpg)
 
-最后，在 Auditing 选项卡中可以看到 SACL：
+最后，SACL 位于“审核”选项卡中：
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/audit-tab.jpg](../../images/audit-tab.jpg)
 
-### Explaining Access Control in a Simplified Manner
+### 以简单方式说明访问控制
 
-管理文件夹等资源的访问权限时，我们会使用称为 Access Control Lists (ACLs) 和 Access Control Entries (ACEs) 的列表和规则。这些内容定义了谁可以或不可以访问特定数据。<sup>[[1]](#references)</sup>
+管理文件夹等资源的访问权限时，我们会使用称为访问控制列表 (ACL) 和访问控制项 (ACE) 的列表和规则。这些内容用于定义谁可以或不可以访问特定数据。<sup>[[1]](#references)</sup>
 
-#### Denying Access to a Specific Group
+#### 拒绝特定组的访问
 
-假设有一个名为 Cost 的文件夹，并且希望所有人都能访问它，但 marketing 团队除外。通过正确设置规则，可以确保在允许其他所有人访问之前，先明确拒绝 marketing 团队的访问权限。具体做法是将拒绝 marketing 团队访问的规则放在允许所有人访问的规则之前。
+假设你有一个名为 Cost 的文件夹，希望除市场团队以外的所有人都能访问。通过正确设置规则，可以确保先明确拒绝市场团队的访问，再允许其他人访问。做法是将拒绝市场团队访问的规则放在允许所有人访问的规则之前。
 
-#### Allowing Access to a Specific Member of a Denied Group
+#### 允许被拒绝组中的特定成员访问
 
-假设 Bob 是 marketing director，虽然 marketing 团队通常不应访问 Cost 文件夹，但 Bob 需要访问权限。可以为 Bob 添加一条授予访问权限的特定规则（ACE），并将其放在拒绝 marketing 团队访问的规则之前。这样，即使 Bob 所属的团队受到一般性限制，他仍然可以访问。
+假设市场总监 Bob 需要访问 Cost 文件夹，尽管通常不允许市场团队访问。我们可以为 Bob 添加一条授予其访问权限的特定规则 (ACE)，并将其放在拒绝市场团队访问的规则之前。这样，即使其团队受到一般限制，Bob 仍然可以访问。
 
-#### Understanding Access Control Entries
+#### 了解访问控制项
 
-ACEs 是 ACL 中的单独规则。它们标识用户或组，指定允许或拒绝的访问权限，并确定这些规则如何应用于子项目（继承）。ACEs 主要有两种类型：
+ACE 是 ACL 中的单条规则。它们标识用户或组，指定允许或拒绝哪些访问权限，并决定这些规则如何应用于子项（继承）。ACE 主要有两种类型：
 
-- **Generic ACEs**：广泛适用，可以影响所有类型的对象，或仅区分容器（例如文件夹）和非容器（例如文件）。例如，一条允许用户查看文件夹内容、但不允许访问其中文件的规则。
-- **Object-Specific ACEs**：提供更精确的控制，允许针对特定类型的对象，甚至对象中的单个属性设置规则。例如，在用户目录中，可以允许用户更新自己的电话号码，但不允许其修改登录时间。
+- **通用 ACE**：适用于范围较广的情形，可以影响所有类型的对象，也可以仅区分容器（如文件夹）和非容器（如文件）。例如，某条规则允许用户查看文件夹内容，但不允许访问其中的文件。
+- **对象特定 ACE**：提供更精细的控制，允许针对特定类型的对象，甚至对象中的单个属性设置规则。例如，在用户目录中，某条规则可以允许用户更新自己的电话号码，但不允许更改登录时间。
 
-每个 ACE 都包含重要信息，例如规则适用的对象（通过 Security Identifier 或 SID 标识）、规则允许或拒绝的操作（通过 access mask 指定），以及该规则如何被其他对象继承。
+每个 ACE 都包含重要信息，例如规则适用对象（使用安全标识符或 SID）、规则允许或拒绝的操作（使用访问掩码），以及规则如何由其他对象继承。
 
-#### Key Differences Between ACE Types
+#### ACE 类型的主要区别
 
-- **Generic ACEs** 适用于简单的访问控制场景，即同一规则应用于对象的所有方面，或应用于容器中的所有对象。
-- **Object-Specific ACEs** 用于更复杂的场景，尤其是在 Active Directory 等环境中，需要针对对象的不同属性分别控制访问权限时。
+- **通用 ACE**适用于简单的访问控制场景，即同一条规则适用于对象的所有方面或容器中的所有对象。
+- **对象特定 ACE**适用于更复杂的场景，尤其是在 Active Directory 等环境中，你可能需要以不同方式控制对对象特定属性的访问。
 
-总而言之，ACLs 和 ACEs 有助于定义精确的访问控制，确保只有正确的个人或组可以访问敏感信息或资源，并且能够将访问权限细化到单个属性或对象类型的级别。
+总之，ACL 和 ACE 有助于定义精确的访问控制，确保只有正确的个人或组能够访问敏感信息或资源，并能将访问权限细化到单个属性或对象类型。
 
-### Access Control Entry Layout
+### 访问控制项布局
 
-| ACE Field   | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ACE 字段 | 描述 |
 | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Type        | 表示 ACE 类型的 flag。Windows 2000 和 Windows Server 2003 支持六种 ACE 类型：附加到所有可保护对象的三种通用 ACE 类型，以及适用于 Active Directory 对象的三种对象特定 ACE 类型。                                                                                                                                                                                                                                                            |
-| Flags       | 用于控制继承和审计的一组 bit flags。                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| Size        | 为 ACE 分配的内存字节数。                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| Access mask | 其各 bit 对应对象访问权限的 32 位值。Bit 可以设置为开启或关闭，但其具体含义取决于 ACE 类型。例如，如果对应读取权限的 bit 被开启，且 ACE 类型为 Deny，则该 ACE 会拒绝读取对象权限的权利。如果同一个 bit 被开启，但 ACE 类型为 Allow，则该 ACE 会授予读取对象权限的权利。Access mask 的更多详细信息见下表。 |
-| SID         | 标识其访问权限由此 ACE 控制或监控的用户或组。                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| 类型 | 用于指示 ACE 类型的标志。Windows 2000 和 Windows Server 2003 支持六种 ACE 类型：三种可应用于所有可设安全对象的通用 ACE 类型，以及三种可用于 Active Directory 对象的对象特定 ACE 类型。 |
+| 标志 | 用于控制继承和审计的一组位标志。 |
+| 大小 | 为 ACE 分配的内存字节数。 |
+| 访问掩码 | 一个 32 位值，其各位对应对象的访问权限。位可以设为开或关，但其含义取决于 ACE 类型。例如，如果表示读取权限的位已开启，且 ACE 类型为 Deny，则该 ACE 会拒绝读取对象权限的权利。如果同一位已开启，但 ACE 类型为 Allow，则该 ACE 会授予读取对象权限的权利。访问掩码的更多详情见下表。 |
+| SID | 标识受此 ACE 控制或监视访问权限的用户或组。 |
 
-### Access Mask Layout
+### 访问掩码布局
 
-| Bit (Range) | Meaning                            | Description/Example                       |
+| 位（范围） | 含义 | 描述/示例 |
 | ----------- | ---------------------------------- | ----------------------------------------- |
-| 0 - 15      | 对象特定访问权限      | 读取数据、执行、追加数据           |
-| 16 - 22     | 标准访问权限             | 删除、写入 ACL、写入所有者            |
-| 23          | 可以访问 security ACL            |                                           |
-| 24 - 27     | 保留                           |                                           |
-| 28          | Generic ALL（读取、写入、执行） | 以下所有权限                          |
-| 29          | Generic Execute                    | 执行程序所需的所有操作 |
-| 30          | Generic Write                      | 写入文件所需的所有操作   |
-| 31          | Generic Read                       | 读取文件所需的所有操作       |
+| 0 - 15 | 对象特定访问权限 | 读取数据、执行、追加数据 |
+| 16 - 22 | 标准访问权限 | 删除、写入 ACL、写入所有者 |
+| 23 | 可以访问安全 ACL | |
+| 24 - 27 | 保留 | |
+| 28 | 通用 ALL（读取、写入、执行） | 包括以下所有内容 |
+| 29 | 通用执行 | 执行程序所需的所有权限 |
+| 30 | 通用写入 | 写入文件所需的所有权限 |
+| 31 | 通用读取 | 读取文件所需的所有权限 |
 
 ## References
 
-- [1] [How the System Uses ACLs - NTFS.com](https://www.ntfs.com/ntfs-permissions-acl-use.htm)
-- [2] [ACL, DACL, SACL and the ACE - secureidentity.se](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)
-
+- [1] [系统如何使用 ACL - NTFS.com](https://www.ntfs.com/ntfs-permissions-acl-use.htm)
+- [2] [ACL、DACL、SACL 和 ACE - secureidentity.se](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)
 {{#include ../../banners/hacktricks-training.md}}
