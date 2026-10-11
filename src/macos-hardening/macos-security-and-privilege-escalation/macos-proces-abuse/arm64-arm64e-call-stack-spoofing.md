@@ -43,7 +43,7 @@ When an address came from a saved LR, lookup may use `PC-1` so that an address i
 
 A parser must bounds-check every header and array, require section version `1`, account for the final first-level sentinel, reject a zero second-level-page offset, and distinguish regular from compressed pages. In a regular page, `entryPageOffset` is relative to the start of that page, whereas the first-level page offset is relative to the start of `__unwind_info`.<sup>[[1]](#references)[[2]](#references)</sup>
 
-The broad mode is `encoding & 0x0F000000`. Current LLVM definitions include the following modes; a parser should not treat every non-DWARF value as a classic frame:<sup>[[2]](#references)</sup>
+The broad mode is `encoding & 0x0F000000`. Current LLVM definitions include the following modes; a parser should not treat every non-DWARF value as a classic frame:<sup>[[1]](#references)[[2]](#references)</sup>
 
 | Mode | Value | Caller recovery |
 | --- | --- | --- |
