@@ -63,7 +63,7 @@ if not dest.is_relative_to(base):
     raise ValueError("extraction root escapes its base")
 ```
 
-For a safe test, upload a valid archive containing one canary file and place traversal sequences in each field that may select its extraction directory. Monitor both the intended directory and a disposable outside path. If the destination can reach an imported module, overwriting it can become code execution when workers reload; an HTTP 500 or connection reset during that reload does not prove that the write failed.<sup>[[14]](#references)[[15]](#references)</sup> See also the broader [file upload methodology](../pentesting-web/file-upload/README.md).
+For a safe test, upload a valid archive containing one canary file and place traversal sequences in each field that may select its extraction directory. Monitor both the intended directory and a disposable outside path. If the destination can reach an imported module, overwriting it can become code execution when workers reload; an HTTP 500 or connection reset during that reload does not prove that the write failed.<sup>[[14]](#references)[[15]](#references)</sup> See also the broader [file upload methodology](../pentesting-web/file-upload/).
 
 ## Advanced Archive-Breakout Primitives
 
