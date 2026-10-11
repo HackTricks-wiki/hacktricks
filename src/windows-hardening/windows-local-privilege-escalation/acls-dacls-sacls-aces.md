@@ -4,73 +4,75 @@
 
 ## **Access Control List (ACL)**
 
-Access Control List (ACL), Access Control Entries (ACEs) का एक क्रमबद्ध समूह होता है, जो किसी object और उसकी properties के लिए protections निर्धारित करता है। मूल रूप से, ACL यह निर्धारित करता है कि दिए गए object पर कौन-सी actions, किन security principals (users या groups) द्वारा अनुमत या अस्वीकृत हैं।
+Access Control List (ACL), Access Control Entries (ACEs) का एक क्रमबद्ध समूह होता है, जो किसी ऑब्जेक्ट और उसकी प्रॉपर्टीज़ की सुरक्षा निर्धारित करता है। मूल रूप से, ACL यह तय करता है कि कौन-से security principals (users या groups) किसी ऑब्जेक्ट पर कौन-सी कार्रवाइयाँ कर सकते हैं या नहीं कर सकते।
 
 ACLs दो प्रकार के होते हैं:
 
-- **Discretionary Access Control List (DACL):** यह निर्दिष्ट करता है कि किन users और groups को किसी object तक access प्राप्त है या नहीं है।
-- **System Access Control List (SACL):** यह किसी object तक access attempts की auditing को नियंत्रित करता है।
+- **Discretionary Access Control List (DACL):** यह तय करता है कि किन users और groups को किसी ऑब्जेक्ट का access है या नहीं है।
+- **System Access Control List (SACL):** यह किसी ऑब्जेक्ट पर access attempts की auditing को नियंत्रित करता है।
 
-किसी file तक access करने की प्रक्रिया में system, object के security descriptor को user के access token के विरुद्ध जांचता है ताकि यह निर्धारित किया जा सके कि access दिया जाना चाहिए या नहीं और उस access की सीमा क्या होगी। यह निर्णय ACEs के आधार पर किया जाता है।<sup>[[1]](#references)</sup>
+किसी file को access करते समय, system यह तय करने के लिए ऑब्जेक्ट के security descriptor की तुलना user के access token से करता है कि access दिया जाना चाहिए या नहीं, और ACEs के आधार पर access का स्तर क्या होना चाहिए।<sup>[[1]](#references)</sup>
+
+जब parent directory Full Control देती है, लेकिन child file पढ़ने से रोकती है, तो **child file** के effective DACL, owner और inheritance को अलग-अलग जाँचें। उस file का DACL बदलने के लिए file पर `WRITE_DAC` या लागू owner right की आवश्यकता होती है; [Microsoft `WRITE_DAC` को परिभाषित करता है](https://learn.microsoft.com/en-us/windows/win32/secauthz/standard-access-rights) और [owner के implicit access का दस्तावेज़ देता है](https://learn.microsoft.com/en-us/windows/win32/secauthz/owner-of-a-new-object)। केवल parent directory की permissions से यह साबित नहीं होता कि child file पढ़ी जा सकती है या उसका DACL बदला जा सकता है।
 
 ### **Key Components**
 
-- **DACL:** इसमें किसी object के लिए users और groups को access permissions देने या अस्वीकार करने वाले ACEs होते हैं। मूल रूप से, यह मुख्य ACL है जो access rights निर्धारित करता है।
-- **SACL:** इसका उपयोग objects तक access की auditing के लिए किया जाता है, जिसमें ACEs यह निर्धारित करते हैं कि Security Event Log में किस प्रकार के access को log किया जाएगा। यह unauthorized access attempts का पता लगाने या access issues की troubleshooting में अत्यंत उपयोगी हो सकता है।<sup>[[1]](#references)</sup>
+- **DACL:** इसमें ACEs होते हैं, जो किसी ऑब्जेक्ट के लिए users और groups को access permissions देते या रोकते हैं। मूल रूप से, यह मुख्य ACL है जो access rights निर्धारित करता है।
+- **SACL:** इसका उपयोग ऑब्जेक्ट्स के access की auditing के लिए होता है। इसमें ACEs उन access के प्रकार तय करते हैं जिन्हें Security Event Log में दर्ज किया जाना है। अनधिकृत access attempts का पता लगाने या access की समस्याओं का निवारण करने में यह उपयोगी हो सकता है।<sup>[[1]](#references)</sup>
 
 ### **System Interaction with ACLs**
 
-प्रत्येक user session एक access token से जुड़ा होता है, जिसमें उस session से संबंधित security information शामिल होती है, जैसे user और group identities तथा privileges। इस token में एक logon SID भी शामिल होता है, जो session की विशिष्ट पहचान करता है।
+हर user session एक access token से जुड़ा होता है, जिसमें उस session से जुड़ी security जानकारी होती है, जैसे user और group identities तथा privileges। इस token में एक logon SID भी होता है, जो session की विशिष्ट पहचान करता है।
 
-Local Security Authority (LSASS), objects के access requests को process करते समय DACL में ऐसे ACEs खोजता है जो access का प्रयास करने वाले security principal से match करते हों। यदि कोई relevant ACE नहीं मिलता, तो access तुरंत grant कर दिया जाता है। अन्यथा, LSASS access token में मौजूद security principal के SID के विरुद्ध ACEs की तुलना करके यह निर्धारित करता है कि access दिया जा सकता है या नहीं।<sup>[[1]](#references)</sup>
+Local Security Authority (LSASS) किसी ऑब्जेक्ट पर access requests को process करते समय DACL में ऐसे ACEs खोजता है जो access का प्रयास कर रहे security principal से मेल खाते हों। यदि कोई संबंधित ACE नहीं मिलता, तो access तुरंत दे दिया जाता है। अन्यथा, LSASS access token में मौजूद security principal के SID के साथ ACEs की तुलना करके तय करता है कि access दिया जा सकता है या नहीं।<sup>[[1]](#references)</sup>
 
 ### **Summarized Process**
 
-- **ACLs:** DACLs के माध्यम से access permissions और SACLs के माध्यम से audit rules निर्धारित करते हैं।
-- **Access Token:** इसमें किसी session के लिए user, group और privilege information होती है।
-- **Access Decision:** यह DACL ACEs की access token के साथ तुलना करके लिया जाता है; SACLs का उपयोग auditing के लिए किया जाता है।<sup>[[1]](#references)</sup>
+- **ACLs:** DACLs के ज़रिए access permissions और SACLs के ज़रिए audit rules तय करते हैं।
+- **Access Token:** इसमें session के user, group और privilege की जानकारी होती है।
+- **Access Decision:** DACL ACEs की तुलना access token से करके लिया जाता है; SACLs का उपयोग auditing के लिए होता है।<sup>[[1]](#references)</sup>
 
 ### ACEs
 
-Access Control Entries (ACEs) के **तीन मुख्य प्रकार** होते हैं:<sup>[[1]](#references)</sup>
+Access Control Entries (ACEs) के **तीन मुख्य प्रकार** हैं:<sup>[[1]](#references)</sup>
 
-- **Access Denied ACE**: यह ACE किसी object के लिए निर्दिष्ट users या groups को access स्पष्ट रूप से अस्वीकार करता है (DACL में)।
-- **Access Allowed ACE**: यह ACE किसी object के लिए निर्दिष्ट users या groups को access स्पष्ट रूप से grant करता है (DACL में)।
-- **System Audit ACE**: System Access Control List (SACL) में स्थित यह ACE, users या groups द्वारा किसी object तक access attempts के दौरान audit logs generate करने के लिए जिम्मेदार होता है। यह record करता है कि access allowed था या denied और access का प्रकार क्या था।
+- **Access Denied ACE**: यह ACE किसी DACL में बताए गए users या groups को किसी ऑब्जेक्ट का access स्पष्ट रूप से रोकता है।
+- **Access Allowed ACE**: यह ACE किसी DACL में बताए गए users या groups को किसी ऑब्जेक्ट का access स्पष्ट रूप से देता है।
+- **System Audit ACE**: System Access Control List (SACL) में मौजूद यह ACE, users या groups द्वारा किसी ऑब्जेक्ट को access करने के प्रयास पर audit logs बनाता है। यह दर्ज करता है कि access दिया गया या रोका गया, और access का प्रकार क्या था।
 
-प्रत्येक ACE के **चार महत्वपूर्ण components** होते हैं:<sup>[[1]](#references)</sup>
+हर ACE के **चार महत्वपूर्ण घटक** होते हैं:<sup>[[1]](#references)</sup>
 
 1. User या group का **Security Identifier (SID)** (या graphical representation में उनका principal name)।
-2. एक **flag**, जो ACE के type (access denied, allowed या system audit) की पहचान करता है।
-3. **Inheritance flags**, जो यह निर्धारित करते हैं कि child objects अपने parent से ACE inherit कर सकते हैं या नहीं।
-4. एक [**access mask**](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/7a53f60e-e730-4dfe-bbe9-b21b62eb790b?redirectedfrom=MSDN), जो 32-bit value होती है और object के granted rights को निर्दिष्ट करती है।
+2. एक **flag**, जो ACE का प्रकार बताता है (access denied, allowed या system audit)।
+3. **Inheritance flags**, जो तय करते हैं कि child objects अपने parent से ACE inherit कर सकते हैं या नहीं।
+4. एक [**access mask**](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/7a53f60e-e730-4dfe-bbe9-b21b62eb790b?redirectedfrom=MSDN), जो 32-bit value है और ऑब्जेक्ट को दिए गए rights बताती है।
 
-Access determination प्रत्येक ACE की क्रमिक जांच करके तब तक की जाती है जब तक:<sup>[[1]](#references)</sup>
+Access का निर्णय हर ACE को क्रम से जाँचकर तब तक किया जाता है, जब तक:<sup>[[1]](#references)</sup>
 
-- कोई **Access-Denied ACE**, access token में पहचाने गए trustee को requested rights स्पष्ट रूप से deny न कर दे।
-- कोई **Access-Allowed ACE(s)** access token में मौजूद trustee को सभी requested rights स्पष्ट रूप से grant न कर दे।
-- सभी ACEs की जांच के बाद, यदि किसी requested right को स्पष्ट रूप से allow नहीं किया गया है, तो access implicitly **denied** होता है।
+- कोई **Access-Denied ACE**, access token में पहचाने गए trustee के अनुरोधित rights को स्पष्ट रूप से रोक न दे।
+- **Access-Allowed ACE(s)**, access token में मौजूद trustee को सभी अनुरोधित rights स्पष्ट रूप से न दे दें।
+- सभी ACEs की जाँच के बाद, यदि कोई अनुरोधित right **स्पष्ट रूप से allow नहीं किया गया है**, तो access को अप्रत्यक्ष रूप से **deny** कर दिया जाता है।
 
 ### Order of ACEs
 
-**ACEs** (वे rules जो बताते हैं कि कौन किसी चीज तक access कर सकता है या नहीं) को **DACL** नामक list में किस क्रम में रखा जाता है, यह बहुत महत्वपूर्ण है। ऐसा इसलिए है क्योंकि system इन rules के आधार पर access grant या deny करने के बाद बाकी rules की जांच करना बंद कर देता है।<sup>[[1]](#references)</sup>
+**ACEs** (वे rules जो बताते हैं कि कौन किसी चीज़ को access कर सकता है या नहीं) को **DACL** नाम की list में किस क्रम में रखा गया है, यह बहुत महत्वपूर्ण है। ऐसा इसलिए है क्योंकि system इन rules के आधार पर access देने या रोकने के बाद बाकी rules को जाँचना बंद कर देता है।<sup>[[1]](#references)</sup>
 
-इन ACEs को व्यवस्थित करने का एक सर्वोत्तम तरीका है, जिसे **"canonical order"** कहा जाता है। यह method सुनिश्चित करता है कि सब कुछ सुचारु और उचित तरीके से काम करे। **Windows 2000** और **Windows Server 2003** जैसे systems में इसका क्रम इस प्रकार है:
+इन ACEs को व्यवस्थित करने का एक बेहतर तरीका है, जिसे **"canonical order"** कहते हैं। इससे यह सुनिश्चित करने में मदद मिलती है कि सब कुछ सुचारू और निष्पक्ष रूप से काम करे। **Windows 2000** और **Windows Server 2003** जैसे systems में यह क्रम इस तरह है:
 
-- सबसे पहले, इस item के लिए **specifically** बनाए गए सभी rules को उन rules से पहले रखें जो किसी अन्य स्थान, जैसे parent folder, से आए हैं।
-- इन specific rules में, **"no" (deny)** कहने वाले rules को **"yes" (allow)** कहने वाले rules से पहले रखें।
-- किसी अन्य स्थान से आए rules में, सबसे **closest source**, जैसे parent, से आए rules को पहले रखें और फिर क्रमशः पीछे के sources पर जाएं। यहां भी **"no"** को **"yes"** से पहले रखें।
+- पहले उन सभी rules को रखें जो **खास तौर पर इसी item के लिए** बनाए गए हैं। इसके बाद parent folder जैसी दूसरी जगह से inherited rules रखें।
+- इन specific rules में, **"नहीं" (deny)** कहने वाले rules को **"हाँ" (allow)** कहने वाले rules से पहले रखें।
+- दूसरी जगह से inherited rules में, **सबसे नज़दीकी source**—जैसे parent—के rules पहले रखें, फिर उससे दूर के sources के rules। यहाँ भी **"नहीं"** कहने वाले rules को **"हाँ"** कहने वाले rules से पहले रखें।
 
-यह setup दो महत्वपूर्ण तरीकों से सहायता करता है:
+इस व्यवस्था के दो बड़े फायदे हैं:
 
-- यह सुनिश्चित करता है कि यदि कोई specific **"no"** मौजूद है, तो अन्य **"yes"** rules होने पर भी उसका पालन किया जाए।
-- यह item के owner को यह तय करने का **अंतिम अधिकार** देता है कि किसे access मिले, इससे पहले कि parent folders या उससे पीछे के rules लागू हों।
+- यह सुनिश्चित करती है कि कोई specific **"नहीं"** लागू हो, चाहे दूसरे **"हाँ"** वाले rules कुछ भी कहते हों।
+- इससे item का owner, parent folders या अन्य sources के rules लागू होने से पहले, यह तय कर सकता है कि किसे access मिले।
 
-इस तरीके से, किसी file या folder का owner यह सटीक रूप से निर्धारित कर सकता है कि किसे access मिलेगा, ताकि सही लोग access कर सकें और गलत लोग नहीं।
+इस तरह, किसी file या folder का owner यह बारीकी से तय कर सकता है कि किसे access मिले, ताकि सही लोग अंदर आ सकें और बाकी नहीं।
 
-![NTFS access control entry ordering diagram](https://www.ntfs.com/images/screenshots/ACEs.gif)
+![NTFS access control entry क्रम का diagram](https://www.ntfs.com/images/screenshots/ACEs.gif)
 
-इसलिए, यह **"canonical order"** यह सुनिश्चित करने के बारे में है कि access rules स्पष्ट और प्रभावी हों, specific rules को पहले रखकर और बाकी सभी rules को एक सुव्यवस्थित तरीके से व्यवस्थित करके।
+इसलिए, **"canonical order"** का उद्देश्य यह है कि access rules स्पष्ट और प्रभावी रहें—specific rules को पहले रखा जाए और बाकी को सही क्रम में व्यवस्थित किया जाए।
 
 ### GUI Example
 
@@ -80,72 +82,71 @@ Access determination प्रत्येक ACE की क्रमिक ज�
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/classicsectab.jpg](../../images/classicsectab.jpg)
 
-यदि हम **Advanced button** पर click करते हैं, तो हमें inheritance जैसे अधिक options मिलेंगे:
+अगर हम **Advanced button** पर click करें, तो inheritance जैसे और options दिखाई देंगे:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/aceinheritance.jpg](../../images/aceinheritance.jpg)
 
-और यदि आप कोई Security Principal add या edit करते हैं:
+और अगर आप कोई Security Principal जोड़ें या edit करें:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/editseprincipalpointers1.jpg](../../images/editseprincipalpointers1.jpg)
 
-अंत में, Auditing tab में SACL मौजूद होता है:
+अंत में, Auditing tab में SACL होता है:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/audit-tab.jpg](../../images/audit-tab.jpg)
 
-### Explaining Access Control in a Simplified Manner
+### Access Control को सरल तरीके से समझना
 
-जब हम किसी folder जैसे resource तक access manage करते हैं, तो हम Access Control Lists (ACLs) और Access Control Entries (ACEs) नामक lists और rules का उपयोग करते हैं। ये निर्धारित करते हैं कि कौन-सा user किसी data तक access कर सकता है और कौन नहीं।<sup>[[1]](#references)</sup>
+Folder जैसे resources का access नियंत्रित करने के लिए, हम Access Control Lists (ACLs) और Access Control Entries (ACEs) नाम की lists और rules का उपयोग करते हैं। ये तय करते हैं कि कौन किसी खास data को access कर सकता है या नहीं।<sup>[[1]](#references)</sup>
 
-#### Denying Access to a Specific Group
+#### किसी खास Group का Access रोकना
 
-मान लीजिए आपके पास Cost नाम का एक folder है और आप marketing team को छोड़कर सभी को उसका access देना चाहते हैं। Rules को सही तरीके से set up करके हम यह सुनिश्चित कर सकते हैं कि marketing team को access स्पष्ट रूप से deny किया जाए और उसके बाद बाकी सभी को access allow किया जाए। इसके लिए marketing team को access deny करने वाले rule को सभी को access allow करने वाले rule से पहले रखना होगा।
+मान लें कि आपके पास Cost नाम का एक folder है और आप चाहते हैं कि marketing team को छोड़कर बाकी सभी लोग इसे access कर सकें। Rules को सही तरीके से सेट करके, हम यह सुनिश्चित कर सकते हैं कि बाकी सभी को access देने से पहले marketing team का access स्पष्ट रूप से रोका जाए। इसके लिए marketing team का access रोकने वाला rule, सभी को access देने वाले rule से पहले रखा जाता है।
 
-#### Allowing Access to a Specific Member of a Denied Group
+#### Denied Group के किसी खास Member को Access देना
 
-मान लीजिए Bob, जो marketing director है, को Cost folder का access चाहिए, जबकि सामान्य रूप से marketing team को access नहीं मिलना चाहिए। हम Bob के लिए एक specific rule (ACE) add कर सकते हैं, जो उसे access grant करे, और इसे marketing team को access deny करने वाले rule से पहले रख सकते हैं। इस तरह, अपनी team पर लागू सामान्य restriction के बावजूद Bob को access मिल जाएगा।
+मान लें कि marketing director Bob को Cost folder का access चाहिए, जबकि marketing team को आम तौर पर access नहीं मिलना चाहिए। हम Bob के लिए एक specific rule (ACE) जोड़ सकते हैं, जो उसे access देता है, और उसे marketing team का access रोकने वाले rule से पहले रख सकते हैं। इस तरह, अपनी team पर लागू सामान्य रोक के बावजूद Bob को access मिल जाता है।
 
-#### Understanding Access Control Entries
+#### Access Control Entries को समझना
 
-ACEs, ACL में मौजूद individual rules होते हैं। ये users या groups की पहचान करते हैं, यह निर्दिष्ट करते हैं कि कौन-सा access allowed या denied है, और यह निर्धारित करते हैं कि ये rules sub-items पर किस प्रकार लागू होंगे (inheritance)। ACEs के दो मुख्य प्रकार होते हैं:
+ACEs, ACL में मौजूद अलग-अलग rules होते हैं। ये users या groups की पहचान करते हैं, बताते हैं कि कौन-सा access दिया या रोका गया है, और तय करते हैं कि ये rules sub-items पर कैसे लागू होंगे (inheritance)। ACEs के दो मुख्य प्रकार हैं:
 
-- **Generic ACEs**: ये व्यापक रूप से लागू होते हैं और या तो सभी प्रकार के objects को प्रभावित करते हैं या केवल containers (जैसे folders) और non-containers (जैसे files) के बीच अंतर करते हैं। उदाहरण के लिए, ऐसा rule जो users को folder के contents देखने की अनुमति देता है, लेकिन उसके अंदर मौजूद files तक access की अनुमति नहीं देता।
-- **Object-Specific ACEs**: ये अधिक सटीक control प्रदान करते हैं और specific types of objects या object के अंदर individual properties के लिए rules set करने की अनुमति देते हैं। उदाहरण के लिए, users की directory में कोई rule किसी user को अपना phone number update करने की अनुमति दे सकता है, लेकिन login hours को नहीं।
+- **Generic ACEs**: ये व्यापक रूप से लागू होते हैं—या तो सभी प्रकार के objects पर, या सिर्फ containers (जैसे folders) और non-containers (जैसे files) के बीच अंतर करके। उदाहरण के लिए, कोई rule users को folder की contents देखने दे सकता है, लेकिन उसके अंदर की files access करने की अनुमति नहीं देता।
+- **Object-Specific ACEs**: ये अधिक सटीक नियंत्रण देते हैं। इनके ज़रिए खास प्रकार के objects या किसी object की अलग-अलग properties के लिए rules सेट किए जा सकते हैं। उदाहरण के लिए, users की directory में कोई rule user को अपना phone number update करने दे सकता है, लेकिन login hours बदलने की अनुमति नहीं देता।
 
-प्रत्येक ACE में महत्वपूर्ण information होती है, जैसे rule किस पर लागू होता है (Security Identifier या SID का उपयोग करके), rule क्या allow या deny करता है (access mask का उपयोग करके), और यह अन्य objects द्वारा किस प्रकार inherit किया जाएगा।
+हर ACE में महत्वपूर्ण जानकारी होती है, जैसे कि rule किस पर लागू होता है (Security Identifier या SID से), rule क्या allow या deny करता है (access mask से), और दूसरे objects इसे कैसे inherit करते हैं।
 
-#### Key Differences Between ACE Types
+#### ACE Types के बीच मुख्य अंतर
 
-- **Generic ACEs** सरल access control scenarios के लिए उपयुक्त होते हैं, जहां एक ही rule किसी object के सभी aspects या किसी container के अंदर मौजूद सभी objects पर लागू होता है।
-- **Object-Specific ACEs** अधिक complex scenarios के लिए उपयोग किए जाते हैं, विशेष रूप से Active Directory जैसे environments में, जहां किसी object की specific properties के लिए अलग-अलग access control की आवश्यकता हो सकती है।
+- **Generic ACEs** सरल access control scenarios के लिए उपयुक्त हैं, जहाँ एक ही rule किसी object के सभी पहलुओं या container के सभी objects पर लागू होता है।
+- **Object-Specific ACEs** अधिक जटिल scenarios के लिए इस्तेमाल होते हैं—खासकर Active Directory जैसे environments में, जहाँ किसी object की विशिष्ट properties का access अलग-अलग नियंत्रित करना पड़ सकता है।
 
-संक्षेप में, ACLs और ACEs सटीक access controls निर्धारित करने में सहायता करते हैं, जिससे यह सुनिश्चित होता है कि केवल सही individuals या groups को sensitive information या resources तक access मिले। साथ ही, access rights को individual properties या object types के स्तर तक customize किया जा सकता है।
+संक्षेप में, ACLs और ACEs सटीक access controls तय करने में मदद करते हैं। इससे यह सुनिश्चित होता है कि केवल सही व्यक्तियों या groups को संवेदनशील जानकारी या resources का access मिले। साथ ही, access rights को individual properties या object types के स्तर तक तय किया जा सकता है।
 
 ### Access Control Entry Layout
 
 | ACE Field   | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Type        | ACE के type को दर्शाने वाला flag। Windows 2000 और Windows Server 2003 छह प्रकार के ACE support करते हैं: तीन generic ACE types, जो सभी securable objects से जुड़े होते हैं। तीन object-specific ACE types, जो Active Directory objects के लिए मौजूद हो सकते हैं।                                                                                                                                                                                                                                                            |
-| Flags       | Bit flags का set, जो inheritance और auditing को control करता है।                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Type        | ACE का प्रकार बताने वाला flag। Windows 2000 और Windows Server 2003, ACE के छह प्रकारों को support करते हैं: तीन generic ACE types, जो सभी securable objects से जुड़े होते हैं; और तीन object-specific ACE types, जो Active Directory objects के लिए हो सकते हैं।                                                                                                                                                                                                                                                            |
+| Flags       | Bit flags का ऐसा समूह जो inheritance और auditing को नियंत्रित करता है।                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | Size        | ACE के लिए allocate की गई memory के bytes की संख्या।                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| Access mask | 32-bit value, जिसके bits object के access rights से संबंधित होते हैं। Bits को on या off set किया जा सकता है, लेकिन setting का अर्थ ACE type पर निर्भर करता है। उदाहरण के लिए, यदि read permissions right से संबंधित bit on है और ACE type Deny है, तो ACE object की permissions पढ़ने के अधिकार को deny करता है। यदि वही bit set है लेकिन ACE type Allow है, तो ACE object की permissions पढ़ने का अधिकार grant करता है। Access mask की अधिक details अगली table में दी गई हैं। |
-| SID         | उस user या group की पहचान करता है, जिसका access इस ACE द्वारा controlled या monitored किया जाता है।                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Access mask | 32-bit value, जिसके bits ऑब्जेक्ट के access rights से जुड़े होते हैं। Bits को on या off किया जा सकता है, लेकिन setting का अर्थ ACE के प्रकार पर निर्भर करता है। उदाहरण के लिए, यदि permissions पढ़ने के right से जुड़ा bit on है और ACE का प्रकार Deny है, तो ACE ऑब्जेक्ट की permissions पढ़ने का right रोकता है। यदि वही bit on हो और ACE का प्रकार Allow हो, तो ACE ऑब्जेक्ट की permissions पढ़ने का right देता है। Access mask की अधिक जानकारी अगली table में है। |
+| SID         | उस user या group की पहचान करता है, जिसका access इस ACE द्वारा नियंत्रित या monitor किया जाता है।                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 ### Access Mask Layout
 
 | Bit (Range) | Meaning                            | Description/Example                       |
 | ----------- | ---------------------------------- | ----------------------------------------- |
-| 0 - 15      | Object Specific Access Rights      | Data read करना, Execute करना, Data append करना |
+| 0 - 15      | Object Specific Access Rights      | Data पढ़ना, Execute, Data जोड़ना           |
 | 16 - 22     | Standard Access Rights             | Delete, Write ACL, Write Owner            |
-| 23          | Can access security ACL            |                                           |
+| 23          | Security ACL को access कर सकता है  |                                           |
 | 24 - 27     | Reserved                           |                                           |
-| 28          | Generic ALL (Read, Write, Execute) | नीचे दिए गए सभी rights                   |
-| 29          | Generic Execute                    | किसी program को execute करने के लिए आवश्यक सभी actions |
-| 30          | Generic Write                      | किसी file में write करने के लिए आवश्यक सभी actions   |
-| 31          | Generic Read                       | किसी file को read करने के लिए आवश्यक सभी actions       |
+| 28          | Generic ALL (Read, Write, Execute) | नीचे दी गई सभी चीज़ें                      |
+| 29          | Generic Execute                    | Program execute करने के लिए आवश्यक सभी चीज़ें |
+| 30          | Generic Write                      | File में लिखने के लिए आवश्यक सभी चीज़ें   |
+| 31          | Generic Read                       | File पढ़ने के लिए आवश्यक सभी चीज़ें       |
 
 ## References
 
-- [1] [How the System Uses ACLs - NTFS.com](https://www.ntfs.com/ntfs-permissions-acl-use.htm)
-- [2] [ACL, DACL, SACL and the ACE - secureidentity.se](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)
-
+- [1] [System ACLs का उपयोग कैसे करता है - NTFS.com](https://www.ntfs.com/ntfs-permissions-acl-use.htm)
+- [2] [ACL, DACL, SACL और ACE - secureidentity.se](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)
 {{#include ../../banners/hacktricks-training.md}}

