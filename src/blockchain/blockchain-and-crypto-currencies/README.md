@@ -4,70 +4,70 @@
 
 ## Dhana za Msingi
 
-- **Smart Contracts** hufafanuliwa kama programu zinazotekelezwa kwenye blockchain masharti fulani yanapotimizwa, na hivyo kuendesha utekelezaji wa makubaliano bila wapatanishi.
-- **Decentralized Applications (dApps)** hujengwa kwa kutumia smart contracts, zikiwa na kiolesura cha mbele kinachorahisisha matumizi na sehemu ya nyuma iliyo wazi na inayoweza kukaguliwa.
-- **Tokens na Coins** hutofautiana kwa kuwa coins hutumika kama pesa za kidijitali, huku tokens zikiwakilisha thamani au umiliki katika miktadha mahususi.
+- **Smart Contracts** hufafanuliwa kama programu zinazotekelezwa kwenye blockchain masharti fulani yanapotimizwa, na kuendesha utekelezaji wa makubaliano bila waamuzi.
+- **Decentralized Applications (dApps)** hujengwa juu ya smart contracts, zikiwa na kiolesura cha mbele kinachofaa watumiaji na sehemu ya nyuma iliyo wazi na inayoweza kukaguliwa.
+- **Tokens & Coins** hutofautiana kwa kuwa coins hutumika kama pesa za kidijitali, ilhali tokens huwakilisha thamani au umiliki katika miktadha maalum.
   - **Utility Tokens** hutoa ufikiaji wa huduma, na **Security Tokens** huashiria umiliki wa mali.
-- **DeFi** humaanisha Decentralized Finance, inayotoa huduma za kifedha bila mamlaka kuu.
-- **DEX** na **DAOs** humaanisha mifumo ya kubadilishana iliyogatuliwa na mashirika huru yaliyogatuliwa, mtawalia.
+- **DeFi** ni kifupi cha Decentralized Finance, inayotoa huduma za kifedha bila mamlaka kuu.
+- **DEX** na **DAOs** humaanisha Decentralized Exchange Platforms na Decentralized Autonomous Organizations, mtawalia.
 
 ## Mbinu za Makubaliano
 
-Mbinu za makubaliano huhakikisha uthibitishaji salama wa miamala unaokubaliwa kwenye blockchain:
+Mbinu za makubaliano huhakikisha miamala inathibitishwa kwa usalama na kwa makubaliano kwenye blockchain:
 
-- **Proof of Work (PoW)** hutegemea uwezo wa kompyuta kuthibitisha miamala.
+- **Proof of Work (PoW)** hutegemea nguvu ya kompyuta kuthibitisha miamala.
 - **Proof of Stake (PoS)** huhitaji wathibitishaji kumiliki kiasi fulani cha tokens, na hivyo kupunguza matumizi ya nishati ikilinganishwa na PoW.<sup>[[1]](#references)</sup>
 
 ## Mambo Muhimu kuhusu Bitcoin
 
 ### Miamala
 
-Miamala ya Bitcoin huhusisha kuhamisha fedha kati ya anwani. Miamala huthibitishwa kwa kutumia saini za kidijitali, kuhakikisha kuwa ni mmiliki wa private key pekee anayeweza kuanzisha uhamisho.<sup>[[2]](#references)</sup>
+Miamala ya Bitcoin huhusisha kuhamisha fedha kati ya anwani. Miamala huthibitishwa kwa sahihi za kidijitali, zinazohakikisha kuwa mmiliki wa ufunguo wa faragha pekee ndiye anayeweza kuanzisha uhamisho.<sup>[[2]](#references)</sup>
 
 #### Vipengele Muhimu:
 
-- **Miamala ya Multisignature** huhitaji saini nyingi ili kuidhinisha muamala.<sup>[[3]](#references)</sup>
-- Miamala ina **inputs** (chanzo cha fedha), **outputs** (mahali zinakopelekwa), **fees** (zinazolipwa kwa wachimbaji), na **scripts** (kanuni za muamala).
+- **Multisignature Transactions** huhitaji sahihi nyingi ili kuidhinisha muamala.<sup>[[3]](#references)</sup>
+- Miamala huwa na **inputs** (chanzo cha fedha), **outputs** (mahali fedha zinakopelekwa), **fees** (zinazolipwa kwa wachimbaji), na **scripts** (sheria za muamala).
 
 ### Lightning Network
 
-Lengo lake ni kuongeza uwezo wa Bitcoin wa kushughulikia miamala kwa kuruhusu miamala mingi ndani ya channel, huku hali ya mwisho pekee ikitangazwa kwenye blockchain.
+Hulenga kuongeza uwezo wa Bitcoin wa kushughulikia miamala kwa kuruhusu miamala mingi ndani ya chaneli, huku hali ya mwisho pekee ikitangazwa kwenye blockchain.
 
 ## Masuala ya Faragha ya Bitcoin
 
-Mashambulizi ya faragha, kama vile **Common Input Ownership** na **UTXO Change Address Detection**, hutumia mifumo ya miamala. Mbinu kama **Mixers** na **CoinJoin** huboresha kutokujulikana kwa kuficha viungo vya miamala kati ya watumiaji.
+Mashambulizi ya faragha, kama vile **Umiliki wa Pamoja wa Ingizo** na **Ugunduzi wa Anwani ya Chenji ya UTXO**, hutumia mifumo ya miamala. Mbinu kama **Mixers** na **CoinJoin** huboresha kutokujulikana kwa kuficha viunganishi vya miamala kati ya watumiaji.
 
 ## Kupata Bitcoins Bila Kujulikana
 
-Mbinu hizo ni pamoja na biashara ya pesa taslimu, mining, na kutumia mixers. **CoinJoin** huchanganya miamala mingi ili kufanya ufuatiliaji kuwa mgumu, huku **PayJoin** ikificha CoinJoins zionekane kama miamala ya kawaida ili kuongeza faragha.
+Mbinu hizo ni pamoja na biashara za pesa taslimu, uchimbaji, na kutumia mixers. **CoinJoin** huchanganya miamala mingi ili kufanya ufuatiliaji kuwa mgumu, huku **PayJoin** ikificha CoinJoins ionekane kama miamala ya kawaida ili kuongeza faragha.
 
 # Muhtasari wa Mashambulizi ya Faragha ya Bitcoin
 
-Katika ulimwengu wa Bitcoin, faragha ya miamala na kutokujulikana kwa watumiaji mara nyingi huwa sababu za wasiwasi. Huu hapa muhtasari rahisi wa baadhi ya mbinu za kawaida ambazo washambuliaji wanaweza kutumia kuvunja faragha ya Bitcoin.<sup>[[6]](#references)</sup>
+Katika ulimwengu wa Bitcoin, faragha ya miamala na kutokujulikana kwa watumiaji mara nyingi huzua wasiwasi. Huu hapa ni muhtasari rahisi wa baadhi ya mbinu za kawaida ambazo washambuliaji wanaweza kutumia kuhatarisha faragha ya Bitcoin.<sup>[[6]](#references)</sup>
 
-## **Dhana ya Umiliki wa Pembejeo za Pamoja**
+## **Dhana ya Umiliki wa Pamoja wa Ingizo**
 
-Kwa kawaida, ni nadra pembejeo kutoka kwa watumiaji tofauti kuunganishwa kwenye muamala mmoja kwa sababu ya ugumu unaohusika. Kwa hiyo, **anwani mbili za pembejeo katika muamala mmoja mara nyingi huchukuliwa kuwa za mmiliki mmoja**.
+Kwa kawaida, ni nadra ingizo kutoka kwa watumiaji tofauti kuunganishwa katika muamala mmoja kwa sababu ya ugumu unaohusika. Kwa hiyo, **anwani mbili za ingizo katika muamala mmoja mara nyingi hudhaniwa kuwa za mmiliki mmoja**.
 
-## **Kutambua Anwani ya Utoaji wa UTXO**
+## **Ugunduzi wa Anwani ya Chenji ya UTXO**
 
-UTXO, au **Matokeo ya Muamala Yasiyotumika**, lazima itumike yote katika muamala. Ikiwa sehemu yake tu ndiyo inayotumwa kwa anwani nyingine, salio hutumwa kwenye anwani mpya ya chenji. Watazamaji wanaweza kudhani kuwa anwani hii mpya ni ya mtumaji, na hivyo kuhatarisha faragha.
+UTXO, au **Matokeo ya Muamala Yasiyotumika**, lazima itumike yote katika muamala. Ikiwa sehemu yake tu itatumwa kwa anwani nyingine, salio huenda kwenye anwani mpya ya chenji. Watazamaji wanaweza kudhani anwani hii mpya ni ya mtumaji, na hivyo kuhatarisha faragha.
 
 ### Mfano
 
-Ili kupunguza hatari hii, kutumia huduma za kuchanganya fedha au anwani nyingi kunaweza kusaidia kuficha umiliki.
+Ili kupunguza hatari hii, huduma za kuchanganya au kutumia anwani nyingi kunaweza kusaidia kuficha umiliki.
 
-## **Kufichuka kwenye Mitandao ya Kijamii na Majukwaa**
+## **Kufichuka Kupitia Mitandao ya Kijamii na Mijadala**
 
-Wakati mwingine watumiaji hushiriki anwani zao za Bitcoin mtandaoni, na hivyo **kurahisisha kuhusisha anwani hiyo na mmiliki wake**.
+Wakati mwingine watumiaji hushiriki anwani zao za Bitcoin mtandaoni, na hivyo **kurahisisha kuhusisha anwani na mmiliki wake**.
 
-## **Uchanganuzi wa Grafu ya Miamala**
+## **Uchambuzi wa Grafu ya Miamala**
 
 Miamala inaweza kuonyeshwa kama grafu, ikifichua miunganisho inayowezekana kati ya watumiaji kulingana na mtiririko wa fedha.
 
-## **Heuristiki ya Pembejeo Isiyohitajika (Heuristiki ya Chenji Bora)**
+## **Heuristiki ya Ingizo Lisilohitajika (Heuristiki ya Chenji Bora)**
 
-Heuristiki hii hutegemea kuchanganua miamala yenye pembejeo na matokeo mengi ili kukisia ni matokeo gani ni chenji inayorudishwa kwa mtumaji.
+Heuristiki hii hutegemea kuchanganua miamala yenye ingizo na matokeo mengi ili kukisia ni matokeo gani ni chenji inayorejeshwa kwa mtumaji.
 
 ### Mfano
 
@@ -76,55 +76,55 @@ Heuristiki hii hutegemea kuchanganua miamala yenye pembejeo na matokeo mengi ili
 3 btc     1 btc
 ```
 
-Ikiwa kuongeza inputs zaidi kutafanya change output kuwa kubwa kuliko input yoyote moja, kunaweza kuchanganya heuristic.
+Ikiwa kuongeza inputs zaidi kunafanya output ya chenji iwe kubwa kuliko input yoyote moja, hilo linaweza kuchanganya heuristic.
 
-## **Forced Address Reuse**
+## **Kulazimisha Kutumia Tena Anwani**
 
-Washambuliaji wanaweza kutuma kiasi kidogo kwa anwani zilizotumika hapo awali, wakitumaini kwamba mpokeaji atazichanganya na inputs nyingine katika transactions zijazo, na hivyo kuunganisha anwani hizo.
+Washambuliaji wanaweza kutuma kiasi kidogo cha bitcoin kwenye anwani zilizotumika hapo awali, wakitumaini kwamba mpokeaji ataziunganisha na inputs nyingine katika miamala ya baadaye, na hivyo kuhusisha anwani hizo.
 
 ### Tabia Sahihi ya Wallet
 
-Wallets zinapaswa kuepuka kutumia coins zilizopokelewa kwenye anwani tupu ambazo tayari zimetumika, ili kuzuia leak hii ya faragha.
+Wallet zinapaswa kuepuka kutumia coins zilizopokelewa kwenye anwani zilizotumika na ambazo hazina salio, ili kuzuia leak hii ya faragha.
 
-## **Mbinu Nyingine za Uchanganuzi wa Blockchain**
+## **Mbinu Nyingine za Kuchanganua Blockchain**
 
-- **Kiasi Halisi cha Malipo:** Transactions zisizo na chenji huenda zikawa kati ya anwani mbili zinazomilikiwa na mtumiaji yuleyule.
-- **Namba Zilizokaribishwa:** Namba iliyokaribishwa katika transaction huashiria kuwa ni malipo, huku output isiyokaribishwa huenda ikawa chenji.
-- **Utambuzi wa Wallet:** Wallet tofauti zina mifumo ya kipekee ya kuunda transactions, inayowaruhusu wachanganuzi kutambua software iliyotumika na huenda pia anwani ya chenji.
-- **Uhusiano wa Kiasi na Muda:** Kufichua muda au kiasi cha transactions kunaweza kufanya transactions zifuatilike.
+- **Kiasi Halisi cha Malipo:** Miamala isiyo na chenji huenda ikawa kati ya anwani mbili zinazomilikiwa na mtumiaji yuleyule.
+- **Namba Zilizokaribiana:** Namba iliyokaribiana kwenye muamala hudokeza kuwa ni malipo, huku output isiyokaribiana huenda ikawa chenji.
+- **Utambuzi wa Wallet:** Wallet tofauti zina mifumo ya kipekee ya kuunda miamala, hivyo wachanganuzi wanaweza kutambua software iliyotumika na huenda pia anwani ya chenji.
+- **Uhusiano wa Kiasi na Muda:** Kufichua nyakati au kiasi cha miamala kunaweza kufanya miamala ifuatilike.
 
 ## **Uchanganuzi wa Trafiki**
 
-Kwa kufuatilia trafiki ya mtandao, washambuliaji wanaweza kuunganisha transactions au blocks na anwani za IP, na kuhatarisha faragha ya watumiaji. Hili ni kweli hasa ikiwa taasisi inaendesha nodes nyingi za Bitcoin, jambo linaloongeza uwezo wake wa kufuatilia transactions.
+Kwa kufuatilia trafiki ya mtandao, washambuliaji wanaweza kuhusisha miamala au blocks na anwani za IP, na hivyo kuhatarisha faragha ya watumiaji. Hili hutokea hasa ikiwa mtu au shirika linaendesha nodes nyingi za Bitcoin, jambo linaloongeza uwezo wao wa kufuatilia miamala.
 
 ## Zaidi
 
-Kwa orodha kamili ya mashambulizi ya faragha na mbinu za kujilinda, tembelea [Bitcoin Privacy on Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy).
+Kwa orodha ya kina ya mashambulizi na ulinzi wa faragha, tembelea [Bitcoin Privacy on Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy).
 
-# Transactions za Bitcoin Zisizojulikana
+# Miamala ya Bitcoin Isiyojulikana
 
 ## Njia za Kupata Bitcoins Bila Kujulikana
 
-- **Transactions za Pesa Taslimu**: Kupata bitcoin kwa kutumia pesa taslimu.
-- **Njia Mbadala za Pesa Taslimu**: Kununua gift cards na kuzibadilisha mtandaoni kwa bitcoin.
-- **Mining**: Njia yenye faragha zaidi ya kupata bitcoins ni kupitia mining, hasa ikiwa unafanya peke yako, kwa kuwa mining pools zinaweza kujua anwani ya IP ya mchimbaji. [Mining Pools Information](https://en.bitcoin.it/wiki/Pooled_mining)
+- **Miamala ya Fedha Taslimu**: Kupata bitcoin kwa kutumia fedha taslimu.
+- **Njia Mbadala za Fedha Taslimu**: Kununua gift cards na kuzibadilisha mtandaoni kupata bitcoin.
+- **Mining**: Njia yenye faragha zaidi ya kupata bitcoins ni kupitia mining, hasa ikiwa unafanya mining peke yako, kwa sababu mining pools zinaweza kujua anwani ya IP ya mchimbaji. [Maelezo kuhusu Mining Pools](https://en.bitcoin.it/wiki/Pooled_mining)
 - **Wizi**: Kinadharia, kuiba bitcoin kunaweza kuwa njia nyingine ya kuipata bila kujulikana, ingawa ni kinyume cha sheria na haipendekezwi.
 
 ## Huduma za Mixing
 
-Kwa kutumia huduma ya mixing, mtumiaji anaweza **kutuma bitcoins** na kupokea **bitcoins tofauti kama malipo**, jambo linalofanya iwe vigumu kumfuatilia mmiliki wa awali. Hata hivyo, hii inahitaji kuamini huduma hiyo isihifadhi logs na irudishe bitcoins kweli. Chaguo mbadala za mixing ni pamoja na kasino za Bitcoin.
+Kwa kutumia huduma ya mixing, mtumiaji anaweza **kutuma bitcoins** na kupokea **bitcoins tofauti kama malipo**, jambo linalofanya iwe vigumu kumfuatilia mmiliki wa awali. Hata hivyo, hii inahitaji kuiamini huduma kwamba haitahifadhi logs na kwamba itarejesha bitcoins hizo. Chaguo mbadala za mixing ni pamoja na kasino za Bitcoin.
 
 ## CoinJoin
 
-**CoinJoin** huunganisha transactions nyingi za watumiaji tofauti kuwa transaction moja, na kufanya iwe vigumu kwa yeyote anayejaribu kulinganisha inputs na outputs. Licha ya ufanisi wake, transactions zenye ukubwa wa kipekee wa inputs na outputs bado zinaweza kufuatiliwa.
+**CoinJoin** huunganisha miamala mingi kutoka kwa watumiaji tofauti na kuifanya muamala mmoja, hivyo kutatiza kazi ya mtu yeyote anayejaribu kulinganisha inputs na outputs. Licha ya ufanisi wake, miamala yenye ukubwa wa inputs na outputs wa kipekee bado inaweza kufuatiliwa.
 
-Mifano ya transactions ambazo huenda zilitumia CoinJoin ni `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` na `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`.
+Mifano ya miamala ambayo huenda ilitumia CoinJoin ni `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` na `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`.
 
-Kwa maelezo zaidi, tembelea [CoinJoin](https://coinjoin.io/en). Kwa mixer ya smart-contract ya Ethereum inayotenganisha deposits na withdrawals za baadaye, angalia [Tornado Cash](https://tornado.cash).
+Kwa maelezo zaidi, tembelea [CoinJoin](https://coinjoin.io/en). Kwa mixer ya Ethereum smart-contract inayotenganisha amana na utoaji wa baadaye, angalia [Tornado Cash](https://tornado.cash).
 
 ## PayJoin
 
-Toleo la CoinJoin, **PayJoin** (au P2EP), huficha transaction inayofanywa na wahusika wawili (kwa mfano, mteja na mfanyabiashara) ionekane kama transaction ya kawaida, bila outputs zenye thamani sawa zinazotambulisha CoinJoin. Hii hufanya iwe vigumu sana kuitambua na inaweza kubatilisha heuristic ya umiliki wa inputs zinazofanana inayotumiwa na taasisi za ufuatiliaji wa transactions.
+Aina ya CoinJoin, **PayJoin** (au P2EP), huficha muamala kati ya pande mbili (kwa mfano, mteja na mfanyabiashara) kwa kuufanya uonekane kama muamala wa kawaida, bila outputs zinazolingana ambazo hutambulisha CoinJoin. Hii hufanya iwe vigumu sana kuitambua na inaweza kubatilisha heuristic ya umiliki wa pamoja wa inputs inayotumiwa na mashirika yanayofuatilia miamala.
 
 ```plaintext
 2 btc --> 3 btc
@@ -141,60 +141,60 @@ Miamala kama iliyo hapo juu inaweza kuwa PayJoin, ikiboresha faragha huku ikibak
 
 Ili kudumisha faragha na usalama, ni muhimu kusawazisha wallet na blockchain. Mbinu mbili zinajitokeza:
 
-- **Full node**: Kwa kupakua blockchain nzima, full node huhakikisha faragha ya kiwango cha juu. Miamala yote iliyowahi kufanywa huhifadhiwa ndani ya kifaa, hivyo haiwezekani kwa washambuliaji kutambua ni miamala au anwani zipi zinazomvutia mtumiaji.
-- **Uchujaji wa block upande wa mteja**: Mbinu hii inahusisha kuunda vichujio kwa kila block kwenye blockchain, ili wallet ziweze kutambua miamala inayohusika bila kufichua maslahi mahususi kwa wachunguzi wa mtandao. Wallet nyepesi hupakua vichujio hivi, na kupakua block kamili tu inapopatikana inayolingana na anwani za mtumiaji.
+- **Full node**: Kwa kupakua blockchain nzima, full node huhakikisha faragha ya kiwango cha juu zaidi. Miamala yote iliyowahi kufanywa huhifadhiwa ndani ya kifaa, hivyo kufanya isiwezekane kwa washambuliaji kutambua miamala au anwani ambazo mtumiaji anavutiwa nazo.
+- **Uchujaji wa block upande wa mteja**: Mbinu hii inahusisha kuunda vichujio kwa kila block kwenye blockchain, na kuziwezesha wallet kutambua miamala husika bila kufichua maslahi mahususi kwa wachunguzi wa mtandao. Wallet nyepesi hupakua vichujio hivi, na kupakua block nzima tu pale anwani za mtumiaji zinapolingana nazo.
 
-## **Kutumia Tor kwa Kutokujulikana**
+## **Kutumia Tor kwa Kutotambulika**
 
-Kwa kuwa Bitcoin hufanya kazi kwenye mtandao wa peer-to-peer, inashauriwa kutumia Tor kuficha anwani yako ya IP na kuimarisha faragha unapowasiliana na mtandao.
+Kwa kuwa Bitcoin hutumia mtandao wa peer-to-peer, inashauriwa kutumia Tor kuficha anwani yako ya IP na kuboresha faragha unapowasiliana na mtandao.
 
 ## **Kuzuia Kutumia Tena Anwani**
 
-Ili kulinda faragha, ni muhimu kutumia anwani mpya kwa kila muamala. Kutumia tena anwani kunaweza kuhatarisha faragha kwa kuunganisha miamala na huluki ileile. Wallet za kisasa zimeundwa ili kuzuia matumizi ya tena ya anwani.
+Ili kulinda faragha, ni muhimu kutumia anwani mpya kwa kila muamala. Kutumia tena anwani kunaweza kuhatarisha faragha kwa kuhusisha miamala na huluki ileile. Wallet za kisasa zimeundwa ili kuzuia matumizi ya anwani tena.
 
 ## **Mikakati ya Kulinda Faragha ya Miamala**
 
-- **Miamala mingi**: Kugawa malipo katika miamala kadhaa kunaweza kuficha kiasi cha muamala na kuzuia mashambulizi ya faragha.
-- **Kuepuka chenji**: Kuchagua miamala isiyohitaji matokeo ya chenji huimarisha faragha kwa kuvuruga mbinu za kutambua chenji.
+- **Miamala mingi**: Kugawa malipo katika miamala kadhaa kunaweza kuficha kiasi cha muamala na kuzuia mashambulizi dhidi ya faragha.
+- **Kuepuka chenji**: Kuchagua miamala isiyohitaji matokeo ya chenji huboresha faragha kwa kutatiza mbinu za kutambua chenji.
 - **Matokeo mengi ya chenji**: Ikiwa haiwezekani kuepuka chenji, kuunda matokeo mengi ya chenji bado kunaweza kuboresha faragha.
 
-# **Monero: Mwanga wa Kutokujulikana**
+# **Monero: Taa ya Kutotambulika**
 
-Monero imeundwa kuweka kipaumbele kwa faragha ya miamala.
+Monero imeundwa kuweka faragha ya miamala kuwa kipaumbele.
 
 # **Ethereum: Gas na Miamala**
 
 ## **Kuelewa Gas**
 
-Gas hupima juhudi za kimahesabu zinazohitajika kutekeleza shughuli kwenye Ethereum, na bei yake huwekwa kwa **gwei**. Kwa mfano, muamala unaogharimu gwei 2,310,000 (au ETH 0.00231) unahusisha kikomo cha gas na ada ya msingi, pamoja na ada ya kipaumbele inayochochea validator kuujumuisha. Watumiaji wanaweza kuweka ada ya juu zaidi ili kuhakikisha hawalipi kupita kiasi; kiasi kinachozidi hurejeshwa.<sup>[[5]](#references)</sup>
+Gas hupima juhudi za kihesabu zinazohitajika kutekeleza shughuli kwenye Ethereum, na bei yake huonyeshwa kwa **gwei**. Kwa mfano, muamala unaogharimu gwei 2,310,000 (au ETH 0.00231) huhusisha kikomo cha gas na ada ya msingi, pamoja na ada ya kipaumbele ya kuhamasisha validator kuujumuisha. Watumiaji wanaweza kuweka ada ya juu zaidi ili kuhakikisha hawalipi kupita kiasi; kiasi kinachozidi hurejeshwa.<sup>[[5]](#references)</sup>
 
 ## **Kutekeleza Miamala**
 
-Miamala kwenye Ethereum huhusisha mtumaji na mpokeaji, ambao wanaweza kuwa anwani za mtumiaji au za smart contract. Inahitaji ada na lazima ijumuishwe kwenye block. Taarifa muhimu katika muamala ni pamoja na mpokeaji, sahihi ya mtumaji, thamani, data ya hiari, kikomo cha gas na ada. Muhimu zaidi, anwani ya mtumaji hukokotolewa kutoka kwenye sahihi, hivyo haihitajiki kwenye data ya muamala.<sup>[[4]](#references)</sup>
+Miamala kwenye Ethereum huhusisha mtumaji na mpokeaji, ambao wanaweza kuwa anwani za mtumiaji au smart contract. Miamala huhitaji ada na lazima ijumuishwe kwenye block. Taarifa muhimu katika muamala ni pamoja na mpokeaji, sahihi ya mtumaji, thamani, data ya hiari, kikomo cha gas na ada. Muhimu ni kwamba, anwani ya mtumaji hutambuliwa kutokana na sahihi, hivyo si lazima iwekwe kwenye data ya muamala.<sup>[[4]](#references)</sup>
 
-Mbinu na taratibu hizi ni msingi kwa yeyote anayetaka kutumia sarafu za kidijitali huku akiweka kipaumbele kwa faragha na usalama.
+Mbinu na mifumo hii ni ya msingi kwa yeyote anayetaka kutumia sarafu za kidijitali huku akitanguliza faragha na usalama.
 
 ## Red Teaming ya Web3 Inayozingatia Thamani
 
-- Orodhesha vipengele vinavyoshikilia thamani (signers, oracles, bridges, automation) ili kuelewa ni nani anayeweza kuhamisha fedha na jinsi anavyoweza kufanya hivyo.
-- Linganisha kila kipengele na mbinu husika za MITRE AADAPT ili kufichua njia za kupandisha marupurupu.
-- Fanya mazoezi ya minyororo ya mashambulizi ya flash-loan/oracle/credential/cross-chain ili kuthibitisha athari na kuweka kumbukumbu za masharti ya awali yanayowezesha unyonyaji.
+- Orodhesha vipengele vyenye thamani (signers, oracles, bridges, automation) ili kuelewa ni nani anayeweza kuhamisha fedha na jinsi anavyoweza kufanya hivyo.
+- Linganisha kila kipengele na mbinu husika za MITRE AADAPT ili kufichua njia za kupandisha mamlaka.
+- Fanyia mazoezi misururu ya mashambulizi ya flash-loan/oracle/credential/cross-chain ili kuthibitisha athari na kurekodi masharti ya awali yanayowezesha unyonyaji.
 
 {{#ref}}
 value-centric-web3-red-teaming.md
 {{#endref}}
 
-## Kuhujumu Mtiririko wa Uwekaji Sahihi wa Web3
+## Kuvurugwa kwa Mchakato wa Kusaini wa Web3
 
-- Kuhujumu mnyororo wa usambazaji wa wallet UIs kunaweza kubadilisha payload za EIP-712 kabla tu ya kusainiwa, na hivyo kukusanya sahihi halali za kuteka proxy zinazotumia delegatecall (kwa mfano, kubadilisha slot-0 ya Safe masterCopy).
+- Ubadilishaji hasidi wa supply chain ya violesura vya wallet unaweza kubadilisha payload za EIP-712 kabla tu ya kusainiwa, na kukusanya sahihi halali za kutwaa proxy zinazotumia delegatecall (kwa mfano, kubadilisha slot-0 ya Safe masterCopy).
 
 {{#ref}}
 web3-signing-workflow-compromise-safe-delegatecall-proxy-takeover.md
 {{#endref}}
 
-## Account Abstraction (ERC-4337)
+## Utoaji wa Abstraction ya Akaunti (ERC-4337)
 
-- Aina za kawaida za hitilafu za smart-account ni pamoja na kukwepa udhibiti wa ufikiaji wa `EntryPoint`, sehemu za gas zisizosainiwa, uthibitishaji unaobadilisha hali, replay ya ERC-1271, na kumaliza ada kupitia revert-baada-ya-uthibitishaji.
+- Hali za kawaida za kushindwa kwa smart-account ni pamoja na kukwepa udhibiti wa ufikiaji wa `EntryPoint`, sehemu za gas zisizosainiwa, uthibitishaji unaobadilisha hali, mashambulizi ya replay ya ERC-1271, na kuondoa ada kupitia revert-baada-ya-uthibitishaji.
 
 {{#ref}}
 erc-4337-smart-account-security-pitfalls.md
@@ -202,23 +202,23 @@ erc-4337-smart-account-security-pitfalls.md
 
 ## Usalama wa Smart Contract
 
-- Kutumia mutation testing kutafuta mapengo katika test suites:
+- Kutumia mutation testing kutafuta maeneo dhaifu katika test suites:
 
 {{#ref}}
 ../smart-contract-security/mutation-testing-with-slither.md
 {{#endref}}
 
-## Uadilifu wa Guest wa ZK Proof / zkVM
+## Uadilifu wa ZK Proof / zkVM Guest
 
-Prover inapotumia **zkVM** au proof circuit maalum ya programu kuthibitisha dai, verifier hujifunza tu kwamba **guest program ilitekelezwa kama ilivyoandikwa**. Ikiwa guest ina **unsafe deserialization**, **undefined behavior**, au **vikwazo vya kisemantiki vinavyokosekana**, prover hasidi anaweza kutoa proof inayothibitishwa huku **vipimo vya umma au invariant inayodaiwa vikiwa si vya kweli**.<sup>[[7]](#references)</sup>
+Prover anapotumia **zkVM** au proof circuit mahususi ya programu kuthibitisha dai, verifier hujifunza tu kwamba **programu ya guest ilitekelezwa kama ilivyoandikwa**. Ikiwa guest ina **deserialization isiyo salama**, **tabia isiyobainishwa**, au **vikwazo vya kisemantiki vinavyokosekana**, prover hasidi anaweza kutengeneza proof inayothibitishwa huku **vipimo vya umma au invariant inayodaiwa vikiwa si vya kweli**.<sup>[[7]](#references)</sup>
 
-### Unsafe deserialization ndani ya proof guests
+### Deserialization isiyo salama ndani ya proof guests
 
-- Chukulia witness/circuit bytes za faragha kama **ingizo lisiloaminika kutoka kwa mshambuliaji**, hata kama zimefichwa na proof.
-- Epuka kuzifungua kwa kutumia helpers zisizokagua, kama `rkyv::access_unchecked`, isipokuwa bytes hizo tayari zimethibitishwa kwa njia nyingine.
-- Enum discriminants, relative pointers, urefu na indexes zinazopakiwa kutoka kwenye data iliyoserialishwa isiyoaminika lazima zithibitishwe kabla hazijaathiri mtiririko wa udhibiti au ufikiaji wa memory.
+- Chukulia bytes za private witness/circuit kama **ingizo lisiloaminika kutoka kwa mshambuliaji**, hata kama zimefichwa na proof.
+- Epuka kuzifanya deserialization kwa kutumia helpers zisizofanya ukaguzi, kama `rkyv::access_unchecked`, isipokuwa bytes zilishathibitishwa kwa njia nyingine.
+- Thibitisha enum discriminants, relative pointers, lengths na indexes zilizopakiwa kutoka kwenye data iliyoserialishwa isiyoaminika kabla hazijaathiri mtiririko wa udhibiti au ufikiaji wa kumbukumbu.
 
-Muundo wa vitendo wa ukaguzi:
+Mbinu ya ukaguzi ya vitendo:
 
 ```rust
 let private_circuit_bytes = sp1_zkvm::io::read_vec();
@@ -227,57 +227,57 @@ let ops = unsafe {
 };
 ```
 
-Ikiwa field kama `op.kind` ni enum na mshambuliaji anaweza kuingiza **discriminant iliyo nje ya masafa**, kila `match` ya baadaye kwenye thamani hiyo inatia shaka.
+Ikiwa field kama `op.kind` ni enum na mshambuliaji anaweza kuingiza **discriminant iliyo nje ya masafa**, kila `match` ya baadaye kwenye thamani hiyo huwa ya kutiliwa shaka.
 
-### Kupita counters za UB kwa kutumia jump table
+### Jump-table / UB counter bypass
 
-Rust ikibadilisha `match` kubwa kuwa **jump table**, discriminant batili ya enum inaweza kusababisha **mtiririko wa udhibiti usiofafanuliwa**. Muundo hatari ni:<sup>[[7]](#references)[[9]](#references)</sup>
+Ikiwa Rust itabadilisha `match` kubwa kuwa **jump table**, discriminant batili ya enum inaweza kusababisha **mtiririko wa udhibiti usiofafanuliwa**. Muundo hatari ni:<sup>[[7]](#references)[[9]](#references)</sup>
 
-1. `match` moja husasisha **counters/vizuizi muhimu kwa usalama**.
-2. `match` ya pili hutekeleza **semantiki halisi ya instruction**.
-3. Discriminant iliyo nje ya masafa hufikia nje ya jump table ya kwanza na kutua kwenye code inayohusishwa na ya pili.
+1. `match` moja husasisha **vihesabio/vikwazo muhimu kwa usalama**.
+2. `match` ya pili hutekeleza **semantiki halisi za maagizo**.
+3. Discriminant iliyo nje ya masafa huenda nje ya jump table ya kwanza na kutua kwenye msimbo unaohusishwa na ya pili.
 
-Matokeo: operesheni bado hutekelezwa, lakini njia ya uhasibu hurukwa. Katika zkVM, hii inaweza kughushi proofs zinazoripoti metrics zisizowezekana, kama vile gates chache, operesheni ghali chache, au rasilimali nyingine zenye mipaka zilizopotoshwa.
+Matokeo: operesheni bado hutekelezwa, lakini njia ya uhasibu hurukwa. Katika zkVM, hii inaweza kutengeneza proofs zinazoripoti vipimo visivyowezekana, kama vile gates chache zaidi, operesheni ghali chache zaidi au rasilimali nyingine zenye mipaka zilizopotoshwa.
 
 Orodha ya ukaguzi:
 
-- Tafuta enums zinazodhibitiwa na mshambuliaji na kuserialishwa kutoka kwa witness/private input.
+- Tafuta enums zinazodhibitiwa na mshambuliaji na ku-deserialize kutoka kwa witness/private input.
 - Kagua kauli za `match` zinazorudiwa kwenye field ileile ya opcode/kind.
-- Chukulia `unsafe` + deserialization isiyokaguliwa + dispatch kubwa ya opcode kama mchanganyiko wenye hatari kubwa.
-- Fanya reverse engineering ya binary iliyotolewa inapohitajika; mpangilio wa jump table unaweza kuwa muhimu zaidi kuliko source.
+- Chukulia mchanganyiko wa `unsafe` + unchecked deserialization + ugawaji mkubwa wa opcode kuwa hatari kubwa.
+- Reverse engineer binary iliyotolewa inapohitajika; mpangilio wa jump table unaweza kuwa muhimu zaidi kuliko source.
 
-### Vizuizi vya kisemantiki vinavyokosekana katika interpreters zinazoweza kutenduliwa/maalum
+### Vikwazo vya kisemantiki vinavyokosekana katika interpreters zinazoweza kubadilishwa au zilizobobea
 
-Usihakiki usalama wa memory pekee; hakiki pia **sheria za kisemantiki** ambazo proof inapaswa kutekeleza.
+Usihakiki tu usalama wa kumbukumbu; hakiki pia **kanuni za kisemantiki** ambazo proof inakusudiwa kutekeleza.
 
-Kwa instruction sets zinazoweza kutenduliwa/zilizo kama quantum, hakikisha kwamba operands zinazopaswa kuwa tofauti zimewekewa kizuizi cha kuwa tofauti. Operesheni inayofanana na Toffoli/CCX iliyotekelezwa kama:<sup>[[7]](#references)[[8]](#references)</sup>
+Kwa instruction set zinazoweza kubadilishwa au zinazofanana na quantum, hakikisha kwamba operands zinazopaswa kuwa tofauti kweli zimewekewa kikwazo cha kuwa tofauti. Operesheni inayofanana na Toffoli/CCX iliyotekelezwa kama:<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```rust
 let v = cond & self.qubit(op.q_control1) & self.qubit(op.q_control2);
 *self.qubit_mut(op.q_target) ^= v;
 ```
 
-inakuwa si salama ikiwa guest haitakataa:
+inakuwa si salama ikiwa mfumo-mgeni hautakataa:
 
 ```text
 op.q_control1 == op.q_control2 == op.q_target
 ```
 
-Katika hali hiyo, mpito hupunguzwa na kuwa:
+Katika hali hiyo, mpito huo huishia kuwa:
 
 ```text
 q = q ^ (q & q) = 0
 ```
 
-Hii huunda **primitive ya deterministic reset**, inayovunja dhana za reversibility na kuwezesha hesabu zisizokusudiwa kwa gharama ndogo. Katika mifumo ya proof inayothibitisha matumizi ya rasilimali, hili linaweza kuwawezesha washambuliaji kutimiza ukaguzi wa utendaji huku wakipita model ya gharama ambayo verifier inaamini inatekelezwa.
+Hii huunda **primitive ya reset inayoweza kubashiriwa**, ikivunja dhana za urejeshaji na kuwezesha ukokotoaji usiokusudiwa kwa gharama ndogo. Katika mifumo ya proof inayothibitisha matumizi ya rasilimali, hili linaweza kuwawezesha washambuliaji kutimiza ukaguzi wa utendaji huku wakikwepa modeli ya gharama ambayo verifier inaamini inatekelezwa.
 
 ### Mambo ya kujaribu katika mifumo ya ZK
 
-- Fuzz guest parser zote kwa encodings za witness/private-input zenye hitilafu.
-- Thibitisha enum range kabla ya opcode dispatch.
-- Ongeza ukaguzi wa semantiki kwa operand aliasing na miundo mingine batili ya instruction.
-- Linganisha counters zinazoripotiwa/za umma na implementation huru ya marejeo.
-- Kumbuka kuwa proof halali bado inaweza kuthibitisha **kauli isiyo sahihi** ikiwa guest program ina hitilafu.
+- Fanya fuzzing kwa parser zote za guest ukitumia encoding za witness/private-input zenye hitilafu.
+- Hakikisha uhalalishaji wa masafa ya enum unafanyika kabla ya opcode dispatch.
+- Ongeza ukaguzi wa kisemantiki wa operand aliasing na miundo mingine batili ya instruction.
+- Linganisha counters zinazoripotiwa/za umma na utekelezaji huru wa marejeo.
+- Kumbuka kuwa proof halali bado inaweza kuthibitisha **kauli isiyo sahihi** ikiwa programu ya guest ina hitilafu.
 
 ## Uidhinishaji Unaotegemea Hali
 
@@ -285,15 +285,15 @@ Hii huunda **primitive ya deterministic reset**, inayovunja dhana za reversibili
 state-divergence-default-value-authorization-bypasses.md
 {{#endref}}
 
-## DeFi/AMM Exploitation
+## Uvunjaji wa Usalama wa DeFi/AMM
 
-Ikiwa unachunguza exploitation ya vitendo dhidi ya DEX na AMM (Uniswap v4 hooks, matumizi mabaya ya rounding/precision, swaps za kuvuka threshold zilizoimarishwa na flash-loan), angalia:
+Ikiwa unatafiti uvunjaji wa usalama wa DEX na AMM kwa vitendo (Uniswap v4 hooks, matumizi mabaya ya rounding/precision, swaps zinazovuka kizingiti kwa kutumia flash loan), angalia:
 
 {{#ref}}
 defi-amm-hook-precision.md
 {{#endref}}
 
-Kwa weighted pool za mali nyingi zinazohifadhi virtual balances kwenye cache na zinaweza kuwekewa sumu wakati `supply == 0`, soma:
+Kwa weighted pools zenye assets nyingi zinazohifadhi virtual balances kwenye cache na zinaweza kuwekewa sumu wakati `supply == 0`, soma:
 
 {{#ref}}
 defi-amm-virtual-balance-cache-exploitation.md
@@ -302,12 +302,12 @@ defi-amm-virtual-balance-cache-exploitation.md
 ## References
 
 - [1] [Proof of stake - Wikipedia](https://en.wikipedia.org/wiki/Proof_of_stake)
-- [2] [Ufunguo wa Umma na Ufunguo wa Faragha Umeelezwa - Mycryptopedia](https://www.mycryptopedia.com/public-key-private-key-explained/)
-- [3] [Muamala wa saini nyingi ni nini? - Bitcoin Stack Exchange](https://bitcoin.stackexchange.com/questions/3718/what-are-multi-signature-transactions)
-- [4] [Miámala | ethereum.org](https://ethereum.org/en/developers/docs/transactions/)
+- [2] [Ufunguo wa Umma na Ufunguo wa Faragha Umefafanuliwa - Mycryptopedia](https://www.mycryptopedia.com/public-key-private-key-explained/)
+- [3] [Miamala ya saini nyingi ni nini? - Bitcoin Stack Exchange](https://bitcoin.stackexchange.com/questions/3718/what-are-multi-signature-transactions)
+- [4] [Miamala | ethereum.org](https://ethereum.org/en/developers/docs/transactions/)
 - [5] [Gas na ada | ethereum.org](https://ethereum.org/en/developers/docs/gas/)
 - [6] [Faragha - Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy#Forced_address_reuse)
-- [7] [Trail of Bits - Tuliishinda proof ya Google's zero-knowledge ya quantum cryptanalysis](https://blog.trailofbits.com/2026/04/17/we-beat-googles-zero-knowledge-proof-of-quantum-cryptanalysis/)
+- [7] [Trail of Bits - Tuliishinda proof ya Google's zero-knowledge ya uchanganuzi wa quantum cryptanalysis](https://blog.trailofbits.com/2026/04/17/we-beat-googles-zero-knowledge-proof-of-quantum-cryptanalysis/)
 - [8] [Kulinda Sarafu za Kidijitali za Elliptic Curve dhidi ya Udhaifu wa Quantum: Makadirio ya Rasilimali na Hatua za Kupunguza Hatari (toleo lililorekebishwa)](https://arxiv.org/abs/2603.28846v2)
 - [9] [Hazina ya proof-of-concept ya Trail of Bits](https://github.com/trailofbits/quantum-zk-proof-poc)
 {{#include ../../banners/hacktricks-training.md}}
