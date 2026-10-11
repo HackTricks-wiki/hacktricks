@@ -1,15 +1,16 @@
-# Faili na Ruhusa Zinazovutia
+# Faili za Kuvutia na Ruhusa
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Umiliki wa faili, ruhusa za kuandika, chaguo za mount, na haki za kutekeleza zinaweza kubadilisha kiwango cha ufikiaji cha mtumiaji wa ndani. Anza kwa kutambua faili lengwa au njia ya utekelezaji, kisha tumia ukurasa husika:
+Umiliki wa faili, ruhusa za kuandika, chaguo za mount, na ruhusa za kutekeleza zinaweza kubadilisha kiwango cha ufikiaji wa mtumiaji wa ndani. Anza kwa kutambua faili au njia ya utekelezaji inayolengwa, kisha utumie ukurasa unaofaa:
 
-- [SUID, SGID, ACLs, na faili nyeti](suid-sgid-and-acl-triage.md) unatoa mtiririko wa kuanzia wa kuchunguza haki za kutekeleza na ruhusa fiche za ufikiaji.
-- [Kuandika faili yoyote kwenye root](write-to-root.md) unaeleza jinsi kuandika kwenye njia zenye upendeleo kunavyoweza kusababisha kupandishwa kwa ruhusa.
-- [Linux capabilities](linux-capabilities.md) unaeleza capabilities za kila mchakato na faili.
-- [Matumizi mabaya ya SUID shared library na linker](suid-shared-library-and-linker-abuse.md) unahusu upakiaji wa libraries kwenye binaries zenye upendeleo.
-- [Mfano wa kupandisha ruhusa kupitia `ld.so`](ld.so.conf-example.md) unachunguza kisa cha usanidi wa linker.
-- [Usanidi usio sahihi wa NFS `no_root_squash` na `no_all_squash`](nfs-no_root_squash-misconfiguration-pe.md) unahusu ulinganishaji wa utambulisho kwenye filesystem ya mbali.
-- [Wildcard spare tricks](wildcards-spare-tricks.md) unahusu upanuzi wa arguments kwenye commands zenye upendeleo.
+- [SUID, SGID, ACLs, na faili nyeti](suid-sgid-and-acl-triage.md) unaeleza mtiririko wa awali wa kazi kwa ruhusa za kutekeleza na ruhusa fiche za ufikiaji.
+- [Kuandika faili kiholela hadi root](write-to-root.md) unaeleza jinsi uandishi kwenye njia zenye upendeleo unavyoweza kutumiwa kupata haki za juu.
+- [Linux capabilities](linux-capabilities.md) unaeleza capabilities za kila mchakato na kila faili.
+- [Matumizi mabaya ya shared library na linker ya SUID](suid-shared-library-and-linker-abuse.md) unaangazia upakiaji wa dynamic kwenye binary zenye upendeleo.
+- [Mfano wa kuongeza haki za `ld.so`](ld.so.conf-example.md) unaonyesha kesi ya usanidi wa linker.
+- [Usanidi usio sahihi wa NFS `no_root_squash` na `no_all_squash`](nfs-no_root_squash-misconfiguration-pe.md) unaangazia ulinganishaji wa utambulisho kwenye remote filesystem.
+- [Ujanja wa wildcard spare](wildcards-spare-tricks.md) unaangazia upanuzi wa arguments kwenye amri zenye upendeleo.
 - [SELinux](selinux.md) unaeleza utekelezaji wa sera na hatua husika za uchunguzi.
+
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,10 +1,10 @@
-# Kontena na Namespaces
+# Kontena na Namespace
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Kontena ni mchakato wa Linux unaoendeshwa kwa mipangilio ya utengano na ruhusa. Tathmini runtime, rasilimali za host zilizowekwa, capabilities zilizopewa, na mipangilio ya namespace kwa pamoja. [Muhtasari wa usalama wa kontena](container-security/README.md) unaeleza tabaka hizi na kuunganisha kila udhibiti.
+Kontena ni mchakato wa Linux unaoendeshwa kwa usanidi wa utengaji na marupurupu. Tathmini runtime, rasilimali za host zilizomountiwa, capabilities zilizotolewa, na mipangilio ya namespace kwa pamoja. [Muhtasari wa usalama wa kontena](container-security/README.md) unaeleza tabaka hizi na unaunganisha na kila udhibiti.
 
-- [Kuongeza privilege kupitia Containerd (`ctr`)](containerd-ctr-privilege-escalation.md) inalenga ufikiaji wa kiolesura cha usimamizi cha containerd.
-- [Kuongeza privilege kupitia RunC](runc-privilege-escalation.md) inaeleza mbinu za kuongeza privilege zinazohusu runtime hii.
-- [Usalama wa kontena](container-security/README.md) inaeleza runtimes, APIs zilizo wazi, hatari za image, mounts nyeti, kontena zenye privilege, tathmini, na kinga kama namespaces, seccomp, na mandatory access control.
+- [Containerd (`ctr`) privilege escalation](containerd-ctr-privilege-escalation.md) inahusu ufikiaji wa kiolesura cha usimamizi cha containerd.
+- [RunC privilege escalation](runc-privilege-escalation.md) inashughulikia maelezo ya escalation mahususi kwa runtime.
+- [Usalama wa kontena](container-security/README.md) unaeleza runtimes, APIs zilizo wazi, hatari za image, mounts nyeti, kontena zenye marupurupu, tathmini, na ulinzi kama namespaces, seccomp, na udhibiti wa ufikiaji wa lazima.
 {{#include ../../banners/hacktricks-training.md}}

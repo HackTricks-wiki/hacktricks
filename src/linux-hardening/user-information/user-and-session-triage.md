@@ -1,8 +1,8 @@
-# Watumiaji, Vipindi, na Mabaki ya Vitambulisho
+# Watumiaji, Vipindi, na Mabaki ya Credential
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Anza na utambulisho wa mtumiaji anayemiliki shell ya sasa, kisha orodhesha watumiaji wengine, vikundi, vipindi vilivyo hai, na hifadhi za vitambulisho. Ukurasa wa [vitambulisho halisi, vinavyotumika, na vilivyohifadhiwa vya mtumiaji](euid-ruid-suid.md) unaeleza kwa nini ruhusa zinazotumika za mchakato zinaweza kutofautiana na akaunti yake ya kuingia.
+Anza na utambulisho unaomiliki shell ya sasa, kisha orodhesha watumiaji wengine, vikundi, vipindi vilivyo hai, na hifadhi za credential. Ukurasa wa [ID halisi, inayotumika, na iliyohifadhiwa ya mtumiaji](euid-ruid-suid.md) unaeleza kwa nini ruhusa za mchakato zinazotumika zinaweza kutofautiana na akaunti yake ya kuingia.
 
 ## Orodhesha utambulisho na ufikiaji unaotegemea vikundi
 
@@ -14,13 +14,13 @@ whoami
 stat -c '%A %U:%G %n' /etc/passwd /etc/shadow /etc/group
 ```
 
-`getent` hujumuisha akaunti zinazotolewa na directory ambazo usomaji wa kawaida wa `/etc/passwd` unaweza kukosa. Kagua akaunti za UID 0, shells za kuingia, saraka za nyumbani, vikundi vya ziada, na akaunti ambazo usanidi wake unaruhusu kuingia kwa njia shirikishi bila kutarajiwa. Ukurasa wa [interesting groups](interesting-groups-linux-pe/README.md) unaeleza ufikiaji uliokabidhiwa, kama vile `sudo`, `docker`, `disk`, na `shadow`. Kagua ACL halisi za mfumo wa faili na sera za ndani kabla ya kuchukulia jina la kikundi kuwa ruhusa ya juu.
+`getent` hujumuisha akaunti zinazotoka kwenye directory ambazo usomaji wa kawaida wa `/etc/passwd` unaweza kukosa. Kagua akaunti za UID 0, login shells, home directories, supplementary groups, na akaunti ambazo usanidi wake unaruhusu login ya kuingiliana bila kutarajiwa. Ukurasa wa [interesting groups](interesting-groups-linux-pe/README.md) unashughulikia ufikiaji uliokabidhiwa kama vile `sudo`, `docker`, `disk`, na `shadow`. Kagua ACL halisi za filesystem na sera za eneo husika kabla ya kuchukulia jina la group kuwa fursa.
 
-Ikiwa [NSS inaelekeza utafutaji wa `passwd`, `group`, au `shadow`](https://man7.org/linux/man-pages/man5/nsswitch.conf.5.html) kwenye hifadhidata, kagua mtoa huduma anayetumika na njia yake ya usanidi kabla ya kutathmini utambulisho unaotegemea hifadhidata. Kwa usanidi wa PostgreSQL NSS, `/etc/nss-pgsql.conf` na `/etc/nss-pgsql-root.conf` ni vielekezi vya njia pekee, kwa sababu mipangilio ya muunganisho inaweza kuwa na vitambulisho vya kuingia. Jukumu la hifadhidata lina umuhimu tu ikiwa linaweza kubadilisha rekodi ambazo mtoa huduma wa NSS anayetumika hurudisha, na akaunti inaweza kuthibitisha utambulisho kwa kutumia rekodi hizo. GID msingi ya 0 hutoa uanachama wa kikundi cha root, si UID 0; uelekezaji wa kikundi cha sudo unahitaji kanuni halali ya kikundi ya [sudoers](https://man7.org/linux/man-pages/man5/sudoers.5.html) na uthibitishaji wowote unaohitajika. Uelekezaji wa UID 0 ni mpaka tofauti wa utambulisho. Usichapishe mifuatano ya muunganisho au kubadilisha rekodi za akaunti wakati wa uorodheshaji tulivu.
+Ikiwa [NSS huelekeza utafutaji wa `passwd`, `group`, au `shadow`](https://man7.org/linux/man-pages/man5/nsswitch.conf.5.html) kwenye database, kagua provider inayotumika na njia ya usanidi wake kabla ya kutathmini identities zinazotegemea database. Kwa deployments za PostgreSQL NSS, `/etc/nss-pgsql.conf` na `/etc/nss-pgsql-root.conf` ni vidokezo vya njia pekee, kwa sababu mipangilio ya muunganisho inaweza kuwa na credentials. Database role ina umuhimu tu ikiwa inaweza kubadilisha records ambazo provider ya NSS inayotumika hurejesha, na akaunti inaweza kuthibitisha utambulisho kwa kutumia records hizo. GID ya msingi ya 0 hutoa uanachama wa root-group, si UID 0; ulinganishaji wa sudo-group huhitaji [sudoers group rule](https://man7.org/linux/man-pages/man5/sudoers.5.html) inayotumika pamoja na uthibitishaji wowote unaohitajika. Ulinganishaji wa UID 0 ni mpaka tofauti wa utambulisho. Usichapishe connection strings au kubadilisha account records wakati wa enumeration tulivu.
 
-Pia linganisha UID za nambari kati ya majina ya akaunti za ndani. Majina mawili katika [`/etc/passwd`](https://man7.org/linux/man-pages/man5/passwd.5.html) yanaweza kurejelea utambulisho uleule wa faili wa Unix, huku rekodi zao za uthibitishaji wa kuingia zikitofautiana. Kwa hiyo, jina la ziada lililoongezwa lenye UID isiyo sifuri inayoshirikiwa linaweza kutoa ufikiaji wa faili au michakato ya mtumiaji mwingine baada ya uthibitishaji kufanikiwa; halitoi ruhusa za root isipokuwa UID hiyo au njia tofauti ya kupata ruhusa ifanye hivyo. UID zinazoshirikiwa zinaweza kuwa za makusudi. Thibitisha chanzo cha akaunti (`/etc/passwd` dhidi ya NSS), historia ya uundaji, shell na saraka ya nyumbani, sera halisi ya uthibitishaji, na kama akaunti zimeidhinishwa kushiriki utambulisho huo. Ukaguzi wa nakala rudufu za akaunti za ndani pekee hauwezi kubaini ikiwa kuna jina la ziada linalotolewa na directory.
+Pia linganisha UID za nambari kati ya majina ya akaunti za eneo husika. Majina mawili katika [`/etc/passwd`](https://man7.org/linux/man-pages/man5/passwd.5.html) yanaweza kurejelea utambulisho uleule wa faili wa Unix, huku records zao za uthibitishaji wa login zikitofautiana. Kwa hivyo, alias iliyoongezwa hivi karibuni yenye UID isiyo sifuri inayoshirikiwa inaweza kumwezesha mtumiaji kufikia faili au michakato ya mtumiaji mwingine baada ya uthibitishaji kufanikiwa; haitoi root isipokuwa UID hiyo au njia tofauti ya kupata fursa itoe hivyo. UID zinazoshirikiwa zinaweza kuwa za makusudi. Thibitisha chanzo cha akaunti (`/etc/passwd` dhidi ya NSS), historia ya uundaji, shell na home, sera halisi ya uthibitishaji, na kama akaunti hizo zimeidhinishwa kushiriki utambulisho huo. Ukaguzi wa nakala zinazopatikana kwenye mfumo wa eneo husika pekee hauwezi kubaini kuwa hakuna alias inayotoka kwenye directory.
 
-## Tafuta vipindi vya kuingia vilivyo hai na vya hivi karibuni
+## Tafuta sessions zinazotumika na za hivi karibuni
 
 ```bash
 who -a
@@ -32,11 +32,11 @@ screen -ls 2>/dev/null
 tmux ls 2>/dev/null
 ```
 
-Socket ya `screen` au `tmux` inaweza kufichua shell iliyopo ikiwa ruhusa zake zinamruhusu mtumiaji wa sasa kujiunga nayo. Kagua mmiliki na hali ya socket kabla ya kujaribu kuifikia; kipindi cha mtumiaji mwingine hakiwezi kujiunganishwa nacho moja kwa moja. Alama ya muda ya sudo iliyo hai au socket ya SSH agent inaweza pia kuwa muhimu, lakini kuitumia tena hutegemea utambulisho wa mtumiaji, ruhusa na sera. Kwa matumizi mabaya ya agent forwarding, angalia [SSH forwarding agent exploitation](ssh-forward-agent-exploitation.md).
+Socket ya `screen` au `tmux` inaweza kufichua shell iliyopo ikiwa ruhusa zake zinamruhusu mtumiaji wa sasa kujiunga. Kagua mmiliki na ruhusa za socket kabla ya kujaribu kuifikia; kipindi cha mtumiaji mwingine hakiwezi kujiunganishwa nacho moja kwa moja. Muda wa sudo ulio hai au socket ya SSH agent pia inaweza kuwa muhimu, lakini kuitumia tena kunategemea utambulisho wa mtumiaji, ruhusa na sera. Kwa matumizi mabaya ya agent forwarding, angalia [SSH forwarding agent exploitation](ssh-forward-agent-exploitation.md).
 
-Socket ya udhibiti ya [OpenSSH multiplex](https://man.openbsd.org/ssh_config#ControlMaster) ni tofauti na `SSH_AUTH_SOCK`: `ControlMaster` na `ControlPath` huruhusu wateja wa baadaye wa SSH kushiriki muunganisho uliopo ambao tayari umethibitishwa, huku `ControlPersist` ikiweza kuweka master ipatikane hata baada ya kipindi cha kwanza kuisha. Kagua `.ssh/config` ya mtumiaji wa sasa na njia za socket zilizo ndani ya `.ssh`, pamoja na mmiliki na ruhusa zake. Jina la faili ya socket pekee halithibitishi kuwa master bado iko hai, kwamba mtumiaji wa sasa anaweza kuiunganisha, au ni akaunti ipi ya mbali inayotumia.
+[OpenSSH multiplex control socket](https://man.openbsd.org/ssh_config#ControlMaster) ni tofauti na `SSH_AUTH_SOCK`: `ControlMaster` na `ControlPath` huruhusu wateja wa SSH wanaofuata kushiriki muunganisho uliopo ambao tayari umethibitishwa, huku `ControlPersist` ikiweza kuweka master ipatikane baada ya kipindi cha kwanza kuisha. Kagua `.ssh/config` ya mtumiaji wa sasa na njia za socket zilizo ndani ya `.ssh` kwa kina kidogo, ikijumuisha mmiliki na ruhusa. Jina la faili la socket pekee halithibitishi kwamba master bado iko hai, kwamba mtumiaji wa sasa anaweza kuunganishwa nayo, au ni akaunti gani ya mbali inayotumia.
 
-## Kagua mabaki ya mtumiaji
+## Kagua vitu vya mtumiaji
 
 ```bash
 find /home -maxdepth 3 -type f \( -name 'authorized_keys' -o -name 'id_*' -o -name '*history' -o -name '.netrc' -o -name '.git-credentials' \) -ls 2>/dev/null
@@ -44,5 +44,5 @@ find /home -maxdepth 3 -type f \( -name '.bashrc' -o -name '.profile' -o -name '
 printenv SSH_AUTH_SOCK KRB5CCNAME GNUPGHOME 2>/dev/null
 ```
 
-Historia ya shell, faili za kuanzisha, funguo za SSH, usanidi wa programu, keyring za GPG, na cache za Kerberos zinaweza kufichua credentials au maeneo ya persistence yanayoweza kuandikwa. `authorized_keys` au faili ya kuanzisha shell inayoweza kuandikwa kwa akaunti yenye mamlaka zaidi inapaswa kukaguliwa. [Ukurasa wa post-exploitation](../post-exploitation/README.md) unaeleza uhamishaji wa GPG homedir na utafutaji wa credentials; [Linux Active Directory](linux-active-directory.md) unaeleza utumiaji upya wa cache za Kerberos na keytab. [Ukurasa wa PAM](../software-information/pam-pluggable-authentication-modules.md) unaeleza hatari za sera za uthibitishaji.
+Historia ya shell, faili za uanzishaji, funguo za SSH, usanidi wa programu, keyring za GPG na akiba za Kerberos zinaweza kufichua vitambulisho au sehemu za persistence zinazoweza kuandikwa. `authorized_keys` au faili ya uanzishaji wa shell inayoweza kuandikwa ya akaunti yenye ruhusa za juu zaidi inapaswa kuchunguzwa. [Ukurasa wa post-exploitation](../post-exploitation/README.md) unaeleza uhamishaji wa GPG homedir na utafutaji wa vitambulisho; [Linux Active Directory](linux-active-directory.md) unaeleza matumizi tena ya akiba za Kerberos na keytab. [Ukurasa wa PAM](../software-information/pam-pluggable-authentication-modules.md) unaeleza hatari za sera za uthibitishaji.
 {{#include ../../banners/hacktricks-training.md}}
