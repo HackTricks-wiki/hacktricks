@@ -2,9 +2,9 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Główne algorytmy uczenia maszynowego
+## Główne algorytmy machine learning
 
-Najlepszym punktem wyjścia do nauki o AI jest zrozumienie działania głównych algorytmów uczenia maszynowego. Pomoże Ci to zrozumieć, jak działa AI, jak go używać i jak je atakować:
+Najlepiej zacząć naukę o AI od poznania działania głównych algorytmów machine learning. Pomoże Ci to zrozumieć, jak działa AI, jak z niego korzystać i jak je atakować:
 
 
 {{#ref}}
@@ -28,7 +28,7 @@ Najlepszym punktem wyjścia do nauki o AI jest zrozumienie działania głównych
 
 ### Architektura LLM
 
-Na poniższej stronie znajdziesz podstawy każdego komponentu potrzebnego do zbudowania podstawowego LLM z użyciem transformerów:
+Na kolejnej stronie znajdziesz podstawowe informacje o każdym komponencie potrzebnym do zbudowania podstawowego LLM z użyciem transformerów:
 
 
 {{#ref}}
@@ -37,9 +37,15 @@ AI-llm-architecture/README.md
 
 ## Bezpieczeństwo AI
 
-### Frameworki ryzyka AI
+### Metodyka bezpieczeństwa agentów AI
 
-Dwa przydatne frameworki na początek do oceny ryzyka systemów AI to OWASP Machine Learning Security Top 10 oraz Google's Secure AI Framework (SAIF). Uzupełniają się one, zamiast stanowić wyczerpującą listę frameworków ryzyka AI.<sup>[[1]](#references)[[2]](#references)</sup>
+{{#ref}}
+AI-Agent-Security-Methodology.md
+{{#endref}}
+
+### Ramy oceny ryzyka AI
+
+Dwa przydatne frameworki na początek do oceny ryzyka systemów AI to OWASP Machine Learning Security Top 10 oraz Secure AI Framework (SAIF) firmy Google. Uzupełniają się, ale nie stanowią wyczerpującej listy frameworków oceny ryzyka AI.<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 {{#ref}}
@@ -48,7 +54,7 @@ AI-Risk-Frameworks.md
 
 ### Bezpieczeństwo promptów AI
 
-LLM spowodowały gwałtowny wzrost wykorzystania AI w ostatnich latach, ale nie są doskonałe i można je oszukać za pomocą adversarial prompts. Jest to bardzo ważny temat pozwalający zrozumieć, jak bezpiecznie używać AI i jak je atakować:
+W ostatnich latach LLM-y doprowadziły do gwałtownego wzrostu wykorzystania AI, ale nie są doskonałe i można je oszukać za pomocą adversarial prompts. To bardzo ważny temat, pozwalający zrozumieć, jak bezpiecznie korzystać z AI i jak je atakować:
 
 
 {{#ref}}
@@ -57,45 +63,45 @@ AI-Prompts.md
 
 ### RCE modeli AI
 
-Deweloperzy i firmy bardzo często uruchamiają modele pobrane z Internetu, jednak samo załadowanie modelu może wystarczyć do wykonania dowolnego kodu w systemie. Jest to bardzo ważny temat pozwalający zrozumieć, jak bezpiecznie używać AI i jak je atakować:
+Deweloperzy i firmy bardzo często uruchamiają modele pobrane z Internetu, jednak samo wczytanie modelu może wystarczyć do wykonania dowolnego kodu w systemie. To bardzo ważny temat, pozwalający zrozumieć, jak bezpiecznie korzystać z AI i jak je atakować:
 
 
 {{#ref}}
 AI-Models-RCE.md
 {{#endref}}
 
-### Omijanie KYC wspomagane przez AI
+### Obejście KYC z pomocą AI
 
-Generative video można łączyć z virtual-camera injection i manipulacją camera API w celu ominięcia słabych mechanizmów KYC, weryfikacji wieku i biometrycznych procedur liveness:
+Generatywne wideo można połączyć z wstrzykiwaniem obrazu z wirtualnej kamery i manipulacją API kamery, aby ominąć słabo zabezpieczone procesy KYC, weryfikacji wieku i biometrycznego potwierdzania żywotności:
 
 
 {{#ref}}
 KYC-Bypass-Using-AI.md
 {{#endref}}
 
-### Model Context Protocol AI
+### AI Model Context Protocol
 
-MCP (Model Context Protocol) to otwarty protokół służący do łączenia aplikacji AI z narzędziami i źródłami danych. Ponieważ serwery MCP mogą udostępniać dane i działania, oceny muszą obejmować autoryzację, zgodę, walidację danych wejściowych narzędzi oraz analizę granic zaufania.<sup>[[3]](#references)</sup>
+MCP (Model Context Protocol) to otwarty protokół łączenia aplikacji AI z narzędziami i źródłami danych. Ponieważ serwery MCP mogą udostępniać dane i działania, ocena musi uwzględniać autoryzację, zgodę, walidację danych wejściowych narzędzi oraz analizę granic zaufania.<sup>[[3]](#references)</sup>
 
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### Fuzzing wspomagany przez AI i zautomatyzowane wykrywanie podatności
+### Fuzzing z pomocą AI i automatyczne wykrywanie podatności
 
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
-### Inżynieria wsteczna wspomagana przez AI
+### Reverse engineering z pomocą AI
 
-[Częściowe lifting, wykrywanie niezmienniczego MBA, dekodowanie zależne od środowiska i walidacja automated-extractor](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
+[Partially lifting, wykrywanie niezmienników MBA, dekodowanie zależne od środowiska oraz walidacja automatycznych extractorów](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
 
-### Webowe boty black-box AI pentester
+### Boty AI do black-box pentestingu aplikacji webowych
 
-Agenci zasilani przez LLM mogą automatyzować długotrwałe procesy black-box web pentesting, jeśli zapewni się im obserwowalność, orkiestrację, obsługę uwierzytelnionych sesji i adversarial validation:
+Agenty oparte na LLM mogą automatyzować długotrwałe procesy black-box pentestingu aplikacji webowych, jeśli zapewni się im obserwowalność, orkiestrację, obsługę uwierzytelnionych sesji i walidację adversarialną:
 
 
 {{#ref}}
@@ -104,7 +110,7 @@ Web-Black-Box-AI-Pentester-Bots.md
 
 ## References
 
-- [1] [OWASP Machine Learning Security Top 10](https://owasp.org/www-project-machine-learning-security-top-10/)
-- [2] [Google — Secure AI Framework (SAIF)](https://saif.google/)
-- [3] [Model Context Protocol — Introduction](https://modelcontextprotocol.io/docs/getting-started/intro)
+- [1] [OWASP: 10 najważniejszych zagadnień bezpieczeństwa machine learning](https://owasp.org/www-project-machine-learning-security-top-10/)
+- [2] [Google — bezpieczny framework AI (SAIF)](https://saif.google/)
+- [3] [Model Context Protocol — wprowadzenie](https://modelcontextprotocol.io/docs/getting-started/intro)
 {{#include ../banners/hacktricks-training.md}}
