@@ -806,6 +806,34 @@ john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
 
+#### Explain and profile rule files
+
+Hashcat rules execute opcodes from left to right. This is easy to misread when operations act at position zero: `^e ^h ^t` prepends `e`, then `h`, then `t`, and therefore changes `password` into `thepassword`. Substitutions are case-sensitive byte comparisons, so a rule such as `sa@` is a no-op for an uppercase `A`. Test unfamiliar rules against representative lowercase, uppercase, and mixed-case basewords before spending GPU time on them.<sup>[[6]](#references)[[9]](#references)</sup>
+
+[HashcatRosetta](https://github.com/bandrel/HashcatRosetta) can show every intermediate candidate and can summarize the opcode distribution of a complete rule file. Static opcode counts reveal whether a file mostly appends, prepends, substitutes, or truncates characters. They do not prove that a rule will crack a password, but they help select a rule set that matches the target population's observed password patterns.<sup>[[6]](#references)[[9]](#references)</sup>
+
+```bash
+uv tool install git+https://github.com/bandrel/HashcatRosetta.git
+hashcat-rosetta --explain '^e ^h ^t' --baseword password
+hashcat-rosetta rules.rule --analyze-rules
+```
+
+#### Reduce redundant rules with debug logs
+
+Hashcat debug mode records rule transformations separately from normal status and result output. Mode `4` writes `baseword:rule:candidate`; mode `5` appends the source wordlist. Always set `--debug-file` explicitly. Otherwise Hashcat opens `hashcat.debugfile` in its profile directory, and redirecting stdout captures the console stream rather than these records. Debug files are opened in append mode, so remove or rotate an old file before a new measurement and protect it because it contains plaintext basewords and candidates.<sup>[[7]](#references)[[8]](#references)[[9]](#references)</sup>
+
+```bash
+rm -f debug.txt
+hashcat -m 1000 -a 0 --debug-mode 5 --debug-file debug.txt \
+  -r rules.rule hashes.txt wordlist.txt
+hashcat-rosetta debug.txt --rules --metric candidates --top 25
+hashcat-rosetta debug.txt --basewords --detail
+hashcat-rosetta debug.txt --wordlists --detail
+hashcat-rosetta debug.txt --export report.json --format json
+```
+
+Use `frequency` to find rules applied most often, `basewords` to measure distinct input coverage, and `candidates` to count distinct outputs. Candidate ranking is usually the best starting point for trimming because a frequently applied rule can still collapse many inputs onto duplicate candidates. Copy the highest-value rules into a smaller file, rerun it against the remaining hashes, and compare reports between runs. Mode `5` also shows whether each source wordlist contributes useful basewords; force parsing with `--debug-mode 4` or `--debug-mode 5` when colons in data make automatic detection ambiguous.<sup>[[6]](#references)[[9]](#references)</sup>
+
 - **Wordlist combinator** attack
 
 It's possible to **combine 2 wordlists into 1** with hashcat.\
@@ -887,6 +915,16 @@ hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt -1 ?d?s ?u?l?l?l?l?l?l?l?1
 hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt .\masks.hcmask
 ```
 
+#### Validate `.hcmask` files before a run
+
+A malformed line can be lost among valid masks, so validate the complete file and its estimated keyspace before launching the attack. HashcatRosetta reports the failing line and returns a non-zero status when any mask is invalid, which makes the check suitable for scripts or CI.<sup>[[6]](#references)[[9]](#references)</sup>
+
+```bash
+hashcat-rosetta masks.hcmask --verify-masks
+```
+
+Do not normalize mask files with generic CSV or text parsers. Hashcat supports custom charsets `?1` through `?8`, treats `#` as a comment only when it is the first byte, and removes backslash escapes in one pass before interpreting `?` tokens. Therefore leading whitespace before `#` is mask data, and escaping can change whether a sequence is a literal or a charset token.<sup>[[6]](#references)[[9]](#references)</sup>
+
 - Wordlist + Mask (`-a 6`) / Mask + Wordlist (`-a 7`) attack
 
 ```bash
@@ -938,5 +976,9 @@ Cracking Common Application Hashes
 - [3] [Hashcat example hashes and Microsoft Office modes](https://hashcat.net/wiki/doku.php?id=example_hashes)
 - [4] [Hashcat combinator attack](https://hashcat.net/wiki/doku.php?id=combinator_attack)
 - [5] [Estate planning of credentials](https://pentestpartners.com/security-blog/estate-planning-of-credentials)
+- [6] [HashcatRosetta repository](https://github.com/bandrel/HashcatRosetta)
+- [7] [Hashcat debug-file implementation](https://github.com/hashcat/hashcat/blob/master/src/debugfile.c)
+- [8] [Hashcat command-line help](https://github.com/hashcat/hashcat/blob/master/docs/hashcat-help.md)
+- [9] [HashcatRosetta: Reading the Rosetta Stone of Password Cracking](https://trustedsec.com/blog/hashcatrosetta-reading-the-rosetta-stone-of-password-cracking)
 
 {{#include ../banners/hacktricks-training.md}}
