@@ -186,7 +186,7 @@ For additional historical browser-automation and Chromium security cases, see th
 
 Chrome's default-profile restriction only blocks the command-line activation path. With sufficient same-user access to manipulate the browser process, the original [**CDP-Enabler**](https://github.com/deathflamingo/CDP-Enabler) and the Cobalt Strike [**CDP-Enable-BOF**](https://github.com/kingofthenops/CDP-Enable-BOF) invoke Chromium's non-exported `content::DevToolsAgentHost::StartRemoteDebuggingServer` inside the already-running `chrome.exe` or `msedge.exe`. The endpoint therefore belongs to the real profile, retaining its tabs, extensions, cookies and authenticated state.<sup>[[15]](#references)[[16]](#references)[[18]](#references)</sup>
 
-For ordinary Chrome/Edge processes, the BOF finds the browser window and loaded `chrome.dll`/`msedge.dll`, scans the remote PE for masked signatures, allocates stubs and a context block, temporarily replaces the window procedure, and dispatches the final call on the browser **UI thread**. The relevant runtime inputs are `StartRemoteDebuggingServer`, Chromium's `operator new`, `TCPServerSocketFactory::CreateForHttpServer`, and the factory vtable. Execution stops unless each mandatory signature has a unique match.<sup>[[15]](#references)[[16]](#references)</sup>
+For ordinary x64 Chrome/Edge processes, the BOF finds the browser window and loaded `chrome.dll`/`msedge.dll`, scans the remote PE for masked signatures, allocates stubs and a context block, temporarily replaces the window procedure, and dispatches the final call on the browser **UI thread**. The relevant runtime inputs are `StartRemoteDebuggingServer`, Chromium's `operator new`, `TCPServerSocketFactory::CreateForHttpServer`, and the factory vtable. Execution stops unless each mandatory signature has a unique match.<sup>[[15]](#references)[[16]](#references)</sup>
 
 The BOF accepts a browser mode and optional port. Its helper script can then verify the endpoint and collect cookies; `chrome-iso` is a separate path for Chrome's Windows Process Isolation boundary.<sup>[[16]](#references)</sup>
 
@@ -197,7 +197,7 @@ cdp-enable chrome-iso
 python .\grab_cookies.py --port 9222 --output cookies.json
 ```
 
-The `chrome-iso` path avoids write/thread handles to the isolated process. It identifies the installed `chrome.dll` whose PE image size matches the live process, resolves symbols from that local image, and uses Chromium's `WindowImpl` dispatch plus synchronous `WM_COPYDATA` and an existing-image User32 hook to reach the UI thread.<sup>[[16]](#references)</sup>
+The `chrome-iso` path uses only query-limited handles to the isolated process. It identifies the installed `chrome.dll` whose PE image size matches the live process, resolves symbols from that local image, and uses Chromium's `WindowImpl` dispatch plus synchronous `WM_COPYDATA` and an existing-image User32 hook to reach the UI thread.<sup>[[16]](#references)</sup>
 
 > [!WARNING]
 > This is a **post-compromise browser-process manipulation** technique, not an unauthenticated network bypass. It is build-dependent because the relevant C++ symbols are not exported and can change after browser updates.<sup>[[15]](#references)[[16]](#references)[[18]](#references)</sup>
