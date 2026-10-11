@@ -2,10 +2,10 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Plaaslike luisterdienste, Unix-sokke en netwerkgerigte sagteware kan paaie blootlê wat nie tydens ’n eksterne skandering sigbaar is nie. Begin met die gasheer se luisterdienste en die proses wat elke eindpunt besit.
+Plaaslike listeners, Unix-sockets en sagteware wat aan die netwerk blootgestel is, kan paaie openbaar wat nie in ’n eksterne skandering sigbaar is nie. Begin met die dienste waarna die host luister en die proses wat elke eindpunt besit.
 
-- [Verkeersvaslegging, firewall- en uitgaande-verkeertriage](traffic-capture-and-firewall-egress.md) dek pakkievaslegging, filtering, gevolmagtigdes en verbindingstoetse.
-- [Plaaslike netwerk- en soktriage](local-network-and-socket-triage.md) dek loopback-dienste, Unix-sokke en houernetwerke.
-- [Sokopdrag-inspuiting](socket-command-injection.md) dek opdragte wat deur blootgestelde plaaslike sokke aanvaar word.
-- [Cisco vManage](cisco-vmanage.md) dokumenteer ’n produkspesifieke teiken en verwante kontroles.
+- [Verkeersvaslegging, firewall- en egress-triage](traffic-capture-and-firewall-egress.md) dek packet capture, filtrering, proxies en konnektiwiteitstoetse.
+- [Plaaslike netwerk- en socket-triage](local-network-and-socket-triage.md) dek loopback-dienste, Unix-sockets en containernetwerke.
+- [Socket command injection](socket-command-injection.md) dek opdragte wat via blootgestelde plaaslike sockets aanvaar word.
+- [Cisco vManage](cisco-vmanage.md) beskryf ’n produkspesifieke teiken en verwante kontroles.
 {{#include ../../banners/hacktricks-training.md}}
