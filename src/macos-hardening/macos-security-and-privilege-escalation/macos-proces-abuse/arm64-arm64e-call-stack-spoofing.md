@@ -12,11 +12,7 @@ An unwinder does not prove that a compiler-generated prologue created a record. 
 
 ## ARM64 frame state
 
-The [ARM64 assembly overview](../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md) provides broader register and calling-convention background.
-
-`SP` is the current allocation boundary, `x29`/`FP` conventionally points to the saved frame record, `x30`/`LR` holds the immediate return address, and `x19-x28` are callee-saved GPRs. `BL`/`BLR` write the address following the call into LR; unlike an x86 `call`, they do not push it. A non-leaf framed function therefore saves LR explicitly, normally alongside the caller FP.<sup>[[1]](#references)[[4]](#references)</sup>
-
-A common frame is created with `stp x29, x30, [sp, #-16]!` followed by `mov x29, sp`. Its Canonical Frame Address (CFA), representing the caller's entry `SP`, is `FP+0x10`:<sup>[[1]](#references)[[4]](#references)</sup>
+The [ARM64 assembly overview](../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md) covers the register roles and calling convention. For a conventional frame created with `stp x29, x30, [sp, #-16]!` followed by `mov x29, sp`, the Canonical Frame Address (CFA), representing the caller's entry `SP`, is `FP+0x10`:<sup>[[1]](#references)[[4]](#references)</sup>
 
 ```text
 higher addresses
