@@ -1,109 +1,119 @@
-# Container Runtimes、Engines、Builders、And Sandboxes
+# コンテナ Runtime、Engine、Builder、Sandbox
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Container securityにおける最大の混乱要因の1つは、まったく異なる複数のコンポーネントが同じ1つの言葉にまとめられてしまうことです。「Docker」は、image format、CLI、daemon、build system、runtime stack、あるいは単にcontainers全般の概念を指す場合があります。Security workでは、この曖昧さが問題になります。異なるlayerが異なるprotectionを担っているためです。悪いbind mountが原因のbreakoutは、low-level runtimeのbugが原因のbreakoutとは異なり、どちらもKubernetesにおけるcluster policyのミスとは別物です。
+コンテナセキュリティで大きな混乱を招く原因の一つは、まったく異なる複数のコンポーネントが、しばしば同じ言葉でひとまとめにされることです。「Docker」は、イメージ形式、CLI、daemon、build system、runtime stack、あるいは単にコンテナ全般を指す場合があります。セキュリティの作業では、この曖昧さが問題になります。レイヤーごとに担う保護が異なるためです。不適切な bind mount による脱出は、低レベル runtime の脆弱性による脱出とは異なり、どちらも Kubernetes の cluster policy の設定ミスとは別物です。
 
-このページでは、ecosystemをroleごとに分け、protectionやweaknessが実際にどこに存在するのかを、このセクションの後半で正確に説明できるようにします。
+このページでは、エコシステムを役割ごとに分け、以降のセクションで保護や弱点が実際にどこにあるのかを正確に説明できるようにします。
 
-## OCIを共通言語として
+## 共通言語としての OCI
 
-Modern Linux container stackは、OCI specificationsの一連の仕様に対応しているため、相互運用できることがよくあります。**OCI Image Specification**は、imagesとlayersの表現方法を定義します。**OCI Runtime Specification**は、namespaces、mounts、cgroups、security settingsを含め、runtimeがprocessを起動する方法を定義します。**OCI Distribution Specification**は、registriesがcontentを公開する方法を標準化します。
+現代の Linux コンテナ stack は、OCI 仕様群に準拠しているため、相互運用できることがよくあります。**OCI Image Specification** は、イメージと layer の表現方法を定めています。**OCI Runtime Specification** は、namespace、mount、cgroup、セキュリティ設定などを含め、runtime がプロセスを起動する方法を定めています。**OCI Distribution Specification** は、registry がコンテンツを公開する方法を標準化しています。
 
-これは、あるtoolでbuildしたcontainer imageを別のtoolで実行できることが多い理由や、複数のenginesが同じlow-level runtimeを共有できる理由を説明します。また、多くの製品が同じOCI runtime configurationを構築し、同じ少数のruntimesに渡しているため、異なる製品間でsecurity behaviorが似て見える理由も説明できます。
+このことから、あるツールで作成したコンテナイメージを別のツールで実行できることが多い理由や、複数の engine が同じ低レベル runtime を共有できる理由がわかります。また、異なる製品間でセキュリティ動作が似ていることがある理由も説明できます。多くの製品は、同じ OCI runtime 設定を構築し、限られた種類の runtime に渡しているからです。
 
-## Low-Level OCI Runtimes
+## 低レベル OCI Runtime
 
-low-level runtimeは、kernel boundaryに最も近いcomponentです。実際にnamespacesを作成し、cgroup settingsを書き込み、capabilitiesとseccomp filtersを適用し、最後にcontainer processを`execve()`する部分です。mechanicalな意味で「container isolation」について議論するとき、明示的にそう言わなくても、通常はこのlayerを指しています。
+低レベル runtime は、kernel 境界に最も近いコンポーネントです。実際に namespace を作成し、cgroup 設定を書き込み、capability と seccomp filter を適用し、最後にコンテナプロセスを `execve()` する部分です。機構としての「コンテナ分離」について人々が話すとき、明示していなくても、通常はこのレイヤーを指しています。
 
 ### `runc`
 
-`runc`はreference OCI runtimeであり、現在も最もよく知られたimplementationです。Docker、containerd、多くのKubernetes deploymentsで広く使用されています。`runc`形式のenvironmentを対象とするpublic researchやexploitation materialが多いのは、単純に普及していること、そしてLinux containerを思い浮かべたときに多くの人が想定するbaselineを`runc`が定義しているためです。したがって、`runc`を理解することは、classic container isolationについて強固なmental modelを得ることにつながります。
+`runc` は OCI の reference runtime であり、今も最もよく知られた実装です。Docker、containerd、および多くの Kubernetes 環境で広く使われています。`runc` 形式の環境を対象にした公開研究や exploit 情報が多いのは、単に普及しているからだけでなく、多くの人が Linux コンテナを想像するときの基準を `runc` が定めているからです。そのため、`runc` を理解すると、従来型のコンテナ分離について強固なメンタルモデルを得られます。
 
 ### `crun`
 
-`crun`は別のOCI runtimeで、Cで記述され、modern Podman environmentsで広く使用されています。優れたcgroup v2 support、強力なrootless ergonomics、低いoverheadで評価されることが多いruntimeです。Securityの観点で重要なのは、別のlanguageで書かれていることではなく、同じroleを担っていることです。つまり、OCI configurationをkernel上で動作するprocess treeに変換するcomponentです。rootless Podman workflowがより安全に感じられる場合、それは`crun`が魔法のようにすべてを修正するからではなく、その周辺のstackがuser namespacesとleast privilegeをより強く重視する傾向にあるためです。
+`crun` は C で書かれた別の OCI runtime で、現代の Podman 環境で広く使われています。cgroup v2 のサポート、rootless の使いやすさ、オーバーヘッドの低さが評価されることがよくあります。セキュリティの観点で重要なのは、異なる言語で書かれていることではなく、同じ役割を担う点です。つまり、OCI 設定を kernel 配下で動作するプロセスツリーに変換するコンポーネントです。rootless Podman の workflow がより安全に感じられることが多いのは、`crun` がすべてを魔法のように解決するからではなく、その周辺の stack 全体が user namespace と最小権限をより重視する傾向があるからです。
 
-### gVisorの`runsc`
+### gVisor の `runsc`
 
-`runsc`はgVisorが使用するruntimeです。ここではboundaryの意味が大きく変わります。通常の方法でほとんどのsyscallsをhost kernelへ直接渡す代わりに、gVisorはuserspace kernel layerを挿入し、Linux interfaceの大部分をemulateまたはmediateします。その結果は、いくつかの追加flagsを付けた通常の`runc` containerではなく、host-kernel attack surfaceを減らすことを目的とした別のsandbox designになります。Compatibilityとperformanceのtradeoffsはこのdesignの一部であるため、`runsc`を使用するenvironmentは、通常のOCI runtime environmentとは異なるものとしてdocumentすべきです。
+`runsc` は gVisor が使用する runtime です。ここでは境界の意味が大きく変わります。通常の方法で大部分の syscall を host kernel に直接渡す代わりに、gVisor は userspace kernel layer を挿入し、Linux interface の大部分をエミュレートまたは仲介します。その結果は、いくつかの flag を追加した通常の `runc` コンテナではありません。host kernel の攻撃対象領域を減らすことを目的とした、別種の sandbox 設計です。互換性とパフォーマンスのトレードオフも設計の一部であるため、`runsc` を使う環境は、通常の OCI runtime 環境とは分けて記録する必要があります。
 
 ### `kata-runtime`
 
-Kata Containersは、workloadをlightweight virtual machine内で起動することでboundaryをさらに広げます。管理上はcontainer deploymentのように見え、orchestration layersもそのように扱う場合がありますが、基盤となるisolation boundaryはclassicなhost-kernel-shared containerよりもvirtualizationに近いものです。そのためKataは、container-centric workflowを捨てずに、より強いtenant isolationが必要な場合に有用です。
+Kata Containers は、軽量 virtual machine 内で workload を起動することで、さらに境界を広げます。管理上はコンテナ deployment のように見え、orchestration layer もコンテナとして扱う場合がありますが、基盤となる分離境界は従来型の host kernel 共有コンテナというより仮想化に近いものです。そのため Kata は、コンテナ中心の workflow を捨てずに、より強い tenant 分離が必要な場合に有用です。
 
-## Engines And Container Managers
+## Engine とコンテナ Manager
 
-low-level runtimeがkernelと直接通信するcomponentであるのに対し、engineまたはmanagerは、通常ユーザーやoperatorsが操作するcomponentです。image pulls、metadata、logs、networks、volumes、lifecycle operations、API exposureを処理します。このlayerは非常に重要です。実際のcompromiseの多くはここで発生するためです。low-level runtime自体が完全に正常でも、runtime socketやdaemon APIへのaccessはhost compromiseと同等になり得ます。
+低レベル runtime が kernel と直接やり取りするコンポーネントなら、engine または manager は、ユーザーや運用担当者が通常操作するコンポーネントです。イメージの pull、metadata、log、network、volume、lifecycle 操作、API 公開を処理します。このレイヤーは非常に重要です。実際の侵害の多くはここで発生するためです。runtime socket や daemon API へのアクセスは、低レベル runtime 自体に問題がなくても、host の侵害と同等になり得ます。
 
 ### Docker Engine
 
-Docker Engineはdevelopersにとって最も認識しやすいcontainer platformであり、container vocabularyがDocker中心になった理由の1つです。一般的な経路は`docker` CLIから`dockerd`へ進み、`dockerd`が`containerd`やOCI runtimeなどのlower-level componentsを調整します。Historically、Docker deploymentsは**rootful**であることが多く、そのためDocker socketへのaccessは非常に強力なprimitiveでした。これが、実用的なprivilege-escalation materialの多くが`docker.sock`に注目する理由です。processが`dockerd`に対してprivileged containerの作成、host pathsのmount、host namespacesへの参加を要求できるなら、kernel exploitはまったく必要ない可能性があります。
+Docker Engine は、開発者にとって最もよく知られたコンテナ platform であり、コンテナに関する語彙が Docker を中心に形作られた理由の一つでもあります。一般的な経路は `docker` CLI から `dockerd` へ、そこから `containerd` や OCI runtime などの低レベルコンポーネントへと進みます。歴史的に、Docker deployment は**rootful**であることが多く、そのため Docker socket へのアクセスは非常に強力な権限でした。実用的な権限昇格の解説で `docker.sock` が頻繁に取り上げられるのはこのためです。プロセスが `dockerd` に、privileged container の作成、host path の mount、host namespace への参加を要求できるなら、kernel exploit は必要ない場合があります。
+
+release 番号は、dot を除去するのではなく、major、minor、patch の各要素で比較してください。たとえば、minor がゼロ埋めされていても、`18.09.1` は `18.09.2` と `18.09.4` のどちらよりも古いバージョンです。Docker の[18.09 release notes](https://docs.docker.com/engine/release-notes/18.09/)には、CVE-2019-5736 に対する同梱 `runc` の修正が 18.09.2 に、CVE-2019-13139 に対する build-reference の修正が 18.09.4 に含まれると記載されています。これらはバージョンを調査する手掛かりであり、exploit が実際に到達可能である証明ではありません。同じ release notes には、daemon、client、runtime は別々に package 化されているという注意もあります。そのため、daemon のバージョンに加えて、インストール済み runtime と vendor の backport も確認してください。また、build-reference の問題には、影響を受ける build workflow と攻撃者が制御する入力へのアクセスも必要です。
 
 ### Podman
 
-Podmanは、よりdaemonlessなmodelを中心に設計されました。Operationally、これはcontainersが、長期間稼働するprivileged daemonを介するのではなく、standard Linux mechanismsによって管理される単なるprocessであるという考えを強めます。またPodmanには、最初に学んだclassic Docker deploymentsよりもはるかに強力な**rootless**の仕組みがあります。これによってPodmanが自動的に安全になるわけではありませんが、特にuser namespaces、SELinux、`crun`と組み合わせた場合、defaultのrisk profileは大きく変わります。
+Podman は、より daemonless なモデルを前提に設計されています。運用面では、コンテナは長期間動作する特権 daemon ではなく、標準的な Linux の仕組みで管理される単なるプロセスだという考え方を後押しします。また、Podman は、多くの人が最初に学んだ従来型 Docker deployment と比べ、**rootless** のサポートがはるかに充実しています。Podman が自動的に安全になるわけではありませんが、特に user namespace、SELinux、`crun` と組み合わせた場合、デフォルトのリスクプロファイルは大きく変わります。
 
 ### containerd
 
-containerdは、多くのmodern stackにおけるcore runtime management componentです。Dockerの下で使用されるほか、主要なKubernetes runtime backendsの1つでもあります。強力なAPIsを公開し、imagesとsnapshotsを管理し、最終的なprocess creationをlow-level runtimeへ委譲します。containerdに関するsecurity discussionsでは、containerd socketへのaccessや`ctr`/`nerdctl` functionalityへのaccessが、interfaceやworkflowがDockerのAPIほど「developer friendly」に感じられなくても、DockerのAPIへのaccessと同じくらい危険になり得ることを強調すべきです。
+containerd は、多くの現代的な stack で中核となる runtime 管理コンポーネントです。Docker の下で使われるほか、Kubernetes の主要な runtime backend の一つでもあります。強力な API を公開し、イメージと snapshot を管理し、最終的なプロセス作成を低レベル runtime に委ねます。containerd に関するセキュリティの議論では、containerd socket や `ctr`/`nerdctl` の機能へのアクセスが、Docker API へのアクセスと同じくらい危険になり得ることを強調してください。interface や workflow がそれほど「開発者向け」に見えなくても同じです。
 
 ### CRI-O
 
-CRI-OはDocker Engineよりもfocusedです。general-purpose developer platformではなく、Kubernetes Container Runtime Interfaceを適切に実装することを中心に構築されています。そのため、Kubernetes distributionsやOpenShiftのようなSELinux-heavy ecosystemsで特によく使用されます。Securityの観点では、この狭いscopeが有用です。conceptual clutterを減らせるためです。CRI-Oはまさに「Kubernetes用にcontainersを実行する」layerの一部であり、everything-platformではありません。
+CRI-O は Docker Engine よりも用途が絞られています。汎用の開発者向け platform ではなく、Kubernetes Container Runtime Interface を適切に実装することを目的として構築されています。そのため、Kubernetes distribution や OpenShift などの SELinux を重視する ecosystem で特によく使われています。セキュリティの観点では、この用途の絞り込みが役立ちます。概念上の混乱が減り、CRI-O が「Kubernetes 用にコンテナを実行する」レイヤーの一部であることが明確になるからです。
 
-### Incus、LXD、And LXC
+Kubernetes node が CRI-O を使用している場合は、namespace で Pod を作成できる現在の identity かどうかに加えて、**node で稼働中の CRI-O release**を確認してください。[CVE-2022-0811](https://github.com/cri-o/cri-o/security/advisories/GHSA-6x2m-w449-qwx7)では、細工された Pod sysctl 値によって host kernel parameter が変更され、影響を受ける release で host-root 実行に至る可能性がありました。upstream advisory には、修正済み release と回避策が記載されています。ローカルでの `crio --version` では、Minikube などの node container 内部にある runtime を見落とす場合があります。読み取り可能な Minikube 起動 log はバージョンを推測する手掛かりにはなりますが、過去の情報であり、稼働中の runtime やその patch 状態を証明するものではありません。これが到達可能な権限昇格経路だと判断する前に、実際の node runtime、Pod 作成の認可、admission rule、関連する seccomp と user namespace の境界を確認してください。
 
-Incus/LXD/LXC systemsは、Docker-style application containersとは分けて考える価値があります。これらはしばしば**system containers**として使用されるためです。system containerは通常、より完全なuserspace、long-running services、より豊富なdevice exposure、より広範なhost integrationを備えたlightweight machineに近い動作を期待されます。Isolation mechanismsは依然としてkernel primitivesですが、operational expectationsは異なります。その結果、ここでのmisconfigurationsは「bad app-container defaults」というより、lightweight virtualizationやhost delegationにおけるミスに近い形で現れることが多くなります。
+ローカルで `pinns` を直接調べる方法もあります。[調査者によると、問題のある helper の実行に Kubernetes は不要です](https://www.crowdstrike.com/en-us/blog/cr8escape-new-vulnerability-discovered-in-cri-o-container-engine-cve-2022-0811/)。現在の account が root 所有の setuid `pinns` を実行できるか、その権限移行が NoNewPrivs または `nosuid` mount によって阻止されるか、インストール済みの**helper build**に修正が含まれているかを確認してください。[upstream advisory](https://github.com/cri-o/cri-o/security/advisories/GHSA-6x2m-w449-qwx7)には修正済み release のバージョンが記載されていますが、daemon に表示されるバージョンだけでは、どの helper binary がインストールされているかは証明できません。また、distribution の backport によって影響の有無が変わる可能性があります。setuid file はあくまで候補にすぎません。日常的な調査の際に実行することなく、helper の出所、設定、host の sysctl 動作を検証してください。
+
+### Incus、LXD、LXC
+
+Incus/LXD/LXC の system は、**system container**として使われることが多いため、Docker 型の application container と分けて考える価値があります。system container は通常、より完全な userspace、長期間稼働する service、豊富な device 公開、より広範な host 連携を備えた、軽量な machine に近いものとして期待されます。分離には引き続き kernel の primitive が使われますが、運用上の想定は異なります。そのため、ここでの設定ミスは「app container のデフォルト設定の不備」というより、軽量仮想化や host の権限委譲の誤りとして現れることがよくあります。
 
 ### systemd-nspawn
 
-systemd-nspawnはsystemd-nativeであり、testing、debugging、OS-like environmentsの実行に非常に有用なため、興味深い位置を占めています。dominantなcloud-native production runtimeではありませんが、labsやdistro-oriented environmentsで十分頻繁に登場するため、言及する価値があります。Security analysisにおいて、これは「container」という概念が複数のecosystemsとoperational stylesにまたがっていることを改めて示します。
+systemd-nspawn は systemd に組み込まれており、テスト、debug、OS のような環境の実行に便利なため、興味深い位置を占めています。cloud-native の本番 runtime として主流ではありませんが、lab や distro 中心の環境では十分に見かけるため、触れておく価値があります。セキュリティ分析において、これは「コンテナ」という概念が複数の ecosystem と運用形態にまたがることを改めて示す例です。
 
 ### Apptainer / Singularity
 
-Apptainer（旧称Singularity）はresearchやHPC environmentsで一般的です。そのtrust assumptions、user workflow、execution modelは、Docker/Kubernetes-centric stacksとは重要な点で異なります。特にこれらのenvironmentでは、usersに広範なprivileged container-management powersを与えずに、packaged workloadsを実行させることが重視される場合があります。reviewerがすべてのcontainer environmentを基本的に「server上のDocker」だと想定すると、これらのdeploymentsを大きく誤解することになります。
+Apptainer（旧 Singularity）は、研究や HPC 環境で一般的です。信頼モデル、ユーザー workflow、実行モデルは、Docker/Kubernetes 中心の stack と重要な点で異なります。特に、ユーザーに広範な特権コンテナ管理権限を与えずに、package 化された workload を実行できるようにすることが重視される環境が多くあります。すべてのコンテナ環境が基本的に「server 上の Docker」だと考えると、こうした deployment を大きく誤解することになります。
 
-## Build-Time Tooling
+## Build 時の Tooling
 
-多くのsecurity discussionsはrun timeについてのみ扱います。しかしbuild-time toolingも重要です。image contents、build secrets exposure、trusted contextが最終artifactにどの程度埋め込まれるかを決定するためです。
+セキュリティの議論では実行時だけが取り上げられることが多いものの、build 時の tooling も重要です。イメージの内容、build secret の漏洩、信頼された context が最終 artifact にどれだけ含まれるかを左右するためです。
 
-**BuildKit**と`docker buildx`は、caching、secret mounting、SSH forwarding、multi-platform buildsなどのfeaturesをサポートするmodern build backendsです。これらは便利なfeaturesですが、securityの観点では、secretsがimage layersにleakする場所や、広すぎるbuild contextによって本来含めるべきでないfilesが露出する場所も生み出します。**Buildah**はOCI-native ecosystems、特にPodman周辺で同様のroleを担います。一方、**Kaniko**は、build pipelineにprivileged Docker daemonを与えたくないCI environmentsでよく使用されます。
+**BuildKit** と `docker buildx` は、cache、secret の mount、SSH forwarding、multi-platform build などの機能をサポートする現代的な build backend です。これらは便利な機能ですが、セキュリティの観点では、secret が image layer に leak したり、広すぎる build context によって本来含めるべきでない file が露出したりする箇所にもなります。**Buildah** は OCI native な ecosystem、特に Podman の周辺で同様の役割を果たします。一方、**Kaniko** は、build pipeline に特権 Docker daemon を与えたくない CI 環境でよく使われます。
 
-重要なlessonは、image creationとimage executionは異なるphasesだということです。しかし、弱いbuild pipelineは、containerが起動されるずっと前から弱いruntime postureを作り出す可能性があります。
+重要なのは、イメージの作成と実行は別々の段階だということです。しかし、弱い build pipeline は、コンテナが起動されるずっと前に、実行時のセキュリティ態勢を弱める可能性があります。
 
-## Orchestration Is Another Layer, Not The Runtime
+## Orchestration は Runtime とは別のレイヤー
 
-Kubernetesをruntimeそのものと同一視すべきではありません。Kubernetesはorchestratorです。Podsをscheduleし、desired stateを保存し、workload configurationを通じてsecurity policyを表現します。その後kubeletがcontainerdやCRI-OなどのCRI implementationと通信し、それらがさらに`runc`、`crun`、`runsc`、`kata-runtime`などのlow-level runtimeを呼び出します。
+Kubernetes を runtime 自体と同一視してはいけません。Kubernetes は orchestrator です。Pod をスケジュールし、desired state を保存し、workload 設定を通じてセキュリティ policy を表現します。kubelet はその後、containerd や CRI-O などの CRI 実装と通信し、さらにその実装が `runc`、`crun`、`runsc`、`kata-runtime` などの低レベル runtime を呼び出します。
 
-この分離は重要です。多くの人が、実際にはnode runtimeによってenforceされているprotectionを「Kubernetes」に誤って帰属させたり、Pod specに由来するbehaviorを「containerd defaults」のせいにしたりするためです。実際のsecurity postureはcompositionです。orchestratorが何かを要求し、runtime stackがそれを変換し、最終的にkernelがenforceします。
+この区別は重要です。多くの人は、実際には node runtime が適用している保護を誤って「Kubernetes の保護」と説明したり、Pod spec に起因する動作を「containerd のデフォルト設定」のせいにしたりします。実際のセキュリティ態勢は複数要素の組み合わせです。orchestrator が要求を出し、runtime stack がそれを変換し、最後に kernel が適用します。
 
-## Why Runtime Identification Matters During Assessment
+## Assessment 中に Runtime を特定する理由
 
-早い段階でengineとruntimeを特定すれば、その後の多くのobservationsを容易に解釈できます。rootless Podman containerからは、user namespacesが関係している可能性が高いと考えられます。workloadにmountされたDocker socketからは、API-driven privilege escalationが現実的なpathだと推測できます。CRI-O/OpenShift nodeでは、SELinux labelsとrestricted workload policyをすぐに検討すべきです。gVisorやKata environmentでは、classicな`runc` breakout PoCが同じように動作すると想定することに慎重になるべきです。
+早い段階で engine と runtime を特定すれば、後から得られる多くの所見を解釈しやすくなります。rootless Podman container であれば、user namespace が関係している可能性が高いと考えられます。workload に Docker socket が mount されていれば、API を利用した権限昇格が現実的な経路になります。CRI-O/OpenShift node では、SELinux label と制限付き workload policy をすぐに考慮すべきです。gVisor や Kata の環境では、従来型の `runc` breakout PoC が同じように動作すると思い込まないよう、より慎重になる必要があります。
 
-そのため、container assessmentの最初のstepsの1つとして、常に2つの簡単な質問に答えるべきです。**containerを管理しているcomponentはどれか**、そして**実際にprocessを起動したruntimeはどれか**。これらの答えが明確になれば、残りのenvironmentは通常、はるかに容易にreasoningできるようになります。
+そのため、コンテナ assessment の最初の手順では、次の2つの簡単な質問に必ず答えるべきです。**どのコンポーネントがコンテナを管理しているか**、そして**どの runtime が実際にプロセスを起動したか**。答えが明確になれば、通常、環境の残りの部分もはるかに理解しやすくなります。
 
-## Runtime Vulnerabilities
+## Runtime の脆弱性
 
-すべてのcontainer escapeがoperator misconfigurationによって発生するわけではありません。runtime自体がvulnerable componentである場合もあります。これは、workloadが慎重に見えるconfigurationで実行されていても、low-level runtime flawを通じてexposedになる可能性があるため重要です。
+コンテナ escape の原因がすべて、運用担当者の設定ミスとは限りません。runtime 自体が脆弱なコンポーネントである場合もあります。注意深く設定されているように見える workload でも、低レベル runtime の欠陥を通じて影響を受ける可能性があるため、これは重要です。
 
-classicな例は、`runc`における**CVE-2019-5736**です。malicious containerがhostの`runc` binaryをoverwriteし、その後の`docker exec`や同様のruntime invocationがattacker-controlled codeをtriggerするまで待機できました。このexploit pathは、runtimeがexec handling中にcontainer process spaceへ再侵入する方法を悪用するため、単純なbind-mountやcapability mistakeとは大きく異なります。<sup>[[1]](#references)</sup>
+典型例は `runc` の **CVE-2019-5736** です。悪意のあるコンテナが host の `runc` binary を上書きし、その後の `docker exec` などの runtime 呼び出しを待って、攻撃者が制御する code を実行させる可能性がありました。この exploit 経路は、単純な bind-mount や capability の設定ミスとは大きく異なります。exec 処理中に runtime がコンテナのプロセス空間へ再び入る方法を悪用するためです。<sup>[[1]](#references)</sup>
 
-red-teamの観点から見たminimal reproduction workflowは、次のとおりです。
+red-team の観点からの最小限の再現 workflow は次のとおりです。
+
 ```bash
 go build main.go
 ./main
 ```
-次に、host から:
+
+次に、ホスト側から:
+
 ```bash
 docker exec -it <container-name> /bin/sh
 ```
-重要なのは、過去の exploit の正確な実装ではなく、評価上の意味です。ランタイムのバージョンに脆弱性がある場合、目に見えるコンテナ設定が明らかに弱く見えなくても、通常の in-container code execution だけでホストを compromise するのに十分な可能性があります。
 
-`runc` の `CVE-2024-21626`、BuildKit の mount race、containerd の parsing bug など、最近のランタイム CVE は同じ点を強調しています。ランタイムのバージョンとパッチレベルは、単なる保守上の細部ではなく、security boundary の一部です。
+重要なのは、過去のexploitの実装そのものではなく、評価上の示唆です。runtimeのバージョンに脆弱性がある場合、見た目上のコンテナ設定に明らかな弱点がなくても、コンテナ内で通常のコード実行ができるだけでホストを侵害できる可能性があります。
+
+`runc`の`CVE-2024-21626`、BuildKitのmount race、containerdのparsing bugなど、近年のruntime CVEも同じ点を示しています。runtimeのバージョンとpatch levelは、単なる保守上の細事ではなく、セキュリティ境界の一部です。
 
 ## References
 
-- [1] [runC 経由で Docker から脱出する – CVE-2019-5736 の解説](https://unit42.paloaltonetworks.com/breaking-docker-via-runc-explaining-cve-2019-5736/)
+- [1] [runC経由でDockerから脱出する — CVE-2019-5736の解説](https://unit42.paloaltonetworks.com/breaking-docker-via-runc-explaining-cve-2019-5736/)
 {{#include ../../../banners/hacktricks-training.md}}

