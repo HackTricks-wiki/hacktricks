@@ -11,35 +11,24 @@ class MDBookSidebarScrollbox extends HTMLElement {
         // Modify TOC to support external links
         var toc = '{{#toc}}{{/toc}}';
         // Handle both old mdbook (<div>) and new mdbook 0.5 (<span>) formats
-        // External links open in new tab with external link icon
-        toc = toc.replace(/<(div|span)>([^$<>]*)\$\$external:([^$<>]*)\$\$<\/(div|span)>/g, '<a class="external-link" href="$3" target="_blank" rel="noopener noreferrer">$2 ↗</a>') 
+        // External links open in a new tab. CSS adds the single external-link icon.
+        toc = toc.replace(/<(div|span)>([^$<>]*)\$\$external:([^$<>]*)\$\$<\/(div|span)>/g, '<a class="external-link" href="$3" target="_blank" rel="noopener noreferrer">$2</a>')
         this.innerHTML = toc
         // Set the current, active page, and reveal it if it's hidden
-        let current_page = document.location.href.toString();
-        if (current_page.endsWith("/")) {
-            current_page += "index.html";
-        }
+        var currentPage = normalizeChapterUrl(document.location.href);
         var links = Array.prototype.slice.call(this.querySelectorAll("a"));
         var l = links.length;
         for (var i = 0; i < l; ++i) {
             var link = links[i];
             var href = link.getAttribute("href");
-            if (href && !href.startsWith("#") && !/^(?:[a-z+]+:)?\/\//.test(href)) {
+            var isChapterLink = href && !href.startsWith("#") && !link.classList.contains("chapter-fold-toggle") && !link.classList.contains("external-link");
+            if (isChapterLink && !/^(?:[a-z+]+:)?\/\//.test(href)) {
                 link.href = path_to_root + href;
             }
             // The "index" page is supposed to alias the first chapter in the book.
-            if (link.href === current_page || (i === 0 && path_to_root === "" && current_page.endsWith("/index.html"))) {
+            if (isChapterLink && (normalizeChapterUrl(link.href) === currentPage || (i === 0 && path_to_root === "" && currentPage.endsWith("/index.html")))) {
                 link.classList.add("active");
-                var parent = link.parentElement;
-                if (parent && parent.classList.contains("chapter-item")) {
-                    parent.classList.add("expanded");
-                }
-                while (parent) {
-                    if (parent.tagName === "LI" && parent.classList.contains("chapter-item")) {
-                        parent.classList.add("expanded");
-                    }
-                    parent = parent.parentElement;
-                }
+                expandChapterPath(link);
             }
         }
         updateChapterNavigation(links);
@@ -96,6 +85,14 @@ function normalizeChapterUrl(url) {
         return normalized.href;
     } catch (_) {
         return "";
+    }
+}
+
+function expandChapterPath(link) {
+    var chapter = link.closest("li.chapter-item");
+    while (chapter) {
+        chapter.classList.add("expanded");
+        chapter = chapter.parentElement && chapter.parentElement.closest("li.chapter-item");
     }
 }
 

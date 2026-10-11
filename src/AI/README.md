@@ -89,6 +89,10 @@ AI-MCP-Servers.md
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
+### AI-Assisted Reverse Engineering
+
+[Partial lifting, invariant MBA detection, environment-bound decoding, and automated-extractor validation](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
+
 ### Web Black-Box AI Pentester Bots
 
 LLM-powered agents can automate long-running black-box web pentesting workflows when they are supported by observability, orchestration, authenticated session handling, and adversarial validation:

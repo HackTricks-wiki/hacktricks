@@ -41,6 +41,12 @@ runc run demo
 > [!CAUTION]
 > The documented `runc run` workflow is rootful: runc's own examples label it "run as root." An unprivileged user needs a rootless configuration such as `runc spec --rootless`, and runc documents that user namespaces must be enabled for that mode.<sup>[[1]](#references)</sup>
 
+## Privileged wrappers and runtime versions
+
+A privileged wrapper that accepts a caller-controlled OCI bundle can expose host files if it permits unsafe bind mounts. Check whether the wrapper resolves traversal and symlinks before validating mount sources and destinations, and whether it constrains `process.cwd`. A sudo rule or a writable `config.json` alone does not prove that the wrapper will accept the bundle or run it with host privileges.
+
+Separately, [CVE-2024-21626](https://github.com/opencontainers/runc/security/advisories/GHSA-xr7r-f8xq-vfvv) affected upstream `runc` versions from `1.0.0-rc93` through `1.1.11`; `1.1.12` contains the upstream fix. Leaked file descriptors and insufficient working-directory validation could place a container process outside its root during certain `runc run` or `runc exec` workflows. File-descriptor numbers depend on the invocation, and a version string does not establish exploitability when a vendor has backported fixes or the caller cannot influence a privileged runtime invocation.
+
 ## References
 
 - [1] [runc: CLI tool for spawning and running containers](https://github.com/opencontainers/runc#using-runc)

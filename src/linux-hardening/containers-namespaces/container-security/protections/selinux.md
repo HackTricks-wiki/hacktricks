@@ -44,7 +44,35 @@ On an SELinux-enabled host, this is a very practical demonstration because it sh
 
 Podman is particularly well aligned with SELinux on systems where SELinux is part of the platform default. Rootless Podman plus SELinux is one of the strongest mainstream container baselines because the process is already unprivileged on the host side and is still confined by MAC policy. Docker can also use SELinux where supported, although administrators sometimes disable it to work around volume-labeling friction. CRI-O and OpenShift rely heavily on SELinux as part of their container isolation story. Kubernetes can expose SELinux-related settings too, but their value obviously depends on whether the node OS actually supports and enforces SELinux.<sup>[[2]](#references)</sup>
 
-The recurring lesson is that SELinux is not an optional garnish. In the ecosystems that are built around it, it is part of the expected security boundary.
+The recurring lesson is that SELinux is not an optional garnish. In the ecosystems that are built around it, it is part of the expected security boundary. For host-side policy enumeration, transition analysis, and abuse of SELinux administration tools, see the [general SELinux page](../../../interesting-files-permissions/selinux.md).
+
+## MCS Categories and Volume Relabeling
+
+Container isolation is normally a combination of **type enforcement** and **Multi-Category Security (MCS)**. Two processes may both run as `container_t`, but receive different levels such as `s0:c123,c456` and `s0:c321,c654`. Private container content is labeled `container_file_t` with the matching categories, so merely reaching another container's path is not enough to access it. Runtimes normally allocate the category pair; manually reusing a level deliberately collapses this per-container separation.<sup>[[3]](#references)</sup>
+
+Compare the process and mount labels instead of checking only the type:<sup>[[3]](#references)</sup>
+
+```bash
+podman inspect --format 'process={{.ProcessLabel}} mount={{.MountLabel}}' <container>
+podman top <container> label
+ps -eZ | grep -E 'container_t|spc_t'
+ls -Zd /path/to/bind-mount
+```
+
+Bind-mount suffixes change host inode labels and therefore change the security boundary, not just mount metadata:<sup>[[3]](#references)</sup>
+
+- `:Z` applies a private label with the container's MCS categories. It is appropriate for a volume owned by one container or Pod.
+- `:z` applies a shared label so other confined containers can use the content too (subject to DAC permissions). Using it for secrets or tenant-specific data removes the MCS isolation that would otherwise separate containers.
+- Relabeling is recursive. Applying either option to broad host trees such as `/`, `/etc`, `/usr`, or an entire home tree can both expose content to the selected container and stop host services whose expected labels were replaced.
+
+Manual level reuse is easy to spot in command lines and manifests. The following two containers intentionally receive the same MCS level and can therefore use content labeled for that level:<sup>[[3]](#references)</sup>
+
+```bash
+podman run --security-opt label=level:s0:c100,c200 ...
+podman run --security-opt label=level:s0:c100,c200 ...
+```
+
+Also distinguish `label=nested` from `label=disable`: the former exposes SELinux operations inside the container and permits label changes only where policy allows, while the latter removes label separation for that workload. Both deserve review, but they are not equivalent.<sup>[[3]](#references)</sup>
 
 ## Misconfigurations
 
@@ -147,14 +175,52 @@ When reviewing a container on an SELinux-capable platform, do not treat labeling
 | --- | --- | --- | --- |
 | Docker Engine | Host-dependent | SELinux separation is available on SELinux-enabled hosts, but the exact behavior depends on host/daemon configuration | `--security-opt label=disable`, broad relabeling of bind mounts, `--privileged` |
 | Podman | Commonly enabled on SELinux hosts | SELinux separation is a normal part of Podman on SELinux systems unless disabled | `--security-opt label=disable`, `label=false` in `containers.conf`, `--privileged` |
-| Kubernetes | Not generally assigned automatically at Pod level | SELinux support exists, but Pods usually need `securityContext.seLinuxOptions` or platform-specific defaults; runtime and node support are required | weak or broad `seLinuxOptions`, running on permissive/disabled nodes, platform policies that disable labeling |
+| Kubernetes | Runtime-assigned on SELinux nodes; explicitly configurable | The runtime can allocate a unique label when the Pod does not set one. Explicit `securityContext.seLinuxOptions` controls the Pod/volume label; on Kubernetes 1.37, eligible volumes use SELinux mount labeling by default | duplicated MCS levels, permissive/disabled nodes, broad privileged workloads, indiscriminate `seLinuxChangePolicy: Recursive` <sup>[[2]](#references)[[4]](#references)</sup> |
 | CRI-O / OpenShift style deployments | Commonly relied on heavily | SELinux is often a core part of the node isolation model in these environments | custom policies that over-broaden access, disabling labeling for compatibility |
 
 SELinux defaults are more distribution-dependent than seccomp defaults. On Fedora/RHEL/OpenShift-style systems, SELinux is often central to the isolation model. On non-SELinux systems, it is simply absent.
+
+## Kubernetes 1.37 Volume Labeling
+
+Kubernetes 1.37 made `SELinuxMount` stable and enabled it by default. For an eligible PVC, a Pod with `seLinuxOptions`, and a CSI driver advertising `.spec.seLinuxMount: true`, kubelet uses `-o context=<label>` instead of asking the runtime to recursively relabel every inode. Unsupported drivers and volume types still use the recursive path. This avoids a large relabel walk and also avoids changing the persistent labels of every file merely to expose the volume to a Pod.<sup>[[2]](#references)[[4]](#references)</sup>
+
+A mount can carry only one such context. Consequently, Pods with **different SELinux labels** that use the same eligible volume on the same node no longer coexist under the default `MountOption` behavior: one remains in `ContainerCreating` with a `conflicting SELinux labels of volume` error. Treat this as both an availability issue and a useful indication that workloads were implicitly sharing storage across MCS boundaries. If that sharing is intentional—for example, a privileged `spc_t` Pod and a confined Pod using the same volume—the per-Pod compatibility escape hatch is `seLinuxChangePolicy: Recursive`; do not apply it cluster-wide without understanding which paths the runtime will relabel.<sup>[[2]](#references)[[4]](#references)</sup>
+
+```yaml
+spec:
+  securityContext:
+    seLinuxOptions:
+      level: "s0:c123,c456"
+    seLinuxChangePolicy: Recursive
+```
+
+Useful cluster-side checks:<sup>[[2]](#references)</sup>
+
+```bash
+# Drivers that opt in to -o context= volume mounts
+kubectl get csidriver -o custom-columns=NAME:.metadata.name,SELINUX_MOUNT:.spec.seLinuxMount
+
+# Explicit levels or recursive-policy exceptions
+kubectl get pods -A -o json | jq -r '
+  .items[] |
+  select(.spec.securityContext.seLinuxOptions or
+         .spec.securityContext.seLinuxChangePolicy) |
+  [.metadata.namespace,.metadata.name,
+   (.spec.securityContext.seLinuxOptions.level // "-"),
+   (.spec.securityContext.seLinuxChangePolicy // "MountOption")] | @tsv'
+
+# Start failures and warnings caused by incompatible labels
+kubectl get events -A --sort-by=.lastTimestamp |
+  grep -Ei 'SELinux|conflicting SELinux labels'
+```
+
+The optional kube-controller-manager `selinux-warning-controller` detects Pods that share a volume with incompatible labels and exposes the `selinux_warning_controller_selinux_volume_conflict` metric. Enable and review it before upgrades or before changing volume-label behavior; it helps distinguish a genuine policy conflict from an ordinary CSI or filesystem failure.<sup>[[2]](#references)</sup>
 
 ## References
 
 - [1] [Podman Documentation: --security-opt=option (label=disable)](https://docs.podman.io/en/v4.6.0/markdown/options/security-opt.html)
 - [2] [Kubernetes: Configure a Security Context for a Pod or Container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
+- [3] [Podman run documentation: SELinux labels and volume relabeling](https://docs.podman.io/en/latest/markdown/podman-run.1.html)
+- [4] [Kubernetes v1.37 release: SELinuxMount and SELinuxChangePolicy](https://kubernetes.io/blog/2026/08/26/kubernetes-v1-37-release/)
 
 {{#include ../../../../banners/hacktricks-training.md}}

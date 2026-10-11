@@ -107,6 +107,8 @@ rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump <lsass pid> lsass.dmp full
 
 [Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) is a Microsoft signed binary which is a part of [sysinternals](https://docs.microsoft.com/en-us/sysinternals/) suite.
 
+An already-existing full-system crash dump, or a compressed copy in an accessible user folder, may retain credential material for offline analysis. Filenames such as `MEMORY.DMP` and `MEMORY.7z` are only review leads: verify provenance and access, and do not assume they contain usable or current credentials.
+
 ```
 Get-Process -Name LSASS
 .\procdump.exe -ma 608 lsass.dmp
@@ -384,9 +386,13 @@ reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v RunAsPPL /t REG_DWORD /d 0 
 * `DSRMAdminLogonBehavior=2` lets the DSRM administrator log on while the DC is online, giving attackers another built-in high-privilege account.
 * `RunAsPPL=0` removes LSASS PPL protections, making memory access trivial for dumpers such as LalsDumper.
 
-## hMailServer database credentials (post-compromise)
+## hMailServer configuration credentials (post-compromise)
 
-hMailServer stores its DB password in `C:\Program Files (x86)\hMailServer\Bin\hMailServer.ini` under `[Database] Password=`. The value is Blowfish-encrypted with the static key `THIS_KEY_IS_NOT_SECRET` and 4-byte word endianness swaps. Use the hex string from the INI with this Python snippet:<sup>[[2]](#references)</sup>
+Check the exact configuration files `C:\Program Files\hMailServer\Bin\hMailServer.ini`, `C:\Program Files (x86)\hMailServer\Bin\hMailServer.ini`, and `C:\ProgramData\hMailServer\hMailServer.ini` according to the installation layout. A readable nonempty `[Security] AdministratorPassword=` value is an hMailServer administration password hash; it is not evidence of a Windows Administrator password. If that credential is recovered, any Windows-account pivot requires independently verified password reuse and logon rights.
+
+For installations using a SQL CE database, the separate `[Database] Password=` value in the INI protects the database. In legacy installations this value is Blowfish-encrypted with the static key `THIS_KEY_IS_NOT_SECRET` and 4-byte word endianness swaps. Use the hex string from the INI with this Python snippet:<sup>[[2]](#references)</sup>
+
+First confirm that the current account can read **both** the INI and the corresponding SQL CE `.sdf` database. The INI password protects the database; it is separate from the mailbox account hashes stored inside it. Inspect or upgrade a **copy** of an in-use database, never the live file.
 
 ```python
 from Crypto.Cipher import Blowfish
@@ -412,7 +418,7 @@ $conn = New-Object System.Data.SqlServerCe.SqlCeConnection("Data Source=C:\Windo
 $cmd = $conn.CreateCommand(); $cmd.CommandText = "SELECT accountaddress,accountpassword FROM hm_accounts"; $cmd.ExecuteReader()
 ```
 
-The `accountpassword` column uses the hMailServer hash format (hashcat mode `1421`). Cracking these values can provide reusable credentials for WinRM/SSH pivots.
+The `accountpassword` column uses the hMailServer hash format (hashcat mode `1421`). A cracked mailbox password becomes a Windows user pivot only if that password is reused by a local/domain account and that account has the required remote-logon rights.
 
 ## LSA Logon Callback Interception (LsaApLogonUserEx2)
 
@@ -436,6 +442,42 @@ On the operator side, rebuild the file and run the dumper locally to recover cre
 ```bash
 base64 -d sqlstudio.b64 > sqlstudio.bin
 ```
+
+## Telegram Desktop `tdata` session theft
+
+Telegram Desktop keeps authorization and account state in its **`tdata`** directory. A copied session can be loaded by compatible tooling to authenticate without the account password while that authorization remains valid; if local-data encryption is enabled, the stealer also needs its passcode. An authenticated session can then expose identity data, dialog and membership metadata, messages, and downloadable media.<sup>[[10]](#references)</sup>
+
+### Discovery and acquisition
+
+Search both installed and portable layouts; Microsoft Store package names vary, so enumerate package directories containing `TelegramMessenge` and inspect their `LocalCache\Roaming` subtree.<sup>[[10]](#references)</sup>
+
+```powershell
+# Standard Telegram Desktop installation
+$env:APPDATA + '\Telegram Desktop\tdata'
+
+# Microsoft Store packages
+Get-ChildItem "$env:LOCALAPPDATA\Packages" -Directory |
+  Where-Object Name -Like '*TelegramMessenge*' |
+  ForEach-Object { Get-ChildItem "$($_.FullName)\LocalCache\Roaming" -Recurse -Directory -Filter tdata -ErrorAction SilentlyContinue }
+
+# Portable/nonstandard copies (expensive and noisy)
+Get-ChildItem C:\ -Recurse -Directory -Filter tdata -ErrorAction SilentlyContinue
+```
+
+If ordinary reads fail and the process token **already contains and enables** `SeBackupPrivilege`, backup-aware access provides a fallback; it does not obtain the privilege or elevate the process. `CreateFileW` with `FILE_FLAG_BACKUP_SEMANTICS` can request backup/restore semantics and override file security checks when the required token privileges are present, but the flag alone does not defeat an incompatible sharing lock.<sup>[[10]](#references)[[11]](#references)</sup>
+
+For live locked files, create/read a **Volume Shadow Copy**; for ACL-blocked files, `robocopy /B` uses backup mode and overrides file and directory ACLs.<sup>[[10]](#references)[[12]](#references)</sup>
+
+```cmd
+whoami /priv
+robocopy "%APPDATA%\Telegram Desktop\tdata" "C:\Temp\tdata" /E /B
+```
+
+A bandwidth-conscious implant may submit only the file-path inventory first, receive a snapshot identifier plus the paths already stored by the C2, and upload only missing files. Therefore, small incremental transfers after recursive `tdata` enumeration can still represent successful session theft.<sup>[[10]](#references)</sup>
+
+### Detection and containment
+
+Correlate recursive access to `tdata` by a non-Telegram process with `SeBackupPrivilege` enablement, backup-semantics file opens, VSS activity, or a child `robocopy.exe` using `/B`. Also hunt for rapid enumeration of both `%APPDATA%` and `%LOCALAPPDATA%\Packages`, followed by outbound connections from the same process. After compromise, use **Settings → Devices** (or **Privacy & Security → Active Sessions**) to terminate unrecognized sessions; enabling two-step verification alone does not revoke an authorization that was already stolen.<sup>[[10]](#references)[[13]](#references)</sup>
 
 ## Passkeys / WebAuthn credential theft from Chrome on Windows
 
@@ -507,5 +549,9 @@ This means **hardware binding prevents off-device export but not same-user use o
 - [7] [0xWord – Hacking Windows: Ataques a Sistemas y Redes Microsoft](https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html)
 - [8] [How the Active Directory Data Store Really Works: Inside NTDS.dit (Part 1)](https://blog.chrisse.se/?p=762)
 - [9] [en.hackndo.com - Remote Lsass Dump Passwords](https://en.hackndo.com/remote-lsass-dump-passwords)
+- [10] [Kaspersky Securelist – Armored Likho Expands Its Cyber-Espionage Arsenal with the Still Toolkit](https://securelist.com/armored-likho-still-toolkit/121033)
+- [11] [Microsoft Learn – CreateFileW function and `FILE_FLAG_BACKUP_SEMANTICS`](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew)
+- [12] [Microsoft Learn – Robocopy `/B` backup mode](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/robocopy)
+- [13] [Telegram FAQ – terminating active sessions](https://telegram.org/faq)
 
 {{#include ../../banners/hacktricks-training.md}}

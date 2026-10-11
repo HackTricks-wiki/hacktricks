@@ -269,6 +269,7 @@ dnsrecon -a -d tesla.com
 
 The fastest way to obtain a lot of subdomains is search in external sources. The most used **tools** are the following ones (for better results configure the API keys):
 
+
 - [**BBOT**](https://github.com/blacklanternsecurity/bbot)
 
 ```bash
@@ -422,6 +423,7 @@ python3 DomainTrail.py -d example.com
 
 - [**securitytrails.com**](https://securitytrails.com/) has a free API to search for subdomains and IP history
 - [**chaos.projectdiscovery.io**](https://chaos.projectdiscovery.io/#/)
+- [**activedns.net**](https://activedns.net/)
 
 This project offers for **free all the subdomains related to bug-bounty programs**. You can access this data also using [chaospy](https://github.com/dr-0x0x/chaospy) or even access the scope used by this project [https://github.com/projectdiscovery/chaos-public-program-list](https://github.com/projectdiscovery/chaos-public-program-list)
 

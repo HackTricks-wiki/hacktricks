@@ -51,6 +51,12 @@ Modern GPU Rowhammer attacks become much more useful when they target **GPU virt
 
 ## Direct Memory Access (DMA) Attacks
 
+For offline UEFI IFR/NVRAM patching that can downgrade pre-boot IOMMU enforcement and enable a Windows DMA chain, see:
+
+{{#ref}}
+firmware-analysis/uefi-ifr-nvram-security-setting-patching.md
+{{#endref}}
+
 **Inception** demonstrates **DMA-based memory acquisition and patching** over interfaces such as FireWire and early Thunderbolt configurations, including historical login-bypass signatures. It is not simply “ineffective against Windows 10”: exploitability depends on the interface, target build, IOMMU policy, lock state, and whether Windows Kernel DMA Protection is supported and enabled. Windows 10 version 1803 and later introduced Kernel DMA Protection on compatible platforms, substantially changing the attack surface.<sup>[[13]](#references)[[14]](#references)</sup>
 
 ---

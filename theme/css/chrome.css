@@ -1445,21 +1445,25 @@ details[open] > summary::before {
 }
 
 details {
+    --details-content-padding: clamp(1.5rem, 4vw, 4rem);
     border-radius: 8px;
     background-color: var(--bg);
     border: 1px solid var(--table-border-color);
-    font-size: 18px;
-    font-weight: 100;
 }
 
 details p {
-    padding-right: 4rem;
-    padding-left: 4rem;
+    padding-right: var(--details-content-padding);
+    padding-left: var(--details-content-padding);
+}
+
+details > pre {
+    margin-right: var(--details-content-padding);
+    margin-left: var(--details-content-padding);
 }
 
 details ul, details ol {
-    padding-right: 6rem;
-    padding-left: 6rem;
+    padding-right: calc(var(--details-content-padding) + 2rem);
+    padding-left: calc(var(--details-content-padding) + 2rem);
     padding-bottom: 2rem;
     margin-top: 0;
 }
