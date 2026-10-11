@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Ein Container ist ein Linux-Prozess, der mit einer Isolations- und Berechtigungskonfiguration ausgeführt wird. Bewerte Runtime, eingehängte Hostressourcen, gewährte Capabilities und Namespace-Einstellungen gemeinsam. Die [Übersicht zur Containersicherheit](container-security/README.md) erläutert diese Ebenen und verlinkt die jeweiligen Kontrollmechanismen.
+Ein Container ist ein Linux-Prozess, der mit einer Konfiguration für Isolation und Berechtigungen ausgeführt wird. Bewerte Laufzeitumgebung, eingebundene Host-Ressourcen, gewährte Capabilities und Namespace-Einstellungen zusammen. Die [Übersicht zur Container-Sicherheit](container-security/README.md) erläutert diese Ebenen und verweist auf die jeweiligen Kontrollen.
 
-- [Containerd (`ctr`) privilege escalation](containerd-ctr-privilege-escalation.md) konzentriert sich auf den Zugriff auf die Verwaltungsschnittstelle von containerd.
-- [RunC privilege escalation](runc-privilege-escalation.md) behandelt Runtime-spezifische Inhalte zur privilege escalation.
-- [Containersicherheit](container-security/README.md) erläutert Runtimes, exponierte APIs, Image-Risiken, sensible Mounts, privilegierte Container, die Bewertung und Schutzmaßnahmen wie Namespaces, seccomp und Mandatory Access Control.
+- [Containerd (`ctr`) Privilege Escalation](containerd-ctr-privilege-escalation.md) konzentriert sich auf den Zugriff auf die Verwaltungsschnittstelle von containerd.
+- [RunC Privilege Escalation](runc-privilege-escalation.md) behandelt laufzeitspezifische Methoden zur Rechteausweitung.
+- [Container-Sicherheit](container-security/README.md) erläutert Laufzeitumgebungen, exponierte APIs, Image-Risiken, sensible Mounts, privilegierte Container, Assessments und Schutzmaßnahmen wie Namespaces, seccomp und obligatorische Zugriffskontrolle.
 {{#include ../../banners/hacktricks-training.md}}
