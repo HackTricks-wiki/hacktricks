@@ -2,76 +2,82 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Authorization が明示的な role ではなく、derived economic state に依存する場合があります。たとえば、「caller が entire supply を所有している」といった条件です。この predicate の値が異なる store から取得される場合、stale な duplicate によって、正当な ownership shortcut が authorization bypass に変わる可能性があります。Provenance marker module は、危険な組み合わせを示しました。live な caller balance と、non-fixed-supply assets に対して更新されない marker-local supply metadata が比較されていました。<sup>[[1]](#references)</sup>
+認可が明示的なロールではなく、導出された経済状態に依存することがあります。たとえば、「呼び出し元が供給量全体を所有している」といった条件です。この判定に使われる値が異なるストアから取得される場合、古い重複値によって、正当な所有権に基づく簡略化が認可バイパスに変わることがあります。Provenance marker moduleでは、ライブな呼び出し元の残高と、固定供給量でない資産について更新されていないマーカー内の供給量メタデータを比較するという、危険な組み合わせが示されました。<sup>[[1]](#references)</sup>
 
-## Audit duplicated state as an authorization boundary
+## 認可境界として重複状態を監査する
 
-permission check で使用されるすべての値について、**all representations** を列挙します。canonical module state、object fields、cached aggregates、indexes、snapshots、bridge records、off-chain mirrors が含まれます。次に、各 object mode でどの copy が更新されるかを判断するため、create、mint、burn、transfer、reset、migration、synchronization の各 path をすべて追跡します。ある field が、ある mode では authoritative であり、別の mode では informational である場合があります。<sup>[[1]](#references)</sup>
+権限チェックで使われるすべての値について、**すべての表現**を列挙します。正規モジュールの状態、オブジェクトのフィールド、キャッシュされた集計値、インデックス、スナップショット、ブリッジの記録、オフチェーンのミラーなどです。次に、各オブジェクトモードでどのコピーが更新されるかを特定するため、作成、mint、burn、transfer、reset、migration、同期の各経路を追跡します。あるフィールドは、特定のモードでは権威ある値でも、別のモードでは参考情報にすぎない場合があります。<sup>[[1]](#references)</sup>
 
-実践的な review workflow は次のとおりです。<sup>[[1]](#references)</sup>
+実践的なレビュー手順は次のとおりです。<sup>[[1]](#references)</sup>
 
-1. protected actions を特定し、各 authorization branch を boolean predicate に簡約する。
-2. 各 operand について、その store、update paths、lifecycle states、source of truth を記録する。
-3. 1つの representation だけを更新する transitions を生成し、すべての copy を比較する。
-4. 各 transition の後、fresh account から protected action を試行する。
-5. bypass の先まで確認する。その action が ACL を編集する場合は、persistent roles を自分自身に付与し、通常の privileged APIs を呼び出す。
+1. 保護対象のアクションを特定し、各認可分岐を真偽値の述語に単純化する。
+2. 各オペランドについて、保存先、更新経路、ライフサイクル状態、信頼できる情報源を記録する。
+3. 片方の表現だけが更新される遷移を生成し、すべてのコピーを比較する。
+4. 各遷移の後、作成したばかりのアカウントから保護対象のアクションを試みる。
+5. バイパス後の影響まで調べる。アクションがACLを変更する場合は、自分に永続ロールを付与し、通常の特権APIを呼び出す。
 
-suspicious な pattern には、`cachedSupply == balance`、`metadataOwner == caller`、`snapshotShares == currentShares` などがあります。特に、両辺で異なる synchronization rules が使用されている場合は注意が必要です。一方の operand について authoritative value を query しても、もう一方の operand が stale である場合、comparison が安全になるわけではありません。<sup>[[1]](#references)</sup>
+`cachedSupply == balance`、`metadataOwner == caller`、`snapshotShares == currentShares` のように、両辺で同期ルールが異なる場合は、疑わしいパターンです。一方のオペランドに権威ある値を照会していても、もう一方が古い値なら比較が安全になるわけではありません。<sup>[[1]](#references)</sup>
 
-## Default-Value equality bypass
+## デフォルト値の等価性によるバイパス
 
-両方の operand が独立して同じ default value を取れる場合、equality predicate も安全ではありません。以下の check は、`supply` が zero のとき、empty account に「full supply control」を付与します。zero が stale metadata によるものか、正当に unfunded な object によるものかは問いません。<sup>[[1]](#references)[[3]](#references)</sup>
+両方のオペランドが、それぞれ独立に同じデフォルト値を取り得る場合も、等価性の述語は安全ではありません。次のチェックは、`supply` がゼロである場合、ゼロが古いメタデータによるものか、正当に資金が投入されていないオブジェクトによるものかを問わず、空のアカウントに「供給量全体の制御」を付与します。<sup>[[1]](#references)[[3]](#references)</sup>
+
 ```go
 balance := bank.GetBalance(ctx, caller, denom)
 supply := marker.GetSupply() // duplicate or stale representation
 return balance.Amount.Equal(supply.Amount) // 0 == 0 -> true
 ```
-canonical store に切り替えると divergence は修正されますが、**empty-object のケース**は修正されません。セキュリティプロパティには独立した validity condition を含める必要があります。Provenance patch では live bank supply を使用し、caller balance と比較する前に nil またはゼロの supply を拒否します。<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+
+正規ストアに切り替えれば状態の不一致は解消されますが、**空オブジェクトのケース**は解決しません。セキュリティ上の性質には独立した有効性条件を含める必要があります。Provenance のパッチでは、稼働中の銀行の供給量を使い、呼び出し元の残高を比較する前に、供給量が nil またはゼロの場合は拒否します。<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+
 ```go
 supply := bank.GetSupply(ctx, denom)
 if supply.Amount.IsNil() || supply.Amount.IsZero() {
-return false
+    return false
 }
 balance := bank.GetBalance(ctx, caller, denom)
 return supply.Equal(NewCoin(denom, balance.Amount))
 ```
-quorum counts、ownership percentages、debt、collateral、epochs、nonces、timestamps、countersにも同じ考え方を適用します。`callerValue == protectedValue`は、protected valueが独立して有効であり、想定されたdomainに属していることが確認されるまで、callerを認可してはなりません。<sup>[[1]](#references)</sup>
 
-## ACL takeoverから正規の特権操作へ
+quorum counts、ownership percentages、debt、collateral、epochs、nonces、timestamps、countersにも同じ考え方を適用します。`callerValue == protectedValue` は、保護対象の値が独立して有効であり、想定されたドメインに属することが確認されるまでは、callerを認可してはなりません。<sup>[[1]](#references)</sup>
 
-ACLを編集する操作におけるbypassは、永続的なprivilege-escalation primitiveです。Provenanceのケースでは、tokenを1つも持たないunprivileged accountが、古い`0 == 0`のsupply testを通過し、自身にadministrative、mint、withdrawal permissionsを付与してから、通常のmessage handlersを使ってassetsをmintしたりescrowからwithdrawしたりできました。したがって、このexploitにはACL変更後の2つ目のvulnerabilityは必要ありませんでした。<sup>[[1]](#references)</sup>
+## ACL乗っ取りから正規の特権操作へ
 
-一般的なexploitation sequence:<sup>[[1]](#references)</sup>
+ACL編集操作のバイパスは、永続的な権限昇格の手段となります。Provenanceのケースでは、トークンを1つも持たない非特権アカウントが、古い `0 == 0` の供給量テストを通過し、自身に管理、mint、withdrawalの権限を付与できました。その後、通常のメッセージハンドラーを使って資産をmintしたり、エスクローから資産を引き出したりできました。そのため、ACL変更後に別の脆弱性を悪用する必要はありませんでした。<sup>[[1]](#references)</sup>
 
-1. non-authoritative fieldがlive stateと異なるobject、またはprotected valueがdefaultになっているobjectを見つける。
-2. local valueがその古い値またはdefault valueと一致するように、新しい/空のidentityを使用する。
-3. role-management、ownership-transfer、またはpolicy-update endpointを呼び出し、自身に永続的なcapabilitiesを付与する。
-4. canonical stateからACLを読み取り、永続化を確認する。
-5. 正規のhigh-impact operation（mint、withdraw、upgrade、transfer ownership、またはchange policy）を実行する。
+一般的な悪用手順：<sup>[[1]](#references)</sup>
 
-影響をtriageする際は、authorization bypassで調査を止めず、新しいroleから到達可能なすべてのcapabilityを確認してください。Escrowのようなaccountは、stale metadataによってtakeoverが可能になったobjectとは無関係なassetsを保管している場合があります。<sup>[[1]](#references)</sup>
+1. 権威のないフィールドが最新の状態と異なるオブジェクト、または保護対象の値がデフォルト値であるオブジェクトを見つけます。
+2. 新規または空のIDを使い、そのローカル値を古い値またはデフォルト値に一致させます。
+3. ロール管理、所有権移転、またはポリシー更新のエンドポイントを呼び出し、自身に永続的な権限を付与します。
+4. 正規の状態からACLを読み取り、変更が永続化されたことを確認します。
+5. 正規の高影響操作（mint、withdraw、upgrade、所有権の移転、ポリシーの変更）を実行します。
 
-## Invariantとstateful-fuzzingの対象
+影響をトリアージする際は、認可バイパスだけで調査を止めず、新しいロールから到達可能なすべての権限を確認してください。エスクローのようなアカウントは、乗っ取りを可能にした古いメタデータを持つオブジェクトとは無関係の資産を保管している場合があります。<sup>[[1]](#references)</sup>
 
-authorizationはimplementationから独立して指定してください。full-supply shortcutの場合、最小限のinvariantは次のとおりです。<sup>[[1]](#references)[[2]](#references)</sup>
+## 不変条件とstateful-fuzzingの対象
+
+実装とは独立して認可条件を定義します。全供給量を条件とするショートカットの最小限の不変条件は次のとおりです。<sup>[[1]](#references)[[2]](#references)</sup>
+
 ```text
 controlsAllSupply(caller, asset) == true
-=> authoritativeSupply(asset) > 0
-&& authoritativeBalance(caller, asset) == authoritativeSupply(asset)
+    => authoritativeSupply(asset) > 0
+    && authoritativeBalance(caller, asset) == authoritativeSupply(asset)
 ```
-model/state-machine fuzzerを使用して、単独の呼び出しではなくシーケンスを生成し、creation、zero-value initialization、activation/finalization、minting、burning、transfers、resets、migrations、sync calls、ACL changesを網羅します。各transitionの後に重複した表現を比較し、新規アカウントが保護されたactionを実行できないことをassertします。zero、one unit、partial ownership、full ownership、stale-low、stale-highの値を明示的なケースとしてseedします。<sup>[[1]](#references)[[2]](#references)</sup>
 
-高いシグナル対ノイズ比を持つregression propertiesは次のとおりです。<sup>[[1]](#references)[[2]](#references)</sup>
+モデル/ステートマシン fuzzer を使って、個別の呼び出しではなく、作成、ゼロ値での初期化、有効化/確定、mint、burn、transfer、リセット、migration、sync 呼び出し、ACL の変更を含む一連の操作を生成します。各遷移の後に重複した表現を比較し、新しいアカウントが保護対象の操作を一切実行できないことを検証します。ゼロ、1 単位、一部所有、全額所有、実際より小さい古い値、実際より大きい古い値の明示的なケースを用意します。<sup>[[1]](#references)[[2]](#references)</sup>
 
-- authoritative supplyがZeroであっても、ownershipやadministrationを意味しない。
-- duplicate supplyが自身のbalanceと等しい場合でも、partial holdersがadministratorsになることはない。
-- live supplyがpositiveである場合、true full holderは意図されたshortcutを保持する。
-- 失敗したself-grantsはACLを変更せず、後続のprivileged callsを有効化しない。
-- mode changesによって、authorization checkがどのrepresentationをauthoritativeとして扱うかが暗黙的に変わることはない。
+シグナルの強い回帰テストのプロパティは次のとおりです。<sup>[[1]](#references)[[2]](#references)</sup>
+
+- 権威ある供給量がゼロの場合、所有権や管理者権限があることを意味しない。
+- 一部保有者は、重複した供給量が自身の残高と等しくても、管理者になれない。
+- 実際に全額を保有するアカウントは、実際の供給量が正である場合、意図されたショートカットを引き続き利用できる。
+- 自身への権限付与に失敗しても ACL は変更されず、その後の特権付き呼び出しも可能にならない。
+- モードの変更によって、認可チェックでどの表現を権威あるものとして扱うかが暗黙に変わらない。
 
 ## References
 
-- [1] [State divergence enables unauthorized access (Trail of Bits)](https://blog.trailofbits.com/2026/08/25/state-divergence-enables-unauthorized-access/)
-- [2] [Provenance PR #2734 - stale supply checksを修正](https://github.com/provenance-io/provenance/pull/2734)
-- [3] [Provenance commit c81fd65 - total-supply authorization shortcutでzero supplyを拒否](https://github.com/provenance-io/provenance/commit/c81fd65f8ad48de42d5a6d68e761a0851c7e72c4)
+- [1] [状態の不整合による不正アクセスの可能性 (Trail of Bits)](https://blog.trailofbits.com/2026/08/25/state-divergence-enables-unauthorized-access/)
+- [2] [Provenance PR #2734 - 古い供給量チェックを修正](https://github.com/provenance-io/provenance/pull/2734)
+- [3] [Provenance commit c81fd65 - 総供給量がゼロの場合に認可ショートカットを拒否](https://github.com/provenance-io/provenance/commit/c81fd65f8ad48de42d5a6d68e761a0851c7e72c4)
 {{#include ../../banners/hacktricks-training.md}}
