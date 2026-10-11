@@ -48,17 +48,23 @@ internal class JsonListener : ExtensionPart, ITextViewOpenClosedListener
 
 This chain downloads Base64 text, decodes it to assembly bytes, loads it from a `MemoryStream` through a collectible `AssemblyLoadContext`, invokes the reflected `EntryPoint` with either no parameters or a `string[]`, awaits asynchronous entry points, and unloads the context. The second stage is not written to disk, although the VSIX and primary extension DLL remain disk artefacts. Base64 provides no authenticity or confidentiality; using HTTP also permits response replacement by an on-path attacker.<sup>[[1]](#references)</sup>
 
-Operational variations include suppressing all exceptions so the advertised feature continues when staging fails, using `ITextViewChangedListener` to trigger after edits, or returning tasking such as `cmd|<command>` and launching a hidden `cmd.exe` with redirected streams. Code executes in the extension host and can use managed APIs, P/Invoke, files, credentials, and child processes available to that user.<sup>[[1]](#references)</sup>
+Operational variations include suppressing all exceptions so the advertised feature continues when staging fails or using `ITextViewChangedListener` to trigger after edits. Code executes in the extension host and can use managed APIs, P/Invoke, files, credentials, and child processes available to that user.<sup>[[1]](#references)</sup>
+
+For a related editor-specific execution surface based on native plugin autoloading, see:
+
+{{#ref}}
+windows-local-privilege-escalation/notepad-plus-plus-plugin-autoload-persistence.md
+{{#endref}}
 
 ### Marketplace and delivery trust abuse
 
-A VSIX can arrive as a directly shared/phished file, from the web Marketplace, or through Visual Studio's embedded Marketplace browser. Publisher registration that mainly enforces uniqueness and a reserved-word list can permit visually suggestive publisher identities; compromising an already trusted publisher or extension is even more effective because it inherits an installed user base. Marketplace installation invokes Visual Studio Installer and temporarily places the downloaded VSIX under `%LOCALAPPDATA%\\Temp`; `payload.vsix` is also used legitimately, so the filename alone is not an indicator.<sup>[[1]](#references)</sup>
+A VSIX can arrive as a directly shared/phished file, from the web Marketplace, or through Visual Studio's embedded Marketplace browser. Publisher registration that mainly enforces uniqueness and a reserved-word list can permit visually suggestive publisher identities; compromising an already trusted publisher or extension is even more effective because it inherits an installed user base. Marketplace installation invokes Visual Studio Installer and temporarily places the downloaded VSIX under `%LOCALAPPDATA%\Temp`; `payload.vsix` is also used legitimately, so the filename alone is not an indicator.<sup>[[1]](#references)</sup>
 
-MDSec did not identify a Visual Studio URL protocol that directly installed an extension. An operator still needs the user to install/trust the VSIX, or must compromise an existing extension's distribution path. An `AllUsers` package may request elevation and install under `Program Files`, but this is normal consented installer behavior rather than an automatic route to administrator or SYSTEM.<sup>[[1]](#references)</sup>
+MDSec did not identify a Visual Studio URL protocol that directly installed an extension. An operator still needs the user to install/trust the VSIX, or must compromise an existing extension's distribution path. An `AllUsers` package installs under the Visual Studio installation folder and may request elevation, but this is normal consented installer behavior rather than an automatic route to administrator or SYSTEM.<sup>[[1]](#references)[[4]](#references)</sup>
 
 ### Static auditing at scale
 
-VSIX packages are usually ZIP containers, so a safe marketplace-review pipeline can enumerate packages, unpack them **without loading extension code**, parse the manifests, identify executable surfaces, and decompile managed assemblies with `ilspycmd`. Prioritize extension-owned assemblies after excluding common bundled dependencies, then correlate credential-store strings with behavioral clusters such as file-read plus network-send, encode plus send, download plus execution, credential-manager plus network access, or screenshot plus send.<sup>[[1]](#references)</sup>
+VSIX packages are usually ZIP containers, so a safe marketplace-review pipeline can enumerate packages, unpack them **without loading extension code**, parse the manifests, identify executable surfaces, and decompile managed assemblies with `ilspycmd`. Prioritize extension-owned assemblies after excluding common bundled dependencies, then correlate credential-store strings with behavioral clusters such as file-read plus network-send, encode plus send, download plus execution, credential-manager plus network access, or screenshot plus send.<sup>[[1]](#references)[[5]](#references)</sup>
 
 ```bash
 unzip -q sample.vsix -d sample-vsix
@@ -69,21 +75,12 @@ rg -n -i 'Login Data|logins\.json|key4\.db|wallet\.dat|\.aws[/\\]credentials|Loa
 
 Also inventory native DLLs, MSBuild targets, scripts, T4 templates, and installer payloads rather than assuming every execution surface is managed code. Compare suspicious behavior with the manifest's claimed purpose; telemetry and legitimate updaters can resemble exfiltration or staging. Static-only review misses packed, obfuscated, dynamically resolved, and dormant code, and reviewing only the latest version misses malicious historical releases.<sup>[[1]](#references)</sup>
 
-### Visual Studio hunting pivots
-
-High-signal hunting correlates several weak indicators instead of alerting on a VSIX name alone:<sup>[[1]](#references)</sup>
-
-- Visual Studio Installer activity shortly after a new `%LOCALAPPDATA%\\Temp\\*.vsix` file appears.
-- New or changed extension DLLs followed by loads into `ServiceHub.Host.Extensibility*.exe` or, for classic extensions, `devenv.exe`.
-- Outbound connections, Base64-heavy responses, or unexpected child processes from `ServiceHub.Host.Extensibility*.exe`.
-- Static references to `ITextViewOpenClosedListener`/`TextViewOpenedAsync` combined with `HttpClient`, `Convert.FromBase64String`, `AssemblyLoadContext.LoadFromStream`, reflection over `EntryPoint`, or process creation.
-- Hidden `cmd.exe` children with redirected standard streams, especially when the parent extension host recently collected hostname, IP, network-interface, or MAC-address data.
-- Extension code that accesses browser credential databases, cloud credential files, certificate stores, Windows Credential Manager, wallet files, or developer-token caches without a clear product requirement.
-
 ## References
 
 - [1] [MDSec - Visual Studio Extensions Revisited](https://www.mdsec.co.uk/2026/05/visual-studio-extensions-revisited/)
 - [2] [Microsoft Learn - About VisualStudio.Extensibility](https://learn.microsoft.com/en-us/visualstudio/extensibility/visualstudio.extensibility/visualstudio-extensibility?view=visualstudio)
-- [3] [Microsoft Learn - ITextViewOpenClosedListener](https://learn.microsoft.com/en-us/dotnet/api/microsoft.visualstudio.extensibility.editor.itextviewopenclosedlistener?view=vs-extensibility)
+- [3] [Microsoft Learn - ITextViewOpenClosedListener.TextViewOpenedAsync](https://learn.microsoft.com/en-us/dotnet/api/microsoft.visualstudio.extensibility.editor.itextviewopenclosedlistener.textviewopenedasync?view=vs-extensibility)
+- [4] [Microsoft Learn - Anatomy of a VSIX package](https://learn.microsoft.com/en-us/visualstudio/extensibility/anatomy-of-a-vsix-package?view=visualstudio)
+- [5] [ILSpy - ilspycmd .NET tool](https://github.com/icsharpcode/ILSpy/blob/master/ICSharpCode.ILSpyCmd/README.md)
 
 {{#include ../banners/hacktricks-training.md}}
