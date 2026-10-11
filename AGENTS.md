@@ -26,12 +26,12 @@ book before deployment.
 The search index source policy is important and cost-sensitive:
 
 - On public hosts, load every language-specific and fallback candidate only from
-  `HackTricks-wiki/hacktricks-searchindex`. Never fall back to the same-origin mdBook output;
-  serving the large index from `hacktricks.wiki` in production is expensive.
+`HackTricks-wiki/hacktricks-searchindex`. Never fall back to the same-origin mdBook output;
+serving the large index from `hacktricks.wiki` in production is expensive.
 - On localhost, `.local`/`.internal` hosts, loopback, RFC1918, carrier-grade NAT, link-local, or
-  private IPv6 addresses, load only the same-origin mdBook output so local/container deployments
-  remain self-contained. For a non-English page, try the language-prefixed local path first (for
-  example `/es/searchindex.js`) and use the root English index only as a fallback.
+private IPv6 addresses, load only the same-origin mdBook output so local/container deployments
+remain self-contained. For a non-English page, try the language-prefixed local path first (for
+example `/es/searchindex.js`) and use the root English index only as a fallback.
 
 For this repo, the expected local fallback is:
 
@@ -79,7 +79,22 @@ If `mdbook build` fails, check:
 
 - Prefer `rg` for searching.
 - Keep generated `book/` output out of commits unless explicitly requested. Search loader fixes are
-  an exception when the already-built pages must be corrected immediately.
+an exception when the already-built pages must be corrected immediately.
 - If changing shared theme behavior, compare and update the matching file in
-  `/Users/carlospolop/git/hacktricks-cloud`.
+`/Users/carlospolop/git/hacktricks-cloud`.
 - Do not revert unrelated local changes.
+
+## Book Organization Notes
+
+HackTricks books are growing every days and it's highly important to keep the organized. Follow the following recommendations when updating it:
+
+- Techniques must be in only 1 place, in the most related place for the technique where is expected to find similar techniques, and referenced internally from wherever needed. We must not duplicate techniques.
+- Files must not be super long or super short: We don't need 1 file per strict techniques because that would generate hundreds of thousands of pages in HackTricks, bu we also want to keep sections readable and properly organized, so we don't want pages with hundreds of techniques together. Therefore find a good tradecraft between the number of techniques to add in page and when to split a page so the organization and number of pages are really scalable.
+
+## Content Syntax and Format Notes
+
+- Use simple words so non native english speakers can easily read and understand every context
+- By direct in the explanations, not adding words or sentences that doesn't add value
+- Explain things properly in a comprehensive way, the gola of HackTricks is to clearly explain even complex techniques in a way that people starting cybersecurity can understand them. If the topic is simple or is a new technique inside a file that already explains the topic just explain the technique briefly but giving all needed details and examples and code to fully understand it. If the topic is complex start from the beginning explaining everything needed to understand the technique and then explain the technique. At the end of each explanation ask yourself if a person with basic IT knowledge will understand the technique or not with all the context of the page, and if not, improve the explanation/give more context
+- Do not start paragraphs with few words likes like: "Do not reuse offsets across kernel builds." The start of a paragraph must start explaining from the begging the idea given in that paragraph and not the end (starting from the end idea is fucking confusing)
+- If you see pages not following these directives, fix them also please
