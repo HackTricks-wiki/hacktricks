@@ -1,8 +1,10 @@
-# Windows Cloud Files Placeholder Name TOCTOU (CVE-2025-55680)
+# Windows MDL-Mapped User Buffer Double-Fetch
 
 {{#include ../../banners/hacktricks-training.md}}
 
-`CfCreatePlaceholders()` creates files or directories below a registered Cloud Files sync root. In CVE-2025-55680, `cldflt.sys` validated a placeholder's relative name and later created the object while still referencing the caller's mutable buffer. This converted a filename-validation TOCTOU into privileged file creation outside the sync root.<sup>[[1]](#references)[[2]](#references)</sup>
+A Windows kernel driver creates a double-fetch when it validates data in caller-backed pages and later passes a pointer into those same pages to a security-sensitive API. Locking and mapping the pages does not make their contents immutable. CVE-2025-55680 in `cldflt.sys` illustrates this pattern: the driver validated a Cloud Files placeholder's relative name, then created the object while still referencing the caller's mutable buffer.<sup>[[1]](#references)[[3]](#references)</sup>
+
+`CfCreatePlaceholders()` creates files or directories below a registered Cloud Files sync root. In the vulnerable path, changing the name after validation could redirect privileged creation outside that root.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## Why locking the pages did not lock the data
 
@@ -18,7 +20,7 @@ The relevant request and use path was:<sup>[[1]](#references)</sup>
 
 This is a **double-fetch** even though both reads use a kernel virtual address: the security boundary depends on the backing storage, not on which virtual mapping the driver dereferences.<sup>[[1]](#references)</sup>
 
-## Race layout
+## Cloud Files race layout
 
 The disclosed exploit strategy used repeated requests, mutator threads, and a junction to turn the double-fetch into path redirection:<sup>[[1]](#references)</sup>
 
@@ -30,17 +32,12 @@ The disclosed exploit strategy used repeated requests, mutator threads, and a ju
 
 The primitive only establishes protected file or directory creation. Turning it into code execution still requires control of the created file's contents and a privileged consumer, such as a suitable DLL side-loading target. The original analysis used this final class of chain but did not publish the loader, payload, or a complete standalone exploit.<sup>[[1]](#references)</sup>
 
-## Driver review and remediation checklist
-
-For pointer-bearing IOCTLs and other kernel interfaces, treat every read from caller-backed memory as volatile. `ProbeForRead()`, page locking, and a kernel mapping establish accessibility and residency, not immutability.<sup>[[1]](#references)[[3]](#references)</sup>
-
-- Copy the complete variable-length record into private kernel memory once. Validate offsets, lengths, alignment, integer additions, UTF-16 boundaries, and forbidden characters only against that snapshot.
-- Build every later `UNICODE_STRING`, `OBJECT_ATTRIBUTES`, and file-identity pointer from the same snapshot. Do not mix copied metadata with variable-length fields that still reference caller pages.
-- Keep the trusted sync-root directory open by handle. If nested paths are intentionally supported, resolve components relative to trusted directory handles and explicitly handle unexpected reparse points rather than validating one pathname and resolving it again later.
-- Add a concurrency regression test that aliases the input pages through a second user mapping and mutates security-sensitive fields while the request is processed. A successful fix must make the result independent of all writes made after the snapshot.
+For complementary techniques that deliberately widen Windows path-lookup races, see [Kernel Race Condition Exploitation via Object Manager Slow Paths](kernel-race-condition-object-manager-slowdown.md).
 
 ## References
 
 - [1] [Exodus Intelligence - Microsoft Windows Cloud Files Minifilter TOCTOU Privilege Escalation](https://blog.exodusintel.com/2025/10/20/microsoft-windows-cloud-files-minifilter-toctou-privilege-escalation/)
 - [2] [Microsoft Learn - CfCreatePlaceholders function](https://learn.microsoft.com/en-us/windows/win32/api/cfapi/nf-cfapi-cfcreateplaceholders)
 - [3] [Microsoft Learn - MmProbeAndLockPages function](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/nf-wdm-mmprobeandlockpages)
+
+{{#include ../../banners/hacktricks-training.md}}
