@@ -212,6 +212,22 @@ Defensive notes:
 
 
 
+## Module-based rootkit triage
+
+A malicious module can hook syscalls, VFS or `/proc` views, network paths, or credential checks to hide processes and files, redirect traffic, or intercept secrets. It can also remove itself from the module list shown by `lsmod`. Persistence may come from `modprobe.d` aliases or install rules, `/etc/modules-load.d`, a systemd unit, initramfs content, or replacement of a legitimate `.ko` file. A normal `lsmod` result is useful evidence, but a kernel-level compromise can make kernel-provided lists unreliable. Correlate loaded modules, on-disk files, boot configuration, module-load logs, and trusted external telemetry.
+
+```bash
+cat /proc/modules
+lsmod
+find /lib/modules/"$(uname -r)" -type f -name '*.ko*' -ls 2>/dev/null
+grep -R -nE '^(install|softdep|blacklist|options) ' /etc/modprobe.d /run/modprobe.d /usr/lib/modprobe.d 2>/dev/null
+find /etc/modules-load.d /usr/lib/modules-load.d -maxdepth 1 -type f -print 2>/dev/null
+journalctl -k -b | grep -Ei 'module|taint|signature|lockdown'
+cat /proc/sys/kernel/tainted
+```
+
+Review unexpected module names, paths, dependencies, signatures, and load times. Kernel taint and unsigned-module messages are leads, not proof of a rootkit. If a rootkit is suspected, collect evidence from a trusted image or recovery environment before relying on live kernel output. The [kernel vulnerability assessment](kernel-vulnerability-assessment.md) page covers configuration and diagnostic exposure, including tracefs and pinned BPF objects.
+
 ## References
 
 - [1] [Documentation for /proc/sys/kernel/ — The Linux Kernel documentation](https://docs.kernel.org/admin-guide/sysctl/kernel.html)

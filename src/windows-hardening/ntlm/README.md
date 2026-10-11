@@ -334,13 +334,15 @@ krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 
 ### Patch & Mitigations
 * KB patch for **CVE-2025-33073** adds a check in `mrxsmb.sys::SmbCeCreateSrvCall` that blocks any SMB connection whose target contains marshalled info (`CredUnmarshalTargetInfo` ≠ `STATUS_INVALID_PARAMETER`).<sup>[[5]](#references)[[6]](#references)</sup>
-* Enforce **SMB signing** to prevent reflection even on unpatched hosts.
+* Enforce **SMB signing** on SMB relay destinations. For other destinations, assess that protocol's own signing or Extended Protection requirements and patch level; SMB signing alone does not determine whether an HTTPS WinRM relay is possible.
 * Monitor DNS records resembling `*<base64>...*` and block coercion vectors (PetitPotam, DFSCoerce, AuthIP...).
 
 ### Detection ideas
 * Network captures with `NTLMSSP_NEGOTIATE_LOCAL_CALL` where client IP ≠ server IP.
 * Kerberos AP-REQ containing a subsession key and a client principal equal to the hostname.
 * Windows Event 4624/4648 SYSTEM logons immediately followed by remote SMB writes from the same host.<sup>[[5]](#references)</sup>
+
+A serialized target-information DNS name can also steer coerced authentication toward an attacker for a **cross-protocol relay** to an AD CS web-enrollment endpoint. This is a separate outcome from same-host reflection: the [ESC8 enrollment conditions](../active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints--esc8), DNS-write rights, a coercion path, and the target's patch level must be assessed independently.
 
 For the **March 2026** local reflection variant that abuses **SMB arbitrary ports** and **TCP connection reuse** to reach `NT AUTHORITY\SYSTEM`, see:
 

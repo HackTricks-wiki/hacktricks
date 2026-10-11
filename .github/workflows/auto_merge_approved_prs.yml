@@ -2,7 +2,7 @@ name: Auto Merge Approved PRs
 
 on:
   schedule:
-    - cron: '0 */1 * * *'  # Every 1 hour
+    - cron: '17 * * * *'  # Every hour at minute 17 UTC
   workflow_dispatch:  # Allow manual triggering
 
 permissions:

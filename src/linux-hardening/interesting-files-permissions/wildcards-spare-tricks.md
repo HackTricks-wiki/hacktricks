@@ -26,8 +26,16 @@ chmod -R 644 *.php
 
 The expanded `--reference=.drf.php` overrides the explicit owner/mode, causing matching files to inherit metadata from `.drf.php` (and, with the setup above, making them writable by the attacker).<sup>[[6]](#references)</sup>
 
+Review the entire privileged helper, not just its `chown` line. An ownership change can clear set-user-ID or set-group-ID bits; [POSIX leaves the privileged case implementation-defined](https://pubs.opengroup.org/onlinepubs/9699919799.2013edition/functions/chown.html). A later `chmod` in the same job may restore those bits on files it selected earlier, changing the outcome. Confirm the actual command order, writable glob directory, affected file and link behavior, resulting owner and mode, and whether the mount honors set-user-ID before treating this as an executable privilege path. An unreadable helper leaves those steps unknown.
+
 *PoC & tool*: [`wildpwn`](https://github.com/localh0t/wildpwn) (combined attack).<sup>[[7]](#references)</sup>
 See also the classic DefenseCode paper for details.<sup>[[6]](#references)</sup>
+
+---
+
+## GNU `cp` in a privileged script
+
+Review a root-run script that copies from its caller-selected working directory with a bare glob, such as `cp .version * /etc/app/staged/`, when a lower-privileged user can create filenames there. GNU `cp` can parse a leading-dash filename expanded from `*` as an option. Its `--preserve=mode` option can retain source mode bits on a new copy, and `--target-directory` can change the copy destination. Either effect needs the exact script branch, destination state, effective privilege, filesystem policy, and GNU `cp` behavior to be verified; the text of a sudo rule or script alone does not prove escalation. Prefixing operands with `./` or terminating option parsing with `--` prevents this leading-dash interpretation for GNU `cp` ([GNU Coreutils FAQ](https://www.gnu.org/software/coreutils/faq/coreutils-faq.html), [`cp` manual](https://www.gnu.org/software/coreutils/manual/html_node/cp-invocation.html)).
 
 ---
 

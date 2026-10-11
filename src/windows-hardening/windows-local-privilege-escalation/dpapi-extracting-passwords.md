@@ -62,7 +62,7 @@ reg save HKLM\SYSTEM C:\Windows\Temp\system.hiv
 reg save HKLM\SECURITY C:\Windows\Temp\security.hiv
 ```
 
-Then on your analysis box, recover the DPAPI_SYSTEM LSA secret from the hives and use it to decrypt machine-scope blobs (scheduled task passwords, service credentials, Wi‑Fi profiles, etc.):
+Then on your analysis box, recover the DPAPI_SYSTEM LSA secret from the hives and use it to decrypt machine-scope DPAPI blobs (for example, machine-protected application credentials or Wi-Fi profiles):
 
 ```text
 mimikatz lsadump::secrets /system:C:\path\system.hiv /security:C:\path\security.hiv
@@ -90,8 +90,9 @@ Among the personal data protected by DPAPI are:
 
 System protected data includes:
 - Wifi passwords
-- Scheduled task passwords
 - ...
+
+Scheduled-task passwords are a separate LSA-secret question. A task registered with the [Password logon type](https://learn.microsoft.com/en-us/windows/win32/api/taskschd/ne-taskschd-task_logon_type) can store a password for local administrator/SYSTEM recovery; an S4U or interactive-token task does not establish that a password was saved. A task's principal and logon type are stronger indicators than its run-as name alone.
 
 ### Master key extraction options
 

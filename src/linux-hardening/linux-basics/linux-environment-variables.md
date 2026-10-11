@@ -48,7 +48,7 @@ tr '\0' '\n' </proc/$$/environ | sort -u
 tr '\0' '\n' </proc/<PID>/environ | sort -u
 ```
 
-If you are looking for **credentials** or **interesting service configuration** inside inherited environments, also check [Linux Post Exploitation](../post-exploitation/linux-post-exploitation/README.md).
+If you are looking for **credentials** or **interesting service configuration** inside inherited environments, also check [Linux Post Exploitation](../post-exploitation/README.md).
 
 ## Common variables
 
@@ -194,6 +194,8 @@ ldso=$(ls /lib64/ld-linux-*.so.* /lib/*-linux-gnu/ld-linux-*.so.* 2>/dev/null | 
 
 `GLIBC_TUNABLES` changes early glibc behavior (for example, allocator tunables) and is very handy in exploit labs. It also matters from a security perspective because the **dynamic loader parses it very early**. The 2023 **Looney Tunables** bug was a good reminder that a single environment variable parsed in the loader can become a **local privilege-escalation primitive** against SUID programs.<sup>[[6]](#references)</sup>
 
+For CVE-2023-4911, compare the **installed distribution package release** with its vendor's fixed release and verify the loader actually used for new processes. An upstream version string alone is unreliable: Debian backported the affected parser into its 2.31 package, while distributions backported fixes without changing the upstream number. A practical privilege transition also needs an executable privileged target whose identity change is not blocked by `NoNewPrivs`, a `nosuid` mount, or another mitigation. Avoid running a malformed `GLIBC_TUNABLES` crash probe during passive enumeration. See the [Ubuntu tracker](https://ubuntu.com/security/CVE-2023-4911), [Debian tracker](https://security-tracker.debian.org/tracker/CVE-2023-4911), and [Red Hat advisory](https://access.redhat.com/security/cve/cve-2023-4911) for release-specific applicability; Ubuntu's [security notice](https://ubuntu.com/security/notices/USN-6409-1) also calls for a reboot after updating.
+
 ```bash
 GLIBC_TUNABLES=glibc.malloc.tcache_count=0 ./binary
 ```
@@ -261,6 +263,10 @@ Perl has equally useful startup variables:
 - `PERL5OPT`: inject switches as if they were on every `perl` command line.
 
 This can force **automatic module loading** or change interpreter behavior before the target script does anything interesting. Perl ignores these variables in **taint / setuid / setgid** contexts, but they still matter a lot for normal root-run wrappers, CI jobs, installers, and custom sudoers rules.
+
+If a sudo rule allows environment overrides and its privileged command eventually launches Perl, also review `PERL5DB`. Perl documents that `PERL5OPT=-d` starts the debugger and that `PERL5DB` supplies debugger initialization code when Perl starts with a bare `-d` switch. Unsetting only `PERL5LIB` and `PERLLIB` does not remove this path. The variables must survive sudo and the wrapper, and the Perl process must not ignore them through taint or set-ID handling; inspect the exact rule and execution chain without running the privileged helper during enumeration. See [perlrun's environment-variable reference](https://perldoc.perl.org/perlrun#ENVIRONMENT).
+
+Perl's built-in [`@INC` search path](https://perldoc.perl.org/perlvar#@INC) is another module trust boundary even without preserved environment variables. For a privileged Perl process, correlate an actual `use` or `require` statement with the resolved module name, search order, and a lower-privileged user's ability to create or replace that module under a searched directory. A writable library directory alone does not establish that the privileged process will load code from it.
 
 ```bash
 mkdir -p /tmp/perllib
@@ -391,7 +397,7 @@ GIT_CONFIG_VALUE_0='sh -c "exec sh 0<&1 1>&1"' \
 git -p help
 ```
 
-From a post-exploitation perspective, also remember that inherited environments often contain **credentials**, **proxy settings**, **service tokens**, or **cloud keys**. Check [Linux Post Exploitation](../post-exploitation/linux-post-exploitation/README.md) for `/proc/<PID>/environ` and `systemd` `Environment=` hunting.
+From a post-exploitation perspective, also remember that inherited environments often contain **credentials**, **proxy settings**, **service tokens**, or **cloud keys**. Check [Linux Post Exploitation](../post-exploitation/README.md) for `/proc/<PID>/environ` and `systemd` `Environment=` hunting.
 
 ### PS1
 
