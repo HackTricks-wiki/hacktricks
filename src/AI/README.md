@@ -2,9 +2,9 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Κύριοι Αλγόριθμοι Machine Learning
+## Κύριοι Αλγόριθμοι Μηχανικής Μάθησης
 
-Το καλύτερο σημείο εκκίνησης για να μάθετε σχετικά με το AI είναι να κατανοήσετε πώς λειτουργούν οι κύριοι αλγόριθμοι machine learning. Αυτό θα σας βοηθήσει να κατανοήσετε πώς λειτουργεί το AI, πώς να το χρησιμοποιείτε και πώς να το επιτίθεστε:
+Το καλύτερο σημείο για να ξεκινήσετε να μαθαίνετε για το AI είναι να κατανοήσετε πώς λειτουργούν οι κύριοι αλγόριθμοι μηχανικής μάθησης. Αυτό θα σας βοηθήσει να καταλάβετε πώς λειτουργεί το AI, πώς να το χρησιμοποιείτε και πώς να του επιτίθεστε:
 
 
 {{#ref}}
@@ -26,9 +26,9 @@
 ./AI-Deep-Learning.md
 {{#endref}}
 
-### Αρχιτεκτονική LLMs
+### Αρχιτεκτονική LLM
 
-Στην ακόλουθη σελίδα θα βρείτε τα βασικά στοιχεία κάθε component για τη δημιουργία ενός βασικού LLM με χρήση transformers:
+Στην παρακάτω σελίδα θα βρείτε τα βασικά στοιχεία κάθε συστατικού που χρειάζεται για να δημιουργήσετε ένα βασικό LLM χρησιμοποιώντας transformers:
 
 
 {{#ref}}
@@ -37,65 +37,71 @@ AI-llm-architecture/README.md
 
 ## Ασφάλεια AI
 
-### Πλαίσια Κινδύνων AI
+### Μεθοδολογία Ασφάλειας AI Agent
 
-Δύο χρήσιμα πλαίσια εκκίνησης για την αξιολόγηση του κινδύνου των AI-system είναι τα OWASP Machine Learning Security Top 10 και Google's Secure AI Framework (SAIF). Είναι συμπληρωματικά και όχι μια εξαντλητική λίστα πλαισίων κινδύνων AI.<sup>[[1]](#references)[[2]](#references)</sup>
+{{#ref}}
+AI-Agent-Security-Methodology.md
+{{#endref}}
+
+### Πλαίσια Κινδύνου AI
+
+Δύο χρήσιμα πλαίσια για να ξεκινήσετε την αξιολόγηση του κινδύνου συστημάτων AI είναι το OWASP Machine Learning Security Top 10 και το Secure AI Framework (SAIF) της Google. Είναι συμπληρωματικά και όχι μια εξαντλητική λίστα πλαισίων κινδύνου AI.<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 {{#ref}}
 AI-Risk-Frameworks.md
 {{#endref}}
 
-### Ασφάλεια AI Prompts
+### Ασφάλεια Prompt AI
 
-Τα LLMs έχουν εκτοξεύσει τη χρήση του AI τα τελευταία χρόνια, αλλά δεν είναι τέλεια και μπορούν να εξαπατηθούν μέσω adversarial prompts. Αυτό είναι ένα πολύ σημαντικό θέμα για να κατανοήσετε πώς να χρησιμοποιείτε το AI με ασφάλεια και πώς να του επιτίθεστε:
+Τα LLM έχουν οδηγήσει σε ραγδαία εξάπλωση της χρήσης AI τα τελευταία χρόνια, αλλά δεν είναι τέλεια και μπορούν να παραπλανηθούν από adversarial prompts. Πρόκειται για ένα πολύ σημαντικό θέμα, ώστε να κατανοήσετε πώς να χρησιμοποιείτε το AI με ασφάλεια και πώς να του επιτίθεστε:
 
 
 {{#ref}}
 AI-Prompts.md
 {{#endref}}
 
-### RCE σε AI Models
+### RCE σε Μοντέλα AI
 
-Είναι πολύ συνηθισμένο για developers και εταιρείες να εκτελούν models που έχουν downloaded από το Internet, ωστόσο ακόμη και η φόρτωση ενός model μπορεί να αρκεί για την εκτέλεση arbitrary code στο σύστημα. Αυτό είναι ένα πολύ σημαντικό θέμα για να κατανοήσετε πώς να χρησιμοποιείτε το AI με ασφάλεια και πώς να του επιτίθεστε:
+Είναι πολύ συνηθισμένο οι developers και οι εταιρείες να εκτελούν μοντέλα που έχουν κατεβάσει από το Internet. Ωστόσο, η απλή φόρτωση ενός μοντέλου μπορεί να αρκεί για την εκτέλεση αυθαίρετου κώδικα στο σύστημα. Πρόκειται για ένα πολύ σημαντικό θέμα, ώστε να κατανοήσετε πώς να χρησιμοποιείτε το AI με ασφάλεια και πώς να του επιτίθεστε:
 
 
 {{#ref}}
 AI-Models-RCE.md
 {{#endref}}
 
-### AI-Assisted KYC Bypass
+### Παράκαμψη KYC με τη βοήθεια AI
 
-Το Generative video μπορεί να συνδυαστεί με virtual-camera injection και camera API manipulation για την παράκαμψη αδύναμων ροών KYC, age-verification και biometric liveness:
+Το generative video μπορεί να συνδυαστεί με virtual-camera injection και χειρισμό του camera API, ώστε να παρακαμφθούν αδύναμες διαδικασίες KYC, επαλήθευσης ηλικίας και βιομετρικού ελέγχου ζωντανής παρουσίας:
 
 
 {{#ref}}
 KYC-Bypass-Using-AI.md
 {{#endref}}
 
-### AI Model Context Protocol
+### Model Context Protocol του AI
 
-Το MCP (Model Context Protocol) είναι ένα open protocol για τη σύνδεση AI applications με tools και data sources. Επειδή οι MCP servers μπορούν να εκθέσουν δεδομένα και actions, οι αξιολογήσεις πρέπει να περιλαμβάνουν authorization, consent, tool-input validation και trust-boundary review.<sup>[[3]](#references)</sup>
+Το MCP (Model Context Protocol) είναι ένα ανοιχτό πρωτόκολλο για τη σύνδεση εφαρμογών AI με εργαλεία και πηγές δεδομένων. Καθώς οι MCP servers μπορούν να εκθέτουν δεδομένα και ενέργειες, οι αξιολογήσεις πρέπει να περιλαμβάνουν έλεγχο εξουσιοδότησης, συναίνεσης, επικύρωσης εισόδων εργαλείων και ορίων εμπιστοσύνης.<sup>[[3]](#references)</sup>
 
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### AI-Assisted Fuzzing & Automated Vulnerability Discovery
+### Fuzzing με τη βοήθεια AI και Αυτοματοποιημένος Εντοπισμός Ευπαθειών
 
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
-### AI-Assisted Reverse Engineering
+### Αντίστροφη Μηχανική με τη βοήθεια AI
 
-[Partial lifting, invariant MBA detection, environment-bound decoding, and automated-extractor validation](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
+[Μερική ανύψωση, εντοπισμός invariant MBA, αποκωδικοποίηση εξαρτώμενη από το περιβάλλον και επικύρωση αυτοματοποιημένων extractors](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
 
 ### Web Black-Box AI Pentester Bots
 
-Οι LLM-powered agents μπορούν να αυτοματοποιήσουν long-running black-box web pentesting workflows όταν υποστηρίζονται από observability, orchestration, authenticated session handling και adversarial validation:
+Οι agents που υποστηρίζονται από LLM μπορούν να αυτοματοποιήσουν μακρόχρονες ροές εργασίας web black-box pentesting, όταν υποστηρίζονται από observability, orchestration, διαχείριση authenticated sessions και adversarial validation:
 
 
 {{#ref}}
@@ -104,7 +110,7 @@ Web-Black-Box-AI-Pentester-Bots.md
 
 ## References
 
-- [1] [OWASP Machine Learning Security Top 10](https://owasp.org/www-project-machine-learning-security-top-10/)
-- [2] [Google — Secure AI Framework (SAIF)](https://saif.google/)
-- [3] [Model Context Protocol — Introduction](https://modelcontextprotocol.io/docs/getting-started/intro)
+- [1] [OWASP Top 10 Ασφάλειας Μηχανικής Μάθησης](https://owasp.org/www-project-machine-learning-security-top-10/)
+- [2] [Google — Πλαίσιο Ασφαλούς AI (SAIF)](https://saif.google/)
+- [3] [Model Context Protocol — Εισαγωγή](https://modelcontextprotocol.io/docs/getting-started/intro)
 {{#include ../banners/hacktricks-training.md}}
