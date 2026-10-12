@@ -1044,6 +1044,7 @@
 - [Vmware Workstation Pvscsi Lfh Escape](binary-exploitation/vmware-workstation-pvscsi-lfh-escape.md)
 - [Windows RIO registered-buffer UAF to kernel R/W](binary-exploitation/windows-kernel-exploitation/afd-rio-buffer-uaf.md)
 - [Windows Exploiting (Basic Guide - OSCP lvl)](binary-exploitation/windows-exploiting-basic-guide-oscp-lvl.md)
+  - [Windows Kernel Type Confusion to NPFS Arbitrary R/W](binary-exploitation/windows-kernel-type-confusion-to-npfs-arbitrary-rw.md)
 - [Windows Vectored Overloading](binary-exploitation/windows-vectored-overloading.md)
 - [iOS Exploiting](binary-exploitation/ios-exploiting/README.md)
   - [ios CVE-2020-27950-mach_msg_trailer_t](binary-exploitation/ios-exploiting/CVE-2020-27950-mach_msg_trailer_t.md)
