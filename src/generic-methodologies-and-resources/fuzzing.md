@@ -4,28 +4,28 @@
 
 ## Mutational Grammar Fuzzing: Coverage dhidi ya Semantics
 
-Katika **mutational grammar fuzzing**, ingizo hubadilishwa huku likibaki **halali kisarufi**. Katika hali ya coverage-guided, sampuli zinazosababisha **coverage mpya** pekee ndizo huhifadhiwa kama mbegu za corpus. Kwa **malengo ya lugha** (parsers, interpreters, engines), hili linaweza kukosa hitilafu zinazohitaji **minyororo ya semantic/dataflow**, ambapo matokeo ya construct moja huwa ingizo la nyingine.<sup>[[1]](#references)</sup>
+Katika **mutational grammar fuzzing**, inputs hubadilishwa huku zikibaki **grammar-valid**. Katika hali inayoongozwa na coverage, sampuli zinazosababisha **coverage mpya** pekee ndizo huhifadhiwa kama corpus seeds. Kwa **language targets** (parsers, interpreters, engines), hii inaweza kukosa bugs zinazohitaji **semantic/dataflow chains**, ambapo matokeo ya construct moja huwa input ya nyingine.<sup>[[1]](#references)</sup>
 
-**Hali ya kushindwa:** fuzzer hupata mbegu zinazotekeleza kila moja `document()` na `generate-id()` (au primitive zinazofanana), lakini **haihifadhi dataflow iliyounganishwa**, hivyo sampuli iliyo “karibu zaidi na hitilafu” hutupwa kwa sababu haiongezi coverage. Kwa **hatua tegemezi 3 au zaidi**, kuunganisha upya kwa nasibu huwa ghali na feedback ya coverage haielekezi utafutaji.<sup>[[1]](#references)</sup>
+**Hali ya kushindwa:** fuzzer hupata seeds zinazotekeleza kila moja `document()` na `generate-id()` (au primitives zinazofanana), lakini **haihifadhi dataflow iliyounganishwa**, kwa hiyo sampuli iliyo “karibu zaidi na bug” hutupwa kwa sababu haiongezi coverage. Kwa **hatua tegemezi 3 au zaidi**, recombination ya nasibu huwa ghali na feedback ya coverage haiongozi utafutaji.<sup>[[1]](#references)</sup>
 
-**Athari:** kwa grammars zenye utegemezi mwingi, zingatia **kuunganisha awamu za mutational na generative** au kuelekeza generation kwenye mifumo ya **function chaining** (si coverage pekee).<sup>[[1]](#references)</sup>
+**Maana yake:** kwa grammars zenye utegemezi mwingi, fikiria **kuunganisha awamu za mutational na generative** au kuelekeza generation kwenye mifumo ya **function chaining** (si coverage pekee).<sup>[[1]](#references)</sup>
 
 ## Changamoto za Utofauti wa Corpus
 
-Mutational inayochochewa na coverage ni **ya pupa**: sampuli yenye coverage mpya huhifadhiwa mara moja, na mara nyingi hubakiza sehemu kubwa zisizobadilika. Baada ya muda, corpora huwa na **nakala zinazokaribiana** na utofauti mdogo wa kimuundo. Minimization kali inaweza kuondoa muktadha muhimu, kwa hiyo suluhu ya vitendo ni **grammar-aware minimization** inayosimama baada ya kufikia **kiwango cha chini cha tokeni** (kupunguza kelele huku ikihifadhi muundo wa kutosha ili mutations ziendelee kuwa na manufaa).<sup>[[1]](#references)</sup>
+Mutation inayoongozwa na coverage ni **ya pupa**: sampuli yenye coverage mpya huhifadhiwa mara moja, mara nyingi ikiwa na maeneo makubwa ambayo hayajabadilika. Baada ya muda, corpora huwa **karibu nakala zinazofanana** zenye utofauti mdogo wa kimuundo. Minimization kali inaweza kuondoa muktadha muhimu, kwa hiyo suluhisho la kati linalofaa ni **grammar-aware minimization** inayosimama baada ya kufikia **kizingiti cha chini cha tokeni** (kupunguza kelele huku ikihifadhi muundo wa kutosha unaofaa kwa mutation).<sup>[[1]](#references)</sup>
 
-Kanuni ya vitendo ya corpus kwa mutational fuzzing ni: **pendelea seti ndogo ya mbegu zenye miundo tofauti zinazoongeza coverage** badala ya rundo kubwa la nakala zinazokaribiana. Kwa kawaida, hili humaanisha yafuatayo.<sup>[[1]](#references)[[3]](#references)</sup>
+Kanuni ya vitendo ya corpus kwa mutational fuzzing ni: **pendelea seti ndogo ya seeds zenye miundo tofauti zinazoongeza coverage** badala ya mkusanyiko mkubwa wa karibu nakala zinazofanana. Kwa kawaida, hii humaanisha yafuatayo.<sup>[[1]](#references)[[3]](#references)</sup>
 
-- Anza na **sampuli za ulimwengu halisi** (corpora za umma, crawling, trafiki iliyorekodiwa, seti za faili kutoka kwenye mfumo wa target).
-- Zichuje kwa **coverage-based corpus minimization** badala ya kuhifadhi kila sampuli halali.
-- Hifadhi mbegu **ndogo vya kutosha** ili mutations ziguse sehemu zenye maana badala ya kutumia muda mwingi kwenye byte zisizo muhimu.
-- Rudia corpus minimization baada ya mabadiliko makubwa ya harness/instrumentation, kwa sababu corpus “bora zaidi” hubadilika reachability inapobadilika.
+- Anza na **sampuli za ulimwengu halisi** (corpora za umma, crawling, traffic iliyonaswa, seti za faili kutoka kwenye ecosystem ya target).
+- Zichuje kwa **minimization ya corpus inayotegemea coverage** badala ya kuhifadhi kila sampuli halali.
+- Hifadhi seeds **ndogo vya kutosha** ili mutations zilenge sehemu zenye maana badala ya kutumia mizunguko mingi kwenye bytes zisizo muhimu.
+- Rudia minimization ya corpus baada ya mabadiliko makubwa ya harness/instrumentation, kwa sababu corpus “bora zaidi” hubadilika reachability inapobadilika.
 
-## Mutation Inayozingatia Ulinganisho kwa Thamani za Magic
+## Mutation Inayotambua Comparisons kwa Thamani za Magic
 
-Sababu ya kawaida inayofanya fuzzers kufikia kikomo si sintaksia bali ni **ulinganisho mgumu**: magic bytes, ukaguzi wa urefu, maandishi ya enum, checksums, au thamani za parser dispatch zinazolindwa na `memcmp`, switch tables, au ulinganisho mfululizo. Mutation ya nasibu pekee hupoteza muda kujaribu kubahatisha thamani hizi byte baada ya byte.
+Sababu ya kawaida ya fuzzers kufikia kikomo si syntax bali ni **comparisons kali**: magic bytes, ukaguzi wa urefu, strings za enum, checksums, au thamani za parser dispatch zinazolindwa na `memcmp`, switch tables, au comparisons za mfululizo. Mutation ya nasibu pekee hupoteza mizunguko ikijaribu kukisia thamani hizi byte kwa byte.
 
-Kwa targets hizi, tumia **comparison tracing** (kwa mfano, workflows za AFL++ `CMPLOG` / Redqueen) ili fuzzer iweze kuona operands za ulinganisho ulioshindwa na kuelekeza mutations kwenye thamani zinazotimiza masharti hayo.<sup>[[3]](#references)</sup>
+Kwa targets hizi, tumia **comparison tracing** (kwa mfano, workflows za AFL++ `CMPLOG` / Redqueen) ili fuzzer iweze kuona operands kutoka kwenye comparisons zilizoshindwa na kuelekeza mutations kwenye thamani zinazotimiza masharti hayo.<sup>[[3]](#references)</sup>
 
 ```bash
 ./configure --cc=afl-clang-fast
@@ -40,17 +40,17 @@ cp ./target ./target.cmplog
 afl-fuzz -i in -o out -c ./target.cmplog -- ./target.afl @@
 ```
 
-**Vidokezi vya vitendo:**
+**Maelezo ya vitendo:**
 
-- Hii ni muhimu hasa pale target inapoweka mantiki ya ndani zaidi nyuma ya **file signatures**, **protocol verbs**, **type tags**, au **version-dependent feature bits**.
-- Iunganishe na **dictionaries** zilizotolewa kutoka kwa sampuli halisi, protocol specs, au debug logs. Dictionary ndogo yenye grammar tokens, chunk names, verbs, na delimiters mara nyingi huwa na manufaa zaidi kuliko wordlist kubwa ya jumla.
-- Ikiwa target hufanya ukaguzi mwingi mfululizo, tatua kwanza ulinganishaji wa mapema zaidi wa “magic”, kisha punguza tena corpus inayotokana na hapo ili hatua zinazofuata zianze na prefixes ambazo tayari ni halali.
+- Hii ni muhimu hasa pale ambapo lengo huficha logic ya ndani nyuma ya **file signatures**, **protocol verbs**, **type tags**, au **version-dependent feature bits**.
+- Iunganishe na **dictionaries** zilizotolewa kutoka kwa sampuli halisi, specs za protocol, au debug logs. Dictionary ndogo yenye tokens za sarufi, majina ya chunks, verbs, na delimiters mara nyingi huwa na thamani zaidi kuliko wordlist kubwa ya jumla.
+- Ikiwa lengo hufanya ukaguzi mwingi mfululizo, tatua ulinganisho wa mapema zaidi wa “magic” kwanza, kisha punguza corpus inayotokana tena ili hatua zinazofuata zianze na prefixes ambazo tayari ni halali.
 
-## Maoni Tajiri Zaidi Wakati Edge Coverage Inapounganisha Njia Tofauti
+## Maoni Tajiri Zaidi Wakati Edge Coverage Inapokunja Njia Tofauti Kuwa Moja
 
-Edge coverage ya kawaida haiwezi kutofautisha executions mbili zinazopita kwenye helper ileile kupitia callers tofauti au kuchukua mchanganyiko tofauti wa branches ndani ya function. Hili ni muhimu katika shared decoders, protocol dispatchers, na interpreter helpers ambapo **njia** ya kufikia edge huamua hali iliyo hai. Kufuatilia kila calling context bila mpango pia ni hatari: coverage map na queue zinaweza kukua kupita kiasi. Kwa hiyo, utafiti wa context-sensitive fuzzing unapendekeza kuboresha contexts zenye matumaini pekee badala ya kuchukulia call graph nzima kuwa context-sensitive.<sup>[[14]](#references)</sup>
+Edge coverage ya kawaida haiwezi kutofautisha executions mbili zinazopita kwenye helper ileile kupitia callers tofauti au kutumia mchanganyiko tofauti wa branches ndani ya function. Hili ni muhimu katika shared decoders, protocol dispatchers, na interpreter helpers ambapo **njia** ya kufikia edge huamua hali inayotumika. Kufuatilia kila calling context bila mpango pia ni hatari: coverage map na queue vinaweza kukua kupita kiasi. Kwa hiyo, utafiti wa context-sensitive fuzzing unapendekeza kuboresha contexts zenye matumaini pekee badala ya kuchukulia call graph nzima kuwa context-sensitive.<sup>[[14]](#references)</sup>
 
-Build za hivi karibuni za AFL++ hutoa **Ball-Larus per-function path coverage** pamoja na edge coverage ya kawaida. Hii huweka feature kwa kila njia isiyo na mizunguko kupitia function; loop back-edges huondolewa, kwa hiyo maoni haya hutofautisha mchanganyiko wa branches lakini **si idadi ya marudio ya loop**. Anza na kiwango kilicholegezwa cha `1`, kisha weka hali kali zaidi kwenye parser/state-machine code inayotia shaka, kwa sababu idadi ya njia inaweza kukua kwa kasi ya kielelezo.<sup>[[13]](#references)</sup>
+Build za hivi karibuni za AFL++ hutoa **Ball-Larus per-function path coverage** pamoja na edge coverage ya kawaida. Huipa kila acyclic path kupitia function feature; loop back-edges huondolewa, kwa hiyo feedback hii hutofautisha mchanganyiko wa branches lakini **si idadi ya marudio ya loop**. Anza na level `1` isiyo kali, kisha weka modes kali zaidi kwenye code ya parser/state-machine inayotia shaka kwa sababu idadi ya paths inaweza kukua kwa kasi ya kielelezo.<sup>[[13]](#references)</sup>
 
 ```bash
 make clean
@@ -62,7 +62,7 @@ make -j"$(nproc)"
 afl-fuzz -i in -o out -- ./target @@
 ```
 
-Kwa helper inayoitwa kutoka sehemu nyingi zinazohusiana na usalama, hali ya LTO inaweza kuunganisha njia ya kila function na call site yake ya moja kwa moja:<sup>[[13]](#references)</sup>
+Kwa helper inayoitwa kutoka sehemu nyingi zinazohusiana na usalama, hali ya LTO inaweza kuunganisha kila njia ya function na sehemu yake ya karibu ya kuiita:<sup>[[13]](#references)</sup>
 
 ```bash
 make clean
@@ -75,50 +75,50 @@ make -j"$(nproc)"
 afl-fuzz -i in -o out -- ./target @@
 ```
 
-**Mwongozo wa kampeni:** tumia feedback yenye maelezo zaidi kwa tahadhari na ufuatilie gharama yake kwa coverage map/queue.<sup>[[13]](#references)[[14]](#references)</sup>
+**Mwongozo wa campaign:** tumia feedback tajiri zaidi kwa tahadhari na ufuatilie gharama yake kwa coverage-map/queue.<sup>[[13]](#references)[[14]](#references)</sup>
 
-- Endesha instance ya kawaida ya edge-coverage sambamba; feedback yenye maelezo zaidi ina manufaa tu ikiwa gharama ya ziada ya queue/map haitapunguza executions per second.
-- Tumia `AFL_LLVM_ALLOWLIST` kuwekea mipaka instrumentation ya path/caller wakati libraries kubwa zenye templates nyingi au generic utility code zinapotawala map.
-- Functions zenye acyclic paths nyingi kupita kiasi zinaweza kurukwa na AFL++; warnings wakati wa compilation ni dalili kwamba target inahitaji allowlisting au kiwango kisicho kali sana.
-- Caller + path coverage inaunga mkono kina kimoja tu cha caller. Usiichanganye na context stacks zenye kina zaidi.
-- Path IDs zinaweza kubadilika kati ya matoleo makuu ya LLVM. Tumia toolchain ileile katika kampeni nzima na usisawazishe corpora zinazotegemea PATH kana kwamba feature IDs zake ni thabiti kati ya builds.
-- Feedback hii hukamilishana na `CMPLOG`: ufuatiliaji wa comparisons hutatua **ni thamani gani inapita guard**, ilhali feedback ya path/caller huhifadhi **ni njia gani na mchanganyiko gani wa branches ulioifikisha hapo**.
+- Endesha instance ya kawaida ya edge-coverage sambamba; feedback tajiri husaidia tu ikiwa gharama ya ziada ya queue/map haiathiri vibaya idadi ya executions kwa sekunde.
+- Tumia `AFL_LLVM_ALLOWLIST` kuweka kikomo cha path/caller instrumentation wakati maktaba kubwa zenye template nyingi au code ya jumla ya utility zinapotawala map.
+- Functions zenye acyclic paths nyingi kupita kiasi zinaweza kurukwa na AFL++; warnings wakati wa compilation ni ishara kwamba target inahitaji allowlisting au kiwango kisicho kali sana.
+- Caller + path coverage hutumia kiwango kimoja tu cha kina cha caller. Usiichanganye na context stacks zenye kina zaidi.
+- Path IDs zinaweza kubadilika kati ya matoleo makuu ya LLVM. Weka toolchain ileile kwa campaign nzima na usisawazishe corpora zinazotumia PATH kana kwamba feature IDs zake ni thabiti kati ya builds.
+- Feedback hii hukamilisha `CMPLOG`: comparison tracing hutatua **ni value gani inayopita guard**, ilhali path/caller feedback huhifadhi **ni route na mchanganyiko gani wa branches ulioifikisha hapo**.
 
-## Stateful Fuzzing: Mfuatano Ni Seeds
+## Fuzzing yenye State: Sequences ni Seeds
 
-Kwa **protocols**, **authenticated workflows**, na **multi-stage parsers**, kitu cha kuvutia mara nyingi si blob moja bali ni **mfuatano wa messages**. Kuunganisha transcript nzima kwenye faili moja na kuibadilisha bila mpango kwa kawaida hakufai, kwa sababu fuzzer hubadilisha kila hatua kwa kiwango sawa, hata pale ambapo ni message ya baadaye tu inayofikia hali dhaifu.<sup>[[4]](#references)</sup>
+Kwa **protocols**, **authenticated workflows**, na **multi-stage parsers**, kitengo cha kuvutia mara nyingi si blob moja bali ni **message sequence**. Kuunganisha transcript nzima kwenye faili moja na kuibadilisha bila mpango kwa kawaida si bora, kwa sababu fuzzer hubadilisha kila hatua kwa kiwango sawa, hata pale ambapo ni message ya baadaye tu inayofikia hali dhaifu.<sup>[[4]](#references)</sup>
 
-Mbinu yenye ufanisi zaidi ni kuichukulia **sequence yenyewe kama seed** na kutumia **hali inayoonekana** (response codes, protocol states, parser phases, aina za objects zinazorudishwa) kama feedback ya ziada.<sup>[[4]](#references)</sup>
+Mbinu bora zaidi ni kuchukulia **sequence yenyewe kama seed** na kutumia **hali inayoonekana** (response codes, protocol states, parser phases, aina za objects zinazorudishwa) kama feedback ya ziada.<sup>[[4]](#references)</sup>
 
-- Hifadhi **valid prefix messages** bila mabadiliko mengi na lenga mutations kwenye message inayoendesha **transition**.
-- Hifadhi identifiers na thamani zinazozalishwa na server kutoka kwenye responses za awali pale ambapo hatua inayofuata inazihitaji.
-- Pendelea mutation/splicing kwa kila message badala ya kubadilisha transcript nzima iliyoserialishwa kana kwamba ni blob isiyo na muundo.
-- Ikiwa protocol inatoa response codes zenye maana, zitumie kama **state oracle** ya gharama ndogo ili kuyapa kipaumbele ma sequences yanayofika hatua za ndani zaidi.
+- Hifadhi **valid prefix messages** bila mabadiliko na elekeza mutations kwenye message **inayoendesha transition**.
+- Hifadhi identifiers na values zinazozalishwa na server kutoka kwa responses zilizotangulia pale hatua inayofuata inapozitegemea.
+- Pendelea mutation/splicing kwa kila message badala ya kubadilisha transcript nzima iliyoserialishwa kama blob isiyoeleweka.
+- Ikiwa protocol inatoa response codes zenye maana, zitumie kama **state oracle** ya gharama ndogo ili kuzipa kipaumbele sequences zinazoendelea kwa kina zaidi.
 
-Hii ndiyo sababu hiyo hiyo inayofanya bugs zilizothibitishwa kwa authentication, transitions zilizofichwa, au parser bugs zinazotokea “baada tu ya handshake” zikosekanwe mara nyingi na file-style fuzzing ya kawaida: fuzzer lazima ihifadhi **mpangilio, hali na dependencies**, si muundo tu.<sup>[[4]](#references)</sup>
+Hii ndiyo sababu authenticated bugs, hidden transitions, au parser bugs zinazotokea “baada tu ya handshake” mara nyingi hukosekana na fuzzing ya kawaida ya mtindo wa faili: fuzzer lazima ihifadhi **mpangilio, hali, na dependencies**, si muundo tu.<sup>[[4]](#references)</sup>
 
-### Android Binder: fuzzing ya driver ya clients wengi
+### Android Binder: fuzzing ya driver yenye clients wengi
 
-Edge coverage ya juu bado inaweza kukosa bugs za IPC driver kwa sababu coverage haielezi **umiliki wa objects, reference counts, messages zinazosubiri, mpangilio wa usafishaji, au interleavings za threads**. Ukurasa wa [Android Binder IPC internals](../binary-exploitation/linux-kernel-exploitation/android-binder-ipc-internals-kernel-vulnerability-research.md) unaeleza object model ya driver; mfano huu unalenga fuzzer harness. Android Binder ni mfano mzuri: kufikia njia za allocation na free zote mbili hakutoshi ikiwa fuzzer haiwezi kufanya processes nyingi zifanye kazi kwenye kernel object ileile kwa mpangilio unaohitajika.<sup>[[15]](#references)</sup>
+Edge coverage kubwa bado inaweza kukosa bugs za IPC-driver kwa sababu coverage haielezi **umiliki wa object, reference counts, messages zinazosubiri, mpangilio wa cleanup, au interleavings za threads**. Ukurasa wa [Android Binder IPC internals](../binary-exploitation/linux-kernel-exploitation/android-binder-ipc-internals-kernel-vulnerability-research.md) unaeleza object model ya driver; mfano huu unaangazia fuzzer harness. Android Binder ni mfano mzuri: kufikia njia za allocation na free hakutoshi ikiwa fuzzer haiwezi kufanya processes nyingi zifanyie kazi kernel object ileile kwa mpangilio unaohitajika.<sup>[[15]](#references)</sup>
 
-#### Modeli ya protocol, si buffers za `ioctl` zilizotengwa
+#### Modeli protocol, si buffers za `ioctl` zilizotengwa
 
-Wakilisha test case kama grammar iliyopangwa ya **utambulisho wa client + operesheni + arguments zenye muundo**. Binder LKL fuzzer hutumia protobuf na `libprotobuf-mutator`, ikiwa na client mmoja endelevu wa context-manager na clients wawili wa kawaida. Kisha semantic harness huhifadhi mahusiano ambayo mutation ya bytes bila mpango ingeharibu.<sup>[[15]](#references)</sup>
+Wakilisha test case kama grammar yenye mpangilio ya **utambulisho wa client + operation + arguments zenye muundo**. Binder LKL fuzzer hutumia protobuf na `libprotobuf-mutator`, ikiwa na client mmoja endelevu wa context-manager na clients wawili wa kawaida. Semantic harness kisha huhifadhi mahusiano ambayo byte mutation ya upofu ingeharibu.<sup>[[15]](#references)</sup>
 
-- Hifadhi thamani zilizorejeshwa na operations za awali. Kwa mfano, `BC_FREE_BUFFER` lazima itumie tena pointer ya transaction-buffer iliyorejeshwa na `ioctl` ya awali.
-- Tengeneza replies chaguomsingi halali ili transactions za synchronous zikamilike na operations za baadaye ziweze kufikiwa.
-- Kataa transitions zisizowezekana kama vile self-transactions au transactions nyingi zinazosubiri kwa target ileile.
-- Weka hali ya singleton bootstrap nje ya reset ya kila input. Binder huruhusu usajili mmoja tu wa `BINDER_SET_CONTEXT_MGR` kwa kila boot, kwa hiyo kuharibu na kuunda upya client huyo mara kwa mara kungefanya inputs za baadaye zisiwe halali.
+- Hifadhi values zinazorejeshwa na operations zilizotangulia. Kwa mfano, `BC_FREE_BUFFER` lazima itumie tena pointer ya transaction-buffer iliyorejeshwa na `ioctl` ya awali.
+- Tengeneza majibu ya kawaida yaliyo valid ili transactions za synchronous zikamilike na operations za baadaye zibaki kufikiwa.
+- Kataa transitions zisizowezekana kama self-transactions au transactions nyingi zinazosubiri kwa target ileile.
+- Weka hali ya bootstrap ya singleton nje ya reset ya kila input. Binder inaruhusu usajili mmoja tu wa `BINDER_SET_CONTEXT_MGR` kwa kila boot, kwa hiyo kuharibu na kuunda upya client hiyo mara kwa mara kungefanya inputs za baadaye ziwe invalid.
 
-Kiolezo kizuri cha lifetime-race ni kufanya client mmoja ahamishe object, kuanzisha usafishaji wa thread au process, na wakati huohuo kufanya client inayopokea i-release transaction buffer. Katika mfano wa CVE-2020-0423, uhamisho wa `BINDER_TYPE_WEAK_BINDER` uliofuatwa na `BINDER_THREAD_EXIT` ikigongana na `BC_FREE_BUFFER` ungeweza kufree `binder_work` iliyopachikwa wakati cleanup path ya thread inayotoka bado inaitumia.<sup>[[15]](#references)</sup>
+Template muhimu ya lifetime-race ni kufanya client mmoja ihamishe object, kuanzisha cleanup ya thread au process, na wakati huohuo kufanya client inayopokea iachilie transaction buffer. Katika mfano wa CVE-2020-0423, uhamishaji wa `BINDER_TYPE_WEAK_BINDER` uliofuatiwa na `BINDER_THREAD_EXIT` ukigongana na `BC_FREE_BUFFER` ungeweza kufree `binder_work` iliyopachikwa huku cleanup path ya thread inayotoka bado ikiitumia.<sup>[[15]](#references)</sup>
 
-#### Kurejesha interleavings zinazodhibitiwa kwenye kernel ya userspace
+#### Rejesha interleavings zinazodhibitiwa kwenye kernel ya userspace
 
-[Linux Kernel Library (LKL)](https://github.com/lkl/linux) huunganisha code halisi ya kernel kwenye userspace harness na kufichua syscall interface yake kupitia `lkl_syscall`. Hii hurahisisha kuratibu protobuf state, coverage na KASAN ndani ya process moja. Hata hivyo, LKL kwa kawaida huendesha syscall bila kernel thread nyingine kuikatiza. Kwa kampeni za race, weka sehemu za `schedule()` karibu na mipaka maalum ya lock/unlock na lifetime, kisha iache harness ichague kwa nasibu client inayofuata katika kila yield. Lenga sehemu hizi kwa uangalifu kwa sababu kila moja huongeza mara nyingi ukubwa wa scheduling search space. Randomized scheduler iliyoelezwa na watafiti **si** sehemu ya Binder fuzzer ya upstream.<sup>[[15]](#references)</sup>
+[Linux Kernel Library (LKL)](https://github.com/lkl/linux) huunganisha code halisi ya kernel kwenye userspace harness na kufichua syscall interface yake kupitia `lkl_syscall`. Hii hurahisisha kuratibu protobuf state, coverage, na KASAN katika process moja. Hata hivyo, LKL kwa kawaida huendesha syscall bila kernel thread nyingine kuikatiza. Kwa race campaigns, weka sehemu za `schedule()` karibu na mipaka iliyochaguliwa ya lock/unlock na lifetime, kisha iache harness ichague client inayofuata kwa nasibu katika kila yield. Weka sehemu hizi kwenye maeneo lengwa kwa sababu kila moja huongeza mara nyingi ukubwa wa scheduling search space. Randomized scheduler iliyoelezwa na watafiti **si** sehemu ya upstream Binder fuzzer.<sup>[[15]](#references)</sup>
 
-#### Build na replay ya serialized regression seeds
+#### Build na replay regression seeds zilizoserialishwa
 
-Harness ya upstream hufunga toleo linalooana la `libprotobuf-mutator`, huwasha LKL fuzzing instrumentation na KASAN kwa `LKL_FUZZING=1`, na huwasha `CONFIG_MMU` kwa Binder kwa kutumia `MMU=1`.<sup>[[16]](#references)</sup>
+Upstream harness hufunga toleo linalooana la `libprotobuf-mutator`, huwasha LKL fuzzing instrumentation na KASAN kwa `LKL_FUZZING=1`, na huwasha `CONFIG_MMU` kwa Binder kwa kutumia `MMU=1`.<sup>[[16]](#references)</sup>
 
 ```bash
 PROTOBUF_MUTATOR_DIR=/tmp/libprotobuf-mutator \
@@ -129,18 +129,18 @@ make -C tools/lkl LKL_FUZZING=1 MMU=1 \
   clean-conf fuzzers -j"$(nproc)"
 ```
 
-Baada ya kuangalia revision iliyoachwa ikiwa hatarishi kimakusudi au kutumia rollback patches zilizoandikwa kwenye upstream, seed iliyoserialishwa inaweza kurudia mabadiliko yote ya hali ya clients wengi bila kuyaunda upya katika proof of concept ya C ya dharura:<sup>[[16]](#references)</sup>
+Baada ya kufanya checkout ya revision iliyoathiriwa kimakusudi au kutumia rollback patches zilizoandikwa kwenye upstream, serialized seed inaweza kuzalisha upya mabadiliko yote ya hali ya multi-client bila kuhitaji kuijenga upya katika C proof of concept ya ad-hoc:<sup>[[16]](#references)</sup>
 
 ```bash
 tools/lkl/fuzzers/binder/binder-fuzzer \
   tools/lkl/fuzzers/binder/seeds/CVE-2023-20938
 ```
 
-Chukulia KASAN use-after-free iliyopatikana kama uthibitisho kwamba seed ilifikia njia ya lifetime iliyo hatarini. Hii **haithibitishi** primitives za baadaye zinazohitajika kwa ajili ya kutekeleza code ya kernel au kupandisha privilege.<sup>[[16]](#references)</sup>
+Chukulia use-after-free ya KASAN iliyopatikana kuwa uthibitisho kwamba seed ilifikia njia ya lifetime iliyo hatarini. **Haithibitishi** primitives za baadaye zinazohitajika ili kutekeleza code kwenye kernel au kuongeza ruhusa.<sup>[[16]](#references)</sup>
 
-## Single-Machine Diversity Trick (Jackalope-Style)
+## Mbinu ya Utofauti kwenye Mashine Moja (Mtindo wa Jackalope)
 
-Njia ya vitendo ya kuchanganya **uvumbuzi unaozalishwa** na **matumizi upya ya coverage** ni **kuanzisha upya workers wa muda mfupi** dhidi ya server inayoendelea kufanya kazi. Kila worker huanza na corpus tupu, husawazisha baada ya sekunde `T`, huendesha kwa sekunde nyingine `T` kwa kutumia corpus iliyounganishwa, husawazisha tena, kisha hutoka. Hii huzalisha **miundo mipya katika kila kizazi** huku ikiendelea kutumia coverage iliyokusanywa.<sup>[[1]](#references)[[2]](#references)</sup>
+Njia ya vitendo ya kuchanganya **ubunifu wa generative** na **utumiaji upya wa coverage** ni kuwasha upya workers wanaofanya kazi kwa muda mfupi dhidi ya server inayoendelea kufanya kazi. Kila worker huanza na corpus tupu, husawazisha baada ya sekunde `T`, huendesha kwa sekunde nyingine `T` kwa kutumia corpus iliyounganishwa, husawazisha tena, kisha hutoka. Hii huzalisha **miundo mipya kila kizazi** huku ikiendelea kutumia coverage iliyokusanywa.<sup>[[1]](#references)[[2]](#references)</sup>
 
 **Server:**
 
@@ -148,7 +148,7 @@ Njia ya vitendo ya kuchanganya **uvumbuzi unaozalishwa** na **matumizi upya ya c
 /path/to/fuzzer -start_server 127.0.0.1:8337 -out serverout
 ```
 
-**Workers wa mfuatano (mfano wa loop):**
+**Workers wa kufuatana (mfano wa loop):**
 
 <details>
 <summary>Loop ya kuwasha upya worker wa Jackalope</summary>
@@ -184,87 +184,144 @@ while True:
 
 **Maelezo:**
 
-- `-in empty` hulazimisha **corpus mpya** katika kila kizazi.
-- `-server_update_interval T` hukaribia **usawazishaji uliocheleweshwa** (ugunduzi wa vipya kwanza, utumiaji upya baadaye).
-- Katika hali ya grammar fuzzing, **usawazishaji wa awali wa server hurukwa kwa chaguomsingi** (hakuna haja ya `-skip_initial_server_sync`).
-- `T` bora zaidi **hutegemea target**; kubadilisha baada ya worker kupata sehemu kubwa ya coverage “rahisi” kwa kawaida hufanya kazi vizuri zaidi.
+- `-in empty` hulazimisha **corpus mpya** kwa kila generation.
+- `-server_update_interval T` hukaribia **sync iliyocheleweshwa** (novelty kwanza, reuse baadaye).
+- Katika hali ya grammar fuzzing, **initial server sync hurukwa kwa chaguomsingi** (hakuna haja ya `-skip_initial_server_sync`).
+- `T` bora hutegemea **target**; kubadilisha baada ya worker kupata coverage nyingi za “easy” kwa kawaida hufanya kazi vizuri zaidi.
 
-## Snapshot Fuzzing Kwa Targets Ngumu Kuweka Kwenye Harness
+## Snapshot Fuzzing Kwa Targets Zilizo Ngumu Kuweka Katika Harness
 
-Wakati code unayotaka kupima inafikiwa tu **baada ya gharama kubwa ya usanidi** (kuwasha VM, kukamilisha login, kupokea packet, kuchanganua container, kuanzisha service), mbadala muhimu ni **snapshot fuzzing**: kunasa hali ya process au VM iliyo tayari, kuingiza kila test case kwenye njia ya ingizo ya target, kutekeleza hadi crash/timeout, kisha kurejesha snapshot. Hii huepusha kurudia uanzishaji au viambishi awali vya protocol, na ni muhimu kwa **network services**, **firmware**, **attack surfaces za baada ya uthibitishaji**, na **targets za binary-only**.<sup>[[9]](#references)[[10]](#references)</sup>
+Wakati code unayotaka ku-test inafikika tu **baada ya gharama kubwa ya setup** (ku-boot VM, kukamilisha login, kupokea packet, kuchanganua container, kuanzisha service), mbadala unaofaa ni **snapshot fuzzing**: kunasa hali ya process au VM iliyo tayari, kuingiza kila test case kwenye njia ya input ya target, kutekeleza hadi crash/timeout, kisha kurejesha snapshot. Hii huepusha kurudia initialization au protocol prefixes na inafaa kwa **network services**, **firmware**, **attack surfaces baada ya auth**, na **targets za binary pekee**.<sup>[[9]](#references)[[10]](#references)</sup>
 
 1. Endesha target hadi hali inayokuvutia iwe tayari.
-2. Piga snapshot ya **memory + registers** wakati huo.
-3. Kwa kila test case, andika ingizo lililobadilishwa moja kwa moja kwenye buffer husika ya guest/process.
+2. Hifadhi snapshot ya **memory + registers** wakati huo.
+3. Kwa kila test case, andika input iliyobadilishwa moja kwa moja kwenye buffer husika ya guest/process.
 4. Tekeleza hadi crash/timeout/reset.
 5. Rejesha snapshot; kwa targets za VM, rejesha **dirty pages** pekee inapoungwa mkono, kisha urudie.
 
-Weka snapshot karibu kadiri inavyowezekana na hatua ya kwanza ya gharama kubwa ya kuchanganua/kusambaza, kama vile baada ya `recv`/`read` au sehemu ya uondoaji wa mfuatano wa packet, na rekodi input buffer inayotumiwa na target. Hii hufuata kanuni ya uwekaji unaobadilika: kuhamisha snapshot ndani zaidi ya uchakataji wa ingizo ili kuepuka kurudia kazi.<sup>[[11]](#references)</sup>
+Weka snapshot karibu iwezekanavyo na hatua ya kwanza ya gharama kubwa ya parse/dispatch, kama vile baada ya `recv`/`read` au sehemu ya packet-deserialization, na urekodi input buffer inayotumiwa na target. Hii hufuata kanuni ya adaptive placement ya kusogeza snapshot ndani zaidi katika uchakataji wa input ili kuepuka kurudia kazi.<sup>[[11]](#references)</sup>
 
-## Uchunguzi wa Harness: Tambua Fuzzers Zisizoingia Kina Mapema
+## Kuchunguza Linux Kernel Race Kwa Kutumia MAccConc
 
-Kampeni inapokwama, mara nyingi tatizo si mutator bali ni **harness**. Tumia **uchunguzi wa reachability/coverage** kutafuta functions zinazoweza kufikiwa kistatik kutoka kwenye fuzz target yako lakini ambazo hufunikwa mara chache au hazifunikwi kamwe kwa njia ya runtime. Functions hizo kwa kawaida huashiria mojawapo ya matatizo matatu.<sup>[[12]](#references)</sup>
+[MAccConc](https://github.com/googleprojectzero/MAccConc) hubadilisha race conditions za Linux kernel zinazotegemea timing kuwa ratiba za memory-access zinazoweza kurudiwa. Inaweza kuorodhesha kiotomatiki execution za **A-B-A** za contexts mbili, au kumruhusu mchambuzi kuweka masharti ya mpangilio kwenye terminal UI/GUI. Hii ni tooling ya majaribio ya utafiti, si concurrency fuzzer kamili: kwa sasa inahitaji LLVM 23+ na kernel iliyowekewa patches na mradi, command-line tools zinaunga mkono test threads mbili, na safu ya userspace fuzzing iliyopendekezwa haijatekelezwa.<sup>[[17]](#references)[[18]](#references)</sup>
 
-- Harness huingia kwenye target ikiwa imechelewa sana au mapema sana.
+### Kukusanya sehemu za mawasiliano kati ya contexts
+
+Build kernel yenye instrumentation kwa kutumia KASAN outline callbacks na usaidizi wa patched KCOV wa kurekodi memory. README ya mradi pia inapendekeza kuzima sibling-call optimization ili call stacks ziendelee kutumika.<sup>[[17]](#references)[[18]](#references)</sup>
+
+```text
+CONFIG_KASAN=y
+CONFIG_KASAN_OUTLINE=y
+CONFIG_KCOV=y
+CONFIG_KCOV_EXT_RECORDS=y
+CONFIG_KCOV_MEMORY=y
+CONFIG_KALLSYMS_ALL=y
+CONFIG_DEBUG_INFO_DWARF5=y
+CONFIG_PREEMPT=y
+CONFIG_RANDOMIZE_BASE=n
+```
+
+```bash
+export KCFLAGS="-fno-optimize-sibling-calls -mllvm -sanitizer-coverage-prune-blocks=false"
+```
+
+KASAN outline mode (`asan-instrumentation-with-call-threshold=0`) hubadilisha accesses zilizo instrumentiwa kuwa miito ya helper. Kernel patches za MAccConc huzima `asan-opt-same-temp` ili accesses zinazofuatana zisiunganishwe; zima pia optimization ya `asan-opt-globals` pale ambapo races za global variables zinapaswa kuonekana. KCOV hupeleka rekodi zinazotokana na hatua hii kwa userspace. Linganisha accesses kutoka execution contexts tofauti na uhifadhi jozi ambazo byte ranges zake zinaingiliana na ambapo angalau upande mmoja unaandika; chukulia `kfree()` kama write ili mabadiliko ya lifetime pia yawe candidates.<sup>[[17]](#references)</sup>
+
+Kwa kazi inayoendelea nje ya task iliyoianzisha, kama vile packet processing au RCU callbacks, subsystem lazima isambaze handle ya KCOV remote-coverage. Remote KCOV ya upstream ni opt-in na haipatikani kiotomatiki kwa kazi yoyote ya background, hivyo kutosambaza handle kunaweza kufanya mwingiliano halisi usionekane.<sup>[[17]](#references)[[19]](#references)</sup>
+
+### Tambua access ileile ya dynamic katika kila run
+
+Usifanye replay kwa kutumia anwani halisi ya heap, ambayo inaweza kubadilika baada ya kila allocation, au anwani ya instruction pekee, ambayo ina utata ndani ya helpers kama `memcpy()` na `spin_lock()`. MAccConc hutumia **count-augmented stack trace**: kila frame hutambua callee pamoja na hesabu ya invocations ndani ya caller wake, na kipengele cha mwisho hutambua instruction ya memory-access. Rekodi za kuingia/kutoka kwenye function za SanitizerCoverage huruhusu userspace kujenga upya kitambulisho hiki cha dynamic, ambacho hubaki thabiti licha ya mabadiliko ya anwani na kelele zisizohusiana za control-flow.<sup>[[17]](#references)</sup>
+
+### Geuza jozi za candidates kuwa ratiba zinazolazimishwa
+
+Ioctl iliyopatchiwa ya `KCOV_SET_DI` huhusisha kitambulisho cha access cha count-augmented na kitendo cha shared-flag.<sup>[[17]](#references)</sup>
+
+| Kitendo | Maana |
+| --- | --- |
+| `DI_STACK_WAKE_PRE` | Weka flag *N* mara moja kabla ya access iliyochaguliwa. |
+| `DI_STACK_WAIT` | Kabla ya access iliyochaguliwa, subiri kwa kuzunguka hadi flag *N* iwekwe au kikomo kilichosanidiwa kiishe. |
+| `DI_STACK_WAKE_POST` | Weka flag *N* mara moja baada ya access iliyochaguliwa. |
+
+Kwa sharti la sehemu la **A-happens-before-B**, weka `DI_STACK_WAKE_POST` kwenye A na `DI_STACK_WAIT` kwenye B ukitumia flag ileile. Kwa ratiba iliyobainishwa kikamilifu ya contexts mbili, anza B ikiwa imezuiwa, kisha A iamshie B na isubiri kwenye sehemu ya kwanza ya uhamishaji; B hufanya kitendo cha kinyume kwenye uhamishaji unaofuata. Hii hufanya kazi kama kubadilisha context kwa namna ya deterministic, na ndiyo inayotumiwa na A-B-A explorer ya kiotomatiki.<sup>[[17]](#references)</sup>
+
+Campaign ndogo kabisa ni kucompile test case ya four-hook (`test_setup`, functions mbili za thread, na `test_end`) kama shared library, kukusanya trace isiyo na vikwazo, kisha kuorodhesha candidates za A-B-A au kuongeza constraints za mkono kuzunguka accesses zinazotia shaka.<sup>[[18]](#references)</sup>
+
+```bash
+cc -shared -fPIC -o testcase.so testcase.c
+./kcov-autorace ./testcase.so
+# or interactively:
+./kcov-terminal ./testcase.so
+```
+
+Tafsiri muda wa kusubiri kando na upangaji upya uliofanikiwa: mpangilio ulioombwa huenda usiwezekane kwa sababu ya lock au utegemezi wa uanzishaji/uchapishaji unaozuia context ya pili kufika kwenye sehemu yake ya injection. Pia zingatia maeneo ambayo KASAN haikagui: ufikiaji wa moja kwa moja wa stack kwa kawaida hauwekwi hooks isipokuwa kuna uwezekano wa kwenda nje ya mipaka, globals huachwa kwa optimization chaguomsingi, na compilers za sasa haziwezi kutoa hooks za ASAN na TSAN kwa wakati mmoja. Hatimaye, prototype hupoteza buffer yake ya KCOV mgeni anapopata panic, kwa hiyo hifadhi crash console/oracle huru.<sup>[[17]](#references)</sup>
+
+Kwa fuzzing ya baadaye inayoongozwa na concurrency, rekodi muhtasari wa ufikiaji wa kumbukumbu kwa kila ingizo au syscall, oanisha operesheni ambazo zingeunda sehemu za mawasiliano kati ya contexts, kisha chunguza michanganyiko hiyo pekee. VM snapshots huweka hali ya kimataifa na anwani thabiti; bila snapshots, metadata ya allocation-site inaweza kutoa muhtasari wa objects katika runs mbalimbali. Hili ni pendekezo la upanuzi, si kipengele cha sasa cha zana za userspace za MAccConc.<sup>[[17]](#references)</sup>
+
+## Ukaguzi wa Harness: Tambua Fuzzers Zisizofika Mbali Mapema
+
+Campaign inapokwama, mara nyingi tatizo si mutator bali ni **harness**. Tumia **ukaguzi wa reachability/coverage** ili kupata functions zinazoweza kufikiwa kistatiki kutoka kwenye fuzz target yako lakini ambazo hazifunikwi sana au hazifunikwi kabisa wakati wa utekelezaji. Functions hizo kwa kawaida huashiria mojawapo ya matatizo matatu.<sup>[[12]](#references)</sup>
+
+- Harness huingia kwenye target mapema mno au kwa kuchelewa mno.
 - Seed corpus haina familia nzima ya vipengele.
-- Target inahitaji **harness ya pili** badala ya harness moja kubwa mno ya “kufanya kila kitu”.
+- Target inahitaji **harness ya pili** badala ya harness moja kubwa kupita kiasi ya “kufanya kila kitu”.
 
-Ukitumia mifumo ya kazi ya aina ya OSS-Fuzz / ClusterFuzz, Fuzz Introspector inaweza kulinganisha reachability ya kistatik na runtime coverage na kutengeneza ripoti kutoka kwa run yenye muda maalum au corpus ya umma.<sup>[[12]](#references)</sup>
+Ukitumia workflows za aina ya OSS-Fuzz / ClusterFuzz, Fuzz Introspector inaweza kulinganisha reachability ya kistatiki na coverage ya wakati wa utekelezaji na kutoa ripoti kutokana na run ya muda maalum au corpus ya umma.<sup>[[12]](#references)</sup>
 
 ```bash
 python3 infra/helper.py introspector libdwarf --seconds=30
 python3 infra/helper.py introspector libdwarf --public-corpora
 ```
 
-Tumia ripoti kuamua ikiwa uongeze harness mpya kwa parser path ambayo haijajaribiwa, upanue corpus kwa kipengele fulani, au ugawanye harness kubwa moja kuwa entry point ndogo zaidi.
+Tumia ripoti kuamua ikiwa utaongeza harness mpya kwa njia ya parser ambayo haijajaribiwa, kupanua corpus kwa kipengele mahususi, au kugawa harness moja kubwa katika entrypoint ndogo.
 
-## Uteuzi wa Fuzz Target kwa Kuanza na Graph na Triage ya Mutation
+## Uteuzi wa Fuzz Target kwa Kutanguliza Graph na Triage ya Mutation
 
-Ikiwa tayari una **matokeo ya static analysis**, **mutant walionusurika kwenye mutation testing**, na **ripoti za coverage**, usizichambue kama orodha zisizohusiana. Tengeneza **call graph** kwanza, weka kwenye nodes maelezo ya **cyclomatic complexity**, **ufikikaji kutoka entrypoint/input isiyoaminika**, na matokeo yoyote ya nje, kisha uliza maswali kuhusu graph.<sup>[[5]](#references)[[6]](#references)</sup>
+Ikiwa tayari una **matokeo ya static analysis**, **mutation-testing survivors**, na **ripoti za coverage**, usizichambue kama orodha zinazojitegemea. Jenga **call graph** kwanza, weka kwenye nodes taarifa za **cyclomatic complexity**, **uwezekano wa kufikiwa kutoka entrypoint/ingizo lisiloaminika**, na matokeo yoyote ya nje, kisha uliza maswali kuhusu graph.<sup>[[5]](#references)[[6]](#references)</sup>
 
-- Ni functions zipi zenye complexity kubwa zinazoweza kufikiwa kutoka kwenye input isiyoaminika?
-- Ni mutant gani walionusurika walio kwenye njia kutoka kwa parsers/handlers hadi kwenye code muhimu kwa usalama?
-- Ni functions zipi ni sehemu muhimu za usanifu zenye **blast radius** kubwa isivyo kawaida?
+- Ni functions zipi zenye complexity ya juu zinazoweza kufikiwa kutoka kwenye ingizo lisiloaminika?
+- Ni mutation survivors zipi ziko kwenye njia kutoka kwa parsers/handlers hadi kwenye code muhimu kwa usalama?
+- Ni functions zipi ni vikwazo muhimu vya usanifu na zina **blast radius** kubwa isiyo ya kawaida?
 
-Kwa kawaida, hili hubainisha fuzz targets bora zaidi kuliko kuangalia "coverage ya chini zaidi" pekee. Parser/decoder yenye **complexity kubwa** na **ufikikaji wa nje uliothibitishwa** ni mgombea bora zaidi wa harness kuliko internal helper isiyohusiana, yenye coverage dhaifu lakini isiyo na njia inayodhibitiwa na mshambulizi.
+Kwa kawaida, hili hufichua fuzz targets bora kuliko kuangalia "coverage ya chini zaidi" pekee. Parser/decoder yenye **complexity ya juu** na **ufikikaji wa nje uliothibitishwa** ni mgombea bora zaidi wa harness kuliko helper ya ndani iliyotengwa, yenye coverage dhaifu lakini isiyo na njia inayodhibitiwa na mshambulizi.
 
 ### Mchakato wa vitendo wa triage
 
-1. Tengeneza **code graph** kutoka kwenye codebase na utoe vipimo vya complexity/branch kwa kila function.
-2. Orodhesha **entrypoints** zinazopokea input inayodhibitiwa na mshambulizi: request handlers, decoders, importers, protocol parsers, CLI/file readers.
-3. Tekeleza **path queries** kutoka kwa entrypoints hadi kwenye functions zinazoweza kuchaguliwa ili kutenganisha attack surface inayoweza kufikiwa na code iliyokufa/ya ndani pekee.
-4. Zipe kipaumbele nodes zinazochanganya:
-   - **cyclomatic complexity** kubwa
-   - **ufikikaji kutoka input isiyoaminika** uliothibitishwa
+1. Jenga **code graph** kutoka kwenye codebase na utoe vipimo vya complexity/branch kwa kila function.
+2. Orodhesha **entrypoints** zinazopokea ingizo linalodhibitiwa na mshambulizi: request handlers, decoders, importers, protocol parsers, CLI/file readers.
+3. Endesha **path queries** kutoka kwenye entrypoints hadi kwenye functions zinazoweza kuchaguliwa ili kutenganisha attack surface inayofikika na code iliyokufa/inayoweza kufikiwa kutoka ndani pekee.
+4. Tanguliza nodes zinazochanganya:
+   - **cyclomatic complexity** ya juu
+   - **ufikikaji uliothibitishwa kutoka kwenye ingizo lisiloaminika**
    - **blast radius** kubwa au dependents wengi wa chini
-   - ushahidi unaounga mkono kama matokeo ya **SARIF**, maelezo ya ukaguzi, au mutant walionusurika
-5. Andika harness maalum kwa nodes zenye alama bora zaidi kwanza, hasa **parsers/codecs** kama hex/Base64/IP/message decoders.
+   - ushahidi unaothibitisha, kama matokeo ya **SARIF**, maelezo ya ukaguzi, au mutation survivors
+5. Andika harnesses zinazolenga nodes bora zaidi kwanza, hasa **parsers/codecs** kama hex/Base64/IP/message decoders.
 
-### Mutant walionusurika: equivalent au actionable
+### Mutation survivors: sawa au zinazoweza kuchukuliwa hatua
 
-Mutation testing mara nyingi hutoa orodha yenye kelele ya mutant walionusurika. Kabla ya kuchukulia kila mmoja kama pengo la usalama, tumia graph kuuliza:
+Mutation testing mara nyingi hutoa orodha ya survivors yenye kelele nyingi. Kabla ya kuchukulia kila survivor kuwa pengo la usalama, tumia graph kuuliza:
 
-- Je, function iliyobadilishwa inaweza kufikiwa kutoka kwenye entrypoint inayodhibitiwa na mshambulizi?
-- Je, njia zote za kuita function zimewekewa vigezo thabiti zaidi kuliko ukaguzi uliobadilishwa?
-- Je, node hiyo iko kwenye code iliyokufa, logic ya uumbizaji pekee, au njia yenye athari kubwa ya arithmetic/parser?
+- Je, function iliyofanyiwa mutation inaweza kufikiwa kutoka kwenye entrypoint inayodhibitiwa na mshambulizi?
+- Je, njia zote za kuita function hiyo zinadhibitiwa na invariants zenye nguvu zaidi kuliko ukaguzi uliofanyiwa mutation?
+- Je, node hiyo iko kwenye code iliyokufa, logic ya uumbizaji pekee, au njia ya arithmetic/parser yenye athari kubwa?
 
-Mutant wanaobaki bila kufikika au waliozuiliwa kimuundo mara nyingi ni **equivalent mutants**. Mutant wanaobaki **wanaoweza kufikiwa** na kugusa **boundary conditions**, **overflow/carry paths**, au **arithmetic/parsing muhimu kwa usalama** wanapaswa kupewa kipaumbele na kuongezwa kwenye:
+Survivors ambazo bado hazifikiwi au zimewekewa vikwazo kimuundo mara nyingi ni **equivalent mutants**. Survivors ambazo bado **zinafikiwa** na zinagusa **mipaka**, **njia za overflow/carry**, au **arithmetic/parsing muhimu kwa usalama** zinapaswa kupewa kipaumbele katika:
 
-- harness mpya za fuzz
+- fuzz harnesses mpya
 - majaribio ya moja kwa moja ya property/invariant
-- vectors maalum za edge case
+- vectors lengwa za hali za ukingoni
 
 ### Linganisha matokeo ya nje na graph
 
-Ikiwa pipeline yako ya SAST inatoa **SARIF**, weka matokeo kwenye nodes za graph kwa kutumia **file + line range**, kisha tumia graph kupanua wigo wa athari.<sup>[[6]](#references)</sup>
+Ikiwa pipeline yako ya SAST inatoa **SARIF**, weka matokeo kwenye nodes za graph kwa kutumia **file + line range**, kisha tumia graph kupanua tathmini ya athari.<sup>[[6]](#references)</sup>
 
-- hesabu **blast radius** ya function iliyoalamishwa
-- angalia ikiwa matokeo yako kwenye njia yoyote kutoka kwa entrypoint
-- panga matokeo ya karibu ambayo yanaelekeza kwenye choke point moja
+- kokotoa **blast radius** ya function iliyotiwa alama
+- angalia ikiwa matokeo yapo kwenye njia yoyote kutoka kwenye entrypoint
+- panga pamoja matokeo yaliyo karibu yanayoishia kwenye kizuizi kilekile
 
-Hii ni muhimu unapoamua kama utatumia muda wa fuzzing kwenye function fulani: node **inayoweza kufikiwa**, **changamano**, na tayari yenye **matokeo ya SAST** mara nyingi ni target bora kuliko node changamano tu isiyo na njia ya mshambulizi.
+Hii ni muhimu unapoamua kama utatumia muda wa fuzzing kwenye function mahususi: node ambayo **inafikiwa**, **ina complexity kubwa**, na tayari ina **matokeo ya SAST** mara nyingi huwa target bora kuliko node yenye complexity kubwa tu lakini isiyo na njia kutoka kwa mshambulizi.
 
-Mfano wa workflow ukitumia Trailmark.<sup>[[6]](#references)</sup>
+Mfano wa mchakato wa kazi kwa kutumia Trailmark.<sup>[[6]](#references)</sup>
 
 ```bash
 uv pip install trailmark
@@ -280,37 +337,37 @@ engine.complexity_hotspots(10)
 engine.paths_between("handle_request", "parse_ipv6")
 ```
 
-Mbinu muhimu ni makutano ya: **utata x uwezekano wa kufikiwa x athari**. Tumia grafu kuchagua malengo ya fuzz yenye thamani kubwa zaidi ya usalama inayotarajiwa, kisha tumia mutation survivors kubaini mipaka na invariants ambazo harness yako inapaswa kujaribu kwa ukali.<sup>[[5]](#references)</sup>
+Mbinu muhimu ni makutano ya: **complexity x exposure x impact**. Tumia grafu kuchagua fuzz targets zenye thamani ya usalama inayotarajiwa zaidi, kisha tumia mutation survivors kubaini mipaka na invariants ambazo harness yako lazima izijaribu kwa msisitizo.<sup>[[5]](#references)</sup>
 
-## Fuzzing ya Go kwa gosentry: Injini Imara Zaidi, Ingizo Zenye Aina, na Ukaguzi Linganishi
+## Go Fuzzing Kwa kutumia gosentry: Engine Imara Zaidi, Inputs Zenye Aina Zilizobainishwa, Na Ukaguzi Tofauti
 
-Ikiwa target ya Go tayari ina harness ya asili ya `testing.F`, njia ya vitendo ya kuiboresha ni kuendesha harness hiyo hiyo kwa [gosentry](https://github.com/trailofbits/gosentry), Go toolchain iliyoforkiwa ambayo huhifadhi `go test -fuzz` lakini hubadilisha backend kuwa **LibAFL**.<sup>[[7]](#references)[[8]](#references)</sup>
+Ikiwa target ya Go tayari ina harness ya asili ya `testing.F`, njia rahisi ya kuiboresha ni kuendesha harness hiyo hiyo kwa [gosentry](https://github.com/trailofbits/gosentry), toolchain ya Go iliyofanyiwa fork ambayo huhifadhi `go test -fuzz` lakini hubadilisha backend kuwa **LibAFL**.<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```bash
 ./bin/go test -fuzz=FuzzHarness --focus-on-new-code=false --catch-races=true --catch-leaks=true
 ```
 
-Hii ni muhimu wakati Go fuzzer ya asili inakwama kwenye **ulinganishi mgumu**, **inputs zenye aina maalum**, au **miundo inayotegemea sana parser**. Mbinu hubaki ileile:
+Hii ni muhimu pale native Go fuzzer inapokwama kwenye **ulinganisho mgumu**, **ingizo zenye aina maalum**, au **miundo inayotegemea sana parser**. Mbinu inabaki ileile:
 
 - Endelea kutumia `f.Add(...)` kwa seeds na `f.Fuzz(...)` kwa callback.
 - Tumia tena harness ileile, lakini iendeshe kwa binary ya `go` ya gosentry badala ya toolchain ya kawaida.
-- Chukulia campaign inayotokana na hilo kama run ya kawaida inayoongozwa na coverage, lakini yenye scheduling/mutation ya LibAFL na detectors za ziada zilizo bora zaidi.
+- Chukulia campaign inayotokana na hilo kama run ya kawaida inayoongozwa na coverage, lakini yenye scheduling/mutation ya LibAFL na detectors bora zaidi zinazohusika.
 
-### Geuza hitilafu zisizoonekana kuwa matokeo ya fuzzing
+### Geuza hitilafu zisizoonekana kuwa findings za fuzz
 
-Tatizo linalojirudia katika tathmini za Go ni kwamba tabia hatari mara nyingi **haisababishi crash** kwa chaguo-msingi. Kwa gosentry, unaweza kubadilisha aina kadhaa za hali “mbaya lakini zisizoonekana” kuwa findings.<sup>[[7]](#references)[[8]](#references)</sup>
+Tatizo linalojirudia katika tathmini za Go ni kwamba tabia hatari mara nyingi **haisababishi crash** kwa chaguo-msingi. Kwa gosentry, unaweza kugeuza aina kadhaa za hali “mbaya lakini zisizoonekana” kuwa findings.<sup>[[7]](#references)[[8]](#references)</sup>
 
-- `--panic-on=pkg.Func,...` ili njia teule za logging/error zitende kama crashes (inafaa kwa njia za msimbo za aina ya `log.Fatal` ambazo vinginevyo huandika log tu na kuendelea).
-- `--catch-races=true` ili kurudia entries mpya zilizogunduliwa kwenye queue kwa kutumia Go race detector.
-- `--catch-leaks=true` ili kurudia entries mpya kwenye queue kwa kutumia `goleak` na kusimama kunapovuja goroutine.
-- Ushughulikiaji wa hang wa LibAFL ili kuhifadhi **loops zisizo na kikomo / inputs zinazoendelea polepole sana** kama findings za fuzzing badala ya kuziacha zipotee kama timeouts.
-- Ukaguzi wa arithmetic overflow uliojengewa ndani kwa chaguo-msingi, pamoja na ukaguzi wa hiari wa truncation kupitia instrumentation ya mtindo wa go-panikint.
+- `--panic-on=pkg.Func,...` ili njia maalum za logging/error zifanye kazi kama crash (inafaa kwa njia za msimbo za aina ya `log.Fatal` ambazo vinginevyo huandika log tu na kuendelea).
+- `--catch-races=true` ili kucheza tena queue entries zilizogunduliwa upya kwa kutumia Go race detector.
+- `--catch-leaks=true` ili kucheza tena queue entries mpya kwa kutumia `goleak` na kusitisha kunapokuwa na goroutine leaks.
+- Ushughulikiaji wa hang wa LibAFL ili kuhifadhi **infinite loops / ingizo za polepole sana** kama findings za fuzz badala ya kuzipoteza kama timeouts.
+- Ukaguzi wa arithmetic overflow uliojumuishwa kwa chaguo-msingi, pamoja na ukaguzi wa hiari wa truncation kupitia instrumentation ya mtindo wa go-panikint.
 
-Hili ni muhimu hasa kwa targets ambazo athari ya kiusalama ni **hitilafu ya parser isiyosababisha panic**, **hitilafu ya concurrency**, au **hang inayosababisha DoS pekee**, badala ya uharibifu wa memory.
+Hili ni muhimu hasa kwa targets ambazo athari ya kiusalama ni **hitilafu ya parser isiyoleta panic**, **hitilafu ya concurrency**, au **hang ya DoS pekee**, badala ya uharibifu wa memory.
 
-### Fuzzing inayozingatia struct kwa API za Go zenye aina maalum
+### Fuzzing inayotambua struct kwa Go APIs zenye aina maalum
 
-Go fuzzing ya asili hutarajia hasa scalars kama `[]byte`, `string`, na nambari. Ikiwa msimbo unaojaribiwa hutumia objects zenye aina maalum, gosentry inaweza kufuzz **values changamano** moja kwa moja (structs, slices, arrays, pointers) huku ikiendelea kufanya mutation ya bytes zilizo chini yake.<sup>[[7]](#references)[[8]](#references)</sup>
+Native Go fuzzing hutarajia zaidi scalars kama `[]byte`, `string`, na namba. Ikiwa msimbo unaojaribiwa hutumia objects zenye aina maalum, gosentry inaweza kufuzz **thamani changamano** moja kwa moja (structs, slices, arrays, pointers) huku ikiendelea kubadilisha bytes zilizo chini yake.<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```go
 type Input struct {
@@ -327,26 +384,26 @@ func FuzzStructInput(f *testing.F) {
 }
 ```
 
-Tumia hili unapounda wire format bandia kwa ajili ya fuzzing pekee, kwani parsing code inayotumika kwenye harness pekee inaweza kuficha hitilafu za logic. Kwa kampeni za differential au grammar-based, weka input ya harness kama `[]byte` au `string` moja, kisha ufanye parsing ndani ya callback.
+Tumia hili unapounda wire format bandia, kwa kuwa kufanya hivyo kwa ajili ya fuzzing pekee kungeficha hitilafu za logic ndani ya msimbo wa parsing wa harness pekee. Kwa kampeni za differential au zinazotegemea grammar, weka ingizo la harness kama `[]byte` au `string` moja na ufanye parsing ndani ya callback badala yake.
 
-### Grammar-based fuzzing kwa parser na input za protocol
+### Fuzzing inayotegemea grammar kwa parser na ingizo la protocol
 
-Kwa parser, format na lugha za input, gosentry inaweza kuendesha **Nautilus grammar fuzzing** juu ya LibAFL. Grammar ni safu ya JSON yenye production rules, na kwa kawaida harness inapaswa kuchukua argument moja ya `[]byte` au `string`.<sup>[[7]](#references)[[8]](#references)</sup>
+Kwa parser, format na lugha za ingizo, gosentry inaweza kuendesha **Nautilus grammar fuzzing** juu ya LibAFL. Grammar ni safu ya JSON ya production rules, na kwa kawaida harness inapaswa kupokea hoja moja ya `[]byte` au `string`.<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```bash
 ./bin/go test -fuzz=FuzzGrammarJSON --use-grammar --grammar=./testdata/JSON.json --focus-on-new-code=false
 ```
 
-Maelezo kuhusu mbinu:
+Vidokezo vya mbinu:
 
-- Tumia grammar mode wakati mutations za byte-level mara nyingi hushindwa kwenye ukaguzi wa awali wa sintaksia.
-- Elekeza grammar kwenye **sehemu ndogo ya lugha/protocol inayohusika na usalama** badala ya kuiga specification nzima.
-- Tumia thamani kubwa za mipaka kwenye terminals/nonterminals ili kujaribu mipaka ya integer, urefu na state machine.
-- Grammar mode huhakikisha inputs zinazingatia grammar, lakini target bado hupokea **bytes/strings**, kwa hiyo uchanganuzi na ukaguzi wa kisemantiki hubaki ndani ya code inayotumika na harness.
+- Tumia grammar mode pale mutations za kiwango cha byte zinaposhindwa mara nyingi kwenye ukaguzi wa awali wa syntax.
+- Lenga grammar kwenye **sehemu ndogo ya lugha/protocol inayohusika na usalama** badala ya kuiga specification nzima.
+- Tumia thamani kubwa za mipaka kwenye terminals/nonterminals ili kuchunguza mipaka ya integer, urefu na state machine.
+- Grammar mode huhakikisha inputs zinafuata grammar, lakini target bado hupokea **bytes/strings**, kwa hiyo parsing na ukaguzi wa semantiki hubaki ndani ya code inayofanyiwa majaribio.
 
-### Differential fuzzing: linganisha implementations, si crashes tu
+### Differential fuzzing: linganisha implementations, si crashes pekee
 
-Mbinu bora kwa mifumo ya Go ni **grammar-based differential fuzzing**: tengeneza inputs halali na zenye muundo, kisha uzitumie kwa parsers, clients au engines mbili za state-transition.<sup>[[7]](#references)[[8]](#references)</sup>
+Mbinu yenye manufaa katika mifumo ya Go ni **grammar-based differential fuzzing**: tengeneza inputs halali zenye muundo na uzitumie kwenye parsers, clients au state-transition engines mbili.<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```go
 f.Fuzz(func(t *testing.T, data []byte) {
@@ -360,43 +417,50 @@ f.Fuzz(func(t *testing.T, data []byte) {
 })
 ```
 
-Chukulia yafuatayo kuwa ni matokeo:
+Chukulia yafuatayo kuwa matokeo:
 
-- implementation moja inapata panic huku nyingine ikikataa kwa usahihi
-- kutolingana kwa ingizo linalokubaliwa/kukataliwa
-- parse trees au decoded objects tofauti
-- state transitions, nonces, balances, au state roots zinazotofautiana
+- implementation moja husababisha panic huku nyingine ikikataa kwa usahihi
+- kutolingana kwa input zinazokubaliwa/kukataliwa
+- parse trees au objects zilizofumbuliwa kuwa tofauti
+- tofauti katika mabadiliko ya state, nonces, balances au state roots
 
-Hii ni njia ya vitendo ya kupata **consensus mismatches**, **parser ambiguity**, na **spec-vs-implementation drift** ambazo mara nyingi hazigunduliki kwa crash fuzzing pekee.
+Hii ni njia ya vitendo ya kupata **kutolingana kwa consensus**, **utata wa parser** na **tofauti kati ya spec na implementation** ambazo fuzzing ya crash pekee mara nyingi hukosa.
 
-### Tumia tena campaign corpus kwa kuripoti coverage
+{{#ref}}
+proof-assistant-formal-verification-security.md
+{{#endref}}
 
-Baada ya campaign, cheza tena corpus ya queue iliyohifadhiwa ili kutengeneza ripoti ya Go coverage bila kuhamisha corpus tofauti mwenyewe.<sup>[[7]](#references)[[8]](#references)</sup>
+### Tumia tena corpus ya campaign kwa kuripoti coverage
+
+Baada ya campaign, rudia corpus ya foleni iliyohifadhiwa ili kutoa ripoti ya Go coverage bila kuhamisha corpus tofauti mwenyewe.<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```bash
 ./bin/go test -fuzz=FuzzHarness --generate-coverage .
 ```
 
-Tekeleza amri kutoka kwenye package hiyo hiyo na utumie target ile ile ya -fuzz ili gosentry itambue hali sahihi ya kampeni iliyohifadhiwa kwenye cache.
+Tekeleza amri kutoka **package** hiyo hiyo na kwa target ileile ya `-fuzz` ili gosentry itambue hali sahihi ya campaign iliyohifadhiwa kwenye cache.
 
 
 
 ## References
 
-- [1] [Mutational grammar fuzzing](https://projectzero.google/2026/03/mutational-grammar-fuzzing.html)
+- [1] [Fuzzing ya sarufi ya mabadiliko](https://projectzero.google/2026/03/mutational-grammar-fuzzing.html)
 - [2] [Jackalope](https://github.com/googleprojectzero/Jackalope)
-- [3] [AFL++ Fuzzing kwa Kina](https://aflplus.plus/docs/fuzzing_in_depth/)
-- [4] [AFLNet Miaka Mitano Baadaye: Kuhusu Protocol Fuzzing Inayoongozwa na Coverage](https://arxiv.org/abs/2412.20324)
+- [3] [Fuzzing ya AFL++ kwa kina](https://aflplus.plus/docs/fuzzing_in_depth/)
+- [4] [AFLNet Miaka Mitano Baadaye: Kuhusu Fuzzing ya Protocol Inayoongozwa na Coverage](https://arxiv.org/abs/2412.20324)
 - [5] [Trailmark hubadilisha code kuwa grafu](https://blog.trailofbits.com/2026/04/23/trailmark-turns-code-into-graphs/)
 - [6] [trailofbits/trailmark](https://github.com/trailofbits/trailmark)
 - [7] [Go fuzzing ilikosa nusu ya zana. Tulifork toolchain ili kurekebisha hilo.](https://blog.trailofbits.com/2026/05/12/go-fuzzing-was-missing-half-the-toolkit.-we-forked-the-toolchain-to-fix-it./)
 - [8] [trailofbits/gosentry](https://github.com/trailofbits/gosentry)
-- [9] [SNPSFuzzer: Greybox Fuzzer ya Haraka kwa Stateful Network Protocols kwa kutumia Snapshots](https://arxiv.org/abs/2202.03643)
-- [10] [Bila Grammar, Hakuna Tatizo: Kuelekea Kufuzz Linux Kernel bila Maelezo ya System Call](https://seclab.bu.edu/papers/FuzzNG-ndss2023.pdf)
-- [11] [Snappy: Fuzzing Bora kwa kutumia Snapshots Zinazobadilika na Kubadilishwa Kulingana na Hali](https://project-theseus.nl/publication/2022/snappy/)
+- [9] [SNPSFuzzer: Greybox Fuzzer ya Haraka kwa Stateful Network Protocols inayotumia Snapshots](https://arxiv.org/abs/2202.03643)
+- [10] [Hakuna Grammar, Hakuna Tatizo: Kuelekea Kufanya Fuzzing ya Linux Kernel Bila Maelezo ya System Call](https://seclab.bu.edu/papers/FuzzNG-ndss2023.pdf)
+- [11] [Snappy: Fuzzing Yenye Ufanisi kwa Kutumia Snapshots Zinazobadilika na Kurekebishwa](https://project-theseus.nl/publication/2022/snappy/)
 - [12] [Fuzz Introspector](https://google.github.io/oss-fuzz/advanced-topics/fuzz-introspector/)
-- [13] [AFL++ LLVM instrumentation: coverage ya njia na caller](https://github.com/AFLplusplus/AFLplusplus/blob/stable/instrumentation/README.llvm.md)
+- [13] [Instrumentation ya AFL++ LLVM: path na caller coverage](https://github.com/AFLplusplus/AFLplusplus/blob/stable/instrumentation/README.llvm.md)
 - [14] [Fuzzing ya Muktadha Inayotabiri](https://www.ndss-symposium.org/ndss-paper/predictive-context-sensitive-fuzzing/)
-- [15] [Android Offensive Security Blog - Binder Fuzzing](https://androidoffsec.withgoogle.com/posts/binder-fuzzing/)
+- [15] [Blogu ya Android Offensive Security - Binder Fuzzing](https://androidoffsec.withgoogle.com/posts/binder-fuzzing/)
 - [16] [LKL Android Binder fuzzer - nyaraka za build na regression-seed](https://github.com/lkl/linux/blob/master/tools/lkl/fuzzers/binder/README.md)
+- [17] [MAccConc: Kuchunguza Race Condition za Linux Kernel kwa Kuingiliana kwa Memory Access Kunakodhibitiwa](https://projectzero.google/2026/09/maccconc-race-condition.html)
+- [18] [googleprojectzero/MAccConc](https://github.com/googleprojectzero/MAccConc)
+- [19] [KCOV: code coverage kwa ajili ya fuzzing](https://docs.kernel.org/dev-tools/kcov.html)
 {{#include ../banners/hacktricks-training.md}}
