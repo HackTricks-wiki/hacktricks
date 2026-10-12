@@ -125,6 +125,12 @@
       return ""
     }
 
+    // Keep the database and old PNG URLs unchanged for rollback and older clients.
+    var optimized = /^\/images\/(lee|azrte|grte|lhe|arte)\.png$/i.exec(value)
+    if (optimized) {
+      value = "/images/" + optimized[1].toLowerCase() + "-sponsor-v1.webp"
+    }
+
     if (/^https:\/\//i.test(value)) {
       return value
     }
@@ -191,8 +197,11 @@
     }
 
     var currentUrl = encodeURIComponent(window.location.href)
-    var url = "https://hacktricks.wiki/sponsor?current_url=" + currentUrl
-    legacySponsorPromise = fetch(url, { method: "GET" })
+    var url = "https://cloud.hacktricks.wiki/sponsor?current_url=" + currentUrl
+    legacySponsorPromise = fetch(url, {
+      method: "GET",
+      headers: { "X-HackTricks-Sponsor-Request": "ht-sponsor-v1" },
+    })
       .then(function(response) {
         if (!response.ok) {
           throw new Error("Response status: " + response.status)
@@ -301,5 +310,17 @@
     }
   }
 
-  initSponsor()
+  function scheduleSponsorLoad() {
+    var afterPageLoad = function() {
+      window.setTimeout(initSponsor, 1000)
+    }
+
+    if (document.readyState === "complete") {
+      afterPageLoad()
+    } else {
+      window.addEventListener("load", afterPageLoad, { once: true })
+    }
+  }
+
+  scheduleSponsorLoad()
 })()

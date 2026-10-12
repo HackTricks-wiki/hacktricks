@@ -51,6 +51,26 @@ The novelty is the composition. No operator travels to the target and the Intern
 
 The [owned two-organization lab](authorized-adversary-emulation-labs.md#lab-4-nearest-neighbor-wireless-pivot) reproduces these observables without attacking a neighbor.
 
+### Validate a Windows pivot path
+
+A dual-homed Windows host does not bridge its interfaces automatically. Inventory its adapters, routes and WLAN state first, then associate only through an approved profile. The `name` argument to `netsh wlan connect` identifies an installed profile, not an arbitrary SSID and password. Compare the route table before and after association so a new default route does not break the control path or invalidate the result. Continue with the [post-association checks](../generic-methodologies-and-resources/pentesting-wifi/wifi-post-association-and-client-isolation-attacks.md) only after confirming the intended interface and route.<sup>[[1]](#references)[[6]](#references)</sup>
+
+```powershell
+Get-NetAdapter -Physical | Sort-Object Status -Descending
+Get-NetIPConfiguration
+Get-NetRoute -AddressFamily IPv4 | Sort-Object InterfaceIndex,RouteMetric
+
+netsh wlan show interfaces
+netsh wlan show networks mode=bssid
+netsh wlan show profiles
+
+# Connect only with an approved profile already installed on the endpoint.
+netsh wlan connect name="<approved-profile>" interface="Wi-Fi"
+Get-NetConnectionProfile
+```
+
+Volexity's released incident artifact shows another useful distinction. Its embedded C# opens the WLAN API, enumerates interfaces, reads EAP XML from disk and calls `WlanSetProfileEapXmlUserData` for a named profile on the first wireless interface. The API sets EAP user credentials on an existing 802.1X profile, but the released component contains neither `WlanConnect` nor the discovery logic described in the report. Treat it as profile provisioning rather than a complete connector, and inspect the resulting profile as part of the [client and supplicant assessment](../generic-methodologies-and-resources/pentesting-wifi/wifi-client-and-supplicant-assessment.md).<sup>[[5]](#references)[[7]](#references)</sup>
+
 ## Public venues and third-party Wi-Fi
 
 Using café, hotel, airport or municipal Wi-Fi changes the IP shown to a destination. It does not create anonymity. The venue or its provider may retain AP association, device MAC, DHCP lease, captive-portal account, SMS/email validation and flow logs. Physical entry, CCTV, purchase, mobile-location and travel records can bridge the digital event to a person.
@@ -134,4 +154,7 @@ When an apparently local source is suspicious, build one timeline:
 - [2] [Kaspersky Securelist — Satellite Turla: APT command and control in the sky](https://securelist.com/satellite-turla-apt-command-and-control-in-the-sky/72081/)
 - [3] [MITRE ATT&CK — Hardware Additions (T1200)](https://attack.mitre.org/techniques/T1200/)
 - [4] [NIST SP 800-153 — Guidelines for Securing Wireless Local Area Networks](https://csrc.nist.gov/pubs/sp/800/153/final)
+- [5] [Volexity — Redacted PowerShell/C# WLAN profile code](https://github.com/volexity/threat-intel/blob/main/2024/2024-11-22%20GruesomeLarch/wifi_ps1_redacted.cs)
+- [6] [Microsoft — netsh wlan](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/netsh-wlan)
+- [7] [Microsoft — WlanSetProfileEapXmlUserData function](https://learn.microsoft.com/en-us/windows/win32/api/wlanapi/nf-wlanapi-wlansetprofileeapxmluserdata)
 {{#include ../banners/hacktricks-training.md}}
