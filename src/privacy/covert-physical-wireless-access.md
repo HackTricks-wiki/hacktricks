@@ -1,131 +1,160 @@
-# Bedekte fisiese en draadlose toegang
+# Verborge Fisiese en Draadlose Toegang
 
 {{#include ../banners/hacktricks-training.md}}
 
-Vir 'n gedetailleerde, eienaar-goedgekeurde implementering wat uitgaande rendezvous, herstel van krag/uplink, minimale geheime wat deur die toestel gehou word, capture-toetsing en monitering vir moontlike ontdekking dek, sien [Capture-Resilient Authorized Field Nodes](capture-resilient-authorized-field-nodes.md).
+Vir ’n gedetailleerde, eienaar-goedgekeurde implementering wat uitgaande rendezvous, herstel van krag/uplink, minimale geheime wat deur die toestel gehou word, capture-toetsing en monitering vir moontlike ontdekking dek, sien [Capture-Resilient Authorized Field Nodes](capture-resilient-authorized-field-nodes.md).
 
-Die verandering van die netwerkpad kan ook die oënskynlike fisiese oorsprong verander. 'n Gesofistikeerde akteur kan 'n nabygeleë gekompromitteerde stelsel, 'n versteekte toestel, publieke toegang, sellulêre backhaul of 'n satellietontvanger gebruik sodat teikenlogs weg van die operateur wys. Nie een hiervan verwyder fisiese, radio- of verskafferbewyse nie; dit verskuif attributie na verskillende datastelle.
+Die verandering van die netwerkroete kan ook die skynbare fisiese oorsprong verander. ’n Gesofistikeerde akteur kan ’n nabygeleë gekompromitteerde stelsel, ’n versteekte toestel, publieke toegang, sellulêre backhaul of ’n satellietontvanger gebruik sodat teikenlogboeke na ’n ander plek as die operateur wys. Niks hiervan verwyder fisiese, radio- of verskafferbewyse nie; dit verskuif die toeskrywing na ander datastelle.
 
 ## Tegniekmatriks
 
-| Tegniek | Oënskynlike oorsprong | Noodsaaklike voorwaarde | Bewyse met hoë waarde |
+| Tegniek | Skynbare oorsprong | Noodsaaklike voorwaarde | Bewyse met hoë waarde |
 |---|---|---|---|
-| Nabygeleë wireless pivot | 'n besigheid/huis langs die teiken | gekompromitteerde dual-homed host en toegang tot die teiken se Wi-Fi | endpoint-logs van die naburige host, RF-assosiasie en teiken se RADIUS/DHCP |
-| Publieke/gasnetwerk | venue-NAT of tunnel-exit | wettige toegang of omseiling van toegangsbeheer | captive portal, DHCP, AP-assosiasie, CCTV en betalings-/liggingsrekords |
-| Covert drop device | bedrade, Wi-Fi- of sellulêre adres by of naby die teiken | fisiese plasing of aflewering | switchport/USB, RF, voorraad, krag en telemetrie van die uitgaande tunnel |
-| Sellulêre router/eSIM | draer-NAT of toegewyde APN | modem/SIM/subskripsie | IMEI/IMSI/eSIM, selfoonsektor, draerrekening en tydsberekening van verkeer |
-| Satellite-link abuse | intekenaaradres binne die straal se dekkingsgebied | protokol- en diensspesifieke swakheid | RF-ligging, uplink-vloei, onmoontlike RTT/routing en verskafferrekords |
+| Nabygeleë draadlose pivot | ’n besigheid/huis langs die teiken | gekompromitteerde dual-homed gasheer en Wi-Fi-toegang tot die teiken | eindpuntlogboeke van die buurgasheer, RF-assosiasie en teiken se RADIUS/DHCP |
+| Publieke/gasnetwerk | venue se NAT of tunnel-uitgang | wettige toegang of omseiling van toegangsbeheer | captive portal, DHCP, AP-assosiasie, CCTV en betalings-/liggingrekords |
+| Versteekte drop-toestel | teiken-/nabygeleë bedrade, Wi-Fi- of sellulêre adres | fisiese plasing of aflewering | switchport/USB, RF, voorraad, krag en telemetrie van uitgaande tunnel |
+| Sellulêre router/eSIM | draer-NAT of toegewyde APN | modem/SIM/intekening | IMEI/IMSI/eSIM, selfoonsektor, draerrekening en verkeerstydsberekening |
+| Misbruik van satellietverbinding | intekenaaradres binne bundeldekking | protokol- en diensspesifieke swakheid | RF-ligging, uplink-vloei, onmoontlike RTT/roetering en verskafferrekords |
 
 ## Nearest-neighbor attack
 
-Volexity het 'n APT28/GRU-operasie uit 2022 gedokumenteer waarin die akteur op afstand van sy uiteindelike teiken was. Dit het die teiken se publieke diens met password spraying geteiken om geldige credentials te verkry, maar MFA het direkte Internet-aanmelding verhoed. Die teiken se enterprise Wi-Fi het daardie credentials sonder MFA aanvaar. Die akteur het organisasies fisies naby die teiken gekompromitteer, 'n dual-homed system met draadlose bereik gevind en daardie stelsel gebruik om by die teiken se Wi-Fi te authenticateer. Volexity het dit die **Nearest Neighbor Attack** genoem.<sup>[[1]](#references)</sup>
+Volexity het ’n APT28/GRU-operasie in 2022 gedokumenteer waarin die akteur op afstand van sy uiteindelike teiken was. Dit het die teiken se publieke diens met password spraying aangeval om geldige credentials te verkry, maar MFA het direkte aanmelding vanaf die Internet verhoed. Die teiken se ondernemings-Wi-Fi het daardie credentials sonder MFA aanvaar. Die akteur het organisasies wat fisies naby die teiken was, gekompromitteer, ’n dual-homed stelsel met draadlose bereik opgespoor en daardie stelsel gebruik om by die teiken se Wi-Fi te autentiseer. Volexity het dit die **Nearest Neighbor Attack** genoem.<sup>[[1]](#references)</sup>
+
 ```text
 remote operator
-|
+      |
 compromised organization C
-|
+      |
 compromised organization B -- Wi-Fi radio --> target organization A
-|
-internal service
+                                               |
+                                        internal service
 ```
-Die nuutheid lê in die samestelling. Geen operator reis na die teiken nie, en die Internet-gerigte diens se MFA werk steeds. Die gekompromitteerde buurman verskaf fisiese nabyheid; die gesteelde teikencredential verskaf logiese toegang; die teiken-Wi-Fi word die pad wat die grens oorsteek.
+
+Die nuutjie lê in die samestelling. Geen operateur reis na die teiken nie, en die MFA van die diens wat aan die Internet blootgestel is, werk steeds. Die gekompromitteerde buurtoestel verskaf fisiese nabyheid; die gesteelde teikenbewysstuk verskaf logiese toegang; die teiken-Wi-Fi word die pad wat die grens oorsteek.
 
 ### Voorvereistes en sigbaarheid
 
-- ’n Nabygeleë stelsel moet op afstand beheerbaar wees en ’n versoenbare radio hê, of toegang tot ’n ander nabygeleë pivot hê.
-- Die teiken-SSID moet daardie stelsel bereik, en Wi-Fi-toelating moet ’n herbruikbare credential/sertifikaat/toesteltoestand aanvaar.
-- Die pivot benodig dikwels twee gelyktydige paaie: een terug na die operator en een na die teiken-WLAN.
-- Die teiken kan ’n nuwe stasie-MAC en ’n wettige gebruikersnaam sien, maar geen ooreenstemmende bestuurde-toestelsertifikaat, posture, geskiedenis of verwagte gebou-inskrywing nie.
-- Logs van die buurman se endpoint kan wireless scans, nuwe profiele, interface-veranderinge, tunneling en remote-control-aktiwiteit toon.
+- ’n Stelsel naby die teiken moet op afstand beheerbaar wees en ’n versoenbare radio hê, of toegang tot ’n ander nabygeleë pivot.
+- Die teiken-SSID moet daardie stelsel bereik, en Wi-Fi-toelating moet ’n herbruikbare bewysstuk/sertifikaat/toesteltoestand aanvaar.
+- Die pivot benodig dikwels twee gelyktydige paaie: een terug na die operateur en een na die teiken-WLAN.
+- Die teiken kan ’n nuwe stasie-MAC en ’n geldige gebruikernaam sien, maar geen ooreenstemmende sertifikaat vir ’n bestuurde toestel, postuur, geskiedenis of verwagte gebouinskrywing nie.
+- Eindpuntlogboeke op die buurtoestel kan draadlose skanderings, nuwe profiele, koppelvlakveranderings, tonnelverkeer en afstandbeheeraktiwiteit toon.
 
 ### Opsporing en voorkoming
 
-1. Vereis certificate-backed EAP-TLS en managed-device posture vir enterprise-Wi-Fi; moenie ’n wagwoord wat op die Internet aan MFA gefaal het, bloot omdat dit oor radio aankom, as voldoende beskou nie.
-2. Korrelleer RADIUS-authentication met MDM/NAC-identiteit, historiese stasie-/toestelbinding, AP-ligging, fisiese-toegangsgebeure en gelyktydige sessies.
-3. Stel ’n alert wanneer ’n rekening vir die eerste keer assosieer, vanaf ’n ongewone AP-edge, sonder ’n bestuurde sertifikaat, of terwyl dieselfde identiteit elders aktief is.
-4. Monitor endpoints wat interfaces kan bridge. Ondersoek op Windows, Linux en network appliances onverwagte WLAN-profiele, forwarding/NAT-konfigurasie, virtuele adapters en persistente tunnels.
-5. Verminder onnodige seinlekkasie met sinvolle AP-plasing en kragbeplanning. Dit is ’n ondersteunende beheermaatreël, nie authentication nie.
-6. Koördineer incident response met naburige huurders: die finale radiobron kan self ’n slagoffer wees.
+1. Vereis EAP-TLS met sertifikate en ’n postuurkontrole vir bestuurde toestelle op ondernemings-Wi-Fi; moenie toelaat dat ’n wagwoord wat MFA op die Internet nie geslaag het nie, voldoende is bloot omdat dit oor die radio aankom nie.
+2. Bring RADIUS-verifikasie in verband met MDM/NAC-identiteit, historiese binding tussen stasie en toestel, AP-ligging, fisiese toegangsgebeure en gelyktydige sessies.
+3. Skep ’n waarskuwing wanneer ’n rekening vir die eerste keer assosieer, vanaf ’n ongewone AP-rand, sonder ’n sertifikaat vir ’n bestuurde toestel, of terwyl dieselfde identiteit elders aktief is.
+4. Monitor eindpunte wat koppelvlakke kan oorbrug. Ondersoek op Windows-, Linux- en netwerktoestelle onverwagte WLAN-profiele, aanstuur-/NAT-konfigurasie, virtuele adapters en aanhoudende tonnels.
+5. Verminder onnodige seinverspreiding met deurdagte AP-plasing en kragbeplanning. Dit is ’n aanvullende beheermaatreël, nie verifikasie nie.
+6. Koördineer insidentreaksie met naburige huurders: die uiteindelike radiobron kan self ’n slagoffer wees.
 
-Die [owned two-organization lab](authorized-adversary-emulation-labs.md#lab-4-nearest-neighbor-wireless-pivot) reproduseer hierdie waarneembare eienskappe sonder om ’n buurman aan te val.
+Die [laboratorium met twee organisasies in besit](authorized-adversary-emulation-labs.md#lab-4-nearest-neighbor-wireless-pivot) boots hierdie waarneembare aktiwiteit na sonder om ’n buurtoestel aan te val.
 
-## Openbare venues en third-party Wi-Fi
+### Valideer ’n Windows-pivotpad
 
-Die gebruik van café-, hotel-, lughawe- of munisipale Wi-Fi verander die IP wat aan ’n bestemming vertoon word. Dit skep nie anonymity nie. Die venue of sy provider kan AP-assosiasie, device MAC, DHCP-lease, captive-portal-rekening, SMS/e-pos-validasie en flow logs behou. Fisiese toegang, CCTV, aankope, mobiele-ligging- en reisrekords kan die digitale gebeurtenis aan ’n persoon koppel.
+’n Windows-gasheer met twee netwerkverbindings oorbrug nie sy koppelvlakke outomaties nie. Inventariseer eers sy adapters, roetes en WLAN-toestand, en assosieer dan slegs deur ’n goedgekeurde profiel. Die `name`-argument vir `netsh wlan connect` identifiseer ’n geïnstalleerde profiel, nie ’n arbitrêre SSID en wagwoord nie. Vergelyk die roetetabel voor en ná assosiasie sodat ’n nuwe verstekroete nie die beheerkanaal verbreek of die resultaat ongeldig maak nie. Gaan slegs voort met die [kontroles ná assosiasie](../generic-methodologies-and-resources/pentesting-wifi/wifi-post-association-and-client-isolation-attacks.md) nadat die bedoelde koppelvlak en roete bevestig is.<sup>[[1]](#references)[[6]](#references)</sup>
 
-’n Actor kan probeer om een identifiseerder te verminder deur gerandomiseerde MAC-adresse, ’n aparte toestel, kontant of ’n tunnel te gebruik. Cross-layer-korrelasie bly moontlik deur aankomstyd, herhaalde venue-patrone, radiofingerprints, portalgedrag, verkeersiming, kamerabeelde en die tunnelprovider. ’n VPN verskuif ook die bestemming van venue-logs na VPN-logs; dit verwyder nie die venue se kennis dat die toestel teenwoordig was nie.
+```powershell
+Get-NetAdapter -Physical | Sort-Object Status -Descending
+Get-NetIPConfiguration
+Get-NetRoute -AddressFamily IPv4 | Sort-Object InterfaceIndex,RouteMetric
 
-Verdedigers van openbare toegang behoort clients te isoleer, laterale verkeer te blokkeer, WPA2/3-Enterprise of per-device keys te gebruik waar haalbaar, proporsionele DHCP/RADIUS/security logs te behou, captive portals te beskerm en ’n abuse-proses te publiseer. Red teams behoort so ’n venue slegs te gebruik wanneer die bepalings daarvan en die engagement dit toelaat; die omseiling van ’n portal, diefstal van toegang of teikening van ander gaste is nie ’n gemagtigde testing-shortcut nie.
+netsh wlan show interfaces
+netsh wlan show networks mode=bssid
+netsh wlan show profiles
 
-## Covert drop devices en warshipping
+# Connect only with an approved profile already installed on the endpoint.
+netsh wlan connect name="<approved-profile>" interface="Wi-Fi"
+Get-NetConnectionProfile
+```
 
-’n Drop is ’n klein stelsel wat in ’n terrein geplaas of daarheen afgelewer word en daarna deur outbound Ethernet, Wi-Fi of cellular beheer word. “Warshipping” verpak die toestel sodat gewone aflewering dit binne die radioperimeter dra. Moontlike hardware wissel van ’n single-board computer tot ’n aangepaste charger, USB-peripheral, network appliance of battery-powered modem.
+Volexity se vrygestelde insidentartefak toon nog ’n nuttige onderskeid. Die ingebedde C# maak die WLAN API oop, lys koppelvlakke, lees EAP XML vanaf skyf en roep `WlanSetProfileEapXmlUserData` aan vir ’n benoemde profiel op die eerste draadlose koppelvlak. Die API stel EAP-gebruikersbewyse op ’n bestaande 802.1X-profiel in, maar die vrygestelde komponent bevat nóg `WlanConnect` nóg die ontdekkingslogika wat in die verslag beskryf word. Beskou dit as profielvoorsiening eerder as ’n volledige verbindinghulpmiddel, en ondersoek die resulterende profiel as deel van die [client and supplicant assessment](../generic-methodologies-and-resources/pentesting-wifi/wifi-client-and-supplicant-assessment.md).<sup>[[5]](#references)[[7]](#references)</sup>
 
-Operasionele argitektuur:
+## Openbare plekke en derdeparty-Wi-Fi
+
+Die gebruik van Wi-Fi by ’n kafee, hotel, lughawe of munisipale plek verander die IP-adres wat ’n bestemming sien. Dit skep nie anonimiteit nie. Die plek of diensverskaffer kan AP-assosiasies, toestel-MAC-adresse, DHCP-huurtoekennings, captive-portal-rekeninge, SMS-/e-posvalidering en verkeerslogboeke behou. Fisieke toegang, CCTV, aankope, selfoonligging en reisrekords kan die digitale gebeurtenis aan ’n persoon koppel.
+
+’n Akteur kan probeer om een identifiseerder te beperk deur ewekansige MAC-adresse, ’n aparte toestel, kontant of ’n tonnel te gebruik. Korrelasie oor verskillende lae heen bly moontlik deur aankomstyd, herhalende besoekpatrone, radiovingerafdrukke, portaalgedrag, verkeerstydsberekening, kamerabeelde en die tonneldiensverskaffer. ’n VPN verskuif ook die bestemming van die plek se logboeke na die VPN-logboeke; dit verwyder nie die plek se kennis dat die toestel daar was nie.
+
+Verdedigers van openbare toegang behoort kliënte te isoleer, laterale verkeer te blokkeer, WPA2/3-Enterprise of sleutels per toestel te gebruik waar haalbaar, proporsionele DHCP/RADIUS-/sekuriteitslogboeke te behou, captive portals te beveilig en ’n proses vir misbruikverslae te publiseer. Red teams behoort so ’n plek slegs te gebruik wanneer die gebruiksvoorwaardes en die opdrag dit toelaat; om ’n portaal te omseil, toegang te steel of ander gaste te teiken, is nie ’n gemagtigde kortpad vir toetsing nie.
+
+## Versteekte drop-toestelle en warshipping
+
+’n Drop is ’n klein stelsel wat op ’n terrein geplaas of daarheen afgelewer word en dan via uitgaande Ethernet, Wi-Fi of sellulêre kommunikasie beheer word. “Warshipping” verpak die toestel so dat gewone aflewering dit binne die radioperimeter bring. Moontlike hardeware wissel van ’n enkelbordrekenaar tot ’n aangepaste laaier, USB-randtoestel, netwerktoestel of battery-aangedrewe modem.
+
+Bedryfsargitektuur:
+
 ```text
 operator -> controlled rendezvous <- outbound encrypted tunnel <- drop
-|
-scoped local interface
+                                                        |
+                                             scoped local interface
 ```
-Die toestel kan ’n remote foothold verskaf, wireless measurements uitvoer, ’n gemagtigde exercise peripheral emuleer, of traffic relay. Die oënskynlike oorsprong daarvan is plaaslik, maar dit skep fisiese artefakte: reeksnommers, verpakking, fingerprints, kameras, toegangslogs, kragverbruik, USB descriptors, switchport negotiation, DHCP fingerprints, MAC OUI/randomization behavior, RF emissions en herhalende rendezvous connections.
 
-### Defensive controls
+Die toestel kan ’n afgeleë vastrapplek bied, draadlose metings uitvoer, ’n randtoestel vir ’n gemagtigde oefening naboots of verkeer aanstuur. Dit lyk of dit plaaslik afkomstig is, maar laat fisiese spore: reeksnommers, verpakking, vingerafdrukke, kameras, toegangslogboeke, kragverbruik, USB-beskrywings, skakelpoort-onderhandeling, DHCP-vingerafdrukke, MAC-OUI-/randomiseringsgedrag, RF-uitstralings en herhalende rendezvous-verbindings.
 
-- Handhaaf prosedures vir die ontvangskamer en asset inventory; inspekteer onverwagte elektronika en pakkette wat aan niebestaande personeel geadresseer is.
-- Gebruik 802.1X/NAC op wired en wireless access, deaktiveer ongebruikte poorte, en plaas onbekende toestelle in ’n beperkte remediation VLAN.
-- Genereer alerts vir nuwe DHCP fingerprints, lokaal-geadministreerde MACs wat voortduur, nuwe USB network/HID devices, unauthorized Wi-Fi Direct/Bluetooth en langdurige outbound tunnels.
-- Stel ’n baseline vir switchport-, power-over-Ethernet-, DNS- en TLS-gedrag. ’n Klein host sonder ’n inventory record wat periodieke encrypted connections maak, is ’n sterker signal as slegs “Raspberry Pi OUI”.
-- Tydens ’n exercise moet die organisasie toestelle inventariseer, label, scope en encrypt, ’n remote kill voorsien, ’n retrieval deadline stel en verseker dat verlies nie reusable credentials kan blootstel nie.
+### Verdedigingsmaatreëls
 
-## Cellular and eSIM backhaul
+- Handhaaf prosedures vir ontvangskamers en bate-inventarisse; inspekteer onverwagte elektronika en pakkette wat aan niebestaande werknemers geadresseer is.
+- Gebruik 802.1X/NAC vir bedrade en draadlose toegang, deaktiveer ongebruikte poorte en plaas onbekende toestelle in ’n beperkte remediëring-VLAN.
+- Stel waarskuwings op vir nuwe DHCP-vingerafdrukke, plaaslik geadministreerde MAC-adresse wat bly bestaan, nuwe USB-netwerk-/HID-toestelle, ongemagtigde Wi-Fi Direct/Bluetooth en langlewende uitgaande tonnels.
+- Stel basislyne vas vir skakelpoort-, Power-over-Ethernet-, DNS- en TLS-gedrag. ’n Klein gasheer sonder ’n inventarisrekord wat periodieke geënkripteerde verbindings maak, is ’n sterker aanwyser as net ’n “Raspberry Pi OUI”.
+- Tydens ’n oefening, inventariseer, merk, beperk omvang, enkripteer, voorsien ’n afgeleë doodskakelaar, stel ’n sperdatum vir terugbesorging en verseker dat verlies nie herbruikbare geloofsbriewe kan blootstel nie.
 
-’n Cellular modem vermy die target se Internet gateway en kan ’n drop bereikbaar hou agter carrier NAT deur middel van ’n outbound rendezvous. Mobile addresses kan roteer of gedeel word; die cellular operator het steeds sterk subscriber- en network evidence: SIM/eSIM identity, IMSI, device IMEI, toegewyde addresses/ports, cell/sector timing, account/payment- en roaming records.
+## Sellulêre en eSIM-terugskakeling
 
-Vanuit die enterprise se perspektief moet onverwagte modems en personal hotspots opgespoor word met wireless/RF surveys, endpoint USB/PCI inventory, MDM restrictions, rogue-SSID monitoring en fisiese inspeksie. ’n Drop wat cellular vir control gebruik, kan steeds deur sy plaaslike Ethernet/Wi-Fi behavior en radio emissions opgespoor word.
+’n Sellulêre modem omseil die teiken se internetpoort en kan ’n drop bereikbaar hou agter draer-NAT deur ’n uitgaande rendezvous. Mobiele adresse kan roteer of gedeel word; die sellulêre operateur hou steeds sterk intekenaar- en netwerkbewyse: SIM-/eSIM-identiteit, IMSI, toestel-IMEI, toegewysde adresse/poorte, sel-/sektor-tydsberekening, rekening-/betalings- en swerfrekords.
 
-Vir gemagtigde exercises behoort die organisasie die subscription en modem te besit, identifiers by die controller aan te teken en te valideer dat carrier/provider terms die traffic toelaat. ’n Prepaid label of cryptocurrency-aankoop verwyder nie tower-, device- of retail records nie.
+Vanuit die onderneming se perspektief kan onverwagte modems en persoonlike hotspots opgespoor word deur draadlose/RF-opnames, USB/PCI-inventarisering van eindpunte, MDM-beperkings, monitering vir skelm SSID’s en fisiese inspeksie. ’n Drop wat sellulêr vir beheer gebruik, kan steeds aan sy plaaslike Ethernet-/Wi-Fi-gedrag en radio-uitstralings uitgeken word.
 
-## MAC randomization and device fingerprinting
+Vir gemagtigde oefeninge behoort die organisasie die intekening en modem te besit, die identifiseerders saam met die beheerder aan te teken en te bevestig dat die draer-/verskafferbepalings die verkeer toelaat. ’n Voorafbetaalde SIM of aankoop met kriptogeldeenheid wis nie toring-, toestel- of kleinhandelrekords uit nie.
 
-Moderne systems kan ’n locally administered random MAC per network gebruik. Dit verminder passiewe langtermyn-tracking deur ’n stabiele factory MAC; dit verberg nie:
+## MAC-randomisering en toestelfingerafdrukke
 
-- probe/association timing en die stel aangevraagde network capabilities nie;
-- 802.11 information elements, supported rates en vendor-specific behavior nie;
-- DHCP options/hostname, IPv6 identifiers en captive-portal/browser fingerprint nie;
-- authenticated 802.1X identity of certificate nie;
-- hoërlaag-account-, tunnel- en traffic pattern nie; of
-- fisiese observation nie.
+Moderne stelsels kan ’n plaaslik geadministreerde, ewekansige MAC per netwerk gebruik. Dit verminder passiewe langtermynnasporing deur ’n stabiele fabrieks-MAC; dit verberg nie:
 
-Defenders behoort nie MAC allowlists as authentication te gebruik nie. Koppel radio identity aan certificate/device posture en behandel veranderende MACs as normaal, tensy ander context anomalous is.
+- probe-/assosiasietydsberekening en die stel aangevraagde netwerkeienskappe nie;
+- 802.11-inligtingselemente, ondersteunde snelhede en verskafferspesifieke gedrag nie;
+- DHCP-opsies/gasheernaam, IPv6-identifiseerders en captive-portal-/blaaier-vingerafdruk nie;
+- geverifieerde 802.1X-identiteit of sertifikaat nie;
+- hoërlaag-rekening-, tonnel- en verkeerspatrone nie; of
+- fisiese waarneming nie.
 
-## Satellite-link hijacking
+Verdedigers behoort nie MAC-toelatingslyste as verifikasie te gebruik nie. Koppel radio-identiteit aan sertifikaat-/toestelhouding en behandel veranderende MAC-adresse as normaal, tensy ander konteks abnormaal is.
 
-Kaspersky het gedokumenteer dat Turla weaknesses in ouer eenrigting-DVB-S satellite Internet gebruik het. In die gerapporteerde model het ’n legitieme remote subscriber outbound requests oor ’n terrestrial link gestuur, maar downstream data via ’n unencrypted wide-area satellite broadcast ontvang. ’n Actor binne die satellite footprint kon die downlink observeer, ’n aktiewe subscriber IP kies en reël dat C2 replies aan daardie IP geadresseer word. Sowel die legitieme subscriber as die actor het die broadcast ontvang; die actor het traffic vir die geselekteerde port onttrek, terwyl die legitieme subscriber unsolicited packets weggegooi het. Die C2 operator het daarna blykbaar ’n satellite-provider address in ’n ander geografiese ligging gebruik.<sup>[[2]](#references)</sup>
+## Kaping van satellietskakels
+
+Kaspersky het gedokumenteer dat Turla swakhede in ouer eenrigting-DVB-S-satellietinternet benut het. In die gerapporteerde model het ’n wettige afgeleë intekenaar uitgaande versoeke oor ’n terrestriële skakel gestuur, maar stroomafdata ontvang via ’n ongeënkripteerde satellietuitsending oor ’n wye gebied. ’n Akteur binne die satellietdekkingsgebied kon die afskakel waarneem, ’n aktiewe intekenaar-IP kies en reël dat C2-antwoorde aan daardie IP gerig word. Sowel die wettige intekenaar as die akteur het die uitsending ontvang; die akteur het verkeer vir die gekose poort onttrek terwyl die wettige intekenaar ongevraagde pakkette weggegooi het. Die C2-operateur het toe voorgekom asof dit ’n satellietverskafferadres in ’n ander geografiese gebied gebruik.<sup>[[2]](#references)</sup>
+
 ```text
 actor uplink request -> C2 server -> Internet -> satellite gateway
-satellite broadcast
-+--------------+-------------+
-|                            |
-legitimate subscriber          actor receiver
+                                           satellite broadcast
+                                  +--------------+-------------+
+                                  |                            |
+                         legitimate subscriber          actor receiver
 ```
-Dit was spesifiek vir ’n protokol/diens, deur bandwydte beperk en nie gelykstaande aan die kompromittering van ’n moderne tweerigting-geënkripteerde satellietterminal nie. Dit het ook nie die actor se uitgaande versoekpad vir ’n voldoende bekwame waarnemer versteek nie. Opsporingsgeleenthede sluit in asimmetriese/onmoontlike roetering, verkeer na ’n subscriber wat nie die vloei geïnisieer het nie, ongewone bestemmingpoorte, provider-telemetrie, ondersoek van die ontvanger se ligging/RF en malware-konfigurasie. Gebruik hierdie geval om die aanname uit te daag dat geolokalisering van ’n C2-IP-adres die ligging van sy beheerder bepaal—nie as ’n bouresep nie.
 
-## Fisiek-na-digitaal-korrelasiewerkblad
+Dit was spesifiek vir ’n protokol/diens, bandwydtebeperk en nie gelykstaande aan die kompromittering van ’n moderne tweerigting-geënkripteerde satellietterminaal nie. Dit het ook nie die akteur se uitgaande versoekroete vir ’n waarnemer met voldoende vermoëns versteek nie. Geleenthede vir opsporing sluit in asimmetriese/onmoontlike roetering, verkeer na ’n intekenaar wat nie die vloei begin het nie, ongewone bestemmingspoorte, verskaffertelemetrie, ondersoek van die ontvanger se ligging/RF en malware-konfigurasie. Gebruik hierdie geval om die aanname te bevraagteken dat die geolokalisering van ’n C2-IP die ligging van die beheerder bepaal—nie as ’n bouresep nie.
 
-Wanneer ’n oënskynlik plaaslike bron verdag is, bou een tydlyn:
+## Werkblad vir fisiese-na-digitale korrelasie
 
-1. normaliseer AP-, RADIUS-, DHCP-, DNS-, proxy-, VPN-, EDR-, switch- en fisiese-toegangs-klokke;
-2. identifiseer die eerste radio-assosiasie of link-up, nie net die eerste alert nie;
-3. karteer die station aan sertifikaat, device posture, DHCP-fingerprint en switch/AP-ligging;
-4. soek gelyktydige remote-control-/tunnel-aktiwiteit op nabygeleë stelsels;
-5. hersien aflewerings, besoekers, voorraaduitsonderings, kameras en RF-bevindings ingevolge toepaslike beleid/wetgewing;
-6. bewaar die vermoedelike toestel en vlugtige netwerktoestand; moenie blindelings die krag af- en aanskakel nie;
-7. bepaal of die oënskynlike bron actor-beheerde infrastruktuur of ’n ander slagoffer is.
+Wanneer ’n skynbaar plaaslike bron verdag is, stel een tydlyn saam:
+
+1. normaliseer die AP-, RADIUS-, DHCP-, DNS-, instaanbediener-, VPN-, EDR-, skakelaar- en fisieke-toegangshorlosies;
+2. identifiseer die eerste radio-assosiasie of skakelverbinding, nie net die eerste waarskuwing nie;
+3. koppel die stasie aan sertifikaat, toestelhouding, DHCP-vingerafdruk en skakelaar-/AP-ligging;
+4. soek na gelyktydige afstandbeheer-/tonnelaktiwiteit op nabygeleë stelsels;
+5. hersien aflewerings, besoekers, voorraaduitsonderings, kameras en RF-bevindinge ingevolge toepaslike beleid/wetgewing;
+6. bewaar die verdagte toestel en die vlugtige netwerktoestand; moenie dit blindelings af- en aanskakel nie;
+7. bepaal of die oënskynlike bron infrastruktuur is wat deur die akteur beheer word, of ’n ander slagoffer.
 
 ## References
 
-- [1] [Volexity — Die Nearest Neighbor Attack: Hoe ’n Russiese APT nabygeleë Wi-Fi-netwerke vir geheime toegang gewapen het](https://www.volexity.com/blog/2024/11/22/the-nearest-neighbor-attack-how-a-russian-apt-weaponized-nearby-wi-fi-networks-for-covert-access/)
-- [2] [Kaspersky Securelist — Satellite Turla: APT command and control in die lug](https://securelist.com/satellite-turla-apt-command-and-control-in-the-sky/72081/)
-- [3] [MITRE ATT&CK — Hardware Additions (T1200)](https://attack.mitre.org/techniques/T1200/)
-- [4] [NIST SP 800-153 — Riglyne vir die beveiliging van Wireless Local Area Networks](https://csrc.nist.gov/pubs/sp/800/153/final)
+- [1] [Volexity — Die Nearest Neighbor-aanval: Hoe ’n Russiese APT nabygeleë Wi-Fi-netwerke bewapen het](https://www.volexity.com/blog/2024/11/22/the-nearest-neighbor-attack-how-a-russian-apt-weaponized-nearby-wi-fi-networks-for-covert-access/)
+- [2] [Kaspersky Securelist — Satellite Turla: APT-beheer en -beheer in die lug](https://securelist.com/satellite-turla-apt-command-and-control-in-the-sky/72081/)
+- [3] [MITRE ATT&CK — Hardewaretoevoegings (T1200)](https://attack.mitre.org/techniques/T1200/)
+- [4] [NIST SP 800-153 — Riglyne vir die beveiliging van draadlose plaaslike-area-netwerke](https://csrc.nist.gov/pubs/sp/800/153/final)
+- [5] [Volexity — Geredigeerde PowerShell/C#-WLAN-profielkode](https://github.com/volexity/threat-intel/blob/main/2024/2024-11-22%20GruesomeLarch/wifi_ps1_redacted.cs)
+- [6] [Microsoft — netsh wlan](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/netsh-wlan)
+- [7] [Microsoft — WlanSetProfileEapXmlUserData-funksie](https://learn.microsoft.com/en-us/windows/win32/api/wlanapi/nf-wlanapi-wlansetprofileeapxmluserdata)
 {{#include ../banners/hacktricks-training.md}}
