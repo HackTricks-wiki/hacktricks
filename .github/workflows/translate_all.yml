@@ -8,6 +8,8 @@ on:
       - '.gitignore'
       - Dockerfile
       - '.github/**'
+      - 'scripts/merge_approved_prs.py'
+      - 'scripts/test_merge_approved_prs.py'
   workflow_dispatch:
     inputs:
       translation_base_sha:
@@ -92,6 +94,11 @@ jobs:
             src/images/arte-badge-v1.webp \
             src/images/grte-badge-v1.webp \
             src/images/azrte-badge-v1.webp \
+            src/images/lee-sponsor-v1.webp \
+            src/images/azrte-sponsor-v1.webp \
+            src/images/grte-sponsor-v1.webp \
+            src/images/lhe-sponsor-v1.webp \
+            src/images/arte-sponsor-v1.webp \
             /tmp/immutable-images/
           cp theme/discount.js /tmp/discount.js
           wget -O /tmp/seo_postprocess.py https://raw.githubusercontent.com/HackTricks-wiki/hacktricks/master/scripts/seo_postprocess.py
@@ -131,11 +138,26 @@ jobs:
             fi
           done
 
-          echo "Files to translate (`wc -l < /tmp/file_paths.txt`):"
+          # Ref comparison can include paths that exist only on a language branch.
+          # The translator requires every source path to exist on master.
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path_file = Path('/tmp/file_paths.txt')
+          paths = path_file.read_text().split(',') if path_file.exists() else []
+          valid = []
+          for path in paths:
+              path = path.strip()
+              if path.startswith('src/') and path.endswith('.md') and Path(path).is_file():
+                  valid.append(path)
+              elif path:
+                  print(f'Skipping missing or invalid translation source: {path}')
+          path_file.write_text(','.join(dict.fromkeys(valid)))
+          PY
+
+          echo "Files to translate:"
           cat /tmp/file_paths.txt
           echo ""
-          echo ""
-          touch /tmp/file_paths.txt
 
           if [ -s /tmp/file_paths.txt ]; then
             python scripts/translator.py \

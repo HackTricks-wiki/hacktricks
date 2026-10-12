@@ -100,6 +100,51 @@ Moreover, you can use these tools to extract **files embedded inside the firmwar
 
 Or [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) to inspect the file.
 
+### Differential flash analysis and recoverable XOR secret stores
+
+When a firmware setting has no documented storage format, first take several matching flash reads, change **exactly one** setting, dump the complete chip again, and compare offsets. Repeating the experiment with controlled values distinguishes the setting from counters and write metadata; changes at new offsets rather than in place indicate an append-only or log-structured store. Keep deleted/tombstoned entries because their payload bytes may remain recoverable.<sup>[[10]](#references)[[11]](#references)</sup>
+
+```bash
+sha256sum baseline-1.bin baseline-2.bin baseline-3.bin
+cmp -l baseline-1.bin changed.bin
+```
+
+After locating the region, extract the firmware modules with tools such as `binwalk` and reverse the writer/validator in Ghidra. Confirm field boundaries, padding, key indexing, and key derivation in code instead of inferring the scheme only from ciphertext patterns.<sup>[[10]](#references)</sup>
+
+#### Recover keys from encrypted zero padding
+
+As described in [XOR-based encryption](../../crypto/symmetric/#xor-based-encryption), known plaintext reveals keystream bytes at the same offsets. A fixed-size field is especially exposed when its zero padding spans every index of a repeating XOR key: the encrypted padding reveals those key bytes directly because `0x00 XOR key_byte = key_byte`. If every key index is covered, reconstruct the key from the ciphertext tail and decrypt the populated bytes.<sup>[[10]](#references)</sup>
+
+Dell's vulnerable DVAR BIOS-password format is a concrete example: byte `0` of a 32-byte field is plaintext, while bytes `1..31` use a repeating 20-byte key.<sup>[[10]](#references)</sup>
+
+```text
+stored[0] = password[0]
+stored[i] = password[i] XOR key[(i - 1) mod 20]  # i = 1..31
+```
+
+For a password length `L`, positions `L..31` were zero before XOR. When `L <= 12`, those positions cover every key index, so the complete key and password are recovered without brute force:<sup>[[10]](#references)</sup>
+
+```text
+key[(i - 1) mod 20] = stored[i]                  # padding positions
+password[i] = stored[i] XOR key[(i - 1) mod 20] # populated positions
+```
+
+#### Lift keys from historical records
+
+Do not analyze each record independently. The DVAR key is derived approximately as `modified_md5(device_seed || variable_GUID || password[0])`: the device seed and GUID are fixed, and the only password-dependent input is the clear first byte. This gives at most 256 keys per device and makes records beginning with the same byte share a key. Group active and deleted records by that byte; a short historical record can leak the full key through padding and decrypt a current longer record whose own padding is insufficient. Password rotation can therefore increase exposure when old ciphertext is tombstoned rather than erased.<sup>[[10]](#references)</sup>
+
+The [`dellpwn`](https://github.com/R3n5k1/dellpwn) tool locates DVAR, validates candidate records, recovers passwords, and can display raw stored/key bytes. Build it from a checkout and scan a verified flash image as follows:<sup>[[11]](#references)</sup>
+
+```bash
+cargo install --path .
+dellpwn scan dump.bin --raw
+dellpwn scan dump.bin --partial  # include uncertain recoveries
+```
+
+For custom parsers, reject false positives with record structure, printable-character constraints, zero-padding checks, key entropy, and consistency where the key wraps. If repeated dumps show sparse per-write bit flips, enumerate the observed masks and rank corrections with these constraints, but report ambiguous characters instead of presenting heuristic output as exact recovery.<sup>[[10]](#references)</sup>
+
+Password verifiers should store a salted, iterated one-way hash rather than reversible ciphertext, and log-structured stores should securely remove superseded secret material.<sup>[[10]](#references)</sup>
+
 ### Getting the Filesystem
 
 With the previous commented tools like `binwalk -ev <bin>` you should have been able to **extract the filesystem**.\
@@ -322,6 +367,50 @@ For ARM binaries, the process is similar, with the `qemu-arm` emulator being uti
 ### Full System Emulation
 
 Tools like [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit), and others, facilitate full firmware emulation, automating the process and aiding in dynamic analysis.
+
+### Reconstructing split and verified root filesystems for emulation
+
+If a SquashFS superblock is readable but inode, directory, or fragment-table offsets are impossible, do not immediately patch `unsquashfs`. Reverse the early boot binary and reproduce the block-device graph it creates: embedded systems may expose a nominal root partition but construct the real filesystem with a `dm-linear` mapping that appends sectors borrowed from another partition. Superblock-only checks can succeed even when every later metadata block is displaced.<sup>[[9]](#references)</sup>
+
+Preserve the firmware's arithmetic exactly. In particular, identify whether lengths are bytes, 512-byte sectors, or 4 KiB pages; reproduce shifts and truncation in their original order; and account for bank-dependent tail regions in A/B layouts. For example, `(partition_bytes >> 12) << 3` first truncates to a 4 KiB boundary and only then expresses the result in 512-byte sectors; replacing it with `partition_bytes // 512` can move the appended extent by a few kilobytes and corrupt all downstream SquashFS tables.<sup>[[9]](#references)</sup>
+
+A useful validation workflow is:<sup>[[9]](#references)</sup>
+
+1. Recover each `dm-linear` segment's source device, start sector, and length from the verifier/init binary.
+2. Concatenate or map the extents without changing their alignment semantics.
+3. If extraction still fails, search only a small window around the predicted boundary and require several consecutive valid metadata structures, rather than accepting a plausible superblock alone.
+4. Run an unmodified `unsquashfs` against the reconstructed image; successful traversal of all directories and fragments is stronger evidence than `unsquashfs -stat`.
+
+#### Analyst-controlled dm-verity replacement
+
+When the analyst controls the QEMU kernel, initramfs, and virtual disks, a modified root can be booted by replacing the vendor's verification PID 1 with a small statically linked init. This is a **lab boot-chain substitution**, not a break of dm-verity, its RSA signature, Secure Boot, or a TPM-sealed key.<sup>[[9]](#references)</sup>
+
+The replacement init should mirror the operational parts of the original boot path: mount `devtmpfs`, call `setsid()`, connect `/dev/console` to file descriptors 0–2, mount `/proc` and `/sys`, wait for the supplied block device, mount the edited root read-only, detach the old-root pseudo-filesystems, move the new mount onto `/`, `chroot`, and `execve()` the firmware's original `/sbin/init`. Detaching `/dev`, `/proc`, and `/sys` **before** `MS_MOVE` avoids accidentally detaching mount points belonging to the new root.<sup>[[9]](#references)</sup>
+
+Keep mutable device state separate from the modified immutable root. A qcow2 overlay can preserve the original disk's LVM state while a second read-only virtio disk supplies the edited SquashFS:<sup>[[9]](#references)</sup>
+
+```bash
+qemu-img create -f qcow2 -F raw -b emmc.raw overlay.qcow2
+qemu-system-x86_64 ... -kernel bzImage -initrd custom-initramfs.cpio.gz \
+  -drive if=none,id=emmc,format=qcow2,file=overlay.qcow2 \
+  -device sdhci-pci -device sd-card,drive=emmc \
+  -drive if=virtio,format=raw,readonly=on,file=rootfs-edited.squashfs
+```
+
+#### Offline image-state debugging
+
+Inspect persistent state outside the guest when slow boots, destructive startup scripts, or unreliable console logging obscure the failure. Never attach an overlay that a running VM is using; expose it with `qemu-nbd`, constrain LVM discovery to the intended NBD partition, and deactivate the volume group before disconnecting it.<sup>[[9]](#references)</sup>
+
+```bash
+sudo modprobe nbd max_part=16
+sudo qemu-nbd --connect=/dev/nbd0 overlay.qcow2
+sudo vgscan --config 'devices { filter = ["a|/dev/nbd0p4|", "r|.*|"] }'
+# inspect/fsck/mount the discovered logical volumes
+sudo vgchange -an VG_NAME
+sudo qemu-nbd --disconnect /dev/nbd0
+```
+
+For repeatable fault isolation, write timestamped marker files to a stable writable volume and verify them offline; `/dev/kmsg`, FIFOs, and transient consoles can produce false negatives through rate limiting or early process death. Also compare exact interfaces across layers before changing unrelated code: `uname -r` versus `/lib/modules/`, on-disk ext4 features versus kernel configuration, and the Mesa `libGL` generation versus DRI driver ABI and PCI-derived driver names. A component can exist and even `dlopen()` successfully while remaining unusable because its consumer expects a different ABI.<sup>[[9]](#references)</sup>
 
 ## Dynamic Analysis in Practice
 
@@ -574,5 +663,8 @@ This turns "encrypted firmware" into a more general problem: **recover the appli
 - [6] [Now You See mi: Now You're Pwned](https://labs.taszk.io/articles/post/nowyouseemi/)
 - [7] [Synacktiv - Exploiting the Tesla Wall Connector from its charge port connector - Part 2: bypassing the anti-downgrade](https://www.synacktiv.com/en/publications/exploiting-the-tesla-wall-connector-from-its-charge-port-connector-part-2-bypassing)
 - [8] [Make it Blink: Over-the-Air Exploitation of the Philips Hue Bridge](https://www.synacktiv.com/en/publications/make-it-blink-over-the-air-exploitation-of-the-philips-hue-bridge.html)
+- [9] [ROOT Tesla OS on QEMU Part 2: Debugging and Fixing](https://cn0xroot.wordpress.com/2026/09/20/root_tesla_os_on_qemu_part_2_debugging_fixing)
+- [10] [Dell BIOS Passwords: Weak XOR Encryption Allows Recovery from SPI Flash (CVE-2026-40639)](https://mdsec.co.uk/2026/07/dell-bios-passwords-weak-xor-encryption-allows-recovery-from-spi-flash-cve-2026-40639)
+- [11] [R3n5k1/dellpwn - Dell BIOS password recovery tooling](https://github.com/R3n5k1/dellpwn)
 
 {{#include ../../banners/hacktricks-training.md}}
