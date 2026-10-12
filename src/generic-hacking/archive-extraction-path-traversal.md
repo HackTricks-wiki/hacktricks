@@ -1,157 +1,186 @@
-# Archive Extraction Path Traversal ("Zip-Slip")
+# Upitiaji wa Njia Wakati wa Kutoa Archive ("Zip-Slip")
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## Muhtasari
 
-Miundo mingi ya archive (ZIP, RAR, TAR, 7-ZIP, n.k.) huruhusu kila entry kubeba **internal path** yake. Utility ya extraction inapofuata path hiyo bila kuichunguza, filename iliyotengenezwa ikiwa na `..` au **absolute path** (kwa mfano `C:\Windows\System32\`) itaandikwa nje ya directory iliyochaguliwa na mtumiaji.
-Aina hii ya vulnerability inajulikana sana kama *Zip-Slip* au **archive extraction path traversal**.<sup>[[6]](#references)</sup>
+Miundo mingi ya archive (ZIP, RAR, TAR, 7-ZIP, n.k.) huruhusu kila ingizo kuwa na **njia ya ndani** yake. Zana ya kutoa archive inapofuata njia hiyo bila kuikagua, jina la faili lililoundwa kwa `..` au **njia kamili** (kwa mfano, `C:\Windows\System32\`) litaandikwa nje ya saraka iliyochaguliwa na mtumiaji.  
+Aina hii ya udhaifu inajulikana sana kama *Zip-Slip* au **upitiaji wa njia wakati wa kutoa archive**.<sup>[[6]](#references)</sup>
 
-Madhara yanaweza kuanzia overwriting ya files kiholela hadi kufanikisha moja kwa moja **remote code execution (RCE)** kwa kuweka payload kwenye eneo la **auto-run** kama vile folder ya Windows *Startup*.
+Madhara yake yanaweza kuwa kuanzia kubadilisha faili zozote hadi kufanikisha moja kwa moja **utekelezaji wa msimbo wa mbali (RCE)** kwa kuweka payload katika eneo la **kujiendesha kiotomatiki**, kama vile folda ya *Startup* ya Windows.
 
 ## Chanzo Kikuu
 
-1. Attacker huunda archive ambapo file headers moja au zaidi zina:
-* Relative traversal sequences (`..\..\..\Users\\victim\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\payload.exe`)
-* Absolute paths (`C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\payload.exe`)
-* Au **symlinks** zilizotengenezwa ambazo huelekezwa nje ya target dir (jambo la kawaida katika ZIP/TAR kwenye *nix*).
-2. Victim hu-extract archive kwa kutumia tool iliyo vulnerable ambayo huamini path iliyo-embed (au hufuata symlinks) badala ya kuisanitize au kulazimisha extraction ifanyike chini ya directory iliyochaguliwa.
-3. File huandikwa katika location inayodhibitiwa na attacker na ku-executiwa/loaded wakati mwingine mfumo au mtumiaji anapo-trigger path hiyo.
+1. Mshambuliaji hutengeneza archive ambamo kichwa cha faili kimoja au zaidi kina:
+   * Mfuatano wa kupitia saraka za juu (`..\..\..\Users\\victim\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\payload.exe`)
+   * Njia kamili (`C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\payload.exe`)
+   * Au **symlinks** zilizoundwa mahsusi zinazoelekeza nje ya saraka lengwa (jambo la kawaida katika ZIP/TAR kwenye *nix*). 
+2. Mhasiriwa hutoa archive kwa kutumia zana yenye udhaifu inayoamini njia iliyopachikwa (au kufuata symlinks) badala ya kuisafisha au kulazimisha utoaji kufanyika ndani ya saraka iliyochaguliwa.
+3. Faili huandikwa katika eneo linalodhibitiwa na mshambuliaji, kisha hutekelezwa/kupakiwa wakati mwingine mfumo au mtumiaji anapowasha njia hiyo.
 
-### .NET `Path.Combine` + `ZipArchive` traversal
+### Upitaji wa njia kupitia `Path.Combine` + `ZipArchive` katika .NET
 
-Anti-pattern ya kawaida ya .NET ni kuunganisha destination iliyokusudiwa na `ZipArchiveEntry.FullName` inayodhibitiwa na mtumiaji na kufanya extraction bila path normalisation:<sup>[[4]](#references)[[8]](#references)</sup>
+Mojawapo ya mifumo mibaya inayotumika sana katika .NET ni kuchanganya eneo lengwa lililokusudiwa na `ZipArchiveEntry.FullName` inayodhibitiwa na **mtumiaji**, kisha kutoa faili bila kurekebisha njia:<sup>[[4]](#references)[[8]](#references)</sup>
+
 ```csharp
 using (var zip = ZipFile.OpenRead(zipPath))
 {
-foreach (var entry in zip.Entries)
-{
-var dest = Path.Combine(@"C:\samples\queue\", entry.FullName); // drops base if FullName is absolute
-entry.ExtractToFile(dest);
-}
+    foreach (var entry in zip.Entries)
+    {
+        var dest = Path.Combine(@"C:\samples\queue\", entry.FullName); // drops base if FullName is absolute
+        entry.ExtractToFile(dest);
+    }
 }
 ```
-- Ikiwa `entry.FullName` inaanza na `..\\`, inapita; ikiwa ni **absolute path**, component ya upande wa kushoto hutupwa kabisa, na hivyo kutoa **arbitrary file write** kama utambulisho wa extraction.
-- Archive ya proof-of-concept ya kuandika kwenye directory ya `app` iliyo jirani, inayofuatiliwa na scanner iliyoratibiwa:
+
+- Ikiwa `entry.FullName` inaanza na `..\\`, huvuka njia; ikiwa ni **absolute path**, sehemu ya upande wa kushoto huondolewa kabisa, na hivyo kusababisha **arbitrary file write** kama kitambulisho cha uchimbaji.
+- Archive ya **proof-of-concept** ya kuandika kwenye directory ya `app` iliyo jirani, inayofuatiliwa na scanner iliyoratibiwa:
+
 ```python
 import zipfile
 with zipfile.ZipFile("slip.zip", "w") as z:
-z.writestr("../app/0xdf.txt", "ABCD")
+    z.writestr("../app/0xdf.txt", "ABCD")
 ```
-Kuweka ZIP hiyo kwenye inbox inayofuatiliwa husababisha `C:\samples\app\0xdf.txt`, kuthibitisha traversal nje ya `C:\samples\queue\` na kuwezesha primitives za ufuatiliaji (kwa mfano, DLL hijacks).
 
-## Advanced Archive-Breakout Primitives
+Kuweka ZIP hiyo kwenye kikasha pokezi kinachofuatiliwa husababisha `C:\samples\app\0xdf.txt` kuundwa, jambo linalothibitisha path traversal nje ya `C:\samples\queue\` na kuwezesha primitives za hatua zinazofuata (kwa mfano, DLL hijacks).
 
-Chukulia extraction kama mfululizo wa mabadiliko ya filesystem, si kama ukaguzi huru wa majina ya faili. Entry ambayo ni salama inapochanganuliwa inaweza kuwa si salama baada ya member wa awali kuunda au kubadilisha link; tatizo hilo hilo huonekana extractor inapoweka directory kwenye cache kuwa salama na baadaye kubadilisha aina yake.<sup>[[11]](#references)</sup>
+### Root ya uchimbaji inayodhibitiwa na mtumiaji
 
-### Link pivots and entry collisions
+Pia jaribu **directory inayopitishwa kwa extractor**, si majina ya washiriki wa archive pekee. Programu inaweza kupata directory hiyo kutoka kwa kichwa, jina la project au sehemu nyingine ya ombi. Thamani kama `../../../../app/module` inaweza kuhamisha root ya uchimbaji nje ya eneo la upakiaji kabla extractor haijachakata washiriki wowote. Katika hali hiyo, hata archive iliyo na basename salama pekee, `api.py`, inaweza kubatilisha code ya programu.<sup>[[14]](#references)[[15]](#references)</sup>
 
-* **Symlink write-through**: unda `pivot -> /tmp`, kisha extract member ya kawaida kama `pivot/PWNED.txt`. Ikiwa extractor inafuata member ya kwanza wakati inamaterialise ya pili, write itatoka nje bila `..` kwenye jina la pili.
-* **Directory-cache/TOCTOU collision**: toa directory `d/sub/`, badilisha `d/sub` iwe symlink inayoelekeza `/tmp`, kisha toa `d/sub/PWNED.txt`. Hii inalenga extractors zinazovalidate au kuweka directory kwenye cache mara moja na hazifanyi ukaguzi tena kabla ya write ya mwisho.
-* **Hardlink read/overwrite**: TAR na RAR zinaweza kuwakilisha hardlinks. Hardlink inayoelekeza kwenye host file iliyopo inaweza kufichua contents zake ikiwa component ya baadaye itahudumia jina lililo-extractiwa; entry ya kawaida inayogongana inaweza badala yake ku-overwrite inode iliyounganishwa. Hii inadhibitiwa na sheria za same-filesystem na ruhusa za OS za hardlink.
-* **Pre-existing or cross-archive pivot**: jaribu tena kwa destination isiyo tupu. Archive moja inaweza kupanda link na extraction ya baadaye ikaandika kupitia hiyo hata ikiwa kila archive imepita ukaguzi wa stateless wa header-name.<sup>[[11]](#references)</sup>
+```python
+# Vulnerable pattern: the ZIP entries themselves need no ../ components.
+extract_root = os.path.join(site_root, "public", "files", user_title)
+archive.extractall(extract_root)
+```
 
-### Filesystem-equivalence collisions
+Huu ni mpaka tofauti wa containment na classic Zip-Slip. Thibitisha extraction root iliyotatuliwa na kila member path iliyotatuliwa. Ukaguzi wa root unaweza kutumia vipengele vya path badala ya kiambishi awali cha string:<sup>[[14]](#references)</sup>
 
-Linganisha majina kwa kutumia semantics za filesystem itakayoyapokea. Mifano muhimu ya differential ni `LINK` dhidi ya `link` kwenye filesystems zisizo na case-sensitivity, tahajia za Unicode za NFC dhidi ya NFD, majina yaliyo sawa kwa compatibility kama `ﬁle` dhidi ya `file`, members zilizojirudia zinazobadilisha path kutoka directory kuwa symlink, na backslashes zinazotafsiriwa kama separators kwenye Windows pekee. Pia jaribu majina yenye ADS kwenye NTFS. Hali hizi zinaweza kufanya validator ione paths mbili huku filesystem ikitatua moja.<sup>[[5]](#references)[[11]](#references)</sup>
+```python
+base = Path(site_root, "public", "files").resolve()
+dest = (base / user_title).resolve()
+if not dest.is_relative_to(base):
+    raise ValueError("extraction root escapes its base")
+```
 
-Kwa hiyo corpus fupi inapaswa kujaribu mchanganyiko ulio na mpangilio wa **directory → symlink → child**, **symlink → colliding regular file**, **hardlink → colliding regular file**, mchanganyiko wa `/` na `\`, majina ya absolute/rooted, na wrappers zilizobanwa kama `.tar.gz`. Iendeshe tu kwenye VM/container inayoweza kutupwa na ufuatilie destination pamoja na canary path iliyokusudiwa kuwa nje.<sup>[[11]](#references)</sup>
+Kwa jaribio salama, pakia archive halali iliyo na faili moja ya canary na uweke mfuatano wa traversal katika kila sehemu inayoweza kuchagua saraka ya kutoa faili. Fuatilia saraka iliyokusudiwa na njia ya nje inayoweza kutupwa. Ikiwa lengwa linaweza kufikia moduli iliyoingizwa, kuandika juu yake kunaweza kusababisha code execution wafanyakazi wanapopakia upya; HTTP 500 au muunganisho kukatika wakati wa upakiaji huo upya hakuthibitishi kuwa uandishi haukufanikiwa.<sup>[[14]](#references)[[15]](#references)</sup> Tazama pia [mbinu pana ya kupakia faili](../pentesting-web/file-upload/).
 
-Utata wa kimuundo mahususi wa ZIP unaweza kufanya pre-scan na extractor halisi zione entry names au trees tofauti. Angalia [Local-header vs central-directory parser confusion](../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/zips-tricks.md#local-header-vs-central-directory-parser-confusion) badala ya kuamini output ya ZIP library moja pekee.
+## Mbinu za Kina za Kuvunja Mipaka ya Archive
 
-## Real-World Example – WinRAR ≤ 7.12 (CVE-2025-8088)
+Chukulia uchimbuaji kama mfuatano wa mabadiliko kwenye mfumo wa faili, wala si ukaguzi huru wa majina ya faili. Kipengee ambacho ni salama kinapochanganuliwa kinaweza kuwa si salama baada ya mwanachama wa awali kuunda au kubadilisha link; tatizo hilo hilo hutokea wakati extractor inapohifadhi saraka kama salama kisha baadaye kubadilisha aina yake.<sup>[[11]](#references)</sup>
 
-WinRAR ya Windows na components zake za Windows RAR/UnRAR zilishindwa ku-validate filenames wakati wa extraction. Flaw hii ilitumia NTFS alternate data streams (ADS) kupita njia iliyochaguliwa ya extraction na kuandika files kwenye locations zisizokusudiwa.<sup>[[5]](#references)</sup>
-RAR archive hasidi iliyokuwa na entry kama:
+### Link pivots na migongano ya vipengee
+
+* **Uandishi kupitia Symlink**: unda `pivot -> /tmp`, kisha uchimbue mwanachama wa kawaida kama `pivot/PWNED.txt`. Ikiwa extractor itafuata mwanachama wa kwanza inapounda wa pili, uandishi utatoka nje bila `..` kwenye jina la pili.
+* **Mgongano wa directory-cache/TOCTOU**: toa saraka `d/sub/`, badilisha `d/sub` iwe symlink inayoelekeza `/tmp`, kisha toa `d/sub/PWNED.txt`. Hii inalenga extractors zinazothibitisha au kuhifadhi saraka mara moja bila kuiangalia tena kabla ya uandishi wa mwisho.
+* **Kusoma/kuandika juu ya Hardlink**: TAR na RAR zinaweza kuwakilisha hardlink. Hardlink inayoelekeza faili iliyopo kwenye host inaweza kufichua yaliyomo ikiwa kipengee cha baadaye kitatoa jina lililochimbuliwa; kipengee cha kawaida kinachogongana nacho kinaweza badala yake kuandika juu ya inode iliyounganishwa. Hili huzuiwa na masharti ya mfumo huo huo wa faili na ruhusa za hardlink za OS.
+* **Pivot iliyokuwepo awali au ya archive nyingine**: jaribu tena kwa kutumia lengwa lisilo tupu. Archive moja inaweza kuweka link na uchimbuaji wa baadaye ukaandika kupitia link hiyo, hata kama kila archive inapita ukaguzi wa jina la header usiohifadhi hali.<sup>[[11]](#references)</sup>
+
+### Migongano ya usawa wa mfumo wa faili
+
+Linganisha majina kwa kutumia kanuni za mfumo wa faili utakaoyapokea. Kesi muhimu za tofauti ni pamoja na `LINK` dhidi ya `link` kwenye mifumo ya faili isiyotofautisha herufi kubwa na ndogo, tahajia za Unicode za NFC dhidi ya NFD, majina yanayolingana kwa uoanifu kama `ﬁle` dhidi ya `file`, wanachama rudufu wanaobadilisha njia kutoka saraka kuwa symlink, na backslash zinazotafsiriwa kama vitenganishi kwenye Windows pekee. Pia jaribu majina yenye ADS kwenye NTFS. Kesi hizi zinaweza kufanya validator ione njia mbili huku mfumo wa faili ukitatua moja.<sup>[[5]](#references)[[11]](#references)</sup>
+
+Kwa hiyo, mkusanyiko mfupi wa majaribio unapaswa kupima michanganyiko ya mpangilio ya **directory → symlink → child**, **symlink → faili ya kawaida inayogongana**, **hardlink → faili ya kawaida inayogongana**, `/` na `\` zilizochanganywa, majina kamili yanayoanzia kwenye root, na wrappers zilizobanwa kama `.tar.gz`. Iendeshe tu kwenye VM/container inayoweza kutupwa na uangalie lengwa pamoja na njia ya nje ya canary iliyokusudiwa.<sup>[[11]](#references)</sup>
+
+Utata wa kimuundo unaohusu ZIP pekee unaweza kufanya uchanganuzi wa awali na extractor halisi zione majina au miti tofauti ya vipengee. Tazama [mkanganyiko wa parser kati ya local header na central directory](../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/zips-tricks.md#local-header-vs-central-directory-parser-confusion) badala ya kutegemea matokeo ya maktaba moja tu ya ZIP.
+
+## Mfano Halisi – WinRAR ≤ 7.12 (CVE-2025-8088)
+
+WinRAR ya Windows na vipengele vyake vya Windows RAR/UnRAR vilishindwa kuthibitisha majina ya faili wakati wa uchimbuaji. Kasoro hiyo ilitumia NTFS alternate data streams (ADS) kukwepa njia iliyochaguliwa ya uchimbuaji na kuandika faili kwenye maeneo yasiyokusudiwa.<sup>[[5]](#references)</sup>
+Archive hasidi ya RAR yenye kipengee kama hiki:
+
 ```text
 ..\..\..\Users\victim\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\payload.lnk
 ```
-ingeishia **nje** ya saraka iliyochaguliwa ya matokeo na ndani ya folda ya *Startup* ya mtumiaji. ESET iliona faili hasidi za LNK zikifunguliwa humo na kutekelezwa mtumiaji anapoingia, hivyo kutoa persistence na njia ya RCE.<sup>[[5]](#references)</sup>
 
-### Kuunda PoC Archive (Linux/Mac)
+ingeishia **nje** ya saraka teule ya matokeo na ndani ya folda ya *Startup* ya mtumiaji. ESET iliona faili hasidi za LNK zikifunguliwa humo na kutekelezwa mtumiaji anapoingia, hivyo kutoa persistence na njia ya kupata RCE.<sup>[[5]](#references)</sup>
 
-Kwa sababu CVE-2025-8088 hutumia path ya traversal katika jina la ADS, tumia generator iliyoundwa mahsusi kuunda RAR, kisha fanya extraction katika lab iliyotengwa pekee, ukitumia build ya WinRAR iliyo vulnerable.<sup>[[5]](#references)</sup>
+### Kutengeneza Kumbukumbu ya PoC (Linux/Mac)
 
-### Exploitation Iliyoonekana Hadharani
+Kwa kuwa CVE-2025-8088 hutumia path traversal katika jina la ADS, tumia generator iliyoundwa mahsusi kuunda RAR, kisha ujaribu uondoaji wake kwenye maabara iliyotengwa pekee ukitumia build ya WinRAR iliyo hatarini.<sup>[[5]](#references)</sup>
 
-ESET iliripoti kampeni za spear-phishing za RomCom (Storm-0978/UNC2596) zilizoweka RAR archives zinazotumia vibaya CVE-2025-8088 ili kusambaza backdoors zilizobinafsishwa na kuwezesha shughuli za ransomware.<sup>[[5]](#references)</sup>
+### Matumizi Yaliyoonekana Hadharani
 
-## Kesi Mpya (2024–2026)
+ESET iliripoti kampeni za spear-phishing za RomCom (Storm-0978/UNC2596) zilizokuwa na kumbukumbu za RAR zinazotumia CVE-2025-8088 vibaya ili kusambaza backdoors zilizobinafsishwa na kuwezesha shughuli za ransomware.<sup>[[5]](#references)</sup>
+
+## Kesi Mpya Zaidi (2024–2026)
 
 ### 7-Zip ZIP symlink traversal → RCE (CVE-2025-11001 / ZDI-25-949)
-* **Bug**: ZIP entries ambazo ni **symbolic links** zilifuatwa wakati wa extraction, hivyo kuwawezesha attackers kutoka kwenye destination directory na kuandika paths za kiholela. User interaction ni *kufungua/kufanya extraction* ya archive tu.<sup>[[1]](#references)</sup>
-* **Affected**: 7-Zip builds za kabla ya **25.00**. Kasoro ya kushughulikia symbolic links ilirekebishwa katika **25.00** (Julai 2025) na matoleo ya baadaye.<sup>[[1]](#references)[[10]](#references)</sup>
-* **Impact path**: Andika juu ya `Start Menu/Programs/Startup` au maeneo yanayoendeshwa na service → code inaendeshwa mtumiaji anapoingia tena au service inapowashwa upya.
-* **Fixture ya haraka ya kushughulikia symlink (Linux)**:
-```bash
-mkdir -p /tmp/archive-slip-test /tmp/archive-slip-outside
-ln -s /tmp/archive-slip-outside /tmp/archive-slip-test/evil
-cd /tmp/archive-slip-test
-zip -y exploit.zip evil   # -y preserves symlinks
-7z x exploit.zip -o/tmp/archive-slip-target
-```
-Archive hii ina symlink entry inayoelekeza nje ya extraction directory; tumia target inayoweza kutupwa na uthibitishe kuwa extractor haifuati symlink hiyo. Test ya write-through pia inahitaji regular-file entry iliyo chini ya symlink.
+* **Hitilafu**: Maingizo ya ZIP yaliyo **symbolic links** yalifuatwa wakati wa uondoaji, na kuwawezesha washambuliaji kutoka kwenye saraka lengwa na kubadilisha njia zozote. Mwingiliano wa mtumiaji ni *kufungua/kutoa* yaliyomo kwenye kumbukumbu tu.<sup>[[1]](#references)</sup>
+* **Zilizoathiriwa**: Build za 7-Zip za kabla ya **25.00**. Hitilafu ya uchakataji wa symbolic link ilirekebishwa katika **25.00** (Julai 2025) na matoleo ya baadaye.<sup>[[1]](#references)[[10]](#references)</sup>
+* **Njia ya athari**: Badilisha `Start Menu/Programs/Startup` au maeneo yanayoendeshwa na service → code hutekelezwa mtumiaji anapoingia tena au service inapowashwa upya.
+* **Mfano wa haraka wa kushughulikia symlink (Linux)**:
+  ```bash
+  mkdir -p /tmp/archive-slip-test /tmp/archive-slip-outside
+  ln -s /tmp/archive-slip-outside /tmp/archive-slip-test/evil
+  cd /tmp/archive-slip-test
+  zip -y exploit.zip evil   # -y preserves symlinks
+  7z x exploit.zip -o/tmp/archive-slip-target
+  ```
+  Archive hii ina ingizo la symlink linaloelekeza nje ya saraka ya uchimbuaji; tumia lengwa linaloweza kutupwa na uhakikishe kuwa kichimbuaji hakilifuati. Jaribio la write-through pia linahitaji ingizo la faili ya kawaida chini ya symlink.
 
-### Go mholt/archiver `Unarchive()` symlink collision (CVE-2025-3445)
-* **Bug**: `archiver.Unarchive()` inaweza kufanya extraction ya ZIP symlink na kisha kuifuata wakati member ya kawaida ya baadaye ina jina lilelile, na kubadilisha write inayoonekana kuwa ndani ya root kuwa write iliyo nje ya root.<sup>[[2]](#references)</sup>
-* **Affected**: `github.com/mholt/archiver` ≤ 3.5.1 (project sasa ime-deprecated).<sup>[[2]](#references)</sup>
-* **Fix**: Hamia kwenye `mholt/archives` ≥ 0.1.0 au kataa links na u-resolve tena kila destination mara moja kabla ya kuifungua.<sup>[[2]](#references)</sup>
-* **Minimal collision generator** (kisha ita `archiver.Unarchive("exploit.zip", "/tmp/safe")`):<sup>[[2]](#references)</sup>
-```python
-import zipfile
+### Go mholt/archiver mgongano wa symlink katika `Unarchive()` (CVE-2025-3445)
+* **Hitilafu**: `archiver.Unarchive()` inaweza kuchimbua symlink ya ZIP kisha kuifuata wakati ingizo la kawaida linalofuata lina jina sawa, na hivyo kubadilisha uandishi unaoonekana kuwa ndani ya mzizi kuwa uandishi nje ya mzizi.<sup>[[2]](#references)</sup>
+* **Zinazoathirika**: `github.com/mholt/archiver` ≤ 3.5.1 (mradi sasa umekatishwa).<sup>[[2]](#references)</sup>
+* **Suluhisho**: Hamia kwenye `mholt/archives` ≥ 0.1.0 au kataa links na utatue upya kila lengwa mara moja kabla ya kulifungua.<sup>[[2]](#references)</sup>
+* **Kijenzi kidogo cha mgongano** (kisha ita `archiver.Unarchive("exploit.zip", "/tmp/safe")`):<sup>[[2]](#references)</sup>
+  ```python
+  import zipfile
 
-with zipfile.ZipFile("exploit.zip", "w") as z:
- link = zipfile.ZipInfo("./x")
- link.create_system = 3
- link.external_attr = 0o120777 << 16
- z.writestr(link, "../../../tmp/PWNED")
- z.writestr("./x", b"owned\n")
-```
+  with zipfile.ZipFile("exploit.zip", "w") as z:
+      link = zipfile.ZipInfo("./x")
+      link.create_system = 3
+      link.external_attr = 0o120777 << 16
+      z.writestr(link, "../../../tmp/PWNED")
+      z.writestr("./x", b"owned\n")
+  ```
 
 ### CPython filtered TAR extraction bypass (CVE-2026-11940)
 
-Hata `tarfile.extractall(filter="data")` na `filter="tar"` zimewahi kuwa na bypasses za link-order. Katika hali hii, hardlink ilirejelea symlink iliyokuwa archived kwenye path ya ndani zaidi; fallback extraction ilivalidate relative symlink katika eneo hilo la ndani, lakini ika-create tena katika eneo la hardlink lililokuwa karibu zaidi, ambapo target ileile ya relative ilitoka nje. Hii ni test ya jumla yenye manufaa: fanya validation na materialisation zitofautiane kuhusu base directory au aina ya mwisho ya member.<sup>[[12]](#references)</sup>
+Hata `tarfile.extractall(filter="data")` na `filter="tar"` zimekuwa na bypass za mpangilio wa link. Katika hali hii, hardlink ilirejelea symlink iliyohifadhiwa kwenye njia ya ndani zaidi; fallback extraction ilithibitisha symlink ya relative kwenye eneo hilo la ndani zaidi lakini ikaizalisha upya kwenye eneo lisilo la ndani sana la hardlink, ambapo target ileile ya relative ilitoroka. Huu ni mtihani wa jumla wenye manufaa: hakikisha uthibitishaji na uwekaji halisi havitofautiani kuhusu saraka msingi au aina ya mwisho ya member.<sup>[[12]](#references)</sup>
 
-### Node `tar` hardlink target escape kupitia symlink chain (GHSA-83g3-92jg-28cx)
+### Node `tar` hardlink target kutoroka kupitia mnyororo wa symlink (GHSA-83g3-92jg-28cx)
 
-Package ya Node.js `tar` ilikubali hardlink ambayo target yake ilionekana kuwa ndani kwa kuangalia lexical, lakini ika-resolve kuwa nje ya extraction root kupitia symlinks mbili za awali. Attack hii hufanya kazi kwa default extraction options: checks za destination-parent zilifunika jina la hardlink lililokuwa ndani ya root, huku hardlink target ikipitishwa kwenye filesystem bila ku-resolve chain nzima ili kuthibitisha containment. `tar` ≤ 7.5.7 imeathirika; 7.5.8 inarekebisha tatizo hilo.<sup>[[13]](#references)</sup>
+Kifurushi cha Node.js `tar` cha `tar.extract()` kilikubali hardlink ambayo target yake ilionekana kuwa ndani kwa kuangalia maandishi, lakini ilisuluhishwa na kutoroka nje ya root ya extraction kupitia symlink mbili za awali. Shambulio hili hufanya kazi kwa chaguo-msingi za extraction: ukaguzi wa parent wa destination ulihusisha jina la hardlink lililo ndani ya root, lakini target ya hardlink ilipitishwa kwa filesystem bila kusuluhisha mnyororo mzima ili kuthibitisha kuwa iko ndani. `tar` ≤ 7.5.7 imeathirika; toleo la 7.5.8 limerekebisha tatizo hilo.<sup>[[13]](#references)</sup>
 
-Fixture muhimu ya test ni **uhusiano wa mpangilio** kati ya members, si majina haya halisi:<sup>[[13]](#references)</sup>
+Kipengele muhimu cha test fixture ni **uhusiano wa mpangilio** kati ya members, si majina haya halisi:<sup>[[13]](#references)</sup>
+
 ```text
 a/b/c/up     -> ../..                          (symlink)
 a/b/escape   -> c/up/../..                     (symlink)
 exfil        => a/b/escape/<path-from-parent>  (hardlink)
 ```
-Ikiwa extraction itafaulu, `exfil` itaendelea kuonekana ndani ya mti wa output lakini itashiriki inode na faili iliyochaguliwa iliyo nje; kuisoma kunaleak faili hilo, na kuiandikia kunarekebisha faili la awali. Bypass hii inaonyesha kwa nini kuangalia tu pathname ya mwisho, kuondoa absolute prefixes, au kuzuia `..` kwenye hardlink header hakutoshi: validate link targets baada ya kutumia hali yote ya filesystem iliyotokana na entries zilizotolewa awali.<sup>[[13]](#references)</sup>
 
-## Detection Tips
+Ikiwa ufunguaji wa archive utafaulu, `exfil` itaendelea kuonekana ndani ya mti wa matokeo lakini itashiriki inode na faili ya nje iliyochaguliwa; kuisoma kutavuja faili hiyo na kuiandikia kutarekebisha faili asili. Njia hii ya kukwepa inaonyesha kwa nini kukagua tu pathname ya mwisho, kuondoa viambishi awali vya absolute, au kuzuia `..` kwenye hardlink header hakutoshi: thibitisha malengo ya link baada ya kutumia hali yote ya mfumo wa faili iliyoundwa na faili zilizotolewa awali.<sup>[[13]](#references)</sup>
 
-* **Static inspection** – Orodhesha member names na link targets zote. Weka alama kwa `../`, `..\\`, absolute/rooted paths, symlinks, hardlinks, special files, duplicate names, mabadiliko ya type, na collisions zinazolingana kwa case/Unicode. Hifadhi mpangilio wa entries wakati wa review kwa sababu exploit inaweza kutegemea members zilizotangulia.<sup>[[11]](#references)</sup>
+## Vidokezo vya Utambuzi
 
-```bash
-bsdtar -tvf suspect.tar       # ordered TAR members, types and link targets
-7z l -slt suspect.7z          # technical metadata, one field per line
-zipinfo -v suspect.zip        # ZIP central-directory metadata and offsets
-```
+* **Ukaguzi tuli** – Orodhesha majina ya wanachama na malengo ya link. Weka alama kwenye `../`, `..\\`, njia za absolute/rooted, symlinks, hardlinks, faili maalum, majina yanayojirudia, mabadiliko ya aina, na migongano ya majina yanayolingana kwa herufi kubwa/ndogo au Unicode. Hifadhi mpangilio wa maingizo wakati wa ukaguzi kwa sababu exploit inaweza kutegemea maingizo yaliyotangulia.<sup>[[11]](#references)</sup>
 
-* **Canonicalisation** – Hakikisha parent iliyoresolve pamoja na final basename inabaki chini ya destination iliyoresolve (linganisha path components, si raw string prefix). Fanya ukaguzi tena baada ya kila member iliyotangulia; test ya mara moja ya `realpath(join(dest, name))` iko hatarini kwa link replacement na inaweza kushindwa kwa leaf ambayo bado haijaundwa.<sup>[[3]](#references)[[11]](#references)</sup>
-* **Sandbox extraction** – Decompress kwenye directory mpya inayoweza kutupwa, ukitumia extractor yenye path/symlink checks (kwa mfano, secure checks za default za bsdtar au 7-Zip ≥ 25.00), kisha thibitisha kuwa mti unaotokana hauna outward links. Isolation lazima izuie escape ambayo tayari imeshaanzishwa kufikia host paths.<sup>[[1]](#references)[[9]](#references)</sup>
-* **Downstream reads matter** – Symlink au hardlink inayosalia inaweza kuwa arbitrary-file-read primitive wakati previewer, CDN, file browser, au package pipeline baadaye inapofungua au kuhudumia extracted name, hata ikiwa extraction yenyewe haikuunda faili lolote nje.<sup>[[11]](#references)</sup>
-* **Endpoint monitoring** – Toa alert kuhusu executables mpya zilizoandikwa kwenye locations za `Startup`/`Run`/`cron` muda mfupi baada ya archive kufunguliwa na WinRAR/7-Zip/etc.
+  ```bash
+  bsdtar -tvf suspect.tar       # ordered TAR members, types and link targets
+  7z l -slt suspect.7z          # technical metadata, one field per line
+  zipinfo -v suspect.zip        # ZIP central-directory metadata and offsets
+  ```
+
+* **Canonicalisation** – Hakikisha kuwa parent iliyosuluhishwa pamoja na basename ya mwisho inabaki ndani ya destination iliyosuluhishwa (linganisha vipengele vya path, si prefix ghafi ya string). Kagua tena baada ya kila member inayotangulia; jaribio la mara moja la `realpath(join(dest, name))` linaweza kushambuliwa kwa kubadilisha link, na huenda likashindwa ikiwa leaf bado haijaundwa.<sup>[[3]](#references)[[11]](#references)</sup>
+* **Sandbox extraction** – Decompress kwenye directory mpya inayoweza kutupwa, ukitumia extractor yenye ukaguzi wa path/symlink (kwa mfano, ukaguzi salama wa kawaida wa bsdtar au 7-Zip ≥ 25.00), kisha thibitisha kuwa tree iliyotokana haina link zinazoelekea nje. Isolation lazima izuie escape ambayo tayari imeanzishwa kufikia path za host.<sup>[[1]](#references)[[9]](#references)</sup>
+* **Usomaji wa hatua zinazofuata ni muhimu** – Symlink au hardlink inayosalia inaweza kuwa primitive ya kusoma faili yoyote wakati previewer, CDN, file browser, au package pipeline baadaye inapofungua au kuhudumia jina lililotolewa, hata kama extraction yenyewe haikuunda faili yoyote nje ya directory.<sup>[[11]](#references)</sup>
+* **Ufuatiliaji wa endpoint** – Toa tahadhari kuhusu executable mpya zilizoandikwa kwenye maeneo ya `Startup`/`Run`/`cron` muda mfupi baada ya archive kufunguliwa na WinRAR/7-Zip/n.k.
 
 ## Mitigation & Hardening
 
-1. **Update the extractor** – WinRAR 7.13+, 7-Zip 25.00+, na Node `tar` 7.5.8+ zina fixes za masuala yaliyotajwa ya path/symlink/link-target.<sup>[[1]](#references)[[5]](#references)[[13]](#references)</sup>
-2. Extract archives kwa “**Do not extract paths**” / “**Ignore paths**” inapowezekana. Kwa input isiyoaminika, kataa symbolic links, hardlinks, devices na FIFOs isipokuwa application ihitaji hizo waziwazi.<sup>[[9]](#references)[[11]](#references)</sup>
-3. Extract kwenye **new empty directory**. Usiunganishe members zisizoaminika kwenye tree yenye paths zinazoweza kubadilishwa na attacker, na usitumie tena directory iliyopandwa na archive ya awali.<sup>[[11]](#references)</sup>
-4. Kwenye Unix, ondoa privileges na tenga destination ndani ya **chroot/mount namespace**; kwenye Windows, tumia **AppContainer** au sandbox. Post-extraction scan pekee haitoshi kwa sababu escaped write hutokea kabla ya scan.<sup>[[11]](#references)</sup>
-5. Katika custom code, tumia separator/case/Unicode rules za target OS na validate member pamoja na link target. Resolve na open destination bila kufuata links; usitenganishe containment check na create/replace operation ya baadaye. Validator lazima itumie base ileile na link-emulation semantics zilezile zinazotumiwa na write path.<sup>[[11]](#references)[[12]](#references)</sup>
+1. **Sasisha extractor** – WinRAR 7.13+, 7-Zip 25.00+, na Node `tar` 7.5.8+ zina marekebisho ya masuala yaliyotajwa ya path/symlink/link-target.<sup>[[1]](#references)[[5]](#references)[[13]](#references)</sup>
+2. Extract archives kwa kutumia “**Do not extract paths**” / “**Ignore paths**” inapowezekana. Kwa input isiyoaminika, kataa symbolic links, hardlinks, devices na FIFOs isipokuwa programu inavihitaji waziwazi.<sup>[[9]](#references)[[11]](#references)</sup>
+3. Extract kwenye **directory mpya tupu**. Usiunganishe members zisizoaminika kwenye tree yenye path ambazo mshambuliaji anaweza kubadilisha, wala kutumia tena directory iliyopandwa na archive ya awali.<sup>[[11]](#references)</sup>
+4. Kwenye Unix, punguza privileges na tenga destination ndani ya **chroot/mount namespace**; kwenye Windows, tumia **AppContainer** au sandbox. Ukaguzi wa baada ya extraction pekee hautoshi, kwa sababu uandishi uliotoroka hutokea kabla ya ukaguzi.<sup>[[11]](#references)</sup>
+5. Katika code maalum, tumia kanuni za OS lengwa za separator/case/Unicode na uthibitishe member pamoja na link target. Suluhisha na ufungue destination bila kufuata links; usitenganishe ukaguzi wa containment na operesheni ya baadaye ya create/replace. Validator lazima itumie base na semantics zilezile za uigaji wa link kama write path.<sup>[[11]](#references)[[12]](#references)</sup>
 
 ## Additional Affected / Historical Cases
 
-* 2018 – Ushauri mkubwa wa *Zip-Slip* kutoka Snyk ulioathiri Java/Go/JS libraries nyingi.<sup>[[6]](#references)</sup>
-* 2025 – HashiCorp `go-slug` (CVE-2025-0377) TAR extraction traversal kwenye slugs (ilirekebishwa katika v0.16.3).<sup>[[7]](#references)</sup>
-* Logic yoyote ya custom extraction inayovalidate header strings lakini si link targets na final filesystem path inayotumiwa kwa kila write.<sup>[[11]](#references)[[12]](#references)</sup>
+* 2018 – Ushauri mkubwa wa *Zip-Slip* kutoka Snyk ulioathiri libraries nyingi za Java/Go/JS.<sup>[[6]](#references)</sup>
+* 2025 – HashiCorp `go-slug` (CVE-2025-0377): path traversal wakati wa TAR extraction kwenye slugs (ilisahihishwa katika v0.16.3).<sup>[[7]](#references)</sup>
+* Logic yoyote maalum ya extraction inayothibitisha header strings lakini si link targets na filesystem path ya mwisho inayotumiwa kwa kila write.<sup>[[11]](#references)[[12]](#references)</sup>
 
 
 
@@ -159,17 +188,19 @@ zipinfo -v suspect.zip        # ZIP central-directory metadata and offsets
 
 ## References
 
-- [1] [Trend Micro ZDI-25-949 – 7-Zip symlink ZIP traversal (CVE-2025-11001)](https://www.zerodayinitiative.com/advisories/ZDI-25-949/)
-- [2] [JFrog Research – mholt/archiver Zip-Slip (CVE-2025-3445)](https://research.jfrog.com/vulnerabilities/archiver-zip-slip/)
-- [3] [Meziantou – Zuia Zip Slip katika .NET](https://www.meziantou.net/prevent-zip-slip-in-dotnet.htm)
-- [4] [0xdf – HTB Bruno ZipSlip → DLL hijack chain](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
-- [5] [ESET Research – Sasisha zana za WinRAR sasa: RomCom na wengine wakitumia zero-day vulnerability (CVE-2025-8088)](https://www.welivesecurity.com/en/eset-research/update-winrar-tools-now-romcom-and-others-exploiting-zero-day-vulnerability/)
-- [6] [Snyk – Ufichuzi wa Umma wa Critical Arbitrary File Overwrite Vulnerability: Zip Slip](https://snyk.io/blog/zip-slip-vulnerability/)
-- [7] [HashiCorp – HCSEC-2025-01: go-slug Iko Hatarini kwa Zip Slip Attack (CVE-2025-0377)](https://discuss.hashicorp.com/t/hcsec-2025-01-hashicorp-go-slug-vulnerable-to-zip-slip-attack/72719)
-- [8] [Microsoft Learn – Path.Combine Method](https://learn.microsoft.com/en-us/dotnet/api/system.io.path.combine?view=net-7.0)
-- [9] [libarchive – bsdtar secure extraction flags](https://github.com/libarchive/libarchive/blob/master/tar/bsdtar.c)
-- [10] [NHS England Digital – Proof-of-Concept Exploit Reported for CVE-2025-11001 in 7-Zip](https://digital.nhs.uk/cyber-alerts/2025/cc-4719)
-- [11] [Joshua Rogers – Burudani ya hacking na zip-slips, tar-slips, symlinks, hardlinks, collisions, na zaidi](https://joshua.hu/tarslip-zipslip-symlink-hardlink-generator)
-- [12] [Python Security Announce – CVE-2026-11940 tarfile extraction filter bypass](https://mail.python.org/archives/list/security-announce@python.org/thread/LD6QIISNQFQYOIEPJNEUIPV7S3V76FZH/)
-- [13] [GitHub Security Advisory – node-tar hardlink target escape through symlink chain](https://github.com/isaacs/node-tar/security/advisories/GHSA-83g3-92jg-28cx)
+- [1] [Trend Micro ZDI-25-949 – 7-Zip: path traversal kupitia symlink kwenye ZIP (CVE-2025-11001)](https://www.zerodayinitiative.com/advisories/ZDI-25-949/)
+- [2] [Utafiti wa JFrog – mholt/archiver Zip-Slip (CVE-2025-3445)](https://research.jfrog.com/vulnerabilities/archiver-zip-slip/)
+- [3] [Meziantou – Kuzuia Zip Slip katika .NET](https://www.meziantou.net/prevent-zip-slip-in-dotnet.htm)
+- [4] [0xdf – Msururu wa HTB Bruno ZipSlip → DLL hijack](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
+- [5] [Utafiti wa ESET – Sasisha zana za WinRAR sasa: RomCom na wengine wanatumia udhaifu wa zero-day (CVE-2025-8088)](https://www.welivesecurity.com/en/eset-research/update-winrar-tools-now-romcom-and-others-exploiting-zero-day-vulnerability/)
+- [6] [Snyk – Ufichuzi wa Umma wa Udhaifu Muhimu wa Kubadilisha Faili Yoyote: Zip Slip](https://snyk.io/blog/zip-slip-vulnerability/)
+- [7] [HashiCorp – HCSEC-2025-01: go-slug Ina Udhaifu wa Zip Slip Attack (CVE-2025-0377)](https://discuss.hashicorp.com/t/hcsec-2025-01-hashicorp-go-slug-vulnerable-to-zip-slip-attack/72719)
+- [8] [Microsoft Learn – Mbinu ya Path.Combine](https://learn.microsoft.com/en-us/dotnet/api/system.io.path.combine?view=net-7.0)
+- [9] [libarchive – Bendera za bsdtar za extraction salama](https://github.com/libarchive/libarchive/blob/master/tar/bsdtar.c)
+- [10] [NHS England Digital – Exploit ya Proof-of-Concept Imeripotiwa kwa CVE-2025-11001 katika 7-Zip](https://digital.nhs.uk/cyber-alerts/2025/cc-4719)
+- [11] [Joshua Rogers – Burudani ya hacking na zip-slips, tar-slips, symlinks, hardlinks, collisions, na mengine](https://joshua.hu/tarslip-zipslip-symlink-hardlink-generator)
+- [12] [Python Security Announce – Bypass ya kichujio cha tarfile extraction ya CVE-2026-11940](https://mail.python.org/archives/list/security-announce@python.org/thread/LD6QIISNQFQYOIEPJNEUIPV7S3V76FZH/)
+- [13] [GitHub Security Advisory – node-tar: hardlink target escape kupitia msururu wa symlink](https://github.com/isaacs/node-tar/security/advisories/GHSA-83g3-92jg-28cx)
+- [14] [Rhino Security Labs CVE PoC – Root ya SCORM extraction inayodhibitiwa na mtumiaji](https://raw.githubusercontent.com/RhinoSecurityLabs/CVEs/master/CVE-2026-39405/README.md)
+- [15] [Rhino Security Labs – Udhaifu Mbalimbali katika Frappe LMS Unaosababisha Remote Code Execution](https://rhinosecuritylabs.com/research/multiple-vulnerabilities-in-frappe-lms-leading-to-remote-code-execution/)
 {{#include ../banners/hacktricks-training.md}}
