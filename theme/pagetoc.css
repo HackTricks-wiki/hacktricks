@@ -95,17 +95,22 @@
     }
     .sidetoc-wrapper {
         position: fixed;
+        top: calc(var(--menu-bar-height) + 25px);
+        bottom: 25px;
         width: 250px;
-        height: calc(100vh - var(--menu-bar-height)  - 50px * 2);
-        overflow: auto;
+        height: auto;
+        overflow: hidden;
         display: flex;
         flex-direction: column;
         gap:14px;
         background-color: transparent;
     }
     .pagetoc {
-        max-height: 48%;
-        overflow: auto;
+        flex: 1 1 auto;
+        min-height: 0;
+        max-height: none;
+        overflow-x: hidden;
+        overflow-y: auto;
         border-left: 1px solid color-mix(in srgb, var(--table-border-color) 70%, transparent);
         border-radius: 12px;
         background: transparent;
@@ -113,8 +118,10 @@
         padding: 4px 4px;
     }
     .sidesponsor {
-        max-height: 52%;
-        height: 52%;
+        flex: 0 1 auto;
+        max-height: min(420px, 52vh);
+        height: auto;
+        margin-top: auto;
         background-color: transparent;
         border: 1px solid color-mix(in srgb, var(--table-border-color) 70%, transparent);
         border-radius: 8px;
@@ -192,8 +199,10 @@
         font-weight: 800;
     }
     .sidesponsor-bsa {
-        max-height: 52%;
-        height: 52%;
+        flex: 0 1 auto;
+        max-height: min(420px, 52vh);
+        height: auto;
+        margin-top: auto;
         background-color: transparent;
         border: 1px solid color-mix(in srgb, var(--table-border-color) 70%, transparent);
         border-radius: 8px;
@@ -781,8 +790,8 @@
 .sidesponsor {
     width: 100% !important;
     min-height: min(360px, 52vh);
-    max-height: 52% !important;
-    height: 52% !important;
+    max-height: min(420px, 52vh) !important;
+    height: auto !important;
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
         "kicker"
@@ -911,8 +920,8 @@
     }
 
     .sidesponsor-bsa {
-        max-height: 52%;
-        height: 52%;
+        max-height: min(420px, 52vh);
+        height: auto;
     }
 }
 
