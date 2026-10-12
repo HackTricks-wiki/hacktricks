@@ -1055,6 +1055,7 @@
 - [Adreno A7xx Sds Rb Priv Bypass Gpu Smmu Kernel Rw](binary-exploitation/linux-kernel-exploitation/adreno-a7xx-sds-rb-priv-bypass-gpu-smmu-kernel-rw.md)
 - [Android Kernel SELinux Bypass After Arbitrary R/W](binary-exploitation/linux-kernel-exploitation/android-kernel-selinux-bypass.md)
 - [Af Unix Msg Oob Uaf Skb Primitives](binary-exploitation/linux-kernel-exploitation/af-unix-msg-oob-uaf-skb-primitives.md)
+- [AF_ALG concurrent-writer scatterlist underflow](binary-exploitation/linux-kernel-exploitation/af-alg-concurrent-writer-scatterlist-oob.md)
 - [Android Binder IPC Internals and Kernel Vulnerability Research](binary-exploitation/linux-kernel-exploitation/android-binder-ipc-internals-kernel-vulnerability-research.md)
 - [Arm64 Static Linear Map Kaslr Bypass](binary-exploitation/linux-kernel-exploitation/arm64-static-linear-map-kaslr-bypass.md)
 - [Linux USB Audio Descriptor OOB Reads to KASLR Leaks](binary-exploitation/linux-kernel-exploitation/usb-audio-descriptor-oob-kaslr-leak.md)
