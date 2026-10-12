@@ -271,11 +271,50 @@ q = q ^ (q & q) = 0
 
 This creates a **deterministic reset primitive**, breaking reversibility assumptions and enabling cheaper non-intended computations. In proof systems that attest resource usage, this can let attackers satisfy functional checks while bypassing the cost model the verifier believes is being enforced.
 
+### Underconstrained prover advice and modular arithmetic
+
+Values loaded from an **advice/witness stack are prover-controlled**, even when they are described as precomputed quotients, remainders, inverses, or hints. A proof only establishes that the witness satisfies the implemented constraints; it does not establish the intended computation if those constraints omit a type, range, or canonical-form check.<sup>[[13]](#references)</sup>
+
+For a reduction or Euclidean-division helper, audit the complete integer relation rather than only the final subtraction or multiplication. Every limb of `q` and `r` must be constrained to its declared width, the reconstruction `x = q * m + r` must hold in the intended integer representation, and the canonical bound `0 <= r < m` must be enforced. Validate a value **before** passing it to a narrower `u32`/`u64` instruction; a narrow operation does not retroactively prove that the original field element or multi-limb value had the expected type.<sup>[[12]](#references)[[13]](#references)</sup>
+
+```text
+prover advice (q, r)
+    -> limb/type assertions
+    -> x = q * m + r
+    -> 0 <= r < m
+    -> consume q/r in narrow arithmetic
+```
+
+The `mod_12289` failure in Miden illustrates the exploit pattern: the quotient was checked as a two-limb 64-bit value, but the advice-supplied remainder reached `u32overflowing_sub` without equivalent validation. A malicious prover could coordinate invalid quotient/remainder values so the implemented subtraction constraints still held while the procedure returned a non-mathematical remainder. Because this result fed Falcon verification, the soundness failure could be escalated into forged authorization signatures rather than merely producing a wrong arithmetic result.<sup>[[13]](#references)</sup>
+
+### Auditing implicit-stack cryptographic VMs
+
+Stack languages hide operands, so first lift instructions into an IR where each consumed and produced stack value is an expression with provenance. A conservative analysis pipeline can then:<sup>[[10]](#references)[[11]](#references)[[12]](#references)[[13]](#references)</sup>
+
+1. Build the call graph and infer procedure input/output stack effects.
+2. Symbolically execute supported instructions and lift control flow into SSA/structured expressions.
+3. Propagate abstract facts such as `Unknown`, `ProvenU32`, `Bool`, value provenance, and local initialization until a fixed point.
+4. Flag advice-derived values that reach typed arithmetic or non-zero sinks without a sanitizer on **every** incoming path.
+5. Compare declared and inferred signatures and verify that every exit preserves caller-owned stack values.
+
+Treat an unknown signature or unsupported construct as an **analysis gap**, not a clean result. Dynamic calls, non-stack-neutral loops, and branches with different stack effects can make sound stack-slot tracking impossible; a safer decompiler rejects or marks these cases instead of emitting plausible but incorrect pseudocode.<sup>[[10]](#references)[[13]](#references)</sup>
+
+At control-flow joins, retain a property only when it holds on every predecessor (for example, `ProvenU32 join Unknown = Unknown`). Also distinguish fixed-point convergence from hitting an iteration limit: only a converged, sound over-approximation can justify treating the absence of a diagnostic as evidence that all represented executions satisfy the property.<sup>[[11]](#references)</sup>
+
+### Use proof obligations to expose hidden preconditions
+
+For small instruction sets, translate procedures into an executable formal VM model and prove both the result and the complete stack transformation. The theorem should cover termination, typed inputs, the expected output prefix, and preservation of the untouched caller stack. Audit the theorem statement as carefully as the proof: the kernel can validate a proof of an accidentally weakened claim.<sup>[[12]](#references)[[13]](#references)</sup>
+
+Unexpected hypotheses are useful findings. In the Miden review, a proof for 64-bit right rotation required `shift mod 32 != 0`, exposing a failing edge case for large inputs when the shift was a multiple of 32; another proof found that 256-bit `wrapping_mul` discarded caller-owned stack values. Add the discovered boundary case to tests, then fix the implementation or strengthen the public precondition deliberately rather than silently accepting the extra assumption.<sup>[[12]](#references)[[13]](#references)</sup>
+
 ### What to test in ZK systems
 
 - Fuzz all guest parsers with malformed witness/private-input encodings.
 - Assert enum range validation before opcode dispatch.
 - Add semantic checks for operand aliasing and other invalid instruction forms.
+- Trace every advice/witness source to each typed arithmetic sink and require validation on every path.<sup>[[11]](#references)[[13]](#references)</sup>
+- Test arithmetic helpers with non-canonical limbs, out-of-range remainders, and boundary shift counts.<sup>[[12]](#references)[[13]](#references)</sup>
+- Assert stack height and preservation of values below the procedure's declared arguments on every return.<sup>[[10]](#references)[[12]](#references)[[13]](#references)</sup>
 - Compare reported/public counters against an independent reference implementation.
 - Remember that a valid proof can still prove the **wrong statement** if the guest program is buggy.
 
@@ -310,5 +349,9 @@ defi-amm-virtual-balance-cache-exploitation.md
 - [7] [Trail of Bits - We beat Google's zero-knowledge proof of quantum cryptanalysis](https://blog.trailofbits.com/2026/04/17/we-beat-googles-zero-knowledge-proof-of-quantum-cryptanalysis/)
 - [8] [Securing Elliptic Curve Cryptocurrencies against Quantum Vulnerabilities: Resource Estimates and Mitigations (patched version)](https://arxiv.org/abs/2603.28846v2)
 - [9] [Trail of Bits proof-of-concept repository](https://github.com/trailofbits/quantum-zk-proof-poc)
+- [10] [MASM decompiler architecture](https://github.com/trailofbits/masm-decompiler/blob/main/ARCHITECTURE.md)
+- [11] [MASM static-analysis engine](https://github.com/trailofbits/masm-lsp/tree/main/crates/masm-analysis)
+- [12] [MASM-to-Lean model and correctness proofs](https://github.com/trailofbits/masm-lean)
+- [13] [Auditing in the age of (good enough) AI](https://blog.trailofbits.com/2026/09/18/auditing-in-the-age-of-good-enough-ai/)
 
 {{#include ../../banners/hacktricks-training.md}}

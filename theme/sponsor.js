@@ -125,6 +125,12 @@
       return ""
     }
 
+    // Keep the database and old PNG URLs unchanged for rollback and older clients.
+    var optimized = /^\/images\/(lee|azrte|grte|lhe|arte)\.png$/i.exec(value)
+    if (optimized) {
+      value = "/images/" + optimized[1].toLowerCase() + "-sponsor-v1.webp"
+    }
+
     if (/^https:\/\//i.test(value)) {
       return value
     }
