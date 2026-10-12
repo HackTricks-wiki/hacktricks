@@ -69,15 +69,15 @@ def approved_by_title(pr):
 
 
 def merge_details(repo, number):
-    for attempt in range(11):
+    for attempt in range(3):
         details = gh_json([
             "pr", "view", str(number), "--repo", repo,
             "--json", "state,isDraft,mergeable,headRefOid",
         ])
         if details["state"] != "OPEN" or details["isDraft"] or details["mergeable"] != "UNKNOWN":
             return details
-        if attempt < 10:
-            time.sleep(2)
+        if attempt < 2:
+            time.sleep(1)
     return details
 
 
@@ -114,9 +114,11 @@ def merge_approved(repo, max_merges=20, target_number=None):
             continue
         if details["state"] != "OPEN" or details["isDraft"]:
             continue
-        if details["mergeable"] != "MERGEABLE":
+        if details["mergeable"] == "CONFLICTING":
             print(f"Skipping PR #{number}: {details['mergeable']}", flush=True)
             continue
+        if details["mergeable"] == "UNKNOWN":
+            print(f"GitHub has not calculated PR #{number}'s mergeability; checking with the server-side merge operation.", flush=True)
         if merge_pr(repo, number, details["headRefOid"]):
             merged += 1
     print(f"Merged {merged} approved PR(s).", flush=True)

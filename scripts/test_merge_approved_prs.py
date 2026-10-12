@@ -104,6 +104,13 @@ class MergeFlowTests(unittest.TestCase):
         self.assertEqual(count, 0)
         merge.assert_not_called()
 
+    def test_unknown_mergeability_uses_server_side_merge_guard(self):
+        unknown = details(1)
+        unknown["mergeable"] = "UNKNOWN"
+        count, merge = self.run_flow([pr(1)], snapshots={1: unknown})
+        self.assertEqual(count, 1)
+        merge.assert_called_once_with("owner/book", 1, "head-1")
+
     def test_comment_verification_failure_never_merges(self):
         with (
             contextlib.redirect_stdout(io.StringIO()),
