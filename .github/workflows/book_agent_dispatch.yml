@@ -42,9 +42,9 @@ jobs:
               });
               core.info(`Dispatched ${workflow_id} for ${source.owner}/${source.repo}#${number}`);
             }
-            async function inspect(number) {
+            async function inspect(number, waitForMergeability) {
               let pr;
-              for (let attempt = 0; attempt < 20; attempt++) {
+              for (let attempt = 0; attempt < (waitForMergeability ? 20 : 1); attempt++) {
                 pr = (await github.rest.pulls.get({...source, pull_number: number})).data;
                 if (pr.mergeable !== null || pr.state !== 'open') break;
                 await sleep(3000);
@@ -59,9 +59,9 @@ jobs:
                 comment.user?.login?.toLowerCase() === 'carlospolop');
             }
             async function route(number, reviewNew) {
-              const pr = await inspect(number);
+              const pr = await inspect(number, reviewNew);
               if (pr.state !== 'open') return;
-              if (pr.mergeable !== true) {
+              if (pr.mergeable === false || (reviewNew && pr.mergeable === null)) {
                 await dispatch('book-conflict-fix.yml', number);
                 if (pr.mergeable === null) core.warning(`Mergeability is still unknown for #${number}; the fixer will check the merge directly.`);
                 return;
