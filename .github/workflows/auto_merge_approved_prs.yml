@@ -39,7 +39,7 @@ jobs:
           persist-credentials: false
           fetch-depth: 1
 
-      - name: Merge approved PRs when other workflows are idle
+      - name: Merge verified approved PRs promptly
         run: python3 scripts/merge_approved_prs.py
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}

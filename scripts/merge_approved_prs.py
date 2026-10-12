@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Merge up to two approved PRs when other repository workflows are idle."""
+"""Merge verified, approved PRs as soon as their approvals arrive."""
 
 import json
 import os
@@ -11,7 +11,6 @@ from pathlib import Path
 
 AUTHORIZED_USER = "carlospolop"
 WORKFLOW_NAME = "Auto Merge Approved PRs"
-ACTIVE_STATUSES = ("in_progress", "queued", "waiting", "pending", "requested")
 
 
 def is_merge_comment(comment):
@@ -62,19 +61,6 @@ def api_items(endpoint):
     return [item for page in pages for item in page]
 
 
-def other_workflows_active(repo, merger_workflow_id):
-    # Exclude every merger instance, including the pending concurrency run.
-    for status in ACTIVE_STATUSES:
-        pages = api_pages(f"repos/{repo}/actions/runs?status={status}&per_page=100")
-        for page in pages:
-            for run in page["workflow_runs"]:
-                if run["workflow_id"] != merger_workflow_id and run["status"] != "completed":
-                    label = run.get("name") or run.get("id")
-                    print(f"Other workflow is {run['status']}: {label}", flush=True)
-                    return True
-    return False
-
-
 def approved_by_title(pr):
     return (
         pr.get("user", {}).get("login") == AUTHORIZED_USER
@@ -107,11 +93,9 @@ def merge_pr(repo, number, head_sha):
     return True
 
 
-def merge_approved(repo, merger_workflow_id, max_merges=2):
-    if other_workflows_active(repo, merger_workflow_id):
-        print("Repository is busy; retrying on the next workflow completion.")
-        return 0
-    prs = api_items(f"repos/{repo}/pulls?state=open&sort=created&direction=asc&per_page=100")
+def merge_approved(repo, max_merges=20, target_number=None):
+    prs = ([gh_json(["api", f"repos/{repo}/pulls/{target_number}"])] if target_number else
+           api_items(f"repos/{repo}/pulls?state=open&sort=created&direction=asc&per_page=100"))
     merged = 0
     for pr in prs:
         if merged >= max_merges:
@@ -133,10 +117,6 @@ def merge_approved(repo, merger_workflow_id, max_merges=2):
         if details["mergeable"] != "MERGEABLE":
             print(f"Skipping PR #{number}: {details['mergeable']}", flush=True)
             continue
-        # A preceding merge may have queued a build while approvals were read.
-        if other_workflows_active(repo, merger_workflow_id):
-            print("Another workflow started; stopping this merge batch.")
-            break
         if merge_pr(repo, number, details["headRefOid"]):
             merged += 1
     print(f"Merged {merged} approved PR(s).", flush=True)
@@ -149,9 +129,8 @@ def main():
         print("Event does not request an approval check.")
         return 0
     repo = os.environ["GITHUB_REPOSITORY"]
-    run_id = os.environ["GITHUB_RUN_ID"]
-    current_run = gh_json(["api", f"repos/{repo}/actions/runs/{run_id}"])
-    merge_approved(repo, current_run["workflow_id"])
+    target_number = event["issue"]["number"] if os.environ["GITHUB_EVENT_NAME"] == "issue_comment" else None
+    merge_approved(repo, target_number=target_number)
     return 0
 
 

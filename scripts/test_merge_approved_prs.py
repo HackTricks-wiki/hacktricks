@@ -53,30 +53,6 @@ class ApprovalTests(unittest.TestCase):
 
 
 class WorkflowActivityTests(unittest.TestCase):
-    def test_a_busy_workflow_on_a_later_page_is_detected(self):
-        pages = [
-            {"workflow_runs": [{"workflow_id": 7, "status": "in_progress"}] * 100},
-            {"workflow_runs": [{"workflow_id": 8, "status": "in_progress", "name": "Build"}]},
-        ]
-        with patch.object(merger, "gh_json", return_value=pages) as request, contextlib.redirect_stdout(io.StringIO()):
-            self.assertTrue(merger.other_workflows_active("owner/book", 7))
-        self.assertIn("--paginate", request.call_args.args[0])
-        self.assertIn("--slurp", request.call_args.args[0])
-
-    def test_pending_merger_instances_do_not_block_the_merger(self):
-        pages = [{"workflow_runs": [{"workflow_id": 7, "status": "queued"}]}]
-        with patch.object(merger, "api_pages", return_value=pages) as request:
-            self.assertFalse(merger.other_workflows_active("owner/book", 7))
-        self.assertEqual(request.call_count, len(merger.ACTIVE_STATUSES))
-
-    def test_each_active_status_blocks_merging(self):
-        for status in merger.ACTIVE_STATUSES:
-            def pages(endpoint):
-                runs = [{"workflow_id": 8, "status": status, "name": "Other"}] if f"status={status}&" in endpoint else []
-                return [{"workflow_runs": runs}]
-            with self.subTest(status=status), patch.object(merger, "api_pages", side_effect=pages), contextlib.redirect_stdout(io.StringIO()):
-                self.assertTrue(merger.other_workflows_active("owner/book", 7))
-
     def test_failed_reads_and_invalid_json_are_not_treated_as_idle(self):
         failed = SimpleNamespace(returncode=1, stderr="API unavailable", stdout="")
         with patch.object(merger.subprocess, "run", return_value=failed), patch.object(merger.time, "sleep"), contextlib.redirect_stdout(io.StringIO()):
@@ -89,7 +65,7 @@ class WorkflowActivityTests(unittest.TestCase):
 
 
 class MergeFlowTests(unittest.TestCase):
-    def run_flow(self, prs, *, activity=(False, False, False), snapshots=None, comments=None):
+    def run_flow(self, prs, *, snapshots=None, comments=None, target_number=None, max_merges=20):
         def items(endpoint):
             if "/pulls?" in endpoint:
                 return prs
@@ -101,31 +77,21 @@ class MergeFlowTests(unittest.TestCase):
 
         with (
             contextlib.redirect_stdout(io.StringIO()),
-            patch.object(merger, "other_workflows_active", side_effect=activity),
             patch.object(merger, "api_items", side_effect=items),
+            patch.object(merger, "gh_json", return_value=next((item for item in prs if item["number"] == target_number), None)),
             patch.object(merger, "merge_details", side_effect=snapshot),
             patch.object(merger, "merge_pr", return_value=True) as merge,
         ):
-            count = merger.merge_approved("owner/book", 7)
+            count = merger.merge_approved("owner/book", max_merges=max_merges, target_number=target_number)
         return count, merge
 
-    def test_an_initially_busy_repository_does_not_merge(self):
-        count, merge = self.run_flow([pr(1)], activity=(True,))
-        self.assertEqual(count, 0)
-        merge.assert_not_called()
-
-    def test_a_workflow_starting_during_approval_collection_blocks_the_merge(self):
-        count, merge = self.run_flow([pr(1)], activity=(False, True))
-        self.assertEqual(count, 0)
-        merge.assert_not_called()
-
-    def test_a_build_queued_by_the_first_merge_stops_the_batch(self):
-        count, merge = self.run_flow([pr(1), pr(2)], activity=(False, False, True))
+    def test_comment_event_handles_its_pr_without_scanning_the_queue(self):
+        count, merge = self.run_flow([pr(1), pr(2)], target_number=2)
         self.assertEqual(count, 1)
-        merge.assert_called_once_with("owner/book", 1, "head-1")
+        merge.assert_called_once_with("owner/book", 2, "head-2")
 
-    def test_no_more_than_two_prs_are_merged_per_batch(self):
-        count, merge = self.run_flow([pr(1), pr(2), pr(3)])
+    def test_batch_limit_is_respected(self):
+        count, merge = self.run_flow([pr(1), pr(2), pr(3)], max_merges=2)
         self.assertEqual(count, 2)
         self.assertEqual([c.args[1] for c in merge.call_args_list], [1, 2])
 
@@ -134,18 +100,17 @@ class MergeFlowTests(unittest.TestCase):
         snapshots[1]["state"] = "CLOSED"
         snapshots[2]["isDraft"] = True
         snapshots[3]["mergeable"] = "CONFLICTING"
-        count, merge = self.run_flow([pr(1), pr(2), pr(3)], activity=(False,), snapshots=snapshots)
+        count, merge = self.run_flow([pr(1), pr(2), pr(3)], snapshots=snapshots)
         self.assertEqual(count, 0)
         merge.assert_not_called()
 
     def test_comment_verification_failure_never_merges(self):
         with (
             contextlib.redirect_stdout(io.StringIO()),
-            patch.object(merger, "other_workflows_active", return_value=False),
             patch.object(merger, "api_items", side_effect=[[pr(1)], RuntimeError("API unavailable")]),
             patch.object(merger, "merge_pr") as merge,
         ):
-            self.assertEqual(merger.merge_approved("owner/book", 7), 0)
+            self.assertEqual(merger.merge_approved("owner/book"), 0)
         merge.assert_not_called()
 
     def test_paginated_comments_can_authorize_a_pr(self):
@@ -156,8 +121,8 @@ class MergeFlowTests(unittest.TestCase):
         merge.assert_called_once()
 
     def test_approval_queue_is_requested_oldest_first_on_every_page(self):
-        with patch.object(merger, "other_workflows_active", return_value=False), patch.object(merger, "api_items", return_value=[]) as request, contextlib.redirect_stdout(io.StringIO()):
-            merger.merge_approved("owner/book", 7)
+        with patch.object(merger, "api_items", return_value=[]) as request, contextlib.redirect_stdout(io.StringIO()):
+            merger.merge_approved("owner/book")
         self.assertIn("sort=created&direction=asc", request.call_args.args[0])
 
     def test_unknown_mergeability_is_rechecked(self):
