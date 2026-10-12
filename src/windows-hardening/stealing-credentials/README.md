@@ -107,6 +107,8 @@ rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump <lsass pid> lsass.dmp full
 
 [Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) is a Microsoft signed binary which is a part of [sysinternals](https://docs.microsoft.com/en-us/sysinternals/) suite.
 
+An already-existing full-system crash dump, or a compressed copy in an accessible user folder, may retain credential material for offline analysis. Filenames such as `MEMORY.DMP` and `MEMORY.7z` are only review leads: verify provenance and access, and do not assume they contain usable or current credentials.
+
 ```
 Get-Process -Name LSASS
 .\procdump.exe -ma 608 lsass.dmp
@@ -384,9 +386,13 @@ reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v RunAsPPL /t REG_DWORD /d 0 
 * `DSRMAdminLogonBehavior=2` lets the DSRM administrator log on while the DC is online, giving attackers another built-in high-privilege account.
 * `RunAsPPL=0` removes LSASS PPL protections, making memory access trivial for dumpers such as LalsDumper.
 
-## hMailServer database credentials (post-compromise)
+## hMailServer configuration credentials (post-compromise)
 
-hMailServer stores its DB password in `C:\Program Files (x86)\hMailServer\Bin\hMailServer.ini` under `[Database] Password=`. The value is Blowfish-encrypted with the static key `THIS_KEY_IS_NOT_SECRET` and 4-byte word endianness swaps. Use the hex string from the INI with this Python snippet:<sup>[[2]](#references)</sup>
+Check the exact configuration files `C:\Program Files\hMailServer\Bin\hMailServer.ini`, `C:\Program Files (x86)\hMailServer\Bin\hMailServer.ini`, and `C:\ProgramData\hMailServer\hMailServer.ini` according to the installation layout. A readable nonempty `[Security] AdministratorPassword=` value is an hMailServer administration password hash; it is not evidence of a Windows Administrator password. If that credential is recovered, any Windows-account pivot requires independently verified password reuse and logon rights.
+
+For installations using a SQL CE database, the separate `[Database] Password=` value in the INI protects the database. In legacy installations this value is Blowfish-encrypted with the static key `THIS_KEY_IS_NOT_SECRET` and 4-byte word endianness swaps. Use the hex string from the INI with this Python snippet:<sup>[[2]](#references)</sup>
+
+First confirm that the current account can read **both** the INI and the corresponding SQL CE `.sdf` database. The INI password protects the database; it is separate from the mailbox account hashes stored inside it. Inspect or upgrade a **copy** of an in-use database, never the live file.
 
 ```python
 from Crypto.Cipher import Blowfish
@@ -412,7 +418,7 @@ $conn = New-Object System.Data.SqlServerCe.SqlCeConnection("Data Source=C:\Windo
 $cmd = $conn.CreateCommand(); $cmd.CommandText = "SELECT accountaddress,accountpassword FROM hm_accounts"; $cmd.ExecuteReader()
 ```
 
-The `accountpassword` column uses the hMailServer hash format (hashcat mode `1421`). Cracking these values can provide reusable credentials for WinRM/SSH pivots.
+The `accountpassword` column uses the hMailServer hash format (hashcat mode `1421`). A cracked mailbox password becomes a Windows user pivot only if that password is reused by a local/domain account and that account has the required remote-logon rights.
 
 ## LSA Logon Callback Interception (LsaApLogonUserEx2)
 
