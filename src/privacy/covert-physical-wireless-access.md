@@ -1,131 +1,160 @@
-# Covert Physical and Wireless Access
+# 秘匿的な物理アクセスとワイヤレスアクセス
 
 {{#include ../banners/hacktricks-training.md}}
 
-アウトバウンド rendezvous、電源/uplink の復旧、device-held secrets の最小化、capture testing、および発見の可能性に対する monitoring を含む、所有者の承認を受けた詳細な実装については、[Capture-Resilient Authorized Field Nodes](capture-resilient-authorized-field-nodes.md) を参照してください。
+アウトバウンドのランデブー、電源／アップリンクの復旧、デバイスが保持する秘密情報の最小化、キャプチャテスト、発見の可能性を監視する手順を含む、所有者の承認を得た詳細な実装については、[Capture-Resilient Authorized Field Nodes](capture-resilient-authorized-field-nodes.md)を参照してください。
 
-ネットワーク経路を変更すると、見かけ上の物理的な発信元も変わる可能性があります。高度な攻撃者は、近隣の侵害済みシステム、隠しデバイス、public access、cellular backhaul、または satellite receiver を使用し、target のログが operator とは異なる場所を指すようにする場合があります。これらはいずれも物理的証拠、radio の証拠、または provider の証拠を消去するものではなく、attribution を別のデータセットへ移すだけです。
+ネットワーク経路を変えると、見かけ上の物理的な発信元も変わることがあります。高度な攻撃者は、近隣の侵害済みシステム、隠しデバイス、公衆アクセス、セルラーバックホール、衛星受信機を利用し、標的のログにオペレーターとは異なる場所を記録させる可能性があります。これらによって物理的、無線、またはプロバイダー側の証拠が消えるわけではありません。帰属調査の対象が別のデータセットに移るだけです。
 
-## Technique matrix
+## 手法マトリクス
 
-| Technique | 見かけ上の発信元 | 必要な条件 | 価値の高い証拠 |
+| 手法 | 見かけ上の発信元 | 必要な条件 | 価値の高い証拠 |
 |---|---|---|---|
-| Nearby wireless pivot | target の隣の business/home | 侵害済みの dual-homed host と target の Wi-Fi access | neighbor-host の endpoint logs、RF association、target の RADIUS/DHCP |
-| Public/guest network | venue の NAT または tunnel exit | 合法的な access または access-control bypass | captive portal、DHCP、AP association、CCTV、payment/location records |
-| Covert drop device | target/近隣の wired、Wi-Fi、または cellular address | 物理的な設置または配送 | switchport/USB、RF、inventory、power、outbound tunnel telemetry |
-| Cellular router/eSIM | carrier NAT または dedicated APN | modem/SIM/subscription | IMEI/IMSI/eSIM、cell-sector、carrier account、traffic timing |
-| Satellite-link abuse | beam footprint 内の subscriber address | protocol および service 固有の weakness | RF location、uplink flow、impossible RTT/routing、provider records |
+| 近隣のワイヤレスピボット | 標的の隣にある企業／住宅 | デュアルホームホストの侵害と標的のWi-Fiへのアクセス | 近隣ホストのエンドポイントログ、RFアソシエーション、標的側のRADIUS／DHCP |
+| 公衆／ゲストネットワーク | 会場のNATまたはトンネル出口 | 合法的なアクセス、またはアクセス制御のバイパス | キャプティブポータル、DHCP、APアソシエーション、CCTV、決済／位置情報記録 |
+| 秘匿型ドロップデバイス | 標的／近隣の有線、Wi-Fi、またはセルラーアドレス | 物理的な設置または配送 | スイッチポート／USB、RF、資産台帳、電源、アウトバウンドトンネルのテレメトリ |
+| セルラールーター／eSIM | キャリアNATまたは専用APN | モデム／SIM／サブスクリプション | IMEI／IMSI／eSIM、セルセクター、キャリアアカウント、通信タイミング |
+| 衛星リンクの悪用 | ビーム照射範囲内の加入者アドレス | プロトコルおよびサービス固有の脆弱性 | RF位置、アップリンクフロー、不自然なRTT／ルーティング、プロバイダー記録 |
 
-## Nearest-neighbor attack
+## Nearest Neighbor Attack
 
-Volexity は、攻撃者が最終的な target から離れた場所にいた、2022 年の APT28/GRU の operation を記録しています。攻撃者は target の public service に password-spraying を行って有効な credentials を取得しましたが、MFA によって Internet からの直接 login は阻止されました。target の enterprise Wi-Fi は、それらの credentials を MFA なしで受け入れました。攻撃者は target の物理的に近くにある organizations を侵害し、wireless reach を持つ dual-homed system を発見して、その system を使用して target の Wi-Fi に authenticate しました。Volexity はこれを **Nearest Neighbor Attack** と名付けました。<sup>[[1]](#references)</sup>
+Volexityは、攻撃者が最終的な標的から離れた場所にいた、2022年のAPT28／GRUによる作戦を記録しました。攻撃者は標的の公開サービスにpassword sprayingを行い、有効な認証情報を取得しましたが、MFAによってインターネットからの直接ログインは阻止されました。一方、標的の企業Wi-FiはMFAなしでその認証情報を受け入れました。攻撃者は標的の物理的な近隣にある組織を侵害し、無線接続が可能なデュアルホームシステムを見つけて、そのシステムを使って標的のWi-Fiに認証しました。Volexityはこれを**Nearest Neighbor Attack**と名付けました。<sup>[[1]](#references)</sup>
+
 ```text
 remote operator
-|
+      |
 compromised organization C
-|
+      |
 compromised organization B -- Wi-Fi radio --> target organization A
-|
-internal service
+                                               |
+                                        internal service
 ```
-新規性は、その組み合わせにあります。オペレーターは標的の場所へ移動せず、Internet-facing service の MFA は引き続き機能します。侵害された近隣システムが物理的な近接性を提供し、盗まれた標的の credential が論理アクセスを提供し、標的の Wi-Fi が境界を越える経路になります。
+
+新規性は、これらの要素の組み合わせにあります。オペレーターは標的の場所へ移動せず、インターネットに公開されたサービスの MFA も引き続き機能します。侵害された隣接システムが物理的な近接性を提供し、窃取した標的の認証情報が論理アクセスを提供し、標的の Wi-Fi が境界を越える経路になります。
 
 ### 前提条件と可視性
 
-- 近隣のシステムがリモート制御可能であり、互換性のある radio、または別の近隣 pivot へのアクセスを備えている必要があります。
-- 標的の SSID がそのシステムまで到達し、Wi-Fi admission が再利用可能な credential、certificate、または device state を受け入れる必要があります。
-- pivot には多くの場合、オペレーターへ戻る経路と標的 WLAN 内へ入る経路という、2つの同時接続が必要です。
-- 標的側には新しい station MAC と正規の username が見える一方で、対応する managed-device certificate、posture、履歴、または想定された建物への入場記録が見えない可能性があります。
-- Neighbor endpoint のログには、wireless scan、新しい profile、interface の変更、tunneling、remote-control activity が記録される可能性があります。
+- 近くに、リモート制御が可能で、互換性のある無線機能を備えたシステム、または別の近隣ピボットへのアクセスが必要です。
+- 標的の SSID がそのシステムまで届き、Wi-Fi の接続制御が再利用可能な認証情報、証明書、またはデバイス状態を受け入れる必要があります。
+- ピボットには多くの場合、オペレーターへの経路と標的の WLAN への経路という、同時に利用できる2つの経路が必要です。
+- 標的側には、新しいステーション MAC アドレスと正規のユーザー名が見える一方、対応する管理対象デバイスの証明書、ポスチャ、履歴、または予想される建物への入館記録が見えない場合があります。
+- 隣接するエンドポイントのログには、無線スキャン、新しいプロファイル、インターフェースの変更、トンネリング、リモート制御アクティビティが記録されることがあります。
 
 ### 検知と防止
 
-1. Enterprise Wi-Fi には certificate-backed EAP-TLS と managed-device posture を必須にします。Internet 上で MFA に失敗した password が、radio 経由で届いたというだけで十分な認証になるようにしてはいけません。
-2. RADIUS authentication を、MDM/NAC identity、過去の station/device binding、AP location、physical-access event、同時進行中の session と相関させます。
-3. Account が初めて associate した場合、通常とは異なる AP edge から接続した場合、managed certificate がない場合、または同じ identity が別の場所でも active な場合に alert を出します。
-4. Interface の bridging が可能な endpoint を監視します。Windows、Linux、network appliance では、想定外の WLAN profile、forwarding/NAT configuration、virtual adapter、persistent tunnel を調査します。
-5. 適切な AP placement と power planning により、不要な signal spill を減らします。これは補助的な control であり、authentication ではありません。
-6. 近隣 tenant と incident response を調整します。最終的な radio source 自体が victim である可能性があります。
+1. 企業 Wi-Fi では証明書ベースの EAP-TLS と管理対象デバイスのポスチャを必須にします。インターネット経由で MFA に失敗したパスワードが、無線経由で届いたというだけで十分な認証手段にならないようにします。
+2. RADIUS 認証を、MDM/NAC の ID、過去のステーションとデバイスの紐付け、AP の場所、物理アクセスの記録、同時セッションと照合します。
+3. アカウントが初めて、通常と異なる AP の端から、管理対象証明書なしで接続した場合、または同じ ID が別の場所でも有効な場合にアラートを出します。
+4. インターフェースをブリッジできるエンドポイントを監視します。Windows、Linux、ネットワーク機器で、予期しない WLAN プロファイル、転送/NAT の設定、仮想アダプター、永続的なトンネルを調査します。
+5. 適切な AP の配置と送信出力の計画により、不要な電波の漏れを減らします。これは補助的な制御であり、認証の代わりにはなりません。
+6. 隣接テナントとインシデント対応を連携します。最後に電波を発信した機器自体が、被害者である可能性があります。
 
-[2組織による所有済み lab](authorized-adversary-emulation-labs.md#lab-4-nearest-neighbor-wireless-pivot)では、近隣への攻撃を行わずに、これらの観測可能な事象を再現します。
+[2組織間の自組織所有ラボ](authorized-adversary-emulation-labs.md#lab-4-nearest-neighbor-wireless-pivot)では、隣接組織を攻撃せずにこれらの観測可能な事象を再現します。
 
-## 公共施設と third-party Wi-Fi
+### Windows ピボット経路の検証
 
-Café、hotel、airport、または municipal Wi-Fi を使用すると、destination に表示される IP が変わります。匿名性が生まれるわけではありません。施設またはその provider は、AP association、device MAC、DHCP lease、captive-portal account、SMS/email validation、flow log を保持している可能性があります。物理的な入場、CCTV、購入記録、mobile-location、travel record によって、デジタル上の event と個人を結び付けられる可能性があります。
+デュアルホームの Windows ホストは、インターフェースを自動的にブリッジしません。まずアダプター、ルート、WLAN の状態を確認し、その後、承認済みプロファイルを通じてのみ接続します。`netsh wlan connect` の `name` 引数は、任意の SSID とパスワードではなく、インストール済みプロファイルを指定します。接続の前後でルーティングテーブルを比較し、新しいデフォルトルートによって制御経路が切断されたり、結果の妥当性が損なわれたりしないことを確認します。意図したインターフェースとルートを確認してから、[接続後の確認項目](../generic-methodologies-and-resources/pentesting-wifi/wifi-post-association-and-client-isolation-attacks.md)に進みます。<sup>[[1]](#references)[[6]](#references)</sup>
 
-Actor は、randomized MAC address、別の device、cash、または tunnel を使用して、手掛かりの1つを減らそうとする可能性があります。それでも、到着時刻、繰り返される venue pattern、radio fingerprint、portal behavior、traffic timing、camera footage、tunnel provider を通じた cross-layer correlation は可能です。VPN を使用しても、destination が venue log から VPN log に移るだけであり、その device が施設内に存在したという venue 側の認識がなくなるわけではありません。
+```powershell
+Get-NetAdapter -Physical | Sort-Object Status -Descending
+Get-NetIPConfiguration
+Get-NetRoute -AddressFamily IPv4 | Sort-Object InterfaceIndex,RouteMetric
 
-Public access の防御側は、client を分離し、lateral traffic を block し、可能な場合は WPA2/3-Enterprise または per-device key を使用し、適切な範囲の DHCP/RADIUS/security log を保持し、captive portal を保護し、abuse process を公開すべきです。Red team は、venue の規約と engagement が許可する場合にのみ、そのような施設を使用すべきです。Portal の bypass、access の窃取、他の guest を標的にすることは、authorized testing の近道ではありません。
+netsh wlan show interfaces
+netsh wlan show networks mode=bssid
+netsh wlan show profiles
 
-## Covert drop device と warshipping
+# Connect only with an approved profile already installed on the endpoint.
+netsh wlan connect name="<approved-profile>" interface="Wi-Fi"
+Get-NetConnectionProfile
+```
 
-Drop は、site 内に設置または搬入された後、outbound Ethernet、Wi-Fi、または cellular を通じて制御される小型システムです。Warshipping では、通常の配送によって device が radio perimeter の内側へ運ばれるように、その device を梱包します。使用される hardware は、single-board computer、modified charger、USB peripheral、network appliance、battery-powered modem など多岐にわたります。
+Volexityが公開したインシデントのアーティファクトは、もう1つの有用な違いを示しています。埋め込まれたC#はWLAN APIを開き、インターフェースを列挙し、ディスクからEAP XMLを読み込み、最初の無線インターフェース上の名前付きプロファイルに対して`WlanSetProfileEapXmlUserData`を呼び出します。このAPIは既存の802.1XプロファイルにEAPユーザー認証情報を設定しますが、公開されたコンポーネントには`WlanConnect`も、レポートで説明されている検出ロジックも含まれていません。これは完全な接続ツールではなく、プロファイルのプロビジョニングとして扱い、[client and supplicant assessment](../generic-methodologies-and-resources/pentesting-wifi/wifi-client-and-supplicant-assessment.md)の一環として、作成されたプロファイルを調査してください。<sup>[[5]](#references)[[7]](#references)</sup>
 
-Operational architecture:
+## 公共施設および第三者のWi-Fi
+
+カフェ、ホテル、空港、自治体のWi-Fiを利用すると、接続先に表示されるIPアドレスは変わりますが、匿名性が得られるわけではありません。施設またはそのプロバイダーは、APへの接続、デバイスのMACアドレス、DHCPリース、キャプティブポータルのアカウント、SMS/メール認証、通信フローのログを保存している可能性があります。現地への立ち入り、CCTV、購入記録、携帯電話の位置情報、移動記録を照合すれば、デジタル上の行動と個人を結びつけられる場合があります。
+
+攻撃者は、MACアドレスのランダム化、別のデバイスの使用、現金払い、トンネル接続などで、手掛かりを1つ減らそうとする場合があります。それでも、到着時刻、同じ施設への繰り返しの訪問パターン、無線フィンガープリント、ポータルでの操作、通信のタイミング、カメラ映像、トンネルプロバイダーを通じた相関分析が可能です。VPNを使うと、接続先から見えるログの記録先が施設からVPNに移るだけであり、デバイスが施設にあったという事実を施設から隠すことはできません。
+
+公共アクセスを提供する側は、クライアントを分離し、横方向の通信をブロックし、可能であればWPA2/3-Enterpriseまたはデバイスごとのキーを使用し、必要な範囲でDHCP/RADIUS/セキュリティログを保存し、キャプティブポータルを保護し、悪用への対応手順を公開してください。レッドチームは、施設の利用規約とエンゲージメントの許可範囲内でのみ、そのような施設を利用してください。ポータルの回避、アクセス情報の窃取、他の利用者への攻撃は、許可されたテストの近道ではありません。
+
+## Covert drop devicesとWarshipping
+
+ドロップとは、施設内に設置するか施設内へ持ち込み、その後、アウトバウンドEthernet、Wi-Fi、または携帯回線を通じて制御する小型システムです。「Warshipping」では、通常の配送に紛れ込ませてデバイスを無線通信範囲内へ運び込みます。ハードウェアには、シングルボードコンピューターから、改造した充電器、USB周辺機器、ネットワーク機器、バッテリー駆動モデムまで、さまざまなものが考えられます。
+
+運用アーキテクチャ：
+
 ```text
 operator -> controlled rendezvous <- outbound encrypted tunnel <- drop
-|
-scoped local interface
+                                                        |
+                                             scoped local interface
 ```
-このデバイスは、リモート foothold の確保、wireless measurements の実行、authorized exercise peripheral のエミュレート、または traffic の relay を行う可能性があります。外見上の発信元はローカルですが、serial numbers、packaging、fingerprints、cameras、access logs、power draw、USB descriptors、switchport negotiation、DHCP fingerprints、MAC OUI/randomization behavior、RF emissions、繰り返し発生する rendezvous connections などの物理的な痕跡を残します。
 
-### Defensive controls
+このデバイスは、リモート foothold の提供、無線測定の実施、許可された演習用 peripheral のエミュレーション、またはトラフィックの中継に利用される可能性があります。発信元はローカルに見えますが、シリアル番号、梱包材、指紋、カメラ、アクセスログ、消費電力、USB descriptor、switchport ネゴシエーション、DHCP fingerprint、MAC OUI／randomization の挙動、RF emissions、定期的な rendezvous 接続といった物理的な痕跡が残ります。
 
-- receiving-room と asset-inventory の手順を維持し、予期しない電子機器や、存在しない従業員宛ての package を検査します。
-- 有線および wireless access に 802.1X/NAC を使用し、未使用の port を無効化して、不明なデバイスを制限された remediation VLAN に配置します。
-- 新しい DHCP fingerprints、継続して使用される locally administered MAC、新しい USB network/HID devices、unauthorized Wi-Fi Direct/Bluetooth、長時間継続する outbound tunnels を alert の対象にします。
-- switchport、power-over-Ethernet、DNS、TLS の behavior を baseline 化します。inventory record がない小型 host が定期的に encrypted connections を行っている場合、単に「Raspberry Pi OUI」であることよりも強い signal になります。
-- exercise 中は、inventory、label、scope、encrypt、remote kill の提供、retrieval deadline の設定を行い、紛失しても再利用可能な credentials が露出しないようにします。
+### 防御策
 
-## Cellular and eSIM backhaul
+- 荷受け場所と資産管理の手順を整備し、予期しない電子機器や、実在しない職員宛ての荷物を確認する。
+- 有線・無線アクセスに 802.1X/NAC を導入し、未使用のポートを無効化して、不明なデバイスを制限付きの remediation VLAN に配置する。
+- 新しい DHCP fingerprint、長期間残る locally administered MAC、新しい USB network/HID デバイス、未許可の Wi-Fi Direct/Bluetooth、長時間継続するアウトバウンド tunnel を検知して警告する。
+- switchport、Power over Ethernet、DNS、TLS の挙動をベースライン化する。資産記録にない小型ホストが定期的に暗号化接続を行う場合、「Raspberry Pi OUI」だけよりも重要な兆候となる。
+- 演習では、資産を記録してラベルを貼り、スコープを定めて暗号化し、リモート kill を用意して回収期限を設定し、紛失しても再利用可能な認証情報が漏れないようにする。
 
-cellular modem は target の Internet gateway を回避し、outbound rendezvous を通じて carrier NAT の背後にある drop への到達性を維持できます。Mobile address は rotate したり共有されたりする可能性がありますが、cellular operator は依然として強力な subscriber および network evidence を保有しています。これには SIM/eSIM identity、IMSI、assigned addresses/ports、cell/sector timing、account/payment、roaming records が含まれます。
+## Cellular と eSIM によるバックホール
 
-enterprise の観点では、wireless/RF surveys、endpoint USB/PCI inventory、MDM restrictions、rogue-SSID monitoring、physical inspection によって、予期しない modem や personal hotspot を検出します。control に cellular を使用する drop であっても、local Ethernet/Wi-Fi behavior と radio emissions によって発見できる可能性があります。
+Cellular modem は標的のインターネットゲートウェイを回避し、アウトバウンド rendezvous を通じて、carrier NAT の背後でも drop への到達性を維持できます。モバイルアドレスは変更されたり共有されたりする可能性がありますが、cellular operator には依然として強力な加入者情報とネットワーク記録が残ります。これには SIM/eSIM identity、IMSI、device IMEI、割り当てられたアドレス／ポート、cell／sector のタイミング、アカウント／支払い記録、ローミング記録が含まれます。
 
-authorized exercises では、組織が subscription と modem を所有し、識別子を controller とともに記録し、carrier/provider の terms がその traffic を許可していることを確認すべきです。prepaid label や cryptocurrency による購入であっても、tower、device、retail records が消えるわけではありません。
+企業側では、無線／RF 調査、endpoint の USB/PCI inventory、MDM 制限、不正な SSID の監視、物理検査によって、予期しない modem や個人用 hotspot を検出します。cellular を制御用に使う drop も、ローカルの Ethernet/Wi-Fi の挙動や無線放射によって検知できます。
 
-## MAC randomization and device fingerprinting
+許可された演習では、組織が subscription と modem を所有し、識別子を controller とともに記録して、通信が carrier/provider の利用規約で許可されていることを確認します。プリペイドのラベルや暗号通貨で購入しても、基地局、デバイス、小売店の記録は消去されません。
 
-Modern systems は、network ごとに locally administered random MAC を使用できます。これにより、安定した factory MAC による受動的な長期 tracking は軽減されますが、以下を隠すことはできません。
+## MAC randomization とデバイス fingerprinting
 
-- probe/association timing と、要求された network capabilities の集合
-- 802.11 information elements、supported rates、vendor-specific behavior
-- DHCP options/hostname、IPv6 identifiers、captive-portal/browser fingerprint
-- authenticated 802.1X identity または certificate
-- higher-layer account、tunnel、traffic pattern、または
-- physical observation
+最新のシステムでは、ネットワークごとに locally administered なランダム MAC を使用できます。これにより、安定した工場出荷時 MAC による受動的な長期追跡は減りますが、以下は隠せません。
 
-Defenders は MAC allowlists を authentication として使用すべきではありません。radio identity を certificate/device posture に紐付け、他の context が anomalous でない限り、変化する MAC を通常のものとして扱います。
+- probe／association のタイミングと、要求するネットワーク機能の種類
+- 802.11 information element、対応レート、vendor 固有の挙動
+- DHCP option／hostname、IPv6 identifier、captive portal／browser fingerprint
+- 認証済み 802.1X identity または certificate
+- 上位レイヤーのアカウント、tunnel、トラフィックパターン
+- 物理的な観察
 
-## Satellite-link hijacking
+防御側は、MAC allowlist を認証手段として使うべきではありません。無線上の identity を certificate／デバイスの posture と結び付け、他の状況に異常がない限り、MAC の変更は通常の挙動として扱います。
 
-Kaspersky は、Turla が古い one-way DVB-S satellite Internet の weaknesses を利用していたことを documentation しました。報告された model では、legitimate remote subscriber が terrestrial link 経由で outbound requests を送信する一方、downstream data は unencrypted wide-area satellite broadcast 経由で受信していました。satellite footprint 内の actor は downlink を監視し、active subscriber IP を選択して、C2 replies がその IP 宛てになるように手配できました。legitimate subscriber と actor はどちらも broadcast を受信し、actor は選択した port の traffic を抽出する一方、legitimate subscriber は unsolicited packets を破棄しました。その後、C2 operator は別の geography にある satellite-provider address を使用しているように見えました。<sup>[[2]](#references)</sup>
+## Satellite link の hijacking
+
+Kaspersky は、Turla が古い片方向 DVB-S satellite Internet の脆弱性を利用した事例を記録しています。報告された方式では、正規のリモート加入者は地上回線でアウトバウンド要求を送信しますが、ダウンストリームデータは暗号化されていない広域 satellite broadcast で受信していました。衛星のサービス範囲内にいる攻撃者はダウンリンクを観測し、通信中の加入者 IP を選んで、C2 の応答がその IP 宛てになるように手配できます。正規の加入者と攻撃者の両方が broadcast を受信し、攻撃者は選択したポート宛てのトラフィックを抽出する一方、正規の加入者は未承諾パケットを破棄します。その結果、C2 の運用者は別の地域にある satellite provider のアドレスを使用しているように見えます。<sup>[[2]](#references)</sup>
+
 ```text
 actor uplink request -> C2 server -> Internet -> satellite gateway
-satellite broadcast
-+--------------+-------------+
-|                            |
-legitimate subscriber          actor receiver
+                                           satellite broadcast
+                                  +--------------+-------------+
+                                  |                            |
+                         legitimate subscriber          actor receiver
 ```
-これはプロトコル／service 固有で、帯域幅の制約があり、現代の双方向暗号化衛星ターミナルを侵害することと同等ではありませんでした。また、十分な能力を持つ観測者から、攻撃者の outbound request path を隠すこともできませんでした。検知の機会には、非対称または不可能な routing、flow を開始していない subscriber への traffic、通常とは異なる destination port、provider telemetry、receiver location／RF investigation、malware configuration などがあります。この事例は、C2 IP の geolocate によって controller の場所も特定できるという前提を検証するために使用してください。build recipe として使用するものではありません。
 
-## Physical-to-digital correlation worksheet
+これはプロトコル／サービス固有で、帯域幅に制約があり、最新の双方向暗号化衛星端末を侵害することと同等ではありません。また、十分な能力を持つ観測者から、攻撃者のアウトバウンド要求経路を隠すものでもありません。検知の機会としては、非対称／不可能なルーティング、フローを開始していない加入者へのトラフィック、異常な宛先ポート、プロバイダーのテレメトリ、受信機の位置情報／RF調査、マルウェアの設定などがあります。この事例は、C2 IPのジオロケーションによってその制御者の位置も特定できるという思い込みを問い直すために使い、手順書としては使わないでください。
 
-一見すると local source に見えるものが疑わしい場合は、1つの timeline を作成します。
+## 物理からデジタルへの相関ワークシート
 
-1. AP、RADIUS、DHCP、DNS、proxy、VPN、EDR、switch、physical-access の各 clock を normalize する。
-2. 最初の alert だけでなく、最初の radio association または link-up を特定する。
-3. station を certificate、device posture、DHCP fingerprint、switch／AP location にマッピングする。
-4. 近隣の systems 上で、同時刻に remote-control／tunnel activity が発生していないか確認する。
-5. applicable policy／law の下で、deliveries、visitors、inventory exceptions、cameras、RF findings を確認する。
-6. suspected device と volatile network state を保全する。無闇に power-cycle してはいけない。
-7. 見かけ上の source が actor-controlled infrastructure なのか、それとも別の victim なのかを判断する。
+ローカルに見える送信元が疑わしい場合は、次の手順で1つのタイムラインを作成します。
+
+1. AP、RADIUS、DHCP、DNS、プロキシ、VPN、EDR、スイッチ、物理アクセスの各時刻を正規化する。
+2. 最初のアラートだけでなく、最初の無線接続またはリンクアップを特定する。
+3. ステーションを、証明書、デバイスのセキュリティ状態、DHCPフィンガープリント、スイッチ／APの場所に対応付ける。
+4. 近隣システムで、同時刻のリモート制御／トンネル活動を調べる。
+5. 適用されるポリシー／法律に従い、納品記録、訪問者、在庫の例外、カメラ映像、RF調査結果を確認する。
+6. 疑わしいデバイスと揮発性ネットワーク状態を保全する。むやみに電源を再投入しない。
+7. 見かけ上の送信元が攻撃者の管理するインフラなのか、別の被害者なのかを判断する。
 
 ## References
 
-- [1] [Volexity — The Nearest Neighbor Attack: ロシアの APT が近隣の Wi-Fi networks を weaponize した方法](https://www.volexity.com/blog/2024/11/22/the-nearest-neighbor-attack-how-a-russian-apt-weaponized-nearby-wi-fi-networks-for-covert-access/)
-- [2] [Kaspersky Securelist — Satellite Turla: 空中における APT の command and control](https://securelist.com/satellite-turla-apt-command-and-control-in-the-sky/72081/)
-- [3] [MITRE ATT&CK — Hardware Additions (T1200)](https://attack.mitre.org/techniques/T1200/)
-- [4] [NIST SP 800-153 — Wireless Local Area Networks の security guidelines](https://csrc.nist.gov/pubs/sp/800/153/final)
+- [1] [Volexity — 最近隣攻撃：ロシアのAPTが近隣のWi-Fiネットワークを武器化した手法](https://www.volexity.com/blog/2024/11/22/the-nearest-neighbor-attack-how-a-russian-apt-weaponized-nearby-wi-fi-networks-for-covert-access/)
+- [2] [Kaspersky Securelist — Satellite Turla：空からのAPTコマンド＆コントロール](https://securelist.com/satellite-turla-apt-command-and-control-in-the-sky/72081/)
+- [3] [MITRE ATT&CK — ハードウェアの追加（T1200）](https://attack.mitre.org/techniques/T1200/)
+- [4] [NIST SP 800-153 — 無線LANのセキュリティに関するガイドライン](https://csrc.nist.gov/pubs/sp/800/153/final)
+- [5] [Volexity — 編集済みPowerShell/C# WLANプロファイルコード](https://github.com/volexity/threat-intel/blob/main/2024/2024-11-22%20GruesomeLarch/wifi_ps1_redacted.cs)
+- [6] [Microsoft — netsh wlan](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/netsh-wlan)
+- [7] [Microsoft — WlanSetProfileEapXmlUserData関数](https://learn.microsoft.com/en-us/windows/win32/api/wlanapi/nf-wlanapi-wlansetprofileeapxmluserdata)
 {{#include ../banners/hacktricks-training.md}}
