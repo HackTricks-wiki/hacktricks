@@ -1,0 +1,91 @@
+name: Dispatch book PR agents
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, edited, ready_for_review]
+  push:
+    branches: [master]
+  schedule:
+    - cron: '13,43 * * * *'
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: PR number to inspect
+        type: number
+        required: true
+      probe:
+        description: Dispatch a dry-run reviewer to test the Feed connection
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Dispatch the assigned PR agents
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ secrets.PAT_TOKEN }}
+          script: |
+            const source = context.repo;
+            const feed = {owner: 'HackTricks-wiki', repo: 'HackTricks-Feed'};
+            const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+            async function dispatch(workflow_id, number, dry_run = false) {
+              await github.rest.actions.createWorkflowDispatch({
+                ...feed, workflow_id, ref: 'main',
+                inputs: {repo: `${source.owner}/${source.repo}`, pr: String(number), dry_run: String(dry_run)}
+              });
+              core.info(`Dispatched ${workflow_id} for ${source.owner}/${source.repo}#${number}`);
+            }
+            async function inspect(number) {
+              let pr;
+              for (let attempt = 0; attempt < 20; attempt++) {
+                pr = (await github.rest.pulls.get({...source, pull_number: number})).data;
+                if (pr.mergeable !== null || pr.state !== 'open') break;
+                await sleep(3000);
+              }
+              return pr;
+            }
+            async function hasOwnerMerge(number) {
+              const comments = await github.paginate(github.rest.issues.listComments, {
+                ...source, issue_number: number, per_page: 100
+              });
+              return comments.some(comment => comment.body === 'merge' &&
+                comment.user?.login?.toLowerCase() === 'carlospolop');
+            }
+            async function route(number, reviewNew) {
+              const pr = await inspect(number);
+              if (pr.state !== 'open') return;
+              if (pr.mergeable !== true) {
+                await dispatch('book-conflict-fix.yml', number);
+                if (pr.mergeable === null) core.warning(`Mergeability is still unknown for #${number}; the fixer will check the merge directly.`);
+                return;
+              }
+              if (!reviewNew || pr.draft || pr.user.login.toLowerCase() !== 'carlospolop') return;
+              const research = pr.body?.includes('<!-- daily-stats-kind: research -->') ||
+                pr.head.ref.startsWith('research_update_');
+              if (!research && !await hasOwnerMerge(number)) {
+                await dispatch('book-pr-review.yml', number);
+              }
+            }
+            if (context.eventName === 'workflow_dispatch') {
+              const number = Number(context.payload.inputs.pr);
+              if (!Number.isSafeInteger(number) || number < 1) throw new Error('A valid PR number is required');
+              if (context.payload.inputs.probe === 'true') {
+                await dispatch('book-pr-review.yml', number, true);
+              } else {
+                await route(number, true);
+              }
+            } else if (context.eventName === 'pull_request_target') {
+              await route(context.payload.pull_request.number, true);
+            } else {
+              const prs = await github.paginate(github.rest.pulls.list, {
+                ...source, state: 'open', per_page: 100
+              });
+              for (const pr of prs) await route(pr.number, false);
+            }
