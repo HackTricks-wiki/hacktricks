@@ -26,9 +26,9 @@ Mahali pazuri pa kuanzia kujifunza kuhusu AI ni kuelewa jinsi algoriti kuu za ma
 ./AI-Deep-Learning.md
 {{#endref}}
 
-### Muundo wa LLM
+### Usanifu wa LLM
 
-Katika ukurasa ufuatao utapata misingi ya kila kipengele kinachohitajika kujenga LLM ya msingi kwa kutumia transformers:
+Katika ukurasa unaofuata utapata misingi ya kila kipengele cha kujenga LLM ya msingi kwa kutumia transformers:
 
 
 {{#ref}}
@@ -43,36 +43,42 @@ AI-llm-architecture/README.md
 AI-Agent-Security-Methodology.md
 {{#endref}}
 
-### Miundo ya Hatari za AI
+### Mifumo ya Hatari za AI
 
-Miundo miwili muhimu ya kuanzia kutathmini hatari za mifumo ya AI ni OWASP Machine Learning Security Top 10 na Secure AI Framework (SAIF) ya Google. Inakamilishana badala ya kuwa orodha kamili ya miundo ya hatari za AI.<sup>[[1]](#references)[[2]](#references)</sup>
+Mifumo miwili muhimu ya kuanzia kutathmini hatari za mifumo ya AI ni OWASP Machine Learning Security Top 10 na Secure AI Framework (SAIF) ya Google. Inakamilishana na mifumo mingine badala ya kuwa orodha kamili ya mifumo ya hatari za AI.<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 {{#ref}}
 AI-Risk-Frameworks.md
 {{#endref}}
 
-### Usalama wa AI Prompts
+### Mashambulizi ya Adversarial Yanayoongozwa na Mechanistic Interpretability
 
-Matumizi ya AI yameongezeka sana katika miaka ya hivi karibuni kutokana na LLMs, lakini si kamilifu na yanaweza kudanganywa kwa adversarial prompts. Hii ni mada muhimu sana kwa kuelewa jinsi ya kutumia AI kwa usalama na jinsi ya kuishambulia:
+{{#ref}}
+AI-Mechanistic-Interpretability-Adversarial-Attacks.md
+{{#endref}}
+
+### Usalama wa Prompts za AI
+
+Matumizi ya AI yameongezeka sana katika miaka ya hivi karibuni kutokana na LLMs, lakini si kamilifu na yanaweza kudanganywa kwa prompts za adversarial. Hii ni mada muhimu sana ili kuelewa jinsi ya kutumia AI kwa usalama na jinsi ya kuishambulia:
 
 
 {{#ref}}
 AI-Prompts.md
 {{#endref}}
 
-### RCE ya AI Models
+### RCE kupitia AI Models
 
-Ni jambo la kawaida kwa developers na kampuni kuendesha models zilizopakuliwa kutoka kwenye Internet. Hata hivyo, kupakia tu model kunaweza kutosha kutekeleza msimbo wowote kwenye mfumo. Hii ni mada muhimu sana kwa kuelewa jinsi ya kutumia AI kwa usalama na jinsi ya kuishambulia:
+Ni jambo la kawaida kwa developers na makampuni kuendesha models zilizopakuliwa kutoka kwenye Internet; hata hivyo, kupakia model pekee kunaweza kutosha kutekeleza msimbo wowote kwenye mfumo. Hii ni mada muhimu sana ili kuelewa jinsi ya kutumia AI kwa usalama na jinsi ya kuishambulia:
 
 
 {{#ref}}
 AI-Models-RCE.md
 {{#endref}}
 
-### KYC Bypass kwa Usaidizi wa AI
+### Kuepuka KYC kwa Usaidizi wa AI
 
-Video generative inaweza kuunganishwa na virtual-camera injection na camera API manipulation ili kupita KYC dhaifu, uthibitishaji wa umri na mifumo ya uthibitishaji wa uhai wa kibayometriki:
+Video generative inaweza kuunganishwa na uingizaji wa virtual camera na udanganyifu wa camera API ili kukwepa taratibu dhaifu za KYC, uthibitishaji wa umri na biometriki za liveness:
 
 
 {{#ref}}
@@ -81,27 +87,27 @@ KYC-Bypass-Using-AI.md
 
 ### AI Model Context Protocol
 
-MCP (Model Context Protocol) ni protocol wazi ya kuunganisha programu za AI na tools pamoja na vyanzo vya data. Kwa kuwa MCP servers zinaweza kufichua data na vitendo, tathmini lazima zijumuishe authorization, consent, uthibitishaji wa tool-input na uhakiki wa mipaka ya uaminifu.<sup>[[3]](#references)</sup>
+MCP (Model Context Protocol) ni protocol wazi ya kuunganisha programu za AI na tools pamoja na vyanzo vya data. Kwa kuwa MCP servers zinaweza kufichua data na vitendo, tathmini lazima zijumuishe uidhinishaji, ridhaa, uthibitishaji wa ingizo la tool na mapitio ya mipaka ya uaminifu.<sup>[[3]](#references)</sup>
 
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### Fuzzing kwa Usaidizi wa AI na Ugunduzi Otomatiki wa Vulnerability
+### Fuzzing Inayosaidiwa na AI na Ugunduzi Otomatiki wa Udhaifu
 
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
-### Reverse Engineering kwa Usaidizi wa AI
+### Reverse Engineering Inayosaidiwa na AI
 
 [Partial lifting, invariant MBA detection, environment-bound decoding, and automated-extractor validation](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
 
-### Web Black-Box AI Pentester Bots
+### Bots za AI za Pentesting ya Wavuti ya Black-Box
 
-Agents zinazoendeshwa na LLM zinaweza kufanya workflows za muda mrefu za black-box web pentesting kiotomatiki zinapoungwa mkono na observability, orchestration, ushughulikiaji wa authenticated session na uthibitishaji wa adversarial:
+Agents zinazotumia LLMs zinaweza kuendesha kiotomatiki workflows za muda mrefu za black-box web pentesting zikiungwa mkono na observability, orchestration, ushughulikiaji wa authenticated sessions na uthibitishaji wa adversarial:
 
 
 {{#ref}}
