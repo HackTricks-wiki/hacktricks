@@ -4,15 +4,16 @@
 
 ## Muktadha
 
-Katika Linux, ili kuendesha program lazima iwepo kama faili, na lazima ipatikane kwa namna fulani kupitia mpangilio wa mfumo wa faili (hivi ndivyo `execve()` inavyofanya kazi). Faili hii inaweza kuwa kwenye diski au kwenye ram (tmpfs, memfd), lakini unahitaji filepath. Hili limefanya iwe rahisi sana kudhibiti kinachoendeshwa kwenye mfumo wa Linux, limerahisisha kugundua threats na tools za mshambuliaji au kuwazuia kabisa kujaribu ku-execute chochote chao (_kwa mfano_ kutowaruhusu users wasio na privileges kuweka executable files mahali popote).
+Linux kwa kawaida huendesha programu kutoka kwenye faili zinazoweza kutekelezwa zilizohifadhiwa kwenye diski au kwenye memory. Inaweza kutambua faili inayoweza kutekelezwa kwa kutumia pathname au file descriptor, kwa hivyo pathname ya kawaida ya filesystem haihitajiki kila wakati.<sup>[[2]](#references)</sup>
 
-Lakini technique hii iko hapa kubadilisha yote hayo. Ikiwa huwezi kuanzisha process unayoitaka... **basi hijack process ambayo tayari ipo**.
+DDexec / EverythingExec hutumia memory ya **process ambayo tayari inaendeshwa**. Ukurasa wa [Linux Fileless Execution](../../../post-exploitation/linux-fileless-execution.md) unaeleza utekelezaji wa anonymous-file na mbinu zinazohusiana za utambuzi na ukusanyaji wa ushahidi wa forensic; muhtasari wa [Memory Bypasses](index.html#memory-bypasses) pia una viungo vya MemExec na Memdlopen.<sup>[[1]](#references)</sup>
 
-Technique hii inakuruhusu **kubypass protection techniques za kawaida kama vile read-only, noexec, file-name whitelisting, na hash whitelisting**.<sup>[[1]](#references)</sup>
+Mbinu hii inakuruhusu **kuzunguka mbinu za kawaida za ulinzi kama vile read-only, noexec, file-name whitelisting na hash whitelisting**.<sup>[[1]](#references)</sup>
 
-## Dependencies
+## Vitegemezi
 
-Script ya mwisho inategemea tools zifuatazo ili kufanya kazi; zinahitaji kupatikana kwenye mfumo unaoushambulia (kwa default utazipata zote kila mahali):
+Script ya mwisho inategemea zana zifuatazo ili kufanya kazi; zinahitaji kupatikana kwenye mfumo unaoshambulia (kwa kawaida, utazipata kila mahali):
+
 ```
 dd
 bash | zsh | ash (busybox)
@@ -26,61 +27,69 @@ wc
 tr
 base64
 ```
+
 ## Mbinu
 
-Ikiwa unaweza kurekebisha kumbukumbu ya process kiholela, basi unaweza kuichukua. Hii inaweza kutumika ku-hijack process iliyopo tayari na kuibadilisha iwe program nyingine. Tunaweza kufanikisha hili kwa kutumia syscall ya `ptrace()` (ambayo inahitaji uwe na uwezo wa kutekeleza syscalls au uwe na gdb kwenye mfumo) au, jambo la kuvutia zaidi, kwa kuandika kwenye `/proc/$pid/mem`.<sup>[[1]](#references)</sup>
+Ikiwa unaweza kurekebisha kumbukumbu ya process yoyote upendavyo, basi unaweza kuiteka. Hii inaweza kutumiwa kuteka process iliyopo tayari na kuibadilisha na program nyingine. Tunaweza kufanya hivi kwa kutumia syscall ya `ptrace()` (ambayo inahitaji uwe na uwezo wa kutekeleza syscalls au gdb ipatikane kwenye mfumo) au, jambo la kuvutia zaidi, kwa kuandika kwenye `/proc/$pid/mem`.<sup>[[1]](#references)</sup>
 
-Faili `/proc/$pid/mem` ni mapping ya one-to-one ya address space nzima ya process (_k. m._ kutoka `0x0000000000000000` hadi `0x7ffffffffffff000` katika x86-64). Hii inamaanisha kuwa kusoma kutoka au kuandika kwenye faili hili katika offset `x` ni sawa na kusoma au kurekebisha yaliyomo kwenye virtual address `x`.
+Faili ya `/proc/$pid/mem` ni ramani ya moja kwa moja ya nafasi nzima ya anwani ya process (_kwa mfano_, kutoka `0x0000000000000000` hadi `0x7ffffffffffff000` kwenye x86-64). Hii inamaanisha kuwa kusoma kutoka au kuandika kwenye faili hii kwenye offset `x` ni sawa na kusoma au kurekebisha maudhui kwenye anwani pepe `x`.
 
 Sasa, tuna matatizo manne ya msingi ya kukabiliana nayo:
 
-- Kwa ujumla, ni root pekee na mwenye programu ya faili anayeweza kuirekebisha.
+- Kwa jumla, root pekee na mmiliki wa program ya faili hiyo wanaweza kuirekebisha.
 - ASLR.
-- Tukijaribu kusoma au kuandika kwenye address ambayo haija-mapped katika address space ya program, tutapata I/O error.
+- Tukijaribu kusoma au kuandika kwenye anwani ambayo haijamapishwa kwenye nafasi ya anwani ya program, tutapata hitilafu ya I/O.
 
-Matatizo haya yana suluhisho ambazo, ingawa si kamili, ni nzuri:
+Matatizo haya yana suluhisho ambazo, ingawa si kamilifu, zinafaa:
 
-- Shell interpreters nyingi huruhusu kuunda file descriptors ambazo zitarithiwa na child processes. Tunaweza kuunda fd inayoelekeza kwenye faili ya `mem` ya shell ikiwa na ruhusa za kuandika... hivyo child processes zinazotumia fd hiyo zitaweza kurekebisha kumbukumbu ya shell.
-- ASLR si tatizo hata kidogo; tunaweza kuangalia faili la `maps` la shell au faili lingine lolote kutoka procfs ili kupata taarifa kuhusu address space ya process.
-- Kwa hiyo tunahitaji kufanya `lseek()` kwenye faili. Kutoka kwenye shell hili haliwezi kufanywa isipokuwa kwa kutumia `dd` maarufu.
+- Interpreters nyingi za shell huruhusu kuunda file descriptors ambazo hurithiwa na child processes. Tunaweza kuunda fd inayoelekeza kwenye faili ya `mem` ya shell kwa ruhusa za kuandika... hivyo child processes zinazotumia fd hiyo zitaweza kurekebisha kumbukumbu ya shell.
+- ASLR si tatizo hata kidogo; tunaweza kuangalia faili ya `maps` ya shell au faili nyingine yoyote kutoka procfs ili kupata taarifa kuhusu nafasi ya anwani ya process.
+- Kwa hiyo tunahitaji kutumia `lseek()` kwenye faili. Hili haliwezekani kutoka kwenye shell isipokuwa tutumie `dd` maarufu.
 
-### Kwa maelezo zaidi
+### Kwa undani zaidi
 
-Hatua hizi ni rahisi kiasi na hazihitaji utaalamu wa aina yoyote kuzielewa:<sup>[[1]](#references)</sup>
+Hatua hizi ni rahisi kiasi na hazihitaji utaalamu wowote kuzielewa:<sup>[[1]](#references)</sup>
 
-- Parse binary tunayotaka ku-run pamoja na loader ili kujua ni mappings zipi zinahitajika. Kisha tengeneza "shell"code ambayo, kwa ujumla, itafanya hatua zilezile ambazo kernel hufanya kila inapoitwa `execve()`:
-- Unda mappings hizo.
-- Soma binaries ndani yake.
-- Weka permissions.
-- Hatimaye, initialize stack kwa arguments za program na uweke auxiliary vector (inayohitajika na loader).
-- Rukia loader na uiruhusu ifanye yaliyosalia (kupakia libraries zinazohitajika na program).
-- Pata kutoka kwenye faili la `syscall` address ambayo process itarudia baada ya syscall inayotekeleza.
-- Overwrite sehemu hiyo, ambayo itakuwa executable, kwa shellcode yetu (kupitia `mem` tunaweza kurekebisha pages zisizoandikika).
-- Pitisha program tunayotaka ku-run kwenye stdin ya process (ita-`read()` na "shell"code hiyo).
-- Katika hatua hii, loader ndiye anayepaswa kupakia libraries zinazohitajika na program yetu na kurukia ndani yake.
+- Changanua binary tunayotaka kuendesha na loader ili kujua mappings wanazohitaji. Kisha tengeneza "shell"code itakayotekeleza, kwa upana, hatua zilezile ambazo kernel hufanya kila `execve()` inapoitwa:
+  - Unda mappings hizo.
+  - Soma binaries na kuziweka humo.
+  - Weka permissions.
+  - Hatimaye, anzisha stack kwa arguments za program na uweke auxiliary vector (inayohitajika na loader).
+  - Rukia kwenye loader na uiruhusu iendelee na mambo mengine (kupakia libraries zinazohitajika na program).
+- Pata kutoka kwenye faili ya `syscall` anwani ambayo process itarudia baada ya syscall inayotekeleza.
+- Andika juu ya eneo hilo, ambalo litaruhusu utekelezaji, kwa kutumia shellcode yetu (kupitia `mem` tunaweza kurekebisha pages zisizoruhusu kuandikwa).
+- Pitisha program tunayotaka kuendesha kwenye stdin ya process (itasomwa kwa `read()` na "shell"code hiyo).
+- Kwa wakati huu, jukumu la loader ni kupakia libraries zinazohitajika na program yetu na kisha kurukia ndani yake.
 
-**Angalia tool katika** [**https://github.com/arget13/DDexec**](https://github.com/arget13/DDexec).<sup>[[1]](#references)</sup>
+**Angalia tool kwenye** [**https://github.com/arget13/DDexec**](https://github.com/arget13/DDexec).<sup>[[1]](#references)</sup>
 
 ## EverythingExec
 
-Kuna alternatives kadhaa za `dd`, mojawapo ikiwa `tail`, ambayo kwa sasa ndiyo program chaguo-msingi inayotumika kufanya `lseek()` kupitia faili la `mem` (ambayo ndiyo ilikuwa sababu pekee ya kutumia `dd`). Alternatives hizo ni:<sup>[[1]](#references)</sup>
+Kuna njia mbadala kadhaa za `dd`; mojawapo, `tail`, ndiyo program inayotumika kwa chaguo-msingi sasa kutumia `lseek()` ndani ya faili ya `mem` (ambayo ndiyo sababu pekee ya kutumia `dd`). Njia hizo mbadala ni:<sup>[[1]](#references)</sup>
+
 ```bash
 tail
 hexdump
 cmp
 xxd
 ```
+
 Kwa kuweka variable `SEEKER`, unaweza kubadilisha seeker inayotumika, _kwa mfano_:
+
 ```bash
 SEEKER=cmp bash ddexec.sh ls -l <<< $(base64 -w0 /bin/ls)
 ```
+
 Ukipata seeker nyingine halali ambayo haijatekelezwa kwenye script, bado unaweza kuitumia kwa kuweka variable ya `SEEKER_ARGS`:
+
 ```bash
 SEEKER=xxd SEEKER_ARGS='-s $offset' zsh ddexec.sh ls -l <<< $(base64 -w0 /bin/ls)
 ```
+
 Zuieni hili, EDRs.
 
 ## References
 
-- [1] [DDexec: Mbinu ya kuendesha binary bila faili na kwa usiri kwenye Linux](https://github.com/arget13/DDexec)
+- [1] [DDexec: Mbinu ya kuendesha faili za binary bila faili na kwa kujificha kwenye Linux](https://github.com/arget13/DDexec)
+- [2] [execveat(2) — ukurasa wa mwongozo wa Linux](https://manpages.debian.org/trixie/manpages-dev/execveat.2.en.html)
 {{#include ../../../../banners/hacktricks-training.md}}
