@@ -547,7 +547,7 @@ settings set target.x86-disassembly-flavor intel
 
 - The command **`sysctl hw.model`** normally returns a Mac model identifier on physical hardware and may return a different value in a VM.<sup>[[3]](#references)</sup>
 - Playing with the values of **`hw.logicalcpu`** and **`hw.physicalcpu`** some malwares try to detect if it's a VM.<sup>[[4]](#references)</sup>
-- Native loaders can also query `kern.hv_vmm_present` and `machdep.cpu.brand_string` through `sysctl` before unpacking later stages. One observed chain combined both checks with `ptrace(PT_DENY_ATTACH)`, so a sample may gate decryption on VM and debugger state rather than merely exit at startup.<sup>[[12]](#references)</sup>
+- A loader may also query `kern.hv_vmm_present` and `machdep.cpu.brand_string` through `sysctl` when checking for a VM before unpacking its next stage. These checks complement, rather than replace, the debugger-attachment check described below.<sup>[[12]](#references)</sup>
 - Some malwares can also **detect** if the machine is **VMware** based on the MAC address (00:50:56).
 - It's also possible to find **if a process is being debugged** with a simple code such us:
   - `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //process being debugged }`
@@ -698,6 +698,8 @@ litefuzz -s -a tcp://localhost:5900 -i input/screenshared-session --reportcrash 
 - [https://github.com/bnagy/francis/tree/master/exploitaben](https://github.com/bnagy/francis/tree/master/exploitaben)
 - [https://github.com/ant4g0nist/crashwrangler](https://github.com/ant4g0nist/crashwrangler)
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 ## References
 
 - [1] [OS X Incident Response: Scripting and Analysis](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
@@ -712,5 +714,3 @@ litefuzz -s -a tcp://localhost:5900 -i input/screenshared-session --reportcrash 
 - [10] [tony-go/antidebug-examples - fork examples](https://github.com/tony-go/antidebug-examples/tree/main/fork)
 - [11] [Reverse Society - Anti-debugging technique using dlsym and fork](https://blog.reversesociety.co/blog/2024/anti-debugging-detection-with-fork)
 - [12] [Kaspersky Securelist - A new version of the MacSync macOS stealer targets crypto enthusiasts and developers](https://securelist.com/macsync-new-version/121383/)
-
-{{#include ../../../banners/hacktricks-training.md}}

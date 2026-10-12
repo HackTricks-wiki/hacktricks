@@ -78,7 +78,7 @@ security set-generic-password-partition-list \
 security dump-keychain ~/Library/Keychains/login.keychain-db
 ```
 
-`-S` sets the item's partition list, while `-k` supplies the current Keychain password required to make that change. This does not prove that a later read will be silent. In an observed prototype, adding `apple-tool:`, `apple:`, and a target `teamid:` and then querying the item through `Security.framework` still produced a confirmation prompt. A matching partition ID is only one part of the ACL and trusted-application checks described above, so test the actual read path instead of treating a successful partition-list update as confirmation-free extraction.<sup>[[3]](#references)</sup>
+`-S` sets the item's partition list, while `-k` supplies the current Keychain password required to make that change; the password-taking flag is deprecated.<sup>[[4]](#references)</sup> A successful update does not prove that a later read will be silent: one observed, disabled prototype still triggered a confirmation prompt when it queried the item through `Security.framework`. A matching partition ID is only one part of the ACL and trusted-application checks described above, so verify the actual read path.<sup>[[3]](#references)</sup>
 
 ### APIs
 
@@ -132,10 +132,11 @@ And these are the **requirements** to be able to **export a secret without a pro
 - **General**: It's to store **metadata** (so it's NOT ENCRYPTED)<sup>[[1]](#references)</sup>
   - Microsoft was storing in plain text all the refresh tokens to access sensitive endpoint.<sup>[[1]](#references)</sup>
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## References
 
 - [1] [#OBTS v5.0: "Lock Picking the macOS Keychain" - Cody Thomas](https://www.youtube.com/watch?v=jKE1ZW33JpY)
 - [2] [Apple Developer — kSecACLAuthorizationExportClear](https://developer.apple.com/documentation/security/ksecaclauthorizationexportclear)
 - [3] [Kaspersky Securelist - A new version of the MacSync macOS stealer targets crypto enthusiasts and developers](https://securelist.com/macsync-new-version/121383/)
-
-{{#include ../../banners/hacktricks-training.md}}
+- [4] [Apple security(1) man page mirror](https://keith.github.io/xcode-man-pages/security.1.html)

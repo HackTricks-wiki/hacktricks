@@ -245,15 +245,9 @@ macos-bash-applications-injection.md
 
 ### Shell stdin command smuggling
 
-Starting `/bin/zsh -s` makes the shell read a program from standard input. Therefore, a downloader that copies an untrusted structured document into the child's stdin without parsing it first has turned the whole document into shell source. One observed loader fed a public iCalendar file through an anonymous pipe line by line. Calendar metadata failed as commands, but zsh continued until it reached executable lines placed after `DESCRIPTION:`. Those lines downloaded and launched the next application bundle. The carrier's expected content type and trusted hosting did not make this safe; the dangerous boundary was passing its bytes to an interpreter.<sup>[[6]](#references)</sup>
+Starting `/bin/zsh -s` makes the shell read a program from standard input. Therefore, a downloader that copies an untrusted structured document into the child's stdin without parsing it first has turned the whole document into shell source. One observed loader fed a public iCalendar file through an anonymous pipe line by line. Calendar metadata failed as commands, but zsh continued until it reached executable lines placed after `DESCRIPTION:`. Those lines downloaded and launched the next application bundle. The carrier's expected content type and trusted hosting did not make this safe; the dangerous boundary was passing its bytes to an interpreter.<sup>[[5]](#references)</sup>
 
-The surrounding primitives are covered in [Mach-O overlays](../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md), [Gatekeeper, quarantine and code signing](../macos-security-protections/macos-gatekeeper.md), and [macOS auto-start locations](../../macos-auto-start-locations.md).
-
-### PAM-backed verification of phished passwords
-
-A native-looking secure-text prompt can collect a candidate account password and validate it in-process through PAM. The flow is `pam_start` with a conversation callback that supplies the candidate, `pam_authenticate`, and finally `pam_end`; failed authentication can simply return the UI to the password field. This avoids spawning `dscl`, `security`, or `osascript` and lets the caller retain only a password known to be correct. PAM authentication validates the credential but does **not** elevate the caller or authorize later privileged operations by itself.<sup>[[5]](#references)[[6]](#references)</sup>
-
-A verified login password can also be tried against Keychain operations that explicitly require the current Keychain password. See [macOS Keychain ACL and partition-ID constraints](../../macos-red-teaming/macos-keychain.md).
+Related stages are covered in [Mach-O overlays](../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md), [Gatekeeper and quarantine](../macos-security-protections/macos-gatekeeper.md), and [macOS auto-start locations](../../macos-auto-start-locations.md).
 
 ### PHP Injection
 
@@ -367,13 +361,12 @@ In [**this blog post**](https://knight.sc/reverse%20engineering/2019/04/15/detec
 
 Note that to call that function you need to be **the same uid** as the one running the process or **root** (and it returns info about the process, not a way to inject code).
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 ## References
 
 - [1] [Shield — open source macOS process-injection detection (GitHub)](https://github.com/theevilbit/Shield)
 - [2] [Apple Developer — EndpointSecurity framework](https://developer.apple.com/documentation/endpointsecurity)
 - [3] [Metnew - Why Electron apps can't store your secrets confidentially: --inspect option](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)
 - [4] [Scott Knight - Detecting task modifications](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html)
-- [5] [Jamf Threat Labs - PamStealer: a Rust-based macOS infostealer that validates credentials through PAM](https://www.jamf.com/blog/pamstealer-macos-infostealer-applescript-rust/)
-- [6] [Kaspersky Securelist - A new version of the MacSync macOS stealer targets crypto enthusiasts and developers](https://securelist.com/macsync-new-version/121383/)
-
-{{#include ../../../banners/hacktricks-training.md}}
+- [5] [Kaspersky Securelist - A new version of the MacSync macOS stealer targets crypto enthusiasts and developers](https://securelist.com/macsync-new-version/121383/)
