@@ -13,6 +13,8 @@ There are two types of ACLs:
 
 The process of accessing a file involves the system checking the object's security descriptor against the user's access token to determine if access should be granted and the extent of that access, based on the ACEs.<sup>[[1]](#references)</sup>
 
+When a parent directory grants Full Control but a child file denies reading, review the **child file's** effective DACL, owner, and inheritance separately. Changing that file's DACL requires `WRITE_DAC` on the file or the applicable owner right; [Microsoft defines `WRITE_DAC`](https://learn.microsoft.com/en-us/windows/win32/secauthz/standard-access-rights) and [documents the owner's implicit access](https://learn.microsoft.com/en-us/windows/win32/secauthz/owner-of-a-new-object). Parent-directory permissions alone do not establish that the child can be read or that its DACL can be changed.
+
 ### **Key Components**
 
 - **DACL:** Contains ACEs that grant or deny access permissions to users and groups for an object. It's essentially the main ACL that dictates access rights.

@@ -58,6 +58,8 @@ qpdf --password='secret' --decrypt suspicious.pdf clean.pdf
 pdfcpu validate -mode strict clean.pdf
 ```
 
+Pixelating an image inside a PDF does not remove its underlying pixels. If a readable document appears to hide a credential this way, extract the embedded image for authorized offline inspection; the result depends on the image and a suitable reference, and visual recovery is not guaranteed. A recovered password still needs separate verification against the account whose privileges matter. Do not put a PDF extraction or image-recovery pass in a routine host-enumeration scan.
+
 Additional useful projects (actively maintained 2023-2025):
 * **pdfcpu** – Go library/CLI able to validate, decrypt, extract, optimize, and manipulate PDFs.<sup>[[9]](#references)</sup>
 * **pdf-inspector** – browser-based visualizer that renders the object graph and streams.

