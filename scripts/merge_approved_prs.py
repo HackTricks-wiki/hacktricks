@@ -78,7 +78,7 @@ def other_workflows_active(repo, merger_workflow_id):
         )
         for page in pages:
             for run in page["workflow_runs"]:
-                if run.get("name") in ("Saturday HackTricks conflict repair", "Sunday HackTricks PR review"):
+                if run.get("path") in (".github/workflows/book-conflict-fix.yml", ".github/workflows/book-pr-review.yml"):
                     print(f"Book maintenance is {run['status']}: {run['name']}", flush=True)
                     return True
     return False
