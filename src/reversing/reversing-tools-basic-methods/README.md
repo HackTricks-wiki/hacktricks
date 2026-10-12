@@ -8,6 +8,12 @@ Software:
 
 - ReverseKit: [https://github.com/zer0condition/ReverseKit](https://github.com/zer0condition/ReverseKit)
 
+## Windows kernel debugging
+
+{{#ref}}
+windows-kernel-debugging-kernelflirt.md
+{{#endref}}
+
 ## Wasm decompiler / Wat compiler
 
 Online:
@@ -25,6 +31,12 @@ Software:
 
 {{#ref}}
 nodejs-v8-cached-bytecode.md
+{{#endref}}
+
+## Virtualized payloads and custom VMs
+
+{{#ref}}
+../../windows-hardening/virtualized-payload-execution.md
 {{#endref}}
 
 ## .NET decompiler
@@ -437,34 +449,72 @@ If you press a button in the graphical application, the debugger can stop in the
 
 ## Golang
 
+For ordinary Go binaries, [IDAGolangHelper](https://github.com/sibears/IDAGolangHelper) can recover runtime structures and improve function names in IDA. Load its Python plugin with **Alt+F7**.
+
 If you have to reverse a Golang binary I would suggest you to use the IDA plugin [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
 
 Press **Alt+F7** in IDA to load a Python plugin, then select the plugin file.
 
 This will resolve the names of the functions.
 
+### Recover metadata without the symbol table
+
+A stripped Go executable still needs runtime metadata to map program counters to functions. [GoReSym](https://github.com/mandiant/GoReSym) locates and parses structures such as `pclntab` and `moduledata` using code derived from the Go runtime. This can recover function boundaries, names, source paths, types and build details without relying on the conventional symbol table.<sup>[[9]](#references)[[13]](#references)</sup>
+
+```bash
+GoReSym.exe -t -d -p /path/to/sample.exe > goresym.json
+```
+
+An obfuscator can leave those structures usable while replacing the recovered names. Garble, for example, hashes identifiers and package paths and removes build, module and debug information.<sup>[[12]](#references)</sup> The obfuscated package token must remain consistent across functions from that package. Group functions by the repeated token, infer one package from its callees, strings and APIs, then propagate that package label to the entire group.<sup>[[13]](#references)</sup>
+
+### Recover Garble names with GoResolver
+
+[GoResolver](https://github.com/volexity/GoResolver) combines runtime-symbol extraction with clean-reference generation and control-flow-graph (CFG) matching. Use this sequence:<sup>[[10]](#references)[[13]](#references)</sup>
+
+1. **Identify the compiler version.** Try `BuildInfo` and embedded version strings first. If the obfuscator removed them, compare portions of the bundled Go runtime with versioned reference runtimes. In Volexity's tests, about `2%` of the runtime was enough to distinguish major Go versions. Treat this as an empirical optimization, not a universal threshold.<sup>[[13]](#references)</sup>
+2. **Build matching references.** Generate clean binaries for the identified Go version, target architecture and likely libraries. Matching the toolchain reduces compiler-generated CFG differences.<sup>[[10]](#references)[[13]](#references)</sup>
+3. **Compare functions.** GoGrapher matches function CFGs and emits normalized scores from `0.0` to `1.0`. Its basic-block matching is based on a weighted comparison of similar instructions. High-confidence matches map randomized functions to the clean implementation. Weaker matches can still identify a package or module.<sup>[[8]](#references)[[11]](#references)[[13]](#references)</sup>
+4. **Validate and import.** Confirm proposed names with call relationships, constants, strings and side effects, then import the JSON report with the GoResolver plugin for IDA or Ghidra.<sup>[[10]](#references)[[13]](#references)</sup>
+
+Install the toolchain and run the combined extractor and graph matcher:<sup>[[10]](#references)</sup>
+
+```bash
+python3 -m venv goresolver-env
+source goresolver-env/bin/activate
+pip install goresolver
+
+# Automatic Go-version detection and reference selection
+goresolver resolve -o report.json /path/to/sample.exe
+
+# Override the version/libraries and confidence threshold when known
+goresolver resolve -v go1.23.4 -l os/exec net/http \
+  -t 0.9 -o report.json /path/to/sample.exe
+```
+
+The default significant-match threshold is `0.9`. The `--extract` and `--graph` switches can isolate either stage, while the default runs both because the recovered runtime metadata and CFG evidence complement each other.<sup>[[10]](#references)</sup> CFG scores are heuristic: inlining, build flags, architecture and library-version differences can change graph shape, so preserve unresolved functions instead of forcing low-confidence names.<sup>[[13]](#references)</sup>
+
 ### Recovering the Go string table
 
-Go binaries place string bytes from every linked package in one contiguous table. The entries are not NUL-terminated and runtime structures do not expose the table base or size. However, the compiler orders entries first by length and then alphabetically across operating systems and architectures. After finding one entry, an analyst can therefore walk adjacent entries and use data cross-references to associate strings with code.<sup>[[10]](#references)</sup>
+Go binaries place string bytes from every linked package in one contiguous table. The entries are not NUL-terminated and runtime structures do not expose the table base or size. However, the compiler orders entries first by length and then alphabetically across operating systems and architectures. After finding one entry, an analyst can therefore walk adjacent entries and use data cross-references to associate strings with code.<sup>[[15]](#references)</sup>
 
-[GoStringExtractor](https://github.com/volexity/GoStringExtractor) automates this workflow in IDA Pro and Ghidra. Let auto-analysis finish first because the plugin relies on data-segment cross-references. Its default anchor is the runtime string `entersyscall`, after which it can scan in either direction, define the recovered strings in the database, and export a JSON mapping of strings to referencing functions.<sup>[[8]](#references)</sup>
+[GoStringExtractor](https://github.com/volexity/GoStringExtractor) automates this workflow in IDA Pro and Ghidra. Let auto-analysis finish first because the plugin relies on data-segment cross-references. Its default anchor is the runtime string `entersyscall`, after which it can scan in either direction, define the recovered strings in the database, and export a JSON mapping of strings to referencing functions.<sup>[[14]](#references)</sup>
 
-Filter the report by the package of the referencing function to separate application or malware code from linked library noise. This technique cannot recover literals destroyed by obfuscation such as Garble's `-literals` transformation. It can still organize runtime strings that remain unobfuscated.<sup>[[8]](#references)[[10]](#references)</sup>
+Filter the report by the package of the referencing function to separate application or malware code from linked library noise. This technique cannot recover literals destroyed by obfuscation such as Garble's `-literals` transformation. It can still organize runtime strings that remain unobfuscated.<sup>[[14]](#references)[[15]](#references)</sup>
 
 ### Recovering Go runtime types
 
-Go embeds runtime type information used by features such as garbage collection. When build information is stripped or the disassembler does not parse this metadata, instructions may appear to load arbitrary data addresses and the target region remains untyped. Recovering the metadata turns those addresses into readable type references and makes package capabilities easier to understand.<sup>[[10]](#references)</sup>
+Go embeds runtime type information used by features such as garbage collection. When build information is stripped or the disassembler does not parse this metadata, instructions may appear to load arbitrary data addresses and the target region remains untyped. Recovering the metadata turns those addresses into readable type references and makes package capabilities easier to understand.<sup>[[15]](#references)</sup>
 
-[GoResolver](https://github.com/volexity/GoResolver) can extract symbols and parse runtime types into a JSON report. The current CLI uses the `resolve` subcommand:<sup>[[9]](#references)</sup>
+[GoResolver](https://github.com/volexity/GoResolver) can extract symbols and parse runtime types into a JSON report. The current CLI uses the `resolve` subcommand:<sup>[[10]](#references)</sup>
 
 ```bash
 pip install goresolver
 goresolver resolve -x -y -o report.json sample_bin.exe
 ```
 
-The `-y`/`--types` option enables type parsing. Import the report with GoResolver's IDA Pro or Ghidra plugin to define the recovered types and apply their references in the analysis database. In the report format introduced with this feature, omitting `-y` leaves the RTTI address and recovered-types members null.<sup>[[9]](#references)[[10]](#references)</sup>
+The `-y`/`--types` option enables type parsing. Import the report with GoResolver's IDA Pro or Ghidra plugin to define the recovered types and apply their references in the analysis database. In the report format introduced with this feature, omitting `-y` leaves the RTTI address and recovered-types members null.<sup>[[10]](#references)[[15]](#references)</sup>
 
-GoResolver supports PE, ELF, and Mach-O samples for x86, AMD64, ARM, and ARM64, so the same workflow applies to Go binaries from Windows, Linux, and macOS.<sup>[[9]](#references)</sup>
+GoResolver supports PE, ELF, and Mach-O samples for x86, AMD64, ARM, and ARM64, so the same workflow applies to Go binaries from Windows, Linux, and macOS.<sup>[[10]](#references)</sup>
 
 ## Compiled Python
 
@@ -609,8 +659,13 @@ https://www.youtube.com/watch?v=VVbRe7wr3G4
 - [5] [pentestpartners/reverse-engineering - RustStrings.py](https://github.com/pentestpartners/reverse-engineering/blob/main/RustStrings.py)
 - [6] [Nostalgia - GBA reversing tutorial (archived)](https://web.archive.org/web/20220328215728/https://exp.codes/Nostalgia/)
 - [7] [Defeating AI-Assisted Reverse Engineering, or at Least Trying To](http://blog.quarkslab.com/defeating-ai-assisted-reverse-engineering-or-at-least-trying-to.html)
-- [8] [Volexity GoStringExtractor repository](https://github.com/volexity/GoStringExtractor)
-- [9] [Volexity GoResolver repository](https://github.com/volexity/GoResolver)
-- [10] [Go Get 'Em: Updates to Volexity Golang Tooling](https://www.volexity.com/blog/2025/08/11/go-get-em-updates-to-volexity-golang-tooling/)
+- [8] [An Approach to Comparing Control Flow Graphs Based on Basic Block Matching](https://www.ijcse.com/docs/INDJCSE20-11-03-237.pdf)
+- [9] [Mandiant GoReSym](https://github.com/mandiant/GoReSym)
+- [10] [Volexity GoResolver repository](https://github.com/volexity/GoResolver)
+- [11] [Volexity GoGrapher](https://github.com/volexity/GoGrapher)
+- [12] [Garble obfuscation mechanism](https://github.com/burrowers/garble#mechanism)
+- [13] [GoResolver: Using Control-Flow Graph Similarity to Automatically Deobfuscate Golang Binaries](https://volexity.com/blog/2025/04/01/goresolver-using-control-flow-graph-similarity-to-deobfuscate-golang-binaries-automatically)
+- [14] [Volexity GoStringExtractor repository](https://github.com/volexity/GoStringExtractor)
+- [15] [Go Get 'Em: Updates to Volexity Golang Tooling](https://www.volexity.com/blog/2025/08/11/go-get-em-updates-to-volexity-golang-tooling/)
 
 {{#include ../../banners/hacktricks-training.md}}
