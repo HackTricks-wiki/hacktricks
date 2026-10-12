@@ -42,6 +42,7 @@ class ApprovalTests(unittest.TestCase):
         }))
         self.assertTrue(merger.should_handle_event("pull_request_target", {}))
         self.assertTrue(merger.should_handle_event("workflow_dispatch", {}))
+        self.assertTrue(merger.should_handle_event("schedule", {}))
         self.assertFalse(merger.should_handle_event("push", {}))
 
     def test_research_title_exception_is_limited_to_the_authorized_author(self):
@@ -153,6 +154,11 @@ class MergeFlowTests(unittest.TestCase):
         count, merge = self.run_flow([pr(1)], comments={1: comments})
         self.assertEqual(count, 1)
         merge.assert_called_once()
+
+    def test_approval_queue_is_requested_oldest_first_on_every_page(self):
+        with patch.object(merger, "other_workflows_active", return_value=False), patch.object(merger, "api_items", return_value=[]) as request, contextlib.redirect_stdout(io.StringIO()):
+            merger.merge_approved("owner/book", 7)
+        self.assertIn("sort=created&direction=asc", request.call_args.args[0])
 
     def test_unknown_mergeability_is_rechecked(self):
         unknown = details(1)
