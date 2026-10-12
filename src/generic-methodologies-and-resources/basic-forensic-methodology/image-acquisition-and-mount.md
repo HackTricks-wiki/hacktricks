@@ -6,6 +6,8 @@
 
 > Always acquire **read-only** and **hash while you copy**. Keep the original device **write-blocked** and work only on verified copies.
 
+Record the source make, model, serial number and size, the tool and version, timestamps, operator, destination, errors and acquisition/verification hashes. Preserve an archive image and examine a separate working copy.<sup>[[5]](#references)[[6]](#references)</sup>
+
 ### DD
 
 ```bash
@@ -17,39 +19,31 @@ sha256sum disk.img > disk.img.sha256
 
 ### dc3dd / dcfldd
 
-`dc3dd` is the actively maintained fork of dcfldd (DoD Computer Forensics Lab dd).
+`dc3dd` adds on-the-fly hashing, output verification, error logging and split output to the `dd` workflow. `hof=` selects a hash-verified output; `hash=`, `hlog=`, `log=` and `bufsz=` are separate operands.<sup>[[7]](#references)</sup>
 
 ```bash
-# Create an image and calculate multiple hashes at acquisition time
-sudo dc3dd if=/dev/sdc of=/forensics/pc.img hash=sha256,sha1 hashlog=/forensics/pc.hashes log=/forensics/pc.log bs=1M
+sudo dc3dd if=/dev/sdc hof=/forensics/pc.img hash=sha256 \
+  hlog=/forensics/pc.hashes log=/forensics/pc.log bufsz=1M
 ```
 
-### Guymager  
-Graphical, multithreaded imager that supports **raw (dd)**, **EWF (E01/EWFX)** and **AFF4** output with parallel verification. Available in most Linux repos (`apt install guymager`).
+### Guymager
 
-```bash
-# Start in GUI mode
-sudo guymager
-# Or acquire from CLI (since v0.9.5)
-sudo guymager --simulate --input /dev/sdb --format EWF --hash sha256 --output /evidence/drive.e01
-```
+Guymager is a graphical, multithreaded Linux imager for raw/dd, EWF and legacy AFF output. **AFF and AFF4 are different formats**; Guymager does not advertise AFF4 output. Enable SHA-256 plus destination verification in the acquisition dialog, then start it with `sudo guymager`.<sup>[[8]](#references)</sup>
 
 ### AFF4 (Advanced Forensics Format 4)
 
-The AFF4 v1.0 specification, authored by Bradley L. Schatz and Michael I. Cohen, defines a forensic container with virtualized storage, arbitrary metadata, extensible compression and hashing, and high-throughput operation.<sup>[[1]](#references)</sup>
+The AFF4 v1.0 specification defines a forensic container with virtualized storage, arbitrary metadata, extensible compression and hashing, and high-throughput operation.<sup>[[1]](#references)</sup>
+
+The canonical C/C++ implementation uses `-i` for the source and `-o` for the AFF4 volume. Create and retain an external container hash as the acquisition baseline.<sup>[[5]](#references)[[9]](#references)</sup>
 
 ```bash
-# Acquire to AFF4 using the reference tool
-pipx install aff4imager
-sudo aff4imager acquire /dev/nvme0n1 /evidence/nvme.aff4 --hash sha256
-
-# Velociraptor can also acquire AFF4 images remotely
-velociraptor --config server.yaml frontend collect --artifact Windows.Disk.Acquire --args device="\\.\\PhysicalDrive0" format=AFF4
+sudo aff4imager -i /dev/nvme0n1 -o /evidence/nvme.aff4
+sha256sum /evidence/nvme.aff4 > /evidence/nvme.aff4.sha256
 ```
 
-### FTK Imager (Windows & Linux)
+### FTK Imager
 
-You can [download FTK Imager](https://accessdata.com/product-download) and create **raw, E01 or AFF4** images:
+Current FTK Imager documentation advertises raw/DD, E01 and AFF output with hash verification. Do not label its AFF output as AFF4.<sup>[[10]](#references)</sup>
 
 ```bash
 ftkimager /dev/sdb evidence --e01 --case-number 1 --evidence-number 1 \
@@ -58,116 +52,159 @@ ftkimager /dev/sdb evidence --e01 --case-number 1 --evidence-number 1 \
 
 ### EWF tools (libewf)
 
-```bash
-sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examiner --format encase6 --compression best
-```
-
-### Imaging Cloud Disks
-
-*AWS* – create a **forensic snapshot** without shutting down the instance:
+For unattended acquisition, the target is `-t`, case metadata uses `-C/-D/-E/-e`, `-d sha256` adds SHA-256, and `-l` records acquisition errors and digests. Verify the completed segment set before analysis.<sup>[[11]](#references)[[12]](#references)</sup>
 
 ```bash
-aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web-server 2025-07-22"
-# Copy the snapshot to S3 and download with aws cli / aws snowball
+sudo ewfacquire -u -t /forensics/evidence -C 1 -D 'Seizure 2025-07-22' \
+  -E 1 -e 'AnalystName' -f encase6 -c deflate:best -d sha256 \
+  -l /forensics/evidence.acquire.log /dev/sdb
+ewfverify -d sha256 -l /forensics/evidence.verify.log /forensics/evidence.E01
 ```
 
-*Azure* – use `az snapshot create` and export to a SAS URL.
+### Imaging cloud disks
 
+A provider snapshot is a point-in-time collection source, not automatically an application-consistent forensic image. An EBS snapshot excludes data still cached by the guest; pause writes, quiesce the application, unmount the data volume or stop an instance whose root volume is being captured when the response plan permits it.<sup>[[13]](#references)</sup>
+
+```bash
+aws ec2 create-snapshot --volume-id vol-01234567 \
+  --description 'IR-case-1234 web-server 2025-07-22'
+```
+
+Do not describe EBS snapshots as files that can simply be copied to S3. To reconstruct the block image without creating a volume, enumerate allocated blocks with `ListSnapshotBlocks`, fetch each 512 KiB block with `GetSnapshotBlock`, validate the returned checksum and zero-fill block indexes that are absent from the sparse snapshot.<sup>[[14]](#references)</sup>
+
+For Azure, create the snapshot, issue a short-lived **read-only** SAS, download the VHD, revoke access and hash the result. Snapshot each disk independently unless the collection mechanism provides coordinated consistency.<sup>[[15]](#references)</sup>
+
+```bash
+snap=$(az snapshot create -g IR-RG -n case123-os --source "$disk_id" --query id -o tsv)
+sas=$(az snapshot grant-access --ids "$snap" --access-level Read \
+  --duration-in-seconds 3600 --query accessSas -o tsv)
+azcopy copy "$sas" case123-os.vhd
+az snapshot revoke-access --ids "$snap"
+sha256sum case123-os.vhd > case123-os.vhd.sha256
+```
 
 ## Mount
 
-### Choosing the right approach
+### Treat images as hostile input
 
-1. Mount the **whole disk** when you want the original partition table (MBR/GPT).
-2. Mount a **single partition file** when you only need one volume.
-3. Keep image attachments read-only (for example, qemu-nbd's `--read-only`).<sup>[[2]](#references)</sup> Mount filesystems read-only (`-o ro`).<sup>[[3]](#references)</sup> Work on **copies**.
+A malicious filesystem can target host kernel partition and filesystem parsers. QEMU explicitly warns against connecting an untrusted guest image to host NBD for mounting, and libguestfs recommends never mounting an untrusted guest filesystem directly with loop or `kpartx`.<sup>[[2]](#references)[[16]](#references)</sup>
+
+Prefer `guestmount` for an unknown or attacker-controlled image. It parses and mounts the guest inside a small appliance, then exposes files through FUSE. Force the known format instead of auto-detection and keep the appliance side read-only.<sup>[[17]](#references)</sup>
+
+```bash
+mkdir -p /mnt/evidence
+virt-filesystems --format=raw -a disk.img --all --long -h
+guestmount --ro --format=raw -a disk.img -i /mnt/evidence
+# Inspect/copy files, but never execute content from the image.
+guestunmount /mnt/evidence
+```
+
+If inspection cannot infer the OS, replace `-i` with an explicit guest device such as `-m /dev/sda2`. Encrypted LUKS volumes can be supplied with `--key` selectors; avoid putting a key directly in shell history.<sup>[[17]](#references)</sup>
+
+### Choosing a direct host mount
+
+Use a direct host mount only for trusted images or in a disposable analysis VM:
+
+1. Mount the **whole disk** when you need its original partition table.
+2. Mount a **single partition image** when you only need one volume.
+3. Make the attachment read-only and force the image format. Mount the filesystem read-only too. `ro` alone does not stop ext3/ext4 journal replay, so use `ro,noload` for dirty ext filesystems.<sup>[[2]](#references)[[3]](#references)</sup>
+
+`mmls` is useful when the sector size is not 512 bytes or partition metadata is damaged; `-b` supplies the actual device-sector size. Continue partition and filesystem analysis here:<sup>[[18]](#references)</sup>
+
+{{#ref}}
+partitions-file-systems-carving/README.md
+{{#endref}}
 
 ### Raw images (dd, AFF4-extracted)
 
 ```bash
-# Identify partitions
-fdisk -l disk.img
+# Identify partitions without attaching the image
+mmls -b 512 disk.img
 
-# Attach the image to a network block device (does not modify the file)
+# Attach a known raw image read-only and force its format
 sudo modprobe nbd max_part=16
-sudo qemu-nbd --connect=/dev/nbd0 --read-only disk.img
+sudo qemu-nbd --connect=/dev/nbd0 --read-only --format=raw disk.img
+lsblk /dev/nbd0 -o NAME,SIZE,RO,TYPE,FSTYPE,LABEL,UUID
 
-# Inspect partitions
-lsblk /dev/nbd0 -o NAME,SIZE,TYPE,FSTYPE,LABEL,UUID
-
-# Mount a partition (e.g. /dev/nbd0p2)
-sudo mount -o ro,uid=$(id -u) /dev/nbd0p2 /mnt
+# Example ext4 partition: prevent journal replay
+sudo mount -o ro,noload /dev/nbd0p2 /mnt/evidence
 ```
 
 Detach when finished:
+
 ```bash
-sudo umount /mnt && sudo qemu-nbd --disconnect /dev/nbd0
+sudo umount /mnt/evidence
+sudo qemu-nbd --disconnect /dev/nbd0
 ```
+
+For qcow2, VMDK or VHD/VHDX, establish the format from trusted provenance or inspect it inside the disposable analysis VM, then replace `--format=raw` with the explicit format. Never rely on host-side format auto-detection for untrusted input.<sup>[[2]](#references)</sup>
 
 ### EWF (E01/EWFX)
 
 ```bash
-# 1. Mount the EWF container
-mkdir /mnt/ewf
+# Verify, then expose the embedded raw media stream
+mkdir -p /mnt/ewf /mnt/evidence
+ewfverify evidence.E01
 ewfmount evidence.E01 /mnt/ewf
 
-# 2. Attach the exposed raw file via qemu-nbd (safer than loop)
-sudo qemu-nbd --connect=/dev/nbd1 --read-only /mnt/ewf/ewf1
-
-# 3. Mount the desired partition (XFS example; use the filesystem-specific option)
+# ewf1 is raw media data; attach it explicitly as raw and read-only
+sudo qemu-nbd --connect=/dev/nbd1 --read-only --format=raw /mnt/ewf/ewf1
+# Example XFS partition
 sudo mount -o ro,norecovery /dev/nbd1p1 /mnt/evidence
 ```
 
 For filesystem-specific no-replay mounts, ext3/ext4 use `noload`, while XFS uses `norecovery` and requires read-only mode.<sup>[[3]](#references)[[4]](#references)</sup>
 
-Alternatively convert on the fly with **xmount**:
+`xmount` can expose a virtual raw view, but that view still contains the original partition table. Feed it into the same `mmls`, isolated `guestmount` or read-only NBD workflow instead of mounting the whole-disk file as a filesystem.<sup>[[21]](#references)</sup>
 
 ```bash
-xmount --in ewf evidence.E01 --out raw /tmp/raw_mount
-mount -o ro /tmp/raw_mount/image.dd /mnt
+mkdir -p /tmp/raw_mount
+xmount --in aewf evidence.E?? --out raw /tmp/raw_mount
+mmls /tmp/raw_mount/evidence.dd
 ```
 
-### LVM / BitLocker / VeraCrypt volumes
+### BitLocker volumes
 
-After attaching the block device (loop or nbd):
+Use read-only mode at both layers. `-u` without a value prompts for the password, which avoids placing it in process arguments or shell history.<sup>[[19]](#references)</sup>
 
 ```bash
-# LVM
-sudo vgchange -ay               # activate logical volumes
-sudo lvscan | grep "/dev/nbd0"
-
-# BitLocker (dislocker)
-sudo dislocker -V /dev/nbd0p3 -u -- /mnt/bitlocker
-sudo mount -o ro /mnt/bitlocker/dislocker-file /mnt/evidence
+mkdir -p /mnt/bitlocker /mnt/evidence
+sudo dislocker -r -V /dev/nbd0p3 -u -- /mnt/bitlocker
+sudo mount -o loop,ro /mnt/bitlocker/dislocker-file /mnt/evidence
 ```
+
+For LUKS or LVM, prefer `guestmount -i --ro`; its appliance can inspect common encrypted and logical-volume layouts without activating a foreign volume group on the host.<sup>[[17]](#references)</sup>
 
 ### kpartx helpers
 
-`kpartx` maps partitions from an image to `/dev/mapper/` automatically:
+`kpartx` creates host device-mapper nodes and therefore is not appropriate for hostile images. When direct mapping is justified, add `-r` so the partition mappings are read-only and remove mappings by passing the same image path used to create them.<sup>[[16]](#references)[[20]](#references)</sup>
 
 ```bash
-sudo kpartx -av disk.img  # creates /dev/mapper/loop0p1, loop0p2 …
-mount -o ro /dev/mapper/loop0p2 /mnt
+sudo kpartx -arv disk.img
+sudo mount -o ro,noload /dev/mapper/loop0p2 /mnt/evidence
+sudo umount /mnt/evidence
+sudo kpartx -dv disk.img
 ```
 
 ### Common mount errors & fixes
 
-For a dirty ext3/ext4 filesystem, use `ro,noload` when journal replay must be prevented.<sup>[[3]](#references)</sup>
-
-| Error | Typical Cause | Fix |
-|-------|---------------|-----|
-| `cannot mount /dev/loop0 read-only` | Journaled FS (ext4) not cleanly unmounted | use `-o ro,noload` |
-| `bad superblock …` | Wrong offset or damaged FS | calculate offset (`sector*size`) or run `fsck -n` on a copy |
-| `mount: unknown filesystem type 'LVM2_member'` | LVM container | activate volume group with `vgchange -ay` |
+| Error | Typical cause | Safe next step |
+|-------|---------------|----------------|
+| `cannot mount ... read-only` | Dirty journaled filesystem | use the filesystem-specific no-replay option such as ext4 `ro,noload` |
+| `bad superblock ...` | Wrong partition/sector offset or damaged filesystem | confirm sector size and offset with `mmls`; run `fsck -n` only on a verified copy |
+| `unknown filesystem type 'LVM2_member'` | The selected partition is an LVM physical volume | let libguestfs inspect it, or isolate manual LVM activation in a disposable VM |
 
 ### Clean-up
 
-Remember to **umount** and **disconnect** loop/nbd devices to avoid leaving dangling mappings that can corrupt further work:
+Unmount filesystems before disconnecting their backing devices. Also remove the FUSE layer for EWF/xmount and any crypt or device-mapper mappings that were created:
 
 ```bash
-umount -Rl /mnt/evidence
-kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0
+sudo umount /mnt/evidence
+sudo qemu-nbd --disconnect /dev/nbd0  # or /dev/nbd1
+fusermount -u /mnt/ewf                # when ewfmount was used
+# fusermount -u /tmp/raw_mount         # when xmount was used
 ```
+
 
 
 ## References
@@ -176,5 +213,21 @@ kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0
 - [2] [QEMU qemu-nbd documentation](https://www.qemu.org/docs/master/tools/qemu-nbd.html)
 - [3] [mount(8) Linux manual page](https://man7.org/linux/man-pages/man8/mount.8.html)
 - [4] [The SGI XFS filesystem (Linux kernel documentation)](https://kernel.org/doc/html/v5.9/admin-guide/xfs.html)
-
+- [5] [SWGDE Best Practices for Digital Evidence Collection](https://www.swgde.org/documents/published-complete-listing/18-f-002-2-0/)
+- [6] [SWGDE Best Practices for Computer Forensic Acquisitions](https://www.swgde.org/wp-content/uploads/2024/03/2023-06-15-SWGDE-Best-Practices-for-Computer-Forensic-Acquisitions-17-F-002-2.0.pdf)
+- [7] [dc3dd(1) manual page](https://manpages.opensuse.org/Leap-16.0/dc3dd/dc3dd.1.en.html)
+- [8] [Guymager homepage and configuration documentation](https://guymager.sourceforge.io/)
+- [9] [c-aff4 documentation](https://github.com/Velocidex/c-aff4/blob/master/docs/index.rst)
+- [10] [Exterro FTK Imager formats and verification](https://www.exterro.com/digital-forensics-software)
+- [11] [libewf ewfacquire(1) manual](https://github.com/libyal/libewf/blob/main/manuals/ewfacquire.1)
+- [12] [libewf ewfverify(1) manual](https://github.com/libyal/libewf/blob/main/manuals/ewfverify.1)
+- [13] [Create Amazon EBS snapshots](https://docs.aws.amazon.com/ebs/latest/userguide/ebs-creating-snapshot.html)
+- [14] [Read Amazon EBS snapshots with EBS direct APIs](https://docs.aws.amazon.com/ebs/latest/userguide/readsnapshots.html)
+- [15] [Azure CLI snapshot reference](https://learn.microsoft.com/en-us/cli/azure/snapshot?view=azure-cli-latest)
+- [16] [libguestfs security](https://libguestfs.org/guestfs-security.1.html)
+- [17] [guestmount(1)](https://libguestfs.org/guestmount.1.html)
+- [18] [mmls(1)](https://sleuthkit.org/sleuthkit/man/mmls.html)
+- [19] [dislocker(1)](https://manpages.debian.org/testing/dislocker/dislocker.1.en.html)
+- [20] [kpartx(8)](https://man.archlinux.org/man/kpartx.8.en)
+- [21] [xmount(1)](https://manpages.debian.org/testing/xmount/xmount.1.en.html)
 {{#include ../../banners/hacktricks-training.md}}

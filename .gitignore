@@ -1,6 +1,8 @@
 .dccache
 scripts/
 scripts/*
+!scripts/
+!scripts/test_search.js
 .DS_Store
 **/.DS_Store
 .vscode
@@ -12,3 +14,5 @@ book/*
 hacktricks-preprocessor.log
 hacktricks-preprocessor-error.log
 searchindex.js
+!scripts/merge_approved_prs.py
+!scripts/test_merge_approved_prs.py
