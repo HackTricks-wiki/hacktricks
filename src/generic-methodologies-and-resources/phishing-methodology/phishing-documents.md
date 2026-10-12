@@ -161,6 +161,14 @@ An HTA is executed using **`mshta.exe`**, which is typically **installed** along
 </script>
 ```
 
+## Fake attachment cards in HTML email
+
+An HTML email can imitate a provider's native attachment-preview card instead of carrying a real attachment. Talos observed a Gmail card rebuilt from four Base64-encoded inline PNG MIME parts. The complete visual control was wrapped in one anchor, and a recipient value in `?m=<target-id>` enabled per-recipient tracking. The link began with `//` rather than `http://` or `https://`; browsers resolve that protocol-relative form, but URL extractors that match only fully qualified URLs can miss it.<sup>[[11]](#references)</sup>
+
+During analysis, inspect the raw MIME instead of trusting the rendered attachment list. Reconstruct how the inline image parts form the visual card, identify its enclosing anchor, and normalize protocol-relative `href` values before extracting URLs.<sup>[[11]](#references)</sup>
+
+For envelope/header sender spoofing and DMARC alignment testing, see [SMTP mail spoofing countermeasures](../../network-services-pentesting/pentesting-smtp/index.html#spf-pass-with-an-unaligned-visible-sender).
+
 ## Forcing NTLM Authentication
 
 There are several ways to **force NTLM authentication "remotely"**, for example, you could add **invisible images** to emails or HTML that the user will access (even HTTP MitM?). Or send the victim the **address of files** that will **trigger** an **authentication** just for **opening the folder.**
@@ -410,4 +418,5 @@ Check the page about **places to steal NTLM creds**:
 - [8] [MITRE ATT&CK – Trusted Developer Utilities Proxy Execution: MSBuild (T1127.001)](https://attack.mitre.org/techniques/T1127/001/)
 - [9] [Elastic Security Labs – GrimResource: Microsoft Management Console for initial access and evasion](https://www.elastic.co/security-labs/threat-command/grimresource)
 - [10] [Microsoft Security Blog – Threat actors leverage tax season to deploy tax-themed phishing campaigns](https://www.microsoft.com/en-us/security/blog/2025/04/03/threat-actors-leverage-tax-season-to-deploy-tax-themed-phishing-campaigns/)
+- [11] [Cisco Talos – UAT-11587 delivery chain and Antino backdoor](https://blog.talosintelligence.com/china-nexus-uat-11587-targets-government-and-policy-organizations-across-asia-with-antino-backdoor/)
 {{#include ../../banners/hacktricks-training.md}}
