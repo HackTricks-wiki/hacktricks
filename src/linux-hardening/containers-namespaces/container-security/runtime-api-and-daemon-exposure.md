@@ -14,6 +14,8 @@ Docker Engine traditionally exposes its privileged API through the local Unix so
 
 containerd, CRI-O, Podman, and kubelet expose similar high-impact surfaces. The names and workflows differ, but the logic does not. If the interface lets the caller create workloads, mount host paths, retrieve credentials, or alter running containers, the interface is a privileged management channel and should be treated accordingly.
 
+A container-management web UI can expose the same boundary without giving the local account direct socket access. For example, [Portainer issue #493](https://github.com/portainer/portainer/issues/493) documented an unauthenticated administrator-password reset in a legacy 1.11.1 build. Treat a locally reachable UI as a review lead only: confirm the installed build and authentication behavior, actual administrator control, and whether its managed endpoint can create containers with a writable host bind mount. [Portainer documents](https://docs.portainer.io/admin/environments/add/docker/socket) that socket-backed management requires access to the Docker socket; a rootless or restricted endpoint changes the host impact. Do not infer the authentication flaw or host-root access from a process name, port, or version string alone.
+
 Common local paths worth checking are:
 
 ```text
