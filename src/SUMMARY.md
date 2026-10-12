@@ -10,6 +10,7 @@
 
 - [Pentesting Methodology](generic-methodologies-and-resources/pentesting-methodology.md)
 - [Fuzzing Methodology](generic-methodologies-and-resources/fuzzing.md)
+- [Proof Assistant and Formal Verification Security](generic-methodologies-and-resources/proof-assistant-formal-verification-security.md)
 - [External Recon Methodology](generic-methodologies-and-resources/external-recon-methodology/README.md)
   - [Database Leaks](generic-methodologies-and-resources/external-recon-methodology/database-leaks.md)
   - [Wide Source Code Search](generic-methodologies-and-resources/external-recon-methodology/wide-source-code-search.md)
@@ -536,6 +537,7 @@
   - [Smali - Decompiling, Modifying, Compiling](mobile-pentesting/android-app-pentesting/smali-changes.md)
   - [Spoofing your location in Play Store](mobile-pentesting/android-app-pentesting/spoofing-your-location-in-play-store.md)
   - [Tapjacking](mobile-pentesting/android-app-pentesting/tapjacking.md)
+  - [Telegram Mini App Privacy Analysis](mobile-pentesting/android-app-pentesting/telegram-mini-app-privacy-analysis.md)
   - [Webview Attacks](mobile-pentesting/android-app-pentesting/webview-attacks.md)
 - [iOS Pentesting Checklist](mobile-pentesting/ios-pentesting-checklist.md)
 - [iOS Pentesting](mobile-pentesting/ios-pentesting/README.md)
