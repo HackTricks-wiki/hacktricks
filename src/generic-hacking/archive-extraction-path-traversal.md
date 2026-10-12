@@ -44,6 +44,27 @@ with zipfile.ZipFile("slip.zip", "w") as z:
 
 Dropping that ZIP into the monitored inbox results in `C:\samples\app\0xdf.txt`, proving traversal outside `C:\samples\queue\` and enabling follow-on primitives (e.g., DLL hijacks).
 
+### User-controlled extraction root
+
+Also test the **directory passed to the extractor**, not only archive member names. An application may derive that directory from a title, project name or other request field. A value such as `../../../../app/module` can move the extraction root outside the upload area before the extractor processes any members. In that case even an archive containing only the safe basename `api.py` can overwrite application code.<sup>[[14]](#references)[[15]](#references)</sup>
+
+```python
+# Vulnerable pattern: the ZIP entries themselves need no ../ components.
+extract_root = os.path.join(site_root, "public", "files", user_title)
+archive.extractall(extract_root)
+```
+
+This is a separate containment boundary from classic Zip-Slip. Validate both the resolved extraction root and every resolved member path. A root check can use path components instead of a string prefix:<sup>[[14]](#references)</sup>
+
+```python
+base = Path(site_root, "public", "files").resolve()
+dest = (base / user_title).resolve()
+if not dest.is_relative_to(base):
+    raise ValueError("extraction root escapes its base")
+```
+
+For a safe test, upload a valid archive containing one canary file and place traversal sequences in each field that may select its extraction directory. Monitor both the intended directory and a disposable outside path. If the destination can reach an imported module, overwriting it can become code execution when workers reload; an HTTP 500 or connection reset during that reload does not prove that the write failed.<sup>[[14]](#references)[[15]](#references)</sup> See also the broader [file upload methodology](../pentesting-web/file-upload/).
+
 ## Advanced Archive-Breakout Primitives
 
 Treat extraction as a sequence of filesystem mutations, not as independent filename checks. An entry that is safe when parsed can become unsafe after an earlier member creates or replaces a link; the same issue appears when an extractor caches a directory as safe and later changes its type.<sup>[[11]](#references)</sup>
@@ -60,6 +81,8 @@ Treat extraction as a sequence of filesystem mutations, not as independent filen
 Compare names using the semantics of the filesystem that will receive them. Useful differential cases include `LINK` versus `link` on case-insensitive filesystems, NFC versus NFD Unicode spellings, compatibility-equivalent names such as `ﬁle` versus `file`, duplicate members that change a path from directory to symlink, and backslashes interpreted as separators only on Windows. Also test ADS-bearing names on NTFS. These cases can make the validator see two paths while the filesystem resolves one.<sup>[[5]](#references)[[11]](#references)</sup>
 
 A compact corpus should therefore test ordered combinations of **directory → symlink → child**, **symlink → colliding regular file**, **hardlink → colliding regular file**, mixed `/` and `\`, absolute/rooted names, and compressed wrappers such as `.tar.gz`. Run it only in a disposable VM/container and watch both the destination and the intended outside canary path.<sup>[[11]](#references)</sup>
+
+ZIP-specific structural ambiguity can make a pre-scan and the real extractor observe different entry names or trees. See [Local-header vs central-directory parser confusion](../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/zips-tricks.md#local-header-vs-central-directory-parser-confusion) rather than trusting the output of only one ZIP library.
 
 ## Real-World Example – WinRAR ≤ 7.12 (CVE-2025-8088)
 
@@ -116,9 +139,30 @@ ESET reported RomCom (Storm-0978/UNC2596) spear-phishing campaigns that attached
 
 Even `tarfile.extractall(filter="data")` and `filter="tar"` have had link-order bypasses. In this case, a hardlink referenced a symlink archived at a deeper path; fallback extraction validated the relative symlink at that deep location but recreated it at the hardlink's shallower location, where the same relative target escaped. This is a useful general test: make validation and materialisation disagree about the base directory or final member type.<sup>[[12]](#references)</sup>
 
+### Node `tar` hardlink target escape through a symlink chain (GHSA-83g3-92jg-28cx)
+
+The Node.js `tar` package's `tar.extract()` accepted a hardlink whose target looked lexically contained but resolved outside the extraction root through two earlier symlinks. The attack works with the default extraction options: destination-parent checks covered the hardlink's in-root name, while the hardlink target was passed to the filesystem without resolving the complete chain for containment. `tar` ≤ 7.5.7 is affected; 7.5.8 patches the issue.<sup>[[13]](#references)</sup>
+
+The important test fixture is the **ordered relationship** between members, not these literal names:<sup>[[13]](#references)</sup>
+
+```text
+a/b/c/up     -> ../..                          (symlink)
+a/b/escape   -> c/up/../..                     (symlink)
+exfil        => a/b/escape/<path-from-parent>  (hardlink)
+```
+
+If extraction succeeds, `exfil` remains visibly inside the output tree but shares an inode with the chosen outside file; reading it leaks that file and writing it modifies the original. This bypass illustrates why checking only the final pathname, stripping absolute prefixes, or blocking `..` in the hardlink header is insufficient: validate link targets after applying all previously extracted filesystem state.<sup>[[13]](#references)</sup>
+
 ## Detection Tips
 
 * **Static inspection** – List both member names and link targets. Flag `../`, `..\\`, absolute/rooted paths, symlinks, hardlinks, special files, duplicate names, type changes, and case/Unicode-equivalent collisions. Preserve entry order during review because the exploit may depend on earlier members.<sup>[[11]](#references)</sup>
+
+  ```bash
+  bsdtar -tvf suspect.tar       # ordered TAR members, types and link targets
+  7z l -slt suspect.7z          # technical metadata, one field per line
+  zipinfo -v suspect.zip        # ZIP central-directory metadata and offsets
+  ```
+
 * **Canonicalisation** – Ensure the resolved parent plus final basename remains beneath the resolved destination (compare path components, not a raw string prefix). Re-check after every preceding member; a one-time `realpath(join(dest, name))` test is vulnerable to link replacement and may fail for a not-yet-created leaf.<sup>[[3]](#references)[[11]](#references)</sup>
 * **Sandbox extraction** – Decompress into a fresh, disposable directory using an extractor with path/symlink checks (for example, bsdtar's default secure checks or 7-Zip ≥ 25.00), then verify the resulting tree contains no outward links. Isolation must prevent an already-triggered escape from reaching host paths.<sup>[[1]](#references)[[9]](#references)</sup>
 * **Downstream reads matter** – A surviving symlink or hardlink can become an arbitrary-file-read primitive when a previewer, CDN, file browser, or package pipeline later opens or serves the extracted name, even if extraction itself created no outside file.<sup>[[11]](#references)</sup>
@@ -126,7 +170,7 @@ Even `tarfile.extractall(filter="data")` and `filter="tar"` have had link-order 
 
 ## Mitigation & Hardening
 
-1. **Update the extractor** – WinRAR 7.13+ and 7-Zip 25.00+ contain fixes for the cited path/symlink issues.<sup>[[1]](#references)[[5]](#references)</sup>
+1. **Update the extractor** – WinRAR 7.13+, 7-Zip 25.00+, and Node `tar` 7.5.8+ contain fixes for the cited path/symlink/link-target issues.<sup>[[1]](#references)[[5]](#references)[[13]](#references)</sup>
 2. Extract archives with “**Do not extract paths**” / “**Ignore paths**” when possible. For untrusted input, reject symbolic links, hardlinks, devices and FIFOs unless the application explicitly needs them.<sup>[[9]](#references)[[11]](#references)</sup>
 3. Extract into a **new empty directory**. Do not merge untrusted members into a tree containing attacker-replaceable paths, and do not reuse a directory planted by an earlier archive.<sup>[[11]](#references)</sup>
 4. On Unix, drop privileges and isolate the destination in a **chroot/mount namespace**; on Windows, use **AppContainer** or a sandbox. A post-extraction scan alone is insufficient because an escaped write occurs before the scan.<sup>[[11]](#references)</sup>
@@ -137,6 +181,8 @@ Even `tarfile.extractall(filter="data")` and `filter="tar"` have had link-order 
 * 2018 – Massive *Zip-Slip* advisory by Snyk affecting many Java/Go/JS libraries.<sup>[[6]](#references)</sup>
 * 2025 – HashiCorp `go-slug` (CVE-2025-0377) TAR extraction traversal in slugs (fixed in v0.16.3).<sup>[[7]](#references)</sup>
 * Any custom extraction logic that validates header strings but not link targets and the final filesystem path used for each write.<sup>[[11]](#references)[[12]](#references)</sup>
+
+
 
 
 
@@ -154,4 +200,7 @@ Even `tarfile.extractall(filter="data")` and `filter="tar"` have had link-order 
 - [10] [NHS England Digital – Proof-of-Concept Exploit Reported for CVE-2025-11001 in 7-Zip](https://digital.nhs.uk/cyber-alerts/2025/cc-4719)
 - [11] [Joshua Rogers – Hacking fun with zip-slips, tar-slips, symlinks, hardlinks, collisions, and more](https://joshua.hu/tarslip-zipslip-symlink-hardlink-generator)
 - [12] [Python Security Announce – CVE-2026-11940 tarfile extraction filter bypass](https://mail.python.org/archives/list/security-announce@python.org/thread/LD6QIISNQFQYOIEPJNEUIPV7S3V76FZH/)
+- [13] [GitHub Security Advisory – node-tar hardlink target escape through symlink chain](https://github.com/isaacs/node-tar/security/advisories/GHSA-83g3-92jg-28cx)
+- [14] [Rhino Security Labs CVE PoC – user-controlled SCORM extraction root](https://raw.githubusercontent.com/RhinoSecurityLabs/CVEs/master/CVE-2026-39405/README.md)
+- [15] [Rhino Security Labs – Multiple Vulnerabilities in Frappe LMS Leading to Remote Code Execution](https://rhinosecuritylabs.com/research/multiple-vulnerabilities-in-frappe-lms-leading-to-remote-code-execution/)
 {{#include ../banners/hacktricks-training.md}}
