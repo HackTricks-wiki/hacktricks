@@ -2,6 +2,10 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
+## Local storage emulators and account keys
+
+An Azure-compatible Blob emulator running in a container can be reachable from its host or bridge network even when the storage service is not exposed externally. Review readable local configuration and backup-file metadata for an account name and key, without printing the key in routine enumeration. [Azurite supports custom local account keys](https://learn.microsoft.com/en-us/azure/storage/common/storage-connect-azurite); [Shared Key authorization](https://learn.microsoft.com/en-us/azure/storage/common/authorize-data-access) can grant broad access to the matching account's data. A key file alone does not establish escalation: confirm the endpoint is reachable, the account and key are accepted, and the specific blob actually contains a usable credential for a higher-privileged identity. If it contains an SSH private key, the corresponding public key must also be authorized for that identity and SSH access must be permitted. Protect and rotate a key once exposure is confirmed.
+
 ## OneDrive
 
 In Windows, you can find the OneDrive folder in `\Users\<username>\AppData\Local\Microsoft\OneDrive`. And inside `logs\Personal` it's possible to find the file `SyncDiagnostics.log` which contains some interesting data regarding the synchronized files:<sup>[[3]](#references)</sup>
