@@ -72,15 +72,6 @@ def other_workflows_active(repo, merger_workflow_id):
                     label = run.get("name") or run.get("id")
                     print(f"Other workflow is {run['status']}: {label}", flush=True)
                     return True
-    for status in ACTIVE_STATUSES:
-        pages = api_pages(
-            f"repos/HackTricks-wiki/HackTricks-Feed/actions/runs?status={status}&per_page=100"
-        )
-        for page in pages:
-            for run in page["workflow_runs"]:
-                if run.get("path") in (".github/workflows/book-conflict-fix.yml", ".github/workflows/book-pr-review.yml"):
-                    print(f"Book maintenance is {run['status']}: {run['name']}", flush=True)
-                    return True
     return False
 
 

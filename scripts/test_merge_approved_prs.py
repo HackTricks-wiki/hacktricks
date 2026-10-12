@@ -67,7 +67,7 @@ class WorkflowActivityTests(unittest.TestCase):
         pages = [{"workflow_runs": [{"workflow_id": 7, "status": "queued"}]}]
         with patch.object(merger, "api_pages", return_value=pages) as request:
             self.assertFalse(merger.other_workflows_active("owner/book", 7))
-        self.assertEqual(request.call_count, 2 * len(merger.ACTIVE_STATUSES))
+        self.assertEqual(request.call_count, len(merger.ACTIVE_STATUSES))
 
     def test_each_active_status_blocks_merging(self):
         for status in merger.ACTIVE_STATUSES:
@@ -76,28 +76,6 @@ class WorkflowActivityTests(unittest.TestCase):
                 return [{"workflow_runs": runs}]
             with self.subTest(status=status), patch.object(merger, "api_pages", side_effect=pages), contextlib.redirect_stdout(io.StringIO()):
                 self.assertTrue(merger.other_workflows_active("owner/book", 7))
-
-    def test_running_feed_maintenance_keeps_the_base_stable_without_disabling(self):
-        def pages(endpoint):
-            if "HackTricks-Feed" in endpoint and "status=in_progress&" in endpoint:
-                return [{"workflow_runs": [{"name": "Saturday HackTricks conflict repair", "path": ".github/workflows/book-conflict-fix.yml", "status": "in_progress"}]}]
-            return [{"workflow_runs": []}]
-        with patch.object(merger, "api_pages", side_effect=pages), contextlib.redirect_stdout(io.StringIO()):
-            self.assertTrue(merger.other_workflows_active("owner/book", 7))
-
-    def test_custom_review_run_name_still_keeps_the_book_base_stable(self):
-        def pages(endpoint):
-            runs = [{"name": "Review owner/book PR queues", "path": ".github/workflows/book-pr-review.yml", "status": "in_progress"}] if "HackTricks-Feed" in endpoint and "status=in_progress&" in endpoint else []
-            return [{"workflow_runs": runs}]
-        with patch.object(merger, "api_pages", side_effect=pages), contextlib.redirect_stdout(io.StringIO()):
-            self.assertTrue(merger.other_workflows_active("owner/book", 7))
-
-    def test_unrelated_feed_jobs_do_not_stop_merging(self):
-        def pages(endpoint):
-            runs = [{"name": "Daily updater", "status": "in_progress"}] if "HackTricks-Feed" in endpoint else []
-            return [{"workflow_runs": runs}]
-        with patch.object(merger, "api_pages", side_effect=pages):
-            self.assertFalse(merger.other_workflows_active("owner/book", 7))
 
     def test_failed_reads_and_invalid_json_are_not_treated_as_idle(self):
         failed = SimpleNamespace(returncode=1, stderr="API unavailable", stdout="")
