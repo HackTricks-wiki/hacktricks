@@ -575,11 +575,11 @@ You can also load C# Assemblies **from PowerShell**, check out [Invoke-SharpLoad
 
 ## NativeAOT WebAssembly repackaging of .NET tools (WasmForge)
 
-Normal `execute-assembly` techniques retain recognizable MSIL and eventually initialize a CLR. **WasmForge** changes the execution substrate instead: it migrates a C# project to the experimental NativeAOT-LLVM WASI target, compiles it ahead of time to WebAssembly, and embeds that module in a Wazero-based Windows PE host. The resulting process does not need the target's CLR, JIT, or `dotnet` host, so rules based only on managed assembly names, CLR loading, AMSI, or .NET ETW lose direct visibility. This is an evasion/packaging technique, not a privilege boundary bypass—the guest keeps the original tool's permissions and observable OS behavior.<sup>[[41]](#references)[[42]](#references)</sup>
+Normal `execute-assembly` techniques retain recognizable MSIL and eventually initialize a CLR. **WasmForge** changes the execution substrate instead: it migrates a C# project to the experimental NativeAOT-LLVM WASI target, compiles it ahead of time to WebAssembly, and embeds that module in a Wazero-based Windows PE host. The resulting process does not need the target's CLR, JIT, or `dotnet` host, so rules based only on managed assembly names, CLR loading, AMSI, or .NET ETW lose direct visibility. This is an evasion/packaging technique, not a privilege boundary bypass—the guest keeps the original tool's permissions and observable OS behavior.<sup>[[44]](#references)[[45]](#references)</sup>
 
 ### Building a C# project
 
-The recommended build path is the project's Docker environment because it includes the .NET 10 SDK, NativeAOT-LLVM workload, WASI SDK 24.0, linker, and signing dependencies. A `.csproj` is auto-detected; the one-shot build performs migration, compatibility patching, WASM compilation, PE forging, and signing.<sup>[[42]](#references)</sup>
+The recommended build path is the project's Docker environment because it includes the .NET 10 SDK, NativeAOT-LLVM workload, WASI SDK 24.0, linker, and signing dependencies. A `.csproj` is auto-detected; the one-shot build performs migration, compatibility patching, WASM compilation, PE forging, and signing.<sup>[[45]](#references)</sup>
 
 ```bash
 # From the WasmForge repository
@@ -591,18 +591,18 @@ GOOS=windows GOARCH=amd64 ./wasmforge build --win32-apis \
   -o seatbelt.exe /path/to/Seatbelt/Seatbelt/
 ```
 
-For troubleshooting or reviewing generated code, split the process into `wasmforge dotnet-migrate <dir>`, `wasmforge dotnet-patch <dir>`, `dotnet publish -c Release -r wasi-wasm`, and a final `wasmforge build --wasm <module> --nativeaot --win32-apis -o <output.exe>`. The build image also uses a `wasm-component-ld` wrapper to avoid the WASI Preview 2 component encoding and produce the plain module expected by the embedded runtime.<sup>[[41]](#references)[[42]](#references)</sup>
+For troubleshooting or reviewing generated code, split the process into `wasmforge dotnet-migrate <dir>`, `wasmforge dotnet-patch <dir>`, `dotnet publish -c Release -r wasi-wasm`, and a final `wasmforge build --wasm <module> --nativeaot --win32-apis -o <output.exe>`. The build image also uses a `wasm-component-ld` wrapper to avoid the WASI Preview 2 component encoding and produce the plain module expected by the embedded runtime.<sup>[[44]](#references)[[45]](#references)</sup>
 
 ### Bridging wasm32 C# to x64 Win32
 
-This is not a transparent recompile. NativeAOT-WASI lacks or changes Windows-oriented BCL features, and a wasm32 guest normally allocates four-byte pointer slots while x64 APIs can return eight-byte pointers. WasmForge addresses both problems with the following generated layers:<sup>[[41]](#references)</sup>
+This is not a transparent recompile. NativeAOT-WASI lacks or changes Windows-oriented BCL features, and a wasm32 guest normally allocates four-byte pointer slots while x64 APIs can return eight-byte pointers. WasmForge addresses both problems with the following generated layers:<sup>[[44]](#references)</sup>
 
 1. A source patcher fixes AOT-specific semantic differences and redirects unsupported registry, pipes, WMI, identity, directory-service, file-version, LSA, and similar calls to `Wf*` helpers.
 2. A P/Invoke scanner emits NativeAOT `DirectPInvoke` mappings so `[DllImport]` calls bind to linked C bridge symbols rather than dynamically loading the declared DLL inside the guest.
 3. Host-bound pointers use `ulong` in C# and `uint64_t` in C. A generic dispatcher forwards the call to the host's Win32 handler; an `out8_mask` marks genuine eight-byte output slots whose upper halves must be retained. Unmarked wasm32-shaped outputs use snapshot/restore protection so an x64 write cannot corrupt the adjacent four bytes.
 4. Dedicated host bridges handle operations that do not fit generic syscall dispatch, such as LSA ticket-cache access, Kerberos/BCrypt operations with structured results, TCP KDC traffic, and LDAP queries.
 
-For example, a wrapper for `version.dll!VerQueryValueW` passes four host addresses and sets bits 2 and 3 (`0xC`) because the value pointer and length are eight-byte output slots. The wrapper itself stays generic and delegates the DLL name, export name, arguments, and mask to `wf_call_v2`; the host performs pointer translation and invokes the native API.<sup>[[41]](#references)</sup>
+For example, a wrapper for `version.dll!VerQueryValueW` passes four host addresses and sets bits 2 and 3 (`0xC`) because the value pointer and length are eight-byte output slots. The wrapper itself stays generic and delegates the DLL name, export name, arguments, and mask to `wf_call_v2`; the host performs pointer translation and invokes the native API.<sup>[[44]](#references)</sup>
 
 ```c
 uint32_t version_VerQueryValueW_v2(uint64_t block, uint64_t subblock,
@@ -614,9 +614,9 @@ uint32_t version_VerQueryValueW_v2(uint64_t block, uint64_t subblock,
 
 ### Limitations and detection pivots
 
-Reflection-heavy code, dynamic assembly loading, arbitrary native callbacks, and complex x64 structures returned into WASM memory can still require per-tool patches or fail outright. Generic WASI Preview 2 sockets may also reach no-op stubs, so supported tools use protocol-specific host shims. Validate each command against a native build instead of assuming feature parity.<sup>[[41]](#references)[[42]](#references)</sup>
+Reflection-heavy code, dynamic assembly loading, arbitrary native callbacks, and complex x64 structures returned into WASM memory can still require per-tool patches or fail outright. Generic WASI Preview 2 sockets may also reach no-op stubs, so supported tools use protocol-specific host shims. Validate each command against a native build instead of assuming feature parity.<sup>[[44]](#references)[[45]](#references)</sup>
 
-The technique shifts telemetry rather than making the payload invisible. Detection can pivot to a PE containing or materializing a WASM module, Wazero-like runtime behavior, unusual host/guest memory allocation and copying, generic direct Win32 dispatch, signing and PE-resource anomalies, plus the resulting API calls and network traffic. The absence of CLR-load, AMSI, or .NET ETW events should therefore not be treated as evidence that a process is benign.<sup>[[41]](#references)</sup>
+The technique shifts telemetry rather than making the payload invisible. Detection can pivot to a PE containing or materializing a WASM module, Wazero-like runtime behavior, unusual host/guest memory allocation and copying, generic direct Win32 dispatch, signing and PE-resource anomalies, plus the resulting API calls and network traffic. The absence of CLR-load, AMSI, or .NET ETW events should therefore not be treated as evidence that a process is benign.<sup>[[44]](#references)</sup>
 
 ## Using Other Programming Languages
 
@@ -648,6 +648,10 @@ As described in [**this blog post**](https://trustedsec.com/blog/abusing-chrome-
  
 
 ## Advanced Evasion
+
+{{#ref}}
+virtualized-payload-execution.md
+{{#endref}}
 
 Evasion is a very complicated topic, sometimes you have to take into account many different sources of telemetry in just one system, so it's pretty much impossible to stay completely undetected in mature environments.
 
@@ -1431,6 +1435,31 @@ Good hunting opportunities mentioned by the authors:
 - P3 is a **cross-process transfer trick**, not a full execution primitive by itself: the copied parameter still needs an execute-permission change and an execution redirection method.
 - `RtlCreateProcessReflection` / Dirty Vanity was considered by the authors but rejected because it internally reaches suspicious primitives such as `NtWriteVirtualMemory` and `NtCreateThreadEx`.
 
+## Console STDIN pipe injection
+
+An interactive console child can also be used as the **payload-transfer primitive**. The injector redirects the child's standard input to a pipe and sends a marker followed by shellcode. After the console program reads the data into its own private memory, the injector finds that buffer, makes it executable and redirects a child thread to it. This avoids `VirtualAllocEx` and `WriteProcessMemory`, but it is still process injection rather than a general EDR bypass.<sup>[[41]](#references)</sup>
+
+Despite the "named-pipe" description, the reference implementation calls `CreatePipe`, which creates an **anonymous pipe**. Windows implements anonymous pipes with uniquely named pipe objects internally, but the PoC neither selects a `\\.\pipe\<name>` path nor calls `CreateNamedPipe`. It creates inheritable handles with a default security descriptor, places the read handle in `STARTUPINFO.hStdInput`, sets `STARTF_USESTDHANDLES`, and launches a new child with handle inheritance enabled. Therefore, this PoC launches the supplied console executable; it does not attach its pipe to an existing process.<sup>[[41]](#references)[[42]](#references)[[43]](#references)</sup>
+
+### Reference workflow
+
+The implementation uses the following chain:<sup>[[41]](#references)</sup>
+
+1. Create anonymous pipe pairs for the child's `STDIN` and `STDOUT`. Clear inheritance on the two parent-side handles and close the child-side duplicates in the parent after process creation.
+2. Launch an interactive executable such as `netsh.exe` or `nslookup.exe` with `CREATE_NEW_CONSOLE`. The child inherits the redirected standard handles.
+3. Send the complete binary `rawData` array with `WriteFile` through the parent-side `STDIN` handle. The console program consumes the bytes and leaves a copy in one of its private committed regions.
+4. Walk the child's address space with `VirtualQueryEx`, read candidate `MEM_PRIVATE` regions with `ReadProcessMemory`, and search for the marker at the beginning of `rawData`.
+5. Change the discovered buffer to `PAGE_EXECUTE_READWRITE` with `VirtualProtectEx`.
+6. Identify the main thread, suspend it, set `RIP` to `found_address + 0x19` with `NtSetContextThread`, and resume it.
+
+```powershell
+InjectSetConsole.exe C:\Windows\System32\netsh.exe
+```
+
+The supplied implementation is x64-specific: it modifies `CONTEXT.Rip`, and its embedded payload is x64 shellcode. `rawData` begins with a 25-byte marker, so executable bytes start at hexadecimal offset `0x19`. When replacing the payload, preserve that layout or update the marker, search vector, array size and execution offset together. The source comments also list `0x0A`, `0x0D` and `0x1A` as bad characters. This workflow does not alter the child's token or privileges.<sup>[[41]](#references)</sup>
+
+For small native helpers and payload compilation patterns, see [Windows C Payloads](windows-local-privilege-escalation/windows-c-payloads.md).
+
 ## SantaStealer Tradecraft for Fileless Evasion and Credential Theft
 
 SantaStealer (aka BluelineStealer) illustrates how modern info-stealers blend AV bypass, anti-analysis and credential access in a single workflow.<sup>[[24]](#references)</sup>
@@ -1511,7 +1540,10 @@ Sleep(exec_delay_seconds * 1000); // config-controlled delay to outlive sandboxe
 - [38] [MDSec Function Peekaboo companion code](https://github.com/mdsecactivebreach/functionpeekaboo)
 - [39] [MDSec - Function Peekaboo: Crafting Self-Masking Functions Using LLVM](https://mdsec.co.uk/2025/10/function-peekaboo-crafting-self-masking-functions-using-llvm/)
 - [40] [Microsoft Learn - VirtualProtect](https://learn.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualprotect)
-- [41] [Praetorian - GhostPack Necromancy: Reforging C# Tools with WasmForge](https://praetorian.com/blog/wasmforge-csharp-ghostpack-edr-evasion)
-- [42] [WasmForge - Compiling C# / .NET Projects](https://github.com/praetorian-inc/wasmforge/blob/main/docs/CSHARP.md)
+- [41] [TwoSevenOneT - InjectSetConsole source](https://github.com/TwoSevenOneT/InjectSetConsole)
+- [42] [Microsoft Learn - CreatePipe function](https://learn.microsoft.com/en-us/windows/win32/api/namedpipeapi/nf-namedpipeapi-createpipe)
+- [43] [Microsoft Learn - Creating a Child Process with Redirected Input and Output](https://learn.microsoft.com/en-us/windows/win32/procthread/creating-a-child-process-with-redirected-input-and-output)
+- [44] [Praetorian - GhostPack Necromancy: Reforging C# Tools with WasmForge](https://praetorian.com/blog/wasmforge-csharp-ghostpack-edr-evasion)
+- [45] [WasmForge - Compiling C# / .NET Projects](https://github.com/praetorian-inc/wasmforge/blob/main/docs/CSHARP.md)
 
 {{#include ../banners/hacktricks-training.md}}
