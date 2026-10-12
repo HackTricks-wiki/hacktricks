@@ -1040,6 +1040,7 @@
 - [Af Unix Msg Oob Uaf Skb Primitives](binary-exploitation/linux-kernel-exploitation/af-unix-msg-oob-uaf-skb-primitives.md)
 - [Android Binder IPC Internals and Kernel Vulnerability Research](binary-exploitation/linux-kernel-exploitation/android-binder-ipc-internals-kernel-vulnerability-research.md)
 - [Arm64 Static Linear Map Kaslr Bypass](binary-exploitation/linux-kernel-exploitation/arm64-static-linear-map-kaslr-bypass.md)
+- [Linux USB Audio Descriptor OOB Reads to KASLR Leaks](binary-exploitation/linux-kernel-exploitation/usb-audio-descriptor-oob-kaslr-leak.md)
 - [Futex PI UAF to Pipe Physical R/W and Workqueue Execution](binary-exploitation/linux-kernel-exploitation/futex-pi-uaf-pipe-buffer-workqueue-usermodehelper.md)
 - [Ksmbd Streams Xattr Oob Write Cve 2025 37947](binary-exploitation/linux-kernel-exploitation/ksmbd-streams_xattr-oob-write-cve-2025-37947.md)
 - [net/sched action-IDR UAF exploitation (CVE-2026-53264)](binary-exploitation/linux-kernel-exploitation/net-sched-action-idr-uaf-cve-2026-53264.md)
