@@ -1027,6 +1027,7 @@
   - [Virtualbox Slirp Nat Packet Heap Exploitation](binary-exploitation/libc-heap/virtualbox-slirp-nat-packet-heap-exploitation.md)
 - [Common Exploiting Problems](binary-exploitation/common-exploiting-problems.md)
   - [QEMU/KVM VM Escape Chains](binary-exploitation/qemu-kvm-vm-escape-chains.md)
+  - [VirtualBox VMSVGA COTable UAF Escape](binary-exploitation/virtualbox-vmsvga-cotable-uaf-escape.md)
 - [Adreno A7xx Sds Rb Priv Bypass Gpu Smmu Kernel Rw](binary-exploitation/linux-kernel-exploitation/adreno-a7xx-sds-rb-priv-bypass-gpu-smmu-kernel-rw.md)
 - [Android Kernel SELinux Bypass After Arbitrary R/W](binary-exploitation/linux-kernel-exploitation/android-kernel-selinux-bypass.md)
 - [Af Unix Msg Oob Uaf Skb Primitives](binary-exploitation/linux-kernel-exploitation/af-unix-msg-oob-uaf-skb-primitives.md)
