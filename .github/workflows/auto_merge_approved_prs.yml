@@ -4,7 +4,7 @@ on:
   issue_comment:
     types: [created, edited]
   workflow_run:
-    workflows: ["*", "!Auto Merge Approved PRs"]
+    workflows: ["Translate All", "Build Master"]
     types: [completed]
   pull_request_target:
     types: [opened, edited, synchronize, reopened, ready_for_review]
@@ -19,7 +19,7 @@ on:
     - cron: "7,22,37,52 * * * *"
 
 concurrency:
-  group: auto-merge-approved-prs
+  group: auto-merge-approved-prs-${{ github.event_name == 'issue_comment' && github.event.issue.number || inputs.pr || 'queue' }}
   cancel-in-progress: false
 
 permissions:
