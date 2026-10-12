@@ -442,6 +442,16 @@ Or from the cli:
 size -m /bin/ls
 ```
 
+### Appended data and reverse-parsed overlays
+
+A loader can keep configuration in appended data instead of a named Mach-O section. A reverse parser then anchors itself on a trailer marker, reads a size stored immediately before it, and uses that value to locate and decrypt the preceding blob. An observed universal loader used this layout for an XOR-encrypted downloader URL:<sup>[[6]](#references)</sup>
+
+```text
+[XOR-encrypted URL][8-byte ciphertext length][SONOMAC1]
+```
+
+When reversing an unfamiliar binary, inspect bytes around recognizable end markers and trace every backward size calculation before assuming that strings or configuration must belong to a load-command section. The marker and XOR key are sample-specific; the reusable technique is the self-describing trailer.
+
 ## Objective-C Common Sections
 
 In `__TEXT` segment (r-x):
@@ -471,5 +481,6 @@ In `__DATA` segment (rw-):
 - [3] [Reading Your Own Entitlements](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/)
 - [4] [carlospolop/machoreader.py (gist)](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4)
 - [5] [Apple Open Source - Mach-O `fat.h` and `loader.h`](https://github.com/apple-oss-distributions/xnu/tree/main/EXTERNAL_HEADERS/mach-o)
+- [6] [Kaspersky Securelist - A new version of the MacSync macOS stealer targets crypto enthusiasts and developers](https://securelist.com/macsync-new-version/121383/)
 
 {{#include ../../../banners/hacktricks-training.md}}

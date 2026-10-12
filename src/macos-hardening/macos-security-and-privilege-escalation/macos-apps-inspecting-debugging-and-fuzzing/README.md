@@ -547,6 +547,7 @@ settings set target.x86-disassembly-flavor intel
 
 - The command **`sysctl hw.model`** normally returns a Mac model identifier on physical hardware and may return a different value in a VM.<sup>[[3]](#references)</sup>
 - Playing with the values of **`hw.logicalcpu`** and **`hw.physicalcpu`** some malwares try to detect if it's a VM.<sup>[[4]](#references)</sup>
+- Native loaders can also query `kern.hv_vmm_present` and `machdep.cpu.brand_string` through `sysctl` before unpacking later stages. One observed chain combined both checks with `ptrace(PT_DENY_ATTACH)`, so a sample may gate decryption on VM and debugger state rather than merely exit at startup.<sup>[[10]](#references)</sup>
 - Some malwares can also **detect** if the machine is **VMware** based on the MAC address (00:50:56).
 - It's also possible to find **if a process is being debugged** with a simple code such us:
   - `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //process being debugged }`
@@ -690,5 +691,6 @@ litefuzz -s -a tcp://localhost:5900 -i input/screenshared-session --reportcrash 
 - [7] [alexomara.com - Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants)
 - [8] [Apple Developer Forums - Xcode structured logs and `Enable-Private-Data`](https://developer.apple.com/forums/thread/738648)
 - [9] [Super User - Showing private data in the macOS unified log](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log)
+- [10] [Kaspersky Securelist - A new version of the MacSync macOS stealer targets crypto enthusiasts and developers](https://securelist.com/macsync-new-version/121383/)
 
 {{#include ../../../banners/hacktricks-training.md}}

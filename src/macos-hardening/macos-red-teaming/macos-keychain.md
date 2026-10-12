@@ -69,11 +69,16 @@ security dump-keychain -a -d
 security find-generic-password -a "Slack" -g
 
 # Change the specified entry's PartitionID value
-security set-generic-password-partition-list -s "test service" -a "test account" -S
+security set-generic-password-partition-list \
+  -s "test service" -a "test account" \
+  -S 'apple-tool:,apple:,teamid:TEAMID' \
+  -k 'KEYCHAIN_PASSWORD' ~/Library/Keychains/login.keychain-db
 
 # Dump specifically the user keychain
 security dump-keychain ~/Library/Keychains/login.keychain-db
 ```
+
+`-S` sets the item's partition list, while `-k` supplies the current Keychain password required to make that change. This does not prove that a later read will be silent. In an observed prototype, adding `apple-tool:`, `apple:`, and a target `teamid:` and then querying the item through `Security.framework` still produced a confirmation prompt. A matching partition ID is only one part of the ACL and trusted-application checks described above, so test the actual read path instead of treating a successful partition-list update as confirmation-free extraction.<sup>[[3]](#references)</sup>
 
 ### APIs
 
@@ -131,5 +136,6 @@ And these are the **requirements** to be able to **export a secret without a pro
 
 - [1] [#OBTS v5.0: "Lock Picking the macOS Keychain" - Cody Thomas](https://www.youtube.com/watch?v=jKE1ZW33JpY)
 - [2] [Apple Developer — kSecACLAuthorizationExportClear](https://developer.apple.com/documentation/security/ksecaclauthorizationexportclear)
+- [3] [Kaspersky Securelist - A new version of the MacSync macOS stealer targets crypto enthusiasts and developers](https://securelist.com/macsync-new-version/121383/)
 
 {{#include ../../banners/hacktricks-training.md}}
