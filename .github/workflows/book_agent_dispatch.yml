@@ -6,7 +6,7 @@ on:
   push:
     branches: [master]
   schedule:
-    - cron: '13,43 * * * *'
+    - cron: '13 */6 * * *'
   workflow_dispatch:
     inputs:
       pr:
@@ -87,5 +87,17 @@ jobs:
               const prs = await github.paginate(github.rest.pulls.list, {
                 ...source, state: 'open', per_page: 100
               });
-              for (const pr of prs) await route(pr.number, false);
+              const changed = context.eventName === 'push'
+                ? new Set((context.payload.commits || []).flatMap(commit =>
+                    [...(commit.added || []), ...(commit.modified || []), ...(commit.removed || [])]))
+                : null;
+              for (const pr of prs) {
+                if (changed?.size) {
+                  const files = await github.paginate(github.rest.pulls.listFiles, {
+                    ...source, pull_number: pr.number, per_page: 100
+                  });
+                  if (!files.some(file => changed.has(file.filename) || changed.has(file.previous_filename))) continue;
+                }
+                await route(pr.number, false);
+              }
             }
