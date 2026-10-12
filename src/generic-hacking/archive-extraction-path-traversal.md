@@ -1,157 +1,186 @@
-# Archive Extraction Path Traversal ("Zip-Slip")
+# Обхід шляху під час розпакування архіву ("Zip-Slip")
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## Огляд
 
-Багато форматів архівів (ZIP, RAR, TAR, 7-ZIP тощо) дозволяють кожному запису містити власний **внутрішній шлях**. Коли утиліта розпакування без перевірки використовує цей шлях, створене ім'я файлу, що містить `..` або **абсолютний шлях** (наприклад, `C:\Windows\System32\`), буде записано за межами вибраного користувачем каталогу.
-Цей клас вразливостей широко відомий як *Zip-Slip* або **archive extraction path traversal**.<sup>[[6]](#references)</sup>
+У багатьох форматах архівів (ZIP, RAR, TAR, 7-ZIP тощо) кожен запис може містити власний **внутрішній шлях**. Якщо утиліта розпакування без перевірки враховує цей шлях, то створене зловмисником ім’я файлу з `..` або **абсолютним шляхом** (наприклад, `C:\Windows\System32\`) призведе до запису файлу за межами каталогу, вибраного користувачем.  
+Цей клас вразливостей широко відомий як *Zip-Slip* або **обхід шляху під час розпакування архіву**.<sup>[[6]](#references)</sup>
 
-Наслідки варіюються від перезапису довільних файлів до безпосереднього досягнення **remote code execution (RCE)** шляхом розміщення payload у місці **auto-run**, наприклад у папці Windows *Startup*.
+Наслідки варіюються від перезапису довільних файлів до безпосереднього досягнення **віддаленого виконання коду (RCE)** шляхом розміщення корисного навантаження в місці **автозапуску**, як-от папка Windows *Startup*.
 
-## Root Cause
+## Першопричина
 
-1. Attacker створює архів, у якому один або кілька заголовків файлів містять:
-* Відносні послідовності обходу (`..\..\..\Users\\victim\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\payload.exe`)
-* Абсолютні шляхи (`C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\payload.exe`)
-* Або створені **symlinks**, які вказують за межі цільового каталогу (поширено в ZIP/TAR на *nix*).
-2. Victim розпаковує архів за допомогою вразливого інструмента, який довіряє вбудованому шляху (або переходить за symlinks), замість того щоб санітизувати його або примусово виконувати розпакування всередині вибраного каталогу.
-3. Файл записується в контрольоване Attacker місце та виконується/завантажується наступного разу, коли система або користувач активує цей шлях.
+1. Зловмисник створює архів, у якому заголовки одного чи кількох файлів містять:
+   * Відносні послідовності обходу каталогів (`..\..\..\Users\\victim\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\payload.exe`)
+   * Абсолютні шляхи (`C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\payload.exe`)
+   * Або створені зловмисником **символьні посилання**, що ведуть за межі цільового каталогу (поширене явище в ZIP/TAR на *nix*). 
+2. Жертва розпаковує архів за допомогою вразливого інструмента, який довіряє вбудованому шляху (або переходить за символьними посиланнями), замість того щоб очищати його чи примусово розпаковувати файли лише в межах вибраного каталогу.
+3. Файл записується в місце, контрольоване зловмисником, і виконується/завантажується, коли система чи користувач наступного разу звертається до цього шляху.
 
-### .NET `Path.Combine` + `ZipArchive` traversal
+### Обхід через `.NET` `Path.Combine` + `ZipArchive`
 
-Поширеним anti-pattern у .NET є об'єднання передбаченого каталогу призначення з **контрольованим користувачем** `ZipArchiveEntry.FullName` і розпакування без нормалізації шляху:<sup>[[4]](#references)[[8]](#references)</sup>
+Поширений антипатерн у .NET — об’єднувати призначення з контрольованим користувачем `ZipArchiveEntry.FullName` і розпаковувати без нормалізації шляху:<sup>[[4]](#references)[[8]](#references)</sup>
+
 ```csharp
 using (var zip = ZipFile.OpenRead(zipPath))
 {
-foreach (var entry in zip.Entries)
-{
-var dest = Path.Combine(@"C:\samples\queue\", entry.FullName); // drops base if FullName is absolute
-entry.ExtractToFile(dest);
-}
+    foreach (var entry in zip.Entries)
+    {
+        var dest = Path.Combine(@"C:\samples\queue\", entry.FullName); // drops base if FullName is absolute
+        entry.ExtractToFile(dest);
+    }
 }
 ```
-- Якщо `entry.FullName` починається з `..\\`, він виконує traversal; якщо це **абсолютний шлях**, компонент зліва повністю відкидається, що дає змогу виконати **запис у довільний файл** як ідентичність розпакування.
-- Архів proof-of-concept для запису в сусідній каталог `app`, за яким стежить планувальник сканера:
+
+- Якщо `entry.FullName` починається з `..\\`, він здійснює обхід; якщо це **абсолютний шлях**, компонент зліва відкидається повністю, що дає змогу **записати довільний файл** під час розпакування.
+- Архів proof-of-concept для запису в сусідній каталог `app`, за яким стежить сканер за розкладом:
+
 ```python
 import zipfile
 with zipfile.ZipFile("slip.zip", "w") as z:
-z.writestr("../app/0xdf.txt", "ABCD")
+    z.writestr("../app/0xdf.txt", "ABCD")
 ```
-Переміщення цього ZIP до monitored inbox призводить до появи `C:\samples\app\0xdf.txt`, що доводить traversal за межі `C:\samples\queue\` і дає змогу застосувати подальші primitives (наприклад, DLL hijacks).
 
-## Advanced Archive-Breakout Primitives
+Розміщення цього ZIP-файлу в контрольованій папці вхідних файлів призводить до появи `C:\samples\app\0xdf.txt`, що доводить traversal за межі `C:\samples\queue\` і дає змогу застосовувати подальші примітиви (наприклад, DLL hijacks).
 
-Розглядайте extraction як послідовність мутацій файлової системи, а не як незалежні перевірки імен файлів. Entry, безпечний під час парсингу, може стати небезпечним після того, як попередній member створить або замінить link; така сама проблема виникає, коли extractor кешує directory як безпечний, а згодом змінює його тип.<sup>[[11]](#references)</sup>
+### Керований користувачем корінь розпакування
 
-### Link pivots and entry collisions
+Також перевіряйте **каталог, переданий засобу розпакування**, а не лише назви елементів архіву. Застосунок може отримувати цей каталог із заголовка, назви проєкту або іншого поля запиту. Значення на кшталт `../../../../app/module` може перемістити корінь розпакування за межі області завантаження ще до обробки будь-яких елементів архіву. У такому разі навіть архів, що містить лише безпечну базову назву `api.py`, може перезаписати код застосунку.<sup>[[14]](#references)[[15]](#references)</sup>
 
-* **Symlink write-through**: створіть `pivot -> /tmp`, а потім витягніть regular member як `pivot/PWNED.txt`. Якщо extractor переходить за першим member під час materialising другого, запис виходить за межі цільового шляху без `..` у другому імені.
-* **Directory-cache/TOCTOU collision**: створіть directory `d/sub/`, замініть `d/sub` на symlink до `/tmp`, а потім додайте `d/sub/PWNED.txt`. Це націлено на extractors, які перевіряють або кешують directory один раз і не перевіряють його повторно перед фінальним записом.
-* **Hardlink read/overwrite**: TAR і RAR можуть представляти hardlinks. Hardlink на наявний host file може розкрити його вміст, якщо пізніший component обслуговує витягнуте ім’я; colliding regular entry натомість може перезаписати пов’язаний inode. Це обмежується правилами щодо same-filesystem і дозволів ОС на hardlinks.
-* **Pre-existing or cross-archive pivot**: повторіть спробу з непорожнім destination. Один archive може встановити link, а подальше extraction може записати через нього, навіть якщо кожен archive проходить stateless header-name check.<sup>[[11]](#references)</sup>
+```python
+# Vulnerable pattern: the ZIP entries themselves need no ../ components.
+extract_root = os.path.join(site_root, "public", "files", user_title)
+archive.extractall(extract_root)
+```
 
-### Filesystem-equivalence collisions
+Це окрема межа ізоляції, відмінна від класичного Zip-Slip. Перевіряйте і визначений шлях кореневого каталогу розпакування, і шлях кожного визначеного елемента. Для перевірки кореневого каталогу можна використовувати компоненти шляху замість рядкового префікса:<sup>[[14]](#references)</sup>
 
-Порівнюйте імена, використовуючи семантику файлової системи, яка прийматиме їх. Корисні differential cases включають `LINK` проти `link` у case-insensitive файлових системах, Unicode-написання NFC проти NFD, compatibility-equivalent імена на кшталт `ﬁle` проти `file`, duplicate members, які змінюють path із directory на symlink, а також backslashes, що інтерпретуються як separators лише у Windows. Також тестуйте імена з ADS на NTFS. Ці випадки можуть призвести до того, що validator бачить два paths, тоді як файлова система визначає один.<sup>[[5]](#references)[[11]](#references)</sup>
+```python
+base = Path(site_root, "public", "files").resolve()
+dest = (base / user_title).resolve()
+if not dest.is_relative_to(base):
+    raise ValueError("extraction root escapes its base")
+```
 
-Отже, компактний corpus має тестувати впорядковані комбінації **directory → symlink → child**, **symlink → colliding regular file**, **hardlink → colliding regular file**, змішані `/` і `\`, absolute/rooted names та compressed wrappers на кшталт `.tar.gz`. Запускайте це лише у disposable VM/container і відстежуйте як destination, так і призначений зовнішній canary path.<sup>[[11]](#references)</sup>
+Для безпечного тестування завантажте валідний архів з одним canary-файлом і додайте послідовності обходу шляху в кожне поле, яке може визначати каталог розпакування. Перевіряйте як цільовий каталог, так і окремий зовнішній шлях. Якщо призначення може охоплювати імпортований модуль, його перезапис може призвести до виконання коду під час перезавантаження workers; HTTP 500 або скидання з’єднання під час цього перезавантаження не доводить, що запис не відбувся.<sup>[[14]](#references)[[15]](#references)</sup> Див. також ширшу [методологію тестування завантаження файлів](../pentesting-web/file-upload/).
 
-ZIP-specific structural ambiguity може призвести до того, що pre-scan і реальний extractor побачать різні entry names або trees. Дивіться [Local-header vs central-directory parser confusion](../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/zips-tricks.md#local-header-vs-central-directory-parser-confusion), а не покладайтеся на результат лише однієї ZIP library.
+## Просунуті примітиви обходу обмежень архівів
 
-## Real-World Example – WinRAR ≤ 7.12 (CVE-2025-8088)
+Розглядайте розпакування як послідовність змін файлової системи, а не як незалежні перевірки імен файлів. Запис, який є безпечним під час розбору, може стати небезпечним після того, як попередній елемент створить або замінить посилання; така сама проблема виникає, коли розпаковувач кешує каталог як безпечний, а згодом змінює його тип.<sup>[[11]](#references)</sup>
 
-WinRAR для Windows і його Windows RAR/UnRAR components не виконували належну валідацію filenames під час extraction. Уразливість використовувала NTFS alternate data streams (ADS), щоб обійти вибраний extraction path і записати files у непередбачені locations.<sup>[[5]](#references)</sup>  
-Шкідливий RAR archive, що містить entry на кшталт:
+### Переходи через посилання та конфлікти записів
+
+* **Запис через symlink**: створіть `pivot -> /tmp`, а потім розпакуйте звичайний елемент як `pivot/PWNED.txt`. Якщо розпаковувач переходить за першим елементом під час створення другого, запис вийде за межі цільового каталогу, навіть якщо в імені другого елемента немає `..`.
+* **Конфлікт кешу каталогу/TOCTOU**: створіть каталог `d/sub/`, замініть `d/sub` на symlink до `/tmp`, а потім створіть `d/sub/PWNED.txt`. Це націлено на розпаковувачі, які перевіряють або кешують каталог один раз і не перевіряють його повторно перед остаточним записом.
+* **Читання/перезапис через hardlink**: TAR і RAR можуть містити hardlink. Hardlink на наявний файл хоста може розкрити його вміст, якщо пізніший компонент обслуговує розпаковане ім’я; натомість конфліктний звичайний елемент може перезаписати inode, на який вказує посилання. Це обмежено правилами тієї самої файлової системи та дозволами ОС на створення hardlink.
+* **Попередньо наявний перехід або перехід між архівами**: повторіть тест із непорожнім цільовим каталогом. Один архів може створити посилання, а під час подальшого розпакування через нього можна записати дані, навіть якщо кожен архів окремо проходить перевірку імен у заголовках без урахування попереднього стану.<sup>[[11]](#references)</sup>
+
+### Колізії еквівалентності файлової системи
+
+Порівнюйте імена з урахуванням семантики файлової системи, у яку їх буде записано. Корисні диференційні випадки: `LINK` і `link` у файлових системах без урахування регістру, Unicode-написання NFC та NFD, еквівалентні за сумісністю імена, наприклад `ﬁle` і `file`, дублікати елементів, які перетворюють шлях із каталогу на symlink, а також зворотні скісні риски, що трактуються як роздільники лише у Windows. Також перевіряйте імена з ADS у NTFS. У таких випадках валідатор може розпізнавати два шляхи, тоді як файлова система трактує їх як один.<sup>[[5]](#references)[[11]](#references)</sup>
+
+Тому компактний набір тестів має перевіряти впорядковані комбінації **каталог → symlink → дочірній елемент**, **symlink → конфліктний звичайний файл**, **hardlink → конфліктний звичайний файл**, змішані `/` і `\`, абсолютні/кореневі імена та стиснуті обгортки, наприклад `.tar.gz`. Запускайте тести лише в одноразовій VM/container і стежте як за цільовим каталогом, так і за призначеним зовнішнім canary-шляхом.<sup>[[11]](#references)</sup>
+
+Структурна неоднозначність, специфічна для ZIP, може призвести до того, що попереднє сканування й справжній розпаковувач побачать різні імена елементів або дерева. Див. [Неузгодженість парсингу локального заголовка та центрального каталогу](../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/zips-tricks.md#local-header-vs-central-directory-parser-confusion), а не покладайтеся лише на результат однієї ZIP-бібліотеки.
+
+## Приклад із реального світу – WinRAR ≤ 7.12 (CVE-2025-8088)
+
+WinRAR для Windows та його компоненти Windows RAR/UnRAR не перевіряли імена файлів під час розпакування. Уразливість використовувала альтернативні потоки даних NTFS (ADS), щоб обійти вибраний шлях розпакування й записати файли в ненавмисні місця.<sup>[[5]](#references)</sup>
+Шкідливий архів RAR із таким елементом:
+
 ```text
 ..\..\..\Users\victim\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\payload.lnk
 ```
-опинився б **за межами** вибраного каталогу в папці *Startup* користувача. ESET спостерігала, як шкідливі LNK-файли розпаковувалися туди й виконувалися під час входу користувача в систему, забезпечуючи persistence і шлях до RCE.<sup>[[5]](#references)</sup>
 
-### Створення PoC Archive (Linux/Mac)
+опинився б **поза** вибраною директорією виводу та в папці *Startup* користувача. ESET виявила, що туди розпаковувалися шкідливі файли LNK і виконувалися під час входу користувача в систему, забезпечуючи закріплення та шлях до RCE.<sup>[[5]](#references)</sup>
 
-Оскільки CVE-2025-8088 використовує traversal path в імені ADS, скористайтеся спеціально створеним генератором для створення RAR, а потім тестуйте розпакування лише в ізольованій lab із вразливою збіркою WinRAR.<sup>[[5]](#references)</sup>
+### Створення архіву PoC (Linux/Mac)
 
-### Спостереження за Exploitation у Wild
+Оскільки CVE-2025-8088 використовує шлях із обходом каталогів в імені ADS, скористайтеся спеціалізованим генератором для створення RAR, а потім тестуйте розпакування лише в ізольованій лабораторії з уразливою збіркою WinRAR.<sup>[[5]](#references)</sup>
 
-ESET повідомила про spear-phishing кампанії RomCom (Storm-0978/UNC2596), у яких додавалися RAR-архіви, що використовували CVE-2025-8088 для розгортання кастомізованих backdoors і сприяння ransomware-операціям.<sup>[[5]](#references)</sup>
+### Виявлені випадки експлуатації в дикій природі
+
+ESET повідомила про spear-phishing-кампанії RomCom (Storm-0978/UNC2596), у яких до листів додавали RAR-архіви, що використовували CVE-2025-8088 для розгортання кастомізованих бекдорів і сприяння операціям із програмами-вимагачами.<sup>[[5]](#references)</sup>
 
 ## Новіші випадки (2024–2026)
 
-### 7-Zip ZIP symlink traversal → RCE (CVE-2025-11001 / ZDI-25-949)
-* **Вразливість**: ZIP entries, які були **symbolic links**, розіменовувалися під час розпакування, що дозволяло attackers вийти за межі destination directory і перезаписати довільні paths. Взаємодія з боку користувача полягає лише у *відкритті/розпакуванні* archive.<sup>[[1]](#references)</sup>
-* **Вразливі версії**: збірки 7-Zip до **25.00**. Flaw в обробці symbolic links було виправлено у версії **25.00** (липень 2025) і пізніших версіях.<sup>[[1]](#references)[[10]](#references)</sup>
-* **Шлях до impact**: Перезаписати `Start Menu/Programs/Startup` або service-run locations → code виконується під час наступного входу в систему або перезапуску service.
-* **Швидкий fixture для обробки symlink (Linux)**:
-```bash
-mkdir -p /tmp/archive-slip-test /tmp/archive-slip-outside
-ln -s /tmp/archive-slip-outside /tmp/archive-slip-test/evil
-cd /tmp/archive-slip-test
-zip -y exploit.zip evil   # -y preserves symlinks
-7z x exploit.zip -o/tmp/archive-slip-target
-```
-Цей archive містить symlink entry, що вказує за межі extraction directory; використовуйте disposable target і перевірте, що extractor не переходить за ним. Для тесту запису також потрібен regular-file entry всередині symlink.
+### Обхід каталогів через символьні посилання в ZIP-файлах 7-Zip → RCE (CVE-2025-11001 / ZDI-25-949)
+* **Помилка**: під час розпакування виконувалося розіменування ZIP-записів, що були **символьними посиланнями**, завдяки чому зловмисники могли вийти за межі каталогу призначення та перезаписати довільні шляхи. Від користувача потрібно лише *відкрити/розпакувати* архів.<sup>[[1]](#references)</sup>
+* **Уразливі версії**: збірки 7-Zip до **25.00**. Помилку обробки символьних посилань виправили у версії **25.00** (липень 2025 року) та новіших.<sup>[[1]](#references)[[10]](#references)</sup>
+* **Шлях впливу**: перезаписати `Start Menu/Programs/Startup` або розташування, звідки запускаються служби → код виконується під час наступного входу в систему або перезапуску служби.
+* **Приклад для тестування обробки символьних посилань (Linux)**:
+  ```bash
+  mkdir -p /tmp/archive-slip-test /tmp/archive-slip-outside
+  ln -s /tmp/archive-slip-outside /tmp/archive-slip-test/evil
+  cd /tmp/archive-slip-test
+  zip -y exploit.zip evil   # -y preserves symlinks
+  7z x exploit.zip -o/tmp/archive-slip-target
+  ```
+  Цей архів містить запис symlink, що вказує за межі каталогу розпакування; використовуйте тимчасову ціль і перевірте, що розпаковувач не переходить за ним. Для тесту запису крізь symlink також потрібен запис звичайного файлу під symlink.
 
-### Колізія symlink у Go mholt/archiver `Unarchive()` (CVE-2025-3445)
-* **Вразливість**: `archiver.Unarchive()` може розпакувати ZIP symlink, а потім розіменувати його, коли пізніший regular member має таке саме ім’я, перетворюючи запис, який начебто відбувається всередині root, на запис за межами root.<sup>[[2]](#references)</sup>
-* **Вразливі версії**: `github.com/mholt/archiver` ≤ 3.5.1 (проєкт тепер deprecated).<sup>[[2]](#references)</sup>
-* **Виправлення**: Перейдіть на `mholt/archives` ≥ 0.1.0 або відхиляйте links і повторно визначайте кожен destination безпосередньо перед його відкриттям.<sup>[[2]](#references)</sup>
-* **Мінімальний генератор collision** (потім викличте `archiver.Unarchive("exploit.zip", "/tmp/safe")`):<sup>[[2]](#references)</sup>
-```python
-import zipfile
+### Go mholt/archiver колізія symlink у `Unarchive()` (CVE-2025-3445)
+* **Помилка**: `archiver.Unarchive()` може розпакувати symlink із ZIP, а потім перейти за ним, коли наступний звичайний запис має таке саме ім’я, перетворивши уявний запис усередині каталогу на запис за його межами.<sup>[[2]](#references)</sup>
+* **Вразливі версії**: `github.com/mholt/archiver` ≤ 3.5.1 (проєкт більше не підтримується).<sup>[[2]](#references)</sup>
+* **Виправлення**: Перейдіть на `mholt/archives` ≥ 0.1.0 або відхиляйте посилання та повторно визначайте шлях призначення безпосередньо перед його відкриттям.<sup>[[2]](#references)</sup>
+* **Мінімальний генератор колізії** (потім викличте `archiver.Unarchive("exploit.zip", "/tmp/safe")`):<sup>[[2]](#references)</sup>
+  ```python
+  import zipfile
 
-with zipfile.ZipFile("exploit.zip", "w") as z:
-link = zipfile.ZipInfo("./x")
-link.create_system = 3
-link.external_attr = 0o120777 << 16
-z.writestr(link, "../../../tmp/PWNED")
-z.writestr("./x", b"owned\n")
-```
+  with zipfile.ZipFile("exploit.zip", "w") as z:
+      link = zipfile.ZipInfo("./x")
+      link.create_system = 3
+      link.external_attr = 0o120777 << 16
+      z.writestr(link, "../../../tmp/PWNED")
+      z.writestr("./x", b"owned\n")
+  ```
 
-### Обхід фільтрованого TAR extraction у CPython (CVE-2026-11940)
+### Обхід фільтрації під час розпакування TAR у CPython (CVE-2026-11940)
 
-Навіть `tarfile.extractall(filter="data")` і `filter="tar"` мали bypass через порядок links. У цьому випадку hardlink посилався на symlink, заархівований за глибшим path; fallback extraction перевіряв relative symlink у цій глибокій location, але відтворював його в мілкішій location hardlink, де той самий relative target виходив за межі. Це корисний загальний тест: зробіть так, щоб validation і materialisation розходилися щодо base directory або final member type.<sup>[[12]](#references)</sup>
+Навіть у `tarfile.extractall(filter="data")` і `filter="tar"` траплялися обходи за порядком посилань. У цьому випадку hardlink посилався на symlink, заархівований за глибшим шляхом; під час резервного розпакування відносний symlink перевірявся в тому глибшому місці, але створювався в менш глибокому місці hardlink, звідки та сама відносна ціль виходила за межі. Це корисний загальний тест: перевірте, чи не розходяться базовий каталог або кінцевий тип елемента під час перевірки та фактичного створення.<sup>[[12]](#references)</sup>
 
-### Escape hardlink target у Node `tar` через symlink chain (GHSA-83g3-92jg-28cx)
+### Вихід цілі hardlink за межі через ланцюжок symlink у Node `tar` (GHSA-83g3-92jg-28cx)
 
-Пакет Node.js `tar` з `tar.extract()` приймав hardlink, target якого лексично здавався таким, що міститься всередині, але через дві попередні symlinks розв’язувався за межами extraction root. Атака працює з default extraction options: перевірки destination-parent охоплювали in-root name hardlink, тоді як hardlink target передавався до filesystem без розв’язання повного chain для перевірки containment. Вразливі версії `tar` ≤ 7.5.7; версія 7.5.8 виправляє цю проблему.<sup>[[13]](#references)</sup>
+Пакет Node.js `tar` у `tar.extract()` приймав hardlink, ціль якого лексично здавалася розташованою всередині каталогу розпакування, але через два раніше створені symlink розв’язувалася в шлях за його межами. Атака працює зі стандартними параметрами розпакування: перевірки батьківського каталогу призначення охоплювали ім’я hardlink усередині кореневого каталогу, тоді як ціль hardlink передавалася файловій системі без перевірки повного ланцюжка на належність до цього каталогу. Уразливі версії `tar` ≤ 7.5.7; у версії 7.5.8 проблему виправлено.<sup>[[13]](#references)</sup>
 
-Важливим test fixture є **впорядкований зв’язок** між members, а не ці literal names:<sup>[[13]](#references)</sup>
+Важливий елемент тестового набору — **порядок розташування** елементів, а не ці буквальні назви:<sup>[[13]](#references)</sup>
+
 ```text
 a/b/c/up     -> ../..                          (symlink)
 a/b/escape   -> c/up/../..                     (symlink)
 exfil        => a/b/escape/<path-from-parent>  (hardlink)
 ```
-Якщо extraction успішне, `exfil` залишається помітним усередині output tree, але спільно використовує inode з вибраним зовнішнім файлом; його читання leak-ає цей файл, а запис змінює оригінал. Цей bypass показує, чому недостатньо перевіряти лише кінцевий pathname, видаляти absolute prefixes або блокувати `..` у hardlink header: link targets потрібно перевіряти після застосування всього раніше extracted filesystem state.<sup>[[13]](#references)</sup>
 
-## Поради щодо виявлення
+Якщо розпакування вдається, `exfil` залишається видимим у дереві вихідних файлів, але має спільний inode з вибраним зовнішнім файлом; читання цього файла призводить до витоку його вмісту, а запис змінює оригінал. Цей обхід показує, чому недостатньо перевіряти лише кінцевий шлях, видаляти абсолютні префікси або блокувати `..` у заголовку hardlink: перевіряйте цілі посилань після застосування всіх попередніх змін файлової системи.<sup>[[13]](#references)</sup>
 
-* **Static inspection** – Перелічіть як імена member-ів, так і link targets. Позначайте `../`, `..\\`, absolute/rooted paths, symlinks, hardlinks, special files, duplicate names, type changes і collisions, еквівалентні з погляду регістру/Unicode. Під час перевірки зберігайте порядок entry, оскільки exploit може залежати від попередніх member-ів.<sup>[[11]](#references)</sup>
+## Поради з виявлення
 
-```bash
-bsdtar -tvf suspect.tar       # ordered TAR members, types and link targets
-7z l -slt suspect.7z          # technical metadata, one field per line
-zipinfo -v suspect.zip        # ZIP central-directory metadata and offsets
-```
+* **Статична перевірка** – Перелічіть імена всіх елементів і цілі посилань. Позначайте `../`, `..\\`, абсолютні шляхи або шляхи від кореня, symlinks, hardlinks, спеціальні файли, дублікати імен, зміну типу та колізії з однаковими символами в різному регістрі або Unicode-еквівалентними символами. Під час перевірки зберігайте порядок елементів, оскільки експлойт може залежати від попередніх елементів.<sup>[[11]](#references)</sup>
 
-* **Canonicalisation** – Переконайтеся, що resolved parent разом із final basename залишається всередині resolved destination (порівнюйте path components, а не raw string prefix). Виконуйте повторну перевірку після кожного попереднього member-а; одноразова перевірка `realpath(join(dest, name))` вразлива до заміни link і може не спрацювати для ще не створеного leaf.<sup>[[3]](#references)[[11]](#references)</sup>
-* **Sandbox extraction** – Decompress-те у свіжу disposable directory за допомогою extractor-а з path/symlink checks (наприклад, стандартних secure checks у bsdtar або 7-Zip ≥ 25.00), а потім перевірте, що resulting tree не містить outward links. Isolation має запобігати тому, щоб уже triggered escape досягав host paths.<sup>[[1]](#references)[[9]](#references)</sup>
-* **Downstream reads matter** – Symlink або hardlink, що залишився, може стати primitive для arbitrary-file-read, коли previewer, CDN, file browser або package pipeline згодом відкриває чи обслуговує extracted name, навіть якщо сама extraction не створила жодного зовнішнього файлу.<sup>[[11]](#references)</sup>
-* **Endpoint monitoring** – Створюйте alert на нові executables, записані до розташувань `Startup`/`Run`/`cron` невдовзі після відкриття archive через WinRAR/7-Zip/etc.
+  ```bash
+  bsdtar -tvf suspect.tar       # ordered TAR members, types and link targets
+  7z l -slt suspect.7z          # technical metadata, one field per line
+  zipinfo -v suspect.zip        # ZIP central-directory metadata and offsets
+  ```
+
+* **Канонікалізація** – Переконайтеся, що resolved parent разом із фінальним basename залишається всередині resolved destination (порівнюйте компоненти шляху, а не сирий префікс рядка). Повторно перевіряйте після кожного попереднього елемента; одноразова перевірка `realpath(join(dest, name))` вразлива до підміни посилання й може не спрацювати для ще не створеного leaf.<sup>[[3]](#references)[[11]](#references)</sup>
+* **Sandbox extraction** – Розпаковуйте в нову тимчасову директорію за допомогою екстрактора з перевірками шляхів/symlink (наприклад, із типово ввімкненими безпечними перевірками bsdtar або 7-Zip ≥ 25.00), а потім переконайтеся, що результівне дерево не містить посилань назовні. Ізоляція має не допустити, щоб уже здійснений вихід за межі директорії досяг шляхів хоста.<sup>[[1]](#references)[[9]](#references)</sup>
+* **Важливе значення мають подальші читання** – Symlink або hardlink, що залишився, може стати примітивом довільного читання файлів, якщо previewer, CDN, файловий браузер або package pipeline пізніше відкриє чи надасть за ім’ям розпакований файл, навіть якщо сама розпаковка не створила файлів за межами директорії.<sup>[[11]](#references)</sup>
+* **Моніторинг кінцевих точок** – Створюйте сповіщення про нові виконувані файли, записані в розташування `Startup`/`Run`/`cron` невдовзі після відкриття архіву у WinRAR/7-Zip тощо.
 
 ## Mitigation & Hardening
 
-1. **Update the extractor** – WinRAR 7.13+, 7-Zip 25.00+ і Node `tar` 7.5.8+ містять fixes для наведених issues із path/symlink/link-target.<sup>[[1]](#references)[[5]](#references)[[13]](#references)</sup>
-2. За можливості extract-те archives з параметрами “**Do not extract paths**” / “**Ignore paths**”. Для untrusted input відхиляйте symbolic links, hardlinks, devices і FIFOs, якщо application явно їх не потребує.<sup>[[9]](#references)[[11]](#references)</sup>
-3. Extract-те у **new empty directory**. Не об’єднуйте untrusted members із tree, що містить paths, які може замінити attacker, і не використовуйте повторно directory, підготовлену попереднім archive.<sup>[[11]](#references)</sup>
-4. В Unix drop-ніть privileges та ізолюйте destination у **chroot/mount namespace**; у Windows використовуйте **AppContainer** або sandbox. Одного post-extraction scan недостатньо, оскільки escaped write відбувається до scan.<sup>[[11]](#references)</sup>
-5. У custom code застосовуйте separator/case/Unicode rules цільової OS і перевіряйте як member, так і link target. Resolve-те й відкривайте destination без переходу за links; не відокремлюйте containment check від подальшої create/replace operation. Validator має використовувати точно такі самі base та link-emulation semantics, як і write path.<sup>[[11]](#references)[[12]](#references)</sup>
+1. **Оновіть екстрактор** – WinRAR 7.13+, 7-Zip 25.00+ і Node `tar` 7.5.8+ містять виправлення для згаданих проблем із шляхами/symlink/цілями посилань.<sup>[[1]](#references)[[5]](#references)[[13]](#references)</sup>
+2. Розпаковуйте архіви з параметром “**Do not extract paths**” / “**Ignore paths**”, коли це можливо. Для недовірених даних відхиляйте symbolic links, hardlinks, devices і FIFOs, якщо вони явно не потрібні застосунку.<sup>[[9]](#references)[[11]](#references)</sup>
+3. Розпаковуйте в **нову порожню директорію**. Не зливайте недовірені елементи з деревом, яке містить шляхи, доступні для підміни зловмисником, і не використовуйте повторно директорію, створену попереднім архівом.<sup>[[11]](#references)</sup>
+4. В Unix скидайте привілеї та ізолюйте destination у **chroot/mount namespace**; у Windows використовуйте **AppContainer** або sandbox. Однієї перевірки після розпаковки недостатньо, оскільки запис за межі директорії відбувається до перевірки.<sup>[[11]](#references)</sup>
+5. У власному коді враховуйте правила цільової ОС щодо роздільників, регістру та Unicode, а також перевіряйте і елемент, і ціль посилання. Розв’язуйте шлях destination і відкривайте його, не переходячи за посиланнями; не відокремлюйте перевірку належності до директорії від подальшої операції створення/заміни. Валідатор має використовувати ті самі базовий шлях і семантику емуляції посилань, що й шлях запису.<sup>[[11]](#references)[[12]](#references)</sup>
 
-## Додаткові / історичні випадки
+## Additional Affected / Historical Cases
 
-* 2018 – Великий *Zip-Slip* advisory від Snyk, що стосувався багатьох Java/Go/JS libraries.<sup>[[6]](#references)</sup>
-* 2025 – HashiCorp `go-slug` (CVE-2025-0377): traversal під час TAR extraction у slugs (виправлено у v0.16.3).<sup>[[7]](#references)</sup>
-* Будь-яка custom extraction logic, яка перевіряє header strings, але не link targets і final filesystem path, що використовується для кожного write.<sup>[[11]](#references)[[12]](#references)</sup>
+* 2018 – Масштабне повідомлення про *Zip-Slip* від Snyk, що стосується багатьох бібліотек Java/Go/JS.<sup>[[6]](#references)</sup>
+* 2025 – HashiCorp `go-slug` (CVE-2025-0377): traversal під час розпакування TAR у slugs (виправлено у v0.16.3).<sup>[[7]](#references)</sup>
+* Будь-яка власна логіка розпакування, яка перевіряє рядки заголовків, але не цілі посилань і фінальний шлях файлової системи, що використовується для кожного запису.<sup>[[11]](#references)[[12]](#references)</sup>
 
 
 
@@ -159,17 +188,19 @@ zipinfo -v suspect.zip        # ZIP central-directory metadata and offsets
 
 ## References
 
-- [1] [Trend Micro ZDI-25-949 – 7-Zip symlink ZIP traversal (CVE-2025-11001)](https://www.zerodayinitiative.com/advisories/ZDI-25-949/)
-- [2] [JFrog Research – mholt/archiver Zip-Slip (CVE-2025-3445)](https://research.jfrog.com/vulnerabilities/archiver-zip-slip/)
-- [3] [Meziantou – Запобігання Zip Slip у .NET](https://www.meziantou.net/prevent-zip-slip-in-dotnet.htm)
-- [4] [0xdf – HTB Bruno ZipSlip → ланцюжок DLL hijack](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
-- [5] [ESET Research – Негайно оновіть WinRAR tools: RomCom та інші використовують zero-day vulnerability (CVE-2025-8088)](https://www.welivesecurity.com/en/eset-research/update-winrar-tools-now-romcom-and-others-exploiting-zero-day-vulnerability/)
-- [6] [Snyk – Публічне розкриття critical arbitrary file overwrite vulnerability: Zip Slip](https://snyk.io/blog/zip-slip-vulnerability/)
-- [7] [HashiCorp – HCSEC-2025-01: go-slug вразливий до Zip Slip attack (CVE-2025-0377)](https://discuss.hashicorp.com/t/hcsec-2025-01-hashicorp-go-slug-vulnerable-to-zip-slip-attack/72719)
+- [1] [Trend Micro ZDI-25-949 – traversal ZIP через symlink у 7-Zip (CVE-2025-11001)](https://www.zerodayinitiative.com/advisories/ZDI-25-949/)
+- [2] [Дослідження JFrog – Zip-Slip у mholt/archiver (CVE-2025-3445)](https://research.jfrog.com/vulnerabilities/archiver-zip-slip/)
+- [3] [Meziantou – Як запобігти Zip Slip у .NET](https://www.meziantou.net/prevent-zip-slip-in-dotnet.htm)
+- [4] [0xdf – ланцюжок HTB Bruno ZipSlip → DLL hijack](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
+- [5] [Дослідження ESET – Оновіть інструменти WinRAR зараз: RomCom та інші експлуатують вразливість zero-day (CVE-2025-8088)](https://www.welivesecurity.com/en/eset-research/update-winrar-tools-now-romcom-and-others-exploiting-zero-day-vulnerability/)
+- [6] [Snyk – Публічне розкриття критичної вразливості довільного перезапису файлів: Zip Slip](https://snyk.io/blog/zip-slip-vulnerability/)
+- [7] [HashiCorp – HCSEC-2025-01: go-slug вразливий до атаки Zip Slip (CVE-2025-0377)](https://discuss.hashicorp.com/t/hcsec-2025-01-hashicorp-go-slug-vulnerable-to-zip-slip-attack/72719)
 - [8] [Microsoft Learn – Метод Path.Combine](https://learn.microsoft.com/en-us/dotnet/api/system.io.path.combine?view=net-7.0)
-- [9] [libarchive – secure extraction flags у bsdtar](https://github.com/libarchive/libarchive/blob/master/tar/bsdtar.c)
-- [10] [NHS England Digital – Для CVE-2025-11001 у 7-Zip повідомлено proof-of-concept exploit](https://digital.nhs.uk/cyber-alerts/2025/cc-4719)
-- [11] [Joshua Rogers – Веселий hacking із zip-slips, tar-slips, symlinks, hardlinks, collisions та іншим](https://joshua.hu/tarslip-zipslip-symlink-hardlink-generator)
-- [12] [Python Security Announce – Обхід extraction filter у tarfile для CVE-2026-11940](https://mail.python.org/archives/list/security-announce@python.org/thread/LD6QIISNQFQYOIEPJNEUIPV7S3V76FZH/)
-- [13] [GitHub Security Advisory – escape hardlink target у node-tar через symlink chain](https://github.com/isaacs/node-tar/security/advisories/GHSA-83g3-92jg-28cx)
+- [9] [libarchive – Прапорці безпечного розпакування bsdtar](https://github.com/libarchive/libarchive/blob/master/tar/bsdtar.c)
+- [10] [NHS England Digital – Повідомлено про proof-of-concept експлойт для CVE-2025-11001 у 7-Zip](https://digital.nhs.uk/cyber-alerts/2025/cc-4719)
+- [11] [Joshua Rogers – Цікаві прийоми з zip-slip, tar-slip, symlink, hardlink, колізіями та іншим](https://joshua.hu/tarslip-zipslip-symlink-hardlink-generator)
+- [12] [Оголошення Python Security – обхід фільтра розпакування tarfile CVE-2026-11940](https://mail.python.org/archives/list/security-announce@python.org/thread/LD6QIISNQFQYOIEPJNEUIPV7S3V76FZH/)
+- [13] [Рекомендація з безпеки GitHub – вихід за межі директорії через ціль hardlink у node-tar із ланцюжком symlink](https://github.com/isaacs/node-tar/security/advisories/GHSA-83g3-92jg-28cx)
+- [14] [PoC CVE від Rhino Security Labs – контрольований користувачем корінь розпакування SCORM](https://raw.githubusercontent.com/RhinoSecurityLabs/CVEs/master/CVE-2026-39405/README.md)
+- [15] [Rhino Security Labs – Кілька вразливостей у Frappe LMS, що призводять до віддаленого виконання коду](https://rhinosecuritylabs.com/research/multiple-vulnerabilities-in-frappe-lms-leading-to-remote-code-execution/)
 {{#include ../banners/hacktricks-training.md}}
