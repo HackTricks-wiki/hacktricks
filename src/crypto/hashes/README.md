@@ -64,7 +64,7 @@ assert raw_hash([b"alice", b"admin"]) == raw_hash([b"aliceadmin", b""])
 
 This becomes exploitable when the verifier believes the digest binds field meanings, but attacker-controlled input can reach a different parser or protocol step that assigns other boundaries. Commitments may gain alternate openings and Fiat-Shamir transcripts may be interpreted as different statements. HMAC prevents [hash length extension](#hash-length-extension-attack), but `HMAC(K, A || B)` still has this tuple-encoding ambiguity because both tuples produce the same message bytes.<sup>[[8]](#references)[[9]](#references)</sup>
 
-Use this audit workflow:
+Use this audit workflow to test whether an ambiguous tuple encoding crosses a security boundary.<sup>[[8]](#references)[[9]](#references)</sup>
 
 1. Find `HASH(A || B)`, `HMAC(K, A || B)`, and consecutive `update()`/`Write()` calls over two or more fields.
 2. Mark every attacker-controlled or variable-length field. Try moving bytes across each boundary while keeping the complete concatenation unchanged. Include empty fields.
@@ -142,5 +142,3 @@ Using a recovered secret against a different account also requires evidence that
 - [9] [Trail of Bits - SequenceHash: multihashing for the rest of us](https://blog.trailofbits.com/2026/10/02/sequencehash-multihashing-for-the-rest-of-us/)
 - [10] [Trail of Bits - SequenceHash Python implementation](https://github.com/trailofbits/sequencehash-py)
 - [11] [C2SP CCTV - SequenceHash test vectors](https://github.com/C2SP/CCTV/tree/main/sequencehash)
-
-{{#include ../../banners/hacktricks-training.md}}
