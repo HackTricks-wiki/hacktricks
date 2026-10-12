@@ -581,6 +581,16 @@ By allowing access to the Interpreter Binaries and the environment on the SMB sh
 
 The repo indicates: Defender still scans the scripts but by utilising Go, Java, PHP etc we have **more flexibility to bypass static signatures**. Testing with random un-obfuscated reverse shell scripts in these languages has proved successful.
 
+## WebAssembly re-hosting for static-analysis evasion
+
+<a id="bridging-linear-memory-to-native-apis"></a>
+<a id="per-build-wasm-vm-polymorphism"></a>
+<a id="camouflaging-the-outer-go-executable"></a>
+
+{{#ref}}
+virtualized-payload-execution.md#webassembly-re-hosting-for-static-analysis-evasion
+{{#endref}}
+
 ## TokenStomping
 
 Token stomping manipulates the access token of a security product such as an EDR or AV. Reducing the token's privileges can leave the process running while preventing it from performing privileged inspection or remediation actions.
