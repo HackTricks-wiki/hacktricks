@@ -5,9 +5,10 @@
 ## Bus Pirate
 
 > [!CAUTION]
-> Verifieer die teikenspanning, pen-uitleg, pull-up-konfigurasie en gemeenskaplike grond voordat jy ’n Bus Pirate koppel. Moenie die Bus Pirate se kragtoevoer op ’n lewendige, teikengevoede bus aktiveer bloot om dit te sniff nie; twee kragtoevoere kan meeding en hardeware beskadig. Die transkripsie hieronder is ’n toestelspesifieke Bus Pirate v3/community-firmware-voorbeeld, nie ’n universele bedradingsresep nie.<sup>[[1]](#references)[[2]](#references)</sup>
+> Verifieer die teikenspanning, penuitleg, optrekreëling en gemeenskaplike aarde voordat jy ’n Bus Pirate koppel. Moenie die Bus Pirate se kragtoevoer op ’n lewendige bus wat deur die teiken aangedryf word aktiveer net om dit af te luister nie; twee kragtoevoere kan met mekaar bots en hardeware beskadig. Die transkripsie hieronder is ’n voorbeeld spesifiek vir Bus Pirate v3/gemeenskapsfermware, nie ’n universele bedradingsresep nie.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Om te toets of ’n Bus Pirate werk, koppel +5V aan VPU en 3.3V aan ADC, kry toegang tot die bus pirate (byvoorbeeld met Tera Term) en gebruik die bevel `~`:
+Om te toets of ’n Bus Pirate werk, koppel +5V aan VPU en 3.3V aan ADC, kry toegang tot die Bus Pirate (byvoorbeeld met Tera Term) en gebruik die opdrag `~`:
+
 ```bash
 # Use command
 HiZ>~
@@ -46,18 +47,20 @@ Any key to exit
 #Press space
 Found 0 errors.
 ```
-Soos jy in die vorige command line kan sien, het dit aangedui dat dit 0 foute gevind het. Dit is baie nuttig om te weet dat dit werk nadat jy dit gekoop het of nadat jy ’n firmware geflits het.
+
+Soos jy in die vorige opdragreël kan sien, het dit aangedui dat 0 foute gevind is. Dit is baie nuttig om te weet dat dit werk nadat jy dit gekoop het of firmware geflash het.
 
 Om met die bus pirate te koppel, kan jy die dokumentasie volg:
 
-![Gebruik command - Druk spasie: Om met die bus pirate te koppel, kan jy die dokumentasie volg](<../../images/image (484).png>)
+![Gebruik opdrag - Druk spasie: Om met die bus pirate te koppel, kan jy die dokumentasie volg](<../../images/image (484).png>)
 
-In hierdie geval is die teiken ’n 24C256-familie-I²C EEPROM. Bevestig die presiese agtervoegsel/datasheet, want die ondersteunde toevoerspanning verskil volgens die onderdeel.<sup>[[3]](#references)</sup>
+In hierdie geval is die teiken ’n 24C256-familie-I²C-EEPROM. Bevestig die presiese agtervoegsel en datablad, want die ondersteunde toevoerspanning wissel na gelang van die onderdeel.<sup>[[3]](#references)</sup>
 
-![Gebruik command - Druk spasie: In hierdie geval gaan ek aan ’n EPROM koppel: ATMEL901 24C256 PU27](<../../images/image (964).png>)
+![Gebruik opdrag - Druk spasie: In hierdie geval gaan ek aan ’n EPROM koppel: ATMEL901 24C256 PU27](<../../images/image (964).png>)
 
-Om met bus pirate te kommunikeer, het ek Tera Term gebruik, gekoppel aan die pirate bus COM-poort met Setup --> Serial Port --> Speed op 115200.\
-In die volgende kommunikasie kan jy sien hoe om die bus pirate voor te berei om met I2C te kommunikeer, asook hoe om na die geheue te skryf en daaruit te lees (Kommentaar verskyn met “#”; moenie verwag dat daardie deel in die kommunikasie sal verskyn nie):
+Om met bus pirate te kommunikeer, het ek Tera Term gebruik, gekoppel aan die COM-poort van die pirate bus met Setup --> Serial Port --> Speed op 115200.\
+In die volgende kommunikasie kan jy sien hoe om die bus pirate voor te berei vir I2C-kommunikasie en hoe om data na die geheue te skryf en daaruit te lees (Opmerkings begin met "#"; moenie daardie deel in die kommunikasie verwag nie):
+
 ```bash
 # Check communication with buspirate
 i
@@ -94,16 +97,16 @@ x. exit(without change)
 # Select I2C
 (1)>4
 I2C mode:
-1. Software
-2. Hardware
+ 1. Software
+ 2. Hardware
 
 # Select Software mode
 (1)>1
 Set speed:
-1. ~5kHz
-2. ~50kHz
-3. ~100kHz
-4. ~240kHz
+ 1. ~5kHz
+ 2. ~50kHz
+ 3. ~100kHz
+ 4. ~240kHz
 
 # Select communication speed
 (1)> 2
@@ -118,9 +121,9 @@ Clutch engaged!!!
 
 # Get macros
 I2C>(0)
-0.Macro menu
-1.7bit address search
-2.I2C sniffer
+ 0.Macro menu
+ 1.7bit address search
+ 2.I2C sniffer
 
 #Get addresses of slaves connected
 I2C>(1)
@@ -156,11 +159,13 @@ WRITE: 0xA1 ACK
 READ: 0x42  ACK 0x42  ACK 0x42  ACK 0x20  ACK 0x48  ACK 0x69  ACK 0x20  ACK 0x44  ACK 0x72  ACK 0x65  ACK 0x67  ACK 0x21  ACK 0x20  ACK 0x41  ACK 0x41  ACK 0x41  ACK 0x00  ACK 0xFF  ACK 0xFF  ACK 0xFF
 NACK
 ```
+
 ### Sniffer
 
-In hierdie scenario gaan ons die I2C-kommunikasie tussen die arduino en die vorige EPROM sniff; jy hoef net met albei toestelle te kommunikeer en dan die bus pirate aan die SCL-, SDA- en GND-penne te koppel:
+In hierdie scenario gaan ons die I2C-kommunikasie tussen die arduino en die vorige EPROM afluister. Jy hoef net albei toestelle te kommunikeer en dan die bus pirate aan die SCL-, SDA- en GND-penne te koppel:
 
-![Lees 20B vanaf adres 0x69 wat vooraf gekonfigureer is - Sniffer: In hierdie scenario gaan ons die I2C-kommunikasie tussen die arduino en die vorige EPROM sniff; jy hoef net...](<../../images/image (166).png>)
+![Read 20B from address 0x69 configured before - Sniffer: In this scenario we are going to sniff the I2C communication between the arduino and the previous EPROM, you just need to...](<../../images/image (166).png>)
+
 ```bash
 I2C>m
 1. HiZ
@@ -178,15 +183,15 @@ x. exit(without change)
 
 (1)>4
 I2C mode:
-1. Software
-2. Hardware
+ 1. Software
+ 2. Hardware
 
 (1)>1
 Set speed:
-1. ~5kHz
-2. ~50kHz
-3. ~100kHz
-4. ~240kHz
+ 1. ~5kHz
+ 2. ~50kHz
+ 3. ~100kHz
+ 4. ~240kHz
 
 (1)>1
 Clutch disengaged!!!
@@ -206,9 +211,51 @@ Sniffer
 Any key to exit
 [0xA0+0x00+0x69+0x41+0x41+0x41+0x20+0x48+0x69+0x20+0x44+0x72+0x65+0x67+0x21+0x20+0x41+0x41+0x41+0x00+]
 ```
+
+## Swartboks-I2C-protokolrekonstruksie
+
+### Identifiseer die bus vanaf aktiewe penne
+
+Wanneer die randtoestel geen penout of datablad het nie, begin passief met ’n hoë-impedansie-logika-ontleder terwyl die oorspronklike gasheer werk. Nadat ’n gemeenskaplike aarde en veilige logikavlak vasgestel is, klassifiseer konstante penne as waarskynlike voedingspennetjies, aardings of penne met optrekweerstande. Vergelyk dan die aktiewe lyne met algemene busse: UART het asinkrone TX/RX-lyne wat onafhanklik in verskillende rigtings werk; konvensionele SPI het gewoonlik ’n klok, chip-select en aparte datarigtings; I2C het ’n gereelde klok plus een tweerigting-datalyn. ’n I2C-dekodering behoort dan 7-bis-teikenadresse, lees-/skryfrigting, ACK/NACK’s en herhalende loonvragte te wys.<sup>[[2]](#references)[[4]](#references)</sup>
+
+Leg verskeie geldige uitruilings vas en bewaar sowel die gedekodeerde grepe as die rou tydsberekening. Herhaalde rame is nuttige bekende-antwoord-toetse vir latere serialiseerders, terwyl verskille tussen versoeke waarskynlike opcode-, indeks-, offset-, lengte-, volgorde- of kontrolesomvelde kan onthul.<sup>[[4]](#references)</sup>
+
+### Herwin die raamformaat uit gasheersagteware
+
+As die randtoestel se firmware ontoeganklik is, haal die **gasheer** se firmware uit en vind die komponent wat die I2C-toestel oopmaak. Soek na stringe en simbole vir die randtoestel se naam, `/dev/i2c-`, opdragbouers, antwoordontleders, terugstel-/initialiseringsroetines en kontrolesomfunksies. Teken vir elke bouer die presiese veldverskuiwings, konstantes, aanvaarde argumentgroottes, loonvraglengte, kontrolesomdekking, kontrolesomgreepvolgorde en teruggekeerde raamlengte aan, eerder as om die formaat uit funksiename af te lei.<sup>[[4]](#references)</sup>
+
+’n Kontrolesomfunksie met die naam `crc16_ccitt` is nie genoeg om ’n preset te kies nie. Bepaal die skuifrigting, tabelindeksgreep, polinoom wat deur die tabel voorgestel word, beginregister, invoer-/uitvoerrefleksie, finale XOR/inversie en die serialiseerder se bytevolgorde op die draad. Byvoorbeeld, ’n laebyte-tabel wat regs skuif en op die omgekeerde polinoom `0x8408` berus, met `0xFFFF` as beginwaarde en komplementering aan die einde, dui op **CRC-16/X-25 (IBM-SDLC)**. ’n Korrekte kontrolesom is dikwels nodig om te verseker dat toetsgevalle verby integriteitsvalidering kom en die opdragontleder bereik.<sup>[[4]](#references)</sup>
+
+Nadat die formaat gerekonstrueer is, soek na kenmerkende simboolname en konstantes in openbare kode. In die MJA1-geval het ’n SDK-omhulsel wat onafhanklik opgespoor is, opdrag-ID’s, argumentvalidering, antwoorddefinisies en die ooreenstemmende CRC-implementering bevestig. Gebruik sulke bronkode as bevestiging, nie as plaasvervanger vir kontrolering van die presiese teikenbinêre lêer en bytevolgorde op die draad nie.<sup>[[4]](#references)[[5]](#references)</sup>
+
+### Stuur rame vanaf ’n Linux-gasheer met root-toegang
+
+’n Gekompromitteerde ingebedde Linux-gasheer kan die randtoestel toets sonder om nog ’n busbeheerder by te voeg. Maak die betrokke adapter oop, kies die 7-bis-adres met `I2C_SLAVE` en stuur ’n raam wat deur ’n toegewyde serialiseerder vervaardig is; behou ’n rou-raammodus vir mutasie en fuzzing.<sup>[[4]](#references)</sup>
+
+```c
+int fd = open("/dev/i2c-0", O_RDWR);
+if (fd < 0 || ioctl(fd, I2C_SLAVE, target_addr) < 0)
+    err(1, "I2C setup");
+if (write(fd, cmd, cmd_len) != cmd_len)
+    err(1, "I2C write");
+ssize_t n = read(fd, resp, resp_size);
+if (n < 0)
+    err(1, "I2C read");
+```
+
+Kruis-kompileer teen ’n toolchain wat met die teiken-SVE en libc versoenbaar is, en vergelyk ontleder-spore van die toetsh kliënt met legitieme verkeer. Transaksiegrense, skryf-/leesvolgorde, vertragings en randtoestand kan saak maak, selfs wanneer die sigbare grepe ooreenstem.<sup>[[4]](#references)</sup>
+
+### Responsgeleide opcode-enumerasie
+
+Sodra die kortste geldige raam en kontrolesom bekend is, enumereer die volledige opcode-wydte en gebruik die protokol se eksplisiete **unsupported-command**-respons as die negatiewe basislyn. ’n Ander resultaat—soos ongeldige argumente, ongeldige toestand of ’n ongedokumenteerde status—dui daarop dat dekodering ’n geïmplementeerde of gedeeltelik geïmplementeerde hanteerder bereik het. Dit bewys **nie** dat die teiken uitbuitbaar is nie; prioritiseer die kandidaat vir gestruktureerde fuzzing van lengte, argumente, toestand en opdragreekse.<sup>[[4]](#references)</sup>
+
+As ’n toets die randtoestel laat vashaak, outomatiseer een geïsoleerde geval per selflaai vanaf ’n eksterne beheerder: koppel via SSH, voer die geval uit, stoor die rou versoek/antwoord en tydsberekening, herlaai of skakel die krag af en weer aan, wag dat gesondheidskontroles herstel, en gaan dan voort. Deur die komponent later na ’n mikrobeheerderbeheerde toetstuig te verskuif, kan deterministiese terugstellings, direkte kragbeheer en vinniger fuzzing moontlik gemaak word.<sup>[[4]](#references)</sup>
+
 ## References
 
 - [1] [Bus Pirate-dokumentasie — I²C](https://docs.buspirate.com/docs/devices/i2c-eeprom/)
-- [2] [NXP — I²C-bus-spesifikasie en gebruikershandleiding](https://www.nxp.com/docs/en/user-guide/UM10204.pdf)
+- [2] [NXP — I²C-busspesifikasie en gebruikershandleiding](https://www.nxp.com/docs/en/user-guide/UM10204.pdf)
 - [3] [Microchip — AT24C256C I²C-seriële EEPROM-datablad](https://ww1.microchip.com/downloads/en/DeviceDoc/AT24C256C-I2C-Compatible-Two-Wire-Serial-EEPROM-256-Kbit-32,768-x-8-20005915A.pdf)
+- [4] [Quarkslab — Swartboks-ondersoek: ’n sekuriteitsontleding van Xiaomi se MJA1 Secure Chip](https://blog.quarkslab.com/black-box-probing-a-security-analysis-of-xiaomis-mja1-secure-chip.html)
+- [5] [Mijia BLE SDK MJA1-kriptografie-omhulsel](https://github.com/iomonad/handshow-firmware/tree/master/components/vendor/common/mijia_ble/libs/cryptography/mja1)
 {{#include ../../banners/hacktricks-training.md}}
