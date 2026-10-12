@@ -65,17 +65,31 @@ def api_items(endpoint):
 def translator_has_capacity(repo):
     """Allow one merge only while no translation is queued for replacement."""
     counts = {}
+    active_run = None
     for status in ("in_progress", *TRANSLATOR_WAITING_STATUSES):
         result = gh_json(["api", f"repos/{repo}/actions/workflows/translate_all.yml/runs?status={status}&per_page=1"])
         count = result.get("total_count") if isinstance(result, dict) else None
         if type(count) is not int or count < 0:
             raise RuntimeError(f"Cannot verify translator {status} count")
         counts[status] = count
+        if status == "in_progress" and count == 1:
+            runs = result.get("workflow_runs")
+            if not isinstance(runs, list) or len(runs) != 1 or type(runs[0].get("id")) is not int:
+                raise RuntimeError("Cannot verify active translator run")
+            active_run = runs[0]["id"]
     running = counts["in_progress"]
     waiting = sum(counts[status] for status in TRANSLATOR_WAITING_STATUSES)
     if waiting or running > 1:
         print(f"Translator capacity unavailable: {running} running, {waiting} waiting; retry after translation completes.", flush=True)
         return False
+    if active_run is not None:
+        jobs = gh_json(["api", f"repos/{repo}/actions/runs/{active_run}/jobs?per_page=100"])
+        listed = jobs.get("jobs") if isinstance(jobs, dict) else None
+        if not isinstance(listed, list) or jobs.get("total_count") != len(listed):
+            raise RuntimeError("Cannot verify all active translator jobs")
+        if any(job.get("status") not in ("in_progress", "completed") for job in listed):
+            print("Translator has queued language jobs; retry after translation completes.", flush=True)
+            return False
     return True
 
 

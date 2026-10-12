@@ -55,17 +55,38 @@ class ApprovalTests(unittest.TestCase):
 class WorkflowActivityTests(unittest.TestCase):
     def test_translator_capacity_allows_one_running_and_no_waiting(self):
         def response(arguments):
+            if "/jobs?" in arguments[1]:
+                return {"total_count": 1, "jobs": [{"status": "in_progress"}]}
             status = arguments[1].split("status=")[1].split("&")[0]
-            return {"total_count": 1 if status == "in_progress" else 0}
+            return {"total_count": 1, "workflow_runs": [{"id": 42}]} if status == "in_progress" else {"total_count": 0}
         with patch.object(merger, "gh_json", side_effect=response):
             self.assertTrue(merger.translator_has_capacity("owner/book"))
+
+    def test_translator_capacity_blocks_queued_language_job(self):
+        def response(arguments):
+            if "/jobs?" in arguments[1]:
+                return {"total_count": 2, "jobs": [{"status": "in_progress"}, {"status": "queued"}]}
+            status = arguments[1].split("status=")[1].split("&")[0]
+            return {"total_count": 1, "workflow_runs": [{"id": 42}]} if status == "in_progress" else {"total_count": 0}
+        with patch.object(merger, "gh_json", side_effect=response), contextlib.redirect_stdout(io.StringIO()):
+            self.assertFalse(merger.translator_has_capacity("owner/book"))
+
+    def test_translator_capacity_fails_closed_if_language_jobs_are_missing(self):
+        def response(arguments):
+            if "/jobs?" in arguments[1]:
+                return {"total_count": 2, "jobs": [{"status": "in_progress"}]}
+            status = arguments[1].split("status=")[1].split("&")[0]
+            return {"total_count": 1, "workflow_runs": [{"id": 42}]} if status == "in_progress" else {"total_count": 0}
+        with patch.object(merger, "gh_json", side_effect=response):
+            with self.assertRaisesRegex(RuntimeError, "Cannot verify all active translator jobs"):
+                merger.translator_has_capacity("owner/book")
 
     def test_translator_capacity_blocks_any_queued_run_or_two_running(self):
         for blocked_status in ("queued", "waiting", "pending", "requested", "two_running"):
             def response(arguments):
                 status = arguments[1].split("status=")[1].split("&")[0]
                 count = 2 if status == "in_progress" and blocked_status == "two_running" else int(status == blocked_status)
-                return {"total_count": count}
+                return {"total_count": count, "workflow_runs": [{"id": 42}]} if count == 1 and status == "in_progress" else {"total_count": count}
             with self.subTest(status=blocked_status), patch.object(merger, "gh_json", side_effect=response), contextlib.redirect_stdout(io.StringIO()):
                 self.assertFalse(merger.translator_has_capacity("owner/book"))
 
