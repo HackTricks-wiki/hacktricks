@@ -4,28 +4,28 @@
 
 ## Mutational Grammar Fuzzing: Coverage naspram semantike
 
-Kod **mutational grammar fuzzing-a**, ulazi se mutiraju tako da ostanu **grammar-valid**. U režimu vođenom coverage-om, kao corpus seeds čuvaju se samo uzorci koji aktiviraju **novi coverage**. Kod **jezičkih ciljeva** (parsera, interpretera, engine-a), ovim se mogu propustiti bagovi koji zahtevaju **semantičke/dataflow lance**, gde izlaz jedne konstrukcije postaje ulaz druge.<sup>[[1]](#references)</sup>
+Kod **mutational grammar fuzzing-a**, ulazi se menjaju tako da ostanu **validni prema gramatici**. U režimu vođenom coverage-om, kao corpus seeds čuvaju se samo uzorci koji ostvaruju **novi coverage**. Kod **jezičkih ciljeva** (parsera, interpretera, engine-a), ovim se mogu propustiti greške koje zahtevaju **semantičke/dataflow lance**, gde izlaz jednog konstrukta postaje ulaz drugog.<sup>[[1]](#references)</sup>
 
-**Način otkaza:** fuzzer pronalazi seeds koji pojedinačno aktiviraju `document()` i `generate-id()` (ili slične primitive), ali **ne čuva povezani dataflow**, pa se uzorak koji je „bliži bugu“ odbacuje jer ne doprinosi novom coverage-u. Kada postoje **3+ zavisna koraka**, nasumična rekombinacija postaje skupa, a povratna informacija o coverage-u ne usmerava pretragu.<sup>[[1]](#references)</sup>
+**Način otkaza:** fuzzer pronalazi seeds koji pojedinačno aktiviraju `document()` i `generate-id()` (ili slične primitive), ali **ne čuva ulančani dataflow**, pa se uzorak „bliži grešci“ odbacuje jer ne povećava coverage. Kada postoje **3+ zavisna koraka**, nasumično ponovno kombinovanje postaje skupo, a povratne informacije o coverage-u ne usmeravaju pretragu.<sup>[[1]](#references)</sup>
 
-**Implikacija:** za gramatike sa mnogo zavisnosti, razmotrite **kombinovanje mutational i generative faza** ili usmeravanje generisanja ka obrascima **function chaining-a** (ne samo ka coverage-u).<sup>[[1]](#references)</sup>
+**Implikacija:** kod gramatika sa mnogo zavisnosti, razmotrite **kombinovanje mutacionih i generativnih faza** ili usmeravanje generisanja ka obrascima **ulančavanja funkcija** (ne samo ka coverage-u).<sup>[[1]](#references)</sup>
 
-## Zamke u raznovrsnosti corpusa
+## Zamke u raznovrsnosti corpus-a
 
-Mutacija vođena coverage-om je **pohlepna**: uzorak koji donosi novi coverage čuva se odmah, često uz zadržavanje velikih neizmenjenih delova. Vremenom corpora postaju **skoro identični duplikati** sa malom strukturnom raznovrsnošću. Agresivna minimizacija može ukloniti koristan kontekst, pa je praktičan kompromis **minimizacija koja uzima u obzir gramatiku** i **zaustavlja se nakon dostizanja minimalnog broja tokena** (smanjuje šum, ali zadržava dovoljno okolne strukture da bi uzorak i dalje bio pogodan za mutacije).<sup>[[1]](#references)</sup>
+Mutacije vođene coverage-om su **pohlepe**: uzorak koji donosi novi coverage odmah se čuva, često uz zadržavanje velikih neizmenjenih delova. Vremenom corpus-i postaju **skoro duplikati** sa malom strukturnom raznovrsnošću. Agresivna minimizacija može ukloniti koristan kontekst, pa je praktičan kompromis **minimizacija koja uvažava gramatiku** i **zaustavlja se nakon dostizanja minimalnog broja tokena** (smanjuje šum, a zadržava dovoljno okolne strukture da bi uzorak ostao pogodan za mutacije).<sup>[[1]](#references)</sup>
 
-Praktično pravilo za corpus pri mutational fuzzing-u glasi: **dajte prednost malom skupu strukturno različitih seed-ova koji maksimizuju coverage-u** u odnosu na veliku gomilu skoro identičnih duplikata. U praksi to obično podrazumeva sledeće.<sup>[[1]](#references)[[3]](#references)</sup>
+Praktično pravilo za corpus pri mutacionom fuzzing-u glasi: **prednost dajte malom skupu strukturno različitih seed-ova koji maksimizuju coverage-u**, umesto velikoj gomili skoro duplikata. U praksi to obično znači sledeće.<sup>[[1]](#references)[[3]](#references)</sup>
 
-- Počnite od **uzoraka iz stvarnog sveta** (javni corpora, crawling, zabeleženi saobraćaj, skupovi fajlova iz ekosistema cilja).
-- Svedite ih na manju meru pomoću **minimizacije corpusa zasnovane na coverage-u**, umesto da zadržite svaki validan uzorak.
-- Zadržite seeds dovoljno malim da mutacije pogađaju smislena polja, umesto da troše većinu ciklusa na nebitne bajtove.
-- Ponovo pokrenite minimizaciju corpusa nakon većih izmena harness-a/instrumentacije, jer se „najbolji“ corpus menja kada se promeni dostupnost putanja.
+- Počnite od **uzoraka iz stvarnog sveta** (javni corpus-i, crawling, zabeležen saobraćaj, skupovi datoteka iz ciljnog ekosistema).
+- Pročistite ih pomoću **minimizacije corpus-a zasnovane na coverage-u**, umesto da zadržite svaki validan uzorak.
+- Seed-ove zadržite **dovoljno malim** da mutacije pogađaju smislena polja, umesto da se većina ciklusa troši na nebitne bajtove.
+- Ponovo pokrenite minimizaciju corpus-a nakon većih izmena harness-a/instrumentacije, jer se „najbolji“ corpus menja kada se promeni dostupnost putanja u programu.
 
-## Mutation koja uzima u obzir poređenja za magic vrednosti
+## Mutacije koje uzimaju u obzir poređenja za magične vrednosti
 
-Čest razlog zbog kog fuzzers prestaju da napreduju nisu sintaksne prepreke, već **direktna poređenja**: magic bajtovi, provere dužine, enum stringovi, kontrolne sume ili vrednosti za usmeravanje parsera koje su zaštićene pomoću `memcmp`, switch tabela ili niza poređenja. Čista nasumična mutacija uzalud troši cikluse pokušavajući da pogodi ove vrednosti bajt po bajt.
+Čest razlog zbog kog fuzzers prestaju da napreduju nisu sintaksne prepreke, već **stroga poređenja**: magični bajtovi, provere dužine, enum stringovi, kontrolne sume ili vrednosti za usmeravanje parsera, koje se proveravaju pomoću `memcmp`, switch tabela ili nizova poređenja. Čiste nasumične mutacije troše cikluse pokušavajući da pogode te vrednosti bajt po bajt.
 
-Za ove ciljeve koristite **praćenje poređenja** (na primer, AFL++ `CMPLOG` / Redqueen-style tokove rada) kako bi fuzzer mogao da posmatra operande neuspelih poređenja i usmerava mutacije ka vrednostima koje ih zadovoljavaju.<sup>[[3]](#references)</sup>
+Za ove ciljeve koristite **praćenje poređenja** (na primer, tokove rada u stilu AFL++ `CMPLOG` / Redqueen), kako bi fuzzer mogao da posmatra operande neuspelih poređenja i usmerava mutacije ka vrednostima koje ih zadovoljavaju.<sup>[[3]](#references)</sup>
 
 ```bash
 ./configure --cc=afl-clang-fast
@@ -42,15 +42,15 @@ afl-fuzz -i in -o out -c ./target.cmplog -- ./target.afl @@
 
 **Praktične napomene:**
 
-- Ovo je posebno korisno kada cilj skriva dublju logiku iza **potpisa datoteka**, **glagola protokola**, **oznaka tipova** ili **bitova funkcionalnosti koji zavise od verzije**.
-- Kombinujte ga sa **dictionaries** izdvojenim iz stvarnih uzoraka, specifikacija protokola ili debug logova. Mali dictionary sa gramatičkim tokenima, nazivima chunkova, glagolima i delimiterima često je vredniji od ogromne generičke liste reči.
-- Ako cilj izvršava mnogo uzastopnih provera, prvo rešite najranija poređenja „magic“, a zatim ponovo minimizujte dobijeni corpus kako bi kasnije faze počele sa već validnim prefiksima.
+- Ovo je naročito korisno kada cilj skriva naprednu logiku iza **potpisa datoteka**, **protocol verbs**, **type tags** ili bitova funkcija koji zavise od verzije.
+- Kombinujte ga sa **rečnicima** izdvojenim iz stvarnih uzoraka, specifikacija protokola ili debug logova. Mali rečnik sa gramatičkim tokenima, nazivima chunk-ova, glagolima i delimiterima često je vredniji od ogromne generičke liste reči.
+- Ako cilj obavlja mnogo uzastopnih provera, prvo rešite najranija poređenja „magic“ vrednosti, a zatim ponovo minimizujte dobijeni korpus kako bi kasnije faze počele od već validnih prefiksa.
 
-## Bogatije povratne informacije kada edge coverage stapa različite putanje
+## Bogatije povratne informacije kada pokrivenost ivica svodi različite putanje na iste
 
-Uobičajeni edge coverage ne može da razlikuje dva izvršavanja koja prolaze kroz isti helper iz različitih pozivalaca ili koriste različite kombinacije grana unutar funkcije. Ovo je važno u deljenim decoderima, dispečerima protokola i helperima interpretera, gde **putanja** do ivice određuje aktivno stanje. Naivno praćenje svakog konteksta pozivanja takođe je rizično: mapa pokrivenosti i red čekanja mogu naglo da porastu. Zato istraživanja context-sensitive fuzzinga preporučuju da se preciziraju samo obećavajući konteksti, umesto da se ceo graf poziva tretira kao context-sensitive.<sup>[[14]](#references)</sup>
+Uobičajena pokrivenost ivica ne može da razlikuje dva izvršavanja koja prolaze kroz isti pomoćni kod, ali imaju različite pozivaoce ili prolaze kroz različite kombinacije grananja unutar funkcije. Ovo je važno u deljenim dekoderima, protocol dispatcher-ima i pomoćnim funkcijama interpretera, gde **putanja** do ivice određuje aktivno stanje. Naivno praćenje svakog konteksta poziva takođe je rizično: mapa pokrivenosti i red čekanja mogu nekontrolisano da narastu. Istraživanja context-sensitive fuzzing-a zato preporučuju da se preciziraju samo obećavajući konteksti, umesto da se ceo graf poziva tretira kao context-sensitive.<sup>[[14]](#references)</sup>
 
-Novije verzije AFL++-a, pored uobičajenog edge coverage-a, nude **Ball-Larus pokrivenost putanja po funkciji**. Ona dodeljuje feature svakoj acikličnoj putanji kroz funkciju; povratne ivice petlji se uklanjaju, pa ova povratna informacija razlikuje kombinacije grana, ali **ne i broj iteracija petlje**. Počnite sa opuštenim nivoom `1`, a zatim strože režime ograničite na sumnjivi kod parsera i mašina stanja, jer broj putanja može eksponencijalno da raste.<sup>[[13]](#references)</sup>
+Novije verzije AFL++ obezbeđuju **Ball-Larus pokrivenost putanja po funkciji** kao dodatak uobičajenoj pokrivenosti ivica. Dodeljuje karakteristiku svakoj acikličkoj putanji kroz funkciju; povratne ivice petlji se uklanjaju, pa ove povratne informacije razlikuju kombinacije grananja, ali **ne i broj iteracija petlje**. Počnite od opuštenog nivoa `1`, a zatim strože režime ograničite na sumnjiv parser/state-machine kod jer broj putanja može eksponencijalno da poraste.<sup>[[13]](#references)</sup>
 
 ```bash
 make clean
@@ -62,7 +62,7 @@ make -j"$(nproc)"
 afl-fuzz -i in -o out -- ./target @@
 ```
 
-Za pomoćnu funkciju koja se poziva sa mnogih bezbednosno relevantnih mesta, LTO režim može da kombinuje putanju svake funkcije sa njenim neposrednim mestom poziva:<sup>[[13]](#references)</sup>
+Za pomoćnu funkciju koja se poziva sa mnogo bezbednosno relevantnih mesta, LTO režim može da kombinuje putanju svake funkcije sa njenim neposrednim mestom poziva:<sup>[[13]](#references)</sup>
 
 ```bash
 make clean
@@ -75,50 +75,50 @@ make -j"$(nproc)"
 afl-fuzz -i in -o out -- ./target @@
 ```
 
-**Smernice za kampanju:** oprezno primenjujte bogatiji feedback i pratite njegovu cenu u map/queue resursima.<sup>[[13]](#references)[[14]](#references)</sup>
+**Smernice za kampanju:** konzervativno primenjujte bogatije povratne informacije i pratite njihov uticaj na mapu pokrivenosti/red.<sup>[[13]](#references)[[14]](#references)</sup>
 
-- Paralelno pokrenite običnu instancu sa edge coverage; bogatiji feedback je koristan samo ako dodatni trošak za queue/map ne smanjuje broj izvršavanja u sekundi.
-- Koristite `AFL_LLVM_ALLOWLIST` da ograničite path/caller instrumentaciju kada velike biblioteke sa mnogo template-a ili generički uslužni kod dominiraju mapom.
-- Funkcije sa prevelikim brojem acikličnih putanja mogu se preskočiti pomoću AFL++; upozorenja tokom kompilacije ukazuju na to da cilj zahteva allowlisting ili manje strog nivo.
-- Caller + path coverage podržava samo jednu dubinu caller-a. Nemojte je kombinovati sa dubljim context stack-ovima.
-- Path ID-jevi mogu da se promene između glavnih verzija LLVM-a. Tokom kampanje koristite isti toolchain i nemojte sinhronizovati korpuse zasnovane na PATH-u kao da su njihovi ID-jevi feature-a stabilni između build-ova.
-- Ovaj feedback dopunjuje `CMPLOG`: praćenje poređenja utvrđuje **koja vrednost prolazi guard**, dok path/caller feedback čuva **koja putanja i kombinacija grana su dovele do njega**.
+- Paralelno pokrenite uobičajenu instancu sa edge-coverage-om; bogatije povratne informacije su korisne samo ako dodatni trošak reda/mape ne smanji broj izvršavanja u sekundi.
+- Koristite `AFL_LLVM_ALLOWLIST` da ograničite instrumentaciju putanja/pozivalaca kada velike biblioteke s mnogo šablona ili generički pomoćni kod dominiraju mapom.
+- Funkcije sa previše acikličnih putanja mogu da se preskoče u AFL++; upozorenja tokom kompilacije ukazuju na to da cilj treba allowlisting ili manje strog nivo.
+- Caller + path coverage podržava samo jedan nivo pozivaoca. Nemojte ga kombinovati sa dubljim stekovima konteksta.
+- ID-jevi putanja mogu da se promene između glavnih verzija LLVM-a. Zadržite isti toolchain tokom kampanje i nemojte sinhronizovati korpuse zasnovane na PATH-u kao da su njihovi ID-jevi funkcija stabilni između verzija.
+- Ove povratne informacije dopunjuju `CMPLOG`: praćenje poređenja rešava pitanje **koja vrednost prolazi kroz zaštitni uslov**, dok povratne informacije o putanji/pozivaocu čuvaju **koja ruta i kombinacija grananja su do njih dovele**.
 
-## Stateful Fuzzing: Sekvence su seed-ovi
+## Stateful fuzzing: sekvence su seed-ovi
 
-Kod **protokola**, **autentifikovanih radnih tokova** i **parsera u više faza**, zanimljiva jedinica često nije jedan blob, već **sekvenca poruka**. Spajanje celog transkripta u jednu datoteku i nasumično menjanje obično je neefikasno, jer fuzzer menja svaki korak podjednako, čak i kada samo kasnija poruka dovodi do krhkog stanja.<sup>[[4]](#references)</sup>
+Kod **protokola**, **autentifikovanih tokova rada** i **višefaznih parsera**, zanimljiva jedinica često nije pojedinačni blob, već **sekvenca poruka**. Spajanje celog transkripta u jednu datoteku i njegovo nasumično menjanje obično je neefikasno jer fuzzer podjednako menja svaki korak, čak i kada samo kasnija poruka stiže do osetljivog stanja.<sup>[[4]](#references)</sup>
 
-Učinkovitiji obrazac je da se **sama sekvenca** tretira kao seed, a da se **uočljivo stanje** (kodovi odgovora, stanja protokola, faze parsera, tipovi vraćenih objekata) koristi kao dodatni feedback.<sup>[[4]](#references)</sup>
+Efikasniji pristup je da se **sama sekvenca** tretira kao seed i da se **uočljivo stanje** (kodovi odgovora, stanja protokola, faze parsera, tipovi vraćenih objekata) koristi kao dodatna povratna informacija.<sup>[[4]](#references)</sup>
 
-- Održavajte **validne poruke prefiksa** nepromenjenim, a mutacije usmerite na poruku koja **pokreće prelaz**.
-- Keširajte identifikatore i vrednosti koje generiše server iz prethodnih odgovora kada od njih zavisi sledeći korak.
-- Dajte prednost mutaciji/splicing-u po poruci, a ne mutiranju celog serijalizovanog transkripta kao neprozirnog bloba.
-- Ako protokol izlaže smislene kodove odgovora, koristite ih kao **jeftin state oracle** za davanje prioriteta sekvencama koje napreduju dublje.
+- Održavajte **validne poruke prefiksa** stabilnim i usmerite izmene na poruku koja **pokreće prelaz**.
+- Keširajte identifikatore i vrednosti koje generiše server iz prethodnih odgovora kada sledeći korak zavisi od njih.
+- Dajte prednost izmenama/ukrštanju pojedinačnih poruka umesto menjanju celog serijalizovanog transkripta kao neprozirnog bloba.
+- Ako protokol izlaže smislene kodove odgovora, koristite ih kao **jeftin oracle stanja** za davanje prioriteta sekvencama koje napreduju dublje.
 
-Iz istog razloga, bagovi u autentifikovanim tokovima, skriveni prelazi ili bagovi parsera koji se javljaju „tek nakon handshake-a“ često promaknu klasičnom fuzzing-u datoteka: fuzzer mora da očuva **redosled, stanje i zavisnosti**, a ne samo strukturu.<sup>[[4]](#references)</sup>
+Iz istog razloga vanilla fuzzing u stilu rada sa datotekama često propušta autentifikovane bagove, skrivene prelaze ili bagove parsera koji se javljaju „tek nakon rukovanja“: fuzzer mora da očuva **redosled, stanje i zavisnosti**, a ne samo strukturu.<sup>[[4]](#references)</sup>
 
 ### Android Binder: fuzzing drajvera sa više klijenata
 
-Visok edge coverage i dalje može da propusti bagove IPC drajvera, jer coverage ne opisuje **vlasništvo nad objektima, brojače referenci, poruke na čekanju, redosled čišćenja ni preplitanje niti**. Stranica [Android Binder IPC internals](../binary-exploitation/linux-kernel-exploitation/android-binder-ipc-internals-kernel-vulnerability-research.md) pokriva model objekata drajvera; ovaj primer se fokusira na harness fuzzera. Android Binder je koristan model: nije dovoljno dosegnuti i putanje za alokaciju i oslobađanje ako fuzzer ne može da navede više procesa da rade nad istim kernel objektom zahtevanim redosledom.<sup>[[15]](#references)</sup>
+Visoka pokrivenost grana i dalje može da propusti bagove IPC drajvera jer pokrivenost ne opisuje **vlasništvo nad objektima, brojače referenci, poruke na čekanju, redosled čišćenja ili preplitanje niti**. Stranica [Android Binder IPC internals](../binary-exploitation/linux-kernel-exploitation/android-binder-ipc-internals-kernel-vulnerability-research.md) obrađuje model objekata drajvera; ovaj primer se fokusira na fuzzer harness. Android Binder je koristan model: nije dovoljno stići i do putanja za alokaciju i do putanja za oslobađanje ako fuzzer ne može da natera više procesa da rade nad istim objektom kernela zahtevanym redosledom.<sup>[[15]](#references)</sup>
 
-#### Modelujte protokol, a ne izolovane `ioctl` baferе
+#### Modelujte protokol, a ne izolovane `ioctl` bafere
 
-Predstavite testni slučaj kao uređenu gramatiku oblika **identitet klijenta + operacija + strukturisani argumenti**. Binder LKL fuzzer koristi protobuf i `libprotobuf-mutator`, uz jedan persistent klijent za context manager i dva obična klijenta. Semantički harness zatim čuva relacije koje bi slepa mutacija bajtova uništila.<sup>[[15]](#references)</sup>
+Predstavite testni slučaj kao uređenu gramatiku **identiteta klijenta + operacije + strukturiranih argumenata**. Binder LKL fuzzer koristi protobuf i `libprotobuf-mutator`, uz jednog persistentnog klijenta upravljača konteksta i dva obična klijenta. Semantički harness zatim čuva odnose koje bi nasumično menjanje bajtova uništilo.<sup>[[15]](#references)</sup>
 
-- Keširajte vrednosti koje vraćaju ranije operacije. Na primer, `BC_FREE_BUFFER` mora ponovo da upotrebi pokazivač na transakциони bafer vraćen prethodnim `ioctl` pozivom.
-- Generišite validne podrazumevane odgovore kako bi sinhrone transakcije mogle da se završe i da kasnije operacije ostanu dostupne.
-- Odbacujte nemoguće prelaze, kao što su transakcije ka samom sebi ili više transakcija na čekanju ka istom cilju.
-- Držite singleton bootstrap stanje izvan resetovanja po ulazu. Binder dozvoljava samo jednu registraciju `BINDER_SET_CONTEXT_MGR` tokom jednog boot-a, pa bi ponovljeno uništavanje i ponovno kreiranje tog klijenta učinilo kasnije ulaze nevalidnim.
+- Keširajte vrednosti vraćene ranijim operacijama. Na primer, `BC_FREE_BUFFER` mora ponovo da koristi pokazivač na bafer transakcije koji je vratio prethodni `ioctl`.
+- Generišite validne podrazumevane odgovore kako bi sinhrone transakcije mogle da se završe, a kasnije operacije ostale dostižne.
+- Odbacujte nemoguće prelaze, kao što su transakcije samom sebi ili više transakcija na čekanju za isti cilj.
+- Držite stanje singleton bootstrap-a izvan resetovanja po ulazu. Binder dozvoljava samo jednu registraciju `BINDER_SET_CONTEXT_MGR` po pokretanju sistema, pa bi stalno uništavanje i ponovno kreiranje tog klijenta učinilo kasnije ulaze nevažećim.
 
-Korisni obrazac za lifetime race jeste da jedan klijent prenese objekat, pokrene čišćenje niti ili procesa, a da prijemni klijent istovremeno oslobodi transakcioni bafer. U primeru CVE-2020-0423, prenos `BINDER_TYPE_WEAK_BINDER`, praćen trkom između `BINDER_THREAD_EXIT` i `BC_FREE_BUFFER`, mogao je da oslobodi ugrađeni `binder_work` dok ga je putanja za čišćenje izlazeće niti još koristila.<sup>[[15]](#references)</sup>
+Korisni obrazac trke oko životnog ciklusa jeste da jedan klijent prenese objekat, pokrene čišćenje niti ili procesa, a zatim istovremeno natera klijenta primaoca da oslobodi bafer transakcije. U primeru CVE-2020-0423, prenos `BINDER_TYPE_WEAK_BINDER`, praćen operacijom `BINDER_THREAD_EXIT` koja se trka sa `BC_FREE_BUFFER`, mogao je da oslobodi ugrađeni `binder_work` dok ga je putanja čišćenja niti koja se gasila još koristila.<sup>[[15]](#references)</sup>
 
-#### Ponovo uvedite kontrolisana preplitanja u kernelu iz userspace-a
+#### Ponovo uvedite kontrolisano preplitanje u kernelu u korisničkom prostoru
 
-[Linux Kernel Library (LKL)](https://github.com/lkl/linux) povezuje stvarni kernel kod sa harness-om iz userspace-a i izlaže njegov syscall interfejs preko `lkl_syscall`. Tako je lako usklađivati protobuf stanje, coverage i KASAN u jednom procesu. LKL, međutim, obično izvršava syscall bez prekidanja druge kernel niti. Za race kampanje umetnite tačke `schedule()` oko odabranih granica zaključavanja/otključavanja i lifetime granica, a zatim prepustite harness-u da nasumično bira sledećeg klijenta pri svakom ustupanju izvršavanja. Pažljivo birajte ove tačke jer svaka od njih umnožava prostor pretrage rasporeda. Randomizovani scheduler koji su opisali istraživači **nije** deo upstream Binder fuzzera.<sup>[[15]](#references)</sup>
+[Linux Kernel Library (LKL)](https://github.com/lkl/linux) povezuje stvarni kernel kod u harness-u za korisnički prostor i izlaže njegov syscall interfejs preko `lkl_syscall`. Tako je jednostavno koordinisati protobuf stanje, pokrivenost i KASAN u jednom procesu. Međutim, LKL obično izvršava syscall bez prekidanja druge niti kernela. Za kampanje trka, umetnite tačke `schedule()` oko odabranih granica zaključavanja/otključavanja i životnog ciklusa, a zatим pustite da harness nasumično bira sledećeg klijenta pri svakom ustupanju izvršavanja. Pažljivo birajte te tačke jer svaka od njih umnožava prostor za pretraživanje rasporeda. Nasumični planer koji su opisali istraživači **nije** deo upstream Binder fuzzera.<sup>[[15]](#references)</sup>
 
-#### Napravite i ponovo reprodukujte serijalizovane regresione seed-ove
+#### Izgradite i ponovo reprodukujte serijalizovane regresione seed-ove
 
-Upstream harness fiksira kompatibilnu verziju `libprotobuf-mutator`, uključuje LKL fuzzing instrumentaciju i KASAN pomoću `LKL_FUZZING=1`, a za Binder uključuje `CONFIG_MMU` pomoću `MMU=1`.<sup>[[16]](#references)</sup>
+Upstream harness fiksira kompatibilnu verziju `libprotobuf-mutator`, omogućava LKL fuzzing instrumentaciju i KASAN pomoću `LKL_FUZZING=1`, a za Binder omogućava `CONFIG_MMU` pomoću `MMU=1`.<sup>[[16]](#references)</sup>
 
 ```bash
 PROTOBUF_MUTATOR_DIR=/tmp/libprotobuf-mutator \
@@ -129,18 +129,18 @@ make -C tools/lkl LKL_FUZZING=1 MMU=1 \
   clean-conf fuzzers -j"$(nproc)"
 ```
 
-Nakon što preuzmete namerno ranjivu reviziju ili primenite rollback zakrpe dokumentovane u upstream-u, serijalizovani seed može da reprodukuje ceo prelaz stanja za više klijenata, bez potrebe da ga rekonstruišete u ad hoc C proof of concept-u:<sup>[[16]](#references)</sup>
+Nakon što proverite namerno ranjivu reviziju ili primenite rollback zakrpe dokumentovane upstream, serijalizovani seed može da reprodukuje čitav prelaz stanja između više klijenata bez rekonstruisanja u ad-hoc C proof of conceptu:<sup>[[16]](#references)</sup>
 
 ```bash
 tools/lkl/fuzzers/binder/binder-fuzzer \
   tools/lkl/fuzzers/binder/seeds/CVE-2023-20938
 ```
 
-Tretirajte nastali KASAN use-after-free kao potvrdu da je seed stigao do ranjivog lifetime puta. To **ne** pokazuje kasnije primitive neophodne za izvršavanje koda u kernelu ili eskalaciju privilegija.<sup>[[16]](#references)</sup>
+Tretirajte dobijeni KASAN use-after-free kao potvrdu da je seed dospeo do ranjive putanje životnog ciklusa. To **ne** dokazuje postojanje kasnijih primitiva potrebnih za izvršavanje koda u kernelu ili eskalaciju privilegija.<sup>[[16]](#references)</sup>
 
-## Trik raznovrsnosti na jednoj mašini (u stilu Jackalope)
+## Trik za raznovrsnost na jednoj mašini (u stilu Jackalope-a)
 
-Praktičan način da se kombinuju **generativna novina** i **ponovna upotreba coverage-a** jeste da se **kratkotrajni worker-i restartuju** dok rade protiv persistent servera. Svaki worker počinje sa praznim corpus-om, sinhronizuje se posle `T` sekundi, zatim radi još `T` sekundi na kombinovanom corpus-u, ponovo se sinhronizuje i izlazi. Tako se dobijaju **sveže strukture u svakoj generaciji**, uz istovremeno korišćenje akumuliranog coverage-a.<sup>[[1]](#references)[[2]](#references)</sup>
+Praktičan način da se kombinuju **generativna novina** i **ponovna upotreba pokrivenosti** jeste da se **kratkotrajni worker-i restartuju** uz rad sa perzistentnim serverom. Svaki worker počinje sa praznim corpus-om, sinhronizuje se nakon `T` sekundi, radi još `T` sekundi koristeći objedinjeni corpus, ponovo se sinhronizuje, a zatim se gasi. Tako se dobijaju **sveže strukture u svakoj generaciji**, uz istovremeno korišćenje akumulirane pokrivenosti.<sup>[[1]](#references)[[2]](#references)</sup>
 
 **Server:**
 
@@ -148,10 +148,10 @@ Praktičan način da se kombinuju **generativna novina** i **ponovna upotreba co
 /path/to/fuzzer -start_server 127.0.0.1:8337 -out serverout
 ```
 
-**Sekvencijalni radnici (primer petlje):**
+**Sekvencijalni worker-i (primer petlje):**
 
 <details>
-<summary>Petlja ponovnog pokretanja Jackalope radnika</summary>
+<summary>Petlja za ponovno pokretanje Jackalope worker-a</summary>
 
 ```python
 import subprocess
@@ -184,85 +184,142 @@ while True:
 
 **Napomene:**
 
-- `-in empty` forsira **novi korpus** pri svakom generisanju.
+- `-in empty` forsira **novi corpus** pri svakom generisanju.
 - `-server_update_interval T` približno simulira **odloženu sinhronizaciju** (prvo novine, kasnije ponovna upotreba).
 - U režimu grammar fuzzing-a, **početna sinhronizacija sa serverom se podrazumevano preskače** (nema potrebe za `-skip_initial_server_sync`).
-- Optimalna vrednost `T` **zavisi od cilja**; najbolje je preći na drugu vrednost kada worker pronađe većinu „lake“ pokrivenosti.
+- Optimalna vrednost `T` zavisi od **cilja**; najbolje je promeniti je nakon što worker pronađe većinu „lake“ pokrivenosti.
 
-## Snapshot Fuzzing Za Ciljeve Koje Je Teško Obuhvatiti Harness-om
+## Snapshot Fuzzing za ciljeve koje je teško pripremiti za testiranje
 
-Kada kod koji želite da testirate postaje dostupan tek **nakon dugotrajne pripreme** (pokretanje VM-a, dovršavanje prijave, primanje paketa, parsiranje kontejnera, inicijalizacija servisa), korisna alternativa je **snapshot fuzzing**: sačuvajte stanje spremnog procesa ili VM-a, ubacite svaki testni slučaj u putanju ulaza cilja, izvršavajte do pada/isteka vremena i vratite snapshot. Tako izbegavate ponavljanje inicijalizacije ili prefiksa protokola, a korisno je za **mrežne servise**, **firmware**, **attack surface nakon autentifikacije** i **binarne ciljeve**.<sup>[[9]](#references)[[10]](#references)</sup>
+Kada kod koji želite da testirate postane dostupan tek **nakon dugotrajne pripreme** (pokretanje VM-a, završetak prijave, prijem paketa, parsiranje kontejnera, inicijalizacija servisa), korisna alternativa je **snapshot fuzzing**: sačuvajte stanje spremnog procesa ili VM-a, ubacite svaki testni slučaj u ulaznu putanju cilja, izvršavajte do pada/vremenskog ograničenja, pa vratite snapshot. Tako se izbegava ponavljanje inicijalizacije ili prefiksa protokola, a korisno je za **mrežne servise**, **firmware**, **površine napada nakon autentifikacije** i **ciljeve dostupne samo kao binarne datoteke**.<sup>[[9]](#references)[[10]](#references)</sup>
 
-1. Pokrenite cilj dok ne bude spreman za zanimljivo stanje.
-2. U tom trenutku napravite snapshot **memorije + registara**.
-3. Za svaki testni slučaj, upišite izmenjeni ulaz direktno u odgovarajući bafer guest-a/procesa.
-4. Izvršavajte do pada/isteka vremena/resetovanja.
-5. Vratite snapshot; za VM ciljeve, vratite samo **izmenjene stranice** ako je to podržano, pa ponovite.
+1. Pokrenite cilj dok ne bude spreman željeni deo izvršavanja.
+2. Napravite snapshot **memorije i registara** u tom trenutku.
+3. Za svaki testni slučaj, upišite izmenjeni ulaz direktno u odgovarajući bafer gosta/procesa.
+4. Izvršavajte do pada/vremenskog ograničenja/resetovanja.
+5. Vratite snapshot; za VM ciljeve, vratite samo **izmenjene stranice** kada je to podržano, pa ponovite postupak.
 
-Postavite snapshot što je moguće bliže prvom skupom koraku parsiranja/dispatch-a, na primer nakon tačke `recv`/`read` ili deserijalizacije paketa, i zabeležite ulazni bafer koji cilj koristi. Ovo prati princip adaptivnog pozicioniranja: pomerajte snapshot dublje u obradu ulaza da biste izbegli ponavljanje posla.<sup>[[11]](#references)</sup>
+Postavite snapshot što je moguće bliže prvom skupom koraku parsiranja/dispečovanja, na primer nakon tačke `recv`/`read` ili deserijalizacije paketa, i zabeležite ulazni bafer koji koristi cilj. Ovo sledi načelo adaptivnog postavljanja: pomerajte snapshot dublje u obradu ulaza kako biste izbegli ponavljanje posla.<sup>[[11]](#references)</sup>
 
-## Introspekcija Harness-a: Rano Otkrijte Površne Fuzzere
+## Istraživanje trka u Linux kernelu pomoću MAccConc
 
-Kada kampanja zastane, problem često nije mutator, već **harness**. Koristite **introspekciju dostupnosti/pokrivenosti** da pronađete funkcije koje su statički dostupne iz vašeg fuzz cilja, ali se retko ili nikada ne pokrivaju dinamički. Takve funkcije obično ukazuju na jedan od tri problema.<sup>[[12]](#references)</sup>
+[MAccConc](https://github.com/googleprojectzero/MAccConc) pretvara vremenski osetljive trke u Linux kernelu u ponovljive rasporede pristupa memoriji. Može automatski da nabroji izvršavanja **A-B-A** u dva konteksta ili da omogući analitičaru da zada ograničenja redosleda putem terminalskog korisničkog interfejsa/grafičkog korisničkog interfejsa. Ovo je eksperimentalni istraživački alat, a ne kompletan concurrency fuzzer: trenutno zahteva LLVM 23+ i kernel projekta sa zakrpama, alati komandne linije podržavaju dve testne niti, a predloženi sloj za fuzzing u userspace-u nije implementiran.<sup>[[17]](#references)[[18]](#references)</sup>
 
-- Harness ulazi u cilj prekasno ili prerano.
-- U seed korpusu nedostaje cela grupa funkcionalnosti.
-- Cilju je zaista potreban **drugi harness**, a ne jedan preveliki harness koji „radi sve“.
+### Prikupljanje tačaka komunikacije između konteksta
 
-Ako koristite tok rada u stilu OSS-Fuzz / ClusterFuzz, Fuzz Introspector može da uporedi statičku dostupnost sa runtime pokrivenošću i generiše izveštaje na osnovu vremenski ograničenog pokretanja ili javnog korpusa.<sup>[[12]](#references)</sup>
+Izgradite instrumentisani kernel sa KASAN outline callback-ovima i podrškom zakrpljenog KCOV-a za beleženje memorije. README projekta takođe preporučuje isključivanje optimizacije sibling-call kako bi stekovi poziva ostali upotrebljivi.<sup>[[17]](#references)[[18]](#references)</sup>
+
+```text
+CONFIG_KASAN=y
+CONFIG_KASAN_OUTLINE=y
+CONFIG_KCOV=y
+CONFIG_KCOV_EXT_RECORDS=y
+CONFIG_KCOV_MEMORY=y
+CONFIG_KALLSYMS_ALL=y
+CONFIG_DEBUG_INFO_DWARF5=y
+CONFIG_PREEMPT=y
+CONFIG_RANDOMIZE_BASE=n
+```
+
+```bash
+export KCFLAGS="-fno-optimize-sibling-calls -mllvm -sanitizer-coverage-prune-blocks=false"
+```
+
+KASAN outline mode (`asan-instrumentation-with-call-threshold=0`) pretvara instrumentirane pristupe u pozive pomoćnih funkcija. MAccConc kernel zakrpe isključuju `asan-opt-same-temp` kako se uzastopni pristupi ne bi spajali; isključite i optimizaciju `asan-opt-globals` kada trke nad globalnim promenljivama moraju biti vidljive. KCOV prenosi dobijene zapise u userspace. Uporedite pristupe iz različitih konteksta izvršavanja i zadržite parove čiji se opsezi bajtova preklapaju i gde bar jedna strana vrši upis; tretirajte `kfree()` kao upis kako bi i promene životnog veka postale kandidati.<sup>[[17]](#references)</sup>
+
+Za rad koji se nastavlja izvan početnog zadatka, kao što su obrada paketa ili RCU callback-ovi, podsistem mora da prosledi KCOV remote-coverage handle. Uzvodni remote KCOV je opcioni i nije automatski dostupan za proizvoljan rad u pozadini, pa izostanak prosleđivanja može učiniti stvarnu interakciju nevidljivom.<sup>[[17]](#references)[[19]](#references)</sup>
+
+### Identifikujte isti dinamički pristup pri svakom pokretanju
+
+Nemojte ponavljati izvršavanje nad konkretnom heap adresom, koja se može promeniti nakon svake alokacije, niti samo nad adresom instrukcije, koja je dvosmislena unutar pomoćnih funkcija kao što su `memcpy()` i `spin_lock()`. MAccConc koristi **count-augmented stack trace**: svaki okvir identifikuje pozvanu funkciju i broj njenog pozivanja unutar pozivaoca, a poslednji element identifikuje instrukciju za pristup memoriji. Zapisi za ulazak u funkciju i izlazak iz nje koje generiše SanitizerCoverage omogućavaju userspace-u da rekonstruiše ovaj dinamički identifikator, koji ostaje stabilan uprkos promenama adresa i nepovezanim promenama toka upravljanja.<sup>[[17]](#references)</sup>
+
+### Pretvorite parove kandidata u prinudne rasporede
+
+Zakrpljeni `KCOV_SET_DI` ioctl povezuje identifikator pristupa sa proširenim brojanjem u steku sa radnjom nad zajedničkom zastavicom.<sup>[[17]](#references)</sup>
+
+| Radnja | Semantika |
+| --- | --- |
+| `DI_STACK_WAKE_PRE` | Postavi zastavicu *N* neposredno pre izabranog pristupa. |
+| `DI_STACK_WAIT` | Pre izabranog pristupa, čekaj u petlji dok se zastavica *N* ne postavi ili dok ne istekne podešeno ograničenje. |
+| `DI_STACK_WAKE_POST` | Postavi zastavicu *N* neposredno nakon izabranog pristupa. |
+
+Za delimično ograničenje **A-happens-before-B**, povežite `DI_STACK_WAKE_POST` sa A, a `DI_STACK_WAIT` sa B, koristeći istu zastavicu. Za potpuno specificiran raspored sa dva konteksta, pokrenite B u blokiranom stanju, zatim neka A probudi B i sačeka na prvoj tački predaje; B obavlja obrnutu radnju na sledećoj tački predaje. Ovo drugo funkcioniše poput determinističkog prebacivanja konteksta i koristi ga automatski A-B-A explorer.<sup>[[17]](#references)</sup>
+
+Minimalna kampanja podrazumeva kompajliranje četvorofunkcijskog testnog slučaja (`test_setup`, dve funkcije niti i `test_end`) kao shared library-ja, prikupljanje traga bez ograničenja, a zatim nabrajanje A-B-A kandidata ili dodavanje ručnih ograničenja oko sumnjivih pristupa.<sup>[[18]](#references)</sup>
+
+```bash
+cc -shared -fPIC -o testcase.so testcase.c
+./kcov-autorace ./testcase.so
+# or interactively:
+./kcov-terminal ./testcase.so
+```
+
+Timeout-e tumačite odvojeno od uspešnih promena redosleda: traženi redosled možda nije moguć zato što lock ili zavisnost pri inicijalizaciji/objavljivanju sprečava drugi kontekst da dođe do tačke ubrizgavanja. Imajte na umu i KASAN-ove slepe tačke: direktni pristupi steku obično se ne instrumentiraju, osim ako postoji mogućnost da prekorače granice; globalne promenljive se izostavljaju pri podrazumevanoj optimizaciji; a trenutni kompajleri ne mogu istovremeno da emituju ASAN i TSAN hookove. Uz to, prototip gubi svoj KCOV bafer kada se guest sruši, zato obezbedite nezavisnu konzolu/oracle za pad.<sup>[[17]](#references)</sup>
+
+Za buduće fuzzing testiranje vođeno konkurentnošću, beležite sažetke pristupa memoriji za svaki ulaz ili syscall, uparujte operacije koje bi formirale tačke komunikacije između konteksta, a zatim istražujte samo te kombinacije. VM snimci stanja stabilizuju globalno stanje i adrese; bez njih, metapodaci o mestu alokacije mogu da apstrahuju objekte između pokretanja. Ovo je predloženo proširenje, a ne mogućnost trenutnih MAccConc userspace alata.<sup>[[17]](#references)</sup>
+
+## Introspekcija harness-a: rano otkrivanje površnih fuzzera
+
+Kada kampanja zapne, problem često nije mutator, već **harness**. Koristite **introspekciju dostižnosti/pokrivenosti** da biste pronašli funkcije koje su statički dostižne iz vašeg fuzz target-a, ali se retko ili nikada ne pokrivaju dinamički. Takve funkcije obično ukazuju na jedan od tri problema.<sup>[[12]](#references)</sup>
+
+- Harness ulazi u target prekasno ili prerano.
+- U korpusu početnih ulaza nedostaje čitava porodica funkcionalnosti.
+- Target-u je zaista potreban **drugi harness**, umesto jednog prevelikog harness-a „radi sve“.
+
+Ako koristite tokove rada u stilu OSS-Fuzz / ClusterFuzz, Fuzz Introspector može da uporedi statičku dostižnost sa pokrivenošću tokom izvršavanja i da generiše izveštaje na osnovu vremenski ograničenog pokretanja ili javnog korpusa.<sup>[[12]](#references)</sup>
 
 ```bash
 python3 infra/helper.py introspector libdwarf --seconds=30
 python3 infra/helper.py introspector libdwarf --public-corpora
 ```
 
-Koristite izveštaj da odlučite da li da dodate novi harness za neproverenu putanju parsera, proširite korpus za određenu funkcionalnost ili podelite monolitni harness na manje ulazne tačke.
+Na osnovu izveštaja odlučite da li da dodate novi harness za neispitanu putanju parsera, proširite korpus za određenu funkciju ili podelite monolitni harness na manje ulazne tačke.
 
-## Izbor fuzz ciljeva i trijaža mutacija na osnovu grafa
+## Izbor fuzz ciljeva na osnovu grafa i trijaža mutacija
 
-Ako već imate **nalaze statičke analize**, **preživele mutacije iz testiranja mutacijama** i **izveštaje o pokrivenosti**, nemojte ih trijažirati kao nezavisne liste. Najpre napravite **graf poziva**, označite čvorove **ciklomatskom složenošću**, **dostupnošću sa entrypoint-a/nepouzdanim ulazom** i svim spoljnim nalazima, a zatim postavite pitanja o grafu.<sup>[[5]](#references)[[6]](#references)</sup>
+Ako već imate **nalaze statičke analize**, **preživele mutacije** i **izveštaje o pokrivenosti**, nemojte ih trijažirati kao nezavisne liste. Najpre napravite **graf poziva**, označite čvorove **ciklomatskom složenošću**, **dostupnošću sa ulaznih tačaka/nepoverljivog ulaza** i svim spoljnim nalazima, a zatim postavljajte pitanja o grafu.<sup>[[5]](#references)[[6]](#references)</sup>
 
-- Koje funkcije velike složenosti su dostupne iz nepouzdanog ulaza?
+- Koje funkcije visoke složenosti su dostupne iz nepoverljivog ulaza?
 - Koje preživele mutacije se nalaze na putanjama od parsera/handlera do bezbednosno kritičnog koda?
-- Koje funkcije predstavljaju arhitektonska uska grla sa neuobičajeno velikim **radijusom uticaja**?
+- Koje funkcije predstavljaju arhitektonska uska grla sa neobično velikim **radijusom uticaja**?
 
-Ovim se obično pronalaze bolji fuzz ciljevi nego samo na osnovu „najmanje pokrivenosti“. Parser/dekoder **visoke složenosti** sa potvrđenom **dostupnošću spolja** bolji je kandidat za harness od izolovanog internog pomoćnog koda sa slabom pokrivenošću, ali bez putanje kojom napadač može da utiče na njega.
+Ovim se obično otkrivaju bolji fuzz ciljevi nego kada se gleda samo „najniža pokrivenost“. Parser/dekoder sa **visokom složenošću** i potvrđenom **dostupnošću spolja** bolji je kandidat za harness nego izolovani interni pomoćni kod sa slabom pokrivenošću, ali bez putanje kojom napadač može da upravlja.
 
 ### Praktični tok trijaže
 
-1. Napravite **graf koda** na osnovu baze koda i izdvojite metrike složenosti/grana za svaku funkciju.
-2. Navedite **entrypoint-e** koji prihvataju ulaz pod kontrolom napadača: handler-e zahteva, dekodere, uvoznike, parser-e protokola, čitače CLI-ja/datoteka.
-3. Pokrenite **upite nad putanjama** od tih entrypoint-a do kandidatskih funkcija da biste odvojili dostupnu površinu za napad od neaktivnog koda ili koda dostupnog samo interno.
+1. Napravite **graf koda** na osnovu baze koda i izdvojite metrike složenosti/grananja za svaku funkciju.
+2. Nabrojte **ulazne tačke** koje prihvataju podatke pod kontrolom napadača: obrađivače zahteva, dekodere, uvoznike, parsere protokola, čitače CLI-ja/datoteka.
+3. Pokrenite **upite nad putanjama** od tih ulaznih tačaka do kandidata za funkcije da biste razdvojili dostupnu površinu za napad od mrtvog koda ili koda dostupnog samo interno.
 4. Dajte prioritet čvorovima koji objedinjuju:
    - visoku **ciklomatsku složenost**
-   - potvrđenu **dostupnost iz nepouzdanog ulaza**
-   - veliki **radijus uticaja** ili veliki broj zavisnih komponenti
-   - dodatne dokaze kao što su nalazi **SARIF**-a, beleške iz revizije ili preživele mutacije
-5. Najpre napišite fokusirane harness-e za čvorove sa najboljim rezultatom, posebno za **parser-e/kodeke** kao što su dekoderi za hex/Base64/IP/poruke.
+   - potvrđenu **dostupnost iz nepoverljivog ulaza**
+   - veliki **radijus uticaja** ili mnogo nizvodnih zavisnih elemenata
+   - potkrepljujuće dokaze, kao što su nalazi **SARIF**, beleške iz bezbednosne revizije ili preživele mutacije
+5. Najpre napišite ciljane harness-e za čvorove sa najboljim rezultatom, naročito za **parser-e/kodeke**, kao što su dekoderi za hex/Base64/IP/poruke.
 
-### Preživele mutacije: ekvivalentne ili korisne za dalje postupanje
+### Preživele mutacije: ekvivalentne ili primenljive
 
-Testiranje mutacijama često daje bučnu listu preživelih mutacija. Pre nego što svaku preživelu mutaciju protumačite kao bezbednosni propust, pomoću grafa proverite:
+Testiranje mutacijama često daje bučnu listu preživelih mutacija. Pre nego što svaku preživelu mutaciju proglasite bezbednosnim propustom, pomoću grafa proverite:
 
-- Da li je mutirana funkcija dostupna sa entrypoint-a pod kontrolom napadača?
-- Da li su sve putanje poziva ograničene jačim invariantama od mutirane provere?
-- Da li se čvor nalazi u neaktivnom kodu, logici koja služi samo za formatiranje ili putanji sa aritmetikom/parserom velikog uticaja?
+- Da li je izmenjena funkcija dostupna sa ulazne tačke pod kontrolom napadača?
+- Da li su sve putanje poziva ograničene jačim invarijantama od izmenjene provere?
+- Da li se čvor nalazi u mrtvom kodu, logici koja služi samo za formatiranje ili u aritmetičkoj/parser putanji velikog uticaja?
 
-Mutacije koje ostaju nedostupne ili su strukturno ograničene često su **ekvivalentni mutanti**. Mutacije koje ostaju **dostupne** i dotiču **granične uslove**, **putanje overflow-a/prenosa** ili **bezbednosno kritičnu aritmetiku/parsiranje** treba unaprediti u:
+Mutacije koje ostanu nedostupne ili strukturno ograničene često su **ekvivalentni mutanti**. Mutacije koje ostanu **dostupne** i dotiču se **graničnih uslova**, **putanja prekoračenja/carry-ja** ili **bezbednosno kritične aritmetike/parsiranja** treba unaprediti u:
 
 - nove fuzz harness-e
 - direktne testove svojstava/invarijanti
-- ciljane skupove vektora za granične slučajeve
+- ciljane vektore graničnih slučajeva
 
-### Povežite spoljne nalaze sa grafom
+### Mapirajte spoljne nalaze na graf
 
-Ako vaš SAST pipeline izvozi **SARIF**, mapirajte nalaze na čvorove grafa prema **datoteci i opsegu redova** i pomoću grafa proširite procenu uticaja.<sup>[[6]](#references)</sup>
+Ako vaš SAST pipeline izvozi **SARIF**, mapirajte nalaze na čvorove grafa prema **datoteci + opsegu redova** i pomoću grafa proširite procenu uticaja.<sup>[[6]](#references)</sup>
 
 - izračunajte **radijus uticaja** označene funkcije
-- proverite da li se nalaz nalazi na nekoj putanji od entrypoint-a
+- proverite da li se nalaz nalazi na nekoj putanji od ulazne tačke
 - grupišite obližnje nalaze koji se svode na isto usko grlo
 
-Ovo je korisno pri odlučivanju da li da vreme za fuzzing uložite u određenu funkciju: čvor koji je **dostupan**, **složen** i već ima **SAST nalaze** često je bolja meta od čvora koji je samo složen, ali nema putanju dostupnu napadaču.
+Ovo je korisno kada odlučujete da li da vreme za fuzzing uložite u određenu funkciju: čvor koji je **dostupan**, **složen** i već ima **SAST nalaze** često je bolji cilj nego samo složen čvor bez putanje kojom napadač može da upravlja.
 
 Primer toka rada pomoću Trailmark-a.<sup>[[6]](#references)</sup>
 
@@ -280,37 +337,37 @@ engine.complexity_hotspots(10)
 engine.paths_between("handle_request", "parse_ipv6")
 ```
 
-Važna metodologija je presek: **složenost x izloženost x uticaj**. Koristite graf da biste izabrali fuzz mete s najvećom očekivanom bezbednosnom vrednošću, a zatim pomoću mutacija koje prežive odlučite koje granice i invarijante vaš harness treba da testira.<sup>[[5]](#references)</sup>
+Važna metodologija je presek: **složenost x izloženost x uticaj**. Koristi graf da izabereš ciljeve fuzz testiranja sa najvećom očekivanom bezbednosnom vrednošću, a zatim pomoću mutanata koji su preživeli odredi koje granice i invarijante tvoj harness treba da testira.<sup>[[5]](#references)</sup>
 
-## Fuzzing u Go-u pomoću gosentry: Snažniji mehanizam, tipizirani ulazi i diferencijalne provere
+## Go Fuzzing With gosentry: Jači mehanizam, tipizirani ulazi i diferencijalne provere
 
-Ako Go meta već ima nativni `testing.F` harness, praktičan način za nadogradnju jeste da pokrenete isti harness pomoću [gosentry](https://github.com/trailofbits/gosentry), fork-ovanog Go toolchain-a koji zadržava `go test -fuzz`, ali menja backend u **LibAFL**.<sup>[[7]](#references)[[8]](#references)</sup>
+Ako Go cilj već ima nativni `testing.F` harness, praktičan put za nadogradnju je da isti harness pokreneš pomoću [gosentry](https://github.com/trailofbits/gosentry), forkovanog Go toolchain-a koji zadržava `go test -fuzz`, ali menja backend u **LibAFL**.<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```bash
 ./bin/go test -fuzz=FuzzHarness --focus-on-new-code=false --catch-races=true --catch-leaks=true
 ```
 
-Ovo je korisno kada izvorni Go fuzzer zapne na **teškim poređenjima**, **tipiziranim ulazima** ili **formatima koji zahtevaju mnogo parsiranja**. Metodologija ostaje ista:
+Ovo je korisno kada se native Go fuzzer zaglavi na **teškim poređenjima**, **tipiziranim ulazima** ili **formatima sa složenim parserima**. Metodologija ostaje ista:
 
-- Nastavite da koristite `f.Add(...)` za početne vrednosti i `f.Fuzz(...)` za callback.
-- Ponovo upotrebite isti harness, ali ga pokrenite gosentry-jevim binarnim fajlom `go` umesto standardnog toolchain-a.
-- Tretirajte dobijenu kampanju kao uobičajeno fuzzing pokretanje vođeno pokrivenošću, ali uz LibAFL raspoređivanje/mutacije i bolje prateće detektore.
+- Nastavite da koristite `f.Add(...)` za početne ulaze i `f.Fuzz(...)` za callback.
+- Ponovo koristite isti harness, ali ga pokrenite gosentry-jevom `go` binarnom datotekom umesto standardnim toolchain-om.
+- Tretirajte dobijenu kampanju kao uobičajeno pokretanje vođeno pokrivenošću, ali uz LibAFL raspoređivanje/mutaciju i bolje prateće detektore.
 
-### Pretvaranje tihih grešaka u fuzz nalaze
+### Pretvaranje tihih grešaka u nalaze fuzzing-a
 
-Čest problem u Go procenama jeste to što opasno ponašanje često **ne izazove** podrazumevani crash. Pomoću gosentry-ja možete više klasa „loših, ali tihih“ stanja pretvoriti u nalaze.<sup>[[7]](#references)[[8]](#references)</sup>
+Čest problem pri Go procenama jeste to što se opasno ponašanje često podrazumevano **ne završava padom**. Pomoću gosentry-ja možete da pretvorite nekoliko klasa „loših, ali tihih“ stanja u nalaze.<sup>[[7]](#references)[[8]](#references)</sup>
 
-- `--panic-on=pkg.Func,...` da bi odabrane putanje za logovanje/greške izazivale crash (korisno za putanje koda u stilu `log.Fatal`, koje bi inače samo zabeležile grešku i nastavile dalje).
-- `--catch-races=true` da bi se novootkrivene stavke reda ponovo izvršile uz Go detektor race uslova.
-- `--catch-leaks=true` da bi se nove stavke reda ponovo izvršile uz `goleak` i zaustavile pri otkrivanju curenja gorutina.
-- Obrada hang-ova u LibAFL-u, koja čuva **beskonačne petlje / veoma spore ulaze** kao fuzz nalaze umesto da ih odbaci kao prekoračenja vremena.
-- Podrazumevano uključene ugrađene provere aritmetičkog prekoračenja, uz opcione provere skraćivanja pomoću instrumentacije u stilu go-panikint-a.
+- `--panic-on=pkg.Func,...` da bi izabrane putanje za logovanje/greške izazvale pad (korisno za putanje koda u stilu `log.Fatal` koje inače samo zabeleže grešku i nastave sa radom).
+- `--catch-races=true` да би се новооткривени уноси у реду поново покренули са Go детектором race услова.
+- `--catch-leaks=true` да би се нови уноси у реду поново покренули помоћу `goleak` и зауставили при откривању цурења goroutine-а.
+- LibAFL обрада заглављивања како би се **бесконачне петље / веома спори улази** задржали као налази fuzzing-а, уместо да нестану као временска ограничења.
+- Уграђене провере аритметичког прекорачења су подразумевано укључене, уз опционе провере скраћивања помоћу инструментације у стилу go-panikint.
 
-Ovo je naročito korisno za ciljeve kod kojih je bezbednosni uticaj **greška parsera bez panike**, **greška konkurentnosti** ili **hang koji izaziva samo DoS**, a ne oštećenje memorije.
+Ово је посебно корисно за циљеве код којих је безбедносни утицај **грешка parser-а без панике**, **concurrency грешка** или **заглављивање које омогућава само DoS**, а не оштећење меморије.
 
-### Fuzzing Go API-ja sa tipiziranim strukturama
+### Fuzzing свестан структура за типизиране Go API-је
 
-Izvorni Go fuzzing uglavnom očekuje skalare kao što su `[]byte`, `string` i brojevi. Ako kod koji se testira koristi tipizirane objekte, gosentry može direktno da fuzz-uje **složene vrednosti** (strukture, slice-ove, nizove, pokazivače), uz istovremeno menjanje bajtova u pozadini.<sup>[[7]](#references)[[8]](#references)</sup>
+Native Go fuzzing углавном очекује скаларне вредности као што су `[]byte`, `string` и бројеви. Ако код који се тестира користи типизиране објекте, gosentry може директно да fuzz-ује **сложене вредности** (структуре, слице, низове, показиваче), а да притом и даље мутира бајтове испод површине.<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```go
 type Input struct {
@@ -327,26 +384,26 @@ func FuzzStructInput(f *testing.F) {
 }
 ```
 
-Ovo koristite kada bi pravljenje lažnog wire formata samo za fuzzing sakrilo logičke greške iza koda za parsiranje koji postoji samo u harness-u. Za differential ili grammar-based kampanje, zadržite ulaz za harness kao jedan `[]byte` ili `string`, a parsirajte ga unutar callback-a.
+Koristite ovo kada bi izrada lažnog wire formata samo za fuzzing sakrila logičke greške iza koda za parsiranje koji postoji samo u harness-u. Za diferencijalne kampanje ili kampanje zasnovane na gramatici, ulaz harness-a zadržite kao jedan `[]byte` ili `string` i parsirajte ga unutar callback-a.
 
-### Grammar-based fuzzing za parser-e i protokolarne ulaze
+### Fuzzing zasnovan na gramatici za parsere i protokolarne ulaze
 
-Za parser-e, formate i ulazne jezike, gosentry može da pokrene **Nautilus grammar fuzzing** povrh LibAFL-a. Gramatika je JSON niz produkcionih pravila, a harness bi obično trebalo da uzima jedan argument tipa `[]byte` ili `string`.<sup>[[7]](#references)[[8]](#references)</sup>
+Za parsere, formate i ulazne jezike, gosentry može da pokrene **Nautilus grammar fuzzing** povrh LibAFL-a. Gramatika je JSON niz produkcionih pravila, a harness bi obično trebalo da prima jedan argument tipa `[]byte` ili `string`.<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```bash
 ./bin/go test -fuzz=FuzzGrammarJSON --use-grammar --grammar=./testdata/JSON.json --focus-on-new-code=false
 ```
 
-Napomene o metodologiji:
+Metodološke napomene:
 
-- Koristite režim gramatike kada mutacije na nivou bajtova uglavnom ne prolaze rane provere sintakse.
-- Ograničite gramatiku na **bezbednosno relevantan podskup** jezika/protokola, umesto da modelujete celu specifikaciju.
-- Koristite velike granične vrednosti u terminalima/neterminalima da biste opteretili granice celih brojeva, dužina i mašine stanja.
-- Režim gramatike održava ulaze validnim prema gramatici, ali cilj i dalje prima **bajtove/niske**, tako da parsiranje i semantičke provere ostaju unutar koda obuhvaćenog harness-om.
+- Koristite grammar mode kada mutacije na nivou bajtova uglavnom ne prolaze rane provere sintakse.
+- Ograničite gramatiku na **podskup jezika/protokola relevantan za bezbednost**, umesto da modelujete celu specifikaciju.
+- Koristite velike granične vrednosti u terminalima/neterminalima da biste testirali rubne slučajeve za cele brojeve, dužine i mašine stanja.
+- Grammar mode obezbeđuje da ulazi budu validni prema gramatici, ali cilj i dalje prima **bajtove/nizove znakova**, tako da parsiranje i semantičke provere ostaju unutar koda koji se testira.
 
-### Differential fuzzing: upoređujte implementacije, ne samo crash-eve
+### Differential fuzzing: uporedite implementacije, ne samo padove
 
-Za Go ekosisteme, snažan obrazac je **fuzzing zasnovan na gramatici i diferencijalnom poređenju**: generišite validne strukturirane ulaze i prosleđujte ih dvama parserima, klijentima ili mašinama za prelaze stanja.<sup>[[7]](#references)[[8]](#references)</sup>
+Dobar obrazac za Go ekosisteme je **grammar-based differential fuzzing**: generišite validne strukturirane ulaze i prosledite ih dvama parserima, klijentima ili mehanizmima za promenu stanja.<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```go
 f.Fuzz(func(t *testing.T, data []byte) {
@@ -362,41 +419,48 @@ f.Fuzz(func(t *testing.T, data []byte) {
 
 Smatrajte sledeće nalazima:
 
-- jedna implementacija izaziva panic, dok druga uredno odbacuje unos
-- nepodudaranja u prihvatanju/odbacivanju unosa
+- jedna implementacija izazove paniku, dok druga ispravno odbije ulaz
+- nepodudaranja u prihvatanju/odbijanju ulaza
 - različita stabla parsiranja ili dekodirani objekti
-- različite promene stanja, nonce vrednosti, stanja na računima ili koreni stanja
+- različiti prelazi stanja, nonce vrednosti, stanja računa ili koreni stanja
 
-Ovo je praktičan način za pronalaženje **nepodudaranja u konsenzusu**, **dvosmislenosti parsera** i **odstupanja između specifikacije i implementacije**, koje čisto fuzz testiranje padova često ne otkriva.
+Ovo je praktičan način za otkrivanje **nepodudaranja u konsenzusu**, **dvosmislenosti parsera** i **odstupanja između specifikacije i implementacije** koje čisto fuzzing testiranje radi pronalaženja padova često ne otkriva.
 
-### Ponovo iskoristite korpus kampanje za izveštavanje o pokrivenosti
+{{#ref}}
+proof-assistant-formal-verification-security.md
+{{#endref}}
 
-Nakon kampanje, ponovo pokrenite sačuvani korpus iz reda čekanja da biste generisali Go izveštaj o pokrivenosti bez ručnog izvoza zasebnog korpusa.<sup>[[7]](#references)[[8]](#references)</sup>
+### Ponovo upotrebite korpus kampanje za izveštavanje o pokrivenosti
+
+Nakon kampanje, ponovo pokrenite sačuvani korpus reda čekanja da biste generisali Go izveštaj o pokrivenosti, bez ručnog izvoza zasebnog korpusa.<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```bash
 ./bin/go test -fuzz=FuzzHarness --generate-coverage .
 ```
 
-Pokrenite komandu iz **istog paketa** i sa istim ciljem `-fuzz` kako bi gosentry razrešio odgovarajuće keširano stanje kampanje.
+Pokrenite komandu iz **istog paketa** i sa istim ciljem `-fuzz` da bi gosentry razrešio odgovarajuće keširano stanje kampanje.
 
 
 
 ## References
 
-- [1] [Mutaciono fuzzing testiranje gramatike](https://projectzero.google/2026/03/mutational-grammar-fuzzing.html)
+- [1] [Fuzzing zasnovan na mutacionoj gramatici](https://projectzero.google/2026/03/mutational-grammar-fuzzing.html)
 - [2] [Jackalope](https://github.com/googleprojectzero/Jackalope)
-- [3] [AFL++ fuzzing testiranje izbliza](https://aflplus.plus/docs/fuzzing_in_depth/)
-- [4] [AFLNet pet godina kasnije: fuzzing testiranje protokola vođeno pokrivenošću](https://arxiv.org/abs/2412.20324)
+- [3] [AFL++ Fuzzing detaljno](https://aflplus.plus/docs/fuzzing_in_depth/)
+- [4] [AFLNet pet godina kasnije: o fuzzingu protokola vođenom pokrivenošću](https://arxiv.org/abs/2412.20324)
 - [5] [Trailmark pretvara kod u grafove](https://blog.trailofbits.com/2026/04/23/trailmark-turns-code-into-graphs/)
 - [6] [trailofbits/trailmark](https://github.com/trailofbits/trailmark)
-- [7] [Go fuzzingu je nedostajala polovina alata. Forkovali smo lanac alata da to popravimo.](https://blog.trailofbits.com/2026/05/12/go-fuzzing-was-missing-half-the-toolkit.-we-forked-the-toolchain-to-fix-it./)
+- [7] [Go fuzzingu je nedostajala polovina alata. Napravili smo fork toolchain-a da to popravimo.](https://blog.trailofbits.com/2026/05/12/go-fuzzing-was-missing-half-the-toolkit.-we-forked-the-toolchain-to-fix-it./)
 - [8] [trailofbits/gosentry](https://github.com/trailofbits/gosentry)
-- [9] [SNPSFuzzer: Brz greybox fuzzer za mrežne protokole sa stanjima pomoću snimaka](https://arxiv.org/abs/2202.03643)
-- [10] [Bez gramatike nema problema: ka fuzzing testiranju Linux kernela bez opisa sistemskih poziva](https://seclab.bu.edu/papers/FuzzNG-ndss2023.pdf)
-- [11] [Snappy: Efikasno fuzzing testiranje sa prilagodljivim i promenljivim snimcima](https://project-theseus.nl/publication/2022/snappy/)
+- [9] [SNPSFuzzer: brz greybox fuzzer za stateful mrežne protokole pomoću snimaka](https://arxiv.org/abs/2202.03643)
+- [10] [Bez gramatike nema problema: ka fuzzingu Linux kernela bez opisa sistemskih poziva](https://seclab.bu.edu/papers/FuzzNG-ndss2023.pdf)
+- [11] [Snappy: efikasan fuzzing uz adaptivne i promenljive snimke](https://project-theseus.nl/publication/2022/snappy/)
 - [12] [Fuzz Introspector](https://google.github.io/oss-fuzz/advanced-topics/fuzz-introspector/)
 - [13] [AFL++ LLVM instrumentacija: pokrivenost putanja i pozivalaca](https://github.com/AFLplusplus/AFLplusplus/blob/stable/instrumentation/README.llvm.md)
-- [14] [Prediktivno fuzzing testiranje osetljivo na kontekst](https://www.ndss-symposium.org/ndss-paper/predictive-context-sensitive-fuzzing/)
-- [15] [Android Offensive Security Blog - fuzzing testiranje Binder-a](https://androidoffsec.withgoogle.com/posts/binder-fuzzing/)
-- [16] [LKL Android Binder fuzzer - dokumentacija za build i regresione seed-ove](https://github.com/lkl/linux/blob/master/tools/lkl/fuzzers/binder/README.md)
+- [14] [Prediktivni kontekstno osetljivi fuzzing](https://www.ndss-symposium.org/ndss-paper/predictive-context-sensitive-fuzzing/)
+- [15] [Android Offensive Security Blog - Binder Fuzzing](https://androidoffsec.withgoogle.com/posts/binder-fuzzing/)
+- [16] [LKL Android Binder fuzzer - dokumentacija za izgradnju i regresione seed-ove](https://github.com/lkl/linux/blob/master/tools/lkl/fuzzers/binder/README.md)
+- [17] [MAccConc: istraživanje race condition-a u Linux kernelu pomoću kontrolisanih preplitanja pristupa memoriji](https://projectzero.google/2026/09/maccconc-race-condition.html)
+- [18] [googleprojectzero/MAccConc](https://github.com/googleprojectzero/MAccConc)
+- [19] [KCOV: pokrivenost koda za fuzzing](https://docs.kernel.org/dev-tools/kcov.html)
 {{#include ../banners/hacktricks-training.md}}
