@@ -56,6 +56,7 @@
 - [ ] Any **writable .service** file?
 - [ ] Any **writable binary** executed by a **service**?
 - [ ] Any writable **helper, config or environment file referenced by a root unit** (`ExecStartPre=`, `ExecStartPost=`, `EnvironmentFile=`)? Inspect the merged unit with `systemctl cat <unit>` and review [service/socket file abuse](../interesting-files-permissions/write-to-root.md).
+- [ ] Does an on-demand privileged workflow run a helper under a lower-privilege writable directory? Check both the helper and its parent for [root execution of user-modifiable paths](../interesting-files-permissions/write-to-root.md#root-executing-user-writable-scriptsbinaries); short-lived helpers may only appear while the workflow runs.
 - [ ] Any **writable folder in systemd PATH**?
 - [ ] Any **writable systemd unit drop-in** in `/etc/systemd/system/<unit>.d/*.conf` that can override `ExecStart`/`User`?<sup>[[2]](#references)</sup>
 

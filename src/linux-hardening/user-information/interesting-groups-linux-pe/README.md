@@ -24,6 +24,8 @@ If this is the case, to **become root you can just execute**:
 sudo su
 ```
 
+If `sudo -l` permits a constrained `adduser` invocation with only a username, check whether it creates a same-named primary group that does not yet exist. A new account in that group may gain privileges if the effective sudoers policy already grants them to `%group`; verify both the group-creation behavior and the group rule before treating this as an escalation path. Creating an account changes the system, so inspect the policy first.
+
 ### PE - Method 2
 
 Find all suid binaries and check if there is the binary **Pkexec**:
@@ -33,6 +35,10 @@ find / -perm -4000 2>/dev/null
 ```
 
 If **pkexec is a SUID binary**, it can execute a program as another user only when polkit authorizes the requested action; the SUID bit alone does not guarantee root. Check the installed policy and the target session's authorization instead of assuming membership in **sudo** or **admin** is sufficient.<sup>[[4]](#references)[[5]](#references)</sup>
+
+For the separate [CVE-2021-4034](https://www.qualys.com/2022/01/25/cve-2021-4034/pwnkit.txt) path, first verify that `pkexec` is an executable **root-owned SUID** file. An installed binary without that bit is not the local SUID escalation described by the advisory. An upstream version string is only a lead: distributions can [backport the fix into older package versions](https://ubuntu.com/security/CVE-2021-4034), so check the installed vendor package and mitigations before calling it vulnerable.
+
+[CVE-2021-3560](https://securitylab.github.com/advisories/GHSL-2021-074-polkit/) is a different polkit path: a D-Bus authorization race, not a `pkexec` SUID flaw. Review the installed vendor polkit package and whether a reachable privileged D-Bus action can make a useful change; an account-creation route also needs a suitable service such as AccountsService, and any new group's sudo access depends on the effective sudo policy. A reported polkit version or installed service alone is only a candidate, especially where vendors [backport fixes](https://access.redhat.com/security/cve/cve-2021-3560). Passive enumeration should not trigger the race.
 
 On distributions that still use the older Local Authority backend, inspect its group rules with:
 
@@ -57,6 +63,8 @@ Error executing command as another user: Not authorized
 ```
 
 On an SSH session without a registered authentication agent, `pkexec` may fail with this error even when the policy would otherwise allow the action; polkit documents `pkttyagent` as a text authentication agent for non-desktop sessions. The exact behavior is version- and distribution-dependent, so verify the local policy and agent setup. One workaround reported for affected NixOS versions uses **2 different SSH sessions**.<sup>[[1]](#references)[[4]](#references)[[5]](#references)</sup>
+
+An ACL that denies one account access to `su` governs that executable, not every route to an administrator-authorized action. If an administrator credential is independently exposed, review whether a separate action such as starting a transient system service through `systemd-run` is permitted by the effective polkit policy, which identity the authentication agent accepts, and which identity the resulting service would use. [Polkit distinguishes authentication as the session owner from an administrator](https://polkit.pages.freedesktop.org/polkit/polkit.8.html), while [systemd-run can request a transient service from the system manager](https://systemd.io/CONTROL_GROUP_INTERFACE/). A history entry, installed command, or readable policy file alone does not establish authorization or credential validity; passive review should not submit credentials or start a unit.
 
 ```bash:session1
 echo $$ #Step1: Get current PID
@@ -233,6 +241,8 @@ find / -group root -perm -g=w 2>/dev/null
 
 Membership in the `docker` group grants root-level access to the Docker daemon on standard rootful installs. Because bind mounts are read-write by default, a user who can control that daemon can mount the host's `/` into a container and alter host files; this effectively gives root on the host.<sup>[[13]](#references)[[14]](#references)[[15]](#references)</sup>
 
+Group membership may be out of sync between `/etc/group`, `/etc/gshadow`, and the current process token. If a user is absent from `id -nG` but `newgrp docker` succeeds, check the group shown by `id` in the new shell and test whether the Docker socket is actually writable and serves a rootful daemon. The group name alone does not establish host control. Bound any automated `newgrp` probe so a password prompt cannot stall enumeration.
+
 ```bash
 docker image #Get images from the docker service
 
@@ -251,7 +261,7 @@ Finally, if you don't like any of the suggestions of before, or they aren't work
 ../../containers-namespaces/container-security/
 {{#endref}}
 
-If you have write permissions over the docker socket read [**this post about how to escalate privileges abusing the docker socket**](../../1-linux-basics/linux-privilege-escalation/index.html#writable-docker-socket)**.**
+If you have write permissions over the docker socket read [**this post about how to escalate privileges abusing the docker socket**](../../linux-basics/linux-privilege-escalation/index.html#writable-docker-socket)**.**
 
 {{#ref}}
 https://github.com/KrustyHack/docker-privilege-escalation
@@ -264,7 +274,7 @@ https://fosterelli.co/privilege-escalation-via-docker.html
 ## lxc/lxd Group
 
 {{#ref}}
-./
+lxd-privilege-escalation.md
 {{#endref}}
 
 ## Adm Group
