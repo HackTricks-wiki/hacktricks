@@ -8,6 +8,12 @@
 
 ## [Shells - Windows](windows.md)
 
+## Utekelezaji wa payload kwenye Windows iliyovirtualishwa
+
+{{#ref}}
+../../windows-hardening/virtualized-payload-execution.md
+{{#endref}}
+
 ---
 
 ## [MSFVenom - CheatSheet](msfvenom.md)
@@ -18,25 +24,25 @@
 
 ---
 
-## Zana za shell zilizotengenezwa kiotomatiki
+## Zana za shell zinazozalishwa kiotomatiki
 
-Wasaidizi kadhaa wa wavuti na command-line wanaweza kutengeneza bind- na reverse-shell payloads kwa interpreters na operating systems mbalimbali:
+Zana kadhaa za wavuti na za mstari wa amri zinaweza kuzalisha payload za bind shell na reverse shell kwa interpreters na mifumo tofauti ya uendeshaji:
 
-- **reverse-shell.sh** na **revshells.com** hutoa generators za payload zinazotumika kupitia browser.<sup>[[1]](#references)[[2]](#references)</sup>
-- **Shellerator**, **ShellPop**, **ShellReverse**, **Reverse Shell Generator**, **revshellgen**, na **rsg** hutengeneza payloads kupitia command line au interface ya ndani.<sup>[[3]](#references)[[4]](#references)[[5]](#references)[[8]](#references)[[9]](#references)[[10]](#references)</sup>
-- **xc** ni reverse shell ndogo ya cross-platform kwa Linux na Windows.<sup>[[7]](#references)</sup>
-- **pyminifier** si shell generator, lakini inaweza kupunguza ukubwa au kufanya obfuscation ya Python payloads wakati mabadiliko hayo yanafaa.<sup>[[6]](#references)</sup>
+- **reverse-shell.sh** na **revshells.com** hutoa jenereta za payload zinazotumika kupitia kivinjari.<sup>[[1]](#references)[[2]](#references)</sup>
+- **Shellerator**, **ShellPop**, **ShellReverse**, **Reverse Shell Generator**, **revshellgen**, na **rsg** huzalisha payload kupitia mstari wa amri au kiolesura cha ndani.<sup>[[3]](#references)[[4]](#references)[[5]](#references)[[8]](#references)[[9]](#references)[[10]](#references)</sup>
+- **xc** ni reverse shell ndogo inayotumika kwenye Linux na Windows.<sup>[[7]](#references)</sup>
+- **pyminifier** si jenereta ya shell, lakini inaweza kupunguza ukubwa au kuficha payload za Python inapofaa kufanya mabadiliko hayo.<sup>[[6]](#references)</sup>
 
 ## References
 
-- [1] [reverse-shell.sh - Generator ya reverse shell](https://reverse-shell.sh/)
-- [2] [revshells.com - Generator ya reverse shell](https://www.revshells.com/)
-- [3] [Shellerator - CLI tool ya kutengeneza bind na reverse shells kwa languages nyingi](https://github.com/ShutdownRepo/shellerator)
-- [4] [ShellPop - Pop shells kama master](https://github.com/0x00-0x00/ShellPop)
-- [5] [ShellReverse - Creator ya shell reverse kwa python, perl, ruby, bash, netcat, php, java, powershell, n.k.](https://github.com/cybervaca/ShellReverse)
-- [6] [pyminifier - Python code minifier/obfuscator](https://liftoff.github.io/pyminifier/)
-- [7] [xc - Reverse shell ndogo kwa Linux na Windows](https://github.com/xct/xc/)
-- [8] [Reverse Shell Generator](https://weibell.github.io/reverse-shell-generator/)
-- [9] [revshellgen - Generator ya reverse shell iliyoandikwa kwa Python 3](https://github.com/t0thkr1s/revshellgen)
-- [10] [rsg (ReverShellGenerator) - Tool ya kutengeneza njia mbalimbali za kufanya reverse shell](https://github.com/mthbernardes/rsg)
+- [1] [reverse-shell.sh - Jenereta ya reverse shell](https://reverse-shell.sh/)
+- [2] [revshells.com - Jenereta ya reverse shell](https://www.revshells.com/)
+- [3] [Shellerator - Zana ya CLI ya kuzalisha bind shell na reverse shell katika lugha mbalimbali](https://github.com/ShutdownRepo/shellerator)
+- [4] [ShellPop - Fungua shell kama mtaalamu](https://github.com/0x00-0x00/ShellPop)
+- [5] [ShellReverse - Kifaa cha kuunda reverse shell kwa python, perl, ruby, bash, netcat, php, java, powershell, n.k.](https://github.com/cybervaca/ShellReverse)
+- [6] [pyminifier - Kifaa cha kupunguza ukubwa/kuficha msimbo wa Python](https://liftoff.github.io/pyminifier/)
+- [7] [xc - Reverse shell ndogo ya Linux na Windows](https://github.com/xct/xc/)
+- [8] [Jenereta ya Reverse Shell](https://weibell.github.io/reverse-shell-generator/)
+- [9] [revshellgen - Jenereta ya reverse shell iliyoandikwa kwa Python 3](https://github.com/t0thkr1s/revshellgen)
+- [10] [rsg (ReverShellGenerator) - Zana ya kuzalisha mbinu mbalimbali za kufanya reverse shell](https://github.com/mthbernardes/rsg)
 {{#include ../../banners/hacktricks-training.md}}
