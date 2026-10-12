@@ -2,17 +2,18 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Contexte
+## Context
 
-Sous Linux, pour exécuter un programme, celui-ci doit exister en tant que fichier et être accessible d'une manière ou d'une autre via la hiérarchie du système de fichiers (c'est simplement ainsi que fonctionne `execve()`). Ce fichier peut se trouver sur le disque ou en RAM (tmpfs, memfd), mais il faut disposer d'un chemin de fichier. Cela a rendu très facile le contrôle de ce qui est exécuté sur un système Linux, la détection des menaces et des outils de l'attaquant, ou leur empêcher complètement de tenter d'exécuter quoi que ce soit leur appartenant (_p. ex._, en empêchant les utilisateurs non privilégiés de placer des fichiers exécutables où que ce soit).
+Linux exécute normalement les programmes à partir de fichiers exécutables stockés sur disque ou en mémoire. Il peut identifier un exécutable par son chemin ou son descripteur de fichier ; un chemin de fichier classique n’est donc pas toujours nécessaire.<sup>[[2]](#references)</sup>
 
-Mais cette technique est là pour changer tout cela. Si vous ne pouvez pas démarrer le processus souhaité... **alors vous en détournez un qui existe déjà**.
+DDexec / EverythingExec utilise la mémoire d’un **processus déjà en cours d’exécution**. La page [Linux Fileless Execution](../../../post-exploitation/linux-fileless-execution.md) traite de l’exécution à partir de fichiers anonymes ainsi que de la détection et de la collecte forensique associées ; la [présentation des contournements en mémoire](index.html#memory-bypasses) renvoie également à MemExec et Memdlopen.<sup>[[1]](#references)</sup>
 
-Cette technique permet de **contourner des techniques de protection courantes telles que read-only, noexec, la file-name whitelisting et la hash whitelisting**.<sup>[[1]](#references)</sup>
+Cette technique permet de **contourner des protections courantes comme le mode lecture seule, noexec, la liste blanche des noms de fichiers et la liste blanche des hash**.<sup>[[1]](#references)</sup>
 
 ## Dépendances
 
-Le script final dépend des outils suivants pour fonctionner ; ils doivent être accessibles sur le système que vous attaquez (par défaut, vous les trouverez tous partout) :
+Le script final nécessite les outils suivants pour fonctionner. Ils doivent être accessibles sur le système que vous attaquez (par défaut, vous les trouverez partout) :
+
 ```
 dd
 bash | zsh | ash (busybox)
@@ -26,11 +27,12 @@ wc
 tr
 base64
 ```
+
 ## La technique
 
-Si vous êtes en mesure de modifier arbitrairement la mémoire d’un processus, vous pouvez en prendre le contrôle. Cela peut être utilisé pour détourner un processus existant et le remplacer par un autre programme. Nous pouvons y parvenir soit en utilisant le syscall `ptrace()` (ce qui nécessite de pouvoir exécuter des syscalls ou de disposer de gdb sur le système), soit, plus intéressant encore, en écrivant dans `/proc/$pid/mem`.<sup>[[1]](#references)</sup>
+Si vous êtes en mesure de modifier arbitrairement la mémoire d’un processus, vous pouvez en prendre le contrôle. Cela peut servir à détourner un processus existant et à le remplacer par un autre programme. Nous pouvons y parvenir soit en utilisant l’appel système `ptrace()` (ce qui nécessite de pouvoir exécuter des appels système ou d’avoir gdb disponible sur le système), soit, plus intéressant encore, en écrivant dans `/proc/$pid/mem`.<sup>[[1]](#references)</sup>
 
-Le fichier `/proc/$pid/mem` est une correspondance un-à-un de tout l’espace d’adressage d’un processus (_par ex._ de `0x0000000000000000` à `0x7ffffffffffff000` sur x86-64). Cela signifie que lire dans ce fichier ou y écrire à un offset `x` revient respectivement à lire le contenu situé à l’adresse virtuelle `x` ou à le modifier.
+Le fichier `/proc/$pid/mem` est une correspondance un à un avec l’intégralité de l’espace d’adressage d’un processus (_p. ex._, de `0x0000000000000000` à `0x7ffffffffffff000` sur x86-64). Cela signifie que lire ou écrire dans ce fichier à l’offset `x` revient à lire ou à modifier le contenu situé à l’adresse virtuelle `x`.
 
 Nous devons maintenant faire face à quatre problèmes fondamentaux :
 
@@ -38,49 +40,56 @@ Nous devons maintenant faire face à quatre problèmes fondamentaux :
 - ASLR.
 - Si nous essayons de lire ou d’écrire à une adresse qui n’est pas mappée dans l’espace d’adressage du programme, nous obtiendrons une erreur d’E/S.
 
-Ces problèmes ont des solutions qui, bien qu’elles ne soient pas parfaites, sont efficaces :
+Ces problèmes ont des solutions qui, bien qu’imparfaites, sont efficaces :
 
-- La plupart des interpréteurs de shell permettent de créer des descripteurs de fichiers qui seront ensuite hérités par les processus enfants. Nous pouvons créer un fd pointant vers le fichier `mem` du shell avec des permissions d’écriture... ainsi, les processus enfants qui utilisent ce fd pourront modifier la mémoire du shell.
-- ASLR ne pose même pas de problème : nous pouvons consulter le fichier `maps` du shell, ou tout autre fichier de procfs, afin d’obtenir des informations sur l’espace d’adressage du processus.
-- Nous devons donc effectuer un `lseek()` sur le fichier. Depuis le shell, cela ne peut pas être fait sans utiliser le célèbre `dd`.
+- La plupart des interpréteurs de shell permettent de créer des descripteurs de fichiers qui seront ensuite hérités par les processus enfants. Nous pouvons créer un fd pointant vers le fichier `mem` du shell avec des permissions en écriture... ainsi, les processus enfants qui utilisent ce fd pourront modifier la mémoire du shell.
+- L’ASLR ne pose même pas problème : nous pouvons consulter le fichier `maps` du shell ou tout autre fichier de procfs afin d’obtenir des informations sur l’espace d’adressage du processus.
+- Nous devons donc utiliser `lseek()` dans le fichier. Depuis le shell, c’est impossible sans utiliser le fameux `dd`.
 
 ### Plus en détail
 
 Les étapes sont relativement simples et ne nécessitent aucune expertise particulière pour être comprises :<sup>[[1]](#references)</sup>
 
-- Analyser le binaire que nous voulons exécuter ainsi que le loader afin de déterminer les mappings dont ils ont besoin. Puis créer un "shell"code qui effectuera, de manière générale, les mêmes étapes que celles réalisées par le kernel lors de chaque appel à `execve()` :
-- Créer les mappings en question.
-- Lire les binaires dans ceux-ci.
-- Configurer les permissions.
-- Enfin, initialiser la stack avec les arguments du programme et placer le vecteur auxiliaire (nécessaire au loader).
-- Sauter dans le loader et le laisser effectuer le reste (charger les libraries nécessaires au programme).
-- Obtenir depuis le fichier `syscall` l’adresse à laquelle le processus retournera après le syscall qu’il est en train d’exécuter.
-- Écraser cet emplacement, qui sera exécutable, avec notre shellcode (via `mem`, nous pouvons modifier des pages non inscriptibles).
-- Passer le programme que nous voulons exécuter à l’entrée standard du processus (il sera `read()` par ledit "shell"code).
-- À ce stade, il revient au loader de charger les libraries nécessaires à notre programme et d’y sauter.
+- Analyser le binaire que nous voulons exécuter et le chargeur pour déterminer les mappages dont ils ont besoin. Puis créer un « shell »code qui effectuera, en gros, les mêmes étapes que le noyau lors de chaque appel à `execve()` :
+  - Créer les mappages en question.
+  - Y lire les binaires.
+  - Configurer les permissions.
+  - Enfin, initialiser la pile avec les arguments du programme et y placer le vecteur auxiliaire (dont le chargeur a besoin).
+  - Sauter dans le chargeur et le laisser faire le reste (charger les bibliothèques nécessaires au programme).
+- Récupérer dans le fichier `syscall` l’adresse à laquelle le processus reprendra son exécution après l’appel système en cours.
+- Écraser cette adresse, qui sera exécutable, avec notre shellcode (via `mem`, nous pouvons modifier des pages non inscriptibles).
+- Transmettre le programme que nous voulons exécuter sur l’entrée standard du processus (il sera `read()` par ledit « shell »code).
+- À ce stade, le chargeur se charge de charger les bibliothèques nécessaires au programme et d’y sauter.
 
-**Consultez l’outil sur** [**https://github.com/arget13/DDexec**](https://github.com/arget13/DDexec).<sup>[[1]](#references)</sup>
+**Découvrez l’outil sur** [**https://github.com/arget13/DDexec**](https://github.com/arget13/DDexec).<sup>[[1]](#references)</sup>
 
 ## EverythingExec
 
-Il existe plusieurs alternatives à `dd`, dont `tail`, qui est actuellement le programme utilisé par défaut pour effectuer le `lseek()` à travers le fichier `mem` (ce qui était l’unique raison d’utiliser `dd`). Ces alternatives sont :<sup>[[1]](#references)</sup>
+Il existe plusieurs alternatives à `dd`, dont `tail`, qui est actuellement le programme utilisé par défaut pour effectuer `lseek()` dans le fichier `mem` (c’était la seule raison d’utiliser `dd`). Ces alternatives sont :<sup>[[1]](#references)</sup>
+
 ```bash
 tail
 hexdump
 cmp
 xxd
 ```
+
 En définissant la variable `SEEKER`, vous pouvez modifier le seeker utilisé, _p. ex._ :
+
 ```bash
 SEEKER=cmp bash ddexec.sh ls -l <<< $(base64 -w0 /bin/ls)
 ```
-Si vous trouvez un autre seeker valide non implémenté dans le script, vous pouvez tout de même l'utiliser en définissant la variable `SEEKER_ARGS` :
+
+Si vous trouvez un autre seeker valide qui n'est pas implémenté dans le script, vous pouvez tout de même l'utiliser en définissant la variable `SEEKER_ARGS` :
+
 ```bash
 SEEKER=xxd SEEKER_ARGS='-s $offset' zsh ddexec.sh ls -l <<< $(base64 -w0 /bin/ls)
 ```
-Bloquez ceci, EDRs.
+
+Bloquez ça, EDRs.
 
 ## References
 
 - [1] [DDexec : une technique pour exécuter des fichiers binaires sans fichier et furtivement sous Linux](https://github.com/arget13/DDexec)
+- [2] [execveat(2) — page de manuel Linux](https://manpages.debian.org/trixie/manpages-dev/execveat.2.en.html)
 {{#include ../../../../banners/hacktricks-training.md}}
