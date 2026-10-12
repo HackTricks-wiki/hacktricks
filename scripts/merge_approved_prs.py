@@ -29,7 +29,7 @@ def should_handle_event(name, event):
     if name == "workflow_run":
         run = event.get("workflow_run", {})
         return run.get("status") == "completed" and run.get("name") != WORKFLOW_NAME
-    return name in ("workflow_dispatch", "pull_request_target")
+    return name in ("workflow_dispatch", "pull_request_target", "schedule")
 
 
 def gh_json(arguments):
@@ -72,6 +72,15 @@ def other_workflows_active(repo, merger_workflow_id):
                     label = run.get("name") or run.get("id")
                     print(f"Other workflow is {run['status']}: {label}", flush=True)
                     return True
+    for status in ACTIVE_STATUSES:
+        pages = api_pages(
+            f"repos/HackTricks-wiki/HackTricks-Feed/actions/runs?status={status}&per_page=100"
+        )
+        for page in pages:
+            for run in page["workflow_runs"]:
+                if run.get("name") in ("Saturday HackTricks conflict repair", "Sunday HackTricks PR review"):
+                    print(f"Book maintenance is {run['status']}: {run['name']}", flush=True)
+                    return True
     return False
 
 
@@ -111,7 +120,7 @@ def merge_approved(repo, merger_workflow_id, max_merges=2):
     if other_workflows_active(repo, merger_workflow_id):
         print("Repository is busy; retrying on the next workflow completion.")
         return 0
-    prs = api_items(f"repos/{repo}/pulls?state=open&per_page=100")
+    prs = api_items(f"repos/{repo}/pulls?state=open&sort=created&direction=asc&per_page=100")
     merged = 0
     for pr in prs:
         if merged >= max_merges:
