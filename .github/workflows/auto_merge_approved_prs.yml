@@ -9,6 +9,11 @@ on:
   pull_request_target:
     types: [opened, edited, synchronize, reopened, ready_for_review]
   workflow_dispatch:
+    inputs:
+      pr:
+        description: Optional PR number for a targeted merge check
+        type: number
+        default: 0
   # Recover the approval queue even if a completion trigger is missed.
   schedule:
     - cron: "7,22,37,52 * * * *"

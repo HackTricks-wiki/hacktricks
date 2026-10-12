@@ -131,7 +131,10 @@ def main():
         print("Event does not request an approval check.")
         return 0
     repo = os.environ["GITHUB_REPOSITORY"]
-    target_number = event["issue"]["number"] if os.environ["GITHUB_EVENT_NAME"] == "issue_comment" else None
+    event_name = os.environ["GITHUB_EVENT_NAME"]
+    target_number = event["issue"]["number"] if event_name == "issue_comment" else None
+    if event_name == "workflow_dispatch":
+        target_number = int(event.get("inputs", {}).get("pr") or 0) or None
     merge_approved(repo, target_number=target_number)
     return 0
 
