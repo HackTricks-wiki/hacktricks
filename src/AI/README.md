@@ -1,10 +1,10 @@
-# KI in Kuberveiligheid
+# KI in kuberveiligheid
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Belangrikste masjienleer-algoritmes
+## Hoofmasjienleer-algoritmes
 
-Die beste beginpunt om oor KI te leer, is om te verstaan hoe die belangrikste masjienleer-algoritmes werk. Dit sal jou help verstaan hoe KI werk, hoe om dit te gebruik en hoe om dit aan te val:
+Die beste beginpunt om oor KI te leer, is om te verstaan hoe die belangrikste masjienleer-algoritmes werk. Dit sal jou help om te verstaan hoe KI werk, hoe om dit te gebruik en hoe om dit aan te val:
 
 
 {{#ref}}
@@ -28,7 +28,7 @@ Die beste beginpunt om oor KI te leer, is om te verstaan hoe die belangrikste ma
 
 ### LLM-argitektuur
 
-Op die volgende bladsy vind jy die basiese beginsels van elke komponent wat nodig is om ’n eenvoudige LLM met transformers te bou:
+Op die volgende bladsy vind jy die grondbeginsels van elke komponent waarmee jy ’n basiese LLM met behulp van transformers kan bou:
 
 
 {{#ref}}
@@ -37,7 +37,7 @@ AI-llm-architecture/README.md
 
 ## KI-sekuriteit
 
-### Sekuriteitsmetodologie vir KI-agente
+### Metodologie vir KI-agent-sekuriteit
 
 {{#ref}}
 AI-Agent-Security-Methodology.md
@@ -45,16 +45,22 @@ AI-Agent-Security-Methodology.md
 
 ### KI-risikoraamwerke
 
-Twee nuttige raamwerke om mee te begin wanneer KI-stelselrisiko beoordeel word, is die OWASP Machine Learning Security Top 10 en Google se Secure AI Framework (SAIF). Hulle vul mekaar aan en is nie ’n volledige lys van KI-risikoraamwerke nie.<sup>[[1]](#references)[[2]](#references)</sup>
+Twee nuttige raamwerke om KI-stelselrisiko te beoordeel, is die OWASP Top 10 vir Masjienleer-sekuriteit en Google se Veilige KI-raamwerk (SAIF). Hulle vul mekaar aan, maar vorm nie ’n volledige lys van KI-risikoraamwerke nie.<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 {{#ref}}
 AI-Risk-Frameworks.md
 {{#endref}}
 
-### Sekuriteit van KI-prompts
+### Meganistiese interpreteerbaarheid-geleide adversariële aanvalle
 
-LLMs het die gebruik van KI die afgelope jare laat ontplof, maar hulle is nie perfek nie en kan deur adversarial prompts mislei word. Dit is ’n baie belangrike onderwerp om te verstaan hoe om KI veilig te gebruik en hoe om dit aan te val:
+{{#ref}}
+AI-Mechanistic-Interpretability-Adversarial-Attacks.md
+{{#endref}}
+
+### Sekuriteit van KI-aanwysings
+
+LLM’s het die gebruik van KI die afgelope jare laat ontplof, maar hulle is nie perfek nie en kan deur adversariële aanwysings mislei word. Dit is ’n baie belangrike onderwerp om te verstaan hoe om KI veilig te gebruik en hoe om dit aan te val:
 
 
 {{#ref}}
@@ -63,45 +69,45 @@ AI-Prompts.md
 
 ### RCE in KI-modelle
 
-Dit is baie algemeen dat ontwikkelaars en maatskappye modelle gebruik wat van die internet afgelaai is. Om ’n model bloot te laai, kan egter genoeg wees om arbitrêre kode op die stelsel uit te voer. Dit is ’n baie belangrike onderwerp om te verstaan hoe om KI veilig te gebruik en hoe om dit aan te val:
+Dit is baie algemeen dat ontwikkelaars en maatskappye modelle laat loop wat van die internet afgelaai is. Die blote laai van ’n model kan egter genoeg wees om arbitrêre kode op die stelsel uit te voer. Dit is ’n baie belangrike onderwerp om te verstaan hoe om KI veilig te gebruik en hoe om dit aan te val:
 
 
 {{#ref}}
 AI-Models-RCE.md
 {{#endref}}
 
-### KI-ondersteunde KYC-omseiling
+### KI-gesteunde KYC-omseiling
 
-Generatiewe video kan gekombineer word met virtuele-kamera-inspuiting en manipulasie van kamera-API’s om swak KYC-, ouderdomsverifikasie- en biometriese lewendigheidskontroles te omseil:
+Generatiewe video kan met virtuele-kamera-inspuiting en manipulasie van kamera-API’s gekombineer word om swak KYC-, ouderdomsverifikasie- en biometriese lewendigheidskontroles te omseil:
 
 
 {{#ref}}
 KYC-Bypass-Using-AI.md
 {{#endref}}
 
-### KI Model Context Protocol
+### AI Model Context Protocol
 
-MCP (Model Context Protocol) is ’n oop protokol om KI-toepassings met nutsgoed en databronne te verbind. Omdat MCP-bedieners data en aksies kan blootstel, moet assesserings magtiging, toestemming, validering van nutsdinginvoer en ’n hersiening van vertrouensgrense insluit.<sup>[[3]](#references)</sup>
+MCP (Model Context Protocol) is ’n oop protokol om KI-toepassings aan nutsmiddels en databronne te koppel. Omdat MCP-bedieners data en aksies kan blootstel, moet assesserings magtiging, toestemming, validering van nutsmiddelinvoer en ’n hersiening van vertrouensgrense insluit.<sup>[[3]](#references)</sup>
 
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### KI-ondersteunde fuzzing en outomatiese kwesbaarheidsontdekking
+### KI-gesteunde fuzzing en outomatiese kwesbaarheidsontdekking
 
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
-### KI-ondersteunde reverse engineering
+### KI-gesteunde reverse engineering
 
-[Partiële lifting, opsporing van invariant MBA, omgewingsgebonde dekodering en validering van outomatiese onttrekkers](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
+[Partiële lifting, opsporing van invariantes in MBA, omgewingsgebonde dekodering en validering van outomatiese ekstrakteurs](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
 
-### Web Black-Box AI Pentester-bots
+### Black-box KI-pentesterbots vir webtoepassings
 
-LLM-aangedrewe agente kan langdurige black-box-web-pentesting-werkvloeie outomatiseer wanneer hulle deur waarneembaarheid, orkestrasie, geverifieerde sessiehantering en adversarial validering ondersteun word:
+LLM-aangedrewe agente kan langdurige black-box-webpentesting-werkvloeie outomatiseer wanneer hulle ondersteun word deur waarneembaarheid, orkestrasie, hantering van geverifieerde sessies en adversariële validering:
 
 
 {{#ref}}
