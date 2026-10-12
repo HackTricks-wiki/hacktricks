@@ -87,12 +87,20 @@ jobs:
               const prs = await github.paginate(github.rest.pulls.list, {
                 ...source, state: 'open', per_page: 100
               });
-              const changed = context.eventName === 'push'
-                ? new Set((context.payload.commits || []).flatMap(commit =>
-                    [...(commit.added || []), ...(commit.modified || []), ...(commit.removed || [])]))
-                : null;
+              let changed = null;
+              if (context.eventName === 'push' && context.payload.before?.match(/[^0]/)) {
+                const comparison = await github.rest.repos.compareCommits({
+                  ...source, base: context.payload.before, head: context.payload.after
+                });
+                // GitHub caps compare file lists at 300; scan all PRs if truncated.
+                if ((comparison.data.files || []).length < 300) {
+                  changed = new Set((comparison.data.files || []).flatMap(file =>
+                    [file.filename, file.previous_filename].filter(Boolean)));
+                }
+              }
               for (const pr of prs) {
-                if (changed?.size) {
+                if (changed !== null) {
+                  if (!changed.size) continue;
                   const files = await github.paginate(github.rest.pulls.listFiles, {
                     ...source, pull_number: pr.number, per_page: 100
                   });
