@@ -1,10 +1,10 @@
-# AI in der Cybersicherheit
+# KI in der Cybersicherheit
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## Wichtige Machine-Learning-Algorithmen
 
-Am besten beginnst du mit dem Thema AI, indem du lernst, wie die wichtigsten Machine-Learning-Algorithmen funktionieren. So kannst du verstehen, wie AI funktioniert, wie du sie einsetzt und wie du sie angreifst:
+Am besten lernst du KI kennen, indem du verstehst, wie die wichtigsten Machine-Learning-Algorithmen funktionieren. So kannst du nachvollziehen, wie KI funktioniert, wie du sie einsetzt und wie du sie angreifst:
 
 
 {{#ref}}
@@ -35,73 +35,79 @@ Auf der folgenden Seite findest du die Grundlagen der einzelnen Komponenten, die
 AI-llm-architecture/README.md
 {{#endref}}
 
-## AI-Sicherheit
+## KI-Sicherheit
 
-### Methodik zur Sicherheit von AI Agents
+### Methodik zur Sicherheit von KI-Agenten
 
 {{#ref}}
 AI-Agent-Security-Methodology.md
 {{#endref}}
 
-### AI-Risikoframeworks
+### KI-Risikoframeworks
 
-Zwei nützliche Frameworks für den Einstieg in die Bewertung von AI-Systemrisiken sind die OWASP Machine Learning Security Top 10 und Googles Secure AI Framework (SAIF). Sie ergänzen einander, bilden aber keine vollständige Liste der AI-Risikoframeworks.<sup>[[1]](#references)[[2]](#references)</sup>
+Zwei nützliche Frameworks für den Einstieg in die Bewertung von KI-Systemrisiken sind die OWASP Machine Learning Security Top 10 und Googles Secure AI Framework (SAIF). Sie ergänzen einander und bilden keine vollständige Liste der KI-Risikoframeworks.<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 {{#ref}}
 AI-Risk-Frameworks.md
 {{#endref}}
 
-### Sicherheit von AI-Prompts
+### Durch mechanistische Interpretierbarkeit gesteuerte adversariale Angriffe
 
-LLMs haben in den letzten Jahren zu einer explosionsartigen Verbreitung von AI geführt, sind aber nicht perfekt und lassen sich durch adversarial Prompts täuschen. Dieses Thema ist sehr wichtig, um zu verstehen, wie du AI sicher einsetzt und wie du sie angreifst:
+{{#ref}}
+AI-Mechanistic-Interpretability-Adversarial-Attacks.md
+{{#endref}}
+
+### Sicherheit von KI-Prompts
+
+LLMs haben in den letzten Jahren zu einer explosionsartigen Verbreitung von KI geführt. Sie sind jedoch nicht perfekt und lassen sich durch adversariale Prompts täuschen. Dieses Thema ist besonders wichtig, um zu verstehen, wie du KI sicher einsetzt und wie du sie angreifst:
 
 
 {{#ref}}
 AI-Prompts.md
 {{#endref}}
 
-### RCE in AI-Modellen
+### RCE über KI-Modelle
 
-Entwickler und Unternehmen führen häufig Modelle aus, die sie aus dem Internet heruntergeladen haben. Das bloße Laden eines Modells kann jedoch ausreichen, um beliebigen Code auf dem System auszuführen. Dieses Thema ist sehr wichtig, um zu verstehen, wie du AI sicher einsetzt und wie du sie angreifst:
+Entwickler und Unternehmen führen häufig aus dem Internet heruntergeladene Modelle aus. Doch schon das Laden eines Modells kann ausreichen, um beliebigen Code auf dem System auszuführen. Dieses Thema ist besonders wichtig, um zu verstehen, wie du KI sicher einsetzt und wie du sie angreifst:
 
 
 {{#ref}}
 AI-Models-RCE.md
 {{#endref}}
 
-### Mit AI unterstützte KYC-Umgehung
+### KI-gestützter KYC-Bypass
 
-Generative Videos können mit Virtual-Camera-Injection und der Manipulation von Kamera-APIs kombiniert werden, um schwache KYC-, Altersverifikations- und biometrische Liveness-Verfahren zu umgehen:
+Generative Videos lassen sich mit virtueller Kameraeinspeisung und der Manipulation von Kamera-APIs kombinieren, um schwache KYC-, Altersverifizierungs- und biometrische Liveness-Verfahren zu umgehen:
 
 
 {{#ref}}
 KYC-Bypass-Using-AI.md
 {{#endref}}
 
-### AI Model Context Protocol
+### Model Context Protocol für KI
 
-MCP (Model Context Protocol) ist ein offenes Protokoll, mit dem AI-Anwendungen mit Tools und Datenquellen verbunden werden können. Da MCP-Server Daten und Aktionen bereitstellen können, müssen Prüfungen Autorisierung, Einwilligung, Validierung von Tool-Eingaben und die Überprüfung von Vertrauensgrenzen umfassen.<sup>[[3]](#references)</sup>
+MCP (Model Context Protocol) ist ein offenes Protokoll, über das sich KI-Anwendungen mit Tools und Datenquellen verbinden lassen. Da MCP-Server Daten und Aktionen bereitstellen können, müssen Sicherheitsbewertungen Autorisierung, Einwilligung, die Validierung von Tool-Eingaben und die Überprüfung von Vertrauensgrenzen umfassen.<sup>[[3]](#references)</sup>
 
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### Mit AI unterstütztes Fuzzing und automatisierte Schwachstellensuche
+### KI-gestütztes Fuzzing und automatisierte Schwachstellensuche
 
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
-### Mit AI unterstütztes Reverse Engineering
+### KI-gestützte Reverse-Engineering-Analyse
 
-[Partielles Lifting, Erkennung invarianten MBAs, umgebungsgebundene Dekodierung und Validierung automatisierter Extractor](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
+[Partielles Lifting, die Erkennung invariantenbasierter MBA-Ausdrücke, umgebungsgebundene Dekodierung und die Validierung automatisierter Extraktoren](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
 
-### Web-Black-Box-AI-Pentester-Bots
+### KI-Pentester-Bots für Black-Box-Webtests
 
-LLM-gestützte Agents können lang laufende Black-Box-Web-Pentesting-Workflows automatisieren, wenn sie durch Observability, Orchestrierung, Verwaltung authentifizierter Sessions und adversariale Validierung unterstützt werden:
+LLM-gestützte Agenten können langwierige Black-Box-Web-Pentesting-Workflows automatisieren, sofern sie durch Observability, Orchestrierung, die Verwaltung authentifizierter Sitzungen und adversariale Validierung unterstützt werden:
 
 
 {{#ref}}
@@ -111,6 +117,6 @@ Web-Black-Box-AI-Pentester-Bots.md
 ## References
 
 - [1] [OWASP Top 10 für Machine-Learning-Sicherheit](https://owasp.org/www-project-machine-learning-security-top-10/)
-- [2] [Google — Secure AI Framework (SAIF)](https://saif.google/)
+- [2] [Google — Sicheres KI-Framework (SAIF)](https://saif.google/)
 - [3] [Model Context Protocol — Einführung](https://modelcontextprotocol.io/docs/getting-started/intro)
 {{#include ../banners/hacktricks-training.md}}
