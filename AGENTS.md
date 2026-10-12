@@ -68,6 +68,8 @@ fallback when refreshing an expired entry fails.
 Common local checks:
 
 - `node --check theme/ht_searcher.js`
+- `node --test scripts/test_search.js` (matching, ranking, UI, source policy, and cache regressions)
+- `HT_SEARCH_CORPUS=1 node --test scripts/test_search.js` (also checks both generated books when present)
 - `mdbook build`
 
 If `mdbook build` fails, check:

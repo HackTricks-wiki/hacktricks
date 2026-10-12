@@ -583,23 +583,13 @@ The repo indicates: Defender still scans the scripts but by utilising Go, Java, 
 
 ## WebAssembly re-hosting for static-analysis evasion
 
-Instead of editing a heavily signatured Go tool, it can be compiled as a `wasip1` guest and embedded in a separate native loader. The guest is built against a patched GOROOT in which unsupported operations such as `net.Dial`, `net.Listen`, `os/exec` and `os.Pipe` delegate through `//go:wasmimport`; a Wazero host module then implements sockets, process operations, Win32 calls and macOS framework calls. This keeps the original project's Go API usage intact while moving most of its logic into an encrypted WASM module that static PE tooling may not understand.<sup>[[41]](#references)</sup>
+<a id="bridging-linear-memory-to-native-apis"></a>
+<a id="per-build-wasm-vm-polymorphism"></a>
+<a id="camouflaging-the-outer-go-executable"></a>
 
-### Bridging linear memory to native APIs
-
-A guest pointer is a 32-bit offset into WASM linear memory, not a host virtual address. Before a native call, the bridge can translate an argument only when it is marked as a local pointer and falls in the range `0x10000 <= value < wasmMemorySize`, producing `wasmMemoryBase + value`. The lower bound avoids rewriting small handles, flags and `nil`; per-API masks generated from `win32metadata` distinguish real pointers from handles, sizes and remote-process addresses, with overrides for inaccurate or ambiguous metadata.<sup>[[41]](#references)</sup>
-
-Native APIs may also return host pointers through guest output buffers. A mirror table can assign such objects guest-memory representations and retain a reverse mapping to the original host address. COM requires mirroring both the interface and its vtable: data pointers can be followed and mirrored, whereas executable pointers in `MEM_IMAGE` regions must remain opaque tokens because WASM cannot execute native instructions. This model does not directly support host-to-guest callback APIs such as `EnumWindows` or `SetWindowsHookEx`.<sup>[[41]](#references)</sup>
-
-### Per-build WASM VM polymorphism
-
-The runtime and payload can be transformed together on every build: shuffle the opcode-to-handler table, rewrite every guest opcode to the new mapping, randomize section identifiers, replace the standard `\0asm` magic with a build-specific marker and change runtime cache magic. Identical source then yields bytewise-different modules, and ordinary WASM tooling cannot parse the payload until the analyst recovers the custom mapping and framing from the host loader.<sup>[[41]](#references)</sup>
-
-For reverse engineering, start with the native host rather than carving only on `\0asm`: identify the compiled marker, module-decryption path, opcode dispatch table and `env` host-function registrations, then reconstruct a standard module or instrument the import boundary. The bridge remains a useful behavioral choke point because calls for networking, process creation, registry access, dynamic loading and generic Win32 dispatch cross it even when the embedded bytecode changes between builds.<sup>[[41]](#references)</sup>
-
-### Camouflaging the outer Go executable
-
-Changing the guest alone still leaves a recognizable loader. The demonstrated outer-binary transformations splice dense symbol profiles harvested from legitimate Go projects into `gopclntab`, rotate a small plausible set of DLL imports, and vary PE `VERSIONINFO` plus Authenticode identity strings. These transformations target static and machine-learning features of the container; they do not remove the runtime behavior exposed by the host shims.<sup>[[41]](#references)</sup>
+{{#ref}}
+virtualized-payload-execution.md#webassembly-re-hosting-for-static-analysis-evasion
+{{#endref}}
 
 ## TokenStomping
 
@@ -623,6 +613,10 @@ As described in [**this blog post**](https://trustedsec.com/blog/abusing-chrome-
  
 
 ## Advanced Evasion
+
+{{#ref}}
+virtualized-payload-execution.md
+{{#endref}}
 
 Evasion is a very complicated topic, sometimes you have to take into account many different sources of telemetry in just one system, so it's pretty much impossible to stay completely undetected in mature environments.
 
@@ -1406,6 +1400,31 @@ Good hunting opportunities mentioned by the authors:
 - P3 is a **cross-process transfer trick**, not a full execution primitive by itself: the copied parameter still needs an execute-permission change and an execution redirection method.
 - `RtlCreateProcessReflection` / Dirty Vanity was considered by the authors but rejected because it internally reaches suspicious primitives such as `NtWriteVirtualMemory` and `NtCreateThreadEx`.
 
+## Console STDIN pipe injection
+
+An interactive console child can also be used as the **payload-transfer primitive**. The injector redirects the child's standard input to a pipe and sends a marker followed by shellcode. After the console program reads the data into its own private memory, the injector finds that buffer, makes it executable and redirects a child thread to it. This avoids `VirtualAllocEx` and `WriteProcessMemory`, but it is still process injection rather than a general EDR bypass.<sup>[[41]](#references)</sup>
+
+Despite the "named-pipe" description, the reference implementation calls `CreatePipe`, which creates an **anonymous pipe**. Windows implements anonymous pipes with uniquely named pipe objects internally, but the PoC neither selects a `\\.\pipe\<name>` path nor calls `CreateNamedPipe`. It creates inheritable handles with a default security descriptor, places the read handle in `STARTUPINFO.hStdInput`, sets `STARTF_USESTDHANDLES`, and launches a new child with handle inheritance enabled. Therefore, this PoC launches the supplied console executable; it does not attach its pipe to an existing process.<sup>[[41]](#references)[[42]](#references)[[43]](#references)</sup>
+
+### Reference workflow
+
+The implementation uses the following chain:<sup>[[41]](#references)</sup>
+
+1. Create anonymous pipe pairs for the child's `STDIN` and `STDOUT`. Clear inheritance on the two parent-side handles and close the child-side duplicates in the parent after process creation.
+2. Launch an interactive executable such as `netsh.exe` or `nslookup.exe` with `CREATE_NEW_CONSOLE`. The child inherits the redirected standard handles.
+3. Send the complete binary `rawData` array with `WriteFile` through the parent-side `STDIN` handle. The console program consumes the bytes and leaves a copy in one of its private committed regions.
+4. Walk the child's address space with `VirtualQueryEx`, read candidate `MEM_PRIVATE` regions with `ReadProcessMemory`, and search for the marker at the beginning of `rawData`.
+5. Change the discovered buffer to `PAGE_EXECUTE_READWRITE` with `VirtualProtectEx`.
+6. Identify the main thread, suspend it, set `RIP` to `found_address + 0x19` with `NtSetContextThread`, and resume it.
+
+```powershell
+InjectSetConsole.exe C:\Windows\System32\netsh.exe
+```
+
+The supplied implementation is x64-specific: it modifies `CONTEXT.Rip`, and its embedded payload is x64 shellcode. `rawData` begins with a 25-byte marker, so executable bytes start at hexadecimal offset `0x19`. When replacing the payload, preserve that layout or update the marker, search vector, array size and execution offset together. The source comments also list `0x0A`, `0x0D` and `0x1A` as bad characters. This workflow does not alter the child's token or privileges.<sup>[[41]](#references)</sup>
+
+For small native helpers and payload compilation patterns, see [Windows C Payloads](windows-local-privilege-escalation/windows-c-payloads.md).
+
 ## SantaStealer Tradecraft for Fileless Evasion and Credential Theft
 
 SantaStealer (aka BluelineStealer) illustrates how modern info-stealers blend AV bypass, anti-analysis and credential access in a single workflow.<sup>[[24]](#references)</sup>
@@ -1486,6 +1505,8 @@ Sleep(exec_delay_seconds * 1000); // config-controlled delay to outlive sandboxe
 - [38] [MDSec Function Peekaboo companion code](https://github.com/mdsecactivebreach/functionpeekaboo)
 - [39] [MDSec - Function Peekaboo: Crafting Self-Masking Functions Using LLVM](https://mdsec.co.uk/2025/10/function-peekaboo-crafting-self-masking-functions-using-llvm/)
 - [40] [Microsoft Learn - VirtualProtect](https://learn.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualprotect)
-- [41] [Praetorian - Enter the WasmForge: Compiling Sliver into WebAssembly](https://praetorian.com/blog/wasmforge-sliver-webassembly)
+- [41] [TwoSevenOneT - InjectSetConsole source](https://github.com/TwoSevenOneT/InjectSetConsole)
+- [42] [Microsoft Learn - CreatePipe function](https://learn.microsoft.com/en-us/windows/win32/api/namedpipeapi/nf-namedpipeapi-createpipe)
+- [43] [Microsoft Learn - Creating a Child Process with Redirected Input and Output](https://learn.microsoft.com/en-us/windows/win32/procthread/creating-a-child-process-with-redirected-input-and-output)
 
 {{#include ../banners/hacktricks-training.md}}
