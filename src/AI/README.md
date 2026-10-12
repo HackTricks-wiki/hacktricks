@@ -1,10 +1,10 @@
-# サイバーセキュリティにおけるAI
+# サイバーセキュリティにおける AI
 
 {{#include ../banners/hacktricks-training.md}}
 
-## 主なMachine Learningアルゴリズム
+## 主な機械学習アルゴリズム
 
-AIについて学ぶには、まず主要なMachine Learningアルゴリズムの仕組みを理解するのが最適です。これにより、AIの仕組みや使い方、攻撃方法を理解しやすくなります。
+AIを学ぶには、まず主要な機械学習アルゴリズムの仕組みを理解するのが最適です。これにより、AIの仕組みや使い方、攻撃方法を理解しやすくなります。
 
 
 {{#ref}}
@@ -28,7 +28,7 @@ AIについて学ぶには、まず主要なMachine Learningアルゴリズム�
 
 ### LLMのアーキテクチャ
 
-以下のページでは、transformersを使って基本的なLLMを構築するために必要な各コンポーネントの基礎を説明しています。
+以下のページでは、transformersを使って基本的なLLMを構築するために必要な各コンポーネントの基礎を説明します。
 
 
 {{#ref}}
@@ -37,7 +37,7 @@ AI-llm-architecture/README.md
 
 ## AIセキュリティ
 
-### AI Agentセキュリティ手法
+### AI Agent Security Methodology
 
 {{#ref}}
 AI-Agent-Security-Methodology.md
@@ -45,16 +45,22 @@ AI-Agent-Security-Methodology.md
 
 ### AIリスクフレームワーク
 
-AIシステムのリスク評価を始める際に役立つフレームワークとして、OWASP Machine Learning Security Top 10とGoogle's Secure AI Framework (SAIF)があります。これらは相互に補完し合うものであり、AIリスクフレームワークを網羅した一覧ではありません。<sup>[[1]](#references)[[2]](#references)</sup>
+AIシステムのリスク評価を始める際に役立つフレームワークとして、OWASP Machine Learning Security Top 10とGoogleのSecure AI Framework (SAIF)があります。これらは相互に補完するものであり、AIリスクフレームワークを網羅するものではありません。<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 {{#ref}}
 AI-Risk-Frameworks.md
 {{#endref}}
 
-### AIプロンプトセキュリティ
+### メカニスティック解釈可能性に基づく敵対的攻撃
 
-ここ数年でLLMの普及によりAIの利用が急増しましたが、LLMは完璧ではなく、敵対的なプロンプトで欺かれることがあります。AIを安全に使う方法と攻撃方法を理解するうえで、非常に重要なトピックです。
+{{#ref}}
+AI-Mechanistic-Interpretability-Adversarial-Attacks.md
+{{#endref}}
+
+### AIプロンプトのセキュリティ
+
+LLMの登場により、ここ数年でAIの利用が急速に拡大しました。しかし、LLMは完璧ではなく、敵対的プロンプトによって欺かれることがあります。AIを安全に使う方法や攻撃方法を理解するうえで、非常に重要なトピックです。
 
 
 {{#ref}}
@@ -63,7 +69,7 @@ AI-Prompts.md
 
 ### AIモデルのRCE
 
-インターネットからダウンロードしたモデルを実行する開発者や企業は珍しくありません。しかし、モデルを読み込むだけでシステム上の任意コードが実行される可能性があります。AIを安全に使う方法と攻撃方法を理解するうえで、非常に重要なトピックです。
+開発者や企業がインターネットからダウンロードしたモデルを実行するのはよくあることですが、モデルを読み込むだけでシステム上で任意のコードが実行される可能性があります。AIを安全に使う方法や攻撃方法を理解するうえで、非常に重要なトピックです。
 
 
 {{#ref}}
@@ -72,7 +78,7 @@ AI-Models-RCE.md
 
 ### AIを利用したKYCバイパス
 
-生成動画を仮想カメラへのインジェクションやカメラAPIの操作と組み合わせることで、脆弱なKYC、年齢確認、生体認証のライブネス判定ワークフローをバイパスできます。
+生成動画は、仮想カメラのインジェクションやカメラAPIの操作と組み合わせることで、脆弱なKYC、年齢確認、生体認証のライブネス判定をバイパスできます。
 
 
 {{#ref}}
@@ -81,14 +87,14 @@ KYC-Bypass-Using-AI.md
 
 ### AI Model Context Protocol
 
-MCP (Model Context Protocol)は、AIアプリケーションをツールやデータソースに接続するためのオープンプロトコルです。MCPサーバーはデータや操作機能を公開できるため、評価には認可、同意、ツール入力の検証、信頼境界の確認を含める必要があります。<sup>[[3]](#references)</sup>
+MCP (Model Context Protocol)は、AIアプリケーションをツールやデータソースに接続するためのオープンプロトコルです。MCPサーバーはデータや操作を公開できるため、評価では認可、同意、ツール入力の検証、信頼境界の確認を含める必要があります。<sup>[[3]](#references)</sup>
 
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### AIを利用したFuzzingと脆弱性の自動検出
+### AIを利用したファジングと脆弱性の自動検出
 
 
 {{#ref}}
@@ -97,11 +103,11 @@ AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 
 ### AIを利用したリバースエンジニアリング
 
-[Partial lifting, invariant MBA detection, environment-bound decoding, and automated-extractor validation](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
+[部分的なリフティング、不変条件に基づくMBA検出、環境依存のデコード、自動抽出ツールの検証](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
 
-### Web Black-Box AI Pentester Bots
+### WebブラックボックスAI Pentester Bot
 
-LLMを活用したagentは、可観測性、オーケストレーション、認証済みセッションの処理、敵対的検証を備えることで、長時間にわたるWeb black-box pentestingのワークフローを自動化できます。
+LLMを活用したエージェントは、可観測性、オーケストレーション、認証済みセッションの処理、敵対的検証を備えることで、長時間にわたるWebブラックボックスpentestingのワークフローを自動化できます。
 
 
 {{#ref}}
@@ -111,6 +117,6 @@ Web-Black-Box-AI-Pentester-Bots.md
 ## References
 
 - [1] [OWASP Machine Learning Security Top 10](https://owasp.org/www-project-machine-learning-security-top-10/)
-- [2] [Google — セキュアAIフレームワーク (SAIF)](https://saif.google/)
+- [2] [Google — Secure AI Framework (SAIF)](https://saif.google/)
 - [3] [Model Context Protocol — 概要](https://modelcontextprotocol.io/docs/getting-started/intro)
 {{#include ../banners/hacktricks-training.md}}
