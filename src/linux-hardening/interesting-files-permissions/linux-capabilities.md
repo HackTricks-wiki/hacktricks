@@ -365,9 +365,9 @@ getcap /usr/sbin/tcpdump
 /usr/sbin/tcpdump = cap_net_admin,cap_net_raw+eip
 ```
 
-### The special case of "empty" capabilities
+### The special case of an omitted capability name
 
-A file can carry an empty capability set (`getcap myelf` returns `myelf =ep`). An empty set grants no capabilities; when combined with a root-owned set-user-ID bit, the program can still change the executing process's effective and saved IDs to 0 without gaining file capabilities. An unowned, non-SUID/SGID file with `=ep` does not run as root.<sup>[[14]](#references)</sup>
+In libcap's text format, `getcap myelf` reporting `myelf =ep` means **all capabilities** are marked effective and permitted, subject to the executing process's bounding set, user namespace, and other execution restrictions. The empty file capability set is `myelf =` (with no `e` or `p`); it is distinct from a file with no capability attribute. An `=ep` file does not by itself change the process UID to root, but a program able to use `CAP_DAC_READ_SEARCH` or `CAP_DAC_OVERRIDE` may read files its Unix UID otherwise could not. Confirm the actual executable's file mode, namespace, and effective capabilities before treating its input options as a privileged file-read path. See libcap's [capability text format](https://man7.org/linux/man-pages/man7/cap_text_formats.7.html) and [empty-value behavior](https://man7.org/linux/man-pages/man8/getcap.8.html).<sup>[[14]](#references)</sup>
 
 ## CAP_SYS_ADMIN
 
@@ -567,6 +567,8 @@ libc.ptrace(PTRACE_DETACH, pid, None, None)
 ```
 /usr/bin/gdb = cap_sys_ptrace+ep
 ```
+
+A capability on a debugger is a review lead only. Check whether the current process can execute that exact file (including group and ACL permissions), whether `CAP_SYS_PTRACE` is effective after execution, and whether a higher-privileged target is visible and attachable in the same PID namespace. `no_new_privs`, a `nosuid` mount, the capability bounding set, Yama, seccomp, or an LSM can change the result. See [`capabilities(7)`](https://man7.org/linux/man-pages/man7/capabilities.7.html) and the [kernel's Yama documentation](https://docs.kernel.org/admin-guide/LSM/Yama.html). Enumerate file and process metadata without attaching to a target.
 
 Create a shellcode with msfvenom to inject in memory via gdb
 
@@ -793,6 +795,8 @@ Another example of this technique can be found in [https://www.cyberark.com/reso
 
 [**CAP_DAC_READ_SEARCH**](https://man7.org/linux/man-pages/man7/capabilities.7.html) enables a process to **bypass permissions for reading files and for reading and executing directories**. It also authorizes `open_by_handle_at(2)`, which interprets a valid file handle relative to a mount file descriptor for the same mounted filesystem. It does not automatically expose every file outside the process's mount namespace. A file-handle breakout additionally needs a host-relevant filesystem reference, valid or discoverable handles, a compatible filesystem and storage layout, and no runtime or LSM block. The historical Docker "Shocker" technique demonstrated such a combination in affected layouts, as analyzed [here](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3).<sup>[[12]](#references)[[13]](#references)[[14]](#references)</sup>
 **This means that you can bypass file read permission checks and directory read/execute permission checks**.<sup>[[14]](#references)</sup>
+
+For a **custom executable** carrying this capability, inspect what it reads and returns to its caller. A file-scanning helper that accepts a caller-chosen protected pathname and a caller-chosen prefix length, then reveals a full digest of that prefix, can act as a file-read oracle: after recovering the first `n-1` bytes, compare candidate digests for each possible next byte with the helper's digest for length `n`. This does not depend on finding a cryptographic collision or on MD5 specifically; it depends on repeated chosen-length queries and visible, deterministic digests. A whole-file digest without prefix control does not establish the same path. Confirm that the caller can execute the helper, its file capability becomes effective, the chosen path is reachable in its mount namespace, and the input/output behavior really exists. Do not run an unknown privileged helper just to test this during passive enumeration.
 
 **Example with binary**
 
@@ -1032,10 +1036,10 @@ file.close()
 
 **Example with environment + CAP_DAC_READ_SEARCH (Docker breakout)**
 
-Confirm `CAP_DAC_OVERRIDE` with `capsh --print` as shown in the preceding `CAP_DAC_READ_SEARCH` environment example.<sup>[[14]](#references)[[26]](#references)</sup>
+`CAP_DAC_READ_SEARCH` permits `open_by_handle_at(2)`, but does **not** bypass write permission checks. Writing through a resolved handle additionally requires write access for the process's effective filesystem UID/GID or ACL, or `CAP_DAC_OVERRIDE`. The host-relevant filesystem reference, supported file handles, writable mount, and runtime/LSM policy must also permit the operation. Check the effective capabilities and identity; neither capability alone proves a writable host target. See [capabilities(7)](https://man7.org/linux/man-pages/man7/capabilities.7.html) and [open_by_handle_at(2)](https://man7.org/linux/man-pages/man2/open_by_handle_at.2.html).<sup>[[14]](#references)[[26]](#references)</sup>
 
 First of all read the previous section that [**abuses DAC_READ_SEARCH capability to read arbitrary files**](linux-capabilities.md#cap_dac_read_search) of the host and **compile** the exploit.\
-Then, **compile the following version of the shocker exploit** that will allow you to **write arbitrary files** inside the hosts filesystem:
+The following historical sample attempts to open a resolved file with `O_RDWR`; it succeeds only when the preceding filesystem and write-permission conditions hold:
 
 ```c
 #include <stdio.h>
@@ -1234,6 +1238,8 @@ prctl.cap_effective.setuid = True
 os.setuid(0)
 os.system("/bin/bash")
 ```
+
+For a **custom** executable with effective `CAP_SETUID`, inspect the reachable code path instead of assuming the capability alone grants a shell. Caller-controlled text passed as the *format string* to [`printf`](https://man7.org/linux/man-pages/man3/printf.3.html) can expose or alter process memory; a useful privilege transition still depends on a vulnerable call, controllable input, and a later action after `setuid(0)`. If that action launches an external helper by name, verify the effective identity at the launch, the actual `PATH`, and whether an earlier searched directory is writable and traversable by the caller. An ineffective file capability, `no_new_privs`, a fixed trusted helper path, or an unreachable branch changes the result. Review the binary or available source offline; do not invoke a suspicious privileged helper during routine enumeration.
 
 ## CAP_SETGID
 
@@ -1463,6 +1469,10 @@ s.connect(('10.10.10.10',500))
 [**CAP_NET_RAW**](https://man7.org/linux/man-pages/man7/capabilities.7.html) permits processes to **create RAW and PACKET sockets**, enabling them to generate and send arbitrary network packets. This can lead to security risks in containerized environments, such as packet spoofing, traffic injection, and bypassing network access controls. Malicious actors could exploit this to interfere with container routing or compromise host network security, especially without adequate firewall protections. Additionally, **CAP_NET_RAW** supports operations like ping via RAW ICMP requests.<sup>[[14]](#references)</sup>
 
 **This can enable packet capture with a suitable socket interface.** It does not directly grant broader privilege escalation.<sup>[[14]](#references)</sup>
+
+For a credential-exposure path, also confirm that the current account can execute a capture tool with effective capabilities, that the relevant traffic crosses an interface visible in its network namespace, and that authentication material is sent in plaintext. For example, HTTP Basic credentials on unencrypted HTTP can be observed on loopback if the capture tool can access that interface. An account transition additionally requires the captured credential to work for another identity; a file capability or a visible login request alone does not establish password reuse.
+
+On a wireless host, an executable WPS audit tool such as `reaver` with effective `CAP_NET_RAW`, plus an AP and monitor-mode interface visible through `iw dev`, is another review clue. It is **not** proof of a usable escalation: the AP must expose WPS PIN authentication without effective lockout, be reachable from the wireless interface, and disclose a PSK; host privilege changes only if that PSK is reused for an account. Passive enumeration should report interface modes and capabilities, not transmit probes or try PINs. See [CERT/CC VU#723755](https://www.kb.cert.org/vuls/id/723755) for the WPS PIN weakness and [Reaver's project documentation](https://github.com/shift/reaver-wps) for the tool's behavior.
 
 **Example with binary**
 

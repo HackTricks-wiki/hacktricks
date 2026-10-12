@@ -97,6 +97,47 @@ A more effective pattern is to treat the **sequence itself as the seed** and use
 
 This is the same reason authenticated bugs, hidden transitions, or “only-after-handshake” parser bugs are often missed by vanilla file-style fuzzing: the fuzzer must preserve **order, state, and dependencies**, not just structure.<sup>[[4]](#references)</sup>
 
+### Android Binder: multi-client driver fuzzing
+
+High edge coverage can still miss IPC-driver bugs because coverage does not describe **object ownership, reference counts, pending messages, cleanup order, or thread interleavings**. The [Android Binder IPC internals](../binary-exploitation/linux-kernel-exploitation/android-binder-ipc-internals-kernel-vulnerability-research.md) page covers the driver object model; this example focuses on the fuzzer harness. Android Binder is a useful model: reaching both the allocation and free paths is not enough if the fuzzer cannot make multiple processes operate on the same kernel object in the required order.<sup>[[15]](#references)</sup>
+
+#### Model the protocol, not isolated `ioctl` buffers
+
+Represent a test case as an ordered grammar of **client identity + operation + structured arguments**. The Binder LKL fuzzer uses protobuf and `libprotobuf-mutator`, with one persistent context-manager client and two ordinary clients. A semantic harness then preserves the relationships which blind byte mutation would destroy.<sup>[[15]](#references)</sup>
+
+- Cache values returned by earlier operations. For example, `BC_FREE_BUFFER` must reuse a transaction-buffer pointer returned by a previous `ioctl`.
+- Generate valid default replies so synchronous transactions can finish and later operations remain reachable.
+- Reject impossible transitions such as self-transactions or multiple pending transactions to the same target.
+- Keep singleton bootstrap state outside the per-input reset. Binder permits only one `BINDER_SET_CONTEXT_MGR` registration per boot, so repeatedly destroying and recreating that client would make later inputs invalid.
+
+A useful lifetime-race template is to make one client transfer an object, start thread or process cleanup, and concurrently make the receiving client release the transaction buffer. In the CVE-2020-0423 example, a `BINDER_TYPE_WEAK_BINDER` transfer followed by `BINDER_THREAD_EXIT` racing with `BC_FREE_BUFFER` could free an embedded `binder_work` while the exiting thread's cleanup path still used it.<sup>[[15]](#references)</sup>
+
+#### Reintroduce controlled interleavings in a userspace kernel
+
+[Linux Kernel Library (LKL)](https://github.com/lkl/linux) links the real kernel code into a userspace harness and exposes its syscall interface through `lkl_syscall`. This makes protobuf state, coverage, and KASAN easy to coordinate in one process. LKL normally runs a syscall without another kernel thread interrupting it, however. For race campaigns, insert `schedule()` points around selected lock/unlock and lifetime boundaries, then let the harness randomly choose the next client at each yield. Keep these points targeted because each one multiplies the scheduling search space. The randomized scheduler described by the researchers is **not** part of the upstream Binder fuzzer.<sup>[[15]](#references)</sup>
+
+#### Build and replay serialized regression seeds
+
+The upstream harness pins a compatible `libprotobuf-mutator`, enables LKL fuzzing instrumentation and KASAN with `LKL_FUZZING=1`, and enables `CONFIG_MMU` for Binder with `MMU=1`.<sup>[[16]](#references)</sup>
+
+```bash
+PROTOBUF_MUTATOR_DIR=/tmp/libprotobuf-mutator \
+  tools/lkl/scripts/libprotobuf-mutator-build.sh
+
+make -C tools/lkl LKL_FUZZING=1 MMU=1 \
+  PROTOBUF_MUTATOR_DIR=/tmp/libprotobuf-mutator \
+  clean-conf fuzzers -j"$(nproc)"
+```
+
+After checking out a deliberately vulnerable revision or applying the rollback patches documented upstream, a serialized seed can reproduce the whole multi-client state transition without reconstructing it in an ad-hoc C proof of concept:<sup>[[16]](#references)</sup>
+
+```bash
+tools/lkl/fuzzers/binder/binder-fuzzer \
+  tools/lkl/fuzzers/binder/seeds/CVE-2023-20938
+```
+
+Treat the resulting KASAN use-after-free as confirmation that the seed reached the vulnerable lifetime path. It does **not** demonstrate the later primitives required for kernel code execution or privilege escalation.<sup>[[16]](#references)</sup>
+
 ## Single-Machine Diversity Trick (Jackalope-Style)
 
 A practical way to hybridize **generative novelty** with **coverage reuse** is to **restart short-lived workers** against a persistent server. Each worker starts from an empty corpus, syncs after `T` seconds, runs another `T` seconds on the combined corpus, syncs again, then exits. This yields **fresh structures each generation** while still leveraging accumulated coverage.<sup>[[1]](#references)[[2]](#references)</sup>
@@ -162,11 +203,11 @@ Place the snapshot as close as practical to the first expensive parse/dispatch s
 
 ## Linux Kernel Race Exploration With MAccConc
 
-[MAccConc](https://github.com/googleprojectzero/MAccConc) turns timing-sensitive Linux-kernel races into repeatable memory-access schedules. It can automatically enumerate two-context **A-B-A** executions or let an analyst impose order constraints in a terminal UI/GUI. This is experimental research tooling rather than a complete concurrency fuzzer: it currently needs LLVM 23+ and the project's patched kernel, the command-line tools support two test threads, and the proposed userspace fuzzing layer is not implemented.<sup>[[15]](#references)[[16]](#references)</sup>
+[MAccConc](https://github.com/googleprojectzero/MAccConc) turns timing-sensitive Linux-kernel races into repeatable memory-access schedules. It can automatically enumerate two-context **A-B-A** executions or let an analyst impose order constraints in a terminal UI/GUI. This is experimental research tooling rather than a complete concurrency fuzzer: it currently needs LLVM 23+ and the project's patched kernel, the command-line tools support two test threads, and the proposed userspace fuzzing layer is not implemented.<sup>[[17]](#references)[[18]](#references)</sup>
 
 ### Collect cross-context communication points
 
-Build the instrumented kernel with KASAN outline callbacks and the patched KCOV memory-record support. The project README also recommends disabling sibling-call optimization so call stacks remain usable.<sup>[[15]](#references)[[16]](#references)</sup>
+Build the instrumented kernel with KASAN outline callbacks and the patched KCOV memory-record support. The project README also recommends disabling sibling-call optimization so call stacks remain usable.<sup>[[17]](#references)[[18]](#references)</sup>
 
 ```text
 CONFIG_KASAN=y
@@ -184,17 +225,17 @@ CONFIG_RANDOMIZE_BASE=n
 export KCFLAGS="-fno-optimize-sibling-calls -mllvm -sanitizer-coverage-prune-blocks=false"
 ```
 
-KASAN outline mode (`asan-instrumentation-with-call-threshold=0`) converts instrumented accesses into helper calls. The MAccConc kernel patches disable `asan-opt-same-temp` so consecutive accesses are not merged; disable the `asan-opt-globals` optimization too when global-variable races must be visible. KCOV carries the resulting records to userspace. Compare accesses from different execution contexts and retain pairs whose byte ranges overlap and where at least one side writes; model `kfree()` as a write so lifetime transitions become candidates too.<sup>[[15]](#references)</sup>
+KASAN outline mode (`asan-instrumentation-with-call-threshold=0`) converts instrumented accesses into helper calls. The MAccConc kernel patches disable `asan-opt-same-temp` so consecutive accesses are not merged; disable the `asan-opt-globals` optimization too when global-variable races must be visible. KCOV carries the resulting records to userspace. Compare accesses from different execution contexts and retain pairs whose byte ranges overlap and where at least one side writes; model `kfree()` as a write so lifetime transitions become candidates too.<sup>[[17]](#references)</sup>
 
-For work that escapes the initiating task, such as packet processing or RCU callbacks, the subsystem must propagate a KCOV remote-coverage handle. Upstream remote KCOV is opt-in and is not automatically available for arbitrary background work, so missing propagation can make a real interaction invisible.<sup>[[15]](#references)[[17]](#references)</sup>
+For work that escapes the initiating task, such as packet processing or RCU callbacks, the subsystem must propagate a KCOV remote-coverage handle. Upstream remote KCOV is opt-in and is not automatically available for arbitrary background work, so missing propagation can make a real interaction invisible.<sup>[[17]](#references)[[19]](#references)</sup>
 
 ### Identify the same dynamic access on every run
 
-Do not replay against a concrete heap address, which may change after each allocation, or only against an instruction address, which is ambiguous inside helpers such as `memcpy()` and `spin_lock()`. MAccConc uses a **count-augmented stack trace**: each frame identifies a callee plus the invocation count within its caller, and the final element identifies the memory-access instruction. SanitizerCoverage function-entry/exit records let userspace reconstruct this dynamic identifier, which remains stable across address changes and unrelated control-flow noise.<sup>[[15]](#references)</sup>
+Do not replay against a concrete heap address, which may change after each allocation, or only against an instruction address, which is ambiguous inside helpers such as `memcpy()` and `spin_lock()`. MAccConc uses a **count-augmented stack trace**: each frame identifies a callee plus the invocation count within its caller, and the final element identifies the memory-access instruction. SanitizerCoverage function-entry/exit records let userspace reconstruct this dynamic identifier, which remains stable across address changes and unrelated control-flow noise.<sup>[[17]](#references)</sup>
 
 ### Convert candidate pairs into forced schedules
 
-The patched `KCOV_SET_DI` ioctl associates a count-augmented access identifier with a shared-flag action.<sup>[[15]](#references)</sup>
+The patched `KCOV_SET_DI` ioctl associates a count-augmented access identifier with a shared-flag action.<sup>[[17]](#references)</sup>
 
 | Action | Semantics |
 | --- | --- |
@@ -202,9 +243,9 @@ The patched `KCOV_SET_DI` ioctl associates a count-augmented access identifier w
 | `DI_STACK_WAIT` | Before the selected access, spin until flag *N* is set or the configured limit expires. |
 | `DI_STACK_WAKE_POST` | Set flag *N* immediately after the selected access. |
 
-For a partial **A-happens-before-B** constraint, attach `DI_STACK_WAKE_POST` to A and `DI_STACK_WAIT` to B using the same flag. For a fully specified two-context schedule, start B blocked, then make A wake B and wait at the first transfer point; B performs the inverse operation at the next transfer. The latter acts like deterministic context switching and is what the automatic A-B-A explorer uses.<sup>[[15]](#references)</sup>
+For a partial **A-happens-before-B** constraint, attach `DI_STACK_WAKE_POST` to A and `DI_STACK_WAIT` to B using the same flag. For a fully specified two-context schedule, start B blocked, then make A wake B and wait at the first transfer point; B performs the inverse operation at the next transfer. The latter acts like deterministic context switching and is what the automatic A-B-A explorer uses.<sup>[[17]](#references)</sup>
 
-A minimal campaign is to compile the four-hook test case (`test_setup`, two thread functions, and `test_end`) as a shared library, collect an unconstrained trace, then enumerate A-B-A candidates or add manual constraints around suspicious accesses.<sup>[[16]](#references)</sup>
+A minimal campaign is to compile the four-hook test case (`test_setup`, two thread functions, and `test_end`) as a shared library, collect an unconstrained trace, then enumerate A-B-A candidates or add manual constraints around suspicious accesses.<sup>[[18]](#references)</sup>
 
 ```bash
 cc -shared -fPIC -o testcase.so testcase.c
@@ -213,9 +254,9 @@ cc -shared -fPIC -o testcase.so testcase.c
 ./kcov-terminal ./testcase.so
 ```
 
-Interpret timeouts separately from successful reorderings: a requested order may be impossible because a lock or an initialization/publication dependency prevents the second context from reaching its injection point. Also keep KASAN's blind spots in mind: direct stack accesses are usually not hooked unless they might be out of bounds, globals are omitted with the default optimization, and current compilers cannot emit ASAN and TSAN hooks simultaneously. Finally, the prototype loses its KCOV buffer when a guest panics, so preserve an independent crash console/oracle.<sup>[[15]](#references)</sup>
+Interpret timeouts separately from successful reorderings: a requested order may be impossible because a lock or an initialization/publication dependency prevents the second context from reaching its injection point. Also keep KASAN's blind spots in mind: direct stack accesses are usually not hooked unless they might be out of bounds, globals are omitted with the default optimization, and current compilers cannot emit ASAN and TSAN hooks simultaneously. Finally, the prototype loses its KCOV buffer when a guest panics, so preserve an independent crash console/oracle.<sup>[[17]](#references)</sup>
 
-For future concurrency-guided fuzzing, record per-input or per-syscall memory-access summaries, pair operations that would form cross-context communication points, and then explore only those combinations. VM snapshots stabilize global state and addresses; without snapshots, allocation-site metadata can abstract objects across runs. This is a proposed extension, not a feature of the current MAccConc userspace tools.<sup>[[15]](#references)</sup>
+For future concurrency-guided fuzzing, record per-input or per-syscall memory-access summaries, pair operations that would form cross-context communication points, and then explore only those combinations. VM snapshots stabilize global state and addresses; without snapshots, allocation-site metadata can abstract objects across runs. This is a proposed extension, not a feature of the current MAccConc userspace tools.<sup>[[17]](#references)</sup>
 
 ## Harness Introspection: Find Shallow Fuzzers Early
 
@@ -413,7 +454,9 @@ Run the command from the **same package** and with the **same `-fuzz` target** s
 - [12] [Fuzz Introspector](https://google.github.io/oss-fuzz/advanced-topics/fuzz-introspector/)
 - [13] [AFL++ LLVM instrumentation: path and caller coverage](https://github.com/AFLplusplus/AFLplusplus/blob/stable/instrumentation/README.llvm.md)
 - [14] [Predictive Context-sensitive Fuzzing](https://www.ndss-symposium.org/ndss-paper/predictive-context-sensitive-fuzzing/)
-- [15] [MAccConc: Exploring Linux Kernel Race Conditions with Controlled Memory-Access Interleavings](https://projectzero.google/2026/09/maccconc-race-condition.html)
-- [16] [googleprojectzero/MAccConc](https://github.com/googleprojectzero/MAccConc)
-- [17] [KCOV: code coverage for fuzzing](https://docs.kernel.org/dev-tools/kcov.html)
+- [15] [Android Offensive Security Blog - Binder Fuzzing](https://androidoffsec.withgoogle.com/posts/binder-fuzzing/)
+- [16] [LKL Android Binder fuzzer - build and regression-seed documentation](https://github.com/lkl/linux/blob/master/tools/lkl/fuzzers/binder/README.md)
+- [17] [MAccConc: Exploring Linux Kernel Race Conditions with Controlled Memory-Access Interleavings](https://projectzero.google/2026/09/maccconc-race-condition.html)
+- [18] [googleprojectzero/MAccConc](https://github.com/googleprojectzero/MAccConc)
+- [19] [KCOV: code coverage for fuzzing](https://docs.kernel.org/dev-tools/kcov.html)
 {{#include ../banners/hacktricks-training.md}}

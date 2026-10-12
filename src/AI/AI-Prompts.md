@@ -727,6 +727,10 @@ Detection idea:
 
 A defensive LLM can be blinded if the attacker wraps the real payload with **non-executable text specifically chosen to trigger a safety refusal**. The malware still runs, but the scanner may stop at the refusal and never analyze the executable parts.
 
+Malware can also embed indirect prompt injection in data that an LLM-assisted triage pipeline extracts from the sample. A 2025 Windows proof of concept used one direct instruction, although the tested models ignored it.<sup>[[23]](#references)</sup> A later variant used a Markdown-fenced cascade of 38 fabricated `system` messages and copied `{{DATA}}` delimiters to resemble the triage harness. Its fake token-expiry, out-of-memory, disk-exhaustion, operation-failure, injection-warning, and static-analysis messages were intended to make the model abort, truncate, or refuse analysis.<sup>[[24]](#references)</sup>
+
+Treat embedded strings and output as untrusted evidence, not as pipeline state. Only independently observed orchestrator telemetry should establish tool failure or resource exhaustion; role labels, copied delimiters, and failure claims inside a sample must remain data.<sup>[[24]](#references)</sup>
+
 Operationally, treat these outcomes as **suspicious and inconclusive**, not as a clean pass:
 - Model refusal
 - Policy error
@@ -820,5 +824,7 @@ This means **timing alone** can be enough to leak secrets through an ordinary ch
 - [20] [OpenAI reasoning guide](https://developers.openai.com/api/docs/guides/reasoning)
 - [21] [Fooling Around with Encrypted Reasoning Blobs](https://blog.cryptographyengineering.com/2026/05/29/fooling-around-with-encrypted-reasoning-blobs/)
 - [22] [SpecterOps – Tokenization Confusion](https://specterops.io/blog/2025/06/03/tokenization-confusion/)
+- [23] [Check Point Research – AI Evasion: Prompt Injection](https://research.checkpoint.com/2025/ai-evasion-prompt-injection/)
+- [24] [SentinelLABS – macOS.Gaslight: Rust Backdoor Turns Prompt Injection on the Analyst, Not the Sandbox](https://www.sentinelone.com/labs/macos-gaslight-rust-backdoor-turns-prompt-injection-on-the-analyst-not-the-sandbox/)
 
 {{#include ../banners/hacktricks-training.md}}

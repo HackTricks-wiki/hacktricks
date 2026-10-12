@@ -24,6 +24,12 @@ Important patterns:
 - `10.0.0.0/8`, `172.16.0.0/12`, or `192.168.0.0/16` on `veth*`, `docker*`, `br-*`, `cni*`: likely container or local lab networks.<sup>[[23]](#references)[[24]](#references)</sup>
 - Unix sockets under `/run`, `/var/run`, `/tmp`, or application directories: local IPC surfaces.<sup>[[5]](#references)</sup>
 
+For the historical [snapd socket parsing issue, CVE-2019-7304](https://ubuntu.com/security/vulnerabilities/snap-socket-parsing), inspect the running daemon, its local API socket, and the installed package or snap revision against the fix for that distribution. The bug was in snapd's validation of a peer's socket address, not in `snap-confine`; a set-user-ID `snap-confine` file or an upstream version string alone cannot establish exposure. Ubuntu shipped fixes under release-specific package versions, and snapd may have refreshed from a snap independently of the distribution package. Confirm the actual running build and local socket reachability before assessing the privileged API boundary. Passive enumeration should not send a crafted socket request or install a snap.
+
+A loopback listener launched through [`socat` with `EXEC`](https://man7.org/linux/man-pages/man1/socat.1.html) can pass local client input to a separate program. Correlate the listener's command, executable path, effective child identity, local reachability, and authentication before treating a root-owned custom service as a privilege-escalation lead. A memory-safety flaw or unsafe input-to-command path requires evidence from the specific binary and build; the port number, `socat` process, or root owner alone does not establish it. Passive enumeration should stop at process, socket, and file metadata rather than sending input to the service.
+
+A local Salt master can listen on TCP 4505 and 4506, including on loopback or a container-published host port. [Salt's 3000.2 release notes](https://docs.saltproject.io/en/latest/topics/releases/3000.2.html) describe an unauthenticated method-access flaw, CVE-2020-11651, fixed in upstream 2019.2.4 and 3000.2. Correlate the listener with the actual `salt-master` process, reachable interface, installed package and vendor patches, and its effective container or host identity before treating it as an escalation lead; a port or upstream version alone is not proof. If a master runs inside a container, host-root impact is a separate boundary: confirm a usable host runtime API socket is mounted and accessible from that container. Passive enumeration should not query the Salt request server or create a container to decide exposure. See [Salt's port documentation](https://docs.saltproject.io/salt/install-guide/en/latest/topics/before-you-start/check-network-ports.html) and [runtime API triage](../containers-namespaces/container-security/runtime-api-and-daemon-exposure.md).
+
 Map local ports with lightweight probes.<sup>[[6]](#references)[[7]](#references)</sup>
 
 ```bash
@@ -63,6 +69,8 @@ nmap -sT -Pn -p 80,443,8000,8080,9000 172.17.0.0/24
 ```
 
 The technique is useful when a web panel, debug endpoint, or helper service is hidden from external scans but reachable from the compromised host or container network.
+
+A loopback notebook service may authenticate with a startup token printed to its process output. If that output is redirected to a log readable by another local account, the token can cross a user boundary and permit code execution in the notebook server's account. Correlate the listening process owner, log destination and permissions, current token configuration, and notebook access controls before treating a log path as an escalation lead. List log metadata during passive enumeration; do not print tokens or connect to the service merely to classify the host.
 
 ## Local Pivot With socat or SSH
 
@@ -116,6 +124,8 @@ curl -k -i https://127.0.0.1:8443/
 
 The goal is to identify the protocol, authentication scheme, version, and whether the service trusts local clients.
 
+For an aiohttp listener, review its static-route configuration as well as its version. CVE-2024-23334 affects aiohttp before 3.9.2 when a static route enables `follow_symlinks=True`: requests to that route can read files outside the static root. If the service runs as root, it may expose files readable by root, provided the route is reachable. A version banner or loopback bind alone does not establish the vulnerable configuration or file access.<sup>[[27]](#references)</sup>
+
 ## Capturing Loopback Traffic
 
 Local traffic can expose headers, bearer tokens, Basic Auth credentials, or application-specific secrets.<sup>[[17]](#references)[[25]](#references)</sup> Capture only in authorized environments.
@@ -167,6 +177,8 @@ Then load `/tmp/tls.pcap` and `/tmp/sslkeys.log` into Wireshark. This only works
 ## Unix Socket Interaction and Command Injection
 
 Unix sockets are local IPC endpoints.<sup>[[5]](#references)</sup> They may expose HTTP APIs, custom protocols, or unsafe command handlers.<sup>[[12]](#references)[[14]](#references)</sup>
+
+A root-owned socket with group write permission is an authorization boundary, not a vulnerability by itself. Compare its group and mode with the current account, identify the listening process, and review what that process accepts from clients before assigning risk. In particular, a privileged service that executes submitted PHP may cross a second boundary if it also trusts a caller-selected `php.ini` path or lets a caller change `disable_functions` or `open_basedir`; inspect the effective configuration and service validation path. The [PHP configuration guide](../../network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/README.md) explains those directives. Socket metadata alone does not establish code execution.
 
 Find sockets.<sup>[[1]](#references)[[5]](#references)</sup>
 
@@ -260,5 +272,6 @@ Prioritize services that are local-only, run as a more privileged user, expose a
 - [24] [ip-link(8) — Linux manual page](https://man7.org/linux/man-pages/man8/ip-link.8.html)
 - [25] [The OAuth 2.0 Authorization Framework: Bearer Token Usage (RFC 6750)](https://www.rfc-editor.org/rfc/rfc6750.html)
 - [26] [CWE-78: Improper Neutralization of Special Elements used in an OS Command](https://cwe.mitre.org/data/definitions/78.html)
+- [27] [aiohttp maintainer advisory: static route traversal with follow_symlinks](https://github.com/aio-libs/aiohttp/security/advisories/GHSA-5h86-8mv2-jq9f)
 
 {{#include ../../banners/hacktricks-training.md}}
