@@ -2,9 +2,9 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Başlıca Makine Öğrenimi Algoritmaları
+## Temel Machine Learning Algoritmaları
 
-AI hakkında bilgi edinmeye başlamak için en iyi yol, başlıca makine öğrenimi algoritmalarının nasıl çalıştığını anlamaktır. Bu, AI'ın nasıl çalıştığını, nasıl kullanılacağını ve ona nasıl saldırılacağını anlamanıza yardımcı olur:
+AI hakkında bilgi edinmeye başlamak için en iyi yol, temel machine learning algoritmalarının nasıl çalıştığını anlamaktır. Bu, AI'ın nasıl çalıştığını, nasıl kullanılacağını ve ona nasıl saldırılacağını anlamanıza yardımcı olur:
 
 
 {{#ref}}
@@ -43,18 +43,24 @@ AI-llm-architecture/README.md
 AI-Agent-Security-Methodology.md
 {{#endref}}
 
-### AI Risk Çerçeveleri
+### AI Risk Framework'leri
 
-AI sistemi riskini değerlendirmeye başlamak için yararlı iki çerçeve, OWASP Machine Learning Security Top 10 ve Google'ın Secure AI Framework (SAIF) çerçevesidir. Bunlar, AI risk çerçevelerinin kapsamlı bir listesini sunmak yerine birbirini tamamlar.<sup>[[1]](#references)[[2]](#references)</sup>
+AI sistemi risklerini değerlendirmek için yararlı iki başlangıç framework'ü, OWASP Machine Learning Security Top 10 ve Google'ın Secure AI Framework'üdür (SAIF). Bunlar, AI risk framework'lerinin kapsamlı bir listesi olmaktan ziyade birbirini tamamlar.<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 {{#ref}}
 AI-Risk-Frameworks.md
 {{#endref}}
 
+### Mekanistik Yorumlanabilirlik Rehberliğinde Adversarial Saldırılar
+
+{{#ref}}
+AI-Mechanistic-Interpretability-Adversarial-Attacks.md
+{{#endref}}
+
 ### AI Prompt Güvenliği
 
-LLM'ler son yıllarda AI kullanımının hızla yaygınlaşmasını sağladı; ancak kusursuz değiller ve adversarial prompt'larla kandırılabilirler. Bu konu, AI'ı güvenli şekilde nasıl kullanacağınızı ve ona nasıl saldıracağınızı anlamak açısından çok önemlidir:
+LLM'ler son yıllarda AI kullanımını büyük ölçüde artırdı; ancak kusursuz değiller ve adversarial prompt'larla kandırılabilirler. Bu, AI'ı güvenli biçimde nasıl kullanacağınızı ve ona nasıl saldıracağınızı anlamak için çok önemli bir konudur:
 
 
 {{#ref}}
@@ -63,16 +69,16 @@ AI-Prompts.md
 
 ### AI Modellerinde RCE
 
-Geliştiricilerin ve şirketlerin internetten indirdikleri modelleri çalıştırması oldukça yaygındır; ancak yalnızca bir modeli yüklemek, sistemde rastgele kod çalıştırmak için yeterli olabilir. Bu konu, AI'ı güvenli şekilde nasıl kullanacağınızı ve ona nasıl saldıracağınızı anlamak açısından çok önemlidir:
+Geliştiricilerin ve şirketlerin internetten indirdikleri modelleri çalıştırması oldukça yaygındır. Ancak yalnızca bir modeli yüklemek bile sistemde rastgele kod çalıştırmak için yeterli olabilir. Bu, AI'ı güvenli biçimde nasıl kullanacağınızı ve ona nasıl saldıracağınızı anlamak için çok önemli bir konudur:
 
 
 {{#ref}}
 AI-Models-RCE.md
 {{#endref}}
 
-### AI Destekli KYC Atlatma
+### AI Destekli KYC Bypass
 
-Üretken video; sanal kamera enjeksiyonu ve kamera API'si manipülasyonuyla birleştirilerek zayıf KYC, yaş doğrulama ve biyometrik canlılık kontrolleri atlatılabilir:
+Generative video; sanal kamera enjeksiyonu ve kamera API manipülasyonuyla birleştirilerek zayıf KYC, yaş doğrulama ve biyometrik canlılık kontrolleri atlatılabilir:
 
 
 {{#ref}}
@@ -81,27 +87,27 @@ KYC-Bypass-Using-AI.md
 
 ### AI Model Context Protocol
 
-MCP (Model Context Protocol), AI uygulamalarını araçlara ve veri kaynaklarına bağlamaya yönelik açık bir protokoldür. MCP sunucuları veri ve eylemlere erişim sağlayabildiğinden, değerlendirmelerde yetkilendirme, izin, araç girdilerinin doğrulanması ve güven sınırlarının incelenmesi yer almalıdır.<sup>[[3]](#references)</sup>
+MCP (Model Context Protocol), AI uygulamalarını araçlara ve veri kaynaklarına bağlamaya yönelik açık bir protokoldür. MCP sunucuları veri ve eylemlere erişim sağlayabildiğinden, değerlendirmelerde yetkilendirme, onay, araç girdisi doğrulaması ve güven sınırlarının incelenmesi ele alınmalıdır.<sup>[[3]](#references)</sup>
 
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### AI Destekli Fuzzing ve Otomatik Güvenlik Açığı Keşfi
+### AI Destekli Fuzzing ve Otomatik Zafiyet Keşfi
 
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
-### AI Destekli Tersine Mühendislik
+### AI Destekli Reverse Engineering
 
-[Kısmi lifting, invariant MBA tespiti, ortama bağlı kod çözme ve otomatik çıkarıcıların doğrulanması](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
+[Partial lifting, invariant MBA detection, environment-bound decoding, and automated-extractor validation](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
 
 ### Web Black-Box AI Pentester Botları
 
-LLM destekli agent'lar; gözlemlenebilirlik, orkestrasyon, kimliği doğrulanmış oturum yönetimi ve adversarial doğrulama ile desteklendiklerinde uzun süren black-box web pentesting iş akışlarını otomatikleştirebilir:
+LLM destekli agent'lar; gözlemlenebilirlik, orkestrasyon, kimliği doğrulanmış oturum yönetimi ve adversarial doğrulamayla desteklendiklerinde uzun süreli black-box web pentesting iş akışlarını otomatikleştirebilir:
 
 
 {{#ref}}
@@ -110,7 +116,7 @@ Web-Black-Box-AI-Pentester-Bots.md
 
 ## References
 
-- [1] [OWASP Makine Öğrenimi Güvenliği İlk 10](https://owasp.org/www-project-machine-learning-security-top-10/)
-- [2] [Google — Güvenli AI Çerçevesi (SAIF)](https://saif.google/)
+- [1] [OWASP Machine Learning Security İlk 10](https://owasp.org/www-project-machine-learning-security-top-10/)
+- [2] [Google — Güvenli AI Framework'ü (SAIF)](https://saif.google/)
 - [3] [Model Context Protocol — Giriş](https://modelcontextprotocol.io/docs/getting-started/intro)
 {{#include ../banners/hacktricks-training.md}}
